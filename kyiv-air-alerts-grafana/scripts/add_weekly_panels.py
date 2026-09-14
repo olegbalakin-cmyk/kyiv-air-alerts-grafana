@@ -17,10 +17,8 @@ def main() -> None:
     if 12 not in by_id or 13 not in by_id:
         raise RuntimeError("Expected monthly source panels 12 and 13")
 
-    # Avoid duplicates if this script is ever run twice on the same rendered file.
     panels = [p for p in panels if p.get("id") not in {14, 15}]
 
-    # Make room beneath the monthly long-horizon panels.
     for panel in panels:
         gp = panel.get("gridPos", {})
         if gp.get("y", 0) >= 40:
@@ -56,13 +54,14 @@ def main() -> None:
             panel["title"] = "Джерела та методологія"
             panel.setdefault("options", {})["mode"] = "markdown"
             panel["options"]["content"] = (
+                "**svg**\n\n"
                 "**Основне джерело:** [Портал відкритих даних Києва]"
                 "(https://data.kyivcity.gov.ua/dataset/statystyka-povitrianykh-tryvoh-u-misti-kyievi-dep-municipal/resource/5e4fb8a8-f0c8-4a12-885f-192d1f0dba75/data/download)  \n"
                 "**Fallback для свіжих завершених подій:** [Kyiv Digital — live-історія]"
                 "(https://kyiv.digital/storage/air-alert/stats.html)  \n"
                 "Поточний календарний день завжди виключено. Тривоги через північ "
                 "розподіляються між календарними добами в часовому поясі Europe/Kyiv; "
-                "перекриття інтервалів зливаються, щоб не подвоювати час.  \n"
+                "перекриття інтервалів зливаються, щоб не подвоювати час. "
                 "Пропозиції надсилати @olbalakin в телеграм"
             )
 
