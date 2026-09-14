@@ -50,10 +50,26 @@ def main() -> None:
 
     panels.extend([weekly_daily_hours, weekly_alert_duration])
     panels.sort(key=lambda p: (p.get("gridPos", {}).get("y", 0), p.get("gridPos", {}).get("x", 0)))
+
+    for panel in panels:
+        if panel.get("id") == 30:
+            panel["title"] = "Джерела та методологія"
+            panel.setdefault("options", {})["mode"] = "markdown"
+            panel["options"]["content"] = (
+                "**Основне джерело:** [Портал відкритих даних Києва]"
+                "(https://data.kyivcity.gov.ua/dataset/statystyka-povitrianykh-tryvoh-u-misti-kyievi-dep-municipal/resource/5e4fb8a8-f0c8-4a12-885f-192d1f0dba75/data/download)  \n"
+                "**Fallback для свіжих завершених подій:** [Kyiv Digital — live-історія]"
+                "(https://kyiv.digital/storage/air-alert/stats.html)  \n"
+                "Поточний календарний день завжди виключено. Тривоги через північ "
+                "розподіляються між календарними добами в часовому поясі Europe/Kyiv; "
+                "перекриття інтервалів зливаються, щоб не подвоювати час.  \n"
+                "Пропозиції надсилати @olbalakin в телеграм"
+            )
+
     obj["panels"] = panels
 
     DASHBOARD.write_text(json.dumps(obj, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-    print("Added weekly long-horizon panels to", DASHBOARD)
+    print("Added weekly long-horizon panels and methodology footer to", DASHBOARD)
 
 
 if __name__ == "__main__":
