@@ -812,6 +812,280 @@
       }
     },
     {
+      "id": 14,
+      "type": "timeseries",
+      "title": "Середній час під тривогою на добу — за повними тижнями",
+      "description": "Повні календарні тижні понеділок–неділя. Тривоги через північ розподілено між календарними добами; перекриття не подвоюються.",
+      "gridPos": {
+        "h": 9,
+        "w": 24,
+        "x": 0,
+        "y": 40
+      },
+      "datasource": {
+        "type": "yesoreyeram-infinity-datasource",
+        "uid": "${DS_INFINITY}"
+      },
+      "targets": [
+        {
+          "columns": [
+            {
+              "selector": "time",
+              "text": "Дата",
+              "type": "timestamp",
+              "timestampFormat": "2006-01-02T15:04:05Z07:00"
+            },
+            {
+              "selector": "avg_daily_alert_hours",
+              "text": "Годин на добу",
+              "type": "number"
+            }
+          ],
+          "computed_columns": [],
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "${DS_INFINITY}"
+          },
+          "filters": [],
+          "format": "table",
+          "global_query_id": "",
+          "parser": "backend",
+          "refId": "A",
+          "root_selector": "$.weekly",
+          "source": "url",
+          "type": "json",
+          "url": "https://raw.githubusercontent.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/main/kyiv-air-alerts-grafana/data/dashboard_data.json",
+          "url_options": {
+            "data": "",
+            "method": "GET"
+          }
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "linear",
+            "barAlignment": 0,
+            "barWidthFactor": 0.65,
+            "lineWidth": 2,
+            "fillOpacity": 12,
+            "gradientMode": "none",
+            "spanNulls": false,
+            "insertNulls": false,
+            "showPoints": "auto",
+            "pointSize": 5,
+            "stacking": {
+              "mode": "none",
+              "group": "A"
+            },
+            "axisPlacement": "auto",
+            "axisLabel": "",
+            "axisColorMode": "text",
+            "axisBorderShow": false,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "axisCenteredZero": false,
+            "hideFrom": {
+              "tooltip": false,
+              "viz": false,
+              "legend": false
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            },
+            "lineStyle": {
+              "fill": "solid"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "short",
+          "decimals": 2
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Годин на добу"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "suffix: год"
+              },
+              {
+                "id": "custom.axisLabel",
+                "value": "Годин на добу"
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "tooltip": {
+          "mode": "single",
+          "sort": "none",
+          "hideZeros": false
+        },
+        "legend": {
+          "showLegend": false,
+          "displayMode": "list",
+          "placement": "bottom",
+          "calcs": []
+        }
+      }
+    },
+    {
+      "id": 15,
+      "type": "timeseries",
+      "title": "Середня тривалість однієї тривоги — за повними тижнями",
+      "description": "Повні календарні тижні понеділок–неділя; повна тривалість завершеної тривоги віднесена до тижня її старту.",
+      "gridPos": {
+        "h": 9,
+        "w": 24,
+        "x": 0,
+        "y": 49
+      },
+      "datasource": {
+        "type": "yesoreyeram-infinity-datasource",
+        "uid": "${DS_INFINITY}"
+      },
+      "targets": [
+        {
+          "columns": [
+            {
+              "selector": "time",
+              "text": "Дата",
+              "type": "timestamp",
+              "timestampFormat": "2006-01-02T15:04:05Z07:00"
+            },
+            {
+              "selector": "avg_alert_duration_min",
+              "text": "Середня тривалість",
+              "type": "number"
+            }
+          ],
+          "computed_columns": [],
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "${DS_INFINITY}"
+          },
+          "filters": [],
+          "format": "table",
+          "global_query_id": "",
+          "parser": "backend",
+          "refId": "A",
+          "root_selector": "$.weekly",
+          "source": "url",
+          "type": "json",
+          "url": "https://raw.githubusercontent.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/main/kyiv-air-alerts-grafana/data/dashboard_data.json",
+          "url_options": {
+            "data": "",
+            "method": "GET"
+          }
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "linear",
+            "barAlignment": 0,
+            "barWidthFactor": 0.65,
+            "lineWidth": 2,
+            "fillOpacity": 12,
+            "gradientMode": "none",
+            "spanNulls": false,
+            "insertNulls": false,
+            "showPoints": "auto",
+            "pointSize": 5,
+            "stacking": {
+              "mode": "none",
+              "group": "A"
+            },
+            "axisPlacement": "auto",
+            "axisLabel": "",
+            "axisColorMode": "text",
+            "axisBorderShow": false,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "axisCenteredZero": false,
+            "hideFrom": {
+              "tooltip": false,
+              "viz": false,
+              "legend": false
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            },
+            "lineStyle": {
+              "fill": "solid"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "short",
+          "decimals": 2
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Середня тривалість"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "suffix: хв"
+              },
+              {
+                "id": "custom.axisLabel",
+                "value": "Середня тривалість"
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "tooltip": {
+          "mode": "single",
+          "sort": "none",
+          "hideZeros": false
+        },
+        "legend": {
+          "showLegend": false,
+          "displayMode": "list",
+          "placement": "bottom",
+          "calcs": []
+        }
+      }
+    },
+    {
       "id": 20,
       "type": "timeseries",
       "title": "Останні 28 завершених днів — сумарний час під тривогою",
@@ -820,7 +1094,7 @@
         "h": 9,
         "w": 24,
         "x": 0,
-        "y": 40
+        "y": 58
       },
       "datasource": {
         "type": "yesoreyeram-infinity-datasource",
@@ -958,7 +1232,7 @@
         "h": 10,
         "w": 24,
         "x": 0,
-        "y": 49
+        "y": 67
       },
       "datasource": {
         "type": "yesoreyeram-infinity-datasource",
@@ -1166,7 +1440,7 @@
         "h": 6,
         "w": 24,
         "x": 0,
-        "y": 59
+        "y": 77
       },
       "options": {
         "mode": "markdown",
