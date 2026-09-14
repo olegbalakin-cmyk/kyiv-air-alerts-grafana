@@ -12,6 +12,10 @@ on:
       - "kyiv-air-alerts-grafana/requirements.txt"
       - ".github/workflows/update.yml"
 
+concurrency:
+  group: kyiv-air-alert-data-${{ github.ref }}
+  cancel-in-progress: true
+
 permissions:
   contents: write
 
@@ -58,4 +62,16 @@ jobs:
             exit 0
           fi
           git commit -m "Update Kyiv air-alert data"
-          git push
+
+          for attempt in 1 2 3; do
+            git fetch origin main
+            if git rebase origin/main && git push origin HEAD:main; then
+              exit 0
+            fi
+            git rebase --abort || true
+            echo "Push attempt ${attempt} failed; retrying..."
+            sleep $((attempt * 2))
+          done
+
+          echo "Push failed after 3 attempts"
+          exit 1
