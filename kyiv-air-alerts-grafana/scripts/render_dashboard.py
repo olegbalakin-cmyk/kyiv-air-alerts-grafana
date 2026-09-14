@@ -24,8 +24,11 @@ def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--repository", required=True, help="OWNER/REPO")
     ap.add_argument("--branch", default="main")
+    ap.add_argument("--prefix", default="", help="Optional path prefix inside the repository")
     args = ap.parse_args()
-    raw = f"https://raw.githubusercontent.com/{args.repository}/{args.branch}/data/dashboard_data.json"
+    prefix = args.prefix.strip("/")
+    path = f"{prefix}/data/dashboard_data.json" if prefix else "data/dashboard_data.json"
+    raw = f"https://raw.githubusercontent.com/{args.repository}/{args.branch}/{path}"
     obj = json.loads(TEMPLATE.read_text(encoding="utf-8"))
     obj = replace(obj, "__RAW_DATA_URL__", raw)
     OUTPUT.write_text(json.dumps(obj, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
