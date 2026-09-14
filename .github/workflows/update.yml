@@ -38,8 +38,14 @@ jobs:
       - name: Update data
         run: python scripts/update_data.py
 
+      - name: Add weekly duration metrics
+        run: python scripts/add_weekly_breakdown.py
+
       - name: Render Grafana dashboard for this repository
         run: python scripts/render_dashboard.py --repository "${GITHUB_REPOSITORY}" --branch "${GITHUB_REF_NAME}" --prefix "kyiv-air-alerts-grafana"
+
+      - name: Add weekly Grafana panels
+        run: python scripts/add_weekly_panels.py
 
       - name: Commit changed data
         working-directory: .
