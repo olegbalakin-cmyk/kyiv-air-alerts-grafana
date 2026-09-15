@@ -8,6 +8,7 @@ on:
     branches: [main]
     paths:
       - "kyiv-air-alerts-grafana/scripts/**"
+      - "kyiv-air-alerts-grafana/data/casualties/**"
       - "kyiv-air-alerts-grafana/grafana/dashboard.template.json"
       - "kyiv-air-alerts-grafana/requirements.txt"
       - ".github/workflows/update.yml"
@@ -60,8 +61,14 @@ jobs:
       - name: Add multicity data and comparison panels
         run: python scripts/add_duration_unit_switch.py
 
+      - name: Update Kyiv casualty series and review queue
+        run: python scripts/update_casualties.py
+
       - name: Finalize single admin/public dashboard
         run: python scripts/finalize_multicity_dashboard.py
+
+      - name: Add Kyiv casualty panel and disclaimer
+        run: python scripts/add_casualty_panel.py
 
       - name: Commit changed data
         working-directory: .
@@ -73,7 +80,7 @@ jobs:
             echo "No changes"
             exit 0
           fi
-          git commit -m "Update Kyiv air-alert data"
+          git commit -m "Update Kyiv air-alert and casualty data"
 
           for attempt in 1 2 3; do
             git fetch origin main
