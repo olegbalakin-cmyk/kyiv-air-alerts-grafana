@@ -24,10 +24,12 @@ CITY_CONFIG = {
     "kharkiv": {
         "label": "Харків",
         "hromada": "м. Харків та Харківська територіальна громада",
+        "valid_from": "2025-02-17T19:02:05+00:00",
     },
     "zaporizhzhia": {
         "label": "Запоріжжя",
         "hromada": "м. Запоріжжя та Запорізька територіальна громада",
+        "valid_from": "2025-03-19T14:25:36+00:00",
     },
 }
 CITY_LABELS = {
@@ -59,6 +61,30 @@ def neutralize_units(panel):
                 prop["value"] = "short"
             elif prop.get("id") == "custom.axisLabel":
                 prop["value"] = "Тривалість"
+
+
+def retarget_duration_overrides(panel_id: int, panel: dict) -> None:
+    duration_names = {
+        12: ("Годин на добу", "Час під тривогою на добу"),
+        14: ("Годин на добу", "Час під тривогою на добу"),
+        20: ("Годин під тривогою", "Час під тривогою"),
+        21: ("Середня тривалість, хв", "Середня тривалість"),
+    }
+    old_new = duration_names.get(panel_id)
+    for override in panel.get("fieldConfig", {}).get("overrides", []):
+        matcher = override.get("matcher", {})
+        name = matcher.get("options")
+        if old_new and name == old_new[0]:
+            matcher["options"] = old_new[1]
+            name = old_new[1]
+        for prop in override.get("properties", []):
+            if prop.get("id") == "unit":
+                prop["value"] = "short"
+            elif prop.get("id") == "custom.axisLabel":
+                if panel_id == 21 and name == "Кількість тривог":
+                    prop["value"] = "Кількість тривог"
+                else:
+                    prop["value"] = "Тривалість"
 
 
 def parse_source_dt(value: str) -> datetime:
@@ -94,6 +120,9 @@ def fetch_city_alerts() -> dict[str, list[Alert]]:
         except ValueError:
             continue
         if end <= start:
+            continue
+        valid_from = datetime.fromisoformat(CITY_CONFIG[key]["valid_from"]).astimezone(TZ)
+        if start < valid_from:
             continue
         seen[key].add((s, e))
         found[key].append(Alert(start=start, end=end, source="vadimkin_official"))
@@ -210,7 +239,7 @@ def build_city_data() -> dict:
             "first_city_record": first.isoformat(),
             "latest_city_record_start": max(a.start for a in alerts).isoformat(),
             "latest_city_record_end": max(a.end for a in alerts).isoformat(),
-            "data_source_kind": "official city-level hromada records",
+            "data_source_kind": "official city-level hromada records from validated separate-city period",
         }
         output = build_outputs(alerts, now_local, meta)
         enrich_weekly(output, alerts)
@@ -380,12 +409,12 @@ def update_methodology(panel: dict, data: dict) -> None:
         "(https://data.kyivcity.gov.ua/dataset/statystyka-povitrianykh-tryvoh-u-misti-kyievi-dep-municipal/resource/5e4fb8a8-f0c8-4a12-885f-192d1f0dba75/data/download) "
         "+ [Kyiv Digital — live-історія](https://kyiv.digital/storage/air-alert/stats.html) як fallback для свіжих завершених подій.  \n"
         "Харків і Запоріжжя: [official_data_uk.csv]"
-        f"({CITY_SOURCE_URL}) — використовуються тільки записи рівня `hromada` для відповідної міської громади.  \n\n"
+        f"({CITY_SOURCE_URL}) — використовуються тільки записи рівня `hromada` для відповідної міської громади, починаючи з валідованого періоду окремих міських тривог.  \n\n"
         "**Початок city-level рядів:** "
         f"Київ — {city_meta['kyiv']['first_city_level_date']}; "
         f"Харків — {city_meta['kharkiv']['first_city_level_date']}; "
         f"Запоріжжя — {city_meta['zaporizhzhia']['first_city_level_date']}. "
-        "Обласні дані не використовуються для заповнення попередніх періодів.  \n\n"
+        "Обласні дані та ретроспективно розмічені ранні записи не використовуються для заповнення попередніх періодів.  \n\n"
         "Поточний календарний день завжди виключено. Перший неповний місяць і перший неповний тиждень кожного city-level ряду не включаються до довгих агрегатів. "
         "Тривоги через північ розподіляються між календарними добами в часовому поясі Europe/Kyiv; перекриття інтервалів зливаються, щоб не подвоювати час.  \n\n"
         "Пропозиції надсилати @olbalakin в телеграм"
@@ -495,6 +524,7 @@ def main():
         set_query(panel, root, columns)
         if panel_id in {2, 3, 12, 13, 14, 15, 20, 21}:
             neutralize_units(panel)
+            retarget_duration_overrides(panel_id, panel)
 
     add_comparison_panels(obj, by_id, data)
 
