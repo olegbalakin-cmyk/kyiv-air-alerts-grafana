@@ -32,6 +32,10 @@ def main():
     obj = json.loads(DASHBOARD.read_text(encoding="utf-8"))
     by_id = {p.get("id"): p for p in obj.get("panels", [])}
 
+    # Make it explicit that all top KPIs exclude the current calendar day.
+    if 1 in by_id:
+        by_id[1]["title"] = "Тривог за останні 28 завершених днів"
+
     variables = obj.setdefault("templating", {}).setdefault("list", [])
     variables[:] = [v for v in variables if v.get("name") != "duration_unit"]
     variables.insert(0, {
@@ -52,12 +56,12 @@ def main():
 
     specs = {
         2: (
-            "Час під тривогою за 28 днів — ${duration_unit:text}",
+            "Час під тривогою за останні 28 завершених днів — ${duration_unit:text}",
             '$.kpis.{"value": "${duration_unit}" = "minutes" ? alert_hours_28d * 60 : alert_hours_28d}',
             [{"selector": "value", "text": "Час під тривогою", "type": "number"}],
         ),
         3: (
-            "Середня тривалість тривоги за 28 днів — ${duration_unit:text}",
+            "Середня тривалість тривоги за останні 28 завершених днів — ${duration_unit:text}",
             '$.kpis.{"value": "${duration_unit}" = "hours" ? avg_alert_duration_min_28d / 60 : avg_alert_duration_min_28d}',
             [{"selector": "value", "text": "Середня тривалість", "type": "number"}],
         ),
@@ -106,7 +110,7 @@ def main():
         neutralize_units(panel)
 
     DASHBOARD.write_text(json.dumps(obj, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-    print("Added global hours/minutes switch to", DASHBOARD)
+    print("Added global hours/minutes switch and clarified 28-day KPI titles in", DASHBOARD)
 
 
 if __name__ == "__main__":
