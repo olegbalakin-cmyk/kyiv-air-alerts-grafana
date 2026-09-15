@@ -51,6 +51,9 @@ jobs:
       - name: Add weekly Grafana panels
         run: python scripts/add_weekly_panels.py
 
+      - name: Add global duration unit switch
+        run: python scripts/add_duration_unit_switch.py
+
       - name: Commit changed data
         working-directory: .
         run: |
