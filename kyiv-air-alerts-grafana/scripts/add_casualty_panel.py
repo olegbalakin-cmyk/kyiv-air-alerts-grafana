@@ -135,6 +135,15 @@ def main() -> None:
     add_disclaimer(methodology)
     obj["panels"].extend([row, panel])
     obj["panels"].sort(key=lambda p: (p.get("gridPos", {}).get("y", 0), p.get("gridPos", {}).get("x", 0)))
+
+    # The air-alert dashboard originally started at 2022-02-28. The casualty
+    # series begins in February 2022, and its month-start timestamp is midnight
+    # Europe/Kyiv (= 2022-01-31 22:00 UTC). Extend the global range just enough
+    # to keep that first monthly point visible. Existing alert panels are not
+    # backfilled because their underlying data remain unchanged.
+    obj.setdefault("time", {})["from"] = "2022-01-31T22:00:00.000Z"
+    obj["time"].setdefault("to", "now")
+
     obj["version"] = 1
     DASHBOARD.write_text(json.dumps(obj, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     print("Added Kyiv casualty row, monthly panel and public-data verification disclaimer")
