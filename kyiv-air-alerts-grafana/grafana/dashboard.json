@@ -112,7 +112,7 @@
     {
       "id": 2,
       "type": "stat",
-      "title": "Годин під тривогою за 28 днів",
+      "title": "Час під тривогою за 28 днів — ${duration_unit:text}",
       "gridPos": {
         "h": 4,
         "w": 8,
@@ -127,8 +127,8 @@
         {
           "columns": [
             {
-              "selector": "alert_hours_28d",
-              "text": "Годин",
+              "selector": "value",
+              "text": "Час під тривогою",
               "type": "number"
             }
           ],
@@ -142,7 +142,7 @@
           "global_query_id": "",
           "parser": "backend",
           "refId": "A",
-          "root_selector": "$.kpis",
+          "root_selector": "$.kpis.{\"value\": \"${duration_unit}\" = \"minutes\" ? alert_hours_28d * 60 : alert_hours_28d}",
           "source": "url",
           "type": "json",
           "url": "https://raw.githubusercontent.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/main/kyiv-air-alerts-grafana/data/dashboard_data.json",
@@ -154,7 +154,7 @@
       ],
       "fieldConfig": {
         "defaults": {
-          "unit": "suffix: год",
+          "unit": "short",
           "decimals": 1,
           "mappings": [],
           "thresholds": {
@@ -189,7 +189,7 @@
     {
       "id": 3,
       "type": "stat",
-      "title": "Середня тривалість тривоги за 28 днів",
+      "title": "Середня тривалість тривоги за 28 днів — ${duration_unit:text}",
       "gridPos": {
         "h": 4,
         "w": 8,
@@ -204,8 +204,8 @@
         {
           "columns": [
             {
-              "selector": "avg_alert_duration_min_28d",
-              "text": "Хвилин",
+              "selector": "value",
+              "text": "Середня тривалість",
               "type": "number"
             }
           ],
@@ -219,7 +219,7 @@
           "global_query_id": "",
           "parser": "backend",
           "refId": "A",
-          "root_selector": "$.kpis",
+          "root_selector": "$.kpis.{\"value\": \"${duration_unit}\" = \"hours\" ? avg_alert_duration_min_28d / 60 : avg_alert_duration_min_28d}",
           "source": "url",
           "type": "json",
           "url": "https://raw.githubusercontent.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/main/kyiv-air-alerts-grafana/data/dashboard_data.json",
@@ -231,7 +231,7 @@
       ],
       "fieldConfig": {
         "defaults": {
-          "unit": "suffix: хв",
+          "unit": "short",
           "decimals": 1,
           "mappings": [],
           "thresholds": {
@@ -540,7 +540,7 @@
     {
       "id": 12,
       "type": "timeseries",
-      "title": "Середній час під тривогою на добу — за місяцями",
+      "title": "Середній час під тривогою на добу — за місяцями (${duration_unit:text})",
       "description": "Тривоги через північ розподілено між календарними добами; перекриття не подвоюються.",
       "gridPos": {
         "h": 9,
@@ -562,8 +562,8 @@
               "timestampFormat": "2006-01-02T15:04:05Z07:00"
             },
             {
-              "selector": "avg_daily_alert_hours",
-              "text": "Годин на добу",
+              "selector": "value",
+              "text": "Час під тривогою на добу",
               "type": "number"
             }
           ],
@@ -577,7 +577,7 @@
           "global_query_id": "",
           "parser": "backend",
           "refId": "A",
-          "root_selector": "$.monthly",
+          "root_selector": "$.monthly.{\"time\": time, \"value\": \"${duration_unit}\" = \"minutes\" ? avg_daily_alert_hours * 60 : avg_daily_alert_hours}",
           "source": "url",
           "type": "json",
           "url": "https://raw.githubusercontent.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/main/kyiv-air-alerts-grafana/data/dashboard_data.json",
@@ -650,11 +650,11 @@
             "properties": [
               {
                 "id": "unit",
-                "value": "suffix: год"
+                "value": "short"
               },
               {
                 "id": "custom.axisLabel",
-                "value": "Годин на добу"
+                "value": "Тривалість"
               }
             ]
           }
@@ -677,7 +677,7 @@
     {
       "id": 13,
       "type": "timeseries",
-      "title": "Середня тривалість однієї тривоги — за місяцем старту",
+      "title": "Середня тривалість однієї тривоги — за місяцем старту (${duration_unit:text})",
       "description": "Тривалість повної завершеної тривоги віднесено до місяця її старту.",
       "gridPos": {
         "h": 9,
@@ -699,7 +699,7 @@
               "timestampFormat": "2006-01-02T15:04:05Z07:00"
             },
             {
-              "selector": "avg_alert_duration_min",
+              "selector": "value",
               "text": "Середня тривалість",
               "type": "number"
             }
@@ -714,7 +714,7 @@
           "global_query_id": "",
           "parser": "backend",
           "refId": "A",
-          "root_selector": "$.monthly",
+          "root_selector": "$.monthly.{\"time\": time, \"value\": \"${duration_unit}\" = \"hours\" ? avg_alert_duration_min / 60 : avg_alert_duration_min}",
           "source": "url",
           "type": "json",
           "url": "https://raw.githubusercontent.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/main/kyiv-air-alerts-grafana/data/dashboard_data.json",
@@ -787,11 +787,11 @@
             "properties": [
               {
                 "id": "unit",
-                "value": "suffix: хв"
+                "value": "short"
               },
               {
                 "id": "custom.axisLabel",
-                "value": "Середня тривалість"
+                "value": "Тривалість"
               }
             ]
           }
@@ -814,7 +814,7 @@
     {
       "id": 14,
       "type": "timeseries",
-      "title": "Середній час під тривогою на добу — за повними тижнями",
+      "title": "Середній час під тривогою на добу — за повними тижнями (${duration_unit:text})",
       "description": "Повні календарні тижні понеділок–неділя. Тривоги через північ розподілено між календарними добами; перекриття не подвоюються.",
       "gridPos": {
         "h": 9,
@@ -836,8 +836,8 @@
               "timestampFormat": "2006-01-02T15:04:05Z07:00"
             },
             {
-              "selector": "avg_daily_alert_hours",
-              "text": "Годин на добу",
+              "selector": "value",
+              "text": "Час під тривогою на добу",
               "type": "number"
             }
           ],
@@ -851,7 +851,7 @@
           "global_query_id": "",
           "parser": "backend",
           "refId": "A",
-          "root_selector": "$.weekly",
+          "root_selector": "$.weekly.{\"time\": time, \"value\": \"${duration_unit}\" = \"minutes\" ? avg_daily_alert_hours * 60 : avg_daily_alert_hours}",
           "source": "url",
           "type": "json",
           "url": "https://raw.githubusercontent.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/main/kyiv-air-alerts-grafana/data/dashboard_data.json",
@@ -924,11 +924,11 @@
             "properties": [
               {
                 "id": "unit",
-                "value": "suffix: год"
+                "value": "short"
               },
               {
                 "id": "custom.axisLabel",
-                "value": "Годин на добу"
+                "value": "Тривалість"
               }
             ]
           }
@@ -951,7 +951,7 @@
     {
       "id": 15,
       "type": "timeseries",
-      "title": "Середня тривалість однієї тривоги — за повними тижнями",
+      "title": "Середня тривалість однієї тривоги — за повними тижнями (${duration_unit:text})",
       "description": "Повні календарні тижні понеділок–неділя; повна тривалість завершеної тривоги віднесена до тижня її старту.",
       "gridPos": {
         "h": 9,
@@ -973,7 +973,7 @@
               "timestampFormat": "2006-01-02T15:04:05Z07:00"
             },
             {
-              "selector": "avg_alert_duration_min",
+              "selector": "value",
               "text": "Середня тривалість",
               "type": "number"
             }
@@ -988,7 +988,7 @@
           "global_query_id": "",
           "parser": "backend",
           "refId": "A",
-          "root_selector": "$.weekly",
+          "root_selector": "$.weekly.{\"time\": time, \"value\": \"${duration_unit}\" = \"hours\" ? avg_alert_duration_min / 60 : avg_alert_duration_min}",
           "source": "url",
           "type": "json",
           "url": "https://raw.githubusercontent.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/main/kyiv-air-alerts-grafana/data/dashboard_data.json",
@@ -1061,11 +1061,11 @@
             "properties": [
               {
                 "id": "unit",
-                "value": "suffix: хв"
+                "value": "short"
               },
               {
                 "id": "custom.axisLabel",
-                "value": "Середня тривалість"
+                "value": "Тривалість"
               }
             ]
           }
@@ -1088,7 +1088,7 @@
     {
       "id": 20,
       "type": "timeseries",
-      "title": "Останні 28 завершених днів — сумарний час під тривогою",
+      "title": "Останні 28 завершених днів — сумарний час під тривогою (${duration_unit:text})",
       "description": "Поточний день ніколи не включається; перекриття інтервалів не подвоюються.",
       "gridPos": {
         "h": 9,
@@ -1110,8 +1110,8 @@
               "timestampFormat": "2006-01-02T15:04:05Z07:00"
             },
             {
-              "selector": "total_alert_duration_hours",
-              "text": "Годин під тривогою",
+              "selector": "value",
+              "text": "Час під тривогою",
               "type": "number"
             }
           ],
@@ -1125,7 +1125,7 @@
           "global_query_id": "",
           "parser": "backend",
           "refId": "A",
-          "root_selector": "$.daily28",
+          "root_selector": "$.daily28.{\"time\": time, \"value\": \"${duration_unit}\" = \"minutes\" ? total_alert_duration_minutes : total_alert_duration_hours}",
           "source": "url",
           "type": "json",
           "url": "https://raw.githubusercontent.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/main/kyiv-air-alerts-grafana/data/dashboard_data.json",
@@ -1198,11 +1198,11 @@
             "properties": [
               {
                 "id": "unit",
-                "value": "suffix: год"
+                "value": "short"
               },
               {
                 "id": "custom.axisLabel",
-                "value": "Годин під тривогою"
+                "value": "Тривалість"
               }
             ]
           }
@@ -1226,7 +1226,7 @@
     {
       "id": 21,
       "type": "timeseries",
-      "title": "Останні 28 завершених днів — кількість тривог і середня тривалість",
+      "title": "Останні 28 завершених днів — кількість тривог і середня тривалість (${duration_unit:text})",
       "description": "Стовпчики — кількість завершених тривог за днем старту; лінія — середня повна тривалість тривог, що стартували цього дня.",
       "gridPos": {
         "h": 10,
@@ -1254,8 +1254,8 @@
               "type": "number"
             },
             {
-              "selector": "avg_alert_duration_minutes",
-              "text": "Середня тривалість, хв",
+              "selector": "avg_duration",
+              "text": "Середня тривалість",
               "type": "number"
             }
           ],
@@ -1269,7 +1269,7 @@
           "global_query_id": "",
           "parser": "backend",
           "refId": "A",
-          "root_selector": "$.daily28",
+          "root_selector": "$.daily28.{\"time\": time, \"alerts_started\": alerts_started, \"avg_duration\": \"${duration_unit}\" = \"hours\" ? avg_alert_duration_minutes / 60 : avg_alert_duration_minutes}",
           "source": "url",
           "type": "json",
           "url": "https://raw.githubusercontent.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/main/kyiv-air-alerts-grafana/data/dashboard_data.json",
@@ -1330,7 +1330,8 @@
               }
             ]
           },
-          "decimals": 1
+          "decimals": 1,
+          "unit": "short"
         },
         "overrides": [
           {
@@ -1361,7 +1362,7 @@
               },
               {
                 "id": "custom.axisLabel",
-                "value": "Кількість тривог"
+                "value": "Тривалість"
               },
               {
                 "id": "unit",
@@ -1401,11 +1402,11 @@
               },
               {
                 "id": "custom.axisLabel",
-                "value": "Середня тривалість, хв"
+                "value": "Тривалість"
               },
               {
                 "id": "unit",
-                "value": "suffix: хв"
+                "value": "short"
               },
               {
                 "id": "color",
@@ -1456,7 +1457,35 @@
     "повітряні тривоги"
   ],
   "templating": {
-    "list": []
+    "list": [
+      {
+        "name": "duration_unit",
+        "label": "Одиниці часу",
+        "type": "custom",
+        "query": "Хвилини : minutes, Години : hours",
+        "current": {
+          "selected": true,
+          "text": "Хвилини",
+          "value": "minutes"
+        },
+        "options": [
+          {
+            "selected": true,
+            "text": "Хвилини",
+            "value": "minutes"
+          },
+          {
+            "selected": false,
+            "text": "Години",
+            "value": "hours"
+          }
+        ],
+        "includeAll": false,
+        "multi": false,
+        "hide": 0,
+        "skipUrlSync": false
+      }
+    ]
   },
   "time": {
     "from": "2022-02-28T00:00:00.000Z",
