@@ -5085,6 +5085,131 @@
       }
     },
     {
+      "id": 950,
+      "type": "row",
+      "title": "Загиблі від повітряних атак — Київ",
+      "collapsed": false,
+      "panels": [],
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 82
+      }
+    },
+    {
+      "id": 951,
+      "type": "timeseries",
+      "title": "Київ: загиблі від повітряних атак РФ за місяцями",
+      "description": "Київ (місто). Ракетні, дронові та інші повітряні атаки. Пізні смерті від отриманих під час атаки поранень віднесені до місяця самої атаки. Наземні бої та артилерійські обстріли 2022 року не включені.",
+      "gridPos": {
+        "h": 10,
+        "w": 24,
+        "x": 0,
+        "y": 83
+      },
+      "datasource": {
+        "type": "yesoreyeram-infinity-datasource",
+        "uid": "${DS_INFINITY}"
+      },
+      "targets": [
+        {
+          "columns": [
+            {
+              "selector": "time",
+              "text": "Місяць",
+              "type": "timestamp",
+              "timestampFormat": "2006-01-02T15:04:05Z07:00"
+            },
+            {
+              "selector": "deaths",
+              "text": "Загиблих",
+              "type": "number"
+            }
+          ],
+          "computed_columns": [],
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "${DS_INFINITY}"
+          },
+          "filters": [],
+          "format": "table",
+          "global_query_id": "",
+          "parser": "backend",
+          "refId": "A",
+          "root_selector": "$.casualties.monthly",
+          "source": "url",
+          "type": "json",
+          "url": "https://raw.githubusercontent.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/main/kyiv-air-alerts-grafana/data/dashboard_data.json",
+          "url_options": {
+            "data": "",
+            "method": "GET"
+          }
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "decimals": 0,
+          "custom": {
+            "drawStyle": "bars",
+            "lineInterpolation": "linear",
+            "barAlignment": 0,
+            "lineWidth": 1,
+            "fillOpacity": 65,
+            "gradientMode": "none",
+            "spanNulls": false,
+            "insertNulls": false,
+            "showPoints": "never",
+            "pointSize": 5,
+            "stacking": {
+              "mode": "none",
+              "group": "A"
+            },
+            "axisPlacement": "auto",
+            "axisLabel": "Кількість загиблих",
+            "axisColorMode": "text",
+            "axisBorderShow": false,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "hideFrom": {
+              "tooltip": false,
+              "viz": false,
+              "legend": false
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "tooltip": {
+          "mode": "single",
+          "sort": "none",
+          "hideZeros": false
+        },
+        "legend": {
+          "showLegend": false,
+          "displayMode": "list",
+          "placement": "bottom",
+          "calcs": []
+        }
+      }
+    },
+    {
       "id": 900,
       "type": "text",
       "title": "Джерела та методологія",
@@ -5092,11 +5217,11 @@
         "h": 6,
         "w": 24,
         "x": 0,
-        "y": 82
+        "y": 93
       },
       "options": {
         "mode": "markdown",
-        "content": "**Джерела.** Київ: [Портал відкритих даних Києва](https://data.kyivcity.gov.ua/dataset/statystyka-povitrianykh-tryvoh-u-misti-kyievi-dep-municipal/resource/5e4fb8a8-f0c8-4a12-885f-192d1f0dba75/data/download) + [Kyiv Digital — live-історія](https://kyiv.digital/storage/air-alert/stats.html) як fallback для свіжих завершених подій.  \nХарків і Запоріжжя: [official_data_uk.csv](https://raw.githubusercontent.com/Vadimkin/ukrainian-air-raid-sirens-dataset/main/datasets/official_data_uk.csv) — використовуються тільки записи рівня `hromada` для відповідної міської громади, починаючи з валідованого періоду окремих міських тривог.  \n\n**Початок city-level рядів:** Київ — 2022-02-28; Харків — 2025-02-17; Запоріжжя — 2025-03-19. Обласні дані та ретроспективно розмічені ранні записи не використовуються для заповнення попередніх періодів.  \n\nПоточний календарний день завжди виключено. Перший неповний місяць і перший неповний тиждень кожного city-level ряду не включаються до довгих агрегатів. Тривоги через північ розподіляються між календарними добами в часовому поясі Europe/Kyiv; перекриття інтервалів зливаються, щоб не подвоювати час.  \n\nПропозиції надсилати @olbalakin в телеграм"
+        "content": "**Джерела.** Київ: [Портал відкритих даних Києва](https://data.kyivcity.gov.ua/dataset/statystyka-povitrianykh-tryvoh-u-misti-kyievi-dep-municipal/resource/5e4fb8a8-f0c8-4a12-885f-192d1f0dba75/data/download) + [Kyiv Digital — live-історія](https://kyiv.digital/storage/air-alert/stats.html) як fallback для свіжих завершених подій.  \nХарків і Запоріжжя: [official_data_uk.csv](https://raw.githubusercontent.com/Vadimkin/ukrainian-air-raid-sirens-dataset/main/datasets/official_data_uk.csv) — використовуються тільки записи рівня `hromada` для відповідної міської громади, починаючи з валідованого періоду окремих міських тривог.  \n\n**Початок city-level рядів:** Київ — 2022-02-28; Харків — 2025-02-17; Запоріжжя — 2025-03-19. Обласні дані та ретроспективно розмічені ранні записи не використовуються для заповнення попередніх періодів.  \n\nПоточний календарний день завжди виключено. Перший неповний місяць і перший неповний тиждень кожного city-level ряду не включаються до довгих агрегатів. Тривоги через північ розподіляються між календарними добами в часовому поясі Europe/Kyiv; перекриття інтервалів зливаються, щоб не подвоювати час.  \n\nПропозиції надсилати @olbalakin в телеграм\n\n**Загиблі від повітряних атак.** Ряд побудований на публічно доступних повідомленнях офіційних органів і медіа. Незалежних інструментів для повної верифікації кожного випадку немає, тому ці дані слід трактувати як реконструкцію на основі доступних відкритих джерел. Для 2025 року використовується подієва реконструкція 166 смертей; КМВА повідомляла річний накопичувальний підсумок 171, але додаткові п’ять смертей не вдалося надійно прив’язати до конкретних атак у публічних джерелах."
       }
     }
   ],
