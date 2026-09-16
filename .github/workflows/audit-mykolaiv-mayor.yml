@@ -1,0 +1,36 @@
+name: Audit Mykolaiv mayor-channel alerts
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "tools/reconstruct_mykolaiv_mayor_channel.py"
+      - ".github/workflows/audit-mykolaiv-mayor.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install "requests>=2.32,<3" "beautifulsoup4>=4.12,<5"
+      - name: Reconstruct Mykolaiv mayor-channel alerts
+        run: python tools/reconstruct_mykolaiv_mayor_channel.py
+      - name: Commit audit output
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add kyiv-air-alerts-grafana/data/mykolaiv_mayor_channel_audit.json
+          if git diff --cached --quiet; then
+            echo "No changes"
+          else
+            git commit -m "Audit Mykolaiv mayor-channel alerts"
+            git pull --rebase origin main
+            git push origin HEAD:main
+          fi
