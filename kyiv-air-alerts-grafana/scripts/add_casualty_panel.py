@@ -24,12 +24,7 @@ def make_panel(query_template: dict, y: int) -> dict:
     datasource = dict(query_template.get("datasource", {}))
     target = {
         "columns": [
-            {
-                "selector": "time",
-                "text": "Місяць",
-                "type": "timestamp",
-                "timestampFormat": "2006-01-02T15:04:05Z07:00",
-            },
+            {"selector": "month", "text": "Місяць", "type": "string"},
             {"selector": "deaths", "text": "Загиблих", "type": "number"},
         ],
         "computed_columns": [],
@@ -47,12 +42,14 @@ def make_panel(query_template: dict, y: int) -> dict:
     }
     return {
         "id": 951,
-        "type": "timeseries",
+        "type": "barchart",
         "title": "Київ: загиблі від повітряних атак РФ за місяцями",
         "description": (
             "Київ (місто). Ракетні, дронові та інші повітряні атаки. "
             "Пізні смерті від отриманих під час атаки поранень віднесені до місяця самої атаки. "
-            "Наземні бої та артилерійські обстріли 2022 року не включені."
+            "Наземні бої та артилерійські обстріли 2022 року не включені. "
+            "Вісь X є категоріальною (YYYY-MM), тому цей графік не обрізається глобальним "
+            "діапазоном часу dashboard у shared/public режимі."
         ),
         "gridPos": {"h": 10, "w": 24, "x": 0, "y": y},
         "datasource": datasource,
@@ -62,23 +59,16 @@ def make_panel(query_template: dict, y: int) -> dict:
                 "unit": "short",
                 "decimals": 0,
                 "custom": {
-                    "drawStyle": "bars",
-                    "lineInterpolation": "linear",
-                    "barAlignment": 0,
-                    "lineWidth": 1,
-                    "fillOpacity": 65,
-                    "gradientMode": "none",
-                    "spanNulls": False,
-                    "insertNulls": False,
-                    "showPoints": "never",
-                    "pointSize": 5,
-                    "stacking": {"mode": "none", "group": "A"},
                     "axisPlacement": "auto",
                     "axisLabel": "Кількість загиблих",
                     "axisColorMode": "text",
                     "axisBorderShow": False,
+                    "axisCenteredZero": False,
                     "scaleDistribution": {"type": "linear"},
                     "hideFrom": {"tooltip": False, "viz": False, "legend": False},
+                    "fillOpacity": 65,
+                    "gradientMode": "none",
+                    "lineWidth": 1,
                     "thresholdsStyle": {"mode": "off"},
                 },
                 "mappings": [],
@@ -87,6 +77,17 @@ def make_panel(query_template: dict, y: int) -> dict:
             "overrides": [],
         },
         "options": {
+            "orientation": "auto",
+            "xField": "Місяць",
+            "xTickLabelRotation": 0,
+            "xTickLabelSpacing": 90,
+            "xTickLabelMaxLength": 12,
+            "groupWidth": 0.72,
+            "barWidth": 0.9,
+            "barRadius": 0,
+            "fullHighlight": True,
+            "showValue": "never",
+            "stacking": "none",
             "tooltip": {"mode": "single", "sort": "none", "hideZeros": False},
             "legend": {"showLegend": False, "displayMode": "list", "placement": "bottom", "calcs": []},
         },
@@ -136,17 +137,15 @@ def main() -> None:
     obj["panels"].extend([row, panel])
     obj["panels"].sort(key=lambda p: (p.get("gridPos", {}).get("y", 0), p.get("gridPos", {}).get("x", 0)))
 
-    # The air-alert dashboard originally started at 2022-02-28. The casualty
-    # series begins in February 2022, and its month-start timestamp is midnight
-    # Europe/Kyiv (= 2022-01-31 22:00 UTC). Extend the global range just enough
-    # to keep that first monthly point visible. Existing alert panels are not
-    # backfilled because their underlying data remain unchanged.
+    # Keep the full-period default for the rest of the dashboard. The casualty
+    # chart itself now uses a categorical month axis and is therefore independent
+    # of the shared dashboard's locked time range.
     obj.setdefault("time", {})["from"] = "2022-01-31T22:00:00.000Z"
     obj["time"].setdefault("to", "now")
 
     obj["version"] = 1
     DASHBOARD.write_text(json.dumps(obj, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-    print("Added Kyiv casualty row, monthly panel and public-data verification disclaimer")
+    print("Added categorical Kyiv casualty panel and public-data verification disclaimer")
 
 
 if __name__ == "__main__":
