@@ -104,15 +104,9 @@ def classify(text: str) -> str | None:
         return None
     if "відбій повітряної тривоги" in low or ("відбій" in low and "тривог" in low):
         return "end"
-
-    # Do not treat status/update posts such as "тривога триває" or
-    # "повітряна тривога продовжується" as new episodes. The mayor's actual
-    # activation posts explicitly address Mykolaiv and announce "Повітряна тривога".
     if "трива" in low or "продовжу" in low:
         return None
     if "повітряна тривога" in low and "миколаїв" in low:
-        # Threat details appended to the same activation (e.g. drone/yellow level)
-        # remain part of the start message and must not be excluded.
         return "start"
     return None
 
@@ -137,8 +131,6 @@ def pair_alerts(messages: list[Msg]) -> tuple[list[dict], list[dict], list[dict]
                     "previous_text": active.text[:300],
                     "current_text": msg.text[:300],
                 })
-                # Preserve the first activation. A second activation before an
-                # all-clear may be a level/threat update, not a new episode.
                 continue
             active = msg
             continue
@@ -168,6 +160,40 @@ def pair_alerts(messages: list[Msg]) -> tuple[list[dict], list[dict], list[dict]
     return pairs, anomalies, typed_rows
 
 
+def anomaly_context(messages: list[Msg], anomalies: list[dict]) -> list[dict]:
+    by_id = {m.mid: m for m in messages}
+    out = []
+    keywords = (
+        "відб", "тривог", "немає", "скас", "заверш", "жовт", "червон", "зелен", "дрон", "ракет", "загроз"
+    )
+    for item in anomalies:
+        if item.get("type") != "repeated_activation":
+            continue
+        a = item["previous_id"]
+        b = item["current_id"]
+        relevant = []
+        for m in messages:
+            if not (a < m.mid < b):
+                continue
+            low = normalize(m.text)
+            if any(k in low for k in keywords):
+                relevant.append({
+                    "id": m.mid,
+                    "at": m.dt.isoformat(),
+                    "url": m.url,
+                    "text": m.text[:500],
+                    "classified_as": classify(m.text),
+                })
+        prev = by_id.get(a)
+        cur = by_id.get(b)
+        out.append({
+            "previous_start": {"id": a, "at": prev.dt.isoformat() if prev else None, "text": prev.text[:500] if prev else None},
+            "next_start": {"id": b, "at": cur.dt.isoformat() if cur else None, "text": cur.text[:500] if cur else None},
+            "relevant_messages_between": relevant,
+        })
+    return out
+
+
 def max_start_gap_days(typed_rows: list[dict]) -> float | None:
     starts = [datetime.fromisoformat(x["at"]) for x in typed_rows if x["kind"] == "start"]
     if len(starts) < 2:
@@ -178,6 +204,7 @@ def max_start_gap_days(typed_rows: list[dict]) -> float | None:
 def main() -> None:
     messages, fetch_meta = fetch_history()
     pairs, anomalies, typed_rows = pair_alerts(messages)
+    contexts = anomaly_context(messages, anomalies)
     by_month: dict[str, dict] = {}
     for p in pairs:
         month = p["start"][:7]
@@ -203,6 +230,7 @@ def main() -> None:
         "last_start": starts[-1] if starts else None,
         "by_month": by_month,
         "anomalies": anomalies,
+        "anomaly_context": contexts,
         "typed_messages": typed_rows,
         "pairs": pairs,
     }
@@ -214,6 +242,7 @@ def main() -> None:
         "starts": out["starts"],
         "paired_events": out["paired_events"],
         "anomaly_count": out["anomaly_count"],
+        "contexts": len(contexts),
         "max_gap_between_starts_days": out["max_gap_between_starts_days"],
         "first_start": out["first_start"],
         "last_start": out["last_start"],
