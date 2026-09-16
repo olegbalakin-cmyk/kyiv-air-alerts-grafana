@@ -76,6 +76,9 @@ jobs:
       - name: Add Kyiv casualty panel and disclaimer
         run: python scripts/add_casualty_panel.py
 
+      - name: QA geography, comparison styling, and source freshness
+        run: python scripts/postprocess_dashboard_qa.py
+
       - name: Commit changed data
         working-directory: .
         run: |
