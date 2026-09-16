@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="uk">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <title>Повітряні тривоги — міста України</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="page-header">
+    <div>
+      <div class="eyebrow">GitHub Pages preview</div>
+      <h1>Повітряні тривоги — міста України</h1>
+      <p class="subtitle">Експериментальна multicity-версія. Exact-city та районні proxy позначені окремо.</p>
+    </div>
+    <div id="updatedAt" class="updated-at"></div>
+  </header>
+
+  <main>
+    <div id="freshnessBanner" class="banner hidden"></div>
+
+    <section class="panel controls-panel">
+      <div class="control grow">
+        <label for="citySelect">Місто</label>
+        <select id="citySelect"></select>
+      </div>
+      <div class="control">
+        <label for="cityPeriod">Період графіків</label>
+        <select id="cityPeriod">
+          <option value="monthly">Місяці</option>
+          <option value="weekly">Тижні</option>
+        </select>
+      </div>
+    </section>
+
+    <section class="city-heading">
+      <div>
+        <h2 id="cityTitle">—</h2>
+        <div id="cityMeta" class="meta-row"></div>
+      </div>
+    </section>
+
+    <section class="kpi-grid">
+      <article class="kpi-card">
+        <span class="kpi-label">Тривог за останні 28 завершених днів</span>
+        <strong id="kpiAlerts">—</strong>
+      </article>
+      <article class="kpi-card">
+        <span class="kpi-label">Годин під тривогою за 28 днів</span>
+        <strong id="kpiHours">—</strong>
+      </article>
+      <article class="kpi-card">
+        <span class="kpi-label">Середня тривалість тривоги</span>
+        <strong id="kpiDuration">—</strong>
+      </article>
+    </section>
+
+    <section class="chart-grid">
+      <article class="panel chart-card">
+        <h3>Середня кількість тривог на день</h3>
+        <div class="chart-wrap"><canvas id="cityAlertsChart"></canvas></div>
+      </article>
+      <article class="panel chart-card">
+        <h3>Середній час під тривогою на добу</h3>
+        <div class="chart-wrap"><canvas id="cityHoursChart"></canvas></div>
+      </article>
+      <article class="panel chart-card wide">
+        <h3>Середня тривалість однієї тривоги</h3>
+        <div class="chart-wrap"><canvas id="cityDurationChart"></canvas></div>
+      </article>
+    </section>
+
+    <section class="comparison-section">
+      <div class="section-heading">
+        <div>
+          <div class="eyebrow">Порівняння</div>
+          <h2>Порівняння обраних міст</h2>
+          <p>Графіки використовують лише календарні періоди, наявні одночасно у всіх вибраних рядах.</p>
+        </div>
+      </div>
+
+      <div class="panel comparison-controls">
+        <div class="control grow">
+          <label for="compareA">Місто A</label>
+          <select id="compareA"></select>
+        </div>
+        <div class="control grow">
+          <label for="compareB">Місто B</label>
+          <select id="compareB"></select>
+        </div>
+        <div class="control grow">
+          <label for="compareC">Місто C</label>
+          <select id="compareC"></select>
+        </div>
+        <div class="control">
+          <label for="comparePeriod">Період</label>
+          <select id="comparePeriod">
+            <option value="monthly">Місяці</option>
+            <option value="weekly">Тижні</option>
+          </select>
+        </div>
+      </div>
+
+      <div id="comparisonNote" class="comparison-note"></div>
+
+      <section class="chart-grid">
+        <article class="panel chart-card">
+          <h3>Середня кількість тривог на день</h3>
+          <div class="chart-wrap"><canvas id="compareAlertsChart"></canvas></div>
+        </article>
+        <article class="panel chart-card">
+          <h3>Середній час під тривогою на добу</h3>
+          <div class="chart-wrap"><canvas id="compareHoursChart"></canvas></div>
+        </article>
+        <article class="panel chart-card wide">
+          <h3>Середня тривалість однієї тривоги</h3>
+          <div class="chart-wrap"><canvas id="compareDurationChart"></canvas></div>
+        </article>
+      </section>
+    </section>
+
+    <section class="panel methodology">
+      <h2>Як читати дані</h2>
+      <p><strong>Exact-city</strong> — ряд для самого міста/міської громади. <strong>Районний proxy</strong> — ряд відповідного району після валідованої дати переходу; він може завищувати тривалість для самого міста.</p>
+      <p>Поточний день не включається у завершені агрегати. Перший неповний місяць і тиждень після початку покриття також не використовуються у довгих рядах.</p>
+      <p class="muted">Це preview WIP-гілки. Триміський production dashboard у main не змінюється.</p>
+    </section>
+  </main>
+
+  <footer>
+    Дані та код: <a href="https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana">GitHub</a>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
