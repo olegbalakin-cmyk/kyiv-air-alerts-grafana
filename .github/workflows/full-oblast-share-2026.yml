@@ -1,0 +1,53 @@
+name: Full oblast alert share 2026
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "kyiv-air-alerts-grafana/scripts/full_oblast_share_2026.py"
+      - ".github/workflows/full-oblast-share-2026.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  calculate:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: kyiv-air-alerts-grafana
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Sync with latest main
+        working-directory: .
+        run: |
+          git fetch origin main
+          git reset --hard origin/main
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install requests
+        run: pip install "requests>=2.32,<3"
+
+      - name: Calculate full-oblast shares
+        run: python scripts/full_oblast_share_2026.py
+
+      - name: Commit outputs
+        working-directory: .
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add kyiv-air-alerts-grafana/data/full_oblast_share_2026.csv kyiv-air-alerts-grafana/data/full_oblast_share_2026.json
+          if git diff --cached --quiet; then
+            echo "No changes"
+          else
+            git commit -m "Update 2026 full-oblast alert shares"
+            git pull --rebase origin main
+            git push origin HEAD:main
+          fi
