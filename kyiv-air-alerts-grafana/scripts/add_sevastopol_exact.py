@@ -18,6 +18,7 @@ DATA_FILE = ROOT / "data" / "dashboard_data.json"
 DASHBOARD = ROOT / "grafana" / "dashboard.json"
 STRICT_AUDIT = ROOT / "data" / "sevastopol_strict_audit.json"
 EVENTS_FILE = ROOT / "data" / "sevastopol_events.json"
+CORRECTIONS_FILE = ROOT / "data" / "sevastopol_event_corrections.json"
 
 CITY_KEY = "sevastopol"
 CITY_LABEL = "Севастополь (сигнали окупаційної адміністрації)"
@@ -185,6 +186,43 @@ def pair_recent(messages: list[dict]) -> tuple[list[dict], list[dict]]:
     return pairs, anomalies
 
 
+def load_corrections() -> list[dict]:
+    if not CORRECTIONS_FILE.exists():
+        return []
+    obj = json.loads(CORRECTIONS_FILE.read_text(encoding="utf-8"))
+    return list(obj.get("corrections", []))
+
+
+def apply_corrections(current: dict[int, dict], recent_anomalies: list[dict]) -> tuple[list[dict], list[dict]]:
+    applied = []
+    corrected_start_ids = set()
+    for c in load_corrections():
+        sid = int(c["start_id"])
+        start = datetime.fromisoformat(c["start"]).astimezone(UTC)
+        end = datetime.fromisoformat(c["end"]).astimezone(UTC)
+        if end <= start:
+            continue
+        current[sid] = {
+            "start": start.isoformat(),
+            "end": end.isoformat(),
+            "start_id": sid,
+            "end_id": None,
+            "duration_min": round((end - start).total_seconds() / 60, 3),
+            "start_url": c.get("start_url"),
+            "end_url": c.get("end_evidence_url"),
+            "correction": {
+                "end_source": c.get("end_source"),
+                "end_precision": c.get("end_precision"),
+                "evidence_note": c.get("evidence_note"),
+                "secondary_evidence_url": c.get("secondary_evidence_url"),
+            },
+        }
+        corrected_start_ids.add(sid)
+        applied.append(c)
+    unresolved = [a for a in recent_anomalies if int(a.get("start_id", -1)) not in corrected_start_ids]
+    return applied, unresolved
+
+
 def initial_events() -> dict:
     audit = json.loads(STRICT_AUDIT.read_text(encoding="utf-8"))
     return {
@@ -207,6 +245,7 @@ def update_event_store() -> tuple[dict, dict]:
     recent_pairs, recent_anomalies = pair_recent(messages)
     for p in recent_pairs:
         current[int(p["start_id"])] = p
+    applied_corrections, unresolved_anomalies = apply_corrections(current, recent_anomalies)
     pairs = sorted(current.values(), key=lambda x: (x["start"], x["start_id"]))
     store["pairs"] = pairs
     store.setdefault("meta", {}).update({
@@ -214,8 +253,10 @@ def update_event_store() -> tuple[dict, dict]:
         "complete_pair_count": len(pairs),
         "latest_complete_end": max((p["end"] for p in pairs), default=None),
         "recent_fetch": fetch_meta,
-        "recent_incomplete_or_anomalous_count": len(recent_anomalies),
-        "recent_anomalies": recent_anomalies,
+        "recent_incomplete_or_anomalous_count": len(unresolved_anomalies),
+        "recent_anomalies": unresolved_anomalies,
+        "verified_corrections_applied": len(applied_corrections),
+        "verified_corrections": applied_corrections,
     })
     EVENTS_FILE.write_text(json.dumps(store, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     return store, fetch_meta
@@ -244,6 +285,7 @@ def build_city_output(store: dict) -> dict:
         "completed_alert_episodes_used": len(alerts),
         "incomplete_or_anomalous_historical_events_excluded": store.get("meta", {}).get("initial_anomaly_count_excluded", 0),
         "latest_complete_end": max(a.end for a in alerts).isoformat(),
+        "verified_source_corrections_applied": store.get("meta", {}).get("verified_corrections_applied", 0),
     }
     output = build_outputs(alerts, datetime.now(TZ), meta)
     multi.enrich_weekly(output, alerts)
@@ -313,9 +355,10 @@ def main() -> None:
         existing = methodology.setdefault("options", {}).get("content", "")
         note = (
             "\n\n**Севастополь.** Ряд є exact-city і починається 25.09.2023. Джерело — city-level сигнали, "
-            "опубліковані окупаційною адміністрацією Севастополя. Використовуються лише повні пари "
-            "«тривога → відбій»; неповні епізоди не інтерполюються. Позначення джерела описує лише "
-            "походження даних і не означає визнання окупаційної адміністрації."
+            "опубліковані окупаційною адміністрацією Севастополя. Використовуються повні пари «тривога → відбій»; "
+            "неповні епізоди не інтерполюються. Якщо одна сторона пари відсутня в Telegram, допускається лише "
+            "окрема документована correction з прямим зовнішнім підтвердженням часу. Позначення джерела описує "
+            "лише походження даних і не означає визнання окупаційної адміністрації."
         )
         if "**Севастополь.**" not in existing:
             methodology["options"]["content"] = existing + note
@@ -324,6 +367,7 @@ def main() -> None:
     print("Added Sevastopol exact-city series")
     print("Complete stored pairs:", len(store.get("pairs", [])))
     print("Recent fetch:", json.dumps(fetch_meta, ensure_ascii=False))
+    print("Verified corrections:", store.get("meta", {}).get("verified_corrections_applied", 0))
     print("Recent anomalies:", json.dumps(store.get("meta", {}).get("recent_anomalies", []), ensure_ascii=False))
     print("Monthly shared comparison starts:", data["comparison"]["monthly"][0]["time"] if data["comparison"]["monthly"] else None)
     print("Weekly shared comparison starts:", data["comparison"]["weekly"][0]["time"] if data["comparison"]["weekly"] else None)
