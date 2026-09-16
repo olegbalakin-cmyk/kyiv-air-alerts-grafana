@@ -58,7 +58,6 @@ def fetch_history() -> tuple[list[Msg], dict]:
     found: dict[int, Msg] = {}
     before: int | None = None
     pages = 0
-    min_seen_date = None
     stalled = 0
 
     while pages < 800:
@@ -73,8 +72,6 @@ def fetch_history() -> tuple[list[Msg], dict]:
             found[row.mid] = row
         oldest = min(rows, key=lambda x: x.mid)
         page_min_date = min(x.dt for x in rows)
-        min_seen_date = page_min_date if min_seen_date is None else min(min_seen_date, page_min_date)
-
         if page_min_date < START_DATE:
             break
         next_before = oldest.mid
@@ -103,12 +100,19 @@ def normalize(text: str) -> str:
 
 def classify(text: str) -> str | None:
     low = normalize(text)
-    # Exclude local non-air warnings.
-    if any(token in low for token in ("артобстр", "артилер", "балістич", "ракетна небезпека", "загроза застосування")):
+    if any(token in low for token in ("артобстр", "артилер")):
         return None
     if "відбій повітряної тривоги" in low or ("відбій" in low and "тривог" in low):
         return "end"
-    if "повітряна тривога" in low and "відбій" not in low:
+
+    # Do not treat status/update posts such as "тривога триває" or
+    # "повітряна тривога продовжується" as new episodes. The mayor's actual
+    # activation posts explicitly address Mykolaiv and announce "Повітряна тривога".
+    if "трива" in low or "продовжу" in low:
+        return None
+    if "повітряна тривога" in low and "миколаїв" in low:
+        # Threat details appended to the same activation (e.g. drone/yellow level)
+        # remain part of the start message and must not be excluded.
         return "start"
     return None
 
@@ -125,12 +129,22 @@ def pair_alerts(messages: list[Msg]) -> tuple[list[dict], list[dict], list[dict]
         typed_rows.append({"id": msg.mid, "at": msg.dt.isoformat(), "kind": kind, "url": msg.url, "text": msg.text[:300]})
         if kind == "start":
             if active is not None:
-                anomalies.append({"type": "repeated_start", "previous_id": active.mid, "current_id": msg.mid, "gap_min": round((msg.dt-active.dt).total_seconds()/60, 2)})
+                anomalies.append({
+                    "type": "repeated_activation",
+                    "previous_id": active.mid,
+                    "current_id": msg.mid,
+                    "gap_min": round((msg.dt-active.dt).total_seconds()/60, 2),
+                    "previous_text": active.text[:300],
+                    "current_text": msg.text[:300],
+                })
+                # Preserve the first activation. A second activation before an
+                # all-clear may be a level/threat update, not a new episode.
+                continue
             active = msg
             continue
 
         if active is None:
-            anomalies.append({"type": "orphan_end", "id": msg.mid, "at": msg.dt.isoformat(), "url": msg.url})
+            anomalies.append({"type": "orphan_end", "id": msg.mid, "at": msg.dt.isoformat(), "url": msg.url, "text": msg.text[:300]})
             continue
         if msg.dt <= active.dt:
             anomalies.append({"type": "nonpositive_pair", "start_id": active.mid, "end_id": msg.mid})
@@ -149,7 +163,7 @@ def pair_alerts(messages: list[Msg]) -> tuple[list[dict], list[dict], list[dict]
         active = None
 
     if active is not None:
-        anomalies.append({"type": "open_start", "id": active.mid, "at": active.dt.isoformat(), "url": active.url})
+        anomalies.append({"type": "open_start", "id": active.mid, "at": active.dt.isoformat(), "url": active.url, "text": active.text[:300]})
 
     return pairs, anomalies, typed_rows
 
