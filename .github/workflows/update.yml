@@ -78,19 +78,29 @@ jobs:
           git add kyiv-air-alerts-grafana/data kyiv-air-alerts-grafana/grafana/dashboard.json
           if git diff --cached --quiet; then
             echo "No changes"
-            exit 0
+          else
+            git commit -m "Update Kyiv air-alert and casualty data"
+
+            for attempt in 1 2 3; do
+              git fetch origin main
+              if git rebase origin/main && git push origin HEAD:main; then
+                break
+              fi
+              git rebase --abort || true
+              if [ "$attempt" -eq 3 ]; then
+                echo "Push failed after 3 attempts"
+                exit 1
+              fi
+              echo "Push attempt ${attempt} failed; retrying..."
+              sleep $((attempt * 2))
+            done
           fi
-          git commit -m "Update Kyiv air-alert and casualty data"
 
-          for attempt in 1 2 3; do
-            git fetch origin main
-            if git rebase origin/main && git push origin HEAD:main; then
-              exit 0
-            fi
-            git rebase --abort || true
-            echo "Push attempt ${attempt} failed; retrying..."
-            sleep $((attempt * 2))
-          done
-
-          echo "Push failed after 3 attempts"
-          exit 1
+      - name: Deploy dashboard to Grafana
+        env:
+          GRAFANA_URL: ${{ secrets.GRAFANA_URL }}
+          GRAFANA_TOKEN: ${{ secrets.GRAFANA_TOKEN }}
+          GRAFANA_DASHBOARD_UID: ${{ secrets.GRAFANA_DASHBOARD_UID }}
+          GRAFANA_DASHBOARD_TITLE: ${{ vars.GRAFANA_DASHBOARD_TITLE }}
+          GRAFANA_INFINITY_NAME: ${{ vars.GRAFANA_INFINITY_NAME }}
+        run: python scripts/deploy_grafana.py
