@@ -7,9 +7,8 @@ import json
 import re
 import time
 from collections import defaultdict
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
-from urllib.parse import quote
 
 import requests
 from bs4 import BeautifulSoup
@@ -33,6 +32,8 @@ HEADERS = {
 BENCH_FROM = datetime(2026, 9, 1, tzinfo=UTC)
 BENCH_TO = datetime(2026, 9, 8, tzinfo=UTC)
 BRIDGE_FROM = BENCH_TO
+# Keep one day before the benchmark so alerts opened just before midnight can close inside it.
+SCAN_FROM = BENCH_FROM - timedelta(days=1)
 
 
 def parse_dt(value: str) -> datetime:
@@ -65,37 +66,58 @@ def parse_page(html: str) -> list[dict]:
     return rows
 
 
-def fetch_search(query: str, max_pages: int = 120) -> list[dict]:
+def fetch_history(max_pages: int = 500) -> tuple[list[dict], dict]:
+    """Walk the public Telegram channel backwards once; do all district filtering locally.
+
+    Telegram's web search endpoint is not reliable for programmatic q= filtering and may
+    silently return the ordinary latest page, so the benchmark must never depend on it.
+    """
     sess = requests.Session()
     sess.headers.update(HEADERS)
     before = None
-    seen = {}
+    seen: dict[int, dict] = {}
     last_min = None
+    pages = 0
+    stalled = 0
+
     for _ in range(max_pages):
-        params = f"q={quote(query)}"
-        if before is not None:
-            params += f"&before={before}"
-        r = sess.get(f"{SOURCE_URL}?{params}", timeout=30)
+        url = SOURCE_URL + (f"?before={before}" if before is not None else "")
+        r = sess.get(url, timeout=30)
         r.raise_for_status()
         rows = parse_page(r.text)
+        pages += 1
         if not rows:
             break
         for row in rows:
             seen[row["id"]] = row
-        cur_min = min(row["id"] for row in rows)
+
         oldest_at = min(row["at"] for row in rows)
-        if oldest_at < BENCH_FROM:
+        cur_min = min(row["id"] for row in rows)
+        if oldest_at < SCAN_FROM:
             break
         if last_min is not None and cur_min >= last_min:
-            break
+            stalled += 1
+            if stalled >= 2:
+                break
+        else:
+            stalled = 0
         last_min = cur_min
+        if cur_min <= 1:
+            break
         before = cur_min
-        time.sleep(0.05)
-    return sorted(seen.values(), key=lambda x: (x["at"], x["id"]))
+        time.sleep(0.04)
+
+    messages = sorted(seen.values(), key=lambda x: (x["at"], x["id"]))
+    return messages, {
+        "pages_requested": pages,
+        "messages_loaded": len(messages),
+        "earliest_loaded_at": messages[0]["at"].isoformat() if messages else None,
+        "latest_loaded_at": messages[-1]["at"].isoformat() if messages else None,
+    }
 
 
 def normalize(text: str) -> str:
-    return " ".join(text.lower().replace("ё", "е").split())
+    return " ".join(text.lower().replace("ё", "е").replace("\xa0", " ").split())
 
 
 def mentions_raion(text: str, raion: str) -> bool:
@@ -111,26 +133,29 @@ def red_transition(text: str, raion: str) -> str | None:
     if "відбій червоної тривоги" in s:
         return "end"
     # Full all-clear also ends any active red alert.
-    if "відбій тривоги" in s and ("🟢" in text or s.startswith("відбій тривоги")):
+    if "відбій тривоги" in s and ("🟢" in text or "відбій тривоги" in s):
         return "end"
 
-    # Newer two-level format.
+    # New two-level format.
     if "червоний рівень тривоги" in s and "відбій" not in s:
         return "start"
-    # Older format before red/yellow labels.
+    # Older explicit air-raid format.
     if "повітряна тривога" in s and "відбій" not in s:
         return "start"
     return None
 
 
-def pair_raion(messages: list[dict], raion: str) -> tuple[list[dict], list[dict]]:
+def pair_raion(messages: list[dict], raion: str) -> tuple[list[dict], list[dict], list[dict]]:
     active = None
     pairs = []
     anomalies = []
+    typed_samples = []
     for msg in messages:
         kind = red_transition(msg["text"], raion)
         if kind is None:
             continue
+        if len(typed_samples) < 8:
+            typed_samples.append({"id": msg["id"], "at": msg["at"].isoformat(), "kind": kind, "text": msg["text"][:500]})
         if kind == "start":
             if active is None:
                 active = msg
@@ -144,7 +169,7 @@ def pair_raion(messages: list[dict], raion: str) -> tuple[list[dict], list[dict]
                     "next_start_id": msg["id"],
                     "gap_min": round(gap, 2),
                 })
-                # Do not invent an end. Replace active with the newer confirmed start.
+                # Never fabricate an end; begin from the newer confirmed state transition.
                 active = msg
         elif kind == "end":
             if active is None:
@@ -162,17 +187,7 @@ def pair_raion(messages: list[dict], raion: str) -> tuple[list[dict], list[dict]
             active = None
     if active is not None:
         anomalies.append({"type": "open_start", "start_id": active["id"], "start": active["at"].isoformat()})
-    return pairs, anomalies
-
-
-def to_intervals(pairs: list[dict], start: datetime, end: datetime) -> list[tuple[datetime, datetime]]:
-    out = []
-    for p in pairs:
-        s = max(parse_dt(p["start"]), start)
-        e = min(parse_dt(p["end"]), end)
-        if e > s:
-            out.append((s, e))
-    return union(out)
+    return pairs, anomalies, typed_samples
 
 
 def union(intervals: list[tuple[datetime, datetime]]) -> list[tuple[datetime, datetime]]:
@@ -185,6 +200,14 @@ def union(intervals: list[tuple[datetime, datetime]]) -> list[tuple[datetime, da
         elif e > merged[-1][1]:
             merged[-1][1] = e
     return [(s, e) for s, e in merged]
+
+
+def to_intervals(pairs: list[dict], start: datetime, end: datetime) -> list[tuple[datetime, datetime]]:
+    return union([
+        (max(parse_dt(p["start"]), start), min(parse_dt(p["end"]), end))
+        for p in pairs
+        if parse_dt(p["end"]) > start and parse_dt(p["start"]) < end
+    ])
 
 
 def duration_h(intervals: list[tuple[datetime, datetime]]) -> float:
@@ -240,6 +263,7 @@ def main() -> None:
     cfg = dict(base.PROXY_CONFIG)
     cfg.update(extra.ADDITIONAL_PROXIES)
     official = load_official(cfg)
+    messages, scan_meta = fetch_history()
 
     result = {
         "generated_at": datetime.now(UTC).isoformat(),
@@ -247,6 +271,7 @@ def main() -> None:
         "source_type": "independent_volunteer_telegram_channel",
         "benchmark_window": {"from": BENCH_FROM.isoformat(), "to": BENCH_TO.isoformat()},
         "red_level_rule": "count explicit air-raid/red alerts only; yellow-only alerts are excluded",
+        "scan": scan_meta,
         "cities": {},
         "summary": {},
     }
@@ -254,15 +279,13 @@ def main() -> None:
     matching = []
     ratios = []
     current_ends = []
+    districts_with_typed = 0
 
     for key, c in cfg.items():
         raion = c["raion"]
-        try:
-            messages = fetch_search(raion)
-            pairs, anomalies = pair_raion(messages, raion)
-        except Exception as exc:
-            result["cities"][key] = {"raion": raion, "error": f"{type(exc).__name__}: {exc}"}
-            continue
+        pairs, anomalies, typed_samples = pair_raion(messages, raion)
+        if typed_samples:
+            districts_with_typed += 1
 
         a = official.get(key, [])
         b = to_intervals(pairs, BENCH_FROM, BENCH_TO)
@@ -283,9 +306,10 @@ def main() -> None:
             current_ends.append(latest)
         result["cities"][key] = {
             "raion": raion,
-            "messages_loaded": len(messages),
+            "typed_transition_count": sum(1 for m in messages if red_transition(m["text"], raion)),
             "complete_pairs": len(pairs),
             "anomaly_count": len(anomalies),
+            "typed_samples": typed_samples,
             "benchmark": bench,
             "bridge_complete_pairs_after_2026_09_08": len(bridge_pairs),
             "bridge_latest_end": latest.isoformat() if latest else None,
@@ -297,6 +321,7 @@ def main() -> None:
 
     result["summary"] = {
         "proxy_city_count": len(cfg),
+        "districts_with_typed_transitions": districts_with_typed,
         "cities_with_benchmark": len(coverages),
         "median_official_covered_pct": round(100 * median(coverages), 2) if coverages else None,
         "median_etryvoga_matching_official_pct": round(100 * median(matching), 2) if matching else None,
