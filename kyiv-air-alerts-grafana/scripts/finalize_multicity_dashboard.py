@@ -8,13 +8,21 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 DASHBOARD = ROOT / "grafana" / "dashboard.json"
+DATA_FILE = ROOT / "data" / "dashboard_data.json"
 
 CITY_PANELS = [1, 2, 3, 10, 11, 12, 13, 14, 15, 20, 21]
-CITY_CONFIG = [
-    ("kyiv", "Київ", 100),
-    ("kharkiv", "Харків", 200),
-    ("zaporizhzhia", "Запоріжжя", 300),
-]
+
+
+def load_city_config() -> list[tuple[str, str, int]]:
+    data = json.loads(DATA_FILE.read_text(encoding="utf-8"))
+    meta = data.get("multicity_meta", {})
+    keys = meta.get("production_city_keys") or ["kyiv", "kharkiv", "zaporizhzhia"]
+    cities = meta.get("cities", {})
+    out = []
+    for idx, key in enumerate(keys, start=1):
+        label = cities.get(key, {}).get("label") or data.get("cities", {}).get(key, {}).get("meta", {}).get("city_label") or key
+        out.append((key, label, idx * 100))
+    return out
 
 
 def replace_hours(expr: str) -> str:
@@ -120,6 +128,7 @@ def collapsed_row(row_id: int, title: str, y: int, panels: list[dict]) -> dict:
 
 
 def main() -> None:
+    city_config = load_city_config()
     obj = json.loads(DASHBOARD.read_text(encoding="utf-8"))
     by_id = {p.get("id"): p for p in obj.get("panels", [])}
     missing = [pid for pid in CITY_PANELS + [30, 41, 42, 43] if pid not in by_id]
@@ -129,21 +138,22 @@ def main() -> None:
     obj["templating"] = {"list": []}
     panels: list[dict] = []
 
+    first_key, first_label, first_base = city_config[0]
     panels.append({
-        "id": 100,
+        "id": first_base,
         "type": "row",
-        "title": "Київ",
+        "title": first_label,
         "collapsed": False,
         "panels": [],
         "gridPos": {"h": 1, "w": 24, "x": 0, "y": 0},
     })
     for idx, pid in enumerate(CITY_PANELS, start=1):
-        panels.append(make_city_panel(by_id[pid], "kyiv", "Київ", 100 + idx, 1))
+        panels.append(make_city_panel(by_id[pid], first_key, first_label, first_base + idx, 1))
 
-    kyiv_end = max(p.get("gridPos", {}).get("y", 0) + p.get("gridPos", {}).get("h", 0) for p in panels)
-    compact_y = kyiv_end
+    first_end = max(p.get("gridPos", {}).get("y", 0) + p.get("gridPos", {}).get("h", 0) for p in panels)
+    compact_y = first_end
 
-    for city_key, city_label, row_base in CITY_CONFIG[1:]:
+    for city_key, city_label, row_base in city_config[1:]:
         nested = []
         for idx, pid in enumerate(CITY_PANELS, start=1):
             child = make_city_panel(by_id[pid], city_key, city_label, row_base + idx, 0)
@@ -153,7 +163,9 @@ def main() -> None:
         compact_y += 1
 
     description = by_id[41].get("description", "")
-    for period, period_label, row_id in [("monthly", "місяці", 400), ("weekly", "тижні", 500)]:
+    compare_base = (len(city_config) + 1) * 100
+    for offset, (period, period_label) in enumerate([("monthly", "місяці"), ("weekly", "тижні")]):
+        row_id = compare_base + offset * 100
         nested = []
         for idx, pid in enumerate([41, 42, 43], start=1):
             child = make_comparison_panel(by_id[pid], period, period_label, row_id + idx)
@@ -165,7 +177,7 @@ def main() -> None:
         compact_y += 1
 
     methodology = copy.deepcopy(by_id[30])
-    methodology["id"] = 900
+    methodology["id"] = compare_base + 200
     methodology["gridPos"]["y"] = compact_y
     panels.append(methodology)
 
@@ -179,7 +191,7 @@ def main() -> None:
         raise RuntimeError(f"Final dashboard still contains unsupported template variables: {bad}")
 
     DASHBOARD.write_text(rendered, encoding="utf-8")
-    print("Finalized single admin/public multicity dashboard with hours as the base unit:", DASHBOARD)
+    print("Finalized dashboard for", len(city_config), "production cities:", ", ".join(label for _, label, _ in city_config))
 
 
 if __name__ == "__main__":
