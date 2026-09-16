@@ -64,11 +64,10 @@ jobs:
       - name: Expand validated production multicity set
         run: python scripts/extend_remaining_proxies.py
 
-      - name: Benchmark Tryvoha API fallback source
-        run: python scripts/audit_tryvoha_fallback.py
-
-      - name: Benchmark eTryvoga Telegram district fallback
-        run: python scripts/audit_etryvoga_district_fallback.py
+      - name: Apply official UkraineAlarm API bridge
+        env:
+          UKRAINEALARM_API_TOKEN: ${{ secrets.UKRAINEALARM_API_TOKEN }}
+        run: python scripts/apply_ukrainealarm_bridge.py
 
       - name: Add Sevastopol exact-city series
         run: python scripts/add_sevastopol_exact.py
@@ -84,6 +83,9 @@ jobs:
 
       - name: QA geography, comparison styling, and source freshness
         run: python scripts/postprocess_dashboard_qa.py
+
+      - name: Reconcile freshness with official API bridge
+        run: python scripts/reconcile_bridge_freshness.py
 
       - name: Commit changed data
         working-directory: .
