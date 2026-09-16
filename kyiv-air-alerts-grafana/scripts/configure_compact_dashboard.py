@@ -105,12 +105,41 @@ def set_query(panel: dict, root: str, columns: list[dict]) -> None:
 
 
 def comparison_columns() -> list[dict]:
+    # Grafana externally shared dashboards do not interpolate ${var:text}
+    # inside Infinity column display names. Keep the legend stable and put
+    # the resolved city names in the panel title instead.
     return [
         TIME_COL,
-        {"selector": "city_a", "text": "${compare_city_a:text}", "type": "number"},
-        {"selector": "city_b", "text": "${compare_city_b:text}", "type": "number"},
-        {"selector": "city_c", "text": "${compare_city_c:text}", "type": "number"},
+        {"selector": "city_a", "text": "A", "type": "number"},
+        {"selector": "city_b", "text": "B", "type": "number"},
+        {"selector": "city_c", "text": "C", "type": "number"},
     ]
+
+
+def comparison_title(metric: str) -> str:
+    return (
+        f"{metric} (${{comparison_period:text}}) — "
+        "A: ${compare_city_a:text} · B: ${compare_city_b:text} · C: ${compare_city_c:text}"
+    )
+
+
+def style_comparison_slots(panel: dict) -> None:
+    # Stable slot colors make shared-view comparisons easier to follow even
+    # though the public dashboard cannot expose the selector controls.
+    overrides = panel.setdefault("fieldConfig", {}).setdefault("overrides", [])
+    overrides[:] = [
+        o for o in overrides
+        if o.get("matcher", {}).get("options") not in {"A", "B", "C"}
+    ]
+    slot_colors = {"A": "blue", "B": "green", "C": "yellow"}
+    for name, color in slot_colors.items():
+        overrides.append({
+            "matcher": {"id": "byName", "options": name},
+            "properties": [
+                {"id": "color", "value": {"mode": "fixed", "fixedColor": color}},
+                {"id": "custom.lineWidth", "value": 2},
+            ],
+        })
 
 
 def configure_comparison_panels(obj: dict) -> None:
@@ -121,14 +150,14 @@ def configure_comparison_panels(obj: dict) -> None:
         row["collapsed"] = False
 
     common_description = (
-        "Показано лише три ряди, вибрані у перемикачах «Порівняння A/B/C». "
+        "Легенда використовує стабільні позначення A/B/C; відповідні назви міст показані в заголовку графіка. "
         "Назва з районом у дужках означає районний proxy, а не exact-city. "
-        "Період можна перемикати між місяцями й тижнями."
+        "У звичайній Grafana міста можна змінювати перемикачами; externally shared view показує збережені значення."
     )
 
     alerts = by_id.get(41)
     if alerts:
-        alerts["title"] = "Порівняння — середня кількість тривог на день (${comparison_period:text})"
+        alerts["title"] = comparison_title("Порівняння — середня кількість тривог на день")
         alerts["description"] = common_description
         root = (
             '$.comparison.${comparison_period}.{' 
@@ -138,10 +167,11 @@ def configure_comparison_panels(obj: dict) -> None:
             '"city_c": $lookup($, "${compare_city_c}_alerts_per_day")}'
         )
         set_query(alerts, root, comparison_columns())
+        style_comparison_slots(alerts)
 
     daily = by_id.get(42)
     if daily:
-        daily["title"] = "Порівняння — середній час під тривогою на добу (${comparison_period:text}, ${duration_unit:text})"
+        daily["title"] = comparison_title("Порівняння — середній час під тривогою на добу")
         daily["description"] = common_description
         root = (
             '$.comparison.${comparison_period}.{' 
@@ -151,10 +181,11 @@ def configure_comparison_panels(obj: dict) -> None:
             '"city_c": "${duration_unit}" = "minutes" ? $lookup($, "${compare_city_c}_avg_daily_alert_hours") * 60 : $lookup($, "${compare_city_c}_avg_daily_alert_hours")}'
         )
         set_query(daily, root, comparison_columns())
+        style_comparison_slots(daily)
 
     duration = by_id.get(43)
     if duration:
-        duration["title"] = "Порівняння — середня тривалість однієї тривоги (${comparison_period:text}, ${duration_unit:text})"
+        duration["title"] = comparison_title("Порівняння — середня тривалість однієї тривоги")
         duration["description"] = common_description
         root = (
             '$.comparison.${comparison_period}.{' 
@@ -164,6 +195,7 @@ def configure_comparison_panels(obj: dict) -> None:
             '"city_c": "${duration_unit}" = "hours" ? $lookup($, "${compare_city_c}_avg_alert_duration_min") / 60 : $lookup($, "${compare_city_c}_avg_alert_duration_min")}'
         )
         set_query(duration, root, comparison_columns())
+        style_comparison_slots(duration)
 
 
 def main() -> None:
