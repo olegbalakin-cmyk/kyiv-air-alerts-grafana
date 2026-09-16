@@ -4286,7 +4286,7 @@
           "id": 401,
           "type": "timeseries",
           "title": "Порівняння міст — середня кількість тривог на день (місяці)",
-          "description": "Порівнюються тільки city-level дані. Обласні тривоги не підмішуються. Спільний повний місячний ряд починається 2025-04-01; спільний повний тижневий ряд — 2025-03-24.",
+          "description": "Порівняння використовує спільний повний період для всіх показаних міст. Київ, Харків і Запоріжжя мають exact-city ряди; інші міста — районний proxy після валідованої дати переходу, з включенням explicit oblast сигналів у перехідному періоді. Спільний місячний ряд починається 2025-12-01; тижневий — 2025-11-10.",
           "gridPos": {
             "h": 9,
             "w": 24,
@@ -4319,6 +4319,66 @@
                 {
                   "selector": "zaporizhzhia_alerts_per_day",
                   "text": "Запоріжжя",
+                  "type": "number"
+                },
+                {
+                  "selector": "cherkasy_alerts_per_day",
+                  "text": "Черкаси",
+                  "type": "number"
+                },
+                {
+                  "selector": "zhytomyr_alerts_per_day",
+                  "text": "Житомир",
+                  "type": "number"
+                },
+                {
+                  "selector": "dnipro_alerts_per_day",
+                  "text": "Дніпро",
+                  "type": "number"
+                },
+                {
+                  "selector": "khmelnytskyi_alerts_per_day",
+                  "text": "Хмельницький",
+                  "type": "number"
+                },
+                {
+                  "selector": "poltava_alerts_per_day",
+                  "text": "Полтава",
+                  "type": "number"
+                },
+                {
+                  "selector": "rivne_alerts_per_day",
+                  "text": "Рівне",
+                  "type": "number"
+                },
+                {
+                  "selector": "sumy_alerts_per_day",
+                  "text": "Суми",
+                  "type": "number"
+                },
+                {
+                  "selector": "vinnytsia_alerts_per_day",
+                  "text": "Вінниця",
+                  "type": "number"
+                },
+                {
+                  "selector": "kropyvnytskyi_alerts_per_day",
+                  "text": "Кропивницький",
+                  "type": "number"
+                },
+                {
+                  "selector": "lviv_alerts_per_day",
+                  "text": "Львів",
+                  "type": "number"
+                },
+                {
+                  "selector": "chernihiv_alerts_per_day",
+                  "text": "Чернігів",
+                  "type": "number"
+                },
+                {
+                  "selector": "odesa_alerts_per_day",
+                  "text": "Одеса",
                   "type": "number"
                 }
               ],
@@ -4416,7 +4476,7 @@
           "id": 402,
           "type": "timeseries",
           "title": "Порівняння міст — середній час під тривогою на добу (місяці, години)",
-          "description": "Порівнюються тільки city-level дані. Обласні тривоги не підмішуються. Спільний повний місячний ряд починається 2025-04-01; спільний повний тижневий ряд — 2025-03-24.",
+          "description": "Порівняння використовує спільний повний період для всіх показаних міст. Київ, Харків і Запоріжжя мають exact-city ряди; інші міста — районний proxy після валідованої дати переходу, з включенням explicit oblast сигналів у перехідному періоді. Спільний місячний ряд починається 2025-12-01; тижневий — 2025-11-10.",
           "gridPos": {
             "h": 9,
             "w": 24,
@@ -4450,6 +4510,66 @@
                   "selector": "zaporizhzhia",
                   "text": "Запоріжжя",
                   "type": "number"
+                },
+                {
+                  "selector": "cherkasy",
+                  "text": "Черкаси",
+                  "type": "number"
+                },
+                {
+                  "selector": "zhytomyr",
+                  "text": "Житомир",
+                  "type": "number"
+                },
+                {
+                  "selector": "dnipro",
+                  "text": "Дніпро",
+                  "type": "number"
+                },
+                {
+                  "selector": "khmelnytskyi",
+                  "text": "Хмельницький",
+                  "type": "number"
+                },
+                {
+                  "selector": "poltava",
+                  "text": "Полтава",
+                  "type": "number"
+                },
+                {
+                  "selector": "rivne",
+                  "text": "Рівне",
+                  "type": "number"
+                },
+                {
+                  "selector": "sumy",
+                  "text": "Суми",
+                  "type": "number"
+                },
+                {
+                  "selector": "vinnytsia",
+                  "text": "Вінниця",
+                  "type": "number"
+                },
+                {
+                  "selector": "kropyvnytskyi",
+                  "text": "Кропивницький",
+                  "type": "number"
+                },
+                {
+                  "selector": "lviv",
+                  "text": "Львів",
+                  "type": "number"
+                },
+                {
+                  "selector": "chernihiv",
+                  "text": "Чернігів",
+                  "type": "number"
+                },
+                {
+                  "selector": "odesa",
+                  "text": "Одеса",
+                  "type": "number"
                 }
               ],
               "computed_columns": [],
@@ -4462,7 +4582,7 @@
               "global_query_id": "",
               "parser": "backend",
               "refId": "A",
-              "root_selector": "$.comparison.monthly.{\"time\": time, \"kyiv\": kyiv_avg_daily_alert_hours, \"kharkiv\": kharkiv_avg_daily_alert_hours, \"zaporizhzhia\": zaporizhzhia_avg_daily_alert_hours}",
+              "root_selector": "$.comparison.monthly.{\"time\": time, \"kyiv\": kyiv_avg_daily_alert_hours, \"kharkiv\": kharkiv_avg_daily_alert_hours, \"zaporizhzhia\": zaporizhzhia_avg_daily_alert_hours, \"cherkasy\": cherkasy_avg_daily_alert_hours, \"zhytomyr\": zhytomyr_avg_daily_alert_hours, \"dnipro\": dnipro_avg_daily_alert_hours, \"khmelnytskyi\": khmelnytskyi_avg_daily_alert_hours, \"poltava\": poltava_avg_daily_alert_hours, \"rivne\": rivne_avg_daily_alert_hours, \"sumy\": sumy_avg_daily_alert_hours, \"vinnytsia\": vinnytsia_avg_daily_alert_hours, \"kropyvnytskyi\": kropyvnytskyi_avg_daily_alert_hours, \"lviv\": lviv_avg_daily_alert_hours, \"chernihiv\": chernihiv_avg_daily_alert_hours, \"odesa\": odesa_avg_daily_alert_hours}",
               "source": "url",
               "type": "json",
               "url": "https://raw.githubusercontent.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/main/kyiv-air-alerts-grafana/data/dashboard_data.json",
@@ -4546,7 +4666,7 @@
           "id": 403,
           "type": "timeseries",
           "title": "Порівняння міст — середня тривалість однієї тривоги (місяці, години)",
-          "description": "Порівнюються тільки city-level дані. Обласні тривоги не підмішуються. Спільний повний місячний ряд починається 2025-04-01; спільний повний тижневий ряд — 2025-03-24.",
+          "description": "Порівняння використовує спільний повний період для всіх показаних міст. Київ, Харків і Запоріжжя мають exact-city ряди; інші міста — районний proxy після валідованої дати переходу, з включенням explicit oblast сигналів у перехідному періоді. Спільний місячний ряд починається 2025-12-01; тижневий — 2025-11-10.",
           "gridPos": {
             "h": 9,
             "w": 24,
@@ -4580,6 +4700,66 @@
                   "selector": "zaporizhzhia",
                   "text": "Запоріжжя",
                   "type": "number"
+                },
+                {
+                  "selector": "cherkasy",
+                  "text": "Черкаси",
+                  "type": "number"
+                },
+                {
+                  "selector": "zhytomyr",
+                  "text": "Житомир",
+                  "type": "number"
+                },
+                {
+                  "selector": "dnipro",
+                  "text": "Дніпро",
+                  "type": "number"
+                },
+                {
+                  "selector": "khmelnytskyi",
+                  "text": "Хмельницький",
+                  "type": "number"
+                },
+                {
+                  "selector": "poltava",
+                  "text": "Полтава",
+                  "type": "number"
+                },
+                {
+                  "selector": "rivne",
+                  "text": "Рівне",
+                  "type": "number"
+                },
+                {
+                  "selector": "sumy",
+                  "text": "Суми",
+                  "type": "number"
+                },
+                {
+                  "selector": "vinnytsia",
+                  "text": "Вінниця",
+                  "type": "number"
+                },
+                {
+                  "selector": "kropyvnytskyi",
+                  "text": "Кропивницький",
+                  "type": "number"
+                },
+                {
+                  "selector": "lviv",
+                  "text": "Львів",
+                  "type": "number"
+                },
+                {
+                  "selector": "chernihiv",
+                  "text": "Чернігів",
+                  "type": "number"
+                },
+                {
+                  "selector": "odesa",
+                  "text": "Одеса",
+                  "type": "number"
                 }
               ],
               "computed_columns": [],
@@ -4592,7 +4772,7 @@
               "global_query_id": "",
               "parser": "backend",
               "refId": "A",
-              "root_selector": "$.comparison.monthly.{\"time\": time, \"kyiv\": kyiv_avg_alert_duration_min / 60, \"kharkiv\": kharkiv_avg_alert_duration_min / 60, \"zaporizhzhia\": zaporizhzhia_avg_alert_duration_min / 60}",
+              "root_selector": "$.comparison.monthly.{\"time\": time, \"kyiv\": kyiv_avg_alert_duration_min / 60, \"kharkiv\": kharkiv_avg_alert_duration_min / 60, \"zaporizhzhia\": zaporizhzhia_avg_alert_duration_min / 60, \"cherkasy\": cherkasy_avg_alert_duration_min / 60, \"zhytomyr\": zhytomyr_avg_alert_duration_min / 60, \"dnipro\": dnipro_avg_alert_duration_min / 60, \"khmelnytskyi\": khmelnytskyi_avg_alert_duration_min / 60, \"poltava\": poltava_avg_alert_duration_min / 60, \"rivne\": rivne_avg_alert_duration_min / 60, \"sumy\": sumy_avg_alert_duration_min / 60, \"vinnytsia\": vinnytsia_avg_alert_duration_min / 60, \"kropyvnytskyi\": kropyvnytskyi_avg_alert_duration_min / 60, \"lviv\": lviv_avg_alert_duration_min / 60, \"chernihiv\": chernihiv_avg_alert_duration_min / 60, \"odesa\": odesa_avg_alert_duration_min / 60}",
               "source": "url",
               "type": "json",
               "url": "https://raw.githubusercontent.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/main/kyiv-air-alerts-grafana/data/dashboard_data.json",
@@ -4690,7 +4870,7 @@
           "id": 501,
           "type": "timeseries",
           "title": "Порівняння міст — середня кількість тривог на день (тижні)",
-          "description": "Порівнюються тільки city-level дані. Обласні тривоги не підмішуються. Спільний повний місячний ряд починається 2025-04-01; спільний повний тижневий ряд — 2025-03-24.",
+          "description": "Порівняння використовує спільний повний період для всіх показаних міст. Київ, Харків і Запоріжжя мають exact-city ряди; інші міста — районний proxy після валідованої дати переходу, з включенням explicit oblast сигналів у перехідному періоді. Спільний місячний ряд починається 2025-12-01; тижневий — 2025-11-10.",
           "gridPos": {
             "h": 9,
             "w": 24,
@@ -4723,6 +4903,66 @@
                 {
                   "selector": "zaporizhzhia_alerts_per_day",
                   "text": "Запоріжжя",
+                  "type": "number"
+                },
+                {
+                  "selector": "cherkasy_alerts_per_day",
+                  "text": "Черкаси",
+                  "type": "number"
+                },
+                {
+                  "selector": "zhytomyr_alerts_per_day",
+                  "text": "Житомир",
+                  "type": "number"
+                },
+                {
+                  "selector": "dnipro_alerts_per_day",
+                  "text": "Дніпро",
+                  "type": "number"
+                },
+                {
+                  "selector": "khmelnytskyi_alerts_per_day",
+                  "text": "Хмельницький",
+                  "type": "number"
+                },
+                {
+                  "selector": "poltava_alerts_per_day",
+                  "text": "Полтава",
+                  "type": "number"
+                },
+                {
+                  "selector": "rivne_alerts_per_day",
+                  "text": "Рівне",
+                  "type": "number"
+                },
+                {
+                  "selector": "sumy_alerts_per_day",
+                  "text": "Суми",
+                  "type": "number"
+                },
+                {
+                  "selector": "vinnytsia_alerts_per_day",
+                  "text": "Вінниця",
+                  "type": "number"
+                },
+                {
+                  "selector": "kropyvnytskyi_alerts_per_day",
+                  "text": "Кропивницький",
+                  "type": "number"
+                },
+                {
+                  "selector": "lviv_alerts_per_day",
+                  "text": "Львів",
+                  "type": "number"
+                },
+                {
+                  "selector": "chernihiv_alerts_per_day",
+                  "text": "Чернігів",
+                  "type": "number"
+                },
+                {
+                  "selector": "odesa_alerts_per_day",
+                  "text": "Одеса",
                   "type": "number"
                 }
               ],
@@ -4820,7 +5060,7 @@
           "id": 502,
           "type": "timeseries",
           "title": "Порівняння міст — середній час під тривогою на добу (тижні, години)",
-          "description": "Порівнюються тільки city-level дані. Обласні тривоги не підмішуються. Спільний повний місячний ряд починається 2025-04-01; спільний повний тижневий ряд — 2025-03-24.",
+          "description": "Порівняння використовує спільний повний період для всіх показаних міст. Київ, Харків і Запоріжжя мають exact-city ряди; інші міста — районний proxy після валідованої дати переходу, з включенням explicit oblast сигналів у перехідному періоді. Спільний місячний ряд починається 2025-12-01; тижневий — 2025-11-10.",
           "gridPos": {
             "h": 9,
             "w": 24,
@@ -4854,6 +5094,66 @@
                   "selector": "zaporizhzhia",
                   "text": "Запоріжжя",
                   "type": "number"
+                },
+                {
+                  "selector": "cherkasy",
+                  "text": "Черкаси",
+                  "type": "number"
+                },
+                {
+                  "selector": "zhytomyr",
+                  "text": "Житомир",
+                  "type": "number"
+                },
+                {
+                  "selector": "dnipro",
+                  "text": "Дніпро",
+                  "type": "number"
+                },
+                {
+                  "selector": "khmelnytskyi",
+                  "text": "Хмельницький",
+                  "type": "number"
+                },
+                {
+                  "selector": "poltava",
+                  "text": "Полтава",
+                  "type": "number"
+                },
+                {
+                  "selector": "rivne",
+                  "text": "Рівне",
+                  "type": "number"
+                },
+                {
+                  "selector": "sumy",
+                  "text": "Суми",
+                  "type": "number"
+                },
+                {
+                  "selector": "vinnytsia",
+                  "text": "Вінниця",
+                  "type": "number"
+                },
+                {
+                  "selector": "kropyvnytskyi",
+                  "text": "Кропивницький",
+                  "type": "number"
+                },
+                {
+                  "selector": "lviv",
+                  "text": "Львів",
+                  "type": "number"
+                },
+                {
+                  "selector": "chernihiv",
+                  "text": "Чернігів",
+                  "type": "number"
+                },
+                {
+                  "selector": "odesa",
+                  "text": "Одеса",
+                  "type": "number"
                 }
               ],
               "computed_columns": [],
@@ -4866,7 +5166,7 @@
               "global_query_id": "",
               "parser": "backend",
               "refId": "A",
-              "root_selector": "$.comparison.weekly.{\"time\": time, \"kyiv\": kyiv_avg_daily_alert_hours, \"kharkiv\": kharkiv_avg_daily_alert_hours, \"zaporizhzhia\": zaporizhzhia_avg_daily_alert_hours}",
+              "root_selector": "$.comparison.weekly.{\"time\": time, \"kyiv\": kyiv_avg_daily_alert_hours, \"kharkiv\": kharkiv_avg_daily_alert_hours, \"zaporizhzhia\": zaporizhzhia_avg_daily_alert_hours, \"cherkasy\": cherkasy_avg_daily_alert_hours, \"zhytomyr\": zhytomyr_avg_daily_alert_hours, \"dnipro\": dnipro_avg_daily_alert_hours, \"khmelnytskyi\": khmelnytskyi_avg_daily_alert_hours, \"poltava\": poltava_avg_daily_alert_hours, \"rivne\": rivne_avg_daily_alert_hours, \"sumy\": sumy_avg_daily_alert_hours, \"vinnytsia\": vinnytsia_avg_daily_alert_hours, \"kropyvnytskyi\": kropyvnytskyi_avg_daily_alert_hours, \"lviv\": lviv_avg_daily_alert_hours, \"chernihiv\": chernihiv_avg_daily_alert_hours, \"odesa\": odesa_avg_daily_alert_hours}",
               "source": "url",
               "type": "json",
               "url": "https://raw.githubusercontent.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/main/kyiv-air-alerts-grafana/data/dashboard_data.json",
@@ -4950,7 +5250,7 @@
           "id": 503,
           "type": "timeseries",
           "title": "Порівняння міст — середня тривалість однієї тривоги (тижні, години)",
-          "description": "Порівнюються тільки city-level дані. Обласні тривоги не підмішуються. Спільний повний місячний ряд починається 2025-04-01; спільний повний тижневий ряд — 2025-03-24.",
+          "description": "Порівняння використовує спільний повний період для всіх показаних міст. Київ, Харків і Запоріжжя мають exact-city ряди; інші міста — районний proxy після валідованої дати переходу, з включенням explicit oblast сигналів у перехідному періоді. Спільний місячний ряд починається 2025-12-01; тижневий — 2025-11-10.",
           "gridPos": {
             "h": 9,
             "w": 24,
@@ -4984,6 +5284,66 @@
                   "selector": "zaporizhzhia",
                   "text": "Запоріжжя",
                   "type": "number"
+                },
+                {
+                  "selector": "cherkasy",
+                  "text": "Черкаси",
+                  "type": "number"
+                },
+                {
+                  "selector": "zhytomyr",
+                  "text": "Житомир",
+                  "type": "number"
+                },
+                {
+                  "selector": "dnipro",
+                  "text": "Дніпро",
+                  "type": "number"
+                },
+                {
+                  "selector": "khmelnytskyi",
+                  "text": "Хмельницький",
+                  "type": "number"
+                },
+                {
+                  "selector": "poltava",
+                  "text": "Полтава",
+                  "type": "number"
+                },
+                {
+                  "selector": "rivne",
+                  "text": "Рівне",
+                  "type": "number"
+                },
+                {
+                  "selector": "sumy",
+                  "text": "Суми",
+                  "type": "number"
+                },
+                {
+                  "selector": "vinnytsia",
+                  "text": "Вінниця",
+                  "type": "number"
+                },
+                {
+                  "selector": "kropyvnytskyi",
+                  "text": "Кропивницький",
+                  "type": "number"
+                },
+                {
+                  "selector": "lviv",
+                  "text": "Львів",
+                  "type": "number"
+                },
+                {
+                  "selector": "chernihiv",
+                  "text": "Чернігів",
+                  "type": "number"
+                },
+                {
+                  "selector": "odesa",
+                  "text": "Одеса",
+                  "type": "number"
                 }
               ],
               "computed_columns": [],
@@ -4996,7 +5356,7 @@
               "global_query_id": "",
               "parser": "backend",
               "refId": "A",
-              "root_selector": "$.comparison.weekly.{\"time\": time, \"kyiv\": kyiv_avg_alert_duration_min / 60, \"kharkiv\": kharkiv_avg_alert_duration_min / 60, \"zaporizhzhia\": zaporizhzhia_avg_alert_duration_min / 60}",
+              "root_selector": "$.comparison.weekly.{\"time\": time, \"kyiv\": kyiv_avg_alert_duration_min / 60, \"kharkiv\": kharkiv_avg_alert_duration_min / 60, \"zaporizhzhia\": zaporizhzhia_avg_alert_duration_min / 60, \"cherkasy\": cherkasy_avg_alert_duration_min / 60, \"zhytomyr\": zhytomyr_avg_alert_duration_min / 60, \"dnipro\": dnipro_avg_alert_duration_min / 60, \"khmelnytskyi\": khmelnytskyi_avg_alert_duration_min / 60, \"poltava\": poltava_avg_alert_duration_min / 60, \"rivne\": rivne_avg_alert_duration_min / 60, \"sumy\": sumy_avg_alert_duration_min / 60, \"vinnytsia\": vinnytsia_avg_alert_duration_min / 60, \"kropyvnytskyi\": kropyvnytskyi_avg_alert_duration_min / 60, \"lviv\": lviv_avg_alert_duration_min / 60, \"chernihiv\": chernihiv_avg_alert_duration_min / 60, \"odesa\": odesa_avg_alert_duration_min / 60}",
               "source": "url",
               "type": "json",
               "url": "https://raw.githubusercontent.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/main/kyiv-air-alerts-grafana/data/dashboard_data.json",
@@ -5244,7 +5604,7 @@
       },
       "options": {
         "mode": "markdown",
-        "content": "**Джерела.** Київ: [Портал відкритих даних Києва](https://data.kyivcity.gov.ua/dataset/statystyka-povitrianykh-tryvoh-u-misti-kyievi-dep-municipal/resource/5e4fb8a8-f0c8-4a12-885f-192d1f0dba75/data/download) + [Kyiv Digital — live-історія](https://kyiv.digital/storage/air-alert/stats.html) як fallback для свіжих завершених подій.  \nХарків і Запоріжжя: [official_data_uk.csv](https://raw.githubusercontent.com/Vadimkin/ukrainian-air-raid-sirens-dataset/main/datasets/official_data_uk.csv) — використовуються тільки записи рівня `hromada` для відповідної міської громади, починаючи з валідованого періоду окремих міських тривог.  \n\n**Початок city-level рядів:** Київ — 2022-02-28; Харків — 2025-02-17; Запоріжжя — 2025-03-19. Обласні дані та ретроспективно розмічені ранні записи не використовуються для заповнення попередніх періодів.  \n\nПоточний календарний день завжди виключено. Перший неповний місяць і перший неповний тиждень кожного city-level ряду не включаються до довгих агрегатів. Тривоги через північ розподіляються між календарними добами в часовому поясі Europe/Kyiv; перекриття інтервалів зливаються, щоб не подвоювати час.  \n\nПропозиції надсилати @olbalakin в телеграм\n\n**Загиблі від повітряних атак.** Ряд побудований на публічно доступних повідомленнях офіційних органів і медіа. Незалежних інструментів для повної верифікації кожного випадку немає, тому ці дані слід трактувати як реконструкцію на основі доступних відкритих джерел. Для 2025 року використовується подієва реконструкція 166 смертей; КМВА повідомляла річний накопичувальний підсумок 171, але додаткові п’ять смертей не вдалося надійно прив’язати до конкретних атак у публічних джерелах."
+        "content": "**Географія та джерела.** Київ використовує міські відкриті дані та Kyiv Digital fallback. Харків і Запоріжжя використовують exact-city записи рівня `hromada` з [official_data_uk.csv](https://raw.githubusercontent.com/Vadimkin/ukrainian-air-raid-sirens-dataset/main/datasets/official_data_uk.csv).  \n\nДля решти показаних облцентрів використовується **районний proxy**: після валідованої дати переходу ряд дорівнює union сигналів відповідного району та explicit `oblast` сигналів. У 2026 році explicit `oblast` записи в цьому джерелі фактично не додають часу, тому ряд дорівнює районному. До coverage-start дані не backfill-яться старими обласними тривогами.  \n\n- **Черкаси**: `Черкаський район`; coverage з 2025-01-10.\n- **Житомир**: `Житомирський район`; coverage з 2025-01-23.\n- **Дніпро**: `Дніпровський район`; coverage з 2025-05-01.\n- **Хмельницький**: `Хмельницький район`; coverage з 2025-07-07.\n- **Полтава**: `Полтавський район`; coverage з 2025-08-01.\n- **Рівне**: `Рівненський район`; coverage з 2025-08-01.\n- **Суми**: `Сумський район`; coverage з 2025-08-06.\n- **Вінниця**: `Вінницький район`; coverage з 2025-08-21.\n- **Кропивницький**: `Кропивницький район`; coverage з 2025-09-01.\n- **Львів**: `Львівський район`; coverage з 2025-09-01.\n- **Чернігів**: `Чернігівський район`; coverage з 2025-09-03.\n- **Одеса**: `Одеський район`; coverage з 2025-11-04.  \n\n**Відкладені міста.** Миколаїв і Тернопіль не включені через несумісну географію сигналів; Донецьк і Луганськ потребують окремої методології. Херсон, Луцьк, Ужгород, Івано-Франківськ і Чернівці поки не включені до production, оскільки стабільний районний ряд є, але точну дату rollout ще не підтверджено зовнішнім офіційним джерелом.  \n\n**Агрегація.** Поточний календарний день виключено. Для proxy перекривні районні та обласні інтервали зливаються в єдині alert episodes до підрахунку і тривалості, і кількості тривог. Перший неповний місяць та тиждень після coverage-start виключаються. Тривоги через північ розподіляються між календарними добами в Europe/Kyiv. Порівняння міст використовує лише спільні повні календарні періоди.  \n\nПропозиції надсилати @olbalakin в телеграм\n\n**Загиблі від повітряних атак.** Ряд побудований на публічно доступних повідомленнях офіційних органів і медіа. Незалежних інструментів для повної верифікації кожного випадку немає, тому ці дані слід трактувати як реконструкцію на основі доступних відкритих джерел. Для 2025 року використовується подієва реконструкція 166 смертей; КМВА повідомляла річний накопичувальний підсумок 171, але додаткові п’ять смертей не вдалося надійно прив’язати до конкретних атак у публічних джерелах."
       }
     }
   ],
