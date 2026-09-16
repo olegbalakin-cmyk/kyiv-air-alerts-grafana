@@ -4,7 +4,6 @@ from __future__ import annotations
 import json
 import re
 import time
-from dataclasses import asdict
 from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 
@@ -118,9 +117,23 @@ def fetch_recent_messages() -> tuple[list[dict], dict]:
     }
 
 
+def msg_diag(msg: dict | None) -> dict | None:
+    if msg is None:
+        return None
+    return {
+        "id": msg["id"],
+        "at": msg["at"].isoformat(),
+        "text": msg.get("text", ""),
+        "normalized": normalize(msg.get("text", "")),
+        "url": f"https://t.me/{CHANNEL}/{msg['id']}",
+    }
+
+
 def pair_recent(messages: list[dict]) -> tuple[list[dict], list[dict]]:
     typed = [(m, strict_kind(m["text"])) for m in messages]
     typed = [(m, k) for m, k in typed if k]
+    by_id = {m["id"]: m for m in messages}
+    ordered_ids = sorted(by_id)
     active = None
     pairs = []
     anomalies = []
@@ -130,11 +143,27 @@ def pair_recent(messages: list[dict]) -> tuple[list[dict], list[dict]]:
                 gap = (msg["at"] - active["at"]).total_seconds() / 60
                 if gap <= 5:
                     continue
-                anomalies.append({"type": "missing_end_before_new_start", "start_id": active["id"], "next_start_id": msg["id"]})
+                between = [
+                    msg_diag(by_id[mid])
+                    for mid in ordered_ids
+                    if active["id"] < mid < msg["id"]
+                ]
+                anomalies.append({
+                    "type": "missing_end_before_new_start",
+                    "start_id": active["id"],
+                    "next_start_id": msg["id"],
+                    "start": msg_diag(active),
+                    "next_start": msg_diag(msg),
+                    "messages_between": between,
+                })
             active = msg
             continue
         if active is None:
-            anomalies.append({"type": "orphan_end", "end_id": msg["id"]})
+            anomalies.append({
+                "type": "orphan_end",
+                "end_id": msg["id"],
+                "end": msg_diag(msg),
+            })
             continue
         if msg["at"] > active["at"]:
             pairs.append({
@@ -148,7 +177,11 @@ def pair_recent(messages: list[dict]) -> tuple[list[dict], list[dict]]:
             })
         active = None
     if active is not None:
-        anomalies.append({"type": "open_start", "start_id": active["id"]})
+        anomalies.append({
+            "type": "open_start",
+            "start_id": active["id"],
+            "start": msg_diag(active),
+        })
     return pairs, anomalies
 
 
@@ -216,8 +249,6 @@ def build_city_output(store: dict) -> dict:
     multi.enrich_weekly(output, alerts)
     multi.trim_to_complete_coverage(output, date.fromisoformat(COVERAGE_START))
 
-    # The city-specific system began during Monday 25 Sep 2023, so that calendar
-    # week is not a full observation week even though coverage_start was Monday.
     output["weekly"] = [r for r in output.get("weekly", []) if r["week_start"] >= "2023-10-02"]
     output["meta"]["first_complete_week_start"] = "2023-10-02"
     output["monthly"] = [r for r in output.get("monthly", []) if r["month"] >= "2023-10"]
@@ -293,6 +324,7 @@ def main() -> None:
     print("Added Sevastopol exact-city series")
     print("Complete stored pairs:", len(store.get("pairs", [])))
     print("Recent fetch:", json.dumps(fetch_meta, ensure_ascii=False))
+    print("Recent anomalies:", json.dumps(store.get("meta", {}).get("recent_anomalies", []), ensure_ascii=False))
     print("Monthly shared comparison starts:", data["comparison"]["monthly"][0]["time"] if data["comparison"]["monthly"] else None)
     print("Weekly shared comparison starts:", data["comparison"]["weekly"][0]["time"] if data["comparison"]["weekly"] else None)
 
