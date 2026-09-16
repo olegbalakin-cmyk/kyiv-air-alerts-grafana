@@ -29749,11 +29749,1426 @@
     {
       "id": 2200,
       "type": "row",
-      "title": "Порівняння міст — місяці",
+      "title": "Севастополь (сигнали окупаційної адміністрації)",
       "collapsed": true,
       "panels": [
         {
           "id": 2201,
+          "type": "stat",
+          "title": "Севастополь (сигнали окупаційної адміністрації): тривог за останні 28 завершених днів",
+          "gridPos": {
+            "h": 4,
+            "w": 8,
+            "x": 0,
+            "y": 0
+          },
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "${DS_INFINITY}"
+          },
+          "targets": [
+            {
+              "columns": [
+                {
+                  "selector": "alerts_28d",
+                  "text": "Тривог",
+                  "type": "number"
+                }
+              ],
+              "computed_columns": [],
+              "datasource": {
+                "type": "yesoreyeram-infinity-datasource",
+                "uid": "${DS_INFINITY}"
+              },
+              "filters": [],
+              "format": "table",
+              "global_query_id": "",
+              "parser": "backend",
+              "refId": "A",
+              "root_selector": "$.cities.sevastopol.kpis",
+              "source": "url",
+              "type": "json",
+              "url": "https://raw.githubusercontent.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/main/kyiv-air-alerts-grafana/data/dashboard_data.json",
+              "url_options": {
+                "data": "",
+                "method": "GET"
+              }
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "short",
+              "decimals": 0,
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "options": {
+            "reduceOptions": {
+              "values": false,
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": ""
+            },
+            "orientation": "auto",
+            "textMode": "auto",
+            "wideLayout": true,
+            "colorMode": "value",
+            "graphMode": "none",
+            "justifyMode": "auto",
+            "showPercentChange": false
+          }
+        },
+        {
+          "id": 2202,
+          "type": "stat",
+          "title": "Севастополь (сигнали окупаційної адміністрації): час під тривогою за останні 28 завершених днів — години",
+          "gridPos": {
+            "h": 4,
+            "w": 8,
+            "x": 8,
+            "y": 0
+          },
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "${DS_INFINITY}"
+          },
+          "targets": [
+            {
+              "columns": [
+                {
+                  "selector": "value",
+                  "text": "Час під тривогою",
+                  "type": "number"
+                }
+              ],
+              "computed_columns": [],
+              "datasource": {
+                "type": "yesoreyeram-infinity-datasource",
+                "uid": "${DS_INFINITY}"
+              },
+              "filters": [],
+              "format": "table",
+              "global_query_id": "",
+              "parser": "backend",
+              "refId": "A",
+              "root_selector": "$.cities.sevastopol.kpis.{\"value\": alert_hours_28d}",
+              "source": "url",
+              "type": "json",
+              "url": "https://raw.githubusercontent.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/main/kyiv-air-alerts-grafana/data/dashboard_data.json",
+              "url_options": {
+                "data": "",
+                "method": "GET"
+              }
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "suffix: год",
+              "decimals": 1,
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "options": {
+            "reduceOptions": {
+              "values": false,
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": ""
+            },
+            "orientation": "auto",
+            "textMode": "auto",
+            "wideLayout": true,
+            "colorMode": "value",
+            "graphMode": "none",
+            "justifyMode": "auto",
+            "showPercentChange": false
+          }
+        },
+        {
+          "id": 2203,
+          "type": "stat",
+          "title": "Севастополь (сигнали окупаційної адміністрації): середня тривалість тривоги за останні 28 завершених днів — години",
+          "gridPos": {
+            "h": 4,
+            "w": 8,
+            "x": 16,
+            "y": 0
+          },
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "${DS_INFINITY}"
+          },
+          "targets": [
+            {
+              "columns": [
+                {
+                  "selector": "value",
+                  "text": "Середня тривалість",
+                  "type": "number"
+                }
+              ],
+              "computed_columns": [],
+              "datasource": {
+                "type": "yesoreyeram-infinity-datasource",
+                "uid": "${DS_INFINITY}"
+              },
+              "filters": [],
+              "format": "table",
+              "global_query_id": "",
+              "parser": "backend",
+              "refId": "A",
+              "root_selector": "$.cities.sevastopol.kpis.{\"value\": avg_alert_duration_min_28d / 60}",
+              "source": "url",
+              "type": "json",
+              "url": "https://raw.githubusercontent.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/main/kyiv-air-alerts-grafana/data/dashboard_data.json",
+              "url_options": {
+                "data": "",
+                "method": "GET"
+              }
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "suffix: год",
+              "decimals": 1,
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "options": {
+            "reduceOptions": {
+              "values": false,
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": ""
+            },
+            "orientation": "auto",
+            "textMode": "auto",
+            "wideLayout": true,
+            "colorMode": "value",
+            "graphMode": "none",
+            "justifyMode": "auto",
+            "showPercentChange": false
+          }
+        },
+        {
+          "id": 2204,
+          "type": "timeseries",
+          "title": "Севастополь (сигнали окупаційної адміністрації): середня кількість тривог на день — за місяцями",
+          "description": "Повні місяці; поточний неповний місяць виключено.",
+          "gridPos": {
+            "h": 9,
+            "w": 24,
+            "x": 0,
+            "y": 4
+          },
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "${DS_INFINITY}"
+          },
+          "targets": [
+            {
+              "columns": [
+                {
+                  "selector": "time",
+                  "text": "Дата",
+                  "type": "timestamp",
+                  "timestampFormat": "2006-01-02T15:04:05Z07:00"
+                },
+                {
+                  "selector": "alerts_per_day",
+                  "text": "Тривог на день",
+                  "type": "number"
+                }
+              ],
+              "computed_columns": [],
+              "datasource": {
+                "type": "yesoreyeram-infinity-datasource",
+                "uid": "${DS_INFINITY}"
+              },
+              "filters": [],
+              "format": "table",
+              "global_query_id": "",
+              "parser": "backend",
+              "refId": "A",
+              "root_selector": "$.cities.sevastopol.monthly",
+              "source": "url",
+              "type": "json",
+              "url": "https://raw.githubusercontent.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/main/kyiv-air-alerts-grafana/data/dashboard_data.json",
+              "url_options": {
+                "data": "",
+                "method": "GET"
+              }
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "drawStyle": "line",
+                "lineInterpolation": "linear",
+                "barAlignment": 0,
+                "barWidthFactor": 0.65,
+                "lineWidth": 2,
+                "fillOpacity": 12,
+                "gradientMode": "none",
+                "spanNulls": false,
+                "insertNulls": false,
+                "showPoints": "auto",
+                "pointSize": 5,
+                "stacking": {
+                  "mode": "none",
+                  "group": "A"
+                },
+                "axisPlacement": "auto",
+                "axisLabel": "",
+                "axisColorMode": "text",
+                "axisBorderShow": false,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "axisCenteredZero": false,
+                "hideFrom": {
+                  "tooltip": false,
+                  "viz": false,
+                  "legend": false
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                },
+                "lineStyle": {
+                  "fill": "solid"
+                }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  }
+                ]
+              },
+              "unit": "short",
+              "decimals": 2
+            },
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Тривог на день"
+                },
+                "properties": [
+                  {
+                    "id": "unit",
+                    "value": "suffix: тривог/день"
+                  },
+                  {
+                    "id": "custom.axisLabel",
+                    "value": "Тривог на день"
+                  }
+                ]
+              }
+            ]
+          },
+          "options": {
+            "tooltip": {
+              "mode": "single",
+              "sort": "none",
+              "hideZeros": false
+            },
+            "legend": {
+              "showLegend": false,
+              "displayMode": "list",
+              "placement": "bottom",
+              "calcs": []
+            }
+          }
+        },
+        {
+          "id": 2205,
+          "type": "timeseries",
+          "title": "Севастополь (сигнали окупаційної адміністрації): середня кількість тривог на день — за повними тижнями",
+          "description": "Повні календарні тижні понеділок–неділя; неповний поточний тиждень виключено.",
+          "gridPos": {
+            "h": 9,
+            "w": 24,
+            "x": 0,
+            "y": 13
+          },
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "${DS_INFINITY}"
+          },
+          "targets": [
+            {
+              "columns": [
+                {
+                  "selector": "time",
+                  "text": "Дата",
+                  "type": "timestamp",
+                  "timestampFormat": "2006-01-02T15:04:05Z07:00"
+                },
+                {
+                  "selector": "alerts_per_day",
+                  "text": "Тривог на день",
+                  "type": "number"
+                }
+              ],
+              "computed_columns": [],
+              "datasource": {
+                "type": "yesoreyeram-infinity-datasource",
+                "uid": "${DS_INFINITY}"
+              },
+              "filters": [],
+              "format": "table",
+              "global_query_id": "",
+              "parser": "backend",
+              "refId": "A",
+              "root_selector": "$.cities.sevastopol.weekly",
+              "source": "url",
+              "type": "json",
+              "url": "https://raw.githubusercontent.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/main/kyiv-air-alerts-grafana/data/dashboard_data.json",
+              "url_options": {
+                "data": "",
+                "method": "GET"
+              }
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "drawStyle": "line",
+                "lineInterpolation": "linear",
+                "barAlignment": 0,
+                "barWidthFactor": 0.65,
+                "lineWidth": 2,
+                "fillOpacity": 12,
+                "gradientMode": "none",
+                "spanNulls": false,
+                "insertNulls": false,
+                "showPoints": "auto",
+                "pointSize": 5,
+                "stacking": {
+                  "mode": "none",
+                  "group": "A"
+                },
+                "axisPlacement": "auto",
+                "axisLabel": "",
+                "axisColorMode": "text",
+                "axisBorderShow": false,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "axisCenteredZero": false,
+                "hideFrom": {
+                  "tooltip": false,
+                  "viz": false,
+                  "legend": false
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                },
+                "lineStyle": {
+                  "fill": "solid"
+                }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  }
+                ]
+              },
+              "unit": "short",
+              "decimals": 2
+            },
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Тривог на день"
+                },
+                "properties": [
+                  {
+                    "id": "unit",
+                    "value": "suffix: тривог/день"
+                  },
+                  {
+                    "id": "custom.axisLabel",
+                    "value": "Тривог на день"
+                  }
+                ]
+              }
+            ]
+          },
+          "options": {
+            "tooltip": {
+              "mode": "single",
+              "sort": "none",
+              "hideZeros": false
+            },
+            "legend": {
+              "showLegend": false,
+              "displayMode": "list",
+              "placement": "bottom",
+              "calcs": []
+            }
+          }
+        },
+        {
+          "id": 2206,
+          "type": "timeseries",
+          "title": "Севастополь (сигнали окупаційної адміністрації): середній час під тривогою на добу — за місяцями (години)",
+          "description": "Тривоги через північ розподілено між календарними добами; перекриття не подвоюються.",
+          "gridPos": {
+            "h": 9,
+            "w": 24,
+            "x": 0,
+            "y": 22
+          },
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "${DS_INFINITY}"
+          },
+          "targets": [
+            {
+              "columns": [
+                {
+                  "selector": "time",
+                  "text": "Дата",
+                  "type": "timestamp",
+                  "timestampFormat": "2006-01-02T15:04:05Z07:00"
+                },
+                {
+                  "selector": "value",
+                  "text": "Час під тривогою на добу",
+                  "type": "number"
+                }
+              ],
+              "computed_columns": [],
+              "datasource": {
+                "type": "yesoreyeram-infinity-datasource",
+                "uid": "${DS_INFINITY}"
+              },
+              "filters": [],
+              "format": "table",
+              "global_query_id": "",
+              "parser": "backend",
+              "refId": "A",
+              "root_selector": "$.cities.sevastopol.monthly.{\"time\": time, \"value\": avg_daily_alert_hours}",
+              "source": "url",
+              "type": "json",
+              "url": "https://raw.githubusercontent.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/main/kyiv-air-alerts-grafana/data/dashboard_data.json",
+              "url_options": {
+                "data": "",
+                "method": "GET"
+              }
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "drawStyle": "line",
+                "lineInterpolation": "linear",
+                "barAlignment": 0,
+                "barWidthFactor": 0.65,
+                "lineWidth": 2,
+                "fillOpacity": 12,
+                "gradientMode": "none",
+                "spanNulls": false,
+                "insertNulls": false,
+                "showPoints": "auto",
+                "pointSize": 5,
+                "stacking": {
+                  "mode": "none",
+                  "group": "A"
+                },
+                "axisPlacement": "auto",
+                "axisLabel": "",
+                "axisColorMode": "text",
+                "axisBorderShow": false,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "axisCenteredZero": false,
+                "hideFrom": {
+                  "tooltip": false,
+                  "viz": false,
+                  "legend": false
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                },
+                "lineStyle": {
+                  "fill": "solid"
+                }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  }
+                ]
+              },
+              "unit": "suffix: год",
+              "decimals": 2
+            },
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Час під тривогою на добу"
+                },
+                "properties": [
+                  {
+                    "id": "unit",
+                    "value": "suffix: год"
+                  },
+                  {
+                    "id": "custom.axisLabel",
+                    "value": "Години"
+                  }
+                ]
+              }
+            ]
+          },
+          "options": {
+            "tooltip": {
+              "mode": "single",
+              "sort": "none",
+              "hideZeros": false
+            },
+            "legend": {
+              "showLegend": false,
+              "displayMode": "list",
+              "placement": "bottom",
+              "calcs": []
+            }
+          }
+        },
+        {
+          "id": 2207,
+          "type": "timeseries",
+          "title": "Севастополь (сигнали окупаційної адміністрації): середня тривалість однієї тривоги — за місяцем старту (години)",
+          "description": "Тривалість повної завершеної тривоги віднесено до місяця її старту.",
+          "gridPos": {
+            "h": 9,
+            "w": 24,
+            "x": 0,
+            "y": 31
+          },
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "${DS_INFINITY}"
+          },
+          "targets": [
+            {
+              "columns": [
+                {
+                  "selector": "time",
+                  "text": "Дата",
+                  "type": "timestamp",
+                  "timestampFormat": "2006-01-02T15:04:05Z07:00"
+                },
+                {
+                  "selector": "value",
+                  "text": "Середня тривалість",
+                  "type": "number"
+                }
+              ],
+              "computed_columns": [],
+              "datasource": {
+                "type": "yesoreyeram-infinity-datasource",
+                "uid": "${DS_INFINITY}"
+              },
+              "filters": [],
+              "format": "table",
+              "global_query_id": "",
+              "parser": "backend",
+              "refId": "A",
+              "root_selector": "$.cities.sevastopol.monthly.{\"time\": time, \"value\": avg_alert_duration_min / 60}",
+              "source": "url",
+              "type": "json",
+              "url": "https://raw.githubusercontent.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/main/kyiv-air-alerts-grafana/data/dashboard_data.json",
+              "url_options": {
+                "data": "",
+                "method": "GET"
+              }
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "drawStyle": "line",
+                "lineInterpolation": "linear",
+                "barAlignment": 0,
+                "barWidthFactor": 0.65,
+                "lineWidth": 2,
+                "fillOpacity": 12,
+                "gradientMode": "none",
+                "spanNulls": false,
+                "insertNulls": false,
+                "showPoints": "auto",
+                "pointSize": 5,
+                "stacking": {
+                  "mode": "none",
+                  "group": "A"
+                },
+                "axisPlacement": "auto",
+                "axisLabel": "",
+                "axisColorMode": "text",
+                "axisBorderShow": false,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "axisCenteredZero": false,
+                "hideFrom": {
+                  "tooltip": false,
+                  "viz": false,
+                  "legend": false
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                },
+                "lineStyle": {
+                  "fill": "solid"
+                }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  }
+                ]
+              },
+              "unit": "suffix: год",
+              "decimals": 2
+            },
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Середня тривалість"
+                },
+                "properties": [
+                  {
+                    "id": "unit",
+                    "value": "suffix: год"
+                  },
+                  {
+                    "id": "custom.axisLabel",
+                    "value": "Години"
+                  }
+                ]
+              }
+            ]
+          },
+          "options": {
+            "tooltip": {
+              "mode": "single",
+              "sort": "none",
+              "hideZeros": false
+            },
+            "legend": {
+              "showLegend": false,
+              "displayMode": "list",
+              "placement": "bottom",
+              "calcs": []
+            }
+          }
+        },
+        {
+          "id": 2208,
+          "type": "timeseries",
+          "title": "Севастополь (сигнали окупаційної адміністрації): середній час під тривогою на добу — за повними тижнями (години)",
+          "description": "Повні календарні тижні понеділок–неділя. Тривоги через північ розподілено між календарними добами; перекриття не подвоюються.",
+          "gridPos": {
+            "h": 9,
+            "w": 24,
+            "x": 0,
+            "y": 40
+          },
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "${DS_INFINITY}"
+          },
+          "targets": [
+            {
+              "columns": [
+                {
+                  "selector": "time",
+                  "text": "Дата",
+                  "type": "timestamp",
+                  "timestampFormat": "2006-01-02T15:04:05Z07:00"
+                },
+                {
+                  "selector": "value",
+                  "text": "Час під тривогою на добу",
+                  "type": "number"
+                }
+              ],
+              "computed_columns": [],
+              "datasource": {
+                "type": "yesoreyeram-infinity-datasource",
+                "uid": "${DS_INFINITY}"
+              },
+              "filters": [],
+              "format": "table",
+              "global_query_id": "",
+              "parser": "backend",
+              "refId": "A",
+              "root_selector": "$.cities.sevastopol.weekly.{\"time\": time, \"value\": avg_daily_alert_hours}",
+              "source": "url",
+              "type": "json",
+              "url": "https://raw.githubusercontent.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/main/kyiv-air-alerts-grafana/data/dashboard_data.json",
+              "url_options": {
+                "data": "",
+                "method": "GET"
+              }
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "drawStyle": "line",
+                "lineInterpolation": "linear",
+                "barAlignment": 0,
+                "barWidthFactor": 0.65,
+                "lineWidth": 2,
+                "fillOpacity": 12,
+                "gradientMode": "none",
+                "spanNulls": false,
+                "insertNulls": false,
+                "showPoints": "auto",
+                "pointSize": 5,
+                "stacking": {
+                  "mode": "none",
+                  "group": "A"
+                },
+                "axisPlacement": "auto",
+                "axisLabel": "",
+                "axisColorMode": "text",
+                "axisBorderShow": false,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "axisCenteredZero": false,
+                "hideFrom": {
+                  "tooltip": false,
+                  "viz": false,
+                  "legend": false
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                },
+                "lineStyle": {
+                  "fill": "solid"
+                }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  }
+                ]
+              },
+              "unit": "suffix: год",
+              "decimals": 2
+            },
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Час під тривогою на добу"
+                },
+                "properties": [
+                  {
+                    "id": "unit",
+                    "value": "suffix: год"
+                  },
+                  {
+                    "id": "custom.axisLabel",
+                    "value": "Години"
+                  }
+                ]
+              }
+            ]
+          },
+          "options": {
+            "tooltip": {
+              "mode": "single",
+              "sort": "none",
+              "hideZeros": false
+            },
+            "legend": {
+              "showLegend": false,
+              "displayMode": "list",
+              "placement": "bottom",
+              "calcs": []
+            }
+          }
+        },
+        {
+          "id": 2209,
+          "type": "timeseries",
+          "title": "Севастополь (сигнали окупаційної адміністрації): середня тривалість однієї тривоги — за повними тижнями (години)",
+          "description": "Повні календарні тижні понеділок–неділя; повна тривалість завершеної тривоги віднесена до тижня її старту.",
+          "gridPos": {
+            "h": 9,
+            "w": 24,
+            "x": 0,
+            "y": 49
+          },
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "${DS_INFINITY}"
+          },
+          "targets": [
+            {
+              "columns": [
+                {
+                  "selector": "time",
+                  "text": "Дата",
+                  "type": "timestamp",
+                  "timestampFormat": "2006-01-02T15:04:05Z07:00"
+                },
+                {
+                  "selector": "value",
+                  "text": "Середня тривалість",
+                  "type": "number"
+                }
+              ],
+              "computed_columns": [],
+              "datasource": {
+                "type": "yesoreyeram-infinity-datasource",
+                "uid": "${DS_INFINITY}"
+              },
+              "filters": [],
+              "format": "table",
+              "global_query_id": "",
+              "parser": "backend",
+              "refId": "A",
+              "root_selector": "$.cities.sevastopol.weekly.{\"time\": time, \"value\": avg_alert_duration_min / 60}",
+              "source": "url",
+              "type": "json",
+              "url": "https://raw.githubusercontent.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/main/kyiv-air-alerts-grafana/data/dashboard_data.json",
+              "url_options": {
+                "data": "",
+                "method": "GET"
+              }
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "drawStyle": "line",
+                "lineInterpolation": "linear",
+                "barAlignment": 0,
+                "barWidthFactor": 0.65,
+                "lineWidth": 2,
+                "fillOpacity": 12,
+                "gradientMode": "none",
+                "spanNulls": false,
+                "insertNulls": false,
+                "showPoints": "auto",
+                "pointSize": 5,
+                "stacking": {
+                  "mode": "none",
+                  "group": "A"
+                },
+                "axisPlacement": "auto",
+                "axisLabel": "",
+                "axisColorMode": "text",
+                "axisBorderShow": false,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "axisCenteredZero": false,
+                "hideFrom": {
+                  "tooltip": false,
+                  "viz": false,
+                  "legend": false
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                },
+                "lineStyle": {
+                  "fill": "solid"
+                }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  }
+                ]
+              },
+              "unit": "suffix: год",
+              "decimals": 2
+            },
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Середня тривалість"
+                },
+                "properties": [
+                  {
+                    "id": "unit",
+                    "value": "suffix: год"
+                  },
+                  {
+                    "id": "custom.axisLabel",
+                    "value": "Години"
+                  }
+                ]
+              }
+            ]
+          },
+          "options": {
+            "tooltip": {
+              "mode": "single",
+              "sort": "none",
+              "hideZeros": false
+            },
+            "legend": {
+              "showLegend": false,
+              "displayMode": "list",
+              "placement": "bottom",
+              "calcs": []
+            }
+          }
+        },
+        {
+          "id": 2210,
+          "type": "timeseries",
+          "title": "Севастополь (сигнали окупаційної адміністрації): останні 28 завершених днів — сумарний час під тривогою (години)",
+          "description": "Поточний день ніколи не включається; перекриття інтервалів не подвоюються.",
+          "gridPos": {
+            "h": 9,
+            "w": 24,
+            "x": 0,
+            "y": 58
+          },
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "${DS_INFINITY}"
+          },
+          "targets": [
+            {
+              "columns": [
+                {
+                  "selector": "time",
+                  "text": "Дата",
+                  "type": "timestamp",
+                  "timestampFormat": "2006-01-02T15:04:05Z07:00"
+                },
+                {
+                  "selector": "value",
+                  "text": "Час під тривогою",
+                  "type": "number"
+                }
+              ],
+              "computed_columns": [],
+              "datasource": {
+                "type": "yesoreyeram-infinity-datasource",
+                "uid": "${DS_INFINITY}"
+              },
+              "filters": [],
+              "format": "table",
+              "global_query_id": "",
+              "parser": "backend",
+              "refId": "A",
+              "root_selector": "$.cities.sevastopol.daily28.{\"time\": time, \"value\": total_alert_duration_hours}",
+              "source": "url",
+              "type": "json",
+              "url": "https://raw.githubusercontent.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/main/kyiv-air-alerts-grafana/data/dashboard_data.json",
+              "url_options": {
+                "data": "",
+                "method": "GET"
+              }
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "drawStyle": "bars",
+                "lineInterpolation": "linear",
+                "barAlignment": 0,
+                "barWidthFactor": 0.65,
+                "lineWidth": 2,
+                "fillOpacity": 70,
+                "gradientMode": "none",
+                "spanNulls": false,
+                "insertNulls": false,
+                "showPoints": "never",
+                "pointSize": 5,
+                "stacking": {
+                  "mode": "none",
+                  "group": "A"
+                },
+                "axisPlacement": "auto",
+                "axisLabel": "",
+                "axisColorMode": "text",
+                "axisBorderShow": false,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "axisCenteredZero": false,
+                "hideFrom": {
+                  "tooltip": false,
+                  "viz": false,
+                  "legend": false
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                },
+                "lineStyle": {
+                  "fill": "solid"
+                }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  }
+                ]
+              },
+              "unit": "suffix: год",
+              "decimals": 2
+            },
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Час під тривогою"
+                },
+                "properties": [
+                  {
+                    "id": "unit",
+                    "value": "suffix: год"
+                  },
+                  {
+                    "id": "custom.axisLabel",
+                    "value": "Години"
+                  }
+                ]
+              }
+            ]
+          },
+          "options": {
+            "tooltip": {
+              "mode": "single",
+              "sort": "none",
+              "hideZeros": false
+            },
+            "legend": {
+              "showLegend": false,
+              "displayMode": "list",
+              "placement": "bottom",
+              "calcs": []
+            }
+          },
+          "timeFrom": "28d"
+        },
+        {
+          "id": 2211,
+          "type": "timeseries",
+          "title": "Севастополь (сигнали окупаційної адміністрації): останні 28 завершених днів — кількість тривог і середня тривалість (години)",
+          "description": "Стовпчики — кількість завершених тривог за днем старту; лінія — середня повна тривалість тривог, що стартували цього дня.",
+          "gridPos": {
+            "h": 10,
+            "w": 24,
+            "x": 0,
+            "y": 67
+          },
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "${DS_INFINITY}"
+          },
+          "timeFrom": "28d",
+          "targets": [
+            {
+              "columns": [
+                {
+                  "selector": "time",
+                  "text": "Дата",
+                  "type": "timestamp",
+                  "timestampFormat": "2006-01-02T15:04:05Z07:00"
+                },
+                {
+                  "selector": "alerts_started",
+                  "text": "Кількість тривог",
+                  "type": "number"
+                },
+                {
+                  "selector": "avg_duration",
+                  "text": "Середня тривалість",
+                  "type": "number"
+                }
+              ],
+              "computed_columns": [],
+              "datasource": {
+                "type": "yesoreyeram-infinity-datasource",
+                "uid": "${DS_INFINITY}"
+              },
+              "filters": [],
+              "format": "table",
+              "global_query_id": "",
+              "parser": "backend",
+              "refId": "A",
+              "root_selector": "$.cities.sevastopol.daily28.{\"time\": time, \"alerts_started\": alerts_started, \"avg_duration\": avg_alert_duration_minutes / 60}",
+              "source": "url",
+              "type": "json",
+              "url": "https://raw.githubusercontent.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/main/kyiv-air-alerts-grafana/data/dashboard_data.json",
+              "url_options": {
+                "data": "",
+                "method": "GET"
+              }
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "drawStyle": "line",
+                "lineInterpolation": "linear",
+                "barAlignment": 0,
+                "barWidthFactor": 0.65,
+                "lineWidth": 2,
+                "fillOpacity": 12,
+                "gradientMode": "none",
+                "spanNulls": false,
+                "insertNulls": false,
+                "showPoints": "auto",
+                "pointSize": 5,
+                "stacking": {
+                  "mode": "none",
+                  "group": "A"
+                },
+                "axisPlacement": "auto",
+                "axisLabel": "",
+                "axisColorMode": "text",
+                "axisBorderShow": false,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "axisCenteredZero": false,
+                "hideFrom": {
+                  "tooltip": false,
+                  "viz": false,
+                  "legend": false
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                },
+                "lineStyle": {
+                  "fill": "solid"
+                }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  }
+                ]
+              },
+              "decimals": 1,
+              "unit": "short"
+            },
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Кількість тривог"
+                },
+                "properties": [
+                  {
+                    "id": "custom.drawStyle",
+                    "value": "bars"
+                  },
+                  {
+                    "id": "custom.fillOpacity",
+                    "value": 70
+                  },
+                  {
+                    "id": "custom.lineWidth",
+                    "value": 1
+                  },
+                  {
+                    "id": "custom.showPoints",
+                    "value": "never"
+                  },
+                  {
+                    "id": "custom.axisPlacement",
+                    "value": "left"
+                  },
+                  {
+                    "id": "custom.axisLabel",
+                    "value": "Кількість тривог"
+                  },
+                  {
+                    "id": "unit",
+                    "value": "short"
+                  },
+                  {
+                    "id": "decimals",
+                    "value": 0
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Середня тривалість"
+                },
+                "properties": [
+                  {
+                    "id": "custom.drawStyle",
+                    "value": "line"
+                  },
+                  {
+                    "id": "custom.lineWidth",
+                    "value": 4
+                  },
+                  {
+                    "id": "custom.showPoints",
+                    "value": "always"
+                  },
+                  {
+                    "id": "custom.pointSize",
+                    "value": 7
+                  },
+                  {
+                    "id": "custom.axisPlacement",
+                    "value": "right"
+                  },
+                  {
+                    "id": "custom.axisLabel",
+                    "value": "Години"
+                  },
+                  {
+                    "id": "unit",
+                    "value": "suffix: год"
+                  },
+                  {
+                    "id": "color",
+                    "value": {
+                      "mode": "fixed",
+                      "fixedColor": "red"
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          "options": {
+            "tooltip": {
+              "mode": "multi",
+              "sort": "none",
+              "hideZeros": false
+            },
+            "legend": {
+              "showLegend": true,
+              "displayMode": "list",
+              "placement": "bottom",
+              "calcs": []
+            }
+          }
+        }
+      ],
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 98
+      }
+    },
+    {
+      "id": 2300,
+      "type": "row",
+      "title": "Порівняння міст — місяці",
+      "collapsed": true,
+      "panels": [
+        {
+          "id": 2301,
           "type": "timeseries",
           "title": "Порівняння міст — середня кількість тривог на день (місяці)",
           "description": "Порівняння використовує спільний повний період для всіх показаних міст. Київ, Харків і Запоріжжя мають exact-city ряди; інші міста — районний proxy після валідованої дати переходу, з включенням explicit oblast сигналів у перехідному періоді. Спільний місячний ряд починається 2026-01-01; тижневий — 2025-12-29.",
@@ -29880,6 +31295,11 @@
                   "selector": "ternopil_alerts_per_day",
                   "text": "Тернопіль (Тернопільський район)",
                   "type": "number"
+                },
+                {
+                  "selector": "sevastopol_alerts_per_day",
+                  "text": "Севастополь (сигнали окупаційної адміністрації)",
+                  "type": "number"
                 }
               ],
               "computed_columns": [],
@@ -29973,7 +31393,7 @@
           }
         },
         {
-          "id": 2202,
+          "id": 2302,
           "type": "timeseries",
           "title": "Порівняння міст — середній час під тривогою на добу (місяці, години)",
           "description": "Порівняння використовує спільний повний період для всіх показаних міст. Київ, Харків і Запоріжжя мають exact-city ряди; інші міста — районний proxy після валідованої дати переходу, з включенням explicit oblast сигналів у перехідному періоді. Спільний місячний ряд починається 2026-01-01; тижневий — 2025-12-29.",
@@ -30100,6 +31520,11 @@
                   "selector": "ternopil",
                   "text": "Тернопіль (Тернопільський район)",
                   "type": "number"
+                },
+                {
+                  "selector": "sevastopol",
+                  "text": "Севастополь (сигнали окупаційної адміністрації)",
+                  "type": "number"
                 }
               ],
               "computed_columns": [],
@@ -30112,7 +31537,7 @@
               "global_query_id": "",
               "parser": "backend",
               "refId": "A",
-              "root_selector": "$.comparison.monthly.{\"time\": time, \"kyiv\": kyiv_avg_daily_alert_hours, \"kharkiv\": kharkiv_avg_daily_alert_hours, \"zaporizhzhia\": zaporizhzhia_avg_daily_alert_hours, \"cherkasy\": cherkasy_avg_daily_alert_hours, \"zhytomyr\": zhytomyr_avg_daily_alert_hours, \"dnipro\": dnipro_avg_daily_alert_hours, \"khmelnytskyi\": khmelnytskyi_avg_daily_alert_hours, \"poltava\": poltava_avg_daily_alert_hours, \"rivne\": rivne_avg_daily_alert_hours, \"sumy\": sumy_avg_daily_alert_hours, \"vinnytsia\": vinnytsia_avg_daily_alert_hours, \"kropyvnytskyi\": kropyvnytskyi_avg_daily_alert_hours, \"lviv\": lviv_avg_daily_alert_hours, \"chernihiv\": chernihiv_avg_daily_alert_hours, \"odesa\": odesa_avg_daily_alert_hours, \"kherson\": kherson_avg_daily_alert_hours, \"lutsk\": lutsk_avg_daily_alert_hours, \"uzhhorod\": uzhhorod_avg_daily_alert_hours, \"ivano_frankivsk\": ivano_frankivsk_avg_daily_alert_hours, \"chernivtsi\": chernivtsi_avg_daily_alert_hours, \"ternopil\": ternopil_avg_daily_alert_hours}",
+              "root_selector": "$.comparison.monthly.{\"time\": time, \"kyiv\": kyiv_avg_daily_alert_hours, \"kharkiv\": kharkiv_avg_daily_alert_hours, \"zaporizhzhia\": zaporizhzhia_avg_daily_alert_hours, \"cherkasy\": cherkasy_avg_daily_alert_hours, \"zhytomyr\": zhytomyr_avg_daily_alert_hours, \"dnipro\": dnipro_avg_daily_alert_hours, \"khmelnytskyi\": khmelnytskyi_avg_daily_alert_hours, \"poltava\": poltava_avg_daily_alert_hours, \"rivne\": rivne_avg_daily_alert_hours, \"sumy\": sumy_avg_daily_alert_hours, \"vinnytsia\": vinnytsia_avg_daily_alert_hours, \"kropyvnytskyi\": kropyvnytskyi_avg_daily_alert_hours, \"lviv\": lviv_avg_daily_alert_hours, \"chernihiv\": chernihiv_avg_daily_alert_hours, \"odesa\": odesa_avg_daily_alert_hours, \"kherson\": kherson_avg_daily_alert_hours, \"lutsk\": lutsk_avg_daily_alert_hours, \"uzhhorod\": uzhhorod_avg_daily_alert_hours, \"ivano_frankivsk\": ivano_frankivsk_avg_daily_alert_hours, \"chernivtsi\": chernivtsi_avg_daily_alert_hours, \"ternopil\": ternopil_avg_daily_alert_hours, \"sevastopol\": sevastopol_avg_daily_alert_hours}",
               "source": "url",
               "type": "json",
               "url": "https://raw.githubusercontent.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/main/kyiv-air-alerts-grafana/data/dashboard_data.json",
@@ -30193,7 +31618,7 @@
           }
         },
         {
-          "id": 2203,
+          "id": 2303,
           "type": "timeseries",
           "title": "Порівняння міст — середня тривалість однієї тривоги (місяці, години)",
           "description": "Порівняння використовує спільний повний період для всіх показаних міст. Київ, Харків і Запоріжжя мають exact-city ряди; інші міста — районний proxy після валідованої дати переходу, з включенням explicit oblast сигналів у перехідному періоді. Спільний місячний ряд починається 2026-01-01; тижневий — 2025-12-29.",
@@ -30320,6 +31745,11 @@
                   "selector": "ternopil",
                   "text": "Тернопіль (Тернопільський район)",
                   "type": "number"
+                },
+                {
+                  "selector": "sevastopol",
+                  "text": "Севастополь (сигнали окупаційної адміністрації)",
+                  "type": "number"
                 }
               ],
               "computed_columns": [],
@@ -30332,7 +31762,7 @@
               "global_query_id": "",
               "parser": "backend",
               "refId": "A",
-              "root_selector": "$.comparison.monthly.{\"time\": time, \"kyiv\": kyiv_avg_alert_duration_min / 60, \"kharkiv\": kharkiv_avg_alert_duration_min / 60, \"zaporizhzhia\": zaporizhzhia_avg_alert_duration_min / 60, \"cherkasy\": cherkasy_avg_alert_duration_min / 60, \"zhytomyr\": zhytomyr_avg_alert_duration_min / 60, \"dnipro\": dnipro_avg_alert_duration_min / 60, \"khmelnytskyi\": khmelnytskyi_avg_alert_duration_min / 60, \"poltava\": poltava_avg_alert_duration_min / 60, \"rivne\": rivne_avg_alert_duration_min / 60, \"sumy\": sumy_avg_alert_duration_min / 60, \"vinnytsia\": vinnytsia_avg_alert_duration_min / 60, \"kropyvnytskyi\": kropyvnytskyi_avg_alert_duration_min / 60, \"lviv\": lviv_avg_alert_duration_min / 60, \"chernihiv\": chernihiv_avg_alert_duration_min / 60, \"odesa\": odesa_avg_alert_duration_min / 60, \"kherson\": kherson_avg_alert_duration_min / 60, \"lutsk\": lutsk_avg_alert_duration_min / 60, \"uzhhorod\": uzhhorod_avg_alert_duration_min / 60, \"ivano_frankivsk\": ivano_frankivsk_avg_alert_duration_min / 60, \"chernivtsi\": chernivtsi_avg_alert_duration_min / 60, \"ternopil\": ternopil_avg_alert_duration_min / 60}",
+              "root_selector": "$.comparison.monthly.{\"time\": time, \"kyiv\": kyiv_avg_alert_duration_min / 60, \"kharkiv\": kharkiv_avg_alert_duration_min / 60, \"zaporizhzhia\": zaporizhzhia_avg_alert_duration_min / 60, \"cherkasy\": cherkasy_avg_alert_duration_min / 60, \"zhytomyr\": zhytomyr_avg_alert_duration_min / 60, \"dnipro\": dnipro_avg_alert_duration_min / 60, \"khmelnytskyi\": khmelnytskyi_avg_alert_duration_min / 60, \"poltava\": poltava_avg_alert_duration_min / 60, \"rivne\": rivne_avg_alert_duration_min / 60, \"sumy\": sumy_avg_alert_duration_min / 60, \"vinnytsia\": vinnytsia_avg_alert_duration_min / 60, \"kropyvnytskyi\": kropyvnytskyi_avg_alert_duration_min / 60, \"lviv\": lviv_avg_alert_duration_min / 60, \"chernihiv\": chernihiv_avg_alert_duration_min / 60, \"odesa\": odesa_avg_alert_duration_min / 60, \"kherson\": kherson_avg_alert_duration_min / 60, \"lutsk\": lutsk_avg_alert_duration_min / 60, \"uzhhorod\": uzhhorod_avg_alert_duration_min / 60, \"ivano_frankivsk\": ivano_frankivsk_avg_alert_duration_min / 60, \"chernivtsi\": chernivtsi_avg_alert_duration_min / 60, \"ternopil\": ternopil_avg_alert_duration_min / 60, \"sevastopol\": sevastopol_avg_alert_duration_min / 60}",
               "source": "url",
               "type": "json",
               "url": "https://raw.githubusercontent.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/main/kyiv-air-alerts-grafana/data/dashboard_data.json",
@@ -30417,17 +31847,17 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 98
+        "y": 99
       }
     },
     {
-      "id": 2300,
+      "id": 2400,
       "type": "row",
       "title": "Порівняння міст — тижні",
       "collapsed": true,
       "panels": [
         {
-          "id": 2301,
+          "id": 2401,
           "type": "timeseries",
           "title": "Порівняння міст — середня кількість тривог на день (тижні)",
           "description": "Порівняння використовує спільний повний період для всіх показаних міст. Київ, Харків і Запоріжжя мають exact-city ряди; інші міста — районний proxy після валідованої дати переходу, з включенням explicit oblast сигналів у перехідному періоді. Спільний місячний ряд починається 2026-01-01; тижневий — 2025-12-29.",
@@ -30554,6 +31984,11 @@
                   "selector": "ternopil_alerts_per_day",
                   "text": "Тернопіль (Тернопільський район)",
                   "type": "number"
+                },
+                {
+                  "selector": "sevastopol_alerts_per_day",
+                  "text": "Севастополь (сигнали окупаційної адміністрації)",
+                  "type": "number"
                 }
               ],
               "computed_columns": [],
@@ -30647,7 +32082,7 @@
           }
         },
         {
-          "id": 2302,
+          "id": 2402,
           "type": "timeseries",
           "title": "Порівняння міст — середній час під тривогою на добу (тижні, години)",
           "description": "Порівняння використовує спільний повний період для всіх показаних міст. Київ, Харків і Запоріжжя мають exact-city ряди; інші міста — районний proxy після валідованої дати переходу, з включенням explicit oblast сигналів у перехідному періоді. Спільний місячний ряд починається 2026-01-01; тижневий — 2025-12-29.",
@@ -30774,6 +32209,11 @@
                   "selector": "ternopil",
                   "text": "Тернопіль (Тернопільський район)",
                   "type": "number"
+                },
+                {
+                  "selector": "sevastopol",
+                  "text": "Севастополь (сигнали окупаційної адміністрації)",
+                  "type": "number"
                 }
               ],
               "computed_columns": [],
@@ -30786,7 +32226,7 @@
               "global_query_id": "",
               "parser": "backend",
               "refId": "A",
-              "root_selector": "$.comparison.weekly.{\"time\": time, \"kyiv\": kyiv_avg_daily_alert_hours, \"kharkiv\": kharkiv_avg_daily_alert_hours, \"zaporizhzhia\": zaporizhzhia_avg_daily_alert_hours, \"cherkasy\": cherkasy_avg_daily_alert_hours, \"zhytomyr\": zhytomyr_avg_daily_alert_hours, \"dnipro\": dnipro_avg_daily_alert_hours, \"khmelnytskyi\": khmelnytskyi_avg_daily_alert_hours, \"poltava\": poltava_avg_daily_alert_hours, \"rivne\": rivne_avg_daily_alert_hours, \"sumy\": sumy_avg_daily_alert_hours, \"vinnytsia\": vinnytsia_avg_daily_alert_hours, \"kropyvnytskyi\": kropyvnytskyi_avg_daily_alert_hours, \"lviv\": lviv_avg_daily_alert_hours, \"chernihiv\": chernihiv_avg_daily_alert_hours, \"odesa\": odesa_avg_daily_alert_hours, \"kherson\": kherson_avg_daily_alert_hours, \"lutsk\": lutsk_avg_daily_alert_hours, \"uzhhorod\": uzhhorod_avg_daily_alert_hours, \"ivano_frankivsk\": ivano_frankivsk_avg_daily_alert_hours, \"chernivtsi\": chernivtsi_avg_daily_alert_hours, \"ternopil\": ternopil_avg_daily_alert_hours}",
+              "root_selector": "$.comparison.weekly.{\"time\": time, \"kyiv\": kyiv_avg_daily_alert_hours, \"kharkiv\": kharkiv_avg_daily_alert_hours, \"zaporizhzhia\": zaporizhzhia_avg_daily_alert_hours, \"cherkasy\": cherkasy_avg_daily_alert_hours, \"zhytomyr\": zhytomyr_avg_daily_alert_hours, \"dnipro\": dnipro_avg_daily_alert_hours, \"khmelnytskyi\": khmelnytskyi_avg_daily_alert_hours, \"poltava\": poltava_avg_daily_alert_hours, \"rivne\": rivne_avg_daily_alert_hours, \"sumy\": sumy_avg_daily_alert_hours, \"vinnytsia\": vinnytsia_avg_daily_alert_hours, \"kropyvnytskyi\": kropyvnytskyi_avg_daily_alert_hours, \"lviv\": lviv_avg_daily_alert_hours, \"chernihiv\": chernihiv_avg_daily_alert_hours, \"odesa\": odesa_avg_daily_alert_hours, \"kherson\": kherson_avg_daily_alert_hours, \"lutsk\": lutsk_avg_daily_alert_hours, \"uzhhorod\": uzhhorod_avg_daily_alert_hours, \"ivano_frankivsk\": ivano_frankivsk_avg_daily_alert_hours, \"chernivtsi\": chernivtsi_avg_daily_alert_hours, \"ternopil\": ternopil_avg_daily_alert_hours, \"sevastopol\": sevastopol_avg_daily_alert_hours}",
               "source": "url",
               "type": "json",
               "url": "https://raw.githubusercontent.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/main/kyiv-air-alerts-grafana/data/dashboard_data.json",
@@ -30867,7 +32307,7 @@
           }
         },
         {
-          "id": 2303,
+          "id": 2403,
           "type": "timeseries",
           "title": "Порівняння міст — середня тривалість однієї тривоги (тижні, години)",
           "description": "Порівняння використовує спільний повний період для всіх показаних міст. Київ, Харків і Запоріжжя мають exact-city ряди; інші міста — районний proxy після валідованої дати переходу, з включенням explicit oblast сигналів у перехідному періоді. Спільний місячний ряд починається 2026-01-01; тижневий — 2025-12-29.",
@@ -30994,6 +32434,11 @@
                   "selector": "ternopil",
                   "text": "Тернопіль (Тернопільський район)",
                   "type": "number"
+                },
+                {
+                  "selector": "sevastopol",
+                  "text": "Севастополь (сигнали окупаційної адміністрації)",
+                  "type": "number"
                 }
               ],
               "computed_columns": [],
@@ -31006,7 +32451,7 @@
               "global_query_id": "",
               "parser": "backend",
               "refId": "A",
-              "root_selector": "$.comparison.weekly.{\"time\": time, \"kyiv\": kyiv_avg_alert_duration_min / 60, \"kharkiv\": kharkiv_avg_alert_duration_min / 60, \"zaporizhzhia\": zaporizhzhia_avg_alert_duration_min / 60, \"cherkasy\": cherkasy_avg_alert_duration_min / 60, \"zhytomyr\": zhytomyr_avg_alert_duration_min / 60, \"dnipro\": dnipro_avg_alert_duration_min / 60, \"khmelnytskyi\": khmelnytskyi_avg_alert_duration_min / 60, \"poltava\": poltava_avg_alert_duration_min / 60, \"rivne\": rivne_avg_alert_duration_min / 60, \"sumy\": sumy_avg_alert_duration_min / 60, \"vinnytsia\": vinnytsia_avg_alert_duration_min / 60, \"kropyvnytskyi\": kropyvnytskyi_avg_alert_duration_min / 60, \"lviv\": lviv_avg_alert_duration_min / 60, \"chernihiv\": chernihiv_avg_alert_duration_min / 60, \"odesa\": odesa_avg_alert_duration_min / 60, \"kherson\": kherson_avg_alert_duration_min / 60, \"lutsk\": lutsk_avg_alert_duration_min / 60, \"uzhhorod\": uzhhorod_avg_alert_duration_min / 60, \"ivano_frankivsk\": ivano_frankivsk_avg_alert_duration_min / 60, \"chernivtsi\": chernivtsi_avg_alert_duration_min / 60, \"ternopil\": ternopil_avg_alert_duration_min / 60}",
+              "root_selector": "$.comparison.weekly.{\"time\": time, \"kyiv\": kyiv_avg_alert_duration_min / 60, \"kharkiv\": kharkiv_avg_alert_duration_min / 60, \"zaporizhzhia\": zaporizhzhia_avg_alert_duration_min / 60, \"cherkasy\": cherkasy_avg_alert_duration_min / 60, \"zhytomyr\": zhytomyr_avg_alert_duration_min / 60, \"dnipro\": dnipro_avg_alert_duration_min / 60, \"khmelnytskyi\": khmelnytskyi_avg_alert_duration_min / 60, \"poltava\": poltava_avg_alert_duration_min / 60, \"rivne\": rivne_avg_alert_duration_min / 60, \"sumy\": sumy_avg_alert_duration_min / 60, \"vinnytsia\": vinnytsia_avg_alert_duration_min / 60, \"kropyvnytskyi\": kropyvnytskyi_avg_alert_duration_min / 60, \"lviv\": lviv_avg_alert_duration_min / 60, \"chernihiv\": chernihiv_avg_alert_duration_min / 60, \"odesa\": odesa_avg_alert_duration_min / 60, \"kherson\": kherson_avg_alert_duration_min / 60, \"lutsk\": lutsk_avg_alert_duration_min / 60, \"uzhhorod\": uzhhorod_avg_alert_duration_min / 60, \"ivano_frankivsk\": ivano_frankivsk_avg_alert_duration_min / 60, \"chernivtsi\": chernivtsi_avg_alert_duration_min / 60, \"ternopil\": ternopil_avg_alert_duration_min / 60, \"sevastopol\": sevastopol_avg_alert_duration_min / 60}",
               "source": "url",
               "type": "json",
               "url": "https://raw.githubusercontent.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/main/kyiv-air-alerts-grafana/data/dashboard_data.json",
@@ -31091,7 +32536,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 99
+        "y": 100
       }
     },
     {
@@ -31104,7 +32549,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 100
+        "y": 101
       }
     },
     {
@@ -31116,7 +32561,7 @@
         "h": 10,
         "w": 24,
         "x": 0,
-        "y": 101
+        "y": 102
       },
       "datasource": {
         "type": "yesoreyeram-infinity-datasource",
@@ -31243,18 +32688,18 @@
       }
     },
     {
-      "id": 2400,
+      "id": 2500,
       "type": "text",
       "title": "Джерела та методологія",
       "gridPos": {
         "h": 6,
         "w": 24,
         "x": 0,
-        "y": 111
+        "y": 112
       },
       "options": {
         "mode": "markdown",
-        "content": "**Географія та джерела.** Київ, Харків і Запоріжжя мають exact-city ряди. Усі назви з районом у дужках є **районними proxy**, а не даними міста в чистому вигляді. Для proxy після validated coverage-start використовується union відповідного району та explicit `oblast` сигналів. У 2026 році explicit `oblast` записи в upstream фактично не додають часу, тому ряд дорівнює районному. До coverage-start старі обласні дані не backfill-яться.  \n\n- **Черкаси (Черкаський район)**: районний proxy; coverage з 2025-01-10.\n- **Житомир (Житомирський район)**: районний proxy; coverage з 2025-01-23.\n- **Дніпро (Дніпровський район)**: районний proxy; coverage з 2025-05-01.\n- **Хмельницький (Хмельницький район)**: районний proxy; coverage з 2025-07-07.\n- **Полтава (Полтавський район)**: районний proxy; coverage з 2025-08-01.\n- **Рівне (Рівненський район)**: районний proxy; coverage з 2025-08-01.\n- **Суми (Сумський район)**: районний proxy; coverage з 2025-08-06.\n- **Вінниця (Вінницький район)**: районний proxy; coverage з 2025-08-21.\n- **Кропивницький (Кропивницький район)**: районний proxy; coverage з 2025-09-01.\n- **Львів (Львівський район)**: районний proxy; coverage з 2025-09-01.\n- **Чернігів (Чернігівський район)**: районний proxy; coverage з 2025-09-03.\n- **Одеса (Одеський район)**: районний proxy; coverage з 2025-11-04.\n- **Херсон (Херсонський район)**: районний proxy; coverage з 2025-12-15.\n- **Луцьк (Луцький район)**: районний proxy; coverage з 2025-12-15.\n- **Ужгород (Ужгородський район)**: районний proxy; coverage з 2025-12-15.\n- **Івано-Франківськ (Івано-Франківський район)**: районний proxy; coverage з 2025-12-15.\n- **Чернівці (Чернівецький район)**: районний proxy; coverage з 2025-12-15.\n- **Тернопіль (Тернопільський район)**: районний proxy; coverage з 2025-12-15.  \n\n**Консервативний rollout 15.12.2025.** Для Херсона, Луцька, Ужгорода, Івано-Франківська, Чернівців і Тернополя використовується 15.12.2025 — дата офіційного загальнонаціонального переходу на порайонне оповіщення (крім Донецької та Луганської областей).  \n\n**Поки не включено.** Миколаїв потребує окремого exact-city adapter; Донецьк і Луганськ свідомо поза поточним scope. Севастополь опрацьовується окремим adapter із явним маркуванням джерела окупаційної адміністрації.  \n\n**Агрегація.** Поточний календарний день виключено. Перекривні інтервали зливаються до підрахунку тривалості та кількості alert episodes. Перший неповний місяць і тиждень після coverage-start виключаються. Порівняння використовує лише спільні повні календарні періоди.  \n\nПропозиції надсилати @olbalakin в телеграм\n\n**Загиблі від повітряних атак.** Ряд побудований на публічно доступних повідомленнях офіційних органів і медіа. Незалежних інструментів для повної верифікації кожного випадку немає, тому ці дані слід трактувати як реконструкцію на основі доступних відкритих джерел. Для 2025 року використовується подієва реконструкція 166 смертей; КМВА повідомляла річний накопичувальний підсумок 171, але додаткові п’ять смертей не вдалося надійно прив’язати до конкретних атак у публічних джерелах."
+        "content": "**Географія та джерела.** Київ, Харків і Запоріжжя мають exact-city ряди. Усі назви з районом у дужках є **районними proxy**, а не даними міста в чистому вигляді. Для proxy після validated coverage-start використовується union відповідного району та explicit `oblast` сигналів. У 2026 році explicit `oblast` записи в upstream фактично не додають часу, тому ряд дорівнює районному. До coverage-start старі обласні дані не backfill-яться.  \n\n- **Черкаси (Черкаський район)**: районний proxy; coverage з 2025-01-10.\n- **Житомир (Житомирський район)**: районний proxy; coverage з 2025-01-23.\n- **Дніпро (Дніпровський район)**: районний proxy; coverage з 2025-05-01.\n- **Хмельницький (Хмельницький район)**: районний proxy; coverage з 2025-07-07.\n- **Полтава (Полтавський район)**: районний proxy; coverage з 2025-08-01.\n- **Рівне (Рівненський район)**: районний proxy; coverage з 2025-08-01.\n- **Суми (Сумський район)**: районний proxy; coverage з 2025-08-06.\n- **Вінниця (Вінницький район)**: районний proxy; coverage з 2025-08-21.\n- **Кропивницький (Кропивницький район)**: районний proxy; coverage з 2025-09-01.\n- **Львів (Львівський район)**: районний proxy; coverage з 2025-09-01.\n- **Чернігів (Чернігівський район)**: районний proxy; coverage з 2025-09-03.\n- **Одеса (Одеський район)**: районний proxy; coverage з 2025-11-04.\n- **Херсон (Херсонський район)**: районний proxy; coverage з 2025-12-15.\n- **Луцьк (Луцький район)**: районний proxy; coverage з 2025-12-15.\n- **Ужгород (Ужгородський район)**: районний proxy; coverage з 2025-12-15.\n- **Івано-Франківськ (Івано-Франківський район)**: районний proxy; coverage з 2025-12-15.\n- **Чернівці (Чернівецький район)**: районний proxy; coverage з 2025-12-15.\n- **Тернопіль (Тернопільський район)**: районний proxy; coverage з 2025-12-15.  \n\n**Консервативний rollout 15.12.2025.** Для Херсона, Луцька, Ужгорода, Івано-Франківська, Чернівців і Тернополя використовується 15.12.2025 — дата офіційного загальнонаціонального переходу на порайонне оповіщення (крім Донецької та Луганської областей).  \n\n**Поки не включено.** Миколаїв потребує окремого exact-city adapter; Донецьк і Луганськ свідомо поза поточним scope. Севастополь опрацьовується окремим adapter із явним маркуванням джерела окупаційної адміністрації.  \n\n**Агрегація.** Поточний календарний день виключено. Перекривні інтервали зливаються до підрахунку тривалості та кількості alert episodes. Перший неповний місяць і тиждень після coverage-start виключаються. Порівняння використовує лише спільні повні календарні періоди.  \n\nПропозиції надсилати @olbalakin в телеграм\n\n**Севастополь.** Ряд є exact-city і починається 25.09.2023. Джерело — city-level сигнали, опубліковані окупаційною адміністрацією Севастополя. Використовуються лише повні пари «тривога → відбій»; неповні епізоди не інтерполюються. Позначення джерела описує лише походження даних і не означає визнання окупаційної адміністрації.\n\n**Загиблі від повітряних атак.** Ряд побудований на публічно доступних повідомленнях офіційних органів і медіа. Незалежних інструментів для повної верифікації кожного випадку немає, тому ці дані слід трактувати як реконструкцію на основі доступних відкритих джерел. Для 2025 року використовується подієва реконструкція 166 смертей; КМВА повідомляла річний накопичувальний підсумок 171, але додаткові п’ять смертей не вдалося надійно прив’язати до конкретних атак у публічних джерелах."
       }
     }
   ],
