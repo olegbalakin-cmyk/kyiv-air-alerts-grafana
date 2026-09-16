@@ -5099,9 +5099,9 @@
     },
     {
       "id": 951,
-      "type": "timeseries",
+      "type": "barchart",
       "title": "Київ: загиблі від повітряних атак РФ за місяцями",
-      "description": "Київ (місто). Ракетні, дронові та інші повітряні атаки. Пізні смерті від отриманих під час атаки поранень віднесені до місяця самої атаки. Наземні бої та артилерійські обстріли 2022 року не включені.",
+      "description": "Київ (місто). Ракетні, дронові та інші повітряні атаки. Пізні смерті від отриманих під час атаки поранень віднесені до місяця самої атаки. Наземні бої та артилерійські обстріли 2022 року не включені. Вісь X є категоріальною (YYYY-MM), тому цей графік не обрізається глобальним діапазоном часу dashboard у shared/public режимі.",
       "gridPos": {
         "h": 10,
         "w": 24,
@@ -5116,10 +5116,9 @@
         {
           "columns": [
             {
-              "selector": "time",
+              "selector": "month",
               "text": "Місяць",
-              "type": "timestamp",
-              "timestampFormat": "2006-01-02T15:04:05Z07:00"
+              "type": "string"
             },
             {
               "selector": "deaths",
@@ -5152,24 +5151,11 @@
           "unit": "short",
           "decimals": 0,
           "custom": {
-            "drawStyle": "bars",
-            "lineInterpolation": "linear",
-            "barAlignment": 0,
-            "lineWidth": 1,
-            "fillOpacity": 65,
-            "gradientMode": "none",
-            "spanNulls": false,
-            "insertNulls": false,
-            "showPoints": "never",
-            "pointSize": 5,
-            "stacking": {
-              "mode": "none",
-              "group": "A"
-            },
             "axisPlacement": "auto",
             "axisLabel": "Кількість загиблих",
             "axisColorMode": "text",
             "axisBorderShow": false,
+            "axisCenteredZero": false,
             "scaleDistribution": {
               "type": "linear"
             },
@@ -5178,6 +5164,9 @@
               "viz": false,
               "legend": false
             },
+            "fillOpacity": 65,
+            "gradientMode": "none",
+            "lineWidth": 1,
             "thresholdsStyle": {
               "mode": "off"
             }
@@ -5196,6 +5185,17 @@
         "overrides": []
       },
       "options": {
+        "orientation": "auto",
+        "xField": "Місяць",
+        "xTickLabelRotation": 0,
+        "xTickLabelSpacing": 90,
+        "xTickLabelMaxLength": 12,
+        "groupWidth": 0.72,
+        "barWidth": 0.9,
+        "barRadius": 0,
+        "fullHighlight": true,
+        "showValue": "never",
+        "stacking": "none",
         "tooltip": {
           "mode": "single",
           "sort": "none",
