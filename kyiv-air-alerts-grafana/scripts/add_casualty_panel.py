@@ -25,12 +25,7 @@ def make_panel(query_template: dict, y: int) -> dict:
     target = {
         "columns": [
             {"selector": "month", "text": "Місяць", "type": "string"},
-            {
-                "selector": "time",
-                "text": "Дата",
-                "type": "timestamp",
-                "timestampFormat": "2006-01-02T15:04:05Z07:00",
-            },
+            {"selector": "time", "text": "Дата", "type": "timestamp", "timestampFormat": "2006-01-02T15:04:05Z07:00"},
             {"selector": "deaths", "text": "Загиблих", "type": "number"},
         ],
         "computed_columns": [],
@@ -83,9 +78,7 @@ def make_panel(query_template: dict, y: int) -> dict:
             "overrides": [
                 {
                     "matcher": {"id": "byName", "options": "Дата"},
-                    "properties": [
-                        {"id": "custom.hideFrom", "value": {"tooltip": True, "viz": True, "legend": True}}
-                    ],
+                    "properties": [{"id": "custom.hideFrom", "value": {"tooltip": True, "viz": True, "legend": True}}],
                 }
             ],
         },
@@ -125,9 +118,17 @@ def main() -> None:
     obj = json.loads(DASHBOARD.read_text(encoding="utf-8"))
     obj["panels"] = [p for p in obj.get("panels", []) if p.get("id") not in {950, 951}]
 
-    methodology = next((p for p in obj["panels"] if p.get("id") == 900), None)
+    methodology = next(
+        (
+            p
+            for p in obj["panels"]
+            if p.get("title") == "Джерела та методологія"
+            or "**Географія та джерела.**" in p.get("options", {}).get("content", "")
+        ),
+        None,
+    )
     if methodology is None:
-        raise RuntimeError("Methodology panel id=900 not found")
+        raise RuntimeError("Methodology panel not found")
 
     insert_y = methodology.get("gridPos", {}).get("y", 0)
     row = {
@@ -150,9 +151,6 @@ def main() -> None:
     obj["panels"].extend([row, panel])
     obj["panels"].sort(key=lambda p: (p.get("gridPos", {}).get("y", 0), p.get("gridPos", {}).get("x", 0)))
 
-    # Keep the full-period default for the rest of the dashboard. The casualty
-    # chart uses the string month field as the x-axis; the timestamp is included
-    # only so shared/public rendering receives a valid time-bearing data frame.
     obj.setdefault("time", {})["from"] = "2022-01-31T22:00:00.000Z"
     obj["time"].setdefault("to", "now")
 
