@@ -58,8 +58,11 @@ jobs:
       - name: Add weekly Grafana panels
         run: python scripts/add_weekly_panels.py
 
-      - name: Add multicity data and comparison panels
+      - name: Add base multicity data and comparison panels
         run: python scripts/add_duration_unit_switch.py
+
+      - name: Expand validated production multicity set
+        run: python scripts/expand_multicity_production.py
 
       - name: Update Kyiv casualty series and review queue
         run: python scripts/update_casualties.py
