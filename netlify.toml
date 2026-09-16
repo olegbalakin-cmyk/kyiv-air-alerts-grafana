@@ -1,0 +1,12 @@
+[build]
+  command = "rm -rf _site && mkdir -p _site && cp kyiv-air-alerts-grafana/pages-preview/index.html _site/index.html && cp kyiv-air-alerts-grafana/pages-preview/styles.css _site/styles.css && cp kyiv-air-alerts-grafana/pages-preview/app.js _site/app.js && cp kyiv-air-alerts-grafana/data/dashboard_data.json _site/data.json"
+  publish = "_site"
+
+[build.environment]
+  NODE_VERSION = "20"
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
