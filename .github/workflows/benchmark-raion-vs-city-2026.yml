@@ -1,0 +1,53 @@
+name: Benchmark raion vs exact city 2026
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "kyiv-air-alerts-grafana/scripts/benchmark_raion_vs_city_2026.py"
+      - ".github/workflows/benchmark-raion-vs-city-2026.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  benchmark:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: kyiv-air-alerts-grafana
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Sync with latest main
+        working-directory: .
+        run: |
+          git fetch origin main
+          git reset --hard origin/main
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install requests
+        run: pip install "requests>=2.32,<3"
+
+      - name: Run benchmark
+        run: python scripts/benchmark_raion_vs_city_2026.py
+
+      - name: Commit outputs
+        working-directory: .
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add kyiv-air-alerts-grafana/data/raion_vs_exact_city_2026.csv kyiv-air-alerts-grafana/data/raion_vs_exact_city_2026.json
+          if git diff --cached --quiet; then
+            echo "No changes"
+          else
+            git commit -m "Update raion vs exact-city benchmark"
+            git pull --rebase origin main
+            git push origin HEAD:main
+          fi
