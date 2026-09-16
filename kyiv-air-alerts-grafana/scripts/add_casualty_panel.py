@@ -25,6 +25,12 @@ def make_panel(query_template: dict, y: int) -> dict:
     target = {
         "columns": [
             {"selector": "month", "text": "Місяць", "type": "string"},
+            {
+                "selector": "time",
+                "text": "Дата",
+                "type": "timestamp",
+                "timestampFormat": "2006-01-02T15:04:05Z07:00",
+            },
             {"selector": "deaths", "text": "Загиблих", "type": "number"},
         ],
         "computed_columns": [],
@@ -48,8 +54,8 @@ def make_panel(query_template: dict, y: int) -> dict:
             "Київ (місто). Ракетні, дронові та інші повітряні атаки. "
             "Пізні смерті від отриманих під час атаки поранень віднесені до місяця самої атаки. "
             "Наземні бої та артилерійські обстріли 2022 року не включені. "
-            "Вісь X є категоріальною (YYYY-MM), тому цей графік не обрізається глобальним "
-            "діапазоном часу dashboard у shared/public режимі."
+            "Вісь X є категоріальною (YYYY-MM). Технічне поле дати збережене у frame "
+            "для сумісності зі shared/public renderer Grafana."
         ),
         "gridPos": {"h": 10, "w": 24, "x": 0, "y": y},
         "datasource": datasource,
@@ -74,7 +80,14 @@ def make_panel(query_template: dict, y: int) -> dict:
                 "mappings": [],
                 "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": None}]},
             },
-            "overrides": [],
+            "overrides": [
+                {
+                    "matcher": {"id": "byName", "options": "Дата"},
+                    "properties": [
+                        {"id": "custom.hideFrom", "value": {"tooltip": True, "viz": True, "legend": True}}
+                    ],
+                }
+            ],
         },
         "options": {
             "orientation": "auto",
@@ -138,14 +151,14 @@ def main() -> None:
     obj["panels"].sort(key=lambda p: (p.get("gridPos", {}).get("y", 0), p.get("gridPos", {}).get("x", 0)))
 
     # Keep the full-period default for the rest of the dashboard. The casualty
-    # chart itself now uses a categorical month axis and is therefore independent
-    # of the shared dashboard's locked time range.
+    # chart uses the string month field as the x-axis; the timestamp is included
+    # only so shared/public rendering receives a valid time-bearing data frame.
     obj.setdefault("time", {})["from"] = "2022-01-31T22:00:00.000Z"
     obj["time"].setdefault("to", "now")
 
     obj["version"] = 1
     DASHBOARD.write_text(json.dumps(obj, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-    print("Added categorical Kyiv casualty panel and public-data verification disclaimer")
+    print("Added categorical Kyiv casualty panel with shared-dashboard time compatibility")
 
 
 if __name__ == "__main__":
