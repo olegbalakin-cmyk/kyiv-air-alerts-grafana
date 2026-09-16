@@ -1,0 +1,52 @@
+{
+  "meta": {
+    "source": "https://raw.githubusercontent.com/Vadimkin/ukrainian-air-raid-sirens-dataset/main/datasets/official_data_uk.csv",
+    "period": "2026",
+    "definition": {
+      "city_time_covered_by_raion_pct": "share of exact-city alert time that overlaps the raion proxy",
+      "raion_time_matching_city_pct": "share of raion alert time that overlaps exact-city alerts",
+      "jaccard_pct": "overlap / union of alert-time intervals",
+      "raion_total_duration_bias_vs_city_pct": "(raion alert hours - exact-city alert hours) / exact-city alert hours"
+    }
+  },
+  "results": [
+    {
+      "city": "kharkiv",
+      "display_name": "Харків",
+      "oblast": "Харківська область",
+      "exact_city_source": "м. Харків та Харківська територіальна громада",
+      "raion_source": "Харківський район",
+      "city_alert_hours": 3294.136,
+      "raion_alert_hours": 3898.516,
+      "overlap_hours": 3270.97,
+      "city_only_hours": 23.166,
+      "raion_only_hours": 627.545,
+      "union_hours": 3921.681,
+      "city_time_covered_by_raion_pct": 99.3,
+      "raion_time_matching_city_pct": 83.9,
+      "jaccard_pct": 83.41,
+      "raion_total_duration_bias_vs_city_pct": 18.35,
+      "city_interval_count_after_merge": 1880,
+      "raion_interval_count_after_merge": 1957
+    },
+    {
+      "city": "zaporizhzhia",
+      "display_name": "Запоріжжя",
+      "oblast": "Запорізька область",
+      "exact_city_source": "м. Запоріжжя та Запорізька територіальна громада",
+      "raion_source": "Запорізький район",
+      "city_alert_hours": 2865.036,
+      "raion_alert_hours": 4892.27,
+      "overlap_hours": 2860.787,
+      "city_only_hours": 4.248,
+      "raion_only_hours": 2031.483,
+      "union_hours": 4896.518,
+      "city_time_covered_by_raion_pct": 99.85,
+      "raion_time_matching_city_pct": 58.48,
+      "jaccard_pct": 58.42,
+      "raion_total_duration_bias_vs_city_pct": 70.76,
+      "city_interval_count_after_merge": 1251,
+      "raion_interval_count_after_merge": 1177
+    }
+  ]
+}
