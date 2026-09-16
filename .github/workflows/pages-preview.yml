@@ -1,0 +1,56 @@
+name: Deploy multicity preview to GitHub Pages
+
+on:
+  push:
+    branches: [multicity-wip-2026-09-16]
+    paths:
+      - "kyiv-air-alerts-grafana/pages-preview/**"
+      - "kyiv-air-alerts-grafana/data/dashboard_data.json"
+      - ".github/workflows/pages-preview.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages-preview
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out WIP branch
+        uses: actions/checkout@v4
+        with:
+          ref: multicity-wip-2026-09-16
+
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+
+      - name: Assemble preview site
+        run: |
+          mkdir -p _site
+          cp kyiv-air-alerts-grafana/pages-preview/index.html _site/index.html
+          cp kyiv-air-alerts-grafana/pages-preview/styles.css _site/styles.css
+          cp kyiv-air-alerts-grafana/pages-preview/app.js _site/app.js
+          cp kyiv-air-alerts-grafana/data/dashboard_data.json _site/data.json
+          touch _site/.nojekyll
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
