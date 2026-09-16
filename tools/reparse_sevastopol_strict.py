@@ -12,7 +12,7 @@ OUT = Path('kyiv-air-alerts-grafana/data/sevastopol_strict_audit.json')
 
 def norm(text: str) -> str:
     s = text.lower().replace('ё', 'е').replace('\xa0', ' ')
-    s = re.sub(r'[⚡️❗‼️◻️]+', ' ', s)
+    s = re.sub(r'[⚡️❗‼️◻️✅]+', ' ', s)
     return ' '.join(s.split())
 
 
