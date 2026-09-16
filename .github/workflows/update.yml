@@ -64,8 +64,11 @@ jobs:
       - name: Expand validated production multicity set
         run: python scripts/extend_remaining_proxies.py
 
-      - name: Benchmark district fallback source
+      - name: Benchmark Tryvoha API fallback source
         run: python scripts/audit_tryvoha_fallback.py
+
+      - name: Benchmark eTryvoga Telegram district fallback
+        run: python scripts/audit_etryvoga_district_fallback.py
 
       - name: Add Sevastopol exact-city series
         run: python scripts/add_sevastopol_exact.py
