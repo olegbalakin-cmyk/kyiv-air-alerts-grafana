@@ -1,0 +1,45 @@
+name: Evaluate proxy union
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "kyiv-air-alerts-grafana/scripts/evaluate_proxy_union.py"
+      - ".github/workflows/evaluate-proxy-union.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  evaluate:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: kyiv-air-alerts-grafana
+    steps:
+      - uses: actions/checkout@v4
+      - name: Sync main
+        working-directory: .
+        run: |
+          git fetch origin main
+          git reset --hard origin/main
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install "requests>=2.32,<3"
+      - name: Evaluate union proxies
+        run: python scripts/evaluate_proxy_union.py
+      - name: Commit outputs
+        working-directory: .
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add kyiv-air-alerts-grafana/data/proxy_union_evaluation.csv kyiv-air-alerts-grafana/data/proxy_union_evaluation.json
+          if git diff --cached --quiet; then
+            echo "No changes"
+          else
+            git commit -m "Update proxy union evaluation"
+            git pull --rebase origin main
+            git push origin HEAD:main
+          fi
