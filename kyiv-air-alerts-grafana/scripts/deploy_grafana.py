@@ -13,6 +13,7 @@ import requests
 ROOT = Path(__file__).resolve().parents[1]
 DASHBOARD_FILE = ROOT / "grafana" / "dashboard.json"
 DEFAULT_TITLE = "Повітряні тривоги — міста України"
+DATASOURCE_TYPE = "yesoreyeram-infinity-datasource"
 DATASOURCE_NAME = "Infinity"
 
 
@@ -61,19 +62,6 @@ def load_local_dashboard() -> dict:
     return obj
 
 
-def resolve_datasource_uid(session: requests.Session, base_url: str) -> str:
-    name = env("GRAFANA_INFINITY_NAME") or DATASOURCE_NAME
-    result = request_json(
-        session,
-        "GET",
-        api_url(base_url, f"/api/datasources/name/{quote(name, safe='')}"),
-    )
-    uid = (result or {}).get("uid")
-    if not uid:
-        raise RuntimeError(f"Grafana datasource {name!r} has no uid")
-    return str(uid)
-
-
 def find_dashboard_uid(session: requests.Session, base_url: str, title: str) -> str:
     configured = env("GRAFANA_DASHBOARD_UID")
     if configured:
@@ -104,6 +92,58 @@ def load_existing_dashboard(session: requests.Session, base_url: str, uid: str) 
         "GET",
         api_url(base_url, f"/api/dashboards/uid/{quote(uid, safe='')}"),
     )
+
+
+def collect_infinity_uids(obj: Any, found: set[str]) -> None:
+    if isinstance(obj, dict):
+        if obj.get("type") == DATASOURCE_TYPE:
+            uid = obj.get("uid")
+            if isinstance(uid, str) and uid and not uid.startswith("${"):
+                found.add(uid)
+        for value in obj.values():
+            collect_infinity_uids(value, found)
+    elif isinstance(obj, list):
+        for value in obj:
+            collect_infinity_uids(value, found)
+
+
+def resolve_datasource_uid(
+    session: requests.Session,
+    base_url: str,
+    existing: dict,
+) -> str:
+    configured_uid = env("GRAFANA_INFINITY_UID")
+    if configured_uid:
+        return configured_uid
+
+    found: set[str] = set()
+    collect_infinity_uids(existing.get("dashboard") or {}, found)
+    if len(found) == 1:
+        uid = next(iter(found))
+        print(f"Reusing Infinity datasource uid from live dashboard: {uid}")
+        return uid
+    if len(found) > 1:
+        raise RuntimeError(
+            "The live dashboard references multiple Infinity datasource UIDs; "
+            "set GRAFANA_INFINITY_UID explicitly."
+        )
+
+    # Fallback for dashboards where Grafana did not persist the datasource UID
+    # in panel JSON. The name is configurable because imported datasources do not
+    # have to be called literally 'Infinity'.
+    name = env("GRAFANA_INFINITY_NAME") or DATASOURCE_NAME
+    result = request_json(
+        session,
+        "GET",
+        api_url(base_url, f"/api/datasources/name/{quote(name, safe='')}"),
+    )
+    uid = (result or {}).get("uid")
+    if not uid:
+        raise RuntimeError(
+            f"Could not resolve Infinity datasource uid from the live dashboard or datasource {name!r}. "
+            "Set GRAFANA_INFINITY_UID explicitly."
+        )
+    return str(uid)
 
 
 def prepare_dashboard(local: dict, existing: dict, dashboard_uid: str, datasource_uid: str) -> tuple[dict, str | None]:
@@ -196,9 +236,9 @@ def main() -> None:
 
     local = load_local_dashboard()
     title = env("GRAFANA_DASHBOARD_TITLE") or local.get("title") or DEFAULT_TITLE
-    datasource_uid = resolve_datasource_uid(session, base_url)
     dashboard_uid = find_dashboard_uid(session, base_url, str(title))
     existing = load_existing_dashboard(session, base_url, dashboard_uid)
+    datasource_uid = resolve_datasource_uid(session, base_url, existing)
     prepared, folder_uid = prepare_dashboard(local, existing, dashboard_uid, datasource_uid)
 
     result = deploy_dashboard(session, base_url, prepared, folder_uid)
