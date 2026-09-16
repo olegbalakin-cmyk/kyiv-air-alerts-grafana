@@ -1,0 +1,35 @@
+name: Reparse Sevastopol strict signals
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "tools/reparse_sevastopol_strict.py"
+      - ".github/workflows/reparse-sevastopol-strict.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  reparse:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Reparse saved Sevastopol candidates
+        run: python tools/reparse_sevastopol_strict.py
+      - name: Commit strict audit
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add kyiv-air-alerts-grafana/data/sevastopol_strict_audit.json
+          if git diff --cached --quiet; then
+            echo "No changes"
+          else
+            git commit -m "Reparse Sevastopol strict signals"
+            git pull --rebase origin main
+            git push origin HEAD:main
+          fi
