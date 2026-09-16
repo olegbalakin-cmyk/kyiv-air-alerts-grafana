@@ -1,0 +1,36 @@
+name: Audit Sevastopol exact-city alerts
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "tools/audit_sevastopol_exact_city.py"
+      - ".github/workflows/audit-sevastopol-exact.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install "requests>=2.32,<3" "beautifulsoup4>=4.12,<5"
+      - name: Audit Sevastopol exact-city alert history
+        run: python tools/audit_sevastopol_exact_city.py
+      - name: Commit audit output
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add kyiv-air-alerts-grafana/data/sevastopol_exact_city_audit.json
+          if git diff --cached --quiet; then
+            echo "No changes"
+          else
+            git commit -m "Audit Sevastopol exact-city alerts"
+            git pull --rebase origin main
+            git push origin HEAD:main
+          fi
