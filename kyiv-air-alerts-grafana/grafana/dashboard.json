@@ -1465,8 +1465,8 @@
     {
       "id": 41,
       "type": "timeseries",
-      "title": "Порівняння — середня кількість тривог на день (${comparison_period:text})",
-      "description": "Показано лише три ряди, вибрані у перемикачах «Порівняння A/B/C». Назва з районом у дужках означає районний proxy, а не exact-city. Період можна перемикати між місяцями й тижнями.",
+      "title": "Порівняння — середня кількість тривог на день (${comparison_period:text}) — A: ${compare_city_a:text} · B: ${compare_city_b:text} · C: ${compare_city_c:text}",
+      "description": "Легенда використовує стабільні позначення A/B/C; відповідні назви міст показані в заголовку графіка. Назва з районом у дужках означає районний proxy, а не exact-city. У звичайній Grafana міста можна змінювати перемикачами; externally shared view показує збережені значення.",
       "gridPos": {
         "h": 9,
         "w": 24,
@@ -1488,17 +1488,17 @@
             },
             {
               "selector": "city_a",
-              "text": "${compare_city_a:text}",
+              "text": "A",
               "type": "number"
             },
             {
               "selector": "city_b",
-              "text": "${compare_city_b:text}",
+              "text": "B",
               "type": "number"
             },
             {
               "selector": "city_c",
-              "text": "${compare_city_c:text}",
+              "text": "C",
               "type": "number"
             }
           ],
@@ -1576,7 +1576,65 @@
           "unit": "suffix: тривог/день",
           "decimals": 2
         },
-        "overrides": []
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "A"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "blue"
+                }
+              },
+              {
+                "id": "custom.lineWidth",
+                "value": 2
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "B"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "green"
+                }
+              },
+              {
+                "id": "custom.lineWidth",
+                "value": 2
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "C"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "yellow"
+                }
+              },
+              {
+                "id": "custom.lineWidth",
+                "value": 2
+              }
+            ]
+          }
+        ]
       },
       "options": {
         "tooltip": {
@@ -1595,8 +1653,8 @@
     {
       "id": 42,
       "type": "timeseries",
-      "title": "Порівняння — середній час під тривогою на добу (${comparison_period:text}, ${duration_unit:text})",
-      "description": "Показано лише три ряди, вибрані у перемикачах «Порівняння A/B/C». Назва з районом у дужках означає районний proxy, а не exact-city. Період можна перемикати між місяцями й тижнями.",
+      "title": "Порівняння — середній час під тривогою на добу (${comparison_period:text}) — A: ${compare_city_a:text} · B: ${compare_city_b:text} · C: ${compare_city_c:text}",
+      "description": "Легенда використовує стабільні позначення A/B/C; відповідні назви міст показані в заголовку графіка. Назва з районом у дужках означає районний proxy, а не exact-city. У звичайній Grafana міста можна змінювати перемикачами; externally shared view показує збережені значення.",
       "gridPos": {
         "h": 9,
         "w": 24,
@@ -1618,17 +1676,17 @@
             },
             {
               "selector": "city_a",
-              "text": "${compare_city_a:text}",
+              "text": "A",
               "type": "number"
             },
             {
               "selector": "city_b",
-              "text": "${compare_city_b:text}",
+              "text": "B",
               "type": "number"
             },
             {
               "selector": "city_c",
-              "text": "${compare_city_c:text}",
+              "text": "C",
               "type": "number"
             }
           ],
@@ -1706,7 +1764,65 @@
           "unit": "short",
           "decimals": 2
         },
-        "overrides": []
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "A"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "blue"
+                }
+              },
+              {
+                "id": "custom.lineWidth",
+                "value": 2
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "B"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "green"
+                }
+              },
+              {
+                "id": "custom.lineWidth",
+                "value": 2
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "C"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "yellow"
+                }
+              },
+              {
+                "id": "custom.lineWidth",
+                "value": 2
+              }
+            ]
+          }
+        ]
       },
       "options": {
         "tooltip": {
@@ -1725,8 +1841,8 @@
     {
       "id": 43,
       "type": "timeseries",
-      "title": "Порівняння — середня тривалість однієї тривоги (${comparison_period:text}, ${duration_unit:text})",
-      "description": "Показано лише три ряди, вибрані у перемикачах «Порівняння A/B/C». Назва з районом у дужках означає районний proxy, а не exact-city. Період можна перемикати між місяцями й тижнями.",
+      "title": "Порівняння — середня тривалість однієї тривоги (${comparison_period:text}) — A: ${compare_city_a:text} · B: ${compare_city_b:text} · C: ${compare_city_c:text}",
+      "description": "Легенда використовує стабільні позначення A/B/C; відповідні назви міст показані в заголовку графіка. Назва з районом у дужках означає районний proxy, а не exact-city. У звичайній Grafana міста можна змінювати перемикачами; externally shared view показує збережені значення.",
       "gridPos": {
         "h": 9,
         "w": 24,
@@ -1748,17 +1864,17 @@
             },
             {
               "selector": "city_a",
-              "text": "${compare_city_a:text}",
+              "text": "A",
               "type": "number"
             },
             {
               "selector": "city_b",
-              "text": "${compare_city_b:text}",
+              "text": "B",
               "type": "number"
             },
             {
               "selector": "city_c",
-              "text": "${compare_city_c:text}",
+              "text": "C",
               "type": "number"
             }
           ],
@@ -1836,7 +1952,65 @@
           "unit": "short",
           "decimals": 2
         },
-        "overrides": []
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "A"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "blue"
+                }
+              },
+              {
+                "id": "custom.lineWidth",
+                "value": 2
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "B"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "green"
+                }
+              },
+              {
+                "id": "custom.lineWidth",
+                "value": 2
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "C"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "yellow"
+                }
+              },
+              {
+                "id": "custom.lineWidth",
+                "value": 2
+              }
+            ]
+          }
+        ]
       },
       "options": {
         "tooltip": {
