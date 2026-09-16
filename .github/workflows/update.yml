@@ -58,11 +58,11 @@ jobs:
       - name: Add weekly Grafana panels
         run: python scripts/add_weekly_panels.py
 
-      - name: Add base multicity data and comparison panels
+      - name: Add exact-city base rows and switches
         run: python scripts/add_duration_unit_switch.py
 
-      - name: Expand validated production multicity set
-        run: python scripts/extend_remaining_proxies.py
+      - name: Add validated production proxy rows
+        run: python scripts/expand_multicity_production.py
 
       - name: Apply official UkraineAlarm API bridge
         env:
@@ -75,14 +75,14 @@ jobs:
       - name: Update Kyiv casualty series and review queue
         run: python scripts/update_casualties.py
 
-      - name: Finalize single admin/public dashboard
-        run: python scripts/finalize_multicity_dashboard.py
+      - name: Configure compact city-selector dashboard
+        run: python scripts/configure_compact_dashboard.py
 
       - name: Add Kyiv casualty panel and disclaimer
         run: python scripts/add_casualty_panel.py
 
-      - name: QA geography, comparison styling, and source freshness
-        run: python scripts/postprocess_dashboard_qa.py
+      - name: QA compact dashboard and source freshness
+        run: python scripts/postprocess_compact_dashboard_qa.py
 
       - name: Reconcile freshness with official API bridge
         run: python scripts/reconcile_bridge_freshness.py
