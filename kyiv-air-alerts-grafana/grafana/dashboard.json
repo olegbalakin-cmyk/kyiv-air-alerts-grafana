@@ -279,8 +279,8 @@
     {
       "id": 104,
       "type": "timeseries",
-      "title": "Київ: кількість тривог і середня тривалість однієї тривоги — за місяцями",
-      "description": "Повні календарні місяці; поточний неповний місяць виключено. Стовпчики — кількість завершених тривог за місяцем старту; лінія — середня повна тривалість тривог, що стартували цього місяця.",
+      "title": "Київ: середня кількість тривог на день — за місяцями",
+      "description": "Повні місяці; поточний неповний місяць виключено.",
       "gridPos": {
         "h": 9,
         "w": 24,
@@ -301,13 +301,8 @@
               "timestampFormat": "2006-01-02T15:04:05Z07:00"
             },
             {
-              "selector": "alerts_started",
-              "text": "Кількість тривог",
-              "type": "number"
-            },
-            {
-              "selector": "avg_duration",
-              "text": "Середня тривалість",
+              "selector": "alerts_per_day",
+              "text": "Тривог на день",
               "type": "number"
             }
           ],
@@ -321,7 +316,7 @@
           "global_query_id": "",
           "parser": "backend",
           "refId": "A",
-          "root_selector": "$.cities.kyiv.monthly.{\"time\": time, \"alerts_started\": alerts_started, \"avg_duration\": avg_alert_duration_min / 60}",
+          "root_selector": "$.cities.kyiv.monthly",
           "source": "url",
           "type": "json",
           "url": "https://raw.githubusercontent.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/main/kyiv-air-alerts-grafana/data/dashboard_data.json",
@@ -382,90 +377,23 @@
               }
             ]
           },
-          "decimals": 1,
-          "unit": "short"
+          "unit": "short",
+          "decimals": 2
         },
         "overrides": [
           {
             "matcher": {
               "id": "byName",
-              "options": "Кількість тривог"
+              "options": "Тривог на день"
             },
             "properties": [
               {
-                "id": "custom.drawStyle",
-                "value": "bars"
-              },
-              {
-                "id": "custom.fillOpacity",
-                "value": 70
-              },
-              {
-                "id": "custom.lineWidth",
-                "value": 1
-              },
-              {
-                "id": "custom.showPoints",
-                "value": "never"
-              },
-              {
-                "id": "custom.axisPlacement",
-                "value": "left"
+                "id": "unit",
+                "value": "suffix: тривог/день"
               },
               {
                 "id": "custom.axisLabel",
-                "value": "Кількість тривог"
-              },
-              {
-                "id": "unit",
-                "value": "short"
-              },
-              {
-                "id": "decimals",
-                "value": 0
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Середня тривалість"
-            },
-            "properties": [
-              {
-                "id": "custom.drawStyle",
-                "value": "line"
-              },
-              {
-                "id": "custom.lineWidth",
-                "value": 4
-              },
-              {
-                "id": "custom.showPoints",
-                "value": "always"
-              },
-              {
-                "id": "custom.pointSize",
-                "value": 7
-              },
-              {
-                "id": "custom.axisPlacement",
-                "value": "right"
-              },
-              {
-                "id": "custom.axisLabel",
-                "value": "Години"
-              },
-              {
-                "id": "unit",
-                "value": "suffix: год"
-              },
-              {
-                "id": "color",
-                "value": {
-                  "mode": "fixed",
-                  "fixedColor": "red"
-                }
+                "value": "Тривог на день"
               }
             ]
           }
@@ -473,12 +401,12 @@
       },
       "options": {
         "tooltip": {
-          "mode": "multi",
+          "mode": "single",
           "sort": "none",
           "hideZeros": false
         },
         "legend": {
-          "showLegend": true,
+          "showLegend": false,
           "displayMode": "list",
           "placement": "bottom",
           "calcs": []
@@ -760,6 +688,215 @@
       }
     },
     {
+      "id": 107,
+      "type": "timeseries",
+      "title": "Київ: кількість тривог і середня тривалість однієї тривоги — за місяцями",
+      "description": "Повні календарні місяці; поточний неповний місяць виключено. Стовпчики — абсолютна кількість завершених тривог за місяцем старту; лінія — середня повна тривалість тривог, що стартували цього місяця. Окремий графік вище зберігає нормалізований показник тривог на день.",
+      "gridPos": {
+        "h": 9,
+        "w": 24,
+        "x": 0,
+        "y": 32
+      },
+      "datasource": {
+        "type": "yesoreyeram-infinity-datasource",
+        "uid": "${DS_INFINITY}"
+      },
+      "targets": [
+        {
+          "columns": [
+            {
+              "selector": "time",
+              "text": "Дата",
+              "type": "timestamp",
+              "timestampFormat": "2006-01-02T15:04:05Z07:00"
+            },
+            {
+              "selector": "alerts_started",
+              "text": "Кількість тривог",
+              "type": "number"
+            },
+            {
+              "selector": "avg_duration",
+              "text": "Середня тривалість",
+              "type": "number"
+            }
+          ],
+          "computed_columns": [],
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "${DS_INFINITY}"
+          },
+          "filters": [],
+          "format": "table",
+          "global_query_id": "",
+          "parser": "backend",
+          "refId": "A",
+          "root_selector": "$.cities.kyiv.monthly.{\"time\": time, \"alerts_started\": alerts_started, \"avg_duration\": avg_alert_duration_min / 60}",
+          "source": "url",
+          "type": "json",
+          "url": "https://raw.githubusercontent.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/main/kyiv-air-alerts-grafana/data/dashboard_data.json",
+          "url_options": {
+            "data": "",
+            "method": "GET"
+          }
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "linear",
+            "barAlignment": 0,
+            "barWidthFactor": 0.65,
+            "lineWidth": 2,
+            "fillOpacity": 12,
+            "gradientMode": "none",
+            "spanNulls": false,
+            "insertNulls": false,
+            "showPoints": "auto",
+            "pointSize": 5,
+            "stacking": {
+              "mode": "none",
+              "group": "A"
+            },
+            "axisPlacement": "auto",
+            "axisLabel": "",
+            "axisColorMode": "text",
+            "axisBorderShow": false,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "axisCenteredZero": false,
+            "hideFrom": {
+              "tooltip": false,
+              "viz": false,
+              "legend": false
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            },
+            "lineStyle": {
+              "fill": "solid"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "decimals": 1,
+          "unit": "short"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Кількість тривог"
+            },
+            "properties": [
+              {
+                "id": "custom.drawStyle",
+                "value": "bars"
+              },
+              {
+                "id": "custom.fillOpacity",
+                "value": 70
+              },
+              {
+                "id": "custom.lineWidth",
+                "value": 1
+              },
+              {
+                "id": "custom.showPoints",
+                "value": "never"
+              },
+              {
+                "id": "custom.axisPlacement",
+                "value": "left"
+              },
+              {
+                "id": "custom.axisLabel",
+                "value": "Кількість тривог"
+              },
+              {
+                "id": "unit",
+                "value": "short"
+              },
+              {
+                "id": "decimals",
+                "value": 0
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Середня тривалість"
+            },
+            "properties": [
+              {
+                "id": "custom.drawStyle",
+                "value": "line"
+              },
+              {
+                "id": "custom.lineWidth",
+                "value": 4
+              },
+              {
+                "id": "custom.showPoints",
+                "value": "always"
+              },
+              {
+                "id": "custom.pointSize",
+                "value": 7
+              },
+              {
+                "id": "custom.axisPlacement",
+                "value": "right"
+              },
+              {
+                "id": "custom.axisLabel",
+                "value": "Години"
+              },
+              {
+                "id": "unit",
+                "value": "suffix: год"
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "red"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "tooltip": {
+          "mode": "multi",
+          "sort": "none",
+          "hideZeros": false
+        },
+        "legend": {
+          "showLegend": true,
+          "displayMode": "list",
+          "placement": "bottom",
+          "calcs": []
+        }
+      }
+    },
+    {
       "id": 108,
       "type": "timeseries",
       "title": "Київ: середній час під тривогою на добу — за ковзними 7 днями (години)",
@@ -768,7 +905,7 @@
         "h": 9,
         "w": 24,
         "x": 0,
-        "y": 32
+        "y": 41
       },
       "datasource": {
         "type": "yesoreyeram-infinity-datasource",
@@ -905,7 +1042,7 @@
         "h": 9,
         "w": 24,
         "x": 0,
-        "y": 41
+        "y": 50
       },
       "datasource": {
         "type": "yesoreyeram-infinity-datasource",
@@ -1042,7 +1179,7 @@
         "h": 9,
         "w": 24,
         "x": 0,
-        "y": 50
+        "y": 59
       },
       "datasource": {
         "type": "yesoreyeram-infinity-datasource",
@@ -1180,7 +1317,7 @@
         "h": 10,
         "w": 24,
         "x": 0,
-        "y": 59
+        "y": 68
       },
       "datasource": {
         "type": "yesoreyeram-infinity-datasource",
@@ -1621,8 +1758,8 @@
         {
           "id": 204,
           "type": "timeseries",
-          "title": "Харків: кількість тривог і середня тривалість однієї тривоги — за місяцями",
-          "description": "Повні календарні місяці; поточний неповний місяць виключено. Стовпчики — кількість завершених тривог за місяцем старту; лінія — середня повна тривалість тривог, що стартували цього місяця.",
+          "title": "Харків: середня кількість тривог на день — за місяцями",
+          "description": "Повні місяці; поточний неповний місяць виключено.",
           "gridPos": {
             "h": 9,
             "w": 24,
@@ -1643,13 +1780,8 @@
                   "timestampFormat": "2006-01-02T15:04:05Z07:00"
                 },
                 {
-                  "selector": "alerts_started",
-                  "text": "Кількість тривог",
-                  "type": "number"
-                },
-                {
-                  "selector": "avg_duration",
-                  "text": "Середня тривалість",
+                  "selector": "alerts_per_day",
+                  "text": "Тривог на день",
                   "type": "number"
                 }
               ],
@@ -1663,7 +1795,7 @@
               "global_query_id": "",
               "parser": "backend",
               "refId": "A",
-              "root_selector": "$.cities.kharkiv.monthly.{\"time\": time, \"alerts_started\": alerts_started, \"avg_duration\": avg_alert_duration_min / 60}",
+              "root_selector": "$.cities.kharkiv.monthly",
               "source": "url",
               "type": "json",
               "url": "https://raw.githubusercontent.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/main/kyiv-air-alerts-grafana/data/dashboard_data.json",
@@ -1724,90 +1856,23 @@
                   }
                 ]
               },
-              "decimals": 1,
-              "unit": "short"
+              "unit": "short",
+              "decimals": 2
             },
             "overrides": [
               {
                 "matcher": {
                   "id": "byName",
-                  "options": "Кількість тривог"
+                  "options": "Тривог на день"
                 },
                 "properties": [
                   {
-                    "id": "custom.drawStyle",
-                    "value": "bars"
-                  },
-                  {
-                    "id": "custom.fillOpacity",
-                    "value": 70
-                  },
-                  {
-                    "id": "custom.lineWidth",
-                    "value": 1
-                  },
-                  {
-                    "id": "custom.showPoints",
-                    "value": "never"
-                  },
-                  {
-                    "id": "custom.axisPlacement",
-                    "value": "left"
+                    "id": "unit",
+                    "value": "suffix: тривог/день"
                   },
                   {
                     "id": "custom.axisLabel",
-                    "value": "Кількість тривог"
-                  },
-                  {
-                    "id": "unit",
-                    "value": "short"
-                  },
-                  {
-                    "id": "decimals",
-                    "value": 0
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "Середня тривалість"
-                },
-                "properties": [
-                  {
-                    "id": "custom.drawStyle",
-                    "value": "line"
-                  },
-                  {
-                    "id": "custom.lineWidth",
-                    "value": 4
-                  },
-                  {
-                    "id": "custom.showPoints",
-                    "value": "always"
-                  },
-                  {
-                    "id": "custom.pointSize",
-                    "value": 7
-                  },
-                  {
-                    "id": "custom.axisPlacement",
-                    "value": "right"
-                  },
-                  {
-                    "id": "custom.axisLabel",
-                    "value": "Години"
-                  },
-                  {
-                    "id": "unit",
-                    "value": "suffix: год"
-                  },
-                  {
-                    "id": "color",
-                    "value": {
-                      "mode": "fixed",
-                      "fixedColor": "red"
-                    }
+                    "value": "Тривог на день"
                   }
                 ]
               }
@@ -1815,12 +1880,12 @@
           },
           "options": {
             "tooltip": {
-              "mode": "multi",
+              "mode": "single",
               "sort": "none",
               "hideZeros": false
             },
             "legend": {
-              "showLegend": true,
+              "showLegend": false,
               "displayMode": "list",
               "placement": "bottom",
               "calcs": []
@@ -2102,6 +2167,215 @@
           }
         },
         {
+          "id": 207,
+          "type": "timeseries",
+          "title": "Харків: кількість тривог і середня тривалість однієї тривоги — за місяцями",
+          "description": "Повні календарні місяці; поточний неповний місяць виключено. Стовпчики — абсолютна кількість завершених тривог за місяцем старту; лінія — середня повна тривалість тривог, що стартували цього місяця. Окремий графік вище зберігає нормалізований показник тривог на день.",
+          "gridPos": {
+            "h": 9,
+            "w": 24,
+            "x": 0,
+            "y": 31
+          },
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "${DS_INFINITY}"
+          },
+          "targets": [
+            {
+              "columns": [
+                {
+                  "selector": "time",
+                  "text": "Дата",
+                  "type": "timestamp",
+                  "timestampFormat": "2006-01-02T15:04:05Z07:00"
+                },
+                {
+                  "selector": "alerts_started",
+                  "text": "Кількість тривог",
+                  "type": "number"
+                },
+                {
+                  "selector": "avg_duration",
+                  "text": "Середня тривалість",
+                  "type": "number"
+                }
+              ],
+              "computed_columns": [],
+              "datasource": {
+                "type": "yesoreyeram-infinity-datasource",
+                "uid": "${DS_INFINITY}"
+              },
+              "filters": [],
+              "format": "table",
+              "global_query_id": "",
+              "parser": "backend",
+              "refId": "A",
+              "root_selector": "$.cities.kharkiv.monthly.{\"time\": time, \"alerts_started\": alerts_started, \"avg_duration\": avg_alert_duration_min / 60}",
+              "source": "url",
+              "type": "json",
+              "url": "https://raw.githubusercontent.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/main/kyiv-air-alerts-grafana/data/dashboard_data.json",
+              "url_options": {
+                "data": "",
+                "method": "GET"
+              }
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "drawStyle": "line",
+                "lineInterpolation": "linear",
+                "barAlignment": 0,
+                "barWidthFactor": 0.65,
+                "lineWidth": 2,
+                "fillOpacity": 12,
+                "gradientMode": "none",
+                "spanNulls": false,
+                "insertNulls": false,
+                "showPoints": "auto",
+                "pointSize": 5,
+                "stacking": {
+                  "mode": "none",
+                  "group": "A"
+                },
+                "axisPlacement": "auto",
+                "axisLabel": "",
+                "axisColorMode": "text",
+                "axisBorderShow": false,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "axisCenteredZero": false,
+                "hideFrom": {
+                  "tooltip": false,
+                  "viz": false,
+                  "legend": false
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                },
+                "lineStyle": {
+                  "fill": "solid"
+                }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  }
+                ]
+              },
+              "decimals": 1,
+              "unit": "short"
+            },
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Кількість тривог"
+                },
+                "properties": [
+                  {
+                    "id": "custom.drawStyle",
+                    "value": "bars"
+                  },
+                  {
+                    "id": "custom.fillOpacity",
+                    "value": 70
+                  },
+                  {
+                    "id": "custom.lineWidth",
+                    "value": 1
+                  },
+                  {
+                    "id": "custom.showPoints",
+                    "value": "never"
+                  },
+                  {
+                    "id": "custom.axisPlacement",
+                    "value": "left"
+                  },
+                  {
+                    "id": "custom.axisLabel",
+                    "value": "Кількість тривог"
+                  },
+                  {
+                    "id": "unit",
+                    "value": "short"
+                  },
+                  {
+                    "id": "decimals",
+                    "value": 0
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Середня тривалість"
+                },
+                "properties": [
+                  {
+                    "id": "custom.drawStyle",
+                    "value": "line"
+                  },
+                  {
+                    "id": "custom.lineWidth",
+                    "value": 4
+                  },
+                  {
+                    "id": "custom.showPoints",
+                    "value": "always"
+                  },
+                  {
+                    "id": "custom.pointSize",
+                    "value": 7
+                  },
+                  {
+                    "id": "custom.axisPlacement",
+                    "value": "right"
+                  },
+                  {
+                    "id": "custom.axisLabel",
+                    "value": "Години"
+                  },
+                  {
+                    "id": "unit",
+                    "value": "suffix: год"
+                  },
+                  {
+                    "id": "color",
+                    "value": {
+                      "mode": "fixed",
+                      "fixedColor": "red"
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          "options": {
+            "tooltip": {
+              "mode": "multi",
+              "sort": "none",
+              "hideZeros": false
+            },
+            "legend": {
+              "showLegend": true,
+              "displayMode": "list",
+              "placement": "bottom",
+              "calcs": []
+            }
+          }
+        },
+        {
           "id": 208,
           "type": "timeseries",
           "title": "Харків: середній час під тривогою на добу — за ковзними 7 днями (години)",
@@ -2110,7 +2384,7 @@
             "h": 9,
             "w": 24,
             "x": 0,
-            "y": 31
+            "y": 40
           },
           "datasource": {
             "type": "yesoreyeram-infinity-datasource",
@@ -2247,7 +2521,7 @@
             "h": 9,
             "w": 24,
             "x": 0,
-            "y": 40
+            "y": 49
           },
           "datasource": {
             "type": "yesoreyeram-infinity-datasource",
@@ -2384,7 +2658,7 @@
             "h": 9,
             "w": 24,
             "x": 0,
-            "y": 49
+            "y": 58
           },
           "datasource": {
             "type": "yesoreyeram-infinity-datasource",
@@ -2522,7 +2796,7 @@
             "h": 10,
             "w": 24,
             "x": 0,
-            "y": 58
+            "y": 67
           },
           "datasource": {
             "type": "yesoreyeram-infinity-datasource",
@@ -2728,7 +3002,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 69
+        "y": 78
       }
     },
     {
@@ -2971,8 +3245,8 @@
         {
           "id": 304,
           "type": "timeseries",
-          "title": "Запоріжжя: кількість тривог і середня тривалість однієї тривоги — за місяцями",
-          "description": "Повні календарні місяці; поточний неповний місяць виключено. Стовпчики — кількість завершених тривог за місяцем старту; лінія — середня повна тривалість тривог, що стартували цього місяця.",
+          "title": "Запоріжжя: середня кількість тривог на день — за місяцями",
+          "description": "Повні місяці; поточний неповний місяць виключено.",
           "gridPos": {
             "h": 9,
             "w": 24,
@@ -2993,13 +3267,8 @@
                   "timestampFormat": "2006-01-02T15:04:05Z07:00"
                 },
                 {
-                  "selector": "alerts_started",
-                  "text": "Кількість тривог",
-                  "type": "number"
-                },
-                {
-                  "selector": "avg_duration",
-                  "text": "Середня тривалість",
+                  "selector": "alerts_per_day",
+                  "text": "Тривог на день",
                   "type": "number"
                 }
               ],
@@ -3013,7 +3282,7 @@
               "global_query_id": "",
               "parser": "backend",
               "refId": "A",
-              "root_selector": "$.cities.zaporizhzhia.monthly.{\"time\": time, \"alerts_started\": alerts_started, \"avg_duration\": avg_alert_duration_min / 60}",
+              "root_selector": "$.cities.zaporizhzhia.monthly",
               "source": "url",
               "type": "json",
               "url": "https://raw.githubusercontent.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/main/kyiv-air-alerts-grafana/data/dashboard_data.json",
@@ -3074,90 +3343,23 @@
                   }
                 ]
               },
-              "decimals": 1,
-              "unit": "short"
+              "unit": "short",
+              "decimals": 2
             },
             "overrides": [
               {
                 "matcher": {
                   "id": "byName",
-                  "options": "Кількість тривог"
+                  "options": "Тривог на день"
                 },
                 "properties": [
                   {
-                    "id": "custom.drawStyle",
-                    "value": "bars"
-                  },
-                  {
-                    "id": "custom.fillOpacity",
-                    "value": 70
-                  },
-                  {
-                    "id": "custom.lineWidth",
-                    "value": 1
-                  },
-                  {
-                    "id": "custom.showPoints",
-                    "value": "never"
-                  },
-                  {
-                    "id": "custom.axisPlacement",
-                    "value": "left"
+                    "id": "unit",
+                    "value": "suffix: тривог/день"
                   },
                   {
                     "id": "custom.axisLabel",
-                    "value": "Кількість тривог"
-                  },
-                  {
-                    "id": "unit",
-                    "value": "short"
-                  },
-                  {
-                    "id": "decimals",
-                    "value": 0
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "Середня тривалість"
-                },
-                "properties": [
-                  {
-                    "id": "custom.drawStyle",
-                    "value": "line"
-                  },
-                  {
-                    "id": "custom.lineWidth",
-                    "value": 4
-                  },
-                  {
-                    "id": "custom.showPoints",
-                    "value": "always"
-                  },
-                  {
-                    "id": "custom.pointSize",
-                    "value": 7
-                  },
-                  {
-                    "id": "custom.axisPlacement",
-                    "value": "right"
-                  },
-                  {
-                    "id": "custom.axisLabel",
-                    "value": "Години"
-                  },
-                  {
-                    "id": "unit",
-                    "value": "suffix: год"
-                  },
-                  {
-                    "id": "color",
-                    "value": {
-                      "mode": "fixed",
-                      "fixedColor": "red"
-                    }
+                    "value": "Тривог на день"
                   }
                 ]
               }
@@ -3165,12 +3367,12 @@
           },
           "options": {
             "tooltip": {
-              "mode": "multi",
+              "mode": "single",
               "sort": "none",
               "hideZeros": false
             },
             "legend": {
-              "showLegend": true,
+              "showLegend": false,
               "displayMode": "list",
               "placement": "bottom",
               "calcs": []
@@ -3452,6 +3654,215 @@
           }
         },
         {
+          "id": 307,
+          "type": "timeseries",
+          "title": "Запоріжжя: кількість тривог і середня тривалість однієї тривоги — за місяцями",
+          "description": "Повні календарні місяці; поточний неповний місяць виключено. Стовпчики — абсолютна кількість завершених тривог за місяцем старту; лінія — середня повна тривалість тривог, що стартували цього місяця. Окремий графік вище зберігає нормалізований показник тривог на день.",
+          "gridPos": {
+            "h": 9,
+            "w": 24,
+            "x": 0,
+            "y": 31
+          },
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "${DS_INFINITY}"
+          },
+          "targets": [
+            {
+              "columns": [
+                {
+                  "selector": "time",
+                  "text": "Дата",
+                  "type": "timestamp",
+                  "timestampFormat": "2006-01-02T15:04:05Z07:00"
+                },
+                {
+                  "selector": "alerts_started",
+                  "text": "Кількість тривог",
+                  "type": "number"
+                },
+                {
+                  "selector": "avg_duration",
+                  "text": "Середня тривалість",
+                  "type": "number"
+                }
+              ],
+              "computed_columns": [],
+              "datasource": {
+                "type": "yesoreyeram-infinity-datasource",
+                "uid": "${DS_INFINITY}"
+              },
+              "filters": [],
+              "format": "table",
+              "global_query_id": "",
+              "parser": "backend",
+              "refId": "A",
+              "root_selector": "$.cities.zaporizhzhia.monthly.{\"time\": time, \"alerts_started\": alerts_started, \"avg_duration\": avg_alert_duration_min / 60}",
+              "source": "url",
+              "type": "json",
+              "url": "https://raw.githubusercontent.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/main/kyiv-air-alerts-grafana/data/dashboard_data.json",
+              "url_options": {
+                "data": "",
+                "method": "GET"
+              }
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "drawStyle": "line",
+                "lineInterpolation": "linear",
+                "barAlignment": 0,
+                "barWidthFactor": 0.65,
+                "lineWidth": 2,
+                "fillOpacity": 12,
+                "gradientMode": "none",
+                "spanNulls": false,
+                "insertNulls": false,
+                "showPoints": "auto",
+                "pointSize": 5,
+                "stacking": {
+                  "mode": "none",
+                  "group": "A"
+                },
+                "axisPlacement": "auto",
+                "axisLabel": "",
+                "axisColorMode": "text",
+                "axisBorderShow": false,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "axisCenteredZero": false,
+                "hideFrom": {
+                  "tooltip": false,
+                  "viz": false,
+                  "legend": false
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                },
+                "lineStyle": {
+                  "fill": "solid"
+                }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  }
+                ]
+              },
+              "decimals": 1,
+              "unit": "short"
+            },
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Кількість тривог"
+                },
+                "properties": [
+                  {
+                    "id": "custom.drawStyle",
+                    "value": "bars"
+                  },
+                  {
+                    "id": "custom.fillOpacity",
+                    "value": 70
+                  },
+                  {
+                    "id": "custom.lineWidth",
+                    "value": 1
+                  },
+                  {
+                    "id": "custom.showPoints",
+                    "value": "never"
+                  },
+                  {
+                    "id": "custom.axisPlacement",
+                    "value": "left"
+                  },
+                  {
+                    "id": "custom.axisLabel",
+                    "value": "Кількість тривог"
+                  },
+                  {
+                    "id": "unit",
+                    "value": "short"
+                  },
+                  {
+                    "id": "decimals",
+                    "value": 0
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Середня тривалість"
+                },
+                "properties": [
+                  {
+                    "id": "custom.drawStyle",
+                    "value": "line"
+                  },
+                  {
+                    "id": "custom.lineWidth",
+                    "value": 4
+                  },
+                  {
+                    "id": "custom.showPoints",
+                    "value": "always"
+                  },
+                  {
+                    "id": "custom.pointSize",
+                    "value": 7
+                  },
+                  {
+                    "id": "custom.axisPlacement",
+                    "value": "right"
+                  },
+                  {
+                    "id": "custom.axisLabel",
+                    "value": "Години"
+                  },
+                  {
+                    "id": "unit",
+                    "value": "suffix: год"
+                  },
+                  {
+                    "id": "color",
+                    "value": {
+                      "mode": "fixed",
+                      "fixedColor": "red"
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          "options": {
+            "tooltip": {
+              "mode": "multi",
+              "sort": "none",
+              "hideZeros": false
+            },
+            "legend": {
+              "showLegend": true,
+              "displayMode": "list",
+              "placement": "bottom",
+              "calcs": []
+            }
+          }
+        },
+        {
           "id": 308,
           "type": "timeseries",
           "title": "Запоріжжя: середній час під тривогою на добу — за ковзними 7 днями (години)",
@@ -3460,7 +3871,7 @@
             "h": 9,
             "w": 24,
             "x": 0,
-            "y": 31
+            "y": 40
           },
           "datasource": {
             "type": "yesoreyeram-infinity-datasource",
@@ -3597,7 +4008,7 @@
             "h": 9,
             "w": 24,
             "x": 0,
-            "y": 40
+            "y": 49
           },
           "datasource": {
             "type": "yesoreyeram-infinity-datasource",
@@ -3734,7 +4145,7 @@
             "h": 9,
             "w": 24,
             "x": 0,
-            "y": 49
+            "y": 58
           },
           "datasource": {
             "type": "yesoreyeram-infinity-datasource",
@@ -3872,7 +4283,7 @@
             "h": 10,
             "w": 24,
             "x": 0,
-            "y": 58
+            "y": 67
           },
           "datasource": {
             "type": "yesoreyeram-infinity-datasource",
@@ -4078,7 +4489,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 70
+        "y": 79
       }
     },
     {
@@ -4482,7 +4893,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 71
+        "y": 80
       }
     },
     {
@@ -4495,7 +4906,7 @@
           "id": 501,
           "type": "timeseries",
           "title": "Порівняння міст — середня кількість тривог на день (ковзні 7 днів)",
-          "description": "Кожна точка — ковзне 7-денне вікно, датоване останнім днем. Порівнюються тільки city-level дані; обласні тривоги не підмішуються. Спільний ряд вибраних тут міст: 2025-03-26–2026-09-07. Харків і Запоріжжя обрізані до 2026-09-07 — останнього гарантовано повного дня перед останнім оновленням upstream-файлу.",
+          "description": "Кожна точка — ковзне 7-денне вікно, датоване останнім днем. Порівнюються тільки city-level дані; обласні тривоги не підмішуються. Спільний ряд вибраних тут міст: 2025-03-26–2026-09-16.",
           "gridPos": {
             "h": 9,
             "w": 24,
@@ -4886,9 +5297,9 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 72
+        "y": 81
       },
-      "description": "Кожна точка — ковзне 7-денне вікно, датоване останнім днем. Порівнюються тільки city-level дані; обласні тривоги не підмішуються. Спільний ряд вибраних тут міст: 2025-03-26–2026-09-07. Харків і Запоріжжя обрізані до 2026-09-07 — останнього гарантовано повного дня перед останнім оновленням upstream-файлу."
+      "description": "Кожна точка — ковзне 7-денне вікно, датоване останнім днем. Порівнюються тільки city-level дані; обласні тривоги не підмішуються. Спільний ряд вибраних тут міст: 2025-03-26–2026-09-16."
     },
     {
       "id": 950,
@@ -4900,7 +5311,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 73
+        "y": 82
       }
     },
     {
@@ -4912,7 +5323,7 @@
         "h": 10,
         "w": 24,
         "x": 0,
-        "y": 74
+        "y": 83
       },
       "datasource": {
         "type": "yesoreyeram-infinity-datasource",
@@ -5046,11 +5457,11 @@
         "h": 6,
         "w": 24,
         "x": 0,
-        "y": 84
+        "y": 93
       },
       "options": {
         "mode": "markdown",
-        "content": "**Джерела.** Київ: [Портал відкритих даних Києва](https://data.kyivcity.gov.ua/dataset/statystyka-povitrianykh-tryvoh-u-misti-kyievi-dep-municipal/resource/5e4fb8a8-f0c8-4a12-885f-192d1f0dba75/data/download) + [Kyiv Digital — live-історія](https://kyiv.digital/storage/air-alert/stats.html) як fallback для свіжих завершених подій.  \nХарків і Запоріжжя: [official_data_uk.csv](https://raw.githubusercontent.com/Vadimkin/ukrainian-air-raid-sirens-dataset/main/datasets/official_data_uk.csv) — використовуються тільки записи рівня `hromada` для відповідної міської громади, починаючи з валідованого періоду окремих міських тривог.  \n\n**Початок city-level рядів:** Київ — 2022-02-28; Харків — 2025-02-17; Запоріжжя — 2025-03-19. Обласні дані та ретроспективно розмічені ранні записи не використовуються для заповнення попередніх періодів.  \n\nПоточний календарний день завжди виключено. Перший неповний місяць кожного city-level ряду не включається до місячних агрегатів. Тривоги через північ розподіляються між календарними добами в часовому поясі Europe/Kyiv; перекриття інтервалів зливаються, щоб не подвоювати час.  \n\nПропозиції надсилати @olbalakin в телеграм\n\n**Ковзні 7 днів.** Кожна точка охоплює 7 завершених календарних днів і датована останнім днем вікна. Сусідні точки перекриваються на 6 днів, тому їх слід читати як rolling-ряд, а не як незалежні календарні тижні. Вікно, що включає неповний стартовий день city-level покриття, відкидається. Для Харкова і Запоріжжя rolling-ряд наразі обрізано до 2026-09-07 за датою останнього оновлення upstream-джерела.\n\n**Загиблі від повітряних атак.** Ряд побудований на публічно доступних повідомленнях офіційних органів і медіа. Незалежних інструментів для повної верифікації кожного випадку немає, тому ці дані слід трактувати як реконструкцію на основі доступних відкритих джерел. Для 2025 року використовується подієва реконструкція 166 смертей; КМВА повідомляла річний накопичувальний підсумок 171, але додаткові п’ять смертей не вдалося надійно прив’язати до конкретних атак у публічних джерелах."
+        "content": "**Джерела.** Київ: [Портал відкритих даних Києва](https://data.kyivcity.gov.ua/dataset/statystyka-povitrianykh-tryvoh-u-misti-kyievi-dep-municipal/resource/5e4fb8a8-f0c8-4a12-885f-192d1f0dba75/data/download) + [Kyiv Digital — live-історія](https://kyiv.digital/storage/air-alert/stats.html) як fallback для свіжих завершених подій.  \nХарків і Запоріжжя: [official_data_uk.csv](https://raw.githubusercontent.com/Vadimkin/ukrainian-air-raid-sirens-dataset/main/datasets/official_data_uk.csv) — використовуються тільки записи рівня `hromada` для відповідної міської громади, починаючи з валідованого періоду окремих міських тривог.  \n\n**Початок city-level рядів:** Київ — 2022-02-28; Харків — 2025-02-17; Запоріжжя — 2025-03-19. Обласні дані та ретроспективно розмічені ранні записи не використовуються для заповнення попередніх періодів.  \n\nПоточний календарний день завжди виключено. Перший неповний місяць кожного city-level ряду не включається до місячних агрегатів. Тривоги через північ розподіляються між календарними добами в часовому поясі Europe/Kyiv; перекриття інтервалів зливаються, щоб не подвоювати час.  \n\nПропозиції надсилати @olbalakin в телеграм\n\n**Ковзні 7 днів.** Кожна точка охоплює 7 завершених календарних днів і датована останнім днем вікна. Сусідні точки перекриваються на 6 днів, тому їх слід читати як rolling-ряд, а не як незалежні календарні тижні. Вікно, що включає неповний стартовий день city-level покриття, відкидається.\n\n**Загиблі від повітряних атак.** Ряд побудований на публічно доступних повідомленнях офіційних органів і медіа. Незалежних інструментів для повної верифікації кожного випадку немає, тому ці дані слід трактувати як реконструкцію на основі доступних відкритих джерел. Для 2025 року використовується подієва реконструкція 166 смертей; КМВА повідомляла річний накопичувальний підсумок 171, але додаткові п’ять смертей не вдалося надійно прив’язати до конкретних атак у публічних джерелах."
       }
     }
   ],
