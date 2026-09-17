@@ -1,4 +1,4 @@
-name: Update and deploy Ukraine air-alert site
+name: Update Ukraine air-alert production data
 
 on:
   schedule:
@@ -134,32 +134,3 @@ jobs:
               sleep $((attempt * 2))
             done
           fi
-
-      - name: Build static production site
-        working-directory: .
-        run: |
-          rm -rf _site
-          mkdir -p _site
-          cp kyiv-air-alerts-grafana/pages-preview/index.html _site/index.html
-          cp kyiv-air-alerts-grafana/pages-preview/styles.css _site/styles.css
-          cp kyiv-air-alerts-grafana/pages-preview/app.js _site/app.js
-          cp kyiv-air-alerts-grafana/data/dashboard_data.json _site/data.json
-
-      - name: Deploy production to Netlify
-        working-directory: .
-        env:
-          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
-        run: |
-          test -n "$NETLIFY_AUTH_TOKEN"
-          npx -y netlify-cli@latest deploy \
-            --prod \
-            --dir=_site \
-            --site=b5aafc46-7468-4070-baf1-db80a4d30501 \
-            --auth="$NETLIFY_AUTH_TOKEN" \
-            --json | tee netlify-production-deploy.json
-
-      - name: Upload deploy metadata
-        uses: actions/upload-artifact@v4
-        with:
-          name: netlify-production-update
-          path: netlify-production-deploy.json
