@@ -171,7 +171,14 @@
 
       <p><strong>Що саме показує сайт.</strong> Тут 23 ряди. Для Києва, Харкова, Запоріжжя та Севастополя є окремі міські ряди. Для інших 19 обласних центрів використовується однойменний район — це районний proxy, а не точний ряд лише для міста. У таких випадках район вказаний у назві в дужках.</p>
 
-      <p><strong>Звідки беруться дані.</strong> Для Києва використовуються міські відкриті дані, а для найсвіжіших подій — Kyiv Digital. Історична основа більшості інших рядів — набір <code>ukrainian-air-raid-sirens-dataset</code>. Розрив у вересні 2026 року закритий даними Alerts.in.ua, а далі ряд продовжується через UkraineAlarm API. Севастополь має окремий міський ряд зі свого спеціального джерела, що зазначене в назві ряду.</p>
+      <p><strong>Основні джерела даних.</strong></p>
+      <ul class="methodology-metrics">
+        <li><strong>Київ:</strong> <a href="https://data.kyivcity.gov.ua/dataset/statystyka-povitrianykh-tryvoh-u-misti-kyievi-dep-municipal/" target="_blank" rel="noopener noreferrer">Портал відкритих даних Києва</a>; для найсвіжіших подій — <a href="https://kyiv.digital/storage/air-alert/stats.html" target="_blank" rel="noopener noreferrer">Kyiv Digital</a>.</li>
+        <li><strong>Харків, Запоріжжя та районні proxy:</strong> історична база — <a href="https://github.com/Vadimkin/ukrainian-air-raid-sirens-dataset" target="_blank" rel="noopener noreferrer">ukrainian-air-raid-sirens-dataset</a>; актуальне продовження — <a href="https://api.ukrainealarm.com/api/v3" target="_blank" rel="noopener noreferrer">UkraineAlarm API</a>.</li>
+        <li><strong>Севастополь:</strong> публічні повідомлення Telegram-каналу окупаційної адміністрації <a href="https://t.me/s/razvozhaev" target="_blank" rel="noopener noreferrer">@razvozhaev</a>. Цей ряд на сайті окремо маркований.</li>
+        <li><strong>Загиблі в Києві:</strong> історична серія реконструйована за публічними повідомленнями. Для моніторингу нових повідомлень використовуються <a href="https://suspilne.media/kyiv/" target="_blank" rel="noopener noreferrer">Суспільне Київ</a>, <a href="https://hromadske.ua/kyyiv" target="_blank" rel="noopener noreferrer">hromadske Київ</a> та <a href="https://www.pravda.com.ua/" target="_blank" rel="noopener noreferrer">Українська правда</a>.</li>
+      </ul>
+      <p class="muted">Допоміжні джерела, які використовувалися лише для закриття коротких технічних розривів або перевірки стику, тут не перелічені.</p>
 
       <p><strong>З якої дати починаються районні proxy.</strong> Для 12 міст дата старту взята з публічно задокументованого переходу на районне оповіщення. Для ще 7 міст — з моменту, коли в історичних даних з’являється стабільний районний ряд; його стикування з новішими джерелами окремо перевірене по конкретних подіях.</p>
 
@@ -225,7 +232,7 @@
 
       <p><strong>Що поки не включено.</strong> Донецьк і Луганськ не показуються: для них потрібна окрема методологія побудови ряду.</p>
 
-      <p class="muted"><strong>Технічна примітка про стик джерел.</strong> При перевірці, що одна й та сама подія збігається між Alerts.in.ua та UkraineAlarm API, допускається різниця timestamp до 15 секунд. Це лише допуск для валідації: самі часи подій не пересуваються і не округлюються.</p>
+      <p class="muted"><strong>Технічна примітка про стик джерел.</strong> Для перевірки безперервності ряду між сусідніми джерелами одна й та сама подія може вважатися збігом, якщо timestamp відрізняється не більш ніж на 15 секунд. Це лише допуск для валідації: самі часи подій не пересуваються і не округлюються.</p>
       <p id="methodologyDynamic" class="hidden"></p>
     </section>
   </main>
