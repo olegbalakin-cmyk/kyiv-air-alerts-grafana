@@ -4,23 +4,28 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="color-scheme" content="dark">
+  <meta name="description" content="Історія повітряних тривог у містах України: exact-city ряди та явно позначені районні proxy, порівняння міст і відкриті дані.">
   <title>Повітряні тривоги — міста України</title>
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
   <header class="page-header">
-    <div>
-      <div class="eyebrow">GitHub Pages preview</div>
-      <h1>Повітряні тривоги — міста України</h1>
-      <p class="subtitle">Експериментальна multicity-версія. Exact-city та районні proxy позначені окремо.</p>
+    <div class="header-copy">
+      <div class="eyebrow">Відкриті дані · міста України</div>
+      <h1>Повітряні тривоги</h1>
+      <p class="subtitle">Історичні ряди для обласних центрів. Exact-city дані та районні proxy завжди позначені окремо.</p>
+      <div id="datasetSummary" class="dataset-summary"></div>
     </div>
-    <div id="updatedAt" class="updated-at"></div>
+    <div class="header-actions">
+      <div id="updatedAt" class="updated-at"></div>
+      <button id="copyLink" class="ghost-button" type="button">Скопіювати посилання</button>
+    </div>
   </header>
 
   <main>
     <div id="freshnessBanner" class="banner hidden"></div>
 
-    <section class="panel controls-panel">
+    <section class="panel controls-panel" aria-label="Вибір міста і періоду">
       <div class="control grow">
         <label for="citySelect">Місто</label>
         <select id="citySelect"></select>
@@ -54,6 +59,11 @@
         <span class="kpi-label">Середня тривалість тривоги</span>
         <strong id="kpiDuration">—</strong>
       </article>
+      <article class="kpi-card">
+        <span class="kpi-label">Найбільше тривог за день у цьому 28-денному вікні</span>
+        <strong id="kpiMaxDay">—</strong>
+        <small id="kpiMaxDayDate"></small>
+      </article>
     </section>
 
     <section class="chart-grid">
@@ -71,12 +81,26 @@
       </article>
     </section>
 
+    <section id="casualtySection" class="comparison-section hidden">
+      <div class="section-heading">
+        <div>
+          <div class="eyebrow">Київ</div>
+          <h2>Загиблі від повітряних атак РФ</h2>
+          <p>Пізні смерті від поранень віднесені до місяця самої атаки. Наземні бої та артилерійські обстріли не включені.</p>
+        </div>
+      </div>
+      <article class="panel chart-card wide">
+        <div class="chart-wrap casualty-chart"><canvas id="casualtyChart"></canvas></div>
+      </article>
+      <p class="source-note">Це реконструкція за публічно доступними повідомленнями офіційних органів і медіа; вона не є повним реєстром усіх жертв.</p>
+    </section>
+
     <section class="comparison-section">
       <div class="section-heading">
         <div>
           <div class="eyebrow">Порівняння</div>
           <h2>Порівняння обраних міст</h2>
-          <p>Графіки використовують лише календарні періоди, наявні одночасно у всіх вибраних рядах.</p>
+          <p>Для коректності графіки показують лише календарні періоди, які одночасно є в усіх трьох вибраних рядах.</p>
         </div>
       </div>
 
@@ -120,16 +144,38 @@
       </section>
     </section>
 
+    <section class="comparison-section">
+      <div class="section-heading">
+        <div>
+          <div class="eyebrow">Останні 28 днів</div>
+          <h2>Усі міста</h2>
+          <p>Швидкий огляд поточного 28-денного вікна. Proxy-ряди не слід напряму трактувати як точний показник лише для міста.</p>
+        </div>
+      </div>
+      <div class="panel table-panel">
+        <div class="table-scroll">
+          <table>
+            <thead>
+              <tr><th>Місто / ряд</th><th>Тип</th><th>Тривог</th><th>Годин</th><th>Сер. тривалість</th><th>Покриття</th></tr>
+            </thead>
+            <tbody id="allCitiesTable"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
     <section class="panel methodology">
+      <div class="eyebrow">Методологія</div>
       <h2>Як читати дані</h2>
-      <p><strong>Exact-city</strong> — ряд для самого міста/міської громади. <strong>Районний proxy</strong> — ряд відповідного району після валідованої дати переходу; він може завищувати тривалість для самого міста.</p>
-      <p>Поточний день не включається у завершені агрегати. Перший неповний місяць і тиждень після початку покриття також не використовуються у довгих рядах.</p>
-      <p class="muted">Це preview WIP-гілки. Триміський production dashboard у main не змінюється.</p>
+      <p><strong>Exact-city</strong> — ряд для самого міста або міської громади. <strong>Районний proxy</strong> — ряд однойменного району після визначеної дати початку покриття; він може відрізнятися від фактичного часу тривоги безпосередньо в місті.</p>
+      <p>Поточний календарний день не включається у завершені агрегати. Перший неповний місяць і тиждень після початку покриття також вилучаються з довгих рядів. Для стику різних джерел допускається технічна різниця timestamp до <strong>15 секунд</strong>; самі часи подій при цьому не змінюються.</p>
+      <p id="methodologyDynamic" class="muted"></p>
     </section>
   </main>
 
   <footer>
-    Дані та код: <a href="https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana">GitHub</a>
+    <span>Дані та код: <a href="https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana">GitHub</a></span>
+    <span>Зауваження до даних: @olbalakin у Telegram</span>
   </footer>
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
