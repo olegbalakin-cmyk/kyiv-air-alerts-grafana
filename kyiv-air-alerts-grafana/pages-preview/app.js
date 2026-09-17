@@ -153,8 +153,66 @@ function renderCity() {
   const rows = city[period] || [];
   const labels = rows.map(r => rowTime(r, period));
   const dashed = type === "raion_proxy";
-  setChart("cityAlertsChart", labels, [seriesDataset(labelFor(key), rows.map(r => r.alerts_per_day), COLORS[0], dashed)], "Тривог/день");
-  setChart("cityHoursChart", labels, [seriesDataset(labelFor(key), rows.map(r => r.avg_daily_alert_hours), COLORS[1], dashed)], "Годин/добу");
+
+  if (state.charts.cityIntensityChart) state.charts.cityIntensityChart.destroy();
+  state.charts.cityIntensityChart = new Chart($("cityIntensityChart"), {
+    data: {
+      labels,
+      datasets: [
+        {
+          type: "bar",
+          label: "Годин під тривогою / добу",
+          data: rows.map(r => r.avg_daily_alert_hours),
+          yAxisID: "yHours",
+          backgroundColor: COLORS[0] + "77",
+          borderColor: COLORS[0],
+          borderWidth: 1
+        },
+        {
+          type: "line",
+          label: "Тривог / день",
+          data: rows.map(r => r.alerts_per_day),
+          yAxisID: "yAlerts",
+          borderColor: COLORS[1],
+          backgroundColor: COLORS[1] + "22",
+          pointRadius: 2,
+          pointHoverRadius: 4,
+          borderWidth: 2,
+          borderDash: dashed ? [7, 5] : [],
+          tension: 0.12,
+          spanGaps: true
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      animation: false,
+      interaction: { mode: "index", intersect: false },
+      plugins: {
+        legend: { labels: { color: TEXT, boxWidth: 14, usePointStyle: true } },
+        tooltip: { mode: "index", intersect: false }
+      },
+      scales: {
+        x: { ticks: { color: TEXT, maxRotation: 0, autoSkip: true }, grid: { color: GRID } },
+        yHours: {
+          position: "left",
+          beginAtZero: true,
+          ticks: { color: TEXT },
+          grid: { color: GRID },
+          title: { display: true, text: "Годин / добу", color: TEXT }
+        },
+        yAlerts: {
+          position: "right",
+          beginAtZero: true,
+          ticks: { color: TEXT },
+          grid: { drawOnChartArea: false },
+          title: { display: true, text: "Тривог / день", color: TEXT }
+        }
+      }
+    }
+  });
+
   setChart("cityDurationChart", labels, [seriesDataset(labelFor(key), rows.map(r => r.avg_alert_duration_min), COLORS[2], dashed)], "Хвилин");
 
   renderCasualties(key);
@@ -223,13 +281,12 @@ function renderComparison() {
 function renderAllCitiesTable() {
   const rows = cityKeys().map(key => {
     const kpi = state.data.cities[key]?.kpis?.[0] || {};
-    return { key, label: labelFor(key), type: typeText(key), alerts: kpi.alerts_28d, hours: kpi.alert_hours_28d, duration: kpi.avg_alert_duration_min_28d, coverage: coverageStart(key) };
+    return { key, label: labelFor(key), alerts: kpi.alerts_28d, hours: kpi.alert_hours_28d, duration: kpi.avg_alert_duration_min_28d, coverage: coverageStart(key) };
   });
   rows.sort((a, b) => (Number(b.alerts) || -1) - (Number(a.alerts) || -1));
   $("allCitiesTable").innerHTML = rows.map(r => `
     <tr>
       <td><button class="table-city-link" data-city="${r.key}" type="button">${r.label}</button></td>
-      <td class="type-cell">${r.type}</td>
       <td>${fmt(r.alerts, 0)}</td>
       <td>${fmt(r.hours, 1)}</td>
       <td>${fmt(r.duration, 1)} хв</td>
