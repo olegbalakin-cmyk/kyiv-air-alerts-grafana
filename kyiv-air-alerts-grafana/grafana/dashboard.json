@@ -33,22 +33,6 @@
   "links": [],
   "panels": [
     {
-      "id": 99001,
-      "type": "text",
-      "title": "Стан джерела районних даних",
-      "gridPos": {
-        "h": 2,
-        "w": 24,
-        "x": 0,
-        "y": 0
-      },
-      "options": {
-        "mode": "markdown",
-        "content": "⚠️ **Районні дані можуть бути неповними біля правого краю графіків.** Файл upstream востаннє оновлено **2026-09-08** (≈ 209 год тому). Останній завершений proxy-event у завантаженому CSV: **2026-09-07**. Не інтерпретуйте нулі після цієї дати як гарантовану відсутність тривог."
-      },
-      "transparent": false
-    },
-    {
       "id": 1,
       "type": "stat",
       "title": "${city:text}: тривог за останні 28 завершених днів",
@@ -56,7 +40,7 @@
         "h": 4,
         "w": 8,
         "x": 0,
-        "y": 2
+        "y": 0
       },
       "datasource": {
         "type": "yesoreyeram-infinity-datasource",
@@ -84,7 +68,7 @@
           "root_selector": "$.cities.${city}.kpis",
           "source": "url",
           "type": "json",
-          "url": "https://raw.githubusercontent.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/main/kyiv-air-alerts-grafana/data/dashboard_data.json",
+          "url": "https://raw.githubusercontent.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/site-prod/kyiv-air-alerts-grafana/data/dashboard_data.json",
           "url_options": {
             "data": "",
             "method": "GET"
@@ -133,7 +117,7 @@
         "h": 4,
         "w": 8,
         "x": 8,
-        "y": 2
+        "y": 0
       },
       "datasource": {
         "type": "yesoreyeram-infinity-datasource",
@@ -161,7 +145,7 @@
           "root_selector": "$.cities.${city}.kpis.{\"value\": \"${duration_unit}\" = \"minutes\" ? alert_hours_28d * 60 : alert_hours_28d}",
           "source": "url",
           "type": "json",
-          "url": "https://raw.githubusercontent.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/main/kyiv-air-alerts-grafana/data/dashboard_data.json",
+          "url": "https://raw.githubusercontent.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/site-prod/kyiv-air-alerts-grafana/data/dashboard_data.json",
           "url_options": {
             "data": "",
             "method": "GET"
@@ -210,7 +194,7 @@
         "h": 4,
         "w": 8,
         "x": 16,
-        "y": 2
+        "y": 0
       },
       "datasource": {
         "type": "yesoreyeram-infinity-datasource",
@@ -238,7 +222,7 @@
           "root_selector": "$.cities.${city}.kpis.{\"value\": \"${duration_unit}\" = \"hours\" ? avg_alert_duration_min_28d / 60 : avg_alert_duration_min_28d}",
           "source": "url",
           "type": "json",
-          "url": "https://raw.githubusercontent.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/main/kyiv-air-alerts-grafana/data/dashboard_data.json",
+          "url": "https://raw.githubusercontent.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/site-prod/kyiv-air-alerts-grafana/data/dashboard_data.json",
           "url_options": {
             "data": "",
             "method": "GET"
@@ -288,7 +272,7 @@
         "h": 9,
         "w": 24,
         "x": 0,
-        "y": 6
+        "y": 4
       },
       "datasource": {
         "type": "yesoreyeram-infinity-datasource",
@@ -322,7 +306,7 @@
           "root_selector": "$.cities.${city}.monthly",
           "source": "url",
           "type": "json",
-          "url": "https://raw.githubusercontent.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/main/kyiv-air-alerts-grafana/data/dashboard_data.json",
+          "url": "https://raw.githubusercontent.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/site-prod/kyiv-air-alerts-grafana/data/dashboard_data.json",
           "url_options": {
             "data": "",
             "method": "GET"
@@ -425,7 +409,7 @@
         "h": 9,
         "w": 24,
         "x": 0,
-        "y": 15
+        "y": 13
       },
       "datasource": {
         "type": "yesoreyeram-infinity-datasource",
@@ -459,7 +443,7 @@
           "root_selector": "$.cities.${city}.weekly",
           "source": "url",
           "type": "json",
-          "url": "https://raw.githubusercontent.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/main/kyiv-air-alerts-grafana/data/dashboard_data.json",
+          "url": "https://raw.githubusercontent.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/site-prod/kyiv-air-alerts-grafana/data/dashboard_data.json",
           "url_options": {
             "data": "",
             "method": "GET"
@@ -562,7 +546,7 @@
         "h": 9,
         "w": 24,
         "x": 0,
-        "y": 24
+        "y": 22
       },
       "datasource": {
         "type": "yesoreyeram-infinity-datasource",
@@ -596,7 +580,7 @@
           "root_selector": "$.cities.${city}.monthly.{\"time\": time, \"value\": \"${duration_unit}\" = \"minutes\" ? avg_daily_alert_hours * 60 : avg_daily_alert_hours}",
           "source": "url",
           "type": "json",
-          "url": "https://raw.githubusercontent.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/main/kyiv-air-alerts-grafana/data/dashboard_data.json",
+          "url": "https://raw.githubusercontent.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/site-prod/kyiv-air-alerts-grafana/data/dashboard_data.json",
           "url_options": {
             "data": "",
             "method": "GET"
@@ -699,7 +683,7 @@
         "h": 9,
         "w": 24,
         "x": 0,
-        "y": 33
+        "y": 31
       },
       "datasource": {
         "type": "yesoreyeram-infinity-datasource",
@@ -733,7 +717,7 @@
           "root_selector": "$.cities.${city}.monthly.{\"time\": time, \"value\": \"${duration_unit}\" = \"hours\" ? avg_alert_duration_min / 60 : avg_alert_duration_min}",
           "source": "url",
           "type": "json",
-          "url": "https://raw.githubusercontent.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/main/kyiv-air-alerts-grafana/data/dashboard_data.json",
+          "url": "https://raw.githubusercontent.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/site-prod/kyiv-air-alerts-grafana/data/dashboard_data.json",
           "url_options": {
             "data": "",
             "method": "GET"
@@ -836,7 +820,7 @@
         "h": 9,
         "w": 24,
         "x": 0,
-        "y": 42
+        "y": 40
       },
       "datasource": {
         "type": "yesoreyeram-infinity-datasource",
@@ -870,7 +854,7 @@
           "root_selector": "$.cities.${city}.weekly.{\"time\": time, \"value\": \"${duration_unit}\" = \"minutes\" ? avg_daily_alert_hours * 60 : avg_daily_alert_hours}",
           "source": "url",
           "type": "json",
-          "url": "https://raw.githubusercontent.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/main/kyiv-air-alerts-grafana/data/dashboard_data.json",
+          "url": "https://raw.githubusercontent.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/site-prod/kyiv-air-alerts-grafana/data/dashboard_data.json",
           "url_options": {
             "data": "",
             "method": "GET"
@@ -973,7 +957,7 @@
         "h": 9,
         "w": 24,
         "x": 0,
-        "y": 51
+        "y": 49
       },
       "datasource": {
         "type": "yesoreyeram-infinity-datasource",
@@ -1007,7 +991,7 @@
           "root_selector": "$.cities.${city}.weekly.{\"time\": time, \"value\": \"${duration_unit}\" = \"hours\" ? avg_alert_duration_min / 60 : avg_alert_duration_min}",
           "source": "url",
           "type": "json",
-          "url": "https://raw.githubusercontent.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/main/kyiv-air-alerts-grafana/data/dashboard_data.json",
+          "url": "https://raw.githubusercontent.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/site-prod/kyiv-air-alerts-grafana/data/dashboard_data.json",
           "url_options": {
             "data": "",
             "method": "GET"
@@ -1110,7 +1094,7 @@
         "h": 9,
         "w": 24,
         "x": 0,
-        "y": 60
+        "y": 58
       },
       "datasource": {
         "type": "yesoreyeram-infinity-datasource",
@@ -1144,7 +1128,7 @@
           "root_selector": "$.cities.${city}.daily28.{\"time\": time, \"value\": \"${duration_unit}\" = \"minutes\" ? total_alert_duration_minutes : total_alert_duration_hours}",
           "source": "url",
           "type": "json",
-          "url": "https://raw.githubusercontent.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/main/kyiv-air-alerts-grafana/data/dashboard_data.json",
+          "url": "https://raw.githubusercontent.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/site-prod/kyiv-air-alerts-grafana/data/dashboard_data.json",
           "url_options": {
             "data": "",
             "method": "GET"
@@ -1248,7 +1232,7 @@
         "h": 10,
         "w": 24,
         "x": 0,
-        "y": 69
+        "y": 67
       },
       "datasource": {
         "type": "yesoreyeram-infinity-datasource",
@@ -1288,7 +1272,7 @@
           "root_selector": "$.cities.${city}.daily28.{\"time\": time, \"alerts_started\": alerts_started, \"avg_duration\": \"${duration_unit}\" = \"hours\" ? avg_alert_duration_minutes / 60 : avg_alert_duration_minutes}",
           "source": "url",
           "type": "json",
-          "url": "https://raw.githubusercontent.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/main/kyiv-air-alerts-grafana/data/dashboard_data.json",
+          "url": "https://raw.githubusercontent.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/site-prod/kyiv-air-alerts-grafana/data/dashboard_data.json",
           "url_options": {
             "data": "",
             "method": "GET"
@@ -1459,7 +1443,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 79
+        "y": 77
       }
     },
     {
@@ -1471,7 +1455,7 @@
         "h": 9,
         "w": 24,
         "x": 0,
-        "y": 80
+        "y": 78
       },
       "datasource": {
         "type": "yesoreyeram-infinity-datasource",
@@ -1515,7 +1499,7 @@
           "root_selector": "$.comparison.${comparison_period}.{\"time\": time, \"city_a\": $lookup($, \"${compare_city_a}_alerts_per_day\"), \"city_b\": $lookup($, \"${compare_city_b}_alerts_per_day\"), \"city_c\": $lookup($, \"${compare_city_c}_alerts_per_day\")}",
           "source": "url",
           "type": "json",
-          "url": "https://raw.githubusercontent.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/main/kyiv-air-alerts-grafana/data/dashboard_data.json",
+          "url": "https://raw.githubusercontent.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/site-prod/kyiv-air-alerts-grafana/data/dashboard_data.json",
           "url_options": {
             "data": "",
             "method": "GET"
@@ -1659,7 +1643,7 @@
         "h": 9,
         "w": 24,
         "x": 0,
-        "y": 89
+        "y": 87
       },
       "datasource": {
         "type": "yesoreyeram-infinity-datasource",
@@ -1703,7 +1687,7 @@
           "root_selector": "$.comparison.${comparison_period}.{\"time\": time, \"city_a\": \"${duration_unit}\" = \"minutes\" ? $lookup($, \"${compare_city_a}_avg_daily_alert_hours\") * 60 : $lookup($, \"${compare_city_a}_avg_daily_alert_hours\"), \"city_b\": \"${duration_unit}\" = \"minutes\" ? $lookup($, \"${compare_city_b}_avg_daily_alert_hours\") * 60 : $lookup($, \"${compare_city_b}_avg_daily_alert_hours\"), \"city_c\": \"${duration_unit}\" = \"minutes\" ? $lookup($, \"${compare_city_c}_avg_daily_alert_hours\") * 60 : $lookup($, \"${compare_city_c}_avg_daily_alert_hours\")}",
           "source": "url",
           "type": "json",
-          "url": "https://raw.githubusercontent.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/main/kyiv-air-alerts-grafana/data/dashboard_data.json",
+          "url": "https://raw.githubusercontent.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/site-prod/kyiv-air-alerts-grafana/data/dashboard_data.json",
           "url_options": {
             "data": "",
             "method": "GET"
@@ -1847,7 +1831,7 @@
         "h": 9,
         "w": 24,
         "x": 0,
-        "y": 98
+        "y": 96
       },
       "datasource": {
         "type": "yesoreyeram-infinity-datasource",
@@ -1891,7 +1875,7 @@
           "root_selector": "$.comparison.${comparison_period}.{\"time\": time, \"city_a\": \"${duration_unit}\" = \"hours\" ? $lookup($, \"${compare_city_a}_avg_alert_duration_min\") / 60 : $lookup($, \"${compare_city_a}_avg_alert_duration_min\"), \"city_b\": \"${duration_unit}\" = \"hours\" ? $lookup($, \"${compare_city_b}_avg_alert_duration_min\") / 60 : $lookup($, \"${compare_city_b}_avg_alert_duration_min\"), \"city_c\": \"${duration_unit}\" = \"hours\" ? $lookup($, \"${compare_city_c}_avg_alert_duration_min\") / 60 : $lookup($, \"${compare_city_c}_avg_alert_duration_min\")}",
           "source": "url",
           "type": "json",
-          "url": "https://raw.githubusercontent.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/main/kyiv-air-alerts-grafana/data/dashboard_data.json",
+          "url": "https://raw.githubusercontent.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/site-prod/kyiv-air-alerts-grafana/data/dashboard_data.json",
           "url_options": {
             "data": "",
             "method": "GET"
@@ -2036,7 +2020,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 107
+        "y": 105
       }
     },
     {
@@ -2048,7 +2032,7 @@
         "h": 10,
         "w": 24,
         "x": 0,
-        "y": 108
+        "y": 106
       },
       "datasource": {
         "type": "yesoreyeram-infinity-datasource",
@@ -2087,7 +2071,7 @@
           "root_selector": "$.casualties.monthly",
           "source": "url",
           "type": "json",
-          "url": "https://raw.githubusercontent.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/main/kyiv-air-alerts-grafana/data/dashboard_data.json",
+          "url": "https://raw.githubusercontent.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/site-prod/kyiv-air-alerts-grafana/data/dashboard_data.json",
           "url_options": {
             "data": "",
             "method": "GET"
@@ -2182,11 +2166,11 @@
         "h": 6,
         "w": 24,
         "x": 0,
-        "y": 118
+        "y": 116
       },
       "options": {
         "mode": "markdown",
-        "content": "**Географія та джерела.** Київ використовує міські відкриті дані та Kyiv Digital fallback. Харків і Запоріжжя використовують exact-city записи рівня `hromada` з [official_data_uk.csv](https://raw.githubusercontent.com/Vadimkin/ukrainian-air-raid-sirens-dataset/main/datasets/official_data_uk.csv).  \n\nДля решти показаних облцентрів використовується **районний proxy**: після валідованої дати переходу ряд дорівнює union сигналів відповідного району та explicit `oblast` сигналів. У 2026 році explicit `oblast` записи в цьому джерелі фактично не додають часу, тому ряд дорівнює районному. До coverage-start дані не backfill-яться старими обласними тривогами.  \n\n- **Черкаси**: `Черкаський район`; coverage з 2025-01-10.\n- **Житомир**: `Житомирський район`; coverage з 2025-01-23.\n- **Дніпро**: `Дніпровський район`; coverage з 2025-05-01.\n- **Хмельницький**: `Хмельницький район`; coverage з 2025-07-07.\n- **Полтава**: `Полтавський район`; coverage з 2025-08-01.\n- **Рівне**: `Рівненський район`; coverage з 2025-08-01.\n- **Суми**: `Сумський район`; coverage з 2025-08-06.\n- **Вінниця**: `Вінницький район`; coverage з 2025-08-21.\n- **Кропивницький**: `Кропивницький район`; coverage з 2025-09-01.\n- **Львів**: `Львівський район`; coverage з 2025-09-01.\n- **Чернігів**: `Чернігівський район`; coverage з 2025-09-03.\n- **Одеса**: `Одеський район`; coverage з 2025-11-04.  \n\n**Відкладені міста.** Миколаїв і Тернопіль не включені через несумісну географію сигналів; Донецьк і Луганськ потребують окремої методології. Херсон, Луцьк, Ужгород, Івано-Франківськ і Чернівці поки не включені до production, оскільки стабільний районний ряд є, але точну дату rollout ще не підтверджено зовнішнім офіційним джерелом.  \n\n**Агрегація.** Поточний календарний день виключено. Для proxy перекривні районні та обласні інтервали зливаються в єдині alert episodes до підрахунку і тривалості, і кількості тривог. Перший неповний місяць та тиждень після coverage-start виключаються. Тривоги через північ розподіляються між календарними добами в Europe/Kyiv. Порівняння міст використовує лише спільні повні календарні періоди.  \n\nПропозиції надсилати @olbalakin в телеграм\n\n**Севастополь.** Ряд є exact-city і починається 25.09.2023. Джерело — city-level сигнали, опубліковані окупаційною адміністрацією Севастополя. Використовуються повні пари «тривога → відбій»; неповні епізоди не інтерполюються. Якщо одна сторона пари відсутня в Telegram, допускається лише окрема документована correction з прямим зовнішнім підтвердженням часу. Позначення джерела описує лише походження даних і не означає визнання окупаційної адміністрації.\n\n**Загиблі від повітряних атак.** Ряд побудований на публічно доступних повідомленнях офіційних органів і медіа. Незалежних інструментів для повної верифікації кожного випадку немає, тому ці дані слід трактувати як реконструкцію на основі доступних відкритих джерел. Для 2025 року використовується подієва реконструкція 166 смертей; КМВА повідомляла річний накопичувальний підсумок 171, але додаткові п’ять смертей не вдалося надійно прив’язати до конкретних атак у публічних джерелах.\n\n**Як користуватися dashboard.** У верхньому перемикачі **«Місто»** обирається один ряд, який показується в усіх основних панелях. Для порівняння використовуються три окремі перемикачі **A/B/C**, тому одночасно на графіку є не більше трьох міст. Назва з районом у дужках означає районний proxy, а не exact-city.\n\n**Freshness upstream.** ⚠️ **Районні дані можуть бути неповними біля правого краю графіків.** Файл upstream востаннє оновлено **2026-09-08** (≈ 209 год тому). Останній завершений proxy-event у завантаженому CSV: **2026-09-07**. Не інтерпретуйте нулі після цієї дати як гарантовану відсутність тривог."
+        "content": "**Географія та джерела.** Київ використовує міські відкриті дані та Kyiv Digital fallback. Харків і Запоріжжя мають exact-city ряди. Решта показаних обласних центрів, окрім Севастополя, позначені як **районні proxy**: використовується однойменний район, а не exact-city ряд.  \n\n**Proxy з документованою датою районного rollout:**  \n- **Черкаси** -> `Черкаський район`; coverage з 2025-01-10.\n- **Житомир** -> `Житомирський район`; coverage з 2025-01-23.\n- **Дніпро** -> `Дніпровський район`; coverage з 2025-05-01.\n- **Хмельницький** -> `Хмельницький район`; coverage з 2025-07-07.\n- **Полтава** -> `Полтавський район`; coverage з 2025-08-01.\n- **Рівне** -> `Рівненський район`; coverage з 2025-08-01.\n- **Суми** -> `Сумський район`; coverage з 2025-08-06.\n- **Вінниця** -> `Вінницький район`; coverage з 2025-08-21.\n- **Кропивницький** -> `Кропивницький район`; coverage з 2025-09-01.\n- **Львів** -> `Львівський район`; coverage з 2025-09-01.\n- **Чернігів** -> `Чернігівський район`; coverage з 2025-09-03.\n- **Одеса** -> `Одеський район`; coverage з 2025-11-04.  \n\n**Додаткові proxy з source-observed стартом.** Для цих міст дата початку взята з появи стабільного районного ряду в historical source. Їхній перехід через розрив upstream окремо перевірено по конкретних подіях `Alerts.in.ua -> UkraineAlarm API` (допуск cross-source timestamp до 15 секунд):  \n- **Херсон** -> `Херсонський район`; coverage з 2025-08-30.\n- **Миколаїв** -> `Миколаївський район`; coverage з 2025-11-05.\n- **Луцьк** -> `Луцький район`; coverage з 2025-11-06.\n- **Ужгород** -> `Ужгородський район`; coverage з 2025-11-06.\n- **Івано-Франківськ** -> `Івано-Франківський район`; coverage з 2025-11-06.\n- **Тернопіль** -> `Тернопільський район`; coverage з 2025-11-06.\n- **Чернівці** -> `Чернівецький район`; coverage з 2025-11-06.  \n\n**Донецьк і Луганськ** поки не показуються: для них потрібна окрема методологія, і область не підміняється містом.  \n\n**Агрегація.** Для proxy перекривні районні та explicit `oblast` інтервали historical source зливаються в єдині alert episodes. Перший неповний місяць і тиждень після coverage-start виключаються. Тривоги через північ розподіляються між календарними добами в Europe/Kyiv. Поточний календарний день не входить до завершених денних агрегатів. Порівняння міст використовує лише спільні повні періоди.  \n\nПропозиції надсилати @olbalakin в телеграм\n\n**Севастополь.** Ряд є exact-city і починається 25.09.2023. Джерело — city-level сигнали, опубліковані окупаційною адміністрацією Севастополя. Використовуються повні пари «тривога → відбій»; неповні епізоди не інтерполюються. Якщо одна сторона пари відсутня в Telegram, допускається лише окрема документована correction з прямим зовнішнім підтвердженням часу. Позначення джерела описує лише походження даних і не означає визнання окупаційної адміністрації.\n\n**Загиблі від повітряних атак.** Ряд побудований на публічно доступних повідомленнях офіційних органів і медіа. Незалежних інструментів для повної верифікації кожного випадку немає, тому ці дані слід трактувати як реконструкцію на основі доступних відкритих джерел. Для 2025 року використовується подієва реконструкція 166 смертей; КМВА повідомляла річний накопичувальний підсумок 171, але додаткові п’ять смертей не вдалося надійно прив’язати до конкретних атак у публічних джерелах.\n\n**Як користуватися dashboard.** У верхньому перемикачі **«Місто»** обирається один ряд, який показується в усіх основних панелях. Для порівняння використовуються три окремі перемикачі **A/B/C**, тому одночасно на графіку є не більше трьох міст. Назва з районом у дужках означає районний proxy, а не exact-city.\n\n**Freshness джерел.** Vadimkin `official_data_uk.csv` зараз stale, але всі ряди, що від нього залежали, дочитуються з **офіційного UkraineAlarm API**. Безперервність від frozen upstream перевірена для всіх 21 рядів; останній успішний API fetch — 2026-09-17T22:26:37.827226+00:00 (≈ 0.0 год тому). Київ і Севастополь мають окремі незалежні джерела."
       }
     }
   ],
@@ -2203,7 +2187,7 @@
         "name": "city",
         "label": "Місто",
         "type": "custom",
-        "query": "Київ : kyiv, Харків : kharkiv, Запоріжжя : zaporizhzhia, Черкаси (Черкаський район) : cherkasy, Житомир (Житомирський район) : zhytomyr, Дніпро (Дніпровський район) : dnipro, Хмельницький (Хмельницький район) : khmelnytskyi, Полтава (Полтавський район) : poltava, Рівне (Рівненський район) : rivne, Суми (Сумський район) : sumy, Вінниця (Вінницький район) : vinnytsia, Кропивницький (Кропивницький район) : kropyvnytskyi, Львів (Львівський район) : lviv, Чернігів (Чернігівський район) : chernihiv, Одеса (Одеський район) : odesa, Севастополь (сигнали окупаційної адміністрації) : sevastopol",
+        "query": "Київ : kyiv, Харків : kharkiv, Запоріжжя : zaporizhzhia, Черкаси (Черкаський район) : cherkasy, Житомир (Житомирський район) : zhytomyr, Дніпро (Дніпровський район) : dnipro, Хмельницький (Хмельницький район) : khmelnytskyi, Полтава (Полтавський район) : poltava, Рівне (Рівненський район) : rivne, Суми (Сумський район) : sumy, Вінниця (Вінницький район) : vinnytsia, Кропивницький (Кропивницький район) : kropyvnytskyi, Львів (Львівський район) : lviv, Чернігів (Чернігівський район) : chernihiv, Одеса (Одеський район) : odesa, Херсон (Херсонський район) : kherson, Миколаїв (Миколаївський район) : mykolaiv, Луцьк (Луцький район) : lutsk, Ужгород (Ужгородський район) : uzhhorod, Івано-Франківськ (Івано-Франківський район) : ivano_frankivsk, Тернопіль (Тернопільський район) : ternopil, Чернівці (Чернівецький район) : chernivtsi, Севастополь (сигнали окупаційної адміністрації) : sevastopol",
         "current": {
           "selected": true,
           "text": "Київ",
@@ -2284,6 +2268,41 @@
             "selected": false,
             "text": "Одеса (Одеський район)",
             "value": "odesa"
+          },
+          {
+            "selected": false,
+            "text": "Херсон (Херсонський район)",
+            "value": "kherson"
+          },
+          {
+            "selected": false,
+            "text": "Миколаїв (Миколаївський район)",
+            "value": "mykolaiv"
+          },
+          {
+            "selected": false,
+            "text": "Луцьк (Луцький район)",
+            "value": "lutsk"
+          },
+          {
+            "selected": false,
+            "text": "Ужгород (Ужгородський район)",
+            "value": "uzhhorod"
+          },
+          {
+            "selected": false,
+            "text": "Івано-Франківськ (Івано-Франківський район)",
+            "value": "ivano_frankivsk"
+          },
+          {
+            "selected": false,
+            "text": "Тернопіль (Тернопільський район)",
+            "value": "ternopil"
+          },
+          {
+            "selected": false,
+            "text": "Чернівці (Чернівецький район)",
+            "value": "chernivtsi"
           },
           {
             "selected": false,
@@ -2300,7 +2319,7 @@
         "name": "compare_city_a",
         "label": "Порівняння A",
         "type": "custom",
-        "query": "Київ : kyiv, Харків : kharkiv, Запоріжжя : zaporizhzhia, Черкаси (Черкаський район) : cherkasy, Житомир (Житомирський район) : zhytomyr, Дніпро (Дніпровський район) : dnipro, Хмельницький (Хмельницький район) : khmelnytskyi, Полтава (Полтавський район) : poltava, Рівне (Рівненський район) : rivne, Суми (Сумський район) : sumy, Вінниця (Вінницький район) : vinnytsia, Кропивницький (Кропивницький район) : kropyvnytskyi, Львів (Львівський район) : lviv, Чернігів (Чернігівський район) : chernihiv, Одеса (Одеський район) : odesa, Севастополь (сигнали окупаційної адміністрації) : sevastopol",
+        "query": "Київ : kyiv, Харків : kharkiv, Запоріжжя : zaporizhzhia, Черкаси (Черкаський район) : cherkasy, Житомир (Житомирський район) : zhytomyr, Дніпро (Дніпровський район) : dnipro, Хмельницький (Хмельницький район) : khmelnytskyi, Полтава (Полтавський район) : poltava, Рівне (Рівненський район) : rivne, Суми (Сумський район) : sumy, Вінниця (Вінницький район) : vinnytsia, Кропивницький (Кропивницький район) : kropyvnytskyi, Львів (Львівський район) : lviv, Чернігів (Чернігівський район) : chernihiv, Одеса (Одеський район) : odesa, Херсон (Херсонський район) : kherson, Миколаїв (Миколаївський район) : mykolaiv, Луцьк (Луцький район) : lutsk, Ужгород (Ужгородський район) : uzhhorod, Івано-Франківськ (Івано-Франківський район) : ivano_frankivsk, Тернопіль (Тернопільський район) : ternopil, Чернівці (Чернівецький район) : chernivtsi, Севастополь (сигнали окупаційної адміністрації) : sevastopol",
         "current": {
           "selected": true,
           "text": "Київ",
@@ -2384,6 +2403,41 @@
           },
           {
             "selected": false,
+            "text": "Херсон (Херсонський район)",
+            "value": "kherson"
+          },
+          {
+            "selected": false,
+            "text": "Миколаїв (Миколаївський район)",
+            "value": "mykolaiv"
+          },
+          {
+            "selected": false,
+            "text": "Луцьк (Луцький район)",
+            "value": "lutsk"
+          },
+          {
+            "selected": false,
+            "text": "Ужгород (Ужгородський район)",
+            "value": "uzhhorod"
+          },
+          {
+            "selected": false,
+            "text": "Івано-Франківськ (Івано-Франківський район)",
+            "value": "ivano_frankivsk"
+          },
+          {
+            "selected": false,
+            "text": "Тернопіль (Тернопільський район)",
+            "value": "ternopil"
+          },
+          {
+            "selected": false,
+            "text": "Чернівці (Чернівецький район)",
+            "value": "chernivtsi"
+          },
+          {
+            "selected": false,
             "text": "Севастополь (сигнали окупаційної адміністрації)",
             "value": "sevastopol"
           }
@@ -2397,7 +2451,7 @@
         "name": "compare_city_b",
         "label": "Порівняння B",
         "type": "custom",
-        "query": "Київ : kyiv, Харків : kharkiv, Запоріжжя : zaporizhzhia, Черкаси (Черкаський район) : cherkasy, Житомир (Житомирський район) : zhytomyr, Дніпро (Дніпровський район) : dnipro, Хмельницький (Хмельницький район) : khmelnytskyi, Полтава (Полтавський район) : poltava, Рівне (Рівненський район) : rivne, Суми (Сумський район) : sumy, Вінниця (Вінницький район) : vinnytsia, Кропивницький (Кропивницький район) : kropyvnytskyi, Львів (Львівський район) : lviv, Чернігів (Чернігівський район) : chernihiv, Одеса (Одеський район) : odesa, Севастополь (сигнали окупаційної адміністрації) : sevastopol",
+        "query": "Київ : kyiv, Харків : kharkiv, Запоріжжя : zaporizhzhia, Черкаси (Черкаський район) : cherkasy, Житомир (Житомирський район) : zhytomyr, Дніпро (Дніпровський район) : dnipro, Хмельницький (Хмельницький район) : khmelnytskyi, Полтава (Полтавський район) : poltava, Рівне (Рівненський район) : rivne, Суми (Сумський район) : sumy, Вінниця (Вінницький район) : vinnytsia, Кропивницький (Кропивницький район) : kropyvnytskyi, Львів (Львівський район) : lviv, Чернігів (Чернігівський район) : chernihiv, Одеса (Одеський район) : odesa, Херсон (Херсонський район) : kherson, Миколаїв (Миколаївський район) : mykolaiv, Луцьк (Луцький район) : lutsk, Ужгород (Ужгородський район) : uzhhorod, Івано-Франківськ (Івано-Франківський район) : ivano_frankivsk, Тернопіль (Тернопільський район) : ternopil, Чернівці (Чернівецький район) : chernivtsi, Севастополь (сигнали окупаційної адміністрації) : sevastopol",
         "current": {
           "selected": true,
           "text": "Харків",
@@ -2481,6 +2535,41 @@
           },
           {
             "selected": false,
+            "text": "Херсон (Херсонський район)",
+            "value": "kherson"
+          },
+          {
+            "selected": false,
+            "text": "Миколаїв (Миколаївський район)",
+            "value": "mykolaiv"
+          },
+          {
+            "selected": false,
+            "text": "Луцьк (Луцький район)",
+            "value": "lutsk"
+          },
+          {
+            "selected": false,
+            "text": "Ужгород (Ужгородський район)",
+            "value": "uzhhorod"
+          },
+          {
+            "selected": false,
+            "text": "Івано-Франківськ (Івано-Франківський район)",
+            "value": "ivano_frankivsk"
+          },
+          {
+            "selected": false,
+            "text": "Тернопіль (Тернопільський район)",
+            "value": "ternopil"
+          },
+          {
+            "selected": false,
+            "text": "Чернівці (Чернівецький район)",
+            "value": "chernivtsi"
+          },
+          {
+            "selected": false,
             "text": "Севастополь (сигнали окупаційної адміністрації)",
             "value": "sevastopol"
           }
@@ -2494,7 +2583,7 @@
         "name": "compare_city_c",
         "label": "Порівняння C",
         "type": "custom",
-        "query": "Київ : kyiv, Харків : kharkiv, Запоріжжя : zaporizhzhia, Черкаси (Черкаський район) : cherkasy, Житомир (Житомирський район) : zhytomyr, Дніпро (Дніпровський район) : dnipro, Хмельницький (Хмельницький район) : khmelnytskyi, Полтава (Полтавський район) : poltava, Рівне (Рівненський район) : rivne, Суми (Сумський район) : sumy, Вінниця (Вінницький район) : vinnytsia, Кропивницький (Кропивницький район) : kropyvnytskyi, Львів (Львівський район) : lviv, Чернігів (Чернігівський район) : chernihiv, Одеса (Одеський район) : odesa, Севастополь (сигнали окупаційної адміністрації) : sevastopol",
+        "query": "Київ : kyiv, Харків : kharkiv, Запоріжжя : zaporizhzhia, Черкаси (Черкаський район) : cherkasy, Житомир (Житомирський район) : zhytomyr, Дніпро (Дніпровський район) : dnipro, Хмельницький (Хмельницький район) : khmelnytskyi, Полтава (Полтавський район) : poltava, Рівне (Рівненський район) : rivne, Суми (Сумський район) : sumy, Вінниця (Вінницький район) : vinnytsia, Кропивницький (Кропивницький район) : kropyvnytskyi, Львів (Львівський район) : lviv, Чернігів (Чернігівський район) : chernihiv, Одеса (Одеський район) : odesa, Херсон (Херсонський район) : kherson, Миколаїв (Миколаївський район) : mykolaiv, Луцьк (Луцький район) : lutsk, Ужгород (Ужгородський район) : uzhhorod, Івано-Франківськ (Івано-Франківський район) : ivano_frankivsk, Тернопіль (Тернопільський район) : ternopil, Чернівці (Чернівецький район) : chernivtsi, Севастополь (сигнали окупаційної адміністрації) : sevastopol",
         "current": {
           "selected": true,
           "text": "Запоріжжя",
@@ -2575,6 +2664,41 @@
             "selected": false,
             "text": "Одеса (Одеський район)",
             "value": "odesa"
+          },
+          {
+            "selected": false,
+            "text": "Херсон (Херсонський район)",
+            "value": "kherson"
+          },
+          {
+            "selected": false,
+            "text": "Миколаїв (Миколаївський район)",
+            "value": "mykolaiv"
+          },
+          {
+            "selected": false,
+            "text": "Луцьк (Луцький район)",
+            "value": "lutsk"
+          },
+          {
+            "selected": false,
+            "text": "Ужгород (Ужгородський район)",
+            "value": "uzhhorod"
+          },
+          {
+            "selected": false,
+            "text": "Івано-Франківськ (Івано-Франківський район)",
+            "value": "ivano_frankivsk"
+          },
+          {
+            "selected": false,
+            "text": "Тернопіль (Тернопільський район)",
+            "value": "ternopil"
+          },
+          {
+            "selected": false,
+            "text": "Чернівці (Чернівецький район)",
+            "value": "chernivtsi"
           },
           {
             "selected": false,
