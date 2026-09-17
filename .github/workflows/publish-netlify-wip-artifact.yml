@@ -1,0 +1,69 @@
+name: Publish validated 23-city artifact to WIP branch
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [multicity-wip-2026-09-16]
+    paths:
+      - ".github/workflows/publish-netlify-wip-artifact.yml"
+
+permissions:
+  actions: read
+  contents: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out WIP branch
+        uses: actions/checkout@v4
+        with:
+          ref: multicity-wip-2026-09-16
+
+      - name: Download validated build artifact
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          rm -rf /tmp/full-site-wip-build
+          mkdir -p /tmp/full-site-wip-build
+          gh run download 35268204069 \
+            --repo "${GITHUB_REPOSITORY}" \
+            --name full-site-wip-build \
+            --dir /tmp/full-site-wip-build
+
+      - name: Verify validated artifact
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          root = Path('/tmp/full-site-wip-build/data')
+          qa = json.loads((root / 'dashboard_qa.json').read_text(encoding='utf-8'))
+          data = json.loads((root / 'dashboard_data.json').read_text(encoding='utf-8'))
+          keys = data.get('multicity_meta', {}).get('production_city_keys', [])
+          freshness = data.get('multicity_meta', {}).get('effective_freshness', {})
+          assert qa.get('ok') is True, qa
+          assert len(keys) == 23, len(keys)
+          assert freshness.get('fully_continuous') is True, freshness
+          assert not freshness.get('warning'), freshness
+          print('Validated artifact:', len(keys), 'rows; freshness continuous')
+          PY
+
+      - name: Copy data used by Netlify site
+        run: |
+          cp /tmp/full-site-wip-build/data/dashboard_data.json kyiv-air-alerts-grafana/data/dashboard_data.json
+          cp /tmp/full-site-wip-build/data/dashboard_qa.json kyiv-air-alerts-grafana/data/dashboard_qa.json
+          cp /tmp/full-site-wip-build/data/ukrainealarm_bridge.json kyiv-air-alerts-grafana/data/ukrainealarm_bridge.json
+
+      - name: Commit validated WIP data
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add kyiv-air-alerts-grafana/data/dashboard_data.json \
+                  kyiv-air-alerts-grafana/data/dashboard_qa.json \
+                  kyiv-air-alerts-grafana/data/ukrainealarm_bridge.json
+          if git diff --cached --quiet; then
+            echo "Validated data already committed"
+          else
+            git commit -m "Publish validated 23-city WIP data"
+            git push origin HEAD:multicity-wip-2026-09-16
+          fi
