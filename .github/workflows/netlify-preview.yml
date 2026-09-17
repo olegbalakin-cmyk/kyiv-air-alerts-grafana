@@ -1,0 +1,57 @@
+name: Deploy Netlify WIP preview
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [multicity-wip-2026-09-16]
+    paths:
+      - "kyiv-air-alerts-grafana/pages-preview/**"
+      - "kyiv-air-alerts-grafana/data/dashboard_data.json"
+      - "netlify.toml"
+      - ".github/workflows/netlify-preview.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  deploy-preview:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out WIP branch
+        uses: actions/checkout@v4
+        with:
+          ref: multicity-wip-2026-09-16
+
+      - name: Verify Netlify token
+        env:
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+        run: |
+          if [ -z "$NETLIFY_AUTH_TOKEN" ]; then
+            echo "NETLIFY_AUTH_TOKEN secret is not configured"
+            exit 2
+          fi
+
+      - name: Build static preview
+        run: |
+          rm -rf _site
+          mkdir -p _site
+          cp kyiv-air-alerts-grafana/pages-preview/index.html _site/index.html
+          cp kyiv-air-alerts-grafana/pages-preview/styles.css _site/styles.css
+          cp kyiv-air-alerts-grafana/pages-preview/app.js _site/app.js
+          cp kyiv-air-alerts-grafana/data/dashboard_data.json _site/data.json
+
+      - name: Deploy draft preview to Netlify
+        env:
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+        run: |
+          npx -y netlify-cli@latest deploy \
+            --dir=_site \
+            --site=b5aafc46-7468-4070-baf1-db80a4d30501 \
+            --auth="$NETLIFY_AUTH_TOKEN" \
+            --json | tee netlify-deploy.json
+
+      - name: Upload deploy metadata
+        uses: actions/upload-artifact@v4
+        with:
+          name: netlify-preview-deploy
+          path: netlify-deploy.json
