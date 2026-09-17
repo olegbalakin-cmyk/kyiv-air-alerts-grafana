@@ -71,6 +71,9 @@ jobs:
       - name: Convert weekly series to rolling 7-day windows
         run: python scripts/apply_rolling_7d.py
 
+      - name: Combine monthly alert count and duration panels
+        run: python scripts/combine_monthly_alerts_duration.py
+
       - name: Add Kyiv casualty panel and disclaimer
         run: python scripts/add_casualty_panel.py
 
