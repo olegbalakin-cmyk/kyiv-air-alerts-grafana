@@ -14,8 +14,9 @@ QA_FILE = ROOT / "data" / "dashboard_qa.json"
 UTC = timezone.utc
 
 EXPECTED_EXACT = {"kyiv", "kharkiv", "zaporizhzhia", "sevastopol"}
-EXPECTED_PROXY_COUNT = 12
-EXPECTED_TOTAL = 16
+EXPECTED_PROXY_COUNT = 19
+EXPECTED_TOTAL = 23
+EXPECTED_DEFERRED = {"donetsk", "luhansk"}
 REQUIRED_VARIABLES = {
     "city",
     "compare_city_a",
@@ -82,19 +83,33 @@ def patch_methodology(obj: dict, fresh: dict) -> None:
 def validate(data: dict, obj: dict, exact: list[str], proxy: list[str], labels: dict[str, str]) -> dict:
     errors: list[str] = []
     warnings: list[str] = []
-    keys = list(data.get("multicity_meta", {}).get("production_city_keys", []))
+    meta = data.get("multicity_meta", {})
+    keys = list(meta.get("production_city_keys", []))
 
     if len(keys) != EXPECTED_TOTAL:
         errors.append(f"Expected {EXPECTED_TOTAL} production rows, found {len(keys)}")
+    if len(set(keys)) != len(keys):
+        errors.append("Production city keys contain duplicates")
     if set(exact) != EXPECTED_EXACT:
         errors.append(f"Exact-city set mismatch: {exact}")
     if len(proxy) != EXPECTED_PROXY_COUNT:
         errors.append(f"Expected {EXPECTED_PROXY_COUNT} proxy rows, found {len(proxy)}")
 
+    deferred = set((meta.get("deferred") or {}).keys())
+    if deferred != EXPECTED_DEFERRED:
+        errors.append(f"Deferred set mismatch: {sorted(deferred)}")
+
+    missing_city_payloads = [key for key in keys if key not in data.get("cities", {})]
+    if missing_city_payloads:
+        errors.append("Missing city payloads: " + ", ".join(missing_city_payloads))
+
     for key in proxy:
         label = labels.get(key, key)
         if "(" not in label or "район" not in label.lower():
             errors.append(f"Proxy label is not explicit: {key} -> {label}")
+        city_meta = data.get("cities", {}).get(key, {}).get("meta", {})
+        if not city_meta.get("coverage_start"):
+            errors.append(f"Proxy coverage_start missing: {key}")
 
     names = variable_names(obj)
     missing_vars = sorted(REQUIRED_VARIABLES - names)
@@ -123,10 +138,20 @@ def validate(data: dict, obj: dict, exact: list[str], proxy: list[str], labels: 
     if "$.cities.${city}" not in rendered:
         errors.append("City panels are not driven by the ${city} selector")
 
+    bridge = meta.get("official_ukrainealarm_bridge") or {}
+    bridge_required = set(bridge.get("required_rows") or [])
+    expected_bridge = set(keys) - {"kyiv", "sevastopol"}
+    if bridge_required and bridge_required != expected_bridge:
+        errors.append(
+            "UkraineAlarm bridge required set mismatch: "
+            f"expected={sorted(expected_bridge)}, actual={sorted(bridge_required)}"
+        )
+
     return {
         "production_rows": len(keys),
         "exact_city_rows": len(exact),
         "raion_proxy_rows": len(proxy),
+        "deferred_rows": sorted(deferred),
         "compact_city_selector": True,
         "comparison_selector_slots": 3,
         "errors": errors,
