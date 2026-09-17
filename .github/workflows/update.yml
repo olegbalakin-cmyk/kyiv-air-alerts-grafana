@@ -62,6 +62,11 @@ jobs:
       - name: Add multicity data and comparison panels
         run: python scripts/add_duration_unit_switch.py
 
+      - name: Apply official UkraineAlarm API bridge
+        env:
+          UKRAINEALARM_API_TOKEN: ${{ secrets.UKRAINEALARM_API_TOKEN }}
+        run: python scripts/apply_ukrainealarm_bridge.py
+
       - name: Update Kyiv casualty series and review queue
         run: python scripts/update_casualties.py
 
@@ -70,6 +75,9 @@ jobs:
 
       - name: Convert weekly series to rolling 7-day windows
         run: python scripts/apply_rolling_7d.py
+
+      - name: Refresh rolling rows from official API bridge
+        run: python scripts/refresh_rolling_from_bridge.py
 
       - name: Combine monthly alert count and duration panels
         run: python scripts/combine_monthly_alerts_duration.py
