@@ -68,6 +68,9 @@ jobs:
       - name: Finalize single admin/public dashboard
         run: python scripts/finalize_multicity_dashboard.py
 
+      - name: Convert weekly series to rolling 7-day windows
+        run: python scripts/apply_rolling_7d.py
+
       - name: Add Kyiv casualty panel and disclaimer
         run: python scripts/add_casualty_panel.py
 
