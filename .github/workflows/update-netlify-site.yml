@@ -120,7 +120,19 @@ jobs:
             echo "No data changes"
           else
             git commit -m "Update production air-alert and casualty data"
-            git push origin HEAD:site-prod
+            for attempt in 1 2 3; do
+              git fetch origin site-prod
+              if git rebase origin/site-prod && git push origin HEAD:site-prod; then
+                break
+              fi
+              git rebase --abort || true
+              if [ "$attempt" -eq 3 ]; then
+                echo "Push failed after 3 attempts"
+                exit 1
+              fi
+              echo "Push attempt ${attempt} failed; retrying..."
+              sleep $((attempt * 2))
+            done
           fi
 
       - name: Build static production site
