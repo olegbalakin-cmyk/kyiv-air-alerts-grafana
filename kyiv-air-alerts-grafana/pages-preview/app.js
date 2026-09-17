@@ -36,6 +36,9 @@ function proxyRaion(key) {
   return state.data.multicity_meta?.cities?.[key]?.proxy_raion || state.data.cities?.[key]?.meta?.proxy_raion || null;
 }
 function typeText(key) { return sourceType(key) === "raion_proxy" ? "Дані по району" : "Дані по місту"; }
+function rolling7dEnabled() {
+  return state.data.multicity_meta?.weekly_mode === "rolling_7d";
+}
 
 function fillSelect(select, keys, current, allowEmpty = false) {
   select.innerHTML = "";
@@ -99,6 +102,7 @@ function seriesDataset(label, values, color, dashed = false) {
 
 function rowTime(row, period) {
   if (period === "monthly") return row.month || String(row.time || "").slice(0, 7);
+  if (rolling7dEnabled()) return row.week_end || String(row.time || "").slice(0, 10);
   return row.week_start || String(row.time || "").slice(0, 10);
 }
 
@@ -282,9 +286,11 @@ function renderComparison() {
   const period = $("comparePeriod").value;
   const shared = sharedRows(keys, period);
   const labels = shared.map(x => x.time);
+  let countLabel = "міс.";
+  if (period === "weekly") countLabel = rolling7dEnabled() ? "7-денних вікон" : "тиж.";
   const note = shared.length
-    ? `Спільний ряд для ${keys.length} міст: ${labels[0]} — ${labels[labels.length - 1]} (${shared.length} ${period === "monthly" ? "міс." : "тиж."}).`
-    : "Немає спільних повних періодів для цієї комбінації.";
+    ? `Спільний ряд для ${keys.length} міст: ${labels[0]} — ${labels[labels.length - 1]} (${shared.length} ${countLabel}).`
+    : "Немає спільних періодів для цієї комбінації.";
   $("comparisonNote").textContent = note;
 
   const metricChart = (id, metric, yTitle) => {
@@ -404,6 +410,19 @@ function renderAllCitiesTable() {
 }
 
 function renderMethodology() {
+  const rolling = rolling7dEnabled();
+  const cityWeeklyOption = $("cityWeeklyOption");
+  const compareWeeklyOption = $("compareWeeklyOption");
+  if (cityWeeklyOption) cityWeeklyOption.textContent = rolling ? "Ковзні 7 днів" : "Тижні";
+  if (compareWeeklyOption) compareWeeklyOption.textContent = rolling ? "Ковзні 7 днів" : "Тижні";
+
+  const periodMethodology = $("periodMethodology");
+  if (periodMethodology) {
+    periodMethodology.innerHTML = rolling
+      ? "<strong>Які дні потрапляють у розрахунки.</strong> Усі показники рахуються лише по завершених календарних днях. Сьогоднішній день не враховується. Картки вгорі показують рівно останні 28 завершених днів — до вчора включно. На місячному графіку показуються лише повні календарні місяці. У режимі «Ковзні 7 днів» кожна точка охоплює 7 завершених календарних днів і датована останнім днем цього вікна; сусідні точки перекриваються на 6 днів. Перше вікно, яке могло б включати неповний стартовий день покриття, не показується."
+      : "<strong>Які дні потрапляють у розрахунки.</strong> Усі показники рахуються лише по завершених календарних днях. Сьогоднішній день не враховується. Картки вгорі показують рівно останні 28 завершених днів — до вчора включно. На місячному графіку показуються лише повні календарні місяці, а на тижневому — лише повні тижні з понеділка до неділі. Якщо дані для міста починаються посеред місяця або тижня, цей перший неповний період не показується.";
+  }
+
   const tolerance = state.data.multicity_meta?.proxy_cross_source_match_tolerance_seconds || 15;
   const deferred = Object.keys(state.data.multicity_meta?.deferred || {});
   $("methodologyDynamic").textContent = `Cross-source continuity перевіряється по конкретних подіях; технічний допуск збігу timestamp — ${tolerance} с. ${deferred.length ? `Не включені: ${deferred.join(", ")}.` : ""}`;
