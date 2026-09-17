@@ -1,0 +1,140 @@
+name: Update and deploy Ukraine air-alert site
+
+on:
+  schedule:
+    - cron: "15 */4 * * *"
+  workflow_dispatch:
+
+concurrency:
+  group: update-netlify-site
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+
+jobs:
+  update-site:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    defaults:
+      run:
+        working-directory: kyiv-air-alerts-grafana
+    steps:
+      - name: Check out production site branch
+        uses: actions/checkout@v4
+        with:
+          ref: site-prod
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: kyiv-air-alerts-grafana/requirements.txt
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Update base data
+        run: python scripts/update_data.py
+
+      - name: Add weekly duration metrics
+        run: python scripts/add_weekly_breakdown.py
+
+      - name: Render dashboard data dependencies
+        run: python scripts/render_dashboard.py --repository "${GITHUB_REPOSITORY}" --branch "site-prod" --prefix "kyiv-air-alerts-grafana"
+
+      - name: Add weekly panels
+        run: python scripts/add_weekly_panels.py
+
+      - name: Add exact-city base rows
+        run: python scripts/add_duration_unit_switch.py
+
+      - name: Add documented proxy rows
+        run: python scripts/expand_multicity_production.py
+
+      - name: Add cross-source validated proxy rows
+        run: python scripts/extend_remaining_proxies.py
+
+      - name: Apply verified Alerts.in.ua and UkraineAlarm bridge
+        env:
+          UKRAINEALARM_API_TOKEN: ${{ secrets.UKRAINEALARM_API_TOKEN }}
+        run: python scripts/apply_ukrainealarm_bridge.py
+
+      - name: Add Sevastopol exact-city series
+        run: python scripts/add_sevastopol_exact.py
+
+      - name: Update Kyiv casualty series and review queue
+        run: python scripts/update_casualties.py
+
+      - name: Configure full city dataset
+        run: python scripts/configure_full_city_dashboard.py
+
+      - name: Add casualty data panel metadata
+        run: python scripts/add_casualty_panel.py
+
+      - name: QA 23-city dataset
+        run: python scripts/postprocess_compact_dashboard_qa.py
+
+      - name: Reconcile source freshness
+        run: python scripts/reconcile_bridge_freshness.py
+
+      - name: Verify production dataset
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          root = Path('data')
+          qa = json.loads((root / 'dashboard_qa.json').read_text(encoding='utf-8'))
+          data = json.loads((root / 'dashboard_data.json').read_text(encoding='utf-8'))
+          keys = data.get('multicity_meta', {}).get('production_city_keys', [])
+          fresh = data.get('multicity_meta', {}).get('effective_freshness', {})
+          assert qa.get('ok') is True, qa
+          assert len(keys) == 23, len(keys)
+          assert fresh.get('fully_continuous') is True, fresh
+          assert not fresh.get('warning'), fresh
+          print('Production dataset verified:', len(keys), 'rows')
+          PY
+
+      - name: Commit updated production data
+        working-directory: .
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add kyiv-air-alerts-grafana/data kyiv-air-alerts-grafana/grafana/dashboard.json
+          if git diff --cached --quiet; then
+            echo "No data changes"
+          else
+            git commit -m "Update production air-alert and casualty data"
+            git push origin HEAD:site-prod
+          fi
+
+      - name: Build static production site
+        working-directory: .
+        run: |
+          rm -rf _site
+          mkdir -p _site
+          cp kyiv-air-alerts-grafana/pages-preview/index.html _site/index.html
+          cp kyiv-air-alerts-grafana/pages-preview/styles.css _site/styles.css
+          cp kyiv-air-alerts-grafana/pages-preview/app.js _site/app.js
+          cp kyiv-air-alerts-grafana/data/dashboard_data.json _site/data.json
+
+      - name: Deploy production to Netlify
+        working-directory: .
+        env:
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+        run: |
+          test -n "$NETLIFY_AUTH_TOKEN"
+          npx -y netlify-cli@latest deploy \
+            --prod \
+            --dir=_site \
+            --site=b5aafc46-7468-4070-baf1-db80a4d30501 \
+            --auth="$NETLIFY_AUTH_TOKEN" \
+            --json | tee netlify-production-deploy.json
+
+      - name: Upload deploy metadata
+        uses: actions/upload-artifact@v4
+        with:
+          name: netlify-production-update
+          path: netlify-production-deploy.json
