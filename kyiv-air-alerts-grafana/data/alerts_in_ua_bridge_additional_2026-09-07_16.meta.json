@@ -1,0 +1,36 @@
+{
+  "schema_version": 2,
+  "source": "alerts.in.ua manual CSV export",
+  "source_url": "https://alerts.in.ua/",
+  "coverage_files": [
+    "alerts_2026-09-07.csv",
+    "alerts_2026-09-08.csv",
+    "alerts_2026-09-09.csv",
+    "alerts_2026-09-10.csv",
+    "alerts_2026-09-11.csv",
+    "alerts_2026-09-12.csv",
+    "alerts_2026-09-13.csv",
+    "alerts_2026-09-14.csv",
+    "alerts_2026-09-15.csv",
+    "alerts_2026-09-16.csv"
+  ],
+  "timezone": "Europe/Kyiv",
+  "filters": {"country": "Україна", "type": "Повітряна тривога", "completed_only": true},
+  "target_summary": {
+    "lutsk": {"kind": "proxy", "alerts_in_ua_location": "Луцький район", "oblast": "Волинська область", "completed_events": 13, "first_start": "2026-09-08T07:12:55+03:00", "last_end": "2026-09-16T08:16:30+03:00", "incomplete_rows_dropped": 1},
+    "uzhhorod": {"kind": "proxy", "alerts_in_ua_location": "Ужгородський район", "oblast": "Закарпатська область", "completed_events": 1, "first_start": "2026-09-15T19:44:27+03:00", "last_end": "2026-09-15T20:09:02+03:00", "incomplete_rows_dropped": 0},
+    "ivano_frankivsk": {"kind": "proxy", "alerts_in_ua_location": "Івано-Франківський район", "oblast": "Івано-Франківська область", "completed_events": 3, "first_start": "2026-09-13T01:00:05+03:00", "last_end": "2026-09-15T20:09:02+03:00", "incomplete_rows_dropped": 0},
+    "chernivtsi": {"kind": "proxy", "alerts_in_ua_location": "Чернівецький район", "oblast": "Чернівецька область", "completed_events": 2, "first_start": "2026-09-12T05:22:11+03:00", "last_end": "2026-09-15T20:09:13+03:00", "incomplete_rows_dropped": 0},
+    "ternopil": {"kind": "proxy", "alerts_in_ua_location": "Тернопільський район", "oblast": "Тернопільська область", "completed_events": 5, "first_start": "2026-09-10T18:33:21+03:00", "last_end": "2026-09-15T20:09:13+03:00", "incomplete_rows_dropped": 0},
+    "kherson": {"kind": "proxy", "alerts_in_ua_location": "Херсонський район", "oblast": "Херсонська область", "completed_events": 52, "first_start": "2026-09-07T05:01:44+03:00", "last_end": "2026-09-16T19:04:57+03:00", "incomplete_rows_dropped": 2},
+    "mykolaiv": {"kind": "proxy", "alerts_in_ua_location": "Миколаївський район", "oblast": "Миколаївська область", "completed_events": 88, "first_start": "2026-09-07T02:55:54+03:00", "last_end": "2026-09-16T23:35:43+03:00", "incomplete_rows_dropped": 2}
+  },
+  "coverage_start": "2026-09-07T00:00:00+03:00",
+  "coverage_end_exclusive": "2026-09-17T00:00:00+03:00",
+  "completed_event_rows": 164,
+  "incomplete_rows_dropped_count": 5,
+  "repo_payload_file": "alerts_in_ua_bridge_additional_2026-09-07_16.csv.gz.b64",
+  "repo_payload_encoding": "base64(gzip(csv utf-8))",
+  "repo_payload_columns": ["city_key", "start", "end"],
+  "scope_note": "Continuity-test payload for seven additional proxy candidates only. Donetsk and Luhansk excluded by decision."
+}
