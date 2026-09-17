@@ -26,8 +26,15 @@ function proxyRaion(key) {
 }
 function typeText(key) { return sourceType(key) === "raion_proxy" ? "Районний proxy" : "Exact-city"; }
 
-function fillSelect(select, keys, current) {
+function fillSelect(select, keys, current, allowEmpty = false) {
   select.innerHTML = "";
+  if (allowEmpty) {
+    const empty = document.createElement("option");
+    empty.value = "";
+    empty.textContent = "— не обирати —";
+    empty.selected = current === "";
+    select.appendChild(empty);
+  }
   for (const key of keys) {
     const opt = document.createElement("option");
     opt.value = key;
@@ -91,13 +98,18 @@ function validParam(name, values, fallback) {
   const value = getParams().get(name);
   return values.includes(value) ? value : fallback;
 }
+function validOptionalParam(name, values, fallback) {
+  const value = getParams().get(name);
+  if (value === "none") return "";
+  return values.includes(value) ? value : fallback;
+}
 function updateUrl() {
   const params = new URLSearchParams();
   params.set("city", $("citySelect").value);
   params.set("period", $("cityPeriod").value);
   params.set("a", $("compareA").value);
   params.set("b", $("compareB").value);
-  params.set("c", $("compareC").value);
+  params.set("c", $("compareC").value || "none");
   params.set("compare", $("comparePeriod").value);
   history.replaceState(null, "", `${location.pathname}?${params.toString()}`);
 }
@@ -255,11 +267,13 @@ function sharedRows(keys, period) {
 }
 
 function renderComparison() {
-  const keys = [$("compareA").value, $("compareB").value, $("compareC").value];
+  const keys = [$("compareA").value, $("compareB").value, $("compareC").value].filter(Boolean);
   const period = $("comparePeriod").value;
   const shared = sharedRows(keys, period);
   const labels = shared.map(x => x.time);
-  const note = shared.length ? `Спільний ряд: ${labels[0]} — ${labels[labels.length - 1]} (${shared.length} ${period === "monthly" ? "міс." : "тиж."}).` : "Немає спільних повних періодів для цієї комбінації.";
+  const note = shared.length
+    ? `Спільний ряд для ${keys.length} міст: ${labels[0]} — ${labels[labels.length - 1]} (${shared.length} ${period === "monthly" ? "міс." : "тиж."}).`
+    : "Немає спільних повних періодів для цієї комбінації.";
   $("comparisonNote").textContent = note;
 
   const metricChart = (id, metric, yTitle) => {
@@ -333,13 +347,13 @@ async function init() {
   const periodDefault = validParam("period", ["monthly", "weekly"], "monthly");
   const aDefault = validParam("a", keys, defaults[0] || keys[0]);
   const bDefault = validParam("b", keys, defaults[1] || keys[0]);
-  const cDefault = validParam("c", keys, defaults[2] || keys[0]);
+  const cDefault = validOptionalParam("c", keys, defaults[2] || "");
   const compareDefault = validParam("compare", ["monthly", "weekly"], "monthly");
 
   fillSelect($("citySelect"), keys, cityDefault);
   fillSelect($("compareA"), keys, aDefault);
   fillSelect($("compareB"), keys, bDefault);
-  fillSelect($("compareC"), keys, cDefault);
+  fillSelect($("compareC"), keys, cDefault, true);
   $("cityPeriod").value = periodDefault;
   $("comparePeriod").value = compareDefault;
 
