@@ -1,20 +1,22 @@
-name: Update Kyiv air-alert data
+name: Update Ukraine city air-alert data
 
 on:
   schedule:
-    - cron: "15 4,12 * * *"
+    - cron: "15 */4 * * *"
   workflow_dispatch:
   push:
     branches: [main]
     paths:
       - "kyiv-air-alerts-grafana/scripts/**"
       - "kyiv-air-alerts-grafana/data/casualties/**"
+      - "kyiv-air-alerts-grafana/data/alerts_in_ua_bridge_*.csv.gz.b64"
+      - "kyiv-air-alerts-grafana/data/alerts_in_ua_bridge_*.meta.json"
       - "kyiv-air-alerts-grafana/grafana/dashboard.template.json"
       - "kyiv-air-alerts-grafana/requirements.txt"
       - ".github/workflows/update.yml"
 
 concurrency:
-  group: kyiv-air-alert-data-${{ github.ref }}
+  group: ukraine-city-air-alert-data-${{ github.ref }}
   cancel-in-progress: true
 
 permissions:
@@ -61,10 +63,13 @@ jobs:
       - name: Add exact-city base rows and switches
         run: python scripts/add_duration_unit_switch.py
 
-      - name: Add validated production proxy rows
+      - name: Add documented production proxy rows
         run: python scripts/expand_multicity_production.py
 
-      - name: Apply official UkraineAlarm API bridge
+      - name: Add cross-source validated proxy rows
+        run: python scripts/extend_remaining_proxies.py
+
+      - name: Apply verified Alerts.in.ua and UkraineAlarm bridge
         env:
           UKRAINEALARM_API_TOKEN: ${{ secrets.UKRAINEALARM_API_TOKEN }}
         run: python scripts/apply_ukrainealarm_bridge.py
@@ -75,13 +80,13 @@ jobs:
       - name: Update Kyiv casualty series and review queue
         run: python scripts/update_casualties.py
 
-      - name: Configure compact city-selector dashboard
-        run: python scripts/configure_compact_dashboard.py
+      - name: Configure full city-selector dashboard
+        run: python scripts/configure_full_city_dashboard.py
 
       - name: Add Kyiv casualty panel and disclaimer
         run: python scripts/add_casualty_panel.py
 
-      - name: QA compact dashboard and source freshness
+      - name: QA 23-city dashboard and source freshness
         run: python scripts/postprocess_compact_dashboard_qa.py
 
       - name: Reconcile freshness with official API bridge
@@ -96,7 +101,7 @@ jobs:
           if git diff --cached --quiet; then
             echo "No changes"
           else
-            git commit -m "Update Kyiv air-alert and casualty data"
+            git commit -m "Update Ukraine city air-alert and casualty data"
 
             for attempt in 1 2 3; do
               git fetch origin main
