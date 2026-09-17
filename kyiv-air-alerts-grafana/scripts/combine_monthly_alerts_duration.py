@@ -9,9 +9,9 @@ ROOT = Path(__file__).resolve().parents[1]
 DASHBOARD = ROOT / "grafana" / "dashboard.json"
 
 CITY_CONFIG = {
-    "kyiv": {"duration": 107, "short": 111, "label": "Київ"},
-    "kharkiv": {"duration": 207, "short": 211, "label": "Харків"},
-    "zaporizhzhia": {"duration": 307, "short": 311, "label": "Запоріжжя"},
+    "kyiv": {"monthly_rate": 104, "duration": 107, "short": 111, "label": "Київ"},
+    "kharkiv": {"monthly_rate": 204, "duration": 207, "short": 211, "label": "Харків"},
+    "zaporizhzhia": {"monthly_rate": 304, "duration": 307, "short": 311, "label": "Запоріжжя"},
 }
 
 TIME_COL = {
@@ -37,6 +37,22 @@ def find_panel(panels: list[dict], panel_id: int) -> dict:
     raise RuntimeError(f"Panel {panel_id} not found")
 
 
+def assert_monthly_rate_panel(panel: dict, city_key: str, city_label: str) -> None:
+    """Fail loudly if the normalized monthly alerts/day panel disappears or is retargeted."""
+    panel["title"] = f"{city_label}: середня кількість тривог на день — за місяцями"
+    if not panel.get("targets"):
+        raise RuntimeError(f"Monthly alerts/day panel missing target for {city_label}")
+    target = panel["targets"][0]
+    columns = target.get("columns", [])
+    if not any(col.get("selector") == "alerts_per_day" for col in columns):
+        raise RuntimeError(f"Monthly alerts/day panel no longer reads alerts_per_day for {city_label}")
+    expected_root = f"$.cities.{city_key}.monthly"
+    if target.get("root_selector") != expected_root:
+        raise RuntimeError(
+            f"Monthly alerts/day panel root changed for {city_label}: {target.get('root_selector')!r}"
+        )
+
+
 def configure_duration_combo(panel: dict, short_panel: dict, city_key: str, city_label: str) -> None:
     panel["title"] = (
         f"{city_label}: кількість тривог і середня тривалість однієї тривоги — за місяцями"
@@ -45,7 +61,7 @@ def configure_duration_combo(panel: dict, short_panel: dict, city_key: str, city
         "Повні календарні місяці; поточний неповний місяць виключено. "
         "Стовпчики — абсолютна кількість завершених тривог за місяцем старту; "
         "лінія — середня повна тривалість тривог, що стартували цього місяця. "
-        "Окремий графік вище зберігає нормалізований показник тривог на день."
+        "Окремий графік вище показує нормалізовану кількість тривог на день."
     )
 
     if not panel.get("targets"):
@@ -62,20 +78,51 @@ def configure_duration_combo(panel: dict, short_panel: dict, city_key: str, city
         '"avg_duration": avg_alert_duration_min / 60}'
     )
 
-    # Reuse the proven short-horizon styling: count as bars on the left axis,
-    # average duration as a line on the right axis.
+    # Reuse the short-horizon dual-axis defaults, but force the monthly
+    # presentation explicitly so Grafana cannot render both series as lines.
     panel["fieldConfig"] = copy.deepcopy(short_panel["fieldConfig"])
     panel["options"] = copy.deepcopy(short_panel["options"])
     panel.pop("timeFrom", None)
+    panel["fieldConfig"]["overrides"] = [
+        {
+            "matcher": {"id": "byName", "options": "Кількість тривог"},
+            "properties": [
+                {"id": "custom.drawStyle", "value": "bars"},
+                {"id": "custom.fillOpacity", "value": 70},
+                {"id": "custom.lineWidth", "value": 1},
+                {"id": "custom.showPoints", "value": "never"},
+                {"id": "custom.axisPlacement", "value": "left"},
+                {"id": "custom.axisLabel", "value": "Кількість тривог"},
+                {"id": "unit", "value": "short"},
+                {"id": "decimals", "value": 0},
+            ],
+        },
+        {
+            "matcher": {"id": "byName", "options": "Середня тривалість"},
+            "properties": [
+                {"id": "custom.drawStyle", "value": "line"},
+                {"id": "custom.lineWidth", "value": 3},
+                {"id": "custom.showPoints", "value": "always"},
+                {"id": "custom.pointSize", "value": 5},
+                {"id": "custom.axisPlacement", "value": "right"},
+                {"id": "custom.axisLabel", "value": "Години"},
+                {"id": "unit", "value": "suffix: год"},
+                {"id": "decimals", "value": 1},
+            ],
+        },
+    ]
+    panel.setdefault("options", {}).setdefault("legend", {})["showLegend"] = True
+    panel["options"].setdefault("tooltip", {})["mode"] = "multi"
 
 
 def main() -> None:
     dashboard = json.loads(DASHBOARD.read_text(encoding="utf-8"))
     panels = dashboard.get("panels", [])
 
-    # Keep the existing monthly alerts/day panels untouched. Enrich only the
-    # monthly average-duration panels with absolute monthly alert counts.
     for city_key, cfg in CITY_CONFIG.items():
+        monthly_rate = find_panel(panels, cfg["monthly_rate"])
+        assert_monthly_rate_panel(monthly_rate, city_key, cfg["label"])
+
         duration = find_panel(panels, cfg["duration"])
         short = find_panel(panels, cfg["short"])
         configure_duration_combo(duration, short, city_key, cfg["label"])
@@ -84,7 +131,7 @@ def main() -> None:
         json.dumps(dashboard, ensure_ascii=False, indent=2) + "\n",
         encoding="utf-8",
     )
-    print("Added monthly alert-count bars to monthly average-duration panels")
+    print("Preserved monthly alerts/day panels and added monthly alert-count bars to duration panels")
 
 
 if __name__ == "__main__":
