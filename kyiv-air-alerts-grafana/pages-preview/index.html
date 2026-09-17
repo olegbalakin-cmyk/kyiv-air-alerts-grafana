@@ -52,11 +52,11 @@
         <strong id="kpiAlerts">—</strong>
       </article>
       <article class="kpi-card">
-        <span class="kpi-label">Годин під тривогою за 28 днів</span>
+        <span class="kpi-label">Годин під тривогою за останні 28 завершених днів</span>
         <strong id="kpiHours">—</strong>
       </article>
       <article class="kpi-card">
-        <span class="kpi-label">Середня тривалість тривоги за останні 28 завершених днів</span>
+        <span class="kpi-label">Середня повна тривалість тривог, що почалися за останні 28 завершених днів</span>
         <strong id="kpiDuration">—</strong>
       </article>
       <article class="kpi-card">
@@ -69,11 +69,12 @@
     <section class="chart-grid">
       <article class="panel chart-card wide">
         <h3>Інтенсивність тривог</h3>
-        <p class="chart-subtitle">Стовпчики — середній час під тривогою на добу; лінія — середня кількість тривог на день.</p>
+        <p class="chart-subtitle">Стовпчики: сумарний час під тривогою в періоді ÷ кількість календарних днів. Лінія: кількість тривог, що почалися в періоді ÷ кількість днів.</p>
         <div class="chart-wrap"><canvas id="cityIntensityChart"></canvas></div>
       </article>
       <article class="panel chart-card wide">
-        <h3>Середня тривалість однієї тривоги</h3>
+        <h3>Середня повна тривалість однієї тривоги</h3>
+        <p class="chart-subtitle">Для кожного місяця або тижня — середнє повної тривалості всіх тривог, що почалися в цьому періоді. Якщо тривога закінчилася вже в наступному періоді, вся її тривалість відноситься до періоду старту.</p>
         <div class="chart-wrap"><canvas id="cityDurationChart"></canvas></div>
       </article>
     </section>
@@ -128,14 +129,17 @@
       <section class="chart-grid">
         <article class="panel chart-card">
           <h3>Середня кількість тривог на день</h3>
+          <p class="chart-subtitle">Кількість тривог, що почалися в періоді ÷ кількість календарних днів.</p>
           <div class="chart-wrap"><canvas id="compareAlertsChart"></canvas></div>
         </article>
         <article class="panel chart-card">
           <h3>Середній час під тривогою на добу</h3>
+          <p class="chart-subtitle">Сумарний час під тривогою в періоді ÷ кількість календарних днів.</p>
           <div class="chart-wrap"><canvas id="compareHoursChart"></canvas></div>
         </article>
         <article class="panel chart-card wide">
-          <h3>Середня тривалість однієї тривоги</h3>
+          <h3>Середня повна тривалість однієї тривоги</h3>
+          <p class="chart-subtitle">Середнє повної тривалості тривог, що почалися в цьому місяці або тижні; тривалість відноситься до періоду старту.</p>
           <div class="chart-wrap"><canvas id="compareDurationChart"></canvas></div>
         </article>
       </section>
@@ -165,6 +169,7 @@
       <div class="eyebrow">Методологія</div>
       <h2>Як читати дані</h2>
       <p><strong>Exact-city</strong> — ряд для самого міста або міської громади. <strong>Районний proxy</strong> — ряд однойменного району після визначеної дати початку покриття; він може відрізнятися від фактичного часу тривоги безпосередньо в місті.</p>
+      <p><strong>Тривог/день</strong> = кількість стартів тривоги в періоді ÷ кількість календарних днів. <strong>Годин під тривогою/добу</strong> = сумарна тривалість покриття тривогою в періоді ÷ кількість днів; перекриття не рахуються двічі. <strong>Середня тривалість</strong> = середнє повної тривалості тривог, що почалися в періоді.</p>
       <p>Поточний календарний день не включається у завершені агрегати. Перший неповний місяць і тиждень після початку покриття також вилучаються з довгих рядів. Для стику різних джерел допускається технічна різниця timestamp до <strong>15 секунд</strong>; самі часи подій при цьому не змінюються.</p>
       <p id="methodologyDynamic" class="muted"></p>
     </section>
