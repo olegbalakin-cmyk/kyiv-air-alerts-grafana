@@ -21,7 +21,10 @@ function sourceType(key) {
 function coverageStart(key) {
   return state.data.multicity_meta?.cities?.[key]?.coverage_start || state.data.cities?.[key]?.meta?.coverage_start || state.data.cities?.[key]?.meta?.first_city_level_date || null;
 }
-function periodLabel(value) { return value === "weekly" ? "тижні" : "місяці"; }
+function proxyRaion(key) {
+  return state.data.multicity_meta?.cities?.[key]?.proxy_raion || state.data.cities?.[key]?.meta?.proxy_raion || null;
+}
+function typeText(key) { return sourceType(key) === "raion_proxy" ? "Районний proxy" : "Exact-city"; }
 
 function fillSelect(select, keys, current) {
   select.innerHTML = "";
@@ -34,7 +37,7 @@ function fillSelect(select, keys, current) {
   }
 }
 
-function chartOptions(yTitle) {
+function chartOptions(yTitle, extra = {}) {
   return {
     responsive: true,
     maintainAspectRatio: false,
@@ -47,16 +50,17 @@ function chartOptions(yTitle) {
     scales: {
       x: { ticks: { color: TEXT, maxRotation: 0, autoSkip: true }, grid: { color: GRID } },
       y: { beginAtZero: true, ticks: { color: TEXT }, grid: { color: GRID }, title: { display: true, text: yTitle, color: TEXT } }
-    }
+    },
+    ...extra
   };
 }
 
-function setChart(id, labels, datasets, yTitle) {
+function setChart(id, labels, datasets, yTitle, type = "line", extra = {}) {
   if (state.charts[id]) state.charts[id].destroy();
   state.charts[id] = new Chart($(id), {
-    type: "line",
+    type,
     data: { labels, datasets },
-    options: chartOptions(yTitle)
+    options: chartOptions(yTitle, extra)
   });
 }
 
@@ -80,6 +84,24 @@ function rowTime(row, period) {
   return row.week_start || String(row.time || "").slice(0, 10);
 }
 
+function getParams() {
+  return new URLSearchParams(location.search);
+}
+function validParam(name, values, fallback) {
+  const value = getParams().get(name);
+  return values.includes(value) ? value : fallback;
+}
+function updateUrl() {
+  const params = new URLSearchParams();
+  params.set("city", $("citySelect").value);
+  params.set("period", $("cityPeriod").value);
+  params.set("a", $("compareA").value);
+  params.set("b", $("compareB").value);
+  params.set("c", $("compareC").value);
+  params.set("compare", $("comparePeriod").value);
+  history.replaceState(null, "", `${location.pathname}?${params.toString()}`);
+}
+
 function renderFreshness() {
   const banner = $("freshnessBanner");
   const fresh = state.data.multicity_meta?.effective_freshness || state.data.multicity_meta?.upstream_freshness;
@@ -88,8 +110,20 @@ function renderFreshness() {
     return;
   }
   const last = fresh.latest_proxy_event_end || fresh.last_successful_fetch_at;
-  banner.textContent = `⚠ Районні/city-level дані біля правого краю можуть бути неповними. Остання підтверджена дата upstream: ${last ? String(last).slice(0, 10) : "невідомо"}. Нулі після неї не слід трактувати як гарантовану відсутність тривог.`;
+  banner.textContent = `⚠ Дані біля правого краю можуть бути неповними. Останній підтверджений update: ${last ? String(last).slice(0, 10) : "невідомо"}. Нулі після цієї точки не слід трактувати як гарантовану відсутність тривог.`;
   banner.classList.remove("hidden");
+}
+
+function renderDatasetSummary() {
+  const keys = cityKeys();
+  const exact = keys.filter(k => sourceType(k) === "exact_city").length;
+  const proxy = keys.filter(k => sourceType(k) === "raion_proxy").length;
+  $("datasetSummary").innerHTML = [
+    `${keys.length} ряди`,
+    `${exact} exact-city`,
+    `${proxy} районних proxy`,
+    "Донецьк і Луганськ поки не включені"
+  ].map(x => `<span class="summary-pill">${x}</span>`).join("");
 }
 
 function renderCity() {
@@ -101,14 +135,20 @@ function renderCity() {
   $("cityTitle").textContent = labelFor(key);
   const type = sourceType(key);
   const coverage = coverageStart(key);
-  const typeText = type === "raion_proxy" ? "Районний proxy" : "Exact-city";
   const badgeClass = type === "raion_proxy" ? "proxy" : "exact";
-  $("cityMeta").innerHTML = `<span class="badge ${badgeClass}">${typeText}</span>${coverage ? `<span class="badge">Покриття з ${coverage}</span>` : ""}`;
+  const raion = proxyRaion(key);
+  $("cityMeta").innerHTML = [
+    `<span class="badge ${badgeClass}">${typeText(key)}</span>`,
+    coverage ? `<span class="badge">Покриття з ${coverage}</span>` : "",
+    raion ? `<span class="badge">${raion}</span>` : ""
+  ].join("");
 
   const kpi = city.kpis?.[0] || {};
   $("kpiAlerts").textContent = fmt(kpi.alerts_28d, 0);
   $("kpiHours").textContent = `${fmt(kpi.alert_hours_28d, 1)} год`;
   $("kpiDuration").textContent = `${fmt(kpi.avg_alert_duration_min_28d, 1)} хв`;
+  $("kpiMaxDay").textContent = fmt(kpi.max_alerts_day, 0);
+  $("kpiMaxDayDate").textContent = kpi.max_alerts_day_date || "";
 
   const rows = city[period] || [];
   const labels = rows.map(r => rowTime(r, period));
@@ -116,6 +156,32 @@ function renderCity() {
   setChart("cityAlertsChart", labels, [seriesDataset(labelFor(key), rows.map(r => r.alerts_per_day), COLORS[0], dashed)], "Тривог/день");
   setChart("cityHoursChart", labels, [seriesDataset(labelFor(key), rows.map(r => r.avg_daily_alert_hours), COLORS[1], dashed)], "Годин/добу");
   setChart("cityDurationChart", labels, [seriesDataset(labelFor(key), rows.map(r => r.avg_alert_duration_min), COLORS[2], dashed)], "Хвилин");
+
+  renderCasualties(key);
+  updateUrl();
+}
+
+function renderCasualties(key) {
+  const section = $("casualtySection");
+  const rows = state.data.casualties?.monthly || [];
+  if (key !== "kyiv" || !rows.length) {
+    section.classList.add("hidden");
+    if (state.charts.casualtyChart) {
+      state.charts.casualtyChart.destroy();
+      delete state.charts.casualtyChart;
+    }
+    return;
+  }
+  section.classList.remove("hidden");
+  const labels = rows.map(r => r.month || String(r.time || "").slice(0, 7));
+  setChart(
+    "casualtyChart",
+    labels,
+    [{ label: "Загиблих", data: rows.map(r => r.deaths), backgroundColor: "#62a0ea99", borderColor: "#62a0ea", borderWidth: 1 }],
+    "Кількість загиблих",
+    "bar",
+    { plugins: { legend: { display: false }, tooltip: { mode: "index", intersect: false } } }
+  );
 }
 
 function sharedRows(keys, period) {
@@ -151,12 +217,50 @@ function renderComparison() {
   metricChart("compareAlertsChart", "alerts_per_day", "Тривог/день");
   metricChart("compareHoursChart", "avg_daily_alert_hours", "Годин/добу");
   metricChart("compareDurationChart", "avg_alert_duration_min", "Хвилин");
+  updateUrl();
+}
+
+function renderAllCitiesTable() {
+  const rows = cityKeys().map(key => {
+    const kpi = state.data.cities[key]?.kpis?.[0] || {};
+    return { key, label: labelFor(key), type: typeText(key), alerts: kpi.alerts_28d, hours: kpi.alert_hours_28d, duration: kpi.avg_alert_duration_min_28d, coverage: coverageStart(key) };
+  });
+  rows.sort((a, b) => (Number(b.alerts) || -1) - (Number(a.alerts) || -1));
+  $("allCitiesTable").innerHTML = rows.map(r => `
+    <tr>
+      <td><button class="table-city-link" data-city="${r.key}" type="button">${r.label}</button></td>
+      <td class="type-cell">${r.type}</td>
+      <td>${fmt(r.alerts, 0)}</td>
+      <td>${fmt(r.hours, 1)}</td>
+      <td>${fmt(r.duration, 1)} хв</td>
+      <td>${r.coverage || "—"}</td>
+    </tr>`).join("");
+  document.querySelectorAll(".table-city-link").forEach(btn => btn.addEventListener("click", () => {
+    $("citySelect").value = btn.dataset.city;
+    renderCity();
+    window.scrollTo({ top: $("cityTitle").offsetTop - 24, behavior: "smooth" });
+  }));
+}
+
+function renderMethodology() {
+  const tolerance = state.data.multicity_meta?.proxy_cross_source_match_tolerance_seconds || 15;
+  const deferred = Object.keys(state.data.multicity_meta?.deferred || {});
+  $("methodologyDynamic").textContent = `Cross-source continuity перевіряється по конкретних подіях; технічний допуск збігу timestamp — ${tolerance} с. ${deferred.length ? `Не включені: ${deferred.join(", ")}.` : ""}`;
 }
 
 function bind() {
   $("citySelect").addEventListener("change", renderCity);
   $("cityPeriod").addEventListener("change", renderCity);
   for (const id of ["compareA", "compareB", "compareC", "comparePeriod"]) $(id).addEventListener("change", renderComparison);
+  $("copyLink").addEventListener("click", async () => {
+    try {
+      await navigator.clipboard.writeText(location.href);
+      $("copyLink").textContent = "Скопійовано";
+      setTimeout(() => { $("copyLink").textContent = "Скопіювати посилання"; }, 1200);
+    } catch {
+      $("copyLink").textContent = "Не вдалося";
+    }
+  });
 }
 
 async function init() {
@@ -168,22 +272,34 @@ async function init() {
   const defaults = ["kyiv", "kharkiv", "zaporizhzhia"].filter(k => keys.includes(k));
   while (defaults.length < 3 && keys[defaults.length]) defaults.push(keys[defaults.length]);
 
-  fillSelect($("citySelect"), keys, defaults[0] || keys[0]);
-  fillSelect($("compareA"), keys, defaults[0] || keys[0]);
-  fillSelect($("compareB"), keys, defaults[1] || keys[0]);
-  fillSelect($("compareC"), keys, defaults[2] || keys[0]);
+  const cityDefault = validParam("city", keys, defaults[0] || keys[0]);
+  const periodDefault = validParam("period", ["monthly", "weekly"], "monthly");
+  const aDefault = validParam("a", keys, defaults[0] || keys[0]);
+  const bDefault = validParam("b", keys, defaults[1] || keys[0]);
+  const cDefault = validParam("c", keys, defaults[2] || keys[0]);
+  const compareDefault = validParam("compare", ["monthly", "weekly"], "monthly");
+
+  fillSelect($("citySelect"), keys, cityDefault);
+  fillSelect($("compareA"), keys, aDefault);
+  fillSelect($("compareB"), keys, bDefault);
+  fillSelect($("compareC"), keys, cDefault);
+  $("cityPeriod").value = periodDefault;
+  $("comparePeriod").value = compareDefault;
 
   const generated = state.data.meta?.generated_at || state.data.cities?.kyiv?.meta?.generated_at;
   $("updatedAt").textContent = generated ? `Дані згенеровано ${String(generated).replace("T", " ").slice(0, 19)}` : "";
 
+  renderDatasetSummary();
   renderFreshness();
+  renderMethodology();
   bind();
   renderCity();
   renderComparison();
+  renderAllCitiesTable();
 }
 
 init().catch(err => {
   console.error(err);
-  $("freshnessBanner").textContent = `Не вдалося завантажити preview: ${err.message}`;
+  $("freshnessBanner").textContent = `Не вдалося завантажити сайт: ${err.message}`;
   $("freshnessBanner").classList.remove("hidden");
 });
