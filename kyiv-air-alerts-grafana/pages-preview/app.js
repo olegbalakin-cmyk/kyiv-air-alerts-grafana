@@ -4,6 +4,7 @@ const state = {
   tableSort: { key: "alerts", direction: "desc" }
 };
 
+const DATA_URL = "https://raw.githubusercontent.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/site-prod/kyiv-air-alerts-grafana/data/dashboard_data.json";
 const COLORS = ["#62a0ea", "#8ff0a4", "#f8e45c"];
 const GRID = "rgba(148,163,184,.16)";
 const TEXT = "#b8c4cf";
@@ -531,8 +532,8 @@ function bind() {
 }
 
 async function init() {
-  const response = await fetch("data.json", { cache: "no-store" });
-  if (!response.ok) throw new Error(`Failed to load data.json: ${response.status}`);
+  const response = await fetch(`${DATA_URL}?v=${Date.now()}`, { cache: "no-store" });
+  if (!response.ok) throw new Error(`Failed to load live dashboard data: ${response.status}`);
   state.data = await response.json();
   const keys = cityKeys();
 
