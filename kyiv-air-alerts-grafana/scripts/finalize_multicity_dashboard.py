@@ -8,6 +8,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 DASHBOARD = ROOT / "grafana" / "dashboard.json"
+SITE_URL = "https://ukraine-air-alerts.netlify.app"
 
 CITY_PANELS = [1, 2, 3, 10, 11, 12, 13, 14, 15, 20, 21]
 CITY_CONFIG = [
@@ -127,6 +128,20 @@ def main() -> None:
         raise RuntimeError(f"Expected source panels missing: {missing}")
 
     obj["templating"] = {"list": []}
+    obj["links"] = [
+        {
+            "asDropdown": False,
+            "icon": "external link",
+            "includeVars": False,
+            "keepTime": False,
+            "tags": [],
+            "targetBlank": True,
+            "title": "Повна версія сайту",
+            "tooltip": "Відкрити сайт зі статистикою та порівнянням міст",
+            "type": "link",
+            "url": SITE_URL,
+        }
+    ]
     panels: list[dict] = []
 
     panels.append({
@@ -167,6 +182,10 @@ def main() -> None:
     methodology = copy.deepcopy(by_id[30])
     methodology["id"] = 900
     methodology["gridPos"]["y"] = compact_y
+    methodology.setdefault("options", {})["mode"] = "markdown"
+    existing_methodology = methodology["options"].get("content", "")
+    site_note = f"🌐 **Повна вебверсія:** [{SITE_URL}]({SITE_URL}) — більше міст, порівняння та зручніший перегляд."
+    methodology["options"]["content"] = site_note + ("\n\n" + existing_methodology if existing_methodology else "")
     panels.append(methodology)
 
     obj["panels"] = panels
