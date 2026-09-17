@@ -1,0 +1,68 @@
+name: Deploy Netlify production site
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [site-prod]
+    paths:
+      - "kyiv-air-alerts-grafana/pages-preview/**"
+      - "kyiv-air-alerts-grafana/data/dashboard_data.json"
+      - "kyiv-air-alerts-grafana/data/dashboard_qa.json"
+      - ".github/workflows/netlify-production.yml"
+
+concurrency:
+  group: netlify-production-site
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  deploy-production:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out production site branch
+        uses: actions/checkout@v4
+        with:
+          ref: site-prod
+
+      - name: Verify validated dataset
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          root = Path('kyiv-air-alerts-grafana/data')
+          qa = json.loads((root / 'dashboard_qa.json').read_text(encoding='utf-8'))
+          data = json.loads((root / 'dashboard_data.json').read_text(encoding='utf-8'))
+          keys = data.get('multicity_meta', {}).get('production_city_keys', [])
+          assert qa.get('ok') is True, qa
+          assert len(keys) == 23, len(keys)
+          print('Validated production dataset:', len(keys), 'rows')
+          PY
+
+      - name: Build static site
+        run: |
+          rm -rf _site
+          mkdir -p _site
+          cp kyiv-air-alerts-grafana/pages-preview/index.html _site/index.html
+          cp kyiv-air-alerts-grafana/pages-preview/styles.css _site/styles.css
+          cp kyiv-air-alerts-grafana/pages-preview/app.js _site/app.js
+          cp kyiv-air-alerts-grafana/data/dashboard_data.json _site/data.json
+
+      - name: Deploy production to Netlify
+        env:
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+        run: |
+          test -n "$NETLIFY_AUTH_TOKEN"
+          npx -y netlify-cli@latest deploy \
+            --prod \
+            --dir=_site \
+            --site=b5aafc46-7468-4070-baf1-db80a4d30501 \
+            --auth="$NETLIFY_AUTH_TOKEN" \
+            --json | tee netlify-production-deploy.json
+
+      - name: Upload deploy metadata
+        uses: actions/upload-artifact@v4
+        with:
+          name: netlify-production-deploy
+          path: netlify-production-deploy.json
