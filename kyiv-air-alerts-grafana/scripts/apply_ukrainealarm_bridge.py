@@ -264,27 +264,21 @@ def merge_history(store: dict, payload: list[dict], cutoffs: dict[str, datetime]
                 "seen_in_latest_payload": False,
                 "last_checked_at": iso(fetched_at),
                 "continuity_cutoff": iso(cutoff),
-                "continuous_from_upstream": bool(previous.get("continuous_from_upstream")),
-                "continuity_reason": previous.get("continuity_reason")
-                or "region_missing_from_history_payload",
+                "continuous_from_upstream": False,
+                "continuity_reason": "region_missing_from_history_payload",
             }
             continue
 
         alarms = group["alarms"]
         starts = [dt for dt in (parse_dt(a.get("startDate")) for a in alarms) if dt]
         oldest = min(starts) if starts else None
-        history_reaches_cutoff = len(alarms) < HISTORY_LIMIT or (
-            oldest is not None and oldest <= cutoff.astimezone(UTC)
+        history_reaches_cutoff = oldest is not None and oldest <= cutoff.astimezone(UTC)
+        continuous = history_reaches_cutoff
+        reason = (
+            "history_overlaps_upstream"
+            if history_reaches_cutoff
+            else "history_window_does_not_reach_upstream"
         )
-        continuous = bool(previous.get("continuous_from_upstream")) or history_reaches_cutoff
-        if previous.get("continuous_from_upstream"):
-            reason = previous.get("continuity_reason") or "previously_verified"
-        elif len(alarms) < HISTORY_LIMIT:
-            reason = "history_not_truncated"
-        elif history_reaches_cutoff:
-            reason = "history_overlaps_upstream"
-        else:
-            reason = "history_window_does_not_reach_upstream"
 
         accepted_names = {
             normalize_name(target),
