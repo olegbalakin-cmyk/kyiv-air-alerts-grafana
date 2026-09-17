@@ -1,0 +1,43 @@
+name: Validate additional proxy bridge
+
+on:
+  push:
+    branches: [multicity-wip-2026-09-16]
+    paths:
+      - "kyiv-air-alerts-grafana/scripts/probe_additional_proxies.py"
+      - "kyiv-air-alerts-grafana/data/alerts_in_ua_bridge_additional_2026-09-07_16.csv.gz.b64"
+      - "kyiv-air-alerts-grafana/data/alerts_in_ua_bridge_additional_2026-09-07_16.meta.json"
+      - ".github/workflows/additional-proxy-bridge.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: kyiv-air-alerts-grafana
+    steps:
+      - name: Check out WIP branch
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: kyiv-air-alerts-grafana/requirements.txt
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+      - name: Verify additional proxy continuity
+        env:
+          UKRAINEALARM_API_TOKEN: ${{ secrets.UKRAINEALARM_API_TOKEN }}
+        run: python scripts/probe_additional_proxies.py
+      - name: Upload report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: additional-proxy-bridge-probe
+          path: kyiv-air-alerts-grafana/data/additional_proxy_bridge_probe.json
+          if-no-files-found: warn
