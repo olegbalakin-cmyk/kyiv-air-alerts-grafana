@@ -1,8 +1,19 @@
-const state = { data: null, charts: {} };
+const state = {
+  data: null,
+  charts: {},
+  tableSort: { key: "alerts", direction: "desc" }
+};
 
 const COLORS = ["#62a0ea", "#8ff0a4", "#f8e45c"];
 const GRID = "rgba(148,163,184,.16)";
 const TEXT = "#b8c4cf";
+const TABLE_SORT_COLUMNS = [
+  { key: "label", label: "Місто / ряд", defaultDirection: "asc" },
+  { key: "alerts", label: "Тривог", defaultDirection: "desc" },
+  { key: "hours", label: "Годин", defaultDirection: "desc" },
+  { key: "duration", label: "Сер. тривалість", defaultDirection: "desc" },
+  { key: "coverage", label: "Покриття", defaultDirection: "asc" }
+];
 
 function $(id) { return document.getElementById(id); }
 function fmt(v, digits = 1) {
@@ -292,12 +303,90 @@ function renderComparison() {
   updateUrl();
 }
 
+function isMissingSortValue(value) {
+  return value === null || value === undefined || value === "" || (typeof value === "number" && Number.isNaN(value));
+}
+
+function compareTableRows(a, b) {
+  const { key, direction } = state.tableSort;
+  const av = a[key];
+  const bv = b[key];
+  const aMissing = isMissingSortValue(av);
+  const bMissing = isMissingSortValue(bv);
+
+  if (aMissing && bMissing) return a.label.localeCompare(b.label, "uk");
+  if (aMissing) return 1;
+  if (bMissing) return -1;
+
+  let cmp;
+  if (key === "label" || key === "coverage") {
+    cmp = String(av).localeCompare(String(bv), "uk", { numeric: true, sensitivity: "base" });
+  } else {
+    cmp = Number(av) - Number(bv);
+  }
+  if (cmp === 0) cmp = a.label.localeCompare(b.label, "uk");
+  return direction === "asc" ? cmp : -cmp;
+}
+
+function updateTableSortHeaders() {
+  const headers = document.querySelectorAll(".table-panel thead th");
+  TABLE_SORT_COLUMNS.forEach((column, idx) => {
+    const th = headers[idx];
+    if (!th) return;
+    const active = state.tableSort.key === column.key;
+    const arrow = active ? (state.tableSort.direction === "asc" ? " ↑" : " ↓") : " ↕";
+    th.textContent = column.label + arrow;
+    th.dataset.sortKey = column.key;
+    th.setAttribute("aria-sort", active ? (state.tableSort.direction === "asc" ? "ascending" : "descending") : "none");
+    th.setAttribute("role", "button");
+    th.tabIndex = 0;
+    th.title = active
+      ? `Сортування: ${state.tableSort.direction === "asc" ? "за зростанням" : "за спаданням"}. Натисніть, щоб змінити напрямок.`
+      : `Сортувати за колонкою «${column.label}»`;
+    th.style.cursor = "pointer";
+    th.style.userSelect = "none";
+  });
+}
+
+function changeTableSort(column) {
+  if (state.tableSort.key === column.key) {
+    state.tableSort.direction = state.tableSort.direction === "asc" ? "desc" : "asc";
+  } else {
+    state.tableSort = { key: column.key, direction: column.defaultDirection };
+  }
+  renderAllCitiesTable();
+}
+
+function setupTableSorting() {
+  const headers = document.querySelectorAll(".table-panel thead th");
+  TABLE_SORT_COLUMNS.forEach((column, idx) => {
+    const th = headers[idx];
+    if (!th) return;
+    const activate = () => changeTableSort(column);
+    th.addEventListener("click", activate);
+    th.addEventListener("keydown", event => {
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault();
+        activate();
+      }
+    });
+  });
+  updateTableSortHeaders();
+}
+
 function renderAllCitiesTable() {
   const rows = cityKeys().map(key => {
     const kpi = state.data.cities[key]?.kpis?.[0] || {};
-    return { key, label: labelFor(key), alerts: kpi.alerts_28d, hours: kpi.alert_hours_28d, duration: kpi.avg_alert_duration_min_28d, coverage: coverageStart(key) };
+    return {
+      key,
+      label: labelFor(key),
+      alerts: kpi.alerts_28d,
+      hours: kpi.alert_hours_28d,
+      duration: kpi.avg_alert_duration_min_28d,
+      coverage: coverageStart(key)
+    };
   });
-  rows.sort((a, b) => (Number(b.alerts) || -1) - (Number(a.alerts) || -1));
+  rows.sort(compareTableRows);
   $("allCitiesTable").innerHTML = rows.map(r => `
     <tr>
       <td><button class="table-city-link" data-city="${r.key}" type="button">${r.label}</button></td>
@@ -311,6 +400,7 @@ function renderAllCitiesTable() {
     renderCity();
     window.scrollTo({ top: $("cityTitle").offsetTop - 24, behavior: "smooth" });
   }));
+  updateTableSortHeaders();
 }
 
 function renderMethodology() {
@@ -323,6 +413,7 @@ function bind() {
   $("citySelect").addEventListener("change", renderCity);
   $("cityPeriod").addEventListener("change", renderCity);
   for (const id of ["compareA", "compareB", "compareC", "comparePeriod"]) $(id).addEventListener("change", renderComparison);
+  setupTableSorting();
   $("copyLink").addEventListener("click", async () => {
     try {
       await navigator.clipboard.writeText(location.href);
