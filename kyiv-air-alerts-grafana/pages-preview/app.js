@@ -242,8 +242,94 @@ function renderCity() {
 
   setChart("cityDurationChart", labels, [seriesDataset(labelFor(key), rows.map(r => r.avg_alert_duration_min), COLORS[2], dashed)], "Хвилин");
 
+  renderShortHorizon(key);
   renderCasualties(key);
   updateUrl();
+}
+
+function renderShortHorizon(key) {
+  const rows = state.data.cities[key]?.daily28 || [];
+  const labels = rows.map(r => r.date || String(r.time || "").slice(0, 10));
+  const range = $("daily28Range");
+  if (range) {
+    range.textContent = labels.length
+      ? `Щоденний розріз для ${labelFor(key)}: ${labels[0]} — ${labels[labels.length - 1]}. Сьогоднішній день не включається.`
+      : `Для ${labelFor(key)} немає доступного 28-денного ряду.`;
+  }
+
+  setChart(
+    "daily28HoursChart",
+    labels,
+    [{
+      label: "Годин під тривогою",
+      data: rows.map(r => r.total_alert_duration_hours),
+      backgroundColor: COLORS[0] + "88",
+      borderColor: COLORS[0],
+      borderWidth: 1
+    }],
+    "Годин",
+    "bar",
+    { plugins: { legend: { display: false }, tooltip: { mode: "index", intersect: false } } }
+  );
+
+  if (state.charts.daily28AlertsDurationChart) state.charts.daily28AlertsDurationChart.destroy();
+  state.charts.daily28AlertsDurationChart = new Chart($("daily28AlertsDurationChart"), {
+    data: {
+      labels,
+      datasets: [
+        {
+          type: "bar",
+          label: "Тривог, що почалися",
+          data: rows.map(r => r.alerts_started),
+          yAxisID: "yAlerts",
+          backgroundColor: COLORS[1] + "77",
+          borderColor: COLORS[1],
+          borderWidth: 1
+        },
+        {
+          type: "line",
+          label: "Середня тривалість, хв",
+          data: rows.map(r => r.avg_alert_duration_minutes),
+          yAxisID: "yDuration",
+          borderColor: COLORS[2],
+          backgroundColor: COLORS[2] + "22",
+          pointRadius: 3,
+          pointHoverRadius: 5,
+          borderWidth: 2,
+          borderDash: sourceType(key) === "raion_proxy" ? [7, 5] : [],
+          tension: 0.12,
+          spanGaps: false
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      animation: false,
+      interaction: { mode: "index", intersect: false },
+      plugins: {
+        legend: { labels: { color: TEXT, boxWidth: 14, usePointStyle: true } },
+        tooltip: { mode: "index", intersect: false }
+      },
+      scales: {
+        x: { ticks: { color: TEXT, maxRotation: 0, autoSkip: true }, grid: { color: GRID } },
+        yAlerts: {
+          position: "left",
+          beginAtZero: true,
+          ticks: { color: TEXT, precision: 0 },
+          grid: { color: GRID },
+          title: { display: true, text: "Кількість тривог", color: TEXT }
+        },
+        yDuration: {
+          position: "right",
+          beginAtZero: true,
+          ticks: { color: TEXT },
+          grid: { drawOnChartArea: false },
+          title: { display: true, text: "Середня тривалість, хв", color: TEXT }
+        }
+      }
+    }
+  });
 }
 
 function renderCasualties(key) {
@@ -419,8 +505,8 @@ function renderMethodology() {
   const periodMethodology = $("periodMethodology");
   if (periodMethodology) {
     periodMethodology.innerHTML = rolling
-      ? "<strong>Які дні потрапляють у розрахунки.</strong> Усі показники рахуються лише по завершених календарних днях. Сьогоднішній день не враховується. Картки вгорі показують рівно останні 28 завершених днів — до вчора включно. На місячному графіку показуються лише повні календарні місяці. У режимі «Ковзні 7 днів» кожна точка охоплює 7 завершених календарних днів і датована останнім днем цього вікна; сусідні точки перекриваються на 6 днів. Перше вікно, яке могло б включати неповний стартовий день покриття, не показується."
-      : "<strong>Які дні потрапляють у розрахунки.</strong> Усі показники рахуються лише по завершених календарних днях. Сьогоднішній день не враховується. Картки вгорі показують рівно останні 28 завершених днів — до вчора включно. На місячному графіку показуються лише повні календарні місяці, а на тижневому — лише повні тижні з понеділка до неділі. Якщо дані для міста починаються посеред місяця або тижня, цей перший неповний період не показується.";
+      ? "<strong>Які дні потрапляють у розрахунки.</strong> Усі показники рахуються лише по завершених календарних днях. Сьогоднішній день не враховується. Картки вгорі і блок «Останні 28 завершених днів» охоплюють рівно останні 28 завершених днів — до вчора включно; у короткому горизонті кожен день показаний окремо. На місячному графіку показуються лише повні календарні місяці. У режимі «Ковзні 7 днів» кожна точка охоплює 7 завершених календарних днів і датована останнім днем цього вікна; сусідні точки перекриваються на 6 днів. Перше вікно, яке могло б включати неповний стартовий день покриття, не показується."
+      : "<strong>Які дні потрапляють у розрахунки.</strong> Усі показники рахуються лише по завершених календарних днях. Сьогоднішній день не враховується. Картки вгорі і блок «Останні 28 завершених днів» охоплюють рівно останні 28 завершених днів — до вчора включно; у короткому горизонті кожен день показаний окремо. На місячному графіку показуються лише повні календарні місяці, а на тижневому — лише повні тижні з понеділка до неділі. Якщо дані для міста починаються посеред місяця або тижня, цей перший неповний період не показується.";
   }
 
   const tolerance = state.data.multicity_meta?.proxy_cross_source_match_tolerance_seconds || 15;
