@@ -35,7 +35,7 @@ function coverageStart(key) {
 function proxyRaion(key) {
   return state.data.multicity_meta?.cities?.[key]?.proxy_raion || state.data.cities?.[key]?.meta?.proxy_raion || null;
 }
-function typeText(key) { return sourceType(key) === "raion_proxy" ? "Районний proxy" : "Exact-city"; }
+function typeText(key) { return sourceType(key) === "raion_proxy" ? "Дані по району" : "Дані по місту"; }
 
 function fillSelect(select, keys, current, allowEmpty = false) {
   select.innerHTML = "";
@@ -133,7 +133,7 @@ function renderFreshness() {
     return;
   }
   const last = fresh.latest_proxy_event_end || fresh.last_successful_fetch_at;
-  banner.textContent = `⚠ Дані біля правого краю можуть бути неповними. Останній підтверджений update: ${last ? String(last).slice(0, 10) : "невідомо"}. Нулі після цієї точки не слід трактувати як гарантовану відсутність тривог.`;
+  banner.textContent = `⚠ Дані біля правого краю можуть бути неповними. Останнє підтверджене оновлення: ${last ? String(last).slice(0, 10) : "невідомо"}. Нулі після цієї точки не слід трактувати як гарантовану відсутність тривог.`;
   banner.classList.remove("hidden");
 }
 
@@ -143,8 +143,8 @@ function renderDatasetSummary() {
   const proxy = keys.filter(k => sourceType(k) === "raion_proxy").length;
   $("datasetSummary").innerHTML = [
     `${keys.length} ряди`,
-    `${exact} exact-city`,
-    `${proxy} районних proxy`,
+    `${exact} ряди з даними по місту`,
+    `${proxy} рядів за даними районів`,
     "Донецьк і Луганськ поки не включені"
   ].map(x => `<span class="summary-pill">${x}</span>`).join("");
 }
