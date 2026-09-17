@@ -1,0 +1,47 @@
+name: Validate multicity WIP bridge
+
+on:
+  push:
+    branches: [multicity-wip-2026-09-16]
+    paths:
+      - "kyiv-air-alerts-grafana/scripts/probe_multicity_bridge.py"
+      - "kyiv-air-alerts-grafana/data/alerts_in_ua_bridge_2026-09-07_16.csv.gz.b64"
+      - "kyiv-air-alerts-grafana/data/alerts_in_ua_bridge_2026-09-07_16.meta.json"
+      - ".github/workflows/multicity-wip-bridge.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: kyiv-air-alerts-grafana
+    steps:
+      - name: Check out WIP branch
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: kyiv-air-alerts-grafana/requirements.txt
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Verify Alerts.in.ua to UkraineAlarm continuity
+        env:
+          UKRAINEALARM_API_TOKEN: ${{ secrets.UKRAINEALARM_API_TOKEN }}
+        run: python scripts/probe_multicity_bridge.py
+
+      - name: Upload continuity report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: multicity-bridge-probe
+          path: kyiv-air-alerts-grafana/data/multicity_bridge_probe.json
+          if-no-files-found: warn
