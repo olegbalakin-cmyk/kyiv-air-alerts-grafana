@@ -14,7 +14,9 @@ from update_data import Alert, TZ, build_outputs
 ROOT = Path(__file__).resolve().parents[1]
 DATA_FILE = ROOT / "data" / "dashboard_data.json"
 STORE_FILE = ROOT / "data" / "ukrainealarm_bridge.json"
-API_URL = "https://api.ukrainealarm.com/api/v3/alerts/regionHistory"
+API_BASE = "https://api.ukrainealarm.com/api/v3"
+API_URL = f"{API_BASE}/alerts/regionHistory"
+REGIONS_URL = f"{API_BASE}/regions"
 TOKEN_ENV = "UKRAINEALARM_API_TOKEN"
 HISTORY_LIMIT = 25
 UTC = timezone.utc
@@ -76,21 +78,147 @@ def load_store() -> dict:
     return store
 
 
-def fetch_history(token: str) -> list[dict]:
-    response = requests.get(
-        API_URL,
-        headers={
-            "Accept": "application/json",
-            "Authorization": token,
-            "User-Agent": "kyiv-air-alerts-grafana/1.0 (+public dashboard updater)",
-        },
-        timeout=60,
+def api_headers(token: str) -> dict[str, str]:
+    return {
+        "Accept": "application/json",
+        "Authorization": token,
+        "User-Agent": "kyiv-air-alerts-grafana/1.0 (+public dashboard updater)",
+    }
+
+
+def raise_api_error(response: requests.Response, context: str) -> None:
+    if response.ok:
+        return
+    body = response.text.strip().replace("\n", " ")[:500]
+    raise RuntimeError(
+        f"{context}: HTTP {response.status_code} {response.reason}; response={body!r}"
     )
-    response.raise_for_status()
+
+
+def collect_region_nodes(payload) -> list[dict]:
+    nodes: list[dict] = []
+    seen: set[tuple[str, str]] = set()
+
+    def walk(value) -> None:
+        if isinstance(value, list):
+            for item in value:
+                walk(item)
+            return
+        if not isinstance(value, dict):
+            return
+
+        region_id = value.get("regionId")
+        region_name = str(value.get("regionName") or "").strip()
+        if region_id is not None and region_name:
+            key = (str(region_id), region_name)
+            if key not in seen:
+                seen.add(key)
+                nodes.append(
+                    {
+                        "regionId": str(region_id),
+                        "regionName": region_name,
+                        "regionType": value.get("regionType"),
+                    }
+                )
+
+        for child in value.values():
+            if isinstance(child, (dict, list)):
+                walk(child)
+
+    walk(payload)
+    return nodes
+
+
+def normalize_name(value: str) -> str:
+    return " ".join(value.casefold().replace("’", "'").split())
+
+
+def find_region_node(nodes: list[dict], target: str) -> dict | None:
+    candidates = [target, *EXACT_ALIASES.get(target, [])]
+    by_name = {normalize_name(str(node["regionName"])): node for node in nodes}
+    for candidate in candidates:
+        node = by_name.get(normalize_name(candidate))
+        if node:
+            return node
+    return None
+
+
+def fetch_regions(token: str) -> list[dict]:
+    response = requests.get(REGIONS_URL, headers=api_headers(token), timeout=60)
+    raise_api_error(response, "UkraineAlarm regions request failed")
     payload = response.json()
-    if not isinstance(payload, list):
-        raise RuntimeError(f"Unexpected UkraineAlarm payload: {type(payload).__name__}")
-    return [row for row in payload if isinstance(row, dict)]
+    nodes = collect_region_nodes(payload)
+    if not nodes:
+        raise RuntimeError("UkraineAlarm regions response contained no regionId/regionName nodes")
+    return nodes
+
+
+def normalize_history_payload(payload, fallback: dict) -> list[dict]:
+    if isinstance(payload, dict):
+        groups = [payload]
+    elif isinstance(payload, list):
+        groups = [row for row in payload if isinstance(row, dict)]
+    else:
+        raise RuntimeError(
+            f"Unexpected UkraineAlarm regionHistory payload: {type(payload).__name__}"
+        )
+
+    out: list[dict] = []
+    for group in groups:
+        row = dict(group)
+        row.setdefault("regionId", fallback["regionId"])
+        row.setdefault("regionName", fallback["regionName"])
+        alarms = row.get("alarms")
+        if alarms is None:
+            row["alarms"] = []
+        elif not isinstance(alarms, list):
+            continue
+        out.append(row)
+    return out
+
+
+def fetch_history(token: str, targets: list[str]) -> list[dict]:
+    nodes = fetch_regions(token)
+    payload: list[dict] = []
+
+    for target in targets:
+        node = find_region_node(nodes, target)
+        if node is None:
+            hints = sorted(
+                n["regionName"]
+                for n in nodes
+                if any(
+                    piece in normalize_name(n["regionName"])
+                    for piece in normalize_name(target).split()
+                    if len(piece) >= 5
+                )
+            )[:12]
+            raise RuntimeError(
+                f"UkraineAlarm region not found for {target!r}; possible matches={hints}"
+            )
+
+        response = requests.get(
+            API_URL,
+            headers=api_headers(token),
+            params={"regionId": node["regionId"]},
+            timeout=60,
+        )
+        raise_api_error(
+            response,
+            f"UkraineAlarm regionHistory request failed for {node['regionName']} ({node['regionId']})",
+        )
+        groups = normalize_history_payload(response.json(), node)
+        if not groups:
+            raise RuntimeError(
+                f"UkraineAlarm regionHistory returned no usable group for {node['regionName']}"
+            )
+        payload.extend(groups)
+        print(
+            f"UkraineAlarm region resolved: {target} -> "
+            f"{node['regionName']} ({node['regionId']})"
+        )
+
+    return payload
 
 
 def groups_by_name(payload: list[dict]) -> dict[str, dict]:
@@ -109,9 +237,11 @@ def groups_by_name(payload: list[dict]) -> dict[str, dict]:
 
 
 def find_group(groups: dict[str, dict], target: str) -> dict | None:
+    normalized = {normalize_name(name): group for name, group in groups.items()}
     for name in [target, *EXACT_ALIASES.get(target, [])]:
-        if name in groups:
-            return groups[name]
+        group = normalized.get(normalize_name(name))
+        if group:
+            return group
     return None
 
 
@@ -157,9 +287,9 @@ def merge_history(store: dict, payload: list[dict], cutoffs: dict[str, datetime]
             reason = "history_window_does_not_reach_upstream"
 
         accepted_names = {
-            target,
-            str(group.get("regionName") or ""),
-            *EXACT_ALIASES.get(target, []),
+            normalize_name(target),
+            normalize_name(str(group.get("regionName") or "")),
+            *(normalize_name(name) for name in EXACT_ALIASES.get(target, [])),
         }
         completed_air = 0
         latest_end = None
@@ -173,7 +303,7 @@ def merge_history(store: dict, payload: list[dict], cutoffs: dict[str, datetime]
             embedded_name = str(
                 alarm.get("regionName") or group.get("regionName") or ""
             ).strip()
-            if embedded_name and embedded_name not in accepted_names:
+            if embedded_name and normalize_name(embedded_name) not in accepted_names:
                 continue
             completed_air += 1
             latest_end = max(latest_end, end) if latest_end else end
@@ -243,7 +373,9 @@ def union_alerts(alerts: list[Alert], source: str) -> list[Alert]:
     return [Alert(start=start, end=end, source=source) for start, end in merged]
 
 
-def bridged_exact_alerts(base_alerts: dict[str, list[Alert]], store: dict | None = None) -> tuple[dict[str, list[Alert]], set[str]]:
+def bridged_exact_alerts(
+    base_alerts: dict[str, list[Alert]], store: dict | None = None
+) -> tuple[dict[str, list[Alert]], set[str]]:
     store = store or load_store()
     result = {key: list(alerts) for key, alerts in base_alerts.items()}
     covered: set[str] = set()
@@ -281,7 +413,8 @@ def main() -> None:
     }
 
     try:
-        store = merge_history(store, fetch_history(token), cutoffs)
+        history_payload = fetch_history(token, list(cutoffs))
+        store = merge_history(store, history_payload, cutoffs)
         STORE_FILE.write_text(
             json.dumps(store, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
         )
@@ -310,6 +443,8 @@ def main() -> None:
         extra = bridge_events(store, region, cutoff)
         status[key] = {
             "region": region,
+            "api_region_id": region_meta.get("region_id"),
+            "api_region_name": region_meta.get("api_region_name"),
             "continuous": continuous,
             "continuity_reason": region_meta.get("continuity_reason"),
             "upstream_cutoff": cutoff.isoformat(),
@@ -355,6 +490,7 @@ def main() -> None:
     covered = sorted(covered_keys)
     summary = {
         "source_url": API_URL,
+        "regions_url": REGIONS_URL,
         "history_limit_per_region": HISTORY_LIMIT,
         "last_successful_fetch_at": store.get("last_successful_fetch_at"),
         "last_fetch_error": store.get("last_fetch_error"),
@@ -370,7 +506,9 @@ def main() -> None:
     DATA_FILE.write_text(
         json.dumps(data, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
     )
-    print(f"Official UkraineAlarm bridge continuity: {len(covered)}/{len(required)} exact city rows")
+    print(
+        f"Official UkraineAlarm bridge continuity: {len(covered)}/{len(required)} exact city rows"
+    )
 
 
 if __name__ == "__main__":
