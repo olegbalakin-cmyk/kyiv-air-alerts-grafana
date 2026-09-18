@@ -1,0 +1,125 @@
+name: Monitor casualty candidates (WIP)
+
+on:
+  schedule:
+    - cron: "45 */4 * * *"
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/casualty-monitor-wip.yml"
+
+concurrency:
+  group: casualty-monitor-wip
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  monitor:
+    runs-on: ubuntu-latest
+    timeout-minutes: 55
+    defaults:
+      run:
+        working-directory: kyiv-air-alerts-grafana
+
+    steps:
+      - name: Check out casualty WIP
+        uses: actions/checkout@v4
+        with:
+          ref: multicity-wip-2026-09-16
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: kyiv-air-alerts-grafana/requirements.txt
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Self-test monitor
+        run: python scripts/monitor_casualty_candidates.py --self-test
+
+      - name: Poll alerts and gate casualty search
+        env:
+          UKRAINEALARM_API_TOKEN: ${{ secrets.UKRAINEALARM_API_TOKEN }}
+        run: |
+          if [ "${{ github.event_name }}" = "push" ]; then
+            echo "First workflow push: bootstrap from cached alert stores only"
+            python scripts/monitor_casualty_candidates.py --local-only
+          else
+            python scripts/monitor_casualty_candidates.py
+          fi
+
+      - name: Validate monitor invariants
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          root = Path("data/casualties")
+          state = json.loads((root / "candidate_monitor_state.json").read_text(encoding="utf-8"))
+          report = json.loads((root / "candidate_monitor_last_run.json").read_text(encoding="utf-8"))
+          queue = json.loads((root / "multicity_review_queue.json").read_text(encoding="utf-8"))
+
+          assert state.get("schema_version") == 1
+          assert len(state.get("cities") or {}) == 23, len(state.get("cities") or {})
+          assert report.get("city_count") == 23
+          assert report.get("confirmed_series_modified") is False
+          assert isinstance(queue, list)
+
+          print(
+              "Monitor validated:",
+              report.get("mode"),
+              "new_alert_episodes=", report.get("new_alert_episodes"),
+              "new_review_candidates=", report.get("new_review_candidates"),
+              "queue_size=", report.get("review_queue_size"),
+          )
+          PY
+
+      - name: Commit monitor state to WIP only
+        working-directory: .
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git add kyiv-air-alerts-grafana/data/casualties/candidate_monitor_state.json \
+                  kyiv-air-alerts-grafana/data/casualties/candidate_monitor_last_run.json \
+                  kyiv-air-alerts-grafana/data/casualties/multicity_review_queue.json
+
+          if [ -f kyiv-air-alerts-grafana/data/sevastopol_events.json ]; then
+            git add kyiv-air-alerts-grafana/data/sevastopol_events.json
+          fi
+
+          if git diff --cached --quiet; then
+            echo "No monitor-state changes"
+            exit 0
+          fi
+
+          git commit -m "Update alert-gated casualty review queue"
+
+          for attempt in 1 2 3; do
+            git fetch origin multicity-wip-2026-09-16
+            if git rebase origin/multicity-wip-2026-09-16 && \
+               git push origin HEAD:multicity-wip-2026-09-16; then
+              break
+            fi
+            git rebase --abort || true
+            if [ "$attempt" -eq 3 ]; then
+              echo "WIP push failed after 3 attempts"
+              exit 1
+            fi
+            sleep $((attempt * 2))
+          done
+
+      - name: Write run summary
+        if: always()
+        run: |
+          if [ -f data/casualties/candidate_monitor_last_run.json ]; then
+            echo "## Casualty monitor" >> "$GITHUB_STEP_SUMMARY"
+            cat data/casualties/candidate_monitor_last_run.json >> "$GITHUB_STEP_SUMMARY"
+          fi
