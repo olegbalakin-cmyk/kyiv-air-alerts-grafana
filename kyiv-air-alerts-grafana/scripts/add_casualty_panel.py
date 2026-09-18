@@ -113,11 +113,12 @@ def add_disclaimer(methodology: dict, count: int) -> None:
         f"\n\n{marker} На тестовому dashboard доступні місячні реконструкції для {count} міст. "
         "Пізні смерті від поранень віднесені до місяця атаки; географія — адміністративні межі міста. "
         "Невирішені review-кейси не включаються до confirmed-рядів. "
-        "Запоріжжя та Херсон не включені до casualty-секції до завершення фінального аудиту. "
+        "Херсон не включений до casualty-секції до завершення фінального аудиту. "
         "2026-09 є поточним неповним місяцем."
     )
-    if marker not in content:
-        methodology["options"]["content"] = content + disclaimer
+    if marker in content:
+        content = content.split(marker, 1)[0].rstrip()
+    methodology["options"]["content"] = content + disclaimer
 
 
 def main() -> None:
