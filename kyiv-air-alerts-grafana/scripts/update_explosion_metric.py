@@ -384,13 +384,11 @@ def add_candidates(queue: list[dict], baseline: dict, city_key: str, rows: list[
             existing["trigger_check_labels"] = sorted(set(existing.get("trigger_check_labels") or []) | set(labels))
             continue
 
-        matched = unique_same_day_episode(row, due)
-        status = "confirmed_strict_auto" if matched else "needs_review"
         item = {
             "candidate_id": cid,
             "city_key": city_key,
             "city": city_label(baseline, city_key),
-            "status": status,
+            "status": "needs_review",
             "source": row.get("source"),
             "publisher": row.get("publisher"),
             "url": row["url"],
@@ -400,19 +398,17 @@ def add_candidates(queue: list[dict], baseline: dict, city_key: str, rows: list[
             "last_seen_at": iso(now),
             "trigger_episode_ids": trigger_ids,
             "trigger_check_labels": labels,
-            "matched_episode_id": matched["episode_id"] if matched else None,
-            "match_basis": "explicit_during_alert_unique_local_day" if matched else None,
+            "matched_episode_id": None,
+            "match_basis": None,
             "note": (
-                "Auto-strict is allowed only for exact-city wording with confirmed air context, "
-                "explicit wording that the explosions occurred during an alert, and one unique alert "
-                "episode on that local calendar day. All other candidates require review."
+                "Automatically discovered after a completed alert episode. Do not count it in strict "
+                "without review of exact-city geography, air-war context, event time, deduplication, "
+                "and a match to one concrete alert episode."
             ),
         }
         queue.append(item)
         by_id[cid] = item
         new_count += 1
-        if matched:
-            auto_count += 1
     return new_count, auto_count
 
 
@@ -444,8 +440,8 @@ def rebuild_output(state: dict, queue: list[dict], baseline: dict, keys: list[st
         "automatic_updates": True,
         "automatic_denominator": True,
         "automatic_candidate_discovery": True,
-        "auto_strict_rule": "exact city + air context + explicit during-alert wording + unique alert episode on local day",
-        "manual_review_required_for_ambiguous_candidates": True,
+        "automatic_strict_confirmation": False,
+        "manual_review_required_for_new_candidates": True,
         "city_count": len(keys),
         "city_membership_source": BASELINE_FILE.name,
     }
@@ -497,8 +493,12 @@ def rebuild_output(state: dict, queue: list[dict], baseline: dict, keys: list[st
                 f"scripts/sync_explosion_seed.py before the scheduled monitor."
             )
         daily_alerts = {d: int(n) for d, n in seed_city["daily_alerts"].items()}
-        for d, n in daily_new.items():
-            daily_alerts[d] = int(n)
+        first_live_day = baseline_end(baseline, key) + timedelta(days=1)
+        d = first_live_day
+        while d <= cutoff:
+            day = d.isoformat()
+            daily_alerts[day] = int(daily_new.get(day, 0))
+            d += timedelta(days=1)
 
         rolling = list(base.get("rolling90") or [])
         last_base = parse_dt((rolling[-1]["date"] + "T00:00:00Z") if rolling else None)
