@@ -109,6 +109,30 @@ The merge chat must not redo web/Telegram research unless the two result files c
 
 Then freeze Kropyvnytskyi into `explosion_preview_input.json`, update the status/handoff, and let the existing automatic onboarding pipeline add it to the audited baseline/test metric.
 
+## All remaining normal cities are pre-sliced
+
+Use:
+- `RESEARCH_SLICES_2026-09-18.csv` — one row per research chat;
+- `SLICE_MICROTASK.md` — generic instructions for one slice;
+- `CITY_MERGE.md` — merge only after every slice of one city is complete.
+
+After Kropyvnytskyi there are **33 slice chats**:
+- Kherson: 469 / 473 / 470
+- Odesa: 489 / 487 / 489
+- Cherkasy: 517 / 516 / 515
+- Mykolaiv: 551 / 554 / 543
+- Chernihiv: 557 / 559 / 561
+- Dnipro: 568 / 562 / 566 / 563
+- Sumy: 573 / 574 / 577 / 573
+- Zaporizhzhia: 592 / 589 / 594 / 590
+- Kharkiv: 593 / 594 / 597 / 592 / 596 / 593
+
+Kherson and Odesa are the only unavoidable sub-500 cases: their city totals cannot be partitioned into chunks that are all 500–600 while preserving whole alert episodes.
+
+For a new slice chat, do **not** read the full handoff unless needed. Read only:
+1. the active row from `RESEARCH_SLICES_2026-09-18.csv`;
+2. `SLICE_MICROTASK.md`.
+
 ## Queue after Kropyvnytskyi
 
 Kherson 1412 -> Odesa 1465 -> Cherkasy 1548 -> Mykolaiv 1648 -> Chernihiv 1677 -> Dnipro 2259 -> Sumy 2297 -> Zaporizhzhia 2365 -> Kharkiv 3565.
