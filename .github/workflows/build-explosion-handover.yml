@@ -37,12 +37,15 @@ jobs:
           next_rows = [r for r in rows if r["explosion_metric_status"] == "next_priority"]
           assert len(next_rows) == 1 and next_rows[0]["city_key"] == "zhytomyr", next_rows
           assert next_rows[0]["completed_alert_episodes_in_frozen_window"] == "685"
-          print("Explosion handover verified: 10 complete; Zhytomyr next")
+          prompt = root / "explosion_metric_handoff/PROMPT_NEXT_CHAT.md"
+          assert prompt.exists() and "Zhytomyr / Житомир" in prompt.read_text(encoding="utf-8")
+          print("Explosion handover verified: 10 complete; Zhytomyr next; prompt present")
           PY
 
       - name: Build compact handover ZIP
         run: |
           mkdir -p /tmp/explosion-handover/repo_snapshot
+          cp kyiv-air-alerts-grafana/data/explosion_metric_handoff/PROMPT_NEXT_CHAT.md /tmp/explosion-handover/
           cp kyiv-air-alerts-grafana/data/explosion_metric_handoff/NEXT_CHAT_HANDOFF_EXPLOSION_METRIC_2026-09-18.md /tmp/explosion-handover/
           cp kyiv-air-alerts-grafana/data/explosion_metric_handoff/city_explosion_metric_status_2026-09-18.csv /tmp/explosion-handover/
           cp kyiv-air-alerts-grafana/data/explosion_preview_input.json /tmp/explosion-handover/repo_snapshot/
