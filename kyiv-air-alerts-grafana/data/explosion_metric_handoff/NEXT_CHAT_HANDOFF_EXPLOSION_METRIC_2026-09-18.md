@@ -19,6 +19,21 @@ Derived test-series commit: `ab1d0b4690044d861b73ef6c8f6fa180e8636c79`
 
 The branch now has explosion data for **10 cities**, not only Poltava.
 
+## Live updating for the 10 audited cities
+
+This is separate from the unfinished-city research queue below.
+
+The 10 already audited cities now have a **test/WIP live-update pipeline** after the frozen baseline through **2026-09-17**:
+- `data/explosion_baseline_2026-09-17.json` — frozen audited baseline;
+- `data/explosion_daily_alert_seed.json` — denominator seed for rolling windows;
+- `scripts/monitor_explosion_candidates.py` — tracks newly completed alert episodes, and only then runs candidate discovery for the affected audited city;
+- candidate discovery uses exact-city filtering across Suspilne / Ukrainska Pravda Telegram plus a targeted Google News RSS gap search;
+- `data/explosion_review_queue.json` — candidates remain `needs_review` until manual classification;
+- `scripts/update_explosion_metric_live.py` — rebuilds `explosions_test.json` from the frozen baseline + new alert episodes + manually approved review items;
+- automatic discovery never promotes an item into the strict numerator on its own.
+
+**Important:** the live updater is for the 10 audited cities only. It does **not** change the frozen research denominator in `city_explosion_metric_status_2026-09-18.csv` and it does not research Zhytomyr or any other unfinished city. For unfinished-city research, use the frozen denominator from the status CSV even if current live dashboard files contain a slightly different current proxy count.
+
 ## Completed cities — do not restart
 
 | City | Alerts | Strict | Strict % | Sensitivity | Sensitivity % |
