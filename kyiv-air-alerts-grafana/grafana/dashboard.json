@@ -2029,149 +2029,2850 @@
     {
       "id": 950,
       "type": "row",
-      "title": "Загиблі від повітряних атак — Київ",
-      "collapsed": false,
-      "panels": [],
-      "gridPos": {
-        "h": 1,
-        "w": 24,
-        "x": 0,
-        "y": 107
-      }
-    },
-    {
-      "id": 951,
-      "type": "barchart",
-      "title": "Київ: загиблі від повітряних атак РФ за місяцями",
-      "description": "Київ (місто). Ракетні, дронові та інші повітряні атаки. Пізні смерті від отриманих під час атаки поранень віднесені до місяця самої атаки. Наземні бої та артилерійські обстріли 2022 року не включені. Вісь X є категоріальною (YYYY-MM). Технічне поле дати збережене у frame для сумісності зі shared/public renderer Grafana.",
-      "gridPos": {
-        "h": 10,
-        "w": 24,
-        "x": 0,
-        "y": 108
-      },
-      "datasource": {
-        "type": "yesoreyeram-infinity-datasource",
-        "uid": "${DS_INFINITY}"
-      },
-      "targets": [
+      "title": "Загиблі від повітряних атак — 21 міст",
+      "collapsed": true,
+      "panels": [
         {
-          "columns": [
-            {
-              "selector": "month",
-              "text": "Місяць",
-              "type": "string"
-            },
-            {
-              "selector": "time",
-              "text": "Дата",
-              "type": "timestamp",
-              "timestampFormat": "2006-01-02T15:04:05Z07:00"
-            },
-            {
-              "selector": "deaths",
-              "text": "Загиблих",
-              "type": "number"
-            }
-          ],
-          "computed_columns": [],
+          "id": 951,
+          "type": "barchart",
+          "title": "Київ: загиблі від повітряних атак РФ",
+          "description": "Київ (місто). Ракетні, дронові та інші повітряні атаки. Пізні смерті від отриманих під час атаки поранень віднесені до місяця самої атаки. Наземні бої та артилерійські обстріли не включені. 2026-09 — поточний неповний місяць.",
+          "gridPos": {
+            "h": 10,
+            "w": 12,
+            "x": 0,
+            "y": 0
+          },
           "datasource": {
             "type": "yesoreyeram-infinity-datasource",
             "uid": "${DS_INFINITY}"
           },
-          "filters": [],
-          "format": "table",
-          "global_query_id": "",
-          "parser": "backend",
-          "refId": "A",
-          "root_selector": "$.casualties.monthly",
-          "source": "url",
-          "type": "json",
-          "url": "https://raw.githubusercontent.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/main/kyiv-air-alerts-grafana/data/dashboard_data.json",
-          "url_options": {
-            "data": "",
-            "method": "GET"
+          "targets": [
+            {
+              "columns": [
+                {
+                  "selector": "month",
+                  "text": "Місяць",
+                  "type": "string"
+                },
+                {
+                  "selector": "time",
+                  "text": "Дата",
+                  "type": "timestamp",
+                  "timestampFormat": "2006-01-02T15:04:05Z07:00"
+                },
+                {
+                  "selector": "deaths",
+                  "text": "Загиблих",
+                  "type": "number"
+                }
+              ],
+              "computed_columns": [],
+              "datasource": {
+                "type": "yesoreyeram-infinity-datasource",
+                "uid": "${DS_INFINITY}"
+              },
+              "filters": [],
+              "format": "table",
+              "global_query_id": "",
+              "parser": "backend",
+              "refId": "A",
+              "root_selector": "$['casualties_by_city']['kyiv']['monthly']",
+              "source": "url",
+              "type": "json",
+              "url": "https://raw.githubusercontent.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/main/kyiv-air-alerts-grafana/data/dashboard_data.json",
+              "url_options": {
+                "data": "",
+                "method": "GET"
+              }
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "short",
+              "decimals": 0,
+              "custom": {
+                "axisPlacement": "auto",
+                "axisLabel": "Кількість загиблих",
+                "axisColorMode": "text",
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "hideFrom": {
+                  "tooltip": false,
+                  "viz": false,
+                  "legend": false
+                },
+                "fillOpacity": 65,
+                "gradientMode": "none",
+                "lineWidth": 1,
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  }
+                ]
+              }
+            },
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Дата"
+                },
+                "properties": [
+                  {
+                    "id": "custom.hideFrom",
+                    "value": {
+                      "tooltip": true,
+                      "viz": true,
+                      "legend": true
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          "options": {
+            "orientation": "auto",
+            "xField": "Місяць",
+            "xTickLabelRotation": 0,
+            "xTickLabelSpacing": 90,
+            "xTickLabelMaxLength": 12,
+            "groupWidth": 0.72,
+            "barWidth": 0.9,
+            "barRadius": 0,
+            "fullHighlight": true,
+            "showValue": "never",
+            "stacking": "none",
+            "tooltip": {
+              "mode": "single",
+              "sort": "none",
+              "hideZeros": false
+            },
+            "legend": {
+              "showLegend": false,
+              "displayMode": "list",
+              "placement": "bottom",
+              "calcs": []
+            }
+          }
+        },
+        {
+          "id": 952,
+          "type": "barchart",
+          "title": "Харків: загиблі від повітряних атак РФ",
+          "description": "Харків (місто). Ракетні, дронові та інші повітряні атаки. Пізні смерті від отриманих під час атаки поранень віднесені до місяця самої атаки. Наземні бої та артилерійські обстріли не включені. 2026-09 — поточний неповний місяць.",
+          "gridPos": {
+            "h": 10,
+            "w": 12,
+            "x": 12,
+            "y": 0
+          },
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "${DS_INFINITY}"
+          },
+          "targets": [
+            {
+              "columns": [
+                {
+                  "selector": "month",
+                  "text": "Місяць",
+                  "type": "string"
+                },
+                {
+                  "selector": "time",
+                  "text": "Дата",
+                  "type": "timestamp",
+                  "timestampFormat": "2006-01-02T15:04:05Z07:00"
+                },
+                {
+                  "selector": "deaths",
+                  "text": "Загиблих",
+                  "type": "number"
+                }
+              ],
+              "computed_columns": [],
+              "datasource": {
+                "type": "yesoreyeram-infinity-datasource",
+                "uid": "${DS_INFINITY}"
+              },
+              "filters": [],
+              "format": "table",
+              "global_query_id": "",
+              "parser": "backend",
+              "refId": "A",
+              "root_selector": "$['casualties_by_city']['kharkiv']['monthly']",
+              "source": "url",
+              "type": "json",
+              "url": "https://raw.githubusercontent.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/main/kyiv-air-alerts-grafana/data/dashboard_data.json",
+              "url_options": {
+                "data": "",
+                "method": "GET"
+              }
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "short",
+              "decimals": 0,
+              "custom": {
+                "axisPlacement": "auto",
+                "axisLabel": "Кількість загиблих",
+                "axisColorMode": "text",
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "hideFrom": {
+                  "tooltip": false,
+                  "viz": false,
+                  "legend": false
+                },
+                "fillOpacity": 65,
+                "gradientMode": "none",
+                "lineWidth": 1,
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  }
+                ]
+              }
+            },
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Дата"
+                },
+                "properties": [
+                  {
+                    "id": "custom.hideFrom",
+                    "value": {
+                      "tooltip": true,
+                      "viz": true,
+                      "legend": true
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          "options": {
+            "orientation": "auto",
+            "xField": "Місяць",
+            "xTickLabelRotation": 0,
+            "xTickLabelSpacing": 90,
+            "xTickLabelMaxLength": 12,
+            "groupWidth": 0.72,
+            "barWidth": 0.9,
+            "barRadius": 0,
+            "fullHighlight": true,
+            "showValue": "never",
+            "stacking": "none",
+            "tooltip": {
+              "mode": "single",
+              "sort": "none",
+              "hideZeros": false
+            },
+            "legend": {
+              "showLegend": false,
+              "displayMode": "list",
+              "placement": "bottom",
+              "calcs": []
+            }
+          }
+        },
+        {
+          "id": 953,
+          "type": "barchart",
+          "title": "Черкаси: загиблі від повітряних атак РФ",
+          "description": "Черкаси (місто). Ракетні, дронові та інші повітряні атаки. Пізні смерті від отриманих під час атаки поранень віднесені до місяця самої атаки. Наземні бої та артилерійські обстріли не включені. 2026-09 — поточний неповний місяць.",
+          "gridPos": {
+            "h": 10,
+            "w": 12,
+            "x": 0,
+            "y": 10
+          },
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "${DS_INFINITY}"
+          },
+          "targets": [
+            {
+              "columns": [
+                {
+                  "selector": "month",
+                  "text": "Місяць",
+                  "type": "string"
+                },
+                {
+                  "selector": "time",
+                  "text": "Дата",
+                  "type": "timestamp",
+                  "timestampFormat": "2006-01-02T15:04:05Z07:00"
+                },
+                {
+                  "selector": "deaths",
+                  "text": "Загиблих",
+                  "type": "number"
+                }
+              ],
+              "computed_columns": [],
+              "datasource": {
+                "type": "yesoreyeram-infinity-datasource",
+                "uid": "${DS_INFINITY}"
+              },
+              "filters": [],
+              "format": "table",
+              "global_query_id": "",
+              "parser": "backend",
+              "refId": "A",
+              "root_selector": "$['casualties_by_city']['cherkasy']['monthly']",
+              "source": "url",
+              "type": "json",
+              "url": "https://raw.githubusercontent.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/main/kyiv-air-alerts-grafana/data/dashboard_data.json",
+              "url_options": {
+                "data": "",
+                "method": "GET"
+              }
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "short",
+              "decimals": 0,
+              "custom": {
+                "axisPlacement": "auto",
+                "axisLabel": "Кількість загиблих",
+                "axisColorMode": "text",
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "hideFrom": {
+                  "tooltip": false,
+                  "viz": false,
+                  "legend": false
+                },
+                "fillOpacity": 65,
+                "gradientMode": "none",
+                "lineWidth": 1,
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  }
+                ]
+              }
+            },
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Дата"
+                },
+                "properties": [
+                  {
+                    "id": "custom.hideFrom",
+                    "value": {
+                      "tooltip": true,
+                      "viz": true,
+                      "legend": true
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          "options": {
+            "orientation": "auto",
+            "xField": "Місяць",
+            "xTickLabelRotation": 0,
+            "xTickLabelSpacing": 90,
+            "xTickLabelMaxLength": 12,
+            "groupWidth": 0.72,
+            "barWidth": 0.9,
+            "barRadius": 0,
+            "fullHighlight": true,
+            "showValue": "never",
+            "stacking": "none",
+            "tooltip": {
+              "mode": "single",
+              "sort": "none",
+              "hideZeros": false
+            },
+            "legend": {
+              "showLegend": false,
+              "displayMode": "list",
+              "placement": "bottom",
+              "calcs": []
+            }
+          }
+        },
+        {
+          "id": 954,
+          "type": "barchart",
+          "title": "Житомир: загиблі від повітряних атак РФ",
+          "description": "Житомир (місто). Ракетні, дронові та інші повітряні атаки. Пізні смерті від отриманих під час атаки поранень віднесені до місяця самої атаки. Наземні бої та артилерійські обстріли не включені. 2026-09 — поточний неповний місяць.",
+          "gridPos": {
+            "h": 10,
+            "w": 12,
+            "x": 12,
+            "y": 10
+          },
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "${DS_INFINITY}"
+          },
+          "targets": [
+            {
+              "columns": [
+                {
+                  "selector": "month",
+                  "text": "Місяць",
+                  "type": "string"
+                },
+                {
+                  "selector": "time",
+                  "text": "Дата",
+                  "type": "timestamp",
+                  "timestampFormat": "2006-01-02T15:04:05Z07:00"
+                },
+                {
+                  "selector": "deaths",
+                  "text": "Загиблих",
+                  "type": "number"
+                }
+              ],
+              "computed_columns": [],
+              "datasource": {
+                "type": "yesoreyeram-infinity-datasource",
+                "uid": "${DS_INFINITY}"
+              },
+              "filters": [],
+              "format": "table",
+              "global_query_id": "",
+              "parser": "backend",
+              "refId": "A",
+              "root_selector": "$['casualties_by_city']['zhytomyr']['monthly']",
+              "source": "url",
+              "type": "json",
+              "url": "https://raw.githubusercontent.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/main/kyiv-air-alerts-grafana/data/dashboard_data.json",
+              "url_options": {
+                "data": "",
+                "method": "GET"
+              }
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "short",
+              "decimals": 0,
+              "custom": {
+                "axisPlacement": "auto",
+                "axisLabel": "Кількість загиблих",
+                "axisColorMode": "text",
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "hideFrom": {
+                  "tooltip": false,
+                  "viz": false,
+                  "legend": false
+                },
+                "fillOpacity": 65,
+                "gradientMode": "none",
+                "lineWidth": 1,
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  }
+                ]
+              }
+            },
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Дата"
+                },
+                "properties": [
+                  {
+                    "id": "custom.hideFrom",
+                    "value": {
+                      "tooltip": true,
+                      "viz": true,
+                      "legend": true
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          "options": {
+            "orientation": "auto",
+            "xField": "Місяць",
+            "xTickLabelRotation": 0,
+            "xTickLabelSpacing": 90,
+            "xTickLabelMaxLength": 12,
+            "groupWidth": 0.72,
+            "barWidth": 0.9,
+            "barRadius": 0,
+            "fullHighlight": true,
+            "showValue": "never",
+            "stacking": "none",
+            "tooltip": {
+              "mode": "single",
+              "sort": "none",
+              "hideZeros": false
+            },
+            "legend": {
+              "showLegend": false,
+              "displayMode": "list",
+              "placement": "bottom",
+              "calcs": []
+            }
+          }
+        },
+        {
+          "id": 955,
+          "type": "barchart",
+          "title": "Дніпро: загиблі від повітряних атак РФ",
+          "description": "Дніпро (місто). Ракетні, дронові та інші повітряні атаки. Пізні смерті від отриманих під час атаки поранень віднесені до місяця самої атаки. Наземні бої та артилерійські обстріли не включені. 2026-09 — поточний неповний місяць.",
+          "gridPos": {
+            "h": 10,
+            "w": 12,
+            "x": 0,
+            "y": 20
+          },
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "${DS_INFINITY}"
+          },
+          "targets": [
+            {
+              "columns": [
+                {
+                  "selector": "month",
+                  "text": "Місяць",
+                  "type": "string"
+                },
+                {
+                  "selector": "time",
+                  "text": "Дата",
+                  "type": "timestamp",
+                  "timestampFormat": "2006-01-02T15:04:05Z07:00"
+                },
+                {
+                  "selector": "deaths",
+                  "text": "Загиблих",
+                  "type": "number"
+                }
+              ],
+              "computed_columns": [],
+              "datasource": {
+                "type": "yesoreyeram-infinity-datasource",
+                "uid": "${DS_INFINITY}"
+              },
+              "filters": [],
+              "format": "table",
+              "global_query_id": "",
+              "parser": "backend",
+              "refId": "A",
+              "root_selector": "$['casualties_by_city']['dnipro']['monthly']",
+              "source": "url",
+              "type": "json",
+              "url": "https://raw.githubusercontent.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/main/kyiv-air-alerts-grafana/data/dashboard_data.json",
+              "url_options": {
+                "data": "",
+                "method": "GET"
+              }
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "short",
+              "decimals": 0,
+              "custom": {
+                "axisPlacement": "auto",
+                "axisLabel": "Кількість загиблих",
+                "axisColorMode": "text",
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "hideFrom": {
+                  "tooltip": false,
+                  "viz": false,
+                  "legend": false
+                },
+                "fillOpacity": 65,
+                "gradientMode": "none",
+                "lineWidth": 1,
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  }
+                ]
+              }
+            },
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Дата"
+                },
+                "properties": [
+                  {
+                    "id": "custom.hideFrom",
+                    "value": {
+                      "tooltip": true,
+                      "viz": true,
+                      "legend": true
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          "options": {
+            "orientation": "auto",
+            "xField": "Місяць",
+            "xTickLabelRotation": 0,
+            "xTickLabelSpacing": 90,
+            "xTickLabelMaxLength": 12,
+            "groupWidth": 0.72,
+            "barWidth": 0.9,
+            "barRadius": 0,
+            "fullHighlight": true,
+            "showValue": "never",
+            "stacking": "none",
+            "tooltip": {
+              "mode": "single",
+              "sort": "none",
+              "hideZeros": false
+            },
+            "legend": {
+              "showLegend": false,
+              "displayMode": "list",
+              "placement": "bottom",
+              "calcs": []
+            }
+          }
+        },
+        {
+          "id": 956,
+          "type": "barchart",
+          "title": "Хмельницький: загиблі від повітряних атак РФ",
+          "description": "Хмельницький (місто). Ракетні, дронові та інші повітряні атаки. Пізні смерті від отриманих під час атаки поранень віднесені до місяця самої атаки. Наземні бої та артилерійські обстріли не включені. 2026-09 — поточний неповний місяць.",
+          "gridPos": {
+            "h": 10,
+            "w": 12,
+            "x": 12,
+            "y": 20
+          },
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "${DS_INFINITY}"
+          },
+          "targets": [
+            {
+              "columns": [
+                {
+                  "selector": "month",
+                  "text": "Місяць",
+                  "type": "string"
+                },
+                {
+                  "selector": "time",
+                  "text": "Дата",
+                  "type": "timestamp",
+                  "timestampFormat": "2006-01-02T15:04:05Z07:00"
+                },
+                {
+                  "selector": "deaths",
+                  "text": "Загиблих",
+                  "type": "number"
+                }
+              ],
+              "computed_columns": [],
+              "datasource": {
+                "type": "yesoreyeram-infinity-datasource",
+                "uid": "${DS_INFINITY}"
+              },
+              "filters": [],
+              "format": "table",
+              "global_query_id": "",
+              "parser": "backend",
+              "refId": "A",
+              "root_selector": "$['casualties_by_city']['khmelnytskyi']['monthly']",
+              "source": "url",
+              "type": "json",
+              "url": "https://raw.githubusercontent.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/main/kyiv-air-alerts-grafana/data/dashboard_data.json",
+              "url_options": {
+                "data": "",
+                "method": "GET"
+              }
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "short",
+              "decimals": 0,
+              "custom": {
+                "axisPlacement": "auto",
+                "axisLabel": "Кількість загиблих",
+                "axisColorMode": "text",
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "hideFrom": {
+                  "tooltip": false,
+                  "viz": false,
+                  "legend": false
+                },
+                "fillOpacity": 65,
+                "gradientMode": "none",
+                "lineWidth": 1,
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  }
+                ]
+              }
+            },
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Дата"
+                },
+                "properties": [
+                  {
+                    "id": "custom.hideFrom",
+                    "value": {
+                      "tooltip": true,
+                      "viz": true,
+                      "legend": true
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          "options": {
+            "orientation": "auto",
+            "xField": "Місяць",
+            "xTickLabelRotation": 0,
+            "xTickLabelSpacing": 90,
+            "xTickLabelMaxLength": 12,
+            "groupWidth": 0.72,
+            "barWidth": 0.9,
+            "barRadius": 0,
+            "fullHighlight": true,
+            "showValue": "never",
+            "stacking": "none",
+            "tooltip": {
+              "mode": "single",
+              "sort": "none",
+              "hideZeros": false
+            },
+            "legend": {
+              "showLegend": false,
+              "displayMode": "list",
+              "placement": "bottom",
+              "calcs": []
+            }
+          }
+        },
+        {
+          "id": 957,
+          "type": "barchart",
+          "title": "Полтава: загиблі від повітряних атак РФ",
+          "description": "Полтава (місто). Ракетні, дронові та інші повітряні атаки. Пізні смерті від отриманих під час атаки поранень віднесені до місяця самої атаки. Наземні бої та артилерійські обстріли не включені. 2026-09 — поточний неповний місяць.",
+          "gridPos": {
+            "h": 10,
+            "w": 12,
+            "x": 0,
+            "y": 30
+          },
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "${DS_INFINITY}"
+          },
+          "targets": [
+            {
+              "columns": [
+                {
+                  "selector": "month",
+                  "text": "Місяць",
+                  "type": "string"
+                },
+                {
+                  "selector": "time",
+                  "text": "Дата",
+                  "type": "timestamp",
+                  "timestampFormat": "2006-01-02T15:04:05Z07:00"
+                },
+                {
+                  "selector": "deaths",
+                  "text": "Загиблих",
+                  "type": "number"
+                }
+              ],
+              "computed_columns": [],
+              "datasource": {
+                "type": "yesoreyeram-infinity-datasource",
+                "uid": "${DS_INFINITY}"
+              },
+              "filters": [],
+              "format": "table",
+              "global_query_id": "",
+              "parser": "backend",
+              "refId": "A",
+              "root_selector": "$['casualties_by_city']['poltava']['monthly']",
+              "source": "url",
+              "type": "json",
+              "url": "https://raw.githubusercontent.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/main/kyiv-air-alerts-grafana/data/dashboard_data.json",
+              "url_options": {
+                "data": "",
+                "method": "GET"
+              }
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "short",
+              "decimals": 0,
+              "custom": {
+                "axisPlacement": "auto",
+                "axisLabel": "Кількість загиблих",
+                "axisColorMode": "text",
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "hideFrom": {
+                  "tooltip": false,
+                  "viz": false,
+                  "legend": false
+                },
+                "fillOpacity": 65,
+                "gradientMode": "none",
+                "lineWidth": 1,
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  }
+                ]
+              }
+            },
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Дата"
+                },
+                "properties": [
+                  {
+                    "id": "custom.hideFrom",
+                    "value": {
+                      "tooltip": true,
+                      "viz": true,
+                      "legend": true
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          "options": {
+            "orientation": "auto",
+            "xField": "Місяць",
+            "xTickLabelRotation": 0,
+            "xTickLabelSpacing": 90,
+            "xTickLabelMaxLength": 12,
+            "groupWidth": 0.72,
+            "barWidth": 0.9,
+            "barRadius": 0,
+            "fullHighlight": true,
+            "showValue": "never",
+            "stacking": "none",
+            "tooltip": {
+              "mode": "single",
+              "sort": "none",
+              "hideZeros": false
+            },
+            "legend": {
+              "showLegend": false,
+              "displayMode": "list",
+              "placement": "bottom",
+              "calcs": []
+            }
+          }
+        },
+        {
+          "id": 958,
+          "type": "barchart",
+          "title": "Рівне: загиблі від повітряних атак РФ",
+          "description": "Рівне (місто). Ракетні, дронові та інші повітряні атаки. Пізні смерті від отриманих під час атаки поранень віднесені до місяця самої атаки. Наземні бої та артилерійські обстріли не включені. 2026-09 — поточний неповний місяць.",
+          "gridPos": {
+            "h": 10,
+            "w": 12,
+            "x": 12,
+            "y": 30
+          },
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "${DS_INFINITY}"
+          },
+          "targets": [
+            {
+              "columns": [
+                {
+                  "selector": "month",
+                  "text": "Місяць",
+                  "type": "string"
+                },
+                {
+                  "selector": "time",
+                  "text": "Дата",
+                  "type": "timestamp",
+                  "timestampFormat": "2006-01-02T15:04:05Z07:00"
+                },
+                {
+                  "selector": "deaths",
+                  "text": "Загиблих",
+                  "type": "number"
+                }
+              ],
+              "computed_columns": [],
+              "datasource": {
+                "type": "yesoreyeram-infinity-datasource",
+                "uid": "${DS_INFINITY}"
+              },
+              "filters": [],
+              "format": "table",
+              "global_query_id": "",
+              "parser": "backend",
+              "refId": "A",
+              "root_selector": "$['casualties_by_city']['rivne']['monthly']",
+              "source": "url",
+              "type": "json",
+              "url": "https://raw.githubusercontent.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/main/kyiv-air-alerts-grafana/data/dashboard_data.json",
+              "url_options": {
+                "data": "",
+                "method": "GET"
+              }
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "short",
+              "decimals": 0,
+              "custom": {
+                "axisPlacement": "auto",
+                "axisLabel": "Кількість загиблих",
+                "axisColorMode": "text",
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "hideFrom": {
+                  "tooltip": false,
+                  "viz": false,
+                  "legend": false
+                },
+                "fillOpacity": 65,
+                "gradientMode": "none",
+                "lineWidth": 1,
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  }
+                ]
+              }
+            },
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Дата"
+                },
+                "properties": [
+                  {
+                    "id": "custom.hideFrom",
+                    "value": {
+                      "tooltip": true,
+                      "viz": true,
+                      "legend": true
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          "options": {
+            "orientation": "auto",
+            "xField": "Місяць",
+            "xTickLabelRotation": 0,
+            "xTickLabelSpacing": 90,
+            "xTickLabelMaxLength": 12,
+            "groupWidth": 0.72,
+            "barWidth": 0.9,
+            "barRadius": 0,
+            "fullHighlight": true,
+            "showValue": "never",
+            "stacking": "none",
+            "tooltip": {
+              "mode": "single",
+              "sort": "none",
+              "hideZeros": false
+            },
+            "legend": {
+              "showLegend": false,
+              "displayMode": "list",
+              "placement": "bottom",
+              "calcs": []
+            }
+          }
+        },
+        {
+          "id": 959,
+          "type": "barchart",
+          "title": "Суми: загиблі від повітряних атак РФ",
+          "description": "Суми (місто). Ракетні, дронові та інші повітряні атаки. Пізні смерті від отриманих під час атаки поранень віднесені до місяця самої атаки. Наземні бої та артилерійські обстріли не включені. 2026-09 — поточний неповний місяць.",
+          "gridPos": {
+            "h": 10,
+            "w": 12,
+            "x": 0,
+            "y": 40
+          },
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "${DS_INFINITY}"
+          },
+          "targets": [
+            {
+              "columns": [
+                {
+                  "selector": "month",
+                  "text": "Місяць",
+                  "type": "string"
+                },
+                {
+                  "selector": "time",
+                  "text": "Дата",
+                  "type": "timestamp",
+                  "timestampFormat": "2006-01-02T15:04:05Z07:00"
+                },
+                {
+                  "selector": "deaths",
+                  "text": "Загиблих",
+                  "type": "number"
+                }
+              ],
+              "computed_columns": [],
+              "datasource": {
+                "type": "yesoreyeram-infinity-datasource",
+                "uid": "${DS_INFINITY}"
+              },
+              "filters": [],
+              "format": "table",
+              "global_query_id": "",
+              "parser": "backend",
+              "refId": "A",
+              "root_selector": "$['casualties_by_city']['sumy']['monthly']",
+              "source": "url",
+              "type": "json",
+              "url": "https://raw.githubusercontent.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/main/kyiv-air-alerts-grafana/data/dashboard_data.json",
+              "url_options": {
+                "data": "",
+                "method": "GET"
+              }
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "short",
+              "decimals": 0,
+              "custom": {
+                "axisPlacement": "auto",
+                "axisLabel": "Кількість загиблих",
+                "axisColorMode": "text",
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "hideFrom": {
+                  "tooltip": false,
+                  "viz": false,
+                  "legend": false
+                },
+                "fillOpacity": 65,
+                "gradientMode": "none",
+                "lineWidth": 1,
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  }
+                ]
+              }
+            },
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Дата"
+                },
+                "properties": [
+                  {
+                    "id": "custom.hideFrom",
+                    "value": {
+                      "tooltip": true,
+                      "viz": true,
+                      "legend": true
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          "options": {
+            "orientation": "auto",
+            "xField": "Місяць",
+            "xTickLabelRotation": 0,
+            "xTickLabelSpacing": 90,
+            "xTickLabelMaxLength": 12,
+            "groupWidth": 0.72,
+            "barWidth": 0.9,
+            "barRadius": 0,
+            "fullHighlight": true,
+            "showValue": "never",
+            "stacking": "none",
+            "tooltip": {
+              "mode": "single",
+              "sort": "none",
+              "hideZeros": false
+            },
+            "legend": {
+              "showLegend": false,
+              "displayMode": "list",
+              "placement": "bottom",
+              "calcs": []
+            }
+          }
+        },
+        {
+          "id": 960,
+          "type": "barchart",
+          "title": "Вінниця: загиблі від повітряних атак РФ",
+          "description": "Вінниця (місто). Ракетні, дронові та інші повітряні атаки. Пізні смерті від отриманих під час атаки поранень віднесені до місяця самої атаки. Наземні бої та артилерійські обстріли не включені. 2026-09 — поточний неповний місяць.",
+          "gridPos": {
+            "h": 10,
+            "w": 12,
+            "x": 12,
+            "y": 40
+          },
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "${DS_INFINITY}"
+          },
+          "targets": [
+            {
+              "columns": [
+                {
+                  "selector": "month",
+                  "text": "Місяць",
+                  "type": "string"
+                },
+                {
+                  "selector": "time",
+                  "text": "Дата",
+                  "type": "timestamp",
+                  "timestampFormat": "2006-01-02T15:04:05Z07:00"
+                },
+                {
+                  "selector": "deaths",
+                  "text": "Загиблих",
+                  "type": "number"
+                }
+              ],
+              "computed_columns": [],
+              "datasource": {
+                "type": "yesoreyeram-infinity-datasource",
+                "uid": "${DS_INFINITY}"
+              },
+              "filters": [],
+              "format": "table",
+              "global_query_id": "",
+              "parser": "backend",
+              "refId": "A",
+              "root_selector": "$['casualties_by_city']['vinnytsia']['monthly']",
+              "source": "url",
+              "type": "json",
+              "url": "https://raw.githubusercontent.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/main/kyiv-air-alerts-grafana/data/dashboard_data.json",
+              "url_options": {
+                "data": "",
+                "method": "GET"
+              }
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "short",
+              "decimals": 0,
+              "custom": {
+                "axisPlacement": "auto",
+                "axisLabel": "Кількість загиблих",
+                "axisColorMode": "text",
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "hideFrom": {
+                  "tooltip": false,
+                  "viz": false,
+                  "legend": false
+                },
+                "fillOpacity": 65,
+                "gradientMode": "none",
+                "lineWidth": 1,
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  }
+                ]
+              }
+            },
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Дата"
+                },
+                "properties": [
+                  {
+                    "id": "custom.hideFrom",
+                    "value": {
+                      "tooltip": true,
+                      "viz": true,
+                      "legend": true
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          "options": {
+            "orientation": "auto",
+            "xField": "Місяць",
+            "xTickLabelRotation": 0,
+            "xTickLabelSpacing": 90,
+            "xTickLabelMaxLength": 12,
+            "groupWidth": 0.72,
+            "barWidth": 0.9,
+            "barRadius": 0,
+            "fullHighlight": true,
+            "showValue": "never",
+            "stacking": "none",
+            "tooltip": {
+              "mode": "single",
+              "sort": "none",
+              "hideZeros": false
+            },
+            "legend": {
+              "showLegend": false,
+              "displayMode": "list",
+              "placement": "bottom",
+              "calcs": []
+            }
+          }
+        },
+        {
+          "id": 961,
+          "type": "barchart",
+          "title": "Кропивницький: загиблі від повітряних атак РФ",
+          "description": "Кропивницький (місто). Ракетні, дронові та інші повітряні атаки. Пізні смерті від отриманих під час атаки поранень віднесені до місяця самої атаки. Наземні бої та артилерійські обстріли не включені. 2026-09 — поточний неповний місяць.",
+          "gridPos": {
+            "h": 10,
+            "w": 12,
+            "x": 0,
+            "y": 50
+          },
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "${DS_INFINITY}"
+          },
+          "targets": [
+            {
+              "columns": [
+                {
+                  "selector": "month",
+                  "text": "Місяць",
+                  "type": "string"
+                },
+                {
+                  "selector": "time",
+                  "text": "Дата",
+                  "type": "timestamp",
+                  "timestampFormat": "2006-01-02T15:04:05Z07:00"
+                },
+                {
+                  "selector": "deaths",
+                  "text": "Загиблих",
+                  "type": "number"
+                }
+              ],
+              "computed_columns": [],
+              "datasource": {
+                "type": "yesoreyeram-infinity-datasource",
+                "uid": "${DS_INFINITY}"
+              },
+              "filters": [],
+              "format": "table",
+              "global_query_id": "",
+              "parser": "backend",
+              "refId": "A",
+              "root_selector": "$['casualties_by_city']['kropyvnytskyi']['monthly']",
+              "source": "url",
+              "type": "json",
+              "url": "https://raw.githubusercontent.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/main/kyiv-air-alerts-grafana/data/dashboard_data.json",
+              "url_options": {
+                "data": "",
+                "method": "GET"
+              }
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "short",
+              "decimals": 0,
+              "custom": {
+                "axisPlacement": "auto",
+                "axisLabel": "Кількість загиблих",
+                "axisColorMode": "text",
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "hideFrom": {
+                  "tooltip": false,
+                  "viz": false,
+                  "legend": false
+                },
+                "fillOpacity": 65,
+                "gradientMode": "none",
+                "lineWidth": 1,
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  }
+                ]
+              }
+            },
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Дата"
+                },
+                "properties": [
+                  {
+                    "id": "custom.hideFrom",
+                    "value": {
+                      "tooltip": true,
+                      "viz": true,
+                      "legend": true
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          "options": {
+            "orientation": "auto",
+            "xField": "Місяць",
+            "xTickLabelRotation": 0,
+            "xTickLabelSpacing": 90,
+            "xTickLabelMaxLength": 12,
+            "groupWidth": 0.72,
+            "barWidth": 0.9,
+            "barRadius": 0,
+            "fullHighlight": true,
+            "showValue": "never",
+            "stacking": "none",
+            "tooltip": {
+              "mode": "single",
+              "sort": "none",
+              "hideZeros": false
+            },
+            "legend": {
+              "showLegend": false,
+              "displayMode": "list",
+              "placement": "bottom",
+              "calcs": []
+            }
+          }
+        },
+        {
+          "id": 962,
+          "type": "barchart",
+          "title": "Львів: загиблі від повітряних атак РФ",
+          "description": "Львів (місто). Ракетні, дронові та інші повітряні атаки. Пізні смерті від отриманих під час атаки поранень віднесені до місяця самої атаки. Наземні бої та артилерійські обстріли не включені. 2026-09 — поточний неповний місяць.",
+          "gridPos": {
+            "h": 10,
+            "w": 12,
+            "x": 12,
+            "y": 50
+          },
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "${DS_INFINITY}"
+          },
+          "targets": [
+            {
+              "columns": [
+                {
+                  "selector": "month",
+                  "text": "Місяць",
+                  "type": "string"
+                },
+                {
+                  "selector": "time",
+                  "text": "Дата",
+                  "type": "timestamp",
+                  "timestampFormat": "2006-01-02T15:04:05Z07:00"
+                },
+                {
+                  "selector": "deaths",
+                  "text": "Загиблих",
+                  "type": "number"
+                }
+              ],
+              "computed_columns": [],
+              "datasource": {
+                "type": "yesoreyeram-infinity-datasource",
+                "uid": "${DS_INFINITY}"
+              },
+              "filters": [],
+              "format": "table",
+              "global_query_id": "",
+              "parser": "backend",
+              "refId": "A",
+              "root_selector": "$['casualties_by_city']['lviv']['monthly']",
+              "source": "url",
+              "type": "json",
+              "url": "https://raw.githubusercontent.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/main/kyiv-air-alerts-grafana/data/dashboard_data.json",
+              "url_options": {
+                "data": "",
+                "method": "GET"
+              }
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "short",
+              "decimals": 0,
+              "custom": {
+                "axisPlacement": "auto",
+                "axisLabel": "Кількість загиблих",
+                "axisColorMode": "text",
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "hideFrom": {
+                  "tooltip": false,
+                  "viz": false,
+                  "legend": false
+                },
+                "fillOpacity": 65,
+                "gradientMode": "none",
+                "lineWidth": 1,
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  }
+                ]
+              }
+            },
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Дата"
+                },
+                "properties": [
+                  {
+                    "id": "custom.hideFrom",
+                    "value": {
+                      "tooltip": true,
+                      "viz": true,
+                      "legend": true
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          "options": {
+            "orientation": "auto",
+            "xField": "Місяць",
+            "xTickLabelRotation": 0,
+            "xTickLabelSpacing": 90,
+            "xTickLabelMaxLength": 12,
+            "groupWidth": 0.72,
+            "barWidth": 0.9,
+            "barRadius": 0,
+            "fullHighlight": true,
+            "showValue": "never",
+            "stacking": "none",
+            "tooltip": {
+              "mode": "single",
+              "sort": "none",
+              "hideZeros": false
+            },
+            "legend": {
+              "showLegend": false,
+              "displayMode": "list",
+              "placement": "bottom",
+              "calcs": []
+            }
+          }
+        },
+        {
+          "id": 963,
+          "type": "barchart",
+          "title": "Чернігів: загиблі від повітряних атак РФ",
+          "description": "Чернігів (місто). Ракетні, дронові та інші повітряні атаки. Пізні смерті від отриманих під час атаки поранень віднесені до місяця самої атаки. Наземні бої та артилерійські обстріли не включені. 2026-09 — поточний неповний місяць.",
+          "gridPos": {
+            "h": 10,
+            "w": 12,
+            "x": 0,
+            "y": 60
+          },
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "${DS_INFINITY}"
+          },
+          "targets": [
+            {
+              "columns": [
+                {
+                  "selector": "month",
+                  "text": "Місяць",
+                  "type": "string"
+                },
+                {
+                  "selector": "time",
+                  "text": "Дата",
+                  "type": "timestamp",
+                  "timestampFormat": "2006-01-02T15:04:05Z07:00"
+                },
+                {
+                  "selector": "deaths",
+                  "text": "Загиблих",
+                  "type": "number"
+                }
+              ],
+              "computed_columns": [],
+              "datasource": {
+                "type": "yesoreyeram-infinity-datasource",
+                "uid": "${DS_INFINITY}"
+              },
+              "filters": [],
+              "format": "table",
+              "global_query_id": "",
+              "parser": "backend",
+              "refId": "A",
+              "root_selector": "$['casualties_by_city']['chernihiv']['monthly']",
+              "source": "url",
+              "type": "json",
+              "url": "https://raw.githubusercontent.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/main/kyiv-air-alerts-grafana/data/dashboard_data.json",
+              "url_options": {
+                "data": "",
+                "method": "GET"
+              }
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "short",
+              "decimals": 0,
+              "custom": {
+                "axisPlacement": "auto",
+                "axisLabel": "Кількість загиблих",
+                "axisColorMode": "text",
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "hideFrom": {
+                  "tooltip": false,
+                  "viz": false,
+                  "legend": false
+                },
+                "fillOpacity": 65,
+                "gradientMode": "none",
+                "lineWidth": 1,
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  }
+                ]
+              }
+            },
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Дата"
+                },
+                "properties": [
+                  {
+                    "id": "custom.hideFrom",
+                    "value": {
+                      "tooltip": true,
+                      "viz": true,
+                      "legend": true
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          "options": {
+            "orientation": "auto",
+            "xField": "Місяць",
+            "xTickLabelRotation": 0,
+            "xTickLabelSpacing": 90,
+            "xTickLabelMaxLength": 12,
+            "groupWidth": 0.72,
+            "barWidth": 0.9,
+            "barRadius": 0,
+            "fullHighlight": true,
+            "showValue": "never",
+            "stacking": "none",
+            "tooltip": {
+              "mode": "single",
+              "sort": "none",
+              "hideZeros": false
+            },
+            "legend": {
+              "showLegend": false,
+              "displayMode": "list",
+              "placement": "bottom",
+              "calcs": []
+            }
+          }
+        },
+        {
+          "id": 964,
+          "type": "barchart",
+          "title": "Одеса: загиблі від повітряних атак РФ",
+          "description": "Одеса (місто). Ракетні, дронові та інші повітряні атаки. Пізні смерті від отриманих під час атаки поранень віднесені до місяця самої атаки. Наземні бої та артилерійські обстріли не включені. 2026-09 — поточний неповний місяць.",
+          "gridPos": {
+            "h": 10,
+            "w": 12,
+            "x": 12,
+            "y": 60
+          },
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "${DS_INFINITY}"
+          },
+          "targets": [
+            {
+              "columns": [
+                {
+                  "selector": "month",
+                  "text": "Місяць",
+                  "type": "string"
+                },
+                {
+                  "selector": "time",
+                  "text": "Дата",
+                  "type": "timestamp",
+                  "timestampFormat": "2006-01-02T15:04:05Z07:00"
+                },
+                {
+                  "selector": "deaths",
+                  "text": "Загиблих",
+                  "type": "number"
+                }
+              ],
+              "computed_columns": [],
+              "datasource": {
+                "type": "yesoreyeram-infinity-datasource",
+                "uid": "${DS_INFINITY}"
+              },
+              "filters": [],
+              "format": "table",
+              "global_query_id": "",
+              "parser": "backend",
+              "refId": "A",
+              "root_selector": "$['casualties_by_city']['odesa']['monthly']",
+              "source": "url",
+              "type": "json",
+              "url": "https://raw.githubusercontent.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/main/kyiv-air-alerts-grafana/data/dashboard_data.json",
+              "url_options": {
+                "data": "",
+                "method": "GET"
+              }
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "short",
+              "decimals": 0,
+              "custom": {
+                "axisPlacement": "auto",
+                "axisLabel": "Кількість загиблих",
+                "axisColorMode": "text",
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "hideFrom": {
+                  "tooltip": false,
+                  "viz": false,
+                  "legend": false
+                },
+                "fillOpacity": 65,
+                "gradientMode": "none",
+                "lineWidth": 1,
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  }
+                ]
+              }
+            },
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Дата"
+                },
+                "properties": [
+                  {
+                    "id": "custom.hideFrom",
+                    "value": {
+                      "tooltip": true,
+                      "viz": true,
+                      "legend": true
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          "options": {
+            "orientation": "auto",
+            "xField": "Місяць",
+            "xTickLabelRotation": 0,
+            "xTickLabelSpacing": 90,
+            "xTickLabelMaxLength": 12,
+            "groupWidth": 0.72,
+            "barWidth": 0.9,
+            "barRadius": 0,
+            "fullHighlight": true,
+            "showValue": "never",
+            "stacking": "none",
+            "tooltip": {
+              "mode": "single",
+              "sort": "none",
+              "hideZeros": false
+            },
+            "legend": {
+              "showLegend": false,
+              "displayMode": "list",
+              "placement": "bottom",
+              "calcs": []
+            }
+          }
+        },
+        {
+          "id": 965,
+          "type": "barchart",
+          "title": "Миколаїв: загиблі від повітряних атак РФ",
+          "description": "Миколаїв (місто). Ракетні, дронові та інші повітряні атаки. Пізні смерті від отриманих під час атаки поранень віднесені до місяця самої атаки. Наземні бої та артилерійські обстріли не включені. 2026-09 — поточний неповний місяць.",
+          "gridPos": {
+            "h": 10,
+            "w": 12,
+            "x": 0,
+            "y": 70
+          },
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "${DS_INFINITY}"
+          },
+          "targets": [
+            {
+              "columns": [
+                {
+                  "selector": "month",
+                  "text": "Місяць",
+                  "type": "string"
+                },
+                {
+                  "selector": "time",
+                  "text": "Дата",
+                  "type": "timestamp",
+                  "timestampFormat": "2006-01-02T15:04:05Z07:00"
+                },
+                {
+                  "selector": "deaths",
+                  "text": "Загиблих",
+                  "type": "number"
+                }
+              ],
+              "computed_columns": [],
+              "datasource": {
+                "type": "yesoreyeram-infinity-datasource",
+                "uid": "${DS_INFINITY}"
+              },
+              "filters": [],
+              "format": "table",
+              "global_query_id": "",
+              "parser": "backend",
+              "refId": "A",
+              "root_selector": "$['casualties_by_city']['mykolaiv']['monthly']",
+              "source": "url",
+              "type": "json",
+              "url": "https://raw.githubusercontent.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/main/kyiv-air-alerts-grafana/data/dashboard_data.json",
+              "url_options": {
+                "data": "",
+                "method": "GET"
+              }
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "short",
+              "decimals": 0,
+              "custom": {
+                "axisPlacement": "auto",
+                "axisLabel": "Кількість загиблих",
+                "axisColorMode": "text",
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "hideFrom": {
+                  "tooltip": false,
+                  "viz": false,
+                  "legend": false
+                },
+                "fillOpacity": 65,
+                "gradientMode": "none",
+                "lineWidth": 1,
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  }
+                ]
+              }
+            },
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Дата"
+                },
+                "properties": [
+                  {
+                    "id": "custom.hideFrom",
+                    "value": {
+                      "tooltip": true,
+                      "viz": true,
+                      "legend": true
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          "options": {
+            "orientation": "auto",
+            "xField": "Місяць",
+            "xTickLabelRotation": 0,
+            "xTickLabelSpacing": 90,
+            "xTickLabelMaxLength": 12,
+            "groupWidth": 0.72,
+            "barWidth": 0.9,
+            "barRadius": 0,
+            "fullHighlight": true,
+            "showValue": "never",
+            "stacking": "none",
+            "tooltip": {
+              "mode": "single",
+              "sort": "none",
+              "hideZeros": false
+            },
+            "legend": {
+              "showLegend": false,
+              "displayMode": "list",
+              "placement": "bottom",
+              "calcs": []
+            }
+          }
+        },
+        {
+          "id": 966,
+          "type": "barchart",
+          "title": "Луцьк: загиблі від повітряних атак РФ",
+          "description": "Луцьк (місто). Ракетні, дронові та інші повітряні атаки. Пізні смерті від отриманих під час атаки поранень віднесені до місяця самої атаки. Наземні бої та артилерійські обстріли не включені. 2026-09 — поточний неповний місяць.",
+          "gridPos": {
+            "h": 10,
+            "w": 12,
+            "x": 12,
+            "y": 70
+          },
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "${DS_INFINITY}"
+          },
+          "targets": [
+            {
+              "columns": [
+                {
+                  "selector": "month",
+                  "text": "Місяць",
+                  "type": "string"
+                },
+                {
+                  "selector": "time",
+                  "text": "Дата",
+                  "type": "timestamp",
+                  "timestampFormat": "2006-01-02T15:04:05Z07:00"
+                },
+                {
+                  "selector": "deaths",
+                  "text": "Загиблих",
+                  "type": "number"
+                }
+              ],
+              "computed_columns": [],
+              "datasource": {
+                "type": "yesoreyeram-infinity-datasource",
+                "uid": "${DS_INFINITY}"
+              },
+              "filters": [],
+              "format": "table",
+              "global_query_id": "",
+              "parser": "backend",
+              "refId": "A",
+              "root_selector": "$['casualties_by_city']['lutsk']['monthly']",
+              "source": "url",
+              "type": "json",
+              "url": "https://raw.githubusercontent.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/main/kyiv-air-alerts-grafana/data/dashboard_data.json",
+              "url_options": {
+                "data": "",
+                "method": "GET"
+              }
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "short",
+              "decimals": 0,
+              "custom": {
+                "axisPlacement": "auto",
+                "axisLabel": "Кількість загиблих",
+                "axisColorMode": "text",
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "hideFrom": {
+                  "tooltip": false,
+                  "viz": false,
+                  "legend": false
+                },
+                "fillOpacity": 65,
+                "gradientMode": "none",
+                "lineWidth": 1,
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  }
+                ]
+              }
+            },
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Дата"
+                },
+                "properties": [
+                  {
+                    "id": "custom.hideFrom",
+                    "value": {
+                      "tooltip": true,
+                      "viz": true,
+                      "legend": true
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          "options": {
+            "orientation": "auto",
+            "xField": "Місяць",
+            "xTickLabelRotation": 0,
+            "xTickLabelSpacing": 90,
+            "xTickLabelMaxLength": 12,
+            "groupWidth": 0.72,
+            "barWidth": 0.9,
+            "barRadius": 0,
+            "fullHighlight": true,
+            "showValue": "never",
+            "stacking": "none",
+            "tooltip": {
+              "mode": "single",
+              "sort": "none",
+              "hideZeros": false
+            },
+            "legend": {
+              "showLegend": false,
+              "displayMode": "list",
+              "placement": "bottom",
+              "calcs": []
+            }
+          }
+        },
+        {
+          "id": 967,
+          "type": "barchart",
+          "title": "Ужгород: загиблі від повітряних атак РФ",
+          "description": "Ужгород (місто). Ракетні, дронові та інші повітряні атаки. Пізні смерті від отриманих під час атаки поранень віднесені до місяця самої атаки. Наземні бої та артилерійські обстріли не включені. 2026-09 — поточний неповний місяць.",
+          "gridPos": {
+            "h": 10,
+            "w": 12,
+            "x": 0,
+            "y": 80
+          },
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "${DS_INFINITY}"
+          },
+          "targets": [
+            {
+              "columns": [
+                {
+                  "selector": "month",
+                  "text": "Місяць",
+                  "type": "string"
+                },
+                {
+                  "selector": "time",
+                  "text": "Дата",
+                  "type": "timestamp",
+                  "timestampFormat": "2006-01-02T15:04:05Z07:00"
+                },
+                {
+                  "selector": "deaths",
+                  "text": "Загиблих",
+                  "type": "number"
+                }
+              ],
+              "computed_columns": [],
+              "datasource": {
+                "type": "yesoreyeram-infinity-datasource",
+                "uid": "${DS_INFINITY}"
+              },
+              "filters": [],
+              "format": "table",
+              "global_query_id": "",
+              "parser": "backend",
+              "refId": "A",
+              "root_selector": "$['casualties_by_city']['uzhhorod']['monthly']",
+              "source": "url",
+              "type": "json",
+              "url": "https://raw.githubusercontent.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/main/kyiv-air-alerts-grafana/data/dashboard_data.json",
+              "url_options": {
+                "data": "",
+                "method": "GET"
+              }
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "short",
+              "decimals": 0,
+              "custom": {
+                "axisPlacement": "auto",
+                "axisLabel": "Кількість загиблих",
+                "axisColorMode": "text",
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "hideFrom": {
+                  "tooltip": false,
+                  "viz": false,
+                  "legend": false
+                },
+                "fillOpacity": 65,
+                "gradientMode": "none",
+                "lineWidth": 1,
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  }
+                ]
+              }
+            },
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Дата"
+                },
+                "properties": [
+                  {
+                    "id": "custom.hideFrom",
+                    "value": {
+                      "tooltip": true,
+                      "viz": true,
+                      "legend": true
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          "options": {
+            "orientation": "auto",
+            "xField": "Місяць",
+            "xTickLabelRotation": 0,
+            "xTickLabelSpacing": 90,
+            "xTickLabelMaxLength": 12,
+            "groupWidth": 0.72,
+            "barWidth": 0.9,
+            "barRadius": 0,
+            "fullHighlight": true,
+            "showValue": "never",
+            "stacking": "none",
+            "tooltip": {
+              "mode": "single",
+              "sort": "none",
+              "hideZeros": false
+            },
+            "legend": {
+              "showLegend": false,
+              "displayMode": "list",
+              "placement": "bottom",
+              "calcs": []
+            }
+          }
+        },
+        {
+          "id": 968,
+          "type": "barchart",
+          "title": "Тернопіль: загиблі від повітряних атак РФ",
+          "description": "Тернопіль (місто). Ракетні, дронові та інші повітряні атаки. Пізні смерті від отриманих під час атаки поранень віднесені до місяця самої атаки. Наземні бої та артилерійські обстріли не включені. 2026-09 — поточний неповний місяць.",
+          "gridPos": {
+            "h": 10,
+            "w": 12,
+            "x": 12,
+            "y": 80
+          },
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "${DS_INFINITY}"
+          },
+          "targets": [
+            {
+              "columns": [
+                {
+                  "selector": "month",
+                  "text": "Місяць",
+                  "type": "string"
+                },
+                {
+                  "selector": "time",
+                  "text": "Дата",
+                  "type": "timestamp",
+                  "timestampFormat": "2006-01-02T15:04:05Z07:00"
+                },
+                {
+                  "selector": "deaths",
+                  "text": "Загиблих",
+                  "type": "number"
+                }
+              ],
+              "computed_columns": [],
+              "datasource": {
+                "type": "yesoreyeram-infinity-datasource",
+                "uid": "${DS_INFINITY}"
+              },
+              "filters": [],
+              "format": "table",
+              "global_query_id": "",
+              "parser": "backend",
+              "refId": "A",
+              "root_selector": "$['casualties_by_city']['ternopil']['monthly']",
+              "source": "url",
+              "type": "json",
+              "url": "https://raw.githubusercontent.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/main/kyiv-air-alerts-grafana/data/dashboard_data.json",
+              "url_options": {
+                "data": "",
+                "method": "GET"
+              }
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "short",
+              "decimals": 0,
+              "custom": {
+                "axisPlacement": "auto",
+                "axisLabel": "Кількість загиблих",
+                "axisColorMode": "text",
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "hideFrom": {
+                  "tooltip": false,
+                  "viz": false,
+                  "legend": false
+                },
+                "fillOpacity": 65,
+                "gradientMode": "none",
+                "lineWidth": 1,
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  }
+                ]
+              }
+            },
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Дата"
+                },
+                "properties": [
+                  {
+                    "id": "custom.hideFrom",
+                    "value": {
+                      "tooltip": true,
+                      "viz": true,
+                      "legend": true
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          "options": {
+            "orientation": "auto",
+            "xField": "Місяць",
+            "xTickLabelRotation": 0,
+            "xTickLabelSpacing": 90,
+            "xTickLabelMaxLength": 12,
+            "groupWidth": 0.72,
+            "barWidth": 0.9,
+            "barRadius": 0,
+            "fullHighlight": true,
+            "showValue": "never",
+            "stacking": "none",
+            "tooltip": {
+              "mode": "single",
+              "sort": "none",
+              "hideZeros": false
+            },
+            "legend": {
+              "showLegend": false,
+              "displayMode": "list",
+              "placement": "bottom",
+              "calcs": []
+            }
+          }
+        },
+        {
+          "id": 969,
+          "type": "barchart",
+          "title": "Чернівці: загиблі від повітряних атак РФ",
+          "description": "Чернівці (місто). Ракетні, дронові та інші повітряні атаки. Пізні смерті від отриманих під час атаки поранень віднесені до місяця самої атаки. Наземні бої та артилерійські обстріли не включені. 2026-09 — поточний неповний місяць.",
+          "gridPos": {
+            "h": 10,
+            "w": 12,
+            "x": 0,
+            "y": 90
+          },
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "${DS_INFINITY}"
+          },
+          "targets": [
+            {
+              "columns": [
+                {
+                  "selector": "month",
+                  "text": "Місяць",
+                  "type": "string"
+                },
+                {
+                  "selector": "time",
+                  "text": "Дата",
+                  "type": "timestamp",
+                  "timestampFormat": "2006-01-02T15:04:05Z07:00"
+                },
+                {
+                  "selector": "deaths",
+                  "text": "Загиблих",
+                  "type": "number"
+                }
+              ],
+              "computed_columns": [],
+              "datasource": {
+                "type": "yesoreyeram-infinity-datasource",
+                "uid": "${DS_INFINITY}"
+              },
+              "filters": [],
+              "format": "table",
+              "global_query_id": "",
+              "parser": "backend",
+              "refId": "A",
+              "root_selector": "$['casualties_by_city']['chernivtsi']['monthly']",
+              "source": "url",
+              "type": "json",
+              "url": "https://raw.githubusercontent.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/main/kyiv-air-alerts-grafana/data/dashboard_data.json",
+              "url_options": {
+                "data": "",
+                "method": "GET"
+              }
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "short",
+              "decimals": 0,
+              "custom": {
+                "axisPlacement": "auto",
+                "axisLabel": "Кількість загиблих",
+                "axisColorMode": "text",
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "hideFrom": {
+                  "tooltip": false,
+                  "viz": false,
+                  "legend": false
+                },
+                "fillOpacity": 65,
+                "gradientMode": "none",
+                "lineWidth": 1,
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  }
+                ]
+              }
+            },
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Дата"
+                },
+                "properties": [
+                  {
+                    "id": "custom.hideFrom",
+                    "value": {
+                      "tooltip": true,
+                      "viz": true,
+                      "legend": true
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          "options": {
+            "orientation": "auto",
+            "xField": "Місяць",
+            "xTickLabelRotation": 0,
+            "xTickLabelSpacing": 90,
+            "xTickLabelMaxLength": 12,
+            "groupWidth": 0.72,
+            "barWidth": 0.9,
+            "barRadius": 0,
+            "fullHighlight": true,
+            "showValue": "never",
+            "stacking": "none",
+            "tooltip": {
+              "mode": "single",
+              "sort": "none",
+              "hideZeros": false
+            },
+            "legend": {
+              "showLegend": false,
+              "displayMode": "list",
+              "placement": "bottom",
+              "calcs": []
+            }
+          }
+        },
+        {
+          "id": 970,
+          "type": "barchart",
+          "title": "Севастополь: загиблі від повітряних атак РФ",
+          "description": "Севастополь (місто). Ракетні, дронові та інші повітряні атаки. Пізні смерті від отриманих під час атаки поранень віднесені до місяця самої атаки. Наземні бої та артилерійські обстріли не включені. 2026-09 — поточний неповний місяць.",
+          "gridPos": {
+            "h": 10,
+            "w": 12,
+            "x": 12,
+            "y": 90
+          },
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "${DS_INFINITY}"
+          },
+          "targets": [
+            {
+              "columns": [
+                {
+                  "selector": "month",
+                  "text": "Місяць",
+                  "type": "string"
+                },
+                {
+                  "selector": "time",
+                  "text": "Дата",
+                  "type": "timestamp",
+                  "timestampFormat": "2006-01-02T15:04:05Z07:00"
+                },
+                {
+                  "selector": "deaths",
+                  "text": "Загиблих",
+                  "type": "number"
+                }
+              ],
+              "computed_columns": [],
+              "datasource": {
+                "type": "yesoreyeram-infinity-datasource",
+                "uid": "${DS_INFINITY}"
+              },
+              "filters": [],
+              "format": "table",
+              "global_query_id": "",
+              "parser": "backend",
+              "refId": "A",
+              "root_selector": "$['casualties_by_city']['sevastopol']['monthly']",
+              "source": "url",
+              "type": "json",
+              "url": "https://raw.githubusercontent.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/main/kyiv-air-alerts-grafana/data/dashboard_data.json",
+              "url_options": {
+                "data": "",
+                "method": "GET"
+              }
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "short",
+              "decimals": 0,
+              "custom": {
+                "axisPlacement": "auto",
+                "axisLabel": "Кількість загиблих",
+                "axisColorMode": "text",
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "hideFrom": {
+                  "tooltip": false,
+                  "viz": false,
+                  "legend": false
+                },
+                "fillOpacity": 65,
+                "gradientMode": "none",
+                "lineWidth": 1,
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  }
+                ]
+              }
+            },
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Дата"
+                },
+                "properties": [
+                  {
+                    "id": "custom.hideFrom",
+                    "value": {
+                      "tooltip": true,
+                      "viz": true,
+                      "legend": true
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          "options": {
+            "orientation": "auto",
+            "xField": "Місяць",
+            "xTickLabelRotation": 0,
+            "xTickLabelSpacing": 90,
+            "xTickLabelMaxLength": 12,
+            "groupWidth": 0.72,
+            "barWidth": 0.9,
+            "barRadius": 0,
+            "fullHighlight": true,
+            "showValue": "never",
+            "stacking": "none",
+            "tooltip": {
+              "mode": "single",
+              "sort": "none",
+              "hideZeros": false
+            },
+            "legend": {
+              "showLegend": false,
+              "displayMode": "list",
+              "placement": "bottom",
+              "calcs": []
+            }
+          }
+        },
+        {
+          "id": 971,
+          "type": "barchart",
+          "title": "Івано-Франківськ: загиблі від повітряних атак РФ",
+          "description": "Івано-Франківськ (місто). Ракетні, дронові та інші повітряні атаки. Пізні смерті від отриманих під час атаки поранень віднесені до місяця самої атаки. Наземні бої та артилерійські обстріли не включені. 2026-09 — поточний неповний місяць.",
+          "gridPos": {
+            "h": 10,
+            "w": 12,
+            "x": 0,
+            "y": 100
+          },
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "${DS_INFINITY}"
+          },
+          "targets": [
+            {
+              "columns": [
+                {
+                  "selector": "month",
+                  "text": "Місяць",
+                  "type": "string"
+                },
+                {
+                  "selector": "time",
+                  "text": "Дата",
+                  "type": "timestamp",
+                  "timestampFormat": "2006-01-02T15:04:05Z07:00"
+                },
+                {
+                  "selector": "deaths",
+                  "text": "Загиблих",
+                  "type": "number"
+                }
+              ],
+              "computed_columns": [],
+              "datasource": {
+                "type": "yesoreyeram-infinity-datasource",
+                "uid": "${DS_INFINITY}"
+              },
+              "filters": [],
+              "format": "table",
+              "global_query_id": "",
+              "parser": "backend",
+              "refId": "A",
+              "root_selector": "$['casualties_by_city']['ivano-frankivsk']['monthly']",
+              "source": "url",
+              "type": "json",
+              "url": "https://raw.githubusercontent.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/main/kyiv-air-alerts-grafana/data/dashboard_data.json",
+              "url_options": {
+                "data": "",
+                "method": "GET"
+              }
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "short",
+              "decimals": 0,
+              "custom": {
+                "axisPlacement": "auto",
+                "axisLabel": "Кількість загиблих",
+                "axisColorMode": "text",
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "hideFrom": {
+                  "tooltip": false,
+                  "viz": false,
+                  "legend": false
+                },
+                "fillOpacity": 65,
+                "gradientMode": "none",
+                "lineWidth": 1,
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  }
+                ]
+              }
+            },
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Дата"
+                },
+                "properties": [
+                  {
+                    "id": "custom.hideFrom",
+                    "value": {
+                      "tooltip": true,
+                      "viz": true,
+                      "legend": true
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          "options": {
+            "orientation": "auto",
+            "xField": "Місяць",
+            "xTickLabelRotation": 0,
+            "xTickLabelSpacing": 90,
+            "xTickLabelMaxLength": 12,
+            "groupWidth": 0.72,
+            "barWidth": 0.9,
+            "barRadius": 0,
+            "fullHighlight": true,
+            "showValue": "never",
+            "stacking": "none",
+            "tooltip": {
+              "mode": "single",
+              "sort": "none",
+              "hideZeros": false
+            },
+            "legend": {
+              "showLegend": false,
+              "displayMode": "list",
+              "placement": "bottom",
+              "calcs": []
+            }
           }
         }
       ],
-      "fieldConfig": {
-        "defaults": {
-          "unit": "short",
-          "decimals": 0,
-          "custom": {
-            "axisPlacement": "auto",
-            "axisLabel": "Кількість загиблих",
-            "axisColorMode": "text",
-            "axisBorderShow": false,
-            "axisCenteredZero": false,
-            "scaleDistribution": {
-              "type": "linear"
-            },
-            "hideFrom": {
-              "tooltip": false,
-              "viz": false,
-              "legend": false
-            },
-            "fillOpacity": 65,
-            "gradientMode": "none",
-            "lineWidth": 1,
-            "thresholdsStyle": {
-              "mode": "off"
-            }
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              }
-            ]
-          }
-        },
-        "overrides": [
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Дата"
-            },
-            "properties": [
-              {
-                "id": "custom.hideFrom",
-                "value": {
-                  "tooltip": true,
-                  "viz": true,
-                  "legend": true
-                }
-              }
-            ]
-          }
-        ]
-      },
-      "options": {
-        "orientation": "auto",
-        "xField": "Місяць",
-        "xTickLabelRotation": 0,
-        "xTickLabelSpacing": 90,
-        "xTickLabelMaxLength": 12,
-        "groupWidth": 0.72,
-        "barWidth": 0.9,
-        "barRadius": 0,
-        "fullHighlight": true,
-        "showValue": "never",
-        "stacking": "none",
-        "tooltip": {
-          "mode": "single",
-          "sort": "none",
-          "hideZeros": false
-        },
-        "legend": {
-          "showLegend": false,
-          "displayMode": "list",
-          "placement": "bottom",
-          "calcs": []
-        }
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 118
       }
     },
     {
@@ -2182,7 +4883,7 @@
         "h": 6,
         "w": 24,
         "x": 0,
-        "y": 118
+        "y": 119
       },
       "options": {
         "mode": "markdown",
