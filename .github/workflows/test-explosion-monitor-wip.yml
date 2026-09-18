@@ -111,7 +111,7 @@ jobs:
           PY
 
           python scripts/sync_explosion_audited_baseline.py \
-            --dashboard-data data/dashboard_data.json
+            --dashboard-data /tmp/special-prod-dashboard.json
           python scripts/monitor_explosion_candidates.py --self-test
           python scripts/monitor_explosion_candidates.py --local-only
           python scripts/update_explosion_metric_live.py
@@ -138,6 +138,11 @@ jobs:
       - name: Simulate automatic Kyiv and Sevastopol onboarding
         working-directory: kyiv-air-alerts-grafana
         run: |
+          git fetch origin site-prod
+          git show origin/site-prod:kyiv-air-alerts-grafana/data/dashboard_data.json > /tmp/special-prod-dashboard.json
+          git show origin/site-prod:kyiv-air-alerts-grafana/data/alerts_combined.json > /tmp/special-prod-kyiv.json
+          git show origin/site-prod:kyiv-air-alerts-grafana/data/sevastopol_events.json > /tmp/special-prod-sevastopol.json
+
           python - <<'PY'
           import json
           from datetime import datetime
@@ -149,10 +154,11 @@ jobs:
           preview_path = data / "explosion_preview_input.json"
           preview = json.loads(preview_path.read_text(encoding="utf-8"))
 
-          kyiv_feed = json.loads((data / "grafana/cities/kyiv.json").read_text(encoding="utf-8"))
-          sev_feed = json.loads((data / "grafana/cities/sevastopol.json").read_text(encoding="utf-8"))
-          kyiv_alerts = json.loads((data / "alerts_combined.json").read_text(encoding="utf-8"))
-          sev_store = json.loads((data / "sevastopol_events.json").read_text(encoding="utf-8"))
+          prod = json.loads(Path("/tmp/special-prod-dashboard.json").read_text(encoding="utf-8"))
+          kyiv_feed = prod["cities"]["kyiv"]
+          sev_feed = prod["cities"]["sevastopol"]
+          kyiv_alerts = json.loads(Path("/tmp/special-prod-kyiv.json").read_text(encoding="utf-8"))
+          sev_store = json.loads(Path("/tmp/special-prod-sevastopol.json").read_text(encoding="utf-8"))
 
           assert "kyiv" not in preview["cities"]
           assert "sevastopol" not in preview["cities"]
@@ -213,8 +219,8 @@ jobs:
           python scripts/monitor_explosion_candidates.py --self-test
           python scripts/monitor_explosion_candidates.py \
             --local-only \
-            --kyiv-alerts-file data/alerts_combined.json \
-            --sevastopol-events-file data/sevastopol_events.json
+            --kyiv-alerts-file /tmp/special-prod-kyiv.json \
+            --sevastopol-events-file /tmp/special-prod-sevastopol.json
           python scripts/update_explosion_metric_live.py
 
           BEFORE_COUNT="$before_count" python - <<'PY'
