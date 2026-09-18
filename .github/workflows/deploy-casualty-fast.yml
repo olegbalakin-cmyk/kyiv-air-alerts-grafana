@@ -37,15 +37,15 @@ jobs:
         working-directory: kyiv-air-alerts-grafana
         run: pip install -r requirements.txt
 
-      - name: Add 22-city casualty data to existing validated alert dataset
+      - name: Add 23-city casualty data to existing validated alert dataset
         working-directory: kyiv-air-alerts-grafana
         run: python scripts/update_casualties.py --no-network
 
-      - name: Add 22-city casualty section to existing Grafana dashboard
+      - name: Add 23-city casualty section to existing Grafana dashboard
         working-directory: kyiv-air-alerts-grafana
         run: python scripts/add_casualty_panel.py
 
-      - name: Validate 22-city casualty release
+      - name: Validate 23-city casualty release
         run: |
           python - <<'PY'
           import json
@@ -60,9 +60,9 @@ jobs:
               "lviv": 29, "chernihiv": 105, "mykolaiv": 106, "lutsk": 10,
               "uzhhorod": 0, "ivano-frankivsk": 3, "ternopil": 41,
               "chernivtsi": 5, "odesa": 171, "zaporizhzhia": 316,
+              "kherson": 163,
           }
           assert set(series) == set(expected), (sorted(series), sorted(expected))
-          assert "kherson" not in series
           totals = {}
           for key, target in expected.items():
               actual = sum(int(r.get("deaths") or 0) for r in series[key].get("monthly", []))
@@ -75,12 +75,12 @@ jobs:
               if p.get("id") == 950 and p.get("type") == "row"
           ]
           assert len(casualty_rows) == 1
-          assert len(casualty_rows[0].get("panels") or []) == 22
+          assert len(casualty_rows[0].get("panels") or []) == 23
 
           out = {
               "ok": True,
-              "city_count": 22,
-              "excluded_pending": ["kherson"],
+              "city_count": 23,
+              "excluded_pending": [],
               "totals": totals,
           }
           Path("/tmp/casualty-validation.json").write_text(
@@ -99,7 +99,7 @@ jobs:
           if git diff --cached --quiet; then
             echo "No generated changes"
           else
-            git commit -m "Publish 22-city casualty test data"
+            git commit -m "Publish 23-city casualty test data"
             git push origin HEAD:multicity-wip-2026-09-16
           fi
 
@@ -167,5 +167,5 @@ jobs:
           print(json.dumps(status, ensure_ascii=False))
           PY
           git add deploy/casualty-fast-status.json
-          git commit -m "Record 22-city casualty test deploy"
+          git commit -m "Record 23-city casualty test deploy"
           git push origin HEAD:multicity-wip-2026-09-16
