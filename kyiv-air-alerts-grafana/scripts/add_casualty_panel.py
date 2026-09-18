@@ -106,6 +106,34 @@ def make_panel(query_template: dict, panel_id: int, city_label: str, root_select
     }
 
 
+def ensure_site_link_panel(obj: dict) -> None:
+    panel_id = 949
+    existing = next((p for p in obj.get("panels", []) if p.get("id") == panel_id), None)
+    panel = {
+        "id": panel_id,
+        "type": "text",
+        "title": "Актуальна версія сайту",
+        "description": "Посилання на актуальну вебверсію проєкту.",
+        "gridPos": {"h": 4, "w": 24, "x": 0, "y": 0},
+        "options": {
+            "mode": "markdown",
+            "content": (
+                "## Актуальна версія сайту\n\n"
+                "Повна актуальна версія з інтерактивними графіками та порівнянням міст:  "
+                "[ukraine-air-alerts.netlify.app](https://ukraine-air-alerts.netlify.app/)"
+            ),
+        },
+    }
+    if existing is None:
+        for item in obj.get("panels", []):
+            gp = item.get("gridPos", {})
+            gp["y"] = int(gp.get("y", 0)) + panel["gridPos"]["h"]
+        obj.setdefault("panels", []).append(panel)
+    else:
+        panel["gridPos"] = existing.get("gridPos", panel["gridPos"])
+        obj["panels"] = [panel if p.get("id") == panel_id else p for p in obj.get("panels", [])]
+
+
 def add_disclaimer(methodology: dict, count: int) -> None:
     content = methodology.setdefault("options", {}).get("content", "")
     marker = "**Загиблі від повітряних атак.**"
@@ -131,6 +159,8 @@ def main() -> None:
         p for p in obj.get("panels", [])
         if not (950 <= int(p.get("id") or -1) < 1000)
     ]
+
+    ensure_site_link_panel(obj)
 
     methodology = next(
         (
