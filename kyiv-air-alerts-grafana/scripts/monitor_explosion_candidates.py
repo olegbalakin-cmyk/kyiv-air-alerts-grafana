@@ -33,6 +33,20 @@ KYIV_TZ = ZoneInfo("Europe/Kyiv")
 GOOGLE_NEWS_URL = "https://news.google.com/rss/search"
 FOLLOWUP_HOURS = [("immediate", 0), ("24h", 24), ("72h", 72), ("7d", 24 * 7)]
 MAX_EPISODES_PER_CITY = 10000
+TELEGRAM_RETENTION_DAYS = 9
+TELEGRAM_MAX_PAGES = 100
+TELEGRAM_CHANNELS = {
+    "suspilne": {
+        "handle": "suspilnenews",
+        "label": "СУСПІЛЬНЕ НОВИНИ",
+        "baseline_after": "2026-09-18T10:59:19Z",
+    },
+    "ukrpravda": {
+        "handle": "ukrpravda_news",
+        "label": "Українська правда",
+        "baseline_after": "2026-09-18T11:01:23Z",
+    },
+}
 
 CITY_CONFIG = {
     "poltava": {"label": "Полтава", "aliases": ["полтава", "полтаві", "полтави", "полтаву", "полтавою"]},
@@ -52,8 +66,12 @@ EXPLOSION_TERMS = (
     "пролунав",
     "пролунали",
     "було чутно",
-    "чули вибух",
+    "чули",
+    "гучно",
     "звук вибух",
+    "звуки вибух",
+    "серія вибух",
+    "ппо",
 )
 
 
@@ -231,6 +249,150 @@ def explosion_relevant(text: str) -> bool:
     return any(term in low for term in EXPLOSION_TERMS)
 
 
+def any_audited_city_mentioned(text: str) -> bool:
+    return any(city_mentioned(key, text) for key in CITY_CONFIG)
+
+
+def telegram_page(handle: str, before: int | None = None) -> tuple[list[dict], str]:
+    url = f"https://t.me/s/{handle}"
+    if before is not None:
+        url += f"?before={before}"
+    response = requests.get(
+        url,
+        headers={
+            "User-Agent": "Mozilla/5.0 (compatible; ukraine-air-alerts-explosion-monitor/1.0)",
+            "Accept-Language": "uk,en;q=0.7",
+        },
+        timeout=45,
+    )
+    response.raise_for_status()
+    soup = BeautifulSoup(response.text, "html.parser")
+    posts = []
+    for wrap in soup.select(".tgme_widget_message_wrap"):
+        message = wrap.select_one(".tgme_widget_message")
+        time_el = wrap.select_one("time[datetime]")
+        if message is None or time_el is None:
+            continue
+        data_post = str(message.get("data-post") or "")
+        if "/" not in data_post:
+            continue
+        post_handle, raw_id = data_post.rsplit("/", 1)
+        try:
+            message_id = int(raw_id)
+        except ValueError:
+            continue
+        published = parse_dt(time_el.get("datetime"))
+        if not published:
+            continue
+        text_el = wrap.select_one(".tgme_widget_message_text")
+        text = clean_text(text_el.get_text(" ", strip=True) if text_el else "")
+        posts.append({
+            "message_id": message_id,
+            "published_at": iso(published),
+            "text": text,
+            "url": f"https://t.me/{post_handle}/{message_id}",
+        })
+    posts.sort(key=lambda row: row["message_id"])
+    return posts, url
+
+
+def refresh_telegram_cache(state: dict, now: datetime) -> dict[str, str]:
+    tg_state = state.setdefault("telegram", {})
+    errors: dict[str, str] = {}
+    retention_floor = now - timedelta(days=TELEGRAM_RETENTION_DAYS)
+
+    for source_key, cfg in TELEGRAM_CHANNELS.items():
+        cstate = tg_state.setdefault(source_key, {
+            "handle": cfg["handle"],
+            "label": cfg["label"],
+            "last_seen_at": cfg["baseline_after"],
+            "posts": [],
+        })
+        cutoff = parse_dt(cstate.get("last_seen_at")) or parse_dt(cfg["baseline_after"])
+        if cutoff is None:
+            cutoff = retention_floor
+
+        collected: dict[int, dict] = {}
+        before = None
+        newest_seen = cutoff
+        try:
+            for _ in range(TELEGRAM_MAX_PAGES):
+                page, _ = telegram_page(cfg["handle"], before)
+                if not page:
+                    break
+                parsed_times = [parse_dt(row["published_at"]) for row in page]
+                parsed_times = [dt for dt in parsed_times if dt]
+                if not parsed_times:
+                    break
+                page_oldest = min(parsed_times)
+                page_newest = max(parsed_times)
+                if page_newest > newest_seen:
+                    newest_seen = page_newest
+                for row in page:
+                    published = parse_dt(row["published_at"])
+                    if not published or published <= cutoff:
+                        continue
+                    text = row.get("text") or ""
+                    if explosion_relevant(text) and any_audited_city_mentioned(text):
+                        collected[int(row["message_id"])] = row
+                if page_oldest <= cutoff:
+                    break
+                next_before = min(int(row["message_id"]) for row in page)
+                if before is not None and next_before >= before:
+                    break
+                before = next_before
+
+            merged = {
+                int(row["message_id"]): row
+                for row in cstate.get("posts", [])
+                if isinstance(row, dict) and str(row.get("message_id") or "").isdigit()
+            }
+            merged.update(collected)
+            kept = []
+            for row in merged.values():
+                published = parse_dt(row.get("published_at"))
+                if published and published >= retention_floor:
+                    kept.append(row)
+            kept.sort(key=lambda row: int(row["message_id"]))
+            cstate["posts"] = kept
+            cstate["last_seen_at"] = iso(newest_seen)
+            cstate["last_poll_at"] = iso(now)
+            cstate["last_error"] = None
+            cstate["new_relevant_posts"] = len(collected)
+        except Exception as exc:
+            message = f"{type(exc).__name__}: {exc}"
+            cstate["last_poll_at"] = iso(now)
+            cstate["last_error"] = message
+            errors[source_key] = message
+    return errors
+
+
+def telegram_candidates_for_city(state: dict, city_key: str, earliest: datetime, now: datetime) -> list[dict]:
+    lower = earliest - timedelta(hours=3)
+    upper = now + timedelta(hours=1)
+    rows = []
+    for source_key, cfg in TELEGRAM_CHANNELS.items():
+        cstate = (state.get("telegram") or {}).get(source_key) or {}
+        for post in cstate.get("posts", []):
+            published = parse_dt(post.get("published_at"))
+            text = str(post.get("text") or "")
+            if not published or not (lower <= published <= upper):
+                continue
+            if not city_mentioned(city_key, text) or not explosion_relevant(text):
+                continue
+            rows.append({
+                "source": f"Telegram / {cfg['label']}",
+                "title": text[:240] or f"Telegram post {post.get('message_id')}",
+                "url": post["url"],
+                "publisher": cfg["label"],
+                "publisher_url": f"https://t.me/{cfg['handle']}",
+                "published_at": post.get("published_at"),
+                "snippet": text[:1200],
+            })
+    dedup = {(row["url"], row["title"]): row for row in rows}
+    return list(dedup.values())
+
+
 def google_news_query(city_label: str) -> str:
     return (
         f'"{city_label}" '
@@ -355,7 +517,7 @@ def add_candidates(queue: list[dict], city_key: str, rows: list[dict], due: list
             "city_key": city_key,
             "city": CITY_CONFIG[city_key]["label"],
             "status": "needs_review",
-            "source": "Google News RSS",
+            "source": row.get("source") or "Google News RSS",
             "publisher": row.get("publisher"),
             "publisher_url": row.get("publisher_url"),
             "url": row["url"],
@@ -388,6 +550,7 @@ def self_test() -> None:
     assert city_mentioned("vinnytsia", "У Вінниці було чутно вибух")
     assert not city_mentioned("vinnytsia", "На Вінниччині було гучно")
     assert explosion_relevant("У Львові пролунали вибухи")
+    assert explosion_relevant("У Львові було гучно, працювала ППО")
     dt = datetime(2026, 9, 18, 10, tzinfo=UTC)
     ep = make_episode("poltava", dt, dt + timedelta(hours=1))
     assert [x["label"] for x in ep["checks"]] == ["immediate", "24h", "72h", "7d"]
@@ -418,28 +581,39 @@ def main() -> None:
         polled, errors = poll_alerts()
         mode = "network"
     new_episodes = process_events(state, polled, errors, started)
+    telegram_errors = refresh_telegram_cache(state, started)
+    errors.update({f"telegram:{key}": value for key, value in telegram_errors.items()})
     due = due_checks(state, started)
     searches = {}
     new_candidates = 0
     for city_key, city_due in sorted(due.items()):
         earliest = min(parse_dt(ep.get("alert_start")) or started for ep, _ in city_due)
+        rows = telegram_candidates_for_city(state, city_key, earliest, started)
+        telegram_count = len(rows)
+        query_url = None
+        google_error = None
         try:
-            rows, query_url = search_city_news(city_key, earliest, started)
-            added = add_candidates(queue, city_key, rows, city_due, started)
-            new_candidates += added
-            searches[city_key] = {
-                "due_checks": len(city_due),
-                "results_after_filter": len(rows),
-                "new_candidates": added,
-                "query_url": query_url,
-            }
-            for _, check in city_due:
-                check["checked_at"] = iso(started)
-                check["new_candidates"] = added
+            google_rows, query_url = search_city_news(city_key, earliest, started)
+            rows.extend(google_rows)
         except Exception as exc:
-            message = f"{type(exc).__name__}: {exc}"
-            errors[f"search:{city_key}"] = message
-            searches[city_key] = {"due_checks": len(city_due), "error": message}
+            google_error = f"{type(exc).__name__}: {exc}"
+            errors[f"search:{city_key}"] = google_error
+
+        dedup = {(row["url"], row["title"]): row for row in rows}
+        rows = list(dedup.values())
+        added = add_candidates(queue, city_key, rows, city_due, started)
+        new_candidates += added
+        searches[city_key] = {
+            "due_checks": len(city_due),
+            "telegram_results": telegram_count,
+            "results_after_filter": len(rows),
+            "new_candidates": added,
+            "query_url": query_url,
+            "google_error": google_error,
+        }
+        for _, check in city_due:
+            check["checked_at"] = iso(started)
+            check["new_candidates"] = added
 
     queue.sort(key=lambda x: (x.get("first_discovered_at") or "", x.get("city_key") or ""), reverse=True)
     state["last_run_at"] = iso(started)
@@ -455,6 +629,14 @@ def main() -> None:
         "searches": searches,
         "new_review_candidates": new_candidates,
         "review_queue_size": len(queue),
+        "telegram": {
+            key: {
+                "last_seen_at": ((state.get("telegram") or {}).get(key) or {}).get("last_seen_at"),
+                "cached_relevant_posts": len(((state.get("telegram") or {}).get(key) or {}).get("posts") or []),
+                "last_error": ((state.get("telegram") or {}).get(key) or {}).get("last_error"),
+            }
+            for key in TELEGRAM_CHANNELS
+        },
         "errors": errors,
         "strict_series_modified_by_discovery": False,
     }
