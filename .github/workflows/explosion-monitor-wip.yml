@@ -39,6 +39,21 @@ jobs:
         working-directory: kyiv-air-alerts-grafana
         run: pip install -r requirements.txt
 
+      - name: Get latest production city feeds for baseline onboarding
+        run: |
+          git fetch origin main
+          rm -rf /tmp/prod-tree
+          mkdir -p /tmp/prod-tree
+          git archive origin/main kyiv-air-alerts-grafana/data/grafana/cities | tar -x -C /tmp/prod-tree
+          test -d /tmp/prod-tree/kyiv-air-alerts-grafana/data/grafana/cities
+
+      - name: Sync newly audited cities into the automatic baseline
+        working-directory: kyiv-air-alerts-grafana
+        run: |
+          python scripts/sync_explosion_audited_baseline.py --self-test
+          python scripts/sync_explosion_audited_baseline.py \
+            --city-data-dir /tmp/prod-tree/kyiv-air-alerts-grafana/data/grafana/cities
+
       - name: Self-test explosion automation
         working-directory: kyiv-air-alerts-grafana
         run: |
@@ -62,7 +77,7 @@ jobs:
           from pathlib import Path
 
           root = Path("kyiv-air-alerts-grafana/data")
-          baseline = json.loads((root / "explosion_baseline_2026-09-17.json").read_text(encoding="utf-8"))
+          baseline = json.loads((root / "explosion_audited_baseline.json").read_text(encoding="utf-8"))
           live = json.loads((root / "explosions_test.json").read_text(encoding="utf-8"))
           state = json.loads((root / "explosion_candidate_monitor_state.json").read_text(encoding="utf-8"))
           queue = json.loads((root / "explosion_review_queue.json").read_text(encoding="utf-8"))
@@ -73,10 +88,12 @@ jobs:
           assert live["meta"]["rolling_window_days"] == 90
           assert live["meta"]["automation"]["strict_promotion"] == "auto_only_if_unambiguous_otherwise_manual_review"
           assert set(live["cities"]) == set(baseline["cities"])
-          assert len(live["cities"]) == 10
+          assert len(live["cities"]) >= 10
+          assert baseline["meta"]["city_count"] == len(baseline["cities"])
+          assert live["meta"]["city_count"] == len(baseline["cities"])
           assert state["schema_version"] == 1
           assert isinstance(queue, list)
-          assert report["city_count"] == 10
+          assert report["city_count"] == len(baseline["cities"])
           assert report["mode"] == "network"
 
           approved = [
@@ -103,7 +120,13 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add             kyiv-air-alerts-grafana/data/explosion_candidate_monitor_state.json             kyiv-air-alerts-grafana/data/explosion_review_queue.json             kyiv-air-alerts-grafana/data/explosion_candidate_monitor_last_run.json             kyiv-air-alerts-grafana/data/explosions_test.json
+          git add \
+            kyiv-air-alerts-grafana/data/explosion_audited_baseline.json \
+            kyiv-air-alerts-grafana/data/explosion_daily_alert_seed.json \
+            kyiv-air-alerts-grafana/data/explosion_candidate_monitor_state.json \
+            kyiv-air-alerts-grafana/data/explosion_review_queue.json \
+            kyiv-air-alerts-grafana/data/explosion_candidate_monitor_last_run.json \
+            kyiv-air-alerts-grafana/data/explosions_test.json
 
           if git diff --cached --quiet; then
             echo "No explosion-monitor changes"
