@@ -34,6 +34,10 @@ Count one numerator event per matched alert episode.
 - Do not print raw denominator rows, large JSON/CSV, search dumps, or broad rejection logs into chat.
 - Keep only numerator-relevant evidence.
 
+## Write-safety
+
+Do not modify any shared files. Create or update **only your own slice result JSON**. In particular, do not edit `RESEARCH_SLICES_2026-09-18.csv`, `explosion_preview_input.json`, status/handoff files, other slice results, or deployment/config files.
+
 ## Output
 
 Write one compact result JSON named:
