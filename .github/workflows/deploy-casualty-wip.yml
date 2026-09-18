@@ -1,0 +1,224 @@
+name: Deploy 21-city casualty WIP
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [multicity-wip-2026-09-16]
+    paths:
+      - "deploy/casualty-wip-release.txt"
+
+concurrency:
+  group: casualty-wip-release
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+
+    steps:
+      - name: Check out WIP branch
+        uses: actions/checkout@v4
+        with:
+          ref: multicity-wip-2026-09-16
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: kyiv-air-alerts-grafana/requirements.txt
+
+      - name: Install dependencies
+        working-directory: kyiv-air-alerts-grafana
+        run: pip install -r requirements.txt
+
+      - name: Update base air-alert data
+        working-directory: kyiv-air-alerts-grafana
+        run: python scripts/update_data.py
+
+      - name: Add weekly duration metrics
+        working-directory: kyiv-air-alerts-grafana
+        run: python scripts/add_weekly_breakdown.py
+
+      - name: Render dashboard for WIP branch
+        working-directory: kyiv-air-alerts-grafana
+        run: python scripts/render_dashboard.py --repository "${GITHUB_REPOSITORY}" --branch "${GITHUB_REF_NAME}" --prefix "kyiv-air-alerts-grafana"
+
+      - name: Add weekly panels
+        working-directory: kyiv-air-alerts-grafana
+        run: python scripts/add_weekly_panels.py
+
+      - name: Add exact-city base rows
+        working-directory: kyiv-air-alerts-grafana
+        run: python scripts/add_duration_unit_switch.py
+
+      - name: Add documented proxy rows
+        working-directory: kyiv-air-alerts-grafana
+        run: python scripts/expand_multicity_production.py
+
+      - name: Add cross-source validated proxy rows
+        working-directory: kyiv-air-alerts-grafana
+        run: python scripts/extend_remaining_proxies.py
+
+      - name: Apply verified Alerts.in.ua and UkraineAlarm bridge
+        working-directory: kyiv-air-alerts-grafana
+        env:
+          UKRAINEALARM_API_TOKEN: ${{ secrets.UKRAINEALARM_API_TOKEN }}
+        run: python scripts/apply_ukrainealarm_bridge.py
+
+      - name: Add Sevastopol exact-city series
+        working-directory: kyiv-air-alerts-grafana
+        run: python scripts/add_sevastopol_exact.py
+
+      - name: Build 21-city casualty data
+        working-directory: kyiv-air-alerts-grafana
+        run: python scripts/update_casualties.py --no-network
+
+      - name: Configure full city dashboard
+        working-directory: kyiv-air-alerts-grafana
+        run: python scripts/configure_full_city_dashboard.py
+
+      - name: Add 21-city casualty panels
+        working-directory: kyiv-air-alerts-grafana
+        run: python scripts/add_casualty_panel.py
+
+      - name: QA dashboard
+        working-directory: kyiv-air-alerts-grafana
+        run: python scripts/postprocess_compact_dashboard_qa.py
+
+      - name: Reconcile source freshness
+        working-directory: kyiv-air-alerts-grafana
+        run: python scripts/reconcile_bridge_freshness.py
+
+      - name: Validate casualty release
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          path = Path("kyiv-air-alerts-grafana/data/dashboard_data.json")
+          data = json.loads(path.read_text(encoding="utf-8"))
+          series = data.get("casualties_by_city") or {}
+          expected = {
+              "kyiv": 454, "kharkiv": 339, "sevastopol": 22, "cherkasy": 2,
+              "zhytomyr": 12, "dnipro": 214, "khmelnytskyi": 10, "poltava": 84,
+              "rivne": 1, "sumy": 158, "vinnytsia": 31, "kropyvnytskyi": 9,
+              "lviv": 29, "chernihiv": 105, "mykolaiv": 106, "lutsk": 10,
+              "uzhhorod": 0, "ivano-frankivsk": 3, "ternopil": 41,
+              "chernivtsi": 5, "odesa": 171,
+          }
+          assert set(series) == set(expected), (sorted(series), sorted(expected))
+          assert "zaporizhzhia" not in series
+          assert "kherson" not in series
+          totals = {}
+          for key, target in expected.items():
+              actual = sum(int(r.get("deaths") or 0) for r in series[key].get("monthly", []))
+              totals[key] = actual
+              assert actual == target, (key, actual, target)
+
+          out = {
+              "ok": True,
+              "city_count": len(series),
+              "excluded_pending": ["zaporizhzhia", "kherson"],
+              "totals": totals,
+          }
+          Path("/tmp/casualty-validation.json").write_text(
+              json.dumps(out, ensure_ascii=False, indent=2) + "\n",
+              encoding="utf-8",
+          )
+          print(json.dumps(out, ensure_ascii=False))
+          PY
+
+      - name: Commit validated WIP build
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add kyiv-air-alerts-grafana/data/dashboard_data.json \
+                  kyiv-air-alerts-grafana/data/dashboard_qa.json \
+                  kyiv-air-alerts-grafana/grafana/dashboard.json
+          if git diff --cached --quiet; then
+            echo "Validated WIP build already committed"
+          else
+            git commit -m "Publish 21-city casualty WIP data"
+            git push origin HEAD:multicity-wip-2026-09-16
+          fi
+
+      - name: Deploy Grafana
+        working-directory: kyiv-air-alerts-grafana
+        env:
+          GRAFANA_URL: ${{ secrets.GRAFANA_URL }}
+          GRAFANA_TOKEN: ${{ secrets.GRAFANA_TOKEN }}
+          GRAFANA_DASHBOARD_UID: ${{ secrets.GRAFANA_DASHBOARD_UID }}
+          GRAFANA_DASHBOARD_TITLE: ${{ vars.GRAFANA_DASHBOARD_TITLE }}
+          GRAFANA_INFINITY_NAME: ${{ vars.GRAFANA_INFINITY_NAME }}
+        run: python scripts/deploy_grafana.py | tee /tmp/grafana-deploy.log
+
+      - name: Assemble Netlify test site
+        run: |
+          rm -rf _site
+          mkdir -p _site
+          cp kyiv-air-alerts-grafana/pages-preview/index.html _site/index.html
+          cp kyiv-air-alerts-grafana/pages-preview/styles.css _site/styles.css
+          cp kyiv-air-alerts-grafana/pages-preview/app.js _site/app.js
+          cp kyiv-air-alerts-grafana/data/dashboard_data.json _site/data.json
+
+      - name: Deploy one Netlify draft preview
+        env:
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+        run: |
+          test -n "$NETLIFY_AUTH_TOKEN"
+          npx -y netlify-cli@latest deploy \
+            --dir=_site \
+            --site=b5aafc46-7468-4070-baf1-db80a4d30501 \
+            --auth="$NETLIFY_AUTH_TOKEN" \
+            --json | tee /tmp/netlify-deploy.json
+
+      - name: Record deploy status
+        run: |
+          mkdir -p deploy
+          python - <<'PY'
+          import json
+          from datetime import datetime, timezone
+          from pathlib import Path
+
+          validation = json.loads(Path("/tmp/casualty-validation.json").read_text(encoding="utf-8"))
+          netlify = json.loads(Path("/tmp/netlify-deploy.json").read_text(encoding="utf-8"))
+          grafana_log = Path("/tmp/grafana-deploy.log").read_text(encoding="utf-8").strip()
+          status = {
+              "generated_at": datetime.now(timezone.utc).isoformat(),
+              "branch": "multicity-wip-2026-09-16",
+              "casualties": validation,
+              "grafana": {"ok": "Grafana deploy successful" in grafana_log, "log_tail": grafana_log[-1000:]},
+              "netlify": {
+                  "production": False,
+                  "draft_preview": True,
+                  "deploy_id": netlify.get("deploy_id") or netlify.get("id"),
+                  "deploy_url": netlify.get("deploy_url") or netlify.get("url"),
+                  "logs": netlify.get("logs"),
+              },
+          }
+          Path("deploy/casualty-wip-status.json").write_text(
+              json.dumps(status, ensure_ascii=False, indent=2) + "\n",
+              encoding="utf-8",
+          )
+          print(json.dumps(status, ensure_ascii=False))
+          PY
+          git add deploy/casualty-wip-status.json
+          git commit -m "Record 21-city casualty WIP deploy"
+          git push origin HEAD:multicity-wip-2026-09-16
+
+      - name: Upload deploy diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: casualty-wip-release-diagnostics
+          path: |
+            /tmp/casualty-validation.json
+            /tmp/grafana-deploy.log
+            /tmp/netlify-deploy.json
+          if-no-files-found: ignore
