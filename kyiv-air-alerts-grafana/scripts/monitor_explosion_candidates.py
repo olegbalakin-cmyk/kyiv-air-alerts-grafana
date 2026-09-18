@@ -24,6 +24,9 @@ ROOT = Path(__file__).resolve().parents[1]
 DATA_DIR = ROOT / "data"
 BASELINE_FILE = DATA_DIR / "explosion_audited_baseline.json"
 BRIDGE_FILE = DATA_DIR / "ukrainealarm_bridge.json"
+KYIV_ALERTS_FILE = DATA_DIR / "alerts_combined.json"
+SEVASTOPOL_EVENTS_FILE = DATA_DIR / "sevastopol_events.json"
+SPECIAL_ALERT_SOURCES = {"kyiv", "sevastopol"}
 STATE_FILE = DATA_DIR / "explosion_candidate_monitor_state.json"
 QUEUE_FILE = DATA_DIR / "explosion_review_queue.json"
 LAST_RUN_FILE = DATA_DIR / "explosion_candidate_monitor_last_run.json"
@@ -176,13 +179,13 @@ def baseline_ends() -> dict[str, str]:
     return out
 
 
-def make_episode(city_key: str, start: datetime, end: datetime) -> dict:
+def make_episode(city_key: str, start: datetime, end: datetime, source: str = "ukrainealarm_regionHistory") -> dict:
     start_s, end_s = iso(start), iso(end)
     return {
         "episode_id": event_id(city_key, start_s, end_s),
         "city_key": city_key,
         "city": CITY_CONFIG[city_key]["label"],
-        "alert_source": "ukrainealarm_regionHistory",
+        "alert_source": source,
         "alert_start": start_s,
         "alert_end": end_s,
         "alert_start_date_kyiv": start.astimezone(KYIV_TZ).date().isoformat(),
@@ -198,7 +201,70 @@ def make_episode(city_key: str, start: datetime, end: datetime) -> dict:
     }
 
 
-def poll_cached_bridge(bridge_path: Path, now: datetime) -> tuple[dict[str, list[dict]], dict[str, str]]:
+def load_kyiv_alert_episodes(path: Path) -> list[dict]:
+    rows = load_json(path, [])
+    if not isinstance(rows, list):
+        raise RuntimeError(f"Kyiv alert store is not a list: {path}")
+    episodes = {}
+    for row in rows:
+        if not isinstance(row, dict):
+            continue
+        start = parse_dt(row.get("start"))
+        end = parse_dt(row.get("end"))
+        if not start or not end or end <= start:
+            continue
+        ep = make_episode("kyiv", start, end, source="kyiv_combined_exact_city")
+        episodes[ep["episode_id"]] = ep
+    if not episodes:
+        raise RuntimeError(f"Kyiv alert store produced no complete episodes: {path}")
+    return sorted(episodes.values(), key=lambda x: x["alert_end"])
+
+
+def load_sevastopol_alert_episodes(path: Path) -> list[dict]:
+    store = load_json(path, {})
+    pairs = store.get("pairs") if isinstance(store, dict) else None
+    if not isinstance(pairs, list):
+        raise RuntimeError(f"Sevastopol event store has no pairs: {path}")
+    episodes = {}
+    for row in pairs:
+        if not isinstance(row, dict):
+            continue
+        start = parse_dt(row.get("start"))
+        end = parse_dt(row.get("end"))
+        if not start or not end or end <= start:
+            continue
+        ep = make_episode("sevastopol", start, end, source="sevastopol_verified_exact_city_pairs")
+        episodes[ep["episode_id"]] = ep
+    if not episodes:
+        raise RuntimeError(f"Sevastopol event store produced no complete episodes: {path}")
+    return sorted(episodes.values(), key=lambda x: x["alert_end"])
+
+
+def special_source_alerts(
+    kyiv_alerts_path: Path,
+    sevastopol_events_path: Path,
+) -> tuple[dict[str, list[dict]], dict[str, str]]:
+    out: dict[str, list[dict]] = {}
+    errors: dict[str, str] = {}
+    if "kyiv" in CITY_CONFIG:
+        try:
+            out["kyiv"] = load_kyiv_alert_episodes(kyiv_alerts_path)
+        except Exception as exc:
+            errors["kyiv"] = f"{type(exc).__name__}: {exc}"
+    if "sevastopol" in CITY_CONFIG:
+        try:
+            out["sevastopol"] = load_sevastopol_alert_episodes(sevastopol_events_path)
+        except Exception as exc:
+            errors["sevastopol"] = f"{type(exc).__name__}: {exc}"
+    return out, errors
+
+
+def poll_cached_bridge(
+    bridge_path: Path,
+    now: datetime,
+    kyiv_alerts_path: Path = KYIV_ALERTS_FILE,
+    sevastopol_events_path: Path = SEVASTOPOL_EVENTS_FILE,
+) -> tuple[dict[str, list[dict]], dict[str, str]]:
     bridge = load_json(bridge_path, {})
     rows_by_city: dict[str, list[dict]] = {key: [] for key in CITY_CONFIG}
     errors: dict[str, str] = {}
@@ -206,7 +272,7 @@ def poll_cached_bridge(bridge_path: Path, now: datetime) -> tuple[dict[str, list
         if not isinstance(row, dict):
             continue
         city_key = str(row.get("city_key") or "")
-        if city_key not in CITY_CONFIG:
+        if city_key not in CITY_CONFIG or city_key in SPECIAL_ALERT_SOURCES:
             continue
         start = parse_dt(row.get("start"))
         end = parse_dt(row.get("end"))
@@ -218,6 +284,8 @@ def poll_cached_bridge(bridge_path: Path, now: datetime) -> tuple[dict[str, list
 
     regions = bridge.get("regions") or {}
     for city_key in CITY_CONFIG:
+        if city_key in SPECIAL_ALERT_SOURCES:
+            continue
         region = regions.get(city_key) or {}
         checked = parse_dt(region.get("last_checked_at"))
         if not checked:
@@ -226,10 +294,17 @@ def poll_cached_bridge(bridge_path: Path, now: datetime) -> tuple[dict[str, list
             errors[city_key] = f"cached_bridge_stale:{iso(checked)}"
         dedup = {ep["episode_id"]: ep for ep in rows_by_city[city_key]}
         rows_by_city[city_key] = sorted(dedup.values(), key=lambda x: x["alert_end"])
+
+    special, special_errors = special_source_alerts(kyiv_alerts_path, sevastopol_events_path)
+    rows_by_city.update(special)
+    errors.update(special_errors)
     return rows_by_city, errors
 
 
-def poll_alerts() -> tuple[dict[str, list[dict]], dict[str, str]]:
+def poll_alerts(
+    kyiv_alerts_path: Path = KYIV_ALERTS_FILE,
+    sevastopol_events_path: Path = SEVASTOPOL_EVENTS_FILE,
+) -> tuple[dict[str, list[dict]], dict[str, str]]:
     token = os.getenv(ua.TOKEN_ENV, "").strip()
     if not token:
         raise RuntimeError(f"{ua.TOKEN_ENV} is not configured")
@@ -239,7 +314,8 @@ def poll_alerts() -> tuple[dict[str, list[dict]], dict[str, str]]:
     out: dict[str, list[dict]] = {}
     errors: dict[str, str] = {}
 
-    for idx, city_key in enumerate(CITY_CONFIG, 1):
+    normal_keys = [key for key in CITY_CONFIG if key not in SPECIAL_ALERT_SOURCES]
+    for idx, city_key in enumerate(normal_keys, 1):
         region = regions.get(city_key) or {}
         region_id = str(region.get("region_id") or "")
         api_name = str(region.get("api_region_name") or region.get("target") or CITY_CONFIG[city_key]["label"])
@@ -255,10 +331,18 @@ def poll_alerts() -> tuple[dict[str, list[dict]], dict[str, str]]:
                     ep = make_episode(city_key, start, end)
                     episodes[ep["episode_id"]] = ep
             out[city_key] = sorted(episodes.values(), key=lambda x: x["alert_end"])
-            print(f"[{idx}/{len(CITY_CONFIG)}] {city_key}: {len(out[city_key])} completed alerts", flush=True)
+            print(f"[{idx}/{len(normal_keys)}] {city_key}: {len(out[city_key])} completed alerts", flush=True)
         except Exception as exc:
             errors[city_key] = f"{type(exc).__name__}: {exc}"
-            print(f"[{idx}/{len(CITY_CONFIG)}] {city_key}: ERROR {errors[city_key]}", file=sys.stderr, flush=True)
+            print(f"[{idx}/{len(normal_keys)}] {city_key}: ERROR {errors[city_key]}", file=sys.stderr, flush=True)
+
+    special, special_errors = special_source_alerts(kyiv_alerts_path, sevastopol_events_path)
+    out.update(special)
+    errors.update(special_errors)
+    for key in sorted(special):
+        print(f"[special] {key}: {len(special[key])} completed alerts", flush=True)
+    for key, message in sorted(special_errors.items()):
+        print(f"[special] {key}: ERROR {message}", file=sys.stderr, flush=True)
     return out, errors
 
 
@@ -654,6 +738,12 @@ def self_test() -> None:
     ep = make_episode("poltava", dt, dt + timedelta(hours=1))
     assert [x["label"] for x in ep["checks"]] == ["immediate", "24h", "72h", "7d"]
     assert ep["alert_start_date_kyiv"] == "2026-09-18"
+    if "kyiv" in CITY_CONFIG:
+        kyiv_rows = load_kyiv_alert_episodes(KYIV_ALERTS_FILE)
+        assert kyiv_rows and kyiv_rows[-1]["alert_source"] == "kyiv_combined_exact_city"
+    if "sevastopol" in CITY_CONFIG:
+        sev_rows = load_sevastopol_alert_episodes(SEVASTOPOL_EVENTS_FILE)
+        assert sev_rows and sev_rows[-1]["alert_source"] == "sevastopol_verified_exact_city_pairs"
     assert len(CITY_CONFIG) >= 10
     print(f"Self-test OK: {len(CITY_CONFIG)} audited cities, exact-city filter, explosion filter, follow-up schedule")
 
@@ -663,6 +753,8 @@ def main() -> None:
     parser.add_argument("--self-test", action="store_true")
     parser.add_argument("--local-only", action="store_true", help="Read completed alerts from a cached UkraineAlarm bridge instead of calling the API.")
     parser.add_argument("--bridge-file", default=str(BRIDGE_FILE), help="Bridge JSON used with --local-only.")
+    parser.add_argument("--kyiv-alerts-file", default=str(KYIV_ALERTS_FILE), help="Completed Kyiv exact-city alert store.")
+    parser.add_argument("--sevastopol-events-file", default=str(SEVASTOPOL_EVENTS_FILE), help="Verified completed Sevastopol event store.")
     args = parser.parse_args()
     if args.self_test:
         self_test()
@@ -675,10 +767,18 @@ def main() -> None:
         queue = []
 
     if args.local_only:
-        polled, errors = poll_cached_bridge(Path(args.bridge_file), started)
+        polled, errors = poll_cached_bridge(
+            Path(args.bridge_file),
+            started,
+            Path(args.kyiv_alerts_file),
+            Path(args.sevastopol_events_file),
+        )
         mode = "cached_bridge"
     else:
-        polled, errors = poll_alerts()
+        polled, errors = poll_alerts(
+            Path(args.kyiv_alerts_file),
+            Path(args.sevastopol_events_file),
+        )
         mode = "network"
     new_episodes = process_events(state, polled, errors, started)
     telegram_errors = refresh_telegram_cache(state, started)
