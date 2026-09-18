@@ -38,18 +38,24 @@ jobs:
         working-directory: kyiv-air-alerts-grafana
         run: pip install -r requirements.txt
 
-      - name: Get latest production alert bridge and dashboard data
+      - name: Get latest production alert inputs
         run: |
-          git fetch origin main
-          git show origin/main:kyiv-air-alerts-grafana/data/ukrainealarm_bridge.json > /tmp/latest-bridge.json
-          git show origin/main:kyiv-air-alerts-grafana/data/dashboard_data.json > /tmp/prod-dashboard.json
+          git fetch origin site-prod
+          git show origin/site-prod:kyiv-air-alerts-grafana/data/ukrainealarm_bridge.json > /tmp/latest-bridge.json
+          git show origin/site-prod:kyiv-air-alerts-grafana/data/dashboard_data.json > /tmp/prod-dashboard.json
+          git show origin/site-prod:kyiv-air-alerts-grafana/data/alerts_combined.json > /tmp/prod-kyiv-alerts.json
+          git show origin/site-prod:kyiv-air-alerts-grafana/data/sevastopol_events.json > /tmp/prod-sevastopol-events.json
           python - <<'PY'
           import json
           from pathlib import Path
           bridge = json.loads(Path("/tmp/latest-bridge.json").read_text(encoding="utf-8"))
           dashboard = json.loads(Path("/tmp/prod-dashboard.json").read_text(encoding="utf-8"))
-          assert bridge.get("events"), "main bridge has no events"
-          assert dashboard.get("cities"), "main dashboard has no cities"
+          kyiv = json.loads(Path("/tmp/prod-kyiv-alerts.json").read_text(encoding="utf-8"))
+          sev = json.loads(Path("/tmp/prod-sevastopol-events.json").read_text(encoding="utf-8"))
+          assert bridge.get("events"), "production bridge has no events"
+          assert dashboard.get("cities"), "production dashboard has no cities"
+          assert isinstance(kyiv, list) and kyiv, "Kyiv alert store is empty"
+          assert sev.get("pairs"), "Sevastopol event store is empty"
           print("bridge events:", len(bridge["events"]), "dashboard cities:", len(dashboard["cities"]))
           PY
 
@@ -63,13 +69,21 @@ jobs:
           python scripts/sync_explosion_audited_baseline.py \
             --dashboard-data /tmp/prod-dashboard.json
 
-      - name: Self-test explosion monitor
+      - name: Self-test primary explosion monitor
         working-directory: kyiv-air-alerts-grafana
-        run: python scripts/update_explosion_metric.py --self-test
+        run: |
+          python scripts/monitor_explosion_candidates.py --self-test
+          python scripts/update_explosion_metric_live.py --self-test
 
-      - name: Update explosion metric and candidate queue
+      - name: Update explosion metric and candidate queue from cached production inputs
         working-directory: kyiv-air-alerts-grafana
-        run: python scripts/update_explosion_metric.py --bridge-file /tmp/latest-bridge.json
+        run: |
+          python scripts/monitor_explosion_candidates.py \
+            --local-only \
+            --bridge-file /tmp/latest-bridge.json \
+            --kyiv-alerts-file /tmp/prod-kyiv-alerts.json \
+            --sevastopol-events-file /tmp/prod-sevastopol-events.json
+          python scripts/update_explosion_metric_live.py
 
       - name: Validate generated explosion metric
         run: |
@@ -81,21 +95,19 @@ jobs:
           x = json.loads((root / "explosions_test.json").read_text(encoding="utf-8"))
           base = json.loads((root / "explosion_audited_baseline.json").read_text(encoding="utf-8"))
           dash = json.loads((root / "dashboard_data.json").read_text(encoding="utf-8"))
-          run = json.loads((root / "explosion_monitor_last_run.json").read_text(encoding="utf-8"))
+          run = json.loads((root / "explosion_candidate_monitor_last_run.json").read_text(encoding="utf-8"))
 
-          assert x["meta"]["automatic_updates"] is True
+          assert x["meta"]["schema_version"] == 2
           assert x["meta"]["rolling_window_days"] == 90
-          assert len(x["cities"]) >= 10
-          assert x["meta"]["city_count"] == len(x["cities"])
           assert set(x["cities"]) == set(base["cities"])
-          assert base["meta"]["city_count"] == len(base["cities"])
+          assert x["meta"]["city_count"] == len(base["cities"])
+          assert dash["explosion_metric_test"]["meta"]["city_count"] == len(base["cities"])
+          assert run["city_count"] == len(base["cities"])
+          assert run["mode"] == "cached_bridge"
           for key, city in x["cities"].items():
               assert city["total_alerts"] >= base["cities"][key]["total_alerts"], key
               assert city["strict_n"] >= base["cities"][key]["strict_n"], key
               assert city["rolling90"], key
-          assert dash["explosion_metric_test"]["meta"]["automatic_updates"] is True
-          assert run["output_city_count"] == len(base["cities"])
-          assert run["audited_city_count"] == len(base["cities"])
           print(json.dumps(run, ensure_ascii=False))
           PY
 
@@ -113,7 +125,14 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add             kyiv-air-alerts-grafana/data/explosions_test.json             kyiv-air-alerts-grafana/data/dashboard_data.json             kyiv-air-alerts-grafana/data/explosion_monitor_state.json             kyiv-air-alerts-grafana/data/explosion_review_queue.json             kyiv-air-alerts-grafana/data/explosion_monitor_last_run.json
+          git add \
+            kyiv-air-alerts-grafana/data/explosion_audited_baseline.json \
+            kyiv-air-alerts-grafana/data/explosion_daily_alert_seed.json \
+            kyiv-air-alerts-grafana/data/explosions_test.json \
+            kyiv-air-alerts-grafana/data/dashboard_data.json \
+            kyiv-air-alerts-grafana/data/explosion_candidate_monitor_state.json \
+            kyiv-air-alerts-grafana/data/explosion_review_queue.json \
+            kyiv-air-alerts-grafana/data/explosion_candidate_monitor_last_run.json
           if git diff --cached --quiet; then
             echo "committed=false" >> "$GITHUB_OUTPUT"
             exit 0
