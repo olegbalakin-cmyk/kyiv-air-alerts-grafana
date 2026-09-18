@@ -372,12 +372,17 @@ def unique_same_day_episode(row: dict, due: list[tuple[dict, dict]]) -> dict | N
 
 def add_candidates(queue: list[dict], baseline: dict, city_key: str, rows: list[dict], due: list[tuple[dict, dict]], now: datetime) -> tuple[int, int]:
     by_id = {x.get("candidate_id"): x for x in queue if isinstance(x, dict) and x.get("candidate_id")}
+    by_url = {
+        (str(x.get("city_key") or ""), str(x.get("url") or "")): x
+        for x in queue
+        if isinstance(x, dict) and x.get("url")
+    }
     trigger_ids = sorted({ep["episode_id"] for ep, _ in due})
     labels = sorted({check["label"] for _, check in due})
     new_count = auto_count = 0
     for row in rows:
         cid = candidate_id(city_key, row["url"], row["text"])
-        existing = by_id.get(cid)
+        existing = by_id.get(cid) or by_url.get((city_key, row["url"]))
         if existing:
             existing["last_seen_at"] = iso(now)
             existing["trigger_episode_ids"] = sorted(set(existing.get("trigger_episode_ids") or []) | set(trigger_ids))
@@ -408,6 +413,7 @@ def add_candidates(queue: list[dict], baseline: dict, city_key: str, rows: list[
         }
         queue.append(item)
         by_id[cid] = item
+        by_url[(city_key, row["url"])] = item
         new_count += 1
     return new_count, auto_count
 
@@ -490,7 +496,7 @@ def rebuild_output(state: dict, queue: list[dict], baseline: dict, keys: list[st
         if not seed_city:
             raise RuntimeError(
                 f"{key}: denominator seed missing. Add the audited city baseline and run "
-                f"scripts/sync_explosion_seed.py before the scheduled monitor."
+                f"scripts/sync_explosion_audited_baseline.py before the scheduled monitor."
             )
         daily_alerts = {d: int(n) for d, n in seed_city["daily_alerts"].items()}
         first_live_day = baseline_end(baseline, key) + timedelta(days=1)
