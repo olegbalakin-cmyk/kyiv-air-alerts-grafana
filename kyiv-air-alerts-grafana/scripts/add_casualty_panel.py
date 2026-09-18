@@ -151,6 +151,19 @@ def add_disclaimer(methodology: dict, count: int) -> None:
 def main() -> None:
     obj = json.loads(DASHBOARD.read_text(encoding="utf-8"))
     data = json.loads(DATA_FILE.read_text(encoding="utf-8"))
+
+    dashboard_data_url = (
+        "https://raw.githubusercontent.com/olegbalakin-cmyk/"
+        "kyiv-air-alerts-grafana/multicity-wip-2026-09-16/"
+        "kyiv-air-alerts-grafana/data/dashboard_data.json"
+    )
+    for panel in obj.get("panels", []):
+        targets = list(panel.get("targets", []))
+        for child in panel.get("panels", []):
+            targets.extend(child.get("targets", []))
+        for target in targets:
+            if target.get("source") == "url" and target.get("type") == "json":
+                target["url"] = dashboard_data_url
     series_by_city = data.get("casualties_by_city") or {}
     if not series_by_city:
         raise RuntimeError("casualties_by_city is empty")
