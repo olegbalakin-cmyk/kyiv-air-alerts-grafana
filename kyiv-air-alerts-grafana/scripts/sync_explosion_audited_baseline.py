@@ -276,6 +276,11 @@ def main() -> None:
         "skipped": skipped,
     }
     print(json.dumps(report, ensure_ascii=False, indent=2))
+    if skipped:
+        raise RuntimeError(
+            "One or more audited cities could not be auto-onboarded; "
+            "complete their dated strict episodes / city feed first."
+        )
 
 
 if __name__ == "__main__":
