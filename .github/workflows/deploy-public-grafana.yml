@@ -1,0 +1,66 @@
+name: Deploy static public Grafana
+
+on:
+  push:
+    branches: [multicity-wip-2026-09-16]
+    paths:
+      - "deploy/public-grafana-release.txt"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: public-grafana-static
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Check out WIP
+        uses: actions/checkout@v4
+        with:
+          ref: multicity-wip-2026-09-16
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: kyiv-air-alerts-grafana/requirements.txt
+
+      - name: Install dependencies
+        working-directory: kyiv-air-alerts-grafana
+        run: pip install -r requirements.txt
+
+      - name: Deploy static public Grafana dashboard
+        working-directory: kyiv-air-alerts-grafana
+        env:
+          GRAFANA_URL: ${{ secrets.GRAFANA_URL }}
+          GRAFANA_TOKEN: ${{ secrets.GRAFANA_TOKEN }}
+          GRAFANA_DASHBOARD_UID: ${{ secrets.GRAFANA_DASHBOARD_UID }}
+          GRAFANA_DASHBOARD_TITLE: ${{ vars.GRAFANA_DASHBOARD_TITLE }}
+          GRAFANA_INFINITY_NAME: ${{ vars.GRAFANA_INFINITY_NAME }}
+        run: python scripts/deploy_public_grafana.py | tee /tmp/public-grafana.json
+
+      - name: Record public Grafana status
+        run: |
+          mkdir -p deploy
+          cp /tmp/public-grafana.json deploy/public-grafana-status.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          d = json.loads(Path("deploy/public-grafana-status.json").read_text(encoding="utf-8"))
+          assert d.get("ok") is True
+          assert d.get("template_variables") == 0
+          assert d.get("public_url")
+          print(d["public_url"])
+          PY
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add deploy/public-grafana-status.json
+          git commit -m "Record static public Grafana deploy"
+          git push origin HEAD:multicity-wip-2026-09-16
