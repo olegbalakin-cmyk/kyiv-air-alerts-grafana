@@ -143,8 +143,9 @@ def main() -> None:
             "production_data_pipeline_changed": False,
             "automation": {
                 "denominator": "automatic_after_completed_alert_episode",
-                "candidate_discovery": "automatic_alert_triggered_google_news_rss",
-                "strict_promotion": "manual_review_required",
+                "candidate_discovery": "automatic_alert_triggered_telegram_and_google_news",
+                "strict_promotion": "auto_only_if_unambiguous_otherwise_manual_review",
+                "auto_strict_rule": "exact city + air context + explicit during-alert wording + immediate candidate published inside unique alert window (+30m grace)",
                 "followups": ["immediate", "24h", "72h", "7d"],
                 "last_monitor_run_at": last_run.get("started_at"),
             },
