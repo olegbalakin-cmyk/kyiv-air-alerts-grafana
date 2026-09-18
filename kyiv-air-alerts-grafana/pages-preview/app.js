@@ -25,7 +25,12 @@ function labelFor(key) {
   return mm?.label || state.data.cities?.[key]?.meta?.city_label || key;
 }
 function cityKeys() {
-  return state.data.multicity_meta?.production_city_keys || Object.keys(state.data.cities || {});
+  const keys = [...(state.data.multicity_meta?.production_city_keys || Object.keys(state.data.cities || {}))];
+  return keys.sort((a, b) => {
+    if (a === "kyiv") return -1;
+    if (b === "kyiv") return 1;
+    return labelFor(a).localeCompare(labelFor(b), "uk", { sensitivity: "base" });
+  });
 }
 function sourceType(key) {
   return state.data.multicity_meta?.cities?.[key]?.source_type || state.data.cities?.[key]?.meta?.source_type || "unknown";
