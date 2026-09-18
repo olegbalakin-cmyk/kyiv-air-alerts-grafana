@@ -6,6 +6,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 DASHBOARD = ROOT / "grafana" / "dashboard.json"
+DATA_FILE = ROOT / "data" / "dashboard_data.json"
 
 
 def find_query_template(obj: dict) -> dict:
@@ -20,7 +21,14 @@ def find_query_template(obj: dict) -> dict:
     raise RuntimeError("Could not find an Infinity JSON query to reuse")
 
 
-def make_panel(query_template: dict, y: int, panel_id: int, city_label: str, root_selector: str) -> dict:
+def city_label(data: dict, key: str, series: dict) -> str:
+    meta = series.get("meta") or {}
+    mm = (data.get("multicity_meta") or {}).get("cities", {}).get(key, {})
+    cm = (data.get("cities") or {}).get(key, {}).get("meta", {})
+    return str(meta.get("city") or mm.get("label") or cm.get("city_label") or key)
+
+
+def make_panel(query_template: dict, panel_id: int, city_label: str, root_selector: str, x: int, y: int) -> dict:
     datasource = dict(query_template.get("datasource", {}))
     target = {
         "columns": [
@@ -44,15 +52,13 @@ def make_panel(query_template: dict, y: int, panel_id: int, city_label: str, roo
     return {
         "id": panel_id,
         "type": "barchart",
-        "title": f"{city_label}: загиблі від повітряних атак РФ за місяцями",
+        "title": f"{city_label}: загиблі від повітряних атак РФ",
         "description": (
             f"{city_label} (місто). Ракетні, дронові та інші повітряні атаки. "
             "Пізні смерті від отриманих під час атаки поранень віднесені до місяця самої атаки. "
-            "Наземні бої та артилерійські обстріли 2022 року не включені. "
-            "Вісь X є категоріальною (YYYY-MM). Технічне поле дати збережене у frame "
-            "для сумісності зі shared/public renderer Grafana."
+            "Наземні бої та артилерійські обстріли не включені. 2026-09 — поточний неповний місяць."
         ),
-        "gridPos": {"h": 10, "w": 24, "x": 0, "y": y},
+        "gridPos": {"h": 10, "w": 12, "x": x, "y": y},
         "datasource": datasource,
         "targets": [target],
         "fieldConfig": {
@@ -100,23 +106,31 @@ def make_panel(query_template: dict, y: int, panel_id: int, city_label: str, roo
     }
 
 
-def add_disclaimer(methodology: dict) -> None:
+def add_disclaimer(methodology: dict, count: int) -> None:
     content = methodology.setdefault("options", {}).get("content", "")
+    marker = "**Загиблі від повітряних атак.**"
     disclaimer = (
-        "\n\n**Загиблі від повітряних атак.** Ряд побудований на публічно доступних повідомленнях "
-        "офіційних органів і медіа. Незалежних інструментів для повної верифікації кожного випадку "
-        "немає, тому ці дані слід трактувати як реконструкцію на основі доступних відкритих джерел. "
-        "Для 2025 року використовується подієва реконструкція 166 смертей; КМВА повідомляла річний "
-        "накопичувальний підсумок 171, але додаткові п’ять смертей не вдалося надійно прив’язати до "
-        "конкретних атак у публічних джерелах."
+        f"\n\n{marker} На тестовому dashboard доступні місячні реконструкції для {count} міст. "
+        "Пізні смерті від поранень віднесені до місяця атаки; географія — адміністративні межі міста. "
+        "Невирішені review-кейси не включаються до confirmed-рядів. "
+        "Запоріжжя та Херсон не включені до casualty-секції до завершення фінального аудиту. "
+        "2026-09 є поточним неповним місяцем."
     )
-    if "Незалежних інструментів для повної верифікації" not in content:
+    if marker not in content:
         methodology["options"]["content"] = content + disclaimer
 
 
 def main() -> None:
     obj = json.loads(DASHBOARD.read_text(encoding="utf-8"))
-    obj["panels"] = [p for p in obj.get("panels", []) if p.get("id") not in {950, 951, 952}]
+    data = json.loads(DATA_FILE.read_text(encoding="utf-8"))
+    series_by_city = data.get("casualties_by_city") or {}
+    if not series_by_city:
+        raise RuntimeError("casualties_by_city is empty")
+
+    obj["panels"] = [
+        p for p in obj.get("panels", [])
+        if not (950 <= int(p.get("id") or -1) < 1000)
+    ]
 
     methodology = next(
         (
@@ -130,35 +144,43 @@ def main() -> None:
     if methodology is None:
         raise RuntimeError("Methodology panel not found")
 
-    insert_y = methodology.get("gridPos", {}).get("y", 0)
-    row = {
-        "id": 950,
-        "type": "row",
-        "title": "Загиблі від повітряних атак — Київ та Одеса",
-        "collapsed": False,
-        "panels": [],
-        "gridPos": {"h": 1, "w": 24, "x": 0, "y": insert_y},
-    }
-    query_template = find_query_template(obj)
-    kyiv_panel = make_panel(query_template, insert_y + 1, 951, "Київ", "$.casualties.monthly")
-    odesa_panel = make_panel(query_template, insert_y + 11, 952, "Одеса", "$.casualties_by_city.odesa.monthly")
+    production = (data.get("multicity_meta") or {}).get("production_city_keys") or []
+    keys = [key for key in production if key in series_by_city]
+    keys.extend(sorted(key for key in series_by_city if key not in keys))
 
-    shift = 21
+    query_template = find_query_template(obj)
+    nested = []
+    for idx, key in enumerate(keys):
+        label = city_label(data, key, series_by_city[key])
+        x = 0 if idx % 2 == 0 else 12
+        y = (idx // 2) * 10
+        selector = f"$['casualties_by_city']['{key}']['monthly']"
+        nested.append(make_panel(query_template, 951 + idx, label, selector, x, y))
+
+    insert_y = methodology.get("gridPos", {}).get("y", 0)
     for existing in obj["panels"]:
         gp = existing.get("gridPos", {})
         if gp.get("y", 0) >= insert_y:
-            gp["y"] = gp.get("y", 0) + shift
+            gp["y"] = gp.get("y", 0) + 1
 
-    add_disclaimer(methodology)
-    obj["panels"].extend([row, kyiv_panel, odesa_panel])
+    row = {
+        "id": 950,
+        "type": "row",
+        "title": f"Загиблі від повітряних атак — {len(keys)} міст",
+        "collapsed": True,
+        "panels": nested,
+        "gridPos": {"h": 1, "w": 24, "x": 0, "y": insert_y},
+    }
+
+    add_disclaimer(methodology, len(keys))
+    obj["panels"].append(row)
     obj["panels"].sort(key=lambda p: (p.get("gridPos", {}).get("y", 0), p.get("gridPos", {}).get("x", 0)))
 
     obj.setdefault("time", {})["from"] = "2022-01-31T22:00:00.000Z"
     obj["time"].setdefault("to", "now")
-
     obj["version"] = 1
     DASHBOARD.write_text(json.dumps(obj, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-    print("Added categorical Kyiv and Odesa casualty panels with shared-dashboard time compatibility")
+    print("Added casualty panels for", len(keys), "cities:", ", ".join(keys))
 
 
 if __name__ == "__main__":
