@@ -372,7 +372,7 @@ def parse_pubdate(value: str | None) -> datetime | None:
 def city_mentioned(city_key: str, text: str) -> bool:
     low = " ".join((text or "").casefold().replace("’", "'").split())
     for alias in CITY_NEWS_ALIASES.get(city_key, []):
-        pattern = rf"(?<![\\w-]){re.escape(alias)}(?![\\w-])"
+        pattern = rf"(?<![\w-]){re.escape(alias)}(?![\w-])"
         if re.search(pattern, low, flags=re.IGNORECASE):
             return True
     return False
