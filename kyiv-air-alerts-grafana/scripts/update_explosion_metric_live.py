@@ -10,7 +10,7 @@ from zoneinfo import ZoneInfo
 
 ROOT = Path(__file__).resolve().parents[1]
 DATA_DIR = ROOT / "data"
-BASELINE_FILE = DATA_DIR / "explosion_baseline_2026-09-17.json"
+BASELINE_FILE = DATA_DIR / "explosion_audited_baseline.json"
 SEED_FILE = DATA_DIR / "explosion_daily_alert_seed.json"
 STATE_FILE = DATA_DIR / "explosion_candidate_monitor_state.json"
 QUEUE_FILE = DATA_DIR / "explosion_review_queue.json"
