@@ -7,12 +7,13 @@ WIP branch: `multicity-wip-2026-09-16`
 
 ## State
 
-- 11 cities are complete.
+- 12 cities are complete.
 - Zhytomyr is frozen at **19/685 strict = 2.77%**, **20/685 sensitivity = 2.92%**.
-- Next unfinished city: **Kropyvnytskyi / Кропивницький**.
-- Frozen full-city denominator: **1161 alert episodes**.
-- Source type: `raion_proxy`, proxy = `Кропивницький район`.
-- Frozen coverage: **2025-09-01 through 2026-09-17**.
+- Kropyvnytskyi / Кропивницький is complete: **38/1161 strict = 3.27%**, **38/1161 sensitivity = 3.27%**.
+- Next unfinished city: **Kherson / Херсон**.
+- Next-city frozen denominator: **1412 alert episodes**.
+- Source type: `raion_proxy`, proxy = `Херсонський район`.
+- Frozen coverage: **2025-08-30 through 2026-09-17**.
 - Work stays on WIP/test. No production deploy.
 
 Canonical completed-city input: `data/explosion_preview_input.json`.  
