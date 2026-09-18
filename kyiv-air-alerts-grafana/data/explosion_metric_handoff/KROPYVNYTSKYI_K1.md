@@ -30,7 +30,7 @@ Region/district-only wording is not enough.
 
 - Retrieve/filter only this date slice.
 - Search exact-city web/local sources narrowly.
-- Use the large Telegram/media archive only for a **specific unresolved date or candidate**.
+- Telegram/media archive is in ChatGPT Library at `/міста/Telegram Desktop.zip`. Search/use it only for a **specific unresolved date or candidate**. If Library access is unavailable in this chat, record that fact and continue without inventing archive evidence.
 - Never dump the 582 alert rows into chat.
 - Never preserve broad negative-search logs.
 - Do not inspect completed cities or K2.
