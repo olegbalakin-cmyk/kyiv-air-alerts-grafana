@@ -96,7 +96,8 @@ jobs:
               assert city["strict_n"] >= base["cities"][key]["strict_n"], key
               assert city["rolling90"], key
           assert dash["explosion_metric_test"]["meta"]["automatic_updates"] is True
-          assert run["output_city_count"] == 10
+          assert run["output_city_count"] == len(base["cities"])
+          assert run["audited_city_count"] == len(base["cities"])
           print(json.dumps(run, ensure_ascii=False))
           PY
 
