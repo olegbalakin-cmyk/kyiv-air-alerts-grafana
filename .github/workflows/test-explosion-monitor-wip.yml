@@ -1,0 +1,78 @@
+name: Test explosion monitor WIP
+
+on:
+  push:
+    branches: [multicity-wip-2026-09-16]
+    paths:
+      - "kyiv-air-alerts-grafana/scripts/update_explosion_metric.py"
+      - "kyiv-air-alerts-grafana/scripts/sync_explosion_audited_baseline.py"
+      - "kyiv-air-alerts-grafana/data/explosion_audited_baseline.json"
+      - "kyiv-air-alerts-grafana/data/explosion_daily_alert_seed.json"
+      - "kyiv-air-alerts-grafana/data/explosion_preview_input.json"
+      - ".github/workflows/test-explosion-monitor-wip.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Check out WIP branch
+        uses: actions/checkout@v4
+        with:
+          ref: multicity-wip-2026-09-16
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: kyiv-air-alerts-grafana/requirements.txt
+
+      - name: Install dependencies
+        working-directory: kyiv-air-alerts-grafana
+        run: pip install -r requirements.txt
+
+      - name: Self-test baseline onboarding
+        working-directory: kyiv-air-alerts-grafana
+        run: python scripts/sync_explosion_audited_baseline.py --self-test
+
+      - name: Sync current audited baseline
+        working-directory: kyiv-air-alerts-grafana
+        run: python scripts/sync_explosion_audited_baseline.py
+
+      - name: Self-test live monitor
+        working-directory: kyiv-air-alerts-grafana
+        run: python scripts/update_explosion_metric.py --self-test
+
+      - name: Rebuild safely without network
+        working-directory: kyiv-air-alerts-grafana
+        run: python scripts/update_explosion_metric.py --no-network
+
+      - name: Validate dynamic city membership
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          root = Path("kyiv-air-alerts-grafana/data")
+          baseline = json.loads((root / "explosion_audited_baseline.json").read_text(encoding="utf-8"))
+          output = json.loads((root / "explosions_test.json").read_text(encoding="utf-8"))
+          seed = json.loads((root / "explosion_daily_alert_seed.json").read_text(encoding="utf-8"))
+
+          expected = set(baseline["cities"])
+          assert len(expected) >= 10
+          assert set(output["cities"]) == expected
+          assert set(seed["cities"]) >= expected
+          assert output["meta"]["city_count"] == len(expected)
+          assert output["meta"]["city_membership_source"] == "explosion_audited_baseline.json"
+          assert output["meta"]["automatic_strict_confirmation"] is False
+
+          for key in expected:
+              assert output["cities"][key]["rolling90"], key
+
+          print("Explosion WIP smoke test OK:", len(expected), "audited cities")
+          PY
