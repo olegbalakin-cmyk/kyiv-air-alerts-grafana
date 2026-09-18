@@ -1,0 +1,121 @@
+name: Monitor explosion metric WIP
+
+on:
+  schedule:
+    - cron: "45 */4 * * *"
+  workflow_dispatch:
+
+concurrency:
+  group: explosion-metric-wip-monitor
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  monitor:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+
+    steps:
+      - name: Check out explosion WIP branch
+        uses: actions/checkout@v4
+        with:
+          ref: multicity-wip-2026-09-16
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: kyiv-air-alerts-grafana/requirements.txt
+
+      - name: Install dependencies
+        working-directory: kyiv-air-alerts-grafana
+        run: pip install -r requirements.txt
+
+      - name: Self-test explosion automation
+        working-directory: kyiv-air-alerts-grafana
+        run: |
+          python scripts/monitor_explosion_candidates.py --self-test
+          python scripts/update_explosion_metric_live.py --self-test
+
+      - name: Poll new completed alerts and discover explosion candidates
+        working-directory: kyiv-air-alerts-grafana
+        env:
+          UKRAINEALARM_API_TOKEN: ${{ secrets.UKRAINEALARM_API_TOKEN }}
+        run: python scripts/monitor_explosion_candidates.py
+
+      - name: Rebuild strict KPI and rolling 90-day test series
+        working-directory: kyiv-air-alerts-grafana
+        run: python scripts/update_explosion_metric_live.py
+
+      - name: Validate automation output
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          root = Path("kyiv-air-alerts-grafana/data")
+          baseline = json.loads((root / "explosion_baseline_2026-09-17.json").read_text(encoding="utf-8"))
+          live = json.loads((root / "explosions_test.json").read_text(encoding="utf-8"))
+          state = json.loads((root / "explosion_candidate_monitor_state.json").read_text(encoding="utf-8"))
+          queue = json.loads((root / "explosion_review_queue.json").read_text(encoding="utf-8"))
+          report = json.loads((root / "explosion_candidate_monitor_last_run.json").read_text(encoding="utf-8"))
+
+          assert live["meta"]["schema_version"] == 2
+          assert live["meta"]["test_only"] is True
+          assert live["meta"]["rolling_window_days"] == 90
+          assert live["meta"]["automation"]["strict_promotion"] == "manual_review_required"
+          assert set(live["cities"]) == set(baseline["cities"])
+          assert len(live["cities"]) == 10
+          assert state["schema_version"] == 1
+          assert isinstance(queue, list)
+          assert report["city_count"] == 10
+
+          approved = [
+              item for item in queue
+              if item.get("status") in {"approved_strict", "approved_sensitivity"}
+          ]
+          for key, row in live["cities"].items():
+              assert row["total_alerts"] >= baseline["cities"][key]["total_alerts"], key
+              assert row["strict_n"] >= baseline["cities"][key]["strict_n"], key
+              assert row["coverage_end"] >= baseline["cities"][key]["coverage_end"], key
+              assert row["rolling90"], key
+
+          print(json.dumps({
+              "ok": True,
+              "new_alert_episodes": report["new_alert_episodes"],
+              "new_review_candidates": report["new_review_candidates"],
+              "review_queue_size": len(queue),
+              "approved_review_items": len(approved),
+              "coverage_end": {k: v["coverage_end"] for k, v in live["cities"].items()},
+          }, ensure_ascii=False, indent=2))
+          PY
+
+      - name: Commit WIP monitor state and metric updates
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add             kyiv-air-alerts-grafana/data/explosion_candidate_monitor_state.json             kyiv-air-alerts-grafana/data/explosion_review_queue.json             kyiv-air-alerts-grafana/data/explosion_candidate_monitor_last_run.json             kyiv-air-alerts-grafana/data/explosions_test.json
+
+          if git diff --cached --quiet; then
+            echo "No explosion-monitor changes"
+            exit 0
+          fi
+
+          git commit -m "Update explosion metric monitor state"
+
+          for attempt in 1 2 3; do
+            git fetch origin multicity-wip-2026-09-16
+            if git rebase origin/multicity-wip-2026-09-16 && git push origin HEAD:multicity-wip-2026-09-16; then
+              exit 0
+            fi
+            git rebase --abort || true
+            if [ "$attempt" -eq 3 ]; then
+              echo "Push failed after 3 attempts"
+              exit 1
+            fi
+            sleep $((attempt * 2))
+          done
