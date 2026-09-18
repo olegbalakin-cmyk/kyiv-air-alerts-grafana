@@ -1,11 +1,14 @@
 const state = {
   data: null,
+  explosions: null,
   charts: {},
   tableSort: { key: "alerts", direction: "desc" }
 };
 
 const DATA_URL = "data.json";
+const EXPLOSIONS_URL = "explosions.json";
 const COLORS = ["#62a0ea", "#8ff0a4", "#f8e45c"];
+const EXPLOSION_COLOR = "#ff9f43";
 const GRID = "rgba(148,163,184,.16)";
 const TEXT = "#b8c4cf";
 const TABLE_SORT_COLUMNS = [
@@ -44,6 +47,9 @@ function proxyRaion(key) {
 function typeText(key) { return sourceType(key) === "raion_proxy" ? "Дані по району" : "Дані по місту"; }
 function rolling7dEnabled() {
   return state.data.multicity_meta?.weekly_mode === "rolling_7d";
+}
+function explosionCity(key) {
+  return state.explosions?.cities?.[key] || null;
 }
 
 function fillSelect(select, keys, current, allowEmpty = false) {
@@ -183,6 +189,16 @@ function renderCity() {
   $("kpiMaxDay").textContent = fmt(kpi.max_alerts_day, 0);
   $("kpiMaxDayDate").textContent = kpi.max_alerts_day_date || "";
 
+  const explosion = explosionCity(key);
+  const explosionCard = $("kpiExplosionsCard");
+  if (explosion) {
+    explosionCard.classList.remove("hidden");
+    $("kpiExplosionsPct").textContent = `${fmt(explosion.strict_pct, 1)}%`;
+    $("kpiExplosionsCount").textContent = `${explosion.strict_n} із ${explosion.total_alerts} тривог · весь доступний період`;
+  } else {
+    explosionCard.classList.add("hidden");
+  }
+
   const rows = city[period] || [];
   const labels = rows.map(r => rowTime(r, period));
   const dashed = type === "raion_proxy";
@@ -278,20 +294,47 @@ function renderShortHorizon(key) {
     { plugins: { legend: { display: false }, tooltip: { mode: "index", intersect: false } } }
   );
 
+  const explosion = explosionCity(key);
+  const strictDaily = explosion?.strict_daily || {};
+  const regularAlerts = rows.map(r => Math.max(0, Number(r.alerts_started || 0) - Number(strictDaily[r.date] || 0)));
+  const explosionAlerts = rows.map(r => Number(strictDaily[r.date] || 0));
+  const alertBarDatasets = explosion ? [
+    {
+      type: "bar",
+      label: "Інші тривоги",
+      data: regularAlerts,
+      yAxisID: "yAlerts",
+      stack: "alerts",
+      backgroundColor: COLORS[1] + "77",
+      borderColor: COLORS[1],
+      borderWidth: 1
+    },
+    {
+      type: "bar",
+      label: "З повідомленням про вибухи",
+      data: explosionAlerts,
+      yAxisID: "yAlerts",
+      stack: "alerts",
+      backgroundColor: EXPLOSION_COLOR + "cc",
+      borderColor: EXPLOSION_COLOR,
+      borderWidth: 1
+    }
+  ] : [{
+    type: "bar",
+    label: "Тривог, що почалися",
+    data: rows.map(r => r.alerts_started),
+    yAxisID: "yAlerts",
+    backgroundColor: COLORS[1] + "77",
+    borderColor: COLORS[1],
+    borderWidth: 1
+  }];
+
   if (state.charts.daily28AlertsDurationChart) state.charts.daily28AlertsDurationChart.destroy();
   state.charts.daily28AlertsDurationChart = new Chart($("daily28AlertsDurationChart"), {
     data: {
       labels,
       datasets: [
-        {
-          type: "bar",
-          label: "Тривог, що почалися",
-          data: rows.map(r => r.alerts_started),
-          yAxisID: "yAlerts",
-          backgroundColor: COLORS[1] + "77",
-          borderColor: COLORS[1],
-          borderWidth: 1
-        },
+        ...alertBarDatasets,
         {
           type: "line",
           label: "Середня тривалість, хв",
@@ -322,6 +365,7 @@ function renderShortHorizon(key) {
         yAlerts: {
           position: "left",
           beginAtZero: true,
+          stacked: true,
           ticks: { color: TEXT, precision: 0 },
           grid: { color: GRID },
           title: { display: true, text: "Кількість тривог", color: TEXT }
@@ -381,6 +425,85 @@ function sharedRows(keys, period) {
   return [...shared].sort().map(t => ({ time: t, rows: maps.map(m => m.get(t)) }));
 }
 
+function renderExplosionComparison(keys) {
+  const card = $("compareExplosionsCard");
+  const note = $("compareExplosionsNote");
+  const availableKeys = keys.filter(key => (explosionCity(key)?.rolling90 || []).length);
+  const missingKeys = keys.filter(key => !availableKeys.includes(key));
+
+  if (!availableKeys.length) {
+    card.classList.add("hidden");
+    if (state.charts.compareExplosionsChart) {
+      state.charts.compareExplosionsChart.destroy();
+      delete state.charts.compareExplosionsChart;
+    }
+    return;
+  }
+
+  card.classList.remove("hidden");
+  const maps = new Map();
+  const allDates = new Set();
+  for (const key of availableKeys) {
+    const m = new Map();
+    for (const row of explosionCity(key).rolling90) {
+      m.set(row.date, row);
+      allDates.add(row.date);
+    }
+    maps.set(key, m);
+  }
+  const labels = [...allDates].sort();
+  const datasets = availableKeys.map((key, idx) => {
+    const m = maps.get(key);
+    const ds = seriesDataset(
+      labelFor(key),
+      labels.map(date => m.get(date)?.pct ?? null),
+      COLORS[idx],
+      false
+    );
+    ds.spanGaps = false;
+    ds.cityKey = key;
+    ds.explosionRows = labels.map(date => m.get(date) || null);
+    return ds;
+  });
+
+  setChart(
+    "compareExplosionsChart",
+    labels,
+    datasets,
+    "%",
+    "line",
+    {
+      plugins: {
+        legend: { labels: { color: TEXT, boxWidth: 14, usePointStyle: true } },
+        tooltip: {
+          mode: "index",
+          intersect: false,
+          callbacks: {
+            label: context => {
+              const row = context.dataset.explosionRows?.[context.dataIndex];
+              if (!row) return null;
+              return `${context.dataset.label}: ${fmt(row.pct, 1)}% · ${row.strict_n}/${row.alerts_n}`;
+            }
+          }
+        }
+      },
+      scales: {
+        x: { ticks: { color: TEXT, maxRotation: 0, autoSkip: true }, grid: { color: GRID } },
+        y: {
+          beginAtZero: true,
+          ticks: { color: TEXT, callback: value => `${value}%` },
+          grid: { color: GRID },
+          title: { display: true, text: "% тривог із повідомленнями про вибухи", color: TEXT }
+        }
+      }
+    }
+  );
+
+  note.textContent = missingKeys.length
+    ? `Ковзні 90 днів, strict; повне 90-денне вікно. Поки немає завершеного explosion-ряду: ${missingKeys.map(labelFor).join(", ")}.`
+    : "Ковзні 90 днів, strict; кожна точка = n/N за останні 90 завершених днів. Перемикач «Період» вище на цей графік не впливає.";
+}
+
 function renderComparison() {
   const keys = [$("compareA").value, $("compareB").value, $("compareC").value].filter(Boolean);
   const period = $("comparePeriod").value;
@@ -406,6 +529,7 @@ function renderComparison() {
   metricChart("compareAlertsChart", "alerts_per_day", "Тривог/день");
   metricChart("compareHoursChart", "avg_daily_alert_hours", "Годин/добу");
   metricChart("compareDurationChart", "avg_alert_duration_min", "Хвилин");
+  renderExplosionComparison(keys);
 
   const casualtyCard = $("compareCasualtiesCard");
   const casualtyNote = $("compareCasualtiesNote");
@@ -590,9 +714,13 @@ function bind() {
 }
 
 async function init() {
-  const response = await fetch(`${DATA_URL}?v=${Date.now()}`, { cache: "no-store" });
+  const [response, explosionResponse] = await Promise.all([
+    fetch(`${DATA_URL}?v=${Date.now()}`, { cache: "no-store" }),
+    fetch(`${EXPLOSIONS_URL}?v=${Date.now()}`, { cache: "no-store" })
+  ]);
   if (!response.ok) throw new Error(`Failed to load live dashboard data: ${response.status}`);
   state.data = await response.json();
+  state.explosions = explosionResponse.ok ? await explosionResponse.json() : { meta: { test_only: true }, cities: {} };
   const keys = cityKeys();
 
   const defaults = ["kyiv", "kharkiv", "zaporizhzhia"].filter(k => keys.includes(k));
