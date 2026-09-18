@@ -133,3 +133,117 @@ jobs:
           assert output["meta"]["city_count"] == 12
           print("Dynamic onboarding simulation OK: audited baseline expands without monitor/workflow edits")
           PY
+
+
+      - name: Simulate automatic Kyiv and Sevastopol onboarding
+        working-directory: kyiv-air-alerts-grafana
+        run: |
+          python - <<'PY'
+          import json
+          from datetime import datetime
+          from pathlib import Path
+          from zoneinfo import ZoneInfo
+
+          data = Path("data")
+          tz = ZoneInfo("Europe/Kyiv")
+          preview_path = data / "explosion_preview_input.json"
+          preview = json.loads(preview_path.read_text(encoding="utf-8"))
+
+          kyiv_feed = json.loads((data / "grafana/cities/kyiv.json").read_text(encoding="utf-8"))
+          sev_feed = json.loads((data / "grafana/cities/sevastopol.json").read_text(encoding="utf-8"))
+          kyiv_alerts = json.loads((data / "alerts_combined.json").read_text(encoding="utf-8"))
+          sev_store = json.loads((data / "sevastopol_events.json").read_text(encoding="utf-8"))
+
+          assert "kyiv" not in preview["cities"]
+          assert "sevastopol" not in preview["cities"]
+
+          kyiv_end = kyiv_feed["kpis"][0]["period_end"]
+          sev_end = sev_feed["kpis"][0]["period_end"]
+
+          def local_start_day(value):
+              return datetime.fromisoformat(value.replace("Z", "+00:00")).astimezone(tz).date().isoformat()
+
+          kyiv_completed = [
+              row for row in kyiv_alerts
+              if row.get("start") and row.get("end") and local_start_day(row["start"]) <= kyiv_end
+          ]
+          sev_completed = [
+              row for row in sev_store["pairs"]
+              if row.get("start") and row.get("end") and local_start_day(row["start"]) <= sev_end
+          ]
+
+          preview["cities"]["kyiv"] = {
+              "label": "Київ",
+              "coverage_start": min(local_start_day(row["start"]) for row in kyiv_completed),
+              "coverage_end": kyiv_end,
+              "alerts_total": len(kyiv_completed),
+              "strict": 0,
+              "strict_pct": 0,
+              "sensitivity": 0,
+              "sensitivity_pct": 0,
+              "trend_available": True,
+              "strict_episode_start_dates": [],
+          }
+          preview["cities"]["sevastopol"] = {
+              "label": "Севастополь",
+              "coverage_start": sev_store["meta"]["coverage_start"],
+              "coverage_end": sev_end,
+              "alerts_total": len(sev_completed),
+              "strict": 0,
+              "strict_pct": 0,
+              "sensitivity": 0,
+              "sensitivity_pct": 0,
+              "trend_available": True,
+              "strict_episode_start_dates": [],
+          }
+          preview_path.write_text(json.dumps(preview, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+          print("simulated Kyiv alerts:", len(kyiv_completed), "Sevastopol alerts:", len(sev_completed))
+          PY
+
+          before_count=$(python - <<'PY'
+          import json
+          from pathlib import Path
+          x = json.loads(Path("data/explosion_audited_baseline.json").read_text(encoding="utf-8"))
+          print(len(x["cities"]))
+          PY
+          )
+
+          python scripts/sync_explosion_audited_baseline.py \
+            --dashboard-data data/dashboard_data.json
+          python scripts/monitor_explosion_candidates.py --self-test
+          python scripts/monitor_explosion_candidates.py \
+            --local-only \
+            --kyiv-alerts-file data/alerts_combined.json \
+            --sevastopol-events-file data/sevastopol_events.json
+          python scripts/update_explosion_metric_live.py
+
+          BEFORE_COUNT="$before_count" python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          data = Path("data")
+          before = int(os.environ["BEFORE_COUNT"])
+          baseline = json.loads((data / "explosion_audited_baseline.json").read_text(encoding="utf-8"))
+          seed = json.loads((data / "explosion_daily_alert_seed.json").read_text(encoding="utf-8"))
+          output = json.loads((data / "explosions_test.json").read_text(encoding="utf-8"))
+          state = json.loads((data / "explosion_candidate_monitor_state.json").read_text(encoding="utf-8"))
+
+          assert len(baseline["cities"]) == before + 2
+          assert {"kyiv", "sevastopol"} <= set(baseline["cities"])
+          assert {"kyiv", "sevastopol"} <= set(seed["cities"])
+          assert {"kyiv", "sevastopol"} <= set(output["cities"])
+          assert {"kyiv", "sevastopol"} <= set(state["cities"])
+
+          kyiv_eps = state["cities"]["kyiv"]["episodes"]
+          sev_eps = state["cities"]["sevastopol"]["episodes"]
+          assert all(ep["alert_source"] == "kyiv_combined_exact_city" for ep in kyiv_eps), kyiv_eps[:1]
+          assert all(ep["alert_source"] == "sevastopol_verified_exact_city_pairs" for ep in sev_eps), sev_eps[:1]
+
+          assert output["meta"]["city_count"] == before + 2
+          print(
+              "Special-source onboarding OK:",
+              "Kyiv + Sevastopol added automatically;",
+              "active cities =", output["meta"]["city_count"],
+          )
+          PY
