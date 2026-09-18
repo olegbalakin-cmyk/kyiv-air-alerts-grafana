@@ -29,25 +29,8 @@ DASHBOARD_FILE = DATA / "dashboard_data.json"
 
 UTC = timezone.utc
 KYIV_TZ = ZoneInfo("Europe/Kyiv")
-BASELINE_END = date(2026, 9, 17)
 ROLLING_DAYS = 90
 FOLLOWUPS = [("immediate", 0), ("24h", 24), ("72h", 72), ("7d", 168)]
-AUDITED_KEYS = [
-    "poltava", "uzhhorod", "ivano_frankivsk", "chernivtsi", "ternopil",
-    "lviv", "lutsk", "rivne", "khmelnytskyi", "vinnytsia",
-]
-CITY_LABELS = {
-    "poltava": "Полтава",
-    "uzhhorod": "Ужгород",
-    "ivano_frankivsk": "Івано-Франківськ",
-    "chernivtsi": "Чернівці",
-    "ternopil": "Тернопіль",
-    "lviv": "Львів",
-    "lutsk": "Луцьк",
-    "rivne": "Рівне",
-    "khmelnytskyi": "Хмельницький",
-    "vinnytsia": "Вінниця",
-}
 CITY_ALIASES = {
     "poltava": ["полтава", "полтаві", "полтави", "полтаву", "полтавою"],
     "uzhhorod": ["ужгород", "ужгороді", "ужгорода", "ужгороду", "ужгородом"],
@@ -59,6 +42,19 @@ CITY_ALIASES = {
     "rivne": ["рівне", "рівному", "рівного", "рівним"],
     "khmelnytskyi": ["хмельницький", "хмельницькому", "хмельницького", "хмельницьким"],
     "vinnytsia": ["вінниця", "вінниці", "вінницю", "вінницею"],
+    "zhytomyr": ["житомир", "житомирі", "житомира", "житомиру", "житомиром"],
+    "kropyvnytskyi": ["кропивницький", "кропивницькому", "кропивницького", "кропивницьким"],
+    "kherson": ["херсон", "херсоні", "херсона", "херсону", "херсоном"],
+    "odesa": ["одеса", "одесі", "одеси", "одесу", "одесою"],
+    "cherkasy": ["черкаси", "черкасах", "черкасами"],
+    "mykolaiv": ["миколаїв", "миколаєві", "миколаєва", "миколаєву", "миколаєвом"],
+    "chernihiv": ["чернігів", "чернігові", "чернігова", "чернігову", "черніговом"],
+    "dnipro": ["дніпро", "дніпрі", "дніпра", "дніпру", "дніпром"],
+    "sumy": ["суми", "сумах", "сумами"],
+    "zaporizhzhia": ["запоріжжя", "запоріжжі", "запоріжжю"],
+    "kharkiv": ["харків", "харкові", "харкова", "харкову", "харковом"],
+    "kyiv": ["київ", "києві", "києва", "києву", "києвом"],
+    "sevastopol": ["севастополь", "севастополі", "севастополя", "севастополю", "севастополем"],
 }
 TELEGRAM_CHANNELS = {
     "Суспільне Новини": "suspilnenews",
@@ -93,6 +89,32 @@ def atomic_json(path: Path, obj) -> None:
     tmp.replace(path)
 
 
+def baseline_data() -> dict:
+    baseline = load_json(BASELINE_FILE, {})
+    cities = baseline.get("cities") if isinstance(baseline, dict) else None
+    if not isinstance(cities, dict) or not cities:
+        raise RuntimeError("Explosion baseline has no audited cities")
+    return baseline
+
+
+def audited_keys(baseline: dict) -> list[str]:
+    return list((baseline.get("cities") or {}).keys())
+
+
+def city_label(baseline: dict, city_key: str) -> str:
+    city = (baseline.get("cities") or {}).get(city_key) or {}
+    return str(city.get("label") or city_key)
+
+
+def baseline_end(baseline: dict, city_key: str) -> date:
+    city = (baseline.get("cities") or {}).get(city_key) or {}
+    value = str(city.get("coverage_end") or "").strip()
+    try:
+        return date.fromisoformat(value)
+    except ValueError as exc:
+        raise RuntimeError(f"{city_key}: invalid baseline coverage_end={value!r}") from exc
+
+
 def parse_dt(value: str | None) -> datetime | None:
     if not value:
         return None
@@ -113,11 +135,21 @@ def norm(text: str) -> str:
     return " ".join((text or "").casefold().replace("’", "'").split())
 
 
-def city_mentioned(city_key: str, text: str) -> bool:
+def city_aliases(baseline: dict, city_key: str) -> list[str]:
+    configured = CITY_ALIASES.get(city_key)
+    if configured:
+        return configured
+    # Safe fallback for a newly audited city outside the known 23-city set:
+    # exact nominative label only. This may reduce recall, but will not broaden
+    # geography beyond the audited city.
+    return [city_label(baseline, city_key).casefold()]
+
+
+def city_mentioned(baseline: dict, city_key: str, text: str) -> bool:
     low = norm(text)
     return any(
         re.search(rf"(?<![\w-]){re.escape(alias)}(?![\w-])", low, re.IGNORECASE)
-        for alias in CITY_ALIASES[city_key]
+        for alias in city_aliases(baseline, city_key)
     )
 
 
@@ -144,9 +176,9 @@ def candidate_id(city_key: str, url: str, text: str) -> str:
     return hashlib.sha256(f"{city_key}|{url}|{text}".encode()).hexdigest()[:24]
 
 
-def load_bridge(path: Path) -> dict[str, list[dict]]:
+def load_bridge(path: Path, keys: list[str]) -> dict[str, list[dict]]:
     bridge = load_json(path, {})
-    out = {key: [] for key in AUDITED_KEYS}
+    out = {key: [] for key in keys}
     for row in bridge.get("events", []):
         key = str(row.get("city_key") or "")
         if key not in out:
@@ -172,12 +204,12 @@ def completed_cutoff(now: datetime) -> date:
     return now.astimezone(KYIV_TZ).date() - timedelta(days=1)
 
 
-def ensure_state() -> dict:
+def ensure_state(keys: list[str]) -> dict:
     state = load_json(STATE_FILE, {})
     if state.get("schema_version") != 1:
-        state = {"schema_version": 1, "baseline_end": BASELINE_END.isoformat(), "cities": {}}
+        state = {"schema_version": 1, "cities": {}}
     state.setdefault("cities", {})
-    for key in AUDITED_KEYS:
+    for key in keys:
         state["cities"].setdefault(key, {"episodes": []})
     return state
 
@@ -199,9 +231,9 @@ def make_monitored_episode(ep: dict) -> dict:
     }
 
 
-def ingest_episodes(state: dict, bridge: dict[str, list[dict]], cutoff: date) -> int:
+def ingest_episodes(state: dict, bridge: dict[str, list[dict]], baseline: dict, keys: list[str], cutoff: date) -> int:
     added = 0
-    for key in AUDITED_KEYS:
+    for key in keys:
         cstate = state["cities"][key]
         known = {x["episode_id"] for x in cstate.get("episodes", [])}
         for ep in bridge.get(key, []):
@@ -209,7 +241,7 @@ def ingest_episodes(state: dict, bridge: dict[str, list[dict]], cutoff: date) ->
             if not start:
                 continue
             local_day = start.astimezone(KYIV_TZ).date()
-            if local_day <= BASELINE_END or local_day > cutoff:
+            if local_day <= baseline_end(baseline, key) or local_day > cutoff:
                 continue
             if ep["episode_id"] in known:
                 continue
@@ -220,9 +252,9 @@ def ingest_episodes(state: dict, bridge: dict[str, list[dict]], cutoff: date) ->
     return added
 
 
-def due_checks(state: dict, now: datetime) -> dict[str, list[tuple[dict, dict]]]:
+def due_checks(state: dict, keys: list[str], now: datetime) -> dict[str, list[tuple[dict, dict]]]:
     out: dict[str, list[tuple[dict, dict]]] = {}
-    for key in AUDITED_KEYS:
+    for key in keys:
         for ep in state["cities"][key].get("episodes", []):
             for check in ep.get("checks", []):
                 if check.get("checked_at"):
@@ -274,8 +306,8 @@ def telegram_rows() -> list[dict]:
     return rows
 
 
-def google_rows(city_key: str) -> tuple[list[dict], str]:
-    label = CITY_LABELS[city_key]
+def google_rows(baseline: dict, city_key: str) -> tuple[list[dict], str]:
+    label = city_label(baseline, city_key)
     query = (
         f'"{label}" '
         '(вибух OR вибухи OR "було гучно" OR "пролунали вибухи" OR "чути вибухи") '
@@ -309,13 +341,13 @@ def google_rows(city_key: str) -> tuple[list[dict], str]:
     return rows, url
 
 
-def relevant_rows(city_key: str, rows: list[dict], earliest: datetime, now: datetime) -> list[dict]:
+def relevant_rows(baseline: dict, city_key: str, rows: list[dict], earliest: datetime, now: datetime) -> list[dict]:
     out = []
     lower = earliest - timedelta(hours=3)
     upper = now + timedelta(hours=1)
     for row in rows:
         text = row.get("text") or ""
-        if not city_mentioned(city_key, text) or not explosion_relevant(text):
+        if not city_mentioned(baseline, city_key, text) or not explosion_relevant(text):
             continue
         published = parse_dt(row.get("published_at"))
         if published and not (lower <= published <= upper):
@@ -338,7 +370,7 @@ def unique_same_day_episode(row: dict, due: list[tuple[dict, dict]]) -> dict | N
     return next(iter(episodes.values())) if len(episodes) == 1 else None
 
 
-def add_candidates(queue: list[dict], city_key: str, rows: list[dict], due: list[tuple[dict, dict]], now: datetime) -> tuple[int, int]:
+def add_candidates(queue: list[dict], baseline: dict, city_key: str, rows: list[dict], due: list[tuple[dict, dict]], now: datetime) -> tuple[int, int]:
     by_id = {x.get("candidate_id"): x for x in queue if isinstance(x, dict) and x.get("candidate_id")}
     trigger_ids = sorted({ep["episode_id"] for ep, _ in due})
     labels = sorted({check["label"] for _, check in due})
@@ -357,7 +389,7 @@ def add_candidates(queue: list[dict], city_key: str, rows: list[dict], due: list
         item = {
             "candidate_id": cid,
             "city_key": city_key,
-            "city": CITY_LABELS[city_key],
+            "city": city_label(baseline, city_key),
             "status": status,
             "source": row.get("source"),
             "publisher": row.get("publisher"),
@@ -401,8 +433,7 @@ def accepted_episode_ids(queue: list[dict], city_key: str) -> tuple[set[str], se
     return strict, sensitivity
 
 
-def rebuild_output(state: dict, queue: list[dict], cutoff: date) -> dict:
-    baseline = load_json(BASELINE_FILE, {})
+def rebuild_output(state: dict, queue: list[dict], baseline: dict, keys: list[str], cutoff: date) -> dict:
     seed = load_json(SEED_FILE, {})
     out = json.loads(json.dumps(baseline))
     out["meta"] = {
@@ -415,9 +446,11 @@ def rebuild_output(state: dict, queue: list[dict], cutoff: date) -> dict:
         "automatic_candidate_discovery": True,
         "auto_strict_rule": "exact city + air context + explicit during-alert wording + unique alert episode on local day",
         "manual_review_required_for_ambiguous_candidates": True,
+        "city_count": len(keys),
+        "city_membership_source": BASELINE_FILE.name,
     }
 
-    for key in AUDITED_KEYS:
+    for key in keys:
         base = baseline["cities"][key]
         city = out["cities"][key]
         episodes = [
@@ -457,13 +490,19 @@ def rebuild_output(state: dict, queue: list[dict], cutoff: date) -> dict:
         city["sensitivity_pct"] = round(sensitivity_n / total_alerts * 100, 2) if total_alerts else 0
         city["strict_daily"] = dict(sorted(strict_daily.items()))
 
-        daily_alerts = {d: int(n) for d, n in seed["cities"][key]["daily_alerts"].items()}
+        seed_city = (seed.get("cities") or {}).get(key)
+        if not seed_city:
+            raise RuntimeError(
+                f"{key}: denominator seed missing. Add the audited city baseline and run "
+                f"scripts/sync_explosion_seed.py before the scheduled monitor."
+            )
+        daily_alerts = {d: int(n) for d, n in seed_city["daily_alerts"].items()}
         for d, n in daily_new.items():
             daily_alerts[d] = int(n)
 
         rolling = list(base.get("rolling90") or [])
         last_base = parse_dt((rolling[-1]["date"] + "T00:00:00Z") if rolling else None)
-        start_day = BASELINE_END + timedelta(days=1)
+        start_day = baseline_end(baseline, key) + timedelta(days=1)
         if last_base:
             start_day = max(start_day, last_base.date() + timedelta(days=1))
 
@@ -494,8 +533,9 @@ def inject_dashboard(explosion: dict) -> None:
 
 
 def self_test() -> None:
-    assert city_mentioned("poltava", "У Полтаві пролунали вибухи")
-    assert not city_mentioned("poltava", "На Полтавщині пролунали вибухи")
+    baseline = {"cities": {"poltava": {"label": "Полтава", "coverage_end": "2026-09-17"}}}
+    assert city_mentioned(baseline, "poltava", "У Полтаві пролунали вибухи")
+    assert not city_mentioned(baseline, "poltava", "На Полтавщині пролунали вибухи")
     assert explosion_relevant("У місті було чутно вибухи")
     assert explicit_during_alert("Під час повітряної тривоги у місті пролунали вибухи")
     assert not explicit_during_alert("У місті пролунали вибухи")
@@ -515,13 +555,15 @@ def main() -> None:
 
     now = datetime.now(UTC)
     cutoff = completed_cutoff(now)
-    state = ensure_state()
+    baseline = baseline_data()
+    keys = audited_keys(baseline)
+    state = ensure_state(keys)
     queue = load_json(QUEUE_FILE, [])
     if not isinstance(queue, list):
         queue = []
 
-    bridge = load_bridge(args.bridge_file)
-    new_episodes = ingest_episodes(state, bridge, cutoff)
+    bridge = load_bridge(args.bridge_file, keys)
+    new_episodes = ingest_episodes(state, bridge, baseline, keys, cutoff)
 
     telegram = []
     errors = {}
@@ -531,7 +573,7 @@ def main() -> None:
         except Exception as exc:
             errors["telegram"] = f"{type(exc).__name__}: {exc}"
 
-    due = due_checks(state, now)
+    due = due_checks(state, keys, now)
     searches = {}
     new_candidates = auto_confirmed = 0
     for key, checks in sorted(due.items()):
@@ -540,12 +582,12 @@ def main() -> None:
         query_url = None
         if not args.no_network:
             try:
-                grow, query_url = google_rows(key)
+                grow, query_url = google_rows(baseline, key)
                 rows.extend(grow)
             except Exception as exc:
                 errors[f"google:{key}"] = f"{type(exc).__name__}: {exc}"
-        filtered = relevant_rows(key, rows, earliest, now)
-        added, auto = add_candidates(queue, key, filtered, checks, now)
+        filtered = relevant_rows(baseline, key, rows, earliest, now)
+        added, auto = add_candidates(queue, baseline, key, filtered, checks, now)
         new_candidates += added
         auto_confirmed += auto
         searches[key] = {
@@ -560,7 +602,7 @@ def main() -> None:
             check["new_candidates"] = added
 
     queue.sort(key=lambda x: (x.get("first_discovered_at") or "", x.get("city_key") or ""), reverse=True)
-    explosion = rebuild_output(state, queue, cutoff)
+    explosion = rebuild_output(state, queue, baseline, keys, cutoff)
     inject_dashboard(explosion)
 
     state["last_run_at"] = iso(now)
@@ -568,7 +610,7 @@ def main() -> None:
         "ok": not errors,
         "started_at": iso(now),
         "cutoff_completed_day": cutoff.isoformat(),
-        "audited_city_count": len(AUDITED_KEYS),
+        "audited_city_count": len(keys),
         "new_alert_episodes": new_episodes,
         "cities_searched": sorted(searches),
         "searches": searches,
