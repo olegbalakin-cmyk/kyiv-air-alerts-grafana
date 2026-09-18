@@ -1,0 +1,69 @@
+name: Build current explosion-metric handover
+
+on:
+  push:
+    branches: [multicity-wip-2026-09-16]
+    paths:
+      - "deploy/explosion-handover-release.txt"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check out WIP
+        uses: actions/checkout@v4
+        with:
+          ref: multicity-wip-2026-09-16
+
+      - name: Validate current explosion research state
+        run: |
+          python - <<'PY'
+          import csv, json
+          from pathlib import Path
+
+          root = Path("kyiv-air-alerts-grafana/data")
+          source = json.loads((root / "explosion_preview_input.json").read_text(encoding="utf-8"))
+          status_path = root / "explosion_metric_handoff/city_explosion_metric_status_2026-09-18.csv"
+          rows = list(csv.DictReader(status_path.open(encoding="utf-8-sig", newline="")))
+
+          assert len(source.get("cities", {})) == 10
+          completed = [r for r in rows if r["explosion_metric_status"] in {"complete_audited", "complete_reaudited"}]
+          assert len(completed) == 10, len(completed)
+          next_rows = [r for r in rows if r["explosion_metric_status"] == "next_priority"]
+          assert len(next_rows) == 1 and next_rows[0]["city_key"] == "zhytomyr", next_rows
+          assert next_rows[0]["completed_alert_episodes_in_frozen_window"] == "685"
+          print("Explosion handover verified: 10 complete; Zhytomyr next")
+          PY
+
+      - name: Build compact handover ZIP
+        run: |
+          mkdir -p /tmp/explosion-handover/repo_snapshot
+          cp kyiv-air-alerts-grafana/data/explosion_metric_handoff/NEXT_CHAT_HANDOFF_EXPLOSION_METRIC_2026-09-18.md /tmp/explosion-handover/
+          cp kyiv-air-alerts-grafana/data/explosion_metric_handoff/city_explosion_metric_status_2026-09-18.csv /tmp/explosion-handover/
+          cp kyiv-air-alerts-grafana/data/explosion_preview_input.json /tmp/explosion-handover/repo_snapshot/
+          cat > /tmp/explosion-handover/README.txt <<'EOF'
+          CURRENT COMPACT HANDOVER
+          Repository: olegbalakin-cmyk/kyiv-air-alerts-grafana
+          Branch: multicity-wip-2026-09-16
+          Current audited explosion cities: 10
+          Next normal city: zhytomyr (685 frozen alert episodes)
+
+          Read the MD and CSV first. Do not load explosions_test.json or large Telegram exports unless needed.
+          The older large handover archive may still be used only as a raw Telegram/Poltava source supplement;
+          its city-status and Uzhhorod checkpoint text are obsolete.
+          EOF
+          cd /tmp/explosion-handover
+          zip -qr /tmp/explosion_metric_handover_current_2026-09-18.zip .
+
+      - name: Upload compact handover
+        uses: actions/upload-artifact@v4
+        with:
+          name: explosion-metric-handover-current-2026-09-18
+          path: /tmp/explosion_metric_handover_current_2026-09-18.zip
+          if-no-files-found: error
+          retention-days: 30
