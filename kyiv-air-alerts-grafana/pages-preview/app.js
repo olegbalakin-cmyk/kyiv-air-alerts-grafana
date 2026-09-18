@@ -233,8 +233,9 @@ function renderCity() {
 
 function renderCasualties(key) {
   const section = $("casualtySection");
-  const rows = state.data.casualties?.monthly || [];
-  if (key !== "kyiv" || !rows.length) {
+  const series = state.data.casualties_by_city?.[key] || (key === "kyiv" ? state.data.casualties : null);
+  const rows = series?.monthly || [];
+  if (!rows.length) {
     section.classList.add("hidden");
     if (state.charts.casualtyChart) {
       state.charts.casualtyChart.destroy();
@@ -243,6 +244,13 @@ function renderCasualties(key) {
     return;
   }
   section.classList.remove("hidden");
+  $("casualtyCityEyebrow").textContent = labelFor(key);
+  const meta = series?.meta || {};
+  const total = rows.reduce((sum, r) => sum + (Number(r.deaths) || 0), 0);
+  const unresolved = Number(meta.unresolved_review_cases || 0);
+  $("casualtySourceNote").textContent = unresolved
+    ? `Підтверджений ряд: ${total} смертей. ${unresolved} невирішених review-кейсів не включено. Реконструкція за публічно доступними повідомленнями офіційних органів і медіа.`
+    : `Підтверджений ряд: ${total} смертей. Реконструкція за публічно доступними повідомленнями офіційних органів і медіа.`;
   const labels = rows.map(r => r.month || String(r.time || "").slice(0, 7));
   setChart(
     "casualtyChart",
