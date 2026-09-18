@@ -11,7 +11,7 @@ on:
 
 concurrency:
   group: casualty-monitor-wip
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 permissions:
   contents: write
@@ -44,17 +44,19 @@ jobs:
       - name: Self-test monitor
         run: python scripts/monitor_casualty_candidates.py --self-test
 
-      - name: Poll alerts and gate casualty search
-        env:
-          UKRAINEALARM_API_TOKEN: ${{ secrets.UKRAINEALARM_API_TOKEN }}
+      - name: Sync API-derived alert trigger stores from production data job
+        working-directory: .
         run: |
-          if [ "${{ github.event_name }}" = "push" ] && \
-             [ ! -f data/casualties/candidate_monitor_state.json ]; then
-            echo "No monitor state yet: bootstrap from cached alert stores only"
-            python scripts/monitor_casualty_candidates.py --local-only
-          else
-            python scripts/monitor_casualty_candidates.py
-          fi
+          git fetch origin site-prod
+          git show origin/site-prod:kyiv-air-alerts-grafana/data/ukrainealarm_bridge.json \
+            > kyiv-air-alerts-grafana/data/ukrainealarm_bridge.json
+          git show origin/site-prod:kyiv-air-alerts-grafana/data/alerts_combined.json \
+            > kyiv-air-alerts-grafana/data/alerts_combined.json
+          git show origin/site-prod:kyiv-air-alerts-grafana/data/sevastopol_events.json \
+            > kyiv-air-alerts-grafana/data/sevastopol_events.json
+
+      - name: Gate casualty search behind new completed alerts
+        run: python scripts/monitor_casualty_candidates.py --local-only
 
       - name: Validate monitor invariants
         run: |
@@ -91,10 +93,6 @@ jobs:
           git add kyiv-air-alerts-grafana/data/casualties/candidate_monitor_state.json \
                   kyiv-air-alerts-grafana/data/casualties/candidate_monitor_last_run.json \
                   kyiv-air-alerts-grafana/data/casualties/multicity_review_queue.json
-
-          if [ -f kyiv-air-alerts-grafana/data/sevastopol_events.json ]; then
-            git add kyiv-air-alerts-grafana/data/sevastopol_events.json
-          fi
 
           if git diff --cached --quiet; then
             echo "No monitor-state changes"
