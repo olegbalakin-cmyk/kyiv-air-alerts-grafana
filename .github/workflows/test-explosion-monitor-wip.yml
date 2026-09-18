@@ -82,7 +82,7 @@ jobs:
           print("Explosion WIP smoke test OK:", len(expected), "audited cities")
           PY
 
-      - name: Simulate onboarding an 11th audited city
+      - name: Simulate onboarding the next audited city
         working-directory: kyiv-air-alerts-grafana
         run: |
           python - <<'PY'
@@ -91,15 +91,15 @@ jobs:
 
           data = Path("data")
           preview_path = data / "explosion_preview_input.json"
-          feed = json.loads((data / "grafana/cities/zhytomyr.json").read_text(encoding="utf-8"))
+          feed = json.loads((data / "grafana/cities/kropyvnytskyi.json").read_text(encoding="utf-8"))
           preview = json.loads(preview_path.read_text(encoding="utf-8"))
-          assert "zhytomyr" not in preview["cities"]
+          assert "kropyvnytskyi" not in preview["cities"]
           kpi = feed["kpis"][0]
-          preview["cities"]["zhytomyr"] = {
-              "label": "Житомир",
-              "coverage_start": "2025-01-23",
+          preview["cities"]["kropyvnytskyi"] = {
+              "label": "Кропивницький",
+              "coverage_start": "2025-09-01",
               "coverage_end": kpi["period_end"],
-              "alerts_total": 685,
+              "alerts_total": 1161,
               "strict": 0,
               "strict_pct": 0,
               "sensitivity": 0,
@@ -124,12 +124,12 @@ jobs:
           baseline = json.loads((data / "explosion_audited_baseline.json").read_text(encoding="utf-8"))
           seed = json.loads((data / "explosion_daily_alert_seed.json").read_text(encoding="utf-8"))
           output = json.loads((data / "explosions_test.json").read_text(encoding="utf-8"))
-          assert len(baseline["cities"]) == 11
-          assert "zhytomyr" in baseline["cities"]
-          assert baseline["cities"]["zhytomyr"]["coverage_start"] == "2025-01-23"
-          assert baseline["cities"]["zhytomyr"]["total_alerts"] == 685
+          assert len(baseline["cities"]) == 12
+          assert "kropyvnytskyi" in baseline["cities"]
+          assert baseline["cities"]["kropyvnytskyi"]["coverage_start"] == "2025-09-01"
+          assert baseline["cities"]["kropyvnytskyi"]["total_alerts"] == 1161
           assert set(seed["cities"]) >= set(baseline["cities"])
           assert set(output["cities"]) == set(baseline["cities"])
           assert output["meta"]["city_count"] == 11
-          print("Dynamic onboarding simulation OK: 10 -> 11 cities without monitor/workflow edits")
+          print("Dynamic onboarding simulation OK: audited baseline expands without monitor/workflow edits")
           PY
