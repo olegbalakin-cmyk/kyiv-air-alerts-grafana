@@ -32,6 +32,8 @@ Current expected next city is **Zhytomyr / Житомир** unless the status fi
 - Work at **alert episode** level, not day level.
 - Do not replace the denominator with a public alert counter.
 
+**Frozen-vs-live guardrail:** for an unfinished city, the status CSV denominator is the research denominator. Do not replace it with a newer count from `dashboard_data.json`, Grafana city JSON, the live monitor, or another current proxy series. The post-2026-09-17 live updater is a separate pipeline for the 10 already audited cities.
+
 ### B. Candidate discovery
 - Search Telegram first using exact grammatical forms of the **city name** plus auditory/explosion phrases.
 - Region/district/oblast mentions are leads only.
