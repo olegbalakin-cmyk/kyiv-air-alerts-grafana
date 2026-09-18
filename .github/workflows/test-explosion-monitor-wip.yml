@@ -111,7 +111,7 @@ jobs:
           PY
 
           python scripts/sync_explosion_audited_baseline.py \
-            --dashboard-data /tmp/special-prod-dashboard.json
+            --dashboard-data data/dashboard_data.json
           python scripts/monitor_explosion_candidates.py --self-test
           python scripts/monitor_explosion_candidates.py --local-only
           python scripts/update_explosion_metric_live.py
@@ -215,7 +215,7 @@ jobs:
           )
 
           python scripts/sync_explosion_audited_baseline.py \
-            --dashboard-data data/dashboard_data.json
+            --dashboard-data /tmp/special-prod-dashboard.json
           python scripts/monitor_explosion_candidates.py --self-test
           python scripts/monitor_explosion_candidates.py \
             --local-only \
