@@ -100,7 +100,26 @@ jobs:
           grep -q 'id="daily28HoursChart"' kyiv-air-alerts-grafana/pages-preview/index.html
           grep -q 'id="compareCasualtiesChart"' kyiv-air-alerts-grafana/pages-preview/index.html
           grep -q 'id="casualtyCityEyebrow"' kyiv-air-alerts-grafana/pages-preview/index.html
+          grep -q 'id="kpiExplosionsCard"' kyiv-air-alerts-grafana/pages-preview/index.html
+          grep -q 'id="compareExplosionsChart"' kyiv-air-alerts-grafana/pages-preview/index.html
+          grep -q 'EXPLOSIONS_URL = "explosions.json"' kyiv-air-alerts-grafana/pages-preview/app.js
           grep -q "methodology-detail-grid" kyiv-air-alerts-grafana/pages-preview/index.html
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p = Path("kyiv-air-alerts-grafana/data/explosions_test.json")
+          x = json.loads(p.read_text(encoding="utf-8"))
+          assert x["meta"]["test_only"] is True
+          assert x["meta"]["rolling_window_days"] == 90
+          assert len(x["cities"]) == 10
+          assert x["cities"]["poltava"]["strict_n"] == 51
+          assert x["cities"]["poltava"]["total_alerts"] == 1805
+          assert x["cities"]["vinnytsia"]["strict_n"] == 5
+          assert x["cities"]["vinnytsia"]["total_alerts"] == 362
+          for key, city in x["cities"].items():
+              assert city["rolling90"], key
+              assert city["rolling90"][0]["date"] > city["coverage_start"], key
+          PY
 
       - name: Build static preview
         run: |
@@ -110,6 +129,7 @@ jobs:
           cp kyiv-air-alerts-grafana/pages-preview/styles.css _site/styles.css
           cp kyiv-air-alerts-grafana/pages-preview/app.js _site/app.js
           cp kyiv-air-alerts-grafana/data/dashboard_data.json _site/data.json
+          cp kyiv-air-alerts-grafana/data/explosions_test.json _site/explosions.json
 
       - name: Deploy draft preview to Netlify
         env:
