@@ -48,8 +48,9 @@ jobs:
         env:
           UKRAINEALARM_API_TOKEN: ${{ secrets.UKRAINEALARM_API_TOKEN }}
         run: |
-          if [ "${{ github.event_name }}" = "push" ]; then
-            echo "First workflow push: bootstrap from cached alert stores only"
+          if [ "${{ github.event_name }}" = "push" ] && \
+             [ ! -f data/casualties/candidate_monitor_state.json ]; then
+            echo "No monitor state yet: bootstrap from cached alert stores only"
             python scripts/monitor_casualty_candidates.py --local-only
           else
             python scripts/monitor_casualty_candidates.py
