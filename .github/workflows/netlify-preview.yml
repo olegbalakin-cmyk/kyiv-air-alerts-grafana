@@ -78,7 +78,8 @@ jobs:
           explosion = json.loads(explosion_path.read_text(encoding="utf-8"))
           assert explosion["meta"]["test_only"] is True
           assert explosion["meta"]["rolling_window_days"] == 90
-          assert len(explosion["cities"]) == 10
+          assert len(explosion["cities"]) >= 10
+          assert explosion["meta"]["city_count"] == len(explosion["cities"])
           prod["explosion_metric_test"] = explosion
 
           data_path.write_text(json.dumps(prod, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
@@ -94,6 +95,7 @@ jobs:
               "explosion_metric_test": {
                   "ok": True,
                   "city_count": len(explosion["cities"]),
+                  "membership_source": explosion["meta"].get("city_membership_source"),
                   "rolling_window_days": explosion["meta"]["rolling_window_days"],
                   "poltava": f'{explosion["cities"]["poltava"]["strict_n"]}/{explosion["cities"]["poltava"]["total_alerts"]}',
                   "vinnytsia": f'{explosion["cities"]["vinnytsia"]["strict_n"]}/{explosion["cities"]["vinnytsia"]["total_alerts"]}',
@@ -126,7 +128,8 @@ jobs:
           x = json.loads(p.read_text(encoding="utf-8"))
           assert x["meta"]["test_only"] is True
           assert x["meta"]["rolling_window_days"] == 90
-          assert len(x["cities"]) == 10
+          assert len(x["cities"]) >= 10
+          assert x["meta"]["city_count"] == len(x["cities"])
           assert x["cities"]["poltava"]["strict_n"] == 51
           assert x["cities"]["poltava"]["total_alerts"] == 1805
           assert x["cities"]["vinnytsia"]["strict_n"] == 5
