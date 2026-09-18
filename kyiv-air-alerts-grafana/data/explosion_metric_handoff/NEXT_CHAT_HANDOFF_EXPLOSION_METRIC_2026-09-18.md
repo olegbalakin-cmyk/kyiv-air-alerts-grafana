@@ -114,3 +114,13 @@ Then freeze Kropyvnytskyi into `explosion_preview_input.json`, update the status
 Kherson 1412 -> Odesa 1465 -> Cherkasy 1548 -> Mykolaiv 1648 -> Chernihiv 1677 -> Dnipro 2259 -> Sumy 2297 -> Zaporizhzhia 2365 -> Kharkiv 3565.
 
 Kyiv and Sevastopol remain special-source cases.
+
+
+## Kyiv and Sevastopol alert-source adapters
+
+These two cities are also auto-onboarded after their historical explosion audit is frozen, but their future alert episodes do **not** come from UkraineAlarm regionHistory:
+
+- `kyiv`: completed exact-city episodes come from the production `alerts_combined.json` store (Kyiv municipal open data + Kyiv Digital fallback).
+- `sevastopol`: completed exact-city episodes come from production `sevastopol_events.json`, using only verified complete pairs after the Sevastopol correction logic.
+
+The scheduled explosion monitor fetches these two stores from the same `site-prod` snapshot as the production dashboard. Do not replace them with a district/region proxy.
