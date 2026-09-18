@@ -38,17 +38,32 @@ jobs:
         working-directory: kyiv-air-alerts-grafana
         run: pip install -r requirements.txt
 
-      - name: Get latest production alert bridge
+      - name: Get latest production alert bridge and city feeds
         run: |
           git fetch origin main
           git show origin/main:kyiv-air-alerts-grafana/data/ukrainealarm_bridge.json > /tmp/latest-bridge.json
+          rm -rf /tmp/prod-tree
+          mkdir -p /tmp/prod-tree
+          git archive origin/main kyiv-air-alerts-grafana/data/grafana/cities | tar -x -C /tmp/prod-tree
           python - <<'PY'
           import json
           from pathlib import Path
           x = json.loads(Path("/tmp/latest-bridge.json").read_text(encoding="utf-8"))
           assert x.get("events"), "main bridge has no events"
-          print("bridge events:", len(x["events"]))
+          city_dir = Path("/tmp/prod-tree/kyiv-air-alerts-grafana/data/grafana/cities")
+          assert city_dir.exists()
+          print("bridge events:", len(x["events"]), "city feeds:", len(list(city_dir.glob("*.json"))))
           PY
+
+      - name: Self-test explosion baseline sync
+        working-directory: kyiv-air-alerts-grafana
+        run: python scripts/sync_explosion_audited_baseline.py --self-test
+
+      - name: Sync newly audited cities into automatic baseline
+        working-directory: kyiv-air-alerts-grafana
+        run: |
+          python scripts/sync_explosion_audited_baseline.py \
+            --city-data-dir /tmp/prod-tree/kyiv-air-alerts-grafana/data/grafana/cities
 
       - name: Self-test explosion monitor
         working-directory: kyiv-air-alerts-grafana
@@ -66,14 +81,16 @@ jobs:
 
           root = Path("kyiv-air-alerts-grafana/data")
           x = json.loads((root / "explosions_test.json").read_text(encoding="utf-8"))
-          base = json.loads((root / "explosion_baseline_2026-09-17.json").read_text(encoding="utf-8"))
+          base = json.loads((root / "explosion_audited_baseline.json").read_text(encoding="utf-8"))
           dash = json.loads((root / "dashboard_data.json").read_text(encoding="utf-8"))
           run = json.loads((root / "explosion_monitor_last_run.json").read_text(encoding="utf-8"))
 
           assert x["meta"]["automatic_updates"] is True
           assert x["meta"]["rolling_window_days"] == 90
-          assert len(x["cities"]) == 10
+          assert len(x["cities"]) >= 10
+          assert x["meta"]["city_count"] == len(x["cities"])
           assert set(x["cities"]) == set(base["cities"])
+          assert base["meta"]["city_count"] == len(base["cities"])
           for key, city in x["cities"].items():
               assert city["total_alerts"] >= base["cities"][key]["total_alerts"], key
               assert city["strict_n"] >= base["cities"][key]["strict_n"], key
