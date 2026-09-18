@@ -23,7 +23,7 @@ Choose it from the status CSV:
 
 Do not reprocess rows marked `complete_audited` or `complete_reaudited`.
 
-Current expected next city is **Zhytomyr / Житомир** unless the status file says otherwise.
+Current expected next city is **Kropyvnytskyi / Кропивницький** unless the status file says otherwise.
 
 ## Method
 
@@ -37,7 +37,7 @@ Current expected next city is **Zhytomyr / Житомир** unless the status fi
 ### B. Candidate discovery
 - Search Telegram first using exact grammatical forms of the **city name** plus auditory/explosion phrases.
 - Region/district/oblast mentions are leads only.
-- For Zhytomyr, do **not** treat `Житомирщина`, `Житомирський район`, or oblast-only wording as exact-city evidence.
+- For Kropyvnytskyi, do **not** treat `Кіровоградщина`, `Кропивницький район`, or oblast-only wording as exact-city evidence.
 
 ### C. Verification and matching
 For each candidate:
