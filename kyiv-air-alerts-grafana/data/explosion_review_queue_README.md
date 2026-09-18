@@ -1,6 +1,6 @@
 # Explosion metric review queue
 
-This queue is populated automatically after newly completed alert episodes for the 10 audited cities.
+This queue is populated automatically after newly completed alert episodes for every city present in `explosion_audited_baseline.json`.
 
 ## Statuses
 
@@ -38,3 +38,12 @@ A candidate may be promoted automatically to `approved_strict` only when all of 
 - publication time falls inside that unique alert interval, with at most 30 minutes after the end.
 
 This is deliberately narrower than the full manual strict methodology. Publication time by itself is never treated as event time. Everything else stays `needs_review`.
+
+
+## Adding another audited city
+
+Do not edit the monitor's city list. Freeze the city's audited result in
+`explosion_preview_input.json`, including `strict_episode_start_dates`.
+The scheduled WIP monitor automatically adds the city to
+`explosion_audited_baseline.json`, builds its rolling-window denominator seed,
+and starts monitoring new completed alerts on the next run.
