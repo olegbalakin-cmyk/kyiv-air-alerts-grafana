@@ -1,4 +1,4 @@
-name: Deploy Grafana site-link note
+name: Repair and deploy Grafana WIP
 
 on:
   push:
@@ -11,13 +11,13 @@ permissions:
   contents: write
 
 concurrency:
-  group: grafana-note-release
+  group: grafana-wip-repair
   cancel-in-progress: true
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
     steps:
       - name: Check out WIP
         uses: actions/checkout@v4
@@ -36,34 +36,104 @@ jobs:
         working-directory: kyiv-air-alerts-grafana
         run: pip install -r requirements.txt
 
-      - name: Refresh Grafana casualty section and site link
+      - name: Build combined WIP data from site-prod plus casualties
+        run: |
+          cp kyiv-air-alerts-grafana/data/dashboard_data.json /tmp/wip-dashboard-data.json
+          git fetch origin site-prod
+          git show origin/site-prod:kyiv-air-alerts-grafana/data/dashboard_data.json \
+            > kyiv-air-alerts-grafana/data/dashboard_data.json
+
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          path = Path("kyiv-air-alerts-grafana/data/dashboard_data.json")
+          prod = json.loads(path.read_text(encoding="utf-8"))
+          wip = json.loads(Path("/tmp/wip-dashboard-data.json").read_text(encoding="utf-8"))
+
+          casualties = wip.get("casualties_by_city") or {}
+          expected = {
+              "kyiv": 454, "kharkiv": 339, "sevastopol": 22, "cherkasy": 2,
+              "zhytomyr": 12, "dnipro": 214, "khmelnytskyi": 10, "poltava": 84,
+              "rivne": 1, "sumy": 158, "vinnytsia": 31, "kropyvnytskyi": 9,
+              "lviv": 29, "chernihiv": 105, "mykolaiv": 106, "lutsk": 10,
+              "uzhhorod": 0, "ivano-frankivsk": 3, "ternopil": 41,
+              "chernivtsi": 5, "odesa": 171, "zaporizhzhia": 316, "kherson": 163,
+          }
+          assert set(casualties) == set(expected), (sorted(casualties), sorted(expected))
+
+          if prod.get("casualties"):
+              casualties["kyiv"] = prod["casualties"]
+
+          for key, target in expected.items():
+              actual = sum(int(r.get("deaths") or 0) for r in casualties[key].get("monthly", []))
+              assert actual == target, (key, actual, target)
+
+          keys = prod.get("multicity_meta", {}).get("production_city_keys", [])
+          assert len(keys) == 23, len(keys)
+          assert prod.get("multicity_meta", {}).get("weekly_mode") == "rolling_7d"
+          missing_daily = [
+              key for key in keys
+              if not (prod.get("cities", {}).get(key, {}).get("daily28") or [])
+          ]
+          assert not missing_daily, missing_daily
+
+          prod["casualties_by_city"] = casualties
+          path.write_text(json.dumps(prod, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+          print("Combined data verified: 23 alerts + 23 casualty series")
+          PY
+
+      - name: Rebuild Grafana casualty section and site link
         working-directory: kyiv-air-alerts-grafana
         run: python scripts/add_casualty_panel.py
 
-      - name: Verify site link panel
+      - name: Verify Grafana dashboard queries
         run: |
           python - <<'PY'
           import json
           from pathlib import Path
-          p = Path("kyiv-air-alerts-grafana/grafana/dashboard.json")
-          obj = json.loads(p.read_text(encoding="utf-8"))
+
+          path = Path("kyiv-air-alerts-grafana/grafana/dashboard.json")
+          obj = json.loads(path.read_text(encoding="utf-8"))
           panels = obj.get("panels", [])
-          note = next((x for x in panels if x.get("id") == 949), None)
+
+          note = next((p for p in panels if p.get("id") == 949), None)
           assert note is not None
-          content = note.get("options", {}).get("content", "")
-          assert "https://ukraine-air-alerts.netlify.app/" in content
-          print("Grafana site-link panel verified")
+          assert "https://ukraine-air-alerts.netlify.app/" in note.get("options", {}).get("content", "")
+
+          urls = []
+          def collect(items):
+              for p in items:
+                  for t in p.get("targets", []):
+                      if t.get("source") == "url" and t.get("type") == "json":
+                          urls.append(t.get("url"))
+                  collect(p.get("panels", []))
+          collect(panels)
+
+          expected_url = (
+              "https://raw.githubusercontent.com/olegbalakin-cmyk/"
+              "kyiv-air-alerts-grafana/multicity-wip-2026-09-16/"
+              "kyiv-air-alerts-grafana/data/dashboard_data.json"
+          )
+          assert urls, "No JSON targets found"
+          bad = sorted(set(u for u in urls if u != expected_url))
+          assert not bad, bad
+          assert len([p for p in panels if p.get("id") == 950 and p.get("type") == "row"]) == 1
+          row = next(p for p in panels if p.get("id") == 950 and p.get("type") == "row")
+          assert len(row.get("panels") or []) == 23
+          print("Grafana queries verified:", len(urls), "targets")
           PY
 
-      - name: Commit dashboard change
+      - name: Commit repaired WIP data and dashboard
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add kyiv-air-alerts-grafana/grafana/dashboard.json
+          git add kyiv-air-alerts-grafana/data/dashboard_data.json \
+                  kyiv-air-alerts-grafana/grafana/dashboard.json
           if git diff --cached --quiet; then
-            echo "No dashboard changes"
+            echo "No generated changes"
           else
-            git commit -m "Publish current site link in Grafana"
+            git commit -m "Repair Grafana WIP data source"
             git push origin HEAD:multicity-wip-2026-09-16
           fi
 
