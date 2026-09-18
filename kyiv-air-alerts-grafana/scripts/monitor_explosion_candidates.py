@@ -22,7 +22,7 @@ import apply_ukrainealarm_bridge as ua
 
 ROOT = Path(__file__).resolve().parents[1]
 DATA_DIR = ROOT / "data"
-BASELINE_FILE = DATA_DIR / "explosion_baseline_2026-09-17.json"
+BASELINE_FILE = DATA_DIR / "explosion_audited_baseline.json"
 BRIDGE_FILE = DATA_DIR / "ukrainealarm_bridge.json"
 STATE_FILE = DATA_DIR / "explosion_candidate_monitor_state.json"
 QUEUE_FILE = DATA_DIR / "explosion_review_queue.json"
@@ -48,7 +48,7 @@ TELEGRAM_CHANNELS = {
     },
 }
 
-CITY_CONFIG = {
+ALL_CITY_CONFIG = {
     "poltava": {"label": "Полтава", "aliases": ["полтава", "полтаві", "полтави", "полтаву", "полтавою"]},
     "uzhhorod": {"label": "Ужгород", "aliases": ["ужгород", "ужгороді", "ужгорода", "ужгороду", "ужгородом"]},
     "ivano_frankivsk": {"label": "Івано-Франківськ", "aliases": ["івано-франківськ", "івано-франківську", "івано-франківська", "івано-франківськом"]},
@@ -59,7 +59,33 @@ CITY_CONFIG = {
     "rivne": {"label": "Рівне", "aliases": ["рівне", "рівному", "рівного", "рівним"]},
     "khmelnytskyi": {"label": "Хмельницький", "aliases": ["хмельницький", "хмельницькому", "хмельницького", "хмельницьким"]},
     "vinnytsia": {"label": "Вінниця", "aliases": ["вінниця", "вінниці", "вінницю", "вінницею"]},
+    "zhytomyr": {"label": "Житомир", "aliases": ["житомир", "житомирі", "житомира", "житомиру", "житомиром"]},
+    "kropyvnytskyi": {"label": "Кропивницький", "aliases": ["кропивницький", "кропивницькому", "кропивницького", "кропивницьким"]},
+    "kherson": {"label": "Херсон", "aliases": ["херсон", "херсоні", "херсона", "херсону", "херсоном"]},
+    "odesa": {"label": "Одеса", "aliases": ["одеса", "одесі", "одеси", "одесу", "одесою"]},
+    "cherkasy": {"label": "Черкаси", "aliases": ["черкаси", "черкасах", "черкасами"]},
+    "mykolaiv": {"label": "Миколаїв", "aliases": ["миколаїв", "миколаєві", "миколаєва", "миколаєву", "миколаєвом"]},
+    "chernihiv": {"label": "Чернігів", "aliases": ["чернігів", "чернігові", "чернігова", "чернігову", "черніговом"]},
+    "dnipro": {"label": "Дніпро", "aliases": ["дніпро", "дніпрі", "дніпра", "дніпру", "дніпром"]},
+    "sumy": {"label": "Суми", "aliases": ["суми", "сумах", "сумами"]},
+    "zaporizhzhia": {"label": "Запоріжжя", "aliases": ["запоріжжя", "запоріжжі", "запоріжжю"]},
+    "kharkiv": {"label": "Харків", "aliases": ["харків", "харкові", "харкова", "харкову", "харковом"]},
+    "kyiv": {"label": "Київ", "aliases": ["київ", "києві", "києва", "києву", "києвом"]},
+    "sevastopol": {"label": "Севастополь", "aliases": ["севастополь", "севастополі", "севастополя", "севастополю", "севастополем"]},
 }
+
+_BASELINE_AT_IMPORT = json.loads(BASELINE_FILE.read_text(encoding="utf-8"))
+_BASELINE_CITIES_AT_IMPORT = _BASELINE_AT_IMPORT.get("cities") or {}
+if not _BASELINE_CITIES_AT_IMPORT:
+    raise RuntimeError("Explosion audited baseline has no cities")
+
+CITY_CONFIG = {}
+for _key, _row in _BASELINE_CITIES_AT_IMPORT.items():
+    _known = ALL_CITY_CONFIG.get(_key) or {}
+    _label = str(_row.get("label") or _known.get("label") or _key)
+    _aliases = list(_known.get("aliases") or [_label.casefold()])
+    CITY_CONFIG[_key] = {"label": _label, "aliases": _aliases}
+
 
 EXPLOSION_TERMS = (
     "вибух",
@@ -628,7 +654,8 @@ def self_test() -> None:
     ep = make_episode("poltava", dt, dt + timedelta(hours=1))
     assert [x["label"] for x in ep["checks"]] == ["immediate", "24h", "72h", "7d"]
     assert ep["alert_start_date_kyiv"] == "2026-09-18"
-    print("Self-test OK: 10 audited cities, exact-city filter, explosion filter, follow-up schedule")
+    assert len(CITY_CONFIG) >= 10
+    print(f"Self-test OK: {len(CITY_CONFIG)} audited cities, exact-city filter, explosion filter, follow-up schedule")
 
 
 def main() -> None:
