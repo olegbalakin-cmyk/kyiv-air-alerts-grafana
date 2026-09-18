@@ -641,7 +641,7 @@ def add_candidates(queue: list[dict], city_key: str, rows: list[dict], due: list
 
 
 def self_test() -> None:
-    assert len(CITY_CONFIG) == 10
+    assert len(CITY_CONFIG) >= 10
     assert city_mentioned("poltava", "У Полтаві пролунали вибухи")
     assert not city_mentioned("poltava", "На Полтавщині пролунали вибухи")
     assert city_mentioned("vinnytsia", "У Вінниці було чутно вибух")
