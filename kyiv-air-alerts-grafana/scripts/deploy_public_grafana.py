@@ -205,6 +205,45 @@ def main() -> None:
     if check.status_code != 200:
         raise RuntimeError(f"Public dashboard URL returned {check.status_code}: {check.text[:500]}")
 
+    # Execute stored public-dashboard queries anonymously, exactly through the
+    # endpoint used by the externally shared dashboard UI. This catches cases
+    # where the admin dashboard works but the public query path returns no data.
+    query_payload = {
+        "intervalMs": 60000,
+        "maxDataPoints": 1000,
+        "queryCachingTTL": 0,
+        "timeRange": {
+            "from": "2022-02-24T00:00:00Z",
+            "to": "2026-09-18T23:59:59Z",
+            "timezone": "Europe/Kyiv",
+        },
+    }
+    smoke = {}
+    for panel_id in (1, 10, 951):
+        query_url = (
+            f"{base_url.rstrip('/')}/api/public/dashboards/"
+            f"{access_token}/panels/{panel_id}/query"
+        )
+        response = requests.post(query_url, json=query_payload, timeout=60)
+        if response.status_code != 200:
+            raise RuntimeError(
+                f"Public panel {panel_id} query returned {response.status_code}: "
+                f"{response.text[:1500]}"
+            )
+        payload = response.json()
+        results = payload.get("results") or {}
+        frames = []
+        for result in results.values():
+            frames.extend(result.get("frames") or [])
+        if not frames:
+            raise RuntimeError(
+                f"Public panel {panel_id} returned no frames: {json.dumps(payload)[:1500]}"
+            )
+        smoke[str(panel_id)] = {
+            "result_count": len(results),
+            "frame_count": len(frames),
+        }
+
     status = {
         "ok": True,
         "interactive_dashboard_uid": interactive_uid,
@@ -215,6 +254,7 @@ def main() -> None:
         "fixed_duration_unit": "minutes",
         "fixed_comparison": ["kyiv", "kharkiv", "zaporizhzhia"],
         "template_variables": 0,
+        "public_query_smoke": smoke,
     }
     print(json.dumps(status, ensure_ascii=False))
 
