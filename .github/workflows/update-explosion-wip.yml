@@ -1,13 +1,10 @@
 name: Update explosion metric WIP
 
+# Legacy/manual fallback only. The scheduled updater is explosion-monitor-wip.yml,
+# which polls the audited city regionHistory series directly. Keeping two scheduled
+# writers would race and could overwrite the live denominator with a stale bridge.
 on:
-  schedule:
-    - cron: "37 */4 * * *"
   workflow_dispatch:
-  push:
-    branches: [main]
-    paths:
-      - ".github/workflows/update-explosion-wip.yml"
 
 concurrency:
   group: explosion-metric-wip
