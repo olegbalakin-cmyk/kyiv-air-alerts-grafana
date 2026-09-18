@@ -72,6 +72,37 @@ CITY_CONFIG = {
     "kherson": {"label": "Херсон", "alert_key": "kherson", "scope": "district_proxy"},
 }
 
+CITY_NEWS_ALIASES = {
+    "kyiv": ["київ", "києві", "києва", "києву", "києвом"],
+    "kharkiv": ["харків", "харкові", "харкова", "харкову", "харковом"],
+    "sevastopol": ["севастополь", "севастополі", "севастополя", "севастополю", "севастополем"],
+    "cherkasy": ["черкаси", "черкасах", "черкасами"],
+    "zhytomyr": ["житомир", "житомирі", "житомира", "житомиру", "житомиром"],
+    "dnipro": ["дніпро", "дніпрі", "дніпра", "дніпру", "дніпром"],
+    "khmelnytskyi": ["хмельницький", "хмельницькому", "хмельницького", "хмельницьким"],
+    "poltava": ["полтава", "полтаві", "полтави", "полтаву", "полтавою"],
+    "rivne": ["рівне", "рівному", "рівного", "рівним"],
+    "sumy": ["суми", "сумах", "сумами"],
+    "vinnytsia": ["вінниця", "вінниці", "вінницю", "вінницею"],
+    "kropyvnytskyi": ["кропивницький", "кропивницькому", "кропивницького", "кропивницьким"],
+    "lviv": ["львів", "львові", "львова", "львову", "львовом"],
+    "chernihiv": ["чернігів", "чернігові", "чернігова", "чернігову", "черніговом"],
+    "mykolaiv": ["миколаїв", "миколаєві", "миколаєва", "миколаєву", "миколаєвом"],
+    "lutsk": ["луцьк", "луцьку", "луцька", "луцьком"],
+    "uzhhorod": ["ужгород", "ужгороді", "ужгорода", "ужгороду", "ужгородом"],
+    "ivano-frankivsk": [
+        "івано-франківськ",
+        "івано-франківську",
+        "івано-франківська",
+        "івано-франківськом",
+    ],
+    "ternopil": ["тернопіль", "тернополі", "тернополя", "тернополю", "тернополем"],
+    "chernivtsi": ["чернівці", "чернівцях", "чернівців", "чернівцями"],
+    "odesa": ["одеса", "одесі", "одеси", "одесу", "одесою"],
+    "zaporizhzhia": ["запоріжжя", "запоріжжі", "запоріжжю"],
+    "kherson": ["херсон", "херсоні", "херсона", "херсону", "херсоном"],
+}
+
 CASUALTY_TERMS = (
     "загиб",
     "загин",
@@ -338,6 +369,15 @@ def parse_pubdate(value: str | None) -> datetime | None:
     return dt.astimezone(UTC)
 
 
+def city_mentioned(city_key: str, text: str) -> bool:
+    low = " ".join((text or "").casefold().replace("’", "'").split())
+    for alias in CITY_NEWS_ALIASES.get(city_key, []):
+        pattern = rf"(?<![\\w-]){re.escape(alias)}(?![\\w-])"
+        if re.search(pattern, low, flags=re.IGNORECASE):
+            return True
+    return False
+
+
 def relevant_news(text: str) -> bool:
     low = " ".join((text or "").casefold().split())
     return (
@@ -390,6 +430,8 @@ def search_city_news(city_key: str, earliest: datetime, now: datetime) -> tuple[
         if published and not (lower_bound <= published <= upper_bound):
             continue
         combined = f"{title} {description}"
+        if not city_mentioned(city_key, combined):
+            continue
         if not relevant_news(combined):
             continue
 
@@ -467,6 +509,7 @@ def add_news_candidates(
             "candidate_id": cid,
             "city_key": city_key,
             "city": CITY_CONFIG[city_key]["label"],
+            "alert_trigger_scope": CITY_CONFIG[city_key]["scope"],
             "status": "needs_review",
             "source": "Google News RSS",
             "publisher": row.get("publisher"),
@@ -568,6 +611,9 @@ def self_test() -> None:
     assert parse_dt(ep["checks"][-1]["due_at"]) == dt + timedelta(hours=169)
     assert relevant_news("У Києві загинула людина після атаки дрона")
     assert not relevant_news("У Києві оголосили повітряну тривогу")
+    assert city_mentioned("zhytomyr", "У Житомирі внаслідок удару загинули двоє")
+    assert not city_mentioned("zhytomyr", "На Житомирщині внаслідок удару загинули двоє")
+    assert city_mentioned("odesa", "В Одесі після атаки загинула людина")
     print("Self-test OK: 23 cities, follow-up schedule, relevance filter")
 
 
@@ -595,6 +641,25 @@ def main() -> None:
     queue = load_json(QUEUE_FILE, [])
     if not isinstance(queue, list):
         queue = []
+
+    # Automatically generated, still-unreviewed items that do not actually
+    # mention the target city are safe to prune. Human-reviewed statuses are
+    # never removed automatically.
+    before_prune = len(queue)
+    queue = [
+        item for item in queue
+        if not (
+            isinstance(item, dict)
+            and item.get("source") == "Google News RSS"
+            and item.get("status") == "needs_review"
+            and item.get("city_key") in CITY_CONFIG
+            and not city_mentioned(
+                str(item.get("city_key")),
+                f"{item.get('title') or ''} {item.get('snippet') or ''}",
+            )
+        )
+    ]
+    pruned_candidates = before_prune - len(queue)
 
     polled, errors = poll_all(args.local_only)
     new_episodes, bootstrapped = process_events(state, polled, errors, started)
@@ -651,6 +716,7 @@ def main() -> None:
         "cities_searched": sorted(searches),
         "searches": searches,
         "new_review_candidates": new_candidates,
+        "pruned_geo_false_positives": pruned_candidates,
         "review_queue_size": len(queue),
         "errors": errors,
         "confirmed_series_modified": False,
