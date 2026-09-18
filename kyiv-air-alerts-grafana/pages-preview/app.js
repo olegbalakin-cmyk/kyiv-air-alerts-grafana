@@ -1,8 +1,20 @@
-const state = { data: null, charts: {} };
+const state = {
+  data: null,
+  charts: {},
+  tableSort: { key: "alerts", direction: "desc" }
+};
 
+const DATA_URL = "data.json";
 const COLORS = ["#62a0ea", "#8ff0a4", "#f8e45c"];
 const GRID = "rgba(148,163,184,.16)";
 const TEXT = "#b8c4cf";
+const TABLE_SORT_COLUMNS = [
+  { key: "label", label: "Місто / ряд", defaultDirection: "asc" },
+  { key: "alerts", label: "Тривог", defaultDirection: "desc" },
+  { key: "hours", label: "Годин", defaultDirection: "desc" },
+  { key: "duration", label: "Сер. тривалість", defaultDirection: "desc" },
+  { key: "coverage", label: "Покриття", defaultDirection: "asc" }
+];
 
 function $(id) { return document.getElementById(id); }
 function fmt(v, digits = 1) {
@@ -24,7 +36,10 @@ function coverageStart(key) {
 function proxyRaion(key) {
   return state.data.multicity_meta?.cities?.[key]?.proxy_raion || state.data.cities?.[key]?.meta?.proxy_raion || null;
 }
-function typeText(key) { return sourceType(key) === "raion_proxy" ? "Районний proxy" : "Exact-city"; }
+function typeText(key) { return sourceType(key) === "raion_proxy" ? "Дані по району" : "Дані по місту"; }
+function rolling7dEnabled() {
+  return state.data.multicity_meta?.weekly_mode === "rolling_7d";
+}
 
 function fillSelect(select, keys, current, allowEmpty = false) {
   select.innerHTML = "";
@@ -88,6 +103,7 @@ function seriesDataset(label, values, color, dashed = false) {
 
 function rowTime(row, period) {
   if (period === "monthly") return row.month || String(row.time || "").slice(0, 7);
+  if (rolling7dEnabled()) return row.week_end || String(row.time || "").slice(0, 10);
   return row.week_start || String(row.time || "").slice(0, 10);
 }
 
@@ -122,7 +138,7 @@ function renderFreshness() {
     return;
   }
   const last = fresh.latest_proxy_event_end || fresh.last_successful_fetch_at;
-  banner.textContent = `⚠ Дані біля правого краю можуть бути неповними. Останній підтверджений update: ${last ? String(last).slice(0, 10) : "невідомо"}. Нулі після цієї точки не слід трактувати як гарантовану відсутність тривог.`;
+  banner.textContent = `⚠ Дані біля правого краю можуть бути неповними. Останнє підтверджене оновлення: ${last ? String(last).slice(0, 10) : "невідомо"}. Нулі після цієї точки не слід трактувати як гарантовану відсутність тривог.`;
   banner.classList.remove("hidden");
 }
 
@@ -132,8 +148,8 @@ function renderDatasetSummary() {
   const proxy = keys.filter(k => sourceType(k) === "raion_proxy").length;
   $("datasetSummary").innerHTML = [
     `${keys.length} ряди`,
-    `${exact} exact-city`,
-    `${proxy} районних proxy`,
+    `${exact} ряди з даними по місту`,
+    `${proxy} рядів за даними районів`,
     "Донецьк і Луганськ поки не включені"
   ].map(x => `<span class="summary-pill">${x}</span>`).join("");
 }
@@ -227,8 +243,94 @@ function renderCity() {
 
   setChart("cityDurationChart", labels, [seriesDataset(labelFor(key), rows.map(r => r.avg_alert_duration_min), COLORS[2], dashed)], "Хвилин");
 
+  renderShortHorizon(key);
   renderCasualties(key);
   updateUrl();
+}
+
+function renderShortHorizon(key) {
+  const rows = state.data.cities[key]?.daily28 || [];
+  const labels = rows.map(r => r.date || String(r.time || "").slice(0, 10));
+  const range = $("daily28Range");
+  if (range) {
+    range.textContent = labels.length
+      ? `Щоденний розріз для ${labelFor(key)}: ${labels[0]} — ${labels[labels.length - 1]}. Сьогоднішній день не включається.`
+      : `Для ${labelFor(key)} немає доступного 28-денного ряду.`;
+  }
+
+  setChart(
+    "daily28HoursChart",
+    labels,
+    [{
+      label: "Годин під тривогою",
+      data: rows.map(r => r.total_alert_duration_hours),
+      backgroundColor: COLORS[0] + "88",
+      borderColor: COLORS[0],
+      borderWidth: 1
+    }],
+    "Годин",
+    "bar",
+    { plugins: { legend: { display: false }, tooltip: { mode: "index", intersect: false } } }
+  );
+
+  if (state.charts.daily28AlertsDurationChart) state.charts.daily28AlertsDurationChart.destroy();
+  state.charts.daily28AlertsDurationChart = new Chart($("daily28AlertsDurationChart"), {
+    data: {
+      labels,
+      datasets: [
+        {
+          type: "bar",
+          label: "Тривог, що почалися",
+          data: rows.map(r => r.alerts_started),
+          yAxisID: "yAlerts",
+          backgroundColor: COLORS[1] + "77",
+          borderColor: COLORS[1],
+          borderWidth: 1
+        },
+        {
+          type: "line",
+          label: "Середня тривалість, хв",
+          data: rows.map(r => r.avg_alert_duration_minutes),
+          yAxisID: "yDuration",
+          borderColor: COLORS[2],
+          backgroundColor: COLORS[2] + "22",
+          pointRadius: 3,
+          pointHoverRadius: 5,
+          borderWidth: 2,
+          borderDash: sourceType(key) === "raion_proxy" ? [7, 5] : [],
+          tension: 0.12,
+          spanGaps: false
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      animation: false,
+      interaction: { mode: "index", intersect: false },
+      plugins: {
+        legend: { labels: { color: TEXT, boxWidth: 14, usePointStyle: true } },
+        tooltip: { mode: "index", intersect: false }
+      },
+      scales: {
+        x: { ticks: { color: TEXT, maxRotation: 0, autoSkip: true }, grid: { color: GRID } },
+        yAlerts: {
+          position: "left",
+          beginAtZero: true,
+          ticks: { color: TEXT, precision: 0 },
+          grid: { color: GRID },
+          title: { display: true, text: "Кількість тривог", color: TEXT }
+        },
+        yDuration: {
+          position: "right",
+          beginAtZero: true,
+          ticks: { color: TEXT },
+          grid: { drawOnChartArea: false },
+          title: { display: true, text: "Середня тривалість, хв", color: TEXT }
+        }
+      }
+    }
+  });
 }
 
 function renderCasualties(key) {
@@ -279,9 +381,11 @@ function renderComparison() {
   const period = $("comparePeriod").value;
   const shared = sharedRows(keys, period);
   const labels = shared.map(x => x.time);
+  let countLabel = "міс.";
+  if (period === "weekly") countLabel = rolling7dEnabled() ? "7-денних вікон" : "тиж.";
   const note = shared.length
-    ? `Спільний ряд для ${keys.length} міст: ${labels[0]} — ${labels[labels.length - 1]} (${shared.length} ${period === "monthly" ? "міс." : "тиж."}).`
-    : "Немає спільних повних періодів для цієї комбінації.";
+    ? `Спільний ряд для ${keys.length} міст: ${labels[0]} — ${labels[labels.length - 1]} (${shared.length} ${countLabel}).`
+    : "Немає спільних періодів для цієї комбінації.";
   $("comparisonNote").textContent = note;
 
   const metricChart = (id, metric, yTitle) => {
@@ -345,12 +449,90 @@ function renderComparison() {
   updateUrl();
 }
 
+function isMissingSortValue(value) {
+  return value === null || value === undefined || value === "" || (typeof value === "number" && Number.isNaN(value));
+}
+
+function compareTableRows(a, b) {
+  const { key, direction } = state.tableSort;
+  const av = a[key];
+  const bv = b[key];
+  const aMissing = isMissingSortValue(av);
+  const bMissing = isMissingSortValue(bv);
+
+  if (aMissing && bMissing) return a.label.localeCompare(b.label, "uk");
+  if (aMissing) return 1;
+  if (bMissing) return -1;
+
+  let cmp;
+  if (key === "label" || key === "coverage") {
+    cmp = String(av).localeCompare(String(bv), "uk", { numeric: true, sensitivity: "base" });
+  } else {
+    cmp = Number(av) - Number(bv);
+  }
+  if (cmp === 0) cmp = a.label.localeCompare(b.label, "uk");
+  return direction === "asc" ? cmp : -cmp;
+}
+
+function updateTableSortHeaders() {
+  const headers = document.querySelectorAll(".table-panel thead th");
+  TABLE_SORT_COLUMNS.forEach((column, idx) => {
+    const th = headers[idx];
+    if (!th) return;
+    const active = state.tableSort.key === column.key;
+    const arrow = active ? (state.tableSort.direction === "asc" ? " ↑" : " ↓") : " ↕";
+    th.textContent = column.label + arrow;
+    th.dataset.sortKey = column.key;
+    th.setAttribute("aria-sort", active ? (state.tableSort.direction === "asc" ? "ascending" : "descending") : "none");
+    th.setAttribute("role", "button");
+    th.tabIndex = 0;
+    th.title = active
+      ? `Сортування: ${state.tableSort.direction === "asc" ? "за зростанням" : "за спаданням"}. Натисніть, щоб змінити напрямок.`
+      : `Сортувати за колонкою «${column.label}»`;
+    th.style.cursor = "pointer";
+    th.style.userSelect = "none";
+  });
+}
+
+function changeTableSort(column) {
+  if (state.tableSort.key === column.key) {
+    state.tableSort.direction = state.tableSort.direction === "asc" ? "desc" : "asc";
+  } else {
+    state.tableSort = { key: column.key, direction: column.defaultDirection };
+  }
+  renderAllCitiesTable();
+}
+
+function setupTableSorting() {
+  const headers = document.querySelectorAll(".table-panel thead th");
+  TABLE_SORT_COLUMNS.forEach((column, idx) => {
+    const th = headers[idx];
+    if (!th) return;
+    const activate = () => changeTableSort(column);
+    th.addEventListener("click", activate);
+    th.addEventListener("keydown", event => {
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault();
+        activate();
+      }
+    });
+  });
+  updateTableSortHeaders();
+}
+
 function renderAllCitiesTable() {
   const rows = cityKeys().map(key => {
     const kpi = state.data.cities[key]?.kpis?.[0] || {};
-    return { key, label: labelFor(key), alerts: kpi.alerts_28d, hours: kpi.alert_hours_28d, duration: kpi.avg_alert_duration_min_28d, coverage: coverageStart(key) };
+    return {
+      key,
+      label: labelFor(key),
+      alerts: kpi.alerts_28d,
+      hours: kpi.alert_hours_28d,
+      duration: kpi.avg_alert_duration_min_28d,
+      coverage: coverageStart(key)
+    };
   });
-  rows.sort((a, b) => (Number(b.alerts) || -1) - (Number(a.alerts) || -1));
+  rows.sort(compareTableRows);
   $("allCitiesTable").innerHTML = rows.map(r => `
     <tr>
       <td><button class="table-city-link" data-city="${r.key}" type="button">${r.label}</button></td>
@@ -364,9 +546,23 @@ function renderAllCitiesTable() {
     renderCity();
     window.scrollTo({ top: $("cityTitle").offsetTop - 24, behavior: "smooth" });
   }));
+  updateTableSortHeaders();
 }
 
 function renderMethodology() {
+  const rolling = rolling7dEnabled();
+  const cityWeeklyOption = $("cityWeeklyOption");
+  const compareWeeklyOption = $("compareWeeklyOption");
+  if (cityWeeklyOption) cityWeeklyOption.textContent = rolling ? "Ковзні 7 днів" : "Тижні";
+  if (compareWeeklyOption) compareWeeklyOption.textContent = rolling ? "Ковзні 7 днів" : "Тижні";
+
+  const periodMethodology = $("periodMethodology");
+  if (periodMethodology) {
+    periodMethodology.innerHTML = rolling
+      ? "<strong>Які дні потрапляють у розрахунки.</strong> Усі показники рахуються лише по завершених календарних днях. Сьогоднішній день не враховується. Картки вгорі і блок «Останні 28 завершених днів» охоплюють рівно останні 28 завершених днів — до вчора включно; у короткому горизонті кожен день показаний окремо. На місячному графіку показуються лише повні календарні місяці. У режимі «Ковзні 7 днів» кожна точка охоплює 7 завершених календарних днів і датована останнім днем цього вікна; сусідні точки перекриваються на 6 днів. Перше вікно, яке могло б включати неповний стартовий день покриття, не показується."
+      : "<strong>Які дні потрапляють у розрахунки.</strong> Усі показники рахуються лише по завершених календарних днях. Сьогоднішній день не враховується. Картки вгорі і блок «Останні 28 завершених днів» охоплюють рівно останні 28 завершених днів — до вчора включно; у короткому горизонті кожен день показаний окремо. На місячному графіку показуються лише повні календарні місяці, а на тижневому — лише повні тижні з понеділка до неділі. Якщо дані для міста починаються посеред місяця або тижня, цей перший неповний період не показується.";
+  }
+
   const tolerance = state.data.multicity_meta?.proxy_cross_source_match_tolerance_seconds || 15;
   const deferred = Object.keys(state.data.multicity_meta?.deferred || {});
   $("methodologyDynamic").textContent = `Cross-source continuity перевіряється по конкретних подіях; технічний допуск збігу timestamp — ${tolerance} с. ${deferred.length ? `Не включені: ${deferred.join(", ")}.` : ""}`;
@@ -376,6 +572,7 @@ function bind() {
   $("citySelect").addEventListener("change", renderCity);
   $("cityPeriod").addEventListener("change", renderCity);
   for (const id of ["compareA", "compareB", "compareC", "comparePeriod"]) $(id).addEventListener("change", renderComparison);
+  setupTableSorting();
   $("copyLink").addEventListener("click", async () => {
     try {
       await navigator.clipboard.writeText(location.href);
@@ -388,8 +585,8 @@ function bind() {
 }
 
 async function init() {
-  const response = await fetch("data.json", { cache: "no-store" });
-  if (!response.ok) throw new Error(`Failed to load data.json: ${response.status}`);
+  const response = await fetch(`${DATA_URL}?v=${Date.now()}`, { cache: "no-store" });
+  if (!response.ok) throw new Error(`Failed to load live dashboard data: ${response.status}`);
   state.data = await response.json();
   const keys = cityKeys();
 
