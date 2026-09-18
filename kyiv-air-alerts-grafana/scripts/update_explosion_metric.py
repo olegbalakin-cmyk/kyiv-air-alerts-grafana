@@ -19,7 +19,7 @@ from bs4 import BeautifulSoup
 
 ROOT = Path(__file__).resolve().parents[1]
 DATA = ROOT / "data"
-BASELINE_FILE = DATA / "explosion_baseline_2026-09-17.json"
+BASELINE_FILE = DATA / "explosion_audited_baseline.json"
 SEED_FILE = DATA / "explosion_daily_alert_seed.json"
 OUTPUT_FILE = DATA / "explosions_test.json"
 STATE_FILE = DATA / "explosion_monitor_state.json"
