@@ -79,6 +79,7 @@ jobs:
           root = Path("kyiv-air-alerts-grafana/data")
           baseline = json.loads((root / "explosion_audited_baseline.json").read_text(encoding="utf-8"))
           live = json.loads((root / "explosions_test.json").read_text(encoding="utf-8"))
+          dashboard = json.loads((root / "dashboard_data.json").read_text(encoding="utf-8"))
           state = json.loads((root / "explosion_candidate_monitor_state.json").read_text(encoding="utf-8"))
           queue = json.loads((root / "explosion_review_queue.json").read_text(encoding="utf-8"))
           report = json.loads((root / "explosion_candidate_monitor_last_run.json").read_text(encoding="utf-8"))
@@ -95,6 +96,8 @@ jobs:
           assert isinstance(queue, list)
           assert report["city_count"] == len(baseline["cities"])
           assert report["mode"] == "network"
+          assert dashboard["explosion_metric_test"]["meta"]["city_count"] == len(baseline["cities"])
+          assert set(dashboard["explosion_metric_test"]["cities"]) == set(baseline["cities"])
 
           approved = [
               item for item in queue
@@ -126,7 +129,8 @@ jobs:
             kyiv-air-alerts-grafana/data/explosion_candidate_monitor_state.json \
             kyiv-air-alerts-grafana/data/explosion_review_queue.json \
             kyiv-air-alerts-grafana/data/explosion_candidate_monitor_last_run.json \
-            kyiv-air-alerts-grafana/data/explosions_test.json
+            kyiv-air-alerts-grafana/data/explosions_test.json \
+            kyiv-air-alerts-grafana/data/dashboard_data.json
 
           if git diff --cached --quiet; then
             echo "No explosion-monitor changes"
