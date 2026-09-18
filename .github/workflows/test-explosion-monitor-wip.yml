@@ -97,9 +97,9 @@ jobs:
           kpi = feed["kpis"][0]
           preview["cities"]["zhytomyr"] = {
               "label": "Житомир",
-              "coverage_start": kpi["period_start"],
+              "coverage_start": "2025-01-23",
               "coverage_end": kpi["period_end"],
-              "alerts_total": int(kpi["alerts_28d"]),
+              "alerts_total": 685,
               "strict": 0,
               "strict_pct": 0,
               "sensitivity": 0,
@@ -126,6 +126,8 @@ jobs:
           output = json.loads((data / "explosions_test.json").read_text(encoding="utf-8"))
           assert len(baseline["cities"]) == 11
           assert "zhytomyr" in baseline["cities"]
+          assert baseline["cities"]["zhytomyr"]["coverage_start"] == "2025-01-23"
+          assert baseline["cities"]["zhytomyr"]["total_alerts"] == 685
           assert set(seed["cities"]) >= set(baseline["cities"])
           assert set(output["cities"]) == set(baseline["cities"])
           assert output["meta"]["city_count"] == 11
