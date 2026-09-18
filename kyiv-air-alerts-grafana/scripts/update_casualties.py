@@ -24,6 +24,8 @@ REVISIONS_FILE = CASUALTY_DIR / "revisions.csv"
 REVIEW_QUEUE_FILE = CASUALTY_DIR / "review_queue.json"
 SOURCE_STATE_FILE = CASUALTY_DIR / "source_state.json"
 CITY_SERIES_DIR = CASUALTY_DIR / "cities"
+MASTER_WIDE_FILE = CASUALTY_DIR / "master_20cities_monthly_wide.csv"
+MASTER_MANIFEST_FILE = CASUALTY_DIR / "master_20cities_manifest.json"
 
 TZ = ZoneInfo("Europe/Kyiv")
 BASELINE_CUTOFF = date(2026, 9, 15)
@@ -383,8 +385,59 @@ def discover_candidates() -> tuple[list[dict], dict]:
 
 
 
+
+def load_master_city_series() -> dict[str, dict]:
+    manifest = load_json(MASTER_MANIFEST_FILE, {})
+    if not MASTER_WIDE_FILE.exists() or not isinstance(manifest, dict):
+        return {}
+    cities = manifest.get("cities") or []
+    meta_by_slug = {
+        str(item.get("slug")): item
+        for item in cities
+        if isinstance(item, dict) and item.get("slug")
+    }
+    out = {
+        slug: {
+            "meta": {
+                "city_slug": slug,
+                "city": item.get("label") or slug,
+                "series_status": "validated_structured_output",
+                "confirmed_deaths": int(item.get("confirmed_deaths") or 0),
+                "source": manifest.get("source"),
+                "date_attribution": manifest.get("date_attribution"),
+                "geography": manifest.get("geography"),
+                "current_month_partial": bool(manifest.get("current_month_partial")),
+            },
+            "monthly": [],
+        }
+        for slug, item in meta_by_slug.items()
+    }
+    with MASTER_WIDE_FILE.open(encoding="utf-8-sig", newline="") as f:
+        reader = csv.DictReader(f)
+        for row in reader:
+            month = (row.get("month") or "").strip()
+            if not re.fullmatch(r"20\d{2}-(0[1-9]|1[0-2])", month):
+                raise RuntimeError(f"Invalid month in casualty master: {month!r}")
+            for slug in out:
+                raw = (row.get(slug) or "0").strip()
+                deaths = int(raw)
+                if deaths < 0:
+                    raise RuntimeError(f"Negative casualty count for {slug} {month}")
+                out[slug]["monthly"].append({
+                    "time": month_timestamp(month),
+                    "month": month,
+                    "deaths": deaths,
+                })
+    for slug, series in out.items():
+        actual = sum(r["deaths"] for r in series["monthly"])
+        expected = int(series["meta"]["confirmed_deaths"])
+        if actual != expected:
+            raise RuntimeError(f"{slug} casualty master total mismatch: {actual} != {expected}")
+    return out
+
+
 def load_validated_city_series() -> dict[str, dict]:
-    out: dict[str, dict] = {}
+    out: dict[str, dict] = load_master_city_series()
     if not CITY_SERIES_DIR.exists():
         return out
     for city_dir in sorted(p for p in CITY_SERIES_DIR.iterdir() if p.is_dir()):
@@ -400,7 +453,7 @@ def load_validated_city_series() -> dict[str, dict]:
         with monthly_path.open(encoding="utf-8-sig", newline="") as f:
             for row in csv.DictReader(f):
                 month = (row.get("month") or "").strip()
-                if not re.fullmatch(r"20\\d{2}-(0[1-9]|1[0-2])", month):
+                if not re.fullmatch(r"20\d{2}-(0[1-9]|1[0-2])", month):
                     raise RuntimeError(f"Invalid month in {monthly_path}: {month!r}")
                 deaths = int((row.get("deaths_confirmed") or row.get("deaths") or "0").strip())
                 item = {
@@ -460,7 +513,9 @@ def update_dashboard_data(no_network: bool) -> None:
         },
         "monthly": monthly,
     }
-    dashboard_data["casualties_by_city"] = {"kyiv": dashboard_data["casualties"], **load_validated_city_series()}
+    city_series = load_validated_city_series()
+    city_series["kyiv"] = dashboard_data["casualties"]
+    dashboard_data["casualties_by_city"] = city_series
 
     DATA_FILE.parent.mkdir(parents=True, exist_ok=True)
     DATA_FILE.write_text(json.dumps(dashboard_data, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
