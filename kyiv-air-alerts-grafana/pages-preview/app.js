@@ -297,6 +297,51 @@ function renderComparison() {
   metricChart("compareAlertsChart", "alerts_per_day", "Тривог/день");
   metricChart("compareHoursChart", "avg_daily_alert_hours", "Годин/добу");
   metricChart("compareDurationChart", "avg_alert_duration_min", "Хвилин");
+
+  const casualtyCard = $("compareCasualtiesCard");
+  const casualtyNote = $("compareCasualtiesNote");
+  const casualtyKeys = keys.filter(key => (state.data.casualties_by_city?.[key]?.monthly || []).length);
+  const missingCasualtyKeys = keys.filter(key => !casualtyKeys.includes(key));
+
+  if (!casualtyKeys.length) {
+    casualtyCard.classList.add("hidden");
+    if (state.charts.compareCasualtiesChart) {
+      state.charts.compareCasualtiesChart.destroy();
+      delete state.charts.compareCasualtiesChart;
+    }
+  } else {
+    casualtyCard.classList.remove("hidden");
+    const casualtyMaps = casualtyKeys.map(key => new Map(
+      state.data.casualties_by_city[key].monthly.map(row => [
+        row.month || String(row.time || "").slice(0, 7),
+        Number(row.deaths) || 0
+      ])
+    ));
+    let casualtyMonths = new Set(casualtyMaps[0].keys());
+    for (const map of casualtyMaps.slice(1)) {
+      casualtyMonths = new Set([...casualtyMonths].filter(month => map.has(month)));
+    }
+    const casualtyLabels = [...casualtyMonths].sort();
+    const casualtyDatasets = casualtyKeys.map((key, idx) => ({
+      label: labelFor(key),
+      data: casualtyLabels.map(month => casualtyMaps[idx].get(month) ?? null),
+      backgroundColor: COLORS[idx] + "77",
+      borderColor: COLORS[idx],
+      borderWidth: 1
+    }));
+    setChart(
+      "compareCasualtiesChart",
+      casualtyLabels,
+      casualtyDatasets,
+      "Кількість загиблих",
+      "bar",
+      { plugins: { legend: { labels: { color: TEXT, boxWidth: 14, usePointStyle: true } }, tooltip: { mode: "index", intersect: false } } }
+    );
+    casualtyNote.textContent = missingCasualtyKeys.length
+      ? `Помісячний confirmed-ряд. Немає готового casualty-ряду: ${missingCasualtyKeys.map(labelFor).join(", ")}.`
+      : "Помісячний confirmed-ряд для всіх обраних міст. Перемикач «Період» вище впливає лише на графіки тривог.";
+  }
+
   updateUrl();
 }
 
