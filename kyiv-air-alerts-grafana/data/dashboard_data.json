@@ -157328,25 +157328,37 @@
   },
   "explosion_metric_test": {
     "meta": {
-      "schema_version": 1,
-      "snapshot_date": "2026-09-17",
+      "schema_version": 2,
+      "snapshot_date": "2026-09-18",
+      "updated_at": "2026-09-18T20:43:50.866172Z",
       "metric": "strict confirmed public reports of explosions matched to production alert episodes",
       "rolling_window_days": 90,
-      "rolling_rule": "sum(strict matched alert episodes) / sum(all production alert episodes) over 90 completed calendar days; full windows only",
+      "rolling_rule": "sum(strict matched alert episodes) / sum(all tracked alert episodes) over 90 completed calendar days; full windows only",
       "test_only": true,
       "production_data_pipeline_changed": false,
+      "automation": {
+        "denominator": "automatic_after_completed_alert_episode",
+        "candidate_discovery": "automatic_alert_triggered_telegram_and_google_news",
+        "strict_promotion": "auto_only_if_unambiguous_otherwise_manual_review",
+        "auto_strict_rule": "exact city + air context + explicit during-alert wording + immediate candidate published inside unique alert window (+30m grace)",
+        "followups": [
+          "immediate",
+          "24h",
+          "72h",
+          "7d"
+        ],
+        "last_monitor_run_at": "2026-09-18T20:30:56.499318Z"
+      },
       "city_count": 10,
-      "automatic_updates": true,
-      "automatic_denominator": true,
-      "automatic_candidate_discovery": true,
-      "auto_strict_rule": "exact city + air context + explicit during-alert wording + unique alert episode on local day",
-      "manual_review_required_for_ambiguous_candidates": true
+      "review_errors": [],
+      "review_queue_size": 3
     },
     "cities": {
       "poltava": {
         "label": "Полтава",
         "coverage_start": "2025-08-01",
         "coverage_end": "2026-09-17",
+        "baseline_coverage_end": "2026-09-17",
         "total_alerts": 1805,
         "strict_n": 51,
         "strict_pct": 2.83,
@@ -159344,12 +159356,20 @@
             "alerts_n": 530,
             "pct": 2.26
           }
-        ]
+        ],
+        "automation": {
+          "new_alert_episodes_since_baseline": 0,
+          "approved_strict_episodes_since_baseline": 0,
+          "approved_sensitivity_episodes_since_baseline": 0,
+          "pending_review_candidates": 0,
+          "last_successful_poll_at": "2026-09-18T20:30:56.499318Z"
+        }
       },
       "uzhhorod": {
         "label": "Ужгород",
         "coverage_start": "2025-11-06",
         "coverage_end": "2026-09-17",
+        "baseline_coverage_end": "2026-09-17",
         "total_alerts": 92,
         "strict_n": 1,
         "strict_pct": 1.09,
@@ -160721,12 +160741,20 @@
             "alerts_n": 14,
             "pct": 0
           }
-        ]
+        ],
+        "automation": {
+          "new_alert_episodes_since_baseline": 0,
+          "approved_strict_episodes_since_baseline": 0,
+          "approved_sensitivity_episodes_since_baseline": 0,
+          "pending_review_candidates": 0,
+          "last_successful_poll_at": "2026-09-18T20:30:56.499318Z"
+        }
       },
       "ivano_frankivsk": {
         "label": "Івано-Франківськ",
         "coverage_start": "2025-11-06",
         "coverage_end": "2026-09-17",
+        "baseline_coverage_end": "2026-09-17",
         "total_alerts": 103,
         "strict_n": 6,
         "strict_pct": 5.83,
@@ -162103,12 +162131,20 @@
             "alerts_n": 19,
             "pct": 10.53
           }
-        ]
+        ],
+        "automation": {
+          "new_alert_episodes_since_baseline": 0,
+          "approved_strict_episodes_since_baseline": 0,
+          "approved_sensitivity_episodes_since_baseline": 0,
+          "pending_review_candidates": 0,
+          "last_successful_poll_at": "2026-09-18T20:30:56.499318Z"
+        }
       },
       "chernivtsi": {
         "label": "Чернівці",
         "coverage_start": "2025-11-06",
         "coverage_end": "2026-09-17",
+        "baseline_coverage_end": "2026-09-17",
         "total_alerts": 113,
         "strict_n": 2,
         "strict_pct": 1.77,
@@ -163481,12 +163517,20 @@
             "alerts_n": 23,
             "pct": 0
           }
-        ]
+        ],
+        "automation": {
+          "new_alert_episodes_since_baseline": 0,
+          "approved_strict_episodes_since_baseline": 0,
+          "approved_sensitivity_episodes_since_baseline": 0,
+          "pending_review_candidates": 0,
+          "last_successful_poll_at": "2026-09-18T20:30:56.499318Z"
+        }
       },
       "ternopil": {
         "label": "Тернопіль",
         "coverage_start": "2025-11-06",
         "coverage_end": "2026-09-17",
+        "baseline_coverage_end": "2026-09-17",
         "total_alerts": 125,
         "strict_n": 5,
         "strict_pct": 4.0,
@@ -164862,12 +164906,20 @@
             "alerts_n": 32,
             "pct": 6.25
           }
-        ]
+        ],
+        "automation": {
+          "new_alert_episodes_since_baseline": 0,
+          "approved_strict_episodes_since_baseline": 0,
+          "approved_sensitivity_episodes_since_baseline": 0,
+          "pending_review_candidates": 3,
+          "last_successful_poll_at": "2026-09-18T20:30:56.499318Z"
+        }
       },
       "lviv": {
         "label": "Львів",
         "coverage_start": "2025-09-01",
         "coverage_end": "2026-09-17",
+        "baseline_coverage_end": "2026-09-17",
         "total_alerts": 126,
         "strict_n": 12,
         "strict_pct": 9.52,
@@ -166646,12 +166698,20 @@
             "alerts_n": 18,
             "pct": 5.56
           }
-        ]
+        ],
+        "automation": {
+          "new_alert_episodes_since_baseline": 0,
+          "approved_strict_episodes_since_baseline": 0,
+          "approved_sensitivity_episodes_since_baseline": 0,
+          "pending_review_candidates": 0,
+          "last_successful_poll_at": "2026-09-18T20:30:56.499318Z"
+        }
       },
       "lutsk": {
         "label": "Луцьк",
         "coverage_start": "2025-11-06",
         "coverage_end": "2026-09-17",
+        "baseline_coverage_end": "2026-09-17",
         "total_alerts": 135,
         "strict_n": 12,
         "strict_pct": 8.89,
@@ -168031,12 +168091,20 @@
             "alerts_n": 38,
             "pct": 15.79
           }
-        ]
+        ],
+        "automation": {
+          "new_alert_episodes_since_baseline": 0,
+          "approved_strict_episodes_since_baseline": 0,
+          "approved_sensitivity_episodes_since_baseline": 0,
+          "pending_review_candidates": 0,
+          "last_successful_poll_at": "2026-09-18T20:30:56.499318Z"
+        }
       },
       "rivne": {
         "label": "Рівне",
         "coverage_start": "2025-08-01",
         "coverage_end": "2026-09-17",
+        "baseline_coverage_end": "2026-09-17",
         "total_alerts": 232,
         "strict_n": 13,
         "strict_pct": 5.6,
@@ -170002,12 +170070,20 @@
             "alerts_n": 59,
             "pct": 3.39
           }
-        ]
+        ],
+        "automation": {
+          "new_alert_episodes_since_baseline": 0,
+          "approved_strict_episodes_since_baseline": 0,
+          "approved_sensitivity_episodes_since_baseline": 0,
+          "pending_review_candidates": 0,
+          "last_successful_poll_at": "2026-09-18T20:30:56.499318Z"
+        }
       },
       "khmelnytskyi": {
         "label": "Хмельницький",
         "coverage_start": "2025-07-07",
         "coverage_end": "2026-09-17",
+        "baseline_coverage_end": "2026-09-17",
         "total_alerts": 248,
         "strict_n": 11,
         "strict_pct": 4.44,
@@ -172121,12 +172197,20 @@
             "alerts_n": 51,
             "pct": 9.8
           }
-        ]
+        ],
+        "automation": {
+          "new_alert_episodes_since_baseline": 0,
+          "approved_strict_episodes_since_baseline": 0,
+          "approved_sensitivity_episodes_since_baseline": 0,
+          "pending_review_candidates": 0,
+          "last_successful_poll_at": "2026-09-18T20:30:56.499318Z"
+        }
       },
       "vinnytsia": {
         "label": "Вінниця",
         "coverage_start": "2025-08-21",
         "coverage_end": "2026-09-17",
+        "baseline_coverage_end": "2026-09-17",
         "total_alerts": 362,
         "strict_n": 5,
         "strict_pct": 1.38,
@@ -173964,7 +174048,14 @@
             "alerts_n": 127,
             "pct": 0.79
           }
-        ]
+        ],
+        "automation": {
+          "new_alert_episodes_since_baseline": 0,
+          "approved_strict_episodes_since_baseline": 0,
+          "approved_sensitivity_episodes_since_baseline": 0,
+          "pending_review_candidates": 0,
+          "last_successful_poll_at": "2026-09-18T20:30:56.499318Z"
+        }
       }
     }
   }
