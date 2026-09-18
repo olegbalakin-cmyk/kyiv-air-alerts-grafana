@@ -73,6 +73,23 @@ EXPLOSION_TERMS = (
     "серія вибух",
     "ппо",
 )
+AIR_CONTEXT_TERMS = (
+    "повітрян",
+    "тривог",
+    "бпла",
+    "безпілот",
+    "дрон",
+    "шахед",
+    "ракет",
+    "ппо",
+    "ворож",
+)
+EXPLICIT_DURING_TERMS = (
+    "під час повітряної тривоги",
+    "під час тривоги",
+    "у період повітряної тривоги",
+)
+AUTO_MATCH_END_GRACE_MINUTES = 30
 
 
 def now_utc() -> datetime:
@@ -247,6 +264,16 @@ def city_mentioned(city_key: str, text: str) -> bool:
 def explosion_relevant(text: str) -> bool:
     low = " ".join((text or "").casefold().split())
     return any(term in low for term in EXPLOSION_TERMS)
+
+
+def air_context(text: str) -> bool:
+    low = " ".join((text or "").casefold().split())
+    return any(term in low for term in AIR_CONTEXT_TERMS)
+
+
+def explicit_during_alert(text: str) -> bool:
+    low = " ".join((text or "").casefold().split())
+    return any(term in low for term in EXPLICIT_DURING_TERMS)
 
 
 def any_audited_city_mentioned(text: str) -> bool:
@@ -519,11 +546,31 @@ def due_checks(state: dict, now: datetime) -> dict[str, list[tuple[dict, dict]]]
     return out
 
 
-def add_candidates(queue: list[dict], city_key: str, rows: list[dict], due: list[tuple[dict, dict]], now: datetime) -> int:
+def auto_strict_episode(row: dict, due: list[tuple[dict, dict]]) -> dict | None:
+    text = f"{row.get('title') or ''} {row.get('snippet') or ''}".strip()
+    published = parse_dt(row.get("published_at"))
+    if not published or not air_context(text) or not explicit_during_alert(text):
+        return None
+
+    matches = {}
+    for ep, check in due:
+        if check.get("label") != "immediate":
+            continue
+        start = parse_dt(ep.get("alert_start"))
+        end = parse_dt(ep.get("alert_end"))
+        if not start or not end:
+            continue
+        if start <= published <= end + timedelta(minutes=AUTO_MATCH_END_GRACE_MINUTES):
+            matches[ep["episode_id"]] = ep
+    return next(iter(matches.values())) if len(matches) == 1 else None
+
+
+def add_candidates(queue: list[dict], city_key: str, rows: list[dict], due: list[tuple[dict, dict]], now: datetime) -> tuple[int, int]:
     by_id = {str(x.get("candidate_id")): x for x in queue if isinstance(x, dict) and x.get("candidate_id")}
     episode_ids = sorted({ep["episode_id"] for ep, _ in due})
     check_labels = sorted({check["label"] for _, check in due})
     added = 0
+    auto_approved = 0
     for row in rows:
         cid = candidate_id(city_key, row["url"], row["title"])
         existing = by_id.get(cid)
@@ -532,11 +579,14 @@ def add_candidates(queue: list[dict], city_key: str, rows: list[dict], due: list
             existing["trigger_check_labels"] = sorted(set(existing.get("trigger_check_labels") or []) | set(check_labels))
             existing["last_seen_at"] = iso(now)
             continue
+
+        auto_match = auto_strict_episode(row, due)
+        status = "approved_strict" if auto_match else "needs_review"
         item = {
             "candidate_id": cid,
             "city_key": city_key,
             "city": CITY_CONFIG[city_key]["label"],
-            "status": "needs_review",
+            "status": status,
             "source": row.get("source") or "Google News RSS",
             "publisher": row.get("publisher"),
             "publisher_url": row.get("publisher_url"),
@@ -548,19 +598,20 @@ def add_candidates(queue: list[dict], city_key: str, rows: list[dict], due: list
             "last_seen_at": iso(now),
             "trigger_episode_ids": episode_ids,
             "trigger_check_labels": check_labels,
-            "matched_episode_id": None,
-            "review_note": None,
+            "matched_episode_id": auto_match["episode_id"] if auto_match else None,
+            "review_note": "auto-approved: explicit during-alert wording + air context + publication inside the unique immediate alert window" if auto_match else None,
             "note": (
-                "Automatically discovered after a completed alert episode. "
-                "Do not count it in strict automatically. Review exact-city geography, war/air context, "
-                "event time (publication time is not explosion time), deduplication, and match to one concrete alert episode. "
-                "Set status=approved_strict with matched_episode_id only after review; use approved_sensitivity for a sensitivity-only case."
+                "Auto-strict is allowed only for exact-city evidence with air context, explicit wording that the event occurred during an alert, "
+                "an immediate follow-up, and publication inside that unique alert window (plus 30 minutes). "
+                "All other candidates require review; publication time alone is never enough."
             ),
         }
         queue.append(item)
         by_id[cid] = item
         added += 1
-    return added
+        if auto_match:
+            auto_approved += 1
+    return added, auto_approved
 
 
 def self_test() -> None:
@@ -571,6 +622,8 @@ def self_test() -> None:
     assert not city_mentioned("vinnytsia", "На Вінниччині було гучно")
     assert explosion_relevant("У Львові пролунали вибухи")
     assert explosion_relevant("У Львові було гучно, працювала ППО")
+    assert air_context("Під час повітряної тривоги працювала ППО")
+    assert explicit_during_alert("Під час тривоги у місті пролунали вибухи")
     dt = datetime(2026, 9, 18, 10, tzinfo=UTC)
     ep = make_episode("poltava", dt, dt + timedelta(hours=1))
     assert [x["label"] for x in ep["checks"]] == ["immediate", "24h", "72h", "7d"]
@@ -621,13 +674,14 @@ def main() -> None:
 
         dedup = {(row["url"], row["title"]): row for row in rows}
         rows = list(dedup.values())
-        added = add_candidates(queue, city_key, rows, city_due, started)
+        added, auto_approved = add_candidates(queue, city_key, rows, city_due, started)
         new_candidates += added
         searches[city_key] = {
             "due_checks": len(city_due),
             "telegram_results": telegram_count,
             "results_after_filter": len(rows),
             "new_candidates": added,
+            "auto_approved_strict": auto_approved,
             "query_url": query_url,
             "google_error": google_error,
         }
