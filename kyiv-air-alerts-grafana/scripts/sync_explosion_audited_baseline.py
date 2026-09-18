@@ -15,6 +15,7 @@ SEED_FILE = DATA / "explosion_daily_alert_seed.json"
 DEFAULT_CITY_DIR = DATA / "grafana" / "cities"
 ROLLING_DAYS = 90
 SEED_DAYS = 120
+SPECIAL_SOURCE_KEYS = {"kyiv", "sevastopol"}
 
 
 def load_json(path: Path) -> dict:
@@ -219,6 +220,12 @@ def main() -> None:
 
     for key, city in preview_cities.items():
         if key not in baseline_cities:
+            if key in SPECIAL_SOURCE_KEYS:
+                skipped.append({
+                    "city_key": key,
+                    "reason": "special_source_adapter_required_before_auto_onboarding",
+                })
+                continue
             strict = int(city.get("strict") or 0)
             dated = city.get("strict_episode_start_dates") or []
             if strict and len(dated) != strict:
