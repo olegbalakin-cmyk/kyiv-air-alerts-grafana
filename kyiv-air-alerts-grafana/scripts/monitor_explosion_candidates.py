@@ -39,12 +39,12 @@ TELEGRAM_CHANNELS = {
     "suspilne": {
         "handle": "suspilnenews",
         "label": "СУСПІЛЬНЕ НОВИНИ",
-        "baseline_after": "2026-09-18T10:59:19Z",
+        "baseline_after": "2026-09-17T21:00:00Z",
     },
     "ukrpravda": {
         "handle": "ukrpravda_news",
         "label": "Українська правда",
-        "baseline_after": "2026-09-18T11:01:23Z",
+        "baseline_after": "2026-09-17T21:00:00Z",
     },
 }
 
