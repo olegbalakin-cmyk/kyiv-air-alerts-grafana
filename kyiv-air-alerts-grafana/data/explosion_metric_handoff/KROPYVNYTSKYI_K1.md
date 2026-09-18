@@ -36,6 +36,10 @@ Region/district-only wording is not enough.
 - Do not inspect completed cities or K2.
 - If the chat gets heavy, save the compact result below and stop.
 
+## Write-safety
+
+Do not modify any shared files. Create or update **only your own slice result JSON**. In particular, do not edit `RESEARCH_SLICES_2026-09-18.csv`, `explosion_preview_input.json`, status/handoff files, other slice results, or deployment/config files.
+
 ## Output
 
 Write `kropyvnytskyi_K1_result.json` only. Keep it compact:
