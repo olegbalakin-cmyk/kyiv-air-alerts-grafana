@@ -11,7 +11,6 @@ on:
       - "kyiv-air-alerts-grafana/data/casualties/**"
       - "kyiv-air-alerts-grafana/grafana/dashboard.template.json"
       - "kyiv-air-alerts-grafana/requirements.txt"
-      - ".github/workflows/full-site-wip.yml"
 
 concurrency:
   group: full-site-wip-${{ github.ref }}
@@ -22,7 +21,6 @@ permissions:
 
 jobs:
   build:
-    if: false # temporarily paused for casualty-only release
     runs-on: ubuntu-latest
     timeout-minutes: 60
     defaults:
