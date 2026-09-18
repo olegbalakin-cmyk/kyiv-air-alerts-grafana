@@ -29,7 +29,7 @@ Count one numerator event per matched alert episode.
 - Read only this file and the one active CSV row.
 - Retrieve/filter only the active date slice.
 - Search exact-city web/local sources narrowly.
-- Use the large Telegram/media archive only for one specific unresolved date/candidate. Do not bulk-unpack or bulk-scan it.
+- Telegram/media archive is in ChatGPT Library at `/міста/Telegram Desktop.zip`. Search/use it only for one specific unresolved date/candidate. Do not bulk-unpack or bulk-scan it. If Library access is unavailable in this chat, record that fact and continue without inventing archive evidence.
 - Do not inspect completed cities, other slices, casualty data, `explosions_test.json`, or full dashboard data.
 - Do not print raw denominator rows, large JSON/CSV, search dumps, or broad rejection logs into chat.
 - Keep only numerator-relevant evidence.
