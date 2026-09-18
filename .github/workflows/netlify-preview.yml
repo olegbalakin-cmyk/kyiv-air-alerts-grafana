@@ -73,6 +73,14 @@ jobs:
               assert actual == target, (key, actual, target)
 
           prod["casualties_by_city"] = casualties
+
+          explosion_path = Path("kyiv-air-alerts-grafana/data/explosions_test.json")
+          explosion = json.loads(explosion_path.read_text(encoding="utf-8"))
+          assert explosion["meta"]["test_only"] is True
+          assert explosion["meta"]["rolling_window_days"] == 90
+          assert len(explosion["cities"]) == 10
+          prod["explosion_metric_test"] = explosion
+
           data_path.write_text(json.dumps(prod, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
           validation = {
@@ -83,6 +91,13 @@ jobs:
               "daily28_city_count": len(keys) - len(missing_daily28),
               "casualty_city_count": len(casualties),
               "casualty_totals": totals,
+              "explosion_metric_test": {
+                  "ok": True,
+                  "city_count": len(explosion["cities"]),
+                  "rolling_window_days": explosion["meta"]["rolling_window_days"],
+                  "poltava": f'{explosion["cities"]["poltava"]["strict_n"]}/{explosion["cities"]["poltava"]["total_alerts"]}',
+                  "vinnytsia": f'{explosion["cities"]["vinnytsia"]["strict_n"]}/{explosion["cities"]["vinnytsia"]["total_alerts"]}',
+              },
           }
           Path("/tmp/preview-validation.json").write_text(
               json.dumps(validation, ensure_ascii=False, indent=2) + "\n",
@@ -102,7 +117,7 @@ jobs:
           grep -q 'id="casualtyCityEyebrow"' kyiv-air-alerts-grafana/pages-preview/index.html
           grep -q 'id="kpiExplosionsCard"' kyiv-air-alerts-grafana/pages-preview/index.html
           grep -q 'id="compareExplosionsChart"' kyiv-air-alerts-grafana/pages-preview/index.html
-          grep -q 'EXPLOSIONS_URL = "explosions.json"' kyiv-air-alerts-grafana/pages-preview/app.js
+          grep -q "state.data.explosion_metric_test" kyiv-air-alerts-grafana/pages-preview/app.js
           grep -q "methodology-detail-grid" kyiv-air-alerts-grafana/pages-preview/index.html
           python - <<'PY'
           import json
@@ -116,6 +131,9 @@ jobs:
           assert x["cities"]["poltava"]["total_alerts"] == 1805
           assert x["cities"]["vinnytsia"]["strict_n"] == 5
           assert x["cities"]["vinnytsia"]["total_alerts"] == 362
+          built = json.loads(Path("kyiv-air-alerts-grafana/data/dashboard_data.json").read_text(encoding="utf-8"))
+          assert built["explosion_metric_test"]["cities"]["poltava"]["strict_n"] == 51
+          assert built["explosion_metric_test"]["cities"]["vinnytsia"]["strict_n"] == 5
           for key, city in x["cities"].items():
               assert city["rolling90"], key
               assert city["rolling90"][0]["date"] > city["coverage_start"], key
@@ -129,7 +147,6 @@ jobs:
           cp kyiv-air-alerts-grafana/pages-preview/styles.css _site/styles.css
           cp kyiv-air-alerts-grafana/pages-preview/app.js _site/app.js
           cp kyiv-air-alerts-grafana/data/dashboard_data.json _site/data.json
-          cp kyiv-air-alerts-grafana/data/explosions_test.json _site/explosions.json
 
       - name: Deploy draft preview to Netlify
         env:
