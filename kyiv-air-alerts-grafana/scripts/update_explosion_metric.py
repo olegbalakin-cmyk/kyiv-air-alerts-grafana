@@ -393,10 +393,10 @@ def accepted_episode_ids(queue: list[dict], city_key: str) -> tuple[set[str], se
         if not eid:
             continue
         status = item.get("status")
-        if status in {"confirmed_strict", "confirmed_strict_auto"}:
+        if status in {"confirmed_strict", "confirmed_strict_auto", "approved_strict"}:
             strict.add(eid)
             sensitivity.add(eid)
-        elif status == "confirmed_sensitivity":
+        elif status in {"confirmed_sensitivity", "approved_sensitivity"}:
             sensitivity.add(eid)
     return strict, sensitivity
 
