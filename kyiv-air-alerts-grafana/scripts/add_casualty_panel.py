@@ -20,7 +20,7 @@ def find_query_template(obj: dict) -> dict:
     raise RuntimeError("Could not find an Infinity JSON query to reuse")
 
 
-def make_panel(query_template: dict, y: int) -> dict:
+def make_panel(query_template: dict, y: int, panel_id: int, city_label: str, root_selector: str) -> dict:
     datasource = dict(query_template.get("datasource", {}))
     target = {
         "columns": [
@@ -35,18 +35,18 @@ def make_panel(query_template: dict, y: int) -> dict:
         "global_query_id": "",
         "parser": "backend",
         "refId": "A",
-        "root_selector": "$.casualties.monthly",
+        "root_selector": root_selector,
         "source": "url",
         "type": "json",
         "url": query_template["url"],
         "url_options": {"data": "", "method": "GET"},
     }
     return {
-        "id": 951,
+        "id": panel_id,
         "type": "barchart",
-        "title": "Київ: загиблі від повітряних атак РФ за місяцями",
+        "title": f"{city_label}: загиблі від повітряних атак РФ за місяцями",
         "description": (
-            "Київ (місто). Ракетні, дронові та інші повітряні атаки. "
+            f"{city_label} (місто). Ракетні, дронові та інші повітряні атаки. "
             "Пізні смерті від отриманих під час атаки поранень віднесені до місяця самої атаки. "
             "Наземні бої та артилерійські обстріли 2022 року не включені. "
             "Вісь X є категоріальною (YYYY-MM). Технічне поле дати збережене у frame "
@@ -116,7 +116,7 @@ def add_disclaimer(methodology: dict) -> None:
 
 def main() -> None:
     obj = json.loads(DASHBOARD.read_text(encoding="utf-8"))
-    obj["panels"] = [p for p in obj.get("panels", []) if p.get("id") not in {950, 951}]
+    obj["panels"] = [p for p in obj.get("panels", []) if p.get("id") not in {950, 951, 952}]
 
     methodology = next(
         (
@@ -134,21 +134,23 @@ def main() -> None:
     row = {
         "id": 950,
         "type": "row",
-        "title": "Загиблі від повітряних атак — Київ",
+        "title": "Загиблі від повітряних атак — Київ та Одеса",
         "collapsed": False,
         "panels": [],
         "gridPos": {"h": 1, "w": 24, "x": 0, "y": insert_y},
     }
-    panel = make_panel(find_query_template(obj), insert_y + 1)
+    query_template = find_query_template(obj)
+    kyiv_panel = make_panel(query_template, insert_y + 1, 951, "Київ", "$.casualties.monthly")
+    odesa_panel = make_panel(query_template, insert_y + 11, 952, "Одеса", "$.casualties_by_city.odesa.monthly")
 
-    shift = 11
+    shift = 21
     for existing in obj["panels"]:
         gp = existing.get("gridPos", {})
         if gp.get("y", 0) >= insert_y:
             gp["y"] = gp.get("y", 0) + shift
 
     add_disclaimer(methodology)
-    obj["panels"].extend([row, panel])
+    obj["panels"].extend([row, kyiv_panel, odesa_panel])
     obj["panels"].sort(key=lambda p: (p.get("gridPos", {}).get("y", 0), p.get("gridPos", {}).get("x", 0)))
 
     obj.setdefault("time", {})["from"] = "2022-01-31T22:00:00.000Z"
@@ -156,7 +158,7 @@ def main() -> None:
 
     obj["version"] = 1
     DASHBOARD.write_text(json.dumps(obj, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-    print("Added categorical Kyiv casualty panel with shared-dashboard time compatibility")
+    print("Added categorical Kyiv and Odesa casualty panels with shared-dashboard time compatibility")
 
 
 if __name__ == "__main__":
