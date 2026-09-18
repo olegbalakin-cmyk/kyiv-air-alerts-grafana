@@ -38,21 +38,19 @@ jobs:
         working-directory: kyiv-air-alerts-grafana
         run: pip install -r requirements.txt
 
-      - name: Get latest production alert bridge and city feeds
+      - name: Get latest production alert bridge and dashboard data
         run: |
           git fetch origin main
           git show origin/main:kyiv-air-alerts-grafana/data/ukrainealarm_bridge.json > /tmp/latest-bridge.json
-          rm -rf /tmp/prod-tree
-          mkdir -p /tmp/prod-tree
-          git archive origin/main kyiv-air-alerts-grafana/data/grafana/cities | tar -x -C /tmp/prod-tree
+          git show origin/main:kyiv-air-alerts-grafana/data/dashboard_data.json > /tmp/prod-dashboard.json
           python - <<'PY'
           import json
           from pathlib import Path
-          x = json.loads(Path("/tmp/latest-bridge.json").read_text(encoding="utf-8"))
-          assert x.get("events"), "main bridge has no events"
-          city_dir = Path("/tmp/prod-tree/kyiv-air-alerts-grafana/data/grafana/cities")
-          assert city_dir.exists()
-          print("bridge events:", len(x["events"]), "city feeds:", len(list(city_dir.glob("*.json"))))
+          bridge = json.loads(Path("/tmp/latest-bridge.json").read_text(encoding="utf-8"))
+          dashboard = json.loads(Path("/tmp/prod-dashboard.json").read_text(encoding="utf-8"))
+          assert bridge.get("events"), "main bridge has no events"
+          assert dashboard.get("cities"), "main dashboard has no cities"
+          print("bridge events:", len(bridge["events"]), "dashboard cities:", len(dashboard["cities"]))
           PY
 
       - name: Self-test explosion baseline sync
@@ -63,7 +61,7 @@ jobs:
         working-directory: kyiv-air-alerts-grafana
         run: |
           python scripts/sync_explosion_audited_baseline.py \
-            --city-data-dir /tmp/prod-tree/kyiv-air-alerts-grafana/data/grafana/cities
+            --dashboard-data /tmp/prod-dashboard.json
 
       - name: Self-test explosion monitor
         working-directory: kyiv-air-alerts-grafana
