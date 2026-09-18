@@ -16,6 +16,7 @@ STATE_FILE = DATA_DIR / "explosion_candidate_monitor_state.json"
 QUEUE_FILE = DATA_DIR / "explosion_review_queue.json"
 LAST_RUN_FILE = DATA_DIR / "explosion_candidate_monitor_last_run.json"
 OUTPUT_FILE = DATA_DIR / "explosions_test.json"
+DASHBOARD_FILE = DATA_DIR / "dashboard_data.json"
 
 KYIV_TZ = ZoneInfo("Europe/Kyiv")
 UTC = timezone.utc
@@ -235,6 +236,13 @@ def main() -> None:
     out["meta"]["review_errors"] = all_review_errors
     out["meta"]["review_queue_size"] = len(queue)
     atomic_json(OUTPUT_FILE, out)
+
+    dashboard = load_json(DASHBOARD_FILE, {})
+    if not isinstance(dashboard, dict) or not dashboard:
+        raise RuntimeError("dashboard_data.json is missing or invalid")
+    dashboard["explosion_metric_test"] = out
+    atomic_json(DASHBOARD_FILE, dashboard)
+
     print(json.dumps({
         "ok": not all_review_errors,
         "coverage_end": latest_complete.isoformat(),
