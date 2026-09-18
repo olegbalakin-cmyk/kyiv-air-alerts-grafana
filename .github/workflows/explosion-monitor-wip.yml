@@ -11,7 +11,7 @@ on:
 
 concurrency:
   group: explosion-metric-wip-monitor
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 permissions:
   contents: write
@@ -45,11 +45,14 @@ jobs:
           python scripts/monitor_explosion_candidates.py --self-test
           python scripts/update_explosion_metric_live.py --self-test
 
+      - name: Reuse latest main-branch UkraineAlarm bridge
+        run: |
+          git fetch origin main
+          git show origin/main:kyiv-air-alerts-grafana/data/ukrainealarm_bridge.json > /tmp/ukrainealarm_bridge.json
+
       - name: Poll new completed alerts and discover explosion candidates
         working-directory: kyiv-air-alerts-grafana
-        env:
-          UKRAINEALARM_API_TOKEN: ${{ secrets.UKRAINEALARM_API_TOKEN }}
-        run: python scripts/monitor_explosion_candidates.py
+        run: python scripts/monitor_explosion_candidates.py --local-only --bridge-file /tmp/ukrainealarm_bridge.json
 
       - name: Rebuild strict KPI and rolling 90-day test series
         working-directory: kyiv-air-alerts-grafana
@@ -77,6 +80,7 @@ jobs:
           assert state["schema_version"] == 1
           assert isinstance(queue, list)
           assert report["city_count"] == 10
+          assert report["mode"] == "cached_bridge"
 
           approved = [
               item for item in queue
