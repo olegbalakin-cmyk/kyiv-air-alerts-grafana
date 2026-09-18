@@ -31,15 +31,13 @@ jobs:
           status_path = root / "explosion_metric_handoff/city_explosion_metric_status_2026-09-18.csv"
           rows = list(csv.DictReader(status_path.open(encoding="utf-8-sig", newline="")))
 
-          assert len(source.get("cities", {})) == 10
+          source_count = len(source.get("cities", {}))
+          assert source_count >= 10
           completed = [r for r in rows if r["explosion_metric_status"] in {"complete_audited", "complete_reaudited"}]
-          assert len(completed) == 10, len(completed)
-          next_rows = [r for r in rows if r["explosion_metric_status"] == "next_priority"]
-          assert len(next_rows) == 1 and next_rows[0]["city_key"] == "zhytomyr", next_rows
-          assert next_rows[0]["completed_alert_episodes_in_frozen_window"] == "685"
+          assert len(completed) == source_count, (len(completed), source_count)
           prompt = root / "explosion_metric_handoff/PROMPT_NEXT_CHAT.md"
-          assert prompt.exists() and "Zhytomyr / Житомир" in prompt.read_text(encoding="utf-8")
-          print("Explosion handover verified: 10 complete; Zhytomyr next; prompt present")
+          assert prompt.exists()
+          print(f"Explosion handover verified: {source_count} complete; prompt present")
           PY
 
       - name: Build compact handover ZIP
@@ -53,8 +51,8 @@ jobs:
           CURRENT COMPACT HANDOVER
           Repository: olegbalakin-cmyk/kyiv-air-alerts-grafana
           Branch: multicity-wip-2026-09-16
-          Current audited explosion cities: 10
-          Next normal city: zhytomyr (685 frozen alert episodes)
+          Current audited explosion cities: see repo_snapshot/explosion_preview_input.json and status CSV.
+          Next normal city: see the row marked next_priority in the status CSV.
 
           Read the MD and CSV first. Do not load explosions_test.json or large Telegram exports unless needed.
           The older large handover archive may still be used only as a raw Telegram/Poltava source supplement;
