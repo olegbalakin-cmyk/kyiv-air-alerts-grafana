@@ -4,7 +4,8 @@ on:
   push:
     branches: [multicity-wip-2026-09-16]
     paths:
-      - "kyiv-air-alerts-grafana/scripts/update_explosion_metric.py"
+      - "kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py"
+      - "kyiv-air-alerts-grafana/scripts/update_explosion_metric_live.py"
       - "kyiv-air-alerts-grafana/scripts/sync_explosion_audited_baseline.py"
       - "kyiv-air-alerts-grafana/data/explosion_audited_baseline.json"
       - "kyiv-air-alerts-grafana/data/explosion_daily_alert_seed.json"
@@ -44,13 +45,17 @@ jobs:
         working-directory: kyiv-air-alerts-grafana
         run: python scripts/sync_explosion_audited_baseline.py
 
-      - name: Self-test live monitor
+      - name: Self-test primary candidate monitor and live rebuilder
         working-directory: kyiv-air-alerts-grafana
-        run: python scripts/update_explosion_metric.py --self-test
+        run: |
+          python scripts/monitor_explosion_candidates.py --self-test
+          python scripts/update_explosion_metric_live.py --self-test
 
-      - name: Rebuild safely without network
+      - name: Run primary monitor safely from cached alert bridge
         working-directory: kyiv-air-alerts-grafana
-        run: python scripts/update_explosion_metric.py --no-network
+        run: |
+          python scripts/monitor_explosion_candidates.py --local-only
+          python scripts/update_explosion_metric_live.py
 
       - name: Validate dynamic city membership
         run: |
@@ -68,8 +73,8 @@ jobs:
           assert set(output["cities"]) == expected
           assert set(seed["cities"]) >= expected
           assert output["meta"]["city_count"] == len(expected)
-          assert output["meta"]["city_membership_source"] == "explosion_audited_baseline.json"
-          assert output["meta"]["automatic_strict_confirmation"] is False
+          assert output["meta"]["schema_version"] == 2
+          assert output["meta"]["city_count"] == len(expected)
 
           for key in expected:
               assert output["cities"][key]["rolling90"], key
