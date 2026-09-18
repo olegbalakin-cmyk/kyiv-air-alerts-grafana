@@ -71,7 +71,7 @@ jobs:
           assert live["meta"]["schema_version"] == 2
           assert live["meta"]["test_only"] is True
           assert live["meta"]["rolling_window_days"] == 90
-          assert live["meta"]["automation"]["strict_promotion"] == "manual_review_required"
+          assert live["meta"]["automation"]["strict_promotion"] == "auto_only_if_unambiguous_otherwise_manual_review"
           assert set(live["cities"]) == set(baseline["cities"])
           assert len(live["cities"]) == 10
           assert state["schema_version"] == 1
