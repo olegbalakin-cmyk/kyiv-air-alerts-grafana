@@ -5,6 +5,7 @@ const state = {
 };
 
 const DATA_URL = "data.json";
+const EXPLOSION_LIVE_URL = "https://raw.githubusercontent.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/multicity-wip-2026-09-16/kyiv-air-alerts-grafana/data/explosions_test.json";
 const COLORS = ["#62a0ea", "#8ff0a4", "#f8e45c"];
 const EXPLOSION_COLOR = "#ff9f43";
 const GRID = "rgba(148,163,184,.16)";
@@ -47,7 +48,8 @@ function rolling7dEnabled() {
   return state.data.multicity_meta?.weekly_mode === "rolling_7d";
 }
 function explosionCity(key) {
-  return state.data.explosion_metric_test?.cities?.[key] || null;
+  const explosionKey = key === "ivano-frankivsk" ? "ivano_frankivsk" : key;
+  return state.data.explosion_metric_test?.cities?.[explosionKey] || null;
 }
 
 function fillSelect(select, keys, current, allowEmpty = false) {
@@ -715,6 +717,19 @@ async function init() {
   const response = await fetch(`${DATA_URL}?v=${Date.now()}`, { cache: "no-store" });
   if (!response.ok) throw new Error(`Failed to load live dashboard data: ${response.status}`);
   state.data = await response.json();
+
+  try {
+    const explosionResponse = await fetch(`${EXPLOSION_LIVE_URL}?v=${Date.now()}`, { cache: "no-store" });
+    if (explosionResponse.ok) {
+      const explosionLive = await explosionResponse.json();
+      if (explosionLive?.meta?.test_only && explosionLive?.cities) {
+        state.data.explosion_metric_test = explosionLive;
+      }
+    }
+  } catch (err) {
+    console.warn("Explosion live data unavailable; using embedded preview snapshot", err);
+  }
+
   const keys = cityKeys();
 
   const defaults = ["kyiv", "kharkiv", "zaporizhzhia"].filter(k => keys.includes(k));
