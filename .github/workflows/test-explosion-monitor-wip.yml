@@ -110,7 +110,8 @@ jobs:
           preview_path.write_text(json.dumps(preview, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
           PY
 
-          python scripts/sync_explosion_audited_baseline.py
+          python scripts/sync_explosion_audited_baseline.py \
+            --dashboard-data data/dashboard_data.json
           python scripts/monitor_explosion_candidates.py --self-test
           python scripts/monitor_explosion_candidates.py --local-only
           python scripts/update_explosion_metric_live.py
