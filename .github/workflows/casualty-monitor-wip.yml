@@ -87,6 +87,12 @@ jobs:
       - name: Commit monitor state to WIP only
         working-directory: .
         run: |
+          # The site-prod alert stores are read-only inputs for this monitor.
+          # Restore WIP copies before committing so only monitor state/queue changes.
+          git restore kyiv-air-alerts-grafana/data/ukrainealarm_bridge.json \
+                      kyiv-air-alerts-grafana/data/alerts_combined.json \
+                      kyiv-air-alerts-grafana/data/sevastopol_events.json
+
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
