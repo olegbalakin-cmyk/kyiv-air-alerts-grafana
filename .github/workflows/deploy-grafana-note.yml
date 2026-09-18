@@ -83,6 +83,10 @@ jobs:
           print("Combined data verified: 23 alerts + 23 casualty series")
           PY
 
+      - name: Build compact Grafana feeds
+        working-directory: kyiv-air-alerts-grafana
+        run: python scripts/build_grafana_feeds.py
+
       - name: Rebuild Grafana casualty section and site link
         working-directory: kyiv-air-alerts-grafana
         run: python scripts/add_casualty_panel.py
@@ -93,8 +97,8 @@ jobs:
           import json
           from pathlib import Path
 
-          path = Path("kyiv-air-alerts-grafana/grafana/dashboard.json")
-          obj = json.loads(path.read_text(encoding="utf-8"))
+          root = Path("kyiv-air-alerts-grafana")
+          obj = json.loads((root / "grafana/dashboard.json").read_text(encoding="utf-8"))
           panels = obj.get("panels", [])
 
           note = next((p for p in panels if p.get("id") == 949), None)
@@ -102,26 +106,53 @@ jobs:
           assert "https://ukraine-air-alerts.netlify.app/" in note.get("options", {}).get("content", "")
 
           urls = []
+          selectors = []
           def collect(items):
               for p in items:
                   for t in p.get("targets", []):
                       if t.get("source") == "url" and t.get("type") == "json":
                           urls.append(t.get("url"))
+                          selectors.append(t.get("root_selector"))
                   collect(p.get("panels", []))
           collect(panels)
 
-          expected_url = (
+          base = (
               "https://raw.githubusercontent.com/olegbalakin-cmyk/"
               "kyiv-air-alerts-grafana/multicity-wip-2026-09-16/"
-              "kyiv-air-alerts-grafana/data/dashboard_data.json"
+              "kyiv-air-alerts-grafana/data/grafana"
           )
+          allowed = {
+              base + "/cities/${city}.json",
+              base + "/comparison.json",
+              base + "/casualties.json",
+          }
           assert urls, "No JSON targets found"
-          bad = sorted(set(u for u in urls if u != expected_url))
+          bad = sorted(set(urls) - allowed)
           assert not bad, bad
-          assert len([p for p in panels if p.get("id") == 950 and p.get("type") == "row"]) == 1
+          assert not any("$.cities.${city}" in str(s) for s in selectors), selectors
+
+          feed_dir = root / "data/grafana"
+          city_files = sorted((feed_dir / "cities").glob("*.json"))
+          assert len(city_files) == 23, len(city_files)
+          assert max(p.stat().st_size for p in city_files) < 1_000_000
+          assert (feed_dir / "comparison.json").stat().st_size < 1_500_000
+          assert (feed_dir / "casualties.json").stat().st_size < 500_000
+
           row = next(p for p in panels if p.get("id") == 950 and p.get("type") == "row")
           assert len(row.get("panels") or []) == 23
-          print("Grafana queries verified:", len(urls), "targets")
+
+          variables = {v.get("name"): v for v in (obj.get("templating") or {}).get("list", [])}
+          for name in ("city", "compare_city_a", "compare_city_b", "compare_city_c"):
+              options = variables[name].get("options") or []
+              assert len(options) == 23, (name, len(options))
+              assert options[0].get("value") == "kyiv", (name, options[0])
+
+          print(
+              "Grafana compact feeds verified:",
+              len(urls), "targets;",
+              len(city_files), "city feeds;",
+              "max city bytes =", max(p.stat().st_size for p in city_files),
+          )
           PY
 
       - name: Commit repaired WIP data and dashboard
@@ -129,13 +160,42 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add kyiv-air-alerts-grafana/data/dashboard_data.json \
+                  kyiv-air-alerts-grafana/data/grafana \
                   kyiv-air-alerts-grafana/grafana/dashboard.json
           if git diff --cached --quiet; then
             echo "No generated changes"
           else
-            git commit -m "Repair Grafana WIP data source"
+            git commit -m "Publish compact Grafana WIP feeds"
             git push origin HEAD:multicity-wip-2026-09-16
           fi
+
+      - name: Verify compact feeds are public
+        run: |
+          python - <<'PY'
+          import json
+          import time
+          import urllib.request
+
+          urls = [
+              "https://raw.githubusercontent.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/multicity-wip-2026-09-16/kyiv-air-alerts-grafana/data/grafana/cities/kyiv.json",
+              "https://raw.githubusercontent.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/multicity-wip-2026-09-16/kyiv-air-alerts-grafana/data/grafana/comparison.json",
+              "https://raw.githubusercontent.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/multicity-wip-2026-09-16/kyiv-air-alerts-grafana/data/grafana/casualties.json",
+          ]
+          for url in urls:
+              last = None
+              for attempt in range(6):
+                  try:
+                      with urllib.request.urlopen(url, timeout=30) as r:
+                          body = r.read()
+                      json.loads(body)
+                      print(url, len(body), "bytes")
+                      break
+                  except Exception as exc:
+                      last = exc
+                      time.sleep(2 + attempt * 2)
+              else:
+                  raise RuntimeError(f"Feed not reachable: {url}: {last}")
+          PY
 
       - name: Deploy Grafana
         working-directory: kyiv-air-alerts-grafana
