@@ -28,7 +28,7 @@ def city_label(data: dict, key: str, series: dict) -> str:
     return str(meta.get("city") or mm.get("label") or cm.get("city_label") or key)
 
 
-def make_panel(query_template: dict, panel_id: int, city_label: str, root_selector: str, x: int, y: int) -> dict:
+def make_panel(query_template: dict, panel_id: int, city_label: str, root_selector: str, source_url: str, x: int, y: int) -> dict:
     datasource = dict(query_template.get("datasource", {}))
     target = {
         "columns": [
@@ -46,7 +46,7 @@ def make_panel(query_template: dict, panel_id: int, city_label: str, root_select
         "root_selector": root_selector,
         "source": "url",
         "type": "json",
-        "url": query_template["url"],
+        "url": source_url,
         "url_options": {"data": "", "method": "GET"},
     }
     return {
@@ -134,6 +134,83 @@ def ensure_site_link_panel(obj: dict) -> None:
         obj["panels"] = [panel if p.get("id") == panel_id else p for p in obj.get("panels", [])]
 
 
+def iter_targets(panels: list[dict]):
+    for panel in panels:
+        for target in panel.get("targets", []):
+            yield target
+        yield from iter_targets(panel.get("panels", []))
+
+
+def configure_compact_feeds(obj: dict) -> tuple[str, str, str]:
+    base = (
+        "https://raw.githubusercontent.com/olegbalakin-cmyk/"
+        "kyiv-air-alerts-grafana/multicity-wip-2026-09-16/"
+        "kyiv-air-alerts-grafana/data/grafana"
+    )
+    city_url = base + "/cities/${city}.json"
+    comparison_url = base + "/comparison.json"
+    casualties_url = base + "/casualties.json"
+
+    for target in iter_targets(obj.get("panels", [])):
+        if target.get("source") != "url" or target.get("type") != "json":
+            continue
+        selector = str(target.get("root_selector") or "")
+        if selector.startswith("$.cities.${city}"):
+            target["url"] = city_url
+            target["root_selector"] = selector.replace("$.cities.${city}", "$", 1)
+        elif selector.startswith("$.comparison"):
+            target["url"] = comparison_url
+        elif selector.startswith("$['casualties_by_city']"):
+            target["url"] = casualties_url
+
+    return city_url, comparison_url, casualties_url
+
+
+def sync_city_variables(obj: dict, data: dict) -> None:
+    keys = list((data.get("multicity_meta") or {}).get("production_city_keys") or [])
+    if not keys:
+        return
+
+    labels = {
+        key: str(
+            (data.get("multicity_meta") or {}).get("cities", {}).get(key, {}).get("label")
+            or (data.get("cities") or {}).get(key, {}).get("meta", {}).get("city_label")
+            or key
+        )
+        for key in keys
+    }
+    keys.sort(key=lambda key: (0 if key == "kyiv" else 1, labels[key].casefold()))
+    query = ", ".join(f"{labels[key]} : {key}" for key in keys)
+
+    defaults = {
+        "city": "kyiv",
+        "compare_city_a": "kyiv",
+        "compare_city_b": "kharkiv",
+        "compare_city_c": "zaporizhzhia",
+    }
+    for var in (obj.get("templating") or {}).get("list", []):
+        name = var.get("name")
+        if name not in defaults:
+            continue
+        current_value = str((var.get("current") or {}).get("value") or defaults[name])
+        if current_value not in keys:
+            current_value = defaults[name]
+        var["query"] = query
+        var["options"] = [
+            {
+                "selected": key == current_value,
+                "text": labels[key],
+                "value": key,
+            }
+            for key in keys
+        ]
+        var["current"] = {
+            "selected": True,
+            "text": labels[current_value],
+            "value": current_value,
+        }
+
+
 def add_disclaimer(methodology: dict, count: int) -> None:
     content = methodology.setdefault("options", {}).get("content", "")
     marker = "**Загиблі від повітряних атак.**"
@@ -152,18 +229,8 @@ def main() -> None:
     obj = json.loads(DASHBOARD.read_text(encoding="utf-8"))
     data = json.loads(DATA_FILE.read_text(encoding="utf-8"))
 
-    dashboard_data_url = (
-        "https://raw.githubusercontent.com/olegbalakin-cmyk/"
-        "kyiv-air-alerts-grafana/multicity-wip-2026-09-16/"
-        "kyiv-air-alerts-grafana/data/dashboard_data.json"
-    )
-    for panel in obj.get("panels", []):
-        targets = list(panel.get("targets", []))
-        for child in panel.get("panels", []):
-            targets.extend(child.get("targets", []))
-        for target in targets:
-            if target.get("source") == "url" and target.get("type") == "json":
-                target["url"] = dashboard_data_url
+    _, _, casualties_url = configure_compact_feeds(obj)
+    sync_city_variables(obj, data)
     series_by_city = data.get("casualties_by_city") or {}
     if not series_by_city:
         raise RuntimeError("casualties_by_city is empty")
@@ -198,7 +265,7 @@ def main() -> None:
         x = 0 if idx % 2 == 0 else 12
         y = (idx // 2) * 10
         selector = f"$['casualties_by_city']['{key}']['monthly']"
-        nested.append(make_panel(query_template, 951 + idx, label, selector, x, y))
+        nested.append(make_panel(query_template, 951 + idx, label, selector, casualties_url, x, y))
 
     insert_y = methodology.get("gridPos", {}).get("y", 0)
     for existing in obj["panels"]:
