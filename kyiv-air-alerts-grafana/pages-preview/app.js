@@ -1,12 +1,10 @@
 const state = {
   data: null,
-  explosions: null,
   charts: {},
   tableSort: { key: "alerts", direction: "desc" }
 };
 
 const DATA_URL = "data.json";
-const EXPLOSIONS_URL = "explosions.json";
 const COLORS = ["#62a0ea", "#8ff0a4", "#f8e45c"];
 const EXPLOSION_COLOR = "#ff9f43";
 const GRID = "rgba(148,163,184,.16)";
@@ -49,7 +47,7 @@ function rolling7dEnabled() {
   return state.data.multicity_meta?.weekly_mode === "rolling_7d";
 }
 function explosionCity(key) {
-  return state.explosions?.cities?.[key] || null;
+  return state.data.explosion_metric_test?.cities?.[key] || null;
 }
 
 function fillSelect(select, keys, current, allowEmpty = false) {
@@ -714,13 +712,9 @@ function bind() {
 }
 
 async function init() {
-  const [response, explosionResponse] = await Promise.all([
-    fetch(`${DATA_URL}?v=${Date.now()}`, { cache: "no-store" }),
-    fetch(`${EXPLOSIONS_URL}?v=${Date.now()}`, { cache: "no-store" })
-  ]);
+  const response = await fetch(`${DATA_URL}?v=${Date.now()}`, { cache: "no-store" });
   if (!response.ok) throw new Error(`Failed to load live dashboard data: ${response.status}`);
   state.data = await response.json();
-  state.explosions = explosionResponse.ok ? await explosionResponse.json() : { meta: { test_only: true }, cities: {} };
   const keys = cityKeys();
 
   const defaults = ["kyiv", "kharkiv", "zaporizhzhia"].filter(k => keys.includes(k));
