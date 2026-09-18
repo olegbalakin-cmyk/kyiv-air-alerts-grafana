@@ -23,6 +23,7 @@ BASELINE_FILE = CASUALTY_DIR / "baseline_monthly.csv"
 REVISIONS_FILE = CASUALTY_DIR / "revisions.csv"
 REVIEW_QUEUE_FILE = CASUALTY_DIR / "review_queue.json"
 SOURCE_STATE_FILE = CASUALTY_DIR / "source_state.json"
+CITY_SERIES_DIR = CASUALTY_DIR / "cities"
 
 TZ = ZoneInfo("Europe/Kyiv")
 BASELINE_CUTOFF = date(2026, 9, 15)
@@ -381,6 +382,45 @@ def discover_candidates() -> tuple[list[dict], dict]:
     return queue, state
 
 
+
+def load_validated_city_series() -> dict[str, dict]:
+    out: dict[str, dict] = {}
+    if not CITY_SERIES_DIR.exists():
+        return out
+    for city_dir in sorted(p for p in CITY_SERIES_DIR.iterdir() if p.is_dir()):
+        manifest = load_json(city_dir / "manifest.json", {})
+        if not isinstance(manifest, dict):
+            continue
+        slug = str(manifest.get("city_slug") or city_dir.name).strip()
+        monthly_name = str(manifest.get("monthly_file") or f"{slug}_air_attack_deaths_monthly.csv")
+        monthly_path = city_dir / monthly_name
+        if not slug or not monthly_path.exists():
+            continue
+        rows = []
+        with monthly_path.open(encoding="utf-8-sig", newline="") as f:
+            for row in csv.DictReader(f):
+                month = (row.get("month") or "").strip()
+                if not re.fullmatch(r"20\\d{2}-(0[1-9]|1[0-2])", month):
+                    raise RuntimeError(f"Invalid month in {monthly_path}: {month!r}")
+                deaths = int((row.get("deaths_confirmed") or row.get("deaths") or "0").strip())
+                item = {
+                    "time": month_timestamp(month),
+                    "month": month,
+                    "deaths": deaths,
+                }
+                for key in ("event_count", "late_deaths_included"):
+                    raw = (row.get(key) or "").strip()
+                    if raw:
+                        item[key] = int(raw)
+                rows.append(item)
+        expected = manifest.get("confirmed_deaths")
+        actual = sum(r["deaths"] for r in rows)
+        if expected is not None and actual != int(expected):
+            raise RuntimeError(f"{slug} casualty total mismatch: {actual} != {expected}")
+        out[slug] = {"meta": manifest, "monthly": rows}
+    return out
+
+
 def update_dashboard_data(no_network: bool) -> None:
     baseline = load_baseline()
     validate_baseline(baseline)
@@ -420,6 +460,8 @@ def update_dashboard_data(no_network: bool) -> None:
         },
         "monthly": monthly,
     }
+    dashboard_data["casualties_by_city"] = {"kyiv": dashboard_data["casualties"], **load_validated_city_series()}
+
     DATA_FILE.parent.mkdir(parents=True, exist_ok=True)
     DATA_FILE.write_text(json.dumps(dashboard_data, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
@@ -430,7 +472,7 @@ def update_dashboard_data(no_network: bool) -> None:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Build Kyiv monthly air-attack casualty series and collect review candidates")
+    parser = argparse.ArgumentParser(description="Build city air-attack casualty series and collect Kyiv review candidates")
     parser.add_argument("--no-network", action="store_true", help="Skip source discovery and only rebuild from local files")
     args = parser.parse_args()
     update_dashboard_data(no_network=args.no_network)
