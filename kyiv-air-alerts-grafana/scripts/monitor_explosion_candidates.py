@@ -137,6 +137,37 @@ def make_episode(city_key: str, start: datetime, end: datetime) -> dict:
     }
 
 
+def poll_cached_bridge(bridge_path: Path, now: datetime) -> tuple[dict[str, list[dict]], dict[str, str]]:
+    bridge = load_json(bridge_path, {})
+    rows_by_city: dict[str, list[dict]] = {key: [] for key in CITY_CONFIG}
+    errors: dict[str, str] = {}
+    for row in bridge.get("events", []):
+        if not isinstance(row, dict):
+            continue
+        city_key = str(row.get("city_key") or "")
+        if city_key not in CITY_CONFIG:
+            continue
+        start = parse_dt(row.get("start"))
+        end = parse_dt(row.get("end"))
+        if not start or not end or end <= start:
+            continue
+        ep = make_episode(city_key, start, end)
+        ep["alert_source"] = "ukrainealarm_bridge_cached"
+        rows_by_city[city_key].append(ep)
+
+    regions = bridge.get("regions") or {}
+    for city_key in CITY_CONFIG:
+        region = regions.get(city_key) or {}
+        checked = parse_dt(region.get("last_checked_at"))
+        if not checked:
+            errors[city_key] = "cached_bridge_missing_last_checked_at"
+        elif now - checked > timedelta(hours=12):
+            errors[city_key] = f"cached_bridge_stale:{iso(checked)}"
+        dedup = {ep["episode_id"]: ep for ep in rows_by_city[city_key]}
+        rows_by_city[city_key] = sorted(dedup.values(), key=lambda x: x["alert_end"])
+    return rows_by_city, errors
+
+
 def poll_alerts() -> tuple[dict[str, list[dict]], dict[str, str]]:
     token = os.getenv(ua.TOKEN_ENV, "").strip()
     if not token:
@@ -367,6 +398,8 @@ def self_test() -> None:
 def main() -> None:
     parser = argparse.ArgumentParser(description="Monitor new completed alerts for explosion-report candidates. Discovery never auto-promotes strict matches.")
     parser.add_argument("--self-test", action="store_true")
+    parser.add_argument("--local-only", action="store_true", help="Read completed alerts from a cached UkraineAlarm bridge instead of calling the API.")
+    parser.add_argument("--bridge-file", default=str(BRIDGE_FILE), help="Bridge JSON used with --local-only.")
     args = parser.parse_args()
     if args.self_test:
         self_test()
@@ -378,7 +411,12 @@ def main() -> None:
     if not isinstance(queue, list):
         queue = []
 
-    polled, errors = poll_alerts()
+    if args.local_only:
+        polled, errors = poll_cached_bridge(Path(args.bridge_file), started)
+        mode = "cached_bridge"
+    else:
+        polled, errors = poll_alerts()
+        mode = "network"
     new_episodes = process_events(state, polled, errors, started)
     due = due_checks(state, started)
     searches = {}
@@ -411,6 +449,7 @@ def main() -> None:
         "started_at": iso(started),
         "finished_at": iso(now_utc()),
         "city_count": len(CITY_CONFIG),
+        "mode": mode,
         "new_alert_episodes": new_episodes,
         "cities_searched": sorted(searches),
         "searches": searches,
