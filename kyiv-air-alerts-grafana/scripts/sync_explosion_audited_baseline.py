@@ -181,6 +181,7 @@ def baseline_city_from_preview(city: dict, daily_alerts: dict[str, int]) -> dict
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--city-data-dir", type=Path, default=DEFAULT_CITY_DIR)
+    parser.add_argument("--dashboard-data", type=Path)
     parser.add_argument("--self-test", action="store_true")
     args = parser.parse_args()
 
@@ -193,6 +194,20 @@ def main() -> None:
     preview = load_json(PREVIEW_INPUT)
     baseline = load_json(BASELINE_FILE)
     seed = load_json(SEED_FILE)
+    dashboard = load_json(args.dashboard_data) if args.dashboard_data else {}
+
+    def get_city_feed(city_key: str) -> dict:
+        dashboard_cities = dashboard.get("cities") if isinstance(dashboard, dict) else {}
+        if isinstance(dashboard_cities, dict):
+            row = dashboard_cities.get(city_key) or dashboard_cities.get(city_key.replace("_", "-"))
+            if isinstance(row, dict) and row.get("weekly") and row.get("daily28"):
+                return row
+        feed_path = args.city_data_dir / f"{city_key}.json"
+        if feed_path.exists():
+            return load_json(feed_path)
+        raise RuntimeError(
+            f"{city_key}: no production city feed in dashboard_data or {feed_path}"
+        )
 
     preview_cities = preview.get("cities") or {}
     baseline_cities = baseline.setdefault("cities", {})
@@ -217,11 +232,11 @@ def main() -> None:
                 )
                 continue
 
-            feed_path = args.city_data_dir / f"{key}.json"
-            if not feed_path.exists():
-                skipped.append({"city_key": key, "reason": f"missing_city_feed:{feed_path}"})
+            try:
+                feed = get_city_feed(key)
+            except RuntimeError as exc:
+                skipped.append({"city_key": key, "reason": str(exc)})
                 continue
-            feed = load_json(feed_path)
             daily = reconstruct_daily(
                 feed,
                 str(city["coverage_start"]),
@@ -233,11 +248,8 @@ def main() -> None:
 
         if key not in seed_cities and key in baseline_cities:
             base = baseline_cities[key]
-            feed_path = args.city_data_dir / f"{key}.json"
-            if not feed_path.exists():
-                raise RuntimeError(f"{key}: cannot create denominator seed; missing {feed_path}")
             daily = reconstruct_daily(
-                load_json(feed_path),
+                get_city_feed(key),
                 str(base["coverage_start"]),
                 str(base["coverage_end"]),
                 int(base["total_alerts"]),
