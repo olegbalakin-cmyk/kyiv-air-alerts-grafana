@@ -1,4 +1,4 @@
-# HANDOFF — explosion metric: 10 cities complete, Zhytomyr next
+# HANDOFF — explosion metric: 11 cities complete, Kropyvnytskyi next
 
 Date: 2026-09-18
 
@@ -17,13 +17,13 @@ Canonical current files:
 Audited input commit: `d03165a5c8510505625a1c794e79899ee7dcde23`  
 Derived test-series commit: `ab1d0b4690044d861b73ef6c8f6fa180e8636c79`
 
-The branch now has explosion data for **10 cities**, not only Poltava.
+The branch now has explosion data for **11 cities**, including the completed Zhytomyr audit.
 
-## Live updating for the 10 audited cities
+## Live updating for the audited cities
 
 This is separate from the unfinished-city research queue below.
 
-The 10 already audited cities now have a **test/WIP live-update pipeline** after the frozen baseline through **2026-09-17**:
+The audited cities have a **test/WIP live-update pipeline** after the frozen baseline through **2026-09-17**:
 - `data/explosion_baseline_2026-09-17.json` — frozen audited baseline;
 - `data/explosion_daily_alert_seed.json` — denominator seed for rolling windows;
 - `scripts/monitor_explosion_candidates.py` — tracks newly completed alert episodes, and only then runs candidate discovery for the affected audited city;
@@ -32,7 +32,7 @@ The 10 already audited cities now have a **test/WIP live-update pipeline** after
 - `scripts/update_explosion_metric_live.py` — rebuilds `explosions_test.json` from the frozen baseline + new alert episodes + manually approved review items;
 - automatic discovery never promotes an item into the strict numerator on its own.
 
-**Important:** the live updater is for the 10 audited cities only. It does **not** change the frozen research denominator in `city_explosion_metric_status_2026-09-18.csv` and it does not research Zhytomyr or any other unfinished city. For unfinished-city research, use the frozen denominator from the status CSV even if current live dashboard files contain a slightly different current proxy count.
+**Important:** the live updater is for audited cities only. It does **not** change frozen research denominators in `city_explosion_metric_status_2026-09-18.csv` and it does not research unfinished cities. For unfinished-city research, use the frozen denominator from the status CSV even if current live dashboard files contain a slightly different current proxy count.
 
 ## Completed cities — do not restart
 
@@ -48,31 +48,31 @@ The 10 already audited cities now have a **test/WIP live-update pipeline** after
 | Рівне | 232 | 13 | 5.60% | 13 | 5.60% |
 | Хмельницький | 248 | 11 | 4.44% | 12 | 4.84% |
 | Вінниця | 362 | 5 | 1.38% | 7 | 1.93% |
+| Житомир | 685 | 19 | 2.77% | 20 | 2.92% |
 
-Poltava remains the frozen methodology benchmark. For the other nine cities, the repo's `explosion_preview_input.json` is the frozen audited summary. Detailed intermediate research packages are not all committed to the repo, so do not infer missing detail or re-open those cities merely because the old archive contains only the Uzhhorod checkpoint.
+Poltava remains the frozen methodology benchmark. For the other audited cities, the repo's `explosion_preview_input.json` is the frozen audited summary. Detailed intermediate research packages are not all committed to the repo, so do not infer missing detail or re-open those cities merely because the old archive contains only the Uzhhorod checkpoint.
 
 ## Next city
 
-**Zhytomyr / Житомир** is next.
+**Kropyvnytskyi / Кропивницький** is next.
 
 Frozen workload snapshot:
 - source type: `raion_proxy`
-- proxy: `Житомирський район`
-- coverage start: `2025-01-23`
-- denominator in the frozen research window: **685 completed alert episodes**
+- proxy: `Кропивницький район`
+- coverage start: `2025-09-01`
+- denominator in the frozen research window: **1161 completed alert episodes**
 
 Remaining normal-city queue, optimized by denominator:
-1. Zhytomyr — 685
-2. Kropyvnytskyi — 1161
-3. Kherson — 1412
-4. Odesa — 1465
-5. Cherkasy — 1548
-6. Mykolaiv — 1648
-7. Chernihiv — 1677
-8. Dnipro — 2259
-9. Sumy — 2297
-10. Zaporizhzhia — 2365
-11. Kharkiv — 3565
+1. Kropyvnytskyi — 1161
+2. Kherson — 1412
+3. Odesa — 1465
+4. Cherkasy — 1548
+5. Mykolaiv — 1648
+6. Chernihiv — 1677
+7. Dnipro — 2259
+8. Sumy — 2297
+9. Zaporizhzhia — 2365
+10. Kharkiv — 3565
 
 Kyiv and Sevastopol remain special-source cases and should be handled after normal cities unless explicitly requested.
 
@@ -115,7 +115,7 @@ A. **Denominator**
 B. **Candidate discovery**
 - Telegram first: exact grammatical city forms + auditory phrases;
 - use region/district hits only as leads;
-- do not treat `Житомирщина`, `Житомирський район`, etc. as exact-city evidence for Zhytomyr.
+- do not treat `Кіровоградщина`, `Кропивницький район`, etc. as exact-city evidence for Kropyvnytskyi.
 
 C. **Verification/matching**
 - deduplicate logical events;
