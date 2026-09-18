@@ -49,7 +49,7 @@ jobs:
       - name: Record public Grafana status
         run: |
           mkdir -p deploy
-          cp /tmp/public-grafana.json deploy/public-grafana-status.json
+          tail -n 1 /tmp/public-grafana.json > deploy/public-grafana-status.json
           python - <<'PY'
           import json
           from pathlib import Path
