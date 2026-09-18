@@ -464,11 +464,31 @@ def process_events(state: dict, polled: dict[str, list[dict]], errors: dict[str,
             "episodes": [],
         })
         cstate["last_poll_at"] = iso(now)
+        rows = polled.get(city_key, [])
+        previous_latest_end = parse_dt(cstate.get("latest_api_alert_end"))
+        if city_key not in errors and previous_latest_end and rows:
+            current_ids = {str(ep.get("episode_id") or "") for ep in rows}
+            known_ids = {
+                str(ep.get("episode_id") or "")
+                for ep in cstate.get("episodes", [])
+                if ep.get("episode_id")
+            }
+            overlaps_known = bool(current_ids & known_ids)
+            oldest_end = parse_dt(rows[0].get("alert_end"))
+            if not overlaps_known and oldest_end and oldest_end > previous_latest_end:
+                errors[city_key] = (
+                    "history_window_no_overlap:"
+                    f"previous_latest_end={iso(previous_latest_end)};"
+                    f"current_oldest_end={iso(oldest_end)}"
+                )
+
         cstate["last_poll_error"] = errors.get(city_key)
         if city_key not in errors:
             cstate["last_successful_poll_at"] = iso(now)
         known = {str(ep.get("episode_id")) for ep in cstate.get("episodes", []) if ep.get("episode_id")}
-        for ep in polled.get(city_key, []):
+        if city_key in errors:
+            continue
+        for ep in rows:
             if ep["alert_start_date_kyiv"] <= frozen_end[city_key]:
                 continue
             if ep["episode_id"] in known:
@@ -477,8 +497,8 @@ def process_events(state: dict, polled: dict[str, list[dict]], errors: dict[str,
             known.add(ep["episode_id"])
             new_count += 1
         cstate["episodes"] = sorted(cstate.get("episodes", []), key=lambda x: x.get("alert_start") or "")[-MAX_EPISODES_PER_CITY:]
-        if polled.get(city_key):
-            latest = polled[city_key][-1]
+        if rows:
+            latest = rows[-1]
             cstate["latest_api_alert_start"] = latest["alert_start"]
             cstate["latest_api_alert_end"] = latest["alert_end"]
     return new_count
