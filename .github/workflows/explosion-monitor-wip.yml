@@ -39,20 +39,24 @@ jobs:
         working-directory: kyiv-air-alerts-grafana
         run: pip install -r requirements.txt
 
-      - name: Get latest production city feeds for baseline onboarding
+      - name: Get latest production dashboard data for baseline onboarding
         run: |
           git fetch origin main
-          rm -rf /tmp/prod-tree
-          mkdir -p /tmp/prod-tree
-          git archive origin/main kyiv-air-alerts-grafana/data/grafana/cities | tar -x -C /tmp/prod-tree
-          test -d /tmp/prod-tree/kyiv-air-alerts-grafana/data/grafana/cities
+          git show origin/main:kyiv-air-alerts-grafana/data/dashboard_data.json > /tmp/prod-dashboard.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          x = json.loads(Path("/tmp/prod-dashboard.json").read_text(encoding="utf-8"))
+          assert x.get("cities"), "production dashboard has no city data"
+          print("production dashboard cities:", len(x["cities"]))
+          PY
 
       - name: Sync newly audited cities into the automatic baseline
         working-directory: kyiv-air-alerts-grafana
         run: |
           python scripts/sync_explosion_audited_baseline.py --self-test
           python scripts/sync_explosion_audited_baseline.py \
-            --city-data-dir /tmp/prod-tree/kyiv-air-alerts-grafana/data/grafana/cities
+            --dashboard-data /tmp/prod-dashboard.json
 
       - name: Self-test explosion automation
         working-directory: kyiv-air-alerts-grafana
