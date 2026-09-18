@@ -153,3 +153,20 @@ Do not:
 - merge to `main`;
 - deploy Netlify/Grafana;
 - mix casualty/deaths work into the explosion metric.
+
+## Automatic onboarding after a city is completed
+
+For a newly completed normal city, do **not** edit the scheduled monitor or its city list.
+When freezing the result into `data/explosion_preview_input.json`, include:
+- `coverage_start` / `coverage_end`;
+- `alerts_total`;
+- strict and sensitivity totals;
+- `strict_episode_start_dates` with one date per strict alert episode (duplicates are allowed when separate alert episodes on the same day are strict).
+
+The scheduled WIP monitor then automatically:
+1. adds the city to `explosion_audited_baseline.json`;
+2. reconstructs the rolling-window denominator seed from current production dashboard data;
+3. begins alert-triggered candidate discovery for that city;
+4. includes the city in the KPI and rolling-90 test series.
+
+If dated strict episodes are missing or the production denominator cannot be reconstructed, onboarding fails loudly instead of silently publishing an incomplete city.
