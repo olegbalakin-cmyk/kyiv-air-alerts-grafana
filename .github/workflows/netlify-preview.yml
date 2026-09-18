@@ -28,6 +28,80 @@ jobs:
             exit 2
           fi
 
+      - name: Build production-parity preview data
+        run: |
+          cp kyiv-air-alerts-grafana/data/dashboard_data.json /tmp/wip-dashboard-data.json
+          git fetch origin site-prod
+          git show origin/site-prod:kyiv-air-alerts-grafana/data/dashboard_data.json \
+            > kyiv-air-alerts-grafana/data/dashboard_data.json
+
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          data_path = Path("kyiv-air-alerts-grafana/data/dashboard_data.json")
+          prod = json.loads(data_path.read_text(encoding="utf-8"))
+          wip = json.loads(Path("/tmp/wip-dashboard-data.json").read_text(encoding="utf-8"))
+
+          keys = prod.get("multicity_meta", {}).get("production_city_keys", [])
+          assert len(keys) == 23, len(keys)
+          assert prod.get("multicity_meta", {}).get("weekly_mode") == "rolling_7d"
+          missing_daily28 = [
+              key for key in keys
+              if not (prod.get("cities", {}).get(key, {}).get("daily28") or [])
+          ]
+          assert not missing_daily28, missing_daily28
+
+          casualties = wip.get("casualties_by_city") or {}
+          expected = {
+              "kyiv": 454, "kharkiv": 339, "sevastopol": 22, "cherkasy": 2,
+              "zhytomyr": 12, "dnipro": 214, "khmelnytskyi": 10, "poltava": 84,
+              "rivne": 1, "sumy": 158, "vinnytsia": 31, "kropyvnytskyi": 9,
+              "lviv": 29, "chernihiv": 105, "mykolaiv": 106, "lutsk": 10,
+              "uzhhorod": 0, "ivano-frankivsk": 3, "ternopil": 41,
+              "chernivtsi": 5, "odesa": 171, "zaporizhzhia": 316, "kherson": 163,
+          }
+          assert set(casualties) == set(expected), (sorted(casualties), sorted(expected))
+
+          if prod.get("casualties"):
+              casualties["kyiv"] = prod["casualties"]
+
+          totals = {}
+          for key, target in expected.items():
+              actual = sum(int(row.get("deaths") or 0) for row in casualties[key].get("monthly", []))
+              totals[key] = actual
+              assert actual == target, (key, actual, target)
+
+          prod["casualties_by_city"] = casualties
+          data_path.write_text(json.dumps(prod, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+
+          validation = {
+              "ok": True,
+              "frontend_base": "site-prod",
+              "city_count": len(keys),
+              "weekly_mode": prod.get("multicity_meta", {}).get("weekly_mode"),
+              "daily28_city_count": len(keys) - len(missing_daily28),
+              "casualty_city_count": len(casualties),
+              "casualty_totals": totals,
+          }
+          Path("/tmp/preview-validation.json").write_text(
+              json.dumps(validation, ensure_ascii=False, indent=2) + "\n",
+              encoding="utf-8",
+          )
+          print(json.dumps(validation, ensure_ascii=False))
+          PY
+
+      - name: Verify production features and casualty additions
+        run: |
+          grep -q "setupTableSorting();" kyiv-air-alerts-grafana/pages-preview/app.js
+          grep -q "function renderShortHorizon" kyiv-air-alerts-grafana/pages-preview/app.js
+          grep -q "rolling7dEnabled" kyiv-air-alerts-grafana/pages-preview/app.js
+          grep -q "compareCasualtiesChart" kyiv-air-alerts-grafana/pages-preview/app.js
+          grep -q 'id="daily28HoursChart"' kyiv-air-alerts-grafana/pages-preview/index.html
+          grep -q 'id="compareCasualtiesChart"' kyiv-air-alerts-grafana/pages-preview/index.html
+          grep -q 'id="casualtyCityEyebrow"' kyiv-air-alerts-grafana/pages-preview/index.html
+          grep -q "methodology-detail-grid" kyiv-air-alerts-grafana/pages-preview/index.html
+
       - name: Build static preview
         run: |
           rm -rf _site
@@ -56,9 +130,11 @@ jobs:
           from pathlib import Path
 
           netlify = json.loads(Path("netlify-deploy.json").read_text(encoding="utf-8"))
+          validation = json.loads(Path("/tmp/preview-validation.json").read_text(encoding="utf-8"))
           status = {
               "generated_at": datetime.now(timezone.utc).isoformat(),
               "branch": "multicity-wip-2026-09-16",
+              "validation": validation,
               "netlify": {
                   "production": False,
                   "draft_preview": True,
