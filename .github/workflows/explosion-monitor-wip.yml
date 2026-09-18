@@ -39,16 +39,29 @@ jobs:
         working-directory: kyiv-air-alerts-grafana
         run: pip install -r requirements.txt
 
-      - name: Get latest production dashboard data for baseline onboarding
+      - name: Get latest production alert inputs
         run: |
-          git fetch origin main
-          git show origin/main:kyiv-air-alerts-grafana/data/dashboard_data.json > /tmp/prod-dashboard.json
+          git fetch origin site-prod
+          git show origin/site-prod:kyiv-air-alerts-grafana/data/dashboard_data.json > /tmp/prod-dashboard.json
+          git show origin/site-prod:kyiv-air-alerts-grafana/data/alerts_combined.json > /tmp/prod-kyiv-alerts.json
+          git show origin/site-prod:kyiv-air-alerts-grafana/data/sevastopol_events.json > /tmp/prod-sevastopol-events.json
           python - <<'PY'
           import json
           from pathlib import Path
-          x = json.loads(Path("/tmp/prod-dashboard.json").read_text(encoding="utf-8"))
-          assert x.get("cities"), "production dashboard has no city data"
-          print("production dashboard cities:", len(x["cities"]))
+
+          dashboard = json.loads(Path("/tmp/prod-dashboard.json").read_text(encoding="utf-8"))
+          kyiv = json.loads(Path("/tmp/prod-kyiv-alerts.json").read_text(encoding="utf-8"))
+          sev = json.loads(Path("/tmp/prod-sevastopol-events.json").read_text(encoding="utf-8"))
+
+          assert dashboard.get("cities"), "production dashboard has no city data"
+          assert isinstance(kyiv, list) and kyiv, "production Kyiv alert store is empty"
+          assert isinstance(sev.get("pairs"), list) and sev["pairs"], "production Sevastopol event store is empty"
+          print(
+              "production inputs:",
+              len(dashboard["cities"]), "cities;",
+              len(kyiv), "Kyiv completed alerts;",
+              len(sev["pairs"]), "Sevastopol completed pairs",
+          )
           PY
 
       - name: Sync newly audited cities into the automatic baseline
@@ -68,7 +81,10 @@ jobs:
         working-directory: kyiv-air-alerts-grafana
         env:
           UKRAINEALARM_API_TOKEN: ${{ secrets.UKRAINEALARM_API_TOKEN }}
-        run: python scripts/monitor_explosion_candidates.py
+        run: |
+          python scripts/monitor_explosion_candidates.py \
+            --kyiv-alerts-file /tmp/prod-kyiv-alerts.json \
+            --sevastopol-events-file /tmp/prod-sevastopol-events.json
 
       - name: Rebuild strict KPI and rolling 90-day test series
         working-directory: kyiv-air-alerts-grafana
