@@ -1,0 +1,92 @@
+{
+  "status": "complete",
+  "city_key": "chernihiv",
+  "city": "Чернігів",
+  "part": 2,
+  "parts_total": 3,
+  "episode_start_range": [
+    "2026-02-01",
+    "2026-06-06"
+  ],
+  "denominator": 559,
+  "strict_events": [
+    {
+      "alert_start": "2026-04-16T18:59:00+03:00",
+      "event_time": "2026-04-16T19:06:00+03:00; 2026-04-16T21:21:00+03:00",
+      "source_url": "https://t.me/s/suspilnechernihiv?before=56108",
+      "evidence": "Public Suspilne Chernihiv feed shows a Chernihiv-district alert, then explosions heard in Chernihiv and an AFU warning of UAVs over the north and south of the city, before the all-clear.",
+      "decision": "strict_exact_city_in_episode"
+    },
+    {
+      "alert_start": "2026-04-17T01:32:00+03:00",
+      "event_time": "2026-04-17T02:17:00+03:00; 2026-04-17T02:23:00+03:00",
+      "source_url": "https://t.me/s/suspilnechernihiv?before=56108",
+      "evidence": "A new Chernihiv-district alert is followed by multiple explosions heard in Chernihiv; the same feed later reports Russian strikes on critical infrastructure in the city.",
+      "decision": "strict_exact_city_in_episode"
+    },
+    {
+      "alert_start": "2026-05-26T21:32:00+03:00",
+      "event_time": "2026-05-27T02:05:00+03:00–02:17:00+03:00",
+      "source_url": "https://t.me/s/suspilnechernihiv?before=58903",
+      "evidence": "During the Chernihiv-district alert, Suspilne correspondents reported repeated explosions in Chernihiv and the MVA said the city was under a mass Russian attack.",
+      "decision": "strict_exact_city_in_episode_cross_midnight"
+    },
+    {
+      "alert_start": "2026-06-05T10:48:00+03:00",
+      "event_time": "2026-06-05T11:53:00+03:00",
+      "source_url": "https://t.me/s/suspilnechernihiv?before=59626",
+      "evidence": "The Chernihiv-district alert was followed by an AFU UAV warning toward Chernihiv and a reported UAV hit on an enterprise in the north of Chernihiv before the all-clear.",
+      "decision": "strict_exact_city_in_episode"
+    }
+  ],
+  "sensitivity_only_events": [
+    {
+      "alert_start": "2026-03-25T04:03:00+02:00",
+      "event_time": "morning of 2026-03-25; exact impact minute not published",
+      "source_url": "https://suspilne.media/chernihiv/1272406-poskodzena-kriticna-infrastruktura-u-cernigovi-na-kilkoh-lokaciah-zafiksuvali-priloti-rosijskih-bpla/",
+      "evidence": "Suspilne reports a morning Russian UAV attack with impacts at two locations inside Chernihiv; the early-morning alert is the only strong same-attack match found, but no exact impact minute or explicit during-alert statement was published.",
+      "decision": "sensitivity_inferred_same_attack"
+    }
+  ],
+  "review_events": [
+    {
+      "alert_start": null,
+      "event_time": "2026-04-02 around 15:00",
+      "source_url": "https://suspilne.media/chernihiv/archive/2026/4/2/",
+      "evidence": "A ballistic missile struck an enterprise in Chernihiv, but a concrete Chernihiv alert-episode start could not be reliably reconstructed from the evidence checked.",
+      "decision": "review_unresolved_episode_start"
+    },
+    {
+      "alert_start": null,
+      "event_time": "night of 2026-04-19",
+      "source_url": "https://npu.gov.ua/news/politsiia-dokumentuie-naslidky-masovanoi-vorozhoi-ataky-po-chernihovu-zahynula-dytyna-ie-poraneni",
+      "evidence": "Police confirm a mass overnight UAV attack at multiple locations in Chernihiv, but the specific matched alert-episode start was not reliably pinned down.",
+      "decision": "review_unresolved_episode_start"
+    },
+    {
+      "alert_start": null,
+      "event_time": "2026-05-17 after 22:00",
+      "source_url": "https://chernigiv-rada.gov.ua/news/id-170060/",
+      "evidence": "Chernihiv city authorities report UAV attacks in the southern part of the city after about 22:00, but the matching alert start remained unresolved.",
+      "decision": "review_unresolved_episode_start"
+    },
+    {
+      "alert_start": null,
+      "event_time": "evening of 2026-05-18",
+      "source_url": "https://suspilne.media/chernihiv/1312654-prilit-ocevidci/",
+      "evidence": "Suspilne confirms a Russian UAV hit on a house in Chernihiv on the evening of May 18, but the concrete matching alert start was not reliably recovered.",
+      "decision": "review_unresolved_episode_start"
+    },
+    {
+      "alert_start": null,
+      "event_time": "2026-05-25 from about 03:00",
+      "source_url": "https://t.me/s/suspilnechernihiv/58708",
+      "evidence": "The city council explicitly said explosions sounded in Chernihiv during an air alert during the UAV attack, but the beginning of that already-running Chernihiv alert was not visible in the checked page context.",
+      "decision": "review_unresolved_episode_start"
+    }
+  ],
+  "strict_n": 4,
+  "sensitivity_n": 5,
+  "local_web_only_retained": 5,
+  "qa": "Frozen denominator matches production/WIP aggregate reconstruction exactly: 559 alert starts (Feb-May 528 + Jun 1-6 31). Times from public Telegram pages were normalized to Europe/Kyiv. Library was available, but /міста/Telegram Desktop.zip was not surfaced by the targeted query, so no archive evidence was used; shared files were not modified."
+}
