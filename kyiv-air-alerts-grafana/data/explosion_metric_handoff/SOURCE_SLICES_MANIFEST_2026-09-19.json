@@ -1,0 +1,920 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-09-19T16:56:27.360934Z",
+  "source_url": "https://raw.githubusercontent.com/Vadimkin/ukrainian-air-raid-sirens-dataset/main/datasets/official_data_uk.csv",
+  "source_git_blob_sha": "71d70c0ca54968f530d596cf315616fa858800e1",
+  "adapter": "assembled WIP production episodes: historical adapter + Alerts.in.ua seam + persisted UkraineAlarm continuation",
+  "boundary_exclusions": [
+    {
+      "parent_task_id": "chernihiv-P1",
+      "city_key": "chernihiv",
+      "alert_start": "2025-09-02T21:00:00Z",
+      "alert_end": "2025-09-03T08:41:22Z",
+      "reason": "exclude clipped carry-in at proxy coverage_start from alert-start denominator",
+      "before": 558,
+      "after": 557
+    },
+    {
+      "parent_task_id": "sumy-P1",
+      "city_key": "sumy",
+      "alert_start": "2025-08-05T21:00:00Z",
+      "alert_end": "2025-08-05T21:27:44Z",
+      "reason": "exclude clipped carry-in at proxy coverage_start from alert-start denominator",
+      "before": 574,
+      "after": 573
+    },
+    {
+      "parent_task_id": "zaporizhzhia-P1",
+      "city_key": "zaporizhzhia",
+      "alert_start": "2025-03-19T14:25:36Z",
+      "alert_end": "2025-03-19T15:51:17Z",
+      "reason": "exclude exact adapter transition-boundary seed to preserve frozen parent denominator",
+      "before": 593,
+      "after": 592
+    }
+  ],
+  "subslice_count": 40,
+  "all_match_frozen_denominator": true,
+  "mismatches": [],
+  "subslices": [
+    {
+      "task_id": "odesa-P1a",
+      "parent_task_id": "odesa-P1",
+      "city_key": "odesa",
+      "source_type": "production_proxy_assembled",
+      "source_name": "Одеський район + explicit Одеська область",
+      "episode_start_range": [
+        "2025-11-04",
+        "2026-01-02"
+      ],
+      "frozen_denominator": 244,
+      "episode_count": 244,
+      "matches_frozen_denominator": true,
+      "source_start_day_count": 4,
+      "source_start_day_starts": [
+        "2025-11-03T22:00:00Z",
+        "2025-11-04T00:25:45Z",
+        "2025-11-04T07:34:32Z",
+        "2025-11-04T19:17:12Z"
+      ]
+    },
+    {
+      "task_id": "odesa-P1b",
+      "parent_task_id": "odesa-P1",
+      "city_key": "odesa",
+      "source_type": "production_proxy_assembled",
+      "source_name": "Одеський район + explicit Одеська область",
+      "episode_start_range": [
+        "2026-01-03",
+        "2026-03-22"
+      ],
+      "frozen_denominator": 245,
+      "episode_count": 245,
+      "matches_frozen_denominator": true,
+      "source_start_day_count": 2,
+      "source_start_day_starts": [
+        "2026-01-02T23:59:55Z",
+        "2026-01-03T01:18:09Z"
+      ]
+    },
+    {
+      "task_id": "odesa-P2a",
+      "parent_task_id": "odesa-P2",
+      "city_key": "odesa",
+      "source_type": "production_proxy_assembled",
+      "source_name": "Одеський район + explicit Одеська область",
+      "episode_start_range": [
+        "2026-03-23",
+        "2026-05-17"
+      ],
+      "frozen_denominator": 242,
+      "episode_count": 242,
+      "matches_frozen_denominator": true,
+      "source_start_day_count": 5,
+      "source_start_day_starts": [
+        "2026-03-22T22:51:59Z",
+        "2026-03-23T10:55:29Z",
+        "2026-03-23T16:29:14Z",
+        "2026-03-23T19:14:53Z",
+        "2026-03-23T20:02:50Z"
+      ]
+    },
+    {
+      "task_id": "odesa-P2b",
+      "parent_task_id": "odesa-P2",
+      "city_key": "odesa",
+      "source_type": "production_proxy_assembled",
+      "source_name": "Одеський район + explicit Одеська область",
+      "episode_start_range": [
+        "2026-05-18",
+        "2026-07-12"
+      ],
+      "frozen_denominator": 245,
+      "episode_count": 245,
+      "matches_frozen_denominator": true,
+      "source_start_day_count": 5,
+      "source_start_day_starts": [
+        "2026-05-17T21:46:35Z",
+        "2026-05-17T23:31:42Z",
+        "2026-05-18T00:28:26Z",
+        "2026-05-18T05:55:22Z",
+        "2026-05-18T12:02:05Z"
+      ]
+    },
+    {
+      "task_id": "cherkasy-P1a",
+      "parent_task_id": "cherkasy-P1",
+      "city_key": "cherkasy",
+      "source_type": "production_proxy_assembled",
+      "source_name": "Черкаський район + explicit Черкаська область",
+      "episode_start_range": [
+        "2025-01-10",
+        "2025-04-16"
+      ],
+      "frozen_denominator": 258,
+      "episode_count": 258,
+      "matches_frozen_denominator": true,
+      "source_start_day_count": 3,
+      "source_start_day_starts": [
+        "2025-01-10T00:36:07Z",
+        "2025-01-10T04:46:07Z",
+        "2025-01-10T20:36:56Z"
+      ]
+    },
+    {
+      "task_id": "cherkasy-P1b",
+      "parent_task_id": "cherkasy-P1",
+      "city_key": "cherkasy",
+      "source_type": "production_proxy_assembled",
+      "source_name": "Черкаський район + explicit Черкаська область",
+      "episode_start_range": [
+        "2025-04-17",
+        "2025-07-31"
+      ],
+      "frozen_denominator": 259,
+      "episode_count": 259,
+      "matches_frozen_denominator": true,
+      "source_start_day_count": 5,
+      "source_start_day_starts": [
+        "2025-04-17T04:58:58Z",
+        "2025-04-17T07:43:52Z",
+        "2025-04-17T10:41:58Z",
+        "2025-04-17T15:00:19Z",
+        "2025-04-17T18:56:53Z"
+      ]
+    },
+    {
+      "task_id": "cherkasy-P2a",
+      "parent_task_id": "cherkasy-P2",
+      "city_key": "cherkasy",
+      "source_type": "production_proxy_assembled",
+      "source_name": "Черкаський район + explicit Черкаська область",
+      "episode_start_range": [
+        "2025-08-01",
+        "2025-12-01"
+      ],
+      "frozen_denominator": 257,
+      "episode_count": 257,
+      "matches_frozen_denominator": true,
+      "source_start_day_count": 1,
+      "source_start_day_starts": [
+        "2025-07-31T21:03:03Z"
+      ]
+    },
+    {
+      "task_id": "cherkasy-P2b",
+      "parent_task_id": "cherkasy-P2",
+      "city_key": "cherkasy",
+      "source_type": "production_proxy_assembled",
+      "source_name": "Черкаський район + explicit Черкаська область",
+      "episode_start_range": [
+        "2025-12-02",
+        "2026-03-24"
+      ],
+      "frozen_denominator": 259,
+      "episode_count": 259,
+      "matches_frozen_denominator": true,
+      "source_start_day_count": 0,
+      "source_start_day_starts": []
+    },
+    {
+      "task_id": "cherkasy-P3a",
+      "parent_task_id": "cherkasy-P3",
+      "city_key": "cherkasy",
+      "source_type": "production_proxy_assembled",
+      "source_name": "Черкаський район + explicit Черкаська область",
+      "episode_start_range": [
+        "2026-03-25",
+        "2026-07-05"
+      ],
+      "frozen_denominator": 257,
+      "episode_count": 257,
+      "matches_frozen_denominator": true,
+      "source_start_day_count": 3,
+      "source_start_day_starts": [
+        "2026-03-25T14:51:22Z",
+        "2026-03-25T17:05:57Z",
+        "2026-03-25T18:57:16Z"
+      ]
+    },
+    {
+      "task_id": "cherkasy-P3b",
+      "parent_task_id": "cherkasy-P3",
+      "city_key": "cherkasy",
+      "source_type": "production_proxy_assembled",
+      "source_name": "Черкаський район + explicit Черкаська область",
+      "episode_start_range": [
+        "2026-07-06",
+        "2026-09-17"
+      ],
+      "frozen_denominator": 258,
+      "episode_count": 258,
+      "matches_frozen_denominator": true,
+      "source_start_day_count": 3,
+      "source_start_day_starts": [
+        "2026-07-05T22:14:00Z",
+        "2026-07-06T19:27:40Z",
+        "2026-07-06T20:01:03Z"
+      ]
+    },
+    {
+      "task_id": "mykolaiv-P2a",
+      "parent_task_id": "mykolaiv-P2",
+      "city_key": "mykolaiv",
+      "source_type": "production_proxy_assembled",
+      "source_name": "Миколаївський район + explicit Миколаївська область",
+      "episode_start_range": [
+        "2026-03-26",
+        "2026-05-23"
+      ],
+      "frozen_denominator": 274,
+      "episode_count": 274,
+      "matches_frozen_denominator": true,
+      "source_start_day_count": 2,
+      "source_start_day_starts": [
+        "2026-03-26T14:31:02Z",
+        "2026-03-26T20:06:43Z"
+      ]
+    },
+    {
+      "task_id": "mykolaiv-P2b",
+      "parent_task_id": "mykolaiv-P2",
+      "city_key": "mykolaiv",
+      "source_type": "production_proxy_assembled",
+      "source_name": "Миколаївський район + explicit Миколаївська область",
+      "episode_start_range": [
+        "2026-05-24",
+        "2026-07-13"
+      ],
+      "frozen_denominator": 280,
+      "episode_count": 280,
+      "matches_frozen_denominator": true,
+      "source_start_day_count": 11,
+      "source_start_day_starts": [
+        "2026-05-23T21:01:29Z",
+        "2026-05-24T01:49:29Z",
+        "2026-05-24T04:44:26Z",
+        "2026-05-24T05:36:06Z",
+        "2026-05-24T06:34:31Z",
+        "2026-05-24T07:39:55Z",
+        "2026-05-24T10:26:58Z",
+        "2026-05-24T12:47:32Z",
+        "2026-05-24T16:08:47Z",
+        "2026-05-24T19:13:32Z",
+        "2026-05-24T20:37:17Z"
+      ]
+    },
+    {
+      "task_id": "mykolaiv-P3a",
+      "parent_task_id": "mykolaiv-P3",
+      "city_key": "mykolaiv",
+      "source_type": "production_proxy_assembled",
+      "source_name": "Миколаївський район + explicit Миколаївська область",
+      "episode_start_range": [
+        "2026-07-14",
+        "2026-08-14"
+      ],
+      "frozen_denominator": 273,
+      "episode_count": 273,
+      "matches_frozen_denominator": true,
+      "source_start_day_count": 8,
+      "source_start_day_starts": [
+        "2026-07-13T21:24:30Z",
+        "2026-07-13T22:54:24Z",
+        "2026-07-14T05:09:01Z",
+        "2026-07-14T08:25:04Z",
+        "2026-07-14T10:21:24Z",
+        "2026-07-14T10:34:18Z",
+        "2026-07-14T14:38:30Z",
+        "2026-07-14T19:11:02Z"
+      ]
+    },
+    {
+      "task_id": "mykolaiv-P3b",
+      "parent_task_id": "mykolaiv-P3",
+      "city_key": "mykolaiv",
+      "source_type": "production_proxy_assembled",
+      "source_name": "Миколаївський район + explicit Миколаївська область",
+      "episode_start_range": [
+        "2026-08-15",
+        "2026-09-17"
+      ],
+      "frozen_denominator": 270,
+      "episode_count": 270,
+      "matches_frozen_denominator": true,
+      "source_start_day_count": 5,
+      "source_start_day_starts": [
+        "2026-08-15T00:34:01Z",
+        "2026-08-15T06:11:41Z",
+        "2026-08-15T11:11:30Z",
+        "2026-08-15T15:24:21Z",
+        "2026-08-15T19:17:22Z"
+      ]
+    },
+    {
+      "task_id": "chernihiv-P1a",
+      "parent_task_id": "chernihiv-P1",
+      "city_key": "chernihiv",
+      "source_type": "production_proxy_assembled",
+      "source_name": "Чернігівський район + explicit Чернігівська область",
+      "episode_start_range": [
+        "2025-09-03",
+        "2025-11-17"
+      ],
+      "frozen_denominator": 276,
+      "episode_count": 276,
+      "matches_frozen_denominator": true,
+      "source_start_day_count": 2,
+      "source_start_day_starts": [
+        "2025-09-03T13:34:02Z",
+        "2025-09-03T17:37:34Z"
+      ]
+    },
+    {
+      "task_id": "chernihiv-P1b",
+      "parent_task_id": "chernihiv-P1",
+      "city_key": "chernihiv",
+      "source_type": "production_proxy_assembled",
+      "source_name": "Чернігівський район + explicit Чернігівська область",
+      "episode_start_range": [
+        "2025-11-18",
+        "2026-01-31"
+      ],
+      "frozen_denominator": 281,
+      "episode_count": 281,
+      "matches_frozen_denominator": true,
+      "source_start_day_count": 7,
+      "source_start_day_starts": [
+        "2025-11-17T22:12:28Z",
+        "2025-11-18T12:43:31Z",
+        "2025-11-18T14:59:37Z",
+        "2025-11-18T15:59:10Z",
+        "2025-11-18T17:12:17Z",
+        "2025-11-18T17:50:14Z",
+        "2025-11-18T21:06:31Z"
+      ]
+    },
+    {
+      "task_id": "dnipro-P1a",
+      "parent_task_id": "dnipro-P1",
+      "city_key": "dnipro",
+      "source_type": "production_proxy_assembled",
+      "source_name": "Дніпровський район + explicit Дніпропетровська область",
+      "episode_start_range": [
+        "2025-05-01",
+        "2025-07-31"
+      ],
+      "frozen_denominator": 284,
+      "episode_count": 284,
+      "matches_frozen_denominator": true,
+      "source_start_day_count": 3,
+      "source_start_day_starts": [
+        "2025-04-30T21:52:33Z",
+        "2025-04-30T23:02:24Z",
+        "2025-05-01T18:17:41Z"
+      ]
+    },
+    {
+      "task_id": "dnipro-P1b",
+      "parent_task_id": "dnipro-P1",
+      "city_key": "dnipro",
+      "source_type": "production_proxy_assembled",
+      "source_name": "Дніпровський район + explicit Дніпропетровська область",
+      "episode_start_range": [
+        "2025-08-01",
+        "2025-10-30"
+      ],
+      "frozen_denominator": 284,
+      "episode_count": 284,
+      "matches_frozen_denominator": true,
+      "source_start_day_count": 1,
+      "source_start_day_starts": [
+        "2025-08-01T14:24:08Z"
+      ]
+    },
+    {
+      "task_id": "dnipro-P3a",
+      "parent_task_id": "dnipro-P3",
+      "city_key": "dnipro",
+      "source_type": "production_proxy_assembled",
+      "source_name": "Дніпровський район + explicit Дніпропетровська область",
+      "episode_start_range": [
+        "2026-03-12",
+        "2026-05-08"
+      ],
+      "frozen_denominator": 285,
+      "episode_count": 285,
+      "matches_frozen_denominator": true,
+      "source_start_day_count": 8,
+      "source_start_day_starts": [
+        "2026-03-11T22:05:20Z",
+        "2026-03-12T00:54:09Z",
+        "2026-03-12T04:49:42Z",
+        "2026-03-12T09:58:45Z",
+        "2026-03-12T11:40:23Z",
+        "2026-03-12T12:14:12Z",
+        "2026-03-12T17:52:20Z",
+        "2026-03-12T20:45:22Z"
+      ]
+    },
+    {
+      "task_id": "dnipro-P3b",
+      "parent_task_id": "dnipro-P3",
+      "city_key": "dnipro",
+      "source_type": "production_proxy_assembled",
+      "source_name": "Дніпровський район + explicit Дніпропетровська область",
+      "episode_start_range": [
+        "2026-05-09",
+        "2026-06-25"
+      ],
+      "frozen_denominator": 281,
+      "episode_count": 281,
+      "matches_frozen_denominator": true,
+      "source_start_day_count": 0,
+      "source_start_day_starts": []
+    },
+    {
+      "task_id": "dnipro-P4a",
+      "parent_task_id": "dnipro-P4",
+      "city_key": "dnipro",
+      "source_type": "production_proxy_assembled",
+      "source_name": "Дніпровський район + explicit Дніпропетровська область",
+      "episode_start_range": [
+        "2026-06-26",
+        "2026-08-02"
+      ],
+      "frozen_denominator": 282,
+      "episode_count": 282,
+      "matches_frozen_denominator": true,
+      "source_start_day_count": 8,
+      "source_start_day_starts": [
+        "2026-06-25T21:52:03Z",
+        "2026-06-25T23:54:55Z",
+        "2026-06-26T02:13:58Z",
+        "2026-06-26T06:20:01Z",
+        "2026-06-26T08:17:08Z",
+        "2026-06-26T13:06:51Z",
+        "2026-06-26T16:10:06Z",
+        "2026-06-26T20:28:30Z"
+      ]
+    },
+    {
+      "task_id": "dnipro-P4b",
+      "parent_task_id": "dnipro-P4",
+      "city_key": "dnipro",
+      "source_type": "production_proxy_assembled",
+      "source_name": "Дніпровський район + explicit Дніпропетровська область",
+      "episode_start_range": [
+        "2026-08-03",
+        "2026-09-17"
+      ],
+      "frozen_denominator": 281,
+      "episode_count": 281,
+      "matches_frozen_denominator": true,
+      "source_start_day_count": 11,
+      "source_start_day_starts": [
+        "2026-08-02T22:21:59Z",
+        "2026-08-03T03:19:10Z",
+        "2026-08-03T03:38:24Z",
+        "2026-08-03T07:11:26Z",
+        "2026-08-03T07:54:16Z",
+        "2026-08-03T09:09:53Z",
+        "2026-08-03T11:53:16Z",
+        "2026-08-03T12:43:44Z",
+        "2026-08-03T14:02:04Z",
+        "2026-08-03T15:27:44Z",
+        "2026-08-03T17:49:32Z"
+      ]
+    },
+    {
+      "task_id": "sumy-P1a",
+      "parent_task_id": "sumy-P1",
+      "city_key": "sumy",
+      "source_type": "production_proxy_assembled",
+      "source_name": "Сумський район + explicit Сумська область",
+      "episode_start_range": [
+        "2025-08-06",
+        "2025-09-21"
+      ],
+      "frozen_denominator": 288,
+      "episode_count": 288,
+      "matches_frozen_denominator": true,
+      "source_start_day_count": 5,
+      "source_start_day_starts": [
+        "2025-08-06T01:02:29Z",
+        "2025-08-06T07:09:52Z",
+        "2025-08-06T11:12:42Z",
+        "2025-08-06T12:45:06Z",
+        "2025-08-06T18:01:17Z"
+      ]
+    },
+    {
+      "task_id": "sumy-P1b",
+      "parent_task_id": "sumy-P1",
+      "city_key": "sumy",
+      "source_type": "production_proxy_assembled",
+      "source_name": "Сумський район + explicit Сумська область",
+      "episode_start_range": [
+        "2025-09-22",
+        "2025-11-17"
+      ],
+      "frozen_denominator": 285,
+      "episode_count": 285,
+      "matches_frozen_denominator": true,
+      "source_start_day_count": 8,
+      "source_start_day_starts": [
+        "2025-09-22T00:25:17Z",
+        "2025-09-22T02:01:54Z",
+        "2025-09-22T06:26:23Z",
+        "2025-09-22T09:06:05Z",
+        "2025-09-22T10:11:22Z",
+        "2025-09-22T11:13:16Z",
+        "2025-09-22T11:59:36Z",
+        "2025-09-22T15:51:06Z"
+      ]
+    },
+    {
+      "task_id": "sumy-P2a",
+      "parent_task_id": "sumy-P2",
+      "city_key": "sumy",
+      "source_type": "production_proxy_assembled",
+      "source_name": "Сумський район + explicit Сумська область",
+      "episode_start_range": [
+        "2025-11-18",
+        "2026-01-12"
+      ],
+      "frozen_denominator": 284,
+      "episode_count": 284,
+      "matches_frozen_denominator": true,
+      "source_start_day_count": 8,
+      "source_start_day_starts": [
+        "2025-11-17T22:44:48Z",
+        "2025-11-18T06:47:55Z",
+        "2025-11-18T08:06:13Z",
+        "2025-11-18T09:01:15Z",
+        "2025-11-18T10:46:18Z",
+        "2025-11-18T14:03:45Z",
+        "2025-11-18T15:31:54Z",
+        "2025-11-18T17:03:32Z"
+      ]
+    },
+    {
+      "task_id": "sumy-P2b",
+      "parent_task_id": "sumy-P2",
+      "city_key": "sumy",
+      "source_type": "production_proxy_assembled",
+      "source_name": "Сумський район + explicit Сумська область",
+      "episode_start_range": [
+        "2026-01-13",
+        "2026-03-04"
+      ],
+      "frozen_denominator": 290,
+      "episode_count": 290,
+      "matches_frozen_denominator": true,
+      "source_start_day_count": 8,
+      "source_start_day_starts": [
+        "2026-01-13T01:14:58Z",
+        "2026-01-13T06:15:11Z",
+        "2026-01-13T07:06:00Z",
+        "2026-01-13T11:54:48Z",
+        "2026-01-13T12:21:30Z",
+        "2026-01-13T13:12:14Z",
+        "2026-01-13T15:19:23Z",
+        "2026-01-13T17:09:47Z"
+      ]
+    },
+    {
+      "task_id": "sumy-P3a",
+      "parent_task_id": "sumy-P3",
+      "city_key": "sumy",
+      "source_type": "production_proxy_assembled",
+      "source_name": "Сумський район + explicit Сумська область",
+      "episode_start_range": [
+        "2026-03-05",
+        "2026-04-25"
+      ],
+      "frozen_denominator": 291,
+      "episode_count": 291,
+      "matches_frozen_denominator": true,
+      "source_start_day_count": 5,
+      "source_start_day_starts": [
+        "2026-03-05T04:10:47Z",
+        "2026-03-05T12:40:23Z",
+        "2026-03-05T18:46:20Z",
+        "2026-03-05T19:37:56Z",
+        "2026-03-05T21:56:21Z"
+      ]
+    },
+    {
+      "task_id": "sumy-P3b",
+      "parent_task_id": "sumy-P3",
+      "city_key": "sumy",
+      "source_type": "production_proxy_assembled",
+      "source_name": "Сумський район + explicit Сумська область",
+      "episode_start_range": [
+        "2026-04-26",
+        "2026-06-08"
+      ],
+      "frozen_denominator": 286,
+      "episode_count": 286,
+      "matches_frozen_denominator": true,
+      "source_start_day_count": 7,
+      "source_start_day_starts": [
+        "2026-04-25T22:11:42Z",
+        "2026-04-26T00:04:52Z",
+        "2026-04-26T06:47:03Z",
+        "2026-04-26T12:20:20Z",
+        "2026-04-26T14:54:21Z",
+        "2026-04-26T17:53:05Z",
+        "2026-04-26T20:57:42Z"
+      ]
+    },
+    {
+      "task_id": "zaporizhzhia-P1a",
+      "parent_task_id": "zaporizhzhia-P1",
+      "city_key": "zaporizhzhia",
+      "source_type": "production_exact_city_assembled",
+      "source_name": "м. Запоріжжя та Запорізька територіальна громада",
+      "episode_start_range": [
+        "2025-03-19",
+        "2025-06-16"
+      ],
+      "frozen_denominator": 296,
+      "episode_count": 296,
+      "matches_frozen_denominator": true,
+      "source_start_day_count": 1,
+      "source_start_day_starts": [
+        "2025-03-19T17:06:59Z"
+      ]
+    },
+    {
+      "task_id": "zaporizhzhia-P1b",
+      "parent_task_id": "zaporizhzhia-P1",
+      "city_key": "zaporizhzhia",
+      "source_type": "production_exact_city_assembled",
+      "source_name": "м. Запоріжжя та Запорізька територіальна громада",
+      "episode_start_range": [
+        "2025-06-17",
+        "2025-08-27"
+      ],
+      "frozen_denominator": 296,
+      "episode_count": 296,
+      "matches_frozen_denominator": true,
+      "source_start_day_count": 2,
+      "source_start_day_starts": [
+        "2025-06-17T05:00:00Z",
+        "2025-06-17T14:48:30Z"
+      ]
+    },
+    {
+      "task_id": "zaporizhzhia-P2a",
+      "parent_task_id": "zaporizhzhia-P2",
+      "city_key": "zaporizhzhia",
+      "source_type": "production_exact_city_assembled",
+      "source_name": "м. Запоріжжя та Запорізька територіальна громада",
+      "episode_start_range": [
+        "2025-08-28",
+        "2025-11-16"
+      ],
+      "frozen_denominator": 295,
+      "episode_count": 295,
+      "matches_frozen_denominator": true,
+      "source_start_day_count": 3,
+      "source_start_day_starts": [
+        "2025-08-28T11:05:43Z",
+        "2025-08-28T11:31:25Z",
+        "2025-08-28T14:59:37Z"
+      ]
+    },
+    {
+      "task_id": "zaporizhzhia-P2b",
+      "parent_task_id": "zaporizhzhia-P2",
+      "city_key": "zaporizhzhia",
+      "source_type": "production_exact_city_assembled",
+      "source_name": "м. Запоріжжя та Запорізька територіальна громада",
+      "episode_start_range": [
+        "2025-11-17",
+        "2026-01-28"
+      ],
+      "frozen_denominator": 294,
+      "episode_count": 294,
+      "matches_frozen_denominator": true,
+      "source_start_day_count": 5,
+      "source_start_day_starts": [
+        "2025-11-16T23:09:54Z",
+        "2025-11-16T23:56:42Z",
+        "2025-11-17T03:08:18Z",
+        "2025-11-17T11:28:25Z",
+        "2025-11-17T19:54:33Z"
+      ]
+    },
+    {
+      "task_id": "zaporizhzhia-P3a",
+      "parent_task_id": "zaporizhzhia-P3",
+      "city_key": "zaporizhzhia",
+      "source_type": "production_exact_city_assembled",
+      "source_name": "м. Запоріжжя та Запорізька територіальна громада",
+      "episode_start_range": [
+        "2026-01-29",
+        "2026-04-01"
+      ],
+      "frozen_denominator": 296,
+      "episode_count": 296,
+      "matches_frozen_denominator": true,
+      "source_start_day_count": 6,
+      "source_start_day_starts": [
+        "2026-01-29T02:41:51Z",
+        "2026-01-29T05:32:19Z",
+        "2026-01-29T07:12:49Z",
+        "2026-01-29T14:15:46Z",
+        "2026-01-29T16:34:48Z",
+        "2026-01-29T17:37:47Z"
+      ]
+    },
+    {
+      "task_id": "zaporizhzhia-P3b",
+      "parent_task_id": "zaporizhzhia-P3",
+      "city_key": "zaporizhzhia",
+      "source_type": "production_exact_city_assembled",
+      "source_name": "м. Запоріжжя та Запорізька територіальна громада",
+      "episode_start_range": [
+        "2026-04-02",
+        "2026-05-28"
+      ],
+      "frozen_denominator": 298,
+      "episode_count": 298,
+      "matches_frozen_denominator": true,
+      "source_start_day_count": 7,
+      "source_start_day_starts": [
+        "2026-04-01T23:42:08Z",
+        "2026-04-02T01:55:50Z",
+        "2026-04-02T07:24:17Z",
+        "2026-04-02T10:23:45Z",
+        "2026-04-02T14:12:41Z",
+        "2026-04-02T16:09:48Z",
+        "2026-04-02T19:33:35Z"
+      ]
+    },
+    {
+      "task_id": "kharkiv-P3a",
+      "parent_task_id": "kharkiv-P3",
+      "city_key": "kharkiv",
+      "source_type": "production_exact_city_assembled",
+      "source_name": "м. Харків та Харківська територіальна громада",
+      "episode_start_range": [
+        "2025-10-17",
+        "2025-12-10"
+      ],
+      "frozen_denominator": 299,
+      "episode_count": 299,
+      "matches_frozen_denominator": true,
+      "source_start_day_count": 4,
+      "source_start_day_starts": [
+        "2025-10-17T09:18:27Z",
+        "2025-10-17T12:44:58Z",
+        "2025-10-17T14:17:16Z",
+        "2025-10-17T18:35:52Z"
+      ]
+    },
+    {
+      "task_id": "kharkiv-P3b",
+      "parent_task_id": "kharkiv-P3",
+      "city_key": "kharkiv",
+      "source_type": "production_exact_city_assembled",
+      "source_name": "м. Харків та Харківська територіальна громада",
+      "episode_start_range": [
+        "2025-12-11",
+        "2026-02-02"
+      ],
+      "frozen_denominator": 298,
+      "episode_count": 298,
+      "matches_frozen_denominator": true,
+      "source_start_day_count": 6,
+      "source_start_day_starts": [
+        "2025-12-10T22:13:39Z",
+        "2025-12-10T23:26:18Z",
+        "2025-12-11T07:12:10Z",
+        "2025-12-11T08:19:07Z",
+        "2025-12-11T09:13:43Z",
+        "2025-12-11T11:57:42Z"
+      ]
+    },
+    {
+      "task_id": "kharkiv-P4a",
+      "parent_task_id": "kharkiv-P4",
+      "city_key": "kharkiv",
+      "source_type": "production_exact_city_assembled",
+      "source_name": "м. Харків та Харківська територіальна громада",
+      "episode_start_range": [
+        "2026-02-03",
+        "2026-03-16"
+      ],
+      "frozen_denominator": 299,
+      "episode_count": 299,
+      "matches_frozen_denominator": true,
+      "source_start_day_count": 4,
+      "source_start_day_starts": [
+        "2026-02-03T12:10:11Z",
+        "2026-02-03T16:57:33Z",
+        "2026-02-03T18:25:16Z",
+        "2026-02-03T18:38:07Z"
+      ]
+    },
+    {
+      "task_id": "kharkiv-P4b",
+      "parent_task_id": "kharkiv-P4",
+      "city_key": "kharkiv",
+      "source_type": "production_exact_city_assembled",
+      "source_name": "м. Харків та Харківська територіальна громада",
+      "episode_start_range": [
+        "2026-03-17",
+        "2026-04-22"
+      ],
+      "frozen_denominator": 293,
+      "episode_count": 293,
+      "matches_frozen_denominator": true,
+      "source_start_day_count": 7,
+      "source_start_day_starts": [
+        "2026-03-16T22:24:13Z",
+        "2026-03-17T06:31:40Z",
+        "2026-03-17T07:48:49Z",
+        "2026-03-17T10:13:17Z",
+        "2026-03-17T13:25:40Z",
+        "2026-03-17T16:33:13Z",
+        "2026-03-17T18:49:39Z"
+      ]
+    },
+    {
+      "task_id": "kharkiv-P5a",
+      "parent_task_id": "kharkiv-P5",
+      "city_key": "kharkiv",
+      "source_type": "production_exact_city_assembled",
+      "source_name": "м. Харків та Харківська територіальна громада",
+      "episode_start_range": [
+        "2026-04-23",
+        "2026-05-30"
+      ],
+      "frozen_denominator": 299,
+      "episode_count": 299,
+      "matches_frozen_denominator": true,
+      "source_start_day_count": 9,
+      "source_start_day_starts": [
+        "2026-04-23T00:50:35Z",
+        "2026-04-23T05:21:00Z",
+        "2026-04-23T06:54:00Z",
+        "2026-04-23T09:58:27Z",
+        "2026-04-23T14:35:12Z",
+        "2026-04-23T15:10:00Z",
+        "2026-04-23T16:51:07Z",
+        "2026-04-23T17:50:49Z",
+        "2026-04-23T18:40:10Z"
+      ]
+    },
+    {
+      "task_id": "kharkiv-P5b",
+      "parent_task_id": "kharkiv-P5",
+      "city_key": "kharkiv",
+      "source_type": "production_exact_city_assembled",
+      "source_name": "м. Харків та Харківська територіальна громада",
+      "episode_start_range": [
+        "2026-05-31",
+        "2026-07-06"
+      ],
+      "frozen_denominator": 297,
+      "episode_count": 297,
+      "matches_frozen_denominator": true,
+      "source_start_day_count": 9,
+      "source_start_day_starts": [
+        "2026-05-30T21:52:59Z",
+        "2026-05-30T23:32:20Z",
+        "2026-05-31T04:15:06Z",
+        "2026-05-31T06:23:45Z",
+        "2026-05-31T08:05:36Z",
+        "2026-05-31T13:03:01Z",
+        "2026-05-31T15:00:01Z",
+        "2026-05-31T16:10:28Z",
+        "2026-05-31T18:13:26Z"
+      ]
+    }
+  ]
+}
