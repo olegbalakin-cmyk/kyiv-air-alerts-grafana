@@ -1,0 +1,98 @@
+{
+  "status": "complete",
+  "city_key": "kharkiv",
+  "city": "Харків",
+  "part": 2,
+  "parts_total": 6,
+  "episode_start_range": [
+    "2025-06-21",
+    "2025-10-16"
+  ],
+  "denominator": 594,
+  "strict_events": [
+    {
+      "matched_alert_episode_start": "2025-07-06T00:58:00+03:00",
+      "event_time": "2025-07-06T01:06:00+03:00",
+      "source_url": "https://zn.ua/ukr/war/645833-u-kharkovi-prolunali-vibukhi-misto-atakujut-shakhedi.html",
+      "evidence": "У Харкові перший вибух о 01:06 під час атаки Shahed; міську тривогу оголосили о 00:58.",
+      "decision": "strict — exact city, confirmed aerial attack, exact event time inside concrete city alert episode"
+    },
+    {
+      "matched_alert_episode_start": "2025-07-23T18:31:00+03:00",
+      "event_time": "2025-07-25T11:28:00+03:00",
+      "source_url": "https://suspilne.media/kharkiv/1075329-rosia-vdarila-kabami-po-industrialnomu-rajonu-harkova-e-postrazdalij/",
+      "evidence": "О 11:28 25 липня вибух у Харкові після попередження про КАБ; міська тривога тривала безперервно з 18:31 23 липня до 21:02 25 липня.",
+      "decision": "strict — exact city KAB strike inside the concrete long-running alert episode; one numerator for the episode"
+    },
+    {
+      "matched_alert_episode_start": "2025-10-05T21:21:00+03:00",
+      "event_time": "2025-10-05T22:44:00+03:00/2025-10-05T23:30:00+03:00",
+      "source_url": "https://suspilne.media/amp/kharkiv/1131536-u-harkovi-prolunala-seria-vibuhiv-misto-perebuvae-pid-atakou-droniv/",
+      "evidence": "Серія ударів дронами по Харкову почалася близько 22:44; тривога для Харкова була з 21:21 до 23:55.",
+      "decision": "strict — exact city drone attack and explicit alert interval; multiple blasts deduplicated to one episode"
+    },
+    {
+      "matched_alert_episode_start": "2025-10-13T09:05:00+03:00",
+      "event_time": "2025-10-13T09:19:00+03:00",
+      "source_url": "https://suspilne.media/kharkiv/1137276-u-harkovi-stavsa-vibuh-u-zitlovij-zabudovi-kiivskogo-rajonu/",
+      "evidence": "Кореспонденти чули вибух у Харкові о 09:19; джерело прямо вказує, що міська тривога тривала з 09:05, удар попередньо БпЛА.",
+      "decision": "strict — exact city, confirmed aerial-war context, exact event time inside concrete city alert episode"
+    }
+  ],
+  "sensitivity_only_events": [],
+  "review_events": [
+    {
+      "matched_alert_episode_start": null,
+      "event_time": "2025-07-02T~03:00:00+03:00",
+      "source_url": "https://suspilne.media/kharkiv/1056495-po-odnopoverhovomu-budinku-v-novobavarskomu-rajoni-harkova-vdariv-sahed-foto-naslidkiv/",
+      "evidence": "Близько 03:00 у Харкові вибух; Shahed влучив у будівлю в Новобаварському районі.",
+      "decision": "review — exact-city aerial strike, but concrete production/WIP alert episode start not independently resolved"
+    },
+    {
+      "matched_alert_episode_start": null,
+      "event_time": "2025-07-11T05:25:00+03:00",
+      "source_url": "https://suspilne.media/kharkiv/1063875-rosia-atakuvala-harkiv-bezpilotnikami-vranci-11-lipna-naslidki/",
+      "evidence": "О 05:25 у Харкові три вибухи під час удару російських безпілотників по центру.",
+      "decision": "review — strong exact-city event, but concrete city alert episode start remains unresolved"
+    },
+    {
+      "matched_alert_episode_start": null,
+      "event_time": "2025-07-15T23:10:00+03:00/2025-07-15T23:35:00+03:00",
+      "source_url": "https://suspilne.media/kharkiv/1067567-harkiv-pid-atakou-bpla-vveceri-15-lipna-u-misti-prolunalo-15-vibuhiv-za-10-hvilin-so-vidomo/",
+      "evidence": "Після 23:10 у Харкові щонайменше 16 вибухів під час масованої атаки БпЛА; стороннє джерело прямо описує вибухи під час тривоги.",
+      "decision": "review — event/air-alert overlap is strong, but exact production/WIP episode start was not resolved; targeted Library lookup returned no relevant Telegram evidence"
+    },
+    {
+      "matched_alert_episode_start": null,
+      "event_time": "2025-08-17T22:50:00+03:00",
+      "source_url": "https://suspilne.media/kharkiv/1092810-rosijska-balisticna-raketa-vlucila-v-industrialnomu-rajoni-harkova-aki-naslidki/",
+      "evidence": "О 22:50 вибух у Харкові після попередження Повітряних сил; влучання в Індустріальному районі, ймовірно Іскандер.",
+      "decision": "review — exact-city aerial strike, concrete city alert episode start unresolved"
+    },
+    {
+      "matched_alert_episode_start": null,
+      "event_time": "2025-09-30T15:25:00+03:00/2025-09-30T18:24:00+03:00",
+      "source_url": "https://suspilne.media/kharkiv/1127423-vibuhi-u-harkovi-rosiani-vdruge-za-den-atakuut-misto-bezpilotnikami/",
+      "evidence": "30 вересня Харків атакували дронами кількома хвилями: близько 15:25, приблизно за годину та з 18:04 ще шість вибухів.",
+      "decision": "review — exact-city attacks could map to more than one alert episode; exact episode starts not resolved, so no forced deduplication/count"
+    },
+    {
+      "matched_alert_episode_start": null,
+      "event_time": "2025-10-01T~02:00:00+03:00/2025-10-01T~02:20:00+03:00",
+      "source_url": "https://suspilne.media/kharkiv/1127749-rosia-zavdala-udariv-po-harkovu-ta-peredmistu-e-postrazdali/",
+      "evidence": "Близько 02:00 у Харкові серія щонайменше шести вибухів під час комбінованої атаки РФ, з влучаннями КАБів у районах міста.",
+      "decision": "review — exact-city event confirmed, but concrete matched city alert episode start not resolved"
+    },
+    {
+      "matched_alert_episode_start": null,
+      "event_time": "2025-10-13T21:50:00+03:00",
+      "source_url": "https://suspilne.media/kharkiv/1138112-armia-rf-atakuvala-kabami-harkiv-vveceri-13-zovtna-so-vidomo/",
+      "evidence": "О 21:50 у Харкові щонайменше два вибухи; перед цим Повітряні сили попереджали про КАБи курсом на місто.",
+      "decision": "review — exact-city KAB attack, but concrete evening city alert episode start not resolved"
+    }
+  ],
+  "strict_n": 4,
+  "sensitivity_n": 4,
+  "local_web_only_retained": 4,
+  "qa": "Frozen denominator independently reconstructed from WIP Kharkiv city-feed rolling weekly starts plus monthly totals = 594 (match); strict events are unique alert episodes; targeted Telegram/Library lookup was attempted only for 2025-07-15 and yielded no relevant archive evidence."
+}
