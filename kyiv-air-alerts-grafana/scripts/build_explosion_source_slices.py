@@ -146,10 +146,12 @@ def main() -> None:
             raise RuntimeError(f"Duplicate production episode signatures in {task_id}")
 
         actual = len(events)
-        start_day_count = sum(
-            1 for start, _ in by_city[city_key]
+        start_day_events = [
+            utc_z(start)
+            for start, _ in by_city[city_key]
             if start.astimezone(TZ).date().isoformat() == date_from
-        )
+        ]
+        start_day_count = len(start_day_events)
         smeta = source_meta[city_key]
         manifest_row = {
             "task_id": task_id,
@@ -162,6 +164,7 @@ def main() -> None:
             "episode_count": actual,
             "matches_frozen_denominator": actual == expected,
             "source_start_day_count": start_day_count,
+            "source_start_day_starts": start_day_events,
         }
         manifest_rows.append(manifest_row)
         if actual != expected:
@@ -214,7 +217,7 @@ def main() -> None:
     )
     if mismatches:
         details = ", ".join(
-            f"{x['task_id']}:{x['episode_count']}!={x['frozen_denominator']}[startday={x['source_start_day_count']}]"
+            f"{x['task_id']}:{x['episode_count']}!={x['frozen_denominator']}[startday={x['source_start_day_count']}:{'|'.join(x['source_start_day_starts'])}]"
             for x in mismatches
         )
         raise RuntimeError(
