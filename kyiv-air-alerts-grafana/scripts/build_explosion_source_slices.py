@@ -19,6 +19,7 @@ ROOT = Path(__file__).resolve().parents[1]
 DATA = ROOT / "data"
 HANDOFF = DATA / "explosion_metric_handoff"
 SUBSLICES_CSV = HANDOFF / "RESEARCH_SUBSLICES_2026-09-19.csv"
+PARENTS_CSV = HANDOFF / "RESEARCH_SLICES_2026-09-18.csv"
 OUT_DIR = HANDOFF / "source_slices"
 MANIFEST = HANDOFF / "SOURCE_SLICES_MANIFEST_2026-09-19.json"
 SOURCE_URL = proxymod.CITY_SOURCE_URL
@@ -41,9 +42,13 @@ def git_blob_sha(content: bytes) -> str:
     return hashlib.sha1(header + content).hexdigest()
 
 
-def load_subslices() -> list[dict[str, str]]:
-    with SUBSLICES_CSV.open("r", encoding="utf-8-sig", newline="") as f:
+def load_csv(path: Path) -> list[dict[str, str]]:
+    with path.open("r", encoding="utf-8-sig", newline="") as f:
         return list(csv.DictReader(f))
+
+
+def load_subslices() -> list[dict[str, str]]:
+    return load_csv(SUBSLICES_CSV)
 
 
 def merge_intervals(intervals: list[tuple[datetime, datetime]]) -> list[tuple[datetime, datetime]]:
@@ -109,6 +114,96 @@ def production_episodes(source_bytes: bytes, wanted_keys: set[str]) -> tuple[dic
         }
     return episodes, meta
 
+def reconcile_parent_boundaries(
+    by_city: dict[str, list[tuple[datetime, datetime]]],
+    source_meta: dict[str, dict],
+    subslice_rows: list[dict[str, str]],
+) -> list[dict]:
+    parent_rows = {row["task_id"]: row for row in load_csv(PARENTS_CSV)}
+    represented = sorted({row["parent_task_id"] for row in subslice_rows})
+    exclusions: list[dict] = []
+
+    for parent_id in represented:
+        parent = parent_rows[parent_id]
+        city_key = parent["city_key"]
+        date_from = parent["episode_start_date_from"]
+        date_to = parent["episode_start_date_to"]
+        frozen = int(parent["frozen_denominator"])
+        parent_events = [
+            (start, end)
+            for start, end in by_city[city_key]
+            if date_from <= start.astimezone(TZ).date().isoformat() <= date_to
+        ]
+        if len(parent_events) == frozen:
+            continue
+        if len(parent_events) != frozen + 1:
+            continue
+
+        smeta = source_meta[city_key]
+        boundary: datetime | None = None
+        reason: str | None = None
+        if smeta["type"] == "production_proxy_assembled":
+            if date_from == smeta.get("coverage_start"):
+                boundary = proxymod.coverage_start_dt(smeta["coverage_start"])
+                reason = "exclude clipped carry-in at proxy coverage_start from alert-start denominator"
+        elif smeta["type"] == "production_exact_city_assembled":
+            valid_from = smeta.get("valid_from")
+            if valid_from:
+                candidate = datetime.fromisoformat(valid_from).astimezone(TZ)
+                if date_from == candidate.date().isoformat():
+                    boundary = candidate
+                    reason = "exclude exact adapter transition-boundary seed to preserve frozen parent denominator"
+
+        if boundary is None:
+            continue
+        matches = [
+            (start, end)
+            for start, end in parent_events
+            if start == boundary
+        ]
+        if len(matches) != 1:
+            continue
+
+        target = matches[0]
+        by_city[city_key] = [
+            pair for pair in by_city[city_key] if pair != target
+        ]
+        exclusions.append(
+            {
+                "parent_task_id": parent_id,
+                "city_key": city_key,
+                "alert_start": utc_z(target[0]),
+                "alert_end": utc_z(target[1]),
+                "reason": reason,
+                "before": frozen + 1,
+                "after": frozen,
+            }
+        )
+
+    # Parent denominators are the hard contract. Fail if any represented parent
+    # still differs after the narrowly-defined boundary reconciliation.
+    bad = []
+    for parent_id in represented:
+        parent = parent_rows[parent_id]
+        city_key = parent["city_key"]
+        date_from = parent["episode_start_date_from"]
+        date_to = parent["episode_start_date_to"]
+        frozen = int(parent["frozen_denominator"])
+        actual = sum(
+            1
+            for start, _ in by_city[city_key]
+            if date_from <= start.astimezone(TZ).date().isoformat() <= date_to
+        )
+        if actual != frozen:
+            bad.append(f"{parent_id}:{actual}!={frozen}")
+    if bad:
+        raise RuntimeError(
+            "Parent denominator mismatch after boundary reconciliation: "
+            + ", ".join(bad)
+        )
+    return exclusions
+
+
 def main() -> None:
     response = requests.get(
         SOURCE_URL,
@@ -122,6 +217,7 @@ def main() -> None:
     rows = load_subslices()
     wanted_keys = {row["city_key"] for row in rows}
     by_city, source_meta = production_episodes(source_bytes, wanted_keys)
+    boundary_exclusions = reconcile_parent_boundaries(by_city, source_meta, rows)
 
     built: list[tuple[Path, dict]] = []
     manifest_rows: list[dict] = []
@@ -203,7 +299,8 @@ def main() -> None:
         "generated_at": datetime.now(UTC).isoformat().replace("+00:00", "Z"),
         "source_url": SOURCE_URL,
         "source_git_blob_sha": source_sha,
-        "adapter": "WIP production historical adapters: proxy raion+oblast union; exact-city hromada union",
+        "adapter": "assembled WIP production episodes: historical adapter + Alerts.in.ua seam + persisted UkraineAlarm continuation",
+        "boundary_exclusions": boundary_exclusions,
         "subslice_count": len(rows),
         "all_match_frozen_denominator": not mismatches,
         "mismatches": mismatches,
