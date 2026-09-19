@@ -62,7 +62,7 @@ Count one numerator event per matched alert episode.
 - Read only this file, the one active subslice row, and its one source-slice JSON.
 - Do not inspect or print the full source-slice episode list in chat; use it only for matching.
 - Search exact-city web/local sources narrowly.
-- Telegram/media archive is in ChatGPT Library at `/Telegram Desktop.zip`. Search/use it only for one specific unresolved date/candidate. Do not bulk-unpack or bulk-scan it. If Library access is unavailable, record that fact and continue without inventing evidence.
+- Telegram/media archive is in ChatGPT Library at `/Telegram Desktop.zip`. If needed, locate it by listing the Library root `/` and matching the exact filename `Telegram Desktop.zip`; do not rely on semantic Library search for the ZIP. Materialize/use it only for one specific unresolved date/candidate. Do not bulk-unpack or bulk-scan it. If Library access is unavailable, record that fact and continue without inventing evidence.
 - Do not inspect completed cities, sibling subslices, sibling parent slices, casualty data, `explosions_test.json`, full dashboard data, or the large upstream CSV.
 - Do not print raw denominator rows, large JSON/CSV, search dumps, or broad rejection logs into chat.
 - Keep only numerator-relevant evidence.
