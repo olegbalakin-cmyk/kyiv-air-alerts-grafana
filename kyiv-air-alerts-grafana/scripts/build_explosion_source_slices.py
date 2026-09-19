@@ -13,6 +13,7 @@ import requests
 import add_duration_unit_switch as exactmod
 import expand_multicity_production as proxymod
 import extend_remaining_proxies as extended
+import apply_ukrainealarm_bridge as bridgemod
 
 ROOT = Path(__file__).resolve().parents[1]
 DATA = ROOT / "data"
@@ -56,96 +57,57 @@ def merge_intervals(intervals: list[tuple[datetime, datetime]]) -> list[tuple[da
 
 
 def production_episodes(source_bytes: bytes, wanted_keys: set[str]) -> tuple[dict[str, list[tuple[datetime, datetime]]], dict[str, dict]]:
-    # Reproduce the historical adapters used by the WIP production pipeline:
-    #   proxy cities = union(eponymous raion, explicit oblast), clipped at coverage start;
-    #   Kharkiv/Zaporizhzhia = validated exact-city hromada stream from valid_from.
+    # Reproduce the exact assembled WIP production episode list:
+    # historical adapter + Alerts.in.ua seam + persisted UkraineAlarm continuation.
+    # The historical adapters download the same public upstream CSV used here.
     proxy_cfg = extended.configure_all_proxies()
-    exact_cfg = exactmod.CITY_CONFIG
+    proxy_base = proxymod.fetch_proxy_alerts()
+    exact_base = exactmod.fetch_city_alerts()
+    static, static_info = bridgemod.load_static_bridge()
+    store = bridgemod.load_store()
 
     proxy_keys = wanted_keys & set(proxy_cfg)
-    exact_keys = wanted_keys & set(exact_cfg)
+    exact_keys = wanted_keys & set(exactmod.CITY_CONFIG)
     unknown = wanted_keys - proxy_keys - exact_keys
     if unknown:
-        raise RuntimeError(f"No production historical adapter for: {sorted(unknown)}")
+        raise RuntimeError(f"No production adapter for: {sorted(unknown)}")
 
-    proxy_by_oblast = {proxy_cfg[key]["oblast"]: key for key in proxy_keys}
-    exact_by_hromada = {exact_cfg[key]["hromada"]: key for key in exact_keys}
-
-    raw_intervals: dict[str, list[tuple[datetime, datetime]]] = {
-        key: [] for key in wanted_keys
-    }
-    seen_proxy: dict[str, set[tuple[str, str, str]]] = {
-        key: set() for key in proxy_keys
-    }
-    seen_exact: dict[str, set[tuple[str, str]]] = {
-        key: set() for key in exact_keys
-    }
-
-    text = source_bytes.decode("utf-8-sig")
-    for row in csv.DictReader(io.StringIO(text)):
-        level = (row.get("level") or "").strip()
-        oblast = (row.get("oblast") or "").strip()
-        raion = (row.get("raion") or "").strip()
-        hromada = (row.get("hromada") or "").strip()
-        s = (row.get("started_at") or "").strip()
-        e = (row.get("finished_at") or "").strip()
-        if not s or not e:
-            continue
-
-        proxy_key = proxy_by_oblast.get(oblast)
-        if proxy_key:
-            cfg = proxy_cfg[proxy_key]
-            if level == "oblast" or (level == "raion" and raion == cfg["raion"]):
-                marker = (level, s, e)
-                if marker not in seen_proxy[proxy_key]:
-                    try:
-                        start = proxymod.parse_source_dt(s)
-                        end = proxymod.parse_source_dt(e)
-                    except ValueError:
-                        start = end = None
-                    if start and end and end > start:
-                        cutoff = proxymod.coverage_start_dt(cfg["coverage_start"])
-                        if end > cutoff:
-                            raw_intervals[proxy_key].append((max(start, cutoff), end))
-                            seen_proxy[proxy_key].add(marker)
-
-        exact_key = exact_by_hromada.get(hromada) if level == "hromada" else None
-        if exact_key:
-            marker = (s, e)
-            if marker in seen_exact[exact_key]:
-                continue
-            try:
-                start = exactmod.parse_source_dt(s)
-                end = exactmod.parse_source_dt(e)
-            except ValueError:
-                continue
-            if end <= start:
-                continue
-            valid_from = datetime.fromisoformat(exact_cfg[exact_key]["valid_from"]).astimezone(TZ)
-            if start < valid_from:
-                continue
-            raw_intervals[exact_key].append((start, end))
-            seen_exact[exact_key].add(marker)
-
-    episodes = {key: merge_intervals(raw_intervals[key]) for key in wanted_keys}
+    episodes: dict[str, list[tuple[datetime, datetime]]] = {}
     meta: dict[str, dict] = {}
-    for key in wanted_keys:
-        if key in proxy_keys:
-            cfg = proxy_cfg[key]
-            meta[key] = {
-                "type": "production_proxy_union",
-                "name": f"{cfg['raion']} + explicit {cfg['oblast']}",
-                "coverage_start": cfg["coverage_start"],
-            }
+    for key in sorted(wanted_keys):
+        if key in exact_keys:
+            base_alerts = exact_base[key]
+            cfg = exactmod.CITY_CONFIG[key]
+            source_type = "production_exact_city_assembled"
+            source_name = cfg["hromada"]
+            source_extra = {"valid_from": cfg["valid_from"]}
         else:
-            cfg = exact_cfg[key]
-            meta[key] = {
-                "type": "production_exact_city_union",
-                "name": cfg["hromada"],
-                "valid_from": cfg["valid_from"],
-            }
-    return episodes, meta
+            base_alerts = proxy_base[key]
+            cfg = proxy_cfg[key]
+            source_type = "production_proxy_assembled"
+            source_name = f"{cfg['raion']} + explicit {cfg['oblast']}"
+            source_extra = {"coverage_start": cfg["coverage_start"]}
 
+        region = (store.get("regions") or {}).get(key) or {}
+        continuous = bool(region.get("continuous"))
+        api_alerts = bridgemod.api_store_alerts(store, key) if continuous else []
+        static_alerts = static.get(key) or []
+        combined = bridgemod.union_alerts(
+            [*base_alerts, *static_alerts, *api_alerts],
+            "historical_plus_alertsinua_plus_ukrainealarm",
+        )
+        episodes[key] = [(a.start, a.end) for a in combined]
+        meta[key] = {
+            "type": source_type,
+            "name": source_name,
+            **source_extra,
+            "static_bridge_events": len(static_alerts),
+            "ukrainealarm_bridge_events": len(api_alerts),
+            "ukrainealarm_bridge_continuous": continuous,
+            "static_bridge_coverage_start": static_info.get("coverage_start"),
+            "static_bridge_coverage_end_exclusive": static_info.get("coverage_end_exclusive"),
+        }
+    return episodes, meta
 
 def main() -> None:
     response = requests.get(
