@@ -1,0 +1,155 @@
+{
+  "status": "complete",
+  "task_id": "kyiv-P1",
+  "city_key": "kyiv",
+  "city": "Київ",
+  "part": 1,
+  "parts_total": 5,
+  "episode_start_range": [
+    "2022-02-28",
+    "2022-09-25"
+  ],
+  "denominator": 492,
+  "strict_events": [
+    {
+      "alert_start_date": "2022-03-01",
+      "alert_start": "2022-03-01T17:08:20+02:00",
+      "event_time": "17:19 EET",
+      "source_url": "https://spatialtech.info/en/works/tv-tower/",
+      "evidence": "CST geolocates the second Russian missile strike on the Kyiv TV tower at 17:19; it falls inside the matched city alert.",
+      "decision": "strict — exact-city aerial strike with event time inside matched alert"
+    },
+    {
+      "alert_start_date": "2022-03-07",
+      "alert_start": "2022-03-07T19:50:16+02:00",
+      "event_time": "~20:30–21:10 EET",
+      "source_url": "https://vechirniy.kyiv.ua/news/62375/",
+      "evidence": "Kyiv reported powerful explosions from air-defence action; aircraft/missiles were engaged around 20:30 and 21:10 while the matched alert was active.",
+      "decision": "strict — exact-city explosions, confirmed aerial context, timed inside matched alert"
+    },
+    {
+      "alert_start_date": "2022-03-12",
+      "alert_start": "2022-03-12T05:21:34+02:00",
+      "event_time": "06:17 EET",
+      "source_url": "https://www.pravda.com.ua/news/2022/03/12/7330632/",
+      "evidence": "At 06:17 an explosive-carrying Russian UAV/downed aerial object struck a building on Podil in Kyiv during the matched alert.",
+      "decision": "strict — exact-city aerial event with explicit time inside matched alert"
+    },
+    {
+      "alert_start_date": "2022-03-15",
+      "alert_start": "2022-03-15T03:45:42+02:00",
+      "event_time": "~04:00–05:00 EET",
+      "source_url": "https://en.lb.ua/news/2022/03/15/11051_explosions_heard_different_kyiv.html",
+      "evidence": "Explosions were reported across Kyiv at about 04:00 and 05:00, with a missile hit among the confirmed impacts, inside one matched alert.",
+      "decision": "strict — exact-city missile/explosion evidence timed inside matched alert"
+    },
+    {
+      "alert_start_date": "2022-03-17",
+      "alert_start": "2022-03-17T03:21:25+02:00",
+      "event_time": "~05:00–05:02 EET",
+      "source_url": "https://vechirniy.kyiv.ua/news/63047/",
+      "evidence": "Around 05:00 missile fragments struck a residential building in Kyiv's Darnytskyi district while the matched alert was active.",
+      "decision": "strict — exact-city aerial event with approximate time inside matched alert"
+    },
+    {
+      "alert_start_date": "2022-03-18",
+      "alert_start": "2022-03-18T07:48:01+02:00",
+      "event_time": "~08:00–08:04 EET",
+      "source_url": "https://vechirniy.kyiv.ua/news/63149/",
+      "evidence": "Around 08:00 debris from a downed Russian missile hit Kyiv's Podil district during the matched alert.",
+      "decision": "strict — exact-city aerial event with approximate time inside matched alert"
+    },
+    {
+      "matched_episode_start": "2022-04-28T18:22:41+03:00",
+      "event_time": "after 20:00",
+      "source_url": "https://www.pravda.com.ua/news/2022/04/28/7342743/",
+      "evidence": "After 20:00 Russian missiles hit an object and an adjacent residential building in Kyiv's Shevchenkivskyi district during the 18:22:41-21:17:58 alert.",
+      "basis": "exact_city_during_alert"
+    },
+    {
+      "matched_episode_start": "2022-06-05T05:01:31+03:00",
+      "event_time": "around 06:00",
+      "source_url": "https://www.pravda.com.ua/news/2022/06/05/7350604/",
+      "evidence": "Around 06:00 explosions were heard in Kyiv's Darnytskyi and Dniprovskyi districts during confirmed Russian missile strikes while the 05:01:31-07:26:36 alert was active.",
+      "basis": "exact_city_during_alert"
+    },
+    {
+      "matched_episode_start": "2022-06-26T05:47:36+03:00",
+      "event_time": "around 06:20",
+      "source_url": "https://www.pravda.com.ua/news/2022/06/26/7354695/",
+      "evidence": "Around 06:20 four explosions were heard in Kyiv; a Russian missile struck in Shevchenkivskyi district inside the 05:47:36-07:21:19 alert.",
+      "basis": "exact_city_during_alert"
+    }
+  ],
+  "sensitivity_only_events": [
+    {
+      "alert_start_date": "2022-03-02",
+      "alert_start": "2022-03-02T20:57:03+02:00",
+      "event_time": "~20:50 EET; near-live reports continued after 21:00",
+      "source_url": "https://lb.ua/society/2022/03/02/507734_rosiya_zavdala_aviatsiynogo_udaru.html",
+      "evidence": "A Russian air strike exploded near Kyiv's Pivdennyi railway station; reported timing straddles the start of the matched alert.",
+      "decision": "sensitivity — near_boundary / conflicting approximate timing"
+    },
+    {
+      "alert_start_date": "2022-03-03",
+      "alert_start": "2022-03-03T01:47:27+02:00",
+      "event_time": "~01:42–02:00 EET",
+      "source_url": "https://vechirniy.kyiv.ua/news/62096/",
+      "evidence": "Powerful explosions in Kyiv were attributed to air defence around 02:00, while another contemporaneous report placed the bombardment near 01:42.",
+      "decision": "sensitivity — near_boundary because contemporaneous timings straddle alert start"
+    },
+    {
+      "alert_start_date": "2022-03-16",
+      "alert_start": "2022-03-16T06:12:43+02:00",
+      "event_time": "~06:00 EET; rescue call 06:16",
+      "source_url": "https://vechirniy.kyiv.ua/news/62966/",
+      "evidence": "A missile fragment struck a Kyiv residential building; the event is reported around 06:00 and the rescue call at 06:16, straddling alert start.",
+      "decision": "sensitivity — near_boundary; event time is not precise enough for strict"
+    },
+    {
+      "alert_start_date": "2022-03-20",
+      "alert_start": "2022-03-20T22:46:18+02:00",
+      "event_time": "~22:45–22:46 EET; emergency call 22:48",
+      "source_url": "https://zmina.info/news/vnaslidok-nichogo-obstrilu-rosiyanamy-stolychnogo-podolu-zagynuly-vosmero-lyudej/",
+      "evidence": "The Russian missile strike on Kyiv's Retroville is reported around 22:45–22:46, immediately before the matched alert; the emergency call followed at 22:48.",
+      "decision": "sensitivity — strong near_boundary same-attack case"
+    },
+    {
+      "alert_start_date": "2022-04-15",
+      "alert_start": "2022-04-15T00:12:54+03:00",
+      "event_time": "~01:30 EEST report window",
+      "source_url": "https://www.pravda.com.ua/news/2022/04/15/7339811/",
+      "evidence": "Kyiv residents reported explosions while Russian missiles were launched and air defence worked; reporting falls within the long matched alert.",
+      "decision": "sensitivity — inferred_same_attack; exact explosion time is not independently pinned"
+    },
+    {
+      "alert_start_date": "2022-04-16",
+      "alert_start": "2022-04-16T05:21:21+03:00",
+      "event_time": "predawn/morning EEST",
+      "source_url": "https://kyivcity.gov.ua/news/kiv_vazhlive_na_16_kvitnya__Kyiv_Important_info_as_of_April_16/",
+      "evidence": "Kyiv authorities reported a predawn Russian missile strike in Darnytskyi district during the morning alert window, but gave no exact impact time.",
+      "decision": "sensitivity — inferred_same_attack; exact event time unavailable"
+    },
+    {
+      "matched_episode_start": "2022-05-04T19:45:02+03:00",
+      "event_time": null,
+      "source_url": "https://24tv.ua/povidomlyayut-pro-vibuhi-kiyevi_n1971453",
+      "evidence": "Media reported explosion sounds in Kyiv during the active 19:45:02-23:16:09 alert and assessed them as likely air-defense activity; exact event time and official explosion confirmation were not established.",
+      "basis": "inferred_same_attack"
+    }
+  ],
+  "review_events": [
+    {
+      "alert_start_date": "2022-03-17",
+      "alert_start": "2022-03-17T16:17:26+02:00",
+      "event_time": "~16:30 EET",
+      "source_url": "https://en.lb.ua/news/2022/03/17/11250_enemy_struck_sviatoshyno.html",
+      "evidence": "The Sviatoshynskyi strike occurred inside the matched alert, but sources conflict between artillery-shell and missile-strike classification.",
+      "decision": "review — aerial-war context unresolved; would change numerator by one"
+    }
+  ],
+  "strict_n": 9,
+  "sensitivity_n": 16,
+  "local_web_only_retained": 12,
+  "qa": "Reconstructed from kyiv-P1a and kyiv-P1b; both children complete, denominators sum to frozen parent, date ranges are contiguous/non-overlapping, and no duplicate matched alert episodes were found."
+}
