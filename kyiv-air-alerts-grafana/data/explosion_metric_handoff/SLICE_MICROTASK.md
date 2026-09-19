@@ -2,6 +2,15 @@
 
 Use this file together with exactly one row from `RESEARCH_SLICES_2026-09-18.csv`.
 
+## Routing / status guard
+
+Check the active row's `status` before doing research.
+
+- `complete`: stop; the parent result already exists.
+- `split_pending`: do **not** research this large parent slice. Use the two child rows in `RESEARCH_SUBSLICES_2026-09-19.csv` and `SUBSLICE_MICROTASK.md`.
+- `blocked` or `denominator_mismatch`: stop; this belongs to the later repair pass.
+- Only a genuinely unsplit `pending` parent row should use this file directly.
+
 ## Scope
 
 Work only on the city/date slice in that row.
