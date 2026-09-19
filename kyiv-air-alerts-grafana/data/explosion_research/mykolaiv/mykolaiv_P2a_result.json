@@ -14,6 +14,13 @@
   "denominator": 274,
   "strict_events": [
     {
+      "alert_start": "2026-03-27T22:26:50Z",
+      "event_time": "2026-03-28T01:00:00+02:00",
+      "source_url": "https://novosti-n.org/ua/news/U-Mykolayevi-prolunaly-vybuhy-335176",
+      "evidence": "Близько 01:00 у Миколаєві пролунала серія вибухів; Повітряні сили попереджали про БпЛА, один Shahed був безпосередньо над містом.",
+      "decision": "strict: exact-city approximate time inside matched alert"
+    },
+    {
       "alert_start": "2026-03-31T20:12:02Z",
       "event_interval": [
         "2026-03-31T23:20:00+03:00",
@@ -120,6 +127,13 @@
       "decision": "strict: exact-city time inside separate long matched alert"
     },
     {
+      "alert_start": "2026-04-25T16:53:03Z",
+      "event_time": "2026-04-25T20:10:00+03:00",
+      "source_url": "https://nv.ua/ukr/ukraine/events/rosiyski-ataki-v-nich-z-25-na-26-kvitnya-vsi-podrobici-onlayn-50603116.html",
+      "evidence": "О 20:10 у Миколаєві пролунав вибух під час повітряної тривоги; сторінка веде хроніку російської атаки дронами, відбій на Миколаївщині був о 20:13.",
+      "decision": "strict: exact-city time inside matched alert"
+    },
+    {
       "alert_start": "2026-04-27T08:28:23Z",
       "event_time": "2026-04-27T12:05:00+03:00",
       "source_url": "https://suspilne.media/mykolaiv/1293579-vibuhi-prolunali-u-mikolaevi/",
@@ -195,6 +209,13 @@
       "decision": "strict: exact-city time inside matched alert"
     },
     {
+      "alert_start": "2026-05-21T04:12:57Z",
+      "event_time": "2026-05-21T07:59:00+03:00",
+      "source_url": "https://24tv.ua/ataka-shahediv-20-21-travnya-2026-de-letyat-bpla-karta-povitryanih_n3071727",
+      "evidence": "О 07:59 у Миколаєві під час повітряної тривоги пролунав вибух; матеріал описує нічну російську атаку ударними БпЛА.",
+      "decision": "strict: explicit exact-city explosion during matched alert"
+    },
+    {
       "alert_start": "2026-05-21T08:08:54Z",
       "event_interval": [
         "2026-05-21T11:08:54+03:00",
@@ -203,6 +224,13 @@
       "source_url": "https://novosti-n.org/ua/news/Raketna-nebezpeka-u-Mykolayevi-chuly-vybuh-chastyna-mista-bez-svitla-338461",
       "evidence": "Після тривоги о 11:08 і повідомлення про дві швидкісні цілі на Миколаїв у місті почули вибух.",
       "decision": "strict: exact-city explosion explicitly sequenced within matched alert"
+    },
+    {
+      "alert_start": "2026-05-22T00:24:49Z",
+      "event_time": "2026-05-22T03:54:00+03:00",
+      "source_url": "https://24tv.ua/ataka-droniv-21-travnya-2026-kudi-letyat-droni-sogodni-karta_n3072471",
+      "evidence": "О 03:54 у Миколаєві пролунали вибухи; о 03:48 повідомлялося про БпЛА в районі міста, а час потрапляє всередину matched alert.",
+      "decision": "strict: exact-city time inside matched alert"
     },
     {
       "alert_start": "2026-05-22T01:52:03Z",
@@ -234,18 +262,11 @@
       "source_url": "https://novosti-n.org/news/Ataka-SHahedov-v-Nykolaeve-progremely-vzrivi-337044",
       "evidence": "Увечері в Миколаєві пролунали вибухи після попереджень про БпЛА до міста та Shahed над містом; точний час вибухів не наведено.",
       "decision": "sensitivity_only: inferred_same_attack; cannot prove event time inside alert"
-    },
-    {
-      "alert_start": "2026-05-22T00:24:49Z",
-      "event_time": "2026-05-22T04:06:00+03:00",
-      "source_url": "https://nv.ua/ukr/amp/ataka-shahediv-21-travnya-povidomlyayut-pro-ruh-bpla-u-nizci-oblastey-mapa-povitryanih-trivog-50609982.html",
-      "evidence": "О 03:55 повідомлялось про БпЛА в районі Миколаєва, о 04:06 — про вибухи у місті; matched alert завершився о 03:57:42.",
-      "decision": "sensitivity_only: near_boundary +8m18s after alert end"
     }
   ],
   "review_events": [],
-  "strict_n": 27,
-  "sensitivity_n": 29,
-  "local_web_only_retained": 25,
-  "qa": "Source-slice checks passed (274/274); canonical and legacy parent results absent; 27 strict + 2 sensitivity-only, no material review items; local_web_only_retained counts retained events sourced only to local Mykolaiv web outlets; Telegram archive not needed."
+  "strict_n": 31,
+  "sensitivity_n": 32,
+  "local_web_only_retained": 26,
+  "qa": "Source-slice checks passed (274/274); canonical and legacy parent results absent; 31 strict + 1 sensitivity-only (32 sensitivity total), no material review items; local_web_only_retained=26; Telegram archive not needed after resolving 22 May by exact-time web evidence."
 }
