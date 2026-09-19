@@ -34,8 +34,8 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Install requests
-        run: pip install requests
+      - name: Install dependencies
+        run: pip install -r kyiv-air-alerts-grafana/requirements.txt
 
       - name: Build and validate source slices
         working-directory: kyiv-air-alerts-grafana
