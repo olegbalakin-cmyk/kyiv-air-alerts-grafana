@@ -82,6 +82,7 @@
       <article id="kpiExplosionsCard" class="kpi-card hidden">
         <span class="kpi-label">Тривог, під час яких повідомлялось про вибухи</span>
         <strong id="kpiExplosionsPct">—</strong>
+        <small id="kpiExplosionsRange"></small>
         <small id="kpiExplosionsCount"></small>
       </article>
     </section>
@@ -97,6 +98,28 @@
         <p class="chart-subtitle">Середнє повної тривалості всіх тривог, що почалися в обраному періоді. Якщо тривога закінчилася вже після завершення періоду, вся її тривалість відноситься до періоду старту.</p>
         <div class="chart-wrap"><canvas id="cityDurationChart"></canvas></div>
       </article>
+    </section>
+
+    <section id="rolling7dSection" class="comparison-section">
+      <div class="section-heading">
+        <div>
+          <div class="eyebrow">Ковзні 7 днів</div>
+          <h2>Динаміка за 7-денним вікном</h2>
+          <p>Кожна точка охоплює 7 завершених календарних днів і датована останнім днем вікна; сусідні точки перекриваються на 6 днів.</p>
+        </div>
+      </div>
+      <section class="chart-grid">
+        <article class="panel chart-card wide">
+          <h3>Інтенсивність тривог</h3>
+          <p class="chart-subtitle">Стовпчики: середній час під тривогою на добу за 7 днів. Лінія: середня кількість тривог на день за ті самі 7 днів.</p>
+          <div class="chart-wrap"><canvas id="rolling7dIntensityChart"></canvas></div>
+        </article>
+        <article class="panel chart-card wide">
+          <h3>Середня повна тривалість однієї тривоги</h3>
+          <p class="chart-subtitle">Середня повна тривалість тривог, що почалися у відповідному 7-денному вікні.</p>
+          <div class="chart-wrap"><canvas id="rolling7dDurationChart"></canvas></div>
+        </article>
+      </section>
     </section>
 
     <section class="comparison-section">
