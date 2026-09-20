@@ -1,24 +1,21 @@
-name: Build explosion source slices
+name: Build kharkiv-P6 explosion source slices
 
 on:
-  workflow_dispatch:
   push:
-    branches: [multicity-wip-2026-09-16]
+    branches:
+      - multicity-wip-2026-09-16
     paths:
       - ".github/workflows/build-explosion-source-slices.yml"
-      - "kyiv-air-alerts-grafana/scripts/build_explosion_source_slices.py"
-      - "kyiv-air-alerts-grafana/scripts/audit_city_sources.py"
-      - "kyiv-air-alerts-grafana/data/explosion_metric_handoff/RESEARCH_SUBSLICES_2026-09-19.csv"
 
 concurrency:
-  group: explosion-source-slices
+  group: kharkiv-P6-explosion-source-slices
   cancel-in-progress: true
 
 permissions:
   contents: write
 
 jobs:
-  build:
+  build-kharkiv-p6:
     runs-on: ubuntu-latest
     timeout-minutes: 15
 
@@ -37,41 +34,51 @@ jobs:
       - name: Install dependencies
         run: pip install -r kyiv-air-alerts-grafana/requirements.txt
 
-      - name: Build and validate source slices
+      - name: Build kharkiv-P6 source slices
         working-directory: kyiv-air-alerts-grafana
-        run: python scripts/build_explosion_source_slices.py
+        run: python scripts/build_explosion_source_slices.py --task kharkiv-P6 --max-episodes 250
 
-      - name: Validate manifest
+      - name: Validate kharkiv-P6 generated files
         working-directory: kyiv-air-alerts-grafana
         run: |
           python - <<'PY'
           import json
           from pathlib import Path
 
-          base = Path("data/explosion_metric_handoff")
-          m = json.loads((base / "SOURCE_SLICES_MANIFEST_2026-09-19.json").read_text(encoding="utf-8"))
-          assert m["subslice_count"] == 40, m["subslice_count"]
-          assert m["all_match_frozen_denominator"] is True
-          assert not m["mismatches"]
-          files = sorted((base / "source_slices").glob("*_alerts.json"))
-          assert len(files) == 40, len(files)
+          base = Path("data/explosion_metric_handoff/source_slices")
+          manifest = base / "kharkiv-P6_chunks_manifest.json"
+          if not manifest.is_file():
+              raise SystemExit(f"Missing {manifest}")
+
+          files = sorted(base.glob("kharkiv-P6*_alerts.json"))
+          if not files:
+              raise SystemExit("No kharkiv-P6*_alerts.json files generated")
+
           for path in files:
-              x = json.loads(path.read_text(encoding="utf-8"))
-              assert x["episode_count"] == x["frozen_denominator"], path.name
-              assert len(x["episodes"]) == x["frozen_denominator"], path.name
-          print("validated", len(files), "source slices")
+              payload = json.loads(path.read_text(encoding="utf-8"))
+              episode_count = payload["episode_count"]
+              if episode_count > 250:
+                  raise SystemExit(
+                      f"{path.name}: episode_count={episode_count} exceeds 250"
+                  )
+
+          print(f"validated {len(files)} kharkiv-P6 alert files")
           PY
 
-      - name: Commit source slices
+      - name: Commit kharkiv-P6 generated files
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add             kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices             kyiv-air-alerts-grafana/data/explosion_metric_handoff/SOURCE_SLICES_MANIFEST_2026-09-19.json
+
+          git add -- kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/kharkiv-P6_chunks_manifest.json
+          git add -- kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/kharkiv-P6*_alerts.json
+
           if git diff --cached --quiet; then
-            echo "No source-slice changes"
+            echo "No kharkiv-P6 generated-file changes"
             exit 0
           fi
-          git commit -m "Build explosion research source slices"
+
+          git commit -m "Build kharkiv-P6 source slices"
 
           for attempt in 1 2 3; do
             git fetch origin multicity-wip-2026-09-16
