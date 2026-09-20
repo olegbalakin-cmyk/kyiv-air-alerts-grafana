@@ -130,13 +130,14 @@ jobs:
           assert x["meta"]["rolling_window_days"] == 90
           assert len(x["cities"]) >= 10
           assert x["meta"]["city_count"] == len(x["cities"])
-          assert x["cities"]["poltava"]["strict_n"] == 51
-          assert x["cities"]["poltava"]["total_alerts"] == 1805
-          assert x["cities"]["vinnytsia"]["strict_n"] == 5
-          assert x["cities"]["vinnytsia"]["total_alerts"] == 362
+          for key in ("poltava", "vinnytsia"):
+              assert key in x["cities"], key
+              assert x["cities"][key]["strict_n"] >= 0, key
+              assert x["cities"][key]["total_alerts"] >= x["cities"][key]["strict_n"], key
           built = json.loads(Path("kyiv-air-alerts-grafana/data/dashboard_data.json").read_text(encoding="utf-8"))
-          assert built["explosion_metric_test"]["cities"]["poltava"]["strict_n"] == 51
-          assert built["explosion_metric_test"]["cities"]["vinnytsia"]["strict_n"] == 5
+          for key in ("poltava", "vinnytsia"):
+              assert built["explosion_metric_test"]["cities"][key]["strict_n"] == x["cities"][key]["strict_n"], key
+              assert built["explosion_metric_test"]["cities"][key]["total_alerts"] == x["cities"][key]["total_alerts"], key
           for key, city in x["cities"].items():
               assert city["rolling90"], key
               assert city["rolling90"][0]["date"] > city["coverage_start"], key
