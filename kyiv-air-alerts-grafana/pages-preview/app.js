@@ -51,6 +51,14 @@ function explosionCity(key) {
   const explosionKey = key === "ivano-frankivsk" ? "ivano_frankivsk" : key;
   return state.data.explosion_metric_test?.cities?.[explosionKey] || null;
 }
+function explosionEstimate(explosion) {
+  if (!explosion) return null;
+  const strict = Number(explosion.strict_pct);
+  const sensitivity = Number(explosion.sensitivity_pct);
+  if (!Number.isFinite(strict)) return null;
+  const high = Number.isFinite(sensitivity) ? Math.max(strict, sensitivity) : strict;
+  return { low: strict, high, mid: (strict + high) / 2 };
+}
 
 function fillSelect(select, keys, current, allowEmpty = false) {
   select.innerHTML = "";
@@ -191,12 +199,19 @@ function renderCity() {
 
   const explosion = explosionCity(key);
   const explosionCard = $("kpiExplosionsCard");
-  if (explosion) {
+  const explosionEstimateValue = explosionEstimate(explosion);
+  if (explosion && explosionEstimateValue) {
+    const sensitivityN = Number.isFinite(Number(explosion.sensitivity_n))
+      ? Number(explosion.sensitivity_n)
+      : Number(explosion.strict_n);
     explosionCard.classList.remove("hidden");
-    $("kpiExplosionsPct").textContent = `${fmt(explosion.strict_pct, 1)}%`;
-    $("kpiExplosionsCount").textContent = `${explosion.strict_n} із ${explosion.total_alerts} тривог · весь доступний період`;
+    $("kpiExplosionsPct").textContent = `≈${fmt(explosionEstimateValue.mid, 1)}%`;
+    $("kpiExplosionsRange").textContent = `Оцінюваний діапазон: ${fmt(explosionEstimateValue.low, 1)}–${fmt(explosionEstimateValue.high, 1)}%`;
+    $("kpiExplosionsCount").textContent = `Консервативно ${explosion.strict_n}; розширено ${sensitivityN} із ${explosion.total_alerts} тривог · весь доступний період`;
+    explosionCard.title = "Орієнтовне значення — середина між консервативною та розширеною оцінкою. Діапазон відображає класифікаційну невизначеність і не є статистичним довірчим інтервалом.";
   } else {
     explosionCard.classList.add("hidden");
+    explosionCard.removeAttribute("title");
   }
 
   const rows = city[period] || [];
@@ -264,9 +279,95 @@ function renderCity() {
 
   setChart("cityDurationChart", labels, [seriesDataset(labelFor(key), rows.map(r => r.avg_alert_duration_min), COLORS[2], dashed)], "Хвилин");
 
+  renderRolling7d(key);
   renderShortHorizon(key);
   renderCasualties(key);
   updateUrl();
+}
+
+function renderRolling7d(key) {
+  const section = $("rolling7dSection");
+  const rows = state.data.cities[key]?.weekly || [];
+  if (!rolling7dEnabled() || !rows.length) {
+    section?.classList.add("hidden");
+    for (const id of ["rolling7dIntensityChart", "rolling7dDurationChart"]) {
+      if (state.charts[id]) {
+        state.charts[id].destroy();
+        delete state.charts[id];
+      }
+    }
+    return;
+  }
+
+  section?.classList.remove("hidden");
+  const labels = rows.map(r => rowTime(r, "weekly"));
+  const dashed = sourceType(key) === "raion_proxy";
+
+  if (state.charts.rolling7dIntensityChart) state.charts.rolling7dIntensityChart.destroy();
+  state.charts.rolling7dIntensityChart = new Chart($("rolling7dIntensityChart"), {
+    data: {
+      labels,
+      datasets: [
+        {
+          type: "bar",
+          label: "Годин під тривогою / добу",
+          data: rows.map(r => r.avg_daily_alert_hours),
+          yAxisID: "yHours",
+          backgroundColor: COLORS[0] + "77",
+          borderColor: COLORS[0],
+          borderWidth: 1
+        },
+        {
+          type: "line",
+          label: "Тривог / день",
+          data: rows.map(r => r.alerts_per_day),
+          yAxisID: "yAlerts",
+          borderColor: COLORS[1],
+          backgroundColor: COLORS[1] + "22",
+          pointRadius: 2,
+          pointHoverRadius: 4,
+          borderWidth: 2,
+          borderDash: dashed ? [7, 5] : [],
+          tension: 0.12,
+          spanGaps: true
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      animation: false,
+      interaction: { mode: "index", intersect: false },
+      plugins: {
+        legend: { labels: { color: TEXT, boxWidth: 14, usePointStyle: true } },
+        tooltip: { mode: "index", intersect: false }
+      },
+      scales: {
+        x: { ticks: { color: TEXT, maxRotation: 0, autoSkip: true }, grid: { color: GRID } },
+        yHours: {
+          position: "left",
+          beginAtZero: true,
+          ticks: { color: TEXT },
+          grid: { color: GRID },
+          title: { display: true, text: "Годин / добу", color: TEXT }
+        },
+        yAlerts: {
+          position: "right",
+          beginAtZero: true,
+          ticks: { color: TEXT },
+          grid: { drawOnChartArea: false },
+          title: { display: true, text: "Тривог / день", color: TEXT }
+        }
+      }
+    }
+  });
+
+  setChart(
+    "rolling7dDurationChart",
+    labels,
+    [seriesDataset(labelFor(key), rows.map(r => r.avg_alert_duration_min), COLORS[2], dashed)],
+    "Хвилин"
+  );
 }
 
 function renderShortHorizon(key) {
@@ -499,9 +600,10 @@ function renderExplosionComparison(keys) {
     }
   );
 
+  const rangeNote = "Лінії показують консервативну strict-оцінку; агрегований KPI для міста вище подається як орієнтовне midpoint-значення з діапазоном strict–sensitivity. Це класифікаційна невизначеність, не довірчий інтервал.";
   note.textContent = missingKeys.length
-    ? `Ковзні 90 днів, strict; повне 90-денне вікно. Поки немає завершеного explosion-ряду: ${missingKeys.map(labelFor).join(", ")}.`
-    : "Ковзні 90 днів, strict; кожна точка = n/N за останні 90 завершених днів. Перемикач «Період» вище на цей графік не впливає.";
+    ? `Ковзні 90 днів, strict; повне 90-денне вікно. Поки немає завершеного explosion-ряду: ${missingKeys.map(labelFor).join(", ")}. ${rangeNote}`
+    : `Ковзні 90 днів, strict; кожна точка = n/N за останні 90 завершених днів. Перемикач «Період» вище на цей графік не впливає. ${rangeNote}`;
 }
 
 function renderComparison() {
