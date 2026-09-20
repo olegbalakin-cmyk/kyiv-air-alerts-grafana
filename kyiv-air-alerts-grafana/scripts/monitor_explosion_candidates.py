@@ -12,7 +12,7 @@ import xml.etree.ElementTree as ET
 from datetime import datetime, timedelta, timezone
 from email.utils import parsedate_to_datetime
 from pathlib import Path
-from urllib.parse import quote_plus
+from urllib.parse import quote_plus, urlparse
 from zoneinfo import ZoneInfo
 
 import requests
@@ -38,6 +38,10 @@ FOLLOWUP_HOURS = [("immediate", 0), ("24h", 24), ("72h", 72), ("7d", 24 * 7)]
 MAX_EPISODES_PER_CITY = 10000
 TELEGRAM_RETENTION_DAYS = 9
 TELEGRAM_MAX_PAGES = 100
+FULLTEXT_FETCH_TIMEOUT_SECONDS = 15
+MAX_FULLTEXT_FETCHES_PER_CITY = 8
+MAX_EXTRACTED_ARTICLE_CHARS = 50000
+FULLTEXT_STRIP_TAGS = ("script", "style", "nav", "header", "footer", "aside", "form", "svg", "noscript")
 TELEGRAM_CHANNELS = {
     "suspilne": {
         "handle": "suspilnenews",
@@ -376,6 +380,113 @@ def explosion_relevant(text: str) -> bool:
     return any(term in low for term in EXPLOSION_TERMS)
 
 
+def matched_text_excerpt(text: str, max_chars: int = 480) -> str | None:
+    normalized = " ".join((text or "").split())
+    if not normalized:
+        return None
+    low = normalized.casefold()
+    hits = [low.find(term) for term in EXPLOSION_TERMS if low.find(term) >= 0]
+    if not hits:
+        return normalized[:max_chars]
+    pos = min(hits)
+    start = max(0, pos - max_chars // 3)
+    end = min(len(normalized), start + max_chars)
+    if end == len(normalized):
+        start = max(0, end - max_chars)
+    fragment = normalized[start:end]
+    return ("…" if start else "") + fragment + ("…" if end < len(normalized) else "")
+
+
+def extract_article_text(raw_html: str, max_chars: int = MAX_EXTRACTED_ARTICLE_CHARS) -> str:
+    soup = BeautifulSoup(raw_html or "", "html.parser")
+    for tag in soup.find_all(FULLTEXT_STRIP_TAGS):
+        tag.decompose()
+
+    container = soup.find("article") or soup.find("main")
+    if container is not None:
+        text = container.get_text(" ", strip=True)
+    else:
+        text = " ".join(p.get_text(" ", strip=True) for p in soup.find_all("p"))
+    return " ".join(text.split())[:max_chars]
+
+
+def fetch_publisher_fulltext(url: str) -> tuple[str | None, str | None]:
+    try:
+        response = requests.get(
+            url,
+            headers={
+                "User-Agent": "Mozilla/5.0 (compatible; ukraine-air-alerts-explosion-monitor/1.0)",
+                "Accept-Language": "uk,en;q=0.7",
+            },
+            timeout=FULLTEXT_FETCH_TIMEOUT_SECONDS,
+            allow_redirects=True,
+        )
+        response.raise_for_status()
+        content_type = str(response.headers.get("Content-Type") or "").casefold()
+        if "html" not in content_type:
+            return None, None
+        resolved_url = str(response.url or url)
+        resolved_host = (urlparse(resolved_url).hostname or "").casefold()
+        if resolved_host == "google.com" or resolved_host.endswith(".google.com"):
+            return None, None
+        body = extract_article_text(response.text)
+        if not body:
+            return None, None
+        return body, resolved_url
+    except Exception:
+        return None, None
+
+
+def build_google_news_candidate(
+    city_key: str,
+    title: str,
+    description: str,
+    link: str,
+    publisher: str,
+    publisher_url: str,
+    published_at: str | None,
+    fulltext_fetcher=None,
+) -> tuple[dict | None, bool, bool]:
+    combined = f"{title} {description}".strip()
+    base = {
+        "title": title,
+        "url": link,
+        "publisher": publisher or "Google News result",
+        "publisher_url": publisher_url or None,
+        "published_at": published_at,
+        "snippet": description[:1200],
+    }
+
+    if city_mentioned(city_key, combined) and explosion_relevant(combined):
+        return {
+            **base,
+            "discovery_basis": "rss_title_snippet",
+            "resolved_url": None,
+            "matched_text_excerpt": matched_text_excerpt(combined),
+        }, False, False
+
+    if fulltext_fetcher is None:
+        return None, False, False
+
+    try:
+        body, resolved_url = fulltext_fetcher(link)
+    except Exception:
+        return None, True, False
+    if not body:
+        return None, True, False
+
+    expanded = f"{combined} {body}".strip()
+    if not city_mentioned(city_key, expanded) or not explosion_relevant(expanded):
+        return None, True, False
+
+    return {
+        **base,
+        "discovery_basis": "publisher_fulltext",
+        "resolved_url": resolved_url,
+        "matched_text_excerpt": matched_text_excerpt(expanded),
+    }, True, True
+
+
 def air_context(text: str) -> bool:
     low = " ".join((text or "").casefold().split())
     return any(term in low for term in AIR_CONTEXT_TERMS)
@@ -538,7 +649,7 @@ def google_news_query(city_label: str) -> str:
     )
 
 
-def search_city_news(city_key: str, earliest: datetime, now: datetime) -> tuple[list[dict], str]:
+def search_city_news(city_key: str, earliest: datetime, now: datetime) -> tuple[list[dict], str, dict]:
     label = CITY_CONFIG[city_key]["label"]
     url = f"{GOOGLE_NEWS_URL}?q={quote_plus(google_news_query(label))}&hl=uk&gl=UA&ceid=UA:uk"
     response = requests.get(
@@ -554,6 +665,8 @@ def search_city_news(city_key: str, earliest: datetime, now: datetime) -> tuple[
     lower_bound = earliest - timedelta(hours=3)
     upper_bound = now + timedelta(hours=1)
     rows = []
+    fulltext_fetches = 0
+    fulltext_rescued_candidates = 0
     for item in root.findall(".//item"):
         title = clean_text(item.findtext("title") or "")
         description = clean_text(item.findtext("description") or "")
@@ -566,21 +679,30 @@ def search_city_news(city_key: str, earliest: datetime, now: datetime) -> tuple[
             continue
         if published and not (lower_bound <= published <= upper_bound):
             continue
-        combined = f"{title} {description}"
-        if not city_mentioned(city_key, combined):
-            continue
-        if not explosion_relevant(combined):
-            continue
-        rows.append({
-            "title": title,
-            "url": link,
-            "publisher": publisher or "Google News result",
-            "publisher_url": publisher_url or None,
-            "published_at": iso(published) if published else None,
-            "snippet": description[:1200],
-        })
+
+        fetcher = fetch_publisher_fulltext if fulltext_fetches < MAX_FULLTEXT_FETCHES_PER_CITY else None
+        row, fetched, rescued = build_google_news_candidate(
+            city_key,
+            title,
+            description,
+            link,
+            publisher,
+            publisher_url,
+            iso(published) if published else None,
+            fulltext_fetcher=fetcher,
+        )
+        if fetched:
+            fulltext_fetches += 1
+        if rescued:
+            fulltext_rescued_candidates += 1
+        if row:
+            rows.append(row)
+
     dedup = {(r["url"], r["title"]): r for r in rows}
-    return list(dedup.values()), url
+    return list(dedup.values()), url, {
+        "fulltext_fetches": fulltext_fetches,
+        "fulltext_rescued_candidates": fulltext_rescued_candidates,
+    }
 
 
 def ensure_state() -> dict:
@@ -690,7 +812,8 @@ def add_candidates(queue: list[dict], city_key: str, rows: list[dict], due: list
             existing["last_seen_at"] = iso(now)
             continue
 
-        auto_match = auto_strict_episode(row, due)
+        discovery_basis = row.get("discovery_basis")
+        auto_match = None if discovery_basis == "publisher_fulltext" else auto_strict_episode(row, due)
         status = "approved_strict" if auto_match else "needs_review"
         item = {
             "candidate_id": cid,
@@ -704,12 +827,19 @@ def add_candidates(queue: list[dict], city_key: str, rows: list[dict], due: list
             "title": row["title"],
             "published_at": row.get("published_at"),
             "snippet": row.get("snippet"),
+            "discovery_basis": discovery_basis,
+            "resolved_url": row.get("resolved_url"),
+            "matched_text_excerpt": row.get("matched_text_excerpt"),
             "first_discovered_at": iso(now),
             "last_seen_at": iso(now),
             "trigger_episode_ids": episode_ids,
             "trigger_check_labels": check_labels,
             "matched_episode_id": auto_match["episode_id"] if auto_match else None,
-            "review_note": "auto-approved: explicit during-alert wording + air context + publication inside the unique immediate alert window" if auto_match else None,
+            "review_note": (
+                "auto-approved: explicit during-alert wording + air context + publication inside the unique immediate alert window"
+                if auto_match
+                else ("publisher full-text rescue: discovery only; strict classification requires review" if discovery_basis == "publisher_fulltext" else None)
+            ),
             "note": (
                 "Auto-strict is allowed only for exact-city evidence with air context, explicit wording that the event occurred during an alert, "
                 "an immediate follow-up, and publication inside that unique alert window (plus 30 minutes). "
@@ -738,6 +868,110 @@ def self_test() -> None:
     ep = make_episode("poltava", dt, dt + timedelta(hours=1))
     assert [x["label"] for x in ep["checks"]] == ["immediate", "24h", "72h", "7d"]
     assert ep["alert_start_date_kyiv"] == "2026-09-18"
+
+    fulltext_calls = []
+    def unexpected_fulltext_fetch(url: str):
+        fulltext_calls.append(url)
+        raise AssertionError("full-text fetch should not run when RSS already passes")
+
+    rss_row, fetched, rescued = build_google_news_candidate(
+        "poltava",
+        "У Полтаві пролунали вибухи",
+        "",
+        "https://news.google.test/rss-item-1",
+        "Test",
+        "",
+        iso(dt),
+        fulltext_fetcher=unexpected_fulltext_fetch,
+    )
+    assert rss_row and rss_row["discovery_basis"] == "rss_title_snippet"
+    assert not fetched and not rescued and not fulltext_calls
+
+    rescued_row, fetched, rescued = build_google_news_candidate(
+        "poltava",
+        "Новини Полтави",
+        "Оперативне оновлення",
+        "https://news.google.test/rss-item-2",
+        "Test",
+        "",
+        iso(dt),
+        fulltext_fetcher=lambda _url: (
+            "У Полтаві пролунали вибухи під час повітряної тривоги.",
+            "https://publisher.test/article-2",
+        ),
+    )
+    assert rescued_row and fetched and rescued
+    assert rescued_row["discovery_basis"] == "publisher_fulltext"
+    assert rescued_row["resolved_url"] == "https://publisher.test/article-2"
+
+    rejected_row, fetched, rescued = build_google_news_candidate(
+        "poltava",
+        "Оперативні новини",
+        "",
+        "https://news.google.test/rss-item-3",
+        "Test",
+        "",
+        iso(dt),
+        fulltext_fetcher=lambda _url: (
+            "У Полтавській області пролунали вибухи.",
+            "https://publisher.test/article-3",
+        ),
+    )
+    assert rejected_row is None and fetched and not rescued
+
+    failed_row, fetched, rescued = build_google_news_candidate(
+        "poltava",
+        "Новини Полтави",
+        "",
+        "https://news.google.test/rss-item-4",
+        "Test",
+        "",
+        iso(dt),
+        fulltext_fetcher=lambda _url: (_ for _ in ()).throw(RuntimeError("synthetic fetch failure")),
+    )
+    assert failed_row is None and fetched and not rescued
+
+    article = extract_article_text(
+        "<header>skip</header><article><p>У Полтаві пролунали вибухи.</p><script>bad</script></article><footer>skip</footer>"
+    )
+    assert article == "У Полтаві пролунали вибухи."
+    assert MAX_FULLTEXT_FETCHES_PER_CITY == 8
+
+    strict_text = "У Полтаві під час повітряної тривоги пролунали вибухи"
+    strict_base = {
+        "title": strict_text,
+        "publisher": "Test",
+        "publisher_url": None,
+        "published_at": iso(dt + timedelta(minutes=30)),
+        "snippet": "",
+        "resolved_url": None,
+        "matched_text_excerpt": strict_text,
+    }
+    due = [(ep, ep["checks"][0])]
+
+    rss_queue = []
+    rss_added, rss_auto = add_candidates(
+        rss_queue,
+        "poltava",
+        [{**strict_base, "url": "https://news.google.test/rss-auto", "discovery_basis": "rss_title_snippet"}],
+        due,
+        dt,
+    )
+    assert rss_added == 1 and rss_auto == 1
+    assert rss_queue[0]["status"] == "approved_strict"
+
+    fulltext_queue = []
+    fulltext_added, fulltext_auto = add_candidates(
+        fulltext_queue,
+        "poltava",
+        [{**strict_base, "url": "https://news.google.test/fulltext-review", "discovery_basis": "publisher_fulltext"}],
+        due,
+        dt,
+    )
+    assert fulltext_added == 1 and fulltext_auto == 0
+    assert fulltext_queue[0]["status"] == "needs_review"
+    assert fulltext_queue[0]["matched_episode_id"] is None
+
     if "kyiv" in CITY_CONFIG:
         kyiv_rows = load_kyiv_alert_episodes(KYIV_ALERTS_FILE)
         assert kyiv_rows and kyiv_rows[-1]["alert_source"] == "kyiv_combined_exact_city"
@@ -745,7 +979,10 @@ def self_test() -> None:
         sev_rows = load_sevastopol_alert_episodes(SEVASTOPOL_EVENTS_FILE)
         assert sev_rows and sev_rows[-1]["alert_source"] == "sevastopol_verified_exact_city_pairs"
     assert len(CITY_CONFIG) >= 10
-    print(f"Self-test OK: {len(CITY_CONFIG)} audited cities, exact-city filter, explosion filter, follow-up schedule")
+    print(
+        f"Self-test OK: {len(CITY_CONFIG)} audited cities, exact-city filter, explosion filter, "
+        "full-text fallback, discovery-only guard, follow-up schedule"
+    )
 
 
 def main() -> None:
@@ -786,14 +1023,17 @@ def main() -> None:
     due = due_checks(state, started)
     searches = {}
     new_candidates = 0
+    fulltext_fetches = 0
+    fulltext_rescued_candidates = 0
     for city_key, city_due in sorted(due.items()):
         earliest = min(parse_dt(ep.get("alert_start")) or started for ep, _ in city_due)
         rows = telegram_candidates_for_city(state, city_key, earliest, started)
         telegram_count = len(rows)
         query_url = None
         google_error = None
+        google_stats = {"fulltext_fetches": 0, "fulltext_rescued_candidates": 0}
         try:
-            google_rows, query_url = search_city_news(city_key, earliest, started)
+            google_rows, query_url, google_stats = search_city_news(city_key, earliest, started)
             rows.extend(google_rows)
         except Exception as exc:
             google_error = f"{type(exc).__name__}: {exc}"
@@ -803,12 +1043,16 @@ def main() -> None:
         rows = list(dedup.values())
         added, auto_approved = add_candidates(queue, city_key, rows, city_due, started)
         new_candidates += added
+        fulltext_fetches += int(google_stats.get("fulltext_fetches") or 0)
+        fulltext_rescued_candidates += int(google_stats.get("fulltext_rescued_candidates") or 0)
         searches[city_key] = {
             "due_checks": len(city_due),
             "telegram_results": telegram_count,
             "results_after_filter": len(rows),
             "new_candidates": added,
             "auto_approved_strict": auto_approved,
+            "fulltext_fetches": int(google_stats.get("fulltext_fetches") or 0),
+            "fulltext_rescued_candidates": int(google_stats.get("fulltext_rescued_candidates") or 0),
             "query_url": query_url,
             "google_error": google_error,
         }
@@ -830,6 +1074,8 @@ def main() -> None:
         "searches": searches,
         "new_review_candidates": new_candidates,
         "review_queue_size": len(queue),
+        "fulltext_fetches": fulltext_fetches,
+        "fulltext_rescued_candidates": fulltext_rescued_candidates,
         "telegram": {
             key: {
                 "last_seen_at": ((state.get("telegram") or {}).get(key) or {}).get("last_seen_at"),
