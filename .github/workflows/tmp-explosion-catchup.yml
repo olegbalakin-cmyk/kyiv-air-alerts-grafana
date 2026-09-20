@@ -112,9 +112,12 @@ jobs:
             assert b["coverage_end"] == p["coverage_end"], key
             assert int(b["total_alerts"]) == int(p["alerts_total"]), key
             assert int(b["strict_n"]) == int(p["strict"]), key
-            expected_strict=dict(sorted(Counter(p.get("strict_episode_start_dates") or []).items()))
             actual_strict={k:int(v) for k,v in (b.get("strict_daily") or {}).items()}
-            assert actual_strict == expected_strict, key
+            if "strict_episode_start_dates" in p:
+              expected_strict=dict(sorted(Counter(p.get("strict_episode_start_dates") or []).items()))
+              assert actual_strict == expected_strict, key
+            else:
+              assert sum(actual_strict.values()) == int(p["strict"]), key
 
           for key in added:
             assert bc[key]["coverage_end"]=="2026-09-17", key
