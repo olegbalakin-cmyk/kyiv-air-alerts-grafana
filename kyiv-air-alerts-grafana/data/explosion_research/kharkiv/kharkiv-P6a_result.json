@@ -5,9 +5,9 @@
   "city_key": "kharkiv",
   "episode_start_range": [
     "2026-07-07",
-    "2026-07-28"
+    "2026-07-29"
   ],
-  "denominator": 194,
+  "denominator": 201,
   "strict_events": [
     {
       "episode_id": "8f055843fa5bf19b19eb868b",
@@ -208,6 +208,15 @@
       "source_url": "https://infocity.kharkiv.ua/proisshestvija/unaslidok-cherhovoi-vorozhoi-ataky-na-kharkiv-postrazhdaly-dev-iatero-liudej/",
       "evidence": "Близько 17:15 російський ударний БпЛА «Герань-4» атакував Новобаварський район Харкова.",
       "decision_basis": "strict_approx_time_inside_episode"
+    },
+    {
+      "episode_id": "7b606a24df345cdd032cd411",
+      "alert_start": "2026-07-29T20:24:06Z",
+      "event_time_kyiv": "2026-07-30T02:15:00+03:00",
+      "source_url": "https://www.objectiv.tv/uk/objectively/2026/07/30/vnochi-po-harkovu-vdariv-shahed-po-kiyevu-balistika-u-lvovi-prilit-po-domah/",
+      "evidence": "Близько 02:15 зафіксовано влучання Shahed у промзону Новобаварського району Харкова.",
+      "decision": "strict",
+      "basis": "exact_time_in_alert"
     }
   ],
   "sensitivity_only_events": [
@@ -270,7 +279,7 @@
       "decision_basis": "review_report_time_not_event_time"
     }
   ],
-  "strict_n": 25,
-  "sensitivity_n": 31,
-  "qa": "denominator=194 equals source-slice episode_count; all retained events match episodes in this chunk; no duplicate retained matched episodes; sensitivity_n=31 includes 25 strict plus 6 sensitivity-only; 1 material temporal review remains."
+  "strict_n": 26,
+  "sensitivity_n": 32,
+  "qa": "denominator=201 equals regenerated source-slice episode_count; existing research decisions preserved by matched episode; no duplicate retained/review matched episodes; sensitivity_n=32 includes 26 strict plus 6 sensitivity-only; 1 review event(s)."
 }
