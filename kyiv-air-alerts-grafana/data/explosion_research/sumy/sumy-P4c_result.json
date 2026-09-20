@@ -7,7 +7,7 @@
     "2026-08-19",
     "2026-09-17"
   ],
-  "denominator": 190,
+  "denominator": 191,
   "strict_events": [
     {
       "matched_episode_id": "e9f5f9fc6c1ad9d86f3a97f8",
@@ -204,9 +204,20 @@
       "source_url": "https://debaty.sumy.ua/news/vibuh-u-sumah-8",
       "evidence": "О 12:20 у Сумах повідомлено про вибух.",
       "decision": "review: exact-city event time is inside the matched episode, but available evidence does not confirm aerial-war context"
+    },
+    {
+      "matched_episode_id": null,
+      "matched_alert_start": null,
+      "candidate_episode_ids": [
+        "d1d8f1e454e15cb6ed6b306c"
+      ],
+      "event_time_kyiv": "2026-09-17/18, exact event time unresolved",
+      "source_url": "https://su.npu.gov.ua/news/na-sumshchyni-vnaslidok-vorozhykh-atak-zahynuv-nepovnolitnii-shche-odna-liudyna-postrazhdala-politsiia-dokumentuie-naslidky",
+      "evidence": "За добу з ранку 17 до ранку 18 вересня поліція підтвердила атаку ворожого БпЛА у Сумській громаді з пораненням 50-річної жінки, але не вказала населений пункт і час події.",
+      "decision": "review: repaired-denominator episode d1d8f1e454e15cb6ed6b306c (20:12-23:56 Kyiv) is not counted; Sumy-hromada evidence is not exact-city Sumy and the event time cannot be placed inside this alert"
     }
   ],
   "strict_n": 15,
   "sensitivity_n": 20,
-  "qa": "city=Суми; source-slice denominator 190 == episode_count 190 and episodes.length 190; all 20 retained strict+sensitivity matched episode IDs belong to sumy-P4c and no matched episode is duplicated; strict_n=15 == len(strict_events); sensitivity_n=20 == strict_n + 5 sensitivity-only events; no automatic time tolerance and no publication time used as event time; long episode e9e0d878658701c064a19c4d (start-date 2026-08-29) contains several exact-city attacks through 2 Sep and is counted once using the strong 31 Aug ~14:00 event; episode 2bd1fb3091de588b0733cb71 is counted once despite another same-episode KAB strike; region/district/community-only mentions without exact-city Sumy evidence were excluded; targeted lookup for the unresolved 23 Aug candidate did not expose /міста/Telegram Desktop.zip through available file access, so no archive evidence was used."
+  "qa": "city=Суми; source-slice denominator 191 == episode_count 191 and episodes.length 191; all 20 retained strict+sensitivity matched episode IDs belong to sumy-P4c and no matched episode is duplicated; strict_n=15 == len(strict_events); sensitivity_n=20 == strict_n + 5 sensitivity-only events; no automatic time tolerance and no publication time used as event time; long episode e9e0d878658701c064a19c4d (start-date 2026-08-29) contains several exact-city attacks through 2 Sep and is counted once using the strong 31 Aug ~14:00 event; episode 2bd1fb3091de588b0733cb71 is counted once despite another same-episode KAB strike; region/district/community-only mentions without exact-city Sumy evidence were excluded; targeted lookup for the unresolved 23 Aug candidate did not expose /міста/Telegram Desktop.zip through available file access, so no archive evidence was used. Denominator-repair reconciliation: old P4c source 190 -> regenerated 191, exactly +1/-0; added episode d1d8f1e454e15cb6ed6b306c was checked pointwise and retained as review/not-counted because available evidence is community-level and lacks an event time inside the added alert; all pre-existing numerator decisions are unchanged."
 }
