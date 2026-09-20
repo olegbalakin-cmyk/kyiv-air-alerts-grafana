@@ -1,0 +1,78 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-09-20T10:22:02.683740Z",
+  "parent_task_id": "sumy-P4",
+  "city_key": "sumy",
+  "city": "Суми",
+  "parent_episode_start_range": [
+    "2026-06-09",
+    "2026-09-17"
+  ],
+  "parent_frozen_denominator": 573,
+  "parent_reconstructed_denominator": 572,
+  "matches_parent_frozen_denominator": false,
+  "chunk_count": 3,
+  "max_episodes": 250,
+  "assignment_rule": "alert start date in Europe/Kyiv; keep each alert_start_date_kyiv wholly within one contiguous chunk; balance by episode count",
+  "source": {
+    "url": "https://raw.githubusercontent.com/Vadimkin/ukrainian-air-raid-sirens-dataset/main/datasets/official_data_uk.csv",
+    "git_blob_sha": "71d70c0ca54968f530d596cf315616fa858800e1",
+    "type": "production_proxy_assembled",
+    "name": "Сумський район + explicit Сумська область",
+    "coverage_start": "2025-08-06",
+    "static_bridge_events": 80,
+    "ukrainealarm_bridge_events": 19,
+    "ukrainealarm_bridge_continuous": true,
+    "static_bridge_coverage_start": "2026-09-06T21:00:00Z",
+    "static_bridge_coverage_end_exclusive": "2026-09-16T21:00:00Z"
+  },
+  "chunks": [
+    {
+      "task_id": "sumy-P4a",
+      "chunk_id": "a",
+      "file": "sumy-P4a_alerts.json",
+      "episode_count": 189,
+      "episode_start_range": [
+        "2026-06-09",
+        "2026-07-11"
+      ],
+      "episode_ids_sha256": "5a195e58b4dbcafd04d0a8dbf034c59acc4eb1713e878e2588530234cc04dcd7"
+    },
+    {
+      "task_id": "sumy-P4b",
+      "chunk_id": "b",
+      "file": "sumy-P4b_alerts.json",
+      "episode_count": 193,
+      "episode_start_range": [
+        "2026-07-12",
+        "2026-08-18"
+      ],
+      "episode_ids_sha256": "4c4bfe441eba894f7bc58c7d210cfdfd04192803640abdf6d07fd8eb12ea4af8"
+    },
+    {
+      "task_id": "sumy-P4c",
+      "chunk_id": "c",
+      "file": "sumy-P4c_alerts.json",
+      "episode_count": 190,
+      "episode_start_range": [
+        "2026-08-19",
+        "2026-09-17"
+      ],
+      "episode_ids_sha256": "1871bdf918fdd9d1248b43263e3076bd462a3ef52cb472bc4ab7a0138a6b49c2"
+    }
+  ],
+  "validation": {
+    "max_episodes": 250,
+    "no_chunk_exceeds_max_episodes": true,
+    "chunks_contiguous_in_parent_episode_order": true,
+    "date_ranges_non_overlapping": true,
+    "duplicate_episode_id_count": 0,
+    "no_duplicate_episode_ids_between_chunks": true,
+    "sum_chunk_episode_count": 572,
+    "sum_matches_parent_reconstructed_denominator": true,
+    "reconstructed_parent_episode_ids_sha256": "24408f88bce32e92f7a58ead736e5ba3dc78008a8831ca76acbb1ffd2b1ff8f8",
+    "chunk_union_episode_ids_sha256": "24408f88bce32e92f7a58ead736e5ba3dc78008a8831ca76acbb1ffd2b1ff8f8",
+    "checksum_match": true,
+    "union_equals_reconstructed_parent_list": true
+  }
+}
