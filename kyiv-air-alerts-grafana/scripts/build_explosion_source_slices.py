@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 from __future__ import annotations
 
+import argparse
 import csv
 import hashlib
 import io
@@ -25,6 +26,7 @@ MANIFEST = HANDOFF / "SOURCE_SLICES_MANIFEST_2026-09-19.json"
 SOURCE_URL = proxymod.CITY_SOURCE_URL
 TZ = proxymod.TZ
 UTC = timezone.utc
+SUPPORTED_TASKS = {"kharkiv-P6", "sumy-P4", "zaporizhzhia-P4"}
 
 
 def utc_z(dt: datetime) -> str:
@@ -61,13 +63,28 @@ def merge_intervals(intervals: list[tuple[datetime, datetime]]) -> list[tuple[da
     return [(start, end) for start, end in merged]
 
 
-def production_episodes(source_bytes: bytes, wanted_keys: set[str]) -> tuple[dict[str, list[tuple[datetime, datetime]]], dict[str, dict]]:
-    # Reproduce the exact assembled WIP production episode list:
-    # historical adapter + Alerts.in.ua seam + persisted UkraineAlarm continuation.
-    # The historical adapters download the same public upstream CSV used here.
-    proxy_cfg = extended.configure_all_proxies()
-    proxy_base = proxymod.fetch_proxy_alerts()
-    exact_base = exactmod.fetch_city_alerts()
+class _BytesResponse:
+    def __init__(self, content: bytes) -> None:
+        self.content = content
+
+    def raise_for_status(self) -> None:
+        return None
+
+
+class _BytesSession:
+    def __init__(self, content: bytes) -> None:
+        self._response = _BytesResponse(content)
+
+    def get(self, *_args, **_kwargs) -> _BytesResponse:
+        return self._response
+
+
+def _assemble_production_episodes(
+    proxy_cfg: dict[str, dict],
+    proxy_base: dict,
+    exact_base: dict,
+    wanted_keys: set[str],
+) -> tuple[dict[str, list[tuple[datetime, datetime]]], dict[str, dict]]:
     static, static_info = bridgemod.load_static_bridge()
     store = bridgemod.load_store()
 
@@ -113,6 +130,70 @@ def production_episodes(source_bytes: bytes, wanted_keys: set[str]) -> tuple[dic
             "static_bridge_coverage_end_exclusive": static_info.get("coverage_end_exclusive"),
         }
     return episodes, meta
+
+
+def production_episodes(
+    source_bytes: bytes,
+    wanted_keys: set[str],
+) -> tuple[dict[str, list[tuple[datetime, datetime]]], dict[str, dict]]:
+    # Full-builder path: preserve the existing production fetch behavior.
+    proxy_cfg = extended.configure_all_proxies()
+    proxy_base = proxymod.fetch_proxy_alerts()
+    exact_base = exactmod.fetch_city_alerts()
+    return _assemble_production_episodes(
+        proxy_cfg, proxy_base, exact_base, wanted_keys
+    )
+
+
+def production_episodes_from_bytes(
+    source_bytes: bytes,
+    wanted_keys: set[str],
+) -> tuple[dict[str, list[tuple[datetime, datetime]]], dict[str, dict]]:
+    # Task mode reuses the production parsers, but feeds them the already-downloaded
+    # upstream bytes so no parser performs a second HTTP fetch.
+    proxy_cfg = extended.configure_all_proxies()
+    proxy_keys = wanted_keys & set(proxy_cfg)
+    exact_keys = wanted_keys & set(exactmod.CITY_CONFIG)
+    unknown = wanted_keys - proxy_keys - exact_keys
+    if unknown:
+        raise RuntimeError(f"No production adapter for: {sorted(unknown)}")
+
+    proxy_base: dict = {}
+    exact_base: dict = {}
+
+    if proxy_keys:
+        original_proxy_config = proxymod.PROXY_CONFIG
+        original_proxy_keys = proxymod.PROXY_KEYS
+        original_proxy_http_session = proxymod.http_session
+        try:
+            proxymod.PROXY_CONFIG = {
+                key: proxy_cfg[key] for key in sorted(proxy_keys)
+            }
+            proxymod.PROXY_KEYS = sorted(proxy_keys)
+            proxymod.http_session = lambda: _BytesSession(source_bytes)
+            proxy_base = proxymod.fetch_proxy_alerts()
+        finally:
+            proxymod.PROXY_CONFIG = original_proxy_config
+            proxymod.PROXY_KEYS = original_proxy_keys
+            proxymod.http_session = original_proxy_http_session
+
+    if exact_keys:
+        original_exact_config = exactmod.CITY_CONFIG
+        original_exact_http_session = exactmod.http_session
+        try:
+            exactmod.CITY_CONFIG = {
+                key: original_exact_config[key] for key in sorted(exact_keys)
+            }
+            exactmod.http_session = lambda: _BytesSession(source_bytes)
+            exact_base = exactmod.fetch_city_alerts()
+        finally:
+            exactmod.CITY_CONFIG = original_exact_config
+            exactmod.http_session = original_exact_http_session
+
+    return _assemble_production_episodes(
+        proxy_cfg, proxy_base, exact_base, wanted_keys
+    )
+
 
 def reconcile_parent_boundaries(
     by_city: dict[str, list[tuple[datetime, datetime]]],
@@ -204,7 +285,7 @@ def reconcile_parent_boundaries(
     return exclusions
 
 
-def main() -> None:
+def build_all() -> None:
     response = requests.get(
         SOURCE_URL,
         timeout=240,
@@ -343,6 +424,123 @@ def main() -> None:
             ensure_ascii=False,
         )
     )
+
+
+def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--task",
+        choices=sorted(SUPPORTED_TASKS),
+        help="Build one repair parent slice without reading RESEARCH_SUBSLICES.",
+    )
+    return parser.parse_args(argv)
+
+
+def load_parent_task(task_id: str) -> dict[str, str]:
+    rows = {row["task_id"]: row for row in load_csv(PARENTS_CSV)}
+    try:
+        return rows[task_id]
+    except KeyError as exc:
+        raise RuntimeError(
+            f"Task {task_id!r} is not present in {PARENTS_CSV.name}"
+        ) from exc
+
+
+def build_task(task_id: str) -> None:
+    if task_id not in SUPPORTED_TASKS:
+        raise RuntimeError(
+            f"Unsupported task {task_id!r}; supported: {sorted(SUPPORTED_TASKS)}"
+        )
+
+    row = load_parent_task(task_id)
+    city_key = row["city_key"]
+    date_from = row["episode_start_date_from"]
+    date_to = row["episode_start_date_to"]
+    expected = int(row["frozen_denominator"])
+
+    response = requests.get(
+        SOURCE_URL,
+        timeout=240,
+        headers={"User-Agent": "kyiv-air-alerts-grafana source-slice builder"},
+    )
+    response.raise_for_status()
+    source_bytes = response.content
+    source_sha = git_blob_sha(source_bytes)
+
+    by_city, source_meta = production_episodes_from_bytes(
+        source_bytes, {city_key}
+    )
+    events = [
+        (start, end)
+        for start, end in by_city[city_key]
+        if date_from <= start.astimezone(TZ).date().isoformat() <= date_to
+    ]
+    events.sort(key=lambda x: (x[0], x[1]))
+
+    sigs = {(utc_z(start), utc_z(end)) for start, end in events}
+    if len(sigs) != len(events):
+        raise RuntimeError(f"Duplicate production episode signatures in {task_id}")
+
+    actual = len(events)
+    matches = actual == expected
+    smeta = source_meta[city_key]
+    payload = {
+        "schema_version": 1,
+        "task_id": task_id,
+        "parent_task_id": task_id,
+        "city_key": city_key,
+        "city": row["city_label"],
+        "source": {
+            "url": SOURCE_URL,
+            "git_blob_sha": source_sha,
+            **smeta,
+        },
+        "assignment_rule": "alert start date in Europe/Kyiv",
+        "episode_start_range": [date_from, date_to],
+        "frozen_denominator": expected,
+        "episode_count": actual,
+        "matches_frozen_denominator": matches,
+        "episodes": [
+            {
+                "episode_id": event_id(city_key, start, end),
+                "alert_start": utc_z(start),
+                "alert_end": utc_z(end),
+                "alert_start_date_kyiv": start.astimezone(TZ).date().isoformat(),
+            }
+            for start, end in events
+        ],
+    }
+
+    OUT_DIR.mkdir(parents=True, exist_ok=True)
+    path = OUT_DIR / f"{task_id}_alerts.json"
+    tmp_path = path.with_suffix(path.suffix + ".tmp")
+    tmp_path.write_text(
+        json.dumps(payload, ensure_ascii=False, separators=(",", ":")) + "\n",
+        encoding="utf-8",
+    )
+    tmp_path.replace(path)
+
+    print(
+        json.dumps(
+            {
+                "task_id": task_id,
+                "source_git_blob_sha": source_sha,
+                "episode_count": actual,
+                "frozen_denominator": expected,
+                "matches_frozen_denominator": matches,
+                "written": str(path),
+            },
+            ensure_ascii=False,
+        )
+    )
+
+
+def main(argv: list[str] | None = None) -> None:
+    args = parse_args(argv)
+    if args.task:
+        build_task(args.task)
+        return
+    build_all()
 
 
 if __name__ == "__main__":
