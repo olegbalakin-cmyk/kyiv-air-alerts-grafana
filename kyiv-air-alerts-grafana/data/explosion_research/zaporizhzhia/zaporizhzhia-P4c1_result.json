@@ -1,0 +1,90 @@
+{
+  "status": "complete",
+  "task_id": "zaporizhzhia-P4c1",
+  "parent_task_id": "zaporizhzhia-P4c",
+  "city_key": "zaporizhzhia",
+  "episode_start_range": [
+    "2026-08-09",
+    "2026-08-27"
+  ],
+  "denominator": 100,
+  "strict_events": [
+    {
+      "episode_id": "242be033424116880cb5ac71",
+      "alert_start": "2026-08-10T21:40:38Z",
+      "alert_end": "2026-08-10T22:10:39Z",
+      "event_time_kyiv": "2026-08-11; immediately after alert announcement",
+      "source_url": "https://zaporizhstal.com/uk-ua/news/zaporizhstal-v-zhalobi-vnaslidok-vorozhoyi-ataki-na-promislovii-maidanchik-zaginuli-spivrobitniki-virobnitstvo-zupineno/",
+      "evidence": "Zaporizhstal says a ballistic strike on its Zaporizhzhia industrial site caught workers heading to shelter immediately after the alert was announced.",
+      "decision": "strict",
+      "basis": "explicit_after_alert_start"
+    },
+    {
+      "episode_id": "246453160ef742d4dce69790",
+      "alert_start": "2026-08-11T23:23:16Z",
+      "alert_end": "2026-08-12T00:23:16Z",
+      "event_time_kyiv": "2026-08-12 ~03:00",
+      "source_url": "https://ukranews.com/ua/amp/news/1168203-u-zaporizhzhi-pislya-udaru-rf-spalahnuv-epitsentr-znestrumleno-tsilyj-rajon",
+      "evidence": "Ukrainian News reports a mass Russian strike on Zaporizhzhia and says explosions in the city sounded around 03:00, inside this alert episode.",
+      "decision": "strict",
+      "basis": "event_time_inside_episode"
+    },
+    {
+      "episode_id": "da2d15710e5eac7032f6e414",
+      "alert_start": "2026-08-16T20:30:40Z",
+      "alert_end": "2026-08-17T03:51:42Z",
+      "event_time_kyiv": "2026-08-16 ~23:45",
+      "source_url": "https://www.zabor.zp.ua/new/fpv-dron-atakuvav-bagatopoverkhivku-v-zaporizhzhi-bezpilotnik-vluchiv-u-balkon-14-go-poverkhu",
+      "evidence": "ZaBor reports that at about 23:45 an FPV drone struck a high-rise in Zaporizhzhia and detonated, inside this alert episode.",
+      "decision": "strict",
+      "basis": "event_time_inside_episode"
+    },
+    {
+      "episode_id": "01e043b7e9553b7edddfc386",
+      "alert_start": "2026-08-19T01:57:32Z",
+      "alert_end": "2026-08-19T03:28:30Z",
+      "event_time_kyiv": "2026-08-19 ~05:00",
+      "source_url": "https://suspilne.media/zaporizhzhia/1382238-persi-dumki-buli-so-treba-svidko-druzinu-des-shovati-ocevidci-pro-aviaudar-rf-po-zaporizzu-vranci-19-serpna/",
+      "evidence": "Suspilne reports a Russian air strike on Zaporizhzhia at about 05:00; a witness describes the alert and then the explosion, inside this episode.",
+      "decision": "strict",
+      "basis": "event_time_inside_episode"
+    },
+    {
+      "episode_id": "ad099cc47e1feaf4685bb8f4",
+      "alert_start": "2026-08-25T07:37:24Z",
+      "alert_end": "2026-08-25T08:37:24Z",
+      "event_time_kyiv": "2026-08-25 ~10:40",
+      "source_url": "https://www.zabor.zp.ua/new/9-poranenikh-i-935-udariv-po-oblasti-yak-minula-doba-u-zaporizhzhi-ta-oblasti",
+      "evidence": "ZaBor reports explosions in Zaporizhzhia at about 10:40 from another hostile attack; the same account identifies repeated Russian drone/KAB attacks on the city that day.",
+      "decision": "strict",
+      "basis": "event_time_inside_episode"
+    },
+    {
+      "episode_id": "b3d11227a82aceb93d5bf798",
+      "alert_start": "2026-08-25T11:45:59Z",
+      "alert_end": "2026-08-25T12:28:45Z",
+      "event_time_kyiv": "2026-08-25 ~14:54",
+      "source_url": "https://www.zabor.zp.ua/new/9-poranenikh-i-935-udariv-po-oblasti-yak-minula-doba-u-zaporizhzhi-ta-oblasti",
+      "evidence": "ZaBor reports a Russian drone attack on a Zaporizhzhia parking area and another city explosion at about 14:54, inside this alert episode.",
+      "decision": "strict",
+      "basis": "event_time_inside_episode"
+    }
+  ],
+  "sensitivity_only_events": [
+    {
+      "episode_id": "fcd2be5cab930f3959097a68",
+      "alert_start": "2026-08-27T19:54:20Z",
+      "alert_end": "2026-08-27T20:54:20Z",
+      "event_time_kyiv": "2026-08-27 late evening; exact event time unresolved",
+      "source_url": "https://1news.zp.ua/poraneno-dvoye-lyudey-vorog-atakuvav-pryvatnyy-sektor-u-zaporizhzhi/",
+      "lead_url": "https://bbcccnn.org/vybuh-u-harkovi-ta-poraneni-na-zaporizhzhi-de-sche-fiksuyut-zahrozu/",
+      "evidence": "Exact-city reporting distinguishes a later repeat Russian drone strike on Zaporizhzhia; contemporaneous live coverage logged city explosions at the alert boundary, but that live timestamp is not treated as event time.",
+      "decision": "sensitivity_only",
+      "basis": "inferred_same_attack_near_boundary"
+    }
+  ],
+  "review_events": [],
+  "strict_n": 6,
+  "sensitivity_n": 7,
+  "qa": "PASS: denominator 100 equals source episode_count; all 7 retained events match episode IDs in zaporizhzhia-P4c1; no duplicate matched episodes; strict_n=6 equals len(strict_events); sensitivity_n=7 equals strict_n + len(sensitivity_only_events); no automatic time tolerance and no publication timestamp was used as event time. A targeted File Library lookup did not surface /міста/Telegram Desktop.zip, so no archive evidence was used and no broad archive scan was attempted. Exact-city candidates without enough event-time evidence to match a concrete source episode were not retained."
+}
