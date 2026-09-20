@@ -1,0 +1,88 @@
+name: Build sumy-P4 explosion source slices
+
+on:
+  push:
+    branches:
+      - multicity-wip-2026-09-16
+    paths:
+      - ".github/workflows/build-explosion-sumy-P4.yml"
+
+concurrency:
+  group: sumy-P4-explosion-source-slices
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+
+jobs:
+  build-sumy-p4:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Check out WIP branch
+        uses: actions/checkout@v4
+        with:
+          ref: multicity-wip-2026-09-16
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install -r kyiv-air-alerts-grafana/requirements.txt
+
+      - name: Build sumy-P4 source slices
+        working-directory: kyiv-air-alerts-grafana
+        run: python scripts/build_explosion_source_slices.py --task sumy-P4 --max-episodes 250
+
+      - name: Validate sumy-P4 generated files
+        working-directory: kyiv-air-alerts-grafana
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          base = Path("data/explosion_metric_handoff/source_slices")
+          manifest = base / "sumy-P4_chunks_manifest.json"
+          if not manifest.is_file():
+              raise SystemExit(f"Missing {manifest}")
+
+          for path in sorted(base.glob("sumy-P4[a-z]_alerts.json")):
+              payload = json.loads(path.read_text(encoding="utf-8"))
+              episode_count = payload["episode_count"]
+              if episode_count > 250:
+                  raise SystemExit(
+                      f"{path.name}: episode_count={episode_count} exceeds 250"
+                  )
+          PY
+
+      - name: Commit sumy-P4 generated files
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git add -- kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/sumy-P4_chunks_manifest.json
+          git add -- kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/sumy-P4[a-z]_alerts.json
+
+          if git diff --cached --quiet; then
+            echo "No sumy-P4 generated-file changes"
+            exit 0
+          fi
+
+          git commit -m "Build sumy-P4 source slices"
+
+          for attempt in 1 2 3; do
+            git fetch origin multicity-wip-2026-09-16
+            if git rebase origin/multicity-wip-2026-09-16 && git push origin HEAD:multicity-wip-2026-09-16; then
+              exit 0
+            fi
+            git rebase --abort || true
+            if [ "$attempt" -eq 3 ]; then
+              echo "Push failed after 3 attempts"
+              exit 1
+            fi
+            sleep $((attempt * 2))
+          done
