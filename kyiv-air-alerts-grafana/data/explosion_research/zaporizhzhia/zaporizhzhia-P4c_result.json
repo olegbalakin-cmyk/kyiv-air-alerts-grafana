@@ -7,7 +7,7 @@
     "2026-08-09",
     "2026-09-17"
   ],
-  "denominator": 193,
+  "denominator": 194,
   "strict_events": [
     {
       "matched_episode_id": "242be033424116880cb5ac71",
@@ -178,6 +178,16 @@
       "source_url": "https://www.zabor.zp.ua/new/fpv-dron-vdariv-po-munitsipalnomu-avtobusu-v-zaporizhzhi-e-poraneni-video-18",
       "evidence": "Близько 16:50 російський FPV-дрон влучив у пасажирський муніципальний автобус у Космічному районі Запоріжжя.",
       "decision_basis": "exact_city_time_inside_episode"
+    },
+    {
+      "matched_episode_id": "c138680a6beb87a4aa8be6fc",
+      "alert_start": "2026-09-17T19:33:49Z",
+      "alert_end": "2026-09-17T21:54:45Z",
+      "alert_start_date_kyiv": "2026-09-17",
+      "event_time_local": "2026-09-17T22:38:00+03:00",
+      "source_url": "https://spravzhne.media/ukr/war/1789720628-yak-voenniy-zlochin-rozsliduyut-dronovu-ataku-na-amstor-u-zaporizhzhi",
+      "evidence": "Близько 22:38 17 вересня російські війська вдарили ударним БпЛА по ТЦ «Амстор» у Хортицькому районі Запоріжжя; час удару лежить усередині цієї exact-city alert episode.",
+      "decision_basis": "exact_city+aerial+event_time_inside_episode"
     }
   ],
   "sensitivity_only_events": [
@@ -253,8 +263,8 @@
       "decision_basis": "unresolved_event_time"
     }
   ],
-  "strict_n": 17,
-  "sensitivity_n": 19,
+  "strict_n": 18,
+  "sensitivity_n": 20,
   "qa": {
     "city": "Запоріжжя",
     "denominator_matches_source": true,
@@ -264,7 +274,8 @@
     "sensitivity_count_ok": true,
     "telegram_archive": "Targeted File Library lookup for the unresolved Aug 11 Zaporizhstal candidate did not surface /міста/Telegram Desktop.zip; no archive evidence was used or invented.",
     "notes": [
-      "Parent denominator mismatch was not investigated.",
+      "Denominator repair reconciled P4c 193 -> 194 by exactly +1/-0; added episode c138680a6beb87a4aa8be6fc was researched pointwise and classified strict.",
+      "All pre-existing P4c research decisions were preserved; only the added episode received a new decision.",
       "Builder was not run.",
       "No automatic time tolerance was applied; publication times were not used as event times."
     ]
