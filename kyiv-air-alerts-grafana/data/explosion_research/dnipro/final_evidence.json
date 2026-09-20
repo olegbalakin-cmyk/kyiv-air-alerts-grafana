@@ -1,0 +1,1692 @@
+{
+  "status": "complete",
+  "city_key": "dnipro",
+  "city_label": "Дніпро",
+  "coverage_start": "2025-05-01",
+  "coverage_end": "2026-09-17",
+  "frozen_denominator": 2259,
+  "parts": {
+    "P1": {
+      "coverage_start": "2025-05-01",
+      "coverage_end": "2025-10-30",
+      "denominator": 568,
+      "strict_n": 40,
+      "sensitivity_n": 43
+    },
+    "P2": {
+      "coverage_start": "2025-10-31",
+      "coverage_end": "2026-03-11",
+      "denominator": 562,
+      "strict_n": 41,
+      "sensitivity_n": 42
+    },
+    "P3": {
+      "coverage_start": "2026-03-12",
+      "coverage_end": "2026-06-25",
+      "denominator": 566,
+      "strict_n": 60,
+      "sensitivity_n": 62
+    },
+    "P4": {
+      "coverage_start": "2026-06-26",
+      "coverage_end": "2026-09-17",
+      "denominator": 563,
+      "strict_n": 39,
+      "sensitivity_n": 40
+    }
+  },
+  "strict_events": [
+    {
+      "alert_episode_start": "2025-05-16T13:05:34+03:00",
+      "event_time": "before 13:14, during the ongoing alert",
+      "source_url": "https://dp.informator.ua/uk/shvidkisna-cil-nad-oblastyu-u-dnipri-chuli-vibuh",
+      "evidence": "У Дніпрі почули вибух; тривога тривала, перед цим Повітряні сили повідомили про швидкісну ціль.",
+      "decision": "strict",
+      "basis": "exact-city sound + aerial-war context + explicit ongoing alert"
+    },
+    {
+      "alert_episode_start": "2025-05-24T20:08:02+03:00",
+      "event_time": "~23:33",
+      "source_url": "https://dp.informator.ua/uk/droni-na-misto-u-dnipri-prolunav-potuzhniy-vibuh",
+      "evidence": "У Дніпрі близько 23:33 пролунав вибух після повідомлень про ворожі дрони; повітряна тривога тривала.",
+      "decision": "strict",
+      "basis": "exact-city + exact event time inside frozen episode + aerial context"
+    },
+    {
+      "alert_episode_start": "2025-05-31T21:39:22+03:00",
+      "event_time": "2025-06-01 ~10:01",
+      "source_url": "https://dp.informator.ua/uk/zalishaytesya-u-bezpechnih-miscyah-meshkanci-dnipra-pochuli-vibuh",
+      "evidence": "1 червня у Дніпрі о 10:01 почули вибух; тривога була оголошена 31 травня о 21:39, перед цим фіксували швидкісну ціль.",
+      "decision": "strict",
+      "basis": "cross-midnight episode; exact-city + exact time inside frozen episode"
+    },
+    {
+      "alert_episode_start": "2025-06-06T22:18:19+03:00",
+      "event_time": "2025-06-07 ~01:00–05:00",
+      "source_url": "https://suspilne.media/dnipro/1036739-vijska-rf-atakuvali-dnipro-so-vidomo/",
+      "evidence": "Суспільне описує комбіновану атаку на Дніпро; місцева жителька повідомила, що з 01:00 до 05:00 всю ніч гупало, збивали дрони й летіли ракети.",
+      "decision": "strict",
+      "basis": "exact-city attack + event interval inside one long frozen episode"
+    },
+    {
+      "alert_episode_start": "2025-06-24T10:56:47+03:00",
+      "event_time": "~11:01",
+      "source_url": "https://suspilne.media/dnipro/1050551-hlopcik-kricav-mi-zaraz-pomremo-pracivnici-ditacogo-centru-u-dnipri-akij-poskodilo-cerez-raketnu-ataku/",
+      "evidence": "Близько 11:01 у Дніпрі пролунали вибухи; війська РФ атакували місто ракетами.",
+      "decision": "strict",
+      "basis": "exact-city + exact time inside frozen episode + confirmed missile attack"
+    },
+    {
+      "alert_episode_start": "2025-06-25T23:01:31+03:00",
+      "event_time": "~23:32",
+      "source_url": "https://dp.informator.ua/uk/berezhit-sebe-vvecheri-25-chervnya-u-dnipri-chuli-vibuh",
+      "evidence": "У Дніпрі близько 23:32 було чутно вибух; тривога тривала з 23:01, Повітряні сили попереджали про БпЛА та ракетну небезпеку.",
+      "decision": "strict",
+      "basis": "exact-city + exact time inside frozen episode + aerial context"
+    },
+    {
+      "alert_episode_start": "2025-06-27T10:57:15+03:00",
+      "event_time": "before 11:05; repeated before 11:23 in the same episode",
+      "source_url": "https://dp.informator.ua/uk/shvidkisna-cil-na-dnipro-u-misti-prolunali-vibuhi",
+      "evidence": "У Дніпрі чули вибухи після попередження про балістику і швидкісну ціль; тривога тривала.",
+      "decision": "strict",
+      "basis": "exact-city sound + aerial context + explicit ongoing alert; one numerator for the episode"
+    },
+    {
+      "alert_episode_start": "2025-07-04T09:37:15+03:00",
+      "event_time": "before 11:07",
+      "source_url": "https://dp.informator.ua/uk/u-dnipri-prolunav-vibuh-povitryana-trivoga-trivaye",
+      "evidence": "4 липня у Дніпрі пролунали вибухи; тривога тривала з 09:37, перед цим повідомляли про ударні БпЛА.",
+      "decision": "strict",
+      "basis": "exact-city + explicit ongoing alert + aerial context"
+    },
+    {
+      "alert_episode_start": "2025-07-04T15:56:16+03:00",
+      "event_time": "before 16:24",
+      "source_url": "https://dp.informator.ua/uk/dnipro-v-ukrittya-vorog-vdariv-balistichnoyu-raketoyu-bulo-chutno-vibuh",
+      "evidence": "Після обіду у Дніпрі було чутно вибух; тривога тривала з 15:56, Повітряні сили попередили про балістику.",
+      "decision": "strict",
+      "basis": "exact-city + explicit ongoing alert + confirmed ballistic context"
+    },
+    {
+      "alert_episode_start": "2025-07-12T19:21:59+03:00",
+      "event_time": "before 19:55, during the alert",
+      "source_url": "https://dp.informator.ua/uk/zagroza-balistiki-u-dnipri-prolunav-vibuh",
+      "evidence": "У Дніпрі під час повітряної тривоги пролунав вибух після попередження про балістичне озброєння.",
+      "decision": "strict",
+      "basis": "explicit explosion during alert + exact-city + aerial context"
+    },
+    {
+      "alert_episode_start": "2025-07-14T19:34:21+03:00",
+      "event_time": "~22:05",
+      "source_url": "https://suspilne.media/dnipro/1066677-z-neba-letili-ulamki-i-gorili-na-hodu-zitelka-dnipra-pro-naslidki-ataki-dronami-rf/",
+      "evidence": "У Дніпрі близько 22:05 під час повітряної тривоги пролунали вибухи; Повітряні сили попереджали про російські БпЛА на місто.",
+      "decision": "strict",
+      "basis": "exact-city + exact time inside frozen episode + explicit alert"
+    },
+    {
+      "alert_episode_start": "2025-07-15T20:58:32+03:00",
+      "event_time": "~22:50–23:05",
+      "source_url": "https://dp.informator.ua/uk/dekilka-bpla-u-napryamku-mista-u-dnipri-prolunali-vibuhi",
+      "evidence": "Після попередження Повітряних сил о 22:50 про кілька БпЛА на Дніпро у місті лунали вибухи; о 23:05 тривога ще тривала.",
+      "decision": "strict",
+      "basis": "exact-city + bounded event interval inside frozen episode + aerial context"
+    },
+    {
+      "alert_episode_start": "2025-07-16T23:41:51+03:00",
+      "event_time": "2025-07-17 after 00:00; new series ~03:10",
+      "source_url": "https://dp.informator.ua/uk/seriya-vibuhiv-lunaye-u-dnipri-negayno-v-ukrittya",
+      "evidence": "У ніч на 17 липня Дніпро атакували БпЛА; після опівночі лунали численні вибухи, тривога тривала з 23:42.",
+      "decision": "strict",
+      "basis": "cross-midnight exact-city attack + explicit ongoing alert; multiple bursts counted once"
+    },
+    {
+      "alert_episode_start": "2025-07-18T19:34:47+03:00",
+      "event_time": "before 19:55",
+      "source_url": "https://dp.informator.ua/uk/zagroza-balistiki-u-dnipri-prolunali-vibuhi-2",
+      "evidence": "Увечері 18 липня у Дніпрі чули вибухи; перед цим попереджали про балістичні ракети, повітряна тривога тривала.",
+      "decision": "strict",
+      "basis": "exact-city + explicit ongoing alert + ballistic context"
+    },
+    {
+      "alert_episode_start": "2025-07-25T22:15:17+03:00",
+      "event_time": "2025-07-26 ~01:50–02:07",
+      "source_url": "https://dp.informator.ua/uk/perebuvati-v-ukrittyah-u-dnipri-ta-kam-yanskomu-lunayut-duzhe-guchni-vibuhi-vorog-atakuye-raketami-ta-shahedami",
+      "evidence": "У Дніпрі лунала серія вибухів під час ракетно-дронової атаки; тривога тривала з 22:15, о 01:50–02:07 повідомляли про нові вибухи.",
+      "decision": "strict",
+      "basis": "cross-midnight exact-city + event interval inside frozen episode + explicit ongoing alert"
+    },
+    {
+      "alert_start_date": "2025-08-07",
+      "alert_start": "2025-08-06T21:22:30Z",
+      "event_time": "2025-08-07 00:42–01:20 Europe/Kyiv",
+      "source_url": "https://dnepr.express/ua/post/vnochi-u-dnipri-ta-oblasti-lunali-vibuhi-sho-vidomo-pro-naslidki-vorozhoyi-ataki",
+      "evidence": "У Дніпрі було гучно з 00:42 до 01:20 після попередження Повітряних сил про ударні БпЛА.",
+      "decision_basis": "strict: exact-city aerial-war evidence with event interval inside matched alert"
+    },
+    {
+      "alert_start_date": "2025-08-09",
+      "alert_start": "2025-08-09T02:47:38Z",
+      "event_time": "2025-08-09 ~05:50 Europe/Kyiv",
+      "source_url": "https://www.pravda.com.ua/news/2025/08/09/7525374/",
+      "evidence": "Після попередження про швидкісну ціль у напрямку Дніпра Суспільне повідомило про вибухи в місті; ОВА підтвердила ракетний удар.",
+      "decision_basis": "strict: exact-city missile-attack evidence timed inside matched alert"
+    },
+    {
+      "alert_start_date": "2025-08-15",
+      "alert_start": "2025-08-15T13:07:09Z",
+      "event_time": "2025-08-15 ~16:09–16:10 Europe/Kyiv",
+      "source_url": "https://news.telegraf.com.ua/ukr/dnepr/2025-08-15/5918011-u-dnipri-prolunali-potuzhni-vibukhi-nad-mistom-zdiynyavsya-stovp-dimu-usi-podrobitsi",
+      "evidence": "У Дніпрі близько 16:09 пролунали вибухи після тривоги о 16:07 та попередження про ракетну загрозу.",
+      "decision_basis": "strict: exact-city timed aerial-war event inside matched alert"
+    },
+    {
+      "alert_start_date": "2025-08-21",
+      "alert_start": "2025-08-20T23:49:45Z",
+      "event_time": "2025-08-21 ~05:20 Europe/Kyiv",
+      "source_url": "https://war.telegraf.com.ua/ukr/war-in-ukraine/2025-08-21/5918517-rosiyani-znovu-atakuyut-ukrainu-zafiksovano-puski-krilatikh-raket-onovlyuetsya",
+      "evidence": "Хронологія атаки фіксує о 05:15 ціль у напрямку Дніпра, а близько 05:20 — вибухи в місті.",
+      "decision_basis": "strict: exact-city timed missile-attack event inside matched alert"
+    },
+    {
+      "alert_start_date": "2025-08-29",
+      "alert_start": "2025-08-28T22:27:31Z",
+      "event_time": "during matched alert; exact time not stated",
+      "source_url": "https://www.ukrinform.ua/rubric-regions/4030639-dnipro-atakuvali-udarni-bpla-u-misti-prolunali-vibuhi.html",
+      "evidence": "Укрінформ прямо повідомляє, що під час повітряної тривоги у Дніпрі пролунали вибухи і місто атакували «Шахеди».",
+      "decision_basis": "strict: exact-city aerial-war event explicitly during alert"
+    },
+    {
+      "alert_start_date": "2025-08-29",
+      "alert_start": "2025-08-29T15:59:42Z",
+      "event_time": "2025-08-30 ~03:19 Europe/Kyiv",
+      "source_url": "https://www.ukrinform.ua/rubric-regions/4030993-u-dnipri-prolunala-seria-vibuhiv.html",
+      "evidence": "Під час масованої атаки «Шахедів» на Дніпро нову серію вибухів зафіксовано близько 03:19.",
+      "decision_basis": "strict: exact-city timed drone-attack event inside cross-midnight matched alert"
+    },
+    {
+      "alert_start_date": "2025-08-31",
+      "alert_start": "2025-08-31T12:51:18Z",
+      "event_time": "2025-08-31 ~16:11 Europe/Kyiv",
+      "source_url": "https://dnipro.tv/news-dnipro/u-dnipri-prolunaly-vybukhy-v-ova-pokazaly-naslidky-vorozhoi-ataky-na-dnipropetrovshchyni/",
+      "evidence": "Мешканці Дніпра чули вибухи близько 16:11 на тлі ворожої ракетно-дронової атаки.",
+      "decision_basis": "strict: exact-city timed aerial-war event inside matched alert"
+    },
+    {
+      "alert_start_date": "2025-09-05",
+      "alert_start": "2025-09-04T22:15:38Z",
+      "event_time": "2025-09-05 ~01:44 Europe/Kyiv",
+      "source_url": "https://www.pravda.com.ua/news/2025/09/05/7529421/",
+      "evidence": "Після оголошення тривоги та повідомлень про дрони в напрямку Дніпра Суспільне о 01:44 повідомило про вибухи в місті.",
+      "decision_basis": "strict: exact-city timed drone-attack event inside matched alert"
+    },
+    {
+      "alert_start_date": "2025-09-06",
+      "alert_start": "2025-09-06T19:52:03Z",
+      "event_time": "2025-09-06 ~23:47 Europe/Kyiv",
+      "source_url": "https://dp.informator.ua/uk/povitryana-trivoga-u-dnipri-chutno-zvuki-vibuhiv",
+      "evidence": "Під час тривоги, що почалася о 22:52, у Дніпрі близько 23:47 було чутно вибухи на тлі руху ударних БпЛА.",
+      "decision_basis": "strict: exact-city timed drone-attack event inside long matched alert"
+    },
+    {
+      "alert_start_date": "2025-09-13",
+      "alert_start": "2025-09-13T17:48:59Z",
+      "event_time": "2025-09-13 ~20:53 Europe/Kyiv",
+      "source_url": "https://www.rbc.ua/rus/news/dnipri-prolunav-vibuh-misto-letila-balistika-1757786691.html",
+      "evidence": "У Дніпрі о 20:53 під час тривоги пролунав вибух; Повітряні сили повідомляли про ракету в напрямку міста.",
+      "decision_basis": "strict: exact-city timed missile-attack event inside matched alert"
+    },
+    {
+      "alert_start_date": "2025-09-17",
+      "alert_start": "2025-09-17T13:52:14Z",
+      "event_time": "2025-09-17 ~17:16–18:20 Europe/Kyiv",
+      "source_url": "https://dnepr.express/ua/post/vibuhi-u-dnipri-v-ova-povidomili-pershi-podrobici",
+      "evidence": "Перший вибух у Дніпрі зафіксовано о 17:16 під час тривоги; серія тривала приблизно до 18:20 на тлі атаки БпЛА.",
+      "decision_basis": "strict: exact-city aerial-war event explicitly during matched alert"
+    },
+    {
+      "alert_start_date": "2025-09-19",
+      "alert_start": "2025-09-19T18:17:21Z",
+      "event_time": "2025-09-20 ~03:36 and later series Europe/Kyiv",
+      "source_url": "https://www.pravda.com.ua/news/2025/09/20/7531678/",
+      "evidence": "Під час нічної атаки Суспільне о 03:36 повідомило про вибухи у Дніпрі, далі — про нові серії.",
+      "decision_basis": "strict: exact-city timed aerial-war event inside cross-midnight matched alert"
+    },
+    {
+      "alert_start_date": "2025-09-21",
+      "alert_start": "2025-09-21T12:54:42Z",
+      "event_time": "2025-09-21 ~16:00 and ~16:57 Europe/Kyiv",
+      "source_url": "https://dnepr.express/ua/post/protyagom-dnya-u-dekilkoh-rajonah-dnipropetrovshini-lunali-vibuhi-ye-postrazhdali/amp",
+      "evidence": "Мешканці Дніпра чули вибухи близько 16:00 та 16:57; Повітряні сили фіксували рух ворожих БпЛА.",
+      "decision_basis": "strict: exact-city timed drone-attack reports fall within one matched alert episode"
+    },
+    {
+      "alert_start_date": "2025-09-24",
+      "alert_start": "2025-09-24T06:55:46Z",
+      "event_time": "2025-09-24 ~10:00 and ~13:00 Europe/Kyiv",
+      "source_url": "https://news.telegraf.com.ua/ukr/dnepr/2025-09-24/5921456-u-dnipri-progrimili-vibukhi-bula-zagroza-balistiki-onovlyuetsya",
+      "evidence": "У Дніпрі повідомляли про вибухи вранці та повторно близько 13:00 після попереджень про балістичну загрозу.",
+      "decision_basis": "strict: exact-city timed aerial-war reports within one continuous matched alert"
+    },
+    {
+      "alert_start_date": "2025-09-30",
+      "alert_start": "2025-09-30T11:40:10Z",
+      "event_time": "2025-09-30 ~15:00–16:00 Europe/Kyiv",
+      "source_url": "https://dnipro.tv/news-dnipro/masovana-ataka-droniv-u-dnipri-ie-poraneni-ta-zaimannia/",
+      "evidence": "Близько 15:00–16:00 Дніпро зазнав масованої атаки БпЛА; у різних районах міста пролунали численні вибухи.",
+      "decision_basis": "strict: exact-city timed drone-attack event inside matched alert"
+    },
+    {
+      "alert_start_date": "2025-10-03",
+      "alert_start": "2025-10-02T21:53:48Z",
+      "event_time": "2025-10-03 ~02:44 and ~02:58 Europe/Kyiv",
+      "source_url": "https://www.pravda.com.ua/news/2025/10/03/8001017/",
+      "evidence": "Після тривоги, оголошеної о 00:53, у Дніпрі о 02:44 та 02:58 повідомили про вибухи на тлі атаки російських дронів.",
+      "decision_basis": "strict: exact-city timed drone-attack event inside matched alert"
+    },
+    {
+      "alert_start_date": "2025-10-03",
+      "alert_start": "2025-10-03T16:44:20Z",
+      "event_time": "2025-10-03 ~20:26 Europe/Kyiv",
+      "source_url": "https://24tv.ua/povitryana-trivoga-03102025-de-fiksuyut-vorozhi-shahedi-novini_n2926977",
+      "evidence": "О 20:23 повідомлялося про БпЛА в напрямку Дніпра, а близько 20:26 у місті було чутно вибухи.",
+      "decision_basis": "strict: exact-city timed drone-attack event inside matched alert"
+    },
+    {
+      "alert_start_date": "2025-10-09",
+      "alert_start": "2025-10-09T14:50:21Z",
+      "event_time": "2025-10-09 ~17:58–18:00 Europe/Kyiv",
+      "source_url": "https://suspilne.media/dnipro/1134428-golovni-novini-dnipra-ta-oblasti-9-zovtna-2/",
+      "evidence": "Суспільне повідомляє про вибух у Дніпрі близько 18:00; Повітряні сили попереджали про рух КАБ у напрямку міста.",
+      "decision_basis": "strict: exact-city timed aerial-attack event inside matched alert"
+    },
+    {
+      "alert_start_date": "2025-10-09",
+      "alert_start": "2025-10-09T19:08:09Z",
+      "event_time": "2025-10-10 around midnight and later overnight Europe/Kyiv",
+      "source_url": "https://dnepr.info/uk/news/u-dnipri-ta-oblasti-vsyu-nich-lunali-vibuhi-shcho-vidomo-pro-masovanu-ataku",
+      "evidence": "Тривогу оголосили о 22:08; близько опівночі у Дніпрі вже лунали вибухи під час масованої ракетно-дронової атаки.",
+      "decision_basis": "strict: exact-city aerial-war explosions inside cross-midnight matched alert"
+    },
+    {
+      "alert_start_date": "2025-10-10",
+      "alert_start": "2025-10-10T13:46:01Z",
+      "event_time": "2025-10-10 ~16:58 Europe/Kyiv",
+      "source_url": "https://dnepr.express/ua/post/kab-na-dnipro-u-misti-prolunav-potuzhnij-vibuh",
+      "evidence": "Під час повітряної тривоги у Дніпрі близько 16:58 пролунав вибух після попередження про авіаційні засоби ураження/КАБ.",
+      "decision_basis": "strict: exact-city aerial-war event explicitly during matched alert"
+    },
+    {
+      "alert_start_date": "2025-10-21",
+      "alert_start": "2025-10-21T20:20:02Z",
+      "event_time": "2025-10-22 ~00:31 Europe/Kyiv",
+      "source_url": "https://www.pravda.com.ua/news/2025/10/22/8003830/",
+      "evidence": "У Дніпрі близько 00:31 пролунав вибух; повітряна тривога, оголошена о 23:20, тривала.",
+      "decision_basis": "strict: exact-city timed aerial-war event inside cross-midnight matched alert"
+    },
+    {
+      "alert_start_date": "2025-10-30",
+      "alert_start": "2025-10-29T22:44:35Z",
+      "event_time": "2025-10-30 ~04:00 Europe/Kyiv",
+      "source_url": "https://24tv.ua/masovana-ataka-ukrayini-30-zhovtnya-2025-yaki-naslidki-obstrilu_n2943109",
+      "evidence": "Хронологія масованої атаки фіксує о 04:00 серію вибухів у Дніпрі.",
+      "decision_basis": "strict: exact-city timed aerial-war event inside matched alert"
+    },
+    {
+      "alert_start_date": "2025-10-30",
+      "alert_start": "2025-10-30T10:00:22Z",
+      "event_time": "2025-10-30 ~12:00 Europe/Kyiv",
+      "source_url": "https://news.telegraf.com.ua/ukr/dnepr/2025-10-30/5924333-potuzhni-vibukhi-prolunali-u-dnipri-usi-podrobitsi-ataki-rosii",
+      "evidence": "Телеграф фіксує російський удар по Дніпру приблизно о 12:00.",
+      "decision_basis": "strict: exact-city timed aerial-war event inside matched alert"
+    },
+    {
+      "alert_start_date": "2025-10-30",
+      "alert_start": "2025-10-30T18:44:03Z",
+      "event_time": "2025-10-30 ~20:49 Europe/Kyiv",
+      "source_url": "https://news.telegraf.com.ua/ukr/dnepr/2025-10-30/5924333-potuzhni-vibukhi-prolunali-u-dnipri-usi-podrobitsi-ataki-rosii",
+      "evidence": "Близько 20:49 у Дніпрі було чутно повторні вибухи; повідомлялося про балістичну атаку.",
+      "decision_basis": "strict: exact-city timed aerial-war event inside matched alert"
+    },
+    {
+      "alert_start_date": "2025-10-30",
+      "alert_start": "2025-10-30T21:08:59Z",
+      "event_time": "2025-10-30 ~23:47 Europe/Kyiv",
+      "source_url": "https://news.telegraf.com.ua/ukr/dnepr/2025-10-30/5924333-potuzhni-vibukhi-prolunali-u-dnipri-usi-podrobitsi-ataki-rosii",
+      "evidence": "Близько 23:47 Суспільне повідомило про вибухи у Дніпрі, а Повітряні сили — про КАБ у напрямку міста.",
+      "decision_basis": "strict: exact-city timed aerial-war event inside matched alert"
+    },
+    {
+      "alert_episode_start": "2025-11-03 03:58",
+      "event_time": "після 03:58",
+      "source_url": "https://dnepr.express/ua/post/shvidkisna-cil-na-dnipro-u-misti-prolunali-potuzhni-vibuhi/amp",
+      "evidence": "Після тривоги о 03:58 через швидкісну ціль на Дніпро в місті пролунали потужні вибухи.",
+      "decision": "strict",
+      "basis": "exact_city; confirmed_air_war; event_during_matched_alert"
+    },
+    {
+      "alert_episode_start": "2025-11-06 ~15:01",
+      "event_time": "17:38, 17:43",
+      "source_url": "https://24tv.ua/dnipri-progrimili-vibuhi_n2947938",
+      "evidence": "Під час тривоги, оголошеної близько 15:01, у Дніпрі о 17:38 та 17:43 пролунали вибухи на тлі масованої атаки БпЛА.",
+      "decision": "strict",
+      "basis": "exact_city; confirmed_air_war; timed_inside_alert"
+    },
+    {
+      "alert_episode_start": "2025-11-06 ~22:16",
+      "event_time": "~22:37",
+      "source_url": "https://24tv.ua/vtretye-za-vechir-dnipri-znovu-prolunali-vibuhi_n2948081",
+      "evidence": "Після повторного оголошення тривоги близько 22:16 через загрозу БпЛА у Дніпрі близько 22:37 стався вибух.",
+      "decision": "strict",
+      "basis": "exact_city; confirmed_air_war; separate_realert_episode"
+    },
+    {
+      "alert_episode_start": "2025-11-07 23:26",
+      "event_time": "23:44 і після 00:00 2025-11-08",
+      "source_url": "https://24tv.ua/vibuh-progrimiv-dnipri_n2948829",
+      "evidence": "Тривога почалася 7 листопада о 23:26; у Дніпрі з 23:44 і після опівночі лунали вибухи під час атаки БпЛА.",
+      "decision": "strict",
+      "basis": "exact_city; confirmed_air_war; cross_midnight_assigned_by_start"
+    },
+    {
+      "alert_episode_start": "2025-11-15 00:38",
+      "event_time": "після 00:38",
+      "source_url": "https://dnepr.express/ua/post/vnochi-u-dnipri-lunali-vibuhi-sho-vidomo-stanom-na-ranok-15-listopada",
+      "evidence": "Після тривоги о 00:38 через ворожі БпЛА у Дніпрі вночі лунали вибухи.",
+      "decision": "strict",
+      "basis": "exact_city; confirmed_air_war; event_during_alert"
+    },
+    {
+      "alert_episode_start": "2025-11-17 ~22:00",
+      "event_time": "~22:32",
+      "source_url": "https://24tv.ua/dnipri-prolunav-vibuh-misto-sune-navala-shahediv_n2954649",
+      "evidence": "Під час тривоги, після повідомлення Повітряних сил про БпЛА на Дніпро о 22:16, у місті близько 22:32 пролунав вибух.",
+      "decision": "strict",
+      "basis": "exact_city; confirmed_air_war; approximate_time_inside_alert"
+    },
+    {
+      "alert_episode_start": "2025-11-18 ~17:30",
+      "event_time": "невдовзі після 17:30",
+      "source_url": "https://24tv.ua/dnipri-progrimili-vibuhi_n2955158",
+      "evidence": "Після початку тривоги близько 17:30 у Дніпрі пролунали вибухи на тлі загрози БпЛА.",
+      "decision": "strict",
+      "basis": "exact_city; confirmed_air_war; event_during_alert"
+    },
+    {
+      "alert_episode_start": "2025-11-19 14:59",
+      "event_time": "~15:13",
+      "source_url": "https://dnepr.express/ua/post/kab-na-dnipro-u-misti-bulo-chutno-vibuh",
+      "evidence": "Тривога почалася о 14:59 через повітряну загрозу; близько 15:13 у Дніпрі було чутно вибух.",
+      "decision": "strict",
+      "basis": "exact_city; confirmed_air_war; timed_inside_alert"
+    },
+    {
+      "alert_episode_start": "2025-11-19 19:22",
+      "event_time": "~19:40",
+      "source_url": "https://dnepr.express/ua/post/u-dnipri-prolunav-potuzhnij-vibuh-ne-pokidajte-ukrittiv",
+      "evidence": "О 19:22 оголосили нову тривогу через ворожі БпЛА; близько 19:40 у Дніпрі пролунав потужний вибух.",
+      "decision": "strict",
+      "basis": "exact_city; confirmed_air_war; separate_same_day_episode"
+    },
+    {
+      "alert_episode_start": "2025-11-20 14:31",
+      "event_time": "~15:30",
+      "source_url": "https://dnepr.express/ua/post/velika-grupa-bpla-na-dnipro-u-misti-prolunav-vibuh",
+      "evidence": "Після тривоги о 14:31 через велику групу БпЛА на Дніпро близько 15:30 у місті пролунали вибухи.",
+      "decision": "strict",
+      "basis": "exact_city; confirmed_air_war; timed_inside_alert"
+    },
+    {
+      "alert_episode_start": "2025-11-22 23:33",
+      "event_time": "~23:50",
+      "source_url": "https://zn.ua/ukr/amp/war/cherez-ataku-droniv-u-dnipri-spalakhnula-bahatopoverkhivka-je-postrazhdali-ova.html",
+      "evidence": "Тривога тривала з 23:33 до 00:24; близько 23:50 у Дніпрі лунали вибухи під час атаки дронів.",
+      "decision": "strict",
+      "basis": "exact_city; confirmed_air_war; cross_midnight_episode"
+    },
+    {
+      "alert_episode_start": "2025-11-25 13:36",
+      "event_time": "13:45",
+      "source_url": "https://dp.informator.ua/uk/bpla-v-napryamku-dnipra-u-misti-prolunav-vibuh",
+      "evidence": "О 13:36 оголосили тривогу, БпЛА рухався в напрямку Дніпра, а о 13:45 у місті пролунав вибух.",
+      "decision": "strict",
+      "basis": "exact_city; confirmed_air_war; timed_inside_alert"
+    },
+    {
+      "alert_episode_start": "2025-11-28 21:00",
+      "event_time": "~22:41",
+      "source_url": "https://dp.informator.ua/uk/bpla-v-napryamku-dnipra-u-misti-lunayut-vibuhi-vvecheri-p-yatnici",
+      "evidence": "Тривога у Дніпровському районі почалася о 21:00; після наближення БпЛА до Дніпра близько 22:41 у місті лунали вибухи.",
+      "decision": "strict",
+      "basis": "exact_city; confirmed_air_war; timed_inside_proxy_alert"
+    },
+    {
+      "alert_episode_start": "2025-12-01 10:10",
+      "event_time": "після 10:10",
+      "source_url": "https://dnepr.express/ua/post/u-dnipri-chutno-zvuki-vibuhu",
+      "evidence": "О 10:10 почалася тривога через швидкісну ціль на Дніпро, після чого в місті було чутно вибух.",
+      "decision": "strict",
+      "basis": "exact_city; confirmed_air_war; event_during_alert"
+    },
+    {
+      "alert_episode_start": "2025-12-06 00:19",
+      "event_time": "після 00:19",
+      "source_url": "https://dnepr.express/ua/post/vnochi-ta-vranci-u-dnipri-lunali-vibuhi-sho-vidomo-pro-vorozhu-ataku",
+      "evidence": "Тривога почалася о 00:19 через ворожі БпЛА, після чого у Дніпрі вночі пролунали вибухи.",
+      "decision": "strict",
+      "basis": "exact_city; confirmed_air_war; event_during_alert"
+    },
+    {
+      "alert_episode_start": "2025-12-07 23:30",
+      "event_time": "~23:40",
+      "source_url": "https://dnepr.express/ua/post/u-dnipri-guchno-lunayut-vibuhi",
+      "evidence": "Перший звук був до сирени, але після оголошення тривоги о 23:30 через БпЛА у Дніпрі близько 23:40 стався ще один вибух.",
+      "decision": "strict",
+      "basis": "exact_city; confirmed_air_war; post_alert_explosion_only"
+    },
+    {
+      "alert_episode_start": "2025-12-09 21:17",
+      "event_time": "~21:52",
+      "source_url": "https://dnepr.express/ua/post/vvecheri-u-dnipri-bulo-chutno-vibuh-situaciya-u-misti-j-oblasti-stanom-na-ranok",
+      "evidence": "Після тривоги о 21:17 і повідомлення про БпЛА в напрямку Дніпра близько 21:52 у місті було чутно вибух.",
+      "decision": "strict",
+      "basis": "exact_city; confirmed_air_war; timed_inside_alert"
+    },
+    {
+      "alert_episode_start": "2025-12-14 15:17",
+      "event_time": "15:29",
+      "source_url": "https://dnepr.express/ua/post/bpla-na-dnipro-u-misti-lunayut-vibuhi",
+      "evidence": "Тривога почалася о 15:17; о 15:29 у Дніпрі пролунав вибух, повідомлялося про ворожі БпЛА в напрямку міста.",
+      "decision": "strict",
+      "basis": "exact_city; confirmed_air_war; timed_inside_alert"
+    },
+    {
+      "alert_episode_start": "2025-12-18 12:58",
+      "event_time": "13:17–13:20",
+      "source_url": "https://dnepr.express/ua/post/grupa-bpla-na-dnipro-u-misti-chutno-zvuki-vibuhiv",
+      "evidence": "О 12:58 почалася тривога через групу БпЛА на Дніпро; о 13:17 та 13:20 у місті було чутно вибухи.",
+      "decision": "strict",
+      "basis": "exact_city; confirmed_air_war; timed_inside_alert"
+    },
+    {
+      "alert_episode_start": "2025-12-25 20:23",
+      "event_time": "20:26",
+      "source_url": "https://dnepr.express/ua/post/shvidkisna-cil-na-dnipro-u-misti-bulo-chutno-vibuh",
+      "evidence": "О 20:23 оголосили тривогу через швидкісну ціль на Дніпро; о 20:26 у місті було чутно вибух.",
+      "decision": "strict",
+      "basis": "exact_city; confirmed_air_war; timed_inside_alert"
+    },
+    {
+      "alert_episode_start": "2025-12-29 11:44",
+      "event_time": "~12:05",
+      "source_url": "https://dnepr.express/ua/post/bpla-na-dnipro-u-misti-prolunav-vibuh",
+      "evidence": "Тривога почалася о 11:44, БпЛА рухався на Дніпро, а близько 12:05 у місті пролунав вибух.",
+      "decision": "strict",
+      "basis": "exact_city; confirmed_air_war; timed_inside_alert"
+    },
+    {
+      "alert_episode_start": "2026-01-03 10:02",
+      "event_time": "~10:07",
+      "source_url": "https://dnepr.express/ua/post/u-dnipri-pid-chas-trivogi-bulo-chutno-vibuh",
+      "evidence": "Під час тривоги, що почалася о 10:02, у Дніпрі близько 10:07 було чутно вибух.",
+      "decision": "strict",
+      "basis": "exact_city; confirmed_air_war; explicit_during_alert"
+    },
+    {
+      "alert_episode_start": "2026-01-05 10:54",
+      "event_time": "10:59–11:01",
+      "source_url": "https://dnepr.express/ua/post/dnipro-pid-atakoyu-bpla-lunayut-vibuhi/amp",
+      "evidence": "О 10:54 оголосили тривогу через БпЛА; у Дніпрі о 10:59 та 11:01 пролунали вибухи.",
+      "decision": "strict",
+      "basis": "exact_city; confirmed_air_war; timed_inside_alert"
+    },
+    {
+      "alert_episode_start": "2026-01-05 12:05",
+      "event_time": "12:16",
+      "source_url": "https://dnepr.express/ua/post/u-dnipri-znovu-prolunav-vibuh-nad-mistom-zdijnyavsya-stovp-dimu",
+      "evidence": "О 12:05 у Дніпрі повторно оголосили тривогу; о 12:16 під час атаки БпЛА пролунав вибух.",
+      "decision": "strict",
+      "basis": "exact_city; confirmed_air_war; separate_same_day_realert"
+    },
+    {
+      "alert_episode_start": "2026-01-06 20:12",
+      "event_time": "~20:13",
+      "source_url": "https://dnepr.express/ua/post/u-dnipri-guchno-mistyani-chuli-vibuh",
+      "evidence": "О 20:12 оголосили тривогу через балістичну загрозу; приблизно за хвилину у Дніпрі пролунав вибух.",
+      "decision": "strict",
+      "basis": "exact_city; confirmed_air_war; timed_inside_alert"
+    },
+    {
+      "alert_episode_start": "2026-01-09 22:13",
+      "event_time": "~00:52 2026-01-10",
+      "source_url": "https://dnepr.express/ua/post/vnochi-u-dnipri-ta-oblasti-lunali-vibuhi-sho-kazhut-v-ova/amp",
+      "evidence": "Тривога почалася 9 січня о 22:13; близько 00:52 10 січня у Дніпрі пролунав вибух під час атаки БпЛА.",
+      "decision": "strict",
+      "basis": "exact_city; confirmed_air_war; cross_midnight_assigned_by_start"
+    },
+    {
+      "alert_episode_start": "2026-01-13 19:08",
+      "event_time": "після 19:08; повторно ~20:27",
+      "source_url": "https://dnepr.express/ua/post/u-dnipri-shojno-prolunav-vibuh",
+      "evidence": "Після тривоги о 19:08 через балістичну загрозу у Дніпрі пролунали вибухи, повторно близько 20:27.",
+      "decision": "strict",
+      "basis": "exact_city; confirmed_air_war; event_during_alert"
+    },
+    {
+      "alert_episode_start": "2026-01-14 19:43",
+      "event_time": "~19:54",
+      "source_url": "https://dnepr.express/ua/post/vorozhij-bpla-u-napryamku-dnipra-u-misti-prolunav-vibuh",
+      "evidence": "О 19:43 почалася тривога, ворожий БпЛА рухався на Дніпро, а близько 19:54 у місті пролунав вибух.",
+      "decision": "strict",
+      "basis": "exact_city; confirmed_air_war; timed_inside_alert"
+    },
+    {
+      "alert_episode_start": "2026-01-19 12:58",
+      "event_time": "~15:06",
+      "source_url": "https://dnepr.express/ua/post/zagroza-balistiki-u-dnipri-bulo-chutno-vibuh",
+      "evidence": "Тривога почалася о 12:58; після повідомлення про балістичну загрозу близько 15:06 у Дніпрі було чутно вибух.",
+      "decision": "strict",
+      "basis": "exact_city; confirmed_air_war; timed_inside_alert"
+    },
+    {
+      "alert_episode_start": "2026-01-22 12:10",
+      "event_time": "12:30, 12:50",
+      "source_url": "https://dnepr.express/ua/post/u-dnipri-prolunav-potuzhnij-vibuh-ne-pokidajte-ukrittya",
+      "evidence": "О 12:10 почалася тривога через БпЛА; о 12:30 та 12:50 у Дніпрі лунали вибухи, згодом підтверджено влучання.",
+      "decision": "strict",
+      "basis": "exact_city; confirmed_air_war; timed_inside_alert"
+    },
+    {
+      "alert_episode_start": "2026-01-24 09:52",
+      "event_time": "від ~10:32",
+      "source_url": "https://dnepr.express/ua/post/podbajte-pro-vlasnu-bezpeku-vibuhi-lunayut-u-dnipri",
+      "evidence": "Тривога почалася о 09:52 через ворожий БпЛА; від близько 10:32 у Дніпрі лунали вибухи.",
+      "decision": "strict",
+      "basis": "exact_city; confirmed_air_war; timed_inside_alert"
+    },
+    {
+      "alert_episode_start": "2026-01-25 11:13",
+      "event_time": "12:42",
+      "source_url": "https://dnepr.express/ua/post/u-dnipri-guchno-prolunali-vibuhi",
+      "evidence": "О 11:13 у Дніпрі оголосили тривогу через БпЛА; о 12:42 у місті пролунали вибухи.",
+      "decision": "strict",
+      "basis": "exact_city; confirmed_air_war; timed_inside_alert"
+    },
+    {
+      "alert_episode_start": "2026-01-25 22:35",
+      "event_time": "22:52–22:58",
+      "source_url": "https://dnepr.express/ua/post/lunali-vibuhi-yak-u-dnipri-ta-oblasti-minula-nich-na-26-sichnya",
+      "evidence": "О 22:35 почалася нова тривога через БпЛА на Дніпро; о 22:52 та 22:58 у місті пролунали вибухи.",
+      "decision": "strict",
+      "basis": "exact_city; confirmed_air_war; separate_late_episode"
+    },
+    {
+      "alert_episode_start": "2026-01-26 04:15",
+      "event_time": "~06:44",
+      "source_url": "https://dnepr.express/ua/post/lunali-vibuhi-yak-u-dnipri-ta-oblasti-minula-nich-na-26-sichnya",
+      "evidence": "Після повторної тривоги о 04:15 близько 06:44 у Дніпрі було гучно на тлі повітряної атаки.",
+      "decision": "strict",
+      "basis": "exact_city; confirmed_air_war; separate_realert_episode"
+    },
+    {
+      "alert_episode_start": "2026-02-05 ~14:31",
+      "event_time": "14:45; 15:39",
+      "source_url": "https://24tv.ua/dnipro-skolihnula-seriya-vibuhiv_n3003501",
+      "evidence": "Після попередження про БпЛА та тривоги близько 14:31 у Дніпрі о 14:45 і 15:39 пролунали вибухи.",
+      "decision": "strict",
+      "basis": "exact_city; confirmed_air_war; timed_inside_alert"
+    },
+    {
+      "alert_episode_start": "2026-02-09 12:26",
+      "event_time": "14:56",
+      "source_url": "https://dnepr.express/ua/post/u-dnipri-progrimiv-guchnij-vibuh",
+      "evidence": "Тривога почалася о 12:26 через повітряні загрози; о 14:56 у Дніпрі пролунав вибух, ОВА підтвердила ворожий удар.",
+      "decision": "strict",
+      "basis": "exact_city; confirmed_air_war; timed_inside_alert"
+    },
+    {
+      "alert_episode_start": "2026-02-17 00:13",
+      "event_time": "під час нічної тривоги",
+      "source_url": "https://dp.informator.ua/uk/u-dnipri-lunayut-vibuhi-zranku-vivtorka-ye-rizik-udaru-raket-zi-strategichnoji-aviaciji-voroga",
+      "evidence": "Тривога у Дніпровському районі почалася о 00:13; під час руху ворожих БпЛА на Дніпро в місті лунали вибухи.",
+      "decision": "strict",
+      "basis": "exact_city; confirmed_air_war; explicit_during_proxy_alert"
+    },
+    {
+      "alert_episode_start": "2026-02-28 04:43",
+      "event_time": "~05:23",
+      "source_url": "https://dnepr.express/ua/post/vranci-u-dnipri-prolunav-vibuh-vnaslidok-vorozhoyi-ataki-ye-postrazhdalij",
+      "evidence": "О 04:43 почалася тривога через БпЛА на Дніпро; близько 05:23 у місті пролунав вибух, ОВА підтвердила атаку.",
+      "decision": "strict",
+      "basis": "exact_city; confirmed_air_war; timed_inside_alert"
+    },
+    {
+      "alert_episode_start": "2026-03-04 14:47",
+      "event_time": "15:21",
+      "source_url": "https://dnepr.express/ua/post/u-dnipri-bulo-chutno-potuzhnij-vibuh",
+      "evidence": "О 14:47 почалася нова тривога; о 15:21 у Дніпрі пролунав потужний вибух під час руху швидкісної цілі.",
+      "decision": "strict",
+      "basis": "exact_city; confirmed_air_war; separate_same_day_episode"
+    },
+    {
+      "alert_episode_start": "2026-03-04 до 04:27 (точна хвилина не вказана)",
+      "event_time": "~04:27",
+      "source_url": "https://dnepr.express/ua/post/lunali-vibuhi-yak-u-dnipri-ta-oblasti-minula-nich-na-4-bereznya",
+      "evidence": "Джерело прямо повідомляє, що близько 04:27 під час повітряної тривоги в Дніпрі стався вибух після попередження про ворожий БпЛА.",
+      "decision": "strict",
+      "basis": "exact_city; confirmed_air_war; explicit_during_alert"
+    },
+    {
+      "alert_episode_start": "2026-03-09 22:26",
+      "event_time": "~23:00",
+      "source_url": "https://dnepr.express/ua/post/u-dnipri-guchno-pracyuye-ppo",
+      "evidence": "О 22:26 оголосили тривогу через ворожі БпЛА; близько 23:00 після їх наближення до Дніпра у місті лунали вибухи.",
+      "decision": "strict",
+      "basis": "exact_city; confirmed_air_war; timed_inside_alert"
+    },
+    {
+      "alert_start_kyiv": "2026-03-12T19:52:20",
+      "event_time_kyiv": "evening, during alert",
+      "source_url": "https://dnepr.info/uk/news/u-dnipri-pid-chas-trivogi-prolunav-vibuh-v-ova-prokomentuvali",
+      "evidence": "Exact-city report says an explosion was heard in Dnipro during the alert; aerial threat was directed toward the city.",
+      "decision_basis": "strict — exact city, aerial-war context, explicit during-alert wording."
+    },
+    {
+      "alert_start_kyiv": "2026-03-14T10:15:46",
+      "event_time_kyiv": "~11:13",
+      "source_url": "https://dnepr.info/uk/news/u-dnipri-pid-chas-povitryanoji-trivogi-prolunali-vibuhi-2",
+      "evidence": "Exact-city report places explosions at about 11:13 and explicitly says they occurred during the air alert; preliminary cause was air defence against a hostile UAV.",
+      "decision_basis": "strict — explicit during-alert wording; approximate clock time is near the frozen alert boundary, no tolerance applied."
+    },
+    {
+      "alert_start_kyiv": "2026-03-15T09:19:33",
+      "event_time_kyiv": "~10:15",
+      "source_url": "https://dnepr.express/ua/post/u-peredmisti-dnipra-bulo-chutno-vibuh-sho-vidomo",
+      "evidence": "Residents in parts of Dnipro heard a powerful explosion after a hostile UAV was reported moving toward the city; the alert remained active.",
+      "decision_basis": "strict — exact-city audibility, hostile UAV context, event inside the frozen episode."
+    },
+    {
+      "alert_start_kyiv": "2026-03-18T15:22:20",
+      "event_time_kyiv": "15:34 and shortly after",
+      "source_url": "https://dnepr.express/ru/post/gromko-v-dnepre-gorod-pod-atakoj-shahedov",
+      "evidence": "Several explosions were reported in Dnipro after the 15:22 alert began while hostile Shahed-type UAVs were moving toward the city.",
+      "decision_basis": "strict — exact city, hostile UAV context, timed explosions inside episode."
+    },
+    {
+      "alert_start_kyiv": "2026-03-20T18:52:58",
+      "event_time_kyiv": "~19:30",
+      "source_url": "https://dneprnews.net/2026/03/20/",
+      "evidence": "The local report says explosions were heard in Dnipro around 19:30 during a Shahed attack, with preliminary air-defence activity.",
+      "decision_basis": "strict — exact city and approximate event time inside the episode."
+    },
+    {
+      "alert_start_kyiv": "2026-03-23T13:29:39",
+      "event_time_kyiv": "13:39",
+      "source_url": "https://dnepr.express/ua/post/u-dnipri-prolunav-vibuh-2",
+      "evidence": "An explosion was heard in Dnipro at 13:39 after the alert began and hostile UAVs were reported near the city.",
+      "decision_basis": "strict — exact city, UAV context, exact time inside episode."
+    },
+    {
+      "alert_start_kyiv": "2026-03-23T16:23:23",
+      "event_time_kyiv": "~16:30",
+      "source_url": "https://vidomo.media/ukr/war/1774276792-okupanti-skeruvali-bpla-na-dnipro-u-misti-prolunav-vibuh",
+      "evidence": "A hostile strike UAV was directed toward Dnipro and an explosion was reported in the city at about 16:30.",
+      "decision_basis": "strict — exact city, UAV context, approximate time inside episode."
+    },
+    {
+      "alert_start_kyiv": "2026-03-24T10:02:05",
+      "event_time_kyiv": "~10:10",
+      "source_url": "https://dnepr.express/ua/post/ranok-pochavsya-z-vibuhiv-vorozhij-dron-vluchiv-u-bagatopoverhivku-v-dnipri",
+      "evidence": "A Russian drone struck a residential area in Dnipro around 10:00, with explosions reported in the city.",
+      "decision_basis": "strict — exact city, confirmed drone attack, event inside episode."
+    },
+    {
+      "alert_start_kyiv": "2026-03-26T08:54:25",
+      "event_time_kyiv": "09:24; repeated ~09:46",
+      "source_url": "https://dnepr.express/ua/post/u-dnipri-chuli-vibuh-sho-vidomo-1",
+      "evidence": "Dnipro heard an explosion at 09:24 and more around 09:46 while hostile UAVs were moving toward the city.",
+      "decision_basis": "strict — exact city, UAV context, timed explosions inside episode."
+    },
+    {
+      "alert_start_kyiv": "2026-03-30T06:34:31",
+      "event_time_kyiv": "07:37 and shortly after",
+      "source_url": "https://dnepr.express/ua/post/u-dnipri-prolunali-vibuhi-2",
+      "evidence": "Explosions were reported in Dnipro from 07:37 during a hostile UAV attack and active air defence.",
+      "decision_basis": "strict — exact city, UAV context, timed event inside episode."
+    },
+    {
+      "alert_start_kyiv": "2026-04-01T02:30:11",
+      "event_time_kyiv": "02:36",
+      "source_url": "https://dnepr.express/ua/post/vnochi-vorog-atakuvav-dnipro-ta-oblast-ye-postrazhdali-poshkodzheni-budinki",
+      "evidence": "Dnipro was attacked overnight and a loud explosion was reported at 02:36 after the alert began.",
+      "decision_basis": "strict — exact city, aerial attack context, timed event inside episode."
+    },
+    {
+      "alert_start_kyiv": "2026-04-13T08:39:58",
+      "event_time_kyiv": "~09:05",
+      "source_url": "https://dnepr.info/uk/news/vibuhi-u-dnipri-zranku-13-kvitnya-pershi-podrobici-vid-ova",
+      "evidence": "Explosions were reported in Dnipro around 09:05 as hostile UAVs were moving toward the city.",
+      "decision_basis": "strict — exact city, UAV context, approximate time inside episode."
+    },
+    {
+      "alert_start_kyiv": "2026-04-14T10:52:46",
+      "event_time_kyiv": "~11:30",
+      "source_url": "https://suspilne.media/dnipro/1288815-armia-rf-atakuvala-dnipro-raketou-semero-ludej-zaginuli/",
+      "evidence": "An explosion was heard in Dnipro around 11:30 as the Air Force warned of a missile moving toward the city; the strike caused casualties.",
+      "decision_basis": "strict — exact city, missile context, approximate time inside episode."
+    },
+    {
+      "alert_start_kyiv": "2026-04-15T02:20:18",
+      "event_time_kyiv": "~03:00",
+      "source_url": "https://24tv.ua/dnipro/dnipri-progrimili-vibuhi-pislya-ataki-bpla-vinikla-pozhezha_n3049070",
+      "evidence": "Explosions and a fire were reported in Dnipro during an overnight hostile UAV attack.",
+      "decision_basis": "strict — exact city, confirmed UAV attack, approximate event time inside episode."
+    },
+    {
+      "alert_start_kyiv": "2026-04-15T10:54:40",
+      "event_time_kyiv": "~11:32",
+      "source_url": "https://tsn.ua/ukrayina/u-velykomu-oblasnomu-tsentri-posered-dnia-lunaiu-vybukhy-3062450.html",
+      "evidence": "Explosions were reported in Dnipro while Russian drones threatened the city and the air alert was active.",
+      "decision_basis": "strict — exact city, UAV context, event within the frozen episode."
+    },
+    {
+      "alert_start_kyiv": "2026-04-15T18:59:20",
+      "event_time_kyiv": "20:24 and minutes after",
+      "source_url": "https://dnepr.express/ua/post/znovu-guchno-v-dnipri-prolunalo-kilka-vibuhiv",
+      "evidence": "The first explosion was reported in Dnipro at 20:24, followed by more, during a Russian drone attack.",
+      "decision_basis": "strict — exact city, UAV context, timed explosions inside episode."
+    },
+    {
+      "alert_start_kyiv": "2026-04-16T01:54:15",
+      "event_time_kyiv": "~02:30",
+      "source_url": "https://suspilne.media/amp/dnipro/1291503-likari-rozpovili-v-akomu-stani-poraneni-cerez-ataki-po-dnipru/",
+      "evidence": "A resident placed the explosion in central Dnipro at about 02:30 during a Russian ballistic strike.",
+      "decision_basis": "strict — exact city, ballistic attack context, approximate time inside episode."
+    },
+    {
+      "alert_start_kyiv": "2026-04-16T19:28:32",
+      "event_time_kyiv": "19:31",
+      "source_url": "https://dnepr.express/ua/post/raketa-na-dnipro-u-misti-znovu-vchergove-prolunav-vibuh",
+      "evidence": "An explosion was heard in Dnipro at 19:31 after the Air Force warned of a missile moving toward the city.",
+      "decision_basis": "strict — exact city, missile context, exact time inside episode."
+    },
+    {
+      "alert_start_kyiv": "2026-04-17T05:31:42",
+      "event_time_kyiv": "from 05:47",
+      "source_url": "https://dnepr.express/ua/post/rano-vranci-u-dnipri-lunali-vibuhi-pershi-podrobici-vid-ova",
+      "evidence": "Explosions began in Dnipro around 05:47 during a hostile UAV attack that damaged a city transport enterprise.",
+      "decision_basis": "strict — exact city, UAV context, timed event inside episode."
+    },
+    {
+      "alert_start_kyiv": "2026-04-17T08:48:10",
+      "event_time_kyiv": "09:10",
+      "source_url": "https://dnepr.express/ua/post/bpla-nad-mistom-u-dnipri-znovu-guchno/amp",
+      "evidence": "Explosions were heard in Dnipro at 09:10 while a hostile UAV group was moving toward the city.",
+      "decision_basis": "strict — exact city, UAV context, exact time inside episode."
+    },
+    {
+      "alert_start_kyiv": "2026-04-17T13:38:40",
+      "event_time_kyiv": "14:02",
+      "source_url": "https://www.dnipro.media/novyny-dnipro/u-dnipri-zbyly-shahed-v-seredmisti/",
+      "evidence": "An explosion was reported in Dnipro at 14:02 during the alert; debris from a downed Shahed fell in the city centre.",
+      "decision_basis": "strict — exact city, hostile UAV/PVO context, exact time inside episode."
+    },
+    {
+      "alert_start_kyiv": "2026-04-22T01:27:17",
+      "event_time_kyiv": "~02:00",
+      "source_url": "https://suspilne.media/dnipro/1295167-stalisa-pozezi-poskodzeno-budinki-so-vidbuvaetsa-na-misci-ataki-po-dnipru/",
+      "evidence": "An explosion was reported in Dnipro around 02:00 during a Russian UAV attack that damaged residential property.",
+      "decision_basis": "strict — exact city, UAV context, approximate time inside episode."
+    },
+    {
+      "alert_start_kyiv": "2026-04-22T05:35:46",
+      "event_time_kyiv": "~06:30",
+      "source_url": "https://fakty.com.ua/ua/proisshestvija/20260422-vybuhy-v-dnipri-u-misti-zafiksovano-pozhezhi/",
+      "evidence": "Explosions were reported in Dnipro around 06:30 while Russian UAVs threatened the city; fires followed.",
+      "decision_basis": "strict — exact city, UAV context, approximate time inside episode."
+    },
+    {
+      "alert_start_kyiv": "2026-04-22T22:54:43",
+      "event_time_kyiv": "00:30 on 2026-04-23",
+      "source_url": "https://suspilne.media/dnipro/1296007-u-dnipri-prolunali-vibuhi-e-vlucanna-u-bagatopoverhivku-2/",
+      "evidence": "Explosions were reported in Dnipro at about 00:30 while hostile UAVs were approaching; a high-rise was hit.",
+      "decision_basis": "strict — exact city, UAV context, event inside cross-midnight episode started Apr 22."
+    },
+    {
+      "alert_start_kyiv": "2026-04-23T13:26:25",
+      "event_time_kyiv": "13:40",
+      "source_url": "https://24tv.ua/ataka-droniv-ukrayinu-22-23-kvitnya-2026-roku-de-ye-zagroza-udaru_n3054253",
+      "evidence": "Drones were reported moving toward Dnipro shortly before explosions were heard in the city at about 13:40.",
+      "decision_basis": "strict — exact city, UAV context, timed event inside episode."
+    },
+    {
+      "alert_start_kyiv": "2026-04-24T07:46:34",
+      "event_time_kyiv": "08:48",
+      "source_url": "https://dnepr.express/ua/post/u-dnipri-pid-chas-trivogi-prolunav-vibuh-sho-vidomo",
+      "evidence": "A loud explosion was heard in Dnipro at 08:48 after warning of a hostile UAV moving toward the city.",
+      "decision_basis": "strict — exact city, UAV/PVO context, exact time inside episode."
+    },
+    {
+      "alert_start_kyiv": "2026-04-24T19:44:13",
+      "event_time_kyiv": "20:25",
+      "source_url": "https://dnepr.express/ua/post/u-dnipri-24-kvitnya-vdruge-prolunav-vibuh-sho-vidomo/amp",
+      "evidence": "An explosion was heard in Dnipro at 20:25 during renewed hostile UAV activity.",
+      "decision_basis": "strict — exact city, UAV/PVO context, exact time inside episode."
+    },
+    {
+      "alert_start_kyiv": "2026-04-24T21:31:18",
+      "event_time_kyiv": "from ~23:00",
+      "source_url": "https://www.pravda.com.ua/news/2026/04/25/8031753/",
+      "evidence": "From about 23:00, repeated loud explosions were reported in Dnipro during a large combined Russian air attack.",
+      "decision_basis": "strict — exact city, combined aerial-war context, event interval inside episode."
+    },
+    {
+      "alert_start_kyiv": "2026-04-25T02:33:36",
+      "event_time_kyiv": "~03:30",
+      "source_url": "https://suspilne.media/dnipro/1297931-vijska-rf-atakuut-dnipro-poskodzenij-budinok-e-poraneni/",
+      "evidence": "Explosions were reported in Dnipro around 03:30 while high-speed targets and UAVs were directed toward the city.",
+      "decision_basis": "strict — exact city, aerial-war context, approximate time inside episode."
+    },
+    {
+      "alert_start_kyiv": "2026-04-25T07:02:30",
+      "event_time_kyiv": "07:28",
+      "source_url": "https://24tv.ua/pislya-strashnoyi-nochi-rosiya-znovu-atakuye-dnipro_n3055917/",
+      "evidence": "New explosions were reported in Dnipro at 07:28 as Russia resumed the attack on the city.",
+      "decision_basis": "strict — exact city, aerial-war context, exact time inside episode."
+    },
+    {
+      "alert_start_kyiv": "2026-04-25T10:32:52",
+      "event_time_kyiv": "11:05; repeated ~11:25",
+      "source_url": "https://dnepr.express/ua/post/u-dnipri-prolunali-povtorni-vibuhi-ye-postrazhdali",
+      "evidence": "Dnipro heard explosions at 11:05 and again around 11:25 after warning of an enemy UAV over the city.",
+      "decision_basis": "strict — exact city, UAV context, timed explosions inside episode."
+    },
+    {
+      "alert_start_kyiv": "2026-04-25T17:04:14",
+      "event_time_kyiv": "~17:05",
+      "source_url": "https://dneprnews.net/2026/04/25/",
+      "evidence": "A local report placed loud explosions in Dnipro at about 17:05 during another Russian attack, with residential damage reported.",
+      "decision_basis": "strict — exact city, aerial-war context, approximate time inside episode."
+    },
+    {
+      "alert_start_kyiv": "2026-04-28T02:15:13",
+      "event_time_kyiv": "02:22",
+      "source_url": "https://dnepr.express/ua/post/lunali-vibuhi-yak-u-dnipri-ta-oblasti-minula-nich-na-28-kvitnya",
+      "evidence": "An explosion was heard in Dnipro at 02:22 during the air alert; preliminary reporting indicated air-defence activity.",
+      "decision_basis": "strict — exact city, hostile-air/PVO context, exact time inside episode."
+    },
+    {
+      "alert_start_kyiv": "2026-04-29T00:21:45",
+      "event_time_kyiv": "00:36",
+      "source_url": "https://dnepr.express/ua/post/vnochi-u-dnipri-ta-oblasti-lunali-vibuhi-sho-vidomo",
+      "evidence": "An explosion was heard in Dnipro at 00:36 during the alert after warning of a hostile UAV moving toward the city.",
+      "decision_basis": "strict — exact city, UAV/PVO context, exact time inside episode."
+    },
+    {
+      "alert_start_kyiv": "2026-04-29T09:41:25",
+      "event_time_kyiv": "10:11 and 10:17",
+      "source_url": "https://dnepr.express/ua/post/bpla-nad-mistom-u-dnipri-chutno-vibuhi",
+      "evidence": "Explosions were heard in Dnipro at 10:11 and 10:17 while hostile UAVs were over or approaching the city.",
+      "decision_basis": "strict — exact city, UAV/PVO context, timed explosions inside episode."
+    },
+    {
+      "alert_start_kyiv": "2026-04-29T18:13:33",
+      "event_time_kyiv": "18:16",
+      "source_url": "https://dnepr.express/ua/post/rosiyani-atakuvali-dnipro-ta-oblast-29-kvitnya-ye-zagibli-postrazhdali-ta-rujnuvannya",
+      "evidence": "Dnipro was loud at 18:16 during an alert with a ballistic/fast-target threat toward the city.",
+      "decision_basis": "strict — exact city, ballistic threat context, exact time inside episode."
+    },
+    {
+      "alert_start_kyiv": "2026-04-30T10:15:18",
+      "event_time_kyiv": "~10:20",
+      "source_url": "https://dnipro.tv/news-dnipro/aktualnye-novosty/odna-liudyna-zahynula-11-postrazhdaly-rosiia-atakuvala-peredmistia-dnipra/",
+      "evidence": "Explosions were heard in Dnipro around 10:20 during a Russian UAV attack; the impact was reported near the city boundary.",
+      "decision_basis": "strict — metric is exact-city explosion reporting; UAV context and event time are inside episode."
+    },
+    {
+      "alert_start_kyiv": "2026-05-03T14:57:11",
+      "event_time_kyiv": "15:00; repeated ~15:06 and 15:11",
+      "source_url": "https://24tv.ua/dnipro/dnipri-progrimiv-vibuh-tudi-letila-raketa_n3060785",
+      "evidence": "Explosions were reported in Dnipro from 15:00 after warning of a missile moving toward the city.",
+      "decision_basis": "strict — exact city, missile context, timed explosions inside episode."
+    },
+    {
+      "alert_start_kyiv": "2026-05-04T20:38:06",
+      "event_time_kyiv": "22:29",
+      "source_url": "https://dnepr.express/ua/post/dnipro-znovu-pid-atakoyu-pislya-vibuhiv-viruye-pozhezha",
+      "evidence": "Explosions began in Dnipro at 22:29 during a hostile UAV attack and were followed by a fire.",
+      "decision_basis": "strict — exact city, UAV context, exact time inside episode."
+    },
+    {
+      "alert_start_kyiv": "2026-05-05T19:47:31",
+      "event_time_kyiv": "19:52",
+      "source_url": "https://dnepr.express/ua/post/u-dnipri-prolunav-vibuh-nad-mistom-zdijnyavsya-stovp-dimu",
+      "evidence": "A loud explosion was heard in Dnipro at 19:52 after warning of a ballistic/fast target toward the city; a fire followed.",
+      "decision_basis": "strict — exact city, ballistic threat context, exact time inside episode."
+    },
+    {
+      "alert_start_kyiv": "2026-05-07T03:18:17",
+      "event_time_kyiv": "~03:44",
+      "source_url": "https://dnepr.express/ua/post/vnochi-vorog-atakuvav-dnipro-sered-postrazhdalih-vagitna-zhinka",
+      "evidence": "A loud explosion was reported in Dnipro around 03:44 while hostile UAVs were moving toward the city; the attack caused damage and injuries.",
+      "decision_basis": "strict — exact city, UAV context, approximate time inside episode."
+    },
+    {
+      "alert_start_kyiv": "2026-05-07T10:42:56",
+      "event_time_kyiv": "~10:46",
+      "source_url": "https://dnepr.express/ua/post/u-dnipri-7-travnya-prolunav-potuzhnij-vibuh-sho-vidomo/amp",
+      "evidence": "A powerful explosion was reported in Dnipro around 10:46 during a Russian aerial threat to the city.",
+      "decision_basis": "strict — exact city, aerial-war context, approximate time inside episode."
+    },
+    {
+      "matched_alert_episode_start": "2026-05-13T05:45:39+03:00",
+      "event_time": "~2026-05-13T08:00:00+03:00",
+      "source_url": "https://fakty.com.ua/ua/proisshestvija/20260513-vybuhy-u-dnipri-shho-stalosya-sogodni-13-travnya-2026/",
+      "evidence": "Explosions in Dnipro were reported around 08:00; Air Force had warned of strike UAVs in the city and the air alert was ongoing; OVA said the sounds were air defence.",
+      "decision_basis": "strict/exact_time_inside_alert"
+    },
+    {
+      "matched_alert_episode_start": "2026-05-16T11:44:00+03:00",
+      "event_time": "during 11:43-12:37 alert",
+      "source_url": "https://tsn.ua/ukrayina/rosiia-posered-dnia-atakuye-velyke-misto-stalysia-vybukhy-3084797.html",
+      "evidence": "TSN reports several powerful explosions in Dnipro while sirens ran 11:43-12:37; UAVs were near the city and OVA attributed the sounds to air defence.",
+      "decision_basis": "strict/explicit_during_alert"
+    },
+    {
+      "matched_alert_episode_start": "2026-05-16T23:22:17+03:00",
+      "event_time": "2026-05-17T00:54:00+03:00",
+      "source_url": "https://24tv.ua/ataka-po-ukrayini-16-travnya-2026-roku-povitryani-sili-poperedili_n3069206",
+      "evidence": "24 Kanal logged renewed explosions in Dnipro at 00:54 and at 00:53 logged a UAV approaching Dnipro from the south.",
+      "decision_basis": "strict/exact_time_inside_alert"
+    },
+    {
+      "matched_alert_episode_start": "2026-05-17T16:49:25+03:00",
+      "event_time": "2026-05-17T18:06:00+03:00",
+      "source_url": "https://24tv.ua/ataka-po-ukrayini-16-travnya-2026-roku-povitryani-sili-poperedili_n3069206",
+      "evidence": "24 Kanal logged a series of explosions in Dnipro at 18:06 during the matched alert, amid active aerial threats.",
+      "decision_basis": "strict/exact_time_inside_alert"
+    },
+    {
+      "matched_alert_episode_start": "2026-05-17T19:02:13+03:00",
+      "event_time": "2026-05-17T19:31:00+03:00",
+      "source_url": "https://24tv.ua/ataka-po-ukrayini-16-travnya-2026-roku-povitryani-sili-poperedili_n3069206",
+      "evidence": "24 Kanal logged explosions in Dnipro at 19:31 after reporting a UAV group heading to Dnipro at 19:24.",
+      "decision_basis": "strict/exact_time_inside_alert"
+    },
+    {
+      "matched_alert_episode_start": "2026-05-19T09:58:31+03:00",
+      "event_time": "during alert; exact minute not stated",
+      "source_url": "https://nashemisto.dp.ua/2026/05/19/u-dnipri-19-travnia-prolunaly-vybukhy-meshkantsiv-zaklykaiut-zalyshatysia-v-ukryttiakh/",
+      "evidence": "Nashe Misto says Dnipro residents heard explosions while the city air alert was sounding; Air Force had reported a UAV threat.",
+      "decision_basis": "strict/explicit_during_alert"
+    },
+    {
+      "matched_alert_episode_start": "2026-05-19T23:58:29+03:00",
+      "event_time": "~2026-05-20T00:17:00+03:00",
+      "source_url": "https://fakty.com.ua/ua/proisshestvija/20260520-nichna-ataka-na-dnipro-20-travnya-2026-naslidky/",
+      "evidence": "Fakty reports the first explosions in Dnipro at about 00:17 during a Russian drone attack on the city.",
+      "decision_basis": "strict/exact_time_inside_alert"
+    },
+    {
+      "matched_alert_episode_start": "2026-05-21T03:15:39+03:00",
+      "event_time": "~2026-05-21T05:00:00+03:00",
+      "source_url": "https://suspilne.media/dnipro/1313049-u-dnipri-cerez-udar-rf-poskodzena-patipoverhivka-e-poraneni-so-kazut-ocevidci-podii/",
+      "evidence": "A Dnipro resident told Suspilne he woke from the explosion at about 05:00; the article documents the Russian strike on the city, while other reporting identified drone debris at the damaged building.",
+      "decision_basis": "strict/approx_time_inside_alert"
+    },
+    {
+      "matched_alert_episode_start": "2026-05-21T06:50:06+03:00",
+      "event_time": "2026-05-21T07:15:00+03:00",
+      "source_url": "https://24tv.ua/ataka-shahediv-20-21-travnya-2026-de-letyat-bpla-karta-povitryanih_n3071727",
+      "evidence": "24 Kanal logged an explosion in Dnipro at 07:15 and simultaneously reported a UAV over the city.",
+      "decision_basis": "strict/exact_time_inside_alert"
+    },
+    {
+      "matched_alert_episode_start": "2026-05-21T15:44:28+03:00",
+      "event_time": "~2026-05-21T16:30:00+03:00",
+      "source_url": "https://suspilne.media/dnipro/1313892-bezpilotniki-rf-pocilili-u-bagatopoverhivki-u-dnipri-blizko-20-poranenih-spalahnula-pozeza/",
+      "evidence": "Suspilne reports two explosions in Dnipro around 16:30; Air Force warned of UAVs over the city and drones hit two apartment buildings.",
+      "decision_basis": "strict/exact_time_inside_alert"
+    },
+    {
+      "matched_alert_episode_start": "2026-05-25T11:53:57+03:00",
+      "event_time": "2026-05-25T12:07:00+03:00",
+      "source_url": "https://suspilne.media/dnipro/1314344-vijska-rf-zavdali-udaru-po-dnipru-poraneni-troe-ludej/",
+      "evidence": "Suspilne reports an explosion in Dnipro at 12:07; Air Force warned of a high-speed target toward the city.",
+      "decision_basis": "strict/exact_time_inside_alert"
+    },
+    {
+      "matched_alert_episode_start": "2026-05-31T10:55:17+03:00",
+      "event_time": "~2026-05-31T11:00:00+03:00",
+      "source_url": "https://zaxid.net/rosiyani_znishhili_viddilennya_novoyi_poshti_u_dnipri_n1638198",
+      "evidence": "ZAXID reports explosions in Dnipro around 11:00 after an Air Force warning about strike UAVs; a Russian drone hit a Nova Poshta branch.",
+      "decision_basis": "strict/exact_time_inside_alert"
+    },
+    {
+      "matched_alert_episode_start": "2026-06-02T01:06:07+03:00",
+      "event_time": "during alert; exact minute not stated",
+      "source_url": "https://www.ukrinform.ua/rubric-regions/4129507-vorog-atakue-dnipro-raketami-u-misti-prolunali-vibuhi.html",
+      "evidence": "Ukrinform's correspondent reported powerful explosions in Dnipro while the city air alert was active; Air Force had warned of a missile moving toward Dnipro.",
+      "decision_basis": "strict/explicit_during_alert"
+    },
+    {
+      "matched_alert_episode_start": "2026-06-02T13:51:17+03:00",
+      "event_time": "~2026-06-02T14:25:00+03:00",
+      "source_url": "https://dp.informator.ua/uk/u-dnipri-rosiyskiy-reaktivniy-dron-vluchiv-po-bagatopoverhivci",
+      "evidence": "Informator reports an explosion in Dnipro around 14:25 when a Russian jet-powered drone struck an apartment building.",
+      "decision_basis": "strict/exact_time_inside_alert"
+    },
+    {
+      "matched_alert_episode_start": "2026-06-07T23:32:59+03:00",
+      "event_time": "2026-06-07T23:47:00+03:00",
+      "source_url": "https://24tv.ua/ataka-shahediv-7-chervnya-2026-roku-de-ogoloshena-trivoga-de_n3083166",
+      "evidence": "24 Kanal logged explosions in Dnipro at 23:47 after reporting a jet UAV heading toward Dnipro at 23:29.",
+      "decision_basis": "strict/exact_time_inside_alert"
+    },
+    {
+      "matched_alert_episode_start": "2026-06-14T13:45:15+03:00",
+      "event_time": "during alert; exact minute not stated",
+      "source_url": "https://sobitie.com.ua/dnipro/u-dnipri-prolunav-vybuh-v-ova-povidomyly-pro-robotu-ppo-425896/",
+      "evidence": "Sobitie reports an explosion heard in Dnipro during the air alert; OVA said it was air defence, after Air Force warned of a hostile UAV toward Dnipro from the west.",
+      "decision_basis": "strict/explicit_during_alert"
+    },
+    {
+      "matched_alert_episode_start": "2026-06-14T23:39:41+03:00",
+      "event_time": "after 00:00 on 2026-06-15; before 02:10",
+      "source_url": "https://suspilne.media/dnipro/1330882-vibuhi-u-dnipri-poranena-ludina-poskodzene-pidpriemstvo/",
+      "evidence": "Suspilne says explosions in Dnipro occurred after midnight during the Russian overnight attack; at 01:25 Air Force warned of a missile toward the city and by 02:10 OVA reported consequences.",
+      "decision_basis": "strict/time_interval_inside_alert"
+    },
+    {
+      "matched_alert_episode_start": "2026-06-18T11:09:15+03:00",
+      "event_time": "~2026-06-18T11:15:00+03:00",
+      "source_url": "https://suspilne.media/dnipro/1333884-rf-udarila-balisticnou-raketou-po-pidpriemstvu-u-dnipri-zaginuv-colovik-e-poraneni/",
+      "evidence": "Suspilne reports two explosions in Dnipro around 11:15; Air Force warned of a ballistic missile moving toward the city.",
+      "decision_basis": "strict/exact_time_inside_alert"
+    },
+    {
+      "matched_alert_start": "2026-06-28T00:38:52+03:00",
+      "event_time": "~01:04",
+      "source_url": "https://dnepr.express/ru/post/vnochi-u-dnipri-ta-oblasti-lunali-vibuhi-sho-vidomo-stanom-na-ranok-28-chervnya",
+      "evidence": "У Дніпрі близько 01:04 було гучно; перед цим Повітряні сили попереджали про БпЛА в напрямку міста.",
+      "decision": "strict_exact_time_inside_episode"
+    },
+    {
+      "matched_alert_start": "2026-06-28T16:26:13+03:00",
+      "event_time": "16:42",
+      "source_url": "https://suspilne.media/dnipro/1341758-golovni-novini-dnipra-ta-oblasti-28-cervna/",
+      "evidence": "У Дніпрі о 16:42 пролунав вибух; згодом ОВА повідомила, що звук був результатом роботи ППО.",
+      "decision": "strict_exact_time_inside_episode"
+    },
+    {
+      "matched_alert_start": "2026-06-29T09:40:59+03:00",
+      "event_time": "~10:25",
+      "source_url": "https://suspilne.media/dnipro/1342440-vijska-rf-vdarili-raketou-po-pidpriemstvu-u-dnipri-e-zagibli-ponad-20-poranenih/",
+      "evidence": "Близько 10:25 у Дніпрі пролунав вибух після попередження про швидкісну ціль у бік міста.",
+      "decision": "strict_exact_time_inside_episode"
+    },
+    {
+      "matched_alert_start": "2026-07-02T10:39:02+03:00",
+      "event_time": "10:41",
+      "source_url": "https://dnepr.express/ua/post/shvidkisna-cil-na-dnipro-u-misti-bulo-chutno-vibuh-1",
+      "evidence": "Тривогу оголосили о 10:39; у Дніпрі гучно було о 10:41 після повідомлення про швидкісну ціль на місто.",
+      "decision": "strict_exact_time_inside_episode"
+    },
+    {
+      "matched_alert_start": "2026-07-04T10:43:30+03:00",
+      "event_time": "~10:44",
+      "source_url": "https://suspilne.media/dnipro/1347230-rosijski-vijska-vdarili-po-pidpriemstvu-v-dnipri-semero-ludej-distali-poranenna/",
+      "evidence": "Близько 10:44 у Дніпрі пролунав вибух; Повітряні сили попереджали про швидкісну ціль на місто.",
+      "decision": "strict_exact_time_inside_episode"
+    },
+    {
+      "matched_alert_start": "2026-07-05T04:49:55+03:00",
+      "event_time": "04:59",
+      "source_url": "https://fakty.com.ua/ua/proisshestvija/20260705-vybuhy-u-dnipri-shho-stalosya-sogodni-5-lypnya-2026/",
+      "evidence": "Перші вибухи у Дніпрі пролунали о 04:59 під час російської повітряної атаки.",
+      "decision": "strict_exact_time_inside_episode"
+    },
+    {
+      "matched_alert_start": "2026-07-05T05:35:21+03:00",
+      "event_time": "05:50",
+      "source_url": "https://dnepr.express/ua/post/vranci-u-dnipri-lunali-vibuhi-v-ova-rozpovili-pershi-podrobici/amp",
+      "evidence": "Повторно гучно у Дніпрі було о 05:50 під час тієї ж ранкової атаки БпЛА.",
+      "decision": "strict_exact_time_inside_separate_episode"
+    },
+    {
+      "matched_alert_start": "2026-07-06T19:10:01+03:00",
+      "event_time": "evening, before 19:21 publication",
+      "source_url": "https://dp.informator.ua/uk/reaktivniy-bpla-na-dnipro-u-peredmisti-prolunav-vibuh",
+      "evidence": "Надвечір у Дніпрі чули вибух після повідомлення про реактивний дрон; на момент повідомлення повітряна тривога тривала.",
+      "decision": "strict_explicit_ongoing_alert_context"
+    },
+    {
+      "matched_alert_start": "2026-07-12T02:44:37+03:00",
+      "event_time": "~03:00",
+      "source_url": "https://dnepr.express/ua/post/vnochi-vorog-atakuvav-dnipro-ta-oblast-podrobici-vid-ova/amp",
+      "evidence": "Близько третьої години ночі гучно було у Дніпрі; Повітряні сили попереджали про реактивний БпЛА, ОВА підтвердила атаку міста.",
+      "decision": "strict_approx_time_inside_episode"
+    },
+    {
+      "matched_alert_start": "2026-07-16T19:49:06+03:00",
+      "event_time": "~19:51",
+      "source_url": "https://dnepr.express/ua/post/dnipro-j-oblast-poterpali-vid-rosijskih-atak-vinikla-pozhezha-ye-rujnuvannya",
+      "evidence": "Близько 19:51 у Дніпрі було чутно вибух; повідомлення пов'язує його з ворожою повітряною атакою.",
+      "decision": "strict_exact_time_inside_episode"
+    },
+    {
+      "matched_alert_start": "2026-07-17T16:33:30+03:00",
+      "event_time": "~16:40",
+      "source_url": "https://dnepr.express/ua/post/reaktivnij-bpla-na-dnipro-u-misti-bulo-chutno-vibuh",
+      "evidence": "Після оголошення тривоги о 16:33 і попередження про реактивний БпЛА на Дніпро близько 16:40 у місті було гучно.",
+      "decision": "strict_exact_time_inside_episode"
+    },
+    {
+      "matched_alert_start": "2026-07-18T16:47:01+03:00",
+      "event_time": "~16:54",
+      "source_url": "https://dnepr.express/ua/post/grupa-bpla-na-dnipro-u-misti-lunayut-vibuhi",
+      "evidence": "Під час атаки групи БпЛА на Дніпро перші вибухи в місті пролунали близько 16:54.",
+      "decision": "strict_exact_time_inside_episode"
+    },
+    {
+      "matched_alert_start": "2026-07-27T04:31:52+03:00",
+      "event_time": "05:02",
+      "source_url": "https://nv.ua/ukr/ukraine/events/rosiyski-ataki-na-ukrajinu-v-nich-z-26-na-27-lipnya-2026-roku-vsi-podrobici-onlayn-50627369.html",
+      "evidence": "О 05:02 у Дніпрі повідомили про декілька вибухів; перед цим Повітряні сили фіксували БпЛА в напрямку міста.",
+      "decision": "strict_exact_time_inside_episode"
+    },
+    {
+      "matched_alert_start": "2026-07-30T01:10:45+03:00",
+      "event_time": "01:15",
+      "source_url": "https://nv.ua/ukr/ukraine/events/udar-po-ukrajini-29-lipnya-u-nizci-oblastey-fiksuyut-bpla-mapa-povitryanih-trivog-50628334.html",
+      "evidence": "О 01:15 ЗМІ повідомили про вибухи у Дніпрі під час нічної російської повітряної атаки.",
+      "decision": "strict_exact_time_inside_episode"
+    },
+    {
+      "matched_alert_start": "2026-07-30T16:28:50+03:00",
+      "event_time": "~17:58",
+      "source_url": "https://dp.informator.ua/uk/lunaye-sirena-u-dnipri-progrimili-dekilka-vibuhiv",
+      "evidence": "Після оголошення у Дніпрі повітряної тривоги через загрозу БпЛА близько 17:58 у місті пролунали щонайменше два вибухи.",
+      "decision": "strict_exact_time_inside_episode"
+    },
+    {
+      "matched_episode_start": "2026-08-03T15:43:44+03:00",
+      "event_time": "shortly after 2026-08-03T15:43:00+03:00",
+      "source_url": "https://dnepr.express/ru/post/u-dnipri-chuli-vibuh-viruye-pozhezha",
+      "evidence": "У Дніпрі повідомили про вибух невдовзі після тривоги о 15:43; ОВА підтвердила російський удар і пожежу.",
+      "basis": "strict_exact_city_event_inside_episode"
+    },
+    {
+      "matched_episode_start": "2026-08-03T17:02:04+03:00",
+      "event_time": "2026-08-03T17:14:00+03:00; 17:44",
+      "source_url": "https://dnepr.express/ru/post/u-dnipri-chuli-vibuh-viruye-pozhezha",
+      "evidence": "У Дніпрі о 17:14 та 17:44 повідомляли про вибухи на тлі роботи ППО; обидва припали на одну frozen-тривогу.",
+      "basis": "strict_exact_city_event_inside_episode"
+    },
+    {
+      "matched_episode_start": "2026-08-03T18:27:44+03:00",
+      "event_time": "2026-08-03T18:39:00+03:00",
+      "source_url": "https://dnepr.express/ru/post/u-dnipri-chuli-vibuh-viruye-pozhezha",
+      "evidence": "О 18:39 у Дніпрі знову повідомили про вибух на тлі роботи ППО під час окремої тривоги.",
+      "basis": "strict_exact_city_event_inside_episode"
+    },
+    {
+      "matched_episode_start": "2026-08-10T12:12:09+03:00",
+      "event_time": "2026-08-10T12:14:00+03:00",
+      "source_url": "https://dnepr.express/ua/post/u-dnipri-10-serpnya-prolunali-vibuhi/amp",
+      "evidence": "Близько 12:14 у Дніпрі було гучно після попередження про реактивні БпЛА в напрямку міста; ОВА повідомила про роботу ППО.",
+      "basis": "strict_exact_city_event_inside_episode"
+    },
+    {
+      "matched_episode_start": "2026-08-10T15:24:54+03:00",
+      "event_time": "2026-08-10T15:40:00+03:00",
+      "source_url": "https://dnepr.express/ua/post/u-dnipri-lunayut-povtorni-vibuhi-detali-vid-ova/amp",
+      "evidence": "Близько 15:40 у Дніпрі пролунав вибух після попередження про реактивний БпЛА на місто; ОВА підтвердила роботу ППО.",
+      "basis": "strict_exact_city_event_inside_episode"
+    },
+    {
+      "matched_episode_start": "2026-08-11T13:56:25+03:00",
+      "event_time": "2026-08-11T14:11:00+03:00",
+      "source_url": "https://dnepr.express/ua/post/u-dnipri-11-serpnya-prolunav-vibuh",
+      "evidence": "Близько 14:11 у Дніпрі пролунав вибух після попередження про ворожий реактивний БпЛА; ОВА повідомила про роботу ППО.",
+      "basis": "strict_exact_city_event_inside_episode"
+    },
+    {
+      "matched_episode_start": "2026-08-11T19:32:18+03:00",
+      "event_time": "2026-08-11T19:35:00+03:00; 19:47; 19:54",
+      "source_url": "https://dnepr.express/ua/post/balistika-ta-reaktivnij-bpla-na-dnipro-u-misti-prolunali-vibuhi",
+      "evidence": "У Дніпрі повідомили про вибухи о 19:35, 19:47 і 19:54 після попереджень про балістику та реактивний БпЛА на місто.",
+      "basis": "strict_exact_city_event_inside_episode"
+    },
+    {
+      "matched_episode_start": "2026-08-22T10:12:24+03:00",
+      "event_time": "shortly before 2026-08-22T10:31:00+03:00",
+      "source_url": "https://dnepr.express/ua/post/u-dnipri-prolunali-vibuhi-22-serpnya",
+      "evidence": "Під час тривоги через ворожий БпЛА у Дніпрі повідомили про потужні вибухи; ОВА підтвердила роботу ППО.",
+      "basis": "strict_exact_city_during_alert"
+    },
+    {
+      "matched_episode_start": "2026-09-02T17:02:43+03:00",
+      "event_time": "about 2026-09-02T17:12:00+03:00",
+      "source_url": "https://dnepr.express/ua/post/dnipro-znovu-pid-atakoyu-u-misti-chuti-vibuhi",
+      "evidence": "Приблизно через десять хвилин після тривоги о 17:02 у Дніпрі повідомили про вибухи на тлі загрози реактивного БпЛА.",
+      "basis": "strict_exact_city_event_inside_episode"
+    },
+    {
+      "matched_episode_start": "2026-09-03T11:03:52+03:00",
+      "event_time": "about 2026-09-03T11:10:00+03:00",
+      "source_url": "https://www.dnipro.media/novyny-dnipro/u-dnipri-prolunav-vybuh-shho-stalosya-4/",
+      "evidence": "Близько 11:10 у Дніпрі пролунав вибух під час тривоги після повідомлення про російську повітряну ціль у напрямку міста.",
+      "basis": "strict_exact_city_event_inside_episode"
+    },
+    {
+      "matched_episode_start": "2026-09-05T01:04:39+03:00",
+      "event_time": "about 2026-09-05T01:21:00+03:00",
+      "source_url": "https://news.novyny.live/u-dnipri-ta-kamianskomu-prolunali-vibukhi-rf-vdarila-balistikoiu-343146.html",
+      "evidence": "Близько 01:21 у Дніпрі повідомили про вибух після попередження Повітряних сил про швидкісну ціль у напрямку міста.",
+      "basis": "strict_exact_city_event_inside_episode"
+    },
+    {
+      "matched_episode_start": "2026-09-05T06:35:28+03:00",
+      "event_time": "2026-09-05T10:32:00+03:00; 10:41",
+      "source_url": "https://militaryaviation.in.ua/n/udar-po-dnipru-gibrydnymy-bpla/",
+      "evidence": "Під час ранкової атаки гібридними БпЛА у Дніпрі зафіксували вибухи близько 10:32 і 10:41 після попередження про цілі на місто.",
+      "basis": "strict_exact_city_event_inside_episode"
+    },
+    {
+      "matched_episode_start": "2026-09-06T15:34:38+03:00",
+      "event_time": "2026-09-06T15:41:00+03:00; 15:53",
+      "source_url": "https://dnepr.express/ua/post/u-dnipri-shojno-prolunav-vibuh-1/amp",
+      "evidence": "У Дніпрі повідомили про вибухи близько 15:41 і 15:53 після попередження про «Бандероль» у напрямку міста.",
+      "basis": "strict_exact_city_event_inside_episode"
+    },
+    {
+      "matched_episode_start": "2026-09-08T09:46:52+03:00",
+      "event_time": "about 2026-09-08T09:58:00+03:00",
+      "source_url": "https://dnepr.express/ua/post/banderol-na-dnipro-u-misti-prolunav-vibuh",
+      "evidence": "Близько 09:58 у Дніпрі пролунав вибух після попередження про ворожу «Бандероль» у напрямку міста; ОВА підтвердила удар.",
+      "basis": "strict_exact_city_event_inside_episode"
+    },
+    {
+      "matched_episode_start": "2026-09-09T03:28:53+03:00",
+      "event_time": "about 2026-09-09T04:00:00+03:00",
+      "source_url": "https://suspilne.media/dnipro/1398820-so-vidbuvaetsa-na-misci-ataki-po-privatnomu-sektoru-u-dnipri/",
+      "evidence": "Свідок у Дніпрі описав нічну дронову атаку близько 04:00 та вибух за кілька хвилин після пробудження.",
+      "basis": "strict_exact_city_event_inside_episode"
+    },
+    {
+      "matched_episode_start": "2026-09-10T05:45:22+03:00",
+      "event_time": "about 2026-09-10T09:08:00+03:00",
+      "source_url": "https://dnepr.express/ua/post/u-dnipri-shojno-progrimiv-vibuh-sho-vidomo",
+      "evidence": "Близько 09:08 у Дніпрі пролунав вибух під час тривоги після повідомлення про «Бандероль» у напрямку міста.",
+      "basis": "strict_exact_city_event_inside_episode"
+    },
+    {
+      "matched_episode_start": "2026-09-10T17:37:24+03:00",
+      "event_time": "about 2026-09-10T17:41:00+03:00",
+      "source_url": "https://dnepr.express/ua/post/rosiyani-vtretye-atakuvali-dnipro-vinikli-pozhezhi",
+      "evidence": "Після тривоги о 17:37 та попередження про ворожий БпЛА у Дніпрі близько 17:41 пролунали вибухи; повідомлялося про пожежі.",
+      "basis": "strict_exact_city_event_inside_episode"
+    },
+    {
+      "matched_episode_start": "2026-09-10T21:30:51+03:00",
+      "event_time": "about 2026-09-10T21:38:00+03:00",
+      "source_url": "https://dnepr.express/ua/post/vnochi-vorog-vchergove-atakuvav-dnipro-ye-poraneni",
+      "evidence": "Близько 21:38 у Дніпрі повідомили про потужні вибухи під час чергової атаки ворожого БпЛА; ОВА підтвердила удар.",
+      "basis": "strict_exact_city_event_inside_episode"
+    },
+    {
+      "matched_episode_start": "2026-09-11T10:35:24+03:00",
+      "event_time": "about 2026-09-11T11:10:00+03:00",
+      "source_url": "https://dnepr.express/ua/post/u-dnipri-vranci-11-veresnya-prolunav-vibuh",
+      "evidence": "Близько 11:10 у Дніпрі пролунав вибух під час тривоги після попередження про «Бандероль» у напрямку міста.",
+      "basis": "strict_exact_city_event_inside_episode"
+    },
+    {
+      "matched_episode_start": "2026-09-11T14:17:31+03:00",
+      "event_time": "2026-09-11T14:27:00+03:00; 14:30",
+      "source_url": "https://dnepr.express/ua/post/u-dnipri-vdruge-za-den-lunayut-vibuhi-nad-mistom-zdijnyavsya-stovp-dimu/amp",
+      "evidence": "У Дніпрі о 14:27 та 14:30 повідомили про вибухи після попередження про «Бандероль»; ОВА підтвердила російський удар.",
+      "basis": "strict_exact_city_event_inside_episode"
+    },
+    {
+      "matched_episode_start": "2026-09-12T00:24:37+03:00",
+      "event_time": "2026-09-12T00:38:00+03:00–01:37:00+03:00",
+      "source_url": "https://dnepr.express/ua/post/vnochi-vorog-znovu-zavdav-udaru-po-dnipru-sho-vidomo-na-ranok-12-veresnya",
+      "evidence": "У Дніпрі між 00:38 і 01:37 повідомили про серію вибухів під час атаки ударних БпЛА в межах однієї тривоги.",
+      "basis": "strict_exact_city_event_inside_episode"
+    },
+    {
+      "matched_episode_start": "2026-09-12T08:48:37+03:00",
+      "event_time": "about 2026-09-12T09:04:00+03:00",
+      "source_url": "https://dnepr.express/ua/post/bpla-na-dnipro-u-misti-12-veresnya-lunayut-vibuhi/amp",
+      "evidence": "Близько 09:04 у Дніпрі пролунав вибух після попередження про реактивні БпЛА в напрямку міста.",
+      "basis": "strict_exact_city_event_inside_episode"
+    },
+    {
+      "matched_episode_start": "2026-09-12T16:12:03+03:00",
+      "event_time": "about 2026-09-12T16:24:00+03:00",
+      "source_url": "https://dnepr.express/ua/post/reaktivni-bpla-na-dnipro-u-misti-12-veresnya-znovu-prolunali-vibuhi/amp",
+      "evidence": "Близько 16:24 у Дніпрі пролунав вибух після попередження про реактивні БпЛА курсом на місто; ОВА повідомила про третій удар.",
+      "basis": "strict_exact_city_event_inside_episode"
+    },
+    {
+      "matched_episode_start": "2026-09-17T20:52:14+03:00",
+      "event_time": "2026-09-17T20:53:00+03:00; 21:14",
+      "source_url": "https://dnepr.express/ua/post/u-dnipri-vvecheri-17-veresnya-bulo-chutno-vibuhi-pershi-podrobici-vid-ova",
+      "evidence": "У Дніпрі повідомили про вибухи о 20:53 і 21:14 після попередження про ворожий реактивний БпЛА; ОВА підтвердила удар.",
+      "basis": "strict_exact_city_event_inside_episode"
+    }
+  ],
+  "sensitivity_only_events": [
+    {
+      "alert_episode_start": "2025-06-28T11:27:30+03:00",
+      "event_time": "shortly before 11:35 publication; exact time not stated",
+      "source_url": "https://dp.informator.ua/uk/kab-na-misto-u-dnipri-chuli-vibuh",
+      "evidence": "28 червня у Дніпрі чули вибух після попередження про КАБ; ППО, за повідомленнями, спрацювала у передмісті.",
+      "decision": "sensitivity_only",
+      "basis": "strong inferred_same_attack / near-boundary match; event time not stated and article appeared just after episode end"
+    },
+    {
+      "alert_episode_start": "2025-07-29T01:59:01+03:00",
+      "event_time": "overnight, exact time not stated",
+      "source_url": "https://dp.informator.ua/uk/vibuhi-yaki-vnochi-chuli-i-u-dnipri-po-kam-yanskomu-vorog-biv-raketami-poshkodzheni-pologoviy-ta-likarnya-ye-zagibli",
+      "evidence": "У ніч на 29 липня мешканці Дніпра чули два вибухи від російського ракетного удару по Кам'янському.",
+      "decision": "sensitivity_only",
+      "basis": "strong inferred_same_attack: exact-city hearing + missile context, but only broad overnight timing"
+    },
+    {
+      "alert_start_date": "2025-10-04",
+      "alert_start": "2025-10-03T22:55:42Z",
+      "event_time": "overnight 2025-10-04 Europe/Kyiv; exact time not stated",
+      "source_url": "https://www.ukr.net/news/details/dnipro/113810259.html",
+      "evidence": "Ранковий звіт повідомляє, що вночі Росія спрямувала БпЛА на Дніпро, пошкоджено інфраструктуру; exact explosion time або пряме «під час тривоги» не наведено.",
+      "decision_basis": "sensitivity_only: inferred_same_attack to the overnight matched alert; timing link insufficient for strict"
+    },
+    {
+      "alert_episode_start": "2025-12-13 00:09",
+      "event_time": "00:07",
+      "source_url": "https://24tv.ua/vibuhi-dnipri-odesi-1312-kudi-letyat-bpla_n2970056",
+      "evidence": "У Дніпрі вибух пролунав о 00:07, а тривогу оголосили близько 00:09; подальший російський удар по місту підтверджено.",
+      "decision": "sensitivity_only",
+      "basis": "near_boundary; exact_city; confirmed_same_attack; event_precedes_alert"
+    },
+    {
+      "alert_start_kyiv": "2026-04-25T22:50:54",
+      "event_time_kyiv": "late evening; exact time not stated",
+      "source_url": "https://ua.korrespondent.net/city/dnepr/4873918-znovu-vybukhy-dnipro-atakuuit-reaktyvni-bpla",
+      "evidence": "Late on Apr 25, explosions and a new reactive-UAV attack were reported in Dnipro; the exact event time was not stated.",
+      "decision_basis": "sensitivity_only — inferred_same_attack to the 22:50 frozen episode; publication time was not used as event time."
+    },
+    {
+      "matched_alert_episode_start": "2026-05-31T17:33:09+03:00",
+      "event_time": "evening; exact explosion minute unresolved",
+      "source_url": "https://dp.informator.ua/uk/vinikla-pozhezha-pershi-dani-vid-ova-pro-novi-vibuhi-v-dnipri",
+      "evidence": "Informator reports evening drone attacks and explosions in Dnipro; contemporaneous tracking placed UAVs toward/on Dnipro during this alert, but the explosion minute is not stated.",
+      "decision_basis": "sensitivity/inferred_same_attack"
+    },
+    {
+      "matched_alert_start": "2026-07-08T08:54:20+03:00",
+      "event_time": "morning; exact time not stated",
+      "source_url": "https://nashemisto.dp.ua/2026/07/08/u-dnipri-prolunaly-vybukhy-meshkantsiv-zaklykaiut-zalyshatysia-v-ukryttiakh-18/",
+      "evidence": "У Дніпрі повідомляли про вибухи, а на момент публікації о 09:05 тривала повітряна тривога; точний час вибухів не наведено.",
+      "decision": "sensitivity_inferred_same_attack"
+    }
+  ],
+  "review_events": [
+    {
+      "alert_episode_start": "2026-01-15 11:06",
+      "event_time": "~11:25",
+      "source_url": "https://dnepr.express/ua/post/u-dnipri-chutno-zvuki-vibuhiv-nad-mistom-zdijnyavsya-stovp-dimu/amp",
+      "evidence": "Під час тривоги у Дніпрі були вибухи й стовп диму, але доступні дані не підтверджують, що звук був наслідком повітряної атаки.",
+      "decision": "review",
+      "basis": "air_war_cause_unconfirmed"
+    },
+    {
+      "alert_episode_start": "2026-01-20 (точний start production episode не встановлено)",
+      "event_time": "01:28",
+      "source_url": "https://dnepr.express/ua/post/unochi-v-dnipri-ta-rajoni-lunali-vibuhi-sho-vidomo-pro-ataku-rf",
+      "evidence": "ОВА підтвердила російську атаку БпЛА на Дніпро та вибухи близько 01:28, але точний start відповідного production alert episode не встановлено.",
+      "decision": "review",
+      "basis": "episode_start_unresolved"
+    },
+    {
+      "alert_episode_start": "2026-02-02 пізній вечір (точний start не встановлено)",
+      "event_time": "00:51 і далі 2026-02-03",
+      "source_url": "https://dnipro.tv/news-dnipro/14-hodyn-teroru-dnipro-ohovtuietsia-pislia-naimasshtabnishoi-ataky-rf/",
+      "evidence": "Дніпро пережив багатогодинну масовану атаку РФ з вибухами під час тривоги, але точний start production episode не відновлено.",
+      "decision": "review",
+      "basis": "episode_start_unresolved"
+    },
+    {
+      "alert_episode_start": "2026-02-11 вечір (точний start не встановлено)",
+      "event_time": "22:58; ~02:25+ 2026-02-12",
+      "source_url": "https://24tv.ua/ataka-dronami-11-lyutogo-2026-yakih-oblastyah-ye-nebezpeka-povitryana_n3007826",
+      "evidence": "Під час комбінованої повітряної атаки на Дніпро були вибухи ввечері та після опівночі, але точний start production alert episode не встановлено.",
+      "decision": "review",
+      "basis": "episode_start_unresolved"
+    },
+    {
+      "alert_episode_start": "2026-02-26 17:09",
+      "event_time": "~18:36",
+      "source_url": "https://dnepr.express/ua/post/u-dnipri-guchno-na-livomu-berezi-chuli-vibuhi",
+      "evidence": "Під час тривоги на лівому березі Дніпра чули вибухи, але повітряно-бойову причину не підтверджено й існує невоєнна альтернативна версія.",
+      "decision": "review",
+      "basis": "air_war_cause_unconfirmed_possible_noncombat"
+    },
+    {
+      "matched_alert_episode_start": "2026-06-14T09:10:23+03:00",
+      "event_time": "morning; exact time unresolved",
+      "source_url": "https://t.me/s/suspilnednipro/64749",
+      "evidence": "Suspilne's public channel shows a 09:10-09:40 Kyiv-time alert and later reports a Russian strike on a Dnipro light-industry enterprise with seven wounded, but gives no strike time; an earlier morning alert also exists.",
+      "decision_basis": "review/unresolved_event_time_multiple_morning_alerts"
+    },
+    {
+      "alert_episode_start": "unresolved among 2025-07-24T23:07:53+03:00, 2025-07-24T23:56:47+03:00, 2025-07-25T02:27:50+03:00",
+      "event_time": "night of 2025-07-24/25, exact time not stated",
+      "source_url": "https://dp.informator.ua/uk/vorog-atakuvav-dnipropetrovsku-oblast-bezpilotnikami-ye-vluchannya-vinikla-pozhezha",
+      "evidence": "У ніч на 25 липня під час дронової атаки у Дніпрі було чутно вибухи та працювала ППО.",
+      "decision": "review",
+      "basis": "material exact-city candidate, but the source cannot identify which of three frozen night alert episodes contains the sound"
+    }
+  ],
+  "final_counts": {
+    "alerts_total": 2259,
+    "strict_n": 180,
+    "strict_pct": 7.97,
+    "sensitivity_n": 187,
+    "sensitivity_pct": 8.28
+  },
+  "strict_episode_start_dates": [
+    "2025-05-16",
+    "2025-05-24",
+    "2025-05-31",
+    "2025-06-06",
+    "2025-06-24",
+    "2025-06-25",
+    "2025-06-27",
+    "2025-07-04",
+    "2025-07-04",
+    "2025-07-12",
+    "2025-07-14",
+    "2025-07-15",
+    "2025-07-16",
+    "2025-07-18",
+    "2025-07-25",
+    "2025-08-07",
+    "2025-08-09",
+    "2025-08-15",
+    "2025-08-21",
+    "2025-08-29",
+    "2025-08-29",
+    "2025-08-31",
+    "2025-09-05",
+    "2025-09-06",
+    "2025-09-13",
+    "2025-09-17",
+    "2025-09-19",
+    "2025-09-21",
+    "2025-09-24",
+    "2025-09-30",
+    "2025-10-03",
+    "2025-10-03",
+    "2025-10-09",
+    "2025-10-09",
+    "2025-10-10",
+    "2025-10-21",
+    "2025-10-30",
+    "2025-10-30",
+    "2025-10-30",
+    "2025-10-30",
+    "2025-11-03",
+    "2025-11-06",
+    "2025-11-06",
+    "2025-11-07",
+    "2025-11-15",
+    "2025-11-17",
+    "2025-11-18",
+    "2025-11-19",
+    "2025-11-19",
+    "2025-11-20",
+    "2025-11-22",
+    "2025-11-25",
+    "2025-11-28",
+    "2025-12-01",
+    "2025-12-06",
+    "2025-12-07",
+    "2025-12-09",
+    "2025-12-14",
+    "2025-12-18",
+    "2025-12-25",
+    "2025-12-29",
+    "2026-01-03",
+    "2026-01-05",
+    "2026-01-05",
+    "2026-01-06",
+    "2026-01-09",
+    "2026-01-13",
+    "2026-01-14",
+    "2026-01-19",
+    "2026-01-22",
+    "2026-01-24",
+    "2026-01-25",
+    "2026-01-25",
+    "2026-01-26",
+    "2026-02-05",
+    "2026-02-09",
+    "2026-02-17",
+    "2026-02-28",
+    "2026-03-04",
+    "2026-03-04",
+    "2026-03-09",
+    "2026-03-12",
+    "2026-03-14",
+    "2026-03-15",
+    "2026-03-18",
+    "2026-03-20",
+    "2026-03-23",
+    "2026-03-23",
+    "2026-03-24",
+    "2026-03-26",
+    "2026-03-30",
+    "2026-04-01",
+    "2026-04-13",
+    "2026-04-14",
+    "2026-04-15",
+    "2026-04-15",
+    "2026-04-15",
+    "2026-04-16",
+    "2026-04-16",
+    "2026-04-17",
+    "2026-04-17",
+    "2026-04-17",
+    "2026-04-22",
+    "2026-04-22",
+    "2026-04-22",
+    "2026-04-23",
+    "2026-04-24",
+    "2026-04-24",
+    "2026-04-24",
+    "2026-04-25",
+    "2026-04-25",
+    "2026-04-25",
+    "2026-04-25",
+    "2026-04-28",
+    "2026-04-29",
+    "2026-04-29",
+    "2026-04-29",
+    "2026-04-30",
+    "2026-05-03",
+    "2026-05-04",
+    "2026-05-05",
+    "2026-05-07",
+    "2026-05-07",
+    "2026-05-13",
+    "2026-05-16",
+    "2026-05-16",
+    "2026-05-17",
+    "2026-05-17",
+    "2026-05-19",
+    "2026-05-19",
+    "2026-05-21",
+    "2026-05-21",
+    "2026-05-21",
+    "2026-05-25",
+    "2026-05-31",
+    "2026-06-02",
+    "2026-06-02",
+    "2026-06-07",
+    "2026-06-14",
+    "2026-06-14",
+    "2026-06-18",
+    "2026-06-28",
+    "2026-06-28",
+    "2026-06-29",
+    "2026-07-02",
+    "2026-07-04",
+    "2026-07-05",
+    "2026-07-05",
+    "2026-07-06",
+    "2026-07-12",
+    "2026-07-16",
+    "2026-07-17",
+    "2026-07-18",
+    "2026-07-27",
+    "2026-07-30",
+    "2026-07-30",
+    "2026-08-03",
+    "2026-08-03",
+    "2026-08-03",
+    "2026-08-10",
+    "2026-08-10",
+    "2026-08-11",
+    "2026-08-11",
+    "2026-08-22",
+    "2026-09-02",
+    "2026-09-03",
+    "2026-09-05",
+    "2026-09-05",
+    "2026-09-06",
+    "2026-09-08",
+    "2026-09-09",
+    "2026-09-10",
+    "2026-09-10",
+    "2026-09-10",
+    "2026-09-11",
+    "2026-09-11",
+    "2026-09-12",
+    "2026-09-12",
+    "2026-09-12",
+    "2026-09-17"
+  ],
+  "qa": {
+    "denominators_verified": true,
+    "parts_sum_to_full_denominator": true,
+    "date_ranges_contiguous_nonoverlapping": true,
+    "assignment_by_alert_start_date_europe_kyiv": true,
+    "duplicate_matched_alert_episodes_between_parts": [],
+    "duplicate_matched_alert_episodes_overall": [],
+    "research_source": "canonical parent-slice result JSON only",
+    "web_telegram_reresearch": false
+  }
+}
