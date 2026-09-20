@@ -426,6 +426,133 @@ def build_all() -> None:
     )
 
 
+DEFAULT_MAX_EPISODES = 250
+
+
+def _group_events_by_start_day(
+    events: list[tuple[datetime, datetime]],
+    max_episodes: int,
+) -> list[tuple[str, list[tuple[datetime, datetime]]]]:
+    groups: list[tuple[str, list[tuple[datetime, datetime]]]] = []
+    for start, end in events:
+        day = start.astimezone(TZ).date().isoformat()
+        if not groups or groups[-1][0] != day:
+            groups.append((day, []))
+        groups[-1][1].append((start, end))
+
+    oversized = [(day, len(group)) for day, group in groups if len(group) > max_episodes]
+    if oversized:
+        details = ", ".join(f"{day}:{count}" for day, count in oversized)
+        raise RuntimeError(
+            "Cannot split repair parent without cutting a Europe/Kyiv alert-start "
+            f"day; day episode count exceeds --max-episodes={max_episodes}: {details}"
+        )
+    return groups
+
+
+def _min_chunks_for_day_groups(
+    day_groups: list[tuple[str, list[tuple[datetime, datetime]]]],
+    max_episodes: int,
+) -> int:
+    chunks = 0
+    current = 0
+    for _, group in day_groups:
+        count = len(group)
+        if current and current + count > max_episodes:
+            chunks += 1
+            current = 0
+        current += count
+    if current:
+        chunks += 1
+    return chunks
+
+
+def split_events_by_start_day(
+    events: list[tuple[datetime, datetime]],
+    max_episodes: int,
+) -> list[list[tuple[datetime, datetime]]]:
+    if max_episodes <= 0:
+        raise ValueError("max_episodes must be positive")
+    if not events:
+        return []
+
+    day_groups = _group_events_by_start_day(events, max_episodes)
+    chunk_count = _min_chunks_for_day_groups(day_groups, max_episodes)
+    chunks: list[list[tuple[datetime, datetime]]] = []
+    group_start = 0
+
+    for chunk_index in range(chunk_count - 1):
+        chunks_left = chunk_count - chunk_index
+        groups_left = day_groups[group_start:]
+        remaining_total = sum(len(group) for _, group in groups_left)
+        target = remaining_total / chunks_left
+        remaining_chunks_after = chunks_left - 1
+        max_cut = len(day_groups) - remaining_chunks_after
+
+        candidates: list[tuple[float, int, int]] = []
+        running = 0
+        for cut in range(group_start + 1, max_cut + 1):
+            running += len(day_groups[cut - 1][1])
+            if running > max_episodes:
+                break
+
+            suffix = day_groups[cut:]
+            if len(suffix) < remaining_chunks_after:
+                continue
+            if (
+                _min_chunks_for_day_groups(suffix, max_episodes)
+                > remaining_chunks_after
+            ):
+                continue
+
+            candidates.append((abs(running - target), -running, cut))
+
+        if not candidates:
+            raise RuntimeError(
+                f"Unable to find a day-preserving split for {len(events)} episodes "
+                f"with --max-episodes={max_episodes}"
+            )
+
+        _, _, cut = min(candidates)
+        chunk = [
+            pair
+            for _, group in day_groups[group_start:cut]
+            for pair in group
+        ]
+        chunks.append(chunk)
+        group_start = cut
+
+    final_chunk = [
+        pair
+        for _, group in day_groups[group_start:]
+        for pair in group
+    ]
+    chunks.append(final_chunk)
+
+    if any(len(chunk) > max_episodes for chunk in chunks):
+        raise RuntimeError("Internal error: chunk exceeds max_episodes after split")
+    if sum(len(chunk) for chunk in chunks) != len(events):
+        raise RuntimeError("Internal error: chunk episode total differs from parent")
+    return chunks
+
+
+def _episode_payload(
+    city_key: str,
+    start: datetime,
+    end: datetime,
+) -> dict[str, str]:
+    return {
+        "episode_id": event_id(city_key, start, end),
+        "alert_start": utc_z(start),
+        "alert_end": utc_z(end),
+        "alert_start_date_kyiv": start.astimezone(TZ).date().isoformat(),
+    }
+
+
+def _episode_id_checksum(episode_ids: list[str]) -> str:
+    return hashlib.sha256("\n".join(episode_ids).encode("utf-8")).hexdigest()
+
+
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser()
     parser.add_argument(
@@ -433,7 +560,21 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         choices=sorted(SUPPORTED_TASKS),
         help="Build one repair parent slice without reading RESEARCH_SUBSLICES.",
     )
-    return parser.parse_args(argv)
+    parser.add_argument(
+        "--max-episodes",
+        type=int,
+        default=None,
+        help=(
+            "Maximum episodes per day-preserving repair chunk; "
+            f"default for --task is {DEFAULT_MAX_EPISODES}."
+        ),
+    )
+    args = parser.parse_args(argv)
+    if args.max_episodes is not None and not args.task:
+        parser.error("--max-episodes requires --task")
+    if args.max_episodes is not None and args.max_episodes <= 0:
+        parser.error("--max-episodes must be positive")
+    return args
 
 
 def load_parent_task(task_id: str) -> dict[str, str]:
@@ -446,11 +587,16 @@ def load_parent_task(task_id: str) -> dict[str, str]:
         ) from exc
 
 
-def build_task(task_id: str) -> None:
+def build_task(
+    task_id: str,
+    max_episodes: int = DEFAULT_MAX_EPISODES,
+) -> None:
     if task_id not in SUPPORTED_TASKS:
         raise RuntimeError(
             f"Unsupported task {task_id!r}; supported: {sorted(SUPPORTED_TASKS)}"
         )
+    if max_episodes <= 0:
+        raise RuntimeError("max_episodes must be positive")
 
     row = load_parent_task(task_id)
     city_key = row["city_key"]
@@ -484,51 +630,185 @@ def build_task(task_id: str) -> None:
     actual = len(events)
     matches = actual == expected
     smeta = source_meta[city_key]
-    payload = {
+    source = {
+        "url": SOURCE_URL,
+        "git_blob_sha": source_sha,
+        **smeta,
+    }
+
+    event_chunks = split_events_by_start_day(events, max_episodes)
+    if len(event_chunks) > 26:
+        raise RuntimeError(
+            f"Too many chunks for alphabetic chunk ids: {len(event_chunks)}"
+        )
+
+    parent_episodes = [
+        _episode_payload(city_key, start, end)
+        for start, end in events
+    ]
+    parent_ids = [episode["episode_id"] for episode in parent_episodes]
+    if len(set(parent_ids)) != len(parent_ids):
+        raise RuntimeError(f"Duplicate episode IDs in reconstructed parent {task_id}")
+
+    assignment_rule = (
+        "alert start date in Europe/Kyiv; keep each alert_start_date_kyiv "
+        "wholly within one contiguous chunk; balance by episode count"
+    )
+
+    chunk_payloads: list[tuple[Path, dict]] = []
+    chunk_manifest_rows: list[dict] = []
+    union_ids: list[str] = []
+
+    for index, chunk_events in enumerate(event_chunks):
+        chunk_id = chr(ord("a") + index)
+        chunk_task_id = f"{task_id}{chunk_id}"
+        episodes = [
+            _episode_payload(city_key, start, end)
+            for start, end in chunk_events
+        ]
+        chunk_ids = [episode["episode_id"] for episode in episodes]
+        union_ids.extend(chunk_ids)
+        chunk_range = [
+            episodes[0]["alert_start_date_kyiv"],
+            episodes[-1]["alert_start_date_kyiv"],
+        ]
+
+        payload = {
+            "schema_version": 1,
+            "task_id": chunk_task_id,
+            "parent_task_id": task_id,
+            "chunk_id": chunk_id,
+            "city_key": city_key,
+            "city": row["city_label"],
+            "episode_start_range": chunk_range,
+            "episode_count": len(episodes),
+            "parent_frozen_denominator": expected,
+            "parent_reconstructed_denominator": actual,
+            "matches_parent_frozen_denominator": matches,
+            "max_episodes": max_episodes,
+            "assignment_rule": assignment_rule,
+            "source": source,
+            "episodes": episodes,
+        }
+        path = OUT_DIR / f"{chunk_task_id}_alerts.json"
+        chunk_payloads.append((path, payload))
+        chunk_manifest_rows.append(
+            {
+                "task_id": chunk_task_id,
+                "chunk_id": chunk_id,
+                "file": path.name,
+                "episode_count": len(episodes),
+                "episode_start_range": chunk_range,
+                "episode_ids_sha256": _episode_id_checksum(chunk_ids),
+            }
+        )
+
+    duplicate_count = len(union_ids) - len(set(union_ids))
+    parent_checksum = _episode_id_checksum(parent_ids)
+    union_checksum = _episode_id_checksum(union_ids)
+    sum_chunk_counts = sum(row["episode_count"] for row in chunk_manifest_rows)
+    no_day_overlap = all(
+        chunk_manifest_rows[i - 1]["episode_start_range"][1]
+        < chunk_manifest_rows[i]["episode_start_range"][0]
+        for i in range(1, len(chunk_manifest_rows))
+    )
+    union_equals_parent = union_ids == parent_ids
+
+    validation = {
+        "max_episodes": max_episodes,
+        "no_chunk_exceeds_max_episodes": all(
+            row["episode_count"] <= max_episodes
+            for row in chunk_manifest_rows
+        ),
+        "chunks_contiguous_in_parent_episode_order": union_equals_parent,
+        "date_ranges_non_overlapping": no_day_overlap,
+        "duplicate_episode_id_count": duplicate_count,
+        "no_duplicate_episode_ids_between_chunks": duplicate_count == 0,
+        "sum_chunk_episode_count": sum_chunk_counts,
+        "sum_matches_parent_reconstructed_denominator": sum_chunk_counts == actual,
+        "reconstructed_parent_episode_ids_sha256": parent_checksum,
+        "chunk_union_episode_ids_sha256": union_checksum,
+        "checksum_match": parent_checksum == union_checksum,
+        "union_equals_reconstructed_parent_list": union_equals_parent,
+    }
+
+    required_checks = [
+        validation["no_chunk_exceeds_max_episodes"],
+        validation["chunks_contiguous_in_parent_episode_order"],
+        validation["date_ranges_non_overlapping"],
+        validation["no_duplicate_episode_ids_between_chunks"],
+        validation["sum_matches_parent_reconstructed_denominator"],
+        validation["checksum_match"],
+        validation["union_equals_reconstructed_parent_list"],
+    ]
+    if not all(required_checks):
+        raise RuntimeError(
+            f"Chunk validation failed for {task_id}: "
+            + json.dumps(validation, ensure_ascii=False)
+        )
+
+    manifest = {
         "schema_version": 1,
-        "task_id": task_id,
+        "generated_at": datetime.now(UTC).isoformat().replace("+00:00", "Z"),
         "parent_task_id": task_id,
         "city_key": city_key,
         "city": row["city_label"],
-        "source": {
-            "url": SOURCE_URL,
-            "git_blob_sha": source_sha,
-            **smeta,
-        },
-        "assignment_rule": "alert start date in Europe/Kyiv",
-        "episode_start_range": [date_from, date_to],
-        "frozen_denominator": expected,
-        "episode_count": actual,
-        "matches_frozen_denominator": matches,
-        "episodes": [
-            {
-                "episode_id": event_id(city_key, start, end),
-                "alert_start": utc_z(start),
-                "alert_end": utc_z(end),
-                "alert_start_date_kyiv": start.astimezone(TZ).date().isoformat(),
-            }
-            for start, end in events
-        ],
+        "parent_episode_start_range": [date_from, date_to],
+        "parent_frozen_denominator": expected,
+        "parent_reconstructed_denominator": actual,
+        "matches_parent_frozen_denominator": matches,
+        "chunk_count": len(chunk_manifest_rows),
+        "max_episodes": max_episodes,
+        "assignment_rule": assignment_rule,
+        "source": source,
+        "chunks": chunk_manifest_rows,
+        "validation": validation,
     }
 
     OUT_DIR.mkdir(parents=True, exist_ok=True)
-    path = OUT_DIR / f"{task_id}_alerts.json"
-    tmp_path = path.with_suffix(path.suffix + ".tmp")
-    tmp_path.write_text(
-        json.dumps(payload, ensure_ascii=False, separators=(",", ":")) + "\n",
+
+    for path, payload in chunk_payloads:
+        tmp_path = path.with_suffix(path.suffix + ".tmp")
+        tmp_path.write_text(
+            json.dumps(payload, ensure_ascii=False, separators=(",", ":")) + "\n",
+            encoding="utf-8",
+        )
+
+    manifest_path = OUT_DIR / f"{task_id}_chunks_manifest.json"
+    manifest_tmp = manifest_path.with_suffix(manifest_path.suffix + ".tmp")
+    manifest_tmp.write_text(
+        json.dumps(manifest, ensure_ascii=False, indent=2) + "\n",
         encoding="utf-8",
     )
-    tmp_path.replace(path)
+
+    wanted_names = {path.name for path, _ in chunk_payloads}
+    for stale_path in OUT_DIR.glob(f"{task_id}[a-z]_alerts.json"):
+        if stale_path.name not in wanted_names:
+            stale_path.unlink()
+
+    for path, _ in chunk_payloads:
+        tmp_path = path.with_suffix(path.suffix + ".tmp")
+        tmp_path.replace(path)
+    manifest_tmp.replace(manifest_path)
 
     print(
         json.dumps(
             {
                 "task_id": task_id,
                 "source_git_blob_sha": source_sha,
-                "episode_count": actual,
-                "frozen_denominator": expected,
-                "matches_frozen_denominator": matches,
-                "written": str(path),
+                "parent_reconstructed_denominator": actual,
+                "parent_frozen_denominator": expected,
+                "matches_parent_frozen_denominator": matches,
+                "chunk_count": len(chunk_manifest_rows),
+                "chunks": [
+                    {
+                        "task_id": chunk["task_id"],
+                        "episode_count": chunk["episode_count"],
+                        "episode_start_range": chunk["episode_start_range"],
+                    }
+                    for chunk in chunk_manifest_rows
+                ],
+                "manifest": str(manifest_path),
             },
             ensure_ascii=False,
         )
@@ -538,7 +818,12 @@ def build_task(task_id: str) -> None:
 def main(argv: list[str] | None = None) -> None:
     args = parse_args(argv)
     if args.task:
-        build_task(args.task)
+        build_task(
+            args.task,
+            args.max_episodes
+            if args.max_episodes is not None
+            else DEFAULT_MAX_EPISODES,
+        )
         return
     build_all()
 
