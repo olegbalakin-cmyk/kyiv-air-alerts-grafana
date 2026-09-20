@@ -1,0 +1,185 @@
+name: One-off explosion baseline monitor catch-up
+
+on:
+  push:
+    branches: [tmp-explosion-catchup-20260920]
+    paths:
+      - ".github/workflows/tmp-explosion-catchup.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  catchup:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - name: Check out temp execution branch
+        uses: actions/checkout@v4
+        with:
+          ref: tmp-explosion-catchup-20260920
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: kyiv-air-alerts-grafana/requirements.txt
+
+      - name: Install dependencies
+        working-directory: kyiv-air-alerts-grafana
+        run: pip install -r requirements.txt
+
+      - name: Record pre-state
+        working-directory: kyiv-air-alerts-grafana
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          d=Path("data")
+          b=json.loads((d/"explosion_audited_baseline.json").read_text(encoding="utf-8"))
+          s=json.loads((d/"explosion_daily_alert_seed.json").read_text(encoding="utf-8"))
+          m=json.loads((d/"explosion_candidate_monitor_state.json").read_text(encoding="utf-8"))
+          q=json.loads((d/"explosion_review_queue.json").read_text(encoding="utf-8"))
+          out={
+            "baseline_city_count":len(b.get("cities") or {}),
+            "seed_city_count":len(s.get("cities") or {}),
+            "monitor_city_count":len(m.get("cities") or {}),
+            "review_queue_size":len(q) if isinstance(q,list) else None,
+          }
+          Path("/tmp/pre.json").write_text(json.dumps(out),encoding="utf-8")
+          print(json.dumps(out,indent=2))
+          PY
+
+      - name: Self-test baseline sync
+        working-directory: kyiv-air-alerts-grafana
+        run: python scripts/sync_explosion_audited_baseline.py --self-test
+
+      - name: Self-test monitor
+        working-directory: kyiv-air-alerts-grafana
+        run: python scripts/monitor_explosion_candidates.py --self-test
+
+      - name: Sync audited baseline
+        working-directory: kyiv-air-alerts-grafana
+        run: python scripts/sync_explosion_audited_baseline.py | tee /tmp/sync.out
+
+      - name: Freeze post-sync baseline hash
+        working-directory: kyiv-air-alerts-grafana
+        run: sha256sum data/explosion_audited_baseline.json | awk '{print $1}' > /tmp/baseline.sha256
+
+      - name: Network catch-up monitor
+        working-directory: kyiv-air-alerts-grafana
+        env:
+          UKRAINEALARM_API_TOKEN: ${{ secrets.UKRAINEALARM_API_TOKEN }}
+        run: python scripts/monitor_explosion_candidates.py | tee /tmp/monitor.out
+
+      - name: Catch-up QA
+        working-directory: kyiv-air-alerts-grafana
+        run: |
+          python - <<'PY'
+          import hashlib, json
+          from collections import Counter
+          from pathlib import Path
+
+          d=Path("data")
+          added={"kharkiv","sumy","zaporizhzhia"}
+          pre=json.loads(Path("/tmp/pre.json").read_text())
+          preview=json.loads((d/"explosion_preview_input.json").read_text(encoding="utf-8"))
+          baseline=json.loads((d/"explosion_audited_baseline.json").read_text(encoding="utf-8"))
+          seed=json.loads((d/"explosion_daily_alert_seed.json").read_text(encoding="utf-8"))
+          state=json.loads((d/"explosion_candidate_monitor_state.json").read_text(encoding="utf-8"))
+          report=json.loads((d/"explosion_candidate_monitor_last_run.json").read_text(encoding="utf-8"))
+          queue=json.loads((d/"explosion_review_queue.json").read_text(encoding="utf-8"))
+
+          # baseline must not change during discovery
+          expected_hash=Path("/tmp/baseline.sha256").read_text().strip()
+          actual_hash=hashlib.sha256((d/"explosion_audited_baseline.json").read_bytes()).hexdigest()
+          assert actual_hash == expected_hash, (expected_hash, actual_hash)
+
+          bc=baseline.get("cities") or {}
+          sc=seed.get("cities") or {}
+          mc=state.get("cities") or {}
+          pc=preview.get("cities") or {}
+          assert len(bc)==23, len(bc)
+          assert len(sc)==23, len(sc)
+          assert len(mc)==23, len(mc)
+          assert added <= set(bc) and added <= set(sc) and added <= set(mc)
+
+          # frozen totals and strict series exactly match canonical preview input
+          for key, p in pc.items():
+            b=bc[key]
+            assert b["coverage_end"] == p["coverage_end"], key
+            assert int(b["total_alerts"]) == int(p["alerts_total"]), key
+            assert int(b["strict_n"]) == int(p["strict"]), key
+            expected_strict=dict(sorted(Counter(p.get("strict_episode_start_dates") or []).items()))
+            actual_strict={k:int(v) for k,v in (b.get("strict_daily") or {}).items()}
+            assert actual_strict == expected_strict, key
+
+          for key in added:
+            assert bc[key]["coverage_end"]=="2026-09-17", key
+            assert mc[key]["baseline_coverage_end"]=="2026-09-17", key
+            assert not mc[key].get("last_poll_error"), (key, mc[key].get("last_poll_error"))
+            assert mc[key].get("last_successful_poll_at"), key
+            for ep in mc[key].get("episodes") or []:
+              assert ep["alert_start_date_kyiv"] >= "2026-09-18", (key, ep["alert_start_date_kyiv"])
+              labels=[x.get("label") for x in ep.get("checks") or []]
+              assert labels == ["immediate","24h","72h","7d"], (key, labels)
+
+          assert state.get("followup_schedule_hours")==[0,24,72,168], state.get("followup_schedule_hours")
+          assert report["ok"] is True, report
+          assert report["city_count"]==23, report["city_count"]
+          assert report["errors"]=={}, report["errors"]
+          assert report["strict_series_modified_by_discovery"] is False
+
+          # sync report
+          sync_text=Path("/tmp/sync.out").read_text(encoding="utf-8")
+          j=json.loads(sync_text[sync_text.index("{"):])
+          assert j["baseline_city_count"]==23
+          assert j["seed_city_count"]==23
+          assert j["skipped"]==[]
+          assert set(j["added_baseline_cities"]) <= added
+          assert set(j["added_seed_cities"]) <= added
+
+          details={}
+          for key in sorted(added):
+            eps=mc[key].get("episodes") or []
+            details[key]={
+              "episodes":len(eps),
+              "first_alert_start_date_kyiv":eps[0]["alert_start_date_kyiv"] if eps else None,
+              "last_alert_start_date_kyiv":eps[-1]["alert_start_date_kyiv"] if eps else None,
+              "latest_api_alert_end":mc[key].get("latest_api_alert_end"),
+              "last_poll_error":mc[key].get("last_poll_error"),
+            }
+
+          qa={
+            "pre":pre,
+            "sync":j,
+            "baseline_city_count_after":len(bc),
+            "seed_city_count_after":len(sc),
+            "monitor_city_count_after":len(mc),
+            "new_alert_episodes":report["new_alert_episodes"],
+            "new_review_candidates":report["new_review_candidates"],
+            "review_queue_size":len(queue),
+            "errors":report["errors"],
+            "strict_series_modified_by_discovery":report["strict_series_modified_by_discovery"],
+            "new_city_details":details,
+            "coverage_from_2026_09_18_confirmed":True,
+          }
+          Path("data/tmp_explosion_catchup_qa.json").write_text(json.dumps(qa,ensure_ascii=False,indent=2)+"\n",encoding="utf-8")
+          print(json.dumps(qa,ensure_ascii=False,indent=2))
+          PY
+
+      - name: Commit temp outputs
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add \
+            kyiv-air-alerts-grafana/data/explosion_audited_baseline.json \
+            kyiv-air-alerts-grafana/data/explosion_daily_alert_seed.json \
+            kyiv-air-alerts-grafana/data/explosion_candidate_monitor_state.json \
+            kyiv-air-alerts-grafana/data/explosion_review_queue.json \
+            kyiv-air-alerts-grafana/data/explosion_candidate_monitor_last_run.json \
+            kyiv-air-alerts-grafana/data/tmp_explosion_catchup_qa.json
+          git commit -m "Run explosion baseline monitor catch-up"
+          git push origin HEAD:tmp-explosion-catchup-20260920
