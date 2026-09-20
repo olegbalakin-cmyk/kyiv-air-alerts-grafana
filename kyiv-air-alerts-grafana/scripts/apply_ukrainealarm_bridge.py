@@ -24,10 +24,12 @@ STORE_FILE = ROOT / "data" / "ukrainealarm_bridge.json"
 STATIC_BRIDGES = [
     ROOT / "data" / "alerts_in_ua_bridge_2026-09-07_16.csv.gz.b64",
     ROOT / "data" / "alerts_in_ua_bridge_additional_2026-09-07_16.csv.gz.b64",
+    ROOT / "data" / "alerts_in_ua_bridge_repair_2026-09-17.csv.gz.b64",
 ]
 STATIC_METAS = [
     ROOT / "data" / "alerts_in_ua_bridge_2026-09-07_16.meta.json",
     ROOT / "data" / "alerts_in_ua_bridge_additional_2026-09-07_16.meta.json",
+    ROOT / "data" / "alerts_in_ua_bridge_repair_2026-09-17.meta.json",
 ]
 API_BASE = "https://api.ukrainealarm.com/api/v3"
 REGIONS_URL = f"{API_BASE}/regions"
