@@ -1,0 +1,937 @@
+{
+  "schema_version": 1,
+  "task": "zaporizhzhia_explosion_blind_sample_50_wave2",
+  "generated_at": "2026-09-21",
+  "repository": "olegbalakin-cmyk/kyiv-air-alerts-grafana",
+  "branch": "multicity-wip-2026-09-16",
+  "selection_reference_commit": "f00caa8faffeac90a914730d2d1845ea4560dabf",
+  "purpose": "Second disjoint blind QA sample of exactly 50 Zaporizhzhia canonical alert episodes from the ignored/dark-zone universe, using the Wave 1 selection rules unchanged, to test whether residual strict explosion misses recur outside prior candidate/PPO discovery.",
+  "relation_to_wave1": {
+    "wave1_artifact": "research/zaporizhzhia_explosion_blind_sample_50.json",
+    "wave1_commit": "f00caa8faffeac90a914730d2d1845ea4560dabf",
+    "wave1_seed": 20260921,
+    "wave1_sample_size": 50,
+    "wave1_result": {
+      "confirmed_strict_miss": 1,
+      "needs_review": 0,
+      "no_explosion_evidence_found": 49
+    },
+    "wave1_positive_episode_id": "7c008970817e8d13ae402670",
+    "relation": "Wave 2 uses the same reconstructed base dark-zone universe and sampling method, then excludes all 50 Wave 1 sampled episode IDs before drawing. No selection rule was changed after seeing Wave 1 outcomes.",
+    "overlap_check_with_wave1": 0,
+    "wave1_all_50_excluded": true
+  },
+  "methodology": {
+    "canonical_definition": "Episode must be in the frozen Zaporizhzhia denominator; canonical strict and sensitivity episodes are excluded.",
+    "blind_selection": "No keyword, source-availability, suspiciousness, or content signal is used to select the 50 episodes.",
+    "randomization": "Mulberry32 with seed 20260922; proportional calendar-quarter stratification using floor plus largest remainder; within each quarter episodes are sorted by UTC start and Fisher-Yates shuffled using one deterministic seeded PRNG stream.",
+    "review_search": "For each sampled episode, perform a broad independent evidence search across available historical sources, including indexed Telegram archives and official/local/national reporting. Search direct explosion wording and equivalent direct event formulations without using the old explosion candidate generator as a filter.",
+    "timing_controls": "Require exact-city evidence and event timing inside the sampled alert, or a source that explicitly states the explosion/strike occurred during that alert. Publication time is not event time. Multiple same-day episodes and cross-midnight cases are checked separately. Air-defence-only wording is not strict explosion evidence.",
+    "replacement_rule": "No sampled episode was replaced after content review. No technical-impossibility replacement was needed.",
+    "stop_rule": "Review stopped after exactly 50 Wave 2 episodes; no Wave 3 was started."
+  },
+  "exclusions": {
+    "base_wave1_dark_zone_reconstruction": {
+      "canonical_denominator": 2365,
+      "canonical_strict_episode_ids": 169,
+      "canonical_sensitivity_only_episode_ids": 55,
+      "historical_review_episode_ids_or_conservative_date_exclusions": 59,
+      "current_review_queue_frozen_denominator_episode_ids": 0,
+      "ppo_reconstructible_episode_exclusions": 29,
+      "gap_audit_episode_exclusions": 24,
+      "excluded_union_episode_count": 311,
+      "base_universe_before_wave1_sampling": 2054
+    },
+    "conservative_date_exclusions": {
+      "unresolved_historical_review_dates": [
+        "2026-02-20",
+        "2026-08-22",
+        "2026-09-07",
+        "2026-09-08",
+        "2026-09-09",
+        "2026-09-11",
+        "2026-09-12",
+        "2026-09-14"
+      ],
+      "preserved_ppo_rejected_lead_dates": [
+        "2025-07-19",
+        "2026-01-10",
+        "2026-01-16",
+        "2026-02-15",
+        "2026-06-20"
+      ]
+    },
+    "wave1_sample_episode_ids_excluded": [
+      "e3d4da61b22d252490821b05",
+      "096835cb1cb093d52f8b062b",
+      "13d45c18a1c3a9cb89d9729d",
+      "971783ed32b2d729a53e405f",
+      "e63331d34d205f5a0eb23fc7",
+      "ca39fd6e4370d04d8e00a317",
+      "01bb4f252d5d1eaa29f3c08c",
+      "13f52fc443a15405187727d2",
+      "7aaa7a2609475f4705477224",
+      "8061dda845403530a18ad82b",
+      "fca8fbf2a019883b2d398869",
+      "729710f0eca640aaae75861c",
+      "56c934319332db56894ed4c7",
+      "a05d6fd667668198f61064b0",
+      "75a6f281702996037c7f3424",
+      "6f515b7093ab72ffe2f99df0",
+      "81af58876709d3c9a4b202b0",
+      "e899708c6724ff366bbd28e9",
+      "80266f8319fbe9d30df889f5",
+      "0eacaff71c39957ef17cfc2e",
+      "f475eade801b7d61dc34ed9a",
+      "e0642eddf195aed4936829b0",
+      "ea726eff0b14d8e92a07c91d",
+      "f7e7bd7e7851f04b458b59cb",
+      "d94edaec011766d4d73474ad",
+      "b6408ac550b2da7778d8f0b0",
+      "b1b77b2edc36fb0a2dc34ae3",
+      "8952933cc9970b1902ee7d15",
+      "1d6829f0c1825769a01906b9",
+      "80bc84d288038afc5660a53b",
+      "9fcf3c54cc8dc53f9052d4c3",
+      "14faf0e11ee9d4f374ff1560",
+      "0f8ba85642f2155b1d5ad5a2",
+      "0b05e05e170ac2f57541755c",
+      "0cc9220de77dccd42203163a",
+      "59def72fa883ba2264ab7393",
+      "5ac93cb0c8dd6828969ec4b2",
+      "1307891e61852d2e9da122ab",
+      "8f0a4468fdbd1a6a492fb444",
+      "88266c71418f7adae56f874b",
+      "7c008970817e8d13ae402670",
+      "9cf1a8b5cb9e124004cc0708",
+      "9bc6681e976796ea1b14399b",
+      "f824dc0e3b8a265dca6c2d49",
+      "1781327dee3074ce13fd5824",
+      "26c879833bf8eae1880e8c87",
+      "4d2abfca4bb96d48813866b4",
+      "c3c3ac75662a40a4dda10f36",
+      "290a13a93fdd11676a9d5bfd",
+      "bc350ae2b9f1575f40a87838"
+    ],
+    "additional_wave1_exclusion_count": 50,
+    "overlap_between_wave1_sample_and_other_base_exclusion_sets": 0,
+    "wave2_sampling_universe_size": 2004
+  },
+  "universe_definition": [
+    "in canonical Zaporizhzhia denominator",
+    "canonical strict explosion = false",
+    "not canonical sensitivity explosion",
+    "not in historical explosion review/candidate signal set or its conservative unresolved-date exclusions",
+    "not in the reconstructible PPO candidate/pilot set or preserved rejected-lead dates",
+    "not among manually checked gap-audit cases",
+    "not among already known confirmed strict misses",
+    "not among already known needs_review cases",
+    "not among any of the 50 Wave 1 blind-sample episodes"
+  ],
+  "universe_size": 2004,
+  "seed": 20260922,
+  "stratification": {
+    "method": "proportional by alert_start_date_kyiv calendar quarter; floor plus largest remainder",
+    "strata": [
+      {
+        "stratum": "2025-Q1",
+        "universe_n": 36,
+        "sample_n": 1,
+        "raw_quota": 0.898204
+      },
+      {
+        "stratum": "2025-Q2",
+        "universe_n": 275,
+        "sample_n": 7,
+        "raw_quota": 6.861277
+      },
+      {
+        "stratum": "2025-Q3",
+        "universe_n": 302,
+        "sample_n": 7,
+        "raw_quota": 7.53493
+      },
+      {
+        "stratum": "2025-Q4",
+        "universe_n": 315,
+        "sample_n": 8,
+        "raw_quota": 7.859281
+      },
+      {
+        "stratum": "2026-Q1",
+        "universe_n": 343,
+        "sample_n": 9,
+        "raw_quota": 8.557884
+      },
+      {
+        "stratum": "2026-Q2",
+        "universe_n": 396,
+        "sample_n": 10,
+        "raw_quota": 9.88024
+      },
+      {
+        "stratum": "2026-Q3",
+        "universe_n": 337,
+        "sample_n": 8,
+        "raw_quota": 8.408184
+      }
+    ]
+  },
+  "sampled_episode_ids": [
+    "47c869654c2ca9083a00edcc",
+    "9a7d8e0e89a2983050c5ead0",
+    "4424dab2d320c66ccb210757",
+    "dd3e343776d11d5dbf43ee34",
+    "f2797000fda6b50f5420f1d1",
+    "5e24f87b480a90c572caf85e",
+    "acefd9e3530fc1078bc2fe37",
+    "61717fa086db17677b4c31e0",
+    "14d20bfa7c1c96e8b5d57926",
+    "7761c60c5c1d2ce4bd955f55",
+    "9f48716c7f0ab9bd5e182b7b",
+    "16263eb107caf9f0a1215699",
+    "73bcebb800200cd1eebfb676",
+    "4ce4add2d6f3f38cc3ee0bbd",
+    "d57401516a9112f7081066d1",
+    "d489eedc98bd8b9478f129c0",
+    "7cc85596baaca7e8f485e508",
+    "812a5f66ecca875918d34c58",
+    "2b0c8484477184c04b636aab",
+    "4b8fdc538eb64d4e79183b1d",
+    "95baff5956e4ed94b865d001",
+    "631136b4006da1639764842e",
+    "261cd6752005e99039966e1d",
+    "5b0cd1e42c9fa400cb957c8c",
+    "b6cd1d3d3d91cc29ae93afa0",
+    "908c0826baef450550bec545",
+    "a41da237e1d2859510b30e59",
+    "a28e11d10a98f1a47e8ccbbc",
+    "0be37295affa9804f2b38a09",
+    "7a45b4c6cd4f18358e063002",
+    "b34f763e0a9de083f8ce13e3",
+    "4a14ee80d5478caae77888c8",
+    "6fbe1c4c79d2e5d92000da8b",
+    "7c1227f15a550fc2e3c8d5ca",
+    "f2ecbc7532ce250536e650e1",
+    "6ae86019ec46095f57a7126d",
+    "fb67b1a1b2909e1f7ae6bbc0",
+    "ff57870af0a20f4e9a3de81c",
+    "93076122c01f24ee5b2aa0e5",
+    "448ac9e226adef5454a1cd03",
+    "7de8bff024b6393e925c3f96",
+    "52cf015ceb99f6edae1a1f97",
+    "9e789cb2399d05340775f67f",
+    "f88d07fb6ca052c2f7f1bc13",
+    "4f6341d101fd2db92ca8f6ce",
+    "00f6ec496eba7b149c6063ae",
+    "e9119967514cfecd9f537a32",
+    "c214b54b64dc43ea99879edb",
+    "e6f197dc17a56cb42880764b",
+    "121c2734a6645fee0f221f78"
+  ],
+  "overlap_check": {
+    "wave1_overlap_count": 0,
+    "wave1_overlap_episode_ids": [],
+    "required_zero_overlap": true,
+    "passed": true,
+    "wave1_positive_excluded": true
+  },
+  "sampled_episodes": [
+    {
+      "sample_index": 1,
+      "stratum": "2025-Q1",
+      "episode_id": "47c869654c2ca9083a00edcc",
+      "date": "2025-03-20",
+      "alert_start_utc": "2025-03-20T07:03:43Z",
+      "alert_end_utc": "2025-03-20T07:14:00Z",
+      "verdict": "no_explosion_evidence_found",
+      "source_evidence": [],
+      "review_note": "Broad independent search of indexed Telegram/public media plus available official/local sources found no qualifying exact-city explosion or aerial-war impact that could be timed to this specific alert episode. Same-date, region-only and out-of-window reports were excluded."
+    },
+    {
+      "sample_index": 2,
+      "stratum": "2025-Q2",
+      "episode_id": "9a7d8e0e89a2983050c5ead0",
+      "date": "2025-04-06",
+      "alert_start_utc": "2025-04-06T14:48:19Z",
+      "alert_end_utc": "2025-04-06T15:29:20Z",
+      "verdict": "no_explosion_evidence_found",
+      "source_evidence": [],
+      "review_note": "Broad independent search of indexed Telegram/public media plus available official/local sources found no qualifying exact-city explosion or aerial-war impact that could be timed to this specific alert episode. Same-date, region-only and out-of-window reports were excluded."
+    },
+    {
+      "sample_index": 3,
+      "stratum": "2025-Q2",
+      "episode_id": "4424dab2d320c66ccb210757",
+      "date": "2025-04-10",
+      "alert_start_utc": "2025-04-10T14:32:05Z",
+      "alert_end_utc": "2025-04-10T15:19:43Z",
+      "verdict": "no_explosion_evidence_found",
+      "source_evidence": [],
+      "review_note": "Broad independent search of indexed Telegram/public media plus available official/local sources found no qualifying exact-city explosion or aerial-war impact that could be timed to this specific alert episode. Same-date, region-only and out-of-window reports were excluded."
+    },
+    {
+      "sample_index": 4,
+      "stratum": "2025-Q2",
+      "episode_id": "dd3e343776d11d5dbf43ee34",
+      "date": "2025-04-21",
+      "alert_start_utc": "2025-04-21T12:26:53Z",
+      "alert_end_utc": "2025-04-21T12:54:36Z",
+      "verdict": "no_explosion_evidence_found",
+      "source_evidence": [],
+      "review_note": "Broad independent search of indexed Telegram/public media plus available official/local sources found no qualifying exact-city explosion or aerial-war impact that could be timed to this specific alert episode. Same-date, region-only and out-of-window reports were excluded."
+    },
+    {
+      "sample_index": 5,
+      "stratum": "2025-Q2",
+      "episode_id": "f2797000fda6b50f5420f1d1",
+      "date": "2025-05-06",
+      "alert_start_utc": "2025-05-06T10:49:36Z",
+      "alert_end_utc": "2025-05-06T10:59:15Z",
+      "verdict": "no_explosion_evidence_found",
+      "source_evidence": [],
+      "review_note": "Broad independent search of indexed Telegram/public media plus available official/local sources found no qualifying exact-city explosion or aerial-war impact that could be timed to this specific alert episode. Same-date, region-only and out-of-window reports were excluded."
+    },
+    {
+      "sample_index": 6,
+      "stratum": "2025-Q2",
+      "episode_id": "5e24f87b480a90c572caf85e",
+      "date": "2025-05-16",
+      "alert_start_utc": "2025-05-16T05:30:49Z",
+      "alert_end_utc": "2025-05-16T05:52:56Z",
+      "verdict": "no_explosion_evidence_found",
+      "source_evidence": [],
+      "review_note": "Broad independent search of indexed Telegram/public media plus available official/local sources found no qualifying exact-city explosion or aerial-war impact that could be timed to this specific alert episode. Same-date, region-only and out-of-window reports were excluded."
+    },
+    {
+      "sample_index": 7,
+      "stratum": "2025-Q2",
+      "episode_id": "acefd9e3530fc1078bc2fe37",
+      "date": "2025-05-27",
+      "alert_start_utc": "2025-05-27T09:57:37Z",
+      "alert_end_utc": "2025-05-27T10:37:44Z",
+      "verdict": "no_explosion_evidence_found",
+      "source_evidence": [],
+      "review_note": "Broad independent search of indexed Telegram/public media plus available official/local sources found no qualifying exact-city explosion or aerial-war impact that could be timed to this specific alert episode. Same-date, region-only and out-of-window reports were excluded."
+    },
+    {
+      "sample_index": 8,
+      "stratum": "2025-Q2",
+      "episode_id": "61717fa086db17677b4c31e0",
+      "date": "2025-06-09",
+      "alert_start_utc": "2025-06-09T05:22:41Z",
+      "alert_end_utc": "2025-06-09T05:48:38Z",
+      "verdict": "no_explosion_evidence_found",
+      "source_evidence": [],
+      "review_note": "Same-date city strike reporting places the Zaporizhzhia event at about 10:30 Kyiv, after this 08:22:41–08:48:38 sampled episode."
+    },
+    {
+      "sample_index": 9,
+      "stratum": "2025-Q3",
+      "episode_id": "14d20bfa7c1c96e8b5d57926",
+      "date": "2025-07-03",
+      "alert_start_utc": "2025-07-03T09:47:05Z",
+      "alert_end_utc": "2025-07-03T10:10:58Z",
+      "verdict": "no_explosion_evidence_found",
+      "source_evidence": [],
+      "review_note": "Broad independent search of indexed Telegram/public media plus available official/local sources found no qualifying exact-city explosion or aerial-war impact that could be timed to this specific alert episode. Same-date, region-only and out-of-window reports were excluded."
+    },
+    {
+      "sample_index": 10,
+      "stratum": "2025-Q3",
+      "episode_id": "7761c60c5c1d2ce4bd955f55",
+      "date": "2025-07-20",
+      "alert_start_utc": "2025-07-20T18:01:36Z",
+      "alert_end_utc": "2025-07-21T03:31:01Z",
+      "verdict": "no_explosion_evidence_found",
+      "source_evidence": [],
+      "review_note": "Cross-midnight controls were checked; no qualifying exact-city explosion was found inside this 21:01–06:31 Kyiv episode."
+    },
+    {
+      "sample_index": 11,
+      "stratum": "2025-Q3",
+      "episode_id": "9f48716c7f0ab9bd5e182b7b",
+      "date": "2025-07-24",
+      "alert_start_utc": "2025-07-24T20:05:53Z",
+      "alert_end_utc": "2025-07-24T20:36:30Z",
+      "verdict": "no_explosion_evidence_found",
+      "source_evidence": [],
+      "review_note": "Broad independent search of indexed Telegram/public media plus available official/local sources found no qualifying exact-city explosion or aerial-war impact that could be timed to this specific alert episode. Same-date, region-only and out-of-window reports were excluded."
+    },
+    {
+      "sample_index": 12,
+      "stratum": "2025-Q3",
+      "episode_id": "16263eb107caf9f0a1215699",
+      "date": "2025-07-27",
+      "alert_start_utc": "2025-07-27T09:36:32Z",
+      "alert_end_utc": "2025-07-27T10:08:18Z",
+      "verdict": "no_explosion_evidence_found",
+      "source_evidence": [],
+      "review_note": "Same-date exact-city explosion reporting found by the search belongs to later alert windows, not this 12:36–13:08 Kyiv episode."
+    },
+    {
+      "sample_index": 13,
+      "stratum": "2025-Q3",
+      "episode_id": "73bcebb800200cd1eebfb676",
+      "date": "2025-08-13",
+      "alert_start_utc": "2025-08-13T05:56:27Z",
+      "alert_end_utc": "2025-08-13T06:24:47Z",
+      "verdict": "no_explosion_evidence_found",
+      "source_evidence": [],
+      "review_note": "Broad independent search of indexed Telegram/public media plus available official/local sources found no qualifying exact-city explosion or aerial-war impact that could be timed to this specific alert episode. Same-date, region-only and out-of-window reports were excluded."
+    },
+    {
+      "sample_index": 14,
+      "stratum": "2025-Q3",
+      "episode_id": "4ce4add2d6f3f38cc3ee0bbd",
+      "date": "2025-09-12",
+      "alert_start_utc": "2025-09-12T20:45:29Z",
+      "alert_end_utc": "2025-09-12T20:45:38Z",
+      "verdict": "no_explosion_evidence_found",
+      "source_evidence": [],
+      "review_note": "Broad independent search of indexed Telegram/public media plus available official/local sources found no qualifying exact-city explosion or aerial-war impact that could be timed to this specific alert episode. Same-date, region-only and out-of-window reports were excluded."
+    },
+    {
+      "sample_index": 15,
+      "stratum": "2025-Q3",
+      "episode_id": "d57401516a9112f7081066d1",
+      "date": "2025-09-28",
+      "alert_start_utc": "2025-09-28T07:55:49Z",
+      "alert_end_utc": "2025-09-28T07:57:42Z",
+      "verdict": "no_explosion_evidence_found",
+      "source_evidence": [],
+      "review_note": "Broad independent search of indexed Telegram/public media plus available official/local sources found no qualifying exact-city explosion or aerial-war impact that could be timed to this specific alert episode. Same-date, region-only and out-of-window reports were excluded."
+    },
+    {
+      "sample_index": 16,
+      "stratum": "2025-Q4",
+      "episode_id": "d489eedc98bd8b9478f129c0",
+      "date": "2025-10-07",
+      "alert_start_utc": "2025-10-07T06:56:23Z",
+      "alert_end_utc": "2025-10-07T07:29:11Z",
+      "verdict": "no_explosion_evidence_found",
+      "source_evidence": [],
+      "review_note": "Broad independent search of indexed Telegram/public media plus available official/local sources found no qualifying exact-city explosion or aerial-war impact that could be timed to this specific alert episode. Same-date, region-only and out-of-window reports were excluded."
+    },
+    {
+      "sample_index": 17,
+      "stratum": "2025-Q4",
+      "episode_id": "7cc85596baaca7e8f485e508",
+      "date": "2025-10-24",
+      "alert_start_utc": "2025-10-24T12:39:13Z",
+      "alert_end_utc": "2025-10-24T13:15:25Z",
+      "verdict": "no_explosion_evidence_found",
+      "source_evidence": [],
+      "review_note": "Broad independent search of indexed Telegram/public media plus available official/local sources found no qualifying exact-city explosion or aerial-war impact that could be timed to this specific alert episode. Same-date, region-only and out-of-window reports were excluded."
+    },
+    {
+      "sample_index": 18,
+      "stratum": "2025-Q4",
+      "episode_id": "812a5f66ecca875918d34c58",
+      "date": "2025-10-29",
+      "alert_start_utc": "2025-10-29T12:19:32Z",
+      "alert_end_utc": "2025-10-29T16:42:58Z",
+      "verdict": "no_explosion_evidence_found",
+      "source_evidence": [],
+      "review_note": "Same-date attack evidence found in the source sweep was outside this afternoon episode; no qualifying in-window exact-city explosion was found."
+    },
+    {
+      "sample_index": 19,
+      "stratum": "2025-Q4",
+      "episode_id": "2b0c8484477184c04b636aab",
+      "date": "2025-11-01",
+      "alert_start_utc": "2025-11-01T20:48:45Z",
+      "alert_end_utc": "2025-11-01T21:08:12Z",
+      "verdict": "no_explosion_evidence_found",
+      "source_evidence": [],
+      "review_note": "Broad independent search of indexed Telegram/public media plus available official/local sources found no qualifying exact-city explosion or aerial-war impact that could be timed to this specific alert episode. Same-date, region-only and out-of-window reports were excluded."
+    },
+    {
+      "sample_index": 20,
+      "stratum": "2025-Q4",
+      "episode_id": "4b8fdc538eb64d4e79183b1d",
+      "date": "2025-11-15",
+      "alert_start_utc": "2025-11-15T21:28:33Z",
+      "alert_end_utc": "2025-11-15T21:49:36Z",
+      "verdict": "no_explosion_evidence_found",
+      "source_evidence": [],
+      "review_note": "Broad independent search of indexed Telegram/public media plus available official/local sources found no qualifying exact-city explosion or aerial-war impact that could be timed to this specific alert episode. Same-date, region-only and out-of-window reports were excluded."
+    },
+    {
+      "sample_index": 21,
+      "stratum": "2025-Q4",
+      "episode_id": "95baff5956e4ed94b865d001",
+      "date": "2025-11-17",
+      "alert_start_utc": "2025-11-17T03:08:18Z",
+      "alert_end_utc": "2025-11-17T06:10:57Z",
+      "verdict": "no_explosion_evidence_found",
+      "source_evidence": [],
+      "review_note": "Broad independent search of indexed Telegram/public media plus available official/local sources found no qualifying exact-city explosion or aerial-war impact that could be timed to this specific alert episode. Same-date, region-only and out-of-window reports were excluded."
+    },
+    {
+      "sample_index": 22,
+      "stratum": "2025-Q4",
+      "episode_id": "631136b4006da1639764842e",
+      "date": "2025-11-29",
+      "alert_start_utc": "2025-11-28T22:56:32Z",
+      "alert_end_utc": "2025-11-29T05:46:41Z",
+      "verdict": "no_explosion_evidence_found",
+      "source_evidence": [],
+      "review_note": "Broad independent search of indexed Telegram/public media plus available official/local sources found no qualifying exact-city explosion or aerial-war impact that could be timed to this specific alert episode. Same-date, region-only and out-of-window reports were excluded."
+    },
+    {
+      "sample_index": 23,
+      "stratum": "2025-Q4",
+      "episode_id": "261cd6752005e99039966e1d",
+      "date": "2025-12-06",
+      "alert_start_utc": "2025-12-06T20:32:40Z",
+      "alert_end_utc": "2025-12-07T00:24:57Z",
+      "verdict": "no_explosion_evidence_found",
+      "source_evidence": [],
+      "review_note": "Broad independent search of indexed Telegram/public media plus available official/local sources found no qualifying exact-city explosion or aerial-war impact that could be timed to this specific alert episode. Same-date, region-only and out-of-window reports were excluded."
+    },
+    {
+      "sample_index": 24,
+      "stratum": "2026-Q1",
+      "episode_id": "5b0cd1e42c9fa400cb957c8c",
+      "date": "2026-01-04",
+      "alert_start_utc": "2026-01-03T22:25:25Z",
+      "alert_end_utc": "2026-01-04T04:17:21Z",
+      "verdict": "no_explosion_evidence_found",
+      "source_evidence": [],
+      "review_note": "Same-date exact-city attack reporting was outside this overnight sampled window; no qualifying in-window explosion evidence was found."
+    },
+    {
+      "sample_index": 25,
+      "stratum": "2026-Q1",
+      "episode_id": "b6cd1d3d3d91cc29ae93afa0",
+      "date": "2026-01-08",
+      "alert_start_utc": "2026-01-08T15:40:07Z",
+      "alert_end_utc": "2026-01-08T17:58:49Z",
+      "verdict": "no_explosion_evidence_found",
+      "source_evidence": [],
+      "review_note": "Broad independent search of indexed Telegram/public media plus available official/local sources found no qualifying exact-city explosion or aerial-war impact that could be timed to this specific alert episode. Same-date, region-only and out-of-window reports were excluded."
+    },
+    {
+      "sample_index": 26,
+      "stratum": "2026-Q1",
+      "episode_id": "908c0826baef450550bec545",
+      "date": "2026-01-30",
+      "alert_start_utc": "2026-01-30T13:53:37Z",
+      "alert_end_utc": "2026-01-30T15:13:10Z",
+      "verdict": "no_explosion_evidence_found",
+      "source_evidence": [],
+      "review_note": "Broad independent search of indexed Telegram/public media plus available official/local sources found no qualifying exact-city explosion or aerial-war impact that could be timed to this specific alert episode. Same-date, region-only and out-of-window reports were excluded."
+    },
+    {
+      "sample_index": 27,
+      "stratum": "2026-Q1",
+      "episode_id": "a41da237e1d2859510b30e59",
+      "date": "2026-02-09",
+      "alert_start_utc": "2026-02-09T03:26:37Z",
+      "alert_end_utc": "2026-02-09T04:41:35Z",
+      "verdict": "no_explosion_evidence_found",
+      "source_evidence": [],
+      "review_note": "Broad independent search of indexed Telegram/public media plus available official/local sources found no qualifying exact-city explosion or aerial-war impact that could be timed to this specific alert episode. Same-date, region-only and out-of-window reports were excluded."
+    },
+    {
+      "sample_index": 28,
+      "stratum": "2026-Q1",
+      "episode_id": "a28e11d10a98f1a47e8ccbbc",
+      "date": "2026-03-18",
+      "alert_start_utc": "2026-03-18T19:54:47Z",
+      "alert_end_utc": "2026-03-18T22:02:39Z",
+      "verdict": "no_explosion_evidence_found",
+      "source_evidence": [],
+      "review_note": "Broad independent search of indexed Telegram/public media plus available official/local sources found no qualifying exact-city explosion or aerial-war impact that could be timed to this specific alert episode. Same-date, region-only and out-of-window reports were excluded."
+    },
+    {
+      "sample_index": 29,
+      "stratum": "2026-Q1",
+      "episode_id": "0be37295affa9804f2b38a09",
+      "date": "2026-03-20",
+      "alert_start_utc": "2026-03-19T23:08:15Z",
+      "alert_end_utc": "2026-03-19T23:30:53Z",
+      "verdict": "no_explosion_evidence_found",
+      "source_evidence": [],
+      "review_note": "Same-date city explosion reporting falls outside this 01:08–01:30 Kyiv sampled episode."
+    },
+    {
+      "sample_index": 30,
+      "stratum": "2026-Q1",
+      "episode_id": "7a45b4c6cd4f18358e063002",
+      "date": "2026-03-21",
+      "alert_start_utc": "2026-03-21T00:28:29Z",
+      "alert_end_utc": "2026-03-21T03:06:48Z",
+      "alert_start_kyiv": "2026-03-21T02:28:29+02:00",
+      "alert_end_kyiv": "2026-03-21T05:06:48+02:00",
+      "verdict": "confirmed_strict_miss",
+      "source_evidence": [
+        {
+          "source": "NV live chronology, citing Suspilne",
+          "source_url": "https://nv.ua/ukr/ukraine/events/ataka-bpla-na-mikolajivshchinu-ta-dnipro-operativni-dani-povitryanih-sil-50593669.html",
+          "source_message_or_article_id": "50593669",
+          "publication_or_message_datetime": "2026-03-21T04:12:00+02:00",
+          "evidence_text": "03:15 У Запоріжжі пролунав вибух, повідомляє Суспільне.",
+          "event_time_kyiv": "2026-03-21T03:15:00+02:00"
+        },
+        {
+          "source": "National Police, Zaporizhzhia region",
+          "source_url": "https://zp.npu.gov.ua/news/u-zaporizhzhi-vnaslidok-ataky-rosiiskykh-bezpilotnykiv-zahynuly-dvoie-liudei-shche-dvoie-nepovnolitnikh-postrazhdaly-na-mistsiakh-vluchan-pratsiuiut-politseiski",
+          "source_message_or_article_id": null,
+          "publication_or_message_datetime": "2026-03-21T08:50:00+02:00",
+          "evidence_text": "Police confirms that on 21 March Russian Shahed-type UAVs attacked Zaporizhzhia, with impacts on housing and infrastructure.",
+          "event_time_kyiv": "morning; corroborative, not used as the primary minute-level timestamp"
+        }
+      ],
+      "event_time_interpretation": "The NV live chronology explicitly timestamps an exact-city explosion at 03:15 Kyiv, inside this canonical alert episode (02:28:29–05:06:48). Publication time is not substituted for event time.",
+      "rationale": "Exact-city explosion wording, confirmed aerial-war/UAV context, and an explicit event time inside one canonical monitor alert episode satisfy the existing strict methodology.",
+      "failure_mechanism": "multiple_episodes_same_date",
+      "secondary_failure_mechanisms": [
+        "source_discovery"
+      ],
+      "same_date_existing_canonical_strict_episode_ids": [
+        "c1d947bd6240f8549c0e385a",
+        "68046107668aad7c9f51499d"
+      ],
+      "review_note": "This date already contained later canonical strict episodes, so date-level closure would suppress discovery of this earlier in-window explosion."
+    },
+    {
+      "sample_index": 31,
+      "stratum": "2026-Q1",
+      "episode_id": "b34f763e0a9de083f8ce13e3",
+      "date": "2026-03-23",
+      "alert_start_utc": "2026-03-23T00:04:35Z",
+      "alert_end_utc": "2026-03-23T00:36:30Z",
+      "verdict": "no_explosion_evidence_found",
+      "source_evidence": [],
+      "review_note": "Broad independent search of indexed Telegram/public media plus available official/local sources found no qualifying exact-city explosion or aerial-war impact that could be timed to this specific alert episode. Same-date, region-only and out-of-window reports were excluded."
+    },
+    {
+      "sample_index": 32,
+      "stratum": "2026-Q1",
+      "episode_id": "4a14ee80d5478caae77888c8",
+      "date": "2026-03-28",
+      "alert_start_utc": "2026-03-27T23:50:38Z",
+      "alert_end_utc": "2026-03-28T01:12:35Z",
+      "verdict": "no_explosion_evidence_found",
+      "source_evidence": [],
+      "review_note": "Broad independent search of indexed Telegram/public media plus available official/local sources found no qualifying exact-city explosion or aerial-war impact that could be timed to this specific alert episode. Same-date, region-only and out-of-window reports were excluded."
+    },
+    {
+      "sample_index": 33,
+      "stratum": "2026-Q2",
+      "episode_id": "6fbe1c4c79d2e5d92000da8b",
+      "date": "2026-04-09",
+      "alert_start_utc": "2026-04-08T22:05:36Z",
+      "alert_end_utc": "2026-04-08T23:04:53Z",
+      "verdict": "no_explosion_evidence_found",
+      "source_evidence": [],
+      "review_note": "Broad independent search of indexed Telegram/public media plus available official/local sources found no qualifying exact-city explosion or aerial-war impact that could be timed to this specific alert episode. Same-date, region-only and out-of-window reports were excluded."
+    },
+    {
+      "sample_index": 34,
+      "stratum": "2026-Q2",
+      "episode_id": "7c1227f15a550fc2e3c8d5ca",
+      "date": "2026-04-15",
+      "alert_start_utc": "2026-04-15T14:47:20Z",
+      "alert_end_utc": "2026-04-15T15:11:54Z",
+      "verdict": "no_explosion_evidence_found",
+      "source_evidence": [],
+      "review_note": "Broad independent search of indexed Telegram/public media plus available official/local sources found no qualifying exact-city explosion or aerial-war impact that could be timed to this specific alert episode. Same-date, region-only and out-of-window reports were excluded."
+    },
+    {
+      "sample_index": 35,
+      "stratum": "2026-Q2",
+      "episode_id": "f2ecbc7532ce250536e650e1",
+      "date": "2026-04-20",
+      "alert_start_utc": "2026-04-20T17:19:22Z",
+      "alert_end_utc": "2026-04-20T17:53:31Z",
+      "verdict": "no_explosion_evidence_found",
+      "source_evidence": [],
+      "review_note": "Broad independent search of indexed Telegram/public media plus available official/local sources found no qualifying exact-city explosion or aerial-war impact that could be timed to this specific alert episode. Same-date, region-only and out-of-window reports were excluded."
+    },
+    {
+      "sample_index": 36,
+      "stratum": "2026-Q2",
+      "episode_id": "6ae86019ec46095f57a7126d",
+      "date": "2026-04-23",
+      "alert_start_utc": "2026-04-23T18:54:17Z",
+      "alert_end_utc": "2026-04-23T20:59:51Z",
+      "verdict": "no_explosion_evidence_found",
+      "source_evidence": [],
+      "review_note": "Broad independent search of indexed Telegram/public media plus available official/local sources found no qualifying exact-city explosion or aerial-war impact that could be timed to this specific alert episode. Same-date, region-only and out-of-window reports were excluded."
+    },
+    {
+      "sample_index": 37,
+      "stratum": "2026-Q2",
+      "episode_id": "fb67b1a1b2909e1f7ae6bbc0",
+      "date": "2026-04-25",
+      "alert_start_utc": "2026-04-25T12:12:33Z",
+      "alert_end_utc": "2026-04-25T13:38:33Z",
+      "verdict": "no_explosion_evidence_found",
+      "source_evidence": [],
+      "review_note": "Broad independent search of indexed Telegram/public media plus available official/local sources found no qualifying exact-city explosion or aerial-war impact that could be timed to this specific alert episode. Same-date, region-only and out-of-window reports were excluded."
+    },
+    {
+      "sample_index": 38,
+      "stratum": "2026-Q2",
+      "episode_id": "ff57870af0a20f4e9a3de81c",
+      "date": "2026-04-28",
+      "alert_start_utc": "2026-04-27T22:14:11Z",
+      "alert_end_utc": "2026-04-28T01:15:33Z",
+      "verdict": "no_explosion_evidence_found",
+      "source_evidence": [],
+      "review_note": "The morning exact-city attack sequence begins around 06:41–07:20 Kyiv, after this sampled episode ended at 04:15:33; it belongs to a subsequent alert window."
+    },
+    {
+      "sample_index": 39,
+      "stratum": "2026-Q2",
+      "episode_id": "93076122c01f24ee5b2aa0e5",
+      "date": "2026-05-11",
+      "alert_start_utc": "2026-05-11T19:15:15Z",
+      "alert_end_utc": "2026-05-11T20:39:14Z",
+      "verdict": "no_explosion_evidence_found",
+      "source_evidence": [],
+      "review_note": "Broad independent search of indexed Telegram/public media plus available official/local sources found no qualifying exact-city explosion or aerial-war impact that could be timed to this specific alert episode. Same-date, region-only and out-of-window reports were excluded."
+    },
+    {
+      "sample_index": 40,
+      "stratum": "2026-Q2",
+      "episode_id": "448ac9e226adef5454a1cd03",
+      "date": "2026-06-07",
+      "alert_start_utc": "2026-06-07T15:03:32Z",
+      "alert_end_utc": "2026-06-07T15:20:02Z",
+      "verdict": "no_explosion_evidence_found",
+      "source_evidence": [],
+      "review_note": "Broad independent search of indexed Telegram/public media plus available official/local sources found no qualifying exact-city explosion or aerial-war impact that could be timed to this specific alert episode. Same-date, region-only and out-of-window reports were excluded."
+    },
+    {
+      "sample_index": 41,
+      "stratum": "2026-Q2",
+      "episode_id": "7de8bff024b6393e925c3f96",
+      "date": "2026-06-14",
+      "alert_start_utc": "2026-06-14T10:00:39Z",
+      "alert_end_utc": "2026-06-14T14:09:28Z",
+      "verdict": "no_explosion_evidence_found",
+      "source_evidence": [],
+      "review_note": "A potentially confusing indexed local snippet was checked against surrounding chronology and did not establish an exact-city aerial explosion inside this 13:00–17:09 Kyiv episode."
+    },
+    {
+      "sample_index": 42,
+      "stratum": "2026-Q2",
+      "episode_id": "52cf015ceb99f6edae1a1f97",
+      "date": "2026-06-16",
+      "alert_start_utc": "2026-06-16T14:28:31Z",
+      "alert_end_utc": "2026-06-16T15:29:50Z",
+      "verdict": "no_explosion_evidence_found",
+      "source_evidence": [],
+      "review_note": "Same date as the Wave 1 positive, but the confirmed 19:51 explosion belongs to the later 19:42–21:04 alert; this sampled 17:28–18:29 episode has no qualifying explosion evidence."
+    },
+    {
+      "sample_index": 43,
+      "stratum": "2026-Q3",
+      "episode_id": "9e789cb2399d05340775f67f",
+      "date": "2026-07-09",
+      "alert_start_utc": "2026-07-09T05:45:11Z",
+      "alert_end_utc": "2026-07-09T10:08:42Z",
+      "verdict": "no_explosion_evidence_found",
+      "source_evidence": [],
+      "review_note": "Broad independent search of indexed Telegram/public media plus available official/local sources found no qualifying exact-city explosion or aerial-war impact that could be timed to this specific alert episode. Same-date, region-only and out-of-window reports were excluded."
+    },
+    {
+      "sample_index": 44,
+      "stratum": "2026-Q3",
+      "episode_id": "f88d07fb6ca052c2f7f1bc13",
+      "date": "2026-07-12",
+      "alert_start_utc": "2026-07-11T22:49:55Z",
+      "alert_end_utc": "2026-07-11T23:23:04Z",
+      "verdict": "no_explosion_evidence_found",
+      "source_evidence": [],
+      "review_note": "Same-date city attack evidence is for the evening, outside this 01:49–02:23 Kyiv episode."
+    },
+    {
+      "sample_index": 45,
+      "stratum": "2026-Q3",
+      "episode_id": "4f6341d101fd2db92ca8f6ce",
+      "date": "2026-07-12",
+      "alert_start_utc": "2026-07-12T10:24:08Z",
+      "alert_end_utc": "2026-07-12T11:47:09Z",
+      "verdict": "no_explosion_evidence_found",
+      "source_evidence": [],
+      "review_note": "Same-date city attack evidence is for the evening, outside this 13:24–14:47 Kyiv episode."
+    },
+    {
+      "sample_index": 46,
+      "stratum": "2026-Q3",
+      "episode_id": "00f6ec496eba7b149c6063ae",
+      "date": "2026-07-16",
+      "alert_start_utc": "2026-07-15T23:50:41Z",
+      "alert_end_utc": "2026-07-16T00:14:29Z",
+      "verdict": "no_explosion_evidence_found",
+      "source_evidence": [],
+      "review_note": "Broad independent search of indexed Telegram/public media plus available official/local sources found no qualifying exact-city explosion or aerial-war impact that could be timed to this specific alert episode. Same-date, region-only and out-of-window reports were excluded."
+    },
+    {
+      "sample_index": 47,
+      "stratum": "2026-Q3",
+      "episode_id": "e9119967514cfecd9f537a32",
+      "date": "2026-07-23",
+      "alert_start_utc": "2026-07-23T19:17:41Z",
+      "alert_end_utc": "2026-07-23T19:38:29Z",
+      "verdict": "no_explosion_evidence_found",
+      "source_evidence": [],
+      "review_note": "Same-date guided-bomb attack evidence is earlier than this 22:17–22:38 Kyiv alert; no qualifying in-window event was found."
+    },
+    {
+      "sample_index": 48,
+      "stratum": "2026-Q3",
+      "episode_id": "c214b54b64dc43ea99879edb",
+      "date": "2026-07-26",
+      "alert_start_utc": "2026-07-25T21:21:21Z",
+      "alert_end_utc": "2026-07-25T22:17:26Z",
+      "verdict": "no_explosion_evidence_found",
+      "source_evidence": [],
+      "review_note": "City attack reporting on July 25/26 was checked against the overnight boundary; no exact-city explosion was established inside this 00:21–01:17 Kyiv episode."
+    },
+    {
+      "sample_index": 49,
+      "stratum": "2026-Q3",
+      "episode_id": "e6f197dc17a56cb42880764b",
+      "date": "2026-07-28",
+      "alert_start_utc": "2026-07-28T20:50:06Z",
+      "alert_end_utc": "2026-07-28T21:50:06Z",
+      "verdict": "no_explosion_evidence_found",
+      "source_evidence": [],
+      "review_note": "Cross-midnight controls were checked; no qualifying exact-city explosion was found inside this 23:50–00:50 Kyiv episode."
+    },
+    {
+      "sample_index": 50,
+      "stratum": "2026-Q3",
+      "episode_id": "121c2734a6645fee0f221f78",
+      "date": "2026-08-05",
+      "alert_start_utc": "2026-08-05T20:51:25Z",
+      "alert_end_utc": "2026-08-05T21:51:25Z",
+      "verdict": "no_explosion_evidence_found",
+      "source_evidence": [],
+      "review_note": "Cross-midnight controls were checked; no qualifying exact-city explosion was found inside this 23:51–00:51 Kyiv episode."
+    }
+  ],
+  "summary": {
+    "sample_size": 50,
+    "reviewed_episode_count": 50,
+    "confirmed_strict_miss": 1,
+    "needs_review": 0,
+    "no_explosion_evidence_found": 49,
+    "positive_episode_ids": [
+      "7a45b4c6cd4f18358e063002"
+    ],
+    "needs_review_episode_ids": [],
+    "failure_mechanisms_found": {
+      "multiple_episodes_same_date": 1,
+      "source_discovery": 1,
+      "cross_midnight_date_join": 0,
+      "classification": 0,
+      "other": 0
+    },
+    "new_failure_mechanism": false,
+    "answer": "Wave 2 again found a confirmed strict explosion miss in the dark zone: 1/50. The miss repeats the already known multiple-episodes-same-date/source-discovery pattern rather than introducing a new mechanism."
+  },
+  "combined_wave1_wave2_summary": {
+    "total_blind_sample": 100,
+    "confirmed_strict_misses": 2,
+    "confirmed_strict_miss_rate_in_observed_sample": "2/100",
+    "needs_review": 0,
+    "no_explosion_evidence_found": 98,
+    "positive_episode_ids": [
+      "7c008970817e8d13ae402670",
+      "7a45b4c6cd4f18358e063002"
+    ],
+    "quarterly_distribution": [
+      {
+        "stratum": "2025-Q1",
+        "wave1_sample_n": 1,
+        "wave2_sample_n": 1,
+        "combined_sample_n": 2,
+        "combined_confirmed_strict_miss_n": 0
+      },
+      {
+        "stratum": "2025-Q2",
+        "wave1_sample_n": 7,
+        "wave2_sample_n": 7,
+        "combined_sample_n": 14,
+        "combined_confirmed_strict_miss_n": 0
+      },
+      {
+        "stratum": "2025-Q3",
+        "wave1_sample_n": 7,
+        "wave2_sample_n": 7,
+        "combined_sample_n": 14,
+        "combined_confirmed_strict_miss_n": 0
+      },
+      {
+        "stratum": "2025-Q4",
+        "wave1_sample_n": 8,
+        "wave2_sample_n": 8,
+        "combined_sample_n": 16,
+        "combined_confirmed_strict_miss_n": 0
+      },
+      {
+        "stratum": "2026-Q1",
+        "wave1_sample_n": 9,
+        "wave2_sample_n": 9,
+        "combined_sample_n": 18,
+        "combined_confirmed_strict_miss_n": 1
+      },
+      {
+        "stratum": "2026-Q2",
+        "wave1_sample_n": 10,
+        "wave2_sample_n": 10,
+        "combined_sample_n": 20,
+        "combined_confirmed_strict_miss_n": 1
+      },
+      {
+        "stratum": "2026-Q3",
+        "wave1_sample_n": 8,
+        "wave2_sample_n": 8,
+        "combined_sample_n": 16,
+        "combined_confirmed_strict_miss_n": 0
+      }
+    ],
+    "failure_mechanisms_observed_among_two_blind_positives": {
+      "multiple_episodes_same_date": 2,
+      "source_discovery": 2,
+      "note": "Mechanisms are multi-label: both positives exhibit both patterns."
+    },
+    "new_failure_mechanism": false,
+    "operational_qa_interpretation": "Under the pre-specified scale, 2–3 confirmed misses per 100 is a materially stronger signal that hidden misses are not limited to isolated edge cases; systematic high-recall re-audit should be seriously considered. This is an operational QA interpretation, not a population estimate.",
+    "ppo_enrichment_interpretation": "The two blind waves are descriptively compatible with the hypothesis that PPO/candidate discovery acted as an enrichment filter: the random dark zone has a sparse but nonzero confirmed-miss yield, while previously surfaced PPO/candidate-like material contained a much denser set of false negatives. The 13/51 gap-audit figure is not mechanically comparable to 2/100 because the former denominator is a candidate/source-message set and the blind audit denominator is sampled alert episodes.",
+    "answer": "Across two disjoint blind samples (100 randomly selected ignored Zaporizhzhia alert episodes), 2 confirmed strict explosion misses were found, with 0 additional needs_review. Both misses share the already known multiple-episodes-same-date and source-discovery failure modes."
+  },
+  "limitations": [
+    "The repository does not preserve a literal complete episode-level list for all initial PPO candidate messages. Wave 2 therefore uses exactly the same conservative reconstructible PPO episode/date exclusions as Wave 1; residual overlap with unrecoverable rejected PPO candidates cannot be proven to be zero.",
+    "A negative verdict means no qualifying evidence was found in the accessible historical source/search surface; it is not proof that no qualifying source exists anywhere.",
+    "Historical source indexing and deleted/edited Telegram material can create source-discovery false negatives.",
+    "Publication time is never substituted for event time; this deliberately leaves unresolved cases negative unless the event can be tied to the sampled episode under the existing methodology.",
+    "The combined 100-episode blind audit is too small for strong population-rate estimation; the pre-specified operational QA scale is used instead.",
+    "Wave 2 is a disjoint without-replacement random sample from the remaining eligible universe. It is an independent selection run operationally, but the two samples are not statistically independent draws with replacement."
+  ],
+  "source_artifacts_used": [
+    "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P1a_alerts.json",
+    "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P1b_alerts.json",
+    "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P2a_alerts.json",
+    "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P2b_alerts.json",
+    "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P3a_alerts.json",
+    "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P3b_alerts.json",
+    "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P4a_alerts.json",
+    "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P4b_alerts.json",
+    "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P4c_alerts.json",
+    "kyiv-air-alerts-grafana/data/explosion_research/zaporizhzhia/final_evidence.json",
+    "kyiv-air-alerts-grafana/data/explosion_research/zaporizhzhia/zaporizhzhia_air_defense_pilot.json",
+    "research/zaporizhzhia_explosion_gap_audit.json",
+    "research/zaporizhzhia_explosion_blind_sample_50.json"
+  ],
+  "canonical_files_modified": false,
+  "production_or_deployment_modified": false,
+  "wave3_started": false
+}
