@@ -1,0 +1,659 @@
+{
+  "schema_version": 1,
+  "task": "zaporizhzhia_explosion_gap_audit",
+  "generated_at": "2026-09-21",
+  "repository": "olegbalakin-cmyk/kyiv-air-alerts-grafana",
+  "branch": "multicity-wip-2026-09-16",
+  "audited_snapshot_commit": "791db0fbd08754ac8fa0b7a2bdf12cff887d27ea",
+  "branch_head_before_artifact_commit": "24d4176b94a24cf5c3fe04f8e96232727a71b879",
+  "scope": {
+    "city_key": "zaporizhzhia",
+    "city": "Запоріжжя",
+    "canonical_denominator": 2365,
+    "canonical_strict_before_audit": 169,
+    "strict_false_universe": 2196,
+    "audit_type": "gap_audit_not_full_backfill",
+    "canonical_files_modified": false
+  },
+  "method": {
+    "local_first": [
+      "P1/P2/P3/P4 research results and child slices",
+      "final_evidence.json",
+      "air-defence pilot",
+      "canonical frozen source slices (2365 unique episodes)",
+      "current review/sensitivity evidence"
+    ],
+    "machine_first_logic": "Search explicit explosion wording and exact-city context, then join candidate timestamps/context to canonical episodes; existing strict episodes are excluded from miss candidates.",
+    "targeted_external_logic": "Candidate/date-driven search of previously used source families, especially Ukrinform, Zaporizhzhia OVA/Fedorov, Suspilne Zaporizhzhia and local media. No broad per-episode web search over all 2196 non-strict episodes.",
+    "timing_rule": "Publication time is not treated as event time. Strict is retained when the source itself explicitly places the explosion during the alert or gives an event time inside the episode.",
+    "multi_episode_date_check": "Dates with multiple canonical episodes were not treated as closed after one strict match; evidence was joined to episode_id."
+  },
+  "counts": {
+    "candidate_messages_manually_checked": 51,
+    "known_confirmed_strict_miss": 1,
+    "additional_confirmed_strict_misses": 12,
+    "additional_needs_review": 4,
+    "hypothetical_revised_strict_numerator_including_known_and_additional": 182,
+    "hypothetical_revised_strict_pct": 7.7
+  },
+  "known_confirmed_miss": {
+    "episode_id": "41f41f98fef80130dff07317",
+    "date": "2025-11-22",
+    "alert_start_utc": "2025-11-22T11:34:32Z",
+    "alert_end_utc": "2025-11-22T16:03:15Z",
+    "alert_start_kyiv": "2025-11-22T13:34:32+02:00",
+    "alert_end_kyiv": "2025-11-22T18:03:15+02:00",
+    "exact_evidence_text": "У Запоріжжі під час повітряної тривоги пролунали вибухи. Мешканців попередили про роботу ППО у місті.",
+    "source": "Укрінформ / Запорізька ОВА",
+    "source_url": "https://www.ukrinform.ua/rubric-regions/4061628-u-zaporizzi-pid-cas-trivogi-prolunali-vibuhi.html",
+    "source_timestamp_kyiv": "2025-11-22T15:32:00+02:00",
+    "current_canonical_classification": "none",
+    "strict_reason": "Exact-city explosions explicitly occurred during the canonical alert; air-defence attribution does not negate the explosion criterion.",
+    "probable_historical_miss_reason": "multiple_episodes_same_date_discovery_suppression",
+    "same_date_existing_strict_episode_id": "6b7ba70bf5f6686e6b51519f"
+  },
+  "additional_confirmed_strict_misses": [
+    {
+      "episode_id": "6e6afea5cad3ced8422d0ff8",
+      "date": "2025-05-23",
+      "alert_start_utc": "2025-05-23T17:39:15Z",
+      "alert_end_utc": "2025-05-23T20:49:55Z",
+      "alert_start_kyiv": "2025-05-23T20:39:15+03:00",
+      "alert_end_kyiv": "2025-05-23T23:49:55+03:00",
+      "exact_evidence_text": "У Запоріжжі під час повітряної тривоги пролунали вибухи.",
+      "source": "Укрінформ / Запорізька ОВА",
+      "source_url": "https://www.ukrinform.ua/rubric-regions/3996407-u-zaporizzi-pid-cas-povitranoi-trivogi-prolunali-vibuhi.html",
+      "source_timestamp_kyiv": "2025-05-23T23:03:00+03:00",
+      "event_time": "Source explicitly states the explosion occurred during the air alert; no publication-time substitution is required.",
+      "current_canonical_classification": "none",
+      "strict_reason": "Exact-city explosion wording, explicit during-alert statement, and aerial/UAV-war context; the source report falls inside the canonical episode.",
+      "probable_historical_miss_reason": "source_discovery_gap"
+    },
+    {
+      "episode_id": "eb29ccba021617db3b0e8bbc",
+      "date": "2025-09-15",
+      "alert_start_utc": "2025-09-14T23:27:57Z",
+      "alert_end_utc": "2025-09-15T00:24:58Z",
+      "alert_start_kyiv": "2025-09-15T02:27:57+03:00",
+      "alert_end_kyiv": "2025-09-15T03:24:58+03:00",
+      "exact_evidence_text": "У Запоріжжі під час повітряної тривоги пролунала серія вибухів, сталося займання.",
+      "source": "Укрінформ",
+      "source_url": "https://www.ukrinform.ua/rubric-regions/4036493-u-zaporizzi-prolunala-seria-vibuhiv.html",
+      "source_timestamp_kyiv": "2025-09-15T02:51:00+03:00",
+      "event_time": "Explicitly during the active alert; source published inside the episode.",
+      "current_canonical_classification": "none",
+      "strict_reason": "Exact city, explicit explosions, explicit during-alert wording, and missile/aerial-war context.",
+      "probable_historical_miss_reason": "multiple_episodes_same_date_discovery_suppression",
+      "same_date_existing_strict_episode_id": "fa1e9624ec208634260fa6cb"
+    },
+    {
+      "episode_id": "19f123f154ffb68f06d0296e",
+      "date": "2025-10-08",
+      "alert_start_utc": "2025-10-08T19:43:17Z",
+      "alert_end_utc": "2025-10-08T21:52:05Z",
+      "alert_start_kyiv": "2025-10-08T22:43:17+03:00",
+      "alert_end_kyiv": "2025-10-09T00:52:05+03:00",
+      "exact_evidence_text": "Ворог атакує Запоріжжя, під час повітряної тривоги у місті пролунали вибухи.",
+      "source": "Укрінформ, mirrored by UKR.NET",
+      "source_url": "https://www.ukr.net/news/details/zaporizhzhya/113888959.html",
+      "source_timestamp_kyiv": "2025-10-08T22:46:00+03:00",
+      "event_time": "Explicitly during the active alert; source published three minutes after episode start.",
+      "current_canonical_classification": "none",
+      "strict_reason": "Exact city, explicit explosions, explicit during-alert wording, and reported fast aerial target toward the city.",
+      "probable_historical_miss_reason": "source_discovery_gap"
+    },
+    {
+      "episode_id": "8534686ad8552aef1dd5a009",
+      "date": "2025-11-15",
+      "alert_start_date_kyiv": "2025-11-14",
+      "alert_start_utc": "2025-11-14T19:20:38Z",
+      "alert_end_utc": "2025-11-15T01:12:12Z",
+      "alert_start_kyiv": "2025-11-14T21:20:38+02:00",
+      "alert_end_kyiv": "2025-11-15T03:12:12+02:00",
+      "exact_evidence_text": "У Запоріжжі під час повітряної тривоги пролунав вибух.",
+      "source": "Укрінформ, mirrored by UKR.NET",
+      "source_url": "https://www.ukr.net/news/details/zaporizhzhya/114518549.html",
+      "source_timestamp_kyiv": "2025-11-15T00:04:00+02:00",
+      "event_time": "Explicitly during the alert; the cross-midnight canonical episode was active at 00:04.",
+      "current_canonical_classification": "none",
+      "strict_reason": "Exact city, explicit explosion, explicit during-alert wording, and UAV-over-Zaporizhzhia context.",
+      "probable_historical_miss_reason": "cross_midnight_source_date_vs_alert_start_date_join_gap"
+    },
+    {
+      "episode_id": "03eb23a34f4367f90dbee592",
+      "date": "2025-11-24",
+      "alert_start_utc": "2025-11-24T14:51:47Z",
+      "alert_end_utc": "2025-11-24T15:27:50Z",
+      "alert_start_kyiv": "2025-11-24T16:51:47+02:00",
+      "alert_end_kyiv": "2025-11-24T17:27:50+02:00",
+      "exact_evidence_text": "У Запоріжжі щойно пролунав вибух. Його чули мешканці кількох районів міста.",
+      "source": "Укрінформ",
+      "source_url": "https://www.ukrinform.ua/rubric-ato/4062313-u-zaporizzi-prolunav-vibuh.html",
+      "source_timestamp_kyiv": "2025-11-24T17:12:00+02:00",
+      "event_time": "The source says the explosion had just occurred at 17:12, inside the episode.",
+      "current_canonical_classification": "none",
+      "strict_reason": "Exact city, immediate event wording, active city alert, and KAB attack on Zaporizhzhia.",
+      "probable_historical_miss_reason": "source_discovery_gap"
+    },
+    {
+      "episode_id": "ced9e05a99318132ec47d0a0",
+      "date": "2025-12-02",
+      "alert_start_utc": "2025-12-02T09:04:04Z",
+      "alert_end_utc": "2025-12-02T10:11:29Z",
+      "alert_start_kyiv": "2025-12-02T11:04:04+02:00",
+      "alert_end_kyiv": "2025-12-02T12:11:29+02:00",
+      "exact_evidence_text": "У Запоріжжі під час повітряної тривоги пролунав вибух.",
+      "source": "Укрінформ",
+      "source_url": "https://www.ukrinform.ua/rubric-regions/4065143-u-zaporizzi-prolunav-vibuh.html",
+      "source_timestamp_kyiv": "2025-12-02T12:03:00+02:00",
+      "event_time": "Explicitly during the active alert.",
+      "current_canonical_classification": "none",
+      "strict_reason": "Exact city, explicit explosion during alert, and aerial-strike warning.",
+      "probable_historical_miss_reason": "source_discovery_gap"
+    },
+    {
+      "episode_id": "5a7d64e4d58b240825d0c954",
+      "date": "2025-12-16",
+      "alert_start_utc": "2025-12-16T19:28:38Z",
+      "alert_end_utc": "2025-12-16T21:46:51Z",
+      "alert_start_kyiv": "2025-12-16T21:28:38+02:00",
+      "alert_end_kyiv": "2025-12-16T23:46:51+02:00",
+      "exact_evidence_text": "Під час повітряної тривоги у Запоріжжі було чутно звуки вибухів.",
+      "source": "Укрінформ / Запорізька ОВА",
+      "source_url": "https://www.ukrinform.ua/rubric-regions/4070429-u-zaporizzi-prolunali-vibuhi.html",
+      "source_timestamp_kyiv": "2025-12-16T22:05:00+02:00",
+      "event_time": "Explicitly during the active alert; source also states air defence was working.",
+      "current_canonical_classification": "none",
+      "strict_reason": "Exact city, explicit explosions during alert, and strike-UAV/air-defence context.",
+      "probable_historical_miss_reason": "multiple_episodes_same_date_discovery_suppression",
+      "same_date_existing_strict_episode_id": "319d4432a8528fe156bcc567"
+    },
+    {
+      "episode_id": "6393c001ec4d0f8dfce54b51",
+      "date": "2026-01-21",
+      "alert_start_utc": "2026-01-21T07:10:58Z",
+      "alert_end_utc": "2026-01-21T18:10:47Z",
+      "alert_start_kyiv": "2026-01-21T09:10:58+02:00",
+      "alert_end_kyiv": "2026-01-21T20:10:47+02:00",
+      "exact_evidence_text": "Ворог завдає авіаційних ударів по Запоріжжю, у різних районах міста лунають вибухи.",
+      "source": "Укрінформ",
+      "source_url": "https://www.ukrinform.ua/amp/rubric-regions/4082594-u-zaporizzi-prolunali-vibuhi.html",
+      "source_timestamp_kyiv": "2026-01-21T10:27:00+02:00",
+      "event_time": "Present-tense report during the active canonical episode.",
+      "current_canonical_classification": "none",
+      "strict_reason": "Exact city, explicit explosions, active air alert, KAB launches toward Zaporizhzhia and additional UAV/cruise-missile threat.",
+      "probable_historical_miss_reason": "source_discovery_gap"
+    },
+    {
+      "episode_id": "0edc1d73c3a86e149371bfbf",
+      "date": "2026-03-12",
+      "alert_start_utc": "2026-03-12T06:55:35Z",
+      "alert_end_utc": "2026-03-12T16:07:45Z",
+      "alert_start_kyiv": "2026-03-12T08:55:35+02:00",
+      "alert_end_kyiv": "2026-03-12T18:07:45+02:00",
+      "exact_evidence_text": "Наразі в області та Запоріжжі оголошено повітряну тривогу. Загроза атаки БПЛА. В Запоріжжі чути вибухи.",
+      "source": "Укрінформ",
+      "source_url": "https://www.ukrinform.ua/rubric-regions/4100820-rosiani-atakuvali-komisuvahu-na-zaporizzi-e-poranenij.html",
+      "source_timestamp_kyiv": "2026-03-12T14:17:00+02:00",
+      "event_time": "Present-tense exact-city explosions during the active alert.",
+      "current_canonical_classification": "sensitivity_only",
+      "strict_reason": "The stronger source supplies the missing exact-city explosion wording and explicit active-alert/UAV context for the same canonical episode.",
+      "probable_historical_miss_reason": "stronger_source_not_used_for_existing_sensitivity_case"
+    },
+    {
+      "episode_id": "404d55294a38c31848e7e093",
+      "date": "2026-04-09",
+      "alert_start_utc": "2026-04-09T01:58:08Z",
+      "alert_end_utc": "2026-04-09T03:41:34Z",
+      "alert_start_kyiv": "2026-04-09T04:58:08+03:00",
+      "alert_end_kyiv": "2026-04-09T06:41:34+03:00",
+      "exact_evidence_text": "У Запоріжжі пролунали кілька вибухів, ворог атакує місто ракетами.",
+      "source": "Укрінформ",
+      "source_url": "https://www.ukrinform.ua/rubric-regions/4110629-u-zaporizzi-prolunali-kilka-vibuhiv.html",
+      "source_timestamp_kyiv": "2026-04-09T05:58:00+03:00",
+      "event_time": "Present-tense report inside the canonical episode.",
+      "current_canonical_classification": "none",
+      "strict_reason": "Exact city, explicit explosions, missile attack, and active city air alert.",
+      "probable_historical_miss_reason": "source_discovery_gap"
+    },
+    {
+      "episode_id": "1e434d0fa5abfd518ad07d1e",
+      "date": "2026-08-28",
+      "alert_start_utc": "2026-08-28T04:23:30Z",
+      "alert_end_utc": "2026-08-28T04:49:34Z",
+      "alert_start_kyiv": "2026-08-28T07:23:30+03:00",
+      "alert_end_kyiv": "2026-08-28T07:49:34+03:00",
+      "exact_evidence_text": "Близько 07:30 28 серпня у Запоріжжі лунали вибухи, повідомлялося про загрозу ударних БпЛА.",
+      "source": "NV",
+      "source_url": "https://nv.ua/ukr/ukraine/events/epicentr-u-zaporizhzhi-atakuvali-droni-vinikla-masshtabna-pozhezha-video-novini-zaporizhzhya-50636377.html",
+      "source_timestamp_kyiv": "2026-08-28T09:11:00+03:00",
+      "event_time_kyiv": "2026-08-28T07:30:00+03:00",
+      "current_canonical_classification": "sensitivity_only",
+      "strict_reason": "Exact-city explosion time is explicitly ~07:30, seven minutes after episode start, with explicit strike-UAV threat.",
+      "probable_historical_miss_reason": "overconservative_sensitivity_classification"
+    },
+    {
+      "episode_id": "eac6a8d131341fb46bd1eae2",
+      "date": "2026-09-08",
+      "alert_start_utc": "2026-09-08T10:21:46Z",
+      "alert_end_utc": "2026-09-08T12:17:15Z",
+      "alert_start_kyiv": "2026-09-08T13:21:46+03:00",
+      "alert_end_kyiv": "2026-09-08T15:17:15+03:00",
+      "exact_evidence_text": "У місті вже тривалий час лунає повітряна тривога, в різних районах міста чути вибухи.",
+      "source": "Укрінформ",
+      "source_url": "https://www.ukrinform.ua/rubric-regions/4162036-vorog-atakuvav-promislove-pidpriemstvo-u-zaporizzi-e-poranenij.html",
+      "source_timestamp_kyiv": "2026-09-08T14:24:00+03:00",
+      "event_time": "Present-tense explosions during a long-running active city alert.",
+      "current_canonical_classification": "review_date_level_unresolved_event_time",
+      "strict_reason": "The stronger source supplies explicit exact-city explosions during the active canonical episode; the earlier review source lacked usable time.",
+      "probable_historical_miss_reason": "stronger_source_not_used_for_existing_review_case"
+    }
+  ],
+  "additional_needs_review": [
+    {
+      "date": "2025-09-15",
+      "episode_id": "70067c052eec48f162697391",
+      "alert_start_utc": "2025-09-15T01:45:22Z",
+      "alert_end_utc": "2025-09-15T02:02:04Z",
+      "source": "Укрінформ / Запорізька ОВА",
+      "source_url": "https://www.ukrinform.ua/rubric-regions/4036500-na-zaporizzi-znovu-vibuhi-po-vorozih-cilah-pracue-ppo.html",
+      "reason": "Source says Zaporizhzhia was attacked again and explosions were heard, but the wording does not independently time the explosion after this very short city-alert start; publication time is not used as event time."
+    },
+    {
+      "date": "2025-09-22",
+      "candidate_episode_ids": [
+        "53b904233ea90ffe7627f543"
+      ],
+      "candidate_alert_start_utc": "2025-09-22T09:06:03Z",
+      "candidate_alert_end_utc": "2025-09-22T09:40:46Z",
+      "source": "Укрінформ",
+      "source_url": "https://www.ukrinform.ua/search-YToxOntzOjU6InF1ZXJ5IjtzOjEyOiLRgNCw0LrQtdGC0LAiO30?page=86",
+      "source_timestamp_kyiv": "2025-09-22T12:58:00+03:00",
+      "exact_evidence_text": "У Запоріжжі під час повітряної тривоги пролунав потужний вибух. Спрацювала ППО.",
+      "reason": "The article appears after the nearest city episode ended and while only the oblast-level alert wording is explicit; no separate event timestamp securely binds it to the city episode."
+    },
+    {
+      "date": "2025-12-13",
+      "candidate_episode_ids": [
+        "e2b12310ac6eb1205c44a8c4"
+      ],
+      "candidate_alert_start_utc": "2025-12-13T18:24:49Z",
+      "candidate_alert_end_utc": "2025-12-13T19:07:14Z",
+      "source": "Укрінформ / Запорізька ОВА",
+      "source_url": "https://www.ukrinform.ua/rubric-regions/4069379-okupanti-atakuut-zaporizkij-rajon.html",
+      "source_timestamp_kyiv": "2025-12-13T21:25:00+02:00",
+      "reason": "Exact-city explosions are reported as occurring after an alert signal, but publication is after the city episode and before the next one; available wording does not make the episode join unique."
+    },
+    {
+      "date": "2026-06-08",
+      "episode_id": "db99e81602ec0cbec92e4ab6",
+      "alert_start_utc": "2026-06-07T22:31:23Z",
+      "alert_end_utc": "2026-06-08T02:32:31Z",
+      "source": "Укрінформ search/tag result",
+      "source_url": "https://www.ukrinform.ua/tag-vibuh",
+      "source_timestamp_kyiv": "2026-06-08T03:52:00+03:00",
+      "reason": "High-signal exact-city explosion headline falls while the episode is active, but the accessible result does not provide enough body/event-time wording to avoid relying on publication time."
+    }
+  ],
+  "failure_patterns": [
+    {
+      "pattern": "multiple_episodes_same_calendar_date",
+      "assessment": "confirmed",
+      "examples": [
+        "2025-11-22: known miss 41f41f98fef80130dff07317 while 6b7ba70bf5f6686e6b51519f was already strict",
+        "2025-09-15: eb29ccba021617db3b0e8bbc missed while fa1e9624ec208634260fa6cb was already strict",
+        "2025-12-16: 5a7d64e4d58b240825d0c954 missed while 319d4432a8528fe156bcc567 was already strict"
+      ],
+      "implication": "The 22.11.2025 case is not an isolated instance of a date containing one retained strict episode and another qualifying episode being missed."
+    },
+    {
+      "pattern": "recurring_source_discovery_gap",
+      "assessment": "confirmed",
+      "note": "Most newly confirmed misses were surfaced by Ukrinform or an Ukrinform mirror, even though Ukrinform was also used elsewhere in the canonical backfill. This indicates incomplete discovery/retention, not wholesale exclusion of the source family."
+    },
+    {
+      "pattern": "cross_midnight_date_join_gap",
+      "assessment": "confirmed_example",
+      "examples": [
+        "2025-11-15 source event maps to episode 8534686ad8552aef1dd5a009 whose canonical alert_start_date_kyiv is 2025-11-14."
+      ]
+    },
+    {
+      "pattern": "existing_sensitivity_or_review_too_conservative",
+      "assessment": "confirmed",
+      "examples": [
+        "2026-03-12 0edc1d73c3a86e149371bfbf: stronger source explicitly says explosions are heard in Zaporizhzhia during the active alert",
+        "2026-08-28 1e434d0fa5abfd518ad07d1e: exact 07:30 explosion time lies inside 07:23:30-07:49:34 alert",
+        "2026-09-08 eac6a8d131341fb46bd1eae2: stronger source explicitly says explosions are heard in different city districts while the alert has been active for a long time"
+      ]
+    }
+  ],
+  "coverage_assessment": {
+    "level": "moderate_but_incomplete",
+    "strengths": [
+      "All 2365 frozen canonical episodes were available for episode-level joins.",
+      "All 169 existing strict events were mapped back to canonical episode IDs.",
+      "All six strict air-defence-positive pilot cases were rechecked.",
+      "All sensitivity-only records containing explicit explosion wording were rechecked.",
+      "Targeted external discovery concentrated on high-signal dates/source hits and multi-episode dates."
+    ],
+    "limitations": [
+      "The repo does not contain a complete raw Zaporizhzhia Telegram archive or a complete log of all rejected historical source-discovery hits.",
+      "The audit did not execute unbounded web search for every one of the 2196 non-strict episodes.",
+      "A negative result therefore cannot prove the remaining non-strict universe is complete."
+    ],
+    "interpretation": "The audit is sufficient to reject the 'isolated miss' hypothesis because multiple independent strict false negatives were confirmed. It is not sufficient to claim the corrected numerator is exhaustive."
+  },
+  "verdict": "evidence of systematic misses",
+  "qa_answer": "The 2025-11-22 miss is a symptom of a broader false-negative problem in the Zaporizhzhia historical explosion backfill. Same-date multi-episode suppression is one confirmed mechanism, but not the only one.",
+  "manual_candidate_register": [
+    {
+      "date": "2025-09-02",
+      "origin": "pilot",
+      "episode_id": "da994aee739fff615d7ae681",
+      "result": "not_strict"
+    },
+    {
+      "date": "2025-09-15",
+      "origin": "pilot",
+      "episode_id": "70067c052eec48f162697391",
+      "result": "needs_review"
+    },
+    {
+      "date": "2025-09-22",
+      "origin": "pilot",
+      "episode_id": "8a765ebfb55474d47cea7625",
+      "result": "not_strict"
+    },
+    {
+      "date": "2025-11-22",
+      "origin": "pilot",
+      "episode_id": "41f41f98fef80130dff07317",
+      "result": "confirmed_strict_miss_known"
+    },
+    {
+      "date": "2025-12-16",
+      "origin": "pilot",
+      "episode_id": "5a7d64e4d58b240825d0c954",
+      "result": "confirmed_strict_miss"
+    },
+    {
+      "date": "2026-02-01",
+      "origin": "pilot",
+      "episode_id": "fc2a7bef1e30703439ca5c06",
+      "result": "not_strict"
+    },
+    {
+      "date": "2025-03-25",
+      "origin": "existing_sensitivity",
+      "episode_id": null,
+      "result": "not_strict"
+    },
+    {
+      "date": "2025-05-30",
+      "origin": "existing_sensitivity",
+      "episode_id": null,
+      "result": "not_strict"
+    },
+    {
+      "date": "2025-09-08",
+      "origin": "existing_sensitivity",
+      "episode_id": null,
+      "result": "not_strict"
+    },
+    {
+      "date": "2026-06-12",
+      "origin": "existing_sensitivity",
+      "episode_id": "cba5d5e39cee8937a53c87da",
+      "result": "not_strict"
+    },
+    {
+      "date": "2026-07-11",
+      "origin": "existing_sensitivity",
+      "episode_id": null,
+      "result": "not_strict"
+    },
+    {
+      "date": "2026-08-28",
+      "origin": "existing_sensitivity",
+      "episode_id": "1e434d0fa5abfd518ad07d1e",
+      "result": "confirmed_strict_miss"
+    },
+    {
+      "date": "2025-05-23",
+      "origin": "targeted_external",
+      "episode_id": "6e6afea5cad3ced8422d0ff8",
+      "result": "confirmed_strict_miss"
+    },
+    {
+      "date": "2025-06-08",
+      "origin": "targeted_external",
+      "episode_id": null,
+      "result": "already_accounted_for"
+    },
+    {
+      "date": "2025-06-25",
+      "origin": "targeted_external",
+      "episode_id": null,
+      "result": "already_accounted_for"
+    },
+    {
+      "date": "2025-07-09",
+      "origin": "targeted_external",
+      "episode_id": null,
+      "result": "already_accounted_for"
+    },
+    {
+      "date": "2025-07-15",
+      "origin": "targeted_external",
+      "episode_id": null,
+      "result": "already_accounted_for"
+    },
+    {
+      "date": "2025-07-20",
+      "origin": "targeted_external",
+      "episode_id": "48826b9dbadd8eaee6601c9c",
+      "result": "already_accounted_for"
+    },
+    {
+      "date": "2025-07-25",
+      "origin": "targeted_external",
+      "episode_id": null,
+      "result": "already_accounted_for"
+    },
+    {
+      "date": "2025-08-29",
+      "origin": "targeted_external",
+      "episode_id": null,
+      "result": "already_accounted_for"
+    },
+    {
+      "date": "2025-09-15",
+      "origin": "targeted_external",
+      "episode_id": "eb29ccba021617db3b0e8bbc",
+      "result": "confirmed_strict_miss"
+    },
+    {
+      "date": "2025-09-22",
+      "origin": "targeted_external",
+      "episode_id": "53b904233ea90ffe7627f543",
+      "result": "needs_review"
+    },
+    {
+      "date": "2025-09-23",
+      "origin": "targeted_external",
+      "episode_id": null,
+      "result": "already_accounted_for"
+    },
+    {
+      "date": "2025-09-26",
+      "origin": "targeted_external",
+      "episode_id": null,
+      "result": "already_accounted_for"
+    },
+    {
+      "date": "2025-10-04",
+      "origin": "targeted_external",
+      "episode_id": null,
+      "result": "already_accounted_for"
+    },
+    {
+      "date": "2025-10-06",
+      "origin": "targeted_external",
+      "episode_id": null,
+      "result": "already_accounted_for"
+    },
+    {
+      "date": "2025-10-08",
+      "origin": "targeted_external",
+      "episode_id": "19f123f154ffb68f06d0296e",
+      "result": "confirmed_strict_miss"
+    },
+    {
+      "date": "2025-10-22",
+      "origin": "targeted_external",
+      "episode_id": null,
+      "result": "already_accounted_for"
+    },
+    {
+      "date": "2025-10-23",
+      "origin": "targeted_external",
+      "episode_id": null,
+      "result": "already_accounted_for"
+    },
+    {
+      "date": "2025-10-29",
+      "origin": "targeted_external",
+      "episode_id": null,
+      "result": "already_accounted_for"
+    },
+    {
+      "date": "2025-11-02",
+      "origin": "targeted_external",
+      "episode_id": null,
+      "result": "already_accounted_for"
+    },
+    {
+      "date": "2025-11-07",
+      "origin": "targeted_external",
+      "episode_id": null,
+      "result": "already_accounted_for"
+    },
+    {
+      "date": "2025-11-11",
+      "origin": "targeted_external",
+      "episode_id": null,
+      "result": "already_accounted_for"
+    },
+    {
+      "date": "2025-11-15",
+      "origin": "targeted_external",
+      "episode_id": "8534686ad8552aef1dd5a009",
+      "result": "confirmed_strict_miss"
+    },
+    {
+      "date": "2025-11-24",
+      "origin": "targeted_external",
+      "episode_id": "03eb23a34f4367f90dbee592",
+      "result": "confirmed_strict_miss"
+    },
+    {
+      "date": "2025-11-25",
+      "origin": "targeted_external",
+      "episode_id": null,
+      "result": "already_accounted_for"
+    },
+    {
+      "date": "2025-12-02",
+      "origin": "targeted_external",
+      "episode_id": "ced9e05a99318132ec47d0a0",
+      "result": "confirmed_strict_miss"
+    },
+    {
+      "date": "2025-12-08",
+      "origin": "targeted_external",
+      "episode_id": null,
+      "result": "already_accounted_for"
+    },
+    {
+      "date": "2025-12-13",
+      "origin": "targeted_external",
+      "episode_id": "e2b12310ac6eb1205c44a8c4",
+      "result": "needs_review"
+    },
+    {
+      "date": "2025-12-24",
+      "origin": "targeted_external",
+      "episode_id": null,
+      "result": "already_accounted_for"
+    },
+    {
+      "date": "2025-12-30",
+      "origin": "targeted_external",
+      "episode_id": null,
+      "result": "already_accounted_for"
+    },
+    {
+      "date": "2026-01-21",
+      "origin": "targeted_external",
+      "episode_id": "6393c001ec4d0f8dfce54b51",
+      "result": "confirmed_strict_miss"
+    },
+    {
+      "date": "2026-03-12",
+      "origin": "targeted_external",
+      "episode_id": "0edc1d73c3a86e149371bfbf",
+      "result": "confirmed_strict_miss"
+    },
+    {
+      "date": "2026-04-09",
+      "origin": "targeted_external",
+      "episode_id": "404d55294a38c31848e7e093",
+      "result": "confirmed_strict_miss"
+    },
+    {
+      "date": "2026-04-13",
+      "origin": "targeted_external",
+      "episode_id": "3fbc7461b6da87389435d052",
+      "result": "already_accounted_for"
+    },
+    {
+      "date": "2026-05-04",
+      "origin": "targeted_external",
+      "episode_id": null,
+      "result": "already_accounted_for"
+    },
+    {
+      "date": "2026-06-02",
+      "origin": "targeted_external",
+      "episode_id": null,
+      "result": "already_accounted_for"
+    },
+    {
+      "date": "2026-06-08",
+      "origin": "targeted_external",
+      "episode_id": "db99e81602ec0cbec92e4ab6",
+      "result": "needs_review"
+    },
+    {
+      "date": "2026-07-20",
+      "origin": "targeted_external",
+      "episode_id": "7afc90b9df18780246f1b995",
+      "result": "already_accounted_for"
+    },
+    {
+      "date": "2026-08-25",
+      "origin": "targeted_external",
+      "episode_id": null,
+      "result": "already_accounted_for"
+    },
+    {
+      "date": "2026-09-08",
+      "origin": "targeted_external",
+      "episode_id": "eac6a8d131341fb46bd1eae2",
+      "result": "confirmed_strict_miss"
+    }
+  ],
+  "repair_performed": false,
+  "canonical_repair_recommendation": "Do not repair from this artifact automatically. First review the 12 additional confirmed misses and 4 needs_review cases, then patch canonical evidence/numerator in a separate controlled repair task."
+}
