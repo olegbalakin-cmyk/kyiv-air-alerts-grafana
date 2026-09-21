@@ -778,6 +778,28 @@ def due_checks(state: dict, now: datetime) -> dict[str, list[tuple[dict, dict]]]
     return out
 
 
+def due_check_counts(due: dict[str, list[tuple[dict, dict]]]) -> tuple[int, int, int]:
+    total = sum(len(city_due) for city_due in due.values())
+    checked = sum(
+        1
+        for city_due in due.values()
+        for _, check in city_due
+        if check.get("checked_at")
+    )
+    return total, checked, total - checked
+
+
+def checks_became_due_between(state: dict, after: datetime, through: datetime) -> int:
+    count = 0
+    for cstate in state.get("cities", {}).values():
+        for ep in cstate.get("episodes", []):
+            for check in ep.get("checks", []):
+                due = parse_dt(check.get("due_at"))
+                if due and after < due <= through:
+                    count += 1
+    return count
+
+
 def auto_strict_episode(row: dict, due: list[tuple[dict, dict]]) -> dict | None:
     text = f"{row.get('title') or ''} {row.get('snippet') or ''}".strip()
     published = parse_dt(row.get("published_at"))
@@ -868,6 +890,46 @@ def self_test() -> None:
     ep = make_episode("poltava", dt, dt + timedelta(hours=1))
     assert [x["label"] for x in ep["checks"]] == ["immediate", "24h", "72h", "7d"]
     assert ep["alert_start_date_kyiv"] == "2026-09-18"
+
+    cutoff = datetime(2026, 9, 18, 12, tzinfo=UTC)
+    timing_state = {
+        "cities": {
+            "poltava": {
+                "episodes": [
+                    {
+                        "episode_id": "timing-a",
+                        "checks": [
+                            {
+                                "label": "A",
+                                "due_at": iso(cutoff - timedelta(seconds=1)),
+                                "checked_at": None,
+                            }
+                        ],
+                    },
+                    {
+                        "episode_id": "timing-b",
+                        "checks": [
+                            {
+                                "label": "B",
+                                "due_at": iso(cutoff + timedelta(seconds=1)),
+                                "checked_at": None,
+                            }
+                        ],
+                    },
+                ]
+            }
+        }
+    }
+    timing_due = due_checks(timing_state, cutoff)
+    assert len(timing_due["poltava"]) == 1
+    assert timing_due["poltava"][0][0]["episode_id"] == "timing-a"
+    for _, check in timing_due["poltava"]:
+        check["checked_at"] = iso(cutoff)
+    assert due_check_counts(timing_due) == (1, 1, 0)
+    assert checks_became_due_between(timing_state, cutoff, cutoff + timedelta(seconds=2)) == 1
+    later_due = due_checks(timing_state, cutoff + timedelta(seconds=2))
+    assert len(later_due["poltava"]) == 1
+    assert later_due["poltava"][0][0]["episode_id"] == "timing-b"
 
     fulltext_calls = []
     def unexpected_fulltext_fetch(url: str):
@@ -981,7 +1043,7 @@ def self_test() -> None:
     assert len(CITY_CONFIG) >= 10
     print(
         f"Self-test OK: {len(CITY_CONFIG)} audited cities, exact-city filter, explosion filter, "
-        "full-text fallback, discovery-only guard, follow-up schedule"
+        "full-text fallback, discovery-only guard, follow-up schedule, snapshot cutoff timing edge"
     )
 
 
@@ -998,6 +1060,7 @@ def main() -> None:
         return
 
     started = now_utc()
+    followup_cutoff = started
     state = ensure_state()
     queue = load_json(QUEUE_FILE, [])
     if not isinstance(queue, list):
@@ -1020,7 +1083,7 @@ def main() -> None:
     new_episodes = process_events(state, polled, errors, started)
     telegram_errors = refresh_telegram_cache(state, started)
     errors.update({f"telegram:{key}": value for key, value in telegram_errors.items()})
-    due = due_checks(state, started)
+    due = due_checks(state, followup_cutoff)
     searches = {}
     new_candidates = 0
     fulltext_fetches = 0
@@ -1060,13 +1123,26 @@ def main() -> None:
             check["checked_at"] = iso(started)
             check["new_candidates"] = added
 
+    (
+        due_checks_at_cutoff,
+        checked_due_checks_at_cutoff,
+        unchecked_due_checks_at_cutoff,
+    ) = due_check_counts(due)
+    finished = now_utc()
+    became_due_during_run = checks_became_due_between(state, followup_cutoff, finished)
+
     queue.sort(key=lambda x: (x.get("first_discovered_at") or "", x.get("city_key") or ""), reverse=True)
     state["last_run_at"] = iso(started)
     state["followup_schedule_hours"] = [hours for _, hours in FOLLOWUP_HOURS]
     report = {
         "ok": not errors,
         "started_at": iso(started),
-        "finished_at": iso(now_utc()),
+        "finished_at": iso(finished),
+        "followup_cutoff_at": iso(followup_cutoff),
+        "due_checks_at_cutoff": due_checks_at_cutoff,
+        "checked_due_checks_at_cutoff": checked_due_checks_at_cutoff,
+        "unchecked_due_checks_at_cutoff": unchecked_due_checks_at_cutoff,
+        "became_due_during_run": became_due_during_run,
         "city_count": len(CITY_CONFIG),
         "mode": mode,
         "new_alert_episodes": new_episodes,
