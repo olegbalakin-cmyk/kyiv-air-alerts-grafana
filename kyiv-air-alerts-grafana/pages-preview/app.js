@@ -146,6 +146,7 @@ function updateUrl() {
   params.set("b", $("compareB").value);
   params.set("c", $("compareC").value || "none");
   params.set("compare", $("comparePeriod").value);
+  if ($("rolling7dYear")?.value) params.set("year", $("rolling7dYear").value);
   history.replaceState(null, "", `${location.pathname}?${params.toString()}`);
 }
 
@@ -287,8 +288,8 @@ function renderCity() {
 
 function renderRolling7d(key) {
   const section = $("rolling7dSection");
-  const rows = state.data.cities[key]?.weekly || [];
-  if (!rolling7dEnabled() || !rows.length) {
+  const allRows = state.data.cities[key]?.weekly || [];
+  if (!rolling7dEnabled() || !allRows.length) {
     section?.classList.add("hidden");
     for (const id of ["rolling7dIntensityChart", "rolling7dDurationChart"]) {
       if (state.charts[id]) {
@@ -300,6 +301,27 @@ function renderRolling7d(key) {
   }
 
   section?.classList.remove("hidden");
+
+  const yearSelect = $("rolling7dYear");
+  const availableYears = [...new Set(
+    allRows
+      .map(r => String(rowTime(r, "weekly")).slice(0, 4))
+      .filter(year => /^\d{4}$/.test(year))
+  )].sort((a, b) => Number(b) - Number(a));
+  const currentCalendarYear = String(new Date().getFullYear());
+  const requestedYear = yearSelect?.value || getParams().get("year") || "";
+  const selectedYear = availableYears.includes(requestedYear)
+    ? requestedYear
+    : (availableYears.includes(currentCalendarYear) ? currentCalendarYear : availableYears[0]);
+
+  if (yearSelect) {
+    yearSelect.innerHTML = availableYears
+      .map(year => `<option value="${year}">${year}</option>`)
+      .join("");
+    yearSelect.value = selectedYear;
+  }
+
+  const rows = allRows.filter(r => String(rowTime(r, "weekly")).slice(0, 4) === selectedYear);
   const labels = rows.map(r => rowTime(r, "weekly"));
   const dashed = sourceType(key) === "raion_proxy";
 
@@ -802,6 +824,10 @@ function renderMethodology() {
 function bind() {
   $("citySelect").addEventListener("change", renderCity);
   $("cityPeriod").addEventListener("change", renderCity);
+  $("rolling7dYear")?.addEventListener("change", () => {
+    renderRolling7d($("citySelect").value);
+    updateUrl();
+  });
   for (const id of ["compareA", "compareB", "compareC", "comparePeriod"]) $(id).addEventListener("change", renderComparison);
   setupTableSorting();
   $("copyLink").addEventListener("click", async () => {
