@@ -1,0 +1,217 @@
+{
+  "metadata": {
+    "task": "Zaporizhzhia air-defense-without-existing-strict-explosion pilot",
+    "city_key": "zaporizhzhia",
+    "city": "Запоріжжя",
+    "generated_at": "2026-09-21T15:20:00+03:00",
+    "branch": "multicity-wip-2026-09-16",
+    "canonical_coverage_start": "2025-03-19",
+    "canonical_coverage_end": "2026-09-17",
+    "denominator_source": "canonical Zaporizhzhia explosion research / source_slices",
+    "denominator_rebuilt": false,
+    "production_modified": false,
+    "pilot_status": "complete_pilot_nonexhaustive_source_sweep",
+    "result_semantics": "confirmed_lower_bound",
+    "methodology": [
+      "Use the canonical Zaporizhzhia alert episodes and canonical strict explosion results without rebuilding either dataset.",
+      "Exclude every episode already in the canonical strict explosion numerator before air-defense classification.",
+      "Require explicit Zaporizhzhia city attribution, explicit current air-defense action, and message/event timing inside the canonical episode. No blanket historical +/-5, +/-10, or +30 minute tolerance is applied.",
+      "Check repository-local research/source material first. The repository does not contain a full historical Zaporizhzhia raw Telegram export, so the pilot then used targeted indexed public media/Telegram searches for exact-city PПО formulations.",
+      "Deduplicate at alert-episode level: one episode contributes at most one air-defense numerator.",
+      "Because source discovery was pilot-level rather than a complete archive scan, strict positives below are a confirmed lower bound, not a claim that every historical PПО message was found."
+    ],
+    "local_sources_checked": [
+      "data/explosion_research/zaporizhzhia/final_evidence.json",
+      "data/explosion_research/zaporizhzhia/*_result.json",
+      "data/explosion_metric_handoff/source_slices/zaporizhzhia-*_alerts.json",
+      "data/telegram_source_audit.json"
+    ]
+  },
+  "counts": {
+    "total_canonical_alert_episodes": 2365,
+    "existing_strict_explosion_episodes": 169,
+    "air_defense_search_universe_after_excluding_strict_explosions": 2196,
+    "episodes_checked_by_candidate_matching": 2196,
+    "candidate_messages_found_before_manual_review": 28,
+    "candidate_messages_manually_read": 28,
+    "strict_air_defense_without_explosion_episodes": 6,
+    "needs_review": 1,
+    "old_strict_explosion_numerator": 169,
+    "new_combined_confirmed_numerator": 175,
+    "denominator": 2365,
+    "old_strict_percent": 7.15,
+    "new_combined_confirmed_percent": 7.4,
+    "numerator_absolute_change": 6,
+    "numerator_relative_change_percent": 3.55,
+    "rate_change_percentage_points": 0.25
+  },
+  "strict_positive_evidence": [
+    {
+      "city": "zaporizhzhia",
+      "episode_id": "da994aee739fff615d7ae681",
+      "alert_start": "2025-09-02T17:01:08Z",
+      "alert_end": "2025-09-02T23:19:55Z",
+      "message_datetime": "2025-09-02T20:13:00+03:00",
+      "source": "24 Канал live chronology",
+      "source_message_id": null,
+      "url": "https://24tv.ua/hronologiya-1287-dnya-viyni-ataka-shahedami-02092025-situatsiya_n2905858",
+      "text": "У Запоріжжі працює ППО.",
+      "match_reason": "Exact-city PПО report in the live chronology; timestamp is inside the canonical alert episode.",
+      "classification": "strict_air_defense",
+      "existing_strict_explosion": false
+    },
+    {
+      "city": "zaporizhzhia",
+      "episode_id": "70067c052eec48f162697391",
+      "alert_start": "2025-09-15T01:45:22Z",
+      "alert_end": "2025-09-15T02:02:04Z",
+      "message_datetime": "2025-09-15T04:47:00+03:00",
+      "source": "Укрінформ",
+      "source_message_id": null,
+      "url": "https://www.ukrinform.ua/rubric-regions/4036500-na-zaporizzi-znovu-vibuhi-po-vorozih-cilah-pracue-ppo.html",
+      "text": "Ворог знову атакував Запоріжжя, вдруге за ніч було чути вибухи, по ворожих цілях працювала ППО.",
+      "match_reason": "Article explicitly ties active PПО work to an attack on Zaporizhzhia; publication/report time is inside the short canonical episode and the source says the alert is active.",
+      "classification": "strict_air_defense",
+      "existing_strict_explosion": false
+    },
+    {
+      "city": "zaporizhzhia",
+      "episode_id": "8a765ebfb55474d47cea7625",
+      "alert_start": "2025-09-22T10:27:21Z",
+      "alert_end": "2025-09-22T13:34:37Z",
+      "message_datetime": "2025-09-22T14:55:00+03:00",
+      "source": "СУСПІЛЬНЕ НОВИНИ Telegram",
+      "source_message_id": "56376",
+      "url": "https://t.me/suspilnenews/56376",
+      "text": "У Запоріжжі працює ППО, повідомив керівник ОВА Федоров.",
+      "match_reason": "Exact-city Telegram report with explicit PПО action; post time is inside the canonical alert episode.",
+      "classification": "strict_air_defense",
+      "existing_strict_explosion": false
+    },
+    {
+      "city": "zaporizhzhia",
+      "episode_id": "41f41f98fef80130dff07317",
+      "alert_start": "2025-11-22T11:34:32Z",
+      "alert_end": "2025-11-22T16:03:15Z",
+      "message_datetime": "2025-11-22T15:32:00+02:00",
+      "source": "Укрінформ",
+      "source_message_id": null,
+      "url": "https://www.ukrinform.ua/rubric-regions/4061628-u-zaporizzi-pid-cas-trivogi-prolunali-vibuhi.html",
+      "text": "Запоріжці, вибухи, які було чутно у місті - робота нашої ППО.",
+      "match_reason": "Exact-city source explicitly attributes the sounds in Zaporizhzhia during the active alert to PПО; timestamp is inside the canonical episode.",
+      "classification": "strict_air_defense",
+      "existing_strict_explosion": false
+    },
+    {
+      "city": "zaporizhzhia",
+      "episode_id": "5a7d64e4d58b240825d0c954",
+      "alert_start": "2025-12-16T19:28:38Z",
+      "alert_end": "2025-12-16T21:46:51Z",
+      "message_datetime": "2025-12-16T22:05:00+02:00",
+      "source": "Укрінформ",
+      "source_message_id": null,
+      "url": "https://www.ukrinform.ua/rubric-regions/4070429-u-zaporizzi-prolunali-vibuhi.html",
+      "text": "Під час повітряної тривоги у Запоріжжі було чутно звуки вибухів. «Працює наша ППО».",
+      "match_reason": "Exact-city source explicitly says PПО is working during the alert; report timestamp is inside the canonical episode.",
+      "classification": "strict_air_defense",
+      "existing_strict_explosion": false
+    },
+    {
+      "city": "zaporizhzhia",
+      "episode_id": "fc2a7bef1e30703439ca5c06",
+      "alert_start": "2026-02-01T17:47:50Z",
+      "alert_end": "2026-02-02T05:37:24Z",
+      "message_datetime": "2026-02-02T06:27:00+02:00",
+      "source": "NV live chronology",
+      "source_message_id": null,
+      "url": "https://nv.ua/ukr/ukraine/events/ataka-rf-na-ukrajinu-1-lyutogo-povitryani-sili-povidomili-pro-zagrozu-bpla-mapa-povitryanih-trivog-50580152.html",
+      "text": "06:27. У Запоріжжі працює ППО — ОВА.",
+      "match_reason": "Exact-city PПО report in a live chronology; timestamp is inside the cross-midnight canonical episode.",
+      "classification": "strict_air_defense",
+      "existing_strict_explosion": false
+    }
+  ],
+  "review": [
+    {
+      "city": "zaporizhzhia",
+      "episode_id": "050599d20982358307cae684",
+      "alert_start": "2025-08-30T22:50:30Z",
+      "alert_end": "2025-08-31T00:23:07Z",
+      "message_datetime": "2025-08-31T03:57:00+03:00",
+      "source": "Новини.LIVE Telegram",
+      "source_message_id": "165258",
+      "url": "https://t.me/novynylive/165258",
+      "text": "У Запоріжжі працює ППО, — ОВА",
+      "match_reason": "Exact-city, explicit PПО evidence, but the post is 34 minutes after the nearest canonical alert end.",
+      "classification": "needs_review",
+      "review_reason": "Fails strict historical timing rule. No blanket boundary tolerance is accepted for the historical explosion methodology; preserve for review rather than count.",
+      "existing_strict_explosion": false
+    }
+  ],
+  "rejected_lead_summary": {
+    "common_reasons": [
+      "PПО wording was only for Zaporizhzhia oblast/region, not the city.",
+      "Candidate was in an episode already counted as strict explosion and therefore excluded from this numerator.",
+      "Exact-city PПО message fell clearly outside a canonical alert episode.",
+      "Retrospective morning/air-force summary could not be tied to one concrete city alert episode.",
+      "Duplicate/repost of the same underlying PПО event."
+    ],
+    "notable_non_counted_examples": [
+      {
+        "date": "2025-07-19",
+        "source": "Укрінформ",
+        "reason": "Exact-city PПО, but the message falls in an episode already represented by strict explosion."
+      },
+      {
+        "date": "2026-01-10",
+        "source": "Іван Федоров repost via local Telegram",
+        "reason": "Exact-city PПО message is about 62 minutes before the nearest canonical episode; outside strict timing."
+      },
+      {
+        "date": "2026-01-16",
+        "source": "Inform.zp.ua",
+        "reason": "Retrospective national/region PПО statistics; not a concrete city episode."
+      },
+      {
+        "date": "2026-02-15",
+        "source": "Укрінформ",
+        "reason": "Wording is Zaporizhzhia oblast / region; insufficient exact-city attribution."
+      },
+      {
+        "date": "2026-06-20",
+        "source": "24 Канал",
+        "reason": "Exact-city PПО, but same canonical episode already has strict explosion."
+      }
+    ]
+  },
+  "workload": {
+    "eligible_alert_episodes_after_strict_explosion_exclusion": 2196,
+    "manual_episode_by_episode_reading_required": false,
+    "candidate_messages_manually_read": 28,
+    "observed_high_signal_candidates_per_100_eligible_episodes": 1.28,
+    "candidate_rate_warning": "Pilot source discovery is not archive-exhaustive, so this density is a lower-bound workload observation and should not be multiplied mechanically across cities.",
+    "most_common_ambiguities": [
+      "city vs oblast attribution",
+      "same alert episode already in strict explosion numerator",
+      "publication/post time vs actual event time",
+      "near-boundary messages outside canonical episode",
+      "retrospective PПО summaries that cannot identify one episode",
+      "duplicate reports/reposts"
+    ],
+    "rules_regex_plus_targeted_review_assessment": "Technically feasible. The alert list can be excluded/matched automatically; manual effort is concentrated in a small candidate set, not in all 2196 eligible alerts.",
+    "main_bottleneck": "Completeness and timestamp quality of historical raw/source archives, especially Telegram, plus reliable city-vs-oblast attribution. Alert-episode volume itself is not the main bottleneck.",
+    "recommendation_for_other_cities": "Use raw historical exports where available, regex/rules for explicit PПО + exact-city terms, automatic exclusion of existing strict explosions, automatic episode-time join, then targeted review only for boundary/city-attribution cases."
+  },
+  "qa": {
+    "strict_positive_count": 6,
+    "strict_episode_ids_unique": true,
+    "strict_positive_overlap_with_existing_strict_explosion": 0,
+    "all_strict_positives_city_zaporizhzhia": true,
+    "all_strict_positives_have_text_and_source": true,
+    "numerator_not_above_denominator": true,
+    "combined_formula_check": "169 + 6 = 175",
+    "combined_formula_pass": true,
+    "denominator_unchanged": true,
+    "review_excluded_from_strict_result": true
+  }
+}
