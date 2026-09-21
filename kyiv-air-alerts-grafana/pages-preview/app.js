@@ -574,7 +574,13 @@ function renderExplosionComparison(keys) {
     }
     maps.set(key, m);
   }
-  const labels = [...allDates].sort();
+  const allLabels = [...allDates].sort();
+  const latestDate = allLabels[allLabels.length - 1];
+  const latestDay = Math.floor(Date.parse(`${latestDate}T00:00:00Z`) / 86400000);
+  const labels = allLabels.filter(date => {
+    const day = Math.floor(Date.parse(`${date}T00:00:00Z`) / 86400000);
+    return Number.isFinite(day) && (latestDay - day) % 7 === 0;
+  });
   const datasets = availableKeys.map((key, idx) => {
     const m = maps.get(key);
     const ds = seriesDataset(
@@ -583,6 +589,8 @@ function renderExplosionComparison(keys) {
       COLORS[idx],
       false
     );
+    ds.pointRadius = 1;
+    ds.pointHoverRadius = 3;
     ds.spanGaps = false;
     ds.cityKey = key;
     ds.explosionRows = labels.map(date => m.get(date) || null);
@@ -624,8 +632,8 @@ function renderExplosionComparison(keys) {
 
   const rangeNote = "Лінії показують консервативну strict-оцінку; агрегований KPI для міста вище подається як орієнтовне midpoint-значення з діапазоном strict–sensitivity. Це класифікаційна невизначеність, не довірчий інтервал.";
   note.textContent = missingKeys.length
-    ? `Ковзні 90 днів, strict; повне 90-денне вікно. Поки немає завершеного explosion-ряду: ${missingKeys.map(labelFor).join(", ")}. ${rangeNote}`
-    : `Ковзні 90 днів, strict; кожна точка = n/N за останні 90 завершених днів. Перемикач «Період» вище на цей графік не впливає. ${rangeNote}`;
+    ? `Ковзні 90 днів, strict; на графіку показано одну точку кожні 7 днів, і кожна точка = n/N за попередні 90 завершених днів. Поки немає завершеного explosion-ряду: ${missingKeys.map(labelFor).join(", ")}. ${rangeNote}`
+    : `Ковзні 90 днів, strict; на графіку показано одну точку кожні 7 днів, і кожна точка = n/N за попередні 90 завершених днів. Перемикач «Період» вище на цей графік не впливає. ${rangeNote}`;
 }
 
 function renderComparison() {
