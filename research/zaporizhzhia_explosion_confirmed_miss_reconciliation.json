@@ -1,0 +1,1902 @@
+{
+  "schema_version": 1,
+  "task": "zaporizhzhia_explosion_confirmed_miss_reconciliation",
+  "generated_date": "2026-09-22",
+  "repository": "olegbalakin-cmyk/kyiv-air-alerts-grafana",
+  "branch": "multicity-wip-2026-09-16",
+  "branch_head_before_commit": "0e3238680f71841202ab5e0acf2a8df47796e7e7",
+  "methodology": {
+    "claim_extraction": "Count only final confirmed_strict_miss records, plus the legacy gap-audit confirmed-miss fields. O3 discovery hits and positive controls are provenance only.",
+    "deduplication": "Deduplicate by episode_id. The full 2,365-episode denominator was also checked for duplicate (alert_start, alert_end) intervals under different IDs.",
+    "canonical_state": "Frozen canonical aggregate is kyiv-air-alerts-grafana/data/explosion_audited_baseline.json. Canonical evidence is kyiv-air-alerts-grafana/data/explosion_research/zaporizhzhia/final_evidence.json. The 169 strict episode IDs were reconstructed losslessly from all 169 strict_events against the nine frozen Zaporizhzhia denominator slices.",
+    "temporal_rule": "Strict matching requires exact-city evidence, aerial-war context, and event-time evidence for the target alert. Explicit during-alert wording, stated event time inside the alert, or contemporaneous in-alert event messages qualify. Publication/update time by itself does not.",
+    "new_source_discovery_performed": false,
+    "targeted_source_lookup_performed": false
+  },
+  "source_artifacts": [
+    {
+      "path": "research/zaporizhzhia_explosion_gap_audit.json",
+      "confirmed_claims_extracted": 13
+    },
+    {
+      "path": "research/zaporizhzhia_explosion_blind_sample_50.json",
+      "confirmed_claims_extracted": 1
+    },
+    {
+      "path": "research/zaporizhzhia_explosion_blind_sample_50_wave2.json",
+      "confirmed_claims_extracted": 1
+    },
+    {
+      "path": "research/zaporizhzhia_explosion_o3_source_discovery.json",
+      "confirmed_claims_extracted": 0
+    },
+    {
+      "path": "research/zaporizhzhia_explosion_o3_manual_review_batch1.json",
+      "confirmed_claims_extracted": 1
+    },
+    {
+      "path": "research/zaporizhzhia_explosion_o3_needs_review_adjudication.json",
+      "confirmed_claims_extracted": 0
+    },
+    {
+      "path": "research/zaporizhzhia_explosion_o3_outside_timing_manual_review.json",
+      "confirmed_claims_extracted": 0
+    }
+  ],
+  "current_canonical_snapshot": {
+    "canonical_file_path": "kyiv-air-alerts-grafana/data/explosion_audited_baseline.json",
+    "canonical_evidence_path": "kyiv-air-alerts-grafana/data/explosion_research/zaporizhzhia/final_evidence.json",
+    "status_cross_check_path": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/city_explosion_metric_status_2026-09-18.csv",
+    "denominator_slice_paths": [
+      "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P1a_alerts.json",
+      "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P1b_alerts.json",
+      "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P2a_alerts.json",
+      "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P2b_alerts.json",
+      "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P3a_alerts.json",
+      "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P3b_alerts.json",
+      "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P4a_alerts.json",
+      "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P4b_alerts.json",
+      "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P4c_alerts.json"
+    ],
+    "snapshot_date": "2026-09-18",
+    "coverage_start": "2025-03-19",
+    "coverage_end": "2026-09-17",
+    "denominator": 2365,
+    "strict_n": 169,
+    "strict_share_percent_stored": 7.15,
+    "strict_share_percent_computed": 7.145877378435518,
+    "sensitivity_n": 224,
+    "sensitivity_share_percent_stored": 9.47,
+    "strict_event_mapping": {
+      "strict_events": 169,
+      "mapped_to_denominator": 169,
+      "unique_episode_ids": 169,
+      "unmapped": 0
+    },
+    "strict_episode_ids": [
+      "4bed22300441e824dbb776d9",
+      "fc414b73d276a1c27a30396b",
+      "e6044efeb051aabde9f47246",
+      "4e60c0e06170b87a4cd42988",
+      "a07f46f6e66f83ebd04c32a5",
+      "fc093d9b07028be0e3b4dc6e",
+      "5c730c2e66d8a4264a357421",
+      "1066e522283ff14f622327cf",
+      "006c04a81119cd9a5e366cdb",
+      "45e9cce2ddfe56582af9555a",
+      "288f2c3fe22c13ade033c850",
+      "6e911dd78a3f47765d361aa0",
+      "1dd834e016b3bed690de2973",
+      "cac44098bced8d1d5cdd7170",
+      "6cf411ed1ba704c725efc257",
+      "989a3167ca65f3b54e6eb3bb",
+      "33fef5b76da452da68129be5",
+      "4d1a69adfb40266b088dc442",
+      "6045a2d1ccfe4848dbf8f31a",
+      "cf12245b5767340b36bb934b",
+      "8c05b7fc08e91711acebc02a",
+      "1a59d49c130eed3e82dd517d",
+      "c68776ede26641548f79a108",
+      "e12d26d1c2062a9585ec9519",
+      "843005edc6568568c2a292fa",
+      "c7006b3ec3bd8928ce7a36bd",
+      "7666b549078065271f0033f3",
+      "6dc2c1209865b6cf7e7f8699",
+      "b41d83d707e66b203d6d1794",
+      "c53264679115cd2fbe52c53a",
+      "202349ba336c5c0ac6cac5d7",
+      "4b5505f1a437fdf606709c66",
+      "67a904a0ab96455cefbc5ba9",
+      "806894d4170f39a8155e8485",
+      "56a73633ee7030cb00e61fcf",
+      "1781440c8942002c1a65c25c",
+      "c0367099eed49727686e61af",
+      "c4e92e077e05dbfd52daeb9e",
+      "48826b9dbadd8eaee6601c9c",
+      "6b8944c3a3d0cbb98d1dd6c3",
+      "9571bb4b5340eb3a198c0169",
+      "783f99fd0c0fcd91758637bf",
+      "f706350461f63c69d13324d4",
+      "2051acef367704cf87e65ddc",
+      "9c8229fbab1da4901030100a",
+      "7ffb26d8e21f7fb8a7348b2b",
+      "83b4235e8c11bcd5c3a0268b",
+      "4dfc0af35ff48d0fb1c39ff9",
+      "fa1e9624ec208634260fa6cb",
+      "f5052bba62e43674bedfc358",
+      "19313dfecc19b71819f7a000",
+      "b7c7da1cbd1cdbf7fbe7974b",
+      "565a575eb696cb87ddcab38d",
+      "fede442dc1bf79856b68b936",
+      "00a0fe746b1980456b94d0cb",
+      "ab9337a0170c2549a94a35fb",
+      "206f69cd684942feb9c1285d",
+      "2f384f6e855a7d5f73a8ee19",
+      "f6cc4f50b7300b6427258821",
+      "b7355c0a49718cedfd3e85d6",
+      "2231050bc683bfab95cd6437",
+      "64a90cfe4c5dd59a328befb6",
+      "719a5f22c90f6cc6cc3b0f79",
+      "96064d56ad504b8f25add9bb",
+      "8fbe1d38fffb22768c60e6b0",
+      "91c500b18b12860b6530d769",
+      "5b43e627ba4831b3ad71b315",
+      "6b7ba70bf5f6686e6b51519f",
+      "febf22a1f559d6c761c8d850",
+      "debf786e32ffef77a472d5f1",
+      "17208f5f6efe265c41d5fa68",
+      "319d4432a8528fe156bcc567",
+      "cddc9de313621dc2726766f7",
+      "566cf4ea1584d270257cb83b",
+      "a1c6c895daaef7e1ff8f500d",
+      "13e5207d022d17cfd7ee6c19",
+      "cb823242980fa8a10e3c0d01",
+      "f3e999546f5f6d6b894bf05d",
+      "f52bac5c3b7bd8b3c4a8954a",
+      "3908215d89f8b657ac70b537",
+      "97d4ad163a9936c845ef29d0",
+      "87348c2c06d552d2ad0fc751",
+      "91168e2093aac422d1c2fdf6",
+      "28787e0f92d83bdb5ee44e99",
+      "a4acd033a648cd0b4e2819f8",
+      "3b326f33c806e4e93ef752ae",
+      "abadfaa348ae865665a005b4",
+      "e367e13dc8ce9a263b1a3a88",
+      "b7d28541e30468af2123d170",
+      "be1b680bad3728c6a5c3ee35",
+      "764104c7ce8eb3b6703a33ec",
+      "b4bfdf83c1078164dd00627c",
+      "b35f7cadc556a5cb0a8c2b18",
+      "573c596e88106904bd5e2f25",
+      "07e99a3114d5dce1c7bfb683",
+      "dea5fb2817b4d8e20372b063",
+      "c905a26da009ac41894db1fa",
+      "430c798170a149d706024a81",
+      "619e44f4093b50547d320e98",
+      "2589c31113466bc0dad61ad1",
+      "1cf4b55dbaaef2eb3cee8eb1",
+      "ca3ecafd3d1e8309e63a2ce5",
+      "e2630c4122c3e58517c93e19",
+      "1e0664ff7844f29a5ee2bb53",
+      "0a267008ea28eb0fbf4808c2",
+      "c2ff7b13072937c80cccf7fc",
+      "8da4bd319ba34e8d89de95f7",
+      "c1d947bd6240f8549c0e385a",
+      "68046107668aad7c9f51499d",
+      "061f39cf16ac184b702f210f",
+      "835683aa84a1a0dc5aa82abd",
+      "3fbc7461b6da87389435d052",
+      "9e3ba4f7407c6d8ad7a27607",
+      "6ff462c250a59f733b93a3cc",
+      "eab8ba4779ef8231c4e1ad88",
+      "7b5468865b1ec758817c4659",
+      "fe1c6e1ccc192996f0726784",
+      "167618925fd2b060cfa9c2fe",
+      "640f4ab9fc846ec0b9fe39c8",
+      "2c6f8ce81c83aef308916e30",
+      "917368ae74bf82a0f5ba5842",
+      "a3745cf85586ae4f9c5156cd",
+      "534a391be41a0a8e0c4237eb",
+      "211b0d0c6e6786b84e0a6915",
+      "9a83cb276478ff27d5f0689d",
+      "f888e7bbf74f6718b57c109a",
+      "80ba9194a8f2ae4b4321a98b",
+      "8770bd1436782473a91df122",
+      "06f89d2120f4e66c08a0f9f5",
+      "f61b72a82702d4c06c5ddbb0",
+      "30214f41a8366c84d497a640",
+      "8632e216d41f3f898d03a1e8",
+      "eaf31fbacef9643618ab3265",
+      "595a6190dfab3accc8428c5c",
+      "f925608b4627f59f007d56d4",
+      "dce5564c1647ac9931a1f6cf",
+      "79d527fe4e87135fa7c2a199",
+      "a1b945ddc1baf001e45d6826",
+      "9280ecea079e223790ecd234",
+      "7f40d4bdf35d4c91159113c1",
+      "e93fb1e618fafbbabc1d2b6d",
+      "7ab7953ea67f124d164ec7ab",
+      "49afd37de69b5dda10df6d3a",
+      "311349383a05ad4a837dc970",
+      "0c67b57472d4f8f79d745541",
+      "0c495f3ec3c2020af36b24bc",
+      "668658cd0144ed423b815ca1",
+      "7afc90b9df18780246f1b995",
+      "3e571bf27fcaa6d922665535",
+      "01bbce18153bcf3fb06bfa85",
+      "098b23131a9e481f85e56aec",
+      "242be033424116880cb5ac71",
+      "246453160ef742d4dce69790",
+      "01e043b7e9553b7edddfc386",
+      "ad099cc47e1feaf4685bb8f4",
+      "b3d11227a82aceb93d5bf798",
+      "1a0b9c2c8b593c16dd36af74",
+      "eb63cd9cb7460558bdc9bb8d",
+      "f642bf83e43e2bcc225205d9",
+      "23371bee083381cd79cf93a2",
+      "4986bef6d046cc4014d5b389",
+      "81047aeff448a71665a131b8",
+      "cb1cbd742ccca93aff6a86af",
+      "24c872e10e37becbd3f30992",
+      "a303c6b6b782ce0d29c741d0",
+      "5ab398d8b6fb78421e33ab77",
+      "8a5aec03a0420e5f64f7c6b2",
+      "30f0140667f8b487a9e04788",
+      "c138680a6beb87a4aa8be6fc"
+    ],
+    "denominator_qa": {
+      "episode_records": 2365,
+      "unique_episode_ids": 2365,
+      "unique_alert_intervals": 2365,
+      "same_interval_different_episode_ids": 0
+    },
+    "noncanonical_monitor_note": "kyiv-air-alerts-grafana/data/explosions_test.json extends beyond the frozen baseline (through 2026-09-21 at the time checked) and was not used for S or D."
+  },
+  "raw_claimed_confirmed_records": [
+    {
+      "source_artifact": "research/zaporizhzhia_explosion_gap_audit.json",
+      "source_audit_pass": "gap_audit_known_confirmed_miss",
+      "source_path": "$.known_confirmed_miss",
+      "original_verdict": "legacy_equivalent_confirmed_strict_miss",
+      "episode_id": "41f41f98fef80130dff07317",
+      "claim_payload": {
+        "episode_id": "41f41f98fef80130dff07317",
+        "date": "2025-11-22",
+        "alert_start_utc": "2025-11-22T11:34:32Z",
+        "alert_end_utc": "2025-11-22T16:03:15Z",
+        "alert_start_kyiv": "2025-11-22T13:34:32+02:00",
+        "alert_end_kyiv": "2025-11-22T18:03:15+02:00",
+        "exact_evidence_text": "У Запоріжжі під час повітряної тривоги пролунали вибухи. Мешканців попередили про роботу ППО у місті.",
+        "source": "Укрінформ / Запорізька ОВА",
+        "source_url": "https://www.ukrinform.ua/rubric-regions/4061628-u-zaporizzi-pid-cas-trivogi-prolunali-vibuhi.html",
+        "source_timestamp_kyiv": "2025-11-22T15:32:00+02:00",
+        "current_canonical_classification": "none",
+        "strict_reason": "Exact-city explosions explicitly occurred during the canonical alert; air-defence attribution does not negate the explosion criterion.",
+        "probable_historical_miss_reason": "multiple_episodes_same_date_discovery_suppression",
+        "same_date_existing_strict_episode_id": "6b7ba70bf5f6686e6b51519f"
+      }
+    },
+    {
+      "source_artifact": "research/zaporizhzhia_explosion_gap_audit.json",
+      "source_audit_pass": "gap_audit_additional_confirmed_strict_misses",
+      "source_path": "$.additional_confirmed_strict_misses[0]",
+      "original_verdict": "legacy_equivalent_confirmed_strict_miss",
+      "episode_id": "6e6afea5cad3ced8422d0ff8",
+      "claim_payload": {
+        "episode_id": "6e6afea5cad3ced8422d0ff8",
+        "date": "2025-05-23",
+        "alert_start_utc": "2025-05-23T17:39:15Z",
+        "alert_end_utc": "2025-05-23T20:49:55Z",
+        "alert_start_kyiv": "2025-05-23T20:39:15+03:00",
+        "alert_end_kyiv": "2025-05-23T23:49:55+03:00",
+        "exact_evidence_text": "У Запоріжжі під час повітряної тривоги пролунали вибухи.",
+        "source": "Укрінформ / Запорізька ОВА",
+        "source_url": "https://www.ukrinform.ua/rubric-regions/3996407-u-zaporizzi-pid-cas-povitranoi-trivogi-prolunali-vibuhi.html",
+        "source_timestamp_kyiv": "2025-05-23T23:03:00+03:00",
+        "event_time": "Source explicitly states the explosion occurred during the air alert; no publication-time substitution is required.",
+        "current_canonical_classification": "none",
+        "strict_reason": "Exact-city explosion wording, explicit during-alert statement, and aerial/UAV-war context; the source report falls inside the canonical episode.",
+        "probable_historical_miss_reason": "source_discovery_gap"
+      }
+    },
+    {
+      "source_artifact": "research/zaporizhzhia_explosion_gap_audit.json",
+      "source_audit_pass": "gap_audit_additional_confirmed_strict_misses",
+      "source_path": "$.additional_confirmed_strict_misses[1]",
+      "original_verdict": "legacy_equivalent_confirmed_strict_miss",
+      "episode_id": "eb29ccba021617db3b0e8bbc",
+      "claim_payload": {
+        "episode_id": "eb29ccba021617db3b0e8bbc",
+        "date": "2025-09-15",
+        "alert_start_utc": "2025-09-14T23:27:57Z",
+        "alert_end_utc": "2025-09-15T00:24:58Z",
+        "alert_start_kyiv": "2025-09-15T02:27:57+03:00",
+        "alert_end_kyiv": "2025-09-15T03:24:58+03:00",
+        "exact_evidence_text": "У Запоріжжі під час повітряної тривоги пролунала серія вибухів, сталося займання.",
+        "source": "Укрінформ",
+        "source_url": "https://www.ukrinform.ua/rubric-regions/4036493-u-zaporizzi-prolunala-seria-vibuhiv.html",
+        "source_timestamp_kyiv": "2025-09-15T02:51:00+03:00",
+        "event_time": "Explicitly during the active alert; source published inside the episode.",
+        "current_canonical_classification": "none",
+        "strict_reason": "Exact city, explicit explosions, explicit during-alert wording, and missile/aerial-war context.",
+        "probable_historical_miss_reason": "multiple_episodes_same_date_discovery_suppression",
+        "same_date_existing_strict_episode_id": "fa1e9624ec208634260fa6cb"
+      }
+    },
+    {
+      "source_artifact": "research/zaporizhzhia_explosion_gap_audit.json",
+      "source_audit_pass": "gap_audit_additional_confirmed_strict_misses",
+      "source_path": "$.additional_confirmed_strict_misses[2]",
+      "original_verdict": "legacy_equivalent_confirmed_strict_miss",
+      "episode_id": "19f123f154ffb68f06d0296e",
+      "claim_payload": {
+        "episode_id": "19f123f154ffb68f06d0296e",
+        "date": "2025-10-08",
+        "alert_start_utc": "2025-10-08T19:43:17Z",
+        "alert_end_utc": "2025-10-08T21:52:05Z",
+        "alert_start_kyiv": "2025-10-08T22:43:17+03:00",
+        "alert_end_kyiv": "2025-10-09T00:52:05+03:00",
+        "exact_evidence_text": "Ворог атакує Запоріжжя, під час повітряної тривоги у місті пролунали вибухи.",
+        "source": "Укрінформ, mirrored by UKR.NET",
+        "source_url": "https://www.ukr.net/news/details/zaporizhzhya/113888959.html",
+        "source_timestamp_kyiv": "2025-10-08T22:46:00+03:00",
+        "event_time": "Explicitly during the active alert; source published three minutes after episode start.",
+        "current_canonical_classification": "none",
+        "strict_reason": "Exact city, explicit explosions, explicit during-alert wording, and reported fast aerial target toward the city.",
+        "probable_historical_miss_reason": "source_discovery_gap"
+      }
+    },
+    {
+      "source_artifact": "research/zaporizhzhia_explosion_gap_audit.json",
+      "source_audit_pass": "gap_audit_additional_confirmed_strict_misses",
+      "source_path": "$.additional_confirmed_strict_misses[3]",
+      "original_verdict": "legacy_equivalent_confirmed_strict_miss",
+      "episode_id": "8534686ad8552aef1dd5a009",
+      "claim_payload": {
+        "episode_id": "8534686ad8552aef1dd5a009",
+        "date": "2025-11-15",
+        "alert_start_date_kyiv": "2025-11-14",
+        "alert_start_utc": "2025-11-14T19:20:38Z",
+        "alert_end_utc": "2025-11-15T01:12:12Z",
+        "alert_start_kyiv": "2025-11-14T21:20:38+02:00",
+        "alert_end_kyiv": "2025-11-15T03:12:12+02:00",
+        "exact_evidence_text": "У Запоріжжі під час повітряної тривоги пролунав вибух.",
+        "source": "Укрінформ, mirrored by UKR.NET",
+        "source_url": "https://www.ukr.net/news/details/zaporizhzhya/114518549.html",
+        "source_timestamp_kyiv": "2025-11-15T00:04:00+02:00",
+        "event_time": "Explicitly during the alert; the cross-midnight canonical episode was active at 00:04.",
+        "current_canonical_classification": "none",
+        "strict_reason": "Exact city, explicit explosion, explicit during-alert wording, and UAV-over-Zaporizhzhia context.",
+        "probable_historical_miss_reason": "cross_midnight_source_date_vs_alert_start_date_join_gap"
+      }
+    },
+    {
+      "source_artifact": "research/zaporizhzhia_explosion_gap_audit.json",
+      "source_audit_pass": "gap_audit_additional_confirmed_strict_misses",
+      "source_path": "$.additional_confirmed_strict_misses[4]",
+      "original_verdict": "legacy_equivalent_confirmed_strict_miss",
+      "episode_id": "03eb23a34f4367f90dbee592",
+      "claim_payload": {
+        "episode_id": "03eb23a34f4367f90dbee592",
+        "date": "2025-11-24",
+        "alert_start_utc": "2025-11-24T14:51:47Z",
+        "alert_end_utc": "2025-11-24T15:27:50Z",
+        "alert_start_kyiv": "2025-11-24T16:51:47+02:00",
+        "alert_end_kyiv": "2025-11-24T17:27:50+02:00",
+        "exact_evidence_text": "У Запоріжжі щойно пролунав вибух. Його чули мешканці кількох районів міста.",
+        "source": "Укрінформ",
+        "source_url": "https://www.ukrinform.ua/rubric-ato/4062313-u-zaporizzi-prolunav-vibuh.html",
+        "source_timestamp_kyiv": "2025-11-24T17:12:00+02:00",
+        "event_time": "The source says the explosion had just occurred at 17:12, inside the episode.",
+        "current_canonical_classification": "none",
+        "strict_reason": "Exact city, immediate event wording, active city alert, and KAB attack on Zaporizhzhia.",
+        "probable_historical_miss_reason": "source_discovery_gap"
+      }
+    },
+    {
+      "source_artifact": "research/zaporizhzhia_explosion_gap_audit.json",
+      "source_audit_pass": "gap_audit_additional_confirmed_strict_misses",
+      "source_path": "$.additional_confirmed_strict_misses[5]",
+      "original_verdict": "legacy_equivalent_confirmed_strict_miss",
+      "episode_id": "ced9e05a99318132ec47d0a0",
+      "claim_payload": {
+        "episode_id": "ced9e05a99318132ec47d0a0",
+        "date": "2025-12-02",
+        "alert_start_utc": "2025-12-02T09:04:04Z",
+        "alert_end_utc": "2025-12-02T10:11:29Z",
+        "alert_start_kyiv": "2025-12-02T11:04:04+02:00",
+        "alert_end_kyiv": "2025-12-02T12:11:29+02:00",
+        "exact_evidence_text": "У Запоріжжі під час повітряної тривоги пролунав вибух.",
+        "source": "Укрінформ",
+        "source_url": "https://www.ukrinform.ua/rubric-regions/4065143-u-zaporizzi-prolunav-vibuh.html",
+        "source_timestamp_kyiv": "2025-12-02T12:03:00+02:00",
+        "event_time": "Explicitly during the active alert.",
+        "current_canonical_classification": "none",
+        "strict_reason": "Exact city, explicit explosion during alert, and aerial-strike warning.",
+        "probable_historical_miss_reason": "source_discovery_gap"
+      }
+    },
+    {
+      "source_artifact": "research/zaporizhzhia_explosion_gap_audit.json",
+      "source_audit_pass": "gap_audit_additional_confirmed_strict_misses",
+      "source_path": "$.additional_confirmed_strict_misses[6]",
+      "original_verdict": "legacy_equivalent_confirmed_strict_miss",
+      "episode_id": "5a7d64e4d58b240825d0c954",
+      "claim_payload": {
+        "episode_id": "5a7d64e4d58b240825d0c954",
+        "date": "2025-12-16",
+        "alert_start_utc": "2025-12-16T19:28:38Z",
+        "alert_end_utc": "2025-12-16T21:46:51Z",
+        "alert_start_kyiv": "2025-12-16T21:28:38+02:00",
+        "alert_end_kyiv": "2025-12-16T23:46:51+02:00",
+        "exact_evidence_text": "Під час повітряної тривоги у Запоріжжі було чутно звуки вибухів.",
+        "source": "Укрінформ / Запорізька ОВА",
+        "source_url": "https://www.ukrinform.ua/rubric-regions/4070429-u-zaporizzi-prolunali-vibuhi.html",
+        "source_timestamp_kyiv": "2025-12-16T22:05:00+02:00",
+        "event_time": "Explicitly during the active alert; source also states air defence was working.",
+        "current_canonical_classification": "none",
+        "strict_reason": "Exact city, explicit explosions during alert, and strike-UAV/air-defence context.",
+        "probable_historical_miss_reason": "multiple_episodes_same_date_discovery_suppression",
+        "same_date_existing_strict_episode_id": "319d4432a8528fe156bcc567"
+      }
+    },
+    {
+      "source_artifact": "research/zaporizhzhia_explosion_gap_audit.json",
+      "source_audit_pass": "gap_audit_additional_confirmed_strict_misses",
+      "source_path": "$.additional_confirmed_strict_misses[7]",
+      "original_verdict": "legacy_equivalent_confirmed_strict_miss",
+      "episode_id": "6393c001ec4d0f8dfce54b51",
+      "claim_payload": {
+        "episode_id": "6393c001ec4d0f8dfce54b51",
+        "date": "2026-01-21",
+        "alert_start_utc": "2026-01-21T07:10:58Z",
+        "alert_end_utc": "2026-01-21T18:10:47Z",
+        "alert_start_kyiv": "2026-01-21T09:10:58+02:00",
+        "alert_end_kyiv": "2026-01-21T20:10:47+02:00",
+        "exact_evidence_text": "Ворог завдає авіаційних ударів по Запоріжжю, у різних районах міста лунають вибухи.",
+        "source": "Укрінформ",
+        "source_url": "https://www.ukrinform.ua/amp/rubric-regions/4082594-u-zaporizzi-prolunali-vibuhi.html",
+        "source_timestamp_kyiv": "2026-01-21T10:27:00+02:00",
+        "event_time": "Present-tense report during the active canonical episode.",
+        "current_canonical_classification": "none",
+        "strict_reason": "Exact city, explicit explosions, active air alert, KAB launches toward Zaporizhzhia and additional UAV/cruise-missile threat.",
+        "probable_historical_miss_reason": "source_discovery_gap"
+      }
+    },
+    {
+      "source_artifact": "research/zaporizhzhia_explosion_gap_audit.json",
+      "source_audit_pass": "gap_audit_additional_confirmed_strict_misses",
+      "source_path": "$.additional_confirmed_strict_misses[8]",
+      "original_verdict": "legacy_equivalent_confirmed_strict_miss",
+      "episode_id": "0edc1d73c3a86e149371bfbf",
+      "claim_payload": {
+        "episode_id": "0edc1d73c3a86e149371bfbf",
+        "date": "2026-03-12",
+        "alert_start_utc": "2026-03-12T06:55:35Z",
+        "alert_end_utc": "2026-03-12T16:07:45Z",
+        "alert_start_kyiv": "2026-03-12T08:55:35+02:00",
+        "alert_end_kyiv": "2026-03-12T18:07:45+02:00",
+        "exact_evidence_text": "Наразі в області та Запоріжжі оголошено повітряну тривогу. Загроза атаки БПЛА. В Запоріжжі чути вибухи.",
+        "source": "Укрінформ",
+        "source_url": "https://www.ukrinform.ua/rubric-regions/4100820-rosiani-atakuvali-komisuvahu-na-zaporizzi-e-poranenij.html",
+        "source_timestamp_kyiv": "2026-03-12T14:17:00+02:00",
+        "event_time": "Present-tense exact-city explosions during the active alert.",
+        "current_canonical_classification": "sensitivity_only",
+        "strict_reason": "The stronger source supplies the missing exact-city explosion wording and explicit active-alert/UAV context for the same canonical episode.",
+        "probable_historical_miss_reason": "stronger_source_not_used_for_existing_sensitivity_case"
+      }
+    },
+    {
+      "source_artifact": "research/zaporizhzhia_explosion_gap_audit.json",
+      "source_audit_pass": "gap_audit_additional_confirmed_strict_misses",
+      "source_path": "$.additional_confirmed_strict_misses[9]",
+      "original_verdict": "legacy_equivalent_confirmed_strict_miss",
+      "episode_id": "404d55294a38c31848e7e093",
+      "claim_payload": {
+        "episode_id": "404d55294a38c31848e7e093",
+        "date": "2026-04-09",
+        "alert_start_utc": "2026-04-09T01:58:08Z",
+        "alert_end_utc": "2026-04-09T03:41:34Z",
+        "alert_start_kyiv": "2026-04-09T04:58:08+03:00",
+        "alert_end_kyiv": "2026-04-09T06:41:34+03:00",
+        "exact_evidence_text": "У Запоріжжі пролунали кілька вибухів, ворог атакує місто ракетами.",
+        "source": "Укрінформ",
+        "source_url": "https://www.ukrinform.ua/rubric-regions/4110629-u-zaporizzi-prolunali-kilka-vibuhiv.html",
+        "source_timestamp_kyiv": "2026-04-09T05:58:00+03:00",
+        "event_time": "Present-tense report inside the canonical episode.",
+        "current_canonical_classification": "none",
+        "strict_reason": "Exact city, explicit explosions, missile attack, and active city air alert.",
+        "probable_historical_miss_reason": "source_discovery_gap"
+      }
+    },
+    {
+      "source_artifact": "research/zaporizhzhia_explosion_gap_audit.json",
+      "source_audit_pass": "gap_audit_additional_confirmed_strict_misses",
+      "source_path": "$.additional_confirmed_strict_misses[10]",
+      "original_verdict": "legacy_equivalent_confirmed_strict_miss",
+      "episode_id": "1e434d0fa5abfd518ad07d1e",
+      "claim_payload": {
+        "episode_id": "1e434d0fa5abfd518ad07d1e",
+        "date": "2026-08-28",
+        "alert_start_utc": "2026-08-28T04:23:30Z",
+        "alert_end_utc": "2026-08-28T04:49:34Z",
+        "alert_start_kyiv": "2026-08-28T07:23:30+03:00",
+        "alert_end_kyiv": "2026-08-28T07:49:34+03:00",
+        "exact_evidence_text": "Близько 07:30 28 серпня у Запоріжжі лунали вибухи, повідомлялося про загрозу ударних БпЛА.",
+        "source": "NV",
+        "source_url": "https://nv.ua/ukr/ukraine/events/epicentr-u-zaporizhzhi-atakuvali-droni-vinikla-masshtabna-pozhezha-video-novini-zaporizhzhya-50636377.html",
+        "source_timestamp_kyiv": "2026-08-28T09:11:00+03:00",
+        "event_time_kyiv": "2026-08-28T07:30:00+03:00",
+        "current_canonical_classification": "sensitivity_only",
+        "strict_reason": "Exact-city explosion time is explicitly ~07:30, seven minutes after episode start, with explicit strike-UAV threat.",
+        "probable_historical_miss_reason": "overconservative_sensitivity_classification"
+      }
+    },
+    {
+      "source_artifact": "research/zaporizhzhia_explosion_gap_audit.json",
+      "source_audit_pass": "gap_audit_additional_confirmed_strict_misses",
+      "source_path": "$.additional_confirmed_strict_misses[11]",
+      "original_verdict": "legacy_equivalent_confirmed_strict_miss",
+      "episode_id": "eac6a8d131341fb46bd1eae2",
+      "claim_payload": {
+        "episode_id": "eac6a8d131341fb46bd1eae2",
+        "date": "2026-09-08",
+        "alert_start_utc": "2026-09-08T10:21:46Z",
+        "alert_end_utc": "2026-09-08T12:17:15Z",
+        "alert_start_kyiv": "2026-09-08T13:21:46+03:00",
+        "alert_end_kyiv": "2026-09-08T15:17:15+03:00",
+        "exact_evidence_text": "У місті вже тривалий час лунає повітряна тривога, в різних районах міста чути вибухи.",
+        "source": "Укрінформ",
+        "source_url": "https://www.ukrinform.ua/rubric-regions/4162036-vorog-atakuvav-promislove-pidpriemstvo-u-zaporizzi-e-poranenij.html",
+        "source_timestamp_kyiv": "2026-09-08T14:24:00+03:00",
+        "event_time": "Present-tense explosions during a long-running active city alert.",
+        "current_canonical_classification": "review_date_level_unresolved_event_time",
+        "strict_reason": "The stronger source supplies explicit exact-city explosions during the active canonical episode; the earlier review source lacked usable time.",
+        "probable_historical_miss_reason": "stronger_source_not_used_for_existing_review_case"
+      }
+    },
+    {
+      "source_artifact": "research/zaporizhzhia_explosion_blind_sample_50.json",
+      "source_audit_pass": "blind_sample_wave_1",
+      "source_path": "$.sampled_episodes[40]",
+      "original_verdict": "confirmed_strict_miss",
+      "episode_id": "7c008970817e8d13ae402670",
+      "claim_payload": {
+        "sample_index": 41,
+        "stratum": "2026-Q2",
+        "episode_id": "7c008970817e8d13ae402670",
+        "date": "2026-06-16",
+        "alert_start_utc": "2026-06-16T16:42:55Z",
+        "alert_end_utc": "2026-06-16T18:04:58Z",
+        "verdict": "confirmed_strict_miss",
+        "source_evidence": [
+          {
+            "source": "Труха⚡️Запоріжжя Telegram",
+            "source_message_id": "truexazaporozie/64460",
+            "url": "https://t.me/truexazaporozie/64460",
+            "message_datetime_kyiv": "2026-06-16T19:51:00+03:00",
+            "relevant_evidence_text": "Вибух."
+          },
+          {
+            "source": "Труха⚡️Запоріжжя Telegram",
+            "source_message_id": "truexazaporozie/64461",
+            "url": "https://t.me/truexazaporozie/64461",
+            "message_datetime_kyiv": "2026-06-16T19:55:00+03:00",
+            "relevant_evidence_text": "Момент влучання БпЛА в місті."
+          },
+          {
+            "source": "Труха⚡️Запоріжжя Telegram",
+            "source_message_id": "truexazaporozie/64465",
+            "url": "https://t.me/truexazaporozie/64465",
+            "message_datetime_kyiv": "2026-06-16T20:02:00+03:00",
+            "relevant_evidence_text": "Повторні вибухи."
+          },
+          {
+            "source": "Головне управління Національної поліції в Запорізькій області",
+            "source_message_id": null,
+            "url": "https://zp.npu.gov.ua/news/shakhedna-ataka-na-zaporizhzhia-zabrala-zhyttia-liudyny-ie-poraneni-na-mistsiakh-vluchan-dopomohu-liudiam-nadaiut-politseiski",
+            "publication_datetime_kyiv": "2026-06-17T00:01:00+03:00",
+            "relevant_evidence_text": "Police confirm a Shahed attack on Zaporizhzhia with multiple city impacts while an air alert was active."
+          }
+        ],
+        "event_time_interpretation": "The alert was active 19:42:55-21:04:58 Europe/Kyiv. Contemporaneous exact-city messages at 19:51, 19:55 and 20:02 explicitly report an explosion, a UAV impact in the city and repeated explosions, all inside the episode. The later police report corroborates the aerial-war context and city impacts; its publication time is not used as event time.",
+        "explanation": "Exact-city explosion wording + explicit UAV impact + confirmed aerial-war context + contemporaneous event times inside one canonical alert episode satisfy the current strict methodology.",
+        "mechanism": "multiple_episodes_same_date",
+        "secondary_mechanism": "source_discovery",
+        "prior_candidate_overlap_assessment": "No overlap with the materialized PPO pilot positive/review IDs, current frozen-period review/candidate IDs, or the 51-message gap-audit register used to construct the dark-zone universe."
+      }
+    },
+    {
+      "source_artifact": "research/zaporizhzhia_explosion_blind_sample_50_wave2.json",
+      "source_audit_pass": "blind_sample_wave_2",
+      "source_path": "$.sampled_episodes[29]",
+      "original_verdict": "confirmed_strict_miss",
+      "episode_id": "7a45b4c6cd4f18358e063002",
+      "claim_payload": {
+        "sample_index": 30,
+        "stratum": "2026-Q1",
+        "episode_id": "7a45b4c6cd4f18358e063002",
+        "date": "2026-03-21",
+        "alert_start_utc": "2026-03-21T00:28:29Z",
+        "alert_end_utc": "2026-03-21T03:06:48Z",
+        "alert_start_kyiv": "2026-03-21T02:28:29+02:00",
+        "alert_end_kyiv": "2026-03-21T05:06:48+02:00",
+        "verdict": "confirmed_strict_miss",
+        "source_evidence": [
+          {
+            "source": "NV live chronology, citing Suspilne",
+            "source_url": "https://nv.ua/ukr/ukraine/events/ataka-bpla-na-mikolajivshchinu-ta-dnipro-operativni-dani-povitryanih-sil-50593669.html",
+            "source_message_or_article_id": "50593669",
+            "publication_or_message_datetime": "2026-03-21T04:12:00+02:00",
+            "evidence_text": "03:15 У Запоріжжі пролунав вибух, повідомляє Суспільне.",
+            "event_time_kyiv": "2026-03-21T03:15:00+02:00"
+          },
+          {
+            "source": "National Police, Zaporizhzhia region",
+            "source_url": "https://zp.npu.gov.ua/news/u-zaporizhzhi-vnaslidok-ataky-rosiiskykh-bezpilotnykiv-zahynuly-dvoie-liudei-shche-dvoie-nepovnolitnikh-postrazhdaly-na-mistsiakh-vluchan-pratsiuiut-politseiski",
+            "source_message_or_article_id": null,
+            "publication_or_message_datetime": "2026-03-21T08:50:00+02:00",
+            "evidence_text": "Police confirms that on 21 March Russian Shahed-type UAVs attacked Zaporizhzhia, with impacts on housing and infrastructure.",
+            "event_time_kyiv": "morning; corroborative, not used as the primary minute-level timestamp"
+          }
+        ],
+        "event_time_interpretation": "The NV live chronology explicitly timestamps an exact-city explosion at 03:15 Kyiv, inside this canonical alert episode (02:28:29–05:06:48). Publication time is not substituted for event time.",
+        "rationale": "Exact-city explosion wording, confirmed aerial-war/UAV context, and an explicit event time inside one canonical monitor alert episode satisfy the existing strict methodology.",
+        "failure_mechanism": "multiple_episodes_same_date",
+        "secondary_failure_mechanisms": [
+          "source_discovery"
+        ],
+        "same_date_existing_canonical_strict_episode_ids": [
+          "c1d947bd6240f8549c0e385a",
+          "68046107668aad7c9f51499d"
+        ],
+        "review_note": "This date already contained later canonical strict episodes, so date-level closure would suppress discovery of this earlier in-window explosion."
+      }
+    },
+    {
+      "source_artifact": "research/zaporizhzhia_explosion_o3_manual_review_batch1.json",
+      "source_audit_pass": "o3_exact_city_manual_review_batch1",
+      "source_path": "$.reviewed_records[9]",
+      "original_verdict": "confirmed_strict_miss",
+      "episode_id": "5da4fc649a38d4796ebbcf94",
+      "claim_payload": {
+        "episode_id": "5da4fc649a38d4796ebbcf94",
+        "date": "2026-09-07",
+        "episode_order_distance": 1,
+        "nearest_canonical_strict_episode_id": "23371bee083381cd79cf93a2",
+        "alert_start_utc": "2026-09-06T21:00:54Z",
+        "alert_end_utc": "2026-09-06T23:48:49Z",
+        "alert_start_kyiv": "2026-09-07T00:00:54",
+        "alert_end_kyiv": "2026-09-07T02:48:49",
+        "saved_source_hits_reviewed": [
+          "h018"
+        ],
+        "source_hits": [
+          {
+            "raw_hit_id": "h018",
+            "publication_or_message_datetime_kyiv": "2026-09-07T01:40:00+03:00",
+            "timestamp_kind": "indexed_Telegram_time_converted_from_22:40_UTC_display",
+            "source": "ЗаБор Запоріжжя Telegram",
+            "source_id": "zaborzp/148907",
+            "source_url": "https://t.me/zaborzp/148907",
+            "exact_relevant_wording": "Палає City Mall у Запоріжжі; наслідки атаки, сильна пожежа після удару.",
+            "source_discovery_role": "exact_city_candidate",
+            "exact_city_rationale": "City Mall у Запоріжжі названий прямо.",
+            "aerial_context": "explicit_attack_context; later sources specify three Shahed impacts around 00:30",
+            "stored_note": "Indexed Telegram context surfaces the event inside the target alert; later reporting gives ~00:30 impact time."
+          }
+        ],
+        "supplemental_evidence": [
+          {
+            "source": "D.UA Новини",
+            "publication_or_message_datetime_kyiv": "2026-09-07T03:00:00+03:00",
+            "datetime_note": "Page metadata exposes an update date rather than a reliable minute-level publication timestamp; only the event time is used for classification.",
+            "url": "https://news.d.ua/culture/shahedi-spalili-trc-city-mall-y-zaporijji-razom-iz-tovarom-minylogo-tijnia-vin-zakrivsia/",
+            "exact_relevant_wording": "Ворожий напад на торговий центр стався приблизно о 00:30 ... влучили три ударні дрони типу «Шахед».",
+            "role": "Decisive event-time evidence inside the target alert."
+          }
+        ],
+        "evidence_is_exact_city_zaporizhzhia": true,
+        "evidence_is_military_explosion_strike_or_air_defense_context": true,
+        "temporal_evidence_to_target_episode": "exact_event_time_inside_target",
+        "final_review_verdict": "confirmed_strict_miss",
+        "rationale": "Independent reporting places three Shahed impacts on City Mall in Zaporizhzhia at approximately 00:30. That time falls unambiguously inside the target alert 00:00:54–02:48:49. Exact city, aerial-war context and target-episode timing all satisfy the canonical strict rule.",
+        "failure_mode": "source_discovery",
+        "failure_mode_note": "The decisive ~00:30 exact-time evidence was absent from canonical strict evidence and was surfaced by the new source-discovery pass. A later canonical strict episode on the same date makes multi-episode matching a plausible contributing risk, but source discovery is the directly observed failure."
+      }
+    }
+  ],
+  "deduplication_summary": {
+    "claimed_confirmed_records_raw": 16,
+    "claimed_confirmed_unique_episode_ids": 16,
+    "duplicate_claims": 0,
+    "duplicate_claim_groups": [],
+    "duplicates_within_artifact": [],
+    "duplicates_across_artifacts": [],
+    "same_city_alert_start_alert_end_under_different_episode_ids": [],
+    "cross_artifact_reference_overlaps_not_counted_as_new_claims": [
+      {
+        "episode_id": "41f41f98fef80130dff07317",
+        "artifacts": [
+          "research/zaporizhzhia_explosion_gap_audit.json",
+          "research/zaporizhzhia_explosion_o3_source_discovery.json"
+        ],
+        "note": "Additional occurrences are supporting references or O3 positive controls, not separate final confirmed claims."
+      },
+      {
+        "episode_id": "5a7d64e4d58b240825d0c954",
+        "artifacts": [
+          "research/zaporizhzhia_explosion_gap_audit.json",
+          "research/zaporizhzhia_explosion_o3_source_discovery.json"
+        ],
+        "note": "Additional occurrences are supporting references or O3 positive controls, not separate final confirmed claims."
+      },
+      {
+        "episode_id": "7c008970817e8d13ae402670",
+        "artifacts": [
+          "research/zaporizhzhia_explosion_blind_sample_50.json",
+          "research/zaporizhzhia_explosion_o3_source_discovery.json"
+        ],
+        "note": "Additional occurrences are supporting references or O3 positive controls, not separate final confirmed claims."
+      },
+      {
+        "episode_id": "7a45b4c6cd4f18358e063002",
+        "artifacts": [
+          "research/zaporizhzhia_explosion_blind_sample_50_wave2.json",
+          "research/zaporizhzhia_explosion_o3_source_discovery.json"
+        ],
+        "note": "Additional occurrences are supporting references or O3 positive controls, not separate final confirmed claims."
+      },
+      {
+        "episode_id": "5da4fc649a38d4796ebbcf94",
+        "artifacts": [
+          "research/zaporizhzhia_explosion_o3_source_discovery.json",
+          "research/zaporizhzhia_explosion_o3_manual_review_batch1.json"
+        ],
+        "note": "Additional occurrences are supporting references or O3 positive controls, not separate final confirmed claims."
+      }
+    ]
+  },
+  "unique_reconciled_episode_records": [
+    {
+      "episode_id": "41f41f98fef80130dff07317",
+      "date": "2025-11-22",
+      "alert_start_utc": "2025-11-22T11:34:32Z",
+      "alert_end_utc": "2025-11-22T16:03:15Z",
+      "alert_start_kyiv": "2025-11-22T13:34:32+02:00",
+      "alert_end_kyiv": "2025-11-22T18:03:15+02:00",
+      "denominator_member": true,
+      "current_canonical_strict": false,
+      "current_canonical_sensitivity_only": false,
+      "prior_classification_in_claim_artifact": "none",
+      "audit_provenance": [
+        {
+          "source_artifact": "research/zaporizhzhia_explosion_gap_audit.json",
+          "source_path": "$.known_confirmed_miss",
+          "occurrence_fields": {
+            "episode_id": "41f41f98fef80130dff07317",
+            "date": "2025-11-22",
+            "current_canonical_classification": "none",
+            "source_url": "https://www.ukrinform.ua/rubric-regions/4061628-u-zaporizzi-pid-cas-trivogi-prolunali-vibuhi.html",
+            "source": "Укрінформ / Запорізька ОВА"
+          }
+        },
+        {
+          "source_artifact": "research/zaporizhzhia_explosion_gap_audit.json",
+          "source_path": "$.manual_candidate_register[3]",
+          "occurrence_fields": {
+            "episode_id": "41f41f98fef80130dff07317",
+            "date": "2025-11-22"
+          }
+        },
+        {
+          "source_artifact": "research/zaporizhzhia_explosion_o3_source_discovery.json",
+          "source_path": "$.positive_control_results.controls[0]",
+          "occurrence_fields": {
+            "episode_id": "41f41f98fef80130dff07317",
+            "date": "2025-11-22",
+            "source": "Укрінформ"
+          }
+        }
+      ],
+      "confirmed_claim_occurrences": [
+        {
+          "source_artifact": "research/zaporizhzhia_explosion_gap_audit.json",
+          "source_audit_pass": "gap_audit_known_confirmed_miss",
+          "source_path": "$.known_confirmed_miss",
+          "original_verdict": "legacy_equivalent_confirmed_strict_miss"
+        }
+      ],
+      "exact_city_evidence": "У Запоріжжі під час повітряної тривоги пролунали вибухи. Мешканців попередили про роботу ППО у місті.",
+      "military_aerial_war_context": "Exact-city explosions explicitly occurred during the canonical alert; air-defence attribution does not negate the explosion criterion.",
+      "best_event_time_or_temporal_wording": null,
+      "evidence_sources": [
+        {
+          "source": "Укрінформ / Запорізька ОВА",
+          "url": "https://www.ukrinform.ua/rubric-regions/4061628-u-zaporizzi-pid-cas-trivogi-prolunali-vibuhi.html",
+          "timestamp_kyiv": "2025-11-22T15:32:00+02:00",
+          "evidence_text": "У Запоріжжі під час повітряної тривоги пролунали вибухи. Мешканців попередили про роботу ППО у місті."
+        }
+      ],
+      "episode_match_reason": "Exact-city explosions explicitly occurred during the canonical alert; air-defence attribution does not negate the explosion criterion.",
+      "same_day_alternative_canonical_strict_episodes": [
+        "6b7ba70bf5f6686e6b51519f"
+      ],
+      "nearest_same_day_strict_gap_minutes": 120.07,
+      "publication_or_update_time_alone_used_as_event_time": false,
+      "temporal_ambiguity": false,
+      "contradictions": [],
+      "reconciliation_verdict": "repair_ready_confirmed_miss"
+    },
+    {
+      "episode_id": "6e6afea5cad3ced8422d0ff8",
+      "date": "2025-05-23",
+      "alert_start_utc": "2025-05-23T17:39:15Z",
+      "alert_end_utc": "2025-05-23T20:49:55Z",
+      "alert_start_kyiv": "2025-05-23T20:39:15+03:00",
+      "alert_end_kyiv": "2025-05-23T23:49:55+03:00",
+      "denominator_member": true,
+      "current_canonical_strict": false,
+      "current_canonical_sensitivity_only": false,
+      "prior_classification_in_claim_artifact": "none",
+      "audit_provenance": [
+        {
+          "source_artifact": "research/zaporizhzhia_explosion_gap_audit.json",
+          "source_path": "$.additional_confirmed_strict_misses[0]",
+          "occurrence_fields": {
+            "episode_id": "6e6afea5cad3ced8422d0ff8",
+            "date": "2025-05-23",
+            "current_canonical_classification": "none",
+            "source_url": "https://www.ukrinform.ua/rubric-regions/3996407-u-zaporizzi-pid-cas-povitranoi-trivogi-prolunali-vibuhi.html",
+            "source": "Укрінформ / Запорізька ОВА",
+            "event_time": "Source explicitly states the explosion occurred during the air alert; no publication-time substitution is required."
+          }
+        },
+        {
+          "source_artifact": "research/zaporizhzhia_explosion_gap_audit.json",
+          "source_path": "$.manual_candidate_register[12]",
+          "occurrence_fields": {
+            "episode_id": "6e6afea5cad3ced8422d0ff8",
+            "date": "2025-05-23"
+          }
+        }
+      ],
+      "confirmed_claim_occurrences": [
+        {
+          "source_artifact": "research/zaporizhzhia_explosion_gap_audit.json",
+          "source_audit_pass": "gap_audit_additional_confirmed_strict_misses",
+          "source_path": "$.additional_confirmed_strict_misses[0]",
+          "original_verdict": "legacy_equivalent_confirmed_strict_miss"
+        }
+      ],
+      "exact_city_evidence": "У Запоріжжі під час повітряної тривоги пролунали вибухи.",
+      "military_aerial_war_context": "Exact-city explosion wording, explicit during-alert statement, and aerial/UAV-war context; the source report falls inside the canonical episode.",
+      "best_event_time_or_temporal_wording": "Source explicitly states the explosion occurred during the air alert; no publication-time substitution is required.",
+      "evidence_sources": [
+        {
+          "source": "Укрінформ / Запорізька ОВА",
+          "url": "https://www.ukrinform.ua/rubric-regions/3996407-u-zaporizzi-pid-cas-povitranoi-trivogi-prolunali-vibuhi.html",
+          "timestamp_kyiv": "2025-05-23T23:03:00+03:00",
+          "evidence_text": "У Запоріжжі під час повітряної тривоги пролунали вибухи."
+        }
+      ],
+      "episode_match_reason": "Exact-city explosion wording, explicit during-alert statement, and aerial/UAV-war context; the source report falls inside the canonical episode.",
+      "same_day_alternative_canonical_strict_episodes": [],
+      "nearest_same_day_strict_gap_minutes": null,
+      "publication_or_update_time_alone_used_as_event_time": false,
+      "temporal_ambiguity": false,
+      "contradictions": [],
+      "reconciliation_verdict": "repair_ready_confirmed_miss"
+    },
+    {
+      "episode_id": "eb29ccba021617db3b0e8bbc",
+      "date": "2025-09-15",
+      "alert_start_utc": "2025-09-14T23:27:57Z",
+      "alert_end_utc": "2025-09-15T00:24:58Z",
+      "alert_start_kyiv": "2025-09-15T02:27:57+03:00",
+      "alert_end_kyiv": "2025-09-15T03:24:58+03:00",
+      "denominator_member": true,
+      "current_canonical_strict": false,
+      "current_canonical_sensitivity_only": false,
+      "prior_classification_in_claim_artifact": "none",
+      "audit_provenance": [
+        {
+          "source_artifact": "research/zaporizhzhia_explosion_gap_audit.json",
+          "source_path": "$.additional_confirmed_strict_misses[1]",
+          "occurrence_fields": {
+            "episode_id": "eb29ccba021617db3b0e8bbc",
+            "date": "2025-09-15",
+            "current_canonical_classification": "none",
+            "source_url": "https://www.ukrinform.ua/rubric-regions/4036493-u-zaporizzi-prolunala-seria-vibuhiv.html",
+            "source": "Укрінформ",
+            "event_time": "Explicitly during the active alert; source published inside the episode."
+          }
+        },
+        {
+          "source_artifact": "research/zaporizhzhia_explosion_gap_audit.json",
+          "source_path": "$.manual_candidate_register[20]",
+          "occurrence_fields": {
+            "episode_id": "eb29ccba021617db3b0e8bbc",
+            "date": "2025-09-15"
+          }
+        }
+      ],
+      "confirmed_claim_occurrences": [
+        {
+          "source_artifact": "research/zaporizhzhia_explosion_gap_audit.json",
+          "source_audit_pass": "gap_audit_additional_confirmed_strict_misses",
+          "source_path": "$.additional_confirmed_strict_misses[1]",
+          "original_verdict": "legacy_equivalent_confirmed_strict_miss"
+        }
+      ],
+      "exact_city_evidence": "У Запоріжжі під час повітряної тривоги пролунала серія вибухів, сталося займання.",
+      "military_aerial_war_context": "Exact city, explicit explosions, explicit during-alert wording, and missile/aerial-war context.",
+      "best_event_time_or_temporal_wording": "Explicitly during the active alert; source published inside the episode.",
+      "evidence_sources": [
+        {
+          "source": "Укрінформ",
+          "url": "https://www.ukrinform.ua/rubric-regions/4036493-u-zaporizzi-prolunala-seria-vibuhiv.html",
+          "timestamp_kyiv": "2025-09-15T02:51:00+03:00",
+          "evidence_text": "У Запоріжжі під час повітряної тривоги пролунала серія вибухів, сталося займання."
+        }
+      ],
+      "episode_match_reason": "Exact city, explicit explosions, explicit during-alert wording, and missile/aerial-war context.",
+      "same_day_alternative_canonical_strict_episodes": [
+        "fa1e9624ec208634260fa6cb"
+      ],
+      "nearest_same_day_strict_gap_minutes": 1205.27,
+      "publication_or_update_time_alone_used_as_event_time": false,
+      "temporal_ambiguity": false,
+      "contradictions": [],
+      "reconciliation_verdict": "repair_ready_confirmed_miss"
+    },
+    {
+      "episode_id": "19f123f154ffb68f06d0296e",
+      "date": "2025-10-08",
+      "alert_start_utc": "2025-10-08T19:43:17Z",
+      "alert_end_utc": "2025-10-08T21:52:05Z",
+      "alert_start_kyiv": "2025-10-08T22:43:17+03:00",
+      "alert_end_kyiv": "2025-10-09T00:52:05+03:00",
+      "denominator_member": true,
+      "current_canonical_strict": false,
+      "current_canonical_sensitivity_only": false,
+      "prior_classification_in_claim_artifact": "none",
+      "audit_provenance": [
+        {
+          "source_artifact": "research/zaporizhzhia_explosion_gap_audit.json",
+          "source_path": "$.additional_confirmed_strict_misses[2]",
+          "occurrence_fields": {
+            "episode_id": "19f123f154ffb68f06d0296e",
+            "date": "2025-10-08",
+            "current_canonical_classification": "none",
+            "source_url": "https://www.ukr.net/news/details/zaporizhzhya/113888959.html",
+            "source": "Укрінформ, mirrored by UKR.NET",
+            "event_time": "Explicitly during the active alert; source published three minutes after episode start."
+          }
+        },
+        {
+          "source_artifact": "research/zaporizhzhia_explosion_gap_audit.json",
+          "source_path": "$.manual_candidate_register[26]",
+          "occurrence_fields": {
+            "episode_id": "19f123f154ffb68f06d0296e",
+            "date": "2025-10-08"
+          }
+        }
+      ],
+      "confirmed_claim_occurrences": [
+        {
+          "source_artifact": "research/zaporizhzhia_explosion_gap_audit.json",
+          "source_audit_pass": "gap_audit_additional_confirmed_strict_misses",
+          "source_path": "$.additional_confirmed_strict_misses[2]",
+          "original_verdict": "legacy_equivalent_confirmed_strict_miss"
+        }
+      ],
+      "exact_city_evidence": "Ворог атакує Запоріжжя, під час повітряної тривоги у місті пролунали вибухи.",
+      "military_aerial_war_context": "Exact city, explicit explosions, explicit during-alert wording, and reported fast aerial target toward the city.",
+      "best_event_time_or_temporal_wording": "Explicitly during the active alert; source published three minutes after episode start.",
+      "evidence_sources": [
+        {
+          "source": "Укрінформ, mirrored by UKR.NET",
+          "url": "https://www.ukr.net/news/details/zaporizhzhya/113888959.html",
+          "timestamp_kyiv": "2025-10-08T22:46:00+03:00",
+          "evidence_text": "Ворог атакує Запоріжжя, під час повітряної тривоги у місті пролунали вибухи."
+        }
+      ],
+      "episode_match_reason": "Exact city, explicit explosions, explicit during-alert wording, and reported fast aerial target toward the city.",
+      "same_day_alternative_canonical_strict_episodes": [],
+      "nearest_same_day_strict_gap_minutes": null,
+      "publication_or_update_time_alone_used_as_event_time": false,
+      "temporal_ambiguity": false,
+      "contradictions": [],
+      "reconciliation_verdict": "repair_ready_confirmed_miss"
+    },
+    {
+      "episode_id": "8534686ad8552aef1dd5a009",
+      "date": "2025-11-15",
+      "alert_start_utc": "2025-11-14T19:20:38Z",
+      "alert_end_utc": "2025-11-15T01:12:12Z",
+      "alert_start_kyiv": "2025-11-14T21:20:38+02:00",
+      "alert_end_kyiv": "2025-11-15T03:12:12+02:00",
+      "denominator_member": true,
+      "current_canonical_strict": false,
+      "current_canonical_sensitivity_only": false,
+      "prior_classification_in_claim_artifact": "none",
+      "audit_provenance": [
+        {
+          "source_artifact": "research/zaporizhzhia_explosion_gap_audit.json",
+          "source_path": "$.additional_confirmed_strict_misses[3]",
+          "occurrence_fields": {
+            "episode_id": "8534686ad8552aef1dd5a009",
+            "date": "2025-11-15",
+            "current_canonical_classification": "none",
+            "source_url": "https://www.ukr.net/news/details/zaporizhzhya/114518549.html",
+            "source": "Укрінформ, mirrored by UKR.NET",
+            "event_time": "Explicitly during the alert; the cross-midnight canonical episode was active at 00:04."
+          }
+        },
+        {
+          "source_artifact": "research/zaporizhzhia_explosion_gap_audit.json",
+          "source_path": "$.manual_candidate_register[33]",
+          "occurrence_fields": {
+            "episode_id": "8534686ad8552aef1dd5a009",
+            "date": "2025-11-15"
+          }
+        }
+      ],
+      "confirmed_claim_occurrences": [
+        {
+          "source_artifact": "research/zaporizhzhia_explosion_gap_audit.json",
+          "source_audit_pass": "gap_audit_additional_confirmed_strict_misses",
+          "source_path": "$.additional_confirmed_strict_misses[3]",
+          "original_verdict": "legacy_equivalent_confirmed_strict_miss"
+        }
+      ],
+      "exact_city_evidence": "У Запоріжжі під час повітряної тривоги пролунав вибух.",
+      "military_aerial_war_context": "Exact city, explicit explosion, explicit during-alert wording, and UAV-over-Zaporizhzhia context.",
+      "best_event_time_or_temporal_wording": "Explicitly during the alert; the cross-midnight canonical episode was active at 00:04.",
+      "evidence_sources": [
+        {
+          "source": "Укрінформ, mirrored by UKR.NET",
+          "url": "https://www.ukr.net/news/details/zaporizhzhya/114518549.html",
+          "timestamp_kyiv": "2025-11-15T00:04:00+02:00",
+          "evidence_text": "У Запоріжжі під час повітряної тривоги пролунав вибух."
+        }
+      ],
+      "episode_match_reason": "Exact city, explicit explosion, explicit during-alert wording, and UAV-over-Zaporizhzhia context.",
+      "same_day_alternative_canonical_strict_episodes": [],
+      "nearest_same_day_strict_gap_minutes": null,
+      "publication_or_update_time_alone_used_as_event_time": false,
+      "temporal_ambiguity": false,
+      "contradictions": [],
+      "reconciliation_verdict": "repair_ready_confirmed_miss"
+    },
+    {
+      "episode_id": "03eb23a34f4367f90dbee592",
+      "date": "2025-11-24",
+      "alert_start_utc": "2025-11-24T14:51:47Z",
+      "alert_end_utc": "2025-11-24T15:27:50Z",
+      "alert_start_kyiv": "2025-11-24T16:51:47+02:00",
+      "alert_end_kyiv": "2025-11-24T17:27:50+02:00",
+      "denominator_member": true,
+      "current_canonical_strict": false,
+      "current_canonical_sensitivity_only": false,
+      "prior_classification_in_claim_artifact": "none",
+      "audit_provenance": [
+        {
+          "source_artifact": "research/zaporizhzhia_explosion_gap_audit.json",
+          "source_path": "$.additional_confirmed_strict_misses[4]",
+          "occurrence_fields": {
+            "episode_id": "03eb23a34f4367f90dbee592",
+            "date": "2025-11-24",
+            "current_canonical_classification": "none",
+            "source_url": "https://www.ukrinform.ua/rubric-ato/4062313-u-zaporizzi-prolunav-vibuh.html",
+            "source": "Укрінформ",
+            "event_time": "The source says the explosion had just occurred at 17:12, inside the episode."
+          }
+        },
+        {
+          "source_artifact": "research/zaporizhzhia_explosion_gap_audit.json",
+          "source_path": "$.manual_candidate_register[34]",
+          "occurrence_fields": {
+            "episode_id": "03eb23a34f4367f90dbee592",
+            "date": "2025-11-24"
+          }
+        }
+      ],
+      "confirmed_claim_occurrences": [
+        {
+          "source_artifact": "research/zaporizhzhia_explosion_gap_audit.json",
+          "source_audit_pass": "gap_audit_additional_confirmed_strict_misses",
+          "source_path": "$.additional_confirmed_strict_misses[4]",
+          "original_verdict": "legacy_equivalent_confirmed_strict_miss"
+        }
+      ],
+      "exact_city_evidence": "У Запоріжжі щойно пролунав вибух. Його чули мешканці кількох районів міста.",
+      "military_aerial_war_context": "Exact city, immediate event wording, active city alert, and KAB attack on Zaporizhzhia.",
+      "best_event_time_or_temporal_wording": "The source says the explosion had just occurred at 17:12, inside the episode.",
+      "evidence_sources": [
+        {
+          "source": "Укрінформ",
+          "url": "https://www.ukrinform.ua/rubric-ato/4062313-u-zaporizzi-prolunav-vibuh.html",
+          "timestamp_kyiv": "2025-11-24T17:12:00+02:00",
+          "evidence_text": "У Запоріжжі щойно пролунав вибух. Його чули мешканці кількох районів міста."
+        }
+      ],
+      "episode_match_reason": "Exact city, immediate event wording, active city alert, and KAB attack on Zaporizhzhia.",
+      "same_day_alternative_canonical_strict_episodes": [],
+      "nearest_same_day_strict_gap_minutes": null,
+      "publication_or_update_time_alone_used_as_event_time": false,
+      "temporal_ambiguity": false,
+      "contradictions": [],
+      "reconciliation_verdict": "repair_ready_confirmed_miss"
+    },
+    {
+      "episode_id": "ced9e05a99318132ec47d0a0",
+      "date": "2025-12-02",
+      "alert_start_utc": "2025-12-02T09:04:04Z",
+      "alert_end_utc": "2025-12-02T10:11:29Z",
+      "alert_start_kyiv": "2025-12-02T11:04:04+02:00",
+      "alert_end_kyiv": "2025-12-02T12:11:29+02:00",
+      "denominator_member": true,
+      "current_canonical_strict": false,
+      "current_canonical_sensitivity_only": false,
+      "prior_classification_in_claim_artifact": "none",
+      "audit_provenance": [
+        {
+          "source_artifact": "research/zaporizhzhia_explosion_gap_audit.json",
+          "source_path": "$.additional_confirmed_strict_misses[5]",
+          "occurrence_fields": {
+            "episode_id": "ced9e05a99318132ec47d0a0",
+            "date": "2025-12-02",
+            "current_canonical_classification": "none",
+            "source_url": "https://www.ukrinform.ua/rubric-regions/4065143-u-zaporizzi-prolunav-vibuh.html",
+            "source": "Укрінформ",
+            "event_time": "Explicitly during the active alert."
+          }
+        },
+        {
+          "source_artifact": "research/zaporizhzhia_explosion_gap_audit.json",
+          "source_path": "$.manual_candidate_register[36]",
+          "occurrence_fields": {
+            "episode_id": "ced9e05a99318132ec47d0a0",
+            "date": "2025-12-02"
+          }
+        }
+      ],
+      "confirmed_claim_occurrences": [
+        {
+          "source_artifact": "research/zaporizhzhia_explosion_gap_audit.json",
+          "source_audit_pass": "gap_audit_additional_confirmed_strict_misses",
+          "source_path": "$.additional_confirmed_strict_misses[5]",
+          "original_verdict": "legacy_equivalent_confirmed_strict_miss"
+        }
+      ],
+      "exact_city_evidence": "У Запоріжжі під час повітряної тривоги пролунав вибух.",
+      "military_aerial_war_context": "Exact city, explicit explosion during alert, and aerial-strike warning.",
+      "best_event_time_or_temporal_wording": "Explicitly during the active alert.",
+      "evidence_sources": [
+        {
+          "source": "Укрінформ",
+          "url": "https://www.ukrinform.ua/rubric-regions/4065143-u-zaporizzi-prolunav-vibuh.html",
+          "timestamp_kyiv": "2025-12-02T12:03:00+02:00",
+          "evidence_text": "У Запоріжжі під час повітряної тривоги пролунав вибух."
+        }
+      ],
+      "episode_match_reason": "Exact city, explicit explosion during alert, and aerial-strike warning.",
+      "same_day_alternative_canonical_strict_episodes": [],
+      "nearest_same_day_strict_gap_minutes": null,
+      "publication_or_update_time_alone_used_as_event_time": false,
+      "temporal_ambiguity": false,
+      "contradictions": [],
+      "reconciliation_verdict": "repair_ready_confirmed_miss"
+    },
+    {
+      "episode_id": "5a7d64e4d58b240825d0c954",
+      "date": "2025-12-16",
+      "alert_start_utc": "2025-12-16T19:28:38Z",
+      "alert_end_utc": "2025-12-16T21:46:51Z",
+      "alert_start_kyiv": "2025-12-16T21:28:38+02:00",
+      "alert_end_kyiv": "2025-12-16T23:46:51+02:00",
+      "denominator_member": true,
+      "current_canonical_strict": false,
+      "current_canonical_sensitivity_only": false,
+      "prior_classification_in_claim_artifact": "none",
+      "audit_provenance": [
+        {
+          "source_artifact": "research/zaporizhzhia_explosion_gap_audit.json",
+          "source_path": "$.additional_confirmed_strict_misses[6]",
+          "occurrence_fields": {
+            "episode_id": "5a7d64e4d58b240825d0c954",
+            "date": "2025-12-16",
+            "current_canonical_classification": "none",
+            "source_url": "https://www.ukrinform.ua/rubric-regions/4070429-u-zaporizzi-prolunali-vibuhi.html",
+            "source": "Укрінформ / Запорізька ОВА",
+            "event_time": "Explicitly during the active alert; source also states air defence was working."
+          }
+        },
+        {
+          "source_artifact": "research/zaporizhzhia_explosion_gap_audit.json",
+          "source_path": "$.manual_candidate_register[4]",
+          "occurrence_fields": {
+            "episode_id": "5a7d64e4d58b240825d0c954",
+            "date": "2025-12-16"
+          }
+        },
+        {
+          "source_artifact": "research/zaporizhzhia_explosion_o3_source_discovery.json",
+          "source_path": "$.positive_control_results.controls[1]",
+          "occurrence_fields": {
+            "episode_id": "5a7d64e4d58b240825d0c954",
+            "date": "2025-12-16",
+            "source": "Укрінформ"
+          }
+        }
+      ],
+      "confirmed_claim_occurrences": [
+        {
+          "source_artifact": "research/zaporizhzhia_explosion_gap_audit.json",
+          "source_audit_pass": "gap_audit_additional_confirmed_strict_misses",
+          "source_path": "$.additional_confirmed_strict_misses[6]",
+          "original_verdict": "legacy_equivalent_confirmed_strict_miss"
+        }
+      ],
+      "exact_city_evidence": "Під час повітряної тривоги у Запоріжжі було чутно звуки вибухів.",
+      "military_aerial_war_context": "Exact city, explicit explosions during alert, and strike-UAV/air-defence context.",
+      "best_event_time_or_temporal_wording": "Explicitly during the active alert; source also states air defence was working.",
+      "evidence_sources": [
+        {
+          "source": "Укрінформ / Запорізька ОВА",
+          "url": "https://www.ukrinform.ua/rubric-regions/4070429-u-zaporizzi-prolunali-vibuhi.html",
+          "timestamp_kyiv": "2025-12-16T22:05:00+02:00",
+          "evidence_text": "Під час повітряної тривоги у Запоріжжі було чутно звуки вибухів."
+        }
+      ],
+      "episode_match_reason": "Exact city, explicit explosions during alert, and strike-UAV/air-defence context.",
+      "same_day_alternative_canonical_strict_episodes": [
+        "319d4432a8528fe156bcc567"
+      ],
+      "nearest_same_day_strict_gap_minutes": 84.38,
+      "publication_or_update_time_alone_used_as_event_time": false,
+      "temporal_ambiguity": false,
+      "contradictions": [],
+      "reconciliation_verdict": "repair_ready_confirmed_miss"
+    },
+    {
+      "episode_id": "6393c001ec4d0f8dfce54b51",
+      "date": "2026-01-21",
+      "alert_start_utc": "2026-01-21T07:10:58Z",
+      "alert_end_utc": "2026-01-21T18:10:47Z",
+      "alert_start_kyiv": "2026-01-21T09:10:58+02:00",
+      "alert_end_kyiv": "2026-01-21T20:10:47+02:00",
+      "denominator_member": true,
+      "current_canonical_strict": false,
+      "current_canonical_sensitivity_only": false,
+      "prior_classification_in_claim_artifact": "none",
+      "audit_provenance": [
+        {
+          "source_artifact": "research/zaporizhzhia_explosion_gap_audit.json",
+          "source_path": "$.additional_confirmed_strict_misses[7]",
+          "occurrence_fields": {
+            "episode_id": "6393c001ec4d0f8dfce54b51",
+            "date": "2026-01-21",
+            "current_canonical_classification": "none",
+            "source_url": "https://www.ukrinform.ua/amp/rubric-regions/4082594-u-zaporizzi-prolunali-vibuhi.html",
+            "source": "Укрінформ",
+            "event_time": "Present-tense report during the active canonical episode."
+          }
+        },
+        {
+          "source_artifact": "research/zaporizhzhia_explosion_gap_audit.json",
+          "source_path": "$.manual_candidate_register[41]",
+          "occurrence_fields": {
+            "episode_id": "6393c001ec4d0f8dfce54b51",
+            "date": "2026-01-21"
+          }
+        }
+      ],
+      "confirmed_claim_occurrences": [
+        {
+          "source_artifact": "research/zaporizhzhia_explosion_gap_audit.json",
+          "source_audit_pass": "gap_audit_additional_confirmed_strict_misses",
+          "source_path": "$.additional_confirmed_strict_misses[7]",
+          "original_verdict": "legacy_equivalent_confirmed_strict_miss"
+        }
+      ],
+      "exact_city_evidence": "Ворог завдає авіаційних ударів по Запоріжжю, у різних районах міста лунають вибухи.",
+      "military_aerial_war_context": "Exact city, explicit explosions, active air alert, KAB launches toward Zaporizhzhia and additional UAV/cruise-missile threat.",
+      "best_event_time_or_temporal_wording": "Present-tense report during the active canonical episode.",
+      "evidence_sources": [
+        {
+          "source": "Укрінформ",
+          "url": "https://www.ukrinform.ua/amp/rubric-regions/4082594-u-zaporizzi-prolunali-vibuhi.html",
+          "timestamp_kyiv": "2026-01-21T10:27:00+02:00",
+          "evidence_text": "Ворог завдає авіаційних ударів по Запоріжжю, у різних районах міста лунають вибухи."
+        }
+      ],
+      "episode_match_reason": "Exact city, explicit explosions, active air alert, KAB launches toward Zaporizhzhia and additional UAV/cruise-missile threat.",
+      "same_day_alternative_canonical_strict_episodes": [],
+      "nearest_same_day_strict_gap_minutes": null,
+      "publication_or_update_time_alone_used_as_event_time": false,
+      "temporal_ambiguity": false,
+      "contradictions": [],
+      "reconciliation_verdict": "repair_ready_confirmed_miss"
+    },
+    {
+      "episode_id": "0edc1d73c3a86e149371bfbf",
+      "date": "2026-03-12",
+      "alert_start_utc": "2026-03-12T06:55:35Z",
+      "alert_end_utc": "2026-03-12T16:07:45Z",
+      "alert_start_kyiv": "2026-03-12T08:55:35+02:00",
+      "alert_end_kyiv": "2026-03-12T18:07:45+02:00",
+      "denominator_member": true,
+      "current_canonical_strict": false,
+      "current_canonical_sensitivity_only": true,
+      "prior_classification_in_claim_artifact": "sensitivity_only",
+      "audit_provenance": [
+        {
+          "source_artifact": "research/zaporizhzhia_explosion_gap_audit.json",
+          "source_path": "$.additional_confirmed_strict_misses[8]",
+          "occurrence_fields": {
+            "episode_id": "0edc1d73c3a86e149371bfbf",
+            "date": "2026-03-12",
+            "current_canonical_classification": "sensitivity_only",
+            "source_url": "https://www.ukrinform.ua/rubric-regions/4100820-rosiani-atakuvali-komisuvahu-na-zaporizzi-e-poranenij.html",
+            "source": "Укрінформ",
+            "event_time": "Present-tense exact-city explosions during the active alert."
+          }
+        },
+        {
+          "source_artifact": "research/zaporizhzhia_explosion_gap_audit.json",
+          "source_path": "$.manual_candidate_register[42]",
+          "occurrence_fields": {
+            "episode_id": "0edc1d73c3a86e149371bfbf",
+            "date": "2026-03-12"
+          }
+        }
+      ],
+      "confirmed_claim_occurrences": [
+        {
+          "source_artifact": "research/zaporizhzhia_explosion_gap_audit.json",
+          "source_audit_pass": "gap_audit_additional_confirmed_strict_misses",
+          "source_path": "$.additional_confirmed_strict_misses[8]",
+          "original_verdict": "legacy_equivalent_confirmed_strict_miss"
+        }
+      ],
+      "exact_city_evidence": "Наразі в області та Запоріжжі оголошено повітряну тривогу. Загроза атаки БПЛА. В Запоріжжі чути вибухи.",
+      "military_aerial_war_context": "The stronger source supplies the missing exact-city explosion wording and explicit active-alert/UAV context for the same canonical episode.",
+      "best_event_time_or_temporal_wording": "Present-tense exact-city explosions during the active alert.",
+      "evidence_sources": [
+        {
+          "source": "Укрінформ",
+          "url": "https://www.ukrinform.ua/rubric-regions/4100820-rosiani-atakuvali-komisuvahu-na-zaporizzi-e-poranenij.html",
+          "timestamp_kyiv": "2026-03-12T14:17:00+02:00",
+          "evidence_text": "Наразі в області та Запоріжжі оголошено повітряну тривогу. Загроза атаки БПЛА. В Запоріжжі чути вибухи."
+        }
+      ],
+      "episode_match_reason": "The stronger source supplies the missing exact-city explosion wording and explicit active-alert/UAV context for the same canonical episode.",
+      "same_day_alternative_canonical_strict_episodes": [],
+      "nearest_same_day_strict_gap_minutes": null,
+      "publication_or_update_time_alone_used_as_event_time": false,
+      "temporal_ambiguity": false,
+      "contradictions": [],
+      "reconciliation_verdict": "repair_ready_confirmed_miss"
+    },
+    {
+      "episode_id": "404d55294a38c31848e7e093",
+      "date": "2026-04-09",
+      "alert_start_utc": "2026-04-09T01:58:08Z",
+      "alert_end_utc": "2026-04-09T03:41:34Z",
+      "alert_start_kyiv": "2026-04-09T04:58:08+03:00",
+      "alert_end_kyiv": "2026-04-09T06:41:34+03:00",
+      "denominator_member": true,
+      "current_canonical_strict": false,
+      "current_canonical_sensitivity_only": false,
+      "prior_classification_in_claim_artifact": "none",
+      "audit_provenance": [
+        {
+          "source_artifact": "research/zaporizhzhia_explosion_gap_audit.json",
+          "source_path": "$.additional_confirmed_strict_misses[9]",
+          "occurrence_fields": {
+            "episode_id": "404d55294a38c31848e7e093",
+            "date": "2026-04-09",
+            "current_canonical_classification": "none",
+            "source_url": "https://www.ukrinform.ua/rubric-regions/4110629-u-zaporizzi-prolunali-kilka-vibuhiv.html",
+            "source": "Укрінформ",
+            "event_time": "Present-tense report inside the canonical episode."
+          }
+        },
+        {
+          "source_artifact": "research/zaporizhzhia_explosion_gap_audit.json",
+          "source_path": "$.manual_candidate_register[43]",
+          "occurrence_fields": {
+            "episode_id": "404d55294a38c31848e7e093",
+            "date": "2026-04-09"
+          }
+        }
+      ],
+      "confirmed_claim_occurrences": [
+        {
+          "source_artifact": "research/zaporizhzhia_explosion_gap_audit.json",
+          "source_audit_pass": "gap_audit_additional_confirmed_strict_misses",
+          "source_path": "$.additional_confirmed_strict_misses[9]",
+          "original_verdict": "legacy_equivalent_confirmed_strict_miss"
+        }
+      ],
+      "exact_city_evidence": "У Запоріжжі пролунали кілька вибухів, ворог атакує місто ракетами.",
+      "military_aerial_war_context": "Exact city, explicit explosions, missile attack, and active city air alert.",
+      "best_event_time_or_temporal_wording": "Present-tense report inside the canonical episode.",
+      "evidence_sources": [
+        {
+          "source": "Укрінформ",
+          "url": "https://www.ukrinform.ua/rubric-regions/4110629-u-zaporizzi-prolunali-kilka-vibuhiv.html",
+          "timestamp_kyiv": "2026-04-09T05:58:00+03:00",
+          "evidence_text": "У Запоріжжі пролунали кілька вибухів, ворог атакує місто ракетами."
+        }
+      ],
+      "episode_match_reason": "Exact city, explicit explosions, missile attack, and active city air alert.",
+      "same_day_alternative_canonical_strict_episodes": [],
+      "nearest_same_day_strict_gap_minutes": null,
+      "publication_or_update_time_alone_used_as_event_time": false,
+      "temporal_ambiguity": false,
+      "contradictions": [],
+      "reconciliation_verdict": "repair_ready_confirmed_miss"
+    },
+    {
+      "episode_id": "1e434d0fa5abfd518ad07d1e",
+      "date": "2026-08-28",
+      "alert_start_utc": "2026-08-28T04:23:30Z",
+      "alert_end_utc": "2026-08-28T04:49:34Z",
+      "alert_start_kyiv": "2026-08-28T07:23:30+03:00",
+      "alert_end_kyiv": "2026-08-28T07:49:34+03:00",
+      "denominator_member": true,
+      "current_canonical_strict": false,
+      "current_canonical_sensitivity_only": true,
+      "prior_classification_in_claim_artifact": "sensitivity_only",
+      "audit_provenance": [
+        {
+          "source_artifact": "research/zaporizhzhia_explosion_gap_audit.json",
+          "source_path": "$.additional_confirmed_strict_misses[10]",
+          "occurrence_fields": {
+            "episode_id": "1e434d0fa5abfd518ad07d1e",
+            "date": "2026-08-28",
+            "current_canonical_classification": "sensitivity_only",
+            "source_url": "https://nv.ua/ukr/ukraine/events/epicentr-u-zaporizhzhi-atakuvali-droni-vinikla-masshtabna-pozhezha-video-novini-zaporizhzhya-50636377.html",
+            "source": "NV",
+            "event_time_kyiv": "2026-08-28T07:30:00+03:00"
+          }
+        },
+        {
+          "source_artifact": "research/zaporizhzhia_explosion_gap_audit.json",
+          "source_path": "$.manual_candidate_register[11]",
+          "occurrence_fields": {
+            "episode_id": "1e434d0fa5abfd518ad07d1e",
+            "date": "2026-08-28"
+          }
+        }
+      ],
+      "confirmed_claim_occurrences": [
+        {
+          "source_artifact": "research/zaporizhzhia_explosion_gap_audit.json",
+          "source_audit_pass": "gap_audit_additional_confirmed_strict_misses",
+          "source_path": "$.additional_confirmed_strict_misses[10]",
+          "original_verdict": "legacy_equivalent_confirmed_strict_miss"
+        }
+      ],
+      "exact_city_evidence": "Близько 07:30 28 серпня у Запоріжжі лунали вибухи, повідомлялося про загрозу ударних БпЛА.",
+      "military_aerial_war_context": "Exact-city explosion time is explicitly ~07:30, seven minutes after episode start, with explicit strike-UAV threat.",
+      "best_event_time_or_temporal_wording": "2026-08-28T07:30:00+03:00",
+      "evidence_sources": [
+        {
+          "source": "NV",
+          "url": "https://nv.ua/ukr/ukraine/events/epicentr-u-zaporizhzhi-atakuvali-droni-vinikla-masshtabna-pozhezha-video-novini-zaporizhzhya-50636377.html",
+          "timestamp_kyiv": "2026-08-28T09:11:00+03:00",
+          "evidence_text": "Близько 07:30 28 серпня у Запоріжжі лунали вибухи, повідомлялося про загрозу ударних БпЛА."
+        }
+      ],
+      "episode_match_reason": "Exact-city explosion time is explicitly ~07:30, seven minutes after episode start, with explicit strike-UAV threat.",
+      "same_day_alternative_canonical_strict_episodes": [],
+      "nearest_same_day_strict_gap_minutes": null,
+      "publication_or_update_time_alone_used_as_event_time": false,
+      "temporal_ambiguity": false,
+      "contradictions": [],
+      "reconciliation_verdict": "repair_ready_confirmed_miss"
+    },
+    {
+      "episode_id": "eac6a8d131341fb46bd1eae2",
+      "date": "2026-09-08",
+      "alert_start_utc": "2026-09-08T10:21:46Z",
+      "alert_end_utc": "2026-09-08T12:17:15Z",
+      "alert_start_kyiv": "2026-09-08T13:21:46+03:00",
+      "alert_end_kyiv": "2026-09-08T15:17:15+03:00",
+      "denominator_member": true,
+      "current_canonical_strict": false,
+      "current_canonical_sensitivity_only": false,
+      "prior_classification_in_claim_artifact": "review_date_level_unresolved_event_time",
+      "audit_provenance": [
+        {
+          "source_artifact": "research/zaporizhzhia_explosion_gap_audit.json",
+          "source_path": "$.additional_confirmed_strict_misses[11]",
+          "occurrence_fields": {
+            "episode_id": "eac6a8d131341fb46bd1eae2",
+            "date": "2026-09-08",
+            "current_canonical_classification": "review_date_level_unresolved_event_time",
+            "source_url": "https://www.ukrinform.ua/rubric-regions/4162036-vorog-atakuvav-promislove-pidpriemstvo-u-zaporizzi-e-poranenij.html",
+            "source": "Укрінформ",
+            "event_time": "Present-tense explosions during a long-running active city alert."
+          }
+        },
+        {
+          "source_artifact": "research/zaporizhzhia_explosion_gap_audit.json",
+          "source_path": "$.manual_candidate_register[50]",
+          "occurrence_fields": {
+            "episode_id": "eac6a8d131341fb46bd1eae2",
+            "date": "2026-09-08"
+          }
+        }
+      ],
+      "confirmed_claim_occurrences": [
+        {
+          "source_artifact": "research/zaporizhzhia_explosion_gap_audit.json",
+          "source_audit_pass": "gap_audit_additional_confirmed_strict_misses",
+          "source_path": "$.additional_confirmed_strict_misses[11]",
+          "original_verdict": "legacy_equivalent_confirmed_strict_miss"
+        }
+      ],
+      "exact_city_evidence": "У місті вже тривалий час лунає повітряна тривога, в різних районах міста чути вибухи.",
+      "military_aerial_war_context": "The stronger source supplies explicit exact-city explosions during the active canonical episode; the earlier review source lacked usable time.",
+      "best_event_time_or_temporal_wording": "Present-tense explosions during a long-running active city alert.",
+      "evidence_sources": [
+        {
+          "source": "Укрінформ",
+          "url": "https://www.ukrinform.ua/rubric-regions/4162036-vorog-atakuvav-promislove-pidpriemstvo-u-zaporizzi-e-poranenij.html",
+          "timestamp_kyiv": "2026-09-08T14:24:00+03:00",
+          "evidence_text": "У місті вже тривалий час лунає повітряна тривога, в різних районах міста чути вибухи."
+        }
+      ],
+      "episode_match_reason": "The stronger source supplies explicit exact-city explosions during the active canonical episode; the earlier review source lacked usable time.",
+      "same_day_alternative_canonical_strict_episodes": [],
+      "nearest_same_day_strict_gap_minutes": null,
+      "publication_or_update_time_alone_used_as_event_time": false,
+      "temporal_ambiguity": false,
+      "contradictions": [],
+      "reconciliation_verdict": "repair_ready_confirmed_miss"
+    },
+    {
+      "episode_id": "7c008970817e8d13ae402670",
+      "date": "2026-06-16",
+      "alert_start_utc": "2026-06-16T16:42:55Z",
+      "alert_end_utc": "2026-06-16T18:04:58Z",
+      "alert_start_kyiv": null,
+      "alert_end_kyiv": null,
+      "denominator_member": true,
+      "current_canonical_strict": false,
+      "current_canonical_sensitivity_only": false,
+      "prior_classification_in_claim_artifact": null,
+      "audit_provenance": [
+        {
+          "source_artifact": "research/zaporizhzhia_explosion_blind_sample_50.json",
+          "source_path": "$.sampled_episodes[40]",
+          "occurrence_fields": {
+            "episode_id": "7c008970817e8d13ae402670",
+            "date": "2026-06-16",
+            "verdict": "confirmed_strict_miss",
+            "mechanism": "multiple_episodes_same_date"
+          }
+        },
+        {
+          "source_artifact": "research/zaporizhzhia_explosion_o3_source_discovery.json",
+          "source_path": "$.positive_control_results.controls[3]",
+          "occurrence_fields": {
+            "episode_id": "7c008970817e8d13ae402670",
+            "date": "2026-06-16",
+            "source": "Trukha Zaporizhzhia Telegram"
+          }
+        }
+      ],
+      "confirmed_claim_occurrences": [
+        {
+          "source_artifact": "research/zaporizhzhia_explosion_blind_sample_50.json",
+          "source_audit_pass": "blind_sample_wave_1",
+          "source_path": "$.sampled_episodes[40]",
+          "original_verdict": "confirmed_strict_miss"
+        }
+      ],
+      "exact_city_evidence": [
+        "Вибух.",
+        "Момент влучання БпЛА в місті.",
+        "Повторні вибухи.",
+        "Police confirm a Shahed attack on Zaporizhzhia with multiple city impacts while an air alert was active."
+      ],
+      "military_aerial_war_context": "Exact-city explosion wording + explicit UAV impact + confirmed aerial-war context + contemporaneous event times inside one canonical alert episode satisfy the current strict methodology.",
+      "best_event_time_or_temporal_wording": "The alert was active 19:42:55-21:04:58 Europe/Kyiv. Contemporaneous exact-city messages at 19:51, 19:55 and 20:02 explicitly report an explosion, a UAV impact in the city and repeated explosions, all inside the episode. The later police report corroborates the aerial-war context and city impacts; its publication time is not used as event time.",
+      "evidence_sources": [
+        {
+          "source": "Труха⚡️Запоріжжя Telegram",
+          "url": "https://t.me/truexazaporozie/64460",
+          "timestamp_kyiv": "2026-06-16T19:51:00+03:00",
+          "event_time_kyiv": null,
+          "evidence_text": "Вибух."
+        },
+        {
+          "source": "Труха⚡️Запоріжжя Telegram",
+          "url": "https://t.me/truexazaporozie/64461",
+          "timestamp_kyiv": "2026-06-16T19:55:00+03:00",
+          "event_time_kyiv": null,
+          "evidence_text": "Момент влучання БпЛА в місті."
+        },
+        {
+          "source": "Труха⚡️Запоріжжя Telegram",
+          "url": "https://t.me/truexazaporozie/64465",
+          "timestamp_kyiv": "2026-06-16T20:02:00+03:00",
+          "event_time_kyiv": null,
+          "evidence_text": "Повторні вибухи."
+        },
+        {
+          "source": "Головне управління Національної поліції в Запорізькій області",
+          "url": "https://zp.npu.gov.ua/news/shakhedna-ataka-na-zaporizhzhia-zabrala-zhyttia-liudyny-ie-poraneni-na-mistsiakh-vluchan-dopomohu-liudiam-nadaiut-politseiski",
+          "timestamp_kyiv": "2026-06-17T00:01:00+03:00",
+          "event_time_kyiv": null,
+          "evidence_text": "Police confirm a Shahed attack on Zaporizhzhia with multiple city impacts while an air alert was active."
+        }
+      ],
+      "episode_match_reason": "The alert was active 19:42:55-21:04:58 Europe/Kyiv. Contemporaneous exact-city messages at 19:51, 19:55 and 20:02 explicitly report an explosion, a UAV impact in the city and repeated explosions, all inside the episode. The later police report corroborates the aerial-war context and city impacts; its publication time is not used as event time.",
+      "same_day_alternative_canonical_strict_episodes": [
+        "f925608b4627f59f007d56d4"
+      ],
+      "nearest_same_day_strict_gap_minutes": 39.05,
+      "publication_or_update_time_alone_used_as_event_time": false,
+      "temporal_ambiguity": false,
+      "contradictions": [],
+      "reconciliation_verdict": "repair_ready_confirmed_miss"
+    },
+    {
+      "episode_id": "7a45b4c6cd4f18358e063002",
+      "date": "2026-03-21",
+      "alert_start_utc": "2026-03-21T00:28:29Z",
+      "alert_end_utc": "2026-03-21T03:06:48Z",
+      "alert_start_kyiv": "2026-03-21T02:28:29+02:00",
+      "alert_end_kyiv": "2026-03-21T05:06:48+02:00",
+      "denominator_member": true,
+      "current_canonical_strict": false,
+      "current_canonical_sensitivity_only": false,
+      "prior_classification_in_claim_artifact": null,
+      "audit_provenance": [
+        {
+          "source_artifact": "research/zaporizhzhia_explosion_blind_sample_50_wave2.json",
+          "source_path": "$.sampled_episodes[29]",
+          "occurrence_fields": {
+            "episode_id": "7a45b4c6cd4f18358e063002",
+            "date": "2026-03-21",
+            "verdict": "confirmed_strict_miss"
+          }
+        },
+        {
+          "source_artifact": "research/zaporizhzhia_explosion_o3_source_discovery.json",
+          "source_path": "$.positive_control_results.controls[2]",
+          "occurrence_fields": {
+            "episode_id": "7a45b4c6cd4f18358e063002",
+            "date": "2026-03-21",
+            "source": "NV live / indexed report of Suspilne message"
+          }
+        }
+      ],
+      "confirmed_claim_occurrences": [
+        {
+          "source_artifact": "research/zaporizhzhia_explosion_blind_sample_50_wave2.json",
+          "source_audit_pass": "blind_sample_wave_2",
+          "source_path": "$.sampled_episodes[29]",
+          "original_verdict": "confirmed_strict_miss"
+        }
+      ],
+      "exact_city_evidence": [
+        "03:15 У Запоріжжі пролунав вибух, повідомляє Суспільне.",
+        "Police confirms that on 21 March Russian Shahed-type UAVs attacked Zaporizhzhia, with impacts on housing and infrastructure."
+      ],
+      "military_aerial_war_context": "Exact-city explosion wording, confirmed aerial-war/UAV context, and an explicit event time inside one canonical monitor alert episode satisfy the existing strict methodology.",
+      "best_event_time_or_temporal_wording": "The NV live chronology explicitly timestamps an exact-city explosion at 03:15 Kyiv, inside this canonical alert episode (02:28:29–05:06:48). Publication time is not substituted for event time.",
+      "evidence_sources": [
+        {
+          "source": "NV live chronology, citing Suspilne",
+          "url": "https://nv.ua/ukr/ukraine/events/ataka-bpla-na-mikolajivshchinu-ta-dnipro-operativni-dani-povitryanih-sil-50593669.html",
+          "timestamp_kyiv": "2026-03-21T04:12:00+02:00",
+          "event_time_kyiv": "2026-03-21T03:15:00+02:00",
+          "evidence_text": "03:15 У Запоріжжі пролунав вибух, повідомляє Суспільне."
+        },
+        {
+          "source": "National Police, Zaporizhzhia region",
+          "url": "https://zp.npu.gov.ua/news/u-zaporizhzhi-vnaslidok-ataky-rosiiskykh-bezpilotnykiv-zahynuly-dvoie-liudei-shche-dvoie-nepovnolitnikh-postrazhdaly-na-mistsiakh-vluchan-pratsiuiut-politseiski",
+          "timestamp_kyiv": "2026-03-21T08:50:00+02:00",
+          "event_time_kyiv": "morning; corroborative, not used as the primary minute-level timestamp",
+          "evidence_text": "Police confirms that on 21 March Russian Shahed-type UAVs attacked Zaporizhzhia, with impacts on housing and infrastructure."
+        }
+      ],
+      "episode_match_reason": "The NV live chronology explicitly timestamps an exact-city explosion at 03:15 Kyiv, inside this canonical alert episode (02:28:29–05:06:48). Publication time is not substituted for event time.",
+      "same_day_alternative_canonical_strict_episodes": [
+        "c1d947bd6240f8549c0e385a",
+        "68046107668aad7c9f51499d"
+      ],
+      "nearest_same_day_strict_gap_minutes": 149.53,
+      "publication_or_update_time_alone_used_as_event_time": false,
+      "temporal_ambiguity": false,
+      "contradictions": [],
+      "reconciliation_verdict": "repair_ready_confirmed_miss"
+    },
+    {
+      "episode_id": "5da4fc649a38d4796ebbcf94",
+      "date": "2026-09-07",
+      "alert_start_utc": "2026-09-06T21:00:54Z",
+      "alert_end_utc": "2026-09-06T23:48:49Z",
+      "alert_start_kyiv": "2026-09-07T00:00:54",
+      "alert_end_kyiv": "2026-09-07T02:48:49",
+      "denominator_member": true,
+      "current_canonical_strict": false,
+      "current_canonical_sensitivity_only": true,
+      "prior_classification_in_claim_artifact": null,
+      "audit_provenance": [
+        {
+          "source_artifact": "research/zaporizhzhia_explosion_o3_source_discovery.json",
+          "source_path": "$.searched_episodes[315]",
+          "occurrence_fields": {
+            "episode_id": "5da4fc649a38d4796ebbcf94",
+            "date": "2026-09-07",
+            "episode_order_distance": 1
+          }
+        },
+        {
+          "source_artifact": "research/zaporizhzhia_explosion_o3_source_discovery.json",
+          "source_path": "$.exact_city_hit_details[9]",
+          "occurrence_fields": {
+            "episode_id": "5da4fc649a38d4796ebbcf94",
+            "date": "2026-09-07",
+            "episode_order_distance": 1
+          }
+        },
+        {
+          "source_artifact": "research/zaporizhzhia_explosion_o3_source_discovery.json",
+          "source_path": "$.whole_day_timelines_for_exact_city_hits[7].source_timestamps[0]",
+          "occurrence_fields": {
+            "episode_id": "5da4fc649a38d4796ebbcf94"
+          }
+        },
+        {
+          "source_artifact": "research/zaporizhzhia_explosion_o3_source_discovery.json",
+          "source_path": "$.whole_day_timelines_for_exact_city_hits[7].episodes[0]",
+          "occurrence_fields": {
+            "episode_id": "5da4fc649a38d4796ebbcf94",
+            "canonical_status": "non_strict"
+          }
+        },
+        {
+          "source_artifact": "research/zaporizhzhia_explosion_o3_manual_review_batch1.json",
+          "source_path": "$.reviewed_records[9]",
+          "occurrence_fields": {
+            "episode_id": "5da4fc649a38d4796ebbcf94",
+            "date": "2026-09-07",
+            "final_review_verdict": "confirmed_strict_miss",
+            "episode_order_distance": 1,
+            "nearest_canonical_strict_episode_id": "23371bee083381cd79cf93a2",
+            "temporal_evidence_to_target_episode": "exact_event_time_inside_target",
+            "failure_mode": "source_discovery"
+          }
+        },
+        {
+          "source_artifact": "research/zaporizhzhia_explosion_o3_manual_review_batch1.json",
+          "source_path": "$.observed_failure_pattern.confirmed_miss_failure_modes[0]",
+          "occurrence_fields": {
+            "episode_id": "5da4fc649a38d4796ebbcf94",
+            "failure_mode": "source_discovery"
+          }
+        }
+      ],
+      "confirmed_claim_occurrences": [
+        {
+          "source_artifact": "research/zaporizhzhia_explosion_o3_manual_review_batch1.json",
+          "source_audit_pass": "o3_exact_city_manual_review_batch1",
+          "source_path": "$.reviewed_records[9]",
+          "original_verdict": "confirmed_strict_miss"
+        }
+      ],
+      "exact_city_evidence": [
+        "Палає City Mall у Запоріжжі; наслідки атаки, сильна пожежа після удару.",
+        "Ворожий напад на торговий центр стався приблизно о 00:30 ... влучили три ударні дрони типу «Шахед»."
+      ],
+      "military_aerial_war_context": "Independent reporting places three Shahed impacts on City Mall in Zaporizhzhia at approximately 00:30. That time falls unambiguously inside the target alert 00:00:54–02:48:49. Exact city, aerial-war context and target-episode timing all satisfy the canonical strict rule.",
+      "best_event_time_or_temporal_wording": "exact_event_time_inside_target",
+      "evidence_sources": [
+        {
+          "source": "ЗаБор Запоріжжя Telegram",
+          "url": "https://t.me/zaborzp/148907",
+          "timestamp_kyiv": "2026-09-07T01:40:00+03:00",
+          "evidence_text": "Палає City Mall у Запоріжжі; наслідки атаки, сильна пожежа після удару."
+        },
+        {
+          "source": "D.UA Новини",
+          "url": "https://news.d.ua/culture/shahedi-spalili-trc-city-mall-y-zaporijji-razom-iz-tovarom-minylogo-tijnia-vin-zakrivsia/",
+          "timestamp_kyiv": "2026-09-07T03:00:00+03:00",
+          "evidence_text": "Ворожий напад на торговий центр стався приблизно о 00:30 ... влучили три ударні дрони типу «Шахед».",
+          "role": "Decisive event-time evidence inside the target alert."
+        }
+      ],
+      "episode_match_reason": "Independent reporting places three Shahed impacts on City Mall in Zaporizhzhia at approximately 00:30. That time falls unambiguously inside the target alert 00:00:54–02:48:49. Exact city, aerial-war context and target-episode timing all satisfy the canonical strict rule.",
+      "same_day_alternative_canonical_strict_episodes": [
+        "23371bee083381cd79cf93a2"
+      ],
+      "nearest_same_day_strict_gap_minutes": 96.53,
+      "publication_or_update_time_alone_used_as_event_time": false,
+      "temporal_ambiguity": false,
+      "contradictions": [],
+      "reconciliation_verdict": "repair_ready_confirmed_miss"
+    }
+  ],
+  "verdict_summary": {
+    "claimed_confirmed_records_raw": 16,
+    "claimed_confirmed_unique_episode_ids": 16,
+    "duplicate_claims": 0,
+    "already_canonical_strict": 0,
+    "repair_ready_confirmed_misses": 16,
+    "duplicate_of_other_claim": 0,
+    "conflict_needs_review": 0,
+    "downgraded_not_strict": 0
+  },
+  "duplicate_overlap_findings": {
+    "confirmed_claim_overlap_between_gap_blind_o3": [],
+    "note": "No final confirmed claim is duplicated across gap audit, blind Wave 1, blind Wave 2, or O3 manual review. Four earlier misses reappear in O3 source-discovery as positive controls; those references are not new claims."
+  },
+  "conflicts": [],
+  "repair_ready_episode_ids": [
+    "41f41f98fef80130dff07317",
+    "6e6afea5cad3ced8422d0ff8",
+    "eb29ccba021617db3b0e8bbc",
+    "19f123f154ffb68f06d0296e",
+    "8534686ad8552aef1dd5a009",
+    "03eb23a34f4367f90dbee592",
+    "ced9e05a99318132ec47d0a0",
+    "5a7d64e4d58b240825d0c954",
+    "6393c001ec4d0f8dfce54b51",
+    "0edc1d73c3a86e149371bfbf",
+    "404d55294a38c31848e7e093",
+    "1e434d0fa5abfd518ad07d1e",
+    "eac6a8d131341fb46bd1eae2",
+    "7c008970817e8d13ae402670",
+    "7a45b4c6cd4f18358e063002",
+    "5da4fc649a38d4796ebbcf94"
+  ],
+  "repair_ready_count": 16,
+  "expected_post_repair_metric": {
+    "denominator": 2365,
+    "current_strict_n": 169,
+    "current_strict_share_percent_exact": 7.145877378435518,
+    "current_strict_share_percent_display_2dp": 7.15,
+    "repair_ready_unique_misses": 16,
+    "expected_repaired_strict_n": 185,
+    "expected_repaired_strict_share_percent_exact": 7.822410147991543,
+    "expected_repaired_strict_share_percent_display_2dp": 7.82,
+    "absolute_percentage_point_change_exact": 0.676532769556025,
+    "absolute_percentage_point_change_display_2dp": 0.68,
+    "formula": "(169 + 16) / 2365"
+  },
+  "scope_guardrails": {
+    "research_only": true,
+    "canonical_changed": false,
+    "strict_series_changed": false,
+    "monitor_changed": false,
+    "dashboard_changed": false,
+    "grafana_changed": false,
+    "netlify_changed": false,
+    "production_changed": false,
+    "canonical_repair_run": false
+  },
+  "precommit_qa": {
+    "json_constructed_from_parsed_source_artifacts": true,
+    "all_claims_trace_to_source_artifacts": true,
+    "raw_claim_count_matches_expected": true,
+    "unique_claim_ids": true,
+    "all_claimed_ids_verified_in_frozen_denominator": true,
+    "same_interval_alias_conflicts": 0,
+    "all_repair_ready_not_in_current_canonical_strict": true,
+    "all_repair_ready_have_evidence": true,
+    "all_repair_ready_have_temporal_match_reason": true,
+    "current_numerator_direct_data_check": true,
+    "expected_arithmetic_correct": true
+  }
+}
