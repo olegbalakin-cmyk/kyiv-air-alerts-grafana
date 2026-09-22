@@ -1,0 +1,1104 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2026-09-22T19:02:00+03:00",
+  "repository": "olegbalakin-cmyk/kyiv-air-alerts-grafana",
+  "branch": "multicity-wip-2026-09-16",
+  "branch_head_before_commit": "baa80916e36557f0bbbd2e30a3053be14408d689",
+  "city": "zaporizhzhia",
+  "task": "Manual evidence review of the six O3 source_hit_outside_episode_timing episodes only.",
+  "context_commits": {
+    "source_discovery": "c0169445c0425d77cba7530cb5307a933475175b",
+    "exact_city_manual_review": "793645016fa1fa81b6e6a704a0c5dfeb42ff7780",
+    "exact_city_needs_review_adjudication": "ccd579937d45f92c74880ae3ae8121a7eba9e044"
+  },
+  "source_artifacts": [
+    "research/zaporizhzhia_explosion_o3_source_discovery.json",
+    "research/zaporizhzhia_explosion_o3_manual_review_batch1.json",
+    "research/zaporizhzhia_explosion_o3_needs_review_adjudication.json",
+    "research/zaporizhzhia_explosion_episode_order_inventory.json"
+  ],
+  "methodology": {
+    "scope": "Exactly the six O3 episodes labeled source_hit_outside_episode_timing in the source-discovery artifact. No no_source_hit_found episodes, no already-reviewed source_hit_exact_city episodes, and no O4/O5 or other universe were reviewed.",
+    "saved_evidence_first": "The saved source hit(s) in the source-discovery artifact were used first for each target. Targeted external chronology was added only to resolve actual event timing and same-day episode attribution.",
+    "publication_time_rule": "Publication/message/update time is not event time. A publication inside or near the target alert does not establish that the reported event occurred in that alert.",
+    "same_day_episode_rule": "All alert episodes on each candidate date were compared. If the event timing better fits a different episode, the target is rejected and better_matching_episode_id is recorded.",
+    "strict_rule": "confirmed_strict_miss requires exact-city Zaporizhzhia evidence, military/aerial-war explosion/strike/PVO context, and sufficiently resolved timing tying the event to the concrete target alert while excluding neighboring episodes.",
+    "sensitivity_rule": "sensitivity_only is reserved for exact-city military evidence plausibly belonging to the target but lacking enough temporal specificity for strict.",
+    "rejection_rule": "rejected is used when event timing excludes the target, or when evidence demonstrably belongs to another alert episode.",
+    "timezone": "Europe/Kyiv",
+    "protected_scope": "No canonical numerator/denominator, monitor, dashboard, Grafana, Netlify, production, or non-research artifact is modified by this pass."
+  },
+  "reviewed_count": 6,
+  "reviewed_source_discovery_bucket": "source_hit_outside_episode_timing",
+  "verdict_counts": {
+    "confirmed_strict_miss": 0,
+    "sensitivity_only": 0,
+    "rejected": 6,
+    "needs_review": 0
+  },
+  "records": [
+    {
+      "episode_id": "6871d178921352e6ab350e65",
+      "date": "2026-01-20",
+      "episode_order_distance": 1,
+      "nearest_canonical_strict_episode": {
+        "episode_id": "87348c2c06d552d2ad0fc751",
+        "alert_start_utc": "2026-01-20T14:23:35Z",
+        "alert_end_utc": "2026-01-20T16:27:28Z",
+        "alert_start_kyiv": "2026-01-20T16:23:35.000+02:00",
+        "alert_end_kyiv": "2026-01-20T18:27:28.000+02:00",
+        "canonical_status": "strict"
+      },
+      "target_alert": {
+        "alert_start_utc": "2026-01-20T16:33:09Z",
+        "alert_end_utc": "2026-01-20T16:44:19Z",
+        "alert_start_kyiv": "2026-01-20T18:33:09+02:00",
+        "alert_end_kyiv": "2026-01-20T18:44:19+02:00"
+      },
+      "saved_source_hits": [
+        {
+          "raw_hit_id": "h004",
+          "source": "Inform.zp.ua",
+          "source_id": "352809_update_18_35",
+          "url": "https://www.inform.zp.ua/ru/2026/01/20/352809_rf-neskolko-raz-atakovala-zaporozhe-chto-izvestno/",
+          "publication_or_message_datetime_kyiv": "2026-01-20T18:35:00+02:00",
+          "timestamp_kind": "live_article_update",
+          "saved_relevant_wording": "Оновлення повідомило, що росіяни знову атакували Запоріжжя дронами.",
+          "saved_exact_city_rationale": "Запоріжжя назване прямо.",
+          "saved_aerial_context": "explicit_UAV_attack",
+          "saved_timing_resolution": "Later chronology places the corresponding air attack at 18:08–18:24, before the 18:33–18:44 target alert."
+        }
+      ],
+      "publication_message_datetimes": [
+        {
+          "raw_hit_id": "h004",
+          "datetime_kyiv": "2026-01-20T18:35:00+02:00",
+          "timestamp_kind": "live_article_update"
+        }
+      ],
+      "exact_relevant_wording": [
+        {
+          "source": "Inform.zp.ua",
+          "kind": "saved_source_discovery_wording",
+          "wording": "Оновлення повідомило, що росіяни знову атакували Запоріжжя дронами."
+        },
+        {
+          "source": "Zaporizhzhia regional prosecutor chronology relayed by Pershyi Zaporizkyi",
+          "kind": "external_timing_evidence_exact_wording",
+          "wording": "З 18:08 по 18:24 години 20 січня військові російської армії атакували Запоріжжя десятками безпілотників."
+        },
+        {
+          "source": "24 Kanal chronology citing Ivan Fedorov",
+          "kind": "external_timing_evidence_exact_wording",
+          "wording": "Станом на 18:23 над Запоріжжям спостерігався 1 БпЛА ударного типу."
+        }
+      ],
+      "exact_city_status": "confirmed_exact_city",
+      "military_aerial_war_context": "Explicit Russian UAV/Shahed attack on Zaporizhzhia, with PVO and impacts on civilian/critical infrastructure.",
+      "best_available_event_time_or_interval": {
+        "value": "2026-01-20T18:08:00+02:00/2026-01-20T18:24:00+02:00",
+        "precision": "officially reported interval",
+        "temporal_confidence": "high"
+      },
+      "event_time_provenance": [
+        {
+          "source": "Zaporizhzhia regional prosecutor chronology relayed by Pershyi Zaporizkyi",
+          "source_type": "retrospective next-day local report relaying official prosecutor statement",
+          "url": "https://1news.zp.ua/rosijskyj-udar-po-zaporizhzhyu-pravoohoronczi-rozsliduyut-yak-voyennyj-zlochyn/",
+          "publication_date": "2026-01-21",
+          "exact_relevant_wording": "З 18:08 по 18:24 години 20 січня військові російської армії атакували Запоріжжя десятками безпілотників.",
+          "timing_use": "Defines the attack interval as 18:08-18:24 Kyiv time."
+        },
+        {
+          "source": "24 Kanal chronology citing Ivan Fedorov",
+          "source_type": "retrospective chronology built from contemporaneous official messages",
+          "url": "https://24tv.ua/zaporizhzhi-pratsyuye-ppo_n2992898",
+          "publication_datetime_kyiv": "2026-01-21T06:42:00+02:00",
+          "exact_relevant_wording": "Станом на 18:23 над Запоріжжям спостерігався 1 БпЛА ударного типу.",
+          "timing_use": "Chronology has a UAV toward Zaporizhzhia at 18:03, strike UAV at 18:08, PVO at 18:17, one UAV at 18:23, then all-clear."
+        }
+      ],
+      "all_alert_episodes_that_day": [
+        {
+          "position": 1,
+          "episode_id": "4f1acc102b88ca92f5aa8bbd",
+          "alert_start_utc": "2026-01-20T07:21:16Z",
+          "alert_end_utc": "2026-01-20T12:23:35Z",
+          "alert_start_kyiv": "2026-01-20T09:21:16.000+02:00",
+          "alert_end_kyiv": "2026-01-20T14:23:35.000+02:00",
+          "canonical_status": "non_strict"
+        },
+        {
+          "position": 2,
+          "episode_id": "e484e954aa9b0e2ae9c61e37",
+          "alert_start_utc": "2026-01-20T12:45:37Z",
+          "alert_end_utc": "2026-01-20T13:49:25Z",
+          "alert_start_kyiv": "2026-01-20T14:45:37.000+02:00",
+          "alert_end_kyiv": "2026-01-20T15:49:25.000+02:00",
+          "canonical_status": "non_strict"
+        },
+        {
+          "position": 3,
+          "episode_id": "87348c2c06d552d2ad0fc751",
+          "alert_start_utc": "2026-01-20T14:23:35Z",
+          "alert_end_utc": "2026-01-20T16:27:28Z",
+          "alert_start_kyiv": "2026-01-20T16:23:35.000+02:00",
+          "alert_end_kyiv": "2026-01-20T18:27:28.000+02:00",
+          "canonical_status": "strict"
+        },
+        {
+          "position": 4,
+          "episode_id": "6871d178921352e6ab350e65",
+          "alert_start_utc": "2026-01-20T16:33:09Z",
+          "alert_end_utc": "2026-01-20T16:44:19Z",
+          "alert_start_kyiv": "2026-01-20T18:33:09.000+02:00",
+          "alert_end_kyiv": "2026-01-20T18:44:19.000+02:00",
+          "canonical_status": "non_strict"
+        },
+        {
+          "position": 5,
+          "episode_id": "64867fdfc87ad6f4835ea664",
+          "alert_start_utc": "2026-01-20T17:44:46Z",
+          "alert_end_utc": "2026-01-20T18:13:05Z",
+          "alert_start_kyiv": "2026-01-20T19:44:46.000+02:00",
+          "alert_end_kyiv": "2026-01-20T20:13:05.000+02:00",
+          "canonical_status": "non_strict"
+        },
+        {
+          "position": 6,
+          "episode_id": "4c9e1e3c3ab0927f33046b0a",
+          "alert_start_utc": "2026-01-20T18:47:51Z",
+          "alert_end_utc": "2026-01-20T19:18:52Z",
+          "alert_start_kyiv": "2026-01-20T20:47:51.000+02:00",
+          "alert_end_kyiv": "2026-01-20T21:18:52.000+02:00",
+          "canonical_status": "non_strict"
+        },
+        {
+          "position": 7,
+          "episode_id": "987d000a8dcb01d5846f5e9d",
+          "alert_start_utc": "2026-01-20T21:26:05Z",
+          "alert_end_utc": "2026-01-20T21:52:09Z",
+          "alert_start_kyiv": "2026-01-20T23:26:05.000+02:00",
+          "alert_end_kyiv": "2026-01-20T23:52:09.000+02:00",
+          "canonical_status": "non_strict"
+        }
+      ],
+      "alert_episodes_that_can_realistically_match_event": [
+        {
+          "position": 3,
+          "episode_id": "87348c2c06d552d2ad0fc751",
+          "alert_start_utc": "2026-01-20T14:23:35Z",
+          "alert_end_utc": "2026-01-20T16:27:28Z",
+          "alert_start_kyiv": "2026-01-20T16:23:35.000+02:00",
+          "alert_end_kyiv": "2026-01-20T18:27:28.000+02:00",
+          "canonical_status": "strict"
+        }
+      ],
+      "canonical_strict_episode_better_explains_source_hit": true,
+      "better_matching_episode_id": "87348c2c06d552d2ad0fc751",
+      "better_matching_episode": {
+        "episode_id": "87348c2c06d552d2ad0fc751",
+        "alert_start_utc": "2026-01-20T14:23:35Z",
+        "alert_end_utc": "2026-01-20T16:27:28Z",
+        "alert_start_kyiv": "2026-01-20T16:23:35.000+02:00",
+        "alert_end_kyiv": "2026-01-20T18:27:28.000+02:00",
+        "canonical_status": "strict"
+      },
+      "final_verdict": "rejected",
+      "rationale": "The saved 18:35 update was published after the attack it describes. Official chronology time-bounds the relevant Zaporizhzhia UAV attack to 18:08-18:24, wholly inside the preceding canonical-strict alert (16:23:35-18:27:28) and ending before the target alert starts at 18:33:09. Publication/update time cannot transfer that event to the target.",
+      "outside_episode_timing_failure_pattern": [
+        "publication_or_live_update_lag",
+        "wrong_episode_attribution"
+      ],
+      "confirmed_strict_miss_failure_mode": null
+    },
+    {
+      "episode_id": "4a1ab0a4fb974e0b2647a683",
+      "date": "2026-02-10",
+      "episode_order_distance": 1,
+      "nearest_canonical_strict_episode": {
+        "episode_id": "e367e13dc8ce9a263b1a3a88",
+        "alert_start_utc": "2026-02-10T13:57:17Z",
+        "alert_end_utc": "2026-02-10T17:25:06Z",
+        "alert_start_kyiv": "2026-02-10T15:57:17.000+02:00",
+        "alert_end_kyiv": "2026-02-10T19:25:06.000+02:00",
+        "canonical_status": "strict"
+      },
+      "target_alert": {
+        "alert_start_utc": "2026-02-10T08:28:31Z",
+        "alert_end_utc": "2026-02-10T13:40:14Z",
+        "alert_start_kyiv": "2026-02-10T10:28:31+02:00",
+        "alert_end_kyiv": "2026-02-10T15:40:14+02:00"
+      },
+      "saved_source_hits": [
+        {
+          "raw_hit_id": "h007",
+          "source": "ZPRZ.CITY",
+          "source_id": "zaporizhzhya-pid-udarom-rosiyani-obstrilyali-dityachij-sadok",
+          "url": "https://zprz.city/news/view/zaporizhzhya-pid-udarom-rosiyani-obstrilyali-dityachij-sadok-foto",
+          "publication_or_message_datetime_kyiv": "2026-02-10T17:23:00+02:00",
+          "timestamp_kind": "article_publication",
+          "saved_relevant_wording": "Вдень російські війська завдали удару по Запоріжжю; у другій половині дня в місті було чутно вибухи.",
+          "saved_exact_city_rationale": "Запоріжжя і місто названі прямо.",
+          "saved_aerial_context": "explicit_aerial_attack_context",
+          "saved_timing_resolution": "Independent timing source places this event shortly before ~16:20, after target alert ended at 15:40."
+        }
+      ],
+      "publication_message_datetimes": [
+        {
+          "raw_hit_id": "h007",
+          "datetime_kyiv": "2026-02-10T17:23:00+02:00",
+          "timestamp_kind": "article_publication"
+        }
+      ],
+      "exact_relevant_wording": [
+        {
+          "source": "ZPRZ.CITY",
+          "kind": "saved_source_discovery_wording",
+          "wording": "Вдень російські війська завдали удару по Запоріжжю; у другій половині дня в місті було чутно вибухи."
+        },
+        {
+          "source": "Akzent",
+          "kind": "external_timing_evidence_exact_wording",
+          "wording": "У Космічному районі Запоріжжя в перші хвилини після вибуху зафіксовано руйнування цивільної інфраструктури."
+        },
+        {
+          "source": "Ivan Fedorov Telegram",
+          "kind": "external_timing_evidence_exact_wording",
+          "wording": "Вибуховою хвилею пошкоджено дитсадок; діти та вихователі були в укритті."
+        }
+      ],
+      "exact_city_status": "confirmed_exact_city",
+      "military_aerial_war_context": "Explicit Russian UAV strike on Zaporizhzhia; blast damage to a kindergarten and nearby apartment buildings during ongoing drone danger.",
+      "best_available_event_time_or_interval": {
+        "value": "shortly before 2026-02-10T16:20:00+02:00; conservatively approximately 16:00-16:20",
+        "precision": "narrow contemporaneous interval, not exact minute",
+        "temporal_confidence": "moderate_high"
+      },
+      "event_time_provenance": [
+        {
+          "source": "Akzent",
+          "source_type": "contemporaneous local report",
+          "url": "https://akzent.zp.ua/pershi-hvylyny-pislya-ataky-bpla-na-zaporizhzhya-10-lyutogo-foto-video/",
+          "publication_datetime_kyiv": "2026-02-10T16:20:00+02:00",
+          "exact_relevant_wording": "У Космічному районі Запоріжжя в перші хвилини після вибуху зафіксовано руйнування цивільної інфраструктури.",
+          "timing_use": "At 16:20 the outlet explicitly describes itself as reporting in the first minutes after the explosion while drone danger is still ongoing."
+        },
+        {
+          "source": "Ivan Fedorov Telegram",
+          "source_type": "primary official Telegram cited by contemporaneous local reporting",
+          "url": "https://t.me/ivan_fedorov_zp/33955",
+          "exact_relevant_wording": "Вибуховою хвилею пошкоджено дитсадок; діти та вихователі були в укритті.",
+          "timing_use": "Confirms the exact-city strike consequences and incident identity; Akzent provides the useful relative timing."
+        }
+      ],
+      "all_alert_episodes_that_day": [
+        {
+          "position": 1,
+          "episode_id": "4a1ab0a4fb974e0b2647a683",
+          "alert_start_utc": "2026-02-10T08:28:31Z",
+          "alert_end_utc": "2026-02-10T13:40:14Z",
+          "alert_start_kyiv": "2026-02-10T10:28:31.000+02:00",
+          "alert_end_kyiv": "2026-02-10T15:40:14.000+02:00",
+          "canonical_status": "non_strict"
+        },
+        {
+          "position": 2,
+          "episode_id": "e367e13dc8ce9a263b1a3a88",
+          "alert_start_utc": "2026-02-10T13:57:17Z",
+          "alert_end_utc": "2026-02-10T17:25:06Z",
+          "alert_start_kyiv": "2026-02-10T15:57:17.000+02:00",
+          "alert_end_kyiv": "2026-02-10T19:25:06.000+02:00",
+          "canonical_status": "strict"
+        },
+        {
+          "position": 3,
+          "episode_id": "b7d28541e30468af2123d170",
+          "alert_start_utc": "2026-02-10T18:51:59Z",
+          "alert_end_utc": "2026-02-11T12:24:58Z",
+          "alert_start_kyiv": "2026-02-10T20:51:59.000+02:00",
+          "alert_end_kyiv": "2026-02-11T14:24:58.000+02:00",
+          "canonical_status": "strict"
+        }
+      ],
+      "alert_episodes_that_can_realistically_match_event": [
+        {
+          "position": 2,
+          "episode_id": "e367e13dc8ce9a263b1a3a88",
+          "alert_start_utc": "2026-02-10T13:57:17Z",
+          "alert_end_utc": "2026-02-10T17:25:06Z",
+          "alert_start_kyiv": "2026-02-10T15:57:17.000+02:00",
+          "alert_end_kyiv": "2026-02-10T19:25:06.000+02:00",
+          "canonical_status": "strict"
+        }
+      ],
+      "canonical_strict_episode_better_explains_source_hit": true,
+      "better_matching_episode_id": "e367e13dc8ce9a263b1a3a88",
+      "better_matching_episode": {
+        "episode_id": "e367e13dc8ce9a263b1a3a88",
+        "alert_start_utc": "2026-02-10T13:57:17Z",
+        "alert_end_utc": "2026-02-10T17:25:06Z",
+        "alert_start_kyiv": "2026-02-10T15:57:17.000+02:00",
+        "alert_end_kyiv": "2026-02-10T19:25:06.000+02:00",
+        "canonical_status": "strict"
+      },
+      "final_verdict": "rejected",
+      "rationale": "The saved 17:23 article is a later report. A contemporaneous 16:20 local report says it is describing the first minutes after the explosion while drone danger remains active. Even allowing for imprecision, that places the event after the target ended at 15:40:14 and much better inside the next alert, which began at 15:57:17 and is already canonical strict. The exact minute remains unresolved, but the target episode is not a defensible match.",
+      "outside_episode_timing_failure_pattern": [
+        "publication_lag",
+        "coarse_event_time",
+        "wrong_episode_attribution"
+      ],
+      "confirmed_strict_miss_failure_mode": null
+    },
+    {
+      "episode_id": "4aa2b1dd84cc144314894e77",
+      "date": "2026-03-11",
+      "episode_order_distance": 1,
+      "nearest_canonical_strict_episode": {
+        "episode_id": "1cf4b55dbaaef2eb3cee8eb1",
+        "alert_start_utc": "2026-03-11T13:57:07Z",
+        "alert_end_utc": "2026-03-11T15:05:12Z",
+        "alert_start_kyiv": "2026-03-11T15:57:07.000+02:00",
+        "alert_end_kyiv": "2026-03-11T17:05:12.000+02:00",
+        "canonical_status": "strict"
+      },
+      "target_alert": {
+        "alert_start_utc": "2026-03-11T15:34:48Z",
+        "alert_end_utc": "2026-03-11T15:53:26Z",
+        "alert_start_kyiv": "2026-03-11T17:34:48+02:00",
+        "alert_end_kyiv": "2026-03-11T17:53:26+02:00"
+      },
+      "saved_source_hits": [
+        {
+          "raw_hit_id": "h009",
+          "source": "Поліція Запорізької області",
+          "source_id": "police_2026-03-11_18-12",
+          "url": "https://zp.npu.gov.ua/news/rosiiany-vdaryly-po-zaporizhzhiu-kerovanymy-aviabombamy-politseiski-nadaiut-dopomohu-postrazhdalym-ta-dokumentuiut-voiennyi-zlochyn",
+          "publication_or_message_datetime_kyiv": "2026-03-11T18:12:00+02:00",
+          "timestamp_kind": "article_publication",
+          "saved_relevant_wording": "П’ять КАБів поцілили по місту; вибухи пролунали на інфраструктурі та в житловому секторі.",
+          "saved_exact_city_rationale": "Поліція прямо описує Запоріжжя/обласний центр.",
+          "saved_aerial_context": "explicit_KAB_attack",
+          "saved_timing_resolution": "Same attack is independently timed to ~16:10, before the 17:34–17:53 target alert."
+        }
+      ],
+      "publication_message_datetimes": [
+        {
+          "raw_hit_id": "h009",
+          "datetime_kyiv": "2026-03-11T18:12:00+02:00",
+          "timestamp_kind": "article_publication"
+        }
+      ],
+      "exact_relevant_wording": [
+        {
+          "source": "Поліція Запорізької області",
+          "kind": "saved_source_discovery_wording",
+          "wording": "П’ять КАБів поцілили по місту; вибухи пролунали на інфраструктурі та в житловому секторі."
+        },
+        {
+          "source": "Zaporizhzhia regional prosecutor statement relayed by Orihiv.com.ua",
+          "kind": "external_timing_evidence_exact_wording",
+          "wording": "11 березня 2026 року близько 16:10 росіяни атакували Запоріжжя та с. Розумівка, застосувавши керовані авіаційні бомби."
+        }
+      ],
+      "exact_city_status": "confirmed_exact_city",
+      "military_aerial_war_context": "Explicit Russian KAB attack on Zaporizhzhia; impacts on housing and critical infrastructure.",
+      "best_available_event_time_or_interval": {
+        "value": "approximately 2026-03-11T16:10:00+02:00",
+        "precision": "official approximate timestamp",
+        "temporal_confidence": "high"
+      },
+      "event_time_provenance": [
+        {
+          "source": "Zaporizhzhia regional prosecutor statement relayed by Orihiv.com.ua",
+          "source_type": "same-day local report quoting official prosecutor chronology",
+          "url": "https://orihiv.com.ua/ukr/novini/11.03.2026/skinuli-kabi-rosiyani-vdarili-po-zaporizzyu-i-rozumivci",
+          "exact_relevant_wording": "11 березня 2026 року близько 16:10 росіяни атакували Запоріжжя та с. Розумівка, застосувавши керовані авіаційні бомби.",
+          "timing_use": "Official chronology places the attack at about 16:10 Kyiv time."
+        }
+      ],
+      "all_alert_episodes_that_day": [
+        {
+          "position": 1,
+          "episode_id": "7ab47c208af5d2b08e75297d",
+          "alert_start_utc": "2026-03-10T22:41:28Z",
+          "alert_end_utc": "2026-03-11T00:00:07Z",
+          "alert_start_kyiv": "2026-03-11T00:41:28.000+02:00",
+          "alert_end_kyiv": "2026-03-11T02:00:07.000+02:00",
+          "canonical_status": "non_strict"
+        },
+        {
+          "position": 2,
+          "episode_id": "b7918fda6a0f4d53627d75da",
+          "alert_start_utc": "2026-03-11T01:52:54Z",
+          "alert_end_utc": "2026-03-11T03:47:25Z",
+          "alert_start_kyiv": "2026-03-11T03:52:54.000+02:00",
+          "alert_end_kyiv": "2026-03-11T05:47:25.000+02:00",
+          "canonical_status": "non_strict"
+        },
+        {
+          "position": 3,
+          "episode_id": "8a102c6a0c9c30357daa6dd2",
+          "alert_start_utc": "2026-03-11T09:05:54Z",
+          "alert_end_utc": "2026-03-11T09:13:23Z",
+          "alert_start_kyiv": "2026-03-11T11:05:54.000+02:00",
+          "alert_end_kyiv": "2026-03-11T11:13:23.000+02:00",
+          "canonical_status": "non_strict"
+        },
+        {
+          "position": 4,
+          "episode_id": "1cf4b55dbaaef2eb3cee8eb1",
+          "alert_start_utc": "2026-03-11T13:57:07Z",
+          "alert_end_utc": "2026-03-11T15:05:12Z",
+          "alert_start_kyiv": "2026-03-11T15:57:07.000+02:00",
+          "alert_end_kyiv": "2026-03-11T17:05:12.000+02:00",
+          "canonical_status": "strict"
+        },
+        {
+          "position": 5,
+          "episode_id": "4aa2b1dd84cc144314894e77",
+          "alert_start_utc": "2026-03-11T15:34:48Z",
+          "alert_end_utc": "2026-03-11T15:53:26Z",
+          "alert_start_kyiv": "2026-03-11T17:34:48.000+02:00",
+          "alert_end_kyiv": "2026-03-11T17:53:26.000+02:00",
+          "canonical_status": "non_strict"
+        },
+        {
+          "position": 6,
+          "episode_id": "879224e7d5c768fb1e06dfb3",
+          "alert_start_utc": "2026-03-11T16:56:20Z",
+          "alert_end_utc": "2026-03-11T17:53:05Z",
+          "alert_start_kyiv": "2026-03-11T18:56:20.000+02:00",
+          "alert_end_kyiv": "2026-03-11T19:53:05.000+02:00",
+          "canonical_status": "non_strict"
+        },
+        {
+          "position": 7,
+          "episode_id": "b0764553c1d300d281bf4e5d",
+          "alert_start_utc": "2026-03-11T18:24:03Z",
+          "alert_end_utc": "2026-03-11T18:31:38Z",
+          "alert_start_kyiv": "2026-03-11T20:24:03.000+02:00",
+          "alert_end_kyiv": "2026-03-11T20:31:38.000+02:00",
+          "canonical_status": "non_strict"
+        },
+        {
+          "position": 8,
+          "episode_id": "16f030ce4756b7ea9e4b74a1",
+          "alert_start_utc": "2026-03-11T19:33:05Z",
+          "alert_end_utc": "2026-03-11T21:23:17Z",
+          "alert_start_kyiv": "2026-03-11T21:33:05.000+02:00",
+          "alert_end_kyiv": "2026-03-11T23:23:17.000+02:00",
+          "canonical_status": "non_strict"
+        }
+      ],
+      "alert_episodes_that_can_realistically_match_event": [
+        {
+          "position": 4,
+          "episode_id": "1cf4b55dbaaef2eb3cee8eb1",
+          "alert_start_utc": "2026-03-11T13:57:07Z",
+          "alert_end_utc": "2026-03-11T15:05:12Z",
+          "alert_start_kyiv": "2026-03-11T15:57:07.000+02:00",
+          "alert_end_kyiv": "2026-03-11T17:05:12.000+02:00",
+          "canonical_status": "strict"
+        }
+      ],
+      "canonical_strict_episode_better_explains_source_hit": true,
+      "better_matching_episode_id": "1cf4b55dbaaef2eb3cee8eb1",
+      "better_matching_episode": {
+        "episode_id": "1cf4b55dbaaef2eb3cee8eb1",
+        "alert_start_utc": "2026-03-11T13:57:07Z",
+        "alert_end_utc": "2026-03-11T15:05:12Z",
+        "alert_start_kyiv": "2026-03-11T15:57:07.000+02:00",
+        "alert_end_kyiv": "2026-03-11T17:05:12.000+02:00",
+        "canonical_status": "strict"
+      },
+      "final_verdict": "rejected",
+      "rationale": "The attack is officially timed to about 16:10, which lies inside the canonical-strict alert 15:57:07-17:05:12. The target alert begins only at 17:34:48, roughly 1 hour 25 minutes after the event. The 18:12 police publication is therefore a later report, not target-window event timing.",
+      "outside_episode_timing_failure_pattern": [
+        "publication_lag",
+        "wrong_episode_attribution"
+      ],
+      "confirmed_strict_miss_failure_mode": null
+    },
+    {
+      "episode_id": "50f8ddab56b64d7db95768bd",
+      "date": "2026-03-14",
+      "episode_order_distance": 1,
+      "nearest_canonical_strict_episode": {
+        "episode_id": "ca3ecafd3d1e8309e63a2ce5",
+        "alert_start_utc": "2026-03-14T12:36:08Z",
+        "alert_end_utc": "2026-03-14T13:48:23Z",
+        "alert_start_kyiv": "2026-03-14T14:36:08.000+02:00",
+        "alert_end_kyiv": "2026-03-14T15:48:23.000+02:00",
+        "canonical_status": "strict"
+      },
+      "target_alert": {
+        "alert_start_utc": "2026-03-14T14:30:16Z",
+        "alert_end_utc": "2026-03-14T17:59:45Z",
+        "alert_start_kyiv": "2026-03-14T16:30:16+02:00",
+        "alert_end_kyiv": "2026-03-14T19:59:45+02:00"
+      },
+      "saved_source_hits": [
+        {
+          "raw_hit_id": "h010",
+          "source": "Поліція Запорізької області",
+          "source_id": "police_2026-03-14_17-23",
+          "url": "https://zp.npu.gov.ua/news/okupanty-atakuvaly-zaporizhzhia-kabamyie-zahybli-ta-poraneni-politseiski-dokumentuiut-naslidky-obstrilu",
+          "publication_or_message_datetime_kyiv": "2026-03-14T17:23:00+02:00",
+          "timestamp_kind": "article_publication",
+          "saved_relevant_wording": "Чотири керовані авіабомби вдарили по житлових кварталах обласного центру.",
+          "saved_exact_city_rationale": "Матеріал прямо про атаку на Запоріжжя.",
+          "saved_aerial_context": "explicit_KAB_attack",
+          "saved_timing_resolution": "Same attack is independently timed to ~15:30, before the 16:30–19:59 target alert."
+        }
+      ],
+      "publication_message_datetimes": [
+        {
+          "raw_hit_id": "h010",
+          "datetime_kyiv": "2026-03-14T17:23:00+02:00",
+          "timestamp_kind": "article_publication"
+        }
+      ],
+      "exact_relevant_wording": [
+        {
+          "source": "Поліція Запорізької області",
+          "kind": "saved_source_discovery_wording",
+          "wording": "Чотири керовані авіабомби вдарили по житлових кварталах обласного центру."
+        },
+        {
+          "source": "Prosecutor chronology carried by UKR.NET/Magnolia-TV",
+          "kind": "external_timing_evidence_exact_wording",
+          "wording": "14 березня 2026 року близько 15:30 росіяни завдали чотири удари по обласному центру, застосувавши КАБи."
+        }
+      ],
+      "exact_city_status": "confirmed_exact_city",
+      "military_aerial_war_context": "Explicit Russian KAB attack on Zaporizhzhia; four strikes on the regional center and residential damage.",
+      "best_available_event_time_or_interval": {
+        "value": "approximately 2026-03-14T15:30:00+02:00",
+        "precision": "official approximate timestamp",
+        "temporal_confidence": "high"
+      },
+      "event_time_provenance": [
+        {
+          "source": "Prosecutor chronology carried by UKR.NET/Magnolia-TV",
+          "source_type": "same-day/near-contemporaneous media relay of official prosecutor chronology",
+          "url": "https://www.ukr.net/news/details/zaporizhzhya/116478687.html",
+          "exact_relevant_wording": "14 березня 2026 року близько 15:30 росіяни завдали чотири удари по обласному центру, застосувавши КАБи.",
+          "timing_use": "Official chronology places the four KAB strikes at about 15:30 Kyiv time."
+        }
+      ],
+      "all_alert_episodes_that_day": [
+        {
+          "position": 1,
+          "episode_id": "216423c300fd3b975e565eed",
+          "alert_start_utc": "2026-03-13T22:52:29Z",
+          "alert_end_utc": "2026-03-14T05:05:14Z",
+          "alert_start_kyiv": "2026-03-14T00:52:29.000+02:00",
+          "alert_end_kyiv": "2026-03-14T07:05:14.000+02:00",
+          "canonical_status": "non_strict"
+        },
+        {
+          "position": 2,
+          "episode_id": "09a683f227e546f99b8ec1e2",
+          "alert_start_utc": "2026-03-14T06:18:08Z",
+          "alert_end_utc": "2026-03-14T07:15:17Z",
+          "alert_start_kyiv": "2026-03-14T08:18:08.000+02:00",
+          "alert_end_kyiv": "2026-03-14T09:15:17.000+02:00",
+          "canonical_status": "non_strict"
+        },
+        {
+          "position": 3,
+          "episode_id": "9c643852367e3a222003339d",
+          "alert_start_utc": "2026-03-14T07:25:55Z",
+          "alert_end_utc": "2026-03-14T09:13:22Z",
+          "alert_start_kyiv": "2026-03-14T09:25:55.000+02:00",
+          "alert_end_kyiv": "2026-03-14T11:13:22.000+02:00",
+          "canonical_status": "non_strict"
+        },
+        {
+          "position": 4,
+          "episode_id": "447fa905df914af509da99ab",
+          "alert_start_utc": "2026-03-14T10:29:42Z",
+          "alert_end_utc": "2026-03-14T11:29:24Z",
+          "alert_start_kyiv": "2026-03-14T12:29:42.000+02:00",
+          "alert_end_kyiv": "2026-03-14T13:29:24.000+02:00",
+          "canonical_status": "non_strict"
+        },
+        {
+          "position": 5,
+          "episode_id": "ca3ecafd3d1e8309e63a2ce5",
+          "alert_start_utc": "2026-03-14T12:36:08Z",
+          "alert_end_utc": "2026-03-14T13:48:23Z",
+          "alert_start_kyiv": "2026-03-14T14:36:08.000+02:00",
+          "alert_end_kyiv": "2026-03-14T15:48:23.000+02:00",
+          "canonical_status": "strict"
+        },
+        {
+          "position": 6,
+          "episode_id": "50f8ddab56b64d7db95768bd",
+          "alert_start_utc": "2026-03-14T14:30:16Z",
+          "alert_end_utc": "2026-03-14T17:59:45Z",
+          "alert_start_kyiv": "2026-03-14T16:30:16.000+02:00",
+          "alert_end_kyiv": "2026-03-14T19:59:45.000+02:00",
+          "canonical_status": "non_strict"
+        },
+        {
+          "position": 7,
+          "episode_id": "f54e9290cf9bf3388409b3d4",
+          "alert_start_utc": "2026-03-14T19:35:25Z",
+          "alert_end_utc": "2026-03-14T21:45:36Z",
+          "alert_start_kyiv": "2026-03-14T21:35:25.000+02:00",
+          "alert_end_kyiv": "2026-03-14T23:45:36.000+02:00",
+          "canonical_status": "non_strict"
+        }
+      ],
+      "alert_episodes_that_can_realistically_match_event": [
+        {
+          "position": 5,
+          "episode_id": "ca3ecafd3d1e8309e63a2ce5",
+          "alert_start_utc": "2026-03-14T12:36:08Z",
+          "alert_end_utc": "2026-03-14T13:48:23Z",
+          "alert_start_kyiv": "2026-03-14T14:36:08.000+02:00",
+          "alert_end_kyiv": "2026-03-14T15:48:23.000+02:00",
+          "canonical_status": "strict"
+        }
+      ],
+      "canonical_strict_episode_better_explains_source_hit": true,
+      "better_matching_episode_id": "ca3ecafd3d1e8309e63a2ce5",
+      "better_matching_episode": {
+        "episode_id": "ca3ecafd3d1e8309e63a2ce5",
+        "alert_start_utc": "2026-03-14T12:36:08Z",
+        "alert_end_utc": "2026-03-14T13:48:23Z",
+        "alert_start_kyiv": "2026-03-14T14:36:08.000+02:00",
+        "alert_end_kyiv": "2026-03-14T15:48:23.000+02:00",
+        "canonical_status": "strict"
+      },
+      "final_verdict": "rejected",
+      "rationale": "The four KAB strikes are timed to about 15:30, inside the canonical-strict alert 14:36:08-15:48:23. The target starts at 16:30:16, about an hour after the attack. The saved police item published at 17:23 reports an earlier attack and cannot be used as target-event timing.",
+      "outside_episode_timing_failure_pattern": [
+        "publication_lag",
+        "wrong_episode_attribution"
+      ],
+      "confirmed_strict_miss_failure_mode": null
+    },
+    {
+      "episode_id": "9b99cb077f8c1a454a66fcff",
+      "date": "2026-03-20",
+      "episode_order_distance": 1,
+      "nearest_canonical_strict_episode": {
+        "episode_id": "8da4bd319ba34e8d89de95f7",
+        "alert_start_utc": "2026-03-20T10:27:05Z",
+        "alert_end_utc": "2026-03-20T15:10:28Z",
+        "alert_start_kyiv": "2026-03-20T12:27:05.000+02:00",
+        "alert_end_kyiv": "2026-03-20T17:10:28.000+02:00",
+        "canonical_status": "strict"
+      },
+      "target_alert": {
+        "alert_start_utc": "2026-03-20T07:28:01Z",
+        "alert_end_utc": "2026-03-20T08:59:23Z",
+        "alert_start_kyiv": "2026-03-20T09:28:01+02:00",
+        "alert_end_kyiv": "2026-03-20T10:59:23+02:00"
+      },
+      "saved_source_hits": [
+        {
+          "raw_hit_id": "h011",
+          "source": "Суспільне Запоріжжя",
+          "source_id": "archive_2026-03-20_13-35",
+          "url": "https://suspilne.media/zaporizhzhia/archive/2026/3/20/",
+          "publication_or_message_datetime_kyiv": "2026-03-20T13:35:00+02:00",
+          "timestamp_kind": "article_publication",
+          "saved_relevant_wording": "Російські війська атакували Запоріжжя; є поранена.",
+          "saved_exact_city_rationale": "Заголовок прямо називає Запоріжжя.",
+          "saved_aerial_context": "explicit_Russian_attack",
+          "saved_timing_resolution": "Independent source inventory places the corresponding event at ~13:00, after target alert ended at 10:59."
+        }
+      ],
+      "publication_message_datetimes": [
+        {
+          "raw_hit_id": "h011",
+          "datetime_kyiv": "2026-03-20T13:35:00+02:00",
+          "timestamp_kind": "article_publication"
+        }
+      ],
+      "exact_relevant_wording": [
+        {
+          "source": "Суспільне Запоріжжя",
+          "kind": "saved_source_discovery_wording",
+          "wording": "Російські війська атакували Запоріжжя; є поранена."
+        },
+        {
+          "source": "Akzent",
+          "kind": "external_timing_evidence_exact_wording",
+          "wording": "Близько першої години дня мешканці Запоріжжя чули вибухи."
+        }
+      ],
+      "exact_city_status": "confirmed_exact_city",
+      "military_aerial_war_context": "Explicit Russian UAV attack on Zaporizhzhia, with an injured woman, a damaged house and fire.",
+      "best_available_event_time_or_interval": {
+        "value": "approximately 2026-03-20T13:00:00+02:00",
+        "precision": "coarse contemporaneous timing ('around one in the afternoon')",
+        "temporal_confidence": "high_for_episode_attribution"
+      },
+      "event_time_provenance": [
+        {
+          "source": "Akzent",
+          "source_type": "contemporaneous local report relaying ZOVA",
+          "url": "https://akzent.zp.ua/zaporizhzhya-pid-atakoyu-bpla-v-misti-chuly-vybuhy-shho-vidomo-foto-video/",
+          "publication_datetime_kyiv": "2026-03-20T13:03:00+02:00",
+          "exact_relevant_wording": "Близько першої години дня мешканці Запоріжжя чули вибухи.",
+          "timing_use": "Places the exact-city explosions around 13:00 and identifies them as consequences of an enemy UAV attack."
+        }
+      ],
+      "all_alert_episodes_that_day": [
+        {
+          "position": 1,
+          "episode_id": "0be37295affa9804f2b38a09",
+          "alert_start_utc": "2026-03-19T23:08:15Z",
+          "alert_end_utc": "2026-03-19T23:30:53Z",
+          "alert_start_kyiv": "2026-03-20T01:08:15.000+02:00",
+          "alert_end_kyiv": "2026-03-20T01:30:53.000+02:00",
+          "canonical_status": "non_strict"
+        },
+        {
+          "position": 2,
+          "episode_id": "5e458361df21d11059e9db68",
+          "alert_start_utc": "2026-03-19T23:46:15Z",
+          "alert_end_utc": "2026-03-20T00:03:07Z",
+          "alert_start_kyiv": "2026-03-20T01:46:15.000+02:00",
+          "alert_end_kyiv": "2026-03-20T02:03:07.000+02:00",
+          "canonical_status": "non_strict"
+        },
+        {
+          "position": 3,
+          "episode_id": "4932626e543b61824157cec5",
+          "alert_start_utc": "2026-03-20T02:39:00Z",
+          "alert_end_utc": "2026-03-20T04:06:24Z",
+          "alert_start_kyiv": "2026-03-20T04:39:00.000+02:00",
+          "alert_end_kyiv": "2026-03-20T06:06:24.000+02:00",
+          "canonical_status": "non_strict"
+        },
+        {
+          "position": 4,
+          "episode_id": "9b99cb077f8c1a454a66fcff",
+          "alert_start_utc": "2026-03-20T07:28:01Z",
+          "alert_end_utc": "2026-03-20T08:59:23Z",
+          "alert_start_kyiv": "2026-03-20T09:28:01.000+02:00",
+          "alert_end_kyiv": "2026-03-20T10:59:23.000+02:00",
+          "canonical_status": "non_strict"
+        },
+        {
+          "position": 5,
+          "episode_id": "8da4bd319ba34e8d89de95f7",
+          "alert_start_utc": "2026-03-20T10:27:05Z",
+          "alert_end_utc": "2026-03-20T15:10:28Z",
+          "alert_start_kyiv": "2026-03-20T12:27:05.000+02:00",
+          "alert_end_kyiv": "2026-03-20T17:10:28.000+02:00",
+          "canonical_status": "strict"
+        },
+        {
+          "position": 6,
+          "episode_id": "640ae45f9490fdc4fa92af63",
+          "alert_start_utc": "2026-03-20T16:02:37Z",
+          "alert_end_utc": "2026-03-20T16:32:41Z",
+          "alert_start_kyiv": "2026-03-20T18:02:37.000+02:00",
+          "alert_end_kyiv": "2026-03-20T18:32:41.000+02:00",
+          "canonical_status": "non_strict"
+        },
+        {
+          "position": 7,
+          "episode_id": "82c0eca20505ded4aebffd2f",
+          "alert_start_utc": "2026-03-20T17:01:48Z",
+          "alert_end_utc": "2026-03-20T17:29:53Z",
+          "alert_start_kyiv": "2026-03-20T19:01:48.000+02:00",
+          "alert_end_kyiv": "2026-03-20T19:29:53.000+02:00",
+          "canonical_status": "non_strict"
+        },
+        {
+          "position": 8,
+          "episode_id": "5e37cf453fccd8d107eaed81",
+          "alert_start_utc": "2026-03-20T17:51:40Z",
+          "alert_end_utc": "2026-03-20T22:33:37Z",
+          "alert_start_kyiv": "2026-03-20T19:51:40.000+02:00",
+          "alert_end_kyiv": "2026-03-21T00:33:37.000+02:00",
+          "canonical_status": "non_strict"
+        }
+      ],
+      "alert_episodes_that_can_realistically_match_event": [
+        {
+          "position": 5,
+          "episode_id": "8da4bd319ba34e8d89de95f7",
+          "alert_start_utc": "2026-03-20T10:27:05Z",
+          "alert_end_utc": "2026-03-20T15:10:28Z",
+          "alert_start_kyiv": "2026-03-20T12:27:05.000+02:00",
+          "alert_end_kyiv": "2026-03-20T17:10:28.000+02:00",
+          "canonical_status": "strict"
+        }
+      ],
+      "canonical_strict_episode_better_explains_source_hit": true,
+      "better_matching_episode_id": "8da4bd319ba34e8d89de95f7",
+      "better_matching_episode": {
+        "episode_id": "8da4bd319ba34e8d89de95f7",
+        "alert_start_utc": "2026-03-20T10:27:05Z",
+        "alert_end_utc": "2026-03-20T15:10:28Z",
+        "alert_start_kyiv": "2026-03-20T12:27:05.000+02:00",
+        "alert_end_kyiv": "2026-03-20T17:10:28.000+02:00",
+        "canonical_status": "strict"
+      },
+      "final_verdict": "rejected",
+      "rationale": "Contemporaneous reporting places the explosions around 13:00, well after the target ended at 10:59:23 and inside the canonical-strict alert 12:27:05-17:10:28. The later 13:35 Suspilne item is consistent with that same attack.",
+      "outside_episode_timing_failure_pattern": [
+        "publication_lag",
+        "coarse_event_time",
+        "wrong_episode_attribution"
+      ],
+      "confirmed_strict_miss_failure_mode": null
+    },
+    {
+      "episode_id": "48ffd16e2071d920db1143ce",
+      "date": "2026-05-26",
+      "episode_order_distance": 1,
+      "nearest_canonical_strict_episode": {
+        "episode_id": "211b0d0c6e6786b84e0a6915",
+        "alert_start_utc": "2026-05-26T06:46:53Z",
+        "alert_end_utc": "2026-05-26T09:14:46Z",
+        "alert_start_kyiv": "2026-05-26T09:46:53.000+03:00",
+        "alert_end_kyiv": "2026-05-26T12:14:46.000+03:00",
+        "canonical_status": "strict"
+      },
+      "target_alert": {
+        "alert_start_utc": "2026-05-26T09:50:02Z",
+        "alert_end_utc": "2026-05-26T10:11:07Z",
+        "alert_start_kyiv": "2026-05-26T12:50:02+03:00",
+        "alert_end_kyiv": "2026-05-26T13:11:07+03:00"
+      },
+      "saved_source_hits": [
+        {
+          "raw_hit_id": "h012",
+          "source": "ТСН",
+          "source_id": "3091862",
+          "url": "https://tsn.ua/ukrayina/velykyy-oblasnyy-tsentr-pid-atakoiu-rf-vlada-povidomyla-pro-pershi-naslidky-3091862.html",
+          "publication_or_message_datetime_kyiv": "2026-05-26T12:51:00+03:00",
+          "timestamp_kind": "article_publication",
+          "saved_relevant_wording": "У Запоріжжі після потужних вибухів спалахнули пожежі; РФ атакувала місто.",
+          "saved_exact_city_rationale": "Матеріал прямо називає Запоріжжя.",
+          "saved_aerial_context": "explicit_Russian_attack",
+          "saved_timing_resolution": "Contemporaneous local reporting places the impact близько опівдня, before target alert began at 12:50."
+        }
+      ],
+      "publication_message_datetimes": [
+        {
+          "raw_hit_id": "h012",
+          "datetime_kyiv": "2026-05-26T12:51:00+03:00",
+          "timestamp_kind": "article_publication"
+        }
+      ],
+      "exact_relevant_wording": [
+        {
+          "source": "ТСН",
+          "kind": "saved_source_discovery_wording",
+          "wording": "У Запоріжжі після потужних вибухів спалахнули пожежі; РФ атакувала місто."
+        },
+        {
+          "source": "Fakty ICTV citing Ivan Fedorov",
+          "kind": "external_timing_evidence_exact_wording",
+          "wording": "За його інформацією, вибухи в Запорізькій області пролунали об 11:40."
+        }
+      ],
+      "exact_city_status": "confirmed_exact_city",
+      "military_aerial_war_context": "Explicit Russian drone/missile attack on Zaporizhzhia; explosions, fires, damaged buildings and casualties.",
+      "best_available_event_time_or_interval": {
+        "value": "approximately 2026-05-26T11:40:00+03:00",
+        "precision": "reported clock time",
+        "temporal_confidence": "high"
+      },
+      "event_time_provenance": [
+        {
+          "source": "Fakty ICTV citing Ivan Fedorov",
+          "source_type": "same-day retrospective media report citing regional official",
+          "url": "https://fakty.com.ua/ua/proisshestvija/20260526-ataka-na-zaporizhzhya-26-travnya-kilkist-postrazhdalyh-zrosla-do-12/",
+          "publication_datetime_kyiv": "2026-05-26T15:24:00+03:00",
+          "exact_relevant_wording": "За його інформацією, вибухи в Запорізькій області пролунали об 11:40.",
+          "timing_use": "Provides a specific 11:40 clock time for the attack sequence reported by the head of ZOVA."
+        }
+      ],
+      "all_alert_episodes_that_day": [
+        {
+          "position": 1,
+          "episode_id": "47031e96d0d5798558bf0d8b",
+          "alert_start_utc": "2026-05-26T02:54:39Z",
+          "alert_end_utc": "2026-05-26T06:19:20Z",
+          "alert_start_kyiv": "2026-05-26T05:54:39.000+03:00",
+          "alert_end_kyiv": "2026-05-26T09:19:20.000+03:00",
+          "canonical_status": "non_strict"
+        },
+        {
+          "position": 2,
+          "episode_id": "211b0d0c6e6786b84e0a6915",
+          "alert_start_utc": "2026-05-26T06:46:53Z",
+          "alert_end_utc": "2026-05-26T09:14:46Z",
+          "alert_start_kyiv": "2026-05-26T09:46:53.000+03:00",
+          "alert_end_kyiv": "2026-05-26T12:14:46.000+03:00",
+          "canonical_status": "strict"
+        },
+        {
+          "position": 3,
+          "episode_id": "48ffd16e2071d920db1143ce",
+          "alert_start_utc": "2026-05-26T09:50:02Z",
+          "alert_end_utc": "2026-05-26T10:11:07Z",
+          "alert_start_kyiv": "2026-05-26T12:50:02.000+03:00",
+          "alert_end_kyiv": "2026-05-26T13:11:07.000+03:00",
+          "canonical_status": "non_strict"
+        },
+        {
+          "position": 4,
+          "episode_id": "97ebbb4f107bc00e2857a8f8",
+          "alert_start_utc": "2026-05-26T12:57:32Z",
+          "alert_end_utc": "2026-05-26T17:12:07Z",
+          "alert_start_kyiv": "2026-05-26T15:57:32.000+03:00",
+          "alert_end_kyiv": "2026-05-26T20:12:07.000+03:00",
+          "canonical_status": "non_strict"
+        },
+        {
+          "position": 5,
+          "episode_id": "65100496386496f331b425f6",
+          "alert_start_utc": "2026-05-26T17:35:40Z",
+          "alert_end_utc": "2026-05-26T17:37:50Z",
+          "alert_start_kyiv": "2026-05-26T20:35:40.000+03:00",
+          "alert_end_kyiv": "2026-05-26T20:37:50.000+03:00",
+          "canonical_status": "non_strict"
+        },
+        {
+          "position": 6,
+          "episode_id": "bcfa9d1092dafaf1747a5154",
+          "alert_start_utc": "2026-05-26T17:54:55Z",
+          "alert_end_utc": "2026-05-26T18:07:51Z",
+          "alert_start_kyiv": "2026-05-26T20:54:55.000+03:00",
+          "alert_end_kyiv": "2026-05-26T21:07:51.000+03:00",
+          "canonical_status": "non_strict"
+        }
+      ],
+      "alert_episodes_that_can_realistically_match_event": [
+        {
+          "position": 2,
+          "episode_id": "211b0d0c6e6786b84e0a6915",
+          "alert_start_utc": "2026-05-26T06:46:53Z",
+          "alert_end_utc": "2026-05-26T09:14:46Z",
+          "alert_start_kyiv": "2026-05-26T09:46:53.000+03:00",
+          "alert_end_kyiv": "2026-05-26T12:14:46.000+03:00",
+          "canonical_status": "strict"
+        }
+      ],
+      "canonical_strict_episode_better_explains_source_hit": true,
+      "better_matching_episode_id": "211b0d0c6e6786b84e0a6915",
+      "better_matching_episode": {
+        "episode_id": "211b0d0c6e6786b84e0a6915",
+        "alert_start_utc": "2026-05-26T06:46:53Z",
+        "alert_end_utc": "2026-05-26T09:14:46Z",
+        "alert_start_kyiv": "2026-05-26T09:46:53.000+03:00",
+        "alert_end_kyiv": "2026-05-26T12:14:46.000+03:00",
+        "canonical_status": "strict"
+      },
+      "final_verdict": "rejected",
+      "rationale": "The attack sequence is timed to about 11:40. That lies inside the canonical-strict alert 09:46:53-12:14:46. The target does not begin until 12:50:02. The saved TSN publication at 12:51 falls inside the target window but is reporting an already earlier event; publication time would create a false match.",
+      "outside_episode_timing_failure_pattern": [
+        "publication_time_false_match",
+        "wrong_episode_attribution"
+      ],
+      "confirmed_strict_miss_failure_mode": null
+    }
+  ],
+  "new_confirmed_strict_miss": [],
+  "sensitivity_only": [],
+  "rejected": [
+    "6871d178921352e6ab350e65",
+    "4a1ab0a4fb974e0b2647a683",
+    "4aa2b1dd84cc144314894e77",
+    "50f8ddab56b64d7db95768bd",
+    "9b99cb077f8c1a454a66fcff",
+    "48ffd16e2071d920db1143ce"
+  ],
+  "needs_review": [],
+  "better_matching_episode_cases": [
+    {
+      "target_episode_id": "6871d178921352e6ab350e65",
+      "date": "2026-01-20",
+      "better_matching_episode_id": "87348c2c06d552d2ad0fc751",
+      "better_episode_canonical_status": "strict"
+    },
+    {
+      "target_episode_id": "4a1ab0a4fb974e0b2647a683",
+      "date": "2026-02-10",
+      "better_matching_episode_id": "e367e13dc8ce9a263b1a3a88",
+      "better_episode_canonical_status": "strict"
+    },
+    {
+      "target_episode_id": "4aa2b1dd84cc144314894e77",
+      "date": "2026-03-11",
+      "better_matching_episode_id": "1cf4b55dbaaef2eb3cee8eb1",
+      "better_episode_canonical_status": "strict"
+    },
+    {
+      "target_episode_id": "50f8ddab56b64d7db95768bd",
+      "date": "2026-03-14",
+      "better_matching_episode_id": "ca3ecafd3d1e8309e63a2ce5",
+      "better_episode_canonical_status": "strict"
+    },
+    {
+      "target_episode_id": "9b99cb077f8c1a454a66fcff",
+      "date": "2026-03-20",
+      "better_matching_episode_id": "8da4bd319ba34e8d89de95f7",
+      "better_episode_canonical_status": "strict"
+    },
+    {
+      "target_episode_id": "48ffd16e2071d920db1143ce",
+      "date": "2026-05-26",
+      "better_matching_episode_id": "211b0d0c6e6786b84e0a6915",
+      "better_episode_canonical_status": "strict"
+    }
+  ],
+  "distance_1_vs_2_summary": {
+    "distance_1": {
+      "reviewed": 6,
+      "confirmed_strict_miss": 0,
+      "sensitivity_only": 0,
+      "rejected": 6,
+      "needs_review": 0
+    },
+    "distance_2": {
+      "reviewed": 0,
+      "confirmed_strict_miss": 0,
+      "sensitivity_only": 0,
+      "rejected": 0,
+      "needs_review": 0
+    }
+  },
+  "cumulative_known_confirmed_strict_misses": {
+    "before_pass": 16,
+    "new_in_this_pass": 0,
+    "after_pass": 16,
+    "canonical_denominator_unchanged": 2365,
+    "canonical_strict_numerator_unchanged": 169
+  },
+  "outside_episode_timing_assessment": {
+    "headline": "All six retained hits described real exact-city military attack evidence, but none belonged to the target episode.",
+    "dominant_mechanism": "wrong-episode attribution on multi-episode dates, usually amplified by publication/update lag",
+    "publication_or_update_lag_examples": [
+      "2026-01-20: 18:35 update described an 18:08-18:24 attack in the preceding strict alert.",
+      "2026-03-11: 18:12 police publication described an attack timed to about 16:10 in the preceding strict alert.",
+      "2026-03-14: 17:23 police publication described four KAB strikes timed to about 15:30 in the preceding strict alert.",
+      "2026-05-26: 12:51 publication fell inside the target window but described an attack timed to about 11:40 in the preceding strict alert."
+    ],
+    "coarse_event_time_examples": [
+      "2026-02-10: no exact minute was recovered, but a 16:20 contemporaneous report explicitly says it was written in the first minutes after the explosion, excluding the target that ended at 15:40 and favoring the 15:57-19:25 strict alert.",
+      "2026-03-20: 'around one in the afternoon' is coarse, but still cleanly excludes the 09:28-10:59 target and falls within the 12:27-17:10 strict alert."
+    ],
+    "location_ambiguity": "none",
+    "target_episode_new_strict_evidence": "none"
+  },
+  "targeted_o3_followup_assessment": {
+    "recommendation": "no_additional_targeted_O3_subset_from_this_pass",
+    "rationale": "The exact-city batch plus this outside-timing batch exhaust the retained O3 source-hit episodes. This pass yielded zero new strict misses and showed that the outside-timing hits were all explainable by already-canonical-strict neighboring episodes. It therefore does not provide a new high-signal rule for expanding into the 313 no_source_hit_found episodes.",
+    "stop": "Do not proceed to no_source_hit_found, O4/O5, canonical repair, or production changes."
+  }
+}
