@@ -1,0 +1,605 @@
+{
+  "schema_version": 1,
+  "task": "explosion_monitor_classification_rule_inventory",
+  "generated_at": "2026-09-22T18:30:00Z",
+  "repository": "olegbalakin-cmyk/kyiv-air-alerts-grafana",
+  "branch": "multicity-wip-2026-09-16",
+  "scope_resolution": {
+    "requested_sequence": "after matching-hardening and before classification coding",
+    "actual_branch_head_at_analysis": "6f352f5e6a7dda976b0c024ad8fc7bf7096f7115",
+    "actual_branch_head_note": "The branch head already contains the later classification-hardening commit. To preserve the requested diagnostic-only sequencing, this inventory analyzes the last post-matching/pre-classification snapshot and does not modify or roll back monitor code.",
+    "diagnostic_target_commit": "b2165f99ed98c1b60185cb3946a1893cc171e63a",
+    "diagnostic_target_commit_message": "Update explosion metric monitor state",
+    "matching_hardening_commit": "137ab8df968c37ce1eb1cdc56347f93a73af2e70",
+    "classification_hardening_commit_already_on_branch_head": "6f352f5e6a7dda976b0c024ad8fc7bf7096f7115",
+    "code_equivalence_note": "The monitor code at b2165f99 is the matching-hardened monitor from 137ab8df; b2165f99 changed data outputs only."
+  },
+  "guardrails": {
+    "monitor_code_changed": false,
+    "queue_changed": false,
+    "statuses_changed": false,
+    "metric_data_changed": false,
+    "canonical_or_historical_data_changed": false,
+    "dashboard_or_deployment_changed": false,
+    "only_research_artifact_to_commit": true
+  },
+  "inputs": {
+    "monitor": {
+      "path": "kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py",
+      "ref": "b2165f99ed98c1b60185cb3946a1893cc171e63a",
+      "blob_sha": "fc7c0af68a5b4c00277455a02df12f44f62b1909"
+    },
+    "queue": {
+      "path": "kyiv-air-alerts-grafana/data/explosion_review_queue.json",
+      "ref": "b2165f99ed98c1b60185cb3946a1893cc171e63a",
+      "blob_sha": "4d53f887693a5099b9eb70a5619dd3e2192afd8b",
+      "total": 249,
+      "status_counts": {
+        "needs_review": 175,
+        "approved_strict": 42,
+        "rejected": 17,
+        "approved_sensitivity": 15
+      }
+    },
+    "system_qa": {
+      "path": "research/explosion_monitor_system_qa_2026-09-21.json",
+      "blob_sha": "52db0d292ade33849757f174a8c0fcc7caae1959"
+    },
+    "matching_hardening_replay": {
+      "path": "research/explosion_monitor_matching_hardening_replay_2026-09-22.json",
+      "blob_sha": "403ae260a3410f59917f8c0ab872be92ba35590b"
+    },
+    "historical_methodology_sources": [
+      {
+        "path": "research/zaporizhzhia_explosion_gap_audit.json",
+        "blob_sha": "f4f739bf0ca00424227b86df4706a632544f607a"
+      },
+      {
+        "path": "research/zaporizhzhia_explosion_blind_sample_50_wave2.json",
+        "blob_sha": "15804a04b056d65dd0376a2e551920fbe60f24a4"
+      },
+      {
+        "path": "kyiv-air-alerts-grafana/data/explosion_research/kyiv/final_evidence.json",
+        "blob_sha": "dd21e37b5903e53ef4be90b23133a14a1b7aa613"
+      },
+      {
+        "path": "kyiv-air-alerts-grafana/data/explosion_research/dnipro/final_evidence.json",
+        "blob_sha": "99758ae2a7d888593ffd863cc53cd9f48bf34f5a"
+      },
+      {
+        "path": "kyiv-air-alerts-grafana/data/explosion_research/mykolaiv/final_evidence.json",
+        "blob_sha": "fe10f780d988917a0f742400d774ac8b20466ffd"
+      },
+      {
+        "path": "kyiv-air-alerts-grafana/data/explosion_research/odesa/final_evidence.json",
+        "blob_sha": "1ed4cf2a52b02c7b1ffb36fa7f7737e81543e428"
+      },
+      {
+        "path": "kyiv-air-alerts-grafana/data/explosion_research/sumy/final_evidence.json",
+        "blob_sha": "e7457f841078467974af4533f7cf1ce39c157f97"
+      },
+      {
+        "path": "kyiv-air-alerts-grafana/data/explosion_research/zaporizhzhia/final_evidence.json",
+        "blob_sha": "4b3559386bdd8515f24498dfaac47ef67542b679"
+      }
+    ]
+  },
+  "current_rules": {
+    "discovery_evidence": {
+      "purpose": "Broad candidate recall.",
+      "code_locations": [
+        "EXPLOSION_TERMS lines 97-108",
+        "build_google_news_candidate lines 441-488",
+        "refresh_telegram_cache lines 548-616",
+        "telegram_candidates_for_city lines 619-642"
+      ],
+      "google_news_rss": "Candidate enters directly when city_mentioned(city_key, title+description) and explosion_relevant(title+description) are both true. Otherwise publisher full text can rescue discovery when the expanded text passes both filters.",
+      "telegram": "Cached Telegram posts are kept when explosion_relevant(text) and any audited city is mentioned; city-specific candidate extraction then requires city_mentioned(city_key,text) and explosion_relevant(text).",
+      "discovery_terms": [
+        "вибух",
+        "пролунав",
+        "пролунали",
+        "було чутно",
+        "чули",
+        "гучно",
+        "звук вибух",
+        "звуки вибух",
+        "серія вибух",
+        "ппо"
+      ],
+      "important_property": "This is a recall filter. It is broader than strict explosion evidence."
+    },
+    "exact_city_check": {
+      "code_location": "city_mentioned lines 371-376",
+      "rule": "Case-folded alias match with token boundaries against the text supplied by discovery. Google News applies it to the concatenated RSS title and description; publisher full-text rescue applies it to title+description+body.",
+      "limitation": "The function checks lexical presence, not whether the city name belongs to the event statement. A Google News title can include publisher branding, so a city name in the publisher suffix can satisfy the check even when the event location is only regional."
+    },
+    "explosion_relevance": {
+      "code_location": "explosion_relevant lines 379-381",
+      "rule": "True when any EXPLOSION_TERMS substring is present.",
+      "important_property": "There is no separate strict-explosion predicate. PVO-only wording, generic 'гучно', and other broad discovery phrases can satisfy this layer.",
+      "classification_dependency": "auto_strict_episode does not re-check a stricter explosion/impact condition. It relies on the fact that the row already passed discovery."
+    },
+    "air_context_check": {
+      "code_location": "air_context lines 491-493",
+      "terms": [
+        "повітрян",
+        "тривог",
+        "бпла",
+        "безпілот",
+        "дрон",
+        "шахед",
+        "ракет",
+        "ппо",
+        "ворож"
+      ],
+      "rule": "True when any listed substring appears in title+snippet used by auto_strict_episode.",
+      "limitation": "The vocabulary omits audited aerial-war terms such as КАБ and авіабомба. The check also does not require the air-context phrase to describe the same event as the city/explosion phrase."
+    },
+    "temporal_evidence": {
+      "code_location": "explicit_during_alert lines 496-498",
+      "literal_terms": [
+        "під час повітряної тривоги",
+        "під час тривоги",
+        "у період повітряної тривоги"
+      ],
+      "rule": "The only textual temporal predicate is literal substring membership in the three-item list.",
+      "publication_time_role": "Publication time is then required to fall inside the candidate immediate alert window or up to 30 minutes after alert end. The code comment correctly says publication time is not event time, but no parser exists for explicit source-stated event times.",
+      "missing_historical_forms": [
+        "explicit event clock inside episode",
+        "після оголошення/початку тривоги with event time inside episode",
+        "present-tense/just-occurred source wording during a documented active alert",
+        "other audited wording that directly binds the event to the alert"
+      ]
+    },
+    "strict_auto_approval_rule": {
+      "code_location": "auto_strict_episode lines 999-1015 and add_candidates lines 1046-1092",
+      "prerequisites": [
+        "candidate has already passed broad discovery",
+        "discovery_basis is not publisher_fulltext",
+        "published_at parses",
+        "air_context(title+snippet) is true",
+        "explicit_during_alert(title+snippet) is true",
+        "only due checks with label == immediate are considered",
+        "publication time falls in alert_start..alert_end+30m",
+        "exactly one immediate episode matches"
+      ],
+      "outcome": "approved_strict",
+      "mismatch_with_matching_hardening": "The hardened all-tracked match_candidate_to_episodes result is stored separately, but auto_strict_episode still classifies only against the one-run immediate due set.",
+      "missing_checks": [
+        "no dedicated strict explosion/impact evidence",
+        "no semantic exact-city event check beyond discovery",
+        "no same-attack linkage between explosion/city and air-context text",
+        "no explicit event-time parsing",
+        "no classification replay of existing needs_review candidates after matching later improves"
+      ]
+    },
+    "sensitivity_rule": {
+      "exists_in_monitor_auto_classification": false,
+      "evidence": "add_candidates assigns only approved_strict or needs_review for new rows.",
+      "queue_note": "The queue contains approved_sensitivity records, but this status is not produced by the post-matching monitor auto-classifier."
+    },
+    "reject_logic": {
+      "exists_in_monitor_auto_classification": false,
+      "evidence": "add_candidates does not assign rejected. Rows that fail discovery never enter the queue; rows that enter and fail auto-strict become needs_review.",
+      "queue_note": "The queue contains rejected records from prior/manual adjudication, not from an automatic reject predicate in this monitor version."
+    },
+    "publisher_fulltext_rule": {
+      "rule": "publisher_fulltext can rescue discovery but is forced to needs_review; it is never auto-strict in this version.",
+      "assessment": "Conservative and safe, with a completeness cost."
+    }
+  },
+  "historical_rules": {
+    "strict": {
+      "exact_city": "Evidence must describe the event in the exact city, not only the oblast/region. Multi-episode dates are adjudicated at episode level.",
+      "explosion_or_attack_evidence": "Strict uses direct explosion wording or a directly documented aerial strike/impact in the exact city. Air-defence-only wording is not sufficient.",
+      "aerial_war_context": "Audited strict evidence includes UAV/Shahed, missiles, KAB/guided aerial bombs, other confirmed aerial strike context, and PVO when coupled with actual exact-city explosion/attack evidence.",
+      "temporal_binding": [
+        "source explicitly states explosion/strike occurred during the alert",
+        "source provides an event time or interval inside the matched episode",
+        "audited contemporaneous wording can establish that the event had just occurred while the alert was active",
+        "publication time alone is never substituted for event time"
+      ],
+      "cross_midnight_and_multiple_episodes": "Cross-midnight episodes and multiple same-day episodes are matched separately; one strict event on a date does not close other episodes.",
+      "examples": [
+        "Zaporizhzhia 2025-11-24: 'щойно пролунав вибух' at 17:12 during an active episode plus KAB context.",
+        "Zaporizhzhia 2026-08-28: explicit ~07:30 explosion time seven minutes after episode start plus strike-UAV context.",
+        "Zaporizhzhia 2026-01-21: present-tense exact-city explosions during active alert plus KAB/UAV/missile context.",
+        "Zaporizhzhia 2025-06-09: ~10:30 KAB attack on the city with explosions, time inside episode."
+      ]
+    },
+    "sensitivity": {
+      "categories": [
+        "near_boundary",
+        "inferred_same_attack"
+      ],
+      "near_boundary": "Strong exact-city aerial-war event whose reported time is immediately before/after or straddles the frozen alert boundary. No blanket tolerance converts it to strict.",
+      "inferred_same_attack": "Strong exact-city explosion/strike and aerial-war context where the same attack is well supported but exact event time is not pinned tightly enough for strict.",
+      "publication_time": "Still not event time. Historical sensitivity artifacts explicitly preserve this distinction.",
+      "examples": [
+        "Kyiv: exact-city explosions/UAV attack with no independently pinned event time -> inferred_same_attack.",
+        "Dnipro: exact-city explosion plus KAB warning, event time not stated and report just after episode -> sensitivity only.",
+        "Mykolaiv: exact-city explosion after UAV warning, no event time -> inferred_same_attack.",
+        "Odesa: explosion plus UAV context, exact minute missing -> inferred_same_attack.",
+        "Zaporizhzhia: approximate KAB/UAV strike time straddling alert start -> near_boundary."
+      ]
+    },
+    "review_or_negative": {
+      "rule": "When exact city, aerial-war attribution, episode identity, or event timing remains unresolved, historical methodology keeps the case in review or outside strict rather than using publication time as a substitute."
+    }
+  },
+  "gaps": [
+    {
+      "code": "DISCOVERY_EQUALS_STRICT_EXPLOSION",
+      "severity": "high",
+      "description": "Broad discovery relevance is implicitly reused as the explosion prerequisite for auto-strict. Because EXPLOSION_TERMS contains ППО and generic loudness phrases, classification has no guarantee of actual explosion/impact evidence."
+    },
+    {
+      "code": "LITERAL_TEMPORAL_UNDERCOVERAGE",
+      "severity": "high",
+      "description": "Historical strict accepts explicit event times inside episodes and several audited direct temporal formulations. Current auto-strict recognizes only three literal phrases."
+    },
+    {
+      "code": "AIR_VOCABULARY_GAP",
+      "severity": "medium",
+      "description": "КАБ/авіабомба and other audited aerial-war terms are absent from AIR_CONTEXT_TERMS, creating false blockers."
+    },
+    {
+      "code": "EXACT_CITY_SEMANTIC_GAP",
+      "severity": "high",
+      "description": "city_mentioned only checks lexical presence. Publisher branding in Google News titles can make a regional/non-city event look exact-city."
+    },
+    {
+      "code": "MATCHING_CLASSIFICATION_SPLIT_BRAIN",
+      "severity": "high",
+      "description": "Matching hardening computes all-tracked unique/ambiguous/no-match, but strict classification still uses only the immediate due set from the discovery run."
+    },
+    {
+      "code": "PUBLICATION_MATCH_WITHOUT_EVENT_TIME_PARSER",
+      "severity": "high",
+      "description": "Publication time selects immediate windows but the classifier cannot consume source-stated event clocks. This blocks legitimate strict cases while making any future publication-time relaxation dangerous."
+    },
+    {
+      "code": "NO_SENSITIVITY_AUTO_RULE",
+      "severity": "medium",
+      "description": "Historical sensitivity has defined near_boundary and inferred_same_attack patterns, but monitor auto-classification has no sensitivity branch."
+    },
+    {
+      "code": "NO_DETERMINISTIC_REJECT_RULE",
+      "severity": "medium",
+      "description": "After discovery, obviously irrelevant PVO-only or controlled-blast items cannot be automatically rejected by this monitor version; they remain review unless manually adjudicated."
+    },
+    {
+      "code": "NO_SAME_ATTACK_LINKAGE",
+      "severity": "medium",
+      "description": "Air-context presence anywhere in title+snippet is enough. The current rule does not prove that air context belongs to the same exact-city event."
+    },
+    {
+      "code": "NO_EXISTING_QUEUE_RECLASSIFICATION",
+      "severity": "medium",
+      "description": "Existing needs_review candidates are rematched but not re-run through classification when later checks or better matching become available."
+    }
+  ],
+  "unsafe_relaxations": [
+    {
+      "change": "Delete explicit_during_alert from auto_strict_episode while leaving the other predicates unchanged.",
+      "why_unsafe": "A PVO-only exact-city row can already pass discovery because ППО is an EXPLOSION_TERM and also pass air_context. A unique publication-time match would then be enough for false strict."
+    },
+    {
+      "change": "Treat unique match_candidate_to_episodes or publication-inside-alert as temporal proof.",
+      "why_unsafe": "The matching layer uses publication time to identify candidate windows. Historical methodology explicitly says publication time is not event time."
+    },
+    {
+      "change": "Add КАБ to AIR_CONTEXT_TERMS without first creating strict explosion/impact evidence.",
+      "why_unsafe": "It would remove an air-context blocker but retain the broad discovery-as-explosion problem."
+    },
+    {
+      "change": "Reuse city_mentioned as the final exact-city verdict.",
+      "why_unsafe": "Publisher branding can satisfy it even when the event wording names only the region."
+    },
+    {
+      "change": "Treat ППО activity itself as explosion evidence.",
+      "why_unsafe": "Historical blind-audit methodology explicitly excludes air-defence-only wording from strict."
+    },
+    {
+      "change": "Auto-sensitivity every exact-city explosion candidate with a unique publication-time match.",
+      "why_unsafe": "Historical sensitivity still requires a defensible same-attack relationship or near-boundary event timing; publication time alone is insufficient."
+    },
+    {
+      "change": "Collapse all overlapping matched episodes to one.",
+      "why_unsafe": "Matching hardening distinguishes near-duplicate representations from genuinely overlapping alerts. Real overlap must remain ambiguous."
+    },
+    {
+      "change": "Auto-approve generic 'було гучно' when it occurs during an alert.",
+      "why_unsafe": "Generic loudness is a discovery signal, not direct explosion/strike evidence."
+    }
+  ],
+  "safe_candidate_changes": [
+    {
+      "change": "Keep discovery broad and create a separate strict_explosion_evidence predicate.",
+      "constraint": "PVO-only and generic loudness must not satisfy strict explosion evidence."
+    },
+    {
+      "change": "Create classification-specific exact-city evidence from event text and exclude publisher branding from location evidence.",
+      "constraint": "Regional morphology alone must remain non-exact."
+    },
+    {
+      "change": "Expand air/military context only from terms already supported by historical audited evidence, including КАБ/авіабомба and existing UAV/missile families.",
+      "constraint": "Air context remains separate from explosion evidence."
+    },
+    {
+      "change": "Use the matching-hardened all-tracked episode result for classification eligibility.",
+      "constraint": "Matching identifies candidate episode(s); it does not establish event time."
+    },
+    {
+      "change": "Implement historical temporal evidence categories: explicit during-alert relation, explicit event time inside episode, and narrowly defined contemporaneous event wording already accepted historically.",
+      "constraint": "Publication timestamp alone must never satisfy temporal binding."
+    },
+    {
+      "change": "Implement sensitivity separately for near_boundary and inferred_same_attack.",
+      "constraint": "If the repo lacks enough evidence to formalize a subtype safely, leave it needs_review."
+    },
+    {
+      "change": "Add deterministic reject predicates only for cases whose evidence is complete enough to exclude strict/sensitivity, such as complete PVO-only messages or controlled quarry blasting.",
+      "constraint": "Ambiguous source snippets remain needs_review."
+    },
+    {
+      "change": "Attach explicit reason codes and evidence fields to dry replay before any live status mutation.",
+      "constraint": "No metric propagation until controlled replay is separately approved."
+    }
+  ],
+  "current_queue_examples": [
+    {
+      "candidate_id": "c0140340f7c5a90ee20dce78",
+      "city_key": "kyiv",
+      "title": "Київ — повітряна тривога через загрозу дронів. Згодом у КМВА повідомили, що в столиці працює ППО.",
+      "current_status": "needs_review",
+      "illustrates": [
+        "PVO_ONLY",
+        "DISCOVERY_EQUALS_STRICT_EXPLOSION_RISK"
+      ],
+      "diagnostic": "Current discovery is true through ППО; air_context is also true. The only reason it is not auto-strict under the old classifier is the temporal/immediate gate. Removing that gate alone is unsafe.",
+      "safe_handling": "Do not treat PVO-only as strict explosion evidence."
+    },
+    {
+      "candidate_id": "ae4361c761c59452d63b18c4",
+      "city_key": "mykolaiv",
+      "title": "Миколаїв під атакою КАБів: у місті пролунав вибух - Новини N",
+      "current_status": "needs_review",
+      "illustrates": [
+        "KAB_AIR_CONTEXT_GAP",
+        "REAL_EPISODE_OVERLAP"
+      ],
+      "diagnostic": "Exact-city explosion wording is present, but current air_context misses КАБ. QA also found two genuinely overlapping candidate episodes, so the case cannot become deterministic strict merely by adding the token.",
+      "safe_handling": "Recognize КАБ as air context, preserve real-overlap ambiguity."
+    },
+    {
+      "candidate_id": "83b7f523fd3fe940b5815e8a",
+      "city_key": "vinnytsia",
+      "title": "Вибухи у кар’єрі на Вінниччині: де та коли проводитимуть роботи - Вінниця Преспоінт",
+      "current_status": "needs_review",
+      "illustrates": [
+        "PUBLISHER_BRANDING_FALSE_EXACT_CITY",
+        "CONTROLLED_BLAST"
+      ],
+      "diagnostic": "The event wording is regional and non-military; lexical exact-city can be satisfied by the publisher branding 'Вінниця Преспоінт'.",
+      "safe_handling": "Classification exact-city must use event text, not publisher branding."
+    },
+    {
+      "candidate_id": "63e4a0c4265cd7c9bac6f485",
+      "city_key": "odesa",
+      "title": "В Одесі під час повітряної тривоги пролунав вибух - Суспільне | Новини",
+      "current_status": "needs_review",
+      "illustrates": [
+        "EXPLICIT_DURING_ALERT",
+        "MATCHING_CLASSIFICATION_SPLIT"
+      ],
+      "diagnostic": "The title contains the literal strict temporal phrase, but the discovery-run immediate matcher missed the episode while all-tracked replay finds a unique window. This is a matching/classification integration problem, not a text-gate problem.",
+      "safe_handling": "Classification should consume hardened matching output, while keeping publication time separate from event-time proof."
+    },
+    {
+      "candidate_id": "f8410c2df817637bad98c18f",
+      "city_key": "odesa",
+      "title": "Вибух пролунав в Одесі: Росія атакує місто реактивними дронами - Новини.Live",
+      "current_status": "needs_review",
+      "illustrates": [
+        "EXACT_CITY_EXPLOSION_WITHOUT_LITERAL_TEMPORAL_PHRASE"
+      ],
+      "diagnostic": "Exact-city explosion and drone context are explicit, but no literal 'під час тривоги' phrase exists. Historical methodology would require event-time evidence for strict; absent that, this pattern is compatible with sensitivity rather than automatic strict.",
+      "safe_handling": "Do not make the literal phrase mandatory for all classification, and do not infer strict timing from publication time."
+    },
+    {
+      "candidate_id": "06a79fb024dc57c5b247d040",
+      "city_key": "poltava",
+      "title": "У Полтаві чули звук вибуху, над містом видно дим, повідомляють кореспонденти Суспільного. Раніше Повітряні сили ЗСУ повідомляли про рух баражуючого боєприпасу «Бандероль» із Сумщини у напрямку Полтавщини курсом на південний захід.",
+      "current_status": "needs_review",
+      "illustrates": [
+        "EXACT_CITY_EXPLOSION",
+        "AERIAL_THREAT",
+        "NO_LITERAL_TEMPORAL_PHRASE"
+      ],
+      "diagnostic": "The saved message has stronger event and aerial context than the literal gate recognizes, but does not itself state the explosion minute.",
+      "safe_handling": "Use as a sensitivity/inferred-same-attack pattern unless stronger temporal evidence is available."
+    },
+    {
+      "candidate_id": "eebbee53e68e94dc2bf3c169",
+      "city_key": "sumy",
+      "title": "⚠️ Вночі росіяни атакували Україну 172 безпілотниками — сили ППО збили 148 БпЛА, зафіксовано влучання на 14 локаціях. Російські дрони двічі атакували Суми, зокрема вдарили біля житлового будинку, внаслідок чого загинула жінка та дістав пора",
+      "current_status": "needs_review",
+      "illustrates": [
+        "BROAD_MULTI_EVENT_SUMMARY",
+        "PVO_DISCOVERY_SIGNAL"
+      ],
+      "diagnostic": "Broad attack/PVO text is discovery-relevant, but the saved excerpt is not a clean exact-city explosion statement tied to one alert episode.",
+      "safe_handling": "Do not convert broad attack summaries to strict solely from PVO/attack vocabulary and publication-time matching."
+    },
+    {
+      "candidate_id": "cc64cf1fe5e06196cac9b4a3",
+      "city_key": "ternopil",
+      "title": "У Тернополі пролунав вибух під час тривоги: перед цим повідомляли про рух БпЛА на місто - tenews.org.ua",
+      "current_status": "needs_review",
+      "illustrates": [
+        "LATE_DISCOVERY",
+        "EXPLICIT_DURING_ALERT"
+      ],
+      "diagnostic": "Strong text-level temporal evidence exists, but the candidate was first discovered on the 72h follow-up and old auto-strict considers only immediate-due episodes.",
+      "safe_handling": "Late discovery must use hardened episode matching. If the episode still cannot be determined safely, retain needs_review."
+    },
+    {
+      "candidate_id": "c9a05f7ddce5ccb67ae89c94",
+      "city_key": "ternopil",
+      "title": "Під час тривоги у Тернополі було гучно: що відомо - 20 хвилин - Новини Тернополя",
+      "current_status": "needs_review",
+      "illustrates": [
+        "LITERAL_TEMPORAL_PHRASE_WITHOUT_STRICT_EXPLOSION_EVIDENCE"
+      ],
+      "diagnostic": "Literal during-alert wording and broad loudness are present. Historical strict still requires explosion/strike evidence; 'було гучно' alone should not auto-strict.",
+      "safe_handling": "Require dedicated strict explosion/impact evidence."
+    },
+    {
+      "candidate_id": "537fc9f91a0405b08c9845a8",
+      "city_key": "zaporizhzhia",
+      "title": "У Запоріжжі пролунали вибухи: ворог поцілив по обʼєкту інфраструктури - Ukr.net",
+      "current_status": "needs_review",
+      "illustrates": [
+        "EXACT_CITY_EXPLOSION",
+        "AIR_CONTEXT_UNRESOLVED"
+      ],
+      "diagnostic": "Direct exact-city explosion/impact wording exists, but current air-context vocabulary does not establish a confirmed aerial mechanism from the saved title alone.",
+      "safe_handling": "Do not infer aerial-war context from generic enemy-hit wording unless the historical rule or source evidence supports it."
+    }
+  ],
+  "comparison_summary": {
+    "core_mismatch": "The post-matching/pre-classification monitor uses broad discovery as a proxy for explosion evidence, a narrow literal temporal gate, and a one-run immediate matcher. Historical methodology separates event evidence from aerial context and requires defensible event-time attribution to the matched episode.",
+    "overconservative_paths": [
+      "exact-city explosion plus audited aerial context without one of three literal temporal phrases",
+      "explicit source event clock inside the alert",
+      "late-discovered evidence whose correct episode is available only through all-tracked matching",
+      "KAB/aviabomb cases blocked by incomplete air vocabulary"
+    ],
+    "false_strict_risks_if_relaxed_naively": [
+      "PVO-only discovery candidate",
+      "publisher-brand exact-city false positive",
+      "generic loudness during alert",
+      "publication-time-only episode attribution",
+      "air-context phrase unrelated to the exact-city event"
+    ]
+  },
+  "proposed_minimal_classification_architecture": {
+    "layer_1_discovery": {
+      "output": "candidate",
+      "policy": "Broad recall. No strict/sensitivity verdict."
+    },
+    "layer_2_episode_matching": {
+      "output": [
+        "unique_match",
+        "ambiguous_match",
+        "no_match"
+      ],
+      "policy": "Use all tracked episodes and near-duplicate reconciliation from matching hardening. Publication time may define candidate windows but is not event-time evidence."
+    },
+    "layer_3_evidence_extraction": {
+      "fields": [
+        "exact_city_event_evidence",
+        "strict_explosion_or_impact_evidence",
+        "air_military_context_evidence",
+        "same_attack_linkage",
+        "temporal_binding_evidence"
+      ],
+      "policy": "Each field is explicit and independently inspectable."
+    },
+    "layer_4_classification": {
+      "approved_strict": "Unique safe episode identity plus exact-city event, strict explosion/impact, audited air/military context, same-attack linkage, and historical-method temporal binding.",
+      "approved_sensitivity": "Strong exact-city aerial-war event with historical near_boundary or inferred_same_attack basis but insufficient strict temporal binding.",
+      "rejected": "Only deterministic exclusions with complete evidence, such as clearly controlled blasting or complete PVO-only messages with no explosion/impact.",
+      "needs_review": "Default for unresolved city semantics, episode ambiguity, insufficient aerial attribution, insufficient timing, or evidence types not formalized from historical artifacts."
+    }
+  },
+  "implementation_requirements": [
+    {
+      "id": "IR01",
+      "requirement": "Keep discovery relevance separate from classification evidence. Broad discovery terms may continue to include ППО and generic loudness, but they must never directly satisfy strict explosion evidence."
+    },
+    {
+      "id": "IR02",
+      "requirement": "Add an explicit strict explosion/impact predicate. It must require actual explosion, strike, hit/impact, or equivalent direct event evidence in the exact city. PVO-only and generic 'гучно' must fail it."
+    },
+    {
+      "id": "IR03",
+      "requirement": "Add classification-specific exact-city semantics. Strip or ignore publisher branding and require the city reference to belong to event text; oblast/regional wording alone must not count."
+    },
+    {
+      "id": "IR04",
+      "requirement": "Separate air/military context from explosion evidence. Expand vocabulary only with terms supported by audited historical artifacts, including КАБ/авіабомба and already established UAV/missile families."
+    },
+    {
+      "id": "IR05",
+      "requirement": "Require same-attack linkage between the exact-city explosion/impact and the air/military context. Mere co-occurrence anywhere in title+snippet is insufficient when multiple events/locations are summarized."
+    },
+    {
+      "id": "IR06",
+      "requirement": "Use match_candidate_to_episodes/all-tracked matching from the matching-hardening step for classification. Do not classify against only the discovery-run immediate due set."
+    },
+    {
+      "id": "IR07",
+      "requirement": "Preserve real overlapping episode ambiguity. Near-duplicate representation collapse may create a logical unique match, but no arbitrary raw episode ID may be selected for metric propagation."
+    },
+    {
+      "id": "IR08",
+      "requirement": "Implement temporal binding independently of publication time. Strict temporal evidence may include explicit during-alert wording, explicit event time/interval inside the matched episode, and only those contemporaneous event formulations demonstrated in audited historical evidence."
+    },
+    {
+      "id": "IR09",
+      "requirement": "Publication time may be used to generate or narrow candidate episode matches, but publication time alone must never prove event time for strict or sensitivity."
+    },
+    {
+      "id": "IR10",
+      "requirement": "Remove dependence on the three-item EXPLICIT_DURING_TERMS list as the sole strict temporal gate. Equivalent historically validated temporal formulations must be supported."
+    },
+    {
+      "id": "IR11",
+      "requirement": "Implement sensitivity as a separate outcome. Support only historically documented near_boundary and inferred_same_attack patterns; unformalized cases remain needs_review."
+    },
+    {
+      "id": "IR12",
+      "requirement": "Do not auto-promote a sensitivity case to strict merely because publication falls inside an alert."
+    },
+    {
+      "id": "IR13",
+      "requirement": "Keep publisher_fulltext rescue manual-review-only unless classification has reliable access to the actual source event text and all strict predicates can be evaluated on that text."
+    },
+    {
+      "id": "IR14",
+      "requirement": "Add deterministic reject logic only where evidence is complete enough for a safe exclusion. At minimum test complete PVO-only messages and controlled quarry/blasting false positives; ambiguous snippets remain needs_review."
+    },
+    {
+      "id": "IR15",
+      "requirement": "Store explicit evidence fields and reason codes for matching, exact-city, strict explosion, air/military context, same-attack linkage, temporal binding, and proposed outcome."
+    },
+    {
+      "id": "IR16",
+      "requirement": "Existing needs_review candidates must be eligible for a dry classification replay after matching is refreshed. The dry replay must not mutate statuses."
+    },
+    {
+      "id": "IR17",
+      "requirement": "Mandatory regression tests must include Kyiv PVO-only, Mykolaiv КАБ plus real overlap, Vinnytsia publisher-brand quarry false positive, Odesa explicit during-alert case, Odesa exact-city explosion+drone without literal phrase, Poltava sound-of-explosion plus aerial threat, Sumy broad attack/PVO summary, and Ternopil late discovery."
+    },
+    {
+      "id": "IR18",
+      "requirement": "The same classification predicates must run for all 23 audited cities. City-specific exceptions require explicit historical evidence and separate tests."
+    },
+    {
+      "id": "IR19",
+      "requirement": "No live queue status mutation or metric propagation may occur in the coding step until a dry replay reports proposed strict, sensitivity, rejected, and remaining needs_review with by-city and reason-code counts."
+    },
+    {
+      "id": "IR20",
+      "requirement": "Acceptance must explicitly verify that PVO-only cannot auto-strict, publisher branding cannot create exact-city strict, publication time alone is not temporal proof, late discovery can use the correct matched episode, and real overlap remains unresolved."
+    }
+  ],
+  "diagnostic_verdict": {
+    "ready_for_direct_literal_gate_removal": false,
+    "reason": "The current post-matching/pre-classification architecture lacks dedicated strict explosion evidence and semantic exact-city evidence. Removing or broadly relaxing explicit_during_alert before those layers exist creates false-strict paths.",
+    "next_step": "Implement the evidence-layered classifier under implementation_requirements, then run dry queue replay before any status mutation."
+  }
+}
