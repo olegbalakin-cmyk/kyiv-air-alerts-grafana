@@ -1,0 +1,1666 @@
+{
+  "schema_version": 1,
+  "task": "controlled_live_explosion_queue_replay",
+  "generated_at": "2026-09-22T19:43:00Z",
+  "repository": "olegbalakin-cmyk/kyiv-air-alerts-grafana",
+  "branch": "multicity-wip-2026-09-16",
+  "prerequisite": {
+    "artifact": "research/explosion_monitor_classification_hardening_replay_2026-09-22.json",
+    "verdict": "READY FOR CONTROLLED LIVE QUEUE REPLAY",
+    "accepted": true
+  },
+  "scope": {
+    "audited_city_count": 23,
+    "historical_baseline_reviewed": false,
+    "historical_canonical_repair_run": false,
+    "live_post_baseline_only": true
+  },
+  "pre_replay_snapshot": {
+    "branch_head": "35960efab83812d71ebe79bec991dea2d44c1f35",
+    "queue_blob_sha": "4d53f887693a5099b9eb70a5619dd3e2192afd8b",
+    "monitor_state_blob_sha": "a70aabad8440da5c39ff04bddca7c48ad0051249",
+    "queue_total": 249,
+    "status_counts": {
+      "approved_strict": 42,
+      "approved_sensitivity": 15,
+      "needs_review": 175,
+      "rejected": 17
+    },
+    "counts_by_city": {
+      "cherkasy": {
+        "total": 3,
+        "approved_strict": 0,
+        "approved_sensitivity": 0,
+        "needs_review": 3,
+        "rejected": 0,
+        "matched": 0,
+        "unmatched": 3
+      },
+      "chernihiv": {
+        "total": 6,
+        "approved_strict": 0,
+        "approved_sensitivity": 0,
+        "needs_review": 6,
+        "rejected": 0,
+        "matched": 0,
+        "unmatched": 6
+      },
+      "chernivtsi": {
+        "total": 0,
+        "approved_strict": 0,
+        "approved_sensitivity": 0,
+        "needs_review": 0,
+        "rejected": 0,
+        "matched": 0,
+        "unmatched": 0
+      },
+      "dnipro": {
+        "total": 50,
+        "approved_strict": 5,
+        "approved_sensitivity": 8,
+        "needs_review": 35,
+        "rejected": 2,
+        "matched": 13,
+        "unmatched": 37
+      },
+      "ivano_frankivsk": {
+        "total": 0,
+        "approved_strict": 0,
+        "approved_sensitivity": 0,
+        "needs_review": 0,
+        "rejected": 0,
+        "matched": 0,
+        "unmatched": 0
+      },
+      "kharkiv": {
+        "total": 2,
+        "approved_strict": 0,
+        "approved_sensitivity": 0,
+        "needs_review": 2,
+        "rejected": 0,
+        "matched": 0,
+        "unmatched": 2
+      },
+      "kherson": {
+        "total": 0,
+        "approved_strict": 0,
+        "approved_sensitivity": 0,
+        "needs_review": 0,
+        "rejected": 0,
+        "matched": 0,
+        "unmatched": 0
+      },
+      "khmelnytskyi": {
+        "total": 0,
+        "approved_strict": 0,
+        "approved_sensitivity": 0,
+        "needs_review": 0,
+        "rejected": 0,
+        "matched": 0,
+        "unmatched": 0
+      },
+      "kropyvnytskyi": {
+        "total": 24,
+        "approved_strict": 10,
+        "approved_sensitivity": 0,
+        "needs_review": 14,
+        "rejected": 0,
+        "matched": 10,
+        "unmatched": 14
+      },
+      "kyiv": {
+        "total": 66,
+        "approved_strict": 11,
+        "approved_sensitivity": 3,
+        "needs_review": 52,
+        "rejected": 0,
+        "matched": 14,
+        "unmatched": 52
+      },
+      "lutsk": {
+        "total": 0,
+        "approved_strict": 0,
+        "approved_sensitivity": 0,
+        "needs_review": 0,
+        "rejected": 0,
+        "matched": 0,
+        "unmatched": 0
+      },
+      "lviv": {
+        "total": 0,
+        "approved_strict": 0,
+        "approved_sensitivity": 0,
+        "needs_review": 0,
+        "rejected": 0,
+        "matched": 0,
+        "unmatched": 0
+      },
+      "mykolaiv": {
+        "total": 16,
+        "approved_strict": 0,
+        "approved_sensitivity": 0,
+        "needs_review": 15,
+        "rejected": 1,
+        "matched": 0,
+        "unmatched": 16
+      },
+      "odesa": {
+        "total": 20,
+        "approved_strict": 9,
+        "approved_sensitivity": 2,
+        "needs_review": 9,
+        "rejected": 0,
+        "matched": 11,
+        "unmatched": 9
+      },
+      "poltava": {
+        "total": 8,
+        "approved_strict": 0,
+        "approved_sensitivity": 0,
+        "needs_review": 8,
+        "rejected": 0,
+        "matched": 0,
+        "unmatched": 8
+      },
+      "rivne": {
+        "total": 9,
+        "approved_strict": 0,
+        "approved_sensitivity": 0,
+        "needs_review": 1,
+        "rejected": 8,
+        "matched": 0,
+        "unmatched": 9
+      },
+      "sevastopol": {
+        "total": 4,
+        "approved_strict": 1,
+        "approved_sensitivity": 2,
+        "needs_review": 1,
+        "rejected": 0,
+        "matched": 3,
+        "unmatched": 1
+      },
+      "sumy": {
+        "total": 13,
+        "approved_strict": 4,
+        "approved_sensitivity": 0,
+        "needs_review": 4,
+        "rejected": 5,
+        "matched": 4,
+        "unmatched": 9
+      },
+      "ternopil": {
+        "total": 6,
+        "approved_strict": 0,
+        "approved_sensitivity": 0,
+        "needs_review": 6,
+        "rejected": 0,
+        "matched": 0,
+        "unmatched": 6
+      },
+      "uzhhorod": {
+        "total": 0,
+        "approved_strict": 0,
+        "approved_sensitivity": 0,
+        "needs_review": 0,
+        "rejected": 0,
+        "matched": 0,
+        "unmatched": 0
+      },
+      "vinnytsia": {
+        "total": 3,
+        "approved_strict": 0,
+        "approved_sensitivity": 0,
+        "needs_review": 3,
+        "rejected": 0,
+        "matched": 0,
+        "unmatched": 3
+      },
+      "zaporizhzhia": {
+        "total": 16,
+        "approved_strict": 2,
+        "approved_sensitivity": 0,
+        "needs_review": 13,
+        "rejected": 1,
+        "matched": 2,
+        "unmatched": 14
+      },
+      "zhytomyr": {
+        "total": 3,
+        "approved_strict": 0,
+        "approved_sensitivity": 0,
+        "needs_review": 3,
+        "rejected": 0,
+        "matched": 0,
+        "unmatched": 3
+      }
+    },
+    "matched_unmatched": {
+      "matched": 57,
+      "unmatched": 192
+    },
+    "queue_metric_inputs": {
+      "approved_strict_candidate_records": 42,
+      "approved_sensitivity_candidate_records_including_strict": 57,
+      "strict_unique_matched_episode_ids": 19,
+      "sensitivity_unique_matched_episode_ids": 20
+    },
+    "active_generated_metric_inputs": {
+      "strict_episode_inputs": 19,
+      "sensitivity_episode_inputs": 20,
+      "pending_review_candidates": 175,
+      "by_city": {
+        "poltava": {
+          "strict_episode_inputs": 0,
+          "sensitivity_episode_inputs": 0,
+          "pending_review_candidates": 8,
+          "coverage_end": "2026-09-21",
+          "total_alerts": 1848,
+          "strict_n": 51,
+          "sensitivity_n": 53
+        },
+        "uzhhorod": {
+          "strict_episode_inputs": 0,
+          "sensitivity_episode_inputs": 0,
+          "pending_review_candidates": 0,
+          "coverage_end": "2026-09-21",
+          "total_alerts": 92,
+          "strict_n": 1,
+          "sensitivity_n": 1
+        },
+        "ivano_frankivsk": {
+          "strict_episode_inputs": 0,
+          "sensitivity_episode_inputs": 0,
+          "pending_review_candidates": 0,
+          "coverage_end": "2026-09-21",
+          "total_alerts": 104,
+          "strict_n": 6,
+          "sensitivity_n": 6
+        },
+        "chernivtsi": {
+          "strict_episode_inputs": 0,
+          "sensitivity_episode_inputs": 0,
+          "pending_review_candidates": 0,
+          "coverage_end": "2026-09-21",
+          "total_alerts": 114,
+          "strict_n": 2,
+          "sensitivity_n": 2
+        },
+        "ternopil": {
+          "strict_episode_inputs": 0,
+          "sensitivity_episode_inputs": 0,
+          "pending_review_candidates": 6,
+          "coverage_end": "2026-09-21",
+          "total_alerts": 127,
+          "strict_n": 5,
+          "sensitivity_n": 5
+        },
+        "lviv": {
+          "strict_episode_inputs": 0,
+          "sensitivity_episode_inputs": 0,
+          "pending_review_candidates": 0,
+          "coverage_end": "2026-09-21",
+          "total_alerts": 126,
+          "strict_n": 12,
+          "sensitivity_n": 12
+        },
+        "lutsk": {
+          "strict_episode_inputs": 0,
+          "sensitivity_episode_inputs": 0,
+          "pending_review_candidates": 0,
+          "coverage_end": "2026-09-21",
+          "total_alerts": 136,
+          "strict_n": 12,
+          "sensitivity_n": 12
+        },
+        "rivne": {
+          "strict_episode_inputs": 0,
+          "sensitivity_episode_inputs": 0,
+          "pending_review_candidates": 1,
+          "coverage_end": "2026-09-21",
+          "total_alerts": 240,
+          "strict_n": 13,
+          "sensitivity_n": 13
+        },
+        "khmelnytskyi": {
+          "strict_episode_inputs": 0,
+          "sensitivity_episode_inputs": 0,
+          "pending_review_candidates": 0,
+          "coverage_end": "2026-09-21",
+          "total_alerts": 254,
+          "strict_n": 11,
+          "sensitivity_n": 12
+        },
+        "vinnytsia": {
+          "strict_episode_inputs": 0,
+          "sensitivity_episode_inputs": 0,
+          "pending_review_candidates": 3,
+          "coverage_end": "2026-09-21",
+          "total_alerts": 371,
+          "strict_n": 5,
+          "sensitivity_n": 7
+        },
+        "zhytomyr": {
+          "strict_episode_inputs": 0,
+          "sensitivity_episode_inputs": 0,
+          "pending_review_candidates": 3,
+          "coverage_end": "2026-09-21",
+          "total_alerts": 704,
+          "strict_n": 19,
+          "sensitivity_n": 20
+        },
+        "kropyvnytskyi": {
+          "strict_episode_inputs": 3,
+          "sensitivity_episode_inputs": 3,
+          "pending_review_candidates": 14,
+          "coverage_end": "2026-09-21",
+          "total_alerts": 1201,
+          "strict_n": 41,
+          "sensitivity_n": 41
+        },
+        "kyiv": {
+          "strict_episode_inputs": 3,
+          "sensitivity_episode_inputs": 3,
+          "pending_review_candidates": 52,
+          "coverage_end": "2026-09-21",
+          "total_alerts": 2503,
+          "strict_n": 380,
+          "sensitivity_n": 407
+        },
+        "kherson": {
+          "strict_episode_inputs": 0,
+          "sensitivity_episode_inputs": 0,
+          "pending_review_candidates": 0,
+          "coverage_end": "2026-09-21",
+          "total_alerts": 1434,
+          "strict_n": 9,
+          "sensitivity_n": 9
+        },
+        "odesa": {
+          "strict_episode_inputs": 7,
+          "sensitivity_episode_inputs": 7,
+          "pending_review_candidates": 9,
+          "coverage_end": "2026-09-21",
+          "total_alerts": 1514,
+          "strict_n": 162,
+          "sensitivity_n": 168
+        },
+        "mykolaiv": {
+          "strict_episode_inputs": 0,
+          "sensitivity_episode_inputs": 0,
+          "pending_review_candidates": 15,
+          "coverage_end": "2026-09-21",
+          "total_alerts": 1704,
+          "strict_n": 122,
+          "sensitivity_n": 135
+        },
+        "chernihiv": {
+          "strict_episode_inputs": 0,
+          "sensitivity_episode_inputs": 0,
+          "pending_review_candidates": 6,
+          "coverage_end": "2026-09-21",
+          "total_alerts": 1712,
+          "strict_n": 39,
+          "sensitivity_n": 43
+        },
+        "dnipro": {
+          "strict_episode_inputs": 3,
+          "sensitivity_episode_inputs": 3,
+          "pending_review_candidates": 35,
+          "coverage_end": "2026-09-21",
+          "total_alerts": 2297,
+          "strict_n": 183,
+          "sensitivity_n": 190
+        },
+        "cherkasy": {
+          "strict_episode_inputs": 0,
+          "sensitivity_episode_inputs": 0,
+          "pending_review_candidates": 3,
+          "coverage_end": "2026-09-21",
+          "total_alerts": 1583,
+          "strict_n": 54,
+          "sensitivity_n": 59
+        },
+        "sevastopol": {
+          "strict_episode_inputs": 1,
+          "sensitivity_episode_inputs": 2,
+          "pending_review_candidates": 1,
+          "coverage_end": "2026-09-21",
+          "total_alerts": 535,
+          "strict_n": 39,
+          "sensitivity_n": 57
+        },
+        "kharkiv": {
+          "strict_episode_inputs": 0,
+          "sensitivity_episode_inputs": 0,
+          "pending_review_candidates": 2,
+          "coverage_end": "2026-09-21",
+          "total_alerts": 3603,
+          "strict_n": 288,
+          "sensitivity_n": 308
+        },
+        "sumy": {
+          "strict_episode_inputs": 1,
+          "sensitivity_episode_inputs": 1,
+          "pending_review_candidates": 4,
+          "coverage_end": "2026-09-21",
+          "total_alerts": 2337,
+          "strict_n": 205,
+          "sensitivity_n": 239
+        },
+        "zaporizhzhia": {
+          "strict_episode_inputs": 1,
+          "sensitivity_episode_inputs": 1,
+          "pending_review_candidates": 13,
+          "coverage_end": "2026-09-21",
+          "total_alerts": 2383,
+          "strict_n": 170,
+          "sensitivity_n": 225
+        }
+      }
+    },
+    "generated_metric_blob_sha": "392061559ca1c43ad4a5468fd562576396d6c65d"
+  },
+  "controlled_replay": {
+    "data_commits": [
+      "e70a96de44919548a0d80850e8167e580e3c36d7",
+      "4a86ab3e644c6d7085d3f8d401a8391663f4a455"
+    ],
+    "queue_blob_after_replay": "8cd6a15b388593b0d338ab04d38f7f860cbb70b8",
+    "queue_total_after_replay": 249,
+    "status_counts_after_replay": {
+      "approved_strict": 46,
+      "approved_sensitivity": 59,
+      "needs_review": 122,
+      "rejected": 22
+    },
+    "matched_unmatched_after_replay": {
+      "matched": 170,
+      "unmatched": 79
+    },
+    "transition_matrix": {
+      "needs_review -> approved_sensitivity": {
+        "count": 44,
+        "candidate_ids": [
+          "76743c6d9be4071874e32016",
+          "b5a20a069124c2ed6c65d7f5",
+          "1a46424e12981a83b54a251e",
+          "37f9c1295655f2a1a406acf8",
+          "48bdec0e326e64c583d31861",
+          "621079aafd7bef7a641fdbdc",
+          "a06e12f4cfed9b43eafe2d58",
+          "aa19972aee883cf12af75d20",
+          "cd9484aa523d512f8167a1ed",
+          "dc4cd44164de1019918413db",
+          "eeee7926046f2e69e5673992",
+          "c0432cb39613e91bee28f154",
+          "07aa5a5a4ba88f890fa03785",
+          "2b380f42ad7d780d36ac82f7",
+          "4b85ff529264d54103733c2f",
+          "8e039640e74ac1487548b72c",
+          "a4e2a3f436209643e31f6ade",
+          "bd6895932f296adc21a71406",
+          "37aa1b96565ec766d2998631",
+          "3e873213239a5b34f3e64ec8",
+          "450222e889b334b2bb3e59a5",
+          "5a2bb37aae44d618e1b9d478",
+          "6d4cd0b8e278b96a345bcccd",
+          "969151182b4d4498df132a53",
+          "d122c212e6e36548ee84ec15",
+          "ea9314b362e6a296bcd50c84",
+          "0e39040303d4b31a603e2017",
+          "1923b7a627ac1b048dc3b49a",
+          "4b8fb9008f6202ff6639678f",
+          "4d0041fd2c915b268f85ba24",
+          "84bd68c869990fb70375c254",
+          "d5cb94fd437118055d979519",
+          "da6ff392a3e504a09e786aec",
+          "ebb7156d3ea8be29c8f4b67b",
+          "f8410c2df817637bad98c18f",
+          "06a79fb024dc57c5b247d040",
+          "61d7078525ab5699721e759f",
+          "c014f6cf5d5bd516df6db11f",
+          "f4592422463c309484994f6f",
+          "7b7b98cc5de0c179d7503f7d",
+          "9484a7cc8dfba18f6b954e2c",
+          "bbff5a268fa000bc7f8c7e05",
+          "098027544cca4ebdda0c9986",
+          "601fc925013243bdf89c12f0"
+        ]
+      },
+      "needs_review -> needs_review": {
+        "count": 122,
+        "candidate_ids": [
+          "abbc6c0eee7a23bbf08cbb1d",
+          "c97967dd88787b316d2d4837",
+          "2495b9421d2d8b889d11239f",
+          "39d39aea6ed0d9afe6a31ea6",
+          "5d76ceafc7040c9569b23775",
+          "6ff14a08237888fd9448e75d",
+          "ad338b06ca91bf4013684015",
+          "2cf7e0b5d5441c9e4e08db89",
+          "30b5f6cd9020593133bb39bf",
+          "313927de03b7cd2c0689c87d",
+          "358ac9edecd02833634e4342",
+          "3f2137adc72e1202240133f7",
+          "45ebbe2d8e117a2da96e91f0",
+          "5092df762f9af44e27b021c5",
+          "68639333ef3866074f8ed53c",
+          "6f07e932e0676a0de514a8ad",
+          "71ed76849aa5f8a4377b8e4d",
+          "76138a5f25ac7ab803296c6b",
+          "8bb215eace94f9b70df4ec8e",
+          "8c0a6c6cc7e18df658d8e622",
+          "8e4ee84d2e87c52eca85b350",
+          "9c3cc44771e3eaf67e0115fe",
+          "a1c7ecd240ed88dadc5dbb31",
+          "a6f9e8a62b9b644ec8620f93",
+          "b04d8aa8336e2caecf480cef",
+          "b1791fc3fba858aa0341636f",
+          "b35ae05bd7c910c2b618fecd",
+          "c7db494537669e69c87baac1",
+          "c9318ca865d6a968eeeb76f0",
+          "d7db1a351aa8caff0a75a524",
+          "e9985c7dfcbddb0f1fbe0a71",
+          "f9a9951a86c85e9524631191",
+          "fe8e9f1bf0d52c99d8bd6b4c",
+          "6e2b9fdc80ce8468309baccd",
+          "4040cda0bcf5a5b98520d3f4",
+          "599ee9d49476fff666b2d875",
+          "677b62f2069e836eb57fbe53",
+          "7372f75419d1c5c17fe58159",
+          "aa7633422217fa2ca7c99d66",
+          "b319d93461dae4546172b5f5",
+          "b7ad79a657da5c22d4fd72a6",
+          "d65bdf337821f323226b830f",
+          "008d591a7fba923827fb7c65",
+          "1e7abed47582c23d2b716d92",
+          "1ff363936c78a5f85f75be2f",
+          "25902cf893b4d3edbeccb7a1",
+          "371b63cabe5c9dc34037e61f",
+          "39ba886bd4178dabad53fd67",
+          "3f3e6e20fe3a7eacc4f646af",
+          "410fc47d6aa7853cc3f5832f",
+          "42c68c4d633bc3d17fe5b2b0",
+          "43d17460796eb8aaed72583b",
+          "4754f7fae6a58c61e65e463c",
+          "5f6244c055e0889ca0a6ad66",
+          "639af0b0ab5048acd05c1afc",
+          "65ccedf40aea67a71fb61dd3",
+          "68c77d4272632a642200f74f",
+          "6a4b5950a4b2c10793714efc",
+          "6d4bdfb8b2fda7176b3f5573",
+          "8626aad6626def4f57dd41fa",
+          "86c64b203e52bce6f9aafa88",
+          "8f189c080aac8d379faeb1dd",
+          "988b7a3d4f986e022af525ab",
+          "a38dd86d7f0145de0cc4ad2e",
+          "a940cce83a1aca60ea5872d8",
+          "a9ae59733379c6e0439bf72c",
+          "aa5f00b7957f03bece44a9e4",
+          "abfb7775d066b8881deb3bc1",
+          "b7cac961886d824318b51d02",
+          "b8d04573bc881fd8de94b728",
+          "babdc0e586dba4747e2b57ce",
+          "bcef8539773d2435ce066163",
+          "c0673df7cda101f42e536163",
+          "c3b2f5e0ae139976892caa59",
+          "c57903cf6571053b5cdb9a9f",
+          "d3dba8cb75ad7c866d599312",
+          "e0e7e50d7405aa8f27a3c82f",
+          "e4e32488b847d1b7e7a7c610",
+          "ecb723a4299d9f566b4bb0c3",
+          "ee5f615fa68b5a0f8ee1c59a",
+          "f14bb80447de862bf978157e",
+          "f50bb7afd349737c01e560b2",
+          "faa5fd9633b4fd94fe1b6769",
+          "3b1982d02fc32722ea71a589",
+          "4b989fb10f30b3dd990ce9bc",
+          "62b85767605168531b4e44df",
+          "828c6b92b458d78971e652ea",
+          "acecb4e89b174f7ba3c2dd2c",
+          "ae4361c761c59452d63b18c4",
+          "efcae3c4c501a8e93610d07c",
+          "fd3ec36270c1e9d5557bdd89",
+          "0af80b9ace77caf690c70160",
+          "30aa8f0165d7f0f5cb555da0",
+          "6e29c53491ebe8d26a225a13",
+          "ec759edeac2531c382c0eb4f",
+          "08bb1062751bc0c7e6a2556a",
+          "2a7ca63187324304db46f973",
+          "67d31ea423a03fa6e7faafe1",
+          "841acc6087e36331a4214653",
+          "a19b98dd388991ec09d00963",
+          "b84eaba277b34f5428046447",
+          "d78f72c5a56e9d687de41978",
+          "0283e176c338ca993a5a777d",
+          "eba700963b0433774e675df4",
+          "eebbee53e68e94dc2bf3c169",
+          "340ac6fce98a0beab15ec49e",
+          "6f11df0c7821da2ba8b3cb93",
+          "a74ae3a76febdb6894935ac3",
+          "c9a05f7ddce5ccb67ae89c94",
+          "cc64cf1fe5e06196cac9b4a3",
+          "a93c2466ca4aa61937d41276",
+          "19e88485cb5e8bed1269fa93",
+          "1f6155860880d64556f86099",
+          "537fc9f91a0405b08c9845a8",
+          "6b9b3e3412ceec2a77a44109",
+          "a41f29ed8e5f21e8e518a332",
+          "bfdb300d78b0e2f2d761081f",
+          "c71667d47fd8bdc5f0eb01c8",
+          "cbc672c50a65fcc2c7da314c",
+          "e1ca647575a2191e505b4c9a",
+          "e514a21aa0498a6e91cdfc72",
+          "e39d3851f7372b549e460988"
+        ]
+      },
+      "needs_review -> rejected": {
+        "count": 5,
+        "candidate_ids": [
+          "3567c9c47f76042ff8af230c",
+          "c0140340f7c5a90ee20dce78",
+          "83b7f523fd3fe940b5815e8a",
+          "09c74f31189f8a84d42119f5",
+          "3dc5ac55454bf2012b6a6b61"
+        ]
+      },
+      "needs_review -> approved_strict": {
+        "count": 4,
+        "candidate_ids": [
+          "d4fb0e081e5be3bd609f0633",
+          "5a61d62cac76456eb62cb386",
+          "63e4a0c4265cd7c9bac6f485",
+          "da37fd7a3b6c42dbff41d115"
+        ]
+      }
+    },
+    "matching": {
+      "scope": "175 pre-replay needs_review candidates",
+      "unique_matches": 129,
+      "ambiguous_matches": 10,
+      "no_matches": 36,
+      "near_duplicate_logical_window_cases": 24,
+      "overlapping_real_alert_cases": 10
+    },
+    "approved_record_conflicts": {
+      "count": 19,
+      "auto_downgraded_or_rebound": 0,
+      "records": [
+        {
+          "candidate_id": "8489a800c094ba130a079b89",
+          "city": "dnipro",
+          "current_status": "approved_sensitivity",
+          "preserved_matched_episode_id": "73ff94382ce8d8c9f55c4f37",
+          "hardened_matching_outcome": "ambiguous_match",
+          "hardened_proposed_matched_episode_id": null,
+          "hardened_matched_episode_ids": [
+            "0574cf6b4187393c9a58cd34",
+            "ffaac5b5fa6fa656c0bcc44f"
+          ],
+          "hardened_matching_reason": "publication_matches_multiple_distinct_tracked_alert_windows",
+          "conflict_kind": "APPROVED_MANUAL_EPISODE_BINDING_DIFFERS_FROM_HARDENED_PUBLICATION_MATCH",
+          "action": "record_only_no_mutation"
+        },
+        {
+          "candidate_id": "bb4cfcc842179b6eccd76ddd",
+          "city": "dnipro",
+          "current_status": "approved_sensitivity",
+          "preserved_matched_episode_id": "73ff94382ce8d8c9f55c4f37",
+          "hardened_matching_outcome": "no_match",
+          "hardened_proposed_matched_episode_id": null,
+          "hardened_matched_episode_ids": [],
+          "hardened_matching_reason": "publication_outside_all_tracked_alert_windows",
+          "conflict_kind": "APPROVED_MANUAL_EPISODE_BINDING_DIFFERS_FROM_HARDENED_PUBLICATION_MATCH",
+          "action": "record_only_no_mutation"
+        },
+        {
+          "candidate_id": "f5d3f321b62f158a9f0b8b80",
+          "city": "dnipro",
+          "current_status": "approved_sensitivity",
+          "preserved_matched_episode_id": "73ff94382ce8d8c9f55c4f37",
+          "hardened_matching_outcome": "ambiguous_match",
+          "hardened_proposed_matched_episode_id": null,
+          "hardened_matched_episode_ids": [
+            "0574cf6b4187393c9a58cd34",
+            "ffaac5b5fa6fa656c0bcc44f"
+          ],
+          "hardened_matching_reason": "publication_matches_multiple_distinct_tracked_alert_windows",
+          "conflict_kind": "APPROVED_MANUAL_EPISODE_BINDING_DIFFERS_FROM_HARDENED_PUBLICATION_MATCH",
+          "action": "record_only_no_mutation"
+        },
+        {
+          "candidate_id": "f74cd4ffe664930eaadf2ff7",
+          "city": "dnipro",
+          "current_status": "approved_sensitivity",
+          "preserved_matched_episode_id": "0574cf6b4187393c9a58cd34",
+          "hardened_matching_outcome": "no_match",
+          "hardened_proposed_matched_episode_id": null,
+          "hardened_matched_episode_ids": [],
+          "hardened_matching_reason": "publication_outside_all_tracked_alert_windows",
+          "conflict_kind": "APPROVED_MANUAL_EPISODE_BINDING_DIFFERS_FROM_HARDENED_PUBLICATION_MATCH",
+          "action": "record_only_no_mutation"
+        },
+        {
+          "candidate_id": "1ac73c928960f550711ff363",
+          "city": "kropyvnytskyi",
+          "current_status": "approved_strict",
+          "preserved_matched_episode_id": "815411eee407c0d936bac013",
+          "hardened_matching_outcome": "unique_match",
+          "hardened_proposed_matched_episode_id": "01d286e217275f643f60379e",
+          "hardened_matched_episode_ids": [
+            "01d286e217275f643f60379e"
+          ],
+          "hardened_matching_reason": "publication_within_unique_tracked_alert_window",
+          "conflict_kind": "APPROVED_MANUAL_EPISODE_BINDING_DIFFERS_FROM_HARDENED_PUBLICATION_MATCH",
+          "action": "record_only_no_mutation"
+        },
+        {
+          "candidate_id": "c183f7db4eaf69442b6e9e69",
+          "city": "kropyvnytskyi",
+          "current_status": "approved_strict",
+          "preserved_matched_episode_id": "815411eee407c0d936bac013",
+          "hardened_matching_outcome": "unique_match",
+          "hardened_proposed_matched_episode_id": "01d286e217275f643f60379e",
+          "hardened_matched_episode_ids": [
+            "01d286e217275f643f60379e"
+          ],
+          "hardened_matching_reason": "publication_within_unique_tracked_alert_window",
+          "conflict_kind": "APPROVED_MANUAL_EPISODE_BINDING_DIFFERS_FROM_HARDENED_PUBLICATION_MATCH",
+          "action": "record_only_no_mutation"
+        },
+        {
+          "candidate_id": "0ae17f8cc2962a26bc1968d9",
+          "city": "kyiv",
+          "current_status": "approved_sensitivity",
+          "preserved_matched_episode_id": "7d7cb0c7a9e7d3574d33c70c",
+          "hardened_matching_outcome": "no_match",
+          "hardened_proposed_matched_episode_id": null,
+          "hardened_matched_episode_ids": [],
+          "hardened_matching_reason": "publication_outside_all_tracked_alert_windows",
+          "conflict_kind": "APPROVED_MANUAL_EPISODE_BINDING_DIFFERS_FROM_HARDENED_PUBLICATION_MATCH",
+          "action": "record_only_no_mutation"
+        },
+        {
+          "candidate_id": "0f151c2626bf6ff16af7993e",
+          "city": "kyiv",
+          "current_status": "approved_strict",
+          "preserved_matched_episode_id": "7d7cb0c7a9e7d3574d33c70c",
+          "hardened_matching_outcome": "no_match",
+          "hardened_proposed_matched_episode_id": null,
+          "hardened_matched_episode_ids": [],
+          "hardened_matching_reason": "publication_outside_all_tracked_alert_windows",
+          "conflict_kind": "APPROVED_MANUAL_EPISODE_BINDING_DIFFERS_FROM_HARDENED_PUBLICATION_MATCH",
+          "action": "record_only_no_mutation"
+        },
+        {
+          "candidate_id": "7132b162083545deeb722bce",
+          "city": "kyiv",
+          "current_status": "approved_strict",
+          "preserved_matched_episode_id": "372a0acab8763541b0422e14",
+          "hardened_matching_outcome": "no_match",
+          "hardened_proposed_matched_episode_id": null,
+          "hardened_matched_episode_ids": [],
+          "hardened_matching_reason": "publication_outside_all_tracked_alert_windows",
+          "conflict_kind": "APPROVED_MANUAL_EPISODE_BINDING_DIFFERS_FROM_HARDENED_PUBLICATION_MATCH",
+          "action": "record_only_no_mutation"
+        },
+        {
+          "candidate_id": "81f3fabc05dca38d05417ef4",
+          "city": "kyiv",
+          "current_status": "approved_sensitivity",
+          "preserved_matched_episode_id": "372a0acab8763541b0422e14",
+          "hardened_matching_outcome": "no_match",
+          "hardened_proposed_matched_episode_id": null,
+          "hardened_matched_episode_ids": [],
+          "hardened_matching_reason": "publication_outside_all_tracked_alert_windows",
+          "conflict_kind": "APPROVED_MANUAL_EPISODE_BINDING_DIFFERS_FROM_HARDENED_PUBLICATION_MATCH",
+          "action": "record_only_no_mutation"
+        },
+        {
+          "candidate_id": "9d8e278e3e837877280ff018",
+          "city": "kyiv",
+          "current_status": "approved_strict",
+          "preserved_matched_episode_id": "7d7cb0c7a9e7d3574d33c70c",
+          "hardened_matching_outcome": "no_match",
+          "hardened_proposed_matched_episode_id": null,
+          "hardened_matched_episode_ids": [],
+          "hardened_matching_reason": "publication_outside_all_tracked_alert_windows",
+          "conflict_kind": "APPROVED_MANUAL_EPISODE_BINDING_DIFFERS_FROM_HARDENED_PUBLICATION_MATCH",
+          "action": "record_only_no_mutation"
+        },
+        {
+          "candidate_id": "e52fef06544b5dcd21f87a8c",
+          "city": "kyiv",
+          "current_status": "approved_sensitivity",
+          "preserved_matched_episode_id": "372a0acab8763541b0422e14",
+          "hardened_matching_outcome": "no_match",
+          "hardened_proposed_matched_episode_id": null,
+          "hardened_matched_episode_ids": [],
+          "hardened_matching_reason": "publication_outside_all_tracked_alert_windows",
+          "conflict_kind": "APPROVED_MANUAL_EPISODE_BINDING_DIFFERS_FROM_HARDENED_PUBLICATION_MATCH",
+          "action": "record_only_no_mutation"
+        },
+        {
+          "candidate_id": "b996608bb254f9d86481bb80",
+          "city": "odesa",
+          "current_status": "approved_sensitivity",
+          "preserved_matched_episode_id": "f602c8ea8a224ea7d45fda29",
+          "hardened_matching_outcome": "unique_match",
+          "hardened_proposed_matched_episode_id": "0ddb9970c791dc2d1760716e",
+          "hardened_matched_episode_ids": [
+            "0ddb9970c791dc2d1760716e"
+          ],
+          "hardened_matching_reason": "publication_within_unique_tracked_alert_window",
+          "conflict_kind": "APPROVED_MANUAL_EPISODE_BINDING_DIFFERS_FROM_HARDENED_PUBLICATION_MATCH",
+          "action": "record_only_no_mutation"
+        },
+        {
+          "candidate_id": "bac870ab2c3e3778839fb3b7",
+          "city": "odesa",
+          "current_status": "approved_sensitivity",
+          "preserved_matched_episode_id": "f602c8ea8a224ea7d45fda29",
+          "hardened_matching_outcome": "ambiguous_match",
+          "hardened_proposed_matched_episode_id": null,
+          "hardened_matched_episode_ids": [
+            "f602c8ea8a224ea7d45fda29",
+            "ff2ba0d3c1cc5ebf116ed7bf"
+          ],
+          "hardened_matching_reason": "publication_matches_multiple_distinct_tracked_alert_windows",
+          "conflict_kind": "APPROVED_MANUAL_EPISODE_BINDING_DIFFERS_FROM_HARDENED_PUBLICATION_MATCH",
+          "action": "record_only_no_mutation"
+        },
+        {
+          "candidate_id": "e8998303b80b496820692c54",
+          "city": "odesa",
+          "current_status": "approved_strict",
+          "preserved_matched_episode_id": "ff2ba0d3c1cc5ebf116ed7bf",
+          "hardened_matching_outcome": "ambiguous_match",
+          "hardened_proposed_matched_episode_id": null,
+          "hardened_matched_episode_ids": [
+            "f602c8ea8a224ea7d45fda29",
+            "ff2ba0d3c1cc5ebf116ed7bf"
+          ],
+          "hardened_matching_reason": "publication_matches_multiple_distinct_tracked_alert_windows",
+          "conflict_kind": "APPROVED_MANUAL_EPISODE_BINDING_DIFFERS_FROM_HARDENED_PUBLICATION_MATCH",
+          "action": "record_only_no_mutation"
+        },
+        {
+          "candidate_id": "e988116e757a346caa952892",
+          "city": "odesa",
+          "current_status": "approved_strict",
+          "preserved_matched_episode_id": "f602c8ea8a224ea7d45fda29",
+          "hardened_matching_outcome": "ambiguous_match",
+          "hardened_proposed_matched_episode_id": null,
+          "hardened_matched_episode_ids": [
+            "f602c8ea8a224ea7d45fda29",
+            "ff2ba0d3c1cc5ebf116ed7bf"
+          ],
+          "hardened_matching_reason": "publication_matches_multiple_distinct_tracked_alert_windows",
+          "conflict_kind": "APPROVED_MANUAL_EPISODE_BINDING_DIFFERS_FROM_HARDENED_PUBLICATION_MATCH",
+          "action": "record_only_no_mutation"
+        },
+        {
+          "candidate_id": "d0f421afdb362cc867e6b175",
+          "city": "sevastopol",
+          "current_status": "approved_strict",
+          "preserved_matched_episode_id": "88a57288a18038509649a991",
+          "hardened_matching_outcome": "no_match",
+          "hardened_proposed_matched_episode_id": null,
+          "hardened_matched_episode_ids": [],
+          "hardened_matching_reason": "publication_outside_all_tracked_alert_windows",
+          "conflict_kind": "APPROVED_MANUAL_EPISODE_BINDING_DIFFERS_FROM_HARDENED_PUBLICATION_MATCH",
+          "action": "record_only_no_mutation"
+        },
+        {
+          "candidate_id": "25c966b4e375b5075b267a91",
+          "city": "sumy",
+          "current_status": "approved_strict",
+          "preserved_matched_episode_id": "e7e8974f19d4fdc782e93980",
+          "hardened_matching_outcome": "no_match",
+          "hardened_proposed_matched_episode_id": null,
+          "hardened_matched_episode_ids": [],
+          "hardened_matching_reason": "publication_outside_all_tracked_alert_windows",
+          "conflict_kind": "APPROVED_MANUAL_EPISODE_BINDING_DIFFERS_FROM_HARDENED_PUBLICATION_MATCH",
+          "action": "record_only_no_mutation"
+        },
+        {
+          "candidate_id": "6212f72cfd28e6a86fd5bc51",
+          "city": "sumy",
+          "current_status": "approved_strict",
+          "preserved_matched_episode_id": "e7e8974f19d4fdc782e93980",
+          "hardened_matching_outcome": "no_match",
+          "hardened_proposed_matched_episode_id": null,
+          "hardened_matched_episode_ids": [],
+          "hardened_matching_reason": "publication_outside_all_tracked_alert_windows",
+          "conflict_kind": "APPROVED_MANUAL_EPISODE_BINDING_DIFFERS_FROM_HARDENED_PUBLICATION_MATCH",
+          "action": "record_only_no_mutation"
+        }
+      ]
+    },
+    "idempotence": {
+      "same_state_second_replay_remaining_needs_review_checked": 122,
+      "status_or_matching_deltas": 0,
+      "duplicate_candidate_ids_after_replay": 0,
+      "passed": true
+    }
+  },
+  "normal_monitor_run": {
+    "workflow_run_id": 35772976413,
+    "workflow_trigger_commit": "6911f6323709c431b3621742b408f47a3c11f440",
+    "data_commit": "077518714e527e7b22fc216ea9649c60ba4e5443",
+    "mode": "network",
+    "ok": true,
+    "started_at": "2026-09-22T19:19:05.353578Z",
+    "finished_at": "2026-09-22T19:42:52.941341Z",
+    "errors": {},
+    "due_checks_at_cutoff": 28,
+    "checked_due_checks_at_cutoff": 28,
+    "unchecked_due_checks_at_cutoff": 0,
+    "new_alert_episodes": 6,
+    "new_candidates": 10,
+    "new_candidate_status_counts": {
+      "approved_strict": 0,
+      "approved_sensitivity": 2,
+      "needs_review": 8,
+      "rejected": 0
+    },
+    "new_candidate_ids": [
+      {
+        "candidate_id": "db9ace808c9f8f67d73b1313",
+        "city_key": "zaporizhzhia",
+        "status": "needs_review",
+        "matching_outcome": "unique_match",
+        "matched_episode_id": "3006c7a0b2bf8ab7127307a3",
+        "trigger_check_labels": [
+          "24h"
+        ]
+      },
+      {
+        "candidate_id": "66056751d6395841ef648903",
+        "city_key": "zaporizhzhia",
+        "status": "approved_sensitivity",
+        "matching_outcome": "unique_match",
+        "matched_episode_id": "b18afdc437be618902d68d31",
+        "trigger_check_labels": [
+          "24h"
+        ]
+      },
+      {
+        "candidate_id": "5dca6804880316f8b8eab41b",
+        "city_key": "poltava",
+        "status": "needs_review",
+        "matching_outcome": "unique_match",
+        "matched_episode_id": "6d3ffb88b431e8e80e024aae",
+        "trigger_check_labels": [
+          "24h",
+          "immediate"
+        ]
+      },
+      {
+        "candidate_id": "8a3328b488714c10fd0024b1",
+        "city_key": "kyiv",
+        "status": "needs_review",
+        "matching_outcome": "no_match",
+        "matched_episode_id": null,
+        "trigger_check_labels": [
+          "72h"
+        ]
+      },
+      {
+        "candidate_id": "038d554e5d8350eea69c83c1",
+        "city_key": "kyiv",
+        "status": "needs_review",
+        "matching_outcome": "unique_match",
+        "matched_episode_id": "da90f993ab369a680b3bb7c4",
+        "trigger_check_labels": [
+          "72h"
+        ]
+      },
+      {
+        "candidate_id": "99664d26fab9593ccb47770a",
+        "city_key": "kyiv",
+        "status": "approved_sensitivity",
+        "matching_outcome": "unique_match",
+        "matched_episode_id": "baf3eaa558f606c14d6e385f",
+        "trigger_check_labels": [
+          "72h"
+        ]
+      },
+      {
+        "candidate_id": "56b86f01dbf85f32db5790ed",
+        "city_key": "kyiv",
+        "status": "needs_review",
+        "matching_outcome": "unique_match",
+        "matched_episode_id": "baf3eaa558f606c14d6e385f",
+        "trigger_check_labels": [
+          "72h"
+        ]
+      },
+      {
+        "candidate_id": "56547dd74262718ddb980048",
+        "city_key": "kharkiv",
+        "status": "needs_review",
+        "matching_outcome": "no_match",
+        "matched_episode_id": null,
+        "trigger_check_labels": [
+          "24h",
+          "immediate"
+        ]
+      },
+      {
+        "candidate_id": "c628dcdeb83d294ecbdb14cb",
+        "city_key": "dnipro",
+        "status": "needs_review",
+        "matching_outcome": "unique_match",
+        "matched_episode_id": "9d26d096ab88208654dd98ac",
+        "trigger_check_labels": [
+          "immediate"
+        ]
+      },
+      {
+        "candidate_id": "7da9994a7d959d58a9acff3b",
+        "city_key": "chernihiv",
+        "status": "needs_review",
+        "matching_outcome": "no_match",
+        "matched_episode_id": null,
+        "trigger_check_labels": [
+          "24h",
+          "72h",
+          "immediate"
+        ]
+      }
+    ],
+    "matching_refresh": {
+      "candidates_checked": 122,
+      "unique_match": 77,
+      "ambiguous_match": 10,
+      "no_match": 35,
+      "status_changes": 0
+    },
+    "existing_candidate_matching_changes": [
+      {
+        "candidate_id": "b8d04573bc881fd8de94b728",
+        "city_key": "kyiv",
+        "status": "needs_review",
+        "before": {
+          "matching_outcome": "unique_match",
+          "matched_episode_id": "da90f993ab369a680b3bb7c4",
+          "matched_episode_ids": [
+            "da90f993ab369a680b3bb7c4"
+          ]
+        },
+        "after": {
+          "matching_outcome": "no_match",
+          "matched_episode_id": null,
+          "matched_episode_ids": []
+        }
+      },
+      {
+        "candidate_id": "a9ae59733379c6e0439bf72c",
+        "city_key": "kyiv",
+        "status": "needs_review",
+        "before": {
+          "matching_outcome": "no_match",
+          "matched_episode_id": null,
+          "matched_episode_ids": []
+        },
+        "after": {
+          "matching_outcome": "unique_match",
+          "matched_episode_id": "be91665768f663f704f73958",
+          "matched_episode_ids": [
+            "be91665768f663f704f73958"
+          ]
+        }
+      }
+    ],
+    "later_valid_match_examples": [
+      {
+        "candidate_id": "a9ae59733379c6e0439bf72c",
+        "city_key": "kyiv",
+        "status": "needs_review",
+        "before": {
+          "matching_outcome": "no_match",
+          "matched_episode_id": null,
+          "matched_episode_ids": []
+        },
+        "after": {
+          "matching_outcome": "unique_match",
+          "matched_episode_id": "be91665768f663f704f73958",
+          "matched_episode_ids": [
+            "be91665768f663f704f73958"
+          ]
+        }
+      }
+    ],
+    "trigger_episode_losses": [],
+    "non_immediate_auto_approved_examples": [
+      {
+        "candidate_id": "66056751d6395841ef648903",
+        "city_key": "zaporizhzhia",
+        "status": "approved_sensitivity",
+        "trigger_check_labels": [
+          "24h"
+        ],
+        "matched_episode_id": "b18afdc437be618902d68d31"
+      },
+      {
+        "candidate_id": "99664d26fab9593ccb47770a",
+        "city_key": "kyiv",
+        "status": "approved_sensitivity",
+        "trigger_check_labels": [
+          "72h"
+        ],
+        "matched_episode_id": "baf3eaa558f606c14d6e385f"
+      }
+    ],
+    "fulltext_fetches": 39,
+    "strict_series_modified_by_discovery": false
+  },
+  "post_run_state": {
+    "branch_head_before_audit_cleanup": "077518714e527e7b22fc216ea9649c60ba4e5443",
+    "queue_blob_sha": "cb1d28318588b73211c5638bf87dccc18d4f0555",
+    "monitor_state_blob_sha": "922ff21ccb7477bd7df47abfc0da633d61c565e4",
+    "last_run_blob_sha": "c7d850704f3d117eda9fb8b97f2e2992fd877326",
+    "generated_metric_blob_sha": "b7c69d3da5bb5a8f560ead67b5ced85371fa3ccf",
+    "queue_total": 259,
+    "status_counts": {
+      "approved_strict": 46,
+      "approved_sensitivity": 61,
+      "needs_review": 130,
+      "rejected": 22
+    },
+    "counts_by_city": {
+      "cherkasy": {
+        "total": 3,
+        "approved_strict": 0,
+        "approved_sensitivity": 1,
+        "needs_review": 2,
+        "rejected": 0,
+        "matched": 3,
+        "unmatched": 0
+      },
+      "chernihiv": {
+        "total": 7,
+        "approved_strict": 0,
+        "approved_sensitivity": 1,
+        "needs_review": 6,
+        "rejected": 0,
+        "matched": 5,
+        "unmatched": 2
+      },
+      "chernivtsi": {
+        "total": 0,
+        "approved_strict": 0,
+        "approved_sensitivity": 0,
+        "needs_review": 0,
+        "rejected": 0,
+        "matched": 0,
+        "unmatched": 0
+      },
+      "dnipro": {
+        "total": 51,
+        "approved_strict": 5,
+        "approved_sensitivity": 17,
+        "needs_review": 27,
+        "rejected": 2,
+        "matched": 34,
+        "unmatched": 17
+      },
+      "ivano_frankivsk": {
+        "total": 0,
+        "approved_strict": 0,
+        "approved_sensitivity": 0,
+        "needs_review": 0,
+        "rejected": 0,
+        "matched": 0,
+        "unmatched": 0
+      },
+      "kharkiv": {
+        "total": 3,
+        "approved_strict": 0,
+        "approved_sensitivity": 1,
+        "needs_review": 2,
+        "rejected": 0,
+        "matched": 1,
+        "unmatched": 2
+      },
+      "kherson": {
+        "total": 0,
+        "approved_strict": 0,
+        "approved_sensitivity": 0,
+        "needs_review": 0,
+        "rejected": 0,
+        "matched": 0,
+        "unmatched": 0
+      },
+      "khmelnytskyi": {
+        "total": 0,
+        "approved_strict": 0,
+        "approved_sensitivity": 0,
+        "needs_review": 0,
+        "rejected": 0,
+        "matched": 0,
+        "unmatched": 0
+      },
+      "kropyvnytskyi": {
+        "total": 24,
+        "approved_strict": 10,
+        "approved_sensitivity": 6,
+        "needs_review": 8,
+        "rejected": 0,
+        "matched": 22,
+        "unmatched": 2
+      },
+      "kyiv": {
+        "total": 70,
+        "approved_strict": 12,
+        "approved_sensitivity": 12,
+        "needs_review": 44,
+        "rejected": 2,
+        "matched": 35,
+        "unmatched": 35
+      },
+      "lutsk": {
+        "total": 0,
+        "approved_strict": 0,
+        "approved_sensitivity": 0,
+        "needs_review": 0,
+        "rejected": 0,
+        "matched": 0,
+        "unmatched": 0
+      },
+      "lviv": {
+        "total": 0,
+        "approved_strict": 0,
+        "approved_sensitivity": 0,
+        "needs_review": 0,
+        "rejected": 0,
+        "matched": 0,
+        "unmatched": 0
+      },
+      "mykolaiv": {
+        "total": 16,
+        "approved_strict": 0,
+        "approved_sensitivity": 7,
+        "needs_review": 8,
+        "rejected": 1,
+        "matched": 11,
+        "unmatched": 5
+      },
+      "odesa": {
+        "total": 20,
+        "approved_strict": 12,
+        "approved_sensitivity": 4,
+        "needs_review": 4,
+        "rejected": 0,
+        "matched": 19,
+        "unmatched": 1
+      },
+      "poltava": {
+        "total": 9,
+        "approved_strict": 0,
+        "approved_sensitivity": 1,
+        "needs_review": 8,
+        "rejected": 0,
+        "matched": 7,
+        "unmatched": 2
+      },
+      "rivne": {
+        "total": 9,
+        "approved_strict": 0,
+        "approved_sensitivity": 0,
+        "needs_review": 1,
+        "rejected": 8,
+        "matched": 2,
+        "unmatched": 7
+      },
+      "sevastopol": {
+        "total": 4,
+        "approved_strict": 1,
+        "approved_sensitivity": 2,
+        "needs_review": 1,
+        "rejected": 0,
+        "matched": 3,
+        "unmatched": 1
+      },
+      "sumy": {
+        "total": 13,
+        "approved_strict": 4,
+        "approved_sensitivity": 3,
+        "needs_review": 1,
+        "rejected": 5,
+        "matched": 10,
+        "unmatched": 3
+      },
+      "ternopil": {
+        "total": 6,
+        "approved_strict": 0,
+        "approved_sensitivity": 1,
+        "needs_review": 5,
+        "rejected": 0,
+        "matched": 3,
+        "unmatched": 3
+      },
+      "uzhhorod": {
+        "total": 0,
+        "approved_strict": 0,
+        "approved_sensitivity": 0,
+        "needs_review": 0,
+        "rejected": 0,
+        "matched": 0,
+        "unmatched": 0
+      },
+      "vinnytsia": {
+        "total": 3,
+        "approved_strict": 0,
+        "approved_sensitivity": 1,
+        "needs_review": 1,
+        "rejected": 1,
+        "matched": 2,
+        "unmatched": 1
+      },
+      "zaporizhzhia": {
+        "total": 18,
+        "approved_strict": 2,
+        "approved_sensitivity": 2,
+        "needs_review": 11,
+        "rejected": 3,
+        "matched": 18,
+        "unmatched": 0
+      },
+      "zhytomyr": {
+        "total": 3,
+        "approved_strict": 0,
+        "approved_sensitivity": 2,
+        "needs_review": 1,
+        "rejected": 0,
+        "matched": 2,
+        "unmatched": 1
+      }
+    },
+    "matched_unmatched": {
+      "matched": 177,
+      "unmatched": 82
+    },
+    "queue_metric_inputs": {
+      "approved_strict_candidate_records": 46,
+      "approved_sensitivity_candidate_records_including_strict": 107,
+      "strict_unique_matched_episode_ids": 20,
+      "sensitivity_unique_matched_episode_ids": 46
+    },
+    "active_generated_metric_inputs": {
+      "strict_episode_inputs": 19,
+      "sensitivity_episode_inputs": 39,
+      "pending_review_candidates": 130,
+      "by_city": {
+        "poltava": {
+          "strict_episode_inputs": 0,
+          "sensitivity_episode_inputs": 1,
+          "pending_review_candidates": 8,
+          "coverage_end": "2026-09-21",
+          "total_alerts": 1848,
+          "strict_n": 51,
+          "sensitivity_n": 54
+        },
+        "uzhhorod": {
+          "strict_episode_inputs": 0,
+          "sensitivity_episode_inputs": 0,
+          "pending_review_candidates": 0,
+          "coverage_end": "2026-09-21",
+          "total_alerts": 92,
+          "strict_n": 1,
+          "sensitivity_n": 1
+        },
+        "ivano_frankivsk": {
+          "strict_episode_inputs": 0,
+          "sensitivity_episode_inputs": 0,
+          "pending_review_candidates": 0,
+          "coverage_end": "2026-09-21",
+          "total_alerts": 104,
+          "strict_n": 6,
+          "sensitivity_n": 6
+        },
+        "chernivtsi": {
+          "strict_episode_inputs": 0,
+          "sensitivity_episode_inputs": 0,
+          "pending_review_candidates": 0,
+          "coverage_end": "2026-09-21",
+          "total_alerts": 114,
+          "strict_n": 2,
+          "sensitivity_n": 2
+        },
+        "ternopil": {
+          "strict_episode_inputs": 0,
+          "sensitivity_episode_inputs": 1,
+          "pending_review_candidates": 5,
+          "coverage_end": "2026-09-21",
+          "total_alerts": 127,
+          "strict_n": 5,
+          "sensitivity_n": 6
+        },
+        "lviv": {
+          "strict_episode_inputs": 0,
+          "sensitivity_episode_inputs": 0,
+          "pending_review_candidates": 0,
+          "coverage_end": "2026-09-21",
+          "total_alerts": 126,
+          "strict_n": 12,
+          "sensitivity_n": 12
+        },
+        "lutsk": {
+          "strict_episode_inputs": 0,
+          "sensitivity_episode_inputs": 0,
+          "pending_review_candidates": 0,
+          "coverage_end": "2026-09-21",
+          "total_alerts": 136,
+          "strict_n": 12,
+          "sensitivity_n": 12
+        },
+        "rivne": {
+          "strict_episode_inputs": 0,
+          "sensitivity_episode_inputs": 0,
+          "pending_review_candidates": 1,
+          "coverage_end": "2026-09-21",
+          "total_alerts": 240,
+          "strict_n": 13,
+          "sensitivity_n": 13
+        },
+        "khmelnytskyi": {
+          "strict_episode_inputs": 0,
+          "sensitivity_episode_inputs": 0,
+          "pending_review_candidates": 0,
+          "coverage_end": "2026-09-21",
+          "total_alerts": 254,
+          "strict_n": 11,
+          "sensitivity_n": 12
+        },
+        "vinnytsia": {
+          "strict_episode_inputs": 0,
+          "sensitivity_episode_inputs": 0,
+          "pending_review_candidates": 1,
+          "coverage_end": "2026-09-21",
+          "total_alerts": 371,
+          "strict_n": 5,
+          "sensitivity_n": 7
+        },
+        "zhytomyr": {
+          "strict_episode_inputs": 0,
+          "sensitivity_episode_inputs": 1,
+          "pending_review_candidates": 1,
+          "coverage_end": "2026-09-21",
+          "total_alerts": 704,
+          "strict_n": 19,
+          "sensitivity_n": 21
+        },
+        "kropyvnytskyi": {
+          "strict_episode_inputs": 3,
+          "sensitivity_episode_inputs": 5,
+          "pending_review_candidates": 8,
+          "coverage_end": "2026-09-21",
+          "total_alerts": 1201,
+          "strict_n": 41,
+          "sensitivity_n": 43
+        },
+        "kyiv": {
+          "strict_episode_inputs": 3,
+          "sensitivity_episode_inputs": 5,
+          "pending_review_candidates": 44,
+          "coverage_end": "2026-09-21",
+          "total_alerts": 2503,
+          "strict_n": 380,
+          "sensitivity_n": 409
+        },
+        "kherson": {
+          "strict_episode_inputs": 0,
+          "sensitivity_episode_inputs": 0,
+          "pending_review_candidates": 0,
+          "coverage_end": "2026-09-21",
+          "total_alerts": 1434,
+          "strict_n": 9,
+          "sensitivity_n": 9
+        },
+        "odesa": {
+          "strict_episode_inputs": 7,
+          "sensitivity_episode_inputs": 7,
+          "pending_review_candidates": 4,
+          "coverage_end": "2026-09-21",
+          "total_alerts": 1514,
+          "strict_n": 162,
+          "sensitivity_n": 168
+        },
+        "mykolaiv": {
+          "strict_episode_inputs": 0,
+          "sensitivity_episode_inputs": 3,
+          "pending_review_candidates": 8,
+          "coverage_end": "2026-09-21",
+          "total_alerts": 1704,
+          "strict_n": 122,
+          "sensitivity_n": 138
+        },
+        "chernihiv": {
+          "strict_episode_inputs": 0,
+          "sensitivity_episode_inputs": 0,
+          "pending_review_candidates": 6,
+          "coverage_end": "2026-09-21",
+          "total_alerts": 1712,
+          "strict_n": 39,
+          "sensitivity_n": 43
+        },
+        "dnipro": {
+          "strict_episode_inputs": 3,
+          "sensitivity_episode_inputs": 7,
+          "pending_review_candidates": 27,
+          "coverage_end": "2026-09-21",
+          "total_alerts": 2297,
+          "strict_n": 183,
+          "sensitivity_n": 194
+        },
+        "cherkasy": {
+          "strict_episode_inputs": 0,
+          "sensitivity_episode_inputs": 1,
+          "pending_review_candidates": 2,
+          "coverage_end": "2026-09-21",
+          "total_alerts": 1583,
+          "strict_n": 54,
+          "sensitivity_n": 60
+        },
+        "sevastopol": {
+          "strict_episode_inputs": 1,
+          "sensitivity_episode_inputs": 2,
+          "pending_review_candidates": 1,
+          "coverage_end": "2026-09-21",
+          "total_alerts": 535,
+          "strict_n": 39,
+          "sensitivity_n": 57
+        },
+        "kharkiv": {
+          "strict_episode_inputs": 0,
+          "sensitivity_episode_inputs": 1,
+          "pending_review_candidates": 2,
+          "coverage_end": "2026-09-21",
+          "total_alerts": 3603,
+          "strict_n": 288,
+          "sensitivity_n": 309
+        },
+        "sumy": {
+          "strict_episode_inputs": 1,
+          "sensitivity_episode_inputs": 3,
+          "pending_review_candidates": 1,
+          "coverage_end": "2026-09-21",
+          "total_alerts": 2337,
+          "strict_n": 205,
+          "sensitivity_n": 241
+        },
+        "zaporizhzhia": {
+          "strict_episode_inputs": 1,
+          "sensitivity_episode_inputs": 2,
+          "pending_review_candidates": 11,
+          "coverage_end": "2026-09-21",
+          "total_alerts": 2383,
+          "strict_n": 170,
+          "sensitivity_n": 226
+        }
+      }
+    }
+  },
+  "regression_checks": {
+    "cities_onboarded": 23,
+    "expected_cities_onboarded": 23,
+    "duplicate_candidate_ids": 0,
+    "broken_matched_episode_id": 0,
+    "all_matched_episode_ids_exist_in_monitor_state": true,
+    "strict_ids_unique": true,
+    "sensitivity_ids_unique": true,
+    "strict_subset_sensitivity": true,
+    "strict_unique_episode_ids": 20,
+    "sensitivity_unique_episode_ids": 46,
+    "numerator_deduplicated_by_episode_id": true,
+    "historical_baseline_blob_sha_before": "5bbd2b771559eac2966aeec65d6e3b5487b9c1a9",
+    "historical_baseline_blob_sha_after": "5bbd2b771559eac2966aeec65d6e3b5487b9c1a9",
+    "frozen_historical_baseline_unchanged": true,
+    "grafana_dashboard_blob_sha_before": "086b715e2ddbe4e85717d1793b0c88119708f412",
+    "grafana_dashboard_blob_sha_after": "086b715e2ddbe4e85717d1793b0c88119708f412",
+    "grafana_dashboard_template_blob_sha_before": "557ef47cbe480a0060650e7bcd25155fcfde28c4",
+    "grafana_dashboard_template_blob_sha_after": "557ef47cbe480a0060650e7bcd25155fcfde28c4",
+    "dashboard_code_unchanged": true,
+    "canonical_historical_repair_run": false,
+    "production_deployment_run": false
+  },
+  "concurrency": {
+    "concurrent_head_change_detected": true,
+    "preserved_commit": "ee013e323ddca0ed4da36764833e4f3a4f77b765",
+    "preserved_commit_message": "research: snapshot current explosion replay state",
+    "preserved_files": [
+      "research/explosion_monitor_live_replay_plan_2026-09-22.json"
+    ],
+    "normal_run_commit_rebased_on_concurrent_head": true
+  },
+  "human_summary": {
+    "controlled_replay_status_counts_before": {
+      "approved_strict": 42,
+      "approved_sensitivity": 15,
+      "needs_review": 175,
+      "rejected": 17
+    },
+    "controlled_replay_status_counts_after": {
+      "approved_strict": 46,
+      "approved_sensitivity": 59,
+      "needs_review": 122,
+      "rejected": 22
+    },
+    "final_post_normal_run_status_counts": {
+      "approved_strict": 46,
+      "approved_sensitivity": 61,
+      "needs_review": 130,
+      "rejected": 22
+    },
+    "replay_unique_episode_match_candidates": 129,
+    "replay_ambiguous_candidates": 10,
+    "replay_no_match_candidates": 36,
+    "normal_run_clean": true,
+    "system_wide_for_all_23_cities": true
+  },
+  "blockers": [],
+  "verdict": "SYSTEM-WIDE LIVE MONITOR HARDENING COMPLETE"
+}
