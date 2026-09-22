@@ -1,0 +1,5063 @@
+{
+  "schema_version": "1.0",
+  "generated_date": "2026-09-22",
+  "repository": "olegbalakin-cmyk/kyiv-air-alerts-grafana",
+  "branch": "multicity-wip-2026-09-16",
+  "source_branch_head": "fe0296ea7be2f7f9b68e6af9074b77ef953c5613",
+  "city": "Zaporizhzhia",
+  "workstream": "historical_explosion_metric_reaudit",
+  "slice": "0",
+  "purpose": "Calibration of broad source discovery. Research artifact only; no production/canonical mutation.",
+  "methodology": {
+    "historical_methodology_preserved": "Strict requires exact-city evidence, aerial-war context, one concrete frozen alert episode, and event timing inside that episode or explicit wording tying the event to that alert. Publication time alone is never event time. PVO alone is not explosion evidence.",
+    "discovery_then_adjudication": "Vocabulary is a discovery mechanism, never a classification rule. Messages are assembled into attack chronologies/evidence chains before episode attribution.",
+    "episode_attribution_priority": [
+      "explicit event datetime/interval",
+      "contemporaneous live message timestamp when wording describes the event as occurring then",
+      "explicit wording tying event to the alert",
+      "unambiguous chronology/evidence chain"
+    ],
+    "multi_episode_rule": "Generic 'during the alert' wording cannot choose among multiple same-day episodes without episode-specific timing. Such cases remain needs_review/episode_ambiguous.",
+    "delayed_publication_rule": "A later article/update is assigned by stated event time/chronology, never by publication time.",
+    "pvo_rule": "PVO_ONLY is discovery context, not strict evidence. PVO_PLUS_EXPLOSION can qualify when exact city, aerial context and target-episode timing are all supported.",
+    "positive_control_independence": "A control counts as independently rediscovered only when it surfaced through the pre-specified broad date/pattern search without using its old source URL/publisher as the search key. Artifact-assisted recovery is recorded separately."
+  },
+  "exact_universe": {
+    "universe_artifact": "research/zaporizhzhia_explosion_enrichment_slice0_universe.json",
+    "selected_local_dates": [
+      "2025-05-22",
+      "2025-05-23",
+      "2025-05-24",
+      "2025-09-14",
+      "2025-09-15",
+      "2025-09-16",
+      "2025-10-07",
+      "2025-10-08",
+      "2025-10-09",
+      "2025-11-14",
+      "2025-11-15",
+      "2025-11-16",
+      "2025-11-21",
+      "2025-11-22",
+      "2025-11-23",
+      "2025-11-24",
+      "2025-11-25",
+      "2025-12-01",
+      "2025-12-02",
+      "2025-12-03",
+      "2025-12-15",
+      "2025-12-16",
+      "2025-12-17",
+      "2026-01-20",
+      "2026-01-21",
+      "2026-01-22",
+      "2026-03-11",
+      "2026-03-12",
+      "2026-03-13",
+      "2026-03-21",
+      "2026-04-09",
+      "2026-06-16",
+      "2026-08-28",
+      "2026-09-07",
+      "2026-09-08"
+    ],
+    "episode_count": 171,
+    "episode_ids": [
+      "82fa4d18494c9148e08bfc2f",
+      "2a893785d7ecbd6ed43ad43d",
+      "b592d70e370f5eb55641c493",
+      "9b05d6a50ed7807c9b740227",
+      "04dcb6efa643b5a9957d9edc",
+      "2a0dcc013be63146bcfdd01c",
+      "6cf411ed1ba704c725efc257",
+      "c74fbdf1b82d7e1732c0156d",
+      "6252be3c10f593912f9181d5",
+      "a73272370b889a3b18f14e62",
+      "6e6afea5cad3ced8422d0ff8",
+      "a30c0830e542c4848e8c0b43",
+      "70e8135f4683bdf07edad469",
+      "7dc1af50893c323a558a4938",
+      "5e84185302388262d2b7f94d",
+      "e98335051024030cb4509d54",
+      "21591d14fceac40aa05b4ed9",
+      "e3962be99546b5a2cc1b486d",
+      "c062865b94287ff038b21aee",
+      "c8282e711bfec7196e70cbd0",
+      "39814d7eb658217adae24bd9",
+      "eb29ccba021617db3b0e8bbc",
+      "70067c052eec48f162697391",
+      "9ac90852a1163b8d94e497f0",
+      "fa1e9624ec208634260fa6cb",
+      "9f79a5661ceb17a852e72a78",
+      "08a32c59bc55483053e24b33",
+      "9f0adec7ff222f22c5fbd64f",
+      "d1df7db7433d4c331600e80c",
+      "67be27878c8b91bf40443755",
+      "d489eedc98bd8b9478f129c0",
+      "34910179f6163e0a2ce863d6",
+      "d098f5f0986d22bafe0d5928",
+      "19f123f154ffb68f06d0296e",
+      "25082656c673ccd89c87acea",
+      "aee4c7f739c8ccac87ec1412",
+      "3e075c1e873c1d3651660199",
+      "206f69cd684942feb9c1285d",
+      "50d8e850d366aa2b6b4e9085",
+      "1b211d9eed4419e9d70b9848",
+      "1738051efb5d6ac5ed26d178",
+      "5cf5840757a27e96dff510fb",
+      "e827132c3180d7229d486e6f",
+      "86670e36015ec1c2badcda19",
+      "8534686ad8552aef1dd5a009",
+      "a32974e3056da5a80f30d9b7",
+      "5d0cb79833130aafc55619d0",
+      "6888840566d0ca531de3cdb1",
+      "94037a6ae891c1e54e799fc2",
+      "4b8fdc538eb64d4e79183b1d",
+      "b0192d4d0fd8085eeafa8049",
+      "91630f5997d7fecf3e7be46f",
+      "6439f5d99d7e8dc1f10f88ee",
+      "a7b2d36f7a5b8811c8ab4119",
+      "4dc5bc6e711aaf28f434d839",
+      "07d38fd578a9d7ab7bbdc25d",
+      "0c7c4e13840568eb18a2c358",
+      "41f41f98fef80130dff07317",
+      "6b7ba70bf5f6686e6b51519f",
+      "aa4db20dedd8b7bc371c9397",
+      "4e941e298be9460c48f07f00",
+      "22e31f88d369afdd93212f1f",
+      "d5db49ee45c5871f80a5b245",
+      "93d76bb46dcfc54a114ba20a",
+      "c65a82b56e8e0cee87f5c719",
+      "03eb23a34f4367f90dbee592",
+      "e12bc9716376707f79e505d6",
+      "8e63c6889372938301a6fe49",
+      "f76353bbd92f74e0abb9b5f7",
+      "febf22a1f559d6c761c8d850",
+      "0910ce2087fe42193ae34c03",
+      "7430371bfb8f0de693b0f197",
+      "ced9e05a99318132ec47d0a0",
+      "65c5d7c6637e7e2449dc746c",
+      "5b11cebfb7659f0658ecd4c8",
+      "1cbb1d48330a952d73209f37",
+      "de7e23522b7babe123874bb0",
+      "997692689348872c95d1207f",
+      "ae98133a453b0e2f9c83dc69",
+      "39e2fa8da6abfa2aaad2edbc",
+      "6f584faf22e506f012b178cd",
+      "483d4aee7f1dad2a0e07e3b9",
+      "69b6767287e18383f94758c2",
+      "648231795de8332b342c4d8b",
+      "b05e8a61b421a1caf0bf253b",
+      "319d4432a8528fe156bcc567",
+      "5a7d64e4d58b240825d0c954",
+      "4f95a8927b24d203504de09b",
+      "cddc9de313621dc2726766f7",
+      "c43a3cc5caa8e4e8795c4b45",
+      "7fef165b3eb0ada83014cc42",
+      "4f1acc102b88ca92f5aa8bbd",
+      "e484e954aa9b0e2ae9c61e37",
+      "87348c2c06d552d2ad0fc751",
+      "6871d178921352e6ab350e65",
+      "64867fdfc87ad6f4835ea664",
+      "4c9e1e3c3ab0927f33046b0a",
+      "987d000a8dcb01d5846f5e9d",
+      "dde8f8a1890af198a9a1991d",
+      "19c858b550d86a15e4911595",
+      "6393c001ec4d0f8dfce54b51",
+      "b234a0c7d8f8be45ee429a21",
+      "3c0be26b070eef1d335ca449",
+      "ccdb3a15089c69f340caab3e",
+      "d06482300de94ff0c9b673d4",
+      "f21d79245d46f048527158a1",
+      "bfdc9c0fb11d3a8768d353a1",
+      "b9d0a533a850494d593c171a",
+      "7ab47c208af5d2b08e75297d",
+      "b7918fda6a0f4d53627d75da",
+      "8a102c6a0c9c30357daa6dd2",
+      "1cf4b55dbaaef2eb3cee8eb1",
+      "4aa2b1dd84cc144314894e77",
+      "879224e7d5c768fb1e06dfb3",
+      "b0764553c1d300d281bf4e5d",
+      "16f030ce4756b7ea9e4b74a1",
+      "877a118da9a12ef872938a40",
+      "6a9c0bb747f71567f3e021fd",
+      "0edc1d73c3a86e149371bfbf",
+      "608cf3a0a6db0c755f5a0a0e",
+      "7f1d056c521084390fe176b6",
+      "7355d0bf9a56180ae3b16517",
+      "3dcde950af5f492ecb7e7bf2",
+      "80bc84d288038afc5660a53b",
+      "c065ed0c94fb9e22b79fcbe2",
+      "e2343ddef99dd25928a0193e",
+      "2036761a5895051664126f94",
+      "221e243949fd2b8fd321b1cd",
+      "5e37cf453fccd8d107eaed81",
+      "7a45b4c6cd4f18358e063002",
+      "d602f44fad3a56880a9289b1",
+      "c1d947bd6240f8549c0e385a",
+      "eaf962bd134afbafbc0294e8",
+      "68046107668aad7c9f51499d",
+      "fd5871a55d8a1445c2e52c68",
+      "d76ce73a66145eca23357699",
+      "e245bdb186dabe8aa6b00cb0",
+      "6fbe1c4c79d2e5d92000da8b",
+      "c274ed848e517f388d2dfe11",
+      "404d55294a38c31848e7e093",
+      "a0fbd54a685f9a3092e1b0d0",
+      "95d25e02ec4a6cc6c4f1e13c",
+      "6b0d929c41703108133cf3f8",
+      "834b9fdb45e99a950b7b9c65",
+      "398cb589a5ad1e70e079b17b",
+      "c72a7385c1c092122988b6fd",
+      "52cf015ceb99f6edae1a1f97",
+      "b9a073c6fb5e4bd51cba993d",
+      "7c008970817e8d13ae402670",
+      "f925608b4627f59f007d56d4",
+      "b1565fe64d3434d1424826cd",
+      "461c518eecc614b3d4a8ef78",
+      "1e434d0fa5abfd518ad07d1e",
+      "9d8b22eaba51c12cc1d1fda2",
+      "abc0e4e421bd4de5a755a59c",
+      "76b51bdb9b2bca6fa8829315",
+      "a566b6daecf3cc4740dfa1e6",
+      "5da4fc649a38d4796ebbcf94",
+      "23371bee083381cd79cf93a2",
+      "6dbb1a64ab408e16bac897c3",
+      "0dd703369cd079679c0b5ef6",
+      "d4d21ab6353ce8c04af598f7",
+      "9cd220490218092ab02d9e07",
+      "a6f5e4175168801a431add39",
+      "8df56d26d6fd41e435354114",
+      "8c7c2028bdc7c3f0e8711654",
+      "ed3f58638bea1b27a43f1ccc",
+      "1b10bbe657e1bf1e964c087a",
+      "eac6a8d131341fb46bd1eae2",
+      "d55b6d7ceb695909de7d244d",
+      "03d32ac3644a08358083d542"
+    ]
+  },
+  "discovery_queries_pattern_families": {
+    "direct_explosion": [
+      "вибух",
+      "вибухи",
+      "пролунав вибух",
+      "пролунали вибухи",
+      "чули вибух",
+      "було чутно вибух",
+      "було гучно"
+    ],
+    "strike_impact": [
+      "влучання",
+      "влучив",
+      "приліт",
+      "удар",
+      "атакували",
+      "поцілили"
+    ],
+    "pvo": [
+      "ППО",
+      "працює ППО",
+      "робота ППО",
+      "сили ППО",
+      "збили",
+      "збито",
+      "перехопили"
+    ],
+    "weapon_context": [
+      "БпЛА",
+      "безпілотник",
+      "Shahed",
+      "шахед",
+      "дрон",
+      "ракета",
+      "КАБ",
+      "авіабомба",
+      "керована авіабомба",
+      "Бандероль",
+      "Гербера",
+      "Герань-2",
+      "УМПК"
+    ],
+    "execution_note": "All 35 selected dates were evaluated against all four logical families. Web requests sometimes combined strike/impact and weapon-context vocabulary in one query; channel tags separate the evidence role.",
+    "logical_date_channel_evaluations": 140
+  },
+  "source_coverage": {
+    "repo_local_raw_telegram_archive": {
+      "available": false,
+      "note": "Recursive branch-tree inspection found Telegram audit tooling/data but no stored raw Zaporizhzhia historical Telegram archive."
+    },
+    "indexed_telegram": {
+      "used": true,
+      "examples": [
+        "@ivan_fedorov_zp",
+        "@truexazaporozie",
+        "Suspilne Zaporizhzhia indexed Telegram pages",
+        "Air Force indexed Telegram"
+      ]
+    },
+    "suspilne": {
+      "used": true
+    },
+    "ukrainska_pravda": {
+      "used": true
+    },
+    "ukrinform": {
+      "used": true
+    },
+    "official_regional_and_police": {
+      "used": true
+    },
+    "local_regional_media": {
+      "used": true
+    },
+    "general_web_search": {
+      "used": true
+    },
+    "independently_attributable_channel_hit_rates": {
+      "direct_explosion": {
+        "independently_attributable_episode_hits": 20,
+        "rate_of_slice_episodes_pct": 11.7,
+        "episode_ids": [
+          "6e6afea5cad3ced8422d0ff8",
+          "eb29ccba021617db3b0e8bbc",
+          "19f123f154ffb68f06d0296e",
+          "8534686ad8552aef1dd5a009",
+          "41f41f98fef80130dff07317",
+          "03eb23a34f4367f90dbee592",
+          "ced9e05a99318132ec47d0a0",
+          "6393c001ec4d0f8dfce54b51",
+          "0edc1d73c3a86e149371bfbf",
+          "404d55294a38c31848e7e093",
+          "eac6a8d131341fb46bd1eae2",
+          "5da4fc649a38d4796ebbcf94",
+          "07d38fd578a9d7ab7bbdc25d",
+          "6cf411ed1ba704c725efc257",
+          "fa1e9624ec208634260fa6cb",
+          "6b7ba70bf5f6686e6b51519f",
+          "febf22a1f559d6c761c8d850",
+          "7fef165b3eb0ada83014cc42",
+          "c1d947bd6240f8549c0e385a",
+          "68046107668aad7c9f51499d"
+        ]
+      },
+      "pvo": {
+        "independently_attributable_episode_hits": 4,
+        "rate_of_slice_episodes_pct": 2.34,
+        "episode_ids": [
+          "8534686ad8552aef1dd5a009",
+          "41f41f98fef80130dff07317",
+          "eac6a8d131341fb46bd1eae2",
+          "07d38fd578a9d7ab7bbdc25d"
+        ]
+      },
+      "strike_impact": {
+        "independently_attributable_episode_hits": 17,
+        "rate_of_slice_episodes_pct": 9.94,
+        "episode_ids": [
+          "03eb23a34f4367f90dbee592",
+          "6393c001ec4d0f8dfce54b51",
+          "404d55294a38c31848e7e093",
+          "eac6a8d131341fb46bd1eae2",
+          "5da4fc649a38d4796ebbcf94",
+          "fa1e9624ec208634260fa6cb",
+          "6b7ba70bf5f6686e6b51519f",
+          "febf22a1f559d6c761c8d850",
+          "cddc9de313621dc2726766f7",
+          "87348c2c06d552d2ad0fc751",
+          "1cf4b55dbaaef2eb3cee8eb1",
+          "c1d947bd6240f8549c0e385a",
+          "68046107668aad7c9f51499d",
+          "f925608b4627f59f007d56d4",
+          "23371bee083381cd79cf93a2",
+          "69b6767287e18383f94758c2",
+          "b234a0c7d8f8be45ee429a21"
+        ]
+      },
+      "weapon_context_chain": {
+        "independently_attributable_episode_hits": 27,
+        "rate_of_slice_episodes_pct": 15.79,
+        "episode_ids": [
+          "6e6afea5cad3ced8422d0ff8",
+          "eb29ccba021617db3b0e8bbc",
+          "19f123f154ffb68f06d0296e",
+          "8534686ad8552aef1dd5a009",
+          "41f41f98fef80130dff07317",
+          "03eb23a34f4367f90dbee592",
+          "ced9e05a99318132ec47d0a0",
+          "6393c001ec4d0f8dfce54b51",
+          "0edc1d73c3a86e149371bfbf",
+          "404d55294a38c31848e7e093",
+          "eac6a8d131341fb46bd1eae2",
+          "5da4fc649a38d4796ebbcf94",
+          "07d38fd578a9d7ab7bbdc25d",
+          "6cf411ed1ba704c725efc257",
+          "fa1e9624ec208634260fa6cb",
+          "6b7ba70bf5f6686e6b51519f",
+          "febf22a1f559d6c761c8d850",
+          "7fef165b3eb0ada83014cc42",
+          "cddc9de313621dc2726766f7",
+          "87348c2c06d552d2ad0fc751",
+          "1cf4b55dbaaef2eb3cee8eb1",
+          "c1d947bd6240f8549c0e385a",
+          "68046107668aad7c9f51499d",
+          "f925608b4627f59f007d56d4",
+          "23371bee083381cd79cf93a2",
+          "69b6767287e18383f94758c2",
+          "b234a0c7d8f8be45ee429a21"
+        ]
+      }
+    },
+    "rate_definition": "Unique Slice 0 episodes with independently surfaced attributable evidence in the named discovery channel divided by 171. Channels overlap; rates do not sum to total source-hit rate.",
+    "attributable_source_hit_episodes": 36,
+    "attributable_source_hit_rate_pct": 21.05
+  },
+  "episode_level_results": [
+    {
+      "episode_id": "82fa4d18494c9148e08bfc2f",
+      "date": "2025-05-22",
+      "alert_start": "2025-05-21T21:24:28Z",
+      "alert_end": "2025-05-21T23:33:44Z",
+      "current_canonical_status": "none",
+      "slice0_verdict": "no_source_hit",
+      "reason_codes": [
+        "NO_SOURCE_HIT"
+      ],
+      "evidence_chain_ids": [],
+      "independently_rediscovered_by_new_discovery": false,
+      "positive_control": false
+    },
+    {
+      "episode_id": "2a893785d7ecbd6ed43ad43d",
+      "date": "2025-05-22",
+      "alert_start": "2025-05-22T00:21:23Z",
+      "alert_end": "2025-05-22T01:18:31Z",
+      "current_canonical_status": "none",
+      "slice0_verdict": "no_source_hit",
+      "reason_codes": [
+        "NO_SOURCE_HIT"
+      ],
+      "evidence_chain_ids": [],
+      "independently_rediscovered_by_new_discovery": false,
+      "positive_control": false
+    },
+    {
+      "episode_id": "b592d70e370f5eb55641c493",
+      "date": "2025-05-22",
+      "alert_start": "2025-05-22T02:51:02Z",
+      "alert_end": "2025-05-22T03:44:05Z",
+      "current_canonical_status": "none",
+      "slice0_verdict": "no_source_hit",
+      "reason_codes": [
+        "NO_SOURCE_HIT"
+      ],
+      "evidence_chain_ids": [],
+      "independently_rediscovered_by_new_discovery": false,
+      "positive_control": false
+    },
+    {
+      "episode_id": "9b05d6a50ed7807c9b740227",
+      "date": "2025-05-22",
+      "alert_start": "2025-05-22T06:52:20Z",
+      "alert_end": "2025-05-22T07:19:26Z",
+      "current_canonical_status": "none",
+      "slice0_verdict": "no_source_hit",
+      "reason_codes": [
+        "NO_SOURCE_HIT"
+      ],
+      "evidence_chain_ids": [],
+      "independently_rediscovered_by_new_discovery": false,
+      "positive_control": false
+    },
+    {
+      "episode_id": "04dcb6efa643b5a9957d9edc",
+      "date": "2025-05-22",
+      "alert_start": "2025-05-22T08:01:13Z",
+      "alert_end": "2025-05-22T08:39:09Z",
+      "current_canonical_status": "none",
+      "slice0_verdict": "no_source_hit",
+      "reason_codes": [
+        "NO_SOURCE_HIT"
+      ],
+      "evidence_chain_ids": [],
+      "independently_rediscovered_by_new_discovery": false,
+      "positive_control": false
+    },
+    {
+      "episode_id": "2a0dcc013be63146bcfdd01c",
+      "date": "2025-05-22",
+      "alert_start": "2025-05-22T11:31:51Z",
+      "alert_end": "2025-05-22T12:40:32Z",
+      "current_canonical_status": "none",
+      "slice0_verdict": "no_source_hit",
+      "reason_codes": [
+        "NO_SOURCE_HIT"
+      ],
+      "evidence_chain_ids": [],
+      "independently_rediscovered_by_new_discovery": false,
+      "positive_control": false
+    },
+    {
+      "episode_id": "6cf411ed1ba704c725efc257",
+      "date": "2025-05-22",
+      "alert_start": "2025-05-22T20:50:17Z",
+      "alert_end": "2025-05-23T04:21:09Z",
+      "current_canonical_status": "strict",
+      "slice0_verdict": "confirmed_strict",
+      "reason_codes": [
+        "BASELINE_CANONICAL_STRICT"
+      ],
+      "evidence_chain_ids": [
+        "baseline_6cf411ed1ba704c725efc257"
+      ],
+      "independently_rediscovered_by_new_discovery": true,
+      "positive_control": false
+    },
+    {
+      "episode_id": "c74fbdf1b82d7e1732c0156d",
+      "date": "2025-05-23",
+      "alert_start": "2025-05-23T06:23:22Z",
+      "alert_end": "2025-05-23T06:53:59Z",
+      "current_canonical_status": "none",
+      "slice0_verdict": "no_source_hit",
+      "reason_codes": [
+        "NO_SOURCE_HIT"
+      ],
+      "evidence_chain_ids": [],
+      "independently_rediscovered_by_new_discovery": false,
+      "positive_control": false
+    },
+    {
+      "episode_id": "6252be3c10f593912f9181d5",
+      "date": "2025-05-23",
+      "alert_start": "2025-05-23T11:09:11Z",
+      "alert_end": "2025-05-23T11:43:21Z",
+      "current_canonical_status": "none",
+      "slice0_verdict": "no_source_hit",
+      "reason_codes": [
+        "NO_SOURCE_HIT"
+      ],
+      "evidence_chain_ids": [],
+      "independently_rediscovered_by_new_discovery": false,
+      "positive_control": false
+    },
+    {
+      "episode_id": "a73272370b889a3b18f14e62",
+      "date": "2025-05-23",
+      "alert_start": "2025-05-23T12:35:51Z",
+      "alert_end": "2025-05-23T12:55:34Z",
+      "current_canonical_status": "none",
+      "slice0_verdict": "no_source_hit",
+      "reason_codes": [
+        "NO_SOURCE_HIT"
+      ],
+      "evidence_chain_ids": [],
+      "independently_rediscovered_by_new_discovery": false,
+      "positive_control": false
+    },
+    {
+      "episode_id": "6e6afea5cad3ced8422d0ff8",
+      "date": "2025-05-23",
+      "alert_start": "2025-05-23T17:39:15Z",
+      "alert_end": "2025-05-23T20:49:55Z",
+      "current_canonical_status": "none",
+      "slice0_verdict": "confirmed_strict",
+      "reason_codes": [
+        "DIRECT_EXPLOSION",
+        "EXPLICIT_EVENT_TIME"
+      ],
+      "evidence_chain_ids": [
+        "pc_6e6afea5cad3ced8422d0ff8"
+      ],
+      "independently_rediscovered_by_new_discovery": true,
+      "positive_control": true
+    },
+    {
+      "episode_id": "a30c0830e542c4848e8c0b43",
+      "date": "2025-05-24",
+      "alert_start": "2025-05-23T23:07:14Z",
+      "alert_end": "2025-05-24T00:24:31Z",
+      "current_canonical_status": "none",
+      "slice0_verdict": "no_source_hit",
+      "reason_codes": [
+        "NO_SOURCE_HIT"
+      ],
+      "evidence_chain_ids": [],
+      "independently_rediscovered_by_new_discovery": false,
+      "positive_control": false
+    },
+    {
+      "episode_id": "70e8135f4683bdf07edad469",
+      "date": "2025-05-24",
+      "alert_start": "2025-05-24T01:26:57Z",
+      "alert_end": "2025-05-24T02:09:42Z",
+      "current_canonical_status": "none",
+      "slice0_verdict": "no_source_hit",
+      "reason_codes": [
+        "NO_SOURCE_HIT"
+      ],
+      "evidence_chain_ids": [],
+      "independently_rediscovered_by_new_discovery": false,
+      "positive_control": false
+    },
+    {
+      "episode_id": "7dc1af50893c323a558a4938",
+      "date": "2025-05-24",
+      "alert_start": "2025-05-24T16:51:35Z",
+      "alert_end": "2025-05-25T01:40:54Z",
+      "current_canonical_status": "none",
+      "slice0_verdict": "no_source_hit",
+      "reason_codes": [
+        "NO_SOURCE_HIT"
+      ],
+      "evidence_chain_ids": [],
+      "independently_rediscovered_by_new_discovery": false,
+      "positive_control": false
+    },
+    {
+      "episode_id": "5e84185302388262d2b7f94d",
+      "date": "2025-09-13",
+      "alert_start": "2025-09-13T19:40:25Z",
+      "alert_end": "2025-09-13T21:09:08Z",
+      "current_canonical_status": "none",
+      "slice0_verdict": "no_source_hit",
+      "reason_codes": [
+        "NO_SOURCE_HIT"
+      ],
+      "evidence_chain_ids": [],
+      "independently_rediscovered_by_new_discovery": false,
+      "positive_control": false
+    },
+    {
+      "episode_id": "e98335051024030cb4509d54",
+      "date": "2025-09-14",
+      "alert_start": "2025-09-13T22:23:05Z",
+      "alert_end": "2025-09-13T22:42:58Z",
+      "current_canonical_status": "none",
+      "slice0_verdict": "no_source_hit",
+      "reason_codes": [
+        "NO_SOURCE_HIT"
+      ],
+      "evidence_chain_ids": [],
+      "independently_rediscovered_by_new_discovery": false,
+      "positive_control": false
+    },
+    {
+      "episode_id": "21591d14fceac40aa05b4ed9",
+      "date": "2025-09-14",
+      "alert_start": "2025-09-14T06:11:58Z",
+      "alert_end": "2025-09-14T06:30:19Z",
+      "current_canonical_status": "none",
+      "slice0_verdict": "no_source_hit",
+      "reason_codes": [
+        "NO_SOURCE_HIT"
+      ],
+      "evidence_chain_ids": [],
+      "independently_rediscovered_by_new_discovery": false,
+      "positive_control": false
+    },
+    {
+      "episode_id": "e3962be99546b5a2cc1b486d",
+      "date": "2025-09-14",
+      "alert_start": "2025-09-14T07:33:24Z",
+      "alert_end": "2025-09-14T08:28:50Z",
+      "current_canonical_status": "none",
+      "slice0_verdict": "no_source_hit",
+      "reason_codes": [
+        "NO_SOURCE_HIT"
+      ],
+      "evidence_chain_ids": [],
+      "independently_rediscovered_by_new_discovery": false,
+      "positive_control": false
+    },
+    {
+      "episode_id": "c062865b94287ff038b21aee",
+      "date": "2025-09-14",
+      "alert_start": "2025-09-14T09:09:37Z",
+      "alert_end": "2025-09-14T10:06:43Z",
+      "current_canonical_status": "none",
+      "slice0_verdict": "no_source_hit",
+      "reason_codes": [
+        "NO_SOURCE_HIT"
+      ],
+      "evidence_chain_ids": [],
+      "independently_rediscovered_by_new_discovery": false,
+      "positive_control": false
+    },
+    {
+      "episode_id": "c8282e711bfec7196e70cbd0",
+      "date": "2025-09-14",
+      "alert_start": "2025-09-14T10:34:04Z",
+      "alert_end": "2025-09-14T10:40:43Z",
+      "current_canonical_status": "none",
+      "slice0_verdict": "no_source_hit",
+      "reason_codes": [
+        "NO_SOURCE_HIT"
+      ],
+      "evidence_chain_ids": [],
+      "independently_rediscovered_by_new_discovery": false,
+      "positive_control": false
+    },
+    {
+      "episode_id": "39814d7eb658217adae24bd9",
+      "date": "2025-09-15",
+      "alert_start": "2025-09-14T21:16:26Z",
+      "alert_end": "2025-09-14T22:47:30Z",
+      "current_canonical_status": "none",
+      "slice0_verdict": "no_source_hit",
+      "reason_codes": [
+        "NO_SOURCE_HIT"
+      ],
+      "evidence_chain_ids": [],
+      "independently_rediscovered_by_new_discovery": false,
+      "positive_control": false
+    },
+    {
+      "episode_id": "eb29ccba021617db3b0e8bbc",
+      "date": "2025-09-15",
+      "alert_start": "2025-09-14T23:27:57Z",
+      "alert_end": "2025-09-15T00:24:58Z",
+      "current_canonical_status": "none",
+      "slice0_verdict": "confirmed_strict",
+      "reason_codes": [
+        "DIRECT_EXPLOSION",
+        "EXPLICIT_EVENT_TIME"
+      ],
+      "evidence_chain_ids": [
+        "pc_eb29ccba021617db3b0e8bbc"
+      ],
+      "independently_rediscovered_by_new_discovery": true,
+      "positive_control": true
+    },
+    {
+      "episode_id": "70067c052eec48f162697391",
+      "date": "2025-09-15",
+      "alert_start": "2025-09-15T01:45:22Z",
+      "alert_end": "2025-09-15T02:02:04Z",
+      "current_canonical_status": "none",
+      "slice0_verdict": "needs_review",
+      "reason_codes": [
+        "PVO_PLUS_EXPLOSION",
+        "MULTI_EPISODE_AMBIGUITY",
+        "PUBLICATION_LAG"
+      ],
+      "evidence_chain_ids": [
+        "review_70067c052eec48f162697391"
+      ],
+      "independently_rediscovered_by_new_discovery": false,
+      "positive_control": false
+    },
+    {
+      "episode_id": "9ac90852a1163b8d94e497f0",
+      "date": "2025-09-15",
+      "alert_start": "2025-09-15T02:12:44Z",
+      "alert_end": "2025-09-15T03:54:20Z",
+      "current_canonical_status": "none",
+      "slice0_verdict": "no_source_hit",
+      "reason_codes": [
+        "NO_SOURCE_HIT"
+      ],
+      "evidence_chain_ids": [],
+      "independently_rediscovered_by_new_discovery": false,
+      "positive_control": false
+    },
+    {
+      "episode_id": "fa1e9624ec208634260fa6cb",
+      "date": "2025-09-15",
+      "alert_start": "2025-09-15T20:30:14Z",
+      "alert_end": "2025-09-15T21:57:54Z",
+      "current_canonical_status": "strict",
+      "slice0_verdict": "confirmed_strict",
+      "reason_codes": [
+        "BASELINE_CANONICAL_STRICT"
+      ],
+      "evidence_chain_ids": [
+        "baseline_fa1e9624ec208634260fa6cb"
+      ],
+      "independently_rediscovered_by_new_discovery": true,
+      "positive_control": false
+    },
+    {
+      "episode_id": "9f79a5661ceb17a852e72a78",
+      "date": "2025-09-16",
+      "alert_start": "2025-09-16T14:44:17Z",
+      "alert_end": "2025-09-16T16:03:43Z",
+      "current_canonical_status": "none",
+      "slice0_verdict": "no_source_hit",
+      "reason_codes": [
+        "NO_SOURCE_HIT"
+      ],
+      "evidence_chain_ids": [],
+      "independently_rediscovered_by_new_discovery": false,
+      "positive_control": false
+    },
+    {
+      "episode_id": "08a32c59bc55483053e24b33",
+      "date": "2025-09-16",
+      "alert_start": "2025-09-16T18:04:19Z",
+      "alert_end": "2025-09-16T18:37:31Z",
+      "current_canonical_status": "none",
+      "slice0_verdict": "no_source_hit",
+      "reason_codes": [
+        "NO_SOURCE_HIT"
+      ],
+      "evidence_chain_ids": [],
+      "independently_rediscovered_by_new_discovery": false,
+      "positive_control": false
+    },
+    {
+      "episode_id": "9f0adec7ff222f22c5fbd64f",
+      "date": "2025-09-16",
+      "alert_start": "2025-09-16T19:37:09Z",
+      "alert_end": "2025-09-16T23:21:10Z",
+      "current_canonical_status": "none",
+      "slice0_verdict": "no_source_hit",
+      "reason_codes": [
+        "NO_SOURCE_HIT"
+      ],
+      "evidence_chain_ids": [],
+      "independently_rediscovered_by_new_discovery": false,
+      "positive_control": false
+    },
+    {
+      "episode_id": "d1df7db7433d4c331600e80c",
+      "date": "2025-10-06",
+      "alert_start": "2025-10-06T19:53:21Z",
+      "alert_end": "2025-10-06T22:34:03Z",
+      "current_canonical_status": "none",
+      "slice0_verdict": "no_source_hit",
+      "reason_codes": [
+        "NO_SOURCE_HIT"
+      ],
+      "evidence_chain_ids": [],
+      "independently_rediscovered_by_new_discovery": false,
+      "positive_control": false
+    },
+    {
+      "episode_id": "67be27878c8b91bf40443755",
+      "date": "2025-10-07",
+      "alert_start": "2025-10-07T05:33:59Z",
+      "alert_end": "2025-10-07T06:14:52Z",
+      "current_canonical_status": "none",
+      "slice0_verdict": "no_source_hit",
+      "reason_codes": [
+        "NO_SOURCE_HIT"
+      ],
+      "evidence_chain_ids": [],
+      "independently_rediscovered_by_new_discovery": false,
+      "positive_control": false
+    },
+    {
+      "episode_id": "d489eedc98bd8b9478f129c0",
+      "date": "2025-10-07",
+      "alert_start": "2025-10-07T06:56:23Z",
+      "alert_end": "2025-10-07T07:29:11Z",
+      "current_canonical_status": "none",
+      "slice0_verdict": "no_source_hit",
+      "reason_codes": [
+        "NO_SOURCE_HIT"
+      ],
+      "evidence_chain_ids": [],
+      "independently_rediscovered_by_new_discovery": false,
+      "positive_control": false
+    },
+    {
+      "episode_id": "34910179f6163e0a2ce863d6",
+      "date": "2025-10-07",
+      "alert_start": "2025-10-07T19:34:59Z",
+      "alert_end": "2025-10-07T23:23:03Z",
+      "current_canonical_status": "none",
+      "slice0_verdict": "no_source_hit",
+      "reason_codes": [
+        "NO_SOURCE_HIT"
+      ],
+      "evidence_chain_ids": [],
+      "independently_rediscovered_by_new_discovery": false,
+      "positive_control": false
+    },
+    {
+      "episode_id": "d098f5f0986d22bafe0d5928",
+      "date": "2025-10-08",
+      "alert_start": "2025-10-08T14:32:03Z",
+      "alert_end": "2025-10-08T15:24:33Z",
+      "current_canonical_status": "none",
+      "slice0_verdict": "no_source_hit",
+      "reason_codes": [
+        "NO_SOURCE_HIT"
+      ],
+      "evidence_chain_ids": [],
+      "independently_rediscovered_by_new_discovery": false,
+      "positive_control": false
+    },
+    {
+      "episode_id": "19f123f154ffb68f06d0296e",
+      "date": "2025-10-08",
+      "alert_start": "2025-10-08T19:43:17Z",
+      "alert_end": "2025-10-08T21:52:05Z",
+      "current_canonical_status": "none",
+      "slice0_verdict": "confirmed_strict",
+      "reason_codes": [
+        "DIRECT_EXPLOSION",
+        "EXPLICIT_EVENT_TIME"
+      ],
+      "evidence_chain_ids": [
+        "pc_19f123f154ffb68f06d0296e"
+      ],
+      "independently_rediscovered_by_new_discovery": true,
+      "positive_control": true
+    },
+    {
+      "episode_id": "25082656c673ccd89c87acea",
+      "date": "2025-10-09",
+      "alert_start": "2025-10-09T12:48:23Z",
+      "alert_end": "2025-10-09T13:16:18Z",
+      "current_canonical_status": "none",
+      "slice0_verdict": "no_source_hit",
+      "reason_codes": [
+        "NO_SOURCE_HIT"
+      ],
+      "evidence_chain_ids": [],
+      "independently_rediscovered_by_new_discovery": false,
+      "positive_control": false
+    },
+    {
+      "episode_id": "aee4c7f739c8ccac87ec1412",
+      "date": "2025-10-09",
+      "alert_start": "2025-10-09T14:27:42Z",
+      "alert_end": "2025-10-09T15:14:24Z",
+      "current_canonical_status": "none",
+      "slice0_verdict": "no_source_hit",
+      "reason_codes": [
+        "NO_SOURCE_HIT"
+      ],
+      "evidence_chain_ids": [],
+      "independently_rediscovered_by_new_discovery": false,
+      "positive_control": false
+    },
+    {
+      "episode_id": "3e075c1e873c1d3651660199",
+      "date": "2025-10-09",
+      "alert_start": "2025-10-09T15:15:46Z",
+      "alert_end": "2025-10-09T15:35:55Z",
+      "current_canonical_status": "none",
+      "slice0_verdict": "no_source_hit",
+      "reason_codes": [
+        "NO_SOURCE_HIT"
+      ],
+      "evidence_chain_ids": [],
+      "independently_rediscovered_by_new_discovery": false,
+      "positive_control": false
+    },
+    {
+      "episode_id": "206f69cd684942feb9c1285d",
+      "date": "2025-10-09",
+      "alert_start": "2025-10-09T18:36:24Z",
+      "alert_end": "2025-10-10T04:24:12Z",
+      "current_canonical_status": "strict",
+      "slice0_verdict": "confirmed_strict",
+      "reason_codes": [
+        "BASELINE_CANONICAL_STRICT"
+      ],
+      "evidence_chain_ids": [
+        "baseline_206f69cd684942feb9c1285d"
+      ],
+      "independently_rediscovered_by_new_discovery": false,
+      "positive_control": false
+    },
+    {
+      "episode_id": "50d8e850d366aa2b6b4e9085",
+      "date": "2025-11-13",
+      "alert_start": "2025-11-13T21:03:35Z",
+      "alert_end": "2025-11-14T03:21:26Z",
+      "current_canonical_status": "none",
+      "slice0_verdict": "no_source_hit",
+      "reason_codes": [
+        "NO_SOURCE_HIT"
+      ],
+      "evidence_chain_ids": [],
+      "independently_rediscovered_by_new_discovery": false,
+      "positive_control": false
+    },
+    {
+      "episode_id": "1b211d9eed4419e9d70b9848",
+      "date": "2025-11-14",
+      "alert_start": "2025-11-14T05:01:16Z",
+      "alert_end": "2025-11-14T05:26:41Z",
+      "current_canonical_status": "none",
+      "slice0_verdict": "no_source_hit",
+      "reason_codes": [
+        "NO_SOURCE_HIT"
+      ],
+      "evidence_chain_ids": [],
+      "independently_rediscovered_by_new_discovery": false,
+      "positive_control": false
+    },
+    {
+      "episode_id": "1738051efb5d6ac5ed26d178",
+      "date": "2025-11-14",
+      "alert_start": "2025-11-14T08:08:54Z",
+      "alert_end": "2025-11-14T09:17:15Z",
+      "current_canonical_status": "none",
+      "slice0_verdict": "no_source_hit",
+      "reason_codes": [
+        "NO_SOURCE_HIT"
+      ],
+      "evidence_chain_ids": [],
+      "independently_rediscovered_by_new_discovery": false,
+      "positive_control": false
+    },
+    {
+      "episode_id": "5cf5840757a27e96dff510fb",
+      "date": "2025-11-14",
+      "alert_start": "2025-11-14T11:30:49Z",
+      "alert_end": "2025-11-14T12:04:59Z",
+      "current_canonical_status": "none",
+      "slice0_verdict": "no_source_hit",
+      "reason_codes": [
+        "NO_SOURCE_HIT"
+      ],
+      "evidence_chain_ids": [],
+      "independently_rediscovered_by_new_discovery": false,
+      "positive_control": false
+    },
+    {
+      "episode_id": "e827132c3180d7229d486e6f",
+      "date": "2025-11-14",
+      "alert_start": "2025-11-14T12:53:22Z",
+      "alert_end": "2025-11-14T13:26:20Z",
+      "current_canonical_status": "none",
+      "slice0_verdict": "no_source_hit",
+      "reason_codes": [
+        "NO_SOURCE_HIT"
+      ],
+      "evidence_chain_ids": [],
+      "independently_rediscovered_by_new_discovery": false,
+      "positive_control": false
+    },
+    {
+      "episode_id": "86670e36015ec1c2badcda19",
+      "date": "2025-11-14",
+      "alert_start": "2025-11-14T18:37:21Z",
+      "alert_end": "2025-11-14T18:54:40Z",
+      "current_canonical_status": "none",
+      "slice0_verdict": "no_source_hit",
+      "reason_codes": [
+        "NO_SOURCE_HIT"
+      ],
+      "evidence_chain_ids": [],
+      "independently_rediscovered_by_new_discovery": false,
+      "positive_control": false
+    },
+    {
+      "episode_id": "8534686ad8552aef1dd5a009",
+      "date": "2025-11-14",
+      "alert_start": "2025-11-14T19:20:38Z",
+      "alert_end": "2025-11-15T01:12:12Z",
+      "current_canonical_status": "none",
+      "slice0_verdict": "confirmed_strict",
+      "reason_codes": [
+        "DIRECT_EXPLOSION",
+        "EXPLICIT_EVENT_TIME"
+      ],
+      "evidence_chain_ids": [
+        "pc_8534686ad8552aef1dd5a009"
+      ],
+      "independently_rediscovered_by_new_discovery": true,
+      "positive_control": true
+    },
+    {
+      "episode_id": "a32974e3056da5a80f30d9b7",
+      "date": "2025-11-15",
+      "alert_start": "2025-11-15T07:40:52Z",
+      "alert_end": "2025-11-15T07:59:18Z",
+      "current_canonical_status": "none",
+      "slice0_verdict": "no_source_hit",
+      "reason_codes": [
+        "NO_SOURCE_HIT"
+      ],
+      "evidence_chain_ids": [],
+      "independently_rediscovered_by_new_discovery": false,
+      "positive_control": false
+    },
+    {
+      "episode_id": "5d0cb79833130aafc55619d0",
+      "date": "2025-11-15",
+      "alert_start": "2025-11-15T08:34:21Z",
+      "alert_end": "2025-11-15T09:15:53Z",
+      "current_canonical_status": "none",
+      "slice0_verdict": "no_source_hit",
+      "reason_codes": [
+        "NO_SOURCE_HIT"
+      ],
+      "evidence_chain_ids": [],
+      "independently_rediscovered_by_new_discovery": false,
+      "positive_control": false
+    },
+    {
+      "episode_id": "6888840566d0ca531de3cdb1",
+      "date": "2025-11-15",
+      "alert_start": "2025-11-15T12:51:27Z",
+      "alert_end": "2025-11-15T13:05:52Z",
+      "current_canonical_status": "none",
+      "slice0_verdict": "no_source_hit",
+      "reason_codes": [
+        "NO_SOURCE_HIT"
+      ],
+      "evidence_chain_ids": [],
+      "independently_rediscovered_by_new_discovery": false,
+      "positive_control": false
+    },
+    {
+      "episode_id": "94037a6ae891c1e54e799fc2",
+      "date": "2025-11-15",
+      "alert_start": "2025-11-15T19:00:31Z",
+      "alert_end": "2025-11-15T19:36:23Z",
+      "current_canonical_status": "none",
+      "slice0_verdict": "no_source_hit",
+      "reason_codes": [
+        "NO_SOURCE_HIT"
+      ],
+      "evidence_chain_ids": [],
+      "independently_rediscovered_by_new_discovery": false,
+      "positive_control": false
+    },
+    {
+      "episode_id": "4b8fdc538eb64d4e79183b1d",
+      "date": "2025-11-15",
+      "alert_start": "2025-11-15T21:28:33Z",
+      "alert_end": "2025-11-15T21:49:36Z",
+      "current_canonical_status": "none",
+      "slice0_verdict": "no_source_hit",
+      "reason_codes": [
+        "NO_SOURCE_HIT"
+      ],
+      "evidence_chain_ids": [],
+      "independently_rediscovered_by_new_discovery": false,
+      "positive_control": false
+    },
+    {
+      "episode_id": "b0192d4d0fd8085eeafa8049",
+      "date": "2025-11-16",
+      "alert_start": "2025-11-16T00:48:05Z",
+      "alert_end": "2025-11-16T01:11:40Z",
+      "current_canonical_status": "none",
+      "slice0_verdict": "no_source_hit",
+      "reason_codes": [
+        "NO_SOURCE_HIT"
+      ],
+      "evidence_chain_ids": [],
+      "independently_rediscovered_by_new_discovery": false,
+      "positive_control": false
+    },
+    {
+      "episode_id": "91630f5997d7fecf3e7be46f",
+      "date": "2025-11-16",
+      "alert_start": "2025-11-16T01:22:00Z",
+      "alert_end": "2025-11-16T03:33:58Z",
+      "current_canonical_status": "none",
+      "slice0_verdict": "no_source_hit",
+      "reason_codes": [
+        "NO_SOURCE_HIT"
+      ],
+      "evidence_chain_ids": [],
+      "independently_rediscovered_by_new_discovery": false,
+      "positive_control": false
+    },
+    {
+      "episode_id": "6439f5d99d7e8dc1f10f88ee",
+      "date": "2025-11-16",
+      "alert_start": "2025-11-16T14:40:27Z",
+      "alert_end": "2025-11-16T15:35:50Z",
+      "current_canonical_status": "none",
+      "slice0_verdict": "no_source_hit",
+      "reason_codes": [
+        "NO_SOURCE_HIT"
+      ],
+      "evidence_chain_ids": [],
+      "independently_rediscovered_by_new_discovery": false,
+      "positive_control": false
+    },
+    {
+      "episode_id": "a7b2d36f7a5b8811c8ab4119",
+      "date": "2025-11-21",
+      "alert_start": "2025-11-21T15:54:18Z",
+      "alert_end": "2025-11-21T16:45:24Z",
+      "current_canonical_status": "none",
+      "slice0_verdict": "no_source_hit",
+      "reason_codes": [
+        "NO_SOURCE_HIT"
+      ],
+      "evidence_chain_ids": [],
+      "independently_rediscovered_by_new_discovery": false,
+      "positive_control": false
+    },
+    {
+      "episode_id": "4dc5bc6e711aaf28f434d839",
+      "date": "2025-11-21",
+      "alert_start": "2025-11-21T19:30:58Z",
+      "alert_end": "2025-11-21T21:38:40Z",
+      "current_canonical_status": "none",
+      "slice0_verdict": "no_source_hit",
+      "reason_codes": [
+        "NO_SOURCE_HIT"
+      ],
+      "evidence_chain_ids": [],
+      "independently_rediscovered_by_new_discovery": false,
+      "positive_control": false
+    },
+    {
+      "episode_id": "07d38fd578a9d7ab7bbdc25d",
+      "date": "2025-11-22",
+      "alert_start": "2025-11-22T00:40:42Z",
+      "alert_end": "2025-11-22T01:42:29Z",
+      "current_canonical_status": "none",
+      "slice0_verdict": "confirmed_strict",
+      "reason_codes": [
+        "PVO_PLUS_EXPLOSION",
+        "CONTEMPORANEOUS_LIVE",
+        "EXPLICIT_DURING_ALERT"
+      ],
+      "evidence_chain_ids": [
+        "new_07d38fd578a9d7ab7bbdc25d"
+      ],
+      "independently_rediscovered_by_new_discovery": true,
+      "positive_control": false
+    },
+    {
+      "episode_id": "0c7c4e13840568eb18a2c358",
+      "date": "2025-11-22",
+      "alert_start": "2025-11-22T06:43:45Z",
+      "alert_end": "2025-11-22T07:27:38Z",
+      "current_canonical_status": "none",
+      "slice0_verdict": "no_source_hit",
+      "reason_codes": [
+        "NO_SOURCE_HIT"
+      ],
+      "evidence_chain_ids": [],
+      "independently_rediscovered_by_new_discovery": false,
+      "positive_control": false
+    },
+    {
+      "episode_id": "41f41f98fef80130dff07317",
+      "date": "2025-11-22",
+      "alert_start": "2025-11-22T11:34:32Z",
+      "alert_end": "2025-11-22T16:03:15Z",
+      "current_canonical_status": "none",
+      "slice0_verdict": "confirmed_strict",
+      "reason_codes": [
+        "DIRECT_EXPLOSION",
+        "EXPLICIT_EVENT_TIME",
+        "PVO_PLUS_EXPLOSION"
+      ],
+      "evidence_chain_ids": [
+        "pc_41f41f98fef80130dff07317"
+      ],
+      "independently_rediscovered_by_new_discovery": true,
+      "positive_control": true
+    },
+    {
+      "episode_id": "6b7ba70bf5f6686e6b51519f",
+      "date": "2025-11-22",
+      "alert_start": "2025-11-22T18:03:19Z",
+      "alert_end": "2025-11-22T18:54:25Z",
+      "current_canonical_status": "strict",
+      "slice0_verdict": "confirmed_strict",
+      "reason_codes": [
+        "BASELINE_CANONICAL_STRICT"
+      ],
+      "evidence_chain_ids": [
+        "baseline_6b7ba70bf5f6686e6b51519f"
+      ],
+      "independently_rediscovered_by_new_discovery": true,
+      "positive_control": false
+    },
+    {
+      "episode_id": "aa4db20dedd8b7bc371c9397",
+      "date": "2025-11-23",
+      "alert_start": "2025-11-23T02:22:57Z",
+      "alert_end": "2025-11-23T05:01:28Z",
+      "current_canonical_status": "none",
+      "slice0_verdict": "no_source_hit",
+      "reason_codes": [
+        "NO_SOURCE_HIT"
+      ],
+      "evidence_chain_ids": [],
+      "independently_rediscovered_by_new_discovery": false,
+      "positive_control": false
+    },
+    {
+      "episode_id": "4e941e298be9460c48f07f00",
+      "date": "2025-11-23",
+      "alert_start": "2025-11-23T07:03:43Z",
+      "alert_end": "2025-11-23T08:09:41Z",
+      "current_canonical_status": "none",
+      "slice0_verdict": "no_source_hit",
+      "reason_codes": [
+        "NO_SOURCE_HIT"
+      ],
+      "evidence_chain_ids": [],
+      "independently_rediscovered_by_new_discovery": false,
+      "positive_control": false
+    },
+    {
+      "episode_id": "22e31f88d369afdd93212f1f",
+      "date": "2025-11-23",
+      "alert_start": "2025-11-23T13:38:26Z",
+      "alert_end": "2025-11-23T14:39:38Z",
+      "current_canonical_status": "none",
+      "slice0_verdict": "no_source_hit",
+      "reason_codes": [
+        "NO_SOURCE_HIT"
+      ],
+      "evidence_chain_ids": [],
+      "independently_rediscovered_by_new_discovery": false,
+      "positive_control": false
+    },
+    {
+      "episode_id": "d5db49ee45c5871f80a5b245",
+      "date": "2025-11-23",
+      "alert_start": "2025-11-23T15:02:18Z",
+      "alert_end": "2025-11-23T15:23:45Z",
+      "current_canonical_status": "none",
+      "slice0_verdict": "no_source_hit",
+      "reason_codes": [
+        "NO_SOURCE_HIT"
+      ],
+      "evidence_chain_ids": [],
+      "independently_rediscovered_by_new_discovery": false,
+      "positive_control": false
+    },
+    {
+      "episode_id": "93d76bb46dcfc54a114ba20a",
+      "date": "2025-11-23",
+      "alert_start": "2025-11-23T18:38:06Z",
+      "alert_end": "2025-11-23T19:56:33Z",
+      "current_canonical_status": "none",
+      "slice0_verdict": "no_source_hit",
+      "reason_codes": [
+        "NO_SOURCE_HIT"
+      ],
+      "evidence_chain_ids": [],
+      "independently_rediscovered_by_new_discovery": false,
+      "positive_control": false
+    },
+    {
+      "episode_id": "c65a82b56e8e0cee87f5c719",
+      "date": "2025-11-23",
+      "alert_start": "2025-11-23T21:23:09Z",
+      "alert_end": "2025-11-23T23:55:24Z",
+      "current_canonical_status": "none",
+      "slice0_verdict": "no_source_hit",
+      "reason_codes": [
+        "NO_SOURCE_HIT"
+      ],
+      "evidence_chain_ids": [],
+      "independently_rediscovered_by_new_discovery": false,
+      "positive_control": false
+    },
+    {
+      "episode_id": "03eb23a34f4367f90dbee592",
+      "date": "2025-11-24",
+      "alert_start": "2025-11-24T14:51:47Z",
+      "alert_end": "2025-11-24T15:27:50Z",
+      "current_canonical_status": "none",
+      "slice0_verdict": "confirmed_strict",
+      "reason_codes": [
+        "DIRECT_EXPLOSION",
+        "EXPLICIT_EVENT_TIME"
+      ],
+      "evidence_chain_ids": [
+        "pc_03eb23a34f4367f90dbee592"
+      ],
+      "independently_rediscovered_by_new_discovery": true,
+      "positive_control": true
+    },
+    {
+      "episode_id": "e12bc9716376707f79e505d6",
+      "date": "2025-11-24",
+      "alert_start": "2025-11-24T19:19:18Z",
+      "alert_end": "2025-11-24T19:43:27Z",
+      "current_canonical_status": "none",
+      "slice0_verdict": "no_source_hit",
+      "reason_codes": [
+        "NO_SOURCE_HIT"
+      ],
+      "evidence_chain_ids": [],
+      "independently_rediscovered_by_new_discovery": false,
+      "positive_control": false
+    },
+    {
+      "episode_id": "8e63c6889372938301a6fe49",
+      "date": "2025-11-24",
+      "alert_start": "2025-11-24T20:01:25Z",
+      "alert_end": "2025-11-25T05:29:38Z",
+      "current_canonical_status": "none",
+      "slice0_verdict": "no_source_hit",
+      "reason_codes": [
+        "NO_SOURCE_HIT"
+      ],
+      "evidence_chain_ids": [],
+      "independently_rediscovered_by_new_discovery": false,
+      "positive_control": false
+    },
+    {
+      "episode_id": "f76353bbd92f74e0abb9b5f7",
+      "date": "2025-11-25",
+      "alert_start": "2025-11-25T10:37:42Z",
+      "alert_end": "2025-11-25T13:36:01Z",
+      "current_canonical_status": "none",
+      "slice0_verdict": "no_source_hit",
+      "reason_codes": [
+        "NO_SOURCE_HIT"
+      ],
+      "evidence_chain_ids": [],
+      "independently_rediscovered_by_new_discovery": false,
+      "positive_control": false
+    },
+    {
+      "episode_id": "febf22a1f559d6c761c8d850",
+      "date": "2025-11-25",
+      "alert_start": "2025-11-25T19:52:16Z",
+      "alert_end": "2025-11-25T21:53:07Z",
+      "current_canonical_status": "strict",
+      "slice0_verdict": "confirmed_strict",
+      "reason_codes": [
+        "BASELINE_CANONICAL_STRICT"
+      ],
+      "evidence_chain_ids": [
+        "baseline_febf22a1f559d6c761c8d850"
+      ],
+      "independently_rediscovered_by_new_discovery": true,
+      "positive_control": false
+    },
+    {
+      "episode_id": "0910ce2087fe42193ae34c03",
+      "date": "2025-12-01",
+      "alert_start": "2025-11-30T23:18:53Z",
+      "alert_end": "2025-11-30T23:57:50Z",
+      "current_canonical_status": "none",
+      "slice0_verdict": "no_source_hit",
+      "reason_codes": [
+        "NO_SOURCE_HIT"
+      ],
+      "evidence_chain_ids": [],
+      "independently_rediscovered_by_new_discovery": false,
+      "positive_control": false
+    },
+    {
+      "episode_id": "7430371bfb8f0de693b0f197",
+      "date": "2025-12-01",
+      "alert_start": "2025-12-01T08:08:13Z",
+      "alert_end": "2025-12-01T09:09:12Z",
+      "current_canonical_status": "none",
+      "slice0_verdict": "no_source_hit",
+      "reason_codes": [
+        "NO_SOURCE_HIT"
+      ],
+      "evidence_chain_ids": [],
+      "independently_rediscovered_by_new_discovery": false,
+      "positive_control": false
+    },
+    {
+      "episode_id": "ced9e05a99318132ec47d0a0",
+      "date": "2025-12-02",
+      "alert_start": "2025-12-02T09:04:04Z",
+      "alert_end": "2025-12-02T10:11:29Z",
+      "current_canonical_status": "none",
+      "slice0_verdict": "confirmed_strict",
+      "reason_codes": [
+        "DIRECT_EXPLOSION",
+        "EXPLICIT_EVENT_TIME"
+      ],
+      "evidence_chain_ids": [
+        "pc_ced9e05a99318132ec47d0a0"
+      ],
+      "independently_rediscovered_by_new_discovery": true,
+      "positive_control": true
+    },
+    {
+      "episode_id": "65c5d7c6637e7e2449dc746c",
+      "date": "2025-12-02",
+      "alert_start": "2025-12-02T14:21:18Z",
+      "alert_end": "2025-12-02T14:21:33Z",
+      "current_canonical_status": "none",
+      "slice0_verdict": "no_source_hit",
+      "reason_codes": [
+        "NO_SOURCE_HIT"
+      ],
+      "evidence_chain_ids": [],
+      "independently_rediscovered_by_new_discovery": false,
+      "positive_control": false
+    },
+    {
+      "episode_id": "5b11cebfb7659f0658ecd4c8",
+      "date": "2025-12-02",
+      "alert_start": "2025-12-02T17:35:46Z",
+      "alert_end": "2025-12-02T18:21:00Z",
+      "current_canonical_status": "none",
+      "slice0_verdict": "no_source_hit",
+      "reason_codes": [
+        "NO_SOURCE_HIT"
+      ],
+      "evidence_chain_ids": [],
+      "independently_rediscovered_by_new_discovery": false,
+      "positive_control": false
+    },
+    {
+      "episode_id": "1cbb1d48330a952d73209f37",
+      "date": "2025-12-03",
+      "alert_start": "2025-12-02T22:11:29Z",
+      "alert_end": "2025-12-02T22:50:00Z",
+      "current_canonical_status": "none",
+      "slice0_verdict": "no_source_hit",
+      "reason_codes": [
+        "NO_SOURCE_HIT"
+      ],
+      "evidence_chain_ids": [],
+      "independently_rediscovered_by_new_discovery": false,
+      "positive_control": false
+    },
+    {
+      "episode_id": "de7e23522b7babe123874bb0",
+      "date": "2025-12-03",
+      "alert_start": "2025-12-03T09:27:24Z",
+      "alert_end": "2025-12-03T10:12:33Z",
+      "current_canonical_status": "none",
+      "slice0_verdict": "no_source_hit",
+      "reason_codes": [
+        "NO_SOURCE_HIT"
+      ],
+      "evidence_chain_ids": [],
+      "independently_rediscovered_by_new_discovery": false,
+      "positive_control": false
+    },
+    {
+      "episode_id": "997692689348872c95d1207f",
+      "date": "2025-12-03",
+      "alert_start": "2025-12-03T15:41:38Z",
+      "alert_end": "2025-12-03T16:09:15Z",
+      "current_canonical_status": "none",
+      "slice0_verdict": "no_source_hit",
+      "reason_codes": [
+        "NO_SOURCE_HIT"
+      ],
+      "evidence_chain_ids": [],
+      "independently_rediscovered_by_new_discovery": false,
+      "positive_control": false
+    },
+    {
+      "episode_id": "ae98133a453b0e2f9c83dc69",
+      "date": "2025-12-03",
+      "alert_start": "2025-12-03T17:08:04Z",
+      "alert_end": "2025-12-03T19:13:53Z",
+      "current_canonical_status": "none",
+      "slice0_verdict": "no_source_hit",
+      "reason_codes": [
+        "NO_SOURCE_HIT"
+      ],
+      "evidence_chain_ids": [],
+      "independently_rediscovered_by_new_discovery": false,
+      "positive_control": false
+    },
+    {
+      "episode_id": "39e2fa8da6abfa2aaad2edbc",
+      "date": "2025-12-15",
+      "alert_start": "2025-12-15T10:37:26Z",
+      "alert_end": "2025-12-15T10:48:12Z",
+      "current_canonical_status": "none",
+      "slice0_verdict": "no_source_hit",
+      "reason_codes": [
+        "NO_SOURCE_HIT"
+      ],
+      "evidence_chain_ids": [],
+      "independently_rediscovered_by_new_discovery": false,
+      "positive_control": false
+    },
+    {
+      "episode_id": "6f584faf22e506f012b178cd",
+      "date": "2025-12-15",
+      "alert_start": "2025-12-15T13:03:58Z",
+      "alert_end": "2025-12-15T13:43:17Z",
+      "current_canonical_status": "none",
+      "slice0_verdict": "no_source_hit",
+      "reason_codes": [
+        "NO_SOURCE_HIT"
+      ],
+      "evidence_chain_ids": [],
+      "independently_rediscovered_by_new_discovery": false,
+      "positive_control": false
+    },
+    {
+      "episode_id": "483d4aee7f1dad2a0e07e3b9",
+      "date": "2025-12-16",
+      "alert_start": "2025-12-15T23:12:02Z",
+      "alert_end": "2025-12-16T01:31:02Z",
+      "current_canonical_status": "none",
+      "slice0_verdict": "no_source_hit",
+      "reason_codes": [
+        "NO_SOURCE_HIT"
+      ],
+      "evidence_chain_ids": [],
+      "independently_rediscovered_by_new_discovery": false,
+      "positive_control": false
+    },
+    {
+      "episode_id": "69b6767287e18383f94758c2",
+      "date": "2025-12-16",
+      "alert_start": "2025-12-16T02:47:13Z",
+      "alert_end": "2025-12-16T03:22:18Z",
+      "current_canonical_status": "sensitivity_only",
+      "slice0_verdict": "confirmed_sensitivity",
+      "reason_codes": [
+        "BASELINE_CANONICAL_SENSITIVITY"
+      ],
+      "evidence_chain_ids": [
+        "baseline_69b6767287e18383f94758c2"
+      ],
+      "independently_rediscovered_by_new_discovery": true,
+      "positive_control": false
+    },
+    {
+      "episode_id": "648231795de8332b342c4d8b",
+      "date": "2025-12-16",
+      "alert_start": "2025-12-16T05:35:55Z",
+      "alert_end": "2025-12-16T06:18:38Z",
+      "current_canonical_status": "none",
+      "slice0_verdict": "no_source_hit",
+      "reason_codes": [
+        "NO_SOURCE_HIT"
+      ],
+      "evidence_chain_ids": [],
+      "independently_rediscovered_by_new_discovery": false,
+      "positive_control": false
+    },
+    {
+      "episode_id": "b05e8a61b421a1caf0bf253b",
+      "date": "2025-12-16",
+      "alert_start": "2025-12-16T08:12:25Z",
+      "alert_end": "2025-12-16T09:30:31Z",
+      "current_canonical_status": "none",
+      "slice0_verdict": "no_source_hit",
+      "reason_codes": [
+        "NO_SOURCE_HIT"
+      ],
+      "evidence_chain_ids": [],
+      "independently_rediscovered_by_new_discovery": false,
+      "positive_control": false
+    },
+    {
+      "episode_id": "319d4432a8528fe156bcc567",
+      "date": "2025-12-16",
+      "alert_start": "2025-12-16T17:21:14Z",
+      "alert_end": "2025-12-16T18:04:15Z",
+      "current_canonical_status": "strict",
+      "slice0_verdict": "confirmed_strict",
+      "reason_codes": [
+        "BASELINE_CANONICAL_STRICT"
+      ],
+      "evidence_chain_ids": [
+        "baseline_319d4432a8528fe156bcc567"
+      ],
+      "independently_rediscovered_by_new_discovery": false,
+      "positive_control": false
+    },
+    {
+      "episode_id": "5a7d64e4d58b240825d0c954",
+      "date": "2025-12-16",
+      "alert_start": "2025-12-16T19:28:38Z",
+      "alert_end": "2025-12-16T21:46:51Z",
+      "current_canonical_status": "none",
+      "slice0_verdict": "confirmed_strict",
+      "reason_codes": [
+        "DIRECT_EXPLOSION",
+        "EXPLICIT_EVENT_TIME",
+        "PVO_PLUS_EXPLOSION"
+      ],
+      "evidence_chain_ids": [
+        "pc_5a7d64e4d58b240825d0c954"
+      ],
+      "independently_rediscovered_by_new_discovery": false,
+      "positive_control": true
+    },
+    {
+      "episode_id": "4f95a8927b24d203504de09b",
+      "date": "2025-12-17",
+      "alert_start": "2025-12-17T04:06:57Z",
+      "alert_end": "2025-12-17T06:16:24Z",
+      "current_canonical_status": "none",
+      "slice0_verdict": "no_source_hit",
+      "reason_codes": [
+        "NO_SOURCE_HIT"
+      ],
+      "evidence_chain_ids": [],
+      "independently_rediscovered_by_new_discovery": false,
+      "positive_control": false
+    },
+    {
+      "episode_id": "cddc9de313621dc2726766f7",
+      "date": "2025-12-17",
+      "alert_start": "2025-12-17T08:17:11Z",
+      "alert_end": "2025-12-17T10:52:21Z",
+      "current_canonical_status": "strict",
+      "slice0_verdict": "confirmed_strict",
+      "reason_codes": [
+        "BASELINE_CANONICAL_STRICT"
+      ],
+      "evidence_chain_ids": [
+        "baseline_cddc9de313621dc2726766f7"
+      ],
+      "independently_rediscovered_by_new_discovery": true,
+      "positive_control": false
+    },
+    {
+      "episode_id": "c43a3cc5caa8e4e8795c4b45",
+      "date": "2025-12-17",
+      "alert_start": "2025-12-17T16:43:25Z",
+      "alert_end": "2025-12-17T17:08:24Z",
+      "current_canonical_status": "none",
+      "slice0_verdict": "no_source_hit",
+      "reason_codes": [
+        "NO_SOURCE_HIT"
+      ],
+      "evidence_chain_ids": [],
+      "independently_rediscovered_by_new_discovery": false,
+      "positive_control": false
+    },
+    {
+      "episode_id": "7fef165b3eb0ada83014cc42",
+      "date": "2026-01-19",
+      "alert_start": "2026-01-19T21:45:39Z",
+      "alert_end": "2026-01-20T07:13:04Z",
+      "current_canonical_status": "sensitivity_only",
+      "slice0_verdict": "confirmed_sensitivity",
+      "reason_codes": [
+        "BASELINE_CANONICAL_SENSITIVITY"
+      ],
+      "evidence_chain_ids": [
+        "baseline_7fef165b3eb0ada83014cc42"
+      ],
+      "independently_rediscovered_by_new_discovery": true,
+      "positive_control": false
+    },
+    {
+      "episode_id": "4f1acc102b88ca92f5aa8bbd",
+      "date": "2026-01-20",
+      "alert_start": "2026-01-20T07:21:16Z",
+      "alert_end": "2026-01-20T12:23:35Z",
+      "current_canonical_status": "none",
+      "slice0_verdict": "no_source_hit",
+      "reason_codes": [
+        "NO_SOURCE_HIT"
+      ],
+      "evidence_chain_ids": [],
+      "independently_rediscovered_by_new_discovery": false,
+      "positive_control": false
+    },
+    {
+      "episode_id": "e484e954aa9b0e2ae9c61e37",
+      "date": "2026-01-20",
+      "alert_start": "2026-01-20T12:45:37Z",
+      "alert_end": "2026-01-20T13:49:25Z",
+      "current_canonical_status": "none",
+      "slice0_verdict": "no_source_hit",
+      "reason_codes": [
+        "NO_SOURCE_HIT"
+      ],
+      "evidence_chain_ids": [],
+      "independently_rediscovered_by_new_discovery": false,
+      "positive_control": false
+    },
+    {
+      "episode_id": "87348c2c06d552d2ad0fc751",
+      "date": "2026-01-20",
+      "alert_start": "2026-01-20T14:23:35Z",
+      "alert_end": "2026-01-20T16:27:28Z",
+      "current_canonical_status": "strict",
+      "slice0_verdict": "confirmed_strict",
+      "reason_codes": [
+        "BASELINE_CANONICAL_STRICT"
+      ],
+      "evidence_chain_ids": [
+        "baseline_87348c2c06d552d2ad0fc751"
+      ],
+      "independently_rediscovered_by_new_discovery": true,
+      "positive_control": false
+    },
+    {
+      "episode_id": "6871d178921352e6ab350e65",
+      "date": "2026-01-20",
+      "alert_start": "2026-01-20T16:33:09Z",
+      "alert_end": "2026-01-20T16:44:19Z",
+      "current_canonical_status": "none",
+      "slice0_verdict": "no_source_hit",
+      "reason_codes": [
+        "NO_SOURCE_HIT"
+      ],
+      "evidence_chain_ids": [],
+      "independently_rediscovered_by_new_discovery": false,
+      "positive_control": false
+    },
+    {
+      "episode_id": "64867fdfc87ad6f4835ea664",
+      "date": "2026-01-20",
+      "alert_start": "2026-01-20T17:44:46Z",
+      "alert_end": "2026-01-20T18:13:05Z",
+      "current_canonical_status": "none",
+      "slice0_verdict": "no_source_hit",
+      "reason_codes": [
+        "NO_SOURCE_HIT"
+      ],
+      "evidence_chain_ids": [],
+      "independently_rediscovered_by_new_discovery": false,
+      "positive_control": false
+    },
+    {
+      "episode_id": "4c9e1e3c3ab0927f33046b0a",
+      "date": "2026-01-20",
+      "alert_start": "2026-01-20T18:47:51Z",
+      "alert_end": "2026-01-20T19:18:52Z",
+      "current_canonical_status": "none",
+      "slice0_verdict": "no_source_hit",
+      "reason_codes": [
+        "NO_SOURCE_HIT"
+      ],
+      "evidence_chain_ids": [],
+      "independently_rediscovered_by_new_discovery": false,
+      "positive_control": false
+    },
+    {
+      "episode_id": "987d000a8dcb01d5846f5e9d",
+      "date": "2026-01-20",
+      "alert_start": "2026-01-20T21:26:05Z",
+      "alert_end": "2026-01-20T21:52:09Z",
+      "current_canonical_status": "none",
+      "slice0_verdict": "no_source_hit",
+      "reason_codes": [
+        "NO_SOURCE_HIT"
+      ],
+      "evidence_chain_ids": [],
+      "independently_rediscovered_by_new_discovery": false,
+      "positive_control": false
+    },
+    {
+      "episode_id": "dde8f8a1890af198a9a1991d",
+      "date": "2026-01-21",
+      "alert_start": "2026-01-20T23:57:21Z",
+      "alert_end": "2026-01-21T05:48:34Z",
+      "current_canonical_status": "sensitivity_only",
+      "slice0_verdict": "confirmed_sensitivity",
+      "reason_codes": [
+        "BASELINE_CANONICAL_SENSITIVITY"
+      ],
+      "evidence_chain_ids": [
+        "baseline_dde8f8a1890af198a9a1991d"
+      ],
+      "independently_rediscovered_by_new_discovery": false,
+      "positive_control": false
+    },
+    {
+      "episode_id": "19c858b550d86a15e4911595",
+      "date": "2026-01-21",
+      "alert_start": "2026-01-21T05:58:35Z",
+      "alert_end": "2026-01-21T06:55:46Z",
+      "current_canonical_status": "none",
+      "slice0_verdict": "no_source_hit",
+      "reason_codes": [
+        "NO_SOURCE_HIT"
+      ],
+      "evidence_chain_ids": [],
+      "independently_rediscovered_by_new_discovery": false,
+      "positive_control": false
+    },
+    {
+      "episode_id": "6393c001ec4d0f8dfce54b51",
+      "date": "2026-01-21",
+      "alert_start": "2026-01-21T07:10:58Z",
+      "alert_end": "2026-01-21T18:10:47Z",
+      "current_canonical_status": "none",
+      "slice0_verdict": "confirmed_strict",
+      "reason_codes": [
+        "DIRECT_EXPLOSION",
+        "EXPLICIT_EVENT_TIME"
+      ],
+      "evidence_chain_ids": [
+        "pc_6393c001ec4d0f8dfce54b51"
+      ],
+      "independently_rediscovered_by_new_discovery": true,
+      "positive_control": true
+    },
+    {
+      "episode_id": "b234a0c7d8f8be45ee429a21",
+      "date": "2026-01-21",
+      "alert_start": "2026-01-21T18:52:44Z",
+      "alert_end": "2026-01-21T20:43:17Z",
+      "current_canonical_status": "sensitivity_only",
+      "slice0_verdict": "confirmed_sensitivity",
+      "reason_codes": [
+        "BASELINE_CANONICAL_SENSITIVITY"
+      ],
+      "evidence_chain_ids": [
+        "baseline_b234a0c7d8f8be45ee429a21"
+      ],
+      "independently_rediscovered_by_new_discovery": true,
+      "positive_control": false
+    },
+    {
+      "episode_id": "3c0be26b070eef1d335ca449",
+      "date": "2026-01-21",
+      "alert_start": "2026-01-21T20:48:47Z",
+      "alert_end": "2026-01-21T21:33:23Z",
+      "current_canonical_status": "none",
+      "slice0_verdict": "no_source_hit",
+      "reason_codes": [
+        "NO_SOURCE_HIT"
+      ],
+      "evidence_chain_ids": [],
+      "independently_rediscovered_by_new_discovery": false,
+      "positive_control": false
+    },
+    {
+      "episode_id": "ccdb3a15089c69f340caab3e",
+      "date": "2026-01-22",
+      "alert_start": "2026-01-22T02:13:29Z",
+      "alert_end": "2026-01-22T06:42:02Z",
+      "current_canonical_status": "none",
+      "slice0_verdict": "no_source_hit",
+      "reason_codes": [
+        "NO_SOURCE_HIT"
+      ],
+      "evidence_chain_ids": [],
+      "independently_rediscovered_by_new_discovery": false,
+      "positive_control": false
+    },
+    {
+      "episode_id": "d06482300de94ff0c9b673d4",
+      "date": "2026-01-22",
+      "alert_start": "2026-01-22T08:23:38Z",
+      "alert_end": "2026-01-22T09:47:25Z",
+      "current_canonical_status": "none",
+      "slice0_verdict": "no_source_hit",
+      "reason_codes": [
+        "NO_SOURCE_HIT"
+      ],
+      "evidence_chain_ids": [],
+      "independently_rediscovered_by_new_discovery": false,
+      "positive_control": false
+    },
+    {
+      "episode_id": "f21d79245d46f048527158a1",
+      "date": "2026-01-22",
+      "alert_start": "2026-01-22T09:50:01Z",
+      "alert_end": "2026-01-22T11:07:27Z",
+      "current_canonical_status": "none",
+      "slice0_verdict": "no_source_hit",
+      "reason_codes": [
+        "NO_SOURCE_HIT"
+      ],
+      "evidence_chain_ids": [],
+      "independently_rediscovered_by_new_discovery": false,
+      "positive_control": false
+    },
+    {
+      "episode_id": "bfdc9c0fb11d3a8768d353a1",
+      "date": "2026-01-22",
+      "alert_start": "2026-01-22T11:35:01Z",
+      "alert_end": "2026-01-22T17:02:53Z",
+      "current_canonical_status": "none",
+      "slice0_verdict": "no_source_hit",
+      "reason_codes": [
+        "NO_SOURCE_HIT"
+      ],
+      "evidence_chain_ids": [],
+      "independently_rediscovered_by_new_discovery": false,
+      "positive_control": false
+    },
+    {
+      "episode_id": "b9d0a533a850494d593c171a",
+      "date": "2026-01-22",
+      "alert_start": "2026-01-22T18:46:09Z",
+      "alert_end": "2026-01-23T04:20:15Z",
+      "current_canonical_status": "none",
+      "slice0_verdict": "no_source_hit",
+      "reason_codes": [
+        "NO_SOURCE_HIT"
+      ],
+      "evidence_chain_ids": [],
+      "independently_rediscovered_by_new_discovery": false,
+      "positive_control": false
+    },
+    {
+      "episode_id": "7ab47c208af5d2b08e75297d",
+      "date": "2026-03-11",
+      "alert_start": "2026-03-10T22:41:28Z",
+      "alert_end": "2026-03-11T00:00:07Z",
+      "current_canonical_status": "none",
+      "slice0_verdict": "no_source_hit",
+      "reason_codes": [
+        "NO_SOURCE_HIT"
+      ],
+      "evidence_chain_ids": [],
+      "independently_rediscovered_by_new_discovery": false,
+      "positive_control": false
+    },
+    {
+      "episode_id": "b7918fda6a0f4d53627d75da",
+      "date": "2026-03-11",
+      "alert_start": "2026-03-11T01:52:54Z",
+      "alert_end": "2026-03-11T03:47:25Z",
+      "current_canonical_status": "none",
+      "slice0_verdict": "no_source_hit",
+      "reason_codes": [
+        "NO_SOURCE_HIT"
+      ],
+      "evidence_chain_ids": [],
+      "independently_rediscovered_by_new_discovery": false,
+      "positive_control": false
+    },
+    {
+      "episode_id": "8a102c6a0c9c30357daa6dd2",
+      "date": "2026-03-11",
+      "alert_start": "2026-03-11T09:05:54Z",
+      "alert_end": "2026-03-11T09:13:23Z",
+      "current_canonical_status": "none",
+      "slice0_verdict": "no_source_hit",
+      "reason_codes": [
+        "NO_SOURCE_HIT"
+      ],
+      "evidence_chain_ids": [],
+      "independently_rediscovered_by_new_discovery": false,
+      "positive_control": false
+    },
+    {
+      "episode_id": "1cf4b55dbaaef2eb3cee8eb1",
+      "date": "2026-03-11",
+      "alert_start": "2026-03-11T13:57:07Z",
+      "alert_end": "2026-03-11T15:05:12Z",
+      "current_canonical_status": "strict",
+      "slice0_verdict": "confirmed_strict",
+      "reason_codes": [
+        "BASELINE_CANONICAL_STRICT"
+      ],
+      "evidence_chain_ids": [
+        "baseline_1cf4b55dbaaef2eb3cee8eb1"
+      ],
+      "independently_rediscovered_by_new_discovery": true,
+      "positive_control": false
+    },
+    {
+      "episode_id": "4aa2b1dd84cc144314894e77",
+      "date": "2026-03-11",
+      "alert_start": "2026-03-11T15:34:48Z",
+      "alert_end": "2026-03-11T15:53:26Z",
+      "current_canonical_status": "none",
+      "slice0_verdict": "no_source_hit",
+      "reason_codes": [
+        "NO_SOURCE_HIT"
+      ],
+      "evidence_chain_ids": [],
+      "independently_rediscovered_by_new_discovery": false,
+      "positive_control": false
+    },
+    {
+      "episode_id": "879224e7d5c768fb1e06dfb3",
+      "date": "2026-03-11",
+      "alert_start": "2026-03-11T16:56:20Z",
+      "alert_end": "2026-03-11T17:53:05Z",
+      "current_canonical_status": "none",
+      "slice0_verdict": "no_source_hit",
+      "reason_codes": [
+        "NO_SOURCE_HIT"
+      ],
+      "evidence_chain_ids": [],
+      "independently_rediscovered_by_new_discovery": false,
+      "positive_control": false
+    },
+    {
+      "episode_id": "b0764553c1d300d281bf4e5d",
+      "date": "2026-03-11",
+      "alert_start": "2026-03-11T18:24:03Z",
+      "alert_end": "2026-03-11T18:31:38Z",
+      "current_canonical_status": "none",
+      "slice0_verdict": "no_source_hit",
+      "reason_codes": [
+        "NO_SOURCE_HIT"
+      ],
+      "evidence_chain_ids": [],
+      "independently_rediscovered_by_new_discovery": false,
+      "positive_control": false
+    },
+    {
+      "episode_id": "16f030ce4756b7ea9e4b74a1",
+      "date": "2026-03-11",
+      "alert_start": "2026-03-11T19:33:05Z",
+      "alert_end": "2026-03-11T21:23:17Z",
+      "current_canonical_status": "none",
+      "slice0_verdict": "no_source_hit",
+      "reason_codes": [
+        "NO_SOURCE_HIT"
+      ],
+      "evidence_chain_ids": [],
+      "independently_rediscovered_by_new_discovery": false,
+      "positive_control": false
+    },
+    {
+      "episode_id": "877a118da9a12ef872938a40",
+      "date": "2026-03-12",
+      "alert_start": "2026-03-12T00:44:19Z",
+      "alert_end": "2026-03-12T01:24:54Z",
+      "current_canonical_status": "none",
+      "slice0_verdict": "no_source_hit",
+      "reason_codes": [
+        "NO_SOURCE_HIT"
+      ],
+      "evidence_chain_ids": [],
+      "independently_rediscovered_by_new_discovery": false,
+      "positive_control": false
+    },
+    {
+      "episode_id": "6a9c0bb747f71567f3e021fd",
+      "date": "2026-03-12",
+      "alert_start": "2026-03-12T04:45:32Z",
+      "alert_end": "2026-03-12T06:37:49Z",
+      "current_canonical_status": "none",
+      "slice0_verdict": "no_source_hit",
+      "reason_codes": [
+        "NO_SOURCE_HIT"
+      ],
+      "evidence_chain_ids": [],
+      "independently_rediscovered_by_new_discovery": false,
+      "positive_control": false
+    },
+    {
+      "episode_id": "0edc1d73c3a86e149371bfbf",
+      "date": "2026-03-12",
+      "alert_start": "2026-03-12T06:55:35Z",
+      "alert_end": "2026-03-12T16:07:45Z",
+      "current_canonical_status": "sensitivity_only",
+      "slice0_verdict": "confirmed_strict",
+      "reason_codes": [
+        "DIRECT_EXPLOSION",
+        "EXPLICIT_EVENT_TIME"
+      ],
+      "evidence_chain_ids": [
+        "baseline_0edc1d73c3a86e149371bfbf",
+        "pc_0edc1d73c3a86e149371bfbf"
+      ],
+      "independently_rediscovered_by_new_discovery": true,
+      "positive_control": true
+    },
+    {
+      "episode_id": "608cf3a0a6db0c755f5a0a0e",
+      "date": "2026-03-12",
+      "alert_start": "2026-03-12T18:20:31Z",
+      "alert_end": "2026-03-12T19:01:16Z",
+      "current_canonical_status": "none",
+      "slice0_verdict": "no_source_hit",
+      "reason_codes": [
+        "NO_SOURCE_HIT"
+      ],
+      "evidence_chain_ids": [],
+      "independently_rediscovered_by_new_discovery": false,
+      "positive_control": false
+    },
+    {
+      "episode_id": "7f1d056c521084390fe176b6",
+      "date": "2026-03-12",
+      "alert_start": "2026-03-12T19:02:21Z",
+      "alert_end": "2026-03-12T19:34:07Z",
+      "current_canonical_status": "none",
+      "slice0_verdict": "no_source_hit",
+      "reason_codes": [
+        "NO_SOURCE_HIT"
+      ],
+      "evidence_chain_ids": [],
+      "independently_rediscovered_by_new_discovery": false,
+      "positive_control": false
+    },
+    {
+      "episode_id": "7355d0bf9a56180ae3b16517",
+      "date": "2026-03-12",
+      "alert_start": "2026-03-12T20:04:12Z",
+      "alert_end": "2026-03-12T22:49:11Z",
+      "current_canonical_status": "none",
+      "slice0_verdict": "no_source_hit",
+      "reason_codes": [
+        "NO_SOURCE_HIT"
+      ],
+      "evidence_chain_ids": [],
+      "independently_rediscovered_by_new_discovery": false,
+      "positive_control": false
+    },
+    {
+      "episode_id": "3dcde950af5f492ecb7e7bf2",
+      "date": "2026-03-13",
+      "alert_start": "2026-03-12T22:59:25Z",
+      "alert_end": "2026-03-12T23:26:42Z",
+      "current_canonical_status": "none",
+      "slice0_verdict": "no_source_hit",
+      "reason_codes": [
+        "NO_SOURCE_HIT"
+      ],
+      "evidence_chain_ids": [],
+      "independently_rediscovered_by_new_discovery": false,
+      "positive_control": false
+    },
+    {
+      "episode_id": "80bc84d288038afc5660a53b",
+      "date": "2026-03-13",
+      "alert_start": "2026-03-13T07:03:17Z",
+      "alert_end": "2026-03-13T07:28:05Z",
+      "current_canonical_status": "none",
+      "slice0_verdict": "no_source_hit",
+      "reason_codes": [
+        "NO_SOURCE_HIT"
+      ],
+      "evidence_chain_ids": [],
+      "independently_rediscovered_by_new_discovery": false,
+      "positive_control": false
+    },
+    {
+      "episode_id": "c065ed0c94fb9e22b79fcbe2",
+      "date": "2026-03-13",
+      "alert_start": "2026-03-13T07:32:30Z",
+      "alert_end": "2026-03-13T11:51:13Z",
+      "current_canonical_status": "none",
+      "slice0_verdict": "no_source_hit",
+      "reason_codes": [
+        "NO_SOURCE_HIT"
+      ],
+      "evidence_chain_ids": [],
+      "independently_rediscovered_by_new_discovery": false,
+      "positive_control": false
+    },
+    {
+      "episode_id": "e2343ddef99dd25928a0193e",
+      "date": "2026-03-13",
+      "alert_start": "2026-03-13T13:49:17Z",
+      "alert_end": "2026-03-13T16:22:09Z",
+      "current_canonical_status": "sensitivity_only",
+      "slice0_verdict": "confirmed_sensitivity",
+      "reason_codes": [
+        "BASELINE_CANONICAL_SENSITIVITY"
+      ],
+      "evidence_chain_ids": [
+        "baseline_e2343ddef99dd25928a0193e"
+      ],
+      "independently_rediscovered_by_new_discovery": false,
+      "positive_control": false
+    },
+    {
+      "episode_id": "2036761a5895051664126f94",
+      "date": "2026-03-13",
+      "alert_start": "2026-03-13T17:01:23Z",
+      "alert_end": "2026-03-13T17:34:48Z",
+      "current_canonical_status": "none",
+      "slice0_verdict": "no_source_hit",
+      "reason_codes": [
+        "NO_SOURCE_HIT"
+      ],
+      "evidence_chain_ids": [],
+      "independently_rediscovered_by_new_discovery": false,
+      "positive_control": false
+    },
+    {
+      "episode_id": "221e243949fd2b8fd321b1cd",
+      "date": "2026-03-13",
+      "alert_start": "2026-03-13T19:25:34Z",
+      "alert_end": "2026-03-13T22:41:39Z",
+      "current_canonical_status": "none",
+      "slice0_verdict": "no_source_hit",
+      "reason_codes": [
+        "NO_SOURCE_HIT"
+      ],
+      "evidence_chain_ids": [],
+      "independently_rediscovered_by_new_discovery": false,
+      "positive_control": false
+    },
+    {
+      "episode_id": "5e37cf453fccd8d107eaed81",
+      "date": "2026-03-20",
+      "alert_start": "2026-03-20T17:51:40Z",
+      "alert_end": "2026-03-20T22:33:37Z",
+      "current_canonical_status": "none",
+      "slice0_verdict": "no_source_hit",
+      "reason_codes": [
+        "NO_SOURCE_HIT"
+      ],
+      "evidence_chain_ids": [],
+      "independently_rediscovered_by_new_discovery": false,
+      "positive_control": false
+    },
+    {
+      "episode_id": "7a45b4c6cd4f18358e063002",
+      "date": "2026-03-21",
+      "alert_start": "2026-03-21T00:28:29Z",
+      "alert_end": "2026-03-21T03:06:48Z",
+      "current_canonical_status": "none",
+      "slice0_verdict": "confirmed_strict",
+      "reason_codes": [
+        "DIRECT_EXPLOSION",
+        "EXPLICIT_EVENT_TIME"
+      ],
+      "evidence_chain_ids": [
+        "pc_7a45b4c6cd4f18358e063002"
+      ],
+      "independently_rediscovered_by_new_discovery": false,
+      "positive_control": true
+    },
+    {
+      "episode_id": "d602f44fad3a56880a9289b1",
+      "date": "2026-03-21",
+      "alert_start": "2026-03-21T05:01:36Z",
+      "alert_end": "2026-03-21T05:26:46Z",
+      "current_canonical_status": "none",
+      "slice0_verdict": "no_source_hit",
+      "reason_codes": [
+        "NO_SOURCE_HIT"
+      ],
+      "evidence_chain_ids": [],
+      "independently_rediscovered_by_new_discovery": false,
+      "positive_control": false
+    },
+    {
+      "episode_id": "c1d947bd6240f8549c0e385a",
+      "date": "2026-03-21",
+      "alert_start": "2026-03-21T05:36:20Z",
+      "alert_end": "2026-03-21T07:34:33Z",
+      "current_canonical_status": "strict",
+      "slice0_verdict": "confirmed_strict",
+      "reason_codes": [
+        "BASELINE_CANONICAL_STRICT"
+      ],
+      "evidence_chain_ids": [
+        "baseline_c1d947bd6240f8549c0e385a"
+      ],
+      "independently_rediscovered_by_new_discovery": true,
+      "positive_control": false
+    },
+    {
+      "episode_id": "eaf962bd134afbafbc0294e8",
+      "date": "2026-03-21",
+      "alert_start": "2026-03-21T08:48:00Z",
+      "alert_end": "2026-03-21T09:48:40Z",
+      "current_canonical_status": "none",
+      "slice0_verdict": "no_source_hit",
+      "reason_codes": [
+        "NO_SOURCE_HIT"
+      ],
+      "evidence_chain_ids": [],
+      "independently_rediscovered_by_new_discovery": false,
+      "positive_control": false
+    },
+    {
+      "episode_id": "68046107668aad7c9f51499d",
+      "date": "2026-03-21",
+      "alert_start": "2026-03-21T13:57:01Z",
+      "alert_end": "2026-03-21T14:31:22Z",
+      "current_canonical_status": "strict",
+      "slice0_verdict": "confirmed_strict",
+      "reason_codes": [
+        "BASELINE_CANONICAL_STRICT"
+      ],
+      "evidence_chain_ids": [
+        "baseline_68046107668aad7c9f51499d"
+      ],
+      "independently_rediscovered_by_new_discovery": true,
+      "positive_control": false
+    },
+    {
+      "episode_id": "fd5871a55d8a1445c2e52c68",
+      "date": "2026-03-21",
+      "alert_start": "2026-03-21T18:01:02Z",
+      "alert_end": "2026-03-21T18:15:28Z",
+      "current_canonical_status": "none",
+      "slice0_verdict": "no_source_hit",
+      "reason_codes": [
+        "NO_SOURCE_HIT"
+      ],
+      "evidence_chain_ids": [],
+      "independently_rediscovered_by_new_discovery": false,
+      "positive_control": false
+    },
+    {
+      "episode_id": "d76ce73a66145eca23357699",
+      "date": "2026-03-21",
+      "alert_start": "2026-03-21T18:40:01Z",
+      "alert_end": "2026-03-21T21:35:00Z",
+      "current_canonical_status": "none",
+      "slice0_verdict": "no_source_hit",
+      "reason_codes": [
+        "NO_SOURCE_HIT"
+      ],
+      "evidence_chain_ids": [],
+      "independently_rediscovered_by_new_discovery": false,
+      "positive_control": false
+    },
+    {
+      "episode_id": "e245bdb186dabe8aa6b00cb0",
+      "date": "2026-04-08",
+      "alert_start": "2026-04-08T19:50:02Z",
+      "alert_end": "2026-04-08T21:40:54Z",
+      "current_canonical_status": "none",
+      "slice0_verdict": "no_source_hit",
+      "reason_codes": [
+        "NO_SOURCE_HIT"
+      ],
+      "evidence_chain_ids": [],
+      "independently_rediscovered_by_new_discovery": false,
+      "positive_control": false
+    },
+    {
+      "episode_id": "6fbe1c4c79d2e5d92000da8b",
+      "date": "2026-04-09",
+      "alert_start": "2026-04-08T22:05:36Z",
+      "alert_end": "2026-04-08T23:04:53Z",
+      "current_canonical_status": "none",
+      "slice0_verdict": "no_source_hit",
+      "reason_codes": [
+        "NO_SOURCE_HIT"
+      ],
+      "evidence_chain_ids": [],
+      "independently_rediscovered_by_new_discovery": false,
+      "positive_control": false
+    },
+    {
+      "episode_id": "c274ed848e517f388d2dfe11",
+      "date": "2026-04-09",
+      "alert_start": "2026-04-08T23:33:48Z",
+      "alert_end": "2026-04-09T00:58:37Z",
+      "current_canonical_status": "none",
+      "slice0_verdict": "no_source_hit",
+      "reason_codes": [
+        "NO_SOURCE_HIT"
+      ],
+      "evidence_chain_ids": [],
+      "independently_rediscovered_by_new_discovery": false,
+      "positive_control": false
+    },
+    {
+      "episode_id": "404d55294a38c31848e7e093",
+      "date": "2026-04-09",
+      "alert_start": "2026-04-09T01:58:08Z",
+      "alert_end": "2026-04-09T03:41:34Z",
+      "current_canonical_status": "none",
+      "slice0_verdict": "confirmed_strict",
+      "reason_codes": [
+        "DIRECT_EXPLOSION",
+        "EXPLICIT_EVENT_TIME"
+      ],
+      "evidence_chain_ids": [
+        "pc_404d55294a38c31848e7e093"
+      ],
+      "independently_rediscovered_by_new_discovery": true,
+      "positive_control": true
+    },
+    {
+      "episode_id": "a0fbd54a685f9a3092e1b0d0",
+      "date": "2026-04-09",
+      "alert_start": "2026-04-09T05:58:45Z",
+      "alert_end": "2026-04-09T10:24:07Z",
+      "current_canonical_status": "none",
+      "slice0_verdict": "no_source_hit",
+      "reason_codes": [
+        "NO_SOURCE_HIT"
+      ],
+      "evidence_chain_ids": [],
+      "independently_rediscovered_by_new_discovery": false,
+      "positive_control": false
+    },
+    {
+      "episode_id": "95d25e02ec4a6cc6c4f1e13c",
+      "date": "2026-04-09",
+      "alert_start": "2026-04-09T12:56:31Z",
+      "alert_end": "2026-04-09T15:58:08Z",
+      "current_canonical_status": "none",
+      "slice0_verdict": "no_source_hit",
+      "reason_codes": [
+        "NO_SOURCE_HIT"
+      ],
+      "evidence_chain_ids": [],
+      "independently_rediscovered_by_new_discovery": false,
+      "positive_control": false
+    },
+    {
+      "episode_id": "6b0d929c41703108133cf3f8",
+      "date": "2026-04-09",
+      "alert_start": "2026-04-09T19:11:03Z",
+      "alert_end": "2026-04-09T23:09:12Z",
+      "current_canonical_status": "none",
+      "slice0_verdict": "no_source_hit",
+      "reason_codes": [
+        "NO_SOURCE_HIT"
+      ],
+      "evidence_chain_ids": [],
+      "independently_rediscovered_by_new_discovery": false,
+      "positive_control": false
+    },
+    {
+      "episode_id": "834b9fdb45e99a950b7b9c65",
+      "date": "2026-06-15",
+      "alert_start": "2026-06-15T16:34:58Z",
+      "alert_end": "2026-06-15T21:21:15Z",
+      "current_canonical_status": "none",
+      "slice0_verdict": "no_source_hit",
+      "reason_codes": [
+        "NO_SOURCE_HIT"
+      ],
+      "evidence_chain_ids": [],
+      "independently_rediscovered_by_new_discovery": false,
+      "positive_control": false
+    },
+    {
+      "episode_id": "398cb589a5ad1e70e079b17b",
+      "date": "2026-06-16",
+      "alert_start": "2026-06-15T22:25:58Z",
+      "alert_end": "2026-06-16T09:44:19Z",
+      "current_canonical_status": "none",
+      "slice0_verdict": "no_source_hit",
+      "reason_codes": [
+        "NO_SOURCE_HIT"
+      ],
+      "evidence_chain_ids": [],
+      "independently_rediscovered_by_new_discovery": false,
+      "positive_control": false
+    },
+    {
+      "episode_id": "c72a7385c1c092122988b6fd",
+      "date": "2026-06-16",
+      "alert_start": "2026-06-16T11:09:11Z",
+      "alert_end": "2026-06-16T12:09:57Z",
+      "current_canonical_status": "none",
+      "slice0_verdict": "no_source_hit",
+      "reason_codes": [
+        "NO_SOURCE_HIT"
+      ],
+      "evidence_chain_ids": [],
+      "independently_rediscovered_by_new_discovery": false,
+      "positive_control": false
+    },
+    {
+      "episode_id": "52cf015ceb99f6edae1a1f97",
+      "date": "2026-06-16",
+      "alert_start": "2026-06-16T14:28:31Z",
+      "alert_end": "2026-06-16T15:29:50Z",
+      "current_canonical_status": "none",
+      "slice0_verdict": "no_source_hit",
+      "reason_codes": [
+        "NO_SOURCE_HIT"
+      ],
+      "evidence_chain_ids": [],
+      "independently_rediscovered_by_new_discovery": false,
+      "positive_control": false
+    },
+    {
+      "episode_id": "b9a073c6fb5e4bd51cba993d",
+      "date": "2026-06-16",
+      "alert_start": "2026-06-16T15:33:09Z",
+      "alert_end": "2026-06-16T16:35:43Z",
+      "current_canonical_status": "none",
+      "slice0_verdict": "no_source_hit",
+      "reason_codes": [
+        "NO_SOURCE_HIT"
+      ],
+      "evidence_chain_ids": [],
+      "independently_rediscovered_by_new_discovery": false,
+      "positive_control": false
+    },
+    {
+      "episode_id": "7c008970817e8d13ae402670",
+      "date": "2026-06-16",
+      "alert_start": "2026-06-16T16:42:55Z",
+      "alert_end": "2026-06-16T18:04:58Z",
+      "current_canonical_status": "none",
+      "slice0_verdict": "confirmed_strict",
+      "reason_codes": [
+        "DIRECT_EXPLOSION",
+        "EXPLICIT_EVENT_TIME"
+      ],
+      "evidence_chain_ids": [
+        "pc_7c008970817e8d13ae402670"
+      ],
+      "independently_rediscovered_by_new_discovery": false,
+      "positive_control": true
+    },
+    {
+      "episode_id": "f925608b4627f59f007d56d4",
+      "date": "2026-06-16",
+      "alert_start": "2026-06-16T18:44:01Z",
+      "alert_end": "2026-06-17T06:48:39Z",
+      "current_canonical_status": "strict",
+      "slice0_verdict": "confirmed_strict",
+      "reason_codes": [
+        "BASELINE_CANONICAL_STRICT"
+      ],
+      "evidence_chain_ids": [
+        "baseline_f925608b4627f59f007d56d4"
+      ],
+      "independently_rediscovered_by_new_discovery": true,
+      "positive_control": false
+    },
+    {
+      "episode_id": "b1565fe64d3434d1424826cd",
+      "date": "2026-08-28",
+      "alert_start": "2026-08-28T01:11:01Z",
+      "alert_end": "2026-08-28T01:20:15Z",
+      "current_canonical_status": "none",
+      "slice0_verdict": "no_source_hit",
+      "reason_codes": [
+        "NO_SOURCE_HIT"
+      ],
+      "evidence_chain_ids": [],
+      "independently_rediscovered_by_new_discovery": false,
+      "positive_control": false
+    },
+    {
+      "episode_id": "461c518eecc614b3d4a8ef78",
+      "date": "2026-08-28",
+      "alert_start": "2026-08-28T03:34:01Z",
+      "alert_end": "2026-08-28T04:00:19Z",
+      "current_canonical_status": "none",
+      "slice0_verdict": "no_source_hit",
+      "reason_codes": [
+        "NO_SOURCE_HIT"
+      ],
+      "evidence_chain_ids": [],
+      "independently_rediscovered_by_new_discovery": false,
+      "positive_control": false
+    },
+    {
+      "episode_id": "1e434d0fa5abfd518ad07d1e",
+      "date": "2026-08-28",
+      "alert_start": "2026-08-28T04:23:30Z",
+      "alert_end": "2026-08-28T04:49:34Z",
+      "current_canonical_status": "sensitivity_only",
+      "slice0_verdict": "confirmed_strict",
+      "reason_codes": [
+        "DIRECT_EXPLOSION",
+        "EXPLICIT_EVENT_TIME"
+      ],
+      "evidence_chain_ids": [
+        "baseline_1e434d0fa5abfd518ad07d1e",
+        "pc_1e434d0fa5abfd518ad07d1e"
+      ],
+      "independently_rediscovered_by_new_discovery": false,
+      "positive_control": true
+    },
+    {
+      "episode_id": "9d8b22eaba51c12cc1d1fda2",
+      "date": "2026-08-28",
+      "alert_start": "2026-08-28T09:43:42Z",
+      "alert_end": "2026-08-28T12:19:14Z",
+      "current_canonical_status": "none",
+      "slice0_verdict": "no_source_hit",
+      "reason_codes": [
+        "NO_SOURCE_HIT"
+      ],
+      "evidence_chain_ids": [],
+      "independently_rediscovered_by_new_discovery": false,
+      "positive_control": false
+    },
+    {
+      "episode_id": "abc0e4e421bd4de5a755a59c",
+      "date": "2026-08-28",
+      "alert_start": "2026-08-28T15:28:18Z",
+      "alert_end": "2026-08-28T15:44:40Z",
+      "current_canonical_status": "none",
+      "slice0_verdict": "no_source_hit",
+      "reason_codes": [
+        "NO_SOURCE_HIT"
+      ],
+      "evidence_chain_ids": [],
+      "independently_rediscovered_by_new_discovery": false,
+      "positive_control": false
+    },
+    {
+      "episode_id": "76b51bdb9b2bca6fa8829315",
+      "date": "2026-08-28",
+      "alert_start": "2026-08-28T20:18:04Z",
+      "alert_end": "2026-08-28T20:31:59Z",
+      "current_canonical_status": "none",
+      "slice0_verdict": "no_source_hit",
+      "reason_codes": [
+        "NO_SOURCE_HIT"
+      ],
+      "evidence_chain_ids": [],
+      "independently_rediscovered_by_new_discovery": false,
+      "positive_control": false
+    },
+    {
+      "episode_id": "a566b6daecf3cc4740dfa1e6",
+      "date": "2026-08-28",
+      "alert_start": "2026-08-28T20:36:47Z",
+      "alert_end": "2026-08-28T20:51:41Z",
+      "current_canonical_status": "none",
+      "slice0_verdict": "no_source_hit",
+      "reason_codes": [
+        "NO_SOURCE_HIT"
+      ],
+      "evidence_chain_ids": [],
+      "independently_rediscovered_by_new_discovery": false,
+      "positive_control": false
+    },
+    {
+      "episode_id": "5da4fc649a38d4796ebbcf94",
+      "date": "2026-09-07",
+      "alert_start": "2026-09-06T21:00:54Z",
+      "alert_end": "2026-09-06T23:48:49Z",
+      "current_canonical_status": "sensitivity_only",
+      "slice0_verdict": "confirmed_strict",
+      "reason_codes": [
+        "DIRECT_EXPLOSION",
+        "EXPLICIT_EVENT_TIME"
+      ],
+      "evidence_chain_ids": [
+        "baseline_5da4fc649a38d4796ebbcf94",
+        "pc_5da4fc649a38d4796ebbcf94"
+      ],
+      "independently_rediscovered_by_new_discovery": true,
+      "positive_control": true
+    },
+    {
+      "episode_id": "23371bee083381cd79cf93a2",
+      "date": "2026-09-07",
+      "alert_start": "2026-09-07T01:25:21Z",
+      "alert_end": "2026-09-07T10:08:16Z",
+      "current_canonical_status": "strict",
+      "slice0_verdict": "confirmed_strict",
+      "reason_codes": [
+        "BASELINE_CANONICAL_STRICT"
+      ],
+      "evidence_chain_ids": [
+        "baseline_23371bee083381cd79cf93a2"
+      ],
+      "independently_rediscovered_by_new_discovery": true,
+      "positive_control": false
+    },
+    {
+      "episode_id": "6dbb1a64ab408e16bac897c3",
+      "date": "2026-09-07",
+      "alert_start": "2026-09-07T10:41:55Z",
+      "alert_end": "2026-09-07T13:04:33Z",
+      "current_canonical_status": "none",
+      "slice0_verdict": "no_source_hit",
+      "reason_codes": [
+        "NO_SOURCE_HIT"
+      ],
+      "evidence_chain_ids": [],
+      "independently_rediscovered_by_new_discovery": false,
+      "positive_control": false
+    },
+    {
+      "episode_id": "0dd703369cd079679c0b5ef6",
+      "date": "2026-09-07",
+      "alert_start": "2026-09-07T15:20:51Z",
+      "alert_end": "2026-09-07T16:35:14Z",
+      "current_canonical_status": "none",
+      "slice0_verdict": "no_source_hit",
+      "reason_codes": [
+        "NO_SOURCE_HIT"
+      ],
+      "evidence_chain_ids": [],
+      "independently_rediscovered_by_new_discovery": false,
+      "positive_control": false
+    },
+    {
+      "episode_id": "d4d21ab6353ce8c04af598f7",
+      "date": "2026-09-07",
+      "alert_start": "2026-09-07T17:29:08Z",
+      "alert_end": "2026-09-07T20:37:20Z",
+      "current_canonical_status": "none",
+      "slice0_verdict": "no_source_hit",
+      "reason_codes": [
+        "NO_SOURCE_HIT"
+      ],
+      "evidence_chain_ids": [],
+      "independently_rediscovered_by_new_discovery": false,
+      "positive_control": false
+    },
+    {
+      "episode_id": "9cd220490218092ab02d9e07",
+      "date": "2026-09-08",
+      "alert_start": "2026-09-07T21:22:24Z",
+      "alert_end": "2026-09-07T21:37:58Z",
+      "current_canonical_status": "none",
+      "slice0_verdict": "no_source_hit",
+      "reason_codes": [
+        "NO_SOURCE_HIT"
+      ],
+      "evidence_chain_ids": [],
+      "independently_rediscovered_by_new_discovery": false,
+      "positive_control": false
+    },
+    {
+      "episode_id": "a6f5e4175168801a431add39",
+      "date": "2026-09-08",
+      "alert_start": "2026-09-07T21:42:35Z",
+      "alert_end": "2026-09-07T22:11:25Z",
+      "current_canonical_status": "none",
+      "slice0_verdict": "no_source_hit",
+      "reason_codes": [
+        "NO_SOURCE_HIT"
+      ],
+      "evidence_chain_ids": [],
+      "independently_rediscovered_by_new_discovery": false,
+      "positive_control": false
+    },
+    {
+      "episode_id": "8df56d26d6fd41e435354114",
+      "date": "2026-09-08",
+      "alert_start": "2026-09-07T23:56:56Z",
+      "alert_end": "2026-09-08T03:26:21Z",
+      "current_canonical_status": "none",
+      "slice0_verdict": "no_source_hit",
+      "reason_codes": [
+        "NO_SOURCE_HIT"
+      ],
+      "evidence_chain_ids": [],
+      "independently_rediscovered_by_new_discovery": false,
+      "positive_control": false
+    },
+    {
+      "episode_id": "8c7c2028bdc7c3f0e8711654",
+      "date": "2026-09-08",
+      "alert_start": "2026-09-08T03:53:07Z",
+      "alert_end": "2026-09-08T04:16:25Z",
+      "current_canonical_status": "none",
+      "slice0_verdict": "no_source_hit",
+      "reason_codes": [
+        "NO_SOURCE_HIT"
+      ],
+      "evidence_chain_ids": [],
+      "independently_rediscovered_by_new_discovery": false,
+      "positive_control": false
+    },
+    {
+      "episode_id": "ed3f58638bea1b27a43f1ccc",
+      "date": "2026-09-08",
+      "alert_start": "2026-09-08T05:03:25Z",
+      "alert_end": "2026-09-08T08:07:01Z",
+      "current_canonical_status": "none",
+      "slice0_verdict": "no_source_hit",
+      "reason_codes": [
+        "NO_SOURCE_HIT"
+      ],
+      "evidence_chain_ids": [],
+      "independently_rediscovered_by_new_discovery": false,
+      "positive_control": false
+    },
+    {
+      "episode_id": "1b10bbe657e1bf1e964c087a",
+      "date": "2026-09-08",
+      "alert_start": "2026-09-08T08:34:52Z",
+      "alert_end": "2026-09-08T08:48:13Z",
+      "current_canonical_status": "none",
+      "slice0_verdict": "no_source_hit",
+      "reason_codes": [
+        "NO_SOURCE_HIT"
+      ],
+      "evidence_chain_ids": [],
+      "independently_rediscovered_by_new_discovery": false,
+      "positive_control": false
+    },
+    {
+      "episode_id": "eac6a8d131341fb46bd1eae2",
+      "date": "2026-09-08",
+      "alert_start": "2026-09-08T10:21:46Z",
+      "alert_end": "2026-09-08T12:17:15Z",
+      "current_canonical_status": "none",
+      "slice0_verdict": "confirmed_strict",
+      "reason_codes": [
+        "DIRECT_EXPLOSION",
+        "EXPLICIT_EVENT_TIME"
+      ],
+      "evidence_chain_ids": [
+        "pc_eac6a8d131341fb46bd1eae2"
+      ],
+      "independently_rediscovered_by_new_discovery": true,
+      "positive_control": true
+    },
+    {
+      "episode_id": "d55b6d7ceb695909de7d244d",
+      "date": "2026-09-08",
+      "alert_start": "2026-09-08T14:00:10Z",
+      "alert_end": "2026-09-08T16:07:36Z",
+      "current_canonical_status": "none",
+      "slice0_verdict": "no_source_hit",
+      "reason_codes": [
+        "NO_SOURCE_HIT"
+      ],
+      "evidence_chain_ids": [],
+      "independently_rediscovered_by_new_discovery": false,
+      "positive_control": false
+    },
+    {
+      "episode_id": "03d32ac3644a08358083d542",
+      "date": "2026-09-08",
+      "alert_start": "2026-09-08T19:25:28Z",
+      "alert_end": "2026-09-08T21:31:08Z",
+      "current_canonical_status": "none",
+      "slice0_verdict": "no_source_hit",
+      "reason_codes": [
+        "NO_SOURCE_HIT"
+      ],
+      "evidence_chain_ids": [],
+      "independently_rediscovered_by_new_discovery": false,
+      "positive_control": false
+    }
+  ],
+  "evidence_chains": [
+    {
+      "chain_id": "baseline_6cf411ed1ba704c725efc257",
+      "episode_id": "6cf411ed1ba704c725efc257",
+      "role": "supplementary_existing_audited_baseline",
+      "discovery_independent": false,
+      "source_hits": [
+        {
+          "source": "existing audited baseline evidence",
+          "url": "https://www.pravda.com.ua/news/2025/05/23/7513617/",
+          "publication_datetime": null,
+          "event_datetime_or_interval": "23:53",
+          "exact_excerpt": "О 23:53 повідомлялося про вибухи в Запоріжжі на тлі балістичної загрози.",
+          "city_specificity": "as adjudicated in audited baseline",
+          "military_context": "as adjudicated in audited baseline"
+        }
+      ],
+      "reason_codes": [
+        "BASELINE_CANONICAL_STRICT"
+      ]
+    },
+    {
+      "chain_id": "baseline_fa1e9624ec208634260fa6cb",
+      "episode_id": "fa1e9624ec208634260fa6cb",
+      "role": "supplementary_existing_audited_baseline",
+      "discovery_independent": false,
+      "source_hits": [
+        {
+          "source": "existing audited baseline evidence",
+          "url": "https://zp.npu.gov.ua/news/unaslidok-obstrilu-zaporizhzhia-ta-raionu-zahynula-liudyna-shche-13-poraneni-politsiia-nadala-dopomohu-postrazhdalym",
+          "publication_datetime": null,
+          "event_datetime_or_interval": "2025-09-15 23:25–2025-09-16 00:45 Europe/Kyiv",
+          "exact_excerpt": "Police timed the attack on Zaporizhzhia and the district to 23:25–00:45, including MLRS munitions and an air strike.",
+          "city_specificity": "as adjudicated in audited baseline",
+          "military_context": "as adjudicated in audited baseline"
+        }
+      ],
+      "reason_codes": [
+        "BASELINE_CANONICAL_STRICT"
+      ]
+    },
+    {
+      "chain_id": "baseline_206f69cd684942feb9c1285d",
+      "episode_id": "206f69cd684942feb9c1285d",
+      "role": "supplementary_existing_audited_baseline",
+      "discovery_independent": false,
+      "source_hits": [
+        {
+          "source": "existing audited baseline evidence",
+          "url": "https://npu.gov.ua/news/720-vorozhykh-obstrily-za-dobu-politseiski-zadokumentuvaly-naslidky-voiennykh-zlochyniv-rf-na-zaporizhzhi",
+          "publication_datetime": null,
+          "event_datetime_or_interval": "2025-10-10 after 00:00 Europe/Kyiv",
+          "exact_excerpt": "Police reported a combined attack on Zaporizhzhia after midnight, including a drone strike on a home.",
+          "city_specificity": "as adjudicated in audited baseline",
+          "military_context": "as adjudicated in audited baseline"
+        }
+      ],
+      "reason_codes": [
+        "BASELINE_CANONICAL_STRICT"
+      ]
+    },
+    {
+      "chain_id": "baseline_6b7ba70bf5f6686e6b51519f",
+      "episode_id": "6b7ba70bf5f6686e6b51519f",
+      "role": "supplementary_existing_audited_baseline",
+      "discovery_independent": false,
+      "source_hits": [
+        {
+          "source": "existing audited baseline evidence",
+          "url": "https://akzent.zp.ua/yak-zaraz-vyglyadaye-postrazhdalyj-vnaslidok-ataky-atb-u-zaporizhzhi-foto-video/",
+          "publication_datetime": null,
+          "event_datetime_or_interval": "2025-11-22T20:50:00+02:00",
+          "exact_excerpt": "О 20:50 у Запоріжжі зафіксували удар керованого дрона-камікадзе «Молнія».",
+          "city_specificity": "as adjudicated in audited baseline",
+          "military_context": "as adjudicated in audited baseline"
+        }
+      ],
+      "reason_codes": [
+        "BASELINE_CANONICAL_STRICT"
+      ]
+    },
+    {
+      "chain_id": "baseline_febf22a1f559d6c761c8d850",
+      "episode_id": "febf22a1f559d6c761c8d850",
+      "role": "supplementary_existing_audited_baseline",
+      "discovery_independent": false,
+      "source_hits": [
+        {
+          "source": "existing audited baseline evidence",
+          "url": "https://zprz.city/news/view/poranennya-rujnuvannya-pozhezhi-vnochi-zaporizhzhya-zaznalo-masovanoi-ataki-vorozhih-droniv-shho-vidomo-pro-naslidki",
+          "publication_datetime": null,
+          "event_datetime_or_interval": "2025-11-25T22:18:00+02:00/2025-11-25T22:30:00+02:00",
+          "exact_excerpt": "За даними поліції, з 22:18 до 22:30 обласний центр атакували понад десять Shahed.",
+          "city_specificity": "as adjudicated in audited baseline",
+          "military_context": "as adjudicated in audited baseline"
+        }
+      ],
+      "reason_codes": [
+        "BASELINE_CANONICAL_STRICT"
+      ]
+    },
+    {
+      "chain_id": "baseline_69b6767287e18383f94758c2",
+      "episode_id": "69b6767287e18383f94758c2",
+      "role": "supplementary_existing_audited_baseline",
+      "discovery_independent": false,
+      "source_hits": [
+        {
+          "source": "existing audited baseline evidence",
+          "url": "https://zp.npu.gov.ua/news/unaslidok-ataky-rosiiskoho-bezpilotnyka-po-zaporizhzhiu-postrazhdaly-troie-liudei",
+          "publication_datetime": null,
+          "event_datetime_or_interval": "2025-12-16T04:45:00+02:00/2025-12-16T04:50:00+02:00",
+          "exact_excerpt": "Удар БпЛА по Запоріжжю датовано приблизно 04:45–04:50; frozen alert починається о 04:47:13.",
+          "city_specificity": "as adjudicated in audited baseline",
+          "military_context": "as adjudicated in audited baseline"
+        }
+      ],
+      "reason_codes": [
+        "BASELINE_CANONICAL_SENSITIVITY"
+      ]
+    },
+    {
+      "chain_id": "baseline_319d4432a8528fe156bcc567",
+      "episode_id": "319d4432a8528fe156bcc567",
+      "role": "supplementary_existing_audited_baseline",
+      "discovery_independent": false,
+      "source_hits": [
+        {
+          "source": "existing audited baseline evidence",
+          "url": "https://www.inform.zp.ua/uk/2025/12/17/348793_vechirnya-ataka-po-zaporizhzhyu-dronom-shho-vidomo/",
+          "publication_datetime": null,
+          "event_datetime_or_interval": "2025-12-16T19:55:00+02:00",
+          "exact_excerpt": "Близько 19:55 російський БпЛА влучив у приватний сектор Запоріжжя.",
+          "city_specificity": "as adjudicated in audited baseline",
+          "military_context": "as adjudicated in audited baseline"
+        }
+      ],
+      "reason_codes": [
+        "BASELINE_CANONICAL_STRICT"
+      ]
+    },
+    {
+      "chain_id": "baseline_cddc9de313621dc2726766f7",
+      "episode_id": "cddc9de313621dc2726766f7",
+      "role": "supplementary_existing_audited_baseline",
+      "discovery_independent": false,
+      "source_hits": [
+        {
+          "source": "existing audited baseline evidence",
+          "url": "https://npu.gov.ua/news/rosiiany-atakuvaly-kabamy-zaporizhzhia-19-liudei-poraneni-na-mistsiakh-vluchan-pratsiuiut-politseiski",
+          "publication_datetime": null,
+          "event_datetime_or_interval": "2025-12-17T11:30:00+02:00/2025-12-17T12:00:00+02:00",
+          "exact_excerpt": "Поліція: з 11:30 до 12:00 росіяни завдали чотири удари КАБами по Запоріжжю та району; у місті є влучання.",
+          "city_specificity": "as adjudicated in audited baseline",
+          "military_context": "as adjudicated in audited baseline"
+        }
+      ],
+      "reason_codes": [
+        "BASELINE_CANONICAL_STRICT"
+      ]
+    },
+    {
+      "chain_id": "baseline_7fef165b3eb0ada83014cc42",
+      "episode_id": "7fef165b3eb0ada83014cc42",
+      "role": "supplementary_existing_audited_baseline",
+      "discovery_independent": false,
+      "source_hits": [
+        {
+          "source": "existing audited baseline evidence",
+          "url": "https://www.inform.zp.ua/uk/2026/01/20/352801_rf-kilka-raziv-atakuvala-zaporizhzhya-shho-vidomo/",
+          "publication_datetime": null,
+          "event_datetime_or_interval": null,
+          "exact_excerpt": "Уночі росіяни кілька разів атакували Запоріжжя БпЛА; наслідки повідомлялися в межах довгого frozen episode.",
+          "city_specificity": "as adjudicated in audited baseline",
+          "military_context": "as adjudicated in audited baseline"
+        }
+      ],
+      "reason_codes": [
+        "BASELINE_CANONICAL_SENSITIVITY"
+      ]
+    },
+    {
+      "chain_id": "baseline_87348c2c06d552d2ad0fc751",
+      "episode_id": "87348c2c06d552d2ad0fc751",
+      "role": "supplementary_existing_audited_baseline",
+      "discovery_independent": false,
+      "source_hits": [
+        {
+          "source": "existing audited baseline evidence",
+          "url": "https://russian-torturers.org/crimes/20-sicnia-2026-roku-m-zaporizzia",
+          "publication_datetime": null,
+          "event_datetime_or_interval": "2026-01-20T18:08:00+02:00/2026-01-20T18:24:00+02:00",
+          "exact_excerpt": "З 18:08 до 18:24 Запоріжжя зазнало повітряної атаки десятками Shahed.",
+          "city_specificity": "as adjudicated in audited baseline",
+          "military_context": "as adjudicated in audited baseline"
+        }
+      ],
+      "reason_codes": [
+        "BASELINE_CANONICAL_STRICT"
+      ]
+    },
+    {
+      "chain_id": "baseline_dde8f8a1890af198a9a1991d",
+      "episode_id": "dde8f8a1890af198a9a1991d",
+      "role": "supplementary_existing_audited_baseline",
+      "discovery_independent": false,
+      "source_hits": [
+        {
+          "source": "existing audited baseline evidence",
+          "url": "https://zprz.city/news/view/rosiyani-zranku-atakuvali-zaporizhzhya-okupanti-obstrilyali-budinki-u-privatnomu-sektori-foto-video",
+          "publication_datetime": null,
+          "event_datetime_or_interval": null,
+          "exact_excerpt": "Вранці російський БпЛА атакував приватний сектор Запоріжжя під час довгого frozen episode.",
+          "city_specificity": "as adjudicated in audited baseline",
+          "military_context": "as adjudicated in audited baseline"
+        }
+      ],
+      "reason_codes": [
+        "BASELINE_CANONICAL_SENSITIVITY"
+      ]
+    },
+    {
+      "chain_id": "baseline_b234a0c7d8f8be45ee429a21",
+      "episode_id": "b234a0c7d8f8be45ee429a21",
+      "role": "supplementary_existing_audited_baseline",
+      "discovery_independent": false,
+      "source_hits": [
+        {
+          "source": "existing audited baseline evidence",
+          "url": "https://www.inform.zp.ua/uk/2026/01/21/353167_rosiyany-atakuvaly-zaporizhzhya-poshkodzhenyj-torgovyj-czentr-ta-budynky/",
+          "publication_datetime": null,
+          "event_datetime_or_interval": null,
+          "exact_excerpt": "Увечері БпЛА атакували Запоріжжя, пошкодивши торговий центр і житло; повідомлення припадає на поточний frozen episode.",
+          "city_specificity": "as adjudicated in audited baseline",
+          "military_context": "as adjudicated in audited baseline"
+        }
+      ],
+      "reason_codes": [
+        "BASELINE_CANONICAL_SENSITIVITY"
+      ]
+    },
+    {
+      "chain_id": "baseline_1cf4b55dbaaef2eb3cee8eb1",
+      "episode_id": "1cf4b55dbaaef2eb3cee8eb1",
+      "role": "supplementary_existing_audited_baseline",
+      "discovery_independent": false,
+      "source_hits": [
+        {
+          "source": "existing audited baseline evidence",
+          "url": "https://zprz.city/news/view/virosla-kilkist-poranenih-pislya-vorozhogo-udaru-po-zaporizhzhyu-11-bereznya-naslidki-obstriliv-za-dobu",
+          "publication_datetime": null,
+          "event_datetime_or_interval": "2026-03-11 ~16:10",
+          "exact_excerpt": "Близько 16:10 російські війська атакували Запоріжжя керованими авіабомбами.",
+          "city_specificity": "as adjudicated in audited baseline",
+          "military_context": "as adjudicated in audited baseline"
+        }
+      ],
+      "reason_codes": [
+        "BASELINE_CANONICAL_STRICT"
+      ]
+    },
+    {
+      "chain_id": "baseline_0edc1d73c3a86e149371bfbf",
+      "episode_id": "0edc1d73c3a86e149371bfbf",
+      "role": "supplementary_existing_audited_baseline",
+      "discovery_independent": false,
+      "source_hits": [
+        {
+          "source": "existing audited baseline evidence",
+          "url": "https://suspilne.media/zaporizhzhia/1262236-armia-rf-obstrilala-zaporizza-poraneni-patrulni-policejski/",
+          "publication_datetime": null,
+          "event_datetime_or_interval": "2026-03-12 afternoon, exact time unknown",
+          "exact_excerpt": "12 березня російські війська атакували Запоріжжя, поранено двох патрульних; повідомлення про наслідки з'явилося під час довгого денного frozen episode.",
+          "city_specificity": "as adjudicated in audited baseline",
+          "military_context": "as adjudicated in audited baseline"
+        }
+      ],
+      "reason_codes": [
+        "BASELINE_CANONICAL_SENSITIVITY"
+      ]
+    },
+    {
+      "chain_id": "baseline_e2343ddef99dd25928a0193e",
+      "episode_id": "e2343ddef99dd25928a0193e",
+      "role": "supplementary_existing_audited_baseline",
+      "discovery_independent": false,
+      "source_hits": [
+        {
+          "source": "existing audited baseline evidence",
+          "url": "https://zprz.city/news/view/u-zaporizhzhi-pid-chas-ataki-drona-poraneno-patrulnogo-bpla-vluchiv-u-sluzhbove-avto-video",
+          "publication_datetime": null,
+          "event_datetime_or_interval": "2026-03-13 afternoon, exact time unknown",
+          "exact_excerpt": "У Запоріжжі під час атаки ворожий БпЛА влучив у службове авто поліції та поранив патрульного; повідомлення з'явилося в межах денного frozen episode.",
+          "city_specificity": "as adjudicated in audited baseline",
+          "military_context": "as adjudicated in audited baseline"
+        }
+      ],
+      "reason_codes": [
+        "BASELINE_CANONICAL_SENSITIVITY"
+      ]
+    },
+    {
+      "chain_id": "baseline_c1d947bd6240f8549c0e385a",
+      "episode_id": "c1d947bd6240f8549c0e385a",
+      "role": "supplementary_existing_audited_baseline",
+      "discovery_independent": false,
+      "source_hits": [
+        {
+          "source": "existing audited baseline evidence",
+          "url": "https://www.ukrinform.ua/rubric-regions/4104020-u-zaporizzi-vnaslidok-rankovoi-ataki-rf-poskodzene-pidpriemstvo.html",
+          "publication_datetime": null,
+          "event_datetime_or_interval": "2026-03-21 ~07:40",
+          "exact_excerpt": "Близько 07:40 російські БпЛА атакували Запоріжжя; пошкоджено підприємство.",
+          "city_specificity": "as adjudicated in audited baseline",
+          "military_context": "as adjudicated in audited baseline"
+        }
+      ],
+      "reason_codes": [
+        "BASELINE_CANONICAL_STRICT"
+      ]
+    },
+    {
+      "chain_id": "baseline_68046107668aad7c9f51499d",
+      "episode_id": "68046107668aad7c9f51499d",
+      "role": "supplementary_existing_audited_baseline",
+      "discovery_independent": false,
+      "source_hits": [
+        {
+          "source": "existing audited baseline evidence",
+          "url": "https://ua.korrespondent.net/city/zaporozhye/4864396-rosiia-atakuvala-krytychnu-infrastrukturu-zaporizhzhia",
+          "publication_datetime": null,
+          "event_datetime_or_interval": "2026-03-21 ~16:10",
+          "exact_excerpt": "Близько 16:10 російська атака уразила критичну інфраструктуру Запоріжжя.",
+          "city_specificity": "as adjudicated in audited baseline",
+          "military_context": "as adjudicated in audited baseline"
+        }
+      ],
+      "reason_codes": [
+        "BASELINE_CANONICAL_STRICT"
+      ]
+    },
+    {
+      "chain_id": "baseline_f925608b4627f59f007d56d4",
+      "episode_id": "f925608b4627f59f007d56d4",
+      "role": "supplementary_existing_audited_baseline",
+      "discovery_independent": false,
+      "source_hits": [
+        {
+          "source": "existing audited baseline evidence",
+          "url": "https://suspilne.media/zaporizhzhia/1332714-rosijskij-obstril-zaporizza-v-nic-proti-17-cervna-e-zagiblij-ta-poraneni/",
+          "publication_datetime": null,
+          "event_datetime_or_interval": "2026-06-16 ~23:00",
+          "exact_excerpt": "Russian forces carried out five UAV strikes on Zaporizhzhia at about 23:00 on 16 June.",
+          "city_specificity": "as adjudicated in audited baseline",
+          "military_context": "as adjudicated in audited baseline"
+        }
+      ],
+      "reason_codes": [
+        "BASELINE_CANONICAL_STRICT"
+      ]
+    },
+    {
+      "chain_id": "baseline_1e434d0fa5abfd518ad07d1e",
+      "episode_id": "1e434d0fa5abfd518ad07d1e",
+      "role": "supplementary_existing_audited_baseline",
+      "discovery_independent": false,
+      "source_hits": [
+        {
+          "source": "existing audited baseline evidence",
+          "url": "https://nv.ua/ukr/ukraine/events/epicentr-u-zaporizhzhi-atakuvali-droni-vinikla-masshtabna-pozhezha-video-novini-zaporizhzhya-50636377.html",
+          "publication_datetime": null,
+          "event_datetime_or_interval": "2026-08-28T07:30:00+03:00",
+          "exact_excerpt": "Близько 07:30 у Запоріжжі лунали вибухи на тлі загрози ударних БпЛА; підтверджене влучання по «Епіцентру» сталося пізніше в межах тієї ж атаки.",
+          "city_specificity": "as adjudicated in audited baseline",
+          "military_context": "as adjudicated in audited baseline"
+        }
+      ],
+      "reason_codes": [
+        "BASELINE_CANONICAL_SENSITIVITY"
+      ]
+    },
+    {
+      "chain_id": "baseline_5da4fc649a38d4796ebbcf94",
+      "episode_id": "5da4fc649a38d4796ebbcf94",
+      "role": "supplementary_existing_audited_baseline",
+      "discovery_independent": false,
+      "source_hits": [
+        {
+          "source": "existing audited baseline evidence",
+          "url": "https://zprz.city/news/view/vnochi-rosiyani-atakuvali-zaporizhzhya-dronami-goriv-torgivelnij-tsentr-foto-video",
+          "publication_datetime": null,
+          "event_datetime_or_interval": null,
+          "exact_excerpt": "Близько опівночі російські дрони тричі вдарили по City Mall у Запоріжжі; формулювання часу лежить на самій межі епізоду, що почався о 00:00:54.",
+          "city_specificity": "as adjudicated in audited baseline",
+          "military_context": "as adjudicated in audited baseline"
+        }
+      ],
+      "reason_codes": [
+        "BASELINE_CANONICAL_SENSITIVITY"
+      ]
+    },
+    {
+      "chain_id": "baseline_23371bee083381cd79cf93a2",
+      "episode_id": "23371bee083381cd79cf93a2",
+      "role": "supplementary_existing_audited_baseline",
+      "discovery_independent": false,
+      "source_hits": [
+        {
+          "source": "existing audited baseline evidence",
+          "url": "https://news2000.org.ua/n/udar-po-zaporizhzhu-avtostoyanka/",
+          "publication_datetime": null,
+          "event_datetime_or_interval": null,
+          "exact_excerpt": "Джерело повідомило про удар російських дронів по парковці в Запоріжжі та прямо зазначило, що в місті тривала повітряна тривога.",
+          "city_specificity": "as adjudicated in audited baseline",
+          "military_context": "as adjudicated in audited baseline"
+        }
+      ],
+      "reason_codes": [
+        "BASELINE_CANONICAL_STRICT"
+      ]
+    },
+    {
+      "chain_id": "pc_41f41f98fef80130dff07317",
+      "episode_id": "41f41f98fef80130dff07317",
+      "role": "positive_control",
+      "discovery_independent": true,
+      "artifact_assisted_only": false,
+      "discovery_channel": "broad_web_search",
+      "search_pattern": "Запоріжжя 2025-11-22 + date-specific combinations from direct explosion / strike-impact / PVO / weapon-context families",
+      "source_hits": [
+        {
+          "source": "Укрінформ / Запорізька ОВА",
+          "url": "https://www.ukrinform.ua/rubric-regions/4061628-u-zaporizzi-pid-cas-trivogi-prolunali-vibuhi.html",
+          "publication_or_message_datetime": "2025-11-22T15:32:00+02:00",
+          "event_datetime_or_interval": null,
+          "exact_excerpt": "У Запоріжжі під час повітряної тривоги пролунали вибухи. Мешканців попередили про роботу ППО у місті.",
+          "city_specificity": "exact city in reconciled evidence",
+          "military_context": "Exact-city explosions explicitly occurred during the canonical alert; air-defence attribution does not negate the explosion criterion.",
+          "candidate_episode_ids": [
+            "41f41f98fef80130dff07317"
+          ]
+        }
+      ],
+      "relation_to_other_messages": "Exact-city explosions explicitly occurred during the canonical alert; air-defence attribution does not negate the explosion criterion.",
+      "reason_codes": [
+        "PVO_PLUS_EXPLOSION",
+        "EXPLICIT_EVENT_TIME"
+      ]
+    },
+    {
+      "chain_id": "pc_6e6afea5cad3ced8422d0ff8",
+      "episode_id": "6e6afea5cad3ced8422d0ff8",
+      "role": "positive_control",
+      "discovery_independent": true,
+      "artifact_assisted_only": false,
+      "discovery_channel": "broad_web_search",
+      "search_pattern": "Запоріжжя 2025-05-23 + date-specific combinations from direct explosion / strike-impact / PVO / weapon-context families",
+      "source_hits": [
+        {
+          "source": "Укрінформ / Запорізька ОВА",
+          "url": "https://www.ukrinform.ua/rubric-regions/3996407-u-zaporizzi-pid-cas-povitranoi-trivogi-prolunali-vibuhi.html",
+          "publication_or_message_datetime": "2025-05-23T23:03:00+03:00",
+          "event_datetime_or_interval": null,
+          "exact_excerpt": "У Запоріжжі під час повітряної тривоги пролунали вибухи.",
+          "city_specificity": "exact city in reconciled evidence",
+          "military_context": "Exact-city explosion wording, explicit during-alert statement, and aerial/UAV-war context; the source report falls inside the canonical episode.",
+          "candidate_episode_ids": [
+            "6e6afea5cad3ced8422d0ff8"
+          ]
+        }
+      ],
+      "relation_to_other_messages": "Exact-city explosion wording, explicit during-alert statement, and aerial/UAV-war context; the source report falls inside the canonical episode.",
+      "reason_codes": [
+        "DIRECT_EXPLOSION",
+        "EXPLICIT_EVENT_TIME"
+      ]
+    },
+    {
+      "chain_id": "pc_eb29ccba021617db3b0e8bbc",
+      "episode_id": "eb29ccba021617db3b0e8bbc",
+      "role": "positive_control",
+      "discovery_independent": true,
+      "artifact_assisted_only": false,
+      "discovery_channel": "broad_web_search",
+      "search_pattern": "Запоріжжя 2025-09-15 + date-specific combinations from direct explosion / strike-impact / PVO / weapon-context families",
+      "source_hits": [
+        {
+          "source": "Укрінформ",
+          "url": "https://www.ukrinform.ua/rubric-regions/4036493-u-zaporizzi-prolunala-seria-vibuhiv.html",
+          "publication_or_message_datetime": "2025-09-15T02:51:00+03:00",
+          "event_datetime_or_interval": null,
+          "exact_excerpt": "У Запоріжжі під час повітряної тривоги пролунала серія вибухів, сталося займання.",
+          "city_specificity": "exact city in reconciled evidence",
+          "military_context": "Exact city, explicit explosions, explicit during-alert wording, and missile/aerial-war context.",
+          "candidate_episode_ids": [
+            "eb29ccba021617db3b0e8bbc"
+          ]
+        }
+      ],
+      "relation_to_other_messages": "Exact city, explicit explosions, explicit during-alert wording, and missile/aerial-war context.",
+      "reason_codes": [
+        "DIRECT_EXPLOSION",
+        "EXPLICIT_EVENT_TIME"
+      ]
+    },
+    {
+      "chain_id": "pc_19f123f154ffb68f06d0296e",
+      "episode_id": "19f123f154ffb68f06d0296e",
+      "role": "positive_control",
+      "discovery_independent": true,
+      "artifact_assisted_only": false,
+      "discovery_channel": "broad_web_search",
+      "search_pattern": "Запоріжжя 2025-10-08 + date-specific combinations from direct explosion / strike-impact / PVO / weapon-context families",
+      "source_hits": [
+        {
+          "source": "Укрінформ, mirrored by UKR.NET",
+          "url": "https://www.ukr.net/news/details/zaporizhzhya/113888959.html",
+          "publication_or_message_datetime": "2025-10-08T22:46:00+03:00",
+          "event_datetime_or_interval": null,
+          "exact_excerpt": "Ворог атакує Запоріжжя, під час повітряної тривоги у місті пролунали вибухи.",
+          "city_specificity": "exact city in reconciled evidence",
+          "military_context": "Exact city, explicit explosions, explicit during-alert wording, and reported fast aerial target toward the city.",
+          "candidate_episode_ids": [
+            "19f123f154ffb68f06d0296e"
+          ]
+        }
+      ],
+      "relation_to_other_messages": "Exact city, explicit explosions, explicit during-alert wording, and reported fast aerial target toward the city.",
+      "reason_codes": [
+        "DIRECT_EXPLOSION",
+        "EXPLICIT_EVENT_TIME"
+      ]
+    },
+    {
+      "chain_id": "pc_8534686ad8552aef1dd5a009",
+      "episode_id": "8534686ad8552aef1dd5a009",
+      "role": "positive_control",
+      "discovery_independent": true,
+      "artifact_assisted_only": false,
+      "discovery_channel": "broad_web_search",
+      "search_pattern": "Запоріжжя 2025-11-15 + date-specific combinations from direct explosion / strike-impact / PVO / weapon-context families",
+      "source_hits": [
+        {
+          "source": "Укрінформ, mirrored by UKR.NET",
+          "url": "https://www.ukr.net/news/details/zaporizhzhya/114518549.html",
+          "publication_or_message_datetime": "2025-11-15T00:04:00+02:00",
+          "event_datetime_or_interval": null,
+          "exact_excerpt": "У Запоріжжі під час повітряної тривоги пролунав вибух.",
+          "city_specificity": "exact city in reconciled evidence",
+          "military_context": "Exact city, explicit explosion, explicit during-alert wording, and UAV-over-Zaporizhzhia context.",
+          "candidate_episode_ids": [
+            "8534686ad8552aef1dd5a009"
+          ]
+        }
+      ],
+      "relation_to_other_messages": "Exact city, explicit explosion, explicit during-alert wording, and UAV-over-Zaporizhzhia context.",
+      "reason_codes": [
+        "DIRECT_EXPLOSION",
+        "EXPLICIT_EVENT_TIME"
+      ]
+    },
+    {
+      "chain_id": "pc_03eb23a34f4367f90dbee592",
+      "episode_id": "03eb23a34f4367f90dbee592",
+      "role": "positive_control",
+      "discovery_independent": true,
+      "artifact_assisted_only": false,
+      "discovery_channel": "broad_web_search",
+      "search_pattern": "Запоріжжя 2025-11-24 + date-specific combinations from direct explosion / strike-impact / PVO / weapon-context families",
+      "source_hits": [
+        {
+          "source": "Укрінформ",
+          "url": "https://www.ukrinform.ua/rubric-ato/4062313-u-zaporizzi-prolunav-vibuh.html",
+          "publication_or_message_datetime": "2025-11-24T17:12:00+02:00",
+          "event_datetime_or_interval": null,
+          "exact_excerpt": "У Запоріжжі щойно пролунав вибух. Його чули мешканці кількох районів міста.",
+          "city_specificity": "exact city in reconciled evidence",
+          "military_context": "Exact city, immediate event wording, active city alert, and KAB attack on Zaporizhzhia.",
+          "candidate_episode_ids": [
+            "03eb23a34f4367f90dbee592"
+          ]
+        }
+      ],
+      "relation_to_other_messages": "Exact city, immediate event wording, active city alert, and KAB attack on Zaporizhzhia.",
+      "reason_codes": [
+        "DIRECT_EXPLOSION",
+        "EXPLICIT_EVENT_TIME"
+      ]
+    },
+    {
+      "chain_id": "pc_ced9e05a99318132ec47d0a0",
+      "episode_id": "ced9e05a99318132ec47d0a0",
+      "role": "positive_control",
+      "discovery_independent": true,
+      "artifact_assisted_only": false,
+      "discovery_channel": "broad_web_search",
+      "search_pattern": "Запоріжжя 2025-12-02 + date-specific combinations from direct explosion / strike-impact / PVO / weapon-context families",
+      "source_hits": [
+        {
+          "source": "Укрінформ",
+          "url": "https://www.ukrinform.ua/rubric-regions/4065143-u-zaporizzi-prolunav-vibuh.html",
+          "publication_or_message_datetime": "2025-12-02T12:03:00+02:00",
+          "event_datetime_or_interval": null,
+          "exact_excerpt": "У Запоріжжі під час повітряної тривоги пролунав вибух.",
+          "city_specificity": "exact city in reconciled evidence",
+          "military_context": "Exact city, explicit explosion during alert, and aerial-strike warning.",
+          "candidate_episode_ids": [
+            "ced9e05a99318132ec47d0a0"
+          ]
+        }
+      ],
+      "relation_to_other_messages": "Exact city, explicit explosion during alert, and aerial-strike warning.",
+      "reason_codes": [
+        "DIRECT_EXPLOSION",
+        "EXPLICIT_EVENT_TIME"
+      ]
+    },
+    {
+      "chain_id": "pc_5a7d64e4d58b240825d0c954",
+      "episode_id": "5a7d64e4d58b240825d0c954",
+      "role": "positive_control",
+      "discovery_independent": false,
+      "artifact_assisted_only": true,
+      "discovery_channel": "existing_artifact_pointer_then_source_recheck",
+      "search_pattern": "Запоріжжя 2025-12-16 + date-specific combinations from direct explosion / strike-impact / PVO / weapon-context families",
+      "source_hits": [
+        {
+          "source": "Укрінформ / Запорізька ОВА",
+          "url": "https://www.ukrinform.ua/rubric-regions/4070429-u-zaporizzi-prolunali-vibuhi.html",
+          "publication_or_message_datetime": "2025-12-16T22:05:00+02:00",
+          "event_datetime_or_interval": null,
+          "exact_excerpt": "Під час повітряної тривоги у Запоріжжі було чутно звуки вибухів.",
+          "city_specificity": "exact city in reconciled evidence",
+          "military_context": "Exact city, explicit explosions during alert, and strike-UAV/air-defence context.",
+          "candidate_episode_ids": [
+            "5a7d64e4d58b240825d0c954"
+          ]
+        }
+      ],
+      "relation_to_other_messages": "Exact city, explicit explosions during alert, and strike-UAV/air-defence context.",
+      "reason_codes": [
+        "PVO_PLUS_EXPLOSION",
+        "EXPLICIT_EVENT_TIME"
+      ]
+    },
+    {
+      "chain_id": "pc_6393c001ec4d0f8dfce54b51",
+      "episode_id": "6393c001ec4d0f8dfce54b51",
+      "role": "positive_control",
+      "discovery_independent": true,
+      "artifact_assisted_only": false,
+      "discovery_channel": "broad_web_search",
+      "search_pattern": "Запоріжжя 2026-01-21 + date-specific combinations from direct explosion / strike-impact / PVO / weapon-context families",
+      "source_hits": [
+        {
+          "source": "Укрінформ",
+          "url": "https://www.ukrinform.ua/amp/rubric-regions/4082594-u-zaporizzi-prolunali-vibuhi.html",
+          "publication_or_message_datetime": "2026-01-21T10:27:00+02:00",
+          "event_datetime_or_interval": null,
+          "exact_excerpt": "Ворог завдає авіаційних ударів по Запоріжжю, у різних районах міста лунають вибухи.",
+          "city_specificity": "exact city in reconciled evidence",
+          "military_context": "Exact city, explicit explosions, active air alert, KAB launches toward Zaporizhzhia and additional UAV/cruise-missile threat.",
+          "candidate_episode_ids": [
+            "6393c001ec4d0f8dfce54b51"
+          ]
+        }
+      ],
+      "relation_to_other_messages": "Exact city, explicit explosions, active air alert, KAB launches toward Zaporizhzhia and additional UAV/cruise-missile threat.",
+      "reason_codes": [
+        "DIRECT_EXPLOSION",
+        "EXPLICIT_EVENT_TIME"
+      ]
+    },
+    {
+      "chain_id": "pc_0edc1d73c3a86e149371bfbf",
+      "episode_id": "0edc1d73c3a86e149371bfbf",
+      "role": "positive_control",
+      "discovery_independent": true,
+      "artifact_assisted_only": false,
+      "discovery_channel": "broad_web_search",
+      "search_pattern": "Запоріжжя 2026-03-12 + date-specific combinations from direct explosion / strike-impact / PVO / weapon-context families",
+      "source_hits": [
+        {
+          "source": "Укрінформ",
+          "url": "https://www.ukrinform.ua/rubric-regions/4100820-rosiani-atakuvali-komisuvahu-na-zaporizzi-e-poranenij.html",
+          "publication_or_message_datetime": "2026-03-12T14:17:00+02:00",
+          "event_datetime_or_interval": null,
+          "exact_excerpt": "Наразі в області та Запоріжжі оголошено повітряну тривогу. Загроза атаки БПЛА. В Запоріжжі чути вибухи.",
+          "city_specificity": "exact city in reconciled evidence",
+          "military_context": "The stronger source supplies the missing exact-city explosion wording and explicit active-alert/UAV context for the same canonical episode.",
+          "candidate_episode_ids": [
+            "0edc1d73c3a86e149371bfbf"
+          ]
+        }
+      ],
+      "relation_to_other_messages": "The stronger source supplies the missing exact-city explosion wording and explicit active-alert/UAV context for the same canonical episode.",
+      "reason_codes": [
+        "DIRECT_EXPLOSION",
+        "EXPLICIT_EVENT_TIME"
+      ]
+    },
+    {
+      "chain_id": "pc_404d55294a38c31848e7e093",
+      "episode_id": "404d55294a38c31848e7e093",
+      "role": "positive_control",
+      "discovery_independent": true,
+      "artifact_assisted_only": false,
+      "discovery_channel": "broad_web_search",
+      "search_pattern": "Запоріжжя 2026-04-09 + date-specific combinations from direct explosion / strike-impact / PVO / weapon-context families",
+      "source_hits": [
+        {
+          "source": "Укрінформ",
+          "url": "https://www.ukrinform.ua/rubric-regions/4110629-u-zaporizzi-prolunali-kilka-vibuhiv.html",
+          "publication_or_message_datetime": "2026-04-09T05:58:00+03:00",
+          "event_datetime_or_interval": null,
+          "exact_excerpt": "У Запоріжжі пролунали кілька вибухів, ворог атакує місто ракетами.",
+          "city_specificity": "exact city in reconciled evidence",
+          "military_context": "Exact city, explicit explosions, missile attack, and active city air alert.",
+          "candidate_episode_ids": [
+            "404d55294a38c31848e7e093"
+          ]
+        }
+      ],
+      "relation_to_other_messages": "Exact city, explicit explosions, missile attack, and active city air alert.",
+      "reason_codes": [
+        "DIRECT_EXPLOSION",
+        "EXPLICIT_EVENT_TIME"
+      ]
+    },
+    {
+      "chain_id": "pc_1e434d0fa5abfd518ad07d1e",
+      "episode_id": "1e434d0fa5abfd518ad07d1e",
+      "role": "positive_control",
+      "discovery_independent": false,
+      "artifact_assisted_only": true,
+      "discovery_channel": "existing_artifact_pointer_then_source_recheck",
+      "search_pattern": "Запоріжжя 2026-08-28 + date-specific combinations from direct explosion / strike-impact / PVO / weapon-context families",
+      "source_hits": [
+        {
+          "source": "NV",
+          "url": "https://nv.ua/ukr/ukraine/events/epicentr-u-zaporizhzhi-atakuvali-droni-vinikla-masshtabna-pozhezha-video-novini-zaporizhzhya-50636377.html",
+          "publication_or_message_datetime": "2026-08-28T09:11:00+03:00",
+          "event_datetime_or_interval": null,
+          "exact_excerpt": "Близько 07:30 28 серпня у Запоріжжі лунали вибухи, повідомлялося про загрозу ударних БпЛА.",
+          "city_specificity": "exact city in reconciled evidence",
+          "military_context": "Exact-city explosion time is explicitly ~07:30, seven minutes after episode start, with explicit strike-UAV threat.",
+          "candidate_episode_ids": [
+            "1e434d0fa5abfd518ad07d1e"
+          ]
+        }
+      ],
+      "relation_to_other_messages": "Exact-city explosion time is explicitly ~07:30, seven minutes after episode start, with explicit strike-UAV threat.",
+      "reason_codes": [
+        "DIRECT_EXPLOSION",
+        "EXPLICIT_EVENT_TIME"
+      ]
+    },
+    {
+      "chain_id": "pc_eac6a8d131341fb46bd1eae2",
+      "episode_id": "eac6a8d131341fb46bd1eae2",
+      "role": "positive_control",
+      "discovery_independent": true,
+      "artifact_assisted_only": false,
+      "discovery_channel": "broad_web_search",
+      "search_pattern": "Запоріжжя 2026-09-08 + date-specific combinations from direct explosion / strike-impact / PVO / weapon-context families",
+      "source_hits": [
+        {
+          "source": "Укрінформ",
+          "url": "https://www.ukrinform.ua/rubric-regions/4162036-vorog-atakuvav-promislove-pidpriemstvo-u-zaporizzi-e-poranenij.html",
+          "publication_or_message_datetime": "2026-09-08T14:24:00+03:00",
+          "event_datetime_or_interval": null,
+          "exact_excerpt": "У місті вже тривалий час лунає повітряна тривога, в різних районах міста чути вибухи.",
+          "city_specificity": "exact city in reconciled evidence",
+          "military_context": "The stronger source supplies explicit exact-city explosions during the active canonical episode; the earlier review source lacked usable time.",
+          "candidate_episode_ids": [
+            "eac6a8d131341fb46bd1eae2"
+          ]
+        }
+      ],
+      "relation_to_other_messages": "The stronger source supplies explicit exact-city explosions during the active canonical episode; the earlier review source lacked usable time.",
+      "reason_codes": [
+        "DIRECT_EXPLOSION",
+        "EXPLICIT_EVENT_TIME"
+      ]
+    },
+    {
+      "chain_id": "pc_7c008970817e8d13ae402670",
+      "episode_id": "7c008970817e8d13ae402670",
+      "role": "positive_control",
+      "discovery_independent": false,
+      "artifact_assisted_only": true,
+      "discovery_channel": "existing_artifact_pointer_then_source_recheck",
+      "search_pattern": "Запоріжжя 2026-06-16 + date-specific combinations from direct explosion / strike-impact / PVO / weapon-context families",
+      "source_hits": [
+        {
+          "source": "Труха⚡️Запоріжжя Telegram",
+          "url": "https://t.me/truexazaporozie/64460",
+          "publication_or_message_datetime": "2026-06-16T19:51:00+03:00",
+          "event_datetime_or_interval": null,
+          "exact_excerpt": "Вибух.",
+          "city_specificity": "exact city in reconciled evidence",
+          "military_context": "Exact-city explosion wording + explicit UAV impact + confirmed aerial-war context + contemporaneous event times inside one canonical alert episode satisfy the current strict methodology.",
+          "candidate_episode_ids": [
+            "7c008970817e8d13ae402670"
+          ]
+        },
+        {
+          "source": "Труха⚡️Запоріжжя Telegram",
+          "url": "https://t.me/truexazaporozie/64461",
+          "publication_or_message_datetime": "2026-06-16T19:55:00+03:00",
+          "event_datetime_or_interval": null,
+          "exact_excerpt": "Момент влучання БпЛА в місті.",
+          "city_specificity": "exact city in reconciled evidence",
+          "military_context": "Exact-city explosion wording + explicit UAV impact + confirmed aerial-war context + contemporaneous event times inside one canonical alert episode satisfy the current strict methodology.",
+          "candidate_episode_ids": [
+            "7c008970817e8d13ae402670"
+          ]
+        },
+        {
+          "source": "Труха⚡️Запоріжжя Telegram",
+          "url": "https://t.me/truexazaporozie/64465",
+          "publication_or_message_datetime": "2026-06-16T20:02:00+03:00",
+          "event_datetime_or_interval": null,
+          "exact_excerpt": "Повторні вибухи.",
+          "city_specificity": "exact city in reconciled evidence",
+          "military_context": "Exact-city explosion wording + explicit UAV impact + confirmed aerial-war context + contemporaneous event times inside one canonical alert episode satisfy the current strict methodology.",
+          "candidate_episode_ids": [
+            "7c008970817e8d13ae402670"
+          ]
+        },
+        {
+          "source": "Головне управління Національної поліції в Запорізькій області",
+          "url": "https://zp.npu.gov.ua/news/shakhedna-ataka-na-zaporizhzhia-zabrala-zhyttia-liudyny-ie-poraneni-na-mistsiakh-vluchan-dopomohu-liudiam-nadaiut-politseiski",
+          "publication_or_message_datetime": "2026-06-17T00:01:00+03:00",
+          "event_datetime_or_interval": null,
+          "exact_excerpt": "Police confirm a Shahed attack on Zaporizhzhia with multiple city impacts while an air alert was active.",
+          "city_specificity": "exact city in reconciled evidence",
+          "military_context": "Exact-city explosion wording + explicit UAV impact + confirmed aerial-war context + contemporaneous event times inside one canonical alert episode satisfy the current strict methodology.",
+          "candidate_episode_ids": [
+            "7c008970817e8d13ae402670"
+          ]
+        }
+      ],
+      "relation_to_other_messages": "The alert was active 19:42:55-21:04:58 Europe/Kyiv. Contemporaneous exact-city messages at 19:51, 19:55 and 20:02 explicitly report an explosion, a UAV impact in the city and repeated explosions, all inside the episode. The later police report corroborates the aerial-war context and city impacts; its publication time is not used as event time.",
+      "reason_codes": [
+        "DIRECT_EXPLOSION",
+        "EXPLICIT_EVENT_TIME"
+      ]
+    },
+    {
+      "chain_id": "pc_7a45b4c6cd4f18358e063002",
+      "episode_id": "7a45b4c6cd4f18358e063002",
+      "role": "positive_control",
+      "discovery_independent": false,
+      "artifact_assisted_only": true,
+      "discovery_channel": "existing_artifact_pointer_then_source_recheck",
+      "search_pattern": "Запоріжжя 2026-03-21 + date-specific combinations from direct explosion / strike-impact / PVO / weapon-context families",
+      "source_hits": [
+        {
+          "source": "NV live chronology, citing Suspilne",
+          "url": "https://nv.ua/ukr/ukraine/events/ataka-bpla-na-mikolajivshchinu-ta-dnipro-operativni-dani-povitryanih-sil-50593669.html",
+          "publication_or_message_datetime": "2026-03-21T04:12:00+02:00",
+          "event_datetime_or_interval": "2026-03-21T03:15:00+02:00",
+          "exact_excerpt": "03:15 У Запоріжжі пролунав вибух, повідомляє Суспільне.",
+          "city_specificity": "exact city in reconciled evidence",
+          "military_context": "Exact-city explosion wording, confirmed aerial-war/UAV context, and an explicit event time inside one canonical monitor alert episode satisfy the existing strict methodology.",
+          "candidate_episode_ids": [
+            "7a45b4c6cd4f18358e063002"
+          ]
+        },
+        {
+          "source": "National Police, Zaporizhzhia region",
+          "url": "https://zp.npu.gov.ua/news/u-zaporizhzhi-vnaslidok-ataky-rosiiskykh-bezpilotnykiv-zahynuly-dvoie-liudei-shche-dvoie-nepovnolitnikh-postrazhdaly-na-mistsiakh-vluchan-pratsiuiut-politseiski",
+          "publication_or_message_datetime": "2026-03-21T08:50:00+02:00",
+          "event_datetime_or_interval": "morning; corroborative, not used as the primary minute-level timestamp",
+          "exact_excerpt": "Police confirms that on 21 March Russian Shahed-type UAVs attacked Zaporizhzhia, with impacts on housing and infrastructure.",
+          "city_specificity": "exact city in reconciled evidence",
+          "military_context": "Exact-city explosion wording, confirmed aerial-war/UAV context, and an explicit event time inside one canonical monitor alert episode satisfy the existing strict methodology.",
+          "candidate_episode_ids": [
+            "7a45b4c6cd4f18358e063002"
+          ]
+        }
+      ],
+      "relation_to_other_messages": "The NV live chronology explicitly timestamps an exact-city explosion at 03:15 Kyiv, inside this canonical alert episode (02:28:29–05:06:48). Publication time is not substituted for event time.",
+      "reason_codes": [
+        "DIRECT_EXPLOSION",
+        "EXPLICIT_EVENT_TIME"
+      ]
+    },
+    {
+      "chain_id": "pc_5da4fc649a38d4796ebbcf94",
+      "episode_id": "5da4fc649a38d4796ebbcf94",
+      "role": "positive_control",
+      "discovery_independent": true,
+      "artifact_assisted_only": false,
+      "discovery_channel": "broad_web_search",
+      "search_pattern": "Запоріжжя 2026-09-07 + date-specific combinations from direct explosion / strike-impact / PVO / weapon-context families",
+      "source_hits": [
+        {
+          "source": "ЗаБор Запоріжжя Telegram",
+          "url": "https://t.me/zaborzp/148907",
+          "publication_or_message_datetime": "2026-09-07T01:40:00+03:00",
+          "event_datetime_or_interval": null,
+          "exact_excerpt": "Палає City Mall у Запоріжжі; наслідки атаки, сильна пожежа після удару.",
+          "city_specificity": "exact city in reconciled evidence",
+          "military_context": "Independent reporting places three Shahed impacts on City Mall in Zaporizhzhia at approximately 00:30. That time falls unambiguously inside the target alert 00:00:54–02:48:49. Exact city, aerial-war context and target-episode timing all satisfy the canonical strict rule.",
+          "candidate_episode_ids": [
+            "5da4fc649a38d4796ebbcf94"
+          ]
+        },
+        {
+          "source": "D.UA Новини",
+          "url": "https://news.d.ua/culture/shahedi-spalili-trc-city-mall-y-zaporijji-razom-iz-tovarom-minylogo-tijnia-vin-zakrivsia/",
+          "publication_or_message_datetime": "2026-09-07T03:00:00+03:00",
+          "event_datetime_or_interval": null,
+          "exact_excerpt": "Ворожий напад на торговий центр стався приблизно о 00:30 ... влучили три ударні дрони типу «Шахед».",
+          "city_specificity": "exact city in reconciled evidence",
+          "military_context": "Independent reporting places three Shahed impacts on City Mall in Zaporizhzhia at approximately 00:30. That time falls unambiguously inside the target alert 00:00:54–02:48:49. Exact city, aerial-war context and target-episode timing all satisfy the canonical strict rule.",
+          "candidate_episode_ids": [
+            "5da4fc649a38d4796ebbcf94"
+          ]
+        }
+      ],
+      "relation_to_other_messages": "Independent reporting places three Shahed impacts on City Mall in Zaporizhzhia at approximately 00:30. That time falls unambiguously inside the target alert 00:00:54–02:48:49. Exact city, aerial-war context and target-episode timing all satisfy the canonical strict rule.",
+      "reason_codes": [
+        "DIRECT_EXPLOSION",
+        "EXPLICIT_EVENT_TIME"
+      ]
+    },
+    {
+      "chain_id": "new_07d38fd578a9d7ab7bbdc25d",
+      "episode_id": "07d38fd578a9d7ab7bbdc25d",
+      "role": "new_candidate_miss",
+      "discovery_independent": true,
+      "discovery_channel": [
+        "direct_explosion",
+        "pvo",
+        "weapon_context_chain"
+      ],
+      "search_pattern": "Запоріжжя 22 листопада 2025 02:41 02:44 вибухи ППО БпЛА",
+      "source_hits": [
+        {
+          "source": "Новини.LIVE",
+          "url": "https://armiya.novyny.live/u-zaporizhzhi-progrimili-vibukhi-v-ova-nazvali-prichinu-295564.html",
+          "publication_or_message_datetime": "2025-11-22T02:53:00+02:00",
+          "event_datetime_or_interval": "contemporaneous after 02:44",
+          "exact_excerpt": "Вибухи пролунали в Запоріжжі зараз, уночі в суботу, 22 листопада.",
+          "city_specificity": "exact city",
+          "military_context": "hostile UAV over Zaporizhzhia; OVA reports air-defence activity",
+          "candidate_episode_ids": [
+            "07d38fd578a9d7ab7bbdc25d"
+          ]
+        },
+        {
+          "source": "24 Канал",
+          "url": "https://24tv.ua/zaporizhzhi-vibuhi-ppo-pratsyuye-po-bpla_n2957459",
+          "publication_or_message_datetime": "2025-11-22T02:46:00+02:00",
+          "event_datetime_or_interval": "02:44 warning followed immediately by reported explosions",
+          "exact_excerpt": "Ударні дрони ворога дісталися Запоріжжя вночі 22 листопада. У місті чули вибухи.",
+          "city_specificity": "exact city",
+          "military_context": "hostile UAV + PVO",
+          "candidate_episode_ids": [
+            "07d38fd578a9d7ab7bbdc25d"
+          ]
+        }
+      ],
+      "relation_to_other_messages": "Air alert began ~02:40; Air Force warned of a hostile UAV over Zaporizhzhia at 02:44; contemporaneous reports say explosions were heard and OVA reported PVO. All fall inside the frozen 02:40:42-03:42:29 episode.",
+      "reason_codes": [
+        "PVO_PLUS_EXPLOSION",
+        "CONTEMPORANEOUS_LIVE",
+        "EXPLICIT_DURING_ALERT"
+      ]
+    },
+    {
+      "chain_id": "review_70067c052eec48f162697391",
+      "episode_id": "70067c052eec48f162697391",
+      "role": "unresolved_episode_attribution",
+      "discovery_independent": false,
+      "discovery_channel": [
+        "pvo",
+        "direct_explosion"
+      ],
+      "source_hits": [
+        {
+          "source": "Укрінформ / Запорізька ОВА",
+          "url": "https://www.ukrinform.ua/rubric-regions/4036500-na-zaporizzi-znovu-vibuhi-po-vorozih-cilah-pracue-ppo.html",
+          "publication_or_message_datetime": "2025-09-15T04:47:00+03:00",
+          "event_datetime_or_interval": null,
+          "exact_excerpt": "Ворог знову атакував Запоріжжя, вдруге за ніч було чути вибухи, по ворожих цілях працювала ППО.",
+          "city_specificity": "exact city",
+          "military_context": "PVO / hostile attack",
+          "candidate_episode_ids": [
+            "70067c052eec48f162697391"
+          ]
+        }
+      ],
+      "relation_to_other_messages": "Publication falls inside the short alert, but wording does not establish that the explosion itself occurred after this episode began. Publication time is not event time.",
+      "reason_codes": [
+        "PVO_PLUS_EXPLOSION",
+        "MULTI_EPISODE_AMBIGUITY",
+        "PUBLICATION_LAG"
+      ]
+    }
+  ],
+  "excluded_or_non_attributable_hits": [
+    {
+      "chain_id": "excluded_2025-11-21_delayed_publication",
+      "attributable_episode_id": null,
+      "source": "Zaporizhzhia regional police",
+      "url": "https://zp.npu.gov.ua/news/zaporizhzhia-vnaslidok-rosiiskoho-aviaudaru-piatero-liudei-zahynuly-shche-troie-poraneni-na-mistsi-vluchannia-pratsiuiut-politseiski",
+      "publication_datetime": "2025-11-21T01:10:00+02:00",
+      "explicit_event_datetime": "2025-11-20T22:10:00+02:00",
+      "exact_excerpt": "О 22:10 росіяни скинули авіабомбу ... на обласний центр.",
+      "reason_codes": [
+        "PUBLICATION_LAG"
+      ],
+      "disposition": "Excluded from all 2025-11-21 Slice 0 episodes; event belongs to the previous local date."
+    },
+    {
+      "chain_id": "excluded_2026-03-21_pvo_only_national",
+      "attributable_episode_id": null,
+      "source": "Air Force indexed Telegram / national air-defence summary",
+      "url": "https://t.me/s/kpszsu?before=58472",
+      "publication_datetime": "2026-03-21",
+      "explicit_event_datetime": null,
+      "exact_excerpt": "Overnight air-defence summary reported intercepted Shahed/Herbera UAVs.",
+      "reason_codes": [
+        "PVO_ONLY",
+        "NO_CITY_SPECIFIC_EVENT"
+      ],
+      "disposition": "Discovery context only; not explosion evidence and not assigned to an episode."
+    }
+  ],
+  "positive_control_recall": {
+    "known_positive_controls": 16,
+    "independently_rediscovered": 12,
+    "independently_rediscovered_rate_pct": 75,
+    "artifact_assisted_only": 4,
+    "missed_by_independent_new_discovery": [
+      "5a7d64e4d58b240825d0c954",
+      "1e434d0fa5abfd518ad07d1e",
+      "7c008970817e8d13ae402670",
+      "7a45b4c6cd4f18358e063002"
+    ],
+    "unrecovered_even_after_artifact_assist": [],
+    "records": [
+      {
+        "episode_id": "41f41f98fef80130dff07317",
+        "date": "2025-11-22",
+        "independently_rediscovered": true,
+        "found_only_because_existing_artifact_pointed_to_source": false,
+        "unrecovered_after_artifact_assist": false,
+        "source_channel": "Укрінформ / Запорізька ОВА",
+        "search_pattern": "Запоріжжя 2025-11-22 + date-specific combinations from direct explosion / strike-impact / PVO / weapon-context families",
+        "target_episode_correct": true,
+        "verdict": "confirmed_strict",
+        "failure_mode_if_not_independent": null
+      },
+      {
+        "episode_id": "6e6afea5cad3ced8422d0ff8",
+        "date": "2025-05-23",
+        "independently_rediscovered": true,
+        "found_only_because_existing_artifact_pointed_to_source": false,
+        "unrecovered_after_artifact_assist": false,
+        "source_channel": "Укрінформ / Запорізька ОВА",
+        "search_pattern": "Запоріжжя 2025-05-23 + date-specific combinations from direct explosion / strike-impact / PVO / weapon-context families",
+        "target_episode_correct": true,
+        "verdict": "confirmed_strict",
+        "failure_mode_if_not_independent": null
+      },
+      {
+        "episode_id": "eb29ccba021617db3b0e8bbc",
+        "date": "2025-09-15",
+        "independently_rediscovered": true,
+        "found_only_because_existing_artifact_pointed_to_source": false,
+        "unrecovered_after_artifact_assist": false,
+        "source_channel": "Укрінформ",
+        "search_pattern": "Запоріжжя 2025-09-15 + date-specific combinations from direct explosion / strike-impact / PVO / weapon-context families",
+        "target_episode_correct": true,
+        "verdict": "confirmed_strict",
+        "failure_mode_if_not_independent": null
+      },
+      {
+        "episode_id": "19f123f154ffb68f06d0296e",
+        "date": "2025-10-08",
+        "independently_rediscovered": true,
+        "found_only_because_existing_artifact_pointed_to_source": false,
+        "unrecovered_after_artifact_assist": false,
+        "source_channel": "Укрінформ, mirrored by UKR.NET",
+        "search_pattern": "Запоріжжя 2025-10-08 + date-specific combinations from direct explosion / strike-impact / PVO / weapon-context families",
+        "target_episode_correct": true,
+        "verdict": "confirmed_strict",
+        "failure_mode_if_not_independent": null
+      },
+      {
+        "episode_id": "8534686ad8552aef1dd5a009",
+        "date": "2025-11-15",
+        "independently_rediscovered": true,
+        "found_only_because_existing_artifact_pointed_to_source": false,
+        "unrecovered_after_artifact_assist": false,
+        "source_channel": "Укрінформ, mirrored by UKR.NET",
+        "search_pattern": "Запоріжжя 2025-11-15 + date-specific combinations from direct explosion / strike-impact / PVO / weapon-context families",
+        "target_episode_correct": true,
+        "verdict": "confirmed_strict",
+        "failure_mode_if_not_independent": null
+      },
+      {
+        "episode_id": "03eb23a34f4367f90dbee592",
+        "date": "2025-11-24",
+        "independently_rediscovered": true,
+        "found_only_because_existing_artifact_pointed_to_source": false,
+        "unrecovered_after_artifact_assist": false,
+        "source_channel": "Укрінформ",
+        "search_pattern": "Запоріжжя 2025-11-24 + date-specific combinations from direct explosion / strike-impact / PVO / weapon-context families",
+        "target_episode_correct": true,
+        "verdict": "confirmed_strict",
+        "failure_mode_if_not_independent": null
+      },
+      {
+        "episode_id": "ced9e05a99318132ec47d0a0",
+        "date": "2025-12-02",
+        "independently_rediscovered": true,
+        "found_only_because_existing_artifact_pointed_to_source": false,
+        "unrecovered_after_artifact_assist": false,
+        "source_channel": "Укрінформ",
+        "search_pattern": "Запоріжжя 2025-12-02 + date-specific combinations from direct explosion / strike-impact / PVO / weapon-context families",
+        "target_episode_correct": true,
+        "verdict": "confirmed_strict",
+        "failure_mode_if_not_independent": null
+      },
+      {
+        "episode_id": "5a7d64e4d58b240825d0c954",
+        "date": "2025-12-16",
+        "independently_rediscovered": false,
+        "found_only_because_existing_artifact_pointed_to_source": true,
+        "unrecovered_after_artifact_assist": false,
+        "source_channel": "Укрінформ / Запорізька ОВА",
+        "search_pattern": "Запоріжжя 2025-12-16 + date-specific combinations from direct explosion / strike-impact / PVO / weapon-context families",
+        "target_episode_correct": true,
+        "verdict": "confirmed_strict",
+        "failure_mode_if_not_independent": "Same-day search ranked the morning attack above the late 21:28-23:46 episode; the late Ukrinform/PVO item did not surface until the old source pointer was used."
+      },
+      {
+        "episode_id": "6393c001ec4d0f8dfce54b51",
+        "date": "2026-01-21",
+        "independently_rediscovered": true,
+        "found_only_because_existing_artifact_pointed_to_source": false,
+        "unrecovered_after_artifact_assist": false,
+        "source_channel": "Укрінформ",
+        "search_pattern": "Запоріжжя 2026-01-21 + date-specific combinations from direct explosion / strike-impact / PVO / weapon-context families",
+        "target_episode_correct": true,
+        "verdict": "confirmed_strict",
+        "failure_mode_if_not_independent": null
+      },
+      {
+        "episode_id": "0edc1d73c3a86e149371bfbf",
+        "date": "2026-03-12",
+        "independently_rediscovered": true,
+        "found_only_because_existing_artifact_pointed_to_source": false,
+        "unrecovered_after_artifact_assist": false,
+        "source_channel": "Укрінформ",
+        "search_pattern": "Запоріжжя 2026-03-12 + date-specific combinations from direct explosion / strike-impact / PVO / weapon-context families",
+        "target_episode_correct": true,
+        "verdict": "confirmed_strict",
+        "failure_mode_if_not_independent": null
+      },
+      {
+        "episode_id": "404d55294a38c31848e7e093",
+        "date": "2026-04-09",
+        "independently_rediscovered": true,
+        "found_only_because_existing_artifact_pointed_to_source": false,
+        "unrecovered_after_artifact_assist": false,
+        "source_channel": "Укрінформ",
+        "search_pattern": "Запоріжжя 2026-04-09 + date-specific combinations from direct explosion / strike-impact / PVO / weapon-context families",
+        "target_episode_correct": true,
+        "verdict": "confirmed_strict",
+        "failure_mode_if_not_independent": null
+      },
+      {
+        "episode_id": "1e434d0fa5abfd518ad07d1e",
+        "date": "2026-08-28",
+        "independently_rediscovered": false,
+        "found_only_because_existing_artifact_pointed_to_source": true,
+        "unrecovered_after_artifact_assist": false,
+        "source_channel": "NV",
+        "search_pattern": "Запоріжжя 2026-08-28 + date-specific combinations from direct explosion / strike-impact / PVO / weapon-context families",
+        "target_episode_correct": true,
+        "verdict": "confirmed_strict",
+        "failure_mode_if_not_independent": "General search found the Epicentr attack but did not surface the ~07:30 event time needed to distinguish the 07:23 episode from the earlier 06:34 episode."
+      },
+      {
+        "episode_id": "eac6a8d131341fb46bd1eae2",
+        "date": "2026-09-08",
+        "independently_rediscovered": true,
+        "found_only_because_existing_artifact_pointed_to_source": false,
+        "unrecovered_after_artifact_assist": false,
+        "source_channel": "Укрінформ",
+        "search_pattern": "Запоріжжя 2026-09-08 + date-specific combinations from direct explosion / strike-impact / PVO / weapon-context families",
+        "target_episode_correct": true,
+        "verdict": "confirmed_strict",
+        "failure_mode_if_not_independent": null
+      },
+      {
+        "episode_id": "7c008970817e8d13ae402670",
+        "date": "2026-06-16",
+        "independently_rediscovered": false,
+        "found_only_because_existing_artifact_pointed_to_source": true,
+        "unrecovered_after_artifact_assist": false,
+        "source_channel": "Труха⚡️Запоріжжя Telegram",
+        "search_pattern": "Запоріжжя 2026-06-16 + date-specific combinations from direct explosion / strike-impact / PVO / weapon-context families",
+        "target_episode_correct": true,
+        "verdict": "confirmed_strict",
+        "failure_mode_if_not_independent": "General search surfaced the broader evening Shahed attack but not the 19:51/19:55/20:02 indexed Trukha messages needed to isolate the 19:42-21:04 episode."
+      },
+      {
+        "episode_id": "7a45b4c6cd4f18358e063002",
+        "date": "2026-03-21",
+        "independently_rediscovered": false,
+        "found_only_because_existing_artifact_pointed_to_source": true,
+        "unrecovered_after_artifact_assist": false,
+        "source_channel": "NV live chronology, citing Suspilne",
+        "search_pattern": "Запоріжжя 2026-03-21 + date-specific combinations from direct explosion / strike-impact / PVO / weapon-context families",
+        "target_episode_correct": true,
+        "verdict": "confirmed_strict",
+        "failure_mode_if_not_independent": "The date had multiple attacks; general search surfaced ~07:40 and ~16:00 events but not the 03:15 Suspilne/NV live item inside the 02:28-05:06 episode."
+      },
+      {
+        "episode_id": "5da4fc649a38d4796ebbcf94",
+        "date": "2026-09-07",
+        "independently_rediscovered": true,
+        "found_only_because_existing_artifact_pointed_to_source": false,
+        "unrecovered_after_artifact_assist": false,
+        "source_channel": "ЗаБор Запоріжжя Telegram",
+        "search_pattern": "Запоріжжя 2026-09-07 + date-specific combinations from direct explosion / strike-impact / PVO / weapon-context families",
+        "target_episode_correct": true,
+        "verdict": "confirmed_strict",
+        "failure_mode_if_not_independent": null
+      }
+    ]
+  },
+  "new_candidate_misses": {
+    "confirmed_strict": [
+      {
+        "episode_id": "07d38fd578a9d7ab7bbdc25d",
+        "date": "2025-11-22",
+        "alert_start": "2025-11-22T00:40:42Z",
+        "alert_end": "2025-11-22T01:42:29Z",
+        "current_canonical_status": "none",
+        "verdict": "confirmed_strict",
+        "reason_codes": [
+          "PVO_PLUS_EXPLOSION",
+          "CONTEMPORANEOUS_LIVE",
+          "EXPLICIT_DURING_ALERT"
+        ],
+        "evidence_chain_id": "new_07d38fd578a9d7ab7bbdc25d",
+        "note": "Research candidate only; not added to canonical."
+      }
+    ],
+    "confirmed_sensitivity": [],
+    "counts": {
+      "strict": 1,
+      "sensitivity": 0
+    }
+  },
+  "no_hit_universe": {
+    "episode_count": 135,
+    "episodes": [
+      {
+        "episode_id": "82fa4d18494c9148e08bfc2f",
+        "date": "2025-05-22",
+        "alert_start": "2025-05-21T21:24:28Z",
+        "alert_end": "2025-05-21T23:33:44Z"
+      },
+      {
+        "episode_id": "2a893785d7ecbd6ed43ad43d",
+        "date": "2025-05-22",
+        "alert_start": "2025-05-22T00:21:23Z",
+        "alert_end": "2025-05-22T01:18:31Z"
+      },
+      {
+        "episode_id": "b592d70e370f5eb55641c493",
+        "date": "2025-05-22",
+        "alert_start": "2025-05-22T02:51:02Z",
+        "alert_end": "2025-05-22T03:44:05Z"
+      },
+      {
+        "episode_id": "9b05d6a50ed7807c9b740227",
+        "date": "2025-05-22",
+        "alert_start": "2025-05-22T06:52:20Z",
+        "alert_end": "2025-05-22T07:19:26Z"
+      },
+      {
+        "episode_id": "04dcb6efa643b5a9957d9edc",
+        "date": "2025-05-22",
+        "alert_start": "2025-05-22T08:01:13Z",
+        "alert_end": "2025-05-22T08:39:09Z"
+      },
+      {
+        "episode_id": "2a0dcc013be63146bcfdd01c",
+        "date": "2025-05-22",
+        "alert_start": "2025-05-22T11:31:51Z",
+        "alert_end": "2025-05-22T12:40:32Z"
+      },
+      {
+        "episode_id": "c74fbdf1b82d7e1732c0156d",
+        "date": "2025-05-23",
+        "alert_start": "2025-05-23T06:23:22Z",
+        "alert_end": "2025-05-23T06:53:59Z"
+      },
+      {
+        "episode_id": "6252be3c10f593912f9181d5",
+        "date": "2025-05-23",
+        "alert_start": "2025-05-23T11:09:11Z",
+        "alert_end": "2025-05-23T11:43:21Z"
+      },
+      {
+        "episode_id": "a73272370b889a3b18f14e62",
+        "date": "2025-05-23",
+        "alert_start": "2025-05-23T12:35:51Z",
+        "alert_end": "2025-05-23T12:55:34Z"
+      },
+      {
+        "episode_id": "a30c0830e542c4848e8c0b43",
+        "date": "2025-05-24",
+        "alert_start": "2025-05-23T23:07:14Z",
+        "alert_end": "2025-05-24T00:24:31Z"
+      },
+      {
+        "episode_id": "70e8135f4683bdf07edad469",
+        "date": "2025-05-24",
+        "alert_start": "2025-05-24T01:26:57Z",
+        "alert_end": "2025-05-24T02:09:42Z"
+      },
+      {
+        "episode_id": "7dc1af50893c323a558a4938",
+        "date": "2025-05-24",
+        "alert_start": "2025-05-24T16:51:35Z",
+        "alert_end": "2025-05-25T01:40:54Z"
+      },
+      {
+        "episode_id": "5e84185302388262d2b7f94d",
+        "date": "2025-09-13",
+        "alert_start": "2025-09-13T19:40:25Z",
+        "alert_end": "2025-09-13T21:09:08Z"
+      },
+      {
+        "episode_id": "e98335051024030cb4509d54",
+        "date": "2025-09-14",
+        "alert_start": "2025-09-13T22:23:05Z",
+        "alert_end": "2025-09-13T22:42:58Z"
+      },
+      {
+        "episode_id": "21591d14fceac40aa05b4ed9",
+        "date": "2025-09-14",
+        "alert_start": "2025-09-14T06:11:58Z",
+        "alert_end": "2025-09-14T06:30:19Z"
+      },
+      {
+        "episode_id": "e3962be99546b5a2cc1b486d",
+        "date": "2025-09-14",
+        "alert_start": "2025-09-14T07:33:24Z",
+        "alert_end": "2025-09-14T08:28:50Z"
+      },
+      {
+        "episode_id": "c062865b94287ff038b21aee",
+        "date": "2025-09-14",
+        "alert_start": "2025-09-14T09:09:37Z",
+        "alert_end": "2025-09-14T10:06:43Z"
+      },
+      {
+        "episode_id": "c8282e711bfec7196e70cbd0",
+        "date": "2025-09-14",
+        "alert_start": "2025-09-14T10:34:04Z",
+        "alert_end": "2025-09-14T10:40:43Z"
+      },
+      {
+        "episode_id": "39814d7eb658217adae24bd9",
+        "date": "2025-09-15",
+        "alert_start": "2025-09-14T21:16:26Z",
+        "alert_end": "2025-09-14T22:47:30Z"
+      },
+      {
+        "episode_id": "9ac90852a1163b8d94e497f0",
+        "date": "2025-09-15",
+        "alert_start": "2025-09-15T02:12:44Z",
+        "alert_end": "2025-09-15T03:54:20Z"
+      },
+      {
+        "episode_id": "9f79a5661ceb17a852e72a78",
+        "date": "2025-09-16",
+        "alert_start": "2025-09-16T14:44:17Z",
+        "alert_end": "2025-09-16T16:03:43Z"
+      },
+      {
+        "episode_id": "08a32c59bc55483053e24b33",
+        "date": "2025-09-16",
+        "alert_start": "2025-09-16T18:04:19Z",
+        "alert_end": "2025-09-16T18:37:31Z"
+      },
+      {
+        "episode_id": "9f0adec7ff222f22c5fbd64f",
+        "date": "2025-09-16",
+        "alert_start": "2025-09-16T19:37:09Z",
+        "alert_end": "2025-09-16T23:21:10Z"
+      },
+      {
+        "episode_id": "d1df7db7433d4c331600e80c",
+        "date": "2025-10-06",
+        "alert_start": "2025-10-06T19:53:21Z",
+        "alert_end": "2025-10-06T22:34:03Z"
+      },
+      {
+        "episode_id": "67be27878c8b91bf40443755",
+        "date": "2025-10-07",
+        "alert_start": "2025-10-07T05:33:59Z",
+        "alert_end": "2025-10-07T06:14:52Z"
+      },
+      {
+        "episode_id": "d489eedc98bd8b9478f129c0",
+        "date": "2025-10-07",
+        "alert_start": "2025-10-07T06:56:23Z",
+        "alert_end": "2025-10-07T07:29:11Z"
+      },
+      {
+        "episode_id": "34910179f6163e0a2ce863d6",
+        "date": "2025-10-07",
+        "alert_start": "2025-10-07T19:34:59Z",
+        "alert_end": "2025-10-07T23:23:03Z"
+      },
+      {
+        "episode_id": "d098f5f0986d22bafe0d5928",
+        "date": "2025-10-08",
+        "alert_start": "2025-10-08T14:32:03Z",
+        "alert_end": "2025-10-08T15:24:33Z"
+      },
+      {
+        "episode_id": "25082656c673ccd89c87acea",
+        "date": "2025-10-09",
+        "alert_start": "2025-10-09T12:48:23Z",
+        "alert_end": "2025-10-09T13:16:18Z"
+      },
+      {
+        "episode_id": "aee4c7f739c8ccac87ec1412",
+        "date": "2025-10-09",
+        "alert_start": "2025-10-09T14:27:42Z",
+        "alert_end": "2025-10-09T15:14:24Z"
+      },
+      {
+        "episode_id": "3e075c1e873c1d3651660199",
+        "date": "2025-10-09",
+        "alert_start": "2025-10-09T15:15:46Z",
+        "alert_end": "2025-10-09T15:35:55Z"
+      },
+      {
+        "episode_id": "50d8e850d366aa2b6b4e9085",
+        "date": "2025-11-13",
+        "alert_start": "2025-11-13T21:03:35Z",
+        "alert_end": "2025-11-14T03:21:26Z"
+      },
+      {
+        "episode_id": "1b211d9eed4419e9d70b9848",
+        "date": "2025-11-14",
+        "alert_start": "2025-11-14T05:01:16Z",
+        "alert_end": "2025-11-14T05:26:41Z"
+      },
+      {
+        "episode_id": "1738051efb5d6ac5ed26d178",
+        "date": "2025-11-14",
+        "alert_start": "2025-11-14T08:08:54Z",
+        "alert_end": "2025-11-14T09:17:15Z"
+      },
+      {
+        "episode_id": "5cf5840757a27e96dff510fb",
+        "date": "2025-11-14",
+        "alert_start": "2025-11-14T11:30:49Z",
+        "alert_end": "2025-11-14T12:04:59Z"
+      },
+      {
+        "episode_id": "e827132c3180d7229d486e6f",
+        "date": "2025-11-14",
+        "alert_start": "2025-11-14T12:53:22Z",
+        "alert_end": "2025-11-14T13:26:20Z"
+      },
+      {
+        "episode_id": "86670e36015ec1c2badcda19",
+        "date": "2025-11-14",
+        "alert_start": "2025-11-14T18:37:21Z",
+        "alert_end": "2025-11-14T18:54:40Z"
+      },
+      {
+        "episode_id": "a32974e3056da5a80f30d9b7",
+        "date": "2025-11-15",
+        "alert_start": "2025-11-15T07:40:52Z",
+        "alert_end": "2025-11-15T07:59:18Z"
+      },
+      {
+        "episode_id": "5d0cb79833130aafc55619d0",
+        "date": "2025-11-15",
+        "alert_start": "2025-11-15T08:34:21Z",
+        "alert_end": "2025-11-15T09:15:53Z"
+      },
+      {
+        "episode_id": "6888840566d0ca531de3cdb1",
+        "date": "2025-11-15",
+        "alert_start": "2025-11-15T12:51:27Z",
+        "alert_end": "2025-11-15T13:05:52Z"
+      },
+      {
+        "episode_id": "94037a6ae891c1e54e799fc2",
+        "date": "2025-11-15",
+        "alert_start": "2025-11-15T19:00:31Z",
+        "alert_end": "2025-11-15T19:36:23Z"
+      },
+      {
+        "episode_id": "4b8fdc538eb64d4e79183b1d",
+        "date": "2025-11-15",
+        "alert_start": "2025-11-15T21:28:33Z",
+        "alert_end": "2025-11-15T21:49:36Z"
+      },
+      {
+        "episode_id": "b0192d4d0fd8085eeafa8049",
+        "date": "2025-11-16",
+        "alert_start": "2025-11-16T00:48:05Z",
+        "alert_end": "2025-11-16T01:11:40Z"
+      },
+      {
+        "episode_id": "91630f5997d7fecf3e7be46f",
+        "date": "2025-11-16",
+        "alert_start": "2025-11-16T01:22:00Z",
+        "alert_end": "2025-11-16T03:33:58Z"
+      },
+      {
+        "episode_id": "6439f5d99d7e8dc1f10f88ee",
+        "date": "2025-11-16",
+        "alert_start": "2025-11-16T14:40:27Z",
+        "alert_end": "2025-11-16T15:35:50Z"
+      },
+      {
+        "episode_id": "a7b2d36f7a5b8811c8ab4119",
+        "date": "2025-11-21",
+        "alert_start": "2025-11-21T15:54:18Z",
+        "alert_end": "2025-11-21T16:45:24Z"
+      },
+      {
+        "episode_id": "4dc5bc6e711aaf28f434d839",
+        "date": "2025-11-21",
+        "alert_start": "2025-11-21T19:30:58Z",
+        "alert_end": "2025-11-21T21:38:40Z"
+      },
+      {
+        "episode_id": "0c7c4e13840568eb18a2c358",
+        "date": "2025-11-22",
+        "alert_start": "2025-11-22T06:43:45Z",
+        "alert_end": "2025-11-22T07:27:38Z"
+      },
+      {
+        "episode_id": "aa4db20dedd8b7bc371c9397",
+        "date": "2025-11-23",
+        "alert_start": "2025-11-23T02:22:57Z",
+        "alert_end": "2025-11-23T05:01:28Z"
+      },
+      {
+        "episode_id": "4e941e298be9460c48f07f00",
+        "date": "2025-11-23",
+        "alert_start": "2025-11-23T07:03:43Z",
+        "alert_end": "2025-11-23T08:09:41Z"
+      },
+      {
+        "episode_id": "22e31f88d369afdd93212f1f",
+        "date": "2025-11-23",
+        "alert_start": "2025-11-23T13:38:26Z",
+        "alert_end": "2025-11-23T14:39:38Z"
+      },
+      {
+        "episode_id": "d5db49ee45c5871f80a5b245",
+        "date": "2025-11-23",
+        "alert_start": "2025-11-23T15:02:18Z",
+        "alert_end": "2025-11-23T15:23:45Z"
+      },
+      {
+        "episode_id": "93d76bb46dcfc54a114ba20a",
+        "date": "2025-11-23",
+        "alert_start": "2025-11-23T18:38:06Z",
+        "alert_end": "2025-11-23T19:56:33Z"
+      },
+      {
+        "episode_id": "c65a82b56e8e0cee87f5c719",
+        "date": "2025-11-23",
+        "alert_start": "2025-11-23T21:23:09Z",
+        "alert_end": "2025-11-23T23:55:24Z"
+      },
+      {
+        "episode_id": "e12bc9716376707f79e505d6",
+        "date": "2025-11-24",
+        "alert_start": "2025-11-24T19:19:18Z",
+        "alert_end": "2025-11-24T19:43:27Z"
+      },
+      {
+        "episode_id": "8e63c6889372938301a6fe49",
+        "date": "2025-11-24",
+        "alert_start": "2025-11-24T20:01:25Z",
+        "alert_end": "2025-11-25T05:29:38Z"
+      },
+      {
+        "episode_id": "f76353bbd92f74e0abb9b5f7",
+        "date": "2025-11-25",
+        "alert_start": "2025-11-25T10:37:42Z",
+        "alert_end": "2025-11-25T13:36:01Z"
+      },
+      {
+        "episode_id": "0910ce2087fe42193ae34c03",
+        "date": "2025-12-01",
+        "alert_start": "2025-11-30T23:18:53Z",
+        "alert_end": "2025-11-30T23:57:50Z"
+      },
+      {
+        "episode_id": "7430371bfb8f0de693b0f197",
+        "date": "2025-12-01",
+        "alert_start": "2025-12-01T08:08:13Z",
+        "alert_end": "2025-12-01T09:09:12Z"
+      },
+      {
+        "episode_id": "65c5d7c6637e7e2449dc746c",
+        "date": "2025-12-02",
+        "alert_start": "2025-12-02T14:21:18Z",
+        "alert_end": "2025-12-02T14:21:33Z"
+      },
+      {
+        "episode_id": "5b11cebfb7659f0658ecd4c8",
+        "date": "2025-12-02",
+        "alert_start": "2025-12-02T17:35:46Z",
+        "alert_end": "2025-12-02T18:21:00Z"
+      },
+      {
+        "episode_id": "1cbb1d48330a952d73209f37",
+        "date": "2025-12-03",
+        "alert_start": "2025-12-02T22:11:29Z",
+        "alert_end": "2025-12-02T22:50:00Z"
+      },
+      {
+        "episode_id": "de7e23522b7babe123874bb0",
+        "date": "2025-12-03",
+        "alert_start": "2025-12-03T09:27:24Z",
+        "alert_end": "2025-12-03T10:12:33Z"
+      },
+      {
+        "episode_id": "997692689348872c95d1207f",
+        "date": "2025-12-03",
+        "alert_start": "2025-12-03T15:41:38Z",
+        "alert_end": "2025-12-03T16:09:15Z"
+      },
+      {
+        "episode_id": "ae98133a453b0e2f9c83dc69",
+        "date": "2025-12-03",
+        "alert_start": "2025-12-03T17:08:04Z",
+        "alert_end": "2025-12-03T19:13:53Z"
+      },
+      {
+        "episode_id": "39e2fa8da6abfa2aaad2edbc",
+        "date": "2025-12-15",
+        "alert_start": "2025-12-15T10:37:26Z",
+        "alert_end": "2025-12-15T10:48:12Z"
+      },
+      {
+        "episode_id": "6f584faf22e506f012b178cd",
+        "date": "2025-12-15",
+        "alert_start": "2025-12-15T13:03:58Z",
+        "alert_end": "2025-12-15T13:43:17Z"
+      },
+      {
+        "episode_id": "483d4aee7f1dad2a0e07e3b9",
+        "date": "2025-12-16",
+        "alert_start": "2025-12-15T23:12:02Z",
+        "alert_end": "2025-12-16T01:31:02Z"
+      },
+      {
+        "episode_id": "648231795de8332b342c4d8b",
+        "date": "2025-12-16",
+        "alert_start": "2025-12-16T05:35:55Z",
+        "alert_end": "2025-12-16T06:18:38Z"
+      },
+      {
+        "episode_id": "b05e8a61b421a1caf0bf253b",
+        "date": "2025-12-16",
+        "alert_start": "2025-12-16T08:12:25Z",
+        "alert_end": "2025-12-16T09:30:31Z"
+      },
+      {
+        "episode_id": "4f95a8927b24d203504de09b",
+        "date": "2025-12-17",
+        "alert_start": "2025-12-17T04:06:57Z",
+        "alert_end": "2025-12-17T06:16:24Z"
+      },
+      {
+        "episode_id": "c43a3cc5caa8e4e8795c4b45",
+        "date": "2025-12-17",
+        "alert_start": "2025-12-17T16:43:25Z",
+        "alert_end": "2025-12-17T17:08:24Z"
+      },
+      {
+        "episode_id": "4f1acc102b88ca92f5aa8bbd",
+        "date": "2026-01-20",
+        "alert_start": "2026-01-20T07:21:16Z",
+        "alert_end": "2026-01-20T12:23:35Z"
+      },
+      {
+        "episode_id": "e484e954aa9b0e2ae9c61e37",
+        "date": "2026-01-20",
+        "alert_start": "2026-01-20T12:45:37Z",
+        "alert_end": "2026-01-20T13:49:25Z"
+      },
+      {
+        "episode_id": "6871d178921352e6ab350e65",
+        "date": "2026-01-20",
+        "alert_start": "2026-01-20T16:33:09Z",
+        "alert_end": "2026-01-20T16:44:19Z"
+      },
+      {
+        "episode_id": "64867fdfc87ad6f4835ea664",
+        "date": "2026-01-20",
+        "alert_start": "2026-01-20T17:44:46Z",
+        "alert_end": "2026-01-20T18:13:05Z"
+      },
+      {
+        "episode_id": "4c9e1e3c3ab0927f33046b0a",
+        "date": "2026-01-20",
+        "alert_start": "2026-01-20T18:47:51Z",
+        "alert_end": "2026-01-20T19:18:52Z"
+      },
+      {
+        "episode_id": "987d000a8dcb01d5846f5e9d",
+        "date": "2026-01-20",
+        "alert_start": "2026-01-20T21:26:05Z",
+        "alert_end": "2026-01-20T21:52:09Z"
+      },
+      {
+        "episode_id": "19c858b550d86a15e4911595",
+        "date": "2026-01-21",
+        "alert_start": "2026-01-21T05:58:35Z",
+        "alert_end": "2026-01-21T06:55:46Z"
+      },
+      {
+        "episode_id": "3c0be26b070eef1d335ca449",
+        "date": "2026-01-21",
+        "alert_start": "2026-01-21T20:48:47Z",
+        "alert_end": "2026-01-21T21:33:23Z"
+      },
+      {
+        "episode_id": "ccdb3a15089c69f340caab3e",
+        "date": "2026-01-22",
+        "alert_start": "2026-01-22T02:13:29Z",
+        "alert_end": "2026-01-22T06:42:02Z"
+      },
+      {
+        "episode_id": "d06482300de94ff0c9b673d4",
+        "date": "2026-01-22",
+        "alert_start": "2026-01-22T08:23:38Z",
+        "alert_end": "2026-01-22T09:47:25Z"
+      },
+      {
+        "episode_id": "f21d79245d46f048527158a1",
+        "date": "2026-01-22",
+        "alert_start": "2026-01-22T09:50:01Z",
+        "alert_end": "2026-01-22T11:07:27Z"
+      },
+      {
+        "episode_id": "bfdc9c0fb11d3a8768d353a1",
+        "date": "2026-01-22",
+        "alert_start": "2026-01-22T11:35:01Z",
+        "alert_end": "2026-01-22T17:02:53Z"
+      },
+      {
+        "episode_id": "b9d0a533a850494d593c171a",
+        "date": "2026-01-22",
+        "alert_start": "2026-01-22T18:46:09Z",
+        "alert_end": "2026-01-23T04:20:15Z"
+      },
+      {
+        "episode_id": "7ab47c208af5d2b08e75297d",
+        "date": "2026-03-11",
+        "alert_start": "2026-03-10T22:41:28Z",
+        "alert_end": "2026-03-11T00:00:07Z"
+      },
+      {
+        "episode_id": "b7918fda6a0f4d53627d75da",
+        "date": "2026-03-11",
+        "alert_start": "2026-03-11T01:52:54Z",
+        "alert_end": "2026-03-11T03:47:25Z"
+      },
+      {
+        "episode_id": "8a102c6a0c9c30357daa6dd2",
+        "date": "2026-03-11",
+        "alert_start": "2026-03-11T09:05:54Z",
+        "alert_end": "2026-03-11T09:13:23Z"
+      },
+      {
+        "episode_id": "4aa2b1dd84cc144314894e77",
+        "date": "2026-03-11",
+        "alert_start": "2026-03-11T15:34:48Z",
+        "alert_end": "2026-03-11T15:53:26Z"
+      },
+      {
+        "episode_id": "879224e7d5c768fb1e06dfb3",
+        "date": "2026-03-11",
+        "alert_start": "2026-03-11T16:56:20Z",
+        "alert_end": "2026-03-11T17:53:05Z"
+      },
+      {
+        "episode_id": "b0764553c1d300d281bf4e5d",
+        "date": "2026-03-11",
+        "alert_start": "2026-03-11T18:24:03Z",
+        "alert_end": "2026-03-11T18:31:38Z"
+      },
+      {
+        "episode_id": "16f030ce4756b7ea9e4b74a1",
+        "date": "2026-03-11",
+        "alert_start": "2026-03-11T19:33:05Z",
+        "alert_end": "2026-03-11T21:23:17Z"
+      },
+      {
+        "episode_id": "877a118da9a12ef872938a40",
+        "date": "2026-03-12",
+        "alert_start": "2026-03-12T00:44:19Z",
+        "alert_end": "2026-03-12T01:24:54Z"
+      },
+      {
+        "episode_id": "6a9c0bb747f71567f3e021fd",
+        "date": "2026-03-12",
+        "alert_start": "2026-03-12T04:45:32Z",
+        "alert_end": "2026-03-12T06:37:49Z"
+      },
+      {
+        "episode_id": "608cf3a0a6db0c755f5a0a0e",
+        "date": "2026-03-12",
+        "alert_start": "2026-03-12T18:20:31Z",
+        "alert_end": "2026-03-12T19:01:16Z"
+      },
+      {
+        "episode_id": "7f1d056c521084390fe176b6",
+        "date": "2026-03-12",
+        "alert_start": "2026-03-12T19:02:21Z",
+        "alert_end": "2026-03-12T19:34:07Z"
+      },
+      {
+        "episode_id": "7355d0bf9a56180ae3b16517",
+        "date": "2026-03-12",
+        "alert_start": "2026-03-12T20:04:12Z",
+        "alert_end": "2026-03-12T22:49:11Z"
+      },
+      {
+        "episode_id": "3dcde950af5f492ecb7e7bf2",
+        "date": "2026-03-13",
+        "alert_start": "2026-03-12T22:59:25Z",
+        "alert_end": "2026-03-12T23:26:42Z"
+      },
+      {
+        "episode_id": "80bc84d288038afc5660a53b",
+        "date": "2026-03-13",
+        "alert_start": "2026-03-13T07:03:17Z",
+        "alert_end": "2026-03-13T07:28:05Z"
+      },
+      {
+        "episode_id": "c065ed0c94fb9e22b79fcbe2",
+        "date": "2026-03-13",
+        "alert_start": "2026-03-13T07:32:30Z",
+        "alert_end": "2026-03-13T11:51:13Z"
+      },
+      {
+        "episode_id": "2036761a5895051664126f94",
+        "date": "2026-03-13",
+        "alert_start": "2026-03-13T17:01:23Z",
+        "alert_end": "2026-03-13T17:34:48Z"
+      },
+      {
+        "episode_id": "221e243949fd2b8fd321b1cd",
+        "date": "2026-03-13",
+        "alert_start": "2026-03-13T19:25:34Z",
+        "alert_end": "2026-03-13T22:41:39Z"
+      },
+      {
+        "episode_id": "5e37cf453fccd8d107eaed81",
+        "date": "2026-03-20",
+        "alert_start": "2026-03-20T17:51:40Z",
+        "alert_end": "2026-03-20T22:33:37Z"
+      },
+      {
+        "episode_id": "d602f44fad3a56880a9289b1",
+        "date": "2026-03-21",
+        "alert_start": "2026-03-21T05:01:36Z",
+        "alert_end": "2026-03-21T05:26:46Z"
+      },
+      {
+        "episode_id": "eaf962bd134afbafbc0294e8",
+        "date": "2026-03-21",
+        "alert_start": "2026-03-21T08:48:00Z",
+        "alert_end": "2026-03-21T09:48:40Z"
+      },
+      {
+        "episode_id": "fd5871a55d8a1445c2e52c68",
+        "date": "2026-03-21",
+        "alert_start": "2026-03-21T18:01:02Z",
+        "alert_end": "2026-03-21T18:15:28Z"
+      },
+      {
+        "episode_id": "d76ce73a66145eca23357699",
+        "date": "2026-03-21",
+        "alert_start": "2026-03-21T18:40:01Z",
+        "alert_end": "2026-03-21T21:35:00Z"
+      },
+      {
+        "episode_id": "e245bdb186dabe8aa6b00cb0",
+        "date": "2026-04-08",
+        "alert_start": "2026-04-08T19:50:02Z",
+        "alert_end": "2026-04-08T21:40:54Z"
+      },
+      {
+        "episode_id": "6fbe1c4c79d2e5d92000da8b",
+        "date": "2026-04-09",
+        "alert_start": "2026-04-08T22:05:36Z",
+        "alert_end": "2026-04-08T23:04:53Z"
+      },
+      {
+        "episode_id": "c274ed848e517f388d2dfe11",
+        "date": "2026-04-09",
+        "alert_start": "2026-04-08T23:33:48Z",
+        "alert_end": "2026-04-09T00:58:37Z"
+      },
+      {
+        "episode_id": "a0fbd54a685f9a3092e1b0d0",
+        "date": "2026-04-09",
+        "alert_start": "2026-04-09T05:58:45Z",
+        "alert_end": "2026-04-09T10:24:07Z"
+      },
+      {
+        "episode_id": "95d25e02ec4a6cc6c4f1e13c",
+        "date": "2026-04-09",
+        "alert_start": "2026-04-09T12:56:31Z",
+        "alert_end": "2026-04-09T15:58:08Z"
+      },
+      {
+        "episode_id": "6b0d929c41703108133cf3f8",
+        "date": "2026-04-09",
+        "alert_start": "2026-04-09T19:11:03Z",
+        "alert_end": "2026-04-09T23:09:12Z"
+      },
+      {
+        "episode_id": "834b9fdb45e99a950b7b9c65",
+        "date": "2026-06-15",
+        "alert_start": "2026-06-15T16:34:58Z",
+        "alert_end": "2026-06-15T21:21:15Z"
+      },
+      {
+        "episode_id": "398cb589a5ad1e70e079b17b",
+        "date": "2026-06-16",
+        "alert_start": "2026-06-15T22:25:58Z",
+        "alert_end": "2026-06-16T09:44:19Z"
+      },
+      {
+        "episode_id": "c72a7385c1c092122988b6fd",
+        "date": "2026-06-16",
+        "alert_start": "2026-06-16T11:09:11Z",
+        "alert_end": "2026-06-16T12:09:57Z"
+      },
+      {
+        "episode_id": "52cf015ceb99f6edae1a1f97",
+        "date": "2026-06-16",
+        "alert_start": "2026-06-16T14:28:31Z",
+        "alert_end": "2026-06-16T15:29:50Z"
+      },
+      {
+        "episode_id": "b9a073c6fb5e4bd51cba993d",
+        "date": "2026-06-16",
+        "alert_start": "2026-06-16T15:33:09Z",
+        "alert_end": "2026-06-16T16:35:43Z"
+      },
+      {
+        "episode_id": "b1565fe64d3434d1424826cd",
+        "date": "2026-08-28",
+        "alert_start": "2026-08-28T01:11:01Z",
+        "alert_end": "2026-08-28T01:20:15Z"
+      },
+      {
+        "episode_id": "461c518eecc614b3d4a8ef78",
+        "date": "2026-08-28",
+        "alert_start": "2026-08-28T03:34:01Z",
+        "alert_end": "2026-08-28T04:00:19Z"
+      },
+      {
+        "episode_id": "9d8b22eaba51c12cc1d1fda2",
+        "date": "2026-08-28",
+        "alert_start": "2026-08-28T09:43:42Z",
+        "alert_end": "2026-08-28T12:19:14Z"
+      },
+      {
+        "episode_id": "abc0e4e421bd4de5a755a59c",
+        "date": "2026-08-28",
+        "alert_start": "2026-08-28T15:28:18Z",
+        "alert_end": "2026-08-28T15:44:40Z"
+      },
+      {
+        "episode_id": "76b51bdb9b2bca6fa8829315",
+        "date": "2026-08-28",
+        "alert_start": "2026-08-28T20:18:04Z",
+        "alert_end": "2026-08-28T20:31:59Z"
+      },
+      {
+        "episode_id": "a566b6daecf3cc4740dfa1e6",
+        "date": "2026-08-28",
+        "alert_start": "2026-08-28T20:36:47Z",
+        "alert_end": "2026-08-28T20:51:41Z"
+      },
+      {
+        "episode_id": "6dbb1a64ab408e16bac897c3",
+        "date": "2026-09-07",
+        "alert_start": "2026-09-07T10:41:55Z",
+        "alert_end": "2026-09-07T13:04:33Z"
+      },
+      {
+        "episode_id": "0dd703369cd079679c0b5ef6",
+        "date": "2026-09-07",
+        "alert_start": "2026-09-07T15:20:51Z",
+        "alert_end": "2026-09-07T16:35:14Z"
+      },
+      {
+        "episode_id": "d4d21ab6353ce8c04af598f7",
+        "date": "2026-09-07",
+        "alert_start": "2026-09-07T17:29:08Z",
+        "alert_end": "2026-09-07T20:37:20Z"
+      },
+      {
+        "episode_id": "9cd220490218092ab02d9e07",
+        "date": "2026-09-08",
+        "alert_start": "2026-09-07T21:22:24Z",
+        "alert_end": "2026-09-07T21:37:58Z"
+      },
+      {
+        "episode_id": "a6f5e4175168801a431add39",
+        "date": "2026-09-08",
+        "alert_start": "2026-09-07T21:42:35Z",
+        "alert_end": "2026-09-07T22:11:25Z"
+      },
+      {
+        "episode_id": "8df56d26d6fd41e435354114",
+        "date": "2026-09-08",
+        "alert_start": "2026-09-07T23:56:56Z",
+        "alert_end": "2026-09-08T03:26:21Z"
+      },
+      {
+        "episode_id": "8c7c2028bdc7c3f0e8711654",
+        "date": "2026-09-08",
+        "alert_start": "2026-09-08T03:53:07Z",
+        "alert_end": "2026-09-08T04:16:25Z"
+      },
+      {
+        "episode_id": "ed3f58638bea1b27a43f1ccc",
+        "date": "2026-09-08",
+        "alert_start": "2026-09-08T05:03:25Z",
+        "alert_end": "2026-09-08T08:07:01Z"
+      },
+      {
+        "episode_id": "1b10bbe657e1bf1e964c087a",
+        "date": "2026-09-08",
+        "alert_start": "2026-09-08T08:34:52Z",
+        "alert_end": "2026-09-08T08:48:13Z"
+      },
+      {
+        "episode_id": "d55b6d7ceb695909de7d244d",
+        "date": "2026-09-08",
+        "alert_start": "2026-09-08T14:00:10Z",
+        "alert_end": "2026-09-08T16:07:36Z"
+      },
+      {
+        "episode_id": "03d32ac3644a08358083d542",
+        "date": "2026-09-08",
+        "alert_start": "2026-09-08T19:25:28Z",
+        "alert_end": "2026-09-08T21:31:08Z"
+      }
+    ]
+  },
+  "unresolved_cases": [
+    {
+      "episode_id": "70067c052eec48f162697391",
+      "date": "2025-09-15",
+      "verdict": "needs_review",
+      "reason_codes": [
+        "MULTI_EPISODE_AMBIGUITY",
+        "PUBLICATION_LAG"
+      ],
+      "note": "Exact-city explosion/PVO wording exists, but source wording does not prove the explosion occurred after the short target episode began."
+    }
+  ],
+  "failure_modes_remaining": [
+    {
+      "code": "DOMINANT_SAME_DAY_EVENT_BURYING_SECONDARY_EPISODE",
+      "affected_positive_controls": [
+        "5a7d64e4d58b240825d0c954",
+        "7a45b4c6cd4f18358e063002",
+        "1e434d0fa5abfd518ad07d1e"
+      ],
+      "mitigation_needed": "Per-episode hour/minute-window searches and source-site archive queries on multi-episode dates."
+    },
+    {
+      "code": "INDEXED_TELEGRAM_MESSAGE_RECALL",
+      "affected_positive_controls": [
+        "7c008970817e8d13ae402670"
+      ],
+      "mitigation_needed": "Systematic channel-targeted indexed Telegram searches around each alert window, especially Trukha/Suspilne/Fedorov and other locally validated feeds."
+    },
+    {
+      "code": "EVENT_TIME_NOT_SURFACED_WITH_ATTACK_ARTICLE",
+      "affected_positive_controls": [
+        "1e434d0fa5abfd518ad07d1e"
+      ],
+      "mitigation_needed": "When an attack is found but date has multiple alerts, force a second-stage search for explicit clock time/live chronology before assigning."
+    }
+  ],
+  "summary_counts": {
+    "slice_episodes_total": 171,
+    "dates": 35,
+    "source_hit_episodes": 36,
+    "no_source_hit_episodes": 135,
+    "confirmed_strict": 30,
+    "confirmed_sensitivity": 5,
+    "confirmed_negative": 0,
+    "needs_review": 1,
+    "no_source_hit": 135,
+    "known_positive_controls": 16,
+    "independently_rediscovered_controls": 12,
+    "new_strict_candidates": 1,
+    "new_sensitivity_candidates": 0
+  },
+  "pvo_channel_assessment": {
+    "independent_attributable_episode_hits": 4,
+    "rate_of_slice_episodes_pct": 2.34,
+    "new_strict_candidates_found": [
+      "07d38fd578a9d7ab7bbdc25d"
+    ],
+    "positive_controls_supported": [
+      "8534686ad8552aef1dd5a009",
+      "41f41f98fef80130dff07317",
+      "eac6a8d131341fb46bd1eae2"
+    ],
+    "raw_pvo_only_hits": "Retained as discovery context and excluded from strict unless paired with exact-city explosion/impact evidence and target-episode timing."
+  },
+  "verdict": "SLICE 0 DISCOVERY PIPELINE NEEDS HARDENING",
+  "acceptance_reason": "Independent positive-control recall is 12/16, below the desired 16/16. Four controls required old-source pointers to recover the target-episode evidence.",
+  "guardrails": {
+    "canonical_169_unchanged": true,
+    "known_16_not_written_to_production": true,
+    "strict_sensitivity_metric_unchanged": true,
+    "live_monitor_queue_state_unchanged_by_this_commit": true,
+    "live_monitor_code_unchanged_by_this_commit": true,
+    "dashboard_not_updated_by_this_commit": true,
+    "no_deploy": true,
+    "next_slice_started": false
+  }
+}
