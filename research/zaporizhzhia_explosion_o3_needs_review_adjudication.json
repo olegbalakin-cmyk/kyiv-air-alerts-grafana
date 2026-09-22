@@ -1,0 +1,113 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2026-09-22",
+  "repository": "olegbalakin-cmyk/kyiv-air-alerts-grafana",
+  "branch": "multicity-wip-2026-09-16",
+  "task": "O3 adjudication pass for the two needs_review episodes from manual review batch 1",
+  "parent_review_artifact": "research/zaporizhzhia_explosion_o3_manual_review_batch1.json",
+  "parent_review_commit": "793645016fa1fa81b6e6a704a0c5dfeb42ff7780",
+  "scope": {
+    "episodes_reviewed": 2,
+    "episode_ids": [
+      "64867fdfc87ad6f4835ea664",
+      "cdda5267905f8fd09929ca32"
+    ],
+    "canonical_data_modified": false,
+    "monitor_modified": false,
+    "dashboard_modified": false,
+    "grafana_modified": false,
+    "netlify_modified": false,
+    "production_modified": false,
+    "outside_episode_timing_batch_started": false
+  },
+  "methodology": {
+    "purpose": "Resolve only the two unresolved temporal-attribution cases from O3 manual review batch 1 using higher-resolution external chronology where available.",
+    "strict_rule": "A target episode can be promoted to confirmed_strict_miss only when exact-city military explosion/strike evidence can be tied to that concrete alert window by event timing or explicit during-alert wording. Publication timing alone is insufficient.",
+    "rejection_rule": "Reject the target episode when the candidate source is shown to describe an event that occurred before the target window, or when the source published inside/near the target window is demonstrably cumulative reporting of impacts already known before the target and no new impact can be tied to the target window.",
+    "timezone": "Europe/Kyiv"
+  },
+  "verdict_counts": {
+    "confirmed_strict_miss": 0,
+    "sensitivity_only": 0,
+    "rejected": 2,
+    "needs_review": 0
+  },
+  "records": [
+    {
+      "episode_id": "64867fdfc87ad6f4835ea664",
+      "date": "2026-01-20",
+      "target_alert_start_kyiv": "2026-01-20T19:44:46",
+      "target_alert_end_kyiv": "2026-01-20T20:13:05",
+      "prior_verdict": "needs_review",
+      "adjudicated_verdict": "rejected",
+      "decisive_evidence": [
+        {
+          "source": "Zaporizhzhia regional prosecutor chronology, relayed by Pershyi Zaporizkyi",
+          "url": "https://1news.zp.ua/rosijskyj-udar-po-zaporizhzhyu-pravoohoronczi-rozsliduyut-yak-voyennyj-zlochyn/",
+          "evidence": "The Zaporizhzhia regional prosecutor's office states that the Russian UAV attack on civilian and critical infrastructure in Zaporizhzhia occurred from 18:08 to 18:24 on 20 January 2026.",
+          "temporal_relation_to_target": "ends 80 minutes before target alert start"
+        },
+        {
+          "source": "24 Kanal contemporaneous chronology",
+          "url": "https://24tv.ua/zaporizhzhi-pratsyuye-ppo_n2992898",
+          "evidence": "At 18:03 a UAV was reported toward Zaporizhzhia, at 18:08 an attack UAV toward Shevchenkivskyi district, PVO was reported working at 18:17, and at 18:23 one attack UAV remained over Zaporizhzhia; the all-clear followed shortly afterward.",
+          "temporal_relation_to_target": "same documented attack sequence is centered around 18:08-18:24, not 19:44-20:13"
+        },
+        {
+          "source": "Zaporizhzhia regional police",
+          "url": "https://zp.npu.gov.ua/news/rosiiany-prodovzhuiut-atakuvaty-zaporizhzhia-bezpilotnykamy-zahynulo-vzhe-troie-liudei-na-mistsiakh-udariv-pratsiuiut-politseiski",
+          "publication_time_kyiv": "2026-01-20T20:17:00+02:00",
+          "evidence": "The police post describes the same Shahed attack, including a strike on private housing and another strike on critical infrastructure.",
+          "temporal_relation_to_target": "publication after target does not override the prosecutor-resolved event time"
+        }
+      ],
+      "rationale": "The previously unresolved 'another strike' on critical infrastructure is part of the same attack that the regional prosecutor time-bounded to 18:08-18:24. That attack ended well before the target alert began at 19:44:46. The 20:17 police publication therefore cannot be used as target-episode timing evidence.",
+      "failure_mode": "publication_time_false_match",
+      "strict_miss_added": false
+    },
+    {
+      "episode_id": "cdda5267905f8fd09929ca32",
+      "date": "2026-09-05",
+      "target_alert_start_kyiv": "2026-09-05T23:49:51",
+      "target_alert_end_kyiv": "2026-09-05T23:54:42",
+      "prior_verdict": "needs_review",
+      "adjudicated_verdict": "rejected",
+      "decisive_evidence": [
+        {
+          "source": "TV5 Zaporizhzhia",
+          "url": "https://tv5.zp.ua/rosiiani-masovano-atakyvali-dronami-zaporijjia-ie-poraneni-palaut-bydinki-foto/",
+          "evidence": "The outlet states that as of 23:19 on 5 September at least six people had already been injured in the Zaporizhzhia drone strikes and describes the residential/civilian impacts.",
+          "temporal_relation_to_target": "the six-injured impact set was already known about 31 minutes before target alert start"
+        },
+        {
+          "source": "ZPRZ.CITY",
+          "url": "https://zprz.city/news/view/rosiyani-masovano-atakuvali-dronami-zaporizhzhya-e-poraneni-palayut-budinki-foto",
+          "publication_time_kyiv": "2026-09-06T00:48:00+03:00",
+          "evidence": "Independent local recap likewise states that by 23:19 at least six people had been injured and that drones had hit residential and civilian sites in different parts of Zaporizhzhia.",
+          "temporal_relation_to_target": "confirms the relevant impacts pre-date the 23:49:51 target"
+        },
+        {
+          "source": "Radio Liberty",
+          "url": "https://www.radiosvoboda.org/a/news-zaporizhzhya-ataky-rf-postrazhdali/33847670.html",
+          "publication_time_kyiv": "2026-09-05T23:51:00+03:00",
+          "evidence": "The 23:51 article reports six injured and summarizes strikes on private/residential buildings and a non-residential administrative site while saying the UAV/KAB threat had already continued for more than two hours.",
+          "temporal_relation_to_target": "secondary cumulative publication inside target, but its reported impact set was already established by 23:19"
+        }
+      ],
+      "rationale": "The 23:51 Radio Liberty timestamp initially made the five-minute target episode look plausible, but higher-resolution chronology shows that the six-injured impact set and described residential/civilian strikes were already reported by 23:19. No reviewed source identifies a new Zaporizhzhia impact between 23:49:51 and 23:54:42. The Radio Liberty item is therefore a cumulative publication-time match, not evidence of a target-window explosion.",
+      "failure_mode": "publication_time_false_match",
+      "strict_miss_added": false
+    }
+  ],
+  "adjudication_summary": {
+    "prior_needs_review": 2,
+    "resolved_to_rejected": 2,
+    "remaining_needs_review": 0,
+    "new_confirmed_strict_misses": 0,
+    "cumulative_known_confirmed_strict_misses": 16,
+    "canonical_denominator": 2365,
+    "canonical_strict_numerator": 169,
+    "canonical_strict_numerator_changed": false,
+    "interpretation": "Both unresolved O3 candidates were false target-episode matches driven by publication timing during or shortly after a later alert. The adjudication strengthens the rule that publication time must never substitute for resolved event time on multi-episode dates."
+  }
+}
