@@ -94,7 +94,7 @@ for _key, _row in _BASELINE_CITIES_AT_IMPORT.items():
     CITY_CONFIG[_key] = {"label": _label, "aliases": _aliases}
 
 
-EXPLOSION_TERMS = (
+DISCOVERY_TERMS = (
     "вибух",
     "пролунав",
     "пролунали",
@@ -105,22 +105,34 @@ EXPLOSION_TERMS = (
     "звуки вибух",
     "серія вибух",
     "ппо",
+    "удар",
+    "влуч",
+    "приліт",
 )
+# Backward-compatible alias for discovery/excerpt helpers. This is deliberately
+# broader than strict explosion evidence.
+EXPLOSION_TERMS = DISCOVERY_TERMS
 AIR_CONTEXT_TERMS = (
     "повітрян",
     "тривог",
     "бпла",
     "безпілот",
     "дрон",
+    "shahed",
     "шахед",
     "ракет",
+    "каб",
+    "авіабомб",
+    "авіаційн",
+    "баліст",
+    "крилат",
+    "іскандер",
+    "бандерол",
+    "молні",
+    "fpv",
     "ппо",
-    "ворож",
-)
-EXPLICIT_DURING_TERMS = (
-    "під час повітряної тривоги",
-    "під час тривоги",
-    "у період повітряної тривоги",
+    "повітряні сили",
+    "швидкісн",
 )
 AUTO_MATCH_END_GRACE_MINUTES = 30
 MATCH_REPRESENTATION_TOLERANCE_SECONDS = 90.0
@@ -488,14 +500,157 @@ def build_google_news_candidate(
     }, True, True
 
 
-def air_context(text: str) -> bool:
-    low = " ".join((text or "").casefold().split())
+def normalize_evidence_text(value: str | None) -> str:
+    return " ".join((value or "").casefold().replace("’", "'").split())
+
+
+def strip_publisher_branding(value: str | None, publisher: str | None) -> str:
+    text = " ".join((value or "").split()).strip()
+    brand = " ".join((publisher or "").split()).strip()
+    if not text or not brand:
+        return text
+    return re.sub(
+        rf"\s*(?:[-–—|]\s*)?{re.escape(brand)}\s*$",
+        "",
+        text,
+        flags=re.IGNORECASE,
+    ).strip()
+
+
+def classification_text(row: dict) -> str:
+    publisher = str(row.get("publisher") or "")
+    parts = [
+        strip_publisher_branding(row.get("title"), publisher),
+        strip_publisher_branding(row.get("snippet"), publisher),
+    ]
+    if row.get("discovery_basis") == "publisher_fulltext" and row.get("matched_text_excerpt"):
+        excerpt = str(row.get("matched_text_excerpt") or "")
+        if publisher:
+            excerpt = re.sub(re.escape(publisher), " ", excerpt, flags=re.IGNORECASE)
+        parts.append(" ".join(excerpt.split()))
+    return " ".join(part for part in parts if part).strip()
+
+
+def classification_segments(row: dict) -> list[str]:
+    text = classification_text(row)
+    if not text:
+        return []
+    return [
+        " ".join(part.split())
+        for part in re.split(r"(?<=[.!?;])\s+|\n+", text)
+        if part and part.strip()
+    ]
+
+
+def controlled_blast_signal(text: str) -> bool:
+    low = normalize_evidence_text(text)
+    return bool(
+        re.search(
+            r"(?:кар'єр\w*|вибухов\w*\s+робот\w*|планов\w*.{0,20}вибух\w*|підривн\w*\s+робот\w*)",
+            low,
+        )
+    )
+
+
+def strict_explosion_signal(text: str) -> bool:
+    low = normalize_evidence_text(text)
+    if not low:
+        return False
+    if controlled_blast_signal(low) and not air_military_context(low):
+        return False
+    if re.search(r"\bвибух\w*", low):
+        return True
+    if re.search(r"\b(?:влуч\w*|поціл\w*|приліт\w*|вдарил\w*)", low):
+        return True
+    if re.search(r"\b(?:завдал\w*|нанес\w*)\b.{0,50}\bудар\w*", low):
+        return True
+    if re.search(r"\bудар(?:у|и|ів|ом|ами)?\b", low):
+        threat_only = bool(re.search(r"\bзагроз\w*.{0,30}\bудар(?:у|и|ів|ом|ами)?\b", low))
+        if not threat_only:
+            return True
+    return False
+
+
+def air_military_context(text: str) -> bool:
+    low = normalize_evidence_text(text)
     return any(term in low for term in AIR_CONTEXT_TERMS)
 
 
+def air_context(text: str) -> bool:
+    return air_military_context(text)
+
+
+def explicit_alert_relation(text: str) -> bool:
+    low = normalize_evidence_text(text)
+    patterns = (
+        r"\bпід\s+час\s+(?:повітрян\w*\s+)?тривог\w*",
+        r"\bу\s+період\s+(?:повітрян\w*\s+)?тривог\w*",
+        r"\bна\s+тлі\s+(?:активн\w*\s+)?повітрян\w*\s+тривог\w*",
+        r"\bколи\s+(?:ще\s+)?тривал\w*\s+(?:повітрян\w*\s+)?тривог\w*",
+        r"\bпоки\s+тривал\w*\s+(?:повітрян\w*\s+)?тривог\w*",
+        r"\bтривог\w*\s+(?:ще\s+)?тривал\w*",
+        r"\bпісля\s+(?:початку|оголошення)\s+(?:повітрян\w*\s+)?тривог\w*",
+    )
+    return any(re.search(pattern, low) for pattern in patterns)
+
+
 def explicit_during_alert(text: str) -> bool:
-    low = " ".join((text or "").casefold().split())
-    return any(term in low for term in EXPLICIT_DURING_TERMS)
+    return explicit_alert_relation(text)
+
+
+def contemporaneous_live_wording(text: str) -> bool:
+    low = normalize_evidence_text(text)
+    return bool(
+        re.search(
+            r"(?:лунають\s+(?:повторн\w*\s+)?вибух\w*|"
+            r"чути\s+(?:звук\w*\s+)?вибух\w*|"
+            r"гримлять\s+вибух\w*|"
+            r"щойно.{0,40}вибух\w*|"
+            r"прямо\s+зараз.{0,40}вибух\w*)",
+            low,
+        )
+    )
+
+
+def trusted_same_attack_source(row: dict) -> bool:
+    source = str(row.get("source") or "")
+    publisher = str(row.get("publisher") or "")
+    return source.startswith("Telegram /") or "суспільн" in f"{source} {publisher}".casefold()
+
+
+def trusted_live_source(row: dict) -> bool:
+    return str(row.get("source") or "").startswith("Telegram /")
+
+
+def exact_city_classification_evidence(city_key: str, row: dict) -> dict:
+    segments = [segment for segment in classification_segments(row) if city_mentioned(city_key, segment)]
+    return {"present": bool(segments), "segments": segments[:4]}
+
+
+def strict_explosion_evidence(city_key: str, row: dict) -> dict:
+    exact = exact_city_classification_evidence(city_key, row)
+    segments = [segment for segment in exact["segments"] if strict_explosion_signal(segment)]
+    return {"present": bool(segments), "segments": segments[:4]}
+
+
+def air_military_context_evidence(row: dict) -> dict:
+    segments = [segment for segment in classification_segments(row) if air_military_context(segment)]
+    return {"present": bool(segments), "segments": segments[:4]}
+
+
+def audited_cities_in_text(text: str) -> list[str]:
+    return sorted(key for key in CITY_CONFIG if city_mentioned(key, text))
+
+
+def same_attack_context_evidence(city_key: str, row: dict, strict_evidence: dict, air_evidence: dict) -> dict:
+    if not strict_evidence.get("present") or not air_evidence.get("present"):
+        return {"present": False, "reason": "missing_explosion_or_air_context"}
+    if any(air_military_context(segment) for segment in strict_evidence.get("segments") or []):
+        return {"present": True, "reason": "air_context_in_exact_city_event_segment"}
+    mentioned = audited_cities_in_text(classification_text(row))
+    if trusted_same_attack_source(row) and len(mentioned) <= 1:
+        return {"present": True, "reason": "trusted_source_adjacent_air_context"}
+    return {"present": False, "reason": "air_context_not_linked_to_exact_city_event"}
 
 
 def any_audited_city_mentioned(text: str) -> bool:
@@ -996,24 +1151,146 @@ def refresh_queue_matching(
     return counts
 
 
-def auto_strict_episode(row: dict, due: list[tuple[dict, dict]]) -> dict | None:
-    text = f"{row.get('title') or ''} {row.get('snippet') or ''}".strip()
+def matched_episode_rows(matching: dict, episodes: list[dict]) -> list[dict]:
+    wanted = set(matching.get("matched_episode_ids") or [])
+    return [ep for ep in episodes if str(ep.get("episode_id") or "") in wanted]
+
+
+def explicit_event_time_binding(row: dict, event_segments: list[str], matching: dict, episodes: list[dict]) -> dict:
     published = parse_dt(row.get("published_at"))
-    if not published or not air_context(text) or not explicit_during_alert(text):
-        return None
+    if not published or matching.get("outcome") != "unique_match":
+        return {"present": False, "event_time": None}
+    matched = matched_episode_rows(matching, episodes)
+    if not matched:
+        return {"present": False, "event_time": None}
+    local_day = published.astimezone(KYIV_TZ).date()
+    pattern = re.compile(r"(?:\bо\b|\bблизько\b|\bприблизно\b)\s*(\d{1,2})[:.](\d{2})", re.IGNORECASE)
+    for segment in event_segments:
+        for hit in pattern.finditer(segment):
+            hour, minute = int(hit.group(1)), int(hit.group(2))
+            if hour > 23 or minute > 59:
+                continue
+            for day_offset in (0, -1):
+                day = local_day + timedelta(days=day_offset)
+                event_dt = datetime(day.year, day.month, day.day, hour, minute, tzinfo=KYIV_TZ).astimezone(UTC)
+                for ep in matched:
+                    start = parse_dt(ep.get("alert_start"))
+                    end = parse_dt(ep.get("alert_end"))
+                    if start and end and start <= event_dt <= end:
+                        return {"present": True, "event_time": iso(event_dt)}
+    return {"present": False, "event_time": None}
 
-    matches = {}
-    for ep, check in due:
-        if check.get("label") != "immediate":
-            continue
-        start = parse_dt(ep.get("alert_start"))
-        end = parse_dt(ep.get("alert_end"))
-        if not start or not end:
-            continue
-        if start <= published <= end + timedelta(minutes=AUTO_MATCH_END_GRACE_MINUTES):
-            matches[ep["episode_id"]] = ep
-    return next(iter(matches.values())) if len(matches) == 1 else None
 
+def temporal_binding_evidence(row: dict, strict_evidence: dict, matching: dict, episodes: list[dict]) -> dict:
+    event_segments = list(strict_evidence.get("segments") or [])
+    explicit_segment = next((segment for segment in event_segments if explicit_alert_relation(segment)), None)
+    if explicit_segment:
+        return {"present": True, "code": "TEMPORAL_EXPLICIT_ALERT_RELATION", "evidence": explicit_segment}
+    clock = explicit_event_time_binding(row, event_segments, matching, episodes)
+    if clock.get("present"):
+        return {"present": True, "code": "TEMPORAL_EXPLICIT_EVENT_TIME_INSIDE_EPISODE", "evidence": clock.get("event_time")}
+    published = parse_dt(row.get("published_at"))
+    if (
+        published
+        and matching.get("outcome") == "unique_match"
+        and trusted_live_source(row)
+        and any(contemporaneous_live_wording(segment) for segment in event_segments)
+    ):
+        for ep in matched_episode_rows(matching, episodes):
+            start = parse_dt(ep.get("alert_start"))
+            end = parse_dt(ep.get("alert_end"))
+            if start and end and start <= published <= end:
+                return {"present": True, "code": "TEMPORAL_CONTEMPORANEOUS_LIVE_WORDING", "evidence": iso(published)}
+    return {"present": False, "code": "NO_STRICT_TEMPORAL_BINDING", "evidence": None}
+
+
+def classify_candidate(row: dict, city_key: str, episodes: list[dict], matching: dict | None = None) -> dict:
+    matching = matching or match_candidate_to_episodes(row, episodes)
+    exact = exact_city_classification_evidence(city_key, row)
+    strict = strict_explosion_evidence(city_key, row)
+    air = air_military_context_evidence(row)
+    same_attack = same_attack_context_evidence(city_key, row, strict, air)
+    temporal = temporal_binding_evidence(row, strict, matching, episodes)
+    text = classification_text(row)
+    segments = classification_segments(row)
+    publisher = str(row.get("publisher") or "")
+    raw_title_snippet = f"{row.get('title') or ''} {row.get('snippet') or ''}"
+    publisher_only_city = (
+        not exact["present"]
+        and bool(publisher)
+        and city_mentioned(city_key, publisher)
+        and city_mentioned(city_key, raw_title_snippet)
+    )
+    controlled = controlled_blast_signal(text) and not air["present"]
+    whole_message_event = any(strict_explosion_signal(segment) for segment in segments)
+    pvo_only_complete_message = (
+        trusted_live_source(row)
+        and exact["present"]
+        and not whole_message_event
+        and "ппо" in normalize_evidence_text(text)
+    )
+    fulltext_requires_review = row.get("discovery_basis") == "publisher_fulltext"
+
+    reason_codes = []
+    outcome = str(matching.get("outcome") or "no_match")
+    if outcome == "unique_match":
+        reason_codes.append("MATCH_UNIQUE")
+        if not matching.get("matched_episode_id"):
+            reason_codes.append("NO_CANONICAL_RAW_EPISODE_ID")
+    elif outcome == "ambiguous_match":
+        reason_codes.append("MATCH_AMBIGUOUS")
+    else:
+        reason_codes.append("MATCH_NONE")
+    reason_codes.append("EXACT_CITY_EVENT_TEXT" if exact["present"] else "NO_EXACT_CITY_EVENT_TEXT")
+    reason_codes.append("STRICT_EXPLOSION_EVIDENCE" if strict["present"] else "NO_STRICT_EXPLOSION_EVIDENCE")
+    reason_codes.append("AIR_MILITARY_CONTEXT" if air["present"] else "NO_AIR_MILITARY_CONTEXT")
+    if air["present"]:
+        reason_codes.append("SAME_ATTACK_CONTEXT_SUPPORTED" if same_attack["present"] else "AIR_CONTEXT_NOT_LINKED_TO_EVENT")
+    reason_codes.append(temporal["code"] if temporal["present"] else "NO_STRICT_TEMPORAL_BINDING")
+    if controlled:
+        reason_codes.append("DETERMINISTIC_CONTROLLED_BLAST")
+    if publisher_only_city:
+        reason_codes.append("EXACT_CITY_ONLY_PUBLISHER_BRANDING")
+    if pvo_only_complete_message:
+        reason_codes.append("PVO_ONLY_COMPLETE_MESSAGE")
+    if fulltext_requires_review:
+        reason_codes.append("PUBLISHER_FULLTEXT_REQUIRES_REVIEW")
+
+    proposed = "needs_review"
+    if controlled or publisher_only_city or pvo_only_complete_message:
+        proposed = "rejected"
+    elif fulltext_requires_review:
+        proposed = "needs_review"
+    elif (
+        outcome == "unique_match"
+        and matching.get("matched_episode_id")
+        and exact["present"]
+        and strict["present"]
+        and air["present"]
+        and same_attack["present"]
+        and temporal["present"]
+    ):
+        proposed = "approved_strict"
+    elif (
+        outcome == "unique_match"
+        and matching.get("matched_episode_id")
+        and exact["present"]
+        and strict["present"]
+        and air["present"]
+        and same_attack["present"]
+    ):
+        proposed = "approved_sensitivity"
+        reason_codes.append("SENSITIVITY_INFERRED_SAME_ATTACK")
+    return {
+        "proposed_outcome": proposed,
+        "matching": matching,
+        "exact_city_classification_evidence": exact,
+        "strict_explosion_evidence": strict,
+        "air_military_context": air,
+        "same_attack_context": same_attack,
+        "temporal_binding": temporal,
+        "reason_codes": reason_codes,
+    }
 
 def add_candidates(
     queue: list[dict],
@@ -1027,7 +1304,7 @@ def add_candidates(
     episode_ids = sorted({ep["episode_id"] for ep, _ in due})
     check_labels = sorted({check["label"] for _, check in due})
     added = 0
-    auto_approved = 0
+    auto_approved_strict = 0
     for row in rows:
         cid = candidate_id(city_key, row["url"], row["title"])
         matching = match_candidate_to_episodes(row, tracked_episodes)
@@ -1043,53 +1320,57 @@ def add_candidates(
                     raise AssertionError("Episode matching must not change candidate status")
             continue
 
-        discovery_basis = row.get("discovery_basis")
-        # Classification remains deliberately unchanged in this hardening step:
-        # the legacy strict gate still uses only a unique immediate due window.
-        auto_match = None if discovery_basis == "publisher_fulltext" else auto_strict_episode(row, due)
-        status = "approved_strict" if auto_match else "needs_review"
+        decision_input = {**row, "source": row.get("source") or "Google News RSS"}
+        decision = classify_candidate(decision_input, city_key, tracked_episodes, matching)
+        status = decision["proposed_outcome"]
         item = {
             "candidate_id": cid,
             "city_key": city_key,
             "city": CITY_CONFIG[city_key]["label"],
             "status": status,
-            "source": row.get("source") or "Google News RSS",
+            "source": decision_input["source"],
             "publisher": row.get("publisher"),
             "publisher_url": row.get("publisher_url"),
             "url": row["url"],
             "title": row["title"],
             "published_at": row.get("published_at"),
             "snippet": row.get("snippet"),
-            "discovery_basis": discovery_basis,
+            "discovery_basis": row.get("discovery_basis"),
             "resolved_url": row.get("resolved_url"),
             "matched_text_excerpt": row.get("matched_text_excerpt"),
             "first_discovered_at": iso(now),
             "last_seen_at": iso(now),
             "trigger_episode_ids": episode_ids,
             "trigger_check_labels": check_labels,
-            "matched_episode_id": auto_match["episode_id"] if auto_match else None,
+            "matched_episode_id": None,
+            "classification_reason_codes": decision["reason_codes"],
+            "classification_evidence": {
+                "exact_city": decision["exact_city_classification_evidence"],
+                "strict_explosion": decision["strict_explosion_evidence"],
+                "air_military_context": decision["air_military_context"],
+                "same_attack_context": decision["same_attack_context"],
+                "temporal_binding": decision["temporal_binding"],
+            },
             "review_note": (
-                "auto-approved: explicit during-alert wording + air context + publication inside the unique immediate alert window"
-                if auto_match
-                else ("publisher full-text rescue: discovery only; strict classification requires review" if discovery_basis == "publisher_fulltext" else None)
+                "evidence-layered auto-classification"
+                if status in {"approved_strict", "approved_sensitivity", "rejected"}
+                else "evidence-layered classification requires manual review"
             ),
             "note": (
-                "Auto-strict is allowed only for exact-city evidence with air context, explicit wording that the event occurred during an alert, "
-                "an immediate follow-up, and publication inside that unique alert window (plus 30 minutes). "
-                "All other candidates require review; publication time alone is never enough."
+                "Discovery relevance, episode matching, and strict/sensitivity classification are separate. "
+                "Publication time can build a candidate episode set but is never event-time proof. "
+                "Strict requires exact-city explosion/strike evidence, aerial-war context, a single raw matched episode, "
+                "and historical-method temporal binding. Sensitivity requires the same event/context evidence and a single raw match "
+                "but allows inferred-same-attack timing. PVO-only evidence is never strict."
             ),
         }
         apply_matching_result(item, matching)
-        if auto_match:
-            # Preserve the legacy classification episode identity; matching metadata
-            # remains separate and may still record a logical ambiguity.
-            item["matched_episode_id"] = auto_match["episode_id"]
         queue.append(item)
         by_id[cid] = item
         added += 1
-        if auto_match:
-            auto_approved += 1
-    return added, auto_approved
+        if status == "approved_strict":
+            auto_approved_strict += 1
+    return added, auto_approved_strict
 
 def self_test() -> None:
     assert len(CITY_CONFIG) >= 10
@@ -1097,54 +1378,43 @@ def self_test() -> None:
     assert not city_mentioned("poltava", "На Полтавщині пролунали вибухи")
     assert city_mentioned("vinnytsia", "У Вінниці було чутно вибух")
     assert not city_mentioned("vinnytsia", "На Вінниччині було гучно")
+
     assert explosion_relevant("У Львові пролунали вибухи")
     assert explosion_relevant("У Львові було гучно, працювала ППО")
-    assert air_context("Під час повітряної тривоги працювала ППО")
-    assert explicit_during_alert("Під час тривоги у місті пролунали вибухи")
+    assert explosion_relevant("У Львові зафіксували влучання")
+    assert not strict_explosion_signal("У Києві працюють сили ППО")
+    assert not strict_explosion_signal("У Полтаві було гучно")
+    assert air_military_context("Повідомляли про КАБ у напрямку міста")
+    assert air_military_context("Повітряні сили попередили про Бандероль")
+    assert explicit_alert_relation("Вибух стався після оголошення тривоги")
+    assert explicit_alert_relation("У місті пролунав вибух, коли тривала повітряна тривога")
+
+    vinnytsia_branding = {
+        "title": "Вибухи у кар’єрі на Вінниччині: де та коли проводитимуть роботи - Вінниця Преспоінт",
+        "snippet": "Вибухи у кар’єрі на Вінниччині: де та коли проводитимуть роботи Вінниця Преспоінт",
+        "publisher": "Вінниця Преспоінт",
+        "source": "Google News RSS",
+        "published_at": "2026-09-18T10:30:00Z",
+    }
+    assert not exact_city_classification_evidence("vinnytsia", vinnytsia_branding)["present"]
+
     dt = datetime(2026, 9, 18, 10, tzinfo=UTC)
     ep = make_episode("poltava", dt, dt + timedelta(hours=1))
     assert [x["label"] for x in ep["checks"]] == ["immediate", "24h", "72h", "7d"]
     assert ep["alert_start_date_kyiv"] == "2026-09-18"
 
     cutoff = datetime(2026, 9, 18, 12, tzinfo=UTC)
-    timing_state = {
-        "cities": {
-            "poltava": {
-                "episodes": [
-                    {
-                        "episode_id": "timing-a",
-                        "checks": [
-                            {
-                                "label": "A",
-                                "due_at": iso(cutoff - timedelta(seconds=1)),
-                                "checked_at": None,
-                            }
-                        ],
-                    },
-                    {
-                        "episode_id": "timing-b",
-                        "checks": [
-                            {
-                                "label": "B",
-                                "due_at": iso(cutoff + timedelta(seconds=1)),
-                                "checked_at": None,
-                            }
-                        ],
-                    },
-                ]
-            }
-        }
-    }
+    timing_state = {"cities": {"poltava": {"episodes": [
+        {"episode_id": "timing-a", "checks": [{"label": "A", "due_at": iso(cutoff - timedelta(seconds=1)), "checked_at": None}]},
+        {"episode_id": "timing-b", "checks": [{"label": "B", "due_at": iso(cutoff + timedelta(seconds=1)), "checked_at": None}]},
+    ]}}}
     timing_due = due_checks(timing_state, cutoff)
     assert len(timing_due["poltava"]) == 1
-    assert timing_due["poltava"][0][0]["episode_id"] == "timing-a"
     for _, check in timing_due["poltava"]:
         check["checked_at"] = iso(cutoff)
     assert due_check_counts(timing_due) == (1, 1, 0)
     assert checks_became_due_between(timing_state, cutoff, cutoff + timedelta(seconds=2)) == 1
-    later_due = due_checks(timing_state, cutoff + timedelta(seconds=2))
-    assert len(later_due["poltava"]) == 1
-    assert later_due["poltava"][0][0]["episode_id"] == "timing-b"
+    assert len(due_checks(timing_state, cutoff + timedelta(seconds=2))["poltava"]) == 1
 
     fulltext_calls = []
     def unexpected_fulltext_fetch(url: str):
@@ -1152,122 +1422,103 @@ def self_test() -> None:
         raise AssertionError("full-text fetch should not run when RSS already passes")
 
     rss_row, fetched, rescued = build_google_news_candidate(
-        "poltava",
-        "У Полтаві пролунали вибухи",
-        "",
-        "https://news.google.test/rss-item-1",
-        "Test",
-        "",
-        iso(dt),
-        fulltext_fetcher=unexpected_fulltext_fetch,
+        "poltava", "У Полтаві пролунали вибухи", "", "https://news.google.test/rss-item-1",
+        "Test", "", iso(dt), fulltext_fetcher=unexpected_fulltext_fetch,
     )
     assert rss_row and rss_row["discovery_basis"] == "rss_title_snippet"
     assert not fetched and not rescued and not fulltext_calls
 
     rescued_row, fetched, rescued = build_google_news_candidate(
-        "poltava",
-        "Новини Полтави",
-        "Оперативне оновлення",
-        "https://news.google.test/rss-item-2",
-        "Test",
-        "",
-        iso(dt),
-        fulltext_fetcher=lambda _url: (
-            "У Полтаві пролунали вибухи під час повітряної тривоги.",
-            "https://publisher.test/article-2",
-        ),
+        "poltava", "Новини Полтави", "Оперативне оновлення", "https://news.google.test/rss-item-2",
+        "Test", "", iso(dt),
+        fulltext_fetcher=lambda _url: ("У Полтаві пролунали вибухи під час повітряної тривоги.", "https://publisher.test/article-2"),
     )
-    assert rescued_row and fetched and rescued
-    assert rescued_row["discovery_basis"] == "publisher_fulltext"
-    assert rescued_row["resolved_url"] == "https://publisher.test/article-2"
+    assert rescued_row and fetched and rescued and rescued_row["discovery_basis"] == "publisher_fulltext"
 
-    rejected_row, fetched, rescued = build_google_news_candidate(
-        "poltava",
-        "Оперативні новини",
-        "",
-        "https://news.google.test/rss-item-3",
-        "Test",
-        "",
-        iso(dt),
-        fulltext_fetcher=lambda _url: (
-            "У Полтавській області пролунали вибухи.",
-            "https://publisher.test/article-3",
-        ),
-    )
-    assert rejected_row is None and fetched and not rescued
-
-    failed_row, fetched, rescued = build_google_news_candidate(
-        "poltava",
-        "Новини Полтави",
-        "",
-        "https://news.google.test/rss-item-4",
-        "Test",
-        "",
-        iso(dt),
-        fulltext_fetcher=lambda _url: (_ for _ in ()).throw(RuntimeError("synthetic fetch failure")),
-    )
-    assert failed_row is None and fetched and not rescued
-
-    article = extract_article_text(
-        "<header>skip</header><article><p>У Полтаві пролунали вибухи.</p><script>bad</script></article><footer>skip</footer>"
-    )
-    assert article == "У Полтаві пролунали вибухи."
-    assert MAX_FULLTEXT_FETCHES_PER_CITY == 8
-
-    strict_text = "У Полтаві під час повітряної тривоги пролунали вибухи"
     strict_base = {
-        "title": strict_text,
+        "title": "У Полтаві під час повітряної тривоги пролунали вибухи",
         "publisher": "Test",
         "publisher_url": None,
         "published_at": iso(dt + timedelta(minutes=30)),
         "snippet": "",
         "resolved_url": None,
-        "matched_text_excerpt": strict_text,
+        "matched_text_excerpt": None,
+        "source": "Google News RSS",
     }
-    due = [(ep, ep["checks"][0])]
+    strict_matching = match_candidate_to_episodes(strict_base, [ep])
+    strict_decision = classify_candidate(strict_base, "poltava", [ep], strict_matching)
+    assert strict_decision["proposed_outcome"] == "approved_strict"
+    assert strict_decision["temporal_binding"]["code"] == "TEMPORAL_EXPLICIT_ALERT_RELATION"
 
+    due = [(ep, ep["checks"][0])]
     rss_queue = []
     rss_added, rss_auto = add_candidates(
-        rss_queue,
-        "poltava",
+        rss_queue, "poltava",
         [{**strict_base, "url": "https://news.google.test/rss-auto", "discovery_basis": "rss_title_snippet"}],
-        due,
-        [ep],
-        dt,
+        due, [ep], dt,
     )
-    assert rss_added == 1 and rss_auto == 1
-    assert rss_queue[0]["status"] == "approved_strict"
+    assert rss_added == 1 and rss_auto == 1 and rss_queue[0]["status"] == "approved_strict"
 
     fulltext_queue = []
     fulltext_added, fulltext_auto = add_candidates(
-        fulltext_queue,
-        "poltava",
-        [{**strict_base, "url": "https://news.google.test/fulltext-review", "discovery_basis": "publisher_fulltext"}],
-        due,
-        [ep],
-        dt,
+        fulltext_queue, "poltava",
+        [{**strict_base, "url": "https://news.google.test/fulltext-review", "discovery_basis": "publisher_fulltext", "matched_text_excerpt": strict_base["title"]}],
+        due, [ep], dt,
     )
     assert fulltext_added == 1 and fulltext_auto == 0
     assert fulltext_queue[0]["status"] == "needs_review"
-    assert fulltext_queue[0]["matching_outcome"] == "unique_match"
-    assert fulltext_queue[0]["matched_episode_id"] == ep["episode_id"]
+    assert "PUBLISHER_FULLTEXT_REQUIRES_REVIEW" in fulltext_queue[0]["classification_reason_codes"]
 
-    # 1. A candidate discovered on a 72h follow-up still matches any tracked
-    # completed city alert; the legacy strict classifier remains immediate-only.
-    late_due = [(ep, ep["checks"][2])]
     late_row = {
         **strict_base,
+        "title": "У Полтаві пролунав вибух після оголошення тривоги через загрозу Бандеролі",
         "url": "https://news.google.test/late-72h",
         "discovery_basis": "rss_title_snippet",
     }
     late_matching = match_candidate_to_episodes(late_row, [ep])
+    late_decision = classify_candidate(late_row, "poltava", [ep], late_matching)
     assert late_matching["outcome"] == "unique_match"
-    assert late_matching["matched_episode_id"] == ep["episode_id"]
-    assert auto_strict_episode(late_row, late_due) is None
+    assert late_decision["proposed_outcome"] == "approved_strict"
 
-    # 2 and 6. Existing needs_review candidates rematch when a tracked episode
-    # appears later, without changing status.
-    existing_row = {
+    publication_only = {**strict_base, "title": "У Полтаві пролунав вибух на тлі руху Бандеролі до міста"}
+    publication_decision = classify_candidate(publication_only, "poltava", [ep])
+    assert publication_decision["proposed_outcome"] == "approved_sensitivity"
+    assert not publication_decision["temporal_binding"]["present"]
+
+    timed_row = {
+        **strict_base,
+        "title": "Близько 13:30 у Полтаві пролунав вибух після повідомлення про Бандероль",
+        "published_at": iso(dt + timedelta(minutes=45)),
+    }
+    timed_decision = classify_candidate(timed_row, "poltava", [ep])
+    assert timed_decision["proposed_outcome"] == "approved_strict"
+    assert timed_decision["temporal_binding"]["code"] == "TEMPORAL_EXPLICIT_EVENT_TIME_INSIDE_EPISODE"
+
+    poltava_suspilne = {
+        **strict_base,
+        "title": "У Полтаві чули звук вибуху, над містом видно дим. Раніше Повітряні сили повідомляли про Бандероль у напрямку Полтавщини.",
+        "snippet": "",
+        "source": "Telegram / СУСПІЛЬНЕ НОВИНИ",
+        "publisher": "СУСПІЛЬНЕ НОВИНИ",
+    }
+    assert classify_candidate(poltava_suspilne, "poltava", [ep])["proposed_outcome"] == "approved_sensitivity"
+
+    pvo_only = {
+        **strict_base,
+        "title": "У Полтаві працює ППО. БпЛА заходять на місто.",
+        "snippet": "",
+        "source": "Telegram / СУСПІЛЬНЕ НОВИНИ",
+        "publisher": "СУСПІЛЬНЕ НОВИНИ",
+    }
+    pvo_decision = classify_candidate(pvo_only, "poltava", [ep])
+    assert pvo_decision["proposed_outcome"] == "rejected"
+    assert "PVO_ONLY_COMPLETE_MESSAGE" in pvo_decision["reason_codes"]
+
+    vinnytsia_decision = classify_candidate(vinnytsia_branding, "vinnytsia", [])
+    assert vinnytsia_decision["proposed_outcome"] == "rejected"
+    assert "EXACT_CITY_ONLY_PUBLISHER_BRANDING" in vinnytsia_decision["reason_codes"]
+
+    existing_queue = [{
         **strict_base,
         "candidate_id": "existing-unmatched",
         "city_key": "poltava",
@@ -1277,67 +1528,44 @@ def self_test() -> None:
         "trigger_episode_ids": [],
         "trigger_check_labels": ["72h"],
         "matched_episode_id": None,
-    }
-    existing_queue = [dict(existing_row)]
-    empty_state = {"cities": {"poltava": {"episodes": []}}}
-    empty_refresh = refresh_queue_matching(existing_queue, empty_state, {"needs_review"})
+    }]
+    empty_refresh = refresh_queue_matching(existing_queue, {"cities": {"poltava": {"episodes": []}}}, {"needs_review"})
     assert empty_refresh["no_match"] == 1
-    assert existing_queue[0]["status"] == "needs_review"
-    later_state = {"cities": {"poltava": {"episodes": [ep]}}}
-    later_refresh = refresh_queue_matching(existing_queue, later_state, {"needs_review"})
+    later_refresh = refresh_queue_matching(existing_queue, {"cities": {"poltava": {"episodes": [ep]}}}, {"needs_review"})
     assert later_refresh["unique_match"] == 1
     assert existing_queue[0]["matched_episode_id"] == ep["episode_id"]
     assert existing_queue[0]["status"] == "needs_review"
 
-    # 3. Two genuinely distinct overlapping alert windows stay ambiguous.
     overlap_a = make_episode("poltava", dt, dt + timedelta(hours=1))
-    overlap_b = make_episode(
-        "poltava",
-        dt + timedelta(minutes=20),
-        dt + timedelta(hours=1, minutes=20),
-    )
-    overlap_row = {"published_at": iso(dt + timedelta(minutes=30))}
-    overlap_matching = match_candidate_to_episodes(overlap_row, [overlap_a, overlap_b])
+    overlap_b = make_episode("poltava", dt + timedelta(minutes=20), dt + timedelta(hours=1, minutes=20))
+    overlap_matching = match_candidate_to_episodes(strict_base, [overlap_a, overlap_b])
+    overlap_decision = classify_candidate(strict_base, "poltava", [overlap_a, overlap_b], overlap_matching)
     assert overlap_matching["outcome"] == "ambiguous_match"
-    assert len(overlap_matching["logical_episode_groups"]) == 2
+    assert overlap_decision["proposed_outcome"] == "needs_review"
 
-    # 4. Very close boundary revisions are treated as two representations of
-    # one alert window, without selecting an arbitrary raw episode ID.
     near_a = make_episode("poltava", dt, dt + timedelta(hours=1))
-    near_b = make_episode(
-        "poltava",
-        dt + timedelta(seconds=35),
-        dt + timedelta(hours=1, seconds=50),
-    )
-    near_matching = match_candidate_to_episodes(overlap_row, [near_a, near_b])
-    assert near_matching["outcome"] == "unique_match"
-    assert len(near_matching["matched_episode_ids"]) == 2
-    assert len(near_matching["logical_episode_groups"]) == 1
-    assert near_matching["matched_episode_id"] is None
+    near_b = make_episode("poltava", dt + timedelta(seconds=35), dt + timedelta(hours=1, seconds=50))
+    near_matching = match_candidate_to_episodes(strict_base, [near_a, near_b])
+    near_decision = classify_candidate(strict_base, "poltava", [near_a, near_b], near_matching)
+    assert near_matching["outcome"] == "unique_match" and near_matching["matched_episode_id"] is None
+    assert near_decision["proposed_outcome"] == "needs_review"
+    assert "NO_CANONICAL_RAW_EPISODE_ID" in near_decision["reason_codes"]
 
-    # 5. Publication outside all tracked windows is a deterministic no-match.
-    outside_matching = match_candidate_to_episodes(
-        {"published_at": iso(dt + timedelta(hours=3))},
-        [ep],
-    )
-    assert outside_matching["outcome"] == "no_match"
+    assert match_candidate_to_episodes({"published_at": iso(dt + timedelta(hours=3))}, [ep])["outcome"] == "no_match"
 
     if "kyiv" in CITY_CONFIG:
-        kyiv_rows = load_kyiv_alert_episodes(KYIV_ALERTS_FILE)
-        assert kyiv_rows and kyiv_rows[-1]["alert_source"] == "kyiv_combined_exact_city"
+        assert load_kyiv_alert_episodes(KYIV_ALERTS_FILE)[-1]["alert_source"] == "kyiv_combined_exact_city"
     if "sevastopol" in CITY_CONFIG:
-        sev_rows = load_sevastopol_alert_episodes(SEVASTOPOL_EVENTS_FILE)
-        assert sev_rows and sev_rows[-1]["alert_source"] == "sevastopol_verified_exact_city_pairs"
-    assert len(CITY_CONFIG) >= 10
+        assert load_sevastopol_alert_episodes(SEVASTOPOL_EVENTS_FILE)[-1]["alert_source"] == "sevastopol_verified_exact_city_pairs"
+
     print(
-        f"Self-test OK: {len(CITY_CONFIG)} audited cities, exact-city filter, explosion filter, "
-        "full-text fallback, discovery-only guard, all-tracked episode matching, near-duplicate reconciliation, "
-        "real-overlap ambiguity, status preservation, follow-up schedule, snapshot cutoff timing edge"
+        f"Self-test OK: {len(CITY_CONFIG)} audited cities; discovery/matching/classification separated; "
+        "PVO-only protected; publisher branding protected; KAB/Banderol air context; historical temporal binding; "
+        "sensitivity separation; late-discovery matching; overlap and near-duplicate guards; status preservation"
     )
 
-
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Monitor new completed alerts for explosion-report candidates. Discovery never auto-promotes strict matches.")
+    parser = argparse.ArgumentParser(description="Monitor completed-alert explosion candidates with separated discovery, matching, and evidence-layered classification.")
     parser.add_argument("--self-test", action="store_true")
     parser.add_argument("--local-only", action="store_true", help="Read completed alerts from a cached UkraineAlarm bridge instead of calling the API.")
     parser.add_argument("--bridge-file", default=str(BRIDGE_FILE), help="Bridge JSON used with --local-only.")
