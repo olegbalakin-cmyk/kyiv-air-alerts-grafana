@@ -1,0 +1,540 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2026-09-22",
+  "repository": "olegbalakin-cmyk/kyiv-air-alerts-grafana",
+  "branch": "multicity-wip-2026-09-16",
+  "city": "zaporizhzhia",
+  "task": "O3 manual evidence review batch 1: source_hit_exact_city only",
+  "source_discovery_artifact": "research/zaporizhzhia_explosion_o3_source_discovery.json",
+  "source_discovery_commit": "c0169445c0425d77cba7530cb5307a933475175b",
+  "methodology": {
+    "scope": "Review exactly the 10 not-previously-audited O3 episodes labeled source_hit_exact_city in the source-discovery artifact. Do not review no_source_hit_found, source_hit_outside_episode_timing, or expand to another batch.",
+    "saved_evidence_rule": "All saved source hits attached to each of the 10 episodes were reviewed. Primary/external sources were opened only where needed to resolve a concrete timing or incident-type ambiguity.",
+    "strict_rule": "confirmed_strict_miss requires exact-city Zaporizhzhia evidence, military/aerial-war explosion or strike context, one concrete canonical alert episode, and event timing inside that episode or explicit wording that the event occurred during it. Publication time is never substituted for event time.",
+    "sensitivity_rule": "sensitivity_only is used when exact-city military attack evidence strongly supports the same attack sequence or immediately adjacent target episode but lacks sufficiently resolved event timing for strict.",
+    "rejection_rule": "rejected is used when the event is resolved outside the target episode, the hit is non-military, or the apparent match depends only on publication timing.",
+    "needs_review_rule": "needs_review is used when exact-city military evidence exists but multiple same-day episodes or a prolonged attack sequence prevent a unique target-episode attribution.",
+    "control_check": "None of these 10 episode IDs is an already-audited known positive control in the source-discovery artifact; therefore no prior verdict was overwritten or contradicted.",
+    "timezone": "Europe/Kyiv"
+  },
+  "reviewed_episode_count": 10,
+  "verdict_counts": {
+    "confirmed_strict_miss": 1,
+    "sensitivity_only": 3,
+    "rejected": 4,
+    "needs_review": 2
+  },
+  "reviewed_records": [
+    {
+      "episode_id": "10fdb826dce7f2e36029f245",
+      "date": "2025-07-24",
+      "episode_order_distance": 2,
+      "nearest_canonical_strict_episode_id": "6b8944c3a3d0cbb98d1dd6c3",
+      "alert_start_utc": "2025-07-24T03:25:05Z",
+      "alert_end_utc": "2025-07-24T04:51:26Z",
+      "alert_start_kyiv": "2025-07-24T06:25:05",
+      "alert_end_kyiv": "2025-07-24T07:51:26",
+      "saved_source_hits_reviewed": [
+        "h001",
+        "h002"
+      ],
+      "source_hits": [
+        {
+          "raw_hit_id": "h001",
+          "publication_or_message_datetime_kyiv": "2025-07-24T07:29:00+03:00",
+          "timestamp_kind": "article_publication",
+          "source": "Українська правда",
+          "source_id": "7523169",
+          "source_url": "https://www.pravda.com.ua/news/2025/07/24/7523169/",
+          "exact_relevant_wording": "Дев’ять Shahed уночі атакували Запоріжжя та Запорізький район; виникли пожежі.",
+          "source_discovery_role": "exact_city_candidate",
+          "exact_city_rationale": "Запоріжжя назване окремо від Запорізького району.",
+          "aerial_context": "explicit_Shahed_attack",
+          "stored_note": "Event time within the night is not minute-resolved; retained for manual attribution."
+        },
+        {
+          "raw_hit_id": "h002",
+          "publication_or_message_datetime_kyiv": "2025-07-24T09:56:00+03:00",
+          "timestamp_kind": "article_publication",
+          "source": "Запоріжжя 24",
+          "source_id": "zaporizhzhya-atakuvaly-9-shahediv",
+          "source_url": "https://24.zp.ua/zaporizhzhya-atakuvaly-9-shahediv-yaki-naslidky-nichnoyi-ataky/",
+          "exact_relevant_wording": "У ніч з 23 на 24 липня росіяни направили на наше місто дев’ять Shahed; один дрон влучив у будівлю навчального закладу.",
+          "source_discovery_role": "duplicate_exact_city_support",
+          "exact_city_rationale": "Матеріал прямо описує атаку на місто Запоріжжя.",
+          "aerial_context": "explicit_Shahed_attack",
+          "stored_note": "Secondary corroboration; de-duplicated to the same target episode."
+        }
+      ],
+      "supplemental_evidence": [
+        {
+          "source": "24 Канал",
+          "publication_or_message_datetime_kyiv": "2025-07-24T02:20:00+03:00",
+          "url": "https://24tv.ua/bpla-atakuyut-zaporizhzhya-pratsyuye-ppo_n2877320",
+          "exact_relevant_wording": "У місті Запоріжжя з 02:08. Приблизно о 02:16 ... повідомила про роботу ППО. Місцеві ж писали ... про звуки вибухів.",
+          "role": "Timing resolution: exact-city explosion/PPO evidence belongs to the earlier strict episode."
+        }
+      ],
+      "evidence_is_exact_city_zaporizhzhia": true,
+      "evidence_is_military_explosion_strike_or_air_defense_context": true,
+      "temporal_evidence_to_target_episode": "does_not_support_target_episode",
+      "final_review_verdict": "rejected",
+      "rationale": "The retained 07:29 and 09:56 items summarize the overnight nine-Shahed attack. Contemporaneous reporting places exact-city explosions/PPO at about 02:16, inside the already-canonical strict episode 02:08:13–03:16:26. No event-time evidence points to the 06:25:05–07:51:26 target; the 07:29 publication time cannot be substituted for event time.",
+      "failure_mode": null,
+      "failure_mode_note": null
+    },
+    {
+      "episode_id": "9141489e7f283d49c39e28e5",
+      "date": "2026-01-03",
+      "episode_order_distance": 1,
+      "nearest_canonical_strict_episode_id": "f52bac5c3b7bd8b3c4a8954a",
+      "alert_start_utc": "2026-01-03T11:20:41Z",
+      "alert_end_utc": "2026-01-03T13:45:41Z",
+      "alert_start_kyiv": "2026-01-03T13:20:41",
+      "alert_end_kyiv": "2026-01-03T15:45:41",
+      "saved_source_hits_reviewed": [
+        "h003"
+      ],
+      "source_hits": [
+        {
+          "raw_hit_id": "h003",
+          "publication_or_message_datetime_kyiv": "2026-01-03T13:42:00+02:00",
+          "timestamp_kind": "article_publication",
+          "source": "LB.ua",
+          "source_id": "715089",
+          "source_url": "https://lb.ua/society/2026/01/03/715089_rosiyani_vdarili_bezpilotnikom.html",
+          "exact_relevant_wording": "Російська армія атакувала місто Запоріжжя; безпілотник влучив у гаражний кооператив.",
+          "source_discovery_role": "exact_city_candidate",
+          "exact_city_rationale": "Джерело прямо каже «місто Запоріжжя».",
+          "aerial_context": "explicit_UAV_attack",
+          "stored_note": "Publication occurs during target alert; event minute is not independently resolved."
+        }
+      ],
+      "supplemental_evidence": [
+        {
+          "source": "Суспільне Запоріжжя archive",
+          "publication_or_message_datetime_kyiv": "2026-01-03T13:05:00+02:00",
+          "url": "https://suspilne.media/zaporizhzhia/archive/2026/1/3/",
+          "exact_relevant_wording": "3 січня, 13:05 Військові РФ 3 січня атакували Запоріжжя безпілотником",
+          "role": "Shows the event was already reported before target alert start."
+        }
+      ],
+      "evidence_is_exact_city_zaporizhzhia": true,
+      "evidence_is_military_explosion_strike_or_air_defense_context": true,
+      "temporal_evidence_to_target_episode": "event_precedes_target_episode",
+      "final_review_verdict": "rejected",
+      "rationale": "LB.ua published at 13:42 while the target alert was active, but Suspilne's archive shows the same Zaporizhzhia UAV-strike story at 13:05, before the target began at 13:20:41 and during the preceding strict episode. Publication inside the target therefore does not establish a target-episode event.",
+      "failure_mode": null,
+      "failure_mode_note": null
+    },
+    {
+      "episode_id": "64867fdfc87ad6f4835ea664",
+      "date": "2026-01-20",
+      "episode_order_distance": 2,
+      "nearest_canonical_strict_episode_id": "87348c2c06d552d2ad0fc751",
+      "alert_start_utc": "2026-01-20T17:44:46Z",
+      "alert_end_utc": "2026-01-20T18:13:05Z",
+      "alert_start_kyiv": "2026-01-20T19:44:46",
+      "alert_end_kyiv": "2026-01-20T20:13:05",
+      "saved_source_hits_reviewed": [
+        "h005",
+        "h006"
+      ],
+      "source_hits": [
+        {
+          "raw_hit_id": "h005",
+          "publication_or_message_datetime_kyiv": "2026-01-20T20:17:00+02:00",
+          "timestamp_kind": "article_publication",
+          "source": "Поліція Запорізької області",
+          "source_id": "police_2026-01-20_20-17",
+          "source_url": "https://zp.npu.gov.ua/news/rosiiany-prodovzhuiut-atakuvaty-zaporizhzhia-bezpilotnykamy-zahynulo-vzhe-troie-liudei-na-mistsiakh-udariv-pratsiuiut-politseiski",
+          "exact_relevant_wording": "Окупанти скерували на обласний центр десятки Shahed; ще один удар прийшовся по об’єкту критичної інфраструктури.",
+          "source_discovery_role": "exact_city_candidate",
+          "exact_city_rationale": "Обласний центр у матеріалі — Запоріжжя; заголовок прямо називає місто.",
+          "aerial_context": "explicit_Shahed_attack",
+          "stored_note": "Published 4 minutes after target alert ended; timing of «ще один удар» is not minute-resolved."
+        },
+        {
+          "raw_hit_id": "h006",
+          "publication_or_message_datetime_kyiv": "2026-01-20T20:26:00+02:00",
+          "timestamp_kind": "live_article_update",
+          "source": "Inform.zp.ua",
+          "source_id": "352809_update_20_26",
+          "source_url": "https://www.inform.zp.ua/ru/2026/01/20/352809_rf-neskolko-raz-atakovala-zaporozhe-chto-izvestno/",
+          "exact_relevant_wording": "Оновлення: ще один вечірній удар припав по об’єкту критичної інфраструктури у Запоріжжі.",
+          "source_discovery_role": "duplicate_exact_city_support",
+          "exact_city_rationale": "Exact-city live article about Zaporizhzhia.",
+          "aerial_context": "explicit_UAV_attack",
+          "stored_note": "Duplicate support for the same unresolved evening event; de-duplicated at episode level."
+        }
+      ],
+      "supplemental_evidence": [
+        {
+          "source": "Inform.zp.ua live chronology",
+          "publication_or_message_datetime_kyiv": "2026-01-20T18:47:00+02:00",
+          "url": "https://www.inform.zp.ua/ru/2026/01/20/352809_rf-neskolko-raz-atakovala-zaporozhe-chto-izvestno/",
+          "exact_relevant_wording": "18:51 ... в результате удара ... погиб человек. 20:26 ... еще один удар вечером пришелся по объекту критической инфраструктуры.",
+          "role": "Separates a confirmed pre-target strike from a later strike whose event time remains unresolved."
+        }
+      ],
+      "evidence_is_exact_city_zaporizhzhia": true,
+      "evidence_is_military_explosion_strike_or_air_defense_context": true,
+      "temporal_evidence_to_target_episode": "ambiguous_across_multiple_evening_episodes",
+      "final_review_verdict": "needs_review",
+      "rationale": "The Police and Inform.zp.ua confirm repeated Shahed strikes on Zaporizhzhia. Inform chronology places one evening fatal strike by 18:51, before the target, while the later 'another strike' on critical infrastructure is not assigned a clock time. With several same-evening alert episodes, the evidence cannot uniquely bind that later strike to 19:44:46–20:13:05.",
+      "failure_mode": null,
+      "failure_mode_note": null
+    },
+    {
+      "episode_id": "898e8b677dfc4572a0361e73",
+      "date": "2026-02-23",
+      "episode_order_distance": 1,
+      "nearest_canonical_strict_episode_id": "c905a26da009ac41894db1fa",
+      "alert_start_utc": "2026-02-23T17:31:23Z",
+      "alert_end_utc": "2026-02-23T17:49:49Z",
+      "alert_start_kyiv": "2026-02-23T19:31:23",
+      "alert_end_kyiv": "2026-02-23T19:49:49",
+      "saved_source_hits_reviewed": [
+        "h008"
+      ],
+      "source_hits": [
+        {
+          "raw_hit_id": "h008",
+          "publication_or_message_datetime_kyiv": "2026-02-23T22:47:00+02:00",
+          "timestamp_kind": "article_publication",
+          "source": "Inform.zp.ua",
+          "source_id": "357928",
+          "source_url": "https://www.inform.zp.ua/uk/2026/02/23/357928_u-zaporizhzhi-chuly-zvuk-vybuhu-shho-kazhut-ochevydczi-pro-avto/",
+          "exact_relevant_wording": "В одному з районів Запоріжжя було чути вибух; очевидці бачили палаючу автівку.",
+          "source_discovery_role": "exact_city_candidate",
+          "exact_city_rationale": "Джерело прямо локалізує звук у Запоріжжі.",
+          "aerial_context": "not_explicit; eyewitness version points to a possible Molotov-cocktail incident",
+          "stored_note": "High-recall lexical hit only; publication is 178 minutes after target alert end and war context is absent. Requires manual review."
+        }
+      ],
+      "supplemental_evidence": [],
+      "evidence_is_exact_city_zaporizhzhia": true,
+      "evidence_is_military_explosion_strike_or_air_defense_context": false,
+      "temporal_evidence_to_target_episode": "no_target_military_event",
+      "final_review_verdict": "rejected",
+      "rationale": "The exact-city lexical hit concerns a burning car. The article says eyewitnesses believed a Molotov cocktail may have been thrown into the vehicle, explicitly notes the information was unconfirmed, and gives no aerial-war context. It was also published almost three hours after the target alert ended.",
+      "failure_mode": null,
+      "failure_mode_note": null
+    },
+    {
+      "episode_id": "22b04aca1ee26285eaac1084",
+      "date": "2026-07-03",
+      "episode_order_distance": 2,
+      "nearest_canonical_strict_episode_id": "311349383a05ad4a837dc970",
+      "alert_start_utc": "2026-07-03T14:33:19Z",
+      "alert_end_utc": "2026-07-03T15:52:22Z",
+      "alert_start_kyiv": "2026-07-03T17:33:19",
+      "alert_end_kyiv": "2026-07-03T18:52:22",
+      "saved_source_hits_reviewed": [
+        "h013"
+      ],
+      "source_hits": [
+        {
+          "raw_hit_id": "h013",
+          "publication_or_message_datetime_kyiv": "2026-07-03T18:03:00+03:00",
+          "timestamp_kind": "article_publication",
+          "source": "Поліція Запорізької області",
+          "source_id": "police_2026-07-03_18-03",
+          "source_url": "https://zp.npu.gov.ua/news/zaporizhzhia-znov-pid-rosiiskymy-kabamy-ie-zahybli-ta-poraneni-na-mistsiakh-udariv-pratsiuie-politsiia",
+          "exact_relevant_wording": "Запоріжжя під ударом КАБів; окупанти вдарили по цивільному сектору, поліція нагадує про повітряну тривогу.",
+          "source_discovery_role": "exact_city_candidate",
+          "exact_city_rationale": "Заголовок прямо називає Запоріжжя.",
+          "aerial_context": "explicit_KAB_attack",
+          "stored_note": "Publication occurs during target alert; minute of impact is not exposed in the retained source."
+        }
+      ],
+      "supplemental_evidence": [
+        {
+          "source": "LB.ua",
+          "publication_or_message_datetime_kyiv": "2026-07-03T18:22:00+03:00",
+          "url": "https://lb.ua/society/2026/07/03/749362_rosiyani_atakuvali_dvoh.html",
+          "exact_relevant_wording": "Росіяни атакували двох цивільних у Запоріжжі. Жінки йшли вулицею на момент атаки.",
+          "role": "Supports a repeated exact-city military attack during the broader target-alert period, without a minute-resolved event time."
+        }
+      ],
+      "evidence_is_exact_city_zaporizhzhia": true,
+      "evidence_is_military_explosion_strike_or_air_defense_context": true,
+      "temporal_evidence_to_target_episode": "probable_same_attack_sequence_but_no_event_time",
+      "final_review_verdict": "sensitivity_only",
+      "rationale": "The retained Police item is an exact-city KAB attack report published during the target, but the initial KAB casualties were already being reported immediately before target start. A separate exact-city attack on two civilians was then reported at 18:22 while the target remained active. The repeated attack sequence plausibly overlaps the target, but no source isolates an impact time inside 17:33:19–18:52:22, so strict is not justified.",
+      "failure_mode": null,
+      "failure_mode_note": null
+    },
+    {
+      "episode_id": "26e3ffb19a31979f19ad22c7",
+      "date": "2026-07-03",
+      "episode_order_distance": 1,
+      "nearest_canonical_strict_episode_id": "311349383a05ad4a837dc970",
+      "alert_start_utc": "2026-07-03T16:44:09Z",
+      "alert_end_utc": "2026-07-03T17:43:31Z",
+      "alert_start_kyiv": "2026-07-03T19:44:09",
+      "alert_end_kyiv": "2026-07-03T20:43:31",
+      "saved_source_hits_reviewed": [
+        "h014"
+      ],
+      "source_hits": [
+        {
+          "raw_hit_id": "h014",
+          "publication_or_message_datetime_kyiv": "2026-07-03T20:50:00+03:00",
+          "timestamp_kind": "article_publication",
+          "source": "Національна поліція України",
+          "source_id": "npu_2026-07-03_20-50",
+          "source_url": "https://npu.gov.ua/news/zaporizhzhia-stanom-na-2040-vidomo-pro-dvokh-zahyblykh-ta-17-poranenykh-unaslidok-masovanoi-vorozhoi-ataky",
+          "exact_relevant_wording": "Станом на 20:40: упродовж кількох годин по обласному центру били КАБами та БпЛА.",
+          "source_discovery_role": "exact_city_candidate",
+          "exact_city_rationale": "Матеріал прямо про Запоріжжя/обласний центр.",
+          "aerial_context": "explicit_KAB_and_UAV_attack",
+          "stored_note": "Publication is 7 minutes after target alert ended; status timestamp 20:40 falls inside target alert, but no individual impact minute is isolated."
+        }
+      ],
+      "supplemental_evidence": [],
+      "evidence_is_exact_city_zaporizhzhia": true,
+      "evidence_is_military_explosion_strike_or_air_defense_context": true,
+      "temporal_evidence_to_target_episode": "sustained_attack_sequence_overlaps_target_but_no_individual_impact_time",
+      "final_review_verdict": "sensitivity_only",
+      "rationale": "The National Police states that, as of 20:40, Russian forces had been striking Zaporizhzhia for several hours with KABs and UAVs. The 20:40 status falls inside the target alert, but the text is cumulative and does not timestamp any individual impact. This supports sensitivity-level same-attack attribution, not strict.",
+      "failure_mode": null,
+      "failure_mode_note": null
+    },
+    {
+      "episode_id": "2fc6f8573ce1962f9fd6c8c8",
+      "date": "2026-08-25",
+      "episode_order_distance": 1,
+      "nearest_canonical_strict_episode_id": "ad099cc47e1feaf4685bb8f4",
+      "alert_start_utc": "2026-08-25T03:09:49Z",
+      "alert_end_utc": "2026-08-25T04:09:49Z",
+      "alert_start_kyiv": "2026-08-25T06:09:49",
+      "alert_end_kyiv": "2026-08-25T07:09:49",
+      "saved_source_hits_reviewed": [
+        "h015"
+      ],
+      "source_hits": [
+        {
+          "raw_hit_id": "h015",
+          "publication_or_message_datetime_kyiv": "2026-08-25T07:59:00+03:00",
+          "timestamp_kind": "article_publication",
+          "source": "LB.ua",
+          "source_id": "761226",
+          "source_url": "https://lb.ua/society/2026/08/25/761226_okupanti_svitanku_vbili_dvoh.html",
+          "exact_relevant_wording": "На світанку росіяни атакували Запоріжжя; по обласному центру вдарила керована авіабомба.",
+          "source_discovery_role": "exact_city_candidate",
+          "exact_city_rationale": "Запоріжжя та обласний центр названі прямо.",
+          "aerial_context": "explicit_KAB_attack",
+          "stored_note": "Publication is 50 minutes after alert end; event phrasing «на світанку» is too coarse for final episode attribution."
+        }
+      ],
+      "supplemental_evidence": [
+        {
+          "source": "NV live",
+          "publication_or_message_datetime_kyiv": "2026-08-25T05:55:00+03:00",
+          "url": "https://nv.ua/ukr/ukraine/events/rosiyski-ataki-na-ukrajinu-u-nich-proti-25-serpnya-vsi-podrobici-onlayn-50635304.html",
+          "exact_relevant_wording": "05:55. Війська РФ вдарили керованою авіабомбою по Запоріжжю.",
+          "role": "Minute-level event timing places the strike before target alert start."
+        }
+      ],
+      "evidence_is_exact_city_zaporizhzhia": true,
+      "evidence_is_military_explosion_strike_or_air_defense_context": true,
+      "temporal_evidence_to_target_episode": "event_precedes_target_episode",
+      "final_review_verdict": "rejected",
+      "rationale": "The retained LB.ua article uses the coarse phrase 'at dawn', but contemporaneous live reporting timestamps the Zaporizhzhia KAB strike at 05:55. That is before the target alert began at 06:09:49, so the 07:59 publication cannot bind the strike to this episode.",
+      "failure_mode": null,
+      "failure_mode_note": null
+    },
+    {
+      "episode_id": "ae5ee840d8e79b3462e505d9",
+      "date": "2026-09-05",
+      "episode_order_distance": 1,
+      "nearest_canonical_strict_episode_id": "f642bf83e43e2bcc225205d9",
+      "alert_start_utc": "2026-09-05T14:25:14Z",
+      "alert_end_utc": "2026-09-05T14:40:04Z",
+      "alert_start_kyiv": "2026-09-05T17:25:14",
+      "alert_end_kyiv": "2026-09-05T17:40:04",
+      "saved_source_hits_reviewed": [
+        "h016"
+      ],
+      "source_hits": [
+        {
+          "raw_hit_id": "h016",
+          "publication_or_message_datetime_kyiv": "2026-09-05T17:41:00+03:00",
+          "timestamp_kind": "article_publication",
+          "source": "Радіо Свобода",
+          "source_id": "33847649",
+          "source_url": "https://www.radiosvoboda.org/amp/news-ataka-rf-postrazhdali-zaporizhzhya/33847649.html",
+          "exact_relevant_wording": "У Запоріжжі через російську атаку постраждали люди; повідомлено про атаку російських БпЛА.",
+          "source_discovery_role": "exact_city_candidate",
+          "exact_city_rationale": "Запоріжжя назване прямо.",
+          "aerial_context": "explicit_UAV_attack",
+          "stored_note": "Published one minute after target alert ended; event minute is not resolved."
+        }
+      ],
+      "supplemental_evidence": [],
+      "evidence_is_exact_city_zaporizhzhia": true,
+      "evidence_is_military_explosion_strike_or_air_defense_context": true,
+      "temporal_evidence_to_target_episode": "probable_same_attack_immediately_adjacent_to_target_but_no_event_time",
+      "final_review_verdict": "sensitivity_only",
+      "rationale": "Radio Liberty published at 17:41, one minute after the 17:25:14–17:40:04 target ended, and reports an evening Russian UAV attack on a Zaporizhzhia residential area/trade center. The event is a strong natural match to the immediately preceding alert, but no source gives the impact minute or explicitly says the strike occurred during that alert. Publication proximity alone is insufficient for strict.",
+      "failure_mode": null,
+      "failure_mode_note": null
+    },
+    {
+      "episode_id": "cdda5267905f8fd09929ca32",
+      "date": "2026-09-05",
+      "episode_order_distance": 2,
+      "nearest_canonical_strict_episode_id": "f642bf83e43e2bcc225205d9",
+      "alert_start_utc": "2026-09-05T20:49:51Z",
+      "alert_end_utc": "2026-09-05T20:54:42Z",
+      "alert_start_kyiv": "2026-09-05T23:49:51",
+      "alert_end_kyiv": "2026-09-05T23:54:42",
+      "saved_source_hits_reviewed": [
+        "h017"
+      ],
+      "source_hits": [
+        {
+          "raw_hit_id": "h017",
+          "publication_or_message_datetime_kyiv": "2026-09-05T23:51:00+03:00",
+          "timestamp_kind": "article_publication",
+          "source": "Радіо Свобода",
+          "source_id": "33847670",
+          "source_url": "https://www.radiosvoboda.org/a/news-zaporizhzhya-ataky-rf-postrazhdali/33847670.html",
+          "exact_relevant_wording": "Запоріжжя зазнало нових російських ударів; загроза КАБів і БпЛА тривала понад дві години.",
+          "source_discovery_role": "exact_city_candidate",
+          "exact_city_rationale": "Запоріжжя назване прямо.",
+          "aerial_context": "explicit_KAB_and_UAV_attack",
+          "stored_note": "Publication occurs inside the short target alert."
+        }
+      ],
+      "supplemental_evidence": [],
+      "evidence_is_exact_city_zaporizhzhia": true,
+      "evidence_is_military_explosion_strike_or_air_defense_context": true,
+      "temporal_evidence_to_target_episode": "ambiguous_within_multi_hour_attack_sequence",
+      "final_review_verdict": "needs_review",
+      "rationale": "Radio Liberty reports new Russian strikes at 23:51, inside the short 23:49:51–23:54:42 target alert, but also says the KAB/UAV threat had continued for more than two hours and describes several impacts without individual times. The evidence confirms exact-city military strikes but cannot isolate one impact to this five-minute target window.",
+      "failure_mode": null,
+      "failure_mode_note": null
+    },
+    {
+      "episode_id": "5da4fc649a38d4796ebbcf94",
+      "date": "2026-09-07",
+      "episode_order_distance": 1,
+      "nearest_canonical_strict_episode_id": "23371bee083381cd79cf93a2",
+      "alert_start_utc": "2026-09-06T21:00:54Z",
+      "alert_end_utc": "2026-09-06T23:48:49Z",
+      "alert_start_kyiv": "2026-09-07T00:00:54",
+      "alert_end_kyiv": "2026-09-07T02:48:49",
+      "saved_source_hits_reviewed": [
+        "h018"
+      ],
+      "source_hits": [
+        {
+          "raw_hit_id": "h018",
+          "publication_or_message_datetime_kyiv": "2026-09-07T01:40:00+03:00",
+          "timestamp_kind": "indexed_Telegram_time_converted_from_22:40_UTC_display",
+          "source": "ЗаБор Запоріжжя Telegram",
+          "source_id": "zaborzp/148907",
+          "source_url": "https://t.me/zaborzp/148907",
+          "exact_relevant_wording": "Палає City Mall у Запоріжжі; наслідки атаки, сильна пожежа після удару.",
+          "source_discovery_role": "exact_city_candidate",
+          "exact_city_rationale": "City Mall у Запоріжжі названий прямо.",
+          "aerial_context": "explicit_attack_context; later sources specify three Shahed impacts around 00:30",
+          "stored_note": "Indexed Telegram context surfaces the event inside the target alert; later reporting gives ~00:30 impact time."
+        }
+      ],
+      "supplemental_evidence": [
+        {
+          "source": "D.UA Новини",
+          "publication_or_message_datetime_kyiv": "2026-09-07T03:00:00+03:00",
+          "datetime_note": "Page metadata exposes an update date rather than a reliable minute-level publication timestamp; only the event time is used for classification.",
+          "url": "https://news.d.ua/culture/shahedi-spalili-trc-city-mall-y-zaporijji-razom-iz-tovarom-minylogo-tijnia-vin-zakrivsia/",
+          "exact_relevant_wording": "Ворожий напад на торговий центр стався приблизно о 00:30 ... влучили три ударні дрони типу «Шахед».",
+          "role": "Decisive event-time evidence inside the target alert."
+        }
+      ],
+      "evidence_is_exact_city_zaporizhzhia": true,
+      "evidence_is_military_explosion_strike_or_air_defense_context": true,
+      "temporal_evidence_to_target_episode": "exact_event_time_inside_target",
+      "final_review_verdict": "confirmed_strict_miss",
+      "rationale": "Independent reporting places three Shahed impacts on City Mall in Zaporizhzhia at approximately 00:30. That time falls unambiguously inside the target alert 00:00:54–02:48:49. Exact city, aerial-war context and target-episode timing all satisfy the canonical strict rule.",
+      "failure_mode": "source_discovery",
+      "failure_mode_note": "The decisive ~00:30 exact-time evidence was absent from canonical strict evidence and was surfaced by the new source-discovery pass. A later canonical strict episode on the same date makes multi-episode matching a plausible contributing risk, but source discovery is the directly observed failure."
+    }
+  ],
+  "new_confirmed_strict_miss": [
+    "5da4fc649a38d4796ebbcf94"
+  ],
+  "needs_review": [
+    "64867fdfc87ad6f4835ea664",
+    "cdda5267905f8fd09929ca32"
+  ],
+  "distance_1_vs_2_summary": {
+    "1": {
+      "reviewed": 6,
+      "verdict_counts": {
+        "confirmed_strict_miss": 1,
+        "sensitivity_only": 2,
+        "rejected": 3,
+        "needs_review": 0
+      },
+      "episode_ids": [
+        "9141489e7f283d49c39e28e5",
+        "898e8b677dfc4572a0361e73",
+        "26e3ffb19a31979f19ad22c7",
+        "2fc6f8573ce1962f9fd6c8c8",
+        "ae5ee840d8e79b3462e505d9",
+        "5da4fc649a38d4796ebbcf94"
+      ]
+    },
+    "2": {
+      "reviewed": 4,
+      "verdict_counts": {
+        "confirmed_strict_miss": 0,
+        "sensitivity_only": 1,
+        "rejected": 1,
+        "needs_review": 2
+      },
+      "episode_ids": [
+        "10fdb826dce7f2e36029f245",
+        "64867fdfc87ad6f4835ea664",
+        "22b04aca1ee26285eaac1084",
+        "cdda5267905f8fd09929ca32"
+      ]
+    }
+  },
+  "cumulative_known_strict_misses_after_batch": {
+    "prior_known_confirmed_strict_misses": 15,
+    "provenance": "13 confirmed in the gap audit (1 initial + 12 additional) plus 1 blind Wave 1 miss plus 1 blind Wave 2 miss.",
+    "new_confirmed_strict_misses_in_this_batch": 1,
+    "cumulative_known_confirmed_strict_misses": 16,
+    "canonical_denominator": 2365,
+    "canonical_strict_numerator": 169,
+    "canonical_strict_numerator_changed": false,
+    "note": "This is a research-only cumulative miss count. No canonical repair is performed in this task."
+  },
+  "observed_failure_pattern": {
+    "confirmed_miss_count": 1,
+    "confirmed_miss_failure_modes": [
+      {
+        "episode_id": "5da4fc649a38d4796ebbcf94",
+        "failure_mode": "source_discovery"
+      }
+    ],
+    "interpretation": "With only one new confirmed strict miss, this batch cannot establish a common confirmed-miss failure mode. The directly observed miss is source_discovery; across the non-strict outcomes, unresolved timing across multi-episode or prolonged attack sequences is the dominant review constraint."
+  },
+  "audit_universe_implication": {
+    "broad_expansion_supported": false,
+    "interpretation": "This enriched positive-hit batch found one new strict miss, but it was preselected from exact-city discovery hits and the discovery strategy was calibration-adjusted. The result does not estimate the miss rate and does not by itself justify a blanket expansion beyond O3. It supports targeted follow-up on high-signal multi-episode/timing cases rather than indiscriminate expansion."
+  },
+  "scope_guardrails": {
+    "canonical_data_modified": false,
+    "monitor_modified": false,
+    "dashboard_modified": false,
+    "grafana_modified": false,
+    "netlify_modified": false,
+    "production_modified": false,
+    "next_batch_started": false
+  }
+}
