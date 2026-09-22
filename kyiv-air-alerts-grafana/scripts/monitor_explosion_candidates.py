@@ -546,6 +546,7 @@ def classification_segments(row: dict) -> list[str]:
     ]
 
 
+
 def controlled_blast_signal(text: str) -> bool:
     low = normalize_evidence_text(text)
     return bool(
@@ -556,11 +557,39 @@ def controlled_blast_signal(text: str) -> bool:
     )
 
 
+def military_strike_event_signal(text: str) -> bool:
+    """
+    Evidence that the event segment itself describes a military strike.
+
+    Generic alert/PPO/aerial-threat wording is intentionally excluded: it may
+    occur elsewhere in the same article and must not turn a clearly planned
+    quarry/blasting event into a military explosion.
+    """
+    low = normalize_evidence_text(text)
+    if not low:
+        return False
+    if re.search(r"\b(?:влуч\w*|поціл\w*|приліт\w*|вдарил\w*|атакув\w*)", low):
+        return True
+    if re.search(r"\b(?:завдал\w*|нанес\w*)\b.{0,50}\bудар\w*", low):
+        return True
+    if re.search(
+        r"\b(?:ракет\w*|дрон\w*|бпла|безпілот\w*|шахед\w*|shahed\w*|каб\w*|авіабомб\w*)"
+        r".{0,60}\b(?:удар\w*|влуч\w*|атак\w*|вибух\w*)",
+        low,
+    ):
+        return True
+    return False
+
+
+def controlled_blast_nonmilitary_signal(text: str) -> bool:
+    return controlled_blast_signal(text) and not military_strike_event_signal(text)
+
+
 def strict_explosion_signal(text: str) -> bool:
     low = normalize_evidence_text(text)
     if not low:
         return False
-    if controlled_blast_signal(low) and not air_military_context(low):
+    if controlled_blast_nonmilitary_signal(low):
         return False
     if re.search(r"\bвибух\w*", low):
         return True
@@ -573,7 +602,6 @@ def strict_explosion_signal(text: str) -> bool:
         if not threat_only:
             return True
     return False
-
 
 def air_military_context(text: str) -> bool:
     low = normalize_evidence_text(text)
@@ -1155,9 +1183,49 @@ def refresh_queue_matching(
     return counts
 
 
+
 def matched_episode_rows(matching: dict, episodes: list[dict]) -> list[dict]:
     wanted = set(matching.get("matched_episode_ids") or [])
     return [ep for ep in episodes if str(ep.get("episode_id") or "") in wanted]
+
+
+def publication_local_day(row: dict):
+    published = parse_dt(row.get("published_at"))
+    return published.astimezone(KYIV_TZ).date() if published else None
+
+
+def episodes_intersecting_local_day(row: dict, episodes: list[dict]) -> list[dict]:
+    local_day = publication_local_day(row)
+    if local_day is None:
+        return []
+    next_day = local_day + timedelta(days=1)
+    day_start = datetime(
+        local_day.year, local_day.month, local_day.day, tzinfo=KYIV_TZ
+    ).astimezone(UTC)
+    day_end = datetime(
+        next_day.year, next_day.month, next_day.day, tzinfo=KYIV_TZ
+    ).astimezone(UTC)
+    rows = {}
+    for ep in episodes:
+        episode_id = str(ep.get("episode_id") or "")
+        start = parse_dt(ep.get("alert_start"))
+        end = parse_dt(ep.get("alert_end"))
+        if not episode_id or not start or not end:
+            continue
+        if start < day_end and end >= day_start:
+            rows[episode_id] = ep
+    return sorted(rows.values(), key=lambda ep: (ep.get("alert_start") or "", ep.get("episode_id") or ""))
+
+
+def exact_active_episodes_at(moment: datetime, episodes: list[dict]) -> list[dict]:
+    rows = {}
+    for ep in episodes:
+        episode_id = str(ep.get("episode_id") or "")
+        start = parse_dt(ep.get("alert_start"))
+        end = parse_dt(ep.get("alert_end"))
+        if episode_id and start and end and start <= moment <= end:
+            rows[episode_id] = ep
+    return sorted(rows.values(), key=lambda ep: str(ep.get("episode_id") or ""))
 
 
 def event_clock_mentions(text: str) -> list[tuple[int, int]]:
@@ -1189,54 +1257,100 @@ def explicit_event_time_relation(
     matching: dict,
     episodes: list[dict],
 ) -> dict:
-    published = parse_dt(row.get("published_at"))
-    if not published or matching.get("outcome") != "unique_match":
-        return {"relation": None, "event_time": None, "distance_seconds": None}
+    """
+    Resolve a source-stated event clock against all tracked episodes.
 
-    matched = matched_episode_rows(matching, episodes)
-    if not matched:
-        return {"relation": None, "event_time": None, "distance_seconds": None}
+    Publication time is used only to infer the calendar date for a clock-only
+    expression such as "близько 16:18"; it never selects the alert episode.
+    """
+    published = parse_dt(row.get("published_at"))
+    if not published:
+        return {
+            "relation": None,
+            "event_time": None,
+            "distance_seconds": None,
+            "episode_specific": False,
+            "supported_episode_ids": [],
+            "episode_id": None,
+        }
 
     local_day = published.astimezone(KYIV_TZ).date()
     candidates = []
+    limit = SENSITIVITY_NEAR_BOUNDARY_MAX_MINUTES * 60
     for segment in event_segments:
         for hour, minute in event_clock_mentions(segment):
             for day_offset in (0, -1):
                 day = local_day + timedelta(days=day_offset)
-                event_dt = datetime(day.year, day.month, day.day, hour, minute, tzinfo=KYIV_TZ).astimezone(UTC)
-                for ep in matched:
+                event_dt = datetime(
+                    day.year, day.month, day.day, hour, minute, tzinfo=KYIV_TZ
+                ).astimezone(UTC)
+                for ep in episodes:
+                    episode_id = str(ep.get("episode_id") or "")
                     start = parse_dt(ep.get("alert_start"))
                     end = parse_dt(ep.get("alert_end"))
-                    if not start or not end:
+                    if not episode_id or not start or not end:
                         continue
                     if start <= event_dt <= end:
-                        candidates.append(("inside", 0.0, event_dt))
+                        candidates.append(("inside", 0.0, event_dt, episode_id))
                         continue
                     before = (start - event_dt).total_seconds()
                     after = (event_dt - end).total_seconds()
-                    limit = SENSITIVITY_NEAR_BOUNDARY_MAX_MINUTES * 60
                     if 0 < before <= limit:
-                        candidates.append(("near_before", before, event_dt))
+                        candidates.append(("near_before", before, event_dt, episode_id))
                     elif 0 < after <= limit:
-                        candidates.append(("near_after", after, event_dt))
+                        candidates.append(("near_after", after, event_dt, episode_id))
 
     if not candidates:
-        return {"relation": None, "event_time": None, "distance_seconds": None}
+        return {
+            "relation": None,
+            "event_time": None,
+            "distance_seconds": None,
+            "episode_specific": False,
+            "supported_episode_ids": [],
+            "episode_id": None,
+        }
 
-    candidates.sort(key=lambda item: (0 if item[0] == "inside" else 1, item[1], item[2]))
-    relation, distance_seconds, event_dt = candidates[0]
+    candidates.sort(key=lambda item: (0 if item[0] == "inside" else 1, item[1], item[2], item[3]))
+    best_priority = 0 if candidates[0][0] == "inside" else 1
+    best_distance = candidates[0][1]
+    best_time = candidates[0][2]
+    selected = [
+        item for item in candidates
+        if (0 if item[0] == "inside" else 1) == best_priority
+        and item[1] == best_distance
+        and item[2] == best_time
+    ]
+    supported_ids = sorted({item[3] for item in selected})
+    relations = sorted({item[0] for item in selected})
+    relation = relations[0] if len(relations) == 1 else None
+    specific = relation is not None and len(supported_ids) == 1
     return {
         "relation": relation,
-        "event_time": iso(event_dt),
-        "distance_seconds": distance_seconds,
+        "event_time": iso(best_time),
+        "distance_seconds": best_distance,
+        "episode_specific": specific,
+        "supported_episode_ids": supported_ids,
+        "episode_id": supported_ids[0] if specific else None,
     }
 
 
 def explicit_event_time_binding(row: dict, event_segments: list[str], matching: dict, episodes: list[dict]) -> dict:
     relation = explicit_event_time_relation(row, event_segments, matching, episodes)
     return {
-        "present": relation.get("relation") == "inside",
+        "present": relation.get("relation") == "inside" and relation.get("episode_specific") is True,
         "event_time": relation.get("event_time") if relation.get("relation") == "inside" else None,
+        "episode_specific": bool(relation.get("episode_specific")),
+        "supported_episode_ids": list(relation.get("supported_episode_ids") or []),
+        "episode_id": relation.get("episode_id"),
+    }
+
+
+def empty_near_boundary() -> dict:
+    return {
+        "present": False,
+        "episode_specific": False,
+        "supported_episode_ids": [],
+        "episode_id": None,
     }
 
 
@@ -1244,60 +1358,158 @@ def temporal_binding_evidence(row: dict, strict_evidence: dict, matching: dict, 
     event_segments = list(strict_evidence.get("segments") or [])
     clock = explicit_event_time_relation(row, event_segments, matching, episodes)
     if clock.get("relation") == "inside":
+        specific = bool(clock.get("episode_specific"))
         return {
-            "present": True,
-            "code": "TEMPORAL_EXPLICIT_EVENT_TIME_INSIDE_EPISODE",
+            "present": specific,
+            "code": (
+                "TEMPORAL_EXPLICIT_EVENT_TIME_INSIDE_EPISODE"
+                if specific
+                else "TEMPORAL_EXPLICIT_EVENT_TIME_AMBIGUOUS_EPISODES"
+            ),
+            "evidence_type": "explicit_event_time",
             "evidence": clock.get("event_time"),
-            "near_boundary": {"present": False},
+            "event_time": clock.get("event_time"),
+            "event_interval": None,
+            "message_time": None,
+            "episode_specific": specific,
+            "supported_episode_ids": list(clock.get("supported_episode_ids") or []),
+            "episode_id": clock.get("episode_id"),
+            "near_boundary": empty_near_boundary(),
         }
     if clock.get("relation") in {"near_before", "near_after"}:
+        specific = bool(clock.get("episode_specific"))
+        near = {
+            "present": specific,
+            "code": "TEMPORAL_EXPLICIT_EVENT_TIME_NEAR_BOUNDARY",
+            "relation": clock.get("relation"),
+            "event_time": clock.get("event_time"),
+            "distance_seconds": clock.get("distance_seconds"),
+            "episode_specific": specific,
+            "supported_episode_ids": list(clock.get("supported_episode_ids") or []),
+            "episode_id": clock.get("episode_id"),
+        }
         return {
             "present": False,
-            "code": "NO_STRICT_TEMPORAL_BINDING",
-            "evidence": None,
-            "near_boundary": {
-                "present": True,
-                "code": "TEMPORAL_EXPLICIT_EVENT_TIME_NEAR_BOUNDARY",
-                "relation": clock.get("relation"),
-                "event_time": clock.get("event_time"),
-                "distance_seconds": clock.get("distance_seconds"),
-            },
-        }
-
-    explicit_segment = next((segment for segment in event_segments if explicit_alert_relation(segment)), None)
-    if explicit_segment:
-        return {
-            "present": True,
-            "code": "TEMPORAL_EXPLICIT_ALERT_RELATION",
-            "evidence": explicit_segment,
-            "near_boundary": {"present": False},
+            "code": (
+                "TEMPORAL_EXPLICIT_EVENT_TIME_NEAR_BOUNDARY"
+                if specific
+                else "TEMPORAL_EXPLICIT_EVENT_TIME_NEAR_BOUNDARY_AMBIGUOUS"
+            ),
+            "evidence_type": "explicit_event_time",
+            "evidence": clock.get("event_time"),
+            "event_time": clock.get("event_time"),
+            "event_interval": None,
+            "message_time": None,
+            "episode_specific": specific,
+            "supported_episode_ids": list(clock.get("supported_episode_ids") or []),
+            "episode_id": clock.get("episode_id"),
+            "near_boundary": near,
         }
 
     published = parse_dt(row.get("published_at"))
     if (
         published
-        and matching.get("outcome") == "unique_match"
         and trusted_live_source(row)
         and any(contemporaneous_live_wording(segment) for segment in event_segments)
     ):
-        for ep in matched_episode_rows(matching, episodes):
-            start = parse_dt(ep.get("alert_start"))
-            end = parse_dt(ep.get("alert_end"))
-            if start and end and start <= published <= end:
-                return {
-                    "present": True,
-                    "code": "TEMPORAL_CONTEMPORANEOUS_LIVE_WORDING",
-                    "evidence": iso(published),
-                    "near_boundary": {"present": False},
-                }
+        active = exact_active_episodes_at(published, episodes)
+        supported_ids = [str(ep.get("episode_id")) for ep in active]
+        specific = len(supported_ids) == 1
+        return {
+            "present": specific,
+            "code": (
+                "TEMPORAL_CONTEMPORANEOUS_LIVE_WORDING"
+                if specific
+                else "TEMPORAL_CONTEMPORANEOUS_LIVE_AMBIGUOUS_EPISODES"
+            ),
+            "evidence_type": "trusted_contemporaneous_live_message",
+            "evidence": iso(published),
+            "event_time": None,
+            "event_interval": None,
+            "message_time": iso(published),
+            "episode_specific": specific,
+            "supported_episode_ids": supported_ids,
+            "episode_id": supported_ids[0] if specific else None,
+            "near_boundary": empty_near_boundary(),
+        }
+
+    explicit_segment = next((segment for segment in event_segments if explicit_alert_relation(segment)), None)
+    if explicit_segment:
+        same_day = episodes_intersecting_local_day(row, episodes)
+        supported_ids = [str(ep.get("episode_id")) for ep in same_day]
+        specific = len(supported_ids) == 1
+        return {
+            "present": specific,
+            "code": (
+                "TEMPORAL_EXPLICIT_ALERT_RELATION"
+                if specific
+                else (
+                    "TEMPORAL_EXPLICIT_ALERT_RELATION_AMBIGUOUS_DATE"
+                    if supported_ids
+                    else "TEMPORAL_EXPLICIT_ALERT_RELATION_NO_EPISODE"
+                )
+            ),
+            "evidence_type": "generic_explicit_alert_relation",
+            "evidence": explicit_segment,
+            "event_time": None,
+            "event_interval": None,
+            "message_time": None,
+            "episode_specific": specific,
+            "supported_episode_ids": supported_ids,
+            "episode_id": supported_ids[0] if specific else None,
+            "near_boundary": empty_near_boundary(),
+        }
 
     return {
         "present": False,
         "code": "NO_STRICT_TEMPORAL_BINDING",
+        "evidence_type": None,
         "evidence": None,
-        "near_boundary": {"present": False},
+        "event_time": None,
+        "event_interval": None,
+        "message_time": None,
+        "episode_specific": False,
+        "supported_episode_ids": [],
+        "episode_id": None,
+        "near_boundary": empty_near_boundary(),
     }
 
+
+def single_episode_day_inference(row: dict, matching: dict, episodes: list[dict]) -> dict:
+    """
+    Conservative sensitivity-only inference.
+
+    A publication-time match can confirm that the report sits inside the sole
+    tracked alert window of that local day, but it cannot choose among multiple
+    episodes and is never treated as event-time proof.
+    """
+    same_day = episodes_intersecting_local_day(row, episodes)
+    day_ids = [str(ep.get("episode_id")) for ep in same_day]
+    local_day = publication_local_day(row)
+    if len(day_ids) != 1:
+        return {
+            "present": False,
+            "reason": "multiple_or_no_tracked_episodes_on_publication_local_date",
+            "local_date": local_day.isoformat() if local_day else None,
+            "supported_episode_ids": day_ids,
+            "episode_id": None,
+        }
+    episode_id = day_ids[0]
+    present = (
+        matching.get("outcome") == "unique_match"
+        and matching.get("matched_episode_id") == episode_id
+    )
+    return {
+        "present": present,
+        "reason": (
+            "single_episode_day_and_publication_window_consistent"
+            if present
+            else "single_episode_day_but_publication_window_not_consistent"
+        ),
+        "local_date": local_day.isoformat() if local_day else None,
+        "supported_episode_ids": day_ids,
+        "episode_id": episode_id if present else None,
+    }
 
 def dry_classify_existing_candidate(item: dict, state: dict) -> dict:
     city_key = str(item.get("city_key") or "")
@@ -1317,6 +1529,7 @@ def dry_classify_existing_candidate(item: dict, state: dict) -> dict:
     matching = match_candidate_to_episodes(item, episodes)
     return classify_candidate(item, city_key, episodes, matching)
 
+
 def classify_candidate(row: dict, city_key: str, episodes: list[dict], matching: dict | None = None) -> dict:
     matching = matching or match_candidate_to_episodes(row, episodes)
     exact = exact_city_classification_evidence(city_key, row)
@@ -1324,6 +1537,7 @@ def classify_candidate(row: dict, city_key: str, episodes: list[dict], matching:
     air = air_military_context_evidence(row)
     same_attack = same_attack_context_evidence(city_key, row, strict, air)
     temporal = temporal_binding_evidence(row, strict, matching, episodes)
+    inference = single_episode_day_inference(row, matching, episodes)
     text = classification_text(row)
     segments = classification_segments(row)
     publisher = str(row.get("publisher") or "")
@@ -1334,7 +1548,12 @@ def classify_candidate(row: dict, city_key: str, episodes: list[dict], matching:
         and city_mentioned(city_key, publisher)
         and city_mentioned(city_key, raw_title_snippet)
     )
-    controlled = controlled_blast_signal(text) and not air["present"]
+    controlled_event_segments = [
+        segment
+        for segment in segments
+        if city_mentioned(city_key, segment) and controlled_blast_nonmilitary_signal(segment)
+    ]
+    controlled = bool(controlled_event_segments)
     whole_message_event = any(strict_explosion_signal(segment) for segment in segments)
     pvo_only_complete_message = (
         trusted_live_source(row)
@@ -1359,8 +1578,11 @@ def classify_candidate(row: dict, city_key: str, episodes: list[dict], matching:
     reason_codes.append("AIR_MILITARY_CONTEXT" if air["present"] else "NO_AIR_MILITARY_CONTEXT")
     if air["present"]:
         reason_codes.append("SAME_ATTACK_CONTEXT_SUPPORTED" if same_attack["present"] else "AIR_CONTEXT_NOT_LINKED_TO_EVENT")
-    reason_codes.append(temporal["code"] if temporal["present"] else "NO_STRICT_TEMPORAL_BINDING")
-    near_boundary = bool((temporal.get("near_boundary") or {}).get("present"))
+    reason_codes.append(temporal.get("code") or "NO_STRICT_TEMPORAL_BINDING")
+    near_boundary = bool(
+        (temporal.get("near_boundary") or {}).get("present")
+        and (temporal.get("near_boundary") or {}).get("episode_specific")
+    )
     if controlled:
         reason_codes.append("DETERMINISTIC_CONTROLLED_BLAST")
     if publisher_only_city:
@@ -1370,50 +1592,62 @@ def classify_candidate(row: dict, city_key: str, episodes: list[dict], matching:
     if fulltext_requires_review:
         reason_codes.append("PUBLISHER_FULLTEXT_REQUIRES_REVIEW")
 
+    base_event_ok = (
+        exact["present"]
+        and strict["present"]
+        and air["present"]
+        and same_attack["present"]
+    )
+    strict_episode_id = (
+        temporal.get("episode_id")
+        if temporal.get("present") and temporal.get("episode_specific")
+        else None
+    )
+    near_boundary_episode_id = (
+        (temporal.get("near_boundary") or {}).get("episode_id")
+        if near_boundary
+        else None
+    )
+    inferred_episode_id = inference.get("episode_id") if inference.get("present") else None
+
     proposed = "needs_review"
+    proposed_matched_episode_id = None
+    sensitivity_basis = None
     if controlled or publisher_only_city or pvo_only_complete_message:
         proposed = "rejected"
     elif fulltext_requires_review:
         proposed = "needs_review"
-    elif (
-        outcome == "unique_match"
-        and matching.get("matched_episode_id")
-        and exact["present"]
-        and strict["present"]
-        and air["present"]
-        and same_attack["present"]
-        and temporal["present"]
-    ):
+    elif base_event_ok and strict_episode_id:
         proposed = "approved_strict"
-    elif (
-        outcome == "unique_match"
-        and matching.get("matched_episode_id")
-        and exact["present"]
-        and strict["present"]
-        and air["present"]
-        and same_attack["present"]
-    ):
+        proposed_matched_episode_id = strict_episode_id
+    elif base_event_ok and near_boundary_episode_id:
         proposed = "approved_sensitivity"
-        reason_codes.append(
-            "SENSITIVITY_NEAR_BOUNDARY"
-            if near_boundary
-            else "SENSITIVITY_INFERRED_SAME_ATTACK"
-        )
+        proposed_matched_episode_id = near_boundary_episode_id
+        sensitivity_basis = "near_boundary"
+        reason_codes.append("SENSITIVITY_NEAR_BOUNDARY")
+    elif base_event_ok and inferred_episode_id:
+        proposed = "approved_sensitivity"
+        proposed_matched_episode_id = inferred_episode_id
+        sensitivity_basis = "inferred_same_attack"
+        reason_codes.append("SENSITIVITY_INFERRED_SAME_ATTACK")
+    elif base_event_ok and len(episodes_intersecting_local_day(row, episodes)) > 1:
+        reason_codes.append("MULTI_EPISODE_DATE_REQUIRES_EPISODE_SPECIFIC_TEMPORAL_PROOF")
+
     return {
         "proposed_outcome": proposed,
+        "proposed_matched_episode_id": proposed_matched_episode_id,
         "matching": matching,
         "exact_city_classification_evidence": exact,
         "strict_explosion_evidence": strict,
         "air_military_context": air,
         "same_attack_context": same_attack,
         "temporal_binding": temporal,
-        "sensitivity_basis": (
-            "near_boundary"
-            if proposed == "approved_sensitivity" and near_boundary
-            else ("inferred_same_attack" if proposed == "approved_sensitivity" else None)
-        ),
+        "single_episode_day_inference": inference,
+        "controlled_blast_event_segments": controlled_event_segments,
+        "sensitivity_basis": sensitivity_basis,
         "reason_codes": reason_codes,
     }
+
 
 def add_candidates(
     queue: list[dict],
@@ -1473,7 +1707,10 @@ def add_candidates(
                 "air_military_context": decision["air_military_context"],
                 "same_attack_context": decision["same_attack_context"],
                 "temporal_binding": decision["temporal_binding"],
+                "single_episode_day_inference": decision["single_episode_day_inference"],
+                "controlled_blast_event_segments": decision["controlled_blast_event_segments"],
                 "sensitivity_basis": decision["sensitivity_basis"],
+                "classification_episode_id": decision["proposed_matched_episode_id"],
             },
             "review_note": (
                 "evidence-layered auto-classification"
@@ -1481,14 +1718,16 @@ def add_candidates(
                 else "evidence-layered classification requires manual review"
             ),
             "note": (
-                "Discovery relevance, episode matching, and strict/sensitivity classification are separate. "
-                "Publication time can build a candidate episode set but is never event-time proof. "
-                "Strict requires exact-city explosion/strike evidence, aerial-war context, a single raw matched episode, "
-                "and historical-method temporal binding. Sensitivity requires the same event/context evidence and a single raw match "
-                "but allows inferred-same-attack timing. PVO-only evidence is never strict."
+                "Discovery relevance, publication-time episode matching, and strict/sensitivity classification are separate. "
+                "Publication time may build a candidate episode set but never supplies event time or chooses an approved event episode. "
+                "Strict requires exact-city explosion/strike evidence, aerial-war context, and episode-specific temporal proof. "
+                "Sensitivity requires explicit near-boundary timing or conservative single-episode-day inference; multi-episode dates "
+                "without episode-specific proof remain manual review. PVO-only and non-military controlled blasts are rejected."
             ),
         }
         apply_matching_result(item, matching)
+        if status in {"approved_strict", "approved_sensitivity"}:
+            item["matched_episode_id"] = decision.get("proposed_matched_episode_id")
         queue.append(item)
         by_id[cid] = item
         added += 1
@@ -1806,6 +2045,189 @@ def self_test() -> None:
 
     assert match_candidate_to_episodes({"published_at": iso(dt + timedelta(hours=3))}, [poltava_ep])["outcome"] == "no_match"
 
+
+    # Temporal attribution corrective regressions.
+    # Odesa wrong-episode: publication falls in the later episode grace window,
+    # but generic "during alert" wording on a multi-episode date cannot select it.
+    odesa_prev = {
+        "episode_id": "eb2580c2bec54ddc2e36eaf7",
+        "city_key": "odesa",
+        "city": "Одеса",
+        "alert_start": "2026-09-21T12:14:59.835398Z",
+        "alert_end": "2026-09-21T13:37:45.918693Z",
+    }
+    odesa_later = {
+        "episode_id": "7a7da068c0efb7be80bd45e4",
+        "city_key": "odesa",
+        "city": "Одеса",
+        "alert_start": "2026-09-21T15:23:04.352831Z",
+        "alert_end": "2026-09-21T16:04:52.076994Z",
+    }
+    for odesa_candidate_id in (
+        "5a61d62cac76456eb62cb386",
+        "da37fd7a3b6c42dbff41d115",
+    ):
+        odesa_wrong_episode_row = {
+            "candidate_id": odesa_candidate_id,
+            "title": "Вибухи в Одесі під час тривоги: РФ атакувала місто реактивними дронами",
+            "snippet": "",
+            "publisher": "Test",
+            "source": "Google News RSS",
+            "published_at": "2026-09-21T16:20:00Z",
+        }
+        wrong_episode_decision = classify_candidate(
+            odesa_wrong_episode_row,
+            "odesa",
+            [odesa_prev, odesa_later],
+        )
+        assert wrong_episode_decision["matching"]["matched_episode_id"] == "7a7da068c0efb7be80bd45e4"
+        assert wrong_episode_decision["proposed_outcome"] == "needs_review"
+        assert wrong_episode_decision["proposed_matched_episode_id"] is None
+        assert not wrong_episode_decision["temporal_binding"]["episode_specific"]
+        assert wrong_episode_decision["temporal_binding"]["code"] == "TEMPORAL_EXPLICIT_ALERT_RELATION_AMBIGUOUS_DATE"
+
+    # Generic alert relation can bind a single episode on a single-episode
+    # date even when publication itself is outside the matching window.
+    ternopil_single_ep = {
+        "episode_id": "542708c29f1a2e044db6876c",
+        "city_key": "ternopil",
+        "city": "Тернопіль",
+        "alert_start": "2026-09-18T17:02:28.779103Z",
+        "alert_end": "2026-09-18T17:20:23.075792Z",
+    }
+    ternopil_late_row = {
+        "candidate_id": "cc64cf1fe5e06196cac9b4a3",
+        "title": "У Тернополі пролунав вибух під час тривоги: перед цим повідомляли про рух БпЛА на місто",
+        "snippet": "",
+        "publisher": "tenews.org.ua",
+        "source": "Google News RSS",
+        "published_at": "2026-09-18T17:51:00Z",
+    }
+    ternopil_late_decision = classify_candidate(
+        ternopil_late_row,
+        "ternopil",
+        [ternopil_single_ep],
+    )
+    assert ternopil_late_decision["matching"]["outcome"] == "no_match"
+    assert ternopil_late_decision["proposed_outcome"] == "approved_strict"
+    assert ternopil_late_decision["proposed_matched_episode_id"] == "542708c29f1a2e044db6876c"
+
+    # Trusted contemporaneous live wording remains strict on a multi-episode date
+    # when the live message itself falls inside exactly one active raw episode.
+    kyiv_earlier = {
+        "episode_id": "kyiv-earlier",
+        "city_key": "kyiv",
+        "city": "Київ",
+        "alert_start": "2026-09-22T06:00:00Z",
+        "alert_end": "2026-09-22T06:30:00Z",
+    }
+    kyiv_live_ep = {
+        "episode_id": "baf3eaa558f606c14d6e385f",
+        "city_key": "kyiv",
+        "city": "Київ",
+        "alert_start": "2026-09-22T09:55:00Z",
+        "alert_end": "2026-09-22T10:20:00Z",
+    }
+    kyiv_live_row = {
+        "candidate_id": "d4fb0e081e5be3bd609f0633",
+        "title": (
+            "У Києві лунають вибухи, повідомляють кореспонденти Суспільного. "
+            "Міський голова Кличко інформує, що у столиці працює ППО."
+        ),
+        "snippet": "",
+        "publisher": "СУСПІЛЬНЕ НОВИНИ",
+        "source": "Telegram / СУСПІЛЬНЕ НОВИНИ",
+        "published_at": "2026-09-22T10:07:54Z",
+    }
+    kyiv_live_decision = classify_candidate(kyiv_live_row, "kyiv", [kyiv_earlier, kyiv_live_ep])
+    assert kyiv_live_decision["proposed_outcome"] == "approved_strict"
+    assert kyiv_live_decision["proposed_matched_episode_id"] == "baf3eaa558f606c14d6e385f"
+    assert kyiv_live_decision["temporal_binding"]["code"] == "TEMPORAL_CONTEMPORANEOUS_LIVE_WORDING"
+
+    # Multi-episode inferred_same_attack cannot use a unique publication-window
+    # match as episode attribution.
+    multi_first = make_episode("poltava", dt, dt + timedelta(hours=1))
+    multi_second = make_episode("poltava", dt + timedelta(hours=2), dt + timedelta(hours=3))
+    multi_inferred_row = {
+        **publication_only,
+        "published_at": iso(dt + timedelta(minutes=30)),
+    }
+    multi_inferred_decision = classify_candidate(
+        multi_inferred_row,
+        "poltava",
+        [multi_first, multi_second],
+    )
+    assert multi_inferred_decision["matching"]["outcome"] == "unique_match"
+    assert multi_inferred_decision["proposed_outcome"] == "needs_review"
+    assert "MULTI_EPISODE_DATE_REQUIRES_EPISODE_SPECIFIC_TEMPORAL_PROOF" in multi_inferred_decision["reason_codes"]
+
+    # Explicit event time attributes the event independently of the publication
+    # window, including when publication matching points to a different episode.
+    event_time_earlier = {
+        "episode_id": "event-time-earlier",
+        "city_key": "poltava",
+        "city": "Полтава",
+        "alert_start": "2026-09-18T10:00:00Z",
+        "alert_end": "2026-09-18T11:00:00Z",
+    }
+    publication_later = {
+        "episode_id": "publication-later",
+        "city_key": "poltava",
+        "city": "Полтава",
+        "alert_start": "2026-09-18T12:00:00Z",
+        "alert_end": "2026-09-18T13:00:00Z",
+    }
+    explicit_clock_row = {
+        **strict_base,
+        "title": "Близько 13:30 у Полтаві пролунав вибух після повідомлення про Бандероль",
+        "published_at": "2026-09-18T12:30:00Z",
+    }
+    explicit_clock_decision = classify_candidate(
+        explicit_clock_row,
+        "poltava",
+        [event_time_earlier, publication_later],
+    )
+    assert explicit_clock_decision["matching"]["matched_episode_id"] == "publication-later"
+    assert explicit_clock_decision["proposed_outcome"] == "approved_strict"
+    assert explicit_clock_decision["proposed_matched_episode_id"] == "event-time-earlier"
+    assert explicit_clock_decision["temporal_binding"]["event_time"] == "2026-09-18T10:30:00Z"
+
+    # Explicit timing just outside a boundary remains episode-specific sensitivity.
+    boundary_ep = {
+        "episode_id": "boundary-episode",
+        "city_key": "poltava",
+        "city": "Полтава",
+        "alert_start": "2026-09-18T10:00:00Z",
+        "alert_end": "2026-09-18T11:00:00Z",
+    }
+    boundary_row = {
+        **strict_base,
+        "title": "Близько 12:55 у Полтаві пролунав вибух на тлі руху Бандеролі до міста",
+        "published_at": "2026-09-18T10:10:00Z",
+    }
+    boundary_decision = classify_candidate(boundary_row, "poltava", [boundary_ep])
+    assert boundary_decision["proposed_outcome"] == "approved_sensitivity"
+    assert boundary_decision["sensitivity_basis"] == "near_boundary"
+    assert boundary_decision["proposed_matched_episode_id"] == "boundary-episode"
+
+    # Controlled blast remains deterministic reject even with unrelated alert/PPO
+    # wording elsewhere in the message.
+    controlled_with_unrelated_air = {
+        **strict_base,
+        "title": (
+            "У Запоріжжі проведуть планові вибухові роботи на кар'єрі. "
+            "У регіоні оголошена повітряна тривога, працює ППО."
+        ),
+        "snippet": "",
+    }
+    controlled_decision = classify_candidate(
+        controlled_with_unrelated_air,
+        "zaporizhzhia",
+        [make_episode("zaporizhzhia", dt, dt + timedelta(hours=1))],
+    )
+    assert controlled_decision["proposed_outcome"] == "rejected"
+    assert "DETERMINISTIC_CONTROLLED_BLAST" in controlled_decision["reason_codes"]
+
     if "kyiv" in CITY_CONFIG:
         assert load_kyiv_alert_episodes(KYIV_ALERTS_FILE)[-1]["alert_source"] == "kyiv_combined_exact_city"
     if "sevastopol" in CITY_CONFIG:
@@ -1813,8 +2235,9 @@ def self_test() -> None:
 
     print(
         f"Self-test OK: {len(CITY_CONFIG)} audited cities; classification requirements IR01-IR20 covered; "
-        "PVO-only and publisher-branding guards; KAB/UAV/missile context; explicit/clock/live temporal binding; "
-        "near-boundary and inferred-same-attack sensitivity; late discovery; overlap/near-duplicate guards; dry replay purity"
+        "PVO-only, controlled-blast, and publisher-branding guards; KAB/UAV/missile context; episode-specific "
+        "explicit/clock/live temporal attribution; near-boundary and conservative single-episode sensitivity; "
+        "late discovery; overlap/near-duplicate guards; dry replay purity"
     )
 
 def main() -> None:

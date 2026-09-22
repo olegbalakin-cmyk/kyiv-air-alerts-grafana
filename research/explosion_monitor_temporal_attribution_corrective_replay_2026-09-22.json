@@ -1,0 +1,2098 @@
+{
+  "schema_version": 1,
+  "task": "explosion_monitor_temporal_attribution_corrective_replay",
+  "generated_date": "2026-09-22",
+  "repository": "olegbalakin-cmyk/kyiv-air-alerts-grafana",
+  "branch": "multicity-wip-2026-09-16",
+  "head_before_corrective_commit": "4e350dd84f82ea86974a1920623687c92eb4fe09",
+  "corrective_code_blob_sha": "c08c4e6a76d1874b74fbe796dc18c1ed566f2f83",
+  "scope": {
+    "live_queue_statuses_mutated": false,
+    "step3_records_repaired": false,
+    "metric_propagation_run": false,
+    "normal_monitor_run": false,
+    "historical_or_canonical_data_changed": false,
+    "dashboard_or_production_deployed": false,
+    "note": "The branch already contains the controlled step-3 live replay. This corrective replay is read-only and deliberately does not repair those live records."
+  },
+  "inputs": {
+    "previous_classification_dry_replay": {
+      "commit": "35960efab83812d71ebe79bec991dea2d44c1f35",
+      "artifact": "research/explosion_monitor_classification_hardening_replay_2026-09-22.json",
+      "artifact_blob_sha": "242e1fbfef24f3e8c255b286a4a4e8d92bff0025",
+      "classifier_commit": "68f969347dcd15f3b25243b0209f6d318ac89c99",
+      "frozen_queue_blob_sha": "4d53f887693a5099b9eb70a5619dd3e2192afd8b",
+      "frozen_monitor_state_blob_sha": "a70aabad8440da5c39ff04bddca7c48ad0051249",
+      "needs_review_total": 175
+    },
+    "current_head_snapshot": {
+      "head": "4e350dd84f82ea86974a1920623687c92eb4fe09",
+      "queue_blob_sha": "cb1d28318588b73211c5638bf87dccc18d4f0555",
+      "monitor_state_blob_sha": "922ff21ccb7477bd7df47abfc0da633d61c565e4",
+      "queue_total": 259,
+      "status_counts": {
+        "needs_review": 130,
+        "approved_sensitivity": 61,
+        "rejected": 22,
+        "approved_strict": 46
+      },
+      "current_needs_review_total": 130
+    }
+  },
+  "rule_correction": {
+    "publication_time_role": "matching/discovery only; never event time and never sufficient to choose an approved event episode",
+    "strict": "requires episode-specific temporal evidence with exactly one supported raw episode ID",
+    "generic_alert_relation": "single-episode local date may be episode-specific; multi-episode local date remains needs_review",
+    "contemporaneous_live": "trusted live wording is strict only when the live message timestamp lies inside exactly one active raw episode",
+    "explicit_event_time": "resolved against all tracked episodes, independently of publication-time matching",
+    "near_boundary": "sensitivity only with explicit event time and one supported raw episode",
+    "inferred_same_attack": "multi-episode local dates require review; conservative inference retained only on a single-episode local date with publication-window consistency",
+    "controlled_blast": "planned/quarry/blasting event segment is deterministic non-military reject unless that same segment contains military-strike evidence"
+  },
+  "previous_dry_replay_counts": {
+    "approved_strict": 4,
+    "approved_sensitivity": 44,
+    "rejected": 5,
+    "needs_review": 122,
+    "total": 175
+  },
+  "corrected_frozen_cohort_replay": {
+    "input_total": 175,
+    "counts": {
+      "approved_strict": 3,
+      "approved_sensitivity": 1,
+      "rejected": 5,
+      "needs_review": 166,
+      "total": 175
+    },
+    "counts_by_city": {
+      "cherkasy": {
+        "input_needs_review": 3,
+        "approved_strict": 0,
+        "approved_sensitivity": 0,
+        "rejected": 0,
+        "needs_review": 3
+      },
+      "chernihiv": {
+        "input_needs_review": 6,
+        "approved_strict": 0,
+        "approved_sensitivity": 0,
+        "rejected": 0,
+        "needs_review": 6
+      },
+      "chernivtsi": {
+        "input_needs_review": 0,
+        "approved_strict": 0,
+        "approved_sensitivity": 0,
+        "rejected": 0,
+        "needs_review": 0
+      },
+      "dnipro": {
+        "input_needs_review": 35,
+        "approved_strict": 0,
+        "approved_sensitivity": 0,
+        "rejected": 0,
+        "needs_review": 35
+      },
+      "ivano_frankivsk": {
+        "input_needs_review": 0,
+        "approved_strict": 0,
+        "approved_sensitivity": 0,
+        "rejected": 0,
+        "needs_review": 0
+      },
+      "kharkiv": {
+        "input_needs_review": 2,
+        "approved_strict": 0,
+        "approved_sensitivity": 0,
+        "rejected": 0,
+        "needs_review": 2
+      },
+      "kherson": {
+        "input_needs_review": 0,
+        "approved_strict": 0,
+        "approved_sensitivity": 0,
+        "rejected": 0,
+        "needs_review": 0
+      },
+      "khmelnytskyi": {
+        "input_needs_review": 0,
+        "approved_strict": 0,
+        "approved_sensitivity": 0,
+        "rejected": 0,
+        "needs_review": 0
+      },
+      "kropyvnytskyi": {
+        "input_needs_review": 14,
+        "approved_strict": 0,
+        "approved_sensitivity": 0,
+        "rejected": 0,
+        "needs_review": 14
+      },
+      "kyiv": {
+        "input_needs_review": 52,
+        "approved_strict": 1,
+        "approved_sensitivity": 0,
+        "rejected": 2,
+        "needs_review": 49
+      },
+      "lutsk": {
+        "input_needs_review": 0,
+        "approved_strict": 0,
+        "approved_sensitivity": 0,
+        "rejected": 0,
+        "needs_review": 0
+      },
+      "lviv": {
+        "input_needs_review": 0,
+        "approved_strict": 0,
+        "approved_sensitivity": 0,
+        "rejected": 0,
+        "needs_review": 0
+      },
+      "mykolaiv": {
+        "input_needs_review": 15,
+        "approved_strict": 0,
+        "approved_sensitivity": 0,
+        "rejected": 0,
+        "needs_review": 15
+      },
+      "odesa": {
+        "input_needs_review": 9,
+        "approved_strict": 0,
+        "approved_sensitivity": 0,
+        "rejected": 0,
+        "needs_review": 9
+      },
+      "poltava": {
+        "input_needs_review": 8,
+        "approved_strict": 0,
+        "approved_sensitivity": 0,
+        "rejected": 0,
+        "needs_review": 8
+      },
+      "rivne": {
+        "input_needs_review": 1,
+        "approved_strict": 0,
+        "approved_sensitivity": 0,
+        "rejected": 0,
+        "needs_review": 1
+      },
+      "sevastopol": {
+        "input_needs_review": 1,
+        "approved_strict": 0,
+        "approved_sensitivity": 0,
+        "rejected": 0,
+        "needs_review": 1
+      },
+      "sumy": {
+        "input_needs_review": 4,
+        "approved_strict": 0,
+        "approved_sensitivity": 0,
+        "rejected": 0,
+        "needs_review": 4
+      },
+      "ternopil": {
+        "input_needs_review": 6,
+        "approved_strict": 2,
+        "approved_sensitivity": 1,
+        "rejected": 0,
+        "needs_review": 3
+      },
+      "uzhhorod": {
+        "input_needs_review": 0,
+        "approved_strict": 0,
+        "approved_sensitivity": 0,
+        "rejected": 0,
+        "needs_review": 0
+      },
+      "vinnytsia": {
+        "input_needs_review": 3,
+        "approved_strict": 0,
+        "approved_sensitivity": 0,
+        "rejected": 1,
+        "needs_review": 2
+      },
+      "zaporizhzhia": {
+        "input_needs_review": 13,
+        "approved_strict": 0,
+        "approved_sensitivity": 0,
+        "rejected": 2,
+        "needs_review": 11
+      },
+      "zhytomyr": {
+        "input_needs_review": 3,
+        "approved_strict": 0,
+        "approved_sensitivity": 0,
+        "rejected": 0,
+        "needs_review": 3
+      }
+    },
+    "changed_candidate_count": 48,
+    "transitions": {
+      "strict_to_review": [
+        {
+          "candidate_id": "5a61d62cac76456eb62cb386",
+          "city_key": "odesa",
+          "previous_outcome": "approved_strict",
+          "corrected_outcome": "needs_review",
+          "previous_matched_episode_id": "7a7da068c0efb7be80bd45e4",
+          "corrected_matched_episode_id": null,
+          "local_date_kyiv": "2026-09-21",
+          "tracked_episode_ids_on_local_date": [
+            "3b5ad85f3217d7d99ac35777",
+            "ea3874832e11d136a9a3896e",
+            "9bedeed8b7bb6b0ff99fc12b",
+            "fedd9b9a869fe95c558f5dec",
+            "399d569d7dfa19badd9b4352",
+            "eb2580c2bec54ddc2e36eaf7",
+            "7a7da068c0efb7be80bd45e4",
+            "8ffac14c2a8f0dd6d9df029c"
+          ],
+          "previous_reason_codes": [
+            "MATCH_UNIQUE",
+            "EXACT_CITY_EVENT_TEXT",
+            "STRICT_EXPLOSION_EVIDENCE",
+            "AIR_MILITARY_CONTEXT",
+            "SAME_ATTACK_CONTEXT_SUPPORTED",
+            "TEMPORAL_EXPLICIT_ALERT_RELATION"
+          ],
+          "corrected_temporal_code": "TEMPORAL_EXPLICIT_ALERT_RELATION_AMBIGUOUS_DATE",
+          "reason": "generic explicit alert relation establishes that an alert was involved but cannot select one raw episode on a multi-episode local date"
+        },
+        {
+          "candidate_id": "63e4a0c4265cd7c9bac6f485",
+          "city_key": "odesa",
+          "previous_outcome": "approved_strict",
+          "corrected_outcome": "needs_review",
+          "previous_matched_episode_id": "eb2580c2bec54ddc2e36eaf7",
+          "corrected_matched_episode_id": null,
+          "local_date_kyiv": "2026-09-21",
+          "tracked_episode_ids_on_local_date": [
+            "3b5ad85f3217d7d99ac35777",
+            "ea3874832e11d136a9a3896e",
+            "9bedeed8b7bb6b0ff99fc12b",
+            "fedd9b9a869fe95c558f5dec",
+            "399d569d7dfa19badd9b4352",
+            "eb2580c2bec54ddc2e36eaf7",
+            "7a7da068c0efb7be80bd45e4",
+            "8ffac14c2a8f0dd6d9df029c"
+          ],
+          "previous_reason_codes": [
+            "MATCH_UNIQUE",
+            "EXACT_CITY_EVENT_TEXT",
+            "STRICT_EXPLOSION_EVIDENCE",
+            "AIR_MILITARY_CONTEXT",
+            "SAME_ATTACK_CONTEXT_SUPPORTED",
+            "TEMPORAL_EXPLICIT_ALERT_RELATION"
+          ],
+          "corrected_temporal_code": "TEMPORAL_EXPLICIT_ALERT_RELATION_AMBIGUOUS_DATE",
+          "reason": "generic explicit alert relation establishes that an alert was involved but cannot select one raw episode on a multi-episode local date"
+        },
+        {
+          "candidate_id": "da37fd7a3b6c42dbff41d115",
+          "city_key": "odesa",
+          "previous_outcome": "approved_strict",
+          "corrected_outcome": "needs_review",
+          "previous_matched_episode_id": "7a7da068c0efb7be80bd45e4",
+          "corrected_matched_episode_id": null,
+          "local_date_kyiv": "2026-09-21",
+          "tracked_episode_ids_on_local_date": [
+            "3b5ad85f3217d7d99ac35777",
+            "ea3874832e11d136a9a3896e",
+            "9bedeed8b7bb6b0ff99fc12b",
+            "fedd9b9a869fe95c558f5dec",
+            "399d569d7dfa19badd9b4352",
+            "eb2580c2bec54ddc2e36eaf7",
+            "7a7da068c0efb7be80bd45e4",
+            "8ffac14c2a8f0dd6d9df029c"
+          ],
+          "previous_reason_codes": [
+            "MATCH_UNIQUE",
+            "EXACT_CITY_EVENT_TEXT",
+            "STRICT_EXPLOSION_EVIDENCE",
+            "AIR_MILITARY_CONTEXT",
+            "SAME_ATTACK_CONTEXT_SUPPORTED",
+            "TEMPORAL_EXPLICIT_ALERT_RELATION"
+          ],
+          "corrected_temporal_code": "TEMPORAL_EXPLICIT_ALERT_RELATION_AMBIGUOUS_DATE",
+          "reason": "generic explicit alert relation establishes that an alert was involved but cannot select one raw episode on a multi-episode local date"
+        }
+      ],
+      "sensitivity_to_review": [
+        {
+          "candidate_id": "76743c6d9be4071874e32016",
+          "city_key": "cherkasy",
+          "previous_outcome": "approved_sensitivity",
+          "corrected_outcome": "needs_review",
+          "previous_matched_episode_id": "f139e46d882418e9f6b1ec95",
+          "corrected_matched_episode_id": null,
+          "local_date_kyiv": "2026-09-20",
+          "tracked_episode_ids_on_local_date": [
+            "ff0c9636c466c37db26e2245",
+            "2063c0c6b049dd1d3f8c2860",
+            "3273b48b81c218df4f3ba23f",
+            "fe5c39b5217ec7cc4a050821",
+            "efde98cfd39e251014ee4a50",
+            "888874451d8b83a351e2770a",
+            "134ff04103f07bbb1350df5c",
+            "e5e524f605d27dd4b316e525",
+            "d0e70588d70891f823ed4c4f",
+            "a011275d46426a7f5fd7bcdd",
+            "9d88aeee03efe28be5e65b07",
+            "f139e46d882418e9f6b1ec95",
+            "e931f70769dedcd632a79340"
+          ],
+          "previous_reason_codes": [
+            "MATCH_UNIQUE",
+            "EXACT_CITY_EVENT_TEXT",
+            "STRICT_EXPLOSION_EVIDENCE",
+            "AIR_MILITARY_CONTEXT",
+            "SAME_ATTACK_CONTEXT_SUPPORTED",
+            "NO_STRICT_TEMPORAL_BINDING",
+            "SENSITIVITY_INFERRED_SAME_ATTACK"
+          ],
+          "corrected_temporal_code": "NO_STRICT_TEMPORAL_BINDING",
+          "reason": "inferred_same_attack has no episode-specific temporal proof on a multi-episode local date; the unique publication-time match is discovery metadata only"
+        },
+        {
+          "candidate_id": "b5a20a069124c2ed6c65d7f5",
+          "city_key": "chernihiv",
+          "previous_outcome": "approved_sensitivity",
+          "corrected_outcome": "needs_review",
+          "previous_matched_episode_id": "3eb231ef04b1b76b44f089dc",
+          "corrected_matched_episode_id": null,
+          "local_date_kyiv": "2026-09-22",
+          "tracked_episode_ids_on_local_date": [
+            "29253c6a2fa1e3009ea16bb0",
+            "a0aa3a327a82ee15ed90a476",
+            "7b879da3aa793a401f03ff5c",
+            "445c91c269749c78b1896690",
+            "f1615d89e08a99960d41ece8",
+            "3eb231ef04b1b76b44f089dc",
+            "431fd1ce69eb668e52395386",
+            "84c7edd8ea27a20a7a855ae1"
+          ],
+          "previous_reason_codes": [
+            "MATCH_UNIQUE",
+            "EXACT_CITY_EVENT_TEXT",
+            "STRICT_EXPLOSION_EVIDENCE",
+            "AIR_MILITARY_CONTEXT",
+            "SAME_ATTACK_CONTEXT_SUPPORTED",
+            "NO_STRICT_TEMPORAL_BINDING",
+            "SENSITIVITY_INFERRED_SAME_ATTACK"
+          ],
+          "corrected_temporal_code": "NO_STRICT_TEMPORAL_BINDING",
+          "reason": "inferred_same_attack has no episode-specific temporal proof on a multi-episode local date; the unique publication-time match is discovery metadata only"
+        },
+        {
+          "candidate_id": "1a46424e12981a83b54a251e",
+          "city_key": "dnipro",
+          "previous_outcome": "approved_sensitivity",
+          "corrected_outcome": "needs_review",
+          "previous_matched_episode_id": "73ff94382ce8d8c9f55c4f37",
+          "corrected_matched_episode_id": null,
+          "local_date_kyiv": "2026-09-19",
+          "tracked_episode_ids_on_local_date": [
+            "7bf7df3c3a315f8124c6c314",
+            "15ea9cb0d6f69de66fd91f04",
+            "f3cfda6be7c89872d24c24cf",
+            "c1b027ac562d41761ae3b602",
+            "40be2789c321d36477fffe9c",
+            "73ff94382ce8d8c9f55c4f37",
+            "66cc8b71849bfdad7ffc66cb",
+            "0574cf6b4187393c9a58cd34",
+            "ffaac5b5fa6fa656c0bcc44f",
+            "0520791f7b2598159495f98c"
+          ],
+          "previous_reason_codes": [
+            "MATCH_UNIQUE",
+            "EXACT_CITY_EVENT_TEXT",
+            "STRICT_EXPLOSION_EVIDENCE",
+            "AIR_MILITARY_CONTEXT",
+            "SAME_ATTACK_CONTEXT_SUPPORTED",
+            "NO_STRICT_TEMPORAL_BINDING",
+            "SENSITIVITY_INFERRED_SAME_ATTACK"
+          ],
+          "corrected_temporal_code": "NO_STRICT_TEMPORAL_BINDING",
+          "reason": "inferred_same_attack has no episode-specific temporal proof on a multi-episode local date; the unique publication-time match is discovery metadata only"
+        },
+        {
+          "candidate_id": "37f9c1295655f2a1a406acf8",
+          "city_key": "dnipro",
+          "previous_outcome": "approved_sensitivity",
+          "corrected_outcome": "needs_review",
+          "previous_matched_episode_id": "495d4a8556e63a79af175cc4",
+          "corrected_matched_episode_id": null,
+          "local_date_kyiv": "2026-09-21",
+          "tracked_episode_ids_on_local_date": [
+            "a78a3747eccee2264fb29a40",
+            "c4c8c59bc24ee5d376003e75",
+            "e1da97f784d43694a7d54052",
+            "bd37cd7ac143a40ddf2479b2",
+            "d25d54527a505716cd269578",
+            "4d57aae61fae551789986b54",
+            "369bb97351eb90923ab24354",
+            "fc97efc77c89d9d77345713d",
+            "495d4a8556e63a79af175cc4",
+            "17ea090f28b16c79db612fa6"
+          ],
+          "previous_reason_codes": [
+            "MATCH_UNIQUE",
+            "EXACT_CITY_EVENT_TEXT",
+            "STRICT_EXPLOSION_EVIDENCE",
+            "AIR_MILITARY_CONTEXT",
+            "SAME_ATTACK_CONTEXT_SUPPORTED",
+            "NO_STRICT_TEMPORAL_BINDING",
+            "SENSITIVITY_INFERRED_SAME_ATTACK"
+          ],
+          "corrected_temporal_code": "NO_STRICT_TEMPORAL_BINDING",
+          "reason": "inferred_same_attack has no episode-specific temporal proof on a multi-episode local date; the unique publication-time match is discovery metadata only"
+        },
+        {
+          "candidate_id": "48bdec0e326e64c583d31861",
+          "city_key": "dnipro",
+          "previous_outcome": "approved_sensitivity",
+          "corrected_outcome": "needs_review",
+          "previous_matched_episode_id": "73ff94382ce8d8c9f55c4f37",
+          "corrected_matched_episode_id": null,
+          "local_date_kyiv": "2026-09-19",
+          "tracked_episode_ids_on_local_date": [
+            "7bf7df3c3a315f8124c6c314",
+            "15ea9cb0d6f69de66fd91f04",
+            "f3cfda6be7c89872d24c24cf",
+            "c1b027ac562d41761ae3b602",
+            "40be2789c321d36477fffe9c",
+            "73ff94382ce8d8c9f55c4f37",
+            "66cc8b71849bfdad7ffc66cb",
+            "0574cf6b4187393c9a58cd34",
+            "ffaac5b5fa6fa656c0bcc44f",
+            "0520791f7b2598159495f98c"
+          ],
+          "previous_reason_codes": [
+            "MATCH_UNIQUE",
+            "EXACT_CITY_EVENT_TEXT",
+            "STRICT_EXPLOSION_EVIDENCE",
+            "AIR_MILITARY_CONTEXT",
+            "SAME_ATTACK_CONTEXT_SUPPORTED",
+            "NO_STRICT_TEMPORAL_BINDING",
+            "SENSITIVITY_INFERRED_SAME_ATTACK"
+          ],
+          "corrected_temporal_code": "NO_STRICT_TEMPORAL_BINDING",
+          "reason": "inferred_same_attack has no episode-specific temporal proof on a multi-episode local date; the unique publication-time match is discovery metadata only"
+        },
+        {
+          "candidate_id": "621079aafd7bef7a641fdbdc",
+          "city_key": "dnipro",
+          "previous_outcome": "approved_sensitivity",
+          "corrected_outcome": "needs_review",
+          "previous_matched_episode_id": "4d57aae61fae551789986b54",
+          "corrected_matched_episode_id": null,
+          "local_date_kyiv": "2026-09-21",
+          "tracked_episode_ids_on_local_date": [
+            "a78a3747eccee2264fb29a40",
+            "c4c8c59bc24ee5d376003e75",
+            "e1da97f784d43694a7d54052",
+            "bd37cd7ac143a40ddf2479b2",
+            "d25d54527a505716cd269578",
+            "4d57aae61fae551789986b54",
+            "369bb97351eb90923ab24354",
+            "fc97efc77c89d9d77345713d",
+            "495d4a8556e63a79af175cc4",
+            "17ea090f28b16c79db612fa6"
+          ],
+          "previous_reason_codes": [
+            "MATCH_UNIQUE",
+            "EXACT_CITY_EVENT_TEXT",
+            "STRICT_EXPLOSION_EVIDENCE",
+            "AIR_MILITARY_CONTEXT",
+            "SAME_ATTACK_CONTEXT_SUPPORTED",
+            "NO_STRICT_TEMPORAL_BINDING",
+            "SENSITIVITY_INFERRED_SAME_ATTACK"
+          ],
+          "corrected_temporal_code": "NO_STRICT_TEMPORAL_BINDING",
+          "reason": "inferred_same_attack has no episode-specific temporal proof on a multi-episode local date; the unique publication-time match is discovery metadata only"
+        },
+        {
+          "candidate_id": "a06e12f4cfed9b43eafe2d58",
+          "city_key": "dnipro",
+          "previous_outcome": "approved_sensitivity",
+          "corrected_outcome": "needs_review",
+          "previous_matched_episode_id": "c894e85e407dc4256d8c4419",
+          "corrected_matched_episode_id": null,
+          "local_date_kyiv": "2026-09-22",
+          "tracked_episode_ids_on_local_date": [
+            "17ea090f28b16c79db612fa6",
+            "875a097d3f1c64e7c5724d5a",
+            "09ee9efd29d604b4b5d98629",
+            "c5e3e9affc34ad6cdc7dd1ff",
+            "c894e85e407dc4256d8c4419",
+            "5761ba90c9cbc0c1d7a1cb2f",
+            "4674fe82f13ba16893bf6693",
+            "79e6f4f39ce69244c8f856e8",
+            "6a2c082d4fb889bc58a757a8",
+            "902477ddcccde3fb6403e967",
+            "9d26d096ab88208654dd98ac",
+            "e6f6221f1618cb80bdbc6922"
+          ],
+          "previous_reason_codes": [
+            "MATCH_UNIQUE",
+            "EXACT_CITY_EVENT_TEXT",
+            "STRICT_EXPLOSION_EVIDENCE",
+            "AIR_MILITARY_CONTEXT",
+            "SAME_ATTACK_CONTEXT_SUPPORTED",
+            "NO_STRICT_TEMPORAL_BINDING",
+            "SENSITIVITY_INFERRED_SAME_ATTACK"
+          ],
+          "corrected_temporal_code": "NO_STRICT_TEMPORAL_BINDING",
+          "reason": "inferred_same_attack has no episode-specific temporal proof on a multi-episode local date; the unique publication-time match is discovery metadata only"
+        },
+        {
+          "candidate_id": "aa19972aee883cf12af75d20",
+          "city_key": "dnipro",
+          "previous_outcome": "approved_sensitivity",
+          "corrected_outcome": "needs_review",
+          "previous_matched_episode_id": "c894e85e407dc4256d8c4419",
+          "corrected_matched_episode_id": null,
+          "local_date_kyiv": "2026-09-22",
+          "tracked_episode_ids_on_local_date": [
+            "17ea090f28b16c79db612fa6",
+            "875a097d3f1c64e7c5724d5a",
+            "09ee9efd29d604b4b5d98629",
+            "c5e3e9affc34ad6cdc7dd1ff",
+            "c894e85e407dc4256d8c4419",
+            "5761ba90c9cbc0c1d7a1cb2f",
+            "4674fe82f13ba16893bf6693",
+            "79e6f4f39ce69244c8f856e8",
+            "6a2c082d4fb889bc58a757a8",
+            "902477ddcccde3fb6403e967",
+            "9d26d096ab88208654dd98ac",
+            "e6f6221f1618cb80bdbc6922"
+          ],
+          "previous_reason_codes": [
+            "MATCH_UNIQUE",
+            "EXACT_CITY_EVENT_TEXT",
+            "STRICT_EXPLOSION_EVIDENCE",
+            "AIR_MILITARY_CONTEXT",
+            "SAME_ATTACK_CONTEXT_SUPPORTED",
+            "NO_STRICT_TEMPORAL_BINDING",
+            "SENSITIVITY_INFERRED_SAME_ATTACK"
+          ],
+          "corrected_temporal_code": "NO_STRICT_TEMPORAL_BINDING",
+          "reason": "inferred_same_attack has no episode-specific temporal proof on a multi-episode local date; the unique publication-time match is discovery metadata only"
+        },
+        {
+          "candidate_id": "cd9484aa523d512f8167a1ed",
+          "city_key": "dnipro",
+          "previous_outcome": "approved_sensitivity",
+          "corrected_outcome": "needs_review",
+          "previous_matched_episode_id": "66cc8b71849bfdad7ffc66cb",
+          "corrected_matched_episode_id": null,
+          "local_date_kyiv": "2026-09-19",
+          "tracked_episode_ids_on_local_date": [
+            "7bf7df3c3a315f8124c6c314",
+            "15ea9cb0d6f69de66fd91f04",
+            "f3cfda6be7c89872d24c24cf",
+            "c1b027ac562d41761ae3b602",
+            "40be2789c321d36477fffe9c",
+            "73ff94382ce8d8c9f55c4f37",
+            "66cc8b71849bfdad7ffc66cb",
+            "0574cf6b4187393c9a58cd34",
+            "ffaac5b5fa6fa656c0bcc44f",
+            "0520791f7b2598159495f98c"
+          ],
+          "previous_reason_codes": [
+            "MATCH_UNIQUE",
+            "EXACT_CITY_EVENT_TEXT",
+            "STRICT_EXPLOSION_EVIDENCE",
+            "AIR_MILITARY_CONTEXT",
+            "SAME_ATTACK_CONTEXT_SUPPORTED",
+            "NO_STRICT_TEMPORAL_BINDING",
+            "SENSITIVITY_INFERRED_SAME_ATTACK"
+          ],
+          "corrected_temporal_code": "NO_STRICT_TEMPORAL_BINDING",
+          "reason": "inferred_same_attack has no episode-specific temporal proof on a multi-episode local date; the unique publication-time match is discovery metadata only"
+        },
+        {
+          "candidate_id": "dc4cd44164de1019918413db",
+          "city_key": "dnipro",
+          "previous_outcome": "approved_sensitivity",
+          "corrected_outcome": "needs_review",
+          "previous_matched_episode_id": "495d4a8556e63a79af175cc4",
+          "corrected_matched_episode_id": null,
+          "local_date_kyiv": "2026-09-21",
+          "tracked_episode_ids_on_local_date": [
+            "a78a3747eccee2264fb29a40",
+            "c4c8c59bc24ee5d376003e75",
+            "e1da97f784d43694a7d54052",
+            "bd37cd7ac143a40ddf2479b2",
+            "d25d54527a505716cd269578",
+            "4d57aae61fae551789986b54",
+            "369bb97351eb90923ab24354",
+            "fc97efc77c89d9d77345713d",
+            "495d4a8556e63a79af175cc4",
+            "17ea090f28b16c79db612fa6"
+          ],
+          "previous_reason_codes": [
+            "MATCH_UNIQUE",
+            "EXACT_CITY_EVENT_TEXT",
+            "STRICT_EXPLOSION_EVIDENCE",
+            "AIR_MILITARY_CONTEXT",
+            "SAME_ATTACK_CONTEXT_SUPPORTED",
+            "NO_STRICT_TEMPORAL_BINDING",
+            "SENSITIVITY_INFERRED_SAME_ATTACK"
+          ],
+          "corrected_temporal_code": "NO_STRICT_TEMPORAL_BINDING",
+          "reason": "inferred_same_attack has no episode-specific temporal proof on a multi-episode local date; the unique publication-time match is discovery metadata only"
+        },
+        {
+          "candidate_id": "eeee7926046f2e69e5673992",
+          "city_key": "dnipro",
+          "previous_outcome": "approved_sensitivity",
+          "corrected_outcome": "needs_review",
+          "previous_matched_episode_id": "d25d54527a505716cd269578",
+          "corrected_matched_episode_id": null,
+          "local_date_kyiv": "2026-09-21",
+          "tracked_episode_ids_on_local_date": [
+            "a78a3747eccee2264fb29a40",
+            "c4c8c59bc24ee5d376003e75",
+            "e1da97f784d43694a7d54052",
+            "bd37cd7ac143a40ddf2479b2",
+            "d25d54527a505716cd269578",
+            "4d57aae61fae551789986b54",
+            "369bb97351eb90923ab24354",
+            "fc97efc77c89d9d77345713d",
+            "495d4a8556e63a79af175cc4",
+            "17ea090f28b16c79db612fa6"
+          ],
+          "previous_reason_codes": [
+            "MATCH_UNIQUE",
+            "EXACT_CITY_EVENT_TEXT",
+            "STRICT_EXPLOSION_EVIDENCE",
+            "AIR_MILITARY_CONTEXT",
+            "SAME_ATTACK_CONTEXT_SUPPORTED",
+            "NO_STRICT_TEMPORAL_BINDING",
+            "SENSITIVITY_INFERRED_SAME_ATTACK"
+          ],
+          "corrected_temporal_code": "NO_STRICT_TEMPORAL_BINDING",
+          "reason": "inferred_same_attack has no episode-specific temporal proof on a multi-episode local date; the unique publication-time match is discovery metadata only"
+        },
+        {
+          "candidate_id": "c0432cb39613e91bee28f154",
+          "city_key": "kharkiv",
+          "previous_outcome": "approved_sensitivity",
+          "corrected_outcome": "needs_review",
+          "previous_matched_episode_id": "caa0b841984bbcebf07c2bf6",
+          "corrected_matched_episode_id": null,
+          "local_date_kyiv": "2026-09-18",
+          "tracked_episode_ids_on_local_date": [
+            "b3c4eda038eb9ddf60f1cc22",
+            "4b1199587e978501da275619",
+            "caa0b841984bbcebf07c2bf6",
+            "64428880a33435a63522df29",
+            "e62b955355f4d815b05ed28e"
+          ],
+          "previous_reason_codes": [
+            "MATCH_UNIQUE",
+            "EXACT_CITY_EVENT_TEXT",
+            "STRICT_EXPLOSION_EVIDENCE",
+            "AIR_MILITARY_CONTEXT",
+            "SAME_ATTACK_CONTEXT_SUPPORTED",
+            "NO_STRICT_TEMPORAL_BINDING",
+            "SENSITIVITY_INFERRED_SAME_ATTACK"
+          ],
+          "corrected_temporal_code": "NO_STRICT_TEMPORAL_BINDING",
+          "reason": "inferred_same_attack has no episode-specific temporal proof on a multi-episode local date; the unique publication-time match is discovery metadata only"
+        },
+        {
+          "candidate_id": "07aa5a5a4ba88f890fa03785",
+          "city_key": "kropyvnytskyi",
+          "previous_outcome": "approved_sensitivity",
+          "corrected_outcome": "needs_review",
+          "previous_matched_episode_id": "6957d2e712b184df443460a0",
+          "corrected_matched_episode_id": null,
+          "local_date_kyiv": "2026-09-20",
+          "tracked_episode_ids_on_local_date": [
+            "815411eee407c0d936bac013",
+            "6da3ba38a4cce844b48b44fe",
+            "70635650fdd146366d26eff2",
+            "9f30afd5500d70f1c903a421",
+            "e79b5d9b2f5913747a5ea0f6",
+            "56813235bcb3b5fcf7fa7819",
+            "b0f6e8e57e73c9c651fbc99f",
+            "6957d2e712b184df443460a0",
+            "cd2d581c92e06718fad5bbfb",
+            "698d223339f2f6ee31024037",
+            "7127c838627bd491debb05e8",
+            "32290c46071b5e362610bd64",
+            "7ffc6141b1eda25304f7b0d4",
+            "4f7122ee3d226a83401c30e2",
+            "5dada194dac64a93c6800d49",
+            "435285eb56a14318b6240e0d",
+            "df31fb2b960ea6f280c6ff73"
+          ],
+          "previous_reason_codes": [
+            "MATCH_UNIQUE",
+            "EXACT_CITY_EVENT_TEXT",
+            "STRICT_EXPLOSION_EVIDENCE",
+            "AIR_MILITARY_CONTEXT",
+            "SAME_ATTACK_CONTEXT_SUPPORTED",
+            "NO_STRICT_TEMPORAL_BINDING",
+            "SENSITIVITY_INFERRED_SAME_ATTACK"
+          ],
+          "corrected_temporal_code": "NO_STRICT_TEMPORAL_BINDING",
+          "reason": "inferred_same_attack has no episode-specific temporal proof on a multi-episode local date; the unique publication-time match is discovery metadata only"
+        },
+        {
+          "candidate_id": "2b380f42ad7d780d36ac82f7",
+          "city_key": "kropyvnytskyi",
+          "previous_outcome": "approved_sensitivity",
+          "corrected_outcome": "needs_review",
+          "previous_matched_episode_id": "6957d2e712b184df443460a0",
+          "corrected_matched_episode_id": null,
+          "local_date_kyiv": "2026-09-20",
+          "tracked_episode_ids_on_local_date": [
+            "815411eee407c0d936bac013",
+            "6da3ba38a4cce844b48b44fe",
+            "70635650fdd146366d26eff2",
+            "9f30afd5500d70f1c903a421",
+            "e79b5d9b2f5913747a5ea0f6",
+            "56813235bcb3b5fcf7fa7819",
+            "b0f6e8e57e73c9c651fbc99f",
+            "6957d2e712b184df443460a0",
+            "cd2d581c92e06718fad5bbfb",
+            "698d223339f2f6ee31024037",
+            "7127c838627bd491debb05e8",
+            "32290c46071b5e362610bd64",
+            "7ffc6141b1eda25304f7b0d4",
+            "4f7122ee3d226a83401c30e2",
+            "5dada194dac64a93c6800d49",
+            "435285eb56a14318b6240e0d",
+            "df31fb2b960ea6f280c6ff73"
+          ],
+          "previous_reason_codes": [
+            "MATCH_UNIQUE",
+            "EXACT_CITY_EVENT_TEXT",
+            "STRICT_EXPLOSION_EVIDENCE",
+            "AIR_MILITARY_CONTEXT",
+            "SAME_ATTACK_CONTEXT_SUPPORTED",
+            "NO_STRICT_TEMPORAL_BINDING",
+            "SENSITIVITY_INFERRED_SAME_ATTACK"
+          ],
+          "corrected_temporal_code": "NO_STRICT_TEMPORAL_BINDING",
+          "reason": "inferred_same_attack has no episode-specific temporal proof on a multi-episode local date; the unique publication-time match is discovery metadata only"
+        },
+        {
+          "candidate_id": "4b85ff529264d54103733c2f",
+          "city_key": "kropyvnytskyi",
+          "previous_outcome": "approved_sensitivity",
+          "corrected_outcome": "needs_review",
+          "previous_matched_episode_id": "6957d2e712b184df443460a0",
+          "corrected_matched_episode_id": null,
+          "local_date_kyiv": "2026-09-20",
+          "tracked_episode_ids_on_local_date": [
+            "815411eee407c0d936bac013",
+            "6da3ba38a4cce844b48b44fe",
+            "70635650fdd146366d26eff2",
+            "9f30afd5500d70f1c903a421",
+            "e79b5d9b2f5913747a5ea0f6",
+            "56813235bcb3b5fcf7fa7819",
+            "b0f6e8e57e73c9c651fbc99f",
+            "6957d2e712b184df443460a0",
+            "cd2d581c92e06718fad5bbfb",
+            "698d223339f2f6ee31024037",
+            "7127c838627bd491debb05e8",
+            "32290c46071b5e362610bd64",
+            "7ffc6141b1eda25304f7b0d4",
+            "4f7122ee3d226a83401c30e2",
+            "5dada194dac64a93c6800d49",
+            "435285eb56a14318b6240e0d",
+            "df31fb2b960ea6f280c6ff73"
+          ],
+          "previous_reason_codes": [
+            "MATCH_UNIQUE",
+            "EXACT_CITY_EVENT_TEXT",
+            "STRICT_EXPLOSION_EVIDENCE",
+            "AIR_MILITARY_CONTEXT",
+            "SAME_ATTACK_CONTEXT_SUPPORTED",
+            "NO_STRICT_TEMPORAL_BINDING",
+            "SENSITIVITY_INFERRED_SAME_ATTACK"
+          ],
+          "corrected_temporal_code": "NO_STRICT_TEMPORAL_BINDING",
+          "reason": "inferred_same_attack has no episode-specific temporal proof on a multi-episode local date; the unique publication-time match is discovery metadata only"
+        },
+        {
+          "candidate_id": "8e039640e74ac1487548b72c",
+          "city_key": "kropyvnytskyi",
+          "previous_outcome": "approved_sensitivity",
+          "corrected_outcome": "needs_review",
+          "previous_matched_episode_id": "c2ad120e98bd7f8e321103f0",
+          "corrected_matched_episode_id": null,
+          "local_date_kyiv": "2026-09-22",
+          "tracked_episode_ids_on_local_date": [
+            "c2ad120e98bd7f8e321103f0",
+            "3fd579a7ede75b6868366d1f",
+            "376f91e0999531926d53669e",
+            "b41b926cb725a3a54a9bdb0d",
+            "2049cfc7e44779b4f8a8cdf0",
+            "bd933f98de1f1a331c22205d",
+            "5e5147f469562d700309ea95",
+            "ca3f2358635119f9f90147d8",
+            "c0d19d205f4e4519a3e68184"
+          ],
+          "previous_reason_codes": [
+            "MATCH_UNIQUE",
+            "EXACT_CITY_EVENT_TEXT",
+            "STRICT_EXPLOSION_EVIDENCE",
+            "AIR_MILITARY_CONTEXT",
+            "SAME_ATTACK_CONTEXT_SUPPORTED",
+            "NO_STRICT_TEMPORAL_BINDING",
+            "SENSITIVITY_INFERRED_SAME_ATTACK"
+          ],
+          "corrected_temporal_code": "NO_STRICT_TEMPORAL_BINDING",
+          "reason": "inferred_same_attack has no episode-specific temporal proof on a multi-episode local date; the unique publication-time match is discovery metadata only"
+        },
+        {
+          "candidate_id": "a4e2a3f436209643e31f6ade",
+          "city_key": "kropyvnytskyi",
+          "previous_outcome": "approved_sensitivity",
+          "corrected_outcome": "needs_review",
+          "previous_matched_episode_id": "c2ad120e98bd7f8e321103f0",
+          "corrected_matched_episode_id": null,
+          "local_date_kyiv": "2026-09-22",
+          "tracked_episode_ids_on_local_date": [
+            "c2ad120e98bd7f8e321103f0",
+            "3fd579a7ede75b6868366d1f",
+            "376f91e0999531926d53669e",
+            "b41b926cb725a3a54a9bdb0d",
+            "2049cfc7e44779b4f8a8cdf0",
+            "bd933f98de1f1a331c22205d",
+            "5e5147f469562d700309ea95",
+            "ca3f2358635119f9f90147d8",
+            "c0d19d205f4e4519a3e68184"
+          ],
+          "previous_reason_codes": [
+            "MATCH_UNIQUE",
+            "EXACT_CITY_EVENT_TEXT",
+            "STRICT_EXPLOSION_EVIDENCE",
+            "AIR_MILITARY_CONTEXT",
+            "SAME_ATTACK_CONTEXT_SUPPORTED",
+            "NO_STRICT_TEMPORAL_BINDING",
+            "SENSITIVITY_INFERRED_SAME_ATTACK"
+          ],
+          "corrected_temporal_code": "NO_STRICT_TEMPORAL_BINDING",
+          "reason": "inferred_same_attack has no episode-specific temporal proof on a multi-episode local date; the unique publication-time match is discovery metadata only"
+        },
+        {
+          "candidate_id": "bd6895932f296adc21a71406",
+          "city_key": "kropyvnytskyi",
+          "previous_outcome": "approved_sensitivity",
+          "corrected_outcome": "needs_review",
+          "previous_matched_episode_id": "c2ad120e98bd7f8e321103f0",
+          "corrected_matched_episode_id": null,
+          "local_date_kyiv": "2026-09-22",
+          "tracked_episode_ids_on_local_date": [
+            "c2ad120e98bd7f8e321103f0",
+            "3fd579a7ede75b6868366d1f",
+            "376f91e0999531926d53669e",
+            "b41b926cb725a3a54a9bdb0d",
+            "2049cfc7e44779b4f8a8cdf0",
+            "bd933f98de1f1a331c22205d",
+            "5e5147f469562d700309ea95",
+            "ca3f2358635119f9f90147d8",
+            "c0d19d205f4e4519a3e68184"
+          ],
+          "previous_reason_codes": [
+            "MATCH_UNIQUE",
+            "EXACT_CITY_EVENT_TEXT",
+            "STRICT_EXPLOSION_EVIDENCE",
+            "AIR_MILITARY_CONTEXT",
+            "SAME_ATTACK_CONTEXT_SUPPORTED",
+            "NO_STRICT_TEMPORAL_BINDING",
+            "SENSITIVITY_INFERRED_SAME_ATTACK"
+          ],
+          "corrected_temporal_code": "NO_STRICT_TEMPORAL_BINDING",
+          "reason": "inferred_same_attack has no episode-specific temporal proof on a multi-episode local date; the unique publication-time match is discovery metadata only"
+        },
+        {
+          "candidate_id": "37aa1b96565ec766d2998631",
+          "city_key": "kyiv",
+          "previous_outcome": "approved_sensitivity",
+          "corrected_outcome": "needs_review",
+          "previous_matched_episode_id": "baf3eaa558f606c14d6e385f",
+          "corrected_matched_episode_id": null,
+          "local_date_kyiv": "2026-09-22",
+          "tracked_episode_ids_on_local_date": [
+            "aad6c0ca9f8267eb0145a183",
+            "0908582bc2b40f65ebcc8e60",
+            "1ab468a9eabfee28624773d3",
+            "731052f1448d4e5b8554a2d9",
+            "baf3eaa558f606c14d6e385f",
+            "006c5c153c255ff5d487e57e",
+            "da90f993ab369a680b3bb7c4"
+          ],
+          "previous_reason_codes": [
+            "MATCH_UNIQUE",
+            "EXACT_CITY_EVENT_TEXT",
+            "STRICT_EXPLOSION_EVIDENCE",
+            "AIR_MILITARY_CONTEXT",
+            "SAME_ATTACK_CONTEXT_SUPPORTED",
+            "NO_STRICT_TEMPORAL_BINDING",
+            "SENSITIVITY_INFERRED_SAME_ATTACK"
+          ],
+          "corrected_temporal_code": "NO_STRICT_TEMPORAL_BINDING",
+          "reason": "inferred_same_attack has no episode-specific temporal proof on a multi-episode local date; the unique publication-time match is discovery metadata only"
+        },
+        {
+          "candidate_id": "3e873213239a5b34f3e64ec8",
+          "city_key": "kyiv",
+          "previous_outcome": "approved_sensitivity",
+          "corrected_outcome": "needs_review",
+          "previous_matched_episode_id": "be91665768f663f704f73958",
+          "corrected_matched_episode_id": null,
+          "local_date_kyiv": "2026-09-21",
+          "tracked_episode_ids_on_local_date": [
+            "e1c0ac9b340f64bfc0d4c468",
+            "d9776312dc63fa1807acb302",
+            "cb62752e18a9ea6b73649953",
+            "925b48de25c377cbb8b32ac8",
+            "5e07434a2569f1a789907611",
+            "be91665768f663f704f73958",
+            "c4201fb45a92302240008a51",
+            "b8e196bee2cbce1de2e24c71",
+            "b620c4e5a262622b868adc36"
+          ],
+          "previous_reason_codes": [
+            "MATCH_UNIQUE",
+            "EXACT_CITY_EVENT_TEXT",
+            "STRICT_EXPLOSION_EVIDENCE",
+            "AIR_MILITARY_CONTEXT",
+            "SAME_ATTACK_CONTEXT_SUPPORTED",
+            "NO_STRICT_TEMPORAL_BINDING",
+            "SENSITIVITY_INFERRED_SAME_ATTACK"
+          ],
+          "corrected_temporal_code": "NO_STRICT_TEMPORAL_BINDING",
+          "reason": "inferred_same_attack has no episode-specific temporal proof on a multi-episode local date; the unique publication-time match is discovery metadata only"
+        },
+        {
+          "candidate_id": "450222e889b334b2bb3e59a5",
+          "city_key": "kyiv",
+          "previous_outcome": "approved_sensitivity",
+          "corrected_outcome": "needs_review",
+          "previous_matched_episode_id": "5e07434a2569f1a789907611",
+          "corrected_matched_episode_id": null,
+          "local_date_kyiv": "2026-09-21",
+          "tracked_episode_ids_on_local_date": [
+            "e1c0ac9b340f64bfc0d4c468",
+            "d9776312dc63fa1807acb302",
+            "cb62752e18a9ea6b73649953",
+            "925b48de25c377cbb8b32ac8",
+            "5e07434a2569f1a789907611",
+            "be91665768f663f704f73958",
+            "c4201fb45a92302240008a51",
+            "b8e196bee2cbce1de2e24c71",
+            "b620c4e5a262622b868adc36"
+          ],
+          "previous_reason_codes": [
+            "MATCH_UNIQUE",
+            "EXACT_CITY_EVENT_TEXT",
+            "STRICT_EXPLOSION_EVIDENCE",
+            "AIR_MILITARY_CONTEXT",
+            "SAME_ATTACK_CONTEXT_SUPPORTED",
+            "NO_STRICT_TEMPORAL_BINDING",
+            "SENSITIVITY_INFERRED_SAME_ATTACK"
+          ],
+          "corrected_temporal_code": "NO_STRICT_TEMPORAL_BINDING",
+          "reason": "inferred_same_attack has no episode-specific temporal proof on a multi-episode local date; the unique publication-time match is discovery metadata only"
+        },
+        {
+          "candidate_id": "5a2bb37aae44d618e1b9d478",
+          "city_key": "kyiv",
+          "previous_outcome": "approved_sensitivity",
+          "corrected_outcome": "needs_review",
+          "previous_matched_episode_id": "baf3eaa558f606c14d6e385f",
+          "corrected_matched_episode_id": null,
+          "local_date_kyiv": "2026-09-22",
+          "tracked_episode_ids_on_local_date": [
+            "aad6c0ca9f8267eb0145a183",
+            "0908582bc2b40f65ebcc8e60",
+            "1ab468a9eabfee28624773d3",
+            "731052f1448d4e5b8554a2d9",
+            "baf3eaa558f606c14d6e385f",
+            "006c5c153c255ff5d487e57e",
+            "da90f993ab369a680b3bb7c4"
+          ],
+          "previous_reason_codes": [
+            "MATCH_UNIQUE",
+            "EXACT_CITY_EVENT_TEXT",
+            "STRICT_EXPLOSION_EVIDENCE",
+            "AIR_MILITARY_CONTEXT",
+            "SAME_ATTACK_CONTEXT_SUPPORTED",
+            "NO_STRICT_TEMPORAL_BINDING",
+            "SENSITIVITY_INFERRED_SAME_ATTACK"
+          ],
+          "corrected_temporal_code": "NO_STRICT_TEMPORAL_BINDING",
+          "reason": "inferred_same_attack has no episode-specific temporal proof on a multi-episode local date; the unique publication-time match is discovery metadata only"
+        },
+        {
+          "candidate_id": "6d4cd0b8e278b96a345bcccd",
+          "city_key": "kyiv",
+          "previous_outcome": "approved_sensitivity",
+          "corrected_outcome": "needs_review",
+          "previous_matched_episode_id": "be91665768f663f704f73958",
+          "corrected_matched_episode_id": null,
+          "local_date_kyiv": "2026-09-21",
+          "tracked_episode_ids_on_local_date": [
+            "e1c0ac9b340f64bfc0d4c468",
+            "d9776312dc63fa1807acb302",
+            "cb62752e18a9ea6b73649953",
+            "925b48de25c377cbb8b32ac8",
+            "5e07434a2569f1a789907611",
+            "be91665768f663f704f73958",
+            "c4201fb45a92302240008a51",
+            "b8e196bee2cbce1de2e24c71",
+            "b620c4e5a262622b868adc36"
+          ],
+          "previous_reason_codes": [
+            "MATCH_UNIQUE",
+            "EXACT_CITY_EVENT_TEXT",
+            "STRICT_EXPLOSION_EVIDENCE",
+            "AIR_MILITARY_CONTEXT",
+            "SAME_ATTACK_CONTEXT_SUPPORTED",
+            "NO_STRICT_TEMPORAL_BINDING",
+            "SENSITIVITY_INFERRED_SAME_ATTACK"
+          ],
+          "corrected_temporal_code": "NO_STRICT_TEMPORAL_BINDING",
+          "reason": "inferred_same_attack has no episode-specific temporal proof on a multi-episode local date; the unique publication-time match is discovery metadata only"
+        },
+        {
+          "candidate_id": "969151182b4d4498df132a53",
+          "city_key": "kyiv",
+          "previous_outcome": "approved_sensitivity",
+          "corrected_outcome": "needs_review",
+          "previous_matched_episode_id": "be91665768f663f704f73958",
+          "corrected_matched_episode_id": null,
+          "local_date_kyiv": "2026-09-21",
+          "tracked_episode_ids_on_local_date": [
+            "e1c0ac9b340f64bfc0d4c468",
+            "d9776312dc63fa1807acb302",
+            "cb62752e18a9ea6b73649953",
+            "925b48de25c377cbb8b32ac8",
+            "5e07434a2569f1a789907611",
+            "be91665768f663f704f73958",
+            "c4201fb45a92302240008a51",
+            "b8e196bee2cbce1de2e24c71",
+            "b620c4e5a262622b868adc36"
+          ],
+          "previous_reason_codes": [
+            "MATCH_UNIQUE",
+            "EXACT_CITY_EVENT_TEXT",
+            "STRICT_EXPLOSION_EVIDENCE",
+            "AIR_MILITARY_CONTEXT",
+            "SAME_ATTACK_CONTEXT_SUPPORTED",
+            "NO_STRICT_TEMPORAL_BINDING",
+            "SENSITIVITY_INFERRED_SAME_ATTACK"
+          ],
+          "corrected_temporal_code": "NO_STRICT_TEMPORAL_BINDING",
+          "reason": "inferred_same_attack has no episode-specific temporal proof on a multi-episode local date; the unique publication-time match is discovery metadata only"
+        },
+        {
+          "candidate_id": "d122c212e6e36548ee84ec15",
+          "city_key": "kyiv",
+          "previous_outcome": "approved_sensitivity",
+          "corrected_outcome": "needs_review",
+          "previous_matched_episode_id": "be91665768f663f704f73958",
+          "corrected_matched_episode_id": null,
+          "local_date_kyiv": "2026-09-21",
+          "tracked_episode_ids_on_local_date": [
+            "e1c0ac9b340f64bfc0d4c468",
+            "d9776312dc63fa1807acb302",
+            "cb62752e18a9ea6b73649953",
+            "925b48de25c377cbb8b32ac8",
+            "5e07434a2569f1a789907611",
+            "be91665768f663f704f73958",
+            "c4201fb45a92302240008a51",
+            "b8e196bee2cbce1de2e24c71",
+            "b620c4e5a262622b868adc36"
+          ],
+          "previous_reason_codes": [
+            "MATCH_UNIQUE",
+            "EXACT_CITY_EVENT_TEXT",
+            "STRICT_EXPLOSION_EVIDENCE",
+            "AIR_MILITARY_CONTEXT",
+            "SAME_ATTACK_CONTEXT_SUPPORTED",
+            "NO_STRICT_TEMPORAL_BINDING",
+            "SENSITIVITY_INFERRED_SAME_ATTACK"
+          ],
+          "corrected_temporal_code": "NO_STRICT_TEMPORAL_BINDING",
+          "reason": "inferred_same_attack has no episode-specific temporal proof on a multi-episode local date; the unique publication-time match is discovery metadata only"
+        },
+        {
+          "candidate_id": "ea9314b362e6a296bcd50c84",
+          "city_key": "kyiv",
+          "previous_outcome": "approved_sensitivity",
+          "corrected_outcome": "needs_review",
+          "previous_matched_episode_id": "da90f993ab369a680b3bb7c4",
+          "corrected_matched_episode_id": null,
+          "local_date_kyiv": "2026-09-22",
+          "tracked_episode_ids_on_local_date": [
+            "aad6c0ca9f8267eb0145a183",
+            "0908582bc2b40f65ebcc8e60",
+            "1ab468a9eabfee28624773d3",
+            "731052f1448d4e5b8554a2d9",
+            "baf3eaa558f606c14d6e385f",
+            "006c5c153c255ff5d487e57e",
+            "da90f993ab369a680b3bb7c4"
+          ],
+          "previous_reason_codes": [
+            "MATCH_UNIQUE",
+            "EXACT_CITY_EVENT_TEXT",
+            "STRICT_EXPLOSION_EVIDENCE",
+            "AIR_MILITARY_CONTEXT",
+            "SAME_ATTACK_CONTEXT_SUPPORTED",
+            "NO_STRICT_TEMPORAL_BINDING",
+            "SENSITIVITY_INFERRED_SAME_ATTACK"
+          ],
+          "corrected_temporal_code": "NO_STRICT_TEMPORAL_BINDING",
+          "reason": "inferred_same_attack has no episode-specific temporal proof on a multi-episode local date; the unique publication-time match is discovery metadata only"
+        },
+        {
+          "candidate_id": "0e39040303d4b31a603e2017",
+          "city_key": "mykolaiv",
+          "previous_outcome": "approved_sensitivity",
+          "corrected_outcome": "needs_review",
+          "previous_matched_episode_id": "cde43bafd9c9a45bf7b31f56",
+          "corrected_matched_episode_id": null,
+          "local_date_kyiv": "2026-09-20",
+          "tracked_episode_ids_on_local_date": [
+            "9b29fcaed49c1891f59fe7a3",
+            "8c71fdc1ddb188ec5e2109b5",
+            "bcb26851e5582219a119ba63",
+            "c9f62ec444c5b5abbd019e8e",
+            "61cec828716864b5d41542de",
+            "0064b23e8372d4965c0a3013",
+            "9ab8d296637580f75657558f",
+            "7199cf706b7f35c9507829ae",
+            "8e026a8c3549e53e4203cdfc",
+            "cc5164f1cfda1ac283137ed3",
+            "6c7f1d6c9e5c83eab5972fc7",
+            "5d185b232493cda0dd2b8102",
+            "9491cea40e67ac977640cd15",
+            "4ed0a7cbecba43d2da7c950b",
+            "324271ec2c163e98e7e9c617",
+            "264f49e3454cac8fb1c4c187",
+            "4dd947dc9aa4813eaf59ba12",
+            "cde43bafd9c9a45bf7b31f56"
+          ],
+          "previous_reason_codes": [
+            "MATCH_UNIQUE",
+            "EXACT_CITY_EVENT_TEXT",
+            "STRICT_EXPLOSION_EVIDENCE",
+            "AIR_MILITARY_CONTEXT",
+            "SAME_ATTACK_CONTEXT_SUPPORTED",
+            "NO_STRICT_TEMPORAL_BINDING",
+            "SENSITIVITY_INFERRED_SAME_ATTACK"
+          ],
+          "corrected_temporal_code": "NO_STRICT_TEMPORAL_BINDING",
+          "reason": "inferred_same_attack has no episode-specific temporal proof on a multi-episode local date; the unique publication-time match is discovery metadata only"
+        },
+        {
+          "candidate_id": "1923b7a627ac1b048dc3b49a",
+          "city_key": "mykolaiv",
+          "previous_outcome": "approved_sensitivity",
+          "corrected_outcome": "needs_review",
+          "previous_matched_episode_id": "324271ec2c163e98e7e9c617",
+          "corrected_matched_episode_id": null,
+          "local_date_kyiv": "2026-09-20",
+          "tracked_episode_ids_on_local_date": [
+            "9b29fcaed49c1891f59fe7a3",
+            "8c71fdc1ddb188ec5e2109b5",
+            "bcb26851e5582219a119ba63",
+            "c9f62ec444c5b5abbd019e8e",
+            "61cec828716864b5d41542de",
+            "0064b23e8372d4965c0a3013",
+            "9ab8d296637580f75657558f",
+            "7199cf706b7f35c9507829ae",
+            "8e026a8c3549e53e4203cdfc",
+            "cc5164f1cfda1ac283137ed3",
+            "6c7f1d6c9e5c83eab5972fc7",
+            "5d185b232493cda0dd2b8102",
+            "9491cea40e67ac977640cd15",
+            "4ed0a7cbecba43d2da7c950b",
+            "324271ec2c163e98e7e9c617",
+            "264f49e3454cac8fb1c4c187",
+            "4dd947dc9aa4813eaf59ba12",
+            "cde43bafd9c9a45bf7b31f56"
+          ],
+          "previous_reason_codes": [
+            "MATCH_UNIQUE",
+            "EXACT_CITY_EVENT_TEXT",
+            "STRICT_EXPLOSION_EVIDENCE",
+            "AIR_MILITARY_CONTEXT",
+            "SAME_ATTACK_CONTEXT_SUPPORTED",
+            "NO_STRICT_TEMPORAL_BINDING",
+            "SENSITIVITY_INFERRED_SAME_ATTACK"
+          ],
+          "corrected_temporal_code": "NO_STRICT_TEMPORAL_BINDING",
+          "reason": "inferred_same_attack has no episode-specific temporal proof on a multi-episode local date; the unique publication-time match is discovery metadata only"
+        },
+        {
+          "candidate_id": "4b8fb9008f6202ff6639678f",
+          "city_key": "mykolaiv",
+          "previous_outcome": "approved_sensitivity",
+          "corrected_outcome": "needs_review",
+          "previous_matched_episode_id": "324271ec2c163e98e7e9c617",
+          "corrected_matched_episode_id": null,
+          "local_date_kyiv": "2026-09-20",
+          "tracked_episode_ids_on_local_date": [
+            "9b29fcaed49c1891f59fe7a3",
+            "8c71fdc1ddb188ec5e2109b5",
+            "bcb26851e5582219a119ba63",
+            "c9f62ec444c5b5abbd019e8e",
+            "61cec828716864b5d41542de",
+            "0064b23e8372d4965c0a3013",
+            "9ab8d296637580f75657558f",
+            "7199cf706b7f35c9507829ae",
+            "8e026a8c3549e53e4203cdfc",
+            "cc5164f1cfda1ac283137ed3",
+            "6c7f1d6c9e5c83eab5972fc7",
+            "5d185b232493cda0dd2b8102",
+            "9491cea40e67ac977640cd15",
+            "4ed0a7cbecba43d2da7c950b",
+            "324271ec2c163e98e7e9c617",
+            "264f49e3454cac8fb1c4c187",
+            "4dd947dc9aa4813eaf59ba12",
+            "cde43bafd9c9a45bf7b31f56"
+          ],
+          "previous_reason_codes": [
+            "MATCH_UNIQUE",
+            "EXACT_CITY_EVENT_TEXT",
+            "STRICT_EXPLOSION_EVIDENCE",
+            "AIR_MILITARY_CONTEXT",
+            "SAME_ATTACK_CONTEXT_SUPPORTED",
+            "NO_STRICT_TEMPORAL_BINDING",
+            "SENSITIVITY_INFERRED_SAME_ATTACK"
+          ],
+          "corrected_temporal_code": "NO_STRICT_TEMPORAL_BINDING",
+          "reason": "inferred_same_attack has no episode-specific temporal proof on a multi-episode local date; the unique publication-time match is discovery metadata only"
+        },
+        {
+          "candidate_id": "4d0041fd2c915b268f85ba24",
+          "city_key": "mykolaiv",
+          "previous_outcome": "approved_sensitivity",
+          "corrected_outcome": "needs_review",
+          "previous_matched_episode_id": "cde43bafd9c9a45bf7b31f56",
+          "corrected_matched_episode_id": null,
+          "local_date_kyiv": "2026-09-20",
+          "tracked_episode_ids_on_local_date": [
+            "9b29fcaed49c1891f59fe7a3",
+            "8c71fdc1ddb188ec5e2109b5",
+            "bcb26851e5582219a119ba63",
+            "c9f62ec444c5b5abbd019e8e",
+            "61cec828716864b5d41542de",
+            "0064b23e8372d4965c0a3013",
+            "9ab8d296637580f75657558f",
+            "7199cf706b7f35c9507829ae",
+            "8e026a8c3549e53e4203cdfc",
+            "cc5164f1cfda1ac283137ed3",
+            "6c7f1d6c9e5c83eab5972fc7",
+            "5d185b232493cda0dd2b8102",
+            "9491cea40e67ac977640cd15",
+            "4ed0a7cbecba43d2da7c950b",
+            "324271ec2c163e98e7e9c617",
+            "264f49e3454cac8fb1c4c187",
+            "4dd947dc9aa4813eaf59ba12",
+            "cde43bafd9c9a45bf7b31f56"
+          ],
+          "previous_reason_codes": [
+            "MATCH_UNIQUE",
+            "EXACT_CITY_EVENT_TEXT",
+            "STRICT_EXPLOSION_EVIDENCE",
+            "AIR_MILITARY_CONTEXT",
+            "SAME_ATTACK_CONTEXT_SUPPORTED",
+            "NO_STRICT_TEMPORAL_BINDING",
+            "SENSITIVITY_INFERRED_SAME_ATTACK"
+          ],
+          "corrected_temporal_code": "NO_STRICT_TEMPORAL_BINDING",
+          "reason": "inferred_same_attack has no episode-specific temporal proof on a multi-episode local date; the unique publication-time match is discovery metadata only"
+        },
+        {
+          "candidate_id": "84bd68c869990fb70375c254",
+          "city_key": "mykolaiv",
+          "previous_outcome": "approved_sensitivity",
+          "corrected_outcome": "needs_review",
+          "previous_matched_episode_id": "cde43bafd9c9a45bf7b31f56",
+          "corrected_matched_episode_id": null,
+          "local_date_kyiv": "2026-09-21",
+          "tracked_episode_ids_on_local_date": [
+            "cde43bafd9c9a45bf7b31f56",
+            "e0438587bb2c9509d55a149e",
+            "6b11e907a5d7c68eefc489ba",
+            "cebaf685da89067185e6b191",
+            "96fac9a052367e4727b32a42",
+            "7ee26268d7957503395ea650",
+            "7de40e20694390d76985efc3",
+            "f7b3a58e791e562cb63376dc",
+            "e98dc546790b73d72b6f2ce0",
+            "d0d561ebd298ce728e8ef92a",
+            "06d720286a38915aef0317d0",
+            "71b69ba2f2bab323c19b0b0e"
+          ],
+          "previous_reason_codes": [
+            "MATCH_UNIQUE",
+            "EXACT_CITY_EVENT_TEXT",
+            "STRICT_EXPLOSION_EVIDENCE",
+            "AIR_MILITARY_CONTEXT",
+            "SAME_ATTACK_CONTEXT_SUPPORTED",
+            "NO_STRICT_TEMPORAL_BINDING",
+            "SENSITIVITY_INFERRED_SAME_ATTACK"
+          ],
+          "corrected_temporal_code": "NO_STRICT_TEMPORAL_BINDING",
+          "reason": "inferred_same_attack has no episode-specific temporal proof on a multi-episode local date; the unique publication-time match is discovery metadata only"
+        },
+        {
+          "candidate_id": "d5cb94fd437118055d979519",
+          "city_key": "mykolaiv",
+          "previous_outcome": "approved_sensitivity",
+          "corrected_outcome": "needs_review",
+          "previous_matched_episode_id": "cde43bafd9c9a45bf7b31f56",
+          "corrected_matched_episode_id": null,
+          "local_date_kyiv": "2026-09-20",
+          "tracked_episode_ids_on_local_date": [
+            "9b29fcaed49c1891f59fe7a3",
+            "8c71fdc1ddb188ec5e2109b5",
+            "bcb26851e5582219a119ba63",
+            "c9f62ec444c5b5abbd019e8e",
+            "61cec828716864b5d41542de",
+            "0064b23e8372d4965c0a3013",
+            "9ab8d296637580f75657558f",
+            "7199cf706b7f35c9507829ae",
+            "8e026a8c3549e53e4203cdfc",
+            "cc5164f1cfda1ac283137ed3",
+            "6c7f1d6c9e5c83eab5972fc7",
+            "5d185b232493cda0dd2b8102",
+            "9491cea40e67ac977640cd15",
+            "4ed0a7cbecba43d2da7c950b",
+            "324271ec2c163e98e7e9c617",
+            "264f49e3454cac8fb1c4c187",
+            "4dd947dc9aa4813eaf59ba12",
+            "cde43bafd9c9a45bf7b31f56"
+          ],
+          "previous_reason_codes": [
+            "MATCH_UNIQUE",
+            "EXACT_CITY_EVENT_TEXT",
+            "STRICT_EXPLOSION_EVIDENCE",
+            "AIR_MILITARY_CONTEXT",
+            "SAME_ATTACK_CONTEXT_SUPPORTED",
+            "NO_STRICT_TEMPORAL_BINDING",
+            "SENSITIVITY_INFERRED_SAME_ATTACK"
+          ],
+          "corrected_temporal_code": "NO_STRICT_TEMPORAL_BINDING",
+          "reason": "inferred_same_attack has no episode-specific temporal proof on a multi-episode local date; the unique publication-time match is discovery metadata only"
+        },
+        {
+          "candidate_id": "da6ff392a3e504a09e786aec",
+          "city_key": "mykolaiv",
+          "previous_outcome": "approved_sensitivity",
+          "corrected_outcome": "needs_review",
+          "previous_matched_episode_id": "cc5164f1cfda1ac283137ed3",
+          "corrected_matched_episode_id": null,
+          "local_date_kyiv": "2026-09-20",
+          "tracked_episode_ids_on_local_date": [
+            "9b29fcaed49c1891f59fe7a3",
+            "8c71fdc1ddb188ec5e2109b5",
+            "bcb26851e5582219a119ba63",
+            "c9f62ec444c5b5abbd019e8e",
+            "61cec828716864b5d41542de",
+            "0064b23e8372d4965c0a3013",
+            "9ab8d296637580f75657558f",
+            "7199cf706b7f35c9507829ae",
+            "8e026a8c3549e53e4203cdfc",
+            "cc5164f1cfda1ac283137ed3",
+            "6c7f1d6c9e5c83eab5972fc7",
+            "5d185b232493cda0dd2b8102",
+            "9491cea40e67ac977640cd15",
+            "4ed0a7cbecba43d2da7c950b",
+            "324271ec2c163e98e7e9c617",
+            "264f49e3454cac8fb1c4c187",
+            "4dd947dc9aa4813eaf59ba12",
+            "cde43bafd9c9a45bf7b31f56"
+          ],
+          "previous_reason_codes": [
+            "MATCH_UNIQUE",
+            "EXACT_CITY_EVENT_TEXT",
+            "STRICT_EXPLOSION_EVIDENCE",
+            "AIR_MILITARY_CONTEXT",
+            "SAME_ATTACK_CONTEXT_SUPPORTED",
+            "NO_STRICT_TEMPORAL_BINDING",
+            "SENSITIVITY_INFERRED_SAME_ATTACK"
+          ],
+          "corrected_temporal_code": "NO_STRICT_TEMPORAL_BINDING",
+          "reason": "inferred_same_attack has no episode-specific temporal proof on a multi-episode local date; the unique publication-time match is discovery metadata only"
+        },
+        {
+          "candidate_id": "ebb7156d3ea8be29c8f4b67b",
+          "city_key": "odesa",
+          "previous_outcome": "approved_sensitivity",
+          "corrected_outcome": "needs_review",
+          "previous_matched_episode_id": "31384cef6eb1ad2f9742b233",
+          "corrected_matched_episode_id": null,
+          "local_date_kyiv": "2026-09-22",
+          "tracked_episode_ids_on_local_date": [
+            "ba5c838f192f1c1319ed195d",
+            "4febb436841b90d6816e2eab",
+            "372b60db79be96b962c4e035",
+            "73b25ffed5b22fcb1e3a95e2",
+            "99a9d24187037113603feab9",
+            "31384cef6eb1ad2f9742b233",
+            "a73e0cac632b612a71dfdcf0",
+            "aee046348f0b715d6a4d6bae",
+            "8b09511c0c01276f861ab24e",
+            "ec5b41e6b7c09855d00f5e67",
+            "15ffa730f7d728debf417003",
+            "43b8960a2b580f38570143b9",
+            "0517b7d2d1b211afdb563c29"
+          ],
+          "previous_reason_codes": [
+            "MATCH_UNIQUE",
+            "EXACT_CITY_EVENT_TEXT",
+            "STRICT_EXPLOSION_EVIDENCE",
+            "AIR_MILITARY_CONTEXT",
+            "SAME_ATTACK_CONTEXT_SUPPORTED",
+            "NO_STRICT_TEMPORAL_BINDING",
+            "SENSITIVITY_INFERRED_SAME_ATTACK"
+          ],
+          "corrected_temporal_code": "NO_STRICT_TEMPORAL_BINDING",
+          "reason": "inferred_same_attack has no episode-specific temporal proof on a multi-episode local date; the unique publication-time match is discovery metadata only"
+        },
+        {
+          "candidate_id": "f8410c2df817637bad98c18f",
+          "city_key": "odesa",
+          "previous_outcome": "approved_sensitivity",
+          "corrected_outcome": "needs_review",
+          "previous_matched_episode_id": "eb2580c2bec54ddc2e36eaf7",
+          "corrected_matched_episode_id": null,
+          "local_date_kyiv": "2026-09-21",
+          "tracked_episode_ids_on_local_date": [
+            "3b5ad85f3217d7d99ac35777",
+            "ea3874832e11d136a9a3896e",
+            "9bedeed8b7bb6b0ff99fc12b",
+            "fedd9b9a869fe95c558f5dec",
+            "399d569d7dfa19badd9b4352",
+            "eb2580c2bec54ddc2e36eaf7",
+            "7a7da068c0efb7be80bd45e4",
+            "8ffac14c2a8f0dd6d9df029c"
+          ],
+          "previous_reason_codes": [
+            "MATCH_UNIQUE",
+            "EXACT_CITY_EVENT_TEXT",
+            "STRICT_EXPLOSION_EVIDENCE",
+            "AIR_MILITARY_CONTEXT",
+            "SAME_ATTACK_CONTEXT_SUPPORTED",
+            "NO_STRICT_TEMPORAL_BINDING",
+            "SENSITIVITY_INFERRED_SAME_ATTACK"
+          ],
+          "corrected_temporal_code": "NO_STRICT_TEMPORAL_BINDING",
+          "reason": "inferred_same_attack has no episode-specific temporal proof on a multi-episode local date; the unique publication-time match is discovery metadata only"
+        },
+        {
+          "candidate_id": "06a79fb024dc57c5b247d040",
+          "city_key": "poltava",
+          "previous_outcome": "approved_sensitivity",
+          "corrected_outcome": "needs_review",
+          "previous_matched_episode_id": "60f6aac885e538d93d88e053",
+          "corrected_matched_episode_id": null,
+          "local_date_kyiv": "2026-09-21",
+          "tracked_episode_ids_on_local_date": [
+            "c62c50c1a999f8fba302f845",
+            "34b8008061d3bc24c6fa401f",
+            "7d0809724b0b0d8c4d48f456",
+            "23b22284c9c646ef462e1aec",
+            "037bd862cc444a2b52986838",
+            "94929485fa14a1ecd2562eb1",
+            "60f6aac885e538d93d88e053",
+            "0b02d2869bc94ab2ebb80c16",
+            "48f6c8d85fec764ad58ccbb9",
+            "49a0be89400e2c64d95e5829",
+            "37afe9f116b872fcf679ca49",
+            "c1b57164384a12db5a0b38f1",
+            "6d3ffb88b431e8e80e024aae"
+          ],
+          "previous_reason_codes": [
+            "MATCH_UNIQUE",
+            "EXACT_CITY_EVENT_TEXT",
+            "STRICT_EXPLOSION_EVIDENCE",
+            "AIR_MILITARY_CONTEXT",
+            "SAME_ATTACK_CONTEXT_SUPPORTED",
+            "NO_STRICT_TEMPORAL_BINDING",
+            "SENSITIVITY_INFERRED_SAME_ATTACK"
+          ],
+          "corrected_temporal_code": "NO_STRICT_TEMPORAL_BINDING",
+          "reason": "inferred_same_attack has no episode-specific temporal proof on a multi-episode local date; the unique publication-time match is discovery metadata only"
+        },
+        {
+          "candidate_id": "61d7078525ab5699721e759f",
+          "city_key": "sumy",
+          "previous_outcome": "approved_sensitivity",
+          "corrected_outcome": "needs_review",
+          "previous_matched_episode_id": "c7bbcc4ab25fe3eeeb2fa6d4",
+          "corrected_matched_episode_id": null,
+          "local_date_kyiv": "2026-09-20",
+          "tracked_episode_ids_on_local_date": [
+            "f1b10a6f0ef6f8f7ce8ce227",
+            "b227b317589c1df682e2e4a7",
+            "cef4a6775a1ef5cb39bdbbc1",
+            "f522e01fd209dbbf3c1b8958",
+            "164f79029da5ed1853ed6897",
+            "23ec1ef72e8ae252851bc968",
+            "b84ab534cebcb275a5548582",
+            "cb0db5b4cd83fe0d0b319205",
+            "6f7875a17108b70919370fb5",
+            "c7bbcc4ab25fe3eeeb2fa6d4",
+            "a02cb7c70056fd3ec19eff4c"
+          ],
+          "previous_reason_codes": [
+            "MATCH_UNIQUE",
+            "EXACT_CITY_EVENT_TEXT",
+            "STRICT_EXPLOSION_EVIDENCE",
+            "AIR_MILITARY_CONTEXT",
+            "SAME_ATTACK_CONTEXT_SUPPORTED",
+            "NO_STRICT_TEMPORAL_BINDING",
+            "SENSITIVITY_INFERRED_SAME_ATTACK"
+          ],
+          "corrected_temporal_code": "NO_STRICT_TEMPORAL_BINDING",
+          "reason": "inferred_same_attack has no episode-specific temporal proof on a multi-episode local date; the unique publication-time match is discovery metadata only"
+        },
+        {
+          "candidate_id": "c014f6cf5d5bd516df6db11f",
+          "city_key": "sumy",
+          "previous_outcome": "approved_sensitivity",
+          "corrected_outcome": "needs_review",
+          "previous_matched_episode_id": "a02cb7c70056fd3ec19eff4c",
+          "corrected_matched_episode_id": null,
+          "local_date_kyiv": "2026-09-20",
+          "tracked_episode_ids_on_local_date": [
+            "f1b10a6f0ef6f8f7ce8ce227",
+            "b227b317589c1df682e2e4a7",
+            "cef4a6775a1ef5cb39bdbbc1",
+            "f522e01fd209dbbf3c1b8958",
+            "164f79029da5ed1853ed6897",
+            "23ec1ef72e8ae252851bc968",
+            "b84ab534cebcb275a5548582",
+            "cb0db5b4cd83fe0d0b319205",
+            "6f7875a17108b70919370fb5",
+            "c7bbcc4ab25fe3eeeb2fa6d4",
+            "a02cb7c70056fd3ec19eff4c"
+          ],
+          "previous_reason_codes": [
+            "MATCH_UNIQUE",
+            "EXACT_CITY_EVENT_TEXT",
+            "STRICT_EXPLOSION_EVIDENCE",
+            "AIR_MILITARY_CONTEXT",
+            "SAME_ATTACK_CONTEXT_SUPPORTED",
+            "NO_STRICT_TEMPORAL_BINDING",
+            "SENSITIVITY_INFERRED_SAME_ATTACK"
+          ],
+          "corrected_temporal_code": "NO_STRICT_TEMPORAL_BINDING",
+          "reason": "inferred_same_attack has no episode-specific temporal proof on a multi-episode local date; the unique publication-time match is discovery metadata only"
+        },
+        {
+          "candidate_id": "f4592422463c309484994f6f",
+          "city_key": "sumy",
+          "previous_outcome": "approved_sensitivity",
+          "corrected_outcome": "needs_review",
+          "previous_matched_episode_id": "c7bbcc4ab25fe3eeeb2fa6d4",
+          "corrected_matched_episode_id": null,
+          "local_date_kyiv": "2026-09-20",
+          "tracked_episode_ids_on_local_date": [
+            "f1b10a6f0ef6f8f7ce8ce227",
+            "b227b317589c1df682e2e4a7",
+            "cef4a6775a1ef5cb39bdbbc1",
+            "f522e01fd209dbbf3c1b8958",
+            "164f79029da5ed1853ed6897",
+            "23ec1ef72e8ae252851bc968",
+            "b84ab534cebcb275a5548582",
+            "cb0db5b4cd83fe0d0b319205",
+            "6f7875a17108b70919370fb5",
+            "c7bbcc4ab25fe3eeeb2fa6d4",
+            "a02cb7c70056fd3ec19eff4c"
+          ],
+          "previous_reason_codes": [
+            "MATCH_UNIQUE",
+            "EXACT_CITY_EVENT_TEXT",
+            "STRICT_EXPLOSION_EVIDENCE",
+            "AIR_MILITARY_CONTEXT",
+            "SAME_ATTACK_CONTEXT_SUPPORTED",
+            "NO_STRICT_TEMPORAL_BINDING",
+            "SENSITIVITY_INFERRED_SAME_ATTACK"
+          ],
+          "corrected_temporal_code": "NO_STRICT_TEMPORAL_BINDING",
+          "reason": "inferred_same_attack has no episode-specific temporal proof on a multi-episode local date; the unique publication-time match is discovery metadata only"
+        },
+        {
+          "candidate_id": "9484a7cc8dfba18f6b954e2c",
+          "city_key": "vinnytsia",
+          "previous_outcome": "approved_sensitivity",
+          "corrected_outcome": "needs_review",
+          "previous_matched_episode_id": "a2b8d414504c8b33c861954d",
+          "corrected_matched_episode_id": null,
+          "local_date_kyiv": "2026-09-22",
+          "tracked_episode_ids_on_local_date": [
+            "b77b96d7380faa7909fe9f30",
+            "e2da66ef86486c11136555c0",
+            "4135f0305f496c1371f48ee6",
+            "a2b8d414504c8b33c861954d",
+            "5efbb36bd344684a86e59011"
+          ],
+          "previous_reason_codes": [
+            "MATCH_UNIQUE",
+            "EXACT_CITY_EVENT_TEXT",
+            "STRICT_EXPLOSION_EVIDENCE",
+            "AIR_MILITARY_CONTEXT",
+            "SAME_ATTACK_CONTEXT_SUPPORTED",
+            "NO_STRICT_TEMPORAL_BINDING",
+            "SENSITIVITY_INFERRED_SAME_ATTACK"
+          ],
+          "corrected_temporal_code": "NO_STRICT_TEMPORAL_BINDING",
+          "reason": "inferred_same_attack has no episode-specific temporal proof on a multi-episode local date; the unique publication-time match is discovery metadata only"
+        },
+        {
+          "candidate_id": "bbff5a268fa000bc7f8c7e05",
+          "city_key": "zaporizhzhia",
+          "previous_outcome": "approved_sensitivity",
+          "corrected_outcome": "needs_review",
+          "previous_matched_episode_id": "e81fa0da53beabbc356e0da3",
+          "corrected_matched_episode_id": null,
+          "local_date_kyiv": "2026-09-22",
+          "tracked_episode_ids_on_local_date": [
+            "e81fa0da53beabbc356e0da3",
+            "b18afdc437be618902d68d31",
+            "3006c7a0b2bf8ab7127307a3",
+            "8fe1b34cc4b4aa0560cd3446",
+            "6435bbd00eb9be6019ee3800",
+            "062e20d35c9d78bf585c479b"
+          ],
+          "previous_reason_codes": [
+            "MATCH_UNIQUE",
+            "EXACT_CITY_EVENT_TEXT",
+            "STRICT_EXPLOSION_EVIDENCE",
+            "AIR_MILITARY_CONTEXT",
+            "SAME_ATTACK_CONTEXT_SUPPORTED",
+            "NO_STRICT_TEMPORAL_BINDING",
+            "SENSITIVITY_INFERRED_SAME_ATTACK"
+          ],
+          "corrected_temporal_code": "NO_STRICT_TEMPORAL_BINDING",
+          "reason": "inferred_same_attack has no episode-specific temporal proof on a multi-episode local date; the unique publication-time match is discovery metadata only"
+        },
+        {
+          "candidate_id": "098027544cca4ebdda0c9986",
+          "city_key": "zhytomyr",
+          "previous_outcome": "approved_sensitivity",
+          "corrected_outcome": "needs_review",
+          "previous_matched_episode_id": "73c3a44ce67b4b5d5d644046",
+          "corrected_matched_episode_id": null,
+          "local_date_kyiv": "2026-09-18",
+          "tracked_episode_ids_on_local_date": [
+            "810faacb9cda76cf840454e8",
+            "a6e9ca9e95897e22b52b0995",
+            "73c3a44ce67b4b5d5d644046",
+            "2f08d2b1122f51d8149fadb7",
+            "ef9eb08d314968f85faf971a"
+          ],
+          "previous_reason_codes": [
+            "MATCH_UNIQUE",
+            "EXACT_CITY_EVENT_TEXT",
+            "STRICT_EXPLOSION_EVIDENCE",
+            "AIR_MILITARY_CONTEXT",
+            "SAME_ATTACK_CONTEXT_SUPPORTED",
+            "NO_STRICT_TEMPORAL_BINDING",
+            "SENSITIVITY_INFERRED_SAME_ATTACK"
+          ],
+          "corrected_temporal_code": "NO_STRICT_TEMPORAL_BINDING",
+          "reason": "inferred_same_attack has no episode-specific temporal proof on a multi-episode local date; the unique publication-time match is discovery metadata only"
+        },
+        {
+          "candidate_id": "601fc925013243bdf89c12f0",
+          "city_key": "zhytomyr",
+          "previous_outcome": "approved_sensitivity",
+          "corrected_outcome": "needs_review",
+          "previous_matched_episode_id": "73c3a44ce67b4b5d5d644046",
+          "corrected_matched_episode_id": null,
+          "local_date_kyiv": "2026-09-18",
+          "tracked_episode_ids_on_local_date": [
+            "810faacb9cda76cf840454e8",
+            "a6e9ca9e95897e22b52b0995",
+            "73c3a44ce67b4b5d5d644046",
+            "2f08d2b1122f51d8149fadb7",
+            "ef9eb08d314968f85faf971a"
+          ],
+          "previous_reason_codes": [
+            "MATCH_UNIQUE",
+            "EXACT_CITY_EVENT_TEXT",
+            "STRICT_EXPLOSION_EVIDENCE",
+            "AIR_MILITARY_CONTEXT",
+            "SAME_ATTACK_CONTEXT_SUPPORTED",
+            "NO_STRICT_TEMPORAL_BINDING",
+            "SENSITIVITY_INFERRED_SAME_ATTACK"
+          ],
+          "corrected_temporal_code": "NO_STRICT_TEMPORAL_BINDING",
+          "reason": "inferred_same_attack has no episode-specific temporal proof on a multi-episode local date; the unique publication-time match is discovery metadata only"
+        }
+      ],
+      "review_to_strict": [
+        {
+          "candidate_id": "6f11df0c7821da2ba8b3cb93",
+          "city_key": "ternopil",
+          "previous_outcome": "needs_review",
+          "corrected_outcome": "approved_strict",
+          "previous_matched_episode_id": null,
+          "corrected_matched_episode_id": "542708c29f1a2e044db6876c",
+          "local_date_kyiv": "2026-09-18",
+          "tracked_episode_ids_on_local_date": [
+            "542708c29f1a2e044db6876c"
+          ],
+          "previous_reason_codes": [
+            "MATCH_NONE",
+            "EXACT_CITY_EVENT_TEXT",
+            "STRICT_EXPLOSION_EVIDENCE",
+            "AIR_MILITARY_CONTEXT",
+            "SAME_ATTACK_CONTEXT_SUPPORTED",
+            "TEMPORAL_EXPLICIT_ALERT_RELATION"
+          ],
+          "corrected_temporal_code": "TEMPORAL_EXPLICIT_ALERT_RELATION",
+          "reason": "generic explicit alert relation is episode-specific because exactly one tracked raw episode intersects the report local date; publication time is not used as event time or as the episode selector"
+        },
+        {
+          "candidate_id": "cc64cf1fe5e06196cac9b4a3",
+          "city_key": "ternopil",
+          "previous_outcome": "needs_review",
+          "corrected_outcome": "approved_strict",
+          "previous_matched_episode_id": null,
+          "corrected_matched_episode_id": "542708c29f1a2e044db6876c",
+          "local_date_kyiv": "2026-09-18",
+          "tracked_episode_ids_on_local_date": [
+            "542708c29f1a2e044db6876c"
+          ],
+          "previous_reason_codes": [
+            "MATCH_NONE",
+            "EXACT_CITY_EVENT_TEXT",
+            "STRICT_EXPLOSION_EVIDENCE",
+            "AIR_MILITARY_CONTEXT",
+            "SAME_ATTACK_CONTEXT_SUPPORTED",
+            "TEMPORAL_EXPLICIT_ALERT_RELATION"
+          ],
+          "corrected_temporal_code": "TEMPORAL_EXPLICIT_ALERT_RELATION",
+          "reason": "generic explicit alert relation is episode-specific because exactly one tracked raw episode intersects the report local date; publication time is not used as event time or as the episode selector"
+        }
+      ],
+      "other": []
+    },
+    "multi_episode_date_sensitivity": {
+      "before": 43,
+      "after": 0,
+      "retained_single_episode_candidate_ids": [
+        "7b7b98cc5de0c179d7503f7d"
+      ]
+    },
+    "retained_key_cases": {
+      "contemporaneous_live_strict": [
+        "d4fb0e081e5be3bd609f0633"
+      ],
+      "single_episode_sensitivity": [
+        "7b7b98cc5de0c179d7503f7d"
+      ]
+    }
+  },
+  "current_head_needs_review_dry_replay": {
+    "input_total": 130,
+    "counts": {
+      "approved_strict": 2,
+      "approved_sensitivity": 0,
+      "rejected": 0,
+      "needs_review": 128,
+      "total": 130
+    },
+    "counts_by_city": {
+      "cherkasy": {
+        "input_needs_review": 2,
+        "approved_strict": 0,
+        "approved_sensitivity": 0,
+        "rejected": 0,
+        "needs_review": 2
+      },
+      "chernihiv": {
+        "input_needs_review": 6,
+        "approved_strict": 0,
+        "approved_sensitivity": 0,
+        "rejected": 0,
+        "needs_review": 6
+      },
+      "chernivtsi": {
+        "input_needs_review": 0,
+        "approved_strict": 0,
+        "approved_sensitivity": 0,
+        "rejected": 0,
+        "needs_review": 0
+      },
+      "dnipro": {
+        "input_needs_review": 27,
+        "approved_strict": 0,
+        "approved_sensitivity": 0,
+        "rejected": 0,
+        "needs_review": 27
+      },
+      "ivano_frankivsk": {
+        "input_needs_review": 0,
+        "approved_strict": 0,
+        "approved_sensitivity": 0,
+        "rejected": 0,
+        "needs_review": 0
+      },
+      "kharkiv": {
+        "input_needs_review": 2,
+        "approved_strict": 0,
+        "approved_sensitivity": 0,
+        "rejected": 0,
+        "needs_review": 2
+      },
+      "kherson": {
+        "input_needs_review": 0,
+        "approved_strict": 0,
+        "approved_sensitivity": 0,
+        "rejected": 0,
+        "needs_review": 0
+      },
+      "khmelnytskyi": {
+        "input_needs_review": 0,
+        "approved_strict": 0,
+        "approved_sensitivity": 0,
+        "rejected": 0,
+        "needs_review": 0
+      },
+      "kropyvnytskyi": {
+        "input_needs_review": 8,
+        "approved_strict": 0,
+        "approved_sensitivity": 0,
+        "rejected": 0,
+        "needs_review": 8
+      },
+      "kyiv": {
+        "input_needs_review": 44,
+        "approved_strict": 0,
+        "approved_sensitivity": 0,
+        "rejected": 0,
+        "needs_review": 44
+      },
+      "lutsk": {
+        "input_needs_review": 0,
+        "approved_strict": 0,
+        "approved_sensitivity": 0,
+        "rejected": 0,
+        "needs_review": 0
+      },
+      "lviv": {
+        "input_needs_review": 0,
+        "approved_strict": 0,
+        "approved_sensitivity": 0,
+        "rejected": 0,
+        "needs_review": 0
+      },
+      "mykolaiv": {
+        "input_needs_review": 8,
+        "approved_strict": 0,
+        "approved_sensitivity": 0,
+        "rejected": 0,
+        "needs_review": 8
+      },
+      "odesa": {
+        "input_needs_review": 4,
+        "approved_strict": 0,
+        "approved_sensitivity": 0,
+        "rejected": 0,
+        "needs_review": 4
+      },
+      "poltava": {
+        "input_needs_review": 8,
+        "approved_strict": 0,
+        "approved_sensitivity": 0,
+        "rejected": 0,
+        "needs_review": 8
+      },
+      "rivne": {
+        "input_needs_review": 1,
+        "approved_strict": 0,
+        "approved_sensitivity": 0,
+        "rejected": 0,
+        "needs_review": 1
+      },
+      "sevastopol": {
+        "input_needs_review": 1,
+        "approved_strict": 0,
+        "approved_sensitivity": 0,
+        "rejected": 0,
+        "needs_review": 1
+      },
+      "sumy": {
+        "input_needs_review": 1,
+        "approved_strict": 0,
+        "approved_sensitivity": 0,
+        "rejected": 0,
+        "needs_review": 1
+      },
+      "ternopil": {
+        "input_needs_review": 5,
+        "approved_strict": 2,
+        "approved_sensitivity": 0,
+        "rejected": 0,
+        "needs_review": 3
+      },
+      "uzhhorod": {
+        "input_needs_review": 0,
+        "approved_strict": 0,
+        "approved_sensitivity": 0,
+        "rejected": 0,
+        "needs_review": 0
+      },
+      "vinnytsia": {
+        "input_needs_review": 1,
+        "approved_strict": 0,
+        "approved_sensitivity": 0,
+        "rejected": 0,
+        "needs_review": 1
+      },
+      "zaporizhzhia": {
+        "input_needs_review": 11,
+        "approved_strict": 0,
+        "approved_sensitivity": 0,
+        "rejected": 0,
+        "needs_review": 11
+      },
+      "zhytomyr": {
+        "input_needs_review": 1,
+        "approved_strict": 0,
+        "approved_sensitivity": 0,
+        "rejected": 0,
+        "needs_review": 1
+      }
+    },
+    "proposed_transitions_from_current_status": [
+      {
+        "candidate_id": "cc64cf1fe5e06196cac9b4a3",
+        "city_key": "ternopil",
+        "current_status": "needs_review",
+        "corrected_outcome": "approved_strict",
+        "corrected_matched_episode_id": "542708c29f1a2e044db6876c",
+        "reason": "generic explicit alert relation is episode-specific because exactly one tracked raw episode intersects the report local date; publication time is not used as event time or as the episode selector"
+      },
+      {
+        "candidate_id": "6f11df0c7821da2ba8b3cb93",
+        "city_key": "ternopil",
+        "current_status": "needs_review",
+        "corrected_outcome": "approved_strict",
+        "corrected_matched_episode_id": "542708c29f1a2e044db6876c",
+        "reason": "generic explicit alert relation is episode-specific because exactly one tracked raw episode intersects the report local date; publication time is not used as event time or as the episode selector"
+      }
+    ],
+    "new_since_frozen_175_snapshot": {
+      "count": 8,
+      "candidate_ids": [
+        "db9ace808c9f8f67d73b1313",
+        "5dca6804880316f8b8eab41b",
+        "8a3328b488714c10fd0024b1",
+        "038d554e5d8350eea69c83c1",
+        "56b86f01dbf85f32db5790ed",
+        "56547dd74262718ddb980048",
+        "c628dcdeb83d294ecbdb14cb",
+        "7da9994a7d959d58a9acff3b"
+      ],
+      "corrected_outcomes": {
+        "approved_strict": 0,
+        "approved_sensitivity": 0,
+        "rejected": 0,
+        "needs_review": 8
+      }
+    }
+  },
+  "regression_tests": {
+    "embedded_in_monitor_self_test": true,
+    "focused_corrective_harness": {
+      "passed": true,
+      "normal_monitor_invoked": false,
+      "covered": [
+        "Odesa wrong-episode generic during-alert regression for 5a61d62cac76456eb62cb386",
+        "Odesa wrong-episode generic during-alert regression for da37fd7a3b6c42dbff41d115",
+        "Kyiv trusted contemporaneous live strict case d4fb0e081e5be3bd609f0633",
+        "multi-episode inferred_same_attack remains needs_review",
+        "explicit event time can bind an earlier episode even when publication matching points to a later episode",
+        "explicit near-boundary event time remains approved_sensitivity/near_boundary",
+        "controlled quarry/planned blast plus unrelated alert/PPO wording is deterministic reject",
+        "single-episode-date generic alert relation can bind without publication-window matching"
+      ]
+    }
+  },
+  "acceptance": {
+    "publication_time_does_not_define_event_episode": true,
+    "generic_during_alert_does_not_select_raw_episode_on_multi_episode_date": true,
+    "odesa_regression_candidates_not_auto_strict_for_later_episode": true,
+    "contemporaneous_live_evidence_preserved": true,
+    "explicit_event_time_preserved": true,
+    "explicit_near_boundary_sensitivity_preserved": true,
+    "inferred_same_attack_not_auto_assigned_on_multi_episode_date": true,
+    "controlled_blast_unrelated_air_context_rejected": true,
+    "rules_apply_uniformly_to_all_23_cities": true,
+    "live_queue_unchanged_by_this_replay": true
+  },
+  "deferred_live_repair": {
+    "performed": false,
+    "note": "Already-applied step-3 statuses are intentionally not mutated in this corrective step. The frozen-cohort transition lists identify records whose live status would require a later controlled repair.",
+    "auto_approved_records_now_requiring_review_candidate_ids": [
+      "5a61d62cac76456eb62cb386",
+      "63e4a0c4265cd7c9bac6f485",
+      "da37fd7a3b6c42dbff41d115",
+      "76743c6d9be4071874e32016",
+      "b5a20a069124c2ed6c65d7f5",
+      "1a46424e12981a83b54a251e",
+      "37f9c1295655f2a1a406acf8",
+      "48bdec0e326e64c583d31861",
+      "621079aafd7bef7a641fdbdc",
+      "a06e12f4cfed9b43eafe2d58",
+      "aa19972aee883cf12af75d20",
+      "cd9484aa523d512f8167a1ed",
+      "dc4cd44164de1019918413db",
+      "eeee7926046f2e69e5673992",
+      "c0432cb39613e91bee28f154",
+      "07aa5a5a4ba88f890fa03785",
+      "2b380f42ad7d780d36ac82f7",
+      "4b85ff529264d54103733c2f",
+      "8e039640e74ac1487548b72c",
+      "a4e2a3f436209643e31f6ade",
+      "bd6895932f296adc21a71406",
+      "37aa1b96565ec766d2998631",
+      "3e873213239a5b34f3e64ec8",
+      "450222e889b334b2bb3e59a5",
+      "5a2bb37aae44d618e1b9d478",
+      "6d4cd0b8e278b96a345bcccd",
+      "969151182b4d4498df132a53",
+      "d122c212e6e36548ee84ec15",
+      "ea9314b362e6a296bcd50c84",
+      "0e39040303d4b31a603e2017",
+      "1923b7a627ac1b048dc3b49a",
+      "4b8fb9008f6202ff6639678f",
+      "4d0041fd2c915b268f85ba24",
+      "84bd68c869990fb70375c254",
+      "d5cb94fd437118055d979519",
+      "da6ff392a3e504a09e786aec",
+      "ebb7156d3ea8be29c8f4b67b",
+      "f8410c2df817637bad98c18f",
+      "06a79fb024dc57c5b247d040",
+      "61d7078525ab5699721e759f",
+      "c014f6cf5d5bd516df6db11f",
+      "f4592422463c309484994f6f",
+      "9484a7cc8dfba18f6b954e2c",
+      "bbff5a268fa000bc7f8c7e05",
+      "098027544cca4ebdda0c9986",
+      "601fc925013243bdf89c12f0"
+    ]
+  },
+  "verdict": "TEMPORAL ATTRIBUTION CORRECTION READY"
+}
