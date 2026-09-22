@@ -1,0 +1,3260 @@
+{
+  "schema_version": 1,
+  "task": "explosion_monitor_matching_hardening_dry_replay",
+  "generated_at": "2026-09-22T17:21:00Z",
+  "repository": "olegbalakin-cmyk/kyiv-air-alerts-grafana",
+  "branch": "multicity-wip-2026-09-16",
+  "source_commit_before_hardening": "2f8e0d54340b56282f29652257f97390f51817e9",
+  "inputs": {
+    "review_queue": {
+      "path": "kyiv-air-alerts-grafana/data/explosion_review_queue.json",
+      "blob_sha": "c81961f3648ef37a5b18cbf89a9a36d710b1841a",
+      "total_records": 236,
+      "status_counts": {
+        "needs_review": 162,
+        "approved_strict": 42,
+        "rejected": 17,
+        "approved_sensitivity": 15
+      }
+    },
+    "monitor_state": {
+      "path": "kyiv-air-alerts-grafana/data/explosion_candidate_monitor_state.json",
+      "blob_sha": "2256ca6fad26ff02e262b08f707b497eb2dd6f77",
+      "tracked_city_count": 23
+    },
+    "diagnostic_artifact": "research/explosion_monitor_system_qa_2026-09-21.json"
+  },
+  "scope_guardrails": {
+    "dry_replay_only": true,
+    "queue_statuses_mutated": false,
+    "classification_rules_changed": false,
+    "canonical_or_historical_data_changed": false,
+    "metric_repair_run": false,
+    "dashboard_changed": false,
+    "deployment_run": false
+  },
+  "methodology": {
+    "matching_universe": "All already tracked completed alert episodes for the candidate city, independent of due/immediate/follow-up state.",
+    "publication_time_role": "Used only to construct temporal candidate alert-window set; never treated as proof of explosion event time.",
+    "publication_window_rule": "alert_start <= published_at <= alert_end + 30 minutes, unchanged from the former temporal candidate rule.",
+    "same_window_representation_rule": "Two raw episode records are reconciled into one logical window only when both start and end boundaries differ by <=90 seconds. This mirrors the QA near90 diagnostic and is deliberately narrower than generic overlap union.",
+    "ambiguity_rule": "After representation reconciliation, more than one logical window remains ambiguous; no arbitrary raw episode winner is selected.",
+    "status_rule": "Matching is diagnostic/identity only in this step and never changes candidate status."
+  },
+  "summary": {
+    "current_queue_total": 236,
+    "total_current_needs_review": 162,
+    "unique_match": 117,
+    "ambiguous_match": 8,
+    "no_match": 37,
+    "matching_outcome_changed_vs_current_state": 125,
+    "previously_unmatched_now_unique": 117,
+    "near_duplicate_collapsed_to_unique": 24,
+    "near_duplicate_related_ambiguity": 1,
+    "overlapping_real_episode_ambiguity": 8,
+    "full_queue_matching_outcomes": {
+      "unique_match": 166,
+      "ambiguous_match": 15,
+      "no_match": 55
+    },
+    "counts_by_city": {
+      "cherkasy": {
+        "total_current_needs_review": 3,
+        "unique_match": 1,
+        "ambiguous_match": 0,
+        "no_match": 2
+      },
+      "chernihiv": {
+        "total_current_needs_review": 5,
+        "unique_match": 4,
+        "ambiguous_match": 0,
+        "no_match": 1
+      },
+      "chernivtsi": {
+        "total_current_needs_review": 0,
+        "unique_match": 0,
+        "ambiguous_match": 0,
+        "no_match": 0
+      },
+      "dnipro": {
+        "total_current_needs_review": 33,
+        "unique_match": 18,
+        "ambiguous_match": 2,
+        "no_match": 13
+      },
+      "ivano_frankivsk": {
+        "total_current_needs_review": 0,
+        "unique_match": 0,
+        "ambiguous_match": 0,
+        "no_match": 0
+      },
+      "kharkiv": {
+        "total_current_needs_review": 1,
+        "unique_match": 1,
+        "ambiguous_match": 0,
+        "no_match": 0
+      },
+      "kherson": {
+        "total_current_needs_review": 0,
+        "unique_match": 0,
+        "ambiguous_match": 0,
+        "no_match": 0
+      },
+      "khmelnytskyi": {
+        "total_current_needs_review": 0,
+        "unique_match": 0,
+        "ambiguous_match": 0,
+        "no_match": 0
+      },
+      "kropyvnytskyi": {
+        "total_current_needs_review": 14,
+        "unique_match": 12,
+        "ambiguous_match": 1,
+        "no_match": 1
+      },
+      "kyiv": {
+        "total_current_needs_review": 48,
+        "unique_match": 36,
+        "ambiguous_match": 1,
+        "no_match": 11
+      },
+      "lutsk": {
+        "total_current_needs_review": 0,
+        "unique_match": 0,
+        "ambiguous_match": 0,
+        "no_match": 0
+      },
+      "lviv": {
+        "total_current_needs_review": 0,
+        "unique_match": 0,
+        "ambiguous_match": 0,
+        "no_match": 0
+      },
+      "mykolaiv": {
+        "total_current_needs_review": 13,
+        "unique_match": 9,
+        "ambiguous_match": 3,
+        "no_match": 1
+      },
+      "odesa": {
+        "total_current_needs_review": 9,
+        "unique_match": 8,
+        "ambiguous_match": 0,
+        "no_match": 1
+      },
+      "poltava": {
+        "total_current_needs_review": 8,
+        "unique_match": 6,
+        "ambiguous_match": 0,
+        "no_match": 2
+      },
+      "rivne": {
+        "total_current_needs_review": 1,
+        "unique_match": 1,
+        "ambiguous_match": 0,
+        "no_match": 0
+      },
+      "sevastopol": {
+        "total_current_needs_review": 1,
+        "unique_match": 0,
+        "ambiguous_match": 0,
+        "no_match": 1
+      },
+      "sumy": {
+        "total_current_needs_review": 4,
+        "unique_match": 3,
+        "ambiguous_match": 1,
+        "no_match": 0
+      },
+      "ternopil": {
+        "total_current_needs_review": 6,
+        "unique_match": 3,
+        "ambiguous_match": 0,
+        "no_match": 3
+      },
+      "uzhhorod": {
+        "total_current_needs_review": 0,
+        "unique_match": 0,
+        "ambiguous_match": 0,
+        "no_match": 0
+      },
+      "vinnytsia": {
+        "total_current_needs_review": 3,
+        "unique_match": 2,
+        "ambiguous_match": 0,
+        "no_match": 1
+      },
+      "zaporizhzhia": {
+        "total_current_needs_review": 11,
+        "unique_match": 11,
+        "ambiguous_match": 0,
+        "no_match": 0
+      },
+      "zhytomyr": {
+        "total_current_needs_review": 2,
+        "unique_match": 2,
+        "ambiguous_match": 0,
+        "no_match": 0
+      }
+    },
+    "tracked_city_count": 23,
+    "cities_with_current_needs_review": 16,
+    "status_changes": 0
+  },
+  "representative_cases": [
+    {
+      "label": "72h late discovery",
+      "candidate_id": "c9a05f7ddce5ccb67ae89c94",
+      "city": "Тернопіль",
+      "city_key": "ternopil",
+      "current_matched_episode_id": null,
+      "current_matching_outcome": null,
+      "new_matching_outcome": "unique_match",
+      "match_cardinality": "unique",
+      "matched_episode_ids": [
+        "542708c29f1a2e044db6876c"
+      ],
+      "logical_episode_groups": [
+        [
+          "542708c29f1a2e044db6876c"
+        ]
+      ],
+      "reason": "publication_within_unique_tracked_alert_window",
+      "matching_outcome_changed_vs_current_state": true
+    },
+    {
+      "label": "late discovery",
+      "candidate_id": "0af80b9ace77caf690c70160",
+      "city": "Одеса",
+      "city_key": "odesa",
+      "current_matched_episode_id": null,
+      "current_matching_outcome": null,
+      "new_matching_outcome": "unique_match",
+      "match_cardinality": "unique",
+      "matched_episode_ids": [
+        "b79711e9ad81cb490c42e956"
+      ],
+      "logical_episode_groups": [
+        [
+          "b79711e9ad81cb490c42e956"
+        ]
+      ],
+      "reason": "publication_within_unique_tracked_alert_window",
+      "matching_outcome_changed_vs_current_state": true
+    },
+    {
+      "label": "Kyiv near-duplicate representations",
+      "candidate_id": "42c68c4d633bc3d17fe5b2b0",
+      "city": "Київ",
+      "city_key": "kyiv",
+      "current_matched_episode_id": null,
+      "current_matching_outcome": null,
+      "new_matching_outcome": "unique_match",
+      "match_cardinality": "unique",
+      "matched_episode_ids": [
+        "3158c9bd3868886f31701b26",
+        "9cd16dab548f77bba4a4c0d9"
+      ],
+      "logical_episode_groups": [
+        [
+          "3158c9bd3868886f31701b26",
+          "9cd16dab548f77bba4a4c0d9"
+        ]
+      ],
+      "reason": "near_duplicate_source_representations_reconciled_to_one_tracked_alert_window",
+      "matching_outcome_changed_vs_current_state": true
+    },
+    {
+      "label": "Dnipro near-duplicate representations",
+      "candidate_id": "6f07e932e0676a0de514a8ad",
+      "city": "Дніпро",
+      "city_key": "dnipro",
+      "current_matched_episode_id": null,
+      "current_matching_outcome": null,
+      "new_matching_outcome": "unique_match",
+      "match_cardinality": "unique",
+      "matched_episode_ids": [
+        "bd37cd7ac143a40ddf2479b2",
+        "e1da97f784d43694a7d54052"
+      ],
+      "logical_episode_groups": [
+        [
+          "bd37cd7ac143a40ddf2479b2",
+          "e1da97f784d43694a7d54052"
+        ]
+      ],
+      "reason": "near_duplicate_source_representations_reconciled_to_one_tracked_alert_window",
+      "matching_outcome_changed_vs_current_state": true
+    },
+    {
+      "label": "Mykolaiv real overlapping episodes",
+      "candidate_id": "828c6b92b458d78971e652ea",
+      "city": "Миколаїв",
+      "city_key": "mykolaiv",
+      "current_matched_episode_id": null,
+      "current_matching_outcome": null,
+      "new_matching_outcome": "ambiguous_match",
+      "match_cardinality": "ambiguous",
+      "matched_episode_ids": [
+        "cde43bafd9c9a45bf7b31f56",
+        "e0438587bb2c9509d55a149e"
+      ],
+      "logical_episode_groups": [
+        [
+          "cde43bafd9c9a45bf7b31f56"
+        ],
+        [
+          "e0438587bb2c9509d55a149e"
+        ]
+      ],
+      "reason": "publication_matches_multiple_distinct_tracked_alert_windows",
+      "matching_outcome_changed_vs_current_state": true
+    }
+  ],
+  "current_needs_review": [
+    {
+      "candidate_id": "76743c6d9be4071874e32016",
+      "city": "Черкаси",
+      "city_key": "cherkasy",
+      "current_matched_episode_id": null,
+      "current_matching_outcome": null,
+      "new_matching_outcome": "unique_match",
+      "match_cardinality": "unique",
+      "matched_episode_ids": [
+        "f139e46d882418e9f6b1ec95"
+      ],
+      "logical_episode_groups": [
+        [
+          "f139e46d882418e9f6b1ec95"
+        ]
+      ],
+      "reason": "publication_within_unique_tracked_alert_window",
+      "matching_outcome_changed_vs_current_state": true
+    },
+    {
+      "candidate_id": "abbc6c0eee7a23bbf08cbb1d",
+      "city": "Черкаси",
+      "city_key": "cherkasy",
+      "current_matched_episode_id": null,
+      "current_matching_outcome": null,
+      "new_matching_outcome": "no_match",
+      "match_cardinality": "none",
+      "matched_episode_ids": [],
+      "logical_episode_groups": [],
+      "reason": "publication_outside_all_tracked_alert_windows",
+      "matching_outcome_changed_vs_current_state": false
+    },
+    {
+      "candidate_id": "c97967dd88787b316d2d4837",
+      "city": "Черкаси",
+      "city_key": "cherkasy",
+      "current_matched_episode_id": null,
+      "current_matching_outcome": null,
+      "new_matching_outcome": "no_match",
+      "match_cardinality": "none",
+      "matched_episode_ids": [],
+      "logical_episode_groups": [],
+      "reason": "publication_outside_all_tracked_alert_windows",
+      "matching_outcome_changed_vs_current_state": false
+    },
+    {
+      "candidate_id": "2495b9421d2d8b889d11239f",
+      "city": "Чернігів",
+      "city_key": "chernihiv",
+      "current_matched_episode_id": null,
+      "current_matching_outcome": null,
+      "new_matching_outcome": "unique_match",
+      "match_cardinality": "unique",
+      "matched_episode_ids": [
+        "7c1c9d2e5dbc8c4d775354e9"
+      ],
+      "logical_episode_groups": [
+        [
+          "7c1c9d2e5dbc8c4d775354e9"
+        ]
+      ],
+      "reason": "publication_within_unique_tracked_alert_window",
+      "matching_outcome_changed_vs_current_state": true
+    },
+    {
+      "candidate_id": "39d39aea6ed0d9afe6a31ea6",
+      "city": "Чернігів",
+      "city_key": "chernihiv",
+      "current_matched_episode_id": null,
+      "current_matching_outcome": null,
+      "new_matching_outcome": "unique_match",
+      "match_cardinality": "unique",
+      "matched_episode_ids": [
+        "7c1c9d2e5dbc8c4d775354e9"
+      ],
+      "logical_episode_groups": [
+        [
+          "7c1c9d2e5dbc8c4d775354e9"
+        ]
+      ],
+      "reason": "publication_within_unique_tracked_alert_window",
+      "matching_outcome_changed_vs_current_state": true
+    },
+    {
+      "candidate_id": "5d76ceafc7040c9569b23775",
+      "city": "Чернігів",
+      "city_key": "chernihiv",
+      "current_matched_episode_id": null,
+      "current_matching_outcome": null,
+      "new_matching_outcome": "unique_match",
+      "match_cardinality": "unique",
+      "matched_episode_ids": [
+        "7c1c9d2e5dbc8c4d775354e9"
+      ],
+      "logical_episode_groups": [
+        [
+          "7c1c9d2e5dbc8c4d775354e9"
+        ]
+      ],
+      "reason": "publication_within_unique_tracked_alert_window",
+      "matching_outcome_changed_vs_current_state": true
+    },
+    {
+      "candidate_id": "6ff14a08237888fd9448e75d",
+      "city": "Чернігів",
+      "city_key": "chernihiv",
+      "current_matched_episode_id": null,
+      "current_matching_outcome": null,
+      "new_matching_outcome": "no_match",
+      "match_cardinality": "none",
+      "matched_episode_ids": [],
+      "logical_episode_groups": [],
+      "reason": "publication_outside_all_tracked_alert_windows",
+      "matching_outcome_changed_vs_current_state": false
+    },
+    {
+      "candidate_id": "b5a20a069124c2ed6c65d7f5",
+      "city": "Чернігів",
+      "city_key": "chernihiv",
+      "current_matched_episode_id": null,
+      "current_matching_outcome": null,
+      "new_matching_outcome": "unique_match",
+      "match_cardinality": "unique",
+      "matched_episode_ids": [
+        "3eb231ef04b1b76b44f089dc"
+      ],
+      "logical_episode_groups": [
+        [
+          "3eb231ef04b1b76b44f089dc"
+        ]
+      ],
+      "reason": "publication_within_unique_tracked_alert_window",
+      "matching_outcome_changed_vs_current_state": true
+    },
+    {
+      "candidate_id": "1a46424e12981a83b54a251e",
+      "city": "Дніпро",
+      "city_key": "dnipro",
+      "current_matched_episode_id": null,
+      "current_matching_outcome": null,
+      "new_matching_outcome": "unique_match",
+      "match_cardinality": "unique",
+      "matched_episode_ids": [
+        "73ff94382ce8d8c9f55c4f37"
+      ],
+      "logical_episode_groups": [
+        [
+          "73ff94382ce8d8c9f55c4f37"
+        ]
+      ],
+      "reason": "publication_within_unique_tracked_alert_window",
+      "matching_outcome_changed_vs_current_state": true
+    },
+    {
+      "candidate_id": "2cf7e0b5d5441c9e4e08db89",
+      "city": "Дніпро",
+      "city_key": "dnipro",
+      "current_matched_episode_id": null,
+      "current_matching_outcome": null,
+      "new_matching_outcome": "unique_match",
+      "match_cardinality": "unique",
+      "matched_episode_ids": [
+        "4d57aae61fae551789986b54"
+      ],
+      "logical_episode_groups": [
+        [
+          "4d57aae61fae551789986b54"
+        ]
+      ],
+      "reason": "publication_within_unique_tracked_alert_window",
+      "matching_outcome_changed_vs_current_state": true
+    },
+    {
+      "candidate_id": "30b5f6cd9020593133bb39bf",
+      "city": "Дніпро",
+      "city_key": "dnipro",
+      "current_matched_episode_id": null,
+      "current_matching_outcome": null,
+      "new_matching_outcome": "unique_match",
+      "match_cardinality": "unique",
+      "matched_episode_ids": [
+        "fc97efc77c89d9d77345713d"
+      ],
+      "logical_episode_groups": [
+        [
+          "fc97efc77c89d9d77345713d"
+        ]
+      ],
+      "reason": "publication_within_unique_tracked_alert_window",
+      "matching_outcome_changed_vs_current_state": true
+    },
+    {
+      "candidate_id": "313927de03b7cd2c0689c87d",
+      "city": "Дніпро",
+      "city_key": "dnipro",
+      "current_matched_episode_id": null,
+      "current_matching_outcome": null,
+      "new_matching_outcome": "no_match",
+      "match_cardinality": "none",
+      "matched_episode_ids": [],
+      "logical_episode_groups": [],
+      "reason": "publication_outside_all_tracked_alert_windows",
+      "matching_outcome_changed_vs_current_state": false
+    },
+    {
+      "candidate_id": "358ac9edecd02833634e4342",
+      "city": "Дніпро",
+      "city_key": "dnipro",
+      "current_matched_episode_id": null,
+      "current_matching_outcome": null,
+      "new_matching_outcome": "no_match",
+      "match_cardinality": "none",
+      "matched_episode_ids": [],
+      "logical_episode_groups": [],
+      "reason": "publication_outside_all_tracked_alert_windows",
+      "matching_outcome_changed_vs_current_state": false
+    },
+    {
+      "candidate_id": "37f9c1295655f2a1a406acf8",
+      "city": "Дніпро",
+      "city_key": "dnipro",
+      "current_matched_episode_id": null,
+      "current_matching_outcome": null,
+      "new_matching_outcome": "unique_match",
+      "match_cardinality": "unique",
+      "matched_episode_ids": [
+        "495d4a8556e63a79af175cc4"
+      ],
+      "logical_episode_groups": [
+        [
+          "495d4a8556e63a79af175cc4"
+        ]
+      ],
+      "reason": "publication_within_unique_tracked_alert_window",
+      "matching_outcome_changed_vs_current_state": true
+    },
+    {
+      "candidate_id": "3f2137adc72e1202240133f7",
+      "city": "Дніпро",
+      "city_key": "dnipro",
+      "current_matched_episode_id": null,
+      "current_matching_outcome": null,
+      "new_matching_outcome": "unique_match",
+      "match_cardinality": "unique",
+      "matched_episode_ids": [
+        "c894e85e407dc4256d8c4419"
+      ],
+      "logical_episode_groups": [
+        [
+          "c894e85e407dc4256d8c4419"
+        ]
+      ],
+      "reason": "publication_within_unique_tracked_alert_window",
+      "matching_outcome_changed_vs_current_state": true
+    },
+    {
+      "candidate_id": "45ebbe2d8e117a2da96e91f0",
+      "city": "Дніпро",
+      "city_key": "dnipro",
+      "current_matched_episode_id": null,
+      "current_matching_outcome": null,
+      "new_matching_outcome": "unique_match",
+      "match_cardinality": "unique",
+      "matched_episode_ids": [
+        "6a2c082d4fb889bc58a757a8"
+      ],
+      "logical_episode_groups": [
+        [
+          "6a2c082d4fb889bc58a757a8"
+        ]
+      ],
+      "reason": "publication_within_unique_tracked_alert_window",
+      "matching_outcome_changed_vs_current_state": true
+    },
+    {
+      "candidate_id": "48bdec0e326e64c583d31861",
+      "city": "Дніпро",
+      "city_key": "dnipro",
+      "current_matched_episode_id": null,
+      "current_matching_outcome": null,
+      "new_matching_outcome": "unique_match",
+      "match_cardinality": "unique",
+      "matched_episode_ids": [
+        "73ff94382ce8d8c9f55c4f37"
+      ],
+      "logical_episode_groups": [
+        [
+          "73ff94382ce8d8c9f55c4f37"
+        ]
+      ],
+      "reason": "publication_within_unique_tracked_alert_window",
+      "matching_outcome_changed_vs_current_state": true
+    },
+    {
+      "candidate_id": "5092df762f9af44e27b021c5",
+      "city": "Дніпро",
+      "city_key": "dnipro",
+      "current_matched_episode_id": null,
+      "current_matching_outcome": null,
+      "new_matching_outcome": "unique_match",
+      "match_cardinality": "unique",
+      "matched_episode_ids": [
+        "cb90d68581fa8f39e9c160c2"
+      ],
+      "logical_episode_groups": [
+        [
+          "cb90d68581fa8f39e9c160c2"
+        ]
+      ],
+      "reason": "publication_within_unique_tracked_alert_window",
+      "matching_outcome_changed_vs_current_state": true
+    },
+    {
+      "candidate_id": "621079aafd7bef7a641fdbdc",
+      "city": "Дніпро",
+      "city_key": "dnipro",
+      "current_matched_episode_id": null,
+      "current_matching_outcome": null,
+      "new_matching_outcome": "unique_match",
+      "match_cardinality": "unique",
+      "matched_episode_ids": [
+        "4d57aae61fae551789986b54"
+      ],
+      "logical_episode_groups": [
+        [
+          "4d57aae61fae551789986b54"
+        ]
+      ],
+      "reason": "publication_within_unique_tracked_alert_window",
+      "matching_outcome_changed_vs_current_state": true
+    },
+    {
+      "candidate_id": "68639333ef3866074f8ed53c",
+      "city": "Дніпро",
+      "city_key": "dnipro",
+      "current_matched_episode_id": null,
+      "current_matching_outcome": null,
+      "new_matching_outcome": "no_match",
+      "match_cardinality": "none",
+      "matched_episode_ids": [],
+      "logical_episode_groups": [],
+      "reason": "publication_outside_all_tracked_alert_windows",
+      "matching_outcome_changed_vs_current_state": false
+    },
+    {
+      "candidate_id": "6f07e932e0676a0de514a8ad",
+      "city": "Дніпро",
+      "city_key": "dnipro",
+      "current_matched_episode_id": null,
+      "current_matching_outcome": null,
+      "new_matching_outcome": "unique_match",
+      "match_cardinality": "unique",
+      "matched_episode_ids": [
+        "bd37cd7ac143a40ddf2479b2",
+        "e1da97f784d43694a7d54052"
+      ],
+      "logical_episode_groups": [
+        [
+          "bd37cd7ac143a40ddf2479b2",
+          "e1da97f784d43694a7d54052"
+        ]
+      ],
+      "reason": "near_duplicate_source_representations_reconciled_to_one_tracked_alert_window",
+      "matching_outcome_changed_vs_current_state": true
+    },
+    {
+      "candidate_id": "71ed76849aa5f8a4377b8e4d",
+      "city": "Дніпро",
+      "city_key": "dnipro",
+      "current_matched_episode_id": null,
+      "current_matching_outcome": null,
+      "new_matching_outcome": "ambiguous_match",
+      "match_cardinality": "ambiguous",
+      "matched_episode_ids": [
+        "09ee9efd29d604b4b5d98629",
+        "c5e3e9affc34ad6cdc7dd1ff",
+        "c894e85e407dc4256d8c4419"
+      ],
+      "logical_episode_groups": [
+        [
+          "09ee9efd29d604b4b5d98629"
+        ],
+        [
+          "c5e3e9affc34ad6cdc7dd1ff"
+        ],
+        [
+          "c894e85e407dc4256d8c4419"
+        ]
+      ],
+      "reason": "publication_matches_multiple_distinct_tracked_alert_windows",
+      "matching_outcome_changed_vs_current_state": true
+    },
+    {
+      "candidate_id": "8bb215eace94f9b70df4ec8e",
+      "city": "Дніпро",
+      "city_key": "dnipro",
+      "current_matched_episode_id": null,
+      "current_matching_outcome": null,
+      "new_matching_outcome": "no_match",
+      "match_cardinality": "none",
+      "matched_episode_ids": [],
+      "logical_episode_groups": [],
+      "reason": "publication_outside_all_tracked_alert_windows",
+      "matching_outcome_changed_vs_current_state": false
+    },
+    {
+      "candidate_id": "8c0a6c6cc7e18df658d8e622",
+      "city": "Дніпро",
+      "city_key": "dnipro",
+      "current_matched_episode_id": null,
+      "current_matching_outcome": null,
+      "new_matching_outcome": "unique_match",
+      "match_cardinality": "unique",
+      "matched_episode_ids": [
+        "bd37cd7ac143a40ddf2479b2",
+        "e1da97f784d43694a7d54052"
+      ],
+      "logical_episode_groups": [
+        [
+          "bd37cd7ac143a40ddf2479b2",
+          "e1da97f784d43694a7d54052"
+        ]
+      ],
+      "reason": "near_duplicate_source_representations_reconciled_to_one_tracked_alert_window",
+      "matching_outcome_changed_vs_current_state": true
+    },
+    {
+      "candidate_id": "8e4ee84d2e87c52eca85b350",
+      "city": "Дніпро",
+      "city_key": "dnipro",
+      "current_matched_episode_id": null,
+      "current_matching_outcome": null,
+      "new_matching_outcome": "no_match",
+      "match_cardinality": "none",
+      "matched_episode_ids": [],
+      "logical_episode_groups": [],
+      "reason": "publication_outside_all_tracked_alert_windows",
+      "matching_outcome_changed_vs_current_state": false
+    },
+    {
+      "candidate_id": "9c3cc44771e3eaf67e0115fe",
+      "city": "Дніпро",
+      "city_key": "dnipro",
+      "current_matched_episode_id": null,
+      "current_matching_outcome": null,
+      "new_matching_outcome": "no_match",
+      "match_cardinality": "none",
+      "matched_episode_ids": [],
+      "logical_episode_groups": [],
+      "reason": "publication_outside_all_tracked_alert_windows",
+      "matching_outcome_changed_vs_current_state": false
+    },
+    {
+      "candidate_id": "a06e12f4cfed9b43eafe2d58",
+      "city": "Дніпро",
+      "city_key": "dnipro",
+      "current_matched_episode_id": null,
+      "current_matching_outcome": null,
+      "new_matching_outcome": "unique_match",
+      "match_cardinality": "unique",
+      "matched_episode_ids": [
+        "c894e85e407dc4256d8c4419"
+      ],
+      "logical_episode_groups": [
+        [
+          "c894e85e407dc4256d8c4419"
+        ]
+      ],
+      "reason": "publication_within_unique_tracked_alert_window",
+      "matching_outcome_changed_vs_current_state": true
+    },
+    {
+      "candidate_id": "a1c7ecd240ed88dadc5dbb31",
+      "city": "Дніпро",
+      "city_key": "dnipro",
+      "current_matched_episode_id": null,
+      "current_matching_outcome": null,
+      "new_matching_outcome": "ambiguous_match",
+      "match_cardinality": "ambiguous",
+      "matched_episode_ids": [
+        "09ee9efd29d604b4b5d98629",
+        "c5e3e9affc34ad6cdc7dd1ff"
+      ],
+      "logical_episode_groups": [
+        [
+          "09ee9efd29d604b4b5d98629"
+        ],
+        [
+          "c5e3e9affc34ad6cdc7dd1ff"
+        ]
+      ],
+      "reason": "publication_matches_multiple_distinct_tracked_alert_windows",
+      "matching_outcome_changed_vs_current_state": true
+    },
+    {
+      "candidate_id": "a6f9e8a62b9b644ec8620f93",
+      "city": "Дніпро",
+      "city_key": "dnipro",
+      "current_matched_episode_id": null,
+      "current_matching_outcome": null,
+      "new_matching_outcome": "no_match",
+      "match_cardinality": "none",
+      "matched_episode_ids": [],
+      "logical_episode_groups": [],
+      "reason": "publication_outside_all_tracked_alert_windows",
+      "matching_outcome_changed_vs_current_state": false
+    },
+    {
+      "candidate_id": "b04d8aa8336e2caecf480cef",
+      "city": "Дніпро",
+      "city_key": "dnipro",
+      "current_matched_episode_id": null,
+      "current_matching_outcome": null,
+      "new_matching_outcome": "no_match",
+      "match_cardinality": "none",
+      "matched_episode_ids": [],
+      "logical_episode_groups": [],
+      "reason": "publication_outside_all_tracked_alert_windows",
+      "matching_outcome_changed_vs_current_state": false
+    },
+    {
+      "candidate_id": "b1791fc3fba858aa0341636f",
+      "city": "Дніпро",
+      "city_key": "dnipro",
+      "current_matched_episode_id": null,
+      "current_matching_outcome": null,
+      "new_matching_outcome": "no_match",
+      "match_cardinality": "none",
+      "matched_episode_ids": [],
+      "logical_episode_groups": [],
+      "reason": "publication_outside_all_tracked_alert_windows",
+      "matching_outcome_changed_vs_current_state": false
+    },
+    {
+      "candidate_id": "b35ae05bd7c910c2b618fecd",
+      "city": "Дніпро",
+      "city_key": "dnipro",
+      "current_matched_episode_id": null,
+      "current_matching_outcome": null,
+      "new_matching_outcome": "unique_match",
+      "match_cardinality": "unique",
+      "matched_episode_ids": [
+        "79e6f4f39ce69244c8f856e8"
+      ],
+      "logical_episode_groups": [
+        [
+          "79e6f4f39ce69244c8f856e8"
+        ]
+      ],
+      "reason": "publication_within_unique_tracked_alert_window",
+      "matching_outcome_changed_vs_current_state": true
+    },
+    {
+      "candidate_id": "c7db494537669e69c87baac1",
+      "city": "Дніпро",
+      "city_key": "dnipro",
+      "current_matched_episode_id": null,
+      "current_matching_outcome": null,
+      "new_matching_outcome": "unique_match",
+      "match_cardinality": "unique",
+      "matched_episode_ids": [
+        "fc97efc77c89d9d77345713d"
+      ],
+      "logical_episode_groups": [
+        [
+          "fc97efc77c89d9d77345713d"
+        ]
+      ],
+      "reason": "publication_within_unique_tracked_alert_window",
+      "matching_outcome_changed_vs_current_state": true
+    },
+    {
+      "candidate_id": "c9318ca865d6a968eeeb76f0",
+      "city": "Дніпро",
+      "city_key": "dnipro",
+      "current_matched_episode_id": null,
+      "current_matching_outcome": null,
+      "new_matching_outcome": "no_match",
+      "match_cardinality": "none",
+      "matched_episode_ids": [],
+      "logical_episode_groups": [],
+      "reason": "publication_outside_all_tracked_alert_windows",
+      "matching_outcome_changed_vs_current_state": false
+    },
+    {
+      "candidate_id": "cd9484aa523d512f8167a1ed",
+      "city": "Дніпро",
+      "city_key": "dnipro",
+      "current_matched_episode_id": null,
+      "current_matching_outcome": null,
+      "new_matching_outcome": "unique_match",
+      "match_cardinality": "unique",
+      "matched_episode_ids": [
+        "66cc8b71849bfdad7ffc66cb"
+      ],
+      "logical_episode_groups": [
+        [
+          "66cc8b71849bfdad7ffc66cb"
+        ]
+      ],
+      "reason": "publication_within_unique_tracked_alert_window",
+      "matching_outcome_changed_vs_current_state": true
+    },
+    {
+      "candidate_id": "d7db1a351aa8caff0a75a524",
+      "city": "Дніпро",
+      "city_key": "dnipro",
+      "current_matched_episode_id": null,
+      "current_matching_outcome": null,
+      "new_matching_outcome": "no_match",
+      "match_cardinality": "none",
+      "matched_episode_ids": [],
+      "logical_episode_groups": [],
+      "reason": "publication_outside_all_tracked_alert_windows",
+      "matching_outcome_changed_vs_current_state": false
+    },
+    {
+      "candidate_id": "dc4cd44164de1019918413db",
+      "city": "Дніпро",
+      "city_key": "dnipro",
+      "current_matched_episode_id": null,
+      "current_matching_outcome": null,
+      "new_matching_outcome": "unique_match",
+      "match_cardinality": "unique",
+      "matched_episode_ids": [
+        "495d4a8556e63a79af175cc4"
+      ],
+      "logical_episode_groups": [
+        [
+          "495d4a8556e63a79af175cc4"
+        ]
+      ],
+      "reason": "publication_within_unique_tracked_alert_window",
+      "matching_outcome_changed_vs_current_state": true
+    },
+    {
+      "candidate_id": "e9985c7dfcbddb0f1fbe0a71",
+      "city": "Дніпро",
+      "city_key": "dnipro",
+      "current_matched_episode_id": null,
+      "current_matching_outcome": null,
+      "new_matching_outcome": "no_match",
+      "match_cardinality": "none",
+      "matched_episode_ids": [],
+      "logical_episode_groups": [],
+      "reason": "publication_outside_all_tracked_alert_windows",
+      "matching_outcome_changed_vs_current_state": false
+    },
+    {
+      "candidate_id": "eeee7926046f2e69e5673992",
+      "city": "Дніпро",
+      "city_key": "dnipro",
+      "current_matched_episode_id": null,
+      "current_matching_outcome": null,
+      "new_matching_outcome": "unique_match",
+      "match_cardinality": "unique",
+      "matched_episode_ids": [
+        "d25d54527a505716cd269578"
+      ],
+      "logical_episode_groups": [
+        [
+          "d25d54527a505716cd269578"
+        ]
+      ],
+      "reason": "publication_within_unique_tracked_alert_window",
+      "matching_outcome_changed_vs_current_state": true
+    },
+    {
+      "candidate_id": "f9a9951a86c85e9524631191",
+      "city": "Дніпро",
+      "city_key": "dnipro",
+      "current_matched_episode_id": null,
+      "current_matching_outcome": null,
+      "new_matching_outcome": "unique_match",
+      "match_cardinality": "unique",
+      "matched_episode_ids": [
+        "cb90d68581fa8f39e9c160c2"
+      ],
+      "logical_episode_groups": [
+        [
+          "cb90d68581fa8f39e9c160c2"
+        ]
+      ],
+      "reason": "publication_within_unique_tracked_alert_window",
+      "matching_outcome_changed_vs_current_state": true
+    },
+    {
+      "candidate_id": "fe8e9f1bf0d52c99d8bd6b4c",
+      "city": "Дніпро",
+      "city_key": "dnipro",
+      "current_matched_episode_id": null,
+      "current_matching_outcome": null,
+      "new_matching_outcome": "no_match",
+      "match_cardinality": "none",
+      "matched_episode_ids": [],
+      "logical_episode_groups": [],
+      "reason": "publication_outside_all_tracked_alert_windows",
+      "matching_outcome_changed_vs_current_state": false
+    },
+    {
+      "candidate_id": "c0432cb39613e91bee28f154",
+      "city": "Харків",
+      "city_key": "kharkiv",
+      "current_matched_episode_id": null,
+      "current_matching_outcome": null,
+      "new_matching_outcome": "unique_match",
+      "match_cardinality": "unique",
+      "matched_episode_ids": [
+        "caa0b841984bbcebf07c2bf6"
+      ],
+      "logical_episode_groups": [
+        [
+          "caa0b841984bbcebf07c2bf6"
+        ]
+      ],
+      "reason": "publication_within_unique_tracked_alert_window",
+      "matching_outcome_changed_vs_current_state": true
+    },
+    {
+      "candidate_id": "07aa5a5a4ba88f890fa03785",
+      "city": "Кропивницький",
+      "city_key": "kropyvnytskyi",
+      "current_matched_episode_id": null,
+      "current_matching_outcome": null,
+      "new_matching_outcome": "unique_match",
+      "match_cardinality": "unique",
+      "matched_episode_ids": [
+        "6957d2e712b184df443460a0"
+      ],
+      "logical_episode_groups": [
+        [
+          "6957d2e712b184df443460a0"
+        ]
+      ],
+      "reason": "publication_within_unique_tracked_alert_window",
+      "matching_outcome_changed_vs_current_state": true
+    },
+    {
+      "candidate_id": "2b380f42ad7d780d36ac82f7",
+      "city": "Кропивницький",
+      "city_key": "kropyvnytskyi",
+      "current_matched_episode_id": null,
+      "current_matching_outcome": null,
+      "new_matching_outcome": "unique_match",
+      "match_cardinality": "unique",
+      "matched_episode_ids": [
+        "6957d2e712b184df443460a0"
+      ],
+      "logical_episode_groups": [
+        [
+          "6957d2e712b184df443460a0"
+        ]
+      ],
+      "reason": "publication_within_unique_tracked_alert_window",
+      "matching_outcome_changed_vs_current_state": true
+    },
+    {
+      "candidate_id": "4040cda0bcf5a5b98520d3f4",
+      "city": "Кропивницький",
+      "city_key": "kropyvnytskyi",
+      "current_matched_episode_id": null,
+      "current_matching_outcome": null,
+      "new_matching_outcome": "unique_match",
+      "match_cardinality": "unique",
+      "matched_episode_ids": [
+        "c2ad120e98bd7f8e321103f0"
+      ],
+      "logical_episode_groups": [
+        [
+          "c2ad120e98bd7f8e321103f0"
+        ]
+      ],
+      "reason": "publication_within_unique_tracked_alert_window",
+      "matching_outcome_changed_vs_current_state": true
+    },
+    {
+      "candidate_id": "4b85ff529264d54103733c2f",
+      "city": "Кропивницький",
+      "city_key": "kropyvnytskyi",
+      "current_matched_episode_id": null,
+      "current_matching_outcome": null,
+      "new_matching_outcome": "unique_match",
+      "match_cardinality": "unique",
+      "matched_episode_ids": [
+        "6957d2e712b184df443460a0"
+      ],
+      "logical_episode_groups": [
+        [
+          "6957d2e712b184df443460a0"
+        ]
+      ],
+      "reason": "publication_within_unique_tracked_alert_window",
+      "matching_outcome_changed_vs_current_state": true
+    },
+    {
+      "candidate_id": "599ee9d49476fff666b2d875",
+      "city": "Кропивницький",
+      "city_key": "kropyvnytskyi",
+      "current_matched_episode_id": null,
+      "current_matching_outcome": null,
+      "new_matching_outcome": "unique_match",
+      "match_cardinality": "unique",
+      "matched_episode_ids": [
+        "376f91e0999531926d53669e"
+      ],
+      "logical_episode_groups": [
+        [
+          "376f91e0999531926d53669e"
+        ]
+      ],
+      "reason": "publication_within_unique_tracked_alert_window",
+      "matching_outcome_changed_vs_current_state": true
+    },
+    {
+      "candidate_id": "677b62f2069e836eb57fbe53",
+      "city": "Кропивницький",
+      "city_key": "kropyvnytskyi",
+      "current_matched_episode_id": null,
+      "current_matching_outcome": null,
+      "new_matching_outcome": "unique_match",
+      "match_cardinality": "unique",
+      "matched_episode_ids": [
+        "376f91e0999531926d53669e"
+      ],
+      "logical_episode_groups": [
+        [
+          "376f91e0999531926d53669e"
+        ]
+      ],
+      "reason": "publication_within_unique_tracked_alert_window",
+      "matching_outcome_changed_vs_current_state": true
+    },
+    {
+      "candidate_id": "7372f75419d1c5c17fe58159",
+      "city": "Кропивницький",
+      "city_key": "kropyvnytskyi",
+      "current_matched_episode_id": null,
+      "current_matching_outcome": null,
+      "new_matching_outcome": "no_match",
+      "match_cardinality": "none",
+      "matched_episode_ids": [],
+      "logical_episode_groups": [],
+      "reason": "publication_outside_all_tracked_alert_windows",
+      "matching_outcome_changed_vs_current_state": false
+    },
+    {
+      "candidate_id": "8e039640e74ac1487548b72c",
+      "city": "Кропивницький",
+      "city_key": "kropyvnytskyi",
+      "current_matched_episode_id": null,
+      "current_matching_outcome": null,
+      "new_matching_outcome": "unique_match",
+      "match_cardinality": "unique",
+      "matched_episode_ids": [
+        "c2ad120e98bd7f8e321103f0"
+      ],
+      "logical_episode_groups": [
+        [
+          "c2ad120e98bd7f8e321103f0"
+        ]
+      ],
+      "reason": "publication_within_unique_tracked_alert_window",
+      "matching_outcome_changed_vs_current_state": true
+    },
+    {
+      "candidate_id": "a4e2a3f436209643e31f6ade",
+      "city": "Кропивницький",
+      "city_key": "kropyvnytskyi",
+      "current_matched_episode_id": null,
+      "current_matching_outcome": null,
+      "new_matching_outcome": "unique_match",
+      "match_cardinality": "unique",
+      "matched_episode_ids": [
+        "c2ad120e98bd7f8e321103f0"
+      ],
+      "logical_episode_groups": [
+        [
+          "c2ad120e98bd7f8e321103f0"
+        ]
+      ],
+      "reason": "publication_within_unique_tracked_alert_window",
+      "matching_outcome_changed_vs_current_state": true
+    },
+    {
+      "candidate_id": "aa7633422217fa2ca7c99d66",
+      "city": "Кропивницький",
+      "city_key": "kropyvnytskyi",
+      "current_matched_episode_id": null,
+      "current_matching_outcome": null,
+      "new_matching_outcome": "unique_match",
+      "match_cardinality": "unique",
+      "matched_episode_ids": [
+        "b41b926cb725a3a54a9bdb0d"
+      ],
+      "logical_episode_groups": [
+        [
+          "b41b926cb725a3a54a9bdb0d"
+        ]
+      ],
+      "reason": "publication_within_unique_tracked_alert_window",
+      "matching_outcome_changed_vs_current_state": true
+    },
+    {
+      "candidate_id": "b319d93461dae4546172b5f5",
+      "city": "Кропивницький",
+      "city_key": "kropyvnytskyi",
+      "current_matched_episode_id": null,
+      "current_matching_outcome": null,
+      "new_matching_outcome": "unique_match",
+      "match_cardinality": "unique",
+      "matched_episode_ids": [
+        "3fd579a7ede75b6868366d1f"
+      ],
+      "logical_episode_groups": [
+        [
+          "3fd579a7ede75b6868366d1f"
+        ]
+      ],
+      "reason": "publication_within_unique_tracked_alert_window",
+      "matching_outcome_changed_vs_current_state": true
+    },
+    {
+      "candidate_id": "b7ad79a657da5c22d4fd72a6",
+      "city": "Кропивницький",
+      "city_key": "kropyvnytskyi",
+      "current_matched_episode_id": null,
+      "current_matching_outcome": null,
+      "new_matching_outcome": "ambiguous_match",
+      "match_cardinality": "ambiguous",
+      "matched_episode_ids": [
+        "32290c46071b5e362610bd64",
+        "7ffc6141b1eda25304f7b0d4"
+      ],
+      "logical_episode_groups": [
+        [
+          "32290c46071b5e362610bd64"
+        ],
+        [
+          "7ffc6141b1eda25304f7b0d4"
+        ]
+      ],
+      "reason": "publication_matches_multiple_distinct_tracked_alert_windows",
+      "matching_outcome_changed_vs_current_state": true
+    },
+    {
+      "candidate_id": "bd6895932f296adc21a71406",
+      "city": "Кропивницький",
+      "city_key": "kropyvnytskyi",
+      "current_matched_episode_id": null,
+      "current_matching_outcome": null,
+      "new_matching_outcome": "unique_match",
+      "match_cardinality": "unique",
+      "matched_episode_ids": [
+        "c2ad120e98bd7f8e321103f0"
+      ],
+      "logical_episode_groups": [
+        [
+          "c2ad120e98bd7f8e321103f0"
+        ]
+      ],
+      "reason": "publication_within_unique_tracked_alert_window",
+      "matching_outcome_changed_vs_current_state": true
+    },
+    {
+      "candidate_id": "d65bdf337821f323226b830f",
+      "city": "Кропивницький",
+      "city_key": "kropyvnytskyi",
+      "current_matched_episode_id": null,
+      "current_matching_outcome": null,
+      "new_matching_outcome": "unique_match",
+      "match_cardinality": "unique",
+      "matched_episode_ids": [
+        "b0f6e8e57e73c9c651fbc99f"
+      ],
+      "logical_episode_groups": [
+        [
+          "b0f6e8e57e73c9c651fbc99f"
+        ]
+      ],
+      "reason": "publication_within_unique_tracked_alert_window",
+      "matching_outcome_changed_vs_current_state": true
+    },
+    {
+      "candidate_id": "008d591a7fba923827fb7c65",
+      "city": "Київ",
+      "city_key": "kyiv",
+      "current_matched_episode_id": null,
+      "current_matching_outcome": null,
+      "new_matching_outcome": "no_match",
+      "match_cardinality": "none",
+      "matched_episode_ids": [],
+      "logical_episode_groups": [],
+      "reason": "publication_outside_all_tracked_alert_windows",
+      "matching_outcome_changed_vs_current_state": false
+    },
+    {
+      "candidate_id": "1e7abed47582c23d2b716d92",
+      "city": "Київ",
+      "city_key": "kyiv",
+      "current_matched_episode_id": null,
+      "current_matching_outcome": null,
+      "new_matching_outcome": "no_match",
+      "match_cardinality": "none",
+      "matched_episode_ids": [],
+      "logical_episode_groups": [],
+      "reason": "publication_outside_all_tracked_alert_windows",
+      "matching_outcome_changed_vs_current_state": false
+    },
+    {
+      "candidate_id": "1ff363936c78a5f85f75be2f",
+      "city": "Київ",
+      "city_key": "kyiv",
+      "current_matched_episode_id": null,
+      "current_matching_outcome": null,
+      "new_matching_outcome": "unique_match",
+      "match_cardinality": "unique",
+      "matched_episode_ids": [
+        "67794eb04b0309bee8a02cc6",
+        "c964a9db4271b3a9d76be49a"
+      ],
+      "logical_episode_groups": [
+        [
+          "67794eb04b0309bee8a02cc6",
+          "c964a9db4271b3a9d76be49a"
+        ]
+      ],
+      "reason": "near_duplicate_source_representations_reconciled_to_one_tracked_alert_window",
+      "matching_outcome_changed_vs_current_state": true
+    },
+    {
+      "candidate_id": "25902cf893b4d3edbeccb7a1",
+      "city": "Київ",
+      "city_key": "kyiv",
+      "current_matched_episode_id": null,
+      "current_matching_outcome": null,
+      "new_matching_outcome": "unique_match",
+      "match_cardinality": "unique",
+      "matched_episode_ids": [
+        "372a0acab8763541b0422e14",
+        "6f7ad9d283d3d095cda16f5b"
+      ],
+      "logical_episode_groups": [
+        [
+          "372a0acab8763541b0422e14",
+          "6f7ad9d283d3d095cda16f5b"
+        ]
+      ],
+      "reason": "near_duplicate_source_representations_reconciled_to_one_tracked_alert_window",
+      "matching_outcome_changed_vs_current_state": true
+    },
+    {
+      "candidate_id": "3567c9c47f76042ff8af230c",
+      "city": "Київ",
+      "city_key": "kyiv",
+      "current_matched_episode_id": null,
+      "current_matching_outcome": null,
+      "new_matching_outcome": "unique_match",
+      "match_cardinality": "unique",
+      "matched_episode_ids": [
+        "67794eb04b0309bee8a02cc6",
+        "c964a9db4271b3a9d76be49a"
+      ],
+      "logical_episode_groups": [
+        [
+          "67794eb04b0309bee8a02cc6",
+          "c964a9db4271b3a9d76be49a"
+        ]
+      ],
+      "reason": "near_duplicate_source_representations_reconciled_to_one_tracked_alert_window",
+      "matching_outcome_changed_vs_current_state": true
+    },
+    {
+      "candidate_id": "371b63cabe5c9dc34037e61f",
+      "city": "Київ",
+      "city_key": "kyiv",
+      "current_matched_episode_id": null,
+      "current_matching_outcome": null,
+      "new_matching_outcome": "unique_match",
+      "match_cardinality": "unique",
+      "matched_episode_ids": [
+        "be91665768f663f704f73958"
+      ],
+      "logical_episode_groups": [
+        [
+          "be91665768f663f704f73958"
+        ]
+      ],
+      "reason": "publication_within_unique_tracked_alert_window",
+      "matching_outcome_changed_vs_current_state": true
+    },
+    {
+      "candidate_id": "37aa1b96565ec766d2998631",
+      "city": "Київ",
+      "city_key": "kyiv",
+      "current_matched_episode_id": null,
+      "current_matching_outcome": null,
+      "new_matching_outcome": "unique_match",
+      "match_cardinality": "unique",
+      "matched_episode_ids": [
+        "baf3eaa558f606c14d6e385f"
+      ],
+      "logical_episode_groups": [
+        [
+          "baf3eaa558f606c14d6e385f"
+        ]
+      ],
+      "reason": "publication_within_unique_tracked_alert_window",
+      "matching_outcome_changed_vs_current_state": true
+    },
+    {
+      "candidate_id": "39ba886bd4178dabad53fd67",
+      "city": "Київ",
+      "city_key": "kyiv",
+      "current_matched_episode_id": null,
+      "current_matching_outcome": null,
+      "new_matching_outcome": "unique_match",
+      "match_cardinality": "unique",
+      "matched_episode_ids": [
+        "67794eb04b0309bee8a02cc6",
+        "c964a9db4271b3a9d76be49a"
+      ],
+      "logical_episode_groups": [
+        [
+          "67794eb04b0309bee8a02cc6",
+          "c964a9db4271b3a9d76be49a"
+        ]
+      ],
+      "reason": "near_duplicate_source_representations_reconciled_to_one_tracked_alert_window",
+      "matching_outcome_changed_vs_current_state": true
+    },
+    {
+      "candidate_id": "3e873213239a5b34f3e64ec8",
+      "city": "Київ",
+      "city_key": "kyiv",
+      "current_matched_episode_id": null,
+      "current_matching_outcome": null,
+      "new_matching_outcome": "unique_match",
+      "match_cardinality": "unique",
+      "matched_episode_ids": [
+        "be91665768f663f704f73958"
+      ],
+      "logical_episode_groups": [
+        [
+          "be91665768f663f704f73958"
+        ]
+      ],
+      "reason": "publication_within_unique_tracked_alert_window",
+      "matching_outcome_changed_vs_current_state": true
+    },
+    {
+      "candidate_id": "3f3e6e20fe3a7eacc4f646af",
+      "city": "Київ",
+      "city_key": "kyiv",
+      "current_matched_episode_id": null,
+      "current_matching_outcome": null,
+      "new_matching_outcome": "no_match",
+      "match_cardinality": "none",
+      "matched_episode_ids": [],
+      "logical_episode_groups": [],
+      "reason": "publication_outside_all_tracked_alert_windows",
+      "matching_outcome_changed_vs_current_state": false
+    },
+    {
+      "candidate_id": "410fc47d6aa7853cc3f5832f",
+      "city": "Київ",
+      "city_key": "kyiv",
+      "current_matched_episode_id": null,
+      "current_matching_outcome": null,
+      "new_matching_outcome": "unique_match",
+      "match_cardinality": "unique",
+      "matched_episode_ids": [
+        "390fe0ec9b9eb45f51577412",
+        "9f675c5071bba608032d9255"
+      ],
+      "logical_episode_groups": [
+        [
+          "390fe0ec9b9eb45f51577412",
+          "9f675c5071bba608032d9255"
+        ]
+      ],
+      "reason": "near_duplicate_source_representations_reconciled_to_one_tracked_alert_window",
+      "matching_outcome_changed_vs_current_state": true
+    },
+    {
+      "candidate_id": "42c68c4d633bc3d17fe5b2b0",
+      "city": "Київ",
+      "city_key": "kyiv",
+      "current_matched_episode_id": null,
+      "current_matching_outcome": null,
+      "new_matching_outcome": "unique_match",
+      "match_cardinality": "unique",
+      "matched_episode_ids": [
+        "3158c9bd3868886f31701b26",
+        "9cd16dab548f77bba4a4c0d9"
+      ],
+      "logical_episode_groups": [
+        [
+          "3158c9bd3868886f31701b26",
+          "9cd16dab548f77bba4a4c0d9"
+        ]
+      ],
+      "reason": "near_duplicate_source_representations_reconciled_to_one_tracked_alert_window",
+      "matching_outcome_changed_vs_current_state": true
+    },
+    {
+      "candidate_id": "43d17460796eb8aaed72583b",
+      "city": "Київ",
+      "city_key": "kyiv",
+      "current_matched_episode_id": null,
+      "current_matching_outcome": null,
+      "new_matching_outcome": "unique_match",
+      "match_cardinality": "unique",
+      "matched_episode_ids": [
+        "d9776312dc63fa1807acb302",
+        "e1c0ac9b340f64bfc0d4c468"
+      ],
+      "logical_episode_groups": [
+        [
+          "d9776312dc63fa1807acb302",
+          "e1c0ac9b340f64bfc0d4c468"
+        ]
+      ],
+      "reason": "near_duplicate_source_representations_reconciled_to_one_tracked_alert_window",
+      "matching_outcome_changed_vs_current_state": true
+    },
+    {
+      "candidate_id": "450222e889b334b2bb3e59a5",
+      "city": "Київ",
+      "city_key": "kyiv",
+      "current_matched_episode_id": null,
+      "current_matching_outcome": null,
+      "new_matching_outcome": "unique_match",
+      "match_cardinality": "unique",
+      "matched_episode_ids": [
+        "5e07434a2569f1a789907611"
+      ],
+      "logical_episode_groups": [
+        [
+          "5e07434a2569f1a789907611"
+        ]
+      ],
+      "reason": "publication_within_unique_tracked_alert_window",
+      "matching_outcome_changed_vs_current_state": true
+    },
+    {
+      "candidate_id": "4754f7fae6a58c61e65e463c",
+      "city": "Київ",
+      "city_key": "kyiv",
+      "current_matched_episode_id": null,
+      "current_matching_outcome": null,
+      "new_matching_outcome": "no_match",
+      "match_cardinality": "none",
+      "matched_episode_ids": [],
+      "logical_episode_groups": [],
+      "reason": "publication_outside_all_tracked_alert_windows",
+      "matching_outcome_changed_vs_current_state": false
+    },
+    {
+      "candidate_id": "5a2bb37aae44d618e1b9d478",
+      "city": "Київ",
+      "city_key": "kyiv",
+      "current_matched_episode_id": null,
+      "current_matching_outcome": null,
+      "new_matching_outcome": "unique_match",
+      "match_cardinality": "unique",
+      "matched_episode_ids": [
+        "baf3eaa558f606c14d6e385f"
+      ],
+      "logical_episode_groups": [
+        [
+          "baf3eaa558f606c14d6e385f"
+        ]
+      ],
+      "reason": "publication_within_unique_tracked_alert_window",
+      "matching_outcome_changed_vs_current_state": true
+    },
+    {
+      "candidate_id": "5f6244c055e0889ca0a6ad66",
+      "city": "Київ",
+      "city_key": "kyiv",
+      "current_matched_episode_id": null,
+      "current_matching_outcome": null,
+      "new_matching_outcome": "unique_match",
+      "match_cardinality": "unique",
+      "matched_episode_ids": [
+        "d9776312dc63fa1807acb302",
+        "e1c0ac9b340f64bfc0d4c468"
+      ],
+      "logical_episode_groups": [
+        [
+          "d9776312dc63fa1807acb302",
+          "e1c0ac9b340f64bfc0d4c468"
+        ]
+      ],
+      "reason": "near_duplicate_source_representations_reconciled_to_one_tracked_alert_window",
+      "matching_outcome_changed_vs_current_state": true
+    },
+    {
+      "candidate_id": "65ccedf40aea67a71fb61dd3",
+      "city": "Київ",
+      "city_key": "kyiv",
+      "current_matched_episode_id": null,
+      "current_matching_outcome": null,
+      "new_matching_outcome": "unique_match",
+      "match_cardinality": "unique",
+      "matched_episode_ids": [
+        "67794eb04b0309bee8a02cc6",
+        "c964a9db4271b3a9d76be49a"
+      ],
+      "logical_episode_groups": [
+        [
+          "67794eb04b0309bee8a02cc6",
+          "c964a9db4271b3a9d76be49a"
+        ]
+      ],
+      "reason": "near_duplicate_source_representations_reconciled_to_one_tracked_alert_window",
+      "matching_outcome_changed_vs_current_state": true
+    },
+    {
+      "candidate_id": "68c77d4272632a642200f74f",
+      "city": "Київ",
+      "city_key": "kyiv",
+      "current_matched_episode_id": null,
+      "current_matching_outcome": null,
+      "new_matching_outcome": "unique_match",
+      "match_cardinality": "unique",
+      "matched_episode_ids": [
+        "baf3eaa558f606c14d6e385f"
+      ],
+      "logical_episode_groups": [
+        [
+          "baf3eaa558f606c14d6e385f"
+        ]
+      ],
+      "reason": "publication_within_unique_tracked_alert_window",
+      "matching_outcome_changed_vs_current_state": true
+    },
+    {
+      "candidate_id": "6a4b5950a4b2c10793714efc",
+      "city": "Київ",
+      "city_key": "kyiv",
+      "current_matched_episode_id": null,
+      "current_matching_outcome": null,
+      "new_matching_outcome": "unique_match",
+      "match_cardinality": "unique",
+      "matched_episode_ids": [
+        "67794eb04b0309bee8a02cc6",
+        "c964a9db4271b3a9d76be49a"
+      ],
+      "logical_episode_groups": [
+        [
+          "67794eb04b0309bee8a02cc6",
+          "c964a9db4271b3a9d76be49a"
+        ]
+      ],
+      "reason": "near_duplicate_source_representations_reconciled_to_one_tracked_alert_window",
+      "matching_outcome_changed_vs_current_state": true
+    },
+    {
+      "candidate_id": "6d4bdfb8b2fda7176b3f5573",
+      "city": "Київ",
+      "city_key": "kyiv",
+      "current_matched_episode_id": null,
+      "current_matching_outcome": null,
+      "new_matching_outcome": "unique_match",
+      "match_cardinality": "unique",
+      "matched_episode_ids": [
+        "74e6bb30920a6eb59eef277a",
+        "b6043fef9f70f63c4cc6596f"
+      ],
+      "logical_episode_groups": [
+        [
+          "74e6bb30920a6eb59eef277a",
+          "b6043fef9f70f63c4cc6596f"
+        ]
+      ],
+      "reason": "near_duplicate_source_representations_reconciled_to_one_tracked_alert_window",
+      "matching_outcome_changed_vs_current_state": true
+    },
+    {
+      "candidate_id": "6d4cd0b8e278b96a345bcccd",
+      "city": "Київ",
+      "city_key": "kyiv",
+      "current_matched_episode_id": null,
+      "current_matching_outcome": null,
+      "new_matching_outcome": "unique_match",
+      "match_cardinality": "unique",
+      "matched_episode_ids": [
+        "be91665768f663f704f73958"
+      ],
+      "logical_episode_groups": [
+        [
+          "be91665768f663f704f73958"
+        ]
+      ],
+      "reason": "publication_within_unique_tracked_alert_window",
+      "matching_outcome_changed_vs_current_state": true
+    },
+    {
+      "candidate_id": "8626aad6626def4f57dd41fa",
+      "city": "Київ",
+      "city_key": "kyiv",
+      "current_matched_episode_id": null,
+      "current_matching_outcome": null,
+      "new_matching_outcome": "unique_match",
+      "match_cardinality": "unique",
+      "matched_episode_ids": [
+        "74e6bb30920a6eb59eef277a",
+        "b6043fef9f70f63c4cc6596f"
+      ],
+      "logical_episode_groups": [
+        [
+          "74e6bb30920a6eb59eef277a",
+          "b6043fef9f70f63c4cc6596f"
+        ]
+      ],
+      "reason": "near_duplicate_source_representations_reconciled_to_one_tracked_alert_window",
+      "matching_outcome_changed_vs_current_state": true
+    },
+    {
+      "candidate_id": "86c64b203e52bce6f9aafa88",
+      "city": "Київ",
+      "city_key": "kyiv",
+      "current_matched_episode_id": null,
+      "current_matching_outcome": null,
+      "new_matching_outcome": "unique_match",
+      "match_cardinality": "unique",
+      "matched_episode_ids": [
+        "731052f1448d4e5b8554a2d9"
+      ],
+      "logical_episode_groups": [
+        [
+          "731052f1448d4e5b8554a2d9"
+        ]
+      ],
+      "reason": "publication_within_unique_tracked_alert_window",
+      "matching_outcome_changed_vs_current_state": true
+    },
+    {
+      "candidate_id": "8f189c080aac8d379faeb1dd",
+      "city": "Київ",
+      "city_key": "kyiv",
+      "current_matched_episode_id": null,
+      "current_matching_outcome": null,
+      "new_matching_outcome": "unique_match",
+      "match_cardinality": "unique",
+      "matched_episode_ids": [
+        "7d7cb0c7a9e7d3574d33c70c",
+        "ce258bb8987be36ce33dcca9"
+      ],
+      "logical_episode_groups": [
+        [
+          "7d7cb0c7a9e7d3574d33c70c",
+          "ce258bb8987be36ce33dcca9"
+        ]
+      ],
+      "reason": "near_duplicate_source_representations_reconciled_to_one_tracked_alert_window",
+      "matching_outcome_changed_vs_current_state": true
+    },
+    {
+      "candidate_id": "969151182b4d4498df132a53",
+      "city": "Київ",
+      "city_key": "kyiv",
+      "current_matched_episode_id": null,
+      "current_matching_outcome": null,
+      "new_matching_outcome": "unique_match",
+      "match_cardinality": "unique",
+      "matched_episode_ids": [
+        "be91665768f663f704f73958"
+      ],
+      "logical_episode_groups": [
+        [
+          "be91665768f663f704f73958"
+        ]
+      ],
+      "reason": "publication_within_unique_tracked_alert_window",
+      "matching_outcome_changed_vs_current_state": true
+    },
+    {
+      "candidate_id": "988b7a3d4f986e022af525ab",
+      "city": "Київ",
+      "city_key": "kyiv",
+      "current_matched_episode_id": null,
+      "current_matching_outcome": null,
+      "new_matching_outcome": "unique_match",
+      "match_cardinality": "unique",
+      "matched_episode_ids": [
+        "baf3eaa558f606c14d6e385f"
+      ],
+      "logical_episode_groups": [
+        [
+          "baf3eaa558f606c14d6e385f"
+        ]
+      ],
+      "reason": "publication_within_unique_tracked_alert_window",
+      "matching_outcome_changed_vs_current_state": true
+    },
+    {
+      "candidate_id": "a38dd86d7f0145de0cc4ad2e",
+      "city": "Київ",
+      "city_key": "kyiv",
+      "current_matched_episode_id": null,
+      "current_matching_outcome": null,
+      "new_matching_outcome": "unique_match",
+      "match_cardinality": "unique",
+      "matched_episode_ids": [
+        "651d5a6ea4dbbd592f029ff3",
+        "e3542827b8a5d78d6cc55a08"
+      ],
+      "logical_episode_groups": [
+        [
+          "651d5a6ea4dbbd592f029ff3",
+          "e3542827b8a5d78d6cc55a08"
+        ]
+      ],
+      "reason": "near_duplicate_source_representations_reconciled_to_one_tracked_alert_window",
+      "matching_outcome_changed_vs_current_state": true
+    },
+    {
+      "candidate_id": "a940cce83a1aca60ea5872d8",
+      "city": "Київ",
+      "city_key": "kyiv",
+      "current_matched_episode_id": null,
+      "current_matching_outcome": null,
+      "new_matching_outcome": "no_match",
+      "match_cardinality": "none",
+      "matched_episode_ids": [],
+      "logical_episode_groups": [],
+      "reason": "publication_outside_all_tracked_alert_windows",
+      "matching_outcome_changed_vs_current_state": false
+    },
+    {
+      "candidate_id": "a9ae59733379c6e0439bf72c",
+      "city": "Київ",
+      "city_key": "kyiv",
+      "current_matched_episode_id": null,
+      "current_matching_outcome": null,
+      "new_matching_outcome": "no_match",
+      "match_cardinality": "none",
+      "matched_episode_ids": [],
+      "logical_episode_groups": [],
+      "reason": "publication_outside_all_tracked_alert_windows",
+      "matching_outcome_changed_vs_current_state": false
+    },
+    {
+      "candidate_id": "aa5f00b7957f03bece44a9e4",
+      "city": "Київ",
+      "city_key": "kyiv",
+      "current_matched_episode_id": null,
+      "current_matching_outcome": null,
+      "new_matching_outcome": "unique_match",
+      "match_cardinality": "unique",
+      "matched_episode_ids": [
+        "67794eb04b0309bee8a02cc6",
+        "c964a9db4271b3a9d76be49a"
+      ],
+      "logical_episode_groups": [
+        [
+          "67794eb04b0309bee8a02cc6",
+          "c964a9db4271b3a9d76be49a"
+        ]
+      ],
+      "reason": "near_duplicate_source_representations_reconciled_to_one_tracked_alert_window",
+      "matching_outcome_changed_vs_current_state": true
+    },
+    {
+      "candidate_id": "abfb7775d066b8881deb3bc1",
+      "city": "Київ",
+      "city_key": "kyiv",
+      "current_matched_episode_id": null,
+      "current_matching_outcome": null,
+      "new_matching_outcome": "unique_match",
+      "match_cardinality": "unique",
+      "matched_episode_ids": [
+        "7d7cb0c7a9e7d3574d33c70c",
+        "ce258bb8987be36ce33dcca9"
+      ],
+      "logical_episode_groups": [
+        [
+          "7d7cb0c7a9e7d3574d33c70c",
+          "ce258bb8987be36ce33dcca9"
+        ]
+      ],
+      "reason": "near_duplicate_source_representations_reconciled_to_one_tracked_alert_window",
+      "matching_outcome_changed_vs_current_state": true
+    },
+    {
+      "candidate_id": "b7cac961886d824318b51d02",
+      "city": "Київ",
+      "city_key": "kyiv",
+      "current_matched_episode_id": null,
+      "current_matching_outcome": null,
+      "new_matching_outcome": "ambiguous_match",
+      "match_cardinality": "ambiguous",
+      "matched_episode_ids": [
+        "390fe0ec9b9eb45f51577412",
+        "9a0b0f80a095704745675407",
+        "9f675c5071bba608032d9255",
+        "c0ae46a8a92dd5b519f333ea"
+      ],
+      "logical_episode_groups": [
+        [
+          "390fe0ec9b9eb45f51577412",
+          "9f675c5071bba608032d9255"
+        ],
+        [
+          "9a0b0f80a095704745675407",
+          "c0ae46a8a92dd5b519f333ea"
+        ]
+      ],
+      "reason": "publication_matches_multiple_distinct_tracked_alert_windows",
+      "matching_outcome_changed_vs_current_state": true
+    },
+    {
+      "candidate_id": "babdc0e586dba4747e2b57ce",
+      "city": "Київ",
+      "city_key": "kyiv",
+      "current_matched_episode_id": null,
+      "current_matching_outcome": null,
+      "new_matching_outcome": "unique_match",
+      "match_cardinality": "unique",
+      "matched_episode_ids": [
+        "67794eb04b0309bee8a02cc6",
+        "c964a9db4271b3a9d76be49a"
+      ],
+      "logical_episode_groups": [
+        [
+          "67794eb04b0309bee8a02cc6",
+          "c964a9db4271b3a9d76be49a"
+        ]
+      ],
+      "reason": "near_duplicate_source_representations_reconciled_to_one_tracked_alert_window",
+      "matching_outcome_changed_vs_current_state": true
+    },
+    {
+      "candidate_id": "bcef8539773d2435ce066163",
+      "city": "Київ",
+      "city_key": "kyiv",
+      "current_matched_episode_id": null,
+      "current_matching_outcome": null,
+      "new_matching_outcome": "unique_match",
+      "match_cardinality": "unique",
+      "matched_episode_ids": [
+        "74e6bb30920a6eb59eef277a",
+        "b6043fef9f70f63c4cc6596f"
+      ],
+      "logical_episode_groups": [
+        [
+          "74e6bb30920a6eb59eef277a",
+          "b6043fef9f70f63c4cc6596f"
+        ]
+      ],
+      "reason": "near_duplicate_source_representations_reconciled_to_one_tracked_alert_window",
+      "matching_outcome_changed_vs_current_state": true
+    },
+    {
+      "candidate_id": "c0140340f7c5a90ee20dce78",
+      "city": "Київ",
+      "city_key": "kyiv",
+      "current_matched_episode_id": null,
+      "current_matching_outcome": null,
+      "new_matching_outcome": "unique_match",
+      "match_cardinality": "unique",
+      "matched_episode_ids": [
+        "be91665768f663f704f73958"
+      ],
+      "logical_episode_groups": [
+        [
+          "be91665768f663f704f73958"
+        ]
+      ],
+      "reason": "publication_within_unique_tracked_alert_window",
+      "matching_outcome_changed_vs_current_state": true
+    },
+    {
+      "candidate_id": "c0673df7cda101f42e536163",
+      "city": "Київ",
+      "city_key": "kyiv",
+      "current_matched_episode_id": null,
+      "current_matching_outcome": null,
+      "new_matching_outcome": "unique_match",
+      "match_cardinality": "unique",
+      "matched_episode_ids": [
+        "baf3eaa558f606c14d6e385f"
+      ],
+      "logical_episode_groups": [
+        [
+          "baf3eaa558f606c14d6e385f"
+        ]
+      ],
+      "reason": "publication_within_unique_tracked_alert_window",
+      "matching_outcome_changed_vs_current_state": true
+    },
+    {
+      "candidate_id": "c3b2f5e0ae139976892caa59",
+      "city": "Київ",
+      "city_key": "kyiv",
+      "current_matched_episode_id": null,
+      "current_matching_outcome": null,
+      "new_matching_outcome": "unique_match",
+      "match_cardinality": "unique",
+      "matched_episode_ids": [
+        "372a0acab8763541b0422e14",
+        "6f7ad9d283d3d095cda16f5b"
+      ],
+      "logical_episode_groups": [
+        [
+          "372a0acab8763541b0422e14",
+          "6f7ad9d283d3d095cda16f5b"
+        ]
+      ],
+      "reason": "near_duplicate_source_representations_reconciled_to_one_tracked_alert_window",
+      "matching_outcome_changed_vs_current_state": true
+    },
+    {
+      "candidate_id": "c57903cf6571053b5cdb9a9f",
+      "city": "Київ",
+      "city_key": "kyiv",
+      "current_matched_episode_id": null,
+      "current_matching_outcome": null,
+      "new_matching_outcome": "no_match",
+      "match_cardinality": "none",
+      "matched_episode_ids": [],
+      "logical_episode_groups": [],
+      "reason": "publication_outside_all_tracked_alert_windows",
+      "matching_outcome_changed_vs_current_state": false
+    },
+    {
+      "candidate_id": "d122c212e6e36548ee84ec15",
+      "city": "Київ",
+      "city_key": "kyiv",
+      "current_matched_episode_id": null,
+      "current_matching_outcome": null,
+      "new_matching_outcome": "unique_match",
+      "match_cardinality": "unique",
+      "matched_episode_ids": [
+        "be91665768f663f704f73958"
+      ],
+      "logical_episode_groups": [
+        [
+          "be91665768f663f704f73958"
+        ]
+      ],
+      "reason": "publication_within_unique_tracked_alert_window",
+      "matching_outcome_changed_vs_current_state": true
+    },
+    {
+      "candidate_id": "d3dba8cb75ad7c866d599312",
+      "city": "Київ",
+      "city_key": "kyiv",
+      "current_matched_episode_id": null,
+      "current_matching_outcome": null,
+      "new_matching_outcome": "no_match",
+      "match_cardinality": "none",
+      "matched_episode_ids": [],
+      "logical_episode_groups": [],
+      "reason": "publication_outside_all_tracked_alert_windows",
+      "matching_outcome_changed_vs_current_state": false
+    },
+    {
+      "candidate_id": "d4fb0e081e5be3bd609f0633",
+      "city": "Київ",
+      "city_key": "kyiv",
+      "current_matched_episode_id": null,
+      "current_matching_outcome": null,
+      "new_matching_outcome": "unique_match",
+      "match_cardinality": "unique",
+      "matched_episode_ids": [
+        "baf3eaa558f606c14d6e385f"
+      ],
+      "logical_episode_groups": [
+        [
+          "baf3eaa558f606c14d6e385f"
+        ]
+      ],
+      "reason": "publication_within_unique_tracked_alert_window",
+      "matching_outcome_changed_vs_current_state": true
+    },
+    {
+      "candidate_id": "e0e7e50d7405aa8f27a3c82f",
+      "city": "Київ",
+      "city_key": "kyiv",
+      "current_matched_episode_id": null,
+      "current_matching_outcome": null,
+      "new_matching_outcome": "unique_match",
+      "match_cardinality": "unique",
+      "matched_episode_ids": [
+        "67794eb04b0309bee8a02cc6",
+        "c964a9db4271b3a9d76be49a"
+      ],
+      "logical_episode_groups": [
+        [
+          "67794eb04b0309bee8a02cc6",
+          "c964a9db4271b3a9d76be49a"
+        ]
+      ],
+      "reason": "near_duplicate_source_representations_reconciled_to_one_tracked_alert_window",
+      "matching_outcome_changed_vs_current_state": true
+    },
+    {
+      "candidate_id": "e4e32488b847d1b7e7a7c610",
+      "city": "Київ",
+      "city_key": "kyiv",
+      "current_matched_episode_id": null,
+      "current_matching_outcome": null,
+      "new_matching_outcome": "no_match",
+      "match_cardinality": "none",
+      "matched_episode_ids": [],
+      "logical_episode_groups": [],
+      "reason": "publication_outside_all_tracked_alert_windows",
+      "matching_outcome_changed_vs_current_state": false
+    },
+    {
+      "candidate_id": "ee5f615fa68b5a0f8ee1c59a",
+      "city": "Київ",
+      "city_key": "kyiv",
+      "current_matched_episode_id": null,
+      "current_matching_outcome": null,
+      "new_matching_outcome": "no_match",
+      "match_cardinality": "none",
+      "matched_episode_ids": [],
+      "logical_episode_groups": [],
+      "reason": "publication_outside_all_tracked_alert_windows",
+      "matching_outcome_changed_vs_current_state": false
+    },
+    {
+      "candidate_id": "f14bb80447de862bf978157e",
+      "city": "Київ",
+      "city_key": "kyiv",
+      "current_matched_episode_id": null,
+      "current_matching_outcome": null,
+      "new_matching_outcome": "no_match",
+      "match_cardinality": "none",
+      "matched_episode_ids": [],
+      "logical_episode_groups": [],
+      "reason": "publication_outside_all_tracked_alert_windows",
+      "matching_outcome_changed_vs_current_state": false
+    },
+    {
+      "candidate_id": "f50bb7afd349737c01e560b2",
+      "city": "Київ",
+      "city_key": "kyiv",
+      "current_matched_episode_id": null,
+      "current_matching_outcome": null,
+      "new_matching_outcome": "unique_match",
+      "match_cardinality": "unique",
+      "matched_episode_ids": [
+        "67794eb04b0309bee8a02cc6",
+        "c964a9db4271b3a9d76be49a"
+      ],
+      "logical_episode_groups": [
+        [
+          "67794eb04b0309bee8a02cc6",
+          "c964a9db4271b3a9d76be49a"
+        ]
+      ],
+      "reason": "near_duplicate_source_representations_reconciled_to_one_tracked_alert_window",
+      "matching_outcome_changed_vs_current_state": true
+    },
+    {
+      "candidate_id": "faa5fd9633b4fd94fe1b6769",
+      "city": "Київ",
+      "city_key": "kyiv",
+      "current_matched_episode_id": null,
+      "current_matching_outcome": null,
+      "new_matching_outcome": "unique_match",
+      "match_cardinality": "unique",
+      "matched_episode_ids": [
+        "7d7cb0c7a9e7d3574d33c70c",
+        "ce258bb8987be36ce33dcca9"
+      ],
+      "logical_episode_groups": [
+        [
+          "7d7cb0c7a9e7d3574d33c70c",
+          "ce258bb8987be36ce33dcca9"
+        ]
+      ],
+      "reason": "near_duplicate_source_representations_reconciled_to_one_tracked_alert_window",
+      "matching_outcome_changed_vs_current_state": true
+    },
+    {
+      "candidate_id": "0e39040303d4b31a603e2017",
+      "city": "Миколаїв",
+      "city_key": "mykolaiv",
+      "current_matched_episode_id": null,
+      "current_matching_outcome": null,
+      "new_matching_outcome": "unique_match",
+      "match_cardinality": "unique",
+      "matched_episode_ids": [
+        "cde43bafd9c9a45bf7b31f56"
+      ],
+      "logical_episode_groups": [
+        [
+          "cde43bafd9c9a45bf7b31f56"
+        ]
+      ],
+      "reason": "publication_within_unique_tracked_alert_window",
+      "matching_outcome_changed_vs_current_state": true
+    },
+    {
+      "candidate_id": "1923b7a627ac1b048dc3b49a",
+      "city": "Миколаїв",
+      "city_key": "mykolaiv",
+      "current_matched_episode_id": null,
+      "current_matching_outcome": null,
+      "new_matching_outcome": "unique_match",
+      "match_cardinality": "unique",
+      "matched_episode_ids": [
+        "324271ec2c163e98e7e9c617"
+      ],
+      "logical_episode_groups": [
+        [
+          "324271ec2c163e98e7e9c617"
+        ]
+      ],
+      "reason": "publication_within_unique_tracked_alert_window",
+      "matching_outcome_changed_vs_current_state": true
+    },
+    {
+      "candidate_id": "3b1982d02fc32722ea71a589",
+      "city": "Миколаїв",
+      "city_key": "mykolaiv",
+      "current_matched_episode_id": null,
+      "current_matching_outcome": null,
+      "new_matching_outcome": "ambiguous_match",
+      "match_cardinality": "ambiguous",
+      "matched_episode_ids": [
+        "cde43bafd9c9a45bf7b31f56",
+        "e0438587bb2c9509d55a149e"
+      ],
+      "logical_episode_groups": [
+        [
+          "cde43bafd9c9a45bf7b31f56"
+        ],
+        [
+          "e0438587bb2c9509d55a149e"
+        ]
+      ],
+      "reason": "publication_matches_multiple_distinct_tracked_alert_windows",
+      "matching_outcome_changed_vs_current_state": true
+    },
+    {
+      "candidate_id": "4b989fb10f30b3dd990ce9bc",
+      "city": "Миколаїв",
+      "city_key": "mykolaiv",
+      "current_matched_episode_id": null,
+      "current_matching_outcome": null,
+      "new_matching_outcome": "unique_match",
+      "match_cardinality": "unique",
+      "matched_episode_ids": [
+        "487301acffc0b00d5183cc33"
+      ],
+      "logical_episode_groups": [
+        [
+          "487301acffc0b00d5183cc33"
+        ]
+      ],
+      "reason": "publication_within_unique_tracked_alert_window",
+      "matching_outcome_changed_vs_current_state": true
+    },
+    {
+      "candidate_id": "4d0041fd2c915b268f85ba24",
+      "city": "Миколаїв",
+      "city_key": "mykolaiv",
+      "current_matched_episode_id": null,
+      "current_matching_outcome": null,
+      "new_matching_outcome": "unique_match",
+      "match_cardinality": "unique",
+      "matched_episode_ids": [
+        "cde43bafd9c9a45bf7b31f56"
+      ],
+      "logical_episode_groups": [
+        [
+          "cde43bafd9c9a45bf7b31f56"
+        ]
+      ],
+      "reason": "publication_within_unique_tracked_alert_window",
+      "matching_outcome_changed_vs_current_state": true
+    },
+    {
+      "candidate_id": "62b85767605168531b4e44df",
+      "city": "Миколаїв",
+      "city_key": "mykolaiv",
+      "current_matched_episode_id": null,
+      "current_matching_outcome": null,
+      "new_matching_outcome": "no_match",
+      "match_cardinality": "none",
+      "matched_episode_ids": [],
+      "logical_episode_groups": [],
+      "reason": "publication_outside_all_tracked_alert_windows",
+      "matching_outcome_changed_vs_current_state": false
+    },
+    {
+      "candidate_id": "828c6b92b458d78971e652ea",
+      "city": "Миколаїв",
+      "city_key": "mykolaiv",
+      "current_matched_episode_id": null,
+      "current_matching_outcome": null,
+      "new_matching_outcome": "ambiguous_match",
+      "match_cardinality": "ambiguous",
+      "matched_episode_ids": [
+        "cde43bafd9c9a45bf7b31f56",
+        "e0438587bb2c9509d55a149e"
+      ],
+      "logical_episode_groups": [
+        [
+          "cde43bafd9c9a45bf7b31f56"
+        ],
+        [
+          "e0438587bb2c9509d55a149e"
+        ]
+      ],
+      "reason": "publication_matches_multiple_distinct_tracked_alert_windows",
+      "matching_outcome_changed_vs_current_state": true
+    },
+    {
+      "candidate_id": "84bd68c869990fb70375c254",
+      "city": "Миколаїв",
+      "city_key": "mykolaiv",
+      "current_matched_episode_id": null,
+      "current_matching_outcome": null,
+      "new_matching_outcome": "unique_match",
+      "match_cardinality": "unique",
+      "matched_episode_ids": [
+        "cde43bafd9c9a45bf7b31f56"
+      ],
+      "logical_episode_groups": [
+        [
+          "cde43bafd9c9a45bf7b31f56"
+        ]
+      ],
+      "reason": "publication_within_unique_tracked_alert_window",
+      "matching_outcome_changed_vs_current_state": true
+    },
+    {
+      "candidate_id": "ae4361c761c59452d63b18c4",
+      "city": "Миколаїв",
+      "city_key": "mykolaiv",
+      "current_matched_episode_id": null,
+      "current_matching_outcome": null,
+      "new_matching_outcome": "ambiguous_match",
+      "match_cardinality": "ambiguous",
+      "matched_episode_ids": [
+        "cde43bafd9c9a45bf7b31f56",
+        "e0438587bb2c9509d55a149e"
+      ],
+      "logical_episode_groups": [
+        [
+          "cde43bafd9c9a45bf7b31f56"
+        ],
+        [
+          "e0438587bb2c9509d55a149e"
+        ]
+      ],
+      "reason": "publication_matches_multiple_distinct_tracked_alert_windows",
+      "matching_outcome_changed_vs_current_state": true
+    },
+    {
+      "candidate_id": "d5cb94fd437118055d979519",
+      "city": "Миколаїв",
+      "city_key": "mykolaiv",
+      "current_matched_episode_id": null,
+      "current_matching_outcome": null,
+      "new_matching_outcome": "unique_match",
+      "match_cardinality": "unique",
+      "matched_episode_ids": [
+        "cde43bafd9c9a45bf7b31f56"
+      ],
+      "logical_episode_groups": [
+        [
+          "cde43bafd9c9a45bf7b31f56"
+        ]
+      ],
+      "reason": "publication_within_unique_tracked_alert_window",
+      "matching_outcome_changed_vs_current_state": true
+    },
+    {
+      "candidate_id": "da6ff392a3e504a09e786aec",
+      "city": "Миколаїв",
+      "city_key": "mykolaiv",
+      "current_matched_episode_id": null,
+      "current_matching_outcome": null,
+      "new_matching_outcome": "unique_match",
+      "match_cardinality": "unique",
+      "matched_episode_ids": [
+        "cc5164f1cfda1ac283137ed3"
+      ],
+      "logical_episode_groups": [
+        [
+          "cc5164f1cfda1ac283137ed3"
+        ]
+      ],
+      "reason": "publication_within_unique_tracked_alert_window",
+      "matching_outcome_changed_vs_current_state": true
+    },
+    {
+      "candidate_id": "efcae3c4c501a8e93610d07c",
+      "city": "Миколаїв",
+      "city_key": "mykolaiv",
+      "current_matched_episode_id": null,
+      "current_matching_outcome": null,
+      "new_matching_outcome": "unique_match",
+      "match_cardinality": "unique",
+      "matched_episode_ids": [
+        "cde43bafd9c9a45bf7b31f56"
+      ],
+      "logical_episode_groups": [
+        [
+          "cde43bafd9c9a45bf7b31f56"
+        ]
+      ],
+      "reason": "publication_within_unique_tracked_alert_window",
+      "matching_outcome_changed_vs_current_state": true
+    },
+    {
+      "candidate_id": "fd3ec36270c1e9d5557bdd89",
+      "city": "Миколаїв",
+      "city_key": "mykolaiv",
+      "current_matched_episode_id": null,
+      "current_matching_outcome": null,
+      "new_matching_outcome": "unique_match",
+      "match_cardinality": "unique",
+      "matched_episode_ids": [
+        "e98dc546790b73d72b6f2ce0"
+      ],
+      "logical_episode_groups": [
+        [
+          "e98dc546790b73d72b6f2ce0"
+        ]
+      ],
+      "reason": "publication_within_unique_tracked_alert_window",
+      "matching_outcome_changed_vs_current_state": true
+    },
+    {
+      "candidate_id": "0af80b9ace77caf690c70160",
+      "city": "Одеса",
+      "city_key": "odesa",
+      "current_matched_episode_id": null,
+      "current_matching_outcome": null,
+      "new_matching_outcome": "unique_match",
+      "match_cardinality": "unique",
+      "matched_episode_ids": [
+        "b79711e9ad81cb490c42e956"
+      ],
+      "logical_episode_groups": [
+        [
+          "b79711e9ad81cb490c42e956"
+        ]
+      ],
+      "reason": "publication_within_unique_tracked_alert_window",
+      "matching_outcome_changed_vs_current_state": true
+    },
+    {
+      "candidate_id": "30aa8f0165d7f0f5cb555da0",
+      "city": "Одеса",
+      "city_key": "odesa",
+      "current_matched_episode_id": null,
+      "current_matching_outcome": null,
+      "new_matching_outcome": "unique_match",
+      "match_cardinality": "unique",
+      "matched_episode_ids": [
+        "31384cef6eb1ad2f9742b233"
+      ],
+      "logical_episode_groups": [
+        [
+          "31384cef6eb1ad2f9742b233"
+        ]
+      ],
+      "reason": "publication_within_unique_tracked_alert_window",
+      "matching_outcome_changed_vs_current_state": true
+    },
+    {
+      "candidate_id": "5a61d62cac76456eb62cb386",
+      "city": "Одеса",
+      "city_key": "odesa",
+      "current_matched_episode_id": null,
+      "current_matching_outcome": null,
+      "new_matching_outcome": "unique_match",
+      "match_cardinality": "unique",
+      "matched_episode_ids": [
+        "7a7da068c0efb7be80bd45e4"
+      ],
+      "logical_episode_groups": [
+        [
+          "7a7da068c0efb7be80bd45e4"
+        ]
+      ],
+      "reason": "publication_within_unique_tracked_alert_window",
+      "matching_outcome_changed_vs_current_state": true
+    },
+    {
+      "candidate_id": "63e4a0c4265cd7c9bac6f485",
+      "city": "Одеса",
+      "city_key": "odesa",
+      "current_matched_episode_id": null,
+      "current_matching_outcome": null,
+      "new_matching_outcome": "unique_match",
+      "match_cardinality": "unique",
+      "matched_episode_ids": [
+        "eb2580c2bec54ddc2e36eaf7"
+      ],
+      "logical_episode_groups": [
+        [
+          "eb2580c2bec54ddc2e36eaf7"
+        ]
+      ],
+      "reason": "publication_within_unique_tracked_alert_window",
+      "matching_outcome_changed_vs_current_state": true
+    },
+    {
+      "candidate_id": "6e29c53491ebe8d26a225a13",
+      "city": "Одеса",
+      "city_key": "odesa",
+      "current_matched_episode_id": null,
+      "current_matching_outcome": null,
+      "new_matching_outcome": "no_match",
+      "match_cardinality": "none",
+      "matched_episode_ids": [],
+      "logical_episode_groups": [],
+      "reason": "publication_outside_all_tracked_alert_windows",
+      "matching_outcome_changed_vs_current_state": false
+    },
+    {
+      "candidate_id": "da37fd7a3b6c42dbff41d115",
+      "city": "Одеса",
+      "city_key": "odesa",
+      "current_matched_episode_id": null,
+      "current_matching_outcome": null,
+      "new_matching_outcome": "unique_match",
+      "match_cardinality": "unique",
+      "matched_episode_ids": [
+        "7a7da068c0efb7be80bd45e4"
+      ],
+      "logical_episode_groups": [
+        [
+          "7a7da068c0efb7be80bd45e4"
+        ]
+      ],
+      "reason": "publication_within_unique_tracked_alert_window",
+      "matching_outcome_changed_vs_current_state": true
+    },
+    {
+      "candidate_id": "ebb7156d3ea8be29c8f4b67b",
+      "city": "Одеса",
+      "city_key": "odesa",
+      "current_matched_episode_id": null,
+      "current_matching_outcome": null,
+      "new_matching_outcome": "unique_match",
+      "match_cardinality": "unique",
+      "matched_episode_ids": [
+        "31384cef6eb1ad2f9742b233"
+      ],
+      "logical_episode_groups": [
+        [
+          "31384cef6eb1ad2f9742b233"
+        ]
+      ],
+      "reason": "publication_within_unique_tracked_alert_window",
+      "matching_outcome_changed_vs_current_state": true
+    },
+    {
+      "candidate_id": "ec759edeac2531c382c0eb4f",
+      "city": "Одеса",
+      "city_key": "odesa",
+      "current_matched_episode_id": null,
+      "current_matching_outcome": null,
+      "new_matching_outcome": "unique_match",
+      "match_cardinality": "unique",
+      "matched_episode_ids": [
+        "eb2580c2bec54ddc2e36eaf7"
+      ],
+      "logical_episode_groups": [
+        [
+          "eb2580c2bec54ddc2e36eaf7"
+        ]
+      ],
+      "reason": "publication_within_unique_tracked_alert_window",
+      "matching_outcome_changed_vs_current_state": true
+    },
+    {
+      "candidate_id": "f8410c2df817637bad98c18f",
+      "city": "Одеса",
+      "city_key": "odesa",
+      "current_matched_episode_id": null,
+      "current_matching_outcome": null,
+      "new_matching_outcome": "unique_match",
+      "match_cardinality": "unique",
+      "matched_episode_ids": [
+        "eb2580c2bec54ddc2e36eaf7"
+      ],
+      "logical_episode_groups": [
+        [
+          "eb2580c2bec54ddc2e36eaf7"
+        ]
+      ],
+      "reason": "publication_within_unique_tracked_alert_window",
+      "matching_outcome_changed_vs_current_state": true
+    },
+    {
+      "candidate_id": "06a79fb024dc57c5b247d040",
+      "city": "Полтава",
+      "city_key": "poltava",
+      "current_matched_episode_id": null,
+      "current_matching_outcome": null,
+      "new_matching_outcome": "unique_match",
+      "match_cardinality": "unique",
+      "matched_episode_ids": [
+        "60f6aac885e538d93d88e053"
+      ],
+      "logical_episode_groups": [
+        [
+          "60f6aac885e538d93d88e053"
+        ]
+      ],
+      "reason": "publication_within_unique_tracked_alert_window",
+      "matching_outcome_changed_vs_current_state": true
+    },
+    {
+      "candidate_id": "08bb1062751bc0c7e6a2556a",
+      "city": "Полтава",
+      "city_key": "poltava",
+      "current_matched_episode_id": null,
+      "current_matching_outcome": null,
+      "new_matching_outcome": "unique_match",
+      "match_cardinality": "unique",
+      "matched_episode_ids": [
+        "60f6aac885e538d93d88e053"
+      ],
+      "logical_episode_groups": [
+        [
+          "60f6aac885e538d93d88e053"
+        ]
+      ],
+      "reason": "publication_within_unique_tracked_alert_window",
+      "matching_outcome_changed_vs_current_state": true
+    },
+    {
+      "candidate_id": "2a7ca63187324304db46f973",
+      "city": "Полтава",
+      "city_key": "poltava",
+      "current_matched_episode_id": null,
+      "current_matching_outcome": null,
+      "new_matching_outcome": "unique_match",
+      "match_cardinality": "unique",
+      "matched_episode_ids": [
+        "6d3ffb88b431e8e80e024aae"
+      ],
+      "logical_episode_groups": [
+        [
+          "6d3ffb88b431e8e80e024aae"
+        ]
+      ],
+      "reason": "publication_within_unique_tracked_alert_window",
+      "matching_outcome_changed_vs_current_state": true
+    },
+    {
+      "candidate_id": "67d31ea423a03fa6e7faafe1",
+      "city": "Полтава",
+      "city_key": "poltava",
+      "current_matched_episode_id": null,
+      "current_matching_outcome": null,
+      "new_matching_outcome": "unique_match",
+      "match_cardinality": "unique",
+      "matched_episode_ids": [
+        "60f6aac885e538d93d88e053"
+      ],
+      "logical_episode_groups": [
+        [
+          "60f6aac885e538d93d88e053"
+        ]
+      ],
+      "reason": "publication_within_unique_tracked_alert_window",
+      "matching_outcome_changed_vs_current_state": true
+    },
+    {
+      "candidate_id": "841acc6087e36331a4214653",
+      "city": "Полтава",
+      "city_key": "poltava",
+      "current_matched_episode_id": null,
+      "current_matching_outcome": null,
+      "new_matching_outcome": "unique_match",
+      "match_cardinality": "unique",
+      "matched_episode_ids": [
+        "60f6aac885e538d93d88e053"
+      ],
+      "logical_episode_groups": [
+        [
+          "60f6aac885e538d93d88e053"
+        ]
+      ],
+      "reason": "publication_within_unique_tracked_alert_window",
+      "matching_outcome_changed_vs_current_state": true
+    },
+    {
+      "candidate_id": "a19b98dd388991ec09d00963",
+      "city": "Полтава",
+      "city_key": "poltava",
+      "current_matched_episode_id": null,
+      "current_matching_outcome": null,
+      "new_matching_outcome": "no_match",
+      "match_cardinality": "none",
+      "matched_episode_ids": [],
+      "logical_episode_groups": [],
+      "reason": "publication_outside_all_tracked_alert_windows",
+      "matching_outcome_changed_vs_current_state": false
+    },
+    {
+      "candidate_id": "b84eaba277b34f5428046447",
+      "city": "Полтава",
+      "city_key": "poltava",
+      "current_matched_episode_id": null,
+      "current_matching_outcome": null,
+      "new_matching_outcome": "no_match",
+      "match_cardinality": "none",
+      "matched_episode_ids": [],
+      "logical_episode_groups": [],
+      "reason": "publication_outside_all_tracked_alert_windows",
+      "matching_outcome_changed_vs_current_state": false
+    },
+    {
+      "candidate_id": "d78f72c5a56e9d687de41978",
+      "city": "Полтава",
+      "city_key": "poltava",
+      "current_matched_episode_id": null,
+      "current_matching_outcome": null,
+      "new_matching_outcome": "unique_match",
+      "match_cardinality": "unique",
+      "matched_episode_ids": [
+        "64cf3cdce03e25fe012795e4"
+      ],
+      "logical_episode_groups": [
+        [
+          "64cf3cdce03e25fe012795e4"
+        ]
+      ],
+      "reason": "publication_within_unique_tracked_alert_window",
+      "matching_outcome_changed_vs_current_state": true
+    },
+    {
+      "candidate_id": "0283e176c338ca993a5a777d",
+      "city": "Рівне",
+      "city_key": "rivne",
+      "current_matched_episode_id": null,
+      "current_matching_outcome": null,
+      "new_matching_outcome": "unique_match",
+      "match_cardinality": "unique",
+      "matched_episode_ids": [
+        "742c27c7166e3cd48edd2fde"
+      ],
+      "logical_episode_groups": [
+        [
+          "742c27c7166e3cd48edd2fde"
+        ]
+      ],
+      "reason": "publication_within_unique_tracked_alert_window",
+      "matching_outcome_changed_vs_current_state": true
+    },
+    {
+      "candidate_id": "eba700963b0433774e675df4",
+      "city": "Севастополь",
+      "city_key": "sevastopol",
+      "current_matched_episode_id": null,
+      "current_matching_outcome": null,
+      "new_matching_outcome": "no_match",
+      "match_cardinality": "none",
+      "matched_episode_ids": [],
+      "logical_episode_groups": [],
+      "reason": "publication_outside_all_tracked_alert_windows",
+      "matching_outcome_changed_vs_current_state": false
+    },
+    {
+      "candidate_id": "61d7078525ab5699721e759f",
+      "city": "Суми",
+      "city_key": "sumy",
+      "current_matched_episode_id": null,
+      "current_matching_outcome": null,
+      "new_matching_outcome": "unique_match",
+      "match_cardinality": "unique",
+      "matched_episode_ids": [
+        "c7bbcc4ab25fe3eeeb2fa6d4"
+      ],
+      "logical_episode_groups": [
+        [
+          "c7bbcc4ab25fe3eeeb2fa6d4"
+        ]
+      ],
+      "reason": "publication_within_unique_tracked_alert_window",
+      "matching_outcome_changed_vs_current_state": true
+    },
+    {
+      "candidate_id": "c014f6cf5d5bd516df6db11f",
+      "city": "Суми",
+      "city_key": "sumy",
+      "current_matched_episode_id": null,
+      "current_matching_outcome": null,
+      "new_matching_outcome": "unique_match",
+      "match_cardinality": "unique",
+      "matched_episode_ids": [
+        "a02cb7c70056fd3ec19eff4c"
+      ],
+      "logical_episode_groups": [
+        [
+          "a02cb7c70056fd3ec19eff4c"
+        ]
+      ],
+      "reason": "publication_within_unique_tracked_alert_window",
+      "matching_outcome_changed_vs_current_state": true
+    },
+    {
+      "candidate_id": "eebbee53e68e94dc2bf3c169",
+      "city": "Суми",
+      "city_key": "sumy",
+      "current_matched_episode_id": null,
+      "current_matching_outcome": null,
+      "new_matching_outcome": "ambiguous_match",
+      "match_cardinality": "ambiguous",
+      "matched_episode_ids": [
+        "9d20bfca2418626647292510",
+        "c19620614623c8486cbefe5c"
+      ],
+      "logical_episode_groups": [
+        [
+          "9d20bfca2418626647292510"
+        ],
+        [
+          "c19620614623c8486cbefe5c"
+        ]
+      ],
+      "reason": "publication_matches_multiple_distinct_tracked_alert_windows",
+      "matching_outcome_changed_vs_current_state": true
+    },
+    {
+      "candidate_id": "f4592422463c309484994f6f",
+      "city": "Суми",
+      "city_key": "sumy",
+      "current_matched_episode_id": null,
+      "current_matching_outcome": null,
+      "new_matching_outcome": "unique_match",
+      "match_cardinality": "unique",
+      "matched_episode_ids": [
+        "c7bbcc4ab25fe3eeeb2fa6d4"
+      ],
+      "logical_episode_groups": [
+        [
+          "c7bbcc4ab25fe3eeeb2fa6d4"
+        ]
+      ],
+      "reason": "publication_within_unique_tracked_alert_window",
+      "matching_outcome_changed_vs_current_state": true
+    },
+    {
+      "candidate_id": "340ac6fce98a0beab15ec49e",
+      "city": "Тернопіль",
+      "city_key": "ternopil",
+      "current_matched_episode_id": null,
+      "current_matching_outcome": null,
+      "new_matching_outcome": "unique_match",
+      "match_cardinality": "unique",
+      "matched_episode_ids": [
+        "542708c29f1a2e044db6876c"
+      ],
+      "logical_episode_groups": [
+        [
+          "542708c29f1a2e044db6876c"
+        ]
+      ],
+      "reason": "publication_within_unique_tracked_alert_window",
+      "matching_outcome_changed_vs_current_state": true
+    },
+    {
+      "candidate_id": "6f11df0c7821da2ba8b3cb93",
+      "city": "Тернопіль",
+      "city_key": "ternopil",
+      "current_matched_episode_id": null,
+      "current_matching_outcome": null,
+      "new_matching_outcome": "no_match",
+      "match_cardinality": "none",
+      "matched_episode_ids": [],
+      "logical_episode_groups": [],
+      "reason": "publication_outside_all_tracked_alert_windows",
+      "matching_outcome_changed_vs_current_state": false
+    },
+    {
+      "candidate_id": "7b7b98cc5de0c179d7503f7d",
+      "city": "Тернопіль",
+      "city_key": "ternopil",
+      "current_matched_episode_id": null,
+      "current_matching_outcome": null,
+      "new_matching_outcome": "unique_match",
+      "match_cardinality": "unique",
+      "matched_episode_ids": [
+        "542708c29f1a2e044db6876c"
+      ],
+      "logical_episode_groups": [
+        [
+          "542708c29f1a2e044db6876c"
+        ]
+      ],
+      "reason": "publication_within_unique_tracked_alert_window",
+      "matching_outcome_changed_vs_current_state": true
+    },
+    {
+      "candidate_id": "a74ae3a76febdb6894935ac3",
+      "city": "Тернопіль",
+      "city_key": "ternopil",
+      "current_matched_episode_id": null,
+      "current_matching_outcome": null,
+      "new_matching_outcome": "no_match",
+      "match_cardinality": "none",
+      "matched_episode_ids": [],
+      "logical_episode_groups": [],
+      "reason": "publication_outside_all_tracked_alert_windows",
+      "matching_outcome_changed_vs_current_state": false
+    },
+    {
+      "candidate_id": "c9a05f7ddce5ccb67ae89c94",
+      "city": "Тернопіль",
+      "city_key": "ternopil",
+      "current_matched_episode_id": null,
+      "current_matching_outcome": null,
+      "new_matching_outcome": "unique_match",
+      "match_cardinality": "unique",
+      "matched_episode_ids": [
+        "542708c29f1a2e044db6876c"
+      ],
+      "logical_episode_groups": [
+        [
+          "542708c29f1a2e044db6876c"
+        ]
+      ],
+      "reason": "publication_within_unique_tracked_alert_window",
+      "matching_outcome_changed_vs_current_state": true
+    },
+    {
+      "candidate_id": "cc64cf1fe5e06196cac9b4a3",
+      "city": "Тернопіль",
+      "city_key": "ternopil",
+      "current_matched_episode_id": null,
+      "current_matching_outcome": null,
+      "new_matching_outcome": "no_match",
+      "match_cardinality": "none",
+      "matched_episode_ids": [],
+      "logical_episode_groups": [],
+      "reason": "publication_outside_all_tracked_alert_windows",
+      "matching_outcome_changed_vs_current_state": false
+    },
+    {
+      "candidate_id": "83b7f523fd3fe940b5815e8a",
+      "city": "Вінниця",
+      "city_key": "vinnytsia",
+      "current_matched_episode_id": null,
+      "current_matching_outcome": null,
+      "new_matching_outcome": "no_match",
+      "match_cardinality": "none",
+      "matched_episode_ids": [],
+      "logical_episode_groups": [],
+      "reason": "publication_outside_all_tracked_alert_windows",
+      "matching_outcome_changed_vs_current_state": false
+    },
+    {
+      "candidate_id": "9484a7cc8dfba18f6b954e2c",
+      "city": "Вінниця",
+      "city_key": "vinnytsia",
+      "current_matched_episode_id": null,
+      "current_matching_outcome": null,
+      "new_matching_outcome": "unique_match",
+      "match_cardinality": "unique",
+      "matched_episode_ids": [
+        "a2b8d414504c8b33c861954d"
+      ],
+      "logical_episode_groups": [
+        [
+          "a2b8d414504c8b33c861954d"
+        ]
+      ],
+      "reason": "publication_within_unique_tracked_alert_window",
+      "matching_outcome_changed_vs_current_state": true
+    },
+    {
+      "candidate_id": "a93c2466ca4aa61937d41276",
+      "city": "Вінниця",
+      "city_key": "vinnytsia",
+      "current_matched_episode_id": null,
+      "current_matching_outcome": null,
+      "new_matching_outcome": "unique_match",
+      "match_cardinality": "unique",
+      "matched_episode_ids": [
+        "a2b8d414504c8b33c861954d"
+      ],
+      "logical_episode_groups": [
+        [
+          "a2b8d414504c8b33c861954d"
+        ]
+      ],
+      "reason": "publication_within_unique_tracked_alert_window",
+      "matching_outcome_changed_vs_current_state": true
+    },
+    {
+      "candidate_id": "09c74f31189f8a84d42119f5",
+      "city": "Запоріжжя",
+      "city_key": "zaporizhzhia",
+      "current_matched_episode_id": null,
+      "current_matching_outcome": null,
+      "new_matching_outcome": "unique_match",
+      "match_cardinality": "unique",
+      "matched_episode_ids": [
+        "3006c7a0b2bf8ab7127307a3"
+      ],
+      "logical_episode_groups": [
+        [
+          "3006c7a0b2bf8ab7127307a3"
+        ]
+      ],
+      "reason": "publication_within_unique_tracked_alert_window",
+      "matching_outcome_changed_vs_current_state": true
+    },
+    {
+      "candidate_id": "19e88485cb5e8bed1269fa93",
+      "city": "Запоріжжя",
+      "city_key": "zaporizhzhia",
+      "current_matched_episode_id": null,
+      "current_matching_outcome": null,
+      "new_matching_outcome": "unique_match",
+      "match_cardinality": "unique",
+      "matched_episode_ids": [
+        "7e721503b305cf045b4c607f"
+      ],
+      "logical_episode_groups": [
+        [
+          "7e721503b305cf045b4c607f"
+        ]
+      ],
+      "reason": "publication_within_unique_tracked_alert_window",
+      "matching_outcome_changed_vs_current_state": true
+    },
+    {
+      "candidate_id": "1f6155860880d64556f86099",
+      "city": "Запоріжжя",
+      "city_key": "zaporizhzhia",
+      "current_matched_episode_id": null,
+      "current_matching_outcome": null,
+      "new_matching_outcome": "unique_match",
+      "match_cardinality": "unique",
+      "matched_episode_ids": [
+        "14d97576d8c4bbceb1ce6b50"
+      ],
+      "logical_episode_groups": [
+        [
+          "14d97576d8c4bbceb1ce6b50"
+        ]
+      ],
+      "reason": "publication_within_unique_tracked_alert_window",
+      "matching_outcome_changed_vs_current_state": true
+    },
+    {
+      "candidate_id": "537fc9f91a0405b08c9845a8",
+      "city": "Запоріжжя",
+      "city_key": "zaporizhzhia",
+      "current_matched_episode_id": null,
+      "current_matching_outcome": null,
+      "new_matching_outcome": "unique_match",
+      "match_cardinality": "unique",
+      "matched_episode_ids": [
+        "a60d817eaa9253200f090720"
+      ],
+      "logical_episode_groups": [
+        [
+          "a60d817eaa9253200f090720"
+        ]
+      ],
+      "reason": "publication_within_unique_tracked_alert_window",
+      "matching_outcome_changed_vs_current_state": true
+    },
+    {
+      "candidate_id": "6b9b3e3412ceec2a77a44109",
+      "city": "Запоріжжя",
+      "city_key": "zaporizhzhia",
+      "current_matched_episode_id": null,
+      "current_matching_outcome": null,
+      "new_matching_outcome": "unique_match",
+      "match_cardinality": "unique",
+      "matched_episode_ids": [
+        "7e721503b305cf045b4c607f"
+      ],
+      "logical_episode_groups": [
+        [
+          "7e721503b305cf045b4c607f"
+        ]
+      ],
+      "reason": "publication_within_unique_tracked_alert_window",
+      "matching_outcome_changed_vs_current_state": true
+    },
+    {
+      "candidate_id": "a41f29ed8e5f21e8e518a332",
+      "city": "Запоріжжя",
+      "city_key": "zaporizhzhia",
+      "current_matched_episode_id": null,
+      "current_matching_outcome": null,
+      "new_matching_outcome": "unique_match",
+      "match_cardinality": "unique",
+      "matched_episode_ids": [
+        "2be173b7a3ca63d5821af3a1"
+      ],
+      "logical_episode_groups": [
+        [
+          "2be173b7a3ca63d5821af3a1"
+        ]
+      ],
+      "reason": "publication_within_unique_tracked_alert_window",
+      "matching_outcome_changed_vs_current_state": true
+    },
+    {
+      "candidate_id": "bbff5a268fa000bc7f8c7e05",
+      "city": "Запоріжжя",
+      "city_key": "zaporizhzhia",
+      "current_matched_episode_id": null,
+      "current_matching_outcome": null,
+      "new_matching_outcome": "unique_match",
+      "match_cardinality": "unique",
+      "matched_episode_ids": [
+        "e81fa0da53beabbc356e0da3"
+      ],
+      "logical_episode_groups": [
+        [
+          "e81fa0da53beabbc356e0da3"
+        ]
+      ],
+      "reason": "publication_within_unique_tracked_alert_window",
+      "matching_outcome_changed_vs_current_state": true
+    },
+    {
+      "candidate_id": "bfdb300d78b0e2f2d761081f",
+      "city": "Запоріжжя",
+      "city_key": "zaporizhzhia",
+      "current_matched_episode_id": null,
+      "current_matching_outcome": null,
+      "new_matching_outcome": "unique_match",
+      "match_cardinality": "unique",
+      "matched_episode_ids": [
+        "195b9bd5c0f956c1af72dc08"
+      ],
+      "logical_episode_groups": [
+        [
+          "195b9bd5c0f956c1af72dc08"
+        ]
+      ],
+      "reason": "publication_within_unique_tracked_alert_window",
+      "matching_outcome_changed_vs_current_state": true
+    },
+    {
+      "candidate_id": "c71667d47fd8bdc5f0eb01c8",
+      "city": "Запоріжжя",
+      "city_key": "zaporizhzhia",
+      "current_matched_episode_id": null,
+      "current_matching_outcome": null,
+      "new_matching_outcome": "unique_match",
+      "match_cardinality": "unique",
+      "matched_episode_ids": [
+        "d0456b4da7b9a1e6243ebdd9"
+      ],
+      "logical_episode_groups": [
+        [
+          "d0456b4da7b9a1e6243ebdd9"
+        ]
+      ],
+      "reason": "publication_within_unique_tracked_alert_window",
+      "matching_outcome_changed_vs_current_state": true
+    },
+    {
+      "candidate_id": "e1ca647575a2191e505b4c9a",
+      "city": "Запоріжжя",
+      "city_key": "zaporizhzhia",
+      "current_matched_episode_id": null,
+      "current_matching_outcome": null,
+      "new_matching_outcome": "unique_match",
+      "match_cardinality": "unique",
+      "matched_episode_ids": [
+        "87a81e330f61274786f6ee08"
+      ],
+      "logical_episode_groups": [
+        [
+          "87a81e330f61274786f6ee08"
+        ]
+      ],
+      "reason": "publication_within_unique_tracked_alert_window",
+      "matching_outcome_changed_vs_current_state": true
+    },
+    {
+      "candidate_id": "e514a21aa0498a6e91cdfc72",
+      "city": "Запоріжжя",
+      "city_key": "zaporizhzhia",
+      "current_matched_episode_id": null,
+      "current_matching_outcome": null,
+      "new_matching_outcome": "unique_match",
+      "match_cardinality": "unique",
+      "matched_episode_ids": [
+        "2be173b7a3ca63d5821af3a1"
+      ],
+      "logical_episode_groups": [
+        [
+          "2be173b7a3ca63d5821af3a1"
+        ]
+      ],
+      "reason": "publication_within_unique_tracked_alert_window",
+      "matching_outcome_changed_vs_current_state": true
+    },
+    {
+      "candidate_id": "098027544cca4ebdda0c9986",
+      "city": "Житомир",
+      "city_key": "zhytomyr",
+      "current_matched_episode_id": null,
+      "current_matching_outcome": null,
+      "new_matching_outcome": "unique_match",
+      "match_cardinality": "unique",
+      "matched_episode_ids": [
+        "73c3a44ce67b4b5d5d644046"
+      ],
+      "logical_episode_groups": [
+        [
+          "73c3a44ce67b4b5d5d644046"
+        ]
+      ],
+      "reason": "publication_within_unique_tracked_alert_window",
+      "matching_outcome_changed_vs_current_state": true
+    },
+    {
+      "candidate_id": "601fc925013243bdf89c12f0",
+      "city": "Житомир",
+      "city_key": "zhytomyr",
+      "current_matched_episode_id": null,
+      "current_matching_outcome": null,
+      "new_matching_outcome": "unique_match",
+      "match_cardinality": "unique",
+      "matched_episode_ids": [
+        "73c3a44ce67b4b5d5d644046"
+      ],
+      "logical_episode_groups": [
+        [
+          "73c3a44ce67b4b5d5d644046"
+        ]
+      ],
+      "reason": "publication_within_unique_tracked_alert_window",
+      "matching_outcome_changed_vs_current_state": true
+    }
+  ]
+}

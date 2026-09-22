@@ -123,6 +123,7 @@ EXPLICIT_DURING_TERMS = (
     "у період повітряної тривоги",
 )
 AUTO_MATCH_END_GRACE_MINUTES = 30
+MATCH_REPRESENTATION_TOLERANCE_SECONDS = 90.0
 
 
 def now_utc() -> datetime:
@@ -800,6 +801,201 @@ def checks_became_due_between(state: dict, after: datetime, through: datetime) -
     return count
 
 
+def tracked_episodes_for_city(state: dict, city_key: str) -> list[dict]:
+    cstate = (state.get("cities") or {}).get(city_key) or {}
+    by_id = {
+        str(ep.get("episode_id")): ep
+        for ep in cstate.get("episodes", [])
+        if isinstance(ep, dict) and ep.get("episode_id")
+    }
+    return sorted(
+        by_id.values(),
+        key=lambda ep: (ep.get("alert_start") or "", ep.get("alert_end") or "", ep.get("episode_id") or ""),
+    )
+
+
+def same_episode_representation(left: dict, right: dict) -> bool:
+    left_start = parse_dt(left.get("alert_start"))
+    left_end = parse_dt(left.get("alert_end"))
+    right_start = parse_dt(right.get("alert_start"))
+    right_end = parse_dt(right.get("alert_end"))
+    if not left_start or not left_end or not right_start or not right_end:
+        return False
+    start_delta = abs((left_start - right_start).total_seconds())
+    end_delta = abs((left_end - right_end).total_seconds())
+    return (
+        start_delta <= MATCH_REPRESENTATION_TOLERANCE_SECONDS
+        and end_delta <= MATCH_REPRESENTATION_TOLERANCE_SECONDS
+    )
+
+
+def episode_representation_clusters(episodes: list[dict]) -> list[list[dict]]:
+    rows = sorted(
+        {
+            str(ep.get("episode_id")): ep
+            for ep in episodes
+            if isinstance(ep, dict) and ep.get("episode_id")
+        }.values(),
+        key=lambda ep: str(ep.get("episode_id")),
+    )
+    parent = list(range(len(rows)))
+
+    def find(index: int) -> int:
+        while parent[index] != index:
+            parent[index] = parent[parent[index]]
+            index = parent[index]
+        return index
+
+    def union(left_index: int, right_index: int) -> None:
+        left_root = find(left_index)
+        right_root = find(right_index)
+        if left_root == right_root:
+            return
+        if left_root < right_root:
+            parent[right_root] = left_root
+        else:
+            parent[left_root] = right_root
+
+    for left_index, left in enumerate(rows):
+        for right_index in range(left_index + 1, len(rows)):
+            if same_episode_representation(left, rows[right_index]):
+                union(left_index, right_index)
+
+    grouped: dict[int, list[dict]] = {}
+    for index, ep in enumerate(rows):
+        grouped.setdefault(find(index), []).append(ep)
+
+    clusters = [
+        sorted(group, key=lambda ep: str(ep.get("episode_id")))
+        for group in grouped.values()
+    ]
+    return sorted(clusters, key=lambda group: str(group[0].get("episode_id")) if group else "")
+
+
+def match_candidate_to_episodes(row: dict, episodes: list[dict]) -> dict:
+    """
+    Deterministic temporal matching only.
+
+    Publication time may identify alert windows that could contain the reported event,
+    but it is not evidence of the event time and does not classify the candidate.
+    """
+    published = parse_dt(row.get("published_at"))
+    if not published:
+        return {
+            "outcome": "no_match",
+            "matched_episode_ids": [],
+            "logical_episode_groups": [],
+            "matched_episode_id": None,
+            "reason": "missing_or_invalid_publication_time",
+        }
+
+    raw_matches = {}
+    for ep in episodes:
+        episode_id = str(ep.get("episode_id") or "")
+        start = parse_dt(ep.get("alert_start"))
+        end = parse_dt(ep.get("alert_end"))
+        if not episode_id or not start or not end:
+            continue
+        if start <= published <= end + timedelta(minutes=AUTO_MATCH_END_GRACE_MINUTES):
+            raw_matches[episode_id] = ep
+
+    if not raw_matches:
+        return {
+            "outcome": "no_match",
+            "matched_episode_ids": [],
+            "logical_episode_groups": [],
+            "matched_episode_id": None,
+            "reason": "publication_outside_all_tracked_alert_windows",
+        }
+
+    matched = sorted(raw_matches.values(), key=lambda ep: str(ep.get("episode_id")))
+    clusters = episode_representation_clusters(matched)
+    matched_ids = [str(ep["episode_id"]) for ep in matched]
+    logical_groups = [
+        [str(ep["episode_id"]) for ep in cluster]
+        for cluster in clusters
+    ]
+
+    if len(clusters) == 1:
+        singleton_id = logical_groups[0][0] if len(logical_groups[0]) == 1 else None
+        return {
+            "outcome": "unique_match",
+            "matched_episode_ids": matched_ids,
+            "logical_episode_groups": logical_groups,
+            "matched_episode_id": singleton_id,
+            "reason": (
+                "publication_within_unique_tracked_alert_window"
+                if singleton_id
+                else "near_duplicate_source_representations_reconciled_to_one_tracked_alert_window"
+            ),
+        }
+
+    return {
+        "outcome": "ambiguous_match",
+        "matched_episode_ids": matched_ids,
+        "logical_episode_groups": logical_groups,
+        "matched_episode_id": None,
+        "reason": "publication_matches_multiple_distinct_tracked_alert_windows",
+    }
+
+
+def apply_matching_result(item: dict, matching: dict) -> None:
+    previous_id = item.get("matched_episode_id")
+    matched_ids = list(matching.get("matched_episode_ids") or [])
+    item["matching_outcome"] = matching.get("outcome")
+    item["matched_episode_ids"] = matched_ids
+    item["matching_logical_episode_groups"] = [
+        list(group) for group in matching.get("logical_episode_groups") or []
+    ]
+    item["matching_reason"] = matching.get("reason")
+
+    if matching.get("outcome") != "unique_match":
+        item["matched_episode_id"] = None
+        return
+
+    singleton_id = matching.get("matched_episode_id")
+    if singleton_id:
+        item["matched_episode_id"] = singleton_id
+    elif previous_id in matched_ids:
+        item["matched_episode_id"] = previous_id
+    else:
+        # Multiple source representations of one logical alert window are unique
+        # at the logical-window level, but there is no arbitrary raw-ID winner.
+        item["matched_episode_id"] = None
+
+
+def refresh_queue_matching(
+    queue: list[dict],
+    state: dict,
+    statuses: set[str] | None = None,
+) -> dict:
+    counts = {
+        "candidates_checked": 0,
+        "unique_match": 0,
+        "ambiguous_match": 0,
+        "no_match": 0,
+        "status_changes": 0,
+    }
+    for item in queue:
+        if not isinstance(item, dict):
+            continue
+        status = str(item.get("status") or "")
+        if statuses is not None and status not in statuses:
+            continue
+        city_key = str(item.get("city_key") or "")
+        if city_key not in CITY_CONFIG:
+            continue
+        before_status = item.get("status")
+        matching = match_candidate_to_episodes(item, tracked_episodes_for_city(state, city_key))
+        apply_matching_result(item, matching)
+        counts["candidates_checked"] += 1
+        counts[matching["outcome"]] += 1
+        if item.get("status") != before_status:
+            counts["status_changes"] += 1
+            raise AssertionError("Episode matching must not change candidate status")
+    return counts
+
+
 def auto_strict_episode(row: dict, due: list[tuple[dict, dict]]) -> dict | None:
     text = f"{row.get('title') or ''} {row.get('snippet') or ''}".strip()
     published = parse_dt(row.get("published_at"))
@@ -819,7 +1015,14 @@ def auto_strict_episode(row: dict, due: list[tuple[dict, dict]]) -> dict | None:
     return next(iter(matches.values())) if len(matches) == 1 else None
 
 
-def add_candidates(queue: list[dict], city_key: str, rows: list[dict], due: list[tuple[dict, dict]], now: datetime) -> tuple[int, int]:
+def add_candidates(
+    queue: list[dict],
+    city_key: str,
+    rows: list[dict],
+    due: list[tuple[dict, dict]],
+    tracked_episodes: list[dict],
+    now: datetime,
+) -> tuple[int, int]:
     by_id = {str(x.get("candidate_id")): x for x in queue if isinstance(x, dict) and x.get("candidate_id")}
     episode_ids = sorted({ep["episode_id"] for ep, _ in due})
     check_labels = sorted({check["label"] for _, check in due})
@@ -827,14 +1030,22 @@ def add_candidates(queue: list[dict], city_key: str, rows: list[dict], due: list
     auto_approved = 0
     for row in rows:
         cid = candidate_id(city_key, row["url"], row["title"])
+        matching = match_candidate_to_episodes(row, tracked_episodes)
         existing = by_id.get(cid)
         if existing:
             existing["trigger_episode_ids"] = sorted(set(existing.get("trigger_episode_ids") or []) | set(episode_ids))
             existing["trigger_check_labels"] = sorted(set(existing.get("trigger_check_labels") or []) | set(check_labels))
             existing["last_seen_at"] = iso(now)
+            if existing.get("status") == "needs_review":
+                before_status = existing.get("status")
+                apply_matching_result(existing, matching)
+                if existing.get("status") != before_status:
+                    raise AssertionError("Episode matching must not change candidate status")
             continue
 
         discovery_basis = row.get("discovery_basis")
+        # Classification remains deliberately unchanged in this hardening step:
+        # the legacy strict gate still uses only a unique immediate due window.
         auto_match = None if discovery_basis == "publisher_fulltext" else auto_strict_episode(row, due)
         status = "approved_strict" if auto_match else "needs_review"
         item = {
@@ -868,13 +1079,17 @@ def add_candidates(queue: list[dict], city_key: str, rows: list[dict], due: list
                 "All other candidates require review; publication time alone is never enough."
             ),
         }
+        apply_matching_result(item, matching)
+        if auto_match:
+            # Preserve the legacy classification episode identity; matching metadata
+            # remains separate and may still record a logical ambiguity.
+            item["matched_episode_id"] = auto_match["episode_id"]
         queue.append(item)
         by_id[cid] = item
         added += 1
         if auto_match:
             auto_approved += 1
     return added, auto_approved
-
 
 def self_test() -> None:
     assert len(CITY_CONFIG) >= 10
@@ -1017,6 +1232,7 @@ def self_test() -> None:
         "poltava",
         [{**strict_base, "url": "https://news.google.test/rss-auto", "discovery_basis": "rss_title_snippet"}],
         due,
+        [ep],
         dt,
     )
     assert rss_added == 1 and rss_auto == 1
@@ -1028,11 +1244,83 @@ def self_test() -> None:
         "poltava",
         [{**strict_base, "url": "https://news.google.test/fulltext-review", "discovery_basis": "publisher_fulltext"}],
         due,
+        [ep],
         dt,
     )
     assert fulltext_added == 1 and fulltext_auto == 0
     assert fulltext_queue[0]["status"] == "needs_review"
-    assert fulltext_queue[0]["matched_episode_id"] is None
+    assert fulltext_queue[0]["matching_outcome"] == "unique_match"
+    assert fulltext_queue[0]["matched_episode_id"] == ep["episode_id"]
+
+    # 1. A candidate discovered on a 72h follow-up still matches any tracked
+    # completed city alert; the legacy strict classifier remains immediate-only.
+    late_due = [(ep, ep["checks"][2])]
+    late_row = {
+        **strict_base,
+        "url": "https://news.google.test/late-72h",
+        "discovery_basis": "rss_title_snippet",
+    }
+    late_matching = match_candidate_to_episodes(late_row, [ep])
+    assert late_matching["outcome"] == "unique_match"
+    assert late_matching["matched_episode_id"] == ep["episode_id"]
+    assert auto_strict_episode(late_row, late_due) is None
+
+    # 2 and 6. Existing needs_review candidates rematch when a tracked episode
+    # appears later, without changing status.
+    existing_row = {
+        **strict_base,
+        "candidate_id": "existing-unmatched",
+        "city_key": "poltava",
+        "city": "Полтава",
+        "status": "needs_review",
+        "url": "https://news.google.test/existing-unmatched",
+        "trigger_episode_ids": [],
+        "trigger_check_labels": ["72h"],
+        "matched_episode_id": None,
+    }
+    existing_queue = [dict(existing_row)]
+    empty_state = {"cities": {"poltava": {"episodes": []}}}
+    empty_refresh = refresh_queue_matching(existing_queue, empty_state, {"needs_review"})
+    assert empty_refresh["no_match"] == 1
+    assert existing_queue[0]["status"] == "needs_review"
+    later_state = {"cities": {"poltava": {"episodes": [ep]}}}
+    later_refresh = refresh_queue_matching(existing_queue, later_state, {"needs_review"})
+    assert later_refresh["unique_match"] == 1
+    assert existing_queue[0]["matched_episode_id"] == ep["episode_id"]
+    assert existing_queue[0]["status"] == "needs_review"
+
+    # 3. Two genuinely distinct overlapping alert windows stay ambiguous.
+    overlap_a = make_episode("poltava", dt, dt + timedelta(hours=1))
+    overlap_b = make_episode(
+        "poltava",
+        dt + timedelta(minutes=20),
+        dt + timedelta(hours=1, minutes=20),
+    )
+    overlap_row = {"published_at": iso(dt + timedelta(minutes=30))}
+    overlap_matching = match_candidate_to_episodes(overlap_row, [overlap_a, overlap_b])
+    assert overlap_matching["outcome"] == "ambiguous_match"
+    assert len(overlap_matching["logical_episode_groups"]) == 2
+
+    # 4. Very close boundary revisions are treated as two representations of
+    # one alert window, without selecting an arbitrary raw episode ID.
+    near_a = make_episode("poltava", dt, dt + timedelta(hours=1))
+    near_b = make_episode(
+        "poltava",
+        dt + timedelta(seconds=35),
+        dt + timedelta(hours=1, seconds=50),
+    )
+    near_matching = match_candidate_to_episodes(overlap_row, [near_a, near_b])
+    assert near_matching["outcome"] == "unique_match"
+    assert len(near_matching["matched_episode_ids"]) == 2
+    assert len(near_matching["logical_episode_groups"]) == 1
+    assert near_matching["matched_episode_id"] is None
+
+    # 5. Publication outside all tracked windows is a deterministic no-match.
+    outside_matching = match_candidate_to_episodes(
+        {"published_at": iso(dt + timedelta(hours=3))},
+        [ep],
+    )
+    assert outside_matching["outcome"] == "no_match"
 
     if "kyiv" in CITY_CONFIG:
         kyiv_rows = load_kyiv_alert_episodes(KYIV_ALERTS_FILE)
@@ -1043,7 +1331,8 @@ def self_test() -> None:
     assert len(CITY_CONFIG) >= 10
     print(
         f"Self-test OK: {len(CITY_CONFIG)} audited cities, exact-city filter, explosion filter, "
-        "full-text fallback, discovery-only guard, follow-up schedule, snapshot cutoff timing edge"
+        "full-text fallback, discovery-only guard, all-tracked episode matching, near-duplicate reconciliation, "
+        "real-overlap ambiguity, status preservation, follow-up schedule, snapshot cutoff timing edge"
     )
 
 
@@ -1081,6 +1370,7 @@ def main() -> None:
         )
         mode = "network"
     new_episodes = process_events(state, polled, errors, started)
+    matching_refresh = refresh_queue_matching(queue, state, {"needs_review"})
     telegram_errors = refresh_telegram_cache(state, started)
     errors.update({f"telegram:{key}": value for key, value in telegram_errors.items()})
     due = due_checks(state, followup_cutoff)
@@ -1104,7 +1394,14 @@ def main() -> None:
 
         dedup = {(row["url"], row["title"]): row for row in rows}
         rows = list(dedup.values())
-        added, auto_approved = add_candidates(queue, city_key, rows, city_due, started)
+        added, auto_approved = add_candidates(
+            queue,
+            city_key,
+            rows,
+            city_due,
+            tracked_episodes_for_city(state, city_key),
+            started,
+        )
         new_candidates += added
         fulltext_fetches += int(google_stats.get("fulltext_fetches") or 0)
         fulltext_rescued_candidates += int(google_stats.get("fulltext_rescued_candidates") or 0)
@@ -1150,6 +1447,7 @@ def main() -> None:
         "searches": searches,
         "new_review_candidates": new_candidates,
         "review_queue_size": len(queue),
+        "matching_refresh": matching_refresh,
         "fulltext_fetches": fulltext_fetches,
         "fulltext_rescued_candidates": fulltext_rescued_candidates,
         "telegram": {
