@@ -1,0 +1,3434 @@
+{
+  "schema_version": 1,
+  "task": "explosion_monitor_live_replay_plan",
+  "generated_date": "2026-09-22",
+  "repository": "olegbalakin-cmyk/kyiv-air-alerts-grafana",
+  "branch": "multicity-wip-2026-09-16",
+  "gate": {
+    "dry_replay_artifact": "research/explosion_monitor_classification_hardening_replay_2026-09-22.json",
+    "dry_replay_artifact_blob_sha": "242e1fbfef24f3e8c255b286a4a4e8d92bff0025",
+    "dry_replay_source_commit": "68f969347dcd15f3b25243b0209f6d318ac89c99",
+    "dry_replay_verdict": "READY FOR CONTROLLED LIVE QUEUE REPLAY",
+    "gate_passed": true
+  },
+  "stage_reconciliation": {
+    "intended_stage": "pre_live_queue_replay",
+    "observed_stage": "post_controlled_replay_with_approved_match_preservation",
+    "dry_replay_input_queue_blob_sha": "4d53f887693a5099b9eb70a5619dd3e2192afd8b",
+    "current_queue_blob_sha": "8cd6a15b388593b0d338ab04d38f7f860cbb70b8",
+    "queue_matches_dry_replay_input": false,
+    "controlled_replay_commit": "e70a96de44919548a0d80850e8167e580e3c36d7",
+    "approved_match_preservation_commit": "4a86ab3e644c6d7085d3f8d401a8391663f4a455",
+    "current_head_before_this_artifact_commit": "6911f6323709c431b3621742b408f47a3c11f440",
+    "explanation": "The dry replay was READY, but the branch already contains the controlled live queue replay and a follow-up commit restoring manually reviewed approved episode bindings. Therefore the current needs_review set is the 122 cases that the dry replay intentionally left unresolved. Re-applying the historical 53 status transitions is neither necessary nor authorized by this current-state plan.",
+    "previously_applied_transition_count": 53,
+    "previously_applied_transitions": [
+      {
+        "candidate_id": "76743c6d9be4071874e32016",
+        "city": "cherkasy",
+        "from": "needs_review",
+        "to": "approved_sensitivity",
+        "proposed_matched_episode_id": "f139e46d882418e9f6b1ec95"
+      },
+      {
+        "candidate_id": "b5a20a069124c2ed6c65d7f5",
+        "city": "chernihiv",
+        "from": "needs_review",
+        "to": "approved_sensitivity",
+        "proposed_matched_episode_id": "3eb231ef04b1b76b44f089dc"
+      },
+      {
+        "candidate_id": "1a46424e12981a83b54a251e",
+        "city": "dnipro",
+        "from": "needs_review",
+        "to": "approved_sensitivity",
+        "proposed_matched_episode_id": "73ff94382ce8d8c9f55c4f37"
+      },
+      {
+        "candidate_id": "37f9c1295655f2a1a406acf8",
+        "city": "dnipro",
+        "from": "needs_review",
+        "to": "approved_sensitivity",
+        "proposed_matched_episode_id": "495d4a8556e63a79af175cc4"
+      },
+      {
+        "candidate_id": "48bdec0e326e64c583d31861",
+        "city": "dnipro",
+        "from": "needs_review",
+        "to": "approved_sensitivity",
+        "proposed_matched_episode_id": "73ff94382ce8d8c9f55c4f37"
+      },
+      {
+        "candidate_id": "621079aafd7bef7a641fdbdc",
+        "city": "dnipro",
+        "from": "needs_review",
+        "to": "approved_sensitivity",
+        "proposed_matched_episode_id": "4d57aae61fae551789986b54"
+      },
+      {
+        "candidate_id": "a06e12f4cfed9b43eafe2d58",
+        "city": "dnipro",
+        "from": "needs_review",
+        "to": "approved_sensitivity",
+        "proposed_matched_episode_id": "c894e85e407dc4256d8c4419"
+      },
+      {
+        "candidate_id": "aa19972aee883cf12af75d20",
+        "city": "dnipro",
+        "from": "needs_review",
+        "to": "approved_sensitivity",
+        "proposed_matched_episode_id": "c894e85e407dc4256d8c4419"
+      },
+      {
+        "candidate_id": "cd9484aa523d512f8167a1ed",
+        "city": "dnipro",
+        "from": "needs_review",
+        "to": "approved_sensitivity",
+        "proposed_matched_episode_id": "66cc8b71849bfdad7ffc66cb"
+      },
+      {
+        "candidate_id": "dc4cd44164de1019918413db",
+        "city": "dnipro",
+        "from": "needs_review",
+        "to": "approved_sensitivity",
+        "proposed_matched_episode_id": "495d4a8556e63a79af175cc4"
+      },
+      {
+        "candidate_id": "eeee7926046f2e69e5673992",
+        "city": "dnipro",
+        "from": "needs_review",
+        "to": "approved_sensitivity",
+        "proposed_matched_episode_id": "d25d54527a505716cd269578"
+      },
+      {
+        "candidate_id": "c0432cb39613e91bee28f154",
+        "city": "kharkiv",
+        "from": "needs_review",
+        "to": "approved_sensitivity",
+        "proposed_matched_episode_id": "caa0b841984bbcebf07c2bf6"
+      },
+      {
+        "candidate_id": "07aa5a5a4ba88f890fa03785",
+        "city": "kropyvnytskyi",
+        "from": "needs_review",
+        "to": "approved_sensitivity",
+        "proposed_matched_episode_id": "6957d2e712b184df443460a0"
+      },
+      {
+        "candidate_id": "2b380f42ad7d780d36ac82f7",
+        "city": "kropyvnytskyi",
+        "from": "needs_review",
+        "to": "approved_sensitivity",
+        "proposed_matched_episode_id": "6957d2e712b184df443460a0"
+      },
+      {
+        "candidate_id": "4b85ff529264d54103733c2f",
+        "city": "kropyvnytskyi",
+        "from": "needs_review",
+        "to": "approved_sensitivity",
+        "proposed_matched_episode_id": "6957d2e712b184df443460a0"
+      },
+      {
+        "candidate_id": "8e039640e74ac1487548b72c",
+        "city": "kropyvnytskyi",
+        "from": "needs_review",
+        "to": "approved_sensitivity",
+        "proposed_matched_episode_id": "c2ad120e98bd7f8e321103f0"
+      },
+      {
+        "candidate_id": "a4e2a3f436209643e31f6ade",
+        "city": "kropyvnytskyi",
+        "from": "needs_review",
+        "to": "approved_sensitivity",
+        "proposed_matched_episode_id": "c2ad120e98bd7f8e321103f0"
+      },
+      {
+        "candidate_id": "bd6895932f296adc21a71406",
+        "city": "kropyvnytskyi",
+        "from": "needs_review",
+        "to": "approved_sensitivity",
+        "proposed_matched_episode_id": "c2ad120e98bd7f8e321103f0"
+      },
+      {
+        "candidate_id": "3567c9c47f76042ff8af230c",
+        "city": "kyiv",
+        "from": "needs_review",
+        "to": "rejected",
+        "proposed_matched_episode_id": null
+      },
+      {
+        "candidate_id": "37aa1b96565ec766d2998631",
+        "city": "kyiv",
+        "from": "needs_review",
+        "to": "approved_sensitivity",
+        "proposed_matched_episode_id": "baf3eaa558f606c14d6e385f"
+      },
+      {
+        "candidate_id": "3e873213239a5b34f3e64ec8",
+        "city": "kyiv",
+        "from": "needs_review",
+        "to": "approved_sensitivity",
+        "proposed_matched_episode_id": "be91665768f663f704f73958"
+      },
+      {
+        "candidate_id": "450222e889b334b2bb3e59a5",
+        "city": "kyiv",
+        "from": "needs_review",
+        "to": "approved_sensitivity",
+        "proposed_matched_episode_id": "5e07434a2569f1a789907611"
+      },
+      {
+        "candidate_id": "5a2bb37aae44d618e1b9d478",
+        "city": "kyiv",
+        "from": "needs_review",
+        "to": "approved_sensitivity",
+        "proposed_matched_episode_id": "baf3eaa558f606c14d6e385f"
+      },
+      {
+        "candidate_id": "6d4cd0b8e278b96a345bcccd",
+        "city": "kyiv",
+        "from": "needs_review",
+        "to": "approved_sensitivity",
+        "proposed_matched_episode_id": "be91665768f663f704f73958"
+      },
+      {
+        "candidate_id": "969151182b4d4498df132a53",
+        "city": "kyiv",
+        "from": "needs_review",
+        "to": "approved_sensitivity",
+        "proposed_matched_episode_id": "be91665768f663f704f73958"
+      },
+      {
+        "candidate_id": "c0140340f7c5a90ee20dce78",
+        "city": "kyiv",
+        "from": "needs_review",
+        "to": "rejected",
+        "proposed_matched_episode_id": "be91665768f663f704f73958"
+      },
+      {
+        "candidate_id": "d122c212e6e36548ee84ec15",
+        "city": "kyiv",
+        "from": "needs_review",
+        "to": "approved_sensitivity",
+        "proposed_matched_episode_id": "be91665768f663f704f73958"
+      },
+      {
+        "candidate_id": "d4fb0e081e5be3bd609f0633",
+        "city": "kyiv",
+        "from": "needs_review",
+        "to": "approved_strict",
+        "proposed_matched_episode_id": "baf3eaa558f606c14d6e385f"
+      },
+      {
+        "candidate_id": "ea9314b362e6a296bcd50c84",
+        "city": "kyiv",
+        "from": "needs_review",
+        "to": "approved_sensitivity",
+        "proposed_matched_episode_id": "da90f993ab369a680b3bb7c4"
+      },
+      {
+        "candidate_id": "0e39040303d4b31a603e2017",
+        "city": "mykolaiv",
+        "from": "needs_review",
+        "to": "approved_sensitivity",
+        "proposed_matched_episode_id": "cde43bafd9c9a45bf7b31f56"
+      },
+      {
+        "candidate_id": "1923b7a627ac1b048dc3b49a",
+        "city": "mykolaiv",
+        "from": "needs_review",
+        "to": "approved_sensitivity",
+        "proposed_matched_episode_id": "324271ec2c163e98e7e9c617"
+      },
+      {
+        "candidate_id": "4b8fb9008f6202ff6639678f",
+        "city": "mykolaiv",
+        "from": "needs_review",
+        "to": "approved_sensitivity",
+        "proposed_matched_episode_id": "324271ec2c163e98e7e9c617"
+      },
+      {
+        "candidate_id": "4d0041fd2c915b268f85ba24",
+        "city": "mykolaiv",
+        "from": "needs_review",
+        "to": "approved_sensitivity",
+        "proposed_matched_episode_id": "cde43bafd9c9a45bf7b31f56"
+      },
+      {
+        "candidate_id": "84bd68c869990fb70375c254",
+        "city": "mykolaiv",
+        "from": "needs_review",
+        "to": "approved_sensitivity",
+        "proposed_matched_episode_id": "cde43bafd9c9a45bf7b31f56"
+      },
+      {
+        "candidate_id": "d5cb94fd437118055d979519",
+        "city": "mykolaiv",
+        "from": "needs_review",
+        "to": "approved_sensitivity",
+        "proposed_matched_episode_id": "cde43bafd9c9a45bf7b31f56"
+      },
+      {
+        "candidate_id": "da6ff392a3e504a09e786aec",
+        "city": "mykolaiv",
+        "from": "needs_review",
+        "to": "approved_sensitivity",
+        "proposed_matched_episode_id": "cc5164f1cfda1ac283137ed3"
+      },
+      {
+        "candidate_id": "5a61d62cac76456eb62cb386",
+        "city": "odesa",
+        "from": "needs_review",
+        "to": "approved_strict",
+        "proposed_matched_episode_id": "7a7da068c0efb7be80bd45e4"
+      },
+      {
+        "candidate_id": "63e4a0c4265cd7c9bac6f485",
+        "city": "odesa",
+        "from": "needs_review",
+        "to": "approved_strict",
+        "proposed_matched_episode_id": "eb2580c2bec54ddc2e36eaf7"
+      },
+      {
+        "candidate_id": "da37fd7a3b6c42dbff41d115",
+        "city": "odesa",
+        "from": "needs_review",
+        "to": "approved_strict",
+        "proposed_matched_episode_id": "7a7da068c0efb7be80bd45e4"
+      },
+      {
+        "candidate_id": "ebb7156d3ea8be29c8f4b67b",
+        "city": "odesa",
+        "from": "needs_review",
+        "to": "approved_sensitivity",
+        "proposed_matched_episode_id": "31384cef6eb1ad2f9742b233"
+      },
+      {
+        "candidate_id": "f8410c2df817637bad98c18f",
+        "city": "odesa",
+        "from": "needs_review",
+        "to": "approved_sensitivity",
+        "proposed_matched_episode_id": "eb2580c2bec54ddc2e36eaf7"
+      },
+      {
+        "candidate_id": "06a79fb024dc57c5b247d040",
+        "city": "poltava",
+        "from": "needs_review",
+        "to": "approved_sensitivity",
+        "proposed_matched_episode_id": "60f6aac885e538d93d88e053"
+      },
+      {
+        "candidate_id": "61d7078525ab5699721e759f",
+        "city": "sumy",
+        "from": "needs_review",
+        "to": "approved_sensitivity",
+        "proposed_matched_episode_id": "c7bbcc4ab25fe3eeeb2fa6d4"
+      },
+      {
+        "candidate_id": "c014f6cf5d5bd516df6db11f",
+        "city": "sumy",
+        "from": "needs_review",
+        "to": "approved_sensitivity",
+        "proposed_matched_episode_id": "a02cb7c70056fd3ec19eff4c"
+      },
+      {
+        "candidate_id": "f4592422463c309484994f6f",
+        "city": "sumy",
+        "from": "needs_review",
+        "to": "approved_sensitivity",
+        "proposed_matched_episode_id": "c7bbcc4ab25fe3eeeb2fa6d4"
+      },
+      {
+        "candidate_id": "7b7b98cc5de0c179d7503f7d",
+        "city": "ternopil",
+        "from": "needs_review",
+        "to": "approved_sensitivity",
+        "proposed_matched_episode_id": "542708c29f1a2e044db6876c"
+      },
+      {
+        "candidate_id": "83b7f523fd3fe940b5815e8a",
+        "city": "vinnytsia",
+        "from": "needs_review",
+        "to": "rejected",
+        "proposed_matched_episode_id": null
+      },
+      {
+        "candidate_id": "9484a7cc8dfba18f6b954e2c",
+        "city": "vinnytsia",
+        "from": "needs_review",
+        "to": "approved_sensitivity",
+        "proposed_matched_episode_id": "a2b8d414504c8b33c861954d"
+      },
+      {
+        "candidate_id": "09c74f31189f8a84d42119f5",
+        "city": "zaporizhzhia",
+        "from": "needs_review",
+        "to": "rejected",
+        "proposed_matched_episode_id": "3006c7a0b2bf8ab7127307a3"
+      },
+      {
+        "candidate_id": "3dc5ac55454bf2012b6a6b61",
+        "city": "zaporizhzhia",
+        "from": "needs_review",
+        "to": "rejected",
+        "proposed_matched_episode_id": "3006c7a0b2bf8ab7127307a3"
+      },
+      {
+        "candidate_id": "bbff5a268fa000bc7f8c7e05",
+        "city": "zaporizhzhia",
+        "from": "needs_review",
+        "to": "approved_sensitivity",
+        "proposed_matched_episode_id": "e81fa0da53beabbc356e0da3"
+      },
+      {
+        "candidate_id": "098027544cca4ebdda0c9986",
+        "city": "zhytomyr",
+        "from": "needs_review",
+        "to": "approved_sensitivity",
+        "proposed_matched_episode_id": "73c3a44ce67b4b5d5d644046"
+      },
+      {
+        "candidate_id": "601fc925013243bdf89c12f0",
+        "city": "zhytomyr",
+        "from": "needs_review",
+        "to": "approved_sensitivity",
+        "proposed_matched_episode_id": "73c3a44ce67b4b5d5d644046"
+      }
+    ]
+  },
+  "pre_replay_snapshot": {
+    "branch_head": "6911f6323709c431b3621742b408f47a3c11f440",
+    "queue": {
+      "path": "kyiv-air-alerts-grafana/data/explosion_review_queue.json",
+      "blob_sha": "8cd6a15b388593b0d338ab04d38f7f860cbb70b8",
+      "total": 249
+    },
+    "monitor_state": {
+      "path": "kyiv-air-alerts-grafana/data/explosion_candidate_monitor_state.json",
+      "blob_sha": "a70aabad8440da5c39ff04bddca7c48ad0051249",
+      "tracked_city_count": 23
+    },
+    "monitor": {
+      "path": "kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py",
+      "blob_sha": "9fda203b9482a8facd318bcd09da7d3524983159"
+    },
+    "status_counts": {
+      "approved_strict": 46,
+      "approved_sensitivity": 59,
+      "needs_review": 122,
+      "rejected": 22
+    },
+    "counts_by_city": {
+      "cherkasy": {
+        "total": 3,
+        "approved_strict": 0,
+        "approved_sensitivity": 1,
+        "needs_review": 2,
+        "rejected": 0,
+        "matched": 3,
+        "unmatched": 0
+      },
+      "chernihiv": {
+        "total": 6,
+        "approved_strict": 0,
+        "approved_sensitivity": 1,
+        "needs_review": 5,
+        "rejected": 0,
+        "matched": 5,
+        "unmatched": 1
+      },
+      "chernivtsi": {
+        "total": 0,
+        "approved_strict": 0,
+        "approved_sensitivity": 0,
+        "needs_review": 0,
+        "rejected": 0,
+        "matched": 0,
+        "unmatched": 0
+      },
+      "dnipro": {
+        "total": 50,
+        "approved_strict": 5,
+        "approved_sensitivity": 17,
+        "needs_review": 26,
+        "rejected": 2,
+        "matched": 33,
+        "unmatched": 17
+      },
+      "ivano_frankivsk": {
+        "total": 0,
+        "approved_strict": 0,
+        "approved_sensitivity": 0,
+        "needs_review": 0,
+        "rejected": 0,
+        "matched": 0,
+        "unmatched": 0
+      },
+      "kharkiv": {
+        "total": 2,
+        "approved_strict": 0,
+        "approved_sensitivity": 1,
+        "needs_review": 1,
+        "rejected": 0,
+        "matched": 1,
+        "unmatched": 1
+      },
+      "kherson": {
+        "total": 0,
+        "approved_strict": 0,
+        "approved_sensitivity": 0,
+        "needs_review": 0,
+        "rejected": 0,
+        "matched": 0,
+        "unmatched": 0
+      },
+      "khmelnytskyi": {
+        "total": 0,
+        "approved_strict": 0,
+        "approved_sensitivity": 0,
+        "needs_review": 0,
+        "rejected": 0,
+        "matched": 0,
+        "unmatched": 0
+      },
+      "kropyvnytskyi": {
+        "total": 24,
+        "approved_strict": 10,
+        "approved_sensitivity": 6,
+        "needs_review": 8,
+        "rejected": 0,
+        "matched": 22,
+        "unmatched": 2
+      },
+      "kyiv": {
+        "total": 66,
+        "approved_strict": 12,
+        "approved_sensitivity": 11,
+        "needs_review": 41,
+        "rejected": 2,
+        "matched": 32,
+        "unmatched": 34
+      },
+      "lutsk": {
+        "total": 0,
+        "approved_strict": 0,
+        "approved_sensitivity": 0,
+        "needs_review": 0,
+        "rejected": 0,
+        "matched": 0,
+        "unmatched": 0
+      },
+      "lviv": {
+        "total": 0,
+        "approved_strict": 0,
+        "approved_sensitivity": 0,
+        "needs_review": 0,
+        "rejected": 0,
+        "matched": 0,
+        "unmatched": 0
+      },
+      "mykolaiv": {
+        "total": 16,
+        "approved_strict": 0,
+        "approved_sensitivity": 7,
+        "needs_review": 8,
+        "rejected": 1,
+        "matched": 11,
+        "unmatched": 5
+      },
+      "odesa": {
+        "total": 20,
+        "approved_strict": 12,
+        "approved_sensitivity": 4,
+        "needs_review": 4,
+        "rejected": 0,
+        "matched": 19,
+        "unmatched": 1
+      },
+      "poltava": {
+        "total": 8,
+        "approved_strict": 0,
+        "approved_sensitivity": 1,
+        "needs_review": 7,
+        "rejected": 0,
+        "matched": 6,
+        "unmatched": 2
+      },
+      "rivne": {
+        "total": 9,
+        "approved_strict": 0,
+        "approved_sensitivity": 0,
+        "needs_review": 1,
+        "rejected": 8,
+        "matched": 2,
+        "unmatched": 7
+      },
+      "sevastopol": {
+        "total": 4,
+        "approved_strict": 1,
+        "approved_sensitivity": 2,
+        "needs_review": 1,
+        "rejected": 0,
+        "matched": 3,
+        "unmatched": 1
+      },
+      "sumy": {
+        "total": 13,
+        "approved_strict": 4,
+        "approved_sensitivity": 3,
+        "needs_review": 1,
+        "rejected": 5,
+        "matched": 10,
+        "unmatched": 3
+      },
+      "ternopil": {
+        "total": 6,
+        "approved_strict": 0,
+        "approved_sensitivity": 1,
+        "needs_review": 5,
+        "rejected": 0,
+        "matched": 3,
+        "unmatched": 3
+      },
+      "uzhhorod": {
+        "total": 0,
+        "approved_strict": 0,
+        "approved_sensitivity": 0,
+        "needs_review": 0,
+        "rejected": 0,
+        "matched": 0,
+        "unmatched": 0
+      },
+      "vinnytsia": {
+        "total": 3,
+        "approved_strict": 0,
+        "approved_sensitivity": 1,
+        "needs_review": 1,
+        "rejected": 1,
+        "matched": 2,
+        "unmatched": 1
+      },
+      "zaporizhzhia": {
+        "total": 16,
+        "approved_strict": 2,
+        "approved_sensitivity": 1,
+        "needs_review": 10,
+        "rejected": 3,
+        "matched": 16,
+        "unmatched": 0
+      },
+      "zhytomyr": {
+        "total": 3,
+        "approved_strict": 0,
+        "approved_sensitivity": 2,
+        "needs_review": 1,
+        "rejected": 0,
+        "matched": 2,
+        "unmatched": 1
+      }
+    },
+    "matched_unmatched": {
+      "matched": 170,
+      "unmatched": 79
+    }
+  },
+  "transition_plan": [
+    {
+      "candidate_id": "abbc6c0eee7a23bbf08cbb1d",
+      "city": "cherkasy",
+      "old_status": "needs_review",
+      "proposed_status": "needs_review",
+      "proposed_matched_episode_id": "d60423dfe272d2cebc28c4cf",
+      "matching_outcome": "unique_match",
+      "matching_reason": "publication_within_unique_tracked_alert_window",
+      "matched_episode_ids": [
+        "d60423dfe272d2cebc28c4cf"
+      ],
+      "reason_codes": [
+        "MATCH_UNIQUE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "NO_AIR_MILITARY_CONTEXT",
+        "NO_STRICT_TEMPORAL_BINDING"
+      ]
+    },
+    {
+      "candidate_id": "c97967dd88787b316d2d4837",
+      "city": "cherkasy",
+      "old_status": "needs_review",
+      "proposed_status": "needs_review",
+      "proposed_matched_episode_id": "d60423dfe272d2cebc28c4cf",
+      "matching_outcome": "unique_match",
+      "matching_reason": "publication_within_unique_tracked_alert_window",
+      "matched_episode_ids": [
+        "d60423dfe272d2cebc28c4cf"
+      ],
+      "reason_codes": [
+        "MATCH_UNIQUE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "NO_AIR_MILITARY_CONTEXT",
+        "NO_STRICT_TEMPORAL_BINDING"
+      ]
+    },
+    {
+      "candidate_id": "2495b9421d2d8b889d11239f",
+      "city": "chernihiv",
+      "old_status": "needs_review",
+      "proposed_status": "needs_review",
+      "proposed_matched_episode_id": "7c1c9d2e5dbc8c4d775354e9",
+      "matching_outcome": "unique_match",
+      "matching_reason": "publication_within_unique_tracked_alert_window",
+      "matched_episode_ids": [
+        "7c1c9d2e5dbc8c4d775354e9"
+      ],
+      "reason_codes": [
+        "MATCH_UNIQUE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "NO_AIR_MILITARY_CONTEXT",
+        "NO_STRICT_TEMPORAL_BINDING"
+      ]
+    },
+    {
+      "candidate_id": "39d39aea6ed0d9afe6a31ea6",
+      "city": "chernihiv",
+      "old_status": "needs_review",
+      "proposed_status": "needs_review",
+      "proposed_matched_episode_id": "7c1c9d2e5dbc8c4d775354e9",
+      "matching_outcome": "unique_match",
+      "matching_reason": "publication_within_unique_tracked_alert_window",
+      "matched_episode_ids": [
+        "7c1c9d2e5dbc8c4d775354e9"
+      ],
+      "reason_codes": [
+        "MATCH_UNIQUE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "NO_AIR_MILITARY_CONTEXT",
+        "NO_STRICT_TEMPORAL_BINDING"
+      ]
+    },
+    {
+      "candidate_id": "5d76ceafc7040c9569b23775",
+      "city": "chernihiv",
+      "old_status": "needs_review",
+      "proposed_status": "needs_review",
+      "proposed_matched_episode_id": "7c1c9d2e5dbc8c4d775354e9",
+      "matching_outcome": "unique_match",
+      "matching_reason": "publication_within_unique_tracked_alert_window",
+      "matched_episode_ids": [
+        "7c1c9d2e5dbc8c4d775354e9"
+      ],
+      "reason_codes": [
+        "MATCH_UNIQUE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "NO_AIR_MILITARY_CONTEXT",
+        "NO_STRICT_TEMPORAL_BINDING"
+      ]
+    },
+    {
+      "candidate_id": "6ff14a08237888fd9448e75d",
+      "city": "chernihiv",
+      "old_status": "needs_review",
+      "proposed_status": "needs_review",
+      "proposed_matched_episode_id": null,
+      "matching_outcome": "no_match",
+      "matching_reason": "publication_outside_all_tracked_alert_windows",
+      "matched_episode_ids": [],
+      "reason_codes": [
+        "MATCH_NONE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "AIR_MILITARY_CONTEXT",
+        "SAME_ATTACK_CONTEXT_SUPPORTED",
+        "NO_STRICT_TEMPORAL_BINDING"
+      ]
+    },
+    {
+      "candidate_id": "ad338b06ca91bf4013684015",
+      "city": "chernihiv",
+      "old_status": "needs_review",
+      "proposed_status": "needs_review",
+      "proposed_matched_episode_id": "84c7edd8ea27a20a7a855ae1",
+      "matching_outcome": "unique_match",
+      "matching_reason": "publication_within_unique_tracked_alert_window",
+      "matched_episode_ids": [
+        "84c7edd8ea27a20a7a855ae1"
+      ],
+      "reason_codes": [
+        "MATCH_UNIQUE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "NO_AIR_MILITARY_CONTEXT",
+        "NO_STRICT_TEMPORAL_BINDING"
+      ]
+    },
+    {
+      "candidate_id": "2cf7e0b5d5441c9e4e08db89",
+      "city": "dnipro",
+      "old_status": "needs_review",
+      "proposed_status": "needs_review",
+      "proposed_matched_episode_id": "4d57aae61fae551789986b54",
+      "matching_outcome": "unique_match",
+      "matching_reason": "publication_within_unique_tracked_alert_window",
+      "matched_episode_ids": [
+        "4d57aae61fae551789986b54"
+      ],
+      "reason_codes": [
+        "MATCH_UNIQUE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "NO_AIR_MILITARY_CONTEXT",
+        "NO_STRICT_TEMPORAL_BINDING"
+      ]
+    },
+    {
+      "candidate_id": "30b5f6cd9020593133bb39bf",
+      "city": "dnipro",
+      "old_status": "needs_review",
+      "proposed_status": "needs_review",
+      "proposed_matched_episode_id": "fc97efc77c89d9d77345713d",
+      "matching_outcome": "unique_match",
+      "matching_reason": "publication_within_unique_tracked_alert_window",
+      "matched_episode_ids": [
+        "fc97efc77c89d9d77345713d"
+      ],
+      "reason_codes": [
+        "MATCH_UNIQUE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "NO_AIR_MILITARY_CONTEXT",
+        "NO_STRICT_TEMPORAL_BINDING"
+      ]
+    },
+    {
+      "candidate_id": "313927de03b7cd2c0689c87d",
+      "city": "dnipro",
+      "old_status": "needs_review",
+      "proposed_status": "needs_review",
+      "proposed_matched_episode_id": null,
+      "matching_outcome": "no_match",
+      "matching_reason": "publication_outside_all_tracked_alert_windows",
+      "matched_episode_ids": [],
+      "reason_codes": [
+        "MATCH_NONE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "NO_AIR_MILITARY_CONTEXT",
+        "NO_STRICT_TEMPORAL_BINDING"
+      ]
+    },
+    {
+      "candidate_id": "358ac9edecd02833634e4342",
+      "city": "dnipro",
+      "old_status": "needs_review",
+      "proposed_status": "needs_review",
+      "proposed_matched_episode_id": null,
+      "matching_outcome": "no_match",
+      "matching_reason": "publication_outside_all_tracked_alert_windows",
+      "matched_episode_ids": [],
+      "reason_codes": [
+        "MATCH_NONE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "AIR_MILITARY_CONTEXT",
+        "SAME_ATTACK_CONTEXT_SUPPORTED",
+        "NO_STRICT_TEMPORAL_BINDING"
+      ]
+    },
+    {
+      "candidate_id": "3f2137adc72e1202240133f7",
+      "city": "dnipro",
+      "old_status": "needs_review",
+      "proposed_status": "needs_review",
+      "proposed_matched_episode_id": "c894e85e407dc4256d8c4419",
+      "matching_outcome": "unique_match",
+      "matching_reason": "publication_within_unique_tracked_alert_window",
+      "matched_episode_ids": [
+        "c894e85e407dc4256d8c4419"
+      ],
+      "reason_codes": [
+        "MATCH_UNIQUE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "NO_AIR_MILITARY_CONTEXT",
+        "TEMPORAL_CONTEMPORANEOUS_LIVE_WORDING"
+      ]
+    },
+    {
+      "candidate_id": "45ebbe2d8e117a2da96e91f0",
+      "city": "dnipro",
+      "old_status": "needs_review",
+      "proposed_status": "needs_review",
+      "proposed_matched_episode_id": "6a2c082d4fb889bc58a757a8",
+      "matching_outcome": "unique_match",
+      "matching_reason": "publication_within_unique_tracked_alert_window",
+      "matched_episode_ids": [
+        "6a2c082d4fb889bc58a757a8"
+      ],
+      "reason_codes": [
+        "MATCH_UNIQUE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "NO_AIR_MILITARY_CONTEXT",
+        "NO_STRICT_TEMPORAL_BINDING"
+      ]
+    },
+    {
+      "candidate_id": "5092df762f9af44e27b021c5",
+      "city": "dnipro",
+      "old_status": "needs_review",
+      "proposed_status": "needs_review",
+      "proposed_matched_episode_id": "cb90d68581fa8f39e9c160c2",
+      "matching_outcome": "unique_match",
+      "matching_reason": "publication_within_unique_tracked_alert_window",
+      "matched_episode_ids": [
+        "cb90d68581fa8f39e9c160c2"
+      ],
+      "reason_codes": [
+        "MATCH_UNIQUE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "NO_AIR_MILITARY_CONTEXT",
+        "NO_STRICT_TEMPORAL_BINDING"
+      ]
+    },
+    {
+      "candidate_id": "68639333ef3866074f8ed53c",
+      "city": "dnipro",
+      "old_status": "needs_review",
+      "proposed_status": "needs_review",
+      "proposed_matched_episode_id": null,
+      "matching_outcome": "no_match",
+      "matching_reason": "publication_outside_all_tracked_alert_windows",
+      "matched_episode_ids": [],
+      "reason_codes": [
+        "MATCH_NONE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "AIR_MILITARY_CONTEXT",
+        "SAME_ATTACK_CONTEXT_SUPPORTED",
+        "NO_STRICT_TEMPORAL_BINDING"
+      ]
+    },
+    {
+      "candidate_id": "6f07e932e0676a0de514a8ad",
+      "city": "dnipro",
+      "old_status": "needs_review",
+      "proposed_status": "needs_review",
+      "proposed_matched_episode_id": null,
+      "matching_outcome": "unique_match",
+      "matching_reason": "near_duplicate_source_representations_reconciled_to_one_tracked_alert_window",
+      "matched_episode_ids": [
+        "bd37cd7ac143a40ddf2479b2",
+        "e1da97f784d43694a7d54052"
+      ],
+      "reason_codes": [
+        "MATCH_UNIQUE",
+        "NO_CANONICAL_RAW_EPISODE_ID",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "AIR_MILITARY_CONTEXT",
+        "SAME_ATTACK_CONTEXT_SUPPORTED",
+        "NO_STRICT_TEMPORAL_BINDING"
+      ]
+    },
+    {
+      "candidate_id": "71ed76849aa5f8a4377b8e4d",
+      "city": "dnipro",
+      "old_status": "needs_review",
+      "proposed_status": "needs_review",
+      "proposed_matched_episode_id": null,
+      "matching_outcome": "ambiguous_match",
+      "matching_reason": "publication_matches_multiple_distinct_tracked_alert_windows",
+      "matched_episode_ids": [
+        "09ee9efd29d604b4b5d98629",
+        "c5e3e9affc34ad6cdc7dd1ff",
+        "c894e85e407dc4256d8c4419"
+      ],
+      "reason_codes": [
+        "MATCH_AMBIGUOUS",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "NO_AIR_MILITARY_CONTEXT",
+        "NO_STRICT_TEMPORAL_BINDING"
+      ]
+    },
+    {
+      "candidate_id": "76138a5f25ac7ab803296c6b",
+      "city": "dnipro",
+      "old_status": "needs_review",
+      "proposed_status": "needs_review",
+      "proposed_matched_episode_id": "9d26d096ab88208654dd98ac",
+      "matching_outcome": "unique_match",
+      "matching_reason": "publication_within_unique_tracked_alert_window",
+      "matched_episode_ids": [
+        "9d26d096ab88208654dd98ac"
+      ],
+      "reason_codes": [
+        "MATCH_UNIQUE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "NO_AIR_MILITARY_CONTEXT",
+        "NO_STRICT_TEMPORAL_BINDING"
+      ]
+    },
+    {
+      "candidate_id": "8bb215eace94f9b70df4ec8e",
+      "city": "dnipro",
+      "old_status": "needs_review",
+      "proposed_status": "needs_review",
+      "proposed_matched_episode_id": null,
+      "matching_outcome": "no_match",
+      "matching_reason": "publication_outside_all_tracked_alert_windows",
+      "matched_episode_ids": [],
+      "reason_codes": [
+        "MATCH_NONE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "NO_AIR_MILITARY_CONTEXT",
+        "NO_STRICT_TEMPORAL_BINDING"
+      ]
+    },
+    {
+      "candidate_id": "8c0a6c6cc7e18df658d8e622",
+      "city": "dnipro",
+      "old_status": "needs_review",
+      "proposed_status": "needs_review",
+      "proposed_matched_episode_id": null,
+      "matching_outcome": "unique_match",
+      "matching_reason": "near_duplicate_source_representations_reconciled_to_one_tracked_alert_window",
+      "matched_episode_ids": [
+        "bd37cd7ac143a40ddf2479b2",
+        "e1da97f784d43694a7d54052"
+      ],
+      "reason_codes": [
+        "MATCH_UNIQUE",
+        "NO_CANONICAL_RAW_EPISODE_ID",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "NO_AIR_MILITARY_CONTEXT",
+        "NO_STRICT_TEMPORAL_BINDING"
+      ]
+    },
+    {
+      "candidate_id": "8e4ee84d2e87c52eca85b350",
+      "city": "dnipro",
+      "old_status": "needs_review",
+      "proposed_status": "needs_review",
+      "proposed_matched_episode_id": null,
+      "matching_outcome": "no_match",
+      "matching_reason": "publication_outside_all_tracked_alert_windows",
+      "matched_episode_ids": [],
+      "reason_codes": [
+        "MATCH_NONE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "NO_AIR_MILITARY_CONTEXT",
+        "NO_STRICT_TEMPORAL_BINDING"
+      ]
+    },
+    {
+      "candidate_id": "9c3cc44771e3eaf67e0115fe",
+      "city": "dnipro",
+      "old_status": "needs_review",
+      "proposed_status": "needs_review",
+      "proposed_matched_episode_id": null,
+      "matching_outcome": "no_match",
+      "matching_reason": "publication_outside_all_tracked_alert_windows",
+      "matched_episode_ids": [],
+      "reason_codes": [
+        "MATCH_NONE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "AIR_MILITARY_CONTEXT",
+        "SAME_ATTACK_CONTEXT_SUPPORTED",
+        "NO_STRICT_TEMPORAL_BINDING"
+      ]
+    },
+    {
+      "candidate_id": "a1c7ecd240ed88dadc5dbb31",
+      "city": "dnipro",
+      "old_status": "needs_review",
+      "proposed_status": "needs_review",
+      "proposed_matched_episode_id": null,
+      "matching_outcome": "ambiguous_match",
+      "matching_reason": "publication_matches_multiple_distinct_tracked_alert_windows",
+      "matched_episode_ids": [
+        "09ee9efd29d604b4b5d98629",
+        "c5e3e9affc34ad6cdc7dd1ff"
+      ],
+      "reason_codes": [
+        "MATCH_AMBIGUOUS",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "NO_AIR_MILITARY_CONTEXT",
+        "NO_STRICT_TEMPORAL_BINDING"
+      ]
+    },
+    {
+      "candidate_id": "a6f9e8a62b9b644ec8620f93",
+      "city": "dnipro",
+      "old_status": "needs_review",
+      "proposed_status": "needs_review",
+      "proposed_matched_episode_id": null,
+      "matching_outcome": "no_match",
+      "matching_reason": "publication_outside_all_tracked_alert_windows",
+      "matched_episode_ids": [],
+      "reason_codes": [
+        "MATCH_NONE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "NO_AIR_MILITARY_CONTEXT",
+        "NO_STRICT_TEMPORAL_BINDING"
+      ]
+    },
+    {
+      "candidate_id": "b04d8aa8336e2caecf480cef",
+      "city": "dnipro",
+      "old_status": "needs_review",
+      "proposed_status": "needs_review",
+      "proposed_matched_episode_id": null,
+      "matching_outcome": "no_match",
+      "matching_reason": "publication_outside_all_tracked_alert_windows",
+      "matched_episode_ids": [],
+      "reason_codes": [
+        "MATCH_NONE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "NO_AIR_MILITARY_CONTEXT",
+        "NO_STRICT_TEMPORAL_BINDING"
+      ]
+    },
+    {
+      "candidate_id": "b1791fc3fba858aa0341636f",
+      "city": "dnipro",
+      "old_status": "needs_review",
+      "proposed_status": "needs_review",
+      "proposed_matched_episode_id": null,
+      "matching_outcome": "no_match",
+      "matching_reason": "publication_outside_all_tracked_alert_windows",
+      "matched_episode_ids": [],
+      "reason_codes": [
+        "MATCH_NONE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "NO_AIR_MILITARY_CONTEXT",
+        "NO_STRICT_TEMPORAL_BINDING"
+      ]
+    },
+    {
+      "candidate_id": "b35ae05bd7c910c2b618fecd",
+      "city": "dnipro",
+      "old_status": "needs_review",
+      "proposed_status": "needs_review",
+      "proposed_matched_episode_id": "79e6f4f39ce69244c8f856e8",
+      "matching_outcome": "unique_match",
+      "matching_reason": "publication_within_unique_tracked_alert_window",
+      "matched_episode_ids": [
+        "79e6f4f39ce69244c8f856e8"
+      ],
+      "reason_codes": [
+        "MATCH_UNIQUE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "NO_AIR_MILITARY_CONTEXT",
+        "NO_STRICT_TEMPORAL_BINDING"
+      ]
+    },
+    {
+      "candidate_id": "c7db494537669e69c87baac1",
+      "city": "dnipro",
+      "old_status": "needs_review",
+      "proposed_status": "needs_review",
+      "proposed_matched_episode_id": "fc97efc77c89d9d77345713d",
+      "matching_outcome": "unique_match",
+      "matching_reason": "publication_within_unique_tracked_alert_window",
+      "matched_episode_ids": [
+        "fc97efc77c89d9d77345713d"
+      ],
+      "reason_codes": [
+        "MATCH_UNIQUE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "NO_AIR_MILITARY_CONTEXT",
+        "NO_STRICT_TEMPORAL_BINDING"
+      ]
+    },
+    {
+      "candidate_id": "c9318ca865d6a968eeeb76f0",
+      "city": "dnipro",
+      "old_status": "needs_review",
+      "proposed_status": "needs_review",
+      "proposed_matched_episode_id": null,
+      "matching_outcome": "no_match",
+      "matching_reason": "publication_outside_all_tracked_alert_windows",
+      "matched_episode_ids": [],
+      "reason_codes": [
+        "MATCH_NONE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "NO_AIR_MILITARY_CONTEXT",
+        "NO_STRICT_TEMPORAL_BINDING"
+      ]
+    },
+    {
+      "candidate_id": "d7db1a351aa8caff0a75a524",
+      "city": "dnipro",
+      "old_status": "needs_review",
+      "proposed_status": "needs_review",
+      "proposed_matched_episode_id": null,
+      "matching_outcome": "no_match",
+      "matching_reason": "publication_outside_all_tracked_alert_windows",
+      "matched_episode_ids": [],
+      "reason_codes": [
+        "MATCH_NONE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "NO_AIR_MILITARY_CONTEXT",
+        "NO_STRICT_TEMPORAL_BINDING"
+      ]
+    },
+    {
+      "candidate_id": "e9985c7dfcbddb0f1fbe0a71",
+      "city": "dnipro",
+      "old_status": "needs_review",
+      "proposed_status": "needs_review",
+      "proposed_matched_episode_id": null,
+      "matching_outcome": "no_match",
+      "matching_reason": "publication_outside_all_tracked_alert_windows",
+      "matched_episode_ids": [],
+      "reason_codes": [
+        "MATCH_NONE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "NO_AIR_MILITARY_CONTEXT",
+        "NO_STRICT_TEMPORAL_BINDING"
+      ]
+    },
+    {
+      "candidate_id": "f9a9951a86c85e9524631191",
+      "city": "dnipro",
+      "old_status": "needs_review",
+      "proposed_status": "needs_review",
+      "proposed_matched_episode_id": "cb90d68581fa8f39e9c160c2",
+      "matching_outcome": "unique_match",
+      "matching_reason": "publication_within_unique_tracked_alert_window",
+      "matched_episode_ids": [
+        "cb90d68581fa8f39e9c160c2"
+      ],
+      "reason_codes": [
+        "MATCH_UNIQUE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "NO_AIR_MILITARY_CONTEXT",
+        "NO_STRICT_TEMPORAL_BINDING"
+      ]
+    },
+    {
+      "candidate_id": "fe8e9f1bf0d52c99d8bd6b4c",
+      "city": "dnipro",
+      "old_status": "needs_review",
+      "proposed_status": "needs_review",
+      "proposed_matched_episode_id": null,
+      "matching_outcome": "no_match",
+      "matching_reason": "publication_outside_all_tracked_alert_windows",
+      "matched_episode_ids": [],
+      "reason_codes": [
+        "MATCH_NONE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "NO_AIR_MILITARY_CONTEXT",
+        "NO_STRICT_TEMPORAL_BINDING"
+      ]
+    },
+    {
+      "candidate_id": "6e2b9fdc80ce8468309baccd",
+      "city": "kharkiv",
+      "old_status": "needs_review",
+      "proposed_status": "needs_review",
+      "proposed_matched_episode_id": null,
+      "matching_outcome": "ambiguous_match",
+      "matching_reason": "publication_matches_multiple_distinct_tracked_alert_windows",
+      "matched_episode_ids": [
+        "7c587243428718dd903c525f",
+        "c1b539d9dd2c9a0e8b0587f9"
+      ],
+      "reason_codes": [
+        "MATCH_AMBIGUOUS",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "NO_AIR_MILITARY_CONTEXT",
+        "NO_STRICT_TEMPORAL_BINDING"
+      ]
+    },
+    {
+      "candidate_id": "4040cda0bcf5a5b98520d3f4",
+      "city": "kropyvnytskyi",
+      "old_status": "needs_review",
+      "proposed_status": "needs_review",
+      "proposed_matched_episode_id": "c2ad120e98bd7f8e321103f0",
+      "matching_outcome": "unique_match",
+      "matching_reason": "publication_within_unique_tracked_alert_window",
+      "matched_episode_ids": [
+        "c2ad120e98bd7f8e321103f0"
+      ],
+      "reason_codes": [
+        "MATCH_UNIQUE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "NO_AIR_MILITARY_CONTEXT",
+        "NO_STRICT_TEMPORAL_BINDING"
+      ]
+    },
+    {
+      "candidate_id": "599ee9d49476fff666b2d875",
+      "city": "kropyvnytskyi",
+      "old_status": "needs_review",
+      "proposed_status": "needs_review",
+      "proposed_matched_episode_id": "376f91e0999531926d53669e",
+      "matching_outcome": "unique_match",
+      "matching_reason": "publication_within_unique_tracked_alert_window",
+      "matched_episode_ids": [
+        "376f91e0999531926d53669e"
+      ],
+      "reason_codes": [
+        "MATCH_UNIQUE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "NO_AIR_MILITARY_CONTEXT",
+        "TEMPORAL_CONTEMPORANEOUS_LIVE_WORDING"
+      ]
+    },
+    {
+      "candidate_id": "677b62f2069e836eb57fbe53",
+      "city": "kropyvnytskyi",
+      "old_status": "needs_review",
+      "proposed_status": "needs_review",
+      "proposed_matched_episode_id": "376f91e0999531926d53669e",
+      "matching_outcome": "unique_match",
+      "matching_reason": "publication_within_unique_tracked_alert_window",
+      "matched_episode_ids": [
+        "376f91e0999531926d53669e"
+      ],
+      "reason_codes": [
+        "MATCH_UNIQUE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "NO_AIR_MILITARY_CONTEXT",
+        "TEMPORAL_CONTEMPORANEOUS_LIVE_WORDING"
+      ]
+    },
+    {
+      "candidate_id": "7372f75419d1c5c17fe58159",
+      "city": "kropyvnytskyi",
+      "old_status": "needs_review",
+      "proposed_status": "needs_review",
+      "proposed_matched_episode_id": null,
+      "matching_outcome": "no_match",
+      "matching_reason": "publication_outside_all_tracked_alert_windows",
+      "matched_episode_ids": [],
+      "reason_codes": [
+        "MATCH_NONE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "AIR_MILITARY_CONTEXT",
+        "AIR_CONTEXT_NOT_LINKED_TO_EVENT",
+        "NO_STRICT_TEMPORAL_BINDING"
+      ]
+    },
+    {
+      "candidate_id": "aa7633422217fa2ca7c99d66",
+      "city": "kropyvnytskyi",
+      "old_status": "needs_review",
+      "proposed_status": "needs_review",
+      "proposed_matched_episode_id": "b41b926cb725a3a54a9bdb0d",
+      "matching_outcome": "unique_match",
+      "matching_reason": "publication_within_unique_tracked_alert_window",
+      "matched_episode_ids": [
+        "b41b926cb725a3a54a9bdb0d"
+      ],
+      "reason_codes": [
+        "MATCH_UNIQUE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "NO_AIR_MILITARY_CONTEXT",
+        "NO_STRICT_TEMPORAL_BINDING"
+      ]
+    },
+    {
+      "candidate_id": "b319d93461dae4546172b5f5",
+      "city": "kropyvnytskyi",
+      "old_status": "needs_review",
+      "proposed_status": "needs_review",
+      "proposed_matched_episode_id": "3fd579a7ede75b6868366d1f",
+      "matching_outcome": "unique_match",
+      "matching_reason": "publication_within_unique_tracked_alert_window",
+      "matched_episode_ids": [
+        "3fd579a7ede75b6868366d1f"
+      ],
+      "reason_codes": [
+        "MATCH_UNIQUE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "NO_AIR_MILITARY_CONTEXT",
+        "NO_STRICT_TEMPORAL_BINDING"
+      ]
+    },
+    {
+      "candidate_id": "b7ad79a657da5c22d4fd72a6",
+      "city": "kropyvnytskyi",
+      "old_status": "needs_review",
+      "proposed_status": "needs_review",
+      "proposed_matched_episode_id": null,
+      "matching_outcome": "ambiguous_match",
+      "matching_reason": "publication_matches_multiple_distinct_tracked_alert_windows",
+      "matched_episode_ids": [
+        "32290c46071b5e362610bd64",
+        "7ffc6141b1eda25304f7b0d4"
+      ],
+      "reason_codes": [
+        "MATCH_AMBIGUOUS",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "NO_AIR_MILITARY_CONTEXT",
+        "NO_STRICT_TEMPORAL_BINDING"
+      ]
+    },
+    {
+      "candidate_id": "d65bdf337821f323226b830f",
+      "city": "kropyvnytskyi",
+      "old_status": "needs_review",
+      "proposed_status": "needs_review",
+      "proposed_matched_episode_id": "b0f6e8e57e73c9c651fbc99f",
+      "matching_outcome": "unique_match",
+      "matching_reason": "publication_within_unique_tracked_alert_window",
+      "matched_episode_ids": [
+        "b0f6e8e57e73c9c651fbc99f"
+      ],
+      "reason_codes": [
+        "MATCH_UNIQUE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "NO_AIR_MILITARY_CONTEXT",
+        "NO_STRICT_TEMPORAL_BINDING"
+      ]
+    },
+    {
+      "candidate_id": "008d591a7fba923827fb7c65",
+      "city": "kyiv",
+      "old_status": "needs_review",
+      "proposed_status": "needs_review",
+      "proposed_matched_episode_id": null,
+      "matching_outcome": "no_match",
+      "matching_reason": "publication_outside_all_tracked_alert_windows",
+      "matched_episode_ids": [],
+      "reason_codes": [
+        "MATCH_NONE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "AIR_MILITARY_CONTEXT",
+        "SAME_ATTACK_CONTEXT_SUPPORTED",
+        "NO_STRICT_TEMPORAL_BINDING"
+      ]
+    },
+    {
+      "candidate_id": "1e7abed47582c23d2b716d92",
+      "city": "kyiv",
+      "old_status": "needs_review",
+      "proposed_status": "needs_review",
+      "proposed_matched_episode_id": null,
+      "matching_outcome": "no_match",
+      "matching_reason": "publication_outside_all_tracked_alert_windows",
+      "matched_episode_ids": [],
+      "reason_codes": [
+        "MATCH_NONE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "AIR_MILITARY_CONTEXT",
+        "SAME_ATTACK_CONTEXT_SUPPORTED",
+        "NO_STRICT_TEMPORAL_BINDING"
+      ]
+    },
+    {
+      "candidate_id": "1ff363936c78a5f85f75be2f",
+      "city": "kyiv",
+      "old_status": "needs_review",
+      "proposed_status": "needs_review",
+      "proposed_matched_episode_id": null,
+      "matching_outcome": "unique_match",
+      "matching_reason": "near_duplicate_source_representations_reconciled_to_one_tracked_alert_window",
+      "matched_episode_ids": [
+        "67794eb04b0309bee8a02cc6",
+        "c964a9db4271b3a9d76be49a"
+      ],
+      "reason_codes": [
+        "MATCH_UNIQUE",
+        "NO_CANONICAL_RAW_EPISODE_ID",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "AIR_MILITARY_CONTEXT",
+        "SAME_ATTACK_CONTEXT_SUPPORTED",
+        "NO_STRICT_TEMPORAL_BINDING"
+      ]
+    },
+    {
+      "candidate_id": "25902cf893b4d3edbeccb7a1",
+      "city": "kyiv",
+      "old_status": "needs_review",
+      "proposed_status": "needs_review",
+      "proposed_matched_episode_id": null,
+      "matching_outcome": "unique_match",
+      "matching_reason": "near_duplicate_source_representations_reconciled_to_one_tracked_alert_window",
+      "matched_episode_ids": [
+        "372a0acab8763541b0422e14",
+        "6f7ad9d283d3d095cda16f5b"
+      ],
+      "reason_codes": [
+        "MATCH_UNIQUE",
+        "NO_CANONICAL_RAW_EPISODE_ID",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "AIR_MILITARY_CONTEXT",
+        "SAME_ATTACK_CONTEXT_SUPPORTED",
+        "NO_STRICT_TEMPORAL_BINDING"
+      ]
+    },
+    {
+      "candidate_id": "371b63cabe5c9dc34037e61f",
+      "city": "kyiv",
+      "old_status": "needs_review",
+      "proposed_status": "needs_review",
+      "proposed_matched_episode_id": "be91665768f663f704f73958",
+      "matching_outcome": "unique_match",
+      "matching_reason": "publication_within_unique_tracked_alert_window",
+      "matched_episode_ids": [
+        "be91665768f663f704f73958"
+      ],
+      "reason_codes": [
+        "MATCH_UNIQUE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "NO_AIR_MILITARY_CONTEXT",
+        "NO_STRICT_TEMPORAL_BINDING"
+      ]
+    },
+    {
+      "candidate_id": "39ba886bd4178dabad53fd67",
+      "city": "kyiv",
+      "old_status": "needs_review",
+      "proposed_status": "needs_review",
+      "proposed_matched_episode_id": null,
+      "matching_outcome": "unique_match",
+      "matching_reason": "near_duplicate_source_representations_reconciled_to_one_tracked_alert_window",
+      "matched_episode_ids": [
+        "67794eb04b0309bee8a02cc6",
+        "c964a9db4271b3a9d76be49a"
+      ],
+      "reason_codes": [
+        "MATCH_UNIQUE",
+        "NO_CANONICAL_RAW_EPISODE_ID",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "AIR_MILITARY_CONTEXT",
+        "SAME_ATTACK_CONTEXT_SUPPORTED",
+        "NO_STRICT_TEMPORAL_BINDING"
+      ]
+    },
+    {
+      "candidate_id": "3f3e6e20fe3a7eacc4f646af",
+      "city": "kyiv",
+      "old_status": "needs_review",
+      "proposed_status": "needs_review",
+      "proposed_matched_episode_id": null,
+      "matching_outcome": "no_match",
+      "matching_reason": "publication_outside_all_tracked_alert_windows",
+      "matched_episode_ids": [],
+      "reason_codes": [
+        "MATCH_NONE",
+        "EXACT_CITY_EVENT_TEXT",
+        "NO_STRICT_EXPLOSION_EVIDENCE",
+        "NO_AIR_MILITARY_CONTEXT",
+        "NO_STRICT_TEMPORAL_BINDING"
+      ]
+    },
+    {
+      "candidate_id": "410fc47d6aa7853cc3f5832f",
+      "city": "kyiv",
+      "old_status": "needs_review",
+      "proposed_status": "needs_review",
+      "proposed_matched_episode_id": null,
+      "matching_outcome": "unique_match",
+      "matching_reason": "near_duplicate_source_representations_reconciled_to_one_tracked_alert_window",
+      "matched_episode_ids": [
+        "390fe0ec9b9eb45f51577412",
+        "9f675c5071bba608032d9255"
+      ],
+      "reason_codes": [
+        "MATCH_UNIQUE",
+        "NO_CANONICAL_RAW_EPISODE_ID",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "NO_AIR_MILITARY_CONTEXT",
+        "NO_STRICT_TEMPORAL_BINDING"
+      ]
+    },
+    {
+      "candidate_id": "42c68c4d633bc3d17fe5b2b0",
+      "city": "kyiv",
+      "old_status": "needs_review",
+      "proposed_status": "needs_review",
+      "proposed_matched_episode_id": null,
+      "matching_outcome": "unique_match",
+      "matching_reason": "near_duplicate_source_representations_reconciled_to_one_tracked_alert_window",
+      "matched_episode_ids": [
+        "3158c9bd3868886f31701b26",
+        "9cd16dab548f77bba4a4c0d9"
+      ],
+      "reason_codes": [
+        "MATCH_UNIQUE",
+        "NO_CANONICAL_RAW_EPISODE_ID",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "NO_AIR_MILITARY_CONTEXT",
+        "NO_STRICT_TEMPORAL_BINDING"
+      ]
+    },
+    {
+      "candidate_id": "43d17460796eb8aaed72583b",
+      "city": "kyiv",
+      "old_status": "needs_review",
+      "proposed_status": "needs_review",
+      "proposed_matched_episode_id": null,
+      "matching_outcome": "unique_match",
+      "matching_reason": "near_duplicate_source_representations_reconciled_to_one_tracked_alert_window",
+      "matched_episode_ids": [
+        "d9776312dc63fa1807acb302",
+        "e1c0ac9b340f64bfc0d4c468"
+      ],
+      "reason_codes": [
+        "MATCH_UNIQUE",
+        "NO_CANONICAL_RAW_EPISODE_ID",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "NO_AIR_MILITARY_CONTEXT",
+        "NO_STRICT_TEMPORAL_BINDING"
+      ]
+    },
+    {
+      "candidate_id": "4754f7fae6a58c61e65e463c",
+      "city": "kyiv",
+      "old_status": "needs_review",
+      "proposed_status": "needs_review",
+      "proposed_matched_episode_id": null,
+      "matching_outcome": "no_match",
+      "matching_reason": "publication_outside_all_tracked_alert_windows",
+      "matched_episode_ids": [],
+      "reason_codes": [
+        "MATCH_NONE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "NO_AIR_MILITARY_CONTEXT",
+        "NO_STRICT_TEMPORAL_BINDING"
+      ]
+    },
+    {
+      "candidate_id": "5f6244c055e0889ca0a6ad66",
+      "city": "kyiv",
+      "old_status": "needs_review",
+      "proposed_status": "needs_review",
+      "proposed_matched_episode_id": null,
+      "matching_outcome": "unique_match",
+      "matching_reason": "near_duplicate_source_representations_reconciled_to_one_tracked_alert_window",
+      "matched_episode_ids": [
+        "d9776312dc63fa1807acb302",
+        "e1c0ac9b340f64bfc0d4c468"
+      ],
+      "reason_codes": [
+        "MATCH_UNIQUE",
+        "NO_CANONICAL_RAW_EPISODE_ID",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "NO_AIR_MILITARY_CONTEXT",
+        "NO_STRICT_TEMPORAL_BINDING"
+      ]
+    },
+    {
+      "candidate_id": "639af0b0ab5048acd05c1afc",
+      "city": "kyiv",
+      "old_status": "needs_review",
+      "proposed_status": "needs_review",
+      "proposed_matched_episode_id": "da90f993ab369a680b3bb7c4",
+      "matching_outcome": "unique_match",
+      "matching_reason": "publication_within_unique_tracked_alert_window",
+      "matched_episode_ids": [
+        "da90f993ab369a680b3bb7c4"
+      ],
+      "reason_codes": [
+        "MATCH_UNIQUE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "NO_AIR_MILITARY_CONTEXT",
+        "NO_STRICT_TEMPORAL_BINDING"
+      ]
+    },
+    {
+      "candidate_id": "65ccedf40aea67a71fb61dd3",
+      "city": "kyiv",
+      "old_status": "needs_review",
+      "proposed_status": "needs_review",
+      "proposed_matched_episode_id": null,
+      "matching_outcome": "unique_match",
+      "matching_reason": "near_duplicate_source_representations_reconciled_to_one_tracked_alert_window",
+      "matched_episode_ids": [
+        "67794eb04b0309bee8a02cc6",
+        "c964a9db4271b3a9d76be49a"
+      ],
+      "reason_codes": [
+        "MATCH_UNIQUE",
+        "NO_CANONICAL_RAW_EPISODE_ID",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "NO_AIR_MILITARY_CONTEXT",
+        "NO_STRICT_TEMPORAL_BINDING"
+      ]
+    },
+    {
+      "candidate_id": "68c77d4272632a642200f74f",
+      "city": "kyiv",
+      "old_status": "needs_review",
+      "proposed_status": "needs_review",
+      "proposed_matched_episode_id": "baf3eaa558f606c14d6e385f",
+      "matching_outcome": "unique_match",
+      "matching_reason": "publication_within_unique_tracked_alert_window",
+      "matched_episode_ids": [
+        "baf3eaa558f606c14d6e385f"
+      ],
+      "reason_codes": [
+        "MATCH_UNIQUE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "NO_AIR_MILITARY_CONTEXT",
+        "NO_STRICT_TEMPORAL_BINDING"
+      ]
+    },
+    {
+      "candidate_id": "6a4b5950a4b2c10793714efc",
+      "city": "kyiv",
+      "old_status": "needs_review",
+      "proposed_status": "needs_review",
+      "proposed_matched_episode_id": null,
+      "matching_outcome": "unique_match",
+      "matching_reason": "near_duplicate_source_representations_reconciled_to_one_tracked_alert_window",
+      "matched_episode_ids": [
+        "67794eb04b0309bee8a02cc6",
+        "c964a9db4271b3a9d76be49a"
+      ],
+      "reason_codes": [
+        "MATCH_UNIQUE",
+        "NO_CANONICAL_RAW_EPISODE_ID",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "AIR_MILITARY_CONTEXT",
+        "SAME_ATTACK_CONTEXT_SUPPORTED",
+        "NO_STRICT_TEMPORAL_BINDING"
+      ]
+    },
+    {
+      "candidate_id": "6d4bdfb8b2fda7176b3f5573",
+      "city": "kyiv",
+      "old_status": "needs_review",
+      "proposed_status": "needs_review",
+      "proposed_matched_episode_id": null,
+      "matching_outcome": "unique_match",
+      "matching_reason": "near_duplicate_source_representations_reconciled_to_one_tracked_alert_window",
+      "matched_episode_ids": [
+        "74e6bb30920a6eb59eef277a",
+        "b6043fef9f70f63c4cc6596f"
+      ],
+      "reason_codes": [
+        "MATCH_UNIQUE",
+        "NO_CANONICAL_RAW_EPISODE_ID",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "NO_AIR_MILITARY_CONTEXT",
+        "NO_STRICT_TEMPORAL_BINDING"
+      ]
+    },
+    {
+      "candidate_id": "8626aad6626def4f57dd41fa",
+      "city": "kyiv",
+      "old_status": "needs_review",
+      "proposed_status": "needs_review",
+      "proposed_matched_episode_id": null,
+      "matching_outcome": "unique_match",
+      "matching_reason": "near_duplicate_source_representations_reconciled_to_one_tracked_alert_window",
+      "matched_episode_ids": [
+        "74e6bb30920a6eb59eef277a",
+        "b6043fef9f70f63c4cc6596f"
+      ],
+      "reason_codes": [
+        "MATCH_UNIQUE",
+        "NO_CANONICAL_RAW_EPISODE_ID",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "NO_AIR_MILITARY_CONTEXT",
+        "NO_STRICT_TEMPORAL_BINDING"
+      ]
+    },
+    {
+      "candidate_id": "86c64b203e52bce6f9aafa88",
+      "city": "kyiv",
+      "old_status": "needs_review",
+      "proposed_status": "needs_review",
+      "proposed_matched_episode_id": "731052f1448d4e5b8554a2d9",
+      "matching_outcome": "unique_match",
+      "matching_reason": "publication_within_unique_tracked_alert_window",
+      "matched_episode_ids": [
+        "731052f1448d4e5b8554a2d9"
+      ],
+      "reason_codes": [
+        "MATCH_UNIQUE",
+        "EXACT_CITY_EVENT_TEXT",
+        "NO_STRICT_EXPLOSION_EVIDENCE",
+        "AIR_MILITARY_CONTEXT",
+        "AIR_CONTEXT_NOT_LINKED_TO_EVENT",
+        "NO_STRICT_TEMPORAL_BINDING"
+      ]
+    },
+    {
+      "candidate_id": "8f189c080aac8d379faeb1dd",
+      "city": "kyiv",
+      "old_status": "needs_review",
+      "proposed_status": "needs_review",
+      "proposed_matched_episode_id": null,
+      "matching_outcome": "unique_match",
+      "matching_reason": "near_duplicate_source_representations_reconciled_to_one_tracked_alert_window",
+      "matched_episode_ids": [
+        "7d7cb0c7a9e7d3574d33c70c",
+        "ce258bb8987be36ce33dcca9"
+      ],
+      "reason_codes": [
+        "MATCH_UNIQUE",
+        "NO_CANONICAL_RAW_EPISODE_ID",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "AIR_MILITARY_CONTEXT",
+        "SAME_ATTACK_CONTEXT_SUPPORTED",
+        "NO_STRICT_TEMPORAL_BINDING"
+      ]
+    },
+    {
+      "candidate_id": "988b7a3d4f986e022af525ab",
+      "city": "kyiv",
+      "old_status": "needs_review",
+      "proposed_status": "needs_review",
+      "proposed_matched_episode_id": "baf3eaa558f606c14d6e385f",
+      "matching_outcome": "unique_match",
+      "matching_reason": "publication_within_unique_tracked_alert_window",
+      "matched_episode_ids": [
+        "baf3eaa558f606c14d6e385f"
+      ],
+      "reason_codes": [
+        "MATCH_UNIQUE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "NO_AIR_MILITARY_CONTEXT",
+        "NO_STRICT_TEMPORAL_BINDING"
+      ]
+    },
+    {
+      "candidate_id": "a38dd86d7f0145de0cc4ad2e",
+      "city": "kyiv",
+      "old_status": "needs_review",
+      "proposed_status": "needs_review",
+      "proposed_matched_episode_id": null,
+      "matching_outcome": "unique_match",
+      "matching_reason": "near_duplicate_source_representations_reconciled_to_one_tracked_alert_window",
+      "matched_episode_ids": [
+        "651d5a6ea4dbbd592f029ff3",
+        "e3542827b8a5d78d6cc55a08"
+      ],
+      "reason_codes": [
+        "MATCH_UNIQUE",
+        "NO_CANONICAL_RAW_EPISODE_ID",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "AIR_MILITARY_CONTEXT",
+        "SAME_ATTACK_CONTEXT_SUPPORTED",
+        "NO_STRICT_TEMPORAL_BINDING"
+      ]
+    },
+    {
+      "candidate_id": "a940cce83a1aca60ea5872d8",
+      "city": "kyiv",
+      "old_status": "needs_review",
+      "proposed_status": "needs_review",
+      "proposed_matched_episode_id": null,
+      "matching_outcome": "no_match",
+      "matching_reason": "publication_outside_all_tracked_alert_windows",
+      "matched_episode_ids": [],
+      "reason_codes": [
+        "MATCH_NONE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "NO_AIR_MILITARY_CONTEXT",
+        "NO_STRICT_TEMPORAL_BINDING"
+      ]
+    },
+    {
+      "candidate_id": "a9ae59733379c6e0439bf72c",
+      "city": "kyiv",
+      "old_status": "needs_review",
+      "proposed_status": "needs_review",
+      "proposed_matched_episode_id": null,
+      "matching_outcome": "no_match",
+      "matching_reason": "publication_outside_all_tracked_alert_windows",
+      "matched_episode_ids": [],
+      "reason_codes": [
+        "MATCH_NONE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "NO_AIR_MILITARY_CONTEXT",
+        "NO_STRICT_TEMPORAL_BINDING"
+      ]
+    },
+    {
+      "candidate_id": "aa5f00b7957f03bece44a9e4",
+      "city": "kyiv",
+      "old_status": "needs_review",
+      "proposed_status": "needs_review",
+      "proposed_matched_episode_id": null,
+      "matching_outcome": "unique_match",
+      "matching_reason": "near_duplicate_source_representations_reconciled_to_one_tracked_alert_window",
+      "matched_episode_ids": [
+        "67794eb04b0309bee8a02cc6",
+        "c964a9db4271b3a9d76be49a"
+      ],
+      "reason_codes": [
+        "MATCH_UNIQUE",
+        "NO_CANONICAL_RAW_EPISODE_ID",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "AIR_MILITARY_CONTEXT",
+        "SAME_ATTACK_CONTEXT_SUPPORTED",
+        "NO_STRICT_TEMPORAL_BINDING"
+      ]
+    },
+    {
+      "candidate_id": "abfb7775d066b8881deb3bc1",
+      "city": "kyiv",
+      "old_status": "needs_review",
+      "proposed_status": "needs_review",
+      "proposed_matched_episode_id": null,
+      "matching_outcome": "unique_match",
+      "matching_reason": "near_duplicate_source_representations_reconciled_to_one_tracked_alert_window",
+      "matched_episode_ids": [
+        "7d7cb0c7a9e7d3574d33c70c",
+        "ce258bb8987be36ce33dcca9"
+      ],
+      "reason_codes": [
+        "MATCH_UNIQUE",
+        "NO_CANONICAL_RAW_EPISODE_ID",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "AIR_MILITARY_CONTEXT",
+        "SAME_ATTACK_CONTEXT_SUPPORTED",
+        "NO_STRICT_TEMPORAL_BINDING"
+      ]
+    },
+    {
+      "candidate_id": "b7cac961886d824318b51d02",
+      "city": "kyiv",
+      "old_status": "needs_review",
+      "proposed_status": "needs_review",
+      "proposed_matched_episode_id": null,
+      "matching_outcome": "ambiguous_match",
+      "matching_reason": "publication_matches_multiple_distinct_tracked_alert_windows",
+      "matched_episode_ids": [
+        "390fe0ec9b9eb45f51577412",
+        "9a0b0f80a095704745675407",
+        "9f675c5071bba608032d9255",
+        "c0ae46a8a92dd5b519f333ea"
+      ],
+      "reason_codes": [
+        "MATCH_AMBIGUOUS",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "NO_AIR_MILITARY_CONTEXT",
+        "NO_STRICT_TEMPORAL_BINDING"
+      ]
+    },
+    {
+      "candidate_id": "b8d04573bc881fd8de94b728",
+      "city": "kyiv",
+      "old_status": "needs_review",
+      "proposed_status": "needs_review",
+      "proposed_matched_episode_id": "da90f993ab369a680b3bb7c4",
+      "matching_outcome": "unique_match",
+      "matching_reason": "publication_within_unique_tracked_alert_window",
+      "matched_episode_ids": [
+        "da90f993ab369a680b3bb7c4"
+      ],
+      "reason_codes": [
+        "MATCH_UNIQUE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "NO_AIR_MILITARY_CONTEXT",
+        "NO_STRICT_TEMPORAL_BINDING"
+      ]
+    },
+    {
+      "candidate_id": "babdc0e586dba4747e2b57ce",
+      "city": "kyiv",
+      "old_status": "needs_review",
+      "proposed_status": "needs_review",
+      "proposed_matched_episode_id": null,
+      "matching_outcome": "unique_match",
+      "matching_reason": "near_duplicate_source_representations_reconciled_to_one_tracked_alert_window",
+      "matched_episode_ids": [
+        "67794eb04b0309bee8a02cc6",
+        "c964a9db4271b3a9d76be49a"
+      ],
+      "reason_codes": [
+        "MATCH_UNIQUE",
+        "NO_CANONICAL_RAW_EPISODE_ID",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "NO_AIR_MILITARY_CONTEXT",
+        "NO_STRICT_TEMPORAL_BINDING"
+      ]
+    },
+    {
+      "candidate_id": "bcef8539773d2435ce066163",
+      "city": "kyiv",
+      "old_status": "needs_review",
+      "proposed_status": "needs_review",
+      "proposed_matched_episode_id": null,
+      "matching_outcome": "unique_match",
+      "matching_reason": "near_duplicate_source_representations_reconciled_to_one_tracked_alert_window",
+      "matched_episode_ids": [
+        "74e6bb30920a6eb59eef277a",
+        "b6043fef9f70f63c4cc6596f"
+      ],
+      "reason_codes": [
+        "MATCH_UNIQUE",
+        "NO_CANONICAL_RAW_EPISODE_ID",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "NO_AIR_MILITARY_CONTEXT",
+        "NO_STRICT_TEMPORAL_BINDING"
+      ]
+    },
+    {
+      "candidate_id": "c0673df7cda101f42e536163",
+      "city": "kyiv",
+      "old_status": "needs_review",
+      "proposed_status": "needs_review",
+      "proposed_matched_episode_id": "baf3eaa558f606c14d6e385f",
+      "matching_outcome": "unique_match",
+      "matching_reason": "publication_within_unique_tracked_alert_window",
+      "matched_episode_ids": [
+        "baf3eaa558f606c14d6e385f"
+      ],
+      "reason_codes": [
+        "MATCH_UNIQUE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "NO_AIR_MILITARY_CONTEXT",
+        "NO_STRICT_TEMPORAL_BINDING"
+      ]
+    },
+    {
+      "candidate_id": "c3b2f5e0ae139976892caa59",
+      "city": "kyiv",
+      "old_status": "needs_review",
+      "proposed_status": "needs_review",
+      "proposed_matched_episode_id": null,
+      "matching_outcome": "unique_match",
+      "matching_reason": "near_duplicate_source_representations_reconciled_to_one_tracked_alert_window",
+      "matched_episode_ids": [
+        "372a0acab8763541b0422e14",
+        "6f7ad9d283d3d095cda16f5b"
+      ],
+      "reason_codes": [
+        "MATCH_UNIQUE",
+        "NO_CANONICAL_RAW_EPISODE_ID",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "AIR_MILITARY_CONTEXT",
+        "SAME_ATTACK_CONTEXT_SUPPORTED",
+        "NO_STRICT_TEMPORAL_BINDING"
+      ]
+    },
+    {
+      "candidate_id": "c57903cf6571053b5cdb9a9f",
+      "city": "kyiv",
+      "old_status": "needs_review",
+      "proposed_status": "needs_review",
+      "proposed_matched_episode_id": null,
+      "matching_outcome": "no_match",
+      "matching_reason": "publication_outside_all_tracked_alert_windows",
+      "matched_episode_ids": [],
+      "reason_codes": [
+        "MATCH_NONE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "AIR_MILITARY_CONTEXT",
+        "SAME_ATTACK_CONTEXT_SUPPORTED",
+        "NO_STRICT_TEMPORAL_BINDING"
+      ]
+    },
+    {
+      "candidate_id": "d3dba8cb75ad7c866d599312",
+      "city": "kyiv",
+      "old_status": "needs_review",
+      "proposed_status": "needs_review",
+      "proposed_matched_episode_id": null,
+      "matching_outcome": "no_match",
+      "matching_reason": "publication_outside_all_tracked_alert_windows",
+      "matched_episode_ids": [],
+      "reason_codes": [
+        "MATCH_NONE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "AIR_MILITARY_CONTEXT",
+        "SAME_ATTACK_CONTEXT_SUPPORTED",
+        "NO_STRICT_TEMPORAL_BINDING"
+      ]
+    },
+    {
+      "candidate_id": "e0e7e50d7405aa8f27a3c82f",
+      "city": "kyiv",
+      "old_status": "needs_review",
+      "proposed_status": "needs_review",
+      "proposed_matched_episode_id": null,
+      "matching_outcome": "unique_match",
+      "matching_reason": "near_duplicate_source_representations_reconciled_to_one_tracked_alert_window",
+      "matched_episode_ids": [
+        "67794eb04b0309bee8a02cc6",
+        "c964a9db4271b3a9d76be49a"
+      ],
+      "reason_codes": [
+        "MATCH_UNIQUE",
+        "NO_CANONICAL_RAW_EPISODE_ID",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "AIR_MILITARY_CONTEXT",
+        "SAME_ATTACK_CONTEXT_SUPPORTED",
+        "NO_STRICT_TEMPORAL_BINDING"
+      ]
+    },
+    {
+      "candidate_id": "e4e32488b847d1b7e7a7c610",
+      "city": "kyiv",
+      "old_status": "needs_review",
+      "proposed_status": "needs_review",
+      "proposed_matched_episode_id": null,
+      "matching_outcome": "no_match",
+      "matching_reason": "publication_outside_all_tracked_alert_windows",
+      "matched_episode_ids": [],
+      "reason_codes": [
+        "MATCH_NONE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "NO_AIR_MILITARY_CONTEXT",
+        "NO_STRICT_TEMPORAL_BINDING"
+      ]
+    },
+    {
+      "candidate_id": "ecb723a4299d9f566b4bb0c3",
+      "city": "kyiv",
+      "old_status": "needs_review",
+      "proposed_status": "needs_review",
+      "proposed_matched_episode_id": "da90f993ab369a680b3bb7c4",
+      "matching_outcome": "unique_match",
+      "matching_reason": "publication_within_unique_tracked_alert_window",
+      "matched_episode_ids": [
+        "da90f993ab369a680b3bb7c4"
+      ],
+      "reason_codes": [
+        "MATCH_UNIQUE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "NO_AIR_MILITARY_CONTEXT",
+        "NO_STRICT_TEMPORAL_BINDING"
+      ]
+    },
+    {
+      "candidate_id": "ee5f615fa68b5a0f8ee1c59a",
+      "city": "kyiv",
+      "old_status": "needs_review",
+      "proposed_status": "needs_review",
+      "proposed_matched_episode_id": null,
+      "matching_outcome": "no_match",
+      "matching_reason": "publication_outside_all_tracked_alert_windows",
+      "matched_episode_ids": [],
+      "reason_codes": [
+        "MATCH_NONE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "AIR_MILITARY_CONTEXT",
+        "SAME_ATTACK_CONTEXT_SUPPORTED",
+        "NO_STRICT_TEMPORAL_BINDING"
+      ]
+    },
+    {
+      "candidate_id": "f14bb80447de862bf978157e",
+      "city": "kyiv",
+      "old_status": "needs_review",
+      "proposed_status": "needs_review",
+      "proposed_matched_episode_id": null,
+      "matching_outcome": "no_match",
+      "matching_reason": "publication_outside_all_tracked_alert_windows",
+      "matched_episode_ids": [],
+      "reason_codes": [
+        "MATCH_NONE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "NO_AIR_MILITARY_CONTEXT",
+        "NO_STRICT_TEMPORAL_BINDING"
+      ]
+    },
+    {
+      "candidate_id": "f50bb7afd349737c01e560b2",
+      "city": "kyiv",
+      "old_status": "needs_review",
+      "proposed_status": "needs_review",
+      "proposed_matched_episode_id": null,
+      "matching_outcome": "unique_match",
+      "matching_reason": "near_duplicate_source_representations_reconciled_to_one_tracked_alert_window",
+      "matched_episode_ids": [
+        "67794eb04b0309bee8a02cc6",
+        "c964a9db4271b3a9d76be49a"
+      ],
+      "reason_codes": [
+        "MATCH_UNIQUE",
+        "NO_CANONICAL_RAW_EPISODE_ID",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "AIR_MILITARY_CONTEXT",
+        "SAME_ATTACK_CONTEXT_SUPPORTED",
+        "NO_STRICT_TEMPORAL_BINDING"
+      ]
+    },
+    {
+      "candidate_id": "faa5fd9633b4fd94fe1b6769",
+      "city": "kyiv",
+      "old_status": "needs_review",
+      "proposed_status": "needs_review",
+      "proposed_matched_episode_id": null,
+      "matching_outcome": "unique_match",
+      "matching_reason": "near_duplicate_source_representations_reconciled_to_one_tracked_alert_window",
+      "matched_episode_ids": [
+        "7d7cb0c7a9e7d3574d33c70c",
+        "ce258bb8987be36ce33dcca9"
+      ],
+      "reason_codes": [
+        "MATCH_UNIQUE",
+        "NO_CANONICAL_RAW_EPISODE_ID",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "AIR_MILITARY_CONTEXT",
+        "SAME_ATTACK_CONTEXT_SUPPORTED",
+        "NO_STRICT_TEMPORAL_BINDING"
+      ]
+    },
+    {
+      "candidate_id": "3b1982d02fc32722ea71a589",
+      "city": "mykolaiv",
+      "old_status": "needs_review",
+      "proposed_status": "needs_review",
+      "proposed_matched_episode_id": null,
+      "matching_outcome": "ambiguous_match",
+      "matching_reason": "publication_matches_multiple_distinct_tracked_alert_windows",
+      "matched_episode_ids": [
+        "cde43bafd9c9a45bf7b31f56",
+        "e0438587bb2c9509d55a149e"
+      ],
+      "reason_codes": [
+        "MATCH_AMBIGUOUS",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "AIR_MILITARY_CONTEXT",
+        "SAME_ATTACK_CONTEXT_SUPPORTED",
+        "NO_STRICT_TEMPORAL_BINDING"
+      ]
+    },
+    {
+      "candidate_id": "4b989fb10f30b3dd990ce9bc",
+      "city": "mykolaiv",
+      "old_status": "needs_review",
+      "proposed_status": "needs_review",
+      "proposed_matched_episode_id": "487301acffc0b00d5183cc33",
+      "matching_outcome": "unique_match",
+      "matching_reason": "publication_within_unique_tracked_alert_window",
+      "matched_episode_ids": [
+        "487301acffc0b00d5183cc33"
+      ],
+      "reason_codes": [
+        "MATCH_UNIQUE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "NO_AIR_MILITARY_CONTEXT",
+        "NO_STRICT_TEMPORAL_BINDING"
+      ]
+    },
+    {
+      "candidate_id": "62b85767605168531b4e44df",
+      "city": "mykolaiv",
+      "old_status": "needs_review",
+      "proposed_status": "needs_review",
+      "proposed_matched_episode_id": null,
+      "matching_outcome": "no_match",
+      "matching_reason": "publication_outside_all_tracked_alert_windows",
+      "matched_episode_ids": [],
+      "reason_codes": [
+        "MATCH_NONE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "AIR_MILITARY_CONTEXT",
+        "SAME_ATTACK_CONTEXT_SUPPORTED",
+        "NO_STRICT_TEMPORAL_BINDING"
+      ]
+    },
+    {
+      "candidate_id": "828c6b92b458d78971e652ea",
+      "city": "mykolaiv",
+      "old_status": "needs_review",
+      "proposed_status": "needs_review",
+      "proposed_matched_episode_id": null,
+      "matching_outcome": "ambiguous_match",
+      "matching_reason": "publication_matches_multiple_distinct_tracked_alert_windows",
+      "matched_episode_ids": [
+        "cde43bafd9c9a45bf7b31f56",
+        "e0438587bb2c9509d55a149e"
+      ],
+      "reason_codes": [
+        "MATCH_AMBIGUOUS",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "AIR_MILITARY_CONTEXT",
+        "SAME_ATTACK_CONTEXT_SUPPORTED",
+        "NO_STRICT_TEMPORAL_BINDING"
+      ]
+    },
+    {
+      "candidate_id": "acecb4e89b174f7ba3c2dd2c",
+      "city": "mykolaiv",
+      "old_status": "needs_review",
+      "proposed_status": "needs_review",
+      "proposed_matched_episode_id": null,
+      "matching_outcome": "ambiguous_match",
+      "matching_reason": "publication_matches_multiple_distinct_tracked_alert_windows",
+      "matched_episode_ids": [
+        "cde43bafd9c9a45bf7b31f56",
+        "e0438587bb2c9509d55a149e"
+      ],
+      "reason_codes": [
+        "MATCH_AMBIGUOUS",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "AIR_MILITARY_CONTEXT",
+        "SAME_ATTACK_CONTEXT_SUPPORTED",
+        "NO_STRICT_TEMPORAL_BINDING"
+      ]
+    },
+    {
+      "candidate_id": "ae4361c761c59452d63b18c4",
+      "city": "mykolaiv",
+      "old_status": "needs_review",
+      "proposed_status": "needs_review",
+      "proposed_matched_episode_id": null,
+      "matching_outcome": "ambiguous_match",
+      "matching_reason": "publication_matches_multiple_distinct_tracked_alert_windows",
+      "matched_episode_ids": [
+        "cde43bafd9c9a45bf7b31f56",
+        "e0438587bb2c9509d55a149e"
+      ],
+      "reason_codes": [
+        "MATCH_AMBIGUOUS",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "AIR_MILITARY_CONTEXT",
+        "SAME_ATTACK_CONTEXT_SUPPORTED",
+        "NO_STRICT_TEMPORAL_BINDING"
+      ]
+    },
+    {
+      "candidate_id": "efcae3c4c501a8e93610d07c",
+      "city": "mykolaiv",
+      "old_status": "needs_review",
+      "proposed_status": "needs_review",
+      "proposed_matched_episode_id": "cde43bafd9c9a45bf7b31f56",
+      "matching_outcome": "unique_match",
+      "matching_reason": "publication_within_unique_tracked_alert_window",
+      "matched_episode_ids": [
+        "cde43bafd9c9a45bf7b31f56"
+      ],
+      "reason_codes": [
+        "MATCH_UNIQUE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "NO_AIR_MILITARY_CONTEXT",
+        "NO_STRICT_TEMPORAL_BINDING"
+      ]
+    },
+    {
+      "candidate_id": "fd3ec36270c1e9d5557bdd89",
+      "city": "mykolaiv",
+      "old_status": "needs_review",
+      "proposed_status": "needs_review",
+      "proposed_matched_episode_id": "e98dc546790b73d72b6f2ce0",
+      "matching_outcome": "unique_match",
+      "matching_reason": "publication_within_unique_tracked_alert_window",
+      "matched_episode_ids": [
+        "e98dc546790b73d72b6f2ce0"
+      ],
+      "reason_codes": [
+        "MATCH_UNIQUE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "NO_AIR_MILITARY_CONTEXT",
+        "NO_STRICT_TEMPORAL_BINDING"
+      ]
+    },
+    {
+      "candidate_id": "0af80b9ace77caf690c70160",
+      "city": "odesa",
+      "old_status": "needs_review",
+      "proposed_status": "needs_review",
+      "proposed_matched_episode_id": "b79711e9ad81cb490c42e956",
+      "matching_outcome": "unique_match",
+      "matching_reason": "publication_within_unique_tracked_alert_window",
+      "matched_episode_ids": [
+        "b79711e9ad81cb490c42e956"
+      ],
+      "reason_codes": [
+        "MATCH_UNIQUE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "NO_AIR_MILITARY_CONTEXT",
+        "NO_STRICT_TEMPORAL_BINDING"
+      ]
+    },
+    {
+      "candidate_id": "30aa8f0165d7f0f5cb555da0",
+      "city": "odesa",
+      "old_status": "needs_review",
+      "proposed_status": "needs_review",
+      "proposed_matched_episode_id": "31384cef6eb1ad2f9742b233",
+      "matching_outcome": "unique_match",
+      "matching_reason": "publication_within_unique_tracked_alert_window",
+      "matched_episode_ids": [
+        "31384cef6eb1ad2f9742b233"
+      ],
+      "reason_codes": [
+        "MATCH_UNIQUE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "NO_AIR_MILITARY_CONTEXT",
+        "NO_STRICT_TEMPORAL_BINDING"
+      ]
+    },
+    {
+      "candidate_id": "6e29c53491ebe8d26a225a13",
+      "city": "odesa",
+      "old_status": "needs_review",
+      "proposed_status": "needs_review",
+      "proposed_matched_episode_id": null,
+      "matching_outcome": "no_match",
+      "matching_reason": "publication_outside_all_tracked_alert_windows",
+      "matched_episode_ids": [],
+      "reason_codes": [
+        "MATCH_NONE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "NO_AIR_MILITARY_CONTEXT",
+        "NO_STRICT_TEMPORAL_BINDING"
+      ]
+    },
+    {
+      "candidate_id": "ec759edeac2531c382c0eb4f",
+      "city": "odesa",
+      "old_status": "needs_review",
+      "proposed_status": "needs_review",
+      "proposed_matched_episode_id": "eb2580c2bec54ddc2e36eaf7",
+      "matching_outcome": "unique_match",
+      "matching_reason": "publication_within_unique_tracked_alert_window",
+      "matched_episode_ids": [
+        "eb2580c2bec54ddc2e36eaf7"
+      ],
+      "reason_codes": [
+        "MATCH_UNIQUE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "NO_AIR_MILITARY_CONTEXT",
+        "NO_STRICT_TEMPORAL_BINDING"
+      ]
+    },
+    {
+      "candidate_id": "08bb1062751bc0c7e6a2556a",
+      "city": "poltava",
+      "old_status": "needs_review",
+      "proposed_status": "needs_review",
+      "proposed_matched_episode_id": "60f6aac885e538d93d88e053",
+      "matching_outcome": "unique_match",
+      "matching_reason": "publication_within_unique_tracked_alert_window",
+      "matched_episode_ids": [
+        "60f6aac885e538d93d88e053"
+      ],
+      "reason_codes": [
+        "MATCH_UNIQUE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "NO_AIR_MILITARY_CONTEXT",
+        "NO_STRICT_TEMPORAL_BINDING"
+      ]
+    },
+    {
+      "candidate_id": "2a7ca63187324304db46f973",
+      "city": "poltava",
+      "old_status": "needs_review",
+      "proposed_status": "needs_review",
+      "proposed_matched_episode_id": "6d3ffb88b431e8e80e024aae",
+      "matching_outcome": "unique_match",
+      "matching_reason": "publication_within_unique_tracked_alert_window",
+      "matched_episode_ids": [
+        "6d3ffb88b431e8e80e024aae"
+      ],
+      "reason_codes": [
+        "MATCH_UNIQUE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "NO_AIR_MILITARY_CONTEXT",
+        "NO_STRICT_TEMPORAL_BINDING"
+      ]
+    },
+    {
+      "candidate_id": "67d31ea423a03fa6e7faafe1",
+      "city": "poltava",
+      "old_status": "needs_review",
+      "proposed_status": "needs_review",
+      "proposed_matched_episode_id": "60f6aac885e538d93d88e053",
+      "matching_outcome": "unique_match",
+      "matching_reason": "publication_within_unique_tracked_alert_window",
+      "matched_episode_ids": [
+        "60f6aac885e538d93d88e053"
+      ],
+      "reason_codes": [
+        "MATCH_UNIQUE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "NO_AIR_MILITARY_CONTEXT",
+        "NO_STRICT_TEMPORAL_BINDING"
+      ]
+    },
+    {
+      "candidate_id": "841acc6087e36331a4214653",
+      "city": "poltava",
+      "old_status": "needs_review",
+      "proposed_status": "needs_review",
+      "proposed_matched_episode_id": "60f6aac885e538d93d88e053",
+      "matching_outcome": "unique_match",
+      "matching_reason": "publication_within_unique_tracked_alert_window",
+      "matched_episode_ids": [
+        "60f6aac885e538d93d88e053"
+      ],
+      "reason_codes": [
+        "MATCH_UNIQUE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "NO_AIR_MILITARY_CONTEXT",
+        "NO_STRICT_TEMPORAL_BINDING"
+      ]
+    },
+    {
+      "candidate_id": "a19b98dd388991ec09d00963",
+      "city": "poltava",
+      "old_status": "needs_review",
+      "proposed_status": "needs_review",
+      "proposed_matched_episode_id": null,
+      "matching_outcome": "no_match",
+      "matching_reason": "publication_outside_all_tracked_alert_windows",
+      "matched_episode_ids": [],
+      "reason_codes": [
+        "MATCH_NONE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "NO_AIR_MILITARY_CONTEXT",
+        "NO_STRICT_TEMPORAL_BINDING"
+      ]
+    },
+    {
+      "candidate_id": "b84eaba277b34f5428046447",
+      "city": "poltava",
+      "old_status": "needs_review",
+      "proposed_status": "needs_review",
+      "proposed_matched_episode_id": null,
+      "matching_outcome": "no_match",
+      "matching_reason": "publication_outside_all_tracked_alert_windows",
+      "matched_episode_ids": [],
+      "reason_codes": [
+        "MATCH_NONE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "NO_AIR_MILITARY_CONTEXT",
+        "NO_STRICT_TEMPORAL_BINDING"
+      ]
+    },
+    {
+      "candidate_id": "d78f72c5a56e9d687de41978",
+      "city": "poltava",
+      "old_status": "needs_review",
+      "proposed_status": "needs_review",
+      "proposed_matched_episode_id": "64cf3cdce03e25fe012795e4",
+      "matching_outcome": "unique_match",
+      "matching_reason": "publication_within_unique_tracked_alert_window",
+      "matched_episode_ids": [
+        "64cf3cdce03e25fe012795e4"
+      ],
+      "reason_codes": [
+        "MATCH_UNIQUE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "NO_AIR_MILITARY_CONTEXT",
+        "NO_STRICT_TEMPORAL_BINDING"
+      ]
+    },
+    {
+      "candidate_id": "0283e176c338ca993a5a777d",
+      "city": "rivne",
+      "old_status": "needs_review",
+      "proposed_status": "needs_review",
+      "proposed_matched_episode_id": "742c27c7166e3cd48edd2fde",
+      "matching_outcome": "unique_match",
+      "matching_reason": "publication_within_unique_tracked_alert_window",
+      "matched_episode_ids": [
+        "742c27c7166e3cd48edd2fde"
+      ],
+      "reason_codes": [
+        "MATCH_UNIQUE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "NO_AIR_MILITARY_CONTEXT",
+        "NO_STRICT_TEMPORAL_BINDING"
+      ]
+    },
+    {
+      "candidate_id": "eba700963b0433774e675df4",
+      "city": "sevastopol",
+      "old_status": "needs_review",
+      "proposed_status": "needs_review",
+      "proposed_matched_episode_id": null,
+      "matching_outcome": "no_match",
+      "matching_reason": "publication_outside_all_tracked_alert_windows",
+      "matched_episode_ids": [],
+      "reason_codes": [
+        "MATCH_NONE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "AIR_MILITARY_CONTEXT",
+        "SAME_ATTACK_CONTEXT_SUPPORTED",
+        "NO_STRICT_TEMPORAL_BINDING"
+      ]
+    },
+    {
+      "candidate_id": "eebbee53e68e94dc2bf3c169",
+      "city": "sumy",
+      "old_status": "needs_review",
+      "proposed_status": "needs_review",
+      "proposed_matched_episode_id": null,
+      "matching_outcome": "ambiguous_match",
+      "matching_reason": "publication_matches_multiple_distinct_tracked_alert_windows",
+      "matched_episode_ids": [
+        "9d20bfca2418626647292510",
+        "c19620614623c8486cbefe5c"
+      ],
+      "reason_codes": [
+        "MATCH_AMBIGUOUS",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "AIR_MILITARY_CONTEXT",
+        "SAME_ATTACK_CONTEXT_SUPPORTED",
+        "NO_STRICT_TEMPORAL_BINDING"
+      ]
+    },
+    {
+      "candidate_id": "340ac6fce98a0beab15ec49e",
+      "city": "ternopil",
+      "old_status": "needs_review",
+      "proposed_status": "needs_review",
+      "proposed_matched_episode_id": "542708c29f1a2e044db6876c",
+      "matching_outcome": "unique_match",
+      "matching_reason": "publication_within_unique_tracked_alert_window",
+      "matched_episode_ids": [
+        "542708c29f1a2e044db6876c"
+      ],
+      "reason_codes": [
+        "MATCH_UNIQUE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "NO_AIR_MILITARY_CONTEXT",
+        "TEMPORAL_CONTEMPORANEOUS_LIVE_WORDING"
+      ]
+    },
+    {
+      "candidate_id": "6f11df0c7821da2ba8b3cb93",
+      "city": "ternopil",
+      "old_status": "needs_review",
+      "proposed_status": "needs_review",
+      "proposed_matched_episode_id": null,
+      "matching_outcome": "no_match",
+      "matching_reason": "publication_outside_all_tracked_alert_windows",
+      "matched_episode_ids": [],
+      "reason_codes": [
+        "MATCH_NONE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "AIR_MILITARY_CONTEXT",
+        "SAME_ATTACK_CONTEXT_SUPPORTED",
+        "TEMPORAL_EXPLICIT_ALERT_RELATION"
+      ]
+    },
+    {
+      "candidate_id": "a74ae3a76febdb6894935ac3",
+      "city": "ternopil",
+      "old_status": "needs_review",
+      "proposed_status": "needs_review",
+      "proposed_matched_episode_id": null,
+      "matching_outcome": "no_match",
+      "matching_reason": "publication_outside_all_tracked_alert_windows",
+      "matched_episode_ids": [],
+      "reason_codes": [
+        "MATCH_NONE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "AIR_MILITARY_CONTEXT",
+        "SAME_ATTACK_CONTEXT_SUPPORTED",
+        "NO_STRICT_TEMPORAL_BINDING"
+      ]
+    },
+    {
+      "candidate_id": "c9a05f7ddce5ccb67ae89c94",
+      "city": "ternopil",
+      "old_status": "needs_review",
+      "proposed_status": "needs_review",
+      "proposed_matched_episode_id": "542708c29f1a2e044db6876c",
+      "matching_outcome": "unique_match",
+      "matching_reason": "publication_within_unique_tracked_alert_window",
+      "matched_episode_ids": [
+        "542708c29f1a2e044db6876c"
+      ],
+      "reason_codes": [
+        "MATCH_UNIQUE",
+        "EXACT_CITY_EVENT_TEXT",
+        "NO_STRICT_EXPLOSION_EVIDENCE",
+        "AIR_MILITARY_CONTEXT",
+        "AIR_CONTEXT_NOT_LINKED_TO_EVENT",
+        "NO_STRICT_TEMPORAL_BINDING"
+      ]
+    },
+    {
+      "candidate_id": "cc64cf1fe5e06196cac9b4a3",
+      "city": "ternopil",
+      "old_status": "needs_review",
+      "proposed_status": "needs_review",
+      "proposed_matched_episode_id": null,
+      "matching_outcome": "no_match",
+      "matching_reason": "publication_outside_all_tracked_alert_windows",
+      "matched_episode_ids": [],
+      "reason_codes": [
+        "MATCH_NONE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "AIR_MILITARY_CONTEXT",
+        "SAME_ATTACK_CONTEXT_SUPPORTED",
+        "TEMPORAL_EXPLICIT_ALERT_RELATION"
+      ]
+    },
+    {
+      "candidate_id": "a93c2466ca4aa61937d41276",
+      "city": "vinnytsia",
+      "old_status": "needs_review",
+      "proposed_status": "needs_review",
+      "proposed_matched_episode_id": "a2b8d414504c8b33c861954d",
+      "matching_outcome": "unique_match",
+      "matching_reason": "publication_within_unique_tracked_alert_window",
+      "matched_episode_ids": [
+        "a2b8d414504c8b33c861954d"
+      ],
+      "reason_codes": [
+        "MATCH_UNIQUE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "NO_AIR_MILITARY_CONTEXT",
+        "NO_STRICT_TEMPORAL_BINDING"
+      ]
+    },
+    {
+      "candidate_id": "19e88485cb5e8bed1269fa93",
+      "city": "zaporizhzhia",
+      "old_status": "needs_review",
+      "proposed_status": "needs_review",
+      "proposed_matched_episode_id": "7e721503b305cf045b4c607f",
+      "matching_outcome": "unique_match",
+      "matching_reason": "publication_within_unique_tracked_alert_window",
+      "matched_episode_ids": [
+        "7e721503b305cf045b4c607f"
+      ],
+      "reason_codes": [
+        "MATCH_UNIQUE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "NO_AIR_MILITARY_CONTEXT",
+        "NO_STRICT_TEMPORAL_BINDING"
+      ]
+    },
+    {
+      "candidate_id": "1f6155860880d64556f86099",
+      "city": "zaporizhzhia",
+      "old_status": "needs_review",
+      "proposed_status": "needs_review",
+      "proposed_matched_episode_id": "14d97576d8c4bbceb1ce6b50",
+      "matching_outcome": "unique_match",
+      "matching_reason": "publication_within_unique_tracked_alert_window",
+      "matched_episode_ids": [
+        "14d97576d8c4bbceb1ce6b50"
+      ],
+      "reason_codes": [
+        "MATCH_UNIQUE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "NO_AIR_MILITARY_CONTEXT",
+        "NO_STRICT_TEMPORAL_BINDING"
+      ]
+    },
+    {
+      "candidate_id": "537fc9f91a0405b08c9845a8",
+      "city": "zaporizhzhia",
+      "old_status": "needs_review",
+      "proposed_status": "needs_review",
+      "proposed_matched_episode_id": "a60d817eaa9253200f090720",
+      "matching_outcome": "unique_match",
+      "matching_reason": "publication_within_unique_tracked_alert_window",
+      "matched_episode_ids": [
+        "a60d817eaa9253200f090720"
+      ],
+      "reason_codes": [
+        "MATCH_UNIQUE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "NO_AIR_MILITARY_CONTEXT",
+        "NO_STRICT_TEMPORAL_BINDING"
+      ]
+    },
+    {
+      "candidate_id": "6b9b3e3412ceec2a77a44109",
+      "city": "zaporizhzhia",
+      "old_status": "needs_review",
+      "proposed_status": "needs_review",
+      "proposed_matched_episode_id": "7e721503b305cf045b4c607f",
+      "matching_outcome": "unique_match",
+      "matching_reason": "publication_within_unique_tracked_alert_window",
+      "matched_episode_ids": [
+        "7e721503b305cf045b4c607f"
+      ],
+      "reason_codes": [
+        "MATCH_UNIQUE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "NO_AIR_MILITARY_CONTEXT",
+        "NO_STRICT_TEMPORAL_BINDING"
+      ]
+    },
+    {
+      "candidate_id": "a41f29ed8e5f21e8e518a332",
+      "city": "zaporizhzhia",
+      "old_status": "needs_review",
+      "proposed_status": "needs_review",
+      "proposed_matched_episode_id": "2be173b7a3ca63d5821af3a1",
+      "matching_outcome": "unique_match",
+      "matching_reason": "publication_within_unique_tracked_alert_window",
+      "matched_episode_ids": [
+        "2be173b7a3ca63d5821af3a1"
+      ],
+      "reason_codes": [
+        "MATCH_UNIQUE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "NO_AIR_MILITARY_CONTEXT",
+        "NO_STRICT_TEMPORAL_BINDING"
+      ]
+    },
+    {
+      "candidate_id": "bfdb300d78b0e2f2d761081f",
+      "city": "zaporizhzhia",
+      "old_status": "needs_review",
+      "proposed_status": "needs_review",
+      "proposed_matched_episode_id": "195b9bd5c0f956c1af72dc08",
+      "matching_outcome": "unique_match",
+      "matching_reason": "publication_within_unique_tracked_alert_window",
+      "matched_episode_ids": [
+        "195b9bd5c0f956c1af72dc08"
+      ],
+      "reason_codes": [
+        "MATCH_UNIQUE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "NO_AIR_MILITARY_CONTEXT",
+        "NO_STRICT_TEMPORAL_BINDING"
+      ]
+    },
+    {
+      "candidate_id": "c71667d47fd8bdc5f0eb01c8",
+      "city": "zaporizhzhia",
+      "old_status": "needs_review",
+      "proposed_status": "needs_review",
+      "proposed_matched_episode_id": "d0456b4da7b9a1e6243ebdd9",
+      "matching_outcome": "unique_match",
+      "matching_reason": "publication_within_unique_tracked_alert_window",
+      "matched_episode_ids": [
+        "d0456b4da7b9a1e6243ebdd9"
+      ],
+      "reason_codes": [
+        "MATCH_UNIQUE",
+        "EXACT_CITY_EVENT_TEXT",
+        "NO_STRICT_EXPLOSION_EVIDENCE",
+        "AIR_MILITARY_CONTEXT",
+        "AIR_CONTEXT_NOT_LINKED_TO_EVENT",
+        "NO_STRICT_TEMPORAL_BINDING"
+      ]
+    },
+    {
+      "candidate_id": "cbc672c50a65fcc2c7da314c",
+      "city": "zaporizhzhia",
+      "old_status": "needs_review",
+      "proposed_status": "needs_review",
+      "proposed_matched_episode_id": "3006c7a0b2bf8ab7127307a3",
+      "matching_outcome": "unique_match",
+      "matching_reason": "publication_within_unique_tracked_alert_window",
+      "matched_episode_ids": [
+        "3006c7a0b2bf8ab7127307a3"
+      ],
+      "reason_codes": [
+        "MATCH_UNIQUE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "NO_AIR_MILITARY_CONTEXT",
+        "NO_STRICT_TEMPORAL_BINDING"
+      ]
+    },
+    {
+      "candidate_id": "e1ca647575a2191e505b4c9a",
+      "city": "zaporizhzhia",
+      "old_status": "needs_review",
+      "proposed_status": "needs_review",
+      "proposed_matched_episode_id": "87a81e330f61274786f6ee08",
+      "matching_outcome": "unique_match",
+      "matching_reason": "publication_within_unique_tracked_alert_window",
+      "matched_episode_ids": [
+        "87a81e330f61274786f6ee08"
+      ],
+      "reason_codes": [
+        "MATCH_UNIQUE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "NO_AIR_MILITARY_CONTEXT",
+        "NO_STRICT_TEMPORAL_BINDING"
+      ]
+    },
+    {
+      "candidate_id": "e514a21aa0498a6e91cdfc72",
+      "city": "zaporizhzhia",
+      "old_status": "needs_review",
+      "proposed_status": "needs_review",
+      "proposed_matched_episode_id": "2be173b7a3ca63d5821af3a1",
+      "matching_outcome": "unique_match",
+      "matching_reason": "publication_within_unique_tracked_alert_window",
+      "matched_episode_ids": [
+        "2be173b7a3ca63d5821af3a1"
+      ],
+      "reason_codes": [
+        "MATCH_UNIQUE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "NO_AIR_MILITARY_CONTEXT",
+        "NO_STRICT_TEMPORAL_BINDING"
+      ]
+    },
+    {
+      "candidate_id": "e39d3851f7372b549e460988",
+      "city": "zhytomyr",
+      "old_status": "needs_review",
+      "proposed_status": "needs_review",
+      "proposed_matched_episode_id": null,
+      "matching_outcome": "no_match",
+      "matching_reason": "publication_outside_all_tracked_alert_windows",
+      "matched_episode_ids": [],
+      "reason_codes": [
+        "MATCH_NONE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "NO_AIR_MILITARY_CONTEXT",
+        "NO_STRICT_TEMPORAL_BINDING"
+      ]
+    }
+  ],
+  "transition_counts": {
+    "needs_review → approved_strict": 0,
+    "needs_review → approved_sensitivity": 0,
+    "needs_review → rejected": 0,
+    "needs_review → needs_review": 122
+  },
+  "transition_matching_outcomes": {
+    "unique_match": 77,
+    "ambiguous_match": 10,
+    "no_match": 35
+  },
+  "counts_by_city": {
+    "cherkasy": {
+      "current_needs_review": 2,
+      "needs_review → approved_strict": 0,
+      "needs_review → approved_sensitivity": 0,
+      "needs_review → rejected": 0,
+      "needs_review → needs_review": 2
+    },
+    "chernihiv": {
+      "current_needs_review": 5,
+      "needs_review → approved_strict": 0,
+      "needs_review → approved_sensitivity": 0,
+      "needs_review → rejected": 0,
+      "needs_review → needs_review": 5
+    },
+    "chernivtsi": {
+      "current_needs_review": 0,
+      "needs_review → approved_strict": 0,
+      "needs_review → approved_sensitivity": 0,
+      "needs_review → rejected": 0,
+      "needs_review → needs_review": 0
+    },
+    "dnipro": {
+      "current_needs_review": 26,
+      "needs_review → approved_strict": 0,
+      "needs_review → approved_sensitivity": 0,
+      "needs_review → rejected": 0,
+      "needs_review → needs_review": 26
+    },
+    "ivano_frankivsk": {
+      "current_needs_review": 0,
+      "needs_review → approved_strict": 0,
+      "needs_review → approved_sensitivity": 0,
+      "needs_review → rejected": 0,
+      "needs_review → needs_review": 0
+    },
+    "kharkiv": {
+      "current_needs_review": 1,
+      "needs_review → approved_strict": 0,
+      "needs_review → approved_sensitivity": 0,
+      "needs_review → rejected": 0,
+      "needs_review → needs_review": 1
+    },
+    "kherson": {
+      "current_needs_review": 0,
+      "needs_review → approved_strict": 0,
+      "needs_review → approved_sensitivity": 0,
+      "needs_review → rejected": 0,
+      "needs_review → needs_review": 0
+    },
+    "khmelnytskyi": {
+      "current_needs_review": 0,
+      "needs_review → approved_strict": 0,
+      "needs_review → approved_sensitivity": 0,
+      "needs_review → rejected": 0,
+      "needs_review → needs_review": 0
+    },
+    "kropyvnytskyi": {
+      "current_needs_review": 8,
+      "needs_review → approved_strict": 0,
+      "needs_review → approved_sensitivity": 0,
+      "needs_review → rejected": 0,
+      "needs_review → needs_review": 8
+    },
+    "kyiv": {
+      "current_needs_review": 41,
+      "needs_review → approved_strict": 0,
+      "needs_review → approved_sensitivity": 0,
+      "needs_review → rejected": 0,
+      "needs_review → needs_review": 41
+    },
+    "lutsk": {
+      "current_needs_review": 0,
+      "needs_review → approved_strict": 0,
+      "needs_review → approved_sensitivity": 0,
+      "needs_review → rejected": 0,
+      "needs_review → needs_review": 0
+    },
+    "lviv": {
+      "current_needs_review": 0,
+      "needs_review → approved_strict": 0,
+      "needs_review → approved_sensitivity": 0,
+      "needs_review → rejected": 0,
+      "needs_review → needs_review": 0
+    },
+    "mykolaiv": {
+      "current_needs_review": 8,
+      "needs_review → approved_strict": 0,
+      "needs_review → approved_sensitivity": 0,
+      "needs_review → rejected": 0,
+      "needs_review → needs_review": 8
+    },
+    "odesa": {
+      "current_needs_review": 4,
+      "needs_review → approved_strict": 0,
+      "needs_review → approved_sensitivity": 0,
+      "needs_review → rejected": 0,
+      "needs_review → needs_review": 4
+    },
+    "poltava": {
+      "current_needs_review": 7,
+      "needs_review → approved_strict": 0,
+      "needs_review → approved_sensitivity": 0,
+      "needs_review → rejected": 0,
+      "needs_review → needs_review": 7
+    },
+    "rivne": {
+      "current_needs_review": 1,
+      "needs_review → approved_strict": 0,
+      "needs_review → approved_sensitivity": 0,
+      "needs_review → rejected": 0,
+      "needs_review → needs_review": 1
+    },
+    "sevastopol": {
+      "current_needs_review": 1,
+      "needs_review → approved_strict": 0,
+      "needs_review → approved_sensitivity": 0,
+      "needs_review → rejected": 0,
+      "needs_review → needs_review": 1
+    },
+    "sumy": {
+      "current_needs_review": 1,
+      "needs_review → approved_strict": 0,
+      "needs_review → approved_sensitivity": 0,
+      "needs_review → rejected": 0,
+      "needs_review → needs_review": 1
+    },
+    "ternopil": {
+      "current_needs_review": 5,
+      "needs_review → approved_strict": 0,
+      "needs_review → approved_sensitivity": 0,
+      "needs_review → rejected": 0,
+      "needs_review → needs_review": 5
+    },
+    "uzhhorod": {
+      "current_needs_review": 0,
+      "needs_review → approved_strict": 0,
+      "needs_review → approved_sensitivity": 0,
+      "needs_review → rejected": 0,
+      "needs_review → needs_review": 0
+    },
+    "vinnytsia": {
+      "current_needs_review": 1,
+      "needs_review → approved_strict": 0,
+      "needs_review → approved_sensitivity": 0,
+      "needs_review → rejected": 0,
+      "needs_review → needs_review": 1
+    },
+    "zaporizhzhia": {
+      "current_needs_review": 10,
+      "needs_review → approved_strict": 0,
+      "needs_review → approved_sensitivity": 0,
+      "needs_review → rejected": 0,
+      "needs_review → needs_review": 10
+    },
+    "zhytomyr": {
+      "current_needs_review": 1,
+      "needs_review → approved_strict": 0,
+      "needs_review → approved_sensitivity": 0,
+      "needs_review → rejected": 0,
+      "needs_review → needs_review": 1
+    }
+  },
+  "approved_record_conflicts": [
+    {
+      "candidate_id": "8489a800c094ba130a079b89",
+      "city": "dnipro",
+      "current_status": "approved_sensitivity",
+      "preserved_matched_episode_id": "73ff94382ce8d8c9f55c4f37",
+      "hardened_matching_outcome": "ambiguous_match",
+      "hardened_proposed_matched_episode_id": null,
+      "hardened_matched_episode_ids": [
+        "0574cf6b4187393c9a58cd34",
+        "ffaac5b5fa6fa656c0bcc44f"
+      ],
+      "hardened_matching_reason": "publication_matches_multiple_distinct_tracked_alert_windows",
+      "conflict_kind": "APPROVED_MANUAL_EPISODE_BINDING_DIFFERS_FROM_HARDENED_PUBLICATION_MATCH",
+      "action": "record_only_no_mutation"
+    },
+    {
+      "candidate_id": "bb4cfcc842179b6eccd76ddd",
+      "city": "dnipro",
+      "current_status": "approved_sensitivity",
+      "preserved_matched_episode_id": "73ff94382ce8d8c9f55c4f37",
+      "hardened_matching_outcome": "no_match",
+      "hardened_proposed_matched_episode_id": null,
+      "hardened_matched_episode_ids": [],
+      "hardened_matching_reason": "publication_outside_all_tracked_alert_windows",
+      "conflict_kind": "APPROVED_MANUAL_EPISODE_BINDING_DIFFERS_FROM_HARDENED_PUBLICATION_MATCH",
+      "action": "record_only_no_mutation"
+    },
+    {
+      "candidate_id": "f5d3f321b62f158a9f0b8b80",
+      "city": "dnipro",
+      "current_status": "approved_sensitivity",
+      "preserved_matched_episode_id": "73ff94382ce8d8c9f55c4f37",
+      "hardened_matching_outcome": "ambiguous_match",
+      "hardened_proposed_matched_episode_id": null,
+      "hardened_matched_episode_ids": [
+        "0574cf6b4187393c9a58cd34",
+        "ffaac5b5fa6fa656c0bcc44f"
+      ],
+      "hardened_matching_reason": "publication_matches_multiple_distinct_tracked_alert_windows",
+      "conflict_kind": "APPROVED_MANUAL_EPISODE_BINDING_DIFFERS_FROM_HARDENED_PUBLICATION_MATCH",
+      "action": "record_only_no_mutation"
+    },
+    {
+      "candidate_id": "f74cd4ffe664930eaadf2ff7",
+      "city": "dnipro",
+      "current_status": "approved_sensitivity",
+      "preserved_matched_episode_id": "0574cf6b4187393c9a58cd34",
+      "hardened_matching_outcome": "no_match",
+      "hardened_proposed_matched_episode_id": null,
+      "hardened_matched_episode_ids": [],
+      "hardened_matching_reason": "publication_outside_all_tracked_alert_windows",
+      "conflict_kind": "APPROVED_MANUAL_EPISODE_BINDING_DIFFERS_FROM_HARDENED_PUBLICATION_MATCH",
+      "action": "record_only_no_mutation"
+    },
+    {
+      "candidate_id": "1ac73c928960f550711ff363",
+      "city": "kropyvnytskyi",
+      "current_status": "approved_strict",
+      "preserved_matched_episode_id": "815411eee407c0d936bac013",
+      "hardened_matching_outcome": "unique_match",
+      "hardened_proposed_matched_episode_id": "01d286e217275f643f60379e",
+      "hardened_matched_episode_ids": [
+        "01d286e217275f643f60379e"
+      ],
+      "hardened_matching_reason": "publication_within_unique_tracked_alert_window",
+      "conflict_kind": "APPROVED_MANUAL_EPISODE_BINDING_DIFFERS_FROM_HARDENED_PUBLICATION_MATCH",
+      "action": "record_only_no_mutation"
+    },
+    {
+      "candidate_id": "c183f7db4eaf69442b6e9e69",
+      "city": "kropyvnytskyi",
+      "current_status": "approved_strict",
+      "preserved_matched_episode_id": "815411eee407c0d936bac013",
+      "hardened_matching_outcome": "unique_match",
+      "hardened_proposed_matched_episode_id": "01d286e217275f643f60379e",
+      "hardened_matched_episode_ids": [
+        "01d286e217275f643f60379e"
+      ],
+      "hardened_matching_reason": "publication_within_unique_tracked_alert_window",
+      "conflict_kind": "APPROVED_MANUAL_EPISODE_BINDING_DIFFERS_FROM_HARDENED_PUBLICATION_MATCH",
+      "action": "record_only_no_mutation"
+    },
+    {
+      "candidate_id": "0ae17f8cc2962a26bc1968d9",
+      "city": "kyiv",
+      "current_status": "approved_sensitivity",
+      "preserved_matched_episode_id": "7d7cb0c7a9e7d3574d33c70c",
+      "hardened_matching_outcome": "no_match",
+      "hardened_proposed_matched_episode_id": null,
+      "hardened_matched_episode_ids": [],
+      "hardened_matching_reason": "publication_outside_all_tracked_alert_windows",
+      "conflict_kind": "APPROVED_MANUAL_EPISODE_BINDING_DIFFERS_FROM_HARDENED_PUBLICATION_MATCH",
+      "action": "record_only_no_mutation"
+    },
+    {
+      "candidate_id": "0f151c2626bf6ff16af7993e",
+      "city": "kyiv",
+      "current_status": "approved_strict",
+      "preserved_matched_episode_id": "7d7cb0c7a9e7d3574d33c70c",
+      "hardened_matching_outcome": "no_match",
+      "hardened_proposed_matched_episode_id": null,
+      "hardened_matched_episode_ids": [],
+      "hardened_matching_reason": "publication_outside_all_tracked_alert_windows",
+      "conflict_kind": "APPROVED_MANUAL_EPISODE_BINDING_DIFFERS_FROM_HARDENED_PUBLICATION_MATCH",
+      "action": "record_only_no_mutation"
+    },
+    {
+      "candidate_id": "7132b162083545deeb722bce",
+      "city": "kyiv",
+      "current_status": "approved_strict",
+      "preserved_matched_episode_id": "372a0acab8763541b0422e14",
+      "hardened_matching_outcome": "no_match",
+      "hardened_proposed_matched_episode_id": null,
+      "hardened_matched_episode_ids": [],
+      "hardened_matching_reason": "publication_outside_all_tracked_alert_windows",
+      "conflict_kind": "APPROVED_MANUAL_EPISODE_BINDING_DIFFERS_FROM_HARDENED_PUBLICATION_MATCH",
+      "action": "record_only_no_mutation"
+    },
+    {
+      "candidate_id": "81f3fabc05dca38d05417ef4",
+      "city": "kyiv",
+      "current_status": "approved_sensitivity",
+      "preserved_matched_episode_id": "372a0acab8763541b0422e14",
+      "hardened_matching_outcome": "no_match",
+      "hardened_proposed_matched_episode_id": null,
+      "hardened_matched_episode_ids": [],
+      "hardened_matching_reason": "publication_outside_all_tracked_alert_windows",
+      "conflict_kind": "APPROVED_MANUAL_EPISODE_BINDING_DIFFERS_FROM_HARDENED_PUBLICATION_MATCH",
+      "action": "record_only_no_mutation"
+    },
+    {
+      "candidate_id": "9d8e278e3e837877280ff018",
+      "city": "kyiv",
+      "current_status": "approved_strict",
+      "preserved_matched_episode_id": "7d7cb0c7a9e7d3574d33c70c",
+      "hardened_matching_outcome": "no_match",
+      "hardened_proposed_matched_episode_id": null,
+      "hardened_matched_episode_ids": [],
+      "hardened_matching_reason": "publication_outside_all_tracked_alert_windows",
+      "conflict_kind": "APPROVED_MANUAL_EPISODE_BINDING_DIFFERS_FROM_HARDENED_PUBLICATION_MATCH",
+      "action": "record_only_no_mutation"
+    },
+    {
+      "candidate_id": "e52fef06544b5dcd21f87a8c",
+      "city": "kyiv",
+      "current_status": "approved_sensitivity",
+      "preserved_matched_episode_id": "372a0acab8763541b0422e14",
+      "hardened_matching_outcome": "no_match",
+      "hardened_proposed_matched_episode_id": null,
+      "hardened_matched_episode_ids": [],
+      "hardened_matching_reason": "publication_outside_all_tracked_alert_windows",
+      "conflict_kind": "APPROVED_MANUAL_EPISODE_BINDING_DIFFERS_FROM_HARDENED_PUBLICATION_MATCH",
+      "action": "record_only_no_mutation"
+    },
+    {
+      "candidate_id": "b996608bb254f9d86481bb80",
+      "city": "odesa",
+      "current_status": "approved_sensitivity",
+      "preserved_matched_episode_id": "f602c8ea8a224ea7d45fda29",
+      "hardened_matching_outcome": "unique_match",
+      "hardened_proposed_matched_episode_id": "0ddb9970c791dc2d1760716e",
+      "hardened_matched_episode_ids": [
+        "0ddb9970c791dc2d1760716e"
+      ],
+      "hardened_matching_reason": "publication_within_unique_tracked_alert_window",
+      "conflict_kind": "APPROVED_MANUAL_EPISODE_BINDING_DIFFERS_FROM_HARDENED_PUBLICATION_MATCH",
+      "action": "record_only_no_mutation"
+    },
+    {
+      "candidate_id": "bac870ab2c3e3778839fb3b7",
+      "city": "odesa",
+      "current_status": "approved_sensitivity",
+      "preserved_matched_episode_id": "f602c8ea8a224ea7d45fda29",
+      "hardened_matching_outcome": "ambiguous_match",
+      "hardened_proposed_matched_episode_id": null,
+      "hardened_matched_episode_ids": [
+        "f602c8ea8a224ea7d45fda29",
+        "ff2ba0d3c1cc5ebf116ed7bf"
+      ],
+      "hardened_matching_reason": "publication_matches_multiple_distinct_tracked_alert_windows",
+      "conflict_kind": "APPROVED_MANUAL_EPISODE_BINDING_DIFFERS_FROM_HARDENED_PUBLICATION_MATCH",
+      "action": "record_only_no_mutation"
+    },
+    {
+      "candidate_id": "e8998303b80b496820692c54",
+      "city": "odesa",
+      "current_status": "approved_strict",
+      "preserved_matched_episode_id": "ff2ba0d3c1cc5ebf116ed7bf",
+      "hardened_matching_outcome": "ambiguous_match",
+      "hardened_proposed_matched_episode_id": null,
+      "hardened_matched_episode_ids": [
+        "f602c8ea8a224ea7d45fda29",
+        "ff2ba0d3c1cc5ebf116ed7bf"
+      ],
+      "hardened_matching_reason": "publication_matches_multiple_distinct_tracked_alert_windows",
+      "conflict_kind": "APPROVED_MANUAL_EPISODE_BINDING_DIFFERS_FROM_HARDENED_PUBLICATION_MATCH",
+      "action": "record_only_no_mutation"
+    },
+    {
+      "candidate_id": "e988116e757a346caa952892",
+      "city": "odesa",
+      "current_status": "approved_strict",
+      "preserved_matched_episode_id": "f602c8ea8a224ea7d45fda29",
+      "hardened_matching_outcome": "ambiguous_match",
+      "hardened_proposed_matched_episode_id": null,
+      "hardened_matched_episode_ids": [
+        "f602c8ea8a224ea7d45fda29",
+        "ff2ba0d3c1cc5ebf116ed7bf"
+      ],
+      "hardened_matching_reason": "publication_matches_multiple_distinct_tracked_alert_windows",
+      "conflict_kind": "APPROVED_MANUAL_EPISODE_BINDING_DIFFERS_FROM_HARDENED_PUBLICATION_MATCH",
+      "action": "record_only_no_mutation"
+    },
+    {
+      "candidate_id": "d0f421afdb362cc867e6b175",
+      "city": "sevastopol",
+      "current_status": "approved_strict",
+      "preserved_matched_episode_id": "88a57288a18038509649a991",
+      "hardened_matching_outcome": "no_match",
+      "hardened_proposed_matched_episode_id": null,
+      "hardened_matched_episode_ids": [],
+      "hardened_matching_reason": "publication_outside_all_tracked_alert_windows",
+      "conflict_kind": "APPROVED_MANUAL_EPISODE_BINDING_DIFFERS_FROM_HARDENED_PUBLICATION_MATCH",
+      "action": "record_only_no_mutation"
+    },
+    {
+      "candidate_id": "25c966b4e375b5075b267a91",
+      "city": "sumy",
+      "current_status": "approved_strict",
+      "preserved_matched_episode_id": "e7e8974f19d4fdc782e93980",
+      "hardened_matching_outcome": "no_match",
+      "hardened_proposed_matched_episode_id": null,
+      "hardened_matched_episode_ids": [],
+      "hardened_matching_reason": "publication_outside_all_tracked_alert_windows",
+      "conflict_kind": "APPROVED_MANUAL_EPISODE_BINDING_DIFFERS_FROM_HARDENED_PUBLICATION_MATCH",
+      "action": "record_only_no_mutation"
+    },
+    {
+      "candidate_id": "6212f72cfd28e6a86fd5bc51",
+      "city": "sumy",
+      "current_status": "approved_strict",
+      "preserved_matched_episode_id": "e7e8974f19d4fdc782e93980",
+      "hardened_matching_outcome": "no_match",
+      "hardened_proposed_matched_episode_id": null,
+      "hardened_matched_episode_ids": [],
+      "hardened_matching_reason": "publication_outside_all_tracked_alert_windows",
+      "conflict_kind": "APPROVED_MANUAL_EPISODE_BINDING_DIFFERS_FROM_HARDENED_PUBLICATION_MATCH",
+      "action": "record_only_no_mutation"
+    }
+  ],
+  "expected_queue_counts_after_replay": {
+    "total": 249,
+    "approved_strict": 46,
+    "approved_sensitivity": 59,
+    "needs_review": 122,
+    "rejected": 22,
+    "matched": 170,
+    "unmatched": 79,
+    "note": "No current candidate or matching-field mutation is proposed; expected counts equal the pre-replay snapshot."
+  },
+  "exact_candidate_ids_to_change": [],
+  "qa": {
+    "current_needs_review_count": 122,
+    "all_current_needs_review_covered_exactly_once": true,
+    "duplicate_candidate_ids_in_queue": 0,
+    "duplicate_candidate_ids_in_transition_plan": 0,
+    "proposed_matched_episode_ids_exist": true,
+    "all_referenced_matched_episode_ids_exist": true,
+    "ambiguous_matching_not_auto_resolved": true,
+    "current_needs_review_exactly_equals_dry_replay_remaining_set": true,
+    "current_matching_fields_equal_dry_replay_decisions": true,
+    "queue_status_or_data_mutation_performed_by_this_step": false,
+    "monitor_state_mutation_performed_by_this_step": false
+  },
+  "readiness": {
+    "apply_required": false,
+    "blocker": "The branch is already past the intended pre-replay stage: the 53 non-review dry-replay transitions were applied in e70a96de44919548a0d80850e8167e580e3c36d7. The current transition plan is a 122-record no-op, so a second queue-transition application should not run.",
+    "verdict": "NOT READY TO APPLY QUEUE TRANSITIONS"
+  }
+}
