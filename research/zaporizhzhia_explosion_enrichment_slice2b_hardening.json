@@ -1,0 +1,562 @@
+{
+  "schema_version": "1.0",
+  "generated_date": "2026-09-23",
+  "repository": "olegbalakin-cmyk/kyiv-air-alerts-grafana",
+  "branch": "multicity-wip-2026-09-16",
+  "source_branch_head": "1e7583c181b43f49d35c8ae90df5d5639b4f170b",
+  "city": "Запоріжжя",
+  "workstream": "explosion_enrichment",
+  "slice": "slice2b_hardening",
+  "purpose": "Calibration hardening after the frozen Slice 2 independent chronological holdout.",
+  "methodological_status": {
+    "frozen_slice2_independent_result": "11/15 strict controls rediscovered",
+    "frozen_slice2_strict_recall_percent": 73.33,
+    "frozen_slice2_result_mutated": false,
+    "slice2_after_tuning": "calibration_data",
+    "next_independent_holdout": "slice3",
+    "slice3_started": false
+  },
+  "exact_disagreement_count": 5,
+  "exact_disagreements": [
+    {
+      "episode_id": "989a3167ca65f3b54e6eb3bb",
+      "date": "2025-05-25",
+      "target_alert": {
+        "start_utc": "2025-05-25T17:38:26Z",
+        "end_utc": "2025-05-26T03:45:42Z",
+        "start_kyiv": "2025-05-25T20:38:26+03:00",
+        "end_kyiv": "2025-05-26T06:45:42+03:00",
+        "timezone": "Europe/Kyiv"
+      },
+      "historical": {
+        "verdict": "strict",
+        "source_provenance": {
+          "artifact": "kyiv-air-alerts-grafana/data/explosion_research/zaporizhzhia/final_evidence.json",
+          "path": "strict_events[15]",
+          "event_time_kyiv": "~20:40",
+          "source_url": "https://24tv.ua/zaporizhzhi-prolunali-vibuhi-chuti-robotu-ppo_n2830767",
+          "evidence": "У Запоріжжі пролунали вибухи через кілька хвилин після оголошення тривоги під час атаки Shahed.",
+          "basis": "exact_city+confirmed_aerial_context+explicit_after_alert"
+        }
+      },
+      "frozen_slice2": {
+        "discovery_verdict": "no_source_hit",
+        "retrieval_search_paths": [
+          "generic episode-level web/news query using exact Kyiv alert-start date and local-hour envelope",
+          "web-indexed Telegram/date-hour chronology scan with neighboring-message context where surfaced",
+          "frozen trusted-domain fallback using the existing Slice 1B trusted-domain universe; target-episode timing enforced at attribution"
+        ],
+        "sources_considered": [],
+        "raw_hits": [],
+        "full_body_extraction": {
+          "performed": false,
+          "summary": null
+        },
+        "extracted_event_statements": [],
+        "event_level_locality": "not_established",
+        "explosion_impact_evidence": "not_established",
+        "aerial_war_context": "not_established",
+        "event_time": null,
+        "publication_time": null,
+        "publication_time_used_as_event_time": false,
+        "temporal_attribution": {
+          "status": "not_attributable",
+          "basis": "Explosion/PVO reporting did not establish a separate qualifying exact-city impact event attributable to this target episode."
+        },
+        "cross_source_composition": {
+          "used": false
+        },
+        "rejection_no_hit_reason": "Explosion/PVO reporting did not establish a separate qualifying exact-city impact event attributable to this target episode."
+      },
+      "post_freeze_independent_source_check": {
+        "discoverable_indexable": true,
+        "retained_url_found_by_frozen_pipeline": false,
+        "source_url": "https://24tv.ua/zaporizhzhi-prolunali-vibuhi-chuti-robotu-ppo_n2830767",
+        "source_publication_time_kyiv": "2025-05-25T20:49:00+03:00",
+        "publication_timestamp_semantics": "publication_time",
+        "event_time_kyiv": "~2025-05-25T20:46:00+03:00",
+        "event_timestamp_semantics": "approximate event/report chronology in article body",
+        "qualifying_event_in_body": true,
+        "locality_isolated": "Article key points explicitly say explosions in Zaporizhzhia; body gives the same attack chronology in Zaporizhzhia oblast and an incoming UAV toward Zaporizhzhia at 20:47.",
+        "cross_source_chain_required": false
+      },
+      "root_cause": {
+        "primary": "classification_failure",
+        "secondary": [
+          "article_selection_failure"
+        ],
+        "existing_diagnostic_code": "PVO_OVERFILTER_EXPLICIT_EXPLOSION_FALSE_NEGATIVE",
+        "explanation": "PVO/Shahed framing suppressed a source that contained separate explicit explosion evidence. The failure occurred before the qualifying event statement was retained and classified.",
+        "source_discoverable": true,
+        "url_retained_by_frozen_pipeline": false,
+        "full_body_read_by_frozen_pipeline": false,
+        "qualifying_event_present": true,
+        "event_time_available": true,
+        "relevant_source_missed_or_dropped_by_retrieval_logic": true,
+        "failure_class_seen_in_slice0_or_slice1": true,
+        "prior_analogue": "Slice 1 PVO_HEADLINE_WITH_BODY_EXPLOSION_FALSE_NEGATIVE; Slice 1B HEADLINE_CONTEXT_NON_OVERRIDE.",
+        "new_top_level_failure_class": false
+      }
+    },
+    {
+      "episode_id": "4d1a69adfb40266b088dc442",
+      "date": "2025-06-07",
+      "target_alert": {
+        "start_utc": "2025-06-07T13:52:39Z",
+        "end_utc": "2025-06-07T14:48:32Z",
+        "start_kyiv": "2025-06-07T16:52:39+03:00",
+        "end_kyiv": "2025-06-07T17:48:32+03:00",
+        "timezone": "Europe/Kyiv"
+      },
+      "historical": {
+        "verdict": "strict",
+        "source_provenance": {
+          "artifact": "kyiv-air-alerts-grafana/data/explosion_research/zaporizhzhia/final_evidence.json",
+          "path": "strict_events[17]",
+          "event_time_kyiv": "~17:00",
+          "source_url": "https://akzent.zp.ua/vybuhy-u-zaporizhzhi-persha-informatsiya/",
+          "evidence": "Близько 17:00 мешканці Запоріжжя чули потужний вибух після оголошення тривоги; ОВА пов’язала звук із ворожою повітряною атакою.",
+          "basis": "exact_city+confirmed_aerial_context+time_inside_episode"
+        }
+      },
+      "frozen_slice2": {
+        "discovery_verdict": "no_source_hit",
+        "retrieval_search_paths": [
+          "generic episode-level web/news query using exact Kyiv alert-start date and local-hour envelope",
+          "web-indexed Telegram/date-hour chronology scan with neighboring-message context where surfaced",
+          "frozen trusted-domain fallback using the existing Slice 1B trusted-domain universe; target-episode timing enforced at attribution"
+        ],
+        "sources_considered": [],
+        "raw_hits": [],
+        "full_body_extraction": {
+          "performed": false,
+          "summary": null
+        },
+        "extracted_event_statements": [],
+        "event_level_locality": "not_established",
+        "explosion_impact_evidence": "not_established",
+        "aerial_war_context": "not_established",
+        "event_time": null,
+        "publication_time": null,
+        "publication_time_used_as_event_time": false,
+        "temporal_attribution": {
+          "status": "not_attributable",
+          "basis": "No qualifying exact-city explosion/impact event time-locked to this alert episode after frozen retrieval paths."
+        },
+        "cross_source_composition": {
+          "used": false
+        },
+        "rejection_no_hit_reason": "no qualifying source hit survived frozen locality/explosion/aerial/temporal guardrails"
+      },
+      "post_freeze_independent_source_check": {
+        "discoverable_indexable": true,
+        "retained_url_found_by_frozen_pipeline": false,
+        "source_url": "https://akzent.zp.ua/vybuhy-u-zaporizhzhi-persha-informatsiya/",
+        "source_publication_time_kyiv": "2025-06-07T17:09:00+03:00",
+        "publication_timestamp_semantics": "publication_time",
+        "event_time_kyiv": "~2025-06-07T17:00:00+03:00",
+        "event_timestamp_semantics": "approximate event time stated in article body",
+        "qualifying_event_in_body": true,
+        "locality_isolated": "Residents of Zaporizhzhia heard a powerful explosion; article separately gives ballistic-threat and hostile-UAV context.",
+        "cross_source_chain_required": false
+      },
+      "root_cause": {
+        "primary": "retrieval_failure",
+        "secondary": [],
+        "existing_diagnostic_code": "NON_TRUSTED_LOCAL_DOMAIN_GENERIC_RETRIEVAL_MISS",
+        "explanation": "The indexable local outlet was outside the fixed trusted-domain fallback and the generic route retained no URL.",
+        "source_discoverable": true,
+        "url_retained_by_frozen_pipeline": false,
+        "full_body_read_by_frozen_pipeline": false,
+        "qualifying_event_present": true,
+        "event_time_available": true,
+        "relevant_source_missed_or_dropped_by_retrieval_logic": true,
+        "failure_class_seen_in_slice0_or_slice1": true,
+        "prior_analogue": "Slice 1 COARSE_TEMPORAL_SOURCE_RETRIEVAL_MISS / STRONG_INDEXABLE_SOURCE_RETRIEVAL_MISS.",
+        "new_specific_subtype": "indexable local/regional source outside fixed trusted-domain fallback",
+        "new_top_level_failure_class": false
+      }
+    },
+    {
+      "episode_id": "cf12245b5767340b36bb934b",
+      "date": "2025-06-09",
+      "target_alert": {
+        "start_utc": "2025-06-09T07:16:03Z",
+        "end_utc": "2025-06-09T08:06:53Z",
+        "start_kyiv": "2025-06-09T10:16:03+03:00",
+        "end_kyiv": "2025-06-09T11:06:53+03:00",
+        "timezone": "Europe/Kyiv"
+      },
+      "historical": {
+        "verdict": "strict",
+        "source_provenance": {
+          "artifact": "kyiv-air-alerts-grafana/data/explosion_research/zaporizhzhia/final_evidence.json",
+          "path": "strict_events[19]",
+          "event_time_kyiv": "~10:30",
+          "source_url": "https://zprz.city/news/view/u-zaporizhzhi-ekoinspektori-doslidili-naslidki-vorozhogo-udaru-kabami-9-chervnya-foto",
+          "evidence": "Близько 10:30 росіяни атакували Запоріжжя КАБами; мешканці міста чули вибухи.",
+          "basis": "exact_city+confirmed_aerial_context+time_inside_episode"
+        }
+      },
+      "frozen_slice2": {
+        "discovery_verdict": "no_source_hit",
+        "retrieval_search_paths": [
+          "generic episode-level web/news query using exact Kyiv alert-start date and local-hour envelope",
+          "web-indexed Telegram/date-hour chronology scan with neighboring-message context where surfaced",
+          "frozen trusted-domain fallback using the existing Slice 1B trusted-domain universe; target-episode timing enforced at attribution"
+        ],
+        "sources_considered": [],
+        "raw_hits": [],
+        "full_body_extraction": {
+          "performed": false,
+          "summary": null
+        },
+        "extracted_event_statements": [],
+        "event_level_locality": "not_established",
+        "explosion_impact_evidence": "not_established",
+        "aerial_war_context": "not_established",
+        "event_time": null,
+        "publication_time": null,
+        "publication_time_used_as_event_time": false,
+        "temporal_attribution": {
+          "status": "not_attributable",
+          "basis": "No qualifying exact-city explosion/impact event time-locked to this alert episode after frozen retrieval paths."
+        },
+        "cross_source_composition": {
+          "used": false
+        },
+        "rejection_no_hit_reason": "no qualifying source hit survived frozen locality/explosion/aerial/temporal guardrails"
+      },
+      "post_freeze_independent_source_check": {
+        "discoverable_indexable": true,
+        "retained_url_found_by_frozen_pipeline": false,
+        "same_day_independent_source": {
+          "url": "https://mvs.gov.ua/news/zaporizzia-vnaslidok-vorozogo-udaru-travmovana-zinka",
+          "publication_time_kyiv": "2025-06-09T16:15:00+03:00",
+          "publication_timestamp_semantics": "publication_time",
+          "event_time_kyiv": "2025-06-09T10:30:00+03:00",
+          "event_timestamp_semantics": "explicit event time",
+          "evidence_summary": "MVS/DSNS states that at 10:30 Russian forces struck the city of Zaporizhzhia and hit the private sector."
+        },
+        "retrospective_source": {
+          "url": "https://zprz.city/news/view/u-zaporizhzhi-ekoinspektori-doslidili-naslidki-vorozhogo-udaru-kabami-9-chervnya-foto",
+          "publication_time_kyiv": "2025-06-10T16:04:00+03:00",
+          "publication_timestamp_semantics": "D+1 publication time",
+          "event_time_kyiv": "~2025-06-09T10:30:00+03:00",
+          "event_timestamp_semantics": "explicit prior-day event time",
+          "evidence_summary": "ZPRZ.CITY states the KAB attack happened around 10:30 and residents heard explosions in Zaporizhzhia."
+        },
+        "qualifying_event_in_body": true,
+        "locality_isolated": "exact city",
+        "cross_source_chain_required": false,
+        "historical_url_used_as_runtime_seed": false
+      },
+      "root_cause": {
+        "primary": "retrieval_failure",
+        "secondary": [
+          "article_selection_failure"
+        ],
+        "existing_diagnostic_code": "TRUSTED_DOMAIN_RETROSPECTIVE_PUBLICATION_LAG_RETRIEVAL_MISS",
+        "explanation": "The frozen hour/date path surfaced neither a same-day official report with explicit 10:30 impact timing nor the D+1 retrospective article with explicit prior-day timing.",
+        "source_discoverable": true,
+        "url_retained_by_frozen_pipeline": false,
+        "full_body_read_by_frozen_pipeline": false,
+        "qualifying_event_present": true,
+        "event_time_available": true,
+        "relevant_source_missed_or_dropped_by_retrieval_logic": true,
+        "failure_class_seen_in_slice0_or_slice1": true,
+        "prior_analogue": "Slice 0B already guarded publication lag at attribution; Slice 1 had indexable-source retrieval misses.",
+        "new_specific_subtype": "D+1 retrospective publication with explicit prior-day event time",
+        "new_top_level_failure_class": false
+      }
+    },
+    {
+      "episode_id": "8c05b7fc08e91711acebc02a",
+      "date": "2025-06-09",
+      "target_alert": {
+        "start_utc": "2025-06-09T17:17:29Z",
+        "end_utc": "2025-06-10T01:44:04Z",
+        "start_kyiv": "2025-06-09T20:17:29+03:00",
+        "end_kyiv": "2025-06-10T04:44:04+03:00",
+        "timezone": "Europe/Kyiv"
+      },
+      "historical": {
+        "verdict": "strict",
+        "source_provenance": {
+          "artifact": "kyiv-air-alerts-grafana/data/explosion_research/zaporizhzhia/final_evidence.json",
+          "path": "strict_events[20]",
+          "event_time_kyiv": "20:19",
+          "source_url": "https://24tv.ua/ataka-shahediv-10-chervnya-kudi-pryamuyut-bpla-de-zagroza-udaru_n2842655",
+          "evidence": "О 20:19 повідомлялося про вибухи в Запоріжжі під час атаки кількох груп БпЛА.",
+          "basis": "exact_city+confirmed_aerial_context+time_inside_episode"
+        }
+      },
+      "frozen_slice2": {
+        "discovery_verdict": "no_source_hit",
+        "retrieval_search_paths": [
+          "generic episode-level web/news query using exact Kyiv alert-start date and local-hour envelope",
+          "web-indexed Telegram/date-hour chronology scan with neighboring-message context where surfaced",
+          "frozen trusted-domain fallback using the existing Slice 1B trusted-domain universe; target-episode timing enforced at attribution"
+        ],
+        "sources_considered": [],
+        "raw_hits": [],
+        "full_body_extraction": {
+          "performed": false,
+          "summary": null
+        },
+        "extracted_event_statements": [],
+        "event_level_locality": "not_established",
+        "explosion_impact_evidence": "not_established",
+        "aerial_war_context": "not_established",
+        "event_time": null,
+        "publication_time": null,
+        "publication_time_used_as_event_time": false,
+        "temporal_attribution": {
+          "status": "not_attributable",
+          "basis": "No qualifying exact-city explosion/impact event time-locked to this alert episode after frozen retrieval paths."
+        },
+        "cross_source_composition": {
+          "used": false
+        },
+        "rejection_no_hit_reason": "no qualifying source hit survived frozen locality/explosion/aerial/temporal guardrails"
+      },
+      "post_freeze_independent_source_check": {
+        "discoverable_indexable": true,
+        "retained_url_found_by_frozen_pipeline": false,
+        "source_url": "https://24tv.ua/ataka-shahediv-10-chervnya-kudi-pryamuyut-bpla-de-zagroza-udaru_n2842655",
+        "page_publication_time_kyiv": "2025-06-10T10:15:00+03:00",
+        "page_timestamp_semantics": "page publication time; not event time",
+        "explosion_entry_time_kyiv": "2025-06-09T20:20:00+03:00",
+        "explosion_timestamp_semantics": "timestamped live-feed entry/report time",
+        "neighboring_context_time_kyiv": "2025-06-09T20:19:00+03:00",
+        "neighboring_timestamp_semantics": "timestamped live-feed entry reporting several groups of strike UAVs heading to Zaporizhzhia",
+        "note_on_historical_minute": "The historical artifact summarizes the explosion at 20:19. Direct source read-back shows the explosion entry at 20:20 and the immediately preceding UAV-to-Zaporizhzhia entry at 20:19.",
+        "qualifying_event_in_body": true,
+        "locality_isolated": "exact city",
+        "cross_source_chain_required": false
+      },
+      "root_cause": {
+        "primary": "retrieval_failure",
+        "secondary": [
+          "body_extraction_failure",
+          "event_segmentation_failure"
+        ],
+        "existing_diagnostic_code": "LONG_LIVE_FEED_BURIED_BODY_RETRIEVAL_MISS",
+        "explanation": "The relevant timestamped entry was buried in a long live feed published the following day; frozen retrieval/body handling retained no qualifying entry.",
+        "source_discoverable": true,
+        "url_retained_by_frozen_pipeline": false,
+        "full_body_read_by_frozen_pipeline": false,
+        "qualifying_event_present": true,
+        "event_time_available": true,
+        "relevant_source_missed_or_dropped_by_retrieval_logic": true,
+        "failure_class_seen_in_slice0_or_slice1": true,
+        "prior_analogue": "Slice 0B EARLY_LIVE_CHRONOLOGY_ITEM_BURIED_BY_LATER_SAME_DAY_ATTACKS; Slice 1B ARTICLE_FULL_BODY_EVENT_SEGMENTATION.",
+        "new_top_level_failure_class": false
+      }
+    },
+    {
+      "episode_id": "6f9108fe0f387d7eda862a8e",
+      "date": "2025-05-30",
+      "target_alert": {
+        "start_utc": "2025-05-30T03:45:39Z",
+        "end_utc": "2025-05-30T10:33:40Z",
+        "start_kyiv": "2025-05-30T06:45:39+03:00",
+        "end_kyiv": "2025-05-30T13:33:40+03:00",
+        "timezone": "Europe/Kyiv"
+      },
+      "historical": {
+        "verdict": "sensitivity_only",
+        "source_provenance": {
+          "artifact": "kyiv-air-alerts-grafana/data/explosion_research/zaporizhzhia/final_evidence.json",
+          "path": "sensitivity_only_events[1]",
+          "event_time_kyiv": "~06:45",
+          "source_url": "https://fakty.com.ua/ua/proisshestvija/20250530-vybuhy-v-zaporizhzhi-shho-stalosya-sogodni-30-travnya-2025/",
+          "evidence": "Вибухи в Запоріжжі почалися майже одночасно з тривогою о 06:45; minute-level час не дозволяє строго поставити їх після старту episode о 06:45:39.",
+          "basis": "near_boundary"
+        }
+      },
+      "frozen_slice2": {
+        "discovery_verdict": "strict_candidate",
+        "retrieval_search_paths": [
+          "generic episode-level web/news query using exact Kyiv alert-start date and local-hour envelope",
+          "web-indexed Telegram/date-hour chronology scan with neighboring-message context where surfaced",
+          "frozen trusted-domain fallback using the existing Slice 1B trusted-domain universe; target-episode timing enforced at attribution"
+        ],
+        "sources_considered": [
+          "https://fakty.com.ua/ua/proisshestvija/20250530-vybuhy-v-zaporizhzhi-shho-stalosya-sogodni-30-travnya-2025/"
+        ],
+        "raw_hits": [
+          "https://fakty.com.ua/ua/proisshestvija/20250530-vybuhy-v-zaporizhzhi-shho-stalosya-sogodni-30-travnya-2025/"
+        ],
+        "full_body_extraction": {
+          "performed": true,
+          "summary": "Explosions in Zaporizhzhia began almost simultaneously with the 06:45 alert; air attack caused an infrastructure fire and power disruption."
+        },
+        "extracted_event_statements": [
+          "Explosions in Zaporizhzhia began almost simultaneously with the 06:45 alert; air attack caused an infrastructure fire and power disruption."
+        ],
+        "event_level_locality": "exact_city",
+        "explosion_impact_evidence": "explicit_explosions_plus_attack_consequences",
+        "aerial_war_context": "air_attack",
+        "event_time": "2025-05-30 ~06:45 Europe/Kyiv",
+        "publication_time": null,
+        "publication_time_used_as_event_time": false,
+        "temporal_attribution": {
+          "status": "target_episode_supported",
+          "basis": "inside target alert 06:45-13:33"
+        },
+        "cross_source_composition": {
+          "used": false,
+          "rule": "Slice 1B compatible-evidence composition only; same locality/attack/timing required"
+        },
+        "rejection_no_hit_reason": null
+      },
+      "boundary_adjudication": {
+        "final": "boundary_ambiguous_keep_sensitivity",
+        "source_url": "https://fakty.com.ua/ua/proisshestvija/20250530-vybuhy-v-zaporizhzhi-shho-stalosya-sogodni-30-travnya-2025/",
+        "source_timestamp_semantics": {
+          "2025-05-30T07:02:00+03:00": "publication_time",
+          "2025-05-30T16:12:00+03:00": "update_time",
+          "2025-05-30T06:45+03:00": "minute-level event/alert wording; seconds unavailable"
+        },
+        "event_wording_summary": "Explosions in Zaporizhzhia and the oblast began almost simultaneously with the 06:45 alert.",
+        "exact_alert_start_kyiv": "2025-05-30T06:45:39+03:00",
+        "independent_neighboring_evidence": "A contemporaneous report at 06:47 says air defence was working; this is report/PVO time, not a second-resolved explosion time.",
+        "event_seconds_available": false,
+        "source_rounding_precision": "minute",
+        "independent_more_precise_explosion_time_found": false,
+        "historical_underclassification": false,
+        "training_error": false,
+        "rationale": "The event and the second-resolved alert start occupy the same minute, and the source does not establish ordering within that minute. PVO timing cannot supply missing explosion seconds."
+      }
+    }
+  ],
+  "root_cause_summary": {
+    "strict_misses": 4,
+    "primary_stage_counts": {
+      "retrieval_failure": 3,
+      "classification_failure": 1
+    },
+    "new_top_level_failure_class": false,
+    "new_specific_subtypes": [
+      "indexable local/regional source outside a fixed trusted-domain fallback",
+      "D+1 retrospective/live publication with explicit prior-event timing"
+    ],
+    "conclusion": "Slice 2 repeats known retrieval, article-retention and body-segmentation failure families. The hardening changes source surfacing and temporal precision; it does not lower the evidence threshold."
+  },
+  "separate_boundary_adjudication": {
+    "final": "boundary_ambiguous_keep_sensitivity",
+    "source_url": "https://fakty.com.ua/ua/proisshestvija/20250530-vybuhy-v-zaporizhzhi-shho-stalosya-sogodni-30-travnya-2025/",
+    "source_timestamp_semantics": {
+      "2025-05-30T07:02:00+03:00": "publication_time",
+      "2025-05-30T16:12:00+03:00": "update_time",
+      "2025-05-30T06:45+03:00": "minute-level event/alert wording; seconds unavailable"
+    },
+    "event_wording_summary": "Explosions in Zaporizhzhia and the oblast began almost simultaneously with the 06:45 alert.",
+    "exact_alert_start_kyiv": "2025-05-30T06:45:39+03:00",
+    "independent_neighboring_evidence": "A contemporaneous report at 06:47 says air defence was working; this is report/PVO time, not a second-resolved explosion time.",
+    "event_seconds_available": false,
+    "source_rounding_precision": "minute",
+    "independent_more_precise_explosion_time_found": false,
+    "historical_underclassification": false,
+    "training_error": false,
+    "rationale": "The event and the second-resolved alert start occupy the same minute, and the source does not establish ordering within that minute. PVO timing cannot supply missing explosion seconds."
+  },
+  "hardening_changes": [
+    {
+      "rule_id": "PVO_EXPLICIT_EXPLOSION_RETENTION",
+      "failure_class": "classification_failure / article_selection_failure",
+      "old_behavior": "PVO-forward framing could suppress a source before a separate explicit explosion/impact statement was evaluated.",
+      "new_behavior": "A retained event statement with explicit explosion/impact evidence is evaluated normally even when the article also emphasizes PVO. PVO_ONLY remains non-positive when no separate explosion/impact evidence exists.",
+      "generalizability_rationale": "The same framing failure appeared in Slice 1 and can occur in any PVO-forward report.",
+      "anti_overfit_safeguards": [
+        "no episode/date/URL condition",
+        "PVO alone remains insufficient",
+        "exact locality, aerial context and episode-specific timing remain required"
+      ]
+    },
+    {
+      "rule_id": "OPEN_LOCAL_REGIONAL_EPISODE_FALLBACK",
+      "failure_class": "retrieval_failure",
+      "old_behavior": "After generic retrieval failed, the fallback was limited to a fixed trusted-domain universe.",
+      "new_behavior": "For unresolved episodes, add an indexed local/regional-news fallback parameterized by target city, local date, alert-hour envelope, explosion/impact vocabulary and aerial-war vocabulary. Domain membership only widens retrieval and never supplies evidence.",
+      "generalizability_rationale": "Unique contemporaneous reporting can appear on indexable local outlets not represented in a previous calibration domain list.",
+      "anti_overfit_safeguards": [
+        "no missed-source domain hard-code",
+        "no URL seed",
+        "no auto-acceptance by domain",
+        "full-body evidence must pass unchanged classification guardrails"
+      ]
+    },
+    {
+      "rule_id": "RETROSPECTIVE_EVENT_DATE_WINDOW",
+      "failure_class": "retrieval_failure",
+      "old_behavior": "Event-hour retrieval could miss later same-day or D+1 publications that explicitly describe an earlier target event.",
+      "new_behavior": "For unresolved episodes, search the target local event date plus a D+1 publication window. Attribution still requires body-level event date/time or unambiguous chronology; publication/update time is never used as event time.",
+      "generalizability_rationale": "Air-attack reporting is often updated or published retrospectively while preserving explicit earlier event timing.",
+      "anti_overfit_safeguards": [
+        "D+1 widens retrieval only",
+        "explicit event chronology required",
+        "publication/update lag cannot create a positive in a later alert"
+      ]
+    },
+    {
+      "rule_id": "LIVE_FEED_TIMESTAMPED_ENTRY_SEGMENTATION",
+      "failure_class": "body_extraction_failure / event_segmentation_failure",
+      "old_behavior": "A long live page could be found without retaining the relevant timestamped entry as an independent event statement.",
+      "new_behavior": "Scan the full available live-feed body and segment timestamped entries. Evaluate each entry, or only tightly compatible neighboring entries in the same attack sequence, for locality, explosion/impact, aerial context and target-episode timing.",
+      "generalizability_rationale": "Live chronologies commonly contain many localities and attacks under one page publication timestamp.",
+      "anti_overfit_safeguards": [
+        "no locality transfer between unrelated entries",
+        "neighbor composition only within one compatible sequence",
+        "page publication time is not event time"
+      ]
+    },
+    {
+      "rule_id": "MINUTE_BOUNDARY_STRICTNESS_GUARD",
+      "failure_class": "temporal_attribution_failure / classification_failure",
+      "old_behavior": "Minute-level event evidence could be called strict when the alert began partway through the same minute.",
+      "new_behavior": "When event timing is only minute-granular and alert start is second-resolved inside that minute, strict requires independent ordering evidence that the event occurred after alert start or an unambiguous semantic after/during relation. Otherwise keep the event sensitivity-positive/boundary-ambiguous.",
+      "generalizability_rationale": "This prevents invented second-level precision at any alert boundary.",
+      "anti_overfit_safeguards": [
+        "does not widen temporal acceptance",
+        "historical verdict is not a runtime signal",
+        "explicit unambiguous ordering evidence can still establish strictness"
+      ]
+    }
+  ],
+  "unchanged_guardrails": [
+    "publication time is not event time",
+    "episode-specific temporal attribution",
+    "event-level locality isolation",
+    "multi-event article segmentation",
+    "PVO_ONLY is insufficient",
+    "headline context does not override qualifying body evidence",
+    "a headline about another locality does not block a separate Zaporizhzhia body event",
+    "cross-source composition only for a compatible event sequence",
+    "publication/update lag cannot create a positive in a later alert episode"
+  ],
+  "anti_overfit_safeguards": {
+    "runtime_episode_id_hardcodes": false,
+    "runtime_date_hardcodes": false,
+    "runtime_article_url_hardcodes": false,
+    "one_miss_special_phrases": false,
+    "historical_verdict_used_as_runtime_signal": false,
+    "historical_source_pointer_used_as_runtime_seed": false,
+    "local_domain_auto_acceptance": false,
+    "locality_threshold_weakened": false,
+    "temporal_threshold_weakened": false,
+    "pvo_only_can_be_positive": false
+  },
+  "implementation_scope": {
+    "reusable_historical_discovery_code_modified": false,
+    "reason": "No standalone executable historical-enrichment runner exists on this branch. The existing explosion scripts are live/metric code and are outside this step's scope; Slice 0B/1B already encode this research workflow as methodology plus episode-level replay artifacts.",
+    "live_monitor_code_modified": false
+  },
+  "pre_rerun_gate": {
+    "exact_four_strict_misses_accounted_for": true,
+    "boundary_case_adjudicated_separately": true,
+    "only_generalizable_hardening_rules": true,
+    "frozen_slice2_validation_preserved": true
+  }
+}
