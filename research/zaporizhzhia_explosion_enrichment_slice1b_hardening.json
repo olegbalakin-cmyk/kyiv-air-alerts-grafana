@@ -1,0 +1,620 @@
+{
+  "schema_version": "1.0",
+  "generated_date": "2026-09-23",
+  "repository": "olegbalakin-cmyk/kyiv-air-alerts-grafana",
+  "branch": "multicity-wip-2026-09-16",
+  "source_branch_head": "729a458713d1f01bc0b171dd2ed5136aba40d4b3",
+  "city": "Запоріжжя",
+  "workstream": "explosion_enrichment",
+  "slice": "slice1b_hardening",
+  "purpose": "Diagnose all six Slice 1 discovery-vs-history disagreements and harden discovery with minimal generalizable rules before rerunning Slice 1 and Slice 0.",
+  "methodological_status": {
+    "slice1_after_this_step": "calibration_hardening_only_not_independent_validation",
+    "regression_slice": "slice0",
+    "next_independent_holdout": "slice2",
+    "slice2_started": false
+  },
+  "exact_disagreement_count": 6,
+  "exact_disagreements": [
+    {
+      "episode_id": "4bed22300441e824dbb776d9",
+      "date": "2025-03-19",
+      "historical_verdict": "strict",
+      "historical_evidence": {
+        "source_url": "https://lb.ua/society/2025/03/19/666548_fedorov_rf_vdarila_zaporizhzhyu_ie.html",
+        "evidence": "Увечері в Запоріжжі пролунали вибухи; повідомлялося про наслідки російського удару по місту.",
+        "event_time_kyiv": "evening",
+        "basis": "exact_city+confirmed_aerial_context+approx_inside_episode"
+      },
+      "original_slice1_discovery": {
+        "result": "no_source_hit",
+        "research_bucket": "no_source_hit",
+        "search_paths": [
+          {
+            "path": "episode_temporal_web",
+            "query": "Запоріжжя 2025-03-19 19:06 23:44 вибух вибухи удар БпЛА"
+          },
+          {
+            "path": "telegram_date_hour_chronology",
+            "query": "site:t.me Запоріжжя 2025-03-19 19:xx вибух БпЛА + neighboring messages"
+          }
+        ],
+        "raw_hits": [],
+        "locality_extraction": {
+          "status": "not_established",
+          "basis": null
+        },
+        "explosion_extraction": {
+          "status": "not_established",
+          "basis": null
+        },
+        "aerial_context_extraction": {
+          "status": "not_established",
+          "basis": null
+        },
+        "event_time_extraction": null,
+        "temporal_attribution": {
+          "status": "not_attributable",
+          "reason": "no qualifying source hit survived frozen guardrails"
+        },
+        "rejection_or_no_hit_reason": "no qualifying source hit survived frozen guardrails"
+      },
+      "original_diagnostic": {
+        "episode_id": "4bed22300441e824dbb776d9",
+        "date": "2025-03-19",
+        "historical_decision": "strict",
+        "slice1_discovery_bucket": "no_source_hit",
+        "loss_stage": "retrieval",
+        "failure_mode": "COARSE_TEMPORAL_SOURCE_RETRIEVAL_MISS",
+        "finding": "Historical LB source is highly relevant (exact city; evening explosions; publication 20:25 inside alert), but frozen independent query/fallback did not surface it. No repair performed.",
+        "source_url": "https://lb.ua/society/2025/03/19/666548_fedorov_rf_vdarila_zaporizhzhyu_ie.html"
+      },
+      "root_cause": {
+        "primary_stage": "retrieval_failure",
+        "contributing_stages": [],
+        "source_indexable_discoverable": true,
+        "pipeline_found_url": false,
+        "pipeline_read_full_body": false,
+        "pipeline_extracted_zaporizhzhia_event": false,
+        "headline_or_context_overrode_body": false,
+        "event_time_available": "approximate_evening; the date has one Slice 1 alert episode, 19:06-23:44 Kyiv time",
+        "multi_source_needed": "For strict aerial context, compatible same-event corroboration is useful: LB supplies exact-city explosions and ZPRZ.CITY independently identifies the same evening attack as a drone attack.",
+        "exact_failure_step": "Both frozen search paths returned no retained raw hit, so processing stopped before article selection/body extraction.",
+        "old_failure_code": "COARSE_TEMPORAL_SOURCE_RETRIEVAL_MISS",
+        "hardened_search_paths": [
+          "trusted-domain episode fallback: site:lb.ua Запоріжжя 2025-03-19 вечір вибухи БпЛА",
+          "trusted-domain episode fallback: site:zprz.city Запоріжжя 2025-03-19 вечір вибухи дрони"
+        ],
+        "new_raw_hits": [
+          {
+            "source": "LB.ua",
+            "url": "https://lb.ua/society/2025/03/19/666548_fedorov_rf_vdarila_zaporizhzhyu_ie.html",
+            "extracted_event": "Exact-city explosions in Zaporizhzhia on the evening of 19 March; injuries from the attack."
+          },
+          {
+            "source": "ZPRZ.CITY",
+            "url": "https://zprz.city/news/view/vorog-vchergove-atakuvav-zaporizhzhya-dronami-yaki-naslidki",
+            "extracted_event": "The same evening attack on Zaporizhzhia is explicitly identified as a drone attack."
+          }
+        ],
+        "hardened_result": "strict_candidate",
+        "temporal_basis": "Approximate event wording is evening, not publication time; the only Slice 1 alert on the date spans 19:06-23:44 Kyiv time.",
+        "publication_time_used_as_event_time": false
+      }
+    },
+    {
+      "episode_id": "4e60c0e06170b87a4cd42988",
+      "date": "2025-03-24",
+      "historical_verdict": "strict",
+      "historical_evidence": {
+        "source_url": "https://24tv.ua/zaporizhzhi-prolunali-vibuhi_n2783456",
+        "evidence": "Близько 20:50 у Запоріжжі пролунали вибухи під час чинної тривоги через загрозу ударних БпЛА.",
+        "event_time_kyiv": "~20:50",
+        "basis": "exact_city+confirmed_aerial_context+time_inside_episode"
+      },
+      "original_slice1_discovery": {
+        "result": "no_source_hit",
+        "research_bucket": "no_source_hit",
+        "search_paths": [
+          {
+            "path": "episode_temporal_web",
+            "query": "Запоріжжя 2025-03-24 17:45 03:07 вибух вибухи удар БпЛА"
+          },
+          {
+            "path": "telegram_date_hour_chronology",
+            "query": "site:t.me Запоріжжя 2025-03-24 17:xx вибух БпЛА + neighboring messages"
+          }
+        ],
+        "raw_hits": [],
+        "locality_extraction": {
+          "status": "not_established",
+          "basis": null
+        },
+        "explosion_extraction": {
+          "status": "not_established",
+          "basis": null
+        },
+        "aerial_context_extraction": {
+          "status": "not_established",
+          "basis": null
+        },
+        "event_time_extraction": null,
+        "temporal_attribution": {
+          "status": "not_attributable",
+          "reason": "no qualifying source hit survived frozen guardrails"
+        },
+        "rejection_or_no_hit_reason": "no qualifying source hit survived frozen guardrails"
+      },
+      "original_diagnostic": {
+        "episode_id": "4e60c0e06170b87a4cd42988",
+        "date": "2025-03-24",
+        "historical_decision": "strict",
+        "slice1_discovery_bucket": "no_source_hit",
+        "loss_stage": "retrieval",
+        "failure_mode": "STRONG_INDEXABLE_SOURCE_RETRIEVAL_MISS",
+        "finding": "Historical 24 Channel article has exact-city title and ~20:50 event time inside target episode; frozen independent pass still missed it. This is a direct recall failure, not temporal ambiguity.",
+        "source_url": "https://24tv.ua/zaporizhzhi-prolunali-vibuhi_n2783456"
+      },
+      "root_cause": {
+        "primary_stage": "retrieval_failure",
+        "contributing_stages": [],
+        "source_indexable_discoverable": true,
+        "pipeline_found_url": false,
+        "pipeline_read_full_body": false,
+        "pipeline_extracted_zaporizhzhia_event": false,
+        "headline_or_context_overrode_body": false,
+        "event_time_available": "explicit ~20:50 Kyiv time",
+        "multi_source_needed": false,
+        "exact_failure_step": "Frozen generic episode query returned no retained raw hit despite an indexable exact-city source with a clock time.",
+        "old_failure_code": "STRONG_INDEXABLE_SOURCE_RETRIEVAL_MISS",
+        "hardened_search_paths": [
+          "trusted-domain episode fallback: site:24tv.ua Запоріжжя 2025-03-24 20:xx вибухи БпЛА"
+        ],
+        "new_raw_hits": [
+          {
+            "source": "24 Канал",
+            "url": "https://24tv.ua/zaporizhzhi-prolunali-vibuhi_n2783456",
+            "extracted_event": "Around 20:50 explosions were heard in Zaporizhzhia while the alert was active; the article describes the Shahed threat and PVO."
+          }
+        ],
+        "hardened_result": "strict_candidate",
+        "temporal_basis": "20:50 falls inside the target 17:45-03:07 Kyiv alert episode.",
+        "publication_time_used_as_event_time": false
+      }
+    },
+    {
+      "episode_id": "5c730c2e66d8a4264a357421",
+      "date": "2025-04-07",
+      "historical_verdict": "strict",
+      "historical_evidence": {
+        "source_url": "https://fakty.com.ua/ua/proisshestvija/20250407-vybuhy-v-zaporizhzhi-ta-oblasti-7-kvitnya-2025-roku-shho-vidomo/",
+        "evidence": "Увечері в Запоріжжі пролунали потужні вибухи на тлі атаки ударних БпЛА та роботи ППО.",
+        "event_time_kyiv": "evening",
+        "basis": "exact_city+confirmed_aerial_context+approx_inside_episode"
+      },
+      "original_slice1_discovery": {
+        "result": "no_source_hit",
+        "research_bucket": "no_source_hit",
+        "search_paths": [
+          {
+            "path": "episode_temporal_web",
+            "query": "Запоріжжя 2025-04-07 21:46 03:10 вибух вибухи удар БпЛА"
+          },
+          {
+            "path": "telegram_date_hour_chronology",
+            "query": "site:t.me Запоріжжя 2025-04-07 21:xx вибух БпЛА + neighboring messages"
+          }
+        ],
+        "raw_hits": [],
+        "locality_extraction": {
+          "status": "not_established",
+          "basis": null
+        },
+        "explosion_extraction": {
+          "status": "not_established",
+          "basis": null
+        },
+        "aerial_context_extraction": {
+          "status": "not_established",
+          "basis": null
+        },
+        "event_time_extraction": null,
+        "temporal_attribution": {
+          "status": "not_attributable",
+          "reason": "no qualifying source hit survived frozen guardrails"
+        },
+        "rejection_or_no_hit_reason": "no qualifying source hit survived frozen guardrails"
+      },
+      "original_diagnostic": {
+        "episode_id": "5c730c2e66d8a4264a357421",
+        "date": "2025-04-07",
+        "historical_decision": "strict",
+        "slice1_discovery_bucket": "no_source_hit",
+        "loss_stage": "retrieval_or_early_PVO_triage",
+        "failure_mode": "PVO_HEADLINE_WITH_BODY_EXPLOSION_FALSE_NEGATIVE",
+        "finding": "Historical source headline foregrounds PVO, while body explicitly says powerful explosions in Zaporizhzhia during Shahed threat. Frozen pass treated 7 Apr material as PVO-only / insufficient and did not retain the body evidence.",
+        "source_url": "https://fakty.com.ua/ua/proisshestvija/20250407-vybuhy-v-zaporizhzhi-ta-oblasti-7-kvitnya-2025-roku-shho-vidomo/"
+      },
+      "root_cause": {
+        "primary_stage": "article_selection_failure",
+        "contributing_stages": [
+          "body_extraction_failure",
+          "classification_failure"
+        ],
+        "source_indexable_discoverable": true,
+        "pipeline_found_url": false,
+        "pipeline_read_full_body": false,
+        "pipeline_extracted_zaporizhzhia_event": false,
+        "headline_or_context_overrode_body": true,
+        "event_time_available": "evening; the date has one Slice 1 alert episode, 21:46-03:10 Kyiv time",
+        "multi_source_needed": false,
+        "exact_failure_step": "The article was not retained from search/PVO triage; its PVO-forward headline obscured body text that separately states powerful explosions in Zaporizhzhia during the Shahed attack.",
+        "old_failure_code": "PVO_HEADLINE_WITH_BODY_EXPLOSION_FALSE_NEGATIVE",
+        "hardened_search_paths": [
+          "trusted-domain episode fallback: site:fakty.com.ua Запоріжжя 2025-04-07 вибухи БпЛА ППО"
+        ],
+        "new_raw_hits": [
+          {
+            "source": "Факти ICTV",
+            "url": "https://fakty.com.ua/ua/proisshestvija/20250407-vybuhy-v-zaporizhzhi-ta-oblasti-7-kvitnya-2025-roku-shho-vidomo/",
+            "extracted_event": "The full body says powerful explosions occurred in Zaporizhzhia and the oblast on the evening of 7 April while Russian Shahed drones were attacking."
+          }
+        ],
+        "hardened_result": "strict_candidate",
+        "temporal_basis": "Evening event wording maps to the date's sole evening/cross-midnight alert; publication time is not the event-time basis.",
+        "publication_time_used_as_event_time": false
+      }
+    },
+    {
+      "episode_id": "1066e522283ff14f622327cf",
+      "date": "2025-04-15",
+      "historical_verdict": "strict",
+      "historical_evidence": {
+        "source_url": "https://zprz.city/news/view/rosiyani-atakuvali-fpvdronom-prifrontovij-orihiv-poranenij-cholovik",
+        "evidence": "Увечері мешканці Запоріжжя чули вибухи під час руху російських дронів до міста; моніторингові джерела пов’язували звук із роботою ППО.",
+        "event_time_kyiv": "evening; ~21:06",
+        "basis": "exact_city+confirmed_aerial_context+approx_inside_episode"
+      },
+      "original_slice1_discovery": {
+        "result": "no_source_hit",
+        "research_bucket": "no_source_hit",
+        "search_paths": [
+          {
+            "path": "episode_temporal_web",
+            "query": "Запоріжжя 2025-04-15 18:21 00:20 вибух вибухи удар БпЛА"
+          },
+          {
+            "path": "telegram_date_hour_chronology",
+            "query": "site:t.me Запоріжжя 2025-04-15 18:xx вибух БпЛА + neighboring messages"
+          }
+        ],
+        "raw_hits": [],
+        "locality_extraction": {
+          "status": "not_established",
+          "basis": null
+        },
+        "explosion_extraction": {
+          "status": "not_established",
+          "basis": null
+        },
+        "aerial_context_extraction": {
+          "status": "not_established",
+          "basis": null
+        },
+        "event_time_extraction": null,
+        "temporal_attribution": {
+          "status": "not_attributable",
+          "reason": "no qualifying source hit survived frozen guardrails"
+        },
+        "rejection_or_no_hit_reason": "no qualifying source hit survived frozen guardrails"
+      },
+      "original_diagnostic": {
+        "episode_id": "1066e522283ff14f622327cf",
+        "date": "2025-04-15",
+        "historical_decision": "strict",
+        "slice1_discovery_bucket": "no_source_hit",
+        "loss_stage": "retrieval",
+        "failure_mode": "SECONDARY_CITY_EVIDENCE_BURIED_UNDER_OTHER_LOCALITY_HEADLINE",
+        "finding": "Historical source headline is about Orikhiv; body later states that drones were directed at Zaporizhzhia and city residents heard explosions on 15 Apr. Body-only exact-city evidence was not discovered independently.",
+        "source_url": "https://zprz.city/news/view/rosiyani-atakuvali-fpvdronom-prifrontovij-orihiv-poranenij-cholovik"
+      },
+      "root_cause": {
+        "primary_stage": "article_selection_failure",
+        "contributing_stages": [
+          "body_extraction_failure",
+          "locality_extraction_failure"
+        ],
+        "source_indexable_discoverable": true,
+        "pipeline_found_url": false,
+        "pipeline_read_full_body": false,
+        "pipeline_extracted_zaporizhzhia_event": false,
+        "headline_or_context_overrode_body": true,
+        "event_time_available": "evening; the target 18:21-00:20 Kyiv episode is the only evening alert on the date",
+        "multi_source_needed": false,
+        "exact_failure_step": "A headline about Orikhiv suppressed a separate body event about drones directed at Zaporizhzhia and city residents hearing explosions on 15 April.",
+        "old_failure_code": "SECONDARY_CITY_EVIDENCE_BURIED_UNDER_OTHER_LOCALITY_HEADLINE",
+        "hardened_search_paths": [
+          "trusted-domain episode fallback: site:zprz.city Запоріжжя 2025-04-15 вибухи дрони ППО"
+        ],
+        "new_raw_hits": [
+          {
+            "source": "ZPRZ.CITY",
+            "url": "https://zprz.city/news/view/rosiyani-atakuvali-fpvdronom-prifrontovij-orihiv-poranenij-cholovik",
+            "extracted_event": "A separate body passage says drones were directed at Zaporizhzhia; in the evening city residents heard explosions, with monitoring groups reporting PVO activity."
+          }
+        ],
+        "hardened_result": "strict_candidate",
+        "temporal_basis": "The extracted Zaporizhzhia event is explicitly evening and is evaluated separately from the Orikhiv event; no explosion evidence is transferred between localities.",
+        "publication_time_used_as_event_time": false
+      }
+    },
+    {
+      "episode_id": "1dd834e016b3bed690de2973",
+      "date": "2025-05-02",
+      "historical_verdict": "strict",
+      "historical_evidence": {
+        "source_url": "https://fakty.com.ua/ua/proisshestvija/20250502-vybuhy-v-zaporizhzhi-ta-oblasti-2-travnya-2025-roku-shho-vidomo/",
+        "evidence": "Увечері в Запоріжжі пролунали потужні вибухи після оголошення тривоги через балістичну загрозу.",
+        "event_time_kyiv": "late evening",
+        "basis": "exact_city+confirmed_aerial_context+explicit_after_alert"
+      },
+      "original_slice1_discovery": {
+        "result": "no_source_hit",
+        "research_bucket": "no_source_hit",
+        "search_paths": [
+          {
+            "path": "episode_temporal_web",
+            "query": "Запоріжжя 2025-05-02 22:50 05:51 вибух вибухи удар БпЛА"
+          },
+          {
+            "path": "telegram_date_hour_chronology",
+            "query": "site:t.me Запоріжжя 2025-05-02 22:xx вибух БпЛА + neighboring messages"
+          }
+        ],
+        "raw_hits": [],
+        "locality_extraction": {
+          "status": "not_established",
+          "basis": null
+        },
+        "explosion_extraction": {
+          "status": "not_established",
+          "basis": null
+        },
+        "aerial_context_extraction": {
+          "status": "not_established",
+          "basis": null
+        },
+        "event_time_extraction": null,
+        "temporal_attribution": {
+          "status": "not_attributable",
+          "reason": "no qualifying source hit survived frozen guardrails"
+        },
+        "rejection_or_no_hit_reason": "no qualifying source hit survived frozen guardrails"
+      },
+      "original_diagnostic": {
+        "episode_id": "1dd834e016b3bed690de2973",
+        "date": "2025-05-02",
+        "historical_decision": "strict",
+        "slice1_discovery_bucket": "no_source_hit",
+        "loss_stage": "retrieval_or_early_PVO_triage",
+        "failure_mode": "POST_ALERT_EXACT_CITY_EXPLOSION_NOT_RETAINED",
+        "finding": "Historical Fakty source states powerful explosions in Zaporizhzhia after the alert announcement on 2 May, but frozen pass did not retain it as a candidate. No wrong-episode issue is indicated.",
+        "source_url": "https://fakty.com.ua/ua/proisshestvija/20250502-vybuhy-v-zaporizhzhi-ta-oblasti-2-travnya-2025-roku-shho-vidomo/"
+      },
+      "root_cause": {
+        "primary_stage": "retrieval_failure",
+        "contributing_stages": [
+          "article_selection_failure",
+          "classification_failure"
+        ],
+        "source_indexable_discoverable": true,
+        "pipeline_found_url": false,
+        "pipeline_read_full_body": false,
+        "pipeline_extracted_zaporizhzhia_event": false,
+        "headline_or_context_overrode_body": true,
+        "event_time_available": "explicit relation: explosions occurred after the air alert was announced on the evening of 2 May",
+        "multi_source_needed": false,
+        "exact_failure_step": "No raw candidate survived the frozen retrieval/early PVO triage, so the explicit exact-city post-alert relation in the full body was never evaluated.",
+        "old_failure_code": "POST_ALERT_EXACT_CITY_EXPLOSION_NOT_RETAINED",
+        "hardened_search_paths": [
+          "trusted-domain episode fallback: site:fakty.com.ua Запоріжжя 2025-05-02 вибухи балістика повітряна тривога"
+        ],
+        "new_raw_hits": [
+          {
+            "source": "Факти ICTV",
+            "url": "https://fakty.com.ua/ua/proisshestvija/20250502-vybuhy-v-zaporizhzhi-ta-oblasti-2-travnya-2025-roku-shho-vidomo/",
+            "extracted_event": "Powerful explosions in Zaporizhzhia occurred after the air alert was announced because of a ballistic threat."
+          }
+        ],
+        "hardened_result": "strict_candidate",
+        "temporal_basis": "The body gives an explicit after-alert relation to the target late-evening alert; article publication time is not substituted.",
+        "publication_time_used_as_event_time": false
+      }
+    },
+    {
+      "episode_id": "6f2bab19aebbb357896550ea",
+      "date": "2025-03-25",
+      "historical_verdict": "sensitivity_only",
+      "historical_evidence": {
+        "source_url": "https://tsn.ua/ukrayina/u-zaporizkiy-oblasti-zrannya-grimlyat-vibuhi-2795082.html",
+        "evidence": "Зранку повідомлялося про вибухи в області, після чого ОВА уточнила російський удар по Запоріжжю; прямого exact-city формулювання вибуху немає.",
+        "event_time_kyiv": "morning",
+        "basis": "inferred_same_attack"
+      },
+      "original_slice1_discovery": {
+        "result": "no_source_hit",
+        "research_bucket": "no_source_hit",
+        "search_paths": [
+          {
+            "path": "episode_temporal_web",
+            "query": "Запоріжжя 2025-03-25 04:45 07:25 вибух вибухи удар БпЛА"
+          },
+          {
+            "path": "telegram_date_hour_chronology",
+            "query": "site:t.me Запоріжжя 2025-03-25 04:xx вибух БпЛА + neighboring messages"
+          }
+        ],
+        "raw_hits": [],
+        "locality_extraction": {
+          "status": "not_established",
+          "basis": null
+        },
+        "explosion_extraction": {
+          "status": "not_established",
+          "basis": null
+        },
+        "aerial_context_extraction": {
+          "status": "not_established",
+          "basis": null
+        },
+        "event_time_extraction": null,
+        "temporal_attribution": {
+          "status": "not_attributable",
+          "reason": "no qualifying source hit survived frozen guardrails"
+        },
+        "rejection_or_no_hit_reason": "no qualifying source hit survived frozen guardrails"
+      },
+      "original_diagnostic": {
+        "episode_id": "6f2bab19aebbb357896550ea",
+        "date": "2025-03-25",
+        "historical_decision": "sensitivity_only",
+        "slice1_discovery_bucket": "no_source_hit",
+        "loss_stage": "cross_source_sensitivity_linkage",
+        "failure_mode": "SENSITIVITY_INFERRED_SAME_ATTACK_CHAIN_NOT_REDISCOVERED",
+        "finding": "Historical sensitivity-only evidence links oblast-level explosion reporting to an exact-city strike, without direct exact-city explosion wording. Frozen pass did not reconstruct that chain; one control is too small for a stable sensitivity recall estimate.",
+        "source_url": "https://tsn.ua/ukrayina/u-zaporizkiy-oblasti-zrannya-grimlyat-vibuhi-2795082.html"
+      },
+      "root_cause": {
+        "primary_stage": "evidence_composition_failure",
+        "contributing_stages": [
+          "retrieval_failure"
+        ],
+        "source_indexable_discoverable": true,
+        "pipeline_found_url": false,
+        "pipeline_read_full_body": false,
+        "pipeline_extracted_zaporizhzhia_event": false,
+        "headline_or_context_overrode_body": false,
+        "event_time_available": "The historical sensitivity chain gives oblast explosions during the alert and a later exact-city strike clarification; an independently found Ukrinform body gives stronger direct exact-city explosions during the air alert.",
+        "multi_source_needed": "Historical sensitivity can be reconstructed by composing compatible same-attack components; however the hardened run also found a direct stricter basis, so composition is not used to manufacture strictness.",
+        "exact_failure_step": "Frozen discovery never retained the region-explosion / exact-city-strike chain and therefore never reached evidence composition.",
+        "old_failure_code": "SENSITIVITY_INFERRED_SAME_ATTACK_CHAIN_NOT_REDISCOVERED",
+        "hardened_search_paths": [
+          "trusted-domain episode fallback: site:tsn.ua Запоріжжя 2025-03-25 вибухи повітряна тривога",
+          "trusted-domain episode fallback: site:ukrinform.ua Запоріжжя 2025-03-25 вибухи повітряна тривога БпЛА"
+        ],
+        "new_raw_hits": [
+          {
+            "source": "TSN",
+            "url": "https://tsn.ua/ukrayina/u-zaporizkiy-oblasti-zrannya-grimlyat-vibuhi-2795082.html",
+            "extracted_event": "Explosions in Zaporizhzhia oblast during the air alert followed by an exact-city Russian strike clarification; this reproduces the historical sensitivity-style composition."
+          },
+          {
+            "source": "Укрінформ",
+            "url": "https://www.ukrinform.ua/rubric-ato/3974399-u-zaporizzi-znovu-prolunali-vibuhi.html",
+            "extracted_event": "The body independently states that earlier, during the air alert, explosions occurred in Zaporizhzhia while PVO worked against hostile drones."
+          }
+        ],
+        "hardened_result": "strict_candidate",
+        "historical_control_recovered_as": "stronger_than_historical_strict_evidence",
+        "temporal_basis": "The direct body statement explicitly places the earlier exact-city explosions during the morning air alert; the next Slice 1 alert is not until 13:45 Kyiv time.",
+        "publication_time_used_as_event_time": false
+      }
+    }
+  ],
+  "root_cause_summary": {
+    "primary_stage_counts": {
+      "retrieval_failure": 3,
+      "article_selection_failure": 2,
+      "evidence_composition_failure": 1
+    },
+    "interpretation": "The six misses are heterogeneous: direct retrieval failures, article-selection/body-event failures caused by headline-level triage, and one evidence-composition failure. Hardening therefore adds targeted layers rather than globally weakening locality or temporal thresholds."
+  },
+  "trusted_source_domain_universe": {
+    "derivation": "Domains already represented in accepted Slice 1 historical/research evidence and independent Slice 1 hits; domain membership only widens retrieval and never confers a positive classification.",
+    "domains": [
+      "24tv.ua",
+      "armyinform.com.ua",
+      "fakty.com.ua",
+      "lb.ua",
+      "mvs.gov.ua",
+      "news.liga.net",
+      "news.telegraf.com.ua",
+      "npu.gov.ua",
+      "pravda.com.ua",
+      "radiosvoboda.org",
+      "rbc.ua",
+      "suspilne.media",
+      "tsn.ua",
+      "ua.korrespondent.net",
+      "ukrinform.ua",
+      "unn.ua",
+      "war.telegraf.com.ua",
+      "zoda.gov.ua",
+      "zp.npu.gov.ua",
+      "zprz.city"
+    ],
+    "telegram_handled_by_existing_separate_fallback": true
+  },
+  "discovery_rules_changed": [
+    {
+      "rule_id": "TRUSTED_DOMAIN_EPISODE_FALLBACK",
+      "layer": "retrieval",
+      "rule": "If generic per-episode web/news and Telegram searches yield no qualifying hit, generate fallback queries from the target episode's exact local date, Zaporizhzhia locality terms, explosion/strike vocabulary, aerial-war vocabulary, and the episode's local-hour envelope across the existing trusted/relevant domain universe. The fallback may surface a URL but never auto-accepts it.",
+      "generalizable_because": "It responds to repeated indexable-source retrieval failures and is parameterized only by episode fields plus a source-domain universe, not by control IDs, dates, URLs, or historical verdicts."
+    },
+    {
+      "rule_id": "ARTICLE_FULL_BODY_EVENT_SEGMENTATION",
+      "layer": "body_extraction",
+      "rule": "For every retained article, inspect the full available body and split it into separate event statements/passages. For each event independently record locality, explosion/impact/PVO-only type, aerial-war context, event time or temporal wording, and relation to the target alert.",
+      "generalizable_because": "Multi-event news articles routinely combine locations and updates; event-level extraction prevents lead/headline bias without lowering evidence thresholds."
+    },
+    {
+      "rule_id": "HEADLINE_CONTEXT_NON_OVERRIDE",
+      "layer": "article_selection_and_classification",
+      "rule": "Headline labels are retrieval metadata only. A PVO-forward headline or a headline about another locality cannot classify the whole article if the body contains a separate event statement. PVO_ONLY remains non-positive when no body event supplies independent explosion/impact evidence.",
+      "generalizable_because": "It separates article framing from event evidence while preserving the existing PVO-only precision guard."
+    },
+    {
+      "rule_id": "EVENT_LEVEL_LOCALITY_ISOLATION",
+      "layer": "locality_extraction",
+      "rule": "Locality is assigned per extracted event statement. Explosion evidence from one locality may never be transferred to a Zaporizhzhia statement merely because both appear in one article.",
+      "generalizable_because": "It addresses multi-locality articles and explicitly blocks the main false-positive risk introduced by full-body extraction."
+    },
+    {
+      "rule_id": "COMPATIBLE_EVIDENCE_COMPOSITION",
+      "layer": "evidence_composition",
+      "rule": "Complementary source or passage components may be composed only when they describe the same attack/event sequence, have compatible locality and timing, and add non-conflicting evidence. Preserve provenance for every component. Composition alone cannot promote ambiguous evidence to strict unless an independent strict basis exists.",
+      "generalizable_because": "It reconstructs legitimate same-attack chains while preventing arbitrary assembly of unrelated region, city, and time facts."
+    }
+  ],
+  "unchanged_temporal_guardrails": [
+    "publication time is not event time",
+    "publication/update lag cannot create a positive for a later episode",
+    "multi-episode dates require episode-specific attribution",
+    "neighboring Telegram messages may clarify chronology only when they form one compatible attack chain",
+    "wrong-episode candidates are rejected or rematched to the episode supported by event chronology",
+    "cumulative updates do not create a new event automatically"
+  ],
+  "anti_overfit_safeguards": {
+    "runtime_episode_id_hardcodes": false,
+    "runtime_date_hardcodes": false,
+    "runtime_article_url_hardcodes": false,
+    "one_control_phrase_special_cases": false,
+    "historical_verdict_used_as_runtime_pointer": false,
+    "historical_evidence_url_used_as_runtime_seed": false,
+    "domain_fallback_auto_accepts_source": false,
+    "locality_threshold_weakened": false,
+    "temporal_threshold_weakened": false,
+    "pvo_only_can_be_positive": false
+  },
+  "implementation_scope": {
+    "reusable_historical_discovery_code_modified": false,
+    "reason": "The Slice 0B and Slice 1 discovery workflow on this branch is encoded as research methodology/artifacts rather than a reusable executable historical-discovery module. Hardening is therefore recorded as reproducible discovery rules and rerun provenance; no live-monitor code is touched.",
+    "live_monitor_code_modified": false
+  },
+  "pre_rerun_gate": {
+    "all_six_disagreements_accounted_for": true,
+    "root_cause_assigned_for_each": true,
+    "pipeline_change_started_only_after_diagnosis": true
+  }
+}
