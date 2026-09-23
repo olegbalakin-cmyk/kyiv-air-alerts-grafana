@@ -1,0 +1,701 @@
+{
+  "schema_version": "1.0",
+  "generated_date": "2026-09-23",
+  "repository": "olegbalakin-cmyk/kyiv-air-alerts-grafana",
+  "branch": "multicity-wip-2026-09-16",
+  "source_branch_head": "079047d01588a5bc02ee445450f44c2906305b6e",
+  "task": "Zaporizhzhia explosion enrichment Slice 0B discovery hardening",
+  "frozen_slice0_universe": {
+    "artifact": "research/zaporizhzhia_explosion_enrichment_slice0_universe.json",
+    "episodes": 171,
+    "dates": 35,
+    "changed": false
+  },
+  "prior_slice0": {
+    "artifact": "research/zaporizhzhia_explosion_enrichment_slice0_results.json",
+    "commit": "079047d01588a5bc02ee445450f44c2906305b6e",
+    "positive_control_recall": "12/16",
+    "verdict": "SLICE 0 DISCOVERY PIPELINE NEEDS HARDENING"
+  },
+  "scope_note": "This artifact analyzes discovery failure and reusable retrieval routes. The prior authoritative strict adjudications are used only to reconstruct root cause and verify recovery; they were not used as starting search pointers in the independent rediscovery step.",
+  "four_previous_misses_root_cause": [
+    {
+      "episode_id": "5a7d64e4d58b240825d0c954",
+      "local_date": "2025-12-16",
+      "alert_window": {
+        "start_kyiv": "2025-12-16T21:28:38+02:00",
+        "end_kyiv": "2025-12-16T23:46:51+02:00"
+      },
+      "same_date_episodes": [
+        {
+          "episode_id": "483d4aee7f1dad2a0e07e3b9",
+          "alert_start_kyiv": "2025-12-16T01:12:02",
+          "alert_end_kyiv": "2025-12-16T03:31:02",
+          "current_canonical_status": "none",
+          "positive_control": false
+        },
+        {
+          "episode_id": "69b6767287e18383f94758c2",
+          "alert_start_kyiv": "2025-12-16T04:47:13",
+          "alert_end_kyiv": "2025-12-16T05:22:18",
+          "current_canonical_status": "sensitivity_only",
+          "positive_control": false
+        },
+        {
+          "episode_id": "648231795de8332b342c4d8b",
+          "alert_start_kyiv": "2025-12-16T07:35:55",
+          "alert_end_kyiv": "2025-12-16T08:18:38",
+          "current_canonical_status": "none",
+          "positive_control": false
+        },
+        {
+          "episode_id": "b05e8a61b421a1caf0bf253b",
+          "alert_start_kyiv": "2025-12-16T10:12:25",
+          "alert_end_kyiv": "2025-12-16T11:30:31",
+          "current_canonical_status": "none",
+          "positive_control": false
+        },
+        {
+          "episode_id": "319d4432a8528fe156bcc567",
+          "alert_start_kyiv": "2025-12-16T19:21:14",
+          "alert_end_kyiv": "2025-12-16T20:04:15",
+          "current_canonical_status": "strict",
+          "positive_control": false
+        },
+        {
+          "episode_id": "5a7d64e4d58b240825d0c954",
+          "alert_start_kyiv": "2025-12-16T21:28:38",
+          "alert_end_kyiv": "2025-12-16T23:46:51",
+          "current_canonical_status": "none",
+          "positive_control": true
+        }
+      ],
+      "authoritative_prior_evidence": {
+        "sources": [
+          {
+            "source": "Укрінформ / Запорізька ОВА",
+            "url": "https://www.ukrinform.ua/rubric-regions/4070429-u-zaporizzi-prolunali-vibuhi.html",
+            "timestamp_kyiv": "2025-12-16T22:05:00+02:00",
+            "evidence_text": "Під час повітряної тривоги у Запоріжжі було чутно звуки вибухів."
+          }
+        ],
+        "exact_city_evidence": "Під час повітряної тривоги у Запоріжжі було чутно звуки вибухів.",
+        "event_time_or_temporal_wording": "Explicitly during the active alert; source also states air defence was working.",
+        "episode_match_reason": "Exact city, explicit explosions during alert, and strike-UAV/air-defence context."
+      },
+      "prior_qa_provenance": [
+        {
+          "source_artifact": "research/zaporizhzhia_explosion_gap_audit.json",
+          "source_path": "$.additional_confirmed_strict_misses[6]",
+          "occurrence_fields": {
+            "episode_id": "5a7d64e4d58b240825d0c954",
+            "date": "2025-12-16",
+            "current_canonical_classification": "none",
+            "source_url": "https://www.ukrinform.ua/rubric-regions/4070429-u-zaporizzi-prolunali-vibuhi.html",
+            "source": "Укрінформ / Запорізька ОВА",
+            "event_time": "Explicitly during the active alert; source also states air defence was working."
+          }
+        },
+        {
+          "source_artifact": "research/zaporizhzhia_explosion_gap_audit.json",
+          "source_path": "$.manual_candidate_register[4]",
+          "occurrence_fields": {
+            "episode_id": "5a7d64e4d58b240825d0c954",
+            "date": "2025-12-16"
+          }
+        },
+        {
+          "source_artifact": "research/zaporizhzhia_explosion_o3_source_discovery.json",
+          "source_path": "$.positive_control_results.controls[1]",
+          "occurrence_fields": {
+            "episode_id": "5a7d64e4d58b240825d0c954",
+            "date": "2025-12-16",
+            "source": "Укрінформ"
+          }
+        }
+      ],
+      "slice0_failure": {
+        "code": "DOMINANT_SAME_DAY_EVENT_SUPPRESSED_LATE_SECONDARY_EPISODE",
+        "detail": "Date-level search was satisfied by the earlier/more prominent 04:45 and 19:55 attack material. It did not continue to a dedicated search for the 21:28-23:46 alert, so the separate 22:05 Ukrinform/PVO-plus-explosion item stayed buried."
+      },
+      "independent_rediscovery": {
+        "prior_artifact_pointer_used_as_starting_hint": false,
+        "old_url_or_message_id_used_as_starting_hint": false,
+        "exact_old_quote_used_as_starting_hint": false,
+        "starting_hints": [
+          "city=Запоріжжя",
+          "date=2025-12-16",
+          "alert window=21:28:38-23:46:51"
+        ],
+        "route": [
+          "Run a separate query for the target alert's hour bucket instead of stopping after the first same-day hit.",
+          "If general results remain dominated by another attack, query major source/date archives or tag pages by date plus late-evening explosion/PVO terms.",
+          "Inspect the date chronology until the target window is covered."
+        ],
+        "queries": [
+          "Запоріжжя 16 грудня 2025 21:28 23:46 вибух ППО БпЛА",
+          "site:ukrinform.ua Запоріжжя 16 грудня 2025 ППО вибухи"
+        ],
+        "source": {
+          "source": "Укрінформ / Запорізька ОВА",
+          "url": "https://www.ukrinform.ua/rubric-regions/4070429-u-zaporizzi-prolunali-vibuhi.html",
+          "source_datetime_kyiv": "2025-12-16T22:05:00+02:00",
+          "event_datetime_kyiv": null,
+          "evidence_text": "Під час повітряної тривоги у Запоріжжі було чутно звуки вибухів.",
+          "discovery_support": "Source/date archive search surfaced the distinct 22:05 item for the late alert. PVO is chain support; the strict evidence is the explicit exact-city explosion wording during the active alert."
+        },
+        "corroboration": null,
+        "correct_episode_attribution": true,
+        "verdict": "confirmed_strict",
+        "rediscovered_independently": true
+      },
+      "old_qa_route": "Gap-audit pilot/manual candidate review found the late same-day item; O3 later used it as a positive control."
+    },
+    {
+      "episode_id": "7a45b4c6cd4f18358e063002",
+      "local_date": "2026-03-21",
+      "alert_window": {
+        "start_kyiv": "2026-03-21T02:28:29+02:00",
+        "end_kyiv": "2026-03-21T05:06:48+02:00"
+      },
+      "same_date_episodes": [
+        {
+          "episode_id": "5e37cf453fccd8d107eaed81",
+          "alert_start_kyiv": "2026-03-20T19:51:40",
+          "alert_end_kyiv": "2026-03-21T00:33:37",
+          "current_canonical_status": "none",
+          "positive_control": false
+        },
+        {
+          "episode_id": "7a45b4c6cd4f18358e063002",
+          "alert_start_kyiv": "2026-03-21T02:28:29",
+          "alert_end_kyiv": "2026-03-21T05:06:48",
+          "current_canonical_status": "none",
+          "positive_control": true
+        },
+        {
+          "episode_id": "d602f44fad3a56880a9289b1",
+          "alert_start_kyiv": "2026-03-21T07:01:36",
+          "alert_end_kyiv": "2026-03-21T07:26:46",
+          "current_canonical_status": "none",
+          "positive_control": false
+        },
+        {
+          "episode_id": "c1d947bd6240f8549c0e385a",
+          "alert_start_kyiv": "2026-03-21T07:36:20",
+          "alert_end_kyiv": "2026-03-21T09:34:33",
+          "current_canonical_status": "strict",
+          "positive_control": false
+        },
+        {
+          "episode_id": "eaf962bd134afbafbc0294e8",
+          "alert_start_kyiv": "2026-03-21T10:48:00",
+          "alert_end_kyiv": "2026-03-21T11:48:40",
+          "current_canonical_status": "none",
+          "positive_control": false
+        },
+        {
+          "episode_id": "68046107668aad7c9f51499d",
+          "alert_start_kyiv": "2026-03-21T15:57:01",
+          "alert_end_kyiv": "2026-03-21T16:31:22",
+          "current_canonical_status": "strict",
+          "positive_control": false
+        },
+        {
+          "episode_id": "fd5871a55d8a1445c2e52c68",
+          "alert_start_kyiv": "2026-03-21T20:01:02",
+          "alert_end_kyiv": "2026-03-21T20:15:28",
+          "current_canonical_status": "none",
+          "positive_control": false
+        },
+        {
+          "episode_id": "d76ce73a66145eca23357699",
+          "alert_start_kyiv": "2026-03-21T20:40:01",
+          "alert_end_kyiv": "2026-03-21T23:35:00",
+          "current_canonical_status": "none",
+          "positive_control": false
+        }
+      ],
+      "authoritative_prior_evidence": {
+        "sources": [
+          {
+            "source": "NV live chronology, citing Suspilne",
+            "url": "https://nv.ua/ukr/ukraine/events/ataka-bpla-na-mikolajivshchinu-ta-dnipro-operativni-dani-povitryanih-sil-50593669.html",
+            "timestamp_kyiv": "2026-03-21T04:12:00+02:00",
+            "event_time_kyiv": "2026-03-21T03:15:00+02:00",
+            "evidence_text": "03:15 У Запоріжжі пролунав вибух, повідомляє Суспільне."
+          },
+          {
+            "source": "National Police, Zaporizhzhia region",
+            "url": "https://zp.npu.gov.ua/news/u-zaporizhzhi-vnaslidok-ataky-rosiiskykh-bezpilotnykiv-zahynuly-dvoie-liudei-shche-dvoie-nepovnolitnikh-postrazhdaly-na-mistsiakh-vluchan-pratsiuiut-politseiski",
+            "timestamp_kyiv": "2026-03-21T08:50:00+02:00",
+            "event_time_kyiv": "morning; corroborative, not used as the primary minute-level timestamp",
+            "evidence_text": "Police confirms that on 21 March Russian Shahed-type UAVs attacked Zaporizhzhia, with impacts on housing and infrastructure."
+          }
+        ],
+        "exact_city_evidence": [
+          "03:15 У Запоріжжі пролунав вибух, повідомляє Суспільне.",
+          "Police confirms that on 21 March Russian Shahed-type UAVs attacked Zaporizhzhia, with impacts on housing and infrastructure."
+        ],
+        "event_time_or_temporal_wording": "The NV live chronology explicitly timestamps an exact-city explosion at 03:15 Kyiv, inside this canonical alert episode (02:28:29–05:06:48). Publication time is not substituted for event time.",
+        "episode_match_reason": "The NV live chronology explicitly timestamps an exact-city explosion at 03:15 Kyiv, inside this canonical alert episode (02:28:29–05:06:48). Publication time is not substituted for event time."
+      },
+      "prior_qa_provenance": [
+        {
+          "source_artifact": "research/zaporizhzhia_explosion_blind_sample_50_wave2.json",
+          "source_path": "$.sampled_episodes[29]",
+          "occurrence_fields": {
+            "episode_id": "7a45b4c6cd4f18358e063002",
+            "date": "2026-03-21",
+            "verdict": "confirmed_strict_miss"
+          }
+        },
+        {
+          "source_artifact": "research/zaporizhzhia_explosion_o3_source_discovery.json",
+          "source_path": "$.positive_control_results.controls[2]",
+          "occurrence_fields": {
+            "episode_id": "7a45b4c6cd4f18358e063002",
+            "date": "2026-03-21",
+            "source": "NV live / indexed report of Suspilne message"
+          }
+        }
+      ],
+      "slice0_failure": {
+        "code": "EARLY_LIVE_CHRONOLOGY_ITEM_BURIED_BY_LATER_SAME_DAY_ATTACKS",
+        "detail": "The date contained several attacks and later canonical strict episodes. General date search surfaced the more prominent ~07:40 and ~16:00 events, while the 03:15 exact-city live update was inside a chronology/live-blog page and did not rank as a standalone result."
+      },
+      "independent_rediscovery": {
+        "prior_artifact_pointer_used_as_starting_hint": false,
+        "old_url_or_message_id_used_as_starting_hint": false,
+        "exact_old_quote_used_as_starting_hint": false,
+        "starting_hints": [
+          "city=Запоріжжя",
+          "date=2026-03-21",
+          "alert window=02:28:29-05:06:48"
+        ],
+        "route": [
+          "Run an episode-hour query for the 02:28-05:06 window.",
+          "When the date has several attacks, explicitly search live/chronology pages from national/local outlets rather than only standalone articles.",
+          "Open the live page and extract clock-stamped updates from the body."
+        ],
+        "queries": [
+          "Запоріжжя 21 березня 2026 02:28 05:06 вибух БпЛА",
+          "NV live 21 березня 2026 Запоріжжя БпЛА ніч"
+        ],
+        "source": {
+          "source": "NV live chronology, citing Suspilne",
+          "url": "https://nv.ua/ukr/ukraine/events/ataka-bpla-na-mikolajivshchinu-ta-dnipro-operativni-dani-povitryanih-sil-50593669.html",
+          "source_datetime_kyiv": "2026-03-21T04:12:00+02:00",
+          "event_datetime_kyiv": "2026-03-21T03:15:00+02:00",
+          "evidence_text": "03:15 У Запоріжжі пролунав вибух, повідомляє Суспільне.",
+          "discovery_support": "The explicit 03:15 event time is inside the target 02:28-05:06 episode. Publication time is not used for attribution."
+        },
+        "corroboration": {
+          "source": "National Police, Zaporizhzhia region",
+          "url": "https://zp.npu.gov.ua/news/u-zaporizhzhi-vnaslidok-ataky-rosiiskykh-bezpilotnykiv-zahynuly-dvoie-liudei-shche-dvoie-nepovnolitnikh-postrazhdaly-na-mistsiakh-vluchan-pratsiuiut-politseiski",
+          "role": "Confirms Shahed-type UAV attack on Zaporizhzhia; not used as the minute-level event clock."
+        },
+        "correct_episode_attribution": true,
+        "verdict": "confirmed_strict",
+        "rediscovered_independently": true
+      },
+      "old_qa_route": "Blind-sample Wave 2 broad review found an NV live chronology entry citing Suspilne, then corroborated the UAV attack with police reporting."
+    },
+    {
+      "episode_id": "7c008970817e8d13ae402670",
+      "local_date": "2026-06-16",
+      "alert_window": {
+        "start_kyiv": "2026-06-16T19:42:55",
+        "end_kyiv": "2026-06-16T21:04:58"
+      },
+      "same_date_episodes": [
+        {
+          "episode_id": "834b9fdb45e99a950b7b9c65",
+          "alert_start_kyiv": "2026-06-15T19:34:58",
+          "alert_end_kyiv": "2026-06-16T00:21:15",
+          "current_canonical_status": "none",
+          "positive_control": false
+        },
+        {
+          "episode_id": "398cb589a5ad1e70e079b17b",
+          "alert_start_kyiv": "2026-06-16T01:25:58",
+          "alert_end_kyiv": "2026-06-16T12:44:19",
+          "current_canonical_status": "none",
+          "positive_control": false
+        },
+        {
+          "episode_id": "c72a7385c1c092122988b6fd",
+          "alert_start_kyiv": "2026-06-16T14:09:11",
+          "alert_end_kyiv": "2026-06-16T15:09:57",
+          "current_canonical_status": "none",
+          "positive_control": false
+        },
+        {
+          "episode_id": "52cf015ceb99f6edae1a1f97",
+          "alert_start_kyiv": "2026-06-16T17:28:31",
+          "alert_end_kyiv": "2026-06-16T18:29:50",
+          "current_canonical_status": "none",
+          "positive_control": false
+        },
+        {
+          "episode_id": "b9a073c6fb5e4bd51cba993d",
+          "alert_start_kyiv": "2026-06-16T18:33:09",
+          "alert_end_kyiv": "2026-06-16T19:35:43",
+          "current_canonical_status": "none",
+          "positive_control": false
+        },
+        {
+          "episode_id": "7c008970817e8d13ae402670",
+          "alert_start_kyiv": "2026-06-16T19:42:55",
+          "alert_end_kyiv": "2026-06-16T21:04:58",
+          "current_canonical_status": "none",
+          "positive_control": true
+        },
+        {
+          "episode_id": "f925608b4627f59f007d56d4",
+          "alert_start_kyiv": "2026-06-16T21:44:01",
+          "alert_end_kyiv": "2026-06-17T09:48:39",
+          "current_canonical_status": "strict",
+          "positive_control": false
+        }
+      ],
+      "authoritative_prior_evidence": {
+        "sources": [
+          {
+            "source": "Труха⚡️Запоріжжя Telegram",
+            "url": "https://t.me/truexazaporozie/64460",
+            "timestamp_kyiv": "2026-06-16T19:51:00+03:00",
+            "event_time_kyiv": null,
+            "evidence_text": "Вибух."
+          },
+          {
+            "source": "Труха⚡️Запоріжжя Telegram",
+            "url": "https://t.me/truexazaporozie/64461",
+            "timestamp_kyiv": "2026-06-16T19:55:00+03:00",
+            "event_time_kyiv": null,
+            "evidence_text": "Момент влучання БпЛА в місті."
+          },
+          {
+            "source": "Труха⚡️Запоріжжя Telegram",
+            "url": "https://t.me/truexazaporozie/64465",
+            "timestamp_kyiv": "2026-06-16T20:02:00+03:00",
+            "event_time_kyiv": null,
+            "evidence_text": "Повторні вибухи."
+          },
+          {
+            "source": "Головне управління Національної поліції в Запорізькій області",
+            "url": "https://zp.npu.gov.ua/news/shakhedna-ataka-na-zaporizhzhia-zabrala-zhyttia-liudyny-ie-poraneni-na-mistsiakh-vluchan-dopomohu-liudiam-nadaiut-politseiski",
+            "timestamp_kyiv": "2026-06-17T00:01:00+03:00",
+            "event_time_kyiv": null,
+            "evidence_text": "Police confirm a Shahed attack on Zaporizhzhia with multiple city impacts while an air alert was active."
+          }
+        ],
+        "exact_city_evidence": [
+          "Вибух.",
+          "Момент влучання БпЛА в місті.",
+          "Повторні вибухи.",
+          "Police confirm a Shahed attack on Zaporizhzhia with multiple city impacts while an air alert was active."
+        ],
+        "event_time_or_temporal_wording": "The alert was active 19:42:55-21:04:58 Europe/Kyiv. Contemporaneous exact-city messages at 19:51, 19:55 and 20:02 explicitly report an explosion, a UAV impact in the city and repeated explosions, all inside the episode. The later police report corroborates the aerial-war context and city impacts; its publication time is not used as event time.",
+        "episode_match_reason": "The alert was active 19:42:55-21:04:58 Europe/Kyiv. Contemporaneous exact-city messages at 19:51, 19:55 and 20:02 explicitly report an explosion, a UAV impact in the city and repeated explosions, all inside the episode. The later police report corroborates the aerial-war context and city impacts; its publication time is not used as event time."
+      },
+      "prior_qa_provenance": [
+        {
+          "source_artifact": "research/zaporizhzhia_explosion_blind_sample_50.json",
+          "source_path": "$.sampled_episodes[40]",
+          "occurrence_fields": {
+            "episode_id": "7c008970817e8d13ae402670",
+            "date": "2026-06-16",
+            "verdict": "confirmed_strict_miss",
+            "mechanism": "multiple_episodes_same_date"
+          }
+        },
+        {
+          "source_artifact": "research/zaporizhzhia_explosion_o3_source_discovery.json",
+          "source_path": "$.positive_control_results.controls[3]",
+          "occurrence_fields": {
+            "episode_id": "7c008970817e8d13ae402670",
+            "date": "2026-06-16",
+            "source": "Trukha Zaporizhzhia Telegram"
+          }
+        }
+      ],
+      "slice0_failure": {
+        "code": "INDEXED_TELEGRAM_MESSAGE_NOT_RETRIEVED_BY_GENERIC_NEWS_SEARCH",
+        "detail": "The decisive evidence existed as several short Telegram posts. Generic web/news search found the broader evening attack but not the individual 19:51/19:55/20:02 messages, so the attack could not be isolated to the 19:42-21:04 episode."
+      },
+      "independent_rediscovery": {
+        "prior_artifact_pointer_used_as_starting_hint": false,
+        "old_url_or_message_id_used_as_starting_hint": false,
+        "exact_old_quote_used_as_starting_hint": false,
+        "starting_hints": [
+          "city=Запоріжжя",
+          "date=2026-06-16",
+          "alert window=19:42:55-21:04:58"
+        ],
+        "route": [
+          "After no precise hit in ordinary web/news search, run a generic Telegram site search with city, date and target-hour terms; do not seed a channel name.",
+          "When a local channel page surfaces, open its date chronology and inspect neighboring messages around the alert.",
+          "Build a threat -> explosion -> impact/PVO chain from consecutive contemporaneous posts."
+        ],
+        "queries": [
+          "site:t.me Запоріжжя 16 червня 2026 19:50 вибух БпЛА",
+          "site:t.me Запоріжжя 16 червня 2026 20:00 удар вибух"
+        ],
+        "source": {
+          "source": "Труха⚡️Запоріжжя Telegram",
+          "chronology_url": "https://t.me/s/truexazaporozie?before=64472",
+          "messages": [
+            {
+              "datetime_kyiv": "2026-06-16T19:51:00+03:00",
+              "evidence_text": "Вибух."
+            },
+            {
+              "datetime_kyiv": "2026-06-16T19:55:00+03:00",
+              "evidence_text": "Момент влучання БпЛА в місті."
+            },
+            {
+              "datetime_kyiv": "2026-06-16T20:02:00+03:00",
+              "evidence_text": "Повторні вибухи."
+            }
+          ],
+          "neighboring_context": [
+            {
+              "datetime_kyiv": "2026-06-16T19:36:00+03:00",
+              "evidence_text": "2 шахеди на Запоріжжя."
+            },
+            {
+              "datetime_kyiv": "2026-06-16T19:57:00+03:00",
+              "evidence_text": "2 БпЛА над містом."
+            }
+          ],
+          "discovery_support": "All decisive contemporaneous messages fall inside the target 19:42:55-21:04:58 episode."
+        },
+        "corroboration": null,
+        "correct_episode_attribution": true,
+        "verdict": "confirmed_strict",
+        "rediscovered_independently": true
+      },
+      "old_qa_route": "Blind-sample Wave 1 source review found the Trukha Zaporizhzhia message chain and later police corroboration; O3 retained it as a positive control."
+    },
+    {
+      "episode_id": "1e434d0fa5abfd518ad07d1e",
+      "local_date": "2026-08-28",
+      "alert_window": {
+        "start_kyiv": "2026-08-28T07:23:30+03:00",
+        "end_kyiv": "2026-08-28T07:49:34+03:00"
+      },
+      "same_date_episodes": [
+        {
+          "episode_id": "b1565fe64d3434d1424826cd",
+          "alert_start_kyiv": "2026-08-28T04:11:01",
+          "alert_end_kyiv": "2026-08-28T04:20:15",
+          "current_canonical_status": "none",
+          "positive_control": false
+        },
+        {
+          "episode_id": "461c518eecc614b3d4a8ef78",
+          "alert_start_kyiv": "2026-08-28T06:34:01",
+          "alert_end_kyiv": "2026-08-28T07:00:19",
+          "current_canonical_status": "none",
+          "positive_control": false
+        },
+        {
+          "episode_id": "1e434d0fa5abfd518ad07d1e",
+          "alert_start_kyiv": "2026-08-28T07:23:30",
+          "alert_end_kyiv": "2026-08-28T07:49:34",
+          "current_canonical_status": "sensitivity_only",
+          "positive_control": true
+        },
+        {
+          "episode_id": "9d8b22eaba51c12cc1d1fda2",
+          "alert_start_kyiv": "2026-08-28T12:43:42",
+          "alert_end_kyiv": "2026-08-28T15:19:14",
+          "current_canonical_status": "none",
+          "positive_control": false
+        },
+        {
+          "episode_id": "abc0e4e421bd4de5a755a59c",
+          "alert_start_kyiv": "2026-08-28T18:28:18",
+          "alert_end_kyiv": "2026-08-28T18:44:40",
+          "current_canonical_status": "none",
+          "positive_control": false
+        },
+        {
+          "episode_id": "76b51bdb9b2bca6fa8829315",
+          "alert_start_kyiv": "2026-08-28T23:18:04",
+          "alert_end_kyiv": "2026-08-28T23:31:59",
+          "current_canonical_status": "none",
+          "positive_control": false
+        },
+        {
+          "episode_id": "a566b6daecf3cc4740dfa1e6",
+          "alert_start_kyiv": "2026-08-28T23:36:47",
+          "alert_end_kyiv": "2026-08-28T23:51:41",
+          "current_canonical_status": "none",
+          "positive_control": false
+        }
+      ],
+      "authoritative_prior_evidence": {
+        "sources": [
+          {
+            "source": "NV",
+            "url": "https://nv.ua/ukr/ukraine/events/epicentr-u-zaporizhzhi-atakuvali-droni-vinikla-masshtabna-pozhezha-video-novini-zaporizhzhya-50636377.html",
+            "timestamp_kyiv": "2026-08-28T09:11:00+03:00",
+            "evidence_text": "Близько 07:30 28 серпня у Запоріжжі лунали вибухи, повідомлялося про загрозу ударних БпЛА."
+          }
+        ],
+        "exact_city_evidence": "Близько 07:30 28 серпня у Запоріжжі лунали вибухи, повідомлялося про загрозу ударних БпЛА.",
+        "event_time_or_temporal_wording": "2026-08-28T07:30:00+03:00",
+        "episode_match_reason": "Exact-city explosion time is explicitly ~07:30, seven minutes after episode start, with explicit strike-UAV threat."
+      },
+      "prior_qa_provenance": [
+        {
+          "source_artifact": "research/zaporizhzhia_explosion_gap_audit.json",
+          "source_path": "$.additional_confirmed_strict_misses[10]",
+          "occurrence_fields": {
+            "episode_id": "1e434d0fa5abfd518ad07d1e",
+            "date": "2026-08-28",
+            "current_canonical_classification": "sensitivity_only",
+            "source_url": "https://nv.ua/ukr/ukraine/events/epicentr-u-zaporizhzhi-atakuvali-droni-vinikla-masshtabna-pozhezha-video-novini-zaporizhzhya-50636377.html",
+            "source": "NV",
+            "event_time_kyiv": "2026-08-28T07:30:00+03:00"
+          }
+        },
+        {
+          "source_artifact": "research/zaporizhzhia_explosion_gap_audit.json",
+          "source_path": "$.manual_candidate_register[11]",
+          "occurrence_fields": {
+            "episode_id": "1e434d0fa5abfd518ad07d1e",
+            "date": "2026-08-28"
+          }
+        }
+      ],
+      "slice0_failure": {
+        "code": "ARTICLE_FOUND_BUT_EVENT_TIME_WAS_BURIED_IN_BODY",
+        "detail": "Search could find the attack article, but title/snippet-level evidence did not expose the ~07:30 event time. Without full-body extraction, the event could not be distinguished from the preceding 06:34-07:00 alert."
+      },
+      "independent_rediscovery": {
+        "prior_artifact_pointer_used_as_starting_hint": false,
+        "old_url_or_message_id_used_as_starting_hint": false,
+        "exact_old_quote_used_as_starting_hint": false,
+        "starting_hints": [
+          "city=Запоріжжя",
+          "date=2026-08-28",
+          "alert window=07:23:30-07:49:34"
+        ],
+        "route": [
+          "Search the target alert hour explicitly.",
+          "Open any relevant attack article even if its title/snippet lacks episode attribution.",
+          "Extract temporal phrases from the full body (e.g. близько, о HH:MM, після, до цього, за кілька хвилин)."
+        ],
+        "queries": [
+          "Запоріжжя 28 серпня 2026 07:23 07:49 вибух БпЛА",
+          "Запоріжжя 28 серпня 2026 07:30 вибухи"
+        ],
+        "source": {
+          "source": "NV",
+          "url": "https://nv.ua/ukr/ukraine/events/epicentr-u-zaporizhzhi-atakuvali-droni-vinikla-masshtabna-pozhezha-video-novini-zaporizhzhya-50636377.html",
+          "source_datetime_kyiv": "2026-08-28T09:11:00+03:00",
+          "event_datetime_kyiv": "2026-08-28T07:30:00+03:00",
+          "evidence_text": "Близько 07:30 28 серпня у Запоріжжі лунали вибухи, повідомлялося про загрозу ударних БпЛА.",
+          "discovery_support": "The explicit event time falls seven minutes after target episode start and after the earlier 06:34-07:00 alert had ended."
+        },
+        "corroboration": null,
+        "correct_episode_attribution": true,
+        "verdict": "confirmed_strict",
+        "rediscovered_independently": true
+      },
+      "old_qa_route": "Gap audit revisited an existing sensitivity classification and read the article body, which gave the explicit ~07:30 exact-city explosion time."
+    }
+  ],
+  "independent_recovery_summary": {
+    "target_controls": 4,
+    "independently_rediscovered": 4,
+    "recovered_episode_ids": [
+      "5a7d64e4d58b240825d0c954",
+      "7a45b4c6cd4f18358e063002",
+      "7c008970817e8d13ae402670",
+      "1e434d0fa5abfd518ad07d1e"
+    ],
+    "all_correct_episode_attribution": true,
+    "all_strict_verdict": true
+  },
+  "discovery_changes": {
+    "reusable_rules": [
+      {
+        "rule_id": "PER_EPISODE_SEARCH_WINDOW",
+        "rule": "Every alert episode on an included date gets its own city+date+local-window search. A date is not complete after one attack is found.",
+        "purpose": "Recover secondary attacks on multi-episode dates."
+      },
+      {
+        "rule_id": "SECONDARY_EPISODE_COMPLETION",
+        "rule": "Maintain episode-level searched/completed state. Continue until every episode on the date is marked source-hit or no-source-hit.",
+        "purpose": "Prevent dominant same-day event suppression."
+      },
+      {
+        "rule_id": "TELEGRAM_GENERIC_SITE_FALLBACK",
+        "rule": "If ordinary web/news search lacks episode-specific evidence, query indexed Telegram generically with city+date+hour+lexical variants, without seeding a known channel. If a channel surfaces, inspect neighboring messages around the alert.",
+        "purpose": "Recover short Telegram-only evidence and chronology."
+      },
+      {
+        "rule_id": "THREAT_EXPLOSION_PVO_CHAIN",
+        "rule": "Assemble neighboring contemporaneous messages into aerial threat -> explosion/impact -> PVO/clarification chains when timing and locality support one attack.",
+        "purpose": "Use PVO as context without treating PVO alone as explosion evidence."
+      },
+      {
+        "rule_id": "SOURCE_DATE_ARCHIVE_FALLBACK",
+        "rule": "When search results are dominated by another same-day event, query outlet date/tag/archive or live chronology pages and scan the target hour.",
+        "purpose": "Surface buried secondary items."
+      },
+      {
+        "rule_id": "LIVE_CHRONOLOGY_FALLBACK",
+        "rule": "For dense attack dates, inspect live-blog or time-stamped chronology bodies and extract clock-stamped updates, not only standalone article titles.",
+        "purpose": "Recover early/secondary event times."
+      },
+      {
+        "rule_id": "FULL_BODY_EVENT_TIME_EXTRACTION",
+        "rule": "Open relevant articles and inspect full body for explicit or approximate event time expressions: о HH:MM, близько, після, до цього, за кілька хвилин, вранці/ввечері. Snippet/title is insufficient when multiple alerts exist.",
+        "purpose": "Attribute found attacks to the correct episode."
+      },
+      {
+        "rule_id": "PUBLICATION_LAG_GUARD",
+        "rule": "Never substitute article/message publication time for event time. Attribute using explicit event time, contemporaneous-live wording, explicit alert relation, or an unambiguous evidence chain.",
+        "purpose": "Avoid wrong-episode attribution."
+      },
+      {
+        "rule_id": "EPISODE_SPECIFIC_EVIDENCE_REQUIRED",
+        "rule": "On multi-episode dates, generic 'during the alert' wording cannot select an episode unless chronology is episode-specific. Otherwise needs_review/episode_ambiguous.",
+        "purpose": "Protect precision after discovery widening."
+      },
+      {
+        "rule_id": "PVO_TRIAGE",
+        "rule": "Classify discovery evidence as PVO_ONLY, PVO_PLUS_EXPLOSION, or PVO_CHAIN_SUPPORT. PVO_ONLY never satisfies explosion strictness.",
+        "purpose": "Keep broad PVO recall without false positives."
+      }
+    ],
+    "pvo_distinction": {
+      "PVO_ONLY": "PVO/air-defence activity with no exact-city explosion/impact evidence. Discovery context only; cannot be strict.",
+      "PVO_PLUS_EXPLOSION": "Exact-city explosion/impact evidence plus PVO/aerial-war context. Can support strict only with target-episode attribution.",
+      "PVO_CHAIN_SUPPORT": "Threat/PVO messages that connect neighboring exact-city explosion/impact messages into one chronology; support only, not standalone evidence."
+    }
+  },
+  "acceptance_check_for_four": {
+    "previous_misses_recovered": "4/4",
+    "reusable_routes_present": true,
+    "publication_time_used_as_event_time": false,
+    "multi_episode_secondary_search_per_episode": true,
+    "telegram_fallback_present": true,
+    "full_body_event_time_extraction_present": true,
+    "pvo_only_can_be_strict": false
+  },
+  "guardrails": {
+    "canonical_mutated": false,
+    "historical_metric_mutated": false,
+    "reconciliation_mutated": false,
+    "live_monitor_queue_state_code_mutated": false,
+    "dashboard_mutated": false,
+    "deployed": false,
+    "slice1_started": false
+  }
+}
