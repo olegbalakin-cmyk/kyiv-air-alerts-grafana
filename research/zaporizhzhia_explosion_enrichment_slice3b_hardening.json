@@ -1,0 +1,477 @@
+{
+  "schema_version": "1.0",
+  "generated_date": "2026-09-23",
+  "repository": "olegbalakin-cmyk/kyiv-air-alerts-grafana",
+  "branch": "multicity-wip-2026-09-16",
+  "source_branch_head": "c6e80b24ec43b8e71ce40324138d68cd0e932112",
+  "city": "Запоріжжя",
+  "workstream": "explosion_enrichment",
+  "slice": "slice3b_hardening",
+  "purpose": "Architecture-first calibration hardening after the frozen Slice 3 independent chronological holdout.",
+  "methodological_status": {
+    "frozen_independent_results_preserved": {
+      "slice1": "8/13",
+      "slice2": "11/15",
+      "slice3": "11/14",
+      "pooled_descriptive_only": "30/42 = 71.43%"
+    },
+    "frozen_slice3_verdict": "SLICE 3 INDEPENDENT HOLDOUT NEEDS REVIEW",
+    "slice3b_status": "calibration; frozen Slice 3 is not rewritten",
+    "slice4_started": false
+  },
+  "exact_three_misses": [
+    "4b5505f1a437fdf606709c66",
+    "c0367099eed49727686e61af",
+    "c4e92e077e05dbfd52daeb9e"
+  ],
+  "forensic_traces": [
+    {
+      "episode_id": "4b5505f1a437fdf606709c66",
+      "date": "2025-07-09",
+      "alert": {
+        "start_utc": "2025-07-09T19:58:53Z",
+        "end_utc": "2025-07-10T00:35:17Z",
+        "start_kyiv": "2025-07-09T22:58:53+03:00",
+        "end_kyiv": "2025-07-10T03:35:17+03:00",
+        "timezone": "Europe/Kyiv"
+      },
+      "historical_strict_evidence": {
+        "artifact": "kyiv-air-alerts-grafana/data/explosion_research/zaporizhzhia/final_evidence.json",
+        "path": "strict_events[31]",
+        "event_time_kyiv": "~23:34",
+        "source_url": "https://www.pravda.com.ua/news/2025/07/09/7520826/",
+        "evidence": "На тлі повідомлення Повітряних сил про швидкісну ціль біля Запоріжжя місцеві медіа повідомили про вибух у місті.",
+        "basis": "strict: exact-city explosion with confirmed aerial threat inside the matched alert."
+      },
+      "historical_source": {
+        "url": "https://www.pravda.com.ua/news/2025/07/09/7520826/",
+        "publication_datetime_kyiv": "2025-07-09T02:49:00+03:00",
+        "actual_event_time_evidence": "23:34",
+        "fact": "The same page contains a later 23:34 body update: Air Force reported a high-speed target east of Zaporizhzhia and local media reported explosion sounds in Zaporizhzhia."
+      },
+      "blind_retrieval_queries": [
+        "generic episode-level exact-city explosion/impact query using alert-start date and local-hour envelope",
+        "trusted/local/regional indexed fallback under frozen Slice 2B source classes",
+        "D+1 retrospective retrieval under frozen Slice 2B timing rules",
+        "timestamped live-feed/full-body segmentation where surfaced by the frozen retrieval paths"
+      ],
+      "forensic_replay_queries": [
+        "Запоріжжя 9 липня 2025 після 23:00 вибухи Повітряні сили"
+      ],
+      "returned_raw_results_replay": [
+        {
+          "rank": 1,
+          "source": "Укрінформ",
+          "url": "https://www.ukrinform.ua/rubric-regions/4013371-u-zaporizzi-progrimili-vibuhi.html",
+          "evidence": "23:01 same-date exact-city report: explosions were heard during the air alert; OVA warned of strike UAV threat."
+        }
+      ],
+      "candidate_ranking": "Frozen artifact does not persist the complete search response; it stores only candidates that survived into raw_hits.",
+      "candidate_retention": {
+        "frozen_sources_considered": [],
+        "frozen_raw_hits": [],
+        "retained": false
+      },
+      "dedupe": "No downstream dedupe decision is observable because no candidate survived the frontier; no evidence of URL-collision loss.",
+      "article_live_feed_fetch": {
+        "frozen_performed": false,
+        "forensic_fetch_performed": true
+      },
+      "fetched_content": "The same page contains a later 23:34 body update: Air Force reported a high-speed target east of Zaporizhzhia and local media reported explosion sounds in Zaporizhzhia.",
+      "body_event_segmentation": "Standalone/updated article; qualifying body event becomes available once the candidate survives the frontier.",
+      "locality_extraction": "exact city: Zaporizhzhia",
+      "temporal_attribution": {
+        "event_time": "~2025-07-09T23:01:00+03:00",
+        "target_episode_supported": true,
+        "publication_time_used_as_event_time": false
+      },
+      "final_frozen_decision": "no_source_hit",
+      "primary_failure": "search_retrieved_but_ranked_out",
+      "secondary_contributing_failure": "retrieved_but_not_retained",
+      "diagnostic_confidence": "medium-high",
+      "diagnostic_caveat": null,
+      "first_layer_qualifying_evidence_became_unavailable_downstream": "candidate ranking/retention frontier before guaranteed full-content extraction"
+    },
+    {
+      "episode_id": "c0367099eed49727686e61af",
+      "date": "2025-07-18",
+      "alert": {
+        "start_utc": "2025-07-18T18:12:02Z",
+        "end_utc": "2025-07-19T05:23:50Z",
+        "start_kyiv": "2025-07-18T21:12:02+03:00",
+        "end_kyiv": "2025-07-19T08:23:50+03:00",
+        "timezone": "Europe/Kyiv"
+      },
+      "historical_strict_evidence": {
+        "artifact": "kyiv-air-alerts-grafana/data/explosion_research/zaporizhzhia/final_evidence.json",
+        "path": "strict_events[36]",
+        "event_time_kyiv": "~22:25",
+        "source_url": "https://24tv.ua/ataka-shahedami-18-lipnya-2025-ukrayini-de-zagroza-udaru-de-trivoga_n2873563",
+        "evidence": "Увечері БпЛА рухалися на Запоріжжя; близько 22:25 у місті було чути вибухи від роботи ППО.",
+        "basis": "strict: exact-city UAV/PPO event inside the matched alert."
+      },
+      "historical_source": {
+        "url": "https://24tv.ua/ataka-shahedami-18-lipnya-2025-ukrayini-de-zagroza-udaru-de-trivoga_n2873563",
+        "publication_datetime_kyiv": "2025-07-19T12:44:00+03:00",
+        "actual_event_time_evidence": "22:25, 18 July",
+        "fact": "Long D+1 live chronology contains a 22:25 entry saying explosions heard in Zaporizhzhia were PVO; 22:10 reports hostile UAVs toward Zaporizhzhia and 21:14 reports UAVs moving toward the city."
+      },
+      "blind_retrieval_queries": [
+        "generic episode-level exact-city explosion/impact query using alert-start date and local-hour envelope",
+        "trusted/local/regional indexed fallback under frozen Slice 2B source classes",
+        "D+1 retrospective retrieval under frozen Slice 2B timing rules",
+        "timestamped live-feed/full-body segmentation where surfaced by the frozen retrieval paths"
+      ],
+      "forensic_replay_queries": [
+        "Запоріжжя 18 липня 2025 вечір 22:00 23:00 дрони вибухи ППО",
+        "Запоріжжя 18 липня 2025 22:00 23:00 атака шахедами хронологія"
+      ],
+      "returned_raw_results_replay": [
+        {
+          "rank": 0,
+          "source": "Суспільне Запоріжжя archive",
+          "url": "https://suspilne.media/zaporizhzhia/archive/2025/7/18/",
+          "evidence": "Target-hour archive exposes a 22:32 exact-city attack/PVO article."
+        },
+        {
+          "rank": 1,
+          "source": "Суспільне Запоріжжя",
+          "url": "https://suspilne.media/zaporizhzhia/1070307-armia-rf-atakuvala-zaporizza-u-misti-pracuvala-ppo/",
+          "evidence": "Exact-city body says explosions heard in Zaporizhzhia were the result of air-defence work."
+        }
+      ],
+      "candidate_ranking": "Frozen artifact does not persist the complete search response; it stores only candidates that survived into raw_hits.",
+      "candidate_retention": {
+        "frozen_sources_considered": [],
+        "frozen_raw_hits": [],
+        "retained": false
+      },
+      "dedupe": "No downstream dedupe decision is observable because no candidate survived the frontier; no evidence of URL-collision loss.",
+      "article_live_feed_fetch": {
+        "frozen_performed": false,
+        "forensic_fetch_performed": true
+      },
+      "fetched_content": "Long D+1 live chronology contains a 22:25 entry saying explosions heard in Zaporizhzhia were PVO; 22:10 reports hostile UAVs toward Zaporizhzhia and 21:14 reports UAVs moving toward the city.",
+      "body_event_segmentation": "Qualifying 22:25 entry is deep in a 629-line live chronology and must be retained as an independent fragment, with the 22:10 UAV-to-city entry only as compatible same-sequence context.",
+      "locality_extraction": "exact city: Zaporizhzhia",
+      "temporal_attribution": {
+        "event_time": "2025-07-18T22:25:00+03:00",
+        "target_episode_supported": true,
+        "publication_time_used_as_event_time": false
+      },
+      "final_frozen_decision": "no_source_hit",
+      "primary_failure": "retrieved_but_not_retained",
+      "secondary_contributing_failure": "live_feed_entry_not_retained",
+      "diagnostic_confidence": "medium",
+      "diagnostic_caveat": "Frozen Slice 3 did not persist the complete pre-retention engine response, so engine non-return versus pre-artifact rank eviction cannot be reconstructed exactly. The first observable loss is the candidate frontier: no page or fragment survived into raw_hits despite indexable target-hour reporting and a qualifying structured chronology.",
+      "first_layer_qualifying_evidence_became_unavailable_downstream": "candidate ranking/retention frontier before guaranteed full-content extraction"
+    },
+    {
+      "episode_id": "c4e92e077e05dbfd52daeb9e",
+      "date": "2025-07-19",
+      "alert": {
+        "start_utc": "2025-07-19T07:02:18Z",
+        "end_utc": "2025-07-19T07:38:46Z",
+        "start_kyiv": "2025-07-19T10:02:18+03:00",
+        "end_kyiv": "2025-07-19T10:38:46+03:00",
+        "timezone": "Europe/Kyiv"
+      },
+      "historical_strict_evidence": {
+        "artifact": "kyiv-air-alerts-grafana/data/explosion_research/zaporizhzhia/final_evidence.json",
+        "path": "strict_events[37]",
+        "event_time_kyiv": "~10:07",
+        "source_url": "https://24tv.ua/zaporizhzhi-prolunali-vibuhi_n2873752/",
+        "evidence": "Повітряну тривогу оголосили о 10:02, а приблизно за п'ять хвилин з'явилося повідомлення про вибухи в Запоріжжі на тлі загрози авіаційних засобів ураження.",
+        "basis": "strict: exact-city aerial-war event immediately after start of the matched alert."
+      },
+      "historical_source": {
+        "url": "https://24tv.ua/zaporizhzhi-prolunali-vibuhi_n2873752/",
+        "publication_datetime_kyiv": "2025-07-19T10:12:00+03:00",
+        "actual_event_time_evidence": "~10:07",
+        "fact": "Body says alert began at 10:02 and five minutes later information appeared about explosions in Zaporizhzhia; Air Force had warned at 09:53 of tactical aviation and aerial-weapon threat."
+      },
+      "blind_retrieval_queries": [
+        "generic episode-level exact-city explosion/impact query using alert-start date and local-hour envelope",
+        "trusted/local/regional indexed fallback under frozen Slice 2B source classes",
+        "D+1 retrospective retrieval under frozen Slice 2B timing rules",
+        "timestamped live-feed/full-body segmentation where surfaced by the frozen retrieval paths"
+      ],
+      "forensic_replay_queries": [
+        "Запоріжжя 19 липня 2025 10:07 вибухи"
+      ],
+      "returned_raw_results_replay": [
+        {
+          "rank": 7,
+          "source": "24 Канал",
+          "url": "https://24tv.ua/zaporizhzhi-prolunali-vibuhi_n2873752",
+          "evidence": "Exact historical standalone article appears below more prominent generic results in broad first-page replay."
+        }
+      ],
+      "candidate_ranking": "Frozen artifact does not persist the complete search response; it stores only candidates that survived into raw_hits.",
+      "candidate_retention": {
+        "frozen_sources_considered": [],
+        "frozen_raw_hits": [],
+        "retained": false
+      },
+      "dedupe": "No downstream dedupe decision is observable because no candidate survived the frontier; no evidence of URL-collision loss.",
+      "article_live_feed_fetch": {
+        "frozen_performed": false,
+        "forensic_fetch_performed": true
+      },
+      "fetched_content": "Body says alert began at 10:02 and five minutes later information appeared about explosions in Zaporizhzhia; Air Force had warned at 09:53 of tactical aviation and aerial-weapon threat.",
+      "body_event_segmentation": "Standalone article; no multi-event ambiguity after fetch.",
+      "locality_extraction": "exact city: Zaporizhzhia",
+      "temporal_attribution": {
+        "event_time": "~2025-07-19T10:07:00+03:00",
+        "target_episode_supported": true,
+        "publication_time_used_as_event_time": false
+      },
+      "final_frozen_decision": "no_source_hit",
+      "primary_failure": "search_retrieved_but_ranked_out",
+      "secondary_contributing_failure": "retrieved_but_not_retained",
+      "diagnostic_confidence": "high",
+      "diagnostic_caveat": null,
+      "first_layer_qualifying_evidence_became_unavailable_downstream": "candidate ranking/retention frontier before guaranteed full-content extraction"
+    }
+  ],
+  "taxonomy_note": "Frozen Slice 3 persisted retained candidates, not complete pre-ranking engine responses. Therefore raw_hits=[] is not treated as proof of search_not_retrieved. The assignment records the first observable loss and flags uncertainty where engine-return versus rank eviction is not reconstructible.",
+  "root_cause_summary": {
+    "architecture_level_hypothesis": "The persistent recall ceiling is primarily an evidence-preservation failure at the candidate frontier. Previous hardenings broadened query coverage and improved downstream segmentation, but rank/early triage still acted as an implicit evidence gate; structured/live pages were only segmented if the page first survived that gate.",
+    "lowest_common_failure_layer": "candidate ranking/retention before full-content event extraction",
+    "slice3_primary_counts": {
+      "search_retrieved_but_ranked_out": 2,
+      "retrieved_but_not_retained": 1
+    },
+    "slice3_secondary_counts": {
+      "retrieved_but_not_retained": 2,
+      "live_feed_entry_not_retained": 1
+    },
+    "independent_causes_required": false,
+    "interpretation": "Slice 1/2 hardenings often repaired downstream symptoms of the same upstream loss: indexable candidates or richer page representations were not guaranteed to reach extraction."
+  },
+  "cross_slice_failure_family_matrix": [
+    {
+      "miss": "4bed22300441e824dbb776d9",
+      "slice": "Slice 1",
+      "date": "2025-03-19",
+      "first_failing_layer": "search_retrieved_but_ranked_out",
+      "source_type": "indexed article / multi-source event",
+      "retrieval_status": "indexable",
+      "retention_status": "did not reach full-body extraction",
+      "extraction_status": "not reached",
+      "previous_hardening_rule": "COARSE_TEMPORAL_SOURCE_RETRIEVAL_MISS",
+      "current_architecture_fix_could_close": true
+    },
+    {
+      "miss": "4e60c0e06170b87a4cd42988",
+      "slice": "Slice 1",
+      "date": "2025-03-24",
+      "first_failing_layer": "search_retrieved_but_ranked_out",
+      "source_type": "indexed article / multi-source event",
+      "retrieval_status": "indexable",
+      "retention_status": "did not reach full-body extraction",
+      "extraction_status": "not reached",
+      "previous_hardening_rule": "STRONG_INDEXABLE_SOURCE_RETRIEVAL_MISS",
+      "current_architecture_fix_could_close": true
+    },
+    {
+      "miss": "5c730c2e66d8a4264a357421",
+      "slice": "Slice 1",
+      "date": "2025-04-07",
+      "first_failing_layer": "retrieved_but_not_retained",
+      "source_type": "article with qualifying body evidence",
+      "retrieval_status": "indexable",
+      "retention_status": "did not reach full-body extraction",
+      "extraction_status": "not reached",
+      "previous_hardening_rule": "PVO_HEADLINE_WITH_BODY_EXPLOSION_FALSE_NEGATIVE",
+      "current_architecture_fix_could_close": true
+    },
+    {
+      "miss": "1066e522283ff14f622327cf",
+      "slice": "Slice 1",
+      "date": "2025-04-15",
+      "first_failing_layer": "retrieved_but_not_retained",
+      "source_type": "article with qualifying body evidence",
+      "retrieval_status": "indexable",
+      "retention_status": "did not reach full-body extraction",
+      "extraction_status": "not reached",
+      "previous_hardening_rule": "SECONDARY_CITY_EVIDENCE_BURIED_UNDER_OTHER_LOCALITY_HEADLINE",
+      "current_architecture_fix_could_close": true
+    },
+    {
+      "miss": "1dd834e016b3bed690de2973",
+      "slice": "Slice 1",
+      "date": "2025-05-02",
+      "first_failing_layer": "search_retrieved_but_ranked_out",
+      "source_type": "indexed article / multi-source event",
+      "retrieval_status": "indexable",
+      "retention_status": "did not reach full-body extraction",
+      "extraction_status": "not reached",
+      "previous_hardening_rule": "POST_ALERT_EXACT_CITY_EXPLOSION_NOT_RETAINED",
+      "current_architecture_fix_could_close": true
+    },
+    {
+      "miss": "6f2bab19aebbb357896550ea",
+      "slice": "Slice 1",
+      "date": "2025-03-25",
+      "first_failing_layer": "retrieved_but_not_retained",
+      "source_type": "indexed article / multi-source event",
+      "retrieval_status": "indexable",
+      "retention_status": "did not reach full-body extraction",
+      "extraction_status": "not reached",
+      "previous_hardening_rule": "SENSITIVITY_INFERRED_SAME_ATTACK_CHAIN_NOT_REDISCOVERED",
+      "current_architecture_fix_could_close": true
+    },
+    {
+      "miss": "989a3167ca65f3b54e6eb3bb",
+      "slice": "Slice 2",
+      "date": "2025-05-25",
+      "first_failing_layer": "retrieved_but_not_retained",
+      "source_type": "PVO-forward article",
+      "retrieval_status": "discoverable/indexable",
+      "retention_status": "URL did not survive frozen frontier",
+      "extraction_status": "not reached",
+      "previous_hardening_rule": "PVO_OVERFILTER_EXPLICIT_EXPLOSION_FALSE_NEGATIVE",
+      "current_architecture_fix_could_close": true
+    },
+    {
+      "miss": "4d1a69adfb40266b088dc442",
+      "slice": "Slice 2",
+      "date": "2025-06-07",
+      "first_failing_layer": "search_retrieved_but_ranked_out",
+      "source_type": "indexed local/retrospective article",
+      "retrieval_status": "discoverable/indexable",
+      "retention_status": "URL did not survive frozen frontier",
+      "extraction_status": "not reached",
+      "previous_hardening_rule": "NON_TRUSTED_LOCAL_DOMAIN_GENERIC_RETRIEVAL_MISS",
+      "current_architecture_fix_could_close": true
+    },
+    {
+      "miss": "cf12245b5767340b36bb934b",
+      "slice": "Slice 2",
+      "date": "2025-06-09",
+      "first_failing_layer": "search_retrieved_but_ranked_out",
+      "source_type": "indexed local/retrospective article",
+      "retrieval_status": "discoverable/indexable",
+      "retention_status": "URL did not survive frozen frontier",
+      "extraction_status": "not reached",
+      "previous_hardening_rule": "TRUSTED_DOMAIN_RETROSPECTIVE_PUBLICATION_LAG_RETRIEVAL_MISS",
+      "current_architecture_fix_could_close": true
+    },
+    {
+      "miss": "8c05b7fc08e91711acebc02a",
+      "slice": "Slice 2",
+      "date": "2025-06-09",
+      "first_failing_layer": "retrieved_but_not_retained",
+      "source_type": "D+1 long live feed",
+      "retrieval_status": "discoverable/indexable",
+      "retention_status": "URL did not survive frozen frontier",
+      "extraction_status": "not reached",
+      "previous_hardening_rule": "LONG_LIVE_FEED_BURIED_BODY_RETRIEVAL_MISS",
+      "current_architecture_fix_could_close": true
+    },
+    {
+      "miss": "4b5505f1a437fdf606709c66",
+      "slice": "Slice 3",
+      "date": "2025-07-09",
+      "first_failing_layer": "search_retrieved_but_ranked_out",
+      "source_type": "mutable/update article + standalone corroboration",
+      "retrieval_status": "indexable; forensic replay returns relevant evidence",
+      "retention_status": "no candidate survived frozen frontier",
+      "extraction_status": "full body not reached",
+      "previous_hardening_rule": "Slice2B open-local/D+1/full-body/live-feed rules",
+      "current_architecture_fix_could_close": true
+    },
+    {
+      "miss": "c0367099eed49727686e61af",
+      "slice": "Slice 3",
+      "date": "2025-07-18",
+      "first_failing_layer": "retrieved_but_not_retained",
+      "source_type": "D+1 long live feed",
+      "retrieval_status": "indexable; forensic replay returns relevant evidence",
+      "retention_status": "no candidate survived frozen frontier",
+      "extraction_status": "live entry unavailable downstream",
+      "previous_hardening_rule": "Slice2B open-local/D+1/full-body/live-feed rules",
+      "current_architecture_fix_could_close": true
+    },
+    {
+      "miss": "c4e92e077e05dbfd52daeb9e",
+      "slice": "Slice 3",
+      "date": "2025-07-19",
+      "first_failing_layer": "search_retrieved_but_ranked_out",
+      "source_type": "standalone exact-event article",
+      "retrieval_status": "indexable; forensic replay returns relevant evidence",
+      "retention_status": "no candidate survived frozen frontier",
+      "extraction_status": "full body not reached",
+      "previous_hardening_rule": "Slice2B open-local/D+1/full-body/live-feed rules",
+      "current_architecture_fix_could_close": true
+    }
+  ],
+  "architecture_level_change": {
+    "rule_id": "EVIDENCE_PRESERVING_CANDIDATE_FRONTIER_V1",
+    "layer": "ranking_retention_and_structured_content_frontier",
+    "old_behavior": "Only a small page-level subset survived early ranking/triage; full-body/live-entry rules executed after that selection.",
+    "new_behavior": [
+      "Inspect a bounded first-page frontier of up to 10 results for each existing query family before rank pruning.",
+      "Retain results that meet a retrieval-only relevance floor: exact-city evidence plus explosion/impact or aerial-war evidence plus target-date/D+1 compatibility. This never auto-classifies a result.",
+      "Fetch structured date archives, update pages and live chronologies that meet the floor before classification; retain every target-window event fragment, capped at 4 per page.",
+      "Deduplicate by canonical URL with richness merge: union query/snippet provenance and keep the richest fetched-body/structured-entry representation; a snippet-only variant cannot replace a richer body.",
+      "Cap retained page candidates at 12 per episode after the relevance floor; use deterministic source diversity and explicit event-time evidence before generic rank/authority."
+    ],
+    "bounded_parameters": {
+      "search_results_inspected_per_query_family": 10,
+      "max_retained_page_candidates_per_episode": 12,
+      "max_target_window_event_fragments_per_page": 4
+    },
+    "generalizable_because": "The rule uses episode locality/date/time and evidence vocabulary only; it contains no missed episode, date, URL, publisher or historical verdict.",
+    "anti_overfit_safeguards": [
+      "no episode/date/URL/domain allowlist",
+      "no historical source pointer/runtime seed",
+      "no historical verdict as runtime signal",
+      "bounded page/fragment caps",
+      "exact-city unchanged",
+      "aerial-war context unchanged",
+      "strict temporal attribution unchanged",
+      "PVO_ONLY remains insufficient",
+      "publication time remains metadata, never event time",
+      "boundary ambiguity unchanged",
+      "cross-source compatibility unchanged"
+    ]
+  },
+  "classification_semantics_changed": false,
+  "implementation_scope": {
+    "reusable_historical_discovery_code_modified": false,
+    "reason": "As in Slice 1B/2B, this branch has no standalone executable historical-enrichment runner. Historical discovery is encoded as research methodology/replay artifacts; live explosion monitor/metric code is out of scope and unchanged.",
+    "live_monitor_code_modified": false
+  },
+  "retention_candidate_volume_impact": {
+    "slice3_frozen": {
+      "episodes": 170,
+      "total_retained_page_records": 15,
+      "average_retained_per_episode": 0.0882,
+      "max_retained_per_episode": 2,
+      "zero_retained_episodes": 159
+    },
+    "slice3b_calibration": {
+      "episodes": 170,
+      "total_retained_page_records": 18,
+      "average_retained_per_episode": 0.1059,
+      "max_retained_per_episode": 2,
+      "newly_retained_records": 3,
+      "relative_total_increase_percent": 20
+    },
+    "fetched_processed_records_before_after": "not instrumented in frozen Slice 3; retained-page count is the auditable proxy",
+    "candidate_explosion": false
+  },
+  "forward_criterion_for_slice4": "If a future independent Slice 4 again shows roughly 20–30% strict misses from the same retrieval/retention family, do not add local Slice 4B fallbacks; treat it as evidence of a persistent discovery-architecture recall ceiling and redesign the discovery layer.",
+  "scope_guardrails": {
+    "slice4_not_started": true,
+    "canonical_169_unchanged": true,
+    "reconciliation_unchanged": true,
+    "live_monitor_queue_unchanged": true,
+    "dashboard_unchanged": true,
+    "grafana_unchanged": true,
+    "netlify_unchanged": true,
+    "production_unchanged": true
+  }
+}
