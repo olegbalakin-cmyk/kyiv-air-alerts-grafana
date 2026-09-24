@@ -3375,6 +3375,10 @@ def self_test() -> None:
             anchor = replayed[composition_anchor_id]
             city_key = str(composition_fixture["city_key"])
             target_id = str(composition_fixture["target_episode_id"])
+            # Standalone needs_review classification refreshes publication-based
+            # matching metadata. Restore only the already-reviewed target binding
+            # on this in-memory composition fixture before episode composition.
+            anchor["matched_episode_id"] = target_id
             episodes = tracked_episodes_for_city(state_rows, city_key)
             target = next(
                 ep for ep in episodes if str(ep.get("episode_id") or "") == target_id
