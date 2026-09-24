@@ -1,0 +1,1603 @@
+{
+  "schema_version": 1,
+  "generated_for_date": "2026-09-24",
+  "repository": "olegbalakin-cmyk/kyiv-air-alerts-grafana",
+  "branch": "multicity-wip-2026-09-16",
+  "purpose": "Read-only episode-level reconciliation of the post-queue-mutation live/test explosion metric. This artifact records the exact numerator/status operations for a later atomic metric update; no metric, dashboard, queue, monitor-state, last-run, code, canonical baseline, Grafana, Netlify, or production deployment mutation was performed in this step.",
+  "current_state": {
+    "head": "370fbb32a3154d4e5d7b40119becd963383288b3",
+    "required_queue_mutations_contained": {
+      "reconciled_downgrade_cleanup_commit": "286b63cf14f612c6c28b17cd59c12991da9e173a",
+      "remaining_composition_approvals_commit": "370fbb32a3154d4e5d7b40119becd963383288b3",
+      "head_is_exact_second_commit": true,
+      "second_commit_is_one_commit_ahead_of_first": true
+    },
+    "blobs": {
+      "explosion_review_queue": {
+        "path": "kyiv-air-alerts-grafana/data/explosion_review_queue.json",
+        "sha": "20a9bdad5b9d4e4dc13bbb5567f7da8a3adc2f60",
+        "records": 436
+      },
+      "explosions_test": {
+        "path": "kyiv-air-alerts-grafana/data/explosions_test.json",
+        "sha": "6116d9eb33b09d28d04e7bfaa4c809cc3bcea7af"
+      },
+      "dashboard_data": {
+        "path": "kyiv-air-alerts-grafana/data/dashboard_data.json",
+        "sha": "349ddf1f885eb8c6b24c5c58f5319c4d44c88d1b"
+      },
+      "explosion_candidate_monitor_state": {
+        "path": "kyiv-air-alerts-grafana/data/explosion_candidate_monitor_state.json",
+        "sha": "bcb46585bdc8a5feeee45b6d48a82171b5d1691d"
+      },
+      "explosion_candidate_monitor_last_run": {
+        "path": "kyiv-air-alerts-grafana/data/explosion_candidate_monitor_last_run.json",
+        "sha": "42054fdee292c8e9d7ac0dc217f584bf8560f96d"
+      },
+      "explosion_audited_baseline": {
+        "path": "kyiv-air-alerts-grafana/data/explosion_audited_baseline.json",
+        "sha": "5bbd2b771559eac2966aeec65d6e3b5487b9c1a9"
+      },
+      "update_explosion_metric_live_script": {
+        "path": "kyiv-air-alerts-grafana/scripts/update_explosion_metric_live.py",
+        "sha": "5f215835f4b1975485e754c2ba34b58b3c245ba9"
+      },
+      "authoritative_final_58_20_replay": {
+        "path": "research/explosion_monitor_final_58_20_replay_2026-09-24.json",
+        "commit": "dcc50e5296b2da80c3d3e1e6fbd9f8b1b2be4dd7",
+        "sha": "b5386d7b9e7188711a1ea8e5054677414b1c5a87"
+      }
+    }
+  },
+  "metric_schema_and_representation": {
+    "classification": "test-only generated metric snapshot combining a separately frozen canonical audited baseline with post-baseline live monitor approvals; it is not the canonical historical baseline itself",
+    "meta": {
+      "schema_version": 2,
+      "snapshot_date": "2026-09-24",
+      "metric": "strict confirmed public reports of explosions matched to production alert episodes",
+      "test_only": true,
+      "production_data_pipeline_changed": false,
+      "rolling_window_days": 90,
+      "rolling_rule": "sum(strict matched alert episodes) / sum(all tracked alert episodes) over 90 completed calendar days; full windows only"
+    },
+    "storage_shape": "one aggregate object per city; there are no episode rows and no episode IDs inside explosions_test.json",
+    "strict_representation": "city.strict_n plus city.strict_daily[Kyiv-local alert-start date] and city.rolling90; unique approved_strict matched_episode_id values are added to the frozen baseline",
+    "sensitivity_representation": "city.sensitivity_n is a union count: every approved_strict or approved_sensitivity episode enters the sensitivity set; strict is therefore a subset of sensitivity",
+    "city_representation": "cities keyed by city_key with label in each city object",
+    "episode_id_location": "episode IDs live in explosion_candidate_monitor_state.json and matched_episode_id fields in explosion_review_queue.json, not in explosions_test.json",
+    "alert_start_end_location": "alert_start and alert_end are taken from monitor-state episodes",
+    "metric_date_rule": "episode date is alert_start converted to Europe/Kyiv; only episodes on or before each city's metric coverage_end can contribute",
+    "source_status_location": "candidate source/status live in the review queue; metric output stores aggregate counts, not per-source rows",
+    "deduplication_key": "matched_episode_id deduplicated in a Set inside each city; multiple approved candidates for one episode contribute at most one episode",
+    "generator": {
+      "path": "kyiv-air-alerts-grafana/scripts/update_explosion_metric_live.py",
+      "sha": "5f215835f4b1975485e754c2ba34b58b3c245ba9"
+    },
+    "current_metric_snapshot_provenance_reconstruction": {
+      "source_commit": "122b444f5e6c55d0bc0df7d7d9b4467c68b16402",
+      "source_queue_blob": "a19e9b6867a2a89a42654523492d481ee1ec03fe",
+      "source_metric_blob": "6116d9eb33b09d28d04e7bfaa4c809cc3bcea7af",
+      "method": "Reconstructed unique strict/sensitivity approval sets from the queue blob that coexisted with the current metric blob, applied the metric coverage_end cutoff, and checked baseline + live unique episode counts against current metric counts.",
+      "affected_city_count_checks": {
+        "odesa": {
+          "baseline_strict_n": 155,
+          "baseline_sensitivity_n": 161,
+          "reconstructed_live_strict_additions": 7,
+          "reconstructed_live_sensitivity_union_additions": 7,
+          "reconstructed_strict_n": 162,
+          "actual_metric_strict_n": 162,
+          "reconstructed_sensitivity_n": 168,
+          "actual_metric_sensitivity_n": 168,
+          "exact_match": true
+        },
+        "zaporizhzhia": {
+          "baseline_strict_n": 169,
+          "baseline_sensitivity_n": 224,
+          "reconstructed_live_strict_additions": 1,
+          "reconstructed_live_sensitivity_union_additions": 2,
+          "reconstructed_strict_n": 170,
+          "actual_metric_strict_n": 170,
+          "reconstructed_sensitivity_n": 226,
+          "actual_metric_sensitivity_n": 226,
+          "exact_match": true
+        },
+        "dnipro": {
+          "baseline_strict_n": 180,
+          "baseline_sensitivity_n": 187,
+          "reconstructed_live_strict_additions": 3,
+          "reconstructed_live_sensitivity_union_additions": 3,
+          "reconstructed_strict_n": 183,
+          "actual_metric_strict_n": 183,
+          "reconstructed_sensitivity_n": 190,
+          "actual_metric_sensitivity_n": 190,
+          "exact_match": true
+        },
+        "kyiv": {
+          "baseline_strict_n": 377,
+          "baseline_sensitivity_n": 404,
+          "reconstructed_live_strict_additions": 5,
+          "reconstructed_live_sensitivity_union_additions": 5,
+          "reconstructed_strict_n": 382,
+          "actual_metric_strict_n": 382,
+          "reconstructed_sensitivity_n": 409,
+          "actual_metric_sensitivity_n": 409,
+          "exact_match": true
+        }
+      },
+      "all_affected_city_count_checks_match": true
+    }
+  },
+  "confirmed_removal_episode_audits": [
+    {
+      "city": "Одеса",
+      "city_key": "odesa",
+      "episode_id": "2c5bbc0aeba9e25e4eec7b09",
+      "alert_start": "2026-09-18T05:00:13.563928Z",
+      "alert_end": "2026-09-18T05:19:46.542756Z",
+      "alert_start_date_kyiv": "2026-09-18",
+      "current_metric_representation": {
+        "representation": "STRICT",
+        "episode_date_kyiv": "2026-09-18",
+        "metric_coverage_end": "2026-09-23"
+      },
+      "current_queue_representation": "ABSENT",
+      "metric_snapshot_supporting_candidates": [
+        {
+          "candidate_id": "d9fad0e4ef5ef4f597f29978",
+          "status": "approved_strict"
+        },
+        {
+          "candidate_id": "f4c561e2f211ba8a707b3696",
+          "status": "approved_strict"
+        }
+      ],
+      "current_queue_candidates": [
+        {
+          "candidate_id": "d9fad0e4ef5ef4f597f29978",
+          "status": "needs_review"
+        },
+        {
+          "candidate_id": "f4c561e2f211ba8a707b3696",
+          "status": "needs_review"
+        }
+      ],
+      "state_episode_occurrences": 1,
+      "authoritative_final_result": "DOWNGRADE_TO_UNRESOLVED",
+      "authoritative_final_live_status": "needs_review",
+      "audit_result": "STRICT_ROW_PRESENT_NEEDS_REMOVAL"
+    },
+    {
+      "city": "Одеса",
+      "city_key": "odesa",
+      "episode_id": "7a7da068c0efb7be80bd45e4",
+      "alert_start": "2026-09-21T15:23:04.352831Z",
+      "alert_end": "2026-09-21T16:04:52.076994Z",
+      "alert_start_date_kyiv": "2026-09-21",
+      "current_metric_representation": {
+        "representation": "STRICT",
+        "episode_date_kyiv": "2026-09-21",
+        "metric_coverage_end": "2026-09-23"
+      },
+      "current_queue_representation": "ABSENT",
+      "metric_snapshot_supporting_candidates": [
+        {
+          "candidate_id": "da37fd7a3b6c42dbff41d115",
+          "status": "needs_review"
+        },
+        {
+          "candidate_id": "5a61d62cac76456eb62cb386",
+          "status": "needs_review"
+        },
+        {
+          "candidate_id": "3ebf49fac81615d023d0c2d2",
+          "status": "approved_strict"
+        }
+      ],
+      "current_queue_candidates": [
+        {
+          "candidate_id": "da37fd7a3b6c42dbff41d115",
+          "status": "needs_review"
+        },
+        {
+          "candidate_id": "5a61d62cac76456eb62cb386",
+          "status": "needs_review"
+        },
+        {
+          "candidate_id": "3ebf49fac81615d023d0c2d2",
+          "status": "needs_review"
+        }
+      ],
+      "state_episode_occurrences": 1,
+      "authoritative_final_result": "DOWNGRADE_TO_UNRESOLVED",
+      "authoritative_final_live_status": "needs_review",
+      "audit_result": "STRICT_ROW_PRESENT_NEEDS_REMOVAL"
+    },
+    {
+      "city": "Одеса",
+      "city_key": "odesa",
+      "episode_id": "eb2580c2bec54ddc2e36eaf7",
+      "alert_start": "2026-09-21T12:14:59.835398Z",
+      "alert_end": "2026-09-21T13:37:45.918693Z",
+      "alert_start_date_kyiv": "2026-09-21",
+      "current_metric_representation": {
+        "representation": "STRICT",
+        "episode_date_kyiv": "2026-09-21",
+        "metric_coverage_end": "2026-09-23"
+      },
+      "current_queue_representation": "ABSENT",
+      "metric_snapshot_supporting_candidates": [
+        {
+          "candidate_id": "c222151c801a464bc4a4325f",
+          "status": "needs_review"
+        },
+        {
+          "candidate_id": "81b7b08579475ca6abd24dd4",
+          "status": "needs_review"
+        },
+        {
+          "candidate_id": "d8bd39aa85657dd39c5e0fbc",
+          "status": "approved_strict"
+        },
+        {
+          "candidate_id": "f8410c2df817637bad98c18f",
+          "status": "needs_review"
+        },
+        {
+          "candidate_id": "ec759edeac2531c382c0eb4f",
+          "status": "needs_review"
+        },
+        {
+          "candidate_id": "63e4a0c4265cd7c9bac6f485",
+          "status": "needs_review"
+        }
+      ],
+      "current_queue_candidates": [
+        {
+          "candidate_id": "c222151c801a464bc4a4325f",
+          "status": "needs_review"
+        },
+        {
+          "candidate_id": "81b7b08579475ca6abd24dd4",
+          "status": "needs_review"
+        },
+        {
+          "candidate_id": "d8bd39aa85657dd39c5e0fbc",
+          "status": "needs_review"
+        },
+        {
+          "candidate_id": "f8410c2df817637bad98c18f",
+          "status": "needs_review"
+        },
+        {
+          "candidate_id": "ec759edeac2531c382c0eb4f",
+          "status": "needs_review"
+        },
+        {
+          "candidate_id": "63e4a0c4265cd7c9bac6f485",
+          "status": "needs_review"
+        }
+      ],
+      "state_episode_occurrences": 1,
+      "authoritative_final_result": "DOWNGRADE_TO_UNRESOLVED",
+      "authoritative_final_live_status": "needs_review",
+      "audit_result": "STRICT_ROW_PRESENT_NEEDS_REMOVAL"
+    },
+    {
+      "city": "Запоріжжя",
+      "city_key": "zaporizhzhia",
+      "episode_id": "a60d817eaa9253200f090720",
+      "alert_start": "2026-09-18T16:21:56.587919Z",
+      "alert_end": "2026-09-18T17:49:19.836467Z",
+      "alert_start_date_kyiv": "2026-09-18",
+      "current_metric_representation": {
+        "representation": "STRICT",
+        "episode_date_kyiv": "2026-09-18",
+        "metric_coverage_end": "2026-09-23"
+      },
+      "current_queue_representation": "ABSENT",
+      "metric_snapshot_supporting_candidates": [
+        {
+          "candidate_id": "537fc9f91a0405b08c9845a8",
+          "status": "needs_review"
+        },
+        {
+          "candidate_id": "e7461ec759e4d79020dfd1ba",
+          "status": "approved_strict"
+        },
+        {
+          "candidate_id": "113dac439efda41673b1f497",
+          "status": "approved_strict"
+        }
+      ],
+      "current_queue_candidates": [
+        {
+          "candidate_id": "537fc9f91a0405b08c9845a8",
+          "status": "needs_review"
+        },
+        {
+          "candidate_id": "e7461ec759e4d79020dfd1ba",
+          "status": "needs_review"
+        },
+        {
+          "candidate_id": "113dac439efda41673b1f497",
+          "status": "needs_review"
+        }
+      ],
+      "state_episode_occurrences": 1,
+      "authoritative_final_result": "DOWNGRADE_TO_UNRESOLVED",
+      "authoritative_final_live_status": "needs_review",
+      "audit_result": "STRICT_ROW_PRESENT_NEEDS_REMOVAL"
+    }
+  ],
+  "validated_strict_episode_audits": [
+    {
+      "city": "Дніпро",
+      "city_key": "dnipro",
+      "episode_id": "c894e85e407dc4256d8c4419",
+      "alert_start": "2026-09-21T22:58:21.538187Z",
+      "alert_end": "2026-09-21T23:58:36.917360Z",
+      "alert_start_date_kyiv": "2026-09-22",
+      "current_metric_representation": {
+        "representation": "ABSENT",
+        "episode_date_kyiv": "2026-09-22",
+        "metric_coverage_end": "2026-09-23"
+      },
+      "current_queue_representation": "STRICT",
+      "metric_snapshot_supporting_candidates": [
+        {
+          "candidate_id": "aa19972aee883cf12af75d20",
+          "status": "needs_review"
+        },
+        {
+          "candidate_id": "3f2137adc72e1202240133f7",
+          "status": "needs_review"
+        },
+        {
+          "candidate_id": "a06e12f4cfed9b43eafe2d58",
+          "status": "needs_review"
+        }
+      ],
+      "current_queue_candidates": [
+        {
+          "candidate_id": "aa19972aee883cf12af75d20",
+          "status": "needs_review"
+        },
+        {
+          "candidate_id": "3f2137adc72e1202240133f7",
+          "status": "approved_strict"
+        },
+        {
+          "candidate_id": "a06e12f4cfed9b43eafe2d58",
+          "status": "needs_review"
+        }
+      ],
+      "state_episode_occurrences": 1,
+      "authoritative_validated_strict_supported": true,
+      "audit_classification": "ABSENT_NEEDS_STRICT_ADD",
+      "eligible_in_current_metric_snapshot": true,
+      "eligibility_reason": "episode local date is within current metric coverage_end"
+    },
+    {
+      "city": "Київ",
+      "city_key": "kyiv",
+      "episode_id": "e97e6e816f96832d02c8b2cd",
+      "alert_start": "2026-09-23T07:24:00Z",
+      "alert_end": "2026-09-23T09:29:00Z",
+      "alert_start_date_kyiv": "2026-09-23",
+      "current_metric_representation": {
+        "representation": "STRICT",
+        "episode_date_kyiv": "2026-09-23",
+        "metric_coverage_end": "2026-09-23"
+      },
+      "current_queue_representation": "STRICT",
+      "metric_snapshot_supporting_candidates": [
+        {
+          "candidate_id": "1e8887b0e0a26a0b0a9601ef",
+          "status": "needs_review"
+        },
+        {
+          "candidate_id": "4225edf94f0a8db2b78f07e3",
+          "status": "needs_review"
+        },
+        {
+          "candidate_id": "4bdc4c0a5f95dc1e01632d22",
+          "status": "needs_review"
+        },
+        {
+          "candidate_id": "73d817926f66c8dce397b91b",
+          "status": "approved_strict"
+        },
+        {
+          "candidate_id": "7dd8008ab0695b10329b3899",
+          "status": "needs_review"
+        },
+        {
+          "candidate_id": "a434269bc3d63864461c6349",
+          "status": "needs_review"
+        },
+        {
+          "candidate_id": "91b7d2133a797aa96099189a",
+          "status": "needs_review"
+        },
+        {
+          "candidate_id": "4f3d2eb50630de9f15fd6c5a",
+          "status": "needs_review"
+        },
+        {
+          "candidate_id": "fcb851f13f5935821fc68503",
+          "status": "needs_review"
+        },
+        {
+          "candidate_id": "fed2d20a9e6ee1cf2151d857",
+          "status": "needs_review"
+        },
+        {
+          "candidate_id": "0405b982305250ea21faab04",
+          "status": "needs_review"
+        }
+      ],
+      "current_queue_candidates": [
+        {
+          "candidate_id": "1e8887b0e0a26a0b0a9601ef",
+          "status": "needs_review"
+        },
+        {
+          "candidate_id": "4225edf94f0a8db2b78f07e3",
+          "status": "needs_review"
+        },
+        {
+          "candidate_id": "4bdc4c0a5f95dc1e01632d22",
+          "status": "needs_review"
+        },
+        {
+          "candidate_id": "73d817926f66c8dce397b91b",
+          "status": "approved_strict"
+        },
+        {
+          "candidate_id": "7dd8008ab0695b10329b3899",
+          "status": "needs_review"
+        },
+        {
+          "candidate_id": "a434269bc3d63864461c6349",
+          "status": "needs_review"
+        },
+        {
+          "candidate_id": "91b7d2133a797aa96099189a",
+          "status": "needs_review"
+        },
+        {
+          "candidate_id": "4f3d2eb50630de9f15fd6c5a",
+          "status": "needs_review"
+        },
+        {
+          "candidate_id": "fcb851f13f5935821fc68503",
+          "status": "needs_review"
+        },
+        {
+          "candidate_id": "fed2d20a9e6ee1cf2151d857",
+          "status": "needs_review"
+        },
+        {
+          "candidate_id": "0405b982305250ea21faab04",
+          "status": "needs_review"
+        }
+      ],
+      "state_episode_occurrences": 1,
+      "authoritative_validated_strict_supported": true,
+      "audit_classification": "ALREADY_PRESENT_STRICT",
+      "eligible_in_current_metric_snapshot": true,
+      "eligibility_reason": "episode local date is within current metric coverage_end"
+    },
+    {
+      "city": "Київ",
+      "city_key": "kyiv",
+      "episode_id": "f235928c329ca806d9dca5ed",
+      "alert_start": "2026-09-23T21:55:00Z",
+      "alert_end": "2026-09-23T23:27:00Z",
+      "alert_start_date_kyiv": "2026-09-24",
+      "current_metric_representation": {
+        "representation": "ABSENT",
+        "reason": "episode_local_date_after_metric_coverage_end",
+        "episode_date_kyiv": "2026-09-24",
+        "metric_coverage_end": "2026-09-23"
+      },
+      "current_queue_representation": "STRICT",
+      "metric_snapshot_supporting_candidates": [
+        {
+          "candidate_id": "04cce83a24ea028d79049d27",
+          "status": "needs_review"
+        },
+        {
+          "candidate_id": "40b762a634e3ed46bd162594",
+          "status": "needs_review"
+        },
+        {
+          "candidate_id": "8f0d738a967303daa04e8b57",
+          "status": "approved_sensitivity"
+        },
+        {
+          "candidate_id": "db751f88062e80a408e5140d",
+          "status": "approved_sensitivity"
+        },
+        {
+          "candidate_id": "3140b59978a82751a8347736",
+          "status": "approved_sensitivity"
+        },
+        {
+          "candidate_id": "67bf5b137c88c6515b15923e",
+          "status": "approved_sensitivity"
+        },
+        {
+          "candidate_id": "b98b6f39b39aff1204f92e93",
+          "status": "needs_review"
+        },
+        {
+          "candidate_id": "5f807237ce10eb9d27bfc95f",
+          "status": "needs_review"
+        },
+        {
+          "candidate_id": "4c81a45894b2a491757baa2c",
+          "status": "approved_sensitivity"
+        },
+        {
+          "candidate_id": "59e46d1b3c06e2c50fd4d259",
+          "status": "approved_sensitivity"
+        },
+        {
+          "candidate_id": "f7c06b0a5c5084a4dc86ce12",
+          "status": "approved_sensitivity"
+        },
+        {
+          "candidate_id": "a9360d117f63e0190154a361",
+          "status": "approved_sensitivity"
+        },
+        {
+          "candidate_id": "7f98c09b95dcd4a2293dd750",
+          "status": "approved_sensitivity"
+        },
+        {
+          "candidate_id": "e095345e2c95b982e3fac04b",
+          "status": "approved_sensitivity"
+        }
+      ],
+      "current_queue_candidates": [
+        {
+          "candidate_id": "04cce83a24ea028d79049d27",
+          "status": "needs_review"
+        },
+        {
+          "candidate_id": "40b762a634e3ed46bd162594",
+          "status": "needs_review"
+        },
+        {
+          "candidate_id": "8f0d738a967303daa04e8b57",
+          "status": "approved_sensitivity"
+        },
+        {
+          "candidate_id": "db751f88062e80a408e5140d",
+          "status": "approved_sensitivity"
+        },
+        {
+          "candidate_id": "3140b59978a82751a8347736",
+          "status": "approved_sensitivity"
+        },
+        {
+          "candidate_id": "67bf5b137c88c6515b15923e",
+          "status": "approved_sensitivity"
+        },
+        {
+          "candidate_id": "b98b6f39b39aff1204f92e93",
+          "status": "needs_review"
+        },
+        {
+          "candidate_id": "5f807237ce10eb9d27bfc95f",
+          "status": "approved_strict"
+        },
+        {
+          "candidate_id": "4c81a45894b2a491757baa2c",
+          "status": "approved_sensitivity"
+        },
+        {
+          "candidate_id": "59e46d1b3c06e2c50fd4d259",
+          "status": "approved_sensitivity"
+        },
+        {
+          "candidate_id": "f7c06b0a5c5084a4dc86ce12",
+          "status": "approved_sensitivity"
+        },
+        {
+          "candidate_id": "a9360d117f63e0190154a361",
+          "status": "approved_sensitivity"
+        },
+        {
+          "candidate_id": "7f98c09b95dcd4a2293dd750",
+          "status": "approved_sensitivity"
+        },
+        {
+          "candidate_id": "e095345e2c95b982e3fac04b",
+          "status": "approved_sensitivity"
+        }
+      ],
+      "state_episode_occurrences": 1,
+      "authoritative_validated_strict_supported": true,
+      "audit_classification": "ABSENT_NEEDS_STRICT_ADD",
+      "eligible_in_current_metric_snapshot": false,
+      "eligibility_reason": "episode local date is after current metric coverage_end; completed-day rule excludes it until the denominator advances"
+    }
+  ],
+  "bounded_episode_consistency_check": {
+    "scope": "Only the four target cities and seven target episodes; no historical reclassification or source discovery.",
+    "target_episode_checks": [
+      {
+        "city": "Одеса",
+        "city_key": "odesa",
+        "episode_id": "2c5bbc0aeba9e25e4eec7b09",
+        "state_episode_occurrences": 1,
+        "current_matched_candidate_count": 2,
+        "current_approved_strict_candidate_count": 0,
+        "current_approved_sensitivity_candidate_count": 0,
+        "deduplicated_metric_episode_contribution_max": 1
+      },
+      {
+        "city": "Одеса",
+        "city_key": "odesa",
+        "episode_id": "7a7da068c0efb7be80bd45e4",
+        "state_episode_occurrences": 1,
+        "current_matched_candidate_count": 3,
+        "current_approved_strict_candidate_count": 0,
+        "current_approved_sensitivity_candidate_count": 0,
+        "deduplicated_metric_episode_contribution_max": 1
+      },
+      {
+        "city": "Одеса",
+        "city_key": "odesa",
+        "episode_id": "eb2580c2bec54ddc2e36eaf7",
+        "state_episode_occurrences": 1,
+        "current_matched_candidate_count": 6,
+        "current_approved_strict_candidate_count": 0,
+        "current_approved_sensitivity_candidate_count": 0,
+        "deduplicated_metric_episode_contribution_max": 1
+      },
+      {
+        "city": "Запоріжжя",
+        "city_key": "zaporizhzhia",
+        "episode_id": "a60d817eaa9253200f090720",
+        "state_episode_occurrences": 1,
+        "current_matched_candidate_count": 3,
+        "current_approved_strict_candidate_count": 0,
+        "current_approved_sensitivity_candidate_count": 0,
+        "deduplicated_metric_episode_contribution_max": 1
+      },
+      {
+        "city": "Дніпро",
+        "city_key": "dnipro",
+        "episode_id": "c894e85e407dc4256d8c4419",
+        "state_episode_occurrences": 1,
+        "current_matched_candidate_count": 3,
+        "current_approved_strict_candidate_count": 1,
+        "current_approved_sensitivity_candidate_count": 0,
+        "deduplicated_metric_episode_contribution_max": 1
+      },
+      {
+        "city": "Київ",
+        "city_key": "kyiv",
+        "episode_id": "e97e6e816f96832d02c8b2cd",
+        "state_episode_occurrences": 1,
+        "current_matched_candidate_count": 11,
+        "current_approved_strict_candidate_count": 1,
+        "current_approved_sensitivity_candidate_count": 0,
+        "deduplicated_metric_episode_contribution_max": 1
+      },
+      {
+        "city": "Київ",
+        "city_key": "kyiv",
+        "episode_id": "f235928c329ca806d9dca5ed",
+        "state_episode_occurrences": 1,
+        "current_matched_candidate_count": 14,
+        "current_approved_strict_candidate_count": 1,
+        "current_approved_sensitivity_candidate_count": 10,
+        "deduplicated_metric_episode_contribution_max": 1
+      }
+    ],
+    "duplicate_state_episode_ids_for_targets": [],
+    "duplicate_metric_episode_rows": "not applicable because explosions_test.json contains aggregate city series rather than episode rows",
+    "candidate_duplicate_handling": "Multiple candidates may map to the same episode, but generator Set deduplication limits each episode to one metric contribution.",
+    "conflicting_target_metric_states": [],
+    "result": "PASS"
+  },
+  "exact_proposed_operations": [
+    {
+      "operation_type": "REMOVE_STRICT_EPISODE",
+      "city": "Одеса",
+      "city_key": "odesa",
+      "episode_id": "2c5bbc0aeba9e25e4eec7b09",
+      "current_metric_representation": "STRICT (counts in both strict_n and sensitivity_n union)",
+      "desired_representation": "ABSENT from strict and sensitivity",
+      "reason": "Authoritative final 58/20 replay result is DOWNGRADE_TO_UNRESOLVED; current queue has no approved candidate for this episode.",
+      "authoritative_artifact_reference": {
+        "commit": "dcc50e5296b2da80c3d3e1e6fbd9f8b1b2be4dd7",
+        "path": "research/explosion_monitor_final_58_20_replay_2026-09-24.json",
+        "current_blob_sha": "b5386d7b9e7188711a1ea8e5054677414b1c5a87"
+      },
+      "supporting_queue_candidates": [
+        {
+          "candidate_id": "d9fad0e4ef5ef4f597f29978",
+          "status": "needs_review"
+        },
+        {
+          "candidate_id": "f4c561e2f211ba8a707b3696",
+          "status": "needs_review"
+        }
+      ]
+    },
+    {
+      "operation_type": "REMOVE_STRICT_EPISODE",
+      "city": "Одеса",
+      "city_key": "odesa",
+      "episode_id": "7a7da068c0efb7be80bd45e4",
+      "current_metric_representation": "STRICT (counts in both strict_n and sensitivity_n union)",
+      "desired_representation": "ABSENT from strict and sensitivity",
+      "reason": "Authoritative final 58/20 replay result is DOWNGRADE_TO_UNRESOLVED; current queue has no approved candidate for this episode.",
+      "authoritative_artifact_reference": {
+        "commit": "dcc50e5296b2da80c3d3e1e6fbd9f8b1b2be4dd7",
+        "path": "research/explosion_monitor_final_58_20_replay_2026-09-24.json",
+        "current_blob_sha": "b5386d7b9e7188711a1ea8e5054677414b1c5a87"
+      },
+      "supporting_queue_candidates": [
+        {
+          "candidate_id": "da37fd7a3b6c42dbff41d115",
+          "status": "needs_review"
+        },
+        {
+          "candidate_id": "5a61d62cac76456eb62cb386",
+          "status": "needs_review"
+        },
+        {
+          "candidate_id": "3ebf49fac81615d023d0c2d2",
+          "status": "needs_review"
+        }
+      ]
+    },
+    {
+      "operation_type": "REMOVE_STRICT_EPISODE",
+      "city": "Одеса",
+      "city_key": "odesa",
+      "episode_id": "eb2580c2bec54ddc2e36eaf7",
+      "current_metric_representation": "STRICT (counts in both strict_n and sensitivity_n union)",
+      "desired_representation": "ABSENT from strict and sensitivity",
+      "reason": "Authoritative final 58/20 replay result is DOWNGRADE_TO_UNRESOLVED; current queue has no approved candidate for this episode.",
+      "authoritative_artifact_reference": {
+        "commit": "dcc50e5296b2da80c3d3e1e6fbd9f8b1b2be4dd7",
+        "path": "research/explosion_monitor_final_58_20_replay_2026-09-24.json",
+        "current_blob_sha": "b5386d7b9e7188711a1ea8e5054677414b1c5a87"
+      },
+      "supporting_queue_candidates": [
+        {
+          "candidate_id": "c222151c801a464bc4a4325f",
+          "status": "needs_review"
+        },
+        {
+          "candidate_id": "81b7b08579475ca6abd24dd4",
+          "status": "needs_review"
+        },
+        {
+          "candidate_id": "d8bd39aa85657dd39c5e0fbc",
+          "status": "needs_review"
+        },
+        {
+          "candidate_id": "f8410c2df817637bad98c18f",
+          "status": "needs_review"
+        },
+        {
+          "candidate_id": "ec759edeac2531c382c0eb4f",
+          "status": "needs_review"
+        },
+        {
+          "candidate_id": "63e4a0c4265cd7c9bac6f485",
+          "status": "needs_review"
+        }
+      ]
+    },
+    {
+      "operation_type": "REMOVE_STRICT_EPISODE",
+      "city": "Запоріжжя",
+      "city_key": "zaporizhzhia",
+      "episode_id": "a60d817eaa9253200f090720",
+      "current_metric_representation": "STRICT (counts in both strict_n and sensitivity_n union)",
+      "desired_representation": "ABSENT from strict and sensitivity",
+      "reason": "Authoritative final 58/20 replay result is DOWNGRADE_TO_UNRESOLVED; current queue has no approved candidate for this episode.",
+      "authoritative_artifact_reference": {
+        "commit": "dcc50e5296b2da80c3d3e1e6fbd9f8b1b2be4dd7",
+        "path": "research/explosion_monitor_final_58_20_replay_2026-09-24.json",
+        "current_blob_sha": "b5386d7b9e7188711a1ea8e5054677414b1c5a87"
+      },
+      "supporting_queue_candidates": [
+        {
+          "candidate_id": "537fc9f91a0405b08c9845a8",
+          "status": "needs_review"
+        },
+        {
+          "candidate_id": "e7461ec759e4d79020dfd1ba",
+          "status": "needs_review"
+        },
+        {
+          "candidate_id": "113dac439efda41673b1f497",
+          "status": "needs_review"
+        }
+      ]
+    },
+    {
+      "operation_type": "ADD_STRICT_EPISODE",
+      "city": "Дніпро",
+      "city_key": "dnipro",
+      "episode_id": "c894e85e407dc4256d8c4419",
+      "current_metric_representation": "ABSENT",
+      "desired_representation": "STRICT",
+      "reason": "Final regression validates strict composition support, current queue has an approved_strict candidate, and episode date is within current metric coverage.",
+      "authoritative_artifact_reference": {
+        "commit": "dcc50e5296b2da80c3d3e1e6fbd9f8b1b2be4dd7",
+        "path": "research/explosion_monitor_final_58_20_replay_2026-09-24.json",
+        "current_blob_sha": "b5386d7b9e7188711a1ea8e5054677414b1c5a87"
+      },
+      "supporting_queue_candidates": [
+        {
+          "candidate_id": "aa19972aee883cf12af75d20",
+          "status": "needs_review"
+        },
+        {
+          "candidate_id": "3f2137adc72e1202240133f7",
+          "status": "approved_strict"
+        },
+        {
+          "candidate_id": "a06e12f4cfed9b43eafe2d58",
+          "status": "needs_review"
+        }
+      ]
+    }
+  ],
+  "no_op_episodes": [
+    {
+      "operation_type": "NO_OP_ALREADY_CORRECT",
+      "city": "Київ",
+      "city_key": "kyiv",
+      "episode_id": "e97e6e816f96832d02c8b2cd",
+      "reason": "Validated strict episode is already represented as strict in the current metric snapshot."
+    },
+    {
+      "operation_type": "NO_OP_ALREADY_CORRECT",
+      "city": "Київ",
+      "city_key": "kyiv",
+      "episode_id": "f235928c329ca806d9dca5ed",
+      "reason": "Strict status is authoritative in the queue, but the episode starts on 2026-09-24 while current metric coverage_end is 2026-09-23. Adding it now would introduce a numerator without the corresponding completed-day denominator. Defer materialization until the denominator naturally includes 2026-09-24.",
+      "deferred_strict_add": true,
+      "deferred_until": "metric denominator coverage includes 2026-09-24"
+    }
+  ],
+  "affected_city_before_after_aggregates": {
+    "odesa": {
+      "city": "Одеса",
+      "total_alerts": {
+        "before": 1535,
+        "after": 1535,
+        "delta": 0
+      },
+      "strict_n": {
+        "before": 162,
+        "after": 159,
+        "delta": -3
+      },
+      "strict_pct": {
+        "before": 10.55,
+        "after": 10.36
+      },
+      "sensitivity_n": {
+        "before": 168,
+        "after": 165,
+        "delta": -3
+      },
+      "sensitivity_pct": {
+        "before": 10.94,
+        "after": 10.75
+      },
+      "automation": {
+        "approved_strict_episodes_since_baseline": {
+          "before": 7,
+          "after": 4
+        },
+        "approved_sensitivity_episodes_since_baseline": {
+          "before": 7,
+          "after": 4
+        }
+      },
+      "strict_daily_changes": [
+        {
+          "date": "2026-09-18",
+          "before": 4,
+          "after": 3,
+          "delta": -1,
+          "after_key_present": true
+        },
+        {
+          "date": "2026-09-21",
+          "before": 2,
+          "after": 0,
+          "delta": -2,
+          "after_key_present": false
+        }
+      ],
+      "rolling90_changes": [
+        {
+          "date": "2026-09-18",
+          "strict_n_before": 68,
+          "strict_n_after": 67,
+          "alerts_n_unchanged": 616,
+          "pct_before": 11.04,
+          "pct_after": 10.88,
+          "strict_delta": -1
+        },
+        {
+          "date": "2026-09-19",
+          "strict_n_before": 68,
+          "strict_n_after": 67,
+          "alerts_n_unchanged": 618,
+          "pct_before": 11,
+          "pct_after": 10.84,
+          "strict_delta": -1
+        },
+        {
+          "date": "2026-09-20",
+          "strict_n_before": 68,
+          "strict_n_after": 67,
+          "alerts_n_unchanged": 627,
+          "pct_before": 10.85,
+          "pct_after": 10.69,
+          "strict_delta": -1
+        },
+        {
+          "date": "2026-09-21",
+          "strict_n_before": 69,
+          "strict_n_after": 66,
+          "alerts_n_unchanged": 627,
+          "pct_before": 11,
+          "pct_after": 10.53,
+          "strict_delta": -3
+        },
+        {
+          "date": "2026-09-22",
+          "strict_n_before": 69,
+          "strict_n_after": 66,
+          "alerts_n_unchanged": 640,
+          "pct_before": 10.78,
+          "pct_after": 10.31,
+          "strict_delta": -3
+        },
+        {
+          "date": "2026-09-23",
+          "strict_n_before": 69,
+          "strict_n_after": 66,
+          "alerts_n_unchanged": 640,
+          "pct_before": 10.78,
+          "pct_after": 10.31,
+          "strict_delta": -3
+        }
+      ]
+    },
+    "zaporizhzhia": {
+      "city": "Запоріжжя",
+      "total_alerts": {
+        "before": 2394,
+        "after": 2394,
+        "delta": 0
+      },
+      "strict_n": {
+        "before": 170,
+        "after": 169,
+        "delta": -1
+      },
+      "strict_pct": {
+        "before": 7.1,
+        "after": 7.06
+      },
+      "sensitivity_n": {
+        "before": 226,
+        "after": 225,
+        "delta": -1
+      },
+      "sensitivity_pct": {
+        "before": 9.44,
+        "after": 9.4
+      },
+      "automation": {
+        "approved_strict_episodes_since_baseline": {
+          "before": 1,
+          "after": 0
+        },
+        "approved_sensitivity_episodes_since_baseline": {
+          "before": 2,
+          "after": 1
+        }
+      },
+      "strict_daily_changes": [
+        {
+          "date": "2026-09-18",
+          "before": 1,
+          "after": 0,
+          "delta": -1,
+          "after_key_present": false
+        }
+      ],
+      "rolling90_changes": [
+        {
+          "date": "2026-09-18",
+          "strict_n_before": 33,
+          "strict_n_after": 32,
+          "alerts_n_unchanged": 484,
+          "pct_before": 6.82,
+          "pct_after": 6.61,
+          "strict_delta": -1
+        },
+        {
+          "date": "2026-09-19",
+          "strict_n_before": 32,
+          "strict_n_after": 31,
+          "alerts_n_unchanged": 480,
+          "pct_before": 6.67,
+          "pct_after": 6.46,
+          "strict_delta": -1
+        },
+        {
+          "date": "2026-09-20",
+          "strict_n_before": 31,
+          "strict_n_after": 30,
+          "alerts_n_unchanged": 477,
+          "pct_before": 6.5,
+          "pct_after": 6.29,
+          "strict_delta": -1
+        },
+        {
+          "date": "2026-09-21",
+          "strict_n_before": 31,
+          "strict_n_after": 30,
+          "alerts_n_unchanged": 481,
+          "pct_before": 6.44,
+          "pct_after": 6.24,
+          "strict_delta": -1
+        },
+        {
+          "date": "2026-09-22",
+          "strict_n_before": 31,
+          "strict_n_after": 30,
+          "alerts_n_unchanged": 479,
+          "pct_before": 6.47,
+          "pct_after": 6.26,
+          "strict_delta": -1
+        },
+        {
+          "date": "2026-09-23",
+          "strict_n_before": 31,
+          "strict_n_after": 30,
+          "alerts_n_unchanged": 480,
+          "pct_before": 6.46,
+          "pct_after": 6.25,
+          "strict_delta": -1
+        }
+      ]
+    },
+    "dnipro": {
+      "city": "Дніпро",
+      "total_alerts": {
+        "before": 2312,
+        "after": 2312,
+        "delta": 0
+      },
+      "strict_n": {
+        "before": 183,
+        "after": 184,
+        "delta": 1
+      },
+      "strict_pct": {
+        "before": 7.92,
+        "after": 7.96
+      },
+      "sensitivity_n": {
+        "before": 190,
+        "after": 191,
+        "delta": 1
+      },
+      "sensitivity_pct": {
+        "before": 8.22,
+        "after": 8.26
+      },
+      "automation": {
+        "approved_strict_episodes_since_baseline": {
+          "before": 3,
+          "after": 4
+        },
+        "approved_sensitivity_episodes_since_baseline": {
+          "before": 3,
+          "after": 4
+        }
+      },
+      "strict_daily_changes": [
+        {
+          "date": "2026-09-22",
+          "before": 0,
+          "after": 1,
+          "delta": 1,
+          "after_key_present": true
+        }
+      ],
+      "rolling90_changes": [
+        {
+          "date": "2026-09-22",
+          "strict_n_before": 42,
+          "strict_n_after": 43,
+          "alerts_n_unchanged": 616,
+          "pct_before": 6.82,
+          "pct_after": 6.98,
+          "strict_delta": 1
+        },
+        {
+          "date": "2026-09-23",
+          "strict_n_before": 42,
+          "strict_n_after": 43,
+          "alerts_n_unchanged": 616,
+          "pct_before": 6.82,
+          "pct_after": 6.98,
+          "strict_delta": 1
+        }
+      ]
+    }
+  },
+  "derived_series_assessment": {
+    "strict_daily": "Must be adjusted only on the listed affected dates.",
+    "rolling90": "Must be adjusted only on the listed rolling rows whose 90-day window contains an immediate strict addition/removal episode date.",
+    "annual_explosion_series_present": false,
+    "weekly_explosion_series_present": false,
+    "note": "dashboard_data.json has unrelated top-level weekly alert data; it is not downstream of the explosion numerator operations and must remain unchanged."
+  },
+  "denominator_check": {
+    "result": "PASS",
+    "denominator_fields_unchanged": [
+      "city.total_alerts",
+      "rolling90[].alerts_n",
+      "coverage_start",
+      "coverage_end",
+      "alert episode windows",
+      "city universe"
+    ],
+    "immediate_operation_cities": [
+      "odesa",
+      "zaporizhzhia",
+      "dnipro"
+    ],
+    "immediate_operations_only_change_explosion_numerator_or_status_attribution": true,
+    "deferred_current_day_case": {
+      "city": "Київ",
+      "episode_id": "f235928c329ca806d9dca5ed",
+      "episode_date_kyiv": "2026-09-24",
+      "current_metric_coverage_end": "2026-09-23",
+      "action_now": "NO_OP_ALREADY_CORRECT for the frozen 2026-09-23 denominator",
+      "reason": "Adding this strict episode now would require the corresponding 2026-09-24 alert denominator/current-day coverage to be introduced, which this reconciliation explicitly forbids.",
+      "later_rule": "When the normal denominator advances to include completed date 2026-09-24, the existing approved_strict queue state should materialize this episode exactly once."
+    }
+  },
+  "canonical_live_boundary_assessment": {
+    "result": "SAFE",
+    "canonical_source": {
+      "path": "kyiv-air-alerts-grafana/data/explosion_audited_baseline.json",
+      "sha": "5bbd2b771559eac2966aeec65d6e3b5487b9c1a9",
+      "canonical_audited_baseline": true,
+      "baseline_snapshot_date": "2026-09-18"
+    },
+    "live_test_output": {
+      "path": "kyiv-air-alerts-grafana/data/explosions_test.json",
+      "sha": "6116d9eb33b09d28d04e7bfaa4c809cc3bcea7af",
+      "test_only": true,
+      "production_data_pipeline_changed": false
+    },
+    "baseline_coverage_end_for_target_cities": {
+      "odesa": "2026-09-17",
+      "zaporizhzhia": "2026-09-17",
+      "dnipro": "2026-09-17",
+      "kyiv": "2026-09-17"
+    },
+    "immediate_operation_episode_dates": {
+      "2c5bbc0aeba9e25e4eec7b09": "2026-09-18",
+      "7a7da068c0efb7be80bd45e4": "2026-09-21",
+      "eb2580c2bec54ddc2e36eaf7": "2026-09-21",
+      "a60d817eaa9253200f090720": "2026-09-18",
+      "c894e85e407dc4256d8c4419": "2026-09-22"
+    },
+    "conclusion": "All immediate episode operations are post-baseline and can be applied to the live/test derived output without mutating explosion_audited_baseline.json or any production/canonical historical source."
+  },
+  "dashboard_derivation_assessment": {
+    "current_dashboard_contains_explosion_metric_test": true,
+    "current_dashboard_explosion_metric_test_exactly_equals_current_explosions_test": true,
+    "generator_behavior": "update_explosion_metric_live.py writes explosions_test.json and then assigns the same object to dashboard_data.json[\"explosion_metric_test\"].",
+    "required_later_operation": "After applying the exact frozen numerator changes to explosions_test.json, replace only dashboard_data.json.explosion_metric_test with the resulting metric object. Leave all other dashboard_data.json fields untouched.",
+    "regenerate_entire_dashboard": false
+  },
+  "exact_next_atomic_mutation_plan": {
+    "preconditions": {
+      "queue_blob_must_equal": "20a9bdad5b9d4e4dc13bbb5567f7da8a3adc2f60",
+      "metric_blob_must_equal": "6116d9eb33b09d28d04e7bfaa4c809cc3bcea7af",
+      "dashboard_blob_must_equal": "349ddf1f885eb8c6b24c5c58f5319c4d44c88d1b",
+      "monitor_state_blob_must_equal": "bcb46585bdc8a5feeee45b6d48a82171b5d1691d",
+      "last_run_blob_must_equal": "42054fdee292c8e9d7ac0dc217f584bf8560f96d",
+      "canonical_baseline_blob_must_equal": "5bbd2b771559eac2966aeec65d6e3b5487b9c1a9"
+    },
+    "metric_source_changes": {
+      "file": "kyiv-air-alerts-grafana/data/explosions_test.json",
+      "immediate_episode_operations": [
+        {
+          "operation_type": "REMOVE_STRICT_EPISODE",
+          "city": "Одеса",
+          "city_key": "odesa",
+          "episode_id": "2c5bbc0aeba9e25e4eec7b09"
+        },
+        {
+          "operation_type": "REMOVE_STRICT_EPISODE",
+          "city": "Одеса",
+          "city_key": "odesa",
+          "episode_id": "7a7da068c0efb7be80bd45e4"
+        },
+        {
+          "operation_type": "REMOVE_STRICT_EPISODE",
+          "city": "Одеса",
+          "city_key": "odesa",
+          "episode_id": "eb2580c2bec54ddc2e36eaf7"
+        },
+        {
+          "operation_type": "REMOVE_STRICT_EPISODE",
+          "city": "Запоріжжя",
+          "city_key": "zaporizhzhia",
+          "episode_id": "a60d817eaa9253200f090720"
+        },
+        {
+          "operation_type": "ADD_STRICT_EPISODE",
+          "city": "Дніпро",
+          "city_key": "dnipro",
+          "episode_id": "c894e85e407dc4256d8c4419"
+        }
+      ],
+      "exact_aggregate_field_changes": {
+        "odesa": {
+          "total_alerts": {
+            "before": 1535,
+            "after": 1535,
+            "delta": 0
+          },
+          "strict_n": {
+            "before": 162,
+            "after": 159,
+            "delta": -3
+          },
+          "strict_pct": {
+            "before": 10.55,
+            "after": 10.36
+          },
+          "sensitivity_n": {
+            "before": 168,
+            "after": 165,
+            "delta": -3
+          },
+          "sensitivity_pct": {
+            "before": 10.94,
+            "after": 10.75
+          },
+          "automation": {
+            "approved_strict_episodes_since_baseline": {
+              "before": 7,
+              "after": 4
+            },
+            "approved_sensitivity_episodes_since_baseline": {
+              "before": 7,
+              "after": 4
+            }
+          },
+          "strict_daily_changes": [
+            {
+              "date": "2026-09-18",
+              "before": 4,
+              "after": 3,
+              "delta": -1,
+              "after_key_present": true
+            },
+            {
+              "date": "2026-09-21",
+              "before": 2,
+              "after": 0,
+              "delta": -2,
+              "after_key_present": false
+            }
+          ],
+          "rolling90_changes": [
+            {
+              "date": "2026-09-18",
+              "strict_n_before": 68,
+              "strict_n_after": 67,
+              "alerts_n_unchanged": 616,
+              "pct_before": 11.04,
+              "pct_after": 10.88,
+              "strict_delta": -1
+            },
+            {
+              "date": "2026-09-19",
+              "strict_n_before": 68,
+              "strict_n_after": 67,
+              "alerts_n_unchanged": 618,
+              "pct_before": 11,
+              "pct_after": 10.84,
+              "strict_delta": -1
+            },
+            {
+              "date": "2026-09-20",
+              "strict_n_before": 68,
+              "strict_n_after": 67,
+              "alerts_n_unchanged": 627,
+              "pct_before": 10.85,
+              "pct_after": 10.69,
+              "strict_delta": -1
+            },
+            {
+              "date": "2026-09-21",
+              "strict_n_before": 69,
+              "strict_n_after": 66,
+              "alerts_n_unchanged": 627,
+              "pct_before": 11,
+              "pct_after": 10.53,
+              "strict_delta": -3
+            },
+            {
+              "date": "2026-09-22",
+              "strict_n_before": 69,
+              "strict_n_after": 66,
+              "alerts_n_unchanged": 640,
+              "pct_before": 10.78,
+              "pct_after": 10.31,
+              "strict_delta": -3
+            },
+            {
+              "date": "2026-09-23",
+              "strict_n_before": 69,
+              "strict_n_after": 66,
+              "alerts_n_unchanged": 640,
+              "pct_before": 10.78,
+              "pct_after": 10.31,
+              "strict_delta": -3
+            }
+          ]
+        },
+        "zaporizhzhia": {
+          "total_alerts": {
+            "before": 2394,
+            "after": 2394,
+            "delta": 0
+          },
+          "strict_n": {
+            "before": 170,
+            "after": 169,
+            "delta": -1
+          },
+          "strict_pct": {
+            "before": 7.1,
+            "after": 7.06
+          },
+          "sensitivity_n": {
+            "before": 226,
+            "after": 225,
+            "delta": -1
+          },
+          "sensitivity_pct": {
+            "before": 9.44,
+            "after": 9.4
+          },
+          "automation": {
+            "approved_strict_episodes_since_baseline": {
+              "before": 1,
+              "after": 0
+            },
+            "approved_sensitivity_episodes_since_baseline": {
+              "before": 2,
+              "after": 1
+            }
+          },
+          "strict_daily_changes": [
+            {
+              "date": "2026-09-18",
+              "before": 1,
+              "after": 0,
+              "delta": -1,
+              "after_key_present": false
+            }
+          ],
+          "rolling90_changes": [
+            {
+              "date": "2026-09-18",
+              "strict_n_before": 33,
+              "strict_n_after": 32,
+              "alerts_n_unchanged": 484,
+              "pct_before": 6.82,
+              "pct_after": 6.61,
+              "strict_delta": -1
+            },
+            {
+              "date": "2026-09-19",
+              "strict_n_before": 32,
+              "strict_n_after": 31,
+              "alerts_n_unchanged": 480,
+              "pct_before": 6.67,
+              "pct_after": 6.46,
+              "strict_delta": -1
+            },
+            {
+              "date": "2026-09-20",
+              "strict_n_before": 31,
+              "strict_n_after": 30,
+              "alerts_n_unchanged": 477,
+              "pct_before": 6.5,
+              "pct_after": 6.29,
+              "strict_delta": -1
+            },
+            {
+              "date": "2026-09-21",
+              "strict_n_before": 31,
+              "strict_n_after": 30,
+              "alerts_n_unchanged": 481,
+              "pct_before": 6.44,
+              "pct_after": 6.24,
+              "strict_delta": -1
+            },
+            {
+              "date": "2026-09-22",
+              "strict_n_before": 31,
+              "strict_n_after": 30,
+              "alerts_n_unchanged": 479,
+              "pct_before": 6.47,
+              "pct_after": 6.26,
+              "strict_delta": -1
+            },
+            {
+              "date": "2026-09-23",
+              "strict_n_before": 31,
+              "strict_n_after": 30,
+              "alerts_n_unchanged": 480,
+              "pct_before": 6.46,
+              "pct_after": 6.25,
+              "strict_delta": -1
+            }
+          ]
+        },
+        "dnipro": {
+          "total_alerts": {
+            "before": 2312,
+            "after": 2312,
+            "delta": 0
+          },
+          "strict_n": {
+            "before": 183,
+            "after": 184,
+            "delta": 1
+          },
+          "strict_pct": {
+            "before": 7.92,
+            "after": 7.96
+          },
+          "sensitivity_n": {
+            "before": 190,
+            "after": 191,
+            "delta": 1
+          },
+          "sensitivity_pct": {
+            "before": 8.22,
+            "after": 8.26
+          },
+          "automation": {
+            "approved_strict_episodes_since_baseline": {
+              "before": 3,
+              "after": 4
+            },
+            "approved_sensitivity_episodes_since_baseline": {
+              "before": 3,
+              "after": 4
+            }
+          },
+          "strict_daily_changes": [
+            {
+              "date": "2026-09-22",
+              "before": 0,
+              "after": 1,
+              "delta": 1,
+              "after_key_present": true
+            }
+          ],
+          "rolling90_changes": [
+            {
+              "date": "2026-09-22",
+              "strict_n_before": 42,
+              "strict_n_after": 43,
+              "alerts_n_unchanged": 616,
+              "pct_before": 6.82,
+              "pct_after": 6.98,
+              "strict_delta": 1
+            },
+            {
+              "date": "2026-09-23",
+              "strict_n_before": 42,
+              "strict_n_after": 43,
+              "alerts_n_unchanged": 616,
+              "pct_before": 6.82,
+              "pct_after": 6.98,
+              "strict_delta": 1
+            }
+          ]
+        }
+      },
+      "preserve": [
+        "meta.snapshot_date",
+        "meta.automation.last_monitor_run_at",
+        "meta.review_queue_size",
+        "coverage_start",
+        "coverage_end",
+        "total_alerts",
+        "all denominator series",
+        "all unaffected city data"
+      ],
+      "metadata_note": "meta.updated_at may be refreshed to the atomic mutation timestamp in both metric copies; this is metadata only and must not change any metric/denominator value.",
+      "deferred_episode_not_to_apply_now": "f235928c329ca806d9dca5ed"
+    },
+    "derived_data_changes": {
+      "file": "kyiv-air-alerts-grafana/data/dashboard_data.json",
+      "operation": "replace only explosion_metric_test with the post-operation explosions_test object",
+      "all_other_fields": "unchanged"
+    },
+    "explicitly_no_changes": [
+      "kyiv-air-alerts-grafana/data/explosion_review_queue.json",
+      "kyiv-air-alerts-grafana/data/explosion_candidate_monitor_state.json",
+      "kyiv-air-alerts-grafana/data/explosion_candidate_monitor_last_run.json",
+      "kyiv-air-alerts-grafana/data/explosion_audited_baseline.json",
+      "kyiv-air-alerts-grafana/scripts/update_explosion_metric_live.py",
+      "Grafana files",
+      "Netlify",
+      "production deployment"
+    ],
+    "atomicity_requirement": "Commit explosions_test.json and dashboard_data.json together in one later commit after verifying the protected precondition SHAs. Do not include queue/state/last-run/canonical files."
+  },
+  "expected_net_effect": {
+    "current_frozen_snapshot_operations": {
+      "strict_additions": 1,
+      "strict_removals": 4,
+      "sensitivity_upgrades": 0,
+      "sensitivity_only_removals": 0,
+      "sensitivity_union_additions_due_to_strict_additions": 1,
+      "sensitivity_union_removals_due_to_strict_removals": 4,
+      "no_ops": 2,
+      "deferred_strict_additions_included_in_no_ops": 1,
+      "net_strict_episode_count": -3,
+      "by_city": {
+        "odesa": -3,
+        "zaporizhzhia": -1,
+        "dnipro": 1,
+        "kyiv": 0
+      },
+      "overall": -3
+    },
+    "eventual_after_2026_09_24_denominator_becomes_eligible": {
+      "additional_deferred_kyiv_strict_addition": 1,
+      "net_strict_vs_current_metric_after_that_future_normal_denominator_advance": -2,
+      "note": "This future +1 is not part of the next numerator-only atomic metric update."
+    }
+  },
+  "final_verdict": "EPISODE METRIC RECONCILIATION CLEAN — READY FOR ATOMIC METRIC UPDATE",
+  "read_back_qa_precommit": {
+    "json_parse_expected": true,
+    "exactly_4_confirmed_removal_episodes_audited": true,
+    "exactly_3_validated_strict_episodes_audited": true,
+    "all_episode_ids_full_24_hex": true,
+    "metric_operations_derived_from_current_metric_state_not_candidate_transition_count": true,
+    "no_duplicate_episode_operations": true,
+    "denominator_unchanged": true,
+    "candidate_counts_not_substituted_for_episode_counts": true
+  }
+}
