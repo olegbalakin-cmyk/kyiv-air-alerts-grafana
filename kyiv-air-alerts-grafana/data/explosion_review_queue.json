@@ -9180,7 +9180,7 @@
     "candidate_id": "5f807237ce10eb9d27bfc95f",
     "city_key": "kyiv",
     "city": "Київ",
-    "status": "needs_review",
+    "status": "approved_strict",
     "source": "Telegram / СУСПІЛЬНЕ НОВИНИ",
     "publisher": "СУСПІЛЬНЕ НОВИНИ",
     "publisher_url": "https://t.me/suspilnenews",
@@ -9224,7 +9224,12 @@
       "EXACT_CITY_EVENT_TEXT",
       "STRICT_EXPLOSION_EVIDENCE",
       "NO_AIR_MILITARY_CONTEXT",
-      "TEMPORAL_CONTEMPORANEOUS_LIVE_WORDING"
+      "TEMPORAL_CONTEMPORANEOUS_LIVE_WORDING",
+      "COMPOSED_STRICT_SAME_EPISODE",
+      "COMPOSED_TEMPORAL_PROOF",
+      "COMPOSED_AIR_MILITARY_CONTEXT",
+      "COMPOSED_SAME_ATTACK_COMPATIBLE",
+      "COMPOSED_NEIGHBOR_CHECK_PASSED"
     ],
     "classification_evidence": {
       "exact_city": {
@@ -9280,9 +9285,89 @@
       },
       "controlled_blast_event_segments": [],
       "sensitivity_basis": null,
-      "classification_episode_id": null
+      "classification_episode_id": null,
+      "episode_level_composition": {
+        "target_episode_id": "f235928c329ca806d9dca5ed",
+        "city_key": "kyiv",
+        "final_composed_verdict": "approved_strict",
+        "anchor_candidate_id": "5f807237ce10eb9d27bfc95f",
+        "contributing_candidate_ids": [
+          "5f807237ce10eb9d27bfc95f",
+          "7f98c09b95dcd4a2293dd750"
+        ],
+        "contributing_candidates": [
+          {
+            "candidate_id": "5f807237ce10eb9d27bfc95f",
+            "roles": [
+              "explosion_evidence",
+              "temporal_proof"
+            ],
+            "temporal_code": "TEMPORAL_CONTEMPORANEOUS_LIVE_WORDING",
+            "temporal_evidence_type": "trusted_contemporaneous_live_message"
+          },
+          {
+            "candidate_id": "7f98c09b95dcd4a2293dd750",
+            "roles": [
+              "explosion_evidence",
+              "air_military_context"
+            ],
+            "same_attack_reason": "air_context_in_exact_city_event_segment"
+          }
+        ],
+        "same_attack_compatibility": {
+          "present": true,
+          "reason": "compatible_same_attack_sequence",
+          "basis": [
+            "timestamps_within_45m",
+            "repeated_explosions"
+          ],
+          "gap_seconds": 978,
+          "temporal_neighbor_check": {
+            "passed": true,
+            "moment": "2026-09-23T22:29:05Z",
+            "active_episode_ids": [
+              "f235928c329ca806d9dca5ed"
+            ],
+            "conflicting_neighbor_episode_ids": []
+          },
+          "context_neighbor_check": {
+            "passed": true,
+            "moment": "2026-09-23T22:12:47Z",
+            "active_episode_ids": [
+              "f235928c329ca806d9dca5ed"
+            ],
+            "conflicting_neighbor_episode_ids": []
+          }
+        },
+        "neighboring_alert_check": {
+          "passed": true,
+          "temporal_source": {
+            "passed": true,
+            "moment": "2026-09-23T22:29:05Z",
+            "active_episode_ids": [
+              "f235928c329ca806d9dca5ed"
+            ],
+            "conflicting_neighbor_episode_ids": []
+          },
+          "air_context_source": {
+            "passed": true,
+            "moment": "2026-09-23T22:12:47Z",
+            "active_episode_ids": [
+              "f235928c329ca806d9dca5ed"
+            ],
+            "conflicting_neighbor_episode_ids": []
+          }
+        },
+        "reason_codes": [
+          "COMPOSED_STRICT_SAME_EPISODE",
+          "COMPOSED_TEMPORAL_PROOF",
+          "COMPOSED_AIR_MILITARY_CONTEXT",
+          "COMPOSED_SAME_ATTACK_COMPATIBLE",
+          "COMPOSED_NEIGHBOR_CHECK_PASSED"
+        ]
+      }
     },
-    "review_note": "evidence-layered classification requires manual review",
+    "review_note": "episode-level composed strict classification",
     "note": "Discovery relevance, publication-time episode matching, and strict/sensitivity classification are separate. Publication time may build a candidate episode set but never supplies event time or chooses an approved event episode. Strict requires exact-city explosion/strike evidence, aerial-war context, and episode-specific temporal proof. Sensitivity requires explicit near-boundary timing or conservative single-episode-day inference; multi-episode dates without episode-specific proof remain manual review. PVO-only and non-military controlled blasts are rejected.",
     "matching_outcome": "unique_match",
     "matched_episode_ids": [
@@ -9293,7 +9378,91 @@
         "f235928c329ca806d9dca5ed"
       ]
     ],
-    "matching_reason": "publication_within_unique_tracked_alert_window"
+    "matching_reason": "publication_within_unique_tracked_alert_window",
+    "composition_provenance": {
+      "target_episode_id": "f235928c329ca806d9dca5ed",
+      "city_key": "kyiv",
+      "final_composed_verdict": "approved_strict",
+      "anchor_candidate_id": "5f807237ce10eb9d27bfc95f",
+      "contributing_candidate_ids": [
+        "5f807237ce10eb9d27bfc95f",
+        "7f98c09b95dcd4a2293dd750"
+      ],
+      "contributing_candidates": [
+        {
+          "candidate_id": "5f807237ce10eb9d27bfc95f",
+          "roles": [
+            "explosion_evidence",
+            "temporal_proof"
+          ],
+          "temporal_code": "TEMPORAL_CONTEMPORANEOUS_LIVE_WORDING",
+          "temporal_evidence_type": "trusted_contemporaneous_live_message"
+        },
+        {
+          "candidate_id": "7f98c09b95dcd4a2293dd750",
+          "roles": [
+            "explosion_evidence",
+            "air_military_context"
+          ],
+          "same_attack_reason": "air_context_in_exact_city_event_segment"
+        }
+      ],
+      "same_attack_compatibility": {
+        "present": true,
+        "reason": "compatible_same_attack_sequence",
+        "basis": [
+          "timestamps_within_45m",
+          "repeated_explosions"
+        ],
+        "gap_seconds": 978,
+        "temporal_neighbor_check": {
+          "passed": true,
+          "moment": "2026-09-23T22:29:05Z",
+          "active_episode_ids": [
+            "f235928c329ca806d9dca5ed"
+          ],
+          "conflicting_neighbor_episode_ids": []
+        },
+        "context_neighbor_check": {
+          "passed": true,
+          "moment": "2026-09-23T22:12:47Z",
+          "active_episode_ids": [
+            "f235928c329ca806d9dca5ed"
+          ],
+          "conflicting_neighbor_episode_ids": []
+        }
+      },
+      "neighboring_alert_check": {
+        "passed": true,
+        "temporal_source": {
+          "passed": true,
+          "moment": "2026-09-23T22:29:05Z",
+          "active_episode_ids": [
+            "f235928c329ca806d9dca5ed"
+          ],
+          "conflicting_neighbor_episode_ids": []
+        },
+        "air_context_source": {
+          "passed": true,
+          "moment": "2026-09-23T22:12:47Z",
+          "active_episode_ids": [
+            "f235928c329ca806d9dca5ed"
+          ],
+          "conflicting_neighbor_episode_ids": []
+        }
+      },
+      "reason_codes": [
+        "COMPOSED_STRICT_SAME_EPISODE",
+        "COMPOSED_TEMPORAL_PROOF",
+        "COMPOSED_AIR_MILITARY_CONTEXT",
+        "COMPOSED_SAME_ATTACK_COMPATIBLE",
+        "COMPOSED_NEIGHBOR_CHECK_PASSED"
+      ]
+    },
+    "methodology": {
+      "monitor_code_blob_sha": "e1286040e6a3911f19cd22c9fb2cf9cddfd8adee",
+      "composition_source_blob_sha": "80fd109943e169f77faa1a95efaa18e44236a620"
+    }
   },
   {
     "candidate_id": "4c81a45894b2a491757baa2c",
@@ -28607,7 +28776,7 @@
     "candidate_id": "3f2137adc72e1202240133f7",
     "city_key": "dnipro",
     "city": "Дніпро",
-    "status": "needs_review",
+    "status": "approved_strict",
     "source": "Telegram / СУСПІЛЬНЕ НОВИНИ",
     "publisher": "СУСПІЛЬНЕ НОВИНИ",
     "publisher_url": "https://t.me/suspilnenews",
@@ -28673,7 +28842,7 @@
       "immediate"
     ],
     "matched_episode_id": "c894e85e407dc4256d8c4419",
-    "review_note": "evidence-layered classification requires manual review",
+    "review_note": "episode-level composed strict classification",
     "note": "Auto-strict is allowed only for exact-city evidence with air context, explicit wording that the event occurred during an alert, an immediate follow-up, and publication inside that unique alert window (plus 30 minutes). All other candidates require review; publication time alone is never enough.",
     "matching_outcome": "unique_match",
     "matched_episode_ids": [
@@ -28690,8 +28859,179 @@
       "EXACT_CITY_EVENT_TEXT",
       "STRICT_EXPLOSION_EVIDENCE",
       "NO_AIR_MILITARY_CONTEXT",
-      "TEMPORAL_CONTEMPORANEOUS_LIVE_WORDING"
-    ]
+      "TEMPORAL_CONTEMPORANEOUS_LIVE_WORDING",
+      "COMPOSED_STRICT_SAME_EPISODE",
+      "COMPOSED_TEMPORAL_PROOF",
+      "COMPOSED_AIR_MILITARY_CONTEXT",
+      "COMPOSED_SAME_ATTACK_COMPATIBLE",
+      "COMPOSED_NEIGHBOR_CHECK_PASSED"
+    ],
+    "composition_provenance": {
+      "target_episode_id": "c894e85e407dc4256d8c4419",
+      "city_key": "dnipro",
+      "final_composed_verdict": "approved_strict",
+      "anchor_candidate_id": "3f2137adc72e1202240133f7",
+      "contributing_candidate_ids": [
+        "3f2137adc72e1202240133f7",
+        "a06e12f4cfed9b43eafe2d58"
+      ],
+      "contributing_candidates": [
+        {
+          "candidate_id": "3f2137adc72e1202240133f7",
+          "roles": [
+            "explosion_evidence",
+            "temporal_proof"
+          ],
+          "temporal_code": "TEMPORAL_CONTEMPORANEOUS_LIVE_WORDING",
+          "temporal_evidence_type": "trusted_contemporaneous_live_message"
+        },
+        {
+          "candidate_id": "a06e12f4cfed9b43eafe2d58",
+          "roles": [
+            "explosion_evidence",
+            "air_military_context"
+          ],
+          "same_attack_reason": "air_context_in_exact_city_event_segment"
+        }
+      ],
+      "same_attack_compatibility": {
+        "present": true,
+        "reason": "compatible_same_attack_sequence",
+        "basis": [
+          "timestamps_within_45m",
+          "repeated_explosions"
+        ],
+        "gap_seconds": 1619,
+        "temporal_neighbor_check": {
+          "passed": true,
+          "moment": "2026-09-21T23:43:27Z",
+          "active_episode_ids": [
+            "c894e85e407dc4256d8c4419"
+          ],
+          "conflicting_neighbor_episode_ids": []
+        },
+        "context_neighbor_check": {
+          "passed": true,
+          "moment": "2026-09-21T23:16:28Z",
+          "active_episode_ids": [
+            "c894e85e407dc4256d8c4419"
+          ],
+          "conflicting_neighbor_episode_ids": []
+        }
+      },
+      "neighboring_alert_check": {
+        "passed": true,
+        "temporal_source": {
+          "passed": true,
+          "moment": "2026-09-21T23:43:27Z",
+          "active_episode_ids": [
+            "c894e85e407dc4256d8c4419"
+          ],
+          "conflicting_neighbor_episode_ids": []
+        },
+        "air_context_source": {
+          "passed": true,
+          "moment": "2026-09-21T23:16:28Z",
+          "active_episode_ids": [
+            "c894e85e407dc4256d8c4419"
+          ],
+          "conflicting_neighbor_episode_ids": []
+        }
+      },
+      "reason_codes": [
+        "COMPOSED_STRICT_SAME_EPISODE",
+        "COMPOSED_TEMPORAL_PROOF",
+        "COMPOSED_AIR_MILITARY_CONTEXT",
+        "COMPOSED_SAME_ATTACK_COMPATIBLE",
+        "COMPOSED_NEIGHBOR_CHECK_PASSED"
+      ]
+    },
+    "classification_evidence": {
+      "episode_level_composition": {
+        "target_episode_id": "c894e85e407dc4256d8c4419",
+        "city_key": "dnipro",
+        "final_composed_verdict": "approved_strict",
+        "anchor_candidate_id": "3f2137adc72e1202240133f7",
+        "contributing_candidate_ids": [
+          "3f2137adc72e1202240133f7",
+          "a06e12f4cfed9b43eafe2d58"
+        ],
+        "contributing_candidates": [
+          {
+            "candidate_id": "3f2137adc72e1202240133f7",
+            "roles": [
+              "explosion_evidence",
+              "temporal_proof"
+            ],
+            "temporal_code": "TEMPORAL_CONTEMPORANEOUS_LIVE_WORDING",
+            "temporal_evidence_type": "trusted_contemporaneous_live_message"
+          },
+          {
+            "candidate_id": "a06e12f4cfed9b43eafe2d58",
+            "roles": [
+              "explosion_evidence",
+              "air_military_context"
+            ],
+            "same_attack_reason": "air_context_in_exact_city_event_segment"
+          }
+        ],
+        "same_attack_compatibility": {
+          "present": true,
+          "reason": "compatible_same_attack_sequence",
+          "basis": [
+            "timestamps_within_45m",
+            "repeated_explosions"
+          ],
+          "gap_seconds": 1619,
+          "temporal_neighbor_check": {
+            "passed": true,
+            "moment": "2026-09-21T23:43:27Z",
+            "active_episode_ids": [
+              "c894e85e407dc4256d8c4419"
+            ],
+            "conflicting_neighbor_episode_ids": []
+          },
+          "context_neighbor_check": {
+            "passed": true,
+            "moment": "2026-09-21T23:16:28Z",
+            "active_episode_ids": [
+              "c894e85e407dc4256d8c4419"
+            ],
+            "conflicting_neighbor_episode_ids": []
+          }
+        },
+        "neighboring_alert_check": {
+          "passed": true,
+          "temporal_source": {
+            "passed": true,
+            "moment": "2026-09-21T23:43:27Z",
+            "active_episode_ids": [
+              "c894e85e407dc4256d8c4419"
+            ],
+            "conflicting_neighbor_episode_ids": []
+          },
+          "air_context_source": {
+            "passed": true,
+            "moment": "2026-09-21T23:16:28Z",
+            "active_episode_ids": [
+              "c894e85e407dc4256d8c4419"
+            ],
+            "conflicting_neighbor_episode_ids": []
+          }
+        },
+        "reason_codes": [
+          "COMPOSED_STRICT_SAME_EPISODE",
+          "COMPOSED_TEMPORAL_PROOF",
+          "COMPOSED_AIR_MILITARY_CONTEXT",
+          "COMPOSED_SAME_ATTACK_COMPATIBLE",
+          "COMPOSED_NEIGHBOR_CHECK_PASSED"
+        ]
+      }
+    },
+    "methodology": {
+      "monitor_code_blob_sha": "e1286040e6a3911f19cd22c9fb2cf9cddfd8adee",
+      "composition_source_blob_sha": "80fd109943e169f77faa1a95efaa18e44236a620"
+    }
   },
   {
     "candidate_id": "a06e12f4cfed9b43eafe2d58",
