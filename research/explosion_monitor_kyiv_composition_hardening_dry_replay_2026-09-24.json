@@ -1,0 +1,2521 @@
+{
+  "schema_version": "1.0",
+  "replay_date": "2026-09-24",
+  "repository": "olegbalakin-cmyk/kyiv-air-alerts-grafana",
+  "branch": "multicity-wip-2026-09-16",
+  "purpose": "Research-only dry replay of narrowly scoped Kyiv live-monitor hardening. No live queue, monitor state, last-run state, metric, canonical history, dashboard, Grafana, Netlify, or production deployment is mutated.",
+  "authoritative_input": {
+    "targeted_qa_commit": "c4a323bf70e0ae57e7648baf7f6ae7a39b09a5c4",
+    "targeted_qa_artifact": "research/kyiv_explosion_live_2026-09-23_targeted_qa.json",
+    "targeted_qa_blob_sha": "4769cad087b753a97cadc9ed07bdf4726980704b"
+  },
+  "branch_head_before_change": "68d70e05ebe2c213eb1c5aa34db889459cb46553",
+  "monitor_before": {
+    "path": "kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py",
+    "blob_sha": "c08c4e6a76d1874b74fbe796dc18c1ed566f2f83"
+  },
+  "monitor_proposed_blob_sha": "78f13c251b2441b1724df9151f49b09a9f6e1403",
+  "live_data_guard_before_commit": {
+    "queue_blob_sha": "fa324767d0204ccf373cd519a23f39a0db68e945",
+    "monitor_state_blob_sha": "a6aba4d5416c36652859bd9e9a6818320069998a",
+    "last_run_blob_sha": "5cc37cc4760d83d05ce7b55325e17c3b7a4a3c1b",
+    "metric_blob_sha": "7b24eced763ff1077b7e3112522da4c34ca00dad"
+  },
+  "code_changes": {
+    "match_refresh_reclassification": {
+      "rule": "Recompute classification when matching_outcome, matched_episode_id, matched_episode_ids, logical/ambiguity state changes, or when stored MATCH_* classification codes disagree with refreshed matching.",
+      "persistence": "Matching metadata, classification reason codes, classification evidence and candidate status are rewritten as one coherent decision.",
+      "status_guard": "Status changes only when the recomputed classifier produces a different outcome."
+    },
+    "trusted_contemporaneous_live_lexical_hardening": {
+      "exact_positive_forms": [
+        "лунає вибух",
+        "лунають вибухи",
+        "лунають повторні вибухи",
+        "чутно вибух",
+        "чутно вибухи",
+        "чутно серію вибухів",
+        "чути вибух",
+        "чути вибухи",
+        "чути серію вибухів"
+      ],
+      "punctuation_variation": "Whitespace and common punctuation separators are accepted between lexical components.",
+      "retrospective_cumulative_blocks": [
+        "було чути",
+        "було чутно",
+        "раніше ... чули/чути/чутно",
+        "протягом дня",
+        "цілий день",
+        "за день",
+        "за добу",
+        "добове зведення/підсумок"
+      ],
+      "unchanged_behavior": [
+        "Existing explosion recognition for «У Києві пролунали вибухи» is unchanged.",
+        "Existing contemporaneous recognition for «У Києві лунають повторні вибухи» is preserved."
+      ]
+    },
+    "bounded_episode_level_composition": {
+      "fixed_episode_required": true,
+      "same_city_required": true,
+      "max_contributor_gap_minutes": 45,
+      "trusted_context_tight_gap_minutes": 15,
+      "required_roles": [
+        "qualifying explosion/impact evidence",
+        "aerial-war context",
+        "episode-specific temporal proof"
+      ],
+      "same_attack_link": "Timestamp compatibility alone is insufficient. At least one additional link is required: repeated/series/ongoing attack-sequence wording, a shared weapon family, or tightly timed trusted same-attack context.",
+      "deterministic_anchor": "Compatible pairs are sorted by gap_seconds, temporal anchor candidate_id, context candidate_id; the first pair anchors the composed verdict.",
+      "duplicate_guard": "Do not add another strict candidate if the fixed episode already has approved_strict."
+    }
+  },
+  "anti_overcomposition_guardrails": [
+    "Never compose across city or matched_episode_id.",
+    "Never use retrospective/cumulative/day-summary wording as a temporal anchor or context contributor.",
+    "Never promote PVO_ONLY, controlled-blast, or publisher-fulltext-review evidence through composition.",
+    "Require the temporal anchor message time and context publication time to fall inside the fixed target episode.",
+    "Reject contributor times that overlap a distinct neighboring alert episode.",
+    "Reject gaps above 45 minutes.",
+    "Timestamp/publication proximity by itself cannot establish same attack.",
+    "Do not transfer locality from one event to another or create duplicate strict events."
+  ],
+  "frozen_cohort": {
+    "tracked_alerts": 9,
+    "candidate_bearing_episodes": 7,
+    "candidates": 36,
+    "frozen_reference_candidate_ids": [
+      "b98b6f39b39aff1204f92e93",
+      "5f807237ce10eb9d27bfc95f",
+      "4c81a45894b2a491757baa2c",
+      "59e46d1b3c06e2c50fd4d259",
+      "f7c06b0a5c5084a4dc86ce12",
+      "a9360d117f63e0190154a361",
+      "f5716ba6984e14f404f10c34",
+      "7f98c09b95dcd4a2293dd750",
+      "e095345e2c95b982e3fac04b",
+      "8d3d5648cc5afd06ebbc661f",
+      "9002de009d36034a73e8471b",
+      "ccd077c356c3b8481b4f3f11",
+      "ba00c35121b631ef7a2acc89",
+      "b76a52c4ff7d8a4117f1408b",
+      "366f90ec53dc981ffa32a319",
+      "82728e6b31f0139371cdffdf",
+      "c837a79e2006589a4763c77e",
+      "0c2ac46f1d42b411a14d06c1",
+      "4225edf94f0a8db2b78f07e3",
+      "6698c0fd3cf23315689e7348",
+      "b686f23ad40cdb74f47bd3fa",
+      "4bdc4c0a5f95dc1e01632d22",
+      "73d817926f66c8dce397b91b",
+      "7dd8008ab0695b10329b3899",
+      "a434269bc3d63864461c6349",
+      "91b7d2133a797aa96099189a",
+      "4f3d2eb50630de9f15fd6c5a",
+      "fcb851f13f5935821fc68503",
+      "fed2d20a9e6ee1cf2151d857",
+      "0405b982305250ea21faab04",
+      "d2ad79c8ba60ec946f91df3c",
+      "5e2d6456f4ddd91c4abd7754",
+      "2b6be74ee09c63c5e5e13dfe",
+      "312e5f662443cd3a07d64e5e",
+      "466178615eb27f33f40544b7",
+      "374e5a3e939278260bcbf65d"
+    ],
+    "episode_ids": [
+      "8185dc2e7c4f8d2ba82fdd97",
+      "886deb3ed4b11cd18a0a015d",
+      "d738bcf202ade96c95580611",
+      "e97e6e816f96832d02c8b2cd",
+      "f2112b57d80fe5a569565cd3",
+      "9ddb41e0e6ccef332646a841",
+      "b1fbe75f41f92851800f1466",
+      "6f6088c593d5c73b17d8a74d",
+      "f235928c329ca806d9dca5ed"
+    ]
+  },
+  "candidate_consistency_audit": {
+    "stale_matching_classification_before": 14,
+    "stale_affected_episode_ids": [
+      "886deb3ed4b11cd18a0a015d",
+      "9ddb41e0e6ccef332646a841",
+      "e97e6e816f96832d02c8b2cd"
+    ],
+    "stale_candidate_ids": [
+      "b686f23ad40cdb74f47bd3fa",
+      "73d817926f66c8dce397b91b",
+      "7dd8008ab0695b10329b3899",
+      "a434269bc3d63864461c6349",
+      "91b7d2133a797aa96099189a",
+      "4f3d2eb50630de9f15fd6c5a",
+      "fcb851f13f5935821fc68503",
+      "fed2d20a9e6ee1cf2151d857",
+      "0405b982305250ea21faab04",
+      "5e2d6456f4ddd91c4abd7754",
+      "2b6be74ee09c63c5e5e13dfe",
+      "312e5f662443cd3a07d64e5e",
+      "466178615eb27f33f40544b7",
+      "374e5a3e939278260bcbf65d"
+    ],
+    "records_repaired_by_reclassification": 14,
+    "candidate_status_changes_caused_only_by_stale_state_repair": 0,
+    "lexical_hardening_affected_candidate_ids": [
+      "73d817926f66c8dce397b91b"
+    ],
+    "candidate_status_changes_caused_only_by_lexical_hardening": 0,
+    "composition_candidate_transitions": [
+      {
+        "candidate_id": "73d817926f66c8dce397b91b",
+        "episode_id": "e97e6e816f96832d02c8b2cd",
+        "from": "needs_review",
+        "to": "approved_strict"
+      },
+      {
+        "candidate_id": "5f807237ce10eb9d27bfc95f",
+        "episode_id": "f235928c329ca806d9dca5ed",
+        "from": "needs_review",
+        "to": "approved_strict"
+      }
+    ],
+    "composition_episode_changes": [
+      "e97e6e816f96832d02c8b2cd",
+      "f235928c329ca806d9dca5ed"
+    ]
+  },
+  "all_36_candidate_recomputations": [
+    {
+      "candidate_id": "b98b6f39b39aff1204f92e93",
+      "episode_id": "f235928c329ca806d9dca5ed",
+      "stored_reference_status": "needs_review",
+      "current_live_status_at_authoritative_qa": "needs_review",
+      "stored_classification_reason_codes": [
+        "MATCH_UNIQUE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "NO_AIR_MILITARY_CONTEXT",
+        "NO_STRICT_TEMPORAL_BINDING"
+      ],
+      "current_matching": {
+        "matched_episode_id": "f235928c329ca806d9dca5ed",
+        "matching_outcome": "unique_match",
+        "matched_episode_ids": [
+          "f235928c329ca806d9dca5ed"
+        ],
+        "matching_reason": "publication_within_unique_tracked_alert_window"
+      },
+      "pre_hardening_recomputed_outcome": "needs_review",
+      "pre_hardening_recomputed_matched_episode_id": null,
+      "pre_hardening_recomputed_reason_codes": [
+        "MATCH_UNIQUE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "NO_AIR_MILITARY_CONTEXT",
+        "NO_STRICT_TEMPORAL_BINDING"
+      ],
+      "post_match_refresh_reason_codes": [
+        "MATCH_UNIQUE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "NO_AIR_MILITARY_CONTEXT",
+        "NO_STRICT_TEMPORAL_BINDING"
+      ],
+      "post_lexical_reason_codes": [
+        "MATCH_UNIQUE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "NO_AIR_MILITARY_CONTEXT",
+        "NO_STRICT_TEMPORAL_BINDING"
+      ],
+      "post_lexical_temporal_binding_code": "NO_STRICT_TEMPORAL_BINDING",
+      "stale_state_repaired": false,
+      "stale_state_status_change": false,
+      "lexical_hardening_applied": false,
+      "lexical_hardening_status_change": false,
+      "composition_transition": null,
+      "final_proposed_candidate_status": "needs_review",
+      "note": "No candidate-level hardening changes the single-candidate outcome."
+    },
+    {
+      "candidate_id": "5f807237ce10eb9d27bfc95f",
+      "episode_id": "f235928c329ca806d9dca5ed",
+      "stored_reference_status": "needs_review",
+      "current_live_status_at_authoritative_qa": "needs_review",
+      "stored_classification_reason_codes": [
+        "MATCH_UNIQUE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "NO_AIR_MILITARY_CONTEXT",
+        "TEMPORAL_CONTEMPORANEOUS_LIVE_WORDING"
+      ],
+      "current_matching": {
+        "matched_episode_id": "f235928c329ca806d9dca5ed",
+        "matching_outcome": "unique_match",
+        "matched_episode_ids": [
+          "f235928c329ca806d9dca5ed"
+        ],
+        "matching_reason": "publication_within_unique_tracked_alert_window"
+      },
+      "pre_hardening_recomputed_outcome": "needs_review",
+      "pre_hardening_recomputed_matched_episode_id": null,
+      "pre_hardening_recomputed_reason_codes": [
+        "MATCH_UNIQUE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "NO_AIR_MILITARY_CONTEXT",
+        "TEMPORAL_CONTEMPORANEOUS_LIVE_WORDING"
+      ],
+      "post_match_refresh_reason_codes": [
+        "MATCH_UNIQUE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "NO_AIR_MILITARY_CONTEXT",
+        "TEMPORAL_CONTEMPORANEOUS_LIVE_WORDING"
+      ],
+      "post_lexical_reason_codes": [
+        "MATCH_UNIQUE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "NO_AIR_MILITARY_CONTEXT",
+        "TEMPORAL_CONTEMPORANEOUS_LIVE_WORDING"
+      ],
+      "post_lexical_temporal_binding_code": "TEMPORAL_CONTEMPORANEOUS_LIVE_WORDING",
+      "stale_state_repaired": false,
+      "stale_state_status_change": false,
+      "lexical_hardening_applied": false,
+      "lexical_hardening_status_change": false,
+      "composition_transition": {
+        "cause": "episode_level_cross_source_composition",
+        "from": "needs_review",
+        "to": "approved_strict",
+        "episode_id": "f235928c329ca806d9dca5ed"
+      },
+      "final_proposed_candidate_status": "approved_strict",
+      "note": "No candidate-level hardening changes the single-candidate outcome."
+    },
+    {
+      "candidate_id": "4c81a45894b2a491757baa2c",
+      "episode_id": "f235928c329ca806d9dca5ed",
+      "stored_reference_status": "approved_sensitivity",
+      "current_live_status_at_authoritative_qa": "approved_sensitivity",
+      "stored_classification_reason_codes": [
+        "MATCH_UNIQUE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "AIR_MILITARY_CONTEXT",
+        "SAME_ATTACK_CONTEXT_SUPPORTED",
+        "NO_STRICT_TEMPORAL_BINDING",
+        "SENSITIVITY_INFERRED_SAME_ATTACK"
+      ],
+      "current_matching": {
+        "matched_episode_id": "f235928c329ca806d9dca5ed",
+        "matching_outcome": "unique_match",
+        "matched_episode_ids": [
+          "f235928c329ca806d9dca5ed"
+        ],
+        "matching_reason": "publication_within_unique_tracked_alert_window"
+      },
+      "pre_hardening_recomputed_outcome": "approved_sensitivity",
+      "pre_hardening_recomputed_matched_episode_id": "f235928c329ca806d9dca5ed",
+      "pre_hardening_recomputed_reason_codes": [
+        "MATCH_UNIQUE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "AIR_MILITARY_CONTEXT",
+        "SAME_ATTACK_CONTEXT_SUPPORTED",
+        "NO_STRICT_TEMPORAL_BINDING",
+        "SENSITIVITY_INFERRED_SAME_ATTACK"
+      ],
+      "post_match_refresh_reason_codes": [
+        "MATCH_UNIQUE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "AIR_MILITARY_CONTEXT",
+        "SAME_ATTACK_CONTEXT_SUPPORTED",
+        "NO_STRICT_TEMPORAL_BINDING",
+        "SENSITIVITY_INFERRED_SAME_ATTACK"
+      ],
+      "post_lexical_reason_codes": [
+        "MATCH_UNIQUE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "AIR_MILITARY_CONTEXT",
+        "SAME_ATTACK_CONTEXT_SUPPORTED",
+        "NO_STRICT_TEMPORAL_BINDING",
+        "SENSITIVITY_INFERRED_SAME_ATTACK"
+      ],
+      "post_lexical_temporal_binding_code": "NO_STRICT_TEMPORAL_BINDING",
+      "stale_state_repaired": false,
+      "stale_state_status_change": false,
+      "lexical_hardening_applied": false,
+      "lexical_hardening_status_change": false,
+      "composition_transition": null,
+      "final_proposed_candidate_status": "approved_sensitivity",
+      "note": "No candidate-level hardening changes the single-candidate outcome."
+    },
+    {
+      "candidate_id": "59e46d1b3c06e2c50fd4d259",
+      "episode_id": "f235928c329ca806d9dca5ed",
+      "stored_reference_status": "approved_sensitivity",
+      "current_live_status_at_authoritative_qa": "approved_sensitivity",
+      "stored_classification_reason_codes": [
+        "MATCH_UNIQUE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "AIR_MILITARY_CONTEXT",
+        "SAME_ATTACK_CONTEXT_SUPPORTED",
+        "NO_STRICT_TEMPORAL_BINDING",
+        "SENSITIVITY_INFERRED_SAME_ATTACK"
+      ],
+      "current_matching": {
+        "matched_episode_id": "f235928c329ca806d9dca5ed",
+        "matching_outcome": "unique_match",
+        "matched_episode_ids": [
+          "f235928c329ca806d9dca5ed"
+        ],
+        "matching_reason": "publication_within_unique_tracked_alert_window"
+      },
+      "pre_hardening_recomputed_outcome": "approved_sensitivity",
+      "pre_hardening_recomputed_matched_episode_id": "f235928c329ca806d9dca5ed",
+      "pre_hardening_recomputed_reason_codes": [
+        "MATCH_UNIQUE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "AIR_MILITARY_CONTEXT",
+        "SAME_ATTACK_CONTEXT_SUPPORTED",
+        "NO_STRICT_TEMPORAL_BINDING",
+        "SENSITIVITY_INFERRED_SAME_ATTACK"
+      ],
+      "post_match_refresh_reason_codes": [
+        "MATCH_UNIQUE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "AIR_MILITARY_CONTEXT",
+        "SAME_ATTACK_CONTEXT_SUPPORTED",
+        "NO_STRICT_TEMPORAL_BINDING",
+        "SENSITIVITY_INFERRED_SAME_ATTACK"
+      ],
+      "post_lexical_reason_codes": [
+        "MATCH_UNIQUE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "AIR_MILITARY_CONTEXT",
+        "SAME_ATTACK_CONTEXT_SUPPORTED",
+        "NO_STRICT_TEMPORAL_BINDING",
+        "SENSITIVITY_INFERRED_SAME_ATTACK"
+      ],
+      "post_lexical_temporal_binding_code": "NO_STRICT_TEMPORAL_BINDING",
+      "stale_state_repaired": false,
+      "stale_state_status_change": false,
+      "lexical_hardening_applied": false,
+      "lexical_hardening_status_change": false,
+      "composition_transition": null,
+      "final_proposed_candidate_status": "approved_sensitivity",
+      "note": "No candidate-level hardening changes the single-candidate outcome."
+    },
+    {
+      "candidate_id": "f7c06b0a5c5084a4dc86ce12",
+      "episode_id": "f235928c329ca806d9dca5ed",
+      "stored_reference_status": "approved_sensitivity",
+      "current_live_status_at_authoritative_qa": "approved_sensitivity",
+      "stored_classification_reason_codes": [
+        "MATCH_UNIQUE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "AIR_MILITARY_CONTEXT",
+        "SAME_ATTACK_CONTEXT_SUPPORTED",
+        "NO_STRICT_TEMPORAL_BINDING",
+        "SENSITIVITY_INFERRED_SAME_ATTACK"
+      ],
+      "current_matching": {
+        "matched_episode_id": "f235928c329ca806d9dca5ed",
+        "matching_outcome": "unique_match",
+        "matched_episode_ids": [
+          "f235928c329ca806d9dca5ed"
+        ],
+        "matching_reason": "publication_within_unique_tracked_alert_window"
+      },
+      "pre_hardening_recomputed_outcome": "approved_sensitivity",
+      "pre_hardening_recomputed_matched_episode_id": "f235928c329ca806d9dca5ed",
+      "pre_hardening_recomputed_reason_codes": [
+        "MATCH_UNIQUE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "AIR_MILITARY_CONTEXT",
+        "SAME_ATTACK_CONTEXT_SUPPORTED",
+        "NO_STRICT_TEMPORAL_BINDING",
+        "SENSITIVITY_INFERRED_SAME_ATTACK"
+      ],
+      "post_match_refresh_reason_codes": [
+        "MATCH_UNIQUE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "AIR_MILITARY_CONTEXT",
+        "SAME_ATTACK_CONTEXT_SUPPORTED",
+        "NO_STRICT_TEMPORAL_BINDING",
+        "SENSITIVITY_INFERRED_SAME_ATTACK"
+      ],
+      "post_lexical_reason_codes": [
+        "MATCH_UNIQUE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "AIR_MILITARY_CONTEXT",
+        "SAME_ATTACK_CONTEXT_SUPPORTED",
+        "NO_STRICT_TEMPORAL_BINDING",
+        "SENSITIVITY_INFERRED_SAME_ATTACK"
+      ],
+      "post_lexical_temporal_binding_code": "NO_STRICT_TEMPORAL_BINDING",
+      "stale_state_repaired": false,
+      "stale_state_status_change": false,
+      "lexical_hardening_applied": false,
+      "lexical_hardening_status_change": false,
+      "composition_transition": null,
+      "final_proposed_candidate_status": "approved_sensitivity",
+      "note": "No candidate-level hardening changes the single-candidate outcome."
+    },
+    {
+      "candidate_id": "a9360d117f63e0190154a361",
+      "episode_id": "f235928c329ca806d9dca5ed",
+      "stored_reference_status": "approved_sensitivity",
+      "current_live_status_at_authoritative_qa": "approved_sensitivity",
+      "stored_classification_reason_codes": [
+        "MATCH_UNIQUE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "AIR_MILITARY_CONTEXT",
+        "SAME_ATTACK_CONTEXT_SUPPORTED",
+        "NO_STRICT_TEMPORAL_BINDING",
+        "SENSITIVITY_INFERRED_SAME_ATTACK"
+      ],
+      "current_matching": {
+        "matched_episode_id": "f235928c329ca806d9dca5ed",
+        "matching_outcome": "unique_match",
+        "matched_episode_ids": [
+          "f235928c329ca806d9dca5ed"
+        ],
+        "matching_reason": "publication_within_unique_tracked_alert_window"
+      },
+      "pre_hardening_recomputed_outcome": "approved_sensitivity",
+      "pre_hardening_recomputed_matched_episode_id": "f235928c329ca806d9dca5ed",
+      "pre_hardening_recomputed_reason_codes": [
+        "MATCH_UNIQUE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "AIR_MILITARY_CONTEXT",
+        "SAME_ATTACK_CONTEXT_SUPPORTED",
+        "NO_STRICT_TEMPORAL_BINDING",
+        "SENSITIVITY_INFERRED_SAME_ATTACK"
+      ],
+      "post_match_refresh_reason_codes": [
+        "MATCH_UNIQUE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "AIR_MILITARY_CONTEXT",
+        "SAME_ATTACK_CONTEXT_SUPPORTED",
+        "NO_STRICT_TEMPORAL_BINDING",
+        "SENSITIVITY_INFERRED_SAME_ATTACK"
+      ],
+      "post_lexical_reason_codes": [
+        "MATCH_UNIQUE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "AIR_MILITARY_CONTEXT",
+        "SAME_ATTACK_CONTEXT_SUPPORTED",
+        "NO_STRICT_TEMPORAL_BINDING",
+        "SENSITIVITY_INFERRED_SAME_ATTACK"
+      ],
+      "post_lexical_temporal_binding_code": "NO_STRICT_TEMPORAL_BINDING",
+      "stale_state_repaired": false,
+      "stale_state_status_change": false,
+      "lexical_hardening_applied": false,
+      "lexical_hardening_status_change": false,
+      "composition_transition": null,
+      "final_proposed_candidate_status": "approved_sensitivity",
+      "note": "No candidate-level hardening changes the single-candidate outcome."
+    },
+    {
+      "candidate_id": "f5716ba6984e14f404f10c34",
+      "episode_id": "6f6088c593d5c73b17d8a74d",
+      "stored_reference_status": "needs_review",
+      "current_live_status_at_authoritative_qa": "needs_review",
+      "stored_classification_reason_codes": [
+        "MATCH_UNIQUE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "NO_AIR_MILITARY_CONTEXT",
+        "NO_STRICT_TEMPORAL_BINDING"
+      ],
+      "current_matching": {
+        "matched_episode_id": "6f6088c593d5c73b17d8a74d",
+        "matching_outcome": "unique_match",
+        "matched_episode_ids": [
+          "6f6088c593d5c73b17d8a74d"
+        ],
+        "matching_reason": "publication_within_unique_tracked_alert_window"
+      },
+      "pre_hardening_recomputed_outcome": "needs_review",
+      "pre_hardening_recomputed_matched_episode_id": null,
+      "pre_hardening_recomputed_reason_codes": [
+        "MATCH_UNIQUE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "NO_AIR_MILITARY_CONTEXT",
+        "NO_STRICT_TEMPORAL_BINDING"
+      ],
+      "post_match_refresh_reason_codes": [
+        "MATCH_UNIQUE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "NO_AIR_MILITARY_CONTEXT",
+        "NO_STRICT_TEMPORAL_BINDING"
+      ],
+      "post_lexical_reason_codes": [
+        "MATCH_UNIQUE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "NO_AIR_MILITARY_CONTEXT",
+        "NO_STRICT_TEMPORAL_BINDING"
+      ],
+      "post_lexical_temporal_binding_code": "NO_STRICT_TEMPORAL_BINDING",
+      "stale_state_repaired": false,
+      "stale_state_status_change": false,
+      "lexical_hardening_applied": false,
+      "lexical_hardening_status_change": false,
+      "composition_transition": null,
+      "final_proposed_candidate_status": "needs_review",
+      "note": "No candidate-level hardening changes the single-candidate outcome."
+    },
+    {
+      "candidate_id": "7f98c09b95dcd4a2293dd750",
+      "episode_id": "f235928c329ca806d9dca5ed",
+      "stored_reference_status": "approved_sensitivity",
+      "current_live_status_at_authoritative_qa": "approved_sensitivity",
+      "stored_classification_reason_codes": [
+        "MATCH_UNIQUE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "AIR_MILITARY_CONTEXT",
+        "SAME_ATTACK_CONTEXT_SUPPORTED",
+        "NO_STRICT_TEMPORAL_BINDING",
+        "SENSITIVITY_INFERRED_SAME_ATTACK"
+      ],
+      "current_matching": {
+        "matched_episode_id": "f235928c329ca806d9dca5ed",
+        "matching_outcome": "unique_match",
+        "matched_episode_ids": [
+          "f235928c329ca806d9dca5ed"
+        ],
+        "matching_reason": "publication_within_unique_tracked_alert_window"
+      },
+      "pre_hardening_recomputed_outcome": "approved_sensitivity",
+      "pre_hardening_recomputed_matched_episode_id": "f235928c329ca806d9dca5ed",
+      "pre_hardening_recomputed_reason_codes": [
+        "MATCH_UNIQUE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "AIR_MILITARY_CONTEXT",
+        "SAME_ATTACK_CONTEXT_SUPPORTED",
+        "NO_STRICT_TEMPORAL_BINDING",
+        "SENSITIVITY_INFERRED_SAME_ATTACK"
+      ],
+      "post_match_refresh_reason_codes": [
+        "MATCH_UNIQUE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "AIR_MILITARY_CONTEXT",
+        "SAME_ATTACK_CONTEXT_SUPPORTED",
+        "NO_STRICT_TEMPORAL_BINDING",
+        "SENSITIVITY_INFERRED_SAME_ATTACK"
+      ],
+      "post_lexical_reason_codes": [
+        "MATCH_UNIQUE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "AIR_MILITARY_CONTEXT",
+        "SAME_ATTACK_CONTEXT_SUPPORTED",
+        "NO_STRICT_TEMPORAL_BINDING",
+        "SENSITIVITY_INFERRED_SAME_ATTACK"
+      ],
+      "post_lexical_temporal_binding_code": "NO_STRICT_TEMPORAL_BINDING",
+      "stale_state_repaired": false,
+      "stale_state_status_change": false,
+      "lexical_hardening_applied": false,
+      "lexical_hardening_status_change": false,
+      "composition_transition": null,
+      "final_proposed_candidate_status": "approved_sensitivity",
+      "note": "No candidate-level hardening changes the single-candidate outcome."
+    },
+    {
+      "candidate_id": "e095345e2c95b982e3fac04b",
+      "episode_id": "f235928c329ca806d9dca5ed",
+      "stored_reference_status": "approved_sensitivity",
+      "current_live_status_at_authoritative_qa": "approved_sensitivity",
+      "stored_classification_reason_codes": [
+        "MATCH_UNIQUE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "AIR_MILITARY_CONTEXT",
+        "SAME_ATTACK_CONTEXT_SUPPORTED",
+        "NO_STRICT_TEMPORAL_BINDING",
+        "SENSITIVITY_INFERRED_SAME_ATTACK"
+      ],
+      "current_matching": {
+        "matched_episode_id": "f235928c329ca806d9dca5ed",
+        "matching_outcome": "unique_match",
+        "matched_episode_ids": [
+          "f235928c329ca806d9dca5ed"
+        ],
+        "matching_reason": "publication_within_unique_tracked_alert_window"
+      },
+      "pre_hardening_recomputed_outcome": "approved_sensitivity",
+      "pre_hardening_recomputed_matched_episode_id": "f235928c329ca806d9dca5ed",
+      "pre_hardening_recomputed_reason_codes": [
+        "MATCH_UNIQUE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "AIR_MILITARY_CONTEXT",
+        "SAME_ATTACK_CONTEXT_SUPPORTED",
+        "NO_STRICT_TEMPORAL_BINDING",
+        "SENSITIVITY_INFERRED_SAME_ATTACK"
+      ],
+      "post_match_refresh_reason_codes": [
+        "MATCH_UNIQUE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "AIR_MILITARY_CONTEXT",
+        "SAME_ATTACK_CONTEXT_SUPPORTED",
+        "NO_STRICT_TEMPORAL_BINDING",
+        "SENSITIVITY_INFERRED_SAME_ATTACK"
+      ],
+      "post_lexical_reason_codes": [
+        "MATCH_UNIQUE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "AIR_MILITARY_CONTEXT",
+        "SAME_ATTACK_CONTEXT_SUPPORTED",
+        "NO_STRICT_TEMPORAL_BINDING",
+        "SENSITIVITY_INFERRED_SAME_ATTACK"
+      ],
+      "post_lexical_temporal_binding_code": "NO_STRICT_TEMPORAL_BINDING",
+      "stale_state_repaired": false,
+      "stale_state_status_change": false,
+      "lexical_hardening_applied": false,
+      "lexical_hardening_status_change": false,
+      "composition_transition": null,
+      "final_proposed_candidate_status": "approved_sensitivity",
+      "note": "No candidate-level hardening changes the single-candidate outcome."
+    },
+    {
+      "candidate_id": "8d3d5648cc5afd06ebbc661f",
+      "episode_id": "b1fbe75f41f92851800f1466",
+      "stored_reference_status": "needs_review",
+      "current_live_status_at_authoritative_qa": "needs_review",
+      "stored_classification_reason_codes": [
+        "MATCH_UNIQUE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "NO_AIR_MILITARY_CONTEXT",
+        "NO_STRICT_TEMPORAL_BINDING"
+      ],
+      "current_matching": {
+        "matched_episode_id": "b1fbe75f41f92851800f1466",
+        "matching_outcome": "unique_match",
+        "matched_episode_ids": [
+          "b1fbe75f41f92851800f1466"
+        ],
+        "matching_reason": "publication_within_unique_tracked_alert_window"
+      },
+      "pre_hardening_recomputed_outcome": "needs_review",
+      "pre_hardening_recomputed_matched_episode_id": null,
+      "pre_hardening_recomputed_reason_codes": [
+        "MATCH_UNIQUE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "NO_AIR_MILITARY_CONTEXT",
+        "NO_STRICT_TEMPORAL_BINDING"
+      ],
+      "post_match_refresh_reason_codes": [
+        "MATCH_UNIQUE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "NO_AIR_MILITARY_CONTEXT",
+        "NO_STRICT_TEMPORAL_BINDING"
+      ],
+      "post_lexical_reason_codes": [
+        "MATCH_UNIQUE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "NO_AIR_MILITARY_CONTEXT",
+        "NO_STRICT_TEMPORAL_BINDING"
+      ],
+      "post_lexical_temporal_binding_code": "NO_STRICT_TEMPORAL_BINDING",
+      "stale_state_repaired": false,
+      "stale_state_status_change": false,
+      "lexical_hardening_applied": false,
+      "lexical_hardening_status_change": false,
+      "composition_transition": null,
+      "final_proposed_candidate_status": "needs_review",
+      "note": "No candidate-level hardening changes the single-candidate outcome."
+    },
+    {
+      "candidate_id": "9002de009d36034a73e8471b",
+      "episode_id": "6f6088c593d5c73b17d8a74d",
+      "stored_reference_status": "needs_review",
+      "current_live_status_at_authoritative_qa": "needs_review",
+      "stored_classification_reason_codes": [
+        "MATCH_UNIQUE",
+        "EXACT_CITY_EVENT_TEXT",
+        "NO_STRICT_EXPLOSION_EVIDENCE",
+        "AIR_MILITARY_CONTEXT",
+        "AIR_CONTEXT_NOT_LINKED_TO_EVENT",
+        "NO_STRICT_TEMPORAL_BINDING"
+      ],
+      "current_matching": {
+        "matched_episode_id": "6f6088c593d5c73b17d8a74d",
+        "matching_outcome": "unique_match",
+        "matched_episode_ids": [
+          "6f6088c593d5c73b17d8a74d"
+        ],
+        "matching_reason": "publication_within_unique_tracked_alert_window"
+      },
+      "pre_hardening_recomputed_outcome": "needs_review",
+      "pre_hardening_recomputed_matched_episode_id": null,
+      "pre_hardening_recomputed_reason_codes": [
+        "MATCH_UNIQUE",
+        "EXACT_CITY_EVENT_TEXT",
+        "NO_STRICT_EXPLOSION_EVIDENCE",
+        "AIR_MILITARY_CONTEXT",
+        "AIR_CONTEXT_NOT_LINKED_TO_EVENT",
+        "NO_STRICT_TEMPORAL_BINDING"
+      ],
+      "post_match_refresh_reason_codes": [
+        "MATCH_UNIQUE",
+        "EXACT_CITY_EVENT_TEXT",
+        "NO_STRICT_EXPLOSION_EVIDENCE",
+        "AIR_MILITARY_CONTEXT",
+        "AIR_CONTEXT_NOT_LINKED_TO_EVENT",
+        "NO_STRICT_TEMPORAL_BINDING"
+      ],
+      "post_lexical_reason_codes": [
+        "MATCH_UNIQUE",
+        "EXACT_CITY_EVENT_TEXT",
+        "NO_STRICT_EXPLOSION_EVIDENCE",
+        "AIR_MILITARY_CONTEXT",
+        "AIR_CONTEXT_NOT_LINKED_TO_EVENT",
+        "NO_STRICT_TEMPORAL_BINDING"
+      ],
+      "post_lexical_temporal_binding_code": "NO_STRICT_TEMPORAL_BINDING",
+      "stale_state_repaired": false,
+      "stale_state_status_change": false,
+      "lexical_hardening_applied": false,
+      "lexical_hardening_status_change": false,
+      "composition_transition": null,
+      "final_proposed_candidate_status": "needs_review",
+      "note": "No candidate-level hardening changes the single-candidate outcome."
+    },
+    {
+      "candidate_id": "ccd077c356c3b8481b4f3f11",
+      "episode_id": "9ddb41e0e6ccef332646a841",
+      "stored_reference_status": "needs_review",
+      "current_live_status_at_authoritative_qa": "needs_review",
+      "stored_classification_reason_codes": [
+        "MATCH_UNIQUE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "NO_AIR_MILITARY_CONTEXT",
+        "NO_STRICT_TEMPORAL_BINDING"
+      ],
+      "current_matching": {
+        "matched_episode_id": "9ddb41e0e6ccef332646a841",
+        "matching_outcome": "unique_match",
+        "matched_episode_ids": [
+          "9ddb41e0e6ccef332646a841"
+        ],
+        "matching_reason": "publication_within_unique_tracked_alert_window"
+      },
+      "pre_hardening_recomputed_outcome": "needs_review",
+      "pre_hardening_recomputed_matched_episode_id": null,
+      "pre_hardening_recomputed_reason_codes": [
+        "MATCH_UNIQUE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "NO_AIR_MILITARY_CONTEXT",
+        "NO_STRICT_TEMPORAL_BINDING"
+      ],
+      "post_match_refresh_reason_codes": [
+        "MATCH_UNIQUE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "NO_AIR_MILITARY_CONTEXT",
+        "NO_STRICT_TEMPORAL_BINDING"
+      ],
+      "post_lexical_reason_codes": [
+        "MATCH_UNIQUE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "NO_AIR_MILITARY_CONTEXT",
+        "NO_STRICT_TEMPORAL_BINDING"
+      ],
+      "post_lexical_temporal_binding_code": "NO_STRICT_TEMPORAL_BINDING",
+      "stale_state_repaired": false,
+      "stale_state_status_change": false,
+      "lexical_hardening_applied": false,
+      "lexical_hardening_status_change": false,
+      "composition_transition": null,
+      "final_proposed_candidate_status": "needs_review",
+      "note": "No candidate-level hardening changes the single-candidate outcome."
+    },
+    {
+      "candidate_id": "ba00c35121b631ef7a2acc89",
+      "episode_id": "f2112b57d80fe5a569565cd3",
+      "stored_reference_status": "needs_review",
+      "current_live_status_at_authoritative_qa": "needs_review",
+      "stored_classification_reason_codes": [
+        "MATCH_UNIQUE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "AIR_MILITARY_CONTEXT",
+        "SAME_ATTACK_CONTEXT_SUPPORTED",
+        "NO_STRICT_TEMPORAL_BINDING",
+        "MULTI_EPISODE_DATE_REQUIRES_EPISODE_SPECIFIC_TEMPORAL_PROOF"
+      ],
+      "current_matching": {
+        "matched_episode_id": "f2112b57d80fe5a569565cd3",
+        "matching_outcome": "unique_match",
+        "matched_episode_ids": [
+          "f2112b57d80fe5a569565cd3"
+        ],
+        "matching_reason": "publication_within_unique_tracked_alert_window"
+      },
+      "pre_hardening_recomputed_outcome": "needs_review",
+      "pre_hardening_recomputed_matched_episode_id": null,
+      "pre_hardening_recomputed_reason_codes": [
+        "MATCH_UNIQUE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "AIR_MILITARY_CONTEXT",
+        "SAME_ATTACK_CONTEXT_SUPPORTED",
+        "NO_STRICT_TEMPORAL_BINDING",
+        "MULTI_EPISODE_DATE_REQUIRES_EPISODE_SPECIFIC_TEMPORAL_PROOF"
+      ],
+      "post_match_refresh_reason_codes": [
+        "MATCH_UNIQUE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "AIR_MILITARY_CONTEXT",
+        "SAME_ATTACK_CONTEXT_SUPPORTED",
+        "NO_STRICT_TEMPORAL_BINDING",
+        "MULTI_EPISODE_DATE_REQUIRES_EPISODE_SPECIFIC_TEMPORAL_PROOF"
+      ],
+      "post_lexical_reason_codes": [
+        "MATCH_UNIQUE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "AIR_MILITARY_CONTEXT",
+        "SAME_ATTACK_CONTEXT_SUPPORTED",
+        "NO_STRICT_TEMPORAL_BINDING",
+        "MULTI_EPISODE_DATE_REQUIRES_EPISODE_SPECIFIC_TEMPORAL_PROOF"
+      ],
+      "post_lexical_temporal_binding_code": "NO_STRICT_TEMPORAL_BINDING",
+      "stale_state_repaired": false,
+      "stale_state_status_change": false,
+      "lexical_hardening_applied": false,
+      "lexical_hardening_status_change": false,
+      "composition_transition": null,
+      "final_proposed_candidate_status": "needs_review",
+      "note": "No candidate-level hardening changes the single-candidate outcome."
+    },
+    {
+      "candidate_id": "b76a52c4ff7d8a4117f1408b",
+      "episode_id": "6f6088c593d5c73b17d8a74d",
+      "stored_reference_status": "needs_review",
+      "current_live_status_at_authoritative_qa": "needs_review",
+      "stored_classification_reason_codes": [
+        "MATCH_UNIQUE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "NO_AIR_MILITARY_CONTEXT",
+        "NO_STRICT_TEMPORAL_BINDING"
+      ],
+      "current_matching": {
+        "matched_episode_id": "6f6088c593d5c73b17d8a74d",
+        "matching_outcome": "unique_match",
+        "matched_episode_ids": [
+          "6f6088c593d5c73b17d8a74d"
+        ],
+        "matching_reason": "publication_within_unique_tracked_alert_window"
+      },
+      "pre_hardening_recomputed_outcome": "needs_review",
+      "pre_hardening_recomputed_matched_episode_id": null,
+      "pre_hardening_recomputed_reason_codes": [
+        "MATCH_UNIQUE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "NO_AIR_MILITARY_CONTEXT",
+        "NO_STRICT_TEMPORAL_BINDING"
+      ],
+      "post_match_refresh_reason_codes": [
+        "MATCH_UNIQUE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "NO_AIR_MILITARY_CONTEXT",
+        "NO_STRICT_TEMPORAL_BINDING"
+      ],
+      "post_lexical_reason_codes": [
+        "MATCH_UNIQUE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "NO_AIR_MILITARY_CONTEXT",
+        "NO_STRICT_TEMPORAL_BINDING"
+      ],
+      "post_lexical_temporal_binding_code": "NO_STRICT_TEMPORAL_BINDING",
+      "stale_state_repaired": false,
+      "stale_state_status_change": false,
+      "lexical_hardening_applied": false,
+      "lexical_hardening_status_change": false,
+      "composition_transition": null,
+      "final_proposed_candidate_status": "needs_review",
+      "note": "No candidate-level hardening changes the single-candidate outcome."
+    },
+    {
+      "candidate_id": "366f90ec53dc981ffa32a319",
+      "episode_id": "9ddb41e0e6ccef332646a841",
+      "stored_reference_status": "needs_review",
+      "current_live_status_at_authoritative_qa": "needs_review",
+      "stored_classification_reason_codes": [
+        "MATCH_UNIQUE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "NO_AIR_MILITARY_CONTEXT",
+        "NO_STRICT_TEMPORAL_BINDING"
+      ],
+      "current_matching": {
+        "matched_episode_id": "9ddb41e0e6ccef332646a841",
+        "matching_outcome": "unique_match",
+        "matched_episode_ids": [
+          "9ddb41e0e6ccef332646a841"
+        ],
+        "matching_reason": "publication_within_unique_tracked_alert_window"
+      },
+      "pre_hardening_recomputed_outcome": "needs_review",
+      "pre_hardening_recomputed_matched_episode_id": null,
+      "pre_hardening_recomputed_reason_codes": [
+        "MATCH_UNIQUE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "NO_AIR_MILITARY_CONTEXT",
+        "NO_STRICT_TEMPORAL_BINDING"
+      ],
+      "post_match_refresh_reason_codes": [
+        "MATCH_UNIQUE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "NO_AIR_MILITARY_CONTEXT",
+        "NO_STRICT_TEMPORAL_BINDING"
+      ],
+      "post_lexical_reason_codes": [
+        "MATCH_UNIQUE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "NO_AIR_MILITARY_CONTEXT",
+        "NO_STRICT_TEMPORAL_BINDING"
+      ],
+      "post_lexical_temporal_binding_code": "NO_STRICT_TEMPORAL_BINDING",
+      "stale_state_repaired": false,
+      "stale_state_status_change": false,
+      "lexical_hardening_applied": false,
+      "lexical_hardening_status_change": false,
+      "composition_transition": null,
+      "final_proposed_candidate_status": "needs_review",
+      "note": "No candidate-level hardening changes the single-candidate outcome."
+    },
+    {
+      "candidate_id": "82728e6b31f0139371cdffdf",
+      "episode_id": "9ddb41e0e6ccef332646a841",
+      "stored_reference_status": "needs_review",
+      "current_live_status_at_authoritative_qa": "needs_review",
+      "stored_classification_reason_codes": [
+        "MATCH_UNIQUE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "NO_AIR_MILITARY_CONTEXT",
+        "NO_STRICT_TEMPORAL_BINDING"
+      ],
+      "current_matching": {
+        "matched_episode_id": "9ddb41e0e6ccef332646a841",
+        "matching_outcome": "unique_match",
+        "matched_episode_ids": [
+          "9ddb41e0e6ccef332646a841"
+        ],
+        "matching_reason": "publication_within_unique_tracked_alert_window"
+      },
+      "pre_hardening_recomputed_outcome": "needs_review",
+      "pre_hardening_recomputed_matched_episode_id": null,
+      "pre_hardening_recomputed_reason_codes": [
+        "MATCH_UNIQUE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "NO_AIR_MILITARY_CONTEXT",
+        "NO_STRICT_TEMPORAL_BINDING"
+      ],
+      "post_match_refresh_reason_codes": [
+        "MATCH_UNIQUE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "NO_AIR_MILITARY_CONTEXT",
+        "NO_STRICT_TEMPORAL_BINDING"
+      ],
+      "post_lexical_reason_codes": [
+        "MATCH_UNIQUE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "NO_AIR_MILITARY_CONTEXT",
+        "NO_STRICT_TEMPORAL_BINDING"
+      ],
+      "post_lexical_temporal_binding_code": "NO_STRICT_TEMPORAL_BINDING",
+      "stale_state_repaired": false,
+      "stale_state_status_change": false,
+      "lexical_hardening_applied": false,
+      "lexical_hardening_status_change": false,
+      "composition_transition": null,
+      "final_proposed_candidate_status": "needs_review",
+      "note": "No candidate-level hardening changes the single-candidate outcome."
+    },
+    {
+      "candidate_id": "c837a79e2006589a4763c77e",
+      "episode_id": "9ddb41e0e6ccef332646a841",
+      "stored_reference_status": "needs_review",
+      "current_live_status_at_authoritative_qa": "needs_review",
+      "stored_classification_reason_codes": [
+        "MATCH_UNIQUE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "NO_AIR_MILITARY_CONTEXT",
+        "NO_STRICT_TEMPORAL_BINDING"
+      ],
+      "current_matching": {
+        "matched_episode_id": "9ddb41e0e6ccef332646a841",
+        "matching_outcome": "unique_match",
+        "matched_episode_ids": [
+          "9ddb41e0e6ccef332646a841"
+        ],
+        "matching_reason": "publication_within_unique_tracked_alert_window"
+      },
+      "pre_hardening_recomputed_outcome": "needs_review",
+      "pre_hardening_recomputed_matched_episode_id": null,
+      "pre_hardening_recomputed_reason_codes": [
+        "MATCH_UNIQUE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "NO_AIR_MILITARY_CONTEXT",
+        "NO_STRICT_TEMPORAL_BINDING"
+      ],
+      "post_match_refresh_reason_codes": [
+        "MATCH_UNIQUE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "NO_AIR_MILITARY_CONTEXT",
+        "NO_STRICT_TEMPORAL_BINDING"
+      ],
+      "post_lexical_reason_codes": [
+        "MATCH_UNIQUE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "NO_AIR_MILITARY_CONTEXT",
+        "NO_STRICT_TEMPORAL_BINDING"
+      ],
+      "post_lexical_temporal_binding_code": "NO_STRICT_TEMPORAL_BINDING",
+      "stale_state_repaired": false,
+      "stale_state_status_change": false,
+      "lexical_hardening_applied": false,
+      "lexical_hardening_status_change": false,
+      "composition_transition": null,
+      "final_proposed_candidate_status": "needs_review",
+      "note": "No candidate-level hardening changes the single-candidate outcome."
+    },
+    {
+      "candidate_id": "0c2ac46f1d42b411a14d06c1",
+      "episode_id": "886deb3ed4b11cd18a0a015d",
+      "stored_reference_status": "needs_review",
+      "current_live_status_at_authoritative_qa": "needs_review",
+      "stored_classification_reason_codes": [
+        "MATCH_UNIQUE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "NO_AIR_MILITARY_CONTEXT",
+        "NO_STRICT_TEMPORAL_BINDING"
+      ],
+      "current_matching": {
+        "matched_episode_id": "886deb3ed4b11cd18a0a015d",
+        "matching_outcome": "unique_match",
+        "matched_episode_ids": [
+          "886deb3ed4b11cd18a0a015d"
+        ],
+        "matching_reason": "publication_within_unique_tracked_alert_window"
+      },
+      "pre_hardening_recomputed_outcome": "needs_review",
+      "pre_hardening_recomputed_matched_episode_id": null,
+      "pre_hardening_recomputed_reason_codes": [
+        "MATCH_UNIQUE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "NO_AIR_MILITARY_CONTEXT",
+        "NO_STRICT_TEMPORAL_BINDING"
+      ],
+      "post_match_refresh_reason_codes": [
+        "MATCH_UNIQUE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "NO_AIR_MILITARY_CONTEXT",
+        "NO_STRICT_TEMPORAL_BINDING"
+      ],
+      "post_lexical_reason_codes": [
+        "MATCH_UNIQUE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "NO_AIR_MILITARY_CONTEXT",
+        "NO_STRICT_TEMPORAL_BINDING"
+      ],
+      "post_lexical_temporal_binding_code": "NO_STRICT_TEMPORAL_BINDING",
+      "stale_state_repaired": false,
+      "stale_state_status_change": false,
+      "lexical_hardening_applied": false,
+      "lexical_hardening_status_change": false,
+      "composition_transition": null,
+      "final_proposed_candidate_status": "needs_review",
+      "note": "No candidate-level hardening changes the single-candidate outcome."
+    },
+    {
+      "candidate_id": "4225edf94f0a8db2b78f07e3",
+      "episode_id": "e97e6e816f96832d02c8b2cd",
+      "stored_reference_status": "needs_review",
+      "current_live_status_at_authoritative_qa": "needs_review",
+      "stored_classification_reason_codes": [
+        "MATCH_UNIQUE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "NO_AIR_MILITARY_CONTEXT",
+        "NO_STRICT_TEMPORAL_BINDING"
+      ],
+      "current_matching": {
+        "matched_episode_id": "e97e6e816f96832d02c8b2cd",
+        "matching_outcome": "unique_match",
+        "matched_episode_ids": [
+          "e97e6e816f96832d02c8b2cd"
+        ],
+        "matching_reason": "publication_within_unique_tracked_alert_window"
+      },
+      "pre_hardening_recomputed_outcome": "needs_review",
+      "pre_hardening_recomputed_matched_episode_id": null,
+      "pre_hardening_recomputed_reason_codes": [
+        "MATCH_UNIQUE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "NO_AIR_MILITARY_CONTEXT",
+        "NO_STRICT_TEMPORAL_BINDING"
+      ],
+      "post_match_refresh_reason_codes": [
+        "MATCH_UNIQUE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "NO_AIR_MILITARY_CONTEXT",
+        "NO_STRICT_TEMPORAL_BINDING"
+      ],
+      "post_lexical_reason_codes": [
+        "MATCH_UNIQUE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "NO_AIR_MILITARY_CONTEXT",
+        "NO_STRICT_TEMPORAL_BINDING"
+      ],
+      "post_lexical_temporal_binding_code": "NO_STRICT_TEMPORAL_BINDING",
+      "stale_state_repaired": false,
+      "stale_state_status_change": false,
+      "lexical_hardening_applied": false,
+      "lexical_hardening_status_change": false,
+      "composition_transition": null,
+      "final_proposed_candidate_status": "needs_review",
+      "note": "No candidate-level hardening changes the single-candidate outcome."
+    },
+    {
+      "candidate_id": "6698c0fd3cf23315689e7348",
+      "episode_id": "f2112b57d80fe5a569565cd3",
+      "stored_reference_status": "needs_review",
+      "current_live_status_at_authoritative_qa": "needs_review",
+      "stored_classification_reason_codes": [
+        "MATCH_UNIQUE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "NO_AIR_MILITARY_CONTEXT",
+        "NO_STRICT_TEMPORAL_BINDING"
+      ],
+      "current_matching": {
+        "matched_episode_id": "f2112b57d80fe5a569565cd3",
+        "matching_outcome": "unique_match",
+        "matched_episode_ids": [
+          "f2112b57d80fe5a569565cd3"
+        ],
+        "matching_reason": "publication_within_unique_tracked_alert_window"
+      },
+      "pre_hardening_recomputed_outcome": "needs_review",
+      "pre_hardening_recomputed_matched_episode_id": null,
+      "pre_hardening_recomputed_reason_codes": [
+        "MATCH_UNIQUE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "NO_AIR_MILITARY_CONTEXT",
+        "NO_STRICT_TEMPORAL_BINDING"
+      ],
+      "post_match_refresh_reason_codes": [
+        "MATCH_UNIQUE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "NO_AIR_MILITARY_CONTEXT",
+        "NO_STRICT_TEMPORAL_BINDING"
+      ],
+      "post_lexical_reason_codes": [
+        "MATCH_UNIQUE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "NO_AIR_MILITARY_CONTEXT",
+        "NO_STRICT_TEMPORAL_BINDING"
+      ],
+      "post_lexical_temporal_binding_code": "NO_STRICT_TEMPORAL_BINDING",
+      "stale_state_repaired": false,
+      "stale_state_status_change": false,
+      "lexical_hardening_applied": false,
+      "lexical_hardening_status_change": false,
+      "composition_transition": null,
+      "final_proposed_candidate_status": "needs_review",
+      "note": "No candidate-level hardening changes the single-candidate outcome."
+    },
+    {
+      "candidate_id": "b686f23ad40cdb74f47bd3fa",
+      "episode_id": "9ddb41e0e6ccef332646a841",
+      "stored_reference_status": "needs_review",
+      "current_live_status_at_authoritative_qa": "needs_review",
+      "stored_classification_reason_codes": [
+        "MATCH_NONE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "AIR_MILITARY_CONTEXT",
+        "SAME_ATTACK_CONTEXT_SUPPORTED",
+        "NO_STRICT_TEMPORAL_BINDING",
+        "MULTI_EPISODE_DATE_REQUIRES_EPISODE_SPECIFIC_TEMPORAL_PROOF"
+      ],
+      "current_matching": {
+        "matched_episode_id": "9ddb41e0e6ccef332646a841",
+        "matching_outcome": "unique_match",
+        "matched_episode_ids": [
+          "9ddb41e0e6ccef332646a841"
+        ],
+        "matching_reason": "publication_within_unique_tracked_alert_window"
+      },
+      "pre_hardening_recomputed_outcome": "needs_review",
+      "pre_hardening_recomputed_matched_episode_id": null,
+      "pre_hardening_recomputed_reason_codes": [
+        "MATCH_UNIQUE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "AIR_MILITARY_CONTEXT",
+        "SAME_ATTACK_CONTEXT_SUPPORTED",
+        "NO_STRICT_TEMPORAL_BINDING",
+        "MULTI_EPISODE_DATE_REQUIRES_EPISODE_SPECIFIC_TEMPORAL_PROOF"
+      ],
+      "post_match_refresh_reason_codes": [
+        "MATCH_UNIQUE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "AIR_MILITARY_CONTEXT",
+        "SAME_ATTACK_CONTEXT_SUPPORTED",
+        "NO_STRICT_TEMPORAL_BINDING",
+        "MULTI_EPISODE_DATE_REQUIRES_EPISODE_SPECIFIC_TEMPORAL_PROOF"
+      ],
+      "post_lexical_reason_codes": [
+        "MATCH_UNIQUE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "AIR_MILITARY_CONTEXT",
+        "SAME_ATTACK_CONTEXT_SUPPORTED",
+        "NO_STRICT_TEMPORAL_BINDING",
+        "MULTI_EPISODE_DATE_REQUIRES_EPISODE_SPECIFIC_TEMPORAL_PROOF"
+      ],
+      "post_lexical_temporal_binding_code": "NO_STRICT_TEMPORAL_BINDING",
+      "stale_state_repaired": true,
+      "stale_state_status_change": false,
+      "lexical_hardening_applied": false,
+      "lexical_hardening_status_change": false,
+      "composition_transition": null,
+      "final_proposed_candidate_status": "needs_review",
+      "note": "Matching/classification metadata is recomputed coherently; current single-candidate outcome is unchanged."
+    },
+    {
+      "candidate_id": "4bdc4c0a5f95dc1e01632d22",
+      "episode_id": "e97e6e816f96832d02c8b2cd",
+      "stored_reference_status": "needs_review",
+      "current_live_status_at_authoritative_qa": "needs_review",
+      "stored_classification_reason_codes": [
+        "MATCH_UNIQUE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "AIR_MILITARY_CONTEXT",
+        "SAME_ATTACK_CONTEXT_SUPPORTED",
+        "NO_STRICT_TEMPORAL_BINDING",
+        "MULTI_EPISODE_DATE_REQUIRES_EPISODE_SPECIFIC_TEMPORAL_PROOF"
+      ],
+      "current_matching": {
+        "matched_episode_id": "e97e6e816f96832d02c8b2cd",
+        "matching_outcome": "unique_match",
+        "matched_episode_ids": [
+          "e97e6e816f96832d02c8b2cd"
+        ],
+        "matching_reason": "publication_within_unique_tracked_alert_window"
+      },
+      "pre_hardening_recomputed_outcome": "needs_review",
+      "pre_hardening_recomputed_matched_episode_id": null,
+      "pre_hardening_recomputed_reason_codes": [
+        "MATCH_UNIQUE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "AIR_MILITARY_CONTEXT",
+        "SAME_ATTACK_CONTEXT_SUPPORTED",
+        "NO_STRICT_TEMPORAL_BINDING",
+        "MULTI_EPISODE_DATE_REQUIRES_EPISODE_SPECIFIC_TEMPORAL_PROOF"
+      ],
+      "post_match_refresh_reason_codes": [
+        "MATCH_UNIQUE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "AIR_MILITARY_CONTEXT",
+        "SAME_ATTACK_CONTEXT_SUPPORTED",
+        "NO_STRICT_TEMPORAL_BINDING",
+        "MULTI_EPISODE_DATE_REQUIRES_EPISODE_SPECIFIC_TEMPORAL_PROOF"
+      ],
+      "post_lexical_reason_codes": [
+        "MATCH_UNIQUE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "AIR_MILITARY_CONTEXT",
+        "SAME_ATTACK_CONTEXT_SUPPORTED",
+        "NO_STRICT_TEMPORAL_BINDING",
+        "MULTI_EPISODE_DATE_REQUIRES_EPISODE_SPECIFIC_TEMPORAL_PROOF"
+      ],
+      "post_lexical_temporal_binding_code": "NO_STRICT_TEMPORAL_BINDING",
+      "stale_state_repaired": false,
+      "stale_state_status_change": false,
+      "lexical_hardening_applied": false,
+      "lexical_hardening_status_change": false,
+      "composition_transition": null,
+      "final_proposed_candidate_status": "needs_review",
+      "note": "No candidate-level hardening changes the single-candidate outcome."
+    },
+    {
+      "candidate_id": "73d817926f66c8dce397b91b",
+      "episode_id": "e97e6e816f96832d02c8b2cd",
+      "stored_reference_status": "needs_review",
+      "current_live_status_at_authoritative_qa": "needs_review",
+      "stored_classification_reason_codes": [
+        "MATCH_NONE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "NO_AIR_MILITARY_CONTEXT",
+        "NO_STRICT_TEMPORAL_BINDING"
+      ],
+      "current_matching": {
+        "matched_episode_id": "e97e6e816f96832d02c8b2cd",
+        "matching_outcome": "unique_match",
+        "matched_episode_ids": [
+          "e97e6e816f96832d02c8b2cd"
+        ],
+        "matching_reason": "publication_within_unique_tracked_alert_window"
+      },
+      "pre_hardening_recomputed_outcome": "needs_review",
+      "pre_hardening_recomputed_matched_episode_id": null,
+      "pre_hardening_recomputed_reason_codes": [
+        "MATCH_UNIQUE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "NO_AIR_MILITARY_CONTEXT",
+        "NO_STRICT_TEMPORAL_BINDING"
+      ],
+      "post_match_refresh_reason_codes": [
+        "MATCH_UNIQUE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "NO_AIR_MILITARY_CONTEXT",
+        "NO_STRICT_TEMPORAL_BINDING"
+      ],
+      "post_lexical_reason_codes": [
+        "MATCH_UNIQUE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "NO_AIR_MILITARY_CONTEXT",
+        "TEMPORAL_CONTEMPORANEOUS_LIVE_WORDING"
+      ],
+      "post_lexical_temporal_binding_code": "TEMPORAL_CONTEMPORANEOUS_LIVE_WORDING",
+      "stale_state_repaired": true,
+      "stale_state_status_change": false,
+      "lexical_hardening_applied": true,
+      "lexical_hardening_status_change": false,
+      "composition_transition": {
+        "cause": "episode_level_cross_source_composition",
+        "from": "needs_review",
+        "to": "approved_strict",
+        "episode_id": "e97e6e816f96832d02c8b2cd"
+      },
+      "final_proposed_candidate_status": "approved_strict",
+      "note": "Trusted contemporaneous Telegram wording gains episode-specific live temporal evidence; the candidate still lacks standalone air/military context, so single-candidate status remains needs_review before composition."
+    },
+    {
+      "candidate_id": "7dd8008ab0695b10329b3899",
+      "episode_id": "e97e6e816f96832d02c8b2cd",
+      "stored_reference_status": "needs_review",
+      "current_live_status_at_authoritative_qa": "needs_review",
+      "stored_classification_reason_codes": [
+        "MATCH_NONE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "AIR_MILITARY_CONTEXT",
+        "SAME_ATTACK_CONTEXT_SUPPORTED",
+        "NO_STRICT_TEMPORAL_BINDING",
+        "MULTI_EPISODE_DATE_REQUIRES_EPISODE_SPECIFIC_TEMPORAL_PROOF"
+      ],
+      "current_matching": {
+        "matched_episode_id": "e97e6e816f96832d02c8b2cd",
+        "matching_outcome": "unique_match",
+        "matched_episode_ids": [
+          "e97e6e816f96832d02c8b2cd"
+        ],
+        "matching_reason": "publication_within_unique_tracked_alert_window"
+      },
+      "pre_hardening_recomputed_outcome": "needs_review",
+      "pre_hardening_recomputed_matched_episode_id": null,
+      "pre_hardening_recomputed_reason_codes": [
+        "MATCH_UNIQUE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "AIR_MILITARY_CONTEXT",
+        "SAME_ATTACK_CONTEXT_SUPPORTED",
+        "NO_STRICT_TEMPORAL_BINDING",
+        "MULTI_EPISODE_DATE_REQUIRES_EPISODE_SPECIFIC_TEMPORAL_PROOF"
+      ],
+      "post_match_refresh_reason_codes": [
+        "MATCH_UNIQUE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "AIR_MILITARY_CONTEXT",
+        "SAME_ATTACK_CONTEXT_SUPPORTED",
+        "NO_STRICT_TEMPORAL_BINDING",
+        "MULTI_EPISODE_DATE_REQUIRES_EPISODE_SPECIFIC_TEMPORAL_PROOF"
+      ],
+      "post_lexical_reason_codes": [
+        "MATCH_UNIQUE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "AIR_MILITARY_CONTEXT",
+        "SAME_ATTACK_CONTEXT_SUPPORTED",
+        "NO_STRICT_TEMPORAL_BINDING",
+        "MULTI_EPISODE_DATE_REQUIRES_EPISODE_SPECIFIC_TEMPORAL_PROOF"
+      ],
+      "post_lexical_temporal_binding_code": "NO_STRICT_TEMPORAL_BINDING",
+      "stale_state_repaired": true,
+      "stale_state_status_change": false,
+      "lexical_hardening_applied": false,
+      "lexical_hardening_status_change": false,
+      "composition_transition": null,
+      "final_proposed_candidate_status": "needs_review",
+      "note": "Matching/classification metadata is recomputed coherently; current single-candidate outcome is unchanged."
+    },
+    {
+      "candidate_id": "a434269bc3d63864461c6349",
+      "episode_id": "e97e6e816f96832d02c8b2cd",
+      "stored_reference_status": "needs_review",
+      "current_live_status_at_authoritative_qa": "needs_review",
+      "stored_classification_reason_codes": [
+        "MATCH_NONE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "NO_AIR_MILITARY_CONTEXT",
+        "NO_STRICT_TEMPORAL_BINDING"
+      ],
+      "current_matching": {
+        "matched_episode_id": "e97e6e816f96832d02c8b2cd",
+        "matching_outcome": "unique_match",
+        "matched_episode_ids": [
+          "e97e6e816f96832d02c8b2cd"
+        ],
+        "matching_reason": "publication_within_unique_tracked_alert_window"
+      },
+      "pre_hardening_recomputed_outcome": "needs_review",
+      "pre_hardening_recomputed_matched_episode_id": null,
+      "pre_hardening_recomputed_reason_codes": [
+        "MATCH_UNIQUE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "NO_AIR_MILITARY_CONTEXT",
+        "NO_STRICT_TEMPORAL_BINDING"
+      ],
+      "post_match_refresh_reason_codes": [
+        "MATCH_UNIQUE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "NO_AIR_MILITARY_CONTEXT",
+        "NO_STRICT_TEMPORAL_BINDING"
+      ],
+      "post_lexical_reason_codes": [
+        "MATCH_UNIQUE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "NO_AIR_MILITARY_CONTEXT",
+        "NO_STRICT_TEMPORAL_BINDING"
+      ],
+      "post_lexical_temporal_binding_code": "NO_STRICT_TEMPORAL_BINDING",
+      "stale_state_repaired": true,
+      "stale_state_status_change": false,
+      "lexical_hardening_applied": false,
+      "lexical_hardening_status_change": false,
+      "composition_transition": null,
+      "final_proposed_candidate_status": "needs_review",
+      "note": "Matching/classification metadata is recomputed coherently; current single-candidate outcome is unchanged."
+    },
+    {
+      "candidate_id": "91b7d2133a797aa96099189a",
+      "episode_id": "e97e6e816f96832d02c8b2cd",
+      "stored_reference_status": "needs_review",
+      "current_live_status_at_authoritative_qa": "needs_review",
+      "stored_classification_reason_codes": [
+        "MATCH_NONE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "NO_AIR_MILITARY_CONTEXT",
+        "NO_STRICT_TEMPORAL_BINDING"
+      ],
+      "current_matching": {
+        "matched_episode_id": "e97e6e816f96832d02c8b2cd",
+        "matching_outcome": "unique_match",
+        "matched_episode_ids": [
+          "e97e6e816f96832d02c8b2cd"
+        ],
+        "matching_reason": "publication_within_unique_tracked_alert_window"
+      },
+      "pre_hardening_recomputed_outcome": "needs_review",
+      "pre_hardening_recomputed_matched_episode_id": null,
+      "pre_hardening_recomputed_reason_codes": [
+        "MATCH_UNIQUE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "NO_AIR_MILITARY_CONTEXT",
+        "NO_STRICT_TEMPORAL_BINDING"
+      ],
+      "post_match_refresh_reason_codes": [
+        "MATCH_UNIQUE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "NO_AIR_MILITARY_CONTEXT",
+        "NO_STRICT_TEMPORAL_BINDING"
+      ],
+      "post_lexical_reason_codes": [
+        "MATCH_UNIQUE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "NO_AIR_MILITARY_CONTEXT",
+        "NO_STRICT_TEMPORAL_BINDING"
+      ],
+      "post_lexical_temporal_binding_code": "NO_STRICT_TEMPORAL_BINDING",
+      "stale_state_repaired": true,
+      "stale_state_status_change": false,
+      "lexical_hardening_applied": false,
+      "lexical_hardening_status_change": false,
+      "composition_transition": null,
+      "final_proposed_candidate_status": "needs_review",
+      "note": "Matching/classification metadata is recomputed coherently; current single-candidate outcome is unchanged."
+    },
+    {
+      "candidate_id": "4f3d2eb50630de9f15fd6c5a",
+      "episode_id": "e97e6e816f96832d02c8b2cd",
+      "stored_reference_status": "needs_review",
+      "current_live_status_at_authoritative_qa": "needs_review",
+      "stored_classification_reason_codes": [
+        "MATCH_NONE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "AIR_MILITARY_CONTEXT",
+        "SAME_ATTACK_CONTEXT_SUPPORTED",
+        "NO_STRICT_TEMPORAL_BINDING",
+        "MULTI_EPISODE_DATE_REQUIRES_EPISODE_SPECIFIC_TEMPORAL_PROOF"
+      ],
+      "current_matching": {
+        "matched_episode_id": "e97e6e816f96832d02c8b2cd",
+        "matching_outcome": "unique_match",
+        "matched_episode_ids": [
+          "e97e6e816f96832d02c8b2cd"
+        ],
+        "matching_reason": "publication_within_unique_tracked_alert_window"
+      },
+      "pre_hardening_recomputed_outcome": "needs_review",
+      "pre_hardening_recomputed_matched_episode_id": null,
+      "pre_hardening_recomputed_reason_codes": [
+        "MATCH_UNIQUE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "AIR_MILITARY_CONTEXT",
+        "SAME_ATTACK_CONTEXT_SUPPORTED",
+        "NO_STRICT_TEMPORAL_BINDING",
+        "MULTI_EPISODE_DATE_REQUIRES_EPISODE_SPECIFIC_TEMPORAL_PROOF"
+      ],
+      "post_match_refresh_reason_codes": [
+        "MATCH_UNIQUE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "AIR_MILITARY_CONTEXT",
+        "SAME_ATTACK_CONTEXT_SUPPORTED",
+        "NO_STRICT_TEMPORAL_BINDING",
+        "MULTI_EPISODE_DATE_REQUIRES_EPISODE_SPECIFIC_TEMPORAL_PROOF"
+      ],
+      "post_lexical_reason_codes": [
+        "MATCH_UNIQUE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "AIR_MILITARY_CONTEXT",
+        "SAME_ATTACK_CONTEXT_SUPPORTED",
+        "NO_STRICT_TEMPORAL_BINDING",
+        "MULTI_EPISODE_DATE_REQUIRES_EPISODE_SPECIFIC_TEMPORAL_PROOF"
+      ],
+      "post_lexical_temporal_binding_code": "NO_STRICT_TEMPORAL_BINDING",
+      "stale_state_repaired": true,
+      "stale_state_status_change": false,
+      "lexical_hardening_applied": false,
+      "lexical_hardening_status_change": false,
+      "composition_transition": null,
+      "final_proposed_candidate_status": "needs_review",
+      "note": "Matching/classification metadata is recomputed coherently; current single-candidate outcome is unchanged."
+    },
+    {
+      "candidate_id": "fcb851f13f5935821fc68503",
+      "episode_id": "e97e6e816f96832d02c8b2cd",
+      "stored_reference_status": "needs_review",
+      "current_live_status_at_authoritative_qa": "needs_review",
+      "stored_classification_reason_codes": [
+        "MATCH_NONE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "AIR_MILITARY_CONTEXT",
+        "SAME_ATTACK_CONTEXT_SUPPORTED",
+        "NO_STRICT_TEMPORAL_BINDING",
+        "MULTI_EPISODE_DATE_REQUIRES_EPISODE_SPECIFIC_TEMPORAL_PROOF"
+      ],
+      "current_matching": {
+        "matched_episode_id": "e97e6e816f96832d02c8b2cd",
+        "matching_outcome": "unique_match",
+        "matched_episode_ids": [
+          "e97e6e816f96832d02c8b2cd"
+        ],
+        "matching_reason": "publication_within_unique_tracked_alert_window"
+      },
+      "pre_hardening_recomputed_outcome": "needs_review",
+      "pre_hardening_recomputed_matched_episode_id": null,
+      "pre_hardening_recomputed_reason_codes": [
+        "MATCH_UNIQUE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "AIR_MILITARY_CONTEXT",
+        "SAME_ATTACK_CONTEXT_SUPPORTED",
+        "NO_STRICT_TEMPORAL_BINDING",
+        "MULTI_EPISODE_DATE_REQUIRES_EPISODE_SPECIFIC_TEMPORAL_PROOF"
+      ],
+      "post_match_refresh_reason_codes": [
+        "MATCH_UNIQUE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "AIR_MILITARY_CONTEXT",
+        "SAME_ATTACK_CONTEXT_SUPPORTED",
+        "NO_STRICT_TEMPORAL_BINDING",
+        "MULTI_EPISODE_DATE_REQUIRES_EPISODE_SPECIFIC_TEMPORAL_PROOF"
+      ],
+      "post_lexical_reason_codes": [
+        "MATCH_UNIQUE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "AIR_MILITARY_CONTEXT",
+        "SAME_ATTACK_CONTEXT_SUPPORTED",
+        "NO_STRICT_TEMPORAL_BINDING",
+        "MULTI_EPISODE_DATE_REQUIRES_EPISODE_SPECIFIC_TEMPORAL_PROOF"
+      ],
+      "post_lexical_temporal_binding_code": "NO_STRICT_TEMPORAL_BINDING",
+      "stale_state_repaired": true,
+      "stale_state_status_change": false,
+      "lexical_hardening_applied": false,
+      "lexical_hardening_status_change": false,
+      "composition_transition": null,
+      "final_proposed_candidate_status": "needs_review",
+      "note": "Matching/classification metadata is recomputed coherently; current single-candidate outcome is unchanged."
+    },
+    {
+      "candidate_id": "fed2d20a9e6ee1cf2151d857",
+      "episode_id": "e97e6e816f96832d02c8b2cd",
+      "stored_reference_status": "needs_review",
+      "current_live_status_at_authoritative_qa": "needs_review",
+      "stored_classification_reason_codes": [
+        "MATCH_NONE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "AIR_MILITARY_CONTEXT",
+        "SAME_ATTACK_CONTEXT_SUPPORTED",
+        "NO_STRICT_TEMPORAL_BINDING",
+        "MULTI_EPISODE_DATE_REQUIRES_EPISODE_SPECIFIC_TEMPORAL_PROOF"
+      ],
+      "current_matching": {
+        "matched_episode_id": "e97e6e816f96832d02c8b2cd",
+        "matching_outcome": "unique_match",
+        "matched_episode_ids": [
+          "e97e6e816f96832d02c8b2cd"
+        ],
+        "matching_reason": "publication_within_unique_tracked_alert_window"
+      },
+      "pre_hardening_recomputed_outcome": "needs_review",
+      "pre_hardening_recomputed_matched_episode_id": null,
+      "pre_hardening_recomputed_reason_codes": [
+        "MATCH_UNIQUE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "AIR_MILITARY_CONTEXT",
+        "SAME_ATTACK_CONTEXT_SUPPORTED",
+        "NO_STRICT_TEMPORAL_BINDING",
+        "MULTI_EPISODE_DATE_REQUIRES_EPISODE_SPECIFIC_TEMPORAL_PROOF"
+      ],
+      "post_match_refresh_reason_codes": [
+        "MATCH_UNIQUE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "AIR_MILITARY_CONTEXT",
+        "SAME_ATTACK_CONTEXT_SUPPORTED",
+        "NO_STRICT_TEMPORAL_BINDING",
+        "MULTI_EPISODE_DATE_REQUIRES_EPISODE_SPECIFIC_TEMPORAL_PROOF"
+      ],
+      "post_lexical_reason_codes": [
+        "MATCH_UNIQUE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "AIR_MILITARY_CONTEXT",
+        "SAME_ATTACK_CONTEXT_SUPPORTED",
+        "NO_STRICT_TEMPORAL_BINDING",
+        "MULTI_EPISODE_DATE_REQUIRES_EPISODE_SPECIFIC_TEMPORAL_PROOF"
+      ],
+      "post_lexical_temporal_binding_code": "NO_STRICT_TEMPORAL_BINDING",
+      "stale_state_repaired": true,
+      "stale_state_status_change": false,
+      "lexical_hardening_applied": false,
+      "lexical_hardening_status_change": false,
+      "composition_transition": null,
+      "final_proposed_candidate_status": "needs_review",
+      "note": "Matching/classification metadata is recomputed coherently; current single-candidate outcome is unchanged."
+    },
+    {
+      "candidate_id": "0405b982305250ea21faab04",
+      "episode_id": "e97e6e816f96832d02c8b2cd",
+      "stored_reference_status": "needs_review",
+      "current_live_status_at_authoritative_qa": "needs_review",
+      "stored_classification_reason_codes": [
+        "MATCH_NONE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "AIR_MILITARY_CONTEXT",
+        "SAME_ATTACK_CONTEXT_SUPPORTED",
+        "NO_STRICT_TEMPORAL_BINDING",
+        "MULTI_EPISODE_DATE_REQUIRES_EPISODE_SPECIFIC_TEMPORAL_PROOF"
+      ],
+      "current_matching": {
+        "matched_episode_id": "e97e6e816f96832d02c8b2cd",
+        "matching_outcome": "unique_match",
+        "matched_episode_ids": [
+          "e97e6e816f96832d02c8b2cd"
+        ],
+        "matching_reason": "publication_within_unique_tracked_alert_window"
+      },
+      "pre_hardening_recomputed_outcome": "needs_review",
+      "pre_hardening_recomputed_matched_episode_id": null,
+      "pre_hardening_recomputed_reason_codes": [
+        "MATCH_UNIQUE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "AIR_MILITARY_CONTEXT",
+        "SAME_ATTACK_CONTEXT_SUPPORTED",
+        "NO_STRICT_TEMPORAL_BINDING",
+        "MULTI_EPISODE_DATE_REQUIRES_EPISODE_SPECIFIC_TEMPORAL_PROOF"
+      ],
+      "post_match_refresh_reason_codes": [
+        "MATCH_UNIQUE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "AIR_MILITARY_CONTEXT",
+        "SAME_ATTACK_CONTEXT_SUPPORTED",
+        "NO_STRICT_TEMPORAL_BINDING",
+        "MULTI_EPISODE_DATE_REQUIRES_EPISODE_SPECIFIC_TEMPORAL_PROOF"
+      ],
+      "post_lexical_reason_codes": [
+        "MATCH_UNIQUE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "AIR_MILITARY_CONTEXT",
+        "SAME_ATTACK_CONTEXT_SUPPORTED",
+        "NO_STRICT_TEMPORAL_BINDING",
+        "MULTI_EPISODE_DATE_REQUIRES_EPISODE_SPECIFIC_TEMPORAL_PROOF"
+      ],
+      "post_lexical_temporal_binding_code": "NO_STRICT_TEMPORAL_BINDING",
+      "stale_state_repaired": true,
+      "stale_state_status_change": false,
+      "lexical_hardening_applied": false,
+      "lexical_hardening_status_change": false,
+      "composition_transition": null,
+      "final_proposed_candidate_status": "needs_review",
+      "note": "Matching/classification metadata is recomputed coherently; current single-candidate outcome is unchanged."
+    },
+    {
+      "candidate_id": "d2ad79c8ba60ec946f91df3c",
+      "episode_id": "886deb3ed4b11cd18a0a015d",
+      "stored_reference_status": "needs_review",
+      "current_live_status_at_authoritative_qa": "needs_review",
+      "stored_classification_reason_codes": [
+        "MATCH_UNIQUE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "NO_AIR_MILITARY_CONTEXT",
+        "NO_STRICT_TEMPORAL_BINDING"
+      ],
+      "current_matching": {
+        "matched_episode_id": "886deb3ed4b11cd18a0a015d",
+        "matching_outcome": "unique_match",
+        "matched_episode_ids": [
+          "886deb3ed4b11cd18a0a015d"
+        ],
+        "matching_reason": "publication_within_unique_tracked_alert_window"
+      },
+      "pre_hardening_recomputed_outcome": "needs_review",
+      "pre_hardening_recomputed_matched_episode_id": null,
+      "pre_hardening_recomputed_reason_codes": [
+        "MATCH_UNIQUE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "NO_AIR_MILITARY_CONTEXT",
+        "NO_STRICT_TEMPORAL_BINDING"
+      ],
+      "post_match_refresh_reason_codes": [
+        "MATCH_UNIQUE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "NO_AIR_MILITARY_CONTEXT",
+        "NO_STRICT_TEMPORAL_BINDING"
+      ],
+      "post_lexical_reason_codes": [
+        "MATCH_UNIQUE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "NO_AIR_MILITARY_CONTEXT",
+        "NO_STRICT_TEMPORAL_BINDING"
+      ],
+      "post_lexical_temporal_binding_code": "NO_STRICT_TEMPORAL_BINDING",
+      "stale_state_repaired": false,
+      "stale_state_status_change": false,
+      "lexical_hardening_applied": false,
+      "lexical_hardening_status_change": false,
+      "composition_transition": null,
+      "final_proposed_candidate_status": "needs_review",
+      "note": "No candidate-level hardening changes the single-candidate outcome."
+    },
+    {
+      "candidate_id": "5e2d6456f4ddd91c4abd7754",
+      "episode_id": "886deb3ed4b11cd18a0a015d",
+      "stored_reference_status": "needs_review",
+      "current_live_status_at_authoritative_qa": "needs_review",
+      "stored_classification_reason_codes": [
+        "MATCH_NONE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "AIR_MILITARY_CONTEXT",
+        "SAME_ATTACK_CONTEXT_SUPPORTED",
+        "NO_STRICT_TEMPORAL_BINDING",
+        "MULTI_EPISODE_DATE_REQUIRES_EPISODE_SPECIFIC_TEMPORAL_PROOF"
+      ],
+      "current_matching": {
+        "matched_episode_id": "886deb3ed4b11cd18a0a015d",
+        "matching_outcome": "unique_match",
+        "matched_episode_ids": [
+          "886deb3ed4b11cd18a0a015d"
+        ],
+        "matching_reason": "publication_within_unique_tracked_alert_window"
+      },
+      "pre_hardening_recomputed_outcome": "needs_review",
+      "pre_hardening_recomputed_matched_episode_id": null,
+      "pre_hardening_recomputed_reason_codes": [
+        "MATCH_UNIQUE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "AIR_MILITARY_CONTEXT",
+        "SAME_ATTACK_CONTEXT_SUPPORTED",
+        "NO_STRICT_TEMPORAL_BINDING",
+        "MULTI_EPISODE_DATE_REQUIRES_EPISODE_SPECIFIC_TEMPORAL_PROOF"
+      ],
+      "post_match_refresh_reason_codes": [
+        "MATCH_UNIQUE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "AIR_MILITARY_CONTEXT",
+        "SAME_ATTACK_CONTEXT_SUPPORTED",
+        "NO_STRICT_TEMPORAL_BINDING",
+        "MULTI_EPISODE_DATE_REQUIRES_EPISODE_SPECIFIC_TEMPORAL_PROOF"
+      ],
+      "post_lexical_reason_codes": [
+        "MATCH_UNIQUE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "AIR_MILITARY_CONTEXT",
+        "SAME_ATTACK_CONTEXT_SUPPORTED",
+        "NO_STRICT_TEMPORAL_BINDING",
+        "MULTI_EPISODE_DATE_REQUIRES_EPISODE_SPECIFIC_TEMPORAL_PROOF"
+      ],
+      "post_lexical_temporal_binding_code": "NO_STRICT_TEMPORAL_BINDING",
+      "stale_state_repaired": true,
+      "stale_state_status_change": false,
+      "lexical_hardening_applied": false,
+      "lexical_hardening_status_change": false,
+      "composition_transition": null,
+      "final_proposed_candidate_status": "needs_review",
+      "note": "Matching/classification metadata is recomputed coherently; current single-candidate outcome is unchanged."
+    },
+    {
+      "candidate_id": "2b6be74ee09c63c5e5e13dfe",
+      "episode_id": "886deb3ed4b11cd18a0a015d",
+      "stored_reference_status": "needs_review",
+      "current_live_status_at_authoritative_qa": "needs_review",
+      "stored_classification_reason_codes": [
+        "MATCH_NONE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "AIR_MILITARY_CONTEXT",
+        "SAME_ATTACK_CONTEXT_SUPPORTED",
+        "NO_STRICT_TEMPORAL_BINDING",
+        "MULTI_EPISODE_DATE_REQUIRES_EPISODE_SPECIFIC_TEMPORAL_PROOF"
+      ],
+      "current_matching": {
+        "matched_episode_id": "886deb3ed4b11cd18a0a015d",
+        "matching_outcome": "unique_match",
+        "matched_episode_ids": [
+          "886deb3ed4b11cd18a0a015d"
+        ],
+        "matching_reason": "publication_within_unique_tracked_alert_window"
+      },
+      "pre_hardening_recomputed_outcome": "needs_review",
+      "pre_hardening_recomputed_matched_episode_id": null,
+      "pre_hardening_recomputed_reason_codes": [
+        "MATCH_UNIQUE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "AIR_MILITARY_CONTEXT",
+        "SAME_ATTACK_CONTEXT_SUPPORTED",
+        "NO_STRICT_TEMPORAL_BINDING",
+        "MULTI_EPISODE_DATE_REQUIRES_EPISODE_SPECIFIC_TEMPORAL_PROOF"
+      ],
+      "post_match_refresh_reason_codes": [
+        "MATCH_UNIQUE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "AIR_MILITARY_CONTEXT",
+        "SAME_ATTACK_CONTEXT_SUPPORTED",
+        "NO_STRICT_TEMPORAL_BINDING",
+        "MULTI_EPISODE_DATE_REQUIRES_EPISODE_SPECIFIC_TEMPORAL_PROOF"
+      ],
+      "post_lexical_reason_codes": [
+        "MATCH_UNIQUE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "AIR_MILITARY_CONTEXT",
+        "SAME_ATTACK_CONTEXT_SUPPORTED",
+        "NO_STRICT_TEMPORAL_BINDING",
+        "MULTI_EPISODE_DATE_REQUIRES_EPISODE_SPECIFIC_TEMPORAL_PROOF"
+      ],
+      "post_lexical_temporal_binding_code": "NO_STRICT_TEMPORAL_BINDING",
+      "stale_state_repaired": true,
+      "stale_state_status_change": false,
+      "lexical_hardening_applied": false,
+      "lexical_hardening_status_change": false,
+      "composition_transition": null,
+      "final_proposed_candidate_status": "needs_review",
+      "note": "Matching/classification metadata is recomputed coherently; current single-candidate outcome is unchanged."
+    },
+    {
+      "candidate_id": "312e5f662443cd3a07d64e5e",
+      "episode_id": "886deb3ed4b11cd18a0a015d",
+      "stored_reference_status": "needs_review",
+      "current_live_status_at_authoritative_qa": "needs_review",
+      "stored_classification_reason_codes": [
+        "MATCH_NONE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "NO_AIR_MILITARY_CONTEXT",
+        "NO_STRICT_TEMPORAL_BINDING"
+      ],
+      "current_matching": {
+        "matched_episode_id": "886deb3ed4b11cd18a0a015d",
+        "matching_outcome": "unique_match",
+        "matched_episode_ids": [
+          "886deb3ed4b11cd18a0a015d"
+        ],
+        "matching_reason": "publication_within_unique_tracked_alert_window"
+      },
+      "pre_hardening_recomputed_outcome": "needs_review",
+      "pre_hardening_recomputed_matched_episode_id": null,
+      "pre_hardening_recomputed_reason_codes": [
+        "MATCH_UNIQUE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "NO_AIR_MILITARY_CONTEXT",
+        "NO_STRICT_TEMPORAL_BINDING"
+      ],
+      "post_match_refresh_reason_codes": [
+        "MATCH_UNIQUE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "NO_AIR_MILITARY_CONTEXT",
+        "NO_STRICT_TEMPORAL_BINDING"
+      ],
+      "post_lexical_reason_codes": [
+        "MATCH_UNIQUE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "NO_AIR_MILITARY_CONTEXT",
+        "NO_STRICT_TEMPORAL_BINDING"
+      ],
+      "post_lexical_temporal_binding_code": "NO_STRICT_TEMPORAL_BINDING",
+      "stale_state_repaired": true,
+      "stale_state_status_change": false,
+      "lexical_hardening_applied": false,
+      "lexical_hardening_status_change": false,
+      "composition_transition": null,
+      "final_proposed_candidate_status": "needs_review",
+      "note": "Matching/classification metadata is recomputed coherently; current single-candidate outcome is unchanged."
+    },
+    {
+      "candidate_id": "466178615eb27f33f40544b7",
+      "episode_id": "886deb3ed4b11cd18a0a015d",
+      "stored_reference_status": "needs_review",
+      "current_live_status_at_authoritative_qa": "needs_review",
+      "stored_classification_reason_codes": [
+        "MATCH_NONE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "AIR_MILITARY_CONTEXT",
+        "SAME_ATTACK_CONTEXT_SUPPORTED",
+        "NO_STRICT_TEMPORAL_BINDING",
+        "MULTI_EPISODE_DATE_REQUIRES_EPISODE_SPECIFIC_TEMPORAL_PROOF"
+      ],
+      "current_matching": {
+        "matched_episode_id": "886deb3ed4b11cd18a0a015d",
+        "matching_outcome": "unique_match",
+        "matched_episode_ids": [
+          "886deb3ed4b11cd18a0a015d"
+        ],
+        "matching_reason": "publication_within_unique_tracked_alert_window"
+      },
+      "pre_hardening_recomputed_outcome": "needs_review",
+      "pre_hardening_recomputed_matched_episode_id": null,
+      "pre_hardening_recomputed_reason_codes": [
+        "MATCH_UNIQUE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "AIR_MILITARY_CONTEXT",
+        "SAME_ATTACK_CONTEXT_SUPPORTED",
+        "NO_STRICT_TEMPORAL_BINDING",
+        "MULTI_EPISODE_DATE_REQUIRES_EPISODE_SPECIFIC_TEMPORAL_PROOF"
+      ],
+      "post_match_refresh_reason_codes": [
+        "MATCH_UNIQUE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "AIR_MILITARY_CONTEXT",
+        "SAME_ATTACK_CONTEXT_SUPPORTED",
+        "NO_STRICT_TEMPORAL_BINDING",
+        "MULTI_EPISODE_DATE_REQUIRES_EPISODE_SPECIFIC_TEMPORAL_PROOF"
+      ],
+      "post_lexical_reason_codes": [
+        "MATCH_UNIQUE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "AIR_MILITARY_CONTEXT",
+        "SAME_ATTACK_CONTEXT_SUPPORTED",
+        "NO_STRICT_TEMPORAL_BINDING",
+        "MULTI_EPISODE_DATE_REQUIRES_EPISODE_SPECIFIC_TEMPORAL_PROOF"
+      ],
+      "post_lexical_temporal_binding_code": "NO_STRICT_TEMPORAL_BINDING",
+      "stale_state_repaired": true,
+      "stale_state_status_change": false,
+      "lexical_hardening_applied": false,
+      "lexical_hardening_status_change": false,
+      "composition_transition": null,
+      "final_proposed_candidate_status": "needs_review",
+      "note": "Matching/classification metadata is recomputed coherently; current single-candidate outcome is unchanged."
+    },
+    {
+      "candidate_id": "374e5a3e939278260bcbf65d",
+      "episode_id": "886deb3ed4b11cd18a0a015d",
+      "stored_reference_status": "needs_review",
+      "current_live_status_at_authoritative_qa": "needs_review",
+      "stored_classification_reason_codes": [
+        "MATCH_NONE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "NO_AIR_MILITARY_CONTEXT",
+        "NO_STRICT_TEMPORAL_BINDING"
+      ],
+      "current_matching": {
+        "matched_episode_id": "886deb3ed4b11cd18a0a015d",
+        "matching_outcome": "unique_match",
+        "matched_episode_ids": [
+          "886deb3ed4b11cd18a0a015d"
+        ],
+        "matching_reason": "publication_within_unique_tracked_alert_window"
+      },
+      "pre_hardening_recomputed_outcome": "needs_review",
+      "pre_hardening_recomputed_matched_episode_id": null,
+      "pre_hardening_recomputed_reason_codes": [
+        "MATCH_UNIQUE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "NO_AIR_MILITARY_CONTEXT",
+        "NO_STRICT_TEMPORAL_BINDING"
+      ],
+      "post_match_refresh_reason_codes": [
+        "MATCH_UNIQUE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "NO_AIR_MILITARY_CONTEXT",
+        "NO_STRICT_TEMPORAL_BINDING"
+      ],
+      "post_lexical_reason_codes": [
+        "MATCH_UNIQUE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "NO_AIR_MILITARY_CONTEXT",
+        "NO_STRICT_TEMPORAL_BINDING"
+      ],
+      "post_lexical_temporal_binding_code": "NO_STRICT_TEMPORAL_BINDING",
+      "stale_state_repaired": true,
+      "stale_state_status_change": false,
+      "lexical_hardening_applied": false,
+      "lexical_hardening_status_change": false,
+      "composition_transition": null,
+      "final_proposed_candidate_status": "needs_review",
+      "note": "Matching/classification metadata is recomputed coherently; current single-candidate outcome is unchanged."
+    }
+  ],
+  "episode_level_composition_decisions": [
+    {
+      "episode_id": "8185dc2e7c4f8d2ba82fdd97",
+      "alert_window_kyiv": "23.09 03:19–05:04",
+      "frozen_candidate_ids": [],
+      "final_composed_verdict": "no_composed_strict",
+      "anchor_candidate_id": null,
+      "contributing_candidate_ids": [],
+      "reason": "No frozen candidate records for this episode; discovery was not broadened.",
+      "final_episode_verdict": "no_explosion_evidence_found",
+      "verdict_scope_qualifier": "no_explosion_evidence_found_in_current_monitor"
+    },
+    {
+      "episode_id": "886deb3ed4b11cd18a0a015d",
+      "alert_window_kyiv": "23.09 05:59–08:02",
+      "frozen_candidate_ids": [
+        "0c2ac46f1d42b411a14d06c1",
+        "d2ad79c8ba60ec946f91df3c",
+        "5e2d6456f4ddd91c4abd7754",
+        "2b6be74ee09c63c5e5e13dfe",
+        "312e5f662443cd3a07d64e5e",
+        "466178615eb27f33f40544b7",
+        "374e5a3e939278260bcbf65d"
+      ],
+      "final_composed_verdict": "no_composed_strict",
+      "anchor_candidate_id": null,
+      "contributing_candidate_ids": [],
+      "reason": "Strong attack/impact evidence but no episode-specific temporal proof that excludes the earlier morning alert.",
+      "final_episode_verdict": "sensitivity_only",
+      "verdict_scope_qualifier": null
+    },
+    {
+      "episode_id": "d738bcf202ade96c95580611",
+      "alert_window_kyiv": "23.09 09:06–09:12",
+      "frozen_candidate_ids": [],
+      "final_composed_verdict": "no_composed_strict",
+      "anchor_candidate_id": null,
+      "contributing_candidate_ids": [],
+      "reason": "No frozen candidate records for this episode; discovery was not broadened.",
+      "final_episode_verdict": "no_explosion_evidence_found",
+      "verdict_scope_qualifier": "no_explosion_evidence_found_in_current_monitor"
+    },
+    {
+      "episode_id": "e97e6e816f96832d02c8b2cd",
+      "alert_window_kyiv": "23.09 10:24–12:29",
+      "frozen_candidate_ids": [
+        "4225edf94f0a8db2b78f07e3",
+        "4bdc4c0a5f95dc1e01632d22",
+        "73d817926f66c8dce397b91b",
+        "7dd8008ab0695b10329b3899",
+        "a434269bc3d63864461c6349",
+        "91b7d2133a797aa96099189a",
+        "4f3d2eb50630de9f15fd6c5a",
+        "fcb851f13f5935821fc68503",
+        "fed2d20a9e6ee1cf2151d857",
+        "0405b982305250ea21faab04"
+      ],
+      "final_composed_verdict": "approved_strict",
+      "anchor_candidate_id": "73d817926f66c8dce397b91b",
+      "contributing_candidate_ids": [
+        "73d817926f66c8dce397b91b",
+        "4bdc4c0a5f95dc1e01632d22"
+      ],
+      "roles": {
+        "73d817926f66c8dce397b91b": [
+          "exact_city",
+          "explosion_evidence",
+          "trusted_contemporaneous_temporal_proof"
+        ],
+        "4bdc4c0a5f95dc1e01632d22": [
+          "exact_city",
+          "explosion_evidence",
+          "uav_air_military_context"
+        ]
+      },
+      "same_attack_compatibility_basis": [
+        "timestamps_within_45m",
+        "explosion_series"
+      ],
+      "gap_seconds": 1732,
+      "neighboring_alert_check": "passed_no_distinct_neighbor_active_at_contributor_times",
+      "reason_codes": [
+        "COMPOSED_STRICT_SAME_EPISODE",
+        "COMPOSED_TEMPORAL_PROOF",
+        "COMPOSED_AIR_MILITARY_CONTEXT",
+        "COMPOSED_SAME_ATTACK_COMPATIBLE",
+        "COMPOSED_NEIGHBOR_CHECK_PASSED"
+      ],
+      "final_episode_verdict": "strict_supported"
+    },
+    {
+      "episode_id": "f2112b57d80fe5a569565cd3",
+      "alert_window_kyiv": "23.09 13:59–14:23",
+      "frozen_candidate_ids": [
+        "ba00c35121b631ef7a2acc89",
+        "6698c0fd3cf23315689e7348"
+      ],
+      "final_composed_verdict": "no_composed_strict",
+      "anchor_candidate_id": null,
+      "contributing_candidate_ids": [],
+      "reason": "Ongoing-language report is just after the alert boundary but lacks trusted live provenance or an explicit event clock.",
+      "final_episode_verdict": "sensitivity_only",
+      "verdict_scope_qualifier": null
+    },
+    {
+      "episode_id": "9ddb41e0e6ccef332646a841",
+      "alert_window_kyiv": "23.09 16:25–17:37",
+      "frozen_candidate_ids": [
+        "ccd077c356c3b8481b4f3f11",
+        "366f90ec53dc981ffa32a319",
+        "82728e6b31f0139371cdffdf",
+        "c837a79e2006589a4763c77e",
+        "b686f23ad40cdb74f47bd3fa"
+      ],
+      "final_composed_verdict": "no_composed_strict",
+      "anchor_candidate_id": null,
+      "contributing_candidate_ids": [],
+      "reason": "Present-tense aggregator headline supports sensitivity, but no high-confidence episode-specific temporal proof.",
+      "final_episode_verdict": "sensitivity_only",
+      "verdict_scope_qualifier": null
+    },
+    {
+      "episode_id": "b1fbe75f41f92851800f1466",
+      "alert_window_kyiv": "23.09 20:33–21:07",
+      "frozen_candidate_ids": [
+        "8d3d5648cc5afd06ebbc661f"
+      ],
+      "final_composed_verdict": "no_composed_strict",
+      "anchor_candidate_id": null,
+      "contributing_candidate_ids": [],
+      "reason": "Explosion evidence lacks linked aerial-war context and temporal proof.",
+      "final_episode_verdict": "needs_review",
+      "verdict_scope_qualifier": null
+    },
+    {
+      "episode_id": "6f6088c593d5c73b17d8a74d",
+      "alert_window_kyiv": "23.09 22:42–22:58",
+      "frozen_candidate_ids": [
+        "f5716ba6984e14f404f10c34",
+        "9002de009d36034a73e8471b",
+        "b76a52c4ff7d8a4117f1408b"
+      ],
+      "final_composed_verdict": "no_composed_strict",
+      "anchor_candidate_id": null,
+      "contributing_candidate_ids": [],
+      "reason": "Evidence is cumulative/day-level and may describe earlier attacks.",
+      "final_episode_verdict": "needs_review",
+      "verdict_scope_qualifier": null
+    },
+    {
+      "episode_id": "f235928c329ca806d9dca5ed",
+      "alert_window_kyiv": "24.09 00:55–02:27",
+      "frozen_candidate_ids": [
+        "b98b6f39b39aff1204f92e93",
+        "5f807237ce10eb9d27bfc95f",
+        "4c81a45894b2a491757baa2c",
+        "59e46d1b3c06e2c50fd4d259",
+        "f7c06b0a5c5084a4dc86ce12",
+        "a9360d117f63e0190154a361",
+        "7f98c09b95dcd4a2293dd750",
+        "e095345e2c95b982e3fac04b"
+      ],
+      "final_composed_verdict": "approved_strict",
+      "anchor_candidate_id": "5f807237ce10eb9d27bfc95f",
+      "contributing_candidate_ids": [
+        "5f807237ce10eb9d27bfc95f",
+        "7f98c09b95dcd4a2293dd750"
+      ],
+      "roles": {
+        "5f807237ce10eb9d27bfc95f": [
+          "exact_city",
+          "explosion_evidence",
+          "trusted_contemporaneous_temporal_proof",
+          "repeated_explosion_sequence"
+        ],
+        "7f98c09b95dcd4a2293dd750": [
+          "exact_city",
+          "explosion_evidence",
+          "ballistic_air_military_context"
+        ]
+      },
+      "same_attack_compatibility_basis": [
+        "timestamps_within_45m",
+        "repeated_explosions"
+      ],
+      "gap_seconds": 978,
+      "neighboring_alert_check": "passed_no_distinct_neighbor_active_at_contributor_times",
+      "reason_codes": [
+        "COMPOSED_STRICT_SAME_EPISODE",
+        "COMPOSED_TEMPORAL_PROOF",
+        "COMPOSED_AIR_MILITARY_CONTEXT",
+        "COMPOSED_SAME_ATTACK_COMPATIBLE",
+        "COMPOSED_NEIGHBOR_CHECK_PASSED"
+      ],
+      "final_episode_verdict": "strict_supported"
+    }
+  ],
+  "proposed_episode_level_verdicts": [
+    {
+      "episode_id": "8185dc2e7c4f8d2ba82fdd97",
+      "alert_window_kyiv": "23.09 03:19–05:04",
+      "proposed_verdict": "no_explosion_evidence_found",
+      "scope_qualifier": "no_explosion_evidence_found_in_current_monitor"
+    },
+    {
+      "episode_id": "886deb3ed4b11cd18a0a015d",
+      "alert_window_kyiv": "23.09 05:59–08:02",
+      "proposed_verdict": "sensitivity_only",
+      "scope_qualifier": null
+    },
+    {
+      "episode_id": "d738bcf202ade96c95580611",
+      "alert_window_kyiv": "23.09 09:06–09:12",
+      "proposed_verdict": "no_explosion_evidence_found",
+      "scope_qualifier": "no_explosion_evidence_found_in_current_monitor"
+    },
+    {
+      "episode_id": "e97e6e816f96832d02c8b2cd",
+      "alert_window_kyiv": "23.09 10:24–12:29",
+      "proposed_verdict": "strict_supported",
+      "scope_qualifier": null
+    },
+    {
+      "episode_id": "f2112b57d80fe5a569565cd3",
+      "alert_window_kyiv": "23.09 13:59–14:23",
+      "proposed_verdict": "sensitivity_only",
+      "scope_qualifier": null
+    },
+    {
+      "episode_id": "9ddb41e0e6ccef332646a841",
+      "alert_window_kyiv": "23.09 16:25–17:37",
+      "proposed_verdict": "sensitivity_only",
+      "scope_qualifier": null
+    },
+    {
+      "episode_id": "b1fbe75f41f92851800f1466",
+      "alert_window_kyiv": "23.09 20:33–21:07",
+      "proposed_verdict": "needs_review",
+      "scope_qualifier": null
+    },
+    {
+      "episode_id": "6f6088c593d5c73b17d8a74d",
+      "alert_window_kyiv": "23.09 22:42–22:58",
+      "proposed_verdict": "needs_review",
+      "scope_qualifier": null
+    },
+    {
+      "episode_id": "f235928c329ca806d9dca5ed",
+      "alert_window_kyiv": "24.09 00:55–02:27",
+      "proposed_verdict": "strict_supported",
+      "scope_qualifier": null
+    }
+  ],
+  "replay_counts": {
+    "strict_supported": 2,
+    "sensitivity_only": 3,
+    "needs_review": 2,
+    "no_explosion_evidence_found_in_current_monitor": 2,
+    "total": 9
+  },
+  "regression_expectations": {
+    "f235928c329ca806d9dca5ed": "PASS: composed strict from trusted live repeated-explosion temporal anchor plus same-window ballistic explosion context.",
+    "e97e6e816f96832d02c8b2cd": "PASS: lexical hardening supplies trusted live temporal proof; same-window UAV/explosion context completes bounded strict composition.",
+    "6f6088c593d5c73b17d8a74d": "PASS: «цілий день» / daily-roundup evidence is blocked from strict composition.",
+    "b1fbe75f41f92851800f1466": "PASS: «У центрі Києва пролунав вибух» remains needs_review without linked aerial-war context and safe temporal proof.",
+    "sensitivity_episodes": "PASS: 886deb3..., f2112b5..., 9ddb41e... remain non-strict."
+  },
+  "differences_from_targeted_manual_qa": [],
+  "tests": {
+    "frozen_rule_equivalent_dry_replay": {
+      "result": "PASS",
+      "method": "Replay over exactly the 9 target episodes and 36 frozen candidate records from the authoritative QA artifact using the new lexical, stale-state and composition predicates; discovery is not broadened.",
+      "lexical_delta_candidate_ids": [
+        "73d817926f66c8dce397b91b"
+      ],
+      "composed_strict_pairs": [
+        {
+          "episode_id": "e97e6e816f96832d02c8b2cd",
+          "anchor": "73d817926f66c8dce397b91b",
+          "context": "4bdc4c0a5f95dc1e01632d22",
+          "gap_seconds": 1732
+        },
+        {
+          "episode_id": "f235928c329ca806d9dca5ed",
+          "anchor": "5f807237ce10eb9d27bfc95f",
+          "context": "7f98c09b95dcd4a2293dd750",
+          "gap_seconds": 978
+        }
+      ]
+    },
+    "focused_self_tests_added": [
+      "Positive contemporaneous forms: лунає/лунають, чутно/чути, singular/plural/series and punctuation variation.",
+      "Negative retrospective/cumulative forms: було чути/чутно, раніше чули, протягом дня, цілий день.",
+      "Match refresh repairs MATCH_NONE -> MATCH_UNIQUE while preserving needs_review when recomputation still supports it.",
+      "Composition positive case, cumulative-context rejection, and overlapping-neighbor rejection."
+    ],
+    "post_commit_ci": "PENDING_AT_ARTIFACT_CREATION"
+  },
+  "mutation_safety": {
+    "live_queue_mutated": false,
+    "monitor_state_mutated": false,
+    "last_run_state_mutated": false,
+    "metric_mutated": false,
+    "live_queue_replayed": false,
+    "strict_series_mutated": false,
+    "canonical_historical_data_mutated": false,
+    "historical_enrichment_mutated": false,
+    "dashboard_grafana_netlify_mutated": false,
+    "production_deployed": false,
+    "system_wide_replay_run": false
+  },
+  "final_verdict": "KYIV LIVE COMPOSITION HARDENING READY FOR SYSTEM-WIDE DRY REPLAY"
+}

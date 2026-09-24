@@ -140,6 +140,8 @@ MATCH_REPRESENTATION_TOLERANCE_SECONDS = 90.0
 # outside a frozen alert boundary. Keep a conservative 10-minute ceiling, and
 # use it only for sensitivity when the source states the event clock.
 SENSITIVITY_NEAR_BOUNDARY_MAX_MINUTES = 10
+COMPOSITION_MAX_GAP_MINUTES = 45
+COMPOSITION_TIGHT_TRUSTED_GAP_MINUTES = 15
 
 
 def now_utc() -> datetime:
@@ -630,15 +632,31 @@ def explicit_during_alert(text: str) -> bool:
     return explicit_alert_relation(text)
 
 
+def retrospective_or_cumulative_wording(text: str) -> bool:
+    low = normalize_evidence_text(text)
+    patterns = (
+        r"\bбуло[\s,:;–—-]+(?:чути|чутно)\b",
+        r"\bраніше.{0,30}\b(?:чути|чутно|чули)\b",
+        r"\bпротягом[\s,:;–—-]+(?:цього[\s,:;–—-]+)?дня\b",
+        r"\bцілий[\s,:;–—-]+день\b",
+        r"\bза[\s,:;–—-]+(?:минулий[\s,:;–—-]+)?(?:день|добу)\b",
+        r"\bдобов\w*[\s,:;–—-]+(?:зведен|підсум)\w*",
+    )
+    return any(re.search(pattern, low) for pattern in patterns)
+
+
 def contemporaneous_live_wording(text: str) -> bool:
     low = normalize_evidence_text(text)
+    if retrospective_or_cumulative_wording(low):
+        return False
+    sep = r"[\s,:;–—-]+"
     return bool(
         re.search(
-            r"(?:лунають\s+(?:повторн\w*\s+)?вибух\w*|"
-            r"чути\s+(?:звук\w*\s+)?вибух\w*|"
-            r"гримлять\s+вибух\w*|"
-            r"щойно.{0,40}вибух\w*|"
-            r"прямо\s+зараз.{0,40}вибух\w*)",
+            rf"(?:\bлуна(?:є|ють){sep}(?:повторн\w*{sep})?(?:сері\w*{sep})?вибух\w*|"
+            rf"\b(?:чутно|чути){sep}(?:(?:звук\w*|сері\w*){sep})?вибух\w*|"
+            rf"\bгримлять{sep}вибух\w*|"
+            r"\bщойно.{0,40}\bвибух\w*|"
+            r"\bпрямо\s+зараз.{0,40}\bвибух\w*)",
             low,
         )
     )
@@ -1151,6 +1169,30 @@ def apply_matching_result(item: dict, matching: dict) -> None:
         item["matched_episode_id"] = None
 
 
+def stored_matching_signature(item: dict) -> tuple:
+    return (
+        str(item.get("matching_outcome") or ""),
+        item.get("matched_episode_id"),
+        tuple(item.get("matched_episode_ids") or []),
+        tuple(tuple(group) for group in item.get("matching_logical_episode_groups") or []),
+        str(item.get("matching_outcome") or "") == "ambiguous_match",
+    )
+
+
+def classification_matching_is_stale(item: dict, matching: dict) -> bool:
+    expected = {
+        "unique_match": "MATCH_UNIQUE",
+        "ambiguous_match": "MATCH_AMBIGUOUS",
+        "no_match": "MATCH_NONE",
+    }.get(str(matching.get("outcome") or "no_match"), "MATCH_NONE")
+    match_codes = {
+        code
+        for code in (item.get("classification_reason_codes") or [])
+        if code in {"MATCH_UNIQUE", "MATCH_AMBIGUOUS", "MATCH_NONE"}
+    }
+    return match_codes != {expected}
+
+
 def refresh_queue_matching(
     queue: list[dict],
     state: dict,
@@ -1161,8 +1203,14 @@ def refresh_queue_matching(
         "unique_match": 0,
         "ambiguous_match": 0,
         "no_match": 0,
+        "material_match_changes": 0,
+        "stale_classification_before": 0,
+        "reclassified_after_match_refresh": 0,
+        "stale_classification_repaired": 0,
         "status_changes": 0,
+        "reclassified_episode_ids": [],
     }
+    reclassified_episode_ids = set()
     for item in queue:
         if not isinstance(item, dict):
             continue
@@ -1172,14 +1220,36 @@ def refresh_queue_matching(
         city_key = str(item.get("city_key") or "")
         if city_key not in CITY_CONFIG:
             continue
+        episodes = tracked_episodes_for_city(state, city_key)
         before_status = item.get("status")
-        matching = match_candidate_to_episodes(item, tracked_episodes_for_city(state, city_key))
+        before_signature = stored_matching_signature(item)
+        matching = match_candidate_to_episodes(item, episodes)
+        stale_before = classification_matching_is_stale(item, matching)
         apply_matching_result(item, matching)
+        after_signature = stored_matching_signature(item)
+        material_change = before_signature != after_signature
+
         counts["candidates_checked"] += 1
         counts[matching["outcome"]] += 1
+        if material_change:
+            counts["material_match_changes"] += 1
+        if stale_before:
+            counts["stale_classification_before"] += 1
+
+        if material_change or stale_before:
+            decision = classify_candidate(item, city_key, episodes, matching)
+            apply_classification_decision(item, decision, matching)
+            counts["reclassified_after_match_refresh"] += 1
+            reclassified_episode_ids.update(matching.get("matched_episode_ids") or [])
+            if stale_before:
+                counts["stale_classification_repaired"] += 1
+            if classification_matching_is_stale(item, matching):
+                raise AssertionError("Classification matching reason codes remain stale after refresh")
+
         if item.get("status") != before_status:
             counts["status_changes"] += 1
-            raise AssertionError("Episode matching must not change candidate status")
+
+    counts["reclassified_episode_ids"] = sorted(reclassified_episode_ids)
     return counts
 
 
@@ -1649,6 +1719,370 @@ def classify_candidate(row: dict, city_key: str, episodes: list[dict], matching:
     }
 
 
+def classification_evidence_payload(decision: dict) -> dict:
+    return {
+        "exact_city": decision["exact_city_classification_evidence"],
+        "strict_explosion": decision["strict_explosion_evidence"],
+        "air_military_context": decision["air_military_context"],
+        "same_attack_context": decision["same_attack_context"],
+        "temporal_binding": decision["temporal_binding"],
+        "single_episode_day_inference": decision["single_episode_day_inference"],
+        "controlled_blast_event_segments": decision["controlled_blast_event_segments"],
+        "sensitivity_basis": decision["sensitivity_basis"],
+        "classification_episode_id": decision["proposed_matched_episode_id"],
+    }
+
+
+def apply_classification_decision(item: dict, decision: dict, matching: dict) -> None:
+    apply_matching_result(item, matching)
+    status = str(decision.get("proposed_outcome") or "needs_review")
+    item["status"] = status
+    item["classification_reason_codes"] = list(decision.get("reason_codes") or [])
+    item["classification_evidence"] = classification_evidence_payload(decision)
+    item["review_note"] = (
+        "evidence-layered auto-classification"
+        if status in {"approved_strict", "approved_sensitivity", "rejected"}
+        else "evidence-layered classification requires manual review"
+    )
+    if status in {"approved_strict", "approved_sensitivity"}:
+        item["matched_episode_id"] = decision.get("proposed_matched_episode_id")
+
+
+def composition_sequence_signals(text: str) -> list[str]:
+    low = normalize_evidence_text(text)
+    signals = []
+    if re.search(r"\bповторн\w*.{0,20}\bвибух\w*", low):
+        signals.append("repeated_explosions")
+    if re.search(r"\bсері\w*.{0,20}\bвибух\w*", low):
+        signals.append("explosion_series")
+    if re.search(r"\bвибух\w*.{0,20}\b(?:не\s+вщух|не\s+припин)", low):
+        signals.append("ongoing_explosions")
+    if re.search(r"\b(?:знову|ще\s+раз).{0,25}\bвибух\w*", low):
+        signals.append("renewed_explosion")
+    return signals
+
+
+def composition_weapon_families(text: str) -> set[str]:
+    low = normalize_evidence_text(text)
+    families = set()
+    if re.search(r"\b(?:баліст\w*|іскандер\w*)", low):
+        families.add("ballistic")
+    if re.search(r"\b(?:ракет\w*|циркон\w*|крилат\w*)", low):
+        families.add("missile")
+    if re.search(r"\b(?:бпла|дрон\w*|безпілот\w*|шахед\w*|shahed\w*)", low):
+        families.add("uav")
+    if re.search(r"\b(?:каб\w*|авіабомб\w*)", low):
+        families.add("guided_bomb")
+    return families
+
+
+def composition_neighbor_check(moment: datetime, target_episode: dict, episodes: list[dict]) -> dict:
+    target_id = str(target_episode.get("episode_id") or "")
+    active = exact_active_episodes_at(moment, episodes)
+    active_ids = [str(ep.get("episode_id") or "") for ep in active]
+    target_active = any(str(ep.get("episode_id") or "") == target_id for ep in active)
+    conflicts = [
+        str(ep.get("episode_id") or "")
+        for ep in active
+        if str(ep.get("episode_id") or "") != target_id
+        and not same_episode_representation(ep, target_episode)
+    ]
+    return {
+        "passed": target_active and not conflicts,
+        "moment": iso(moment),
+        "active_episode_ids": active_ids,
+        "conflicting_neighbor_episode_ids": sorted(set(conflicts)),
+    }
+
+
+def composition_same_attack_compatibility(
+    temporal_row: dict,
+    context_row: dict,
+    target_episode: dict,
+    episodes: list[dict],
+) -> dict:
+    temporal_time = parse_dt(temporal_row.get("published_at"))
+    context_time = parse_dt(context_row.get("published_at"))
+    if not temporal_time or not context_time:
+        return {"present": False, "reason": "missing_publication_timestamp_for_compatibility_check"}
+
+    temporal_text = classification_text(temporal_row)
+    context_text = classification_text(context_row)
+    if retrospective_or_cumulative_wording(temporal_text) or retrospective_or_cumulative_wording(context_text):
+        return {"present": False, "reason": "retrospective_or_cumulative_wording"}
+
+    temporal_neighbor = composition_neighbor_check(temporal_time, target_episode, episodes)
+    context_neighbor = composition_neighbor_check(context_time, target_episode, episodes)
+    if not temporal_neighbor["passed"] or not context_neighbor["passed"]:
+        return {
+            "present": False,
+            "reason": "neighboring_alert_conflict",
+            "temporal_neighbor_check": temporal_neighbor,
+            "context_neighbor_check": context_neighbor,
+        }
+
+    gap_seconds = abs((context_time - temporal_time).total_seconds())
+    if gap_seconds > COMPOSITION_MAX_GAP_MINUTES * 60:
+        return {
+            "present": False,
+            "reason": "temporal_gap_too_large",
+            "gap_seconds": gap_seconds,
+        }
+
+    basis = [f"timestamps_within_{COMPOSITION_MAX_GAP_MINUTES}m"]
+    sequence = composition_sequence_signals(temporal_text)
+    if sequence:
+        basis.extend(sequence)
+
+    shared_weapons = sorted(
+        composition_weapon_families(temporal_text)
+        & composition_weapon_families(context_text)
+    )
+    if shared_weapons:
+        basis.append("shared_weapon_family:" + ",".join(shared_weapons))
+
+    if (
+        trusted_same_attack_source(context_row)
+        and gap_seconds <= COMPOSITION_TIGHT_TRUSTED_GAP_MINUTES * 60
+    ):
+        basis.append(f"trusted_context_within_{COMPOSITION_TIGHT_TRUSTED_GAP_MINUTES}m")
+
+    if len(basis) == 1:
+        return {
+            "present": False,
+            "reason": "insufficient_same_attack_link_beyond_timestamp_proximity",
+            "gap_seconds": gap_seconds,
+            "temporal_neighbor_check": temporal_neighbor,
+            "context_neighbor_check": context_neighbor,
+        }
+
+    return {
+        "present": True,
+        "reason": "compatible_same_attack_sequence",
+        "basis": basis,
+        "gap_seconds": gap_seconds,
+        "temporal_neighbor_check": temporal_neighbor,
+        "context_neighbor_check": context_neighbor,
+    }
+
+
+def compose_episode_candidates(
+    city_key: str,
+    target_episode: dict,
+    candidates: list[dict],
+    episodes: list[dict],
+) -> dict:
+    target_id = str(target_episode.get("episode_id") or "")
+    evaluated = []
+    for item in sorted(candidates, key=lambda row: str(row.get("candidate_id") or "")):
+        if str(item.get("city_key") or "") != city_key:
+            continue
+        if str(item.get("matched_episode_id") or "") != target_id:
+            continue
+        if str(item.get("status") or "") == "rejected":
+            continue
+        matching = match_candidate_to_episodes(item, episodes)
+        decision = classify_candidate(item, city_key, episodes, matching)
+        if (
+            "DETERMINISTIC_CONTROLLED_BLAST" in decision["reason_codes"]
+            or "PVO_ONLY_COMPLETE_MESSAGE" in decision["reason_codes"]
+            or "PUBLISHER_FULLTEXT_REQUIRES_REVIEW" in decision["reason_codes"]
+        ):
+            continue
+        if retrospective_or_cumulative_wording(classification_text(item)):
+            continue
+        evaluated.append((item, decision))
+
+    anchors = []
+    contexts = []
+    for item, decision in evaluated:
+        temporal = decision.get("temporal_binding") or {}
+        if (
+            decision["exact_city_classification_evidence"].get("present")
+            and decision["strict_explosion_evidence"].get("present")
+            and temporal.get("present")
+            and temporal.get("episode_specific")
+            and str(temporal.get("episode_id") or "") == target_id
+        ):
+            anchors.append((item, decision))
+        if (
+            decision["exact_city_classification_evidence"].get("present")
+            and decision["strict_explosion_evidence"].get("present")
+            and decision["air_military_context"].get("present")
+            and decision["same_attack_context"].get("present")
+        ):
+            contexts.append((item, decision))
+
+    compatible_pairs = []
+    for anchor_item, anchor_decision in anchors:
+        for context_item, context_decision in contexts:
+            if anchor_item.get("candidate_id") == context_item.get("candidate_id"):
+                continue
+            compatibility = composition_same_attack_compatibility(
+                anchor_item, context_item, target_episode, episodes
+            )
+            if not compatibility.get("present"):
+                continue
+            compatible_pairs.append((
+                float(compatibility.get("gap_seconds") or 0),
+                str(anchor_item.get("candidate_id") or ""),
+                str(context_item.get("candidate_id") or ""),
+                anchor_item,
+                anchor_decision,
+                context_item,
+                context_decision,
+                compatibility,
+            ))
+
+    if not compatible_pairs:
+        return {
+            "target_episode_id": target_id,
+            "city_key": city_key,
+            "final_composed_verdict": "no_composed_strict",
+            "contributing_candidate_ids": [],
+            "anchor_candidate_id": None,
+            "reason_codes": ["NO_SAFE_EPISODE_LEVEL_COMPOSITION"],
+            "candidate_count_considered": len(evaluated),
+            "temporal_anchor_candidate_ids": sorted(
+                str(item.get("candidate_id") or "") for item, _ in anchors
+            ),
+            "air_context_candidate_ids": sorted(
+                str(item.get("candidate_id") or "") for item, _ in contexts
+            ),
+        }
+
+    compatible_pairs.sort(key=lambda row: (row[0], row[1], row[2]))
+    (
+        _gap,
+        _anchor_id,
+        _context_id,
+        anchor_item,
+        anchor_decision,
+        context_item,
+        context_decision,
+        compatibility,
+    ) = compatible_pairs[0]
+    anchor_id = str(anchor_item.get("candidate_id") or "")
+    context_id = str(context_item.get("candidate_id") or "")
+    temporal = anchor_decision["temporal_binding"]
+    return {
+        "target_episode_id": target_id,
+        "city_key": city_key,
+        "final_composed_verdict": "approved_strict",
+        "anchor_candidate_id": anchor_id,
+        "contributing_candidate_ids": [anchor_id, context_id],
+        "contributing_candidates": [
+            {
+                "candidate_id": anchor_id,
+                "roles": ["explosion_evidence", "temporal_proof"],
+                "temporal_code": temporal.get("code"),
+                "temporal_evidence_type": temporal.get("evidence_type"),
+            },
+            {
+                "candidate_id": context_id,
+                "roles": ["explosion_evidence", "air_military_context"],
+                "same_attack_reason": context_decision["same_attack_context"].get("reason"),
+            },
+        ],
+        "same_attack_compatibility": compatibility,
+        "neighboring_alert_check": {
+            "passed": True,
+            "temporal_source": compatibility.get("temporal_neighbor_check"),
+            "air_context_source": compatibility.get("context_neighbor_check"),
+        },
+        "reason_codes": [
+            "COMPOSED_STRICT_SAME_EPISODE",
+            "COMPOSED_TEMPORAL_PROOF",
+            "COMPOSED_AIR_MILITARY_CONTEXT",
+            "COMPOSED_SAME_ATTACK_COMPATIBLE",
+            "COMPOSED_NEIGHBOR_CHECK_PASSED",
+        ],
+    }
+
+
+def apply_episode_composition(
+    queue: list[dict],
+    state: dict,
+    target_episode_ids: set[str] | None = None,
+) -> dict:
+    groups: dict[tuple[str, str], list[dict]] = {}
+    for item in queue:
+        if not isinstance(item, dict):
+            continue
+        if str(item.get("status") or "") == "rejected":
+            continue
+        city_key = str(item.get("city_key") or "")
+        episode_id = str(item.get("matched_episode_id") or "")
+        if city_key not in CITY_CONFIG or not episode_id:
+            continue
+        if target_episode_ids is not None and episode_id not in target_episode_ids:
+            continue
+        groups.setdefault((city_key, episode_id), []).append(item)
+
+    counts = {
+        "episode_groups_checked": 0,
+        "composed_strict": 0,
+        "candidate_status_changes": 0,
+        "composed_strict_episode_ids": [],
+    }
+    composed_ids = []
+    for (city_key, episode_id), candidates in sorted(groups.items()):
+        if len(candidates) < 2:
+            continue
+        episodes = tracked_episodes_for_city(state, city_key)
+        target_episode = next(
+            (ep for ep in episodes if str(ep.get("episode_id") or "") == episode_id),
+            None,
+        )
+        if not target_episode:
+            continue
+        counts["episode_groups_checked"] += 1
+        composition = compose_episode_candidates(
+            city_key, target_episode, candidates, episodes
+        )
+        if composition.get("final_composed_verdict") != "approved_strict":
+            continue
+
+        existing_strict = [
+            item
+            for item in candidates
+            if str(item.get("status") or "") == "approved_strict"
+            and str(item.get("matched_episode_id") or "") == episode_id
+        ]
+        if existing_strict:
+            continue
+
+        anchor_id = str(composition.get("anchor_candidate_id") or "")
+        anchor = next(
+            (item for item in candidates if str(item.get("candidate_id") or "") == anchor_id),
+            None,
+        )
+        if not anchor:
+            raise AssertionError("Composed strict verdict has no deterministic anchor candidate")
+
+        before_status = str(anchor.get("status") or "")
+        anchor["status"] = "approved_strict"
+        anchor["matched_episode_id"] = episode_id
+        anchor["composition_provenance"] = composition
+        evidence = dict(anchor.get("classification_evidence") or {})
+        evidence["episode_level_composition"] = composition
+        anchor["classification_evidence"] = evidence
+        reason_codes = list(anchor.get("classification_reason_codes") or [])
+        for code in composition.get("reason_codes") or []:
+            if code not in reason_codes:
+                reason_codes.append(code)
+        anchor["classification_reason_codes"] = reason_codes
+        anchor["review_note"] = "episode-level composed strict classification"
+
+        counts["composed_strict"] += 1
+        composed_ids.append(episode_id)
+        if before_status != "approved_strict":
+            counts["candidate_status_changes"] += 1
+
+    counts["composed_strict_episode_ids"] = sorted(set(composed_ids))
+    return counts
+
+
 def add_candidates(
     queue: list[dict],
     city_key: str,
@@ -1701,17 +2135,7 @@ def add_candidates(
             "trigger_check_labels": check_labels,
             "matched_episode_id": None,
             "classification_reason_codes": decision["reason_codes"],
-            "classification_evidence": {
-                "exact_city": decision["exact_city_classification_evidence"],
-                "strict_explosion": decision["strict_explosion_evidence"],
-                "air_military_context": decision["air_military_context"],
-                "same_attack_context": decision["same_attack_context"],
-                "temporal_binding": decision["temporal_binding"],
-                "single_episode_day_inference": decision["single_episode_day_inference"],
-                "controlled_blast_event_segments": decision["controlled_blast_event_segments"],
-                "sensitivity_basis": decision["sensitivity_basis"],
-                "classification_episode_id": decision["proposed_matched_episode_id"],
-            },
+            "classification_evidence": classification_evidence_payload(decision),
             "review_note": (
                 "evidence-layered auto-classification"
                 if status in {"approved_strict", "approved_sensitivity", "rejected"}
@@ -1754,6 +2178,26 @@ def self_test() -> None:
     assert air_military_context("Ракета рухається у напрямку міста")
     assert explicit_alert_relation("Вибух стався після оголошення тривоги")
     assert explicit_alert_relation("У місті пролунав вибух, коли тривала повітряна тривога")
+    for live_phrase in (
+        "У Києві лунає вибух",
+        "У Києві лунають вибухи",
+        "У Києві лунають повторні вибухи",
+        "У Києві чутно вибух",
+        "У Києві чутно вибухи",
+        "У Києві чутно серію вибухів",
+        "У Києві чути вибух",
+        "У Києві чути вибухи",
+        "У Києві чути: серію вибухів",
+    ):
+        assert contemporaneous_live_wording(live_phrase), live_phrase
+    for retrospective_phrase in (
+        "У Києві було чути вибухи",
+        "У Києві було чутно вибух",
+        "У Києві раніше чули вибухи",
+        "Протягом дня у Києві було чути вибухи",
+        "Київ під ударом цілий день: вибухи лунали у різних районах",
+    ):
+        assert not contemporaneous_live_wording(retrospective_phrase), retrospective_phrase
 
     vinnytsia_branding = {
         "title": "Вибухи у кар’єрі на Вінниччині: де та коли проводитимуть роботи - Вінниця Преспоінт",
@@ -2013,9 +2457,10 @@ def self_test() -> None:
     assert dry_decision["proposed_outcome"] == "approved_sensitivity"
     assert existing["status"] == before_status == "needs_review"
 
-    # Matching invariants remain intact.
+    # Matching refresh must keep matching and classification metadata coherent.
     existing_queue = [{
         **strict_base,
+        "title": "У Полтаві пролунав вибух",
         "candidate_id": "existing-unmatched",
         "city_key": "poltava",
         "city": "Полтава",
@@ -2024,11 +2469,35 @@ def self_test() -> None:
         "trigger_episode_ids": [],
         "trigger_check_labels": ["72h"],
         "matched_episode_id": None,
+        "matching_outcome": "no_match",
+        "matched_episode_ids": [],
+        "matching_logical_episode_groups": [],
+        "classification_reason_codes": [
+            "MATCH_NONE",
+            "EXACT_CITY_EVENT_TEXT",
+            "STRICT_EXPLOSION_EVIDENCE",
+            "NO_AIR_MILITARY_CONTEXT",
+            "NO_STRICT_TEMPORAL_BINDING",
+        ],
+        "classification_evidence": {},
     }]
-    assert refresh_queue_matching(existing_queue, {"cities": {"poltava": {"episodes": []}}}, {"needs_review"})["no_match"] == 1
-    assert refresh_queue_matching(existing_queue, {"cities": {"poltava": {"episodes": [poltava_ep]}}}, {"needs_review"})["unique_match"] == 1
+    no_match_refresh = refresh_queue_matching(
+        existing_queue,
+        {"cities": {"poltava": {"episodes": []}}},
+        {"needs_review"},
+    )
+    assert no_match_refresh["no_match"] == 1
+    unique_refresh = refresh_queue_matching(
+        existing_queue,
+        {"cities": {"poltava": {"episodes": [poltava_ep]}}},
+        {"needs_review"},
+    )
+    assert unique_refresh["unique_match"] == 1
+    assert unique_refresh["stale_classification_repaired"] == 1
     assert existing_queue[0]["matched_episode_id"] == poltava_ep["episode_id"]
     assert existing_queue[0]["status"] == "needs_review"
+    assert "MATCH_UNIQUE" in existing_queue[0]["classification_reason_codes"]
+    assert "MATCH_NONE" not in existing_queue[0]["classification_reason_codes"]
 
     overlap_a = make_episode("poltava", dt, dt + timedelta(hours=1))
     overlap_b = make_episode("poltava", dt + timedelta(minutes=20), dt + timedelta(hours=1, minutes=20))
@@ -2228,6 +2697,73 @@ def self_test() -> None:
     assert controlled_decision["proposed_outcome"] == "rejected"
     assert "DETERMINISTIC_CONTROLLED_BLAST" in controlled_decision["reason_codes"]
 
+    # Bounded episode-level composition: one trusted live temporal anchor plus
+    # a separate same-attack exact-city aerial-war source may support strict.
+    composition_anchor = {
+        **strict_base,
+        "candidate_id": "composition-anchor",
+        "city_key": "poltava",
+        "city": "Полтава",
+        "status": "needs_review",
+        "source": "Telegram / СУСПІЛЬНЕ НОВИНИ",
+        "publisher": "СУСПІЛЬНЕ НОВИНИ",
+        "title": "У Полтаві чутно серію вибухів, повідомляють кореспонденти Суспільного.",
+        "snippet": "",
+        "published_at": iso(dt + timedelta(minutes=20)),
+        "matched_episode_id": poltava_ep["episode_id"],
+    }
+    composition_context = {
+        **strict_base,
+        "candidate_id": "composition-context",
+        "city_key": "poltava",
+        "city": "Полтава",
+        "status": "needs_review",
+        "source": "Google News RSS",
+        "publisher": "Test",
+        "title": "У Полтаві пролунали вибухи через атаку балістикою",
+        "snippet": "",
+        "published_at": iso(dt + timedelta(minutes=35)),
+        "matched_episode_id": poltava_ep["episode_id"],
+    }
+    composition_decision = compose_episode_candidates(
+        "poltava",
+        poltava_ep,
+        [composition_anchor, composition_context],
+        [poltava_ep],
+    )
+    assert composition_decision["final_composed_verdict"] == "approved_strict"
+    assert composition_decision["anchor_candidate_id"] == "composition-anchor"
+    assert composition_decision["contributing_candidate_ids"] == [
+        "composition-anchor",
+        "composition-context",
+    ]
+
+    cumulative_context = {
+        **composition_context,
+        "candidate_id": "composition-cumulative",
+        "title": "Полтава під ударом цілий день: вибухи через атаки дронами",
+    }
+    cumulative_decision = compose_episode_candidates(
+        "poltava",
+        poltava_ep,
+        [composition_anchor, cumulative_context],
+        [poltava_ep],
+    )
+    assert cumulative_decision["final_composed_verdict"] == "no_composed_strict"
+
+    overlapping_neighbor = make_episode(
+        "poltava",
+        dt + timedelta(minutes=25),
+        dt + timedelta(minutes=45),
+    )
+    neighbor_decision = compose_episode_candidates(
+        "poltava",
+        poltava_ep,
+        [composition_anchor, composition_context],
+        [poltava_ep, overlapping_neighbor],
+    )
+    assert neighbor_decision["final_composed_verdict"] == "no_composed_strict"
+
     if "kyiv" in CITY_CONFIG:
         assert load_kyiv_alert_episodes(KYIV_ALERTS_FILE)[-1]["alert_source"] == "kyiv_combined_exact_city"
     if "sevastopol" in CITY_CONFIG:
@@ -2279,10 +2815,14 @@ def main() -> None:
     errors.update({f"telegram:{key}": value for key, value in telegram_errors.items()})
     due = due_checks(state, followup_cutoff)
     searches = {}
+    composition_target_episode_ids = set()
     new_candidates = 0
     fulltext_fetches = 0
     fulltext_rescued_candidates = 0
     for city_key, city_due in sorted(due.items()):
+        composition_target_episode_ids.update(
+            str(ep.get("episode_id") or "") for ep, _ in city_due if ep.get("episode_id")
+        )
         earliest = min(parse_dt(ep.get("alert_start")) or started for ep, _ in city_due)
         rows = telegram_candidates_for_city(state, city_key, earliest, started)
         telegram_count = len(rows)
@@ -2324,6 +2864,11 @@ def main() -> None:
             check["checked_at"] = iso(started)
             check["new_candidates"] = added
 
+    composition_refresh = apply_episode_composition(
+        queue,
+        state,
+        composition_target_episode_ids,
+    )
     (
         due_checks_at_cutoff,
         checked_due_checks_at_cutoff,
@@ -2352,6 +2897,7 @@ def main() -> None:
         "new_review_candidates": new_candidates,
         "review_queue_size": len(queue),
         "matching_refresh": matching_refresh,
+        "composition_refresh": composition_refresh,
         "fulltext_fetches": fulltext_fetches,
         "fulltext_rescued_candidates": fulltext_rescued_candidates,
         "telegram": {
