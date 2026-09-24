@@ -3508,6 +3508,44 @@ def self_test() -> None:
         assert negative_count == 2
         assert not mismatches, mismatches
 
+        transition_cases = list(fixture.get("transition_cases") or [])
+        transition_types = {"strict_to_needs_review": 0, "sensitivity_to_needs_review": 0}
+        for transition in transition_cases:
+            old_status = str(transition.get("old_live_status") or "")
+            new_status = str(transition.get("expected_status") or "")
+            if old_status == "approved_strict" and new_status == "needs_review":
+                transition_types["strict_to_needs_review"] += 1
+            elif old_status == "approved_sensitivity" and new_status == "needs_review":
+                transition_types["sensitivity_to_needs_review"] += 1
+        assert len(transition_cases) == 8
+        assert transition_types == {
+            "strict_to_needs_review": 7,
+            "sensitivity_to_needs_review": 1,
+        }
+
+        episode_results = {}
+        for episode_case in fixture.get("episode_cases") or []:
+            supporting = [
+                replayed[str(cid)].get("status")
+                for cid in episode_case.get("supporting_candidate_ids") or []
+            ]
+            if "approved_strict" in supporting:
+                live_status = "approved_strict"
+                result = "KEEP_STRICT"
+            elif "approved_sensitivity" in supporting:
+                live_status = "approved_sensitivity"
+                result = "KEEP_SENSITIVITY"
+            else:
+                live_status = "needs_review"
+                result = "DOWNGRADE_TO_UNRESOLVED"
+            assert live_status == episode_case["expected_status"], (episode_case, supporting)
+            assert result == episode_case["expected_result"], (episode_case, supporting)
+            episode_results[str(episode_case["episode_id"])] = result
+        assert len(episode_results) == 20
+        assert list(episode_results.values()).count("KEEP_STRICT") == 15
+        assert list(episode_results.values()).count("KEEP_SENSITIVITY") == 1
+        assert list(episode_results.values()).count("DOWNGRADE_TO_UNRESOLVED") == 4
+
         no_adapter_mismatches = []
         for case in cases:
             expected_raw = case.get("expected_without_review_provenance")
@@ -3615,6 +3653,19 @@ def self_test() -> None:
             assert result["final_composed_verdict"] == "approved_strict", result
             assert result.get("anchor_candidate_id") == composed_case["anchor_candidate_id"], result
         assert len(composition_regression_results) == 3
+        frozen_strict_episode_ids = {
+            episode_id
+            for episode_id, result in episode_results.items()
+            if result == "KEEP_STRICT"
+        }
+        composition_strict_episode_ids = {
+            str(row["episode_id"]) for row in composition_regression_results
+        }
+        strict_event_ids = frozen_strict_episode_ids | composition_strict_episode_ids
+        assert len(frozen_strict_episode_ids) == 15
+        assert len(composition_strict_episode_ids) == 3
+        assert not (frozen_strict_episode_ids & composition_strict_episode_ids)
+        assert len(strict_event_ids) == 18
 
         future_queue = json.loads(json.dumps(queue_rows))
         future_by_id = {
@@ -3695,8 +3746,10 @@ def self_test() -> None:
             "Provenance hardening frozen replay OK: "
             f"50/50 approvals ({positive_strict} strict, {positive_sensitivity} sensitivity); "
             "2/2 deterministic negatives; 58/58 no-adapter regression; "
+            "20/20 episode replay (15 strict, 1 sensitivity, 4 unresolved); "
+            "8/8 transitions (7 strict, 1 sensitivity -> needs_review); "
             f"{ordinary_checked} ordinary unreviewed controls; "
-            f"3/3 composition-positive recomputations; "
+            f"3/3 composition-positive recomputations; strict episode event IDs unique (18/18); "
             f"{ordinary_checked} ordinary unreviewed identity controls "
             f"(persisted deltas={len(ordinary_persisted_deltas)}, adapter widening=0); "
             f"future-run unexpected status changes=0; stale unique+MATCH_NONE={stale_unique_match_none}; "
