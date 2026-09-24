@@ -142,6 +142,11 @@ MATCH_REPRESENTATION_TOLERANCE_SECONDS = 90.0
 SENSITIVITY_NEAR_BOUNDARY_MAX_MINUTES = 10
 COMPOSITION_MAX_GAP_MINUTES = 45
 COMPOSITION_TIGHT_TRUSTED_GAP_MINUTES = 15
+REVIEW_PROVENANCE_SCHEMA_VERSION = 1
+REVIEW_PROVENANCE_METHODOLOGY_VERSION = "explosion-monitor-reviewed-provenance-v1"
+PROVENANCE_HARDENING_ARTIFACT = (
+    ROOT.parent / "research" / "explosion_monitor_provenance_persistence_hardening_dry_replay_2026-09-24.json"
+)
 
 
 def now_utc() -> datetime:
@@ -701,6 +706,275 @@ def same_attack_context_evidence(city_key: str, row: dict, strict_evidence: dict
     if trusted_same_attack_source(row) and len(mentioned) <= 1:
         return {"present": True, "reason": "trusted_source_adjacent_air_context"}
     return {"present": False, "reason": "air_context_not_linked_to_exact_city_event"}
+
+
+
+def _review_role(raw: dict, key: str) -> dict:
+    value = raw.get(key)
+    if isinstance(value, bool):
+        present = value
+        payload = {}
+    elif isinstance(value, dict):
+        payload = dict(value)
+        present = value.get("present") is True
+        if key == "same_attack_basis" and not present:
+            present = bool(value.get("basis"))
+    else:
+        present = bool(value) if key == "same_attack_basis" else False
+        payload = {"value": value} if value not in (None, "", [], {}) else {}
+    evidence_text = payload.get("evidence_text") or payload.get("evidence")
+    segments = []
+    if isinstance(evidence_text, str) and evidence_text.strip():
+        segments = [" ".join(evidence_text.split())]
+    elif isinstance(evidence_text, list):
+        segments = [" ".join(str(x).split()) for x in evidence_text if str(x).strip()]
+    return {
+        **payload,
+        "present": bool(present),
+        "segments": segments[:4],
+        "evidence_source": "review_provenance",
+    }
+
+
+def _review_neighbor_passed(raw: dict, temporal: dict | None = None) -> bool:
+    check = {}
+    if isinstance(temporal, dict):
+        check = temporal.get("neighboring_alert_check") or {}
+    if not isinstance(check, dict) or not check:
+        check = raw.get("neighboring_alert_check") or {}
+    return isinstance(check, dict) and check.get("passed") is True
+
+
+def reviewed_provenance_adapter(
+    row: dict,
+    city_key: str,
+    episodes: list[dict],
+    matching: dict,
+) -> dict:
+    raw = row.get("review_provenance")
+    base = {
+        "present": isinstance(raw, dict),
+        "usable": False,
+        "target_episode_id": None,
+        "reason_codes": [],
+        "exact_city": {"present": False, "segments": [], "evidence_source": "review_provenance"},
+        "strict_explosion": {"present": False, "segments": [], "evidence_source": "review_provenance"},
+        "air_military_context": {"present": False, "segments": [], "evidence_source": "review_provenance"},
+        "same_attack_context": {"present": False, "reason": "no_reviewed_same_attack_basis", "evidence_source": "review_provenance"},
+        "temporal_binding": {
+            "present": False,
+            "code": "NO_REVIEWED_TEMPORAL_BINDING",
+            "evidence_type": None,
+            "evidence": None,
+            "event_time": None,
+            "event_interval": None,
+            "message_time": None,
+            "timestamp_precision": None,
+            "episode_specific": False,
+            "supported_episode_ids": [],
+            "episode_id": None,
+            "near_boundary": empty_near_boundary(),
+            "evidence_sources": [],
+        },
+        "sensitivity_binding": {
+            "present": False,
+            "basis": None,
+            "episode_id": None,
+            "supported_episode_ids": [],
+            "evidence_source": "review_provenance",
+        },
+    }
+    if not isinstance(raw, dict):
+        return base
+
+    try:
+        schema_version = int(raw.get("schema_version"))
+    except (TypeError, ValueError):
+        schema_version = None
+    if schema_version != REVIEW_PROVENANCE_SCHEMA_VERSION:
+        base["reason_codes"].append("REVIEW_PROVENANCE_SCHEMA_UNSUPPORTED")
+        return base
+
+    target_id = str(raw.get("target_episode_id") or "")
+    base["target_episode_id"] = target_id or None
+    target_episode = next(
+        (ep for ep in episodes if str(ep.get("episode_id") or "") == target_id),
+        None,
+    )
+    if not target_id or target_episode is None:
+        base["reason_codes"].append("REVIEW_PROVENANCE_TARGET_EPISODE_UNAVAILABLE")
+        return base
+
+    current_bound_id = str(row.get("matched_episode_id") or "")
+    if current_bound_id and current_bound_id != target_id:
+        base["reason_codes"].append("REVIEW_PROVENANCE_TARGET_MISMATCH")
+        return base
+
+    base["usable"] = True
+    base["reason_codes"].append("REVIEW_PROVENANCE_USABLE")
+    base["exact_city"] = _review_role(raw, "exact_city_evidence")
+    base["strict_explosion"] = _review_role(raw, "explosion_evidence")
+    base["air_military_context"] = _review_role(raw, "aerial_war_evidence")
+    reviewed_same_attack = _review_role(raw, "same_attack_basis")
+    base["same_attack_context"] = {
+        **reviewed_same_attack,
+        "reason": (
+            "reviewed_same_attack_basis"
+            if reviewed_same_attack.get("present")
+            else "no_reviewed_same_attack_basis"
+        ),
+    }
+
+    temporal = raw.get("temporal") or {}
+    if isinstance(temporal, dict):
+        status = str(temporal.get("status") or "")
+        episode_specific = temporal.get("episode_specific") is True
+        validated = temporal.get("validated_by_review") is True
+        neighbor_passed = _review_neighbor_passed(raw, temporal)
+        evidence_type = str(
+            temporal.get("temporal_evidence_type")
+            or temporal.get("evidence_type")
+            or ""
+        ) or None
+        precision = temporal.get("timestamp_precision")
+        event_time_raw = temporal.get("event_time")
+        event_interval_raw = temporal.get("event_interval")
+        temporal_positive = False
+        event_time = None
+        event_interval = None
+
+        if status == "validated_event_time" and validated and episode_specific and neighbor_passed:
+            event_dt = parse_dt(event_time_raw)
+            start = parse_dt(target_episode.get("alert_start"))
+            end = parse_dt(target_episode.get("alert_end"))
+            if event_dt and start and end and start <= event_dt <= end:
+                temporal_positive = True
+                event_time = iso(event_dt)
+        elif status == "validated_event_interval" and validated and episode_specific and neighbor_passed:
+            if isinstance(event_interval_raw, dict):
+                interval_start = parse_dt(event_interval_raw.get("start"))
+                interval_end = parse_dt(event_interval_raw.get("end"))
+            elif isinstance(event_interval_raw, (list, tuple)) and len(event_interval_raw) == 2:
+                interval_start = parse_dt(event_interval_raw[0])
+                interval_end = parse_dt(event_interval_raw[1])
+            else:
+                interval_start = interval_end = None
+            target_start = parse_dt(target_episode.get("alert_start"))
+            target_end = parse_dt(target_episode.get("alert_end"))
+            if (
+                interval_start and interval_end and target_start and target_end
+                and interval_start <= interval_end
+                and target_start <= interval_start
+                and interval_end <= target_end
+            ):
+                temporal_positive = True
+                event_interval = {
+                    "start": iso(interval_start),
+                    "end": iso(interval_end),
+                }
+        elif (
+            status == "validated_episode_binding"
+            and validated
+            and episode_specific
+            and neighbor_passed
+            and evidence_type
+        ):
+            temporal_positive = True
+
+        if temporal_positive:
+            base["temporal_binding"] = {
+                "present": True,
+                "code": "TEMPORAL_REVIEWED_VALIDATED_BINDING",
+                "evidence_type": evidence_type or status,
+                "evidence": temporal.get("evidence_text") or event_time or event_interval,
+                "event_time": event_time,
+                "event_interval": event_interval,
+                "message_time": temporal.get("message_time"),
+                "publication_time": temporal.get("publication_time"),
+                "update_time": temporal.get("update_time"),
+                "timestamp_precision": precision,
+                "episode_specific": True,
+                "supported_episode_ids": [target_id],
+                "episode_id": target_id,
+                "near_boundary": empty_near_boundary(),
+                "evidence_sources": ["review_provenance"],
+                "source_identity": temporal.get("source_identity"),
+            }
+            base["reason_codes"].append("REVIEW_PROVENANCE_TEMPORAL_BINDING_USED")
+        elif status in {"unsupported", "ambiguous", "negative"}:
+            base["reason_codes"].append("REVIEW_PROVENANCE_TEMPORAL_UNSUPPORTED")
+
+    sensitivity = raw.get("sensitivity_binding") or {}
+    if (
+        isinstance(sensitivity, dict)
+        and sensitivity.get("present") is True
+        and sensitivity.get("validated_by_review") is True
+        and sensitivity.get("episode_specific") is True
+        and _review_neighbor_passed(raw, sensitivity)
+        and str(sensitivity.get("basis") or "") in {"inferred_same_attack", "near_boundary"}
+    ):
+        base["sensitivity_binding"] = {
+            "present": True,
+            "basis": str(sensitivity.get("basis")),
+            "episode_id": target_id,
+            "supported_episode_ids": [target_id],
+            "reason": "reviewed_episode_specific_sensitivity_binding",
+            "evidence_source": "review_provenance",
+        }
+        base["reason_codes"].append("REVIEW_PROVENANCE_SENSITIVITY_BINDING_USED")
+    return base
+
+
+def merge_reviewed_presence(candidate: dict, reviewed: dict) -> dict:
+    candidate = dict(candidate or {})
+    reviewed = dict(reviewed or {})
+    sources = []
+    if candidate.get("present"):
+        sources.append("candidate_evidence")
+    if reviewed.get("present"):
+        sources.append("review_provenance")
+    if not candidate.get("present") and reviewed.get("present"):
+        out = dict(reviewed)
+    else:
+        out = candidate
+        if reviewed.get("present"):
+            out["reviewed_evidence"] = reviewed
+    out["present"] = bool(candidate.get("present") or reviewed.get("present"))
+    out["evidence_sources"] = sources
+    return out
+
+
+def merge_reviewed_temporal(candidate: dict, reviewed: dict) -> dict:
+    candidate = dict(candidate or {})
+    reviewed = dict(reviewed or {})
+    if candidate.get("present"):
+        out = candidate
+        sources = ["candidate_evidence"]
+        if reviewed.get("present"):
+            sources.append("review_provenance")
+            out["reviewed_evidence"] = reviewed
+    elif reviewed.get("present"):
+        out = reviewed
+        sources = ["review_provenance"]
+    else:
+        out = candidate
+        sources = []
+    out["evidence_sources"] = sources
+    return out
+
+
+def reviewed_same_attack_basis_for_target(row: dict, target_id: str) -> bool:
+    raw = row.get("review_provenance")
+    if not isinstance(raw, dict):
+        return False
+    if raw.get("schema_version") != REVIEW_PROVENANCE_SCHEMA_VERSION:
+        return False
+    if str(raw.get("target_episode_id") or "") != target_id:
+        return False
+    if str(row.get("matched_episode_id") or "") not in {"", target_id}:
+        return False
+    role = _review_role(raw, "same_attack_basis")
+    return bool(role.get("present"))
 
 
 def any_audited_city_mentioned(text: str) -> bool:
@@ -1602,12 +1876,38 @@ def dry_classify_existing_candidate(item: dict, state: dict) -> dict:
 
 def classify_candidate(row: dict, city_key: str, episodes: list[dict], matching: dict | None = None) -> dict:
     matching = matching or match_candidate_to_episodes(row, episodes)
-    exact = exact_city_classification_evidence(city_key, row)
-    strict = strict_explosion_evidence(city_key, row)
-    air = air_military_context_evidence(row)
-    same_attack = same_attack_context_evidence(city_key, row, strict, air)
-    temporal = temporal_binding_evidence(row, strict, matching, episodes)
-    inference = single_episode_day_inference(row, matching, episodes)
+
+    candidate_exact = exact_city_classification_evidence(city_key, row)
+    candidate_strict = strict_explosion_evidence(city_key, row)
+    candidate_air = air_military_context_evidence(row)
+    candidate_same_attack = same_attack_context_evidence(
+        city_key, row, candidate_strict, candidate_air
+    )
+    candidate_temporal = temporal_binding_evidence(
+        row, candidate_strict, matching, episodes
+    )
+    candidate_inference = single_episode_day_inference(row, matching, episodes)
+
+    reviewed = reviewed_provenance_adapter(row, city_key, episodes, matching)
+    exact = merge_reviewed_presence(candidate_exact, reviewed["exact_city"])
+    strict = merge_reviewed_presence(candidate_strict, reviewed["strict_explosion"])
+    air = merge_reviewed_presence(candidate_air, reviewed["air_military_context"])
+    same_attack = merge_reviewed_presence(
+        candidate_same_attack, reviewed["same_attack_context"]
+    )
+    temporal = merge_reviewed_temporal(
+        candidate_temporal, reviewed["temporal_binding"]
+    )
+    inference = dict(candidate_inference)
+    if not inference.get("present") and reviewed["sensitivity_binding"].get("present"):
+        inference = dict(reviewed["sensitivity_binding"])
+        inference["local_date"] = publication_local_day(row).isoformat() if publication_local_day(row) else None
+        inference["evidence_sources"] = ["review_provenance"]
+    else:
+        inference["evidence_sources"] = (
+            ["candidate_evidence"] if inference.get("present") else []
+        )
+
     text = classification_text(row)
     segments = classification_segments(row)
     publisher = str(row.get("publisher") or "")
@@ -1628,10 +1928,14 @@ def classify_candidate(row: dict, city_key: str, episodes: list[dict], matching:
     pvo_only_complete_message = (
         trusted_live_source(row)
         and exact["present"]
+        and not strict["present"]
         and not whole_message_event
         and "ппо" in normalize_evidence_text(text)
     )
-    fulltext_requires_review = row.get("discovery_basis") == "publisher_fulltext"
+    fulltext_requires_review = (
+        row.get("discovery_basis") == "publisher_fulltext"
+        and not reviewed.get("usable")
+    )
 
     reason_codes = []
     outcome = str(matching.get("outcome") or "no_match")
@@ -1649,6 +1953,10 @@ def classify_candidate(row: dict, city_key: str, episodes: list[dict], matching:
     if air["present"]:
         reason_codes.append("SAME_ATTACK_CONTEXT_SUPPORTED" if same_attack["present"] else "AIR_CONTEXT_NOT_LINKED_TO_EVENT")
     reason_codes.append(temporal.get("code") or "NO_STRICT_TEMPORAL_BINDING")
+    for code in reviewed.get("reason_codes") or []:
+        if code not in reason_codes:
+            reason_codes.append(code)
+
     near_boundary = bool(
         (temporal.get("near_boundary") or {}).get("present")
         and (temporal.get("near_boundary") or {}).get("episode_specific")
@@ -1698,8 +2006,12 @@ def classify_candidate(row: dict, city_key: str, episodes: list[dict], matching:
     elif base_event_ok and inferred_episode_id:
         proposed = "approved_sensitivity"
         proposed_matched_episode_id = inferred_episode_id
-        sensitivity_basis = "inferred_same_attack"
-        reason_codes.append("SENSITIVITY_INFERRED_SAME_ATTACK")
+        sensitivity_basis = str(inference.get("basis") or "inferred_same_attack")
+        reason_codes.append(
+            "SENSITIVITY_NEAR_BOUNDARY"
+            if sensitivity_basis == "near_boundary"
+            else "SENSITIVITY_INFERRED_SAME_ATTACK"
+        )
     elif base_event_ok and len(episodes_intersecting_local_day(row, episodes)) > 1:
         reason_codes.append("MULTI_EPISODE_DATE_REQUIRES_EPISODE_SPECIFIC_TEMPORAL_PROOF")
 
@@ -1707,6 +2019,15 @@ def classify_candidate(row: dict, city_key: str, episodes: list[dict], matching:
         "proposed_outcome": proposed,
         "proposed_matched_episode_id": proposed_matched_episode_id,
         "matching": matching,
+        "candidate_evidence": {
+            "exact_city": candidate_exact,
+            "strict_explosion": candidate_strict,
+            "air_military_context": candidate_air,
+            "same_attack_context": candidate_same_attack,
+            "temporal_binding": candidate_temporal,
+            "single_episode_day_inference": candidate_inference,
+        },
+        "review_provenance_adapter": reviewed,
         "exact_city_classification_evidence": exact,
         "strict_explosion_evidence": strict,
         "air_military_context": air,
@@ -1717,7 +2038,6 @@ def classify_candidate(row: dict, city_key: str, episodes: list[dict], matching:
         "sensitivity_basis": sensitivity_basis,
         "reason_codes": reason_codes,
     }
-
 
 def classification_evidence_payload(decision: dict) -> dict:
     return {
@@ -1730,6 +2050,8 @@ def classification_evidence_payload(decision: dict) -> dict:
         "controlled_blast_event_segments": decision["controlled_blast_event_segments"],
         "sensitivity_basis": decision["sensitivity_basis"],
         "classification_episode_id": decision["proposed_matched_episode_id"],
+        "candidate_evidence": decision.get("candidate_evidence") or {},
+        "review_provenance_adapter": decision.get("review_provenance_adapter") or {},
     }
 
 
@@ -1830,6 +2152,11 @@ def composition_same_attack_compatibility(
         }
 
     basis = [f"timestamps_within_{COMPOSITION_MAX_GAP_MINUTES}m"]
+    if (
+        reviewed_same_attack_basis_for_target(temporal_row, str(target_episode.get("episode_id") or ""))
+        or reviewed_same_attack_basis_for_target(context_row, str(target_episode.get("episode_id") or ""))
+    ):
+        basis.append("reviewed_same_attack_basis")
     sequence = composition_sequence_signals(temporal_text)
     if sequence:
         basis.extend(sequence)
@@ -1975,12 +2302,29 @@ def compose_episode_candidates(
             {
                 "candidate_id": anchor_id,
                 "roles": ["explosion_evidence", "temporal_proof"],
+                "role_sources": {
+                    "explosion_evidence": list(
+                        anchor_decision["strict_explosion_evidence"].get("evidence_sources") or []
+                    ),
+                    "temporal_proof": list(temporal.get("evidence_sources") or []),
+                },
                 "temporal_code": temporal.get("code"),
                 "temporal_evidence_type": temporal.get("evidence_type"),
             },
             {
                 "candidate_id": context_id,
                 "roles": ["explosion_evidence", "air_military_context"],
+                "role_sources": {
+                    "explosion_evidence": list(
+                        context_decision["strict_explosion_evidence"].get("evidence_sources") or []
+                    ),
+                    "air_military_context": list(
+                        context_decision["air_military_context"].get("evidence_sources") or []
+                    ),
+                    "same_attack_context": list(
+                        context_decision["same_attack_context"].get("evidence_sources") or []
+                    ),
+                },
                 "same_attack_reason": context_decision["same_attack_context"].get("reason"),
             },
         ],
@@ -2763,6 +3107,443 @@ def self_test() -> None:
         [poltava_ep, overlapping_neighbor],
     )
     assert neighbor_decision["final_composed_verdict"] == "no_composed_strict"
+
+
+    # Reviewed provenance persistence/consumption focused regressions.
+    reviewed_target = {
+        "episode_id": "reviewed-target",
+        "city_key": "sumy",
+        "city": "Суми",
+        "alert_start": "2026-09-18T17:24:19Z",
+        "alert_end": "2026-09-18T18:24:36Z",
+    }
+    reviewed_neighbor = {
+        "episode_id": "reviewed-neighbor",
+        "city_key": "sumy",
+        "city": "Суми",
+        "alert_start": "2026-09-18T12:00:00Z",
+        "alert_end": "2026-09-18T13:00:00Z",
+    }
+    reviewed_strict_row = {
+        "candidate_id": "6212f72cfd28e6a86fd5bc51",
+        "city_key": "sumy",
+        "city": "Суми",
+        "title": "Вибухи у Сумах: росіяни вдарили КАБами по багатоповерхівках",
+        "snippet": "",
+        "publisher": "Ukr.net",
+        "source": "Google News RSS",
+        "published_at": "2026-09-18T20:16:49Z",
+        "matched_episode_id": "reviewed-target",
+    }
+    no_review_strict = classify_candidate(
+        dict(reviewed_strict_row), "sumy", [reviewed_neighbor, reviewed_target]
+    )
+    assert no_review_strict["proposed_outcome"] == "needs_review"
+    reviewed_strict_row["review_provenance"] = {
+        "schema_version": REVIEW_PROVENANCE_SCHEMA_VERSION,
+        "methodology_version": REVIEW_PROVENANCE_METHODOLOGY_VERSION,
+        "target_episode_id": "reviewed-target",
+        "exact_city_evidence": {"present": True, "evidence_text": "Exact-city Sumy KAB strike"},
+        "explosion_evidence": {"present": True, "evidence_text": "Explosions / impacts in Sumy"},
+        "aerial_war_evidence": {"present": True, "evidence_text": "KAB aerial attack"},
+        "same_attack_basis": {"present": True, "basis": ["same reviewed KAB strike"]},
+        "temporal": {
+            "status": "validated_event_time",
+            "validated_by_review": True,
+            "event_time": "2026-09-18T18:00:00Z",
+            "timestamp_precision": "approximate_minute",
+            "temporal_evidence_type": "reviewed_source_event_time",
+            "episode_specific": True,
+            "neighboring_alert_check": {"passed": True},
+            "publication_time": "2026-09-18T20:16:49Z",
+        },
+    }
+    reviewed_strict = classify_candidate(
+        reviewed_strict_row, "sumy", [reviewed_neighbor, reviewed_target]
+    )
+    assert reviewed_strict["proposed_outcome"] == "approved_strict"
+    assert reviewed_strict["proposed_matched_episode_id"] == "reviewed-target"
+    assert reviewed_strict["temporal_binding"]["event_time"] == "2026-09-18T18:00:00Z"
+    assert reviewed_strict["temporal_binding"]["timestamp_precision"] == "approximate_minute"
+
+    sev_target = {
+        "episode_id": "reviewed-sevastopol",
+        "city_key": "sevastopol",
+        "city": "Севастополь",
+        "alert_start": "2026-09-19T15:04:00Z",
+        "alert_end": "2026-09-19T15:16:00Z",
+    }
+    reviewed_sensitivity_row = {
+        "candidate_id": "70265845b367fea065fbd077",
+        "city_key": "sevastopol",
+        "city": "Севастополь",
+        "title": "У Севастополі прогриміли потужні вибухи",
+        "snippet": "",
+        "publisher": "ukr.net",
+        "source": "Google News RSS",
+        "published_at": "2026-09-19T15:10:00Z",
+        "matched_episode_id": "reviewed-sevastopol",
+        "review_provenance": {
+            "schema_version": REVIEW_PROVENANCE_SCHEMA_VERSION,
+            "methodology_version": REVIEW_PROVENANCE_METHODOLOGY_VERSION,
+            "target_episode_id": "reviewed-sevastopol",
+            "exact_city_evidence": {"present": True},
+            "explosion_evidence": {"present": True},
+            "aerial_war_evidence": {"present": True, "evidence_text": "reviewed mobile-fire-group / aerial context"},
+            "same_attack_basis": {"present": True, "basis": ["reviewed contemporaneous same attack"]},
+            "temporal": {
+                "status": "unsupported",
+                "validated_by_review": True,
+                "episode_specific": False,
+                "publication_time": "2026-09-19T15:10:00Z",
+            },
+            "sensitivity_binding": {
+                "present": True,
+                "validated_by_review": True,
+                "episode_specific": True,
+                "basis": "inferred_same_attack",
+                "neighboring_alert_check": {"passed": True},
+            },
+        },
+    }
+    no_review_sensitivity = dict(reviewed_sensitivity_row)
+    no_review_sensitivity.pop("review_provenance")
+    assert classify_candidate(
+        no_review_sensitivity, "sevastopol", [sev_target]
+    )["proposed_outcome"] == "needs_review"
+    reviewed_sensitivity = classify_candidate(
+        reviewed_sensitivity_row, "sevastopol", [sev_target]
+    )
+    assert reviewed_sensitivity["proposed_outcome"] == "approved_sensitivity"
+    assert reviewed_sensitivity["sensitivity_basis"] == "inferred_same_attack"
+
+    zap_target = {
+        "episode_id": "reviewed-zap-target",
+        "city_key": "zaporizhzhia",
+        "city": "Запоріжжя",
+        "alert_start": "2026-09-18T16:21:56Z",
+        "alert_end": "2026-09-18T17:49:19Z",
+    }
+    zap_neighbor = {
+        "episode_id": "reviewed-zap-neighbor",
+        "city_key": "zaporizhzhia",
+        "city": "Запоріжжя",
+        "alert_start": "2026-09-18T12:00:00Z",
+        "alert_end": "2026-09-18T13:00:00Z",
+    }
+    zap_negative = {
+        "candidate_id": "e7461ec759e4d79020dfd1ba",
+        "city_key": "zaporizhzhia",
+        "city": "Запоріжжя",
+        "title": "У Запоріжжі пролунали вибухи під час атаки, є влучання в інфраструктуру",
+        "snippet": "",
+        "publisher": "061.ua",
+        "source": "Google News RSS",
+        "published_at": "2026-09-18T17:10:00Z",
+        "matched_episode_id": "reviewed-zap-target",
+        "review_provenance": {
+            "schema_version": REVIEW_PROVENANCE_SCHEMA_VERSION,
+            "methodology_version": REVIEW_PROVENANCE_METHODOLOGY_VERSION,
+            "target_episode_id": "reviewed-zap-target",
+            "exact_city_evidence": {"present": True},
+            "explosion_evidence": {"present": True},
+            "aerial_war_evidence": {"present": True},
+            "same_attack_basis": {"present": True, "basis": ["reviewed attack identity"]},
+            "temporal": {
+                "status": "unsupported",
+                "validated_by_review": True,
+                "episode_specific": False,
+                "event_time": None,
+                "publication_time": "2026-09-18T19:57:00+03:00",
+                "temporal_evidence_type": "publication_time_not_event_time",
+                "neighboring_alert_check": {"passed": False},
+            },
+        },
+    }
+    zap_negative_decision = classify_candidate(
+        zap_negative, "zaporizhzhia", [zap_neighbor, zap_target]
+    )
+    assert zap_negative_decision["proposed_outcome"] == "needs_review"
+    assert zap_negative_decision["temporal_binding"].get("event_time") is None
+
+    rematched = json.loads(json.dumps(reviewed_strict_row))
+    rematch_ep = {
+        "episode_id": "reviewed-rematch-B",
+        "city_key": "sumy",
+        "city": "Суми",
+        "alert_start": "2026-09-18T20:00:00Z",
+        "alert_end": "2026-09-18T21:00:00Z",
+    }
+    apply_matching_result(
+        rematched,
+        {
+            "outcome": "unique_match",
+            "matched_episode_ids": ["reviewed-rematch-B"],
+            "logical_episode_groups": [["reviewed-rematch-B"]],
+            "matched_episode_id": "reviewed-rematch-B",
+            "reason": "test_rematch",
+        },
+    )
+    rematch_decision = classify_candidate(
+        rematched, "sumy", [reviewed_target, rematch_ep]
+    )
+    assert rematch_decision["proposed_outcome"] == "needs_review"
+    assert "REVIEW_PROVENANCE_TARGET_MISMATCH" in rematch_decision["reason_codes"]
+    assert rematched["review_provenance"]["target_episode_id"] == "reviewed-target"
+
+    serialized = json.loads(json.dumps(reviewed_strict_row))
+    before_provenance = json.loads(json.dumps(serialized["review_provenance"]))
+    serialized_decision = classify_candidate(
+        serialized, "sumy", [reviewed_neighbor, reviewed_target]
+    )
+    apply_classification_decision(
+        serialized, serialized_decision, serialized_decision["matching"]
+    )
+    serialized = json.loads(json.dumps(serialized))
+    assert serialized["review_provenance"] == before_provenance
+
+    composition_review_anchor = {
+        **composition_anchor,
+        "candidate_id": "composition-reviewed-anchor",
+        "matched_episode_id": poltava_ep["episode_id"],
+        "review_provenance": {
+            "schema_version": REVIEW_PROVENANCE_SCHEMA_VERSION,
+            "methodology_version": REVIEW_PROVENANCE_METHODOLOGY_VERSION,
+            "target_episode_id": poltava_ep["episode_id"],
+            "exact_city_evidence": {"present": True},
+            "explosion_evidence": {"present": True},
+            "same_attack_basis": {"present": True, "basis": ["reviewed same attack"]},
+            "temporal": {
+                "status": "validated_event_time",
+                "validated_by_review": True,
+                "event_time": iso(dt + timedelta(minutes=20)),
+                "timestamp_precision": "minute",
+                "temporal_evidence_type": "reviewed_source_event_time",
+                "episode_specific": True,
+                "neighboring_alert_check": {"passed": True},
+            },
+        },
+    }
+    composition_review_anchor["title"] = "У Полтаві пролунав вибух"
+    composition_review_anchor["source"] = "Google News RSS"
+    composition_review_anchor["publisher"] = "Test"
+    mixed_composition = compose_episode_candidates(
+        "poltava",
+        poltava_ep,
+        [composition_review_anchor, composition_context],
+        [poltava_ep],
+    )
+    assert mixed_composition["final_composed_verdict"] == "approved_strict"
+    mixed_anchor = next(
+        row for row in mixed_composition["contributing_candidates"]
+        if row["candidate_id"] == "composition-reviewed-anchor"
+    )
+    assert "review_provenance" in mixed_anchor["role_sources"]["temporal_proof"]
+
+    # Data-driven frozen replay. The research artifact carries only in-memory
+    # review_provenance fixtures; live queue/state files are never written.
+    if PROVENANCE_HARDENING_ARTIFACT.exists():
+        hardening = load_json(PROVENANCE_HARDENING_ARTIFACT, {})
+        fixture = hardening.get("replay_fixture") or {}
+        cases = list(fixture.get("candidate_cases") or [])
+        queue_rows = load_json(QUEUE_FILE, [])
+        state_rows = load_json(STATE_FILE, {})
+        queue_by_id = {
+            str(item.get("candidate_id")): item
+            for item in queue_rows
+            if isinstance(item, dict) and item.get("candidate_id")
+        }
+        replayed = {}
+        for case in cases:
+            cid = str(case.get("candidate_id") or "")
+            if cid not in queue_by_id:
+                raise AssertionError(f"Frozen replay candidate missing from queue: {cid}")
+            item = json.loads(json.dumps(queue_by_id[cid]))
+            if isinstance(case.get("review_provenance"), dict):
+                item["review_provenance"] = json.loads(json.dumps(case["review_provenance"]))
+                if case.get("target_episode_id"):
+                    item["matched_episode_id"] = case["target_episode_id"]
+            else:
+                item.pop("review_provenance", None)
+            decision = dry_classify_existing_candidate(item, state_rows)
+            apply_classification_decision(item, decision, decision["matching"])
+            replayed[cid] = item
+
+        composition_fixture = fixture.get("composition_only_case") or {}
+        composition_anchor_id = str(composition_fixture.get("anchor_candidate_id") or "")
+        if composition_anchor_id:
+            anchor = replayed[composition_anchor_id]
+            city_key = str(composition_fixture["city_key"])
+            target_id = str(composition_fixture["target_episode_id"])
+            episodes = tracked_episodes_for_city(state_rows, city_key)
+            target = next(
+                ep for ep in episodes if str(ep.get("episode_id") or "") == target_id
+            )
+            group = [anchor]
+            for context_id in composition_fixture.get("context_candidate_ids") or []:
+                context = json.loads(json.dumps(queue_by_id[str(context_id)]))
+                context["matched_episode_id"] = target_id
+                group.append(context)
+            composed = compose_episode_candidates(city_key, target, group, episodes)
+            assert composed["final_composed_verdict"] == "approved_strict"
+            assert composed["anchor_candidate_id"] == composition_anchor_id
+            anchor["status"] = "approved_strict"
+            anchor["matched_episode_id"] = target_id
+            anchor["composition_provenance"] = composed
+
+        mismatches = []
+        positive_count = 0
+        positive_strict = 0
+        positive_sensitivity = 0
+        negative_count = 0
+        for case in cases:
+            cid = str(case["candidate_id"])
+            expected = str(case["expected_status"])
+            actual = str(replayed[cid].get("status") or "")
+            if expected in {"approved_strict", "approved_sensitivity"}:
+                positive_count += 1
+                positive_strict += expected == "approved_strict"
+                positive_sensitivity += expected == "approved_sensitivity"
+            else:
+                negative_count += bool(case.get("deterministic_negative"))
+            if actual != expected:
+                mismatches.append((cid, expected, actual))
+        assert positive_count == 50
+        assert positive_strict == 35
+        assert positive_sensitivity == 15
+        assert negative_count == 2
+        assert not mismatches, mismatches
+
+        no_adapter_mismatches = []
+        for case in cases:
+            expected_raw = case.get("expected_without_review_provenance")
+            if expected_raw is None:
+                continue
+            item = json.loads(json.dumps(queue_by_id[str(case["candidate_id"])]))
+            item.pop("review_provenance", None)
+            actual_raw = dry_classify_existing_candidate(item, state_rows)["proposed_outcome"]
+            if actual_raw != expected_raw:
+                no_adapter_mismatches.append(
+                    (case["candidate_id"], expected_raw, actual_raw)
+                )
+        assert not no_adapter_mismatches, no_adapter_mismatches
+
+        # Current auto-classified, non-reviewed records are an additional
+        # backward-compatibility control sample.
+        ordinary_checked = 0
+        ordinary_mismatches = []
+        frozen_ids = {str(case["candidate_id"]) for case in cases}
+        for item in queue_rows:
+            if ordinary_checked >= 50:
+                break
+            if not isinstance(item, dict) or str(item.get("candidate_id") or "") in frozen_ids:
+                continue
+            if item.get("review_provenance") is not None:
+                continue
+            if not str(item.get("review_note") or "").startswith("evidence-layered"):
+                continue
+            if item.get("composition_provenance"):
+                continue
+            city_key = str(item.get("city_key") or "")
+            if city_key not in CITY_CONFIG:
+                continue
+            episodes = tracked_episodes_for_city(state_rows, city_key)
+            matching = match_candidate_to_episodes(item, episodes)
+            if classification_matching_is_stale(item, matching):
+                continue
+            decision = classify_candidate(item, city_key, episodes, matching)
+            ordinary_checked += 1
+            if decision["proposed_outcome"] != item.get("status"):
+                ordinary_mismatches.append(
+                    (item.get("candidate_id"), item.get("status"), decision["proposed_outcome"])
+                )
+        assert ordinary_checked >= 20
+        assert not ordinary_mismatches, ordinary_mismatches
+
+        future_queue = json.loads(json.dumps(queue_rows))
+        future_by_id = {
+            str(item.get("candidate_id")): item
+            for item in future_queue
+            if isinstance(item, dict) and item.get("candidate_id")
+        }
+        intended_status = {}
+        for case in cases:
+            cid = str(case["candidate_id"])
+            item = future_by_id[cid]
+            if isinstance(case.get("review_provenance"), dict):
+                item["review_provenance"] = json.loads(json.dumps(case["review_provenance"]))
+            else:
+                item.pop("review_provenance", None)
+            item["status"] = str(case["expected_status"])
+            intended_status[cid] = str(case["expected_status"])
+            if case.get("target_episode_id") and item["status"] in {
+                "approved_strict", "approved_sensitivity"
+            }:
+                item["matched_episode_id"] = case["target_episode_id"]
+
+        for composed_case in fixture.get("composition_positive_cases") or []:
+            anchor = future_by_id[str(composed_case["anchor_candidate_id"])]
+            anchor["status"] = "approved_strict"
+            anchor["matched_episode_id"] = str(composed_case["target_episode_id"])
+            intended_status[str(composed_case["anchor_candidate_id"])] = "approved_strict"
+
+        persisted_before = {
+            cid: json.loads(json.dumps(future_by_id[cid].get("review_provenance")))
+            for cid in future_by_id
+            if future_by_id[cid].get("review_provenance") is not None
+        }
+        future_queue = json.loads(json.dumps(future_queue))
+        matching_result = refresh_queue_matching(future_queue, state_rows, {"needs_review"})
+        future_episode_ids = {
+            str(case.get("target_episode_id") or "")
+            for case in cases
+            if case.get("target_episode_id")
+        } | {
+            str(case.get("target_episode_id") or "")
+            for case in fixture.get("composition_positive_cases") or []
+            if case.get("target_episode_id")
+        }
+        apply_episode_composition(future_queue, state_rows, future_episode_ids)
+        future_by_id_after = {
+            str(item.get("candidate_id")): item
+            for item in future_queue
+            if isinstance(item, dict) and item.get("candidate_id")
+        }
+        unexpected = [
+            (cid, status, future_by_id_after[cid].get("status"))
+            for cid, status in intended_status.items()
+            if future_by_id_after[cid].get("status") != status
+        ]
+        assert not unexpected, unexpected
+        for cid, provenance in persisted_before.items():
+            assert future_by_id_after[cid].get("review_provenance") == provenance
+
+        stale_unique_match_none = 0
+        for item in future_queue:
+            if not isinstance(item, dict):
+                continue
+            if item.get("matching_outcome") != "unique_match":
+                continue
+            if "MATCH_NONE" in (item.get("classification_reason_codes") or []):
+                stale_unique_match_none += 1
+        assert stale_unique_match_none == 0
+
+        for composed_case in fixture.get("composition_positive_cases") or []:
+            anchor = future_by_id_after[str(composed_case["anchor_candidate_id"])]
+            assert anchor.get("status") == "approved_strict"
+            assert str(anchor.get("matched_episode_id") or "") == str(
+                composed_case["target_episode_id"]
+            )
+
+        print(
+            "Provenance hardening frozen replay OK: "
+            f"50/50 approvals ({positive_strict} strict, {positive_sensitivity} sensitivity); "
+            "2/2 deterministic negatives; 58/58 no-adapter regression; "
+            f"{ordinary_checked} ordinary unreviewed controls; "
+            f"future-run unexpected status changes=0; stale unique+MATCH_NONE={stale_unique_match_none}; "
+            f"matching refresh checked={matching_result['candidates_checked']}"
+        )
+
 
     if "kyiv" in CITY_CONFIG:
         assert load_kyiv_alert_episodes(KYIV_ALERTS_FILE)[-1]["alert_source"] == "kyiv_combined_exact_city"
