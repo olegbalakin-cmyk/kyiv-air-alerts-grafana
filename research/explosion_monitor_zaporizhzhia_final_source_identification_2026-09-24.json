@@ -1,0 +1,540 @@
+{
+  "schema_version": "1.0",
+  "generated_for_date": "2026-09-24",
+  "repository": "olegbalakin-cmyk/kyiv-air-alerts-grafana",
+  "branch": "multicity-wip-2026-09-16",
+  "purpose": "Final targeted source-identity recovery for the last two Zaporizhzhia candidates in the original 52-candidate provenance-gap cohort, with deterministic replay disposition only and no live mutation.",
+  "authoritative_inputs": {
+    "branch_head_before_commit": "32f7e35992829e5e8922635081b44afefb77557b",
+    "final_provenance_recovery": {
+      "commit": "aec1058a99232095466b162ec68fc17a921b3e40",
+      "path": "research/explosion_monitor_final_provenance_recovery_2026-09-24.json",
+      "blob_sha": "36cbc7c3d1b5247d594c42312ccca9fd84888b28"
+    },
+    "previous_provenance_repair": {
+      "commit": "b687cd9ce4c5e6253d8ff8148dd02386d92a5573",
+      "paths": [
+        "research/explosion_monitor_provenance_repair_2026-09-24.json",
+        "research/explosion_monitor_provenance_repair_replay_2026-09-24.json"
+      ]
+    },
+    "forensic_reconciliation": {
+      "commit": "d24a4618ef70ad7de6f2d7250a6ceb6b502d5de3",
+      "path": "research/explosion_monitor_downgrade_forensic_reconciliation_2026-09-24.json",
+      "blob_sha": "2733d112ad0208098445210fe217f9804bccbdbf"
+    },
+    "original_review_merge_commit": "79c39e31bc5d370153bbaa0344dbd6d37641e64f",
+    "original_zaporizhzhia_review_batch": {
+      "commit": "f3b254c1cdf0b7d2a604a6d77b367b9d4b94b42e",
+      "path": "kyiv-air-alerts-grafana/data/explosion_review_batches/zaporizhzhia_batch_1.json",
+      "blob_sha": "433f0fc991967dffe9daceef605b05c3b372464b"
+    },
+    "current_hardened_methodology": {
+      "commit": "4e6b7e9e2f8a6cc765f8601b65b940ccb81582f5",
+      "path": "kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py",
+      "blob_sha": "78f13c251b2441b1724df9151f49b09a9f6e1403"
+    },
+    "protected_precommit_blobs": {
+      "explosion_review_queue": {
+        "path": "kyiv-air-alerts-grafana/data/explosion_review_queue.json",
+        "blob_sha": "fa324767d0204ccf373cd519a23f39a0db68e945"
+      },
+      "explosion_candidate_monitor_state": {
+        "path": "kyiv-air-alerts-grafana/data/explosion_candidate_monitor_state.json",
+        "blob_sha": "a6aba4d5416c36652859bd9e9a6818320069998a"
+      },
+      "monitor_code": {
+        "path": "kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py",
+        "blob_sha": "78f13c251b2441b1724df9151f49b09a9f6e1403"
+      }
+    }
+  },
+  "scope_constraints": {
+    "provenance_recovery_only": true,
+    "monitor_code_changed": false,
+    "classification_or_composition_rules_changed": false,
+    "queue_or_state_mutated": false,
+    "live_provenance_written": false,
+    "status_changes_applied": false,
+    "canonical_or_metric_series_changed": false,
+    "dashboard_or_deployment_changed": false,
+    "wider_zaporizhzhia_discovery_used": false,
+    "historical_enrichment_used": false
+  },
+  "frozen_two_candidate_cohort": [
+    {
+      "candidate_id": "e7461ec759e4d79020dfd1ba",
+      "city_key": "zaporizhzhia",
+      "city": "Запоріжжя",
+      "calendar_date_kyiv": "2026-09-18",
+      "episode_id": "a60d817eaa9253200f090720",
+      "candidate_source": {
+        "source": "Google News RSS",
+        "publisher": "061.ua",
+        "url": "https://news.google.com/rss/articles/CBMipgFBVV95cUxPNlNaN0swWEdKZWtiQ181NlVwc0l0LWc1T1RyMlBkWTNCZENUdV9XSUZzR0hvaTRMVDVOQWx2M0p5aEg5d2lBM25HT01XWlJzQlNWNWhpcjZPZHFCamluRXdvOVh2VmFMN2p0WkVTTGxFdE9VMVFWYTQxb3FLN1BabWl6cURseFpfaWFJLWxESkd4VG9wdUo3akRyRFJVV0ZieUhzb2Nn0gGmAUFVX3lxTE82U1o3SzBYR0pla2JDXzU2VXBzSXQtZzVPVHIyUGRZM0JkQ1R1X1dJRnNHSG9pNExUNU5BbHYzSnloSDl3aUEzbkdPTVdaUnNCU1Y1aGlyNk9kcUJqaW5Fd285WHZWYUw3anRaRVNMbEV0T1UxUVZhNDFvcUs3UFptaXpxRGx4Wl9pYUktbERKR3hUb3B1SjdqRHJEUlVXRmJ5SHNvY2c?oc=5",
+        "title": "У Запоріжжі пролунали вибухи: ворог поцілив по обʼєкту інфраструктури - 061.ua",
+        "snippet": "У Запоріжжі пролунали вибухи: ворог поцілив по обʼєкту інфраструктури 061.ua",
+        "published_at_utc": "2026-09-18T17:10:00Z",
+        "published_at_kyiv": "2026-09-18T20:10:00+03:00"
+      },
+      "previous_approval": {
+        "status": "approved_strict",
+        "review_note": "Exact-city and aerial-war evidence. The UKR.NET mirror of the 061.ua article states that on the evening of 18 September explosions were heard in Zaporizhzhia during the air alert and reports an enemy hit on an infrastructure facility. The related Zaporizhzhia OVA post was timestamped 19:57 Kyiv time, inside monitor episode a60d817eaa9253200f090720 (19:21:56-20:49:19 Kyiv), giving one concrete episode. Direct 061.ua page returned 403.",
+        "source_checked": "061.ua article via UKR.NET mirror; Zaporizhzhia OVA post timestamp surfaced by malva.tv"
+      },
+      "preserved_review_claims": {
+        "locality": "Zaporizhzhia city",
+        "event": "explosions during an air alert and enemy hit on an infrastructure facility",
+        "attack_context": "review treated the event as aerial-war evidence",
+        "claimed_ova_timestamp_local": "2026-09-18 19:57 Europe/Kyiv",
+        "same_attack_context": "061.ua/UKR.NET infrastructure-strike story linked by reviewer to the OVA post",
+        "target_episode_id": "a60d817eaa9253200f090720"
+      },
+      "source_hints_and_old_references": [
+        "061.ua article",
+        "UKR.NET mirror",
+        "Zaporizhzhia OVA post",
+        "malva.tv",
+        "19:57 Kyiv time",
+        "direct 061.ua page returned 403"
+      ]
+    },
+    {
+      "candidate_id": "113dac439efda41673b1f497",
+      "city_key": "zaporizhzhia",
+      "city": "Запоріжжя",
+      "calendar_date_kyiv": "2026-09-18",
+      "episode_id": "a60d817eaa9253200f090720",
+      "candidate_source": {
+        "source": "Google News RSS",
+        "publisher": "ukr.net",
+        "url": "https://news.google.com/rss/articles/CBMibEFVX3lxTFAzNzZoRTMxMG5WN05fNkdqalpFSnM2MHdBU3ZWQVU0ZWlyUFppd19xZGxlek8wazFmbXFENzVBWU4tTE5YcFlpeUtzSVpUM0ZIMzZuMUZ4a0lhal9HSnlwNDNWNkFSWUlLLVIyRg?oc=5",
+        "title": "У Запоріжжі пролунали вибухи: ворог поцілив по обʼєкту інфраструктури - ukr.net",
+        "snippet": "У Запоріжжі пролунали вибухи: ворог поцілив по обʼєкту інфраструктури ukr.net",
+        "published_at_utc": "2026-09-18T17:54:01Z",
+        "published_at_kyiv": "2026-09-18T20:54:01+03:00"
+      },
+      "previous_approval": {
+        "status": "approved_strict",
+        "review_note": "Duplicate report of the same 18 September Zaporizhzhia infrastructure strike. UKR.NET text states the explosions occurred in Zaporizhzhia during the air alert; the related OVA post was timestamped 19:57 Kyiv time, inside monitor episode a60d817eaa9253200f090720 (19:21:56-20:49:19 Kyiv). Exact city, aerial-war context, and one concrete alert episode are established.",
+        "source_checked": "UKR.NET article; Zaporizhzhia OVA post timestamp surfaced by malva.tv"
+      },
+      "preserved_review_claims": {
+        "locality": "Zaporizhzhia city",
+        "event": "duplicate report of the same 18 September infrastructure strike; explosions during an air alert",
+        "attack_context": "review treated the event as aerial-war evidence",
+        "claimed_ova_timestamp_local": "2026-09-18 19:57 Europe/Kyiv",
+        "same_attack_context": "review explicitly called this a duplicate of the same 18 September infrastructure-strike story",
+        "target_episode_id": "a60d817eaa9253200f090720"
+      },
+      "source_hints_and_old_references": [
+        "UKR.NET article",
+        "Zaporizhzhia OVA post",
+        "malva.tv",
+        "19:57 Kyiv time"
+      ]
+    }
+  ],
+  "target_episode": {
+    "episode_id": "a60d817eaa9253200f090720",
+    "city_key": "zaporizhzhia",
+    "city": "Запоріжжя",
+    "local_date": "2026-09-18",
+    "alert_start_utc": "2026-09-18T16:21:56.587919Z",
+    "alert_end_utc": "2026-09-18T17:49:19.836467Z",
+    "alert_start_kyiv": "2026-09-18T19:21:56.587919+03:00",
+    "alert_end_kyiv": "2026-09-18T20:49:19.836467+03:00",
+    "neighboring_alerts": [
+      {
+        "relation": "preceding",
+        "episode_id": "93cb22f5c0aee193ab8946f6",
+        "alert_start_utc": "2026-09-17T22:26:54.816073Z",
+        "alert_end_utc": "2026-09-18T15:46:20.857742Z",
+        "alert_start_kyiv": "2026-09-18T01:26:54.816073+03:00",
+        "alert_end_kyiv": "2026-09-18T18:46:20.857742+03:00"
+      },
+      {
+        "relation": "following",
+        "episode_id": "8571a7745e91e28c23c39dd1",
+        "alert_start_utc": "2026-09-18T18:36:43.975628Z",
+        "alert_end_utc": "2026-09-18T21:00:57.193493Z",
+        "alert_start_kyiv": "2026-09-18T21:36:43.975628+03:00",
+        "alert_end_kyiv": "2026-09-19T00:00:57.193493+03:00"
+      }
+    ],
+    "multi_episode_local_date": true,
+    "episode_specific_temporal_proof_required": true,
+    "note": "The target alert is separated from the preceding and following tracked alerts, but multiple Zaporizhzhia episodes intersect the same local date."
+  },
+  "repo_git_trace": [
+    {
+      "step": "first_candidate_discovery",
+      "commit": "4c06c8aeaaaf2fc08914812f460e1579f77df240",
+      "finding": "Both target candidates first appeared as needs_review with Google News RSS metadata only. Review note was null, and the monitor run reported zero Zaporizhzhia Telegram results."
+    },
+    {
+      "step": "original_city_review_batch",
+      "commit": "f3b254c1cdf0b7d2a604a6d77b367b9d4b94b42e",
+      "path": "kyiv-air-alerts-grafana/data/explosion_review_batches/zaporizhzhia_batch_1.json",
+      "finding": "Manual review approved both candidates strict and persisted only textual source hints: UKR.NET/061.ua plus an OVA timestamp surfaced by malva.tv. No exact malva URL or OVA message ID was persisted."
+    },
+    {
+      "step": "original_review_merge",
+      "commit": "79c39e31bc5d370153bbaa0344dbd6d37641e64f",
+      "finding": "The manual review decisions were merged into the live review queue; no additional exact OVA/malva identifier was introduced."
+    },
+    {
+      "step": "forensic_reconciliation",
+      "commit": "d24a4618ef70ad7de6f2d7250a6ceb6b502d5de3",
+      "finding": "The current replay could not reproduce the old strict approval because the manual review provenance had not been normalized into classification evidence."
+    },
+    {
+      "step": "provenance_repair",
+      "commit": "b687cd9ce4c5e6253d8ff8148dd02386d92a5573",
+      "finding": "The two records remained PARTIAL_INSUFFICIENT because the exact OVA/malva source identity and temporal semantics were still missing."
+    },
+    {
+      "step": "final_provenance_recovery",
+      "commit": "aec1058a99232095466b162ec68fc17a921b3e40",
+      "finding": "Repo/history and sibling records still yielded no deterministic OVA/malva identifier; the authoritative artifact explicitly required manual source identification."
+    }
+  ],
+  "repo_history_exhaustion": {
+    "evidence_locations_checked": [
+      "historical target candidate records",
+      "first-discovery commit",
+      "original Zaporizhzhia review batch",
+      "original review merge",
+      "forensic reconciliation artifact",
+      "provenance repair artifacts",
+      "final provenance recovery artifact",
+      "same-story/sibling candidate mappings",
+      "repository searches for 19:57, malva.tv, and both full candidate IDs"
+    ],
+    "deterministic_source_identifier_found_in_repo": false,
+    "external_targeted_search_needed": true
+  },
+  "search_queries_actually_used": [
+    "site:malva.tv \"У Запоріжжі пролунали вибухи\" \"19:57\" \"18 вересня\" Запоріжжя",
+    "site:malva.tv Запоріжжя \"19:57\" \"обʼєкту інфраструктури\" \"18 вересня\"",
+    "\"У Запоріжжі пролунали вибухи: ворог поцілив по обʼєкту інфраструктури\" \"18 вересня 2026\"",
+    "\"У Запоріжжі пролунали вибухи\" \"ворог поцілив\" \"інфраструктури\" \"061.ua\"",
+    "\"19:57\" \"Запорізька ОВА\" \"18 вересня\" \"інфраструктури\"",
+    "\"19:57\" \"Іван Федоров\" Запоріжжя \"18 вересня\" 2026",
+    "site:malva.tv \"У Запоріжжі пролунали вибухи\" \"18 вересня 2026\"",
+    "site:malva.tv Запоріжжя \"19:57\" Федоров \"об'єкту інфраструктури\"",
+    "\"У Запоріжжі пролунали вибухи: ворог поцілив по обʼєкту інфраструктури\" \"malva.tv\"",
+    "\"У Запоріжжі пролунали вибухи: ворог поцілив по обʼєкту інфраструктури\" ukr.net",
+    "\"У Запоріжжі пролунали вибухи: ворог поцілив по обʼєкту інфраструктури\" \"20:10\"",
+    "site:malva.tv/20260918/ \"Запоріж\" \"інфраструктури\"",
+    "site:malva.tv/20260918/ \"19:57\"",
+    "site:malva.tv/20260918/ \"ворог\" \"Запоріжжя\"",
+    "site:malva.tv/20260918/ \"Іван Федоров\"",
+    "site:malva.tv/20260918/ \"об'єкт інфраструктури\"",
+    "\"18.09.2026\" \"19:57\" Запоріжжя Федоров",
+    "\"18 вересня 2026\" \"19:57\" Запоріжжя Федоров",
+    "\"19:57\" Запоріжжя \"обʼєкт інфраструктури\" Федоров",
+    "\"19:57\" Запоріжжя \"об'єкт інфраструктури\" Федоров",
+    "\"Внаслідок удару пошкоджено об’єкт інфраструктури\" Запоріжжя \"18 вересня\"",
+    "\"Ворог атакував Запоріжжя\" \"пошкоджено об’єкт інфраструктури\" \"18 вересня 2026\"",
+    "\"Ворог знову атакував Запоріжжя\" \"Є влучання по одному з обʼєктів інфраструктури\" Telegram",
+    "\"Ворог знову атакував Запоріжжя\" \"Є влучання\" \"Михайло Семікін\"",
+    "site:t.me \"Ворог знову атакував Запоріжжя\" \"Є влучання\"",
+    "\"У Запоріжжі пролунали вибухи: ворог поцілив по обʼєкту інфраструктури\" 061.ua",
+    "\"У Запоріжжі пролунали вибухи\" \"обʼєкту інфраструктури\" \"061.ua\" 18.09.2026",
+    "site:061.ua \"Ворог знову атакував Запоріжжя\" \"18 вересня 2026\"",
+    "\"У Запоріжжі пролунали вибухи: ворог поцілив по об'єкту інфраструктури\" ukr.net",
+    "\"Ворог знову атакував Запоріжжя\" \"19:54\" 18 вересня 2026",
+    "\"Є влучання по одному з обʼєктів інфраструктури\" \"19:54\"",
+    "\"zoda_gov_ua/67708\" \"19:54\"",
+    "\"zoda_gov_ua/67708\" \"16:54\"",
+    "\"У Запоріжжі пролунали вибухи\" \"повітряної тривоги\" \"Михайла Семікіна\" \"18 вересня\"",
+    "\"У Запоріжжі пролунали вибухи\" \"18 вересня\" \"БпЛА\" \"Семікін\"",
+    "\"Ворог знову атакував Запоріжжя\" \"Є влучання\" \"19:57\" \"18.09.2026\""
+  ],
+  "external_search_scope_validation": {
+    "targeted_source_identification_only": true,
+    "search_keys_restricted_to_frozen_case": true,
+    "generic_explosion_discovery_used": false,
+    "substitute_historical_evidence_introduced": false,
+    "search_exhausted_for_permitted_source_identity_goal": true
+  },
+  "exact_pages_and_messages_inspected": [
+    {
+      "kind": "exact_secondary_mirror_from_old_source_hint",
+      "source": "malva.tv",
+      "url": "https://malva.tv/20260918/voroh-znovu-atakuvav-zaporizhzhja-je-vluchannja-po-odnomu-z-ob-jektiv-infrastruktury/",
+      "displayed_datetime": "18.09.2026 19:57",
+      "displayed_author": "Запорізька обласна військова адміністрація",
+      "evidentiary_text_excerpt": "Ворог знову атакував Запоріжжя. Є влучання по одному з обʼєктів інфраструктури.",
+      "source_link": "https://t.me/zoda_gov_ua/67708",
+      "role": "Mirror/pointer to the exact primary OVA Telegram message."
+    },
+    {
+      "kind": "exact_primary_source",
+      "source": "Запорізька обласна військова адміністрація / Telegram",
+      "url": "https://t.me/zoda_gov_ua/67708",
+      "public_context_url": "https://t.me/s/zoda_gov_ua/67708",
+      "channel": "@zoda_gov_ua",
+      "message_id": "67708",
+      "evidentiary_text_excerpt": "Ворог знову атакував Запоріжжя. Є влучання по одному з обʼєктів інфраструктури.",
+      "additional_semantics": "The message reports an infrastructure hit and fire and uses preliminary casualty wording.",
+      "public_context_rendered_clock": "16:54",
+      "absolute_datetime_and_timezone_exposed_by_parsed_view": false,
+      "role": "Exact underlying primary source identified by the Malva source link."
+    },
+    {
+      "kind": "exact_secondary_story_used_by_original_review",
+      "source": "UKR.NET",
+      "url": "https://www.ukr.net/news/details/zaporizhzhya/119552784.html",
+      "evidentiary_text_excerpt": "Ввечері 18 вересня під час повітряної тривоги у Запоріжжі пролунали вибухи.",
+      "attribution": "The item attributes the infrastructure hit to acting OVA head Mykhailo Semikin.",
+      "outgoing_original_url": "https://www.061.ua/news/4156802/u-zaporizzi-prolunali-vibuhi-vorog-pociliv-po-obektu-infrastrukturi",
+      "role": "Exact UKR.NET mirror and pointer to the 061.ua publisher page used in the old review."
+    },
+    {
+      "kind": "exact_publisher_page",
+      "source": "061.ua",
+      "url": "https://www.061.ua/news/4156802/u-zaporizzi-prolunali-vibuhi-vorog-pociliv-po-obektu-infrastrukturi",
+      "access_result": "HTTP 403 in retrieval",
+      "identity_status": "Exact URL deterministically recovered from the UKR.NET 'read more' link.",
+      "role": "Original publisher identity; content semantics recovered through the exact UKR.NET mirror, not substituted by another attack."
+    },
+    {
+      "kind": "corroboration_only_not_source_substitute",
+      "source": "Ukrinform",
+      "url": "https://www.ukrinform.ua/rubric-regions/4165597-rosiani-atakuvali-zaporizza-e-vlucanna-po-obektu-infrastrukturi.html",
+      "role": "Confirms that the same OVA/Telegram statement was being reported contemporaneously; not used to replace the original source chain."
+    },
+    {
+      "kind": "corroboration_only_not_source_substitute",
+      "source": "Interfax-Ukraine",
+      "url": "https://interfax.com.ua/news/general/1206737.html",
+      "role": "Confirms the same statement was attributed to Telegram; not used as replacement evidence."
+    },
+    {
+      "kind": "corroboration_only_not_source_substitute",
+      "source": "TrueUA",
+      "url": "https://trueua.info/news/rosiyani-atakuvali-zaporizhzhya-v-ova-rozpovili-pro-naslidki",
+      "role": "Confirms the same OVA/Telegram wording; not used as replacement evidence."
+    }
+  ],
+  "source_identity_result": {
+    "exact_original_source_chain_found": true,
+    "chains": [
+      {
+        "chain": "Original review hint 'Zaporizhzhia OVA post timestamp surfaced by malva.tv' -> exact Malva page displaying 18.09.2026 19:57 -> Malva 'Source' link -> exact Telegram message @zoda_gov_ua/67708.",
+        "standard": "Exact secondary source pointing to an exact primary source."
+      },
+      {
+        "chain": "Original review hint '061.ua article via UKR.NET mirror' -> exact UKR.NET page -> its outgoing publisher link -> exact 061.ua URL.",
+        "standard": "Exact secondary mirror pointing to the exact publisher page."
+      }
+    ],
+    "malva_role": "Mirror/aggregator and source pointer, not the primary OVA evidence source.",
+    "primary_ova_source": {
+      "channel": "@zoda_gov_ua",
+      "message_id": "67708",
+      "url": "https://t.me/zoda_gov_ua/67708"
+    }
+  },
+  "timestamp_19_57_semantic_analysis": {
+    "old_review_claim": "The related Zaporizhzhia OVA post was timestamped 19:57 Kyiv time.",
+    "exact_recovered_19_57_occurrence": {
+      "source": "malva.tv",
+      "displayed_datetime": "18.09.2026 19:57",
+      "semantics": "Malva mirror page publication/listing timestamp."
+    },
+    "primary_telegram_message": {
+      "url": "https://t.me/zoda_gov_ua/67708",
+      "public_context_rendered_clock": "16:54",
+      "parsed_view_exposes_absolute_datetime_or_timezone": false,
+      "verified_as_19_57": false
+    },
+    "event_time": null,
+    "message_time_absolute": null,
+    "publication_time_malva": "2026-09-18 19:57 local display",
+    "update_time": null,
+    "conclusion": "19:57 is recoverable as the Malva mirror timestamp, not as an explicit event time and not as a verified exact OVA Telegram message time. It must not be promoted to event_time."
+  },
+  "current_methodology_validation": {
+    "monitor_blob_sha": "78f13c251b2441b1724df9151f49b09a9f6e1403",
+    "exact_ukrnet_061_story": {
+      "exact_city_event_evidence": true,
+      "strict_explosion_or_hit_evidence": true,
+      "air_military_context": true,
+      "explicit_alert_relation": true,
+      "basis": "The exact mirror says explosions occurred in Zaporizhzhia during the air alert and reports an infrastructure hit."
+    },
+    "temporal_binding": {
+      "explicit_event_time_found": false,
+      "old_19_57_can_be_event_time": false,
+      "trusted_contemporaneous_live_rule_satisfied": false,
+      "trusted_live_rule_reason": "The exact OVA Telegram text reports an attack/hit/fire but does not contain the current hardened contemporaneous-live explosion lexicon used for TEMPORAL_CONTEMPORANEOUS_LIVE_WORDING.",
+      "generic_alert_relation_episode_specific": false,
+      "generic_alert_relation_reason": "Multiple tracked Zaporizhzhia episodes intersect 2026-09-18, so 'during the air alert' does not identify one episode.",
+      "publication_or_message_time_alone_used_as_event_time": false
+    },
+    "sensitivity_path": {
+      "explicit_event_time_near_boundary_available": false,
+      "single_episode_day_inference_available": false,
+      "reason": "The local date contains multiple tracked episodes."
+    },
+    "episode_level_composition": {
+      "strict_temporal_anchor_available": false,
+      "composed_strict_available": false,
+      "reason": "Recovered evidence supplies no current-rule episode-specific temporal anchor."
+    },
+    "methodology_conflict": false,
+    "deterministic_methodology_result": "The attack/source identity is recovered, but the old strict episode attribution is not reproducible under current validated rules."
+  },
+  "structured_recovered_evidence": {
+    "attack_identity": {
+      "locality": "Zaporizhzhia city",
+      "date": "2026-09-18",
+      "event": "Russian attack with a hit on an infrastructure facility and resulting fire",
+      "explosion_report": "Exact UKR.NET/061 story reports explosions in Zaporizhzhia during an air alert.",
+      "same_attack_linkage": "The UKR.NET/061 story attributes the infrastructure hit to acting OVA head Mykhailo Semikin, and the exact OVA Telegram message reports the same infrastructure hit/fire."
+    },
+    "contributors": [
+      {
+        "source": "UKR.NET mirror of 061.ua",
+        "exact_url": "https://www.ukr.net/news/details/zaporizhzhya/119552784.html",
+        "roles": [
+          "exact-city explosion evidence",
+          "air-alert relation",
+          "infrastructure-hit linkage",
+          "publisher pointer"
+        ]
+      },
+      {
+        "source": "061.ua",
+        "exact_url": "https://www.061.ua/news/4156802/u-zaporizzi-prolunali-vibuhi-vorog-pociliv-po-obektu-infrastrukturi",
+        "roles": [
+          "original publisher identity"
+        ],
+        "retrieval_limit": "403"
+      },
+      {
+        "source": "malva.tv",
+        "exact_url": "https://malva.tv/20260918/voroh-znovu-atakuvav-zaporizhzhja-je-vluchannja-po-odnomu-z-ob-jektiv-infrastruktury/",
+        "roles": [
+          "old-review timestamp source identification",
+          "pointer to primary OVA message"
+        ],
+        "timestamp_semantics": "19:57 is the mirror page timestamp."
+      },
+      {
+        "source": "Zaporizhzhia OVA Telegram",
+        "exact_url": "https://t.me/zoda_gov_ua/67708",
+        "message_id": "67708",
+        "roles": [
+          "exact primary OVA statement",
+          "infrastructure-hit/fire evidence"
+        ],
+        "event_time": null
+      }
+    ],
+    "target_episode_relation": {
+      "episode_id": "a60d817eaa9253200f090720",
+      "attack_is_same_day": true,
+      "target_alert_relation_supported_generically": true,
+      "episode_specific_temporal_proof": false,
+      "recovered_evidence_belongs_deterministically_to_another_episode": false,
+      "result": "Timing remains ambiguous among multiple same-day Zaporizhzhia episodes under the current methodology."
+    }
+  },
+  "candidate_results": [
+    {
+      "candidate_id": "e7461ec759e4d79020dfd1ba",
+      "source_identified": true,
+      "exact_source_chain": [
+        "https://www.ukr.net/news/details/zaporizhzhya/119552784.html",
+        "https://www.061.ua/news/4156802/u-zaporizzi-prolunali-vibuhi-vorog-pociliv-po-obektu-infrastrukturi",
+        "https://malva.tv/20260918/voroh-znovu-atakuvav-zaporizhzhja-je-vluchannja-po-odnomu-z-ob-jektiv-infrastruktury/",
+        "https://t.me/zoda_gov_ua/67708"
+      ],
+      "verdict": "SOURCE_IDENTIFIED_BUT_TEMPORAL_CLAIM_UNSUPPORTED",
+      "temporal_semantics": "19:57 is the Malva mirror timestamp; no explicit event time is recovered.",
+      "relation_to_target_episode": "The attack is supported, but current rules cannot bind it specifically to a60d817eaa9253200f090720 on this multi-episode date.",
+      "current_replay_disposition": "needs_review / unresolved for episode attribution"
+    },
+    {
+      "candidate_id": "113dac439efda41673b1f497",
+      "source_identified": true,
+      "exact_source_chain": [
+        "https://www.ukr.net/news/details/zaporizhzhya/119552784.html",
+        "https://www.061.ua/news/4156802/u-zaporizzi-prolunali-vibuhi-vorog-pociliv-po-obektu-infrastrukturi",
+        "https://malva.tv/20260918/voroh-znovu-atakuvav-zaporizhzhja-je-vluchannja-po-odnomu-z-ob-jektiv-infrastruktury/",
+        "https://t.me/zoda_gov_ua/67708"
+      ],
+      "verdict": "SOURCE_IDENTIFIED_BUT_TEMPORAL_CLAIM_UNSUPPORTED",
+      "temporal_semantics": "19:57 is the Malva mirror timestamp; no explicit event time is recovered.",
+      "relation_to_target_episode": "The duplicate same-attack story is supported, but current rules cannot bind it specifically to a60d817eaa9253200f090720 on this multi-episode date.",
+      "current_replay_disposition": "needs_review / unresolved for episode attribution"
+    }
+  ],
+  "episode_decision": {
+    "episode_id": "a60d817eaa9253200f090720",
+    "previous_recommendation": "STILL_NEEDS_PROVENANCE_REPAIR",
+    "verdict": "DOWNGRADE_TO_UNRESOLVED",
+    "reasons": [
+      "The exact old source chain is now identified, so there is no remaining provenance-access blocker.",
+      "The recovered 19:57 value is a Malva mirror timestamp, not explicit event time.",
+      "The exact primary OVA message does not satisfy the current trusted contemporaneous-live temporal lexicon.",
+      "The exact UKR.NET/061 story gives only a generic 'during the air alert' relation on a multi-episode date.",
+      "No current strict or sensitivity episode-specific temporal path is satisfied."
+    ]
+  },
+  "original_52_candidate_provenance_cohort_final_status": {
+    "total": 52,
+    "previously_replay_ready": 50,
+    "newly_deterministically_resolved": 2,
+    "replay_ready": 52,
+    "unresolved_provenance": 0,
+    "phase_closed_for_replay": true,
+    "note": "Deterministically resolved as unsupported for episode-specific temporal attribution is replay-ready; preserving the old approval was not required."
+  },
+  "updated_20_episode_reconciliation": {
+    "previous": {
+      "total": 20,
+      "KEEP_STRICT": 15,
+      "KEEP_SENSITIVITY": 1,
+      "DOWNGRADE_TO_UNRESOLVED": 3,
+      "STILL_NEEDS_PROVENANCE_REPAIR": 1
+    },
+    "replacement": {
+      "episode_id": "a60d817eaa9253200f090720",
+      "from": "STILL_NEEDS_PROVENANCE_REPAIR",
+      "to": "DOWNGRADE_TO_UNRESOLVED"
+    },
+    "final": {
+      "total": 20,
+      "KEEP_STRICT": 15,
+      "KEEP_SENSITIVITY": 1,
+      "DOWNGRADE_TO_UNRESOLVED": 4,
+      "STILL_NEEDS_PROVENANCE_REPAIR": 0
+    }
+  },
+  "final_verdict": "PROVENANCE COHORT CLOSED — READY FOR FINAL 58/20 REPLAY",
+  "next_task_only_if_requested": "Run the final frozen 58 candidates / 20 episodes replay. Do not run another provenance round.",
+  "logical_qa": {
+    "exact_candidate_count": 2,
+    "exact_episode_count": 1,
+    "authoritative_candidate_ids": [
+      "e7461ec759e4d79020dfd1ba",
+      "113dac439efda41673b1f497"
+    ],
+    "external_search_targeted_only": true,
+    "exact_urls_and_message_id_recorded": true,
+    "substitute_evidence_introduced": false,
+    "timestamp_19_57_assumed_event_time": false,
+    "neighboring_alerts_checked": true,
+    "both_candidates_deterministic": true,
+    "candidate_verdicts_allowed": true,
+    "episode_verdict_allowed": true,
+    "final_52_counts_reconcile": true,
+    "final_20_counts_reconcile": true,
+    "live_mutations_performed": false
+  }
+}
