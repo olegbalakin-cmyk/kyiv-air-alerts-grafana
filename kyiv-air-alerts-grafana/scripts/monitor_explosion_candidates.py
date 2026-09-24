@@ -3525,9 +3525,17 @@ def self_test() -> None:
 
         episode_results = {}
         for episode_case in fixture.get("episode_cases") or []:
+            supporting_ids = list(episode_case.get("supporting_candidate_ids") or [])
+            if not supporting_ids:
+                supporting_ids = [
+                    str(case["candidate_id"])
+                    for case in cases
+                    if str(case.get("target_episode_id") or "")
+                    == str(episode_case.get("episode_id") or "")
+                ]
             supporting = [
                 replayed[str(cid)].get("status")
-                for cid in episode_case.get("supporting_candidate_ids") or []
+                for cid in supporting_ids
             ]
             if "approved_strict" in supporting:
                 live_status = "approved_strict"
