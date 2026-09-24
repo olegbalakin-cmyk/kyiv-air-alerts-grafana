@@ -1,0 +1,2339 @@
+{
+  "schema_version": "1.0",
+  "generated_date": "2026-09-24",
+  "repository": "olegbalakin-cmyk/kyiv-air-alerts-grafana",
+  "branch": "multicity-wip-2026-09-16",
+  "branch_head_at_artifact_commit_base": "36fe082bc78c51553b2cca36b9252f66fc5f29da",
+  "city": "Zaporizhzhia",
+  "workstream": "explosion enrichment independent chronological holdout",
+  "slice": "Slice 4",
+  "purpose": "First independent chronological holdout after EVIDENCE_PRESERVING_CANDIDATE_FRONTIER_V1 architecture-level candidate-retention hardening.",
+  "frozen_pipeline": {
+    "commit_context": "42a7238c244404eb2213609e34cbb02e9e5096fa",
+    "frontier_version": "EVIDENCE_PRESERVING_CANDIDATE_FRONTIER_V1",
+    "search_results_inspected_per_query_family_cap": 10,
+    "retained_pages_per_episode_cap": 12,
+    "event_fragments_per_page_cap": 4
+  },
+  "selection_methodology": {
+    "previous_slice_boundary": "2025-08-11",
+    "start_rule": "Start at the next eligible episode after Slice 3.",
+    "cohort_rule": "Add complete chronological Europe/Kyiv alert-start dates until unique episode count first reaches at least 170 without exceeding 200, matching the established Slice 3 principle.",
+    "end_date_not_selected_by": [
+      "known controls",
+      "positive count",
+      "source availability",
+      "expected recall",
+      "result convenience"
+    ],
+    "actual_first_threshold_crossing": {
+      "date": "2025-10-01",
+      "episode_count_after_complete_date": 171
+    },
+    "historical_controls_consulted_for_selection": false
+  },
+  "denominator_sources": [
+    {
+      "path": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P1b_alerts.json",
+      "blob_sha": "9dba2195b25276b164a568a1df35ccd9764c1b9f"
+    },
+    {
+      "path": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P2a_alerts.json",
+      "blob_sha": "43b93b64f9dbe13d03279b99c814498ce79858cc"
+    }
+  ],
+  "date_range": {
+    "start": "2025-08-12",
+    "end": "2025-10-01"
+  },
+  "summary": {
+    "episodes": 171,
+    "unique_dates": 50,
+    "single_episode_dates": 9,
+    "multi_episode_dates": 41,
+    "episodes_with_prior_source_review_provenance": 32,
+    "episodes_without_prior_source_review_provenance": 139,
+    "duplicate_episode_ids": 0
+  },
+  "provenance_methodology": {
+    "computed_posthoc_only_after_discovery_freeze": true,
+    "direct_episode_membership_only": true,
+    "nearest_control_reference_fields_counted_as_provenance": false,
+    "source_artifacts": [
+      {
+        "path": "kyiv-air-alerts-grafana/data/explosion_research/zaporizhzhia/final_evidence.json",
+        "blob_sha": "4b3559386bdd8515f24498dfaac47ef67542b679"
+      },
+      {
+        "path": "research/zaporizhzhia_explosion_blind_sample_50.json",
+        "blob_sha": "654b3ffde8f8b83ab7de965654a4d58a69f859cd"
+      },
+      {
+        "path": "research/zaporizhzhia_explosion_blind_sample_50_wave2.json",
+        "blob_sha": "15804a04b056d65dd0376a2e551920fbe60f24a4"
+      },
+      {
+        "path": "research/zaporizhzhia_explosion_o3_source_discovery.json",
+        "blob_sha": "0bd07e579300321489a883a7d0e523b2dc8bd1c3"
+      }
+    ],
+    "purpose": "Describe prior audit/source-review coverage only; provenance was not used for Slice 4 universe selection or blind discovery.",
+    "discovery_freeze_marker": "SLICE4_DISCOVERY_FROZEN_BEFORE_HISTORICAL_COMPARISON"
+  },
+  "dates": [
+    {
+      "date": "2025-08-12",
+      "episode_count": 3,
+      "episode_ids": [
+        "67623b1497e09450a67c2a44",
+        "cac22a34f58d8adef7fe8e7a",
+        "5915adfa4d555e30fc424a15"
+      ]
+    },
+    {
+      "date": "2025-08-13",
+      "episode_count": 5,
+      "episode_ids": [
+        "73bcebb800200cd1eebfb676",
+        "2051acef367704cf87e65ddc",
+        "fffd0949182850325d2ef631",
+        "89b237690c31d11f6a9e95dc",
+        "a70206eed2a8f0d7039f7fd2"
+      ]
+    },
+    {
+      "date": "2025-08-14",
+      "episode_count": 6,
+      "episode_ids": [
+        "cc7285137c6a87ab1656235b",
+        "c489bfd6d2b9560c40a55cf5",
+        "25dd6092cc42242c8198dec7",
+        "31075020fcadc72072434ed8",
+        "c37b289cee727a3e6cccd3dc",
+        "729710f0eca640aaae75861c"
+      ]
+    },
+    {
+      "date": "2025-08-15",
+      "episode_count": 5,
+      "episode_ids": [
+        "56c934319332db56894ed4c7",
+        "6de018bcdefa0739760a6336",
+        "e2ddb5beb05a17fddc7e5a46",
+        "fea153b042e19a312fecd317",
+        "7e8d57fc9102bd23d0dcc6be"
+      ]
+    },
+    {
+      "date": "2025-08-16",
+      "episode_count": 5,
+      "episode_ids": [
+        "ea38ff19bb8077ba89276940",
+        "3921198b0e987d7068c023fe",
+        "72e0ef1c2e68546ba4afb96c",
+        "2f00073c7b323e4b8d3406fe",
+        "e077ffaf45817b3005a629e4"
+      ]
+    },
+    {
+      "date": "2025-08-17",
+      "episode_count": 4,
+      "episode_ids": [
+        "f54e1aa67742d627bd4ac91f",
+        "01e5965b7c971400700abb69",
+        "1afc15d15b3a415d3ffc74d0",
+        "c47dd7a357f4263a1b27efe0"
+      ]
+    },
+    {
+      "date": "2025-08-18",
+      "episode_count": 7,
+      "episode_ids": [
+        "20d5c6a7f36fa4006163586d",
+        "306059a87a2c1bada856df70",
+        "d45689d3031c4aa303816658",
+        "9c8229fbab1da4901030100a",
+        "a05d6fd667668198f61064b0",
+        "746e2f53adce1e79bb184356",
+        "8a7c3b17639b97c49df95b26"
+      ]
+    },
+    {
+      "date": "2025-08-19",
+      "episode_count": 2,
+      "episode_ids": [
+        "3fd25ba4f6307ee19653df1e",
+        "401bd0031b7b4930fc4262e6"
+      ]
+    },
+    {
+      "date": "2025-08-20",
+      "episode_count": 5,
+      "episode_ids": [
+        "0d7ccb91d817bfb593018c77",
+        "8bccdc4dfe22dc1d1aaa98db",
+        "46f9baeb28cb88a5a69bc051",
+        "946bbb00617d88aa8846420f",
+        "208b2aad344532f1140641ed"
+      ]
+    },
+    {
+      "date": "2025-08-21",
+      "episode_count": 4,
+      "episode_ids": [
+        "7ffb26d8e21f7fb8a7348b2b",
+        "195fb6dce20962736fccb85b",
+        "e05213217d00f1cff2f265b7",
+        "5bfa03380864b9b254c16e5d"
+      ]
+    },
+    {
+      "date": "2025-08-22",
+      "episode_count": 2,
+      "episode_ids": [
+        "8c6d7d143b35ed3c5937d39a",
+        "266dc8eb44825712d534bb78"
+      ]
+    },
+    {
+      "date": "2025-08-23",
+      "episode_count": 1,
+      "episode_ids": [
+        "d28cf8f387e66df1717e13c0"
+      ]
+    },
+    {
+      "date": "2025-08-24",
+      "episode_count": 2,
+      "episode_ids": [
+        "44bf79da2e2270637a31a8da",
+        "f82ad7fcf80b20a86ed4a850"
+      ]
+    },
+    {
+      "date": "2025-08-25",
+      "episode_count": 7,
+      "episode_ids": [
+        "cab6231d0ad39dc39de20ad3",
+        "285eff5c2a83234066adfe19",
+        "c195177c04b57b43067c1c54",
+        "1fff02ce1f1786c0b202b0fa",
+        "88d786f76a0f20e941e2861c",
+        "ec17e71239eca2d3f23e1e2f",
+        "b7b550f779f388884477d385"
+      ]
+    },
+    {
+      "date": "2025-08-26",
+      "episode_count": 3,
+      "episode_ids": [
+        "b8e74e9a8aebe0b628124c6b",
+        "bb34734437fbd1cbeb5a2043",
+        "df3ea5e01dba054d7d33b978"
+      ]
+    },
+    {
+      "date": "2025-08-27",
+      "episode_count": 2,
+      "episode_ids": [
+        "207327c82bb09d2d702e6845",
+        "76af4075922872814a8abdce"
+      ]
+    },
+    {
+      "date": "2025-08-28",
+      "episode_count": 3,
+      "episode_ids": [
+        "221325835455a194ccefa414",
+        "13c0f05f23e1841437eda7e1",
+        "85a7527ae89289e84b9aa375"
+      ]
+    },
+    {
+      "date": "2025-08-29",
+      "episode_count": 1,
+      "episode_ids": [
+        "83b4235e8c11bcd5c3a0268b"
+      ]
+    },
+    {
+      "date": "2025-08-30",
+      "episode_count": 5,
+      "episode_ids": [
+        "3bb068ced3c98b11e6ee427c",
+        "fe7a63c77e3980766024d5cd",
+        "313579933486170a5edbaa82",
+        "85e83d0efb70ca1f491519ad",
+        "232481551d9a6069a9a1fe3a"
+      ]
+    },
+    {
+      "date": "2025-08-31",
+      "episode_count": 6,
+      "episode_ids": [
+        "050599d20982358307cae684",
+        "dfdcfdd79c45bd0660d59855",
+        "b6a354be997d7b9b32d6149e",
+        "ce0b88ce7b1eee3a12ccc604",
+        "e2ba9374f694545675d90c12",
+        "71008e3a6c452d020e567427"
+      ]
+    },
+    {
+      "date": "2025-09-01",
+      "episode_count": 1,
+      "episode_ids": [
+        "50a02e7cda7033a10543e77a"
+      ]
+    },
+    {
+      "date": "2025-09-02",
+      "episode_count": 1,
+      "episode_ids": [
+        "da994aee739fff615d7ae681"
+      ]
+    },
+    {
+      "date": "2025-09-03",
+      "episode_count": 3,
+      "episode_ids": [
+        "2c8c2db7652c1e83eea46062",
+        "630964837b84dcb82d015247",
+        "4570d497a36ab7b0629f2683"
+      ]
+    },
+    {
+      "date": "2025-09-04",
+      "episode_count": 6,
+      "episode_ids": [
+        "39bb5b15cd6c023330aa8590",
+        "d6e2b12131136ac15b7cc0ce",
+        "7a1522b52a106068b6e24bb9",
+        "2cf6c845f69a490d94feff9b",
+        "1d098bdc28da042a8944c7b1",
+        "79ec2fff0d73da6a1b9601bb"
+      ]
+    },
+    {
+      "date": "2025-09-05",
+      "episode_count": 1,
+      "episode_ids": [
+        "176686aefdcb3e632f8f8e7e"
+      ]
+    },
+    {
+      "date": "2025-09-06",
+      "episode_count": 3,
+      "episode_ids": [
+        "f1f2d8742b84ae40023b943d",
+        "4dfc0af35ff48d0fb1c39ff9",
+        "33c4eddfb879d586fbd5ff9c"
+      ]
+    },
+    {
+      "date": "2025-09-08",
+      "episode_count": 6,
+      "episode_ids": [
+        "6fe23aa8fb8bb190cfb98251",
+        "3c7b246d72177af6b733bebb",
+        "bbf019ee48b8cd0175c9dc20",
+        "07352bd1401df6f05d7125ed",
+        "f972e8adca852aa6d9d0d4b5",
+        "b882d1c472d058338d714368"
+      ]
+    },
+    {
+      "date": "2025-09-09",
+      "episode_count": 1,
+      "episode_ids": [
+        "e1d83d342f15ac6d82f0205c"
+      ]
+    },
+    {
+      "date": "2025-09-10",
+      "episode_count": 3,
+      "episode_ids": [
+        "aded8aba517d2e055f5a6110",
+        "22a2058ff3ba352128e5ef58",
+        "bb93b8a772c7c84e92dd19c4"
+      ]
+    },
+    {
+      "date": "2025-09-11",
+      "episode_count": 7,
+      "episode_ids": [
+        "29931e9748670ab97cdce319",
+        "4187fccd965a282b942d7694",
+        "14ea356407ea5af5a6eb7960",
+        "8368c926278c10a22028c429",
+        "b1d1be4f1c2687317bbe6056",
+        "94f40e6df8f282b49748bf6d",
+        "5b629bbfc4cc054196f2cc25"
+      ]
+    },
+    {
+      "date": "2025-09-12",
+      "episode_count": 6,
+      "episode_ids": [
+        "7e3f2d09fa3ed0aa1c81d069",
+        "39a399352611cecdc1369fa7",
+        "8f9125a89b7ada589780a711",
+        "2eeafe664253222ef9bd1ab6",
+        "fb56c5f50a8934d81b5dfb30",
+        "4ce4add2d6f3f38cc3ee0bbd"
+      ]
+    },
+    {
+      "date": "2025-09-13",
+      "episode_count": 6,
+      "episode_ids": [
+        "319b58cf92a62f6fe7cbf7ff",
+        "0b3c0e5fd45c7a8db06a7733",
+        "3c08d66d528be6b88af17f53",
+        "6088e02d959f8f794b3daf96",
+        "f91a4586c27839f9b04db1fc",
+        "5e84185302388262d2b7f94d"
+      ]
+    },
+    {
+      "date": "2025-09-14",
+      "episode_count": 5,
+      "episode_ids": [
+        "e98335051024030cb4509d54",
+        "21591d14fceac40aa05b4ed9",
+        "e3962be99546b5a2cc1b486d",
+        "c062865b94287ff038b21aee",
+        "c8282e711bfec7196e70cbd0"
+      ]
+    },
+    {
+      "date": "2025-09-15",
+      "episode_count": 5,
+      "episode_ids": [
+        "39814d7eb658217adae24bd9",
+        "eb29ccba021617db3b0e8bbc",
+        "70067c052eec48f162697391",
+        "9ac90852a1163b8d94e497f0",
+        "fa1e9624ec208634260fa6cb"
+      ]
+    },
+    {
+      "date": "2025-09-16",
+      "episode_count": 3,
+      "episode_ids": [
+        "9f79a5661ceb17a852e72a78",
+        "08a32c59bc55483053e24b33",
+        "9f0adec7ff222f22c5fbd64f"
+      ]
+    },
+    {
+      "date": "2025-09-17",
+      "episode_count": 2,
+      "episode_ids": [
+        "cc6ec57c042c0666d01bbce2",
+        "5743362a382a01ee96440d8d"
+      ]
+    },
+    {
+      "date": "2025-09-18",
+      "episode_count": 1,
+      "episode_ids": [
+        "262278a259493e70b57653b9"
+      ]
+    },
+    {
+      "date": "2025-09-19",
+      "episode_count": 1,
+      "episode_ids": [
+        "956307f95e3202b8a7f8321e"
+      ]
+    },
+    {
+      "date": "2025-09-20",
+      "episode_count": 2,
+      "episode_ids": [
+        "43b7701ec678e76d2d51a789",
+        "1da7751aa099962f539ee148"
+      ]
+    },
+    {
+      "date": "2025-09-21",
+      "episode_count": 2,
+      "episode_ids": [
+        "2f4a685a0a6d083b7279c269",
+        "66a8a120ed45c750b02ef347"
+      ]
+    },
+    {
+      "date": "2025-09-22",
+      "episode_count": 6,
+      "episode_ids": [
+        "f5052bba62e43674bedfc358",
+        "cc8950668009e74e60458e88",
+        "75a6f281702996037c7f3424",
+        "53b904233ea90ffe7627f543",
+        "8a765ebfb55474d47cea7625",
+        "19313dfecc19b71819f7a000"
+      ]
+    },
+    {
+      "date": "2025-09-23",
+      "episode_count": 2,
+      "episode_ids": [
+        "b7c7da1cbd1cdbf7fbe7974b",
+        "415f67e66e79ab4fd14156c9"
+      ]
+    },
+    {
+      "date": "2025-09-24",
+      "episode_count": 4,
+      "episode_ids": [
+        "c1c1682a9c6c77bb6a5b8f90",
+        "c2afd732dc1e57f03d96ab70",
+        "d2ded60d799b5bb2a15fefed",
+        "cf76a7bb3c3de8cfa6f46d36"
+      ]
+    },
+    {
+      "date": "2025-09-25",
+      "episode_count": 2,
+      "episode_ids": [
+        "e2399a792236e770164d872c",
+        "80688011a7bed50371bbb05e"
+      ]
+    },
+    {
+      "date": "2025-09-26",
+      "episode_count": 2,
+      "episode_ids": [
+        "c129392a62156167bbe0fbdd",
+        "565a575eb696cb87ddcab38d"
+      ]
+    },
+    {
+      "date": "2025-09-27",
+      "episode_count": 2,
+      "episode_ids": [
+        "04abf746a9419089e58a8089",
+        "a06c6c2deca98df1f25f3ee2"
+      ]
+    },
+    {
+      "date": "2025-09-28",
+      "episode_count": 4,
+      "episode_ids": [
+        "fede442dc1bf79856b68b936",
+        "d57401516a9112f7081066d1",
+        "5c9e4daefd8f7e5b3af68d23",
+        "6b2a2926c0f250c09397f41a"
+      ]
+    },
+    {
+      "date": "2025-09-29",
+      "episode_count": 1,
+      "episode_ids": [
+        "85d1c7573c8faa33c066aa6d"
+      ]
+    },
+    {
+      "date": "2025-09-30",
+      "episode_count": 3,
+      "episode_ids": [
+        "333127ebb8a9d80b0b3e30a7",
+        "55bba7d918ca5d55576cc0d6",
+        "a5d2d613ce171f67a66044e7"
+      ]
+    },
+    {
+      "date": "2025-10-01",
+      "episode_count": 2,
+      "episode_ids": [
+        "55ece991ac899c392a28c3e1",
+        "8bb8b13ef64bccea498579d6"
+      ]
+    }
+  ],
+  "episodes": [
+    {
+      "episode_id": "67623b1497e09450a67c2a44",
+      "alert_start": "2025-08-11T23:58:06Z",
+      "alert_end": "2025-08-12T00:40:30Z",
+      "alert_start_date_kyiv": "2025-08-12",
+      "denominator_source_artifact": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P1b_alerts.json",
+      "posthoc_prior_source_research_provenance": false,
+      "posthoc_provenance_records": []
+    },
+    {
+      "episode_id": "cac22a34f58d8adef7fe8e7a",
+      "alert_start": "2025-08-12T02:47:21Z",
+      "alert_end": "2025-08-12T04:41:07Z",
+      "alert_start_date_kyiv": "2025-08-12",
+      "denominator_source_artifact": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P1b_alerts.json",
+      "posthoc_prior_source_research_provenance": false,
+      "posthoc_provenance_records": []
+    },
+    {
+      "episode_id": "5915adfa4d555e30fc424a15",
+      "alert_start": "2025-08-12T19:38:48Z",
+      "alert_end": "2025-08-12T21:21:10Z",
+      "alert_start_date_kyiv": "2025-08-12",
+      "denominator_source_artifact": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P1b_alerts.json",
+      "posthoc_prior_source_research_provenance": false,
+      "posthoc_provenance_records": []
+    },
+    {
+      "episode_id": "73bcebb800200cd1eebfb676",
+      "alert_start": "2025-08-13T05:56:27Z",
+      "alert_end": "2025-08-13T06:24:47Z",
+      "alert_start_date_kyiv": "2025-08-13",
+      "denominator_source_artifact": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P1b_alerts.json",
+      "posthoc_prior_source_research_provenance": true,
+      "posthoc_provenance_records": [
+        {
+          "artifact": "research/zaporizhzhia_explosion_blind_sample_50_wave2.json",
+          "path": "sampled_episodes[12]",
+          "verdict": "no_explosion_evidence_found"
+        }
+      ]
+    },
+    {
+      "episode_id": "2051acef367704cf87e65ddc",
+      "alert_start": "2025-08-13T06:27:20Z",
+      "alert_end": "2025-08-13T06:40:26Z",
+      "alert_start_date_kyiv": "2025-08-13",
+      "denominator_source_artifact": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P1b_alerts.json",
+      "posthoc_prior_source_research_provenance": false,
+      "posthoc_provenance_records": []
+    },
+    {
+      "episode_id": "fffd0949182850325d2ef631",
+      "alert_start": "2025-08-13T18:28:49Z",
+      "alert_end": "2025-08-13T18:43:54Z",
+      "alert_start_date_kyiv": "2025-08-13",
+      "denominator_source_artifact": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P1b_alerts.json",
+      "posthoc_prior_source_research_provenance": true,
+      "posthoc_provenance_records": [
+        {
+          "artifact": "research/zaporizhzhia_explosion_o3_source_discovery.json",
+          "path": "searched_episodes[75]",
+          "discovery_result": "no_source_hit_found"
+        }
+      ]
+    },
+    {
+      "episode_id": "89b237690c31d11f6a9e95dc",
+      "alert_start": "2025-08-13T19:24:51Z",
+      "alert_end": "2025-08-13T19:56:01Z",
+      "alert_start_date_kyiv": "2025-08-13",
+      "denominator_source_artifact": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P1b_alerts.json",
+      "posthoc_prior_source_research_provenance": true,
+      "posthoc_provenance_records": [
+        {
+          "artifact": "research/zaporizhzhia_explosion_o3_source_discovery.json",
+          "path": "searched_episodes[76]",
+          "discovery_result": "no_source_hit_found"
+        }
+      ]
+    },
+    {
+      "episode_id": "a70206eed2a8f0d7039f7fd2",
+      "alert_start": "2025-08-13T20:05:06Z",
+      "alert_end": "2025-08-13T20:39:01Z",
+      "alert_start_date_kyiv": "2025-08-13",
+      "denominator_source_artifact": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P1b_alerts.json",
+      "posthoc_prior_source_research_provenance": false,
+      "posthoc_provenance_records": []
+    },
+    {
+      "episode_id": "cc7285137c6a87ab1656235b",
+      "alert_start": "2025-08-13T22:06:04Z",
+      "alert_end": "2025-08-13T22:30:32Z",
+      "alert_start_date_kyiv": "2025-08-14",
+      "denominator_source_artifact": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P1b_alerts.json",
+      "posthoc_prior_source_research_provenance": false,
+      "posthoc_provenance_records": []
+    },
+    {
+      "episode_id": "c489bfd6d2b9560c40a55cf5",
+      "alert_start": "2025-08-14T13:57:19Z",
+      "alert_end": "2025-08-14T14:22:37Z",
+      "alert_start_date_kyiv": "2025-08-14",
+      "denominator_source_artifact": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P1b_alerts.json",
+      "posthoc_prior_source_research_provenance": false,
+      "posthoc_provenance_records": []
+    },
+    {
+      "episode_id": "25dd6092cc42242c8198dec7",
+      "alert_start": "2025-08-14T15:04:27Z",
+      "alert_end": "2025-08-14T15:16:16Z",
+      "alert_start_date_kyiv": "2025-08-14",
+      "denominator_source_artifact": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P1b_alerts.json",
+      "posthoc_prior_source_research_provenance": false,
+      "posthoc_provenance_records": []
+    },
+    {
+      "episode_id": "31075020fcadc72072434ed8",
+      "alert_start": "2025-08-14T17:07:37Z",
+      "alert_end": "2025-08-14T17:45:38Z",
+      "alert_start_date_kyiv": "2025-08-14",
+      "denominator_source_artifact": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P1b_alerts.json",
+      "posthoc_prior_source_research_provenance": false,
+      "posthoc_provenance_records": []
+    },
+    {
+      "episode_id": "c37b289cee727a3e6cccd3dc",
+      "alert_start": "2025-08-14T17:51:29Z",
+      "alert_end": "2025-08-14T18:21:51Z",
+      "alert_start_date_kyiv": "2025-08-14",
+      "denominator_source_artifact": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P1b_alerts.json",
+      "posthoc_prior_source_research_provenance": false,
+      "posthoc_provenance_records": []
+    },
+    {
+      "episode_id": "729710f0eca640aaae75861c",
+      "alert_start": "2025-08-14T19:52:30Z",
+      "alert_end": "2025-08-14T21:37:03Z",
+      "alert_start_date_kyiv": "2025-08-14",
+      "denominator_source_artifact": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P1b_alerts.json",
+      "posthoc_prior_source_research_provenance": true,
+      "posthoc_provenance_records": [
+        {
+          "artifact": "research/zaporizhzhia_explosion_blind_sample_50.json",
+          "path": "sampled_episodes[11]",
+          "verdict": "no_explosion_evidence_found"
+        }
+      ]
+    },
+    {
+      "episode_id": "56c934319332db56894ed4c7",
+      "alert_start": "2025-08-14T23:24:08Z",
+      "alert_end": "2025-08-15T00:02:53Z",
+      "alert_start_date_kyiv": "2025-08-15",
+      "denominator_source_artifact": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P1b_alerts.json",
+      "posthoc_prior_source_research_provenance": true,
+      "posthoc_provenance_records": [
+        {
+          "artifact": "research/zaporizhzhia_explosion_blind_sample_50.json",
+          "path": "sampled_episodes[12]",
+          "verdict": "no_explosion_evidence_found"
+        }
+      ]
+    },
+    {
+      "episode_id": "6de018bcdefa0739760a6336",
+      "alert_start": "2025-08-15T07:32:58Z",
+      "alert_end": "2025-08-15T07:56:19Z",
+      "alert_start_date_kyiv": "2025-08-15",
+      "denominator_source_artifact": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P1b_alerts.json",
+      "posthoc_prior_source_research_provenance": false,
+      "posthoc_provenance_records": []
+    },
+    {
+      "episode_id": "e2ddb5beb05a17fddc7e5a46",
+      "alert_start": "2025-08-15T12:04:33Z",
+      "alert_end": "2025-08-15T12:19:32Z",
+      "alert_start_date_kyiv": "2025-08-15",
+      "denominator_source_artifact": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P1b_alerts.json",
+      "posthoc_prior_source_research_provenance": false,
+      "posthoc_provenance_records": []
+    },
+    {
+      "episode_id": "fea153b042e19a312fecd317",
+      "alert_start": "2025-08-15T13:06:11Z",
+      "alert_end": "2025-08-15T13:37:58Z",
+      "alert_start_date_kyiv": "2025-08-15",
+      "denominator_source_artifact": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P1b_alerts.json",
+      "posthoc_prior_source_research_provenance": false,
+      "posthoc_provenance_records": []
+    },
+    {
+      "episode_id": "7e8d57fc9102bd23d0dcc6be",
+      "alert_start": "2025-08-15T16:31:52Z",
+      "alert_end": "2025-08-15T16:47:03Z",
+      "alert_start_date_kyiv": "2025-08-15",
+      "denominator_source_artifact": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P1b_alerts.json",
+      "posthoc_prior_source_research_provenance": false,
+      "posthoc_provenance_records": []
+    },
+    {
+      "episode_id": "ea38ff19bb8077ba89276940",
+      "alert_start": "2025-08-15T23:03:26Z",
+      "alert_end": "2025-08-16T00:51:42Z",
+      "alert_start_date_kyiv": "2025-08-16",
+      "denominator_source_artifact": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P1b_alerts.json",
+      "posthoc_prior_source_research_provenance": false,
+      "posthoc_provenance_records": []
+    },
+    {
+      "episode_id": "3921198b0e987d7068c023fe",
+      "alert_start": "2025-08-16T02:42:13Z",
+      "alert_end": "2025-08-16T03:52:02Z",
+      "alert_start_date_kyiv": "2025-08-16",
+      "denominator_source_artifact": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P1b_alerts.json",
+      "posthoc_prior_source_research_provenance": false,
+      "posthoc_provenance_records": []
+    },
+    {
+      "episode_id": "72e0ef1c2e68546ba4afb96c",
+      "alert_start": "2025-08-16T13:05:03Z",
+      "alert_end": "2025-08-16T13:28:54Z",
+      "alert_start_date_kyiv": "2025-08-16",
+      "denominator_source_artifact": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P1b_alerts.json",
+      "posthoc_prior_source_research_provenance": false,
+      "posthoc_provenance_records": []
+    },
+    {
+      "episode_id": "2f00073c7b323e4b8d3406fe",
+      "alert_start": "2025-08-16T19:11:49Z",
+      "alert_end": "2025-08-16T20:15:41Z",
+      "alert_start_date_kyiv": "2025-08-16",
+      "denominator_source_artifact": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P1b_alerts.json",
+      "posthoc_prior_source_research_provenance": false,
+      "posthoc_provenance_records": []
+    },
+    {
+      "episode_id": "e077ffaf45817b3005a629e4",
+      "alert_start": "2025-08-16T20:25:11Z",
+      "alert_end": "2025-08-16T21:08:54Z",
+      "alert_start_date_kyiv": "2025-08-16",
+      "denominator_source_artifact": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P1b_alerts.json",
+      "posthoc_prior_source_research_provenance": false,
+      "posthoc_provenance_records": []
+    },
+    {
+      "episode_id": "f54e1aa67742d627bd4ac91f",
+      "alert_start": "2025-08-17T06:36:30Z",
+      "alert_end": "2025-08-17T06:50:24Z",
+      "alert_start_date_kyiv": "2025-08-17",
+      "denominator_source_artifact": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P1b_alerts.json",
+      "posthoc_prior_source_research_provenance": false,
+      "posthoc_provenance_records": []
+    },
+    {
+      "episode_id": "01e5965b7c971400700abb69",
+      "alert_start": "2025-08-17T07:09:54Z",
+      "alert_end": "2025-08-17T07:38:11Z",
+      "alert_start_date_kyiv": "2025-08-17",
+      "denominator_source_artifact": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P1b_alerts.json",
+      "posthoc_prior_source_research_provenance": false,
+      "posthoc_provenance_records": []
+    },
+    {
+      "episode_id": "1afc15d15b3a415d3ffc74d0",
+      "alert_start": "2025-08-17T15:14:42Z",
+      "alert_end": "2025-08-17T15:37:14Z",
+      "alert_start_date_kyiv": "2025-08-17",
+      "denominator_source_artifact": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P1b_alerts.json",
+      "posthoc_prior_source_research_provenance": false,
+      "posthoc_provenance_records": []
+    },
+    {
+      "episode_id": "c47dd7a357f4263a1b27efe0",
+      "alert_start": "2025-08-17T18:05:55Z",
+      "alert_end": "2025-08-17T20:44:48Z",
+      "alert_start_date_kyiv": "2025-08-17",
+      "denominator_source_artifact": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P1b_alerts.json",
+      "posthoc_prior_source_research_provenance": false,
+      "posthoc_provenance_records": []
+    },
+    {
+      "episode_id": "20d5c6a7f36fa4006163586d",
+      "alert_start": "2025-08-17T21:40:41Z",
+      "alert_end": "2025-08-17T21:47:14Z",
+      "alert_start_date_kyiv": "2025-08-18",
+      "denominator_source_artifact": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P1b_alerts.json",
+      "posthoc_prior_source_research_provenance": false,
+      "posthoc_provenance_records": []
+    },
+    {
+      "episode_id": "306059a87a2c1bada856df70",
+      "alert_start": "2025-08-17T23:50:52Z",
+      "alert_end": "2025-08-17T23:56:26Z",
+      "alert_start_date_kyiv": "2025-08-18",
+      "denominator_source_artifact": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P1b_alerts.json",
+      "posthoc_prior_source_research_provenance": true,
+      "posthoc_provenance_records": [
+        {
+          "artifact": "research/zaporizhzhia_explosion_o3_source_discovery.json",
+          "path": "searched_episodes[77]",
+          "discovery_result": "no_source_hit_found"
+        }
+      ]
+    },
+    {
+      "episode_id": "d45689d3031c4aa303816658",
+      "alert_start": "2025-08-18T04:48:00Z",
+      "alert_end": "2025-08-18T05:43:55Z",
+      "alert_start_date_kyiv": "2025-08-18",
+      "denominator_source_artifact": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P1b_alerts.json",
+      "posthoc_prior_source_research_provenance": true,
+      "posthoc_provenance_records": [
+        {
+          "artifact": "research/zaporizhzhia_explosion_o3_source_discovery.json",
+          "path": "searched_episodes[78]",
+          "discovery_result": "no_source_hit_found"
+        }
+      ]
+    },
+    {
+      "episode_id": "9c8229fbab1da4901030100a",
+      "alert_start": "2025-08-18T05:56:47Z",
+      "alert_end": "2025-08-18T06:28:46Z",
+      "alert_start_date_kyiv": "2025-08-18",
+      "denominator_source_artifact": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P1b_alerts.json",
+      "posthoc_prior_source_research_provenance": false,
+      "posthoc_provenance_records": []
+    },
+    {
+      "episode_id": "a05d6fd667668198f61064b0",
+      "alert_start": "2025-08-18T16:09:48Z",
+      "alert_end": "2025-08-18T16:41:33Z",
+      "alert_start_date_kyiv": "2025-08-18",
+      "denominator_source_artifact": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P1b_alerts.json",
+      "posthoc_prior_source_research_provenance": true,
+      "posthoc_provenance_records": [
+        {
+          "artifact": "research/zaporizhzhia_explosion_blind_sample_50.json",
+          "path": "sampled_episodes[13]",
+          "verdict": "no_explosion_evidence_found"
+        }
+      ]
+    },
+    {
+      "episode_id": "746e2f53adce1e79bb184356",
+      "alert_start": "2025-08-18T17:56:06Z",
+      "alert_end": "2025-08-18T18:28:22Z",
+      "alert_start_date_kyiv": "2025-08-18",
+      "denominator_source_artifact": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P1b_alerts.json",
+      "posthoc_prior_source_research_provenance": true,
+      "posthoc_provenance_records": [
+        {
+          "artifact": "research/zaporizhzhia_explosion_o3_source_discovery.json",
+          "path": "searched_episodes[79]",
+          "discovery_result": "no_source_hit_found"
+        }
+      ]
+    },
+    {
+      "episode_id": "8a7c3b17639b97c49df95b26",
+      "alert_start": "2025-08-18T19:44:26Z",
+      "alert_end": "2025-08-19T02:53:13Z",
+      "alert_start_date_kyiv": "2025-08-18",
+      "denominator_source_artifact": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P1b_alerts.json",
+      "posthoc_prior_source_research_provenance": false,
+      "posthoc_provenance_records": []
+    },
+    {
+      "episode_id": "3fd25ba4f6307ee19653df1e",
+      "alert_start": "2025-08-19T07:50:32Z",
+      "alert_end": "2025-08-19T08:33:24Z",
+      "alert_start_date_kyiv": "2025-08-19",
+      "denominator_source_artifact": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P1b_alerts.json",
+      "posthoc_prior_source_research_provenance": false,
+      "posthoc_provenance_records": []
+    },
+    {
+      "episode_id": "401bd0031b7b4930fc4262e6",
+      "alert_start": "2025-08-19T18:52:36Z",
+      "alert_end": "2025-08-19T20:15:19Z",
+      "alert_start_date_kyiv": "2025-08-19",
+      "denominator_source_artifact": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P1b_alerts.json",
+      "posthoc_prior_source_research_provenance": false,
+      "posthoc_provenance_records": []
+    },
+    {
+      "episode_id": "0d7ccb91d817bfb593018c77",
+      "alert_start": "2025-08-20T04:08:27Z",
+      "alert_end": "2025-08-20T04:27:58Z",
+      "alert_start_date_kyiv": "2025-08-20",
+      "denominator_source_artifact": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P1b_alerts.json",
+      "posthoc_prior_source_research_provenance": false,
+      "posthoc_provenance_records": []
+    },
+    {
+      "episode_id": "8bccdc4dfe22dc1d1aaa98db",
+      "alert_start": "2025-08-20T09:20:30Z",
+      "alert_end": "2025-08-20T09:46:35Z",
+      "alert_start_date_kyiv": "2025-08-20",
+      "denominator_source_artifact": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P1b_alerts.json",
+      "posthoc_prior_source_research_provenance": false,
+      "posthoc_provenance_records": []
+    },
+    {
+      "episode_id": "46f9baeb28cb88a5a69bc051",
+      "alert_start": "2025-08-20T09:57:33Z",
+      "alert_end": "2025-08-20T10:39:30Z",
+      "alert_start_date_kyiv": "2025-08-20",
+      "denominator_source_artifact": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P1b_alerts.json",
+      "posthoc_prior_source_research_provenance": false,
+      "posthoc_provenance_records": []
+    },
+    {
+      "episode_id": "946bbb00617d88aa8846420f",
+      "alert_start": "2025-08-20T15:05:32Z",
+      "alert_end": "2025-08-20T15:37:10Z",
+      "alert_start_date_kyiv": "2025-08-20",
+      "denominator_source_artifact": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P1b_alerts.json",
+      "posthoc_prior_source_research_provenance": false,
+      "posthoc_provenance_records": []
+    },
+    {
+      "episode_id": "208b2aad344532f1140641ed",
+      "alert_start": "2025-08-20T19:02:04Z",
+      "alert_end": "2025-08-20T21:43:26Z",
+      "alert_start_date_kyiv": "2025-08-20",
+      "denominator_source_artifact": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P1b_alerts.json",
+      "posthoc_prior_source_research_provenance": false,
+      "posthoc_provenance_records": []
+    },
+    {
+      "episode_id": "7ffb26d8e21f7fb8a7348b2b",
+      "alert_start": "2025-08-20T23:49:34Z",
+      "alert_end": "2025-08-21T03:25:21Z",
+      "alert_start_date_kyiv": "2025-08-21",
+      "denominator_source_artifact": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P1b_alerts.json",
+      "posthoc_prior_source_research_provenance": false,
+      "posthoc_provenance_records": []
+    },
+    {
+      "episode_id": "195fb6dce20962736fccb85b",
+      "alert_start": "2025-08-21T03:59:02Z",
+      "alert_end": "2025-08-21T04:13:52Z",
+      "alert_start_date_kyiv": "2025-08-21",
+      "denominator_source_artifact": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P1b_alerts.json",
+      "posthoc_prior_source_research_provenance": true,
+      "posthoc_provenance_records": [
+        {
+          "artifact": "research/zaporizhzhia_explosion_o3_source_discovery.json",
+          "path": "searched_episodes[80]",
+          "discovery_result": "no_source_hit_found"
+        }
+      ]
+    },
+    {
+      "episode_id": "e05213217d00f1cff2f265b7",
+      "alert_start": "2025-08-21T15:24:12Z",
+      "alert_end": "2025-08-21T15:50:26Z",
+      "alert_start_date_kyiv": "2025-08-21",
+      "denominator_source_artifact": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P1b_alerts.json",
+      "posthoc_prior_source_research_provenance": true,
+      "posthoc_provenance_records": [
+        {
+          "artifact": "research/zaporizhzhia_explosion_o3_source_discovery.json",
+          "path": "searched_episodes[81]",
+          "discovery_result": "no_source_hit_found"
+        }
+      ]
+    },
+    {
+      "episode_id": "5bfa03380864b9b254c16e5d",
+      "alert_start": "2025-08-21T20:12:42Z",
+      "alert_end": "2025-08-21T23:07:44Z",
+      "alert_start_date_kyiv": "2025-08-21",
+      "denominator_source_artifact": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P1b_alerts.json",
+      "posthoc_prior_source_research_provenance": false,
+      "posthoc_provenance_records": []
+    },
+    {
+      "episode_id": "8c6d7d143b35ed3c5937d39a",
+      "alert_start": "2025-08-22T00:53:58Z",
+      "alert_end": "2025-08-22T01:33:19Z",
+      "alert_start_date_kyiv": "2025-08-22",
+      "denominator_source_artifact": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P1b_alerts.json",
+      "posthoc_prior_source_research_provenance": false,
+      "posthoc_provenance_records": []
+    },
+    {
+      "episode_id": "266dc8eb44825712d534bb78",
+      "alert_start": "2025-08-22T12:26:35Z",
+      "alert_end": "2025-08-22T12:47:47Z",
+      "alert_start_date_kyiv": "2025-08-22",
+      "denominator_source_artifact": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P1b_alerts.json",
+      "posthoc_prior_source_research_provenance": false,
+      "posthoc_provenance_records": []
+    },
+    {
+      "episode_id": "d28cf8f387e66df1717e13c0",
+      "alert_start": "2025-08-23T19:13:32Z",
+      "alert_end": "2025-08-23T22:12:54Z",
+      "alert_start_date_kyiv": "2025-08-23",
+      "denominator_source_artifact": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P1b_alerts.json",
+      "posthoc_prior_source_research_provenance": false,
+      "posthoc_provenance_records": []
+    },
+    {
+      "episode_id": "44bf79da2e2270637a31a8da",
+      "alert_start": "2025-08-24T12:08:13Z",
+      "alert_end": "2025-08-24T12:18:00Z",
+      "alert_start_date_kyiv": "2025-08-24",
+      "denominator_source_artifact": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P1b_alerts.json",
+      "posthoc_prior_source_research_provenance": false,
+      "posthoc_provenance_records": []
+    },
+    {
+      "episode_id": "f82ad7fcf80b20a86ed4a850",
+      "alert_start": "2025-08-24T17:50:07Z",
+      "alert_end": "2025-08-24T18:50:48Z",
+      "alert_start_date_kyiv": "2025-08-24",
+      "denominator_source_artifact": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P1b_alerts.json",
+      "posthoc_prior_source_research_provenance": false,
+      "posthoc_provenance_records": []
+    },
+    {
+      "episode_id": "cab6231d0ad39dc39de20ad3",
+      "alert_start": "2025-08-25T03:16:45Z",
+      "alert_end": "2025-08-25T03:45:06Z",
+      "alert_start_date_kyiv": "2025-08-25",
+      "denominator_source_artifact": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P1b_alerts.json",
+      "posthoc_prior_source_research_provenance": false,
+      "posthoc_provenance_records": []
+    },
+    {
+      "episode_id": "285eff5c2a83234066adfe19",
+      "alert_start": "2025-08-25T04:02:29Z",
+      "alert_end": "2025-08-25T04:17:36Z",
+      "alert_start_date_kyiv": "2025-08-25",
+      "denominator_source_artifact": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P1b_alerts.json",
+      "posthoc_prior_source_research_provenance": false,
+      "posthoc_provenance_records": []
+    },
+    {
+      "episode_id": "c195177c04b57b43067c1c54",
+      "alert_start": "2025-08-25T11:57:22Z",
+      "alert_end": "2025-08-25T12:12:35Z",
+      "alert_start_date_kyiv": "2025-08-25",
+      "denominator_source_artifact": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P1b_alerts.json",
+      "posthoc_prior_source_research_provenance": false,
+      "posthoc_provenance_records": []
+    },
+    {
+      "episode_id": "1fff02ce1f1786c0b202b0fa",
+      "alert_start": "2025-08-25T12:18:55Z",
+      "alert_end": "2025-08-25T12:46:47Z",
+      "alert_start_date_kyiv": "2025-08-25",
+      "denominator_source_artifact": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P1b_alerts.json",
+      "posthoc_prior_source_research_provenance": false,
+      "posthoc_provenance_records": []
+    },
+    {
+      "episode_id": "88d786f76a0f20e941e2861c",
+      "alert_start": "2025-08-25T15:03:11Z",
+      "alert_end": "2025-08-25T15:20:39Z",
+      "alert_start_date_kyiv": "2025-08-25",
+      "denominator_source_artifact": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P1b_alerts.json",
+      "posthoc_prior_source_research_provenance": false,
+      "posthoc_provenance_records": []
+    },
+    {
+      "episode_id": "ec17e71239eca2d3f23e1e2f",
+      "alert_start": "2025-08-25T15:54:06Z",
+      "alert_end": "2025-08-25T16:33:34Z",
+      "alert_start_date_kyiv": "2025-08-25",
+      "denominator_source_artifact": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P1b_alerts.json",
+      "posthoc_prior_source_research_provenance": false,
+      "posthoc_provenance_records": []
+    },
+    {
+      "episode_id": "b7b550f779f388884477d385",
+      "alert_start": "2025-08-25T20:32:46Z",
+      "alert_end": "2025-08-25T22:23:01Z",
+      "alert_start_date_kyiv": "2025-08-25",
+      "denominator_source_artifact": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P1b_alerts.json",
+      "posthoc_prior_source_research_provenance": false,
+      "posthoc_provenance_records": []
+    },
+    {
+      "episode_id": "b8e74e9a8aebe0b628124c6b",
+      "alert_start": "2025-08-26T03:32:04Z",
+      "alert_end": "2025-08-26T03:48:12Z",
+      "alert_start_date_kyiv": "2025-08-26",
+      "denominator_source_artifact": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P1b_alerts.json",
+      "posthoc_prior_source_research_provenance": false,
+      "posthoc_provenance_records": []
+    },
+    {
+      "episode_id": "bb34734437fbd1cbeb5a2043",
+      "alert_start": "2025-08-26T06:10:51Z",
+      "alert_end": "2025-08-26T07:17:24Z",
+      "alert_start_date_kyiv": "2025-08-26",
+      "denominator_source_artifact": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P1b_alerts.json",
+      "posthoc_prior_source_research_provenance": false,
+      "posthoc_provenance_records": []
+    },
+    {
+      "episode_id": "df3ea5e01dba054d7d33b978",
+      "alert_start": "2025-08-26T20:09:38Z",
+      "alert_end": "2025-08-26T23:00:47Z",
+      "alert_start_date_kyiv": "2025-08-26",
+      "denominator_source_artifact": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P1b_alerts.json",
+      "posthoc_prior_source_research_provenance": false,
+      "posthoc_provenance_records": []
+    },
+    {
+      "episode_id": "207327c82bb09d2d702e6845",
+      "alert_start": "2025-08-27T08:39:08Z",
+      "alert_end": "2025-08-27T09:00:17Z",
+      "alert_start_date_kyiv": "2025-08-27",
+      "denominator_source_artifact": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P1b_alerts.json",
+      "posthoc_prior_source_research_provenance": false,
+      "posthoc_provenance_records": []
+    },
+    {
+      "episode_id": "76af4075922872814a8abdce",
+      "alert_start": "2025-08-27T16:55:23Z",
+      "alert_end": "2025-08-28T03:20:11Z",
+      "alert_start_date_kyiv": "2025-08-27",
+      "denominator_source_artifact": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P1b_alerts.json",
+      "posthoc_prior_source_research_provenance": false,
+      "posthoc_provenance_records": []
+    },
+    {
+      "episode_id": "221325835455a194ccefa414",
+      "alert_start": "2025-08-28T11:05:43Z",
+      "alert_end": "2025-08-28T11:20:28Z",
+      "alert_start_date_kyiv": "2025-08-28",
+      "denominator_source_artifact": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P2a_alerts.json",
+      "posthoc_prior_source_research_provenance": false,
+      "posthoc_provenance_records": []
+    },
+    {
+      "episode_id": "13c0f05f23e1841437eda7e1",
+      "alert_start": "2025-08-28T11:31:25Z",
+      "alert_end": "2025-08-28T11:47:48Z",
+      "alert_start_date_kyiv": "2025-08-28",
+      "denominator_source_artifact": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P2a_alerts.json",
+      "posthoc_prior_source_research_provenance": false,
+      "posthoc_provenance_records": []
+    },
+    {
+      "episode_id": "85a7527ae89289e84b9aa375",
+      "alert_start": "2025-08-28T14:59:37Z",
+      "alert_end": "2025-08-28T15:23:02Z",
+      "alert_start_date_kyiv": "2025-08-28",
+      "denominator_source_artifact": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P2a_alerts.json",
+      "posthoc_prior_source_research_provenance": false,
+      "posthoc_provenance_records": []
+    },
+    {
+      "episode_id": "83b4235e8c11bcd5c3a0268b",
+      "alert_start": "2025-08-29T15:59:23Z",
+      "alert_end": "2025-08-30T04:01:36Z",
+      "alert_start_date_kyiv": "2025-08-29",
+      "denominator_source_artifact": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P2a_alerts.json",
+      "posthoc_prior_source_research_provenance": true,
+      "posthoc_provenance_records": [
+        {
+          "artifact": "kyiv-air-alerts-grafana/data/explosion_research/zaporizhzhia/final_evidence.json",
+          "path": "strict_events[46]",
+          "verdict": "strict: exact city, war attack, timed interval inside the matched alert."
+        }
+      ]
+    },
+    {
+      "episode_id": "3bb068ced3c98b11e6ee427c",
+      "alert_start": "2025-08-30T06:40:14Z",
+      "alert_end": "2025-08-30T07:02:03Z",
+      "alert_start_date_kyiv": "2025-08-30",
+      "denominator_source_artifact": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P2a_alerts.json",
+      "posthoc_prior_source_research_provenance": false,
+      "posthoc_provenance_records": []
+    },
+    {
+      "episode_id": "fe7a63c77e3980766024d5cd",
+      "alert_start": "2025-08-30T08:28:23Z",
+      "alert_end": "2025-08-30T09:36:42Z",
+      "alert_start_date_kyiv": "2025-08-30",
+      "denominator_source_artifact": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P2a_alerts.json",
+      "posthoc_prior_source_research_provenance": false,
+      "posthoc_provenance_records": []
+    },
+    {
+      "episode_id": "313579933486170a5edbaa82",
+      "alert_start": "2025-08-30T17:53:57Z",
+      "alert_end": "2025-08-30T18:12:12Z",
+      "alert_start_date_kyiv": "2025-08-30",
+      "denominator_source_artifact": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P2a_alerts.json",
+      "posthoc_prior_source_research_provenance": false,
+      "posthoc_provenance_records": []
+    },
+    {
+      "episode_id": "85e83d0efb70ca1f491519ad",
+      "alert_start": "2025-08-30T18:36:24Z",
+      "alert_end": "2025-08-30T18:48:25Z",
+      "alert_start_date_kyiv": "2025-08-30",
+      "denominator_source_artifact": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P2a_alerts.json",
+      "posthoc_prior_source_research_provenance": false,
+      "posthoc_provenance_records": []
+    },
+    {
+      "episode_id": "232481551d9a6069a9a1fe3a",
+      "alert_start": "2025-08-30T20:15:56Z",
+      "alert_end": "2025-08-30T21:00:24Z",
+      "alert_start_date_kyiv": "2025-08-30",
+      "denominator_source_artifact": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P2a_alerts.json",
+      "posthoc_prior_source_research_provenance": false,
+      "posthoc_provenance_records": []
+    },
+    {
+      "episode_id": "050599d20982358307cae684",
+      "alert_start": "2025-08-30T22:50:30Z",
+      "alert_end": "2025-08-31T00:23:07Z",
+      "alert_start_date_kyiv": "2025-08-31",
+      "denominator_source_artifact": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P2a_alerts.json",
+      "posthoc_prior_source_research_provenance": false,
+      "posthoc_provenance_records": []
+    },
+    {
+      "episode_id": "dfdcfdd79c45bd0660d59855",
+      "alert_start": "2025-08-31T03:49:21Z",
+      "alert_end": "2025-08-31T04:05:26Z",
+      "alert_start_date_kyiv": "2025-08-31",
+      "denominator_source_artifact": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P2a_alerts.json",
+      "posthoc_prior_source_research_provenance": false,
+      "posthoc_provenance_records": []
+    },
+    {
+      "episode_id": "b6a354be997d7b9b32d6149e",
+      "alert_start": "2025-08-31T06:19:36Z",
+      "alert_end": "2025-08-31T07:20:01Z",
+      "alert_start_date_kyiv": "2025-08-31",
+      "denominator_source_artifact": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P2a_alerts.json",
+      "posthoc_prior_source_research_provenance": false,
+      "posthoc_provenance_records": []
+    },
+    {
+      "episode_id": "ce0b88ce7b1eee3a12ccc604",
+      "alert_start": "2025-08-31T07:43:59Z",
+      "alert_end": "2025-08-31T08:22:47Z",
+      "alert_start_date_kyiv": "2025-08-31",
+      "denominator_source_artifact": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P2a_alerts.json",
+      "posthoc_prior_source_research_provenance": false,
+      "posthoc_provenance_records": []
+    },
+    {
+      "episode_id": "e2ba9374f694545675d90c12",
+      "alert_start": "2025-08-31T09:27:03Z",
+      "alert_end": "2025-08-31T10:23:46Z",
+      "alert_start_date_kyiv": "2025-08-31",
+      "denominator_source_artifact": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P2a_alerts.json",
+      "posthoc_prior_source_research_provenance": false,
+      "posthoc_provenance_records": []
+    },
+    {
+      "episode_id": "71008e3a6c452d020e567427",
+      "alert_start": "2025-08-31T12:27:39Z",
+      "alert_end": "2025-08-31T13:49:07Z",
+      "alert_start_date_kyiv": "2025-08-31",
+      "denominator_source_artifact": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P2a_alerts.json",
+      "posthoc_prior_source_research_provenance": false,
+      "posthoc_provenance_records": []
+    },
+    {
+      "episode_id": "50a02e7cda7033a10543e77a",
+      "alert_start": "2025-09-01T07:17:54Z",
+      "alert_end": "2025-09-01T07:41:09Z",
+      "alert_start_date_kyiv": "2025-09-01",
+      "denominator_source_artifact": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P2a_alerts.json",
+      "posthoc_prior_source_research_provenance": false,
+      "posthoc_provenance_records": []
+    },
+    {
+      "episode_id": "da994aee739fff615d7ae681",
+      "alert_start": "2025-09-02T17:01:08Z",
+      "alert_end": "2025-09-02T23:19:55Z",
+      "alert_start_date_kyiv": "2025-09-02",
+      "denominator_source_artifact": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P2a_alerts.json",
+      "posthoc_prior_source_research_provenance": false,
+      "posthoc_provenance_records": []
+    },
+    {
+      "episode_id": "2c8c2db7652c1e83eea46062",
+      "alert_start": "2025-09-03T01:11:18Z",
+      "alert_end": "2025-09-03T04:14:43Z",
+      "alert_start_date_kyiv": "2025-09-03",
+      "denominator_source_artifact": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P2a_alerts.json",
+      "posthoc_prior_source_research_provenance": false,
+      "posthoc_provenance_records": []
+    },
+    {
+      "episode_id": "630964837b84dcb82d015247",
+      "alert_start": "2025-09-03T07:34:45Z",
+      "alert_end": "2025-09-03T07:54:37Z",
+      "alert_start_date_kyiv": "2025-09-03",
+      "denominator_source_artifact": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P2a_alerts.json",
+      "posthoc_prior_source_research_provenance": false,
+      "posthoc_provenance_records": []
+    },
+    {
+      "episode_id": "4570d497a36ab7b0629f2683",
+      "alert_start": "2025-09-03T08:35:17Z",
+      "alert_end": "2025-09-03T08:42:37Z",
+      "alert_start_date_kyiv": "2025-09-03",
+      "denominator_source_artifact": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P2a_alerts.json",
+      "posthoc_prior_source_research_provenance": false,
+      "posthoc_provenance_records": []
+    },
+    {
+      "episode_id": "39bb5b15cd6c023330aa8590",
+      "alert_start": "2025-09-04T02:35:18Z",
+      "alert_end": "2025-09-04T03:34:35Z",
+      "alert_start_date_kyiv": "2025-09-04",
+      "denominator_source_artifact": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P2a_alerts.json",
+      "posthoc_prior_source_research_provenance": false,
+      "posthoc_provenance_records": []
+    },
+    {
+      "episode_id": "d6e2b12131136ac15b7cc0ce",
+      "alert_start": "2025-09-04T07:58:30Z",
+      "alert_end": "2025-09-04T08:28:31Z",
+      "alert_start_date_kyiv": "2025-09-04",
+      "denominator_source_artifact": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P2a_alerts.json",
+      "posthoc_prior_source_research_provenance": false,
+      "posthoc_provenance_records": []
+    },
+    {
+      "episode_id": "7a1522b52a106068b6e24bb9",
+      "alert_start": "2025-09-04T10:11:37Z",
+      "alert_end": "2025-09-04T10:38:13Z",
+      "alert_start_date_kyiv": "2025-09-04",
+      "denominator_source_artifact": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P2a_alerts.json",
+      "posthoc_prior_source_research_provenance": false,
+      "posthoc_provenance_records": []
+    },
+    {
+      "episode_id": "2cf6c845f69a490d94feff9b",
+      "alert_start": "2025-09-04T11:51:34Z",
+      "alert_end": "2025-09-04T12:22:08Z",
+      "alert_start_date_kyiv": "2025-09-04",
+      "denominator_source_artifact": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P2a_alerts.json",
+      "posthoc_prior_source_research_provenance": false,
+      "posthoc_provenance_records": []
+    },
+    {
+      "episode_id": "1d098bdc28da042a8944c7b1",
+      "alert_start": "2025-09-04T15:15:48Z",
+      "alert_end": "2025-09-04T15:37:44Z",
+      "alert_start_date_kyiv": "2025-09-04",
+      "denominator_source_artifact": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P2a_alerts.json",
+      "posthoc_prior_source_research_provenance": false,
+      "posthoc_provenance_records": []
+    },
+    {
+      "episode_id": "79ec2fff0d73da6a1b9601bb",
+      "alert_start": "2025-09-04T18:05:04Z",
+      "alert_end": "2025-09-04T18:38:17Z",
+      "alert_start_date_kyiv": "2025-09-04",
+      "denominator_source_artifact": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P2a_alerts.json",
+      "posthoc_prior_source_research_provenance": false,
+      "posthoc_provenance_records": []
+    },
+    {
+      "episode_id": "176686aefdcb3e632f8f8e7e",
+      "alert_start": "2025-09-05T07:31:34Z",
+      "alert_end": "2025-09-05T08:15:52Z",
+      "alert_start_date_kyiv": "2025-09-05",
+      "denominator_source_artifact": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P2a_alerts.json",
+      "posthoc_prior_source_research_provenance": false,
+      "posthoc_provenance_records": []
+    },
+    {
+      "episode_id": "f1f2d8742b84ae40023b943d",
+      "alert_start": "2025-09-06T11:32:59Z",
+      "alert_end": "2025-09-06T11:53:49Z",
+      "alert_start_date_kyiv": "2025-09-06",
+      "denominator_source_artifact": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P2a_alerts.json",
+      "posthoc_prior_source_research_provenance": true,
+      "posthoc_provenance_records": [
+        {
+          "artifact": "research/zaporizhzhia_explosion_o3_source_discovery.json",
+          "path": "searched_episodes[82]",
+          "discovery_result": "no_source_hit_found"
+        }
+      ]
+    },
+    {
+      "episode_id": "4dfc0af35ff48d0fb1c39ff9",
+      "alert_start": "2025-09-06T15:59:57Z",
+      "alert_end": "2025-09-06T19:26:18Z",
+      "alert_start_date_kyiv": "2025-09-06",
+      "denominator_source_artifact": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P2a_alerts.json",
+      "posthoc_prior_source_research_provenance": true,
+      "posthoc_provenance_records": [
+        {
+          "artifact": "kyiv-air-alerts-grafana/data/explosion_research/zaporizhzhia/final_evidence.json",
+          "path": "strict_events[47]",
+          "verdict": "strict: exact-city attack sequence is timed within the matched alert."
+        }
+      ]
+    },
+    {
+      "episode_id": "33c4eddfb879d586fbd5ff9c",
+      "alert_start": "2025-09-06T19:36:11Z",
+      "alert_end": "2025-09-07T03:40:13Z",
+      "alert_start_date_kyiv": "2025-09-06",
+      "denominator_source_artifact": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P2a_alerts.json",
+      "posthoc_prior_source_research_provenance": true,
+      "posthoc_provenance_records": [
+        {
+          "artifact": "research/zaporizhzhia_explosion_o3_source_discovery.json",
+          "path": "searched_episodes[83]",
+          "discovery_result": "no_source_hit_found"
+        }
+      ]
+    },
+    {
+      "episode_id": "6fe23aa8fb8bb190cfb98251",
+      "alert_start": "2025-09-08T04:06:29Z",
+      "alert_end": "2025-09-08T04:32:36Z",
+      "alert_start_date_kyiv": "2025-09-08",
+      "denominator_source_artifact": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P2a_alerts.json",
+      "posthoc_prior_source_research_provenance": false,
+      "posthoc_provenance_records": []
+    },
+    {
+      "episode_id": "3c7b246d72177af6b733bebb",
+      "alert_start": "2025-09-08T05:28:36Z",
+      "alert_end": "2025-09-08T05:59:44Z",
+      "alert_start_date_kyiv": "2025-09-08",
+      "denominator_source_artifact": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P2a_alerts.json",
+      "posthoc_prior_source_research_provenance": false,
+      "posthoc_provenance_records": []
+    },
+    {
+      "episode_id": "bbf019ee48b8cd0175c9dc20",
+      "alert_start": "2025-09-08T16:13:22Z",
+      "alert_end": "2025-09-08T16:57:56Z",
+      "alert_start_date_kyiv": "2025-09-08",
+      "denominator_source_artifact": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P2a_alerts.json",
+      "posthoc_prior_source_research_provenance": false,
+      "posthoc_provenance_records": []
+    },
+    {
+      "episode_id": "07352bd1401df6f05d7125ed",
+      "alert_start": "2025-09-08T18:35:03Z",
+      "alert_end": "2025-09-08T19:13:30Z",
+      "alert_start_date_kyiv": "2025-09-08",
+      "denominator_source_artifact": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P2a_alerts.json",
+      "posthoc_prior_source_research_provenance": false,
+      "posthoc_provenance_records": []
+    },
+    {
+      "episode_id": "f972e8adca852aa6d9d0d4b5",
+      "alert_start": "2025-09-08T19:27:52Z",
+      "alert_end": "2025-09-08T19:39:34Z",
+      "alert_start_date_kyiv": "2025-09-08",
+      "denominator_source_artifact": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P2a_alerts.json",
+      "posthoc_prior_source_research_provenance": false,
+      "posthoc_provenance_records": []
+    },
+    {
+      "episode_id": "b882d1c472d058338d714368",
+      "alert_start": "2025-09-08T19:49:51Z",
+      "alert_end": "2025-09-08T22:16:08Z",
+      "alert_start_date_kyiv": "2025-09-08",
+      "denominator_source_artifact": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P2a_alerts.json",
+      "posthoc_prior_source_research_provenance": true,
+      "posthoc_provenance_records": [
+        {
+          "artifact": "kyiv-air-alerts-grafana/data/explosion_research/zaporizhzhia/final_evidence.json",
+          "path": "sensitivity_only_events[2]",
+          "verdict": "sensitivity: inferred_same_attack; exact-city event timing is inferred from the continuous attack sequence."
+        }
+      ]
+    },
+    {
+      "episode_id": "e1d83d342f15ac6d82f0205c",
+      "alert_start": "2025-09-09T18:17:30Z",
+      "alert_end": "2025-09-09T21:28:52Z",
+      "alert_start_date_kyiv": "2025-09-09",
+      "denominator_source_artifact": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P2a_alerts.json",
+      "posthoc_prior_source_research_provenance": false,
+      "posthoc_provenance_records": []
+    },
+    {
+      "episode_id": "aded8aba517d2e055f5a6110",
+      "alert_start": "2025-09-10T02:10:42Z",
+      "alert_end": "2025-09-10T04:10:07Z",
+      "alert_start_date_kyiv": "2025-09-10",
+      "denominator_source_artifact": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P2a_alerts.json",
+      "posthoc_prior_source_research_provenance": false,
+      "posthoc_provenance_records": []
+    },
+    {
+      "episode_id": "22a2058ff3ba352128e5ef58",
+      "alert_start": "2025-09-10T05:56:00Z",
+      "alert_end": "2025-09-10T06:26:26Z",
+      "alert_start_date_kyiv": "2025-09-10",
+      "denominator_source_artifact": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P2a_alerts.json",
+      "posthoc_prior_source_research_provenance": false,
+      "posthoc_provenance_records": []
+    },
+    {
+      "episode_id": "bb93b8a772c7c84e92dd19c4",
+      "alert_start": "2025-09-10T14:27:19Z",
+      "alert_end": "2025-09-10T18:17:12Z",
+      "alert_start_date_kyiv": "2025-09-10",
+      "denominator_source_artifact": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P2a_alerts.json",
+      "posthoc_prior_source_research_provenance": true,
+      "posthoc_provenance_records": [
+        {
+          "artifact": "kyiv-air-alerts-grafana/data/explosion_research/zaporizhzhia/final_evidence.json",
+          "path": "sensitivity_only_events[3]",
+          "verdict": "sensitivity: inferred_same_attack; source does not pin the exact-city strike to a precise clock time."
+        }
+      ]
+    },
+    {
+      "episode_id": "29931e9748670ab97cdce319",
+      "alert_start": "2025-09-10T23:43:57Z",
+      "alert_end": "2025-09-11T00:01:59Z",
+      "alert_start_date_kyiv": "2025-09-11",
+      "denominator_source_artifact": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P2a_alerts.json",
+      "posthoc_prior_source_research_provenance": false,
+      "posthoc_provenance_records": []
+    },
+    {
+      "episode_id": "4187fccd965a282b942d7694",
+      "alert_start": "2025-09-11T04:09:19Z",
+      "alert_end": "2025-09-11T04:29:47Z",
+      "alert_start_date_kyiv": "2025-09-11",
+      "denominator_source_artifact": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P2a_alerts.json",
+      "posthoc_prior_source_research_provenance": false,
+      "posthoc_provenance_records": []
+    },
+    {
+      "episode_id": "14ea356407ea5af5a6eb7960",
+      "alert_start": "2025-09-11T07:57:45Z",
+      "alert_end": "2025-09-11T08:14:51Z",
+      "alert_start_date_kyiv": "2025-09-11",
+      "denominator_source_artifact": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P2a_alerts.json",
+      "posthoc_prior_source_research_provenance": false,
+      "posthoc_provenance_records": []
+    },
+    {
+      "episode_id": "8368c926278c10a22028c429",
+      "alert_start": "2025-09-11T10:56:47Z",
+      "alert_end": "2025-09-11T11:12:36Z",
+      "alert_start_date_kyiv": "2025-09-11",
+      "denominator_source_artifact": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P2a_alerts.json",
+      "posthoc_prior_source_research_provenance": false,
+      "posthoc_provenance_records": []
+    },
+    {
+      "episode_id": "b1d1be4f1c2687317bbe6056",
+      "alert_start": "2025-09-11T12:05:14Z",
+      "alert_end": "2025-09-11T12:48:20Z",
+      "alert_start_date_kyiv": "2025-09-11",
+      "denominator_source_artifact": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P2a_alerts.json",
+      "posthoc_prior_source_research_provenance": false,
+      "posthoc_provenance_records": []
+    },
+    {
+      "episode_id": "94f40e6df8f282b49748bf6d",
+      "alert_start": "2025-09-11T15:34:02Z",
+      "alert_end": "2025-09-11T15:57:17Z",
+      "alert_start_date_kyiv": "2025-09-11",
+      "denominator_source_artifact": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P2a_alerts.json",
+      "posthoc_prior_source_research_provenance": false,
+      "posthoc_provenance_records": []
+    },
+    {
+      "episode_id": "5b629bbfc4cc054196f2cc25",
+      "alert_start": "2025-09-11T19:43:12Z",
+      "alert_end": "2025-09-11T20:52:45Z",
+      "alert_start_date_kyiv": "2025-09-11",
+      "denominator_source_artifact": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P2a_alerts.json",
+      "posthoc_prior_source_research_provenance": false,
+      "posthoc_provenance_records": []
+    },
+    {
+      "episode_id": "7e3f2d09fa3ed0aa1c81d069",
+      "alert_start": "2025-09-11T21:18:48Z",
+      "alert_end": "2025-09-11T23:05:44Z",
+      "alert_start_date_kyiv": "2025-09-12",
+      "denominator_source_artifact": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P2a_alerts.json",
+      "posthoc_prior_source_research_provenance": false,
+      "posthoc_provenance_records": []
+    },
+    {
+      "episode_id": "39a399352611cecdc1369fa7",
+      "alert_start": "2025-09-12T07:52:28Z",
+      "alert_end": "2025-09-12T09:13:00Z",
+      "alert_start_date_kyiv": "2025-09-12",
+      "denominator_source_artifact": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P2a_alerts.json",
+      "posthoc_prior_source_research_provenance": false,
+      "posthoc_provenance_records": []
+    },
+    {
+      "episode_id": "8f9125a89b7ada589780a711",
+      "alert_start": "2025-09-12T13:53:35Z",
+      "alert_end": "2025-09-12T14:30:47Z",
+      "alert_start_date_kyiv": "2025-09-12",
+      "denominator_source_artifact": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P2a_alerts.json",
+      "posthoc_prior_source_research_provenance": false,
+      "posthoc_provenance_records": []
+    },
+    {
+      "episode_id": "2eeafe664253222ef9bd1ab6",
+      "alert_start": "2025-09-12T15:56:05Z",
+      "alert_end": "2025-09-12T16:27:35Z",
+      "alert_start_date_kyiv": "2025-09-12",
+      "denominator_source_artifact": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P2a_alerts.json",
+      "posthoc_prior_source_research_provenance": false,
+      "posthoc_provenance_records": []
+    },
+    {
+      "episode_id": "fb56c5f50a8934d81b5dfb30",
+      "alert_start": "2025-09-12T17:16:44Z",
+      "alert_end": "2025-09-12T18:10:38Z",
+      "alert_start_date_kyiv": "2025-09-12",
+      "denominator_source_artifact": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P2a_alerts.json",
+      "posthoc_prior_source_research_provenance": false,
+      "posthoc_provenance_records": []
+    },
+    {
+      "episode_id": "4ce4add2d6f3f38cc3ee0bbd",
+      "alert_start": "2025-09-12T20:45:29Z",
+      "alert_end": "2025-09-12T20:45:38Z",
+      "alert_start_date_kyiv": "2025-09-12",
+      "denominator_source_artifact": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P2a_alerts.json",
+      "posthoc_prior_source_research_provenance": true,
+      "posthoc_provenance_records": [
+        {
+          "artifact": "research/zaporizhzhia_explosion_blind_sample_50_wave2.json",
+          "path": "sampled_episodes[13]",
+          "verdict": "no_explosion_evidence_found"
+        }
+      ]
+    },
+    {
+      "episode_id": "319b58cf92a62f6fe7cbf7ff",
+      "alert_start": "2025-09-13T01:34:34Z",
+      "alert_end": "2025-09-13T03:14:09Z",
+      "alert_start_date_kyiv": "2025-09-13",
+      "denominator_source_artifact": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P2a_alerts.json",
+      "posthoc_prior_source_research_provenance": false,
+      "posthoc_provenance_records": []
+    },
+    {
+      "episode_id": "0b3c0e5fd45c7a8db06a7733",
+      "alert_start": "2025-09-13T10:05:47Z",
+      "alert_end": "2025-09-13T10:20:29Z",
+      "alert_start_date_kyiv": "2025-09-13",
+      "denominator_source_artifact": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P2a_alerts.json",
+      "posthoc_prior_source_research_provenance": false,
+      "posthoc_provenance_records": []
+    },
+    {
+      "episode_id": "3c08d66d528be6b88af17f53",
+      "alert_start": "2025-09-13T14:32:35Z",
+      "alert_end": "2025-09-13T15:28:14Z",
+      "alert_start_date_kyiv": "2025-09-13",
+      "denominator_source_artifact": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P2a_alerts.json",
+      "posthoc_prior_source_research_provenance": false,
+      "posthoc_provenance_records": []
+    },
+    {
+      "episode_id": "6088e02d959f8f794b3daf96",
+      "alert_start": "2025-09-13T15:46:16Z",
+      "alert_end": "2025-09-13T16:15:25Z",
+      "alert_start_date_kyiv": "2025-09-13",
+      "denominator_source_artifact": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P2a_alerts.json",
+      "posthoc_prior_source_research_provenance": false,
+      "posthoc_provenance_records": []
+    },
+    {
+      "episode_id": "f91a4586c27839f9b04db1fc",
+      "alert_start": "2025-09-13T17:48:02Z",
+      "alert_end": "2025-09-13T18:28:33Z",
+      "alert_start_date_kyiv": "2025-09-13",
+      "denominator_source_artifact": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P2a_alerts.json",
+      "posthoc_prior_source_research_provenance": false,
+      "posthoc_provenance_records": []
+    },
+    {
+      "episode_id": "5e84185302388262d2b7f94d",
+      "alert_start": "2025-09-13T19:40:25Z",
+      "alert_end": "2025-09-13T21:09:08Z",
+      "alert_start_date_kyiv": "2025-09-13",
+      "denominator_source_artifact": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P2a_alerts.json",
+      "posthoc_prior_source_research_provenance": false,
+      "posthoc_provenance_records": []
+    },
+    {
+      "episode_id": "e98335051024030cb4509d54",
+      "alert_start": "2025-09-13T22:23:05Z",
+      "alert_end": "2025-09-13T22:42:58Z",
+      "alert_start_date_kyiv": "2025-09-14",
+      "denominator_source_artifact": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P2a_alerts.json",
+      "posthoc_prior_source_research_provenance": false,
+      "posthoc_provenance_records": []
+    },
+    {
+      "episode_id": "21591d14fceac40aa05b4ed9",
+      "alert_start": "2025-09-14T06:11:58Z",
+      "alert_end": "2025-09-14T06:30:19Z",
+      "alert_start_date_kyiv": "2025-09-14",
+      "denominator_source_artifact": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P2a_alerts.json",
+      "posthoc_prior_source_research_provenance": false,
+      "posthoc_provenance_records": []
+    },
+    {
+      "episode_id": "e3962be99546b5a2cc1b486d",
+      "alert_start": "2025-09-14T07:33:24Z",
+      "alert_end": "2025-09-14T08:28:50Z",
+      "alert_start_date_kyiv": "2025-09-14",
+      "denominator_source_artifact": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P2a_alerts.json",
+      "posthoc_prior_source_research_provenance": false,
+      "posthoc_provenance_records": []
+    },
+    {
+      "episode_id": "c062865b94287ff038b21aee",
+      "alert_start": "2025-09-14T09:09:37Z",
+      "alert_end": "2025-09-14T10:06:43Z",
+      "alert_start_date_kyiv": "2025-09-14",
+      "denominator_source_artifact": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P2a_alerts.json",
+      "posthoc_prior_source_research_provenance": false,
+      "posthoc_provenance_records": []
+    },
+    {
+      "episode_id": "c8282e711bfec7196e70cbd0",
+      "alert_start": "2025-09-14T10:34:04Z",
+      "alert_end": "2025-09-14T10:40:43Z",
+      "alert_start_date_kyiv": "2025-09-14",
+      "denominator_source_artifact": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P2a_alerts.json",
+      "posthoc_prior_source_research_provenance": false,
+      "posthoc_provenance_records": []
+    },
+    {
+      "episode_id": "39814d7eb658217adae24bd9",
+      "alert_start": "2025-09-14T21:16:26Z",
+      "alert_end": "2025-09-14T22:47:30Z",
+      "alert_start_date_kyiv": "2025-09-15",
+      "denominator_source_artifact": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P2a_alerts.json",
+      "posthoc_prior_source_research_provenance": false,
+      "posthoc_provenance_records": []
+    },
+    {
+      "episode_id": "eb29ccba021617db3b0e8bbc",
+      "alert_start": "2025-09-14T23:27:57Z",
+      "alert_end": "2025-09-15T00:24:58Z",
+      "alert_start_date_kyiv": "2025-09-15",
+      "denominator_source_artifact": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P2a_alerts.json",
+      "posthoc_prior_source_research_provenance": false,
+      "posthoc_provenance_records": []
+    },
+    {
+      "episode_id": "70067c052eec48f162697391",
+      "alert_start": "2025-09-15T01:45:22Z",
+      "alert_end": "2025-09-15T02:02:04Z",
+      "alert_start_date_kyiv": "2025-09-15",
+      "denominator_source_artifact": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P2a_alerts.json",
+      "posthoc_prior_source_research_provenance": false,
+      "posthoc_provenance_records": []
+    },
+    {
+      "episode_id": "9ac90852a1163b8d94e497f0",
+      "alert_start": "2025-09-15T02:12:44Z",
+      "alert_end": "2025-09-15T03:54:20Z",
+      "alert_start_date_kyiv": "2025-09-15",
+      "denominator_source_artifact": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P2a_alerts.json",
+      "posthoc_prior_source_research_provenance": true,
+      "posthoc_provenance_records": [
+        {
+          "artifact": "research/zaporizhzhia_explosion_o3_source_discovery.json",
+          "path": "searched_episodes[84]",
+          "discovery_result": "no_source_hit_found"
+        }
+      ]
+    },
+    {
+      "episode_id": "fa1e9624ec208634260fa6cb",
+      "alert_start": "2025-09-15T20:30:14Z",
+      "alert_end": "2025-09-15T21:57:54Z",
+      "alert_start_date_kyiv": "2025-09-15",
+      "denominator_source_artifact": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P2a_alerts.json",
+      "posthoc_prior_source_research_provenance": true,
+      "posthoc_provenance_records": [
+        {
+          "artifact": "kyiv-air-alerts-grafana/data/explosion_research/zaporizhzhia/final_evidence.json",
+          "path": "strict_events[48]",
+          "verdict": "strict: exact-city timed attack interval substantially overlaps the matched alert."
+        }
+      ]
+    },
+    {
+      "episode_id": "9f79a5661ceb17a852e72a78",
+      "alert_start": "2025-09-16T14:44:17Z",
+      "alert_end": "2025-09-16T16:03:43Z",
+      "alert_start_date_kyiv": "2025-09-16",
+      "denominator_source_artifact": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P2a_alerts.json",
+      "posthoc_prior_source_research_provenance": false,
+      "posthoc_provenance_records": []
+    },
+    {
+      "episode_id": "08a32c59bc55483053e24b33",
+      "alert_start": "2025-09-16T18:04:19Z",
+      "alert_end": "2025-09-16T18:37:31Z",
+      "alert_start_date_kyiv": "2025-09-16",
+      "denominator_source_artifact": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P2a_alerts.json",
+      "posthoc_prior_source_research_provenance": false,
+      "posthoc_provenance_records": []
+    },
+    {
+      "episode_id": "9f0adec7ff222f22c5fbd64f",
+      "alert_start": "2025-09-16T19:37:09Z",
+      "alert_end": "2025-09-16T23:21:10Z",
+      "alert_start_date_kyiv": "2025-09-16",
+      "denominator_source_artifact": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P2a_alerts.json",
+      "posthoc_prior_source_research_provenance": false,
+      "posthoc_provenance_records": []
+    },
+    {
+      "episode_id": "cc6ec57c042c0666d01bbce2",
+      "alert_start": "2025-09-17T08:18:58Z",
+      "alert_end": "2025-09-17T08:20:45Z",
+      "alert_start_date_kyiv": "2025-09-17",
+      "denominator_source_artifact": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P2a_alerts.json",
+      "posthoc_prior_source_research_provenance": false,
+      "posthoc_provenance_records": []
+    },
+    {
+      "episode_id": "5743362a382a01ee96440d8d",
+      "alert_start": "2025-09-17T18:06:52Z",
+      "alert_end": "2025-09-17T21:47:54Z",
+      "alert_start_date_kyiv": "2025-09-17",
+      "denominator_source_artifact": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P2a_alerts.json",
+      "posthoc_prior_source_research_provenance": false,
+      "posthoc_provenance_records": []
+    },
+    {
+      "episode_id": "262278a259493e70b57653b9",
+      "alert_start": "2025-09-17T23:58:35Z",
+      "alert_end": "2025-09-18T00:24:18Z",
+      "alert_start_date_kyiv": "2025-09-18",
+      "denominator_source_artifact": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P2a_alerts.json",
+      "posthoc_prior_source_research_provenance": false,
+      "posthoc_provenance_records": []
+    },
+    {
+      "episode_id": "956307f95e3202b8a7f8321e",
+      "alert_start": "2025-09-19T18:32:39Z",
+      "alert_end": "2025-09-20T03:57:25Z",
+      "alert_start_date_kyiv": "2025-09-19",
+      "denominator_source_artifact": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P2a_alerts.json",
+      "posthoc_prior_source_research_provenance": false,
+      "posthoc_provenance_records": []
+    },
+    {
+      "episode_id": "43b7701ec678e76d2d51a789",
+      "alert_start": "2025-09-20T06:30:38Z",
+      "alert_end": "2025-09-20T06:51:01Z",
+      "alert_start_date_kyiv": "2025-09-20",
+      "denominator_source_artifact": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P2a_alerts.json",
+      "posthoc_prior_source_research_provenance": false,
+      "posthoc_provenance_records": []
+    },
+    {
+      "episode_id": "1da7751aa099962f539ee148",
+      "alert_start": "2025-09-20T13:20:40Z",
+      "alert_end": "2025-09-20T16:08:00Z",
+      "alert_start_date_kyiv": "2025-09-20",
+      "denominator_source_artifact": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P2a_alerts.json",
+      "posthoc_prior_source_research_provenance": false,
+      "posthoc_provenance_records": []
+    },
+    {
+      "episode_id": "2f4a685a0a6d083b7279c269",
+      "alert_start": "2025-09-21T12:02:57Z",
+      "alert_end": "2025-09-21T15:33:31Z",
+      "alert_start_date_kyiv": "2025-09-21",
+      "denominator_source_artifact": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P2a_alerts.json",
+      "posthoc_prior_source_research_provenance": false,
+      "posthoc_provenance_records": []
+    },
+    {
+      "episode_id": "66a8a120ed45c750b02ef347",
+      "alert_start": "2025-09-21T16:01:20Z",
+      "alert_end": "2025-09-21T22:55:00Z",
+      "alert_start_date_kyiv": "2025-09-21",
+      "denominator_source_artifact": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P2a_alerts.json",
+      "posthoc_prior_source_research_provenance": false,
+      "posthoc_provenance_records": []
+    },
+    {
+      "episode_id": "f5052bba62e43674bedfc358",
+      "alert_start": "2025-09-22T01:18:43Z",
+      "alert_end": "2025-09-22T03:29:40Z",
+      "alert_start_date_kyiv": "2025-09-22",
+      "denominator_source_artifact": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P2a_alerts.json",
+      "posthoc_prior_source_research_provenance": true,
+      "posthoc_provenance_records": [
+        {
+          "artifact": "kyiv-air-alerts-grafana/data/explosion_research/zaporizhzhia/final_evidence.json",
+          "path": "strict_events[49]",
+          "verdict": "strict: exact city and exact attack interval inside the matched alert."
+        }
+      ]
+    },
+    {
+      "episode_id": "cc8950668009e74e60458e88",
+      "alert_start": "2025-09-22T04:56:20Z",
+      "alert_end": "2025-09-22T05:12:51Z",
+      "alert_start_date_kyiv": "2025-09-22",
+      "denominator_source_artifact": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P2a_alerts.json",
+      "posthoc_prior_source_research_provenance": true,
+      "posthoc_provenance_records": [
+        {
+          "artifact": "research/zaporizhzhia_explosion_o3_source_discovery.json",
+          "path": "searched_episodes[85]",
+          "discovery_result": "no_source_hit_found"
+        }
+      ]
+    },
+    {
+      "episode_id": "75a6f281702996037c7f3424",
+      "alert_start": "2025-09-22T06:27:26Z",
+      "alert_end": "2025-09-22T06:43:22Z",
+      "alert_start_date_kyiv": "2025-09-22",
+      "denominator_source_artifact": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P2a_alerts.json",
+      "posthoc_prior_source_research_provenance": true,
+      "posthoc_provenance_records": [
+        {
+          "artifact": "research/zaporizhzhia_explosion_blind_sample_50.json",
+          "path": "sampled_episodes[14]",
+          "verdict": "no_explosion_evidence_found"
+        }
+      ]
+    },
+    {
+      "episode_id": "53b904233ea90ffe7627f543",
+      "alert_start": "2025-09-22T09:06:03Z",
+      "alert_end": "2025-09-22T09:40:46Z",
+      "alert_start_date_kyiv": "2025-09-22",
+      "denominator_source_artifact": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P2a_alerts.json",
+      "posthoc_prior_source_research_provenance": false,
+      "posthoc_provenance_records": []
+    },
+    {
+      "episode_id": "8a765ebfb55474d47cea7625",
+      "alert_start": "2025-09-22T10:27:21Z",
+      "alert_end": "2025-09-22T13:34:37Z",
+      "alert_start_date_kyiv": "2025-09-22",
+      "denominator_source_artifact": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P2a_alerts.json",
+      "posthoc_prior_source_research_provenance": false,
+      "posthoc_provenance_records": []
+    },
+    {
+      "episode_id": "19313dfecc19b71819f7a000",
+      "alert_start": "2025-09-22T14:16:02Z",
+      "alert_end": "2025-09-22T23:03:19Z",
+      "alert_start_date_kyiv": "2025-09-22",
+      "denominator_source_artifact": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P2a_alerts.json",
+      "posthoc_prior_source_research_provenance": true,
+      "posthoc_provenance_records": [
+        {
+          "artifact": "kyiv-air-alerts-grafana/data/explosion_research/zaporizhzhia/final_evidence.json",
+          "path": "strict_events[50]",
+          "verdict": "strict: exact-city explosions and aerial attack are timed inside the matched alert."
+        }
+      ]
+    },
+    {
+      "episode_id": "b7c7da1cbd1cdbf7fbe7974b",
+      "alert_start": "2025-09-23T06:57:51Z",
+      "alert_end": "2025-09-23T13:31:32Z",
+      "alert_start_date_kyiv": "2025-09-23",
+      "denominator_source_artifact": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P2a_alerts.json",
+      "posthoc_prior_source_research_provenance": true,
+      "posthoc_provenance_records": [
+        {
+          "artifact": "kyiv-air-alerts-grafana/data/explosion_research/zaporizhzhia/final_evidence.json",
+          "path": "strict_events[51]",
+          "verdict": "strict: explicit exact-city explosions during the matched alert."
+        }
+      ]
+    },
+    {
+      "episode_id": "415f67e66e79ab4fd14156c9",
+      "alert_start": "2025-09-23T15:55:44Z",
+      "alert_end": "2025-09-23T22:43:31Z",
+      "alert_start_date_kyiv": "2025-09-23",
+      "denominator_source_artifact": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P2a_alerts.json",
+      "posthoc_prior_source_research_provenance": true,
+      "posthoc_provenance_records": [
+        {
+          "artifact": "kyiv-air-alerts-grafana/data/explosion_research/zaporizhzhia/final_evidence.json",
+          "path": "sensitivity_only_events[4]",
+          "verdict": "sensitivity: inferred_same_attack; exact strike time is not stated precisely enough for strict."
+        },
+        {
+          "artifact": "research/zaporizhzhia_explosion_o3_source_discovery.json",
+          "path": "searched_episodes[86]",
+          "discovery_result": "no_source_hit_found"
+        }
+      ]
+    },
+    {
+      "episode_id": "c1c1682a9c6c77bb6a5b8f90",
+      "alert_start": "2025-09-24T05:42:57Z",
+      "alert_end": "2025-09-24T06:14:46Z",
+      "alert_start_date_kyiv": "2025-09-24",
+      "denominator_source_artifact": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P2a_alerts.json",
+      "posthoc_prior_source_research_provenance": false,
+      "posthoc_provenance_records": []
+    },
+    {
+      "episode_id": "c2afd732dc1e57f03d96ab70",
+      "alert_start": "2025-09-24T07:12:15Z",
+      "alert_end": "2025-09-24T08:11:04Z",
+      "alert_start_date_kyiv": "2025-09-24",
+      "denominator_source_artifact": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P2a_alerts.json",
+      "posthoc_prior_source_research_provenance": false,
+      "posthoc_provenance_records": []
+    },
+    {
+      "episode_id": "d2ded60d799b5bb2a15fefed",
+      "alert_start": "2025-09-24T09:27:41Z",
+      "alert_end": "2025-09-24T11:40:40Z",
+      "alert_start_date_kyiv": "2025-09-24",
+      "denominator_source_artifact": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P2a_alerts.json",
+      "posthoc_prior_source_research_provenance": false,
+      "posthoc_provenance_records": []
+    },
+    {
+      "episode_id": "cf76a7bb3c3de8cfa6f46d36",
+      "alert_start": "2025-09-24T15:43:12Z",
+      "alert_end": "2025-09-24T23:25:12Z",
+      "alert_start_date_kyiv": "2025-09-24",
+      "denominator_source_artifact": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P2a_alerts.json",
+      "posthoc_prior_source_research_provenance": false,
+      "posthoc_provenance_records": []
+    },
+    {
+      "episode_id": "e2399a792236e770164d872c",
+      "alert_start": "2025-09-25T01:01:44Z",
+      "alert_end": "2025-09-25T02:55:37Z",
+      "alert_start_date_kyiv": "2025-09-25",
+      "denominator_source_artifact": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P2a_alerts.json",
+      "posthoc_prior_source_research_provenance": true,
+      "posthoc_provenance_records": [
+        {
+          "artifact": "kyiv-air-alerts-grafana/data/explosion_research/zaporizhzhia/final_evidence.json",
+          "path": "sensitivity_only_events[5]",
+          "verdict": "sensitivity: near_boundary; approximate event time straddles the alert start."
+        }
+      ]
+    },
+    {
+      "episode_id": "80688011a7bed50371bbb05e",
+      "alert_start": "2025-09-25T17:54:59Z",
+      "alert_end": "2025-09-25T22:15:24Z",
+      "alert_start_date_kyiv": "2025-09-25",
+      "denominator_source_artifact": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P2a_alerts.json",
+      "posthoc_prior_source_research_provenance": false,
+      "posthoc_provenance_records": []
+    },
+    {
+      "episode_id": "c129392a62156167bbe0fbdd",
+      "alert_start": "2025-09-26T10:45:30Z",
+      "alert_end": "2025-09-26T15:31:37Z",
+      "alert_start_date_kyiv": "2025-09-26",
+      "denominator_source_artifact": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P2a_alerts.json",
+      "posthoc_prior_source_research_provenance": true,
+      "posthoc_provenance_records": [
+        {
+          "artifact": "research/zaporizhzhia_explosion_o3_source_discovery.json",
+          "path": "searched_episodes[87]",
+          "discovery_result": "no_source_hit_found"
+        }
+      ]
+    },
+    {
+      "episode_id": "565a575eb696cb87ddcab38d",
+      "alert_start": "2025-09-26T18:35:04Z",
+      "alert_end": "2025-09-27T00:27:30Z",
+      "alert_start_date_kyiv": "2025-09-26",
+      "denominator_source_artifact": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P2a_alerts.json",
+      "posthoc_prior_source_research_provenance": true,
+      "posthoc_provenance_records": [
+        {
+          "artifact": "kyiv-air-alerts-grafana/data/explosion_research/zaporizhzhia/final_evidence.json",
+          "path": "strict_events[52]",
+          "verdict": "strict: exact-city UAV attack falls inside the matched cross-midnight alert."
+        }
+      ]
+    },
+    {
+      "episode_id": "04abf746a9419089e58a8089",
+      "alert_start": "2025-09-27T06:17:57Z",
+      "alert_end": "2025-09-27T07:20:10Z",
+      "alert_start_date_kyiv": "2025-09-27",
+      "denominator_source_artifact": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P2a_alerts.json",
+      "posthoc_prior_source_research_provenance": false,
+      "posthoc_provenance_records": []
+    },
+    {
+      "episode_id": "a06c6c2deca98df1f25f3ee2",
+      "alert_start": "2025-09-27T11:39:35Z",
+      "alert_end": "2025-09-27T12:54:42Z",
+      "alert_start_date_kyiv": "2025-09-27",
+      "denominator_source_artifact": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P2a_alerts.json",
+      "posthoc_prior_source_research_provenance": false,
+      "posthoc_provenance_records": []
+    },
+    {
+      "episode_id": "fede442dc1bf79856b68b936",
+      "alert_start": "2025-09-27T22:14:00Z",
+      "alert_end": "2025-09-28T04:01:41Z",
+      "alert_start_date_kyiv": "2025-09-28",
+      "denominator_source_artifact": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P2a_alerts.json",
+      "posthoc_prior_source_research_provenance": true,
+      "posthoc_provenance_records": [
+        {
+          "artifact": "kyiv-air-alerts-grafana/data/explosion_research/zaporizhzhia/final_evidence.json",
+          "path": "strict_events[53]",
+          "verdict": "strict: source explicitly places exact-city explosions during the matched alert."
+        }
+      ]
+    },
+    {
+      "episode_id": "d57401516a9112f7081066d1",
+      "alert_start": "2025-09-28T07:55:49Z",
+      "alert_end": "2025-09-28T07:57:42Z",
+      "alert_start_date_kyiv": "2025-09-28",
+      "denominator_source_artifact": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P2a_alerts.json",
+      "posthoc_prior_source_research_provenance": true,
+      "posthoc_provenance_records": [
+        {
+          "artifact": "research/zaporizhzhia_explosion_blind_sample_50_wave2.json",
+          "path": "sampled_episodes[14]",
+          "verdict": "no_explosion_evidence_found"
+        }
+      ]
+    },
+    {
+      "episode_id": "5c9e4daefd8f7e5b3af68d23",
+      "alert_start": "2025-09-28T11:19:44Z",
+      "alert_end": "2025-09-28T12:55:22Z",
+      "alert_start_date_kyiv": "2025-09-28",
+      "denominator_source_artifact": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P2a_alerts.json",
+      "posthoc_prior_source_research_provenance": true,
+      "posthoc_provenance_records": [
+        {
+          "artifact": "research/zaporizhzhia_explosion_o3_source_discovery.json",
+          "path": "searched_episodes[88]",
+          "discovery_result": "no_source_hit_found"
+        }
+      ]
+    },
+    {
+      "episode_id": "6b2a2926c0f250c09397f41a",
+      "alert_start": "2025-09-28T18:52:03Z",
+      "alert_end": "2025-09-28T23:22:09Z",
+      "alert_start_date_kyiv": "2025-09-28",
+      "denominator_source_artifact": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P2a_alerts.json",
+      "posthoc_prior_source_research_provenance": false,
+      "posthoc_provenance_records": []
+    },
+    {
+      "episode_id": "85d1c7573c8faa33c066aa6d",
+      "alert_start": "2025-09-29T19:44:09Z",
+      "alert_end": "2025-09-29T21:36:41Z",
+      "alert_start_date_kyiv": "2025-09-29",
+      "denominator_source_artifact": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P2a_alerts.json",
+      "posthoc_prior_source_research_provenance": false,
+      "posthoc_provenance_records": []
+    },
+    {
+      "episode_id": "333127ebb8a9d80b0b3e30a7",
+      "alert_start": "2025-09-30T05:26:51Z",
+      "alert_end": "2025-09-30T06:46:17Z",
+      "alert_start_date_kyiv": "2025-09-30",
+      "denominator_source_artifact": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P2a_alerts.json",
+      "posthoc_prior_source_research_provenance": false,
+      "posthoc_provenance_records": []
+    },
+    {
+      "episode_id": "55bba7d918ca5d55576cc0d6",
+      "alert_start": "2025-09-30T13:13:15Z",
+      "alert_end": "2025-09-30T14:19:11Z",
+      "alert_start_date_kyiv": "2025-09-30",
+      "denominator_source_artifact": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P2a_alerts.json",
+      "posthoc_prior_source_research_provenance": false,
+      "posthoc_provenance_records": []
+    },
+    {
+      "episode_id": "a5d2d613ce171f67a66044e7",
+      "alert_start": "2025-09-30T19:58:43Z",
+      "alert_end": "2025-09-30T20:21:29Z",
+      "alert_start_date_kyiv": "2025-09-30",
+      "denominator_source_artifact": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P2a_alerts.json",
+      "posthoc_prior_source_research_provenance": false,
+      "posthoc_provenance_records": []
+    },
+    {
+      "episode_id": "55ece991ac899c392a28c3e1",
+      "alert_start": "2025-09-30T22:56:41Z",
+      "alert_end": "2025-10-01T00:19:48Z",
+      "alert_start_date_kyiv": "2025-10-01",
+      "denominator_source_artifact": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P2a_alerts.json",
+      "posthoc_prior_source_research_provenance": false,
+      "posthoc_provenance_records": []
+    },
+    {
+      "episode_id": "8bb8b13ef64bccea498579d6",
+      "alert_start": "2025-10-01T15:59:18Z",
+      "alert_end": "2025-10-01T16:44:00Z",
+      "alert_start_date_kyiv": "2025-10-01",
+      "denominator_source_artifact": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P2a_alerts.json",
+      "posthoc_prior_source_research_provenance": false,
+      "posthoc_provenance_records": []
+    }
+  ],
+  "overlap_checks": {
+    "slice0": {
+      "count": 14,
+      "episode_ids": [
+        "5e84185302388262d2b7f94d",
+        "e98335051024030cb4509d54",
+        "21591d14fceac40aa05b4ed9",
+        "e3962be99546b5a2cc1b486d",
+        "c062865b94287ff038b21aee",
+        "c8282e711bfec7196e70cbd0",
+        "39814d7eb658217adae24bd9",
+        "eb29ccba021617db3b0e8bbc",
+        "70067c052eec48f162697391",
+        "9ac90852a1163b8d94e497f0",
+        "fa1e9624ec208634260fa6cb",
+        "9f79a5661ceb17a852e72a78",
+        "08a32c59bc55483053e24b33",
+        "9f0adec7ff222f22c5fbd64f"
+      ]
+    },
+    "slice1": {
+      "count": 0,
+      "episode_ids": []
+    },
+    "slice2": {
+      "count": 0,
+      "episode_ids": []
+    },
+    "slice3": {
+      "count": 0,
+      "episode_ids": []
+    },
+    "duplicate_episode_ids": 0
+  },
+  "guardrails": {
+    "historical_controls_not_used_before_discovery_freeze": true,
+    "historical_urls_not_used_as_runtime_pointers": true,
+    "no_targeted_rescue": true,
+    "no_pipeline_change": true,
+    "no_slice4b": true,
+    "no_slice5": true,
+    "canonical_untouched": true,
+    "live_monitor_queue_untouched": true,
+    "dashboard_grafana_netlify_production_untouched": true
+  }
+}
