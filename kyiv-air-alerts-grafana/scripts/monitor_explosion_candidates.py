@@ -977,6 +977,64 @@ def reviewed_same_attack_basis_for_target(row: dict, target_id: str) -> bool:
     return bool(role.get("present"))
 
 
+def reviewed_composition_binding_for_target(row: dict, target_id: str) -> dict | None:
+    raw = row.get("review_provenance")
+    if not isinstance(raw, dict):
+        return None
+    if raw.get("schema_version") != REVIEW_PROVENANCE_SCHEMA_VERSION:
+        return None
+    if str(raw.get("target_episode_id") or "") != target_id:
+        return None
+    if str(row.get("matched_episode_id") or "") not in {"", target_id}:
+        return None
+    composition = raw.get("composition")
+    if not isinstance(composition, dict):
+        return None
+    if str(composition.get("target_episode_id") or target_id) != target_id:
+        return None
+    if composition.get("validated_by_review") is not True:
+        return None
+    if composition.get("same_attack_compatible") is not True:
+        return None
+    neighbor = composition.get("neighboring_alert_check") or {}
+    if not isinstance(neighbor, dict) or neighbor.get("passed") is not True:
+        return None
+    anchor_id = str(composition.get("anchor_candidate_id") or "")
+    contributor_ids = [
+        str(value)
+        for value in (composition.get("contributor_candidate_ids") or [])
+        if str(value)
+    ]
+    if not anchor_id or not contributor_ids:
+        return None
+    return {
+        **composition,
+        "anchor_candidate_id": anchor_id,
+        "contributor_candidate_ids": contributor_ids,
+        "evidence_source": "review_provenance",
+    }
+
+
+def reviewed_composition_pair(
+    temporal_row: dict,
+    context_row: dict,
+    target_id: str,
+) -> dict | None:
+    temporal_id = str(temporal_row.get("candidate_id") or "")
+    context_id = str(context_row.get("candidate_id") or "")
+    for owner in (temporal_row, context_row):
+        binding = reviewed_composition_binding_for_target(owner, target_id)
+        if not binding:
+            continue
+        ids = {
+            str(binding.get("anchor_candidate_id") or ""),
+            *[str(value) for value in binding.get("contributor_candidate_ids") or []],
+        }
+        if temporal_id in ids and context_id in ids:
+            return binding
+    return None
+
+
 def any_audited_city_mentioned(text: str) -> bool:
     return any(city_mentioned(key, text) for key in CITY_CONFIG)
 
@@ -2123,6 +2181,23 @@ def composition_same_attack_compatibility(
     target_episode: dict,
     episodes: list[dict],
 ) -> dict:
+    target_id = str(target_episode.get("episode_id") or "")
+    reviewed_pair = reviewed_composition_pair(temporal_row, context_row, target_id)
+    if reviewed_pair:
+        return {
+            "present": True,
+            "reason": "reviewed_composition_same_attack_compatible",
+            "basis": [
+                "reviewed_exact_contributor_pair",
+                "reviewed_same_attack_compatible",
+                "reviewed_neighbor_check_passed",
+            ],
+            "gap_seconds": None,
+            "temporal_neighbor_check": reviewed_pair.get("neighboring_alert_check"),
+            "context_neighbor_check": reviewed_pair.get("neighboring_alert_check"),
+            "evidence_source": "review_provenance",
+        }
+
     temporal_time = parse_dt(temporal_row.get("published_at"))
     context_time = parse_dt(context_row.get("published_at"))
     if not temporal_time or not context_time:
@@ -2200,6 +2275,18 @@ def compose_episode_candidates(
     episodes: list[dict],
 ) -> dict:
     target_id = str(target_episode.get("episode_id") or "")
+    reviewed_composition_participants = set()
+    for provenance_owner in candidates:
+        binding = reviewed_composition_binding_for_target(provenance_owner, target_id)
+        if not binding:
+            continue
+        reviewed_composition_participants.add(
+            str(binding.get("anchor_candidate_id") or "")
+        )
+        reviewed_composition_participants.update(
+            str(value) for value in binding.get("contributor_candidate_ids") or []
+        )
+
     evaluated = []
     for item in sorted(candidates, key=lambda row: str(row.get("candidate_id") or "")):
         if str(item.get("city_key") or "") != city_key:
@@ -2216,7 +2303,10 @@ def compose_episode_candidates(
             or "PUBLISHER_FULLTEXT_REQUIRES_REVIEW" in decision["reason_codes"]
         ):
             continue
-        if retrospective_or_cumulative_wording(classification_text(item)):
+        if (
+            retrospective_or_cumulative_wording(classification_text(item))
+            and str(item.get("candidate_id") or "") not in reviewed_composition_participants
+        ):
             continue
         evaluated.append((item, decision))
 
@@ -3464,6 +3554,31 @@ def self_test() -> None:
         assert ordinary_checked >= 20
         assert not ordinary_mismatches, ordinary_mismatches
 
+        composition_regression_results = []
+        for composed_case in fixture.get("composition_positive_cases") or []:
+            city_key = str(composed_case["city_key"])
+            target_id = str(composed_case["target_episode_id"])
+            episodes = tracked_episodes_for_city(state_rows, city_key)
+            target = next(
+                ep for ep in episodes if str(ep.get("episode_id") or "") == target_id
+            )
+            group = []
+            for contributor_id in composed_case.get("contributor_candidate_ids") or []:
+                contributor = json.loads(json.dumps(queue_by_id[str(contributor_id)]))
+                contributor["matched_episode_id"] = target_id
+                group.append(contributor)
+            result = compose_episode_candidates(city_key, target, group, episodes)
+            composition_regression_results.append(
+                {
+                    "episode_id": target_id,
+                    "verdict": result["final_composed_verdict"],
+                    "anchor_candidate_id": result.get("anchor_candidate_id"),
+                }
+            )
+            assert result["final_composed_verdict"] == "approved_strict", result
+            assert result.get("anchor_candidate_id") == composed_case["anchor_candidate_id"], result
+        assert len(composition_regression_results) == 3
+
         future_queue = json.loads(json.dumps(queue_rows))
         future_by_id = {
             str(item.get("candidate_id")): item
@@ -3544,6 +3659,7 @@ def self_test() -> None:
             f"50/50 approvals ({positive_strict} strict, {positive_sensitivity} sensitivity); "
             "2/2 deterministic negatives; 58/58 no-adapter regression; "
             f"{ordinary_checked} ordinary unreviewed controls; "
+            f"3/3 composition-positive recomputations; "
             f"future-run unexpected status changes=0; stale unique+MATCH_NONE={stale_unique_match_none}; "
             f"matching refresh checked={matching_result['candidates_checked']}"
         )

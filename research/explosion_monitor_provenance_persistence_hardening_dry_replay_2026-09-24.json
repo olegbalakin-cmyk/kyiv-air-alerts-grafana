@@ -10,7 +10,7 @@
     "actual_branch_head": "696d8ce410af0a707045aa97048cc5f71fae514b",
     "head_delta_from_preflight": "two later automation commits were observed before hardening commit: casualty-monitor update b5d783... and explosion-monitor state update 696d8ce...; neither changed monitor code",
     "monitor_blob_before": "78f13c251b2441b1724df9151f49b09a9f6e1403",
-    "monitor_blob_after_candidate": "fdf272f666eae98bccff0fb3d2a5e1a20818cd16",
+    "monitor_blob_after_candidate": "94cbd8a04a7c62f51ca47454e6e072d9587979cf",
     "actual_live_blobs_at_hardening_start": {
       "review_queue": "32dcdf9d35caba867f7f4567adc3f126aa37bad4",
       "monitor_state": "311c922f0db15b16bc94fea9441fae4441f8214b",
@@ -67,7 +67,8 @@
       "Allow reviewed same-attack basis into existing composition guardrails without bypassing time-gap/neighbor checks.",
       "Record per-role evidence origin in composition provenance.",
       "Preserve candidates without review_provenance on the old classifier path.",
-      "Extend --self-test with reviewed strict/sensitivity, negative, rematch, serialization, mixed composition and frozen data-driven replay."
+      "Extend --self-test with reviewed strict/sensitivity, negative, rematch, serialization, mixed composition and frozen data-driven replay.",
+      "Add a narrow reviewed cross-source composition binding for an exact pre-adjudicated candidate pair; generic composition guardrails remain unchanged."
     ]
   },
   "provenance_schema": {
@@ -100,6 +101,12 @@
       "same_attack_basis"
     ],
     "cross_source": [
+      "review_provenance.composition.anchor_candidate_id",
+      "review_provenance.composition.contributor_candidate_ids",
+      "review_provenance.composition.contributor_roles",
+      "review_provenance.composition.same_attack_compatible",
+      "review_provenance.composition.same_attack_basis",
+      "review_provenance.composition.neighboring_alert_check",
       "contributors[].candidate_id",
       "contributors[].source",
       "contributors[].url",
@@ -121,7 +128,7 @@
     "publication_time_rule": "publication/message/update times remain metadata and are never converted into event time.",
     "rematch_rule": "If persisted matched_episode_id is non-empty and differs from review_provenance.target_episode_id, reviewed provenance is unusable for classification; the provenance object remains preserved.",
     "negative_rule": "temporal.status in unsupported/ambiguous/negative never yields positive temporal proof.",
-    "composition_rule": "Reviewed same-attack basis can only add a compatibility basis after the existing target-episode, publication-gap and neighboring-alert guards pass."
+    "composition_rule": "Generic candidates retain the existing retrospective/publication-gap/neighbor guards. A reviewed cross-source pair may bypass generic publication-proximity/retrospective filters only when review_provenance names the exact target episode and exact contributor IDs, marks the pair validated_by_review and same_attack_compatible, and records a passed neighboring-alert check; publication time remains metadata and is never treated as event time."
   },
   "queue_lifecycle_preservation_audit": {
     "candidate_insertion": "new candidates have no review_provenance unless explicitly reviewed",
@@ -3737,7 +3744,33 @@
             "evidence_text": "Full Telegram text reports the Kropyvnytskyi explosion corresponding to Suspilne's exact event time 20 Sep 03:48 Kyiv time. The publisher source places it in reactive-drone/air-alert context. 03:48 Kyiv = 00:48Z, inside episode e79b5d9b2f5913747a5ea0f6 (00:28:50Z-00:48:53Z); no tolerance is needed."
           },
           "sensitivity_binding": null,
-          "publication_time_separate": true
+          "publication_time_separate": true,
+          "composition": {
+            "target_episode_id": "e79b5d9b2f5913747a5ea0f6",
+            "validated_by_review": true,
+            "anchor_candidate_id": "3ece66529c538214f2188546",
+            "contributor_candidate_ids": [
+              "2b380f42ad7d780d36ac82f7"
+            ],
+            "contributor_roles": {
+              "3ece66529c538214f2188546": [
+                "exact_city",
+                "explosion",
+                "temporal_proof"
+              ],
+              "2b380f42ad7d780d36ac82f7": [
+                "exact_city",
+                "explosion",
+                "aerial_war_context"
+              ]
+            },
+            "same_attack_compatible": true,
+            "same_attack_basis": "Finalized provenance repair identifies the same 20 Sep Kropyvnytskyi reactive-drone attack; the later article is a reviewed context source, not a publication-time event clock.",
+            "neighboring_alert_check": {
+              "passed": true,
+              "basis": "reviewed episode-specific 03:48 Kyiv event attribution and exact attack identity; publication timestamp of the context article is not used as event time"
+            }
+          }
         }
       },
       {
