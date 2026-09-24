@@ -1,0 +1,1321 @@
+{
+  "schema_version": "1.0",
+  "generated_for_date": "2026-09-24",
+  "repository": "olegbalakin-cmyk/kyiv-air-alerts-grafana",
+  "branch": "multicity-wip-2026-09-16",
+  "purpose": "Final exact-source provenance recovery for the seven PARTIAL_INSUFFICIENT explosion-review candidates, followed by a frozen seven-candidate / three-episode replay with no methodology or live-state mutation.",
+  "authoritative_inputs": {
+    "pre_recovery_branch_head": "b687cd9ce4c5e6253d8ff8148dd02386d92a5573",
+    "forensic_reconciliation": {
+      "commit": "d24a4618ef70ad7de6f2d7250a6ceb6b502d5de3",
+      "path": "research/explosion_monitor_downgrade_forensic_reconciliation_2026-09-24.json",
+      "blob_sha": "2733d112ad0208098445210fe217f9804bccbdbf"
+    },
+    "provenance_repair": {
+      "commit": "b687cd9ce4c5e6253d8ff8148dd02386d92a5573",
+      "path": "research/explosion_monitor_provenance_repair_2026-09-24.json",
+      "blob_sha": "ad1c6969c8c2653dfef66bf66fb513fca91e1b38"
+    },
+    "provenance_repair_replay": {
+      "commit": "b687cd9ce4c5e6253d8ff8148dd02386d92a5573",
+      "path": "research/explosion_monitor_provenance_repair_replay_2026-09-24.json",
+      "blob_sha": "193d18c39d079258f9d0446a79dc6e193b910ef6"
+    },
+    "original_approval_commit": "79c39e31bc5d370153bbaa0344dbd6d37641e64f",
+    "monitor_hardening_commit": "4e6b7e9e2f8a6cc765f8601b65b940ccb81582f5",
+    "systemwide_dry_replay": {
+      "commit": "4a3b1fbc3ca6da977b2ea9970f5cb02330fae314",
+      "path": "research/explosion_monitor_composition_systemwide_dry_replay_2026-09-24.json",
+      "blob_sha": "80fd109943e169f77faa1a95efaa18e44236a620"
+    },
+    "live_frozen_blobs": {
+      "queue": {
+        "path": "kyiv-air-alerts-grafana/data/explosion_review_queue.json",
+        "blob_sha": "fa324767d0204ccf373cd519a23f39a0db68e945"
+      },
+      "monitor_state": {
+        "path": "kyiv-air-alerts-grafana/data/explosion_candidate_monitor_state.json",
+        "blob_sha": "a6aba4d5416c36652859bd9e9a6818320069998a"
+      },
+      "monitor_code": {
+        "path": "kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py",
+        "blob_sha": "78f13c251b2441b1724df9151f49b09a9f6e1403"
+      }
+    },
+    "original_review_batches": {
+      "sumy": {
+        "commit": "6b0c9dff4858c9fca7845609093ac73c38e77800",
+        "path": "kyiv-air-alerts-grafana/data/explosion_review_batches/sumy_batch_1.json",
+        "blob_sha": "feaa6d5138201ec8a5fd2df5471ad0f4033fc014"
+      },
+      "zaporizhzhia": {
+        "commit": "f3b254c1cdf0b7d2a604a6d77b367b9d4b94b42e",
+        "path": "kyiv-air-alerts-grafana/data/explosion_review_batches/zaporizhzhia_batch_1.json",
+        "blob_sha": "433f0fc991967dffe9daceef605b05c3b372464b"
+      },
+      "odesa": {
+        "commit": "2cd3ad78f4ceecb01cc222a229bc123cf3c36602",
+        "path": "kyiv-air-alerts-grafana/data/explosion_review_batches/odesa_batch_1.json",
+        "blob_sha": "ffd2e82890b400991012324169fae85c13e2eb77"
+      }
+    }
+  },
+  "frozen_scope": {
+    "candidate_count": 7,
+    "candidate_ids": [
+      "6212f72cfd28e6a86fd5bc51",
+      "e7461ec759e4d79020dfd1ba",
+      "113dac439efda41673b1f497",
+      "b5c1ac3e5dba6b12eb699016",
+      "d403a466c13b9ec069765241",
+      "25c966b4e375b5075b267a91",
+      "e8998303b80b496820692c54"
+    ],
+    "city_counts": {
+      "sumy": 4,
+      "zaporizhzhia": 2,
+      "odesa": 1
+    },
+    "episode_count": 3,
+    "episode_ids": [
+      "e7e8974f19d4fdc782e93980",
+      "a60d817eaa9253200f090720",
+      "ff2ba0d3c1cc5ebf116ed7bf"
+    ],
+    "scope_constraints": [
+      "No candidates or episodes added beyond the seven PARTIAL_INSUFFICIENT records and their three frozen episodes.",
+      "No broad explosion discovery or historical enrichment.",
+      "External retrieval used only for exact URLs recovered from existing original-review provenance.",
+      "No substitute evidence introduced to preserve an old approval."
+    ]
+  },
+  "recovery_method": {
+    "repo_history_trace": [
+      "current frozen queue record",
+      "original city review batch commit and source_checked field",
+      "merge commit 79c39e31bc5d370153bbaa0344dbd6d37641e64f",
+      "current provenance-repair artifacts",
+      "committed review batches and sibling duplicate records",
+      "current monitor-state candidate-ID trace where relevant"
+    ],
+    "exact_source_policy": "Only exact URLs/identifiers already recoverable from repo provenance were externally retrieved. No broad web search was used.",
+    "temporal_rules": [
+      "Publication/update/message timestamps remain separate from event time.",
+      "No timestamp precision is increased.",
+      "A multi-episode date requires episode-specific temporal proof.",
+      "Cross-source contributors are preserved separately rather than collapsed into a synthetic source."
+    ],
+    "replay_method": "Apply the same validated classification/composition semantics used by the current hardened monitor and the b687cd9 provenance replay, changing only the availability of recovered structured provenance."
+  },
+  "source_identity_recovery_summary": {
+    "reviewed": 7,
+    "RECOVERED_COMPLETE": 5,
+    "RECOVERED_SUFFICIENT": 0,
+    "STILL_INSUFFICIENT": 2,
+    "ORIGINAL_REVIEW_UNSUPPORTED": 0
+  },
+  "candidates": [
+    {
+      "candidate_id": "6212f72cfd28e6a86fd5bc51",
+      "city_key": "sumy",
+      "city": "Суми",
+      "episode_id": "e7e8974f19d4fdc782e93980",
+      "previous_approval": {
+        "status": "approved_strict",
+        "review_note": "Exact-city KAB attack on Sumy. Independent contemporaneous reporting places the strike at about 21:00 local on 18 Sep (~18:00Z), inside the single Sumy monitor episode 17:24:19Z-18:24:36Z. This is confirmed aerial-war context with approximate event time; publication time was not used.",
+        "source_checked": "Original Google News RSS title/snippet; matching Fakty ICTV article: https://fakty.com.ua/ua/proisshestvija/20260918-vybuhy-u-sumah-18-veresnya-rosiyany-vdaryly-kabamy-po-bagatopoverhivkah-ye-poraneni/ ; time corroboration: https://suspilne.media/sumy/1407184-armia-rf-vlucila-po-sumah-2/",
+        "candidate_source": {
+          "source": "Google News RSS",
+          "publisher": "Ukr.net",
+          "url": "https://news.google.com/rss/articles/CBMiZkFVX3lxTFBqekR4X1VJazY0Q01RVWp5aDhJNUVRWkJmanR4UlVjMkE3S180eFRuMHNTV1RWVzUwa2ZrM2JZeGdIVk5iTEpTX0NnOU9va3VLRGEyUE5tZks1TkdjLTBqNlZwTXZWdw?oc=5",
+          "title": "Вибухи у Сумах: росіяни вдарили КАБами по багатоповерхівках, є поранені - Ukr.net",
+          "snippet": "Вибухи у Сумах: росіяни вдарили КАБами по багатоповерхівках, є поранені Ukr.net",
+          "published_at": "2026-09-18T20:16:49Z"
+        }
+      },
+      "previous_provenance_repair": {
+        "repair_quality": "PARTIAL_INSUFFICIENT",
+        "replay_ready": false,
+        "structured_repair_summary": "The review says independent contemporaneous reporting placed the Sumy KAB strike at about 21:00 local, but the underlying reference is not named or persisted.",
+        "previous_standalone_current_verdict": "needs_review",
+        "previous_final_proposed_candidate_status": "needs_review",
+        "unresolved_material_fields": [
+          "Exact underlying source/reference for the ~21:00 Sumy event-time claim is not persisted."
+        ]
+      },
+      "git_provenance_trace": [
+        {
+          "step": "original_city_review_batch",
+          "commit": "6b0c9dff4858c9fca7845609093ac73c38e77800",
+          "path": "kyiv-air-alerts-grafana/data/explosion_review_batches/sumy_batch_1.json",
+          "blob_sha": "feaa6d5138201ec8a5fd2df5471ad0f4033fc014",
+          "source_checked": "Original Google News RSS title/snippet; matching Fakty ICTV article: https://fakty.com.ua/ua/proisshestvija/20260918-vybuhy-u-sumah-18-veresnya-rosiyany-vdaryly-kabamy-po-bagatopoverhivkah-ye-poraneni/ ; time corroboration: https://suspilne.media/sumy/1407184-armia-rf-vlucila-po-sumah-2/"
+        },
+        {
+          "step": "merged_to_live_review_queue",
+          "commit": "79c39e31bc5d370153bbaa0344dbd6d37641e64f",
+          "path": "kyiv-air-alerts-grafana/data/explosion_review_queue.json",
+          "note": "Original review batch decision was merged into the queue."
+        },
+        {
+          "step": "forensic_and_provenance_repair",
+          "commit": "b687cd9ce4c5e6253d8ff8148dd02386d92a5573",
+          "paths": [
+            "research/explosion_monitor_provenance_repair_2026-09-24.json",
+            "research/explosion_monitor_provenance_repair_replay_2026-09-24.json"
+          ],
+          "prior_result": "PARTIAL_INSUFFICIENT"
+        }
+      ],
+      "source_identity_recovery_attempts": [
+        {
+          "result": "RECOVERED",
+          "evidence_chain": "6b0c9dff4858c9fca7845609093ac73c38e77800 -> kyiv-air-alerts-grafana/data/explosion_review_batches/sumy_batch_1.json -> source_checked",
+          "recovered_exact_sources": [
+            "https://fakty.com.ua/ua/proisshestvija/20260918-vybuhy-u-sumah-18-veresnya-rosiyany-vdaryly-kabamy-po-bagatopoverhivkah-ye-poraneni/",
+            "https://suspilne.media/sumy/1407184-armia-rf-vlucila-po-sumah-2/"
+          ],
+          "note": "The original batch explicitly records the Fakty article plus the exact Suspilne time-corroboration URL; for 25c966... it also records the same Google News URL as 6212f72...."
+        }
+      ],
+      "exact_source_external_recovery": [
+        {
+          "url": "https://suspilne.media/sumy/1407184-armia-rf-vlucila-po-sumah-2/",
+          "retrieval_mode": "exact URL recovered from original review provenance; no search/discovery",
+          "result": "RETRIEVED",
+          "material_fact": "The source explicitly states that the strike on the Sumy apartment building happened about 21:00 and involved 6-7 KABs.",
+          "temporal_type": "explicit event time",
+          "event_time_local": "2026-09-18 ~21:00 Europe/Kyiv",
+          "event_time_utc": "2026-09-18 ~18:00Z",
+          "precision": "approximate hour/minute as stated; not promoted to seconds",
+          "publication_time_used_as_event_time": false
+        },
+        {
+          "url": "https://fakty.com.ua/ua/proisshestvija/20260918-vybuhy-u-sumah-18-veresnya-rosiyany-vdaryly-kabamy-po-bagatopoverhivkah-ye-poraneni/",
+          "retrieval_mode": "exact URL recovered from original review provenance; no search/discovery",
+          "result": "RETRIEVED",
+          "material_fact": "The publisher article identifies the 18 September Sumy incident as a guided-aerial-bomb attack on the city/apartment building.",
+          "displayed_publication_time_local": "2026-09-18 21:54 Europe/Kyiv",
+          "publication_time_used_as_event_time": false
+        }
+      ],
+      "sibling_duplicate_source_mappings": [],
+      "old_review_note_claims": {
+        "locality": "Sumy city",
+        "event": "KAB strike / explosion impact",
+        "aerial_war_context": "guided aerial bombs (KAB)",
+        "temporal_claim": "about 21:00 local on 18 September (~18:00Z)",
+        "target_episode": "e7e8974f19d4fdc782e93980"
+      },
+      "recovered_structured_evidence": {
+        "contributors": [
+          {
+            "source": "Fakty ICTV",
+            "exact_url": "https://fakty.com.ua/ua/proisshestvija/20260918-vybuhy-u-sumah-18-veresnya-rosiyany-vdaryly-kabamy-po-bagatopoverhivkah-ye-poraneni/",
+            "role": [
+              "explosion/impact",
+              "aerial-war context",
+              "locality",
+              "same-attack linkage"
+            ]
+          },
+          {
+            "source": "Suspilne Sumy",
+            "exact_url": "https://suspilne.media/sumy/1407184-armia-rf-vlucila-po-sumah-2/",
+            "role": [
+              "temporal proof",
+              "explosion/impact",
+              "aerial-war context",
+              "locality",
+              "same-attack linkage"
+            ],
+            "event_time_local": "2026-09-18 ~21:00 Europe/Kyiv",
+            "precision": "approximate; source says about 21:00"
+          }
+        ],
+        "target_episode": {
+          "episode_id": "e7e8974f19d4fdc782e93980",
+          "window_utc": "2026-09-18T17:24:19Z/2026-09-18T18:24:36Z",
+          "window_local": "2026-09-18T20:24:19+03:00/2026-09-18T21:24:36+03:00",
+          "event_time_safely_inside": true,
+          "neighboring_alert_conflict": false
+        },
+        "publication_time_separate": {
+          "candidate_published_at": "2026-09-18T20:16:49Z",
+          "temporal_source_publication_time": null,
+          "note": "The recovered event-time statement is explicit source content; no publication timestamp is converted into event time."
+        }
+      },
+      "unsupported_claims": [],
+      "final_provenance_status": "RECOVERED_COMPLETE",
+      "final_provenance_reason": "The original batch identifies the exact Suspilne temporal source and exact Fakty attack source. Exact-source retrieval confirms the material ~21:00 KAB claim without increasing precision, and that time falls safely inside the frozen episode.",
+      "seven_candidate_replay": {
+        "methodology": "unchanged current validated classification/composition semantics",
+        "current_standalone_verdict": "approved_strict",
+        "replay_reasoning": [
+          "exact-city impact/explosion evidence",
+          "aerial-war context explicit",
+          "same-attack cross-source linkage explicit in original batch",
+          "explicit approximate event time recovered from exact original temporal source",
+          "event time safely inside target episode",
+          "publication time not used as event time"
+        ],
+        "composition_contribution": "strict support for episode e7e8974f19d4fdc782e93980",
+        "final_proposed_candidate_status": "approved_strict"
+      }
+    },
+    {
+      "candidate_id": "e7461ec759e4d79020dfd1ba",
+      "city_key": "zaporizhzhia",
+      "city": "Запоріжжя",
+      "episode_id": "a60d817eaa9253200f090720",
+      "previous_approval": {
+        "status": "approved_strict",
+        "review_note": "Exact-city and aerial-war evidence. The UKR.NET mirror of the 061.ua article states that on the evening of 18 September explosions were heard in Zaporizhzhia during the air alert and reports an enemy hit on an infrastructure facility. The related Zaporizhzhia OVA post was timestamped 19:57 Kyiv time, inside monitor episode a60d817eaa9253200f090720 (19:21:56-20:49:19 Kyiv), giving one concrete episode. Direct 061.ua page returned 403.",
+        "source_checked": "061.ua article via UKR.NET mirror; Zaporizhzhia OVA post timestamp surfaced by malva.tv",
+        "candidate_source": {
+          "source": "Google News RSS",
+          "publisher": "061.ua",
+          "url": "https://news.google.com/rss/articles/CBMipgFBVV95cUxPNlNaN0swWEdKZWtiQ181NlVwc0l0LWc1T1RyMlBkWTNCZENUdV9XSUZzR0hvaTRMVDVOQWx2M0p5aEg5d2lBM25HT01XWlJzQlNWNWhpcjZPZHFCamluRXdvOVh2VmFMN2p0WkVTTGxFdE9VMVFWYTQxb3FLN1BabWl6cURseFpfaWFJLWxESkd4VG9wdUo3akRyRFJVV0ZieUhzb2Nn0gGmAUFVX3lxTE82U1o3SzBYR0pla2JDXzU2VXBzSXQtZzVPVHIyUGRZM0JkQ1R1X1dJRnNHSG9pNExUNU5BbHYzSnloSDl3aUEzbkdPTVdaUnNCU1Y1aGlyNk9kcUJqaW5Fd285WHZWYUw3anRaRVNMbEV0T1UxUVZhNDFvcUs3UFptaXpxRGx4Wl9pYUktbERKR3hUb3B1SjdqRHJEUlVXRmJ5SHNvY2c?oc=5",
+          "title": "У Запоріжжі пролунали вибухи: ворог поцілив по обʼєкту інфраструктури - 061.ua",
+          "snippet": "У Запоріжжі пролунали вибухи: ворог поцілив по обʼєкту інфраструктури 061.ua",
+          "published_at": "2026-09-18T17:10:00Z"
+        }
+      },
+      "previous_provenance_repair": {
+        "repair_quality": "PARTIAL_INSUFFICIENT",
+        "replay_ready": false,
+        "structured_repair_summary": "The review names a related Zaporizhzhia OVA post timestamped 19:57, but the exact post/reference and live wording are not persisted; its publication time is not promoted to event time.",
+        "previous_standalone_current_verdict": "needs_review",
+        "previous_final_proposed_candidate_status": "needs_review",
+        "unresolved_material_fields": [
+          "Exact Zaporizhzhia OVA post/reference and contemporaneous-live wording behind the 19:57 timestamp are not persisted; timestamp remains publication/message time, not event time."
+        ]
+      },
+      "git_provenance_trace": [
+        {
+          "step": "original_city_review_batch",
+          "commit": "f3b254c1cdf0b7d2a604a6d77b367b9d4b94b42e",
+          "path": "kyiv-air-alerts-grafana/data/explosion_review_batches/zaporizhzhia_batch_1.json",
+          "blob_sha": "433f0fc991967dffe9daceef605b05c3b372464b",
+          "source_checked": "061.ua article via UKR.NET mirror; Zaporizhzhia OVA post timestamp surfaced by malva.tv"
+        },
+        {
+          "step": "merged_to_live_review_queue",
+          "commit": "79c39e31bc5d370153bbaa0344dbd6d37641e64f",
+          "path": "kyiv-air-alerts-grafana/data/explosion_review_queue.json",
+          "note": "Original review batch decision was merged into the queue."
+        },
+        {
+          "step": "forensic_and_provenance_repair",
+          "commit": "b687cd9ce4c5e6253d8ff8148dd02386d92a5573",
+          "paths": [
+            "research/explosion_monitor_provenance_repair_2026-09-24.json",
+            "research/explosion_monitor_provenance_repair_replay_2026-09-24.json"
+          ],
+          "prior_result": "PARTIAL_INSUFFICIENT"
+        }
+      ],
+      "source_identity_recovery_attempts": [
+        {
+          "result": "PARTIAL_ONLY",
+          "evidence_chain": "f3b254c1cdf0b7d2a604a6d77b367b9d4b94b42e -> kyiv-air-alerts-grafana/data/explosion_review_batches/zaporizhzhia_batch_1.json -> source_checked",
+          "recovered_identity": "Zaporizhzhia OVA post timestamp was surfaced by malva.tv",
+          "missing_identity_fields": [
+            "exact malva.tv URL",
+            "exact OVA post URL or message ID",
+            "exact archived record ID",
+            "source title/snippet sufficient to identify the OVA post",
+            "preserved contemporaneous-live wording"
+          ],
+          "note": "The original batch recovers the domain/source type but not a deterministic source record."
+        },
+        {
+          "result": "NO_ADDITIONAL_IDENTITY",
+          "evidence_checked": [
+            "merged approval queue at 79c39e31bc5d370153bbaa0344dbd6d37641e64f",
+            "current frozen queue",
+            "all committed explosion_review_batches",
+            "current monitor-state candidate-ID trace",
+            "same-URL sibling candidate 537fc9f91a0405b08c9845a8"
+          ],
+          "note": "No exact malva URL, OVA message ID, canonical mapping, or archived source record was recovered."
+        }
+      ],
+      "exact_source_external_recovery": [
+        {
+          "source": "missing OVA/malva temporal source",
+          "result": "NOT_ATTEMPTED_BEYOND_EXISTING_EXACT_IDENTIFIERS",
+          "reason": "The underlying temporal source identity is not recoverable strongly enough from repo provenance to permit a broad external search. The candidate Google News URLs are preserved, but they are not the missing OVA/malva source identity.",
+          "broad_search_used": false
+        }
+      ],
+      "sibling_duplicate_source_mappings": [
+        {
+          "candidate_id": "113dac439efda41673b1f497",
+          "identity_basis": "Original review batch explicitly treats this as a duplicate report of the same 18 September infrastructure-strike story, but the two candidate Google News URLs differ; this is not used as deterministic identity for the missing OVA post.",
+          "additional_provenance_recovered": false
+        }
+      ],
+      "old_review_note_claims": {
+        "locality": "Zaporizhzhia city",
+        "event": "explosions during an air alert and enemy hit on infrastructure",
+        "aerial_war_context": "review described the strike as qualifying aerial-war evidence",
+        "temporal_claim": "related OVA post timestamped 19:57 Kyiv time",
+        "target_episode": "a60d817eaa9253200f090720"
+      },
+      "recovered_structured_evidence": {
+        "contributors": [
+          {
+            "source": "061.ua article via UKR.NET mirror",
+            "identity_status": "candidate 061.ua Google News URL is preserved; UKR.NET mirror URL not separately persisted",
+            "role": [
+              "explosion/impact",
+              "locality",
+              "reviewed alert relation"
+            ],
+            "material_limitation": "The reviewed article description does not by itself select one alert episode on a multi-episode date."
+          },
+          {
+            "source": "Zaporizhzhia OVA post surfaced by malva.tv",
+            "identity_status": "not deterministic",
+            "role": [
+              "claimed temporal proof"
+            ],
+            "preserved_timestamp_local": "2026-09-18 19:57 Europe/Kyiv",
+            "timestamp_semantics": "publication/message timestamp only unless contemporaneous-live wording is recovered",
+            "event_time": null
+          }
+        ],
+        "target_episode": {
+          "episode_id": "a60d817eaa9253200f090720",
+          "window_local": "2026-09-18T19:21:56+03:00/2026-09-18T20:49:19+03:00",
+          "event_time_safely_inside": null,
+          "neighboring_alert_conflict": "multi-episode date; episode-specific temporal proof required"
+        },
+        "publication_time_separate": {
+          "candidate_published_at": "2026-09-18T17:10:00Z",
+          "claimed_ova_message_timestamp_local": "2026-09-18 19:57 Europe/Kyiv",
+          "publication_time_used_as_event_time": false,
+          "note": "19:57 is deliberately not encoded as event time."
+        }
+      },
+      "unsupported_claims": [
+        {
+          "claim": "Use 19:57 as sufficient episode-specific event timing for a60d817eaa9253200f090720.",
+          "disposition": "NOT_ENCODED_AS_FACT",
+          "reason": "Exact OVA/malva source and any contemporaneous-live wording remain unidentified; message/publication time alone cannot be promoted to event time."
+        }
+      ],
+      "final_provenance_status": "STILL_INSUFFICIENT",
+      "final_provenance_reason": "Material episode-specific temporal/source provenance still lacks an identifiable underlying OVA/malva source record. The available repo history is insufficient to determine whether the 19:57 message was contemporaneous-live evidence or merely publication timing.",
+      "seven_candidate_replay": {
+        "methodology": "unchanged current validated classification/composition semantics",
+        "current_standalone_verdict": "needs_review",
+        "replay_reasoning": [
+          "reviewed exact-city/attack evidence exists",
+          "multi-episode date requires episode-specific temporal proof",
+          "missing OVA/malva source identity",
+          "19:57 retained as publication/message time only",
+          "no publication-to-event-time conversion"
+        ],
+        "composition_contribution": null,
+        "final_proposed_candidate_status": "needs_review"
+      }
+    },
+    {
+      "candidate_id": "113dac439efda41673b1f497",
+      "city_key": "zaporizhzhia",
+      "city": "Запоріжжя",
+      "episode_id": "a60d817eaa9253200f090720",
+      "previous_approval": {
+        "status": "approved_strict",
+        "review_note": "Duplicate report of the same 18 September Zaporizhzhia infrastructure strike. UKR.NET text states the explosions occurred in Zaporizhzhia during the air alert; the related OVA post was timestamped 19:57 Kyiv time, inside monitor episode a60d817eaa9253200f090720 (19:21:56-20:49:19 Kyiv). Exact city, aerial-war context, and one concrete alert episode are established.",
+        "source_checked": "UKR.NET article; Zaporizhzhia OVA post timestamp surfaced by malva.tv",
+        "candidate_source": {
+          "source": "Google News RSS",
+          "publisher": "ukr.net",
+          "url": "https://news.google.com/rss/articles/CBMibEFVX3lxTFAzNzZoRTMxMG5WN05fNkdqalpFSnM2MHdBU3ZWQVU0ZWlyUFppd19xZGxlek8wazFmbXFENzVBWU4tTE5YcFlpeUtzSVpUM0ZIMzZuMUZ4a0lhal9HSnlwNDNWNkFSWUlLLVIyRg?oc=5",
+          "title": "У Запоріжжі пролунали вибухи: ворог поцілив по обʼєкту інфраструктури - ukr.net",
+          "snippet": "У Запоріжжі пролунали вибухи: ворог поцілив по обʼєкту інфраструктури ukr.net",
+          "published_at": "2026-09-18T17:54:01Z"
+        }
+      },
+      "previous_provenance_repair": {
+        "repair_quality": "PARTIAL_INSUFFICIENT",
+        "replay_ready": false,
+        "structured_repair_summary": "The review names a related Zaporizhzhia OVA post timestamped 19:57, but the exact post/reference and live wording are not persisted; its publication time is not promoted to event time.",
+        "previous_standalone_current_verdict": "needs_review",
+        "previous_final_proposed_candidate_status": "needs_review",
+        "unresolved_material_fields": [
+          "Exact Zaporizhzhia OVA post/reference and contemporaneous-live wording behind the 19:57 timestamp are not persisted; timestamp remains publication/message time, not event time."
+        ]
+      },
+      "git_provenance_trace": [
+        {
+          "step": "original_city_review_batch",
+          "commit": "f3b254c1cdf0b7d2a604a6d77b367b9d4b94b42e",
+          "path": "kyiv-air-alerts-grafana/data/explosion_review_batches/zaporizhzhia_batch_1.json",
+          "blob_sha": "433f0fc991967dffe9daceef605b05c3b372464b",
+          "source_checked": "UKR.NET article; Zaporizhzhia OVA post timestamp surfaced by malva.tv"
+        },
+        {
+          "step": "merged_to_live_review_queue",
+          "commit": "79c39e31bc5d370153bbaa0344dbd6d37641e64f",
+          "path": "kyiv-air-alerts-grafana/data/explosion_review_queue.json",
+          "note": "Original review batch decision was merged into the queue."
+        },
+        {
+          "step": "forensic_and_provenance_repair",
+          "commit": "b687cd9ce4c5e6253d8ff8148dd02386d92a5573",
+          "paths": [
+            "research/explosion_monitor_provenance_repair_2026-09-24.json",
+            "research/explosion_monitor_provenance_repair_replay_2026-09-24.json"
+          ],
+          "prior_result": "PARTIAL_INSUFFICIENT"
+        }
+      ],
+      "source_identity_recovery_attempts": [
+        {
+          "result": "PARTIAL_ONLY",
+          "evidence_chain": "f3b254c1cdf0b7d2a604a6d77b367b9d4b94b42e -> kyiv-air-alerts-grafana/data/explosion_review_batches/zaporizhzhia_batch_1.json -> source_checked",
+          "recovered_identity": "Zaporizhzhia OVA post timestamp was surfaced by malva.tv",
+          "missing_identity_fields": [
+            "exact malva.tv URL",
+            "exact OVA post URL or message ID",
+            "exact archived record ID",
+            "source title/snippet sufficient to identify the OVA post",
+            "preserved contemporaneous-live wording"
+          ],
+          "note": "The original batch recovers the domain/source type but not a deterministic source record."
+        },
+        {
+          "result": "NO_ADDITIONAL_IDENTITY",
+          "evidence_checked": [
+            "merged approval queue at 79c39e31bc5d370153bbaa0344dbd6d37641e64f",
+            "current frozen queue",
+            "all committed explosion_review_batches",
+            "current monitor-state candidate-ID trace",
+            "same-URL sibling candidate 537fc9f91a0405b08c9845a8"
+          ],
+          "note": "No exact malva URL, OVA message ID, canonical mapping, or archived source record was recovered."
+        }
+      ],
+      "exact_source_external_recovery": [
+        {
+          "source": "missing OVA/malva temporal source",
+          "result": "NOT_ATTEMPTED_BEYOND_EXISTING_EXACT_IDENTIFIERS",
+          "reason": "The underlying temporal source identity is not recoverable strongly enough from repo provenance to permit a broad external search. The candidate Google News URLs are preserved, but they are not the missing OVA/malva source identity.",
+          "broad_search_used": false
+        }
+      ],
+      "sibling_duplicate_source_mappings": [
+        {
+          "candidate_id": "537fc9f91a0405b08c9845a8",
+          "identity_basis": "Exact same Google News URL and same title in the current queue.",
+          "additional_provenance_recovered": false,
+          "note": "Sibling has resolved_url=null and only a generic manual-review note, so it does not identify the OVA/malva source."
+        }
+      ],
+      "old_review_note_claims": {
+        "locality": "Zaporizhzhia city",
+        "event": "explosions during an air alert and enemy hit on infrastructure",
+        "aerial_war_context": "review described the strike as qualifying aerial-war evidence",
+        "temporal_claim": "related OVA post timestamped 19:57 Kyiv time",
+        "target_episode": "a60d817eaa9253200f090720"
+      },
+      "recovered_structured_evidence": {
+        "contributors": [
+          {
+            "source": "UKR.NET article",
+            "identity_status": "candidate Google News URL is preserved",
+            "role": [
+              "explosion/impact",
+              "locality",
+              "reviewed alert relation"
+            ],
+            "material_limitation": "The reviewed article description does not by itself select one alert episode on a multi-episode date."
+          },
+          {
+            "source": "Zaporizhzhia OVA post surfaced by malva.tv",
+            "identity_status": "not deterministic",
+            "role": [
+              "claimed temporal proof"
+            ],
+            "preserved_timestamp_local": "2026-09-18 19:57 Europe/Kyiv",
+            "timestamp_semantics": "publication/message timestamp only unless contemporaneous-live wording is recovered",
+            "event_time": null
+          }
+        ],
+        "target_episode": {
+          "episode_id": "a60d817eaa9253200f090720",
+          "window_local": "2026-09-18T19:21:56+03:00/2026-09-18T20:49:19+03:00",
+          "event_time_safely_inside": null,
+          "neighboring_alert_conflict": "multi-episode date; episode-specific temporal proof required"
+        },
+        "publication_time_separate": {
+          "candidate_published_at": "2026-09-18T17:54:01Z",
+          "claimed_ova_message_timestamp_local": "2026-09-18 19:57 Europe/Kyiv",
+          "publication_time_used_as_event_time": false,
+          "note": "19:57 is deliberately not encoded as event time."
+        }
+      },
+      "unsupported_claims": [
+        {
+          "claim": "Use 19:57 as sufficient episode-specific event timing for a60d817eaa9253200f090720.",
+          "disposition": "NOT_ENCODED_AS_FACT",
+          "reason": "Exact OVA/malva source and any contemporaneous-live wording remain unidentified; message/publication time alone cannot be promoted to event time."
+        }
+      ],
+      "final_provenance_status": "STILL_INSUFFICIENT",
+      "final_provenance_reason": "Material episode-specific temporal/source provenance still lacks an identifiable underlying OVA/malva source record. The available repo history is insufficient to determine whether the 19:57 message was contemporaneous-live evidence or merely publication timing.",
+      "seven_candidate_replay": {
+        "methodology": "unchanged current validated classification/composition semantics",
+        "current_standalone_verdict": "needs_review",
+        "replay_reasoning": [
+          "reviewed exact-city/attack evidence exists",
+          "multi-episode date requires episode-specific temporal proof",
+          "missing OVA/malva source identity",
+          "19:57 retained as publication/message time only",
+          "no publication-to-event-time conversion"
+        ],
+        "composition_contribution": null,
+        "final_proposed_candidate_status": "needs_review"
+      }
+    },
+    {
+      "candidate_id": "b5c1ac3e5dba6b12eb699016",
+      "city_key": "sumy",
+      "city": "Суми",
+      "episode_id": "e7e8974f19d4fdc782e93980",
+      "previous_approval": {
+        "status": "approved_strict",
+        "review_note": "Exact-city KAB attack on Sumy. The publisher article confirms guided aerial bombs; independent contemporaneous reporting places the strike at about 21:00 local on 18 Sep (~18:00Z), inside the single Sumy monitor episode 17:24:19Z-18:24:36Z.",
+        "source_checked": "Original Google News RSS title/snippet; Fakty ICTV publisher article: https://fakty.com.ua/ua/proisshestvija/20260918-vybuhy-u-sumah-18-veresnya-rosiyany-vdaryly-kabamy-po-bagatopoverhivkah-ye-poraneni/ ; time corroboration: https://suspilne.media/sumy/1407184-armia-rf-vlucila-po-sumah-2/",
+        "candidate_source": {
+          "source": "Google News RSS",
+          "publisher": "Факти ICTV",
+          "url": "https://news.google.com/rss/articles/CBMizAFBVV95cUxPeUpoYUNpMjhiTndGY2lzZW5WdlhnNXFlT0Nic0F5WDZ6NVA4VXNicVNJdU9tVWJJZE0tNUpTVWwwczM2Zjg1NmNFdENXaF9BNFozRFduNzNHRE9iRDlPSS05SXk3UEpGMmJON3ZUaHJwaHlCeDkyRnhJT1FFcEZwVWdGQ0pHcmEycFJWOFZPbnBHdmFCd0EtbzVOb3RfWkdGbHFTMmM2YjZWMmhhd3NQRHBSS09fRjZWVmhvclUwT2JHQVlGQmtPaTN2eHXSAdIBQVVfeXFMT3A4Y21KRXdZMVZHanVuX29sYUN0RktsQlRDcHVXRkVRcG80ZlBFWm9MWldzX0Z4a2xqTm1xaG5WbjJJM3JiVEQ5eVRuMEotSk1hTjBpZjFqN2d4V19sUFVtM1RjZTY5djRJejNuMFlaT1p6OTJoTU5OcUhfeFJwaWp3Q0o2S1dia25IeWpNeFM1TTJPMWtqcHlxdExHYS1uX3l4eHZQcFk3amd2MVVpb1RsbnNrUEIzVzNDanRla0NIdHdCb2VLTzNQTFJHclZKNWZn?oc=5",
+          "title": "Вибухи у Сумах: росіяни вдарили КАБами по багатоповерхівках, двоє загиблих, є поранені - Факти ICTV",
+          "snippet": "Вибухи у Сумах: росіяни вдарили КАБами по багатоповерхівках, двоє загиблих, є поранені Факти ICTV",
+          "published_at": "2026-09-18T18:54:00Z"
+        }
+      },
+      "previous_provenance_repair": {
+        "repair_quality": "PARTIAL_INSUFFICIENT",
+        "replay_ready": false,
+        "structured_repair_summary": "The review says independent contemporaneous reporting placed the Sumy KAB strike at about 21:00 local, but the underlying reference is not named or persisted.",
+        "previous_standalone_current_verdict": "needs_review",
+        "previous_final_proposed_candidate_status": "needs_review",
+        "unresolved_material_fields": [
+          "Exact underlying source/reference for the ~21:00 Sumy event-time claim is not persisted."
+        ]
+      },
+      "git_provenance_trace": [
+        {
+          "step": "original_city_review_batch",
+          "commit": "6b0c9dff4858c9fca7845609093ac73c38e77800",
+          "path": "kyiv-air-alerts-grafana/data/explosion_review_batches/sumy_batch_1.json",
+          "blob_sha": "feaa6d5138201ec8a5fd2df5471ad0f4033fc014",
+          "source_checked": "Original Google News RSS title/snippet; Fakty ICTV publisher article: https://fakty.com.ua/ua/proisshestvija/20260918-vybuhy-u-sumah-18-veresnya-rosiyany-vdaryly-kabamy-po-bagatopoverhivkah-ye-poraneni/ ; time corroboration: https://suspilne.media/sumy/1407184-armia-rf-vlucila-po-sumah-2/"
+        },
+        {
+          "step": "merged_to_live_review_queue",
+          "commit": "79c39e31bc5d370153bbaa0344dbd6d37641e64f",
+          "path": "kyiv-air-alerts-grafana/data/explosion_review_queue.json",
+          "note": "Original review batch decision was merged into the queue."
+        },
+        {
+          "step": "forensic_and_provenance_repair",
+          "commit": "b687cd9ce4c5e6253d8ff8148dd02386d92a5573",
+          "paths": [
+            "research/explosion_monitor_provenance_repair_2026-09-24.json",
+            "research/explosion_monitor_provenance_repair_replay_2026-09-24.json"
+          ],
+          "prior_result": "PARTIAL_INSUFFICIENT"
+        }
+      ],
+      "source_identity_recovery_attempts": [
+        {
+          "result": "RECOVERED",
+          "evidence_chain": "6b0c9dff4858c9fca7845609093ac73c38e77800 -> kyiv-air-alerts-grafana/data/explosion_review_batches/sumy_batch_1.json -> source_checked",
+          "recovered_exact_sources": [
+            "https://fakty.com.ua/ua/proisshestvija/20260918-vybuhy-u-sumah-18-veresnya-rosiyany-vdaryly-kabamy-po-bagatopoverhivkah-ye-poraneni/",
+            "https://suspilne.media/sumy/1407184-armia-rf-vlucila-po-sumah-2/"
+          ],
+          "note": "The original batch explicitly records the Fakty publisher article plus the exact Suspilne time-corroboration URL."
+        }
+      ],
+      "exact_source_external_recovery": [
+        {
+          "url": "https://suspilne.media/sumy/1407184-armia-rf-vlucila-po-sumah-2/",
+          "retrieval_mode": "exact URL recovered from original review provenance; no search/discovery",
+          "result": "RETRIEVED",
+          "material_fact": "The source explicitly states that the strike on the Sumy apartment building happened about 21:00 and involved 6-7 KABs.",
+          "temporal_type": "explicit event time",
+          "event_time_local": "2026-09-18 ~21:00 Europe/Kyiv",
+          "event_time_utc": "2026-09-18 ~18:00Z",
+          "precision": "approximate hour/minute as stated; not promoted to seconds",
+          "publication_time_used_as_event_time": false
+        },
+        {
+          "url": "https://fakty.com.ua/ua/proisshestvija/20260918-vybuhy-u-sumah-18-veresnya-rosiyany-vdaryly-kabamy-po-bagatopoverhivkah-ye-poraneni/",
+          "retrieval_mode": "exact URL recovered from original review provenance; no search/discovery",
+          "result": "RETRIEVED",
+          "material_fact": "The publisher article identifies the 18 September Sumy incident as a guided-aerial-bomb attack on the city/apartment building.",
+          "displayed_publication_time_local": "2026-09-18 21:54 Europe/Kyiv",
+          "publication_time_used_as_event_time": false
+        }
+      ],
+      "sibling_duplicate_source_mappings": [],
+      "old_review_note_claims": {
+        "locality": "Sumy city",
+        "event": "KAB strike / explosion impact",
+        "aerial_war_context": "guided aerial bombs (KAB)",
+        "temporal_claim": "about 21:00 local on 18 September (~18:00Z)",
+        "target_episode": "e7e8974f19d4fdc782e93980"
+      },
+      "recovered_structured_evidence": {
+        "contributors": [
+          {
+            "source": "Fakty ICTV",
+            "exact_url": "https://fakty.com.ua/ua/proisshestvija/20260918-vybuhy-u-sumah-18-veresnya-rosiyany-vdaryly-kabamy-po-bagatopoverhivkah-ye-poraneni/",
+            "role": [
+              "explosion/impact",
+              "aerial-war context",
+              "locality",
+              "same-attack linkage"
+            ]
+          },
+          {
+            "source": "Suspilne Sumy",
+            "exact_url": "https://suspilne.media/sumy/1407184-armia-rf-vlucila-po-sumah-2/",
+            "role": [
+              "temporal proof",
+              "explosion/impact",
+              "aerial-war context",
+              "locality",
+              "same-attack linkage"
+            ],
+            "event_time_local": "2026-09-18 ~21:00 Europe/Kyiv",
+            "precision": "approximate; source says about 21:00"
+          }
+        ],
+        "target_episode": {
+          "episode_id": "e7e8974f19d4fdc782e93980",
+          "window_utc": "2026-09-18T17:24:19Z/2026-09-18T18:24:36Z",
+          "window_local": "2026-09-18T20:24:19+03:00/2026-09-18T21:24:36+03:00",
+          "event_time_safely_inside": true,
+          "neighboring_alert_conflict": false
+        },
+        "publication_time_separate": {
+          "candidate_published_at": "2026-09-18T18:54:00Z",
+          "temporal_source_publication_time": null,
+          "note": "The recovered event-time statement is explicit source content; no publication timestamp is converted into event time."
+        }
+      },
+      "unsupported_claims": [],
+      "final_provenance_status": "RECOVERED_COMPLETE",
+      "final_provenance_reason": "The original batch identifies the exact Suspilne temporal source and exact Fakty attack source. Exact-source retrieval confirms the material ~21:00 KAB claim without increasing precision, and that time falls safely inside the frozen episode.",
+      "seven_candidate_replay": {
+        "methodology": "unchanged current validated classification/composition semantics",
+        "current_standalone_verdict": "approved_strict",
+        "replay_reasoning": [
+          "exact-city impact/explosion evidence",
+          "aerial-war context explicit",
+          "same-attack cross-source linkage explicit in original batch",
+          "explicit approximate event time recovered from exact original temporal source",
+          "event time safely inside target episode",
+          "publication time not used as event time"
+        ],
+        "composition_contribution": "strict support for episode e7e8974f19d4fdc782e93980",
+        "final_proposed_candidate_status": "approved_strict"
+      }
+    },
+    {
+      "candidate_id": "d403a466c13b9ec069765241",
+      "city_key": "sumy",
+      "city": "Суми",
+      "episode_id": "e7e8974f19d4fdc782e93980",
+      "previous_approval": {
+        "status": "approved_strict",
+        "review_note": "Duplicate discovery of the Fakty ICTV Sumy KAB attack. The strike occurred about 21:00 local on 18 Sep (~18:00Z), within Sumy episode e7e8974f19d4fdc782e93980 (17:24:19Z-18:24:36Z). Exact city and aerial-war context are explicit.",
+        "source_checked": "Original Google News RSS title/snippet; Fakty ICTV publisher article: https://fakty.com.ua/ua/proisshestvija/20260918-vybuhy-u-sumah-18-veresnya-rosiyany-vdaryly-kabamy-po-bagatopoverhivkah-ye-poraneni/ ; time corroboration: https://suspilne.media/sumy/1407184-armia-rf-vlucila-po-sumah-2/",
+        "candidate_source": {
+          "source": "Google News RSS",
+          "publisher": "Факти ICTV",
+          "url": "https://news.google.com/rss/articles/CBMi0gFBVV95cUxOVmdKazZaY085b2lEVjZnZ0gtRnZFRzFpYzFKcXJmLW5xQzBhanhtNWVyMkNKME9HYVkxZkswYkpPSjFOdzk3Q1RFaGZtY1FnLUwydlppamM3SGhYYzkya2R1dEpjdlVpSmt1bUhibFh6UFV5NU1mWURVUm02Sk9KRGRtVkZ4OXpxOGVvdUc2ZWdFd0EyRDFuTW9xZGtZVVBOUmhNRUZxdE92VnFHUGF6U0hoakJCVmE1ZWRzVHE1R3NyMGs5OEdZZm5rS3FxZ2tWaFHSAdcBQVVfeXFMTW9pRWlCZGlpTXBLc3M0NkxSSi1LX3RyZmFpSURwZlZWaEZWX09Fb3RhbkUxUWhNM3BlNWtHSmNmYlY3MVFsRjdKTkRTcTVUeUJvRS1KZVU1Nm1NSFpyZnl5QWo1QzJ3QXl2N1F1cG9FYU0xOUljY3FzYm9ya0hSbFljODc3dVhpdmhjekg5NGdTbmZJUGV4RnRkMHB5T3lfVWs1eS04N2Q2UDl4OHJ2WTVfWlRjU1FsVmh3andCdVVQSVpzYWk0MU43UjFnLWtVWER2UVRaYXc?oc=5",
+          "title": "Вибухи у Сумах: росіяни вдарили КАБами по багатоповерхівках, двоє загиблих, є поранені - Факти ICTV",
+          "snippet": "Вибухи у Сумах: росіяни вдарили КАБами по багатоповерхівках, двоє загиблих, є поранені Факти ICTV",
+          "published_at": "2026-09-18T18:54:00Z"
+        }
+      },
+      "previous_provenance_repair": {
+        "repair_quality": "PARTIAL_INSUFFICIENT",
+        "replay_ready": false,
+        "structured_repair_summary": "The review says independent contemporaneous reporting placed the Sumy KAB strike at about 21:00 local, but the underlying reference is not named or persisted.",
+        "previous_standalone_current_verdict": "needs_review",
+        "previous_final_proposed_candidate_status": "needs_review",
+        "unresolved_material_fields": [
+          "Exact underlying source/reference for the ~21:00 Sumy event-time claim is not persisted."
+        ]
+      },
+      "git_provenance_trace": [
+        {
+          "step": "original_city_review_batch",
+          "commit": "6b0c9dff4858c9fca7845609093ac73c38e77800",
+          "path": "kyiv-air-alerts-grafana/data/explosion_review_batches/sumy_batch_1.json",
+          "blob_sha": "feaa6d5138201ec8a5fd2df5471ad0f4033fc014",
+          "source_checked": "Original Google News RSS title/snippet; Fakty ICTV publisher article: https://fakty.com.ua/ua/proisshestvija/20260918-vybuhy-u-sumah-18-veresnya-rosiyany-vdaryly-kabamy-po-bagatopoverhivkah-ye-poraneni/ ; time corroboration: https://suspilne.media/sumy/1407184-armia-rf-vlucila-po-sumah-2/"
+        },
+        {
+          "step": "merged_to_live_review_queue",
+          "commit": "79c39e31bc5d370153bbaa0344dbd6d37641e64f",
+          "path": "kyiv-air-alerts-grafana/data/explosion_review_queue.json",
+          "note": "Original review batch decision was merged into the queue."
+        },
+        {
+          "step": "forensic_and_provenance_repair",
+          "commit": "b687cd9ce4c5e6253d8ff8148dd02386d92a5573",
+          "paths": [
+            "research/explosion_monitor_provenance_repair_2026-09-24.json",
+            "research/explosion_monitor_provenance_repair_replay_2026-09-24.json"
+          ],
+          "prior_result": "PARTIAL_INSUFFICIENT"
+        }
+      ],
+      "source_identity_recovery_attempts": [
+        {
+          "result": "RECOVERED",
+          "evidence_chain": "6b0c9dff4858c9fca7845609093ac73c38e77800 -> kyiv-air-alerts-grafana/data/explosion_review_batches/sumy_batch_1.json -> source_checked",
+          "recovered_exact_sources": [
+            "https://fakty.com.ua/ua/proisshestvija/20260918-vybuhy-u-sumah-18-veresnya-rosiyany-vdaryly-kabamy-po-bagatopoverhivkah-ye-poraneni/",
+            "https://suspilne.media/sumy/1407184-armia-rf-vlucila-po-sumah-2/"
+          ],
+          "note": "The original batch explicitly records the Fakty publisher article plus the exact Suspilne time-corroboration URL."
+        }
+      ],
+      "exact_source_external_recovery": [
+        {
+          "url": "https://suspilne.media/sumy/1407184-armia-rf-vlucila-po-sumah-2/",
+          "retrieval_mode": "exact URL recovered from original review provenance; no search/discovery",
+          "result": "RETRIEVED",
+          "material_fact": "The source explicitly states that the strike on the Sumy apartment building happened about 21:00 and involved 6-7 KABs.",
+          "temporal_type": "explicit event time",
+          "event_time_local": "2026-09-18 ~21:00 Europe/Kyiv",
+          "event_time_utc": "2026-09-18 ~18:00Z",
+          "precision": "approximate hour/minute as stated; not promoted to seconds",
+          "publication_time_used_as_event_time": false
+        },
+        {
+          "url": "https://fakty.com.ua/ua/proisshestvija/20260918-vybuhy-u-sumah-18-veresnya-rosiyany-vdaryly-kabamy-po-bagatopoverhivkah-ye-poraneni/",
+          "retrieval_mode": "exact URL recovered from original review provenance; no search/discovery",
+          "result": "RETRIEVED",
+          "material_fact": "The publisher article identifies the 18 September Sumy incident as a guided-aerial-bomb attack on the city/apartment building.",
+          "displayed_publication_time_local": "2026-09-18 21:54 Europe/Kyiv",
+          "publication_time_used_as_event_time": false
+        }
+      ],
+      "sibling_duplicate_source_mappings": [
+        {
+          "candidate_id": "b5c1ac3e5dba6b12eb699016",
+          "identity_basis": "Original batch explicitly describes duplicate discovery of the same Fakty ICTV attack and cites the identical Fakty + Suspilne source pair."
+        }
+      ],
+      "old_review_note_claims": {
+        "locality": "Sumy city",
+        "event": "KAB strike / explosion impact",
+        "aerial_war_context": "guided aerial bombs (KAB)",
+        "temporal_claim": "about 21:00 local on 18 September (~18:00Z)",
+        "target_episode": "e7e8974f19d4fdc782e93980"
+      },
+      "recovered_structured_evidence": {
+        "contributors": [
+          {
+            "source": "Fakty ICTV",
+            "exact_url": "https://fakty.com.ua/ua/proisshestvija/20260918-vybuhy-u-sumah-18-veresnya-rosiyany-vdaryly-kabamy-po-bagatopoverhivkah-ye-poraneni/",
+            "role": [
+              "explosion/impact",
+              "aerial-war context",
+              "locality",
+              "same-attack linkage"
+            ]
+          },
+          {
+            "source": "Suspilne Sumy",
+            "exact_url": "https://suspilne.media/sumy/1407184-armia-rf-vlucila-po-sumah-2/",
+            "role": [
+              "temporal proof",
+              "explosion/impact",
+              "aerial-war context",
+              "locality",
+              "same-attack linkage"
+            ],
+            "event_time_local": "2026-09-18 ~21:00 Europe/Kyiv",
+            "precision": "approximate; source says about 21:00"
+          }
+        ],
+        "target_episode": {
+          "episode_id": "e7e8974f19d4fdc782e93980",
+          "window_utc": "2026-09-18T17:24:19Z/2026-09-18T18:24:36Z",
+          "window_local": "2026-09-18T20:24:19+03:00/2026-09-18T21:24:36+03:00",
+          "event_time_safely_inside": true,
+          "neighboring_alert_conflict": false
+        },
+        "publication_time_separate": {
+          "candidate_published_at": "2026-09-18T18:54:00Z",
+          "temporal_source_publication_time": null,
+          "note": "The recovered event-time statement is explicit source content; no publication timestamp is converted into event time."
+        }
+      },
+      "unsupported_claims": [],
+      "final_provenance_status": "RECOVERED_COMPLETE",
+      "final_provenance_reason": "The original batch identifies the exact Suspilne temporal source and exact Fakty attack source. Exact-source retrieval confirms the material ~21:00 KAB claim without increasing precision, and that time falls safely inside the frozen episode.",
+      "seven_candidate_replay": {
+        "methodology": "unchanged current validated classification/composition semantics",
+        "current_standalone_verdict": "approved_strict",
+        "replay_reasoning": [
+          "exact-city impact/explosion evidence",
+          "aerial-war context explicit",
+          "same-attack cross-source linkage explicit in original batch",
+          "explicit approximate event time recovered from exact original temporal source",
+          "event time safely inside target episode",
+          "publication time not used as event time"
+        ],
+        "composition_contribution": "strict support for episode e7e8974f19d4fdc782e93980",
+        "final_proposed_candidate_status": "approved_strict"
+      }
+    },
+    {
+      "candidate_id": "25c966b4e375b5075b267a91",
+      "city_key": "sumy",
+      "city": "Суми",
+      "episode_id": "e7e8974f19d4fdc782e93980",
+      "previous_approval": {
+        "status": "approved_strict",
+        "review_note": "Duplicate discovery of the 18 Sep Sumy KAB attack. Independent reporting gives approximate event time around 21:00 local (~18:00Z), inside the single matching Sumy alert episode e7e8974f19d4fdc782e93980.",
+        "source_checked": "Original Google News RSS title/snippet; same Google News URL as candidate 6212f72cfd28e6a86fd5bc51; matching Fakty ICTV article: https://fakty.com.ua/ua/proisshestvija/20260918-vybuhy-u-sumah-18-veresnya-rosiyany-vdaryly-kabamy-po-bagatopoverhivkah-ye-poraneni/ ; time corroboration: https://suspilne.media/sumy/1407184-armia-rf-vlucila-po-sumah-2/",
+        "candidate_source": {
+          "source": "Google News RSS",
+          "publisher": "ukr.net",
+          "url": "https://news.google.com/rss/articles/CBMiZkFVX3lxTFBqekR4X1VJazY0Q01RVWp5aDhJNUVRWkJmanR4UlVjMkE3S180eFRuMHNTV1RWVzUwa2ZrM2JZeGdIVk5iTEpTX0NnOU9va3VLRGEyUE5tZks1TkdjLTBqNlZwTXZWdw?oc=5",
+          "title": "Вибухи у Сумах: росіяни вдарили КАБами по багатоповерхівках, є поранені - ukr.net",
+          "snippet": "Вибухи у Сумах: росіяни вдарили КАБами по багатоповерхівках, є поранені ukr.net",
+          "published_at": "2026-09-18T20:16:49Z"
+        }
+      },
+      "previous_provenance_repair": {
+        "repair_quality": "PARTIAL_INSUFFICIENT",
+        "replay_ready": false,
+        "structured_repair_summary": "The review says independent contemporaneous reporting placed the Sumy KAB strike at about 21:00 local, but the underlying reference is not named or persisted.",
+        "previous_standalone_current_verdict": "needs_review",
+        "previous_final_proposed_candidate_status": "needs_review",
+        "unresolved_material_fields": [
+          "Exact underlying source/reference for the ~21:00 Sumy event-time claim is not persisted."
+        ]
+      },
+      "git_provenance_trace": [
+        {
+          "step": "original_city_review_batch",
+          "commit": "6b0c9dff4858c9fca7845609093ac73c38e77800",
+          "path": "kyiv-air-alerts-grafana/data/explosion_review_batches/sumy_batch_1.json",
+          "blob_sha": "feaa6d5138201ec8a5fd2df5471ad0f4033fc014",
+          "source_checked": "Original Google News RSS title/snippet; same Google News URL as candidate 6212f72cfd28e6a86fd5bc51; matching Fakty ICTV article: https://fakty.com.ua/ua/proisshestvija/20260918-vybuhy-u-sumah-18-veresnya-rosiyany-vdaryly-kabamy-po-bagatopoverhivkah-ye-poraneni/ ; time corroboration: https://suspilne.media/sumy/1407184-armia-rf-vlucila-po-sumah-2/"
+        },
+        {
+          "step": "merged_to_live_review_queue",
+          "commit": "79c39e31bc5d370153bbaa0344dbd6d37641e64f",
+          "path": "kyiv-air-alerts-grafana/data/explosion_review_queue.json",
+          "note": "Original review batch decision was merged into the queue."
+        },
+        {
+          "step": "forensic_and_provenance_repair",
+          "commit": "b687cd9ce4c5e6253d8ff8148dd02386d92a5573",
+          "paths": [
+            "research/explosion_monitor_provenance_repair_2026-09-24.json",
+            "research/explosion_monitor_provenance_repair_replay_2026-09-24.json"
+          ],
+          "prior_result": "PARTIAL_INSUFFICIENT"
+        }
+      ],
+      "source_identity_recovery_attempts": [
+        {
+          "result": "RECOVERED",
+          "evidence_chain": "6b0c9dff4858c9fca7845609093ac73c38e77800 -> kyiv-air-alerts-grafana/data/explosion_review_batches/sumy_batch_1.json -> source_checked",
+          "recovered_exact_sources": [
+            "https://fakty.com.ua/ua/proisshestvija/20260918-vybuhy-u-sumah-18-veresnya-rosiyany-vdaryly-kabamy-po-bagatopoverhivkah-ye-poraneni/",
+            "https://suspilne.media/sumy/1407184-armia-rf-vlucila-po-sumah-2/"
+          ],
+          "note": "The original batch explicitly records the Fakty article plus the exact Suspilne time-corroboration URL; for 25c966... it also records the same Google News URL as 6212f72...."
+        }
+      ],
+      "exact_source_external_recovery": [
+        {
+          "url": "https://suspilne.media/sumy/1407184-armia-rf-vlucila-po-sumah-2/",
+          "retrieval_mode": "exact URL recovered from original review provenance; no search/discovery",
+          "result": "RETRIEVED",
+          "material_fact": "The source explicitly states that the strike on the Sumy apartment building happened about 21:00 and involved 6-7 KABs.",
+          "temporal_type": "explicit event time",
+          "event_time_local": "2026-09-18 ~21:00 Europe/Kyiv",
+          "event_time_utc": "2026-09-18 ~18:00Z",
+          "precision": "approximate hour/minute as stated; not promoted to seconds",
+          "publication_time_used_as_event_time": false
+        },
+        {
+          "url": "https://fakty.com.ua/ua/proisshestvija/20260918-vybuhy-u-sumah-18-veresnya-rosiyany-vdaryly-kabamy-po-bagatopoverhivkah-ye-poraneni/",
+          "retrieval_mode": "exact URL recovered from original review provenance; no search/discovery",
+          "result": "RETRIEVED",
+          "material_fact": "The publisher article identifies the 18 September Sumy incident as a guided-aerial-bomb attack on the city/apartment building.",
+          "displayed_publication_time_local": "2026-09-18 21:54 Europe/Kyiv",
+          "publication_time_used_as_event_time": false
+        }
+      ],
+      "sibling_duplicate_source_mappings": [
+        {
+          "candidate_id": "6212f72cfd28e6a86fd5bc51",
+          "identity_basis": "Original batch explicitly says same Google News URL."
+        }
+      ],
+      "old_review_note_claims": {
+        "locality": "Sumy city",
+        "event": "KAB strike / explosion impact",
+        "aerial_war_context": "guided aerial bombs (KAB)",
+        "temporal_claim": "about 21:00 local on 18 September (~18:00Z)",
+        "target_episode": "e7e8974f19d4fdc782e93980"
+      },
+      "recovered_structured_evidence": {
+        "contributors": [
+          {
+            "source": "Fakty ICTV",
+            "exact_url": "https://fakty.com.ua/ua/proisshestvija/20260918-vybuhy-u-sumah-18-veresnya-rosiyany-vdaryly-kabamy-po-bagatopoverhivkah-ye-poraneni/",
+            "role": [
+              "explosion/impact",
+              "aerial-war context",
+              "locality",
+              "same-attack linkage"
+            ]
+          },
+          {
+            "source": "Suspilne Sumy",
+            "exact_url": "https://suspilne.media/sumy/1407184-armia-rf-vlucila-po-sumah-2/",
+            "role": [
+              "temporal proof",
+              "explosion/impact",
+              "aerial-war context",
+              "locality",
+              "same-attack linkage"
+            ],
+            "event_time_local": "2026-09-18 ~21:00 Europe/Kyiv",
+            "precision": "approximate; source says about 21:00"
+          }
+        ],
+        "target_episode": {
+          "episode_id": "e7e8974f19d4fdc782e93980",
+          "window_utc": "2026-09-18T17:24:19Z/2026-09-18T18:24:36Z",
+          "window_local": "2026-09-18T20:24:19+03:00/2026-09-18T21:24:36+03:00",
+          "event_time_safely_inside": true,
+          "neighboring_alert_conflict": false
+        },
+        "publication_time_separate": {
+          "candidate_published_at": "2026-09-18T20:16:49Z",
+          "temporal_source_publication_time": null,
+          "note": "The recovered event-time statement is explicit source content; no publication timestamp is converted into event time."
+        }
+      },
+      "unsupported_claims": [],
+      "final_provenance_status": "RECOVERED_COMPLETE",
+      "final_provenance_reason": "The original batch identifies the exact Suspilne temporal source and exact Fakty attack source. Exact-source retrieval confirms the material ~21:00 KAB claim without increasing precision, and that time falls safely inside the frozen episode.",
+      "seven_candidate_replay": {
+        "methodology": "unchanged current validated classification/composition semantics",
+        "current_standalone_verdict": "approved_strict",
+        "replay_reasoning": [
+          "exact-city impact/explosion evidence",
+          "aerial-war context explicit",
+          "same-attack cross-source linkage explicit in original batch",
+          "explicit approximate event time recovered from exact original temporal source",
+          "event time safely inside target episode",
+          "publication time not used as event time"
+        ],
+        "composition_contribution": "strict support for episode e7e8974f19d4fdc782e93980",
+        "final_proposed_candidate_status": "approved_strict"
+      }
+    },
+    {
+      "candidate_id": "e8998303b80b496820692c54",
+      "city_key": "odesa",
+      "city": "Одеса",
+      "episode_id": "ff2ba0d3c1cc5ebf116ed7bf",
+      "previous_approval": {
+        "status": "approved_strict",
+        "review_note": "Strict: the Fakty ICTV candidate is the confirmed reactive-drone strike on central Odesa that damaged an administrative building. Suspilne independently identifies this same strike as occurring at 16:02 Kyiv time, after a reactive-UAV warning and during the corresponding alert. 16:02 Kyiv is inside monitor episode ff2ba0d3c1cc5ebf116ed7bf (15:33:23-16:14:04 Kyiv).",
+        "source_checked": "Original candidate title/snippet; publisher article https://fakty.com.ua/ua/proisshestvija/20260918-vybuhy-v-odesi-18-veresnya-rf-vdaryla-po-tsentru-mista-ye-vluchannya-v-adminbudivlyu/; corroborating Suspilne https://suspilne.media/odesa/1406978-rosijski-vijska-vdarili-reaktivnim-bpla-po-centru-odesi-poskodzeno-adminbudivlu/",
+        "candidate_source": {
+          "source": "Google News RSS",
+          "publisher": "Факти ICTV",
+          "url": "https://news.google.com/rss/articles/CBMizgFBVV95cUxPWExqY1l6bmw3LU9KNlNJQUlpLVNmcGhQZGxDWk1DaE9kRWxQQVRNZ2hXOThOZWVodTdVT0g5QmlkTlkyU1ljTlBZeTdHZmtLSEd1akRYN2J6MVdnU19GYmRkdmt5OGlhT0NaUUpRUkw0WW5yZVNjUnc5OGNqa3JweUNqc29rTHJlQy1MTWM0UmtLbklvakZoRldkcEhUekFsUE1zRUdWT0VvZDBGRWJnaVQxQ0dOS0ZoZ0R3QndQeHo5dGdDa09iV1hQbEJSUQ?oc=5",
+          "title": "Вибухи в Одесі: РФ вдарила по центру міста, є влучання в адмінбудівлю та постраждалі - Факти ICTV",
+          "snippet": "Вибухи в Одесі: РФ вдарила по центру міста, є влучання в адмінбудівлю та постраждалі Факти ICTV",
+          "published_at": "2026-09-18T13:27:00Z"
+        }
+      },
+      "previous_provenance_repair": {
+        "repair_quality": "PARTIAL_INSUFFICIENT",
+        "replay_ready": false,
+        "structured_repair_summary": "Review records a Suspilne 16:02 event time, but the exact underlying Suspilne reference is not persisted in repo/history.",
+        "previous_standalone_current_verdict": "needs_review",
+        "previous_final_proposed_candidate_status": "needs_review",
+        "unresolved_material_fields": [
+          "Exact Suspilne reference behind the reviewed 16:02 Odesa event-time claim is not persisted."
+        ]
+      },
+      "git_provenance_trace": [
+        {
+          "step": "original_city_review_batch",
+          "commit": "2cd3ad78f4ceecb01cc222a229bc123cf3c36602",
+          "path": "kyiv-air-alerts-grafana/data/explosion_review_batches/odesa_batch_1.json",
+          "blob_sha": "ffd2e82890b400991012324169fae85c13e2eb77",
+          "source_checked": "Original candidate title/snippet; publisher article https://fakty.com.ua/ua/proisshestvija/20260918-vybuhy-v-odesi-18-veresnya-rf-vdaryla-po-tsentru-mista-ye-vluchannya-v-adminbudivlyu/; corroborating Suspilne https://suspilne.media/odesa/1406978-rosijski-vijska-vdarili-reaktivnim-bpla-po-centru-odesi-poskodzeno-adminbudivlu/"
+        },
+        {
+          "step": "merged_to_live_review_queue",
+          "commit": "79c39e31bc5d370153bbaa0344dbd6d37641e64f",
+          "path": "kyiv-air-alerts-grafana/data/explosion_review_queue.json",
+          "note": "Original review batch decision was merged into the queue."
+        },
+        {
+          "step": "forensic_and_provenance_repair",
+          "commit": "b687cd9ce4c5e6253d8ff8148dd02386d92a5573",
+          "paths": [
+            "research/explosion_monitor_provenance_repair_2026-09-24.json",
+            "research/explosion_monitor_provenance_repair_replay_2026-09-24.json"
+          ],
+          "prior_result": "PARTIAL_INSUFFICIENT"
+        }
+      ],
+      "source_identity_recovery_attempts": [
+        {
+          "result": "RECOVERED",
+          "evidence_chain": "2cd3ad78f4ceecb01cc222a229bc123cf3c36602 -> kyiv-air-alerts-grafana/data/explosion_review_batches/odesa_batch_1.json -> source_checked",
+          "recovered_exact_sources": [
+            "https://fakty.com.ua/ua/proisshestvija/20260918-vybuhy-v-odesi-18-veresnya-rf-vdaryla-po-tsentru-mista-ye-vluchannya-v-adminbudivlyu/",
+            "https://suspilne.media/odesa/1406978-rosijski-vijska-vdarili-reaktivnim-bpla-po-centru-odesi-poskodzeno-adminbudivlu/"
+          ],
+          "note": "The original batch explicitly identifies the exact Suspilne article as corroboration for the reviewed 16:02 claim."
+        }
+      ],
+      "exact_source_external_recovery": [
+        {
+          "url": "https://suspilne.media/odesa/1406978-rosijski-vijska-vdarili-reaktivnim-bpla-po-centru-odesi-poskodzeno-adminbudivlu/",
+          "retrieval_mode": "exact URL recovered from original review provenance; no search/discovery",
+          "result": "RETRIEVED",
+          "material_fact": "The source states the attack was about 16:00 and the explosion in Odesa occurred at 16:02, preceded by Air Force warnings about a reactive UAV moving toward and then over the city.",
+          "temporal_type": "explicit event time",
+          "event_time_local": "2026-09-18 16:02 Europe/Kyiv",
+          "precision": "minute precision as stated; not promoted to seconds",
+          "publication_time_used_as_event_time": false
+        },
+        {
+          "url": "https://fakty.com.ua/ua/proisshestvija/20260918-vybuhy-v-odesi-18-veresnya-rf-vdaryla-po-tsentru-mista-ye-vluchannya-v-adminbudivlyu/",
+          "retrieval_mode": "exact URL recovered from original review provenance; no search/discovery",
+          "result": "RETRIEVED",
+          "material_fact": "The publisher article reports the central Odesa drone strike and administrative-building hit; it displays 16:27 local publication and quotes a 16:18 MVA post.",
+          "displayed_publication_time_local": "2026-09-18 16:27 Europe/Kyiv",
+          "publication_time_used_as_event_time": false
+        }
+      ],
+      "sibling_duplicate_source_mappings": [],
+      "old_review_note_claims": {
+        "locality": "central Odesa",
+        "event": "reactive-drone strike damaging an administrative building",
+        "aerial_war_context": "reactive UAV",
+        "temporal_claim": "16:02 Kyiv time",
+        "target_episode": "ff2ba0d3c1cc5ebf116ed7bf"
+      },
+      "recovered_structured_evidence": {
+        "contributors": [
+          {
+            "source": "Fakty ICTV",
+            "exact_url": "https://fakty.com.ua/ua/proisshestvija/20260918-vybuhy-v-odesi-18-veresnya-rf-vdaryla-po-tsentru-mista-ye-vluchannya-v-adminbudivlyu/",
+            "role": [
+              "explosion/impact",
+              "aerial-war context",
+              "locality",
+              "same-attack linkage"
+            ]
+          },
+          {
+            "source": "Suspilne Odesa",
+            "exact_url": "https://suspilne.media/odesa/1406978-rosijski-vijska-vdarili-reaktivnim-bpla-po-centru-odesi-poskodzeno-adminbudivlu/",
+            "role": [
+              "temporal proof",
+              "explosion/impact",
+              "aerial-war context",
+              "locality",
+              "same-attack linkage"
+            ],
+            "event_time_local": "2026-09-18 16:02 Europe/Kyiv",
+            "precision": "minute"
+          }
+        ],
+        "same_attack_linkage": "The original batch explicitly pairs these two exact sources. Fakty's item was published at 16:27 local and cites the 16:18 MVA report about the administrative-building hit; Suspilne places that first hit/explosion at 16:02 and separately describes the later repeat strike about half an hour after the first.",
+        "target_episode": {
+          "episode_id": "ff2ba0d3c1cc5ebf116ed7bf",
+          "window_local": "2026-09-18T15:33:23+03:00/2026-09-18T16:14:04+03:00",
+          "event_time_safely_inside": true,
+          "neighboring_alert_conflict": false,
+          "note": "The later repeat strike is outside this episode and is not collapsed into the 16:02 event."
+        },
+        "publication_time_separate": {
+          "candidate_published_at": "2026-09-18T13:27:00Z",
+          "candidate_publication_local": "2026-09-18 16:27 Europe/Kyiv",
+          "temporal_source_publication_time": null,
+          "note": "16:02 is explicit event time from Suspilne, not publication/update time."
+        }
+      },
+      "unsupported_claims": [],
+      "final_provenance_status": "RECOVERED_COMPLETE",
+      "final_provenance_reason": "The exact Suspilne temporal source is recovered from the original review batch and directly confirms the 16:02 reactive-UAV explosion. The exact Fakty source and chronology deterministically link the candidate to the first administrative-building strike, not the later repeat strike.",
+      "seven_candidate_replay": {
+        "methodology": "unchanged current validated classification/composition semantics",
+        "current_standalone_verdict": "approved_strict",
+        "replay_reasoning": [
+          "exact-city impact/explosion evidence",
+          "reactive-UAV aerial context explicit",
+          "exact original cross-source pair recovered",
+          "explicit 16:02 event time recovered",
+          "event time safely inside target episode",
+          "later repeat strike kept distinct",
+          "publication time not used as event time"
+        ],
+        "composition_contribution": "strict support for episode ff2ba0d3c1cc5ebf116ed7bf",
+        "final_proposed_candidate_status": "approved_strict"
+      }
+    }
+  ],
+  "seven_candidate_replay_summary": {
+    "candidate_count": 7,
+    "final_proposed_status_counts": {
+      "approved_strict": 5,
+      "approved_sensitivity": 0,
+      "needs_review": 2,
+      "rejected": 0
+    },
+    "rule_changes": 0,
+    "live_mutations": 0
+  },
+  "three_episode_reconciliation": [
+    {
+      "city_key": "sumy",
+      "city": "Суми",
+      "episode_id": "e7e8974f19d4fdc782e93980",
+      "current_frozen_status": "STILL_NEEDS_PROVENANCE_REPAIR",
+      "recovered_supporting_evidence": {
+        "candidate_ids": [
+          "6212f72cfd28e6a86fd5bc51",
+          "b5c1ac3e5dba6b12eb699016",
+          "d403a466c13b9ec069765241",
+          "25c966b4e375b5075b267a91"
+        ],
+        "exact_temporal_source": "https://suspilne.media/sumy/1407184-armia-rf-vlucila-po-sumah-2/",
+        "event_time_local": "2026-09-18 ~21:00 Europe/Kyiv",
+        "target_window_local": "2026-09-18T20:24:19+03:00/2026-09-18T21:24:36+03:00",
+        "strict_supporting_candidates": 4
+      },
+      "final_recommendation": "KEEP_STRICT",
+      "reason": "All four original strict candidates now have a deterministic identity chain to the exact temporal source; the approximate event time is safely within the frozen episode."
+    },
+    {
+      "city_key": "zaporizhzhia",
+      "city": "Запоріжжя",
+      "episode_id": "a60d817eaa9253200f090720",
+      "current_frozen_status": "STILL_NEEDS_PROVENANCE_REPAIR",
+      "recovered_supporting_evidence": {
+        "candidate_ids": [
+          "e7461ec759e4d79020dfd1ba",
+          "113dac439efda41673b1f497"
+        ],
+        "article_identity": "partially recoverable",
+        "missing_temporal_source": "exact Zaporizhzhia OVA/malva source record",
+        "preserved_message_timestamp_local": "2026-09-18 19:57 Europe/Kyiv",
+        "message_timestamp_is_event_time": false,
+        "strict_supporting_candidates": 0
+      },
+      "final_recommendation": "STILL_NEEDS_PROVENANCE_REPAIR",
+      "reason": "The source record that could establish whether the 19:57 OVA message was contemporaneous-live evidence remains unidentified; no deterministic episode-specific temporal fact can be encoded."
+    },
+    {
+      "city_key": "odesa",
+      "city": "Одеса",
+      "episode_id": "ff2ba0d3c1cc5ebf116ed7bf",
+      "current_frozen_status": "STILL_NEEDS_PROVENANCE_REPAIR",
+      "recovered_supporting_evidence": {
+        "candidate_ids": [
+          "e8998303b80b496820692c54"
+        ],
+        "exact_temporal_source": "https://suspilne.media/odesa/1406978-rosijski-vijska-vdarili-reaktivnim-bpla-po-centru-odesi-poskodzeno-adminbudivlu/",
+        "event_time_local": "2026-09-18 16:02 Europe/Kyiv",
+        "target_window_local": "2026-09-18T15:33:23+03:00/2026-09-18T16:14:04+03:00",
+        "strict_supporting_candidates": 1
+      },
+      "final_recommendation": "KEEP_STRICT",
+      "reason": "The exact original Suspilne corroboration source directly states the 16:02 reactive-UAV explosion and disambiguates it from the later repeat strike."
+    }
+  ],
+  "updated_conceptual_totals": {
+    "original_52_provenance_gap_cohort": {
+      "total": 52,
+      "replay_ready": 50,
+      "unresolved": 2,
+      "conceptual_quality_counts": {
+        "COMPLETE_OR_RECOVERED_COMPLETE": 43,
+        "PARTIAL_BUT_SUFFICIENT_FOR_REPLAY": 7,
+        "PARTIAL_INSUFFICIENT_OR_STILL_INSUFFICIENT": 2,
+        "UNRECOVERABLE": 0
+      },
+      "unresolved_candidate_ids": [
+        "e7461ec759e4d79020dfd1ba",
+        "113dac439efda41673b1f497"
+      ]
+    },
+    "original_20_episode_reconciliation": {
+      "total": 20,
+      "KEEP_STRICT": 15,
+      "KEEP_SENSITIVITY": 1,
+      "DOWNGRADE_TO_SENSITIVITY": 0,
+      "DOWNGRADE_TO_UNRESOLVED": 3,
+      "STILL_NEEDS_PROVENANCE_REPAIR": 1,
+      "remaining_episode_id": "a60d817eaa9253200f090720"
+    }
+  },
+  "classifier_change_needed": false,
+  "final_verdict": "PROVENANCE RECOVERY PARTIAL — MANUAL SOURCE IDENTIFICATION REQUIRED",
+  "mutation_safety": {
+    "monitor_code_modified": false,
+    "classifier_or_composition_rules_modified": false,
+    "queue_mutated": false,
+    "monitor_state_mutated": false,
+    "last_run_mutated": false,
+    "repaired_provenance_persisted_to_live_queue": false,
+    "status_changes_applied": false,
+    "new_composition_strict_transitions_applied": false,
+    "canonical_or_metric_series_modified": false,
+    "dashboard_grafana_netlify_modified": false,
+    "production_deployed": false
+  },
+  "qa": {
+    "json_constructed_from_exact_frozen_records": true,
+    "exact_7_candidates": true,
+    "exact_3_episodes": true,
+    "candidate_ids_equal_partial_insufficient_set": true,
+    "no_substitute_or_new_discovery_evidence": true,
+    "every_recovered_source_has_repo_identity_chain": true,
+    "publication_time_separate_from_event_time": true,
+    "source_timestamp_precision_preserved": true,
+    "unsupported_review_note_claims_not_encoded_as_facts": true,
+    "candidate_outcomes_sum_to_7": true,
+    "episode_outcomes_sum_to_3": true,
+    "expected_post_commit_change_set": [
+      "research/explosion_monitor_final_provenance_recovery_2026-09-24.json"
+    ]
+  }
+}
