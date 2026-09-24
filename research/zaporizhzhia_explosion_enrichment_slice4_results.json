@@ -3,11 +3,11 @@
   "generated_date": "2026-09-24",
   "repository": "olegbalakin-cmyk/kyiv-air-alerts-grafana",
   "branch": "multicity-wip-2026-09-16",
-  "branch_head_at_artifact_commit_base": "36fe082bc78c51553b2cca36b9252f66fc5f29da",
+  "branch_head_at_artifact_commit_base": "c4a323bf70e0ae57e7648baf7f6ae7a39b09a5c4",
   "city": "Zaporizhzhia",
   "workstream": "explosion enrichment independent chronological holdout",
   "slice": "Slice 4",
-  "methodological_status": "Frozen independent chronological holdout; no rescue, rerun or post-freeze bucket changes.",
+  "methodological_status": "Corrected frozen chronological holdout with documented split-freeze QA repair; no corrected-universe episode was searched after its own historical label was inspected.",
   "universe_artifact": "research/zaporizhzhia_explosion_enrichment_slice4_universe.json",
   "frozen_pipeline": {
     "commit_context": "42a7238c244404eb2213609e34cbb02e9e5096fa",
@@ -29,15 +29,16 @@
     "historical_controls_consulted_before_freeze": false,
     "historical_source_urls_used_as_runtime_pointers": false,
     "targeted_rescue": false,
-    "episodes": 171,
+    "episodes": 170,
     "summary_counts": {
       "strict_candidate": 15,
       "sensitivity_candidate": 0,
       "needs_review": 0,
-      "no_source_hit": 156,
-      "bucket_sum": 171
+      "no_source_hit": 155,
+      "bucket_sum": 170
     },
     "strict_candidate_ids": [
+      "00a0fe746b1980456b94d0cb",
       "19313dfecc19b71819f7a000",
       "415f67e66e79ab4fd14156c9",
       "4dfc0af35ff48d0fb1c39ff9",
@@ -51,7 +52,6 @@
       "bb93b8a772c7c84e92dd19c4",
       "d6e2b12131136ac15b7cc0ce",
       "f5052bba62e43674bedfc358",
-      "fa1e9624ec208634260fa6cb",
       "fede442dc1bf79856b68b936"
     ],
     "sensitivity_candidate_ids": [],
@@ -4773,557 +4773,6 @@
         "historical_controls_read_before_freeze": false
       },
       {
-        "episode_id": "5e84185302388262d2b7f94d",
-        "date": "2025-09-13",
-        "alert_start": "2025-09-13T19:40:25Z",
-        "alert_end": "2025-09-13T21:09:08Z",
-        "alert_start_kyiv": "2025-09-13T22:40:25",
-        "alert_end_kyiv": "2025-09-14T00:09:08",
-        "query_search_family": [
-          "frozen_exact_city_date_family",
-          "frozen_alert_window_family",
-          "frozen_domain_fallback_family",
-          "frozen_structured_live_page_family"
-        ],
-        "raw_retrieval_metadata": {
-          "pre_ranking_result_set_persisted": false,
-          "note": "The available search interface does not persist complete pre-ranking raw responses; absence of a retained page is not proof that search returned zero raw hits."
-        },
-        "ranking": "no qualifying page retained after frozen ranking/relevance checks; exact pre-ranking rank is not reconstructable",
-        "retained_candidate_set": [],
-        "dedupe_decisions": "no retained page; per-episode pre-ranking dedupe trace not persisted",
-        "retained_page_count": 0,
-        "fetched_content": [],
-        "retained_event_fragments": [],
-        "event_segmentation": "no qualifying event fragment retained",
-        "locality": "no qualifying exact-city event retained",
-        "event_type": null,
-        "aerial_war_context": null,
-        "event_time": null,
-        "publication_update_time": null,
-        "temporal_attribution": null,
-        "cross_source_composition": {
-          "used": false,
-          "basis": "not used"
-        },
-        "final_discovery_bucket": "no_source_hit",
-        "rejection_no_hit_reason": "no qualifying retained exact-city aerial-war explosion/impact evidence attributable to this target episode under the frozen pipeline",
-        "historical_controls_read_before_freeze": false
-      },
-      {
-        "episode_id": "e98335051024030cb4509d54",
-        "date": "2025-09-14",
-        "alert_start": "2025-09-13T22:23:05Z",
-        "alert_end": "2025-09-13T22:42:58Z",
-        "alert_start_kyiv": "2025-09-14T01:23:05",
-        "alert_end_kyiv": "2025-09-14T01:42:58",
-        "query_search_family": [
-          "frozen_exact_city_date_family",
-          "frozen_alert_window_family",
-          "frozen_domain_fallback_family",
-          "frozen_structured_live_page_family"
-        ],
-        "raw_retrieval_metadata": {
-          "pre_ranking_result_set_persisted": false,
-          "note": "The available search interface does not persist complete pre-ranking raw responses; absence of a retained page is not proof that search returned zero raw hits."
-        },
-        "ranking": "no qualifying page retained after frozen ranking/relevance checks; exact pre-ranking rank is not reconstructable",
-        "retained_candidate_set": [],
-        "dedupe_decisions": "no retained page; per-episode pre-ranking dedupe trace not persisted",
-        "retained_page_count": 0,
-        "fetched_content": [],
-        "retained_event_fragments": [],
-        "event_segmentation": "no qualifying event fragment retained",
-        "locality": "no qualifying exact-city event retained",
-        "event_type": null,
-        "aerial_war_context": null,
-        "event_time": null,
-        "publication_update_time": null,
-        "temporal_attribution": null,
-        "cross_source_composition": {
-          "used": false,
-          "basis": "not used"
-        },
-        "final_discovery_bucket": "no_source_hit",
-        "rejection_no_hit_reason": "no qualifying retained exact-city aerial-war explosion/impact evidence attributable to this target episode under the frozen pipeline",
-        "historical_controls_read_before_freeze": false
-      },
-      {
-        "episode_id": "21591d14fceac40aa05b4ed9",
-        "date": "2025-09-14",
-        "alert_start": "2025-09-14T06:11:58Z",
-        "alert_end": "2025-09-14T06:30:19Z",
-        "alert_start_kyiv": "2025-09-14T09:11:58",
-        "alert_end_kyiv": "2025-09-14T09:30:19",
-        "query_search_family": [
-          "frozen_exact_city_date_family",
-          "frozen_alert_window_family",
-          "frozen_domain_fallback_family",
-          "frozen_structured_live_page_family"
-        ],
-        "raw_retrieval_metadata": {
-          "pre_ranking_result_set_persisted": false,
-          "note": "The available search interface does not persist complete pre-ranking raw responses; absence of a retained page is not proof that search returned zero raw hits."
-        },
-        "ranking": "no qualifying page retained after frozen ranking/relevance checks; exact pre-ranking rank is not reconstructable",
-        "retained_candidate_set": [],
-        "dedupe_decisions": "no retained page; per-episode pre-ranking dedupe trace not persisted",
-        "retained_page_count": 0,
-        "fetched_content": [],
-        "retained_event_fragments": [],
-        "event_segmentation": "no qualifying event fragment retained",
-        "locality": "no qualifying exact-city event retained",
-        "event_type": null,
-        "aerial_war_context": null,
-        "event_time": null,
-        "publication_update_time": null,
-        "temporal_attribution": null,
-        "cross_source_composition": {
-          "used": false,
-          "basis": "not used"
-        },
-        "final_discovery_bucket": "no_source_hit",
-        "rejection_no_hit_reason": "no qualifying retained exact-city aerial-war explosion/impact evidence attributable to this target episode under the frozen pipeline",
-        "historical_controls_read_before_freeze": false
-      },
-      {
-        "episode_id": "e3962be99546b5a2cc1b486d",
-        "date": "2025-09-14",
-        "alert_start": "2025-09-14T07:33:24Z",
-        "alert_end": "2025-09-14T08:28:50Z",
-        "alert_start_kyiv": "2025-09-14T10:33:24",
-        "alert_end_kyiv": "2025-09-14T11:28:50",
-        "query_search_family": [
-          "frozen_exact_city_date_family",
-          "frozen_alert_window_family",
-          "frozen_domain_fallback_family",
-          "frozen_structured_live_page_family"
-        ],
-        "raw_retrieval_metadata": {
-          "pre_ranking_result_set_persisted": false,
-          "note": "The available search interface does not persist complete pre-ranking raw responses; absence of a retained page is not proof that search returned zero raw hits."
-        },
-        "ranking": "no qualifying page retained after frozen ranking/relevance checks; exact pre-ranking rank is not reconstructable",
-        "retained_candidate_set": [],
-        "dedupe_decisions": "no retained page; per-episode pre-ranking dedupe trace not persisted",
-        "retained_page_count": 0,
-        "fetched_content": [],
-        "retained_event_fragments": [],
-        "event_segmentation": "no qualifying event fragment retained",
-        "locality": "no qualifying exact-city event retained",
-        "event_type": null,
-        "aerial_war_context": null,
-        "event_time": null,
-        "publication_update_time": null,
-        "temporal_attribution": null,
-        "cross_source_composition": {
-          "used": false,
-          "basis": "not used"
-        },
-        "final_discovery_bucket": "no_source_hit",
-        "rejection_no_hit_reason": "no qualifying retained exact-city aerial-war explosion/impact evidence attributable to this target episode under the frozen pipeline",
-        "historical_controls_read_before_freeze": false
-      },
-      {
-        "episode_id": "c062865b94287ff038b21aee",
-        "date": "2025-09-14",
-        "alert_start": "2025-09-14T09:09:37Z",
-        "alert_end": "2025-09-14T10:06:43Z",
-        "alert_start_kyiv": "2025-09-14T12:09:37",
-        "alert_end_kyiv": "2025-09-14T13:06:43",
-        "query_search_family": [
-          "frozen_exact_city_date_family",
-          "frozen_alert_window_family",
-          "frozen_domain_fallback_family",
-          "frozen_structured_live_page_family"
-        ],
-        "raw_retrieval_metadata": {
-          "pre_ranking_result_set_persisted": false,
-          "note": "The available search interface does not persist complete pre-ranking raw responses; absence of a retained page is not proof that search returned zero raw hits."
-        },
-        "ranking": "no qualifying page retained after frozen ranking/relevance checks; exact pre-ranking rank is not reconstructable",
-        "retained_candidate_set": [],
-        "dedupe_decisions": "no retained page; per-episode pre-ranking dedupe trace not persisted",
-        "retained_page_count": 0,
-        "fetched_content": [],
-        "retained_event_fragments": [],
-        "event_segmentation": "no qualifying event fragment retained",
-        "locality": "no qualifying exact-city event retained",
-        "event_type": null,
-        "aerial_war_context": null,
-        "event_time": null,
-        "publication_update_time": null,
-        "temporal_attribution": null,
-        "cross_source_composition": {
-          "used": false,
-          "basis": "not used"
-        },
-        "final_discovery_bucket": "no_source_hit",
-        "rejection_no_hit_reason": "no qualifying retained exact-city aerial-war explosion/impact evidence attributable to this target episode under the frozen pipeline",
-        "historical_controls_read_before_freeze": false
-      },
-      {
-        "episode_id": "c8282e711bfec7196e70cbd0",
-        "date": "2025-09-14",
-        "alert_start": "2025-09-14T10:34:04Z",
-        "alert_end": "2025-09-14T10:40:43Z",
-        "alert_start_kyiv": "2025-09-14T13:34:04",
-        "alert_end_kyiv": "2025-09-14T13:40:43",
-        "query_search_family": [
-          "frozen_exact_city_date_family",
-          "frozen_alert_window_family",
-          "frozen_domain_fallback_family",
-          "frozen_structured_live_page_family"
-        ],
-        "raw_retrieval_metadata": {
-          "pre_ranking_result_set_persisted": false,
-          "note": "The available search interface does not persist complete pre-ranking raw responses; absence of a retained page is not proof that search returned zero raw hits."
-        },
-        "ranking": "no qualifying page retained after frozen ranking/relevance checks; exact pre-ranking rank is not reconstructable",
-        "retained_candidate_set": [],
-        "dedupe_decisions": "no retained page; per-episode pre-ranking dedupe trace not persisted",
-        "retained_page_count": 0,
-        "fetched_content": [],
-        "retained_event_fragments": [],
-        "event_segmentation": "no qualifying event fragment retained",
-        "locality": "no qualifying exact-city event retained",
-        "event_type": null,
-        "aerial_war_context": null,
-        "event_time": null,
-        "publication_update_time": null,
-        "temporal_attribution": null,
-        "cross_source_composition": {
-          "used": false,
-          "basis": "not used"
-        },
-        "final_discovery_bucket": "no_source_hit",
-        "rejection_no_hit_reason": "no qualifying retained exact-city aerial-war explosion/impact evidence attributable to this target episode under the frozen pipeline",
-        "historical_controls_read_before_freeze": false
-      },
-      {
-        "episode_id": "39814d7eb658217adae24bd9",
-        "date": "2025-09-15",
-        "alert_start": "2025-09-14T21:16:26Z",
-        "alert_end": "2025-09-14T22:47:30Z",
-        "alert_start_kyiv": "2025-09-15T00:16:26",
-        "alert_end_kyiv": "2025-09-15T01:47:30",
-        "query_search_family": [
-          "frozen_exact_city_date_family",
-          "frozen_alert_window_family",
-          "frozen_domain_fallback_family",
-          "frozen_structured_live_page_family"
-        ],
-        "raw_retrieval_metadata": {
-          "pre_ranking_result_set_persisted": false,
-          "note": "The available search interface does not persist complete pre-ranking raw responses; absence of a retained page is not proof that search returned zero raw hits."
-        },
-        "ranking": "no qualifying page retained after frozen ranking/relevance checks; exact pre-ranking rank is not reconstructable",
-        "retained_candidate_set": [],
-        "dedupe_decisions": "no retained page; per-episode pre-ranking dedupe trace not persisted",
-        "retained_page_count": 0,
-        "fetched_content": [],
-        "retained_event_fragments": [],
-        "event_segmentation": "no qualifying event fragment retained",
-        "locality": "no qualifying exact-city event retained",
-        "event_type": null,
-        "aerial_war_context": null,
-        "event_time": null,
-        "publication_update_time": null,
-        "temporal_attribution": null,
-        "cross_source_composition": {
-          "used": false,
-          "basis": "not used"
-        },
-        "final_discovery_bucket": "no_source_hit",
-        "rejection_no_hit_reason": "no qualifying retained exact-city aerial-war explosion/impact evidence attributable to this target episode under the frozen pipeline",
-        "historical_controls_read_before_freeze": false
-      },
-      {
-        "episode_id": "eb29ccba021617db3b0e8bbc",
-        "date": "2025-09-15",
-        "alert_start": "2025-09-14T23:27:57Z",
-        "alert_end": "2025-09-15T00:24:58Z",
-        "alert_start_kyiv": "2025-09-15T02:27:57",
-        "alert_end_kyiv": "2025-09-15T03:24:58",
-        "query_search_family": [
-          "frozen_exact_city_date_family",
-          "frozen_alert_window_family",
-          "frozen_domain_fallback_family",
-          "frozen_structured_live_page_family"
-        ],
-        "raw_retrieval_metadata": {
-          "pre_ranking_result_set_persisted": false,
-          "note": "The available search interface does not persist complete pre-ranking raw responses; absence of a retained page is not proof that search returned zero raw hits."
-        },
-        "ranking": "no qualifying page retained after frozen ranking/relevance checks; exact pre-ranking rank is not reconstructable",
-        "retained_candidate_set": [],
-        "dedupe_decisions": "no retained page; per-episode pre-ranking dedupe trace not persisted",
-        "retained_page_count": 0,
-        "fetched_content": [],
-        "retained_event_fragments": [],
-        "event_segmentation": "no qualifying event fragment retained",
-        "locality": "no qualifying exact-city event retained",
-        "event_type": null,
-        "aerial_war_context": null,
-        "event_time": null,
-        "publication_update_time": null,
-        "temporal_attribution": null,
-        "cross_source_composition": {
-          "used": false,
-          "basis": "not used"
-        },
-        "final_discovery_bucket": "no_source_hit",
-        "rejection_no_hit_reason": "no qualifying retained exact-city aerial-war explosion/impact evidence attributable to this target episode under the frozen pipeline",
-        "historical_controls_read_before_freeze": false
-      },
-      {
-        "episode_id": "70067c052eec48f162697391",
-        "date": "2025-09-15",
-        "alert_start": "2025-09-15T01:45:22Z",
-        "alert_end": "2025-09-15T02:02:04Z",
-        "alert_start_kyiv": "2025-09-15T04:45:22",
-        "alert_end_kyiv": "2025-09-15T05:02:04",
-        "query_search_family": [
-          "frozen_exact_city_date_family",
-          "frozen_alert_window_family",
-          "frozen_domain_fallback_family",
-          "frozen_structured_live_page_family"
-        ],
-        "raw_retrieval_metadata": {
-          "pre_ranking_result_set_persisted": false,
-          "note": "The available search interface does not persist complete pre-ranking raw responses; absence of a retained page is not proof that search returned zero raw hits."
-        },
-        "ranking": "no qualifying page retained after frozen ranking/relevance checks; exact pre-ranking rank is not reconstructable",
-        "retained_candidate_set": [],
-        "dedupe_decisions": "no retained page; per-episode pre-ranking dedupe trace not persisted",
-        "retained_page_count": 0,
-        "fetched_content": [],
-        "retained_event_fragments": [],
-        "event_segmentation": "no qualifying event fragment retained",
-        "locality": "no qualifying exact-city event retained",
-        "event_type": null,
-        "aerial_war_context": null,
-        "event_time": null,
-        "publication_update_time": null,
-        "temporal_attribution": null,
-        "cross_source_composition": {
-          "used": false,
-          "basis": "not used"
-        },
-        "final_discovery_bucket": "no_source_hit",
-        "rejection_no_hit_reason": "no qualifying retained exact-city aerial-war explosion/impact evidence attributable to this target episode under the frozen pipeline",
-        "historical_controls_read_before_freeze": false
-      },
-      {
-        "episode_id": "9ac90852a1163b8d94e497f0",
-        "date": "2025-09-15",
-        "alert_start": "2025-09-15T02:12:44Z",
-        "alert_end": "2025-09-15T03:54:20Z",
-        "alert_start_kyiv": "2025-09-15T05:12:44",
-        "alert_end_kyiv": "2025-09-15T06:54:20",
-        "query_search_family": [
-          "frozen_exact_city_date_family",
-          "frozen_alert_window_family",
-          "frozen_domain_fallback_family",
-          "frozen_structured_live_page_family"
-        ],
-        "raw_retrieval_metadata": {
-          "pre_ranking_result_set_persisted": false,
-          "note": "The available search interface does not persist complete pre-ranking raw responses; absence of a retained page is not proof that search returned zero raw hits."
-        },
-        "ranking": "no qualifying page retained after frozen ranking/relevance checks; exact pre-ranking rank is not reconstructable",
-        "retained_candidate_set": [],
-        "dedupe_decisions": "no retained page; per-episode pre-ranking dedupe trace not persisted",
-        "retained_page_count": 0,
-        "fetched_content": [],
-        "retained_event_fragments": [],
-        "event_segmentation": "no qualifying event fragment retained",
-        "locality": "no qualifying exact-city event retained",
-        "event_type": null,
-        "aerial_war_context": null,
-        "event_time": null,
-        "publication_update_time": null,
-        "temporal_attribution": null,
-        "cross_source_composition": {
-          "used": false,
-          "basis": "not used"
-        },
-        "final_discovery_bucket": "no_source_hit",
-        "rejection_no_hit_reason": "no qualifying retained exact-city aerial-war explosion/impact evidence attributable to this target episode under the frozen pipeline",
-        "historical_controls_read_before_freeze": false
-      },
-      {
-        "episode_id": "fa1e9624ec208634260fa6cb",
-        "date": "2025-09-15",
-        "alert_start": "2025-09-15T20:30:14Z",
-        "alert_end": "2025-09-15T21:57:54Z",
-        "alert_start_kyiv": "2025-09-15T23:30:14",
-        "alert_end_kyiv": "2025-09-16T00:57:54",
-        "query_search_family": [
-          "frozen_exact_city_date_family",
-          "frozen_alert_window_family",
-          "frozen_domain_fallback_family",
-          "frozen_structured_live_page_family"
-        ],
-        "raw_retrieval_metadata": {
-          "pre_ranking_result_set_persisted": false,
-          "note": "The available search interface does not persist complete pre-ranking raw responses; absence of a retained page is not proof that search returned zero raw hits."
-        },
-        "ranking": "passed bounded relevance floor and remained within retained-page cap",
-        "retained_candidate_set": [
-          "https://zp.npu.gov.ua/news/unaslidok-obstrilu-zaporizhzhia-ta-raionu-zahynula-liudyna-shche-13-poraneni-politsiia-nadala-dopomohu-postrazhdalym",
-          "https://fakty.com.ua/ua/proisshestvija/20250916-vybuhy-v-zaporizhzhi-shho-stalosya-sogodni-16-veresnya-2025/amp/"
-        ],
-        "dedupe_decisions": "canonical-URL richness merge applied; snippet-only representations could not replace richer fetched content",
-        "retained_page_count": 2,
-        "fetched_content": [
-          {
-            "url": "https://zp.npu.gov.ua/news/unaslidok-obstrilu-zaporizhzhia-ta-raionu-zahynula-liudyna-shche-13-poraneni-politsiia-nadala-dopomohu-postrazhdalym",
-            "content_summary": "Later waves of the Zaporizhzhia attack occurred clearly after alert onset; the rounded boundary event was not used."
-          },
-          {
-            "url": "https://fakty.com.ua/ua/proisshestvija/20250916-vybuhy-v-zaporizhzhi-shho-stalosya-sogodni-16-veresnya-2025/amp/",
-            "content_summary": "Later waves of the Zaporizhzhia attack occurred clearly after alert onset; the rounded boundary event was not used."
-          }
-        ],
-        "retained_event_fragments": [
-          {
-            "summary": "Later waves of the Zaporizhzhia attack occurred clearly after alert onset; the rounded boundary event was not used."
-          }
-        ],
-        "event_segmentation": "qualifying event/attack sequence isolated from retained page content",
-        "locality": "exact_city",
-        "event_type": "mlrs_airstrike_attack_sequence",
-        "aerial_war_context": "air strike plus aerial-attack context; later in-alert explosions provide strict evidence",
-        "event_time": "2025-09-15 23:44 onward through after midnight; first ~23:30 boundary mention not relied on",
-        "publication_update_time": null,
-        "temporal_attribution": {
-          "frozen_status": "target_episode_supported",
-          "basis": "The first rounded 23:30 mention is excluded; later 23:44, 23:55 and after-midnight events are inside 23:30:14–00:57:54."
-        },
-        "cross_source_composition": {
-          "used": true,
-          "basis": "same attack/date/locality context; no unrelated events composed"
-        },
-        "final_discovery_bucket": "strict_candidate",
-        "rejection_no_hit_reason": null,
-        "historical_controls_read_before_freeze": false
-      },
-      {
-        "episode_id": "9f79a5661ceb17a852e72a78",
-        "date": "2025-09-16",
-        "alert_start": "2025-09-16T14:44:17Z",
-        "alert_end": "2025-09-16T16:03:43Z",
-        "alert_start_kyiv": "2025-09-16T17:44:17",
-        "alert_end_kyiv": "2025-09-16T19:03:43",
-        "query_search_family": [
-          "frozen_exact_city_date_family",
-          "frozen_alert_window_family",
-          "frozen_domain_fallback_family",
-          "frozen_structured_live_page_family"
-        ],
-        "raw_retrieval_metadata": {
-          "pre_ranking_result_set_persisted": false,
-          "note": "The available search interface does not persist complete pre-ranking raw responses; absence of a retained page is not proof that search returned zero raw hits."
-        },
-        "ranking": "no qualifying page retained after frozen ranking/relevance checks; exact pre-ranking rank is not reconstructable",
-        "retained_candidate_set": [],
-        "dedupe_decisions": "no retained page; per-episode pre-ranking dedupe trace not persisted",
-        "retained_page_count": 0,
-        "fetched_content": [],
-        "retained_event_fragments": [],
-        "event_segmentation": "no qualifying event fragment retained",
-        "locality": "no qualifying exact-city event retained",
-        "event_type": null,
-        "aerial_war_context": null,
-        "event_time": null,
-        "publication_update_time": null,
-        "temporal_attribution": null,
-        "cross_source_composition": {
-          "used": false,
-          "basis": "not used"
-        },
-        "final_discovery_bucket": "no_source_hit",
-        "rejection_no_hit_reason": "no qualifying retained exact-city aerial-war explosion/impact evidence attributable to this target episode under the frozen pipeline",
-        "historical_controls_read_before_freeze": false
-      },
-      {
-        "episode_id": "08a32c59bc55483053e24b33",
-        "date": "2025-09-16",
-        "alert_start": "2025-09-16T18:04:19Z",
-        "alert_end": "2025-09-16T18:37:31Z",
-        "alert_start_kyiv": "2025-09-16T21:04:19",
-        "alert_end_kyiv": "2025-09-16T21:37:31",
-        "query_search_family": [
-          "frozen_exact_city_date_family",
-          "frozen_alert_window_family",
-          "frozen_domain_fallback_family",
-          "frozen_structured_live_page_family"
-        ],
-        "raw_retrieval_metadata": {
-          "pre_ranking_result_set_persisted": false,
-          "note": "The available search interface does not persist complete pre-ranking raw responses; absence of a retained page is not proof that search returned zero raw hits."
-        },
-        "ranking": "no qualifying page retained after frozen ranking/relevance checks; exact pre-ranking rank is not reconstructable",
-        "retained_candidate_set": [],
-        "dedupe_decisions": "no retained page; per-episode pre-ranking dedupe trace not persisted",
-        "retained_page_count": 0,
-        "fetched_content": [],
-        "retained_event_fragments": [],
-        "event_segmentation": "no qualifying event fragment retained",
-        "locality": "no qualifying exact-city event retained",
-        "event_type": null,
-        "aerial_war_context": null,
-        "event_time": null,
-        "publication_update_time": null,
-        "temporal_attribution": null,
-        "cross_source_composition": {
-          "used": false,
-          "basis": "not used"
-        },
-        "final_discovery_bucket": "no_source_hit",
-        "rejection_no_hit_reason": "no qualifying retained exact-city aerial-war explosion/impact evidence attributable to this target episode under the frozen pipeline",
-        "historical_controls_read_before_freeze": false
-      },
-      {
-        "episode_id": "9f0adec7ff222f22c5fbd64f",
-        "date": "2025-09-16",
-        "alert_start": "2025-09-16T19:37:09Z",
-        "alert_end": "2025-09-16T23:21:10Z",
-        "alert_start_kyiv": "2025-09-16T22:37:09",
-        "alert_end_kyiv": "2025-09-17T02:21:10",
-        "query_search_family": [
-          "frozen_exact_city_date_family",
-          "frozen_alert_window_family",
-          "frozen_domain_fallback_family",
-          "frozen_structured_live_page_family"
-        ],
-        "raw_retrieval_metadata": {
-          "pre_ranking_result_set_persisted": false,
-          "note": "The available search interface does not persist complete pre-ranking raw responses; absence of a retained page is not proof that search returned zero raw hits."
-        },
-        "ranking": "no qualifying page retained after frozen ranking/relevance checks; exact pre-ranking rank is not reconstructable",
-        "retained_candidate_set": [],
-        "dedupe_decisions": "no retained page; per-episode pre-ranking dedupe trace not persisted",
-        "retained_page_count": 0,
-        "fetched_content": [],
-        "retained_event_fragments": [],
-        "event_segmentation": "no qualifying event fragment retained",
-        "locality": "no qualifying exact-city event retained",
-        "event_type": null,
-        "aerial_war_context": null,
-        "event_time": null,
-        "publication_update_time": null,
-        "temporal_attribution": null,
-        "cross_source_composition": {
-          "used": false,
-          "basis": "not used"
-        },
-        "final_discovery_bucket": "no_source_hit",
-        "rejection_no_hit_reason": "no qualifying retained exact-city aerial-war explosion/impact evidence attributable to this target episode under the frozen pipeline",
-        "historical_controls_read_before_freeze": false
-      },
-      {
         "episode_id": "cc6ec57c042c0666d01bbce2",
         "date": "2025-09-17",
         "alert_start": "2025-09-17T08:18:58Z",
@@ -6779,36 +6228,560 @@
         "final_discovery_bucket": "no_source_hit",
         "rejection_no_hit_reason": "no qualifying retained exact-city aerial-war explosion/impact evidence attributable to this target episode under the frozen pipeline",
         "historical_controls_read_before_freeze": false
+      },
+      {
+        "episode_id": "48ea63d506d8cc16720e52f6",
+        "date": "2025-10-02",
+        "alert_start": "2025-10-02T07:48:05Z",
+        "alert_end": "2025-10-02T08:35:04Z",
+        "alert_start_kyiv": "2025-10-02T10:48:05",
+        "alert_end_kyiv": "2025-10-02T11:35:04",
+        "query_search_family": [
+          "frozen_exact_city_date_family",
+          "frozen_alert_window_family",
+          "frozen_domain_fallback_family",
+          "frozen_structured_live_page_family"
+        ],
+        "raw_retrieval_metadata": {
+          "pre_ranking_result_set_persisted": false,
+          "note": "The available search interface does not persist complete pre-ranking raw responses; absence of a retained page is not proof that search returned zero raw hits."
+        },
+        "ranking": "no qualifying page retained after frozen ranking/relevance checks; exact pre-ranking rank is not reconstructable",
+        "retained_candidate_set": [],
+        "dedupe_decisions": "no retained page; per-episode pre-ranking dedupe trace not persisted",
+        "retained_page_count": 0,
+        "fetched_content": [],
+        "retained_event_fragments": [],
+        "event_segmentation": "no qualifying event fragment retained",
+        "locality": "no qualifying exact-city event retained",
+        "event_type": null,
+        "aerial_war_context": null,
+        "event_time": null,
+        "publication_update_time": null,
+        "temporal_attribution": null,
+        "cross_source_composition": {
+          "used": false,
+          "basis": "not used"
+        },
+        "final_discovery_bucket": "no_source_hit",
+        "rejection_no_hit_reason": "no qualifying retained exact-city aerial-war explosion/impact evidence attributable to this target episode under the frozen pipeline",
+        "historical_controls_read_before_freeze": false
+      },
+      {
+        "episode_id": "602f7b7c11e68f541ca948ba",
+        "date": "2025-10-02",
+        "alert_start": "2025-10-02T09:41:50Z",
+        "alert_end": "2025-10-02T10:55:40Z",
+        "alert_start_kyiv": "2025-10-02T12:41:50",
+        "alert_end_kyiv": "2025-10-02T13:55:40",
+        "query_search_family": [
+          "frozen_exact_city_date_family",
+          "frozen_alert_window_family",
+          "frozen_domain_fallback_family",
+          "frozen_structured_live_page_family"
+        ],
+        "raw_retrieval_metadata": {
+          "pre_ranking_result_set_persisted": false,
+          "note": "The available search interface does not persist complete pre-ranking raw responses; absence of a retained page is not proof that search returned zero raw hits."
+        },
+        "ranking": "no qualifying page retained after frozen ranking/relevance checks; exact pre-ranking rank is not reconstructable",
+        "retained_candidate_set": [],
+        "dedupe_decisions": "no retained page; per-episode pre-ranking dedupe trace not persisted",
+        "retained_page_count": 0,
+        "fetched_content": [],
+        "retained_event_fragments": [],
+        "event_segmentation": "no qualifying event fragment retained",
+        "locality": "no qualifying exact-city event retained",
+        "event_type": null,
+        "aerial_war_context": null,
+        "event_time": null,
+        "publication_update_time": null,
+        "temporal_attribution": null,
+        "cross_source_composition": {
+          "used": false,
+          "basis": "not used"
+        },
+        "final_discovery_bucket": "no_source_hit",
+        "rejection_no_hit_reason": "no qualifying retained exact-city aerial-war explosion/impact evidence attributable to this target episode under the frozen pipeline",
+        "historical_controls_read_before_freeze": false
+      },
+      {
+        "episode_id": "62d1b5996fe7d6669f2f9578",
+        "date": "2025-10-02",
+        "alert_start": "2025-10-02T19:59:42Z",
+        "alert_end": "2025-10-03T02:36:01Z",
+        "alert_start_kyiv": "2025-10-02T22:59:42",
+        "alert_end_kyiv": "2025-10-03T05:36:01",
+        "query_search_family": [
+          "frozen_exact_city_date_family",
+          "frozen_alert_window_family",
+          "frozen_domain_fallback_family",
+          "frozen_structured_live_page_family"
+        ],
+        "raw_retrieval_metadata": {
+          "pre_ranking_result_set_persisted": false,
+          "note": "The available search interface does not persist complete pre-ranking raw responses; absence of a retained page is not proof that search returned zero raw hits."
+        },
+        "ranking": "no qualifying page retained after frozen ranking/relevance checks; exact pre-ranking rank is not reconstructable",
+        "retained_candidate_set": [],
+        "dedupe_decisions": "no retained page; per-episode pre-ranking dedupe trace not persisted",
+        "retained_page_count": 0,
+        "fetched_content": [],
+        "retained_event_fragments": [],
+        "event_segmentation": "no qualifying event fragment retained",
+        "locality": "no qualifying exact-city event retained",
+        "event_type": null,
+        "aerial_war_context": null,
+        "event_time": null,
+        "publication_update_time": null,
+        "temporal_attribution": null,
+        "cross_source_composition": {
+          "used": false,
+          "basis": "not used"
+        },
+        "final_discovery_bucket": "no_source_hit",
+        "rejection_no_hit_reason": "no qualifying retained exact-city aerial-war explosion/impact evidence attributable to this target episode under the frozen pipeline",
+        "historical_controls_read_before_freeze": false
+      },
+      {
+        "episode_id": "6f515b7093ab72ffe2f99df0",
+        "date": "2025-10-03",
+        "alert_start": "2025-10-03T02:42:06Z",
+        "alert_end": "2025-10-03T02:51:45Z",
+        "alert_start_kyiv": "2025-10-03T05:42:06",
+        "alert_end_kyiv": "2025-10-03T05:51:45",
+        "query_search_family": [
+          "frozen_exact_city_date_family",
+          "frozen_alert_window_family",
+          "frozen_domain_fallback_family",
+          "frozen_structured_live_page_family"
+        ],
+        "raw_retrieval_metadata": {
+          "pre_ranking_result_set_persisted": false,
+          "note": "The available search interface does not persist complete pre-ranking raw responses; absence of a retained page is not proof that search returned zero raw hits."
+        },
+        "ranking": "no qualifying page retained after frozen ranking/relevance checks; exact pre-ranking rank is not reconstructable",
+        "retained_candidate_set": [],
+        "dedupe_decisions": "no retained page; per-episode pre-ranking dedupe trace not persisted",
+        "retained_page_count": 0,
+        "fetched_content": [],
+        "retained_event_fragments": [],
+        "event_segmentation": "no qualifying event fragment retained",
+        "locality": "no qualifying exact-city event retained",
+        "event_type": null,
+        "aerial_war_context": null,
+        "event_time": null,
+        "publication_update_time": null,
+        "temporal_attribution": null,
+        "cross_source_composition": {
+          "used": false,
+          "basis": "not used"
+        },
+        "final_discovery_bucket": "no_source_hit",
+        "rejection_no_hit_reason": "no qualifying retained exact-city aerial-war explosion/impact evidence attributable to this target episode under the frozen pipeline",
+        "historical_controls_read_before_freeze": false
+      },
+      {
+        "episode_id": "ab8a9cc37975ac5212b1b14a",
+        "date": "2025-10-03",
+        "alert_start": "2025-10-03T14:33:55Z",
+        "alert_end": "2025-10-03T14:43:12Z",
+        "alert_start_kyiv": "2025-10-03T17:33:55",
+        "alert_end_kyiv": "2025-10-03T17:43:12",
+        "query_search_family": [
+          "frozen_exact_city_date_family",
+          "frozen_alert_window_family",
+          "frozen_domain_fallback_family",
+          "frozen_structured_live_page_family"
+        ],
+        "raw_retrieval_metadata": {
+          "pre_ranking_result_set_persisted": false,
+          "note": "The available search interface does not persist complete pre-ranking raw responses; absence of a retained page is not proof that search returned zero raw hits."
+        },
+        "ranking": "no qualifying page retained after frozen ranking/relevance checks; exact pre-ranking rank is not reconstructable",
+        "retained_candidate_set": [],
+        "dedupe_decisions": "no retained page; per-episode pre-ranking dedupe trace not persisted",
+        "retained_page_count": 0,
+        "fetched_content": [],
+        "retained_event_fragments": [],
+        "event_segmentation": "no qualifying event fragment retained",
+        "locality": "no qualifying exact-city event retained",
+        "event_type": null,
+        "aerial_war_context": null,
+        "event_time": null,
+        "publication_update_time": null,
+        "temporal_attribution": null,
+        "cross_source_composition": {
+          "used": false,
+          "basis": "not used"
+        },
+        "final_discovery_bucket": "no_source_hit",
+        "rejection_no_hit_reason": "no qualifying retained exact-city aerial-war explosion/impact evidence attributable to this target episode under the frozen pipeline",
+        "historical_controls_read_before_freeze": false
+      },
+      {
+        "episode_id": "b3cad8923734086de3d8df7b",
+        "date": "2025-10-03",
+        "alert_start": "2025-10-03T16:11:00Z",
+        "alert_end": "2025-10-03T16:37:46Z",
+        "alert_start_kyiv": "2025-10-03T19:11:00",
+        "alert_end_kyiv": "2025-10-03T19:37:46",
+        "query_search_family": [
+          "frozen_exact_city_date_family",
+          "frozen_alert_window_family",
+          "frozen_domain_fallback_family",
+          "frozen_structured_live_page_family"
+        ],
+        "raw_retrieval_metadata": {
+          "pre_ranking_result_set_persisted": false,
+          "note": "The available search interface does not persist complete pre-ranking raw responses; absence of a retained page is not proof that search returned zero raw hits."
+        },
+        "ranking": "no qualifying page retained after frozen ranking/relevance checks; exact pre-ranking rank is not reconstructable",
+        "retained_candidate_set": [],
+        "dedupe_decisions": "no retained page; per-episode pre-ranking dedupe trace not persisted",
+        "retained_page_count": 0,
+        "fetched_content": [],
+        "retained_event_fragments": [],
+        "event_segmentation": "no qualifying event fragment retained",
+        "locality": "no qualifying exact-city event retained",
+        "event_type": null,
+        "aerial_war_context": null,
+        "event_time": null,
+        "publication_update_time": null,
+        "temporal_attribution": null,
+        "cross_source_composition": {
+          "used": false,
+          "basis": "not used"
+        },
+        "final_discovery_bucket": "no_source_hit",
+        "rejection_no_hit_reason": "no qualifying retained exact-city aerial-war explosion/impact evidence attributable to this target episode under the frozen pipeline",
+        "historical_controls_read_before_freeze": false
+      },
+      {
+        "episode_id": "d87c780a9ac854141420ff02",
+        "date": "2025-10-03",
+        "alert_start": "2025-10-03T17:43:53Z",
+        "alert_end": "2025-10-03T18:15:30Z",
+        "alert_start_kyiv": "2025-10-03T20:43:53",
+        "alert_end_kyiv": "2025-10-03T21:15:30",
+        "query_search_family": [
+          "frozen_exact_city_date_family",
+          "frozen_alert_window_family",
+          "frozen_domain_fallback_family",
+          "frozen_structured_live_page_family"
+        ],
+        "raw_retrieval_metadata": {
+          "pre_ranking_result_set_persisted": false,
+          "note": "The available search interface does not persist complete pre-ranking raw responses; absence of a retained page is not proof that search returned zero raw hits."
+        },
+        "ranking": "no qualifying page retained after frozen ranking/relevance checks; exact pre-ranking rank is not reconstructable",
+        "retained_candidate_set": [],
+        "dedupe_decisions": "no retained page; per-episode pre-ranking dedupe trace not persisted",
+        "retained_page_count": 0,
+        "fetched_content": [],
+        "retained_event_fragments": [],
+        "event_segmentation": "no qualifying event fragment retained",
+        "locality": "no qualifying exact-city event retained",
+        "event_type": null,
+        "aerial_war_context": null,
+        "event_time": null,
+        "publication_update_time": null,
+        "temporal_attribution": null,
+        "cross_source_composition": {
+          "used": false,
+          "basis": "not used"
+        },
+        "final_discovery_bucket": "no_source_hit",
+        "rejection_no_hit_reason": "no qualifying retained exact-city aerial-war explosion/impact evidence attributable to this target episode under the frozen pipeline",
+        "historical_controls_read_before_freeze": false
+      },
+      {
+        "episode_id": "36faec61e879ad34b8710814",
+        "date": "2025-10-03",
+        "alert_start": "2025-10-03T18:57:43Z",
+        "alert_end": "2025-10-03T19:45:42Z",
+        "alert_start_kyiv": "2025-10-03T21:57:43",
+        "alert_end_kyiv": "2025-10-03T22:45:42",
+        "query_search_family": [
+          "frozen_exact_city_date_family",
+          "frozen_alert_window_family",
+          "frozen_domain_fallback_family",
+          "frozen_structured_live_page_family"
+        ],
+        "raw_retrieval_metadata": {
+          "pre_ranking_result_set_persisted": false,
+          "note": "The available search interface does not persist complete pre-ranking raw responses; absence of a retained page is not proof that search returned zero raw hits."
+        },
+        "ranking": "no qualifying page retained after frozen ranking/relevance checks; exact pre-ranking rank is not reconstructable",
+        "retained_candidate_set": [],
+        "dedupe_decisions": "no retained page; per-episode pre-ranking dedupe trace not persisted",
+        "retained_page_count": 0,
+        "fetched_content": [],
+        "retained_event_fragments": [],
+        "event_segmentation": "no qualifying event fragment retained",
+        "locality": "no qualifying exact-city event retained",
+        "event_type": null,
+        "aerial_war_context": null,
+        "event_time": null,
+        "publication_update_time": null,
+        "temporal_attribution": null,
+        "cross_source_composition": {
+          "used": false,
+          "basis": "not used"
+        },
+        "final_discovery_bucket": "no_source_hit",
+        "rejection_no_hit_reason": "no qualifying retained exact-city aerial-war explosion/impact evidence attributable to this target episode under the frozen pipeline",
+        "historical_controls_read_before_freeze": false
+      },
+      {
+        "episode_id": "68bbb34be4a6171b8bbdeffc",
+        "date": "2025-10-03",
+        "alert_start": "2025-10-03T19:58:24Z",
+        "alert_end": "2025-10-03T22:26:18Z",
+        "alert_start_kyiv": "2025-10-03T22:58:24",
+        "alert_end_kyiv": "2025-10-04T01:26:18",
+        "query_search_family": [
+          "frozen_exact_city_date_family",
+          "frozen_alert_window_family",
+          "frozen_domain_fallback_family",
+          "frozen_structured_live_page_family"
+        ],
+        "raw_retrieval_metadata": {
+          "pre_ranking_result_set_persisted": false,
+          "note": "The available search interface does not persist complete pre-ranking raw responses; absence of a retained page is not proof that search returned zero raw hits."
+        },
+        "ranking": "no qualifying page retained after frozen ranking/relevance checks; exact pre-ranking rank is not reconstructable",
+        "retained_candidate_set": [],
+        "dedupe_decisions": "no retained page; per-episode pre-ranking dedupe trace not persisted",
+        "retained_page_count": 0,
+        "fetched_content": [],
+        "retained_event_fragments": [],
+        "event_segmentation": "no qualifying event fragment retained",
+        "locality": "no qualifying exact-city event retained",
+        "event_type": null,
+        "aerial_war_context": null,
+        "event_time": null,
+        "publication_update_time": null,
+        "temporal_attribution": null,
+        "cross_source_composition": {
+          "used": false,
+          "basis": "not used"
+        },
+        "final_discovery_bucket": "no_source_hit",
+        "rejection_no_hit_reason": "no qualifying retained exact-city aerial-war explosion/impact evidence attributable to this target episode under the frozen pipeline",
+        "historical_controls_read_before_freeze": false
+      },
+      {
+        "episode_id": "44a59f98926b7246ed2d6f00",
+        "date": "2025-10-04",
+        "alert_start": "2025-10-04T09:24:14Z",
+        "alert_end": "2025-10-04T09:40:19Z",
+        "alert_start_kyiv": "2025-10-04T12:24:14",
+        "alert_end_kyiv": "2025-10-04T12:40:19",
+        "query_search_family": [
+          "frozen_exact_city_date_family",
+          "frozen_alert_window_family",
+          "frozen_domain_fallback_family",
+          "frozen_structured_live_page_family"
+        ],
+        "raw_retrieval_metadata": {
+          "pre_ranking_result_set_persisted": false,
+          "note": "The available search interface does not persist complete pre-ranking raw responses; absence of a retained page is not proof that search returned zero raw hits."
+        },
+        "ranking": "no qualifying page retained after frozen ranking/relevance checks; exact pre-ranking rank is not reconstructable",
+        "retained_candidate_set": [],
+        "dedupe_decisions": "no retained page; per-episode pre-ranking dedupe trace not persisted",
+        "retained_page_count": 0,
+        "fetched_content": [],
+        "retained_event_fragments": [],
+        "event_segmentation": "no qualifying event fragment retained",
+        "locality": "no qualifying exact-city event retained",
+        "event_type": null,
+        "aerial_war_context": null,
+        "event_time": null,
+        "publication_update_time": null,
+        "temporal_attribution": null,
+        "cross_source_composition": {
+          "used": false,
+          "basis": "not used"
+        },
+        "final_discovery_bucket": "no_source_hit",
+        "rejection_no_hit_reason": "no qualifying retained exact-city aerial-war explosion/impact evidence attributable to this target episode under the frozen pipeline",
+        "historical_controls_read_before_freeze": false
+      },
+      {
+        "episode_id": "9ad4ee0cdba367d717c7deb3",
+        "date": "2025-10-04",
+        "alert_start": "2025-10-04T10:08:08Z",
+        "alert_end": "2025-10-04T10:37:02Z",
+        "alert_start_kyiv": "2025-10-04T13:08:08",
+        "alert_end_kyiv": "2025-10-04T13:37:02",
+        "query_search_family": [
+          "frozen_exact_city_date_family",
+          "frozen_alert_window_family",
+          "frozen_domain_fallback_family",
+          "frozen_structured_live_page_family"
+        ],
+        "raw_retrieval_metadata": {
+          "pre_ranking_result_set_persisted": false,
+          "note": "The available search interface does not persist complete pre-ranking raw responses; absence of a retained page is not proof that search returned zero raw hits."
+        },
+        "ranking": "no qualifying page retained after frozen ranking/relevance checks; exact pre-ranking rank is not reconstructable",
+        "retained_candidate_set": [],
+        "dedupe_decisions": "no retained page; per-episode pre-ranking dedupe trace not persisted",
+        "retained_page_count": 0,
+        "fetched_content": [],
+        "retained_event_fragments": [],
+        "event_segmentation": "no qualifying event fragment retained",
+        "locality": "no qualifying exact-city event retained",
+        "event_type": null,
+        "aerial_war_context": null,
+        "event_time": null,
+        "publication_update_time": null,
+        "temporal_attribution": null,
+        "cross_source_composition": {
+          "used": false,
+          "basis": "not used"
+        },
+        "final_discovery_bucket": "no_source_hit",
+        "rejection_no_hit_reason": "no qualifying retained exact-city aerial-war explosion/impact evidence attributable to this target episode under the frozen pipeline",
+        "historical_controls_read_before_freeze": false
+      },
+      {
+        "episode_id": "2368fca859a9e2ea63959df4",
+        "date": "2025-10-04",
+        "alert_start": "2025-10-04T11:50:10Z",
+        "alert_end": "2025-10-04T12:27:53Z",
+        "alert_start_kyiv": "2025-10-04T14:50:10",
+        "alert_end_kyiv": "2025-10-04T15:27:53",
+        "query_search_family": [
+          "frozen_exact_city_date_family",
+          "frozen_alert_window_family",
+          "frozen_domain_fallback_family",
+          "frozen_structured_live_page_family"
+        ],
+        "raw_retrieval_metadata": {
+          "pre_ranking_result_set_persisted": false,
+          "note": "The available search interface does not persist complete pre-ranking raw responses; absence of a retained page is not proof that search returned zero raw hits."
+        },
+        "ranking": "no qualifying page retained after frozen ranking/relevance checks; exact pre-ranking rank is not reconstructable",
+        "retained_candidate_set": [],
+        "dedupe_decisions": "no retained page; per-episode pre-ranking dedupe trace not persisted",
+        "retained_page_count": 0,
+        "fetched_content": [],
+        "retained_event_fragments": [],
+        "event_segmentation": "no qualifying event fragment retained",
+        "locality": "no qualifying exact-city event retained",
+        "event_type": null,
+        "aerial_war_context": null,
+        "event_time": null,
+        "publication_update_time": null,
+        "temporal_attribution": null,
+        "cross_source_composition": {
+          "used": false,
+          "basis": "not used"
+        },
+        "final_discovery_bucket": "no_source_hit",
+        "rejection_no_hit_reason": "no qualifying retained exact-city aerial-war explosion/impact evidence attributable to this target episode under the frozen pipeline",
+        "historical_controls_read_before_freeze": false
+      },
+      {
+        "episode_id": "00a0fe746b1980456b94d0cb",
+        "date": "2025-10-04",
+        "alert_start": "2025-10-04T19:24:42Z",
+        "alert_end": "2025-10-05T04:11:41Z",
+        "alert_start_kyiv": "2025-10-04T22:24:42",
+        "alert_end_kyiv": "2025-10-05T07:11:41",
+        "query_search_family": [
+          "frozen_exact_city_date_family",
+          "frozen_alert_window_family",
+          "frozen_domain_fallback_family",
+          "frozen_structured_live_page_family"
+        ],
+        "raw_retrieval_metadata": {
+          "pre_ranking_result_set_persisted": false,
+          "note": "The available search interface does not persist complete pre-ranking raw responses; absence of a retained page is not proof that search returned zero raw hits."
+        },
+        "ranking": "passed bounded relevance floor and remained within retained-page cap",
+        "retained_candidate_set": [
+          "https://zp.npu.gov.ua/news/kombinovana-ataka-rosiian-na-zaporizhzhia-zahynula-liudyna-shche-deviat-poraneni-na-mistsiakh-udariv-pratsiuiut-politseiski"
+        ],
+        "dedupe_decisions": "canonical-URL richness merge applied; no retained duplicate displaced richer content",
+        "retained_page_count": 1,
+        "fetched_content": [
+          {
+            "url": "https://zp.npu.gov.ua/news/kombinovana-ataka-rosiian-na-zaporizhzhia-zahynula-liudyna-shche-deviat-poraneni-na-mistsiakh-udariv-pratsiuiut-politseiski",
+            "content_summary": "After midnight Russian forces struck Zaporizhzhia with attack drones and guided aerial bombs, causing casualties and damage."
+          }
+        ],
+        "retained_event_fragments": [
+          {
+            "summary": "After midnight the regional centre was struck by attack drones and guided aerial bombs."
+          }
+        ],
+        "event_segmentation": "single combined overnight attack sequence",
+        "locality": "exact_city",
+        "event_type": "combined_uav_guided_bomb_attack",
+        "aerial_war_context": "attack drones and guided aerial bombs",
+        "event_time": "after midnight on 2025-10-05 Europe/Kyiv",
+        "publication_update_time": null,
+        "temporal_attribution": {
+          "frozen_status": "target_episode_supported",
+          "basis": "The event is explicitly after midnight while the target alert runs 2025-10-04 22:24:42–2025-10-05 07:11:41."
+        },
+        "cross_source_composition": {
+          "used": false,
+          "basis": "not used"
+        },
+        "final_discovery_bucket": "strict_candidate",
+        "rejection_no_hit_reason": null,
+        "historical_controls_read_before_freeze": false
       }
-    ]
+    ],
+    "split_freeze": {
+      "segment_a": {
+        "episodes": 157,
+        "description": "Corrected-universe episodes contained in the preliminary blind run; their discovery results were frozen before any historical comparison."
+      },
+      "segment_b": {
+        "episodes": 13,
+        "date_range": "2025-10-02 → 2025-10-04",
+        "description": "Episodes appended after overlap QA correction; blind-discovered and frozen before their own historical labels were queried."
+      },
+      "every_episode_result_frozen_before_own_historical_label_lookup": true,
+      "single_global_freeze_before_first_historical_comparison": false
+    }
   },
   "discovery_freeze": {
-    "marker": "SLICE4_DISCOVERY_FROZEN_BEFORE_HISTORICAL_COMPARISON",
-    "frozen_candidate_set_fingerprint": "fnv1a32-bf58ade2",
+    "marker": "SLICE4_CORRECTED_UNIVERSE_EPISODE_RESULTS_FROZEN_BEFORE_OWN_LABEL_LOOKUP",
+    "frozen_candidate_set_fingerprint": "fnv1a32-2e4773b2",
     "pipeline_commit_context": "42a7238c244404eb2213609e34cbb02e9e5096fa",
     "frontier_version": "EVIDENCE_PRESERVING_CANDIDATE_FRONTIER_V1",
     "buckets": {
       "strict_candidate": 15,
       "sensitivity_candidate": 0,
       "needs_review": 0,
-      "no_source_hit": 156
+      "no_source_hit": 155
     },
-    "result_changed_after_freeze": false
+    "result_changed_after_each_episode_freeze": false,
+    "split_freeze_required_by_readback_qa": true,
+    "single_global_freeze_before_first_historical_comparison": false,
+    "per_episode_historical_label_blindness_preserved": true
   },
   "candidate_frontier_observability": {
     "total_search_candidates_observed": null,
     "total_search_candidates_observed_status": "not safely reconstructable because complete pre-ranking result sets are not persisted",
-    "total_retained_pages": 18,
-    "average_retained_pages_per_episode": 0.1053,
+    "total_retained_pages": 17,
+    "average_retained_pages_per_episode": 0.1,
     "median_retained_pages_per_episode": 0,
     "max_retained_pages_per_episode": 2,
     "episodes_hitting_12_retained_pages_cap": 0,
     "pages_hitting_4_event_fragments_cap": 0,
-    "dedupe_drops_observed_aggregate": 4,
+    "dedupe_drops_observed_aggregate": 3,
     "dedupe_drop_episode_mapping": "not safely persisted at full pre-ranking granularity",
     "candidates_rejected_before_extraction": null,
     "candidates_rejected_before_extraction_status": "not safely reconstructable",
-    "candidates_passed_to_full_content_extraction": 18,
+    "candidates_passed_to_full_content_extraction": 17,
     "observability_limit": "Complete pre-ranking raw responses are not persisted by the available search interface. raw_hits=[] must not be treated as proof of search_not_retrieved.",
     "candidate_explosion": false,
     "comparison_to_slice3b": {
@@ -6818,10 +6791,12 @@
       "slice4_retained_pages": 18,
       "slice4_average_per_episode": 0.1053,
       "slice4_max_per_episode": 2
-    }
+    },
+    "correction_note": "Removed the ineligible Slice 0 Sep-15 positive (2 retained pages; one observed duplicate drop) and appended one retained NPU page for the blind 4→5 Oct strict candidate."
   },
   "historical_comparison": {
-    "performed_only_after_discovery_freeze": true,
+    "performed_after_each_corrected_episode_result_was_frozen": true,
+    "single_global_freeze_before_first_historical_comparison": false,
     "source_artifact": "kyiv-air-alerts-grafana/data/explosion_research/zaporizhzhia/final_evidence.json",
     "source_blob_sha": "4b3559386bdd8515f24498dfaac47ef67542b679",
     "known_strict_controls": 8,
@@ -6832,7 +6807,7 @@
       "denominator": 8,
       "fraction": "8/8",
       "percent": 100,
-      "qualification": "Small denominator (8 controls); interpret descriptively."
+      "qualification": "Small denominator (8 controls); interpret descriptively. Every control was rediscovered before its own historical label was queried."
     },
     "known_sensitivity_controls": 4,
     "sensitivity_rediscovered_as_positive": 3,
@@ -6865,20 +6840,6 @@
           "event_time": null,
           "evidence": "During the alert, reports progressed from air defence over Zaporizhzhia to a confirmed Shahed strike in the city.",
           "basis": "strict: exact-city attack sequence is timed within the matched alert."
-        },
-        "frozen_discovery_verdict": "strict_candidate",
-        "independently_rediscovered_as_strict": true
-      },
-      {
-        "episode_id": "fa1e9624ec208634260fa6cb",
-        "historical_verdict": "strict",
-        "historical_evidence_provenance": {
-          "artifact": "kyiv-air-alerts-grafana/data/explosion_research/zaporizhzhia/final_evidence.json",
-          "path": "strict_events[48]",
-          "source_url": "https://zp.npu.gov.ua/news/unaslidok-obstrilu-zaporizhzhia-ta-raionu-zahynula-liudyna-shche-13-poraneni-politsiia-nadala-dopomohu-postrazhdalym",
-          "event_time": null,
-          "evidence": "Police timed the attack on Zaporizhzhia and the district to 23:25–00:45, including MLRS munitions and an air strike.",
-          "basis": "strict: exact-city timed attack interval substantially overlaps the matched alert."
         },
         "frozen_discovery_verdict": "strict_candidate",
         "independently_rediscovered_as_strict": true
@@ -6949,6 +6910,20 @@
           "event_time": null,
           "evidence": "TSN reported explosions in Zaporizhzhia during the air alert and a fire in the city after the enemy attack.",
           "basis": "strict: source explicitly places exact-city explosions during the matched alert."
+        },
+        "frozen_discovery_verdict": "strict_candidate",
+        "independently_rediscovered_as_strict": true
+      },
+      {
+        "episode_id": "00a0fe746b1980456b94d0cb",
+        "historical_verdict": "strict",
+        "historical_evidence_provenance": {
+          "artifact": "kyiv-air-alerts-grafana/data/explosion_research/zaporizhzhia/final_evidence.json",
+          "path": "strict_events[54]",
+          "source_url": "https://www.zoda.gov.ua/news/76344/zaporizhzhya-ogovtujetsya-pislya-chergovoji-vorozhoji-ataki.html",
+          "event_time": null,
+          "evidence": "ZODA reported that around 02:30 Zaporizhzhia woke to explosions during a combined Shahed and guided-bomb attack.",
+          "basis": "strict: official exact-city timed aerial attack inside the matched alert."
         },
         "frozen_discovery_verdict": "strict_candidate",
         "independently_rediscovered_as_strict": true
@@ -7052,7 +7027,7 @@
           "seen_in": [
             "Slice 2 near-boundary sensitivity family"
           ],
-          "diagnosis": "Historical sensitivity evidence is a rounded ~04:00 event around a 04:01:44 alert boundary. The frozen run retained no qualifying page; without persisted pre-ranking raw results, search_not_retrieved cannot be asserted."
+          "diagnosis": "Historical sensitivity evidence is a rounded ~04:00 event around a 04:01:44 alert boundary. No qualifying page was retained; pre-ranking raw results are not persisted, so search_not_retrieved is not asserted."
         }
       }
     ],
@@ -7141,7 +7116,7 @@
         "seen_in": [
           "Slice 2 near-boundary sensitivity family"
         ],
-        "diagnosis": "Historical sensitivity evidence is a rounded ~04:00 event around a 04:01:44 alert boundary. The frozen run retained no qualifying page; without persisted pre-ranking raw results, search_not_retrieved cannot be asserted.",
+        "diagnosis": "Historical sensitivity evidence is a rounded ~04:00 event around a 04:01:44 alert boundary. No qualifying page was retained; pre-ranking raw results are not persisted, so search_not_retrieved is not asserted.",
         "targeted_rescue_performed": false,
         "discovery_result_changed_after_freeze": false
       }
@@ -7157,7 +7132,7 @@
       "percent": 0
     },
     "recurring_slice3_candidate_loss_mechanism_observed_on_known_strict_controls": false,
-    "interpretation": "No known strict control was lost in Slice 4. On strict recall, the architecture-level candidate-frontier fix generalized in this holdout."
+    "interpretation": "No known strict control was lost in the corrected Slice 4 universe. On strict recall, the architecture-level candidate-frontier fix generalized in this holdout."
   },
   "new_candidates": {
     "new_strict_count": 4,
@@ -7263,6 +7238,7 @@
     "all_strict_sensitivity_needs_review_outputs_manually_reviewed": true,
     "reviewed_positive_count": 15,
     "reviewed_positive_ids": [
+      "00a0fe746b1980456b94d0cb",
       "19313dfecc19b71819f7a000",
       "415f67e66e79ab4fd14156c9",
       "4dfc0af35ff48d0fb1c39ff9",
@@ -7276,7 +7252,6 @@
       "bb93b8a772c7c84e92dd19c4",
       "d6e2b12131136ac15b7cc0ce",
       "f5052bba62e43674bedfc358",
-      "fa1e9624ec208634260fa6cb",
       "fede442dc1bf79856b68b936"
     ],
     "reviewed_cases": [
@@ -7502,14 +7477,14 @@
         "strict_semantics_clean": true
       },
       {
-        "episode_id": "fa1e9624ec208634260fa6cb",
+        "episode_id": "fede442dc1bf79856b68b936",
         "frozen_verdict": "strict_candidate",
         "exact_city": true,
         "actual_explosion_or_impact_evidence": true,
         "aerial_war_context_supported": true,
-        "event_time": "2025-09-15 23:44 onward through after midnight; first ~23:30 boundary mention not relied on",
-        "temporal_attribution_basis": "The first rounded 23:30 mention is excluded; later 23:44, 23:55 and after-midnight events are inside 23:30:14–00:57:54.",
-        "publication_lag_check": "pass; event chronology, not publication time, supplies strict timing.",
+        "event_time": "2025-09-28 01:21 and later morning explosions; pre-alert midnight volley excluded",
+        "temporal_attribution_basis": "01:21 is after the 01:14:00 alert start and before 07:01:41; the midnight pre-alert volley is excluded.",
+        "publication_lag_check": "pass; in-event chronology supplies time.",
         "pvo_only": false,
         "locality_mixing": false,
         "wrong_episode_positive": false,
@@ -7519,14 +7494,14 @@
         "strict_semantics_clean": true
       },
       {
-        "episode_id": "fede442dc1bf79856b68b936",
+        "episode_id": "00a0fe746b1980456b94d0cb",
         "frozen_verdict": "strict_candidate",
         "exact_city": true,
         "actual_explosion_or_impact_evidence": true,
         "aerial_war_context_supported": true,
-        "event_time": "2025-09-28 01:21 and later morning explosions; pre-alert midnight volley excluded",
-        "temporal_attribution_basis": "01:21 is after the 01:14:00 alert start and before 07:01:41; the midnight pre-alert volley is excluded.",
-        "publication_lag_check": "pass; in-event chronology supplies time.",
+        "event_time": "after midnight on 2025-10-05 Europe/Kyiv",
+        "temporal_attribution_basis": "After-midnight combined drone/KAB attack is wholly inside the 4 Oct 22:24:42–5 Oct 07:11:41 target alert.",
+        "publication_lag_check": "pass; event-period wording, not publication time, supplies temporal attribution.",
         "pvo_only": false,
         "locality_mixing": false,
         "wrong_episode_positive": false,
@@ -7609,8 +7584,8 @@
   },
   "architecture_assessment": {
     "main_question": "Did EVIDENCE_PRESERVING_CANDIDATE_FRONTIER_V1 remove the recurring retrieval/retention bottleneck on new data?",
-    "strict_recall_answer": "Supported in this holdout: 8/8 known strict controls rediscovered, 0 retrieval/retention-family strict misses.",
-    "candidate_volume_answer": "Bounded: 18 retained pages across 171 episodes, average 0.1053, max 2, no cap hits.",
+    "strict_recall_answer": "Supported in corrected Slice 4: 8/8 known strict controls rediscovered, 0 retrieval/retention-family strict misses.",
+    "candidate_volume_answer": "Bounded: 17 retained pages across 170 eligible episodes, average 0.1000, max 2, no cap hits.",
     "precision_answer": "Not clean: the frozen strict set contains one unsupported-aerial-context candidate and four strict temporal-attribution overcalls; three of those temporal overcalls are historical sensitivity controls.",
     "architecture_redesign_triggered_by_retrieval_ceiling": false
   },
@@ -7620,16 +7595,17 @@
     "precision_guardrails_clean": false,
     "candidate_volume_bounded": true,
     "new_systematic_retrieval_failure": false,
-    "decision_path": "C_OTHER_FAILURE_PRECISION_REGRESSION"
+    "decision_path": "C_OTHER_FAILURE_PRECISION_REGRESSION_AND_DOCUMENTED_FREEZE_SEQUENCE_DEVIATION"
   },
   "final_verdict": "SLICE 4 INDEPENDENT HOLDOUT NEEDS REVIEW",
   "verdict_rationale": [
-    "The candidate-frontier architecture passes the core recall/generalization test on known strict controls: 8/8, with zero retrieval/retention-family misses.",
-    "Candidate volume remains bounded and shows no explosion.",
-    "The frozen strict output is not precision-clean: several temporal-attribution decisions exceed the unchanged strict semantics, and one new strict candidate lacks explicit aerial-war context in its retained evidence.",
-    "Therefore Slice 4 remains a valid frozen independent result but cannot receive the PASS verdict."
+    "After correcting the prior-slice eligibility defect, the strict-control result remains 8/8 with zero retrieval/retention-family misses.",
+    "Candidate volume remains bounded: 17 retained pages over 170 eligible episodes, average 0.1000, max 2, no cap hits.",
+    "Precision is not clean: the frozen strict set contains one unsupported-aerial-context candidate and four strict temporal-attribution overcalls; three temporal overcalls are historical sensitivity controls.",
+    "Read-back QA required a split-freeze repair: all individual episode results remained label-blind, but the requested single global freeze-before-any-history sequence was not preserved.",
+    "Therefore the candidate-frontier recall architecture is supported by this holdout, but the overall Slice 4 result remains NEEDS REVIEW."
   ],
-  "next_step_recommendation": "Preserve Slice 4 frozen. Do not run Slice 4B or add local retrieval fallbacks. Review strict temporal attribution/publication-time guarding and the aerial-war evidence requirement before any future independent holdout. The Slice 4 result does not justify DISCOVERY ARCHITECTURE REVIEW / REDESIGN on recall grounds.",
+  "next_step_recommendation": "Preserve corrected Slice 4 frozen. Do not run Slice 4B, do not add local retrieval fallbacks, and do not run Slice 5 in this step. Review strict temporal attribution/publication-time guarding and the aerial-war evidence requirement before any future independent holdout. The corrected result does not justify DISCOVERY ARCHITECTURE REVIEW / REDESIGN on recall grounds.",
   "scope_guardrails": {
     "pipeline_modified": false,
     "frontier_caps_modified": false,
@@ -7643,5 +7619,53 @@
     "production_deployed": false,
     "slice4b_started": false,
     "slice5_started": false
+  },
+  "qa_correction": {
+    "preliminary_invalid_commit": "749f88ffe2f4f5e4f6971b016665a8a6c5a00a8b",
+    "preliminary_universe_overlap_slice0": 14,
+    "corrected_universe_prior_slice_overlap": 0,
+    "removed_prior_slice_episode_count": 14,
+    "removed_prior_slice_episode_ids": [
+      "08a32c59bc55483053e24b33",
+      "21591d14fceac40aa05b4ed9",
+      "39814d7eb658217adae24bd9",
+      "5e84185302388262d2b7f94d",
+      "70067c052eec48f162697391",
+      "9ac90852a1163b8d94e497f0",
+      "9f0adec7ff222f22c5fbd64f",
+      "9f79a5661ceb17a852e72a78",
+      "c062865b94287ff038b21aee",
+      "c8282e711bfec7196e70cbd0",
+      "e3962be99546b5a2cc1b486d",
+      "e98335051024030cb4509d54",
+      "eb29ccba021617db3b0e8bbc",
+      "fa1e9624ec208634260fa6cb"
+    ],
+    "removed_preliminary_positive_ids": [
+      "fa1e9624ec208634260fa6cb"
+    ],
+    "appended_blind_episode_count": 13,
+    "appended_episode_ids": [
+      "48ea63d506d8cc16720e52f6",
+      "602f7b7c11e68f541ca948ba",
+      "62d1b5996fe7d6669f2f9578",
+      "6f515b7093ab72ffe2f99df0",
+      "ab8a9cc37975ac5212b1b14a",
+      "b3cad8923734086de3d8df7b",
+      "d87c780a9ac854141420ff02",
+      "36faec61e879ad34b8710814",
+      "68bbb34be4a6171b8bbdeffc",
+      "44a59f98926b7246ed2d6f00",
+      "9ad4ee0cdba367d717c7deb3",
+      "2368fca859a9e2ea63959df4",
+      "00a0fe746b1980456b94d0cb"
+    ],
+    "appended_blind_positive_ids": [
+      "00a0fe746b1980456b94d0cb"
+    ],
+    "appended_historical_labels_queried_only_after_appended_freeze": true,
+    "per_episode_label_blindness_preserved": true,
+    "single_global_freeze_order_preserved": false,
+    "note": "This is a procedural deviation from the requested single global freeze sequence. It is retained as a methodological limitation; no targeted rescue or label-informed search was performed."
   }
 }
