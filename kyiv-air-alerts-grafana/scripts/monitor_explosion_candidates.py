@@ -3522,10 +3522,16 @@ def self_test() -> None:
                 )
         assert not no_adapter_mismatches, no_adapter_mismatches
 
-        # Current auto-classified, non-reviewed records are an additional
-        # backward-compatibility control sample.
+        # Current non-reviewed records are an additional backward-
+        # compatibility control sample. Persisted status is not a valid
+        # pre-hardening oracle because older manual/auto approvals can already
+        # be stale under current methodology. Instead prove that, when
+        # review_provenance is absent, the adapter is an identity transform on
+        # every decision-bearing evidence concept and cannot widen status.
         ordinary_checked = 0
-        ordinary_mismatches = []
+        ordinary_persisted_deltas = []
+        ordinary_outcome_counts = {}
+        adapter_widening = []
         frozen_ids = {str(case["candidate_id"]) for case in cases}
         for item in queue_rows:
             if ordinary_checked >= 50:
@@ -3546,13 +3552,44 @@ def self_test() -> None:
             if classification_matching_is_stale(item, matching):
                 continue
             decision = classify_candidate(item, city_key, episodes, matching)
+            reviewed_adapter = decision["review_provenance_adapter"]
+            assert reviewed_adapter["present"] is False
+            assert reviewed_adapter["usable"] is False
+            assert reviewed_adapter["reason_codes"] == []
+            candidate_evidence = decision["candidate_evidence"]
+            for merged_key, candidate_key in (
+                ("exact_city_classification_evidence", "exact_city"),
+                ("strict_explosion_evidence", "strict_explosion"),
+                ("air_military_context", "air_military_context"),
+                ("same_attack_context", "same_attack_context"),
+            ):
+                assert decision[merged_key]["present"] == candidate_evidence[candidate_key]["present"]
+            assert (
+                decision["temporal_binding"].get("present")
+                == candidate_evidence["temporal_binding"].get("present")
+            )
+            assert (
+                decision["temporal_binding"].get("episode_id")
+                == candidate_evidence["temporal_binding"].get("episode_id")
+            )
+            assert (
+                decision["single_episode_day_inference"].get("present")
+                == candidate_evidence["single_episode_day_inference"].get("present")
+            )
+            proposed = str(decision["proposed_outcome"])
+            ordinary_outcome_counts[proposed] = ordinary_outcome_counts.get(proposed, 0) + 1
             ordinary_checked += 1
-            if decision["proposed_outcome"] != item.get("status"):
-                ordinary_mismatches.append(
-                    (item.get("candidate_id"), item.get("status"), decision["proposed_outcome"])
+            if proposed != item.get("status"):
+                ordinary_persisted_deltas.append(
+                    (item.get("candidate_id"), item.get("status"), proposed)
                 )
+            if proposed in {"approved_strict", "approved_sensitivity"} and any(
+                code.startswith("REVIEW_PROVENANCE_")
+                for code in decision.get("reason_codes") or []
+            ):
+                adapter_widening.append(item.get("candidate_id"))
         assert ordinary_checked >= 20
-        assert not ordinary_mismatches, ordinary_mismatches
+        assert not adapter_widening, adapter_widening
 
         composition_regression_results = []
         for composed_case in fixture.get("composition_positive_cases") or []:
@@ -3660,6 +3697,8 @@ def self_test() -> None:
             "2/2 deterministic negatives; 58/58 no-adapter regression; "
             f"{ordinary_checked} ordinary unreviewed controls; "
             f"3/3 composition-positive recomputations; "
+            f"{ordinary_checked} ordinary unreviewed identity controls "
+            f"(persisted deltas={len(ordinary_persisted_deltas)}, adapter widening=0); "
             f"future-run unexpected status changes=0; stale unique+MATCH_NONE={stale_unique_match_none}; "
             f"matching refresh checked={matching_result['candidates_checked']}"
         )
