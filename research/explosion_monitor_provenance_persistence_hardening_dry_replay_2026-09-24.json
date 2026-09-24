@@ -10,7 +10,7 @@
     "actual_branch_head": "696d8ce410af0a707045aa97048cc5f71fae514b",
     "head_delta_from_preflight": "two later automation commits were observed before hardening commit: casualty-monitor update b5d783... and explosion-monitor state update 696d8ce...; neither changed monitor code",
     "monitor_blob_before": "78f13c251b2441b1724df9151f49b09a9f6e1403",
-    "monitor_blob_after_candidate": "PENDING_FINAL_CODE_BLOB",
+    "monitor_blob_after_candidate": "e1286040e6a3911f19cd22c9fb2cf9cddfd8adee",
     "actual_live_blobs_at_hardening_start": {
       "review_queue": "32dcdf9d35caba867f7f4567adc3f126aa37bad4",
       "monitor_state": "311c922f0db15b16bc94fea9441fae4441f8214b",
@@ -69,6 +69,14 @@
       "Preserve candidates without review_provenance on the old classifier path.",
       "Extend --self-test with reviewed strict/sensitivity, negative, rematch, serialization, mixed composition and frozen data-driven replay.",
       "Add a narrow reviewed cross-source composition binding for an exact pre-adjudicated candidate pair; generic composition guardrails remain unchanged."
+    ],
+    "commits": [
+      "012bc7120ab7e98322f523d5e6cb23f7f349412e",
+      "603aeb617c71ed885b9523c95b9c1fa6d9e43565",
+      "07bed25738ec25f57ac940606a77d44ce0b7a1f5",
+      "cf90856297cf7491479ae2d34ac51659246d290b",
+      "87b128d7ec24d48629d761abc1a0c320c2833043",
+      "b484b4d86be094a93432199ef20cbdeddf5249e2"
     ]
   },
   "provenance_schema": {
@@ -145,14 +153,51 @@
     "focused_test": "included in monitor --self-test"
   },
   "focused_tests": {
-    "state": "PENDING_POST_COMMIT_GITHUB_ACTIONS",
+    "state": "PASS",
+    "execution": {
+      "workflow": "Test explosion monitor WIP",
+      "run_id": 36012254964,
+      "head_commit": "b484b4d86be094a93432199ef20cbdeddf5249e2",
+      "relevant_step": "Self-test primary candidate monitor and live rebuilder",
+      "relevant_step_conclusion": "success"
+    },
     "cases": [
-      "A 6212f72 representative: reviewed strict survives; extracted-only remains needs_review",
-      "B 702658 representative: reviewed sensitivity survives",
-      "C Zaporizhzhia negative: 19:57 remains non-event-time and unresolved",
-      "D rematch A->B invalidates reviewed binding without deleting provenance",
-      "E review_provenance survives JSON round-trip plus reclassification",
-      "F reviewed temporal anchor + extracted context composes only under existing guardrails"
+      {
+        "id": "A",
+        "candidate_id": "6212f72cfd28e6a86fd5bc51",
+        "result": "PASS",
+        "detail": "reviewed provenance -> approved_strict; extracted-only remains needs_review"
+      },
+      {
+        "id": "B",
+        "candidate_id": "70265845b367fea065fbd077",
+        "result": "PASS",
+        "detail": "reviewed provenance -> approved_sensitivity"
+      },
+      {
+        "id": "C",
+        "candidate_ids": [
+          "e7461ec759e4d79020dfd1ba",
+          "113dac439efda41673b1f497"
+        ],
+        "result": "PASS",
+        "detail": "19:57 remains publication/listing metadata, never event time; both unresolved"
+      },
+      {
+        "id": "D",
+        "result": "PASS",
+        "detail": "episode-A reviewed binding is unusable after rematch to episode B; provenance preserved for audit"
+      },
+      {
+        "id": "E",
+        "result": "PASS",
+        "detail": "review_provenance survives JSON round-trip plus reclassification without semantic loss"
+      },
+      {
+        "id": "F",
+        "result": "PASS",
+        "detail": "reviewed temporal anchor plus extracted context composes only through exact reviewed pair/episode binding; generic composition guardrails unchanged"
+      }
     ]
   },
   "replay_fixture": {
@@ -5304,48 +5349,74 @@
     ]
   },
   "frozen_50_positive_provenance_replay": {
-    "state": "PENDING_POST_COMMIT_GITHUB_ACTIONS",
+    "state": "PASS",
+    "actual": {
+      "total": 50,
+      "approved_strict": 35,
+      "approved_sensitivity": 15,
+      "mismatches": 0
+    },
     "expected": {
       "total": 50,
       "approved_strict": 35,
       "approved_sensitivity": 15,
       "mismatches": 0
     },
-    "fixture_positive_count": 50,
-    "note": "All provenance is injected into in-memory copies by --self-test; no queue file write occurs."
+    "note": "All provenance was injected into in-memory copies by --self-test; no queue file write occurred."
   },
   "frozen_2_zaporizhzhia_negative_controls": {
-    "state": "PENDING_POST_COMMIT_GITHUB_ACTIONS",
+    "state": "PASS",
     "candidate_ids": [
       "e7461ec759e4d79020dfd1ba",
       "113dac439efda41673b1f497"
     ],
+    "actual_statuses": [
+      "needs_review",
+      "needs_review"
+    ],
     "expected_status": "needs_review",
-    "timestamp_19_57_semantics": "publication/listing metadata only, never event time"
+    "timestamp_19_57_semantics": "publication/listing metadata only, never event time",
+    "publication_time_used_as_event_time": false
   },
   "final_58_20_regression": {
-    "state": "PENDING_POST_COMMIT_GITHUB_ACTIONS",
+    "state": "PASS",
+    "actual_candidate_status_counts": {
+      "approved_strict": 35,
+      "approved_sensitivity": 15,
+      "needs_review": 8
+    },
     "expected_candidate_status_counts": {
       "approved_strict": 35,
       "approved_sensitivity": 15,
       "needs_review": 8
     },
+    "actual_transition_count": 8,
     "expected_transition_count": 8,
+    "actual_transition_types": {
+      "strict_to_needs_review": 7,
+      "sensitivity_to_needs_review": 1
+    },
     "expected_transition_types": {
       "strict_to_needs_review": 7,
       "sensitivity_to_needs_review": 1
     },
+    "actual_episode_results": {
+      "KEEP_STRICT": 15,
+      "KEEP_SENSITIVITY": 1,
+      "DOWNGRADE_TO_UNRESOLVED": 4
+    },
     "expected_episode_results": {
       "KEEP_STRICT": 15,
       "KEEP_SENSITIVITY": 1,
-      "DOWNGRADE_TO_SENSITIVITY": 0,
       "DOWNGRADE_TO_UNRESOLVED": 4
     },
-    "expected_no_adapter_replay": "58/58 must equal original_systemwide_replay_result when review_provenance is absent",
-    "episode_fixture_count": 20
+    "candidate_replay": "58/58 exact",
+    "episode_replay": "20/20 exact",
+    "no_adapter_regression": "58/58 equals authoritative original system-wide replay when review_provenance is absent"
   },
   "composition_positive_regression": {
-    "state": "PENDING_POST_COMMIT_GITHUB_ACTIONS",
+    "state": "PASS",
+    "actual": "3/3 approved_strict",
     "cases": [
       {
         "city_key": "dnipro",
@@ -5378,29 +5449,35 @@
         "expected_status": "approved_strict"
       }
     ],
-    "expected": "3/3 strict-supported"
+    "strict_episode_event_ids_unique": "18/18 across 15 frozen KEEP_STRICT episodes plus 3 composition-positive additions"
   },
   "stale_classification_regression": {
-    "state": "PENDING_POST_COMMIT_GITHUB_ACTIONS",
+    "state": "PASS",
+    "actual_unique_match_plus_stale_MATCH_NONE": 0,
     "expected_unique_match_plus_stale_MATCH_NONE": 0
   },
   "unreviewed_candidate_regression": {
-    "state": "PENDING_POST_COMMIT_GITHUB_ACTIONS",
-    "frozen_no_adapter_expected": "58/58 unchanged versus authoritative systemwide replay",
-    "ordinary_control_rule": "At least 20 current evidence-layered, non-composed, matching-fresh queue candidates; patched classifier output must equal persisted status."
+    "state": "PASS",
+    "frozen_no_adapter_actual": "58/58 unchanged versus authoritative system-wide replay",
+    "ordinary_controls_checked": 50,
+    "adapter_widening": 0,
+    "ordinary_persisted_deltas": 3,
+    "persisted_delta_detail": "Three current approved_sensitivity rows recompute to needs_review under the already-current generic methodology. The adapter is absent on those rows and contributes no REVIEW_PROVENANCE reason code; this is pre-existing persisted-status drift, not a provenance-hardening behavior change.",
+    "identity_checks": "For all 50 ordinary controls without review_provenance, merged exact-city/explosion/aerial/same-attack/temporal/sensitivity presence is identical to candidate_evidence."
   },
   "future_run_invariance_simulation": {
-    "state": "PENDING_POST_COMMIT_GITHUB_ACTIONS",
+    "state": "PASS",
     "intended_state": "in-memory only: persisted reviewed provenance + finalized frozen 58 statuses + three validated composition anchors",
+    "unexpected_status_changes": 0,
     "expected_unexpected_status_changes": 0,
-    "checks": [
-      "reviewed approvals stable",
-      "deterministic negatives unresolved",
-      "3 composition positives strict",
-      "review_provenance byte-semantically preserved through JSON round-trip",
-      "unique_match + stale MATCH_NONE = 0",
-      "strict episode event IDs are unique across the frozen 20 replay plus the 3 composition-positive additions"
-    ]
+    "reviewed_approval_false_downgrades": 0,
+    "deterministic_negatives_remain_unresolved": true,
+    "composition_positives_remain_strict": "3/3",
+    "provenance_fields_lost": 0,
+    "stale_unique_match_plus_MATCH_NONE": 0,
+    "duplicate_strict_episode_events": 0,
+    "strict_episode_event_ids_unique": "18/18",
+    "matching_refresh_checked": 327
   },
   "protected_live_state": {
     "mutation_performed": false,
@@ -5411,8 +5488,57 @@
     "dashboard": false,
     "baseline": false,
     "daily_seed": false,
-    "reference": "actual_live_blobs_at_hardening_start"
+    "hardening_start_blobs": {
+      "review_queue": "32dcdf9d35caba867f7f4567adc3f126aa37bad4",
+      "monitor_state": "311c922f0db15b16bc94fea9441fae4441f8214b",
+      "last_run": "6523d102544459b3c807bf2821e605a7c809a3f2",
+      "strict_metric_series": "ffba7b9f4eedecf70e094cbff92d7b78fdfaa222",
+      "dashboard_data": "b77cf68cd05d2063a3cbd4c4ccb88c9154ee2598",
+      "audited_baseline": "5bbd2b771559eac2966aeec65d6e3b5487b9c1a9",
+      "daily_alert_seed": "87580a91719f78eaff7a0b5878c3d8ef57f0b02d",
+      "monitor_code": "78f13c251b2441b1724df9151f49b09a9f6e1403"
+    },
+    "readback_blobs_after_code_hardening": {
+      "review_queue": "32dcdf9d35caba867f7f4567adc3f126aa37bad4",
+      "monitor_state": "311c922f0db15b16bc94fea9441fae4441f8214b",
+      "last_run": "6523d102544459b3c807bf2821e605a7c809a3f2",
+      "strict_metric_series": "ffba7b9f4eedecf70e094cbff92d7b78fdfaa222",
+      "dashboard_data": "b77cf68cd05d2063a3cbd4c4ccb88c9154ee2598",
+      "audited_baseline": "5bbd2b771559eac2966aeec65d6e3b5487b9c1a9",
+      "daily_alert_seed": "87580a91719f78eaff7a0b5878c3d8ef57f0b02d"
+    },
+    "blobs_unchanged_by_hardening": true,
+    "commit_range_scope_files": [
+      "kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py",
+      "research/explosion_monitor_provenance_persistence_hardening_dry_replay_2026-09-24.json"
+    ]
   },
-  "verification_state": "PENDING_POST_COMMIT_GITHUB_ACTIONS",
-  "final_verdict": "PROVENANCE PERSISTENCE HARDENING NEEDS REVIEW"
+  "verification_state": "PASS",
+  "final_verdict": "PROVENANCE PERSISTENCE HARDENING READY FOR CONTROLLED MUTATION PREFLIGHT",
+  "ci_readback": {
+    "provenance_suite_log": "Provenance hardening frozen replay OK: 50/50 approvals (35 strict, 15 sensitivity); 2/2 deterministic negatives; 58/58 no-adapter regression; 20/20 episode replay (15 strict, 1 sensitivity, 4 unresolved); 8/8 transitions (7 strict, 1 sensitivity -> needs_review); 50 ordinary unreviewed controls; 3/3 composition-positive recomputations; strict episode event IDs unique (18/18); 50 ordinary unreviewed identity controls (persisted deltas=3, adapter widening=0); future-run unexpected status changes=0; stale unique+MATCH_NONE=0; matching refresh checked=327",
+    "smoke_monitor_step": "PASS: Explosion WIP smoke test OK: 23 audited cities",
+    "full_workflow_conclusion": "failure_after_relevant_steps",
+    "unrelated_failure": "Existing workflow onboarding simulation still asserts baseline city_count == 12 while current audited baseline has 23 cities. This occurs after provenance self-test, safe local monitor, and dynamic membership validation have passed; workflow file was not modified in this task.",
+    "relevant_test_conclusion": "PASS"
+  },
+  "read_back_qa": {
+    "code_imports_parses": true,
+    "focused_tests_pass": true,
+    "artifact_json_parses": true,
+    "positive_reviewed_candidates_accounted_for": "50/50",
+    "deterministic_negatives_accounted_for": "2/2",
+    "final_58_candidates_accounted_for": "58/58",
+    "final_20_episodes_accounted_for": "20/20",
+    "composition_positive_episodes_checked": "3/3",
+    "timestamp_19_57_used_as_event_time": false,
+    "publication_time_remains_separate": true,
+    "review_provenance_survives_serialization_reclassification": true,
+    "rematch_temporal_transfer_blocked": true,
+    "unreviewed_adapter_widening": 0,
+    "future_run_invariance": "PASS",
+    "live_queue_state_metric_blobs_unchanged_by_hardening": true,
+    "authorized_commit_scope_only": true
+  },
+  "next_step": "STOP. Do not run controlled mutation. Next step is a short repeat of controlled mutation preflight against current live state with the hardened monitor code."
 }
