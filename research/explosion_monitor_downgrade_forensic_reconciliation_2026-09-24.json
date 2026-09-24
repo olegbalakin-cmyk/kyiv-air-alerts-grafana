@@ -109,7 +109,6 @@
       "5c03b9b16cd8676a36d34364",
       "e32f3597227018c2564e8935"
     ],
-    "candidate_current_or_applied_episode_reference_count": 20,
     "exact_episode_level_downgrade_count": 20,
     "exact_affected_episode_ids": [
       "0574cf6b4187393c9a58cd34",
@@ -133,12 +132,14 @@
       "e7e8974f19d4fdc782e93980",
       "a60d817eaa9253200f090720"
     ],
-    "note_on_23_vs_20": "Candidate-level records reference 23 applied/current episode IDs because three candidate rematches point to episodes whose episode-level transition is not a downgrade. The authoritative affected-episode cohort is the 20 records with transition_category=downgraded in episode_level_proposed_transitions.",
+    "note_on_23_vs_20": "The 58 candidate downgrade records expose 23 unique episode references when the artifact's new_match.matched_episode_id is used with old_match.matched_episode_id as fallback. Applied current matches expose 20 unique episode IDs. The authoritative affected-episode cohort is independently the 20 episode_level_proposed_transitions records with transition_category=downgraded. The sets differ because three candidate rematches point to non-downgraded episodes, while three old downgraded episodes have no applied current candidate match.",
     "non_downgraded_episode_refs_created_or_retained_by_candidate_rematch": [
       "baf3eaa558f606c14d6e385f",
       "01d286e217275f643f60379e",
       "0ddb9970c791dc2d1760716e"
-    ]
+    ],
+    "candidate_new_match_or_old_match_fallback_episode_reference_count": 23,
+    "candidate_applied_current_episode_reference_count": 20
   },
   "provenance_reconstruction_summary": {
     "first_appearance_status_counts": {
