@@ -1,0 +1,3239 @@
+{
+  "schema_version": 1,
+  "generated_for_date": "2026-09-24",
+  "repository": "olegbalakin-cmyk/kyiv-air-alerts-grafana",
+  "branch": "multicity-wip-2026-09-16",
+  "purpose": "Controlled live mutation preflight only. No live mutation. Primary architectural question: whether current queue plus current monitor can persist and consume the structured reviewed provenance required to reproduce supported approvals.",
+  "authoritative_input_chain": {
+    "final_58_20_replay": {
+      "commit": "dcc50e5296b2da80c3d3e1e6fbd9f8b1b2be4dd7",
+      "path": "research/explosion_monitor_final_58_20_replay_2026-09-24.json",
+      "blob_sha": "b5386d7b9e7188711a1ea8e5054677414b1c5a87",
+      "verdict": "FINAL 58/20 REPLAY CLEAN — READY FOR CONTROLLED MUTATION PLAN"
+    },
+    "systemwide_composition_replay": {
+      "commit": "4a3b1fbc3ca6da977b2ea9970f5cb02330fae314",
+      "path": "research/explosion_monitor_composition_systemwide_dry_replay_2026-09-24.json",
+      "blob_sha": "80fd109943e169f77faa1a95efaa18e44236a620"
+    },
+    "kyiv_composition_hardening": {
+      "commit": "4e6b7e9e2f8a6cc765f8601b65b940ccb81582f5",
+      "path": "research/explosion_monitor_kyiv_composition_hardening_dry_replay_2026-09-24.json",
+      "monitor_blob_sha": "78f13c251b2441b1724df9151f49b09a9f6e1403"
+    },
+    "forensic_reconciliation": {
+      "commit": "d24a4618ef70ad7de6f2d7250a6ceb6b502d5de3",
+      "path": "research/explosion_monitor_downgrade_forensic_reconciliation_2026-09-24.json",
+      "blob_sha": "2733d112ad0208098445210fe217f9804bccbdbf"
+    },
+    "provenance_repair_primary_excluded": {
+      "commit": "b687cd9ce4c5e6253d8ff8148dd02386d92a5573",
+      "path": "research/explosion_monitor_provenance_repair_2026-09-24.json",
+      "blob_sha": "ad1c6969c8c2653dfef66bf66fb513fca91e1b38",
+      "committed_bytes": 0,
+      "used_as_evidence": false,
+      "exclusion_reason": "Authoritative chain confirms this committed blob is zero bytes."
+    },
+    "provenance_repair_replay": {
+      "commit": "b687cd9ce4c5e6253d8ff8148dd02386d92a5573",
+      "path": "research/explosion_monitor_provenance_repair_replay_2026-09-24.json",
+      "blob_sha": "193d18c39d079258f9d0446a79dc6e193b910ef6"
+    },
+    "final_7_recovery": {
+      "commit": "aec1058a99232095466b162ec68fc17a921b3e40",
+      "path": "research/explosion_monitor_final_provenance_recovery_2026-09-24.json",
+      "blob_sha": "36cbc7c3d1b5247d594c42312ccca9fd84888b28"
+    },
+    "final_zaporizhzhia_source_identification": {
+      "commit": "15e28a2da45f4ef6a7d42135a95087364563b272",
+      "path": "research/explosion_monitor_zaporizhzhia_final_source_identification_2026-09-24.json",
+      "blob_sha": "3bf44aab9924b9bd6ea0ecc7cf5590e80e32c792"
+    }
+  },
+  "current_live_freeze": {
+    "branch_head_before_preflight": "dcc50e5296b2da80c3d3e1e6fbd9f8b1b2be4dd7",
+    "branch_head_reconciled_to_authoritative_final_replay": true,
+    "blobs": {
+      "review_queue": {
+        "path": "kyiv-air-alerts-grafana/data/explosion_review_queue.json",
+        "sha": "447245427253b80d92ac5b6fc84221dd5d312637"
+      },
+      "monitor_state": {
+        "path": "kyiv-air-alerts-grafana/data/explosion_candidate_monitor_state.json",
+        "sha": "2127a4fcbc000068d1e9e150159727c444eeb91c"
+      },
+      "last_run": {
+        "path": "kyiv-air-alerts-grafana/data/explosion_candidate_monitor_last_run.json",
+        "sha": "2bd760e885d98f90601571279201e4f861322467"
+      },
+      "strict_metric_series": {
+        "path": "kyiv-air-alerts-grafana/data/explosions_test.json",
+        "sha": "1fc8eacee3590f8cf597058e35db0d37d7250238"
+      },
+      "dashboard_data": {
+        "path": "kyiv-air-alerts-grafana/data/dashboard_data.json",
+        "sha": "5a6eba1072447f9c2903012de9a1610ec46b156e"
+      },
+      "audited_baseline": {
+        "path": "kyiv-air-alerts-grafana/data/explosion_audited_baseline.json",
+        "sha": "5bbd2b771559eac2966aeec65d6e3b5487b9c1a9"
+      },
+      "daily_alert_seed": {
+        "path": "kyiv-air-alerts-grafana/data/explosion_daily_alert_seed.json",
+        "sha": "87580a91719f78eaff7a0b5878c3d8ef57f0b02d"
+      },
+      "monitor_code": {
+        "path": "kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py",
+        "sha": "78f13c251b2441b1724df9151f49b09a9f6e1403"
+      }
+    },
+    "queue_total": 404,
+    "status_totals": {
+      "needs_review": 301,
+      "rejected": 29,
+      "approved_sensitivity": 28,
+      "approved_strict": 46
+    },
+    "last_run": {
+      "ok": true,
+      "started_at": "2026-09-24T09:29:41.710109Z",
+      "finished_at": "2026-09-24T09:53:27.455575Z",
+      "followup_cutoff_at": "2026-09-24T09:29:41.710109Z",
+      "due_checks_at_cutoff": 52,
+      "checked_due_checks_at_cutoff": 52,
+      "unchecked_due_checks_at_cutoff": 0,
+      "became_due_during_run": 9,
+      "city_count": 23,
+      "mode": "network",
+      "new_alert_episodes": 18,
+      "cities_searched": [
+        "cherkasy",
+        "chernihiv",
+        "chernivtsi",
+        "dnipro",
+        "kharkiv",
+        "kherson",
+        "kropyvnytskyi",
+        "kyiv",
+        "lutsk",
+        "mykolaiv",
+        "odesa",
+        "poltava",
+        "rivne",
+        "sumy",
+        "vinnytsia",
+        "zaporizhzhia"
+      ],
+      "searches": {
+        "cherkasy": {
+          "due_checks": 3,
+          "telegram_results": 0,
+          "results_after_filter": 1,
+          "new_candidates": 0,
+          "auto_approved_strict": 0,
+          "fulltext_fetches": 5,
+          "fulltext_rescued_candidates": 0,
+          "query_url": "https://news.google.com/rss/search?q=%22%D0%A7%D0%B5%D1%80%D0%BA%D0%B0%D1%81%D0%B8%22+%28%D0%B2%D0%B8%D0%B1%D1%83%D1%85+OR+%D0%B2%D0%B8%D0%B1%D1%83%D1%85%D0%B8+OR+%22%D0%B1%D1%83%D0%BB%D0%BE+%D1%87%D1%83%D1%82%D0%BD%D0%BE%22+OR+%22%D0%BF%D1%80%D0%BE%D0%BB%D1%83%D0%BD%D0%B0%D0%BB%D0%B8+%D0%B2%D0%B8%D0%B1%D1%83%D1%85%D0%B8%22+OR+%22%D1%87%D1%83%D0%BB%D0%B8+%D0%B2%D0%B8%D0%B1%D1%83%D1%85%D0%B8%22%29+when%3A8d&hl=uk&gl=UA&ceid=UA:uk",
+          "google_error": null
+        },
+        "chernihiv": {
+          "due_checks": 2,
+          "telegram_results": 0,
+          "results_after_filter": 0,
+          "new_candidates": 0,
+          "auto_approved_strict": 0,
+          "fulltext_fetches": 1,
+          "fulltext_rescued_candidates": 0,
+          "query_url": "https://news.google.com/rss/search?q=%22%D0%A7%D0%B5%D1%80%D0%BD%D1%96%D0%B3%D1%96%D0%B2%22+%28%D0%B2%D0%B8%D0%B1%D1%83%D1%85+OR+%D0%B2%D0%B8%D0%B1%D1%83%D1%85%D0%B8+OR+%22%D0%B1%D1%83%D0%BB%D0%BE+%D1%87%D1%83%D1%82%D0%BD%D0%BE%22+OR+%22%D0%BF%D1%80%D0%BE%D0%BB%D1%83%D0%BD%D0%B0%D0%BB%D0%B8+%D0%B2%D0%B8%D0%B1%D1%83%D1%85%D0%B8%22+OR+%22%D1%87%D1%83%D0%BB%D0%B8+%D0%B2%D0%B8%D0%B1%D1%83%D1%85%D0%B8%22%29+when%3A8d&hl=uk&gl=UA&ceid=UA:uk",
+          "google_error": null
+        },
+        "chernivtsi": {
+          "due_checks": 1,
+          "telegram_results": 0,
+          "results_after_filter": 0,
+          "new_candidates": 0,
+          "auto_approved_strict": 0,
+          "fulltext_fetches": 0,
+          "fulltext_rescued_candidates": 0,
+          "query_url": "https://news.google.com/rss/search?q=%22%D0%A7%D0%B5%D1%80%D0%BD%D1%96%D0%B2%D1%86%D1%96%22+%28%D0%B2%D0%B8%D0%B1%D1%83%D1%85+OR+%D0%B2%D0%B8%D0%B1%D1%83%D1%85%D0%B8+OR+%22%D0%B1%D1%83%D0%BB%D0%BE+%D1%87%D1%83%D1%82%D0%BD%D0%BE%22+OR+%22%D0%BF%D1%80%D0%BE%D0%BB%D1%83%D0%BD%D0%B0%D0%BB%D0%B8+%D0%B2%D0%B8%D0%B1%D1%83%D1%85%D0%B8%22+OR+%22%D1%87%D1%83%D0%BB%D0%B8+%D0%B2%D0%B8%D0%B1%D1%83%D1%85%D0%B8%22%29+when%3A8d&hl=uk&gl=UA&ceid=UA:uk",
+          "google_error": null
+        },
+        "dnipro": {
+          "due_checks": 2,
+          "telegram_results": 3,
+          "results_after_filter": 20,
+          "new_candidates": 1,
+          "auto_approved_strict": 0,
+          "fulltext_fetches": 5,
+          "fulltext_rescued_candidates": 0,
+          "query_url": "https://news.google.com/rss/search?q=%22%D0%94%D0%BD%D1%96%D0%BF%D1%80%D0%BE%22+%28%D0%B2%D0%B8%D0%B1%D1%83%D1%85+OR+%D0%B2%D0%B8%D0%B1%D1%83%D1%85%D0%B8+OR+%22%D0%B1%D1%83%D0%BB%D0%BE+%D1%87%D1%83%D1%82%D0%BD%D0%BE%22+OR+%22%D0%BF%D1%80%D0%BE%D0%BB%D1%83%D0%BD%D0%B0%D0%BB%D0%B8+%D0%B2%D0%B8%D0%B1%D1%83%D1%85%D0%B8%22+OR+%22%D1%87%D1%83%D0%BB%D0%B8+%D0%B2%D0%B8%D0%B1%D1%83%D1%85%D0%B8%22%29+when%3A8d&hl=uk&gl=UA&ceid=UA:uk",
+          "google_error": null
+        },
+        "kharkiv": {
+          "due_checks": 8,
+          "telegram_results": 1,
+          "results_after_filter": 3,
+          "new_candidates": 0,
+          "auto_approved_strict": 0,
+          "fulltext_fetches": 8,
+          "fulltext_rescued_candidates": 0,
+          "query_url": "https://news.google.com/rss/search?q=%22%D0%A5%D0%B0%D1%80%D0%BA%D1%96%D0%B2%22+%28%D0%B2%D0%B8%D0%B1%D1%83%D1%85+OR+%D0%B2%D0%B8%D0%B1%D1%83%D1%85%D0%B8+OR+%22%D0%B1%D1%83%D0%BB%D0%BE+%D1%87%D1%83%D1%82%D0%BD%D0%BE%22+OR+%22%D0%BF%D1%80%D0%BE%D0%BB%D1%83%D0%BD%D0%B0%D0%BB%D0%B8+%D0%B2%D0%B8%D0%B1%D1%83%D1%85%D0%B8%22+OR+%22%D1%87%D1%83%D0%BB%D0%B8+%D0%B2%D0%B8%D0%B1%D1%83%D1%85%D0%B8%22%29+when%3A8d&hl=uk&gl=UA&ceid=UA:uk",
+          "google_error": null
+        },
+        "kherson": {
+          "due_checks": 1,
+          "telegram_results": 0,
+          "results_after_filter": 0,
+          "new_candidates": 0,
+          "auto_approved_strict": 0,
+          "fulltext_fetches": 0,
+          "fulltext_rescued_candidates": 0,
+          "query_url": "https://news.google.com/rss/search?q=%22%D0%A5%D0%B5%D1%80%D1%81%D0%BE%D0%BD%22+%28%D0%B2%D0%B8%D0%B1%D1%83%D1%85+OR+%D0%B2%D0%B8%D0%B1%D1%83%D1%85%D0%B8+OR+%22%D0%B1%D1%83%D0%BB%D0%BE+%D1%87%D1%83%D1%82%D0%BD%D0%BE%22+OR+%22%D0%BF%D1%80%D0%BE%D0%BB%D1%83%D0%BD%D0%B0%D0%BB%D0%B8+%D0%B2%D0%B8%D0%B1%D1%83%D1%85%D0%B8%22+OR+%22%D1%87%D1%83%D0%BB%D0%B8+%D0%B2%D0%B8%D0%B1%D1%83%D1%85%D0%B8%22%29+when%3A8d&hl=uk&gl=UA&ceid=UA:uk",
+          "google_error": null
+        },
+        "kropyvnytskyi": {
+          "due_checks": 2,
+          "telegram_results": 1,
+          "results_after_filter": 4,
+          "new_candidates": 0,
+          "auto_approved_strict": 0,
+          "fulltext_fetches": 1,
+          "fulltext_rescued_candidates": 0,
+          "query_url": "https://news.google.com/rss/search?q=%22%D0%9A%D1%80%D0%BE%D0%BF%D0%B8%D0%B2%D0%BD%D0%B8%D1%86%D1%8C%D0%BA%D0%B8%D0%B9%22+%28%D0%B2%D0%B8%D0%B1%D1%83%D1%85+OR+%D0%B2%D0%B8%D0%B1%D1%83%D1%85%D0%B8+OR+%22%D0%B1%D1%83%D0%BB%D0%BE+%D1%87%D1%83%D1%82%D0%BD%D0%BE%22+OR+%22%D0%BF%D1%80%D0%BE%D0%BB%D1%83%D0%BD%D0%B0%D0%BB%D0%B8+%D0%B2%D0%B8%D0%B1%D1%83%D1%85%D0%B8%22+OR+%22%D1%87%D1%83%D0%BB%D0%B8+%D0%B2%D0%B8%D0%B1%D1%83%D1%85%D0%B8%22%29+when%3A8d&hl=uk&gl=UA&ceid=UA:uk",
+          "google_error": null
+        },
+        "kyiv": {
+          "due_checks": 4,
+          "telegram_results": 20,
+          "results_after_filter": 63,
+          "new_candidates": 8,
+          "auto_approved_strict": 0,
+          "fulltext_fetches": 8,
+          "fulltext_rescued_candidates": 0,
+          "query_url": "https://news.google.com/rss/search?q=%22%D0%9A%D0%B8%D1%97%D0%B2%22+%28%D0%B2%D0%B8%D0%B1%D1%83%D1%85+OR+%D0%B2%D0%B8%D0%B1%D1%83%D1%85%D0%B8+OR+%22%D0%B1%D1%83%D0%BB%D0%BE+%D1%87%D1%83%D1%82%D0%BD%D0%BE%22+OR+%22%D0%BF%D1%80%D0%BE%D0%BB%D1%83%D0%BD%D0%B0%D0%BB%D0%B8+%D0%B2%D0%B8%D0%B1%D1%83%D1%85%D0%B8%22+OR+%22%D1%87%D1%83%D0%BB%D0%B8+%D0%B2%D0%B8%D0%B1%D1%83%D1%85%D0%B8%22%29+when%3A8d&hl=uk&gl=UA&ceid=UA:uk",
+          "google_error": null
+        },
+        "lutsk": {
+          "due_checks": 1,
+          "telegram_results": 0,
+          "results_after_filter": 5,
+          "new_candidates": 4,
+          "auto_approved_strict": 0,
+          "fulltext_fetches": 4,
+          "fulltext_rescued_candidates": 0,
+          "query_url": "https://news.google.com/rss/search?q=%22%D0%9B%D1%83%D1%86%D1%8C%D0%BA%22+%28%D0%B2%D0%B8%D0%B1%D1%83%D1%85+OR+%D0%B2%D0%B8%D0%B1%D1%83%D1%85%D0%B8+OR+%22%D0%B1%D1%83%D0%BB%D0%BE+%D1%87%D1%83%D1%82%D0%BD%D0%BE%22+OR+%22%D0%BF%D1%80%D0%BE%D0%BB%D1%83%D0%BD%D0%B0%D0%BB%D0%B8+%D0%B2%D0%B8%D0%B1%D1%83%D1%85%D0%B8%22+OR+%22%D1%87%D1%83%D0%BB%D0%B8+%D0%B2%D0%B8%D0%B1%D1%83%D1%85%D0%B8%22%29+when%3A8d&hl=uk&gl=UA&ceid=UA:uk",
+          "google_error": null
+        },
+        "mykolaiv": {
+          "due_checks": 4,
+          "telegram_results": 0,
+          "results_after_filter": 1,
+          "new_candidates": 0,
+          "auto_approved_strict": 0,
+          "fulltext_fetches": 1,
+          "fulltext_rescued_candidates": 0,
+          "query_url": "https://news.google.com/rss/search?q=%22%D0%9C%D0%B8%D0%BA%D0%BE%D0%BB%D0%B0%D1%97%D0%B2%22+%28%D0%B2%D0%B8%D0%B1%D1%83%D1%85+OR+%D0%B2%D0%B8%D0%B1%D1%83%D1%85%D0%B8+OR+%22%D0%B1%D1%83%D0%BB%D0%BE+%D1%87%D1%83%D1%82%D0%BD%D0%BE%22+OR+%22%D0%BF%D1%80%D0%BE%D0%BB%D1%83%D0%BD%D0%B0%D0%BB%D0%B8+%D0%B2%D0%B8%D0%B1%D1%83%D1%85%D0%B8%22+OR+%22%D1%87%D1%83%D0%BB%D0%B8+%D0%B2%D0%B8%D0%B1%D1%83%D1%85%D0%B8%22%29+when%3A8d&hl=uk&gl=UA&ceid=UA:uk",
+          "google_error": null
+        },
+        "odesa": {
+          "due_checks": 4,
+          "telegram_results": 1,
+          "results_after_filter": 2,
+          "new_candidates": 2,
+          "auto_approved_strict": 0,
+          "fulltext_fetches": 4,
+          "fulltext_rescued_candidates": 0,
+          "query_url": "https://news.google.com/rss/search?q=%22%D0%9E%D0%B4%D0%B5%D1%81%D0%B0%22+%28%D0%B2%D0%B8%D0%B1%D1%83%D1%85+OR+%D0%B2%D0%B8%D0%B1%D1%83%D1%85%D0%B8+OR+%22%D0%B1%D1%83%D0%BB%D0%BE+%D1%87%D1%83%D1%82%D0%BD%D0%BE%22+OR+%22%D0%BF%D1%80%D0%BE%D0%BB%D1%83%D0%BD%D0%B0%D0%BB%D0%B8+%D0%B2%D0%B8%D0%B1%D1%83%D1%85%D0%B8%22+OR+%22%D1%87%D1%83%D0%BB%D0%B8+%D0%B2%D0%B8%D0%B1%D1%83%D1%85%D0%B8%22%29+when%3A8d&hl=uk&gl=UA&ceid=UA:uk",
+          "google_error": null
+        },
+        "poltava": {
+          "due_checks": 7,
+          "telegram_results": 1,
+          "results_after_filter": 3,
+          "new_candidates": 0,
+          "auto_approved_strict": 0,
+          "fulltext_fetches": 4,
+          "fulltext_rescued_candidates": 0,
+          "query_url": "https://news.google.com/rss/search?q=%22%D0%9F%D0%BE%D0%BB%D1%82%D0%B0%D0%B2%D0%B0%22+%28%D0%B2%D0%B8%D0%B1%D1%83%D1%85+OR+%D0%B2%D0%B8%D0%B1%D1%83%D1%85%D0%B8+OR+%22%D0%B1%D1%83%D0%BB%D0%BE+%D1%87%D1%83%D1%82%D0%BD%D0%BE%22+OR+%22%D0%BF%D1%80%D0%BE%D0%BB%D1%83%D0%BD%D0%B0%D0%BB%D0%B8+%D0%B2%D0%B8%D0%B1%D1%83%D1%85%D0%B8%22+OR+%22%D1%87%D1%83%D0%BB%D0%B8+%D0%B2%D0%B8%D0%B1%D1%83%D1%85%D0%B8%22%29+when%3A8d&hl=uk&gl=UA&ceid=UA:uk",
+          "google_error": null
+        },
+        "rivne": {
+          "due_checks": 1,
+          "telegram_results": 1,
+          "results_after_filter": 8,
+          "new_candidates": 6,
+          "auto_approved_strict": 0,
+          "fulltext_fetches": 8,
+          "fulltext_rescued_candidates": 0,
+          "query_url": "https://news.google.com/rss/search?q=%22%D0%A0%D1%96%D0%B2%D0%BD%D0%B5%22+%28%D0%B2%D0%B8%D0%B1%D1%83%D1%85+OR+%D0%B2%D0%B8%D0%B1%D1%83%D1%85%D0%B8+OR+%22%D0%B1%D1%83%D0%BB%D0%BE+%D1%87%D1%83%D1%82%D0%BD%D0%BE%22+OR+%22%D0%BF%D1%80%D0%BE%D0%BB%D1%83%D0%BD%D0%B0%D0%BB%D0%B8+%D0%B2%D0%B8%D0%B1%D1%83%D1%85%D0%B8%22+OR+%22%D1%87%D1%83%D0%BB%D0%B8+%D0%B2%D0%B8%D0%B1%D1%83%D1%85%D0%B8%22%29+when%3A8d&hl=uk&gl=UA&ceid=UA:uk",
+          "google_error": null
+        },
+        "sumy": {
+          "due_checks": 8,
+          "telegram_results": 3,
+          "results_after_filter": 6,
+          "new_candidates": 0,
+          "auto_approved_strict": 0,
+          "fulltext_fetches": 8,
+          "fulltext_rescued_candidates": 0,
+          "query_url": "https://news.google.com/rss/search?q=%22%D0%A1%D1%83%D0%BC%D0%B8%22+%28%D0%B2%D0%B8%D0%B1%D1%83%D1%85+OR+%D0%B2%D0%B8%D0%B1%D1%83%D1%85%D0%B8+OR+%22%D0%B1%D1%83%D0%BB%D0%BE+%D1%87%D1%83%D1%82%D0%BD%D0%BE%22+OR+%22%D0%BF%D1%80%D0%BE%D0%BB%D1%83%D0%BD%D0%B0%D0%BB%D0%B8+%D0%B2%D0%B8%D0%B1%D1%83%D1%85%D0%B8%22+OR+%22%D1%87%D1%83%D0%BB%D0%B8+%D0%B2%D0%B8%D0%B1%D1%83%D1%85%D0%B8%22%29+when%3A8d&hl=uk&gl=UA&ceid=UA:uk",
+          "google_error": null
+        },
+        "vinnytsia": {
+          "due_checks": 2,
+          "telegram_results": 0,
+          "results_after_filter": 0,
+          "new_candidates": 0,
+          "auto_approved_strict": 0,
+          "fulltext_fetches": 0,
+          "fulltext_rescued_candidates": 0,
+          "query_url": "https://news.google.com/rss/search?q=%22%D0%92%D1%96%D0%BD%D0%BD%D0%B8%D1%86%D1%8F%22+%28%D0%B2%D0%B8%D0%B1%D1%83%D1%85+OR+%D0%B2%D0%B8%D0%B1%D1%83%D1%85%D0%B8+OR+%22%D0%B1%D1%83%D0%BB%D0%BE+%D1%87%D1%83%D1%82%D0%BD%D0%BE%22+OR+%22%D0%BF%D1%80%D0%BE%D0%BB%D1%83%D0%BD%D0%B0%D0%BB%D0%B8+%D0%B2%D0%B8%D0%B1%D1%83%D1%85%D0%B8%22+OR+%22%D1%87%D1%83%D0%BB%D0%B8+%D0%B2%D0%B8%D0%B1%D1%83%D1%85%D0%B8%22%29+when%3A8d&hl=uk&gl=UA&ceid=UA:uk",
+          "google_error": null
+        },
+        "zaporizhzhia": {
+          "due_checks": 2,
+          "telegram_results": 1,
+          "results_after_filter": 2,
+          "new_candidates": 1,
+          "auto_approved_strict": 0,
+          "fulltext_fetches": 2,
+          "fulltext_rescued_candidates": 0,
+          "query_url": "https://news.google.com/rss/search?q=%22%D0%97%D0%B0%D0%BF%D0%BE%D1%80%D1%96%D0%B6%D0%B6%D1%8F%22+%28%D0%B2%D0%B8%D0%B1%D1%83%D1%85+OR+%D0%B2%D0%B8%D0%B1%D1%83%D1%85%D0%B8+OR+%22%D0%B1%D1%83%D0%BB%D0%BE+%D1%87%D1%83%D1%82%D0%BD%D0%BE%22+OR+%22%D0%BF%D1%80%D0%BE%D0%BB%D1%83%D0%BD%D0%B0%D0%BB%D0%B8+%D0%B2%D0%B8%D0%B1%D1%83%D1%85%D0%B8%22+OR+%22%D1%87%D1%83%D0%BB%D0%B8+%D0%B2%D0%B8%D0%B1%D1%83%D1%85%D0%B8%22%29+when%3A8d&hl=uk&gl=UA&ceid=UA:uk",
+          "google_error": null
+        }
+      },
+      "new_review_candidates": 22,
+      "review_queue_size": 404,
+      "matching_refresh": {
+        "candidates_checked": 282,
+        "unique_match": 215,
+        "ambiguous_match": 10,
+        "no_match": 57,
+        "material_match_changes": 7,
+        "stale_classification_before": 26,
+        "reclassified_after_match_refresh": 30,
+        "stale_classification_repaired": 26,
+        "status_changes": 0,
+        "reclassified_episode_ids": [
+          "63e7c8f5bb22f41c2af4d60b",
+          "64e34e0fca03e48f426ae71b",
+          "74e6bb30920a6eb59eef277a",
+          "886deb3ed4b11cd18a0a015d",
+          "9d3bc1da6730b2e88e0251ca",
+          "9ddb41e0e6ccef332646a841",
+          "a9b09f413c57ed2d979a9d73",
+          "ae246c2ad4c225e10ab38cda",
+          "b6043fef9f70f63c4cc6596f",
+          "ca3f2358635119f9f90147d8",
+          "e97e6e816f96832d02c8b2cd"
+        ]
+      },
+      "composition_refresh": {
+        "episode_groups_checked": 5,
+        "composed_strict": 1,
+        "candidate_status_changes": 1,
+        "composed_strict_episode_ids": [
+          "e97e6e816f96832d02c8b2cd"
+        ]
+      },
+      "fulltext_fetches": 59,
+      "fulltext_rescued_candidates": 0,
+      "telegram": {
+        "suspilne": {
+          "last_seen_at": "2026-09-24T09:52:19Z",
+          "cached_relevant_posts": 41,
+          "last_error": null
+        },
+        "ukrpravda": {
+          "last_seen_at": "2026-09-24T09:47:01Z",
+          "cached_relevant_posts": 8,
+          "last_error": null
+        }
+      },
+      "errors": {},
+      "strict_series_modified_by_discovery": false
+    }
+  },
+  "live_state_reconciliation": {
+    "final_8": {
+      "expected_count": 8,
+      "observed_count": 8,
+      "material_conflict_count": 0,
+      "result": "NO_MATERIAL_CONFLICT",
+      "records": [
+        {
+          "candidate_id": "99664d26fab9593ccb47770a",
+          "city": "Київ",
+          "current_status": "approved_sensitivity",
+          "expected_frozen_old_status": "approved_sensitivity",
+          "proposed_status": "needs_review",
+          "current_matched_episode_id": "baf3eaa558f606c14d6e385f",
+          "target_episode_id": "baf3eaa558f606c14d6e385f",
+          "reconciliation": "unchanged_and_safe"
+        },
+        {
+          "candidate_id": "3ebf49fac81615d023d0c2d2",
+          "city": "Одеса",
+          "current_status": "approved_strict",
+          "expected_frozen_old_status": "approved_strict",
+          "proposed_status": "needs_review",
+          "current_matched_episode_id": "7a7da068c0efb7be80bd45e4",
+          "target_episode_id": "7a7da068c0efb7be80bd45e4",
+          "reconciliation": "unchanged_and_safe"
+        },
+        {
+          "candidate_id": "d8bd39aa85657dd39c5e0fbc",
+          "city": "Одеса",
+          "current_status": "approved_strict",
+          "expected_frozen_old_status": "approved_strict",
+          "proposed_status": "needs_review",
+          "current_matched_episode_id": "eb2580c2bec54ddc2e36eaf7",
+          "target_episode_id": "eb2580c2bec54ddc2e36eaf7",
+          "reconciliation": "unchanged_and_safe"
+        },
+        {
+          "candidate_id": "d9fad0e4ef5ef4f597f29978",
+          "city": "Одеса",
+          "current_status": "approved_strict",
+          "expected_frozen_old_status": "approved_strict",
+          "proposed_status": "needs_review",
+          "current_matched_episode_id": "2c5bbc0aeba9e25e4eec7b09",
+          "target_episode_id": "2c5bbc0aeba9e25e4eec7b09",
+          "reconciliation": "unchanged_and_safe"
+        },
+        {
+          "candidate_id": "f4c561e2f211ba8a707b3696",
+          "city": "Одеса",
+          "current_status": "approved_strict",
+          "expected_frozen_old_status": "approved_strict",
+          "proposed_status": "needs_review",
+          "current_matched_episode_id": "2c5bbc0aeba9e25e4eec7b09",
+          "target_episode_id": "2c5bbc0aeba9e25e4eec7b09",
+          "reconciliation": "unchanged_and_safe"
+        },
+        {
+          "candidate_id": "e7461ec759e4d79020dfd1ba",
+          "city": "Запоріжжя",
+          "current_status": "approved_strict",
+          "expected_frozen_old_status": "approved_strict",
+          "proposed_status": "needs_review",
+          "current_matched_episode_id": "a60d817eaa9253200f090720",
+          "target_episode_id": "a60d817eaa9253200f090720",
+          "reconciliation": "unchanged_and_safe"
+        },
+        {
+          "candidate_id": "113dac439efda41673b1f497",
+          "city": "Запоріжжя",
+          "current_status": "approved_strict",
+          "expected_frozen_old_status": "approved_strict",
+          "proposed_status": "needs_review",
+          "current_matched_episode_id": "a60d817eaa9253200f090720",
+          "target_episode_id": "a60d817eaa9253200f090720",
+          "reconciliation": "unchanged_and_safe"
+        },
+        {
+          "candidate_id": "e84bc9a86b87a64b6b604974",
+          "city": "Одеса",
+          "current_status": "approved_strict",
+          "expected_frozen_old_status": "approved_strict",
+          "proposed_status": "needs_review",
+          "current_matched_episode_id": "e956b3621d18df308b368835",
+          "target_episode_id": "e956b3621d18df308b368835",
+          "reconciliation": "unchanged_and_safe"
+        }
+      ]
+    },
+    "validated_composition_3": {
+      "expected_episode_count": 3,
+      "observed_episode_count": 3,
+      "material_conflict_count": 0,
+      "already_transitioned_consistently": [
+        "e97e6e816f96832d02c8b2cd"
+      ],
+      "unchanged_and_safe": [
+        "c894e85e407dc4256d8c4419",
+        "f235928c329ca806d9dca5ed"
+      ],
+      "result": "NO_MATERIAL_CONFLICT",
+      "records": [
+        {
+          "target_episode_id": "c894e85e407dc4256d8c4419",
+          "city": "Дніпро",
+          "anchor_candidate_id": "3f2137adc72e1202240133f7",
+          "current_anchor_status": "needs_review",
+          "proposed_anchor_status": "approved_strict",
+          "current_anchor_matched_episode_id": "c894e85e407dc4256d8c4419",
+          "reconciliation": "unchanged_and_safe"
+        },
+        {
+          "target_episode_id": "e97e6e816f96832d02c8b2cd",
+          "city": "Київ",
+          "anchor_candidate_id": "73d817926f66c8dce397b91b",
+          "current_anchor_status": "approved_strict",
+          "proposed_anchor_status": "approved_strict",
+          "current_anchor_matched_episode_id": "e97e6e816f96832d02c8b2cd",
+          "reconciliation": "already_transitioned_consistently"
+        },
+        {
+          "target_episode_id": "f235928c329ca806d9dca5ed",
+          "city": "Київ",
+          "anchor_candidate_id": "5f807237ce10eb9d27bfc95f",
+          "current_anchor_status": "needs_review",
+          "proposed_anchor_status": "approved_strict",
+          "current_anchor_matched_episode_id": "f235928c329ca806d9dca5ed",
+          "reconciliation": "unchanged_and_safe"
+        }
+      ]
+    },
+    "provenance_52": {
+      "all_present": true,
+      "all_current_target_episode_matches": true,
+      "count": 52,
+      "supported_approval_persistence_required_count": 50,
+      "deterministic_negative_audit_only_count": 2
+    },
+    "unrelated_new_candidates_do_not_invalidate_preflight": true
+  },
+  "exact_8_final_downgrade_cleanup_transitions": [
+    {
+      "candidate_id": "99664d26fab9593ccb47770a",
+      "city": "Київ",
+      "current_live_status": "approved_sensitivity",
+      "proposed_status": "needs_review",
+      "matched_episode_id": "baf3eaa558f606c14d6e385f",
+      "target_episode_id": "baf3eaa558f606c14d6e385f",
+      "final_classification_reasons": [
+        "MATCH_UNIQUE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "AIR_MILITARY_CONTEXT",
+        "SAME_ATTACK_CONTEXT_SUPPORTED",
+        "NO_STRICT_TEMPORAL_BINDING",
+        "MULTI_EPISODE_DATE_REQUIRES_EPISODE_SPECIFIC_TEMPORAL_PROOF",
+        "CANDIDATE_CLEANUP_EPISODE_PRESERVED"
+      ],
+      "structured_provenance_reference": {
+        "artifact": "research/explosion_monitor_downgrade_forensic_reconciliation_2026-09-24.json",
+        "blob_sha": "2733d112ad0208098445210fe217f9804bccbdbf",
+        "status": "CANDIDATE_DOWNGRADE_EPISODE_STILL_SUPPORTED"
+      },
+      "episode_level_consequence": "Candidate cleanup only; episode baf3eaa558f606c14d6e385f remains approved_strict.",
+      "candidate_transition_affects_metric": false,
+      "live_now": {
+        "status": "approved_sensitivity",
+        "matched_episode_id": "baf3eaa558f606c14d6e385f",
+        "matching_outcome": "unique_match",
+        "classification_reason_codes": [
+          "MATCH_UNIQUE",
+          "EXACT_CITY_EVENT_TEXT",
+          "STRICT_EXPLOSION_EVIDENCE",
+          "AIR_MILITARY_CONTEXT",
+          "SAME_ATTACK_CONTEXT_SUPPORTED",
+          "NO_STRICT_TEMPORAL_BINDING",
+          "SENSITIVITY_INFERRED_SAME_ATTACK"
+        ],
+        "has_classification_evidence": true,
+        "has_composition_provenance": false
+      },
+      "live_state_reconciliation": "unchanged_and_safe"
+    },
+    {
+      "candidate_id": "3ebf49fac81615d023d0c2d2",
+      "city": "Одеса",
+      "current_live_status": "approved_strict",
+      "proposed_status": "needs_review",
+      "matched_episode_id": "7a7da068c0efb7be80bd45e4",
+      "target_episode_id": "7a7da068c0efb7be80bd45e4",
+      "final_classification_reasons": [
+        "MATCH_UNIQUE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "AIR_MILITARY_CONTEXT",
+        "SAME_ATTACK_CONTEXT_SUPPORTED",
+        "TEMPORAL_EXPLICIT_ALERT_RELATION_AMBIGUOUS_DATE",
+        "MULTI_EPISODE_DATE_REQUIRES_EPISODE_SPECIFIC_TEMPORAL_PROOF",
+        "TRUE_LEGACY_OVERAPPROVAL",
+        "OLD_PUBLICATION_ASSISTED_TEMPORAL_ATTRIBUTION_REJECTED"
+      ],
+      "structured_provenance_reference": {
+        "artifact": "research/explosion_monitor_downgrade_forensic_reconciliation_2026-09-24.json",
+        "blob_sha": "2733d112ad0208098445210fe217f9804bccbdbf",
+        "status": "TRUE_LEGACY_OVERAPPROVAL"
+      },
+      "episode_level_consequence": "Frozen episode result: DOWNGRADE_TO_UNRESOLVED.",
+      "candidate_transition_affects_metric": true,
+      "live_now": {
+        "status": "approved_strict",
+        "matched_episode_id": "7a7da068c0efb7be80bd45e4",
+        "matching_outcome": "unique_match",
+        "classification_reason_codes": null,
+        "has_classification_evidence": false,
+        "has_composition_provenance": false
+      },
+      "live_state_reconciliation": "unchanged_and_safe"
+    },
+    {
+      "candidate_id": "d8bd39aa85657dd39c5e0fbc",
+      "city": "Одеса",
+      "current_live_status": "approved_strict",
+      "proposed_status": "needs_review",
+      "matched_episode_id": "eb2580c2bec54ddc2e36eaf7",
+      "target_episode_id": "eb2580c2bec54ddc2e36eaf7",
+      "final_classification_reasons": [
+        "MATCH_UNIQUE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "AIR_MILITARY_CONTEXT",
+        "SAME_ATTACK_CONTEXT_SUPPORTED",
+        "TEMPORAL_EXPLICIT_ALERT_RELATION_AMBIGUOUS_DATE",
+        "MULTI_EPISODE_DATE_REQUIRES_EPISODE_SPECIFIC_TEMPORAL_PROOF",
+        "TRUE_LEGACY_OVERAPPROVAL",
+        "OLD_PUBLICATION_ASSISTED_TEMPORAL_ATTRIBUTION_REJECTED"
+      ],
+      "structured_provenance_reference": {
+        "artifact": "research/explosion_monitor_downgrade_forensic_reconciliation_2026-09-24.json",
+        "blob_sha": "2733d112ad0208098445210fe217f9804bccbdbf",
+        "status": "TRUE_LEGACY_OVERAPPROVAL"
+      },
+      "episode_level_consequence": "Frozen episode result: DOWNGRADE_TO_UNRESOLVED.",
+      "candidate_transition_affects_metric": true,
+      "live_now": {
+        "status": "approved_strict",
+        "matched_episode_id": "eb2580c2bec54ddc2e36eaf7",
+        "matching_outcome": "unique_match",
+        "classification_reason_codes": null,
+        "has_classification_evidence": false,
+        "has_composition_provenance": false
+      },
+      "live_state_reconciliation": "unchanged_and_safe"
+    },
+    {
+      "candidate_id": "d9fad0e4ef5ef4f597f29978",
+      "city": "Одеса",
+      "current_live_status": "approved_strict",
+      "proposed_status": "needs_review",
+      "matched_episode_id": "2c5bbc0aeba9e25e4eec7b09",
+      "target_episode_id": "2c5bbc0aeba9e25e4eec7b09",
+      "final_classification_reasons": [
+        "MATCH_UNIQUE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "AIR_MILITARY_CONTEXT",
+        "SAME_ATTACK_CONTEXT_SUPPORTED",
+        "TEMPORAL_EXPLICIT_ALERT_RELATION_AMBIGUOUS_DATE",
+        "MULTI_EPISODE_DATE_REQUIRES_EPISODE_SPECIFIC_TEMPORAL_PROOF",
+        "TRUE_LEGACY_OVERAPPROVAL",
+        "OLD_PUBLICATION_ASSISTED_TEMPORAL_ATTRIBUTION_REJECTED"
+      ],
+      "structured_provenance_reference": {
+        "artifact": "research/explosion_monitor_downgrade_forensic_reconciliation_2026-09-24.json",
+        "blob_sha": "2733d112ad0208098445210fe217f9804bccbdbf",
+        "status": "TRUE_LEGACY_OVERAPPROVAL"
+      },
+      "episode_level_consequence": "Frozen episode result: DOWNGRADE_TO_UNRESOLVED.",
+      "candidate_transition_affects_metric": true,
+      "live_now": {
+        "status": "approved_strict",
+        "matched_episode_id": "2c5bbc0aeba9e25e4eec7b09",
+        "matching_outcome": "unique_match",
+        "classification_reason_codes": null,
+        "has_classification_evidence": false,
+        "has_composition_provenance": false
+      },
+      "live_state_reconciliation": "unchanged_and_safe"
+    },
+    {
+      "candidate_id": "f4c561e2f211ba8a707b3696",
+      "city": "Одеса",
+      "current_live_status": "approved_strict",
+      "proposed_status": "needs_review",
+      "matched_episode_id": "2c5bbc0aeba9e25e4eec7b09",
+      "target_episode_id": "2c5bbc0aeba9e25e4eec7b09",
+      "final_classification_reasons": [
+        "MATCH_UNIQUE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "AIR_MILITARY_CONTEXT",
+        "SAME_ATTACK_CONTEXT_SUPPORTED",
+        "TEMPORAL_EXPLICIT_ALERT_RELATION_AMBIGUOUS_DATE",
+        "MULTI_EPISODE_DATE_REQUIRES_EPISODE_SPECIFIC_TEMPORAL_PROOF",
+        "TRUE_LEGACY_OVERAPPROVAL",
+        "OLD_PUBLICATION_ASSISTED_TEMPORAL_ATTRIBUTION_REJECTED"
+      ],
+      "structured_provenance_reference": {
+        "artifact": "research/explosion_monitor_downgrade_forensic_reconciliation_2026-09-24.json",
+        "blob_sha": "2733d112ad0208098445210fe217f9804bccbdbf",
+        "status": "TRUE_LEGACY_OVERAPPROVAL"
+      },
+      "episode_level_consequence": "Frozen episode result: DOWNGRADE_TO_UNRESOLVED.",
+      "candidate_transition_affects_metric": true,
+      "live_now": {
+        "status": "approved_strict",
+        "matched_episode_id": "2c5bbc0aeba9e25e4eec7b09",
+        "matching_outcome": "unique_match",
+        "classification_reason_codes": null,
+        "has_classification_evidence": false,
+        "has_composition_provenance": false
+      },
+      "live_state_reconciliation": "unchanged_and_safe"
+    },
+    {
+      "candidate_id": "e7461ec759e4d79020dfd1ba",
+      "city": "Запоріжжя",
+      "current_live_status": "approved_strict",
+      "proposed_status": "needs_review",
+      "matched_episode_id": "a60d817eaa9253200f090720",
+      "target_episode_id": "a60d817eaa9253200f090720",
+      "final_classification_reasons": [
+        "MATCH_UNIQUE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "NO_AIR_MILITARY_CONTEXT",
+        "NO_STRICT_TEMPORAL_BINDING",
+        "FINAL_SOURCE_CHAIN_IDENTIFIED",
+        "TEMPORAL_CLAIM_UNSUPPORTED",
+        "MULTI_EPISODE_NO_EPISODE_SPECIFIC_BINDING"
+      ],
+      "structured_provenance_reference": {
+        "artifact": "research/explosion_monitor_zaporizhzhia_final_source_identification_2026-09-24.json",
+        "blob_sha": "3bf44aab9924b9bd6ea0ecc7cf5590e80e32c792",
+        "status": "SOURCE_IDENTIFIED_BUT_TEMPORAL_CLAIM_UNSUPPORTED"
+      },
+      "episode_level_consequence": "Frozen episode result: DOWNGRADE_TO_UNRESOLVED.",
+      "candidate_transition_affects_metric": true,
+      "live_now": {
+        "status": "approved_strict",
+        "matched_episode_id": "a60d817eaa9253200f090720",
+        "matching_outcome": "unique_match",
+        "classification_reason_codes": null,
+        "has_classification_evidence": false,
+        "has_composition_provenance": false
+      },
+      "live_state_reconciliation": "unchanged_and_safe"
+    },
+    {
+      "candidate_id": "113dac439efda41673b1f497",
+      "city": "Запоріжжя",
+      "current_live_status": "approved_strict",
+      "proposed_status": "needs_review",
+      "matched_episode_id": "a60d817eaa9253200f090720",
+      "target_episode_id": "a60d817eaa9253200f090720",
+      "final_classification_reasons": [
+        "MATCH_UNIQUE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "NO_AIR_MILITARY_CONTEXT",
+        "NO_STRICT_TEMPORAL_BINDING",
+        "FINAL_SOURCE_CHAIN_IDENTIFIED",
+        "TEMPORAL_CLAIM_UNSUPPORTED",
+        "MULTI_EPISODE_NO_EPISODE_SPECIFIC_BINDING"
+      ],
+      "structured_provenance_reference": {
+        "artifact": "research/explosion_monitor_zaporizhzhia_final_source_identification_2026-09-24.json",
+        "blob_sha": "3bf44aab9924b9bd6ea0ecc7cf5590e80e32c792",
+        "status": "SOURCE_IDENTIFIED_BUT_TEMPORAL_CLAIM_UNSUPPORTED"
+      },
+      "episode_level_consequence": "Frozen episode result: DOWNGRADE_TO_UNRESOLVED.",
+      "candidate_transition_affects_metric": true,
+      "live_now": {
+        "status": "approved_strict",
+        "matched_episode_id": "a60d817eaa9253200f090720",
+        "matching_outcome": "unique_match",
+        "classification_reason_codes": null,
+        "has_classification_evidence": false,
+        "has_composition_provenance": false
+      },
+      "live_state_reconciliation": "unchanged_and_safe"
+    },
+    {
+      "candidate_id": "e84bc9a86b87a64b6b604974",
+      "city": "Одеса",
+      "current_live_status": "approved_strict",
+      "proposed_status": "needs_review",
+      "matched_episode_id": "e956b3621d18df308b368835",
+      "target_episode_id": "e956b3621d18df308b368835",
+      "final_classification_reasons": [
+        "MATCH_UNIQUE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "AIR_MILITARY_CONTEXT",
+        "SAME_ATTACK_CONTEXT_SUPPORTED",
+        "TEMPORAL_EXPLICIT_ALERT_RELATION_AMBIGUOUS_DATE",
+        "MULTI_EPISODE_DATE_REQUIRES_EPISODE_SPECIFIC_TEMPORAL_PROOF",
+        "CANDIDATE_CLEANUP_EPISODE_PRESERVED"
+      ],
+      "structured_provenance_reference": {
+        "artifact": "research/explosion_monitor_downgrade_forensic_reconciliation_2026-09-24.json",
+        "blob_sha": "2733d112ad0208098445210fe217f9804bccbdbf",
+        "status": "CANDIDATE_DOWNGRADE_EPISODE_STILL_SUPPORTED"
+      },
+      "episode_level_consequence": "Candidate cleanup only; episode e956b3621d18df308b368835 remains approved_strict.",
+      "candidate_transition_affects_metric": false,
+      "live_now": {
+        "status": "approved_strict",
+        "matched_episode_id": "e956b3621d18df308b368835",
+        "matching_outcome": "unique_match",
+        "classification_reason_codes": null,
+        "has_classification_evidence": false,
+        "has_composition_provenance": false
+      },
+      "live_state_reconciliation": "unchanged_and_safe"
+    }
+  ],
+  "exact_validated_composition_addition_transitions": [
+    {
+      "city_key": "dnipro",
+      "city": "Дніпро",
+      "target_episode_id": "c894e85e407dc4256d8c4419",
+      "previous_effective_episode_status": "needs_review",
+      "resulting_episode_status": "approved_strict",
+      "deterministic_anchor_candidate_id": "3f2137adc72e1202240133f7",
+      "episode_candidate_ids": [
+        "3f2137adc72e1202240133f7",
+        "a06e12f4cfed9b43eafe2d58",
+        "aa19972aee883cf12af75d20"
+      ],
+      "composition_contributor_candidate_ids": [
+        "3f2137adc72e1202240133f7",
+        "a06e12f4cfed9b43eafe2d58"
+      ],
+      "composition_contributors": [
+        {
+          "candidate_id": "3f2137adc72e1202240133f7",
+          "roles": [
+            "explosion_evidence",
+            "temporal_proof"
+          ],
+          "temporal_code": "TEMPORAL_CONTEMPORANEOUS_LIVE_WORDING",
+          "temporal_evidence_type": "trusted_contemporaneous_live_message"
+        },
+        {
+          "candidate_id": "a06e12f4cfed9b43eafe2d58",
+          "roles": [
+            "explosion_evidence",
+            "air_military_context"
+          ],
+          "same_attack_reason": "air_context_in_exact_city_event_segment"
+        }
+      ],
+      "same_attack_compatibility": {
+        "present": true,
+        "reason": "compatible_same_attack_sequence",
+        "basis": [
+          "timestamps_within_45m",
+          "repeated_explosions"
+        ],
+        "gap_seconds": 1619,
+        "temporal_neighbor_check": {
+          "passed": true,
+          "moment": "2026-09-21T23:43:27Z",
+          "active_episode_ids": [
+            "c894e85e407dc4256d8c4419"
+          ],
+          "conflicting_neighbor_episode_ids": []
+        },
+        "context_neighbor_check": {
+          "passed": true,
+          "moment": "2026-09-21T23:16:28Z",
+          "active_episode_ids": [
+            "c894e85e407dc4256d8c4419"
+          ],
+          "conflicting_neighbor_episode_ids": []
+        }
+      },
+      "neighboring_episode_check": {
+        "passed": true,
+        "temporal_source": {
+          "passed": true,
+          "moment": "2026-09-21T23:43:27Z",
+          "active_episode_ids": [
+            "c894e85e407dc4256d8c4419"
+          ],
+          "conflicting_neighbor_episode_ids": []
+        },
+        "air_context_source": {
+          "passed": true,
+          "moment": "2026-09-21T23:16:28Z",
+          "active_episode_ids": [
+            "c894e85e407dc4256d8c4419"
+          ],
+          "conflicting_neighbor_episode_ids": []
+        }
+      },
+      "proposed_anchor_candidate_status": "approved_strict",
+      "composition_reason_codes": [
+        "COMPOSED_STRICT_SAME_EPISODE",
+        "COMPOSED_TEMPORAL_PROOF",
+        "COMPOSED_AIR_MILITARY_CONTEXT",
+        "COMPOSED_SAME_ATTACK_COMPATIBLE",
+        "COMPOSED_NEIGHBOR_CHECK_PASSED"
+      ],
+      "live_anchor": {
+        "status": "needs_review",
+        "matched_episode_id": "c894e85e407dc4256d8c4419",
+        "has_composition_provenance": false
+      },
+      "live_state_reconciliation": "unchanged_and_safe"
+    },
+    {
+      "city_key": "kyiv",
+      "city": "Київ",
+      "target_episode_id": "e97e6e816f96832d02c8b2cd",
+      "previous_effective_episode_status": "needs_review",
+      "resulting_episode_status": "approved_strict",
+      "deterministic_anchor_candidate_id": "73d817926f66c8dce397b91b",
+      "episode_candidate_ids": [
+        "0405b982305250ea21faab04",
+        "4225edf94f0a8db2b78f07e3",
+        "4bdc4c0a5f95dc1e01632d22",
+        "4f3d2eb50630de9f15fd6c5a",
+        "73d817926f66c8dce397b91b",
+        "7dd8008ab0695b10329b3899",
+        "91b7d2133a797aa96099189a",
+        "a434269bc3d63864461c6349",
+        "fcb851f13f5935821fc68503",
+        "fed2d20a9e6ee1cf2151d857"
+      ],
+      "composition_contributor_candidate_ids": [
+        "73d817926f66c8dce397b91b",
+        "4bdc4c0a5f95dc1e01632d22"
+      ],
+      "composition_contributors": [
+        {
+          "candidate_id": "73d817926f66c8dce397b91b",
+          "roles": [
+            "explosion_evidence",
+            "temporal_proof"
+          ],
+          "temporal_code": "TEMPORAL_CONTEMPORANEOUS_LIVE_WORDING",
+          "temporal_evidence_type": "trusted_contemporaneous_live_message"
+        },
+        {
+          "candidate_id": "4bdc4c0a5f95dc1e01632d22",
+          "roles": [
+            "explosion_evidence",
+            "air_military_context"
+          ],
+          "same_attack_reason": "air_context_in_exact_city_event_segment"
+        }
+      ],
+      "same_attack_compatibility": {
+        "present": true,
+        "reason": "compatible_same_attack_sequence",
+        "basis": [
+          "timestamps_within_45m",
+          "explosion_series"
+        ],
+        "gap_seconds": 1732,
+        "temporal_neighbor_check": {
+          "passed": true,
+          "moment": "2026-09-23T07:55:51Z",
+          "active_episode_ids": [
+            "e97e6e816f96832d02c8b2cd"
+          ],
+          "conflicting_neighbor_episode_ids": []
+        },
+        "context_neighbor_check": {
+          "passed": true,
+          "moment": "2026-09-23T08:24:43Z",
+          "active_episode_ids": [
+            "e97e6e816f96832d02c8b2cd"
+          ],
+          "conflicting_neighbor_episode_ids": []
+        }
+      },
+      "neighboring_episode_check": {
+        "passed": true,
+        "temporal_source": {
+          "passed": true,
+          "moment": "2026-09-23T07:55:51Z",
+          "active_episode_ids": [
+            "e97e6e816f96832d02c8b2cd"
+          ],
+          "conflicting_neighbor_episode_ids": []
+        },
+        "air_context_source": {
+          "passed": true,
+          "moment": "2026-09-23T08:24:43Z",
+          "active_episode_ids": [
+            "e97e6e816f96832d02c8b2cd"
+          ],
+          "conflicting_neighbor_episode_ids": []
+        }
+      },
+      "proposed_anchor_candidate_status": "approved_strict",
+      "composition_reason_codes": [
+        "COMPOSED_STRICT_SAME_EPISODE",
+        "COMPOSED_TEMPORAL_PROOF",
+        "COMPOSED_AIR_MILITARY_CONTEXT",
+        "COMPOSED_SAME_ATTACK_COMPATIBLE",
+        "COMPOSED_NEIGHBOR_CHECK_PASSED"
+      ],
+      "live_anchor": {
+        "status": "approved_strict",
+        "matched_episode_id": "e97e6e816f96832d02c8b2cd",
+        "has_composition_provenance": true
+      },
+      "live_state_reconciliation": "already_transitioned_consistently"
+    },
+    {
+      "city_key": "kyiv",
+      "city": "Київ",
+      "target_episode_id": "f235928c329ca806d9dca5ed",
+      "previous_effective_episode_status": "approved_sensitivity",
+      "resulting_episode_status": "approved_strict",
+      "deterministic_anchor_candidate_id": "5f807237ce10eb9d27bfc95f",
+      "episode_candidate_ids": [
+        "3140b59978a82751a8347736",
+        "4c81a45894b2a491757baa2c",
+        "59e46d1b3c06e2c50fd4d259",
+        "5f807237ce10eb9d27bfc95f",
+        "67bf5b137c88c6515b15923e",
+        "7f98c09b95dcd4a2293dd750",
+        "8f0d738a967303daa04e8b57",
+        "a9360d117f63e0190154a361",
+        "b98b6f39b39aff1204f92e93",
+        "db751f88062e80a408e5140d",
+        "e095345e2c95b982e3fac04b",
+        "f7c06b0a5c5084a4dc86ce12"
+      ],
+      "composition_contributor_candidate_ids": [
+        "5f807237ce10eb9d27bfc95f",
+        "7f98c09b95dcd4a2293dd750"
+      ],
+      "composition_contributors": [
+        {
+          "candidate_id": "5f807237ce10eb9d27bfc95f",
+          "roles": [
+            "explosion_evidence",
+            "temporal_proof"
+          ],
+          "temporal_code": "TEMPORAL_CONTEMPORANEOUS_LIVE_WORDING",
+          "temporal_evidence_type": "trusted_contemporaneous_live_message"
+        },
+        {
+          "candidate_id": "7f98c09b95dcd4a2293dd750",
+          "roles": [
+            "explosion_evidence",
+            "air_military_context"
+          ],
+          "same_attack_reason": "air_context_in_exact_city_event_segment"
+        }
+      ],
+      "same_attack_compatibility": {
+        "present": true,
+        "reason": "compatible_same_attack_sequence",
+        "basis": [
+          "timestamps_within_45m",
+          "repeated_explosions"
+        ],
+        "gap_seconds": 978,
+        "temporal_neighbor_check": {
+          "passed": true,
+          "moment": "2026-09-23T22:29:05Z",
+          "active_episode_ids": [
+            "f235928c329ca806d9dca5ed"
+          ],
+          "conflicting_neighbor_episode_ids": []
+        },
+        "context_neighbor_check": {
+          "passed": true,
+          "moment": "2026-09-23T22:12:47Z",
+          "active_episode_ids": [
+            "f235928c329ca806d9dca5ed"
+          ],
+          "conflicting_neighbor_episode_ids": []
+        }
+      },
+      "neighboring_episode_check": {
+        "passed": true,
+        "temporal_source": {
+          "passed": true,
+          "moment": "2026-09-23T22:29:05Z",
+          "active_episode_ids": [
+            "f235928c329ca806d9dca5ed"
+          ],
+          "conflicting_neighbor_episode_ids": []
+        },
+        "air_context_source": {
+          "passed": true,
+          "moment": "2026-09-23T22:12:47Z",
+          "active_episode_ids": [
+            "f235928c329ca806d9dca5ed"
+          ],
+          "conflicting_neighbor_episode_ids": []
+        }
+      },
+      "proposed_anchor_candidate_status": "approved_strict",
+      "composition_reason_codes": [
+        "COMPOSED_STRICT_SAME_EPISODE",
+        "COMPOSED_TEMPORAL_PROOF",
+        "COMPOSED_AIR_MILITARY_CONTEXT",
+        "COMPOSED_SAME_ATTACK_COMPATIBLE",
+        "COMPOSED_NEIGHBOR_CHECK_PASSED"
+      ],
+      "live_anchor": {
+        "status": "needs_review",
+        "matched_episode_id": "f235928c329ca806d9dca5ed",
+        "has_composition_provenance": false
+      },
+      "live_state_reconciliation": "unchanged_and_safe"
+    }
+  ],
+  "provenance_persistence_cohort": {
+    "original_provenance_gap_count": 52,
+    "required_for_future_supported_approval_invariance": 50,
+    "audit_only_deterministic_negative_count": 2,
+    "source_distribution": {
+      "provenance_repair_replay": 45,
+      "final_7_recovery": 5,
+      "final_zaporizhzhia_source_identification": 2
+    },
+    "records": [
+      {
+        "candidate_id": "6212f72cfd28e6a86fd5bc51",
+        "city_key": "sumy",
+        "city": "Суми",
+        "target_episode_id": "e7e8974f19d4fdc782e93980",
+        "current_status": "approved_strict",
+        "current_matched_episode_id": "e7e8974f19d4fdc782e93980",
+        "final_supported_status": "approved_strict",
+        "source_artifact": "research/explosion_monitor_final_provenance_recovery_2026-09-24.json",
+        "source_blob_sha": "36cbc7c3d1b5247d594c42312ccca9fd84888b28",
+        "provenance_status": "RECOVERED_COMPLETE",
+        "persistence_requirement": "REQUIRED_FOR_FUTURE_INVARIANCE",
+        "reason": "Current classifier cannot reconstruct the supported approval from the live candidate representation without the repaired reviewed provenance.",
+        "proposed_future_schema_fields": [
+          "review_provenance.schema_version",
+          "review_provenance.methodology_version",
+          "review_provenance.origin",
+          "review_provenance.source_artifacts",
+          "review_provenance.contributors",
+          "review_provenance.temporal.event_time_or_interval",
+          "review_provenance.temporal.timestamp_precision",
+          "review_provenance.temporal.evidence_type",
+          "review_provenance.temporal.publication_time_separate",
+          "review_provenance.target_episode_id",
+          "review_provenance.exact_city_evidence",
+          "review_provenance.explosion_evidence",
+          "review_provenance.aerial_war_evidence",
+          "review_provenance.same_attack_basis",
+          "review_provenance.neighboring_alert_check"
+        ]
+      },
+      {
+        "candidate_id": "a9fe266a5a139486045ab459",
+        "city_key": "odesa",
+        "city": "Одеса",
+        "target_episode_id": "b79711e9ad81cb490c42e956",
+        "current_status": "approved_strict",
+        "current_matched_episode_id": "b79711e9ad81cb490c42e956",
+        "final_supported_status": "approved_strict",
+        "source_artifact": "research/explosion_monitor_provenance_repair_replay_2026-09-24.json",
+        "source_blob_sha": "193d18c39d079258f9d0446a79dc6e193b910ef6",
+        "provenance_status": "COMPLETE",
+        "persistence_requirement": "REQUIRED_FOR_FUTURE_INVARIANCE",
+        "reason": "Current classifier cannot reconstruct the supported approval from the live candidate representation without the repaired reviewed provenance.",
+        "proposed_future_schema_fields": [
+          "review_provenance.schema_version",
+          "review_provenance.methodology_version",
+          "review_provenance.origin",
+          "review_provenance.source_artifacts",
+          "review_provenance.contributors",
+          "review_provenance.temporal.event_time_or_interval",
+          "review_provenance.temporal.timestamp_precision",
+          "review_provenance.temporal.evidence_type",
+          "review_provenance.temporal.publication_time_separate",
+          "review_provenance.target_episode_id",
+          "review_provenance.exact_city_evidence",
+          "review_provenance.explosion_evidence",
+          "review_provenance.aerial_war_evidence",
+          "review_provenance.same_attack_basis",
+          "review_provenance.neighboring_alert_check"
+        ]
+      },
+      {
+        "candidate_id": "e7461ec759e4d79020dfd1ba",
+        "city_key": "zaporizhzhia",
+        "city": "Запоріжжя",
+        "target_episode_id": "a60d817eaa9253200f090720",
+        "current_status": "approved_strict",
+        "current_matched_episode_id": "a60d817eaa9253200f090720",
+        "final_supported_status": "needs_review",
+        "source_artifact": "research/explosion_monitor_zaporizhzhia_final_source_identification_2026-09-24.json",
+        "source_blob_sha": "3bf44aab9924b9bd6ea0ecc7cf5590e80e32c792",
+        "provenance_status": "SOURCE_IDENTIFIED_BUT_TEMPORAL_CLAIM_UNSUPPORTED",
+        "persistence_requirement": "AUDIT_ONLY_NOT_REQUIRED_TO_PRESERVE_APPROVAL",
+        "reason": "Final source identification resolves this as a deterministic negative; structured provenance remains useful for auditability but is not required to preserve an approval.",
+        "proposed_future_schema_fields": [
+          "review_provenance.schema_version",
+          "review_provenance.methodology_version",
+          "review_provenance.origin",
+          "review_provenance.source_artifacts",
+          "review_provenance.contributors",
+          "review_provenance.temporal.event_time_or_interval",
+          "review_provenance.temporal.timestamp_precision",
+          "review_provenance.temporal.evidence_type",
+          "review_provenance.temporal.publication_time_separate",
+          "review_provenance.target_episode_id",
+          "review_provenance.exact_city_evidence",
+          "review_provenance.explosion_evidence",
+          "review_provenance.aerial_war_evidence",
+          "review_provenance.same_attack_basis",
+          "review_provenance.neighboring_alert_check"
+        ]
+      },
+      {
+        "candidate_id": "113dac439efda41673b1f497",
+        "city_key": "zaporizhzhia",
+        "city": "Запоріжжя",
+        "target_episode_id": "a60d817eaa9253200f090720",
+        "current_status": "approved_strict",
+        "current_matched_episode_id": "a60d817eaa9253200f090720",
+        "final_supported_status": "needs_review",
+        "source_artifact": "research/explosion_monitor_zaporizhzhia_final_source_identification_2026-09-24.json",
+        "source_blob_sha": "3bf44aab9924b9bd6ea0ecc7cf5590e80e32c792",
+        "provenance_status": "SOURCE_IDENTIFIED_BUT_TEMPORAL_CLAIM_UNSUPPORTED",
+        "persistence_requirement": "AUDIT_ONLY_NOT_REQUIRED_TO_PRESERVE_APPROVAL",
+        "reason": "Final source identification resolves this as a deterministic negative; structured provenance remains useful for auditability but is not required to preserve an approval.",
+        "proposed_future_schema_fields": [
+          "review_provenance.schema_version",
+          "review_provenance.methodology_version",
+          "review_provenance.origin",
+          "review_provenance.source_artifacts",
+          "review_provenance.contributors",
+          "review_provenance.temporal.event_time_or_interval",
+          "review_provenance.temporal.timestamp_precision",
+          "review_provenance.temporal.evidence_type",
+          "review_provenance.temporal.publication_time_separate",
+          "review_provenance.target_episode_id",
+          "review_provenance.exact_city_evidence",
+          "review_provenance.explosion_evidence",
+          "review_provenance.aerial_war_evidence",
+          "review_provenance.same_attack_basis",
+          "review_provenance.neighboring_alert_check"
+        ]
+      },
+      {
+        "candidate_id": "b5c1ac3e5dba6b12eb699016",
+        "city_key": "sumy",
+        "city": "Суми",
+        "target_episode_id": "e7e8974f19d4fdc782e93980",
+        "current_status": "approved_strict",
+        "current_matched_episode_id": "e7e8974f19d4fdc782e93980",
+        "final_supported_status": "approved_strict",
+        "source_artifact": "research/explosion_monitor_final_provenance_recovery_2026-09-24.json",
+        "source_blob_sha": "36cbc7c3d1b5247d594c42312ccca9fd84888b28",
+        "provenance_status": "RECOVERED_COMPLETE",
+        "persistence_requirement": "REQUIRED_FOR_FUTURE_INVARIANCE",
+        "reason": "Current classifier cannot reconstruct the supported approval from the live candidate representation without the repaired reviewed provenance.",
+        "proposed_future_schema_fields": [
+          "review_provenance.schema_version",
+          "review_provenance.methodology_version",
+          "review_provenance.origin",
+          "review_provenance.source_artifacts",
+          "review_provenance.contributors",
+          "review_provenance.temporal.event_time_or_interval",
+          "review_provenance.temporal.timestamp_precision",
+          "review_provenance.temporal.evidence_type",
+          "review_provenance.temporal.publication_time_separate",
+          "review_provenance.target_episode_id",
+          "review_provenance.exact_city_evidence",
+          "review_provenance.explosion_evidence",
+          "review_provenance.aerial_war_evidence",
+          "review_provenance.same_attack_basis",
+          "review_provenance.neighboring_alert_check"
+        ]
+      },
+      {
+        "candidate_id": "d403a466c13b9ec069765241",
+        "city_key": "sumy",
+        "city": "Суми",
+        "target_episode_id": "e7e8974f19d4fdc782e93980",
+        "current_status": "approved_strict",
+        "current_matched_episode_id": "e7e8974f19d4fdc782e93980",
+        "final_supported_status": "approved_strict",
+        "source_artifact": "research/explosion_monitor_final_provenance_recovery_2026-09-24.json",
+        "source_blob_sha": "36cbc7c3d1b5247d594c42312ccca9fd84888b28",
+        "provenance_status": "RECOVERED_COMPLETE",
+        "persistence_requirement": "REQUIRED_FOR_FUTURE_INVARIANCE",
+        "reason": "Current classifier cannot reconstruct the supported approval from the live candidate representation without the repaired reviewed provenance.",
+        "proposed_future_schema_fields": [
+          "review_provenance.schema_version",
+          "review_provenance.methodology_version",
+          "review_provenance.origin",
+          "review_provenance.source_artifacts",
+          "review_provenance.contributors",
+          "review_provenance.temporal.event_time_or_interval",
+          "review_provenance.temporal.timestamp_precision",
+          "review_provenance.temporal.evidence_type",
+          "review_provenance.temporal.publication_time_separate",
+          "review_provenance.target_episode_id",
+          "review_provenance.exact_city_evidence",
+          "review_provenance.explosion_evidence",
+          "review_provenance.aerial_war_evidence",
+          "review_provenance.same_attack_basis",
+          "review_provenance.neighboring_alert_check"
+        ]
+      },
+      {
+        "candidate_id": "25c966b4e375b5075b267a91",
+        "city_key": "sumy",
+        "city": "Суми",
+        "target_episode_id": "e7e8974f19d4fdc782e93980",
+        "current_status": "approved_strict",
+        "current_matched_episode_id": "e7e8974f19d4fdc782e93980",
+        "final_supported_status": "approved_strict",
+        "source_artifact": "research/explosion_monitor_final_provenance_recovery_2026-09-24.json",
+        "source_blob_sha": "36cbc7c3d1b5247d594c42312ccca9fd84888b28",
+        "provenance_status": "RECOVERED_COMPLETE",
+        "persistence_requirement": "REQUIRED_FOR_FUTURE_INVARIANCE",
+        "reason": "Current classifier cannot reconstruct the supported approval from the live candidate representation without the repaired reviewed provenance.",
+        "proposed_future_schema_fields": [
+          "review_provenance.schema_version",
+          "review_provenance.methodology_version",
+          "review_provenance.origin",
+          "review_provenance.source_artifacts",
+          "review_provenance.contributors",
+          "review_provenance.temporal.event_time_or_interval",
+          "review_provenance.temporal.timestamp_precision",
+          "review_provenance.temporal.evidence_type",
+          "review_provenance.temporal.publication_time_separate",
+          "review_provenance.target_episode_id",
+          "review_provenance.exact_city_evidence",
+          "review_provenance.explosion_evidence",
+          "review_provenance.aerial_war_evidence",
+          "review_provenance.same_attack_basis",
+          "review_provenance.neighboring_alert_check"
+        ]
+      },
+      {
+        "candidate_id": "70265845b367fea065fbd077",
+        "city_key": "sevastopol",
+        "city": "Севастополь",
+        "target_episode_id": "886263e508ba1a6a3cc213a6",
+        "current_status": "approved_sensitivity",
+        "current_matched_episode_id": "886263e508ba1a6a3cc213a6",
+        "final_supported_status": "approved_sensitivity",
+        "source_artifact": "research/explosion_monitor_provenance_repair_replay_2026-09-24.json",
+        "source_blob_sha": "193d18c39d079258f9d0446a79dc6e193b910ef6",
+        "provenance_status": "PARTIAL_BUT_SUFFICIENT_FOR_REPLAY",
+        "persistence_requirement": "REQUIRED_FOR_FUTURE_INVARIANCE",
+        "reason": "Current classifier cannot reconstruct the supported approval from the live candidate representation without the repaired reviewed provenance.",
+        "proposed_future_schema_fields": [
+          "review_provenance.schema_version",
+          "review_provenance.methodology_version",
+          "review_provenance.origin",
+          "review_provenance.source_artifacts",
+          "review_provenance.contributors",
+          "review_provenance.temporal.event_time_or_interval",
+          "review_provenance.temporal.timestamp_precision",
+          "review_provenance.temporal.evidence_type",
+          "review_provenance.temporal.publication_time_separate",
+          "review_provenance.target_episode_id",
+          "review_provenance.exact_city_evidence",
+          "review_provenance.explosion_evidence",
+          "review_provenance.aerial_war_evidence",
+          "review_provenance.same_attack_basis",
+          "review_provenance.neighboring_alert_check"
+        ]
+      },
+      {
+        "candidate_id": "f74cd4ffe664930eaadf2ff7",
+        "city_key": "dnipro",
+        "city": "Дніпро",
+        "target_episode_id": "0574cf6b4187393c9a58cd34",
+        "current_status": "approved_sensitivity",
+        "current_matched_episode_id": "0574cf6b4187393c9a58cd34",
+        "final_supported_status": "approved_sensitivity",
+        "source_artifact": "research/explosion_monitor_provenance_repair_replay_2026-09-24.json",
+        "source_blob_sha": "193d18c39d079258f9d0446a79dc6e193b910ef6",
+        "provenance_status": "COMPLETE",
+        "persistence_requirement": "REQUIRED_FOR_FUTURE_INVARIANCE",
+        "reason": "Current classifier cannot reconstruct the supported approval from the live candidate representation without the repaired reviewed provenance.",
+        "proposed_future_schema_fields": [
+          "review_provenance.schema_version",
+          "review_provenance.methodology_version",
+          "review_provenance.origin",
+          "review_provenance.source_artifacts",
+          "review_provenance.contributors",
+          "review_provenance.temporal.event_time_or_interval",
+          "review_provenance.temporal.timestamp_precision",
+          "review_provenance.temporal.evidence_type",
+          "review_provenance.temporal.publication_time_separate",
+          "review_provenance.target_episode_id",
+          "review_provenance.exact_city_evidence",
+          "review_provenance.explosion_evidence",
+          "review_provenance.aerial_war_evidence",
+          "review_provenance.same_attack_basis",
+          "review_provenance.neighboring_alert_check"
+        ]
+      },
+      {
+        "candidate_id": "f5d3f321b62f158a9f0b8b80",
+        "city_key": "dnipro",
+        "city": "Дніпро",
+        "target_episode_id": "73ff94382ce8d8c9f55c4f37",
+        "current_status": "approved_sensitivity",
+        "current_matched_episode_id": "73ff94382ce8d8c9f55c4f37",
+        "final_supported_status": "approved_sensitivity",
+        "source_artifact": "research/explosion_monitor_provenance_repair_replay_2026-09-24.json",
+        "source_blob_sha": "193d18c39d079258f9d0446a79dc6e193b910ef6",
+        "provenance_status": "COMPLETE",
+        "persistence_requirement": "REQUIRED_FOR_FUTURE_INVARIANCE",
+        "reason": "Current classifier cannot reconstruct the supported approval from the live candidate representation without the repaired reviewed provenance.",
+        "proposed_future_schema_fields": [
+          "review_provenance.schema_version",
+          "review_provenance.methodology_version",
+          "review_provenance.origin",
+          "review_provenance.source_artifacts",
+          "review_provenance.contributors",
+          "review_provenance.temporal.event_time_or_interval",
+          "review_provenance.temporal.timestamp_precision",
+          "review_provenance.temporal.evidence_type",
+          "review_provenance.temporal.publication_time_separate",
+          "review_provenance.target_episode_id",
+          "review_provenance.exact_city_evidence",
+          "review_provenance.explosion_evidence",
+          "review_provenance.aerial_war_evidence",
+          "review_provenance.same_attack_basis",
+          "review_provenance.neighboring_alert_check"
+        ]
+      },
+      {
+        "candidate_id": "c183f7db4eaf69442b6e9e69",
+        "city_key": "kropyvnytskyi",
+        "city": "Кропивницький",
+        "target_episode_id": "815411eee407c0d936bac013",
+        "current_status": "approved_strict",
+        "current_matched_episode_id": "815411eee407c0d936bac013",
+        "final_supported_status": "approved_strict",
+        "source_artifact": "research/explosion_monitor_provenance_repair_replay_2026-09-24.json",
+        "source_blob_sha": "193d18c39d079258f9d0446a79dc6e193b910ef6",
+        "provenance_status": "COMPLETE",
+        "persistence_requirement": "REQUIRED_FOR_FUTURE_INVARIANCE",
+        "reason": "Current classifier cannot reconstruct the supported approval from the live candidate representation without the repaired reviewed provenance.",
+        "proposed_future_schema_fields": [
+          "review_provenance.schema_version",
+          "review_provenance.methodology_version",
+          "review_provenance.origin",
+          "review_provenance.source_artifacts",
+          "review_provenance.contributors",
+          "review_provenance.temporal.event_time_or_interval",
+          "review_provenance.temporal.timestamp_precision",
+          "review_provenance.temporal.evidence_type",
+          "review_provenance.temporal.publication_time_separate",
+          "review_provenance.target_episode_id",
+          "review_provenance.exact_city_evidence",
+          "review_provenance.explosion_evidence",
+          "review_provenance.aerial_war_evidence",
+          "review_provenance.same_attack_basis",
+          "review_provenance.neighboring_alert_check"
+        ]
+      },
+      {
+        "candidate_id": "d0f421afdb362cc867e6b175",
+        "city_key": "sevastopol",
+        "city": "Севастополь",
+        "target_episode_id": "88a57288a18038509649a991",
+        "current_status": "approved_strict",
+        "current_matched_episode_id": "88a57288a18038509649a991",
+        "final_supported_status": "approved_strict",
+        "source_artifact": "research/explosion_monitor_provenance_repair_replay_2026-09-24.json",
+        "source_blob_sha": "193d18c39d079258f9d0446a79dc6e193b910ef6",
+        "provenance_status": "COMPLETE",
+        "persistence_requirement": "REQUIRED_FOR_FUTURE_INVARIANCE",
+        "reason": "Current classifier cannot reconstruct the supported approval from the live candidate representation without the repaired reviewed provenance.",
+        "proposed_future_schema_fields": [
+          "review_provenance.schema_version",
+          "review_provenance.methodology_version",
+          "review_provenance.origin",
+          "review_provenance.source_artifacts",
+          "review_provenance.contributors",
+          "review_provenance.temporal.event_time_or_interval",
+          "review_provenance.temporal.timestamp_precision",
+          "review_provenance.temporal.evidence_type",
+          "review_provenance.temporal.publication_time_separate",
+          "review_provenance.target_episode_id",
+          "review_provenance.exact_city_evidence",
+          "review_provenance.explosion_evidence",
+          "review_provenance.aerial_war_evidence",
+          "review_provenance.same_attack_basis",
+          "review_provenance.neighboring_alert_check"
+        ]
+      },
+      {
+        "candidate_id": "d91e644d5d1a46d3efe166df",
+        "city_key": "sevastopol",
+        "city": "Севастополь",
+        "target_episode_id": "886263e508ba1a6a3cc213a6",
+        "current_status": "approved_sensitivity",
+        "current_matched_episode_id": "886263e508ba1a6a3cc213a6",
+        "final_supported_status": "approved_sensitivity",
+        "source_artifact": "research/explosion_monitor_provenance_repair_replay_2026-09-24.json",
+        "source_blob_sha": "193d18c39d079258f9d0446a79dc6e193b910ef6",
+        "provenance_status": "PARTIAL_BUT_SUFFICIENT_FOR_REPLAY",
+        "persistence_requirement": "REQUIRED_FOR_FUTURE_INVARIANCE",
+        "reason": "Current classifier cannot reconstruct the supported approval from the live candidate representation without the repaired reviewed provenance.",
+        "proposed_future_schema_fields": [
+          "review_provenance.schema_version",
+          "review_provenance.methodology_version",
+          "review_provenance.origin",
+          "review_provenance.source_artifacts",
+          "review_provenance.contributors",
+          "review_provenance.temporal.event_time_or_interval",
+          "review_provenance.temporal.timestamp_precision",
+          "review_provenance.temporal.evidence_type",
+          "review_provenance.temporal.publication_time_separate",
+          "review_provenance.target_episode_id",
+          "review_provenance.exact_city_evidence",
+          "review_provenance.explosion_evidence",
+          "review_provenance.aerial_war_evidence",
+          "review_provenance.same_attack_basis",
+          "review_provenance.neighboring_alert_check"
+        ]
+      },
+      {
+        "candidate_id": "93087ad8721a8a4cf33fcd26",
+        "city_key": "odesa",
+        "city": "Одеса",
+        "target_episode_id": "e956b3621d18df308b368835",
+        "current_status": "approved_strict",
+        "current_matched_episode_id": "e956b3621d18df308b368835",
+        "final_supported_status": "approved_strict",
+        "source_artifact": "research/explosion_monitor_provenance_repair_replay_2026-09-24.json",
+        "source_blob_sha": "193d18c39d079258f9d0446a79dc6e193b910ef6",
+        "provenance_status": "COMPLETE",
+        "persistence_requirement": "REQUIRED_FOR_FUTURE_INVARIANCE",
+        "reason": "Current classifier cannot reconstruct the supported approval from the live candidate representation without the repaired reviewed provenance.",
+        "proposed_future_schema_fields": [
+          "review_provenance.schema_version",
+          "review_provenance.methodology_version",
+          "review_provenance.origin",
+          "review_provenance.source_artifacts",
+          "review_provenance.contributors",
+          "review_provenance.temporal.event_time_or_interval",
+          "review_provenance.temporal.timestamp_precision",
+          "review_provenance.temporal.evidence_type",
+          "review_provenance.temporal.publication_time_separate",
+          "review_provenance.target_episode_id",
+          "review_provenance.exact_city_evidence",
+          "review_provenance.explosion_evidence",
+          "review_provenance.aerial_war_evidence",
+          "review_provenance.same_attack_basis",
+          "review_provenance.neighboring_alert_check"
+        ]
+      },
+      {
+        "candidate_id": "1ac73c928960f550711ff363",
+        "city_key": "kropyvnytskyi",
+        "city": "Кропивницький",
+        "target_episode_id": "815411eee407c0d936bac013",
+        "current_status": "approved_strict",
+        "current_matched_episode_id": "815411eee407c0d936bac013",
+        "final_supported_status": "approved_strict",
+        "source_artifact": "research/explosion_monitor_provenance_repair_replay_2026-09-24.json",
+        "source_blob_sha": "193d18c39d079258f9d0446a79dc6e193b910ef6",
+        "provenance_status": "COMPLETE",
+        "persistence_requirement": "REQUIRED_FOR_FUTURE_INVARIANCE",
+        "reason": "Current classifier cannot reconstruct the supported approval from the live candidate representation without the repaired reviewed provenance.",
+        "proposed_future_schema_fields": [
+          "review_provenance.schema_version",
+          "review_provenance.methodology_version",
+          "review_provenance.origin",
+          "review_provenance.source_artifacts",
+          "review_provenance.contributors",
+          "review_provenance.temporal.event_time_or_interval",
+          "review_provenance.temporal.timestamp_precision",
+          "review_provenance.temporal.evidence_type",
+          "review_provenance.temporal.publication_time_separate",
+          "review_provenance.target_episode_id",
+          "review_provenance.exact_city_evidence",
+          "review_provenance.explosion_evidence",
+          "review_provenance.aerial_war_evidence",
+          "review_provenance.same_attack_basis",
+          "review_provenance.neighboring_alert_check"
+        ]
+      },
+      {
+        "candidate_id": "04d5dd1cfe6e96a8f2820ecc",
+        "city_key": "dnipro",
+        "city": "Дніпро",
+        "target_episode_id": "ffaac5b5fa6fa656c0bcc44f",
+        "current_status": "approved_strict",
+        "current_matched_episode_id": "ffaac5b5fa6fa656c0bcc44f",
+        "final_supported_status": "approved_strict",
+        "source_artifact": "research/explosion_monitor_provenance_repair_replay_2026-09-24.json",
+        "source_blob_sha": "193d18c39d079258f9d0446a79dc6e193b910ef6",
+        "provenance_status": "COMPLETE",
+        "persistence_requirement": "REQUIRED_FOR_FUTURE_INVARIANCE",
+        "reason": "Current classifier cannot reconstruct the supported approval from the live candidate representation without the repaired reviewed provenance.",
+        "proposed_future_schema_fields": [
+          "review_provenance.schema_version",
+          "review_provenance.methodology_version",
+          "review_provenance.origin",
+          "review_provenance.source_artifacts",
+          "review_provenance.contributors",
+          "review_provenance.temporal.event_time_or_interval",
+          "review_provenance.temporal.timestamp_precision",
+          "review_provenance.temporal.evidence_type",
+          "review_provenance.temporal.publication_time_separate",
+          "review_provenance.target_episode_id",
+          "review_provenance.exact_city_evidence",
+          "review_provenance.explosion_evidence",
+          "review_provenance.aerial_war_evidence",
+          "review_provenance.same_attack_basis",
+          "review_provenance.neighboring_alert_check"
+        ]
+      },
+      {
+        "candidate_id": "03d6be6664bf5061e5ce3bc8",
+        "city_key": "dnipro",
+        "city": "Дніпро",
+        "target_episode_id": "73ff94382ce8d8c9f55c4f37",
+        "current_status": "approved_sensitivity",
+        "current_matched_episode_id": "73ff94382ce8d8c9f55c4f37",
+        "final_supported_status": "approved_sensitivity",
+        "source_artifact": "research/explosion_monitor_provenance_repair_replay_2026-09-24.json",
+        "source_blob_sha": "193d18c39d079258f9d0446a79dc6e193b910ef6",
+        "provenance_status": "COMPLETE",
+        "persistence_requirement": "REQUIRED_FOR_FUTURE_INVARIANCE",
+        "reason": "Current classifier cannot reconstruct the supported approval from the live candidate representation without the repaired reviewed provenance.",
+        "proposed_future_schema_fields": [
+          "review_provenance.schema_version",
+          "review_provenance.methodology_version",
+          "review_provenance.origin",
+          "review_provenance.source_artifacts",
+          "review_provenance.contributors",
+          "review_provenance.temporal.event_time_or_interval",
+          "review_provenance.temporal.timestamp_precision",
+          "review_provenance.temporal.evidence_type",
+          "review_provenance.temporal.publication_time_separate",
+          "review_provenance.target_episode_id",
+          "review_provenance.exact_city_evidence",
+          "review_provenance.explosion_evidence",
+          "review_provenance.aerial_war_evidence",
+          "review_provenance.same_attack_basis",
+          "review_provenance.neighboring_alert_check"
+        ]
+      },
+      {
+        "candidate_id": "f40bbd14a7ec65d26af3292e",
+        "city_key": "dnipro",
+        "city": "Дніпро",
+        "target_episode_id": "0574cf6b4187393c9a58cd34",
+        "current_status": "approved_sensitivity",
+        "current_matched_episode_id": "0574cf6b4187393c9a58cd34",
+        "final_supported_status": "approved_sensitivity",
+        "source_artifact": "research/explosion_monitor_provenance_repair_replay_2026-09-24.json",
+        "source_blob_sha": "193d18c39d079258f9d0446a79dc6e193b910ef6",
+        "provenance_status": "COMPLETE",
+        "persistence_requirement": "REQUIRED_FOR_FUTURE_INVARIANCE",
+        "reason": "Current classifier cannot reconstruct the supported approval from the live candidate representation without the repaired reviewed provenance.",
+        "proposed_future_schema_fields": [
+          "review_provenance.schema_version",
+          "review_provenance.methodology_version",
+          "review_provenance.origin",
+          "review_provenance.source_artifacts",
+          "review_provenance.contributors",
+          "review_provenance.temporal.event_time_or_interval",
+          "review_provenance.temporal.timestamp_precision",
+          "review_provenance.temporal.evidence_type",
+          "review_provenance.temporal.publication_time_separate",
+          "review_provenance.target_episode_id",
+          "review_provenance.exact_city_evidence",
+          "review_provenance.explosion_evidence",
+          "review_provenance.aerial_war_evidence",
+          "review_provenance.same_attack_basis",
+          "review_provenance.neighboring_alert_check"
+        ]
+      },
+      {
+        "candidate_id": "bb4cfcc842179b6eccd76ddd",
+        "city_key": "dnipro",
+        "city": "Дніпро",
+        "target_episode_id": "73ff94382ce8d8c9f55c4f37",
+        "current_status": "approved_sensitivity",
+        "current_matched_episode_id": "73ff94382ce8d8c9f55c4f37",
+        "final_supported_status": "approved_sensitivity",
+        "source_artifact": "research/explosion_monitor_provenance_repair_replay_2026-09-24.json",
+        "source_blob_sha": "193d18c39d079258f9d0446a79dc6e193b910ef6",
+        "provenance_status": "COMPLETE",
+        "persistence_requirement": "REQUIRED_FOR_FUTURE_INVARIANCE",
+        "reason": "Current classifier cannot reconstruct the supported approval from the live candidate representation without the repaired reviewed provenance.",
+        "proposed_future_schema_fields": [
+          "review_provenance.schema_version",
+          "review_provenance.methodology_version",
+          "review_provenance.origin",
+          "review_provenance.source_artifacts",
+          "review_provenance.contributors",
+          "review_provenance.temporal.event_time_or_interval",
+          "review_provenance.temporal.timestamp_precision",
+          "review_provenance.temporal.evidence_type",
+          "review_provenance.temporal.publication_time_separate",
+          "review_provenance.target_episode_id",
+          "review_provenance.exact_city_evidence",
+          "review_provenance.explosion_evidence",
+          "review_provenance.aerial_war_evidence",
+          "review_provenance.same_attack_basis",
+          "review_provenance.neighboring_alert_check"
+        ]
+      },
+      {
+        "candidate_id": "e8998303b80b496820692c54",
+        "city_key": "odesa",
+        "city": "Одеса",
+        "target_episode_id": "ff2ba0d3c1cc5ebf116ed7bf",
+        "current_status": "approved_strict",
+        "current_matched_episode_id": "ff2ba0d3c1cc5ebf116ed7bf",
+        "final_supported_status": "approved_strict",
+        "source_artifact": "research/explosion_monitor_final_provenance_recovery_2026-09-24.json",
+        "source_blob_sha": "36cbc7c3d1b5247d594c42312ccca9fd84888b28",
+        "provenance_status": "RECOVERED_COMPLETE",
+        "persistence_requirement": "REQUIRED_FOR_FUTURE_INVARIANCE",
+        "reason": "Current classifier cannot reconstruct the supported approval from the live candidate representation without the repaired reviewed provenance.",
+        "proposed_future_schema_fields": [
+          "review_provenance.schema_version",
+          "review_provenance.methodology_version",
+          "review_provenance.origin",
+          "review_provenance.source_artifacts",
+          "review_provenance.contributors",
+          "review_provenance.temporal.event_time_or_interval",
+          "review_provenance.temporal.timestamp_precision",
+          "review_provenance.temporal.evidence_type",
+          "review_provenance.temporal.publication_time_separate",
+          "review_provenance.target_episode_id",
+          "review_provenance.exact_city_evidence",
+          "review_provenance.explosion_evidence",
+          "review_provenance.aerial_war_evidence",
+          "review_provenance.same_attack_basis",
+          "review_provenance.neighboring_alert_check"
+        ]
+      },
+      {
+        "candidate_id": "e988116e757a346caa952892",
+        "city_key": "odesa",
+        "city": "Одеса",
+        "target_episode_id": "f602c8ea8a224ea7d45fda29",
+        "current_status": "approved_strict",
+        "current_matched_episode_id": "f602c8ea8a224ea7d45fda29",
+        "final_supported_status": "approved_strict",
+        "source_artifact": "research/explosion_monitor_provenance_repair_replay_2026-09-24.json",
+        "source_blob_sha": "193d18c39d079258f9d0446a79dc6e193b910ef6",
+        "provenance_status": "PARTIAL_BUT_SUFFICIENT_FOR_REPLAY",
+        "persistence_requirement": "REQUIRED_FOR_FUTURE_INVARIANCE",
+        "reason": "Current classifier cannot reconstruct the supported approval from the live candidate representation without the repaired reviewed provenance.",
+        "proposed_future_schema_fields": [
+          "review_provenance.schema_version",
+          "review_provenance.methodology_version",
+          "review_provenance.origin",
+          "review_provenance.source_artifacts",
+          "review_provenance.contributors",
+          "review_provenance.temporal.event_time_or_interval",
+          "review_provenance.temporal.timestamp_precision",
+          "review_provenance.temporal.evidence_type",
+          "review_provenance.temporal.publication_time_separate",
+          "review_provenance.target_episode_id",
+          "review_provenance.exact_city_evidence",
+          "review_provenance.explosion_evidence",
+          "review_provenance.aerial_war_evidence",
+          "review_provenance.same_attack_basis",
+          "review_provenance.neighboring_alert_check"
+        ]
+      },
+      {
+        "candidate_id": "b996608bb254f9d86481bb80",
+        "city_key": "odesa",
+        "city": "Одеса",
+        "target_episode_id": "f602c8ea8a224ea7d45fda29",
+        "current_status": "approved_sensitivity",
+        "current_matched_episode_id": "f602c8ea8a224ea7d45fda29",
+        "final_supported_status": "approved_sensitivity",
+        "source_artifact": "research/explosion_monitor_provenance_repair_replay_2026-09-24.json",
+        "source_blob_sha": "193d18c39d079258f9d0446a79dc6e193b910ef6",
+        "provenance_status": "PARTIAL_BUT_SUFFICIENT_FOR_REPLAY",
+        "persistence_requirement": "REQUIRED_FOR_FUTURE_INVARIANCE",
+        "reason": "Current classifier cannot reconstruct the supported approval from the live candidate representation without the repaired reviewed provenance.",
+        "proposed_future_schema_fields": [
+          "review_provenance.schema_version",
+          "review_provenance.methodology_version",
+          "review_provenance.origin",
+          "review_provenance.source_artifacts",
+          "review_provenance.contributors",
+          "review_provenance.temporal.event_time_or_interval",
+          "review_provenance.temporal.timestamp_precision",
+          "review_provenance.temporal.evidence_type",
+          "review_provenance.temporal.publication_time_separate",
+          "review_provenance.target_episode_id",
+          "review_provenance.exact_city_evidence",
+          "review_provenance.explosion_evidence",
+          "review_provenance.aerial_war_evidence",
+          "review_provenance.same_attack_basis",
+          "review_provenance.neighboring_alert_check"
+        ]
+      },
+      {
+        "candidate_id": "bac870ab2c3e3778839fb3b7",
+        "city_key": "odesa",
+        "city": "Одеса",
+        "target_episode_id": "f602c8ea8a224ea7d45fda29",
+        "current_status": "approved_sensitivity",
+        "current_matched_episode_id": "f602c8ea8a224ea7d45fda29",
+        "final_supported_status": "approved_sensitivity",
+        "source_artifact": "research/explosion_monitor_provenance_repair_replay_2026-09-24.json",
+        "source_blob_sha": "193d18c39d079258f9d0446a79dc6e193b910ef6",
+        "provenance_status": "PARTIAL_BUT_SUFFICIENT_FOR_REPLAY",
+        "persistence_requirement": "REQUIRED_FOR_FUTURE_INVARIANCE",
+        "reason": "Current classifier cannot reconstruct the supported approval from the live candidate representation without the repaired reviewed provenance.",
+        "proposed_future_schema_fields": [
+          "review_provenance.schema_version",
+          "review_provenance.methodology_version",
+          "review_provenance.origin",
+          "review_provenance.source_artifacts",
+          "review_provenance.contributors",
+          "review_provenance.temporal.event_time_or_interval",
+          "review_provenance.temporal.timestamp_precision",
+          "review_provenance.temporal.evidence_type",
+          "review_provenance.temporal.publication_time_separate",
+          "review_provenance.target_episode_id",
+          "review_provenance.exact_city_evidence",
+          "review_provenance.explosion_evidence",
+          "review_provenance.aerial_war_evidence",
+          "review_provenance.same_attack_basis",
+          "review_provenance.neighboring_alert_check"
+        ]
+      },
+      {
+        "candidate_id": "8921e04308819e02f3770f33",
+        "city_key": "kyiv",
+        "city": "Київ",
+        "target_episode_id": "372a0acab8763541b0422e14",
+        "current_status": "approved_strict",
+        "current_matched_episode_id": "372a0acab8763541b0422e14",
+        "final_supported_status": "approved_strict",
+        "source_artifact": "research/explosion_monitor_provenance_repair_replay_2026-09-24.json",
+        "source_blob_sha": "193d18c39d079258f9d0446a79dc6e193b910ef6",
+        "provenance_status": "COMPLETE",
+        "persistence_requirement": "REQUIRED_FOR_FUTURE_INVARIANCE",
+        "reason": "Current classifier cannot reconstruct the supported approval from the live candidate representation without the repaired reviewed provenance.",
+        "proposed_future_schema_fields": [
+          "review_provenance.schema_version",
+          "review_provenance.methodology_version",
+          "review_provenance.origin",
+          "review_provenance.source_artifacts",
+          "review_provenance.contributors",
+          "review_provenance.temporal.event_time_or_interval",
+          "review_provenance.temporal.timestamp_precision",
+          "review_provenance.temporal.evidence_type",
+          "review_provenance.temporal.publication_time_separate",
+          "review_provenance.target_episode_id",
+          "review_provenance.exact_city_evidence",
+          "review_provenance.explosion_evidence",
+          "review_provenance.aerial_war_evidence",
+          "review_provenance.same_attack_basis",
+          "review_provenance.neighboring_alert_check"
+        ]
+      },
+      {
+        "candidate_id": "99ff73449d4c8f15a257e3f0",
+        "city_key": "kyiv",
+        "city": "Київ",
+        "target_episode_id": "372a0acab8763541b0422e14",
+        "current_status": "approved_strict",
+        "current_matched_episode_id": "372a0acab8763541b0422e14",
+        "final_supported_status": "approved_strict",
+        "source_artifact": "research/explosion_monitor_provenance_repair_replay_2026-09-24.json",
+        "source_blob_sha": "193d18c39d079258f9d0446a79dc6e193b910ef6",
+        "provenance_status": "COMPLETE",
+        "persistence_requirement": "REQUIRED_FOR_FUTURE_INVARIANCE",
+        "reason": "Current classifier cannot reconstruct the supported approval from the live candidate representation without the repaired reviewed provenance.",
+        "proposed_future_schema_fields": [
+          "review_provenance.schema_version",
+          "review_provenance.methodology_version",
+          "review_provenance.origin",
+          "review_provenance.source_artifacts",
+          "review_provenance.contributors",
+          "review_provenance.temporal.event_time_or_interval",
+          "review_provenance.temporal.timestamp_precision",
+          "review_provenance.temporal.evidence_type",
+          "review_provenance.temporal.publication_time_separate",
+          "review_provenance.target_episode_id",
+          "review_provenance.exact_city_evidence",
+          "review_provenance.explosion_evidence",
+          "review_provenance.aerial_war_evidence",
+          "review_provenance.same_attack_basis",
+          "review_provenance.neighboring_alert_check"
+        ]
+      },
+      {
+        "candidate_id": "3ae6887464278ba84a47a837",
+        "city_key": "kyiv",
+        "city": "Київ",
+        "target_episode_id": "372a0acab8763541b0422e14",
+        "current_status": "approved_strict",
+        "current_matched_episode_id": "372a0acab8763541b0422e14",
+        "final_supported_status": "approved_strict",
+        "source_artifact": "research/explosion_monitor_provenance_repair_replay_2026-09-24.json",
+        "source_blob_sha": "193d18c39d079258f9d0446a79dc6e193b910ef6",
+        "provenance_status": "COMPLETE",
+        "persistence_requirement": "REQUIRED_FOR_FUTURE_INVARIANCE",
+        "reason": "Current classifier cannot reconstruct the supported approval from the live candidate representation without the repaired reviewed provenance.",
+        "proposed_future_schema_fields": [
+          "review_provenance.schema_version",
+          "review_provenance.methodology_version",
+          "review_provenance.origin",
+          "review_provenance.source_artifacts",
+          "review_provenance.contributors",
+          "review_provenance.temporal.event_time_or_interval",
+          "review_provenance.temporal.timestamp_precision",
+          "review_provenance.temporal.evidence_type",
+          "review_provenance.temporal.publication_time_separate",
+          "review_provenance.target_episode_id",
+          "review_provenance.exact_city_evidence",
+          "review_provenance.explosion_evidence",
+          "review_provenance.aerial_war_evidence",
+          "review_provenance.same_attack_basis",
+          "review_provenance.neighboring_alert_check"
+        ]
+      },
+      {
+        "candidate_id": "9d8e278e3e837877280ff018",
+        "city_key": "kyiv",
+        "city": "Київ",
+        "target_episode_id": "7d7cb0c7a9e7d3574d33c70c",
+        "current_status": "approved_strict",
+        "current_matched_episode_id": "7d7cb0c7a9e7d3574d33c70c",
+        "final_supported_status": "approved_strict",
+        "source_artifact": "research/explosion_monitor_provenance_repair_replay_2026-09-24.json",
+        "source_blob_sha": "193d18c39d079258f9d0446a79dc6e193b910ef6",
+        "provenance_status": "COMPLETE",
+        "persistence_requirement": "REQUIRED_FOR_FUTURE_INVARIANCE",
+        "reason": "Current classifier cannot reconstruct the supported approval from the live candidate representation without the repaired reviewed provenance.",
+        "proposed_future_schema_fields": [
+          "review_provenance.schema_version",
+          "review_provenance.methodology_version",
+          "review_provenance.origin",
+          "review_provenance.source_artifacts",
+          "review_provenance.contributors",
+          "review_provenance.temporal.event_time_or_interval",
+          "review_provenance.temporal.timestamp_precision",
+          "review_provenance.temporal.evidence_type",
+          "review_provenance.temporal.publication_time_separate",
+          "review_provenance.target_episode_id",
+          "review_provenance.exact_city_evidence",
+          "review_provenance.explosion_evidence",
+          "review_provenance.aerial_war_evidence",
+          "review_provenance.same_attack_basis",
+          "review_provenance.neighboring_alert_check"
+        ]
+      },
+      {
+        "candidate_id": "57a2ee77cd614130d54c569b",
+        "city_key": "kyiv",
+        "city": "Київ",
+        "target_episode_id": "372a0acab8763541b0422e14",
+        "current_status": "approved_strict",
+        "current_matched_episode_id": "372a0acab8763541b0422e14",
+        "final_supported_status": "approved_strict",
+        "source_artifact": "research/explosion_monitor_provenance_repair_replay_2026-09-24.json",
+        "source_blob_sha": "193d18c39d079258f9d0446a79dc6e193b910ef6",
+        "provenance_status": "COMPLETE",
+        "persistence_requirement": "REQUIRED_FOR_FUTURE_INVARIANCE",
+        "reason": "Current classifier cannot reconstruct the supported approval from the live candidate representation without the repaired reviewed provenance.",
+        "proposed_future_schema_fields": [
+          "review_provenance.schema_version",
+          "review_provenance.methodology_version",
+          "review_provenance.origin",
+          "review_provenance.source_artifacts",
+          "review_provenance.contributors",
+          "review_provenance.temporal.event_time_or_interval",
+          "review_provenance.temporal.timestamp_precision",
+          "review_provenance.temporal.evidence_type",
+          "review_provenance.temporal.publication_time_separate",
+          "review_provenance.target_episode_id",
+          "review_provenance.exact_city_evidence",
+          "review_provenance.explosion_evidence",
+          "review_provenance.aerial_war_evidence",
+          "review_provenance.same_attack_basis",
+          "review_provenance.neighboring_alert_check"
+        ]
+      },
+      {
+        "candidate_id": "c41ea18cbf1a997ef01da7cf",
+        "city_key": "kyiv",
+        "city": "Київ",
+        "target_episode_id": "9cd16dab548f77bba4a4c0d9",
+        "current_status": "approved_strict",
+        "current_matched_episode_id": "9cd16dab548f77bba4a4c0d9",
+        "final_supported_status": "approved_strict",
+        "source_artifact": "research/explosion_monitor_provenance_repair_replay_2026-09-24.json",
+        "source_blob_sha": "193d18c39d079258f9d0446a79dc6e193b910ef6",
+        "provenance_status": "COMPLETE",
+        "persistence_requirement": "REQUIRED_FOR_FUTURE_INVARIANCE",
+        "reason": "Current classifier cannot reconstruct the supported approval from the live candidate representation without the repaired reviewed provenance.",
+        "proposed_future_schema_fields": [
+          "review_provenance.schema_version",
+          "review_provenance.methodology_version",
+          "review_provenance.origin",
+          "review_provenance.source_artifacts",
+          "review_provenance.contributors",
+          "review_provenance.temporal.event_time_or_interval",
+          "review_provenance.temporal.timestamp_precision",
+          "review_provenance.temporal.evidence_type",
+          "review_provenance.temporal.publication_time_separate",
+          "review_provenance.target_episode_id",
+          "review_provenance.exact_city_evidence",
+          "review_provenance.explosion_evidence",
+          "review_provenance.aerial_war_evidence",
+          "review_provenance.same_attack_basis",
+          "review_provenance.neighboring_alert_check"
+        ]
+      },
+      {
+        "candidate_id": "0ae17f8cc2962a26bc1968d9",
+        "city_key": "kyiv",
+        "city": "Київ",
+        "target_episode_id": "7d7cb0c7a9e7d3574d33c70c",
+        "current_status": "approved_sensitivity",
+        "current_matched_episode_id": "7d7cb0c7a9e7d3574d33c70c",
+        "final_supported_status": "approved_sensitivity",
+        "source_artifact": "research/explosion_monitor_provenance_repair_replay_2026-09-24.json",
+        "source_blob_sha": "193d18c39d079258f9d0446a79dc6e193b910ef6",
+        "provenance_status": "COMPLETE",
+        "persistence_requirement": "REQUIRED_FOR_FUTURE_INVARIANCE",
+        "reason": "Current classifier cannot reconstruct the supported approval from the live candidate representation without the repaired reviewed provenance.",
+        "proposed_future_schema_fields": [
+          "review_provenance.schema_version",
+          "review_provenance.methodology_version",
+          "review_provenance.origin",
+          "review_provenance.source_artifacts",
+          "review_provenance.contributors",
+          "review_provenance.temporal.event_time_or_interval",
+          "review_provenance.temporal.timestamp_precision",
+          "review_provenance.temporal.evidence_type",
+          "review_provenance.temporal.publication_time_separate",
+          "review_provenance.target_episode_id",
+          "review_provenance.exact_city_evidence",
+          "review_provenance.explosion_evidence",
+          "review_provenance.aerial_war_evidence",
+          "review_provenance.same_attack_basis",
+          "review_provenance.neighboring_alert_check"
+        ]
+      },
+      {
+        "candidate_id": "a0499fb1c167f8d1276aef39",
+        "city_key": "kyiv",
+        "city": "Київ",
+        "target_episode_id": "372a0acab8763541b0422e14",
+        "current_status": "approved_strict",
+        "current_matched_episode_id": "372a0acab8763541b0422e14",
+        "final_supported_status": "approved_strict",
+        "source_artifact": "research/explosion_monitor_provenance_repair_replay_2026-09-24.json",
+        "source_blob_sha": "193d18c39d079258f9d0446a79dc6e193b910ef6",
+        "provenance_status": "COMPLETE",
+        "persistence_requirement": "REQUIRED_FOR_FUTURE_INVARIANCE",
+        "reason": "Current classifier cannot reconstruct the supported approval from the live candidate representation without the repaired reviewed provenance.",
+        "proposed_future_schema_fields": [
+          "review_provenance.schema_version",
+          "review_provenance.methodology_version",
+          "review_provenance.origin",
+          "review_provenance.source_artifacts",
+          "review_provenance.contributors",
+          "review_provenance.temporal.event_time_or_interval",
+          "review_provenance.temporal.timestamp_precision",
+          "review_provenance.temporal.evidence_type",
+          "review_provenance.temporal.publication_time_separate",
+          "review_provenance.target_episode_id",
+          "review_provenance.exact_city_evidence",
+          "review_provenance.explosion_evidence",
+          "review_provenance.aerial_war_evidence",
+          "review_provenance.same_attack_basis",
+          "review_provenance.neighboring_alert_check"
+        ]
+      },
+      {
+        "candidate_id": "1158ab6b2a892e802822d669",
+        "city_key": "kyiv",
+        "city": "Київ",
+        "target_episode_id": "7d7cb0c7a9e7d3574d33c70c",
+        "current_status": "approved_strict",
+        "current_matched_episode_id": "7d7cb0c7a9e7d3574d33c70c",
+        "final_supported_status": "approved_strict",
+        "source_artifact": "research/explosion_monitor_provenance_repair_replay_2026-09-24.json",
+        "source_blob_sha": "193d18c39d079258f9d0446a79dc6e193b910ef6",
+        "provenance_status": "COMPLETE",
+        "persistence_requirement": "REQUIRED_FOR_FUTURE_INVARIANCE",
+        "reason": "Current classifier cannot reconstruct the supported approval from the live candidate representation without the repaired reviewed provenance.",
+        "proposed_future_schema_fields": [
+          "review_provenance.schema_version",
+          "review_provenance.methodology_version",
+          "review_provenance.origin",
+          "review_provenance.source_artifacts",
+          "review_provenance.contributors",
+          "review_provenance.temporal.event_time_or_interval",
+          "review_provenance.temporal.timestamp_precision",
+          "review_provenance.temporal.evidence_type",
+          "review_provenance.temporal.publication_time_separate",
+          "review_provenance.target_episode_id",
+          "review_provenance.exact_city_evidence",
+          "review_provenance.explosion_evidence",
+          "review_provenance.aerial_war_evidence",
+          "review_provenance.same_attack_basis",
+          "review_provenance.neighboring_alert_check"
+        ]
+      },
+      {
+        "candidate_id": "4f9beb4b905d396ccdc5bc28",
+        "city_key": "kyiv",
+        "city": "Київ",
+        "target_episode_id": "372a0acab8763541b0422e14",
+        "current_status": "approved_strict",
+        "current_matched_episode_id": "372a0acab8763541b0422e14",
+        "final_supported_status": "approved_strict",
+        "source_artifact": "research/explosion_monitor_provenance_repair_replay_2026-09-24.json",
+        "source_blob_sha": "193d18c39d079258f9d0446a79dc6e193b910ef6",
+        "provenance_status": "COMPLETE",
+        "persistence_requirement": "REQUIRED_FOR_FUTURE_INVARIANCE",
+        "reason": "Current classifier cannot reconstruct the supported approval from the live candidate representation without the repaired reviewed provenance.",
+        "proposed_future_schema_fields": [
+          "review_provenance.schema_version",
+          "review_provenance.methodology_version",
+          "review_provenance.origin",
+          "review_provenance.source_artifacts",
+          "review_provenance.contributors",
+          "review_provenance.temporal.event_time_or_interval",
+          "review_provenance.temporal.timestamp_precision",
+          "review_provenance.temporal.evidence_type",
+          "review_provenance.temporal.publication_time_separate",
+          "review_provenance.target_episode_id",
+          "review_provenance.exact_city_evidence",
+          "review_provenance.explosion_evidence",
+          "review_provenance.aerial_war_evidence",
+          "review_provenance.same_attack_basis",
+          "review_provenance.neighboring_alert_check"
+        ]
+      },
+      {
+        "candidate_id": "e52fef06544b5dcd21f87a8c",
+        "city_key": "kyiv",
+        "city": "Київ",
+        "target_episode_id": "372a0acab8763541b0422e14",
+        "current_status": "approved_sensitivity",
+        "current_matched_episode_id": "372a0acab8763541b0422e14",
+        "final_supported_status": "approved_sensitivity",
+        "source_artifact": "research/explosion_monitor_provenance_repair_replay_2026-09-24.json",
+        "source_blob_sha": "193d18c39d079258f9d0446a79dc6e193b910ef6",
+        "provenance_status": "COMPLETE",
+        "persistence_requirement": "REQUIRED_FOR_FUTURE_INVARIANCE",
+        "reason": "Current classifier cannot reconstruct the supported approval from the live candidate representation without the repaired reviewed provenance.",
+        "proposed_future_schema_fields": [
+          "review_provenance.schema_version",
+          "review_provenance.methodology_version",
+          "review_provenance.origin",
+          "review_provenance.source_artifacts",
+          "review_provenance.contributors",
+          "review_provenance.temporal.event_time_or_interval",
+          "review_provenance.temporal.timestamp_precision",
+          "review_provenance.temporal.evidence_type",
+          "review_provenance.temporal.publication_time_separate",
+          "review_provenance.target_episode_id",
+          "review_provenance.exact_city_evidence",
+          "review_provenance.explosion_evidence",
+          "review_provenance.aerial_war_evidence",
+          "review_provenance.same_attack_basis",
+          "review_provenance.neighboring_alert_check"
+        ]
+      },
+      {
+        "candidate_id": "7132b162083545deeb722bce",
+        "city_key": "kyiv",
+        "city": "Київ",
+        "target_episode_id": "372a0acab8763541b0422e14",
+        "current_status": "approved_strict",
+        "current_matched_episode_id": "372a0acab8763541b0422e14",
+        "final_supported_status": "approved_strict",
+        "source_artifact": "research/explosion_monitor_provenance_repair_replay_2026-09-24.json",
+        "source_blob_sha": "193d18c39d079258f9d0446a79dc6e193b910ef6",
+        "provenance_status": "COMPLETE",
+        "persistence_requirement": "REQUIRED_FOR_FUTURE_INVARIANCE",
+        "reason": "Current classifier cannot reconstruct the supported approval from the live candidate representation without the repaired reviewed provenance.",
+        "proposed_future_schema_fields": [
+          "review_provenance.schema_version",
+          "review_provenance.methodology_version",
+          "review_provenance.origin",
+          "review_provenance.source_artifacts",
+          "review_provenance.contributors",
+          "review_provenance.temporal.event_time_or_interval",
+          "review_provenance.temporal.timestamp_precision",
+          "review_provenance.temporal.evidence_type",
+          "review_provenance.temporal.publication_time_separate",
+          "review_provenance.target_episode_id",
+          "review_provenance.exact_city_evidence",
+          "review_provenance.explosion_evidence",
+          "review_provenance.aerial_war_evidence",
+          "review_provenance.same_attack_basis",
+          "review_provenance.neighboring_alert_check"
+        ]
+      },
+      {
+        "candidate_id": "0f151c2626bf6ff16af7993e",
+        "city_key": "kyiv",
+        "city": "Київ",
+        "target_episode_id": "7d7cb0c7a9e7d3574d33c70c",
+        "current_status": "approved_strict",
+        "current_matched_episode_id": "7d7cb0c7a9e7d3574d33c70c",
+        "final_supported_status": "approved_strict",
+        "source_artifact": "research/explosion_monitor_provenance_repair_replay_2026-09-24.json",
+        "source_blob_sha": "193d18c39d079258f9d0446a79dc6e193b910ef6",
+        "provenance_status": "COMPLETE",
+        "persistence_requirement": "REQUIRED_FOR_FUTURE_INVARIANCE",
+        "reason": "Current classifier cannot reconstruct the supported approval from the live candidate representation without the repaired reviewed provenance.",
+        "proposed_future_schema_fields": [
+          "review_provenance.schema_version",
+          "review_provenance.methodology_version",
+          "review_provenance.origin",
+          "review_provenance.source_artifacts",
+          "review_provenance.contributors",
+          "review_provenance.temporal.event_time_or_interval",
+          "review_provenance.temporal.timestamp_precision",
+          "review_provenance.temporal.evidence_type",
+          "review_provenance.temporal.publication_time_separate",
+          "review_provenance.target_episode_id",
+          "review_provenance.exact_city_evidence",
+          "review_provenance.explosion_evidence",
+          "review_provenance.aerial_war_evidence",
+          "review_provenance.same_attack_basis",
+          "review_provenance.neighboring_alert_check"
+        ]
+      },
+      {
+        "candidate_id": "81f3fabc05dca38d05417ef4",
+        "city_key": "kyiv",
+        "city": "Київ",
+        "target_episode_id": "372a0acab8763541b0422e14",
+        "current_status": "approved_sensitivity",
+        "current_matched_episode_id": "372a0acab8763541b0422e14",
+        "final_supported_status": "approved_sensitivity",
+        "source_artifact": "research/explosion_monitor_provenance_repair_replay_2026-09-24.json",
+        "source_blob_sha": "193d18c39d079258f9d0446a79dc6e193b910ef6",
+        "provenance_status": "COMPLETE",
+        "persistence_requirement": "REQUIRED_FOR_FUTURE_INVARIANCE",
+        "reason": "Current classifier cannot reconstruct the supported approval from the live candidate representation without the repaired reviewed provenance.",
+        "proposed_future_schema_fields": [
+          "review_provenance.schema_version",
+          "review_provenance.methodology_version",
+          "review_provenance.origin",
+          "review_provenance.source_artifacts",
+          "review_provenance.contributors",
+          "review_provenance.temporal.event_time_or_interval",
+          "review_provenance.temporal.timestamp_precision",
+          "review_provenance.temporal.evidence_type",
+          "review_provenance.temporal.publication_time_separate",
+          "review_provenance.target_episode_id",
+          "review_provenance.exact_city_evidence",
+          "review_provenance.explosion_evidence",
+          "review_provenance.aerial_war_evidence",
+          "review_provenance.same_attack_basis",
+          "review_provenance.neighboring_alert_check"
+        ]
+      },
+      {
+        "candidate_id": "3ece66529c538214f2188546",
+        "city_key": "kropyvnytskyi",
+        "city": "Кропивницький",
+        "target_episode_id": "e79b5d9b2f5913747a5ea0f6",
+        "current_status": "approved_strict",
+        "current_matched_episode_id": "e79b5d9b2f5913747a5ea0f6",
+        "final_supported_status": "approved_strict",
+        "source_artifact": "research/explosion_monitor_provenance_repair_replay_2026-09-24.json",
+        "source_blob_sha": "193d18c39d079258f9d0446a79dc6e193b910ef6",
+        "provenance_status": "PARTIAL_BUT_SUFFICIENT_FOR_REPLAY",
+        "persistence_requirement": "REQUIRED_FOR_FUTURE_INVARIANCE",
+        "reason": "Current classifier cannot reconstruct the supported approval from the live candidate representation without the repaired reviewed provenance.",
+        "proposed_future_schema_fields": [
+          "review_provenance.schema_version",
+          "review_provenance.methodology_version",
+          "review_provenance.origin",
+          "review_provenance.source_artifacts",
+          "review_provenance.contributors",
+          "review_provenance.temporal.event_time_or_interval",
+          "review_provenance.temporal.timestamp_precision",
+          "review_provenance.temporal.evidence_type",
+          "review_provenance.temporal.publication_time_separate",
+          "review_provenance.target_episode_id",
+          "review_provenance.exact_city_evidence",
+          "review_provenance.explosion_evidence",
+          "review_provenance.aerial_war_evidence",
+          "review_provenance.same_attack_basis",
+          "review_provenance.neighboring_alert_check"
+        ]
+      },
+      {
+        "candidate_id": "33c23edfc19c5943a92979d8",
+        "city_key": "kropyvnytskyi",
+        "city": "Кропивницький",
+        "target_episode_id": "815411eee407c0d936bac013",
+        "current_status": "approved_strict",
+        "current_matched_episode_id": "815411eee407c0d936bac013",
+        "final_supported_status": "approved_strict",
+        "source_artifact": "research/explosion_monitor_provenance_repair_replay_2026-09-24.json",
+        "source_blob_sha": "193d18c39d079258f9d0446a79dc6e193b910ef6",
+        "provenance_status": "COMPLETE",
+        "persistence_requirement": "REQUIRED_FOR_FUTURE_INVARIANCE",
+        "reason": "Current classifier cannot reconstruct the supported approval from the live candidate representation without the repaired reviewed provenance.",
+        "proposed_future_schema_fields": [
+          "review_provenance.schema_version",
+          "review_provenance.methodology_version",
+          "review_provenance.origin",
+          "review_provenance.source_artifacts",
+          "review_provenance.contributors",
+          "review_provenance.temporal.event_time_or_interval",
+          "review_provenance.temporal.timestamp_precision",
+          "review_provenance.temporal.evidence_type",
+          "review_provenance.temporal.publication_time_separate",
+          "review_provenance.target_episode_id",
+          "review_provenance.exact_city_evidence",
+          "review_provenance.explosion_evidence",
+          "review_provenance.aerial_war_evidence",
+          "review_provenance.same_attack_basis",
+          "review_provenance.neighboring_alert_check"
+        ]
+      },
+      {
+        "candidate_id": "2f006a58fc355ba41b076b4f",
+        "city_key": "dnipro",
+        "city": "Дніпро",
+        "target_episode_id": "ffaac5b5fa6fa656c0bcc44f",
+        "current_status": "approved_strict",
+        "current_matched_episode_id": "ffaac5b5fa6fa656c0bcc44f",
+        "final_supported_status": "approved_strict",
+        "source_artifact": "research/explosion_monitor_provenance_repair_replay_2026-09-24.json",
+        "source_blob_sha": "193d18c39d079258f9d0446a79dc6e193b910ef6",
+        "provenance_status": "COMPLETE",
+        "persistence_requirement": "REQUIRED_FOR_FUTURE_INVARIANCE",
+        "reason": "Current classifier cannot reconstruct the supported approval from the live candidate representation without the repaired reviewed provenance.",
+        "proposed_future_schema_fields": [
+          "review_provenance.schema_version",
+          "review_provenance.methodology_version",
+          "review_provenance.origin",
+          "review_provenance.source_artifacts",
+          "review_provenance.contributors",
+          "review_provenance.temporal.event_time_or_interval",
+          "review_provenance.temporal.timestamp_precision",
+          "review_provenance.temporal.evidence_type",
+          "review_provenance.temporal.publication_time_separate",
+          "review_provenance.target_episode_id",
+          "review_provenance.exact_city_evidence",
+          "review_provenance.explosion_evidence",
+          "review_provenance.aerial_war_evidence",
+          "review_provenance.same_attack_basis",
+          "review_provenance.neighboring_alert_check"
+        ]
+      },
+      {
+        "candidate_id": "9a154ed1b5746a68484cb84b",
+        "city_key": "dnipro",
+        "city": "Дніпро",
+        "target_episode_id": "73ff94382ce8d8c9f55c4f37",
+        "current_status": "approved_strict",
+        "current_matched_episode_id": "73ff94382ce8d8c9f55c4f37",
+        "final_supported_status": "approved_strict",
+        "source_artifact": "research/explosion_monitor_provenance_repair_replay_2026-09-24.json",
+        "source_blob_sha": "193d18c39d079258f9d0446a79dc6e193b910ef6",
+        "provenance_status": "COMPLETE",
+        "persistence_requirement": "REQUIRED_FOR_FUTURE_INVARIANCE",
+        "reason": "Current classifier cannot reconstruct the supported approval from the live candidate representation without the repaired reviewed provenance.",
+        "proposed_future_schema_fields": [
+          "review_provenance.schema_version",
+          "review_provenance.methodology_version",
+          "review_provenance.origin",
+          "review_provenance.source_artifacts",
+          "review_provenance.contributors",
+          "review_provenance.temporal.event_time_or_interval",
+          "review_provenance.temporal.timestamp_precision",
+          "review_provenance.temporal.evidence_type",
+          "review_provenance.temporal.publication_time_separate",
+          "review_provenance.target_episode_id",
+          "review_provenance.exact_city_evidence",
+          "review_provenance.explosion_evidence",
+          "review_provenance.aerial_war_evidence",
+          "review_provenance.same_attack_basis",
+          "review_provenance.neighboring_alert_check"
+        ]
+      },
+      {
+        "candidate_id": "d9a2b4cd788dc18c56652555",
+        "city_key": "dnipro",
+        "city": "Дніпро",
+        "target_episode_id": "73ff94382ce8d8c9f55c4f37",
+        "current_status": "approved_sensitivity",
+        "current_matched_episode_id": "73ff94382ce8d8c9f55c4f37",
+        "final_supported_status": "approved_sensitivity",
+        "source_artifact": "research/explosion_monitor_provenance_repair_replay_2026-09-24.json",
+        "source_blob_sha": "193d18c39d079258f9d0446a79dc6e193b910ef6",
+        "provenance_status": "COMPLETE",
+        "persistence_requirement": "REQUIRED_FOR_FUTURE_INVARIANCE",
+        "reason": "Current classifier cannot reconstruct the supported approval from the live candidate representation without the repaired reviewed provenance.",
+        "proposed_future_schema_fields": [
+          "review_provenance.schema_version",
+          "review_provenance.methodology_version",
+          "review_provenance.origin",
+          "review_provenance.source_artifacts",
+          "review_provenance.contributors",
+          "review_provenance.temporal.event_time_or_interval",
+          "review_provenance.temporal.timestamp_precision",
+          "review_provenance.temporal.evidence_type",
+          "review_provenance.temporal.publication_time_separate",
+          "review_provenance.target_episode_id",
+          "review_provenance.exact_city_evidence",
+          "review_provenance.explosion_evidence",
+          "review_provenance.aerial_war_evidence",
+          "review_provenance.same_attack_basis",
+          "review_provenance.neighboring_alert_check"
+        ]
+      },
+      {
+        "candidate_id": "b04a1d9512fa2bfc24e5e903",
+        "city_key": "dnipro",
+        "city": "Дніпро",
+        "target_episode_id": "0574cf6b4187393c9a58cd34",
+        "current_status": "approved_sensitivity",
+        "current_matched_episode_id": "0574cf6b4187393c9a58cd34",
+        "final_supported_status": "approved_sensitivity",
+        "source_artifact": "research/explosion_monitor_provenance_repair_replay_2026-09-24.json",
+        "source_blob_sha": "193d18c39d079258f9d0446a79dc6e193b910ef6",
+        "provenance_status": "COMPLETE",
+        "persistence_requirement": "REQUIRED_FOR_FUTURE_INVARIANCE",
+        "reason": "Current classifier cannot reconstruct the supported approval from the live candidate representation without the repaired reviewed provenance.",
+        "proposed_future_schema_fields": [
+          "review_provenance.schema_version",
+          "review_provenance.methodology_version",
+          "review_provenance.origin",
+          "review_provenance.source_artifacts",
+          "review_provenance.contributors",
+          "review_provenance.temporal.event_time_or_interval",
+          "review_provenance.temporal.timestamp_precision",
+          "review_provenance.temporal.evidence_type",
+          "review_provenance.temporal.publication_time_separate",
+          "review_provenance.target_episode_id",
+          "review_provenance.exact_city_evidence",
+          "review_provenance.explosion_evidence",
+          "review_provenance.aerial_war_evidence",
+          "review_provenance.same_attack_basis",
+          "review_provenance.neighboring_alert_check"
+        ]
+      },
+      {
+        "candidate_id": "678c62869805eb3feda580bf",
+        "city_key": "dnipro",
+        "city": "Дніпро",
+        "target_episode_id": "0574cf6b4187393c9a58cd34",
+        "current_status": "approved_strict",
+        "current_matched_episode_id": "0574cf6b4187393c9a58cd34",
+        "final_supported_status": "approved_strict",
+        "source_artifact": "research/explosion_monitor_provenance_repair_replay_2026-09-24.json",
+        "source_blob_sha": "193d18c39d079258f9d0446a79dc6e193b910ef6",
+        "provenance_status": "COMPLETE",
+        "persistence_requirement": "REQUIRED_FOR_FUTURE_INVARIANCE",
+        "reason": "Current classifier cannot reconstruct the supported approval from the live candidate representation without the repaired reviewed provenance.",
+        "proposed_future_schema_fields": [
+          "review_provenance.schema_version",
+          "review_provenance.methodology_version",
+          "review_provenance.origin",
+          "review_provenance.source_artifacts",
+          "review_provenance.contributors",
+          "review_provenance.temporal.event_time_or_interval",
+          "review_provenance.temporal.timestamp_precision",
+          "review_provenance.temporal.evidence_type",
+          "review_provenance.temporal.publication_time_separate",
+          "review_provenance.target_episode_id",
+          "review_provenance.exact_city_evidence",
+          "review_provenance.explosion_evidence",
+          "review_provenance.aerial_war_evidence",
+          "review_provenance.same_attack_basis",
+          "review_provenance.neighboring_alert_check"
+        ]
+      },
+      {
+        "candidate_id": "8489a800c094ba130a079b89",
+        "city_key": "dnipro",
+        "city": "Дніпро",
+        "target_episode_id": "73ff94382ce8d8c9f55c4f37",
+        "current_status": "approved_sensitivity",
+        "current_matched_episode_id": "73ff94382ce8d8c9f55c4f37",
+        "final_supported_status": "approved_sensitivity",
+        "source_artifact": "research/explosion_monitor_provenance_repair_replay_2026-09-24.json",
+        "source_blob_sha": "193d18c39d079258f9d0446a79dc6e193b910ef6",
+        "provenance_status": "COMPLETE",
+        "persistence_requirement": "REQUIRED_FOR_FUTURE_INVARIANCE",
+        "reason": "Current classifier cannot reconstruct the supported approval from the live candidate representation without the repaired reviewed provenance.",
+        "proposed_future_schema_fields": [
+          "review_provenance.schema_version",
+          "review_provenance.methodology_version",
+          "review_provenance.origin",
+          "review_provenance.source_artifacts",
+          "review_provenance.contributors",
+          "review_provenance.temporal.event_time_or_interval",
+          "review_provenance.temporal.timestamp_precision",
+          "review_provenance.temporal.evidence_type",
+          "review_provenance.temporal.publication_time_separate",
+          "review_provenance.target_episode_id",
+          "review_provenance.exact_city_evidence",
+          "review_provenance.explosion_evidence",
+          "review_provenance.aerial_war_evidence",
+          "review_provenance.same_attack_basis",
+          "review_provenance.neighboring_alert_check"
+        ]
+      },
+      {
+        "candidate_id": "af4e998f475530e6d42f210c",
+        "city_key": "dnipro",
+        "city": "Дніпро",
+        "target_episode_id": "ffaac5b5fa6fa656c0bcc44f",
+        "current_status": "approved_strict",
+        "current_matched_episode_id": "ffaac5b5fa6fa656c0bcc44f",
+        "final_supported_status": "approved_strict",
+        "source_artifact": "research/explosion_monitor_provenance_repair_replay_2026-09-24.json",
+        "source_blob_sha": "193d18c39d079258f9d0446a79dc6e193b910ef6",
+        "provenance_status": "PARTIAL_BUT_SUFFICIENT_FOR_REPLAY",
+        "persistence_requirement": "REQUIRED_FOR_FUTURE_INVARIANCE",
+        "reason": "Current classifier cannot reconstruct the supported approval from the live candidate representation without the repaired reviewed provenance.",
+        "proposed_future_schema_fields": [
+          "review_provenance.schema_version",
+          "review_provenance.methodology_version",
+          "review_provenance.origin",
+          "review_provenance.source_artifacts",
+          "review_provenance.contributors",
+          "review_provenance.temporal.event_time_or_interval",
+          "review_provenance.temporal.timestamp_precision",
+          "review_provenance.temporal.evidence_type",
+          "review_provenance.temporal.publication_time_separate",
+          "review_provenance.target_episode_id",
+          "review_provenance.exact_city_evidence",
+          "review_provenance.explosion_evidence",
+          "review_provenance.aerial_war_evidence",
+          "review_provenance.same_attack_basis",
+          "review_provenance.neighboring_alert_check"
+        ]
+      },
+      {
+        "candidate_id": "61cebe69d047a09b9c5b41bc",
+        "city_key": "kropyvnytskyi",
+        "city": "Кропивницький",
+        "target_episode_id": "815411eee407c0d936bac013",
+        "current_status": "approved_strict",
+        "current_matched_episode_id": "815411eee407c0d936bac013",
+        "final_supported_status": "approved_strict",
+        "source_artifact": "research/explosion_monitor_provenance_repair_replay_2026-09-24.json",
+        "source_blob_sha": "193d18c39d079258f9d0446a79dc6e193b910ef6",
+        "provenance_status": "COMPLETE",
+        "persistence_requirement": "REQUIRED_FOR_FUTURE_INVARIANCE",
+        "reason": "Current classifier cannot reconstruct the supported approval from the live candidate representation without the repaired reviewed provenance.",
+        "proposed_future_schema_fields": [
+          "review_provenance.schema_version",
+          "review_provenance.methodology_version",
+          "review_provenance.origin",
+          "review_provenance.source_artifacts",
+          "review_provenance.contributors",
+          "review_provenance.temporal.event_time_or_interval",
+          "review_provenance.temporal.timestamp_precision",
+          "review_provenance.temporal.evidence_type",
+          "review_provenance.temporal.publication_time_separate",
+          "review_provenance.target_episode_id",
+          "review_provenance.exact_city_evidence",
+          "review_provenance.explosion_evidence",
+          "review_provenance.aerial_war_evidence",
+          "review_provenance.same_attack_basis",
+          "review_provenance.neighboring_alert_check"
+        ]
+      },
+      {
+        "candidate_id": "5c0214d314f8bd6b8a1d5d9b",
+        "city_key": "kropyvnytskyi",
+        "city": "Кропивницький",
+        "target_episode_id": "e3370a23e1fc59123ba22279",
+        "current_status": "approved_strict",
+        "current_matched_episode_id": "e3370a23e1fc59123ba22279",
+        "final_supported_status": "approved_strict",
+        "source_artifact": "research/explosion_monitor_provenance_repair_replay_2026-09-24.json",
+        "source_blob_sha": "193d18c39d079258f9d0446a79dc6e193b910ef6",
+        "provenance_status": "COMPLETE",
+        "persistence_requirement": "REQUIRED_FOR_FUTURE_INVARIANCE",
+        "reason": "Current classifier cannot reconstruct the supported approval from the live candidate representation without the repaired reviewed provenance.",
+        "proposed_future_schema_fields": [
+          "review_provenance.schema_version",
+          "review_provenance.methodology_version",
+          "review_provenance.origin",
+          "review_provenance.source_artifacts",
+          "review_provenance.contributors",
+          "review_provenance.temporal.event_time_or_interval",
+          "review_provenance.temporal.timestamp_precision",
+          "review_provenance.temporal.evidence_type",
+          "review_provenance.temporal.publication_time_separate",
+          "review_provenance.target_episode_id",
+          "review_provenance.exact_city_evidence",
+          "review_provenance.explosion_evidence",
+          "review_provenance.aerial_war_evidence",
+          "review_provenance.same_attack_basis",
+          "review_provenance.neighboring_alert_check"
+        ]
+      },
+      {
+        "candidate_id": "861f6ae2bbd6f639ce7ebfe3",
+        "city_key": "kropyvnytskyi",
+        "city": "Кропивницький",
+        "target_episode_id": "815411eee407c0d936bac013",
+        "current_status": "approved_strict",
+        "current_matched_episode_id": "815411eee407c0d936bac013",
+        "final_supported_status": "approved_strict",
+        "source_artifact": "research/explosion_monitor_provenance_repair_replay_2026-09-24.json",
+        "source_blob_sha": "193d18c39d079258f9d0446a79dc6e193b910ef6",
+        "provenance_status": "COMPLETE",
+        "persistence_requirement": "REQUIRED_FOR_FUTURE_INVARIANCE",
+        "reason": "Current classifier cannot reconstruct the supported approval from the live candidate representation without the repaired reviewed provenance.",
+        "proposed_future_schema_fields": [
+          "review_provenance.schema_version",
+          "review_provenance.methodology_version",
+          "review_provenance.origin",
+          "review_provenance.source_artifacts",
+          "review_provenance.contributors",
+          "review_provenance.temporal.event_time_or_interval",
+          "review_provenance.temporal.timestamp_precision",
+          "review_provenance.temporal.evidence_type",
+          "review_provenance.temporal.publication_time_separate",
+          "review_provenance.target_episode_id",
+          "review_provenance.exact_city_evidence",
+          "review_provenance.explosion_evidence",
+          "review_provenance.aerial_war_evidence",
+          "review_provenance.same_attack_basis",
+          "review_provenance.neighboring_alert_check"
+        ]
+      },
+      {
+        "candidate_id": "f27ee788b3489758d08fea05",
+        "city_key": "kropyvnytskyi",
+        "city": "Кропивницький",
+        "target_episode_id": "e3370a23e1fc59123ba22279",
+        "current_status": "approved_strict",
+        "current_matched_episode_id": "e3370a23e1fc59123ba22279",
+        "final_supported_status": "approved_strict",
+        "source_artifact": "research/explosion_monitor_provenance_repair_replay_2026-09-24.json",
+        "source_blob_sha": "193d18c39d079258f9d0446a79dc6e193b910ef6",
+        "provenance_status": "COMPLETE",
+        "persistence_requirement": "REQUIRED_FOR_FUTURE_INVARIANCE",
+        "reason": "Current classifier cannot reconstruct the supported approval from the live candidate representation without the repaired reviewed provenance.",
+        "proposed_future_schema_fields": [
+          "review_provenance.schema_version",
+          "review_provenance.methodology_version",
+          "review_provenance.origin",
+          "review_provenance.source_artifacts",
+          "review_provenance.contributors",
+          "review_provenance.temporal.event_time_or_interval",
+          "review_provenance.temporal.timestamp_precision",
+          "review_provenance.temporal.evidence_type",
+          "review_provenance.temporal.publication_time_separate",
+          "review_provenance.target_episode_id",
+          "review_provenance.exact_city_evidence",
+          "review_provenance.explosion_evidence",
+          "review_provenance.aerial_war_evidence",
+          "review_provenance.same_attack_basis",
+          "review_provenance.neighboring_alert_check"
+        ]
+      },
+      {
+        "candidate_id": "5c03b9b16cd8676a36d34364",
+        "city_key": "kropyvnytskyi",
+        "city": "Кропивницький",
+        "target_episode_id": "e3370a23e1fc59123ba22279",
+        "current_status": "approved_strict",
+        "current_matched_episode_id": "e3370a23e1fc59123ba22279",
+        "final_supported_status": "approved_strict",
+        "source_artifact": "research/explosion_monitor_provenance_repair_replay_2026-09-24.json",
+        "source_blob_sha": "193d18c39d079258f9d0446a79dc6e193b910ef6",
+        "provenance_status": "COMPLETE",
+        "persistence_requirement": "REQUIRED_FOR_FUTURE_INVARIANCE",
+        "reason": "Current classifier cannot reconstruct the supported approval from the live candidate representation without the repaired reviewed provenance.",
+        "proposed_future_schema_fields": [
+          "review_provenance.schema_version",
+          "review_provenance.methodology_version",
+          "review_provenance.origin",
+          "review_provenance.source_artifacts",
+          "review_provenance.contributors",
+          "review_provenance.temporal.event_time_or_interval",
+          "review_provenance.temporal.timestamp_precision",
+          "review_provenance.temporal.evidence_type",
+          "review_provenance.temporal.publication_time_separate",
+          "review_provenance.target_episode_id",
+          "review_provenance.exact_city_evidence",
+          "review_provenance.explosion_evidence",
+          "review_provenance.aerial_war_evidence",
+          "review_provenance.same_attack_basis",
+          "review_provenance.neighboring_alert_check"
+        ]
+      },
+      {
+        "candidate_id": "e32f3597227018c2564e8935",
+        "city_key": "kropyvnytskyi",
+        "city": "Кропивницький",
+        "target_episode_id": "e3370a23e1fc59123ba22279",
+        "current_status": "approved_strict",
+        "current_matched_episode_id": "e3370a23e1fc59123ba22279",
+        "final_supported_status": "approved_strict",
+        "source_artifact": "research/explosion_monitor_provenance_repair_replay_2026-09-24.json",
+        "source_blob_sha": "193d18c39d079258f9d0446a79dc6e193b910ef6",
+        "provenance_status": "COMPLETE",
+        "persistence_requirement": "REQUIRED_FOR_FUTURE_INVARIANCE",
+        "reason": "Current classifier cannot reconstruct the supported approval from the live candidate representation without the repaired reviewed provenance.",
+        "proposed_future_schema_fields": [
+          "review_provenance.schema_version",
+          "review_provenance.methodology_version",
+          "review_provenance.origin",
+          "review_provenance.source_artifacts",
+          "review_provenance.contributors",
+          "review_provenance.temporal.event_time_or_interval",
+          "review_provenance.temporal.timestamp_precision",
+          "review_provenance.temporal.evidence_type",
+          "review_provenance.temporal.publication_time_separate",
+          "review_provenance.target_episode_id",
+          "review_provenance.exact_city_evidence",
+          "review_provenance.explosion_evidence",
+          "review_provenance.aerial_war_evidence",
+          "review_provenance.same_attack_basis",
+          "review_provenance.neighboring_alert_check"
+        ]
+      }
+    ]
+  },
+  "current_queue_schema_audit": {
+    "observed_field_counts": {
+      "candidate_id": 404,
+      "city_key": 404,
+      "city": 404,
+      "status": 404,
+      "source": 404,
+      "publisher": 404,
+      "publisher_url": 404,
+      "url": 404,
+      "title": 404,
+      "published_at": 404,
+      "snippet": 404,
+      "discovery_basis": 310,
+      "resolved_url": 310,
+      "matched_text_excerpt": 310,
+      "first_discovered_at": 404,
+      "last_seen_at": 404,
+      "trigger_episode_ids": 404,
+      "trigger_check_labels": 404,
+      "matched_episode_id": 404,
+      "classification_reason_codes": 330,
+      "classification_evidence": 201,
+      "review_note": 404,
+      "note": 404,
+      "matching_outcome": 385,
+      "matched_episode_ids": 385,
+      "matching_logical_episode_groups": 385,
+      "matching_reason": 385,
+      "composition_provenance": 1,
+      "sensitivity_basis": 77
+    },
+    "review_provenance_field_observed": false,
+    "classification_evidence_observed_records": 201,
+    "composition_provenance_observed_records": 1,
+    "capability_checks": [
+      {
+        "capability": "event_time_or_interval",
+        "result": "PARTIAL",
+        "note": "classification_evidence.temporal_binding has auto-derived event_time/event_interval, but there is no durable reviewed-provenance contract."
+      },
+      {
+        "capability": "timestamp_precision",
+        "result": "FAIL",
+        "note": "No standardized reviewed timestamp-precision field."
+      },
+      {
+        "capability": "temporal_evidence_type",
+        "result": "PARTIAL",
+        "note": "Auto-derived temporal_binding.evidence_type exists; reviewed origin is not represented durably."
+      },
+      {
+        "capability": "event_time_vs_publication_time",
+        "result": "PARTIAL",
+        "note": "published_at and temporal fields are separate in current auto evidence, but repaired reviewed event time is not a consumed input."
+      },
+      {
+        "capability": "target_episode",
+        "result": "PASS_PARTIAL",
+        "note": "matched_episode_id/classification_episode_id/composition target exist, but reviewed attribution provenance is not durable."
+      },
+      {
+        "capability": "exact_city_evidence",
+        "result": "PARTIAL",
+        "note": "Auto-derived classification evidence exists; reviewed cross-source support is not modeled."
+      },
+      {
+        "capability": "explosion_evidence",
+        "result": "PARTIAL",
+        "note": "Auto-derived evidence exists; reviewed cross-source support is not modeled."
+      },
+      {
+        "capability": "aerial_war_evidence",
+        "result": "PARTIAL",
+        "note": "Auto-derived evidence exists; reviewed cross-source support is not modeled."
+      },
+      {
+        "capability": "same_attack_basis",
+        "result": "PARTIAL",
+        "note": "Auto same_attack_context and composition compatibility exist; repaired reviewer basis lacks a durable provenance block."
+      },
+      {
+        "capability": "cross_source_contributors",
+        "result": "FAIL_GENERAL",
+        "note": "Only episode composition stores contributor IDs/roles; generic reviewed cross-source provenance is absent."
+      },
+      {
+        "capability": "contributor_roles",
+        "result": "FAIL_GENERAL",
+        "note": "Present only for composition provenance, not general reviewed provenance."
+      },
+      {
+        "capability": "neighboring_alert_check",
+        "result": "PARTIAL",
+        "note": "Composition stores it; general reviewed temporal attribution does not."
+      },
+      {
+        "capability": "provenance_source_origin",
+        "result": "FAIL",
+        "note": "Candidate source is not the same as provenance-chain origin; source artifacts/URLs are not modeled consistently."
+      },
+      {
+        "capability": "methodology_rule_version",
+        "result": "FAIL",
+        "note": "No per-reviewed-provenance methodology/rule version field."
+      }
+    ],
+    "can_represent_finalized_reviewed_provenance_without_semantic_loss_under_current_supported_contract": false,
+    "result": "FAIL",
+    "conclusion": "The JSON container is schemaless enough to hold new top-level data, but the current supported queue schema/monitor contract lacks a durable, versioned reviewed-provenance block for the full repaired evidence chain."
+  },
+  "monitor_persistence_audit": {
+    "result": "FAIL_FOR_MACHINE_CRITICAL_REVIEWED_PROVENANCE",
+    "code_facts": {
+      "classification_text_reads_review_provenance": false,
+      "any_review_provenance_reference": false,
+      "any_source_checked_reference": false,
+      "classification_evidence_is_rebuilt_on_apply": true,
+      "review_note_is_rebuilt_on_apply": true,
+      "composition_provenance_written": true,
+      "main_matching_refresh_scoped_to_needs_review": true
+    },
+    "details": {
+      "queue_load": "json object fields are retained in memory.",
+      "serialization": "atomic_json serializes the full object, so a dedicated unknown top-level review_provenance block survives a pure load/serialize round-trip.",
+      "existing_candidate_merge": "add_candidates updates selected fields on existing records; it does not reconstruct the whole record.",
+      "matching_refresh": "apply_matching_result changes matching fields only; however a material/stale match triggers reclassification.",
+      "reclassification": "apply_classification_decision replaces classification_reason_codes, classification_evidence and review_note. Therefore repaired evidence stored only in classification_evidence or review_note is not durable.",
+      "composition": "apply_episode_composition writes top-level composition_provenance and an episode_level_composition copy into classification_evidence, but stored composition_provenance is not a classification input.",
+      "deduplication": "No safe reviewed-provenance merge contract exists; identity dedup does not by itself consume or validate reviewed provenance."
+    },
+    "conclusion": "A dedicated top-level provenance block could be physically preserved, but the currently used evidence/review fields are not safe persistence locations across reclassification, and persistence alone would not solve consumption."
+  },
+  "monitor_provenance_consumption_audit": {
+    "monitor_path": "kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py",
+    "monitor_blob_sha": "78f13c251b2441b1724df9151f49b09a9f6e1403",
+    "facts": {
+      "classification_text_reads_review_provenance": false,
+      "any_review_provenance_reference": false,
+      "any_source_checked_reference": false,
+      "classification_evidence_is_rebuilt_on_apply": true,
+      "review_note_is_rebuilt_on_apply": true,
+      "composition_provenance_written": true,
+      "main_matching_refresh_scoped_to_needs_review": true
+    },
+    "classifier_inputs": [
+      "title",
+      "snippet",
+      "publisher",
+      "discovery_basis",
+      "matched_text_excerpt",
+      "source",
+      "published_at",
+      "current tracked episodes and publication-time matching"
+    ],
+    "persistence_result": "PARTIAL",
+    "consumption_result": "FAIL",
+    "conclusion": "A dedicated unknown top-level reviewed-provenance block can survive JSON serialization and non-reconstructive queue updates, but current classification/reclassification/composition logic does not consume it. Reclassification also replaces classification_evidence and review_note, so machine-critical repaired provenance cannot safely live only in those fields.",
+    "authoritative_replay_confirmation": {
+      "research_only_provenance_adapter": true,
+      "production_replay_directly_reads_proposed_schema": false,
+      "adapter_description": "The replay projects repaired evidence into the same decision concepts used by current classification_evidence / temporal_binding / same_attack_context / episode composition. It does not write those fields to live queue records."
+    },
+    "result": "FAIL",
+    "critical_finding": "classify_candidate and compose_episode_candidates re-derive evidence from candidate text/source/publication metadata and tracked episodes. They do not merge or consume finalized structured reviewed provenance from queue records."
+  },
+  "representative_future_run_simulation": {
+    "method": "Read-only in-memory persistence/consumption simulation anchored to the authoritative current-code system-wide replay. A synthetic top-level review_provenance block is injected into exact current queue records, JSON-round-tripped, and checked against the actual classifier dependency set. The authoritative no-adapter replay result is used for the current-code classification outcome; direct code audit proves the injected block is not consumed.",
+    "live_files_mutated": false,
+    "cases": [
+      {
+        "kind": "reviewed_strict_original_false_downgrade",
+        "candidate_id": "6212f72cfd28e6a86fd5bc51",
+        "city": "Суми",
+        "current_status": "approved_strict",
+        "target_episode_id": "e7e8974f19d4fdc782e93980",
+        "current_code_no_adapter_result": "needs_review",
+        "finalized_supported_status": "approved_strict",
+        "injected_review_provenance_survives_json_roundtrip": true,
+        "classifier_raw_input_fields_unchanged_by_injection": true,
+        "classifier_consumes_review_provenance": false,
+        "invariance_if_reclassified": "FAIL",
+        "note": "The authoritative current-code system-wide replay supplies the no-adapter result. Direct code audit shows the injected review_provenance field is outside classification inputs, so adding it cannot change that result."
+      },
+      {
+        "kind": "reviewed_sensitivity_original_false_downgrade",
+        "candidate_id": "70265845b367fea065fbd077",
+        "city": "Севастополь",
+        "current_status": "approved_sensitivity",
+        "target_episode_id": "886263e508ba1a6a3cc213a6",
+        "current_code_no_adapter_result": "needs_review",
+        "finalized_supported_status": "approved_sensitivity",
+        "injected_review_provenance_survives_json_roundtrip": true,
+        "classifier_raw_input_fields_unchanged_by_injection": true,
+        "classifier_consumes_review_provenance": false,
+        "invariance_if_reclassified": "FAIL",
+        "note": "The authoritative current-code system-wide replay supplies the no-adapter result. Direct code audit shows the injected review_provenance field is outside classification inputs, so adding it cannot change that result."
+      },
+      {
+        "kind": "deterministic_zaporizhzhia_negative",
+        "candidate_id": "e7461ec759e4d79020dfd1ba",
+        "city": "Запоріжжя",
+        "current_status": "approved_strict",
+        "target_episode_id": "a60d817eaa9253200f090720",
+        "current_code_no_adapter_result": "needs_review",
+        "finalized_supported_status": "needs_review",
+        "injected_review_provenance_survives_json_roundtrip": true,
+        "classifier_raw_input_fields_unchanged_by_injection": true,
+        "classifier_consumes_review_provenance": false,
+        "invariance_if_reclassified": "PASS",
+        "note": "The authoritative current-code system-wide replay supplies the no-adapter result. Direct code audit shows the injected review_provenance field is outside classification inputs, so adding it cannot change that result."
+      },
+      {
+        "kind": "newly_strict_composed_episode",
+        "target_episode_id": "e97e6e816f96832d02c8b2cd",
+        "anchor_candidate_id": "73d817926f66c8dce397b91b",
+        "context_candidate_id": "4bdc4c0a5f95dc1e01632d22",
+        "current_anchor_status": "approved_strict",
+        "composition_provenance_survives_json_roundtrip": true,
+        "contributors_survive_json_roundtrip": true,
+        "stored_composition_provenance_is_consumed_by_compose_episode_candidates": false,
+        "composition_is_recomputed_from_candidate_text_and_timestamps": true,
+        "duplicate_strict_guard_present": true,
+        "no_duplicate_strict_episode_expected_with_no_new_evidence": true,
+        "invariance_if_no_new_evidence": "PASS_FOR_THIS_COMPOSED_EPISODE",
+        "note": "This anchor has already transitioned consistently in live state. Current composition code recomputes evidence rather than reading stored composition_provenance, then skips promotion when an approved_strict candidate already exists for the episode."
+      },
+      {
+        "kind": "candidate_cleanup_episode_preserved",
+        "candidate_id": "99664d26fab9593ccb47770a",
+        "city": "Київ",
+        "current_status": "approved_sensitivity",
+        "target_episode_id": "baf3eaa558f606c14d6e385f",
+        "current_code_no_adapter_result": "needs_review",
+        "finalized_supported_status": "needs_review",
+        "injected_review_provenance_survives_json_roundtrip": true,
+        "classifier_raw_input_fields_unchanged_by_injection": true,
+        "classifier_consumes_review_provenance": false,
+        "invariance_if_reclassified": "PASS",
+        "note": "The authoritative current-code system-wide replay supplies the no-adapter result. Direct code audit shows the injected review_provenance field is outside classification inputs, so adding it cannot change that result.",
+        "proposed_post_mutation_status": "needs_review",
+        "episode_preserved_by_other_strict_candidate": true,
+        "invariance_after_proposed_cleanup": "PASS_BY_CURRENT_RAW_CLASSIFICATION"
+      }
+    ],
+    "checks": {
+      "provenance_survives_serialization": "PASS_FOR_DEDICATED_TOP_LEVEL_BLOCK",
+      "correct_supported_status_reproduced_for_recovered_strict": "FAIL",
+      "correct_supported_status_reproduced_for_recovered_sensitivity": "FAIL",
+      "deterministic_zaporizhzhia_negative_reproduced": "PASS",
+      "event_time_not_converted_to_publication_time": "STORAGE_CAN_PRESERVE_DISTINCTION_BUT_CLASSIFIER_IGNORES_REVIEWED_EVENT_TIME",
+      "composition_contributors_survive_serialization": "PASS_FOR_EXISTING_COMPOSITION_PROVENANCE",
+      "stored_composition_contributors_are_consumed": "FAIL",
+      "duplicate_strict_episode_created": "NO_FOR_REPRESENTATIVE_ALREADY_STRICT_EPISODE_DUE_TO_EXISTING_STRICT_GUARD"
+    },
+    "result": "FAIL"
+  },
+  "current_state_conflicts": {
+    "material_conflict_count": 0,
+    "conflicts": [],
+    "already_transitioned_consistently": [
+      {
+        "type": "composition_anchor",
+        "episode_id": "e97e6e816f96832d02c8b2cd",
+        "candidate_id": "73d817926f66c8dce397b91b",
+        "current_status": "approved_strict",
+        "note": "Consistent with the frozen validated composition result; treated as already transitioned consistently, not as a conflict."
+      }
+    ],
+    "conflict_verdict_triggered": false
+  },
+  "section_6_decision": {
+    "persistence_architecture_already_adequate": false,
+    "preserves_dedicated_unknown_top_level_fields": true,
+    "classifier_consumes_persisted_reviewed_provenance": false,
+    "current_existing_fields_safe_for_machine_critical_reviewed_provenance": false,
+    "future_run_invariance_for_recovered_supported_approvals": false,
+    "action": "STOP_BEFORE_MUTATION_PLAN"
+  },
+  "minimal_hardening_required": {
+    "implement_in_this_step": false,
+    "scope": [
+      {
+        "change": "Add explicit versioned review_provenance block to queue records.",
+        "minimum_semantics": [
+          "origin/source artifact(s) and source identifiers",
+          "event time or interval with timestamp precision",
+          "temporal evidence type",
+          "publication/message time stored separately from event time",
+          "target episode ID",
+          "exact-city, explosion/impact, aerial-war and same-attack evidence",
+          "cross-source contributors and role of each contributor",
+          "neighboring-alert check",
+          "methodology/rule version"
+        ]
+      },
+      {
+        "change": "Merge persisted reviewed evidence into classification input explicitly and conservatively.",
+        "principle": "Reviewed evidence may supplement original candidate representation but must not overwrite source facts or convert publication time into event time."
+      },
+      {
+        "change": "Preserve review_provenance across matching refresh, reclassification, existing-candidate merge/dedup and queue serialization.",
+        "principle": "apply_classification_decision must not erase reviewed provenance."
+      },
+      {
+        "change": "Teach temporal attribution to consume reviewed event-time/interval evidence as a distinct evidence source with explicit precision and target-episode validation.",
+        "principle": "Never infer reviewed event time from published_at."
+      },
+      {
+        "change": "Teach episode composition to consume and/or validate persisted reviewed contributor roles and composition provenance, with neighboring-alert guard and deterministic anchor semantics.",
+        "principle": "Stored composition provenance must not become an unvalidated override."
+      },
+      {
+        "change": "Add methodology/version tags and stale-provenance invalidation rules.",
+        "principle": "A rule-version change must not silently carry forward incompatible classification reasons."
+      },
+      {
+        "change": "Add representative and 50-supported-case invariance regressions.",
+        "required_assertion": "After applying reviewed provenance and rerunning with no new evidence, all 50 supported approvals remain supported; the two Zaporizhzhia negatives remain needs_review; composition creates no duplicate strict episode."
+      }
+    ]
+  },
+  "exact_proposed_mutation_operations_if_safe": {
+    "built": false,
+    "reason": "Section 6 failed because persisted reviewed provenance is not consumed and current evidence fields are not safe durable machine-critical storage. Per task STOP condition, no exact live mutation operations are authorized in this artifact.",
+    "candidate_status_changes": [],
+    "provenance_writes": [],
+    "metric_writes": []
+  },
+  "episode_level_metric_effects_reference_only": {
+    "actionable": false,
+    "reason": "Architecture preflight failed; these are frozen analytical reference effects only, not an executable mutation plan.",
+    "four_episode_metric_downgrades": [
+      {
+        "episode_id": "2c5bbc0aeba9e25e4eec7b09",
+        "city": "Одеса",
+        "old": "approved_strict",
+        "final": "DOWNGRADE_TO_UNRESOLVED"
+      },
+      {
+        "episode_id": "7a7da068c0efb7be80bd45e4",
+        "city": "Одеса",
+        "old": "approved_strict",
+        "final": "DOWNGRADE_TO_UNRESOLVED"
+      },
+      {
+        "episode_id": "eb2580c2bec54ddc2e36eaf7",
+        "city": "Одеса",
+        "old": "approved_strict",
+        "final": "DOWNGRADE_TO_UNRESOLVED"
+      },
+      {
+        "episode_id": "a60d817eaa9253200f090720",
+        "city": "Запоріжжя",
+        "old": "approved_strict",
+        "final": "DOWNGRADE_TO_UNRESOLVED"
+      }
+    ],
+    "three_validated_new_strict_composition_episodes": [
+      {
+        "city": "Дніпро",
+        "episode_id": "c894e85e407dc4256d8c4419",
+        "previous_effective_episode_status": "needs_review",
+        "proposed_effective_episode_status": "approved_strict",
+        "live_reconciliation": "unchanged_and_safe"
+      },
+      {
+        "city": "Київ",
+        "episode_id": "e97e6e816f96832d02c8b2cd",
+        "previous_effective_episode_status": "needs_review",
+        "proposed_effective_episode_status": "approved_strict",
+        "live_reconciliation": "already_transitioned_consistently"
+      },
+      {
+        "city": "Київ",
+        "episode_id": "f235928c329ca806d9dca5ed",
+        "previous_effective_episode_status": "approved_sensitivity",
+        "proposed_effective_episode_status": "approved_strict",
+        "live_reconciliation": "unchanged_and_safe"
+      }
+    ],
+    "candidate_cleanups_zero_metric_effect": [
+      {
+        "candidate_id": "99664d26fab9593ccb47770a",
+        "episode_id": "baf3eaa558f606c14d6e385f",
+        "city": "Київ",
+        "metric_effect": "none"
+      },
+      {
+        "candidate_id": "e84bc9a86b87a64b6b604974",
+        "episode_id": "e956b3621d18df308b368835",
+        "city": "Одеса",
+        "metric_effect": "none"
+      }
+    ],
+    "frozen_nominal_effect": {
+      "strict_episodes_added": 3,
+      "strict_episodes_removed": 4,
+      "sensitivity_only_episodes_added": 0,
+      "sensitivity_only_episodes_removed": 1,
+      "strict_count_net": -1,
+      "approved_strict_or_sensitivity_union_net": -2,
+      "by_city": {
+        "dnipro": {
+          "strict_added": 1,
+          "strict_removed": 0,
+          "sensitivity_only_added": 0,
+          "sensitivity_only_removed": 0,
+          "approved_union_net": 1
+        },
+        "kyiv": {
+          "strict_added": 2,
+          "strict_removed": 0,
+          "sensitivity_only_added": 0,
+          "sensitivity_only_removed": 1,
+          "approved_union_net": 1
+        },
+        "odesa": {
+          "strict_added": 0,
+          "strict_removed": 3,
+          "sensitivity_only_added": 0,
+          "sensitivity_only_removed": 0,
+          "approved_union_net": -3
+        },
+        "zaporizhzhia": {
+          "strict_added": 0,
+          "strict_removed": 1,
+          "sensitivity_only_added": 0,
+          "sensitivity_only_removed": 0,
+          "approved_union_net": -1
+        }
+      },
+      "note": "Kyiv f235928c... is an effective sensitivity->strict upgrade, so it adds one strict episode but does not add one episode to the approved union."
+    },
+    "current_live_adjusted_reference_effect": {
+      "note": "One validated Kyiv strict composition episode (e97e6e...) is already transitioned consistently in current live queue. If architecture were hardened later, the remaining status/metric deltas would be evaluated from that current state rather than reapplying it.",
+      "remaining_strict_episodes_added": 2,
+      "strict_episodes_removed": 4,
+      "remaining_strict_count_net": -2,
+      "approved_strict_or_sensitivity_union_net": -3,
+      "by_city": {
+        "dnipro": {
+          "remaining_strict_added": 1,
+          "strict_removed": 0,
+          "sensitivity_only_removed": 0,
+          "approved_union_net": 1
+        },
+        "kyiv": {
+          "remaining_strict_added": 1,
+          "strict_removed": 0,
+          "sensitivity_only_removed": 1,
+          "approved_union_net": 0,
+          "already_applied_strict_episode": "e97e6e816f96832d02c8b2cd"
+        },
+        "odesa": {
+          "remaining_strict_added": 0,
+          "strict_removed": 3,
+          "sensitivity_only_removed": 0,
+          "approved_union_net": -3
+        },
+        "zaporizhzhia": {
+          "remaining_strict_added": 0,
+          "strict_removed": 1,
+          "sensitivity_only_removed": 0,
+          "approved_union_net": -1
+        }
+      }
+    }
+  },
+  "atomicity_requirements_for_later_safe_mutation": {
+    "apply_only_after_hardening_and_dry_replay": true,
+    "coherent_record_update_fields": [
+      "review_provenance",
+      "status",
+      "classification_reason_codes",
+      "classification_evidence",
+      "composition_provenance where applicable",
+      "matched_episode_id and matching metadata"
+    ],
+    "invariant": "No candidate may temporarily carry a new approval/status while retaining contradictory old classification reasons or an unconsumed provenance block.",
+    "recommended_mechanism": "Build the full deterministic post-hardening operation list from a fresh SHA-frozen queue, validate all preconditions, then write the queue coherently and rebuild dependent metric outputs from that same state."
+  },
+  "future_run_invariance_result": {
+    "required_statement": "After applying the planned state and running the current monitor again with no new evidence, the affected reviewed candidates/episodes should remain at the same supported statuses.",
+    "result": false,
+    "failing_examples": [
+      {
+        "candidate_id": "6212f72cfd28e6a86fd5bc51",
+        "required": "approved_strict",
+        "current_code_no_adapter": "needs_review"
+      },
+      {
+        "candidate_id": "70265845b367fea065fbd077",
+        "required": "approved_sensitivity",
+        "current_code_no_adapter": "needs_review"
+      }
+    ],
+    "cause": "Persisted reviewed provenance is not a classifier input."
+  },
+  "mutation_safety": {
+    "monitor_code_modified": false,
+    "queue_modified": false,
+    "monitor_state_modified": false,
+    "last_run_modified": false,
+    "strict_metric_series_modified": false,
+    "dashboard_data_modified": false,
+    "canonical_historical_data_modified": false,
+    "source_search_performed": false,
+    "historical_enrichment_run": false,
+    "eight_downgrades_applied": false,
+    "composition_results_applied_by_this_preflight": false,
+    "provenance_written_to_live_queue": false,
+    "deployment_performed": false
+  },
+  "read_back_qa_precommit": {
+    "json_serializable": true,
+    "frozen_58_20_input_referenced_correctly": true,
+    "exact_final_8_accounted_for": true,
+    "exact_3_validated_composition_episodes_accounted_for": true,
+    "candidate_transitions_and_provenance_only_writes_not_conflated": true,
+    "four_episode_level_downgrades_identified": true,
+    "metric_impact_uses_episode_counts": true,
+    "zero_byte_provenance_artifact_not_used_as_evidence": true,
+    "structured_provenance_source_chain_explicit": true,
+    "queue_schema_audit_complete": true,
+    "preservation_audit_complete": true,
+    "consumption_audit_complete": true,
+    "future_run_invariance_tested": true,
+    "current_live_shas_captured": true,
+    "no_live_code_data_metric_mutation": true
+  },
+  "final_verdict": "CONTROLLED MUTATION BLOCKED — PROVENANCE PERSISTENCE HARDENING REQUIRED"
+}
