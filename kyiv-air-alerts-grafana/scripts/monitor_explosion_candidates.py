@@ -2727,6 +2727,48 @@ def self_test() -> None:
     assert not kyiv_pvo_decision["strict_explosion_evidence"]["present"]
     assert "PVO_ONLY_COMPLETE_MESSAGE" in kyiv_pvo_decision["reason_codes"]
 
+    # Air-defense hardening invariant: PPO explains an observed explosion; it
+    # does not negate that explosion. Explicit explosion evidence remains
+    # strict-eligible when city/episode attribution is independently satisfied.
+    air_defense_positive_cases = (
+        "У Полтаві під час повітряної тривоги вибухи, які було чутно у місті — робота нашої ППО.",
+        "У Полтаві чути вибухи. Працює ППО.",
+        "Полтава: лунають вибухи — працює ППО.",
+    )
+    for title in air_defense_positive_cases:
+        row = {
+            **strict_base,
+            "title": title,
+            "snippet": "",
+            "source": "Telegram / СУСПІЛЬНЕ НОВИНИ",
+            "publisher": "СУСПІЛЬНЕ НОВИНИ",
+        }
+        decision = classify_candidate(row, "poltava", [poltava_ep])
+        assert decision["strict_explosion_evidence"]["present"], decision
+        assert decision["air_military_context"]["present"], decision
+        assert decision["same_attack_context"]["present"], decision
+        assert decision["proposed_outcome"] == "approved_strict", decision
+        assert "PVO_ONLY_COMPLETE_MESSAGE" not in decision["reason_codes"], decision
+
+    # Air-defense wording alone is context, not explosion evidence.
+    air_defense_negative_cases = (
+        "У Полтаві працює ППО.",
+        "У Полтаві наші сили ППО збили БпЛА.",
+        "У Полтаві Повітряні сили повідомляють про роботу ППО.",
+    )
+    for title in air_defense_negative_cases:
+        row = {
+            **strict_base,
+            "title": title,
+            "snippet": "",
+            "source": "Telegram / СУСПІЛЬНЕ НОВИНИ",
+            "publisher": "СУСПІЛЬНЕ НОВИНИ",
+        }
+        decision = classify_candidate(row, "poltava", [poltava_ep])
+        assert not decision["strict_explosion_evidence"]["present"], decision
+        assert decision["proposed_outcome"] != "approved_strict", decision
+        assert "PVO_ONLY_COMPLETE_MESSAGE" in decision["reason_codes"], decision
+
     # Mandatory: Vinnytsia regional/quarry wording plus publisher branding is
     # neither semantic exact-city evidence nor strict.
     vinnytsia_decision = classify_candidate(vinnytsia_branding, "vinnytsia", [])
