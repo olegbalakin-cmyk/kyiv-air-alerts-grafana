@@ -1,0 +1,323 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-09-25T04:47:00Z",
+  "branch": "multicity-wip-2026-09-16",
+  "scope": {
+    "step": "air-defense hardening + control-period dry replay only",
+    "control_local_dates": {
+      "start": "2026-09-18",
+      "end": "2026-09-24",
+      "timezone": "Europe/Kyiv"
+    },
+    "full_historical_replay_performed": false,
+    "normal_network_monitor_invoked_by_this_step": false
+  },
+  "head_and_blobs_before": {
+    "head": "80a5b9974da7e1684e53b86620601e3cbdc3c9e3",
+    "files": {
+      "kyiv-air-alerts-grafana/data/explosion_review_queue.json": "f987e741ac64f8d8aa6ce4cfc2e4c4f7578f394d",
+      "kyiv-air-alerts-grafana/data/explosion_candidate_monitor_state.json": "6393be6a0fd6bb37abb1cf1765770f6d344cd5db",
+      "kyiv-air-alerts-grafana/data/explosion_candidate_monitor_last_run.json": "4cf6203679ee85bde000ccd3236954792c0179ce",
+      "kyiv-air-alerts-grafana/data/explosions_test.json": "7dc8a613d9069a87dfb32009ffc9fde6d0435063",
+      "kyiv-air-alerts-grafana/data/dashboard_data.json": "835b3474c9734baaf8e2669567d388cdfb978eae",
+      "kyiv-air-alerts-grafana/data/explosion_audited_baseline.json": "5bbd2b771559eac2966aeec65d6e3b5487b9c1a9",
+      "kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py": "e1286040e6a3911f19cd22c9fb2cf9cddfd8adee"
+    }
+  },
+  "current_behavior_audit": {
+    "discovery_note": "PPO is a broad discovery/air-context term, not strict explosion evidence.",
+    "strict_explosion_gate": "strict_explosion_signal requires explicit explosion/strike wording and does not treat PPO wording as explosion evidence.",
+    "city_gate": "strict_explosion_evidence requires a segment with target-city evidence plus strict explosion signal.",
+    "air_context_gate": "air_military_context_evidence separately recognizes PPO and other aerial-war context.",
+    "same_attack_gate": "same_attack_context_evidence links explosion and air context in the same event segment, or narrowly across adjacent segments for trusted same-attack sources.",
+    "temporal_gate": "strict promotion additionally requires episode-specific temporal binding; publication-window matching alone is insufficient.",
+    "ppo_only_guard": "trusted live exact-city messages with PPO wording but no strict explosion evidence are rejected with PVO_ONLY_COMPLETE_MESSAGE.",
+    "conclusion": "The requested narrow PPO semantics were already implemented by the runtime classifier; no runtime classification expansion was required."
+  },
+  "air_defense_rule": {
+    "positive": "explicit explosion evidence + exact target-city evidence + linked air-defense/aerial-war context + episode-specific temporal attribution => strict-eligible; PPO may explain the explosion and does not negate it.",
+    "negative": "PPO / works PPO / target intercepted / Air Force reports PPO, without explicit explosion evidence => not strict solely because PPO is mentioned.",
+    "generic_ppo_keyword_expansion": false
+  },
+  "hardening_change": {
+    "commit": "e0aaecfcdceb28cc57159c5038f35c990dce352b",
+    "file": "kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py",
+    "old_blob": "e1286040e6a3911f19cd22c9fb2cf9cddfd8adee",
+    "new_blob": "c667389f175038e23e0ac775bb58f00fe11effcf",
+    "runtime_classifier_changed": false,
+    "change_summary": "Added explicit self-test regression fixtures only: three positive explosion+PPO cases and three PPO-only negative cases. Existing runtime gates were left unchanged."
+  },
+  "regression_tests": {
+    "positive": [
+      {
+        "text": "У Полтаві під час повітряної тривоги вибухи, які було чутно у місті — робота нашої ППО.",
+        "expected": "approved_strict",
+        "result": "pass"
+      },
+      {
+        "text": "У Полтаві чути вибухи. Працює ППО.",
+        "expected": "approved_strict",
+        "result": "pass"
+      },
+      {
+        "text": "Полтава: лунають вибухи — працює ППО.",
+        "expected": "approved_strict",
+        "result": "pass"
+      }
+    ],
+    "negative": [
+      {
+        "text": "У Полтаві працює ППО.",
+        "expected": "not approved_strict; PVO_ONLY_COMPLETE_MESSAGE",
+        "result": "pass"
+      },
+      {
+        "text": "У Полтаві наші сили ППО збили БпЛА.",
+        "expected": "not approved_strict; PVO_ONLY_COMPLETE_MESSAGE",
+        "result": "pass"
+      },
+      {
+        "text": "У Полтаві Повітряні сили повідомляють про роботу ППО.",
+        "expected": "not approved_strict; PVO_ONLY_COMPLETE_MESSAGE",
+        "result": "pass"
+      }
+    ],
+    "github_actions": {
+      "run_id": 36095607591,
+      "relevant_steps": {
+        "Self-test primary candidate monitor and live rebuilder": "success",
+        "Run primary monitor safely from cached alert bridge": "success",
+        "Validate dynamic city membership": "success"
+      },
+      "overall_run": "failure",
+      "unrelated_failure": {
+        "step": "Simulate onboarding the next audited city",
+        "reason": "stale onboarding simulation assertion expected a historical small city-count shape; failure occurred after the monitor self-test, cached dry monitor, and current 23-city validation had all succeeded.",
+        "air_defense_regression_related": false
+      }
+    }
+  },
+  "control_replay": {
+    "method": "Because runtime classification functions were unchanged, the old-vs-new replay is an identity replay by construction. Current queue/state were enumerated for all 23 cities over completed local dates 2026-09-18..2026-09-24; the relevant classifier self-test and cached local-only monitor executed successfully in CI. No normal network monitor was run by this step.",
+    "city_count": 23,
+    "completed_episode_count": 889,
+    "current_strict_episode_count_in_control_window": 20,
+    "queue_record_count": 465,
+    "ppo_candidates_reviewed_in_control_window": 23,
+    "ppo_approved_strict_count": 2,
+    "ppo_only_approved_strict_count": 0,
+    "changed_candidates_old_vs_new": [],
+    "changed_episodes_old_vs_new": [],
+    "city_episode_counts": [
+      {
+        "city": "cherkasy",
+        "completed": 57,
+        "strict": 0
+      },
+      {
+        "city": "chernihiv",
+        "completed": 53,
+        "strict": 0
+      },
+      {
+        "city": "chernivtsi",
+        "completed": 4,
+        "strict": 0
+      },
+      {
+        "city": "dnipro",
+        "completed": 58,
+        "strict": 4
+      },
+      {
+        "city": "ivano_frankivsk",
+        "completed": 1,
+        "strict": 0
+      },
+      {
+        "city": "kharkiv",
+        "completed": 64,
+        "strict": 0
+      },
+      {
+        "city": "kherson",
+        "completed": 32,
+        "strict": 0
+      },
+      {
+        "city": "khmelnytskyi",
+        "completed": 18,
+        "strict": 0
+      },
+      {
+        "city": "kropyvnytskyi",
+        "completed": 69,
+        "strict": 3
+      },
+      {
+        "city": "kyiv",
+        "completed": 71,
+        "strict": 6
+      },
+      {
+        "city": "lutsk",
+        "completed": 9,
+        "strict": 0
+      },
+      {
+        "city": "lviv",
+        "completed": 0,
+        "strict": 0
+      },
+      {
+        "city": "mykolaiv",
+        "completed": 91,
+        "strict": 0
+      },
+      {
+        "city": "odesa",
+        "completed": 83,
+        "strict": 4
+      },
+      {
+        "city": "poltava",
+        "completed": 79,
+        "strict": 0
+      },
+      {
+        "city": "rivne",
+        "completed": 18,
+        "strict": 0
+      },
+      {
+        "city": "sevastopol",
+        "completed": 14,
+        "strict": 1
+      },
+      {
+        "city": "sumy",
+        "completed": 71,
+        "strict": 1
+      },
+      {
+        "city": "ternopil",
+        "completed": 6,
+        "strict": 1
+      },
+      {
+        "city": "uzhhorod",
+        "completed": 0,
+        "strict": 0
+      },
+      {
+        "city": "vinnytsia",
+        "completed": 21,
+        "strict": 0
+      },
+      {
+        "city": "zaporizhzhia",
+        "completed": 36,
+        "strict": 0
+      },
+      {
+        "city": "zhytomyr",
+        "completed": 34,
+        "strict": 0
+      }
+    ]
+  },
+  "known_reconciliation_controls": {
+    "must_not_be_strict": [
+      {
+        "city": "odesa",
+        "episode_id": "2c5bbc0aeba9e25e4eec7b09",
+        "approved_strict_candidates": 0,
+        "result": "pass"
+      },
+      {
+        "city": "odesa",
+        "episode_id": "7a7da068c0efb7be80bd45e4",
+        "approved_strict_candidates": 0,
+        "result": "pass"
+      },
+      {
+        "city": "odesa",
+        "episode_id": "eb2580c2bec54ddc2e36eaf7",
+        "approved_strict_candidates": 0,
+        "result": "pass"
+      },
+      {
+        "city": "zaporizhzhia",
+        "episode_id": "a60d817eaa9253200f090720",
+        "approved_strict_candidates": 0,
+        "result": "pass"
+      }
+    ],
+    "must_be_strict": [
+      {
+        "city": "dnipro",
+        "episode_id": "c894e85e407dc4256d8c4419",
+        "anchor_candidate_id": "3f2137adc72e1202240133f7",
+        "mechanism": "episode-level composition",
+        "result": "pass"
+      },
+      {
+        "city": "kyiv",
+        "episode_id": "e97e6e816f96832d02c8b2cd",
+        "anchor_candidate_id": "73d817926f66c8dce397b91b",
+        "mechanism": "episode-level composition",
+        "result": "pass"
+      },
+      {
+        "city": "kyiv",
+        "episode_id": "f235928c329ca806d9dca5ed",
+        "anchor_candidate_id": "5f807237ce10eb9d27bfc95f",
+        "mechanism": "episode-level composition",
+        "eligible_local_date": "2026-09-24",
+        "current_coverage_end": "2026-09-24",
+        "result": "pass"
+      }
+    ]
+  },
+  "false_positive_review": {
+    "conclusion": "No new obvious false strict was created by PPO wording.",
+    "ppo_strict_cases": [
+      {
+        "candidate_id": "d4fb0e081e5be3bd609f0633",
+        "city": "kyiv",
+        "basis": "explicit explosion evidence + PPO context + trusted contemporaneous-live episode-specific temporal binding",
+        "false_positive_from_ppo": false
+      },
+      {
+        "candidate_id": "4f9beb4b905d396ccdc5bc28",
+        "city": "kyiv",
+        "basis": "persisted reviewed provenance explicitly validates explosion evidence, same-attack basis, and episode-specific temporal binding; title PPO wording alone is not the strict basis",
+        "false_positive_from_ppo": false
+      }
+    ],
+    "ppo_only_examples_remain_non_strict": true
+  },
+  "metric_consistency": {
+    "all_23_coverage_end": "2026-09-24",
+    "current_known_correct_totals": {
+      "odesa_strict_n": 159,
+      "zaporizhzhia_strict_n": 169,
+      "dnipro_strict_n": 184,
+      "kyiv_strict_n": 383
+    },
+    "kyiv_f235_denominator_guard": "Episode f235928c329ca806d9dca5ed has local episode date 2026-09-24 and is eligible only when denominator coverage includes 2026-09-24; current coverage does."
+  },
+  "mutation_boundaries": {
+    "allowed_changes": [
+      "kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py",
+      "research/explosion_monitor_air_defense_hardening_control_replay_2026-09-25.json"
+    ],
+    "forbidden_data_files_mutated_by_hardening_commit": false,
+    "normal_network_monitor_run_by_this_step": false,
+    "grafana_mutated": false,
+    "netlify_mutated": false,
+    "production_mutated": false
+  },
+  "readiness_for_full_historical_replay": true,
+  "verdict": "AIR-DEFENSE HARDENING CONTROL REPLAY CLEAN — READY FOR FULL HISTORICAL REPLAY"
+}
