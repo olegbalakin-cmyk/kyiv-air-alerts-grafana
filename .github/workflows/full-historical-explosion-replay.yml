@@ -1,0 +1,187 @@
+name: Full historical explosion replay
+
+on:
+  workflow_dispatch:
+    inputs:
+      input_sha:
+        description: Frozen repository commit to replay
+        required: true
+        default: 7c4ffe5971708b2d7e9acfe8622a04566671875b
+      through:
+        description: Inclusive local replay end date
+        required: true
+        default: "2026-09-17"
+
+permissions:
+  contents: read
+
+jobs:
+  preflight:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    outputs:
+      matrix: ${{ steps.matrix.outputs.cities }}
+    steps:
+      - name: Check out replay implementation
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          path: implementation
+
+      - name: Check out exact frozen replay input
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.input_sha }}
+          path: input
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: input/kyiv-air-alerts-grafana/requirements.txt
+
+      - name: Install frozen input dependencies
+        run: pip install -r input/kyiv-air-alerts-grafana/requirements.txt
+
+      - name: Verify frozen SHA and run read-only preflight
+        id: replay_preflight
+        continue-on-error: true
+        env:
+          INPUT_SHA: ${{ inputs.input_sha }}
+          THROUGH: ${{ inputs.through }}
+        run: |
+          set -euo pipefail
+          test "$(git -C input rev-parse HEAD)" = "$INPUT_SHA"
+          mkdir -p "$RUNNER_TEMP/explosion-replay"
+          python implementation/kyiv-air-alerts-grafana/scripts/replay_explosion_history.py \
+            --repo-root "$GITHUB_WORKSPACE/input/kyiv-air-alerts-grafana" \
+            --through "$THROUGH" \
+            --input-head "$INPUT_SHA" \
+            --read-only \
+            --preflight \
+            --output "$RUNNER_TEMP/explosion-replay/preflight.json"
+
+      - name: Export deterministic city matrix
+        id: matrix
+        if: always()
+        run: |
+          set -euo pipefail
+          if [ "${{ steps.replay_preflight.outcome }}" = "success" ]; then
+            echo "cities=$(jq -c '.city_keys' "$RUNNER_TEMP/explosion-replay/preflight.json")" >> "$GITHUB_OUTPUT"
+          else
+            echo 'cities=[]' >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Upload preflight artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: historical-replay-preflight
+          path: ${{ runner.temp }}/explosion-replay/preflight.json
+          if-no-files-found: error
+
+      - name: Enforce preflight gate
+        if: steps.replay_preflight.outcome != 'success'
+        run: |
+          echo "Historical replay preflight blocked; city matrix will not start."
+          exit 1
+
+  replay-city:
+    needs: preflight
+    if: needs.preflight.result == 'success' && needs.preflight.outputs.matrix != '[]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        city: ${{ fromJson(needs.preflight.outputs.matrix) }}
+    steps:
+      - name: Check out replay implementation
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          path: implementation
+
+      - name: Check out exact frozen replay input
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.input_sha }}
+          path: input
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: input/kyiv-air-alerts-grafana/requirements.txt
+
+      - name: Install frozen input dependencies
+        run: pip install -r input/kyiv-air-alerts-grafana/requirements.txt
+
+      - name: Replay one audited city read-only
+        env:
+          INPUT_SHA: ${{ inputs.input_sha }}
+          THROUGH: ${{ inputs.through }}
+          CITY: ${{ matrix.city }}
+        run: |
+          set -euo pipefail
+          test "$(git -C input rev-parse HEAD)" = "$INPUT_SHA"
+          mkdir -p "$RUNNER_TEMP/explosion-replay"
+          python implementation/kyiv-air-alerts-grafana/scripts/replay_explosion_history.py \
+            --repo-root "$GITHUB_WORKSPACE/input/kyiv-air-alerts-grafana" \
+            --city "$CITY" \
+            --through "$THROUGH" \
+            --input-head "$INPUT_SHA" \
+            --read-only \
+            --output "$RUNNER_TEMP/explosion-replay/$CITY.json"
+          git -C input diff --exit-code -- \
+            kyiv-air-alerts-grafana/data/explosion_audited_baseline.json \
+            kyiv-air-alerts-grafana/data/explosion_review_queue.json \
+            kyiv-air-alerts-grafana/data/explosion_candidate_monitor_state.json \
+            kyiv-air-alerts-grafana/data/explosion_candidate_monitor_last_run.json \
+            kyiv-air-alerts-grafana/data/explosions_test.json \
+            kyiv-air-alerts-grafana/data/dashboard_data.json
+
+      - name: Upload city replay artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: historical-replay-${{ matrix.city }}
+          path: ${{ runner.temp }}/explosion-replay/${{ matrix.city }}.json
+          if-no-files-found: error
+
+  aggregate:
+    needs: [preflight, replay-city]
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check out replay implementation
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          path: implementation
+
+      - name: Download completed replay artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: ${{ runner.temp }}/historical-replay
+          merge-multiple: true
+
+      - name: Build consolidated read-only reconciliation artifact
+        run: |
+          set -euo pipefail
+          PRE=$(find "$RUNNER_TEMP/historical-replay" -name preflight.json -print -quit)
+          test -n "$PRE"
+          python implementation/kyiv-air-alerts-grafana/scripts/aggregate_explosion_history_replay.py \
+            --preflight "$PRE" \
+            --results-dir "$RUNNER_TEMP/historical-replay" \
+            --output "$RUNNER_TEMP/explosion_monitor_full_historical_replay_2026-09-25.json"
+
+      - name: Upload consolidated replay artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: explosion-monitor-full-historical-replay-2026-09-25
+          path: ${{ runner.temp }}/explosion_monitor_full_historical_replay_2026-09-25.json
+          if-no-files-found: error

@@ -1,0 +1,62 @@
+name: Test historical explosion replay
+
+on:
+  push:
+    branches: [multicity-wip-2026-09-16]
+    paths:
+      - "kyiv-air-alerts-grafana/scripts/replay_explosion_history.py"
+      - "kyiv-air-alerts-grafana/scripts/aggregate_explosion_history_replay.py"
+      - ".github/workflows/full-historical-explosion-replay.yml"
+      - ".github/workflows/test-historical-explosion-replay.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  replay-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Check out exact test commit
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: kyiv-air-alerts-grafana/requirements.txt
+
+      - name: Install dependencies
+        run: pip install -r kyiv-air-alerts-grafana/requirements.txt
+
+      - name: Helper and frozen monitor self-tests
+        run: |
+          python kyiv-air-alerts-grafana/scripts/replay_explosion_history.py --self-test
+          python kyiv-air-alerts-grafana/scripts/replay_explosion_history.py --help >/dev/null
+          python kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py --self-test
+
+      - name: Confirm source preflight is deterministic and read-only
+        run: |
+          set -euo pipefail
+          ROOT="$GITHUB_WORKSPACE/kyiv-air-alerts-grafana"
+          HEAD="$(git rev-parse HEAD)"
+          mkdir -p "$RUNNER_TEMP/replay-a" "$RUNNER_TEMP/replay-b"
+          set +e
+          python kyiv-air-alerts-grafana/scripts/replay_explosion_history.py --repo-root "$ROOT" --through 2026-09-17 --input-head "$HEAD" --read-only --preflight --output "$RUNNER_TEMP/replay-a/preflight.json"
+          A=$?
+          python kyiv-air-alerts-grafana/scripts/replay_explosion_history.py --repo-root "$ROOT" --through 2026-09-17 --input-head "$HEAD" --read-only --preflight --output "$RUNNER_TEMP/replay-b/preflight.json"
+          B=$?
+          set -e
+          test "$A" = "$B"
+          cmp "$RUNNER_TEMP/replay-a/preflight.json" "$RUNNER_TEMP/replay-b/preflight.json"
+          git diff --exit-code -- \
+            kyiv-air-alerts-grafana/data/explosion_audited_baseline.json \
+            kyiv-air-alerts-grafana/data/explosion_review_queue.json \
+            kyiv-air-alerts-grafana/data/explosion_candidate_monitor_state.json \
+            kyiv-air-alerts-grafana/data/explosion_candidate_monitor_last_run.json \
+            kyiv-air-alerts-grafana/data/explosions_test.json \
+            kyiv-air-alerts-grafana/data/dashboard_data.json
