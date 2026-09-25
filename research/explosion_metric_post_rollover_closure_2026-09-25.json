@@ -1,0 +1,94 @@
+{
+  "schema_version": 1,
+  "generated_for_date": "2026-09-25",
+  "repository": "olegbalakin-cmyk/kyiv-air-alerts-grafana",
+  "branch": "multicity-wip-2026-09-16",
+  "purpose": "Read-only post-rollover closure audit after the normal explosion monitor advanced coverage through completed local date 2026-09-24. No metric, queue, dashboard, monitor state, baseline, code, deployment, Grafana, or Netlify mutation was performed by this audit.",
+  "current_head": "745a5e34540329e3a6a9f243ecdb5f7d24a6d413",
+  "current_head_message": "Update explosion metric monitor state",
+  "current_blobs": {
+    "explosions_test": "7dc8a613d9069a87dfb32009ffc9fde6d0435063",
+    "dashboard_data": "835b3474c9734baaf8e2669567d388cdfb978eae",
+    "explosion_review_queue": "f987e741ac64f8d8aa6ce4cfc2e4c4f7578f394d",
+    "explosion_candidate_monitor_state": "6393be6a0fd6bb37abb1cf1765770f6d344cd5db",
+    "explosion_candidate_monitor_last_run": "4cf6203679ee85bde000ccd3236954792c0179ce",
+    "explosion_audited_baseline": "5bbd2b771559eac2966aeec65d6e3b5487b9c1a9"
+  },
+  "observations": {
+    "normal_monitor_advanced_snapshot_date_to": "2026-09-25",
+    "affected_city_coverage_end": "2026-09-24",
+    "dashboard_explosion_metric_test_exactly_equals_explosions_test": true,
+    "expected_reconciliation_effects_materialized": {
+      "odesa": {
+        "strict_n": 159,
+        "sensitivity_n": 165,
+        "expected_from_prior_reconciliation": true
+      },
+      "zaporizhzhia": {
+        "strict_n": 169,
+        "sensitivity_n": 225,
+        "expected_from_prior_reconciliation": true
+      },
+      "dnipro": {
+        "strict_n": 184,
+        "sensitivity_n": 191,
+        "expected_from_prior_reconciliation": true
+      }
+    },
+    "deferred_kyiv_rollover": {
+      "episode_id": "f235928c329ca806d9dca5ed",
+      "queue_status": "approved_strict",
+      "local_episode_date": "2026-09-24",
+      "metric_coverage_end": "2026-09-24",
+      "materialized_exactly_once": true,
+      "kyiv_strict_n": 383,
+      "kyiv_sensitivity_n": 410
+    }
+  },
+  "strict_reconstruction": {
+    "date_rule": "Europe/Kyiv local alert-start date; September 2026 is UTC+3",
+    "cities": {
+      "odesa": {
+        "baseline_strict_n": 155,
+        "unique_live_strict_after_baseline": 4,
+        "reconstructed_strict_n": 159,
+        "actual_strict_n": 159,
+        "exact": true
+      },
+      "zaporizhzhia": {
+        "baseline_strict_n": 169,
+        "unique_live_strict_after_baseline": 0,
+        "reconstructed_strict_n": 169,
+        "actual_strict_n": 169,
+        "exact": true
+      },
+      "dnipro": {
+        "baseline_strict_n": 180,
+        "unique_live_strict_after_baseline": 4,
+        "reconstructed_strict_n": 184,
+        "actual_strict_n": 184,
+        "exact": true
+      },
+      "kyiv": {
+        "baseline_strict_n": 377,
+        "unique_live_strict_after_baseline": 6,
+        "reconstructed_strict_n": 383,
+        "actual_strict_n": 383,
+        "exact": true
+      }
+    },
+    "all_target_cities_exact": true
+  },
+  "prior_reconciliation_episode_checks": {
+    "removals_not_in_current_strict_set": [
+      "2c5bbc0aeba9e25e4eec7b09",
+      "7a7da068c0efb7be80bd45e4",
+      "eb2580c2bec54ddc2e36eaf7",
+      "a60d817eaa9253200f090720"
+    ],
+    "dnipro_addition_present": "c894e85e407dc4256d8c4419",
+    "kyiv_already_strict_present": "e97e6e816f96832d02c8b2cd",
+    "kyiv_deferred_now_present": "f235928c329ca806d9dca5ed"
+  },
+  "verdict": "POST-ROLLOVER EXPLOSION METRIC CLOSURE CLEAN"
+}
