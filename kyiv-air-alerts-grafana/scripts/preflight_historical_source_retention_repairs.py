@@ -282,7 +282,8 @@ def preflight(
             "row_index": index,
             "source_url": best.get("url"),
             "old_evidence": old_evidence,
-            "new_evidence": combined_evidence,\n            "source_excerpt": new_excerpt,
+            "new_evidence": combined_evidence,
+            "source_excerpt": new_excerpt,
             "old_row_hash": canonical_hash(old_row),
             "new_row_hash": canonical_hash(patched_row),
         })
