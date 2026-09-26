@@ -380,7 +380,7 @@ def main() -> None:
     parser.add_argument("--qa", type=Path)
     parser.add_argument("--audit", type=Path)
     parser.add_argument("--through", required=False, default="2026-09-17")
-    parser.add_argument("--input-head", required=True)
+    parser.add_argument("--input-head")
     parser.add_argument("--output", type=Path)
     parser.add_argument("--self-test", action="store_true")
     args = parser.parse_args()
