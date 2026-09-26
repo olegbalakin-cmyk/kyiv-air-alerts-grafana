@@ -1,0 +1,336 @@
+name: Historical explosion replay QA finalization
+
+on:
+  workflow_dispatch:
+    inputs:
+      scope:
+        description: "Which QA decisions to validate"
+        required: true
+        default: "all"
+        type: choice
+        options:
+          - all
+          - city
+      city:
+        description: "City key when scope=city"
+        required: false
+        default: "sevastopol"
+        type: string
+  push:
+    branches:
+      - multicity-wip-2026-09-16
+    paths:
+      - ".github/workflows/historical-replay-qa-finalize.yml"
+      - "kyiv-air-alerts-grafana/scripts/finalize_historical_replay_qa.py"
+      - "kyiv-air-alerts-grafana/scripts/build_historical_replay_qa.py"
+      - "kyiv-air-alerts-grafana/scripts/replay_explosion_history.py"
+      - "kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py"
+      - "research/historical_replay_qa/*.json"
+      - "research/historical_replay_qa_decisions/*.json"
+      - "research/historical_replay_status_current.json"
+
+permissions:
+  contents: write
+  actions: read
+
+concurrency:
+  group: historical-explosion-replay-qa-finalization
+  cancel-in-progress: false
+
+jobs:
+  plan:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    outputs:
+      matrix: ${{ steps.plan.outputs.matrix }}
+      has_work: ${{ steps.plan.outputs.has_work }}
+      input_sha: ${{ steps.plan.outputs.input_sha }}
+
+    steps:
+      - name: Checkout planning input
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+
+      - name: Build finalization matrix
+        id: plan
+        shell: bash
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          DISPATCH_SCOPE: ${{ inputs.scope }}
+          DISPATCH_CITY: ${{ inputs.city }}
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          index_path = Path("research/historical_replay_qa/index.json")
+          if not index_path.exists():
+              raise SystemExit("Missing historical replay QA index")
+          index = json.loads(index_path.read_text(encoding="utf-8"))
+          qa_cities = sorted((index.get("cities") or {}).keys())
+
+          if os.environ.get("EVENT_NAME") == "workflow_dispatch":
+              scope = os.environ.get("DISPATCH_SCOPE") or "all"
+              city = os.environ.get("DISPATCH_CITY") or "sevastopol"
+          else:
+              scope = "all"
+              city = ""
+
+          if scope == "city":
+              if city not in qa_cities:
+                  raise SystemExit(f"City {city} is not in QA index")
+              selected = [city]
+          elif scope == "all":
+              selected = qa_cities
+          else:
+              raise SystemExit(f"Unsupported scope: {scope}")
+
+          include = []
+          for city in selected:
+              bundle = Path(f"research/historical_replay_qa/{city}.json")
+              decisions = Path(f"research/historical_replay_qa_decisions/{city}.json")
+              if not bundle.exists():
+                  raise SystemExit(f"Missing QA bundle: {bundle}")
+              if not decisions.exists():
+                  raise SystemExit(f"Missing QA decision file: {decisions}")
+              payload = json.loads(bundle.read_text(encoding="utf-8"))
+              include.append({
+                  "city": city,
+                  "through": payload.get("through") or "2026-09-17",
+              })
+
+          matrix = json.dumps({"include": include}, separators=(",", ":"))
+          with Path(os.environ["GITHUB_OUTPUT"]).open("a", encoding="utf-8") as f:
+              f.write("matrix=" + matrix + "\n")
+              f.write("has_work=" + ("true" if include else "false") + "\n")
+              f.write("input_sha=" + os.environ["GITHUB_SHA"] + "\n")
+          print(f"Selected finalization cities: {selected}")
+          PY
+
+  finalize:
+    if: ${{ needs.plan.outputs.has_work == 'true' }}
+    needs: plan
+    strategy:
+      fail-fast: false
+      max-parallel: 4
+      matrix: ${{ fromJson(needs.plan.outputs.matrix) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      CITY: ${{ matrix.city }}
+      THROUGH: ${{ matrix.through }}
+      INPUT_SHA: ${{ needs.plan.outputs.input_sha }}
+
+    steps:
+      - name: Checkout exact finalization input
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ env.INPUT_SHA }}
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: kyiv-air-alerts-grafana/requirements.txt
+
+      - name: Install dependencies
+        run: pip install -r kyiv-air-alerts-grafana/requirements.txt
+
+      - name: Finalizer self-test
+        run: python kyiv-air-alerts-grafana/scripts/finalize_historical_replay_qa.py --self-test
+
+      - name: Run fresh read-only replay
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$INPUT_SHA"
+          python kyiv-air-alerts-grafana/scripts/replay_explosion_history.py \
+            --repo-root "$GITHUB_WORKSPACE/kyiv-air-alerts-grafana" \
+            --city "$CITY" \
+            --through "$THROUGH" \
+            --input-head "$INPUT_SHA" \
+            --read-only \
+            --output "$RUNNER_TEMP/replay_${CITY}.json"
+
+      - name: Rebuild fresh QA bundle
+        shell: bash
+        run: |
+          set -euo pipefail
+          python kyiv-air-alerts-grafana/scripts/build_historical_replay_qa.py \
+            --replay "$RUNNER_TEMP/replay_${CITY}.json" \
+            --status "research/historical_replay_status_current.json" \
+            --city "$CITY" \
+            --output "$RUNNER_TEMP/fresh-qa-${CITY}.json"
+
+      - name: Validate decisions and project metric
+        shell: bash
+        run: |
+          set -euo pipefail
+          python kyiv-air-alerts-grafana/scripts/finalize_historical_replay_qa.py \
+            --persistent-bundle "research/historical_replay_qa/${CITY}.json" \
+            --fresh-bundle "$RUNNER_TEMP/fresh-qa-${CITY}.json" \
+            --decisions "research/historical_replay_qa_decisions/${CITY}.json" \
+            --output "$RUNNER_TEMP/finalization-${CITY}.json"
+
+      - name: Verify protected production files unchanged
+        shell: bash
+        run: |
+          set -euo pipefail
+          git diff --exit-code -- \
+            kyiv-air-alerts-grafana/data/explosion_audited_baseline.json \
+            kyiv-air-alerts-grafana/data/explosion_review_queue.json \
+            kyiv-air-alerts-grafana/data/explosion_candidate_monitor_state.json \
+            kyiv-air-alerts-grafana/data/explosion_candidate_monitor_last_run.json \
+            kyiv-air-alerts-grafana/data/explosions_test.json \
+            kyiv-air-alerts-grafana/data/dashboard_data.json
+
+      - name: Add finalization summary
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+          city = os.environ["CITY"]
+          row = json.loads(
+              Path(os.environ["RUNNER_TEMP"], f"finalization-{city}.json").read_text(encoding="utf-8")
+          )
+          with Path(os.environ["GITHUB_STEP_SUMMARY"]).open("a", encoding="utf-8") as f:
+              f.write(f"## QA finalization: {city}\n\n")
+              f.write(f"- Status: **{row['status']}**\n")
+              f.write(f"- Resolved: **{row['resolved_count']} / {row['case_count']}**\n")
+              p = row["projected_metric"]
+              f.write(
+                  f"- Strict: **{p['baseline_strict_episodes']} → {p['projected_strict_episodes']}** "
+                  f"({p['strict_delta']:+d})\n"
+              )
+              f.write(
+                  f"- Sensitivity: **{p['baseline_sensitivity_episodes']} → "
+                  f"{p['projected_sensitivity_episodes']}** ({p['sensitivity_delta']:+d})\n"
+              )
+          PY
+
+      - name: Upload finalization artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: historical-replay-qa-finalization-${{ matrix.city }}-${{ env.INPUT_SHA }}
+          path: ${{ runner.temp }}/finalization-${{ matrix.city }}.json
+          if-no-files-found: error
+          retention-days: 30
+
+  aggregate:
+    if: ${{ always() && needs.plan.result == 'success' && needs.plan.outputs.has_work == 'true' && needs.finalize.result == 'success' }}
+    needs:
+      - plan
+      - finalize
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      INPUT_SHA: ${{ needs.plan.outputs.input_sha }}
+      BRANCH: multicity-wip-2026-09-16
+
+    steps:
+      - name: Checkout publication branch
+        uses: actions/checkout@v4
+        with:
+          ref: multicity-wip-2026-09-16
+          fetch-depth: 0
+
+      - name: Download finalization artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: historical-replay-qa-finalization-*-${{ env.INPUT_SHA }}
+          path: _finalization_download
+          merge-multiple: true
+
+      - name: Publish finalization status
+        shell: bash
+        run: |
+          set -euo pipefail
+          git pull --rebase origin "$BRANCH"
+          mkdir -p research/historical_replay_qa_finalization
+
+          python - <<'PY'
+          import json
+          import shutil
+          from datetime import datetime, timezone
+          from pathlib import Path
+
+          out_dir = Path("research/historical_replay_qa_finalization")
+          qa_index = json.loads(
+              Path("research/historical_replay_qa/index.json").read_text(encoding="utf-8")
+          )
+          qa_cities = sorted((qa_index.get("cities") or {}).keys())
+
+          downloaded = {}
+          for path in Path("_finalization_download").glob("finalization-*.json"):
+              row = json.loads(path.read_text(encoding="utf-8"))
+              downloaded[row["city_key"]] = (path, row)
+
+          for city, (path, row) in downloaded.items():
+              shutil.copyfile(path, out_dir / f"{city}.json")
+
+          rows = {}
+          for city in qa_cities:
+              path = out_dir / f"{city}.json"
+              if not path.exists():
+                  rows[city] = {"status": "FINALIZATION_NOT_RUN", "path": str(path)}
+                  continue
+              row = json.loads(path.read_text(encoding="utf-8"))
+              rows[city] = {
+                  "status": row.get("status"),
+                  "case_count": row.get("case_count"),
+                  "resolved_count": row.get("resolved_count"),
+                  "unresolved_count": row.get("unresolved_count"),
+                  "projected_metric": row.get("projected_metric"),
+                  "path": str(path),
+              }
+
+          index = {
+              "schema_version": 1,
+              "kind": "historical_replay_qa_finalization_index",
+              "generated_at_utc": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
+              "qa_city_count": len(qa_cities),
+              "ready_to_apply_count": sum(
+                  row.get("status") == "READY_TO_APPLY" for row in rows.values()
+              ),
+              "cities": rows,
+          }
+          (out_dir / "index.json").write_text(
+              json.dumps(index, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
+              encoding="utf-8",
+          )
+          print(json.dumps(index, ensure_ascii=False, indent=2))
+          PY
+
+          git diff --check -- research/historical_replay_qa_finalization
+
+      - name: Commit only finalization status
+        shell: bash
+        run: |
+          set -euo pipefail
+          TARGET="research/historical_replay_qa_finalization"
+          git add -A -- "$TARGET"
+          if git diff --cached --quiet -- "$TARGET"; then
+            echo "Finalization status unchanged."
+            exit 0
+          fi
+          mapfile -t CHANGED < <(git diff --cached --name-only)
+          printf '%s\n' "${CHANGED[@]}"
+          for path in "${CHANGED[@]}"; do
+            case "$path" in
+              research/historical_replay_qa_finalization/*) ;;
+              *) echo "Unexpected staged path: $path" >&2; exit 1 ;;
+            esac
+          done
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "Update historical replay QA finalization status"
+          git pull --rebase origin "$BRANCH"
+          git push origin HEAD:"$BRANCH"
