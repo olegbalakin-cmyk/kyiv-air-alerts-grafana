@@ -56,6 +56,6 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: lviv-historical-alert-corpus-2026-09-17
-          path: $RUNNER_TEMP/lviv_historical_alert_corpus_2026-09-17.json
+          path: ${{ runner.temp }}/lviv_historical_alert_corpus_2026-09-17.json
           if-no-files-found: error
           retention-days: 30
