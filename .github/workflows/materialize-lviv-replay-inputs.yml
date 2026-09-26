@@ -1,0 +1,141 @@
+name: Materialize Lviv historical replay inputs
+
+on:
+  push:
+    branches:
+      - multicity-wip-2026-09-16
+    paths:
+      - ".github/workflows/materialize-lviv-replay-inputs.yml"
+
+permissions:
+  contents: write
+  actions: read
+
+concurrency:
+  group: materialize-lviv-replay-inputs
+  cancel-in-progress: false
+
+jobs:
+  materialize:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout branch
+        uses: actions/checkout@v4
+        with:
+          ref: multicity-wip-2026-09-16
+          fetch-depth: 0
+
+      - name: Download validated Lviv artifacts
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/lviv-alerts" "$RUNNER_TEMP/lviv-evidence"
+          gh run download 36257143449             --repo "${{ github.repository }}"             --name lviv-historical-alert-corpus-2026-09-17             --dir "$RUNNER_TEMP/lviv-alerts"
+          gh run download 36259959990             --repo "${{ github.repository }}"             --name lviv-final-evidence-2026-09-17             --dir "$RUNNER_TEMP/lviv-evidence"
+          test -f "$RUNNER_TEMP/lviv-alerts/lviv_historical_alert_corpus_2026-09-17.json"
+          test -f "$RUNNER_TEMP/lviv-evidence/final_evidence.json"
+
+      - name: Materialize replay source files
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices
+          mkdir -p kyiv-air-alerts-grafana/data/explosion_research/lviv
+          cp "$RUNNER_TEMP/lviv-evidence/final_evidence.json"             kyiv-air-alerts-grafana/data/explosion_research/lviv/final_evidence.json
+          python - <<'PY'
+          import json
+          from datetime import datetime
+          from pathlib import Path
+          from zoneinfo import ZoneInfo
+
+          src = Path("$RUNNER_TEMP/lviv-alerts/lviv_historical_alert_corpus_2026-09-17.json")
+          dst = Path("kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/lviv-replay_alerts.json")
+          payload = json.loads(src.read_text(encoding="utf-8"))
+          kyiv = ZoneInfo("Europe/Kyiv")
+          episodes = []
+          for row in payload["episodes"]:
+              start = datetime.fromisoformat(row["start"].replace("Z", "+00:00"))
+              episodes.append({
+                  "episode_id": row["episode_id"],
+                  "alert_start": row["start"],
+                  "alert_end": row["end"],
+                  "alert_start_date_kyiv": start.astimezone(kyiv).date().isoformat(),
+              })
+
+          out = {
+              "schema_version": 1,
+              "task_id": "lviv-replay-source-2026-09-26",
+              "parent_task_id": "lviv-canonical-historical-alert-corpus",
+              "city_key": "lviv",
+              "city": "Львів",
+              "source": {
+                  "kind": "production-equivalent historical reconstruction",
+                  "coverage_start": "2025-09-01",
+                  "coverage_end": "2026-09-17",
+                  "frozen_csv_ref": "58ee75bc20113181b9ddf8029d4cbf3a62d8cd10",
+                  "frozen_csv_blob": "71d70c0ca54968f530d596cf315616fa858800e1",
+                  "ukrainealarm_bridge_ref": "e23479ef250396d441cfe68814768be8134c761d",
+                  "ukrainealarm_bridge_blob": "9b2922b0863ff6f3dba6e84f2348ad0e4b111d41",
+              },
+              "assignment_rule": "final merged production boundaries; canonical episode_id contract SHA256(city_key|start_utc_z|end_utc_z)[:24]",
+              "episode_start_range": [episodes[0]["alert_start"], episodes[-1]["alert_start"]],
+              "frozen_denominator": 126,
+              "episode_count": len(episodes),
+              "episodes": episodes,
+          }
+          dst.write_text(json.dumps(out, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+          PY
+
+      - name: Validate exact replay inputs
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          alerts_path = Path("kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/lviv-replay_alerts.json")
+          evidence_path = Path("kyiv-air-alerts-grafana/data/explosion_research/lviv/final_evidence.json")
+          alerts = json.loads(alerts_path.read_text(encoding="utf-8"))
+          evidence = json.loads(evidence_path.read_text(encoding="utf-8"))
+
+          episodes = alerts["episodes"]
+          ids = [e["episode_id"] for e in episodes]
+          assert alerts["city_key"] == "lviv"
+          assert alerts["episode_count"] == 126
+          assert len(episodes) == 126
+          assert len(set(ids)) == 126
+          assert "56d59bf102df184eda42379a" in ids
+          assert evidence["city_key"] == "lviv"
+          assert len(evidence.get("strict_events") or []) == 12
+          assert len(evidence.get("sensitivity_only_events") or []) == 0
+          assert len({e["episode_id"] for e in evidence["strict_events"]}) == 12
+          assert {e["episode_id"] for e in evidence["strict_events"]} <= set(ids)
+          manual = evidence.get("manual_binding_qa") or {}
+          assert manual.get("event_id") == "LVI-20250903-01"
+          assert manual.get("episode_id") == "a0e9cfed0043356fe207107f"
+          print("LVIV REPLAY INPUT MATERIALIZATION VALIDATED")
+          print("episodes=126 unique_ids=126 strict_events=12")
+          PY
+          git diff --check
+
+      - name: Commit only validated Lviv replay inputs
+        shell: bash
+        run: |
+          set -euo pipefail
+          A="kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/lviv-replay_alerts.json"
+          E="kyiv-air-alerts-grafana/data/explosion_research/lviv/final_evidence.json"
+          git add -- "$A" "$E"
+          mapfile -t CHANGED < <(git diff --cached --name-only)
+          printf '%s\n' "${CHANGED[@]}"
+          test "${#CHANGED[@]}" -eq 2
+          test "${CHANGED[0]}" = "$A"
+          test "${CHANGED[1]}" = "$E"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "Materialize validated Lviv historical replay inputs"
+          git push origin HEAD:multicity-wip-2026-09-16
