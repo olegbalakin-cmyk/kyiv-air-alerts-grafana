@@ -1,0 +1,139 @@
+name: Repair Sevastopol historical alert gap
+
+on:
+  push:
+    branches:
+      - multicity-wip-2026-09-16
+    paths:
+      - ".github/workflows/repair-sevastopol-historical-alert-gap.yml"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: repair-sevastopol-historical-alert-gap
+  cancel-in-progress: false
+
+jobs:
+  repair:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout branch
+        uses: actions/checkout@v4
+        with:
+          ref: multicity-wip-2026-09-16
+          fetch-depth: 0
+
+      - name: Verify frozen source slices
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/sevastopol-P1a_alerts.json)" = "5d9a756625d4a16d24cf010764a299b56179f5c8"
+          test "$(git hash-object kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/sevastopol-P1b_alerts.json)" = "4d2e1d28a363a33e4f4f6226497555ea70fb3138"
+
+      - name: Repair exact two missing episodes
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          root = Path("kyiv-air-alerts-grafana/data")
+          a = json.loads((root / "explosion_metric_handoff/source_slices/sevastopol-P1a_alerts.json").read_text(encoding="utf-8"))
+          b = json.loads((root / "explosion_metric_handoff/source_slices/sevastopol-P1b_alerts.json").read_text(encoding="utf-8"))
+          path = root / "sevastopol_events.json"
+          store = json.loads(path.read_text(encoding="utf-8"))
+
+          expected_rows = [*(a.get("episodes") or []), *(b.get("episodes") or [])]
+          expected = {}
+          for row in expected_rows:
+              key = (row["alert_start"], row["alert_end"])
+              if key in expected:
+                  raise SystemExit(f"Duplicate source-slice interval: {key}")
+              expected[key] = row
+
+          current = {}
+          for row in store.get("pairs") or []:
+              key = (row["start"], row["end"])
+              if key in current:
+                  raise SystemExit(f"Duplicate current interval: {key}")
+              current[key] = row
+
+          assert len(expected) == 527, len(expected)
+          assert len(current) == 525, len(current)
+          extras = sorted(set(current) - set(expected))
+          if extras:
+              raise SystemExit(f"Current store has intervals not in frozen 527 corpus: {extras}")
+
+          missing_keys = sorted(set(expected) - set(current))
+          expected_missing = [
+              ("2026-09-17T11:40:50+00:00", "2026-09-17T12:03:31+00:00"),
+              ("2026-09-17T17:40:35+00:00", "2026-09-17T20:21:07+00:00"),
+          ]
+          assert missing_keys == expected_missing, (missing_keys, expected_missing)
+
+          recovered = []
+          for key in missing_keys:
+              src = expected[key]
+              pair = {
+                  "start": src["alert_start"],
+                  "end": src["alert_end"],
+                  "duration_min": round(
+                      ( __import__("datetime").datetime.fromisoformat(src["alert_end"])
+                      - __import__("datetime").datetime.fromisoformat(src["alert_start"]) ).total_seconds() / 60,
+                      3,
+                  ),
+                  "start_id": src.get("start_id"),
+                  "end_id": src.get("end_id"),
+                  "start_url": src.get("start_url"),
+                  "end_url": src.get("end_url"),
+              }
+              store.setdefault("pairs", []).append(pair)
+              recovered.append(pair)
+
+          store["pairs"] = sorted(store["pairs"], key=lambda x: (x["start"], x["end"]))
+          meta = store.setdefault("meta", {})
+          meta["complete_pair_count"] = len(store["pairs"])
+          meta["latest_complete_end"] = max(x["end"] for x in store["pairs"])
+          meta["historical_replay_recovery"] = {
+              "recovered_count": 2,
+              "reason": "Restore the two 2026-09-17 complete alert pairs already present in the frozen 527-episode explosion source slices.",
+              "source_slices": [
+                  "data/explosion_metric_handoff/source_slices/sevastopol-P1a_alerts.json",
+                  "data/explosion_metric_handoff/source_slices/sevastopol-P1b_alerts.json",
+              ],
+              "recovered_pairs": recovered,
+          }
+
+          repaired = {(x["start"], x["end"]) for x in store["pairs"]}
+          assert len(store["pairs"]) == 527
+          assert repaired == set(expected)
+          assert meta["complete_pair_count"] == 527
+          assert meta["latest_complete_end"] == "2026-09-17T20:21:07+00:00"
+
+          path.write_text(json.dumps(store, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+          print("SEVASTOPOL HISTORICAL ALERT GAP REPAIRED")
+          print("525 -> 527; recovered exactly 2 episodes")
+          for row in recovered:
+              print(row["start"], "->", row["end"], row["start_id"], row["end_id"])
+          PY
+          git diff --check
+
+      - name: Commit only Sevastopol historical alert store
+        shell: bash
+        run: |
+          set -euo pipefail
+          TARGET="kyiv-air-alerts-grafana/data/sevastopol_events.json"
+          git add -- "$TARGET"
+          mapfile -t CHANGED < <(git diff --cached --name-only)
+          printf '%s\n' "${CHANGED[@]}"
+          test "${#CHANGED[@]}" -eq 1
+          test "${CHANGED[0]}" = "$TARGET"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "Restore two Sevastopol historical alert episodes"
+          git pull --rebase origin multicity-wip-2026-09-16
+          git push origin HEAD:multicity-wip-2026-09-16
