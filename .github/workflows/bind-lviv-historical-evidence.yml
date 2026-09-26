@@ -6,7 +6,9 @@ on:
     branches:
       - multicity-wip-2026-09-16
     paths:
-      - "research/lviv_recovery_source/lviv_explosion_reaudit_final_2026-09-18.zip"
+      - "research/lviv_explosion_reaudit_final_2026-09-18.zip"
+      - "kyiv-air-alerts-grafana/scripts/bind_lviv_historical_evidence.py"
+      - ".github/workflows/bind-lviv-historical-evidence.yml"
 
 permissions:
   contents: read
@@ -26,7 +28,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          test -f research/lviv_recovery_source/lviv_explosion_reaudit_final_2026-09-18.zip
+          test -f research/lviv_explosion_reaudit_final_2026-09-18.zip
 
       - name: Materialize pinned UkraineAlarm bridge
         shell: bash
@@ -63,7 +65,7 @@ jobs:
           set -euo pipefail
           python kyiv-air-alerts-grafana/scripts/bind_lviv_historical_evidence.py \
             --corpus "$RUNNER_TEMP/lviv_historical_alert_corpus_2026-09-17.json" \
-            --evidence-zip research/lviv_recovery_source/lviv_explosion_reaudit_final_2026-09-18.zip \
+            --evidence-zip research/lviv_explosion_reaudit_final_2026-09-18.zip \
             --output "$RUNNER_TEMP/lviv_historical_evidence_binding_2026-09-17.json"
 
       - name: Upload binding artifact
