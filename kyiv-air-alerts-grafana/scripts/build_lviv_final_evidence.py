@@ -71,6 +71,7 @@ def main():
 
     strict_events = []
     review_events = []
+    excluded_events = []
 
     for row in binding.get("rows") or []:
         legacy = row.get("legacy_fields_present_but_ignored") or {}
@@ -106,7 +107,11 @@ def main():
                 "raw_record": raw,
             })
         else:
-            review_events.append(clean_review_row(row2))
+            cleaned = clean_review_row(row2)
+            if str(frozen_status or "").startswith("excluded_"):
+                excluded_events.append(cleaned)
+            else:
+                review_events.append(cleaned)
 
     strict_ids = [x["episode_id"] for x in strict_events]
     if len(strict_events) != 12:
@@ -127,7 +132,9 @@ def main():
         },
         "methodology_note": (
             "Historical bucket membership reconstructs the frozen audited baseline only. "
-            "It is not treated as current truth. The current hardened classifier must re-evaluate all retained evidence."
+            "It is not treated as current truth. The current hardened classifier must re-evaluate all retained evidence. "
+            "Explicitly excluded non-air, non-city, and out-of-coverage records are retained separately "
+            "and are not fed to the classifier as review candidates."
         ),
         "manual_binding_qa": {
             "event_id": override_event,
@@ -138,10 +145,12 @@ def main():
         "strict_events": strict_events,
         "sensitivity_only_events": [],
         "review_events": review_events,
+        "excluded_events": excluded_events,
         "checks": {
             "strict_event_rows": len(strict_events),
             "unique_strict_episode_ids": len(set(strict_ids)),
             "review_event_rows": len(review_events),
+            "excluded_event_rows": len(excluded_events),
             "historical_strict_matches_baseline": len(strict_events) == 12,
             "historical_sensitivity_matches_baseline": len(strict_events) == 12
         },

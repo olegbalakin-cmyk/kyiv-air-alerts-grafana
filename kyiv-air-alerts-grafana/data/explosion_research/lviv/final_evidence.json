@@ -9,7 +9,7 @@
     "strict_n": 12,
     "sensitivity_n": 12
   },
-  "methodology_note": "Historical bucket membership reconstructs the frozen audited baseline only. It is not treated as current truth. The current hardened classifier must re-evaluate all retained evidence.",
+  "methodology_note": "Historical bucket membership reconstructs the frozen audited baseline only. It is not treated as current truth. The current hardened classifier must re-evaluate all retained evidence. Explicitly excluded non-air, non-city, and out-of-coverage records are retained separately and are not fed to the classifier as review candidates.",
   "manual_binding_qa": {
     "event_id": "LVI-20250903-01",
     "episode_id": "a0e9cfed0043356fe207107f",
@@ -461,7 +461,18 @@
         "source_2": "",
         "notes": "Some secondary/local mentions suggested an explosion in Lviv, but authoritative reporting confirms the strike/explosion in Brody. Exact-city audible evidence for Lviv was not strong enough."
       }
-    },
+    }
+  ],
+  "checks": {
+    "strict_event_rows": 12,
+    "unique_strict_episode_ids": 12,
+    "review_event_rows": 1,
+    "historical_strict_matches_baseline": true,
+    "historical_sensitivity_matches_baseline": true,
+    "excluded_event_rows": 8
+  },
+  "verdict": "LVIV FINAL EVIDENCE CORPUS READY FOR CURRENT-RULES REPLAY",
+  "excluded_events": [
     {
       "event_id": "LVI-X-20260217-01",
       "episode_id": "800a2f75ecb74b003af538e0",
@@ -734,13 +745,5 @@
         "notes": "Authoritative current reporting places the attack in Stryi. A lower-quality claim that explosions were heard in Lviv was not retained."
       }
     }
-  ],
-  "checks": {
-    "strict_event_rows": 12,
-    "unique_strict_episode_ids": 12,
-    "review_event_rows": 9,
-    "historical_strict_matches_baseline": true,
-    "historical_sensitivity_matches_baseline": true
-  },
-  "verdict": "LVIV FINAL EVIDENCE CORPUS READY FOR CURRENT-RULES REPLAY"
+  ]
 }

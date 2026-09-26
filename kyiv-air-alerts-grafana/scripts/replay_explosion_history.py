@@ -270,9 +270,24 @@ def history_status(row: dict, bucket: str) -> str:
 def history_provenance(row: dict, bucket: str, target_id: str, monitor) -> dict | None:
     basis = evidence_text(row)
     if bucket == "strict_events":
-        return {
+        raw = row.get("raw_record") or {}
+        city_status = str(raw.get("city_status") or "").strip()
+        war_air_context = str(raw.get("war_air_context") or "").strip()
+        temporal_kind = str(raw.get("temporal_evidence") or "").strip()
+        alert_basis = str(raw.get("alert_interval_basis") or "").strip()
+        reviewed_context = " | ".join(
+            part
+            for part in [
+                f"city_status={city_status}" if city_status else "",
+                f"war_air_context={war_air_context}" if war_air_context else "",
+                f"temporal_evidence={temporal_kind}" if temporal_kind else "",
+                alert_basis,
+            ]
+            if part
+        )
+        provenance = {
             "schema_version": monitor.REVIEW_PROVENANCE_SCHEMA_VERSION,
-            "methodology_version": "historical-audit-replay-adapter-v1",
+            "methodology_version": "historical-audit-replay-adapter-v2",
             "target_episode_id": target_id,
             "temporal": {
                 "status": "validated_episode_binding",
@@ -283,6 +298,28 @@ def history_provenance(row: dict, bucket: str, target_id: str, monitor) -> dict 
                 "neighboring_alert_check": {"passed": True},
             },
         }
+
+        # Preserve only reviewed factual context that is absent from the
+        # retained quote. Do not use the old strict label itself as evidence.
+        # Exact-city and explicit-explosion wording are still re-evaluated by
+        # the current classifier from the retained evidence text.
+        if war_air_context == "confirmed":
+            provenance["aerial_war_evidence"] = {
+                "present": True,
+                "evidence_text": reviewed_context or "war_air_context=confirmed",
+            }
+            if (
+                city_status == "exact_city"
+                and temporal_kind in {"exact_time_in_alert", "explicit_during_alert"}
+            ):
+                provenance["same_attack_basis"] = {
+                    "present": True,
+                    "basis": "reviewed_exact_city_air_context_with_episode_specific_temporal_binding",
+                    "evidence_text": reviewed_context
+                    or "reviewed exact-city air context with episode-specific temporal binding",
+                }
+        return provenance
+
     if bucket == "sensitivity_only_events":
         low = basis.casefold()
         if "near_boundary" in low or "near-boundary" in low or "precedes_alert" in low:
@@ -293,7 +330,7 @@ def history_provenance(row: dict, bucket: str, target_id: str, monitor) -> dict 
             return None
         return {
             "schema_version": monitor.REVIEW_PROVENANCE_SCHEMA_VERSION,
-            "methodology_version": "historical-audit-replay-adapter-v1",
+            "methodology_version": "historical-audit-replay-adapter-v2",
             "target_episode_id": target_id,
             "sensitivity_binding": {
                 "present": True,
@@ -304,7 +341,6 @@ def history_provenance(row: dict, bucket: str, target_id: str, monitor) -> dict 
             },
         }
     return None
-
 
 def candidate_from_history(city: str, row: dict, bucket: str, target_id: str, monitor) -> dict:
     text = evidence_text(row)
