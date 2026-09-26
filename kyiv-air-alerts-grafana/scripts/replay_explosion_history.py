@@ -53,6 +53,7 @@ START_FIELDS = (
     "matched_alert_episode_start",
     "alert_episode_start",
     "alert_start",
+    "alert_start_kyiv",
     "episode_start",
     "matched_start",
 )
