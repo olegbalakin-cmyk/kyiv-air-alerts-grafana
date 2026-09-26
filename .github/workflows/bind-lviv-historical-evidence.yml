@@ -1,0 +1,75 @@
+name: Bind Lviv historical explosion evidence
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - multicity-wip-2026-09-16
+    paths:
+      - "research/lviv_recovery_source/lviv_explosion_reaudit_final_2026-09-18.zip"
+
+permissions:
+  contents: read
+
+jobs:
+  bind:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Assert evidence source exists
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f research/lviv_recovery_source/lviv_explosion_reaudit_final_2026-09-18.zip
+
+      - name: Materialize pinned UkraineAlarm bridge
+        shell: bash
+        run: |
+          set -euo pipefail
+          git show e23479ef250396d441cfe68814768be8134c761d:kyiv-air-alerts-grafana/data/ukrainealarm_bridge.json > "$RUNNER_TEMP/ukrainealarm_bridge.json"
+          test "$(git hash-object "$RUNNER_TEMP/ukrainealarm_bridge.json")" = "9b2922b0863ff6f3dba6e84f2348ad0e4b111d41"
+
+      - name: Download pinned frozen official_data_uk.csv
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --fail --location --silent --show-error --retry 3 \
+            "https://raw.githubusercontent.com/Vadimkin/ukrainian-air-raid-sirens-dataset/58ee75bc20113181b9ddf8029d4cbf3a62d8cd10/datasets/official_data_uk.csv" \
+            --output "$RUNNER_TEMP/official_data_uk.csv"
+          test "$(git hash-object "$RUNNER_TEMP/official_data_uk.csv")" = "71d70c0ca54968f530d596cf315616fa858800e1"
+
+      - name: Rebuild canonical 126-episode Lviv corpus
+        shell: bash
+        run: |
+          set -euo pipefail
+          python kyiv-air-alerts-grafana/scripts/build_lviv_historical_alert_corpus.py \
+            --frozen-csv "$RUNNER_TEMP/official_data_uk.csv" \
+            --bridge-json "$RUNNER_TEMP/ukrainealarm_bridge.json" \
+            --output "$RUNNER_TEMP/lviv_historical_alert_corpus_2026-09-17.json" \
+            --expected-frozen-blob "71d70c0ca54968f530d596cf315616fa858800e1" \
+            --expected-bridge-blob "9b2922b0863ff6f3dba6e84f2348ad0e4b111d41" \
+            --upstream-ref "58ee75bc20113181b9ddf8029d4cbf3a62d8cd10" \
+            --bridge-ref "e23479ef250396d441cfe68814768be8134c761d"
+
+      - name: Bind raw evidence to canonical episodes
+        shell: bash
+        run: |
+          set -euo pipefail
+          python kyiv-air-alerts-grafana/scripts/bind_lviv_historical_evidence.py \
+            --corpus "$RUNNER_TEMP/lviv_historical_alert_corpus_2026-09-17.json" \
+            --evidence-zip research/lviv_recovery_source/lviv_explosion_reaudit_final_2026-09-18.zip \
+            --output "$RUNNER_TEMP/lviv_historical_evidence_binding_2026-09-17.json"
+
+      - name: Upload binding artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: lviv-historical-evidence-binding-2026-09-17
+          path: ${{ runner.temp }}/lviv_historical_evidence_binding_2026-09-17.json
+          if-no-files-found: error
+          retention-days: 30
