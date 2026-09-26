@@ -944,8 +944,8 @@ def self_test() -> None:
     assert category("NON_STRICT", "NON_STRICT", False) == "UNREPLAYABLE_MISSING_EVIDENCE"
     assert ppo_related("У місті вибухи — працює ППО")
     assert not ppo_related("У місті пролунав вибух")
-    assert re.search(r"\\b(?:ударив|ударила|ударили|ударило)\\b", "російський бпла ударив по об'єкту".casefold())
-    assert not re.search(r"\\b(?:ударив|ударила|ударили|ударило)\\b", "російський бпла атакував об'єкт".casefold())
+    assert re.search(r"\b(?:ударив|ударила|ударили|ударило)\b", "російський бпла ударив по об'єкту".casefold())
+    assert not re.search(r"\b(?:ударив|ударила|ударили|ударило)\b", "російський бпла атакував об'єкт".casefold())
     print("Historical replay helper self-test OK")
 
 
