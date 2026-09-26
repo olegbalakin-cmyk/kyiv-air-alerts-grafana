@@ -1,0 +1,371 @@
+name: Historical explosion replay QA bundles
+
+on:
+  workflow_dispatch:
+    inputs:
+      scope:
+        description: "Which QA bundles to build"
+        required: true
+        default: "qa_required"
+        type: choice
+        options:
+          - qa_required
+          - city
+      city:
+        description: "City key when scope=city"
+        required: false
+        default: "sevastopol"
+        type: string
+      through:
+        description: "Inclusive historical replay end date; blank uses status file"
+        required: false
+        default: ""
+        type: string
+  push:
+    branches:
+      - multicity-wip-2026-09-16
+    paths:
+      - ".github/workflows/historical-replay-qa.yml"
+      - "kyiv-air-alerts-grafana/scripts/build_historical_replay_qa.py"
+      - "kyiv-air-alerts-grafana/scripts/replay_explosion_history.py"
+      - "kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py"
+      - "kyiv-air-alerts-grafana/data/explosion_research/**/final_evidence.json"
+      - "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/**"
+      - "kyiv-air-alerts-grafana/data/sevastopol_events.json"
+      - "kyiv-air-alerts-grafana/data/alerts_combined.json"
+      - "research/historical_replay_status_current.json"
+
+permissions:
+  contents: write
+  actions: read
+
+concurrency:
+  group: historical-explosion-replay-qa
+  cancel-in-progress: false
+
+jobs:
+  plan:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    outputs:
+      matrix: ${{ steps.plan.outputs.matrix }}
+      has_work: ${{ steps.plan.outputs.has_work }}
+      input_sha: ${{ steps.plan.outputs.input_sha }}
+      through: ${{ steps.plan.outputs.through }}
+
+    steps:
+      - name: Checkout exact QA planning input
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+
+      - name: Build QA matrix from persistent status
+        id: plan
+        shell: bash
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          DISPATCH_SCOPE: ${{ inputs.scope }}
+          DISPATCH_CITY: ${{ inputs.city }}
+          DISPATCH_THROUGH: ${{ inputs.through }}
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          status_path = Path("research/historical_replay_status_current.json")
+          if not status_path.exists():
+              raise SystemExit("Missing research/historical_replay_status_current.json")
+          status = json.loads(status_path.read_text(encoding="utf-8"))
+          cities = status.get("cities") or {}
+
+          if os.environ.get("EVENT_NAME") == "workflow_dispatch":
+              scope = os.environ.get("DISPATCH_SCOPE") or "qa_required"
+              requested_city = os.environ.get("DISPATCH_CITY") or "sevastopol"
+              through = os.environ.get("DISPATCH_THROUGH") or status.get("through") or "2026-09-17"
+          else:
+              scope = "qa_required"
+              requested_city = ""
+              through = status.get("through") or "2026-09-17"
+
+          if scope == "city":
+              row = cities.get(requested_city)
+              if not isinstance(row, dict):
+                  raise SystemExit(f"Unknown city: {requested_city}")
+              if row.get("status") != "QA_REQUIRED":
+                  raise SystemExit(
+                      f"City {requested_city} is {row.get('status')}, not QA_REQUIRED"
+                  )
+              selected = [requested_city]
+          elif scope == "qa_required":
+              selected = sorted(
+                  city for city, row in cities.items()
+                  if isinstance(row, dict) and row.get("status") == "QA_REQUIRED"
+              )
+          else:
+              raise SystemExit(f"Unsupported scope: {scope}")
+
+          include = [
+              {
+                  "city": city,
+                  "expected_qa_count": int(cities[city].get("manual_qa_count") or 0),
+              }
+              for city in selected
+          ]
+          matrix = json.dumps({"include": include}, separators=(",", ":"))
+          with Path(os.environ["GITHUB_OUTPUT"]).open("a", encoding="utf-8") as f:
+              f.write("matrix=" + matrix + "\n")
+              f.write("has_work=" + ("true" if include else "false") + "\n")
+              f.write("input_sha=" + os.environ["GITHUB_SHA"] + "\n")
+              f.write("through=" + str(through) + "\n")
+
+          print(f"Selected QA cities: {selected}")
+          print(f"Through: {through}")
+          PY
+
+  qa:
+    if: ${{ needs.plan.outputs.has_work == 'true' }}
+    needs: plan
+    strategy:
+      fail-fast: false
+      max-parallel: 4
+      matrix: ${{ fromJson(needs.plan.outputs.matrix) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      CITY: ${{ matrix.city }}
+      INPUT_SHA: ${{ needs.plan.outputs.input_sha }}
+      THROUGH: ${{ needs.plan.outputs.through }}
+
+    steps:
+      - name: Checkout exact replay input
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ env.INPUT_SHA }}
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: kyiv-air-alerts-grafana/requirements.txt
+
+      - name: Install dependencies
+        run: pip install -r kyiv-air-alerts-grafana/requirements.txt
+
+      - name: QA helper self-test
+        run: python kyiv-air-alerts-grafana/scripts/build_historical_replay_qa.py --self-test
+
+      - name: Run fresh current-rules city replay read-only
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$INPUT_SHA"
+          python kyiv-air-alerts-grafana/scripts/replay_explosion_history.py \
+            --repo-root "$GITHUB_WORKSPACE/kyiv-air-alerts-grafana" \
+            --city "$CITY" \
+            --through "$THROUGH" \
+            --input-head "$INPUT_SHA" \
+            --read-only \
+            --output "$RUNNER_TEMP/replay_${CITY}.json"
+
+      - name: Build persistent QA bundle
+        shell: bash
+        run: |
+          set -euo pipefail
+          python kyiv-air-alerts-grafana/scripts/build_historical_replay_qa.py \
+            --replay "$RUNNER_TEMP/replay_${CITY}.json" \
+            --status "research/historical_replay_status_current.json" \
+            --city "$CITY" \
+            --output "$RUNNER_TEMP/qa-${CITY}.json"
+
+      - name: Verify protected production files unchanged
+        shell: bash
+        run: |
+          set -euo pipefail
+          git diff --exit-code -- \
+            kyiv-air-alerts-grafana/data/explosion_audited_baseline.json \
+            kyiv-air-alerts-grafana/data/explosion_review_queue.json \
+            kyiv-air-alerts-grafana/data/explosion_candidate_monitor_state.json \
+            kyiv-air-alerts-grafana/data/explosion_candidate_monitor_last_run.json \
+            kyiv-air-alerts-grafana/data/explosions_test.json \
+            kyiv-air-alerts-grafana/data/dashboard_data.json
+
+      - name: Add QA summary
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+          city = os.environ["CITY"]
+          bundle = json.loads(
+              Path(os.environ["RUNNER_TEMP"], f"qa-{city}.json").read_text(encoding="utf-8")
+          )
+          with Path(os.environ["GITHUB_STEP_SUMMARY"]).open("a", encoding="utf-8") as f:
+              f.write(f"## Historical replay QA: {city}\n\n")
+              f.write(f"- QA cases: **{bundle['qa_count']}**\n")
+              f.write(f"- PPO-related changes: **{bundle['ppo_related_change_count']}**\n")
+              f.write(f"- Categories: `{json.dumps(bundle['category_counts'], ensure_ascii=False)}`\n\n")
+              f.write("| Date | Episode | Category | Old → replay | PPO |\n")
+              f.write("|---|---|---|---|---|\n")
+              for case in bundle["cases"]:
+                  if case.get("case_type") != "EPISODE_CHANGE":
+                      continue
+                  f.write(
+                      f"| {case.get('local_date') or ''} | `{case['episode_id']}` | "
+                      f"{case.get('category') or ''} | {case.get('frozen_old_status') or ''} → "
+                      f"{case.get('replayed_status') or ''} | "
+                      f"{'yes' if case.get('ppo_related') else 'no'} |\n"
+                  )
+          PY
+
+      - name: Upload QA bundle and replay
+        uses: actions/upload-artifact@v4
+        with:
+          name: historical-replay-qa-${{ matrix.city }}-${{ env.INPUT_SHA }}
+          path: |
+            ${{ runner.temp }}/qa-${{ matrix.city }}.json
+            ${{ runner.temp }}/replay_${{ matrix.city }}.json
+          if-no-files-found: error
+          retention-days: 30
+
+  aggregate:
+    if: ${{ always() && needs.plan.result == 'success' && needs.plan.outputs.has_work == 'true' && needs.qa.result == 'success' }}
+    needs:
+      - plan
+      - qa
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      INPUT_SHA: ${{ needs.plan.outputs.input_sha }}
+      BRANCH: multicity-wip-2026-09-16
+
+    steps:
+      - name: Checkout publication branch
+        uses: actions/checkout@v4
+        with:
+          ref: multicity-wip-2026-09-16
+          fetch-depth: 0
+
+      - name: Download QA bundles
+        uses: actions/download-artifact@v4
+        with:
+          pattern: historical-replay-qa-*-${{ env.INPUT_SHA }}
+          path: _qa_download
+          merge-multiple: true
+
+      - name: Publish current QA bundles and index
+        shell: bash
+        run: |
+          set -euo pipefail
+          git pull --rebase origin "$BRANCH"
+          mkdir -p research/historical_replay_qa
+
+          python - <<'PY'
+          import json
+          import shutil
+          from datetime import datetime, timezone
+          from pathlib import Path
+
+          qa_dir = Path("research/historical_replay_qa")
+          status = json.loads(
+              Path("research/historical_replay_status_current.json").read_text(encoding="utf-8")
+          )
+          current_qa = {
+              city: row
+              for city, row in (status.get("cities") or {}).items()
+              if isinstance(row, dict) and row.get("status") == "QA_REQUIRED"
+          }
+
+          downloaded = {}
+          for path in Path("_qa_download").glob("qa-*.json"):
+              bundle = json.loads(path.read_text(encoding="utf-8"))
+              city = bundle["city_key"]
+              if city in current_qa:
+                  downloaded[city] = (path, bundle)
+
+          for path in qa_dir.glob("*.json"):
+              if path.name == "index.json":
+                  continue
+              city = path.stem
+              if city not in current_qa:
+                  path.unlink()
+
+          for city, (path, bundle) in downloaded.items():
+              current_ids = sorted(str(x) for x in (current_qa[city].get("qa_episode_ids") or []))
+              bundle_ids = sorted(str(x) for x in (bundle.get("qa_episode_ids") or []))
+              if current_ids != bundle_ids:
+                  raise SystemExit(
+                      f"Refusing to publish stale QA bundle for {city}: "
+                      f"status_ids={current_ids} bundle_ids={bundle_ids}"
+                  )
+              shutil.copyfile(path, qa_dir / f"{city}.json")
+
+          index_rows = {}
+          for city in sorted(current_qa):
+              path = qa_dir / f"{city}.json"
+              if not path.exists():
+                  index_rows[city] = {
+                      "status": "QA_REQUIRED_BUNDLE_MISSING",
+                      "qa_count": current_qa[city].get("manual_qa_count"),
+                      "path": str(path),
+                  }
+                  continue
+              bundle = json.loads(path.read_text(encoding="utf-8"))
+              index_rows[city] = {
+                  "status": bundle.get("status"),
+                  "qa_count": bundle.get("qa_count"),
+                  "category_counts": bundle.get("category_counts") or {},
+                  "ppo_related_change_count": bundle.get("ppo_related_change_count"),
+                  "replay_input_head": bundle.get("replay_input_head"),
+                  "path": str(path),
+              }
+
+          index = {
+              "schema_version": 1,
+              "kind": "historical_replay_manual_qa_index",
+              "generated_at_utc": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
+              "status_input_head": status.get("input_head"),
+              "through": status.get("through"),
+              "qa_city_count": len(current_qa),
+              "qa_case_count": sum(int(row.get("manual_qa_count") or 0) for row in current_qa.values()),
+              "cities": index_rows,
+          }
+          (qa_dir / "index.json").write_text(
+              json.dumps(index, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
+              encoding="utf-8",
+          )
+          print(json.dumps(index, ensure_ascii=False, indent=2))
+          PY
+
+          git diff --check -- research/historical_replay_qa
+
+      - name: Commit only persistent QA files
+        shell: bash
+        run: |
+          set -euo pipefail
+          TARGET="research/historical_replay_qa"
+          git add -A -- "$TARGET"
+          if git diff --cached --quiet -- "$TARGET"; then
+            echo "QA bundles unchanged."
+            exit 0
+          fi
+
+          mapfile -t CHANGED < <(git diff --cached --name-only)
+          printf '%s\n' "${CHANGED[@]}"
+          for path in "${CHANGED[@]}"; do
+            case "$path" in
+              research/historical_replay_qa/*) ;;
+              *) echo "Unexpected staged path: $path" >&2; exit 1 ;;
+            esac
+          done
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "Publish historical replay QA bundles"
+          git pull --rebase origin "$BRANCH"
+          git push origin HEAD:"$BRANCH"
