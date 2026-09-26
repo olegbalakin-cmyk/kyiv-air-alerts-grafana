@@ -8,6 +8,7 @@ import subprocess
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
+import tempfile
 
 
 def load_json(path: Path):
@@ -241,7 +242,7 @@ def apply(
     )
 
     through = str(preflight.get("through") or qa.get("through") or "2026-09-17")
-    replay_path = output_path.parent / f"post-apply-replay-{city}.json"
+    replay_path = Path(tempfile.gettempdir()) / f"post-apply-replay-{city}.json"
     replay = run_replay(
         repo_root,
         city,
