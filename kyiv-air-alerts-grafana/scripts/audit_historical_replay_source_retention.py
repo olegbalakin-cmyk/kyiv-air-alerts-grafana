@@ -15,16 +15,28 @@ from urllib.parse import urlparse
 import requests
 from bs4 import BeautifulSoup
 
-USER_AGENT = "Mozilla/5.0 (compatible; historical-replay-source-retention-audit/1.0)"
+USER_AGENT = "Mozilla/5.0 (compatible; historical-replay-source-retention-audit/2.0)"
 STRIP_TAGS = ("script", "style", "noscript", "svg", "nav", "footer", "header", "form")
 GENERIC_TOKENS = {
     "суми", "сумах", "сум", "місто", "міста", "місті", "обласного", "центру",
+    "черкаси", "черкасах", "черкас", "район", "районі",
     "російський", "російські", "російська", "російського", "армія", "війська",
     "бпла", "дрон", "дрони", "безпілотник", "безпілотники", "шахед", "вибух",
     "вибухи", "удар", "удари", "атакував", "атакували", "влучив", "влучили",
-    "близько", "після", "вранці", "увечері", "ввечері", "вночі", "вночі",
-    "було", "були", "через", "під", "час", "один", "одного", "цього", "того",
+    "близько", "після", "вранці", "увечері", "ввечері", "вночі", "було", "були",
+    "через", "під", "час", "один", "одного", "цього", "того",
 }
+TEMPORAL_OTHER_EVENT_PATTERNS = (
+    r"\bранков\w*\b",
+    r"\bнічн\w*\b",
+    r"\bденн\w*\b",
+    r"\bвечірн\w*\b",
+    r"\bраніше\b",
+    r"\bперед\s+цим\b",
+    r"\bнапередодні\b",
+    r"\bцього\s+ранку\b",
+    r"\bцієї\s+ночі\b",
+)
 
 
 def load_json(path: Path):
@@ -33,7 +45,10 @@ def load_json(path: Path):
 
 def dump_json(path: Path, payload: dict) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    path.write_text(
+        json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
 
 
 def import_monitor(repo_root: Path):
@@ -54,11 +69,17 @@ def normalize(text: str | None) -> str:
 def content_tokens(text: str) -> set[str]:
     low = text.casefold().replace("’", "'")
     tokens = set(re.findall(r"[0-9A-Za-zА-Яа-яІіЇїЄєҐґ'-]{3,}", low))
-    return {t.strip("'-") for t in tokens if t.strip("'-") and t.strip("'-") not in GENERIC_TOKENS}
+    return {
+        t.strip("'-")
+        for t in tokens
+        if t.strip("'-") and t.strip("'-") not in GENERIC_TOKENS
+    }
 
 
 def time_tokens(text: str) -> set[str]:
-    return set(re.findall(r"(?<!\d)(?:[01]?\d|2[0-3]):[0-5]\d(?!\d)", text or ""))
+    return set(
+        re.findall(r"(?<!\d)(?:[01]?\d|2[0-3]):[0-5]\d(?!\d)", text or "")
+    )
 
 
 def original_case_text(case: dict) -> str:
@@ -68,6 +89,14 @@ def original_case_text(case: dict) -> str:
         if value:
             parts.append(str(value).split(" — ", 1)[0])
     return " ".join(parts)
+
+
+def split_sentences(text: str) -> list[str]:
+    return [
+        normalize(part)
+        for part in re.split(r"(?<=[.!?;])\s+|\n+", text or "")
+        if normalize(part)
+    ]
 
 
 def dedupe_chunks(chunks: list[str]) -> list[str]:
@@ -138,7 +167,9 @@ def fetch_source(url: str) -> dict:
             "http_status": response.status_code,
             "content_type": content_type,
             "resolved_url": str(response.url or url),
-            "content_sha256": hashlib.sha256(normalized.encode("utf-8")).hexdigest(),
+            "content_sha256": hashlib.sha256(
+                normalized.encode("utf-8")
+            ).hexdigest(),
             "chunk_count": len(chunks),
             "chunks": chunks,
         }
@@ -164,30 +195,77 @@ def missing_roles(case: dict) -> list[str]:
     return roles
 
 
-def analyze_chunk(city: str, chunk: str, original: str, monitor) -> dict:
-    exact = bool(monitor.city_mentioned(city, chunk))
-    explosion = bool(monitor.strict_explosion_signal(chunk))
-    air = bool(monitor.air_military_context(chunk))
-    military_event = bool(monitor.military_strike_event_signal(chunk))
-    complete = exact and explosion and air
-    original_tokens = content_tokens(original)
-    chunk_tokens = content_tokens(chunk)
-    shared = sorted(original_tokens & chunk_tokens)
+def event_local_windows(chunk: str, original: str) -> list[dict]:
+    sentences = split_sentences(chunk)
     original_times = time_tokens(original)
-    chunk_times = time_tokens(chunk)
-    shared_times = sorted(original_times & chunk_times)
-    anchor_ok = bool(shared_times or len(shared) >= 2)
+    original_tokens = content_tokens(original)
+    windows = []
+
+    if original_times:
+        for i, sentence in enumerate(sentences):
+            shared_times = sorted(time_tokens(sentence) & original_times)
+            if not shared_times:
+                continue
+
+            candidates = [(i, i)]
+            if i > 0:
+                candidates.append((i - 1, i))
+            if i + 1 < len(sentences):
+                candidates.append((i, i + 1))
+
+            for start, end in candidates:
+                text = " ".join(sentences[start : end + 1])
+                all_times = time_tokens(text)
+                foreign_times = sorted(all_times - set(shared_times))
+                lower = text.casefold()
+                temporal_other_event = any(
+                    re.search(pattern, lower)
+                    for pattern in TEMPORAL_OTHER_EVENT_PATTERNS
+                )
+                windows.append({
+                    "text": text,
+                    "shared_time_tokens": shared_times,
+                    "foreign_time_tokens": foreign_times,
+                    "shared_content_tokens": sorted(
+                        original_tokens & content_tokens(text)
+                    )[:12],
+                    "time_anchored": True,
+                    "event_local_safe": not foreign_times and not temporal_other_event,
+                    "window_sentence_range": [start, end],
+                })
+    else:
+        for i, sentence in enumerate(sentences):
+            shared = sorted(original_tokens & content_tokens(sentence))
+            if len(shared) >= 3:
+                windows.append({
+                    "text": sentence,
+                    "shared_time_tokens": [],
+                    "foreign_time_tokens": [],
+                    "shared_content_tokens": shared[:12],
+                    "time_anchored": False,
+                    "event_local_safe": False,
+                    "window_sentence_range": [i, i],
+                })
+
+    return windows
+
+
+def analyze_window(city: str, window: dict, monitor) -> dict:
+    text = window["text"]
+    exact = bool(monitor.city_mentioned(city, text))
+    explosion = bool(monitor.strict_explosion_signal(text))
+    air = bool(monitor.air_military_context(text))
+    military_event = bool(monitor.military_strike_event_signal(text))
+    complete = exact and explosion and air
     return {
+        **window,
         "exact_city": exact,
         "strict_explosion": explosion,
         "air_military_context": air,
         "military_strike_event": military_event,
         "same_attack_context": complete,
         "complete_current_rule_roles": complete,
-        "anchor_ok": anchor_ok,
-        "shared_time_tokens": shared_times,
-        "shared_content_tokens": shared[:12],
-        "excerpt": chunk[:700],
+        "excerpt": text[:700],
     }
 
 
@@ -214,26 +292,37 @@ def case_audit(city: str, case: dict, source_cache: dict[str, dict], monitor) ->
             "error": src.get("error"),
         })
         for idx, chunk in enumerate(src.get("chunks") or []):
-            a = analyze_chunk(city, chunk, original, monitor)
-            role_map = {
-                "exact_city": a["exact_city"],
-                "strict_explosion": a["strict_explosion"],
-                "air_military_context": a["air_military_context"],
-                "same_attack_context": a["same_attack_context"],
-            }
-            required_satisfied = all(role_map.get(role, False) for role in required)
-            if required_satisfied or a["complete_current_rule_roles"]:
-                candidates.append({
-                    "url": url,
-                    "chunk_index": idx,
-                    **a,
-                    "required_roles_satisfied": required_satisfied,
-                })
+            for local in event_local_windows(chunk, original):
+                a = analyze_window(city, local, monitor)
+                role_map = {
+                    "exact_city": a["exact_city"],
+                    "strict_explosion": a["strict_explosion"],
+                    "air_military_context": a["air_military_context"],
+                    "same_attack_context": a["same_attack_context"],
+                }
+                required_satisfied = all(
+                    role_map.get(role, False) for role in required
+                )
+                if required_satisfied or a["complete_current_rule_roles"]:
+                    candidates.append({
+                        "url": url,
+                        "chunk_index": idx,
+                        **a,
+                        "required_roles_satisfied": required_satisfied,
+                    })
 
     candidates.sort(
         key=lambda x: (
-            bool(x.get("required_roles_satisfied") and x.get("anchor_ok")),
-            bool(x.get("complete_current_rule_roles") and x.get("anchor_ok")),
+            bool(
+                x.get("required_roles_satisfied")
+                and x.get("time_anchored")
+                and x.get("event_local_safe")
+            ),
+            bool(
+                x.get("complete_current_rule_roles")
+                and x.get("time_anchored")
+                and x.get("event_local_safe")
+            ),
             bool(x.get("required_roles_satisfied")),
             len(x.get("shared_time_tokens") or []),
             len(x.get("shared_content_tokens") or []),
@@ -243,8 +332,13 @@ def case_audit(city: str, case: dict, source_cache: dict[str, dict], monitor) ->
     best = candidates[0] if candidates else None
 
     any_ok = any(x.get("status") == "OK" for x in fetch_statuses)
-    if best and best.get("required_roles_satisfied") and best.get("anchor_ok"):
-        triage = "SOURCE_RETENTION_CANDIDATE"
+    if (
+        best
+        and best.get("required_roles_satisfied")
+        and best.get("time_anchored")
+        and best.get("event_local_safe")
+    ):
+        triage = "SAFE_SOURCE_RETENTION_CANDIDATE"
     elif best and best.get("required_roles_satisfied"):
         triage = "SOURCE_CONTEXT_FOUND_WEAK_ANCHOR"
     elif any_ok:
@@ -284,14 +378,19 @@ def audit(repo_root: Path, qa_path: Path, output: Path) -> None:
                 urls.append(url)
 
     source_cache = {url: fetch_source(url) for url in urls}
-    cases = [case_audit(city, case, source_cache, monitor) for case in qa.get("cases") or []]
+    cases = [
+        case_audit(city, case, source_cache, monitor)
+        for case in qa.get("cases") or []
+    ]
     counts = Counter(row["triage"] for row in cases)
     fetch_counts = Counter(src.get("status") for src in source_cache.values())
 
     payload = {
-        "schema_version": 1,
+        "schema_version": 2,
         "kind": "historical_replay_source_retention_audit",
-        "generated_at_utc": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
+        "generated_at_utc": datetime.now(timezone.utc).isoformat().replace(
+            "+00:00", "Z"
+        ),
         "city_key": city,
         "qa_bundle_path": str(qa_path),
         "qa_bundle_replay_input_head": qa.get("replay_input_head"),
@@ -301,12 +400,13 @@ def audit(repo_root: Path, qa_path: Path, output: Path) -> None:
         "source_fetch_counts": dict(sorted(fetch_counts.items())),
         "safe_mutation_performed": False,
         "methodology": {
-            "purpose": "Detect likely source-retention misses without changing historical evidence or production data.",
+            "purpose": "Detect source-retention misses without changing historical evidence or production data.",
             "source_scope": "Only source URLs already retained in the frozen QA bundle.",
-            "role_logic": "Current monitor city/explosion/air-context functions applied to local source chunks.",
-            "same_attack_gate": "Exact city + strict explosion + air context must co-occur in one extracted chunk.",
-            "anchor_gate": "At least one shared clock time or at least two non-generic content tokens with retained evidence.",
-            "automatic_repairs": "None. SOURCE_RETENTION_CANDIDATE is a reviewable candidate, not a mutation.",
+            "role_logic": "Current monitor city/explosion/air-context functions applied to event-local source windows.",
+            "same_attack_gate": "Exact city + strict explosion + air context must co-occur in the same event-local window.",
+            "safe_anchor_gate": "SAFE_SOURCE_RETENTION_CANDIDATE requires a shared exact clock time with retained evidence and no other clock time or explicit different-daypart marker in the local window.",
+            "weak_anchor_gate": "Cases without a safe exact-time window remain weak/manual even if the page contains all roles elsewhere.",
+            "automatic_repairs": "None. This workflow only triages.",
         },
         "cases": cases,
     }
@@ -314,9 +414,35 @@ def audit(repo_root: Path, qa_path: Path, output: Path) -> None:
 
 
 def self_test() -> None:
-    assert "strict_explosion" in missing_roles({"reason_codes": ["NO_STRICT_EXPLOSION_EVIDENCE"]})
+    assert "strict_explosion" in missing_roles({
+        "reason_codes": ["NO_STRICT_EXPLOSION_EVIDENCE"]
+    })
     assert time_tokens("о 14:30 та 15:00") == {"14:30", "15:00"}
-    assert len(content_tokens("реактивний дрон атакував Мануфактуру у Сумах")) >= 2
+    assert len(
+        content_tokens("реактивний дрон атакував Мануфактуру у Сумах")
+    ) >= 2
+
+    same = event_local_windows(
+        "Вибух пролунав близько 14:30. Армія РФ атакувала ТРЦ у Сумах реактивним дроном.",
+        "Близько 14:30 російський реактивний дрон атакував ТРЦ у Сумах.",
+    )
+    assert any(x["event_local_safe"] for x in same)
+
+    bleed = event_local_windows(
+        "У Сумах вибух було чути близько 17:00. Близько 14:00 зафіксовано удар шахеда.",
+        "Близько 17:00 у Сумах був вибух; підтверджені російські удари.",
+    )
+    assert all(not x["event_local_safe"] for x in bleed if len(x["window_sentence_range"]) == 2)
+
+    morning = event_local_windows(
+        "Безпілотник атакував близько 18:00. Внаслідок ранкового удару постраждали люди.",
+        "Близько 18:00 безпілотник атакував АЗС у Сумах.",
+    )
+    assert all(
+        not x["event_local_safe"]
+        for x in morning
+        if len(x["window_sentence_range"]) == 2
+    )
     print("Source-retention auditor self-test OK")
 
 
