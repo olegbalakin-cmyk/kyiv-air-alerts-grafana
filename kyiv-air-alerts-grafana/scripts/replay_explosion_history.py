@@ -270,7 +270,7 @@ def history_status(row: dict, bucket: str) -> str:
     return "AMBIGUOUS"
 
 
-def historical_review_roles(city: str, row: dict) -> tuple[dict, str]:
+def historical_review_roles(city: str, row: dict, monitor) -> tuple[dict, str]:
     evidence_parts = []
     for key in EVIDENCE_FIELDS:
         value = row.get(key)
@@ -310,14 +310,13 @@ def historical_review_roles(city: str, row: dict) -> tuple[dict, str]:
                 low,
             )
         )
-        explosion = bool(re.search(r"\bвибух\w*\b", low))
+        # Reuse the frozen current classifier's event semantics: its
+        # strict explosion layer intentionally includes explicit military
+        # strikes/hits as well as literal explosion wording.
+        explosion = bool(monitor.strict_explosion_signal(evidence))
         air_context = bool(
-            re.search(
-                r"\b(?:бпла|дрон\w*|безпілот\w*|шахед\w*|shahed\w*|"
-                r"каб\w*|ракет\w*|авіаудар\w*|повітрян\w*|молні\w*|"
-                r"італмас\w*|геран\w*|ланцет\w*|fpv)\b",
-                low,
-            )
+            monitor.air_military_context(evidence)
+            or re.search(r"\bавіаудар\w*\b", low)
         )
     else:
         return {}, evidence
@@ -360,7 +359,7 @@ def historical_review_roles(city: str, row: dict) -> tuple[dict, str]:
 
 def history_provenance(row: dict, bucket: str, target_id: str, monitor, city: str) -> dict | None:
     basis = evidence_text(row)
-    reviewed_roles, reviewed_evidence = historical_review_roles(city, row)
+    reviewed_roles, reviewed_evidence = historical_review_roles(city, row, monitor)
 
     if bucket == "strict_events":
         raw = row.get("raw_record") or {}
