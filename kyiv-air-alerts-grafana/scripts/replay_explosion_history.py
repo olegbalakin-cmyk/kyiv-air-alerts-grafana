@@ -268,8 +268,62 @@ def history_status(row: dict, bucket: str) -> str:
     return "AMBIGUOUS"
 
 
-def history_provenance(row: dict, bucket: str, target_id: str, monitor) -> dict | None:
+def historical_review_roles(city: str, row: dict) -> tuple[dict, str]:
+    evidence_parts = []
+    for key in EVIDENCE_FIELDS:
+        value = row.get(key)
+        if value and str(value).strip() not in evidence_parts:
+            evidence_parts.append(str(value).strip())
+    evidence = " — ".join(evidence_parts)
+
+    # Sevastopol's frozen final_evidence corpus stores reviewed factual
+    # summaries in English. Preserve those factual roles for the current
+    # classifier without using the historical strict/sensitivity label itself.
+    if city != "sevastopol" or not evidence:
+        return {}, evidence
+
+    low = evidence.casefold()
+    exact_city = bool(re.search(r"\bsevastopol\b", low))
+    explosion = bool(
+        re.search(r"\b(?:explosion(?:s)?|blast(?:s)?|bang(?:s)?)\b", low)
+    )
+    air_context = bool(
+        re.search(
+            r"\b(?:air alert|alert|alarm|sirens?|aerial|missile(?:s)?|"
+            r"drone(?:s)?|air[- ]?defen[cs]e|attack|rocket(?:s)?)\b",
+            low,
+        )
+    )
+
+    roles = {}
+    if exact_city:
+        roles["exact_city_evidence"] = {
+            "present": True,
+            "evidence_text": evidence[:1200],
+        }
+    if explosion:
+        roles["explosion_evidence"] = {
+            "present": True,
+            "evidence_text": evidence[:1200],
+        }
+    if air_context:
+        roles["aerial_war_evidence"] = {
+            "present": True,
+            "evidence_text": evidence[:1200],
+        }
+    if exact_city and explosion and air_context:
+        roles["same_attack_basis"] = {
+            "present": True,
+            "basis": "reviewed_factual_summary_links_exact_city_explosion_and_air_context",
+            "evidence_text": evidence[:1200],
+        }
+    return roles, evidence
+
+
+def history_provenance(row: dict, bucket: str, target_id: str, monitor, city: str) -> dict | None:
     basis = evidence_text(row)
+    reviewed_roles, reviewed_evidence = historical_review_roles(city, row)
+
     if bucket == "strict_events":
         raw = row.get("raw_record") or {}
         city_status = str(raw.get("city_status") or "").strip()
@@ -288,7 +342,7 @@ def history_provenance(row: dict, bucket: str, target_id: str, monitor) -> dict 
         )
         provenance = {
             "schema_version": monitor.REVIEW_PROVENANCE_SCHEMA_VERSION,
-            "methodology_version": "historical-audit-replay-adapter-v2",
+            "methodology_version": "historical-audit-replay-adapter-v3",
             "target_episode_id": target_id,
             "temporal": {
                 "status": "validated_episode_binding",
@@ -299,11 +353,10 @@ def history_provenance(row: dict, bucket: str, target_id: str, monitor) -> dict 
                 "neighboring_alert_check": {"passed": True},
             },
         }
+        provenance.update(reviewed_roles)
 
-        # Preserve only reviewed factual context that is absent from the
-        # retained quote. Do not use the old strict label itself as evidence.
-        # Exact-city and explicit-explosion wording are still re-evaluated by
-        # the current classifier from the retained evidence text.
+        # Lviv's recovered corpus has explicit structured audit fields. Preserve
+        # factual reviewed context only; do not use the historical strict label.
         if war_air_context == "confirmed":
             provenance["aerial_war_evidence"] = {
                 "present": True,
@@ -329,9 +382,9 @@ def history_provenance(row: dict, bucket: str, target_id: str, monitor) -> dict 
             sens_basis = "inferred_same_attack"
         else:
             return None
-        return {
+        provenance = {
             "schema_version": monitor.REVIEW_PROVENANCE_SCHEMA_VERSION,
-            "methodology_version": "historical-audit-replay-adapter-v2",
+            "methodology_version": "historical-audit-replay-adapter-v3",
             "target_episode_id": target_id,
             "sensitivity_binding": {
                 "present": True,
@@ -341,6 +394,8 @@ def history_provenance(row: dict, bucket: str, target_id: str, monitor) -> dict 
                 "neighboring_alert_check": {"passed": True},
             },
         }
+        provenance.update(reviewed_roles)
+        return provenance
     return None
 
 def candidate_from_history(city: str, row: dict, bucket: str, target_id: str, monitor) -> dict:
@@ -364,7 +419,7 @@ def candidate_from_history(city: str, row: dict, bucket: str, target_id: str, mo
         "historical_bucket": bucket,
         "historical_record": copy.deepcopy(row),
     }
-    provenance = history_provenance(row, bucket, target_id, monitor)
+    provenance = history_provenance(row, bucket, target_id, monitor, city)
     if provenance:
         candidate["review_provenance"] = provenance
     return candidate
