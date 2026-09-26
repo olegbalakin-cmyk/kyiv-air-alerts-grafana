@@ -289,7 +289,7 @@ def historical_review_roles(city: str, row: dict) -> tuple[dict, str]:
     )
     air_context = bool(
         re.search(
-            r"\b(?:air alert|alert|alarm|sirens?|aerial|missile(?:s)?|"
+            r"\b(?:air alert|alerts?|alarm|sirens?|aerial|missile(?:s)?|"
             r"drone(?:s)?|air[- ]?defen[cs]e|attack|rocket(?:s)?)\b",
             low,
         )
@@ -300,6 +300,17 @@ def historical_review_roles(city: str, row: dict) -> tuple[dict, str]:
         roles["exact_city_evidence"] = {
             "present": True,
             "evidence_text": evidence[:1200],
+        }
+
+    reviewed_exact = row.get("reviewed_exact_city_evidence")
+    if isinstance(reviewed_exact, dict) and reviewed_exact.get("present") is True:
+        roles["exact_city_evidence"] = {
+            "present": True,
+            "evidence_text": str(
+                reviewed_exact.get("evidence_text")
+                or reviewed_exact.get("evidence")
+                or evidence
+            )[:1200],
         }
     if explosion:
         roles["explosion_evidence"] = {

@@ -1,0 +1,58 @@
+{
+  "schema_version": 1,
+  "city_key": "sevastopol",
+  "purpose": "Manual factual QA of the five sensitivity-only episodes left ambiguous after historical replay adapter v3.",
+  "input_replay": {
+    "run_id": 36261600310,
+    "input_head": "9ce235a2a67be85e00f57d4bf8147f316d3cfe2c",
+    "baseline_sensitivity_episodes": 55,
+    "replayed_sensitivity_episodes": 50,
+    "new_ambiguous": 5
+  },
+  "cases": [
+    {
+      "episode_id": "3278197984116d50eca3b21d",
+      "local_date": "2026-06-02",
+      "verdict": "adapter_lexical_gap",
+      "action": "Treat plural 'alerts' as reviewed air-alert context; retain sensitivity if other current-rule factual roles pass.",
+      "rationale": "Retained evidence explicitly reports explosions in Sevastopol during repeated night alerts."
+    },
+    {
+      "episode_id": "445e5ea68cfd64e10e878f54",
+      "local_date": "2024-07-01",
+      "verdict": "exact_city_summary_omission",
+      "action": "Persist reviewed exact-city evidence from the cited source; retain sensitivity if other current-rule factual roles pass.",
+      "source_url": "https://ru.krymr.com/a/news-v-sevastopole-slyshali-vzryvy/33017466.html",
+      "rationale": "The cited source explicitly places the explosions in Sevastopol near Cape Fiolent and the Balaklava TPP; the frozen English summary omitted the city name in that sentence."
+    },
+    {
+      "episode_id": "65859ecd57b0cb10581e213d",
+      "local_date": "2026-07-14",
+      "verdict": "adapter_lexical_gap",
+      "action": "Treat plural 'alerts' as reviewed air-alert context; retain sensitivity if other current-rule factual roles pass.",
+      "rationale": "Retained evidence explicitly says Sevastopol was under alerts and explosions were heard."
+    },
+    {
+      "episode_id": "88f87e4d95d35a9ba3d40f15",
+      "local_date": "2026-08-28",
+      "verdict": "current_rules_ambiguity_retained",
+      "action": "Do not synthesize explosion evidence from a drone hit.",
+      "rationale": "Retained evidence documents a drone hit during an attack but does not explicitly report an explosion."
+    },
+    {
+      "episode_id": "998bd353fe8d91de0ec6e534",
+      "local_date": "2026-09-08",
+      "verdict": "current_rules_ambiguity_retained",
+      "action": "Do not synthesize explosion evidence from a hit on the transmitting radio center.",
+      "rationale": "Retained evidence documents a hit but does not explicitly report an explosion."
+    }
+  ],
+  "expected_post_qa_replay": {
+    "strict_episodes": 38,
+    "sensitivity_episodes": 53,
+    "new_ambiguous": 2,
+    "strict_downgrades": 0,
+    "errors": 0
+  },
+  "classification_policy_note": "This QA preserves factual reviewed evidence only. It does not use the historical strict/sensitivity label as current evidence and does not infer explosion evidence from impacts alone."
+}
