@@ -1,0 +1,746 @@
+{
+  "schema_version": 1,
+  "city_key": "lviv",
+  "coverage_start": "2025-09-01",
+  "coverage_end": "2026-09-17",
+  "purpose": "Frozen historical evidence corpus for current-rules replay.",
+  "historical_baseline": {
+    "total_alerts": 126,
+    "strict_n": 12,
+    "sensitivity_n": 12
+  },
+  "methodology_note": "Historical bucket membership reconstructs the frozen audited baseline only. It is not treated as current truth. The current hardened classifier must re-evaluate all retained evidence.",
+  "manual_binding_qa": {
+    "event_id": "LVI-20250903-01",
+    "episode_id": "a0e9cfed0043356fe207107f",
+    "source_url": "https://suspilne.media/lviv/1100898-u-lvovi-prolunali-vibuhi-so-vidomo-pro-obstril-3-veresna/",
+    "artifact": "research/lviv_historical_evidence_binding_manual_qa_2026-09-26.json"
+  },
+  "strict_events": [
+    {
+      "event_id": "LVI-20250903-01",
+      "episode_id": "a0e9cfed0043356fe207107f",
+      "source_url": "https://suspilne.media/lviv/1100898-u-lvovi-prolunali-vibuhi-so-vidomo-pro-obstril-3-veresna/",
+      "evidence": "У Львові пролунала серія вибухів, повідомляють кореспонденти Суспільного.",
+      "decision_basis": "Frozen historical audit retained evidence; historical bucket only. Current hardened replay must reclassify.",
+      "binding_method": "source_chronology_manual_qa",
+      "temporal_evidence": {
+        "temporal_evidence": "explicit_during_alert"
+      },
+      "notes": {
+        "notes": "Exact-city series of explosions during the first alert of the night. Multiple reports inside the same alert episode count once."
+      },
+      "historical_frozen_status": "included_strict",
+      "raw_record": {
+        "event_id": "LVI-20250903-01",
+        "date": "2025-09-03",
+        "event_time_local": "2025-09-03T04:02:00+03:00",
+        "time_precision": "approx_minute",
+        "city_status": "exact_city",
+        "war_air_context": "confirmed",
+        "temporal_evidence": "explicit_during_alert",
+        "alert_start_local": "",
+        "alert_end_local": "",
+        "alert_interval_basis": "Suspilne chronology: explosions in Lviv during an air alert",
+        "telegram_hit": "direct_auditory_exact_city",
+        "telegram_source": "СУСПІЛЬНЕ НОВИНИ",
+        "telegram_datetime_local": "2025-09-03T04:02:33+03:00",
+        "telegram_message_id": "55489",
+        "source_1": "https://suspilne.media/lviv/1100898-u-lvovi-prolunali-vibuhi-so-vidomo-pro-obstril-3-veresna/",
+        "source_2": "",
+        "notes": "Exact-city series of explosions during the first alert of the night. Multiple reports inside the same alert episode count once."
+      }
+    },
+    {
+      "event_id": "LVI-20250910-01",
+      "episode_id": "22227f5541a687eaa23251c4",
+      "source_url": "https://suspilne.media/lviv/1110176-u-lvovi-bulo-cutno-vibuhi-so-vidomo-pro-obstril-10-veresna/",
+      "evidence": "У Львові чутно звуки вибухів, повідомляють кореспонденти Суспільного.",
+      "decision_basis": "Frozen historical audit retained evidence; historical bucket only. Current hardened replay must reclassify.",
+      "binding_method": "alert_interval_overlap_unique_best",
+      "temporal_evidence": {
+        "temporal_evidence": "exact_time_in_alert"
+      },
+      "notes": {
+        "notes": "First city explosions about 02:36 during the 00:44–04:25 alert. A later alert that morning has no separate exact-city explosion evidence in this audit."
+      },
+      "historical_frozen_status": "included_strict",
+      "raw_record": {
+        "event_id": "LVI-20250910-01",
+        "date": "2025-09-10",
+        "event_time_local": "2025-09-10T02:36:00+03:00",
+        "time_precision": "approx_minute",
+        "city_status": "exact_city",
+        "war_air_context": "confirmed",
+        "temporal_evidence": "exact_time_in_alert",
+        "alert_start_local": "2025-09-10T00:44:00+03:00",
+        "alert_end_local": "2025-09-10T04:25:00+03:00",
+        "alert_interval_basis": "Suspilne chronology",
+        "telegram_hit": "direct_auditory_exact_city",
+        "telegram_source": "СУСПІЛЬНЕ НОВИНИ",
+        "telegram_datetime_local": "2025-09-10T03:34:08+03:00",
+        "telegram_message_id": "55843",
+        "source_1": "https://suspilne.media/lviv/1110176-u-lvovi-bulo-cutno-vibuhi-so-vidomo-pro-obstril-10-veresna/",
+        "source_2": "",
+        "notes": "First city explosions about 02:36 during the 00:44–04:25 alert. A later alert that morning has no separate exact-city explosion evidence in this audit."
+      }
+    },
+    {
+      "event_id": "LVI-20251005-01",
+      "episode_id": "a0e59d07f8af013260163cc9",
+      "source_url": "https://suspilne.media/lviv/1131132-u-lvovi-prolunali-vibuhi-so-vidomo-pro-obstril-5-zovtna/",
+      "evidence": "У Львові пролунала серія потужних вибухів, повідомляють кореспонденти Суспільного.",
+      "decision_basis": "Frozen historical audit retained evidence; historical bucket only. Current hardened replay must reclassify.",
+      "binding_method": "alert_start_nearest_within_300s",
+      "temporal_evidence": {
+        "temporal_evidence": "exact_time_in_alert"
+      },
+      "notes": {
+        "notes": "Many explosions were reported over several hours, but they occurred inside one continuous alert episode. Count once."
+      },
+      "historical_frozen_status": "included_strict",
+      "raw_record": {
+        "event_id": "LVI-20251005-01",
+        "date": "2025-10-05",
+        "event_time_local": "2025-10-05T04:26:00+03:00",
+        "time_precision": "approx_minute",
+        "city_status": "exact_city",
+        "war_air_context": "confirmed",
+        "temporal_evidence": "exact_time_in_alert",
+        "alert_start_local": "2025-10-05T03:52:00+03:00",
+        "alert_end_local": "",
+        "alert_interval_basis": "Suspilne chronology: long continuous alert/attack",
+        "telegram_hit": "direct_auditory_exact_city",
+        "telegram_source": "СУСПІЛЬНЕ НОВИНИ",
+        "telegram_datetime_local": "2025-10-05T06:28:16+03:00",
+        "telegram_message_id": "56895",
+        "source_1": "https://suspilne.media/lviv/1131132-u-lvovi-prolunali-vibuhi-so-vidomo-pro-obstril-5-zovtna/",
+        "source_2": "",
+        "notes": "Many explosions were reported over several hours, but they occurred inside one continuous alert episode. Count once."
+      }
+    },
+    {
+      "event_id": "LVI-20251119-01",
+      "episode_id": "136b2a346b2f5c15aed1d9e1",
+      "source_url": "https://suspilne.media/lviv/1168012-na-lvivsini-prolunali-vibuhi-so-vidomo/",
+      "evidence": "У Тернополі та Львові було чутно вибухи, повідомляють кореспонденти Суспільного.",
+      "decision_basis": "Frozen historical audit retained evidence; historical bucket only. Current hardened replay must reclassify.",
+      "binding_method": "event_time_inside_unique_episode",
+      "temporal_evidence": {
+        "temporal_evidence": "explicit_during_alert"
+      },
+      "notes": {
+        "notes": "Exact-city auditory report, followed by repeated explosions at 07:39. Same active alert episode, counted once."
+      },
+      "historical_frozen_status": "included_strict",
+      "raw_record": {
+        "event_id": "LVI-20251119-01",
+        "date": "2025-11-19",
+        "event_time_local": "2025-11-19T06:41:00+02:00",
+        "time_precision": "approx_minute",
+        "city_status": "exact_city",
+        "war_air_context": "confirmed",
+        "temporal_evidence": "explicit_during_alert",
+        "alert_start_local": "2025-11-19T03:23:00+02:00",
+        "alert_end_local": "",
+        "alert_interval_basis": "Suspilne chronology",
+        "telegram_hit": "direct_auditory_exact_city",
+        "telegram_source": "СУСПІЛЬНЕ НОВИНИ",
+        "telegram_datetime_local": "2025-11-19T06:41:04+02:00",
+        "telegram_message_id": "58985",
+        "source_1": "https://suspilne.media/lviv/1168012-na-lvivsini-prolunali-vibuhi-so-vidomo/",
+        "source_2": "",
+        "notes": "Exact-city auditory report, followed by repeated explosions at 07:39. Same active alert episode, counted once."
+      }
+    },
+    {
+      "event_id": "LVI-20260108-01",
+      "episode_id": "498d07cfea5ac7e9090a08e3",
+      "source_url": "https://suspilne.media/lviv/1199498-na-lvivsini-prolunali-vibuhi-so-vidomo-pro-obstril-9-sicna/",
+      "evidence": "У Львові було чутно вибухи, повідомляють кореспонденти Суспільного.",
+      "decision_basis": "Frozen historical audit retained evidence; historical bucket only. Current hardened replay must reclassify.",
+      "binding_method": "alert_start_nearest_within_300s",
+      "temporal_evidence": {
+        "temporal_evidence": "exact_time_in_alert"
+      },
+      "notes": {
+        "notes": "First exact-city explosion report was before midnight on 8 Jan. A 00:04 follow-up on 9 Jan belongs to the same alert episode; event date remains 8 Jan."
+      },
+      "historical_frozen_status": "included_strict",
+      "raw_record": {
+        "event_id": "LVI-20260108-01",
+        "date": "2026-01-08",
+        "event_time_local": "2026-01-08T23:50:00+02:00",
+        "time_precision": "approx_minute",
+        "city_status": "exact_city",
+        "war_air_context": "confirmed",
+        "temporal_evidence": "exact_time_in_alert",
+        "alert_start_local": "2026-01-08T23:35:00+02:00",
+        "alert_end_local": "",
+        "alert_interval_basis": "Suspilne/UP chronology; alert crossed midnight",
+        "telegram_hit": "direct_auditory_exact_city",
+        "telegram_source": "СУСПІЛЬНЕ НОВИНИ",
+        "telegram_datetime_local": "2026-01-08T23:50:18+02:00",
+        "telegram_message_id": "61010",
+        "source_1": "https://suspilne.media/lviv/1199498-na-lvivsini-prolunali-vibuhi-so-vidomo-pro-obstril-9-sicna/",
+        "source_2": "",
+        "notes": "First exact-city explosion report was before midnight on 8 Jan. A 00:04 follow-up on 9 Jan belongs to the same alert episode; event date remains 8 Jan."
+      }
+    },
+    {
+      "event_id": "LVI-20260115-01",
+      "episode_id": "25181fb006061e161dd7bcdb",
+      "source_url": "https://suspilne.media/lviv/1213016-zvuki-vibuhiv-u-lvovi-so-vidomo-pro-ataku-rf-15-sicna/",
+      "evidence": "У Львові було чути вибух, повідомляють кореспонденти Суспільного. Голова Львівської ОДА Козицький поінформував про рух російських БпЛА на місто.",
+      "decision_basis": "Frozen historical audit retained evidence; historical bucket only. Current hardened replay must reclassify.",
+      "binding_method": "event_time_inside_unique_episode",
+      "temporal_evidence": {
+        "temporal_evidence": "exact_time_in_alert"
+      },
+      "notes": {
+        "notes": "City explosion during a confirmed drone attack after the 05:47 alert start."
+      },
+      "historical_frozen_status": "included_strict",
+      "raw_record": {
+        "event_id": "LVI-20260115-01",
+        "date": "2026-01-15",
+        "event_time_local": "2026-01-15T06:34:00+02:00",
+        "time_precision": "approx_minute",
+        "city_status": "exact_city",
+        "war_air_context": "confirmed",
+        "temporal_evidence": "exact_time_in_alert",
+        "alert_start_local": "2026-01-15T05:47:00+02:00",
+        "alert_end_local": "",
+        "alert_interval_basis": "Suspilne chronology",
+        "telegram_hit": "direct_auditory_exact_city",
+        "telegram_source": "СУСПІЛЬНЕ НОВИНИ",
+        "telegram_datetime_local": "2026-01-15T06:39:15+02:00",
+        "telegram_message_id": "61307",
+        "source_1": "https://suspilne.media/lviv/1213016-zvuki-vibuhiv-u-lvovi-so-vidomo-pro-ataku-rf-15-sicna/",
+        "source_2": "",
+        "notes": "City explosion during a confirmed drone attack after the 05:47 alert start."
+      }
+    },
+    {
+      "event_id": "LVI-20260205-01",
+      "episode_id": "6cd77c20720eafece633c1ad",
+      "source_url": "https://suspilne.media/lviv/1216592-u-lvovi-prolunali-vibuhi-pracuvala-ppo/",
+      "evidence": "У Львові пролунали вибухи під час повітряної тривоги 15:50–17:05; ППО знищила безпілотник над Львовом / Львівською громадою.",
+      "decision_basis": "Frozen historical audit retained evidence; historical bucket only. Current hardened replay must reclassify.",
+      "binding_method": "alert_interval_overlap_unique_best",
+      "temporal_evidence": {
+        "temporal_evidence": "explicit_during_alert"
+      },
+      "notes": {
+        "notes": "Local/web gap-search addition. Suspilne reports explosions/PPO in Lviv during the 15:50–17:05 alert; drone was destroyed over Lviv/Lviv community."
+      },
+      "historical_frozen_status": "included_strict",
+      "raw_record": {
+        "event_id": "LVI-20260205-01",
+        "date": "2026-02-05",
+        "event_time_local": "",
+        "time_precision": "explicit_during_alert",
+        "city_status": "exact_city",
+        "war_air_context": "confirmed",
+        "temporal_evidence": "explicit_during_alert",
+        "alert_start_local": "2026-02-05T15:50:00+02:00",
+        "alert_end_local": "2026-02-05T17:05:00+02:00",
+        "alert_interval_basis": "Suspilne chronology",
+        "telegram_hit": "not_found_direct",
+        "telegram_source": "",
+        "telegram_datetime_local": "",
+        "telegram_message_id": "",
+        "source_1": "https://suspilne.media/lviv/1216592-u-lvovi-prolunali-vibuhi-pracuvala-ppo/",
+        "source_2": "",
+        "notes": "Local/web gap-search addition. Suspilne reports explosions/PPO in Lviv during the 15:50–17:05 alert; drone was destroyed over Lviv/Lviv community."
+      }
+    },
+    {
+      "event_id": "LVI-20260208-01",
+      "episode_id": "c9b6fbced2332a867f10b809",
+      "source_url": "https://suspilne.media/lviv/1234590-na-lvivsini-protipovitrana-oborona-znisila-bezpilotniki-so-vidomo-pro-ataku-8-lutogo/",
+      "evidence": "У Львові о 08:48 було чути звуки вибухів під час повітряної тривоги 07:53–08:58; ППО знищила ворожі безпілотники.",
+      "decision_basis": "Frozen historical audit retained evidence; historical bucket only. Current hardened replay must reclassify.",
+      "binding_method": "alert_interval_overlap_unique_best",
+      "temporal_evidence": {
+        "temporal_evidence": "exact_time_in_alert"
+      },
+      "notes": {
+        "notes": "Local/web gap-search addition. OVA explicitly states sounds of explosions were heard in Lviv at 08:48; PVO destroyed an attack drone during the 07:53–08:58 alert."
+      },
+      "historical_frozen_status": "included_strict",
+      "raw_record": {
+        "event_id": "LVI-20260208-01",
+        "date": "2026-02-08",
+        "event_time_local": "2026-02-08T08:48:00+02:00",
+        "time_precision": "exact_minute",
+        "city_status": "exact_city",
+        "war_air_context": "confirmed",
+        "temporal_evidence": "exact_time_in_alert",
+        "alert_start_local": "2026-02-08T07:53:00+02:00",
+        "alert_end_local": "2026-02-08T08:58:00+02:00",
+        "alert_interval_basis": "Suspilne/OVA chronology",
+        "telegram_hit": "not_found_direct",
+        "telegram_source": "",
+        "telegram_datetime_local": "",
+        "telegram_message_id": "",
+        "source_1": "https://suspilne.media/lviv/1234590-na-lvivsini-protipovitrana-oborona-znisila-bezpilotniki-so-vidomo-pro-ataku-8-lutogo/",
+        "source_2": "",
+        "notes": "Local/web gap-search addition. OVA explicitly states sounds of explosions were heard in Lviv at 08:48; PVO destroyed an attack drone during the 07:53–08:58 alert."
+      }
+    },
+    {
+      "event_id": "LVI-20260211-01",
+      "episode_id": "8cf4aa273a76166a6e8f232c",
+      "source_url": "https://suspilne.media/lviv/1237538-u-lvovi-cutno-vibuhi-u-misti-pracuvalo-ppo/",
+      "evidence": "UPD / Близько 14:40 в напрямку Львова летіли два «Кинжали». Сили ППО їх знешкодили. Наразі інформації про руйнування чи постраждалих немає, повідомив міський голова Садовий. У Львові пролунали вибухи, повідомили кореспонденти Суспільного. В місті чути роботу ППО, уточнив міський голова Садовий.",
+      "decision_basis": "Frozen historical audit retained evidence; historical bucket only. Current hardened replay must reclassify.",
+      "binding_method": "event_time_inside_unique_episode",
+      "temporal_evidence": {
+        "temporal_evidence": "explicit_during_alert"
+      },
+      "notes": {
+        "notes": "Two Kinzhals were headed toward Lviv and neutralized by air defense; exact-city explosions were reported during the active alert."
+      },
+      "historical_frozen_status": "included_strict",
+      "raw_record": {
+        "event_id": "LVI-20260211-01",
+        "date": "2026-02-11",
+        "event_time_local": "2026-02-11T14:50:00+02:00",
+        "time_precision": "approx_minute",
+        "city_status": "exact_city",
+        "war_air_context": "confirmed",
+        "temporal_evidence": "explicit_during_alert",
+        "alert_start_local": "",
+        "alert_end_local": "",
+        "alert_interval_basis": "Suspilne chronology; two Kinzhals neutralized near Lviv during alert",
+        "telegram_hit": "direct_auditory_exact_city",
+        "telegram_source": "СУСПІЛЬНЕ НОВИНИ",
+        "telegram_datetime_local": "2026-02-11T14:51:21+02:00",
+        "telegram_message_id": "62743",
+        "source_1": "https://suspilne.media/lviv/1237538-u-lvovi-cutno-vibuhi-u-misti-pracuvalo-ppo/",
+        "source_2": "",
+        "notes": "Two Kinzhals were headed toward Lviv and neutralized by air defense; exact-city explosions were reported during the active alert."
+      }
+    },
+    {
+      "event_id": "LVI-20260318-01",
+      "episode_id": "8d75e678d9fe449474b9fd0b",
+      "source_url": "https://suspilne.media/lviv/1246544-u-lvovi-pid-cas-povitranoi-trivogi-bezpilotnik-vluciv-v-upravlinna-sbu-e-rujnuvanna/",
+      "evidence": "UPD / Під час повітряної тривоги дрон РФ атакував Львів. Попередньо, без постраждалих. На місці влучання працюють всі профільні служби, повідомив керівник ОВА Козицький.У Львові чутно звук вибуху, повідомляють кореспонденти Суспільного.",
+      "decision_basis": "Frozen historical audit retained evidence; historical bucket only. Current hardened replay must reclassify.",
+      "binding_method": "alert_interval_overlap_unique_best",
+      "temporal_evidence": {
+        "temporal_evidence": "exact_time_in_alert"
+      },
+      "notes": {
+        "notes": "Drone attacked Lviv during the alert; exact-city explosion heard at about 22:16."
+      },
+      "historical_frozen_status": "included_strict",
+      "raw_record": {
+        "event_id": "LVI-20260318-01",
+        "date": "2026-03-18",
+        "event_time_local": "2026-03-18T22:16:00+02:00",
+        "time_precision": "approx_minute",
+        "city_status": "exact_city",
+        "war_air_context": "confirmed",
+        "temporal_evidence": "exact_time_in_alert",
+        "alert_start_local": "2026-03-18T21:45:00+02:00",
+        "alert_end_local": "2026-03-18T22:21:00+02:00",
+        "alert_interval_basis": "Suspilne chronology",
+        "telegram_hit": "direct_auditory_exact_city",
+        "telegram_source": "СУСПІЛЬНЕ НОВИНИ",
+        "telegram_datetime_local": "2026-03-18T22:17:05+02:00",
+        "telegram_message_id": "64687",
+        "source_1": "https://suspilne.media/lviv/1246544-u-lvovi-pid-cas-povitranoi-trivogi-bezpilotnik-vluciv-v-upravlinna-sbu-e-rujnuvanna/",
+        "source_2": "",
+        "notes": "Drone attacked Lviv during the alert; exact-city explosion heard at about 22:16."
+      }
+    },
+    {
+      "event_id": "LVI-20260324-01",
+      "episode_id": "2d638b37f8ce528c6e812ae0",
+      "source_url": "https://suspilne.media/lviv/1106682-u-lvovi-24-berezna-prolunali-vibuhi-so-vidomo/",
+      "evidence": "У Львові чутно звук вибуху, повідомляють кореспонденти Суспільного. Працює ППО, додав керівник ОВА Козицький.",
+      "decision_basis": "Frozen historical audit retained evidence; historical bucket only. Current hardened replay must reclassify.",
+      "binding_method": "event_time_inside_unique_episode",
+      "temporal_evidence": {
+        "temporal_evidence": "explicit_during_alert"
+      },
+      "notes": {
+        "notes": "First exact-city explosion around 16:19. Another at 17:22 occurred in the same continuous attack/alert episode, so the numerator increases by one only."
+      },
+      "historical_frozen_status": "included_strict",
+      "raw_record": {
+        "event_id": "LVI-20260324-01",
+        "date": "2026-03-24",
+        "event_time_local": "2026-03-24T16:19:00+02:00",
+        "time_precision": "exact_minute",
+        "city_status": "exact_city",
+        "war_air_context": "confirmed",
+        "temporal_evidence": "explicit_during_alert",
+        "alert_start_local": "",
+        "alert_end_local": "2026-03-24T18:34:00+02:00",
+        "alert_interval_basis": "Suspilne chronology: city/oblast attacked for more than two hours; all-clear 18:34",
+        "telegram_hit": "direct_auditory_exact_city",
+        "telegram_source": "СУСПІЛЬНЕ НОВИНИ",
+        "telegram_datetime_local": "2026-03-24T16:20:13+02:00",
+        "telegram_message_id": "64988",
+        "source_1": "https://suspilne.media/lviv/1106682-u-lvovi-24-berezna-prolunali-vibuhi-so-vidomo/",
+        "source_2": "",
+        "notes": "First exact-city explosion around 16:19. Another at 17:22 occurred in the same continuous attack/alert episode, so the numerator increases by one only."
+      }
+    },
+    {
+      "event_id": "LVI-20260730-01",
+      "episode_id": "7bcfba555c73be540f49a908",
+      "source_url": "https://suspilne.media/lviv/1367172-u-lvovi-cutno-vibuhi-u-misti-pracuut-sili-ppo/",
+      "evidence": "У Львові чути вибухи, повідомляють кореспонденти Суспільного.",
+      "decision_basis": "Frozen historical audit retained evidence; historical bucket only. Current hardened replay must reclassify.",
+      "binding_method": "alert_interval_overlap_unique_best",
+      "temporal_evidence": {
+        "temporal_evidence": "exact_time_in_alert"
+      },
+      "notes": {
+        "notes": "City explosions around 04:40 inside the 04:12–05:16 alert. Later Telegram publication time is not used as the explosion time."
+      },
+      "historical_frozen_status": "included_strict",
+      "raw_record": {
+        "event_id": "LVI-20260730-01",
+        "date": "2026-07-30",
+        "event_time_local": "2026-07-30T04:40:00+03:00",
+        "time_precision": "approx_minute",
+        "city_status": "exact_city",
+        "war_air_context": "confirmed",
+        "temporal_evidence": "exact_time_in_alert",
+        "alert_start_local": "2026-07-30T04:12:00+03:00",
+        "alert_end_local": "2026-07-30T05:16:00+03:00",
+        "alert_interval_basis": "Suspilne chronology",
+        "telegram_hit": "direct_auditory_exact_city",
+        "telegram_source": "СУСПІЛЬНЕ НОВИНИ",
+        "telegram_datetime_local": "2026-07-30T05:47:57+03:00",
+        "telegram_message_id": "72413",
+        "source_1": "https://suspilne.media/lviv/1367172-u-lvovi-cutno-vibuhi-u-misti-pracuut-sili-ppo/",
+        "source_2": "",
+        "notes": "City explosions around 04:40 inside the 04:12–05:16 alert. Later Telegram publication time is not used as the explosion time."
+      }
+    }
+  ],
+  "sensitivity_only_events": [],
+  "review_events": [
+    {
+      "event_id": "LVI-R-20260127-01",
+      "episode_id": "5188bb2962e9b97c312b1dbb",
+      "binding_status": "matched",
+      "binding_method": "unique_episode_on_event_local_day",
+      "source_url": "https://suspilne.media/lviv/1224050-armia-rf-atakuvala-obekt-infrastrukturi-na-lvivsini/",
+      "evidence": "during_alert_unverified_city_sound — Some secondary/local mentions suggested an explosion in Lviv, but authoritative reporting confirms the strike/explosion in Brody. Exact-city audible evidence for Lviv was not strong enough.",
+      "temporal_evidence": {
+        "temporal_evidence": "during_alert_unverified_city_sound"
+      },
+      "notes": {
+        "notes": "Some secondary/local mentions suggested an explosion in Lviv, but authoritative reporting confirms the strike/explosion in Brody. Exact-city audible evidence for Lviv was not strong enough."
+      },
+      "historical_frozen_status": "review_not_counted",
+      "raw_record": {
+        "event_id": "LVI-R-20260127-01",
+        "date": "2026-01-27",
+        "event_time_local": "",
+        "time_precision": "review",
+        "city_status": "review_city_unverified",
+        "war_air_context": "confirmed",
+        "temporal_evidence": "during_alert_unverified_city_sound",
+        "alert_start_local": "",
+        "alert_end_local": "",
+        "alert_interval_basis": "Authoritative local source confirms attack in Brody; no robust exact-city Lviv auditory confirmation retained",
+        "telegram_hit": "not_retained",
+        "telegram_source": "",
+        "telegram_datetime_local": "",
+        "telegram_message_id": "",
+        "source_1": "https://suspilne.media/lviv/1224050-armia-rf-atakuvala-obekt-infrastrukturi-na-lvivsini/",
+        "source_2": "",
+        "notes": "Some secondary/local mentions suggested an explosion in Lviv, but authoritative reporting confirms the strike/explosion in Brody. Exact-city audible evidence for Lviv was not strong enough."
+      }
+    },
+    {
+      "event_id": "LVI-X-20260217-01",
+      "episode_id": "800a2f75ecb74b003af538e0",
+      "binding_status": "matched",
+      "binding_method": "event_time_inside_unique_episode",
+      "source_url": "https://suspilne.media/lviv/1242126-u-lvivskomu-rajoni-pracuvala-ppo-so-vidomo-pro-obstril-17-lutogo/",
+      "evidence": "region_or_raion_only — Authoritative source places the explosions in Lviv district and reports a drone near Lviv, but does not confirm that explosions were heard in Lviv city.",
+      "temporal_evidence": {
+        "temporal_evidence": "region_or_raion_only"
+      },
+      "notes": {
+        "notes": "Authoritative source places the explosions in Lviv district and reports a drone near Lviv, but does not confirm that explosions were heard in Lviv city."
+      },
+      "historical_frozen_status": "excluded_region_non_city",
+      "raw_record": {
+        "event_id": "LVI-X-20260217-01",
+        "date": "2026-02-17",
+        "event_time_local": "2026-02-17T08:37:00+02:00",
+        "time_precision": "approx_minute",
+        "city_status": "not_exact_city",
+        "war_air_context": "confirmed",
+        "temporal_evidence": "region_or_raion_only",
+        "alert_start_local": "",
+        "alert_end_local": "2026-02-17T08:56:00+02:00",
+        "alert_interval_basis": "Suspilne exact wording: explosions in Lviv district; PVO",
+        "telegram_hit": "same_attack_lead",
+        "telegram_source": "",
+        "telegram_datetime_local": "",
+        "telegram_message_id": "",
+        "source_1": "https://suspilne.media/lviv/1242126-u-lvivskomu-rajoni-pracuvala-ppo-so-vidomo-pro-obstril-17-lutogo/",
+        "source_2": "",
+        "notes": "Authoritative source places the explosions in Lviv district and reports a drone near Lviv, but does not confirm that explosions were heard in Lviv city."
+      }
+    },
+    {
+      "event_id": "LVI-X-20260222-01",
+      "episode_id": "ec675936a833969f972b6ab7",
+      "binding_status": "matched",
+      "binding_method": "unique_episode_on_event_local_day",
+      "source_url": "https://suspilne.media/lviv/1246598-u-lvovi-prolunav-vibuh-so-vidomo/",
+      "evidence": "Унаслідок вибухів у Львові є загиблі та поранені правоохоронці, повідомили у Нацполіції. Вибухи сталися після того, як наряди патрульної поліції приїхали на виклик у місті.",
+      "temporal_evidence": {
+        "temporal_evidence": "non_air"
+      },
+      "notes": {
+        "notes": "Two explosive devices detonated in central Lviv in a terrorist attack; not an air-raid episode."
+      },
+      "historical_frozen_status": "excluded_non_air",
+      "raw_record": {
+        "event_id": "LVI-X-20260222-01",
+        "date": "2026-02-22",
+        "event_time_local": "2026-02-22T00:30:00+02:00",
+        "time_precision": "approx_minute",
+        "city_status": "exact_city",
+        "war_air_context": "not_air_attack",
+        "temporal_evidence": "non_air",
+        "alert_start_local": "",
+        "alert_end_local": "",
+        "alert_interval_basis": "Police/Suspilne",
+        "telegram_hit": "direct_but_non_air",
+        "telegram_source": "СУСПІЛЬНЕ НОВИНИ",
+        "telegram_datetime_local": "2026-02-22T01:26:42+02:00",
+        "telegram_message_id": "63311",
+        "source_1": "https://suspilne.media/lviv/1246598-u-lvovi-prolunav-vibuh-so-vidomo/",
+        "source_2": "",
+        "notes": "Two explosive devices detonated in central Lviv in a terrorist attack; not an air-raid episode."
+      }
+    },
+    {
+      "event_id": "LVI-X-20260316-01",
+      "episode_id": null,
+      "binding_status": "unmatched",
+      "binding_method": "insufficient_deterministic_temporal_fields",
+      "source_url": "https://suspilne.media/lviv/1265556-u-lvovi-prolunav-vibuh-poperedno-zagorivsa-avtobus-na-stoanci/",
+      "evidence": "У Львові пролунав вибух. Попередньо, на одній зі стоянок загорівся автобус (не громадський транспорт), повідомив міський голова Садовий. Інформації про постраждалих немає.Відео: Telegram/Андрій Садовий",
+      "temporal_evidence": {
+        "temporal_evidence": "non_air"
+      },
+      "notes": {
+        "notes": "Explosion associated with a bus fire in a parking area; non-air incident."
+      },
+      "historical_frozen_status": "excluded_non_air",
+      "raw_record": {
+        "event_id": "LVI-X-20260316-01",
+        "date": "2026-03-16",
+        "event_time_local": "2026-03-16T22:10:00+02:00",
+        "time_precision": "approx_minute",
+        "city_status": "exact_city",
+        "war_air_context": "not_air_attack",
+        "temporal_evidence": "non_air",
+        "alert_start_local": "",
+        "alert_end_local": "",
+        "alert_interval_basis": "Mayor/Suspilne",
+        "telegram_hit": "direct_but_non_air",
+        "telegram_source": "СУСПІЛЬНЕ НОВИНИ",
+        "telegram_datetime_local": "2026-03-16T22:10:25+02:00",
+        "telegram_message_id": "64581",
+        "source_1": "https://suspilne.media/lviv/1265556-u-lvovi-prolunav-vibuh-poperedno-zagorivsa-avtobus-na-stoanci/",
+        "source_2": "",
+        "notes": "Explosion associated with a bus fire in a parking area; non-air incident."
+      }
+    },
+    {
+      "event_id": "LVI-X-20260427-01",
+      "episode_id": null,
+      "binding_status": "unmatched",
+      "binding_method": "insufficient_deterministic_temporal_fields",
+      "source_url": "https://suspilne.media/lviv/1299681-u-lvovi-na-vul-uria-lipi-prolunav-vibuh-na-misci-pracuut-ratuvalniki-ta-pravoohoronci/",
+      "evidence": "У Львові в одній з квартир стався вибух: загинула людина, на місці виявили чеку від гранати, розповіли Суспільному джерела у правоохоронних органах. На місці вибуху працюють рятувальники та поліція.",
+      "temporal_evidence": {
+        "temporal_evidence": "non_air"
+      },
+      "notes": {
+        "notes": "Apartment explosion; a grenade pin was found at the scene. Not an air attack."
+      },
+      "historical_frozen_status": "excluded_non_air",
+      "raw_record": {
+        "event_id": "LVI-X-20260427-01",
+        "date": "2026-04-27",
+        "event_time_local": "2026-04-27T19:30:00+03:00",
+        "time_precision": "approx_minute",
+        "city_status": "exact_city",
+        "war_air_context": "not_air_attack",
+        "temporal_evidence": "non_air",
+        "alert_start_local": "",
+        "alert_end_local": "",
+        "alert_interval_basis": "Law enforcement/Suspilne",
+        "telegram_hit": "direct_but_non_air",
+        "telegram_source": "СУСПІЛЬНЕ НОВИНИ",
+        "telegram_datetime_local": "2026-04-27T19:30:52+03:00",
+        "telegram_message_id": "66872",
+        "source_1": "https://suspilne.media/lviv/1299681-u-lvovi-na-vul-uria-lipi-prolunav-vibuh-na-misci-pracuut-ratuvalniki-ta-pravoohoronci/",
+        "source_2": "",
+        "notes": "Apartment explosion; a grenade pin was found at the scene. Not an air attack."
+      }
+    },
+    {
+      "event_id": "LVI-X-20260823-01",
+      "episode_id": null,
+      "binding_status": "unmatched",
+      "binding_method": "insufficient_deterministic_temporal_fields",
+      "source_url": "https://www.pravda.com.ua/news/2026/08/23/8049899/",
+      "evidence": "Уранці у Львові стався вибух у приміщенні аптеки, за попередніми даними, загинув аптекар.Офіційної інформації наразі немає📰 підписатися",
+      "temporal_evidence": {
+        "temporal_evidence": "non_air"
+      },
+      "notes": {
+        "notes": "Explosion inside a pharmacy; local non-air incident."
+      },
+      "historical_frozen_status": "excluded_non_air",
+      "raw_record": {
+        "event_id": "LVI-X-20260823-01",
+        "date": "2026-08-23",
+        "event_time_local": "",
+        "time_precision": "unknown",
+        "city_status": "exact_city",
+        "war_air_context": "not_air_attack",
+        "temporal_evidence": "non_air",
+        "alert_start_local": "",
+        "alert_end_local": "",
+        "alert_interval_basis": "UP/local incident report",
+        "telegram_hit": "direct_but_non_air",
+        "telegram_source": "Українська правда",
+        "telegram_datetime_local": "2026-08-23T12:01:17+03:00",
+        "telegram_message_id": "82822",
+        "source_1": "https://www.pravda.com.ua/news/2026/08/23/8049899/",
+        "source_2": "",
+        "notes": "Explosion inside a pharmacy; local non-air incident."
+      }
+    },
+    {
+      "event_id": "LVI-X-20250821-01",
+      "episode_id": null,
+      "binding_status": "unmatched",
+      "binding_method": "insufficient_deterministic_temporal_fields",
+      "source_url": "https://suspilne.media/lviv/1071349-rf-atakuvala-lviv-sahedami-ta-raketami-zaginula-odna-ludina-e-travmovani/",
+      "evidence": "explicit_during_alert — Exact-city wartime attack evidence, but before the frozen Lviv coverage start of 2025-09-01.",
+      "temporal_evidence": {
+        "temporal_evidence": "explicit_during_alert"
+      },
+      "notes": {
+        "notes": "Exact-city wartime attack evidence, but before the frozen Lviv coverage start of 2025-09-01."
+      },
+      "historical_frozen_status": "excluded_out_of_coverage",
+      "raw_record": {
+        "event_id": "LVI-X-20250821-01",
+        "date": "2025-08-21",
+        "event_time_local": "",
+        "time_precision": "explicit_during_alert",
+        "city_status": "exact_city",
+        "war_air_context": "confirmed",
+        "temporal_evidence": "explicit_during_alert",
+        "alert_start_local": "",
+        "alert_end_local": "",
+        "alert_interval_basis": "Suspilne",
+        "telegram_hit": "not_assessed",
+        "telegram_source": "",
+        "telegram_datetime_local": "",
+        "telegram_message_id": "",
+        "source_1": "https://suspilne.media/lviv/1071349-rf-atakuvala-lviv-sahedami-ta-raketami-zaginula-odna-ludina-e-travmovani/",
+        "source_2": "",
+        "notes": "Exact-city wartime attack evidence, but before the frozen Lviv coverage start of 2025-09-01."
+      }
+    },
+    {
+      "event_id": "LVI-X-20251206-01",
+      "episode_id": null,
+      "binding_status": "ambiguous",
+      "binding_method": "multiple_episodes_on_event_local_day",
+      "source_url": "https://suspilne.media/lviv/archive/2025/12/6/",
+      "evidence": "region_only — Mass attack on Lviv oblast; retained as region-only because this audit did not find robust exact-city evidence that explosions were heard in Lviv city.",
+      "temporal_evidence": {
+        "temporal_evidence": "region_only"
+      },
+      "notes": {
+        "notes": "Mass attack on Lviv oblast; retained as region-only because this audit did not find robust exact-city evidence that explosions were heard in Lviv city."
+      },
+      "historical_frozen_status": "excluded_region_non_city",
+      "raw_record": {
+        "event_id": "LVI-X-20251206-01",
+        "date": "2025-12-06",
+        "event_time_local": "",
+        "time_precision": "region_only",
+        "city_status": "not_exact_city",
+        "war_air_context": "confirmed",
+        "temporal_evidence": "region_only",
+        "alert_start_local": "",
+        "alert_end_local": "",
+        "alert_interval_basis": "Authoritative local reporting documents strikes on energy infrastructure in the oblast, without exact-city Lviv auditory confirmation",
+        "telegram_hit": "same_attack_lead",
+        "telegram_source": "",
+        "telegram_datetime_local": "",
+        "telegram_message_id": "",
+        "source_1": "https://suspilne.media/lviv/archive/2025/12/6/",
+        "source_2": "",
+        "notes": "Mass attack on Lviv oblast; retained as region-only because this audit did not find robust exact-city evidence that explosions were heard in Lviv city."
+      }
+    },
+    {
+      "event_id": "LVI-X-20260913-01",
+      "episode_id": null,
+      "binding_status": "ambiguous",
+      "binding_method": "multiple_episodes_on_event_local_day",
+      "source_url": "https://suspilne.media/lviv/",
+      "evidence": "region_non_city — Authoritative current reporting places the attack in Stryi. A lower-quality claim that explosions were heard in Lviv was not retained.",
+      "temporal_evidence": {
+        "temporal_evidence": "region_non_city"
+      },
+      "notes": {
+        "notes": "Authoritative current reporting places the attack in Stryi. A lower-quality claim that explosions were heard in Lviv was not retained."
+      },
+      "historical_frozen_status": "excluded_region_non_city",
+      "raw_record": {
+        "event_id": "LVI-X-20260913-01",
+        "date": "2026-09-13",
+        "event_time_local": "",
+        "time_precision": "region_non_city",
+        "city_status": "not_exact_city",
+        "war_air_context": "confirmed",
+        "temporal_evidence": "region_non_city",
+        "alert_start_local": "",
+        "alert_end_local": "",
+        "alert_interval_basis": "Authoritative local reporting places the impacts/explosions in Stryi",
+        "telegram_hit": "same_attack_lead",
+        "telegram_source": "",
+        "telegram_datetime_local": "",
+        "telegram_message_id": "",
+        "source_1": "https://suspilne.media/lviv/",
+        "source_2": "",
+        "notes": "Authoritative current reporting places the attack in Stryi. A lower-quality claim that explosions were heard in Lviv was not retained."
+      }
+    }
+  ],
+  "checks": {
+    "strict_event_rows": 12,
+    "unique_strict_episode_ids": 12,
+    "review_event_rows": 9,
+    "historical_strict_matches_baseline": true,
+    "historical_sensitivity_matches_baseline": true
+  },
+  "verdict": "LVIV FINAL EVIDENCE CORPUS READY FOR CURRENT-RULES REPLAY"
+}
