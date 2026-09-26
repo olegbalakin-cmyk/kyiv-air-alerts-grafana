@@ -48,11 +48,12 @@ jobs:
           cp "$RUNNER_TEMP/lviv-evidence/final_evidence.json"             kyiv-air-alerts-grafana/data/explosion_research/lviv/final_evidence.json
           python - <<'PY'
           import json
+          import os
           from datetime import datetime
           from pathlib import Path
           from zoneinfo import ZoneInfo
 
-          src = Path("$RUNNER_TEMP/lviv-alerts/lviv_historical_alert_corpus_2026-09-17.json")
+          src = Path(os.environ["RUNNER_TEMP"]) / "lviv-alerts" / "lviv_historical_alert_corpus_2026-09-17.json"
           dst = Path("kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/lviv-replay_alerts.json")
           payload = json.loads(src.read_text(encoding="utf-8"))
           kyiv = ZoneInfo("Europe/Kyiv")
