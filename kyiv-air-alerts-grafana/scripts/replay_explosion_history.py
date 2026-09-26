@@ -304,19 +304,25 @@ def historical_review_roles(city: str, row: dict, monitor) -> tuple[dict, str]:
         # Preserve only facts explicit in the retained summary. In particular,
         # a strike/hit is not synthesized into explosion evidence.
         exact_city = bool(
-            re.search(r"\b(?:суми|сумах|сумами)\b", low)
-            or re.search(
-                r"\b(?:район\w*|околи\w*|центр\w*|частин\w*|зон\w*)\s+сум\b",
-                low,
-            )
+            # "Сум" is the genitive form of the city name; it does not match
+            # "Сумської"/"Сумщини".
+            re.search(r"\b(?:сум|суми|сумах|сумами)\b", low)
         )
-        # Reuse the frozen current classifier's event semantics: its
-        # strict explosion layer intentionally includes explicit military
-        # strikes/hits as well as literal explosion wording.
-        explosion = bool(monitor.strict_explosion_signal(evidence))
+        # Reuse the frozen current classifier's event semantics and
+        # normalize reviewed Ukrainian summaries for linguistic forms that the
+        # live lexical layer does not spell explicitly (for example "вдарив").
+        # This preserves the factual event role; it does not use the old
+        # strict/sensitivity label as evidence.
+        explosion = bool(
+            monitor.strict_explosion_signal(evidence)
+            or re.search(r"\bвдар\w*\b", low)
+        )
         air_context = bool(
             monitor.air_military_context(evidence)
-            or re.search(r"\bавіаудар\w*\b", low)
+            or re.search(
+                r"\b(?:авіаудар\w*|італмас\w*|геран\w*|ланцет\w*)\b",
+                low,
+            )
         )
     else:
         return {}, evidence
