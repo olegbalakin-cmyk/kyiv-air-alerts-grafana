@@ -86,6 +86,7 @@ jobs:
           CITY: ${{ steps.req.outputs.city }}
         run: |
           set -euo pipefail
+          find kyiv-air-alerts-grafana -type d -name __pycache__ -prune -exec rm -rf {} +
           git diff --check
           mapfile -t CHANGED < <({ git diff --name-only; git ls-files --others --exclude-standard; } | sort -u)
           printf '%s\n' "${CHANGED[@]}"
