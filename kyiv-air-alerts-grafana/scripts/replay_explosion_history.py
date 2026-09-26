@@ -54,6 +54,8 @@ START_FIELDS = (
     "alert_episode_start",
     "alert_start",
     "alert_start_kyiv",
+    "alert_start_local",
+    "matched_alert_start",
     "episode_start",
     "matched_start",
 )
@@ -206,7 +208,7 @@ def episode_index(episodes: list[dict]) -> tuple[dict[str, dict], dict[str, list
 
 def bind_evidence_record(row: dict, episodes: list[dict], monitor) -> dict:
     by_id, by_day = episode_index(episodes)
-    explicit_id = str(row.get("episode_id") or row.get("matched_episode_id") or "")
+    explicit_id = str(row.get("episode_id") or row.get("matched_episode_id") or row.get("alert_episode_id") or "")
     if explicit_id:
         if explicit_id in by_id:
             return {"episode_id": explicit_id, "method": "persisted_episode_id", "candidates": [explicit_id]}
@@ -234,7 +236,7 @@ def bind_evidence_record(row: dict, episodes: list[dict], monitor) -> dict:
         return {"episode_id": None, "method": "ambiguous_alert_start", "candidates": [str(ep["episode_id"]) for ep in (exact or minute_rows)]}
 
     day = None
-    for field in START_FIELDS + ("alert_start_date", "episode_start_date", "local_date"):
+    for field in START_FIELDS + ("alert_start_date", "episode_start_date", "matched_episode_start_date_kyiv", "local_date"):
         if row.get(field):
             day = local_day(row.get(field), monitor)
             if day:
