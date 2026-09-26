@@ -1,0 +1,251 @@
+name: Historical replay source-retention audit
+
+on:
+  workflow_dispatch:
+    inputs:
+      scope:
+        description: "Which QA-required cities to audit"
+        required: true
+        default: "qa_required"
+        type: choice
+        options:
+          - qa_required
+          - city
+      city:
+        description: "City key when scope=city"
+        required: false
+        default: "sumy"
+        type: string
+  push:
+    branches:
+      - multicity-wip-2026-09-16
+    paths:
+      - ".github/workflows/historical-replay-source-retention.yml"
+      - "kyiv-air-alerts-grafana/scripts/audit_historical_replay_source_retention.py"
+      - "research/historical_replay_qa/*.json"
+      - "research/historical_replay_status_current.json"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: historical-replay-source-retention
+  cancel-in-progress: false
+
+jobs:
+  plan:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.plan.outputs.matrix }}
+      has_work: ${{ steps.plan.outputs.has_work }}
+      input_sha: ${{ steps.plan.outputs.input_sha }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+
+      - id: plan
+        shell: bash
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          DISPATCH_SCOPE: ${{ inputs.scope }}
+          DISPATCH_CITY: ${{ inputs.city }}
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          status = json.loads(Path("research/historical_replay_status_current.json").read_text(encoding="utf-8"))
+          cities = status.get("cities") or {}
+          qa_required = sorted(
+              city for city, row in cities.items()
+              if isinstance(row, dict) and row.get("status") == "QA_REQUIRED"
+              and Path(f"research/historical_replay_qa/{city}.json").exists()
+          )
+
+          if os.environ.get("EVENT_NAME") == "workflow_dispatch":
+              scope = os.environ.get("DISPATCH_SCOPE") or "qa_required"
+              requested = os.environ.get("DISPATCH_CITY") or "sumy"
+          else:
+              scope = "qa_required"
+              requested = ""
+
+          if scope == "city":
+              if requested not in qa_required:
+                  raise SystemExit(f"City {requested} is not currently QA_REQUIRED with a QA bundle")
+              selected = [requested]
+          elif scope == "qa_required":
+              selected = qa_required
+          else:
+              raise SystemExit(f"Unsupported scope: {scope}")
+
+          matrix = json.dumps({"include": [{"city": city} for city in selected]}, separators=(",", ":"))
+          with Path(os.environ["GITHUB_OUTPUT"]).open("a", encoding="utf-8") as f:
+              f.write("matrix=" + matrix + "\n")
+              f.write("has_work=" + ("true" if selected else "false") + "\n")
+              f.write("input_sha=" + os.environ["GITHUB_SHA"] + "\n")
+          print(f"Source-retention audit cities: {selected}")
+          PY
+
+  audit:
+    if: ${{ needs.plan.outputs.has_work == 'true' }}
+    needs: plan
+    strategy:
+      fail-fast: false
+      max-parallel: 3
+      matrix: ${{ fromJson(needs.plan.outputs.matrix) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      CITY: ${{ matrix.city }}
+      INPUT_SHA: ${{ needs.plan.outputs.input_sha }}
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.INPUT_SHA }}
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: kyiv-air-alerts-grafana/requirements.txt
+
+      - run: pip install -r kyiv-air-alerts-grafana/requirements.txt
+
+      - name: Auditor self-test
+        run: python kyiv-air-alerts-grafana/scripts/audit_historical_replay_source_retention.py --self-test
+
+      - name: Audit retained source URLs
+        shell: bash
+        run: |
+          set -euo pipefail
+          python kyiv-air-alerts-grafana/scripts/audit_historical_replay_source_retention.py \
+            --repo-root "$GITHUB_WORKSPACE/kyiv-air-alerts-grafana" \
+            --qa "$GITHUB_WORKSPACE/research/historical_replay_qa/${CITY}.json" \
+            --output "$RUNNER_TEMP/source-retention-${CITY}.json"
+
+      - name: Verify protected production files unchanged
+        shell: bash
+        run: |
+          set -euo pipefail
+          git diff --exit-code -- \
+            kyiv-air-alerts-grafana/data/explosion_audited_baseline.json \
+            kyiv-air-alerts-grafana/data/explosion_review_queue.json \
+            kyiv-air-alerts-grafana/data/explosion_candidate_monitor_state.json \
+            kyiv-air-alerts-grafana/data/explosion_candidate_monitor_last_run.json \
+            kyiv-air-alerts-grafana/data/explosions_test.json \
+            kyiv-air-alerts-grafana/data/dashboard_data.json
+
+      - name: Add audit summary
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+          city = os.environ["CITY"]
+          row = json.loads(Path(os.environ["RUNNER_TEMP"], f"source-retention-{city}.json").read_text(encoding="utf-8"))
+          with Path(os.environ["GITHUB_STEP_SUMMARY"]).open("a", encoding="utf-8") as f:
+              f.write(f"## Source-retention audit: {city}\n\n")
+              f.write(f"- QA cases: **{row['qa_case_count']}**\n")
+              f.write(f"- Unique retained source URLs: **{row['unique_source_url_count']}**\n")
+              f.write(f"- Triage: `{json.dumps(row['triage_counts'], ensure_ascii=False)}`\n")
+              f.write(f"- Fetch: `{json.dumps(row['source_fetch_counts'], ensure_ascii=False)}`\n")
+          PY
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: historical-replay-source-retention-${{ matrix.city }}-${{ env.INPUT_SHA }}
+          path: ${{ runner.temp }}/source-retention-${{ matrix.city }}.json
+          if-no-files-found: error
+          retention-days: 30
+
+  aggregate:
+    if: ${{ always() && needs.plan.result == 'success' && needs.plan.outputs.has_work == 'true' && needs.audit.result == 'success' }}
+    needs:
+      - plan
+      - audit
+    runs-on: ubuntu-latest
+    env:
+      INPUT_SHA: ${{ needs.plan.outputs.input_sha }}
+      BRANCH: multicity-wip-2026-09-16
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: multicity-wip-2026-09-16
+          fetch-depth: 0
+
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: historical-replay-source-retention-*-${{ env.INPUT_SHA }}
+          path: _source_retention_download
+          merge-multiple: true
+
+      - name: Publish source-retention audits
+        shell: bash
+        run: |
+          set -euo pipefail
+          git pull --rebase origin "$BRANCH"
+          mkdir -p research/historical_replay_source_retention
+          python - <<'PY'
+          import json
+          import shutil
+          from datetime import datetime, timezone
+          from pathlib import Path
+
+          out = Path("research/historical_replay_source_retention")
+          rows = {}
+          for path in Path("_source_retention_download").glob("source-retention-*.json"):
+              payload = json.loads(path.read_text(encoding="utf-8"))
+              city = payload["city_key"]
+              shutil.copyfile(path, out / f"{city}.json")
+              rows[city] = {
+                  "qa_case_count": payload.get("qa_case_count"),
+                  "triage_counts": payload.get("triage_counts") or {},
+                  "source_fetch_counts": payload.get("source_fetch_counts") or {},
+                  "path": str(out / f"{city}.json"),
+              }
+
+          index = {
+              "schema_version": 1,
+              "kind": "historical_replay_source_retention_index",
+              "generated_at_utc": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
+              "city_count": len(rows),
+              "cities": dict(sorted(rows.items())),
+          }
+          (out / "index.json").write_text(
+              json.dumps(index, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
+              encoding="utf-8",
+          )
+          print(json.dumps(index, ensure_ascii=False, indent=2))
+          PY
+          git diff --check -- research/historical_replay_source_retention
+
+      - name: Commit only source-retention audit files
+        shell: bash
+        run: |
+          set -euo pipefail
+          TARGET="research/historical_replay_source_retention"
+          git add -A -- "$TARGET"
+          if git diff --cached --quiet -- "$TARGET"; then
+            echo "Source-retention audit unchanged."
+            exit 0
+          fi
+          mapfile -t CHANGED < <(git diff --cached --name-only)
+          printf '%s\n' "${CHANGED[@]}"
+          for path in "${CHANGED[@]}"; do
+            case "$path" in
+              research/historical_replay_source_retention/*) ;;
+              *) echo "Unexpected staged path: $path" >&2; exit 1 ;;
+            esac
+          done
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "Publish historical source-retention audit"
+          git pull --rebase origin "$BRANCH"
+          git push origin HEAD:"$BRANCH"
