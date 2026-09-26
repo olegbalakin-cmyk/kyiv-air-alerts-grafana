@@ -1,0 +1,310 @@
+name: Historical source-retention repair preflight
+
+on:
+  workflow_dispatch:
+    inputs:
+      scope:
+        description: "Which cities to dry-run"
+        required: true
+        default: "safe_candidates"
+        type: choice
+        options:
+          - safe_candidates
+          - city
+      city:
+        description: "City key when scope=city"
+        required: false
+        default: "sumy"
+        type: string
+  push:
+    branches:
+      - multicity-wip-2026-09-16
+    paths:
+      - ".github/workflows/historical-source-retention-repair-preflight.yml"
+      - "kyiv-air-alerts-grafana/scripts/preflight_historical_source_retention_repairs.py"
+      - "kyiv-air-alerts-grafana/scripts/replay_explosion_history.py"
+      - "kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py"
+      - "research/historical_replay_qa/*.json"
+      - "research/historical_replay_source_retention/*.json"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: historical-source-retention-repair-preflight
+  cancel-in-progress: false
+
+jobs:
+  plan:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.plan.outputs.matrix }}
+      has_work: ${{ steps.plan.outputs.has_work }}
+      input_sha: ${{ steps.plan.outputs.input_sha }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+
+      - id: plan
+        shell: bash
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          DISPATCH_SCOPE: ${{ inputs.scope }}
+          DISPATCH_CITY: ${{ inputs.city }}
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          audit_index = json.loads(
+              Path("research/historical_replay_source_retention/index.json")
+              .read_text(encoding="utf-8")
+          )
+          cities = audit_index.get("cities") or {}
+
+          safe = []
+          for city in sorted(cities):
+              path = Path(f"research/historical_replay_source_retention/{city}.json")
+              if not path.exists():
+                  continue
+              payload = json.loads(path.read_text(encoding="utf-8"))
+              n = int(
+                  (payload.get("triage_counts") or {})
+                  .get("SAFE_SOURCE_RETENTION_CANDIDATE", 0)
+              )
+              if n > 0:
+                  qa = json.loads(
+                      Path(f"research/historical_replay_qa/{city}.json")
+                      .read_text(encoding="utf-8")
+                  )
+                  safe.append({
+                      "city": city,
+                      "safe_count": n,
+                      "through": qa.get("through") or "2026-09-17",
+                  })
+
+          if os.environ.get("EVENT_NAME") == "workflow_dispatch":
+              scope = os.environ.get("DISPATCH_SCOPE") or "safe_candidates"
+              requested = os.environ.get("DISPATCH_CITY") or "sumy"
+          else:
+              scope = "safe_candidates"
+              requested = ""
+
+          if scope == "city":
+              selected = [row for row in safe if row["city"] == requested]
+              if not selected:
+                  raise SystemExit(
+                      f"City {requested} has no SAFE_SOURCE_RETENTION_CANDIDATE"
+                  )
+          elif scope == "safe_candidates":
+              selected = safe
+          else:
+              raise SystemExit(f"Unsupported scope: {scope}")
+
+          matrix = json.dumps({"include": selected}, separators=(",", ":"))
+          with Path(os.environ["GITHUB_OUTPUT"]).open("a", encoding="utf-8") as f:
+              f.write("matrix=" + matrix + "\n")
+              f.write("has_work=" + ("true" if selected else "false") + "\n")
+              f.write("input_sha=" + os.environ["GITHUB_SHA"] + "\n")
+          print(f"Repair preflight cities: {selected}")
+          PY
+
+  preflight:
+    if: ${{ needs.plan.outputs.has_work == 'true' }}
+    needs: plan
+    strategy:
+      fail-fast: false
+      max-parallel: 3
+      matrix: ${{ fromJson(needs.plan.outputs.matrix) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    env:
+      CITY: ${{ matrix.city }}
+      THROUGH: ${{ matrix.through }}
+      INPUT_SHA: ${{ needs.plan.outputs.input_sha }}
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.INPUT_SHA }}
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: kyiv-air-alerts-grafana/requirements.txt
+
+      - run: pip install -r kyiv-air-alerts-grafana/requirements.txt
+
+      - name: Preflight helper self-test
+        run: python kyiv-air-alerts-grafana/scripts/preflight_historical_source_retention_repairs.py --self-test
+
+      - name: Dry-run source-retention repair and replay
+        shell: bash
+        run: |
+          set -euo pipefail
+          python kyiv-air-alerts-grafana/scripts/preflight_historical_source_retention_repairs.py \
+            --repo-root "$GITHUB_WORKSPACE/kyiv-air-alerts-grafana" \
+            --qa "$GITHUB_WORKSPACE/research/historical_replay_qa/${CITY}.json" \
+            --audit "$GITHUB_WORKSPACE/research/historical_replay_source_retention/${CITY}.json" \
+            --through "$THROUGH" \
+            --input-head "$INPUT_SHA" \
+            --output "$RUNNER_TEMP/repair-preflight-${CITY}.json"
+
+      - name: Verify working tree source and protected production files restored
+        shell: bash
+        run: |
+          set -euo pipefail
+          git diff --exit-code -- \
+            "kyiv-air-alerts-grafana/data/explosion_research/${CITY}/final_evidence.json" \
+            kyiv-air-alerts-grafana/data/explosion_audited_baseline.json \
+            kyiv-air-alerts-grafana/data/explosion_review_queue.json \
+            kyiv-air-alerts-grafana/data/explosion_candidate_monitor_state.json \
+            kyiv-air-alerts-grafana/data/explosion_candidate_monitor_last_run.json \
+            kyiv-air-alerts-grafana/data/explosions_test.json \
+            kyiv-air-alerts-grafana/data/dashboard_data.json
+
+      - name: Add preflight summary
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+          city = os.environ["CITY"]
+          row = json.loads(
+              Path(
+                  os.environ["RUNNER_TEMP"],
+                  f"repair-preflight-{city}.json",
+              ).read_text(encoding="utf-8")
+          )
+          with Path(os.environ["GITHUB_STEP_SUMMARY"]).open(
+              "a", encoding="utf-8"
+          ) as f:
+              f.write(f"## Source-retention repair preflight: {city}\n\n")
+              f.write(f"- Status: **{row['status']}**\n")
+              f.write(
+                  f"- Safe candidates: **{row['safe_candidate_count']}**\n"
+              )
+              f.write(
+                  f"- Resolved in dry replay: **{row['resolved_candidate_count']}**\n"
+              )
+              f.write(
+                  f"- Eligible to apply: **{row['eligible_to_apply_count']}**\n"
+              )
+              f.write(
+                  f"- New regressions: **{len(row['new_regression_episode_ids'])}**\n"
+              )
+          PY
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: historical-source-retention-repair-preflight-${{ matrix.city }}-${{ env.INPUT_SHA }}
+          path: ${{ runner.temp }}/repair-preflight-${{ matrix.city }}.json
+          if-no-files-found: error
+          retention-days: 30
+
+  aggregate:
+    if: ${{ always() && needs.plan.result == 'success' && needs.plan.outputs.has_work == 'true' && needs.preflight.result == 'success' }}
+    needs:
+      - plan
+      - preflight
+    runs-on: ubuntu-latest
+    env:
+      INPUT_SHA: ${{ needs.plan.outputs.input_sha }}
+      BRANCH: multicity-wip-2026-09-16
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: multicity-wip-2026-09-16
+          fetch-depth: 0
+
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: historical-source-retention-repair-preflight-*-${{ env.INPUT_SHA }}
+          path: _repair_preflight_download
+          merge-multiple: true
+
+      - name: Publish preflight results
+        shell: bash
+        run: |
+          set -euo pipefail
+          git pull --rebase origin "$BRANCH"
+          mkdir -p research/historical_replay_source_retention_preflight
+
+          python - <<'PY'
+          import json
+          import shutil
+          from datetime import datetime, timezone
+          from pathlib import Path
+
+          out = Path("research/historical_replay_source_retention_preflight")
+          rows = {}
+          for path in Path("_repair_preflight_download").glob(
+              "repair-preflight-*.json"
+          ):
+              payload = json.loads(path.read_text(encoding="utf-8"))
+              city = payload["city_key"]
+              shutil.copyfile(path, out / f"{city}.json")
+              rows[city] = {
+                  "status": payload.get("status"),
+                  "safe_candidate_count": payload.get("safe_candidate_count"),
+                  "resolved_candidate_count": payload.get("resolved_candidate_count"),
+                  "eligible_to_apply_count": payload.get("eligible_to_apply_count"),
+                  "new_regression_episode_ids": payload.get("new_regression_episode_ids") or [],
+                  "non_target_drift_episode_ids": payload.get("non_target_drift_episode_ids") or [],
+                  "eligible_to_apply_ids": payload.get("eligible_to_apply_ids") or [],
+                  "path": str(out / f"{city}.json"),
+              }
+
+          index = {
+              "schema_version": 1,
+              "kind": "historical_replay_source_retention_repair_preflight_index",
+              "generated_at_utc": datetime.now(timezone.utc).isoformat().replace(
+                  "+00:00", "Z"
+              ),
+              "city_count": len(rows),
+              "eligible_to_apply_count": sum(
+                  int(row.get("eligible_to_apply_count") or 0)
+                  for row in rows.values()
+              ),
+              "cities": dict(sorted(rows.items())),
+          }
+          (out / "index.json").write_text(
+              json.dumps(index, ensure_ascii=False, indent=2, sort_keys=True)
+              + "\n",
+              encoding="utf-8",
+          )
+          print(json.dumps(index, ensure_ascii=False, indent=2))
+          PY
+
+          git diff --check -- research/historical_replay_source_retention_preflight
+
+      - name: Commit only preflight artifacts
+        shell: bash
+        run: |
+          set -euo pipefail
+          TARGET="research/historical_replay_source_retention_preflight"
+          git add -A -- "$TARGET"
+          if git diff --cached --quiet -- "$TARGET"; then
+            echo "Repair preflight artifacts unchanged."
+            exit 0
+          fi
+          mapfile -t CHANGED < <(git diff --cached --name-only)
+          printf '%s\n' "${CHANGED[@]}"
+          for path in "${CHANGED[@]}"; do
+            case "$path" in
+              research/historical_replay_source_retention_preflight/*) ;;
+              *) echo "Unexpected staged path: $path" >&2; exit 1 ;;
+            esac
+          done
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "Publish historical source-retention repair preflight"
+          git pull --rebase origin "$BRANCH"
+          git push origin HEAD:"$BRANCH"
