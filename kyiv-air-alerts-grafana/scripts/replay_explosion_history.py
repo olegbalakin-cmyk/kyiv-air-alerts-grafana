@@ -277,25 +277,50 @@ def historical_review_roles(city: str, row: dict) -> tuple[dict, str]:
         if value and str(value).strip() not in evidence_parts:
             evidence_parts.append(str(value).strip())
     evidence = " — ".join(evidence_parts)
-
-    # Sevastopol's frozen final_evidence corpus stores reviewed factual
-    # summaries in English. Preserve those factual roles for the current
-    # classifier without using the historical strict/sensitivity label itself.
-    if city != "sevastopol" or not evidence:
+    if not evidence:
         return {}, evidence
 
     low = evidence.casefold()
-    exact_city = bool(re.search(r"\bsevastopol\b", low))
-    explosion = bool(
-        re.search(r"\b(?:explosion(?:s)?|blast(?:s)?|bang(?:s)?)\b", low)
-    )
-    air_context = bool(
-        re.search(
-            r"\b(?:air alert|alerts?|alarm|sirens?|aerial|missile(?:s)?|"
-            r"drone(?:s)?|air[- ]?defen[cs]e|attack|rocket(?:s)?)\b",
-            low,
+    exact_city = False
+    explosion = False
+    air_context = False
+
+    if city == "sevastopol":
+        # Sevastopol's frozen final_evidence corpus stores reviewed factual
+        # summaries in English.
+        exact_city = bool(re.search(r"\bsevastopol\b", low))
+        explosion = bool(
+            re.search(r"\b(?:explosion(?:s)?|blast(?:s)?|bang(?:s)?)\b", low)
         )
-    )
+        air_context = bool(
+            re.search(
+                r"\b(?:air alert|alerts?|alarm|sirens?|aerial|missile(?:s)?|"
+                r"drone(?:s)?|air[- ]?defen[cs]e|attack|rocket(?:s)?)\b",
+                low,
+            )
+        )
+    elif city == "sumy":
+        # Sumy's frozen corpus stores reviewed Ukrainian factual summaries.
+        # Preserve only facts explicit in the retained summary. In particular,
+        # a strike/hit is not synthesized into explosion evidence.
+        exact_city = bool(
+            re.search(r"\b(?:суми|сумах|сумами)\b", low)
+            or re.search(
+                r"\b(?:район\w*|околи\w*|центр\w*|частин\w*|зон\w*)\s+сум\b",
+                low,
+            )
+        )
+        explosion = bool(re.search(r"\bвибух\w*\b", low))
+        air_context = bool(
+            re.search(
+                r"\b(?:бпла|дрон\w*|безпілот\w*|шахед\w*|shahed\w*|"
+                r"каб\w*|ракет\w*|авіаудар\w*|повітрян\w*|молні\w*|"
+                r"італмас\w*|геран\w*|ланцет\w*|fpv)\b",
+                low,
+            )
+        )
+    else:
+        return {}, evidence
 
     roles = {}
     if exact_city:
@@ -332,7 +357,6 @@ def historical_review_roles(city: str, row: dict) -> tuple[dict, str]:
             "evidence_text": evidence[:1200],
         }
     return roles, evidence
-
 
 def history_provenance(row: dict, bucket: str, target_id: str, monitor, city: str) -> dict | None:
     basis = evidence_text(row)
@@ -772,12 +796,17 @@ def replay_city(repo_root: Path, city: str, through: str, output: Path, input_he
         decision_by_candidate: dict[str, dict] = {}
         evidence_by_episode: dict[str, list[dict]] = defaultdict(list)
         errors = []
+        unbound_review_evidence = []
         for bucket in ("strict_events", "sensitivity_only_events", "review_events"):
             for row in evidence.get(bucket) or []:
                 binding = bind_evidence_record(row, episodes, monitor)
                 target_id = binding.get("episode_id")
                 if not target_id:
-                    errors.append({"code": "UNBOUND_HISTORICAL_EVIDENCE", "bucket": bucket, "binding": binding, "evidence": evidence_text(row)[:500]})
+                    record = {"code": "UNBOUND_HISTORICAL_EVIDENCE", "bucket": bucket, "binding": binding, "evidence": evidence_text(row)[:500]}
+                    if bucket == "review_events":
+                        unbound_review_evidence.append(record)
+                    else:
+                        errors.append(record)
                     continue
                 candidate = candidate_from_history(city, row, bucket, target_id, monitor)
                 matching = manual_matching(target_id)
@@ -875,6 +904,7 @@ def replay_city(repo_root: Path, city: str, through: str, output: Path, input_he
             "strict_episode_identity": identity,
             "reconciliation_counts": {name: counts[name] for name in REQUIRED_CATEGORIES},
             "errors": errors,
+            "unbound_review_evidence": unbound_review_evidence,
             "source_validation": source,
             "source_files": source_files + [source["inventory"]["final_evidence"]],
             "methodology": {
