@@ -1,0 +1,126 @@
+name: Apply historical source-retention repairs
+
+on:
+  push:
+    branches:
+      - multicity-wip-2026-09-16
+    paths:
+      - ".github/workflows/historical-source-retention-repair-apply.yml"
+      - "kyiv-air-alerts-grafana/scripts/apply_historical_source_retention_repairs.py"
+      - "research/historical_replay_source_retention_apply_request.json"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: historical-source-retention-repair-apply
+  cancel-in-progress: false
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    env:
+      INPUT_SHA: ${{ github.sha }}
+      BRANCH: multicity-wip-2026-09-16
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.INPUT_SHA }}
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: kyiv-air-alerts-grafana/requirements.txt
+
+      - run: pip install -r kyiv-air-alerts-grafana/requirements.txt
+
+      - name: Apply helper self-test
+        run: python kyiv-air-alerts-grafana/scripts/apply_historical_source_retention_repairs.py --self-test
+
+      - name: Resolve request city and paths
+        id: req
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          req = json.loads(
+              Path("research/historical_replay_source_retention_apply_request.json")
+              .read_text(encoding="utf-8")
+          )
+          city = str(req.get("city_key") or "")
+          if not city:
+              raise SystemExit("Apply request missing city_key")
+          with Path(os.environ["GITHUB_OUTPUT"]).open("a", encoding="utf-8") as f:
+              f.write("city=" + city + "\n")
+          print(f"Apply request city: {city}")
+          print(f"Apply request cases: {req.get('case_ids') or []}")
+          PY
+
+      - name: Apply exact preflight-approved repairs and validate replay
+        shell: bash
+        env:
+          CITY: ${{ steps.req.outputs.city }}
+        run: |
+          set -euo pipefail
+          mkdir -p research/historical_replay_source_retention_apply
+          python kyiv-air-alerts-grafana/scripts/apply_historical_source_retention_repairs.py \
+            --repo-root "$GITHUB_WORKSPACE/kyiv-air-alerts-grafana" \
+            --preflight "$GITHUB_WORKSPACE/research/historical_replay_source_retention_preflight/${CITY}.json" \
+            --audit "$GITHUB_WORKSPACE/research/historical_replay_source_retention/${CITY}.json" \
+            --qa "$GITHUB_WORKSPACE/research/historical_replay_qa/${CITY}.json" \
+            --request "$GITHUB_WORKSPACE/research/historical_replay_source_retention_apply_request.json" \
+            --input-head "$INPUT_SHA" \
+            --output "$GITHUB_WORKSPACE/research/historical_replay_source_retention_apply/${CITY}.json"
+
+      - name: Verify mutation scope
+        shell: bash
+        env:
+          CITY: ${{ steps.req.outputs.city }}
+        run: |
+          set -euo pipefail
+          git diff --check
+          mapfile -t CHANGED < <(git diff --name-only)
+          printf '%s\n' "${CHANGED[@]}"
+          test "${#CHANGED[@]}" -eq 2
+          for path in "${CHANGED[@]}"; do
+            case "$path" in
+              "kyiv-air-alerts-grafana/data/explosion_research/${CITY}/final_evidence.json") ;;
+              "research/historical_replay_source_retention_apply/${CITY}.json") ;;
+              *) echo "Unexpected mutation path: $path" >&2; exit 1 ;;
+            esac
+          done
+
+          git diff --exit-code -- \
+            kyiv-air-alerts-grafana/data/explosion_audited_baseline.json \
+            kyiv-air-alerts-grafana/data/explosion_review_queue.json \
+            kyiv-air-alerts-grafana/data/explosion_candidate_monitor_state.json \
+            kyiv-air-alerts-grafana/data/explosion_candidate_monitor_last_run.json \
+            kyiv-air-alerts-grafana/data/explosions_test.json \
+            kyiv-air-alerts-grafana/data/dashboard_data.json
+
+      - name: Commit exact source repair
+        shell: bash
+        env:
+          CITY: ${{ steps.req.outputs.city }}
+        run: |
+          set -euo pipefail
+          git add -- \
+            "kyiv-air-alerts-grafana/data/explosion_research/${CITY}/final_evidence.json" \
+            "research/historical_replay_source_retention_apply/${CITY}.json"
+
+          mapfile -t STAGED < <(git diff --cached --name-only)
+          test "${#STAGED[@]}" -eq 2
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "Apply validated historical source-retention repairs for ${CITY}"
+          git pull --rebase origin "$BRANCH"
+          git push origin HEAD:"$BRANCH"
