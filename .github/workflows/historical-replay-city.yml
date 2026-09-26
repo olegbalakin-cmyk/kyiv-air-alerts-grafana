@@ -1,0 +1,246 @@
+name: Historical explosion replay - one city
+
+on:
+  workflow_call:
+    inputs:
+      city:
+        required: true
+        type: string
+      input_sha:
+        required: false
+        type: string
+        default: ""
+      through:
+        required: false
+        type: string
+        default: "2026-09-17"
+      source_status:
+        required: false
+        type: string
+        default: ""
+      expected_alert_episodes:
+        required: false
+        type: string
+        default: ""
+      reconstructed_alert_episodes:
+        required: false
+        type: string
+        default: ""
+      blocker_codes_json:
+        required: false
+        type: string
+        default: "[]"
+  workflow_dispatch:
+    inputs:
+      city:
+        description: "City key"
+        required: true
+        type: string
+      through:
+        description: "Inclusive historical replay end date"
+        required: false
+        default: "2026-09-17"
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  replay-city:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      CITY: ${{ inputs.city }}
+      THROUGH: ${{ inputs.through || '2026-09-17' }}
+      INPUT_SHA: ${{ inputs.input_sha || github.sha }}
+
+    steps:
+      - name: Checkout exact replay input
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ env.INPUT_SHA }}
+          fetch-depth: 0
+
+      - name: Validate city key
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+          city = os.environ["CITY"]
+          baseline = json.loads(Path("kyiv-air-alerts-grafana/data/explosion_audited_baseline.json").read_text(encoding="utf-8"))
+          cities = set((baseline.get("cities") or {}).keys())
+          if city not in cities:
+              raise SystemExit(f"Unknown audited city key: {city}")
+          print(f"Validated city={city}")
+          PY
+
+      - name: Set up Python
+        if: ${{ inputs.source_status == '' || inputs.source_status == 'READY' }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: kyiv-air-alerts-grafana/requirements.txt
+
+      - name: Install dependencies
+        if: ${{ inputs.source_status == '' || inputs.source_status == 'READY' }}
+        run: pip install -r kyiv-air-alerts-grafana/requirements.txt
+
+      - name: Resolve source status
+        id: source
+        shell: bash
+        env:
+          PROVIDED_SOURCE_STATUS: ${{ inputs.source_status }}
+          PROVIDED_EXPECTED: ${{ inputs.expected_alert_episodes }}
+          PROVIDED_RECONSTRUCTED: ${{ inputs.reconstructed_alert_episodes }}
+          PROVIDED_BLOCKERS: ${{ inputs.blocker_codes_json }}
+        run: |
+          set -euo pipefail
+          if [ -n "$PROVIDED_SOURCE_STATUS" ]; then
+            echo "source_status=$PROVIDED_SOURCE_STATUS" >> "$GITHUB_OUTPUT"
+            echo "expected=$PROVIDED_EXPECTED" >> "$GITHUB_OUTPUT"
+            echo "reconstructed=$PROVIDED_RECONSTRUCTED" >> "$GITHUB_OUTPUT"
+            echo "blockers=$PROVIDED_BLOCKERS" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          set +e
+          python kyiv-air-alerts-grafana/scripts/replay_explosion_history.py             --repo-root "$GITHUB_WORKSPACE/kyiv-air-alerts-grafana"             --through "$THROUGH"             --input-head "$INPUT_SHA"             --read-only             --preflight             --output "$RUNNER_TEMP/source_preflight_all.json"
+          rc=$?
+          set -e
+          test -f "$RUNNER_TEMP/source_preflight_all.json"
+
+          python - <<'PY' >> "$GITHUB_OUTPUT"
+          import json
+          import os
+          from pathlib import Path
+          payload = json.loads(Path(os.environ["RUNNER_TEMP"], "source_preflight_all.json").read_text(encoding="utf-8"))
+          city = os.environ["CITY"]
+          row = next((x for x in payload.get("cities", []) if x.get("city_key") == city), None)
+          if row is None:
+              raise SystemExit(f"City {city} absent from preflight")
+          blockers = [x.get("code") for x in row.get("blocking_reasons", []) if x.get("code")]
+          print(f"source_status={row.get('source_status')}")
+          print(f"expected={row.get('expected_alert_episodes', '')}")
+          print(f"reconstructed={row.get('reconstructed_alert_episodes', '')}")
+          print("blockers=" + json.dumps(blockers, ensure_ascii=False, separators=(",", ":")))
+          PY
+
+      - name: Run current-rules city replay read-only
+        id: replay
+        if: ${{ steps.source.outputs.source_status == 'READY' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$INPUT_SHA"
+          set +e
+          python kyiv-air-alerts-grafana/scripts/replay_explosion_history.py             --repo-root "$GITHUB_WORKSPACE/kyiv-air-alerts-grafana"             --city "$CITY"             --through "$THROUGH"             --input-head "$INPUT_SHA"             --read-only             --output "$RUNNER_TEMP/replay_${CITY}.json"
+          rc=$?
+          set -e
+          echo "return_code=$rc" >> "$GITHUB_OUTPUT"
+          if [ "$rc" -ne 0 ]; then
+            echo "Replay returned rc=$rc; status artifact will record INFRA_ERROR."
+          fi
+
+      - name: Build city status record
+        if: always()
+        shell: bash
+        env:
+          SOURCE_STATUS: ${{ steps.source.outputs.source_status }}
+          EXPECTED: ${{ steps.source.outputs.expected }}
+          RECONSTRUCTED: ${{ steps.source.outputs.reconstructed }}
+          BLOCKERS_JSON: ${{ steps.source.outputs.blockers }}
+          REPLAY_RC: ${{ steps.replay.outputs.return_code }}
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+          city = os.environ["CITY"]
+          source_status = os.environ.get("SOURCE_STATUS") or "UNKNOWN"
+          try:
+              blockers = json.loads(os.environ.get("BLOCKERS_JSON") or "[]")
+          except json.JSONDecodeError:
+              blockers = [os.environ.get("BLOCKERS_JSON")]
+          record = {
+              "schema_version": 1,
+              "city_key": city,
+              "input_head": os.environ["INPUT_SHA"],
+              "through": os.environ["THROUGH"],
+              "source_status": source_status,
+              "expected_alert_episodes": int(os.environ["EXPECTED"]) if os.environ.get("EXPECTED", "").isdigit() else None,
+              "reconstructed_alert_episodes": int(os.environ["RECONSTRUCTED"]) if os.environ.get("RECONSTRUCTED", "").isdigit() else None,
+              "blocker_codes": blockers,
+          }
+          replay_path = Path(os.environ["RUNNER_TEMP"], f"replay_{city}.json")
+          if source_status != "READY":
+              record.update({"status": "BLOCKED", "manual_qa_count": 0, "verdict": "SOURCE BLOCKED"})
+          elif not replay_path.exists():
+              record.update({
+                  "status": "INFRA_ERROR",
+                  "manual_qa_count": 0,
+                  "verdict": "REPLAY ARTIFACT MISSING",
+                  "replay_return_code": int(os.environ.get("REPLAY_RC") or -1),
+              })
+          else:
+              replay = json.loads(replay_path.read_text(encoding="utf-8"))
+              changed = replay.get("changed_episodes") or []
+              errors = replay.get("errors") or []
+              changed_count = len(changed)
+              error_count = len(errors)
+              clean = replay.get("status") == "COMPLETE" and changed_count == 0 and error_count == 0 and replay.get("protected_files_unchanged") is True
+              record.update({
+                  "status": "READY" if clean else "QA_REQUIRED",
+                  "manual_qa_count": changed_count + error_count,
+                  "verdict": replay.get("verdict"),
+                  "episodes_checked": replay.get("episodes_checked"),
+                  "baseline_strict_episodes": replay.get("baseline_strict_episodes"),
+                  "replayed_strict_episodes": replay.get("replayed_strict_episodes"),
+                  "baseline_sensitivity_episodes": replay.get("baseline_sensitivity_episodes"),
+                  "replayed_sensitivity_episodes": replay.get("replayed_sensitivity_episodes"),
+                  "reconciliation_counts": replay.get("reconciliation_counts") or {},
+                  "changed_count": changed_count,
+                  "error_count": error_count,
+                  "ppo_related_change_count": len(replay.get("ppo_related_changes") or []),
+                  "protected_files_unchanged": replay.get("protected_files_unchanged"),
+                  "replay_return_code": int(os.environ.get("REPLAY_RC") or 0),
+                  "qa_episode_ids": [x.get("episode_id") for x in changed if isinstance(x, dict) and x.get("episode_id")],
+              })
+          out = Path(os.environ["RUNNER_TEMP"], f"status-{city}.json")
+          out.write_text(json.dumps(record, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+          print(json.dumps(record, ensure_ascii=False, indent=2))
+          summary = Path(os.environ["GITHUB_STEP_SUMMARY"])
+          with summary.open("a", encoding="utf-8") as f:
+              f.write(f"## Historical replay: {city}\n\n")
+              f.write(f"- Status: **{record['status']}**\n")
+              f.write(f"- Source: **{source_status}**\n")
+              f.write(f"- Input SHA: {record['input_head']}\n")
+              f.write(f"- Through: {record['through']}\n")
+              if record["status"] == "BLOCKED":
+                  f.write(f"- Blockers: {', '.join(blockers) or 'unknown'}\n")
+              else:
+                  f.write(f"- Manual QA items: **{record.get('manual_qa_count', 0)}**\n")
+          PY
+
+      - name: Verify protected production files unchanged
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          git diff --exit-code --             kyiv-air-alerts-grafana/data/explosion_audited_baseline.json             kyiv-air-alerts-grafana/data/explosion_review_queue.json             kyiv-air-alerts-grafana/data/explosion_candidate_monitor_state.json             kyiv-air-alerts-grafana/data/explosion_candidate_monitor_last_run.json             kyiv-air-alerts-grafana/data/explosions_test.json             kyiv-air-alerts-grafana/data/dashboard_data.json
+
+      - name: Upload city status and replay
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: historical-replay-city-${{ inputs.city }}-${{ env.INPUT_SHA }}
+          path: |
+            ${{ runner.temp }}/status-${{ inputs.city }}.json
+            ${{ runner.temp }}/replay_${{ inputs.city }}.json
+            ${{ runner.temp }}/source_preflight_all.json
+          if-no-files-found: error
+          retention-days: 30
