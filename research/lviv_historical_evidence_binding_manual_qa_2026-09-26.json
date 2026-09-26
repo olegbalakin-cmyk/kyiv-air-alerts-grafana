@@ -1,0 +1,41 @@
+{
+  "schema_version": 1,
+  "city_key": "lviv",
+  "event_id": "LVI-20250903-01",
+  "manual_binding": {
+    "episode_id": "a0e9cfed0043356fe207107f",
+    "status": "validated",
+    "method": "source_chronology_manual_qa"
+  },
+  "source_url": "https://suspilne.media/lviv/1100898-u-lvovi-prolunali-vibuhi-so-vidomo-pro-obstril-3-veresna/",
+  "source_chronology_local": {
+    "first_alert_announced": "2025-09-03T00:42:00+03:00",
+    "first_exact_city_explosion": "2025-09-03T02:03:00+03:00",
+    "additional_exact_city_explosions": [
+      "2025-09-03T02:27:00+03:00",
+      "2025-09-03T02:40:00+03:00",
+      "2025-09-03T02:52:00+03:00",
+      "2025-09-03T02:55:00+03:00",
+      "2025-09-03T02:58:00+03:00",
+      "2025-09-03T03:05:00+03:00",
+      "2025-09-03T03:09:00+03:00"
+    ],
+    "first_alert_all_clear": "2025-09-03T03:44:00+03:00",
+    "second_alert_announced": "2025-09-03T04:46:00+03:00"
+  },
+  "canonical_candidates": [
+    {
+      "episode_id": "a0e9cfed0043356fe207107f",
+      "start_utc": "2025-09-02T21:45:15Z",
+      "end_utc": "2025-09-03T00:43:54Z"
+    },
+    {
+      "episode_id": "c1e7df3290acd35ea20e4324",
+      "start_utc": "2025-09-03T01:42:40Z",
+      "end_utc": "2025-09-03T03:45:38Z"
+    }
+  ],
+  "rationale": "The exact-city explosion series at 02:03-03:09 local falls inside the first canonical episode and before its all-clear. The second alert begins only after 04:42/04:46 local, so this event binds to the first episode.",
+  "classification_changed": false,
+  "note": "This QA resolves episode binding only. It does not accept the historical strict label as current truth; current hardened replay must reclassify the evidence."
+}

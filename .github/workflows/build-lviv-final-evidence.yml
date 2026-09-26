@@ -1,0 +1,49 @@
+name: Build Lviv final evidence corpus
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - multicity-wip-2026-09-16
+    paths:
+      - "research/lviv_historical_evidence_binding_manual_qa_2026-09-26.json"
+      - "kyiv-air-alerts-grafana/scripts/build_lviv_final_evidence.py"
+      - ".github/workflows/build-lviv-final-evidence.yml"
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Download latest successful binding artifact
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          gh run download 36259611160             --repo "${{ github.repository }}"             --name lviv-historical-evidence-binding-2026-09-17             --dir "$RUNNER_TEMP/binding"
+          test -f "$RUNNER_TEMP/binding/lviv_historical_evidence_binding_2026-09-17.json"
+
+      - name: Build final evidence corpus
+        shell: bash
+        run: |
+          set -euo pipefail
+          python kyiv-air-alerts-grafana/scripts/build_lviv_final_evidence.py             --binding "$RUNNER_TEMP/binding/lviv_historical_evidence_binding_2026-09-17.json"             --manual-qa research/lviv_historical_evidence_binding_manual_qa_2026-09-26.json             --output "$RUNNER_TEMP/final_evidence.json"
+
+      - name: Upload final evidence artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: lviv-final-evidence-2026-09-17
+          path: ${{ runner.temp }}/final_evidence.json
+          if-no-files-found: error
+          retention-days: 30
