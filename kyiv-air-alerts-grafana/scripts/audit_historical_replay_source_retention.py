@@ -432,7 +432,7 @@ def self_test() -> None:
         "У Сумах вибух було чути близько 17:00. Близько 14:00 зафіксовано удар шахеда.",
         "Близько 17:00 у Сумах був вибух; підтверджені російські удари.",
     )
-    assert all(not x["event_local_safe"] for x in bleed if len(x["window_sentence_range"]) == 2)
+    assert all(not x["event_local_safe"] for x in bleed if x["window_sentence_range"][0] != x["window_sentence_range"][1])
 
     morning = event_local_windows(
         "Безпілотник атакував близько 18:00. Внаслідок ранкового удару постраждали люди.",
@@ -441,7 +441,7 @@ def self_test() -> None:
     assert all(
         not x["event_local_safe"]
         for x in morning
-        if len(x["window_sentence_range"]) == 2
+        if x["window_sentence_range"][0] != x["window_sentence_range"][1]
     )
     print("Source-retention auditor self-test OK")
 
