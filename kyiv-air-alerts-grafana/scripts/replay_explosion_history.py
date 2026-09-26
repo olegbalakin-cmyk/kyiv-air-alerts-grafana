@@ -315,6 +315,7 @@ def historical_review_roles(city: str, row: dict, monitor) -> tuple[dict, str]:
         # strict/sensitivity label as evidence.
         explosion = bool(
             monitor.strict_explosion_signal(evidence)
+            or re.search(r"\bвдар\w*\b", low)
             or re.search(r"\b(?:ударив|ударила|ударили|ударило)\b", low)
             or re.search(
                 r"\b(?:завдав|завдала|завдали|наніс|нанесла|нанесли)\b.{0,40}\bавіаудар\w*\b",
@@ -944,6 +945,7 @@ def self_test() -> None:
     assert category("NON_STRICT", "NON_STRICT", False) == "UNREPLAYABLE_MISSING_EVIDENCE"
     assert ppo_related("У місті вибухи — працює ППО")
     assert not ppo_related("У місті пролунав вибух")
+    assert re.search(r"\bвдар\w*\b", "російський бпла вдарив по об'єкту".casefold())
     assert re.search(r"\b(?:ударив|ударила|ударили|ударило)\b", "російський бпла ударив по об'єкту".casefold())
     assert not re.search(r"\b(?:ударив|ударила|ударили|ударило)\b", "російський бпла атакував об'єкт".casefold())
     print("Historical replay helper self-test OK")
