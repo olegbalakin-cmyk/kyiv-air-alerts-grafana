@@ -1,0 +1,93 @@
+name: Current historical explosion replay preflight
+
+on:
+  push:
+    branches:
+      - multicity-wip-2026-09-16
+    paths:
+      - ".github/workflows/current-historical-explosion-preflight.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: current-historical-explosion-preflight
+  cancel-in-progress: false
+
+jobs:
+  preflight:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout exact current HEAD
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: kyiv-air-alerts-grafana/requirements.txt
+
+      - name: Install dependencies
+        run: pip install -r kyiv-air-alerts-grafana/requirements.txt
+
+      - name: Run read-only 23-city source preflight
+        id: replay_preflight
+        continue-on-error: true
+        env:
+          INPUT_SHA: ${{ github.sha }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$INPUT_SHA"
+          python kyiv-air-alerts-grafana/scripts/replay_explosion_history.py             --repo-root "$GITHUB_WORKSPACE/kyiv-air-alerts-grafana"             --through 2026-09-17             --input-head "$INPUT_SHA"             --read-only             --preflight             --output "$RUNNER_TEMP/historical_explosion_preflight_current.json"
+
+      - name: Summarize current blockers
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f "$RUNNER_TEMP/historical_explosion_preflight_current.json"
+          jq '{
+            input_head,
+            replay_end,
+            city_count,
+            ready_city_count,
+            blocked_city_count,
+            ready_for_matrix,
+            verdict,
+            protected_files_unchanged,
+            live_controls_all_pass: .live_control_regressions.all_pass,
+            ready_cities: [.cities[] | select(.source_status == "READY") | .city_key],
+            blocked_cities: [
+              .cities[]
+              | select(.source_status != "READY")
+              | {
+                  city_key,
+                  expected_alert_episodes,
+                  reconstructed_alert_episodes,
+                  blocking_reasons: [.blocking_reasons[] | .code]
+                }
+            ]
+          }' "$RUNNER_TEMP/historical_explosion_preflight_current.json"
+
+      - name: Verify protected production files unchanged
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          git diff --exit-code --             kyiv-air-alerts-grafana/data/explosion_audited_baseline.json             kyiv-air-alerts-grafana/data/explosion_review_queue.json             kyiv-air-alerts-grafana/data/explosion_candidate_monitor_state.json             kyiv-air-alerts-grafana/data/explosion_candidate_monitor_last_run.json             kyiv-air-alerts-grafana/data/explosions_test.json             kyiv-air-alerts-grafana/data/dashboard_data.json
+
+      - name: Upload preflight artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: current-historical-explosion-replay-preflight
+          path: ${{ runner.temp }}/historical_explosion_preflight_current.json
+          if-no-files-found: error
+          retention-days: 30
