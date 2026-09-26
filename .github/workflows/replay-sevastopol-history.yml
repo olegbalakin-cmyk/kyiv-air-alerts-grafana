@@ -1,0 +1,83 @@
+name: Replay Sevastopol historical explosions
+
+on:
+  push:
+    branches:
+      - multicity-wip-2026-09-16
+    paths:
+      - "kyiv-air-alerts-grafana/data/sevastopol_events.json"
+      - ".github/workflows/replay-sevastopol-history.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: replay-sevastopol-historical-explosions
+  cancel-in-progress: false
+
+jobs:
+  replay:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout exact replay input
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: kyiv-air-alerts-grafana/requirements.txt
+
+      - name: Install dependencies
+        run: pip install -r kyiv-air-alerts-grafana/requirements.txt
+
+      - name: Run Sevastopol-only current-rules replay read-only
+        env:
+          INPUT_SHA: ${{ github.sha }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$INPUT_SHA"
+          python kyiv-air-alerts-grafana/scripts/replay_explosion_history.py             --repo-root "$GITHUB_WORKSPACE/kyiv-air-alerts-grafana"             --city sevastopol             --through 2026-09-17             --input-head "$INPUT_SHA"             --read-only             --output "$RUNNER_TEMP/sevastopol_historical_replay_2026-09-17.json"
+
+      - name: Summarize replay
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f "$RUNNER_TEMP/sevastopol_historical_replay_2026-09-17.json"
+          jq '{
+            status,
+            verdict,
+            episodes_checked,
+            baseline_strict_episodes,
+            replayed_strict_episodes,
+            baseline_sensitivity_episodes,
+            replayed_sensitivity_episodes,
+            reconciliation_counts,
+            changed_count: (.changed_episodes | length),
+            error_count: (.errors | length),
+            ppo_related_change_count: (.ppo_related_changes | length),
+            protected_files_unchanged
+          }' "$RUNNER_TEMP/sevastopol_historical_replay_2026-09-17.json"
+
+      - name: Verify protected production files unchanged
+        shell: bash
+        run: |
+          set -euo pipefail
+          git diff --exit-code --             kyiv-air-alerts-grafana/data/explosion_audited_baseline.json             kyiv-air-alerts-grafana/data/explosion_review_queue.json             kyiv-air-alerts-grafana/data/explosion_candidate_monitor_state.json             kyiv-air-alerts-grafana/data/explosion_candidate_monitor_last_run.json             kyiv-air-alerts-grafana/data/explosions_test.json             kyiv-air-alerts-grafana/data/dashboard_data.json
+
+      - name: Upload Sevastopol replay artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sevastopol-historical-current-rules-replay-2026-09-17
+          path: ${{ runner.temp }}/sevastopol_historical_replay_2026-09-17.json
+          if-no-files-found: error
+          retention-days: 30
