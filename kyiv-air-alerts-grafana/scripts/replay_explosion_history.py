@@ -304,6 +304,7 @@ def historical_review_roles(city: str, row: dict) -> tuple[dict, str]:
 
     reviewed_exact = row.get("reviewed_exact_city_evidence")
     if isinstance(reviewed_exact, dict) and reviewed_exact.get("present") is True:
+        exact_city = True
         roles["exact_city_evidence"] = {
             "present": True,
             "evidence_text": str(
