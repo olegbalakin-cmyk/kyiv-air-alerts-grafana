@@ -1,6 +1,11 @@
 name: Historical explosion replay orchestrator
 
 on:
+  workflow_run:
+    workflows:
+      - Apply historical source-retention repairs
+    types:
+      - completed
   workflow_dispatch:
     inputs:
       scope:
@@ -45,6 +50,7 @@ concurrency:
 
 jobs:
   plan:
+    if: ${{ github.event_name != 'workflow_run' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'multicity-wip-2026-09-16') }}
     runs-on: ubuntu-latest
     timeout-minutes: 20
     outputs:
@@ -58,8 +64,13 @@ jobs:
       - name: Checkout exact planning input
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.sha }}
+          ref: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_branch || github.sha }}
           fetch-depth: 0
+
+      - name: Resolve planning SHA
+        id: basis
+        shell: bash
+        run: echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -76,7 +87,7 @@ jobs:
         run: |
           set -euo pipefail
           set +e
-          python kyiv-air-alerts-grafana/scripts/replay_explosion_history.py             --repo-root "$GITHUB_WORKSPACE/kyiv-air-alerts-grafana"             --through "${{ inputs.through || '2026-09-17' }}"             --input-head "${{ github.sha }}"             --read-only             --preflight             --output "$RUNNER_TEMP/orchestrator_preflight.json"
+          python kyiv-air-alerts-grafana/scripts/replay_explosion_history.py             --repo-root "$GITHUB_WORKSPACE/kyiv-air-alerts-grafana"             --through "${{ inputs.through || '2026-09-17' }}"             --input-head "${{ steps.basis.outputs.sha }}"             --read-only             --preflight             --output "$RUNNER_TEMP/orchestrator_preflight.json"
           rc=$?
           set -e
           test -f "$RUNNER_TEMP/orchestrator_preflight.json"
@@ -90,6 +101,7 @@ jobs:
           DISPATCH_SCOPE: ${{ inputs.scope }}
           DISPATCH_CITY: ${{ inputs.city }}
           DISPATCH_THROUGH: ${{ inputs.through }}
+          PLANNING_SHA: ${{ steps.basis.outputs.sha }}
         run: |
           set -euo pipefail
           python - <<'PY'
@@ -145,7 +157,7 @@ jobs:
           matrix = json.dumps({"include": include}, ensure_ascii=False, separators=(",", ":"))
           with Path(os.environ["GITHUB_OUTPUT"]).open("a", encoding="utf-8") as f:
               f.write("matrix=" + matrix + "\n")
-              f.write("input_sha=" + os.environ["GITHUB_SHA"] + "\n")
+              f.write("input_sha=" + os.environ["PLANNING_SHA"] + "\n")
               f.write("through=" + through + "\n")
               f.write("scope=" + scope + "\n")
               f.write("requested_city=" + requested_city + "\n")
@@ -156,7 +168,7 @@ jobs:
       - name: Upload planning preflight
         uses: actions/upload-artifact@v4
         with:
-          name: historical-replay-plan-${{ github.sha }}
+          name: historical-replay-plan-${{ steps.basis.outputs.sha }}
           path: ${{ runner.temp }}/orchestrator_preflight.json
           if-no-files-found: error
           retention-days: 30
