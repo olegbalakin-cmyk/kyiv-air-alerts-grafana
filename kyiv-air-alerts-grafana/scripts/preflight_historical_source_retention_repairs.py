@@ -249,7 +249,15 @@ def preflight(
 
         patched_row = patched_payload[bucket][index]
         old_evidence = str(patched_row.get("evidence") or "")
-        patched_row["evidence"] = new_excerpt
+        if new_excerpt and new_excerpt not in old_evidence:
+            combined_evidence = (
+                old_evidence.rstrip()
+                + " — source-retention supplement: "
+                + new_excerpt
+            )
+        else:
+            combined_evidence = old_evidence
+        patched_row["evidence"] = combined_evidence
         patched_row["source_retention_repair_candidate"] = {
             "schema_version": 1,
             "case_id": case_id,
@@ -274,7 +282,7 @@ def preflight(
             "row_index": index,
             "source_url": best.get("url"),
             "old_evidence": old_evidence,
-            "new_evidence": new_excerpt,
+            "new_evidence": combined_evidence,\n            "source_excerpt": new_excerpt,
             "old_row_hash": canonical_hash(old_row),
             "new_row_hash": canonical_hash(patched_row),
         })
