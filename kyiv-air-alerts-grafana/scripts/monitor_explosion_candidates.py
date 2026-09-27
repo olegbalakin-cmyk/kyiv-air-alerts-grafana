@@ -596,7 +596,58 @@ def controlled_blast_nonmilitary_signal(text: str) -> bool:
     return controlled_blast_signal(text) and not military_strike_event_signal(text)
 
 
-ATTACK_EVENT_TYPE_ORDER = ("explosion", "impact", "arrival", "strike", "damage", "fire")
+AIR_DEFENSE_CONTEXT_RE = re.compile(r"\\b(?:ппо|пво|протиповітр\\w*|противовоздуш\\w*)", re.IGNORECASE)
+AIR_DEFENSE_ACTUAL_RE = re.compile(
+    r"(?:"
+    r"(?:\\bппо\\b|\\bпво\\b|протиповітр\\w*|противовоздуш\\w*).{0,35}"
+    r"(?:працю(?:є|ють|вала|вали)|відпрацю\\w*|работа(?:ет|ют|ла|ли)|отработа\\w*)|"
+    r"(?:працю(?:є|ють|вала|вали)|відпрацю\\w*|работа(?:ет|ют|ла|ли)|отработа\\w*).{0,35}"
+    r"(?:\\bппо\\b|\\bпво\\b|протиповітр\\w*|противовоздуш\\w*)|"
+    r"(?:чути|чутно|було\\s+чутно|слышно).{0,40}(?:робот\\w*|работ\\w*).{0,35}"
+    r"(?:\\bппо\\b|\\bпво\\b|протиповітр\\w*|противовоздуш\\w*)|"
+    r"(?:робот\\w*|работ\\w*).{0,35}(?:\\bппо\\b|\\bпво\\b|протиповітр\\w*|противовоздуш\\w*)"
+    r")",
+    re.IGNORECASE,
+)
+AIR_DEFENSE_PREDICTIVE_RE = re.compile(
+    r"(?:можлив\\w*|може|можуть|можливо|может|могут|возможн\\w*|"
+    r"готов\\w*|напоготові|очіку\\w*|ожида\\w*|ймовірн\\w*|вероятн\\w*)"
+    r".{0,60}(?:ппо|пво|протиповітр\\w*|противовоздуш\\w*|робот\\w*|работ\\w*|чути|чутно|слышно)|"
+    r"(?:ппо|пво|протиповітр\\w*|противовоздуш\\w*).{0,60}"
+    r"(?:можлив\\w*|може|можуть|можливо|может|могут|возможн\\w*|готов\\w*|напоготові|очіку\\w*|ожида\\w*)",
+    re.IGNORECASE,
+)
+INTERCEPTION_CLAIM_RE = re.compile(
+    r"(?:збит\\w*|знищен\\w*|знешкоджен\\w*|перехоп\\w*|сбит\\w*|уничтожен\\w*|перехвачен\\w*)",
+    re.IGNORECASE,
+)
+
+
+def air_defense_context_signal(text: str) -> bool:
+    low = normalize_evidence_text(text)
+    return bool(low and AIR_DEFENSE_CONTEXT_RE.search(low))
+
+
+def interception_claim_signal(text: str) -> bool:
+    low = normalize_evidence_text(text)
+    return bool(low and INTERCEPTION_CLAIM_RE.search(low))
+
+
+def air_defense_action_signal(text: str) -> bool:
+    """Confirmed actual air-defense activity, excluding warning/readiness language."""
+    low = normalize_evidence_text(text)
+    if not low or not AIR_DEFENSE_CONTEXT_RE.search(low):
+        return False
+    if AIR_DEFENSE_PREDICTIVE_RE.search(low):
+        return False
+    if AIR_DEFENSE_ACTUAL_RE.search(low):
+        return True
+    # An explicit interception by named/mentioned air defense is itself evidence
+    # that air defense actually operated; interception remains a separate flag.
+    return interception_claim_signal(low)
+
+
+ATTACK_EVENT_TYPE_ORDER = ("explosion", "impact", "arrival", "strike", "damage", "fire", "air_defense_action")
 
 
 def attack_event_types(text: str) -> list[str]:
@@ -621,6 +672,8 @@ def attack_event_types(text: str) -> list[str]:
         found.add("damage")
     if re.search(r"\b(?:пожеж\w*|загор\w*|займан\w*)", low):
         found.add("fire")
+    if air_defense_action_signal(low):
+        found.add("air_defense_action")
     return [event_type for event_type in ATTACK_EVENT_TYPE_ORDER if event_type in found]
 
 
@@ -643,6 +696,8 @@ def strict_attack_event_signal(text: str) -> bool:
         return False
     event_types = attack_event_types(low)
     if any(event_type in event_types for event_type in ("explosion", "impact", "arrival", "strike")):
+        return True
+    if "air_defense_action" in event_types:
         return True
     if any(event_type in event_types for event_type in ("damage", "fire")):
         return attack_consequence_signal(low)
@@ -702,7 +757,8 @@ def contemporaneous_live_wording(text: str) -> bool:
         return False
     sep = r"[\s,:;–—-]+"
     return bool(
-        re.search(
+        air_defense_action_signal(low)
+        or re.search(
             rf"(?:\bлуна(?:є|ють){sep}(?:повторн\w*{sep})?(?:сері\w*{sep})?вибух\w*|"
             rf"\b(?:чутно|чути){sep}(?:(?:звук\w*|сері\w*){sep})?вибух\w*|"
             rf"\bгримлять{sep}вибух\w*|"
@@ -2119,6 +2175,9 @@ def classify_candidate(row: dict, city_key: str, episodes: list[dict], matching:
     candidate_exact = exact_city_classification_evidence(city_key, row)
     candidate_strict = strict_explosion_evidence(city_key, row)
     candidate_event_types = list(candidate_strict.get("event_types") or [])
+    candidate_air_defense_context = air_defense_context_signal(classification_text(row))
+    candidate_air_defense_action = air_defense_action_signal(classification_text(row))
+    candidate_interception_claim = interception_claim_signal(classification_text(row))
     candidate_air = air_military_context_evidence(row)
     candidate_same_attack = same_attack_context_evidence(
         city_key, row, candidate_strict, candidate_air
@@ -2274,6 +2333,9 @@ def classify_candidate(row: dict, city_key: str, episodes: list[dict], matching:
         "exact_city_classification_evidence": exact,
         "strict_explosion_evidence": strict,
         "event_types": candidate_event_types,
+        "air_defense_context": candidate_air_defense_context,
+        "air_defense_action": candidate_air_defense_action,
+        "interception_claim": candidate_interception_claim,
         "air_military_context": air,
         "same_attack_context": same_attack,
         "temporal_binding": temporal,
@@ -2288,6 +2350,9 @@ def classification_evidence_payload(decision: dict) -> dict:
         "exact_city": decision["exact_city_classification_evidence"],
         "strict_explosion": decision["strict_explosion_evidence"],
         "event_types": list(decision.get("event_types") or []),
+        "air_defense_context": bool(decision.get("air_defense_context")),
+        "air_defense_action": bool(decision.get("air_defense_action")),
+        "interception_claim": bool(decision.get("interception_claim")),
         "air_military_context": decision["air_military_context"],
         "same_attack_context": decision["same_attack_context"],
         "temporal_binding": decision["temporal_binding"],
@@ -2801,6 +2866,10 @@ def self_test() -> None:
     assert explicit_alert_relation("Вибух стався після оголошення тривоги")
     assert explicit_alert_relation("У місті пролунав вибух, коли тривала повітряна тривога")
     assert attack_event_types("У Полтаві влучання пошкодило будинок і спричинило пожежу") == ["impact", "damage", "fire"]
+    assert attack_event_types("У Полтаві працює ППО") == ["air_defense_action"]
+    assert not air_defense_action_signal("У Полтаві можлива робота ППО")
+    assert not air_defense_action_signal("У Полтаві не лякайтеся, може бути чутно роботу ППО")
+    assert not air_defense_action_signal("У Полтаві ППО готова до роботи")
     assert strict_attack_event_signal("У Полтаві внаслідок атаки БпЛА пошкоджено будинок")
     assert strict_attack_event_signal("У Полтаві після удару БпЛА виникла пожежа")
     assert not strict_attack_event_signal("У Полтаві під час повітряної тривоги сталася пожежа у квартирі")
@@ -2937,23 +3006,52 @@ def self_test() -> None:
     retrospective_damage_decision = classify_candidate(retrospective_damage, "poltava", [poltava_ep])
     assert retrospective_damage_decision["proposed_outcome"] not in {"approved_strict", "approved_sensitivity"}, retrospective_damage_decision
 
-    # Mandatory: Kyiv PVO-only must never be strict.
-    kyiv_ep = make_episode("kyiv", dt, dt + timedelta(hours=1))
-    kyiv_pvo = {
-        **strict_base,
-        "title": "Київ — повітряна тривога через загрозу дронів. У столиці працює ППО.",
-        "snippet": "",
-        "source": "Telegram / СУСПІЛЬНЕ НОВИНИ",
-        "publisher": "СУСПІЛЬНЕ НОВИНИ",
-    }
-    kyiv_pvo_decision = classify_candidate(kyiv_pvo, "kyiv", [kyiv_ep])
-    assert kyiv_pvo_decision["proposed_outcome"] != "approved_strict"
-    assert not kyiv_pvo_decision["strict_explosion_evidence"]["present"]
-    assert "PVO_ONLY_COMPLETE_MESSAGE" in kyiv_pvo_decision["reason_codes"]
+    # Air-defense action is now a canonical event class. It must still pass
+    # exact-city, same-attack/air-context and temporal attribution gates.
+    ppo_action_controls = (
+        (
+            "ppo-action-only",
+            "У Полтаві під час повітряної тривоги працює ППО.",
+            ["air_defense_action"],
+            False,
+        ),
+        (
+            "ppo-action-plus-explosion",
+            "У Полтаві під час повітряної тривоги чути вибухи. Працює ППО.",
+            ["explosion", "air_defense_action"],
+            False,
+        ),
+        (
+            "ppo-interception",
+            "У Полтаві під час повітряної тривоги ППО збила БпЛА.",
+            ["air_defense_action"],
+            True,
+        ),
+    )
+    for label, title, expected_types, expected_interception in ppo_action_controls:
+        row = {**strict_base, "candidate_id": label, "title": title, "snippet": ""}
+        decision = classify_candidate(row, "poltava", [poltava_ep])
+        assert decision["air_defense_context"], decision
+        assert decision["air_defense_action"], decision
+        assert decision["interception_claim"] is expected_interception, decision
+        assert decision["event_types"] == expected_types, decision
+        assert decision["proposed_outcome"] == "approved_strict", decision
 
-    # Air-defense hardening invariant: PPO explains an observed explosion; it
-    # does not negate that explosion. Explicit explosion evidence remains
-    # strict-eligible when city/episode attribution is independently satisfied.
+    # Prediction, warning and generic readiness/capability remain non-events.
+    ppo_negative_controls = (
+        "У Полтаві під час повітряної тривоги можлива робота ППО.",
+        "У Полтаві під час повітряної тривоги не лякайтеся, може бути чутно роботу ППО.",
+        "У Полтаві під час повітряної тривоги ППО готова до роботи.",
+    )
+    for title in ppo_negative_controls:
+        row = {**strict_base, "title": title, "snippet": ""}
+        decision = classify_candidate(row, "poltava", [poltava_ep])
+        assert decision["air_defense_context"], decision
+        assert not decision["air_defense_action"], decision
+        assert "air_defense_action" not in decision["event_types"], decision
+        assert decision["proposed_outcome"] != "approved_strict", decision
+
+    # Explicit explosion + PPO remains strict and now preserves both event types.
     air_defense_positive_cases = (
         "У Полтаві під час повітряної тривоги вибухи, які було чутно у місті — робота нашої ППО.",
         "У Полтаві чути вибухи. Працює ППО.",
@@ -2969,29 +3067,12 @@ def self_test() -> None:
         }
         decision = classify_candidate(row, "poltava", [poltava_ep])
         assert decision["strict_explosion_evidence"]["present"], decision
+        assert decision["air_defense_action"], decision
+        assert "air_defense_action" in decision["event_types"], decision
         assert decision["air_military_context"]["present"], decision
         assert decision["same_attack_context"]["present"], decision
         assert decision["proposed_outcome"] == "approved_strict", decision
         assert "PVO_ONLY_COMPLETE_MESSAGE" not in decision["reason_codes"], decision
-
-    # Air-defense wording alone is context, not explosion evidence.
-    air_defense_negative_cases = (
-        "У Полтаві працює ППО.",
-        "У Полтаві наші сили ППО збили БпЛА.",
-        "У Полтаві Повітряні сили повідомляють про роботу ППО.",
-    )
-    for title in air_defense_negative_cases:
-        row = {
-            **strict_base,
-            "title": title,
-            "snippet": "",
-            "source": "Telegram / СУСПІЛЬНЕ НОВИНИ",
-            "publisher": "СУСПІЛЬНЕ НОВИНИ",
-        }
-        decision = classify_candidate(row, "poltava", [poltava_ep])
-        assert not decision["strict_explosion_evidence"]["present"], decision
-        assert decision["proposed_outcome"] != "approved_strict", decision
-        assert "PVO_ONLY_COMPLETE_MESSAGE" in decision["reason_codes"], decision
 
     # Mandatory: Vinnytsia regional/quarry wording plus publisher branding is
     # neither semantic exact-city evidence nor strict.
@@ -3130,16 +3211,17 @@ def self_test() -> None:
     assert conflicting_decision["proposed_outcome"] == "approved_sensitivity"
     assert conflicting_decision["sensitivity_basis"] == "near_boundary"
 
-    # IR14 deterministic PVO-only rejection.
+    # IR14 deterministic predicted-PVO rejection remains intact.
     pvo_only = {
         **strict_base,
-        "title": "У Полтаві працює ППО. БпЛА заходять на місто.",
+        "title": "У Полтаві можлива робота ППО. БпЛА заходять на місто.",
         "snippet": "",
         "source": "Telegram / СУСПІЛЬНЕ НОВИНИ",
         "publisher": "СУСПІЛЬНЕ НОВИНИ",
     }
     pvo_decision = classify_candidate(pvo_only, "poltava", [poltava_ep])
     assert pvo_decision["proposed_outcome"] == "rejected"
+    assert not pvo_decision["air_defense_action"]
     assert "PVO_ONLY_COMPLETE_MESSAGE" in pvo_decision["reason_codes"]
 
     # IR16: dry classification of an existing needs_review row is pure and does
