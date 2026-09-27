@@ -1,0 +1,268 @@
+{
+  "schema_version": 1,
+  "artifact_type": "cherkasy_source_recovery_batch2_preflight",
+  "generated_at_utc": "2026-09-27T10:49:31.160498Z",
+  "repository": "olegbalakin-cmyk/kyiv-air-alerts-grafana",
+  "branch": "multicity-wip-2026-09-16",
+  "city_key": "cherkasy",
+  "input_head": "793b4f5414bc8f4abfd05b968b1be0cb7a0447f0",
+  "workflow_run_id": 36313757808,
+  "scope": {
+    "dry_run_only": true,
+    "append_only": true,
+    "target_episode_ids": [
+      "4dcfd4e2f9d8ed59c0d9cbdc",
+      "55fe7b2b2c6d38b7222a6c12",
+      "742487e7882ef7e9e54a1409",
+      "750530dec9a40c82528122d2"
+    ],
+    "canonical_evidence_mutated": false,
+    "other_cities_touched": false,
+    "new_external_research_performed": false,
+    "classifier_rules_changed": false
+  },
+  "authoritative_replay": {
+    "actual_executable_used": true,
+    "executable": "kyiv-air-alerts-grafana/scripts/replay_explosion_history.py",
+    "workflow_equivalent": ".github/workflows/historical-replay-city.yml",
+    "replay_tool_git_blob_sha": "f2a8f11324dfb0d1db7d9ecda513f194268bced9",
+    "replay_tool_sha256": "bd2b67c4f672f77cabe239ba1cab40f64cd4420c7cc56bbf6211bae18afd01da",
+    "command_template": "python kyiv-air-alerts-grafana/scripts/replay_explosion_history.py --repo-root <checkout>/kyiv-air-alerts-grafana --city cherkasy --through 2026-09-17 --input-head 793b4f5414bc8f4abfd05b968b1be0cb7a0447f0 --read-only --output <temp>.json",
+    "proof": {
+      "workflow_run_id": 36313757808,
+      "checked_out_head": "793b4f5414bc8f4abfd05b968b1be0cb7a0447f0",
+      "invocation_count": 6,
+      "all_invocations_same_executable": true,
+      "all_return_codes_zero": true
+    }
+  },
+  "current_before": {
+    "denominator": "1548/1548",
+    "persistent_qa_count": 30,
+    "fresh_qa_count": 30,
+    "dropped_ids": [],
+    "added_ids": [],
+    "exact_qa_set_match": true,
+    "replay_error_count": 0,
+    "passed": true
+  },
+  "per_target_results": [
+    {
+      "target_id": "4dcfd4e2f9d8ed59c0d9cbdc",
+      "source_url": "https://suspilne.media/cherkasy/1188436-dronova-ataka-17-grudna-na-cerkasini-znisili-dva-bpla/",
+      "exact_appended_fragment": "У Черкасах під час повітряної тривоги у ніч на 17 грудня було чутно вибухи; це була російська дронова атака.",
+      "patch": {
+        "bucket": "strict_events",
+        "row_index": 36,
+        "operation": "append_to_evidence_only"
+      },
+      "resulting_event_types": [
+        "explosion"
+      ],
+      "exact_city_basis": "У Черкасах ... було чутно вибухи",
+      "aerial_war_basis": "російська дронова атака",
+      "temporal_basis": "Existing validated frozen binding to the 2025-12-17T00:06:32Z–02:14:11Z alert plus retained-source during-alert context.",
+      "same_attack_basis": "Exact-city explosions and Russian drone attack are in the same retained source event context.",
+      "classifier_reason_codes": [
+        "MATCH_UNIQUE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "ATTACK_EVENT_TYPES:explosion",
+        "AIR_MILITARY_CONTEXT",
+        "SAME_ATTACK_CONTEXT_SUPPORTED",
+        "TEMPORAL_REVIEWED_VALIDATED_BINDING",
+        "REVIEW_PROVENANCE_USABLE",
+        "REVIEW_PROVENANCE_TEMPORAL_BINDING_USED"
+      ],
+      "real_replay_status": "STRICT",
+      "target_removed_from_qa": true,
+      "temporary_qa_count": 29,
+      "new_regressions": [],
+      "non_target_drift": [],
+      "eligible": true
+    },
+    {
+      "target_id": "55fe7b2b2c6d38b7222a6c12",
+      "source_url": "https://suspilne.media/cherkasy/1224070-rosijska-ataka-na-cerkasinu-28-sicna-so-vidomo/",
+      "exact_appended_fragment": "У Повітряних силах попереджали про рух БпЛА у напрямку Черкас та Сміли. О 14:39 у Черкасах було чутно звук вибуху, про це повідомляли кореспонденти Суспільного.",
+      "patch": {
+        "bucket": "strict_events",
+        "row_index": 42,
+        "operation": "append_to_evidence_only"
+      },
+      "resulting_event_types": [
+        "explosion"
+      ],
+      "exact_city_basis": "О 14:39 у Черкасах було чутно звук вибуху",
+      "aerial_war_basis": "рух БпЛА у напрямку Черкас та Сміли",
+      "temporal_basis": "14:39 local is inside the target later alert; separate morning incident was not used.",
+      "same_attack_basis": "Source-local later-episode UAV warning and 14:39 explosion were appended, but current real classifier did not establish linked same-attack composition.",
+      "classifier_reason_codes": [
+        "MATCH_UNIQUE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "ATTACK_EVENT_TYPES:explosion",
+        "AIR_MILITARY_CONTEXT",
+        "AIR_CONTEXT_NOT_LINKED_TO_EVENT",
+        "TEMPORAL_REVIEWED_VALIDATED_BINDING",
+        "REVIEW_PROVENANCE_USABLE",
+        "REVIEW_PROVENANCE_TEMPORAL_BINDING_USED"
+      ],
+      "real_replay_status": "AMBIGUOUS",
+      "target_removed_from_qa": false,
+      "temporary_qa_count": 30,
+      "new_regressions": [],
+      "non_target_drift": [],
+      "eligible": false,
+      "blocker": "AIR_CONTEXT_NOT_LINKED_TO_EVENT"
+    },
+    {
+      "target_id": "742487e7882ef7e9e54a1409",
+      "source_url": "https://suspilne.media/cherkasy/1394370-na-cerkasini-3-veresna-lunali-vibuhi-so-vidomo-pro-ataku-rf/",
+      "exact_appended_fragment": "О 18:07 Повітряні сили повідомляли про БпЛА у напрямку Черкас; о 18:28 у Черкасах було чутно вибух у межах тієї самої вечірньої атаки.",
+      "patch": {
+        "bucket": "strict_events",
+        "row_index": 52,
+        "operation": "append_to_evidence_only"
+      },
+      "resulting_event_types": [
+        "explosion"
+      ],
+      "exact_city_basis": "о 18:28 у Черкасах було чутно вибух",
+      "aerial_war_basis": "о 18:07 ... БпЛА у напрямку Черкас",
+      "temporal_basis": "18:07 and 18:28 local both fall within the target alert.",
+      "same_attack_basis": "Retained chronology supplies the same-evening sequence, but current real classifier still did not establish linked same-attack composition.",
+      "classifier_reason_codes": [
+        "MATCH_UNIQUE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "ATTACK_EVENT_TYPES:explosion",
+        "AIR_MILITARY_CONTEXT",
+        "AIR_CONTEXT_NOT_LINKED_TO_EVENT",
+        "TEMPORAL_REVIEWED_VALIDATED_BINDING",
+        "REVIEW_PROVENANCE_USABLE",
+        "REVIEW_PROVENANCE_TEMPORAL_BINDING_USED"
+      ],
+      "real_replay_status": "AMBIGUOUS",
+      "target_removed_from_qa": false,
+      "temporary_qa_count": 30,
+      "new_regressions": [],
+      "non_target_drift": [],
+      "eligible": false,
+      "blocker": "AIR_CONTEXT_NOT_LINKED_TO_EVENT"
+    },
+    {
+      "target_id": "750530dec9a40c82528122d2",
+      "source_url": "https://suspilne.media/cherkasy/1250002-uveceri-6-berezna-u-cerkasah-lunali-vibuhi-so-vidomo-pro-ataku-rosijskih-vijsk/",
+      "exact_appended_fragment": "У соцмережі WhatsApp о 22:36 командування Повітряних сил повідомляло про групи БпЛА у напрямку Черкащини через Полтавщину, згодом, о 22:55 про загрозу дронів для Черкас та Сміли. О 22:59 кореспонденти Суспільного у Черкасах чули вибух.",
+      "patch": {
+        "bucket": "strict_events",
+        "row_index": 44,
+        "operation": "append_to_evidence_only"
+      },
+      "resulting_event_types": [
+        "explosion"
+      ],
+      "exact_city_basis": "О 22:59 ... у Черкасах чули вибух",
+      "aerial_war_basis": "о 22:55 ... загроза дронів для Черкас та Сміли",
+      "temporal_basis": "22:55 and 22:59 local are inside the target alert.",
+      "same_attack_basis": "Retained source-local threat/explosion sequence is deterministic to a reviewer, but current real classifier still did not establish linked same-attack composition.",
+      "classifier_reason_codes": [
+        "MATCH_UNIQUE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "ATTACK_EVENT_TYPES:explosion",
+        "AIR_MILITARY_CONTEXT",
+        "AIR_CONTEXT_NOT_LINKED_TO_EVENT",
+        "TEMPORAL_REVIEWED_VALIDATED_BINDING",
+        "REVIEW_PROVENANCE_USABLE",
+        "REVIEW_PROVENANCE_TEMPORAL_BINDING_USED"
+      ],
+      "real_replay_status": "AMBIGUOUS",
+      "target_removed_from_qa": false,
+      "temporary_qa_count": 30,
+      "new_regressions": [],
+      "non_target_drift": [],
+      "eligible": false,
+      "blocker": "AIR_CONTEXT_NOT_LINKED_TO_EVENT"
+    }
+  ],
+  "combined_replay": {
+    "applied_individually_eligible_ids": [
+      "4dcfd4e2f9d8ed59c0d9cbdc"
+    ],
+    "denominator": "1548/1548",
+    "qa_count_before": 30,
+    "qa_count_after": 29,
+    "targets_removed_from_qa": [
+      "4dcfd4e2f9d8ed59c0d9cbdc"
+    ],
+    "new_qa_ids": [],
+    "unrelated_removed_qa_ids": [],
+    "new_regressions": [],
+    "non_target_drift": [],
+    "replay_error_count": 0,
+    "batch1_repaired_ids": [
+      "2aef6fef78547b13c04b5de7",
+      "2d71c76ca60e3344054b2f29",
+      "2e0c503d42b611fcfb0d74cc",
+      "484842ab6691a38b559ac789"
+    ],
+    "batch1_repaired_cases_remain_resolved": true
+  },
+  "source_file_integrity": {
+    "path": "kyiv-air-alerts-grafana/data/explosion_research/cherkasy/final_evidence.json",
+    "initial_git_blob_sha": "5dd59bb3c4076d2a27ee6f77464ec0be507d2cd7",
+    "final_git_blob_sha": "5dd59bb3c4076d2a27ee6f77464ec0be507d2cd7",
+    "initial_sha256": "758eaf21ca3d205ac40bb3583d75acf876b30bfc5c07cc456d883fd8560cab34",
+    "final_sha256": "758eaf21ca3d205ac40bb3583d75acf876b30bfc5c07cc456d883fd8560cab34",
+    "temporary_mutation_performed": true,
+    "canonical_mutation_performed": false,
+    "restored_byte_for_byte": true
+  },
+  "protected_file_verification": {
+    "unchanged": true,
+    "post_run_branch_recheck_head": "23f2a900d0bbb80bfad0bf0b97a02ca4ebf44798",
+    "blob_shas_unchanged_from_preflight_input": true,
+    "blobs": {
+      "kyiv-air-alerts-grafana/data/explosion_research/cherkasy/final_evidence.json": "5dd59bb3c4076d2a27ee6f77464ec0be507d2cd7",
+      "kyiv-air-alerts-grafana/data/explosion_audited_baseline.json": "5bbd2b771559eac2966aeec65d6e3b5487b9c1a9",
+      "kyiv-air-alerts-grafana/data/explosion_review_queue.json": "e6ed6776ae326a18a07978b1979dd3b265096bf0",
+      "kyiv-air-alerts-grafana/data/explosion_candidate_monitor_state.json": "3c8658880c6b93a00fb8ddbec2c4eaeed6d3f2cc",
+      "kyiv-air-alerts-grafana/data/explosion_candidate_monitor_last_run.json": "1552b13a2a9361be968cea4f09876cc20f96572f",
+      "kyiv-air-alerts-grafana/data/explosions_test.json": "3109dc02d2292efa59eddd26b34292cab2b554ab",
+      "kyiv-air-alerts-grafana/data/dashboard_data.json": "85e1d5cacfbe0af1530bbf584cb63ebdfef463e6",
+      "research/historical_replay_qa/cherkasy.json": "dc339e5a78e862f23a11720132ec8e221bc67964",
+      "research/historical_replay_status_current.json": "b04f110c81b03522898c0c45a3c632eb96f759fa"
+    }
+  },
+  "summary": {
+    "current_before_qa_count": 30,
+    "current_before_dropped_ids": [],
+    "current_before_added_ids": [],
+    "eligible_ids": [
+      "4dcfd4e2f9d8ed59c0d9cbdc"
+    ],
+    "unresolved_ids": [
+      "55fe7b2b2c6d38b7222a6c12",
+      "742487e7882ef7e9e54a1409",
+      "750530dec9a40c82528122d2"
+    ],
+    "targets_removed_from_qa": [
+      "4dcfd4e2f9d8ed59c0d9cbdc"
+    ],
+    "temporary_post_repair_qa_count": 29,
+    "resulting_event_types_by_eligible_target": {
+      "4dcfd4e2f9d8ed59c0d9cbdc": [
+        "explosion"
+      ]
+    },
+    "new_regressions": [],
+    "non_target_drift": [],
+    "batch1_repaired_cases_remain_resolved": true,
+    "actual_historical_replay_executable_used": true,
+    "source_file_restored_byte_for_byte": true,
+    "protected_files_unchanged": true,
+    "verdict": "BLOCKER: CHERKASY BATCH 2 HAS UNRESOLVED TARGETS"
+  }
+}
