@@ -96,7 +96,7 @@ jobs:
         run: |
           set -euo pipefail
           python kyiv-air-alerts-grafana/scripts/_historical_17_city_atomic_corpus_repair_tmp.py --mode apply --upstream /tmp/official_data_uk.csv --forensic /tmp/historical_17_city_corpus_gap_forensic_inventory_2026-09-27.json --output /tmp/repair_apply.json --expected-pre-head "$PRE_HEAD"
-          rm kyiv-air-alerts-grafana/scripts/_historical_17_city_corrected_recon_tmp.py kyiv-air-alerts-grafana/scripts/_historical_17_city_atomic_corpus_repair_tmp.py
+          rm kyiv-air-alerts-grafana/scripts/_historical_17_city_corrected_recon_tmp.py
           find kyiv-air-alerts-grafana/scripts -type d -name __pycache__ -prune -exec rm -rf {} +
 
       - name: Verify atomic corpus state before commit
