@@ -362,6 +362,8 @@ def main() -> None:
         duplicates_total += dup_count
         post_city[city] = {
             "expected": expected,
+            "pre_repair": city_data[city]["pre_repair"],
+            "episodes_added": city_data[city].get("planned_additions", 0),
             "reconstructed": len(idset),
             "missing": len(missing),
             "excess": len(excess),
