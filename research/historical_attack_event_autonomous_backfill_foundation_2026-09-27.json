@@ -1,9 +1,9 @@
 {
   "schema_version": 2,
   "kind": "historical_attack_event_autonomous_backfill_foundation",
-  "generated_at": "2026-09-27T13:19:20.889685Z",
+  "generated_at": "2026-09-27T13:22:05.992214Z",
   "actual_starting_head": "b5ee67c95f8adedd217e8b6efae415f5322d7337",
-  "acceptance_head": "17b6aa1122f23cbf4228a2ab266d5d0b626863cf",
+  "acceptance_head": "dab8724b258062b43babef76ed57c74d3dcf9c4d",
   "campaign_branch": "historical-attack-event-backfill-2026-09-27",
   "campaign_id": "historical-attack-events-v2-2026-09-27",
   "methodology_version": "historical-attack-event-air-defense-action-v2",
@@ -19,7 +19,7 @@
     "scheduled_resume_activation_note": "Default-branch scheduler remains a no-op while scanned_episodes == 0; no full campaign is started by methodology acceptance."
   },
   "code_version_identity": {
-    "classifier_sha": "d12032c376360c142cf828a3cf451c1a257090c3",
+    "classifier_sha": "18ca677e29a1ec9ef8ba2a0b7cb63da237f7ff02",
     "source_adapter_sha": "0ceb3ea480de9b401000ba9d8b0bb02b22d83c89",
     "orchestrator_sha": "cbd0de837f3c37b6a22027ce47c5dc567554144b",
     "discovery_sha": "1bb92d3355e60f060826519bd5823cc23cddf961",
@@ -129,12 +129,15 @@
   },
   "acceptance_test_results": {
     "classifier_drift": {
-      "passed": true,
+      "passed": false,
       "evaluated_candidates": 762,
-      "changed_candidate_count": 0,
-      "changed_classification_ids": [],
-      "targeted_air_defense_action_count": 0,
-      "uncontrolled_drift_count": 0,
+      "changed_candidate_count": 2,
+      "changed_classification_ids": [
+        "3567c9c47f76042ff8af230c",
+        "c0140340f7c5a90ee20dce78"
+      ],
+      "targeted_air_defense_action_count": 1,
+      "uncontrolled_drift_count": 1,
       "approved_regression_count": 0
     },
     "positive_ppo_controls": [
@@ -144,13 +147,15 @@
         "expected_event_types": [
           "air_defense_action"
         ],
-        "event_types": [],
-        "air_defense_context": false,
-        "air_defense_action": false,
+        "event_types": [
+          "air_defense_action"
+        ],
+        "air_defense_context": true,
+        "air_defense_action": true,
         "interception_claim": false,
-        "classification": "rejected",
-        "episode_id": null,
-        "passed": false
+        "classification": "approved_strict",
+        "episode_id": "air-defense-methodology-control",
+        "passed": true
       },
       {
         "control_id": "PPO_ACTION_PLUS_EXPLOSION",
@@ -160,14 +165,15 @@
           "air_defense_action"
         ],
         "event_types": [
-          "explosion"
+          "explosion",
+          "air_defense_action"
         ],
-        "air_defense_context": false,
-        "air_defense_action": false,
+        "air_defense_context": true,
+        "air_defense_action": true,
         "interception_claim": false,
         "classification": "approved_strict",
         "episode_id": "air-defense-methodology-control",
-        "passed": false
+        "passed": true
       },
       {
         "control_id": "PPO_INTERCEPTION",
@@ -175,13 +181,15 @@
         "expected_event_types": [
           "air_defense_action"
         ],
-        "event_types": [],
-        "air_defense_context": false,
-        "air_defense_action": false,
-        "interception_claim": false,
-        "classification": "rejected",
-        "episode_id": null,
-        "passed": false
+        "event_types": [
+          "air_defense_action"
+        ],
+        "air_defense_context": true,
+        "air_defense_action": true,
+        "interception_claim": true,
+        "classification": "approved_strict",
+        "episode_id": "air-defense-methodology-control",
+        "passed": true
       }
     ],
     "negative_ppo_controls": [
@@ -189,7 +197,7 @@
         "control_id": "PPO_PREDICTION",
         "source_text": "У Полтаві можлива робота ППО.",
         "event_types": [],
-        "air_defense_context": false,
+        "air_defense_context": true,
         "air_defense_action": false,
         "interception_claim": false,
         "classification": "rejected",
@@ -199,7 +207,7 @@
         "control_id": "PPO_WARNING",
         "source_text": "У Полтаві не лякайтеся, може бути чутно роботу ППО.",
         "event_types": [],
-        "air_defense_context": false,
+        "air_defense_context": true,
         "air_defense_action": false,
         "interception_claim": false,
         "classification": "rejected",
@@ -209,7 +217,7 @@
         "control_id": "PPO_READY",
         "source_text": "У Полтаві ППО готова до роботи.",
         "event_types": [],
-        "air_defense_context": false,
+        "air_defense_context": true,
         "air_defense_action": false,
         "interception_claim": false,
         "classification": "rejected",
@@ -222,7 +230,89 @@
       "retained_controls": 7,
       "rediscovered_controls": 7,
       "newly_positive_episode_ids": [],
-      "changes": [],
+      "changes": [
+        {
+          "episode_id": "6cd77c20720eafece633c1ad",
+          "previous_classification": "STRICT_EVENT_POSITIVE",
+          "new_classification": "STRICT_EVENT_POSITIVE",
+          "previous_event_types": [
+            "explosion"
+          ],
+          "new_event_types": [
+            "air_defense_action",
+            "explosion"
+          ],
+          "source_evidence": [
+            {
+              "observation_id": "21758c201aca9d8bbc7fcd83",
+              "source_url": "https://t.me/kozytskyy_maksym_official/27896",
+              "source_timestamp": "2026-02-05T14:36:42Z",
+              "excerpt": "У Львові працює ППО. Залишайтесь в укриттях до відбою.",
+              "event_types": [
+                "air_defense_action"
+              ],
+              "air_defense_action": true,
+              "interception_claim": false,
+              "classification_outcome": "approved_strict"
+            },
+            {
+              "observation_id": "dad4057278d25c4383d24ebf",
+              "source_url": "https://suspilne.media/lviv/1216592-u-lvovi-prolunali-vibuhi-pracuvala-ppo/",
+              "source_timestamp": "2026-02-05T14:45:47Z",
+              "excerpt": "У Львові 5 лютого сили протиповітряної оборони знищили безпілотник . За інформацією Львівської ОВА, він прямував у бік об’єкта критичної інфраструктури. Травмованих немає. Про це повідомив очільник Львівської ОВА Максим Козицький. Ввечері 5 лютого Максим Козицький повідомив : \"Вдалося збити безпілотник, який намагався завдати удар по об’єкту критичної інфраструктури. На жаль, ми б мали менше світла. Прохання допомагати ПВК \"Захід\", допомагати тим, хто закриває небо над Львівщиною\". Начальник ОВА",
+              "event_types": [
+                "explosion",
+                "air_defense_action"
+              ],
+              "air_defense_action": true,
+              "interception_claim": true,
+              "classification_outcome": "approved_sensitivity"
+            },
+            {
+              "observation_id": "93719ebc107d8a2bc3391c0a",
+              "source_url": "https://lviv.tsn.ua/lviv/u-lvovi-hrymliat-vybukhy-3015458.html",
+              "source_timestamp": "2026-02-05T15:33:12Z",
+              "excerpt": "Львів / © Associated Press Доповнено додатковими матеріалами У Львові пролунали вибухи під час повітряної тривоги 5 лютого. Над містом кружляє російський дрон. Про це повідомили очільник Львівської ОВА Максим Козицький , мер Львова Андрій Садовий та місцеві телеграм-канали. «У Львові працює ППО. Залишайтеся в укриттях до відбою», — написав Козицький у Мережі. Перед цим він попереджав про ворожий безпілотник курсом на обласний центр. «Безпілотник над містом», — повідомив своєю чергою Садовий. Жит",
+              "event_types": [
+                "explosion",
+                "air_defense_action"
+              ],
+              "air_defense_action": false,
+              "interception_claim": false,
+              "classification_outcome": "approved_strict"
+            }
+          ],
+          "solely_due_to_air_defense_action": false
+        },
+        {
+          "episode_id": "8cf4aa273a76166a6e8f232c",
+          "previous_classification": "STRICT_EVENT_POSITIVE",
+          "new_classification": "STRICT_EVENT_POSITIVE",
+          "previous_event_types": [
+            "explosion"
+          ],
+          "new_event_types": [
+            "explosion",
+            "air_defense_action"
+          ],
+          "source_evidence": [
+            {
+              "observation_id": "4104e14ed03e184584706b20",
+              "source_url": "https://suspilne.media/lviv/1237538-u-lvovi-cutno-vibuhi-u-misti-pracuvalo-ppo/",
+              "source_timestamp": "2026-02-11T13:04:27Z",
+              "excerpt": "У Львові 11 лютого під час повітряної тривоги пролунали вибухи . У місті було чутно роботу сил протиповітряної оборони. Як повідомив міський голова Львова Андрій Садовий, сили ППО збили два \"Кинджали\". \"Близько 14:40 в напрямку Львова летіли два \"Кинджали\". Сили ППО їх знешкодили. Це титанічна робота. Дякуємо нашим захисникам за захист!\" — написав Андрій Садовий. За його словами, станом на 15:28 інформації про руйнування чи травмованих не було. Міські служби розпочали обстеження території Львівс",
+              "event_types": [
+                "explosion",
+                "air_defense_action"
+              ],
+              "air_defense_action": true,
+              "interception_claim": true,
+              "classification_outcome": "approved_strict"
+            }
+          ],
+          "solely_due_to_air_defense_action": false
+        }
+      ],
       "unexplained_changes": []
     },
     "sevastopol": {
@@ -314,8 +404,8 @@
   "checks": {
     "source_adapter_self_test": true,
     "classifier_self_test": false,
-    "classifier_control_replay": true,
-    "positive_ppo_controls": false,
+    "classifier_control_replay": false,
+    "positive_ppo_controls": true,
     "negative_ppo_controls": true,
     "lviv_acceptance": true,
     "sevastopol_acceptance": true,
