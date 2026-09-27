@@ -288,6 +288,7 @@ def historical_review_roles(city: str, row: dict, monitor) -> tuple[dict, str]:
     direct_event_segment = None
     direct_event_type = None
     direct_event_basis = None
+    conflicting_named_city = False
 
     if city == "sevastopol":
         # Sevastopol's frozen final_evidence corpus stores reviewed factual
@@ -308,6 +309,10 @@ def historical_review_roles(city: str, row: dict, monitor) -> tuple[dict, str]:
         # Preserve only facts explicit in the retained summary.
         city_pattern = r"\b(?:сум|суми|сумах|сумами)\b"
         exact_city = bool(re.search(city_pattern, low))
+        conflicting_named_city = any(
+            named_city != "sumy"
+            for named_city in monitor.audited_cities_in_text(evidence)
+        )
 
         adversary = (
             r"(?:рф|росі(?:я|йськ\w*)|ворож\w*|окупант\w*|"
@@ -478,7 +483,7 @@ def historical_review_roles(city: str, row: dict, monitor) -> tuple[dict, str]:
             "basis": direct_event_basis,
             "evidence_text": direct_event_segment[:1200],
         }
-    elif exact_city and explosion and air_context:
+    elif exact_city and explosion and air_context and not conflicting_named_city:
         roles["same_attack_basis"] = {
             "present": True,
             "basis": "reviewed_factual_summary_links_exact_city_explosion_and_air_context",
