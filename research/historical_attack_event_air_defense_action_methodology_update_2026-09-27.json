@@ -1,143 +1,71 @@
 {
-  "schema_version": 2,
-  "kind": "historical_attack_event_autonomous_backfill_foundation",
-  "generated_at": "2026-09-27T13:19:20.889685Z",
-  "actual_starting_head": "b5ee67c95f8adedd217e8b6efae415f5322d7337",
+  "schema_version": 1,
+  "kind": "historical_attack_event_air_defense_action_methodology_update",
+  "generated_at": "2026-09-27T13:19:20.892144Z",
+  "starting_head": "b5ee67c95f8adedd217e8b6efae415f5322d7337",
   "acceptance_head": "17b6aa1122f23cbf4228a2ab266d5d0b626863cf",
   "campaign_branch": "historical-attack-event-backfill-2026-09-27",
-  "campaign_id": "historical-attack-events-v2-2026-09-27",
-  "methodology_version": "historical-attack-event-air-defense-action-v2",
-  "state_location": "research/historical_attack_event_backfill_status.json",
-  "campaign_architecture": {
-    "batch_runner": "kyiv-air-alerts-grafana/scripts/run_historical_attack_event_backfill_batch.py",
-    "batch_artifact_layout": "research/historical_attack_event_backfill/<campaign_id>/<city>/batch_000001.json",
-    "workflow": ".github/workflows/historical-attack-event-backfill.yml",
-    "default_batch_size": 50,
-    "late_damage_fire_window_hours": 72,
-    "same_campaign_resume_requires_same_versions": true,
-    "scheduled_resume_declared": true,
-    "scheduled_resume_activation_note": "Default-branch scheduler remains a no-op while scanned_episodes == 0; no full campaign is started by methodology acceptance."
-  },
-  "code_version_identity": {
-    "classifier_sha": "d12032c376360c142cf828a3cf451c1a257090c3",
-    "source_adapter_sha": "0ceb3ea480de9b401000ba9d8b0bb02b22d83c89",
-    "orchestrator_sha": "cbd0de837f3c37b6a22027ce47c5dc567554144b",
-    "discovery_sha": "1bb92d3355e60f060826519bd5823cc23cddf961",
-    "sevastopol_pilot_sha": "24f63ca254a6cb41f4073602518eecea2a30d0ab",
-    "normalization_version": "historical-attack-event-observation-v2",
-    "methodology_version": "historical-attack-event-air-defense-action-v2"
-  },
-  "source_registry": {
-    "path": "research/historical_attack_event_source_registry.json",
-    "blob_sha": "8e4ac347f32261cd29288a59c3c06d1d99929c45"
-  },
-  "replay_ready_cities": [
-    {
-      "city_key": "cherkasy",
-      "total_episodes": 1548,
-      "replay_status": "QA_REQUIRED",
-      "manual_qa_count": 34
-    },
-    {
-      "city_key": "kyiv",
-      "total_episodes": 2456,
-      "replay_status": "QA_REQUIRED",
-      "manual_qa_count": 260
-    },
-    {
-      "city_key": "lviv",
-      "total_episodes": 126,
-      "replay_status": "READY",
-      "manual_qa_count": 0
-    },
-    {
-      "city_key": "sevastopol",
-      "total_episodes": 527,
-      "replay_status": "READY",
-      "manual_qa_count": 0
-    },
-    {
-      "city_key": "sumy",
-      "total_episodes": 2297,
-      "replay_status": "QA_REQUIRED",
-      "manual_qa_count": 19
-    },
-    {
-      "city_key": "zaporizhzhia",
-      "total_episodes": 2365,
-      "replay_status": "QA_REQUIRED",
-      "manual_qa_count": 151
-    }
-  ],
-  "discovery_ready_cities": [
-    "cherkasy",
-    "lviv",
-    "sevastopol",
-    "sumy",
-    "zaporizhzhia"
-  ],
-  "source_adapter_required_cities": [
-    "kyiv"
-  ],
-  "total_episodes_currently_eligible_for_autonomous_scan": 6863,
-  "event_taxonomy": [
-    "explosion",
-    "impact",
-    "arrival",
-    "strike",
-    "damage",
-    "fire",
-    "air_defense_action"
-  ],
-  "ppo_contract": {
-    "air_defense_context_separate": true,
-    "air_defense_action_separate": true,
-    "interception_claim_separate": true,
-    "confirmed_actual_air_defense_action_sets_event_positive": true,
-    "predicted_possible_air_defense_sets_event_positive": false,
-    "rule": "confirmed actual air-defense action bound to an alert episode is an event-positive attack-event class"
-  },
-  "checkpoint_schema": {
-    "schema_version": 2,
-    "status_path": "research/historical_attack_event_backfill_status.json",
-    "episode_result_fields": [
-      "confirmed_event_types",
-      "sensitivity_event_types",
-      "air_defense_context",
-      "air_defense_action",
-      "interception_claim",
-      "event_positive_strict",
-      "event_positive_sensitivity"
+  "old_methodology": {
+    "event_taxonomy": [
+      "explosion",
+      "impact",
+      "arrival",
+      "strike",
+      "damage",
+      "fire"
     ],
-    "terminal_states": [
-      "STRICT_EVENT_POSITIVE",
-      "SENSITIVITY_EVENT_POSITIVE",
-      "NO_CONFIRMED_EVENT",
-      "NEEDS_REVIEW"
+    "ppo_rule": "PPO-only sets event-positive = NO",
+    "campaign_id": "historical-attack-events-v1-2026-09-27"
+  },
+  "new_methodology": {
+    "event_taxonomy": [
+      "explosion",
+      "impact",
+      "arrival",
+      "strike",
+      "damage",
+      "fire",
+      "air_defense_action"
     ],
-    "retryable_state": "SOURCE_FETCH_RETRY_REQUIRED",
-    "blocked_state": "SOURCE_ADAPTER_REQUIRED"
+    "rule": "confirmed actual air-defense action bound to an alert episode is an event-positive attack-event class",
+    "prediction_warning_rule": "possible, predicted, readiness, capability, or warning-only PPO does not set air_defense_action and is non-event-positive unless another event class is confirmed",
+    "interception_rule": "interception_claim remains a separate attribute and is not required for air_defense_action",
+    "numerator_rule": "episode contributes at most 1 when strict/sensitivity evidence supports at least one canonical event class"
   },
-  "workflow_design": {
-    "manual_workflow_dispatch": true,
-    "scheduled_resume": true,
-    "concurrency_protection": true,
-    "no_force_push": true,
-    "stale_writer_guard": true,
-    "batch_checkpoint_atomic_commit": true,
-    "full_campaign_started": false
-  },
-  "acceptance_test_results": {
-    "classifier_drift": {
-      "passed": true,
-      "evaluated_candidates": 762,
-      "changed_candidate_count": 0,
-      "changed_classification_ids": [],
-      "targeted_air_defense_action_count": 0,
-      "uncontrolled_drift_count": 0,
-      "approved_regression_count": 0
+  "classifier_schema_versions": {
+    "before": {
+      "classifier_sha": "eefd63aeebc17347b750f61115842be6c53a79da",
+      "source_adapter_sha": "0ceb3ea480de9b401000ba9d8b0bb02b22d83c89",
+      "orchestrator_sha": "bffd09462b36fd2581216e6511641fd44b199e3f",
+      "normalization_version": "historical-attack-event-observation-v1"
     },
-    "positive_ppo_controls": [
+    "after": {
+      "classifier_sha": "d12032c376360c142cf828a3cf451c1a257090c3",
+      "source_adapter_sha": "0ceb3ea480de9b401000ba9d8b0bb02b22d83c89",
+      "orchestrator_sha": "cbd0de837f3c37b6a22027ce47c5dc567554144b",
+      "discovery_sha": "1bb92d3355e60f060826519bd5823cc23cddf961",
+      "sevastopol_pilot_sha": "24f63ca254a6cb41f4073602518eecea2a30d0ab",
+      "normalization_version": "historical-attack-event-observation-v2",
+      "methodology_version": "historical-attack-event-air-defense-action-v2"
+    },
+    "checkpoint_schema_before": 1,
+    "checkpoint_schema_after": 2,
+    "campaign_id_before": "historical-attack-events-v1-2026-09-27",
+    "campaign_id_after": "historical-attack-events-v2-2026-09-27"
+  },
+  "exact_code_files_changed": [
+    "kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py",
+    "kyiv-air-alerts-grafana/scripts/audit_attack_event_classifier.py",
+    "kyiv-air-alerts-grafana/scripts/discover_historical_attack_events.py",
+    "kyiv-air-alerts-grafana/scripts/run_historical_attack_event_source_adapter_pilot.py",
+    "kyiv-air-alerts-grafana/scripts/run_historical_attack_event_backfill_batch.py",
+    "research/historical_attack_event_source_registry.json",
+    "research/historical_attack_event_backfill_status.json",
+    ".github/workflows/historical-attack-event-backfill.yml",
+    ".github/workflows/historical-attack-event-backfill-scheduler.yml"
+  ],
+  "positive_ppo_controls": {
+    "synthetic": [
       {
         "control_id": "PPO_ACTION_ONLY",
         "source_text": "У Полтаві працює ППО.",
@@ -184,7 +112,54 @@
         "passed": false
       }
     ],
-    "negative_ppo_controls": [
+    "retained_evidence_examples": [
+      {
+        "episode_id": "da994aee739fff615d7ae681",
+        "source": "24 Канал live chronology",
+        "url": "https://24tv.ua/hronologiya-1287-dnya-viyni-ataka-shahedami-02092025-situatsiya_n2905858",
+        "text": "У Запоріжжі працює ППО.",
+        "classification": "strict_air_defense"
+      },
+      {
+        "episode_id": "70067c052eec48f162697391",
+        "source": "Укрінформ",
+        "url": "https://www.ukrinform.ua/rubric-regions/4036500-na-zaporizzi-znovu-vibuhi-po-vorozih-cilah-pracue-ppo.html",
+        "text": "Ворог знову атакував Запоріжжя, вдруге за ніч було чути вибухи, по ворожих цілях працювала ППО.",
+        "classification": "strict_air_defense"
+      },
+      {
+        "episode_id": "8a765ebfb55474d47cea7625",
+        "source": "СУСПІЛЬНЕ НОВИНИ Telegram",
+        "url": "https://t.me/suspilnenews/56376",
+        "text": "У Запоріжжі працює ППО, повідомив керівник ОВА Федоров.",
+        "classification": "strict_air_defense"
+      },
+      {
+        "episode_id": "41f41f98fef80130dff07317",
+        "source": "Укрінформ",
+        "url": "https://www.ukrinform.ua/rubric-regions/4061628-u-zaporizzi-pid-cas-trivogi-prolunali-vibuhi.html",
+        "text": "Запоріжці, вибухи, які було чутно у місті - робота нашої ППО.",
+        "classification": "strict_air_defense"
+      },
+      {
+        "episode_id": "5a7d64e4d58b240825d0c954",
+        "source": "Укрінформ",
+        "url": "https://www.ukrinform.ua/rubric-regions/4070429-u-zaporizzi-prolunali-vibuhi.html",
+        "text": "Під час повітряної тривоги у Запоріжжі було чутно звуки вибухів. «Працює наша ППО».",
+        "classification": "strict_air_defense"
+      },
+      {
+        "episode_id": "fc2a7bef1e30703439ca5c06",
+        "source": "NV live chronology",
+        "url": "https://nv.ua/ukr/ukraine/events/ataka-rf-na-ukrajinu-1-lyutogo-povitryani-sili-povidomili-pro-zagrozu-bpla-mapa-povitryanih-trivog-50580152.html",
+        "text": "06:27. У Запоріжжі працює ППО — ОВА.",
+        "classification": "strict_air_defense"
+      }
+    ],
+    "passed": false
+  },
+  "negative_ppo_controls": {
+    "synthetic": [
       {
         "control_id": "PPO_PREDICTION",
         "source_text": "У Полтаві можлива робота ППО.",
@@ -216,47 +191,47 @@
         "passed": true
       }
     ],
-    "lviv": {
-      "passed": true,
-      "selected_episodes": 40,
-      "retained_controls": 7,
-      "rediscovered_controls": 7,
-      "newly_positive_episode_ids": [],
-      "changes": [],
-      "unexplained_changes": []
-    },
-    "sevastopol": {
-      "passed": true,
-      "selected_episodes": 40,
-      "strict": 0,
-      "sensitivity": 0,
-      "needs_review": 4,
-      "current_rule_downgrade_ids": [
-        "05300b71bb2c1311bddc3527",
-        "0ed9d9044dde6bc06645e064",
-        "a94b7665358a92d17b405839"
-      ],
-      "resolved_current_rule_downgrade_ids": [],
-      "changes": [],
-      "unexplained_changes": []
-    }
+    "passed": true
   },
-  "restart_idempotence_proof": {
-    "restart_proof": "PASS",
-    "completed_batch_rerun": false,
-    "unfinished_work_resumed": true,
-    "duplicate_observations": 0,
-    "uninterrupted_equivalence": true,
-    "second_resume_new_work": 0,
-    "idempotence": "PASS",
-    "version_change_protection": "PASS"
+  "classifier_control_replay": {
+    "total_controls_evaluated": 762,
+    "total_changed_classifications": 0,
+    "changed_classification_ids": [],
+    "changes": [],
+    "uncontrolled_drift_count": 0,
+    "approved_regression_count": 0
   },
-  "version_change_proof": {
+  "all_classification_changes": {
+    "classifier_records": [],
+    "lviv_episode_changes": [],
+    "sevastopol_episode_changes": []
+  },
+  "unexplained_drift_count": 0,
+  "lviv_acceptance_result": {
     "passed": true,
-    "behavior": "same campaign with processed episodes rejects incompatible methodology/classifier/adapter/orchestrator/normalization identity"
+    "selected_episodes": 40,
+    "retained_controls": 7,
+    "rediscovered_controls": 7,
+    "newly_positive_episode_ids": [],
+    "changes": [],
+    "unexplained_changes": []
   },
-  "protected_file_verification": {
-    "unchanged": true,
+  "sevastopol_acceptance_result": {
+    "passed": true,
+    "selected_episodes": 40,
+    "strict": 0,
+    "sensitivity": 0,
+    "needs_review": 4,
+    "current_rule_downgrade_ids": [
+      "05300b71bb2c1311bddc3527",
+      "0ed9d9044dde6bc06645e064",
+      "a94b7665358a92d17b405839"
+    ],
+    "resolved_current_rule_downgrade_ids": [],
+    "changes": [],
+    "unexplained_changes": []
+  },
+  "protected_file_hashes": {
     "before": {
       "kyiv-air-alerts-grafana/data/explosion_audited_baseline.json": "5bbd2b771559eac2966aeec65d6e3b5487b9c1a9",
       "kyiv-air-alerts-grafana/data/explosion_review_queue.json": "e6ed6776ae326a18a07978b1979dd3b265096bf0",
@@ -298,38 +273,10 @@
       "kyiv-air-alerts-grafana/data/explosion_research/sevastopol/final_evidence.json": "931a575dbd9b3fc4c90579bfbbb9ad54d8e70a62",
       "kyiv-air-alerts-grafana/data/explosion_research/sumy/final_evidence.json": "7c0a4a64b3d7000cd10e8f1b846b1e57641d8a4d",
       "kyiv-air-alerts-grafana/data/explosion_research/zaporizhzhia/final_evidence.json": "afc2702bfeb0b599dbec00d251362450b2d292e1"
-    }
-  },
-  "exact_code_workflow_files_changed": [
-    "kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py",
-    "kyiv-air-alerts-grafana/scripts/audit_attack_event_classifier.py",
-    "kyiv-air-alerts-grafana/scripts/discover_historical_attack_events.py",
-    "kyiv-air-alerts-grafana/scripts/run_historical_attack_event_source_adapter_pilot.py",
-    "kyiv-air-alerts-grafana/scripts/run_historical_attack_event_backfill_batch.py",
-    "research/historical_attack_event_source_registry.json",
-    "research/historical_attack_event_backfill_status.json",
-    ".github/workflows/historical-attack-event-backfill.yml",
-    ".github/workflows/historical-attack-event-backfill-scheduler.yml"
-  ],
-  "checks": {
-    "source_adapter_self_test": true,
-    "classifier_self_test": false,
-    "classifier_control_replay": true,
-    "positive_ppo_controls": false,
-    "negative_ppo_controls": true,
-    "lviv_acceptance": true,
-    "sevastopol_acceptance": true,
-    "restart_idempotence": {
-      "restart_proof": "PASS",
-      "completed_batch_rerun": false,
-      "unfinished_work_resumed": true,
-      "duplicate_observations": 0,
-      "uninterrupted_equivalence": true,
-      "second_resume_new_work": 0,
-      "idempotence": "PASS",
-      "version_change_protection": "PASS"
     },
-    "protected_files_unchanged": true
+    "unchanged": true
   },
-  "verdict": "AUTONOMOUS HISTORICAL ATTACK-EVENT BACKFILL FOUNDATION BLOCKED — ACCEPTANCE_FAILURE"
+  "campaign_methodology_version_changed": true,
+  "full_campaign_launch_status": "NOT_STARTED",
+  "verdict": "AIR-DEFENSE ACTION METHODOLOGY UPDATE BLOCKED — ACCEPTANCE_FAILURE"
 }
