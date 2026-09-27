@@ -1,0 +1,232 @@
+{
+  "schema_version": "sumy-three-recovered-sources-atomic-evidence-repair-v1",
+  "generated_date": "2026-09-27",
+  "repository": "olegbalakin-cmyk/kyiv-air-alerts-grafana",
+  "branch": "multicity-wip-2026-09-16",
+  "starting_head": "49c16ed3df07e8e100eeebf37aad673f2d507a5d",
+  "authoritative_recovery_artifact": {
+    "path": "research/sumy_final_four_source_recovery_preflight_2026-09-27.json",
+    "commit": "49c16ed3df07e8e100eeebf37aad673f2d507a5d"
+  },
+  "pre_repair_replay": {
+    "execution": "actual GitHub Actions Sumy read-only replay on semantically identical Sumy replay inputs",
+    "workflow_run_id": 36345928578,
+    "workflow_job_id": 108694929010,
+    "input_head": "1bb62eeacf5cdb2799acd985266e94740b5e1923",
+    "starting_head_semantic_identity_verified": true,
+    "semantic_identity_basis": "compare 1bb62e..49c16 shows no changes to Sumy final_evidence, Sumy source slices, replay_explosion_history.py, or monitor_explosion_candidates.py",
+    "denominator_expected": 2297,
+    "denominator_reconstructed": 2297,
+    "strict": 201,
+    "sensitivity": 233,
+    "qa_count": 5,
+    "qa_episode_ids": [
+      "2c7ad2e0b42e1350e305a18f",
+      "402035df8980628fa245c4e8",
+      "45050b31bdcf42a5f8054e8d",
+      "90a484f51b321e0950e31b60",
+      "c69285b7ffb05693c3393895"
+    ]
+  },
+  "repair": {
+    "commit_sha": "2f2ce7a5e66f02d991b0e271f2e2ff5ec3c8c4d5",
+    "changed_files": [
+      "kyiv-air-alerts-grafana/data/explosion_research/sumy/final_evidence.json"
+    ],
+    "final_evidence_blob_before": "7c0a4a64b3d7000cd10e8f1b846b1e57641d8a4d",
+    "final_evidence_blob_after": "cb4413104bf9e834be10f49abc4041621f396c1b",
+    "append_only": true,
+    "existing_evidence_source_url_decision_basis_preserved": true,
+    "targets": {
+      "2c7ad2e0b42e1350e305a18f": {
+        "repaired": true,
+        "existing_record_preserved": true,
+        "appended_excerpt": "Source-local sequence: 21:21 «❗️Всі укриття Суми» → 21:23 «На удар» → 21:28 «Кружляє падло, це Італмас - вишукує ціль» → 21:29 «Вибух».",
+        "recovered_source_context": {
+          "source_url": "https://t.me/s/sumygo?before=130739",
+          "source_local_date": "2025-10-06",
+          "source_local_time_basis": "Telegram source display",
+          "source_local_order": [
+            {
+              "time": "21:21",
+              "text": "❗️Всі укриття Суми"
+            },
+            {
+              "time": "21:23",
+              "text": "На удар"
+            },
+            {
+              "time": "21:28",
+              "text": "Кружляє падло, це Італмас - вишукує ціль"
+            },
+            {
+              "time": "21:29",
+              "text": "Вибух"
+            }
+          ],
+          "supported_event_types": [
+            "explosion"
+          ]
+        }
+      },
+      "45050b31bdcf42a5f8054e8d": {
+        "repaired": true,
+        "existing_record_preserved": true,
+        "appended_excerpt": "Source-local sequence: 20:34 джерело відстежує ворожий БпЛА «Молнія» курсом на Суми; «Суми в укриття!» → 20:35 «Збили» → immediate follow-up «Впала десь біля будинків в Сумах.»",
+        "recovered_source_context": {
+          "source_url": "https://t.me/s/sumyregion?before=139789",
+          "source_local_date": "2026-07-06",
+          "source_local_time_basis": "Telegram source display",
+          "source_local_order": [
+            {
+              "time": "20:34",
+              "text": "Молнія курсом на Суми; Суми в укриття!",
+              "note": "source-local approach context summarized in the recovery preflight"
+            },
+            {
+              "time": "20:35",
+              "text": "Збили"
+            },
+            {
+              "time": null,
+              "text": "Впала десь біля будинків в Сумах.",
+              "note": "immediate source-local follow-up; exact display time not retained in the recovery preflight"
+            }
+          ],
+          "supported_event_types": [
+            "explosion",
+            "air_defense_action",
+            "impact",
+            "damage"
+          ]
+        }
+      },
+      "c69285b7ffb05693c3393895": {
+        "repaired": true,
+        "existing_record_preserved": true,
+        "appended_excerpt": "Source-local sequence: 21:16 «Суми всі укриття, Італмас над містом» → 21:18 «Вибух» → 21:20 «Вибух» → 21:22 «Усі прильоти по місту».",
+        "recovered_source_context": {
+          "source_url": "https://t.me/s/sumygo?before=131089",
+          "source_local_date": "2025-10-08",
+          "source_local_time_basis": "Telegram source display",
+          "source_local_order": [
+            {
+              "time": "21:16",
+              "text": "Суми всі укриття, Італмас над містом"
+            },
+            {
+              "time": "21:18",
+              "text": "Вибух"
+            },
+            {
+              "time": "21:20",
+              "text": "Вибух"
+            },
+            {
+              "time": "21:22",
+              "text": "Усі прильоти по місту"
+            }
+          ],
+          "supported_event_types": [
+            "explosion",
+            "arrival"
+          ]
+        }
+      }
+    }
+  },
+  "post_repair_replay": {
+    "execution": "actual GitHub Actions Sumy read-only replay",
+    "workflow_run_id": 36347034347,
+    "workflow_job_id": 108698094805,
+    "workflow_artifact_id": 10941226899,
+    "input_head": "2f2ce7a5e66f02d991b0e271f2e2ff5ec3c8c4d5",
+    "conclusion": "success",
+    "status": "COMPLETE",
+    "episodes_checked": 2297,
+    "denominator_expected": 2297,
+    "denominator_reconstructed": 2297,
+    "strict": 204,
+    "sensitivity": 236,
+    "qa_count": 2,
+    "qa_episode_ids": [
+      "402035df8980628fa245c4e8",
+      "90a484f51b321e0950e31b60"
+    ],
+    "errors": [],
+    "protected_files_unchanged": true
+  },
+  "delta_audit": {
+    "removed_qa_ids": [
+      "2c7ad2e0b42e1350e305a18f",
+      "45050b31bdcf42a5f8054e8d",
+      "c69285b7ffb05693c3393895"
+    ],
+    "added_qa_ids": [],
+    "denominator": {
+      "before": 2297,
+      "after": 2297,
+      "delta": 0
+    },
+    "strict": {
+      "before": 201,
+      "after": 204,
+      "delta": 3
+    },
+    "sensitivity": {
+      "before": 233,
+      "after": 236,
+      "delta": 3
+    },
+    "qa": {
+      "before": 5,
+      "after": 2,
+      "delta": -3
+    },
+    "all_three_ready_targets_removed": true,
+    "no_new_qa_ids": true,
+    "no_unrelated_qa_removal": true,
+    "strict_sensitivity_delta_fully_explained_by_three_targets": true,
+    "unexplained_drift": false
+  },
+  "out_of_scope_controls": {
+    "402035df8980628fa245c4e8": {
+      "modified_by_repair": false,
+      "qa_before": true,
+      "qa_after": true,
+      "unchanged_by_this_repair": true
+    },
+    "90a484f51b321e0950e31b60": {
+      "modified_by_repair": false,
+      "qa_before": true,
+      "qa_after": true,
+      "unchanged_by_this_repair": true
+    }
+  },
+  "protected_state": {
+    "replay_classifier_code_modified": false,
+    "other_cities_data_modified_by_repair": false,
+    "historical_alert_corpus_modified_by_repair": false,
+    "site_prod_modified": false,
+    "production_dashboard_state_modified": false,
+    "active_6863_campaign": {
+      "branch": "historical-attack-event-backfill-2026-09-27",
+      "head_before": "5809bd677a93e6c2f6a1bff9cb7f6b5bde0c7c1e",
+      "head_after": "5809bd677a93e6c2f6a1bff9cb7f6b5bde0c7c1e",
+      "unchanged": true
+    },
+    "protected_files_unchanged_except_intended_evidence_additions": true
+  },
+  "post_replay_branch_drift": {
+    "observed": true,
+    "commit": "92280d0b55f24eca75e2c29337d02e66f7e5cf04",
+    "files": [
+      "research/historical_replay_status_current.json"
+    ],
+    "classification": "automated post-replay status snapshot only",
+    "sumy_final_evidence_blob_after_drift": "cb4413104bf9e834be10f49abc4041621f396c1b",
+    "affects_repair_verdict": false
+  },
+  "artifact_path": "research/sumy_three_recovered_sources_atomic_evidence_repair_2026-09-27.json",
+  "verdict": "SUMY THREE RECOVERED SOURCES ATOMICALLY APPLIED"
+}
