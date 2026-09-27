@@ -134,7 +134,7 @@ def main() -> None:
             gained_strict
             and after.get("air_defense_action") is True
             and "air_defense_action" in after["event_types"]
-            and before.get("air_defense_action") is False
+            and "air_defense_action" not in before["event_types"]
         )
         targeted = targeted_damage_fire or targeted_relative_chronology or targeted_air_defense_action
         row = {
