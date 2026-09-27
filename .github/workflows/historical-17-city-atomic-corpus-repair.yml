@@ -1,0 +1,259 @@
+name: Historical 17-city atomic corpus repair
+
+on:
+  push:
+    branches:
+      - historical-17-city-atomic-corpus-repair-runner-2026-09-27
+    paths:
+      - .github/workflows/historical-17-city-atomic-corpus-repair.yml
+
+permissions:
+  contents: write
+
+jobs:
+  repair:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      TARGET_BRANCH: multicity-wip-2026-09-16
+      PRE_HEAD: 29364ca6d1275e9fbbca657f5f20a2ec4f7eb179
+      CORRECTED_CONTRACT: 68f716be027d3a614bbee02878ecf23f6c80c993
+      CORRECTED_ARTIFACT_COMMIT: 89f3304e91ae5bbf1bdeb7fd13f1a18b480e4e99
+      CORRECTED_RUNNER_COMMIT: 3850391fcb0beada6f08c17983efa22b4fac1f90
+      FORENSIC_COMMIT: 87c0993fe87037729a947a812cc70f8d8fac729a
+      UPSTREAM_BLOB: 71d70c0ca54968f530d596cf315616fa858800e1
+      ACTIVE_CAMPAIGN_BRANCH: historical-attack-event-backfill-2026-09-27
+      ACTIVE_CAMPAIGN_EXPECTED: 5809bd677a93e6c2f6a1bff9cb7f6b5bde0c7c1e
+      ARTIFACT: research/historical_17_city_atomic_corpus_repair_2026-09-27.json
+
+    steps:
+      - name: Checkout runner branch
+        uses: actions/checkout@v4
+        with:
+          ref: historical-17-city-atomic-corpus-repair-runner-2026-09-27
+          fetch-depth: 0
+
+      - name: Verify target precondition
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch --no-tags origin "$TARGET_BRANCH"
+          remote_head="$(git rev-parse "origin/$TARGET_BRANCH")"
+          test "$remote_head" = "$PRE_HEAD"
+          git fetch --no-tags origin "$CORRECTED_CONTRACT" "$CORRECTED_ARTIFACT_COMMIT" "$CORRECTED_RUNNER_COMMIT" "$FORENSIC_COMMIT"
+          test "$(git merge-base "$PRE_HEAD" "$CORRECTED_CONTRACT")" = "$PRE_HEAD"
+          campaign="$(git ls-remote origin "refs/heads/$ACTIVE_CAMPAIGN_BRANCH" | cut -f1)"
+          test "$campaign" = "$ACTIVE_CAMPAIGN_EXPECTED"
+
+      - name: Set up exact target worktree state
+        shell: bash
+        run: |
+          set -euo pipefail
+          git checkout -B "$TARGET_BRANCH" "$PRE_HEAD"
+          git checkout "$CORRECTED_CONTRACT" --             kyiv-air-alerts-grafana/data/explosion_metric_handoff/RESEARCH_SLICES_2026-09-18.csv             kyiv-air-alerts-grafana/data/explosion_metric_handoff/RESEARCH_SUBSLICES_2026-09-19.csv             kyiv-air-alerts-grafana/data/explosion_metric_handoff/chernihiv_P3_result.json             kyiv-air-alerts-grafana/scripts/build_explosion_source_slices.py             research/historical_replay_status_current.json
+          git show "$CORRECTED_RUNNER_COMMIT:kyiv-air-alerts-grafana/scripts/historical_17_city_corrected_baseline_reconciliation.py" > kyiv-air-alerts-grafana/scripts/_historical_17_city_corrected_recon_tmp.py
+          git show "$FORENSIC_COMMIT:research/historical_17_city_corpus_gap_forensic_inventory_2026-09-27.json" > /tmp/historical_17_city_corpus_gap_forensic_inventory_2026-09-27.json
+          git show "a44b27cbe66d8563655f39d75b09d7b86ba37d7f:kyiv-air-alerts-grafana/scripts/historical_17_city_atomic_corpus_repair_runner.py" > /tmp/historical_17_city_atomic_corpus_repair_runner.py
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install runtime dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pip install --disable-pip-version-check --quiet requests beautifulsoup4
+
+      - name: Materialize exact verified upstream blob
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/ukrainian-air-raid-sirens-dataset.git
+          git clone --mirror --quiet https://github.com/Vadimkin/ukrainian-air-raid-sirens-dataset.git /tmp/ukrainian-air-raid-sirens-dataset.git
+          git -C /tmp/ukrainian-air-raid-sirens-dataset.git rev-list --all -- datasets/official_data_uk.csv > /tmp/upstream_path_commits.txt
+          found=""
+          while IFS= read -r commit; do
+            blob="$(git -C /tmp/ukrainian-air-raid-sirens-dataset.git rev-parse "$commit:datasets/official_data_uk.csv" 2>/dev/null || true)"
+            if [ "$blob" = "$UPSTREAM_BLOB" ]; then found="$commit"; break; fi
+          done < /tmp/upstream_path_commits.txt
+          test -n "$found"
+          git -C /tmp/ukrainian-air-raid-sirens-dataset.git cat-file blob "$UPSTREAM_BLOB" > /tmp/official_data_uk.csv
+          test "$(git hash-object /tmp/official_data_uk.csv)" = "$UPSTREAM_BLOB"
+
+      - name: Snapshot protected state
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import hashlib, json
+          from pathlib import Path
+          root=Path("kyiv-air-alerts-grafana")
+          paths=["data/explosion_review_queue.json","data/explosion_candidate_monitor_state.json","data/explosion_candidate_monitor_last_run.json","data/dashboard_data.json"]
+          out={}
+          for rel in paths:
+              p=root/rel
+              out[rel]=hashlib.sha256(p.read_bytes()).hexdigest() if p.exists() else None
+          Path("/tmp/protected_before.json").write_text(json.dumps(out,sort_keys=True))
+          PY
+
+      - name: Apply approved corpus mutation
+        shell: bash
+        run: |
+          set -euo pipefail
+          python /tmp/historical_17_city_atomic_corpus_repair_runner.py --mode apply --upstream /tmp/official_data_uk.csv --forensic /tmp/historical_17_city_corpus_gap_forensic_inventory_2026-09-27.json --output /tmp/repair_apply.json --expected-pre-head "$PRE_HEAD"
+          rm kyiv-air-alerts-grafana/scripts/_historical_17_city_corrected_recon_tmp.py
+          find kyiv-air-alerts-grafana/scripts -type d -name __pycache__ -prune -exec rm -rf {} +
+
+      - name: Verify atomic corpus state before commit
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          d=json.load(open("/tmp/repair_apply.json"))
+          assert d["expected_total"] == 17086
+          assert d["pre_repair_total"] == 6705
+          assert d["post_repair_total"] == 17086
+          assert d["cities_reconciled"] == 17
+          assert d["missing_canonical_ids"] == {}
+          assert d["unexplained_excess_ids"] == {}
+          assert d["duplicate_canonical_ids"] == 0
+          assert d["chernihiv_final_count"] == 1676
+          assert d["synthetic_chernihiv_episode_added"] is False
+          assert d["per_city"]["kharkiv"]["reconstructed"] == 3565
+          assert d["kharkiv_boundary_episode_present"] is False
+          PY
+          campaign="$(git ls-remote origin "refs/heads/$ACTIVE_CAMPAIGN_BRANCH" | cut -f1)"
+          test "$campaign" = "$ACTIVE_CAMPAIGN_EXPECTED"
+
+      - name: Commit atomic corpus repair
+        id: repair_commit
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add kyiv-air-alerts-grafana/data/explosion_audited_baseline.json kyiv-air-alerts-grafana/data/explosion_metric_handoff/RESEARCH_SLICES_2026-09-18.csv kyiv-air-alerts-grafana/data/explosion_metric_handoff/RESEARCH_SUBSLICES_2026-09-19.csv kyiv-air-alerts-grafana/data/explosion_metric_handoff/chernihiv_P3_result.json kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices kyiv-air-alerts-grafana/scripts/build_explosion_source_slices.py research/historical_replay_status_current.json
+          changed="$(git diff --cached --name-only)"
+          test -n "$changed"
+          if echo "$changed" | grep -Ev '^(kyiv-air-alerts-grafana/data/explosion_audited_baseline.json|kyiv-air-alerts-grafana/data/explosion_metric_handoff/RESEARCH_SLICES_2026-09-18.csv|kyiv-air-alerts-grafana/data/explosion_metric_handoff/RESEARCH_SUBSLICES_2026-09-19.csv|kyiv-air-alerts-grafana/data/explosion_metric_handoff/chernihiv_P3_result.json|kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/[^/]+-historical-recovery_alerts.json|kyiv-air-alerts-grafana/scripts/build_explosion_source_slices.py|research/historical_replay_status_current.json)$'; then
+            echo "unexpected repair path" >&2; exit 1
+          fi
+          git commit -m "Repair corrected 17-city historical alert corpus"
+          repair_sha="$(git rev-parse HEAD)"
+          echo "sha=$repair_sha" >> "$GITHUB_OUTPUT"
+          test "$(git ls-remote origin "refs/heads/$TARGET_BRANCH" | cut -f1)" = "$PRE_HEAD"
+          git push origin "HEAD:refs/heads/$TARGET_BRANCH"
+
+      - name: Real replay verification for repaired cities
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/replays
+          cities="chernihiv chernivtsi dnipro ivano_frankivsk kharkiv kherson khmelnytskyi kropyvnytskyi lutsk mykolaiv odesa poltava rivne ternopil uzhhorod vinnytsia zhytomyr"
+          for city in $cities; do
+            python kyiv-air-alerts-grafana/scripts/replay_explosion_history.py --repo-root "$PWD/kyiv-air-alerts-grafana" --city "$city" --through 2026-09-17 --output "/tmp/replays/$city.json" --input-head "${{ steps.repair_commit.outputs.sha }}" --read-only
+          done
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          expected={"chernihiv":1676,"chernivtsi":113,"dnipro":2259,"ivano_frankivsk":103,"kharkiv":3565,"kherson":1412,"khmelnytskyi":248,"kropyvnytskyi":1161,"lutsk":135,"mykolaiv":1648,"odesa":1465,"poltava":1805,"rivne":232,"ternopil":125,"uzhhorod":92,"vinnytsia":362,"zhytomyr":685}
+          summary={}
+          for city,n in expected.items():
+              d=json.load(open(f"/tmp/replays/{city}.json"))
+              assert d["status"] == "COMPLETE", (city,d.get("errors"),d.get("source_validation"))
+              assert d["episodes_checked"] == n, (city,d["episodes_checked"],n)
+              assert d["source_validation"]["reconstructed_alert_episodes"] == n
+              assert d["protected_files_unchanged"] is True
+              summary[city]={"status":d["status"],"episodes_checked":d["episodes_checked"],"verdict":d["verdict"]}
+          Path("/tmp/replay_summary.json").write_text(json.dumps(summary,ensure_ascii=False,indent=2))
+          PY
+
+      - name: Verify idempotent second materialization
+        shell: bash
+        run: |
+          set -euo pipefail
+          git show "$CORRECTED_RUNNER_COMMIT:kyiv-air-alerts-grafana/scripts/historical_17_city_corrected_baseline_reconciliation.py" > kyiv-air-alerts-grafana/scripts/_historical_17_city_corrected_recon_tmp.py
+          python /tmp/historical_17_city_atomic_corpus_repair_runner.py --mode verify --upstream /tmp/official_data_uk.csv --forensic /tmp/historical_17_city_corpus_gap_forensic_inventory_2026-09-27.json --output /tmp/repair_verify.json
+          rm kyiv-air-alerts-grafana/scripts/_historical_17_city_corrected_recon_tmp.py
+          find kyiv-air-alerts-grafana/scripts -type d -name __pycache__ -prune -exec rm -rf {} +
+          python - <<'PY'
+          import json
+          d=json.load(open("/tmp/repair_verify.json"))
+          assert d["episodes_added"] == 0
+          assert d["post_repair_total"] == 17086
+          assert d["cities_reconciled"] == 17
+          assert d["missing_canonical_ids"] == {}
+          assert d["unexplained_excess_ids"] == {}
+          assert d["duplicate_canonical_ids"] == 0
+          PY
+          test -z "$(git status --porcelain)"
+
+      - name: Verify protected state and write acceptance artifact
+        shell: bash
+        run: |
+          set -euo pipefail
+          campaign="$(git ls-remote origin "refs/heads/$ACTIVE_CAMPAIGN_BRANCH" | cut -f1)"
+          test "$campaign" = "$ACTIVE_CAMPAIGN_EXPECTED"
+          python - <<'PY'
+          import hashlib, json, os
+          from pathlib import Path
+          root=Path("kyiv-air-alerts-grafana")
+          before=json.load(open("/tmp/protected_before.json"))
+          after={}
+          for rel in before:
+              p=root/rel
+              after[rel]=hashlib.sha256(p.read_bytes()).hexdigest() if p.exists() else None
+          assert before == after, (before,after)
+          apply=json.load(open("/tmp/repair_apply.json"))
+          idem=json.load(open("/tmp/repair_verify.json"))
+          replay=json.load(open("/tmp/replay_summary.json"))
+          artifact={
+            "schema_version":1,
+            "pre_repair_head":os.environ["PRE_HEAD"],
+            "corrected_contract_artifact":{"path":"research/historical_17_city_corrected_baseline_reconciliation_2026-09-27.json","commit":os.environ["CORRECTED_ARTIFACT_COMMIT"],"implementation_commit":os.environ["CORRECTED_CONTRACT"]},
+            "upstream":{"repository":"Vadimkin/ukrainian-air-raid-sirens-dataset","path":"datasets/official_data_uk.csv","git_blob_sha":os.environ["UPSTREAM_BLOB"]},
+            "pre_repair_per_city_counts":{c:r["pre_repair"] for c,r in apply["per_city"].items()},
+            "post_repair_per_city_counts":{c:r["reconstructed"] for c,r in apply["per_city"].items()},
+            "episodes_added":apply["episodes_added"],
+            "episodes_removed":apply["episodes_removed"],
+            "episodes_unchanged":apply["episodes_unchanged"],
+            "provenance_breakdown":apply["provenance_breakdown"],
+            "final_aggregate":apply["post_repair_total"],
+            "corrected_expected_total":apply["expected_total"],
+            "missing_canonical_ids":apply["missing_canonical_ids"],
+            "unexplained_excess_ids":apply["unexplained_excess_ids"],
+            "duplicate_canonical_ids":apply["duplicate_canonical_ids"],
+            "kharkiv_boundary_exclusion":{"episode_id":"30e0080db2e490337f98d277","present":apply["kharkiv_boundary_episode_present"],"observed_exclusions":apply["kharkiv_boundary_exclusions"]},
+            "chernihiv_corrected_baseline":{"final_count":apply["chernihiv_final_count"],"synthetic_episode_added":apply["synthetic_chernihiv_episode_added"]},
+            "real_replay_verification":{"passed":True,"cities":replay},
+            "idempotence":{"passed":True,"second_pass_additional_changes":idem["episodes_added"]},
+            "protected_state_verification":{"passed":True,"sha256_before":before,"sha256_after":after},
+            "active_6863_campaign_integrity":{"unchanged":True,"branch":os.environ["ACTIVE_CAMPAIGN_BRANCH"],"sha":os.environ["ACTIVE_CAMPAIGN_EXPECTED"]},
+            "corpus_repair_commit":"${{ steps.repair_commit.outputs.sha }}",
+            "verdict":"17-CITY HISTORICAL ALERT CORPUS ATOMICALLY REPAIRED — 17086/17086"
+          }
+          Path(os.environ["ARTIFACT"]).write_text(json.dumps(artifact,ensure_ascii=False,indent=2)+"\n")
+          PY
+
+      - name: Commit artifact
+        id: artifact_commit
+        shell: bash
+        run: |
+          set -euo pipefail
+          git add "$ARTIFACT"
+          git commit -m "Record 17-city historical corpus atomic repair"
+          artifact_sha="$(git rev-parse HEAD)"
+          echo "sha=$artifact_sha" >> "$GITHUB_OUTPUT"
+          test "$(git ls-remote origin "refs/heads/$TARGET_BRANCH" | cut -f1)" = "${{ steps.repair_commit.outputs.sha }}"
+          git push origin "HEAD:refs/heads/$TARGET_BRANCH"
+
+      - name: Final acceptance
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "repair_commit=${{ steps.repair_commit.outputs.sha }}"
+          echo "artifact_commit=${{ steps.artifact_commit.outputs.sha }}"
+          cat "$ARTIFACT"
