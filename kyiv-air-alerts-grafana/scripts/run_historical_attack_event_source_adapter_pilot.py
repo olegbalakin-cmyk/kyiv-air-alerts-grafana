@@ -568,18 +568,32 @@ def run_sevastopol_pilot(max_episodes: int, output_path: Path) -> dict:
     missed = sorted(set(retained_ids) - event_positive)
     new_ids = sorted(event_positive - set(retained_ids))
 
+    def control_clock_tokens(control_row: dict) -> set[str]:
+        raw = (control_row.get("raw_control") or {}).get("event_time") or (control_row.get("raw_control") or {}).get("event_time_kyiv") or ""
+        tokens = set()
+        for hour, minute in re.findall(r"(?<!\\d)([0-2]?\\d)[:.]([0-5]\\d)", str(raw)):
+            hh = f"{int(hour):02d}"
+            tokens.add(f"{hh}:{minute}")
+            tokens.add(f"{hh}.{minute}")
+        return tokens
+
     missed_diag = []
     for eid in missed:
         control_rows = [x for x in controls if x["episode_id"] == eid]
         source_urls = sorted({str(x.get("source_url") or "") for x in control_rows})
         obs_for_episode = by_episode.get(eid) or []
         retrieval_bound_obs = []
+        target_clock_tokens = set()
+        for control_row in control_rows:
+            target_clock_tokens.update(control_clock_tokens(control_row))
         for obs in observations:
             matching = (obs.get("provenance") or {}).get("candidate_matching") or {}
             candidate_ids = set(matching.get("matched_episode_ids") or [])
             if matching.get("matched_episode_id"):
                 candidate_ids.add(str(matching.get("matched_episode_id")))
-            if eid in candidate_ids:
+            excerpt = str(obs.get("excerpt") or "")
+            clock_match = bool(target_clock_tokens and any(token in excerpt for token in target_clock_tokens))
+            if eid in candidate_ids or clock_match:
                 retrieval_bound_obs.append(obs)
         is_crimeanwind = any("t.me" in url and "Crimeanwind" in url for url in source_urls)
         if obs_for_episode or retrieval_bound_obs:
@@ -592,6 +606,7 @@ def run_sevastopol_pilot(max_episodes: int, output_path: Path) -> dict:
             "episode_id": eid,
             "gap_code": code,
             "retained_source_urls": source_urls,
+            "retained_event_clock_tokens": sorted(target_clock_tokens),
             "retrieved_observation_ids": sorted({
                 x["observation_id"] for x in (obs_for_episode + retrieval_bound_obs)
             }),
