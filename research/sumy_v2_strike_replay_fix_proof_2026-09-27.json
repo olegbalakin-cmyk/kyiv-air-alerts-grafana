@@ -1,0 +1,575 @@
+{
+  "schema_version": 1,
+  "artifact_type": "sumy_v2_strike_replay_fix_proof",
+  "date": "2026-09-27",
+  "implementation_branch": "sumy-v2-strike-replay-fix-2026-09-27",
+  "starting_head": "41ccea99e42f1d07475b9c4357b52c6dab394f4e",
+  "diagnostic_parent_head": "5bb57e3388ea6c408613b6a169661996a62aed49",
+  "authoritative_diagnostic": {
+    "path": "research/sumy_four_case_v2_attack_event_reconciliation_2026-09-27.json",
+    "commit": "41ccea99e42f1d07475b9c4357b52c6dab394f4e",
+    "verdict": "SUMY V2 LEGACY-GATE MISMATCH CONFIRMED — READY FOR SHARED REPLAY FIX"
+  },
+  "implementation": {
+    "commit": "be9fd7da3f356cb2e3651f2f7a208761716ed20b",
+    "files": [
+      "kyiv-air-alerts-grafana/scripts/replay_explosion_history.py",
+      "kyiv-air-alerts-grafana/tests/test_historical_replay_strike_roles.py"
+    ],
+    "function": "historical_review_roles",
+    "exact_rule": "In retained Sumy historical evidence, a sentence segment is a direct v2 strike only when it contains a completed factual attack verb matching \\bатакув(?:ав|ала|ало|али)\\b, an exact Sumy city form, and military/aerial/UAV context in that same segment. That segment supplies reviewed strike evidence and intrinsic same-attack basis; existing episode-specific temporal/sensitivity binding remains mandatory in the classifier.",
+    "excluded_forms_and_controls": [
+      "може атакувати",
+      "можлива атака",
+      "загроза атаки",
+      "очікується атака",
+      "generic aerial threat",
+      "region-only Сумщина wording without exact-city binding",
+      "missing/out-of-window temporal binding",
+      "possible PPO activity"
+    ],
+    "air_defense_action_changed": false,
+    "interception_logic_changed": false,
+    "source_adapters_changed": false,
+    "episode_ids_changed": false,
+    "retained_evidence_changed": false
+  },
+  "tests": {
+    "github_actions_run_id": 36342775408,
+    "github_actions_job_id": 108685976714,
+    "focused_pytest": "8 passed",
+    "replay_helper_self_test": "PASS",
+    "monitor_self_test": "PASS",
+    "positive_controls": [
+      "232eb0da4edf28c2d1c726ab",
+      "6f22822eb67990654c28d3e8",
+      "71eded846a321cdc6188fed9",
+      "88f59d26acd8ae4fd31c7511"
+    ],
+    "negative_controls": [
+      "prediction/threat",
+      "city missing",
+      "region-only",
+      "generic aerial threat",
+      "possible PPO",
+      "missing/outside temporal binding"
+    ],
+    "passed": true
+  },
+  "real_sumy_replay": {
+    "mechanism": "actual existing replay_explosion_history.py executed in normal GitHub Actions checkouts/worktrees; no in-memory replay approximation used for acceptance",
+    "through": "2026-09-17",
+    "baseline": {
+      "input_head": "41ccea99e42f1d07475b9c4357b52c6dab394f4e",
+      "expected_denominator": 2297,
+      "reconstructed_denominator": 2297,
+      "qa_count": 19,
+      "strict": 189,
+      "sensitivity": 219,
+      "four_targets_present": true,
+      "previously_resolved_absent": [
+        "b103be64497fc7d33f5c7b3d",
+        "d6b1b9ffc10dafbc86e253c7"
+      ],
+      "protected_files_unchanged": true
+    },
+    "post_fix": {
+      "input_head": "be9fd7da3f356cb2e3651f2f7a208761716ed20b",
+      "expected_denominator": 2297,
+      "reconstructed_denominator": 2297,
+      "qa_count": 10,
+      "strict": 197,
+      "sensitivity": 228,
+      "four_targets_absent": true,
+      "previously_resolved_absent": [
+        "b103be64497fc7d33f5c7b3d",
+        "d6b1b9ffc10dafbc86e253c7"
+      ],
+      "protected_files_unchanged": true
+    }
+  },
+  "delta_audit": {
+    "removed_qa_ids": [
+      "232eb0da4edf28c2d1c726ab",
+      "38e791b343c6335f8082849d",
+      "6358accd9bb0bbf258970062",
+      "6f22822eb67990654c28d3e8",
+      "71eded846a321cdc6188fed9",
+      "88f59d26acd8ae4fd31c7511",
+      "dc2fcb0cd195adf9d564394f",
+      "f7ebb81f67fc6bc99cc8e836",
+      "fa15fdc4b36ac1cc5f5efbfe"
+    ],
+    "additional_removed_qa_ids": [
+      "38e791b343c6335f8082849d",
+      "6358accd9bb0bbf258970062",
+      "dc2fcb0cd195adf9d564394f",
+      "f7ebb81f67fc6bc99cc8e836",
+      "fa15fdc4b36ac1cc5f5efbfe"
+    ],
+    "added_qa_ids": [],
+    "strict_delta": 8,
+    "sensitivity_delta": 9,
+    "explanation": "Eight removed QA episodes are approved_strict direct factual strikes; 6358accd9bb0bbf258970062 is approved_sensitivity because its retained near-boundary timing does not satisfy strict temporal binding. Therefore sensitivity rises by nine while strict rises by eight.",
+    "unexplained_drift": false,
+    "changed_episode_details": [
+      {
+        "episode_id": "232eb0da4edf28c2d1c726ab",
+        "known_target": true,
+        "evidence": "Близько 04:30 російський ударний БпЛА атакував Ковпаківський район міста Суми. — strict: exact_city_aerial_attack_inside_alert",
+        "binding_method": "alert_start_within_90s",
+        "before": {
+          "replay_status": "QA / needs_review",
+          "event_types": [],
+          "reason_codes": [
+            "MATCH_UNIQUE",
+            "EXACT_CITY_EVENT_TEXT",
+            "NO_STRICT_EXPLOSION_EVIDENCE",
+            "AIR_MILITARY_CONTEXT",
+            "AIR_CONTEXT_NOT_LINKED_TO_EVENT",
+            "TEMPORAL_REVIEWED_VALIDATED_BINDING",
+            "REVIEW_PROVENANCE_USABLE",
+            "REVIEW_PROVENANCE_TEMPORAL_BINDING_USED"
+          ]
+        },
+        "after": {
+          "replay_status": "STRICT / approved_strict",
+          "event_types": [
+            "strike"
+          ],
+          "reason_codes": [
+            "MATCH_UNIQUE",
+            "EXACT_CITY_EVENT_TEXT",
+            "STRICT_EXPLOSION_EVIDENCE",
+            "AIR_MILITARY_CONTEXT",
+            "SAME_ATTACK_CONTEXT_SUPPORTED",
+            "TEMPORAL_REVIEWED_VALIDATED_BINDING",
+            "REVIEW_PROVENANCE_USABLE",
+            "REVIEW_PROVENANCE_TEMPORAL_BINDING_USED"
+          ],
+          "same_attack_basis": "reviewed_direct_v2_strike_same_statement_exact_city_air_context"
+        },
+        "rule_match": {
+          "completed_factual_attack_form": true,
+          "exact_city_same_statement": true,
+          "air_or_uav_context_same_statement": true,
+          "episode_binding_valid": true
+        }
+      },
+      {
+        "episode_id": "38e791b343c6335f8082849d",
+        "known_target": false,
+        "evidence": "Близько першої ночі ударний БпЛА «Герань» атакував Сумську кінноспортивну школу в Сумах. — strict: exact-city aerial-war evidence with event time/interval inside matched episode",
+        "binding_method": "persisted_episode_id",
+        "before": {
+          "replay_status": "QA / needs_review",
+          "event_types": [],
+          "reason_codes": [
+            "MATCH_UNIQUE",
+            "EXACT_CITY_EVENT_TEXT",
+            "NO_STRICT_EXPLOSION_EVIDENCE",
+            "AIR_MILITARY_CONTEXT",
+            "AIR_CONTEXT_NOT_LINKED_TO_EVENT",
+            "TEMPORAL_REVIEWED_VALIDATED_BINDING",
+            "REVIEW_PROVENANCE_USABLE",
+            "REVIEW_PROVENANCE_TEMPORAL_BINDING_USED"
+          ]
+        },
+        "after": {
+          "replay_status": "STRICT / approved_strict",
+          "event_types": [
+            "strike"
+          ],
+          "reason_codes": [
+            "MATCH_UNIQUE",
+            "EXACT_CITY_EVENT_TEXT",
+            "STRICT_EXPLOSION_EVIDENCE",
+            "AIR_MILITARY_CONTEXT",
+            "SAME_ATTACK_CONTEXT_SUPPORTED",
+            "TEMPORAL_REVIEWED_VALIDATED_BINDING",
+            "REVIEW_PROVENANCE_USABLE",
+            "REVIEW_PROVENANCE_TEMPORAL_BINDING_USED"
+          ],
+          "same_attack_basis": "reviewed_direct_v2_strike_same_statement_exact_city_air_context"
+        },
+        "rule_match": {
+          "completed_factual_attack_form": true,
+          "exact_city_same_statement": true,
+          "air_or_uav_context_same_statement": true,
+          "episode_binding_valid": true
+        }
+      },
+      {
+        "episode_id": "6f22822eb67990654c28d3e8",
+        "known_target": true,
+        "evidence": "У ніч на 17 серпня, після 23:00, російські ударні БпЛА масовано атакували Суми. — strict_exact_city_aerial_time_inside",
+        "binding_method": "persisted_episode_id",
+        "before": {
+          "replay_status": "QA / needs_review",
+          "event_types": [],
+          "reason_codes": [
+            "MATCH_UNIQUE",
+            "EXACT_CITY_EVENT_TEXT",
+            "NO_STRICT_EXPLOSION_EVIDENCE",
+            "AIR_MILITARY_CONTEXT",
+            "AIR_CONTEXT_NOT_LINKED_TO_EVENT",
+            "TEMPORAL_REVIEWED_VALIDATED_BINDING",
+            "REVIEW_PROVENANCE_USABLE",
+            "REVIEW_PROVENANCE_TEMPORAL_BINDING_USED"
+          ]
+        },
+        "after": {
+          "replay_status": "STRICT / approved_strict",
+          "event_types": [
+            "strike"
+          ],
+          "reason_codes": [
+            "MATCH_UNIQUE",
+            "EXACT_CITY_EVENT_TEXT",
+            "STRICT_EXPLOSION_EVIDENCE",
+            "AIR_MILITARY_CONTEXT",
+            "SAME_ATTACK_CONTEXT_SUPPORTED",
+            "TEMPORAL_REVIEWED_VALIDATED_BINDING",
+            "REVIEW_PROVENANCE_USABLE",
+            "REVIEW_PROVENANCE_TEMPORAL_BINDING_USED"
+          ],
+          "same_attack_basis": "reviewed_direct_v2_strike_same_statement_exact_city_air_context"
+        },
+        "rule_match": {
+          "completed_factual_attack_form": true,
+          "exact_city_same_statement": true,
+          "air_or_uav_context_same_statement": true,
+          "episode_binding_valid": true
+        }
+      },
+      {
+        "episode_id": "71eded846a321cdc6188fed9",
+        "known_target": true,
+        "evidence": "Близько 08:00 ударні БпЛА атакували приватний сектор Сум. — strict: exact city, UAV, approximate event time inside frozen episode",
+        "binding_method": "alert_start_within_90s",
+        "before": {
+          "replay_status": "QA / needs_review",
+          "event_types": [],
+          "reason_codes": [
+            "MATCH_UNIQUE",
+            "EXACT_CITY_EVENT_TEXT",
+            "NO_STRICT_EXPLOSION_EVIDENCE",
+            "AIR_MILITARY_CONTEXT",
+            "AIR_CONTEXT_NOT_LINKED_TO_EVENT",
+            "TEMPORAL_REVIEWED_VALIDATED_BINDING",
+            "REVIEW_PROVENANCE_USABLE",
+            "REVIEW_PROVENANCE_TEMPORAL_BINDING_USED"
+          ]
+        },
+        "after": {
+          "replay_status": "STRICT / approved_strict",
+          "event_types": [
+            "strike"
+          ],
+          "reason_codes": [
+            "MATCH_UNIQUE",
+            "EXACT_CITY_EVENT_TEXT",
+            "STRICT_EXPLOSION_EVIDENCE",
+            "AIR_MILITARY_CONTEXT",
+            "SAME_ATTACK_CONTEXT_SUPPORTED",
+            "TEMPORAL_REVIEWED_VALIDATED_BINDING",
+            "REVIEW_PROVENANCE_USABLE",
+            "REVIEW_PROVENANCE_TEMPORAL_BINDING_USED"
+          ],
+          "same_attack_basis": "reviewed_direct_v2_strike_same_statement_exact_city_air_context"
+        },
+        "rule_match": {
+          "completed_factual_attack_form": true,
+          "exact_city_same_statement": true,
+          "air_or_uav_context_same_statement": true,
+          "episode_binding_valid": true
+        }
+      },
+      {
+        "episode_id": "88f59d26acd8ae4fd31c7511",
+        "known_target": true,
+        "evidence": "Близько 13:40 російський БпЛА атакував АЗС у Зарічному районі Сум. — strict: exact-city aerial-war evidence with event time/interval inside matched episode",
+        "binding_method": "persisted_episode_id",
+        "before": {
+          "replay_status": "QA / needs_review",
+          "event_types": [],
+          "reason_codes": [
+            "MATCH_UNIQUE",
+            "EXACT_CITY_EVENT_TEXT",
+            "NO_STRICT_EXPLOSION_EVIDENCE",
+            "AIR_MILITARY_CONTEXT",
+            "AIR_CONTEXT_NOT_LINKED_TO_EVENT",
+            "TEMPORAL_REVIEWED_VALIDATED_BINDING",
+            "REVIEW_PROVENANCE_USABLE",
+            "REVIEW_PROVENANCE_TEMPORAL_BINDING_USED"
+          ]
+        },
+        "after": {
+          "replay_status": "STRICT / approved_strict",
+          "event_types": [
+            "strike"
+          ],
+          "reason_codes": [
+            "MATCH_UNIQUE",
+            "EXACT_CITY_EVENT_TEXT",
+            "STRICT_EXPLOSION_EVIDENCE",
+            "AIR_MILITARY_CONTEXT",
+            "SAME_ATTACK_CONTEXT_SUPPORTED",
+            "TEMPORAL_REVIEWED_VALIDATED_BINDING",
+            "REVIEW_PROVENANCE_USABLE",
+            "REVIEW_PROVENANCE_TEMPORAL_BINDING_USED"
+          ],
+          "same_attack_basis": "reviewed_direct_v2_strike_same_statement_exact_city_air_context"
+        },
+        "rule_match": {
+          "completed_factual_attack_form": true,
+          "exact_city_same_statement": true,
+          "air_or_uav_context_same_statement": true,
+          "episode_binding_valid": true
+        }
+      },
+      {
+        "episode_id": "dc2fcb0cd195adf9d564394f",
+        "known_target": false,
+        "evidence": "Близько 11:55 російський БпЛА атакував Ковпаківський район міста Суми. — strict: exact_city_aerial_attack_inside_alert",
+        "binding_method": "alert_start_within_90s",
+        "before": {
+          "replay_status": "QA / needs_review",
+          "event_types": [],
+          "reason_codes": [
+            "MATCH_UNIQUE",
+            "EXACT_CITY_EVENT_TEXT",
+            "NO_STRICT_EXPLOSION_EVIDENCE",
+            "AIR_MILITARY_CONTEXT",
+            "AIR_CONTEXT_NOT_LINKED_TO_EVENT",
+            "TEMPORAL_REVIEWED_VALIDATED_BINDING",
+            "REVIEW_PROVENANCE_USABLE",
+            "REVIEW_PROVENANCE_TEMPORAL_BINDING_USED"
+          ]
+        },
+        "after": {
+          "replay_status": "STRICT / approved_strict",
+          "event_types": [
+            "strike"
+          ],
+          "reason_codes": [
+            "MATCH_UNIQUE",
+            "EXACT_CITY_EVENT_TEXT",
+            "STRICT_EXPLOSION_EVIDENCE",
+            "AIR_MILITARY_CONTEXT",
+            "SAME_ATTACK_CONTEXT_SUPPORTED",
+            "TEMPORAL_REVIEWED_VALIDATED_BINDING",
+            "REVIEW_PROVENANCE_USABLE",
+            "REVIEW_PROVENANCE_TEMPORAL_BINDING_USED"
+          ],
+          "same_attack_basis": "reviewed_direct_v2_strike_same_statement_exact_city_air_context"
+        },
+        "rule_match": {
+          "completed_factual_attack_form": true,
+          "exact_city_same_statement": true,
+          "air_or_uav_context_same_statement": true,
+          "episode_binding_valid": true
+        }
+      },
+      {
+        "episode_id": "f7ebb81f67fc6bc99cc8e836",
+        "known_target": false,
+        "evidence": "Близько 12:15 окупанти атакували дроном АЗС на околиці міста Суми. — strict: exact_city_aerial_attack_inside_alert",
+        "binding_method": "alert_start_within_90s",
+        "before": {
+          "replay_status": "QA / needs_review",
+          "event_types": [],
+          "reason_codes": [
+            "MATCH_UNIQUE",
+            "EXACT_CITY_EVENT_TEXT",
+            "NO_STRICT_EXPLOSION_EVIDENCE",
+            "AIR_MILITARY_CONTEXT",
+            "AIR_CONTEXT_NOT_LINKED_TO_EVENT",
+            "TEMPORAL_REVIEWED_VALIDATED_BINDING",
+            "REVIEW_PROVENANCE_USABLE",
+            "REVIEW_PROVENANCE_TEMPORAL_BINDING_USED"
+          ]
+        },
+        "after": {
+          "replay_status": "STRICT / approved_strict",
+          "event_types": [
+            "strike"
+          ],
+          "reason_codes": [
+            "MATCH_UNIQUE",
+            "EXACT_CITY_EVENT_TEXT",
+            "STRICT_EXPLOSION_EVIDENCE",
+            "AIR_MILITARY_CONTEXT",
+            "SAME_ATTACK_CONTEXT_SUPPORTED",
+            "TEMPORAL_REVIEWED_VALIDATED_BINDING",
+            "REVIEW_PROVENANCE_USABLE",
+            "REVIEW_PROVENANCE_TEMPORAL_BINDING_USED"
+          ],
+          "same_attack_basis": "reviewed_direct_v2_strike_same_statement_exact_city_air_context"
+        },
+        "rule_match": {
+          "completed_factual_attack_form": true,
+          "exact_city_same_statement": true,
+          "air_or_uav_context_same_statement": true,
+          "episode_binding_valid": true
+        }
+      },
+      {
+        "episode_id": "fa15fdc4b36ac1cc5f5efbfe",
+        "known_target": false,
+        "evidence": "Близько 05:30 російський ударний БпЛА атакував маршрутку на околиці Сум. — strict: exact_city_aerial_attack_inside_alert",
+        "binding_method": "alert_start_within_90s",
+        "before": {
+          "replay_status": "QA / needs_review",
+          "event_types": [],
+          "reason_codes": [
+            "MATCH_UNIQUE",
+            "EXACT_CITY_EVENT_TEXT",
+            "NO_STRICT_EXPLOSION_EVIDENCE",
+            "AIR_MILITARY_CONTEXT",
+            "AIR_CONTEXT_NOT_LINKED_TO_EVENT",
+            "TEMPORAL_REVIEWED_VALIDATED_BINDING",
+            "REVIEW_PROVENANCE_USABLE",
+            "REVIEW_PROVENANCE_TEMPORAL_BINDING_USED"
+          ]
+        },
+        "after": {
+          "replay_status": "STRICT / approved_strict",
+          "event_types": [
+            "strike"
+          ],
+          "reason_codes": [
+            "MATCH_UNIQUE",
+            "EXACT_CITY_EVENT_TEXT",
+            "STRICT_EXPLOSION_EVIDENCE",
+            "AIR_MILITARY_CONTEXT",
+            "SAME_ATTACK_CONTEXT_SUPPORTED",
+            "TEMPORAL_REVIEWED_VALIDATED_BINDING",
+            "REVIEW_PROVENANCE_USABLE",
+            "REVIEW_PROVENANCE_TEMPORAL_BINDING_USED"
+          ],
+          "same_attack_basis": "reviewed_direct_v2_strike_same_statement_exact_city_air_context"
+        },
+        "rule_match": {
+          "completed_factual_attack_form": true,
+          "exact_city_same_statement": true,
+          "air_or_uav_context_same_statement": true,
+          "episode_binding_valid": true
+        }
+      },
+      {
+        "episode_id": "6358accd9bb0bbf258970062",
+        "known_target": false,
+        "evidence": "Після 01:00 російські безпілотники масовано атакували Суми; точніше event time джерело не дає. — sensitivity_only: near_boundary; matched episode starts at 01:02 Kyiv time, so the broad wording can straddle the boundary and no tolerance is applied",
+        "binding_method": "persisted_episode_id",
+        "before": {
+          "replay_status": "QA / needs_review",
+          "event_types": [],
+          "reason_codes": [
+            "MATCH_UNIQUE",
+            "EXACT_CITY_EVENT_TEXT",
+            "NO_STRICT_EXPLOSION_EVIDENCE",
+            "AIR_MILITARY_CONTEXT",
+            "AIR_CONTEXT_NOT_LINKED_TO_EVENT",
+            "NO_STRICT_TEMPORAL_BINDING",
+            "REVIEW_PROVENANCE_USABLE",
+            "REVIEW_PROVENANCE_SENSITIVITY_BINDING_USED"
+          ]
+        },
+        "after": {
+          "replay_status": "SENSITIVITY / approved_sensitivity",
+          "event_types": [
+            "strike"
+          ],
+          "reason_codes": [
+            "MATCH_UNIQUE",
+            "EXACT_CITY_EVENT_TEXT",
+            "STRICT_EXPLOSION_EVIDENCE",
+            "AIR_MILITARY_CONTEXT",
+            "SAME_ATTACK_CONTEXT_SUPPORTED",
+            "NO_STRICT_TEMPORAL_BINDING",
+            "REVIEW_PROVENANCE_USABLE",
+            "REVIEW_PROVENANCE_SENSITIVITY_BINDING_USED",
+            "SENSITIVITY_NEAR_BOUNDARY"
+          ],
+          "sensitivity_basis": "near_boundary",
+          "same_attack_basis": "reviewed_direct_v2_strike_same_statement_exact_city_air_context"
+        },
+        "rule_match": {
+          "completed_factual_attack_form": true,
+          "exact_city_same_statement": true,
+          "air_or_uav_context_same_statement": true,
+          "episode_binding_valid_for_sensitivity": true,
+          "strict_temporal_binding": false
+        }
+      }
+    ]
+  },
+  "cross_city_regression": {
+    "clean": true,
+    "cities": {
+      "sevastopol": {
+        "strict_before": 38,
+        "strict_after": 38,
+        "sensitivity_before": 55,
+        "sensitivity_after": 55,
+        "changed_count_before": 0,
+        "changed_count_after": 0
+      },
+      "lviv": {
+        "strict_before": 12,
+        "strict_after": 12,
+        "sensitivity_before": 12,
+        "sensitivity_after": 12,
+        "changed_count_before": 0,
+        "changed_count_after": 0
+      }
+    }
+  },
+  "protected_state": {
+    "replay_protected_content_equal_between_baseline_and_post": true,
+    "protected_files": [
+      "data/explosion_audited_baseline.json",
+      "data/explosion_review_queue.json",
+      "data/explosion_candidate_monitor_state.json",
+      "data/explosion_candidate_monitor_last_run.json",
+      "data/explosions_test.json",
+      "data/dashboard_data.json"
+    ],
+    "retained_evidence_files_modified": false,
+    "canonical_historical_source_slices_modified": false,
+    "persistent_qa_or_status_modified": false
+  },
+  "campaign_integrity": {
+    "branch": "historical-attack-event-backfill-2026-09-27",
+    "head_before": "5809bd677a93e6c2f6a1bff9cb7f6b5bde0c7c1e",
+    "head_after": "5809bd677a93e6c2f6a1bff9cb7f6b5bde0c7c1e",
+    "unchanged": true,
+    "active_6863_campaign_state_or_checkpoints_modified": false
+  },
+  "protected_branches": {
+    "multicity_wip_head_after": "41ccea99e42f1d07475b9c4357b52c6dab394f4e",
+    "multicity_wip_modified_by_this_task": false,
+    "site_prod_modified_by_this_task": false
+  },
+  "proof_orchestration": {
+    "acceptance_run_id": 36342775408,
+    "acceptance_job_id": 108685976714,
+    "proof_bundle_artifact_name": "sumy-v2-strike-replay-proof",
+    "temporary_workflow_removed_from_final_tree": true,
+    "workflow_cleanup_commit": "44c9607aabf15b138d0d9cecb841c12359c7d3ce"
+  },
+  "acceptance": {
+    "all_four_targets_resolve": true,
+    "denominator_unchanged": true,
+    "no_new_qa_ids": true,
+    "all_additional_removals_independently_match_same_narrow_rule": true,
+    "no_unexplained_strict_or_sensitivity_drift": true,
+    "previously_resolved_controls_remain_resolved": true,
+    "protected_state_unchanged": true,
+    "tests_pass": true,
+    "cross_city_regression_clean": true,
+    "active_6863_campaign_unchanged": true
+  },
+  "verdict": "SUMY V2 STRIKE REPLAY FIX PROVEN — READY FOR ATOMIC APPLY"
+}
