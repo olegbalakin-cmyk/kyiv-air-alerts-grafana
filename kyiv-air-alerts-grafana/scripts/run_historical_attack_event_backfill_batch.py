@@ -1175,9 +1175,9 @@ def foundation_acceptance(output: Path) -> dict:
         "acceptance_head": acceptance_head,
         "campaign_branch": "historical-attack-event-backfill-2026-09-27",
         "old_methodology": {
-            "event_taxonomy": list(old_foundation.get("event_taxonomy") or ["explosion", "impact", "arrival", "strike", "damage", "fire"]),
+            "event_taxonomy": ["explosion", "impact", "arrival", "strike", "damage", "fire"],
             "ppo_rule": "PPO-only sets event-positive = NO",
-            "campaign_id": old_foundation.get("campaign_id") or "historical-attack-events-v1-2026-09-27",
+            "campaign_id": "historical-attack-events-v1-2026-09-27",
         },
         "new_methodology": {
             "event_taxonomy": list(monitor.ATTACK_EVENT_TYPE_ORDER),
@@ -1187,11 +1187,17 @@ def foundation_acceptance(output: Path) -> dict:
             "numerator_rule": "episode contributes at most 1 when strict/sensitivity evidence supports at least one canonical event class",
         },
         "classifier_schema_versions": {
-            "before": (old_foundation.get("code_version_identity") or {}),
+            "before": {
+                "classifier_sha": "eefd63aeebc17347b750f61115842be6c53a79da",
+                "source_adapter_sha": "0ceb3ea480de9b401000ba9d8b0bb02b22d83c89",
+                "orchestrator_sha": "bffd09462b36fd2581216e6511641fd44b199e3f",
+                "normalization_version": "historical-attack-event-observation-v1",
+                "methodology_version": "historical-attack-event-ppo-context-v1",
+            },
             "after": versions,
-            "checkpoint_schema_before": old_foundation.get("schema_version"),
+            "checkpoint_schema_before": 1,
             "checkpoint_schema_after": 2,
-            "campaign_id_before": old_foundation.get("campaign_id"),
+            "campaign_id_before": "historical-attack-events-v1-2026-09-27",
             "campaign_id_after": DEFAULT_CAMPAIGN_ID,
         },
         "exact_code_files_changed": code_workflow_files,
@@ -1268,6 +1274,8 @@ def main() -> None:
     if args.foundation_acceptance:
         doc = foundation_acceptance(args.foundation_output)
         print(json.dumps({"verdict": doc["verdict"], "output": str(args.foundation_output)}, ensure_ascii=False, indent=2))
+        if doc["verdict"] != "AUTONOMOUS HISTORICAL ATTACK-EVENT BACKFILL FOUNDATION READY":
+            raise SystemExit(2)
         return
 
     result = run_one_batch(args)
