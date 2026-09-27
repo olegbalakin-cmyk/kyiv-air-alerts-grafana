@@ -1,0 +1,272 @@
+{
+  "schema_version": 1,
+  "artifact_type": "append_only_source_retention_preflight",
+  "city_key": "sumy",
+  "branch": "multicity-wip-2026-09-16",
+  "observed_branch_head": "8b5e0a14f37aa6aea9f8d578c4c9887283952454",
+  "scope": {
+    "dry_run_only": true,
+    "target_episode_ids": [
+      "232eb0da4edf28c2d1c726ab",
+      "6f22822eb67990654c28d3e8",
+      "71eded846a321cdc6188fed9",
+      "88f59d26acd8ae4fd31c7511"
+    ],
+    "canonical_source_repairs_applied": false,
+    "other_cities_touched": false,
+    "full_23_city_orchestrator_run": false
+  },
+  "authoritative_inputs": {
+    "qa_path": "research/historical_replay_qa/sumy.json",
+    "qa_blob_sha": "a154a763fadbde279d861faf4fde70fe4ff2aebb",
+    "source_retention_path": "research/historical_replay_source_retention/sumy.json",
+    "source_retention_blob_sha": "aff08d4da6fc6e881f4978a56bcfc4058fa3e28e",
+    "recovery_inventory_path": "research/sumy_remaining_21_source_recovery_inventory.json",
+    "recovery_inventory_commit": "66629cb0d7b99375e26468229f4f0c6e82721c3b",
+    "recovery_inventory_blob_sha": "dad0e7c6a797e8b347af5c9868e44d96f9949bf4",
+    "final_evidence_path": "kyiv-air-alerts-grafana/data/explosion_research/sumy/final_evidence.json",
+    "final_evidence_blob_sha": "7c0a4a64b3d7000cd10e8f1b846b1e57641d8a4d",
+    "monitor_blob_sha": "eefd63aeebc17347b750f61115842be6c53a79da",
+    "replay_tool_blob_sha": "7509d9f391d206a2b052ff35ee8993ced33c6936",
+    "persistent_status_blob_sha": "6a45e1b5cd052dbc4a417d04b1b962b3d8de245f"
+  },
+  "preflight_input_drift": {
+    "detected": true,
+    "code": "CURRENT_HARDENED_REPLAY_QA_ID_DRIFT",
+    "persistent_qa_count": 21,
+    "fresh_current_replay_qa_count": 19,
+    "dropped_from_fresh_replay": [
+      "b103be64497fc7d33f5c7b3d",
+      "d6b1b9ffc10dafbc86e253c7"
+    ],
+    "added_in_fresh_replay": [],
+    "target_ids_still_present_in_fresh_replay": [
+      "232eb0da4edf28c2d1c726ab",
+      "6f22822eb67990654c28d3e8",
+      "71eded846a321cdc6188fed9",
+      "88f59d26acd8ae4fd31c7511"
+    ],
+    "verification": {
+      "workflow_run_id": 36310493055,
+      "workflow_name": "Historical explosion replay QA bundles",
+      "job_id": 108595365680,
+      "job_name": "qa (sumy, 21)",
+      "replay_head_sha": "7aabe2d5ce0a029d4630f306e6a3ced9bd3d6dca",
+      "conclusion": "failure",
+      "exact_failure": "QA episode ID drift between persistent status and fresh replay",
+      "current_inputs_equal_replay_inputs": {
+        "monitor_blob_sha": true,
+        "replay_tool_blob_sha": true,
+        "qa_blob_sha": true,
+        "final_evidence_blob_sha": true,
+        "persistent_status_blob_sha": true
+      }
+    },
+    "effect_on_preflight": "STOP_BEFORE_TEMPORARY_SOURCE_MUTATION",
+    "reason": "The requested regression contract requires a synchronized current-before Sumy replay. Fresh current hardened replay already differs from the persistent 21-case QA/status baseline before any target repair is appended."
+  },
+  "live_control_and_self_tests": {
+    "workflow_run_id": 36310508295,
+    "workflow_name": "Attack-event classifier hardening",
+    "job_id": 108595386902,
+    "conclusion": "success",
+    "monitor_blob_sha": "eefd63aeebc17347b750f61115842be6c53a79da",
+    "self_test_passed": true,
+    "frozen_replay_controls_passed": true,
+    "uncontrolled_drift_count": 0,
+    "verdict": "ATTACK-EVENT CLASSIFIER CONTROL REPLAY CLEAN"
+  },
+  "source_file_integrity": {
+    "path": "kyiv-air-alerts-grafana/data/explosion_research/sumy/final_evidence.json",
+    "initial_git_blob_sha": "7c0a4a64b3d7000cd10e8f1b846b1e57641d8a4d",
+    "final_git_blob_sha": "7c0a4a64b3d7000cd10e8f1b846b1e57641d8a4d",
+    "temporary_mutation_performed": false,
+    "canonical_mutation_performed": false,
+    "restored_byte_for_byte": true,
+    "verification_basis": "Canonical source file was never written because the preflight stopped on current-before replay drift."
+  },
+  "protected_file_verification": {
+    "before_artifact_commit_blob_shas": {
+      "kyiv-air-alerts-grafana/data/explosion_audited_baseline.json": "5bbd2b771559eac2966aeec65d6e3b5487b9c1a9",
+      "kyiv-air-alerts-grafana/data/explosion_review_queue.json": "e6ed6776ae326a18a07978b1979dd3b265096bf0",
+      "kyiv-air-alerts-grafana/data/explosion_candidate_monitor_state.json": "3c8658880c6b93a00fb8ddbec2c4eaeed6d3f2cc",
+      "kyiv-air-alerts-grafana/data/explosion_candidate_monitor_last_run.json": "1552b13a2a9361be968cea4f09876cc20f96572f",
+      "kyiv-air-alerts-grafana/data/explosions_test.json": "3109dc02d2292efa59eddd26b34292cab2b554ab",
+      "kyiv-air-alerts-grafana/data/dashboard_data.json": "85e1d5cacfbe0af1530bbf584cb63ebdfef463e6"
+    },
+    "expected_after_artifact_commit_blob_shas": {
+      "kyiv-air-alerts-grafana/data/explosion_audited_baseline.json": "5bbd2b771559eac2966aeec65d6e3b5487b9c1a9",
+      "kyiv-air-alerts-grafana/data/explosion_review_queue.json": "e6ed6776ae326a18a07978b1979dd3b265096bf0",
+      "kyiv-air-alerts-grafana/data/explosion_candidate_monitor_state.json": "3c8658880c6b93a00fb8ddbec2c4eaeed6d3f2cc",
+      "kyiv-air-alerts-grafana/data/explosion_candidate_monitor_last_run.json": "1552b13a2a9361be968cea4f09876cc20f96572f",
+      "kyiv-air-alerts-grafana/data/explosions_test.json": "3109dc02d2292efa59eddd26b34292cab2b554ab",
+      "kyiv-air-alerts-grafana/data/dashboard_data.json": "85e1d5cacfbe0af1530bbf584cb63ebdfef463e6"
+    },
+    "unchanged": true,
+    "verification_basis": "Only this research artifact is written by the commit operation; protected paths are not write targets. Post-commit commit/file verification is required and was planned as the final check."
+  },
+  "cases": [
+    {
+      "episode_id": "232eb0da4edf28c2d1c726ab",
+      "old_qa_status": "STRICT_DOWNGRADE",
+      "frozen_old_status": "STRICT",
+      "current_persistent_replayed_status": "AMBIGUOUS",
+      "current_replay_reason_codes": [
+        "AIR_CONTEXT_NOT_LINKED_TO_EVENT",
+        "AIR_MILITARY_CONTEXT",
+        "EXACT_CITY_EVENT_TEXT",
+        "MATCH_UNIQUE",
+        "NO_STRICT_EXPLOSION_EVIDENCE",
+        "REVIEW_PROVENANCE_TEMPORAL_BINDING_USED",
+        "REVIEW_PROVENANCE_USABLE",
+        "TEMPORAL_REVIEWED_VALIDATED_BINDING"
+      ],
+      "retained_source": "https://suspilne.media/sumy/1263844-pogorilo-vse-u-sumah-pisla-ataki-bezpilotnika-zgoriv-budinok-ta-poskodzeno-se-desat-osel/",
+      "retained_evidence": "Близько 04:30 російський ударний БпЛА атакував Ковпаківський район міста Суми.",
+      "recovered_minimal_fragment": "Близько 4:30 14 березня російський ударний безпілотник вибухнув в одному з приватних секторів Ковпаківського району міста Суми.",
+      "recovery_source_scope": "same retained source; exact same 04:30 incident; later separate city-centre incident explicitly excluded",
+      "exact_city_evidence": "Ковпаківський район міста Суми",
+      "temporal_evidence": {
+        "reviewed_binding_code": "TEMPORAL_REVIEWED_VALIDATED_BINDING",
+        "target_episode_id": "232eb0da4edf28c2d1c726ab",
+        "retained_event_time": "~2026-03-14T04:30:00+02:00",
+        "alert_start": "2026-03-13T19:28:45Z",
+        "alert_end": "2026-03-14T05:47:26Z",
+        "episode_specific": true
+      },
+      "current_rule_event_type_after_append": "explosion",
+      "source_recovery_assessment": "DETERMINISTIC_FRAGMENT_IDENTIFIED",
+      "replay_result": "NOT_EXECUTED_AFTER_APPEND_DUE_CURRENT_BEFORE_INPUT_DRIFT",
+      "target_disappeared_from_qa": false,
+      "regression_count": null,
+      "non_target_drift_count": null,
+      "verdict": "UNRESOLVED"
+    },
+    {
+      "episode_id": "6f22822eb67990654c28d3e8",
+      "old_qa_status": "STRICT_DOWNGRADE",
+      "frozen_old_status": "STRICT",
+      "current_persistent_replayed_status": "AMBIGUOUS",
+      "current_replay_reason_codes": [
+        "AIR_CONTEXT_NOT_LINKED_TO_EVENT",
+        "AIR_MILITARY_CONTEXT",
+        "EXACT_CITY_EVENT_TEXT",
+        "MATCH_UNIQUE",
+        "NO_STRICT_EXPLOSION_EVIDENCE",
+        "REVIEW_PROVENANCE_TEMPORAL_BINDING_USED",
+        "REVIEW_PROVENANCE_USABLE",
+        "TEMPORAL_REVIEWED_VALIDATED_BINDING"
+      ],
+      "retained_source": "https://suspilne.media/sumy/1380462-masovana-ataka-sumi-so-vidomo/",
+      "retained_evidence": "У ніч на 17 серпня, після 23:00, російські ударні БпЛА масовано атакували Суми.",
+      "recovered_minimal_fragment": "Вибухи у Сумах пролунали після 23:00.",
+      "recovery_source_scope": "same retained source; source states the mass UAV attack was ongoing at 23:25 immediately before the explosion statement",
+      "exact_city_evidence": "Суми",
+      "temporal_evidence": {
+        "reviewed_binding_code": "TEMPORAL_REVIEWED_VALIDATED_BINDING",
+        "target_episode_id": "6f22822eb67990654c28d3e8",
+        "retained_event_time": "2026-08-16/17 night, after ~23:00",
+        "alert_start": "2026-08-16T15:43:31Z",
+        "alert_end": "2026-08-17T03:27:09Z",
+        "episode_specific": true
+      },
+      "current_rule_event_type_after_append": "explosion",
+      "source_recovery_assessment": "DETERMINISTIC_FRAGMENT_IDENTIFIED",
+      "replay_result": "NOT_EXECUTED_AFTER_APPEND_DUE_CURRENT_BEFORE_INPUT_DRIFT",
+      "target_disappeared_from_qa": false,
+      "regression_count": null,
+      "non_target_drift_count": null,
+      "verdict": "UNRESOLVED"
+    },
+    {
+      "episode_id": "71eded846a321cdc6188fed9",
+      "old_qa_status": "STRICT_DOWNGRADE",
+      "frozen_old_status": "STRICT",
+      "current_persistent_replayed_status": "AMBIGUOUS",
+      "current_replay_reason_codes": [
+        "AIR_CONTEXT_NOT_LINKED_TO_EVENT",
+        "AIR_MILITARY_CONTEXT",
+        "EXACT_CITY_EVENT_TEXT",
+        "MATCH_UNIQUE",
+        "NO_STRICT_EXPLOSION_EVIDENCE",
+        "REVIEW_PROVENANCE_TEMPORAL_BINDING_USED",
+        "REVIEW_PROVENANCE_USABLE",
+        "TEMPORAL_REVIEWED_VALIDATED_BINDING"
+      ],
+      "retained_source": "https://suspilne.media/amp/sumy/1315753-krim-togo-so-zgorilo-vse-u-vodi-so-rozpovidaut-ocevidci-pro-udari-po-sumah/",
+      "retained_evidence": "Близько 08:00 ударні БпЛА атакували приватний сектор Сум.",
+      "recovered_minimal_fragment": "Уранці 26 травня у Сумах російські військові атакували місто ударними безпілотниками. Близько 8-ї ранку два дрони поцілили по приватному сектору.",
+      "recovery_source_scope": "same retained source; same private-sector ~08:00 incident; later tyre-service impacts excluded from the repair fragment",
+      "exact_city_evidence": "Уранці 26 травня у Сумах",
+      "temporal_evidence": {
+        "reviewed_binding_code": "TEMPORAL_REVIEWED_VALIDATED_BINDING",
+        "target_episode_id": "71eded846a321cdc6188fed9",
+        "retained_event_time": "2026-05-26 близько 08:00",
+        "alert_start": "2026-05-26T04:39:39Z",
+        "alert_end": "2026-05-26T06:00:24Z",
+        "episode_specific": true
+      },
+      "current_rule_event_type_after_append": "impact",
+      "source_recovery_assessment": "DETERMINISTIC_FRAGMENT_IDENTIFIED",
+      "replay_result": "NOT_EXECUTED_AFTER_APPEND_DUE_CURRENT_BEFORE_INPUT_DRIFT",
+      "target_disappeared_from_qa": false,
+      "regression_count": null,
+      "non_target_drift_count": null,
+      "verdict": "UNRESOLVED"
+    },
+    {
+      "episode_id": "88f59d26acd8ae4fd31c7511",
+      "old_qa_status": "STRICT_DOWNGRADE",
+      "frozen_old_status": "STRICT",
+      "current_persistent_replayed_status": "AMBIGUOUS",
+      "current_replay_reason_codes": [
+        "AIR_CONTEXT_NOT_LINKED_TO_EVENT",
+        "AIR_MILITARY_CONTEXT",
+        "EXACT_CITY_EVENT_TEXT",
+        "MATCH_UNIQUE",
+        "NO_STRICT_EXPLOSION_EVIDENCE",
+        "REVIEW_PROVENANCE_TEMPORAL_BINDING_USED",
+        "REVIEW_PROVENANCE_USABLE",
+        "TEMPORAL_REVIEWED_VALIDATED_BINDING"
+      ],
+      "retained_source": "https://suspilne.media/sumy/1345582-troe-civilnih-postrazdali-vnaslidok-ataki-rosijskogo-bpla-po-avtozapravnij-stancii-u-sumah/",
+      "retained_evidence": "Близько 13:40 російський БпЛА атакував АЗС у Зарічному районі Сум.",
+      "recovered_minimal_fragment": "Трьом людям надали медичну допомогу після прицільної атаки російського БпЛА по автозаправній станції у Сумській громаді. Удар був близько 13:40 2 липня у Зарічному районі міста.",
+      "recovery_source_scope": "same retained source; same 13:40 AЗС incident; separate morning hit and 1 July incident excluded",
+      "exact_city_evidence": "Зарічний район Сум (existing retained evidence), with same-source 13:40 Zarichnyi-district attack context",
+      "temporal_evidence": {
+        "reviewed_binding_code": "TEMPORAL_REVIEWED_VALIDATED_BINDING",
+        "target_episode_id": "88f59d26acd8ae4fd31c7511",
+        "retained_event_time": "2026-07-02 ~13:40",
+        "alert_start": "2026-07-02T10:16:53Z",
+        "alert_end": "2026-07-02T11:12:12Z",
+        "episode_specific": true
+      },
+      "current_rule_event_type_after_append": "strike",
+      "source_recovery_assessment": "DETERMINISTIC_FRAGMENT_IDENTIFIED",
+      "replay_result": "NOT_EXECUTED_AFTER_APPEND_DUE_CURRENT_BEFORE_INPUT_DRIFT",
+      "target_disappeared_from_qa": false,
+      "regression_count": null,
+      "non_target_drift_count": null,
+      "verdict": "UNRESOLVED"
+    }
+  ],
+  "summary": {
+    "eligible_ids": [],
+    "unresolved_ids": [
+      "232eb0da4edf28c2d1c726ab",
+      "6f22822eb67990654c28d3e8",
+      "71eded846a321cdc6188fed9",
+      "88f59d26acd8ae4fd31c7511"
+    ],
+    "target_cases_removed_from_qa_in_dry_run": [],
+    "new_regressions": null,
+    "non_target_drift": null,
+    "preexisting_current_before_drift_count": 2,
+    "source_file_restored_byte_for_byte": true,
+    "protected_files_unchanged": true,
+    "eligible_count": 0,
+    "unresolved_count": 4,
+    "verdict": "BLOCKER: CURRENT SUMY QA INPUT DRIFT (21 persistent vs 19 fresh current hardened replay; b103be64497fc7d33f5c7b3d and d6b1b9ffc10dafbc86e253c7 already leave QA before any batch-1 repair)"
+  }
+}
