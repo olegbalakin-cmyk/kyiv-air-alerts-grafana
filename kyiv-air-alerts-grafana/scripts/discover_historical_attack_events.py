@@ -142,15 +142,15 @@ def extract_article_text_from_soup(soup: BeautifulSoup) -> str:
 
 
 ARCHIVE_CARD_RE = re.compile(
-    r"(?:львів|львов|вибух|атак|обстріл|удар|влуч|приліт|ракет|бпла|безпілот|дрон|шахед|ппо|протиповітр|пошкод|пожеж|загор|займан)",
+    r"(?:вибух|атак|обстріл|удар|влуч|приліт|ракет|бпла|безпілот|дрон|шахед|ппо|протиповітр|пошкод|пожеж|загор|займан)",
     re.IGNORECASE,
 )
 
 
 def fetch_suspilne_archive_day(session: requests.Session, local_day: str) -> tuple[list[str], str]:
     year, month, day = local_day.split("-")
-    url = f"https://suspilne.media/lviv/archive/{year}/{int(month)}/{int(day)}/"
-    response = session.get(url, timeout=30)
+    url = f"https://suspilne.media/lviv/amp/archive/{year}/{int(month)}/{int(day)}/"
+    response = session.get(url, timeout=15)
     response.raise_for_status()
     soup = BeautifulSoup(response.text, "html.parser")
     urls = set()
@@ -188,7 +188,7 @@ def fetch_suspilne_articles_for_days(
             if url in seen_urls:
                 continue
             seen_urls.add(url)
-            response = session.get(url, timeout=30)
+            response = session.get(url, timeout=15)
             article_requests += 1
             response.raise_for_status()
             soup = BeautifulSoup(response.text, "html.parser")
@@ -494,7 +494,7 @@ def build_pilot(
             "search_window_start": iso(search_start),
             "search_window_end": iso(search_end),
             "rate_limit_sleep_seconds": sleep_seconds,
-            "timeout_seconds": 30,
+            "timeout_seconds": 15,
             "fallback_telegram_source_not_used": f"@{channel}",
             "fallback_reason": "public Telegram search did not provide sufficient historical depth in first pilot attempt",
         },
