@@ -1,0 +1,168 @@
+{
+  "schema_version": "sumy-402035-temporal-binding-recovery-v1",
+  "generated_date": "2026-09-27",
+  "repository": "olegbalakin-cmyk/kyiv-air-alerts-grafana",
+  "branch": "multicity-wip-2026-09-16",
+  "starting_head": "5dcca34b7342e776dbc8391253dfeb0812cd5019",
+  "pre_artifact_head": "5dcca34b7342e776dbc8391253dfeb0812cd5019",
+  "scope": {
+    "target_episode_id": "402035df8980628fa245c4e8",
+    "excluded_parallel_target": "90a484f51b321e0950e31b60",
+    "excluded_parallel_target_inspected": false,
+    "mutation_scope": "artifact only"
+  },
+  "target_alert": {
+    "start_utc": "2026-06-18T17:50:00Z",
+    "end_utc": "2026-06-18T20:46:26Z",
+    "project_timezone": "Europe/Kyiv",
+    "local_offset_on_2026_06_18": "+03:00",
+    "start_local": "2026-06-18T20:50:00+03:00",
+    "end_local": "2026-06-18T23:46:26+03:00"
+  },
+  "existing_source": {
+    "url": "https://t.me/s/suspilnesumy?before=45421",
+    "message_ids": [
+      45416,
+      45417
+    ],
+    "source_local_sequence": [
+      {
+        "message_id": 45416,
+        "text": "Ще вибух в Сумах.",
+        "recovered_preview_time": "20:35",
+        "recovered_calendar_date_utc": "2026-06-18"
+      },
+      {
+        "message_id": 45417,
+        "text": "Було влучання російської «Молнії» у технічний поверх багатоповерхівки у Ковпаківському районі Сум.",
+        "recovered_preview_time": "21:06",
+        "recovered_calendar_date_utc": "2026-06-18"
+      }
+    ]
+  },
+  "recovered_sources": {
+    "strongest_temporal_source": {
+      "name": "Suspilne Sumy public Telegram preview, message 45416",
+      "url": "https://t.me/suspilnesumy/45416",
+      "publication_message_timestamp": {
+        "utc_minute": "2026-06-18T20:35Z",
+        "precision": "minute",
+        "exact_seconds_recovered": false,
+        "seconds_synthesized": false
+      },
+      "timestamp_timezone_basis": {
+        "timezone": "UTC",
+        "basis": "Telegram public-preview message date metadata uses an ISO datetime in UTC; the preview/index exposes the 20:35 minute. Exact seconds were not exposed by the retrieval surface and are not invented."
+      },
+      "event_time_statement": null,
+      "event_time_use": "The 20:35 timestamp is used as a conservative contemporaneous-report upper bound, not as a separately stated exact impact time."
+    },
+    "same_event_local_time_bound": {
+      "name": "Kordon.Media contemporaneous local report citing Sumy MVA",
+      "url": "https://kordon.media/dron-molniya-vdaryv-po-bagatopoverhivczi-v-sumah-naslidky-ataky/",
+      "publication_date": "2026-06-19",
+      "stated_event_time": "after 23:00 on 2026-06-18",
+      "stated_event_timezone": "Europe/Kyiv",
+      "stated_event_utc_lower_bound_exclusive": "2026-06-18T20:00:00Z",
+      "event_identity": "Russian Molniya strike into the technical floor of a high-rise in Sumy, Kovpakivskyi district"
+    },
+    "authoritative_identity_source": {
+      "name": "Sumy MVA post cited by Interfax-Ukraine",
+      "url": "https://t.me/serhii_kryvosheienko/1781",
+      "recovered_via": "https://interfax.com.ua/news/general/1177786.html",
+      "stated_event_time": "late evening",
+      "role": "authoritative same-event identity/city/causation corroboration; not used as a precise event-time point"
+    },
+    "official_city_page": {
+      "name": "Sumy City Council / MVA attack consequences page for 18 June 2026",
+      "url": "https://smr.gov.ua/uk/novini/pro-golovne/37148-sumska-hromada-vorozhi-ataky-ta-ikhni-naslidky-18-chervnia-2026-roku.html",
+      "stated_event_time": "late evening",
+      "role": "official same-event identity corroboration"
+    },
+    "timestamp_contract_reference": {
+      "name": "Telegram public-preview timestamp inspection reference",
+      "url": "https://hatless1der.com/telegram-osint-basics-5-tips-anyone-can-do-right-now/",
+      "basis": "tgme_widget_message_date exposes a UTC machine timestamp separately from rendered/local display time"
+    }
+  },
+  "publication_vs_event_time": {
+    "message_45416_publication_timestamp": "2026-06-18T20:35Z (minute precision; exact seconds unavailable)",
+    "message_45416_stated_event_time": "not separately stated; contemporaneous report says another explosion in Sumy",
+    "message_45417_publication_timestamp": "2026-06-18T21:06Z (minute precision; exact seconds unavailable)",
+    "message_45417_stated_event_time": "late evening; no exact minute stated",
+    "kordon_publication_date": "2026-06-19",
+    "kordon_stated_event_time": "after 23:00 Europe/Kyiv on 2026-06-18",
+    "rule_applied": "The later 21:06 follow-up publication time is not treated as the event time."
+  },
+  "same_attack_linkage": {
+    "result": "YES",
+    "basis": [
+      "Suspilne messages 45416 and 45417 are consecutive in the recovered source-local sequence.",
+      "Message 45416 reports another explosion in Sumy; message 45417 immediately attributes the late-evening event to a Russian Molniya impact in Sumy's Kovpakivskyi district.",
+      "No competing Sumy attack is introduced between messages 45416 and 45417 in the recovered Suspilne sequence.",
+      "Kordon.Media independently describes the same late-evening technical-floor Molniya strike in the Kovpakivskyi district as occurring after 23:00 local.",
+      "The original Sumy MVA post cited by Interfax-Ukraine matches the same target, district, weapon, and late-evening event."
+    ],
+    "competing_attack_between_45416_and_45417": "none in the recovered source-local sequence"
+  },
+  "temporal_binding": {
+    "source_timezone_machine": "UTC",
+    "event_timezone_local": "Europe/Kyiv",
+    "local_offset": "+03:00",
+    "lower_bound": {
+      "relation": ">",
+      "local": "2026-06-18T23:00:00+03:00",
+      "utc": "2026-06-18T20:00:00Z",
+      "basis": "Kordon.Media same-event stated time: after 23:00 local"
+    },
+    "upper_bound": {
+      "relation": "<",
+      "utc": "2026-06-18T20:36:00Z",
+      "local": "2026-06-18T23:36:00+03:00",
+      "basis": "Suspilne message 45416 is timestamped in the 20:35 UTC minute; exact seconds are unavailable, so the conservative publication bound is before 20:36Z"
+    },
+    "normalized_event_time": "(2026-06-18T20:00:00Z, 2026-06-18T20:36:00Z)",
+    "exact_seconds_invented": false,
+    "entire_recovered_event_interval_inside_target_episode": true,
+    "proof": "The same event is stated to occur after 23:00 local (>20:00Z) and is contemporaneously reported by 20:35 UTC (<20:36Z). This full interval is inside the target alert 17:50:00Z-20:46:26Z."
+  },
+  "classification_checks": {
+    "exact_city_binding": "YES",
+    "military_aerial_causation": "YES",
+    "event_inside_target_episode": "YES",
+    "supported_event_types": [
+      "explosion",
+      "impact",
+      "damage"
+    ]
+  },
+  "temporal_binding_status": "TEMPORAL_BINDING_RECOVERED_READY_FOR_APPEND_ONLY_REPAIR",
+  "minimal_append_only_repair": {
+    "required": true,
+    "fields": [
+      "episode_id=402035df8980628fa245c4e8",
+      "temporal_source_url=https://t.me/suspilnesumy/45416",
+      "temporal_source_message_id=45416",
+      "source_publication_time_utc_minute=2026-06-18T20:35Z",
+      "source_publication_time_precision=minute",
+      "source_timezone=UTC",
+      "event_local_timezone=Europe/Kyiv",
+      "same_event_local_lower_bound=after 2026-06-18T23:00+03:00",
+      "normalized_event_time_utc_interval=(2026-06-18T20:00:00Z,2026-06-18T20:36:00Z)",
+      "same_attack_link_message_id=45417",
+      "same_attack_link_url=https://t.me/suspilnesumy/45417",
+      "authoritative_attribution_url=https://t.me/serhii_kryvosheienko/1781",
+      "corroborating_local_time_url=https://kordon.media/dron-molniya-vdaryv-po-bagatopoverhivczi-v-sumah-naslidky-ataky/",
+      "temporal_precision_note=do not synthesize seconds"
+    ],
+    "mutation_rule": "append provenance/evidence only; do not alter classifier logic, temporal rules, canonical metrics, or existing evidence"
+  },
+  "classifier_methodology_change_required": "NO",
+  "active_6863_campaign": {
+    "branch": "historical-attack-event-backfill-2026-09-27",
+    "head_at_task_start": "5809bd677a93e6c2f6a1bff9cb7f6b5bde0c7c1e",
+    "head_immediately_before_artifact_commit": "5809bd677a93e6c2f6a1bff9cb7f6b5bde0c7c1e"
+  },
+  "protected_files_expected_unchanged": true,
+  "verdict": "SUMY 402035 TEMPORAL BINDING RECOVERED — READY FOR APPEND-ONLY EVIDENCE REPAIR"
+}
