@@ -230,6 +230,52 @@ class PublicTelegramAdapter:
             "returned_message_ids": [row["message_id"] for row in rows],
         }
 
+    def fetch_before_page(
+        self,
+        channel: str,
+        before_message_id: int,
+        *,
+        min_time: datetime | None = None,
+        max_time: datetime | None = None,
+    ) -> tuple[list[dict], dict]:
+        """Fetch exactly one bounded public Telegram history page."""
+        url = f"https://t.me/s/{channel}?before={before_message_id}"
+        response = self.http.get(url)
+        soup = BeautifulSoup(response.text, "html.parser")
+        rows = []
+        for wrap in soup.select(".tgme_widget_message_wrap"):
+            msg = wrap.select_one(".tgme_widget_message")
+            time_el = wrap.select_one("time[datetime]")
+            if not msg or not time_el:
+                continue
+            post = str(msg.get("data-post") or "")
+            match = re.search(r"/([0-9]+)$", post)
+            if not match:
+                continue
+            message_id = int(match.group(1))
+            published = parse_dt(time_el["datetime"])
+            if min_time is not None and published < min_time:
+                continue
+            if max_time is not None and published > max_time:
+                continue
+            text_el = wrap.select_one(".tgme_widget_message_text")
+            text = " ".join(text_el.stripped_strings) if text_el else ""
+            rows.append({
+                "channel": channel,
+                "message_id": message_id,
+                "published_at": iso(published),
+                "text": text,
+                "url": f"https://t.me/{channel}/{message_id}",
+                "retrieval_url": url,
+            })
+        rows.sort(key=lambda row: (row["published_at"], row["message_id"]))
+        return rows, {
+            "url": url,
+            "resolved": True,
+            "requests_made": 1,
+            "returned_message_ids": [row["message_id"] for row in rows],
+        }
+
     def search(
         self,
         channel: str,
