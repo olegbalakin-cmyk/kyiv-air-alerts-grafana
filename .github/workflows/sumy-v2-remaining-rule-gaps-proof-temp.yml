@@ -34,7 +34,7 @@ jobs:
         run: |
           set -euo pipefail
           BASE=29364ca6d1275e9fbbca657f5f20a2ec4f7eb179
-          POST=659b9ed5178a811c187f9975b76c31c2da5d14e5
+          POST=bd7b062369f8807e15a517a443a93ab577d69ee1
           git worktree add "$RUNNER_TEMP/base" "$BASE"
           git worktree add "$RUNNER_TEMP/post" "$POST"
           test "$(git -C "$RUNNER_TEMP/base" rev-parse HEAD)" = "$BASE"
@@ -59,7 +59,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          python "$RUNNER_TEMP/post/kyiv-air-alerts-grafana/scripts/replay_explosion_history.py"             --repo-root "$RUNNER_TEMP/post/kyiv-air-alerts-grafana"             --city sumy --through 2026-09-17             --input-head 659b9ed5178a811c187f9975b76c31c2da5d14e5             --read-only --output "$RUNNER_TEMP/sumy-post.json"
+          python "$RUNNER_TEMP/post/kyiv-air-alerts-grafana/scripts/replay_explosion_history.py"             --repo-root "$RUNNER_TEMP/post/kyiv-air-alerts-grafana"             --city sumy --through 2026-09-17             --input-head bd7b062369f8807e15a517a443a93ab577d69ee1             --read-only --output "$RUNNER_TEMP/sumy-post.json"
 
       - name: Run same cross-city replay regression
         shell: bash
@@ -67,7 +67,7 @@ jobs:
           set -euo pipefail
           for city in sevastopol lviv; do
             python "$RUNNER_TEMP/base/kyiv-air-alerts-grafana/scripts/replay_explosion_history.py"               --repo-root "$RUNNER_TEMP/base/kyiv-air-alerts-grafana"               --city "$city" --through 2026-09-17               --input-head 29364ca6d1275e9fbbca657f5f20a2ec4f7eb179               --read-only --output "$RUNNER_TEMP/$city-baseline.json"
-            python "$RUNNER_TEMP/post/kyiv-air-alerts-grafana/scripts/replay_explosion_history.py"               --repo-root "$RUNNER_TEMP/post/kyiv-air-alerts-grafana"               --city "$city" --through 2026-09-17               --input-head 659b9ed5178a811c187f9975b76c31c2da5d14e5               --read-only --output "$RUNNER_TEMP/$city-post.json"
+            python "$RUNNER_TEMP/post/kyiv-air-alerts-grafana/scripts/replay_explosion_history.py"               --repo-root "$RUNNER_TEMP/post/kyiv-air-alerts-grafana"               --city "$city" --through 2026-09-17               --input-head bd7b062369f8807e15a517a443a93ab577d69ee1               --read-only --output "$RUNNER_TEMP/$city-post.json"
           done
 
       - name: Build and assert exact proof delta
@@ -201,7 +201,7 @@ jobs:
           diff_files = subprocess.check_output(
               ["git", "-C", str(post_root), "diff", "--name-only",
                "29364ca6d1275e9fbbca657f5f20a2ec4f7eb179",
-               "659b9ed5178a811c187f9975b76c31c2da5d14e5"],
+               "bd7b062369f8807e15a517a443a93ab577d69ee1"],
               text=True,
           ).splitlines()
           allowed_files = {
