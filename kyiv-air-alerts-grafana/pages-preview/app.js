@@ -114,11 +114,11 @@ function seriesDataset(label, values, color, dashed = false) {
     data: values,
     borderColor: color,
     backgroundColor: color + "22",
-    pointRadius: 2,
-    pointHoverRadius: 4,
+    pointRadius: 0,
+    pointHoverRadius: 0,
     borderWidth: 2,
     borderDash: dashed ? [7, 5] : [],
-    tension: 0.12,
+    tension: 0,
     spanGaps: true
   };
 }
@@ -201,7 +201,7 @@ function renderTimeOfDay(key) {
         fill: true,
         borderWidth: 2,
         pointRadius: 0,
-        pointHoverRadius: 4,
+        pointHoverRadius: 0,
         pointHitRadius: 10,
         tension: 0
       }]
@@ -278,7 +278,7 @@ function renderTimeOfDayComparison(keys) {
     backgroundColor: COLORS[idx % COLORS.length] + "18",
     borderWidth: 2,
     pointRadius: 0,
-    pointHoverRadius: 4,
+    pointHoverRadius: 0,
     pointHitRadius: 10,
     tension: 0,
     fill: false
@@ -425,11 +425,11 @@ function renderCity() {
           yAxisID: "yAlerts",
           borderColor: COLORS[1],
           backgroundColor: COLORS[1] + "22",
-          pointRadius: 2,
-          pointHoverRadius: 4,
+          pointRadius: 0,
+          pointHoverRadius: 0,
           borderWidth: 2,
           borderDash: dashed ? [7, 5] : [],
-          tension: 0.12,
+          tension: 0,
           spanGaps: true
         }
       ]
@@ -532,11 +532,11 @@ function renderRolling7d(key) {
           yAxisID: "yAlerts",
           borderColor: COLORS[1],
           backgroundColor: COLORS[1] + "22",
-          pointRadius: 2,
-          pointHoverRadius: 4,
+          pointRadius: 0,
+          pointHoverRadius: 0,
           borderWidth: 2,
           borderDash: dashed ? [7, 5] : [],
-          tension: 0.12,
+          tension: 0,
           spanGaps: true
         }
       ]
@@ -668,11 +668,11 @@ function renderShortHorizon(key) {
           yAxisID: "yDuration",
           borderColor: COLORS[2],
           backgroundColor: COLORS[2] + "22",
-          pointRadius: 3,
-          pointHoverRadius: 5,
+          pointRadius: 0,
+          pointHoverRadius: 0,
           borderWidth: 2,
           borderDash: sourceType(key) === "raion_proxy" ? [7, 5] : [],
-          tension: 0.12,
+          tension: 0,
           spanGaps: false
         }
       ]
@@ -798,8 +798,8 @@ function renderExplosionComparison(keys) {
       COLORS[idx],
       false
     );
-    ds.pointRadius = 1;
-    ds.pointHoverRadius = 3;
+    ds.pointRadius = 0;
+    ds.pointHoverRadius = 0;
     ds.spanGaps = false;
     ds.cityKey = key;
     ds.explosionRows = labels.map(date => m.get(date) || null);
