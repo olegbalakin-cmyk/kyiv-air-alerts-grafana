@@ -125,6 +125,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          find kyiv-air-alerts-grafana/scripts -type d -name __pycache__ -prune -exec rm -rf {} +
           mapfile -t changed < <(git status --porcelain=v1 | sed -E 's/^.. //')
           printf 'workspace_change=%s\n' "${changed[@]:-}"
           if [ "${#changed[@]}" -ne 1 ] || [ "${changed[0]}" != "$OUTPUT_PATH" ]; then
