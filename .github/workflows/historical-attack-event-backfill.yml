@@ -52,7 +52,7 @@ permissions:
 
 jobs:
   foundation-acceptance:
-    if: \${{ (github.event_name == 'push' && contains(github.event.head_commit.message, 'Run autonomous attack-event backfill foundation acceptance')) || (github.event_name == 'workflow_dispatch' && inputs.mode == 'foundation_acceptance') }}
+    if: ${{ (github.event_name == 'push' && contains(github.event.head_commit.message, 'Run autonomous attack-event backfill foundation acceptance')) || (github.event_name == 'workflow_dispatch' && inputs.mode == 'foundation_acceptance') }}
     runs-on: ubuntu-latest
     timeout-minutes: 45
     steps:
@@ -90,6 +90,7 @@ jobs:
           test "$BASE_HEAD" = "$(git rev-parse origin/historical-attack-event-backfill-2026-09-27)"
       - name: Commit foundation artifact
         run: |
+          find kyiv-air-alerts-grafana/scripts -type d -name __pycache__ -prune -exec rm -rf {} +
           CHANGED="$(git status --porcelain --untracked-files=all | awk '{print $2}' | sort)"
           EXPECTED="research/historical_attack_event_autonomous_backfill_foundation_2026-09-27.json"
           test "$CHANGED" = "$EXPECTED"
@@ -100,16 +101,16 @@ jobs:
           git push origin HEAD:historical-attack-event-backfill-2026-09-27
 
   backfill:
-    if: \${{ github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && inputs.mode == 'backfill') }}
+    if: ${{ github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && inputs.mode == 'backfill') }}
     runs-on: ubuntu-latest
     timeout-minutes: 50
     env:
       CAMPAIGN_BRANCH: historical-attack-event-backfill-2026-09-27
-      CAMPAIGN_ID: \${{ inputs.campaign_id || 'historical-attack-events-v1-2026-09-27' }}
-      CITY_KEY: \${{ inputs.city_key || 'auto' }}
-      BATCH_SIZE: \${{ inputs.batch_size || '50' }}
-      MAX_BATCHES: \${{ inputs.max_batches_per_run || '1' }}
-      RESUME: \${{ inputs.resume == false && 'false' || 'true' }}
+      CAMPAIGN_ID: ${{ inputs.campaign_id || 'historical-attack-events-v1-2026-09-27' }}
+      CITY_KEY: ${{ inputs.city_key || 'auto' }}
+      BATCH_SIZE: ${{ inputs.batch_size || '50' }}
+      MAX_BATCHES: ${{ inputs.max_batches_per_run || '1' }}
+      RESUME: ${{ inputs.resume == false && 'false' || 'true' }}
     steps:
       - uses: actions/checkout@v4
         with:
