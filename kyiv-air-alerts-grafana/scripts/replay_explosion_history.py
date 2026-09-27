@@ -318,10 +318,23 @@ def historical_review_roles(city: str, row: dict, monitor) -> tuple[dict, str]:
             r"(?:рф|росі(?:я|йськ\w*)|ворож\w*|окупант\w*|"
             r"військ\w*\s+рф)"
         )
-        negative_or_modal = (
-            r"\b(?:не|без|може|можуть|можлива|можливий|можливе|"
-            r"ймовірн\w*|очіку\w*|прогноз\w*|загроз\w*|плану\w*|"
-            r"атакуватиме|атакуватимуть)\b"
+        attack_negative_or_modal = (
+            r"(?:\bне\s+атакув\w*\b|"
+            r"\b(?:може|можуть|міг|могла|могли)\b.{0,28}\bатак\w*\b|"
+            r"\b(?:можлив\w*|ймовірн\w*|очікуван\w*|прогнозован\w*|"
+            r"загроз\w*|планован\w*)\b.{0,35}\bатак\w*\b|"
+            r"\bатакуватиме\b|\bатакуватимуть\b|"
+            r"\bатак\w*\b.{0,18}\bне\s+бул\w*\b)"
+        )
+        impact_negative_or_modal = (
+            r"(?:\bне\b.{0,20}\bвлучанн\w*\b|"
+            r"\bвлучанн\w*\b.{0,28}\bне\b|"
+            r"\b(?:можлив\w*|ймовірн\w*|загроз\w*)\b.{0,28}\bвлучанн\w*\b)"
+        )
+        fall_negative_or_modal = (
+            r"(?:\bне\s+(?:упав|впав|пада\w*)\b|"
+            r"\b(?:може|можуть|можлив\w*|ймовірн\w*)\b.{0,24}"
+            r"\b(?:упасти|впасти|пада\w*)\b)"
         )
         historical_cue = r"\b(?:торік|минул\w*\s+рок\w*|раніше)\b"
         nonmilitary_strike = (
@@ -374,7 +387,7 @@ def historical_review_roles(city: str, row: dict, monitor) -> tuple[dict, str]:
                 )
                 if (
                     (completed_attack or attack_noun or adversary_strike)
-                    and not re.search(negative_or_modal, segment_low)
+                    and not re.search(attack_negative_or_modal, segment_low)
                     and not re.search(nonmilitary_strike, segment_low)
                 ):
                     direct_event_segment = segment
@@ -393,7 +406,7 @@ def historical_review_roles(city: str, row: dict, monitor) -> tuple[dict, str]:
                 )
                 if (
                     factual_impact_noun
-                    and not re.search(negative_or_modal, segment_low)
+                    and not re.search(impact_negative_or_modal, segment_low)
                     and not re.search(figurative_impact, segment_low)
                 ):
                     direct_event_segment = segment
@@ -416,7 +429,7 @@ def historical_review_roles(city: str, row: dict, monitor) -> tuple[dict, str]:
                 if (
                     enemy_uav_fall
                     and re.search(physical_location, segment_low)
-                    and not re.search(negative_or_modal, segment_low)
+                    and not re.search(fall_negative_or_modal, segment_low)
                 ):
                     direct_event_segment = segment
                     direct_event_type = "impact"
