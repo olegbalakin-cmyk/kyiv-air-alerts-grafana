@@ -34,11 +34,13 @@ HEADERS = {
     "Accept-Language": "uk,en;q=0.8",
 }
 ATTACK_DISCOVERY_RE = re.compile(
-    r"\b(?:вибух\w*|влуч\w*|поціл\w*|приліт\w*|удар\w*|вдар\w*|"
-    r"пошкод\w*|пожеж\w*|загор\w*|займан\w*|ппо|протиповітр\w*)",
+    r"\b(?:вибух\w*|взрыв\w*|влуч\w*|попад\w*|поціл\w*|приліт\w*|прилет\w*|"
+    r"удар\w*|вдар\w*|пошкод\w*|поврежд\w*|пожеж\w*|пожар\w*|загор\w*|займан\w*|"
+    r"ппо|пво|протиповітр\w*|противовоздуш\w*|працю\w*|робот\w*|работ\w*|"
+    r"чути|чутно|слышно)",
     re.IGNORECASE,
 )
-PPO_RE = re.compile(r"\b(?:ппо|протиповітр\w*)", re.IGNORECASE)
+PPO_RE = re.compile(r"\b(?:ппо|пво|протиповітр\w*|противовоздуш\w*)", re.IGNORECASE)
 TELEGRAM_POST_RE = re.compile(
     r"https?://(?:t\.me|telegram\.me)/(?:s/)?([A-Za-z0-9_]+)/([0-9]+)",
     re.IGNORECASE,
@@ -148,8 +150,12 @@ def matched_terms(text: str) -> list[str]:
     for event_type in monitor.ATTACK_EVENT_TYPE_ORDER:
         if event_type in monitor.attack_event_types(low):
             terms.append(event_type)
-    if "ппо" in low or "протиповітр" in low:
+    if monitor.air_defense_context_signal(low):
         terms.append("air_defense_context")
+    if monitor.air_defense_action_signal(low):
+        terms.append("air_defense_action")
+    if monitor.interception_claim_signal(low):
+        terms.append("interception_claim")
     return terms
 
 
@@ -239,6 +245,9 @@ def build_pilot(
                 "excerpt": str(article.get("text") or "")[:1200],
                 "matched_terms": matched_terms(text),
                 "event_types_supported": list(decision.get("event_types") or []),
+                "air_defense_context": bool(decision.get("air_defense_context")),
+                "air_defense_action": bool(decision.get("air_defense_action")),
+                "interception_claim": bool(decision.get("interception_claim")),
                 "exact_city_binding": decision.get("exact_city_classification_evidence"),
                 "air_attack_context": decision.get("air_military_context"),
                 "same_attack_context": decision.get("same_attack_context"),
@@ -336,6 +345,9 @@ def build_pilot(
             "excerpt": text[:1200],
             "matched_terms": matched_terms(text),
             "event_types_supported": list(decision.get("event_types") or []),
+            "air_defense_context": bool(decision.get("air_defense_context")),
+            "air_defense_action": bool(decision.get("air_defense_action")),
+            "interception_claim": bool(decision.get("interception_claim")),
             "exact_city_binding": decision.get("exact_city_classification_evidence"),
             "air_attack_context": decision.get("air_military_context"),
             "same_attack_context": decision.get("same_attack_context"),
@@ -431,6 +443,9 @@ def build_pilot(
             "excerpt": str(article.get("text") or "")[:1200],
             "matched_terms": matched_terms(text),
             "event_types_supported": list(decision.get("event_types") or []),
+            "air_defense_context": bool(decision.get("air_defense_context")),
+            "air_defense_action": bool(decision.get("air_defense_action")),
+            "interception_claim": bool(decision.get("interception_claim")),
             "exact_city_binding": decision.get("exact_city_classification_evidence"),
             "air_attack_context": decision.get("air_military_context"),
             "same_attack_context": decision.get("same_attack_context"),
@@ -461,11 +476,18 @@ def build_pilot(
         ep_obs = by_episode[episode_id]
         strict_obs = [x for x in ep_obs if x["classification_outcome"] == "approved_strict"]
         sensitivity_obs = [x for x in ep_obs if x["classification_outcome"] == "approved_sensitivity"]
-        event_types = []
+        confirmed_event_types = []
+        sensitivity_event_types = []
         for obs in strict_obs:
             for event_type in obs["event_types_supported"]:
-                if event_type not in event_types:
-                    event_types.append(event_type)
+                if event_type not in confirmed_event_types:
+                    confirmed_event_types.append(event_type)
+        for obs in strict_obs + sensitivity_obs:
+            for event_type in obs["event_types_supported"]:
+                if event_type not in sensitivity_event_types:
+                    sensitivity_event_types.append(event_type)
+        event_types = list(confirmed_event_types)
+        for obs in strict_obs:
             canonical_events.append(
                 {
                     "canonical_event_id": hashlib.sha256(
@@ -484,6 +506,13 @@ def build_pilot(
                 "has_confirmed_event": bool(strict_obs),
                 "confirmed_event_count": len(strict_obs),
                 "event_types": event_types,
+                "confirmed_event_types": confirmed_event_types,
+                "sensitivity_event_types": sensitivity_event_types,
+                "air_defense_context": any(bool(x.get("air_defense_context")) for x in ep_obs),
+                "air_defense_action": any(bool(x.get("air_defense_action")) for x in ep_obs),
+                "interception_claim": any(bool(x.get("interception_claim")) for x in ep_obs),
+                "event_positive_strict": bool(strict_obs),
+                "event_positive_sensitivity": bool(strict_obs or sensitivity_obs),
                 "strict_observation_ids": [x["observation_id"] for x in strict_obs],
                 "sensitivity_observation_ids": [x["observation_id"] for x in sensitivity_obs],
             }
