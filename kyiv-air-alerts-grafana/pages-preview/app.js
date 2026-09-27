@@ -172,10 +172,10 @@ function renderTimeOfDay(key) {
   section.classList.remove("hidden");
 
   const peakText = period.peak_slot
-    ? \`Найвище значення: \${period.peak_slot} · \${fmt(period.peak_alert_share_pct, 1)}% часу під тривогою.\`
+    ? `Найвище значення: ${period.peak_slot} · ${fmt(period.peak_alert_share_pct, 1)}% часу під тривогою.`
     : "У цьому діапазоні немає часу під тривогою.";
   $("timeOfDayMeta").textContent =
-    \`\${period.range_start} — \${period.range_end} · \${period.days} завершених днів. \${peakText}\`;
+    `${period.range_start} — ${period.range_end} · ${period.days} завершених днів. ${peakText}`;
 
   const slots = new Map(period.slots.map(slot => [Number(slot.index), slot]));
   const grid = $("timeOfDayHeatmap");
@@ -195,13 +195,13 @@ function renderTimeOfDay(key) {
   for (let quarter = 0; quarter < 4; quarter += 1) {
     const rowLabel = document.createElement("div");
     rowLabel.className = "heatmap-quarter";
-    rowLabel.textContent = \`:\${String(quarter * 15).padStart(2, "0")}\`;
+    rowLabel.textContent = `:${String(quarter * 15).padStart(2, "0")}`;
     grid.appendChild(rowLabel);
 
     for (let hour = 0; hour < 24; hour += 1) {
       const index = hour * 4 + quarter;
       const slot = slots.get(index) || {
-        label: \`\${String(hour).padStart(2, "0")}:\${String(quarter * 15).padStart(2, "0")}\`,
+        label: `${String(hour).padStart(2, "0")}:${String(quarter * 15).padStart(2, "0")}`,
         alert_share_pct: 0,
         relative_intensity: 0
       };
@@ -211,9 +211,9 @@ function renderTimeOfDay(key) {
 
       const cell = document.createElement("div");
       cell.className = "heatmap-cell";
-      cell.style.backgroundColor = \`rgba(98,160,234,\${alpha.toFixed(3)})\`;
+      cell.style.backgroundColor = `rgba(98,160,234,${alpha.toFixed(3)})`;
       cell.dataset.relative = String(relative);
-      const title = \`\${slot.label}: \${fmt(share, 1)}% часу під тривогою · \${fmt(relative, 0)}% від пікового слота\`;
+      const title = `${slot.label}: ${fmt(share, 1)}% часу під тривогою · ${fmt(relative, 0)}% від пікового слота`;
       cell.title = title;
       cell.setAttribute("aria-label", title);
       cell.setAttribute("role", "gridcell");
