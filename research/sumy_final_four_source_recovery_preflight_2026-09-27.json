@@ -1,0 +1,225 @@
+{
+  "schema_version": "sumy-final-four-source-recovery-preflight-v1",
+  "generated_date": "2026-09-27",
+  "repository": "olegbalakin-cmyk/kyiv-air-alerts-grafana",
+  "branch": "multicity-wip-2026-09-16",
+  "starting_head": "5d170974829092aaa93b95ca77c3871f8976e08b",
+  "parallel_state_note": "90a484f51b321e0950e31b60 is explicitly out of scope and may advance independently. The branch was observed at 7757ee8feecd605ce156b517a775056ecd92ad07 immediately before this artifact commit; that movement is not treated as drift for this task.",
+  "authoritative_starting_sumy_replay": {
+    "denominator_expected": 2297,
+    "denominator_reconstructed": 2297,
+    "strict": 201,
+    "sensitivity": 233,
+    "qa": 5
+  },
+  "target_ids": [
+    "2c7ad2e0b42e1350e305a18f",
+    "402035df8980628fa245c4e8",
+    "45050b31bdcf42a5f8054e8d",
+    "c69285b7ffb05693c3393895"
+  ],
+  "ignored_parallel_target": "90a484f51b321e0950e31b60",
+  "accepted_v2_event_positive_types": [
+    "explosion",
+    "impact",
+    "arrival",
+    "strike",
+    "damage",
+    "fire",
+    "air_defense_action"
+  ],
+  "targets": [
+    {
+      "episode_id": "2c7ad2e0b42e1350e305a18f",
+      "alert_start_utc": "2025-10-06T16:55:09Z",
+      "alert_end_utc": "2025-10-06T22:34:48Z",
+      "recovery_status": "SOURCE_RECOVERED_READY_FOR_APPEND_ONLY_REPAIR",
+      "strongest_source": {
+        "name": "SUMY GO — source-local Telegram sequence",
+        "url": "https://t.me/s/sumygo?before=130739",
+        "source_timestamp": "2025-10-06 21:21–21:31 (Telegram source display)",
+        "corroborating_source": {
+          "name": "Суми | Сумська область — contemporaneous Telegram sequence",
+          "url": "https://t.me/s/sumypost?before=52355",
+          "source_timestamp": "2025-10-06 21:21–21:29 (Telegram source display)"
+        }
+      },
+      "exact_excerpt": "«❗️Всі укриття Суми» → «На удар» → «Кружляє падло, це Італмас - вишукує ціль» → «Вибух»",
+      "supported_event_types": [
+        "explosion"
+      ],
+      "exact_city_binding": {
+        "supported": true,
+        "basis": "The immediately preceding source-local message explicitly names Sumy («❗️Всі укриття Суми»); the tracked Italmas and 21:29 explosion follow in one uninterrupted sequence, and 21:31 again says «Суми-район»."
+      },
+      "temporal_binding": {
+        "supported": true,
+        "basis": "The recovered source-local sequence gives displayed times 21:21, 21:23, 21:28, 21:29 and 21:31. The 21:29 explosion is the already reviewed event time for this target episode."
+      },
+      "military_aerial_causation": {
+        "supported": true,
+        "basis": "The same sequence identifies the tracked object as «Італмас» and describes it searching for a target immediately before the explosion."
+      },
+      "same_attack_basis": {
+        "supported": true,
+        "basis": "Continuous source-local tracking: Sumy shelter warning → attack warning → Italmas circling/searching for a target → explosion eight minutes later, with no competing event introduced between those messages."
+      },
+      "minimal_append_only_repair": "Append the recovered surrounding SUMY GO messages that explicitly name Sumy and continuously bind the Italmas track to the 21:29 explosion; keep the existing event and classifier methodology unchanged.",
+      "further_research_required": false
+    },
+    {
+      "episode_id": "402035df8980628fa245c4e8",
+      "alert_start_utc": "2026-06-18T17:50:00Z",
+      "alert_end_utc": "2026-06-18T20:46:26Z",
+      "recovery_status": "SOURCE_RECOVERED_BUT_BINDING_INSUFFICIENT",
+      "strongest_source": {
+        "name": "Kordon.Media, contemporaneous report citing Sumy MVA",
+        "url": "https://kordon.media/dron-molniya-vdaryv-po-bagatopoverhivczi-v-sumah-naslidky-ataky/",
+        "source_timestamp": "published 2026-06-19; event described as after 23:00 on 2026-06-18",
+        "source_local_companion": {
+          "name": "Suspilne Sumy Telegram sequence",
+          "url": "https://t.me/s/suspilnesumy?before=45421",
+          "exact_message_urls": [
+            "https://t.me/suspilnesumy/45416",
+            "https://t.me/suspilnesumy/45417"
+          ],
+          "source_timestamp": "20:35 explosion; 21:06 MVA-attributed Molniya follow-up (Telegram source display)"
+        }
+      },
+      "exact_excerpt": "«Ще вибух в Сумах.» → «Було влучання російської “Молнії” ... у Ковпаківському районі Сум.»",
+      "supported_event_types": [
+        "explosion",
+        "impact",
+        "damage"
+      ],
+      "exact_city_binding": {
+        "supported": true,
+        "basis": "Both Kordon.Media and the source-local Suspilne follow-up explicitly name Sumy; Kordon.Media specifies a high-rise in Sumy and the Kovpakivskyi district."
+      },
+      "temporal_binding": {
+        "supported": false,
+        "basis": "Kordon.Media narrows the impact only to «after 23:00», which does not by itself prove occurrence before the target alert ended at 20:46:26Z. Suspilne provides a 20:35 city explosion and a 21:06 follow-up, but the retrieved Telegram web output does not expose an absolute timestamp/time-zone field sufficient to independently normalize that display time to the UTC alert window."
+      },
+      "military_aerial_causation": {
+        "supported": true,
+        "basis": "Kordon.Media explicitly identifies a Russian strike UAV «Молнія»; the Suspilne follow-up identifies a Russian «Молнія» impact."
+      },
+      "same_attack_basis": {
+        "supported": true,
+        "basis": "The Suspilne source-local sequence places the Sumy explosion immediately before the MVA-attributed Molniya impact follow-up, with no different Sumy strike introduced between the two messages."
+      },
+      "minimal_append_only_repair": null,
+      "further_research_required": true,
+      "further_research_need": "Recover the original Sumy MVA post metadata or another reliable contemporaneous source with an absolute/local-zone event timestamp precise enough to prove the Molniya impact falls inside this exact alert episode."
+    },
+    {
+      "episode_id": "45050b31bdcf42a5f8054e8d",
+      "alert_start_utc": "2026-07-06T17:33:50Z",
+      "alert_end_utc": "2026-07-06T19:17:53Z",
+      "recovery_status": "SOURCE_RECOVERED_READY_FOR_APPEND_ONLY_REPAIR",
+      "strongest_source": {
+        "name": "SUMY REGION — source-local Telegram causal sequence",
+        "url": "https://t.me/s/sumyregion?before=139789",
+        "source_timestamp": "2026-07-06 20:33–20:35, with immediate follow-up (Telegram source display)",
+        "companion_source": {
+          "name": "Suspilne Sumy Telegram",
+          "url": "https://t.me/s/suspilnesumy?before=46132",
+          "source_timestamp": "2026-07-06 20:35 (retained source display)"
+        }
+      },
+      "exact_excerpt": "«Далі курсом на Чисті Пруди, Баранівку, Суми. Суми в укриття!» → «Збили» → «Впала десь біля будинків в Сумах.»",
+      "supported_event_types": [
+        "explosion",
+        "air_defense_action",
+        "impact",
+        "damage"
+      ],
+      "exact_city_binding": {
+        "supported": true,
+        "basis": "The retained Suspilne message explicitly says the explosion was in Sumy; the recovered causal sequence independently names Sumy immediately before «Збили» and then says the object fell near houses in Sumy."
+      },
+      "temporal_binding": {
+        "supported": true,
+        "basis": "The retained 20:35 Suspilne explosion already has accepted temporal binding for this target. The recovered source independently gives the causal sequence at the same displayed minute: 20:34 approach to Sumy and 20:35 «Збили»."
+      },
+      "military_aerial_causation": {
+        "supported": true,
+        "basis": "The recovered source explicitly tracks «Молнія» toward Sumy and reports «Збили» at the same minute as the retained Sumy explosion."
+      },
+      "same_attack_basis": {
+        "supported": true,
+        "basis": "Same-minute cross-source match plus continuous source-local sequence: Molniya toward Sumy → Sumy shelter warning → «Збили» at 20:35 → object fell near buildings in Sumy; later source-local reporting describes a Molniya impact crater and civilian damage."
+      },
+      "minimal_append_only_repair": "Append the SUMY REGION 20:33–20:35 Molniya/«Збили»/Sumy-fall sequence as causal corroboration for the already retained and temporally bound 20:35 Suspilne Sumy explosion; do not alter the causation gate or event taxonomy.",
+      "further_research_required": false
+    },
+    {
+      "episode_id": "c69285b7ffb05693c3393895",
+      "alert_start_utc": "2025-10-08T17:44:30Z",
+      "alert_end_utc": "2025-10-08T23:17:39Z",
+      "recovery_status": "SOURCE_RECOVERED_READY_FOR_APPEND_ONLY_REPAIR",
+      "strongest_source": {
+        "name": "SUMY GO — source-local Telegram sequence",
+        "url": "https://t.me/s/sumygo?before=131089",
+        "source_timestamp": "2025-10-08 21:12–21:22 (Telegram source display)",
+        "corroborating_source": {
+          "name": "Sumy City Military Administration",
+          "url": "https://sumycma.gov.ua/category/novyny/",
+          "source_timestamp": "2025-10-08",
+          "note": "Contemporaneous official item states that on 8 October the enemy struck Sumy with UAVs."
+        }
+      },
+      "exact_excerpt": "«Суми всі укриття, Італмас над містом» → «Вибух» → «Вибух» → «Усі прильоти по місту»",
+      "supported_event_types": [
+        "explosion",
+        "arrival"
+      ],
+      "exact_city_binding": {
+        "supported": true,
+        "basis": "The 21:16 source-local message explicitly names Sumy and, in the same sentence, identifies the Italmas as «над містом»; the subsequent explosions and arrivals therefore inherit a deterministic source-local antecedent."
+      },
+      "temporal_binding": {
+        "supported": true,
+        "basis": "The sequence provides displayed times 21:12, 21:15, 21:16, 21:18, 21:20 and 21:22. The 21:18–21:20 explosions are the already reviewed event times for this target episode."
+      },
+      "military_aerial_causation": {
+        "supported": true,
+        "basis": "The source tracks an «ударний БпЛА»/«Італмас» into Sumy immediately before the explosions; the Sumy MVA contemporaneously states that UAVs struck Sumy on 8 October."
+      },
+      "same_attack_basis": {
+        "supported": true,
+        "basis": "Continuous source-local chain: new Italmas → Bаранівка → «Суми ... Італмас над містом» → explosions → «Усі прильоти по місту», with no competing attack introduced in between."
+      },
+      "minimal_append_only_repair": "Append the recovered 21:12–21:22 SUMY GO surrounding messages, especially the 21:16 explicit Sumy antecedent, so the existing explosion/arrival evidence has exact-city and same-attack context without classifier changes.",
+      "further_research_required": false
+    }
+  ],
+  "counts": {
+    "ready": 3,
+    "insufficient_binding": 1,
+    "unrecovered": 0,
+    "conflicting": 0
+  },
+  "targets_still_requiring_further_research": [
+    "402035df8980628fa245c4e8"
+  ],
+  "classifier_methodology_change_required": "NO",
+  "active_6863_campaign": {
+    "branch": "historical-attack-event-backfill-2026-09-27",
+    "head_at_start_reference": "5809bd677a93e6c2f6a1bff9cb7f6b5bde0c7c1e",
+    "head_immediately_before_artifact_commit": "5809bd677a93e6c2f6a1bff9cb7f6b5bde0c7c1e",
+    "unchanged": "YES"
+  },
+  "protected_files_unchanged": "YES",
+  "mutations_performed": {
+    "retained_evidence": false,
+    "provenance": false,
+    "replay_code": false,
+    "classifier": false,
+    "qa_status": false,
+    "canonical_metrics": false,
+    "source_slices": false,
+    "production_data": false
+  },
+  "verdict": "SUMY FINAL FOUR SOURCE RECOVERY PARTIAL — 3 READY FOR ATOMIC EVIDENCE REPAIR; 1 BINDING INSUFFICIENT"
+}
