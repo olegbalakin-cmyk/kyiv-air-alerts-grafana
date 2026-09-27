@@ -187,6 +187,56 @@ def parse_exact_telegram_post_html(html: str, channel: str, message_id: int) -> 
     return None
 
 
+def fetch_telegram_neighbor_window(
+    session: requests.Session,
+    channel: str,
+    center_message_id: int,
+    previous_count: int = 3,
+) -> tuple[list[dict], dict]:
+    url = f"https://t.me/s/{channel}?before={center_message_id + 1}"
+    try:
+        response = session.get(url, timeout=15)
+        response.raise_for_status()
+    except requests.RequestException as exc:
+        return [], {
+            "url": url,
+            "resolved": False,
+            "error": f"{type(exc).__name__}: {exc}",
+        }
+    soup = BeautifulSoup(response.text, "html.parser")
+    floor = max(1, center_message_id - previous_count)
+    rows = []
+    for wrap in soup.select(".tgme_widget_message_wrap"):
+        msg = wrap.select_one(".tgme_widget_message")
+        time_el = wrap.select_one("time[datetime]")
+        if not msg or not time_el:
+            continue
+        post = str(msg.get("data-post") or "")
+        match = re.search(r"/([0-9]+)$", post)
+        if not match:
+            continue
+        message_id = int(match.group(1))
+        if not (floor <= message_id < center_message_id):
+            continue
+        text_el = wrap.select_one(".tgme_widget_message_text")
+        text = " ".join(text_el.stripped_strings) if text_el else ""
+        rows.append({
+            "channel": channel,
+            "message_id": message_id,
+            "published_at": iso(parse_dt(time_el["datetime"])),
+            "text": text,
+            "url": f"https://t.me/{channel}/{message_id}",
+            "retrieval_url": url,
+        })
+    rows.sort(key=lambda row: row["message_id"])
+    return rows, {
+        "url": url,
+        "resolved": True,
+        "previous_count": previous_count,
+        "returned_message_ids": [row["message_id"] for row in rows],
+    }
+
+
 def fetch_exact_linked_telegram_post(
     session: requests.Session,
     channel: str,
@@ -483,6 +533,7 @@ def build_pilot(
     linked_telegram_seen = set()
     linked_telegram_fetches = []
     linked_telegram_posts = []
+    linked_neighbor_fetches = []
     targeted_secondary_fetches = []
     targeted_secondary_articles = []
 
@@ -560,7 +611,30 @@ def build_pilot(
                     post["parent_article_url"] = article["url"]
                     post["retained_episode_id"] = retained_episode_id
                     linked_telegram_posts.append(post)
+                    neighbors, neighbor_meta = fetch_telegram_neighbor_window(
+                        network_session, str(ref["channel"]), int(ref["message_id"]), previous_count=3
+                    )
+                    linked_neighbor_fetches.append({
+                        "parent_article_url": article["url"],
+                        "retained_episode_id": retained_episode_id,
+                        "channel": ref["channel"],
+                        "center_message_id": ref["message_id"],
+                        **neighbor_meta,
+                    })
+                    for neighbor in neighbors:
+                        neighbor["parent_article_url"] = article["url"]
+                        neighbor["retained_episode_id"] = retained_episode_id
+                        linked_telegram_posts.append(neighbor)
                 time.sleep(sleep_seconds)
+
+    linked_post_dedup = {}
+    for post in linked_telegram_posts:
+        key = (str(post.get("channel") or "").casefold(), int(post.get("message_id") or 0))
+        linked_post_dedup[key] = post
+    linked_telegram_posts = sorted(
+        linked_post_dedup.values(),
+        key=lambda row: (str(row.get("published_at") or ""), str(row.get("channel") or ""), int(row.get("message_id") or 0)),
+    )
 
     linked_candidate_rows = []
     linked_candidate_decisions = {}
@@ -825,6 +899,7 @@ def build_pilot(
                     for post in linked_telegram_posts
                 ],
                 "fetches": linked_telegram_fetches,
+                "neighbor_fetches": linked_neighbor_fetches,
                 "composition_diagnostics": composition_diagnostics,
             },
             "targeted_secondary_html": {
