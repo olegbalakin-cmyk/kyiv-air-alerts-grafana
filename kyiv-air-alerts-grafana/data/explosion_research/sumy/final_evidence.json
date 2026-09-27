@@ -248,7 +248,37 @@
       "source_url": "https://t.me/s/sumygo?before=130740",
       "evidence": "SUMY GO повідомляв про «Італмас» над містом і вибух о 21:29.",
       "decision": "strict",
-      "basis": "exact-city UAV sequence and explosion inside matched alert"
+      "basis": "exact-city UAV sequence and explosion inside matched alert",
+      "excerpt": "Source-local sequence: 21:21 «❗️Всі укриття Суми» → 21:23 «На удар» → 21:28 «Кружляє падло, це Італмас - вишукує ціль» → 21:29 «Вибух».",
+      "recovered_source_context": {
+        "recovery_status": "SOURCE_RECOVERED_READY_FOR_APPEND_ONLY_REPAIR",
+        "source_url": "https://t.me/s/sumygo?before=130739",
+        "source_local_date": "2025-10-06",
+        "source_local_time_basis": "Telegram source display",
+        "source_local_order": [
+          {
+            "time": "21:21",
+            "text": "❗️Всі укриття Суми"
+          },
+          {
+            "time": "21:23",
+            "text": "На удар"
+          },
+          {
+            "time": "21:28",
+            "text": "Кружляє падло, це Італмас - вишукує ціль"
+          },
+          {
+            "time": "21:29",
+            "text": "Вибух"
+          }
+        ],
+        "supported_event_types": [
+          "explosion"
+        ],
+        "provenance_artifact": "research/sumy_final_four_source_recovery_preflight_2026-09-27.json",
+        "provenance_commit": "49c16ed3df07e8e100eeebf37aad673f2d507a5d"
+      }
     },
     {
       "alert_episode_id": "5b05996435ef74622b17451a",
@@ -288,7 +318,38 @@
       "source_url": "https://t.me/s/sumygo?before=131089",
       "evidence": "SUMY GO повідомив про «Італмас» над містом, вибухи о 21:18-21:20 і влучання по місту.",
       "decision": "strict",
-      "basis": "exact-city UAV attack/explosions inside matched alert"
+      "basis": "exact-city UAV attack/explosions inside matched alert",
+      "excerpt": "Source-local sequence: 21:16 «Суми всі укриття, Італмас над містом» → 21:18 «Вибух» → 21:20 «Вибух» → 21:22 «Усі прильоти по місту».",
+      "recovered_source_context": {
+        "recovery_status": "SOURCE_RECOVERED_READY_FOR_APPEND_ONLY_REPAIR",
+        "source_url": "https://t.me/s/sumygo?before=131089",
+        "source_local_date": "2025-10-08",
+        "source_local_time_basis": "Telegram source display",
+        "source_local_order": [
+          {
+            "time": "21:16",
+            "text": "Суми всі укриття, Італмас над містом"
+          },
+          {
+            "time": "21:18",
+            "text": "Вибух"
+          },
+          {
+            "time": "21:20",
+            "text": "Вибух"
+          },
+          {
+            "time": "21:22",
+            "text": "Усі прильоти по місту"
+          }
+        ],
+        "supported_event_types": [
+          "explosion",
+          "arrival"
+        ],
+        "provenance_artifact": "research/sumy_final_four_source_recovery_preflight_2026-09-27.json",
+        "provenance_commit": "49c16ed3df07e8e100eeebf37aad673f2d507a5d"
+      }
     },
     {
       "alert_episode_id": "891f7397c572e7fa251b1d44",
@@ -1296,7 +1357,38 @@
       "event_time_kyiv": "2026-07-06 ~20:35",
       "source_url": "https://t.me/s/suspilnesumy?before=46132",
       "evidence": "О 20:35 у Сумах знову було чути вибух; це вже інший alert episode.",
-      "decision": "strict: exact-city aerial-war evidence with event time/interval inside matched episode"
+      "decision": "strict: exact-city aerial-war evidence with event time/interval inside matched episode",
+      "excerpt": "Source-local sequence: 20:34 джерело відстежує ворожий БпЛА «Молнія» курсом на Суми; «Суми в укриття!» → 20:35 «Збили» → immediate follow-up «Впала десь біля будинків в Сумах.»",
+      "recovered_source_context": {
+        "recovery_status": "SOURCE_RECOVERED_READY_FOR_APPEND_ONLY_REPAIR",
+        "source_url": "https://t.me/s/sumyregion?before=139789",
+        "source_local_date": "2026-07-06",
+        "source_local_time_basis": "Telegram source display",
+        "source_local_order": [
+          {
+            "time": "20:34",
+            "text": "Молнія курсом на Суми; Суми в укриття!",
+            "note": "source-local approach context summarized in the recovery preflight"
+          },
+          {
+            "time": "20:35",
+            "text": "Збили"
+          },
+          {
+            "time": null,
+            "text": "Впала десь біля будинків в Сумах.",
+            "note": "immediate source-local follow-up; exact display time not retained in the recovery preflight"
+          }
+        ],
+        "supported_event_types": [
+          "explosion",
+          "air_defense_action",
+          "impact",
+          "damage"
+        ],
+        "provenance_artifact": "research/sumy_final_four_source_recovery_preflight_2026-09-27.json",
+        "provenance_commit": "49c16ed3df07e8e100eeebf37aad673f2d507a5d"
+      }
     },
     {
       "matched_episode_id": "4f1c074afec150a88ff2dab1",
