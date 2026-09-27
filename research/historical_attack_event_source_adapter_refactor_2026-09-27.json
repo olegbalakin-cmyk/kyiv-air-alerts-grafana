@@ -1,0 +1,179 @@
+{
+  "schema_version": 1,
+  "kind": "historical_attack_event_source_adapter_refactor",
+  "generated_at": "2026-09-27T12:25:23.019392Z",
+  "task_starting_head": "31482913d2aa1335f313db375fb88aaed30e0c5f",
+  "workflow_input_head": "df419cbaddf7dd0e72a949dff40b79a345c30271",
+  "files_inspected_for_duplicate_adapter_functionality": [
+    "kyiv-air-alerts-grafana/scripts/discover_historical_attack_events.py",
+    "kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py",
+    ".github/workflows/historical-attack-event-discovery-pilot.yml",
+    "research/historical_ppo_source_inventory.json",
+    "research/historical_replay_status_current.json",
+    "research/historical_replay_source_retention/index.json"
+  ],
+  "reusable_adapters": [
+    "SourceLocalHtmlArchiveAdapter",
+    "PublicTelegramAdapter",
+    "ExactUrlHtmlPreflightAdapter"
+  ],
+  "files_changed_for_refactor": [
+    "kyiv-air-alerts-grafana/scripts/historical_attack_event_sources.py",
+    "kyiv-air-alerts-grafana/scripts/discover_historical_attack_events.py",
+    "kyiv-air-alerts-grafana/scripts/run_historical_attack_event_source_adapter_pilot.py",
+    ".github/workflows/historical-attack-event-discovery-pilot.yml"
+  ],
+  "before_structure": "Lviv pilot worker owned source-local HTML, linked public Telegram, exact-URL HTML retrieval and classifier orchestration in one script.",
+  "after_structure": "Reusable adapters own bounded discover/fetch/parse/normalize/provenance primitives; the existing worker and pilot runner hand observations to monitor_explosion_candidates.py for all classification.",
+  "network_bounds": {
+    "explicit_user_agent": true,
+    "timeout_seconds": 15,
+    "max_retries": 2,
+    "rate_limit_seconds": 0.2,
+    "max_archive_articles_per_day": 80,
+    "max_telegram_pages": 100,
+    "max_neighbor_previous": 3,
+    "bounded_pagination": true,
+    "canonical_source_deduplication": true,
+    "telegram_public_web_only": true,
+    "telegram_api_credentials": false
+  },
+  "evidence_observation_contract": [
+    "observation_id",
+    "source_type",
+    "source",
+    "source_url",
+    "telegram_channel",
+    "telegram_message_id",
+    "source_timestamp",
+    "event_timestamp_if_stated",
+    "excerpt",
+    "matched_terms",
+    "event_types_supported",
+    "exact_city_binding",
+    "air_attack_context",
+    "same_attack_context",
+    "temporal_binding",
+    "classification_outcome",
+    "classification_episode_id",
+    "classification_reason_codes",
+    "content_hash",
+    "provenance"
+  ],
+  "source_adapter_self_test": {
+    "return_code": 0,
+    "passed": true,
+    "stdout": "Historical attack-event pilot helper self-test OK\n"
+  },
+  "classifier_self_test": {
+    "return_code": 0,
+    "passed": true,
+    "stdout": "Provenance hardening frozen replay OK: 50/50 approvals (35 strict, 15 sensitivity); 2/2 deterministic negatives; 58/58 no-adapter regression; 20/20 episode replay (15 strict, 1 sensitivity, 4 unresolved); 8/8 transitions (7 strict, 1 sensitivity -> needs_review); 50 ordinary unreviewed controls; 3/3 composition-positive recomputations; strict episode event IDs unique (18/18); 50 ordinary unreviewed identity controls (persisted deltas=0, adapter widening=0); future-run unexpected status changes=0; stale unique+MATCH_NONE=0; matching refresh checked=660\nSelf-test OK: 23 audited cities; classification requirements IR01-IR20 covered; PVO-only, controlled-blast, and publisher-branding guards; KAB/UAV/missile context; episode-specific explicit/clock/live temporal attribution; near-boundary and conservative single-episode sensitivity; late discovery; overlap/near-duplicate guards; dry replay purity\n"
+  },
+  "classifier_control_replay": {
+    "schema_version": 1,
+    "evaluated_candidates": 762,
+    "changed_candidate_count": 0,
+    "targeted_damage_fire_widening_count": 0,
+    "targeted_relative_chronology_count": 0,
+    "uncontrolled_drift_count": 0,
+    "approved_regression_count": 0,
+    "changes": [],
+    "uncontrolled_drift": [],
+    "approved_regressions": [],
+    "verdict": "ATTACK-EVENT CLASSIFIER CONTROL REPLAY CLEAN"
+  },
+  "lviv_regression": {
+    "passed": true,
+    "return_code": 0,
+    "old_blob": "e744d3c4458331decd4a8d4508c3756668580469",
+    "new_blob": "29ff59b90748caac66987e8dfb4542bdec49a994",
+    "behaviorally_equivalent": true,
+    "expected_provenance_only_differences": [
+      "generated_at changes",
+      "bounded retry adapter metadata may differ only if a network retry occurs"
+    ],
+    "selected_episode_count": 40,
+    "retained_control_count": 7,
+    "rediscovered_strict_control_count": 7,
+    "newly_strict_episode_ids": [],
+    "event_positive_episode_count": 7,
+    "relative_chronology_codes": [
+      "TEMPORAL_RELATIVE_ALERT_CHRONOLOGY"
+    ],
+    "targeted_secondary_control_recovered": true,
+    "targeted_secondary_source_family_onboarded": false,
+    "stdout_tail": "               },\n                \"air_context\": {\n                  \"present\": true,\n                  \"segments\": [\n                    \"У Львові працює ППО.\",\n                    \"У Львові працює ППО.\"\n                  ],\n                  \"evidence_sources\": [\n                    \"candidate_evidence\"\n                  ]\n                },\n                \"same_attack\": {\n                  \"present\": false,\n                  \"reason\": \"missing_explosion_or_air_context\",\n                  \"evidence_sources\": []\n                },\n                \"reason_codes\": [\n                  \"MATCH_UNIQUE\",\n                  \"EXACT_CITY_EVENT_TEXT\",\n                  \"NO_STRICT_EXPLOSION_EVIDENCE\",\n                  \"AIR_MILITARY_CONTEXT\",\n                  \"AIR_CONTEXT_NOT_LINKED_TO_EVENT\",\n                  \"NO_STRICT_TEMPORAL_BINDING\",\n                  \"PVO_ONLY_COMPLETE_MESSAGE\"\n                ]\n              }\n            }\n          ],\n          \"composition\": {\n            \"target_episode_id\": \"6cd77c20720eafece633c1ad\",\n            \"city_key\": \"lviv\",\n            \"final_composed_verdict\": \"no_composed_strict\",\n            \"contributing_candidate_ids\": [],\n            \"anchor_candidate_id\": null,\n            \"reason_codes\": [\n              \"NO_SAFE_EPISODE_LEVEL_COMPOSITION\"\n            ],\n            \"candidate_count_considered\": 0,\n            \"temporal_anchor_candidate_ids\": [],\n            \"air_context_candidate_ids\": []\n          }\n        }\n      }\n    },\n    \"targeted_secondary_html\": {\n      \"configured_sources\": 1,\n      \"resolved_articles\": 1,\n      \"fetches\": [\n        {\n          \"url\": \"https://lviv.tsn.ua/lviv/u-lvovi-hrymliat-vybukhy-3015458.html\",\n          \"status_code\": 200,\n          \"published_at\": \"2026-02-05T15:33:12Z\",\n          \"bytes\": 169136,\n          \"source_family_onboarded\": false,\n          \"target_episode_id\": \"6cd77c20720eafece633c1ad\",\n          \"resolved\": true\n        }\n      ],\n      \"source_family_onboarded\": false\n    }\n  }\n}\n"
+  },
+  "protected_blobs_before": {
+    "kyiv-air-alerts-grafana/data/explosion_audited_baseline.json": "5bbd2b771559eac2966aeec65d6e3b5487b9c1a9",
+    "kyiv-air-alerts-grafana/data/explosion_review_queue.json": "e6ed6776ae326a18a07978b1979dd3b265096bf0",
+    "kyiv-air-alerts-grafana/data/explosion_candidate_monitor_state.json": "3c8658880c6b93a00fb8ddbec2c4eaeed6d3f2cc",
+    "kyiv-air-alerts-grafana/data/explosion_candidate_monitor_last_run.json": "1552b13a2a9361be968cea4f09876cc20f96572f",
+    "kyiv-air-alerts-grafana/data/explosions_test.json": "3109dc02d2292efa59eddd26b34292cab2b554ab",
+    "kyiv-air-alerts-grafana/data/dashboard_data.json": "85e1d5cacfbe0af1530bbf584cb63ebdfef463e6",
+    "kyiv-air-alerts-grafana/data/explosion_research/cherkasy/final_evidence.json": "5dd59bb3c4076d2a27ee6f77464ec0be507d2cd7",
+    "kyiv-air-alerts-grafana/data/explosion_research/chernihiv/final_evidence.json": "708644ea2cf5673d56f8cc73104c2fa17c72fd93",
+    "kyiv-air-alerts-grafana/data/explosion_research/dnipro/final_evidence.json": "99758ae2a7d888593ffd863cc53cd9f48bf34f5a",
+    "kyiv-air-alerts-grafana/data/explosion_research/kharkiv/final_evidence.json": "dcbbb3a2cf96276f23672d8e6e497626740c7947",
+    "kyiv-air-alerts-grafana/data/explosion_research/kherson/final_evidence.json": "243b36904ea715fef0d100656f0822100009ca9b",
+    "kyiv-air-alerts-grafana/data/explosion_research/kropyvnytskyi/final_evidence.json": "ab21e5608a2d0600538b7a5b4d3cee77f5eb9f7b",
+    "kyiv-air-alerts-grafana/data/explosion_research/kyiv/final_evidence.json": "dd21e37b5903e53ef4be90b23133a14a1b7aa613",
+    "kyiv-air-alerts-grafana/data/explosion_research/lviv/final_evidence.json": "bc6b04e0892e430f8a055f2a7d54b41dfd00715b",
+    "kyiv-air-alerts-grafana/data/explosion_research/mykolaiv/final_evidence.json": "fe10f780d988917a0f742400d774ac8b20466ffd",
+    "kyiv-air-alerts-grafana/data/explosion_research/odesa/final_evidence.json": "1ed4cf2a52b02c7b1ffb36fa7f7737e81543e428",
+    "kyiv-air-alerts-grafana/data/explosion_research/sevastopol/final_evidence.json": "931a575dbd9b3fc4c90579bfbbb9ad54d8e70a62",
+    "kyiv-air-alerts-grafana/data/explosion_research/sumy/final_evidence.json": "7c0a4a64b3d7000cd10e8f1b846b1e57641d8a4d",
+    "kyiv-air-alerts-grafana/data/explosion_research/zaporizhzhia/final_evidence.json": "afc2702bfeb0b599dbec00d251362450b2d292e1"
+  },
+  "protected_blobs_after": {
+    "kyiv-air-alerts-grafana/data/explosion_audited_baseline.json": "5bbd2b771559eac2966aeec65d6e3b5487b9c1a9",
+    "kyiv-air-alerts-grafana/data/explosion_review_queue.json": "e6ed6776ae326a18a07978b1979dd3b265096bf0",
+    "kyiv-air-alerts-grafana/data/explosion_candidate_monitor_state.json": "3c8658880c6b93a00fb8ddbec2c4eaeed6d3f2cc",
+    "kyiv-air-alerts-grafana/data/explosion_candidate_monitor_last_run.json": "1552b13a2a9361be968cea4f09876cc20f96572f",
+    "kyiv-air-alerts-grafana/data/explosions_test.json": "3109dc02d2292efa59eddd26b34292cab2b554ab",
+    "kyiv-air-alerts-grafana/data/dashboard_data.json": "85e1d5cacfbe0af1530bbf584cb63ebdfef463e6",
+    "kyiv-air-alerts-grafana/data/explosion_research/cherkasy/final_evidence.json": "5dd59bb3c4076d2a27ee6f77464ec0be507d2cd7",
+    "kyiv-air-alerts-grafana/data/explosion_research/chernihiv/final_evidence.json": "708644ea2cf5673d56f8cc73104c2fa17c72fd93",
+    "kyiv-air-alerts-grafana/data/explosion_research/dnipro/final_evidence.json": "99758ae2a7d888593ffd863cc53cd9f48bf34f5a",
+    "kyiv-air-alerts-grafana/data/explosion_research/kharkiv/final_evidence.json": "dcbbb3a2cf96276f23672d8e6e497626740c7947",
+    "kyiv-air-alerts-grafana/data/explosion_research/kherson/final_evidence.json": "243b36904ea715fef0d100656f0822100009ca9b",
+    "kyiv-air-alerts-grafana/data/explosion_research/kropyvnytskyi/final_evidence.json": "ab21e5608a2d0600538b7a5b4d3cee77f5eb9f7b",
+    "kyiv-air-alerts-grafana/data/explosion_research/kyiv/final_evidence.json": "dd21e37b5903e53ef4be90b23133a14a1b7aa613",
+    "kyiv-air-alerts-grafana/data/explosion_research/lviv/final_evidence.json": "bc6b04e0892e430f8a055f2a7d54b41dfd00715b",
+    "kyiv-air-alerts-grafana/data/explosion_research/mykolaiv/final_evidence.json": "fe10f780d988917a0f742400d774ac8b20466ffd",
+    "kyiv-air-alerts-grafana/data/explosion_research/odesa/final_evidence.json": "1ed4cf2a52b02c7b1ffb36fa7f7737e81543e428",
+    "kyiv-air-alerts-grafana/data/explosion_research/sevastopol/final_evidence.json": "931a575dbd9b3fc4c90579bfbbb9ad54d8e70a62",
+    "kyiv-air-alerts-grafana/data/explosion_research/sumy/final_evidence.json": "7c0a4a64b3d7000cd10e8f1b846b1e57641d8a4d",
+    "kyiv-air-alerts-grafana/data/explosion_research/zaporizhzhia/final_evidence.json": "afc2702bfeb0b599dbec00d251362450b2d292e1"
+  },
+  "protected_files_unchanged": true,
+  "excluded_active_parallel_work_cities": [
+    "cherkasy",
+    "kyiv",
+    "lviv",
+    "sumy",
+    "zaporizhzhia"
+  ],
+  "eligible_next_city_candidates": [
+    {
+      "city_key": "sevastopol",
+      "episode_universe": 527,
+      "reconstructed_episode_universe": 527,
+      "replay_status": "READY",
+      "retained_strict_controls": 38,
+      "deterministic_public_source": {
+        "source_type": "public_telegram",
+        "channel": "Crimeanwind",
+        "source_url": "https://t.me/s/Crimeanwind?before=106206"
+      }
+    }
+  ],
+  "deterministic_city_selection": {
+    "rule": "complete current corpus; no active blocker; retained positive control; deterministic autonomous public source; smallest episode universe; tie-break city_key",
+    "selected_city": "sevastopol"
+  },
+  "pilot_workflow_run_id": "36318862376",
+  "blocker": null,
+  "verdict": "ATTACK-EVENT SOURCE ADAPTER REFACTOR CLEAN"
+}

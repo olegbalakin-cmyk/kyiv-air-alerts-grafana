@@ -1,0 +1,853 @@
+{
+  "schema_version": 1,
+  "kind": "historical_attack_event_discovery_pilot",
+  "generated_at": "2026-09-27T12:25:22.956168Z",
+  "city_key": "sevastopol",
+  "city": "Севастополь",
+  "starting_head": "df419cbaddf7dd0e72a949dff40b79a345c30271",
+  "workflow_run_id": "36318862376",
+  "selection": {
+    "rule": "complete corpus + no active blocker + retained positive control + deterministic autonomous public source; prefer smallest episode universe; tie-break city_key",
+    "anchor": {
+      "episode_id": "a94b7665358a92d17b405839",
+      "episode_index": 397,
+      "source_url": "https://t.me/s/Crimeanwind?before=106206",
+      "source_type": "public_telegram",
+      "channel": "Crimeanwind",
+      "before_message_id": 106206,
+      "basis": "strict_exact_time_inside_episode",
+      "evidence": "Crimeanwind reports a strong explosion near the Balaklava TPP in Sevastopol at 23:49, after the alert was switched on at 23:47."
+    },
+    "selected_episode_count": 40,
+    "window_start_episode_id": "7cbcbb0216a831c560bdeb2e",
+    "window_end_episode_id": "0809ad13a86bc5c072e54285",
+    "window_start": "2026-07-22T02:46:34Z",
+    "window_end": "2026-08-08T05:50:46Z"
+  },
+  "source_adapters_used": [
+    "PublicTelegramAdapter"
+  ],
+  "retrieval_diagnostics": {
+    "retained_page_fetches": [
+      {
+        "channel": "Crimeanwind",
+        "before_message_id": 106206,
+        "url": "https://t.me/s/Crimeanwind?before=106206",
+        "resolved": true,
+        "requests_made": 1,
+        "returned_message_ids": [
+          106185,
+          106187,
+          106188,
+          106189,
+          106190,
+          106195,
+          106197,
+          106201,
+          106202,
+          106203,
+          106204,
+          106205
+        ]
+      }
+    ],
+    "searches": [
+      {
+        "channel": "Crimeanwind",
+        "query": "Севастополь",
+        "pages": 3,
+        "requests_made": 3,
+        "max_pages": 60,
+        "stopped_because_older_than_window": false,
+        "window_hits": 0
+      }
+    ],
+    "search_window_start": "2026-07-21T23:46:34Z",
+    "search_window_end": "2026-08-11T05:50:46Z",
+    "raw_posts_retrieved": 12,
+    "candidate_posts_after_city_and_attack_discovery_filter": 4,
+    "network_bounds": {
+      "user_agent": "explicit adapter User-Agent",
+      "timeout_seconds": 15,
+      "max_retries": 2,
+      "rate_limit_seconds": 0.2,
+      "max_search_pages": 60,
+      "retained_before_page_requests": 1,
+      "unbounded_history_crawl": false,
+      "telegram_api_credentials": false
+    }
+  },
+  "evidence_observations": [
+    {
+      "observation_id": "08216d65ff753536b6c7d760",
+      "source_type": "public_telegram",
+      "source": "Telegram / Crimeanwind",
+      "source_url": "https://t.me/Crimeanwind/106185",
+      "telegram_channel": "Crimeanwind",
+      "telegram_message_id": 106185,
+      "source_timestamp": "2026-07-31T23:13:09Z",
+      "event_timestamp_if_stated": null,
+      "excerpt": "🔥 В Севастополе прилет с детонацией, разгорается пожар Всего прозвучало 8 взрывов, потом было зарево и детонация, сообщают подписчики. Сейчас горит или на позиции 475 Центра РЭБ (территория отмечена красным) на мысе Фиолент или дальше, на высотах Кая-Баш под Балаклавой, где позиции росПВО. За 15 минут шлейф дыма уже растянулся на 1-2 километра. Кстати, откуда-то оттуда стрелял \"Панцирь\". 📷 наш подписчик Кто знает подробности или снял фото/видео - пишите в наш бот (анонимно) 👇 @crimeanwind_newsbot",
+      "matched_terms": [],
+      "event_types_supported": [],
+      "exact_city_binding": {
+        "present": false,
+        "segments": [],
+        "evidence_sources": []
+      },
+      "air_attack_context": {
+        "present": false,
+        "segments": [],
+        "evidence_sources": []
+      },
+      "same_attack_context": {
+        "present": false,
+        "reason": "missing_explosion_or_air_context",
+        "evidence_sources": []
+      },
+      "temporal_binding": {
+        "present": false,
+        "code": "NO_STRICT_TEMPORAL_BINDING",
+        "evidence_type": null,
+        "evidence": null,
+        "event_time": null,
+        "event_interval": null,
+        "message_time": null,
+        "episode_specific": false,
+        "supported_episode_ids": [],
+        "episode_id": null,
+        "near_boundary": {
+          "present": false,
+          "episode_specific": false,
+          "supported_episode_ids": [],
+          "episode_id": null
+        },
+        "evidence_sources": []
+      },
+      "classification_outcome": "needs_review",
+      "classification_episode_id": null,
+      "classification_reason_codes": [
+        "MATCH_UNIQUE",
+        "NO_EXACT_CITY_EVENT_TEXT",
+        "NO_STRICT_EXPLOSION_EVIDENCE",
+        "NO_AIR_MILITARY_CONTEXT",
+        "NO_STRICT_TEMPORAL_BINDING"
+      ],
+      "content_hash": "0d8cb516dabf20635afb458f26afbc108fbb57ae6d616569fa6f63abb5aabe35",
+      "provenance": {
+        "retrieval_method": "retained_public_telegram_bounded_page",
+        "retrieval_url": "https://t.me/s/Crimeanwind?before=106206",
+        "source_family_onboarded": true,
+        "classifier": "monitor_explosion_candidates.py current branch version",
+        "raw_metadata": {
+          "telegram_channel": "Crimeanwind",
+          "telegram_message_id": 106185
+        },
+        "candidate_matching": {
+          "outcome": "unique_match",
+          "matched_episode_ids": [
+            "a94b7665358a92d17b405839"
+          ],
+          "logical_episode_groups": [
+            [
+              "a94b7665358a92d17b405839"
+            ]
+          ],
+          "matched_episode_id": "a94b7665358a92d17b405839",
+          "reason": "publication_within_unique_tracked_alert_window"
+        }
+      }
+    },
+    {
+      "observation_id": "eb1e6bf778bbeb95f7b6048d",
+      "source_type": "public_telegram",
+      "source": "Telegram / Crimeanwind",
+      "source_url": "https://t.me/Crimeanwind/106190",
+      "telegram_channel": "Crimeanwind",
+      "telegram_message_id": 106190,
+      "source_timestamp": "2026-08-01T04:35:48Z",
+      "event_timestamp_if_stated": null,
+      "excerpt": "🔥 В Севастополе возникли пожары после прилетов по позициям росРЭБ и росПВО , сообщает мониторинговая группа \"Крымского ветра\" со ссылкой на данные спутниковой съемки Ночью мы публиковали фото пожара от нашего подписчика и не могли определить, прилетело по РЭБ или ПВО, но как оказалось, туда и туда. Всего подписчики насчитали 8 взрывов, сколько из них было прилетов, неизвестно. 1. На мысе Фиолент - 475-й отдельный центр радиоэлектронной борьбы (в/ч 60135) — подразделение ЧФ рф, на вооружении которого состоят мощные комплексы радиоэлектронной борьбы, включая системы стратегического назначения. На вооружении состоят стратегический комплекс РЭБ «Мурманск-БН», мобильные системы «Красуха-2» и «Красуха-4», а также станции помех «Житель» и «Инфауна». В ночь с 26 на 27 июля 2026 года ГУР поразило там станцию ​​комплекса РЭБ \"Мурманск-БН\". 2. Район высот Кая-Баш - позиция в/ч ПВО. Кто знает подробности или снял фото/видео - пишите в наш бот (анонимно) 👇 @crimeanwind_newsbot",
+      "matched_terms": [],
+      "event_types_supported": [],
+      "exact_city_binding": {
+        "present": false,
+        "segments": [],
+        "evidence_sources": []
+      },
+      "air_attack_context": {
+        "present": false,
+        "segments": [],
+        "evidence_sources": []
+      },
+      "same_attack_context": {
+        "present": false,
+        "reason": "missing_explosion_or_air_context",
+        "evidence_sources": []
+      },
+      "temporal_binding": {
+        "present": false,
+        "code": "NO_STRICT_TEMPORAL_BINDING",
+        "evidence_type": null,
+        "evidence": null,
+        "event_time": null,
+        "event_interval": null,
+        "message_time": null,
+        "episode_specific": false,
+        "supported_episode_ids": [],
+        "episode_id": null,
+        "near_boundary": {
+          "present": false,
+          "episode_specific": false,
+          "supported_episode_ids": [],
+          "episode_id": null
+        },
+        "evidence_sources": []
+      },
+      "classification_outcome": "needs_review",
+      "classification_episode_id": null,
+      "classification_reason_codes": [
+        "MATCH_NONE",
+        "NO_EXACT_CITY_EVENT_TEXT",
+        "NO_STRICT_EXPLOSION_EVIDENCE",
+        "NO_AIR_MILITARY_CONTEXT",
+        "NO_STRICT_TEMPORAL_BINDING"
+      ],
+      "content_hash": "fb416ed242b6b4959cebf7e89aced060a1dad69dc16cab362488d6fe97bbb39f",
+      "provenance": {
+        "retrieval_method": "retained_public_telegram_bounded_page",
+        "retrieval_url": "https://t.me/s/Crimeanwind?before=106206",
+        "source_family_onboarded": true,
+        "classifier": "monitor_explosion_candidates.py current branch version",
+        "raw_metadata": {
+          "telegram_channel": "Crimeanwind",
+          "telegram_message_id": 106190
+        },
+        "candidate_matching": {
+          "outcome": "no_match",
+          "matched_episode_ids": [],
+          "logical_episode_groups": [],
+          "matched_episode_id": null,
+          "reason": "publication_outside_all_tracked_alert_windows"
+        }
+      }
+    },
+    {
+      "observation_id": "258f1c43a4de98b3537b84c7",
+      "source_type": "public_telegram",
+      "source": "Telegram / Crimeanwind",
+      "source_url": "https://t.me/Crimeanwind/106195",
+      "telegram_channel": "Crimeanwind",
+      "telegram_message_id": 106195,
+      "source_timestamp": "2026-08-01T04:46:02Z",
+      "event_timestamp_if_stated": null,
+      "excerpt": "В Севастополе в 03.24 и в 03.55 были взрывы и пуски ракет, в 05.10-05.20 снова 4 взрыва и пуска. 🎥 наш подписчик Прислать информацию, фото, видео (анонимно): ➡️ @crimeanwind_newsbot",
+      "matched_terms": [],
+      "event_types_supported": [],
+      "exact_city_binding": {
+        "present": false,
+        "segments": [],
+        "evidence_sources": []
+      },
+      "air_attack_context": {
+        "present": true,
+        "segments": [
+          "В Севастополе в 03.24 и в 03.55 были взрывы и пуски ракет, в 05.10-05.20 снова 4 взрыва и пуска.",
+          "🎥 наш подписчик Прислать информацию, фото, видео (анонимно): ➡️ @crimeanwind_newsbot В Севастополе в 03.24 и в 03.55 были взрывы и пуски ракет, в 05.10-05.20 снова 4 взрыва и пуска."
+        ],
+        "evidence_sources": [
+          "candidate_evidence"
+        ]
+      },
+      "same_attack_context": {
+        "present": false,
+        "reason": "missing_explosion_or_air_context",
+        "evidence_sources": []
+      },
+      "temporal_binding": {
+        "present": false,
+        "code": "NO_STRICT_TEMPORAL_BINDING",
+        "evidence_type": null,
+        "evidence": null,
+        "event_time": null,
+        "event_interval": null,
+        "message_time": null,
+        "episode_specific": false,
+        "supported_episode_ids": [],
+        "episode_id": null,
+        "near_boundary": {
+          "present": false,
+          "episode_specific": false,
+          "supported_episode_ids": [],
+          "episode_id": null
+        },
+        "evidence_sources": []
+      },
+      "classification_outcome": "needs_review",
+      "classification_episode_id": null,
+      "classification_reason_codes": [
+        "MATCH_NONE",
+        "NO_EXACT_CITY_EVENT_TEXT",
+        "NO_STRICT_EXPLOSION_EVIDENCE",
+        "AIR_MILITARY_CONTEXT",
+        "AIR_CONTEXT_NOT_LINKED_TO_EVENT",
+        "NO_STRICT_TEMPORAL_BINDING"
+      ],
+      "content_hash": "e5c6d2f55a89f7cd8a24cdbdf39e55d6b326c501eb14d2ee2aece7acc84934c6",
+      "provenance": {
+        "retrieval_method": "retained_public_telegram_bounded_page",
+        "retrieval_url": "https://t.me/s/Crimeanwind?before=106206",
+        "source_family_onboarded": true,
+        "classifier": "monitor_explosion_candidates.py current branch version",
+        "raw_metadata": {
+          "telegram_channel": "Crimeanwind",
+          "telegram_message_id": 106195
+        },
+        "candidate_matching": {
+          "outcome": "no_match",
+          "matched_episode_ids": [],
+          "logical_episode_groups": [],
+          "matched_episode_id": null,
+          "reason": "publication_outside_all_tracked_alert_windows"
+        }
+      }
+    },
+    {
+      "observation_id": "486199ded2a5a53bc1677cfd",
+      "source_type": "public_telegram",
+      "source": "Telegram / Crimeanwind",
+      "source_url": "https://t.me/Crimeanwind/106202",
+      "telegram_channel": "Crimeanwind",
+      "telegram_message_id": 106202,
+      "source_timestamp": "2026-08-01T05:10:13Z",
+      "event_timestamp_if_stated": null,
+      "excerpt": "🔥 В Севастополе прилет с детонацией, разгорается пожар  Всего прозвучало 8 взрывов, потом было зарево и детонация, сообщают подписчики.  Сейчас горит или на позиции 475 Центра РЭБ (территория отмечена красным) на мысе Фиолент или дальше, на высотах Кая-Баш…",
+      "matched_terms": [],
+      "event_types_supported": [],
+      "exact_city_binding": {
+        "present": false,
+        "segments": [],
+        "evidence_sources": []
+      },
+      "air_attack_context": {
+        "present": false,
+        "segments": [],
+        "evidence_sources": []
+      },
+      "same_attack_context": {
+        "present": false,
+        "reason": "missing_explosion_or_air_context",
+        "evidence_sources": []
+      },
+      "temporal_binding": {
+        "present": false,
+        "code": "NO_STRICT_TEMPORAL_BINDING",
+        "evidence_type": null,
+        "evidence": null,
+        "event_time": null,
+        "event_interval": null,
+        "message_time": null,
+        "episode_specific": false,
+        "supported_episode_ids": [],
+        "episode_id": null,
+        "near_boundary": {
+          "present": false,
+          "episode_specific": false,
+          "supported_episode_ids": [],
+          "episode_id": null
+        },
+        "evidence_sources": []
+      },
+      "classification_outcome": "needs_review",
+      "classification_episode_id": null,
+      "classification_reason_codes": [
+        "MATCH_NONE",
+        "NO_EXACT_CITY_EVENT_TEXT",
+        "NO_STRICT_EXPLOSION_EVIDENCE",
+        "NO_AIR_MILITARY_CONTEXT",
+        "NO_STRICT_TEMPORAL_BINDING"
+      ],
+      "content_hash": "5836f02add48f7a9f6988e96bb9cfb9c2ca690c529d3e48517efb95c000189e2",
+      "provenance": {
+        "retrieval_method": "retained_public_telegram_bounded_page",
+        "retrieval_url": "https://t.me/s/Crimeanwind?before=106206",
+        "source_family_onboarded": true,
+        "classifier": "monitor_explosion_candidates.py current branch version",
+        "raw_metadata": {
+          "telegram_channel": "Crimeanwind",
+          "telegram_message_id": 106202
+        },
+        "candidate_matching": {
+          "outcome": "no_match",
+          "matched_episode_ids": [],
+          "logical_episode_groups": [],
+          "matched_episode_id": null,
+          "reason": "publication_outside_all_tracked_alert_windows"
+        }
+      }
+    }
+  ],
+  "canonical_event_candidates": [],
+  "episode_level_results": [
+    {
+      "episode_id": "7cbcbb0216a831c560bdeb2e",
+      "alert_start": "2026-07-22T02:46:34Z",
+      "alert_end": "2026-07-22T04:10:22Z",
+      "has_confirmed_event": false,
+      "confirmed_event_count": 0,
+      "event_types": [],
+      "strict_observation_ids": [],
+      "sensitivity_observation_ids": []
+    },
+    {
+      "episode_id": "6fd8a42ee569aecfe4483b65",
+      "alert_start": "2026-07-22T04:49:07Z",
+      "alert_end": "2026-07-22T05:10:28Z",
+      "has_confirmed_event": false,
+      "confirmed_event_count": 0,
+      "event_types": [],
+      "strict_observation_ids": [],
+      "sensitivity_observation_ids": []
+    },
+    {
+      "episode_id": "bb9668ffdfff1484d915c72d",
+      "alert_start": "2026-07-22T05:34:42Z",
+      "alert_end": "2026-07-22T05:44:43Z",
+      "has_confirmed_event": false,
+      "confirmed_event_count": 0,
+      "event_types": [],
+      "strict_observation_ids": [],
+      "sensitivity_observation_ids": []
+    },
+    {
+      "episode_id": "a2fd63babafe638cbfe13075",
+      "alert_start": "2026-07-22T13:30:30Z",
+      "alert_end": "2026-07-22T14:35:09Z",
+      "has_confirmed_event": false,
+      "confirmed_event_count": 0,
+      "event_types": [],
+      "strict_observation_ids": [],
+      "sensitivity_observation_ids": []
+    },
+    {
+      "episode_id": "a505ce954a9ffab9a5717535",
+      "alert_start": "2026-07-22T23:37:35Z",
+      "alert_end": "2026-07-23T01:10:46Z",
+      "has_confirmed_event": false,
+      "confirmed_event_count": 0,
+      "event_types": [],
+      "strict_observation_ids": [],
+      "sensitivity_observation_ids": []
+    },
+    {
+      "episode_id": "febe12db6a7963eb3e1e4b09",
+      "alert_start": "2026-07-23T20:23:44Z",
+      "alert_end": "2026-07-23T21:43:12Z",
+      "has_confirmed_event": false,
+      "confirmed_event_count": 0,
+      "event_types": [],
+      "strict_observation_ids": [],
+      "sensitivity_observation_ids": []
+    },
+    {
+      "episode_id": "79da2028f88c7f57c936cb0e",
+      "alert_start": "2026-07-23T23:54:25Z",
+      "alert_end": "2026-07-24T00:41:54Z",
+      "has_confirmed_event": false,
+      "confirmed_event_count": 0,
+      "event_types": [],
+      "strict_observation_ids": [],
+      "sensitivity_observation_ids": []
+    },
+    {
+      "episode_id": "7561a3cc79f1ce9e91a7c5c9",
+      "alert_start": "2026-07-24T10:23:13Z",
+      "alert_end": "2026-07-24T10:48:55Z",
+      "has_confirmed_event": false,
+      "confirmed_event_count": 0,
+      "event_types": [],
+      "strict_observation_ids": [],
+      "sensitivity_observation_ids": []
+    },
+    {
+      "episode_id": "da0799dd823002e5c2a09df2",
+      "alert_start": "2026-07-24T20:51:31Z",
+      "alert_end": "2026-07-24T21:27:21Z",
+      "has_confirmed_event": false,
+      "confirmed_event_count": 0,
+      "event_types": [],
+      "strict_observation_ids": [],
+      "sensitivity_observation_ids": []
+    },
+    {
+      "episode_id": "846d5a56c8cf9e7f728cbf5c",
+      "alert_start": "2026-07-27T01:25:02Z",
+      "alert_end": "2026-07-27T02:51:12Z",
+      "has_confirmed_event": false,
+      "confirmed_event_count": 0,
+      "event_types": [],
+      "strict_observation_ids": [],
+      "sensitivity_observation_ids": []
+    },
+    {
+      "episode_id": "56099bfa8f50de0af3362932",
+      "alert_start": "2026-07-27T15:45:51Z",
+      "alert_end": "2026-07-27T16:40:12Z",
+      "has_confirmed_event": false,
+      "confirmed_event_count": 0,
+      "event_types": [],
+      "strict_observation_ids": [],
+      "sensitivity_observation_ids": []
+    },
+    {
+      "episode_id": "d34fd4c451eadcd53d3c3d26",
+      "alert_start": "2026-07-27T19:02:05Z",
+      "alert_end": "2026-07-27T20:27:01Z",
+      "has_confirmed_event": false,
+      "confirmed_event_count": 0,
+      "event_types": [],
+      "strict_observation_ids": [],
+      "sensitivity_observation_ids": []
+    },
+    {
+      "episode_id": "ae6ffd5b2aff0da6b9af7d3f",
+      "alert_start": "2026-07-27T23:42:46Z",
+      "alert_end": "2026-07-28T00:59:06Z",
+      "has_confirmed_event": false,
+      "confirmed_event_count": 0,
+      "event_types": [],
+      "strict_observation_ids": [],
+      "sensitivity_observation_ids": []
+    },
+    {
+      "episode_id": "9c9a546ecbe5b72fc3057af3",
+      "alert_start": "2026-07-28T11:12:48Z",
+      "alert_end": "2026-07-28T12:42:03Z",
+      "has_confirmed_event": false,
+      "confirmed_event_count": 0,
+      "event_types": [],
+      "strict_observation_ids": [],
+      "sensitivity_observation_ids": []
+    },
+    {
+      "episode_id": "4d11482103347df7b9313712",
+      "alert_start": "2026-07-28T20:06:18Z",
+      "alert_end": "2026-07-29T00:37:46Z",
+      "has_confirmed_event": false,
+      "confirmed_event_count": 0,
+      "event_types": [],
+      "strict_observation_ids": [],
+      "sensitivity_observation_ids": []
+    },
+    {
+      "episode_id": "9c17769de9aa670ab4bf60e3",
+      "alert_start": "2026-07-29T02:26:50Z",
+      "alert_end": "2026-07-29T02:55:12Z",
+      "has_confirmed_event": false,
+      "confirmed_event_count": 0,
+      "event_types": [],
+      "strict_observation_ids": [],
+      "sensitivity_observation_ids": []
+    },
+    {
+      "episode_id": "0a79e2815a8db8a59ef3458f",
+      "alert_start": "2026-07-29T09:15:15Z",
+      "alert_end": "2026-07-29T10:18:59Z",
+      "has_confirmed_event": false,
+      "confirmed_event_count": 0,
+      "event_types": [],
+      "strict_observation_ids": [],
+      "sensitivity_observation_ids": []
+    },
+    {
+      "episode_id": "3a47cc6de3161cf02ca26ee3",
+      "alert_start": "2026-07-29T15:57:11Z",
+      "alert_end": "2026-07-29T16:30:32Z",
+      "has_confirmed_event": false,
+      "confirmed_event_count": 0,
+      "event_types": [],
+      "strict_observation_ids": [],
+      "sensitivity_observation_ids": []
+    },
+    {
+      "episode_id": "8fb06d9d045433e8780ba9ed",
+      "alert_start": "2026-07-30T22:23:29Z",
+      "alert_end": "2026-07-30T23:55:29Z",
+      "has_confirmed_event": false,
+      "confirmed_event_count": 0,
+      "event_types": [],
+      "strict_observation_ids": [],
+      "sensitivity_observation_ids": []
+    },
+    {
+      "episode_id": "451fa38c11ce1cb5abca6ce2",
+      "alert_start": "2026-07-31T16:09:01Z",
+      "alert_end": "2026-07-31T16:32:09Z",
+      "has_confirmed_event": false,
+      "confirmed_event_count": 0,
+      "event_types": [],
+      "strict_observation_ids": [],
+      "sensitivity_observation_ids": []
+    },
+    {
+      "episode_id": "a94b7665358a92d17b405839",
+      "alert_start": "2026-07-31T20:47:50Z",
+      "alert_end": "2026-07-31T23:24:29Z",
+      "has_confirmed_event": false,
+      "confirmed_event_count": 0,
+      "event_types": [],
+      "strict_observation_ids": [],
+      "sensitivity_observation_ids": []
+    },
+    {
+      "episode_id": "0ed9d9044dde6bc06645e064",
+      "alert_start": "2026-08-01T00:16:30Z",
+      "alert_end": "2026-08-01T00:31:19Z",
+      "has_confirmed_event": false,
+      "confirmed_event_count": 0,
+      "event_types": [],
+      "strict_observation_ids": [],
+      "sensitivity_observation_ids": []
+    },
+    {
+      "episode_id": "05300b71bb2c1311bddc3527",
+      "alert_start": "2026-08-01T01:29:58Z",
+      "alert_end": "2026-08-01T02:44:25Z",
+      "has_confirmed_event": false,
+      "confirmed_event_count": 0,
+      "event_types": [],
+      "strict_observation_ids": [],
+      "sensitivity_observation_ids": []
+    },
+    {
+      "episode_id": "308ad765b6cd0bcd1930d095",
+      "alert_start": "2026-08-01T22:06:12Z",
+      "alert_end": "2026-08-01T23:08:22Z",
+      "has_confirmed_event": false,
+      "confirmed_event_count": 0,
+      "event_types": [],
+      "strict_observation_ids": [],
+      "sensitivity_observation_ids": []
+    },
+    {
+      "episode_id": "baf73635e368875dbb3cd9e8",
+      "alert_start": "2026-08-02T03:15:29Z",
+      "alert_end": "2026-08-02T04:12:57Z",
+      "has_confirmed_event": false,
+      "confirmed_event_count": 0,
+      "event_types": [],
+      "strict_observation_ids": [],
+      "sensitivity_observation_ids": []
+    },
+    {
+      "episode_id": "c2c8251178d0cf9727600fd3",
+      "alert_start": "2026-08-02T17:53:11Z",
+      "alert_end": "2026-08-02T18:22:21Z",
+      "has_confirmed_event": false,
+      "confirmed_event_count": 0,
+      "event_types": [],
+      "strict_observation_ids": [],
+      "sensitivity_observation_ids": []
+    },
+    {
+      "episode_id": "4d0fb3ef3b22a269d453ea39",
+      "alert_start": "2026-08-04T18:54:37Z",
+      "alert_end": "2026-08-04T21:06:41Z",
+      "has_confirmed_event": false,
+      "confirmed_event_count": 0,
+      "event_types": [],
+      "strict_observation_ids": [],
+      "sensitivity_observation_ids": []
+    },
+    {
+      "episode_id": "f93045df9b29071bd05e7f60",
+      "alert_start": "2026-08-05T05:16:28Z",
+      "alert_end": "2026-08-05T05:23:49Z",
+      "has_confirmed_event": false,
+      "confirmed_event_count": 0,
+      "event_types": [],
+      "strict_observation_ids": [],
+      "sensitivity_observation_ids": []
+    },
+    {
+      "episode_id": "00bcf89b84bf3db58167c837",
+      "alert_start": "2026-08-05T07:37:36Z",
+      "alert_end": "2026-08-05T08:30:09Z",
+      "has_confirmed_event": false,
+      "confirmed_event_count": 0,
+      "event_types": [],
+      "strict_observation_ids": [],
+      "sensitivity_observation_ids": []
+    },
+    {
+      "episode_id": "1b98d6cd83f6879eb5504764",
+      "alert_start": "2026-08-05T09:15:39Z",
+      "alert_end": "2026-08-05T09:51:55Z",
+      "has_confirmed_event": false,
+      "confirmed_event_count": 0,
+      "event_types": [],
+      "strict_observation_ids": [],
+      "sensitivity_observation_ids": []
+    },
+    {
+      "episode_id": "cc46597813bed4d379d55959",
+      "alert_start": "2026-08-05T18:50:29Z",
+      "alert_end": "2026-08-05T19:21:50Z",
+      "has_confirmed_event": false,
+      "confirmed_event_count": 0,
+      "event_types": [],
+      "strict_observation_ids": [],
+      "sensitivity_observation_ids": []
+    },
+    {
+      "episode_id": "978f0a29330cead904e7d761",
+      "alert_start": "2026-08-06T00:55:11Z",
+      "alert_end": "2026-08-06T02:41:41Z",
+      "has_confirmed_event": false,
+      "confirmed_event_count": 0,
+      "event_types": [],
+      "strict_observation_ids": [],
+      "sensitivity_observation_ids": []
+    },
+    {
+      "episode_id": "9500269aacb8a297cd5bfc9f",
+      "alert_start": "2026-08-06T04:25:38Z",
+      "alert_end": "2026-08-06T05:24:12Z",
+      "has_confirmed_event": false,
+      "confirmed_event_count": 0,
+      "event_types": [],
+      "strict_observation_ids": [],
+      "sensitivity_observation_ids": []
+    },
+    {
+      "episode_id": "71ff58994bd55a9a75b36d06",
+      "alert_start": "2026-08-06T05:34:02Z",
+      "alert_end": "2026-08-06T05:45:39Z",
+      "has_confirmed_event": false,
+      "confirmed_event_count": 0,
+      "event_types": [],
+      "strict_observation_ids": [],
+      "sensitivity_observation_ids": []
+    },
+    {
+      "episode_id": "fa96af3ba88039fcd9ff9ffc",
+      "alert_start": "2026-08-06T11:44:37Z",
+      "alert_end": "2026-08-06T12:46:29Z",
+      "has_confirmed_event": false,
+      "confirmed_event_count": 0,
+      "event_types": [],
+      "strict_observation_ids": [],
+      "sensitivity_observation_ids": []
+    },
+    {
+      "episode_id": "d41dab91ffe4ea7ab94f3fc9",
+      "alert_start": "2026-08-06T13:18:01Z",
+      "alert_end": "2026-08-06T14:01:52Z",
+      "has_confirmed_event": false,
+      "confirmed_event_count": 0,
+      "event_types": [],
+      "strict_observation_ids": [],
+      "sensitivity_observation_ids": []
+    },
+    {
+      "episode_id": "5a835b1e4444df2dda5f5a2d",
+      "alert_start": "2026-08-06T21:53:07Z",
+      "alert_end": "2026-08-06T23:38:49Z",
+      "has_confirmed_event": false,
+      "confirmed_event_count": 0,
+      "event_types": [],
+      "strict_observation_ids": [],
+      "sensitivity_observation_ids": []
+    },
+    {
+      "episode_id": "512cf1618b6688a8d2e9e315",
+      "alert_start": "2026-08-07T23:35:22Z",
+      "alert_end": "2026-08-07T23:53:11Z",
+      "has_confirmed_event": false,
+      "confirmed_event_count": 0,
+      "event_types": [],
+      "strict_observation_ids": [],
+      "sensitivity_observation_ids": []
+    },
+    {
+      "episode_id": "358ea3d3ff81b3a37b94b76b",
+      "alert_start": "2026-08-08T00:36:18Z",
+      "alert_end": "2026-08-08T02:29:19Z",
+      "has_confirmed_event": false,
+      "confirmed_event_count": 0,
+      "event_types": [],
+      "strict_observation_ids": [],
+      "sensitivity_observation_ids": []
+    },
+    {
+      "episode_id": "0809ad13a86bc5c072e54285",
+      "alert_start": "2026-08-08T04:30:00Z",
+      "alert_end": "2026-08-08T05:50:46Z",
+      "has_confirmed_event": false,
+      "confirmed_event_count": 0,
+      "event_types": [],
+      "strict_observation_ids": [],
+      "sensitivity_observation_ids": []
+    }
+  ],
+  "control_recovery": {
+    "retained_control_episode_ids": [
+      "05300b71bb2c1311bddc3527",
+      "0ed9d9044dde6bc06645e064",
+      "a94b7665358a92d17b405839"
+    ],
+    "rediscovered_control_episode_ids": [],
+    "missed_control_episode_ids": [
+      "05300b71bb2c1311bddc3527",
+      "0ed9d9044dde6bc06645e064",
+      "a94b7665358a92d17b405839"
+    ],
+    "missed_control_diagnostics": [
+      {
+        "episode_id": "05300b71bb2c1311bddc3527",
+        "gap_code": "SOURCE_NOT_DISCOVERED",
+        "retained_source_urls": [
+          "https://t.me/s/Crimeanwind?before=106206"
+        ],
+        "retrieved_observation_ids": []
+      },
+      {
+        "episode_id": "0ed9d9044dde6bc06645e064",
+        "gap_code": "SOURCE_NOT_DISCOVERED",
+        "retained_source_urls": [
+          "https://t.me/s/Crimeanwind?before=106206"
+        ],
+        "retrieved_observation_ids": []
+      },
+      {
+        "episode_id": "a94b7665358a92d17b405839",
+        "gap_code": "CURRENT_RULE_DOWNGRADE",
+        "retained_source_urls": [
+          "https://t.me/s/Crimeanwind?before=106206"
+        ],
+        "retrieved_observation_ids": [
+          "08216d65ff753536b6c7d760"
+        ]
+      }
+    ]
+  },
+  "newly_strict_cases": [],
+  "event_types_observed": [],
+  "qa_summary": {
+    "selected_alert_episodes": 40,
+    "retrieved_observations": 4,
+    "strict_observations": 0,
+    "sensitivity_observations": 0,
+    "needs_review_observations": 4,
+    "rejected_observations": 0,
+    "event_positive_episode_count": 0,
+    "pilot_event_positive_share": 0.0,
+    "retained_controls_in_window": 3,
+    "rediscovered_controls": 0,
+    "missed_controls": 3
+  },
+  "metric_rule": "Binary per alert episode: has_confirmed_event contributes at most 1 to the public numerator. Pilot share is QA-only.",
+  "baseline_mutated": false,
+  "production_metric_mutated": false,
+  "verdict": "HISTORICAL ATTACK-EVENT DISCOVERY PILOT COMPLETE"
+}
