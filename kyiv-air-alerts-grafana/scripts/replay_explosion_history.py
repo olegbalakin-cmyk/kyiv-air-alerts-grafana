@@ -285,6 +285,7 @@ def historical_review_roles(city: str, row: dict, monitor) -> tuple[dict, str]:
     exact_city = False
     explosion = False
     air_context = False
+    direct_strike_segment = None
 
     if city == "sevastopol":
         # Sevastopol's frozen final_evidence corpus stores reviewed factual
@@ -304,16 +305,43 @@ def historical_review_roles(city: str, row: dict, monitor) -> tuple[dict, str]:
         # Sumy's frozen corpus stores reviewed Ukrainian factual summaries.
         # Preserve only facts explicit in the retained summary. In particular,
         # a strike/hit is not synthesized into explosion evidence.
+        city_pattern = r"\b(?:сум|суми|сумах|сумами)\b"
         exact_city = bool(
             # "Сум" is the genitive form of the city name; it does not match
             # "Сумської"/"Сумщини".
-            re.search(r"\b(?:сум|суми|сумах|сумами)\b", low)
+            re.search(city_pattern, low)
         )
+        # V2 historical-only normalization for direct factual strikes. Keep
+        # this deliberately narrower than generic "атакув..." so forecasts
+        # such as "може атакувати" / "атакуватиме" cannot become events.
+        # Exact-city and military/UAV context must occur in the same retained
+        # statement that contains the completed attack verb.
+        for part in evidence_parts:
+            for segment in re.split(r"(?<=[.!?;])\s+|\n+", part):
+                segment = " ".join(segment.split())
+                segment_low = segment.casefold()
+                if not re.search(r"\bатакув(?:ав|ала|ало|али)\b", segment_low):
+                    continue
+                if not re.search(city_pattern, segment_low):
+                    continue
+                if not (
+                    monitor.air_military_context(segment)
+                    or re.search(
+                        r"\b(?:авіаудар\w*|італмас\w*|геран\w*|ланцет\w*)\b",
+                        segment_low,
+                    )
+                ):
+                    continue
+                direct_strike_segment = segment
+                break
+            if direct_strike_segment:
+                break
+
         # Reuse the frozen current classifier's event semantics and
         # normalize reviewed Ukrainian summaries for linguistic forms that the
         # live lexical layer does not spell explicitly (for example "вдарив").
-        # This preserves the factual event role; it does not use the old
-        # strict/sensitivity label as evidence.
+        # The legacy variable name is retained, but this role is the monitor's
+        # unified attack-event gate, so a direct v2 strike is valid here.
         explosion = bool(
             monitor.strict_explosion_signal(evidence)
             or re.search(r"\bвдар\w*\b", low)
@@ -322,6 +350,7 @@ def historical_review_roles(city: str, row: dict, monitor) -> tuple[dict, str]:
                 r"\b(?:завдав|завдала|завдали|наніс|нанесла|нанесли)\b.{0,40}\bавіаудар\w*\b",
                 low,
             )
+            or direct_strike_segment
         )
         air_context = bool(
             monitor.air_military_context(evidence)
@@ -354,14 +383,22 @@ def historical_review_roles(city: str, row: dict, monitor) -> tuple[dict, str]:
     if explosion:
         roles["explosion_evidence"] = {
             "present": True,
-            "evidence_text": evidence[:1200],
+            "evidence_text": (direct_strike_segment or evidence)[:1200],
         }
+        if direct_strike_segment:
+            roles["explosion_evidence"]["event_types"] = ["strike"]
     if air_context:
         roles["aerial_war_evidence"] = {
             "present": True,
             "evidence_text": evidence[:1200],
         }
-    if exact_city and explosion and air_context:
+    if direct_strike_segment:
+        roles["same_attack_basis"] = {
+            "present": True,
+            "basis": "reviewed_direct_v2_strike_same_statement_exact_city_air_context",
+            "evidence_text": direct_strike_segment[:1200],
+        }
+    elif exact_city and explosion and air_context:
         roles["same_attack_basis"] = {
             "present": True,
             "basis": "reviewed_factual_summary_links_exact_city_explosion_and_air_context",
