@@ -10,6 +10,7 @@ const COLORS = ["#62a0ea", "#8ff0a4", "#f8e45c"];
 const EXPLOSION_COLOR = "#ff9f43";
 const GRID = "rgba(148,163,184,.16)";
 const TEXT = "#b8c4cf";
+const HEATMAP_RANGES = ["7d", "30d", "90d", "year", "all"];
 const TABLE_SORT_COLUMNS = [
   { key: "label", label: "Місто / ряд", defaultDirection: "asc" },
   { key: "alerts", label: "Тривог", defaultDirection: "desc" },
@@ -147,7 +148,78 @@ function updateUrl() {
   params.set("c", $("compareC").value || "none");
   params.set("compare", $("comparePeriod").value);
   if ($("rolling7dYear")?.value) params.set("year", $("rolling7dYear").value);
+  if ($("timeOfDayRange")?.value) params.set("tod", $("timeOfDayRange").value);
   history.replaceState(null, "", `${location.pathname}?${params.toString()}`);
+}
+
+
+function renderTimeOfDay(key) {
+  const section = $("timeOfDaySection");
+  const root = state.data.time_of_day_heatmap_test;
+  const city = root?.cities?.[key];
+  const select = $("timeOfDayRange");
+  if (!section || !select || !city?.periods) {
+    section?.classList.add("hidden");
+    return;
+  }
+
+  const range = HEATMAP_RANGES.includes(select.value) ? select.value : "30d";
+  const period = city.periods[range];
+  if (!period?.slots?.length) {
+    section.classList.add("hidden");
+    return;
+  }
+  section.classList.remove("hidden");
+
+  const peakText = period.peak_slot
+    ? \`Найвище значення: \${period.peak_slot} · \${fmt(period.peak_alert_share_pct, 1)}% часу під тривогою.\`
+    : "У цьому діапазоні немає часу під тривогою.";
+  $("timeOfDayMeta").textContent =
+    \`\${period.range_start} — \${period.range_end} · \${period.days} завершених днів. \${peakText}\`;
+
+  const slots = new Map(period.slots.map(slot => [Number(slot.index), slot]));
+  const grid = $("timeOfDayHeatmap");
+  grid.innerHTML = "";
+
+  const corner = document.createElement("div");
+  corner.className = "heatmap-corner";
+  grid.appendChild(corner);
+
+  for (let hour = 0; hour < 24; hour += 1) {
+    const label = document.createElement("div");
+    label.className = "heatmap-hour";
+    label.textContent = String(hour).padStart(2, "0");
+    grid.appendChild(label);
+  }
+
+  for (let quarter = 0; quarter < 4; quarter += 1) {
+    const rowLabel = document.createElement("div");
+    rowLabel.className = "heatmap-quarter";
+    rowLabel.textContent = \`:\${String(quarter * 15).padStart(2, "0")}\`;
+    grid.appendChild(rowLabel);
+
+    for (let hour = 0; hour < 24; hour += 1) {
+      const index = hour * 4 + quarter;
+      const slot = slots.get(index) || {
+        label: \`\${String(hour).padStart(2, "0")}:\${String(quarter * 15).padStart(2, "0")}\`,
+        alert_share_pct: 0,
+        relative_intensity: 0
+      };
+      const relative = Math.max(0, Math.min(100, Number(slot.relative_intensity) || 0));
+      const share = Math.max(0, Number(slot.alert_share_pct) || 0);
+      const alpha = relative > 0 ? 0.08 + 0.84 * (relative / 100) : 0.035;
+
+      const cell = document.createElement("div");
+      cell.className = "heatmap-cell";
+      cell.style.backgroundColor = \`rgba(98,160,234,\${alpha.toFixed(3)})\`;
+      cell.dataset.relative = String(relative);
+      const title = \`\${slot.label}: \${fmt(share, 1)}% часу під тривогою · \${fmt(relative, 0)}% від пікового слота\`;
+      cell.title = title;
+      cell.setAttribute("aria-label", title);
+      cell.setAttribute("role", "gridcell");
+      grid.appendChild(cell);
+    }
+  }
 }
 
 function renderFreshness() {
@@ -280,6 +352,7 @@ function renderCity() {
 
   setChart("cityDurationChart", labels, [seriesDataset(labelFor(key), rows.map(r => r.avg_alert_duration_min), COLORS[2], dashed)], "Хвилин");
 
+  renderTimeOfDay(key);
   renderRolling7d(key);
   renderShortHorizon(key);
   renderCasualties(key);
@@ -832,6 +905,10 @@ function renderMethodology() {
 function bind() {
   $("citySelect").addEventListener("change", renderCity);
   $("cityPeriod").addEventListener("change", renderCity);
+  $("timeOfDayRange")?.addEventListener("change", () => {
+    renderTimeOfDay($("citySelect").value);
+    updateUrl();
+  });
   $("rolling7dYear")?.addEventListener("change", () => {
     renderRolling7d($("citySelect").value);
     updateUrl();
@@ -877,6 +954,7 @@ async function init() {
   const bDefault = validParam("b", keys, defaults[1] || keys[0]);
   const cDefault = validOptionalParam("c", keys, defaults[2] || "");
   const compareDefault = validParam("compare", ["monthly", "weekly"], "monthly");
+  const heatmapDefault = validParam("tod", HEATMAP_RANGES, "30d");
 
   fillSelect($("citySelect"), keys, cityDefault);
   fillSelect($("compareA"), keys, aDefault);
@@ -884,6 +962,7 @@ async function init() {
   fillSelect($("compareC"), keys, cDefault, true);
   $("cityPeriod").value = periodDefault;
   $("comparePeriod").value = compareDefault;
+  $("timeOfDayRange").value = heatmapDefault;
 
   const generated = state.data.meta?.generated_at || state.data.cities?.kyiv?.meta?.generated_at;
   $("updatedAt").textContent = generated ? `Дані згенеровано ${String(generated).replace("T", " ").slice(0, 19)}` : "";
