@@ -904,8 +904,15 @@ def _unexplained_pilot_changes(changes: list[dict]) -> list[dict]:
 
 
 def foundation_acceptance(output: Path) -> dict:
+    old_foundation = load_json(output) if output.exists() else {}
+    old_lviv = load_json(LVIV_PILOT_PATH) if LVIV_PILOT_PATH.exists() else {}
+    old_sevastopol = load_json(SEVASTOPOL_PILOT_PATH) if SEVASTOPOL_PILOT_PATH.exists() else {}
+    starting_head = os.getenv("FOUNDATION_STARTING_HEAD") or git("rev-parse", "HEAD")
+    acceptance_head = git("rev-parse", "HEAD")
     before = protected_blobs()
+
     self_result = self_test()
+    controls = air_defense_methodology_controls()
     worker = subprocess.run(
         [sys.executable, "scripts/discover_historical_attack_events.py", "--self-test"],
         cwd=ROOT, text=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, check=False,
@@ -929,25 +936,55 @@ def foundation_acceptance(output: Path) -> dict:
 
     l_controls = lviv.get("controls") or {}
     l_summary = lviv.get("summary") or {}
+    lviv_changes = _pilot_episode_changes(old_lviv, lviv)
+    lviv_unexplained = _unexplained_pilot_changes(lviv_changes)
+    lviv_new_ids = set(l_controls.get("newly_strict_episode_ids_vs_retained_controls") or [])
+    lviv_change_map = {row["episode_id"]: row for row in lviv_changes}
+    lviv_new_supported = all(
+        lviv_change_map.get(eid, {}).get("solely_due_to_air_defense_action") is True
+        for eid in lviv_new_ids
+    )
+    retained_count = int(l_controls.get("retained_control_count") or 0)
+    rediscovered_count = int(l_controls.get("rediscovered_strict_control_count") or 0)
     lviv_pass = (
         lviv_proc.returncode == 0
         and l_summary.get("selected_episode_count") == 40
-        and l_controls.get("retained_control_count") == 7
-        and l_controls.get("rediscovered_strict_control_count") == 7
-        and l_controls.get("newly_strict_episode_ids_vs_retained_controls") == []
-        and l_summary.get("event_positive_episode_count") == 7
+        and retained_count == rediscovered_count
+        and not lviv_unexplained
+        and lviv_new_supported
     )
+
     sev_q = sev.get("qa_summary") or {}
+    sev_changes = _pilot_episode_changes(old_sevastopol, sev)
+    sev_unexplained = _unexplained_pilot_changes(sev_changes)
+    old_sev_diag = ((old_sevastopol.get("control_recovery") or {}).get("missed_control_diagnostics") or [])
     sev_diag = ((sev.get("control_recovery") or {}).get("missed_control_diagnostics") or [])
-    sev_downgrades = sum(x.get("gap_code") == "CURRENT_RULE_DOWNGRADE" for x in sev_diag)
+    old_downgrade_ids = {
+        str(x.get("episode_id") or "") for x in old_sev_diag
+        if x.get("gap_code") == "CURRENT_RULE_DOWNGRADE"
+    }
+    new_downgrade_ids = {
+        str(x.get("episode_id") or "") for x in sev_diag
+        if x.get("gap_code") == "CURRENT_RULE_DOWNGRADE"
+    }
+    resolved_downgrades = old_downgrade_ids - new_downgrade_ids
+    sev_change_map = {row["episode_id"]: row for row in sev_changes}
+    resolved_supported = all(
+        sev_change_map.get(eid, {}).get("solely_due_to_air_defense_action") is True
+        for eid in resolved_downgrades
+    )
     sev_pass = (
         sev_q.get("selected_alert_episodes") == 40
-        and sev_q.get("strict_observations") == 0
-        and sev_q.get("sensitivity_observations") == 0
-        and sev_q.get("needs_review_observations") == 4
-        and sev_downgrades == 3
+        and not sev_unexplained
+        and resolved_supported
     )
-    drift_pass = bool(audit) and audit_rc == 0 and int(audit.get("uncontrolled_drift_count") or 0) == 0 and int(audit.get("approved_regression_count") or 0) == 0
+
+    drift_pass = (
+        bool(audit)
+        and audit_rc == 0
+        and int(audit.get("uncontrolled_drift_count") or 0) == 0
+        and int(audit.get("approved_regression_count") or 0) == 0
+    )
     after = protected_blobs()
     protected_clean = before == after
 
@@ -962,10 +999,20 @@ def foundation_acceptance(output: Path) -> dict:
     eligible = sum(x["total_episodes"] for x in ready if x["city_key"] in discovery_ready)
     versions = version_identity()
 
+    unexplained_count = (
+        int((audit or {}).get("uncontrolled_drift_count") or 0)
+        + len(lviv_unexplained)
+        + len(sev_unexplained)
+    )
+    positive_pass = bool(controls.get("positive_passed"))
+    negative_pass = bool(controls.get("negative_passed"))
+
     checks = {
         "source_adapter_self_test": worker.returncode == 0,
         "classifier_self_test": classifier.returncode == 0,
         "classifier_control_replay": drift_pass,
+        "positive_ppo_controls": positive_pass,
+        "negative_ppo_controls": negative_pass,
         "lviv_acceptance": lviv_pass,
         "sevastopol_acceptance": sev_pass,
         "restart_idempotence": self_result,
@@ -975,18 +1022,35 @@ def foundation_acceptance(output: Path) -> dict:
         checks["source_adapter_self_test"],
         checks["classifier_self_test"],
         checks["classifier_control_replay"],
-        checks["lviv_acceptance"],
-        checks["sevastopol_acceptance"],
+        positive_pass,
+        negative_pass,
+        lviv_pass,
+        sev_pass,
         protected_clean,
+        unexplained_count == 0,
     ])
 
+    code_workflow_files = [
+        "kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py",
+        "kyiv-air-alerts-grafana/scripts/audit_attack_event_classifier.py",
+        "kyiv-air-alerts-grafana/scripts/discover_historical_attack_events.py",
+        "kyiv-air-alerts-grafana/scripts/run_historical_attack_event_source_adapter_pilot.py",
+        "kyiv-air-alerts-grafana/scripts/run_historical_attack_event_backfill_batch.py",
+        "research/historical_attack_event_source_registry.json",
+        "research/historical_attack_event_backfill_status.json",
+        ".github/workflows/historical-attack-event-backfill.yml",
+        ".github/workflows/historical-attack-event-backfill-scheduler.yml",
+    ]
+
     artifact = {
-        "schema_version": 1,
+        "schema_version": 2,
         "kind": "historical_attack_event_autonomous_backfill_foundation",
         "generated_at": now_iso(),
-        "actual_starting_head": os.getenv("FOUNDATION_STARTING_HEAD") or git("rev-parse", "HEAD^"),
+        "actual_starting_head": starting_head,
+        "acceptance_head": acceptance_head,
         "campaign_branch": "historical-attack-event-backfill-2026-09-27",
         "campaign_id": DEFAULT_CAMPAIGN_ID,
+        "methodology_version": METHODOLOGY_VERSION,
         "state_location": "research/historical_attack_event_backfill_status.json",
         "campaign_architecture": {
             "batch_runner": "kyiv-air-alerts-grafana/scripts/run_historical_attack_event_backfill_batch.py",
@@ -996,7 +1060,7 @@ def foundation_acceptance(output: Path) -> dict:
             "late_damage_fire_window_hours": LATE_WINDOW_HOURS,
             "same_campaign_resume_requires_same_versions": True,
             "scheduled_resume_declared": True,
-            "scheduled_resume_activation_note": "GitHub cron executes the workflow only after this workflow exists on the repository default branch; the campaign branch itself remains isolated and no full campaign is started by this foundation task.",
+            "scheduled_resume_activation_note": "Default-branch scheduler remains a no-op while scanned_episodes == 0; no full campaign is started by methodology acceptance.",
         },
         "code_version_identity": versions,
         "source_registry": {
@@ -1012,14 +1076,17 @@ def foundation_acceptance(output: Path) -> dict:
             "air_defense_context_separate": True,
             "air_defense_action_separate": True,
             "interception_claim_separate": True,
-            "ppo_only_sets_event_positive": False,
+            "confirmed_actual_air_defense_action_sets_event_positive": True,
+            "predicted_possible_air_defense_sets_event_positive": False,
+            "rule": "confirmed actual air-defense action bound to an alert episode is an event-positive attack-event class",
         },
         "checkpoint_schema": {
+            "schema_version": 2,
             "status_path": "research/historical_attack_event_backfill_status.json",
-            "per_city_fields": [
-                "total_episodes", "discovery_ready", "scanned_episodes", "terminal_episodes",
-                "retryable_episodes", "qa_episodes", "last_completed_batch", "campaign_version",
-                "classifier_sha", "adapter_sha", "updated_at", "status", "episode_states",
+            "episode_result_fields": [
+                "confirmed_event_types", "sensitivity_event_types", "air_defense_context",
+                "air_defense_action", "interception_claim", "event_positive_strict",
+                "event_positive_sensitivity",
             ],
             "terminal_states": ["STRICT_EVENT_POSITIVE", "SENSITIVITY_EVENT_POSITIVE", "NO_CONFIRMED_EVENT", "NEEDS_REVIEW"],
             "retryable_state": "SOURCE_FETCH_RETRY_REQUIRED",
@@ -1037,16 +1104,23 @@ def foundation_acceptance(output: Path) -> dict:
         "acceptance_test_results": {
             "classifier_drift": {
                 "passed": drift_pass,
+                "evaluated_candidates": (audit or {}).get("evaluated_candidates"),
+                "changed_candidate_count": (audit or {}).get("changed_candidate_count"),
+                "changed_classification_ids": (audit or {}).get("changed_classification_ids") or [],
+                "targeted_air_defense_action_count": (audit or {}).get("targeted_air_defense_action_count"),
                 "uncontrolled_drift_count": (audit or {}).get("uncontrolled_drift_count"),
                 "approved_regression_count": (audit or {}).get("approved_regression_count"),
-                "stdout_tail": audit_text[-1200:],
             },
+            "positive_ppo_controls": controls["positive"],
+            "negative_ppo_controls": controls["negative"],
             "lviv": {
                 "passed": lviv_pass,
                 "selected_episodes": l_summary.get("selected_episode_count"),
-                "retained_controls": l_controls.get("retained_control_count"),
-                "rediscovered_controls": l_controls.get("rediscovered_strict_control_count"),
-                "new_unsupported_strict": l_controls.get("newly_strict_episode_ids_vs_retained_controls"),
+                "retained_controls": retained_count,
+                "rediscovered_controls": rediscovered_count,
+                "newly_positive_episode_ids": sorted(lviv_new_ids),
+                "changes": lviv_changes,
+                "unexplained_changes": lviv_unexplained,
             },
             "sevastopol": {
                 "passed": sev_pass,
@@ -1054,26 +1128,23 @@ def foundation_acceptance(output: Path) -> dict:
                 "strict": sev_q.get("strict_observations"),
                 "sensitivity": sev_q.get("sensitivity_observations"),
                 "needs_review": sev_q.get("needs_review_observations"),
-                "current_rule_downgrades": sev_downgrades,
+                "current_rule_downgrade_ids": sorted(new_downgrade_ids),
+                "resolved_current_rule_downgrade_ids": sorted(resolved_downgrades),
+                "changes": sev_changes,
+                "unexplained_changes": sev_unexplained,
             },
         },
         "restart_idempotence_proof": self_result,
         "version_change_proof": {
             "passed": self_result["version_change_protection"] == "PASS",
-            "behavior": "same campaign with processed episodes rejects incompatible classifier/adapter/orchestrator/normalization identity",
+            "behavior": "same campaign with processed episodes rejects incompatible methodology/classifier/adapter/orchestrator/normalization identity",
         },
         "protected_file_verification": {
             "unchanged": protected_clean,
             "before": before,
             "after": after,
         },
-        "exact_code_workflow_files_changed": [
-            "kyiv-air-alerts-grafana/scripts/run_historical_attack_event_backfill_batch.py",
-            "research/historical_attack_event_source_registry.json",
-            "research/historical_attack_event_backfill_status.json",
-            ".github/workflows/historical-attack-event-backfill.yml",
-            "research/historical_attack_event_autonomous_backfill_foundation_2026-09-27.json",
-        ],
+        "exact_code_workflow_files_changed": code_workflow_files,
         "checks": checks,
         "verdict": (
             "AUTONOMOUS HISTORICAL ATTACK-EVENT BACKFILL FOUNDATION READY"
@@ -1081,9 +1152,97 @@ def foundation_acceptance(output: Path) -> dict:
             else "AUTONOMOUS HISTORICAL ATTACK-EVENT BACKFILL FOUNDATION BLOCKED — ACCEPTANCE_FAILURE"
         ),
     }
-    dump_json(output, artifact)
-    return artifact
 
+    retained_ppo_path = ROOT / "data" / "explosion_research" / "zaporizhzhia" / "zaporizhzhia_air_defense_pilot.json"
+    retained_ppo = load_json(retained_ppo_path) if retained_ppo_path.exists() else {}
+    retained_positive_controls = [
+        {
+            "episode_id": row.get("episode_id"),
+            "source": row.get("source"),
+            "url": row.get("url"),
+            "text": row.get("text"),
+            "classification": row.get("classification"),
+        }
+        for row in (retained_ppo.get("strict_positive_evidence") or [])[:6]
+    ]
+
+    classifier_changes = list((audit or {}).get("changes") or [])
+    methodology_artifact = {
+        "schema_version": 1,
+        "kind": "historical_attack_event_air_defense_action_methodology_update",
+        "generated_at": now_iso(),
+        "starting_head": starting_head,
+        "acceptance_head": acceptance_head,
+        "campaign_branch": "historical-attack-event-backfill-2026-09-27",
+        "old_methodology": {
+            "event_taxonomy": list(old_foundation.get("event_taxonomy") or ["explosion", "impact", "arrival", "strike", "damage", "fire"]),
+            "ppo_rule": "PPO-only sets event-positive = NO",
+            "campaign_id": old_foundation.get("campaign_id") or "historical-attack-events-v1-2026-09-27",
+        },
+        "new_methodology": {
+            "event_taxonomy": list(monitor.ATTACK_EVENT_TYPE_ORDER),
+            "rule": "confirmed actual air-defense action bound to an alert episode is an event-positive attack-event class",
+            "prediction_warning_rule": "possible, predicted, readiness, capability, or warning-only PPO does not set air_defense_action and is non-event-positive unless another event class is confirmed",
+            "interception_rule": "interception_claim remains a separate attribute and is not required for air_defense_action",
+            "numerator_rule": "episode contributes at most 1 when strict/sensitivity evidence supports at least one canonical event class",
+        },
+        "classifier_schema_versions": {
+            "before": (old_foundation.get("code_version_identity") or {}),
+            "after": versions,
+            "checkpoint_schema_before": old_foundation.get("schema_version"),
+            "checkpoint_schema_after": 2,
+            "campaign_id_before": old_foundation.get("campaign_id"),
+            "campaign_id_after": DEFAULT_CAMPAIGN_ID,
+        },
+        "exact_code_files_changed": code_workflow_files,
+        "positive_ppo_controls": {
+            "synthetic": controls["positive"],
+            "retained_evidence_examples": retained_positive_controls,
+            "passed": positive_pass,
+        },
+        "negative_ppo_controls": {
+            "synthetic": controls["negative"],
+            "passed": negative_pass,
+        },
+        "classifier_control_replay": {
+            "total_controls_evaluated": (audit or {}).get("evaluated_candidates"),
+            "total_changed_classifications": (audit or {}).get("changed_candidate_count"),
+            "changed_classification_ids": (audit or {}).get("changed_classification_ids") or [],
+            "changes": classifier_changes,
+            "uncontrolled_drift_count": (audit or {}).get("uncontrolled_drift_count"),
+            "approved_regression_count": (audit or {}).get("approved_regression_count"),
+        },
+        "all_classification_changes": {
+            "classifier_records": classifier_changes,
+            "lviv_episode_changes": [
+                row for row in lviv_changes
+                if row["previous_classification"] != row["new_classification"]
+            ],
+            "sevastopol_episode_changes": [
+                row for row in sev_changes
+                if row["previous_classification"] != row["new_classification"]
+            ],
+        },
+        "unexplained_drift_count": unexplained_count,
+        "lviv_acceptance_result": artifact["acceptance_test_results"]["lviv"],
+        "sevastopol_acceptance_result": artifact["acceptance_test_results"]["sevastopol"],
+        "protected_file_hashes": {
+            "before": before,
+            "after": after,
+            "unchanged": protected_clean,
+        },
+        "campaign_methodology_version_changed": True,
+        "full_campaign_launch_status": "NOT_STARTED",
+        "verdict": (
+            "AIR-DEFENSE ACTION PROMOTED TO EVENT-POSITIVE — AUTONOMOUS CAMPAIGN READY"
+            if all_pass
+            else "AIR-DEFENSE ACTION METHODOLOGY UPDATE BLOCKED — ACCEPTANCE_FAILURE"
+        ),
+    }
+
+    dump_json(output, artifact)
+    dump_json(METHODOLOGY_ARTIFACT_PATH, methodology_artifact)
+    return artifact
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Restart-safe historical attack-event discovery batch runner.")
