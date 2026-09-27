@@ -572,7 +572,7 @@ def run_sevastopol_pilot(max_episodes: int, output_path: Path) -> dict:
     def control_clock_tokens(control_row: dict) -> set[str]:
         raw = (control_row.get("raw_control") or {}).get("event_time") or (control_row.get("raw_control") or {}).get("event_time_kyiv") or ""
         tokens = set()
-        for hour, minute in re.findall(r"(?<!\\d)([0-2]?\\d)[:.]([0-5]\\d)", str(raw)):
+        for hour, minute in re.findall("([0-2]?[0-9])[:.]([0-5][0-9])", str(raw)):
             hh = f"{int(hour):02d}"
             tokens.add(f"{hh}:{minute}")
             tokens.add(f"{hh}.{minute}")
