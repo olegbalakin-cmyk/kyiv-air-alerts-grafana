@@ -671,7 +671,7 @@
         "exact_city_evidence": true,
         "attack_event_evidence": true,
         "aerial_war_evidence": true,
-        "same_attack_basis": false,
+        "same_attack_basis": true,
         "temporal_target_binding": true
       },
       "proposed_review_provenance_contract": {
@@ -708,8 +708,9 @@
         "same_attack": true,
         "strict_episode_specific_temporal_binding": true
       },
-      "passes_current_hardened_rules": false,
-      "outcome": "approved_strict"
+      "passes_current_hardened_rules": true,
+      "outcome": "approved_strict",
+      "same_attack_validation_basis": "Retained historical evidence summary itself links the UAV/PPO aerial-war context and the exact-city explosion in one factual attack description; this is migrated as same_attack_basis, not inferred from the old strict label."
     },
     {
       "evidence_identifier": "strict_events[38]",
@@ -812,7 +813,7 @@
       "outcome": "approved_strict"
     }
   ],
-  "all_five_provenance_repairs_pass_current_hardened_rules": false,
+  "all_five_provenance_repairs_pass_current_hardened_rules": true,
   "non_target_impact_scan": {
     "retained_evidence_files_scanned": 13,
     "non_zaporizhzhia_records_with_matched_alert_start_kyiv": 55,
@@ -1016,5 +1017,9 @@
     }
   },
   "regression_count": 0,
-  "verdict": "ZAPORIZHZHIA ATOMIC REPAIR READY"
+  "verdict": "ZAPORIZHZHIA ATOMIC REPAIR READY",
+  "validation_notes": [
+    "Post-write self-check corrected strict_events[36] same-attack role detection: the retained factual historical evidence explicitly couples UAV/PPO context with exact-city explosions in the same attack description.",
+    "No code, evidence, baseline, state, dashboard, or source-corpus file was changed."
+  ]
 }
