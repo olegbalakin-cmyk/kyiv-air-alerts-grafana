@@ -12,6 +12,7 @@ const TIME_PROFILE_COLOR = "#ef4444";
 const GRID = "rgba(148,163,184,.16)";
 const TEXT = "#b8c4cf";
 const HEATMAP_RANGES = ["7d", "30d", "90d", "year", "all"];
+const TABLE_RANGES = ["7d", "30d", "90d", "year", "common"];
 const TABLE_SORT_COLUMNS = [
   { key: "label", label: "Місто / ряд", defaultDirection: "asc" },
   { key: "alerts", label: "Тривог", defaultDirection: "desc" },
@@ -151,6 +152,7 @@ function updateUrl() {
   if ($("rolling7dYear")?.value) params.set("year", $("rolling7dYear").value);
   if ($("timeOfDayRange")?.value) params.set("tod", $("timeOfDayRange").value);
   if ($("compareTimeOfDayRange")?.value) params.set("ctod", $("compareTimeOfDayRange").value);
+  if ($("allCitiesRange")?.value) params.set("table", $("allCitiesRange").value);
   history.replaceState(null, "", `${location.pathname}?${params.toString()}`);
 }
 
@@ -990,17 +992,34 @@ function setupTableSorting() {
 }
 
 function renderAllCitiesTable() {
+  const range = TABLE_RANGES.includes($("allCitiesRange")?.value)
+    ? $("allCitiesRange").value
+    : "30d";
+  const periodLabels = {
+    "7d": "7 днів",
+    "30d": "30 днів",
+    "90d": "90 днів",
+    "year": "Рік",
+    "common": "Від початку спільних даних"
+  };
+  const root = state.data.all_cities_table_test;
+  const cities = root?.cities || {};
+
   const rows = cityKeys().map(key => {
-    const kpi = state.data.cities[key]?.kpis?.[0] || {};
+    const period = cities?.[key]?.periods?.[range];
+    const fallback = state.data.cities[key]?.kpis?.[0] || {};
     return {
       key,
       label: labelFor(key),
-      alerts: kpi.alerts_28d,
-      hours: kpi.alert_hours_28d,
-      duration: kpi.avg_alert_duration_min_28d,
-      coverage: coverageStart(key)
+      alerts: period?.alerts_started ?? fallback.alerts_28d,
+      hours: period?.alert_hours ?? fallback.alert_hours_28d,
+      duration: period?.avg_alert_duration_min ?? fallback.avg_alert_duration_min_28d,
+      coverage: coverageStart(key),
+      rangeStart: period?.range_start || fallback.period_start || null,
+      rangeEnd: period?.range_end || fallback.period_end || null
     };
   });
+
   rows.sort(compareTableRows);
   $("allCitiesTable").innerHTML = rows.map(r => `
     <tr>
@@ -1010,6 +1029,15 @@ function renderAllCitiesTable() {
       <td>${fmt(r.duration, 1)} хв</td>
       <td>${r.coverage || "—"}</td>
     </tr>`).join("");
+
+  const note = $("allCitiesRangeNote");
+  if (note) {
+    const sample = rows.find(r => r.rangeStart && r.rangeEnd);
+    const dates = sample ? `${sample.rangeStart} — ${sample.rangeEnd}` : "—";
+    note.textContent =
+      `${periodLabels[range]} · ${dates}. Усі 23 ряди рахуються на одному спільному часовому вікні.`;
+  }
+
   document.querySelectorAll(".table-city-link").forEach(btn => btn.addEventListener("click", () => {
     $("citySelect").value = btn.dataset.city;
     renderCity();
@@ -1046,6 +1074,10 @@ function bind() {
   });
   $("rolling7dYear")?.addEventListener("change", () => {
     renderRolling7d($("citySelect").value);
+    updateUrl();
+  });
+  $("allCitiesRange")?.addEventListener("change", () => {
+    renderAllCitiesTable();
     updateUrl();
   });
   for (const id of ["compareA", "compareB", "compareC", "comparePeriod", "compareTimeOfDayRange"]) $(id).addEventListener("change", renderComparison);
@@ -1091,6 +1123,7 @@ async function init() {
   const compareDefault = validParam("compare", ["monthly", "weekly"], "monthly");
   const heatmapDefault = validParam("tod", HEATMAP_RANGES, "30d");
   const compareTimeOfDayDefault = validParam("ctod", HEATMAP_RANGES, "30d");
+  const allCitiesRangeDefault = validParam("table", TABLE_RANGES, "30d");
 
   fillSelect($("citySelect"), keys, cityDefault);
   fillSelect($("compareA"), keys, aDefault);
@@ -1100,6 +1133,7 @@ async function init() {
   $("comparePeriod").value = compareDefault;
   $("timeOfDayRange").value = heatmapDefault;
   $("compareTimeOfDayRange").value = compareTimeOfDayDefault;
+  $("allCitiesRange").value = allCitiesRangeDefault;
 
   const generated = state.data.meta?.generated_at || state.data.cities?.kyiv?.meta?.generated_at;
   $("updatedAt").textContent = generated ? `Дані згенеровано ${String(generated).replace("T", " ").slice(0, 19)}` : "";

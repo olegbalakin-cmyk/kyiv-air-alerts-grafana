@@ -132,6 +132,20 @@ jobs:
           data_path = Path("kyiv-air-alerts-grafana/data/dashboard_data.json")
           data = json.loads(data_path.read_text(encoding="utf-8"))
           heat = data["time_of_day_heatmap_test"]
+          table = data["all_cities_table_test"]
+          assert table["meta"]["test_only"] is True
+          assert table["meta"]["city_count"] == 23
+          assert set(table["meta"]["periods"]) == {"7d", "30d", "90d", "year", "common"}
+          assert table["meta"]["common_start"] <= table["meta"]["common_end"]
+          assert set(table["cities"]) == set(data["multicity_meta"]["production_city_keys"])
+          for key, city in table["cities"].items():
+              for period in ("7d", "30d", "90d", "year", "common"):
+                  row = city["periods"][period]
+                  assert row["range_start"] <= row["range_end"], (key, period)
+                  assert int(row["alerts_started"]) >= 0, (key, period)
+                  assert float(row["alert_hours"]) >= 0, (key, period)
+                  assert row["avg_alert_duration_min"] is None or float(row["avg_alert_duration_min"]) >= 0, (key, period)
+
           assert heat["meta"]["test_only"] is True
           assert heat["meta"]["slot_minutes"] == 15
           assert heat["meta"]["city_count"] == 23
@@ -172,6 +186,7 @@ jobs:
           grep -q 'id="timeOfDayRange"' kyiv-air-alerts-grafana/pages-preview/index.html
           grep -q 'id="compareTimeOfDayChart"' kyiv-air-alerts-grafana/pages-preview/index.html
           grep -q 'id="compareTimeOfDayRange"' kyiv-air-alerts-grafana/pages-preview/index.html
+          grep -q 'id="allCitiesRange"' kyiv-air-alerts-grafana/pages-preview/index.html
           grep -q "function renderTimeOfDay" kyiv-air-alerts-grafana/pages-preview/app.js
           grep -q "function renderTimeOfDayComparison" kyiv-air-alerts-grafana/pages-preview/app.js
           grep -q "time_of_day_heatmap_test" kyiv-air-alerts-grafana/pages-preview/app.js

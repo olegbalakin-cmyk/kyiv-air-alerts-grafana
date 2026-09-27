@@ -249,6 +249,41 @@ def period_heatmap(
     }
 
 
+def period_summary(alerts: list[Alert], start_day: date, end_day: date) -> dict:
+    start_local = datetime.combine(start_day, time.min, tzinfo=TZ)
+    end_local = datetime.combine(end_day + timedelta(days=1), time.min, tzinfo=TZ)
+    start_utc = start_local.astimezone(UTC)
+    end_utc = end_local.astimezone(UTC)
+
+    active_seconds = 0.0
+    for alert in alerts:
+        a0 = max(alert.start.astimezone(UTC), start_utc)
+        a1 = min(alert.end.astimezone(UTC), end_utc)
+        if a1 > a0:
+            active_seconds += (a1 - a0).total_seconds()
+
+    starts_in_period = [
+        alert
+        for alert in alerts
+        if start_utc <= alert.start.astimezone(UTC) < end_utc
+    ]
+    durations_min = [
+        (alert.end.astimezone(UTC) - alert.start.astimezone(UTC)).total_seconds() / 60.0
+        for alert in starts_in_period
+        if alert.end.astimezone(UTC) > alert.start.astimezone(UTC)
+    ]
+    avg_duration = sum(durations_min) / len(durations_min) if durations_min else None
+
+    return {
+        "range_start": start_day.isoformat(),
+        "range_end": end_day.isoformat(),
+        "days": (end_day - start_day).days + 1,
+        "alerts_started": len(starts_in_period),
+        "alert_hours": round(active_seconds / 3600.0, 3),
+        "avg_alert_duration_min": round(avg_duration, 3) if avg_duration is not None else None,
+    }
+
+
 def coverage_start(dashboard: dict, key: str, alerts: list[Alert]) -> date:
     meta = dashboard.get("multicity_meta", {}).get("cities", {}).get(key, {})
     value = meta.get("coverage_start") or dashboard.get("cities", {}).get(key, {}).get("meta", {}).get("coverage_start")
@@ -303,11 +338,35 @@ def main() -> None:
     if missing:
         raise RuntimeError(f"Missing alert intervals for heatmap rows: {missing}")
 
+    coverage_days = {
+        key: coverage_start(dashboard, key, city_alerts[key])
+        for key in production_keys
+    }
+    analysis_days = {
+        key: analysis_end(dashboard, key)
+        for key in production_keys
+    }
+    common_start_day = max(coverage_days.values())
+    common_end_day = min(analysis_days.values())
+    if common_start_day > common_end_day:
+        raise RuntimeError(
+            f"No shared all-city window: {common_start_day} > {common_end_day}"
+        )
+
     cities = {}
+    table_cities = {}
+    table_specs = {
+        "7d": 7,
+        "30d": 30,
+        "90d": 90,
+        "year": 365,
+        "common": None,
+    }
+
     for key in production_keys:
         alerts = city_alerts[key]
-        start_day = coverage_start(dashboard, key, alerts)
-        end_day = analysis_end(dashboard, key)
+        start_day = coverage_days[key]
+        end_day = analysis_days[key]
         periods = {
             period: period_heatmap(alerts, start_day, end_day, days)
             for period, days in PERIODS.items()
@@ -318,6 +377,29 @@ def main() -> None:
             "source_type": dashboard.get("multicity_meta", {}).get("cities", {}).get(key, {}).get("source_type"),
             "periods": periods,
         }
+
+        table_periods = {}
+        for period, requested_days in table_specs.items():
+            if requested_days is None:
+                table_start = common_start_day
+            else:
+                requested_start = common_end_day - timedelta(days=requested_days - 1)
+                table_start = max(common_start_day, requested_start)
+            table_periods[period] = period_summary(alerts, table_start, common_end_day)
+        table_cities[key] = {"periods": table_periods}
+
+    dashboard["all_cities_table_test"] = {
+        "meta": {
+            "test_only": True,
+            "city_count": len(table_cities),
+            "periods": list(table_specs),
+            "common_start": common_start_day.isoformat(),
+            "common_end": common_end_day.isoformat(),
+            "comparison_window": "intersection_of_all_23_city_rows",
+            "current_day_excluded": True,
+        },
+        "cities": table_cities,
+    }
 
     dashboard["time_of_day_heatmap_test"] = {
         "meta": {
@@ -339,6 +421,8 @@ def main() -> None:
         "city_count": len(cities),
         "slot_minutes": SLOT_MINUTES,
         "periods": list(PERIODS),
+        "all_cities_table_common_start": common_start_day.isoformat(),
+        "all_cities_table_common_end": common_end_day.isoformat(),
     }, ensure_ascii=False))
 
 
