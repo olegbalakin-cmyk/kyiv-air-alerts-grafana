@@ -1,0 +1,149 @@
+{
+  "schema_version": 1,
+  "artifact_type": "sumy_90a484_retained_provenance_atomic_repair",
+  "generated_for_date": "2026-09-27",
+  "repository": "olegbalakin-cmyk/kyiv-air-alerts-grafana",
+  "branch": "multicity-wip-2026-09-16",
+  "target_episode_id": "90a484f51b321e0950e31b60",
+  "starting_head": "e32cfacf56ac01d1d9212ca8c75b5347c3092ac2",
+  "current_head_before_artifact": "bd8ea571e704ce3ad7a1447bf8d827c5047c257c",
+  "concurrent_branch_drift": {
+    "observed": true,
+    "commits": [
+      {
+        "sha": "5d170974829092aaa93b95ca77c3871f8976e08b",
+        "message": "Repair corrected 17-city historical alert corpus",
+        "sumy_target_final_evidence_changed": false,
+        "sumy_source_slices_changed": false,
+        "replay_script_changed": false,
+        "classifier_changed": false,
+        "note": "The commit corrected Chernihiv historical corpus/baseline material and added other-city recovery slices; the Sumy target blob remained unchanged. It also rewrote the current status artifact to an older replay snapshot, so that status file was not used as the current Sumy semantic precondition."
+      },
+      {
+        "sha": "bd8ea571e704ce3ad7a1447bf8d827c5047c257c",
+        "message": "Add corrected 17-city corpus repair artifact",
+        "sumy_semantic_inputs_changed": false
+      }
+    ],
+    "target_final_evidence_blob_unchanged": "7c0a4a64b3d7000cd10e8f1b846b1e57641d8a4d"
+  },
+  "exact_retained_source": "https://24tv.ua/sumah-progrimiv-vibuh_n2897888",
+  "retained_record": {
+    "path": "kyiv-air-alerts-grafana/data/explosion_research/sumy/final_evidence.json",
+    "json_path": "sensitivity_only_events[2]",
+    "before": {
+      "matched_episode_start": "2025-08-20T13:17:18+03:00",
+      "event_time": "~2025-08-20T13:24:00+03:00",
+      "source_url": "https://24tv.ua/sumah-progrimiv-vibuh_n2897888",
+      "evidence": "Близько 13:24 у Сумах пролунав вибух усередині alert episode, але джерело не підтвердило причину вибуху.",
+      "basis": "inferred_same_attack"
+    },
+    "after": "UNCHANGED — no supported append-only repair passed the current replay contract",
+    "source_time_used_for_diagnostic": "13:24 Europe/Kyiv",
+    "source_date_retained_elsewhere": "2025-08-20",
+    "publication_or_message_timestamp_retained": false
+  },
+  "authoritative_pre_repair_replay": {
+    "execution": "actual GitHub Actions Sumy read-only replay",
+    "workflow_run_id": 36345928578,
+    "workflow_job_id": 108694929010,
+    "input_head": "1bb62eeacf5cdb2799acd985266e94740b5e1923",
+    "conclusion": "success",
+    "denominator": {
+      "expected": 2297,
+      "reconstructed": 2297
+    },
+    "qa_count": 5,
+    "strict": 201,
+    "sensitivity": 233,
+    "qa_episode_ids": [
+      "2c7ad2e0b42e1350e305a18f",
+      "402035df8980628fa245c4e8",
+      "45050b31bdcf42a5f8054e8d",
+      "90a484f51b321e0950e31b60",
+      "c69285b7ffb05693c3393895"
+    ],
+    "protected_files_unchanged": true,
+    "semantic_identity_to_starting_head": true,
+    "semantic_identity_note": "The starting status-only commit e32cfacf56ac01d1d9212ca8c75b5347c3092ac2 records this replay state; intervening later commits did not change the Sumy target evidence, Sumy source slices, replay script, or classifier."
+  },
+  "target_current_replay_contract": {
+    "current_reason_codes": [
+      "ATTACK_EVENT_TYPES:explosion",
+      "EXACT_CITY_EVENT_TEXT",
+      "MATCH_UNIQUE",
+      "NO_AIR_MILITARY_CONTEXT",
+      "NO_STRICT_TEMPORAL_BINDING",
+      "REVIEW_PROVENANCE_SENSITIVITY_BINDING_USED",
+      "REVIEW_PROVENANCE_USABLE",
+      "STRICT_EXPLOSION_EVIDENCE"
+    ],
+    "retained_inventory_findings": {
+      "exact_city_evidence_exists": true,
+      "explicit_explosion_evidence_exists": true,
+      "retained_event_time": "~2025-08-20T13:24:00+03:00",
+      "event_time_inside_target_alert": true,
+      "air_military_context_in_current_replay_provenance": false,
+      "same_attack_context_in_current_replay_provenance": false,
+      "source_retention_triage": "NO_COMPLETE_SOURCE_SEGMENT",
+      "source_retention_missing_roles": [
+        "air_military_context"
+      ],
+      "source_retention_candidate_count": 0,
+      "publication_or_message_timestamp_status": "not_retained_in_current_repo_inputs"
+    },
+    "classifier_gate": {
+      "base_event_ok_requires": [
+        "exact_city",
+        "strict_explosion",
+        "air_military_context",
+        "same_attack"
+      ],
+      "temporal_proof_is_additional_not_substitutive": true
+    }
+  },
+  "repair_assessment": {
+    "requested_scope": "append-only retained provenance/time binding only; no classifier/replay changes and no new sources",
+    "candidate_minimal_temporal_append": "publication_time date anchor for retained 2025-08-20, allowing unchanged source text clock 13:24 to resolve deterministically",
+    "candidate_temporal_append_would_supply": "episode-specific explicit event time inside target alert",
+    "candidate_temporal_append_is_sufficient": false,
+    "blocker": "Even with deterministic temporal proof, current base_event_ok remains false because retained provenance has no air_military_context and no same_attack_context. Adding either role would invent unsupported provenance and contradict the retained evidence statement that the source did not confirm the cause of the explosion.",
+    "unsupported_actions_not_taken": [
+      "did not add aerial-war context",
+      "did not add same-attack context",
+      "did not rewrite the evidence wording",
+      "did not add or retrieve a source",
+      "did not change classifier/replay code",
+      "did not commit a known-insufficient publication_time-only mutation"
+    ],
+    "repair_applied": false,
+    "repair_commit_sha": null
+  },
+  "post_repair_replay": {
+    "executed": false,
+    "reason": "Blocked before mutation: no supported append-only data repair can satisfy the current replay contract.",
+    "effective_repository_state_unchanged": true,
+    "qa_count_if_noop": 5,
+    "strict_if_noop": 201,
+    "sensitivity_if_noop": 233,
+    "exact_qa_delta": [],
+    "added_qa_ids": [],
+    "target_removed_from_qa": false,
+    "other_four_qa_ids_unchanged": true,
+    "denominator_unchanged": true,
+    "unexplained_drift": false
+  },
+  "protected_state": {
+    "target_evidence_mutated": false,
+    "replay_classifier_code_mutated": false,
+    "other_sumy_evidence_mutated": false,
+    "other_cities_mutated_by_this_task": false,
+    "site_prod_mutated": false,
+    "production_dashboard_state_mutated": false,
+    "active_6863_campaign_branch": "historical-attack-event-backfill-2026-09-27",
+    "active_6863_campaign_head_before": "5809bd677a93e6c2f6a1bff9cb7f6b5bde0c7c1e",
+    "active_6863_campaign_unchanged_before_artifact": true
+  },
+  "artifact_path": "research/sumy_90a484_retained_provenance_atomic_repair_2026-09-27.json",
+  "verdict": "BLOCKED — RETAINED 13:24 TEMPORAL PROOF IS RECOVERABLE, BUT CURRENT REPLAY ALSO REQUIRES AIR_MILITARY_CONTEXT + SAME_ATTACK; RETAINED REPO MATERIAL DOES NOT SUPPORT THOSE ROLES, SO NO SAFE APPEND-ONLY REPAIR WAS APPLIED"
+}
