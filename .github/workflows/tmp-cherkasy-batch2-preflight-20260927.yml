@@ -1,0 +1,629 @@
+name: Temporary Cherkasy batch2 source-recovery preflight
+
+on:
+  push:
+    branches:
+      - tmp-cherkasy-batch2-preflight-20260927
+    paths:
+      - ".github/workflows/tmp-cherkasy-batch2-preflight-20260927.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  preflight:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: 793b4f5414bc8f4abfd05b968b1be0cb7a0447f0
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: kyiv-air-alerts-grafana/requirements.txt
+
+      - run: pip install -r kyiv-air-alerts-grafana/requirements.txt
+
+      - name: Run isolated append-only Cherkasy batch2 preflight
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from __future__ import annotations
+          import base64
+          import copy
+          import hashlib
+          import importlib.util
+          import json
+          import os
+          import subprocess
+          import sys
+          from datetime import datetime, timezone
+          from pathlib import Path
+
+          CHECKOUT = Path(os.environ["GITHUB_WORKSPACE"]).resolve()
+          APP = CHECKOUT / "kyiv-air-alerts-grafana"
+          RESEARCH = CHECKOUT / "research"
+          TMP = Path(os.environ["RUNNER_TEMP"]).resolve()
+          INPUT_HEAD = "793b4f5414bc8f4abfd05b968b1be0cb7a0447f0"
+          CITY = "cherkasy"
+          THROUGH = "2026-09-17"
+          TARGETS = [
+              "4dcfd4e2f9d8ed59c0d9cbdc",
+              "55fe7b2b2c6d38b7222a6c12",
+              "742487e7882ef7e9e54a1409",
+              "750530dec9a40c82528122d2",
+          ]
+          BATCH1_IDS = [
+              "2aef6fef78547b13c04b5de7",
+              "2d71c76ca60e3344054b2f29",
+              "2e0c503d42b611fcfb0d74cc",
+              "484842ab6691a38b559ac789",
+          ]
+          QA_PATH = RESEARCH / "historical_replay_qa" / "cherkasy.json"
+          STATUS_PATH = RESEARCH / "historical_replay_status_current.json"
+          AUDIT_PATH = RESEARCH / "historical_replay_source_retention" / "cherkasy.json"
+          INVENTORY_PATH = RESEARCH / "cherkasy_remaining_30_source_recovery_inventory.json"
+          FINAL_PATH = APP / "data" / "explosion_research" / "cherkasy" / "final_evidence.json"
+          REPLAY_PATH = APP / "scripts" / "replay_explosion_history.py"
+          PROTECTED = [
+              "kyiv-air-alerts-grafana/data/explosion_research/cherkasy/final_evidence.json",
+              "kyiv-air-alerts-grafana/data/explosion_audited_baseline.json",
+              "kyiv-air-alerts-grafana/data/explosion_review_queue.json",
+              "kyiv-air-alerts-grafana/data/explosion_candidate_monitor_state.json",
+              "kyiv-air-alerts-grafana/data/explosion_candidate_monitor_last_run.json",
+              "kyiv-air-alerts-grafana/data/explosions_test.json",
+              "kyiv-air-alerts-grafana/data/dashboard_data.json",
+              "research/historical_replay_qa/cherkasy.json",
+              "research/historical_replay_status_current.json",
+          ]
+
+          PLANS = {
+              "4dcfd4e2f9d8ed59c0d9cbdc": {
+                  "source_url": "https://suspilne.media/cherkasy/1188436-dronova-ataka-17-grudna-na-cerkasini-znisili-dva-bpla/",
+                  "match_field": "alert_episode_start",
+                  "match_value": "2025-12-17T00:06:32Z",
+                  "fragment": "У Черкасах під час повітряної тривоги у ніч на 17 грудня було чутно вибухи; це була російська дронова атака.",
+                  "fragment_basis": "Minimum Ukrainian retained-source summary of the inventory finding; no source refetch performed.",
+                  "exact_city_basis": "У Черкасах ... було чутно вибухи",
+                  "aerial_war_basis": "російська дронова атака",
+                  "temporal_basis": "Existing validated frozen binding to the 2025-12-17 00:06:32Z–02:14:11Z alert plus the retained-source statement that the explosions were heard during that overnight alert.",
+                  "same_attack_basis": "Exact-city explosions and the Russian drone attack are stated in the same retained source event context.",
+              },
+              "55fe7b2b2c6d38b7222a6c12": {
+                  "source_url": "https://suspilne.media/cherkasy/1224070-rosijska-ataka-na-cerkasinu-28-sicna-so-vidomo/",
+                  "match_field": "alert_episode_start",
+                  "match_value": "2026-01-28T10:08:54Z",
+                  "fragment": "У Повітряних силах попереджали про рух БпЛА у напрямку Черкас та Сміли. О 14:39 у Черкасах було чутно звук вибуху, про це повідомляли кореспонденти Суспільного.",
+                  "fragment_basis": "Exact retained source-local candidate already stored in the source-retention audit; only the target later-episode fragment is used.",
+                  "exact_city_basis": "О 14:39 у Черкасах було чутно звук вибуху",
+                  "aerial_war_basis": "рух БпЛА у напрямку Черкас та Сміли",
+                  "temporal_basis": "14:39 local is inside the target later alert; the existing validated frozen binding remains unchanged.",
+                  "same_attack_basis": "The UAV warning and 14:39 Cherkasy explosion are adjacent in the target later source-local sequence; the separate morning incident is not used.",
+              },
+              "742487e7882ef7e9e54a1409": {
+                  "source_url": "https://suspilne.media/cherkasy/1394370-na-cerkasini-3-veresna-lunali-vibuhi-so-vidomo-pro-ataku-rf/",
+                  "match_field": "matched_episode_start",
+                  "match_value": "2026-09-03T18:01:56+03:00",
+                  "fragment": "О 18:07 Повітряні сили повідомляли про БпЛА у напрямку Черкас; о 18:28 у Черкасах було чутно вибух у межах тієї самої вечірньої атаки.",
+                  "fragment_basis": "Minimum retained-source chronology summary from the inventory finding; no source refetch performed.",
+                  "exact_city_basis": "о 18:28 у Черкасах було чутно вибух",
+                  "aerial_war_basis": "о 18:07 ... БпЛА у напрямку Черкас",
+                  "temporal_basis": "18:07 and 18:28 local both fall within the 18:01:56+03:00–23:12:43+03:00 target alert.",
+                  "same_attack_basis": "The retained chronology explicitly places the 18:07 UAV movement and 18:28 explosion in the same evening attack sequence.",
+              },
+              "750530dec9a40c82528122d2": {
+                  "source_url": "https://suspilne.media/cherkasy/1250002-uveceri-6-berezna-u-cerkasah-lunali-vibuhi-so-vidomo-pro-ataku-rosijskih-vijsk/",
+                  "match_field": "alert_episode_start",
+                  "match_value": "2026-03-06T20:28:02Z",
+                  "fragment": "У соцмережі WhatsApp о 22:36 командування Повітряних сил повідомляло про групи БпЛА у напрямку Черкащини через Полтавщину, згодом, о 22:55 про загрозу дронів для Черкас та Сміли. О 22:59 кореспонденти Суспільного у Черкасах чули вибух.",
+                  "fragment_basis": "Exact retained weak-anchor source-local candidate already stored in the source-retention audit; eligibility is determined only by the real replay.",
+                  "exact_city_basis": "О 22:59 ... у Черкасах чули вибух",
+                  "aerial_war_basis": "о 22:55 ... загроза дронів для Черкас та Сміли",
+                  "temporal_basis": "22:55 and 22:59 local are inside the target alert that began at 22:28:02 local.",
+                  "same_attack_basis": "The retained chronology locally connects the Cherkasy drone threat at 22:55 with the exact-city explosion at 22:59.",
+              },
+          }
+
+          def load(path: Path):
+              return json.loads(path.read_text(encoding="utf-8"))
+
+          def sha256_bytes(data: bytes) -> str:
+              return hashlib.sha256(data).hexdigest()
+
+          def file_sha(path: Path) -> str:
+              return sha256_bytes(path.read_bytes())
+
+          def git_blob(rel: str) -> str:
+              return subprocess.check_output(
+                  ["git", "-C", str(CHECKOUT), "rev-parse", f"HEAD:{rel}"],
+                  text=True,
+              ).strip()
+
+          def snapshot():
+              return {
+                  rel: {"sha256": file_sha(CHECKOUT / rel), "git_blob_sha": git_blob(rel)}
+                  for rel in PROTECTED
+              }
+
+          replay_invocations = []
+
+          def run_replay(label: str):
+              out = TMP / f"{label}.json"
+              cmd = [
+                  sys.executable,
+                  str(REPLAY_PATH),
+                  "--repo-root", str(APP),
+                  "--city", CITY,
+                  "--through", THROUGH,
+                  "--input-head", INPUT_HEAD,
+                  "--read-only",
+                  "--output", str(out),
+              ]
+              proc = subprocess.run(cmd, text=True, capture_output=True)
+              replay_invocations.append({
+                  "label": label,
+                  "argv": cmd,
+                  "return_code": proc.returncode,
+                  "output_path": str(out),
+              })
+              if proc.returncode != 0:
+                  raise RuntimeError(
+                      f"replay {label} failed rc={proc.returncode}\n"
+                      + proc.stdout[-4000:] + "\n" + proc.stderr[-4000:]
+                  )
+              return load(out)
+
+          def changed_map(replay):
+              return {
+                  str(x.get("episode_id")): x
+                  for x in (replay.get("changed_episodes") or [])
+                  if x.get("episode_id")
+              }
+
+          def signature(row):
+              keep = {
+                  "episode_id": row.get("episode_id"),
+                  "category": row.get("category"),
+                  "frozen_old_status": row.get("frozen_old_status"),
+                  "replayed_status": row.get("replayed_status"),
+                  "reason_codes": row.get("reason_codes") or [],
+                  "candidate_contributor_ids": row.get("candidate_contributor_ids") or [],
+                  "ppo_related": bool(row.get("ppo_related")),
+              }
+              return hashlib.sha256(
+                  json.dumps(keep, ensure_ascii=False, sort_keys=True, separators=(",", ":")).encode("utf-8")
+              ).hexdigest()
+
+          def drift_between(before_map, after_map, excluded):
+              excluded = set(excluded)
+              changed_common = []
+              for eid in sorted((set(before_map) & set(after_map)) - excluded):
+                  if signature(before_map[eid]) != signature(after_map[eid]):
+                      changed_common.append(eid)
+              added = sorted(set(after_map) - set(before_map))
+              removed_unrelated = sorted((set(before_map) - set(after_map)) - excluded)
+              return {
+                  "changed_common_ids": changed_common,
+                  "added_ids": added,
+                  "unrelated_removed_ids": removed_unrelated,
+                  "all_ids": sorted(set(changed_common) | set(added) | set(removed_unrelated)),
+              }
+
+          def import_file(name, path):
+              spec = importlib.util.spec_from_file_location(name, path)
+              if spec is None or spec.loader is None:
+                  raise RuntimeError(f"Cannot import {path}")
+              mod = importlib.util.module_from_spec(spec)
+              spec.loader.exec_module(mod)
+              return mod
+
+          replay_mod = import_file("batch2_replay", REPLAY_PATH)
+          monitor = replay_mod.import_monitor(APP)
+          monitor.self_test()
+          baseline = load(APP / "data" / "explosion_audited_baseline.json")
+          episodes, _ = replay_mod.load_historical_episodes(APP, CITY, monitor)
+          episodes = replay_mod.filter_window(
+              episodes, str(baseline["cities"][CITY]["coverage_start"]), THROUGH, monitor
+          )
+
+          def locate_row(payload, plan):
+              rows = payload.get("strict_events") or []
+              hits = []
+              for idx, row in enumerate(rows):
+                  if not isinstance(row, dict):
+                      continue
+                  if str(row.get("source_url") or "") != plan["source_url"]:
+                      continue
+                  if str(row.get(plan["match_field"]) or "") != plan["match_value"]:
+                      continue
+                  hits.append((idx, row))
+              if len(hits) != 1:
+                  raise RuntimeError(f"Expected one target row for {plan['source_url']}, got {len(hits)}")
+              return hits[0]
+
+          def patched_payload(target_ids):
+              payload = copy.deepcopy(original_payload)
+              patches = {}
+              for eid in target_ids:
+                  plan = PLANS[eid]
+                  idx, row = locate_row(payload, plan)
+                  old_evidence = str(row.get("evidence") or "")
+                  supplement = " — source-retention supplement: " + plan["fragment"]
+                  if plan["fragment"] not in old_evidence:
+                      row["evidence"] = old_evidence.rstrip() + supplement
+                  patches[eid] = {
+                      "bucket": "strict_events",
+                      "row_index": idx,
+                      "source_url": plan["source_url"],
+                      "old_evidence": old_evidence,
+                      "appended_fragment": plan["fragment"],
+                      "new_evidence": row.get("evidence"),
+                  }
+              return payload, patches
+
+          def write_payload(payload):
+              FINAL_PATH.write_text(
+                  json.dumps(payload, ensure_ascii=False, indent=2) + "\n",
+                  encoding="utf-8",
+              )
+
+          def classifier_trace(payload, eid):
+              plan = PLANS[eid]
+              idx, row = locate_row(payload, plan)
+              candidate = replay_mod.candidate_from_history(CITY, row, "strict_events", eid, monitor)
+              matching = replay_mod.manual_matching(eid)
+              decision = monitor.classify_candidate(candidate, CITY, episodes, matching)
+              temporal = decision.get("temporal_binding") or {}
+              reason_codes = decision.get("reason_codes") or []
+              event_types = decision.get("event_types") or []
+              if not event_types:
+                  for code in reason_codes:
+                      if str(code).startswith("ATTACK_EVENT_TYPES:"):
+                          event_types = [x for x in str(code).split(":", 1)[1].split(",") if x]
+              return {
+                  "diagnostic_only_not_ready_authority": True,
+                  "row_index": idx,
+                  "proposed_outcome": decision.get("proposed_outcome"),
+                  "reason_codes": reason_codes,
+                  "event_types": event_types,
+                  "exact_city_pass": bool((decision.get("exact_city_classification_evidence") or {}).get("present")),
+                  "strict_attack_event_pass": bool((decision.get("strict_explosion_evidence") or {}).get("present")),
+                  "aerial_war_pass": bool((decision.get("air_military_context") or {}).get("present")),
+                  "same_attack_pass": bool((decision.get("same_attack_context") or {}).get("present")),
+                  "temporal_binding": temporal,
+              }
+
+          qa = load(QA_PATH)
+          audit = load(AUDIT_PATH)
+          inventory = load(INVENTORY_PATH)
+          inventory_cases = {
+              str(x.get("episode_id")): x
+              for x in (inventory.get("episodes") or [])
+              if str(x.get("episode_id") or "") in TARGETS
+          }
+          audit_cases = {
+              str(x.get("episode_id") or x.get("case_id")): x
+              for x in (audit.get("cases") or [])
+              if str(x.get("episode_id") or x.get("case_id") or "") in TARGETS
+          }
+
+          retained_context_checks = {}
+          for eid in TARGETS:
+              inv = inventory_cases.get(eid) or {}
+              aud = audit_cases.get(eid) or {}
+              urls = set(inv.get("source_urls") or [])
+              fetches = inv.get("source_fetches") or []
+              plan = PLANS[eid]
+              check = {
+                  "new_external_research_performed": False,
+                  "source_url_retained": plan["source_url"] in urls,
+                  "inventory_recovery_bucket": inv.get("recovery_bucket"),
+                  "inventory_source_local_roles": inv.get("source_local_roles") or {},
+                  "inventory_source_local_findings": inv.get("source_local_findings"),
+                  "retained_fetch_metadata": next((x for x in fetches if x.get("url") == plan["source_url"]), None),
+                  "audit_triage": aud.get("triage"),
+                  "fragment_basis": plan["fragment_basis"],
+              }
+              if eid in {"55fe7b2b2c6d38b7222a6c12", "750530dec9a40c82528122d2"}:
+                  check["audit_best_candidate_text_matches_fragment"] = (
+                      str((aud.get("best_candidate") or {}).get("text") or "") == plan["fragment"]
+                  )
+              retained_context_checks[eid] = check
+
+          original_bytes = FINAL_PATH.read_bytes()
+          original_payload = json.loads(original_bytes.decode("utf-8"))
+          initial_sha256 = sha256_bytes(original_bytes)
+          initial_blob = git_blob("kyiv-air-alerts-grafana/data/explosion_research/cherkasy/final_evidence.json")
+          protected_before = snapshot()
+
+          before = run_replay("cherkasy-current-before")
+          before_map = changed_map(before)
+          persistent_ids = set(str(x) for x in (qa.get("qa_episode_ids") or []))
+          fresh_ids = set(before_map)
+          dropped = sorted(persistent_ids - fresh_ids)
+          added = sorted(fresh_ids - persistent_ids)
+          expected_denominator = int(original_payload.get("frozen_denominator") or 0)
+          before_denominator = int(before.get("episodes_checked") or 0)
+          current_before_clean = (
+              expected_denominator == 1548
+              and before_denominator == 1548
+              and len(persistent_ids) == 30
+              and len(fresh_ids) == 30
+              and not dropped
+              and not added
+              and not (before.get("errors") or [])
+          )
+
+          base = {
+              "schema_version": 1,
+              "artifact_type": "cherkasy_source_recovery_batch2_preflight",
+              "city_key": CITY,
+              "branch": "multicity-wip-2026-09-16",
+              "input_head": INPUT_HEAD,
+              "generated_at_utc": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
+              "workflow_run_id": int(os.environ["GITHUB_RUN_ID"]),
+              "scope": {
+                  "dry_run_only": True,
+                  "append_only": True,
+                  "target_episode_ids": TARGETS,
+                  "other_cities_touched": False,
+                  "new_external_research_performed": False,
+                  "classifier_rules_changed": False,
+                  "canonical_evidence_mutated": False,
+              },
+              "authoritative_replay": {
+                  "executable": "kyiv-air-alerts-grafana/scripts/replay_explosion_history.py",
+                  "workflow_equivalent": ".github/workflows/historical-replay-city.yml",
+                  "replay_tool_git_blob_sha": git_blob("kyiv-air-alerts-grafana/scripts/replay_explosion_history.py"),
+                  "replay_tool_sha256": file_sha(REPLAY_PATH),
+                  "input_head": INPUT_HEAD,
+                  "through": THROUGH,
+                  "read_only": True,
+                  "actual_executable_used": True,
+              },
+              "current_before": {
+                  "persistent_qa_count": len(persistent_ids),
+                  "fresh_qa_count": len(fresh_ids),
+                  "persistent_qa_ids": sorted(persistent_ids),
+                  "fresh_qa_ids": sorted(fresh_ids),
+                  "dropped_ids": dropped,
+                  "added_ids": added,
+                  "expected_denominator": expected_denominator,
+                  "replayed_denominator": before_denominator,
+                  "denominator": f"{before_denominator}/{expected_denominator}",
+                  "replay_error_count": len(before.get("errors") or []),
+                  "exact_qa_set_match": not dropped and not added,
+                  "passed": current_before_clean,
+              },
+              "retained_context_checks": retained_context_checks,
+          }
+
+          if not current_before_clean:
+              FINAL_PATH.write_bytes(original_bytes)
+              protected_after = snapshot()
+              artifact = {
+                  **base,
+                  "per_target_results": [],
+                  "combined_replay": None,
+                  "source_file_integrity": {
+                      "initial_sha256": initial_sha256,
+                      "final_sha256": file_sha(FINAL_PATH),
+                      "initial_git_blob_sha": initial_blob,
+                      "final_git_blob_sha": git_blob("kyiv-air-alerts-grafana/data/explosion_research/cherkasy/final_evidence.json"),
+                      "restored_byte_for_byte": FINAL_PATH.read_bytes() == original_bytes,
+                  },
+                  "protected_file_verification": {
+                      "before": protected_before,
+                      "after": protected_after,
+                      "unchanged": protected_before == protected_after,
+                  },
+                  "summary": {
+                      "eligible_ids": [],
+                      "unresolved_ids": TARGETS,
+                      "targets_removed_from_qa": [],
+                      "temporary_post_repair_qa_count": None,
+                      "new_regressions": [],
+                      "non_target_drift": [],
+                      "batch1_repaired_cases_remain_resolved": all(x not in fresh_ids for x in BATCH1_IDS),
+                      "verdict": "BLOCKER: CURRENT CHERKASY QA INPUT DRIFT",
+                  },
+              }
+              out = TMP / "cherkasy_source_recovery_batch2_preflight.json"
+              out.write_text(json.dumps(artifact, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+              print("PREFLIGHT_RESULT_B64=" + base64.b64encode(out.read_bytes()).decode("ascii"))
+              raise SystemExit(0)
+
+          case_results = []
+          individually_eligible = []
+          try:
+              for eid in TARGETS:
+                  payload, patches = patched_payload([eid])
+                  write_payload(payload)
+                  trace = classifier_trace(payload, eid)
+                  replay = run_replay(f"cherkasy-single-{eid}")
+                  amap = changed_map(replay)
+                  drift = drift_between(before_map, amap, [eid])
+                  target_removed = eid not in amap
+                  denom_ok = int(replay.get("episodes_checked") or 0) == expected_denominator == 1548
+                  eligible = (
+                      target_removed
+                      and not drift["all_ids"]
+                      and not (replay.get("errors") or [])
+                      and denom_ok
+                  )
+                  if eligible:
+                      individually_eligible.append(eid)
+                  case_results.append({
+                      "target_id": eid,
+                      "source_url": PLANS[eid]["source_url"],
+                      "exact_appended_fragment": PLANS[eid]["fragment"],
+                      "fragment_basis": PLANS[eid]["fragment_basis"],
+                      "patch_record": patches[eid],
+                      "resulting_event_types": trace["event_types"],
+                      "exact_city_basis": {
+                          "source_local": PLANS[eid]["exact_city_basis"],
+                          "classifier_pass": trace["exact_city_pass"],
+                      },
+                      "aerial_war_basis": {
+                          "source_local": PLANS[eid]["aerial_war_basis"],
+                          "classifier_pass": trace["aerial_war_pass"],
+                      },
+                      "temporal_basis": {
+                          "source_local": PLANS[eid]["temporal_basis"],
+                          "classifier_binding": trace["temporal_binding"],
+                      },
+                      "same_attack_basis": {
+                          "source_local": PLANS[eid]["same_attack_basis"],
+                          "classifier_pass": trace["same_attack_pass"],
+                      },
+                      "classifier_trace": trace,
+                      "real_replay_status": "STRICT" if target_removed else (amap.get(eid) or {}).get("replayed_status"),
+                      "target_removed_from_qa": target_removed,
+                      "temporary_qa_count": len(amap) + len(replay.get("errors") or []),
+                      "denominator": f"{int(replay.get('episodes_checked') or 0)}/{expected_denominator}",
+                      "new_regressions": drift["added_ids"],
+                      "unrelated_removed_ids": drift["unrelated_removed_ids"],
+                      "non_target_drift": drift["all_ids"],
+                      "replay_error_count": len(replay.get("errors") or []),
+                      "eligible": eligible,
+                  })
+                  FINAL_PATH.write_bytes(original_bytes)
+                  if FINAL_PATH.read_bytes() != original_bytes:
+                      raise RuntimeError(f"Source restore failed after {eid}")
+
+              combined_payload, combined_patches = patched_payload(individually_eligible)
+              write_payload(combined_payload)
+              combined = run_replay("cherkasy-combined-eligible")
+              combined_map = changed_map(combined)
+              combined_drift = drift_between(before_map, combined_map, individually_eligible)
+              combined_removed = sorted(set(individually_eligible) - set(combined_map))
+              combined_errors = len(combined.get("errors") or [])
+              combined_denominator = int(combined.get("episodes_checked") or 0)
+          finally:
+              FINAL_PATH.write_bytes(original_bytes)
+
+          source_restored = FINAL_PATH.read_bytes() == original_bytes
+          protected_after = snapshot()
+          protected_unchanged = protected_before == protected_after
+
+          combined_clean = (
+              combined_denominator == expected_denominator == 1548
+              and not combined_drift["all_ids"]
+              and combined_errors == 0
+              and set(combined_removed) == set(individually_eligible)
+          )
+          eligible_ids = sorted(individually_eligible) if combined_clean else []
+          unresolved_ids = sorted(set(TARGETS) - set(eligible_ids))
+          targets_removed = sorted(set(TARGETS) - set(combined_map))
+          batch1_resolved = all(eid not in combined_map for eid in BATCH1_IDS)
+          qa_count = len(combined_map) + combined_errors
+
+          if (
+              len(eligible_ids) == 4
+              and qa_count == 26
+              and not combined_drift["all_ids"]
+              and batch1_resolved
+              and source_restored
+              and protected_unchanged
+          ):
+              verdict = "CHERKASY BATCH 2 READY FOR ATOMIC APPLY"
+          elif not source_restored:
+              verdict = "BLOCKER: CHERKASY SOURCE RESTORE FAILED"
+          elif not protected_unchanged:
+              verdict = "BLOCKER: CHERKASY PROTECTED FILE DRIFT"
+          elif combined_drift["all_ids"]:
+              verdict = "BLOCKER: CHERKASY BATCH 2 NON-TARGET DRIFT"
+          elif unresolved_ids:
+              verdict = "BLOCKER: CHERKASY BATCH 2 HAS UNRESOLVED TARGETS"
+          else:
+              verdict = "BLOCKER: CHERKASY BATCH 2 COMBINED REPLAY MISMATCH"
+
+          artifact = {
+              **base,
+              "temporary_mutations": {row["target_id"]: row["patch_record"] for row in case_results},
+              "per_target_results": case_results,
+              "combined_replay": {
+                  "eligible_repairs_applied": individually_eligible,
+                  "patch_records": combined_patches,
+                  "qa_count_before": len(before_map),
+                  "qa_count_after": qa_count,
+                  "target_ids_removed_from_qa": targets_removed,
+                  "new_qa_ids": combined_drift["added_ids"],
+                  "unrelated_removed_qa_ids": combined_drift["unrelated_removed_ids"],
+                  "non_target_drift": combined_drift["all_ids"],
+                  "replay_error_count": combined_errors,
+                  "expected_denominator": expected_denominator,
+                  "replayed_denominator": combined_denominator,
+                  "denominator": f"{combined_denominator}/{expected_denominator}",
+                  "batch1_repaired_ids": BATCH1_IDS,
+                  "batch1_repaired_cases_remain_resolved": batch1_resolved,
+              },
+              "replay_invocations": replay_invocations,
+              "proof_actual_replay_executable_used": {
+                  "used": True,
+                  "invocation_count": len(replay_invocations),
+                  "all_invocations_same_executable": all(
+                      len(x["argv"]) > 1 and Path(x["argv"][1]).resolve() == REPLAY_PATH.resolve()
+                      for x in replay_invocations
+                  ),
+                  "all_return_codes_zero": all(x["return_code"] == 0 for x in replay_invocations),
+                  "checked_out_head": subprocess.check_output(
+                      ["git", "-C", str(CHECKOUT), "rev-parse", "HEAD"], text=True
+                  ).strip(),
+              },
+              "source_file_integrity": {
+                  "initial_sha256": initial_sha256,
+                  "final_sha256": file_sha(FINAL_PATH),
+                  "initial_git_blob_sha": initial_blob,
+                  "final_git_blob_sha": git_blob("kyiv-air-alerts-grafana/data/explosion_research/cherkasy/final_evidence.json"),
+                  "temporary_mutation_performed": True,
+                  "canonical_mutation_performed": False,
+                  "restored_byte_for_byte": source_restored,
+              },
+              "protected_file_verification": {
+                  "paths": PROTECTED,
+                  "before": protected_before,
+                  "after": protected_after,
+                  "unchanged": protected_unchanged,
+              },
+              "summary": {
+                  "current_before_qa_count": len(before_map),
+                  "current_before_dropped_ids": dropped,
+                  "current_before_added_ids": added,
+                  "eligible_ids": eligible_ids,
+                  "unresolved_ids": unresolved_ids,
+                  "targets_removed_from_qa": targets_removed,
+                  "temporary_post_repair_qa_count": qa_count,
+                  "resulting_event_types_by_eligible_target": {
+                      row["target_id"]: row["resulting_event_types"]
+                      for row in case_results if row["target_id"] in eligible_ids
+                  },
+                  "new_regressions": combined_drift["added_ids"],
+                  "non_target_drift": combined_drift["all_ids"],
+                  "batch1_repaired_cases_remain_resolved": batch1_resolved,
+                  "actual_historical_replay_executable_used": True,
+                  "source_file_restored_byte_for_byte": source_restored,
+                  "protected_files_unchanged": protected_unchanged,
+                  "verdict": verdict,
+              },
+          }
+          out = TMP / "cherkasy_source_recovery_batch2_preflight.json"
+          out.write_text(
+              json.dumps(artifact, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
+              encoding="utf-8",
+          )
+          print("PREFLIGHT_RESULT_B64=" + base64.b64encode(out.read_bytes()).decode("ascii"))
+          print(json.dumps(artifact["summary"], ensure_ascii=False, indent=2))
+          PY
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: cherkasy-source-recovery-batch2-preflight
+          path: ${{ runner.temp }}/cherkasy_source_recovery_batch2_preflight.json
+          if-no-files-found: error
+          retention-days: 7
