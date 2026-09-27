@@ -1,0 +1,390 @@
+{
+  "schema_version": 1,
+  "kind": "historical_replay_persisted_provenance_adapter_preflight",
+  "generated_for_date": "2026-09-27",
+  "repository": "olegbalakin-cmyk/kyiv-air-alerts-grafana",
+  "branch": "multicity-wip-2026-09-16",
+  "input_head": "5094fe0393d708eae008facd6e2d94a15837743b",
+  "scope": {
+    "mutation_policy": "Preflight only. No evidence, QA/status, classifier, monitor-state, dashboard, or production data mutation. No temporary code committed.",
+    "requested_actual_replay_executable": "kyiv-air-alerts-grafana/scripts/replay_explosion_history.py",
+    "source_ready_cities": [
+      "cherkasy",
+      "kyiv",
+      "lviv",
+      "sevastopol",
+      "sumy",
+      "zaporizhzhia"
+    ]
+  },
+  "freeze_current_state": {
+    "git_blob_shas": {
+      "kyiv-air-alerts-grafana/scripts/replay_explosion_history.py": "f2a8f11324dfb0d1db7d9ecda513f194268bced9",
+      "kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py": "eefd63aeebc17347b750f61115842be6c53a79da",
+      "research/historical_replay_status_current.json": "b04f110c81b03522898c0c45a3c632eb96f759fa",
+      "kyiv-air-alerts-grafana/data/explosion_audited_baseline.json": "5bbd2b771559eac2966aeec65d6e3b5487b9c1a9",
+      "kyiv-air-alerts-grafana/data/explosion_review_queue.json": "e6ed6776ae326a18a07978b1979dd3b265096bf0",
+      "kyiv-air-alerts-grafana/data/explosion_candidate_monitor_state.json": "3c8658880c6b93a00fb8ddbec2c4eaeed6d3f2cc",
+      "kyiv-air-alerts-grafana/data/explosion_candidate_monitor_last_run.json": "1552b13a2a9361be968cea4f09876cc20f96572f",
+      "kyiv-air-alerts-grafana/data/explosions_test.json": "3109dc02d2292efa59eddd26b34292cab2b554ab",
+      "kyiv-air-alerts-grafana/data/dashboard_data.json": "85e1d5cacfbe0af1530bbf584cb63ebdfef463e6",
+      "kyiv-air-alerts-grafana/data/explosion_research/cherkasy/final_evidence.json": "5dd59bb3c4076d2a27ee6f77464ec0be507d2cd7",
+      "kyiv-air-alerts-grafana/data/explosion_research/kyiv/final_evidence.json": "dd21e37b5903e53ef4be90b23133a14a1b7aa613",
+      "kyiv-air-alerts-grafana/data/explosion_research/lviv/final_evidence.json": "bc6b04e0892e430f8a055f2a7d54b41dfd00715b",
+      "kyiv-air-alerts-grafana/data/explosion_research/sevastopol/final_evidence.json": "931a575dbd9b3fc4c90579bfbbb9ad54d8e70a62",
+      "kyiv-air-alerts-grafana/data/explosion_research/sumy/final_evidence.json": "7c0a4a64b3d7000cd10e8f1b846b1e57641d8a4d",
+      "kyiv-air-alerts-grafana/data/explosion_research/zaporizhzhia/final_evidence.json": "afc2702bfeb0b599dbec00d251362450b2d292e1"
+    },
+    "replay_script_sha256": "bd2b67c4f672f77cabe239ba1cab40f64cd4420c7cc56bbf6211bae18afd01da",
+    "final_evidence_top_level_review_provenance_counts": {
+      "cherkasy": 0,
+      "kyiv": 0,
+      "lviv": 0,
+      "sevastopol": 0,
+      "sumy": 0,
+      "zaporizhzhia": 5
+    }
+  },
+  "confirmed_defect": {
+    "first_divergence_stage": "CANDIDATE_CONSTRUCTION",
+    "root_cause": "PERSISTED_REVIEW_PROVENANCE_DROPPED_BY_HISTORICAL_REPLAY_CANDIDATE_ADAPTER",
+    "current_behavior": "candidate_from_history() assigns review_provenance only from history_provenance(...), so valid row.review_provenance never reaches the classifier.",
+    "classifier_accepts_current_schema_v1": true
+  },
+  "exact_proposed_merge_contract": {
+    "recommended_scope": "candidate_from_history() plus a small explicit merge_historical_review_provenance() helper; classifier unchanged.",
+    "preserve_reviewed_roles": [
+      "exact_city_evidence",
+      "explosion_evidence",
+      "aerial_war_evidence",
+      "same_attack_basis",
+      "sensitivity_binding",
+      "temporal"
+    ],
+    "adapter_generated_fields": [
+      "current target_episode_id",
+      "validated frozen historical episode binding",
+      "neighboring_alert_check",
+      "adapter methodology metadata"
+    ],
+    "schema_validation": [
+      "Persisted provenance must be an object with schema_version == monitor.REVIEW_PROVENANCE_SCHEMA_VERSION.",
+      "Persisted target_episode_id must equal the current replay target.",
+      "Reviewed role payloads must be classifier-compatible bool/dict structures; malformed or obsolete provenance is reported and remains non-authoritative."
+    ],
+    "conflict_policy": [
+      "No generic dictionary merge.",
+      "Explicit persisted/generated factual-role disagreement fails closed; false is never silently promoted to true.",
+      "Explicit neighboring-alert disagreement makes temporal provenance non-permissive and is recorded.",
+      "Target-episode mismatch is a provenance conflict and persisted provenance is not forwarded.",
+      "Historical STRICT/SENSITIVITY labels never create factual provenance."
+    ],
+    "no_persisted_behavior": "Generated history_provenance is returned unchanged."
+  },
+  "unit_level_adapter_tests": {
+    "implementation_form": "standalone temporary contract harness; repository code was not modified",
+    "harness_sha256": "f0623740133fd509fdf01a020ef0fd8a78edd816bd1b6293def57d746d5cd8c8",
+    "results": [
+      [
+        "A_PERSISTED_ROLE_SURVIVES",
+        "PASS"
+      ],
+      [
+        "B_SAME_ATTACK_SURVIVES",
+        "PASS"
+      ],
+      [
+        "C_GENERATED_TEMPORAL_BINDING",
+        "PASS"
+      ],
+      [
+        "D_NO_PERSISTED_UNCHANGED",
+        "PASS"
+      ],
+      [
+        "E_CONFLICT_FAILS_CLOSED",
+        "PASS"
+      ],
+      [
+        "F_OLD_LABEL_NOT_AUTHORITY",
+        "PASS"
+      ],
+      [
+        "G_OBSOLETE_NON_AUTHORITATIVE",
+        "PASS"
+      ],
+      [
+        "H_TARGET_CONFLICT_FAILS_CLOSED",
+        "PASS"
+      ]
+    ],
+    "temporary_patched_replay_file_sha256": null,
+    "limitation": "Contract tests do not satisfy the required real replay validation."
+  },
+  "before_real_replay_matrix": {
+    "cherkasy": {
+      "denominator": "1548/1548",
+      "qa_count": 30,
+      "strict_episode_count": null,
+      "sensitivity_episode_count": null,
+      "error_count": 0,
+      "authority": "actual current-before replay recorded in cherksasy batch2 preflight, workflow 36313757808; aggregate strict/sensitivity not retained there"
+    },
+    "kyiv": {
+      "denominator": "2456/2456",
+      "qa_count": 260,
+      "strict_episode_count": 140,
+      "sensitivity_episode_count": 144,
+      "error_count": 0,
+      "authority": "fresh actual replay workflow 36312589252; inventory states current replay-critical drift since fresh = []"
+    },
+    "lviv": {
+      "denominator": "126/126",
+      "qa_count": 0,
+      "strict_episode_count": 12,
+      "sensitivity_episode_count": 12,
+      "error_count": 0,
+      "authority": "current historical replay status"
+    },
+    "sevastopol": {
+      "denominator": "527/527",
+      "qa_count": 0,
+      "strict_episode_count": 38,
+      "sensitivity_episode_count": 55,
+      "error_count": 0,
+      "authority": "current historical replay status"
+    },
+    "sumy": {
+      "denominator": "2297/2297",
+      "qa_count": 19,
+      "strict_episode_count": 189,
+      "sensitivity_episode_count": 219,
+      "error_count": 0,
+      "authority": "current historical replay status/fresh replay-synchronized Sumy state"
+    },
+    "zaporizhzhia": {
+      "denominator": "2365/2365",
+      "qa_count": 151,
+      "strict_episode_count": 62,
+      "sensitivity_episode_count": 73,
+      "error_count": 0,
+      "unbound": 0,
+      "authority": "actual replay workflow 36312334697; relevant replay/classifier/evidence/slices remain current"
+    }
+  },
+  "after_real_replay_matrix": {
+    "cherkasy": {
+      "executed": false
+    },
+    "kyiv": {
+      "executed": false
+    },
+    "lviv": {
+      "executed": false
+    },
+    "sevastopol": {
+      "executed": false
+    },
+    "sumy": {
+      "executed": false
+    },
+    "zaporizhzhia": {
+      "executed": false
+    }
+  },
+  "actual_replay_blocker": {
+    "before_and_after_same_executable_used": false,
+    "code": "REAL_AFTER_REPLAY_NOT_EXECUTABLE_WITHOUT_TEMP_CODE_COMMIT_IN_AVAILABLE_RUNTIME",
+    "detail": "The repository workflow supports workflow_dispatch, but the available GitHub connection exposes no workflow-dispatch action. The local execution container has no repository network checkout. Committing temporary adapter code merely to trigger Actions would violate the explicit no-temp-code-commit constraint.",
+    "custom_prediction_substituted_for_real_replay": false
+  },
+  "zaporizhzhia_control": {
+    "five_known_targets": [
+      "6dc2c1209865b6cf7e7f8699",
+      "1781440c8942002c1a65c25c",
+      "c0367099eed49727686e61af",
+      "48826b9dbadd8eaee6601c9c",
+      "9571bb4b5340eb3a198c0169"
+    ],
+    "all_five_current_persisted_provenance_schema_version": 1,
+    "all_five_roles": [
+      "exact_city_evidence.present",
+      "explosion_evidence.present",
+      "aerial_war_evidence.present",
+      "same_attack_basis.present",
+      "temporal.validated_episode_binding"
+    ],
+    "proposed_merge_conflicts": 0,
+    "before_status_each": "AMBIGUOUS / STRICT_DOWNGRADE",
+    "static_classifier_contract_expectation_each": "STRICT once the already-persisted provenance reaches monitor.classify_candidate()",
+    "static_expected_recovered_count": 5,
+    "static_expected_after": {
+      "qa_count": 146,
+      "strict_episode_count": 67,
+      "sensitivity_episode_count": 78,
+      "denominator": "2365/2365",
+      "unbound": 0
+    },
+    "actual_after": null,
+    "deterministic_rebindings_18_revalidated_after_patch": false
+  },
+  "kyiv_control": {
+    "provenance_77_inventory_ids": [
+      "02da6a7ba7d5f43a8aecc418",
+      "036034317c7a1be87ea2dbae",
+      "067b1ad3f90faf6c1617d047",
+      "0938df1546012d72010d873d",
+      "1d1966c5aadc1b7980f1e33c",
+      "1dc6d97ed48ce09fe252c44a",
+      "2b40ae493b3f351ed73f8fe6",
+      "2e7b2676a9967c5304dc8728",
+      "31cacacc26d1dc60f68fbc6e",
+      "362121b51656c9ad94021289",
+      "4005bd5b14a73e5730b405be",
+      "4547f78c06fb068dd684a2bc",
+      "479a5bc35ce9b2d3d157d006",
+      "4d48d08297571fd042ff1501",
+      "4de9ddc35865deadd3c00fff",
+      "51a1ae1ba9dc5f1095c346a9",
+      "554f95d5b4c3ec17556930b1",
+      "5a614d4f51c92f43dc082cc0",
+      "5bd70515f137b0952c2f82da",
+      "5e8f3b21dcfdd38102e6a6ad",
+      "5f6f14923d0a826d22c2e621",
+      "60acf6a4710300beb2ad14c7",
+      "6150ee36b4949a3711dba9b4",
+      "64e51cd0f3bf7eb8929a3d95",
+      "6518d50dd574358935c647ab",
+      "68cd9bad718abb017f31157a",
+      "6e64f433f2655e39540ebf05",
+      "6fec10862974b70a2ba46c0a",
+      "724221a4c6719579558fa5de",
+      "77a7ccf1c01252e455f25e5c",
+      "7fedf205e65fa707eeccae3f",
+      "80b759a33c3e0b2d8fcdfc63",
+      "8320940bb036ae175a151c75",
+      "836c9dfa8feb6ef7f36062d2",
+      "84c0ef4d7fc11c886647c736",
+      "86722806404e08ba6be92947",
+      "89615866e47071b0fc6d98c1",
+      "8cd368f9443ceefc753df858",
+      "8d1d8751e686e00730415bc7",
+      "8f2a89f541d84b708fc0cfed",
+      "8f9ae72fc91a9f46ad0ba7ea",
+      "955a78db9f9c5334a4858d99",
+      "992d2d12572a217de95badef",
+      "a006a443ea53986f1f6125ab",
+      "a1cf52daf33e06815e6742f1",
+      "a4bea4c56c8f7382efc13000",
+      "a917766f55319d7aea5cd00b",
+      "af7e73568406bc48561f52a7",
+      "af938e030eb643c3fc54e0d9",
+      "b0e5cd475c461eeef9345efc",
+      "b172aafda065364f9826ad97",
+      "b2b27c1c150ddf368fa2d0ad",
+      "b4dda17d58a0ecd1f9ff48de",
+      "bcece87c781c7a470f7220e0",
+      "bd853fda408e1e5ae113effc",
+      "c13b0d63cc5e3906f8f8d226",
+      "c2d4ff2443ef8069ef3bf4c4",
+      "c4ce08f82d3745ee2f8d9198",
+      "c6cfb22e87786326274730d9",
+      "c7a28daf8a3c503539341446",
+      "cbfb46b8a76728a43b4de4ee",
+      "cfa40e10ed6659a29787a3fb",
+      "d01da34b7f5dffa9338f303f",
+      "d4c65cb2ac7a2d086af0078a",
+      "db5040e92539a011658c6541",
+      "dc58e1ff257d3cf2d011efad",
+      "deef8f0d21b005c7d37e3957",
+      "defd607a079867b3b9e800db",
+      "dfd71baec22b494ea9dafa27",
+      "e0bde97ded8cda727ce33f93",
+      "e5f2d7dae36c949201e1d29e",
+      "e8fa09812840e73262ab2773",
+      "ec652814c40ed0dd5ca29ebf",
+      "ec9215a832c3b3825aca96c3",
+      "ec9217b54d3aaf9340997594",
+      "f53cb5aed4fecf36570c5e65",
+      "ff68ba1826f484190f41813a"
+    ],
+    "current_final_evidence_top_level_review_provenance_count": 0,
+    "finding": "The 77 are inventory candidates for MIGRATE_RETAINED_PROVENANCE, not currently persisted row.review_provenance in final_evidence.json.",
+    "static_adapter_only_recovered_count": 0,
+    "static_adapter_only_unresolved_count": 77,
+    "actual_recovered_count": null,
+    "actual_unresolved_count": null,
+    "source_159_actual_changes": null,
+    "temporal_23_actual_changes": null
+  },
+  "cherkasy_control": {
+    "before_qa_count": 30,
+    "do_not_apply_source_repair": "4dcfd4e2f9d8ed59c0d9cbdc",
+    "current_final_evidence_top_level_review_provenance_count": 0,
+    "three_air_context_cases": [
+      "55fe7b2b2c6d38b7222a6c12",
+      "742487e7882ef7e9e54a1409",
+      "750530dec9a40c82528122d2"
+    ],
+    "static_adapter_only_status": "UNCHANGED_AMBIGUOUS / AIR_CONTEXT_NOT_LINKED_TO_EVENT",
+    "actual_after": null
+  },
+  "regression_controls": {
+    "sumy": {
+      "persisted_review_provenance_count": 0,
+      "actual_regressions": null,
+      "static_expectation": "UNCHANGED"
+    },
+    "lviv": {
+      "persisted_review_provenance_count": 0,
+      "actual_regressions": null,
+      "static_expectation": "UNCHANGED"
+    },
+    "sevastopol": {
+      "persisted_review_provenance_count": 0,
+      "actual_regressions": null,
+      "static_expectation": "UNCHANGED"
+    }
+  },
+  "changed_episode_ids_actual": null,
+  "changed_episode_ids_static_expectation": [
+    "6dc2c1209865b6cf7e7f8699",
+    "1781440c8942002c1a65c25c",
+    "c0367099eed49727686e61af",
+    "48826b9dbadd8eaee6601c9c",
+    "9571bb4b5340eb3a198c0169"
+  ],
+  "recovered_count_by_city_actual": null,
+  "recovered_count_by_city_static_expectation": {
+    "cherkasy": 0,
+    "kyiv": 0,
+    "lviv": 0,
+    "sevastopol": 0,
+    "sumy": 0,
+    "zaporizhzhia": 5
+  },
+  "genuine_new_regressions_actual": null,
+  "provenance_conflicts_actual": null,
+  "provenance_conflicts_in_current_persisted_set_under_proposed_contract": 0,
+  "denominator_drift_actual": null,
+  "source_corpus_changes": 0,
+  "recommended_minimal_code_diff": {
+    "files": [
+      "kyiv-air-alerts-grafana/scripts/replay_explosion_history.py"
+    ],
+    "classifier_changed": false,
+    "helper_required": true,
+    "helper_name": "merge_historical_review_provenance",
+    "candidate_change": "candidate_from_history() must merge row.review_provenance with history_provenance(...) before monitor.classify_candidate(), and retain an auditable merge diagnostic.",
+    "unrelated_refactor": false
+  },
+  "restoration_and_integrity": {
+    "temporary_repo_code_modified": false,
+    "temporary_code_restored_byte_for_byte": true,
+    "protected_files_unchanged_before_artifact_commit": true,
+    "evidence_mutated": false,
+    "qa_status_mutated": false,
+    "classifier_mutated": false
+  },
+  "verdict": "BLOCKER: REAL BEFORE/AFTER HISTORICAL REPLAY WITH THE UNCOMMITTED ADAPTER PATCH COULD NOT BE EXECUTED IN THE AVAILABLE RUNTIME; DO NOT CLAIM READY UNTIL THAT EXACT PATCH IS RUN THROUGH replay_explosion_history.py FOR ALL SOURCE-READY CITIES."
+}
