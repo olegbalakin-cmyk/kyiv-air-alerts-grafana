@@ -125,6 +125,9 @@ function seriesDataset(label, values, color, dashed = false) {
 
 function rowTime(row, period) {
   if (period === "monthly") return row.month || String(row.time || "").slice(0, 7);
+  if (period === "rolling30" || period === "rolling90") {
+    return row.window_end || String(row.time || "").slice(0, 10);
+  }
   if (rolling7dEnabled()) return row.week_end || String(row.time || "").slice(0, 10);
   return row.week_start || String(row.time || "").slice(0, 10);
 }
@@ -1116,7 +1119,7 @@ async function init() {
   while (defaults.length < 3 && keys[defaults.length]) defaults.push(keys[defaults.length]);
 
   const cityDefault = validParam("city", keys, defaults[0] || keys[0]);
-  const periodDefault = validParam("period", ["monthly", "weekly"], "monthly");
+  const periodDefault = validParam("period", ["monthly", "weekly", "rolling30", "rolling90"], "monthly");
   const aDefault = validParam("a", keys, defaults[0] || keys[0]);
   const bDefault = validParam("b", keys, defaults[1] || keys[0]);
   const cDefault = validOptionalParam("c", keys, defaults[2] || "");

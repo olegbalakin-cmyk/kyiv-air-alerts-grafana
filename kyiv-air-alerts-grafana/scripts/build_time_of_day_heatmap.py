@@ -284,6 +284,32 @@ def period_summary(alerts: list[Alert], start_day: date, end_day: date) -> dict:
     }
 
 
+def rolling_window_series(
+    alerts: list[Alert],
+    coverage_day: date,
+    endpoints: list[date],
+    window_days: int,
+) -> list[dict]:
+    rows = []
+    for end_day in endpoints:
+        start_day = end_day - timedelta(days=window_days - 1)
+        if start_day < coverage_day:
+            continue
+        summary = period_summary(alerts, start_day, end_day)
+        rows.append(
+            {
+                "time": datetime.combine(end_day, time.min, tzinfo=TZ).isoformat(),
+                "window_start": start_day.isoformat(),
+                "window_end": end_day.isoformat(),
+                "window_days": window_days,
+                "alerts_per_day": round(summary["alerts_started"] / window_days, 3),
+                "avg_daily_alert_hours": round(summary["alert_hours"] / window_days, 3),
+                "avg_alert_duration_min": summary["avg_alert_duration_min"],
+                "alerts_started": summary["alerts_started"],
+            }
+        )
+    return rows
+
 def coverage_start(dashboard: dict, key: str, alerts: list[Alert]) -> date:
     meta = dashboard.get("multicity_meta", {}).get("cities", {}).get(key, {})
     value = meta.get("coverage_start") or dashboard.get("cities", {}).get(key, {}).get("meta", {}).get("coverage_start")
@@ -377,6 +403,24 @@ def main() -> None:
             "source_type": dashboard.get("multicity_meta", {}).get("cities", {}).get(key, {}).get("source_type"),
             "periods": periods,
         }
+
+        weekly_rows = dashboard.get("cities", {}).get(key, {}).get("weekly", [])
+        endpoints = []
+        for row in weekly_rows:
+            endpoint_value = row.get("week_end") or str(row.get("time", ""))[:10]
+            if not endpoint_value:
+                continue
+            try:
+                endpoints.append(date.fromisoformat(endpoint_value))
+            except ValueError:
+                continue
+        endpoints = sorted(set(endpoints))
+        dashboard["cities"][key]["rolling30"] = rolling_window_series(
+            alerts, start_day, endpoints, 30
+        )
+        dashboard["cities"][key]["rolling90"] = rolling_window_series(
+            alerts, start_day, endpoints, 90
+        )
 
         table_periods = {}
         for period, requested_days in table_specs.items():
