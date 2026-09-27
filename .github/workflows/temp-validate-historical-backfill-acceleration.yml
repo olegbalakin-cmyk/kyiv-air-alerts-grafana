@@ -1,0 +1,51 @@
+name: TEMP validate historical backfill acceleration
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/temp-validate-historical-backfill-acceleration.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          path: scheduler
+          fetch-depth: 1
+
+      - name: Check out campaign branch read-only
+        uses: actions/checkout@v4
+        with:
+          ref: historical-attack-event-backfill-2026-09-27
+          path: campaign
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Compile controller
+        run: |
+          python -m py_compile scheduler/kyiv-air-alerts-grafana/scripts/historical_attack_event_acceleration_controller.py
+
+      - name: Run deterministic controller tests
+        run: |
+          python scheduler/kyiv-air-alerts-grafana/scripts/historical_attack_event_acceleration_controller.py self-test
+
+      - name: Inspect live campaign checkpoint without mutation
+        run: |
+          python scheduler/kyiv-air-alerts-grafana/scripts/historical_attack_event_acceleration_controller.py inspect \
+            --checkout-root campaign
+
+      - name: Assert campaign checkout remains clean
+        working-directory: campaign
+        run: |
+          test -z "$(git status --porcelain)"
