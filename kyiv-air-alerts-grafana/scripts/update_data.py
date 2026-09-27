@@ -5,6 +5,7 @@ import csv
 import json
 import math
 import re
+import sys
 from collections import defaultdict
 from dataclasses import dataclass
 from datetime import date, datetime, time, timedelta, timezone
@@ -93,6 +94,68 @@ def parse_official(payload: object) -> list[Alert]:
     return out
 
 
+def parse_committed_alerts(payload: object) -> list[Alert]:
+    """Parse the committed combined dataset without silently dropping rows."""
+    if not isinstance(payload, list) or not payload:
+        raise ValueError("Committed alerts_combined.json is missing or empty")
+
+    out: list[Alert] = []
+    for index, row in enumerate(payload):
+        if not isinstance(row, dict):
+            raise ValueError(f"Committed alert row {index} is not an object")
+        s = row.get("start")
+        e = row.get("end")
+        if not s or not e:
+            raise ValueError(f"Committed alert row {index} is missing start/end")
+        try:
+            start = localize_naive(datetime.fromisoformat(str(s)))
+            end = localize_naive(datetime.fromisoformat(str(e)))
+        except ValueError as exc:
+            raise ValueError(f"Committed alert row {index} has invalid timestamps") from exc
+        if end.astimezone(UTC) <= start.astimezone(UTC):
+            raise ValueError(f"Committed alert row {index} has non-positive duration")
+        out.append(
+            Alert(
+                start=start,
+                end=end,
+                source=str(row.get("source") or "committed_historical_fallback"),
+            )
+        )
+
+    out.sort(key=lambda a: a.start.astimezone(UTC))
+    return out
+
+
+def load_historical_base(
+    session: requests.Session, fallback_path: Path | None = None
+) -> tuple[list[Alert], str, str | None]:
+    fallback_path = fallback_path or (DATA_DIR / "alerts_combined.json")
+    try:
+        response = session.get(OFFICIAL_JSON_URL, timeout=30)
+        response.raise_for_status()
+        official = parse_official(response.json())
+        if not official:
+            raise ValueError("Municipal source produced no completed alerts")
+        return official, "municipal_open_data", None
+    except (requests.RequestException, ValueError) as exc:
+        try:
+            committed_payload = json.loads(fallback_path.read_text(encoding="utf-8"))
+            committed = parse_committed_alerts(committed_payload)
+        except (OSError, json.JSONDecodeError, ValueError) as fallback_exc:
+            raise RuntimeError(
+                "Kyiv municipal historical source is unavailable and the committed "
+                "alerts_combined.json fallback is not valid"
+            ) from fallback_exc
+
+        warning = (
+            "WARNING: Kyiv municipal historical source unavailable "
+            f"({type(exc).__name__}: {exc}); retaining {len(committed)} committed "
+            f"alerts from {fallback_path.name} and continuing with live sources."
+        )
+        print(warning, file=sys.stderr)
+        return committed, "committed_alerts_combined_fallback", warning
+
+
 LIVE_DT_RE = re.compile(r"(?P<hm>\d{2}:\d{2})\s+(?P<d>\d{2}\.\d{2}\.\d{2})(?!\d)")
 
 
@@ -163,12 +226,12 @@ def parse_live_history(html: str) -> tuple[list[Alert], list[tuple[datetime, str
     return alerts, events
 
 
-def merge_sources(official: list[Alert], live: list[Alert]) -> tuple[list[Alert], int]:
-    if not official:
-        raise ValueError("Official JSON produced no completed alerts")
-    cutoff = max(a.start.astimezone(UTC) for a in official)
+def merge_sources(historical: list[Alert], live: list[Alert]) -> tuple[list[Alert], int]:
+    if not historical:
+        raise ValueError("Historical base produced no completed alerts")
+    cutoff = max(a.start.astimezone(UTC) for a in historical)
     additions = [a for a in live if a.start.astimezone(UTC) > cutoff]
-    merged = official + additions
+    merged = historical + additions
     merged.sort(key=lambda a: a.start.astimezone(UTC))
     return merged, len(additions)
 
@@ -371,10 +434,7 @@ def main() -> None:
     DATA_DIR.mkdir(parents=True, exist_ok=True)
     session = http_session()
 
-    r = session.get(OFFICIAL_JSON_URL, timeout=30)
-    r.raise_for_status()
-    official_payload = r.json()
-    official = parse_official(official_payload)
+    historical, historical_mode, municipal_warning = load_historical_base(session)
 
     live_response = session.get(LIVE_HISTORY_URL, timeout=30)
     live_response.raise_for_status()
@@ -382,7 +442,8 @@ def main() -> None:
     if not live_events:
         raise RuntimeError("Kyiv Digital live history returned no parsable events")
 
-    alerts, live_added = merge_sources(official, live_alerts)
+    alerts, live_added = merge_sources(historical, live_alerts)
+    official = [a for a in historical if a.source == "official_json"] or historical
     official_latest_start = max(a.start for a in official)
     official_latest_end = max(a.end for a in official)
     live_latest_event = max((x[0] for x in live_events), default=None)
@@ -391,9 +452,14 @@ def main() -> None:
     meta = {
         "official_json_url": OFFICIAL_JSON_URL,
         "live_history_url": LIVE_HISTORY_URL,
+        "historical_base_mode": historical_mode,
+        "historical_base_completed_alerts": len(historical),
+        "municipal_source_available": historical_mode == "municipal_open_data",
+        "municipal_source_warning": municipal_warning,
         "official_completed_alerts": len(official),
         "live_completed_alerts_parsed": len(live_alerts),
         "live_alerts_added_after_official_cutoff": live_added,
+        "live_alerts_added_after_historical_cutoff": live_added,
         "combined_completed_alerts": len(alerts),
         "official_latest_start": official_latest_start.isoformat(),
         "official_latest_end": official_latest_end.isoformat(),
