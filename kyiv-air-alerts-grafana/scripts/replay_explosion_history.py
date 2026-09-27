@@ -348,6 +348,10 @@ def historical_review_roles(city: str, row: dict, monitor) -> tuple[dict, str]:
 
                 completed_attack = bool(
                     re.search(r"\bатакув(?:ав|ала|ало|али)\b", segment_low)
+                    and (
+                        re.search(rf"\b{adversary}\b", segment_low)
+                        or monitor.air_military_context(segment)
+                    )
                 )
                 attack_noun = bool(
                     re.search(rf"\b{adversary}\b.{{0,45}}\bатак\w*\b", segment_low)
