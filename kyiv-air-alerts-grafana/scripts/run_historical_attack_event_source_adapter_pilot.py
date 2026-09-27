@@ -218,6 +218,33 @@ def retained_controls(evidence: dict, episodes: list[dict], selected_ids: set[st
     return out
 
 
+def source_city_mentioned(city_key: str, text: str) -> bool:
+    """Discovery-only source recognition; classifier city semantics stay untouched."""
+    if monitor.city_mentioned(city_key, text):
+        return True
+    low = " ".join(str(text or "").casefold().replace("’", "'").split())
+    if city_key == "sevastopol":
+        return bool(re.search(r"(?<![\\w-])севастопол(?:ь|я|ю|ем|е)(?![\\w-])", low))
+    return False
+
+
+def source_matched_terms(text: str) -> list[str]:
+    low = str(text or "").casefold()
+    terms = []
+    patterns = {
+        "explosion_discovery": r"\\b(?:взрыв\\w*|вибух\\w*)",
+        "impact_arrival_discovery": r"\\b(?:прилет\\w*|приліт\\w*|попад\\w*|влуч\\w*)",
+        "strike_discovery": r"\\bудар\\w*",
+        "damage_discovery": r"\\b(?:поврежд\\w*|пошкод\\w*)",
+        "fire_discovery": r"\\b(?:пожар\\w*|пожеж\\w*|загор\\w*)",
+        "air_defense_context": r"\\b(?:пво|ппо|противовоздуш\\w*|протиповітр\\w*)",
+    }
+    for label, pattern in patterns.items():
+        if re.search(pattern, low, flags=re.IGNORECASE):
+            terms.append(label)
+    return terms
+
+
 def candidate_from_post(post: dict) -> dict:
     text = str(post.get("text") or "")
     return {
@@ -250,7 +277,7 @@ def observation_from_post(post: dict, selected: list[dict]) -> dict:
         "source_timestamp": post["published_at"],
         "event_timestamp_if_stated": temporal.get("event_time"),
         "excerpt": str(post.get("text") or "")[:1200],
-        "matched_terms": event_types,
+        "matched_terms": source_matched_terms(str(post.get("text") or "")),
         "event_types_supported": event_types,
         "exact_city_binding": decision.get("exact_city_classification_evidence"),
         "air_attack_context": decision.get("air_military_context"),
@@ -274,6 +301,7 @@ def observation_from_post(post: dict, selected: list[dict]) -> dict:
                 "telegram_channel": post["channel"],
                 "telegram_message_id": post["message_id"],
             },
+            "candidate_matching": matching,
         },
     }
 
@@ -491,7 +519,7 @@ def run_sevastopol_pilot(max_episodes: int, output_path: Path) -> dict:
     candidate_posts = [
         post for post in all_posts
         if DISCOVERY_RE.search(str(post.get("text") or ""))
-        and monitor.city_mentioned("sevastopol", str(post.get("text") or ""))
+        and source_city_mentioned("sevastopol", str(post.get("text") or ""))
     ]
     observations = [observation_from_post(post, selected) for post in candidate_posts]
     observations.sort(key=lambda x: (x.get("source_timestamp") or "", x["observation_id"]))
@@ -545,8 +573,16 @@ def run_sevastopol_pilot(max_episodes: int, output_path: Path) -> dict:
         control_rows = [x for x in controls if x["episode_id"] == eid]
         source_urls = sorted({str(x.get("source_url") or "") for x in control_rows})
         obs_for_episode = by_episode.get(eid) or []
+        retrieval_bound_obs = []
+        for obs in observations:
+            matching = (obs.get("provenance") or {}).get("candidate_matching") or {}
+            candidate_ids = set(matching.get("matched_episode_ids") or [])
+            if matching.get("matched_episode_id"):
+                candidate_ids.add(str(matching.get("matched_episode_id")))
+            if eid in candidate_ids:
+                retrieval_bound_obs.append(obs)
         is_crimeanwind = any("t.me" in url and "Crimeanwind" in url for url in source_urls)
-        if obs_for_episode:
+        if obs_for_episode or retrieval_bound_obs:
             code = "CURRENT_RULE_DOWNGRADE"
         elif is_crimeanwind:
             code = "SOURCE_NOT_DISCOVERED"
@@ -556,7 +592,9 @@ def run_sevastopol_pilot(max_episodes: int, output_path: Path) -> dict:
             "episode_id": eid,
             "gap_code": code,
             "retained_source_urls": source_urls,
-            "retrieved_observation_ids": [x["observation_id"] for x in obs_for_episode],
+            "retrieved_observation_ids": sorted({
+                x["observation_id"] for x in (obs_for_episode + retrieval_bound_obs)
+            }),
         })
 
     newly_strict = []
