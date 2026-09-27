@@ -71,16 +71,8 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          rm -rf /tmp/ukrainian-air-raid-sirens-dataset.git
-          git clone --mirror --quiet https://github.com/Vadimkin/ukrainian-air-raid-sirens-dataset.git /tmp/ukrainian-air-raid-sirens-dataset.git
-          git -C /tmp/ukrainian-air-raid-sirens-dataset.git rev-list --all -- datasets/official_data_uk.csv > /tmp/upstream_path_commits.txt
-          found=""
-          while IFS= read -r commit; do
-            blob="$(git -C /tmp/ukrainian-air-raid-sirens-dataset.git rev-parse "$commit:datasets/official_data_uk.csv" 2>/dev/null || true)"
-            if [ "$blob" = "$UPSTREAM_BLOB" ]; then found="$commit"; break; fi
-          done < /tmp/upstream_path_commits.txt
-          test -n "$found"
-          git -C /tmp/ukrainian-air-raid-sirens-dataset.git cat-file blob "$UPSTREAM_BLOB" > /tmp/official_data_uk.csv
+          source_commit="58ee75bc20113181b9ddf8029d4cbf3a62d8cd10"
+          curl -fsSL "https://raw.githubusercontent.com/Vadimkin/ukrainian-air-raid-sirens-dataset/$source_commit/datasets/official_data_uk.csv" -o /tmp/official_data_uk.csv
           test "$(git hash-object /tmp/official_data_uk.csv)" = "$UPSTREAM_BLOB"
 
       - name: Snapshot protected state
