@@ -144,36 +144,18 @@ jobs:
           print("VERDICT:", d["verdict"])
           PY
 
-      - name: Persist only research result and disable bootstrap trigger
+      - name: Persist only research result
         shell: bash
         run: |
           set -euo pipefail
-          python - <<'PY'
-          from pathlib import Path
-          p=Path(".github/workflows/historical-public-upstream-recovery-preflight.yml")
-          text=p.read_text(encoding="utf-8")
-          start=text.index("  push:\n")
-          end=text.index("\npermissions:", start)
-          text=text[:start] + text[end:]
-          p.write_text(text, encoding="utf-8")
-          PY
-
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add "$OUTPUT_PATH" "$WORKFLOW_PATH"
+          git add "$OUTPUT_PATH"
 
           mapfile -t staged < <(git diff --cached --name-only)
           printf 'staged=%s\n' "${staged[@]}"
-          if [ "${#staged[@]}" -ne 2 ]; then
-            echo "Unexpected staged file count"
-            exit 1
-          fi
-          if ! printf '%s\n' "${staged[@]}" | grep -Fxq "$OUTPUT_PATH"; then
-            echo "Missing output artifact from staged set"
-            exit 1
-          fi
-          if ! printf '%s\n' "${staged[@]}" | grep -Fxq "$WORKFLOW_PATH"; then
-            echo "Missing workflow bootstrap-disable change from staged set"
+          if [ "${#staged[@]}" -ne 1 ] || [ "${staged[0]}" != "$OUTPUT_PATH" ]; then
+            echo "Unexpected staged files"
             exit 1
           fi
 
@@ -181,6 +163,3 @@ jobs:
           artifact_commit="$(git rev-parse HEAD)"
           echo "artifact_commit=$artifact_commit"
           git push origin "HEAD:$PREFLIGHT_BRANCH"
-
-          echo "Final workflow trigger block:"
-          sed -n '1,12p' "$WORKFLOW_PATH"
