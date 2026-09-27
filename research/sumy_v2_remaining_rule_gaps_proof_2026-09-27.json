@@ -1,0 +1,251 @@
+{
+  "schema_version": "sumy-v2-remaining-rule-gaps-proof-v1",
+  "generated_date": "2026-09-27",
+  "repository": "olegbalakin-cmyk/kyiv-air-alerts-grafana",
+  "starting_head": "29364ca6d1275e9fbbca657f5f20a2ec4f7eb179",
+  "implementation_branch": "sumy-v2-remaining-rule-gaps-proof-2026-09-27",
+  "implementation_tree_commit": "97fc2f5e74d697ddb9e09abac7acbbfc942acf4f",
+  "last_code_test_commit": "626c7ae5f686cfd06a876b99f4d7ad9dbe27f39f",
+  "successful_proof_workflow_commit": "b4061bdf0acb8f6319eb584116a9033cd62dee9f",
+  "successful_github_actions_run_id": 36345486611,
+  "successful_github_actions_job_id": 108693691746,
+  "scope": {
+    "target_ids": [
+      "2b3df2af5d1a6eb3a0a5b5e6",
+      "57813e54f364c6ea1c31b79d",
+      "b350026329e2fb7dee324d0b",
+      "bc17e3913b1f9a7b78cf8af7",
+      "d4ca36a6f8fdb93684f7b2c2"
+    ],
+    "out_of_scope_qa_ids": [
+      "2c7ad2e0b42e1350e305a18f",
+      "402035df8980628fa245c4e8",
+      "45050b31bdcf42a5f8054e8d",
+      "90a484f51b321e0950e31b60",
+      "c69285b7ffb05693c3393895"
+    ]
+  },
+  "rules_added": [
+    {
+      "id": "sumy_direct_adversary_attack_strike_context",
+      "implemented": true,
+      "event_type": "strike",
+      "summary": "Recognize retained factual completed/current adversary attack or adversary strike wording in exact Sumy context and supply reviewed military/same-attack context without requiring a redundant second same-attack statement.",
+      "guards": [
+        "exact Sumy city context required",
+        "explicit competing audited city blocks Sumy context inheritance",
+        "completed attack requires explicit adversary marker or military/UAV context",
+        "future, possible, threat, prediction and event-predicate negation rejected",
+        "non-military use of strike wording rejected",
+        "existing episode-specific temporal/classifier binding remains mandatory",
+        "no global alert-window tolerance change"
+      ]
+    },
+    {
+      "id": "sumy_factual_vluchannia_impact",
+      "implemented": true,
+      "event_type": "impact",
+      "summary": "Map factual physical Ukrainian noun влучання to v2 impact for exact Sumy retained evidence.",
+      "guards": [
+        "exact Sumy city context required",
+        "figurative and negated uses rejected",
+        "prediction/possibility wording rejected",
+        "competing locality rejected",
+        "existing temporal binding remains mandatory",
+        "reviewed near-boundary sensitivity binding remains required where applicable"
+      ]
+    },
+    {
+      "id": "sumy_enemy_uav_physical_fall_impact",
+      "implemented": true,
+      "event_type": "impact",
+      "summary": "Map completed physical enemy/military UAV or drone упав/впав at a physical Sumy location to v2 impact.",
+      "guards": [
+        "explicit enemy/adversary plus UAV/drone subject required",
+        "physical exact-city location/context required",
+        "generic drone fall, signal loss, speculation and non-military contexts rejected",
+        "existing episode-specific temporal binding remains mandatory"
+      ]
+    },
+    {
+      "id": "sumy_cross_city_same_attack_guard",
+      "implemented": true,
+      "summary": "Prevent legacy reviewed same-attack fallback from linking a Sumy mention to an attack/event explicitly assigned to another audited city in the same statement."
+    }
+  ],
+  "tests": {
+    "focused_and_inherited_pytest": {
+      "passed": true,
+      "count": 19,
+      "elapsed_seconds_reported": 0.47
+    },
+    "replay_self_test": {
+      "passed": true,
+      "output": "Historical replay helper self-test OK"
+    },
+    "monitor_self_test": {
+      "passed": true
+    },
+    "negative_controls_covered": [
+      "future attack",
+      "possible attack",
+      "threat of attack",
+      "generic alarm warning",
+      "another locality",
+      "oblast-only context",
+      "missing temporal binding",
+      "negated wording",
+      "historical/unbound references",
+      "non-military use of удар",
+      "figurative влучання",
+      "generic упав without enemy UAV context",
+      "unrelated later negation does not cancel a completed attack fact"
+    ]
+  },
+  "baseline_replay": {
+    "denominator": 2297,
+    "denominator_expected": 2297,
+    "qa_count": 10,
+    "strict": 197,
+    "sensitivity": 228,
+    "protected_files_unchanged": true
+  },
+  "post_fix_replay": {
+    "denominator": 2297,
+    "denominator_expected": 2297,
+    "qa_count": 5,
+    "strict": 201,
+    "sensitivity": 233,
+    "protected_files_unchanged": true
+  },
+  "exact_qa_delta": {
+    "removed_qa_ids": [
+      "2b3df2af5d1a6eb3a0a5b5e6",
+      "57813e54f364c6ea1c31b79d",
+      "b350026329e2fb7dee324d0b",
+      "bc17e3913b1f9a7b78cf8af7",
+      "d4ca36a6f8fdb93684f7b2c2"
+    ],
+    "added_qa_ids": [],
+    "five_target_ids_removed": true,
+    "out_of_scope_five_qa_ids_unchanged": true
+  },
+  "event_types_before_after": {
+    "2b3df2af5d1a6eb3a0a5b5e6": {
+      "before": [
+        "explosion"
+      ],
+      "after": [
+        "explosion"
+      ],
+      "outcome_before": "needs_review",
+      "outcome_after": "approved_strict",
+      "resolution": "direct adversary strike wording supplies military/same-attack context for the explicitly stated explosion"
+    },
+    "57813e54f364c6ea1c31b79d": {
+      "before": [],
+      "after": [
+        "strike"
+      ],
+      "outcome_before": "needs_review",
+      "outcome_after": "approved_strict"
+    },
+    "b350026329e2fb7dee324d0b": {
+      "before": [],
+      "after": [
+        "strike"
+      ],
+      "outcome_before": "needs_review",
+      "outcome_after": "approved_strict"
+    },
+    "bc17e3913b1f9a7b78cf8af7": {
+      "before": [],
+      "after": [
+        "impact"
+      ],
+      "outcome_before": "needs_review",
+      "outcome_after": "approved_sensitivity",
+      "sensitivity_basis": "near_boundary"
+    },
+    "d4ca36a6f8fdb93684f7b2c2": {
+      "before": [],
+      "after": [
+        "impact"
+      ],
+      "outcome_before": "needs_review",
+      "outcome_after": "approved_strict"
+    }
+  },
+  "metric_delta": {
+    "denominator": {
+      "before": 2297,
+      "after": 2297,
+      "delta": 0
+    },
+    "qa": {
+      "before": 10,
+      "after": 5,
+      "delta": -5
+    },
+    "strict": {
+      "before": 197,
+      "after": 201,
+      "delta": 4
+    },
+    "sensitivity": {
+      "before": 228,
+      "after": 233,
+      "delta": 5
+    },
+    "unexplained_drift": false
+  },
+  "intermediate_regression_catch": {
+    "occurred": true,
+    "added_qa_id": "6358accd9bb0bbf258970062",
+    "retained_evidence": "Після 01:00 російські безпілотники масовано атакували Суми; точніше event time джерело не дає.",
+    "root_cause": "An initially broad negation guard treated unrelated later 'не дає' as negating the completed attack predicate.",
+    "correction": "Scoped negation/modal guards to the relevant attack/impact/fall predicates and added a retained-evidence regression test.",
+    "final_added_qa_ids": []
+  },
+  "cross_city_regression": {
+    "method": "same historical replay/classifier regression used for the previous Sumy v2 strike fix",
+    "clean": true,
+    "cities": {
+      "lviv": {
+        "qa_before": 0,
+        "qa_after": 0,
+        "strict_before": 12,
+        "strict_after": 12,
+        "sensitivity_before": 12,
+        "sensitivity_after": 12
+      },
+      "sevastopol": {
+        "qa_before": 0,
+        "qa_after": 0,
+        "strict_before": 38,
+        "strict_after": 38,
+        "sensitivity_before": 55,
+        "sensitivity_after": 55
+      }
+    }
+  },
+  "protected_state_verification": {
+    "implementation_tree_diff_files_before_artifact": [
+      "kyiv-air-alerts-grafana/scripts/replay_explosion_history.py",
+      "kyiv-air-alerts-grafana/tests/test_historical_replay_remaining_v2_roles.py"
+    ],
+    "retained_evidence_modified": false,
+    "source_slices_modified": false,
+    "persistent_qa_status_modified": false,
+    "canonical_metrics_modified": false,
+    "production_data_modified": false,
+    "site_prod_modified": false,
+    "dashboard_data_modified": false,
+    "multicity_base_branch_modified": false,
+    "active_6863_campaign_branch": "historical-attack-event-backfill-2026-09-27",
+    "active_6863_campaign_head_before_and_after": "5809bd677a93e6c2f6a1bff9cb7f6b5bde0c7c1e",
+    "active_6863_campaign_unchanged": true,
+    "protected_files_unchanged": true
+  },
+  "verdict": "SUMY REMAINING V2 RULE GAPS PROVEN — READY FOR ATOMIC APPLY"
+}
