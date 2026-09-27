@@ -1,0 +1,228 @@
+name: Temporary Sumy v2 strike replay proof
+
+on:
+  push:
+    branches:
+      - sumy-v2-strike-replay-fix-2026-09-27
+    paths:
+      - ".github/workflows/sumy-v2-strike-proof-temp.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  proof:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout proof branch
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies and test runner
+        run: |
+          python -m pip install -r kyiv-air-alerts-grafana/requirements.txt pytest
+
+      - name: Prepare exact baseline and implementation worktrees
+        shell: bash
+        run: |
+          set -euo pipefail
+          git worktree add "$RUNNER_TEMP/base" 41ccea99e42f1d07475b9c4357b52c6dab394f4e
+          git worktree add "$RUNNER_TEMP/post" be9fd7da3f356cb2e3651f2f7a208761716ed20b
+          test "$(git -C "$RUNNER_TEMP/base" rev-parse HEAD)" = "41ccea99e42f1d07475b9c4357b52c6dab394f4e"
+          test "$(git -C "$RUNNER_TEMP/post" rev-parse HEAD)" = "be9fd7da3f356cb2e3651f2f7a208761716ed20b"
+
+      - name: Run focused regression tests on implementation
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pytest -q "$RUNNER_TEMP/post/kyiv-air-alerts-grafana/tests/test_historical_replay_strike_roles.py"
+          python "$RUNNER_TEMP/post/kyiv-air-alerts-grafana/scripts/replay_explosion_history.py" --self-test
+          python "$RUNNER_TEMP/post/kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py" --self-test
+
+      - name: Run real Sumy baseline replay
+        shell: bash
+        run: |
+          set -euo pipefail
+          python "$RUNNER_TEMP/base/kyiv-air-alerts-grafana/scripts/replay_explosion_history.py"             --repo-root "$RUNNER_TEMP/base/kyiv-air-alerts-grafana"             --city sumy             --through 2026-09-17             --input-head 41ccea99e42f1d07475b9c4357b52c6dab394f4e             --read-only             --output "$RUNNER_TEMP/sumy-baseline.json"
+
+      - name: Run real Sumy post-fix replay
+        shell: bash
+        run: |
+          set -euo pipefail
+          python "$RUNNER_TEMP/post/kyiv-air-alerts-grafana/scripts/replay_explosion_history.py"             --repo-root "$RUNNER_TEMP/post/kyiv-air-alerts-grafana"             --city sumy             --through 2026-09-17             --input-head be9fd7da3f356cb2e3651f2f7a208761716ed20b             --read-only             --output "$RUNNER_TEMP/sumy-post.json"
+
+      - name: Run lightweight cross-city before/after regression
+        shell: bash
+        run: |
+          set -euo pipefail
+          for city in sevastopol lviv; do
+            python "$RUNNER_TEMP/base/kyiv-air-alerts-grafana/scripts/replay_explosion_history.py"               --repo-root "$RUNNER_TEMP/base/kyiv-air-alerts-grafana"               --city "$city"               --through 2026-09-17               --input-head 41ccea99e42f1d07475b9c4357b52c6dab394f4e               --read-only               --output "$RUNNER_TEMP/$city-baseline.json"
+            python "$RUNNER_TEMP/post/kyiv-air-alerts-grafana/scripts/replay_explosion_history.py"               --repo-root "$RUNNER_TEMP/post/kyiv-air-alerts-grafana"               --city "$city"               --through 2026-09-17               --input-head be9fd7da3f356cb2e3651f2f7a208761716ed20b               --read-only               --output "$RUNNER_TEMP/$city-post.json"
+          done
+
+      - name: Build and assert replay delta
+        shell: bash
+        run: |
+          set -euo pipefail
+          RUNNER_TEMP="$RUNNER_TEMP" python - <<'PY'
+          import hashlib
+          import json
+          import os
+          from pathlib import Path
+
+          tmp = Path(os.environ["RUNNER_TEMP"])
+          baseline = json.loads((tmp / "sumy-baseline.json").read_text(encoding="utf-8"))
+          post = json.loads((tmp / "sumy-post.json").read_text(encoding="utf-8"))
+
+          def changed_map(payload):
+              return {row["episode_id"]: row for row in payload.get("changed_episodes", [])}
+
+          bmap = changed_map(baseline)
+          pmap = changed_map(post)
+          b_ids = set(bmap)
+          p_ids = set(pmap)
+          removed = sorted(b_ids - p_ids)
+          added = sorted(p_ids - b_ids)
+          targets = {
+              "232eb0da4edf28c2d1c726ab",
+              "6f22822eb67990654c28d3e8",
+              "71eded846a321cdc6188fed9",
+              "88f59d26acd8ae4fd31c7511",
+          }
+          controls = {"b103be64497fc7d33f5c7b3d", "d6b1b9ffc10dafbc86e253c7"}
+
+          def event_types(row):
+              out = []
+              for code in row.get("reason_codes", []):
+                  if code.startswith("ATTACK_EVENT_TYPES:"):
+                      out.extend(x for x in code.split(":", 1)[1].split(",") if x)
+              return sorted(set(out))
+
+          protected = [
+              "data/explosion_audited_baseline.json",
+              "data/explosion_review_queue.json",
+              "data/explosion_candidate_monitor_state.json",
+              "data/explosion_candidate_monitor_last_run.json",
+              "data/explosions_test.json",
+              "data/dashboard_data.json",
+          ]
+          def sha(path):
+              h=hashlib.sha256()
+              h.update(path.read_bytes())
+              return h.hexdigest()
+
+          protected_equal = all(
+              sha(tmp/"base"/"kyiv-air-alerts-grafana"/rel) == sha(tmp/"post"/"kyiv-air-alerts-grafana"/rel)
+              for rel in protected
+          )
+
+          cross = {}
+          cross_clean = True
+          for city in ("sevastopol", "lviv"):
+              a = json.loads((tmp/f"{city}-baseline.json").read_text(encoding="utf-8"))
+              b = json.loads((tmp/f"{city}-post.json").read_text(encoding="utf-8"))
+              fields = [
+                  "episodes_checked", "replayed_strict_episodes",
+                  "replayed_sensitivity_episodes", "changed_episodes", "errors",
+                  "protected_files_unchanged",
+              ]
+              equal = all(a.get(k) == b.get(k) for k in fields)
+              cross[city] = {
+                  "clean": equal,
+                  "baseline_strict": a.get("replayed_strict_episodes"),
+                  "post_strict": b.get("replayed_strict_episodes"),
+                  "baseline_sensitivity": a.get("replayed_sensitivity_episodes"),
+                  "post_sensitivity": b.get("replayed_sensitivity_episodes"),
+                  "baseline_changed_count": len(a.get("changed_episodes", [])),
+                  "post_changed_count": len(b.get("changed_episodes", [])),
+              }
+              cross_clean = cross_clean and equal
+
+          result = {
+              "baseline": {
+                  "input_head": baseline.get("input_head"),
+                  "denominator": baseline.get("episodes_checked"),
+                  "qa_count": len(baseline.get("changed_episodes", [])),
+                  "qa_ids": sorted(b_ids),
+                  "strict": baseline.get("replayed_strict_episodes"),
+                  "sensitivity": baseline.get("replayed_sensitivity_episodes"),
+                  "protected_files_unchanged": baseline.get("protected_files_unchanged"),
+              },
+              "post": {
+                  "input_head": post.get("input_head"),
+                  "denominator": post.get("episodes_checked"),
+                  "qa_count": len(post.get("changed_episodes", [])),
+                  "qa_ids": sorted(p_ids),
+                  "strict": post.get("replayed_strict_episodes"),
+                  "sensitivity": post.get("replayed_sensitivity_episodes"),
+                  "protected_files_unchanged": post.get("protected_files_unchanged"),
+              },
+              "removed_qa_ids": removed,
+              "added_qa_ids": added,
+              "four_targets_removed": targets <= set(removed),
+              "additional_removed_qa_ids": sorted(set(removed) - targets),
+              "previously_resolved_absent_baseline": sorted(controls - b_ids),
+              "previously_resolved_absent_post": sorted(controls - p_ids),
+              "removed_details": {
+                  eid: {
+                      "before_category": bmap[eid].get("category"),
+                      "before_reason_codes": bmap[eid].get("reason_codes", []),
+                      "before_event_types": event_types(bmap[eid]),
+                      "evidence": bmap[eid].get("evidence", []),
+                  }
+                  for eid in removed
+              },
+              "remaining_changed_details": {
+                  eid: {
+                      "category": pmap[eid].get("category"),
+                      "reason_codes": pmap[eid].get("reason_codes", []),
+                      "event_types": event_types(pmap[eid]),
+                  }
+                  for eid in sorted(p_ids)
+              },
+              "protected_blob_content_equal_base_to_post": protected_equal,
+              "cross_city": cross,
+              "cross_city_clean": cross_clean,
+          }
+
+          assert result["baseline"]["denominator"] == 2297
+          assert result["post"]["denominator"] == 2297
+          assert result["baseline"]["qa_count"] == 19
+          assert targets <= b_ids
+          assert result["four_targets_removed"]
+          assert not added
+          assert controls.isdisjoint(p_ids)
+          assert protected_equal
+          assert baseline.get("protected_files_unchanged") is True
+          assert post.get("protected_files_unchanged") is True
+          assert cross_clean
+
+          (tmp/"proof-summary.json").write_text(
+              json.dumps(result, ensure_ascii=False, indent=2, sort_keys=True)+"\n",
+              encoding="utf-8",
+          )
+          print(json.dumps(result, ensure_ascii=False, indent=2))
+          PY
+
+      - name: Upload proof bundle
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sumy-v2-strike-replay-proof
+          path: |
+            ${{ runner.temp }}/sumy-baseline.json
+            ${{ runner.temp }}/sumy-post.json
+            ${{ runner.temp }}/sevastopol-baseline.json
+            ${{ runner.temp }}/sevastopol-post.json
+            ${{ runner.temp }}/lviv-baseline.json
+            ${{ runner.temp }}/lviv-post.json
+            ${{ runner.temp }}/proof-summary.json
+          if-no-files-found: warn
+          retention-days: 30
