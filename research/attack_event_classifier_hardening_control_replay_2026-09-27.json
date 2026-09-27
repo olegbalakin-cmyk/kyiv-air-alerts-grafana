@@ -1,0 +1,129 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-09-27T09:07:00Z",
+  "branch": "multicity-wip-2026-09-16",
+  "scope": {
+    "step": "unified attack-event classifier hardening + read-only control replay",
+    "historical_crawl_performed": false,
+    "historical_replay_mutation_performed": false,
+    "baseline_mutated": false,
+    "final_evidence_mutated": false,
+    "live_metric_mutated": false,
+    "dashboard_mutated": false,
+    "production_mutated": false
+  },
+  "prerequisite_source_preflight": {
+    "artifact": "research/historical_ppo_source_inventory.json",
+    "commit": "ff256cbb88b17bcd388b3c8d1db766e877104430",
+    "verdict": "HISTORICAL PPO SOURCE PREFLIGHT COMPLETE",
+    "scope_note": "PPO filename retained for continuity; source inventory is reused for expanded historical attack-event enrichment."
+  },
+  "methodology": {
+    "public_metric": "share of alert episodes with >=1 confirmed attack event",
+    "numerator_unit": "canonical alert episode, counted once regardless of number of observations/events",
+    "conceptual_model": [
+      "alert episode",
+      "canonical attack event",
+      "evidence observations"
+    ],
+    "event_types": [
+      "explosion",
+      "impact",
+      "arrival",
+      "strike",
+      "damage",
+      "fire"
+    ],
+    "ppo_role": "context/mechanism, not a separate numerator",
+    "backward_compatible_interfaces": [
+      "strict_explosion_signal",
+      "strict_explosion_evidence",
+      "existing historical replay callers"
+    ]
+  },
+  "vocabulary_audit": {
+    "legacy_strict_families": [
+      "explosion",
+      "impact",
+      "arrival",
+      "strike"
+    ],
+    "newly_hardened_families": [
+      "damage",
+      "fire"
+    ],
+    "discovery_terms_added": [
+      "пошкод*",
+      "пожеж*",
+      "загор*",
+      "займан*"
+    ],
+    "damage_fire_guard": "damage/fire becomes strict-event evidence only when the same evidence segment contains explicit attack causality; exact-city, air/military-context, same-attack, and temporal gates still apply",
+    "retrospective_guard": "generic night/morning/day/evening attack-consequence summaries without episode-specific temporal proof are prevented from same-day sensitivity inference"
+  },
+  "code_changes": [
+    {
+      "file": "kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py",
+      "commit": "7123c1c4ea1663fdcc5b04dee829eaf4ed8c1726",
+      "old_blob": "c667389f175038e23e0ac775bb58f00fe11effcf",
+      "new_blob": "e545509d22248beac63d19f165814bdccd27c297",
+      "changes": [
+        "added attack_event_types() with explicit unified taxonomy",
+        "added conservative attack_consequence_signal() for damage/fire",
+        "added strict_attack_event_signal(); legacy strict_explosion_signal delegates to it",
+        "legacy strict_explosion_evidence interface retained and now emits event_types",
+        "classification payload and future queue observations emit event_types",
+        "added positive/negative damage-fire regression fixtures"
+      ]
+    },
+    {
+      "file": "kyiv-air-alerts-grafana/scripts/audit_attack_event_classifier.py",
+      "commit": "90c23f73e64473af553a139417fa3fe70e0f1fd4",
+      "role": "read-only old-vs-new queue replay; legacy signal emulated in memory"
+    },
+    {
+      "file": ".github/workflows/attack-event-classifier-hardening.yml",
+      "commit": "1c17d5f437e0f05ef1b389c21d923ff6a8c2c892",
+      "role": "GitHub-native regression + control replay"
+    }
+  ],
+  "regression_controls": {
+    "positive_damage_fire_examples": 3,
+    "negative_damage_fire_examples": 3,
+    "prior_air_defense_positive_examples_preserved": 3,
+    "prior_air_defense_negative_examples_preserved": 3,
+    "monitor_self_test": "success"
+  },
+  "control_replay": {
+    "workflow_run_id": 36308325860,
+    "workflow_conclusion": "success",
+    "evaluated_candidates": 725,
+    "changed_candidate_count": 0,
+    "targeted_damage_fire_widening_count": 0,
+    "uncontrolled_drift_count": 0,
+    "approved_regression_count": 0,
+    "verdict": "ATTACK-EVENT CLASSIFIER CONTROL REPLAY CLEAN",
+    "interpretation": "No currently retained queue candidate changes classification outcome under the expanded taxonomy. New damage/fire capability is therefore exercised by regression fixtures but introduces no accidental current-queue reclassification."
+  },
+  "protected_files": {
+    "kyiv-air-alerts-grafana/data/explosion_audited_baseline.json": "5bbd2b771559eac2966aeec65d6e3b5487b9c1a9",
+    "kyiv-air-alerts-grafana/data/explosion_review_queue.json": "e33c175b40942f7968c2241b71fdfea30ef9da64",
+    "kyiv-air-alerts-grafana/data/explosion_candidate_monitor_state.json": "cba3c2b2ef3bbc52243b252810dd106f540ce164",
+    "kyiv-air-alerts-grafana/data/explosion_candidate_monitor_last_run.json": "8f4b5b6f223e33046d9113dcd19804ddc79af054",
+    "kyiv-air-alerts-grafana/data/explosions_test.json": "61f5d5201d72c8474229da74395bc92eea5b0722",
+    "kyiv-air-alerts-grafana/data/dashboard_data.json": "ae06bc7b14dfb6a02fe110db9cc2fbe262cd895f"
+  },
+  "next_step": {
+    "name": "one-city historical attack-event discovery pilot",
+    "constraints": [
+      "networked discovery only into a deterministic evidence artifact",
+      "reuse source-preflight inventory",
+      "max 40 alert episodes",
+      "run current expanded classifier offline against discovered observations",
+      "no baseline/final_evidence/live metric/dashboard/production mutation",
+      "preserve all evidence observations and event_types; episode numerator remains binary"
+    ]
+  },
+  "readiness_for_historical_attack_event_discovery_pilot": true,
+  "verdict": "ATTACK-EVENT CLASSIFIER HARDENING CONTROL REPLAY CLEAN — READY FOR HISTORICAL ATTACK-EVENT DISCOVERY PILOT"
+}
