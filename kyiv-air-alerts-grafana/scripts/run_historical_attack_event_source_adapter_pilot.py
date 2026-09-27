@@ -213,6 +213,7 @@ def retained_controls(evidence: dict, episodes: list[dict], selected_ids: set[st
                 "evidence": row.get("evidence"),
                 "basis": row.get("basis") or row.get("decision"),
                 "binding": binding,
+                "raw_control": row,
             })
     out.sort(key=lambda x: (x["episode_id"], str(x.get("source_url") or "")))
     return out
@@ -224,25 +225,25 @@ def source_city_mentioned(city_key: str, text: str) -> bool:
         return True
     low = " ".join(str(text or "").casefold().replace("’", "'").split())
     if city_key == "sevastopol":
-        return bool(re.search(r"(?<![\\w-])севастопол(?:ь|я|ю|ем|е)(?![\\w-])", low))
+        return "севастопол" in low
     return False
 
 
 def source_matched_terms(text: str) -> list[str]:
     low = str(text or "").casefold()
-    terms = []
-    patterns = {
-        "explosion_discovery": r"\\b(?:взрыв\\w*|вибух\\w*)",
-        "impact_arrival_discovery": r"\\b(?:прилет\\w*|приліт\\w*|попад\\w*|влуч\\w*)",
-        "strike_discovery": r"\\bудар\\w*",
-        "damage_discovery": r"\\b(?:поврежд\\w*|пошкод\\w*)",
-        "fire_discovery": r"\\b(?:пожар\\w*|пожеж\\w*|загор\\w*)",
-        "air_defense_context": r"\\b(?:пво|ппо|противовоздуш\\w*|протиповітр\\w*)",
+    families = {
+        "explosion_discovery": ("взрыв", "вибух"),
+        "impact_arrival_discovery": ("прилет", "приліт", "попад", "влуч"),
+        "strike_discovery": ("удар",),
+        "damage_discovery": ("поврежд", "пошкод"),
+        "fire_discovery": ("пожар", "пожеж", "загор"),
+        "air_defense_context": ("пво", "ппо", "противовоздуш", "протиповітр"),
     }
-    for label, pattern in patterns.items():
-        if re.search(pattern, low, flags=re.IGNORECASE):
-            terms.append(label)
-    return terms
+    return [
+        label
+        for label, stems in families.items()
+        if any(stem in low for stem in stems)
+    ]
 
 
 def candidate_from_post(post: dict) -> dict:
