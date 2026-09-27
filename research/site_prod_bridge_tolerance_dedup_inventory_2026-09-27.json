@@ -1,0 +1,2501 @@
+{
+  "schema_version": 1,
+  "forensic_date": "2026-09-27",
+  "repository": "olegbalakin-cmyk/kyiv-air-alerts-grafana",
+  "branch": "site-prod",
+  "current_head_before_artifact_commit": "f2769e24dbae2f33eb40bfc6eb120226a15b764e",
+  "known_production_commit": "f2769e24dbae2f33eb40bfc6eb120226a15b764e",
+  "head_matches_known_production_commit": true,
+  "read_only_scope": {
+    "code_modified": false,
+    "bridge_modified": false,
+    "production_workflow_run": false,
+    "only_planned_mutation": "this forensic artifact commit"
+  },
+  "bridge": {
+    "path": "kyiv-air-alerts-grafana/data/ukrainealarm_bridge.json",
+    "blob_sha": "6291eb530c06841d12a5b961827fd001cd3bac09",
+    "source_url": "https://api.ukrainealarm.com/api/v3/alerts/regionHistory",
+    "event_count_before": 1540,
+    "completed_air_rows_scanned": 1540,
+    "match_tolerance_seconds": 15,
+    "equivalence_definition": {
+      "same_city_key": true,
+      "absolute_start_delta_seconds_lte": 15,
+      "absolute_end_delta_seconds_lte": 15,
+      "generic_interval_overlap_used": false
+    }
+  },
+  "duplicate_inventory": {
+    "expected_per_city": {
+      "kharkiv": 19,
+      "mykolaiv": 19,
+      "sumy": 14
+    },
+    "actual_per_city": {
+      "kharkiv": 19,
+      "mykolaiv": 19,
+      "sumy": 14
+    },
+    "total_duplicate_pairs": 52,
+    "all_pairs_manual_recovery_plus_api": true,
+    "rows_participating_in_multiple_pairs": [],
+    "exceptions": [],
+    "max_start_delta_seconds": 0.891906,
+    "max_end_delta_seconds": 9.443265,
+    "expected_event_count_after_atomic_repair": 1488,
+    "pairs": [
+      {
+        "pair_id": "kharkiv-01",
+        "city_key": "kharkiv",
+        "pair_structure": "manual Alerts.in.ua recovery row + UkraineAlarm API row",
+        "manual_recovery_row_index": 1324,
+        "api_row_index": 1323,
+        "start_delta_seconds_abs": 0.268574,
+        "end_delta_seconds_abs": 0.446657,
+        "api_minus_manual_start_seconds": 0.268574,
+        "api_minus_manual_end_seconds": 0.446657,
+        "manual_recovery": {
+          "city_key": "kharkiv",
+          "region_id": "1293",
+          "api_region_name": "м. Харків та Харківська територіальна громада",
+          "start": "2026-09-25T15:04:15Z",
+          "end": "2026-09-25T15:34:53Z",
+          "alert_type": "AIR",
+          "source": "alerts.in.ua_manual_csv_recovery",
+          "source_kind": "manual_csv_export",
+          "source_files": [
+            "alerts_2026-09-25(1).csv"
+          ],
+          "recovery_artifact": "research/site_prod_bridge_continuity_repair_2026-09-27.json"
+        },
+        "ukrainealarm_api": {
+          "city_key": "kharkiv",
+          "region_id": "1293",
+          "api_region_name": "м. Харків та Харківська територіальна громада",
+          "start": "2026-09-25T15:04:15.268574Z",
+          "end": "2026-09-25T15:34:53.446657Z",
+          "alert_type": "AIR",
+          "inherited_bridge_source_url": "https://api.ukrainealarm.com/api/v3/alerts/regionHistory",
+          "explicit_manual_recovery_fields_present": false
+        },
+        "proposed_canonical_survivor": "ukrainealarm_api",
+        "proposed_recovery_provenance": {
+          "original_recovery_source": "alerts.in.ua_manual_csv_recovery",
+          "source_kind": "manual_csv_export",
+          "source_files": [
+            "alerts_2026-09-25(1).csv"
+          ],
+          "recovery_artifact": "research/site_prod_bridge_continuity_repair_2026-09-27.json",
+          "original_recovery_start": "2026-09-25T15:04:15Z",
+          "original_recovery_end": "2026-09-25T15:34:53Z"
+        }
+      },
+      {
+        "pair_id": "kharkiv-02",
+        "city_key": "kharkiv",
+        "pair_structure": "manual Alerts.in.ua recovery row + UkraineAlarm API row",
+        "manual_recovery_row_index": 1337,
+        "api_row_index": 1336,
+        "start_delta_seconds_abs": 0.469327,
+        "end_delta_seconds_abs": 0.356654,
+        "api_minus_manual_start_seconds": -0.469327,
+        "api_minus_manual_end_seconds": 0.356654,
+        "manual_recovery": {
+          "city_key": "kharkiv",
+          "region_id": "1293",
+          "api_region_name": "м. Харків та Харківська територіальна громада",
+          "start": "2026-09-25T17:57:32Z",
+          "end": "2026-09-25T19:10:56Z",
+          "alert_type": "AIR",
+          "source": "alerts.in.ua_manual_csv_recovery",
+          "source_kind": "manual_csv_export",
+          "source_files": [
+            "alerts_2026-09-25(1).csv"
+          ],
+          "recovery_artifact": "research/site_prod_bridge_continuity_repair_2026-09-27.json"
+        },
+        "ukrainealarm_api": {
+          "city_key": "kharkiv",
+          "region_id": "1293",
+          "api_region_name": "м. Харків та Харківська територіальна громада",
+          "start": "2026-09-25T17:57:31.530673Z",
+          "end": "2026-09-25T19:10:56.356654Z",
+          "alert_type": "AIR",
+          "inherited_bridge_source_url": "https://api.ukrainealarm.com/api/v3/alerts/regionHistory",
+          "explicit_manual_recovery_fields_present": false
+        },
+        "proposed_canonical_survivor": "ukrainealarm_api",
+        "proposed_recovery_provenance": {
+          "original_recovery_source": "alerts.in.ua_manual_csv_recovery",
+          "source_kind": "manual_csv_export",
+          "source_files": [
+            "alerts_2026-09-25(1).csv"
+          ],
+          "recovery_artifact": "research/site_prod_bridge_continuity_repair_2026-09-27.json",
+          "original_recovery_start": "2026-09-25T17:57:32Z",
+          "original_recovery_end": "2026-09-25T19:10:56Z"
+        }
+      },
+      {
+        "pair_id": "kharkiv-03",
+        "city_key": "kharkiv",
+        "pair_structure": "manual Alerts.in.ua recovery row + UkraineAlarm API row",
+        "manual_recovery_row_index": 1346,
+        "api_row_index": 1345,
+        "start_delta_seconds_abs": 0.699268,
+        "end_delta_seconds_abs": 0.235085,
+        "api_minus_manual_start_seconds": 0.699268,
+        "api_minus_manual_end_seconds": 0.235085,
+        "manual_recovery": {
+          "city_key": "kharkiv",
+          "region_id": "1293",
+          "api_region_name": "м. Харків та Харківська територіальна громада",
+          "start": "2026-09-25T20:32:24Z",
+          "end": "2026-09-25T20:56:31Z",
+          "alert_type": "AIR",
+          "source": "alerts.in.ua_manual_csv_recovery",
+          "source_kind": "manual_csv_export",
+          "source_files": [
+            "alerts_2026-09-25(1).csv"
+          ],
+          "recovery_artifact": "research/site_prod_bridge_continuity_repair_2026-09-27.json"
+        },
+        "ukrainealarm_api": {
+          "city_key": "kharkiv",
+          "region_id": "1293",
+          "api_region_name": "м. Харків та Харківська територіальна громада",
+          "start": "2026-09-25T20:32:24.699268Z",
+          "end": "2026-09-25T20:56:31.235085Z",
+          "alert_type": "AIR",
+          "inherited_bridge_source_url": "https://api.ukrainealarm.com/api/v3/alerts/regionHistory",
+          "explicit_manual_recovery_fields_present": false
+        },
+        "proposed_canonical_survivor": "ukrainealarm_api",
+        "proposed_recovery_provenance": {
+          "original_recovery_source": "alerts.in.ua_manual_csv_recovery",
+          "source_kind": "manual_csv_export",
+          "source_files": [
+            "alerts_2026-09-25(1).csv"
+          ],
+          "recovery_artifact": "research/site_prod_bridge_continuity_repair_2026-09-27.json",
+          "original_recovery_start": "2026-09-25T20:32:24Z",
+          "original_recovery_end": "2026-09-25T20:56:31Z"
+        }
+      },
+      {
+        "pair_id": "kharkiv-04",
+        "city_key": "kharkiv",
+        "pair_structure": "manual Alerts.in.ua recovery row + UkraineAlarm API row",
+        "manual_recovery_row_index": 1352,
+        "api_row_index": 1351,
+        "start_delta_seconds_abs": 0.314958,
+        "end_delta_seconds_abs": 0.072009,
+        "api_minus_manual_start_seconds": -0.314958,
+        "api_minus_manual_end_seconds": 0.072009,
+        "manual_recovery": {
+          "city_key": "kharkiv",
+          "region_id": "1293",
+          "api_region_name": "м. Харків та Харківська територіальна громада",
+          "start": "2026-09-25T22:32:46Z",
+          "end": "2026-09-25T22:54:22Z",
+          "alert_type": "AIR",
+          "source": "alerts.in.ua_manual_csv_recovery",
+          "source_kind": "manual_csv_export",
+          "source_files": [
+            "alerts_2026-09-26(1).csv"
+          ],
+          "recovery_artifact": "research/site_prod_bridge_continuity_repair_2026-09-27.json"
+        },
+        "ukrainealarm_api": {
+          "city_key": "kharkiv",
+          "region_id": "1293",
+          "api_region_name": "м. Харків та Харківська територіальна громада",
+          "start": "2026-09-25T22:32:45.685042Z",
+          "end": "2026-09-25T22:54:22.072009Z",
+          "alert_type": "AIR",
+          "inherited_bridge_source_url": "https://api.ukrainealarm.com/api/v3/alerts/regionHistory",
+          "explicit_manual_recovery_fields_present": false
+        },
+        "proposed_canonical_survivor": "ukrainealarm_api",
+        "proposed_recovery_provenance": {
+          "original_recovery_source": "alerts.in.ua_manual_csv_recovery",
+          "source_kind": "manual_csv_export",
+          "source_files": [
+            "alerts_2026-09-26(1).csv"
+          ],
+          "recovery_artifact": "research/site_prod_bridge_continuity_repair_2026-09-27.json",
+          "original_recovery_start": "2026-09-25T22:32:46Z",
+          "original_recovery_end": "2026-09-25T22:54:22Z"
+        }
+      },
+      {
+        "pair_id": "kharkiv-05",
+        "city_key": "kharkiv",
+        "pair_structure": "manual Alerts.in.ua recovery row + UkraineAlarm API row",
+        "manual_recovery_row_index": 1358,
+        "api_row_index": 1357,
+        "start_delta_seconds_abs": 0.066922,
+        "end_delta_seconds_abs": 0.016365,
+        "api_minus_manual_start_seconds": 0.066922,
+        "api_minus_manual_end_seconds": 0.016365,
+        "manual_recovery": {
+          "city_key": "kharkiv",
+          "region_id": "1293",
+          "api_region_name": "м. Харків та Харківська територіальна громада",
+          "start": "2026-09-25T23:09:09Z",
+          "end": "2026-09-26T01:51:14Z",
+          "alert_type": "AIR",
+          "source": "alerts.in.ua_manual_csv_recovery",
+          "source_kind": "manual_csv_export",
+          "source_files": [
+            "alerts_2026-09-26(1).csv"
+          ],
+          "recovery_artifact": "research/site_prod_bridge_continuity_repair_2026-09-27.json"
+        },
+        "ukrainealarm_api": {
+          "city_key": "kharkiv",
+          "region_id": "1293",
+          "api_region_name": "м. Харків та Харківська територіальна громада",
+          "start": "2026-09-25T23:09:09.066922Z",
+          "end": "2026-09-26T01:51:14.016365Z",
+          "alert_type": "AIR",
+          "inherited_bridge_source_url": "https://api.ukrainealarm.com/api/v3/alerts/regionHistory",
+          "explicit_manual_recovery_fields_present": false
+        },
+        "proposed_canonical_survivor": "ukrainealarm_api",
+        "proposed_recovery_provenance": {
+          "original_recovery_source": "alerts.in.ua_manual_csv_recovery",
+          "source_kind": "manual_csv_export",
+          "source_files": [
+            "alerts_2026-09-26(1).csv"
+          ],
+          "recovery_artifact": "research/site_prod_bridge_continuity_repair_2026-09-27.json",
+          "original_recovery_start": "2026-09-25T23:09:09Z",
+          "original_recovery_end": "2026-09-26T01:51:14Z"
+        }
+      },
+      {
+        "pair_id": "kharkiv-06",
+        "city_key": "kharkiv",
+        "pair_structure": "manual Alerts.in.ua recovery row + UkraineAlarm API row",
+        "manual_recovery_row_index": 1379,
+        "api_row_index": 1378,
+        "start_delta_seconds_abs": 0.026209,
+        "end_delta_seconds_abs": 0.088507,
+        "api_minus_manual_start_seconds": -0.026209,
+        "api_minus_manual_end_seconds": 0.088507,
+        "manual_recovery": {
+          "city_key": "kharkiv",
+          "region_id": "1293",
+          "api_region_name": "м. Харків та Харківська територіальна громада",
+          "start": "2026-09-26T03:57:19Z",
+          "end": "2026-09-26T06:11:56Z",
+          "alert_type": "AIR",
+          "source": "alerts.in.ua_manual_csv_recovery",
+          "source_kind": "manual_csv_export",
+          "source_files": [
+            "alerts_2026-09-26(1).csv"
+          ],
+          "recovery_artifact": "research/site_prod_bridge_continuity_repair_2026-09-27.json"
+        },
+        "ukrainealarm_api": {
+          "city_key": "kharkiv",
+          "region_id": "1293",
+          "api_region_name": "м. Харків та Харківська територіальна громада",
+          "start": "2026-09-26T03:57:18.973791Z",
+          "end": "2026-09-26T06:11:56.088507Z",
+          "alert_type": "AIR",
+          "inherited_bridge_source_url": "https://api.ukrainealarm.com/api/v3/alerts/regionHistory",
+          "explicit_manual_recovery_fields_present": false
+        },
+        "proposed_canonical_survivor": "ukrainealarm_api",
+        "proposed_recovery_provenance": {
+          "original_recovery_source": "alerts.in.ua_manual_csv_recovery",
+          "source_kind": "manual_csv_export",
+          "source_files": [
+            "alerts_2026-09-26(1).csv"
+          ],
+          "recovery_artifact": "research/site_prod_bridge_continuity_repair_2026-09-27.json",
+          "original_recovery_start": "2026-09-26T03:57:19Z",
+          "original_recovery_end": "2026-09-26T06:11:56Z"
+        }
+      },
+      {
+        "pair_id": "kharkiv-07",
+        "city_key": "kharkiv",
+        "pair_structure": "manual Alerts.in.ua recovery row + UkraineAlarm API row",
+        "manual_recovery_row_index": 1399,
+        "api_row_index": 1398,
+        "start_delta_seconds_abs": 0.832869,
+        "end_delta_seconds_abs": 0.978562,
+        "api_minus_manual_start_seconds": -0.832869,
+        "api_minus_manual_end_seconds": 0.978562,
+        "manual_recovery": {
+          "city_key": "kharkiv",
+          "region_id": "1293",
+          "api_region_name": "м. Харків та Харківська територіальна громада",
+          "start": "2026-09-26T07:01:04Z",
+          "end": "2026-09-26T07:28:56Z",
+          "alert_type": "AIR",
+          "source": "alerts.in.ua_manual_csv_recovery",
+          "source_kind": "manual_csv_export",
+          "source_files": [
+            "alerts_2026-09-26(1).csv"
+          ],
+          "recovery_artifact": "research/site_prod_bridge_continuity_repair_2026-09-27.json"
+        },
+        "ukrainealarm_api": {
+          "city_key": "kharkiv",
+          "region_id": "1293",
+          "api_region_name": "м. Харків та Харківська територіальна громада",
+          "start": "2026-09-26T07:01:03.167131Z",
+          "end": "2026-09-26T07:28:56.978562Z",
+          "alert_type": "AIR",
+          "inherited_bridge_source_url": "https://api.ukrainealarm.com/api/v3/alerts/regionHistory",
+          "explicit_manual_recovery_fields_present": false
+        },
+        "proposed_canonical_survivor": "ukrainealarm_api",
+        "proposed_recovery_provenance": {
+          "original_recovery_source": "alerts.in.ua_manual_csv_recovery",
+          "source_kind": "manual_csv_export",
+          "source_files": [
+            "alerts_2026-09-26(1).csv"
+          ],
+          "recovery_artifact": "research/site_prod_bridge_continuity_repair_2026-09-27.json",
+          "original_recovery_start": "2026-09-26T07:01:04Z",
+          "original_recovery_end": "2026-09-26T07:28:56Z"
+        }
+      },
+      {
+        "pair_id": "kharkiv-08",
+        "city_key": "kharkiv",
+        "pair_structure": "manual Alerts.in.ua recovery row + UkraineAlarm API row",
+        "manual_recovery_row_index": 1406,
+        "api_row_index": 1405,
+        "start_delta_seconds_abs": 0.119856,
+        "end_delta_seconds_abs": 0.793155,
+        "api_minus_manual_start_seconds": -0.119856,
+        "api_minus_manual_end_seconds": 0.793155,
+        "manual_recovery": {
+          "city_key": "kharkiv",
+          "region_id": "1293",
+          "api_region_name": "м. Харків та Харківська територіальна громада",
+          "start": "2026-09-26T07:58:42Z",
+          "end": "2026-09-26T11:52:30Z",
+          "alert_type": "AIR",
+          "source": "alerts.in.ua_manual_csv_recovery",
+          "source_kind": "manual_csv_export",
+          "source_files": [
+            "alerts_2026-09-26(1).csv"
+          ],
+          "recovery_artifact": "research/site_prod_bridge_continuity_repair_2026-09-27.json"
+        },
+        "ukrainealarm_api": {
+          "city_key": "kharkiv",
+          "region_id": "1293",
+          "api_region_name": "м. Харків та Харківська територіальна громада",
+          "start": "2026-09-26T07:58:41.880144Z",
+          "end": "2026-09-26T11:52:30.793155Z",
+          "alert_type": "AIR",
+          "inherited_bridge_source_url": "https://api.ukrainealarm.com/api/v3/alerts/regionHistory",
+          "explicit_manual_recovery_fields_present": false
+        },
+        "proposed_canonical_survivor": "ukrainealarm_api",
+        "proposed_recovery_provenance": {
+          "original_recovery_source": "alerts.in.ua_manual_csv_recovery",
+          "source_kind": "manual_csv_export",
+          "source_files": [
+            "alerts_2026-09-26(1).csv"
+          ],
+          "recovery_artifact": "research/site_prod_bridge_continuity_repair_2026-09-27.json",
+          "original_recovery_start": "2026-09-26T07:58:42Z",
+          "original_recovery_end": "2026-09-26T11:52:30Z"
+        }
+      },
+      {
+        "pair_id": "kharkiv-09",
+        "city_key": "kharkiv",
+        "pair_structure": "manual Alerts.in.ua recovery row + UkraineAlarm API row",
+        "manual_recovery_row_index": 1426,
+        "api_row_index": 1425,
+        "start_delta_seconds_abs": 0.438926,
+        "end_delta_seconds_abs": 0.290067,
+        "api_minus_manual_start_seconds": 0.438926,
+        "api_minus_manual_end_seconds": 0.290067,
+        "manual_recovery": {
+          "city_key": "kharkiv",
+          "region_id": "1293",
+          "api_region_name": "м. Харків та Харківська територіальна громада",
+          "start": "2026-09-26T12:21:34Z",
+          "end": "2026-09-26T15:25:36Z",
+          "alert_type": "AIR",
+          "source": "alerts.in.ua_manual_csv_recovery",
+          "source_kind": "manual_csv_export",
+          "source_files": [
+            "alerts_2026-09-26(1).csv"
+          ],
+          "recovery_artifact": "research/site_prod_bridge_continuity_repair_2026-09-27.json"
+        },
+        "ukrainealarm_api": {
+          "city_key": "kharkiv",
+          "region_id": "1293",
+          "api_region_name": "м. Харків та Харківська територіальна громада",
+          "start": "2026-09-26T12:21:34.438926Z",
+          "end": "2026-09-26T15:25:36.290067Z",
+          "alert_type": "AIR",
+          "inherited_bridge_source_url": "https://api.ukrainealarm.com/api/v3/alerts/regionHistory",
+          "explicit_manual_recovery_fields_present": false
+        },
+        "proposed_canonical_survivor": "ukrainealarm_api",
+        "proposed_recovery_provenance": {
+          "original_recovery_source": "alerts.in.ua_manual_csv_recovery",
+          "source_kind": "manual_csv_export",
+          "source_files": [
+            "alerts_2026-09-26(1).csv"
+          ],
+          "recovery_artifact": "research/site_prod_bridge_continuity_repair_2026-09-27.json",
+          "original_recovery_start": "2026-09-26T12:21:34Z",
+          "original_recovery_end": "2026-09-26T15:25:36Z"
+        }
+      },
+      {
+        "pair_id": "kharkiv-10",
+        "city_key": "kharkiv",
+        "pair_structure": "manual Alerts.in.ua recovery row + UkraineAlarm API row",
+        "manual_recovery_row_index": 1446,
+        "api_row_index": 1445,
+        "start_delta_seconds_abs": 0.076573,
+        "end_delta_seconds_abs": 0.674577,
+        "api_minus_manual_start_seconds": -0.076573,
+        "api_minus_manual_end_seconds": 0.674577,
+        "manual_recovery": {
+          "city_key": "kharkiv",
+          "region_id": "1293",
+          "api_region_name": "м. Харків та Харківська територіальна громада",
+          "start": "2026-09-26T15:37:42Z",
+          "end": "2026-09-26T17:05:52Z",
+          "alert_type": "AIR",
+          "source": "alerts.in.ua_manual_csv_recovery",
+          "source_kind": "manual_csv_export",
+          "source_files": [
+            "alerts_2026-09-26(1).csv"
+          ],
+          "recovery_artifact": "research/site_prod_bridge_continuity_repair_2026-09-27.json"
+        },
+        "ukrainealarm_api": {
+          "city_key": "kharkiv",
+          "region_id": "1293",
+          "api_region_name": "м. Харків та Харківська територіальна громада",
+          "start": "2026-09-26T15:37:41.923427Z",
+          "end": "2026-09-26T17:05:52.674577Z",
+          "alert_type": "AIR",
+          "inherited_bridge_source_url": "https://api.ukrainealarm.com/api/v3/alerts/regionHistory",
+          "explicit_manual_recovery_fields_present": false
+        },
+        "proposed_canonical_survivor": "ukrainealarm_api",
+        "proposed_recovery_provenance": {
+          "original_recovery_source": "alerts.in.ua_manual_csv_recovery",
+          "source_kind": "manual_csv_export",
+          "source_files": [
+            "alerts_2026-09-26(1).csv"
+          ],
+          "recovery_artifact": "research/site_prod_bridge_continuity_repair_2026-09-27.json",
+          "original_recovery_start": "2026-09-26T15:37:42Z",
+          "original_recovery_end": "2026-09-26T17:05:52Z"
+        }
+      },
+      {
+        "pair_id": "kharkiv-11",
+        "city_key": "kharkiv",
+        "pair_structure": "manual Alerts.in.ua recovery row + UkraineAlarm API row",
+        "manual_recovery_row_index": 1458,
+        "api_row_index": 1457,
+        "start_delta_seconds_abs": 0.025808,
+        "end_delta_seconds_abs": 0.923235,
+        "api_minus_manual_start_seconds": 0.025808,
+        "api_minus_manual_end_seconds": 0.923235,
+        "manual_recovery": {
+          "city_key": "kharkiv",
+          "region_id": "1293",
+          "api_region_name": "м. Харків та Харківська територіальна громада",
+          "start": "2026-09-26T17:35:12Z",
+          "end": "2026-09-26T17:57:11Z",
+          "alert_type": "AIR",
+          "source": "alerts.in.ua_manual_csv_recovery",
+          "source_kind": "manual_csv_export",
+          "source_files": [
+            "alerts_2026-09-26(1).csv"
+          ],
+          "recovery_artifact": "research/site_prod_bridge_continuity_repair_2026-09-27.json"
+        },
+        "ukrainealarm_api": {
+          "city_key": "kharkiv",
+          "region_id": "1293",
+          "api_region_name": "м. Харків та Харківська територіальна громада",
+          "start": "2026-09-26T17:35:12.025808Z",
+          "end": "2026-09-26T17:57:11.923235Z",
+          "alert_type": "AIR",
+          "inherited_bridge_source_url": "https://api.ukrainealarm.com/api/v3/alerts/regionHistory",
+          "explicit_manual_recovery_fields_present": false
+        },
+        "proposed_canonical_survivor": "ukrainealarm_api",
+        "proposed_recovery_provenance": {
+          "original_recovery_source": "alerts.in.ua_manual_csv_recovery",
+          "source_kind": "manual_csv_export",
+          "source_files": [
+            "alerts_2026-09-26(1).csv"
+          ],
+          "recovery_artifact": "research/site_prod_bridge_continuity_repair_2026-09-27.json",
+          "original_recovery_start": "2026-09-26T17:35:12Z",
+          "original_recovery_end": "2026-09-26T17:57:11Z"
+        }
+      },
+      {
+        "pair_id": "kharkiv-12",
+        "city_key": "kharkiv",
+        "pair_structure": "manual Alerts.in.ua recovery row + UkraineAlarm API row",
+        "manual_recovery_row_index": 1462,
+        "api_row_index": 1461,
+        "start_delta_seconds_abs": 0.888012,
+        "end_delta_seconds_abs": 0.942657,
+        "api_minus_manual_start_seconds": 0.888012,
+        "api_minus_manual_end_seconds": 0.942657,
+        "manual_recovery": {
+          "city_key": "kharkiv",
+          "region_id": "1293",
+          "api_region_name": "м. Харків та Харківська територіальна громада",
+          "start": "2026-09-26T18:16:06Z",
+          "end": "2026-09-26T19:23:39Z",
+          "alert_type": "AIR",
+          "source": "alerts.in.ua_manual_csv_recovery",
+          "source_kind": "manual_csv_export",
+          "source_files": [
+            "alerts_2026-09-26(1).csv"
+          ],
+          "recovery_artifact": "research/site_prod_bridge_continuity_repair_2026-09-27.json"
+        },
+        "ukrainealarm_api": {
+          "city_key": "kharkiv",
+          "region_id": "1293",
+          "api_region_name": "м. Харків та Харківська територіальна громада",
+          "start": "2026-09-26T18:16:06.888012Z",
+          "end": "2026-09-26T19:23:39.942657Z",
+          "alert_type": "AIR",
+          "inherited_bridge_source_url": "https://api.ukrainealarm.com/api/v3/alerts/regionHistory",
+          "explicit_manual_recovery_fields_present": false
+        },
+        "proposed_canonical_survivor": "ukrainealarm_api",
+        "proposed_recovery_provenance": {
+          "original_recovery_source": "alerts.in.ua_manual_csv_recovery",
+          "source_kind": "manual_csv_export",
+          "source_files": [
+            "alerts_2026-09-26(1).csv"
+          ],
+          "recovery_artifact": "research/site_prod_bridge_continuity_repair_2026-09-27.json",
+          "original_recovery_start": "2026-09-26T18:16:06Z",
+          "original_recovery_end": "2026-09-26T19:23:39Z"
+        }
+      },
+      {
+        "pair_id": "kharkiv-13",
+        "city_key": "kharkiv",
+        "pair_structure": "manual Alerts.in.ua recovery row + UkraineAlarm API row",
+        "manual_recovery_row_index": 1472,
+        "api_row_index": 1471,
+        "start_delta_seconds_abs": 0.418226,
+        "end_delta_seconds_abs": 0.630001,
+        "api_minus_manual_start_seconds": -0.418226,
+        "api_minus_manual_end_seconds": 0.630001,
+        "manual_recovery": {
+          "city_key": "kharkiv",
+          "region_id": "1293",
+          "api_region_name": "м. Харків та Харківська територіальна громада",
+          "start": "2026-09-26T19:31:11Z",
+          "end": "2026-09-26T19:42:36Z",
+          "alert_type": "AIR",
+          "source": "alerts.in.ua_manual_csv_recovery",
+          "source_kind": "manual_csv_export",
+          "source_files": [
+            "alerts_2026-09-26(1).csv"
+          ],
+          "recovery_artifact": "research/site_prod_bridge_continuity_repair_2026-09-27.json"
+        },
+        "ukrainealarm_api": {
+          "city_key": "kharkiv",
+          "region_id": "1293",
+          "api_region_name": "м. Харків та Харківська територіальна громада",
+          "start": "2026-09-26T19:31:10.581774Z",
+          "end": "2026-09-26T19:42:36.630001Z",
+          "alert_type": "AIR",
+          "inherited_bridge_source_url": "https://api.ukrainealarm.com/api/v3/alerts/regionHistory",
+          "explicit_manual_recovery_fields_present": false
+        },
+        "proposed_canonical_survivor": "ukrainealarm_api",
+        "proposed_recovery_provenance": {
+          "original_recovery_source": "alerts.in.ua_manual_csv_recovery",
+          "source_kind": "manual_csv_export",
+          "source_files": [
+            "alerts_2026-09-26(1).csv"
+          ],
+          "recovery_artifact": "research/site_prod_bridge_continuity_repair_2026-09-27.json",
+          "original_recovery_start": "2026-09-26T19:31:11Z",
+          "original_recovery_end": "2026-09-26T19:42:36Z"
+        }
+      },
+      {
+        "pair_id": "kharkiv-14",
+        "city_key": "kharkiv",
+        "pair_structure": "manual Alerts.in.ua recovery row + UkraineAlarm API row",
+        "manual_recovery_row_index": 1488,
+        "api_row_index": 1487,
+        "start_delta_seconds_abs": 0.041933,
+        "end_delta_seconds_abs": 0.343605,
+        "api_minus_manual_start_seconds": -0.041933,
+        "api_minus_manual_end_seconds": 0.343605,
+        "manual_recovery": {
+          "city_key": "kharkiv",
+          "region_id": "1293",
+          "api_region_name": "м. Харків та Харківська територіальна громада",
+          "start": "2026-09-26T21:52:52Z",
+          "end": "2026-09-26T22:14:01Z",
+          "alert_type": "AIR",
+          "source": "alerts.in.ua_manual_csv_recovery",
+          "source_kind": "manual_csv_export",
+          "source_files": [
+            "alerts_2026-09-27(1).csv"
+          ],
+          "recovery_artifact": "research/site_prod_bridge_continuity_repair_2026-09-27.json"
+        },
+        "ukrainealarm_api": {
+          "city_key": "kharkiv",
+          "region_id": "1293",
+          "api_region_name": "м. Харків та Харківська територіальна громада",
+          "start": "2026-09-26T21:52:51.958067Z",
+          "end": "2026-09-26T22:14:01.343605Z",
+          "alert_type": "AIR",
+          "inherited_bridge_source_url": "https://api.ukrainealarm.com/api/v3/alerts/regionHistory",
+          "explicit_manual_recovery_fields_present": false
+        },
+        "proposed_canonical_survivor": "ukrainealarm_api",
+        "proposed_recovery_provenance": {
+          "original_recovery_source": "alerts.in.ua_manual_csv_recovery",
+          "source_kind": "manual_csv_export",
+          "source_files": [
+            "alerts_2026-09-27(1).csv"
+          ],
+          "recovery_artifact": "research/site_prod_bridge_continuity_repair_2026-09-27.json",
+          "original_recovery_start": "2026-09-26T21:52:52Z",
+          "original_recovery_end": "2026-09-26T22:14:01Z"
+        }
+      },
+      {
+        "pair_id": "kharkiv-15",
+        "city_key": "kharkiv",
+        "pair_structure": "manual Alerts.in.ua recovery row + UkraineAlarm API row",
+        "manual_recovery_row_index": 1493,
+        "api_row_index": 1492,
+        "start_delta_seconds_abs": 0.790139,
+        "end_delta_seconds_abs": 0.877334,
+        "api_minus_manual_start_seconds": 0.790139,
+        "api_minus_manual_end_seconds": 0.877334,
+        "manual_recovery": {
+          "city_key": "kharkiv",
+          "region_id": "1293",
+          "api_region_name": "м. Харків та Харківська територіальна громада",
+          "start": "2026-09-26T22:17:11Z",
+          "end": "2026-09-27T01:23:08Z",
+          "alert_type": "AIR",
+          "source": "alerts.in.ua_manual_csv_recovery",
+          "source_kind": "manual_csv_export",
+          "source_files": [
+            "alerts_2026-09-27(1).csv"
+          ],
+          "recovery_artifact": "research/site_prod_bridge_continuity_repair_2026-09-27.json"
+        },
+        "ukrainealarm_api": {
+          "city_key": "kharkiv",
+          "region_id": "1293",
+          "api_region_name": "м. Харків та Харківська територіальна громада",
+          "start": "2026-09-26T22:17:11.790139Z",
+          "end": "2026-09-27T01:23:08.877334Z",
+          "alert_type": "AIR",
+          "inherited_bridge_source_url": "https://api.ukrainealarm.com/api/v3/alerts/regionHistory",
+          "explicit_manual_recovery_fields_present": false
+        },
+        "proposed_canonical_survivor": "ukrainealarm_api",
+        "proposed_recovery_provenance": {
+          "original_recovery_source": "alerts.in.ua_manual_csv_recovery",
+          "source_kind": "manual_csv_export",
+          "source_files": [
+            "alerts_2026-09-27(1).csv"
+          ],
+          "recovery_artifact": "research/site_prod_bridge_continuity_repair_2026-09-27.json",
+          "original_recovery_start": "2026-09-26T22:17:11Z",
+          "original_recovery_end": "2026-09-27T01:23:08Z"
+        }
+      },
+      {
+        "pair_id": "kharkiv-16",
+        "city_key": "kharkiv",
+        "pair_structure": "manual Alerts.in.ua recovery row + UkraineAlarm API row",
+        "manual_recovery_row_index": 1502,
+        "api_row_index": 1501,
+        "start_delta_seconds_abs": 0.33009,
+        "end_delta_seconds_abs": 0.932989,
+        "api_minus_manual_start_seconds": 0.33009,
+        "api_minus_manual_end_seconds": 0.932989,
+        "manual_recovery": {
+          "city_key": "kharkiv",
+          "region_id": "1293",
+          "api_region_name": "м. Харків та Харківська територіальна громада",
+          "start": "2026-09-27T01:44:53Z",
+          "end": "2026-09-27T02:44:22Z",
+          "alert_type": "AIR",
+          "source": "alerts.in.ua_manual_csv_recovery",
+          "source_kind": "manual_csv_export",
+          "source_files": [
+            "alerts_2026-09-27(1).csv"
+          ],
+          "recovery_artifact": "research/site_prod_bridge_continuity_repair_2026-09-27.json"
+        },
+        "ukrainealarm_api": {
+          "city_key": "kharkiv",
+          "region_id": "1293",
+          "api_region_name": "м. Харків та Харківська територіальна громада",
+          "start": "2026-09-27T01:44:53.330090Z",
+          "end": "2026-09-27T02:44:22.932989Z",
+          "alert_type": "AIR",
+          "inherited_bridge_source_url": "https://api.ukrainealarm.com/api/v3/alerts/regionHistory",
+          "explicit_manual_recovery_fields_present": false
+        },
+        "proposed_canonical_survivor": "ukrainealarm_api",
+        "proposed_recovery_provenance": {
+          "original_recovery_source": "alerts.in.ua_manual_csv_recovery",
+          "source_kind": "manual_csv_export",
+          "source_files": [
+            "alerts_2026-09-27(1).csv"
+          ],
+          "recovery_artifact": "research/site_prod_bridge_continuity_repair_2026-09-27.json",
+          "original_recovery_start": "2026-09-27T01:44:53Z",
+          "original_recovery_end": "2026-09-27T02:44:22Z"
+        }
+      },
+      {
+        "pair_id": "kharkiv-17",
+        "city_key": "kharkiv",
+        "pair_structure": "manual Alerts.in.ua recovery row + UkraineAlarm API row",
+        "manual_recovery_row_index": 1505,
+        "api_row_index": 1504,
+        "start_delta_seconds_abs": 0.268014,
+        "end_delta_seconds_abs": 0.158499,
+        "api_minus_manual_start_seconds": 0.268014,
+        "api_minus_manual_end_seconds": 0.158499,
+        "manual_recovery": {
+          "city_key": "kharkiv",
+          "region_id": "1293",
+          "api_region_name": "м. Харків та Харківська територіальна громада",
+          "start": "2026-09-27T03:07:54Z",
+          "end": "2026-09-27T03:32:13Z",
+          "alert_type": "AIR",
+          "source": "alerts.in.ua_manual_csv_recovery",
+          "source_kind": "manual_csv_export",
+          "source_files": [
+            "alerts_2026-09-27(1).csv"
+          ],
+          "recovery_artifact": "research/site_prod_bridge_continuity_repair_2026-09-27.json"
+        },
+        "ukrainealarm_api": {
+          "city_key": "kharkiv",
+          "region_id": "1293",
+          "api_region_name": "м. Харків та Харківська територіальна громада",
+          "start": "2026-09-27T03:07:54.268014Z",
+          "end": "2026-09-27T03:32:13.158499Z",
+          "alert_type": "AIR",
+          "inherited_bridge_source_url": "https://api.ukrainealarm.com/api/v3/alerts/regionHistory",
+          "explicit_manual_recovery_fields_present": false
+        },
+        "proposed_canonical_survivor": "ukrainealarm_api",
+        "proposed_recovery_provenance": {
+          "original_recovery_source": "alerts.in.ua_manual_csv_recovery",
+          "source_kind": "manual_csv_export",
+          "source_files": [
+            "alerts_2026-09-27(1).csv"
+          ],
+          "recovery_artifact": "research/site_prod_bridge_continuity_repair_2026-09-27.json",
+          "original_recovery_start": "2026-09-27T03:07:54Z",
+          "original_recovery_end": "2026-09-27T03:32:13Z"
+        }
+      },
+      {
+        "pair_id": "kharkiv-18",
+        "city_key": "kharkiv",
+        "pair_structure": "manual Alerts.in.ua recovery row + UkraineAlarm API row",
+        "manual_recovery_row_index": 1510,
+        "api_row_index": 1509,
+        "start_delta_seconds_abs": 0.214435,
+        "end_delta_seconds_abs": 0.482321,
+        "api_minus_manual_start_seconds": -0.214435,
+        "api_minus_manual_end_seconds": 0.482321,
+        "manual_recovery": {
+          "city_key": "kharkiv",
+          "region_id": "1293",
+          "api_region_name": "м. Харків та Харківська територіальна громада",
+          "start": "2026-09-27T04:07:16Z",
+          "end": "2026-09-27T04:45:20Z",
+          "alert_type": "AIR",
+          "source": "alerts.in.ua_manual_csv_recovery",
+          "source_kind": "manual_csv_export",
+          "source_files": [
+            "alerts_2026-09-27(1).csv"
+          ],
+          "recovery_artifact": "research/site_prod_bridge_continuity_repair_2026-09-27.json"
+        },
+        "ukrainealarm_api": {
+          "city_key": "kharkiv",
+          "region_id": "1293",
+          "api_region_name": "м. Харків та Харківська територіальна громада",
+          "start": "2026-09-27T04:07:15.785565Z",
+          "end": "2026-09-27T04:45:20.482321Z",
+          "alert_type": "AIR",
+          "inherited_bridge_source_url": "https://api.ukrainealarm.com/api/v3/alerts/regionHistory",
+          "explicit_manual_recovery_fields_present": false
+        },
+        "proposed_canonical_survivor": "ukrainealarm_api",
+        "proposed_recovery_provenance": {
+          "original_recovery_source": "alerts.in.ua_manual_csv_recovery",
+          "source_kind": "manual_csv_export",
+          "source_files": [
+            "alerts_2026-09-27(1).csv"
+          ],
+          "recovery_artifact": "research/site_prod_bridge_continuity_repair_2026-09-27.json",
+          "original_recovery_start": "2026-09-27T04:07:16Z",
+          "original_recovery_end": "2026-09-27T04:45:20Z"
+        }
+      },
+      {
+        "pair_id": "kharkiv-19",
+        "city_key": "kharkiv",
+        "pair_structure": "manual Alerts.in.ua recovery row + UkraineAlarm API row",
+        "manual_recovery_row_index": 1521,
+        "api_row_index": 1520,
+        "start_delta_seconds_abs": 0.36438,
+        "end_delta_seconds_abs": 0.865326,
+        "api_minus_manual_start_seconds": 0.36438,
+        "api_minus_manual_end_seconds": 0.865326,
+        "manual_recovery": {
+          "city_key": "kharkiv",
+          "region_id": "1293",
+          "api_region_name": "м. Харків та Харківська територіальна громада",
+          "start": "2026-09-27T05:58:25Z",
+          "end": "2026-09-27T08:25:00Z",
+          "alert_type": "AIR",
+          "source": "alerts.in.ua_manual_csv_recovery",
+          "source_kind": "manual_csv_export",
+          "source_files": [
+            "alerts_2026-09-27(1).csv"
+          ],
+          "recovery_artifact": "research/site_prod_bridge_continuity_repair_2026-09-27.json"
+        },
+        "ukrainealarm_api": {
+          "city_key": "kharkiv",
+          "region_id": "1293",
+          "api_region_name": "м. Харків та Харківська територіальна громада",
+          "start": "2026-09-27T05:58:25.364380Z",
+          "end": "2026-09-27T08:25:00.865326Z",
+          "alert_type": "AIR",
+          "inherited_bridge_source_url": "https://api.ukrainealarm.com/api/v3/alerts/regionHistory",
+          "explicit_manual_recovery_fields_present": false
+        },
+        "proposed_canonical_survivor": "ukrainealarm_api",
+        "proposed_recovery_provenance": {
+          "original_recovery_source": "alerts.in.ua_manual_csv_recovery",
+          "source_kind": "manual_csv_export",
+          "source_files": [
+            "alerts_2026-09-27(1).csv"
+          ],
+          "recovery_artifact": "research/site_prod_bridge_continuity_repair_2026-09-27.json",
+          "original_recovery_start": "2026-09-27T05:58:25Z",
+          "original_recovery_end": "2026-09-27T08:25:00Z"
+        }
+      },
+      {
+        "pair_id": "mykolaiv-01",
+        "city_key": "mykolaiv",
+        "pair_structure": "manual Alerts.in.ua recovery row + UkraineAlarm API row",
+        "manual_recovery_row_index": 1389,
+        "api_row_index": 1388,
+        "start_delta_seconds_abs": 0.32459,
+        "end_delta_seconds_abs": 0.185757,
+        "api_minus_manual_start_seconds": -0.32459,
+        "api_minus_manual_end_seconds": 0.185757,
+        "manual_recovery": {
+          "city_key": "mykolaiv",
+          "region_id": "98",
+          "api_region_name": "Миколаївський район",
+          "start": "2026-09-26T05:38:58Z",
+          "end": "2026-09-26T07:04:52Z",
+          "alert_type": "AIR",
+          "source": "alerts.in.ua_manual_csv_recovery",
+          "source_kind": "manual_csv_export",
+          "source_files": [
+            "alerts_2026-09-26(1).csv"
+          ],
+          "recovery_artifact": "research/site_prod_bridge_continuity_repair_2026-09-27.json"
+        },
+        "ukrainealarm_api": {
+          "city_key": "mykolaiv",
+          "region_id": "98",
+          "api_region_name": "Миколаївський район",
+          "start": "2026-09-26T05:38:57.675410Z",
+          "end": "2026-09-26T07:04:52.185757Z",
+          "alert_type": "AIR",
+          "inherited_bridge_source_url": "https://api.ukrainealarm.com/api/v3/alerts/regionHistory",
+          "explicit_manual_recovery_fields_present": false
+        },
+        "proposed_canonical_survivor": "ukrainealarm_api",
+        "proposed_recovery_provenance": {
+          "original_recovery_source": "alerts.in.ua_manual_csv_recovery",
+          "source_kind": "manual_csv_export",
+          "source_files": [
+            "alerts_2026-09-26(1).csv"
+          ],
+          "recovery_artifact": "research/site_prod_bridge_continuity_repair_2026-09-27.json",
+          "original_recovery_start": "2026-09-26T05:38:58Z",
+          "original_recovery_end": "2026-09-26T07:04:52Z"
+        }
+      },
+      {
+        "pair_id": "mykolaiv-02",
+        "city_key": "mykolaiv",
+        "pair_structure": "manual Alerts.in.ua recovery row + UkraineAlarm API row",
+        "manual_recovery_row_index": 1403,
+        "api_row_index": 1402,
+        "start_delta_seconds_abs": 0.193855,
+        "end_delta_seconds_abs": 0.497595,
+        "api_minus_manual_start_seconds": 0.193855,
+        "api_minus_manual_end_seconds": 0.497595,
+        "manual_recovery": {
+          "city_key": "mykolaiv",
+          "region_id": "98",
+          "api_region_name": "Миколаївський район",
+          "start": "2026-09-26T07:53:42Z",
+          "end": "2026-09-26T08:23:28Z",
+          "alert_type": "AIR",
+          "source": "alerts.in.ua_manual_csv_recovery",
+          "source_kind": "manual_csv_export",
+          "source_files": [
+            "alerts_2026-09-26(1).csv"
+          ],
+          "recovery_artifact": "research/site_prod_bridge_continuity_repair_2026-09-27.json"
+        },
+        "ukrainealarm_api": {
+          "city_key": "mykolaiv",
+          "region_id": "98",
+          "api_region_name": "Миколаївський район",
+          "start": "2026-09-26T07:53:42.193855Z",
+          "end": "2026-09-26T08:23:28.497595Z",
+          "alert_type": "AIR",
+          "inherited_bridge_source_url": "https://api.ukrainealarm.com/api/v3/alerts/regionHistory",
+          "explicit_manual_recovery_fields_present": false
+        },
+        "proposed_canonical_survivor": "ukrainealarm_api",
+        "proposed_recovery_provenance": {
+          "original_recovery_source": "alerts.in.ua_manual_csv_recovery",
+          "source_kind": "manual_csv_export",
+          "source_files": [
+            "alerts_2026-09-26(1).csv"
+          ],
+          "recovery_artifact": "research/site_prod_bridge_continuity_repair_2026-09-27.json",
+          "original_recovery_start": "2026-09-26T07:53:42Z",
+          "original_recovery_end": "2026-09-26T08:23:28Z"
+        }
+      },
+      {
+        "pair_id": "mykolaiv-03",
+        "city_key": "mykolaiv",
+        "pair_structure": "manual Alerts.in.ua recovery row + UkraineAlarm API row",
+        "manual_recovery_row_index": 1418,
+        "api_row_index": 1417,
+        "start_delta_seconds_abs": 0.326326,
+        "end_delta_seconds_abs": 0.353424,
+        "api_minus_manual_start_seconds": 0.326326,
+        "api_minus_manual_end_seconds": 0.353424,
+        "manual_recovery": {
+          "city_key": "mykolaiv",
+          "region_id": "98",
+          "api_region_name": "Миколаївський район",
+          "start": "2026-09-26T10:54:47Z",
+          "end": "2026-09-26T11:27:40Z",
+          "alert_type": "AIR",
+          "source": "alerts.in.ua_manual_csv_recovery",
+          "source_kind": "manual_csv_export",
+          "source_files": [
+            "alerts_2026-09-26(1).csv"
+          ],
+          "recovery_artifact": "research/site_prod_bridge_continuity_repair_2026-09-27.json"
+        },
+        "ukrainealarm_api": {
+          "city_key": "mykolaiv",
+          "region_id": "98",
+          "api_region_name": "Миколаївський район",
+          "start": "2026-09-26T10:54:47.326326Z",
+          "end": "2026-09-26T11:27:40.353424Z",
+          "alert_type": "AIR",
+          "inherited_bridge_source_url": "https://api.ukrainealarm.com/api/v3/alerts/regionHistory",
+          "explicit_manual_recovery_fields_present": false
+        },
+        "proposed_canonical_survivor": "ukrainealarm_api",
+        "proposed_recovery_provenance": {
+          "original_recovery_source": "alerts.in.ua_manual_csv_recovery",
+          "source_kind": "manual_csv_export",
+          "source_files": [
+            "alerts_2026-09-26(1).csv"
+          ],
+          "recovery_artifact": "research/site_prod_bridge_continuity_repair_2026-09-27.json",
+          "original_recovery_start": "2026-09-26T10:54:47Z",
+          "original_recovery_end": "2026-09-26T11:27:40Z"
+        }
+      },
+      {
+        "pair_id": "mykolaiv-04",
+        "city_key": "mykolaiv",
+        "pair_structure": "manual Alerts.in.ua recovery row + UkraineAlarm API row",
+        "manual_recovery_row_index": 1424,
+        "api_row_index": 1422,
+        "start_delta_seconds_abs": 0.369944,
+        "end_delta_seconds_abs": 0.742668,
+        "api_minus_manual_start_seconds": -0.369944,
+        "api_minus_manual_end_seconds": 0.742668,
+        "manual_recovery": {
+          "city_key": "mykolaiv",
+          "region_id": "98",
+          "api_region_name": "Миколаївський район",
+          "start": "2026-09-26T11:54:03Z",
+          "end": "2026-09-26T12:18:42Z",
+          "alert_type": "AIR",
+          "source": "alerts.in.ua_manual_csv_recovery",
+          "source_kind": "manual_csv_export",
+          "source_files": [
+            "alerts_2026-09-26(1).csv"
+          ],
+          "recovery_artifact": "research/site_prod_bridge_continuity_repair_2026-09-27.json"
+        },
+        "ukrainealarm_api": {
+          "city_key": "mykolaiv",
+          "region_id": "98",
+          "api_region_name": "Миколаївський район",
+          "start": "2026-09-26T11:54:02.630056Z",
+          "end": "2026-09-26T12:18:42.742668Z",
+          "alert_type": "AIR",
+          "inherited_bridge_source_url": "https://api.ukrainealarm.com/api/v3/alerts/regionHistory",
+          "explicit_manual_recovery_fields_present": false
+        },
+        "proposed_canonical_survivor": "ukrainealarm_api",
+        "proposed_recovery_provenance": {
+          "original_recovery_source": "alerts.in.ua_manual_csv_recovery",
+          "source_kind": "manual_csv_export",
+          "source_files": [
+            "alerts_2026-09-26(1).csv"
+          ],
+          "recovery_artifact": "research/site_prod_bridge_continuity_repair_2026-09-27.json",
+          "original_recovery_start": "2026-09-26T11:54:03Z",
+          "original_recovery_end": "2026-09-26T12:18:42Z"
+        }
+      },
+      {
+        "pair_id": "mykolaiv-05",
+        "city_key": "mykolaiv",
+        "pair_structure": "manual Alerts.in.ua recovery row + UkraineAlarm API row",
+        "manual_recovery_row_index": 1428,
+        "api_row_index": 1427,
+        "start_delta_seconds_abs": 0.37615,
+        "end_delta_seconds_abs": 0.114277,
+        "api_minus_manual_start_seconds": 0.37615,
+        "api_minus_manual_end_seconds": 0.114277,
+        "manual_recovery": {
+          "city_key": "mykolaiv",
+          "region_id": "98",
+          "api_region_name": "Миколаївський район",
+          "start": "2026-09-26T12:22:03Z",
+          "end": "2026-09-26T12:29:35Z",
+          "alert_type": "AIR",
+          "source": "alerts.in.ua_manual_csv_recovery",
+          "source_kind": "manual_csv_export",
+          "source_files": [
+            "alerts_2026-09-26(1).csv"
+          ],
+          "recovery_artifact": "research/site_prod_bridge_continuity_repair_2026-09-27.json"
+        },
+        "ukrainealarm_api": {
+          "city_key": "mykolaiv",
+          "region_id": "98",
+          "api_region_name": "Миколаївський район",
+          "start": "2026-09-26T12:22:03.376150Z",
+          "end": "2026-09-26T12:29:35.114277Z",
+          "alert_type": "AIR",
+          "inherited_bridge_source_url": "https://api.ukrainealarm.com/api/v3/alerts/regionHistory",
+          "explicit_manual_recovery_fields_present": false
+        },
+        "proposed_canonical_survivor": "ukrainealarm_api",
+        "proposed_recovery_provenance": {
+          "original_recovery_source": "alerts.in.ua_manual_csv_recovery",
+          "source_kind": "manual_csv_export",
+          "source_files": [
+            "alerts_2026-09-26(1).csv"
+          ],
+          "recovery_artifact": "research/site_prod_bridge_continuity_repair_2026-09-27.json",
+          "original_recovery_start": "2026-09-26T12:22:03Z",
+          "original_recovery_end": "2026-09-26T12:29:35Z"
+        }
+      },
+      {
+        "pair_id": "mykolaiv-06",
+        "city_key": "mykolaiv",
+        "pair_structure": "manual Alerts.in.ua recovery row + UkraineAlarm API row",
+        "manual_recovery_row_index": 1439,
+        "api_row_index": 1438,
+        "start_delta_seconds_abs": 0.267669,
+        "end_delta_seconds_abs": 4.436109,
+        "api_minus_manual_start_seconds": -0.267669,
+        "api_minus_manual_end_seconds": -4.436109,
+        "manual_recovery": {
+          "city_key": "mykolaiv",
+          "region_id": "98",
+          "api_region_name": "Миколаївський район",
+          "start": "2026-09-26T14:50:10Z",
+          "end": "2026-09-26T16:12:43Z",
+          "alert_type": "AIR",
+          "source": "alerts.in.ua_manual_csv_recovery",
+          "source_kind": "manual_csv_export",
+          "source_files": [
+            "alerts_2026-09-26(1).csv"
+          ],
+          "recovery_artifact": "research/site_prod_bridge_continuity_repair_2026-09-27.json"
+        },
+        "ukrainealarm_api": {
+          "city_key": "mykolaiv",
+          "region_id": "98",
+          "api_region_name": "Миколаївський район",
+          "start": "2026-09-26T14:50:09.732331Z",
+          "end": "2026-09-26T16:12:38.563891Z",
+          "alert_type": "AIR",
+          "inherited_bridge_source_url": "https://api.ukrainealarm.com/api/v3/alerts/regionHistory",
+          "explicit_manual_recovery_fields_present": false
+        },
+        "proposed_canonical_survivor": "ukrainealarm_api",
+        "proposed_recovery_provenance": {
+          "original_recovery_source": "alerts.in.ua_manual_csv_recovery",
+          "source_kind": "manual_csv_export",
+          "source_files": [
+            "alerts_2026-09-26(1).csv"
+          ],
+          "recovery_artifact": "research/site_prod_bridge_continuity_repair_2026-09-27.json",
+          "original_recovery_start": "2026-09-26T14:50:10Z",
+          "original_recovery_end": "2026-09-26T16:12:43Z"
+        }
+      },
+      {
+        "pair_id": "mykolaiv-07",
+        "city_key": "mykolaiv",
+        "pair_structure": "manual Alerts.in.ua recovery row + UkraineAlarm API row",
+        "manual_recovery_row_index": 1448,
+        "api_row_index": 1447,
+        "start_delta_seconds_abs": 0.028719,
+        "end_delta_seconds_abs": 0.415972,
+        "api_minus_manual_start_seconds": -0.028719,
+        "api_minus_manual_end_seconds": 0.415972,
+        "manual_recovery": {
+          "city_key": "mykolaiv",
+          "region_id": "98",
+          "api_region_name": "Миколаївський район",
+          "start": "2026-09-26T16:41:02Z",
+          "end": "2026-09-26T16:59:59Z",
+          "alert_type": "AIR",
+          "source": "alerts.in.ua_manual_csv_recovery",
+          "source_kind": "manual_csv_export",
+          "source_files": [
+            "alerts_2026-09-26(1).csv"
+          ],
+          "recovery_artifact": "research/site_prod_bridge_continuity_repair_2026-09-27.json"
+        },
+        "ukrainealarm_api": {
+          "city_key": "mykolaiv",
+          "region_id": "98",
+          "api_region_name": "Миколаївський район",
+          "start": "2026-09-26T16:41:01.971281Z",
+          "end": "2026-09-26T16:59:59.415972Z",
+          "alert_type": "AIR",
+          "inherited_bridge_source_url": "https://api.ukrainealarm.com/api/v3/alerts/regionHistory",
+          "explicit_manual_recovery_fields_present": false
+        },
+        "proposed_canonical_survivor": "ukrainealarm_api",
+        "proposed_recovery_provenance": {
+          "original_recovery_source": "alerts.in.ua_manual_csv_recovery",
+          "source_kind": "manual_csv_export",
+          "source_files": [
+            "alerts_2026-09-26(1).csv"
+          ],
+          "recovery_artifact": "research/site_prod_bridge_continuity_repair_2026-09-27.json",
+          "original_recovery_start": "2026-09-26T16:41:02Z",
+          "original_recovery_end": "2026-09-26T16:59:59Z"
+        }
+      },
+      {
+        "pair_id": "mykolaiv-08",
+        "city_key": "mykolaiv",
+        "pair_structure": "manual Alerts.in.ua recovery row + UkraineAlarm API row",
+        "manual_recovery_row_index": 1455,
+        "api_row_index": 1454,
+        "start_delta_seconds_abs": 0.300794,
+        "end_delta_seconds_abs": 0.562925,
+        "api_minus_manual_start_seconds": -0.300794,
+        "api_minus_manual_end_seconds": 0.562925,
+        "manual_recovery": {
+          "city_key": "mykolaiv",
+          "region_id": "98",
+          "api_region_name": "Миколаївський район",
+          "start": "2026-09-26T17:22:41Z",
+          "end": "2026-09-26T18:07:13Z",
+          "alert_type": "AIR",
+          "source": "alerts.in.ua_manual_csv_recovery",
+          "source_kind": "manual_csv_export",
+          "source_files": [
+            "alerts_2026-09-26(1).csv"
+          ],
+          "recovery_artifact": "research/site_prod_bridge_continuity_repair_2026-09-27.json"
+        },
+        "ukrainealarm_api": {
+          "city_key": "mykolaiv",
+          "region_id": "98",
+          "api_region_name": "Миколаївський район",
+          "start": "2026-09-26T17:22:40.699206Z",
+          "end": "2026-09-26T18:07:13.562925Z",
+          "alert_type": "AIR",
+          "inherited_bridge_source_url": "https://api.ukrainealarm.com/api/v3/alerts/regionHistory",
+          "explicit_manual_recovery_fields_present": false
+        },
+        "proposed_canonical_survivor": "ukrainealarm_api",
+        "proposed_recovery_provenance": {
+          "original_recovery_source": "alerts.in.ua_manual_csv_recovery",
+          "source_kind": "manual_csv_export",
+          "source_files": [
+            "alerts_2026-09-26(1).csv"
+          ],
+          "recovery_artifact": "research/site_prod_bridge_continuity_repair_2026-09-27.json",
+          "original_recovery_start": "2026-09-26T17:22:41Z",
+          "original_recovery_end": "2026-09-26T18:07:13Z"
+        }
+      },
+      {
+        "pair_id": "mykolaiv-09",
+        "city_key": "mykolaiv",
+        "pair_structure": "manual Alerts.in.ua recovery row + UkraineAlarm API row",
+        "manual_recovery_row_index": 1464,
+        "api_row_index": 1463,
+        "start_delta_seconds_abs": 0.283898,
+        "end_delta_seconds_abs": 0.350821,
+        "api_minus_manual_start_seconds": -0.283898,
+        "api_minus_manual_end_seconds": 0.350821,
+        "manual_recovery": {
+          "city_key": "mykolaiv",
+          "region_id": "98",
+          "api_region_name": "Миколаївський район",
+          "start": "2026-09-26T18:26:37Z",
+          "end": "2026-09-26T18:50:30Z",
+          "alert_type": "AIR",
+          "source": "alerts.in.ua_manual_csv_recovery",
+          "source_kind": "manual_csv_export",
+          "source_files": [
+            "alerts_2026-09-26(1).csv"
+          ],
+          "recovery_artifact": "research/site_prod_bridge_continuity_repair_2026-09-27.json"
+        },
+        "ukrainealarm_api": {
+          "city_key": "mykolaiv",
+          "region_id": "98",
+          "api_region_name": "Миколаївський район",
+          "start": "2026-09-26T18:26:36.716102Z",
+          "end": "2026-09-26T18:50:30.350821Z",
+          "alert_type": "AIR",
+          "inherited_bridge_source_url": "https://api.ukrainealarm.com/api/v3/alerts/regionHistory",
+          "explicit_manual_recovery_fields_present": false
+        },
+        "proposed_canonical_survivor": "ukrainealarm_api",
+        "proposed_recovery_provenance": {
+          "original_recovery_source": "alerts.in.ua_manual_csv_recovery",
+          "source_kind": "manual_csv_export",
+          "source_files": [
+            "alerts_2026-09-26(1).csv"
+          ],
+          "recovery_artifact": "research/site_prod_bridge_continuity_repair_2026-09-27.json",
+          "original_recovery_start": "2026-09-26T18:26:37Z",
+          "original_recovery_end": "2026-09-26T18:50:30Z"
+        }
+      },
+      {
+        "pair_id": "mykolaiv-10",
+        "city_key": "mykolaiv",
+        "pair_structure": "manual Alerts.in.ua recovery row + UkraineAlarm API row",
+        "manual_recovery_row_index": 1470,
+        "api_row_index": 1469,
+        "start_delta_seconds_abs": 0.096131,
+        "end_delta_seconds_abs": 0.966611,
+        "api_minus_manual_start_seconds": 0.096131,
+        "api_minus_manual_end_seconds": 0.966611,
+        "manual_recovery": {
+          "city_key": "mykolaiv",
+          "region_id": "98",
+          "api_region_name": "Миколаївський район",
+          "start": "2026-09-26T19:08:38Z",
+          "end": "2026-09-26T19:36:38Z",
+          "alert_type": "AIR",
+          "source": "alerts.in.ua_manual_csv_recovery",
+          "source_kind": "manual_csv_export",
+          "source_files": [
+            "alerts_2026-09-26(1).csv"
+          ],
+          "recovery_artifact": "research/site_prod_bridge_continuity_repair_2026-09-27.json"
+        },
+        "ukrainealarm_api": {
+          "city_key": "mykolaiv",
+          "region_id": "98",
+          "api_region_name": "Миколаївський район",
+          "start": "2026-09-26T19:08:38.096131Z",
+          "end": "2026-09-26T19:36:38.966611Z",
+          "alert_type": "AIR",
+          "inherited_bridge_source_url": "https://api.ukrainealarm.com/api/v3/alerts/regionHistory",
+          "explicit_manual_recovery_fields_present": false
+        },
+        "proposed_canonical_survivor": "ukrainealarm_api",
+        "proposed_recovery_provenance": {
+          "original_recovery_source": "alerts.in.ua_manual_csv_recovery",
+          "source_kind": "manual_csv_export",
+          "source_files": [
+            "alerts_2026-09-26(1).csv"
+          ],
+          "recovery_artifact": "research/site_prod_bridge_continuity_repair_2026-09-27.json",
+          "original_recovery_start": "2026-09-26T19:08:38Z",
+          "original_recovery_end": "2026-09-26T19:36:38Z"
+        }
+      },
+      {
+        "pair_id": "mykolaiv-11",
+        "city_key": "mykolaiv",
+        "pair_structure": "manual Alerts.in.ua recovery row + UkraineAlarm API row",
+        "manual_recovery_row_index": 1474,
+        "api_row_index": 1473,
+        "start_delta_seconds_abs": 0.136054,
+        "end_delta_seconds_abs": 0.555808,
+        "api_minus_manual_start_seconds": -0.136054,
+        "api_minus_manual_end_seconds": 0.555808,
+        "manual_recovery": {
+          "city_key": "mykolaiv",
+          "region_id": "98",
+          "api_region_name": "Миколаївський район",
+          "start": "2026-09-26T19:39:15Z",
+          "end": "2026-09-26T19:54:11Z",
+          "alert_type": "AIR",
+          "source": "alerts.in.ua_manual_csv_recovery",
+          "source_kind": "manual_csv_export",
+          "source_files": [
+            "alerts_2026-09-26(1).csv"
+          ],
+          "recovery_artifact": "research/site_prod_bridge_continuity_repair_2026-09-27.json"
+        },
+        "ukrainealarm_api": {
+          "city_key": "mykolaiv",
+          "region_id": "98",
+          "api_region_name": "Миколаївський район",
+          "start": "2026-09-26T19:39:14.863946Z",
+          "end": "2026-09-26T19:54:11.555808Z",
+          "alert_type": "AIR",
+          "inherited_bridge_source_url": "https://api.ukrainealarm.com/api/v3/alerts/regionHistory",
+          "explicit_manual_recovery_fields_present": false
+        },
+        "proposed_canonical_survivor": "ukrainealarm_api",
+        "proposed_recovery_provenance": {
+          "original_recovery_source": "alerts.in.ua_manual_csv_recovery",
+          "source_kind": "manual_csv_export",
+          "source_files": [
+            "alerts_2026-09-26(1).csv"
+          ],
+          "recovery_artifact": "research/site_prod_bridge_continuity_repair_2026-09-27.json",
+          "original_recovery_start": "2026-09-26T19:39:15Z",
+          "original_recovery_end": "2026-09-26T19:54:11Z"
+        }
+      },
+      {
+        "pair_id": "mykolaiv-12",
+        "city_key": "mykolaiv",
+        "pair_structure": "manual Alerts.in.ua recovery row + UkraineAlarm API row",
+        "manual_recovery_row_index": 1484,
+        "api_row_index": 1483,
+        "start_delta_seconds_abs": 0.321693,
+        "end_delta_seconds_abs": 0.244784,
+        "api_minus_manual_start_seconds": -0.321693,
+        "api_minus_manual_end_seconds": 0.244784,
+        "manual_recovery": {
+          "city_key": "mykolaiv",
+          "region_id": "98",
+          "api_region_name": "Миколаївський район",
+          "start": "2026-09-26T21:00:56Z",
+          "end": "2026-09-26T21:25:00Z",
+          "alert_type": "AIR",
+          "source": "alerts.in.ua_manual_csv_recovery",
+          "source_kind": "manual_csv_export",
+          "source_files": [
+            "alerts_2026-09-27(1).csv"
+          ],
+          "recovery_artifact": "research/site_prod_bridge_continuity_repair_2026-09-27.json"
+        },
+        "ukrainealarm_api": {
+          "city_key": "mykolaiv",
+          "region_id": "98",
+          "api_region_name": "Миколаївський район",
+          "start": "2026-09-26T21:00:55.678307Z",
+          "end": "2026-09-26T21:25:00.244784Z",
+          "alert_type": "AIR",
+          "inherited_bridge_source_url": "https://api.ukrainealarm.com/api/v3/alerts/regionHistory",
+          "explicit_manual_recovery_fields_present": false
+        },
+        "proposed_canonical_survivor": "ukrainealarm_api",
+        "proposed_recovery_provenance": {
+          "original_recovery_source": "alerts.in.ua_manual_csv_recovery",
+          "source_kind": "manual_csv_export",
+          "source_files": [
+            "alerts_2026-09-27(1).csv"
+          ],
+          "recovery_artifact": "research/site_prod_bridge_continuity_repair_2026-09-27.json",
+          "original_recovery_start": "2026-09-26T21:00:56Z",
+          "original_recovery_end": "2026-09-26T21:25:00Z"
+        }
+      },
+      {
+        "pair_id": "mykolaiv-13",
+        "city_key": "mykolaiv",
+        "pair_structure": "manual Alerts.in.ua recovery row + UkraineAlarm API row",
+        "manual_recovery_row_index": 1486,
+        "api_row_index": 1485,
+        "start_delta_seconds_abs": 0.389034,
+        "end_delta_seconds_abs": 0.624612,
+        "api_minus_manual_start_seconds": 0.389034,
+        "api_minus_manual_end_seconds": 0.624612,
+        "manual_recovery": {
+          "city_key": "mykolaiv",
+          "region_id": "98",
+          "api_region_name": "Миколаївський район",
+          "start": "2026-09-26T21:34:33Z",
+          "end": "2026-09-26T22:03:04Z",
+          "alert_type": "AIR",
+          "source": "alerts.in.ua_manual_csv_recovery",
+          "source_kind": "manual_csv_export",
+          "source_files": [
+            "alerts_2026-09-27(1).csv"
+          ],
+          "recovery_artifact": "research/site_prod_bridge_continuity_repair_2026-09-27.json"
+        },
+        "ukrainealarm_api": {
+          "city_key": "mykolaiv",
+          "region_id": "98",
+          "api_region_name": "Миколаївський район",
+          "start": "2026-09-26T21:34:33.389034Z",
+          "end": "2026-09-26T22:03:04.624612Z",
+          "alert_type": "AIR",
+          "inherited_bridge_source_url": "https://api.ukrainealarm.com/api/v3/alerts/regionHistory",
+          "explicit_manual_recovery_fields_present": false
+        },
+        "proposed_canonical_survivor": "ukrainealarm_api",
+        "proposed_recovery_provenance": {
+          "original_recovery_source": "alerts.in.ua_manual_csv_recovery",
+          "source_kind": "manual_csv_export",
+          "source_files": [
+            "alerts_2026-09-27(1).csv"
+          ],
+          "recovery_artifact": "research/site_prod_bridge_continuity_repair_2026-09-27.json",
+          "original_recovery_start": "2026-09-26T21:34:33Z",
+          "original_recovery_end": "2026-09-26T22:03:04Z"
+        }
+      },
+      {
+        "pair_id": "mykolaiv-14",
+        "city_key": "mykolaiv",
+        "pair_structure": "manual Alerts.in.ua recovery row + UkraineAlarm API row",
+        "manual_recovery_row_index": 1491,
+        "api_row_index": 1490,
+        "start_delta_seconds_abs": 0.281513,
+        "end_delta_seconds_abs": 0.083473,
+        "api_minus_manual_start_seconds": 0.281513,
+        "api_minus_manual_end_seconds": 0.083473,
+        "manual_recovery": {
+          "city_key": "mykolaiv",
+          "region_id": "98",
+          "api_region_name": "Миколаївський район",
+          "start": "2026-09-26T22:15:40Z",
+          "end": "2026-09-26T22:36:08Z",
+          "alert_type": "AIR",
+          "source": "alerts.in.ua_manual_csv_recovery",
+          "source_kind": "manual_csv_export",
+          "source_files": [
+            "alerts_2026-09-27(1).csv"
+          ],
+          "recovery_artifact": "research/site_prod_bridge_continuity_repair_2026-09-27.json"
+        },
+        "ukrainealarm_api": {
+          "city_key": "mykolaiv",
+          "region_id": "98",
+          "api_region_name": "Миколаївський район",
+          "start": "2026-09-26T22:15:40.281513Z",
+          "end": "2026-09-26T22:36:08.083473Z",
+          "alert_type": "AIR",
+          "inherited_bridge_source_url": "https://api.ukrainealarm.com/api/v3/alerts/regionHistory",
+          "explicit_manual_recovery_fields_present": false
+        },
+        "proposed_canonical_survivor": "ukrainealarm_api",
+        "proposed_recovery_provenance": {
+          "original_recovery_source": "alerts.in.ua_manual_csv_recovery",
+          "source_kind": "manual_csv_export",
+          "source_files": [
+            "alerts_2026-09-27(1).csv"
+          ],
+          "recovery_artifact": "research/site_prod_bridge_continuity_repair_2026-09-27.json",
+          "original_recovery_start": "2026-09-26T22:15:40Z",
+          "original_recovery_end": "2026-09-26T22:36:08Z"
+        }
+      },
+      {
+        "pair_id": "mykolaiv-15",
+        "city_key": "mykolaiv",
+        "pair_structure": "manual Alerts.in.ua recovery row + UkraineAlarm API row",
+        "manual_recovery_row_index": 1498,
+        "api_row_index": 1497,
+        "start_delta_seconds_abs": 0.035004,
+        "end_delta_seconds_abs": 0.74642,
+        "api_minus_manual_start_seconds": 0.035004,
+        "api_minus_manual_end_seconds": 0.74642,
+        "manual_recovery": {
+          "city_key": "mykolaiv",
+          "region_id": "98",
+          "api_region_name": "Миколаївський район",
+          "start": "2026-09-27T01:14:04Z",
+          "end": "2026-09-27T02:20:56Z",
+          "alert_type": "AIR",
+          "source": "alerts.in.ua_manual_csv_recovery",
+          "source_kind": "manual_csv_export",
+          "source_files": [
+            "alerts_2026-09-27(1).csv"
+          ],
+          "recovery_artifact": "research/site_prod_bridge_continuity_repair_2026-09-27.json"
+        },
+        "ukrainealarm_api": {
+          "city_key": "mykolaiv",
+          "region_id": "98",
+          "api_region_name": "Миколаївський район",
+          "start": "2026-09-27T01:14:04.035004Z",
+          "end": "2026-09-27T02:20:56.746420Z",
+          "alert_type": "AIR",
+          "inherited_bridge_source_url": "https://api.ukrainealarm.com/api/v3/alerts/regionHistory",
+          "explicit_manual_recovery_fields_present": false
+        },
+        "proposed_canonical_survivor": "ukrainealarm_api",
+        "proposed_recovery_provenance": {
+          "original_recovery_source": "alerts.in.ua_manual_csv_recovery",
+          "source_kind": "manual_csv_export",
+          "source_files": [
+            "alerts_2026-09-27(1).csv"
+          ],
+          "recovery_artifact": "research/site_prod_bridge_continuity_repair_2026-09-27.json",
+          "original_recovery_start": "2026-09-27T01:14:04Z",
+          "original_recovery_end": "2026-09-27T02:20:56Z"
+        }
+      },
+      {
+        "pair_id": "mykolaiv-16",
+        "city_key": "mykolaiv",
+        "pair_structure": "manual Alerts.in.ua recovery row + UkraineAlarm API row",
+        "manual_recovery_row_index": 1512,
+        "api_row_index": 1511,
+        "start_delta_seconds_abs": 0.741275,
+        "end_delta_seconds_abs": 0.714159,
+        "api_minus_manual_start_seconds": 0.741275,
+        "api_minus_manual_end_seconds": 0.714159,
+        "manual_recovery": {
+          "city_key": "mykolaiv",
+          "region_id": "98",
+          "api_region_name": "Миколаївський район",
+          "start": "2026-09-27T04:24:26Z",
+          "end": "2026-09-27T04:42:12Z",
+          "alert_type": "AIR",
+          "source": "alerts.in.ua_manual_csv_recovery",
+          "source_kind": "manual_csv_export",
+          "source_files": [
+            "alerts_2026-09-27(1).csv"
+          ],
+          "recovery_artifact": "research/site_prod_bridge_continuity_repair_2026-09-27.json"
+        },
+        "ukrainealarm_api": {
+          "city_key": "mykolaiv",
+          "region_id": "98",
+          "api_region_name": "Миколаївський район",
+          "start": "2026-09-27T04:24:26.741275Z",
+          "end": "2026-09-27T04:42:12.714159Z",
+          "alert_type": "AIR",
+          "inherited_bridge_source_url": "https://api.ukrainealarm.com/api/v3/alerts/regionHistory",
+          "explicit_manual_recovery_fields_present": false
+        },
+        "proposed_canonical_survivor": "ukrainealarm_api",
+        "proposed_recovery_provenance": {
+          "original_recovery_source": "alerts.in.ua_manual_csv_recovery",
+          "source_kind": "manual_csv_export",
+          "source_files": [
+            "alerts_2026-09-27(1).csv"
+          ],
+          "recovery_artifact": "research/site_prod_bridge_continuity_repair_2026-09-27.json",
+          "original_recovery_start": "2026-09-27T04:24:26Z",
+          "original_recovery_end": "2026-09-27T04:42:12Z"
+        }
+      },
+      {
+        "pair_id": "mykolaiv-17",
+        "city_key": "mykolaiv",
+        "pair_structure": "manual Alerts.in.ua recovery row + UkraineAlarm API row",
+        "manual_recovery_row_index": 1516,
+        "api_row_index": 1515,
+        "start_delta_seconds_abs": 0.891906,
+        "end_delta_seconds_abs": 0.370972,
+        "api_minus_manual_start_seconds": 0.891906,
+        "api_minus_manual_end_seconds": 0.370972,
+        "manual_recovery": {
+          "city_key": "mykolaiv",
+          "region_id": "98",
+          "api_region_name": "Миколаївський район",
+          "start": "2026-09-27T04:57:44Z",
+          "end": "2026-09-27T05:44:36Z",
+          "alert_type": "AIR",
+          "source": "alerts.in.ua_manual_csv_recovery",
+          "source_kind": "manual_csv_export",
+          "source_files": [
+            "alerts_2026-09-27(1).csv"
+          ],
+          "recovery_artifact": "research/site_prod_bridge_continuity_repair_2026-09-27.json"
+        },
+        "ukrainealarm_api": {
+          "city_key": "mykolaiv",
+          "region_id": "98",
+          "api_region_name": "Миколаївський район",
+          "start": "2026-09-27T04:57:44.891906Z",
+          "end": "2026-09-27T05:44:36.370972Z",
+          "alert_type": "AIR",
+          "inherited_bridge_source_url": "https://api.ukrainealarm.com/api/v3/alerts/regionHistory",
+          "explicit_manual_recovery_fields_present": false
+        },
+        "proposed_canonical_survivor": "ukrainealarm_api",
+        "proposed_recovery_provenance": {
+          "original_recovery_source": "alerts.in.ua_manual_csv_recovery",
+          "source_kind": "manual_csv_export",
+          "source_files": [
+            "alerts_2026-09-27(1).csv"
+          ],
+          "recovery_artifact": "research/site_prod_bridge_continuity_repair_2026-09-27.json",
+          "original_recovery_start": "2026-09-27T04:57:44Z",
+          "original_recovery_end": "2026-09-27T05:44:36Z"
+        }
+      },
+      {
+        "pair_id": "mykolaiv-18",
+        "city_key": "mykolaiv",
+        "pair_structure": "manual Alerts.in.ua recovery row + UkraineAlarm API row",
+        "manual_recovery_row_index": 1524,
+        "api_row_index": 1523,
+        "start_delta_seconds_abs": 0.347241,
+        "end_delta_seconds_abs": 1.191859,
+        "api_minus_manual_start_seconds": -0.347241,
+        "api_minus_manual_end_seconds": -1.191859,
+        "manual_recovery": {
+          "city_key": "mykolaiv",
+          "region_id": "98",
+          "api_region_name": "Миколаївський район",
+          "start": "2026-09-27T07:08:12Z",
+          "end": "2026-09-27T07:48:35Z",
+          "alert_type": "AIR",
+          "source": "alerts.in.ua_manual_csv_recovery",
+          "source_kind": "manual_csv_export",
+          "source_files": [
+            "alerts_2026-09-27(1).csv"
+          ],
+          "recovery_artifact": "research/site_prod_bridge_continuity_repair_2026-09-27.json"
+        },
+        "ukrainealarm_api": {
+          "city_key": "mykolaiv",
+          "region_id": "98",
+          "api_region_name": "Миколаївський район",
+          "start": "2026-09-27T07:08:11.652759Z",
+          "end": "2026-09-27T07:48:33.808141Z",
+          "alert_type": "AIR",
+          "inherited_bridge_source_url": "https://api.ukrainealarm.com/api/v3/alerts/regionHistory",
+          "explicit_manual_recovery_fields_present": false
+        },
+        "proposed_canonical_survivor": "ukrainealarm_api",
+        "proposed_recovery_provenance": {
+          "original_recovery_source": "alerts.in.ua_manual_csv_recovery",
+          "source_kind": "manual_csv_export",
+          "source_files": [
+            "alerts_2026-09-27(1).csv"
+          ],
+          "recovery_artifact": "research/site_prod_bridge_continuity_repair_2026-09-27.json",
+          "original_recovery_start": "2026-09-27T07:08:12Z",
+          "original_recovery_end": "2026-09-27T07:48:35Z"
+        }
+      },
+      {
+        "pair_id": "mykolaiv-19",
+        "city_key": "mykolaiv",
+        "pair_structure": "manual Alerts.in.ua recovery row + UkraineAlarm API row",
+        "manual_recovery_row_index": 1530,
+        "api_row_index": 1529,
+        "start_delta_seconds_abs": 0.439772,
+        "end_delta_seconds_abs": 0.779261,
+        "api_minus_manual_start_seconds": 0.439772,
+        "api_minus_manual_end_seconds": 0.779261,
+        "manual_recovery": {
+          "city_key": "mykolaiv",
+          "region_id": "98",
+          "api_region_name": "Миколаївський район",
+          "start": "2026-09-27T07:59:58Z",
+          "end": "2026-09-27T08:45:44Z",
+          "alert_type": "AIR",
+          "source": "alerts.in.ua_manual_csv_recovery",
+          "source_kind": "manual_csv_export",
+          "source_files": [
+            "alerts_2026-09-27(1).csv"
+          ],
+          "recovery_artifact": "research/site_prod_bridge_continuity_repair_2026-09-27.json"
+        },
+        "ukrainealarm_api": {
+          "city_key": "mykolaiv",
+          "region_id": "98",
+          "api_region_name": "Миколаївський район",
+          "start": "2026-09-27T07:59:58.439772Z",
+          "end": "2026-09-27T08:45:44.779261Z",
+          "alert_type": "AIR",
+          "inherited_bridge_source_url": "https://api.ukrainealarm.com/api/v3/alerts/regionHistory",
+          "explicit_manual_recovery_fields_present": false
+        },
+        "proposed_canonical_survivor": "ukrainealarm_api",
+        "proposed_recovery_provenance": {
+          "original_recovery_source": "alerts.in.ua_manual_csv_recovery",
+          "source_kind": "manual_csv_export",
+          "source_files": [
+            "alerts_2026-09-27(1).csv"
+          ],
+          "recovery_artifact": "research/site_prod_bridge_continuity_repair_2026-09-27.json",
+          "original_recovery_start": "2026-09-27T07:59:58Z",
+          "original_recovery_end": "2026-09-27T08:45:44Z"
+        }
+      },
+      {
+        "pair_id": "sumy-01",
+        "city_key": "sumy",
+        "pair_structure": "manual Alerts.in.ua recovery row + UkraineAlarm API row",
+        "manual_recovery_row_index": 1374,
+        "api_row_index": 1373,
+        "start_delta_seconds_abs": 0.053186,
+        "end_delta_seconds_abs": 0.013372,
+        "api_minus_manual_start_seconds": -0.053186,
+        "api_minus_manual_end_seconds": 0.013372,
+        "manual_recovery": {
+          "city_key": "sumy",
+          "region_id": "114",
+          "api_region_name": "Сумський район",
+          "start": "2026-09-26T02:13:38Z",
+          "end": "2026-09-26T03:35:02Z",
+          "alert_type": "AIR",
+          "source": "alerts.in.ua_manual_csv_recovery",
+          "source_kind": "manual_csv_export",
+          "source_files": [
+            "alerts_2026-09-26(1).csv"
+          ],
+          "recovery_artifact": "research/site_prod_bridge_continuity_repair_2026-09-27.json"
+        },
+        "ukrainealarm_api": {
+          "city_key": "sumy",
+          "region_id": "114",
+          "api_region_name": "Сумський район",
+          "start": "2026-09-26T02:13:37.946814Z",
+          "end": "2026-09-26T03:35:02.013372Z",
+          "alert_type": "AIR",
+          "inherited_bridge_source_url": "https://api.ukrainealarm.com/api/v3/alerts/regionHistory",
+          "explicit_manual_recovery_fields_present": false
+        },
+        "proposed_canonical_survivor": "ukrainealarm_api",
+        "proposed_recovery_provenance": {
+          "original_recovery_source": "alerts.in.ua_manual_csv_recovery",
+          "source_kind": "manual_csv_export",
+          "source_files": [
+            "alerts_2026-09-26(1).csv"
+          ],
+          "recovery_artifact": "research/site_prod_bridge_continuity_repair_2026-09-27.json",
+          "original_recovery_start": "2026-09-26T02:13:38Z",
+          "original_recovery_end": "2026-09-26T03:35:02Z"
+        }
+      },
+      {
+        "pair_id": "sumy-02",
+        "city_key": "sumy",
+        "pair_structure": "manual Alerts.in.ua recovery row + UkraineAlarm API row",
+        "manual_recovery_row_index": 1396,
+        "api_row_index": 1395,
+        "start_delta_seconds_abs": 0.082468,
+        "end_delta_seconds_abs": 9.443265,
+        "api_minus_manual_start_seconds": 0.082468,
+        "api_minus_manual_end_seconds": -9.443265,
+        "manual_recovery": {
+          "city_key": "sumy",
+          "region_id": "114",
+          "api_region_name": "Сумський район",
+          "start": "2026-09-26T06:23:35Z",
+          "end": "2026-09-26T07:35:29Z",
+          "alert_type": "AIR",
+          "source": "alerts.in.ua_manual_csv_recovery",
+          "source_kind": "manual_csv_export",
+          "source_files": [
+            "alerts_2026-09-26(1).csv"
+          ],
+          "recovery_artifact": "research/site_prod_bridge_continuity_repair_2026-09-27.json"
+        },
+        "ukrainealarm_api": {
+          "city_key": "sumy",
+          "region_id": "114",
+          "api_region_name": "Сумський район",
+          "start": "2026-09-26T06:23:35.082468Z",
+          "end": "2026-09-26T07:35:19.556735Z",
+          "alert_type": "AIR",
+          "inherited_bridge_source_url": "https://api.ukrainealarm.com/api/v3/alerts/regionHistory",
+          "explicit_manual_recovery_fields_present": false
+        },
+        "proposed_canonical_survivor": "ukrainealarm_api",
+        "proposed_recovery_provenance": {
+          "original_recovery_source": "alerts.in.ua_manual_csv_recovery",
+          "source_kind": "manual_csv_export",
+          "source_files": [
+            "alerts_2026-09-26(1).csv"
+          ],
+          "recovery_artifact": "research/site_prod_bridge_continuity_repair_2026-09-27.json",
+          "original_recovery_start": "2026-09-26T06:23:35Z",
+          "original_recovery_end": "2026-09-26T07:35:29Z"
+        }
+      },
+      {
+        "pair_id": "sumy-03",
+        "city_key": "sumy",
+        "pair_structure": "manual Alerts.in.ua recovery row + UkraineAlarm API row",
+        "manual_recovery_row_index": 1408,
+        "api_row_index": 1407,
+        "start_delta_seconds_abs": 0.736307,
+        "end_delta_seconds_abs": 1.501324,
+        "api_minus_manual_start_seconds": -0.736307,
+        "api_minus_manual_end_seconds": -1.501324,
+        "manual_recovery": {
+          "city_key": "sumy",
+          "region_id": "114",
+          "api_region_name": "Сумський район",
+          "start": "2026-09-26T08:24:23Z",
+          "end": "2026-09-26T09:26:58Z",
+          "alert_type": "AIR",
+          "source": "alerts.in.ua_manual_csv_recovery",
+          "source_kind": "manual_csv_export",
+          "source_files": [
+            "alerts_2026-09-26(1).csv"
+          ],
+          "recovery_artifact": "research/site_prod_bridge_continuity_repair_2026-09-27.json"
+        },
+        "ukrainealarm_api": {
+          "city_key": "sumy",
+          "region_id": "114",
+          "api_region_name": "Сумський район",
+          "start": "2026-09-26T08:24:22.263693Z",
+          "end": "2026-09-26T09:26:56.498676Z",
+          "alert_type": "AIR",
+          "inherited_bridge_source_url": "https://api.ukrainealarm.com/api/v3/alerts/regionHistory",
+          "explicit_manual_recovery_fields_present": false
+        },
+        "proposed_canonical_survivor": "ukrainealarm_api",
+        "proposed_recovery_provenance": {
+          "original_recovery_source": "alerts.in.ua_manual_csv_recovery",
+          "source_kind": "manual_csv_export",
+          "source_files": [
+            "alerts_2026-09-26(1).csv"
+          ],
+          "recovery_artifact": "research/site_prod_bridge_continuity_repair_2026-09-27.json",
+          "original_recovery_start": "2026-09-26T08:24:23Z",
+          "original_recovery_end": "2026-09-26T09:26:58Z"
+        }
+      },
+      {
+        "pair_id": "sumy-04",
+        "city_key": "sumy",
+        "pair_structure": "manual Alerts.in.ua recovery row + UkraineAlarm API row",
+        "manual_recovery_row_index": 1414,
+        "api_row_index": 1413,
+        "start_delta_seconds_abs": 0.229566,
+        "end_delta_seconds_abs": 0.780754,
+        "api_minus_manual_start_seconds": -0.229566,
+        "api_minus_manual_end_seconds": 0.780754,
+        "manual_recovery": {
+          "city_key": "sumy",
+          "region_id": "114",
+          "api_region_name": "Сумський район",
+          "start": "2026-09-26T09:28:03Z",
+          "end": "2026-09-26T11:09:26Z",
+          "alert_type": "AIR",
+          "source": "alerts.in.ua_manual_csv_recovery",
+          "source_kind": "manual_csv_export",
+          "source_files": [
+            "alerts_2026-09-26(1).csv"
+          ],
+          "recovery_artifact": "research/site_prod_bridge_continuity_repair_2026-09-27.json"
+        },
+        "ukrainealarm_api": {
+          "city_key": "sumy",
+          "region_id": "114",
+          "api_region_name": "Сумський район",
+          "start": "2026-09-26T09:28:02.770434Z",
+          "end": "2026-09-26T11:09:26.780754Z",
+          "alert_type": "AIR",
+          "inherited_bridge_source_url": "https://api.ukrainealarm.com/api/v3/alerts/regionHistory",
+          "explicit_manual_recovery_fields_present": false
+        },
+        "proposed_canonical_survivor": "ukrainealarm_api",
+        "proposed_recovery_provenance": {
+          "original_recovery_source": "alerts.in.ua_manual_csv_recovery",
+          "source_kind": "manual_csv_export",
+          "source_files": [
+            "alerts_2026-09-26(1).csv"
+          ],
+          "recovery_artifact": "research/site_prod_bridge_continuity_repair_2026-09-27.json",
+          "original_recovery_start": "2026-09-26T09:28:03Z",
+          "original_recovery_end": "2026-09-26T11:09:26Z"
+        }
+      },
+      {
+        "pair_id": "sumy-05",
+        "city_key": "sumy",
+        "pair_structure": "manual Alerts.in.ua recovery row + UkraineAlarm API row",
+        "manual_recovery_row_index": 1430,
+        "api_row_index": 1429,
+        "start_delta_seconds_abs": 0.459274,
+        "end_delta_seconds_abs": 0.017951,
+        "api_minus_manual_start_seconds": 0.459274,
+        "api_minus_manual_end_seconds": 0.017951,
+        "manual_recovery": {
+          "city_key": "sumy",
+          "region_id": "114",
+          "api_region_name": "Сумський район",
+          "start": "2026-09-26T12:28:11Z",
+          "end": "2026-09-26T12:59:44Z",
+          "alert_type": "AIR",
+          "source": "alerts.in.ua_manual_csv_recovery",
+          "source_kind": "manual_csv_export",
+          "source_files": [
+            "alerts_2026-09-26(1).csv"
+          ],
+          "recovery_artifact": "research/site_prod_bridge_continuity_repair_2026-09-27.json"
+        },
+        "ukrainealarm_api": {
+          "city_key": "sumy",
+          "region_id": "114",
+          "api_region_name": "Сумський район",
+          "start": "2026-09-26T12:28:11.459274Z",
+          "end": "2026-09-26T12:59:44.017951Z",
+          "alert_type": "AIR",
+          "inherited_bridge_source_url": "https://api.ukrainealarm.com/api/v3/alerts/regionHistory",
+          "explicit_manual_recovery_fields_present": false
+        },
+        "proposed_canonical_survivor": "ukrainealarm_api",
+        "proposed_recovery_provenance": {
+          "original_recovery_source": "alerts.in.ua_manual_csv_recovery",
+          "source_kind": "manual_csv_export",
+          "source_files": [
+            "alerts_2026-09-26(1).csv"
+          ],
+          "recovery_artifact": "research/site_prod_bridge_continuity_repair_2026-09-27.json",
+          "original_recovery_start": "2026-09-26T12:28:11Z",
+          "original_recovery_end": "2026-09-26T12:59:44Z"
+        }
+      },
+      {
+        "pair_id": "sumy-06",
+        "city_key": "sumy",
+        "pair_structure": "manual Alerts.in.ua recovery row + UkraineAlarm API row",
+        "manual_recovery_row_index": 1433,
+        "api_row_index": 1432,
+        "start_delta_seconds_abs": 0.126375,
+        "end_delta_seconds_abs": 3.554039,
+        "api_minus_manual_start_seconds": 0.126375,
+        "api_minus_manual_end_seconds": -3.554039,
+        "manual_recovery": {
+          "city_key": "sumy",
+          "region_id": "114",
+          "api_region_name": "Сумський район",
+          "start": "2026-09-26T13:00:36Z",
+          "end": "2026-09-26T14:44:37Z",
+          "alert_type": "AIR",
+          "source": "alerts.in.ua_manual_csv_recovery",
+          "source_kind": "manual_csv_export",
+          "source_files": [
+            "alerts_2026-09-26(1).csv"
+          ],
+          "recovery_artifact": "research/site_prod_bridge_continuity_repair_2026-09-27.json"
+        },
+        "ukrainealarm_api": {
+          "city_key": "sumy",
+          "region_id": "114",
+          "api_region_name": "Сумський район",
+          "start": "2026-09-26T13:00:36.126375Z",
+          "end": "2026-09-26T14:44:33.445961Z",
+          "alert_type": "AIR",
+          "inherited_bridge_source_url": "https://api.ukrainealarm.com/api/v3/alerts/regionHistory",
+          "explicit_manual_recovery_fields_present": false
+        },
+        "proposed_canonical_survivor": "ukrainealarm_api",
+        "proposed_recovery_provenance": {
+          "original_recovery_source": "alerts.in.ua_manual_csv_recovery",
+          "source_kind": "manual_csv_export",
+          "source_files": [
+            "alerts_2026-09-26(1).csv"
+          ],
+          "recovery_artifact": "research/site_prod_bridge_continuity_repair_2026-09-27.json",
+          "original_recovery_start": "2026-09-26T13:00:36Z",
+          "original_recovery_end": "2026-09-26T14:44:37Z"
+        }
+      },
+      {
+        "pair_id": "sumy-07",
+        "city_key": "sumy",
+        "pair_structure": "manual Alerts.in.ua recovery row + UkraineAlarm API row",
+        "manual_recovery_row_index": 1437,
+        "api_row_index": 1436,
+        "start_delta_seconds_abs": 0.11321,
+        "end_delta_seconds_abs": 9.37219,
+        "api_minus_manual_start_seconds": -0.11321,
+        "api_minus_manual_end_seconds": -9.37219,
+        "manual_recovery": {
+          "city_key": "sumy",
+          "region_id": "114",
+          "api_region_name": "Сумський район",
+          "start": "2026-09-26T14:49:50Z",
+          "end": "2026-09-26T15:24:34Z",
+          "alert_type": "AIR",
+          "source": "alerts.in.ua_manual_csv_recovery",
+          "source_kind": "manual_csv_export",
+          "source_files": [
+            "alerts_2026-09-26(1).csv"
+          ],
+          "recovery_artifact": "research/site_prod_bridge_continuity_repair_2026-09-27.json"
+        },
+        "ukrainealarm_api": {
+          "city_key": "sumy",
+          "region_id": "114",
+          "api_region_name": "Сумський район",
+          "start": "2026-09-26T14:49:49.886790Z",
+          "end": "2026-09-26T15:24:24.627810Z",
+          "alert_type": "AIR",
+          "inherited_bridge_source_url": "https://api.ukrainealarm.com/api/v3/alerts/regionHistory",
+          "explicit_manual_recovery_fields_present": false
+        },
+        "proposed_canonical_survivor": "ukrainealarm_api",
+        "proposed_recovery_provenance": {
+          "original_recovery_source": "alerts.in.ua_manual_csv_recovery",
+          "source_kind": "manual_csv_export",
+          "source_files": [
+            "alerts_2026-09-26(1).csv"
+          ],
+          "recovery_artifact": "research/site_prod_bridge_continuity_repair_2026-09-27.json",
+          "original_recovery_start": "2026-09-26T14:49:50Z",
+          "original_recovery_end": "2026-09-26T15:24:34Z"
+        }
+      },
+      {
+        "pair_id": "sumy-08",
+        "city_key": "sumy",
+        "pair_structure": "manual Alerts.in.ua recovery row + UkraineAlarm API row",
+        "manual_recovery_row_index": 1444,
+        "api_row_index": 1443,
+        "start_delta_seconds_abs": 0.019974,
+        "end_delta_seconds_abs": 0.943774,
+        "api_minus_manual_start_seconds": -0.019974,
+        "api_minus_manual_end_seconds": 0.943774,
+        "manual_recovery": {
+          "city_key": "sumy",
+          "region_id": "114",
+          "api_region_name": "Сумський район",
+          "start": "2026-09-26T15:31:29Z",
+          "end": "2026-09-26T16:03:32Z",
+          "alert_type": "AIR",
+          "source": "alerts.in.ua_manual_csv_recovery",
+          "source_kind": "manual_csv_export",
+          "source_files": [
+            "alerts_2026-09-26(1).csv"
+          ],
+          "recovery_artifact": "research/site_prod_bridge_continuity_repair_2026-09-27.json"
+        },
+        "ukrainealarm_api": {
+          "city_key": "sumy",
+          "region_id": "114",
+          "api_region_name": "Сумський район",
+          "start": "2026-09-26T15:31:28.980026Z",
+          "end": "2026-09-26T16:03:32.943774Z",
+          "alert_type": "AIR",
+          "inherited_bridge_source_url": "https://api.ukrainealarm.com/api/v3/alerts/regionHistory",
+          "explicit_manual_recovery_fields_present": false
+        },
+        "proposed_canonical_survivor": "ukrainealarm_api",
+        "proposed_recovery_provenance": {
+          "original_recovery_source": "alerts.in.ua_manual_csv_recovery",
+          "source_kind": "manual_csv_export",
+          "source_files": [
+            "alerts_2026-09-26(1).csv"
+          ],
+          "recovery_artifact": "research/site_prod_bridge_continuity_repair_2026-09-27.json",
+          "original_recovery_start": "2026-09-26T15:31:29Z",
+          "original_recovery_end": "2026-09-26T16:03:32Z"
+        }
+      },
+      {
+        "pair_id": "sumy-09",
+        "city_key": "sumy",
+        "pair_structure": "manual Alerts.in.ua recovery row + UkraineAlarm API row",
+        "manual_recovery_row_index": 1453,
+        "api_row_index": 1452,
+        "start_delta_seconds_abs": 0.207629,
+        "end_delta_seconds_abs": 0.45063,
+        "api_minus_manual_start_seconds": 0.207629,
+        "api_minus_manual_end_seconds": 0.45063,
+        "manual_recovery": {
+          "city_key": "sumy",
+          "region_id": "114",
+          "api_region_name": "Сумський район",
+          "start": "2026-09-26T17:19:38Z",
+          "end": "2026-09-26T17:55:58Z",
+          "alert_type": "AIR",
+          "source": "alerts.in.ua_manual_csv_recovery",
+          "source_kind": "manual_csv_export",
+          "source_files": [
+            "alerts_2026-09-26(1).csv"
+          ],
+          "recovery_artifact": "research/site_prod_bridge_continuity_repair_2026-09-27.json"
+        },
+        "ukrainealarm_api": {
+          "city_key": "sumy",
+          "region_id": "114",
+          "api_region_name": "Сумський район",
+          "start": "2026-09-26T17:19:38.207629Z",
+          "end": "2026-09-26T17:55:58.450630Z",
+          "alert_type": "AIR",
+          "inherited_bridge_source_url": "https://api.ukrainealarm.com/api/v3/alerts/regionHistory",
+          "explicit_manual_recovery_fields_present": false
+        },
+        "proposed_canonical_survivor": "ukrainealarm_api",
+        "proposed_recovery_provenance": {
+          "original_recovery_source": "alerts.in.ua_manual_csv_recovery",
+          "source_kind": "manual_csv_export",
+          "source_files": [
+            "alerts_2026-09-26(1).csv"
+          ],
+          "recovery_artifact": "research/site_prod_bridge_continuity_repair_2026-09-27.json",
+          "original_recovery_start": "2026-09-26T17:19:38Z",
+          "original_recovery_end": "2026-09-26T17:55:58Z"
+        }
+      },
+      {
+        "pair_id": "sumy-10",
+        "city_key": "sumy",
+        "pair_structure": "manual Alerts.in.ua recovery row + UkraineAlarm API row",
+        "manual_recovery_row_index": 1460,
+        "api_row_index": 1459,
+        "start_delta_seconds_abs": 0.277026,
+        "end_delta_seconds_abs": 0.430864,
+        "api_minus_manual_start_seconds": 0.277026,
+        "api_minus_manual_end_seconds": 0.430864,
+        "manual_recovery": {
+          "city_key": "sumy",
+          "region_id": "114",
+          "api_region_name": "Сумський район",
+          "start": "2026-09-26T18:15:17Z",
+          "end": "2026-09-26T18:32:09Z",
+          "alert_type": "AIR",
+          "source": "alerts.in.ua_manual_csv_recovery",
+          "source_kind": "manual_csv_export",
+          "source_files": [
+            "alerts_2026-09-26(1).csv"
+          ],
+          "recovery_artifact": "research/site_prod_bridge_continuity_repair_2026-09-27.json"
+        },
+        "ukrainealarm_api": {
+          "city_key": "sumy",
+          "region_id": "114",
+          "api_region_name": "Сумський район",
+          "start": "2026-09-26T18:15:17.277026Z",
+          "end": "2026-09-26T18:32:09.430864Z",
+          "alert_type": "AIR",
+          "inherited_bridge_source_url": "https://api.ukrainealarm.com/api/v3/alerts/regionHistory",
+          "explicit_manual_recovery_fields_present": false
+        },
+        "proposed_canonical_survivor": "ukrainealarm_api",
+        "proposed_recovery_provenance": {
+          "original_recovery_source": "alerts.in.ua_manual_csv_recovery",
+          "source_kind": "manual_csv_export",
+          "source_files": [
+            "alerts_2026-09-26(1).csv"
+          ],
+          "recovery_artifact": "research/site_prod_bridge_continuity_repair_2026-09-27.json",
+          "original_recovery_start": "2026-09-26T18:15:17Z",
+          "original_recovery_end": "2026-09-26T18:32:09Z"
+        }
+      },
+      {
+        "pair_id": "sumy-11",
+        "city_key": "sumy",
+        "pair_structure": "manual Alerts.in.ua recovery row + UkraineAlarm API row",
+        "manual_recovery_row_index": 1466,
+        "api_row_index": 1465,
+        "start_delta_seconds_abs": 0.446318,
+        "end_delta_seconds_abs": 0.613602,
+        "api_minus_manual_start_seconds": 0.446318,
+        "api_minus_manual_end_seconds": 0.613602,
+        "manual_recovery": {
+          "city_key": "sumy",
+          "region_id": "114",
+          "api_region_name": "Сумський район",
+          "start": "2026-09-26T18:32:52Z",
+          "end": "2026-09-26T19:20:00Z",
+          "alert_type": "AIR",
+          "source": "alerts.in.ua_manual_csv_recovery",
+          "source_kind": "manual_csv_export",
+          "source_files": [
+            "alerts_2026-09-26(1).csv"
+          ],
+          "recovery_artifact": "research/site_prod_bridge_continuity_repair_2026-09-27.json"
+        },
+        "ukrainealarm_api": {
+          "city_key": "sumy",
+          "region_id": "114",
+          "api_region_name": "Сумський район",
+          "start": "2026-09-26T18:32:52.446318Z",
+          "end": "2026-09-26T19:20:00.613602Z",
+          "alert_type": "AIR",
+          "inherited_bridge_source_url": "https://api.ukrainealarm.com/api/v3/alerts/regionHistory",
+          "explicit_manual_recovery_fields_present": false
+        },
+        "proposed_canonical_survivor": "ukrainealarm_api",
+        "proposed_recovery_provenance": {
+          "original_recovery_source": "alerts.in.ua_manual_csv_recovery",
+          "source_kind": "manual_csv_export",
+          "source_files": [
+            "alerts_2026-09-26(1).csv"
+          ],
+          "recovery_artifact": "research/site_prod_bridge_continuity_repair_2026-09-27.json",
+          "original_recovery_start": "2026-09-26T18:32:52Z",
+          "original_recovery_end": "2026-09-26T19:20:00Z"
+        }
+      },
+      {
+        "pair_id": "sumy-12",
+        "city_key": "sumy",
+        "pair_structure": "manual Alerts.in.ua recovery row + UkraineAlarm API row",
+        "manual_recovery_row_index": 1482,
+        "api_row_index": 1481,
+        "start_delta_seconds_abs": 0.606425,
+        "end_delta_seconds_abs": 6.130701,
+        "api_minus_manual_start_seconds": -0.606425,
+        "api_minus_manual_end_seconds": -6.130701,
+        "manual_recovery": {
+          "city_key": "sumy",
+          "region_id": "114",
+          "api_region_name": "Сумський район",
+          "start": "2026-09-26T20:40:07Z",
+          "end": "2026-09-27T01:22:39Z",
+          "alert_type": "AIR",
+          "source": "alerts.in.ua_manual_csv_recovery",
+          "source_kind": "manual_csv_export",
+          "source_files": [
+            "alerts_2026-09-27(1).csv"
+          ],
+          "recovery_artifact": "research/site_prod_bridge_continuity_repair_2026-09-27.json"
+        },
+        "ukrainealarm_api": {
+          "city_key": "sumy",
+          "region_id": "114",
+          "api_region_name": "Сумський район",
+          "start": "2026-09-26T20:40:06.393575Z",
+          "end": "2026-09-27T01:22:32.869299Z",
+          "alert_type": "AIR",
+          "inherited_bridge_source_url": "https://api.ukrainealarm.com/api/v3/alerts/regionHistory",
+          "explicit_manual_recovery_fields_present": false
+        },
+        "proposed_canonical_survivor": "ukrainealarm_api",
+        "proposed_recovery_provenance": {
+          "original_recovery_source": "alerts.in.ua_manual_csv_recovery",
+          "source_kind": "manual_csv_export",
+          "source_files": [
+            "alerts_2026-09-27(1).csv"
+          ],
+          "recovery_artifact": "research/site_prod_bridge_continuity_repair_2026-09-27.json",
+          "original_recovery_start": "2026-09-26T20:40:07Z",
+          "original_recovery_end": "2026-09-27T01:22:39Z"
+        }
+      },
+      {
+        "pair_id": "sumy-13",
+        "city_key": "sumy",
+        "pair_structure": "manual Alerts.in.ua recovery row + UkraineAlarm API row",
+        "manual_recovery_row_index": 1500,
+        "api_row_index": 1499,
+        "start_delta_seconds_abs": 0.749201,
+        "end_delta_seconds_abs": 0.288554,
+        "api_minus_manual_start_seconds": 0.749201,
+        "api_minus_manual_end_seconds": 0.288554,
+        "manual_recovery": {
+          "city_key": "sumy",
+          "region_id": "114",
+          "api_region_name": "Сумський район",
+          "start": "2026-09-27T01:36:51Z",
+          "end": "2026-09-27T03:32:00Z",
+          "alert_type": "AIR",
+          "source": "alerts.in.ua_manual_csv_recovery",
+          "source_kind": "manual_csv_export",
+          "source_files": [
+            "alerts_2026-09-27(1).csv"
+          ],
+          "recovery_artifact": "research/site_prod_bridge_continuity_repair_2026-09-27.json"
+        },
+        "ukrainealarm_api": {
+          "city_key": "sumy",
+          "region_id": "114",
+          "api_region_name": "Сумський район",
+          "start": "2026-09-27T01:36:51.749201Z",
+          "end": "2026-09-27T03:32:00.288554Z",
+          "alert_type": "AIR",
+          "inherited_bridge_source_url": "https://api.ukrainealarm.com/api/v3/alerts/regionHistory",
+          "explicit_manual_recovery_fields_present": false
+        },
+        "proposed_canonical_survivor": "ukrainealarm_api",
+        "proposed_recovery_provenance": {
+          "original_recovery_source": "alerts.in.ua_manual_csv_recovery",
+          "source_kind": "manual_csv_export",
+          "source_files": [
+            "alerts_2026-09-27(1).csv"
+          ],
+          "recovery_artifact": "research/site_prod_bridge_continuity_repair_2026-09-27.json",
+          "original_recovery_start": "2026-09-27T01:36:51Z",
+          "original_recovery_end": "2026-09-27T03:32:00Z"
+        }
+      },
+      {
+        "pair_id": "sumy-14",
+        "city_key": "sumy",
+        "pair_structure": "manual Alerts.in.ua recovery row + UkraineAlarm API row",
+        "manual_recovery_row_index": 1508,
+        "api_row_index": 1507,
+        "start_delta_seconds_abs": 0.591263,
+        "end_delta_seconds_abs": 0.343064,
+        "api_minus_manual_start_seconds": 0.591263,
+        "api_minus_manual_end_seconds": 0.343064,
+        "manual_recovery": {
+          "city_key": "sumy",
+          "region_id": "114",
+          "api_region_name": "Сумський район",
+          "start": "2026-09-27T03:50:59Z",
+          "end": "2026-09-27T04:45:00Z",
+          "alert_type": "AIR",
+          "source": "alerts.in.ua_manual_csv_recovery",
+          "source_kind": "manual_csv_export",
+          "source_files": [
+            "alerts_2026-09-27(1).csv"
+          ],
+          "recovery_artifact": "research/site_prod_bridge_continuity_repair_2026-09-27.json"
+        },
+        "ukrainealarm_api": {
+          "city_key": "sumy",
+          "region_id": "114",
+          "api_region_name": "Сумський район",
+          "start": "2026-09-27T03:50:59.591263Z",
+          "end": "2026-09-27T04:45:00.343064Z",
+          "alert_type": "AIR",
+          "inherited_bridge_source_url": "https://api.ukrainealarm.com/api/v3/alerts/regionHistory",
+          "explicit_manual_recovery_fields_present": false
+        },
+        "proposed_canonical_survivor": "ukrainealarm_api",
+        "proposed_recovery_provenance": {
+          "original_recovery_source": "alerts.in.ua_manual_csv_recovery",
+          "source_kind": "manual_csv_export",
+          "source_files": [
+            "alerts_2026-09-27(1).csv"
+          ],
+          "recovery_artifact": "research/site_prod_bridge_continuity_repair_2026-09-27.json",
+          "original_recovery_start": "2026-09-27T03:50:59Z",
+          "original_recovery_end": "2026-09-27T04:45:00Z"
+        }
+      }
+    ]
+  },
+  "proposed_canonical_survivor_rule": {
+    "survivor": "UkraineAlarm API row",
+    "timestamps": "retain API start and end exactly",
+    "primary_source_identity": "retain UkraineAlarm API identity; keep region_id, api_region_name, alert_type, and bridge source_url semantics",
+    "manual_source_identity": "do not overwrite or replace the API row's primary source identity with manual recovery source fields"
+  },
+  "proposed_provenance_retention_rule": {
+    "field": "recovery_provenance",
+    "location": "nested on the canonical UkraineAlarm API survivor",
+    "exact_structure": {
+      "original_recovery_source": "<manual row source>",
+      "source_kind": "<manual row source_kind>",
+      "source_files": [
+        "<manual row source_files...>"
+      ],
+      "recovery_artifact": "<manual row recovery_artifact>",
+      "original_recovery_start": "<manual row start>",
+      "original_recovery_end": "<manual row end>"
+    },
+    "semantics": "Preserve the manual recovery as factual provenance only; do not use it as the canonical timing or primary API source identity."
+  },
+  "code_defect": {
+    "file": "kyiv-air-alerts-grafana/scripts/apply_ukrainealarm_bridge.py",
+    "script_blob_sha": "9893f02f65f6392b2bdf67ea65da21ab2f239a71",
+    "persisted_event_exact_key_seed": {
+      "lines": "388-392",
+      "snippet": "    events = {\n        (e.get(\"city_key\"), e.get(\"start\"), e.get(\"end\")): e\n        for e in store.get(\"events\", [])\n        if isinstance(e, dict)\n    }",
+      "defect": "Persisted events are keyed only by exact (city_key, start, end), so tolerance-equivalent rows with sub-second timestamp differences remain distinct."
+    },
+    "api_exact_key_upsert": {
+      "line": 452,
+      "snippet": "                        events[(key, event[\"start\"], event[\"end\"])] = event",
+      "defect": "Fresh UkraineAlarm rows are inserted by the same exact tuple key; a manual recovery row whose timestamps differ within MATCH_TOLERANCE_SECONDS is not reconciled."
+    },
+    "serialization": {
+      "lines": "498-500",
+      "snippet": "    store[\"events\"] = sorted(\n        events.values(), key=lambda e: (e.get(\"start\") or \"\", e.get(\"city_key\") or \"\")\n    )",
+      "effect": "Both exact-key entries are serialized back to the persisted bridge."
+    }
+  },
+  "proposed_minimal_repair_algorithm": [
+    "Introduce one tolerance-aware completed-AIR equivalence check using the existing MATCH_TOLERANCE_SECONDS: same city_key and absolute start/end deltas each <= 15 seconds. Do not use generic interval overlap.",
+    "Run the same reconciliation against persisted store events before serialization so the already-persisted 52 manual/API pairs collapse even when no new API fetch introduces them.",
+    "For exactly one tolerance-equivalent pair consisting of one manual Alerts.in.ua recovery row and one UkraineAlarm API row, keep the API row and its timestamps and attach/merge the manual row under recovery_provenance.",
+    "Use the same tolerance-aware upsert when adding each fresh UkraineAlarm history event instead of assigning only by the exact (city_key, start, end) tuple.",
+    "Make provenance merge idempotent: rerunning must not duplicate the same recovery_provenance payload.",
+    "If a tolerance group contains multiple candidate API rows, multiple manual rows, an unexpected source structure, or any non-AIR/incomplete case, do not guess; flag/block that group for forensic review.",
+    "After reconciliation, sort exactly as today and recompute event_count. For this verified bridge state the deterministic reduction is 1540 -> 1488 events."
+  ],
+  "repair_invariants": {
+    "api_timestamps_preserved": true,
+    "api_primary_source_identity_preserved": true,
+    "manual_recovery_provenance_preserved": true,
+    "unrelated_rows_unchanged": true,
+    "generic_overlap_merge_forbidden": true,
+    "expected_pairs_removed": 52,
+    "expected_post_repair_event_count": 1488
+  },
+  "verdict": "BRIDGE DEDUP INVENTORY COMPLETE — READY FOR ATOMIC REPAIR"
+}
