@@ -1,0 +1,1438 @@
+{
+  "schema_version": 1,
+  "generated_at_utc": "2026-09-27T19:42:01.856701Z",
+  "repository": "olegbalakin-cmyk/kyiv-air-alerts-grafana",
+  "starting_branch": "multicity-wip-2026-09-16",
+  "starting_head": "29364ca6d1275e9fbbca657f5f20a2ec4f7eb179",
+  "preflight_branch": "historical-17-city-corrected-baseline-2026-09-27",
+  "workflow_run_id": "36345228959",
+  "forensic_artifact": {
+    "path": "research/historical_17_city_corpus_gap_forensic_inventory_2026-09-27.json",
+    "commit": "87c0993fe87037729a947a812cc70f8d8fac729a"
+  },
+  "historical_cutoff": "2026-09-17",
+  "upstream": {
+    "repository": "Vadimkin/ukrainian-air-raid-sirens-dataset",
+    "path": "datasets/official_data_uk.csv",
+    "blob_sha_expected": "71d70c0ca54968f530d596cf315616fa858800e1",
+    "blob_sha_actual": "71d70c0ca54968f530d596cf315616fa858800e1",
+    "blob_sha_calculated_from_bytes": "71d70c0ca54968f530d596cf315616fa858800e1",
+    "sha_match": true,
+    "source_commit_containing_blob": "58ee75bc20113181b9ddf8029d4cbf3a62d8cd10",
+    "csv_committed_to_this_repository": false
+  },
+  "canonical_logic": {
+    "reused_modules": [
+      "scripts/build_explosion_source_slices.py",
+      "scripts/expand_multicity_production.py",
+      "scripts/extend_remaining_proxies.py",
+      "scripts/add_duration_unit_switch.py",
+      "scripts/apply_ukrainealarm_bridge.py",
+      "scripts/replay_explosion_history.py"
+    ],
+    "episode_id_rule": "sha256(city_key + '|' + UTC alert_start + '|' + UTC alert_end)[:24] after canonical interval union",
+    "kharkiv_exact_city_only": true,
+    "kharkiv_hromada": "м. Харків та Харківська територіальна громада",
+    "boundary_exclusions": [
+      {
+        "parent_task_id": "chernihiv-P1",
+        "city_key": "chernihiv",
+        "alert_start": "2025-09-02T21:00:00Z",
+        "alert_end": "2025-09-03T08:41:22Z",
+        "reason": "exclude clipped carry-in at proxy coverage_start from alert-start denominator",
+        "before": 558,
+        "after": 557
+      },
+      {
+        "parent_task_id": "kharkiv-P1",
+        "city_key": "kharkiv",
+        "alert_start": "2025-02-17T19:02:05Z",
+        "alert_end": "2025-02-17T21:54:42Z",
+        "reason": "exclude exact adapter transition-boundary seed to preserve frozen parent denominator",
+        "before": 594,
+        "after": 593
+      }
+    ],
+    "boundary_reconciliation_error": null
+  },
+  "contract_corrections": {
+    "chernihiv": {
+      "old_p3_expected": 561,
+      "new_p3_expected": 560,
+      "old_city_expected": 1677,
+      "new_city_expected": 1676,
+      "root_cause": "EXPECTED_BASELINE_ERROR",
+      "synthetic_episode_added": false,
+      "basis": "Exact upstream identifies 490 P3 episodes and retained primary evidence identifies 70 additional episodes; no 561st identity is recoverable."
+    },
+    "kharkiv": {
+      "excluded_episode_id": "30e0080db2e490337f98d277",
+      "alert_start": "2025-02-17T19:02:05Z",
+      "alert_end": "2025-02-17T21:54:42Z",
+      "root_cause": "HISTORICAL_CUTOFF_ERROR",
+      "exclusion_rule": "existing exact-adapter transition-boundary rule: when first parent starts on exact adapter valid_from and contains frozen+1 episodes, exclude the unique episode whose start equals valid_from",
+      "observed_boundary_exclusion": {
+        "parent_task_id": "kharkiv-P1",
+        "city_key": "kharkiv",
+        "alert_start": "2025-02-17T19:02:05Z",
+        "alert_end": "2025-02-17T21:54:42Z",
+        "reason": "exclude exact adapter transition-boundary seed to preserve frozen parent denominator",
+        "before": 594,
+        "after": 593
+      }
+    },
+    "previous_expected_total": 17087,
+    "corrected_expected_total": 17086
+  },
+  "aggregate": {
+    "expected": 17086,
+    "starting_reconstructed": 6705,
+    "starting_missing": 10381,
+    "retained_primary_inventory_rows": 573,
+    "recovered_from_retained_primary": 565,
+    "recovered_from_upstream": 9874,
+    "retained_upstream_overlap": 58,
+    "unique_recovered": 10381,
+    "hypothetical_final_total": 17086,
+    "canonical_union_final_total": 17086,
+    "unresolved": 0,
+    "duplicate_canonical_ids": 0,
+    "unexplained_excess_episodes": 0,
+    "geography_ambiguities_affecting_target_universe": 0,
+    "episode_id_timestamp_mismatches": 0,
+    "cities_fully_reconciled": [
+      "chernihiv",
+      "chernivtsi",
+      "dnipro",
+      "ivano_frankivsk",
+      "kharkiv",
+      "kherson",
+      "khmelnytskyi",
+      "kropyvnytskyi",
+      "lutsk",
+      "mykolaiv",
+      "odesa",
+      "poltava",
+      "rivne",
+      "ternopil",
+      "uzhhorod",
+      "vinnytsia",
+      "zhytomyr"
+    ],
+    "cities_fully_reconciled_count": 17,
+    "cities_with_blockers": {},
+    "cities_with_blockers_count": 0,
+    "arithmetic_checks": {
+      "expected_minus_starting_equals_starting_missing": true,
+      "starting_plus_recovered_less_overlap_equals_hypothetical": true,
+      "hypothetical_equals_canonical_union": true,
+      "canonical_union_equals_expected": true
+    }
+  },
+  "cities": {
+    "chernihiv": {
+      "expected_episodes": 1676,
+      "current_reconstructed_episodes": 557,
+      "authoritative_current_reconstructed_episodes": 557,
+      "current_count_matches_authoritative": true,
+      "current_source_files": [
+        "data/explosion_metric_handoff/source_slices/chernihiv-P1a_alerts.json",
+        "data/explosion_metric_handoff/source_slices/chernihiv-P1b_alerts.json"
+      ],
+      "retained_primary_inventory_rows": 70,
+      "retained_primary_extracted_unique_rows": 70,
+      "retained_primary_block_diagnostics": [
+        {
+          "source_path": "kyiv-air-alerts-grafana/data/alerts_in_ua_bridge_2026-09-07_16.csv.gz.b64",
+          "source_kind": "Alerts.in.ua retained manual CSV payload",
+          "expected_rows": 60,
+          "extracted_rows": 60,
+          "match": true,
+          "raw_time_range": [
+            "2026-09-07T11:45:15+03:00",
+            "2026-09-16T23:06:37+03:00"
+          ]
+        },
+        {
+          "source_path": "kyiv-air-alerts-grafana/data/ukrainealarm_bridge.json",
+          "source_kind": "persisted UkraineAlarm regionHistory",
+          "expected_rows": 10,
+          "extracted_rows": 10,
+          "match": true,
+          "raw_time_range": [
+            "2026-09-16T20:39:08.406102Z",
+            "2026-09-17T19:58:45.814695Z"
+          ]
+        }
+      ],
+      "valid_retained_primary_additions": 70,
+      "valid_upstream_additions": 1049,
+      "retained_upstream_overlap": 0,
+      "unique_valid_additions": 1119,
+      "hypothetical_final_episode_count": 1676,
+      "canonical_union_episode_count": 1676,
+      "arithmetic_reconciles_to_canonical_union": true,
+      "unresolved_missing_episodes": 0,
+      "duplicate_canonical_ids": 0,
+      "current_source_duplicate_ids": 0,
+      "unexplained_excess_episodes": 0,
+      "unexplained_new_episode_count": 0,
+      "unexplained_new_episode_ids": [],
+      "geography_ambiguities": [],
+      "geography_ambiguity_count": 0,
+      "episode_id_timestamp_mismatch_count": 0,
+      "current_only_episode_count": 0,
+      "current_only_episode_details": [],
+      "new_final_overlapping_current_count": 0,
+      "new_final_overlapping_current_details": [],
+      "current_id_rule_errors": [],
+      "final_id_rule_errors": [],
+      "upstream_adapter": {
+        "type": "production_proxy",
+        "raion": "Чернігівський район",
+        "oblast": "Чернігівська область",
+        "coverage_start": "2025-09-03"
+      },
+      "canonical_union_adapter": {
+        "type": "production_proxy_assembled",
+        "name": "Чернігівський район + explicit Чернігівська область",
+        "coverage_start": "2025-09-03",
+        "static_bridge_events": 60,
+        "ukrainealarm_bridge_events": 20,
+        "ukrainealarm_bridge_continuous": true,
+        "static_bridge_coverage_start": "2026-09-06T21:00:00Z",
+        "static_bridge_coverage_end_exclusive": "2026-09-18T00:00:00Z"
+      },
+      "fully_reconciled": true,
+      "blockers": []
+    },
+    "chernivtsi": {
+      "expected_episodes": 113,
+      "current_reconstructed_episodes": 0,
+      "authoritative_current_reconstructed_episodes": 0,
+      "current_count_matches_authoritative": true,
+      "current_source_files": [],
+      "retained_primary_inventory_rows": 20,
+      "retained_primary_extracted_unique_rows": 20,
+      "retained_primary_block_diagnostics": [
+        {
+          "source_path": "kyiv-air-alerts-grafana/data/alerts_in_ua_bridge_additional_2026-09-07_16.csv.gz.b64",
+          "source_kind": "Alerts.in.ua retained manual CSV payload",
+          "expected_rows": 2,
+          "extracted_rows": 2,
+          "match": true,
+          "raw_time_range": [
+            "2026-09-12T05:22:11+03:00",
+            "2026-09-15T20:09:13+03:00"
+          ]
+        },
+        {
+          "source_path": "kyiv-air-alerts-grafana/data/ukrainealarm_bridge.json",
+          "source_kind": "persisted UkraineAlarm regionHistory",
+          "expected_rows": 15,
+          "extracted_rows": 15,
+          "match": true,
+          "raw_time_range": [
+            "2026-06-21T09:20:12.884688Z",
+            "2026-09-05T12:53:43.988227Z"
+          ]
+        },
+        {
+          "source_path": "kyiv-air-alerts-grafana/data/ukrainealarm_bridge.json",
+          "source_kind": "persisted UkraineAlarm regionHistory",
+          "expected_rows": 3,
+          "extracted_rows": 3,
+          "match": true,
+          "raw_time_range": [
+            "2026-09-16T23:05:57.991834Z",
+            "2026-09-17T10:41:56.505820Z"
+          ]
+        }
+      ],
+      "valid_retained_primary_additions": 20,
+      "valid_upstream_additions": 106,
+      "retained_upstream_overlap": 13,
+      "unique_valid_additions": 113,
+      "hypothetical_final_episode_count": 113,
+      "canonical_union_episode_count": 113,
+      "arithmetic_reconciles_to_canonical_union": true,
+      "unresolved_missing_episodes": 0,
+      "duplicate_canonical_ids": 0,
+      "current_source_duplicate_ids": 0,
+      "unexplained_excess_episodes": 0,
+      "unexplained_new_episode_count": 0,
+      "unexplained_new_episode_ids": [],
+      "geography_ambiguities": [],
+      "geography_ambiguity_count": 0,
+      "episode_id_timestamp_mismatch_count": 0,
+      "current_only_episode_count": 0,
+      "current_only_episode_details": [],
+      "new_final_overlapping_current_count": 0,
+      "new_final_overlapping_current_details": [],
+      "current_id_rule_errors": [],
+      "final_id_rule_errors": [],
+      "upstream_adapter": {
+        "type": "production_proxy",
+        "raion": "Чернівецький район",
+        "oblast": "Чернівецька область",
+        "coverage_start": "2025-11-06"
+      },
+      "canonical_union_adapter": {
+        "type": "production_proxy_assembled",
+        "name": "Чернівецький район + explicit Чернівецька область",
+        "coverage_start": "2025-11-06",
+        "static_bridge_events": 2,
+        "ukrainealarm_bridge_events": 20,
+        "ukrainealarm_bridge_continuous": true,
+        "static_bridge_coverage_start": "2026-09-06T21:00:00Z",
+        "static_bridge_coverage_end_exclusive": "2026-09-18T00:00:00Z"
+      },
+      "fully_reconciled": true,
+      "blockers": []
+    },
+    "dnipro": {
+      "expected_episodes": 2259,
+      "current_reconstructed_episodes": 1697,
+      "authoritative_current_reconstructed_episodes": 1697,
+      "current_count_matches_authoritative": true,
+      "current_source_files": [
+        "data/explosion_metric_handoff/source_slices/dnipro-P1a_alerts.json",
+        "data/explosion_metric_handoff/source_slices/dnipro-P1b_alerts.json",
+        "data/explosion_metric_handoff/source_slices/dnipro-P3a_alerts.json",
+        "data/explosion_metric_handoff/source_slices/dnipro-P3b_alerts.json",
+        "data/explosion_metric_handoff/source_slices/dnipro-P4a_alerts.json",
+        "data/explosion_metric_handoff/source_slices/dnipro-P4b_alerts.json"
+      ],
+      "retained_primary_inventory_rows": 0,
+      "retained_primary_extracted_unique_rows": 0,
+      "retained_primary_block_diagnostics": [],
+      "valid_retained_primary_additions": 0,
+      "valid_upstream_additions": 562,
+      "retained_upstream_overlap": 0,
+      "unique_valid_additions": 562,
+      "hypothetical_final_episode_count": 2259,
+      "canonical_union_episode_count": 2259,
+      "arithmetic_reconciles_to_canonical_union": true,
+      "unresolved_missing_episodes": 0,
+      "duplicate_canonical_ids": 0,
+      "current_source_duplicate_ids": 0,
+      "unexplained_excess_episodes": 0,
+      "unexplained_new_episode_count": 0,
+      "unexplained_new_episode_ids": [],
+      "geography_ambiguities": [],
+      "geography_ambiguity_count": 0,
+      "episode_id_timestamp_mismatch_count": 0,
+      "current_only_episode_count": 0,
+      "current_only_episode_details": [],
+      "new_final_overlapping_current_count": 0,
+      "new_final_overlapping_current_details": [],
+      "current_id_rule_errors": [],
+      "final_id_rule_errors": [],
+      "upstream_adapter": {
+        "type": "production_proxy",
+        "raion": "Дніпровський район",
+        "oblast": "Дніпропетровська область",
+        "coverage_start": "2025-05-01"
+      },
+      "canonical_union_adapter": {
+        "type": "production_proxy_assembled",
+        "name": "Дніпровський район + explicit Дніпропетровська область",
+        "coverage_start": "2025-05-01",
+        "static_bridge_events": 72,
+        "ukrainealarm_bridge_events": 20,
+        "ukrainealarm_bridge_continuous": true,
+        "static_bridge_coverage_start": "2026-09-06T21:00:00Z",
+        "static_bridge_coverage_end_exclusive": "2026-09-18T00:00:00Z"
+      },
+      "fully_reconciled": true,
+      "blockers": []
+    },
+    "ivano_frankivsk": {
+      "expected_episodes": 103,
+      "current_reconstructed_episodes": 0,
+      "authoritative_current_reconstructed_episodes": 0,
+      "current_count_matches_authoritative": true,
+      "current_source_files": [],
+      "retained_primary_inventory_rows": 20,
+      "retained_primary_extracted_unique_rows": 20,
+      "retained_primary_block_diagnostics": [
+        {
+          "source_path": "kyiv-air-alerts-grafana/data/alerts_in_ua_bridge_additional_2026-09-07_16.csv.gz.b64",
+          "source_kind": "Alerts.in.ua retained manual CSV payload",
+          "expected_rows": 3,
+          "extracted_rows": 3,
+          "match": true,
+          "raw_time_range": [
+            "2026-09-13T01:00:05+03:00",
+            "2026-09-15T20:09:02+03:00"
+          ]
+        },
+        {
+          "source_path": "kyiv-air-alerts-grafana/data/ukrainealarm_bridge.json",
+          "source_kind": "persisted UkraineAlarm regionHistory",
+          "expected_rows": 15,
+          "extracted_rows": 15,
+          "match": true,
+          "raw_time_range": [
+            "2026-06-11T20:31:05.085529Z",
+            "2026-09-01T18:46:21.925719Z"
+          ]
+        },
+        {
+          "source_path": "kyiv-air-alerts-grafana/data/ukrainealarm_bridge.json",
+          "source_kind": "persisted UkraineAlarm regionHistory",
+          "expected_rows": 2,
+          "extracted_rows": 2,
+          "match": true,
+          "raw_time_range": [
+            "2026-09-16T23:05:55.480787Z",
+            "2026-09-17T10:41:41.497131Z"
+          ]
+        }
+      ],
+      "valid_retained_primary_additions": 20,
+      "valid_upstream_additions": 97,
+      "retained_upstream_overlap": 14,
+      "unique_valid_additions": 103,
+      "hypothetical_final_episode_count": 103,
+      "canonical_union_episode_count": 103,
+      "arithmetic_reconciles_to_canonical_union": true,
+      "unresolved_missing_episodes": 0,
+      "duplicate_canonical_ids": 0,
+      "current_source_duplicate_ids": 0,
+      "unexplained_excess_episodes": 0,
+      "unexplained_new_episode_count": 0,
+      "unexplained_new_episode_ids": [],
+      "geography_ambiguities": [],
+      "geography_ambiguity_count": 0,
+      "episode_id_timestamp_mismatch_count": 0,
+      "current_only_episode_count": 0,
+      "current_only_episode_details": [],
+      "new_final_overlapping_current_count": 0,
+      "new_final_overlapping_current_details": [],
+      "current_id_rule_errors": [],
+      "final_id_rule_errors": [],
+      "upstream_adapter": {
+        "type": "production_proxy",
+        "raion": "Івано-Франківський район",
+        "oblast": "Івано-Франківська область",
+        "coverage_start": "2025-11-06"
+      },
+      "canonical_union_adapter": {
+        "type": "production_proxy_assembled",
+        "name": "Івано-Франківський район + explicit Івано-Франківська область",
+        "coverage_start": "2025-11-06",
+        "static_bridge_events": 3,
+        "ukrainealarm_bridge_events": 20,
+        "ukrainealarm_bridge_continuous": true,
+        "static_bridge_coverage_start": "2026-09-06T21:00:00Z",
+        "static_bridge_coverage_end_exclusive": "2026-09-18T00:00:00Z"
+      },
+      "fully_reconciled": true,
+      "blockers": []
+    },
+    "kharkiv": {
+      "expected_episodes": 3565,
+      "current_reconstructed_episodes": 2378,
+      "authoritative_current_reconstructed_episodes": 2378,
+      "current_count_matches_authoritative": true,
+      "current_source_files": [
+        "data/explosion_metric_handoff/source_slices/kharkiv-P3a_alerts.json",
+        "data/explosion_metric_handoff/source_slices/kharkiv-P3b_alerts.json",
+        "data/explosion_metric_handoff/source_slices/kharkiv-P4a_alerts.json",
+        "data/explosion_metric_handoff/source_slices/kharkiv-P4b_alerts.json",
+        "data/explosion_metric_handoff/source_slices/kharkiv-P5a_alerts.json",
+        "data/explosion_metric_handoff/source_slices/kharkiv-P5b_alerts.json",
+        "data/explosion_metric_handoff/source_slices/kharkiv-P6a_alerts.json",
+        "data/explosion_metric_handoff/source_slices/kharkiv-P6b_alerts.json",
+        "data/explosion_metric_handoff/source_slices/kharkiv-P6c_alerts.json"
+      ],
+      "retained_primary_inventory_rows": 0,
+      "retained_primary_extracted_unique_rows": 0,
+      "retained_primary_block_diagnostics": [],
+      "valid_retained_primary_additions": 0,
+      "valid_upstream_additions": 1187,
+      "retained_upstream_overlap": 0,
+      "unique_valid_additions": 1187,
+      "hypothetical_final_episode_count": 3565,
+      "canonical_union_episode_count": 3565,
+      "arithmetic_reconciles_to_canonical_union": true,
+      "unresolved_missing_episodes": 0,
+      "duplicate_canonical_ids": 0,
+      "current_source_duplicate_ids": 0,
+      "unexplained_excess_episodes": 0,
+      "unexplained_new_episode_count": 0,
+      "unexplained_new_episode_ids": [],
+      "geography_ambiguities": [],
+      "geography_ambiguity_count": 0,
+      "episode_id_timestamp_mismatch_count": 0,
+      "current_only_episode_count": 0,
+      "current_only_episode_details": [],
+      "new_final_overlapping_current_count": 0,
+      "new_final_overlapping_current_details": [],
+      "current_id_rule_errors": [],
+      "final_id_rule_errors": [],
+      "upstream_adapter": {
+        "type": "production_exact_city",
+        "name": "м. Харків та Харківська територіальна громада",
+        "valid_from": "2025-02-17T19:02:05+00:00"
+      },
+      "canonical_union_adapter": {
+        "type": "production_exact_city_assembled",
+        "name": "м. Харків та Харківська територіальна громада",
+        "valid_from": "2025-02-17T19:02:05+00:00",
+        "static_bridge_events": 87,
+        "ukrainealarm_bridge_events": 19,
+        "ukrainealarm_bridge_continuous": true,
+        "static_bridge_coverage_start": "2026-09-06T21:00:00Z",
+        "static_bridge_coverage_end_exclusive": "2026-09-18T00:00:00Z"
+      },
+      "fully_reconciled": true,
+      "blockers": []
+    },
+    "kherson": {
+      "expected_episodes": 1412,
+      "current_reconstructed_episodes": 0,
+      "authoritative_current_reconstructed_episodes": 0,
+      "current_count_matches_authoritative": true,
+      "current_source_files": [],
+      "retained_primary_inventory_rows": 59,
+      "retained_primary_extracted_unique_rows": 59,
+      "retained_primary_block_diagnostics": [
+        {
+          "source_path": "kyiv-air-alerts-grafana/data/alerts_in_ua_bridge_additional_2026-09-07_16.csv.gz.b64",
+          "source_kind": "Alerts.in.ua retained manual CSV payload",
+          "expected_rows": 52,
+          "extracted_rows": 52,
+          "match": true,
+          "raw_time_range": [
+            "2026-09-07T05:01:44+03:00",
+            "2026-09-16T19:04:57+03:00"
+          ]
+        },
+        {
+          "source_path": "kyiv-air-alerts-grafana/data/ukrainealarm_bridge.json",
+          "source_kind": "persisted UkraineAlarm regionHistory",
+          "expected_rows": 7,
+          "extracted_rows": 7,
+          "match": true,
+          "raw_time_range": [
+            "2026-09-16T22:18:15.801870Z",
+            "2026-09-17T18:48:12.811840Z"
+          ]
+        }
+      ],
+      "valid_retained_primary_additions": 57,
+      "valid_upstream_additions": 1355,
+      "retained_upstream_overlap": 0,
+      "unique_valid_additions": 1412,
+      "hypothetical_final_episode_count": 1412,
+      "canonical_union_episode_count": 1412,
+      "arithmetic_reconciles_to_canonical_union": true,
+      "unresolved_missing_episodes": 0,
+      "duplicate_canonical_ids": 0,
+      "current_source_duplicate_ids": 0,
+      "unexplained_excess_episodes": 0,
+      "unexplained_new_episode_count": 0,
+      "unexplained_new_episode_ids": [],
+      "geography_ambiguities": [],
+      "geography_ambiguity_count": 0,
+      "episode_id_timestamp_mismatch_count": 0,
+      "current_only_episode_count": 0,
+      "current_only_episode_details": [],
+      "new_final_overlapping_current_count": 0,
+      "new_final_overlapping_current_details": [],
+      "current_id_rule_errors": [],
+      "final_id_rule_errors": [],
+      "upstream_adapter": {
+        "type": "production_proxy",
+        "raion": "Херсонський район",
+        "oblast": "Херсонська область",
+        "coverage_start": "2025-08-30"
+      },
+      "canonical_union_adapter": {
+        "type": "production_proxy_assembled",
+        "name": "Херсонський район + explicit Херсонська область",
+        "coverage_start": "2025-08-30",
+        "static_bridge_events": 52,
+        "ukrainealarm_bridge_events": 20,
+        "ukrainealarm_bridge_continuous": true,
+        "static_bridge_coverage_start": "2026-09-06T21:00:00Z",
+        "static_bridge_coverage_end_exclusive": "2026-09-18T00:00:00Z"
+      },
+      "fully_reconciled": true,
+      "blockers": []
+    },
+    "khmelnytskyi": {
+      "expected_episodes": 248,
+      "current_reconstructed_episodes": 0,
+      "authoritative_current_reconstructed_episodes": 0,
+      "current_count_matches_authoritative": true,
+      "current_source_files": [],
+      "retained_primary_inventory_rows": 20,
+      "retained_primary_extracted_unique_rows": 20,
+      "retained_primary_block_diagnostics": [
+        {
+          "source_path": "kyiv-air-alerts-grafana/data/alerts_in_ua_bridge_2026-09-07_16.csv.gz.b64",
+          "source_kind": "Alerts.in.ua retained manual CSV payload",
+          "expected_rows": 17,
+          "extracted_rows": 17,
+          "match": true,
+          "raw_time_range": [
+            "2026-09-07T20:27:56+03:00",
+            "2026-09-15T20:09:13+03:00"
+          ]
+        },
+        {
+          "source_path": "kyiv-air-alerts-grafana/data/ukrainealarm_bridge.json",
+          "source_kind": "persisted UkraineAlarm regionHistory",
+          "expected_rows": 3,
+          "extracted_rows": 3,
+          "match": true,
+          "raw_time_range": [
+            "2026-09-16T23:00:53.849844Z",
+            "2026-09-17T10:41:48.888281Z"
+          ]
+        }
+      ],
+      "valid_retained_primary_additions": 19,
+      "valid_upstream_additions": 229,
+      "retained_upstream_overlap": 0,
+      "unique_valid_additions": 248,
+      "hypothetical_final_episode_count": 248,
+      "canonical_union_episode_count": 248,
+      "arithmetic_reconciles_to_canonical_union": true,
+      "unresolved_missing_episodes": 0,
+      "duplicate_canonical_ids": 0,
+      "current_source_duplicate_ids": 0,
+      "unexplained_excess_episodes": 0,
+      "unexplained_new_episode_count": 0,
+      "unexplained_new_episode_ids": [],
+      "geography_ambiguities": [],
+      "geography_ambiguity_count": 0,
+      "episode_id_timestamp_mismatch_count": 0,
+      "current_only_episode_count": 0,
+      "current_only_episode_details": [],
+      "new_final_overlapping_current_count": 0,
+      "new_final_overlapping_current_details": [],
+      "current_id_rule_errors": [],
+      "final_id_rule_errors": [],
+      "upstream_adapter": {
+        "type": "production_proxy",
+        "raion": "Хмельницький район",
+        "oblast": "Хмельницька область",
+        "coverage_start": "2025-07-07"
+      },
+      "canonical_union_adapter": {
+        "type": "production_proxy_assembled",
+        "name": "Хмельницький район + explicit Хмельницька область",
+        "coverage_start": "2025-07-07",
+        "static_bridge_events": 17,
+        "ukrainealarm_bridge_events": 20,
+        "ukrainealarm_bridge_continuous": true,
+        "static_bridge_coverage_start": "2026-09-06T21:00:00Z",
+        "static_bridge_coverage_end_exclusive": "2026-09-18T00:00:00Z"
+      },
+      "fully_reconciled": true,
+      "blockers": []
+    },
+    "kropyvnytskyi": {
+      "expected_episodes": 1161,
+      "current_reconstructed_episodes": 0,
+      "authoritative_current_reconstructed_episodes": 0,
+      "current_count_matches_authoritative": true,
+      "current_source_files": [],
+      "retained_primary_inventory_rows": 64,
+      "retained_primary_extracted_unique_rows": 64,
+      "retained_primary_block_diagnostics": [
+        {
+          "source_path": "kyiv-air-alerts-grafana/data/alerts_in_ua_bridge_2026-09-07_16.csv.gz.b64",
+          "source_kind": "Alerts.in.ua retained manual CSV payload",
+          "expected_rows": 56,
+          "extracted_rows": 56,
+          "match": true,
+          "raw_time_range": [
+            "2026-09-07T16:38:21+03:00",
+            "2026-09-16T23:42:36+03:00"
+          ]
+        },
+        {
+          "source_path": "kyiv-air-alerts-grafana/data/ukrainealarm_bridge.json",
+          "source_kind": "persisted UkraineAlarm regionHistory",
+          "expected_rows": 8,
+          "extracted_rows": 8,
+          "match": true,
+          "raw_time_range": [
+            "2026-09-16T22:59:13.471331Z",
+            "2026-09-17T16:46:43.443117Z"
+          ]
+        }
+      ],
+      "valid_retained_primary_additions": 62,
+      "valid_upstream_additions": 1099,
+      "retained_upstream_overlap": 0,
+      "unique_valid_additions": 1161,
+      "hypothetical_final_episode_count": 1161,
+      "canonical_union_episode_count": 1161,
+      "arithmetic_reconciles_to_canonical_union": true,
+      "unresolved_missing_episodes": 0,
+      "duplicate_canonical_ids": 0,
+      "current_source_duplicate_ids": 0,
+      "unexplained_excess_episodes": 0,
+      "unexplained_new_episode_count": 0,
+      "unexplained_new_episode_ids": [],
+      "geography_ambiguities": [],
+      "geography_ambiguity_count": 0,
+      "episode_id_timestamp_mismatch_count": 0,
+      "current_only_episode_count": 0,
+      "current_only_episode_details": [],
+      "new_final_overlapping_current_count": 0,
+      "new_final_overlapping_current_details": [],
+      "current_id_rule_errors": [],
+      "final_id_rule_errors": [],
+      "upstream_adapter": {
+        "type": "production_proxy",
+        "raion": "Кропивницький район",
+        "oblast": "Кіровоградська область",
+        "coverage_start": "2025-09-01"
+      },
+      "canonical_union_adapter": {
+        "type": "production_proxy_assembled",
+        "name": "Кропивницький район + explicit Кіровоградська область",
+        "coverage_start": "2025-09-01",
+        "static_bridge_events": 56,
+        "ukrainealarm_bridge_events": 20,
+        "ukrainealarm_bridge_continuous": true,
+        "static_bridge_coverage_start": "2026-09-06T21:00:00Z",
+        "static_bridge_coverage_end_exclusive": "2026-09-18T00:00:00Z"
+      },
+      "fully_reconciled": true,
+      "blockers": []
+    },
+    "lutsk": {
+      "expected_episodes": 135,
+      "current_reconstructed_episodes": 0,
+      "authoritative_current_reconstructed_episodes": 0,
+      "current_count_matches_authoritative": true,
+      "current_source_files": [],
+      "retained_primary_inventory_rows": 20,
+      "retained_primary_extracted_unique_rows": 20,
+      "retained_primary_block_diagnostics": [
+        {
+          "source_path": "kyiv-air-alerts-grafana/data/alerts_in_ua_bridge_additional_2026-09-07_16.csv.gz.b64",
+          "source_kind": "Alerts.in.ua retained manual CSV payload",
+          "expected_rows": 13,
+          "extracted_rows": 13,
+          "match": true,
+          "raw_time_range": [
+            "2026-09-08T07:12:55+03:00",
+            "2026-09-16T08:16:30+03:00"
+          ]
+        },
+        {
+          "source_path": "kyiv-air-alerts-grafana/data/ukrainealarm_bridge.json",
+          "source_kind": "persisted UkraineAlarm regionHistory",
+          "expected_rows": 5,
+          "extracted_rows": 5,
+          "match": true,
+          "raw_time_range": [
+            "2026-08-30T21:30:43.131492Z",
+            "2026-09-05T12:51:14.507732Z"
+          ]
+        },
+        {
+          "source_path": "kyiv-air-alerts-grafana/data/ukrainealarm_bridge.json",
+          "source_kind": "persisted UkraineAlarm regionHistory",
+          "expected_rows": 2,
+          "extracted_rows": 2,
+          "match": true,
+          "raw_time_range": [
+            "2026-09-16T23:05:59.864019Z",
+            "2026-09-17T10:41:44.988461Z"
+          ]
+        }
+      ],
+      "valid_retained_primary_additions": 20,
+      "valid_upstream_additions": 119,
+      "retained_upstream_overlap": 4,
+      "unique_valid_additions": 135,
+      "hypothetical_final_episode_count": 135,
+      "canonical_union_episode_count": 135,
+      "arithmetic_reconciles_to_canonical_union": true,
+      "unresolved_missing_episodes": 0,
+      "duplicate_canonical_ids": 0,
+      "current_source_duplicate_ids": 0,
+      "unexplained_excess_episodes": 0,
+      "unexplained_new_episode_count": 0,
+      "unexplained_new_episode_ids": [],
+      "geography_ambiguities": [],
+      "geography_ambiguity_count": 0,
+      "episode_id_timestamp_mismatch_count": 0,
+      "current_only_episode_count": 0,
+      "current_only_episode_details": [],
+      "new_final_overlapping_current_count": 0,
+      "new_final_overlapping_current_details": [],
+      "current_id_rule_errors": [],
+      "final_id_rule_errors": [],
+      "upstream_adapter": {
+        "type": "production_proxy",
+        "raion": "Луцький район",
+        "oblast": "Волинська область",
+        "coverage_start": "2025-11-06"
+      },
+      "canonical_union_adapter": {
+        "type": "production_proxy_assembled",
+        "name": "Луцький район + explicit Волинська область",
+        "coverage_start": "2025-11-06",
+        "static_bridge_events": 13,
+        "ukrainealarm_bridge_events": 20,
+        "ukrainealarm_bridge_continuous": true,
+        "static_bridge_coverage_start": "2026-09-06T21:00:00Z",
+        "static_bridge_coverage_end_exclusive": "2026-09-18T00:00:00Z"
+      },
+      "fully_reconciled": true,
+      "blockers": []
+    },
+    "mykolaiv": {
+      "expected_episodes": 1648,
+      "current_reconstructed_episodes": 1097,
+      "authoritative_current_reconstructed_episodes": 1097,
+      "current_count_matches_authoritative": true,
+      "current_source_files": [
+        "data/explosion_metric_handoff/source_slices/mykolaiv-P2a_alerts.json",
+        "data/explosion_metric_handoff/source_slices/mykolaiv-P2b_alerts.json",
+        "data/explosion_metric_handoff/source_slices/mykolaiv-P3a_alerts.json",
+        "data/explosion_metric_handoff/source_slices/mykolaiv-P3b_alerts.json"
+      ],
+      "retained_primary_inventory_rows": 0,
+      "retained_primary_extracted_unique_rows": 0,
+      "retained_primary_block_diagnostics": [],
+      "valid_retained_primary_additions": 0,
+      "valid_upstream_additions": 551,
+      "retained_upstream_overlap": 0,
+      "unique_valid_additions": 551,
+      "hypothetical_final_episode_count": 1648,
+      "canonical_union_episode_count": 1648,
+      "arithmetic_reconciles_to_canonical_union": true,
+      "unresolved_missing_episodes": 0,
+      "duplicate_canonical_ids": 0,
+      "current_source_duplicate_ids": 0,
+      "unexplained_excess_episodes": 0,
+      "unexplained_new_episode_count": 0,
+      "unexplained_new_episode_ids": [],
+      "geography_ambiguities": [],
+      "geography_ambiguity_count": 0,
+      "episode_id_timestamp_mismatch_count": 0,
+      "current_only_episode_count": 0,
+      "current_only_episode_details": [],
+      "new_final_overlapping_current_count": 0,
+      "new_final_overlapping_current_details": [],
+      "current_id_rule_errors": [],
+      "final_id_rule_errors": [],
+      "upstream_adapter": {
+        "type": "production_proxy",
+        "raion": "Миколаївський район",
+        "oblast": "Миколаївська область",
+        "coverage_start": "2025-11-05"
+      },
+      "canonical_union_adapter": {
+        "type": "production_proxy_assembled",
+        "name": "Миколаївський район + explicit Миколаївська область",
+        "coverage_start": "2025-11-05",
+        "static_bridge_events": 88,
+        "ukrainealarm_bridge_events": 20,
+        "ukrainealarm_bridge_continuous": true,
+        "static_bridge_coverage_start": "2026-09-06T21:00:00Z",
+        "static_bridge_coverage_end_exclusive": "2026-09-18T00:00:00Z"
+      },
+      "fully_reconciled": true,
+      "blockers": []
+    },
+    "odesa": {
+      "expected_episodes": 1465,
+      "current_reconstructed_episodes": 976,
+      "authoritative_current_reconstructed_episodes": 976,
+      "current_count_matches_authoritative": true,
+      "current_source_files": [
+        "data/explosion_metric_handoff/source_slices/odesa-P1a_alerts.json",
+        "data/explosion_metric_handoff/source_slices/odesa-P1b_alerts.json",
+        "data/explosion_metric_handoff/source_slices/odesa-P2a_alerts.json",
+        "data/explosion_metric_handoff/source_slices/odesa-P2b_alerts.json"
+      ],
+      "retained_primary_inventory_rows": 94,
+      "retained_primary_extracted_unique_rows": 94,
+      "retained_primary_block_diagnostics": [
+        {
+          "source_path": "kyiv-air-alerts-grafana/data/alerts_in_ua_bridge_2026-09-07_16.csv.gz.b64",
+          "source_kind": "Alerts.in.ua retained manual CSV payload",
+          "expected_rows": 81,
+          "extracted_rows": 81,
+          "match": true,
+          "raw_time_range": [
+            "2026-09-07T16:05:30+03:00",
+            "2026-09-16T23:35:43+03:00"
+          ]
+        },
+        {
+          "source_path": "kyiv-air-alerts-grafana/data/ukrainealarm_bridge.json",
+          "source_kind": "persisted UkraineAlarm regionHistory",
+          "expected_rows": 13,
+          "extracted_rows": 13,
+          "match": true,
+          "raw_time_range": [
+            "2026-09-16T21:22:36.809687Z",
+            "2026-09-17T18:24:20.551812Z"
+          ]
+        }
+      ],
+      "valid_retained_primary_additions": 92,
+      "valid_upstream_additions": 397,
+      "retained_upstream_overlap": 0,
+      "unique_valid_additions": 489,
+      "hypothetical_final_episode_count": 1465,
+      "canonical_union_episode_count": 1465,
+      "arithmetic_reconciles_to_canonical_union": true,
+      "unresolved_missing_episodes": 0,
+      "duplicate_canonical_ids": 0,
+      "current_source_duplicate_ids": 0,
+      "unexplained_excess_episodes": 0,
+      "unexplained_new_episode_count": 0,
+      "unexplained_new_episode_ids": [],
+      "geography_ambiguities": [],
+      "geography_ambiguity_count": 0,
+      "episode_id_timestamp_mismatch_count": 0,
+      "current_only_episode_count": 0,
+      "current_only_episode_details": [],
+      "new_final_overlapping_current_count": 0,
+      "new_final_overlapping_current_details": [],
+      "current_id_rule_errors": [],
+      "final_id_rule_errors": [],
+      "upstream_adapter": {
+        "type": "production_proxy",
+        "raion": "Одеський район",
+        "oblast": "Одеська область",
+        "coverage_start": "2025-11-04"
+      },
+      "canonical_union_adapter": {
+        "type": "production_proxy_assembled",
+        "name": "Одеський район + explicit Одеська область",
+        "coverage_start": "2025-11-04",
+        "static_bridge_events": 81,
+        "ukrainealarm_bridge_events": 20,
+        "ukrainealarm_bridge_continuous": true,
+        "static_bridge_coverage_start": "2026-09-06T21:00:00Z",
+        "static_bridge_coverage_end_exclusive": "2026-09-18T00:00:00Z"
+      },
+      "fully_reconciled": true,
+      "blockers": []
+    },
+    "poltava": {
+      "expected_episodes": 1805,
+      "current_reconstructed_episodes": 0,
+      "authoritative_current_reconstructed_episodes": 0,
+      "current_count_matches_authoritative": true,
+      "current_source_files": [],
+      "retained_primary_inventory_rows": 74,
+      "retained_primary_extracted_unique_rows": 74,
+      "retained_primary_block_diagnostics": [
+        {
+          "source_path": "kyiv-air-alerts-grafana/data/alerts_in_ua_bridge_2026-09-07_16.csv.gz.b64",
+          "source_kind": "Alerts.in.ua retained manual CSV payload",
+          "expected_rows": 65,
+          "extracted_rows": 65,
+          "match": true,
+          "raw_time_range": [
+            "2026-09-07T07:38:06+03:00",
+            "2026-09-16T21:44:38+03:00"
+          ]
+        },
+        {
+          "source_path": "kyiv-air-alerts-grafana/data/ukrainealarm_bridge.json",
+          "source_kind": "persisted UkraineAlarm regionHistory",
+          "expected_rows": 9,
+          "extracted_rows": 9,
+          "match": true,
+          "raw_time_range": [
+            "2026-09-16T21:58:27.254513Z",
+            "2026-09-17T17:25:10.189943Z"
+          ]
+        }
+      ],
+      "valid_retained_primary_additions": 74,
+      "valid_upstream_additions": 1732,
+      "retained_upstream_overlap": 1,
+      "unique_valid_additions": 1805,
+      "hypothetical_final_episode_count": 1805,
+      "canonical_union_episode_count": 1805,
+      "arithmetic_reconciles_to_canonical_union": true,
+      "unresolved_missing_episodes": 0,
+      "duplicate_canonical_ids": 0,
+      "current_source_duplicate_ids": 0,
+      "unexplained_excess_episodes": 0,
+      "unexplained_new_episode_count": 0,
+      "unexplained_new_episode_ids": [],
+      "geography_ambiguities": [],
+      "geography_ambiguity_count": 0,
+      "episode_id_timestamp_mismatch_count": 0,
+      "current_only_episode_count": 0,
+      "current_only_episode_details": [],
+      "new_final_overlapping_current_count": 0,
+      "new_final_overlapping_current_details": [],
+      "current_id_rule_errors": [],
+      "final_id_rule_errors": [],
+      "upstream_adapter": {
+        "type": "production_proxy",
+        "raion": "Полтавський район",
+        "oblast": "Полтавська область",
+        "coverage_start": "2025-08-01"
+      },
+      "canonical_union_adapter": {
+        "type": "production_proxy_assembled",
+        "name": "Полтавський район + explicit Полтавська область",
+        "coverage_start": "2025-08-01",
+        "static_bridge_events": 65,
+        "ukrainealarm_bridge_events": 20,
+        "ukrainealarm_bridge_continuous": true,
+        "static_bridge_coverage_start": "2026-09-06T21:00:00Z",
+        "static_bridge_coverage_end_exclusive": "2026-09-18T00:00:00Z"
+      },
+      "fully_reconciled": true,
+      "blockers": []
+    },
+    "rivne": {
+      "expected_episodes": 232,
+      "current_reconstructed_episodes": 0,
+      "authoritative_current_reconstructed_episodes": 0,
+      "current_count_matches_authoritative": true,
+      "current_source_files": [],
+      "retained_primary_inventory_rows": 25,
+      "retained_primary_extracted_unique_rows": 25,
+      "retained_primary_block_diagnostics": [
+        {
+          "source_path": "kyiv-air-alerts-grafana/data/alerts_in_ua_bridge_2026-09-07_16.csv.gz.b64",
+          "source_kind": "Alerts.in.ua retained manual CSV payload",
+          "expected_rows": 21,
+          "extracted_rows": 21,
+          "match": true,
+          "raw_time_range": [
+            "2026-09-08T04:03:25+03:00",
+            "2026-09-16T08:16:30+03:00"
+          ]
+        },
+        {
+          "source_path": "kyiv-air-alerts-grafana/data/ukrainealarm_bridge.json",
+          "source_kind": "persisted UkraineAlarm regionHistory",
+          "expected_rows": 4,
+          "extracted_rows": 4,
+          "match": true,
+          "raw_time_range": [
+            "2026-09-16T23:00:54.171217Z",
+            "2026-09-17T10:41:43.492512Z"
+          ]
+        }
+      ],
+      "valid_retained_primary_additions": 24,
+      "valid_upstream_additions": 208,
+      "retained_upstream_overlap": 0,
+      "unique_valid_additions": 232,
+      "hypothetical_final_episode_count": 232,
+      "canonical_union_episode_count": 232,
+      "arithmetic_reconciles_to_canonical_union": true,
+      "unresolved_missing_episodes": 0,
+      "duplicate_canonical_ids": 0,
+      "current_source_duplicate_ids": 0,
+      "unexplained_excess_episodes": 0,
+      "unexplained_new_episode_count": 0,
+      "unexplained_new_episode_ids": [],
+      "geography_ambiguities": [],
+      "geography_ambiguity_count": 0,
+      "episode_id_timestamp_mismatch_count": 0,
+      "current_only_episode_count": 0,
+      "current_only_episode_details": [],
+      "new_final_overlapping_current_count": 0,
+      "new_final_overlapping_current_details": [],
+      "current_id_rule_errors": [],
+      "final_id_rule_errors": [],
+      "upstream_adapter": {
+        "type": "production_proxy",
+        "raion": "Рівненський район",
+        "oblast": "Рівненська область",
+        "coverage_start": "2025-08-01"
+      },
+      "canonical_union_adapter": {
+        "type": "production_proxy_assembled",
+        "name": "Рівненський район + explicit Рівненська область",
+        "coverage_start": "2025-08-01",
+        "static_bridge_events": 21,
+        "ukrainealarm_bridge_events": 20,
+        "ukrainealarm_bridge_continuous": true,
+        "static_bridge_coverage_start": "2026-09-06T21:00:00Z",
+        "static_bridge_coverage_end_exclusive": "2026-09-18T00:00:00Z"
+      },
+      "fully_reconciled": true,
+      "blockers": []
+    },
+    "ternopil": {
+      "expected_episodes": 125,
+      "current_reconstructed_episodes": 0,
+      "authoritative_current_reconstructed_episodes": 0,
+      "current_count_matches_authoritative": true,
+      "current_source_files": [],
+      "retained_primary_inventory_rows": 20,
+      "retained_primary_extracted_unique_rows": 20,
+      "retained_primary_block_diagnostics": [
+        {
+          "source_path": "kyiv-air-alerts-grafana/data/alerts_in_ua_bridge_additional_2026-09-07_16.csv.gz.b64",
+          "source_kind": "Alerts.in.ua retained manual CSV payload",
+          "expected_rows": 5,
+          "extracted_rows": 5,
+          "match": true,
+          "raw_time_range": [
+            "2026-09-10T18:33:21+03:00",
+            "2026-09-15T20:09:13+03:00"
+          ]
+        },
+        {
+          "source_path": "kyiv-air-alerts-grafana/data/ukrainealarm_bridge.json",
+          "source_kind": "persisted UkraineAlarm regionHistory",
+          "expected_rows": 13,
+          "extracted_rows": 13,
+          "match": true,
+          "raw_time_range": [
+            "2026-08-04T17:22:06.031567Z",
+            "2026-09-03T03:37:16.086417Z"
+          ]
+        },
+        {
+          "source_path": "kyiv-air-alerts-grafana/data/ukrainealarm_bridge.json",
+          "source_kind": "persisted UkraineAlarm regionHistory",
+          "expected_rows": 2,
+          "extracted_rows": 2,
+          "match": true,
+          "raw_time_range": [
+            "2026-09-16T23:05:58.779367Z",
+            "2026-09-17T10:41:45.978009Z"
+          ]
+        }
+      ],
+      "valid_retained_primary_additions": 20,
+      "valid_upstream_additions": 114,
+      "retained_upstream_overlap": 9,
+      "unique_valid_additions": 125,
+      "hypothetical_final_episode_count": 125,
+      "canonical_union_episode_count": 125,
+      "arithmetic_reconciles_to_canonical_union": true,
+      "unresolved_missing_episodes": 0,
+      "duplicate_canonical_ids": 0,
+      "current_source_duplicate_ids": 0,
+      "unexplained_excess_episodes": 0,
+      "unexplained_new_episode_count": 0,
+      "unexplained_new_episode_ids": [],
+      "geography_ambiguities": [],
+      "geography_ambiguity_count": 0,
+      "episode_id_timestamp_mismatch_count": 0,
+      "current_only_episode_count": 0,
+      "current_only_episode_details": [],
+      "new_final_overlapping_current_count": 0,
+      "new_final_overlapping_current_details": [],
+      "current_id_rule_errors": [],
+      "final_id_rule_errors": [],
+      "upstream_adapter": {
+        "type": "production_proxy",
+        "raion": "Тернопільський район",
+        "oblast": "Тернопільська область",
+        "coverage_start": "2025-11-06"
+      },
+      "canonical_union_adapter": {
+        "type": "production_proxy_assembled",
+        "name": "Тернопільський район + explicit Тернопільська область",
+        "coverage_start": "2025-11-06",
+        "static_bridge_events": 5,
+        "ukrainealarm_bridge_events": 20,
+        "ukrainealarm_bridge_continuous": true,
+        "static_bridge_coverage_start": "2026-09-06T21:00:00Z",
+        "static_bridge_coverage_end_exclusive": "2026-09-18T00:00:00Z"
+      },
+      "fully_reconciled": true,
+      "blockers": []
+    },
+    "uzhhorod": {
+      "expected_episodes": 92,
+      "current_reconstructed_episodes": 0,
+      "authoritative_current_reconstructed_episodes": 0,
+      "current_count_matches_authoritative": true,
+      "current_source_files": [],
+      "retained_primary_inventory_rows": 20,
+      "retained_primary_extracted_unique_rows": 20,
+      "retained_primary_block_diagnostics": [
+        {
+          "source_path": "kyiv-air-alerts-grafana/data/alerts_in_ua_bridge_additional_2026-09-07_16.csv.gz.b64",
+          "source_kind": "Alerts.in.ua retained manual CSV payload",
+          "expected_rows": 1,
+          "extracted_rows": 1,
+          "match": true,
+          "raw_time_range": [
+            "2026-09-15T19:44:27+03:00",
+            "2026-09-15T20:09:02+03:00"
+          ]
+        },
+        {
+          "source_path": "kyiv-air-alerts-grafana/data/ukrainealarm_bridge.json",
+          "source_kind": "persisted UkraineAlarm regionHistory",
+          "expected_rows": 17,
+          "extracted_rows": 17,
+          "match": true,
+          "raw_time_range": [
+            "2026-05-27T18:56:27.341315Z",
+            "2026-08-07T15:13:50.642665Z"
+          ]
+        },
+        {
+          "source_path": "kyiv-air-alerts-grafana/data/ukrainealarm_bridge.json",
+          "source_kind": "persisted UkraineAlarm regionHistory",
+          "expected_rows": 2,
+          "extracted_rows": 2,
+          "match": true,
+          "raw_time_range": [
+            "2026-09-16T23:05:54.663902Z",
+            "2026-09-17T10:41:41.009227Z"
+          ]
+        }
+      ],
+      "valid_retained_primary_additions": 20,
+      "valid_upstream_additions": 89,
+      "retained_upstream_overlap": 17,
+      "unique_valid_additions": 92,
+      "hypothetical_final_episode_count": 92,
+      "canonical_union_episode_count": 92,
+      "arithmetic_reconciles_to_canonical_union": true,
+      "unresolved_missing_episodes": 0,
+      "duplicate_canonical_ids": 0,
+      "current_source_duplicate_ids": 0,
+      "unexplained_excess_episodes": 0,
+      "unexplained_new_episode_count": 0,
+      "unexplained_new_episode_ids": [],
+      "geography_ambiguities": [],
+      "geography_ambiguity_count": 0,
+      "episode_id_timestamp_mismatch_count": 0,
+      "current_only_episode_count": 0,
+      "current_only_episode_details": [],
+      "new_final_overlapping_current_count": 0,
+      "new_final_overlapping_current_details": [],
+      "current_id_rule_errors": [],
+      "final_id_rule_errors": [],
+      "upstream_adapter": {
+        "type": "production_proxy",
+        "raion": "Ужгородський район",
+        "oblast": "Закарпатська область",
+        "coverage_start": "2025-11-06"
+      },
+      "canonical_union_adapter": {
+        "type": "production_proxy_assembled",
+        "name": "Ужгородський район + explicit Закарпатська область",
+        "coverage_start": "2025-11-06",
+        "static_bridge_events": 1,
+        "ukrainealarm_bridge_events": 20,
+        "ukrainealarm_bridge_continuous": true,
+        "static_bridge_coverage_start": "2026-09-06T21:00:00Z",
+        "static_bridge_coverage_end_exclusive": "2026-09-18T00:00:00Z"
+      },
+      "fully_reconciled": true,
+      "blockers": []
+    },
+    "vinnytsia": {
+      "expected_episodes": 362,
+      "current_reconstructed_episodes": 0,
+      "authoritative_current_reconstructed_episodes": 0,
+      "current_count_matches_authoritative": true,
+      "current_source_files": [],
+      "retained_primary_inventory_rows": 30,
+      "retained_primary_extracted_unique_rows": 30,
+      "retained_primary_block_diagnostics": [
+        {
+          "source_path": "kyiv-air-alerts-grafana/data/alerts_in_ua_bridge_2026-09-07_16.csv.gz.b64",
+          "source_kind": "Alerts.in.ua retained manual CSV payload",
+          "expected_rows": 26,
+          "extracted_rows": 26,
+          "match": true,
+          "raw_time_range": [
+            "2026-09-07T18:02:21+03:00",
+            "2026-09-16T17:49:46+03:00"
+          ]
+        },
+        {
+          "source_path": "kyiv-air-alerts-grafana/data/ukrainealarm_bridge.json",
+          "source_kind": "persisted UkraineAlarm regionHistory",
+          "expected_rows": 4,
+          "extracted_rows": 4,
+          "match": true,
+          "raw_time_range": [
+            "2026-09-16T23:03:01.279160Z",
+            "2026-09-17T18:48:12.158371Z"
+          ]
+        }
+      ],
+      "valid_retained_primary_additions": 30,
+      "valid_upstream_additions": 332,
+      "retained_upstream_overlap": 0,
+      "unique_valid_additions": 362,
+      "hypothetical_final_episode_count": 362,
+      "canonical_union_episode_count": 362,
+      "arithmetic_reconciles_to_canonical_union": true,
+      "unresolved_missing_episodes": 0,
+      "duplicate_canonical_ids": 0,
+      "current_source_duplicate_ids": 0,
+      "unexplained_excess_episodes": 0,
+      "unexplained_new_episode_count": 0,
+      "unexplained_new_episode_ids": [],
+      "geography_ambiguities": [],
+      "geography_ambiguity_count": 0,
+      "episode_id_timestamp_mismatch_count": 0,
+      "current_only_episode_count": 0,
+      "current_only_episode_details": [],
+      "new_final_overlapping_current_count": 0,
+      "new_final_overlapping_current_details": [],
+      "current_id_rule_errors": [],
+      "final_id_rule_errors": [],
+      "upstream_adapter": {
+        "type": "production_proxy",
+        "raion": "Вінницький район",
+        "oblast": "Вінницька область",
+        "coverage_start": "2025-08-21"
+      },
+      "canonical_union_adapter": {
+        "type": "production_proxy_assembled",
+        "name": "Вінницький район + explicit Вінницька область",
+        "coverage_start": "2025-08-21",
+        "static_bridge_events": 26,
+        "ukrainealarm_bridge_events": 20,
+        "ukrainealarm_bridge_continuous": true,
+        "static_bridge_coverage_start": "2026-09-06T21:00:00Z",
+        "static_bridge_coverage_end_exclusive": "2026-09-18T00:00:00Z"
+      },
+      "fully_reconciled": true,
+      "blockers": []
+    },
+    "zhytomyr": {
+      "expected_episodes": 685,
+      "current_reconstructed_episodes": 0,
+      "authoritative_current_reconstructed_episodes": 0,
+      "current_count_matches_authoritative": true,
+      "current_source_files": [],
+      "retained_primary_inventory_rows": 37,
+      "retained_primary_extracted_unique_rows": 37,
+      "retained_primary_block_diagnostics": [
+        {
+          "source_path": "kyiv-air-alerts-grafana/data/alerts_in_ua_bridge_2026-09-07_16.csv.gz.b64",
+          "source_kind": "Alerts.in.ua retained manual CSV payload",
+          "expected_rows": 33,
+          "extracted_rows": 33,
+          "match": true,
+          "raw_time_range": [
+            "2026-09-07T18:15:29+03:00",
+            "2026-09-16T18:08:47+03:00"
+          ]
+        },
+        {
+          "source_path": "kyiv-air-alerts-grafana/data/ukrainealarm_bridge.json",
+          "source_kind": "persisted UkraineAlarm regionHistory",
+          "expected_rows": 4,
+          "extracted_rows": 4,
+          "match": true,
+          "raw_time_range": [
+            "2026-09-16T23:03:05.387574Z",
+            "2026-09-17T19:30:40.010756Z"
+          ]
+        }
+      ],
+      "valid_retained_primary_additions": 37,
+      "valid_upstream_additions": 648,
+      "retained_upstream_overlap": 0,
+      "unique_valid_additions": 685,
+      "hypothetical_final_episode_count": 685,
+      "canonical_union_episode_count": 685,
+      "arithmetic_reconciles_to_canonical_union": true,
+      "unresolved_missing_episodes": 0,
+      "duplicate_canonical_ids": 0,
+      "current_source_duplicate_ids": 0,
+      "unexplained_excess_episodes": 0,
+      "unexplained_new_episode_count": 0,
+      "unexplained_new_episode_ids": [],
+      "geography_ambiguities": [],
+      "geography_ambiguity_count": 0,
+      "episode_id_timestamp_mismatch_count": 0,
+      "current_only_episode_count": 0,
+      "current_only_episode_details": [],
+      "new_final_overlapping_current_count": 0,
+      "new_final_overlapping_current_details": [],
+      "current_id_rule_errors": [],
+      "final_id_rule_errors": [],
+      "upstream_adapter": {
+        "type": "production_proxy",
+        "raion": "Житомирський район",
+        "oblast": "Житомирська область",
+        "coverage_start": "2025-01-23"
+      },
+      "canonical_union_adapter": {
+        "type": "production_proxy_assembled",
+        "name": "Житомирський район + explicit Житомирська область",
+        "coverage_start": "2025-01-23",
+        "static_bridge_events": 33,
+        "ukrainealarm_bridge_events": 20,
+        "ukrainealarm_bridge_continuous": true,
+        "static_bridge_coverage_start": "2026-09-06T21:00:00Z",
+        "static_bridge_coverage_end_exclusive": "2026-09-18T00:00:00Z"
+      },
+      "fully_reconciled": true,
+      "blockers": []
+    }
+  },
+  "verification": {
+    "chernihiv_expected": 1676,
+    "chernihiv_reconstructed": 1676,
+    "kharkiv_expected": 3565,
+    "kharkiv_reconstructed": 3565,
+    "other_15_cities": [
+      "chernivtsi",
+      "dnipro",
+      "ivano_frankivsk",
+      "kherson",
+      "khmelnytskyi",
+      "kropyvnytskyi",
+      "lutsk",
+      "mykolaiv",
+      "odesa",
+      "poltava",
+      "rivne",
+      "ternopil",
+      "uzhhorod",
+      "vinnytsia",
+      "zhytomyr"
+    ],
+    "other_15_unchanged": true,
+    "all_17_cities_reconciled": true,
+    "unresolved_ids": {},
+    "excess_ids": {}
+  },
+  "implementation_commit": "68f716be027d3a614bbee02878ecf23f6c80c993",
+  "isolation": {
+    "prep_diff_from_starting_head": [
+      ".github/workflows/historical-17-city-corrected-baseline-reconciliation.yml",
+      "kyiv-air-alerts-grafana/data/explosion_metric_handoff/RESEARCH_SLICES_2026-09-18.csv",
+      "kyiv-air-alerts-grafana/data/explosion_metric_handoff/RESEARCH_SUBSLICES_2026-09-19.csv",
+      "kyiv-air-alerts-grafana/data/explosion_metric_handoff/chernihiv_P3_result.json",
+      "kyiv-air-alerts-grafana/scripts/build_explosion_source_slices.py",
+      "kyiv-air-alerts-grafana/scripts/historical_17_city_corrected_baseline_reconciliation.py",
+      "research/historical_replay_status_current.json"
+    ],
+    "prep_diff_only_temporary_preflight_files": true,
+    "protected_operational_files_unchanged_in_workspace": true,
+    "active_6863_campaign_branch_observed_sha": "5809bd677a93e6c2f6a1bff9cb7f6b5bde0c7c1e",
+    "active_6863_campaign_unchanged_by_this_task": true,
+    "operational_data_mutated": false,
+    "protected_files_unchanged_except_intended_corpus_contract_changes": true
+  },
+  "global_blockers": [],
+  "acceptance_passed": true,
+  "verdict": "17-CITY HISTORICAL CORPUS CONTRACT CORRECTED — 17086/17086 READY FOR ATOMIC CORPUS REPAIR"
+}
