@@ -1,0 +1,624 @@
+{
+  "schema_version": 1,
+  "artifact": "kyiv_historical_alert_corpus_gap_diagnostic_2026-09-27",
+  "generated_date": "2026-09-27",
+  "repository": "olegbalakin-cmyk/kyiv-air-alerts-grafana",
+  "branch": "multicity-wip-2026-09-16",
+  "diagnostic_parent_head": "8b5e0a14f37aa6aea9f8d578c4c9887283952454",
+  "scope": {
+    "city_key": "kyiv",
+    "through": "2026-09-17",
+    "read_only_forensic_diagnostic": true,
+    "event_classifications_changed": false,
+    "external_web_research_performed": false
+  },
+  "summary": {
+    "expected_count": 2456,
+    "reconstructed_count": 2446,
+    "expected_reconstructed_confirmed": true,
+    "exact_missing_count": 10,
+    "retained_recovery_count": 10,
+    "requires_new_external_source_count": 0,
+    "one_common_loader_or_source_defect_explains_all": true,
+    "temporary_reconstructed_count": 2456,
+    "temporary_reconstruction_reaches_expected": true,
+    "achievable_from_retained_data": true,
+    "verdict": "KYIV HISTORICAL CORPUS REPAIR READY"
+  },
+  "authoritative_comparison": {
+    "replay_preflight_expected_count_source": {
+      "path": "kyiv-air-alerts-grafana/data/explosion_audited_baseline.json",
+      "blob": "5bbd2b771559eac2966aeec65d6e3b5487b9c1a9",
+      "kyiv_coverage_start": "2022-02-28",
+      "kyiv_coverage_end": "2026-09-17",
+      "kyiv_total_alerts": 2456
+    },
+    "note": "The replay preflight stores/uses the audited expected COUNT from explosion_audited_baseline.json; it does not load a separate expected episode-ID list. For this forensic set difference, the expected canonical ID set was reconstructed from the retained exact raw primary 2456-row snapshot and cross-checked against the frozen Kyiv source-slice union.",
+    "retained_primary_identity_source": {
+      "path": "kyiv-air-alerts-grafana/data/alerts_combined.json",
+      "commit": "527c48de8cd8d872ef5eaf2b510874be54d063c2",
+      "blob": "ab9babd3527055256017867869bc62b96a6ebffc",
+      "row_count": 2456,
+      "unique_interval_count": 2456,
+      "overlap_count": 0,
+      "terminal_local_date": "2026-09-17"
+    },
+    "frozen_audit_corroboration": {
+      "source_slice_files": [
+        {
+          "file": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/kyiv-P1a_alerts.json",
+          "blob": "d28a0ec051d739e8ce2ecd59e55e04b501021027",
+          "episode_count": 246
+        },
+        {
+          "file": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/kyiv-P1b_alerts.json",
+          "blob": "95fb29605923146ba3ed8cb99fe57e068479aa5e",
+          "episode_count": 246
+        },
+        {
+          "file": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/kyiv-P2a_alerts.json",
+          "blob": "a564ef8946ccd47a9e726c9d9ea0e423941b20aa",
+          "episode_count": 247
+        },
+        {
+          "file": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/kyiv-P2b_alerts.json",
+          "blob": "69faf530a4f857ef13551e316981f2caec04abc8",
+          "episode_count": 244
+        },
+        {
+          "file": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/kyiv-P3a_alerts.json",
+          "blob": "1d8f6579b9bffb17eb6a3864d38ce802dec37129",
+          "episode_count": 246
+        },
+        {
+          "file": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/kyiv-P3b_alerts.json",
+          "blob": "a52b8d88cc8fd40bb26a551d06cb8139459beb20",
+          "episode_count": 245
+        },
+        {
+          "file": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/kyiv-P4a_alerts.json",
+          "blob": "f50d9b8a187464a32f986f918bd5ace0301705ae",
+          "episode_count": 245
+        },
+        {
+          "file": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/kyiv-P4b_alerts.json",
+          "blob": "febabe4ce79fb4ca756063ce4768a7da6bf456d4",
+          "episode_count": 245
+        },
+        {
+          "file": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/kyiv-P5a_alerts.json",
+          "blob": "2d3add49b70697b8d01a50328d592256a1c9c245",
+          "episode_count": 246
+        },
+        {
+          "file": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/kyiv-P5b_alerts.json",
+          "blob": "035c686d9d9699bdc2b715e9a8291fff55ddd3c3",
+          "episode_count": 246
+        }
+      ],
+      "union_episode_count": 2456,
+      "union_unique_interval_count": 2456,
+      "p5b_contains_all_10_missing": true,
+      "legacy_slice_ids_are_noncanonical": true
+    },
+    "current_reconstruction_source": {
+      "path": "kyiv-air-alerts-grafana/data/alerts_combined.json",
+      "branch": "multicity-wip-2026-09-16",
+      "blob": "129e2298e56244939e7d56cccd4b40a26d816c93",
+      "row_count": 2446,
+      "unique_interval_count": 2446,
+      "last_row_local_start": "2026-09-16T21:20:00+03:00",
+      "last_row_local_end": "2026-09-16T21:31:00+03:00",
+      "current_branch_latest_commit_touching_file": "b1657baccbf87e8b22165fc32d78d9e371ceacc6"
+    },
+    "set_difference": {
+      "operation": "canonical(expected retained primary 2456) - canonical(current branch-local 2446)",
+      "expected_unique_canonical_ids": 2456,
+      "reconstructed_unique_canonical_ids": 2446,
+      "missing_canonical_ids": [
+        "cce2ce6afe7dca47f7c21d4b",
+        "1a603e438745d4a3d6408639",
+        "a018066fae8d383f5351c7cc",
+        "659fa411a4626d02df3c16b6",
+        "73184793018bc20346494560",
+        "1a8900b3e09048b0a61db83c",
+        "8fdc1d511a3ff6d0e5061c91",
+        "baaa05dfc347eee6e22e2eb5",
+        "ba16519469117045b3c662e7",
+        "874b0acd3bce44540edb93a9"
+      ],
+      "missing_count": 10,
+      "current_only_count": 0
+    }
+  },
+  "missing_episodes": [
+    {
+      "episode_id": "cce2ce6afe7dca47f7c21d4b",
+      "alert_start_utc": "2026-09-16T21:21:00Z",
+      "alert_end_utc": "2026-09-16T22:33:00Z",
+      "local_kyiv_date": "2026-09-17",
+      "alert_start_local": "2026-09-17T00:21:00+03:00",
+      "alert_end_local": "2026-09-17T01:33:00+03:00",
+      "expected_denominator_provenance": {
+        "retained_primary_source_path": "kyiv-air-alerts-grafana/data/alerts_combined.json",
+        "retained_primary_commit": "527c48de8cd8d872ef5eaf2b510874be54d063c2",
+        "retained_primary_blob": "ab9babd3527055256017867869bc62b96a6ebffc",
+        "retained_primary_row_source": "kyiv_digital_live",
+        "corroborating_frozen_slice": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/kyiv-P5b_alerts.json",
+        "corroborating_frozen_slice_blob": "035c686d9d9699bdc2b715e9a8291fff55ddd3c3"
+      },
+      "retained_raw_source": {
+        "exists": true,
+        "source": "git-retained raw primary alerts_combined.json snapshot",
+        "commit": "527c48de8cd8d872ef5eaf2b510874be54d063c2",
+        "blob": "ab9babd3527055256017867869bc62b96a6ebffc"
+      },
+      "noncanonical_or_old_id": {
+        "exists": true,
+        "legacy_episode_id": "kyiv-202609170021000300-202609170133000300",
+        "canonical_rebind_required_for_any_slice_based_loader": true
+      },
+      "overlaps_or_duplicates_another_reconstructed_episode": false,
+      "loader_stage_failure": {
+        "raw_source": "PRESENT in retained primary snapshot but ABSENT from current branch-local alerts_combined.json",
+        "normalized_interval": "NOT_REACHED by current replay loader because selected raw source lacks the row",
+        "merged_interval": "NOT_APPLICABLE; current Kyiv historical replay loader does not merge intervals",
+        "canonical_episode": "NOT_GENERATED in current replay path",
+        "replay_corpus": "ABSENT"
+      },
+      "root_cause": "SOURCE_NOT_CURRENTLY_LOADED",
+      "recovery_source_classification": "RECOVERABLE_FROM_FROZEN_PRIMARY_SOURCE"
+    },
+    {
+      "episode_id": "1a603e438745d4a3d6408639",
+      "alert_start_utc": "2026-09-16T23:03:00Z",
+      "alert_end_utc": "2026-09-16T23:54:00Z",
+      "local_kyiv_date": "2026-09-17",
+      "alert_start_local": "2026-09-17T02:03:00+03:00",
+      "alert_end_local": "2026-09-17T02:54:00+03:00",
+      "expected_denominator_provenance": {
+        "retained_primary_source_path": "kyiv-air-alerts-grafana/data/alerts_combined.json",
+        "retained_primary_commit": "527c48de8cd8d872ef5eaf2b510874be54d063c2",
+        "retained_primary_blob": "ab9babd3527055256017867869bc62b96a6ebffc",
+        "retained_primary_row_source": "kyiv_digital_live",
+        "corroborating_frozen_slice": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/kyiv-P5b_alerts.json",
+        "corroborating_frozen_slice_blob": "035c686d9d9699bdc2b715e9a8291fff55ddd3c3"
+      },
+      "retained_raw_source": {
+        "exists": true,
+        "source": "git-retained raw primary alerts_combined.json snapshot",
+        "commit": "527c48de8cd8d872ef5eaf2b510874be54d063c2",
+        "blob": "ab9babd3527055256017867869bc62b96a6ebffc"
+      },
+      "noncanonical_or_old_id": {
+        "exists": true,
+        "legacy_episode_id": "kyiv-202609170203000300-202609170254000300",
+        "canonical_rebind_required_for_any_slice_based_loader": true
+      },
+      "overlaps_or_duplicates_another_reconstructed_episode": false,
+      "loader_stage_failure": {
+        "raw_source": "PRESENT in retained primary snapshot but ABSENT from current branch-local alerts_combined.json",
+        "normalized_interval": "NOT_REACHED by current replay loader because selected raw source lacks the row",
+        "merged_interval": "NOT_APPLICABLE; current Kyiv historical replay loader does not merge intervals",
+        "canonical_episode": "NOT_GENERATED in current replay path",
+        "replay_corpus": "ABSENT"
+      },
+      "root_cause": "SOURCE_NOT_CURRENTLY_LOADED",
+      "recovery_source_classification": "RECOVERABLE_FROM_FROZEN_PRIMARY_SOURCE"
+    },
+    {
+      "episode_id": "a018066fae8d383f5351c7cc",
+      "alert_start_utc": "2026-09-17T01:33:00Z",
+      "alert_end_utc": "2026-09-17T04:18:00Z",
+      "local_kyiv_date": "2026-09-17",
+      "alert_start_local": "2026-09-17T04:33:00+03:00",
+      "alert_end_local": "2026-09-17T07:18:00+03:00",
+      "expected_denominator_provenance": {
+        "retained_primary_source_path": "kyiv-air-alerts-grafana/data/alerts_combined.json",
+        "retained_primary_commit": "527c48de8cd8d872ef5eaf2b510874be54d063c2",
+        "retained_primary_blob": "ab9babd3527055256017867869bc62b96a6ebffc",
+        "retained_primary_row_source": "kyiv_digital_live",
+        "corroborating_frozen_slice": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/kyiv-P5b_alerts.json",
+        "corroborating_frozen_slice_blob": "035c686d9d9699bdc2b715e9a8291fff55ddd3c3"
+      },
+      "retained_raw_source": {
+        "exists": true,
+        "source": "git-retained raw primary alerts_combined.json snapshot",
+        "commit": "527c48de8cd8d872ef5eaf2b510874be54d063c2",
+        "blob": "ab9babd3527055256017867869bc62b96a6ebffc"
+      },
+      "noncanonical_or_old_id": {
+        "exists": true,
+        "legacy_episode_id": "kyiv-202609170433000300-202609170718000300",
+        "canonical_rebind_required_for_any_slice_based_loader": true
+      },
+      "overlaps_or_duplicates_another_reconstructed_episode": false,
+      "loader_stage_failure": {
+        "raw_source": "PRESENT in retained primary snapshot but ABSENT from current branch-local alerts_combined.json",
+        "normalized_interval": "NOT_REACHED by current replay loader because selected raw source lacks the row",
+        "merged_interval": "NOT_APPLICABLE; current Kyiv historical replay loader does not merge intervals",
+        "canonical_episode": "NOT_GENERATED in current replay path",
+        "replay_corpus": "ABSENT"
+      },
+      "root_cause": "SOURCE_NOT_CURRENTLY_LOADED",
+      "recovery_source_classification": "RECOVERABLE_FROM_FROZEN_PRIMARY_SOURCE"
+    },
+    {
+      "episode_id": "659fa411a4626d02df3c16b6",
+      "alert_start_utc": "2026-09-17T06:01:00Z",
+      "alert_end_utc": "2026-09-17T06:03:00Z",
+      "local_kyiv_date": "2026-09-17",
+      "alert_start_local": "2026-09-17T09:01:00+03:00",
+      "alert_end_local": "2026-09-17T09:03:00+03:00",
+      "expected_denominator_provenance": {
+        "retained_primary_source_path": "kyiv-air-alerts-grafana/data/alerts_combined.json",
+        "retained_primary_commit": "527c48de8cd8d872ef5eaf2b510874be54d063c2",
+        "retained_primary_blob": "ab9babd3527055256017867869bc62b96a6ebffc",
+        "retained_primary_row_source": "kyiv_digital_live",
+        "corroborating_frozen_slice": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/kyiv-P5b_alerts.json",
+        "corroborating_frozen_slice_blob": "035c686d9d9699bdc2b715e9a8291fff55ddd3c3"
+      },
+      "retained_raw_source": {
+        "exists": true,
+        "source": "git-retained raw primary alerts_combined.json snapshot",
+        "commit": "527c48de8cd8d872ef5eaf2b510874be54d063c2",
+        "blob": "ab9babd3527055256017867869bc62b96a6ebffc"
+      },
+      "noncanonical_or_old_id": {
+        "exists": true,
+        "legacy_episode_id": "kyiv-202609170901000300-202609170903000300",
+        "canonical_rebind_required_for_any_slice_based_loader": true
+      },
+      "overlaps_or_duplicates_another_reconstructed_episode": false,
+      "loader_stage_failure": {
+        "raw_source": "PRESENT in retained primary snapshot but ABSENT from current branch-local alerts_combined.json",
+        "normalized_interval": "NOT_REACHED by current replay loader because selected raw source lacks the row",
+        "merged_interval": "NOT_APPLICABLE; current Kyiv historical replay loader does not merge intervals",
+        "canonical_episode": "NOT_GENERATED in current replay path",
+        "replay_corpus": "ABSENT"
+      },
+      "root_cause": "SOURCE_NOT_CURRENTLY_LOADED",
+      "recovery_source_classification": "RECOVERABLE_FROM_FROZEN_PRIMARY_SOURCE"
+    },
+    {
+      "episode_id": "73184793018bc20346494560",
+      "alert_start_utc": "2026-09-17T06:30:00Z",
+      "alert_end_utc": "2026-09-17T07:02:00Z",
+      "local_kyiv_date": "2026-09-17",
+      "alert_start_local": "2026-09-17T09:30:00+03:00",
+      "alert_end_local": "2026-09-17T10:02:00+03:00",
+      "expected_denominator_provenance": {
+        "retained_primary_source_path": "kyiv-air-alerts-grafana/data/alerts_combined.json",
+        "retained_primary_commit": "527c48de8cd8d872ef5eaf2b510874be54d063c2",
+        "retained_primary_blob": "ab9babd3527055256017867869bc62b96a6ebffc",
+        "retained_primary_row_source": "kyiv_digital_live",
+        "corroborating_frozen_slice": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/kyiv-P5b_alerts.json",
+        "corroborating_frozen_slice_blob": "035c686d9d9699bdc2b715e9a8291fff55ddd3c3"
+      },
+      "retained_raw_source": {
+        "exists": true,
+        "source": "git-retained raw primary alerts_combined.json snapshot",
+        "commit": "527c48de8cd8d872ef5eaf2b510874be54d063c2",
+        "blob": "ab9babd3527055256017867869bc62b96a6ebffc"
+      },
+      "noncanonical_or_old_id": {
+        "exists": true,
+        "legacy_episode_id": "kyiv-202609170930000300-202609171002000300",
+        "canonical_rebind_required_for_any_slice_based_loader": true
+      },
+      "overlaps_or_duplicates_another_reconstructed_episode": false,
+      "loader_stage_failure": {
+        "raw_source": "PRESENT in retained primary snapshot but ABSENT from current branch-local alerts_combined.json",
+        "normalized_interval": "NOT_REACHED by current replay loader because selected raw source lacks the row",
+        "merged_interval": "NOT_APPLICABLE; current Kyiv historical replay loader does not merge intervals",
+        "canonical_episode": "NOT_GENERATED in current replay path",
+        "replay_corpus": "ABSENT"
+      },
+      "root_cause": "SOURCE_NOT_CURRENTLY_LOADED",
+      "recovery_source_classification": "RECOVERABLE_FROM_FROZEN_PRIMARY_SOURCE"
+    },
+    {
+      "episode_id": "1a8900b3e09048b0a61db83c",
+      "alert_start_utc": "2026-09-17T08:40:00Z",
+      "alert_end_utc": "2026-09-17T08:55:00Z",
+      "local_kyiv_date": "2026-09-17",
+      "alert_start_local": "2026-09-17T11:40:00+03:00",
+      "alert_end_local": "2026-09-17T11:55:00+03:00",
+      "expected_denominator_provenance": {
+        "retained_primary_source_path": "kyiv-air-alerts-grafana/data/alerts_combined.json",
+        "retained_primary_commit": "527c48de8cd8d872ef5eaf2b510874be54d063c2",
+        "retained_primary_blob": "ab9babd3527055256017867869bc62b96a6ebffc",
+        "retained_primary_row_source": "kyiv_digital_live",
+        "corroborating_frozen_slice": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/kyiv-P5b_alerts.json",
+        "corroborating_frozen_slice_blob": "035c686d9d9699bdc2b715e9a8291fff55ddd3c3"
+      },
+      "retained_raw_source": {
+        "exists": true,
+        "source": "git-retained raw primary alerts_combined.json snapshot",
+        "commit": "527c48de8cd8d872ef5eaf2b510874be54d063c2",
+        "blob": "ab9babd3527055256017867869bc62b96a6ebffc"
+      },
+      "noncanonical_or_old_id": {
+        "exists": true,
+        "legacy_episode_id": "kyiv-202609171140000300-202609171155000300",
+        "canonical_rebind_required_for_any_slice_based_loader": true
+      },
+      "overlaps_or_duplicates_another_reconstructed_episode": false,
+      "loader_stage_failure": {
+        "raw_source": "PRESENT in retained primary snapshot but ABSENT from current branch-local alerts_combined.json",
+        "normalized_interval": "NOT_REACHED by current replay loader because selected raw source lacks the row",
+        "merged_interval": "NOT_APPLICABLE; current Kyiv historical replay loader does not merge intervals",
+        "canonical_episode": "NOT_GENERATED in current replay path",
+        "replay_corpus": "ABSENT"
+      },
+      "root_cause": "SOURCE_NOT_CURRENTLY_LOADED",
+      "recovery_source_classification": "RECOVERABLE_FROM_FROZEN_PRIMARY_SOURCE"
+    },
+    {
+      "episode_id": "8fdc1d511a3ff6d0e5061c91",
+      "alert_start_utc": "2026-09-17T10:22:00Z",
+      "alert_end_utc": "2026-09-17T10:42:00Z",
+      "local_kyiv_date": "2026-09-17",
+      "alert_start_local": "2026-09-17T13:22:00+03:00",
+      "alert_end_local": "2026-09-17T13:42:00+03:00",
+      "expected_denominator_provenance": {
+        "retained_primary_source_path": "kyiv-air-alerts-grafana/data/alerts_combined.json",
+        "retained_primary_commit": "527c48de8cd8d872ef5eaf2b510874be54d063c2",
+        "retained_primary_blob": "ab9babd3527055256017867869bc62b96a6ebffc",
+        "retained_primary_row_source": "kyiv_digital_live",
+        "corroborating_frozen_slice": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/kyiv-P5b_alerts.json",
+        "corroborating_frozen_slice_blob": "035c686d9d9699bdc2b715e9a8291fff55ddd3c3"
+      },
+      "retained_raw_source": {
+        "exists": true,
+        "source": "git-retained raw primary alerts_combined.json snapshot",
+        "commit": "527c48de8cd8d872ef5eaf2b510874be54d063c2",
+        "blob": "ab9babd3527055256017867869bc62b96a6ebffc"
+      },
+      "noncanonical_or_old_id": {
+        "exists": true,
+        "legacy_episode_id": "kyiv-202609171322000300-202609171342000300",
+        "canonical_rebind_required_for_any_slice_based_loader": true
+      },
+      "overlaps_or_duplicates_another_reconstructed_episode": false,
+      "loader_stage_failure": {
+        "raw_source": "PRESENT in retained primary snapshot but ABSENT from current branch-local alerts_combined.json",
+        "normalized_interval": "NOT_REACHED by current replay loader because selected raw source lacks the row",
+        "merged_interval": "NOT_APPLICABLE; current Kyiv historical replay loader does not merge intervals",
+        "canonical_episode": "NOT_GENERATED in current replay path",
+        "replay_corpus": "ABSENT"
+      },
+      "root_cause": "SOURCE_NOT_CURRENTLY_LOADED",
+      "recovery_source_classification": "RECOVERABLE_FROM_FROZEN_PRIMARY_SOURCE"
+    },
+    {
+      "episode_id": "baaa05dfc347eee6e22e2eb5",
+      "alert_start_utc": "2026-09-17T13:31:00Z",
+      "alert_end_utc": "2026-09-17T13:57:00Z",
+      "local_kyiv_date": "2026-09-17",
+      "alert_start_local": "2026-09-17T16:31:00+03:00",
+      "alert_end_local": "2026-09-17T16:57:00+03:00",
+      "expected_denominator_provenance": {
+        "retained_primary_source_path": "kyiv-air-alerts-grafana/data/alerts_combined.json",
+        "retained_primary_commit": "527c48de8cd8d872ef5eaf2b510874be54d063c2",
+        "retained_primary_blob": "ab9babd3527055256017867869bc62b96a6ebffc",
+        "retained_primary_row_source": "kyiv_digital_live",
+        "corroborating_frozen_slice": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/kyiv-P5b_alerts.json",
+        "corroborating_frozen_slice_blob": "035c686d9d9699bdc2b715e9a8291fff55ddd3c3"
+      },
+      "retained_raw_source": {
+        "exists": true,
+        "source": "git-retained raw primary alerts_combined.json snapshot",
+        "commit": "527c48de8cd8d872ef5eaf2b510874be54d063c2",
+        "blob": "ab9babd3527055256017867869bc62b96a6ebffc"
+      },
+      "noncanonical_or_old_id": {
+        "exists": true,
+        "legacy_episode_id": "kyiv-202609171631000300-202609171657000300",
+        "canonical_rebind_required_for_any_slice_based_loader": true
+      },
+      "overlaps_or_duplicates_another_reconstructed_episode": false,
+      "loader_stage_failure": {
+        "raw_source": "PRESENT in retained primary snapshot but ABSENT from current branch-local alerts_combined.json",
+        "normalized_interval": "NOT_REACHED by current replay loader because selected raw source lacks the row",
+        "merged_interval": "NOT_APPLICABLE; current Kyiv historical replay loader does not merge intervals",
+        "canonical_episode": "NOT_GENERATED in current replay path",
+        "replay_corpus": "ABSENT"
+      },
+      "root_cause": "SOURCE_NOT_CURRENTLY_LOADED",
+      "recovery_source_classification": "RECOVERABLE_FROM_FROZEN_PRIMARY_SOURCE"
+    },
+    {
+      "episode_id": "ba16519469117045b3c662e7",
+      "alert_start_utc": "2026-09-17T17:40:00Z",
+      "alert_end_utc": "2026-09-17T17:45:00Z",
+      "local_kyiv_date": "2026-09-17",
+      "alert_start_local": "2026-09-17T20:40:00+03:00",
+      "alert_end_local": "2026-09-17T20:45:00+03:00",
+      "expected_denominator_provenance": {
+        "retained_primary_source_path": "kyiv-air-alerts-grafana/data/alerts_combined.json",
+        "retained_primary_commit": "527c48de8cd8d872ef5eaf2b510874be54d063c2",
+        "retained_primary_blob": "ab9babd3527055256017867869bc62b96a6ebffc",
+        "retained_primary_row_source": "kyiv_digital_live",
+        "corroborating_frozen_slice": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/kyiv-P5b_alerts.json",
+        "corroborating_frozen_slice_blob": "035c686d9d9699bdc2b715e9a8291fff55ddd3c3"
+      },
+      "retained_raw_source": {
+        "exists": true,
+        "source": "git-retained raw primary alerts_combined.json snapshot",
+        "commit": "527c48de8cd8d872ef5eaf2b510874be54d063c2",
+        "blob": "ab9babd3527055256017867869bc62b96a6ebffc"
+      },
+      "noncanonical_or_old_id": {
+        "exists": true,
+        "legacy_episode_id": "kyiv-202609172040000300-202609172045000300",
+        "canonical_rebind_required_for_any_slice_based_loader": true
+      },
+      "overlaps_or_duplicates_another_reconstructed_episode": false,
+      "loader_stage_failure": {
+        "raw_source": "PRESENT in retained primary snapshot but ABSENT from current branch-local alerts_combined.json",
+        "normalized_interval": "NOT_REACHED by current replay loader because selected raw source lacks the row",
+        "merged_interval": "NOT_APPLICABLE; current Kyiv historical replay loader does not merge intervals",
+        "canonical_episode": "NOT_GENERATED in current replay path",
+        "replay_corpus": "ABSENT"
+      },
+      "root_cause": "SOURCE_NOT_CURRENTLY_LOADED",
+      "recovery_source_classification": "RECOVERABLE_FROM_FROZEN_PRIMARY_SOURCE"
+    },
+    {
+      "episode_id": "874b0acd3bce44540edb93a9",
+      "alert_start_utc": "2026-09-17T18:56:00Z",
+      "alert_end_utc": "2026-09-17T19:10:00Z",
+      "local_kyiv_date": "2026-09-17",
+      "alert_start_local": "2026-09-17T21:56:00+03:00",
+      "alert_end_local": "2026-09-17T22:10:00+03:00",
+      "expected_denominator_provenance": {
+        "retained_primary_source_path": "kyiv-air-alerts-grafana/data/alerts_combined.json",
+        "retained_primary_commit": "527c48de8cd8d872ef5eaf2b510874be54d063c2",
+        "retained_primary_blob": "ab9babd3527055256017867869bc62b96a6ebffc",
+        "retained_primary_row_source": "kyiv_digital_live",
+        "corroborating_frozen_slice": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/kyiv-P5b_alerts.json",
+        "corroborating_frozen_slice_blob": "035c686d9d9699bdc2b715e9a8291fff55ddd3c3"
+      },
+      "retained_raw_source": {
+        "exists": true,
+        "source": "git-retained raw primary alerts_combined.json snapshot",
+        "commit": "527c48de8cd8d872ef5eaf2b510874be54d063c2",
+        "blob": "ab9babd3527055256017867869bc62b96a6ebffc"
+      },
+      "noncanonical_or_old_id": {
+        "exists": true,
+        "legacy_episode_id": "kyiv-202609172156000300-202609172210000300",
+        "canonical_rebind_required_for_any_slice_based_loader": true
+      },
+      "overlaps_or_duplicates_another_reconstructed_episode": false,
+      "loader_stage_failure": {
+        "raw_source": "PRESENT in retained primary snapshot but ABSENT from current branch-local alerts_combined.json",
+        "normalized_interval": "NOT_REACHED by current replay loader because selected raw source lacks the row",
+        "merged_interval": "NOT_APPLICABLE; current Kyiv historical replay loader does not merge intervals",
+        "canonical_episode": "NOT_GENERATED in current replay path",
+        "replay_corpus": "ABSENT"
+      },
+      "root_cause": "SOURCE_NOT_CURRENTLY_LOADED",
+      "recovery_source_classification": "RECOVERABLE_FROM_FROZEN_PRIMARY_SOURCE"
+    }
+  ],
+  "root_cause_counts": {
+    "SOURCE_NOT_CURRENTLY_LOADED": 10
+  },
+  "recovery_source_counts": {
+    "RECOVERABLE_FROM_FROZEN_PRIMARY_SOURCE": 10
+  },
+  "loader_analysis": {
+    "common_defect": "Kyiv replay is hard-wired to the current branch-local data/alerts_combined.json. That branch-local copy stopped at 2026-09-16 (2446 rows), while the audited/frozen denominator through 2026-09-17 was established from the later retained primary snapshot with 2456 rows. The loader never sees the retained final-day rows.",
+    "all_10_share_common_defect": true,
+    "geography_selection": {
+      "cause": false,
+      "detail": "Kyiv uses its dedicated exact-city loader; no Kyiv-oblast substitution is involved."
+    },
+    "date_boundary": {
+      "cause": true,
+      "detail": "Replay window includes local 2026-09-17, but selected branch-local source contains no 2026-09-17 rows."
+    },
+    "timezone_normalization": {
+      "cause": false,
+      "detail": "Canonical comparison normalizes exact +03:00 retained times to UTC Z and reproduces deterministic SHA-256 IDs."
+    },
+    "overlap_merge": {
+      "cause": false,
+      "detail": "Retained 2456 primary intervals have zero overlaps; current Kyiv loader performs no merge step."
+    },
+    "deduplication": {
+      "cause": false,
+      "detail": "Current 2446 and retained 2456 each have equal row and unique-interval counts; canonical expected IDs are unique."
+    },
+    "source_switch_or_seam": {
+      "cause": false,
+      "detail": "Retained Alerts.in.ua and UkraineAlarm bridge material contains no Kyiv continuation for these gaps; Kyiv is a special exact-city source."
+    },
+    "canonical_id_generation": {
+      "cause": false,
+      "detail": "Current contract is preserved. Frozen source slices carry legacy human-readable IDs, but exact times rebind deterministically to canonical SHA IDs."
+    },
+    "exact_disappearance_stage": "raw source selection: retained primary row exists, but current replay selects an older branch-local snapshot before normalization/canonicalization"
+  },
+  "historical_period_coverage": {
+    "local_date_distribution": {
+      "2026-09-17": 10
+    },
+    "cluster_count": 1,
+    "cluster_type": "terminal-day source snapshot cutoff",
+    "one_continuous_alert_interval": false,
+    "discrete_episode_count": 10,
+    "near_historical_replay_end_boundary": true,
+    "near_historical_live_bridge_boundary": false,
+    "caused_by_overlap_merging": false
+  },
+  "proposed_repair": {
+    "root_cause_group": "SOURCE_NOT_CURRENTLY_LOADED",
+    "repair_type": "APPEND_RETAINED_EPISODES",
+    "files_to_change": [
+      "kyiv-air-alerts-grafana/data/alerts_combined.json"
+    ],
+    "deterministic_method": "Use retained primary commit 527c48de8cd8d872ef5eaf2b510874be54d063c2 / blob ab9babd3527055256017867869bc62b96a6ebffc as the pinned recovery source; normalize start/end; compute retained-primary interval set minus current branch-local interval set within 2022-02-28..2026-09-17; append exactly that set difference; sort chronologically. Do not hardcode episode IDs; let the existing loader regenerate canonical IDs from exact UTC start/end.",
+    "code_change_required": false,
+    "canonical_contract_change_required": false,
+    "event_classification_change_required": false,
+    "production_site_prod_logic_change_required": false
+  },
+  "dry_reconstruction_check": {
+    "method": "In-memory union of current 2446 exact intervals with the retained-primary set difference.",
+    "before_count": 2446,
+    "added_retained_rows": 10,
+    "after_count": 2456,
+    "unique_canonical_id_count": 2456,
+    "duplicate_canonical_id_count": 0,
+    "overlap_count": 0,
+    "existing_2446_all_preserved": true,
+    "chronological_order_valid": true,
+    "canonical_ids_deterministic": true,
+    "canonical_contract": "SHA256(f\"{city_key}|{start_utc_z}|{end_utc_z}\")[:24]",
+    "unrelated_city_corpora_changed": false,
+    "persisted": false
+  },
+  "external_source_requirement": {
+    "required": false,
+    "reason": "All 10 exact intervals are retained in raw Git history and corroborated by the frozen Kyiv P5b source slice."
+  },
+  "protected_file_verification": {
+    "diagnostic_write_scope": [
+      "research/kyiv_historical_alert_corpus_gap_diagnostic_2026-09-27.json"
+    ],
+    "protected_files_unchanged_by_this_diagnostic": true,
+    "precommit_parent_head": "8b5e0a14f37aa6aea9f8d578c4c9887283952454",
+    "precommit_blobs": {
+      "research/historical_replay_status_current.json": "6a45e1b5cd052dbc4a417d04b1b962b3d8de245f",
+      "kyiv-air-alerts-grafana/data/alerts_combined.json": "129e2298e56244939e7d56cccd4b40a26d816c93",
+      "kyiv-air-alerts-grafana/data/explosion_audited_baseline.json": "5bbd2b771559eac2966aeec65d6e3b5487b9c1a9",
+      "kyiv-air-alerts-grafana/data/explosion_review_queue.json": "e6ed6776ae326a18a07978b1979dd3b265096bf0",
+      "kyiv-air-alerts-grafana/data/explosion_candidate_monitor_state.json": "3c8658880c6b93a00fb8ddbec2c4eaeed6d3f2cc",
+      "kyiv-air-alerts-grafana/data/explosion_candidate_monitor_last_run.json": "1552b13a2a9361be968cea4f09876cc20f96572f",
+      "kyiv-air-alerts-grafana/data/explosions_test.json": "3109dc02d2292efa59eddd26b34292cab2b554ab",
+      "kyiv-air-alerts-grafana/data/dashboard_data.json": "85e1d5cacfbe0af1530bbf584cb63ebdfef463e6",
+      "kyiv-air-alerts-grafana/data/explosion_research/kyiv/final_evidence.json": "dd21e37b5903e53ef4be90b23133a14a1b7aa613",
+      "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/kyiv-P5b_alerts.json": "035c686d9d9699bdc2b715e9a8291fff55ddd3c3",
+      "kyiv-air-alerts-grafana/scripts/replay_explosion_history.py": "7509d9f391d206a2b052ff35ee8993ced33c6936",
+      "kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py": "eefd63aeebc17347b750f61115842be6c53a79da"
+    },
+    "concurrent_branch_change_observed_during_analysis": {
+      "observed": true,
+      "initial_head": "1a847933cedb5dd34422b9892a26145d81324fe0",
+      "later_head": "8b5e0a14f37aa6aea9f8d578c4c9887283952454",
+      "unrelated_commit_changed_only": [
+        "kyiv-air-alerts-grafana/data/dashboard_data.json",
+        "kyiv-air-alerts-grafana/data/explosion_candidate_monitor_last_run.json",
+        "kyiv-air-alerts-grafana/data/explosion_candidate_monitor_state.json",
+        "kyiv-air-alerts-grafana/data/explosion_review_queue.json",
+        "kyiv-air-alerts-grafana/data/explosions_test.json"
+      ],
+      "denominator_status_loader_baseline_or_alert_source_changed": false,
+      "note": "Diagnostic was rebased logically onto the later HEAD before writing; those concurrent changes were not produced by this task."
+    }
+  },
+  "verdict": "KYIV HISTORICAL CORPUS REPAIR READY"
+}
