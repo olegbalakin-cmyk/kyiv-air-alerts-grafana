@@ -1,0 +1,2101 @@
+{
+  "schema_version": 1,
+  "inventory_date": "2026-09-27",
+  "repository": "olegbalakin-cmyk/kyiv-air-alerts-grafana",
+  "starting_branch": "multicity-wip-2026-09-16",
+  "starting_head": "7ad52d55e02d85dc14e6ece4b68f304f6540bbfc",
+  "inventory_branch": "historical-corpus-gap-inventory-2026-09-27",
+  "scope": "Forensic/read-only inventory of the 17 non-replay-ready cities. No alert/evidence/classifier/QA/baseline/production/campaign repair is performed.",
+  "no_web_research": true,
+  "authoritative_status_file": "research/historical_replay_status_current.json",
+  "authoritative_status_generated_at_utc": "2026-09-27T10:38:06.469948Z",
+  "replay_through": "2026-09-17",
+  "reference_drift": {
+    "detected": false,
+    "expected_reference": {
+      "expected": 17087,
+      "reconstructed": 6705,
+      "missing": 10382
+    },
+    "actual": {
+      "expected": 17087,
+      "reconstructed": 6705,
+      "missing": 10382
+    }
+  },
+  "corpus_model": {
+    "required_episode_fields": [
+      "episode_id",
+      "alert_start",
+      "alert_end",
+      "city",
+      "local date/equivalent canonical field"
+    ],
+    "canonical_episode_id_rule": "sha256(city_key + '|' + UTC alert_start + '|' + UTC alert_end)[:24], but only after final production interval union; IDs were not synthesized from partial inputs.",
+    "retained_primary_count_rule": "Count retained Alerts.in.ua start/end rows inside missing blocks, plus only UkraineAlarm rows proven non-overlapping with the counted static-row envelope. Overlapping API rows are not double-counted.",
+    "exact_upstream_snapshot_reference": {
+      "url_recorded_in_repo": "https://raw.githubusercontent.com/Vadimkin/ukrainian-air-raid-sirens-dataset/main/datasets/official_data_uk.csv",
+      "recorded_git_blob_sha": "71d70c0ca54968f530d596cf315616fa858800e1",
+      "blob_present_in_this_repository_object_store": false,
+      "probe_result": "GitHub blob lookup in this repository returned 404; the hash is provenance, not retained content."
+    }
+  },
+  "evidence_model": {
+    "replay_grade_rule": "Current replay requires city final_evidence.json; summary counts/dates alone are insufficient for current-classifier replay.",
+    "zhytomyr_note": "working_evidence.json is retained with status=complete, denominator=685, strict=19, sensitivity=20, qa.remaining=[]; because it is not replay-accepted final_evidence.json it is classified PARTIAL, not NO.",
+    "summary_only_sources": [
+      "kyiv-air-alerts-grafana/data/explosion_preview_input.json",
+      "kyiv-air-alerts-grafana/data/explosion_audited_baseline.json",
+      "kyiv-air-alerts-grafana/data/explosion_daily_alert_seed.json"
+    ]
+  },
+  "git_and_branch_search": {
+    "recursive_base_tree_blob_count": 577,
+    "current_source_slice_build_commit": "b940d5e750d2efa32a36c312147c57fa1cbfb851",
+    "searched_reachable_branches": [
+      "analysis-poltava-explosion-20260918",
+      "api-history-probe-2026-09-17",
+      "casualty-workflow",
+      "lviv-recovery-source-2026-09-25",
+      "main",
+      "site-prod",
+      "tmp-cherkasy-batch1-preflight-20260927",
+      "tmp-cherkasy-batch2-preflight-20260927",
+      "tmp-explosion-catchup-20260920",
+      "tmp-kharkiv-p6-diagnostic-20260920"
+    ],
+    "findings": [
+      "No branch tree contained additional missing-city canonical alert slices beyond the current multicity base.",
+      "Likely missing slice paths such as chernihiv-P2a, dnipro-P2a, kharkiv-P1a, mykolaiv-P1a, odesa-P3a and kherson-P1a have no commit history on the multicity lineage.",
+      "The initial source-slice build commit created only the slices still present for these 17 cities; later commits add other/repair city slices, not the missing blocks.",
+      "No deleted final_evidence history was found for chernivtsi, ivano_frankivsk, khmelnytskyi, lutsk, poltava, rivne, ternopil, uzhhorod or vinnytsia.",
+      "Zhytomyr history contains only working_evidence.json; no final_evidence.json was found."
+    ]
+  },
+  "aggregate_totals": {
+    "expected_episodes": 17087,
+    "reconstructed_episodes": 6705,
+    "missing_episodes": 10382,
+    "recovery_class_counts": {
+      "RECOVERABLE_FROM_CURRENT_REPO": 0,
+      "RECOVERABLE_FROM_GIT_HISTORY": 0,
+      "PRIMARY_DATA_PRESENT_NOT_LOADED": 573,
+      "PARTIAL_RECOVERY_AVAILABLE": 0,
+      "LOCAL_DATA_REQUIRED": 9809,
+      "EXTERNAL_SOURCE_REQUIRED": 0,
+      "UNRESOLVED_SOURCE_IDENTITY": 0
+    },
+    "recovery_classes_reconcile_to_missing": true,
+    "cities_ready_for_deterministic_corpus_repair": [],
+    "cities_ready_for_deterministic_corpus_repair_count": 0,
+    "cities_partially_recoverable": [
+      "chernihiv",
+      "chernivtsi",
+      "ivano_frankivsk",
+      "kherson",
+      "khmelnytskyi",
+      "kropyvnytskyi",
+      "lutsk",
+      "odesa",
+      "poltava",
+      "rivne",
+      "ternopil",
+      "uzhhorod",
+      "vinnytsia",
+      "zhytomyr"
+    ],
+    "cities_partially_recoverable_count": 14,
+    "cities_requiring_local_files": [
+      "chernihiv",
+      "chernivtsi",
+      "dnipro",
+      "ivano_frankivsk",
+      "kharkiv",
+      "kherson",
+      "khmelnytskyi",
+      "kropyvnytskyi",
+      "lutsk",
+      "mykolaiv",
+      "odesa",
+      "poltava",
+      "rivne",
+      "ternopil",
+      "uzhhorod",
+      "vinnytsia",
+      "zhytomyr"
+    ],
+    "cities_requiring_local_files_count": 17,
+    "cities_conditionally_requiring_external_evidence_research": [
+      "chernivtsi",
+      "ivano_frankivsk",
+      "khmelnytskyi",
+      "lutsk",
+      "poltava",
+      "rivne",
+      "ternopil",
+      "uzhhorod",
+      "vinnytsia"
+    ],
+    "cities_conditionally_requiring_external_evidence_research_count": 9,
+    "frozen_evidence_status_counts": {
+      "YES": 7,
+      "PARTIAL": 1,
+      "NO": 9
+    },
+    "discovery_adapter_status_counts": {
+      "YES": 0,
+      "PARTIAL": 5,
+      "NO": 12
+    }
+  },
+  "cities": {
+    "chernihiv": {
+      "city_key": "chernihiv",
+      "expected_episodes": 1677,
+      "reconstructed_episodes": 557,
+      "missing_episodes": 1120,
+      "coverage_start": "2025-09-03",
+      "coverage_end": "2026-09-17",
+      "blocker_codes": [
+        "INCOMPLETE_HISTORICAL_ALERT_EPISODE_CORPUS"
+      ],
+      "exact_missing_ids": [],
+      "exact_missing_ids_count": 0,
+      "exact_missing_ids_note": "Canonical missing episode IDs cannot be derived safely from denominator summaries/result-only artifacts. The source-slice ID hashes depend on final assembled start/end intervals, and the upstream historical source blob is not retained in this repo.",
+      "missing_date_ranges": [
+        {
+          "start_date": "2026-02-01",
+          "end_date": "2026-06-06",
+          "expected_missing_episodes": 559,
+          "source_partition": "chernihiv-P2"
+        },
+        {
+          "start_date": "2026-06-07",
+          "end_date": "2026-09-17",
+          "expected_missing_episodes": 561,
+          "source_partition": "chernihiv-P3"
+        }
+      ],
+      "current_alert_sources": [
+        "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/chernihiv-P1a_alerts.json",
+        "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/chernihiv-P1b_alerts.json"
+      ],
+      "additional_repo_sources_found": [
+        "kyiv-air-alerts-grafana/data/alerts_in_ua_bridge_2026-09-07_16.csv.gz.b64",
+        "kyiv-air-alerts-grafana/data/ukrainealarm_bridge.json",
+        "kyiv-air-alerts-grafana/data/explosion_metric_handoff/chernihiv_P2_result.json",
+        "kyiv-air-alerts-grafana/data/explosion_metric_handoff/chernihiv_P3_result.json",
+        "kyiv-air-alerts-grafana/data/explosion_research/chernihiv/final_evidence.json"
+      ],
+      "recoverable_raw_blocks": [
+        {
+          "classification": "PRIMARY_DATA_PRESENT_NOT_LOADED",
+          "source_path": "kyiv-air-alerts-grafana/data/alerts_in_ua_bridge_2026-09-07_16.csv.gz.b64",
+          "source_kind": "Alerts.in.ua retained manual CSV payload",
+          "episode_rows": 60,
+          "raw_time_range": [
+            "2026-09-07T11:45:15+03:00",
+            "2026-09-16T23:06:37+03:00"
+          ],
+          "note": "Rows are complete start/end primary alert rows and are not currently loaded by historical replay."
+        },
+        {
+          "classification": "PRIMARY_DATA_PRESENT_NOT_LOADED",
+          "source_path": "kyiv-air-alerts-grafana/data/ukrainealarm_bridge.json",
+          "source_kind": "persisted UkraineAlarm regionHistory",
+          "episode_rows": 10,
+          "raw_time_range": [
+            "2026-09-16T20:39:08.406102Z",
+            "2026-09-17T19:58:45.814695Z"
+          ],
+          "note": "Persisted API rows later than the retained static-row envelope; therefore non-overlapping with the counted static rows."
+        }
+      ],
+      "git_history_sources_found": [],
+      "git_history_note": "No missing canonical alert-corpus file for this city was found in reachable branch trees or relevant path history. Related result/evidence history does not contain the full missing denominator.",
+      "final_evidence_present": true,
+      "working_evidence_present": false,
+      "recovery_class_counts": {
+        "RECOVERABLE_FROM_CURRENT_REPO": 0,
+        "RECOVERABLE_FROM_GIT_HISTORY": 0,
+        "PRIMARY_DATA_PRESENT_NOT_LOADED": 70,
+        "PARTIAL_RECOVERY_AVAILABLE": 0,
+        "LOCAL_DATA_REQUIRED": 1050,
+        "EXTERNAL_SOURCE_REQUIRED": 0,
+        "UNRESOLVED_SOURCE_IDENTITY": 0
+      },
+      "city_recovery_status": "PARTIALLY_RECOVERABLE",
+      "frozen_evidence_status": "YES",
+      "discovery_adapter_status": "PARTIAL",
+      "local_data_required": {
+        "required": true,
+        "alert_corpus": {
+          "required_episode_rows_not_already_proven_retained": 1050,
+          "preferred_file": "Exact upstream official_data_uk.csv snapshot used by source-slice builder, matching git blob SHA 71d70c0ca54968f530d596cf315616fa858800e1; alternatively canonical assembled episode JSON/CSV covering the full missing ranges.",
+          "requested_coverage": [
+            {
+              "start_date": "2026-02-01",
+              "end_date": "2026-06-06"
+            },
+            {
+              "start_date": "2026-06-07",
+              "end_date": "2026-09-17"
+            }
+          ],
+          "minimum_fields": [
+            "city/location identity",
+            "oblast/raion or exact hromada identity",
+            "alert type",
+            "alert start timestamp",
+            "alert end timestamp"
+          ],
+          "raw_alerts_in_ua_export_suffices": "YES if it is a complete historical export for the required proxy/exact geography and contains complete start/end rows.",
+          "raw_ukrainealarm_export_suffices": "YES if it is a full historical export covering the missing period; the retained latest-history store is capped/partial and is not enough by itself.",
+          "old_project_json_csv_preferred": "YES. Prefer the exact original source snapshot or already-assembled canonical episode rows because this preserves denominator semantics and avoids source drift."
+        },
+        "evidence_archive": {
+          "required": false,
+          "note": "Replay-grade final_evidence.json is retained."
+        }
+      },
+      "external_research_required": {
+        "alert_corpus": false,
+        "frozen_evidence": false,
+        "condition": null
+      },
+      "recommended_next_action": "Retain the 70 proven primary rows already in repo, obtain the exact historical source snapshot for the remaining 1050 missing episodes, then perform a separate append-only corpus repair."
+    },
+    "chernivtsi": {
+      "city_key": "chernivtsi",
+      "expected_episodes": 113,
+      "reconstructed_episodes": 0,
+      "missing_episodes": 113,
+      "coverage_start": "2025-11-06",
+      "coverage_end": "2026-09-17",
+      "blocker_codes": [
+        "INCOMPLETE_HISTORICAL_ALERT_EPISODE_CORPUS",
+        "MISSING_FROZEN_HISTORICAL_EVIDENCE_CORPUS"
+      ],
+      "exact_missing_ids": [],
+      "exact_missing_ids_count": 0,
+      "exact_missing_ids_note": "Canonical missing episode IDs cannot be derived safely from denominator summaries/result-only artifacts. The source-slice ID hashes depend on final assembled start/end intervals, and the upstream historical source blob is not retained in this repo.",
+      "missing_date_ranges": [
+        {
+          "start_date": "2025-11-06",
+          "end_date": "2026-09-17",
+          "expected_missing_episodes": 113,
+          "source_partition": "full_expected_denominator"
+        }
+      ],
+      "current_alert_sources": [],
+      "additional_repo_sources_found": [
+        "kyiv-air-alerts-grafana/data/alerts_in_ua_bridge_additional_2026-09-07_16.csv.gz.b64",
+        "kyiv-air-alerts-grafana/data/ukrainealarm_bridge.json"
+      ],
+      "recoverable_raw_blocks": [
+        {
+          "classification": "PRIMARY_DATA_PRESENT_NOT_LOADED",
+          "source_path": "kyiv-air-alerts-grafana/data/alerts_in_ua_bridge_additional_2026-09-07_16.csv.gz.b64",
+          "source_kind": "Alerts.in.ua retained manual CSV payload",
+          "episode_rows": 2,
+          "raw_time_range": [
+            "2026-09-12T05:22:11+03:00",
+            "2026-09-15T20:09:13+03:00"
+          ],
+          "note": "Rows are complete start/end primary alert rows and are not currently loaded by historical replay."
+        },
+        {
+          "classification": "PRIMARY_DATA_PRESENT_NOT_LOADED",
+          "source_path": "kyiv-air-alerts-grafana/data/ukrainealarm_bridge.json",
+          "source_kind": "persisted UkraineAlarm regionHistory",
+          "episode_rows": 15,
+          "raw_time_range": [
+            "2026-06-21T09:20:12.884688Z",
+            "2026-09-05T12:53:43.988227Z"
+          ],
+          "note": "Persisted API rows earlier than the retained static-row envelope; therefore non-overlapping with the counted static rows."
+        },
+        {
+          "classification": "PRIMARY_DATA_PRESENT_NOT_LOADED",
+          "source_path": "kyiv-air-alerts-grafana/data/ukrainealarm_bridge.json",
+          "source_kind": "persisted UkraineAlarm regionHistory",
+          "episode_rows": 3,
+          "raw_time_range": [
+            "2026-09-16T23:05:57.991834Z",
+            "2026-09-17T10:41:56.505820Z"
+          ],
+          "note": "Persisted API rows later than the retained static-row envelope; therefore non-overlapping with the counted static rows."
+        }
+      ],
+      "git_history_sources_found": [],
+      "git_history_note": "No missing canonical alert-corpus file for this city was found in reachable branch trees or relevant path history. Related result/evidence history does not contain the full missing denominator.",
+      "final_evidence_present": false,
+      "working_evidence_present": false,
+      "recovery_class_counts": {
+        "RECOVERABLE_FROM_CURRENT_REPO": 0,
+        "RECOVERABLE_FROM_GIT_HISTORY": 0,
+        "PRIMARY_DATA_PRESENT_NOT_LOADED": 20,
+        "PARTIAL_RECOVERY_AVAILABLE": 0,
+        "LOCAL_DATA_REQUIRED": 93,
+        "EXTERNAL_SOURCE_REQUIRED": 0,
+        "UNRESOLVED_SOURCE_IDENTITY": 0
+      },
+      "city_recovery_status": "PARTIALLY_RECOVERABLE",
+      "frozen_evidence_status": "NO",
+      "discovery_adapter_status": "NO",
+      "local_data_required": {
+        "required": true,
+        "alert_corpus": {
+          "required_episode_rows_not_already_proven_retained": 93,
+          "preferred_file": "Exact upstream official_data_uk.csv snapshot used by source-slice builder, matching git blob SHA 71d70c0ca54968f530d596cf315616fa858800e1; alternatively canonical assembled episode JSON/CSV covering the full missing ranges.",
+          "requested_coverage": [
+            {
+              "start_date": "2025-11-06",
+              "end_date": "2026-09-17"
+            }
+          ],
+          "minimum_fields": [
+            "city/location identity",
+            "oblast/raion or exact hromada identity",
+            "alert type",
+            "alert start timestamp",
+            "alert end timestamp"
+          ],
+          "raw_alerts_in_ua_export_suffices": "YES if it is a complete historical export for the required proxy/exact geography and contains complete start/end rows.",
+          "raw_ukrainealarm_export_suffices": "YES if it is a full historical export covering the missing period; the retained latest-history store is capped/partial and is not enough by itself.",
+          "old_project_json_csv_preferred": "YES. Prefer the exact original source snapshot or already-assembled canonical episode rows because this preserves denominator semantics and avoids source drift."
+        },
+        "evidence_archive": {
+          "required": true,
+          "preferred_file": "Any original chernivtsi audit/final_evidence JSON, city audit result, or retained source archive from the historical explosion research.",
+          "minimum_fields": [
+            "source URL or retained source identity",
+            "evidence text/snippet",
+            "publication/event timestamp or date",
+            "city-status/context fields",
+            "decision/classification bucket",
+            "matched alert locator if available"
+          ],
+          "reason": "Current repo has only summary counts/dates for this city and no replay-grade final_evidence.json or complete working_evidence.json."
+        }
+      },
+      "external_research_required": {
+        "alert_corpus": false,
+        "frozen_evidence": true,
+        "condition": "Required only if no local historical audit/source archive can be supplied; current controlled repo/git data are insufficient for current-classifier evidence reconciliation."
+      },
+      "recommended_next_action": "Retain the 20 proven primary rows already in repo, obtain the exact historical source snapshot for the remaining 93 missing episodes, then perform a separate append-only corpus repair."
+    },
+    "dnipro": {
+      "city_key": "dnipro",
+      "expected_episodes": 2259,
+      "reconstructed_episodes": 1697,
+      "missing_episodes": 562,
+      "coverage_start": "2025-05-01",
+      "coverage_end": "2026-09-17",
+      "blocker_codes": [
+        "INCOMPLETE_HISTORICAL_ALERT_EPISODE_CORPUS"
+      ],
+      "exact_missing_ids": [],
+      "exact_missing_ids_count": 0,
+      "exact_missing_ids_note": "Canonical missing episode IDs cannot be derived safely from denominator summaries/result-only artifacts. The source-slice ID hashes depend on final assembled start/end intervals, and the upstream historical source blob is not retained in this repo.",
+      "missing_date_ranges": [
+        {
+          "start_date": "2025-10-31",
+          "end_date": "2026-03-11",
+          "expected_missing_episodes": 562,
+          "source_partition": "dnipro-P2"
+        }
+      ],
+      "current_alert_sources": [
+        "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/dnipro-P1a_alerts.json",
+        "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/dnipro-P1b_alerts.json",
+        "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/dnipro-P3a_alerts.json",
+        "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/dnipro-P3b_alerts.json",
+        "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/dnipro-P4a_alerts.json",
+        "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/dnipro-P4b_alerts.json"
+      ],
+      "additional_repo_sources_found": [
+        "kyiv-air-alerts-grafana/data/explosion_research/dnipro/dnipro_P2_result.json",
+        "kyiv-air-alerts-grafana/data/explosion_research/dnipro/final_evidence.json"
+      ],
+      "recoverable_raw_blocks": [],
+      "git_history_sources_found": [],
+      "git_history_note": "No missing canonical alert-corpus file for this city was found in reachable branch trees or relevant path history. Related result/evidence history does not contain the full missing denominator.",
+      "final_evidence_present": true,
+      "working_evidence_present": false,
+      "recovery_class_counts": {
+        "RECOVERABLE_FROM_CURRENT_REPO": 0,
+        "RECOVERABLE_FROM_GIT_HISTORY": 0,
+        "PRIMARY_DATA_PRESENT_NOT_LOADED": 0,
+        "PARTIAL_RECOVERY_AVAILABLE": 0,
+        "LOCAL_DATA_REQUIRED": 562,
+        "EXTERNAL_SOURCE_REQUIRED": 0,
+        "UNRESOLVED_SOURCE_IDENTITY": 0
+      },
+      "city_recovery_status": "LOCAL_DATA_REQUIRED",
+      "frozen_evidence_status": "YES",
+      "discovery_adapter_status": "PARTIAL",
+      "local_data_required": {
+        "required": true,
+        "alert_corpus": {
+          "required_episode_rows_not_already_proven_retained": 562,
+          "preferred_file": "Exact upstream official_data_uk.csv snapshot used by source-slice builder, matching git blob SHA 71d70c0ca54968f530d596cf315616fa858800e1; alternatively canonical assembled episode JSON/CSV covering the full missing ranges.",
+          "requested_coverage": [
+            {
+              "start_date": "2025-10-31",
+              "end_date": "2026-03-11"
+            }
+          ],
+          "minimum_fields": [
+            "city/location identity",
+            "oblast/raion or exact hromada identity",
+            "alert type",
+            "alert start timestamp",
+            "alert end timestamp"
+          ],
+          "raw_alerts_in_ua_export_suffices": "YES if it is a complete historical export for the required proxy/exact geography and contains complete start/end rows.",
+          "raw_ukrainealarm_export_suffices": "YES if it is a full historical export covering the missing period; the retained latest-history store is capped/partial and is not enough by itself.",
+          "old_project_json_csv_preferred": "YES. Prefer the exact original source snapshot or already-assembled canonical episode rows because this preserves denominator semantics and avoids source drift."
+        },
+        "evidence_archive": {
+          "required": false,
+          "note": "Replay-grade final_evidence.json is retained."
+        }
+      },
+      "external_research_required": {
+        "alert_corpus": false,
+        "frozen_evidence": false,
+        "condition": null
+      },
+      "recommended_next_action": "Obtain the exact historical source snapshot for all 562 missing episodes, then perform a separate append-only corpus repair."
+    },
+    "ivano_frankivsk": {
+      "city_key": "ivano_frankivsk",
+      "expected_episodes": 103,
+      "reconstructed_episodes": 0,
+      "missing_episodes": 103,
+      "coverage_start": "2025-11-06",
+      "coverage_end": "2026-09-17",
+      "blocker_codes": [
+        "INCOMPLETE_HISTORICAL_ALERT_EPISODE_CORPUS",
+        "MISSING_FROZEN_HISTORICAL_EVIDENCE_CORPUS"
+      ],
+      "exact_missing_ids": [],
+      "exact_missing_ids_count": 0,
+      "exact_missing_ids_note": "Canonical missing episode IDs cannot be derived safely from denominator summaries/result-only artifacts. The source-slice ID hashes depend on final assembled start/end intervals, and the upstream historical source blob is not retained in this repo.",
+      "missing_date_ranges": [
+        {
+          "start_date": "2025-11-06",
+          "end_date": "2026-09-17",
+          "expected_missing_episodes": 103,
+          "source_partition": "full_expected_denominator"
+        }
+      ],
+      "current_alert_sources": [],
+      "additional_repo_sources_found": [
+        "kyiv-air-alerts-grafana/data/alerts_in_ua_bridge_additional_2026-09-07_16.csv.gz.b64",
+        "kyiv-air-alerts-grafana/data/ukrainealarm_bridge.json"
+      ],
+      "recoverable_raw_blocks": [
+        {
+          "classification": "PRIMARY_DATA_PRESENT_NOT_LOADED",
+          "source_path": "kyiv-air-alerts-grafana/data/alerts_in_ua_bridge_additional_2026-09-07_16.csv.gz.b64",
+          "source_kind": "Alerts.in.ua retained manual CSV payload",
+          "episode_rows": 3,
+          "raw_time_range": [
+            "2026-09-13T01:00:05+03:00",
+            "2026-09-15T20:09:02+03:00"
+          ],
+          "note": "Rows are complete start/end primary alert rows and are not currently loaded by historical replay."
+        },
+        {
+          "classification": "PRIMARY_DATA_PRESENT_NOT_LOADED",
+          "source_path": "kyiv-air-alerts-grafana/data/ukrainealarm_bridge.json",
+          "source_kind": "persisted UkraineAlarm regionHistory",
+          "episode_rows": 15,
+          "raw_time_range": [
+            "2026-06-11T20:31:05.085529Z",
+            "2026-09-01T18:46:21.925719Z"
+          ],
+          "note": "Persisted API rows earlier than the retained static-row envelope; therefore non-overlapping with the counted static rows."
+        },
+        {
+          "classification": "PRIMARY_DATA_PRESENT_NOT_LOADED",
+          "source_path": "kyiv-air-alerts-grafana/data/ukrainealarm_bridge.json",
+          "source_kind": "persisted UkraineAlarm regionHistory",
+          "episode_rows": 2,
+          "raw_time_range": [
+            "2026-09-16T23:05:55.480787Z",
+            "2026-09-17T10:41:41.497131Z"
+          ],
+          "note": "Persisted API rows later than the retained static-row envelope; therefore non-overlapping with the counted static rows."
+        }
+      ],
+      "git_history_sources_found": [],
+      "git_history_note": "No missing canonical alert-corpus file for this city was found in reachable branch trees or relevant path history. Related result/evidence history does not contain the full missing denominator.",
+      "final_evidence_present": false,
+      "working_evidence_present": false,
+      "recovery_class_counts": {
+        "RECOVERABLE_FROM_CURRENT_REPO": 0,
+        "RECOVERABLE_FROM_GIT_HISTORY": 0,
+        "PRIMARY_DATA_PRESENT_NOT_LOADED": 20,
+        "PARTIAL_RECOVERY_AVAILABLE": 0,
+        "LOCAL_DATA_REQUIRED": 83,
+        "EXTERNAL_SOURCE_REQUIRED": 0,
+        "UNRESOLVED_SOURCE_IDENTITY": 0
+      },
+      "city_recovery_status": "PARTIALLY_RECOVERABLE",
+      "frozen_evidence_status": "NO",
+      "discovery_adapter_status": "NO",
+      "local_data_required": {
+        "required": true,
+        "alert_corpus": {
+          "required_episode_rows_not_already_proven_retained": 83,
+          "preferred_file": "Exact upstream official_data_uk.csv snapshot used by source-slice builder, matching git blob SHA 71d70c0ca54968f530d596cf315616fa858800e1; alternatively canonical assembled episode JSON/CSV covering the full missing ranges.",
+          "requested_coverage": [
+            {
+              "start_date": "2025-11-06",
+              "end_date": "2026-09-17"
+            }
+          ],
+          "minimum_fields": [
+            "city/location identity",
+            "oblast/raion or exact hromada identity",
+            "alert type",
+            "alert start timestamp",
+            "alert end timestamp"
+          ],
+          "raw_alerts_in_ua_export_suffices": "YES if it is a complete historical export for the required proxy/exact geography and contains complete start/end rows.",
+          "raw_ukrainealarm_export_suffices": "YES if it is a full historical export covering the missing period; the retained latest-history store is capped/partial and is not enough by itself.",
+          "old_project_json_csv_preferred": "YES. Prefer the exact original source snapshot or already-assembled canonical episode rows because this preserves denominator semantics and avoids source drift."
+        },
+        "evidence_archive": {
+          "required": true,
+          "preferred_file": "Any original ivano_frankivsk audit/final_evidence JSON, city audit result, or retained source archive from the historical explosion research.",
+          "minimum_fields": [
+            "source URL or retained source identity",
+            "evidence text/snippet",
+            "publication/event timestamp or date",
+            "city-status/context fields",
+            "decision/classification bucket",
+            "matched alert locator if available"
+          ],
+          "reason": "Current repo has only summary counts/dates for this city and no replay-grade final_evidence.json or complete working_evidence.json."
+        }
+      },
+      "external_research_required": {
+        "alert_corpus": false,
+        "frozen_evidence": true,
+        "condition": "Required only if no local historical audit/source archive can be supplied; current controlled repo/git data are insufficient for current-classifier evidence reconciliation."
+      },
+      "recommended_next_action": "Retain the 20 proven primary rows already in repo, obtain the exact historical source snapshot for the remaining 83 missing episodes, then perform a separate append-only corpus repair."
+    },
+    "kharkiv": {
+      "city_key": "kharkiv",
+      "expected_episodes": 3565,
+      "reconstructed_episodes": 2378,
+      "missing_episodes": 1187,
+      "coverage_start": "2025-02-17",
+      "coverage_end": "2026-09-17",
+      "blocker_codes": [
+        "INCOMPLETE_HISTORICAL_ALERT_EPISODE_CORPUS"
+      ],
+      "exact_missing_ids": [],
+      "exact_missing_ids_count": 0,
+      "exact_missing_ids_note": "Canonical missing episode IDs cannot be derived safely from denominator summaries/result-only artifacts. The source-slice ID hashes depend on final assembled start/end intervals, and the upstream historical source blob is not retained in this repo.",
+      "missing_date_ranges": [
+        {
+          "start_date": "2025-02-17",
+          "end_date": "2025-06-20",
+          "expected_missing_episodes": 593,
+          "source_partition": "kharkiv-P1"
+        },
+        {
+          "start_date": "2025-06-21",
+          "end_date": "2025-10-16",
+          "expected_missing_episodes": 594,
+          "source_partition": "kharkiv-P2"
+        }
+      ],
+      "current_alert_sources": [
+        "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/kharkiv-P3a_alerts.json",
+        "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/kharkiv-P3b_alerts.json",
+        "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/kharkiv-P4a_alerts.json",
+        "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/kharkiv-P4b_alerts.json",
+        "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/kharkiv-P5a_alerts.json",
+        "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/kharkiv-P5b_alerts.json",
+        "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/kharkiv-P6a_alerts.json",
+        "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/kharkiv-P6b_alerts.json",
+        "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/kharkiv-P6c_alerts.json"
+      ],
+      "additional_repo_sources_found": [
+        "kyiv-air-alerts-grafana/data/explosion_research/kharkiv/kharkiv_P1_result.json",
+        "kyiv-air-alerts-grafana/data/explosion_research/kharkiv/kharkiv_P2_result.json",
+        "kyiv-air-alerts-grafana/data/explosion_research/kharkiv/final_evidence.json"
+      ],
+      "recoverable_raw_blocks": [],
+      "git_history_sources_found": [],
+      "git_history_note": "No missing canonical alert-corpus file for this city was found in reachable branch trees or relevant path history. Related result/evidence history does not contain the full missing denominator.",
+      "final_evidence_present": true,
+      "working_evidence_present": false,
+      "recovery_class_counts": {
+        "RECOVERABLE_FROM_CURRENT_REPO": 0,
+        "RECOVERABLE_FROM_GIT_HISTORY": 0,
+        "PRIMARY_DATA_PRESENT_NOT_LOADED": 0,
+        "PARTIAL_RECOVERY_AVAILABLE": 0,
+        "LOCAL_DATA_REQUIRED": 1187,
+        "EXTERNAL_SOURCE_REQUIRED": 0,
+        "UNRESOLVED_SOURCE_IDENTITY": 0
+      },
+      "city_recovery_status": "LOCAL_DATA_REQUIRED",
+      "frozen_evidence_status": "YES",
+      "discovery_adapter_status": "PARTIAL",
+      "local_data_required": {
+        "required": true,
+        "alert_corpus": {
+          "required_episode_rows_not_already_proven_retained": 1187,
+          "preferred_file": "Exact upstream official_data_uk.csv snapshot used by source-slice builder, matching git blob SHA 71d70c0ca54968f530d596cf315616fa858800e1; alternatively canonical assembled episode JSON/CSV covering the full missing ranges.",
+          "requested_coverage": [
+            {
+              "start_date": "2025-02-17",
+              "end_date": "2025-06-20"
+            },
+            {
+              "start_date": "2025-06-21",
+              "end_date": "2025-10-16"
+            }
+          ],
+          "minimum_fields": [
+            "city/location identity",
+            "oblast/raion or exact hromada identity",
+            "alert type",
+            "alert start timestamp",
+            "alert end timestamp"
+          ],
+          "raw_alerts_in_ua_export_suffices": "YES only if it contains exact Kharkiv city/hromada rows for the missing period; oblast/proxy rows are not a substitute.",
+          "raw_ukrainealarm_export_suffices": "YES if it is a full historical export covering the missing period; the retained latest-history store is capped/partial and is not enough by itself.",
+          "old_project_json_csv_preferred": "YES. Prefer the exact original source snapshot or already-assembled canonical episode rows because this preserves denominator semantics and avoids source drift."
+        },
+        "evidence_archive": {
+          "required": false,
+          "note": "Replay-grade final_evidence.json is retained."
+        }
+      },
+      "external_research_required": {
+        "alert_corpus": false,
+        "frozen_evidence": false,
+        "condition": null
+      },
+      "recommended_next_action": "Obtain the exact historical source snapshot for all 1187 missing episodes, then perform a separate append-only corpus repair."
+    },
+    "kherson": {
+      "city_key": "kherson",
+      "expected_episodes": 1412,
+      "reconstructed_episodes": 0,
+      "missing_episodes": 1412,
+      "coverage_start": "2025-08-30",
+      "coverage_end": "2026-09-17",
+      "blocker_codes": [
+        "INCOMPLETE_HISTORICAL_ALERT_EPISODE_CORPUS"
+      ],
+      "exact_missing_ids": [],
+      "exact_missing_ids_count": 0,
+      "exact_missing_ids_note": "Canonical missing episode IDs cannot be derived safely from denominator summaries/result-only artifacts. The source-slice ID hashes depend on final assembled start/end intervals, and the upstream historical source blob is not retained in this repo.",
+      "missing_date_ranges": [
+        {
+          "start_date": "2025-08-30",
+          "end_date": "2026-09-17",
+          "expected_missing_episodes": 1412,
+          "source_partition": "full_expected_denominator"
+        }
+      ],
+      "current_alert_sources": [],
+      "additional_repo_sources_found": [
+        "kyiv-air-alerts-grafana/data/alerts_in_ua_bridge_additional_2026-09-07_16.csv.gz.b64",
+        "kyiv-air-alerts-grafana/data/ukrainealarm_bridge.json",
+        "kyiv-air-alerts-grafana/data/explosion_metric_handoff/kherson_P1_result.json",
+        "kyiv-air-alerts-grafana/data/explosion_metric_handoff/kherson_P2_result.json",
+        "kyiv-air-alerts-grafana/data/explosion_metric_handoff/kherson_P3_result.json",
+        "kyiv-air-alerts-grafana/data/explosion_research/kherson/final_evidence.json"
+      ],
+      "recoverable_raw_blocks": [
+        {
+          "classification": "PRIMARY_DATA_PRESENT_NOT_LOADED",
+          "source_path": "kyiv-air-alerts-grafana/data/alerts_in_ua_bridge_additional_2026-09-07_16.csv.gz.b64",
+          "source_kind": "Alerts.in.ua retained manual CSV payload",
+          "episode_rows": 52,
+          "raw_time_range": [
+            "2026-09-07T05:01:44+03:00",
+            "2026-09-16T19:04:57+03:00"
+          ],
+          "note": "Rows are complete start/end primary alert rows and are not currently loaded by historical replay."
+        },
+        {
+          "classification": "PRIMARY_DATA_PRESENT_NOT_LOADED",
+          "source_path": "kyiv-air-alerts-grafana/data/ukrainealarm_bridge.json",
+          "source_kind": "persisted UkraineAlarm regionHistory",
+          "episode_rows": 7,
+          "raw_time_range": [
+            "2026-09-16T22:18:15.801870Z",
+            "2026-09-17T18:48:12.811840Z"
+          ],
+          "note": "Persisted API rows later than the retained static-row envelope; therefore non-overlapping with the counted static rows."
+        }
+      ],
+      "git_history_sources_found": [],
+      "git_history_note": "No missing canonical alert-corpus file for this city was found in reachable branch trees or relevant path history. Related result/evidence history does not contain the full missing denominator.",
+      "final_evidence_present": true,
+      "working_evidence_present": false,
+      "recovery_class_counts": {
+        "RECOVERABLE_FROM_CURRENT_REPO": 0,
+        "RECOVERABLE_FROM_GIT_HISTORY": 0,
+        "PRIMARY_DATA_PRESENT_NOT_LOADED": 59,
+        "PARTIAL_RECOVERY_AVAILABLE": 0,
+        "LOCAL_DATA_REQUIRED": 1353,
+        "EXTERNAL_SOURCE_REQUIRED": 0,
+        "UNRESOLVED_SOURCE_IDENTITY": 0
+      },
+      "city_recovery_status": "PARTIALLY_RECOVERABLE",
+      "frozen_evidence_status": "YES",
+      "discovery_adapter_status": "NO",
+      "local_data_required": {
+        "required": true,
+        "alert_corpus": {
+          "required_episode_rows_not_already_proven_retained": 1353,
+          "preferred_file": "Exact upstream official_data_uk.csv snapshot used by source-slice builder, matching git blob SHA 71d70c0ca54968f530d596cf315616fa858800e1; alternatively canonical assembled episode JSON/CSV covering the full missing ranges.",
+          "requested_coverage": [
+            {
+              "start_date": "2025-08-30",
+              "end_date": "2026-09-17"
+            }
+          ],
+          "minimum_fields": [
+            "city/location identity",
+            "oblast/raion or exact hromada identity",
+            "alert type",
+            "alert start timestamp",
+            "alert end timestamp"
+          ],
+          "raw_alerts_in_ua_export_suffices": "YES if it is a complete historical export for the required proxy/exact geography and contains complete start/end rows.",
+          "raw_ukrainealarm_export_suffices": "YES if it is a full historical export covering the missing period; the retained latest-history store is capped/partial and is not enough by itself.",
+          "old_project_json_csv_preferred": "YES. Prefer the exact original source snapshot or already-assembled canonical episode rows because this preserves denominator semantics and avoids source drift."
+        },
+        "evidence_archive": {
+          "required": false,
+          "note": "Replay-grade final_evidence.json is retained."
+        }
+      },
+      "external_research_required": {
+        "alert_corpus": false,
+        "frozen_evidence": false,
+        "condition": null
+      },
+      "recommended_next_action": "Retain the 59 proven primary rows already in repo, obtain the exact historical source snapshot for the remaining 1353 missing episodes, then perform a separate append-only corpus repair."
+    },
+    "khmelnytskyi": {
+      "city_key": "khmelnytskyi",
+      "expected_episodes": 248,
+      "reconstructed_episodes": 0,
+      "missing_episodes": 248,
+      "coverage_start": "2025-07-07",
+      "coverage_end": "2026-09-17",
+      "blocker_codes": [
+        "INCOMPLETE_HISTORICAL_ALERT_EPISODE_CORPUS",
+        "MISSING_FROZEN_HISTORICAL_EVIDENCE_CORPUS"
+      ],
+      "exact_missing_ids": [],
+      "exact_missing_ids_count": 0,
+      "exact_missing_ids_note": "Canonical missing episode IDs cannot be derived safely from denominator summaries/result-only artifacts. The source-slice ID hashes depend on final assembled start/end intervals, and the upstream historical source blob is not retained in this repo.",
+      "missing_date_ranges": [
+        {
+          "start_date": "2025-07-07",
+          "end_date": "2026-09-17",
+          "expected_missing_episodes": 248,
+          "source_partition": "full_expected_denominator"
+        }
+      ],
+      "current_alert_sources": [],
+      "additional_repo_sources_found": [
+        "kyiv-air-alerts-grafana/data/alerts_in_ua_bridge_2026-09-07_16.csv.gz.b64",
+        "kyiv-air-alerts-grafana/data/ukrainealarm_bridge.json"
+      ],
+      "recoverable_raw_blocks": [
+        {
+          "classification": "PRIMARY_DATA_PRESENT_NOT_LOADED",
+          "source_path": "kyiv-air-alerts-grafana/data/alerts_in_ua_bridge_2026-09-07_16.csv.gz.b64",
+          "source_kind": "Alerts.in.ua retained manual CSV payload",
+          "episode_rows": 17,
+          "raw_time_range": [
+            "2026-09-07T20:27:56+03:00",
+            "2026-09-15T20:09:13+03:00"
+          ],
+          "note": "Rows are complete start/end primary alert rows and are not currently loaded by historical replay."
+        },
+        {
+          "classification": "PRIMARY_DATA_PRESENT_NOT_LOADED",
+          "source_path": "kyiv-air-alerts-grafana/data/ukrainealarm_bridge.json",
+          "source_kind": "persisted UkraineAlarm regionHistory",
+          "episode_rows": 3,
+          "raw_time_range": [
+            "2026-09-16T23:00:53.849844Z",
+            "2026-09-17T10:41:48.888281Z"
+          ],
+          "note": "Persisted API rows later than the retained static-row envelope; therefore non-overlapping with the counted static rows."
+        }
+      ],
+      "git_history_sources_found": [],
+      "git_history_note": "No missing canonical alert-corpus file for this city was found in reachable branch trees or relevant path history. Related result/evidence history does not contain the full missing denominator.",
+      "final_evidence_present": false,
+      "working_evidence_present": false,
+      "recovery_class_counts": {
+        "RECOVERABLE_FROM_CURRENT_REPO": 0,
+        "RECOVERABLE_FROM_GIT_HISTORY": 0,
+        "PRIMARY_DATA_PRESENT_NOT_LOADED": 20,
+        "PARTIAL_RECOVERY_AVAILABLE": 0,
+        "LOCAL_DATA_REQUIRED": 228,
+        "EXTERNAL_SOURCE_REQUIRED": 0,
+        "UNRESOLVED_SOURCE_IDENTITY": 0
+      },
+      "city_recovery_status": "PARTIALLY_RECOVERABLE",
+      "frozen_evidence_status": "NO",
+      "discovery_adapter_status": "NO",
+      "local_data_required": {
+        "required": true,
+        "alert_corpus": {
+          "required_episode_rows_not_already_proven_retained": 228,
+          "preferred_file": "Exact upstream official_data_uk.csv snapshot used by source-slice builder, matching git blob SHA 71d70c0ca54968f530d596cf315616fa858800e1; alternatively canonical assembled episode JSON/CSV covering the full missing ranges.",
+          "requested_coverage": [
+            {
+              "start_date": "2025-07-07",
+              "end_date": "2026-09-17"
+            }
+          ],
+          "minimum_fields": [
+            "city/location identity",
+            "oblast/raion or exact hromada identity",
+            "alert type",
+            "alert start timestamp",
+            "alert end timestamp"
+          ],
+          "raw_alerts_in_ua_export_suffices": "YES if it is a complete historical export for the required proxy/exact geography and contains complete start/end rows.",
+          "raw_ukrainealarm_export_suffices": "YES if it is a full historical export covering the missing period; the retained latest-history store is capped/partial and is not enough by itself.",
+          "old_project_json_csv_preferred": "YES. Prefer the exact original source snapshot or already-assembled canonical episode rows because this preserves denominator semantics and avoids source drift."
+        },
+        "evidence_archive": {
+          "required": true,
+          "preferred_file": "Any original khmelnytskyi audit/final_evidence JSON, city audit result, or retained source archive from the historical explosion research.",
+          "minimum_fields": [
+            "source URL or retained source identity",
+            "evidence text/snippet",
+            "publication/event timestamp or date",
+            "city-status/context fields",
+            "decision/classification bucket",
+            "matched alert locator if available"
+          ],
+          "reason": "Current repo has only summary counts/dates for this city and no replay-grade final_evidence.json or complete working_evidence.json."
+        }
+      },
+      "external_research_required": {
+        "alert_corpus": false,
+        "frozen_evidence": true,
+        "condition": "Required only if no local historical audit/source archive can be supplied; current controlled repo/git data are insufficient for current-classifier evidence reconciliation."
+      },
+      "recommended_next_action": "Retain the 20 proven primary rows already in repo, obtain the exact historical source snapshot for the remaining 228 missing episodes, then perform a separate append-only corpus repair."
+    },
+    "kropyvnytskyi": {
+      "city_key": "kropyvnytskyi",
+      "expected_episodes": 1161,
+      "reconstructed_episodes": 0,
+      "missing_episodes": 1161,
+      "coverage_start": "2025-09-01",
+      "coverage_end": "2026-09-17",
+      "blocker_codes": [
+        "INCOMPLETE_HISTORICAL_ALERT_EPISODE_CORPUS"
+      ],
+      "exact_missing_ids": [],
+      "exact_missing_ids_count": 0,
+      "exact_missing_ids_note": "Canonical missing episode IDs cannot be derived safely from denominator summaries/result-only artifacts. The source-slice ID hashes depend on final assembled start/end intervals, and the upstream historical source blob is not retained in this repo.",
+      "missing_date_ranges": [
+        {
+          "start_date": "2025-09-01",
+          "end_date": "2026-09-17",
+          "expected_missing_episodes": 1161,
+          "source_partition": "full_expected_denominator"
+        }
+      ],
+      "current_alert_sources": [],
+      "additional_repo_sources_found": [
+        "kyiv-air-alerts-grafana/data/alerts_in_ua_bridge_2026-09-07_16.csv.gz.b64",
+        "kyiv-air-alerts-grafana/data/ukrainealarm_bridge.json",
+        "kyiv-air-alerts-grafana/data/explosion_research/kropyvnytskyi/kropyvnytskyi_K1_result.json",
+        "kyiv-air-alerts-grafana/data/explosion_research/kropyvnytskyi/kropyvnytskyi_K2_result.json",
+        "kyiv-air-alerts-grafana/data/explosion_research/kropyvnytskyi/final_evidence.json"
+      ],
+      "recoverable_raw_blocks": [
+        {
+          "classification": "PRIMARY_DATA_PRESENT_NOT_LOADED",
+          "source_path": "kyiv-air-alerts-grafana/data/alerts_in_ua_bridge_2026-09-07_16.csv.gz.b64",
+          "source_kind": "Alerts.in.ua retained manual CSV payload",
+          "episode_rows": 56,
+          "raw_time_range": [
+            "2026-09-07T16:38:21+03:00",
+            "2026-09-16T23:42:36+03:00"
+          ],
+          "note": "Rows are complete start/end primary alert rows and are not currently loaded by historical replay."
+        },
+        {
+          "classification": "PRIMARY_DATA_PRESENT_NOT_LOADED",
+          "source_path": "kyiv-air-alerts-grafana/data/ukrainealarm_bridge.json",
+          "source_kind": "persisted UkraineAlarm regionHistory",
+          "episode_rows": 8,
+          "raw_time_range": [
+            "2026-09-16T22:59:13.471331Z",
+            "2026-09-17T16:46:43.443117Z"
+          ],
+          "note": "Persisted API rows later than the retained static-row envelope; therefore non-overlapping with the counted static rows."
+        }
+      ],
+      "git_history_sources_found": [],
+      "git_history_note": "No missing canonical alert-corpus file for this city was found in reachable branch trees or relevant path history. Related result/evidence history does not contain the full missing denominator.",
+      "final_evidence_present": true,
+      "working_evidence_present": false,
+      "recovery_class_counts": {
+        "RECOVERABLE_FROM_CURRENT_REPO": 0,
+        "RECOVERABLE_FROM_GIT_HISTORY": 0,
+        "PRIMARY_DATA_PRESENT_NOT_LOADED": 64,
+        "PARTIAL_RECOVERY_AVAILABLE": 0,
+        "LOCAL_DATA_REQUIRED": 1097,
+        "EXTERNAL_SOURCE_REQUIRED": 0,
+        "UNRESOLVED_SOURCE_IDENTITY": 0
+      },
+      "city_recovery_status": "PARTIALLY_RECOVERABLE",
+      "frozen_evidence_status": "YES",
+      "discovery_adapter_status": "NO",
+      "local_data_required": {
+        "required": true,
+        "alert_corpus": {
+          "required_episode_rows_not_already_proven_retained": 1097,
+          "preferred_file": "Exact upstream official_data_uk.csv snapshot used by source-slice builder, matching git blob SHA 71d70c0ca54968f530d596cf315616fa858800e1; alternatively canonical assembled episode JSON/CSV covering the full missing ranges.",
+          "requested_coverage": [
+            {
+              "start_date": "2025-09-01",
+              "end_date": "2026-09-17"
+            }
+          ],
+          "minimum_fields": [
+            "city/location identity",
+            "oblast/raion or exact hromada identity",
+            "alert type",
+            "alert start timestamp",
+            "alert end timestamp"
+          ],
+          "raw_alerts_in_ua_export_suffices": "YES if it is a complete historical export for the required proxy/exact geography and contains complete start/end rows.",
+          "raw_ukrainealarm_export_suffices": "YES if it is a full historical export covering the missing period; the retained latest-history store is capped/partial and is not enough by itself.",
+          "old_project_json_csv_preferred": "YES. Prefer the exact original source snapshot or already-assembled canonical episode rows because this preserves denominator semantics and avoids source drift."
+        },
+        "evidence_archive": {
+          "required": false,
+          "note": "Replay-grade final_evidence.json is retained."
+        }
+      },
+      "external_research_required": {
+        "alert_corpus": false,
+        "frozen_evidence": false,
+        "condition": null
+      },
+      "recommended_next_action": "Retain the 64 proven primary rows already in repo, obtain the exact historical source snapshot for the remaining 1097 missing episodes, then perform a separate append-only corpus repair."
+    },
+    "lutsk": {
+      "city_key": "lutsk",
+      "expected_episodes": 135,
+      "reconstructed_episodes": 0,
+      "missing_episodes": 135,
+      "coverage_start": "2025-11-06",
+      "coverage_end": "2026-09-17",
+      "blocker_codes": [
+        "INCOMPLETE_HISTORICAL_ALERT_EPISODE_CORPUS",
+        "MISSING_FROZEN_HISTORICAL_EVIDENCE_CORPUS"
+      ],
+      "exact_missing_ids": [],
+      "exact_missing_ids_count": 0,
+      "exact_missing_ids_note": "Canonical missing episode IDs cannot be derived safely from denominator summaries/result-only artifacts. The source-slice ID hashes depend on final assembled start/end intervals, and the upstream historical source blob is not retained in this repo.",
+      "missing_date_ranges": [
+        {
+          "start_date": "2025-11-06",
+          "end_date": "2026-09-17",
+          "expected_missing_episodes": 135,
+          "source_partition": "full_expected_denominator"
+        }
+      ],
+      "current_alert_sources": [],
+      "additional_repo_sources_found": [
+        "kyiv-air-alerts-grafana/data/alerts_in_ua_bridge_additional_2026-09-07_16.csv.gz.b64",
+        "kyiv-air-alerts-grafana/data/ukrainealarm_bridge.json"
+      ],
+      "recoverable_raw_blocks": [
+        {
+          "classification": "PRIMARY_DATA_PRESENT_NOT_LOADED",
+          "source_path": "kyiv-air-alerts-grafana/data/alerts_in_ua_bridge_additional_2026-09-07_16.csv.gz.b64",
+          "source_kind": "Alerts.in.ua retained manual CSV payload",
+          "episode_rows": 13,
+          "raw_time_range": [
+            "2026-09-08T07:12:55+03:00",
+            "2026-09-16T08:16:30+03:00"
+          ],
+          "note": "Rows are complete start/end primary alert rows and are not currently loaded by historical replay."
+        },
+        {
+          "classification": "PRIMARY_DATA_PRESENT_NOT_LOADED",
+          "source_path": "kyiv-air-alerts-grafana/data/ukrainealarm_bridge.json",
+          "source_kind": "persisted UkraineAlarm regionHistory",
+          "episode_rows": 5,
+          "raw_time_range": [
+            "2026-08-30T21:30:43.131492Z",
+            "2026-09-05T12:51:14.507732Z"
+          ],
+          "note": "Persisted API rows earlier than the retained static-row envelope; therefore non-overlapping with the counted static rows."
+        },
+        {
+          "classification": "PRIMARY_DATA_PRESENT_NOT_LOADED",
+          "source_path": "kyiv-air-alerts-grafana/data/ukrainealarm_bridge.json",
+          "source_kind": "persisted UkraineAlarm regionHistory",
+          "episode_rows": 2,
+          "raw_time_range": [
+            "2026-09-16T23:05:59.864019Z",
+            "2026-09-17T10:41:44.988461Z"
+          ],
+          "note": "Persisted API rows later than the retained static-row envelope; therefore non-overlapping with the counted static rows."
+        }
+      ],
+      "git_history_sources_found": [],
+      "git_history_note": "No missing canonical alert-corpus file for this city was found in reachable branch trees or relevant path history. Related result/evidence history does not contain the full missing denominator.",
+      "final_evidence_present": false,
+      "working_evidence_present": false,
+      "recovery_class_counts": {
+        "RECOVERABLE_FROM_CURRENT_REPO": 0,
+        "RECOVERABLE_FROM_GIT_HISTORY": 0,
+        "PRIMARY_DATA_PRESENT_NOT_LOADED": 20,
+        "PARTIAL_RECOVERY_AVAILABLE": 0,
+        "LOCAL_DATA_REQUIRED": 115,
+        "EXTERNAL_SOURCE_REQUIRED": 0,
+        "UNRESOLVED_SOURCE_IDENTITY": 0
+      },
+      "city_recovery_status": "PARTIALLY_RECOVERABLE",
+      "frozen_evidence_status": "NO",
+      "discovery_adapter_status": "NO",
+      "local_data_required": {
+        "required": true,
+        "alert_corpus": {
+          "required_episode_rows_not_already_proven_retained": 115,
+          "preferred_file": "Exact upstream official_data_uk.csv snapshot used by source-slice builder, matching git blob SHA 71d70c0ca54968f530d596cf315616fa858800e1; alternatively canonical assembled episode JSON/CSV covering the full missing ranges.",
+          "requested_coverage": [
+            {
+              "start_date": "2025-11-06",
+              "end_date": "2026-09-17"
+            }
+          ],
+          "minimum_fields": [
+            "city/location identity",
+            "oblast/raion or exact hromada identity",
+            "alert type",
+            "alert start timestamp",
+            "alert end timestamp"
+          ],
+          "raw_alerts_in_ua_export_suffices": "YES if it is a complete historical export for the required proxy/exact geography and contains complete start/end rows.",
+          "raw_ukrainealarm_export_suffices": "YES if it is a full historical export covering the missing period; the retained latest-history store is capped/partial and is not enough by itself.",
+          "old_project_json_csv_preferred": "YES. Prefer the exact original source snapshot or already-assembled canonical episode rows because this preserves denominator semantics and avoids source drift."
+        },
+        "evidence_archive": {
+          "required": true,
+          "preferred_file": "Any original lutsk audit/final_evidence JSON, city audit result, or retained source archive from the historical explosion research.",
+          "minimum_fields": [
+            "source URL or retained source identity",
+            "evidence text/snippet",
+            "publication/event timestamp or date",
+            "city-status/context fields",
+            "decision/classification bucket",
+            "matched alert locator if available"
+          ],
+          "reason": "Current repo has only summary counts/dates for this city and no replay-grade final_evidence.json or complete working_evidence.json."
+        }
+      },
+      "external_research_required": {
+        "alert_corpus": false,
+        "frozen_evidence": true,
+        "condition": "Required only if no local historical audit/source archive can be supplied; current controlled repo/git data are insufficient for current-classifier evidence reconciliation."
+      },
+      "recommended_next_action": "Retain the 20 proven primary rows already in repo, obtain the exact historical source snapshot for the remaining 115 missing episodes, then perform a separate append-only corpus repair."
+    },
+    "mykolaiv": {
+      "city_key": "mykolaiv",
+      "expected_episodes": 1648,
+      "reconstructed_episodes": 1097,
+      "missing_episodes": 551,
+      "coverage_start": "2025-11-05",
+      "coverage_end": "2026-09-17",
+      "blocker_codes": [
+        "INCOMPLETE_HISTORICAL_ALERT_EPISODE_CORPUS"
+      ],
+      "exact_missing_ids": [],
+      "exact_missing_ids_count": 0,
+      "exact_missing_ids_note": "Canonical missing episode IDs cannot be derived safely from denominator summaries/result-only artifacts. The source-slice ID hashes depend on final assembled start/end intervals, and the upstream historical source blob is not retained in this repo.",
+      "missing_date_ranges": [
+        {
+          "start_date": "2025-11-05",
+          "end_date": "2026-03-25",
+          "expected_missing_episodes": 551,
+          "source_partition": "mykolaiv-P1"
+        }
+      ],
+      "current_alert_sources": [
+        "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/mykolaiv-P2a_alerts.json",
+        "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/mykolaiv-P2b_alerts.json",
+        "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/mykolaiv-P3a_alerts.json",
+        "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/mykolaiv-P3b_alerts.json"
+      ],
+      "additional_repo_sources_found": [
+        "kyiv-air-alerts-grafana/data/explosion_research/mykolaiv/mykolaiv_P1_result.json",
+        "kyiv-air-alerts-grafana/data/explosion_research/mykolaiv/final_evidence.json"
+      ],
+      "recoverable_raw_blocks": [],
+      "git_history_sources_found": [],
+      "git_history_note": "No missing canonical alert-corpus file for this city was found in reachable branch trees or relevant path history. Related result/evidence history does not contain the full missing denominator.",
+      "final_evidence_present": true,
+      "working_evidence_present": false,
+      "recovery_class_counts": {
+        "RECOVERABLE_FROM_CURRENT_REPO": 0,
+        "RECOVERABLE_FROM_GIT_HISTORY": 0,
+        "PRIMARY_DATA_PRESENT_NOT_LOADED": 0,
+        "PARTIAL_RECOVERY_AVAILABLE": 0,
+        "LOCAL_DATA_REQUIRED": 551,
+        "EXTERNAL_SOURCE_REQUIRED": 0,
+        "UNRESOLVED_SOURCE_IDENTITY": 0
+      },
+      "city_recovery_status": "LOCAL_DATA_REQUIRED",
+      "frozen_evidence_status": "YES",
+      "discovery_adapter_status": "PARTIAL",
+      "local_data_required": {
+        "required": true,
+        "alert_corpus": {
+          "required_episode_rows_not_already_proven_retained": 551,
+          "preferred_file": "Exact upstream official_data_uk.csv snapshot used by source-slice builder, matching git blob SHA 71d70c0ca54968f530d596cf315616fa858800e1; alternatively canonical assembled episode JSON/CSV covering the full missing ranges.",
+          "requested_coverage": [
+            {
+              "start_date": "2025-11-05",
+              "end_date": "2026-03-25"
+            }
+          ],
+          "minimum_fields": [
+            "city/location identity",
+            "oblast/raion or exact hromada identity",
+            "alert type",
+            "alert start timestamp",
+            "alert end timestamp"
+          ],
+          "raw_alerts_in_ua_export_suffices": "YES if it is a complete historical export for the required proxy/exact geography and contains complete start/end rows.",
+          "raw_ukrainealarm_export_suffices": "YES if it is a full historical export covering the missing period; the retained latest-history store is capped/partial and is not enough by itself.",
+          "old_project_json_csv_preferred": "YES. Prefer the exact original source snapshot or already-assembled canonical episode rows because this preserves denominator semantics and avoids source drift."
+        },
+        "evidence_archive": {
+          "required": false,
+          "note": "Replay-grade final_evidence.json is retained."
+        }
+      },
+      "external_research_required": {
+        "alert_corpus": false,
+        "frozen_evidence": false,
+        "condition": null
+      },
+      "recommended_next_action": "Obtain the exact historical source snapshot for all 551 missing episodes, then perform a separate append-only corpus repair."
+    },
+    "odesa": {
+      "city_key": "odesa",
+      "expected_episodes": 1465,
+      "reconstructed_episodes": 976,
+      "missing_episodes": 489,
+      "coverage_start": "2025-11-04",
+      "coverage_end": "2026-09-17",
+      "blocker_codes": [
+        "INCOMPLETE_HISTORICAL_ALERT_EPISODE_CORPUS"
+      ],
+      "exact_missing_ids": [],
+      "exact_missing_ids_count": 0,
+      "exact_missing_ids_note": "Canonical missing episode IDs cannot be derived safely from denominator summaries/result-only artifacts. The source-slice ID hashes depend on final assembled start/end intervals, and the upstream historical source blob is not retained in this repo.",
+      "missing_date_ranges": [
+        {
+          "start_date": "2026-07-13",
+          "end_date": "2026-09-17",
+          "expected_missing_episodes": 489,
+          "source_partition": "odesa-P3"
+        }
+      ],
+      "current_alert_sources": [
+        "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/odesa-P1a_alerts.json",
+        "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/odesa-P1b_alerts.json",
+        "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/odesa-P2a_alerts.json",
+        "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/odesa-P2b_alerts.json"
+      ],
+      "additional_repo_sources_found": [
+        "kyiv-air-alerts-grafana/data/alerts_in_ua_bridge_2026-09-07_16.csv.gz.b64",
+        "kyiv-air-alerts-grafana/data/ukrainealarm_bridge.json",
+        "kyiv-air-alerts-grafana/data/explosion_metric_handoff/odesa_P3_result.json",
+        "kyiv-air-alerts-grafana/data/explosion_research/odesa/final_evidence.json"
+      ],
+      "recoverable_raw_blocks": [
+        {
+          "classification": "PRIMARY_DATA_PRESENT_NOT_LOADED",
+          "source_path": "kyiv-air-alerts-grafana/data/alerts_in_ua_bridge_2026-09-07_16.csv.gz.b64",
+          "source_kind": "Alerts.in.ua retained manual CSV payload",
+          "episode_rows": 81,
+          "raw_time_range": [
+            "2026-09-07T16:05:30+03:00",
+            "2026-09-16T23:35:43+03:00"
+          ],
+          "note": "Rows are complete start/end primary alert rows and are not currently loaded by historical replay."
+        },
+        {
+          "classification": "PRIMARY_DATA_PRESENT_NOT_LOADED",
+          "source_path": "kyiv-air-alerts-grafana/data/ukrainealarm_bridge.json",
+          "source_kind": "persisted UkraineAlarm regionHistory",
+          "episode_rows": 13,
+          "raw_time_range": [
+            "2026-09-16T21:22:36.809687Z",
+            "2026-09-17T18:24:20.551812Z"
+          ],
+          "note": "Persisted API rows later than the retained static-row envelope; therefore non-overlapping with the counted static rows."
+        }
+      ],
+      "git_history_sources_found": [],
+      "git_history_note": "No missing canonical alert-corpus file for this city was found in reachable branch trees or relevant path history. Related result/evidence history does not contain the full missing denominator.",
+      "final_evidence_present": true,
+      "working_evidence_present": false,
+      "recovery_class_counts": {
+        "RECOVERABLE_FROM_CURRENT_REPO": 0,
+        "RECOVERABLE_FROM_GIT_HISTORY": 0,
+        "PRIMARY_DATA_PRESENT_NOT_LOADED": 94,
+        "PARTIAL_RECOVERY_AVAILABLE": 0,
+        "LOCAL_DATA_REQUIRED": 395,
+        "EXTERNAL_SOURCE_REQUIRED": 0,
+        "UNRESOLVED_SOURCE_IDENTITY": 0
+      },
+      "city_recovery_status": "PARTIALLY_RECOVERABLE",
+      "frozen_evidence_status": "YES",
+      "discovery_adapter_status": "PARTIAL",
+      "local_data_required": {
+        "required": true,
+        "alert_corpus": {
+          "required_episode_rows_not_already_proven_retained": 395,
+          "preferred_file": "Exact upstream official_data_uk.csv snapshot used by source-slice builder, matching git blob SHA 71d70c0ca54968f530d596cf315616fa858800e1; alternatively canonical assembled episode JSON/CSV covering the full missing ranges.",
+          "requested_coverage": [
+            {
+              "start_date": "2026-07-13",
+              "end_date": "2026-09-17"
+            }
+          ],
+          "minimum_fields": [
+            "city/location identity",
+            "oblast/raion or exact hromada identity",
+            "alert type",
+            "alert start timestamp",
+            "alert end timestamp"
+          ],
+          "raw_alerts_in_ua_export_suffices": "YES if it is a complete historical export for the required proxy/exact geography and contains complete start/end rows.",
+          "raw_ukrainealarm_export_suffices": "YES if it is a full historical export covering the missing period; the retained latest-history store is capped/partial and is not enough by itself.",
+          "old_project_json_csv_preferred": "YES. Prefer the exact original source snapshot or already-assembled canonical episode rows because this preserves denominator semantics and avoids source drift."
+        },
+        "evidence_archive": {
+          "required": false,
+          "note": "Replay-grade final_evidence.json is retained."
+        }
+      },
+      "external_research_required": {
+        "alert_corpus": false,
+        "frozen_evidence": false,
+        "condition": null
+      },
+      "recommended_next_action": "Retain the 94 proven primary rows already in repo, obtain the exact historical source snapshot for the remaining 395 missing episodes, then perform a separate append-only corpus repair."
+    },
+    "poltava": {
+      "city_key": "poltava",
+      "expected_episodes": 1805,
+      "reconstructed_episodes": 0,
+      "missing_episodes": 1805,
+      "coverage_start": "2025-08-01",
+      "coverage_end": "2026-09-17",
+      "blocker_codes": [
+        "INCOMPLETE_HISTORICAL_ALERT_EPISODE_CORPUS",
+        "MISSING_FROZEN_HISTORICAL_EVIDENCE_CORPUS"
+      ],
+      "exact_missing_ids": [],
+      "exact_missing_ids_count": 0,
+      "exact_missing_ids_note": "Canonical missing episode IDs cannot be derived safely from denominator summaries/result-only artifacts. The source-slice ID hashes depend on final assembled start/end intervals, and the upstream historical source blob is not retained in this repo.",
+      "missing_date_ranges": [
+        {
+          "start_date": "2025-08-01",
+          "end_date": "2026-09-17",
+          "expected_missing_episodes": 1805,
+          "source_partition": "full_expected_denominator"
+        }
+      ],
+      "current_alert_sources": [],
+      "additional_repo_sources_found": [
+        "kyiv-air-alerts-grafana/data/alerts_in_ua_bridge_2026-09-07_16.csv.gz.b64",
+        "kyiv-air-alerts-grafana/data/ukrainealarm_bridge.json"
+      ],
+      "recoverable_raw_blocks": [
+        {
+          "classification": "PRIMARY_DATA_PRESENT_NOT_LOADED",
+          "source_path": "kyiv-air-alerts-grafana/data/alerts_in_ua_bridge_2026-09-07_16.csv.gz.b64",
+          "source_kind": "Alerts.in.ua retained manual CSV payload",
+          "episode_rows": 65,
+          "raw_time_range": [
+            "2026-09-07T07:38:06+03:00",
+            "2026-09-16T21:44:38+03:00"
+          ],
+          "note": "Rows are complete start/end primary alert rows and are not currently loaded by historical replay."
+        },
+        {
+          "classification": "PRIMARY_DATA_PRESENT_NOT_LOADED",
+          "source_path": "kyiv-air-alerts-grafana/data/ukrainealarm_bridge.json",
+          "source_kind": "persisted UkraineAlarm regionHistory",
+          "episode_rows": 9,
+          "raw_time_range": [
+            "2026-09-16T21:58:27.254513Z",
+            "2026-09-17T17:25:10.189943Z"
+          ],
+          "note": "Persisted API rows later than the retained static-row envelope; therefore non-overlapping with the counted static rows."
+        }
+      ],
+      "git_history_sources_found": [],
+      "git_history_note": "No missing canonical alert-corpus file for this city was found in reachable branch trees or relevant path history. Related result/evidence history does not contain the full missing denominator.",
+      "final_evidence_present": false,
+      "working_evidence_present": false,
+      "recovery_class_counts": {
+        "RECOVERABLE_FROM_CURRENT_REPO": 0,
+        "RECOVERABLE_FROM_GIT_HISTORY": 0,
+        "PRIMARY_DATA_PRESENT_NOT_LOADED": 74,
+        "PARTIAL_RECOVERY_AVAILABLE": 0,
+        "LOCAL_DATA_REQUIRED": 1731,
+        "EXTERNAL_SOURCE_REQUIRED": 0,
+        "UNRESOLVED_SOURCE_IDENTITY": 0
+      },
+      "city_recovery_status": "PARTIALLY_RECOVERABLE",
+      "frozen_evidence_status": "NO",
+      "discovery_adapter_status": "NO",
+      "local_data_required": {
+        "required": true,
+        "alert_corpus": {
+          "required_episode_rows_not_already_proven_retained": 1731,
+          "preferred_file": "Exact upstream official_data_uk.csv snapshot used by source-slice builder, matching git blob SHA 71d70c0ca54968f530d596cf315616fa858800e1; alternatively canonical assembled episode JSON/CSV covering the full missing ranges.",
+          "requested_coverage": [
+            {
+              "start_date": "2025-08-01",
+              "end_date": "2026-09-17"
+            }
+          ],
+          "minimum_fields": [
+            "city/location identity",
+            "oblast/raion or exact hromada identity",
+            "alert type",
+            "alert start timestamp",
+            "alert end timestamp"
+          ],
+          "raw_alerts_in_ua_export_suffices": "YES if it is a complete historical export for the required proxy/exact geography and contains complete start/end rows.",
+          "raw_ukrainealarm_export_suffices": "YES if it is a full historical export covering the missing period; the retained latest-history store is capped/partial and is not enough by itself.",
+          "old_project_json_csv_preferred": "YES. Prefer the exact original source snapshot or already-assembled canonical episode rows because this preserves denominator semantics and avoids source drift."
+        },
+        "evidence_archive": {
+          "required": true,
+          "preferred_file": "Any original poltava audit/final_evidence JSON, city audit result, or retained source archive from the historical explosion research.",
+          "minimum_fields": [
+            "source URL or retained source identity",
+            "evidence text/snippet",
+            "publication/event timestamp or date",
+            "city-status/context fields",
+            "decision/classification bucket",
+            "matched alert locator if available"
+          ],
+          "reason": "Current repo has only summary counts/dates for this city and no replay-grade final_evidence.json or complete working_evidence.json."
+        }
+      },
+      "external_research_required": {
+        "alert_corpus": false,
+        "frozen_evidence": true,
+        "condition": "Required only if no local historical audit/source archive can be supplied; current controlled repo/git data are insufficient for current-classifier evidence reconciliation."
+      },
+      "recommended_next_action": "Retain the 74 proven primary rows already in repo, obtain the exact historical source snapshot for the remaining 1731 missing episodes, then perform a separate append-only corpus repair."
+    },
+    "rivne": {
+      "city_key": "rivne",
+      "expected_episodes": 232,
+      "reconstructed_episodes": 0,
+      "missing_episodes": 232,
+      "coverage_start": "2025-08-01",
+      "coverage_end": "2026-09-17",
+      "blocker_codes": [
+        "INCOMPLETE_HISTORICAL_ALERT_EPISODE_CORPUS",
+        "MISSING_FROZEN_HISTORICAL_EVIDENCE_CORPUS"
+      ],
+      "exact_missing_ids": [],
+      "exact_missing_ids_count": 0,
+      "exact_missing_ids_note": "Canonical missing episode IDs cannot be derived safely from denominator summaries/result-only artifacts. The source-slice ID hashes depend on final assembled start/end intervals, and the upstream historical source blob is not retained in this repo.",
+      "missing_date_ranges": [
+        {
+          "start_date": "2025-08-01",
+          "end_date": "2026-09-17",
+          "expected_missing_episodes": 232,
+          "source_partition": "full_expected_denominator"
+        }
+      ],
+      "current_alert_sources": [],
+      "additional_repo_sources_found": [
+        "kyiv-air-alerts-grafana/data/alerts_in_ua_bridge_2026-09-07_16.csv.gz.b64",
+        "kyiv-air-alerts-grafana/data/ukrainealarm_bridge.json",
+        "kyiv-air-alerts-grafana/data/explosion_review_batches/rivne_batch_1.json"
+      ],
+      "recoverable_raw_blocks": [
+        {
+          "classification": "PRIMARY_DATA_PRESENT_NOT_LOADED",
+          "source_path": "kyiv-air-alerts-grafana/data/alerts_in_ua_bridge_2026-09-07_16.csv.gz.b64",
+          "source_kind": "Alerts.in.ua retained manual CSV payload",
+          "episode_rows": 21,
+          "raw_time_range": [
+            "2026-09-08T04:03:25+03:00",
+            "2026-09-16T08:16:30+03:00"
+          ],
+          "note": "Rows are complete start/end primary alert rows and are not currently loaded by historical replay."
+        },
+        {
+          "classification": "PRIMARY_DATA_PRESENT_NOT_LOADED",
+          "source_path": "kyiv-air-alerts-grafana/data/ukrainealarm_bridge.json",
+          "source_kind": "persisted UkraineAlarm regionHistory",
+          "episode_rows": 4,
+          "raw_time_range": [
+            "2026-09-16T23:00:54.171217Z",
+            "2026-09-17T10:41:43.492512Z"
+          ],
+          "note": "Persisted API rows later than the retained static-row envelope; therefore non-overlapping with the counted static rows."
+        }
+      ],
+      "git_history_sources_found": [],
+      "git_history_note": "No missing canonical alert-corpus file for this city was found in reachable branch trees or relevant path history. Related result/evidence history does not contain the full missing denominator.",
+      "final_evidence_present": false,
+      "working_evidence_present": false,
+      "recovery_class_counts": {
+        "RECOVERABLE_FROM_CURRENT_REPO": 0,
+        "RECOVERABLE_FROM_GIT_HISTORY": 0,
+        "PRIMARY_DATA_PRESENT_NOT_LOADED": 25,
+        "PARTIAL_RECOVERY_AVAILABLE": 0,
+        "LOCAL_DATA_REQUIRED": 207,
+        "EXTERNAL_SOURCE_REQUIRED": 0,
+        "UNRESOLVED_SOURCE_IDENTITY": 0
+      },
+      "city_recovery_status": "PARTIALLY_RECOVERABLE",
+      "frozen_evidence_status": "NO",
+      "discovery_adapter_status": "NO",
+      "local_data_required": {
+        "required": true,
+        "alert_corpus": {
+          "required_episode_rows_not_already_proven_retained": 207,
+          "preferred_file": "Exact upstream official_data_uk.csv snapshot used by source-slice builder, matching git blob SHA 71d70c0ca54968f530d596cf315616fa858800e1; alternatively canonical assembled episode JSON/CSV covering the full missing ranges.",
+          "requested_coverage": [
+            {
+              "start_date": "2025-08-01",
+              "end_date": "2026-09-17"
+            }
+          ],
+          "minimum_fields": [
+            "city/location identity",
+            "oblast/raion or exact hromada identity",
+            "alert type",
+            "alert start timestamp",
+            "alert end timestamp"
+          ],
+          "raw_alerts_in_ua_export_suffices": "YES if it is a complete historical export for the required proxy/exact geography and contains complete start/end rows.",
+          "raw_ukrainealarm_export_suffices": "YES if it is a full historical export covering the missing period; the retained latest-history store is capped/partial and is not enough by itself.",
+          "old_project_json_csv_preferred": "YES. Prefer the exact original source snapshot or already-assembled canonical episode rows because this preserves denominator semantics and avoids source drift."
+        },
+        "evidence_archive": {
+          "required": true,
+          "preferred_file": "Any original rivne audit/final_evidence JSON, city audit result, or retained source archive from the historical explosion research.",
+          "minimum_fields": [
+            "source URL or retained source identity",
+            "evidence text/snippet",
+            "publication/event timestamp or date",
+            "city-status/context fields",
+            "decision/classification bucket",
+            "matched alert locator if available"
+          ],
+          "reason": "Current repo has only summary counts/dates for this city and no replay-grade final_evidence.json or complete working_evidence.json."
+        }
+      },
+      "external_research_required": {
+        "alert_corpus": false,
+        "frozen_evidence": true,
+        "condition": "Required only if no local historical audit/source archive can be supplied; current controlled repo/git data are insufficient for current-classifier evidence reconciliation."
+      },
+      "recommended_next_action": "Retain the 25 proven primary rows already in repo, obtain the exact historical source snapshot for the remaining 207 missing episodes, then perform a separate append-only corpus repair."
+    },
+    "ternopil": {
+      "city_key": "ternopil",
+      "expected_episodes": 125,
+      "reconstructed_episodes": 0,
+      "missing_episodes": 125,
+      "coverage_start": "2025-11-06",
+      "coverage_end": "2026-09-17",
+      "blocker_codes": [
+        "INCOMPLETE_HISTORICAL_ALERT_EPISODE_CORPUS",
+        "MISSING_FROZEN_HISTORICAL_EVIDENCE_CORPUS"
+      ],
+      "exact_missing_ids": [],
+      "exact_missing_ids_count": 0,
+      "exact_missing_ids_note": "Canonical missing episode IDs cannot be derived safely from denominator summaries/result-only artifacts. The source-slice ID hashes depend on final assembled start/end intervals, and the upstream historical source blob is not retained in this repo.",
+      "missing_date_ranges": [
+        {
+          "start_date": "2025-11-06",
+          "end_date": "2026-09-17",
+          "expected_missing_episodes": 125,
+          "source_partition": "full_expected_denominator"
+        }
+      ],
+      "current_alert_sources": [],
+      "additional_repo_sources_found": [
+        "kyiv-air-alerts-grafana/data/alerts_in_ua_bridge_additional_2026-09-07_16.csv.gz.b64",
+        "kyiv-air-alerts-grafana/data/ukrainealarm_bridge.json"
+      ],
+      "recoverable_raw_blocks": [
+        {
+          "classification": "PRIMARY_DATA_PRESENT_NOT_LOADED",
+          "source_path": "kyiv-air-alerts-grafana/data/alerts_in_ua_bridge_additional_2026-09-07_16.csv.gz.b64",
+          "source_kind": "Alerts.in.ua retained manual CSV payload",
+          "episode_rows": 5,
+          "raw_time_range": [
+            "2026-09-10T18:33:21+03:00",
+            "2026-09-15T20:09:13+03:00"
+          ],
+          "note": "Rows are complete start/end primary alert rows and are not currently loaded by historical replay."
+        },
+        {
+          "classification": "PRIMARY_DATA_PRESENT_NOT_LOADED",
+          "source_path": "kyiv-air-alerts-grafana/data/ukrainealarm_bridge.json",
+          "source_kind": "persisted UkraineAlarm regionHistory",
+          "episode_rows": 13,
+          "raw_time_range": [
+            "2026-08-04T17:22:06.031567Z",
+            "2026-09-03T03:37:16.086417Z"
+          ],
+          "note": "Persisted API rows earlier than the retained static-row envelope; therefore non-overlapping with the counted static rows."
+        },
+        {
+          "classification": "PRIMARY_DATA_PRESENT_NOT_LOADED",
+          "source_path": "kyiv-air-alerts-grafana/data/ukrainealarm_bridge.json",
+          "source_kind": "persisted UkraineAlarm regionHistory",
+          "episode_rows": 2,
+          "raw_time_range": [
+            "2026-09-16T23:05:58.779367Z",
+            "2026-09-17T10:41:45.978009Z"
+          ],
+          "note": "Persisted API rows later than the retained static-row envelope; therefore non-overlapping with the counted static rows."
+        }
+      ],
+      "git_history_sources_found": [],
+      "git_history_note": "No missing canonical alert-corpus file for this city was found in reachable branch trees or relevant path history. Related result/evidence history does not contain the full missing denominator.",
+      "final_evidence_present": false,
+      "working_evidence_present": false,
+      "recovery_class_counts": {
+        "RECOVERABLE_FROM_CURRENT_REPO": 0,
+        "RECOVERABLE_FROM_GIT_HISTORY": 0,
+        "PRIMARY_DATA_PRESENT_NOT_LOADED": 20,
+        "PARTIAL_RECOVERY_AVAILABLE": 0,
+        "LOCAL_DATA_REQUIRED": 105,
+        "EXTERNAL_SOURCE_REQUIRED": 0,
+        "UNRESOLVED_SOURCE_IDENTITY": 0
+      },
+      "city_recovery_status": "PARTIALLY_RECOVERABLE",
+      "frozen_evidence_status": "NO",
+      "discovery_adapter_status": "NO",
+      "local_data_required": {
+        "required": true,
+        "alert_corpus": {
+          "required_episode_rows_not_already_proven_retained": 105,
+          "preferred_file": "Exact upstream official_data_uk.csv snapshot used by source-slice builder, matching git blob SHA 71d70c0ca54968f530d596cf315616fa858800e1; alternatively canonical assembled episode JSON/CSV covering the full missing ranges.",
+          "requested_coverage": [
+            {
+              "start_date": "2025-11-06",
+              "end_date": "2026-09-17"
+            }
+          ],
+          "minimum_fields": [
+            "city/location identity",
+            "oblast/raion or exact hromada identity",
+            "alert type",
+            "alert start timestamp",
+            "alert end timestamp"
+          ],
+          "raw_alerts_in_ua_export_suffices": "YES if it is a complete historical export for the required proxy/exact geography and contains complete start/end rows.",
+          "raw_ukrainealarm_export_suffices": "YES if it is a full historical export covering the missing period; the retained latest-history store is capped/partial and is not enough by itself.",
+          "old_project_json_csv_preferred": "YES. Prefer the exact original source snapshot or already-assembled canonical episode rows because this preserves denominator semantics and avoids source drift."
+        },
+        "evidence_archive": {
+          "required": true,
+          "preferred_file": "Any original ternopil audit/final_evidence JSON, city audit result, or retained source archive from the historical explosion research.",
+          "minimum_fields": [
+            "source URL or retained source identity",
+            "evidence text/snippet",
+            "publication/event timestamp or date",
+            "city-status/context fields",
+            "decision/classification bucket",
+            "matched alert locator if available"
+          ],
+          "reason": "Current repo has only summary counts/dates for this city and no replay-grade final_evidence.json or complete working_evidence.json."
+        }
+      },
+      "external_research_required": {
+        "alert_corpus": false,
+        "frozen_evidence": true,
+        "condition": "Required only if no local historical audit/source archive can be supplied; current controlled repo/git data are insufficient for current-classifier evidence reconciliation."
+      },
+      "recommended_next_action": "Retain the 20 proven primary rows already in repo, obtain the exact historical source snapshot for the remaining 105 missing episodes, then perform a separate append-only corpus repair."
+    },
+    "uzhhorod": {
+      "city_key": "uzhhorod",
+      "expected_episodes": 92,
+      "reconstructed_episodes": 0,
+      "missing_episodes": 92,
+      "coverage_start": "2025-11-06",
+      "coverage_end": "2026-09-17",
+      "blocker_codes": [
+        "INCOMPLETE_HISTORICAL_ALERT_EPISODE_CORPUS",
+        "MISSING_FROZEN_HISTORICAL_EVIDENCE_CORPUS"
+      ],
+      "exact_missing_ids": [],
+      "exact_missing_ids_count": 0,
+      "exact_missing_ids_note": "Canonical missing episode IDs cannot be derived safely from denominator summaries/result-only artifacts. The source-slice ID hashes depend on final assembled start/end intervals, and the upstream historical source blob is not retained in this repo.",
+      "missing_date_ranges": [
+        {
+          "start_date": "2025-11-06",
+          "end_date": "2026-09-17",
+          "expected_missing_episodes": 92,
+          "source_partition": "full_expected_denominator"
+        }
+      ],
+      "current_alert_sources": [],
+      "additional_repo_sources_found": [
+        "kyiv-air-alerts-grafana/data/alerts_in_ua_bridge_additional_2026-09-07_16.csv.gz.b64",
+        "kyiv-air-alerts-grafana/data/ukrainealarm_bridge.json"
+      ],
+      "recoverable_raw_blocks": [
+        {
+          "classification": "PRIMARY_DATA_PRESENT_NOT_LOADED",
+          "source_path": "kyiv-air-alerts-grafana/data/alerts_in_ua_bridge_additional_2026-09-07_16.csv.gz.b64",
+          "source_kind": "Alerts.in.ua retained manual CSV payload",
+          "episode_rows": 1,
+          "raw_time_range": [
+            "2026-09-15T19:44:27+03:00",
+            "2026-09-15T20:09:02+03:00"
+          ],
+          "note": "Rows are complete start/end primary alert rows and are not currently loaded by historical replay."
+        },
+        {
+          "classification": "PRIMARY_DATA_PRESENT_NOT_LOADED",
+          "source_path": "kyiv-air-alerts-grafana/data/ukrainealarm_bridge.json",
+          "source_kind": "persisted UkraineAlarm regionHistory",
+          "episode_rows": 17,
+          "raw_time_range": [
+            "2026-05-27T18:56:27.341315Z",
+            "2026-08-07T15:13:50.642665Z"
+          ],
+          "note": "Persisted API rows earlier than the retained static-row envelope; therefore non-overlapping with the counted static rows."
+        },
+        {
+          "classification": "PRIMARY_DATA_PRESENT_NOT_LOADED",
+          "source_path": "kyiv-air-alerts-grafana/data/ukrainealarm_bridge.json",
+          "source_kind": "persisted UkraineAlarm regionHistory",
+          "episode_rows": 2,
+          "raw_time_range": [
+            "2026-09-16T23:05:54.663902Z",
+            "2026-09-17T10:41:41.009227Z"
+          ],
+          "note": "Persisted API rows later than the retained static-row envelope; therefore non-overlapping with the counted static rows."
+        }
+      ],
+      "git_history_sources_found": [],
+      "git_history_note": "No missing canonical alert-corpus file for this city was found in reachable branch trees or relevant path history. Related result/evidence history does not contain the full missing denominator.",
+      "final_evidence_present": false,
+      "working_evidence_present": false,
+      "recovery_class_counts": {
+        "RECOVERABLE_FROM_CURRENT_REPO": 0,
+        "RECOVERABLE_FROM_GIT_HISTORY": 0,
+        "PRIMARY_DATA_PRESENT_NOT_LOADED": 20,
+        "PARTIAL_RECOVERY_AVAILABLE": 0,
+        "LOCAL_DATA_REQUIRED": 72,
+        "EXTERNAL_SOURCE_REQUIRED": 0,
+        "UNRESOLVED_SOURCE_IDENTITY": 0
+      },
+      "city_recovery_status": "PARTIALLY_RECOVERABLE",
+      "frozen_evidence_status": "NO",
+      "discovery_adapter_status": "NO",
+      "local_data_required": {
+        "required": true,
+        "alert_corpus": {
+          "required_episode_rows_not_already_proven_retained": 72,
+          "preferred_file": "Exact upstream official_data_uk.csv snapshot used by source-slice builder, matching git blob SHA 71d70c0ca54968f530d596cf315616fa858800e1; alternatively canonical assembled episode JSON/CSV covering the full missing ranges.",
+          "requested_coverage": [
+            {
+              "start_date": "2025-11-06",
+              "end_date": "2026-09-17"
+            }
+          ],
+          "minimum_fields": [
+            "city/location identity",
+            "oblast/raion or exact hromada identity",
+            "alert type",
+            "alert start timestamp",
+            "alert end timestamp"
+          ],
+          "raw_alerts_in_ua_export_suffices": "YES if it is a complete historical export for the required proxy/exact geography and contains complete start/end rows.",
+          "raw_ukrainealarm_export_suffices": "YES if it is a full historical export covering the missing period; the retained latest-history store is capped/partial and is not enough by itself.",
+          "old_project_json_csv_preferred": "YES. Prefer the exact original source snapshot or already-assembled canonical episode rows because this preserves denominator semantics and avoids source drift."
+        },
+        "evidence_archive": {
+          "required": true,
+          "preferred_file": "Any original uzhhorod audit/final_evidence JSON, city audit result, or retained source archive from the historical explosion research.",
+          "minimum_fields": [
+            "source URL or retained source identity",
+            "evidence text/snippet",
+            "publication/event timestamp or date",
+            "city-status/context fields",
+            "decision/classification bucket",
+            "matched alert locator if available"
+          ],
+          "reason": "Current repo has only summary counts/dates for this city and no replay-grade final_evidence.json or complete working_evidence.json."
+        }
+      },
+      "external_research_required": {
+        "alert_corpus": false,
+        "frozen_evidence": true,
+        "condition": "Required only if no local historical audit/source archive can be supplied; current controlled repo/git data are insufficient for current-classifier evidence reconciliation."
+      },
+      "recommended_next_action": "Retain the 20 proven primary rows already in repo, obtain the exact historical source snapshot for the remaining 72 missing episodes, then perform a separate append-only corpus repair."
+    },
+    "vinnytsia": {
+      "city_key": "vinnytsia",
+      "expected_episodes": 362,
+      "reconstructed_episodes": 0,
+      "missing_episodes": 362,
+      "coverage_start": "2025-08-21",
+      "coverage_end": "2026-09-17",
+      "blocker_codes": [
+        "INCOMPLETE_HISTORICAL_ALERT_EPISODE_CORPUS",
+        "MISSING_FROZEN_HISTORICAL_EVIDENCE_CORPUS"
+      ],
+      "exact_missing_ids": [],
+      "exact_missing_ids_count": 0,
+      "exact_missing_ids_note": "Canonical missing episode IDs cannot be derived safely from denominator summaries/result-only artifacts. The source-slice ID hashes depend on final assembled start/end intervals, and the upstream historical source blob is not retained in this repo.",
+      "missing_date_ranges": [
+        {
+          "start_date": "2025-08-21",
+          "end_date": "2026-09-17",
+          "expected_missing_episodes": 362,
+          "source_partition": "full_expected_denominator"
+        }
+      ],
+      "current_alert_sources": [],
+      "additional_repo_sources_found": [
+        "kyiv-air-alerts-grafana/data/alerts_in_ua_bridge_2026-09-07_16.csv.gz.b64",
+        "kyiv-air-alerts-grafana/data/ukrainealarm_bridge.json"
+      ],
+      "recoverable_raw_blocks": [
+        {
+          "classification": "PRIMARY_DATA_PRESENT_NOT_LOADED",
+          "source_path": "kyiv-air-alerts-grafana/data/alerts_in_ua_bridge_2026-09-07_16.csv.gz.b64",
+          "source_kind": "Alerts.in.ua retained manual CSV payload",
+          "episode_rows": 26,
+          "raw_time_range": [
+            "2026-09-07T18:02:21+03:00",
+            "2026-09-16T17:49:46+03:00"
+          ],
+          "note": "Rows are complete start/end primary alert rows and are not currently loaded by historical replay."
+        },
+        {
+          "classification": "PRIMARY_DATA_PRESENT_NOT_LOADED",
+          "source_path": "kyiv-air-alerts-grafana/data/ukrainealarm_bridge.json",
+          "source_kind": "persisted UkraineAlarm regionHistory",
+          "episode_rows": 4,
+          "raw_time_range": [
+            "2026-09-16T23:03:01.279160Z",
+            "2026-09-17T18:48:12.158371Z"
+          ],
+          "note": "Persisted API rows later than the retained static-row envelope; therefore non-overlapping with the counted static rows."
+        }
+      ],
+      "git_history_sources_found": [],
+      "git_history_note": "No missing canonical alert-corpus file for this city was found in reachable branch trees or relevant path history. Related result/evidence history does not contain the full missing denominator.",
+      "final_evidence_present": false,
+      "working_evidence_present": false,
+      "recovery_class_counts": {
+        "RECOVERABLE_FROM_CURRENT_REPO": 0,
+        "RECOVERABLE_FROM_GIT_HISTORY": 0,
+        "PRIMARY_DATA_PRESENT_NOT_LOADED": 30,
+        "PARTIAL_RECOVERY_AVAILABLE": 0,
+        "LOCAL_DATA_REQUIRED": 332,
+        "EXTERNAL_SOURCE_REQUIRED": 0,
+        "UNRESOLVED_SOURCE_IDENTITY": 0
+      },
+      "city_recovery_status": "PARTIALLY_RECOVERABLE",
+      "frozen_evidence_status": "NO",
+      "discovery_adapter_status": "NO",
+      "local_data_required": {
+        "required": true,
+        "alert_corpus": {
+          "required_episode_rows_not_already_proven_retained": 332,
+          "preferred_file": "Exact upstream official_data_uk.csv snapshot used by source-slice builder, matching git blob SHA 71d70c0ca54968f530d596cf315616fa858800e1; alternatively canonical assembled episode JSON/CSV covering the full missing ranges.",
+          "requested_coverage": [
+            {
+              "start_date": "2025-08-21",
+              "end_date": "2026-09-17"
+            }
+          ],
+          "minimum_fields": [
+            "city/location identity",
+            "oblast/raion or exact hromada identity",
+            "alert type",
+            "alert start timestamp",
+            "alert end timestamp"
+          ],
+          "raw_alerts_in_ua_export_suffices": "YES if it is a complete historical export for the required proxy/exact geography and contains complete start/end rows.",
+          "raw_ukrainealarm_export_suffices": "YES if it is a full historical export covering the missing period; the retained latest-history store is capped/partial and is not enough by itself.",
+          "old_project_json_csv_preferred": "YES. Prefer the exact original source snapshot or already-assembled canonical episode rows because this preserves denominator semantics and avoids source drift."
+        },
+        "evidence_archive": {
+          "required": true,
+          "preferred_file": "Any original vinnytsia audit/final_evidence JSON, city audit result, or retained source archive from the historical explosion research.",
+          "minimum_fields": [
+            "source URL or retained source identity",
+            "evidence text/snippet",
+            "publication/event timestamp or date",
+            "city-status/context fields",
+            "decision/classification bucket",
+            "matched alert locator if available"
+          ],
+          "reason": "Current repo has only summary counts/dates for this city and no replay-grade final_evidence.json or complete working_evidence.json."
+        }
+      },
+      "external_research_required": {
+        "alert_corpus": false,
+        "frozen_evidence": true,
+        "condition": "Required only if no local historical audit/source archive can be supplied; current controlled repo/git data are insufficient for current-classifier evidence reconciliation."
+      },
+      "recommended_next_action": "Retain the 30 proven primary rows already in repo, obtain the exact historical source snapshot for the remaining 332 missing episodes, then perform a separate append-only corpus repair."
+    },
+    "zhytomyr": {
+      "city_key": "zhytomyr",
+      "expected_episodes": 685,
+      "reconstructed_episodes": 0,
+      "missing_episodes": 685,
+      "coverage_start": "2025-01-23",
+      "coverage_end": "2026-09-17",
+      "blocker_codes": [
+        "INCOMPLETE_HISTORICAL_ALERT_EPISODE_CORPUS",
+        "MISSING_FROZEN_HISTORICAL_EVIDENCE_CORPUS"
+      ],
+      "exact_missing_ids": [],
+      "exact_missing_ids_count": 0,
+      "exact_missing_ids_note": "Canonical missing episode IDs cannot be derived safely from denominator summaries/result-only artifacts. The source-slice ID hashes depend on final assembled start/end intervals, and the upstream historical source blob is not retained in this repo.",
+      "missing_date_ranges": [
+        {
+          "start_date": "2025-01-23",
+          "end_date": "2026-09-17",
+          "expected_missing_episodes": 685,
+          "source_partition": "full_expected_denominator"
+        }
+      ],
+      "current_alert_sources": [],
+      "additional_repo_sources_found": [
+        "kyiv-air-alerts-grafana/data/alerts_in_ua_bridge_2026-09-07_16.csv.gz.b64",
+        "kyiv-air-alerts-grafana/data/ukrainealarm_bridge.json",
+        "kyiv-air-alerts-grafana/data/explosion_research/zhytomyr/working_evidence.json",
+        "kyiv-air-alerts-grafana/data/explosion_research/zhytomyr/working_evidence.json"
+      ],
+      "recoverable_raw_blocks": [
+        {
+          "classification": "PRIMARY_DATA_PRESENT_NOT_LOADED",
+          "source_path": "kyiv-air-alerts-grafana/data/alerts_in_ua_bridge_2026-09-07_16.csv.gz.b64",
+          "source_kind": "Alerts.in.ua retained manual CSV payload",
+          "episode_rows": 33,
+          "raw_time_range": [
+            "2026-09-07T18:15:29+03:00",
+            "2026-09-16T18:08:47+03:00"
+          ],
+          "note": "Rows are complete start/end primary alert rows and are not currently loaded by historical replay."
+        },
+        {
+          "classification": "PRIMARY_DATA_PRESENT_NOT_LOADED",
+          "source_path": "kyiv-air-alerts-grafana/data/ukrainealarm_bridge.json",
+          "source_kind": "persisted UkraineAlarm regionHistory",
+          "episode_rows": 4,
+          "raw_time_range": [
+            "2026-09-16T23:03:05.387574Z",
+            "2026-09-17T19:30:40.010756Z"
+          ],
+          "note": "Persisted API rows later than the retained static-row envelope; therefore non-overlapping with the counted static rows."
+        }
+      ],
+      "git_history_sources_found": [],
+      "git_history_note": "No missing canonical alert-corpus file for this city was found in reachable branch trees or relevant path history. Related result/evidence history does not contain the full missing denominator.",
+      "final_evidence_present": false,
+      "working_evidence_present": true,
+      "recovery_class_counts": {
+        "RECOVERABLE_FROM_CURRENT_REPO": 0,
+        "RECOVERABLE_FROM_GIT_HISTORY": 0,
+        "PRIMARY_DATA_PRESENT_NOT_LOADED": 37,
+        "PARTIAL_RECOVERY_AVAILABLE": 0,
+        "LOCAL_DATA_REQUIRED": 648,
+        "EXTERNAL_SOURCE_REQUIRED": 0,
+        "UNRESOLVED_SOURCE_IDENTITY": 0
+      },
+      "city_recovery_status": "PARTIALLY_RECOVERABLE",
+      "frozen_evidence_status": "PARTIAL",
+      "discovery_adapter_status": "NO",
+      "local_data_required": {
+        "required": true,
+        "alert_corpus": {
+          "required_episode_rows_not_already_proven_retained": 648,
+          "preferred_file": "Exact upstream official_data_uk.csv snapshot used by source-slice builder, matching git blob SHA 71d70c0ca54968f530d596cf315616fa858800e1; alternatively canonical assembled episode JSON/CSV covering the full missing ranges.",
+          "requested_coverage": [
+            {
+              "start_date": "2025-01-23",
+              "end_date": "2026-09-17"
+            }
+          ],
+          "minimum_fields": [
+            "city/location identity",
+            "oblast/raion or exact hromada identity",
+            "alert type",
+            "alert start timestamp",
+            "alert end timestamp"
+          ],
+          "raw_alerts_in_ua_export_suffices": "YES if it is a complete historical export for the required proxy/exact geography and contains complete start/end rows.",
+          "raw_ukrainealarm_export_suffices": "YES if it is a full historical export covering the missing period; the retained latest-history store is capped/partial and is not enough by itself.",
+          "old_project_json_csv_preferred": "YES. Prefer the exact original source snapshot or already-assembled canonical episode rows because this preserves denominator semantics and avoids source drift."
+        },
+        "evidence_archive": {
+          "required": false,
+          "note": "Complete working_evidence.json is retained; normalization/promotion is a repo repair step, not a new research requirement."
+        }
+      },
+      "external_research_required": {
+        "alert_corpus": false,
+        "frozen_evidence": false,
+        "condition": null
+      },
+      "recommended_next_action": "Retain the 37 proven primary rows already in repo, obtain the exact historical source snapshot for the remaining 648 missing episodes, then perform a separate append-only corpus repair."
+    }
+  },
+  "local_data_request_inventory": {
+    "shared_alert_source_request": {
+      "preferred_single_file": "official_data_uk.csv exact snapshot matching git blob SHA 71d70c0ca54968f530d596cf315616fa858800e1",
+      "why_one_file_is_efficient": "The historical source-slice builder used this exact snapshot together with retained Alerts.in.ua and UkraineAlarm seam data. A matching snapshot can deterministically supply the 9,809 missing rows not already proven present.",
+      "minimum_fields": [
+        "location/city/raion/hromada identity",
+        "oblast",
+        "alert type",
+        "start timestamp",
+        "end timestamp"
+      ],
+      "alternative_1": "Old project JSON/CSV containing canonical assembled alert episodes for the listed missing ranges.",
+      "alternative_2": "Full Alerts.in.ua export covering every missing period; exact-city geography is required for Kharkiv.",
+      "alternative_3": "Full UkraineAlarm historical export for all missing periods and target regions; a latest-20 history dump is not sufficient."
+    },
+    "evidence_archive_request": {
+      "cities": [
+        "chernivtsi",
+        "ivano_frankivsk",
+        "khmelnytskyi",
+        "lutsk",
+        "poltava",
+        "rivne",
+        "ternopil",
+        "uzhhorod",
+        "vinnytsia"
+      ],
+      "preferred_files": "Original city audit/final_evidence JSONs, audit result files, or retained source archives.",
+      "minimum_fields": [
+        "source URL/identity",
+        "evidence text/snippet",
+        "publication/event time/date",
+        "city-status/context",
+        "classification decision",
+        "matched alert locator when available"
+      ],
+      "note": "If these local archives exist, no new external research is needed. If they do not exist, these nine cities require new external source research for replay-grade evidence reconstruction."
+    }
+  },
+  "repair_priority": [
+    {
+      "tier": 1,
+      "label": "fully recoverable from current repo",
+      "cities": []
+    },
+    {
+      "tier": 2,
+      "label": "fully recoverable from git history",
+      "cities": []
+    },
+    {
+      "tier": 3,
+      "label": "local alert-corpus gap only; replay-grade final evidence retained",
+      "cities": [
+        "odesa",
+        "mykolaiv",
+        "dnipro",
+        "chernihiv",
+        "kropyvnytskyi",
+        "kharkiv",
+        "kherson"
+      ],
+      "ordering_basis": "ascending missing rows not already proven in retained primary data"
+    },
+    {
+      "tier": 4,
+      "label": "local alert-corpus gap plus deterministic evidence normalization",
+      "cities": [
+        "zhytomyr"
+      ],
+      "ordering_basis": "complete working evidence is retained but not in final_evidence replay form"
+    },
+    {
+      "tier": 5,
+      "label": "local alert-corpus gap plus missing replay-grade evidence archive",
+      "cities": [
+        "uzhhorod",
+        "ivano_frankivsk",
+        "chernivtsi",
+        "ternopil",
+        "lutsk",
+        "rivne",
+        "khmelnytskyi",
+        "vinnytsia",
+        "poltava"
+      ],
+      "ordering_basis": "ascending remaining alert-corpus gap; external evidence research only if local archive cannot be supplied"
+    }
+  ],
+  "protected_scope": {
+    "operational_files_to_remain_unchanged": [
+      "kyiv-air-alerts-grafana/data/explosion_audited_baseline.json",
+      "kyiv-air-alerts-grafana/data/explosion_review_queue.json",
+      "kyiv-air-alerts-grafana/data/explosion_candidate_monitor_state.json",
+      "kyiv-air-alerts-grafana/data/explosion_candidate_monitor_last_run.json",
+      "kyiv-air-alerts-grafana/data/explosions_test.json",
+      "kyiv-air-alerts-grafana/data/dashboard_data.json",
+      "all kyiv-air-alerts-grafana/data/explosion_research/*/final_evidence.json",
+      "all active historical-attack-event campaign state/checkpoints"
+    ],
+    "intended_commit_scope": [
+      "research/historical_17_city_corpus_gap_forensic_inventory_2026-09-27.json"
+    ]
+  },
+  "verdict": "17-CITY HISTORICAL CORPUS FORENSIC INVENTORY COMPLETE"
+}
