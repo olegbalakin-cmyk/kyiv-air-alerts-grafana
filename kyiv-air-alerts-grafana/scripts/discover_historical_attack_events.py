@@ -149,7 +149,7 @@ ARCHIVE_CARD_RE = re.compile(
 
 def fetch_suspilne_archive_day(session: requests.Session, local_day: str) -> tuple[list[str], str]:
     year, month, day = local_day.split("-")
-    url = f"https://suspilne.media/lviv/amp/archive/{year}/{int(month)}/{int(day)}/"
+    url = f"https://suspilne.media/lviv/archive/{year}/{int(month)}/{int(day)}/"
     response = session.get(url, timeout=15)
     response.raise_for_status()
     soup = BeautifulSoup(response.text, "html.parser")
