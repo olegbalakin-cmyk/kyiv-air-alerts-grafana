@@ -32,15 +32,20 @@ STATUS_PATH = RESEARCH / "historical_attack_event_backfill_status.json"
 REPLAY_STATUS_PATH = RESEARCH / "historical_replay_status_current.json"
 UTC = timezone.utc
 KYIV_TZ = ZoneInfo("Europe/Kyiv")
-NORMALIZATION_VERSION = "historical-attack-event-observation-v1"
-DEFAULT_CAMPAIGN_ID = "historical-attack-events-v1-2026-09-27"
+NORMALIZATION_VERSION = "historical-attack-event-observation-v2"
+DEFAULT_CAMPAIGN_ID = "historical-attack-events-v2-2026-09-27"
 LATE_WINDOW_HOURS = 72
 PRE_ALERT_WINDOW_HOURS = 3
+METHODOLOGY_VERSION = "historical-attack-event-air-defense-action-v2"
+METHODOLOGY_ARTIFACT_PATH = RESEARCH / "historical_attack_event_air_defense_action_methodology_update_2026-09-27.json"
+LVIV_PILOT_PATH = RESEARCH / "historical_attack_event_discovery_pilot_lviv_2026-09-27.json"
+SEVASTOPOL_PILOT_PATH = RESEARCH / "historical_attack_event_discovery_pilot_sevastopol_2026-09-27.json"
 
 DISCOVERY_RE = re.compile(
     r"(?:вибух|взрыв|влуч|попад|приліт|прилет|удар|пошкод|поврежд|"
     r"пожеж|пожар|загор|займан|атак|обстріл|обстрел|ппо|пво|"
-    r"протиповітр|противовоздуш)",
+    r"протиповітр|противовоздуш|працю|працювала|робота|чути|чутно|"
+    r"слышно|работает|работала)",
     re.IGNORECASE,
 )
 AIR_DEFENSE_RE = re.compile(r"(?:\bппо\b|\bпво\b|протиповітр\w*|противовоздуш\w*)", re.IGNORECASE)
@@ -100,7 +105,10 @@ def version_identity() -> dict:
         "classifier_sha": blob_for(ROOT / "scripts" / "monitor_explosion_candidates.py"),
         "source_adapter_sha": blob_for(ROOT / "scripts" / "historical_attack_event_sources.py"),
         "orchestrator_sha": blob_for(Path(__file__).resolve()),
+        "discovery_sha": blob_for(ROOT / "scripts" / "discover_historical_attack_events.py"),
+        "sevastopol_pilot_sha": blob_for(ROOT / "scripts" / "run_historical_attack_event_source_adapter_pilot.py"),
         "normalization_version": NORMALIZATION_VERSION,
+        "methodology_version": METHODOLOGY_VERSION,
     }
 
 
@@ -168,7 +176,7 @@ def campaign_status_template(campaign_id: str, versions: dict) -> dict:
             "episode_states": {},
         }
     return {
-        "schema_version": 1,
+        "schema_version": 2,
         "campaign_id": campaign_id,
         "campaign_branch": "historical-attack-event-backfill-2026-09-27",
         "campaign_version": versions,
@@ -232,18 +240,20 @@ def local_days_for_batch(episodes: list[dict]) -> list[str]:
 
 def ppo_fields(text: str) -> dict:
     return {
-        "air_defense_context": bool(AIR_DEFENSE_RE.search(text)),
-        "air_defense_action": bool(AIR_DEFENSE_ACTION_RE.search(text)),
-        "interception_claim": bool(INTERCEPTION_RE.search(text)),
+        "air_defense_context": monitor.air_defense_context_signal(text),
+        "air_defense_action": monitor.air_defense_action_signal(text),
+        "interception_claim": monitor.interception_claim_signal(text),
     }
 
 
 def matched_terms(text: str) -> list[str]:
     terms = list(monitor.attack_event_types(text))
     ppo = ppo_fields(text)
-    if ppo["air_defense_context"]:
+    if ppo["air_defense_context"] and "air_defense_context" not in terms:
         terms.append("air_defense_context")
-    if ppo["interception_claim"]:
+    if ppo["air_defense_action"] and "air_defense_action" not in terms:
+        terms.append("air_defense_action")
+    if ppo["interception_claim"] and "interception_claim" not in terms:
         terms.append("interception_claim")
     return terms
 
@@ -644,7 +654,7 @@ def run_one_batch(args) -> dict:
     status["updated_at"] = now_iso()
 
     batch = {
-        "schema_version": 1,
+        "schema_version": 2,
         "campaign_id": args.campaign_id,
         "campaign_version": versions,
         "city_key": city_key,
@@ -738,6 +748,159 @@ def self_test() -> dict:
         "idempotence": "PASS",
         "version_change_protection": "PASS",
     }
+
+
+
+def air_defense_methodology_controls() -> dict:
+    ep = {
+        "episode_id": "air-defense-methodology-control",
+        "city_key": "poltava",
+        "city": "Полтава",
+        "alert_start": "2026-09-27T10:00:00Z",
+        "alert_end": "2026-09-27T11:00:00Z",
+    }
+    base = {
+        "publisher": "СУСПІЛЬНЕ НОВИНИ",
+        "publisher_url": None,
+        "published_at": "2026-09-27T10:30:00Z",
+        "snippet": "",
+        "resolved_url": None,
+        "matched_text_excerpt": None,
+        "source": "Telegram / СУСПІЛЬНЕ НОВИНИ",
+    }
+    positive_specs = [
+        ("PPO_ACTION_ONLY", "У Полтаві працює ППО.", ["air_defense_action"], False),
+        ("PPO_ACTION_PLUS_EXPLOSION", "У Полтаві чути вибухи — працює ППО.", ["explosion", "air_defense_action"], False),
+        ("PPO_INTERCEPTION", "У Полтаві ППО збила БпЛА.", ["air_defense_action"], True),
+    ]
+    negative_specs = [
+        ("PPO_PREDICTION", "У Полтаві можлива робота ППО."),
+        ("PPO_WARNING", "У Полтаві не лякайтеся, може бути чутно роботу ППО."),
+        ("PPO_READY", "У Полтаві ППО готова до роботи."),
+    ]
+    positives = []
+    negatives = []
+    for control_id, title, expected_types, expected_interception in positive_specs:
+        row = {**base, "candidate_id": control_id, "title": title}
+        decision = monitor.classify_candidate(row, "poltava", [ep])
+        actual_types = list(decision.get("event_types") or [])
+        passed = (
+            decision.get("air_defense_action") is True
+            and decision.get("proposed_outcome") == "approved_strict"
+            and all(x in actual_types for x in expected_types)
+            and bool(decision.get("interception_claim")) is expected_interception
+        )
+        positives.append({
+            "control_id": control_id,
+            "source_text": title,
+            "expected_event_types": expected_types,
+            "event_types": actual_types,
+            "air_defense_context": bool(decision.get("air_defense_context")),
+            "air_defense_action": bool(decision.get("air_defense_action")),
+            "interception_claim": bool(decision.get("interception_claim")),
+            "classification": decision.get("proposed_outcome"),
+            "episode_id": decision.get("proposed_matched_episode_id"),
+            "passed": passed,
+        })
+    for control_id, title in negative_specs:
+        row = {**base, "candidate_id": control_id, "title": title}
+        decision = monitor.classify_candidate(row, "poltava", [ep])
+        actual_types = list(decision.get("event_types") or [])
+        passed = (
+            decision.get("air_defense_action") is False
+            and "air_defense_action" not in actual_types
+            and decision.get("proposed_outcome") != "approved_strict"
+        )
+        negatives.append({
+            "control_id": control_id,
+            "source_text": title,
+            "event_types": actual_types,
+            "air_defense_context": bool(decision.get("air_defense_context")),
+            "air_defense_action": bool(decision.get("air_defense_action")),
+            "interception_claim": bool(decision.get("interception_claim")),
+            "classification": decision.get("proposed_outcome"),
+            "passed": passed,
+        })
+    return {
+        "positive": positives,
+        "negative": negatives,
+        "positive_passed": all(x["passed"] for x in positives),
+        "negative_passed": all(x["passed"] for x in negatives),
+    }
+
+
+def _episode_rows(doc: dict) -> list[dict]:
+    return list(doc.get("episode_results") or doc.get("episode_level_results") or [])
+
+
+def _episode_classification(row: dict) -> str:
+    if row.get("event_positive_strict") or row.get("has_confirmed_event"):
+        return "STRICT_EVENT_POSITIVE"
+    sensitivity_ids = list(row.get("sensitivity_observation_ids") or [])
+    if row.get("event_positive_sensitivity") or sensitivity_ids:
+        return "SENSITIVITY_EVENT_POSITIVE"
+    return "NO_CONFIRMED_EVENT"
+
+
+def _pilot_episode_changes(old_doc: dict, new_doc: dict) -> list[dict]:
+    old_rows = {str(x.get("episode_id") or ""): x for x in _episode_rows(old_doc)}
+    new_rows = {str(x.get("episode_id") or ""): x for x in _episode_rows(new_doc)}
+    observations = list(new_doc.get("evidence_observations") or [])
+    out = []
+    for episode_id in sorted(set(old_rows) | set(new_rows)):
+        old_row = old_rows.get(episode_id) or {}
+        new_row = new_rows.get(episode_id) or {}
+        old_class = _episode_classification(old_row)
+        new_class = _episode_classification(new_row)
+        old_types = list(old_row.get("confirmed_event_types") or old_row.get("event_types") or [])
+        new_types = list(new_row.get("confirmed_event_types") or new_row.get("event_types") or [])
+        if old_class == new_class and old_types == new_types:
+            continue
+        support = [
+            {
+                "observation_id": obs.get("observation_id"),
+                "source_url": obs.get("source_url"),
+                "source_timestamp": obs.get("source_timestamp"),
+                "excerpt": str(obs.get("excerpt") or "")[:500],
+                "event_types": list(obs.get("event_types_supported") or obs.get("event_types") or []),
+                "air_defense_action": bool(obs.get("air_defense_action")),
+                "interception_claim": bool(obs.get("interception_claim")),
+                "classification_outcome": obs.get("classification_outcome"),
+            }
+            for obs in observations
+            if str(obs.get("classification_episode_id") or "") == episode_id
+            and obs.get("classification_outcome") in {"approved_strict", "approved_sensitivity"}
+        ]
+        newly_positive = old_class == "NO_CONFIRMED_EVENT" and new_class in {
+            "STRICT_EVENT_POSITIVE", "SENSITIVITY_EVENT_POSITIVE"
+        }
+        solely_air_defense = bool(
+            newly_positive
+            and support
+            and any(x["air_defense_action"] and "air_defense_action" in x["event_types"] for x in support)
+            and all(
+                (not x["event_types"]) or "air_defense_action" in x["event_types"]
+                for x in support
+            )
+        )
+        out.append({
+            "episode_id": episode_id,
+            "previous_classification": old_class,
+            "new_classification": new_class,
+            "previous_event_types": old_types,
+            "new_event_types": new_types,
+            "source_evidence": support,
+            "solely_due_to_air_defense_action": solely_air_defense,
+        })
+    return out
+
+
+def _unexplained_pilot_changes(changes: list[dict]) -> list[dict]:
+    return [
+        row for row in changes
+        if row["previous_classification"] != row["new_classification"]
+        and not row["solely_due_to_air_defense_action"]
+    ]
 
 
 def foundation_acceptance(output: Path) -> dict:
