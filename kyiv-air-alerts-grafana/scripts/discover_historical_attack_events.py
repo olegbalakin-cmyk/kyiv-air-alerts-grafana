@@ -141,6 +141,12 @@ def extract_article_text_from_soup(soup: BeautifulSoup) -> str:
     return " ".join(text.split())[:50000]
 
 
+ARCHIVE_CARD_RE = re.compile(
+    r"(?:львів|львов|вибух|атак|обстріл|удар|влуч|приліт|ракет|бпла|безпілот|дрон|шахед|ппо|протиповітр|пошкод|пожеж|загор|займан)",
+    re.IGNORECASE,
+)
+
+
 def fetch_suspilne_archive_day(session: requests.Session, local_day: str) -> tuple[list[str], str]:
     year, month, day = local_day.split("-")
     url = f"https://suspilne.media/lviv/archive/{year}/{int(month)}/{int(day)}/"
@@ -150,6 +156,9 @@ def fetch_suspilne_archive_day(session: requests.Session, local_day: str) -> tup
     urls = set()
     for link in soup.select('a[href]'):
         href = str(link.get("href") or "")
+        card_text = " ".join(link.stripped_strings)
+        if not ARCHIVE_CARD_RE.search(card_text):
+            continue
         if href.startswith("/lviv/"):
             href = "https://suspilne.media" + href
         if not href.startswith("https://suspilne.media/lviv/"):
