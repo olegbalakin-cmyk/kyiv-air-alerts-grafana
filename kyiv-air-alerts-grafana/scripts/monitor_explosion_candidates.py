@@ -1705,6 +1705,108 @@ def event_clock_mentions(text: str) -> list[tuple[int, int]]:
     return out
 
 
+def relative_alert_chronology_relation(row: dict, episodes: list[dict]) -> dict:
+    """
+    Resolve narrow source-local chronology such as:
+    "Повітряну тривогу оголосили о 23:36. Вже за 10 хвилин ... вибухи."
+
+    This is parser hardening only: it does not create a new eligibility rule.
+    Both the stated alert clock and derived event clock must fall inside the
+    same tracked episode, and the text must contain explicit alert language
+    followed by a bounded minute offset and an attack-event signal.
+    """
+    published = parse_dt(row.get("published_at"))
+    text = classification_text(row)
+    low = normalize_evidence_text(text)
+    if not published or not low:
+        return {
+            "relation": None,
+            "event_time": None,
+            "alert_time": None,
+            "offset_minutes": None,
+            "episode_specific": False,
+            "supported_episode_ids": [],
+            "episode_id": None,
+        }
+
+    pattern = re.compile(
+        r"(?:повітрян\w*\s+)?тривог\w*.{0,80}?(?:оголосил\w*|розпочал\w*|почал\w*)"
+        r".{0,40}?\bо\s*(\d{1,2})[:.](\d{2})\b"
+        r".{0,180}?\b(?:вже\s+)?за\s+(\d{1,2})\s+хвилин\w*\b"
+        r".{0,180}?\b(?:вибух\w*|влуч\w*|приліт\w*|удар\w*|пошкод\w*|пожеж\w*)",
+        re.IGNORECASE,
+    )
+    match = pattern.search(low)
+    if not match:
+        return {
+            "relation": None,
+            "event_time": None,
+            "alert_time": None,
+            "offset_minutes": None,
+            "episode_specific": False,
+            "supported_episode_ids": [],
+            "episode_id": None,
+        }
+
+    alert_hour, alert_minute, offset_minutes = map(int, match.groups())
+    if alert_hour > 23 or alert_minute > 59 or offset_minutes > 180:
+        return {
+            "relation": None,
+            "event_time": None,
+            "alert_time": None,
+            "offset_minutes": None,
+            "episode_specific": False,
+            "supported_episode_ids": [],
+            "episode_id": None,
+        }
+
+    published_local = published.astimezone(KYIV_TZ)
+    local_day = published_local.date()
+    day_offsets = (0, -1) if published_local.hour < 6 else (0,)
+    candidates = []
+    for day_offset in day_offsets:
+        day = local_day + timedelta(days=day_offset)
+        alert_dt = datetime(
+            day.year, day.month, day.day, alert_hour, alert_minute, tzinfo=KYIV_TZ
+        ).astimezone(UTC)
+        event_dt = alert_dt + timedelta(minutes=offset_minutes)
+        for ep in episodes:
+            episode_id = str(ep.get("episode_id") or "")
+            start = parse_dt(ep.get("alert_start"))
+            end = parse_dt(ep.get("alert_end"))
+            if not episode_id or not start or not end:
+                continue
+            if start <= alert_dt <= end and start <= event_dt <= end:
+                candidates.append((event_dt, alert_dt, episode_id))
+
+    if not candidates:
+        return {
+            "relation": None,
+            "event_time": None,
+            "alert_time": None,
+            "offset_minutes": offset_minutes,
+            "episode_specific": False,
+            "supported_episode_ids": [],
+            "episode_id": None,
+        }
+
+    candidates.sort(key=lambda x: (x[0], x[1], x[2]))
+    best_event = candidates[0][0]
+    best_alert = candidates[0][1]
+    selected = [x for x in candidates if x[0] == best_event and x[1] == best_alert]
+    supported_ids = sorted({x[2] for x in selected})
+    specific = len(supported_ids) == 1
+    return {
+        "relation": "inside" if specific else None,
+        "event_time": iso(best_event),
+        "alert_time": iso(best_alert),
+        "offset_minutes": offset_minutes,
+        "episode_specific": specific,
+        "supported_episode_ids": supported_ids,
+        "episode_id": supported_ids[0] if specific else None,
+    }
+
+
 def explicit_event_time_relation(
     row: dict,
     event_segments: list[str],
@@ -1817,6 +1919,26 @@ def empty_near_boundary() -> dict:
 
 def temporal_binding_evidence(row: dict, strict_evidence: dict, matching: dict, episodes: list[dict]) -> dict:
     event_segments = list(strict_evidence.get("segments") or [])
+    relative = relative_alert_chronology_relation(row, episodes)
+    if relative.get("relation") == "inside":
+        return {
+            "present": True,
+            "code": "TEMPORAL_RELATIVE_ALERT_CHRONOLOGY",
+            "evidence_type": "relative_alert_chronology",
+            "evidence": {
+                "alert_time": relative.get("alert_time"),
+                "offset_minutes": relative.get("offset_minutes"),
+                "event_time": relative.get("event_time"),
+            },
+            "event_time": relative.get("event_time"),
+            "event_interval": None,
+            "message_time": None,
+            "episode_specific": True,
+            "supported_episode_ids": list(relative.get("supported_episode_ids") or []),
+            "episode_id": relative.get("episode_id"),
+            "near_boundary": empty_near_boundary(),
+        }
+
     clock = explicit_event_time_relation(row, event_segments, matching, episodes)
     if clock.get("relation") == "inside":
         specific = bool(clock.get("episode_specific"))
@@ -3238,6 +3360,40 @@ def self_test() -> None:
     assert explicit_clock_decision["proposed_outcome"] == "approved_strict"
     assert explicit_clock_decision["proposed_matched_episode_id"] == "event-time-earlier"
     assert explicit_clock_decision["temporal_binding"]["event_time"] == "2026-09-18T10:30:00Z"
+
+    # Narrow relative chronology: alert clock + bounded minute offset to
+    # exact-city explosions resolves a cross-midnight historical article without
+    # treating publication time as event time.
+    relative_ep = {
+        "episode_id": "relative-chronology-target",
+        "city_key": "lviv",
+        "city": "Львів",
+        "alert_start": "2026-01-08T21:35:35Z",
+        "alert_end": "2026-01-08T22:11:53Z",
+    }
+    relative_row = {
+        **strict_base,
+        "title": "У Львові під час повітряної тривоги пролунали вибухи",
+        "snippet": (
+            "Повітряну тривогу оголосили о 23:36. "
+            "Вже за 10 хвилин у Львові було чутно звуки вибухів."
+        ),
+        "published_at": "2026-01-08T22:00:10Z",
+    }
+    relative_decision = classify_candidate(relative_row, "lviv", [relative_ep])
+    assert relative_decision["proposed_outcome"] == "approved_strict", relative_decision
+    assert relative_decision["proposed_matched_episode_id"] == "relative-chronology-target"
+    assert relative_decision["temporal_binding"]["code"] == "TEMPORAL_RELATIVE_ALERT_CHRONOLOGY"
+    assert relative_decision["temporal_binding"]["event_time"] == "2026-01-08T21:46:00Z"
+
+    relative_negative = {
+        **strict_base,
+        "title": "У Львові повідомили про вибухи",
+        "snippet": "Повітряну тривогу оголосили о 23:36. Через 10 хвилин опублікували оновлення.",
+        "published_at": "2026-01-08T22:00:10Z",
+    }
+    relative_negative_decision = classify_candidate(relative_negative, "lviv", [relative_ep])
+    assert relative_negative_decision["temporal_binding"]["code"] != "TEMPORAL_RELATIVE_ALERT_CHRONOLOGY"
 
     # A daytime article must not reinterpret a clock-only event as the
     # previous calendar day merely because an alert existed at that clock.
