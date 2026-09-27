@@ -64,5 +64,7 @@ jobs:
             echo "No artifact change"
           else
             git commit -m "Record Lviv historical attack-event discovery pilot"
+            git fetch origin multicity-wip-2026-09-16
+            git rebase origin/multicity-wip-2026-09-16
             git push origin HEAD:multicity-wip-2026-09-16
           fi
