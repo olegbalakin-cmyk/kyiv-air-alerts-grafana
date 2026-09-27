@@ -73,6 +73,10 @@ def now_iso() -> str:
     return datetime.now(UTC).isoformat().replace("+00:00", "Z")
 
 
+def checkout_relative(path: Path) -> str:
+    return str(path.resolve().relative_to(CHECKOUT_ROOT.resolve())).replace(os.sep, "/")
+
+
 def load_json(path: Path):
     return json.loads(path.read_text(encoding="utf-8"))
 
@@ -817,7 +821,7 @@ def run_one_batch(args) -> dict:
                 ),
                 "needs_review_count": sum(x["classifier_result"] == "NEEDS_REVIEW" for x in results),
                 "source_retry_count": sum(x["classifier_result"] == "SOURCE_FETCH_RETRY_REQUIRED" for x in results),
-                "batch_path": str(batch_path.relative_to(CHECKOUT_ROOT)).replace(os.sep, "/"),
+                "batch_path": checkout_relative(batch_path),
             },
             "checkpoint_proof": {
                 "status_path": str(STATUS_PATH.relative_to(CHECKOUT_ROOT)).replace(os.sep, "/"),
@@ -844,7 +848,7 @@ def run_one_batch(args) -> dict:
         "new_work": len(selected),
         "city_key": city_key,
         "batch_number": batch_number,
-        "batch_path": str(batch_path.relative_to(CHECKOUT_ROOT)).replace(os.sep, "/"),
+        "batch_path": checkout_relative(batch_path),
         "status_path": str(STATUS_PATH.relative_to(CHECKOUT_ROOT)).replace(os.sep, "/"),
         "city_status": city_state["status"],
         "strict_positive": sum(x["event_positive_strict"] for x in results),
