@@ -108,6 +108,10 @@ DISCOVERY_TERMS = (
     "удар",
     "влуч",
     "приліт",
+    "пошкод",
+    "пожеж",
+    "загор",
+    "займан",
 )
 # Backward-compatible alias for discovery/excerpt helpers. This is deliberately
 # broader than strict explosion evidence.
@@ -592,23 +596,63 @@ def controlled_blast_nonmilitary_signal(text: str) -> bool:
     return controlled_blast_signal(text) and not military_strike_event_signal(text)
 
 
-def strict_explosion_signal(text: str) -> bool:
+ATTACK_EVENT_TYPE_ORDER = ("explosion", "impact", "arrival", "strike", "damage", "fire")
+
+
+def attack_event_types(text: str) -> list[str]:
+    """Detect event types mentioned in text without deciding episode eligibility."""
     low = normalize_evidence_text(text)
     if not low:
-        return False
-    if controlled_blast_nonmilitary_signal(low):
-        return False
+        return []
+    found = set()
     if re.search(r"\bвибух\w*", low):
-        return True
-    if re.search(r"\b(?:влуч\w*|поціл\w*|приліт\w*|вдарил\w*)", low):
-        return True
-    if re.search(r"\b(?:завдал\w*|нанес\w*)\b.{0,50}\bудар\w*", low):
-        return True
+        found.add("explosion")
+    if re.search(r"\b(?:влуч\w*|поціл\w*)", low):
+        found.add("impact")
+    if re.search(r"\bприліт\w*", low):
+        found.add("arrival")
+    if re.search(r"\bвдарил\w*", low) or re.search(r"\b(?:завдал\w*|нанес\w*)\b.{0,50}\bудар\w*", low):
+        found.add("strike")
     if re.search(r"\bудар(?:у|и|ів|ом|ами)?\b", low):
         threat_only = bool(re.search(r"\bзагроз\w*.{0,30}\bудар(?:у|и|ів|ом|ами)?\b", low))
         if not threat_only:
-            return True
+            found.add("strike")
+    if re.search(r"\bпошкод\w*", low):
+        found.add("damage")
+    if re.search(r"\b(?:пожеж\w*|загор\w*|займан\w*)", low):
+        found.add("fire")
+    return [event_type for event_type in ATTACK_EVENT_TYPE_ORDER if event_type in found]
+
+
+def attack_consequence_signal(text: str) -> bool:
+    """Require damage/fire to be explicitly linked to an attack, not merely co-present with an alert."""
+    low = normalize_evidence_text(text)
+    if not low or not re.search(r"\b(?:пошкод\w*|пожеж\w*|загор\w*|займан\w*)", low):
+        return False
+    attack = r"(?:атак\w*|обстріл\w*|удар\w*|влуч\w*|приліт\w*|вибух\w*|бпла|безпілот\w*|дрон\w*|шахед\w*|shahed\w*|ракет\w*|каб\w*|авіабомб\w*)"
+    consequence = r"(?:пошкод\w*|пожеж\w*|загор\w*|займан\w*)"
+    return bool(
+        re.search(rf"\b{attack}\b.{{0,120}}\b{consequence}\b", low)
+        or re.search(rf"\b{consequence}\b.{{0,120}}\b(?:внаслідок|через)\b.{{0,80}}\b{attack}\b", low)
+    )
+
+
+def strict_attack_event_signal(text: str) -> bool:
+    low = normalize_evidence_text(text)
+    if not low or controlled_blast_nonmilitary_signal(low):
+        return False
+    event_types = attack_event_types(low)
+    if any(event_type in event_types for event_type in ("explosion", "impact", "arrival", "strike")):
+        return True
+    if any(event_type in event_types for event_type in ("damage", "fire")):
+        return attack_consequence_signal(low)
     return False
+
+
+def strict_explosion_signal(text: str) -> bool:
+    # Backward-compatible interface: the historical name now delegates to the
+    # unified attack-event signal while existing city/air/temporal gates remain.
+    return strict_attack_event_signal(text)
 
 def air_military_context(text: str) -> bool:
     low = normalize_evidence_text(text)
@@ -646,6 +690,8 @@ def retrospective_or_cumulative_wording(text: str) -> bool:
         r"\bцілий[\s,:;–—-]+день\b",
         r"\bза[\s,:;–—-]+(?:минулий[\s,:;–—-]+)?(?:день|добу)\b",
         r"\bдобов\w*[\s,:;–—-]+(?:зведен|підсум)\w*",
+        r"\bнаслідк\w*.{0,40}\b(?:нічн|ранков|денн|вечірн)\w*.{0,40}\bатак\w*",
+        r"\bпісля[\s,:;–—-]+(?:нічн|ранков|денн|вечірн)\w*[\s,:;–—-]+атак\w*.{0,60}\b(?:пошкод\w*|пожеж\w*|загор\w*|займан\w*)",
     )
     return any(re.search(pattern, low) for pattern in patterns)
 
@@ -683,9 +729,15 @@ def exact_city_classification_evidence(city_key: str, row: dict) -> dict:
 
 
 def strict_explosion_evidence(city_key: str, row: dict) -> dict:
+    # Historical interface retained; evidence now covers the unified attack-event taxonomy.
     exact = exact_city_classification_evidence(city_key, row)
-    segments = [segment for segment in exact["segments"] if strict_explosion_signal(segment)]
-    return {"present": bool(segments), "segments": segments[:4]}
+    segments = [segment for segment in exact["segments"] if strict_attack_event_signal(segment)]
+    event_types = []
+    for segment in segments:
+        for event_type in attack_event_types(segment):
+            if event_type not in event_types:
+                event_types.append(event_type)
+    return {"present": bool(segments), "segments": segments[:4], "event_types": event_types}
 
 
 def air_military_context_evidence(row: dict) -> dict:
@@ -1937,6 +1989,7 @@ def classify_candidate(row: dict, city_key: str, episodes: list[dict], matching:
 
     candidate_exact = exact_city_classification_evidence(city_key, row)
     candidate_strict = strict_explosion_evidence(city_key, row)
+    candidate_event_types = list(candidate_strict.get("event_types") or [])
     candidate_air = air_military_context_evidence(row)
     candidate_same_attack = same_attack_context_evidence(
         city_key, row, candidate_strict, candidate_air
@@ -2007,6 +2060,8 @@ def classify_candidate(row: dict, city_key: str, episodes: list[dict], matching:
         reason_codes.append("MATCH_NONE")
     reason_codes.append("EXACT_CITY_EVENT_TEXT" if exact["present"] else "NO_EXACT_CITY_EVENT_TEXT")
     reason_codes.append("STRICT_EXPLOSION_EVIDENCE" if strict["present"] else "NO_STRICT_EXPLOSION_EVIDENCE")
+    if candidate_event_types:
+        reason_codes.append("ATTACK_EVENT_TYPES:" + ",".join(candidate_event_types))
     reason_codes.append("AIR_MILITARY_CONTEXT" if air["present"] else "NO_AIR_MILITARY_CONTEXT")
     if air["present"]:
         reason_codes.append("SAME_ATTACK_CONTEXT_SUPPORTED" if same_attack["present"] else "AIR_CONTEXT_NOT_LINKED_TO_EVENT")
@@ -2080,6 +2135,7 @@ def classify_candidate(row: dict, city_key: str, episodes: list[dict], matching:
         "candidate_evidence": {
             "exact_city": candidate_exact,
             "strict_explosion": candidate_strict,
+            "event_types": candidate_event_types,
             "air_military_context": candidate_air,
             "same_attack_context": candidate_same_attack,
             "temporal_binding": candidate_temporal,
@@ -2088,6 +2144,7 @@ def classify_candidate(row: dict, city_key: str, episodes: list[dict], matching:
         "review_provenance_adapter": reviewed,
         "exact_city_classification_evidence": exact,
         "strict_explosion_evidence": strict,
+        "event_types": candidate_event_types,
         "air_military_context": air,
         "same_attack_context": same_attack,
         "temporal_binding": temporal,
@@ -2101,6 +2158,7 @@ def classification_evidence_payload(decision: dict) -> dict:
     return {
         "exact_city": decision["exact_city_classification_evidence"],
         "strict_explosion": decision["strict_explosion_evidence"],
+        "event_types": list(decision.get("event_types") or []),
         "air_military_context": decision["air_military_context"],
         "same_attack_context": decision["same_attack_context"],
         "temporal_binding": decision["temporal_binding"],
@@ -2119,6 +2177,7 @@ def apply_classification_decision(item: dict, decision: dict, matching: dict) ->
     item["status"] = status
     item["classification_reason_codes"] = list(decision.get("reason_codes") or [])
     item["classification_evidence"] = classification_evidence_payload(decision)
+    item["event_types"] = list(decision.get("event_types") or [])
     item["review_note"] = (
         "evidence-layered auto-classification"
         if status in {"approved_strict", "approved_sensitivity", "rejected"}
@@ -2612,6 +2671,11 @@ def self_test() -> None:
     assert air_military_context("Ракета рухається у напрямку міста")
     assert explicit_alert_relation("Вибух стався після оголошення тривоги")
     assert explicit_alert_relation("У місті пролунав вибух, коли тривала повітряна тривога")
+    assert attack_event_types("У Полтаві влучання пошкодило будинок і спричинило пожежу") == ["impact", "damage", "fire"]
+    assert strict_attack_event_signal("У Полтаві внаслідок атаки БпЛА пошкоджено будинок")
+    assert strict_attack_event_signal("У Полтаві після удару БпЛА виникла пожежа")
+    assert not strict_attack_event_signal("У Полтаві під час повітряної тривоги сталася пожежа у квартирі")
+    assert not strict_attack_event_signal("У Полтаві пошкоджено водогін через аварію")
     for live_phrase in (
         "У Києві лунає вибух",
         "У Києві лунають вибухи",
@@ -2712,6 +2776,37 @@ def self_test() -> None:
     assert fulltext_added == 1 and fulltext_auto == 0
     assert fulltext_queue[0]["status"] == "needs_review"
     assert "PUBLISHER_FULLTEXT_REQUIRES_REVIEW" in fulltext_queue[0]["classification_reason_codes"]
+
+    # Unified attack-event hardening: damage/fire require attack causality and
+    # still pass exact-city, air-context and episode-specific temporal gates.
+    attack_event_positive_cases = (
+        ("У Полтаві під час повітряної тривоги внаслідок атаки БпЛА пошкоджено будинок.", ["damage"]),
+        ("У Полтаві під час повітряної тривоги після удару БпЛА виникла пожежа.", ["strike", "fire"]),
+        ("У Полтаві під час повітряної тривоги БпЛА влучив у будинок, пошкоджено фасад і виникла пожежа.", ["impact", "damage", "fire"]),
+    )
+    for title, expected_types in attack_event_positive_cases:
+        row = {**strict_base, "title": title, "snippet": ""}
+        decision = classify_candidate(row, "poltava", [poltava_ep])
+        assert decision["proposed_outcome"] == "approved_strict", decision
+        assert decision["event_types"] == expected_types, decision
+
+    attack_event_negative_cases = (
+        "У Полтаві під час повітряної тривоги сталася пожежа у квартирі.",
+        "У Полтаві під час повітряної тривоги пошкоджено водогін через аварію.",
+        "На Полтавщині під час повітряної тривоги внаслідок атаки БпЛА виникла пожежа.",
+    )
+    for title in attack_event_negative_cases:
+        row = {**strict_base, "title": title, "snippet": ""}
+        decision = classify_candidate(row, "poltava", [poltava_ep])
+        assert decision["proposed_outcome"] != "approved_strict", decision
+
+    retrospective_damage = {
+        **strict_base,
+        "title": "У Полтаві повідомили про наслідки нічної атаки: пошкоджено будинок.",
+        "snippet": "",
+    }
+    retrospective_damage_decision = classify_candidate(retrospective_damage, "poltava", [poltava_ep])
+    assert retrospective_damage_decision["proposed_outcome"] not in {"approved_strict", "approved_sensitivity"}, retrospective_damage_decision
 
     # Mandatory: Kyiv PVO-only must never be strict.
     kyiv_ep = make_episode("kyiv", dt, dt + timedelta(hours=1))
