@@ -1,0 +1,165 @@
+{
+  "schema_version": 1,
+  "date": "2026-09-27",
+  "repository": "olegbalakin-cmyk/kyiv-air-alerts-grafana",
+  "workflow_ownership": {
+    "workflow_file": ".github/workflows/update-netlify-site.yml",
+    "owner_branch": "main",
+    "workflow_absent_from_site_prod": true,
+    "production_checkout_branch": "site-prod",
+    "production_data_branch": "site-prod"
+  },
+  "old_workflow_order": [
+    "checkout site-prod",
+    "update/fetch base source data",
+    "apply UkraineAlarm bridge (writes bridge JSON in workspace)",
+    "downstream production generation",
+    "23-city QA",
+    "reconcile source freshness",
+    "Verify production dataset",
+    "single final commit of data + dashboard, including bridge"
+  ],
+  "new_workflow_order": [
+    "checkout site-prod",
+    "update/fetch base source data",
+    "snapshot previous UkraineAlarm bridge checkpoint",
+    "apply UkraineAlarm bridge",
+    "validate bridge checkpoint",
+    "persist checkpoint-only commit to site-prod",
+    "upload bridge diagnostic artifact",
+    "continue production generation",
+    "23-city QA",
+    "reconcile source freshness",
+    "Verify production dataset",
+    "persist final production outputs"
+  ],
+  "checkpoint_validation_contract": {
+    "authenticated_fresh_fetch_required": true,
+    "bridge_json_parses": true,
+    "schema_version": 3,
+    "expected_required_rows": 21,
+    "unresolved_fetch_errors_allowed": false,
+    "all_required_regions_continuous": true,
+    "fully_continuous_required": true,
+    "completed_air_history_required_per_region": true,
+    "tolerance_equivalent_duplicate_pairs_required": 0,
+    "checkpoint_timestamps_must_not_regress": true,
+    "historical_events_must_not_be_dropped": true,
+    "recovery_provenance_must_not_be_lost": true,
+    "summary_store_checkpoint_must_match": true,
+    "http_200_alone_is_sufficient": false
+  },
+  "early_persistence": {
+    "files": [
+      "kyiv-air-alerts-grafana/data/ukrainealarm_bridge.json"
+    ],
+    "commit_message": "Persist verified UkraineAlarm bridge checkpoint",
+    "empty_commit_allowed": false,
+    "live_checkpoint_commit": "691a503151ba71d56b38bd7e6ddf0a584e94fae8"
+  },
+  "monotonicity_protection": {
+    "github_actions_concurrency_preserved": true,
+    "cancel_in_progress": true,
+    "pre_run_checkpoint_comparison": true,
+    "remote_checkpoint_revalidated_immediately_before_push": true,
+    "non_fast_forward_push_rejected": true,
+    "force_push": false,
+    "reset_used": false,
+    "stale_run_overwrite_protection": true,
+    "identical_state_idempotent": true
+  },
+  "failure_injection": {
+    "workflow_self_test_step": "Test bridge checkpoint persistence semantics",
+    "workflow_self_test_result": "success",
+    "run_a": {
+      "simulated": true,
+      "sequence": [
+        "t0 bridge",
+        "advance/persist bridge t1",
+        "intentional downstream failure"
+      ],
+      "checkpoint_t1_persisted": true,
+      "final_outputs_advanced": false,
+      "result": "PASS"
+    },
+    "run_b": {
+      "simulated": true,
+      "api_history_no_longer_reaches_t0": true,
+      "api_history_still_overlaps_t1": true,
+      "resumes_from_persisted_t1": true,
+      "aged_out_seam_prevented": true,
+      "result": "PASS"
+    },
+    "negative_control": {
+      "api_history_newer_than_t1": true,
+      "continuity_still_fails": true,
+      "result": "PASS"
+    }
+  },
+  "live_integration_run": {
+    "run_id": 36317839963,
+    "attempt": 1,
+    "conclusion": "success",
+    "checkpoint_validation": "success",
+    "checkpoint_persistence": "success",
+    "diagnostics_upload": "success",
+    "qa_23_city": "success",
+    "verify_production_dataset": "success",
+    "checkpoint_commit": "691a503151ba71d56b38bd7e6ddf0a584e94fae8",
+    "final_production_commit": "0ba7504d503488fe01bbb4c47f4d53ebc1466ad6",
+    "diagnostic_artifact": "ukrainealarm-bridge-fetch-36317839963-1",
+    "diagnostic_retention_days": 7
+  },
+  "dedup_verification": {
+    "tolerance_seconds": 15,
+    "duplicate_pairs": 0,
+    "recovery_provenance_preserved": "52/52",
+    "normalization_regression": false
+  },
+  "continuity_verification": {
+    "verified": "21/21",
+    "fully_continuous": true,
+    "unverified_rows": [],
+    "last_successful_fetch_at": "2026-09-27T12:29:27.188576Z",
+    "last_fetch_error": null
+  },
+  "deployment_safety": {
+    "netlify_project": "ukraine-air-alerts",
+    "deployment_source": "cli",
+    "git_branch_attached_to_current_deploy": null,
+    "git_commit_ref_attached_to_current_deploy": null,
+    "current_deploy_id": "6aac63967b97f0812c8be949",
+    "current_deploy_unchanged_across_checkpoint_and_final_git_commits": true,
+    "checkpoint_only_commit_can_expose_partial_production_data": false
+  },
+  "files_changed": {
+    "site_prod": [
+      "kyiv-air-alerts-grafana/scripts/validate_bridge_checkpoint.py"
+    ],
+    "main": [
+      ".github/workflows/update-netlify-site.yml"
+    ],
+    "runtime_checkpoint": [
+      "kyiv-air-alerts-grafana/data/ukrainealarm_bridge.json"
+    ]
+  },
+  "commits_created": {
+    "site_prod_validator_initial": "ea596b5bd61367580ac61aaa9ab4abd2049997c6",
+    "site_prod_validator_idempotence": "43685ef34197e56d3c82b85d021edbbf40cabb63",
+    "main_workflow_hardening": "a0faf4dfbbc6b3cdebc54f8caf19f7ea3b96e71f",
+    "live_checkpoint_commit": "691a503151ba71d56b38bd7e6ddf0a584e94fae8",
+    "live_final_production_commit": "0ba7504d503488fe01bbb4c47f4d53ebc1466ad6"
+  },
+  "final_verification": {
+    "bridge_parses": true,
+    "event_count_matches": true,
+    "event_count": 1491,
+    "duplicate_pairs": 0,
+    "continuity": "21/21",
+    "fully_continuous": true,
+    "recovery_provenance_preserved": "52/52",
+    "checkpoint_regression": false,
+    "final_verification_gates_preserved": true
+  },
+  "verdict": "BRIDGE CHECKPOINT PERSISTENCE HARDENED — AGED-OUT SEAM RECURRENCE PREVENTED"
+}
