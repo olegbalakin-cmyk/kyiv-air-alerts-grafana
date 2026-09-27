@@ -54,7 +54,7 @@ jobs:
           git checkout "$CORRECTED_CONTRACT" --             kyiv-air-alerts-grafana/data/explosion_metric_handoff/RESEARCH_SLICES_2026-09-18.csv             kyiv-air-alerts-grafana/data/explosion_metric_handoff/RESEARCH_SUBSLICES_2026-09-19.csv             kyiv-air-alerts-grafana/data/explosion_metric_handoff/chernihiv_P3_result.json             kyiv-air-alerts-grafana/scripts/build_explosion_source_slices.py             research/historical_replay_status_current.json
           git show "$CORRECTED_RUNNER_COMMIT:kyiv-air-alerts-grafana/scripts/historical_17_city_corrected_baseline_reconciliation.py" > kyiv-air-alerts-grafana/scripts/_historical_17_city_corrected_recon_tmp.py
           git show "$FORENSIC_COMMIT:research/historical_17_city_corpus_gap_forensic_inventory_2026-09-27.json" > /tmp/historical_17_city_corpus_gap_forensic_inventory_2026-09-27.json
-          git show "c2623b66ed0737f8401c7af6425c7c2c1682f1a2:kyiv-air-alerts-grafana/scripts/historical_17_city_atomic_corpus_repair_runner.py" > /tmp/historical_17_city_atomic_corpus_repair_runner.py
+          git show "c2623b66ed0737f8401c7af6425c7c2c1682f1a2:kyiv-air-alerts-grafana/scripts/historical_17_city_atomic_corpus_repair_runner.py" > kyiv-air-alerts-grafana/scripts/_historical_17_city_atomic_corpus_repair_tmp.py
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -95,8 +95,8 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          python /tmp/historical_17_city_atomic_corpus_repair_runner.py --mode apply --upstream /tmp/official_data_uk.csv --forensic /tmp/historical_17_city_corpus_gap_forensic_inventory_2026-09-27.json --output /tmp/repair_apply.json --expected-pre-head "$PRE_HEAD"
-          rm kyiv-air-alerts-grafana/scripts/_historical_17_city_corrected_recon_tmp.py
+          python kyiv-air-alerts-grafana/scripts/_historical_17_city_atomic_corpus_repair_tmp.py --mode apply --upstream /tmp/official_data_uk.csv --forensic /tmp/historical_17_city_corpus_gap_forensic_inventory_2026-09-27.json --output /tmp/repair_apply.json --expected-pre-head "$PRE_HEAD"
+          rm kyiv-air-alerts-grafana/scripts/_historical_17_city_corrected_recon_tmp.py kyiv-air-alerts-grafana/scripts/_historical_17_city_atomic_corpus_repair_tmp.py
           find kyiv-air-alerts-grafana/scripts -type d -name __pycache__ -prune -exec rm -rf {} +
 
       - name: Verify atomic corpus state before commit
@@ -169,8 +169,8 @@ jobs:
         run: |
           set -euo pipefail
           git show "$CORRECTED_RUNNER_COMMIT:kyiv-air-alerts-grafana/scripts/historical_17_city_corrected_baseline_reconciliation.py" > kyiv-air-alerts-grafana/scripts/_historical_17_city_corrected_recon_tmp.py
-          python /tmp/historical_17_city_atomic_corpus_repair_runner.py --mode verify --upstream /tmp/official_data_uk.csv --forensic /tmp/historical_17_city_corpus_gap_forensic_inventory_2026-09-27.json --output /tmp/repair_verify.json
-          rm kyiv-air-alerts-grafana/scripts/_historical_17_city_corrected_recon_tmp.py
+          python kyiv-air-alerts-grafana/scripts/_historical_17_city_atomic_corpus_repair_tmp.py --mode verify --upstream /tmp/official_data_uk.csv --forensic /tmp/historical_17_city_corpus_gap_forensic_inventory_2026-09-27.json --output /tmp/repair_verify.json
+          rm kyiv-air-alerts-grafana/scripts/_historical_17_city_corrected_recon_tmp.py kyiv-air-alerts-grafana/scripts/_historical_17_city_atomic_corpus_repair_tmp.py
           find kyiv-air-alerts-grafana/scripts -type d -name __pycache__ -prune -exec rm -rf {} +
           python - <<'PY'
           import json
