@@ -806,6 +806,24 @@ def build_pilot(
             "article_linked_telegram": {
                 "unique_exact_posts_requested": len(linked_telegram_seen),
                 "resolved_posts": len(linked_telegram_posts),
+                "resolved_post_diagnostics": [
+                    {
+                        "channel": post.get("channel"),
+                        "message_id": post.get("message_id"),
+                        "url": post.get("url"),
+                        "published_at": post.get("published_at"),
+                        "retained_episode_id": post.get("retained_episode_id"),
+                        "parent_article_url": post.get("parent_article_url"),
+                        "text_excerpt": str(post.get("text") or "")[:300],
+                        "city_mentioned": monitor.city_mentioned(city_key, str(post.get("text") or "")),
+                        "attack_discovery_match": bool(ATTACK_DISCOVERY_RE.search(str(post.get("text") or ""))),
+                        "active_episode_ids_at_post_time": [
+                            str(ep.get("episode_id") or "")
+                            for ep in monitor.exact_active_episodes_at(parse_dt(post["published_at"]), selected)
+                        ],
+                    }
+                    for post in linked_telegram_posts
+                ],
                 "fetches": linked_telegram_fetches,
                 "composition_diagnostics": composition_diagnostics,
             },
