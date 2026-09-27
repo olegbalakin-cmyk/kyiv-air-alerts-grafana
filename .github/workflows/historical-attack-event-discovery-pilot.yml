@@ -88,6 +88,7 @@ jobs:
       - name: Verify only pilot artifacts are staged
         run: |
           PILOT_REPO_PATH="$(cat /tmp/attack-event-adapter-pilot/pilot_repo_path_after_rebase.txt)"
+          find kyiv-air-alerts-grafana/scripts -type d -name __pycache__ -prune -exec rm -rf {} +
           CHANGED="$(git status --porcelain --untracked-files=all | awk '{print $2}' | sort)"
           EXPECTED="$(printf '%s\n%s\n'             'research/historical_attack_event_source_adapter_refactor_2026-09-27.json'             "$PILOT_REPO_PATH" | sort)"
           test "$CHANGED" = "$EXPECTED"
