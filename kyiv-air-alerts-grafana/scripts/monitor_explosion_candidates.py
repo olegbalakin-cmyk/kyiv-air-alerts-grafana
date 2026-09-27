@@ -1728,12 +1728,19 @@ def explicit_event_time_relation(
             "episode_id": None,
         }
 
-    local_day = published.astimezone(KYIV_TZ).date()
+    published_local = published.astimezone(KYIV_TZ)
+    local_day = published_local.date()
+    # A clock-only source statement normally belongs to the publication local
+    # day. Previous-day fallback is reserved for genuinely near-midnight
+    # publication, where a late report can describe an event before midnight.
+    # This prevents daytime reports such as "8 February ... at 08:48" from
+    # accidentally binding to an unrelated alert at the same clock on 7 February.
+    day_offsets = (0, -1) if published_local.hour < 6 else (0,)
     candidates = []
     limit = SENSITIVITY_NEAR_BOUNDARY_MAX_MINUTES * 60
     for segment in event_segments:
         for hour, minute in event_clock_mentions(segment):
-            for day_offset in (0, -1):
+            for day_offset in day_offsets:
                 day = local_day + timedelta(days=day_offset)
                 event_dt = datetime(
                     day.year, day.month, day.day, hour, minute, tzinfo=KYIV_TZ
@@ -3231,6 +3238,55 @@ def self_test() -> None:
     assert explicit_clock_decision["proposed_outcome"] == "approved_strict"
     assert explicit_clock_decision["proposed_matched_episode_id"] == "event-time-earlier"
     assert explicit_clock_decision["temporal_binding"]["event_time"] == "2026-09-18T10:30:00Z"
+
+    # A daytime article must not reinterpret a clock-only event as the
+    # previous calendar day merely because an alert existed at that clock.
+    prev_day = {
+        "episode_id": "clock-prev-day",
+        "city_key": "lviv",
+        "city": "Львів",
+        "alert_start": "2026-02-07T06:30:00Z",
+        "alert_end": "2026-02-07T07:00:00Z",
+    }
+    same_day = {
+        "episode_id": "clock-same-day",
+        "city_key": "lviv",
+        "city": "Львів",
+        "alert_start": "2026-02-08T05:53:00Z",
+        "alert_end": "2026-02-08T06:58:00Z",
+    }
+    daytime_clock_row = {
+        **strict_base,
+        "title": "У Львові о 08:48 було чути вибухи під час атаки БпЛА",
+        "published_at": "2026-02-08T08:02:27Z",
+    }
+    daytime_clock_decision = classify_candidate(
+        daytime_clock_row, "lviv", [prev_day, same_day]
+    )
+    assert daytime_clock_decision["proposed_outcome"] == "approved_strict"
+    assert daytime_clock_decision["proposed_matched_episode_id"] == "clock-same-day"
+    assert daytime_clock_decision["temporal_binding"]["event_time"] == "2026-02-08T06:48:00Z"
+
+    # Genuine shortly-after-midnight publication may still describe a clock-only
+    # event from the previous local day.
+    cross_midnight_ep = {
+        "episode_id": "clock-cross-midnight",
+        "city_key": "lviv",
+        "city": "Львів",
+        "alert_start": "2026-01-08T21:35:00Z",
+        "alert_end": "2026-01-08T22:11:59Z",
+    }
+    cross_midnight_row = {
+        **strict_base,
+        "title": "У Львові близько 23:50 пролунав вибух під час атаки БпЛА",
+        "published_at": "2026-01-08T22:20:00Z",
+    }
+    cross_midnight_decision = classify_candidate(
+        cross_midnight_row, "lviv", [cross_midnight_ep]
+    )
+    assert cross_midnight_decision["proposed_outcome"] == "approved_strict"
+    assert cross_midnight_decision["proposed_matched_episode_id"] == "clock-cross-midnight"
+    assert cross_midnight_decision["temporal_binding"]["event_time"] == "2026-01-08T21:50:00Z"
 
     # Explicit timing just outside a boundary remains episode-specific sensitivity.
     boundary_ep = {
