@@ -1,0 +1,67 @@
+name: Historical 17-city post-repair verification
+on:
+  push:
+    branches:
+      - historical-17-city-atomic-corpus-repair-runner-2026-09-27
+    paths:
+      - .github/workflows/historical-17-city-post-repair-verify.yml
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: 5d170974829092aaa93b95ca77c3871f8976e08b
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python -m pip install --disable-pip-version-check --quiet requests beautifulsoup4
+      - name: Prepare exact verification inputs
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fsSL "https://raw.githubusercontent.com/Vadimkin/ukrainian-air-raid-sirens-dataset/58ee75bc20113181b9ddf8029d4cbf3a62d8cd10/datasets/official_data_uk.csv" -o /tmp/official_data_uk.csv
+          test "$(git hash-object /tmp/official_data_uk.csv)" = "71d70c0ca54968f530d596cf315616fa858800e1"
+          git show "87c0993fe87037729a947a812cc70f8d8fac729a:research/historical_17_city_corpus_gap_forensic_inventory_2026-09-27.json" > /tmp/forensic.json
+          git show "3850391fcb0beada6f08c17983efa22b4fac1f90:kyiv-air-alerts-grafana/scripts/historical_17_city_corrected_baseline_reconciliation.py" > kyiv-air-alerts-grafana/scripts/_historical_17_city_corrected_recon_tmp.py
+          git show "c2623b66ed0737f8401c7af6425c7c2c1682f1a2:kyiv-air-alerts-grafana/scripts/historical_17_city_atomic_corpus_repair_runner.py" > kyiv-air-alerts-grafana/scripts/_historical_17_city_atomic_corpus_repair_tmp.py
+      - name: Idempotence
+        shell: bash
+        run: |
+          set -euo pipefail
+          python kyiv-air-alerts-grafana/scripts/_historical_17_city_atomic_corpus_repair_tmp.py --mode verify --upstream /tmp/official_data_uk.csv --forensic /tmp/forensic.json --output /tmp/idempotence.json
+          cat /tmp/idempotence.json
+      - name: Real replay source diagnostics
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/replays
+          cities="chernihiv chernivtsi dnipro ivano_frankivsk kharkiv kherson khmelnytskyi kropyvnytskyi lutsk mykolaiv odesa poltava rivne ternopil uzhhorod vinnytsia zhytomyr"
+          for city in $cities; do
+            set +e
+            python kyiv-air-alerts-grafana/scripts/replay_explosion_history.py --repo-root "$PWD/kyiv-air-alerts-grafana" --city "$city" --through 2026-09-17 --output "/tmp/replays/$city.json" --input-head 5d170974829092aaa93b95ca77c3871f8976e08b --read-only
+            rc=$?
+            set -e
+            python - "$city" "$rc" <<'PY'
+          import json,sys
+          city,rc=sys.argv[1],int(sys.argv[2])
+          d=json.load(open(f"/tmp/replays/{city}.json"))
+          print(json.dumps({
+            "city":city,"rc":rc,"status":d.get("status"),"episodes_checked":d.get("episodes_checked"),
+            "source_status":d.get("source_validation",{}).get("source_status"),
+            "expected":d.get("source_validation",{}).get("expected_alert_episodes"),
+            "reconstructed":d.get("source_validation",{}).get("reconstructed_alert_episodes"),
+            "blocking_reasons":d.get("source_validation",{}).get("blocking_reasons"),
+            "errors":d.get("errors"),"verdict":d.get("verdict"),
+            "protected_files_unchanged":d.get("protected_files_unchanged")
+          },ensure_ascii=False))
+          PY
+          done
+      - name: Cleanup temp helpers
+        if: always()
+        run: |
+          rm -f kyiv-air-alerts-grafana/scripts/_historical_17_city_corrected_recon_tmp.py kyiv-air-alerts-grafana/scripts/_historical_17_city_atomic_corpus_repair_tmp.py
