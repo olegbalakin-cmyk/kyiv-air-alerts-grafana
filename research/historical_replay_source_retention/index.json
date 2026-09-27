@@ -2,29 +2,45 @@
   "cities": {
     "cherkasy": {
       "path": "research/historical_replay_source_retention/cherkasy.json",
-      "qa_case_count": 34,
+      "qa_case_count": 30,
       "source_fetch_counts": {
-        "OK": 33
+        "OK": 29
       },
       "triage_counts": {
-        "NO_COMPLETE_SOURCE_SEGMENT": 30,
+        "NO_COMPLETE_SOURCE_SEGMENT": 27,
         "SAFE_SOURCE_RETENTION_CANDIDATE": 1,
-        "SOURCE_CONTEXT_FOUND_WEAK_ANCHOR": 3
+        "SOURCE_CONTEXT_FOUND_WEAK_ANCHOR": 2
+      }
+    },
+    "kyiv": {
+      "path": "research/historical_replay_source_retention/kyiv.json",
+      "qa_case_count": 260,
+      "source_fetch_counts": {
+        "FETCH_ERROR": 30,
+        "NO_TEXT_EXTRACTED": 3,
+        "OK": 220
+      },
+      "triage_counts": {
+        "FETCH_FAILED": 37,
+        "NO_COMPLETE_SOURCE_SEGMENT": 208,
+        "SAFE_SOURCE_RETENTION_CANDIDATE": 13,
+        "SOURCE_CONTEXT_FOUND_WEAK_ANCHOR": 2
       }
     },
     "sumy": {
       "path": "research/historical_replay_source_retention/sumy.json",
-      "qa_case_count": 21,
+      "qa_case_count": 19,
       "source_fetch_counts": {
-        "OK": 21
+        "OK": 19
       },
       "triage_counts": {
-        "NO_COMPLETE_SOURCE_SEGMENT": 21
+        "NO_COMPLETE_SOURCE_SEGMENT": 18,
+        "SAFE_SOURCE_RETENTION_CANDIDATE": 1
       }
     }
   },
-  "city_count": 2,
-  "generated_at_utc": "2026-09-27T08:36:41.342120Z",
+  "city_count": 3,
+  "generated_at_utc": "2026-09-27T10:36:40.015558Z",
   "kind": "historical_replay_source_retention_index",
   "schema_version": 1
 }
