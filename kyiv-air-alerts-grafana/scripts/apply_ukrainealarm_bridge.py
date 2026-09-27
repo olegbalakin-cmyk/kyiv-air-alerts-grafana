@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import json
 import os
+import time
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -19,7 +20,11 @@ API_URL = f"{API_BASE}/alerts/regionHistory"
 REGIONS_URL = f"{API_BASE}/regions"
 TOKEN_ENV = "UKRAINEALARM_API_TOKEN"
 HISTORY_LIMIT = 25
+MIN_API_INTERVAL_SECONDS = float(os.getenv("UKRAINEALARM_MIN_INTERVAL_SECONDS", "70"))
+MAX_401_RETRIES = 2
 UTC = timezone.utc
+
+_last_api_request_at: float | None = None
 
 EXACT_ALIASES = {
     "м. Харків та Харківська територіальна громада": [
@@ -143,9 +148,53 @@ def find_region_node(nodes: list[dict], target: str) -> dict | None:
     return None
 
 
+def api_get(
+    token: str,
+    url: str,
+    *,
+    params: dict | None = None,
+    context: str,
+) -> requests.Response:
+    global _last_api_request_at
+
+    for attempt in range(MAX_401_RETRIES + 1):
+        if _last_api_request_at is not None:
+            wait = MIN_API_INTERVAL_SECONDS - (time.monotonic() - _last_api_request_at)
+            if wait > 0:
+                print(
+                    f"UkraineAlarm request guard: sleeping {wait:.1f}s before {context}",
+                    flush=True,
+                )
+                time.sleep(wait)
+
+        response = requests.get(
+            url,
+            headers=api_headers(token),
+            params=params,
+            timeout=60,
+        )
+        _last_api_request_at = time.monotonic()
+
+        if response.status_code == 401 and attempt < MAX_401_RETRIES:
+            print(
+                f"{context}: HTTP 401 on attempt {attempt + 1}; "
+                "retrying after request guard interval",
+                flush=True,
+            )
+            continue
+
+        raise_api_error(response, context)
+        return response
+
+    raise AssertionError("unreachable")
+
+
 def fetch_regions(token: str) -> list[dict]:
-    response = requests.get(REGIONS_URL, headers=api_headers(token), timeout=60)
-    raise_api_error(response, "UkraineAlarm regions request failed")
+    response = api_get(
+        token,
+        REGIONS_URL,
+        context="UkraineAlarm regions request failed",
+    )
     payload = response.json()
     nodes = collect_region_nodes(payload)
     if not nodes:
@@ -177,48 +226,77 @@ def normalize_history_payload(payload, fallback: dict) -> list[dict]:
     return out
 
 
-def fetch_history(token: str, targets: list[str]) -> list[dict]:
-    nodes = fetch_regions(token)
+def fetch_history(
+    token: str,
+    targets: list[str],
+    store: dict,
+) -> tuple[list[dict], set[str], dict[str, str]]:
     payload: list[dict] = []
+    successful_targets: set[str] = set()
+    errors: dict[str, str] = {}
+    nodes: list[dict] | None = None
 
     for target in targets:
-        node = find_region_node(nodes, target)
-        if node is None:
-            hints = sorted(
-                n["regionName"]
-                for n in nodes
-                if any(
-                    piece in normalize_name(n["regionName"])
-                    for piece in normalize_name(target).split()
-                    if len(piece) >= 5
+        previous = store.get("regions", {}).get(target, {})
+        region_id = str(previous.get("region_id") or "")
+        region_name = str(previous.get("api_region_name") or target)
+
+        if not region_id:
+            try:
+                if nodes is None:
+                    nodes = fetch_regions(token)
+                node = find_region_node(nodes, target)
+                if node is None:
+                    hints = sorted(
+                        n["regionName"]
+                        for n in nodes
+                        if any(
+                            piece in normalize_name(n["regionName"])
+                            for piece in normalize_name(target).split()
+                            if len(piece) >= 5
+                        )
+                    )[:12]
+                    raise RuntimeError(
+                        f"UkraineAlarm region not found for {target!r}; "
+                        f"possible matches={hints}"
+                    )
+                region_id = str(node["regionId"])
+                region_name = str(node["regionName"])
+            except Exception as exc:
+                message = f"{type(exc).__name__}: {exc}"
+                errors[target] = message
+                print(f"UkraineAlarm fetch FAILED: {target}: {message}", flush=True)
+                continue
+
+        try:
+            response = api_get(
+                token,
+                API_URL,
+                params={"regionId": region_id},
+                context=(
+                    f"UkraineAlarm regionHistory request failed for "
+                    f"{region_name} ({region_id})"
+                ),
+            )
+            fallback = {"regionId": region_id, "regionName": region_name}
+            groups = normalize_history_payload(response.json(), fallback)
+            if not groups:
+                raise RuntimeError(
+                    f"UkraineAlarm regionHistory returned no usable group for {region_name}"
                 )
-            )[:12]
-            raise RuntimeError(
-                f"UkraineAlarm region not found for {target!r}; possible matches={hints}"
+            payload.extend(groups)
+            successful_targets.add(target)
+            print(
+                f"UkraineAlarm fetch OK: {target} -> "
+                f"{region_name} ({region_id})",
+                flush=True,
             )
+        except Exception as exc:
+            message = f"{type(exc).__name__}: {exc}"
+            errors[target] = message
+            print(f"UkraineAlarm fetch FAILED: {target}: {message}", flush=True)
 
-        response = requests.get(
-            API_URL,
-            headers=api_headers(token),
-            params={"regionId": node["regionId"]},
-            timeout=60,
-        )
-        raise_api_error(
-            response,
-            f"UkraineAlarm regionHistory request failed for {node['regionName']} ({node['regionId']})",
-        )
-        groups = normalize_history_payload(response.json(), node)
-        if not groups:
-            raise RuntimeError(
-                f"UkraineAlarm regionHistory returned no usable group for {node['regionName']}"
-            )
-        payload.extend(groups)
-        print(
-            f"UkraineAlarm region resolved: {target} -> "
-            f"{node['regionName']} ({node['regionId']})"
-        )
-
-    return payload
+    return payload, successful_targets, errors
 
 
 def groups_by_name(payload: list[dict]) -> dict[str, dict]:
@@ -406,23 +484,68 @@ def main() -> None:
         for key, cfg in exactmod.CITY_CONFIG.items()
     }
 
+    history_payload: list[dict] = []
+    successful_targets: set[str] = set()
+    fetch_errors: dict[str, str] = {}
+
     try:
-        history_payload = fetch_history(token, list(cutoffs))
-        store = merge_history(store, history_payload, cutoffs)
-        STORE_FILE.write_text(
-            json.dumps(store, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
+        history_payload, successful_targets, fetch_errors = fetch_history(
+            token,
+            list(cutoffs),
+            store,
         )
-        print("UkraineAlarm API history fetched successfully")
+
+        if successful_targets:
+            successful_cutoffs = {
+                target: cutoffs[target]
+                for target in successful_targets
+            }
+            store = merge_history(store, history_payload, successful_cutoffs)
+
+        store["last_fetch_error"] = fetch_errors or None
+        STORE_FILE.write_text(
+            json.dumps(store, ensure_ascii=False, indent=2) + "\n",
+            encoding="utf-8",
+        )
+
+        for target in cutoffs:
+            meta = store.get("regions", {}).get(target, {})
+            if target in successful_targets:
+                print(
+                    "UkraineAlarm continuity "
+                    f"{target}: {meta.get('continuous_from_upstream')} "
+                    f"({meta.get('continuity_reason')}); "
+                    f"oldest={meta.get('oldest_history_start')} "
+                    f"latest={meta.get('latest_history_end')}",
+                    flush=True,
+                )
+            else:
+                print(
+                    f"UkraineAlarm continuity {target}: fetch failed; "
+                    "retaining prior events and continuity state",
+                    flush=True,
+                )
+
+        print(
+            "UkraineAlarm per-city fetch complete: "
+            f"{len(successful_targets)}/{len(cutoffs)} succeeded",
+            flush=True,
+        )
     except Exception as exc:
         error = f"{type(exc).__name__}: {exc}"
-        store["last_fetch_error"] = error
+        store["last_fetch_error"] = {"global": error}
         if STORE_FILE.exists():
             STORE_FILE.write_text(
-                json.dumps(store, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
+                json.dumps(store, ensure_ascii=False, indent=2) + "\n",
+                encoding="utf-8",
             )
         if not store.get("events"):
             raise RuntimeError(f"UkraineAlarm API first fetch failed: {error}") from exc
-        print("UkraineAlarm API fetch failed; retaining prior bridge store:", error)
+        print(
+            "UkraineAlarm API global fetch failure; retaining prior bridge store:",
+            error,
+            flush=True,
+        )
 
     merged_alerts, covered_keys = bridged_exact_alerts(base_alerts, store)
     now = datetime.now(TZ)
