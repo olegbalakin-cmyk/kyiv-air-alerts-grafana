@@ -187,3 +187,162 @@ def validate_state_contract(state: dict, status: dict) -> None:
     if (state.get("campaign_version") or {}) != (status.get("campaign_version") or {}):
         raise GuardFailure("ACCELERATION_STATE_VERSION_MISMATCH")
 
+
+
+def verify_protected(root: Path, launch: dict) -> dict[str, str]:
+    expected = launch.get("protected_file_hashes") or {}
+    if not expected:
+        raise GuardFailure("PROTECTED_HASH_BASELINE_MISSING")
+    current: dict[str, str] = {}
+    for path, expected_sha in expected.items():
+        rel = Path(path)
+        actual = blob(root, rel)
+        current[path] = actual
+        if actual != expected_sha:
+            raise GuardFailure(f"PROTECTED_FILE_MUTATION:{path}")
+    return current
+
+
+def launch_blob(root: Path) -> str:
+    return blob(root, LAUNCH_REL)
+
+
+def episode_snapshot(status: dict) -> dict[str, tuple[str, str]]:
+    version = json.dumps(status.get("campaign_version") or {}, sort_keys=True, separators=(",", ":"))
+    out: dict[str, tuple[str, str]] = {}
+    for city, city_state in (status.get("cities") or {}).items():
+        for episode_id, row in (city_state.get("episode_states") or {}).items():
+            out[f"{city}:{episode_id}"] = (str((row or {}).get("state") or ""), version)
+    return out
+
+
+def validate_episode_progress(before: dict[str, tuple[str, str]], after: dict[str, tuple[str, str]]) -> None:
+    for key, (old_state, old_version) in before.items():
+        if old_state in TERMINAL_STATES:
+            current = after.get(key)
+            if current is None:
+                raise GuardFailure(f"TERMINAL_EPISODE_STATE_LOST:{key}")
+            if current[1] == old_version and current[0] != old_state:
+                raise GuardFailure(f"TERMINAL_EPISODE_RERUN_OR_REGRESSION:{key}:{old_state}->{current[0]}")
+
+
+def collect_observation_ids(root: Path) -> set[str]:
+    seen: set[str] = set()
+    batch_root = root / BATCH_ROOT_REL
+    if not batch_root.exists():
+        return seen
+    for path in sorted(batch_root.glob("*/batch_*.json")):
+        doc = load_json(path)
+        local: set[str] = set()
+        for row in doc.get("observations") or []:
+            oid = str((row or {}).get("observation_id") or "")
+            if not oid:
+                continue
+            if oid in local or oid in seen:
+                raise GuardFailure(f"DUPLICATE_OBSERVATION_ID:{oid}:{path.relative_to(root).as_posix()}")
+            local.add(oid)
+        seen.update(local)
+    return seen
+
+
+def validate_new_batch_observations(batch_path: Path, seen: set[str]) -> set[str]:
+    doc = load_json(batch_path)
+    local: set[str] = set()
+    for row in doc.get("observations") or []:
+        oid = str((row or {}).get("observation_id") or "")
+        if not oid:
+            continue
+        if oid in local or oid in seen:
+            raise GuardFailure(f"DUPLICATE_OBSERVATION_ID:{oid}:{batch_path.name}")
+        local.add(oid)
+    return local
+
+
+def run_worker(root: Path) -> dict:
+    proc = run_cmd([
+        sys.executable,
+        str(root / WORKER_REL),
+        "--campaign-id", CAMPAIGN_ID,
+        "--city-key", "auto",
+        "--batch-size", str(BATCH_SIZE),
+        "--output-dir", str(root / "research/historical_attack_event_backfill"),
+        "--resume",
+    ], root / "kyiv-air-alerts-grafana", check=False)
+    text = proc.stdout.strip()
+    if proc.returncode:
+        raise GuardFailure(f"WORKER_FAILED:{proc.returncode}:{proc.stderr.strip() or text}")
+    start = text.find("{")
+    if start < 0:
+        raise GuardFailure("WORKER_OUTPUT_NOT_JSON")
+    try:
+        payload = json.loads(text[start:])
+    except json.JSONDecodeError as exc:
+        raise GuardFailure(f"WORKER_OUTPUT_NOT_JSON:{exc}") from exc
+    if payload.get("ok") is not True:
+        raise GuardFailure(f"WORKER_NOT_OK:{payload.get('reason')}")
+    return payload
+
+
+def changed_paths(root: Path) -> set[str]:
+    rows = [x for x in git(root, "status", "--porcelain", "--untracked-files=all").splitlines() if x.strip()]
+    out: set[str] = set()
+    for row in rows:
+        path = row[3:].strip()
+        if " -> " in path:
+            path = path.split(" -> ", 1)[1]
+        out.add(path)
+    return out
+
+
+def ensure_expected_dirty_paths(root: Path, batch_rel: Path | None, *, metadata_only: bool = False) -> None:
+    changed = changed_paths(root)
+    allowed = {STATUS_REL.as_posix()}
+    if batch_rel is not None:
+        allowed.add(batch_rel.as_posix())
+    if metadata_only:
+        allowed = {STATUS_REL.as_posix()}
+    unexpected = sorted(changed - allowed)
+    if unexpected:
+        raise GuardFailure("UNEXPECTED_WORKTREE_MUTATION:" + ",".join(unexpected))
+
+
+def rollback_worker(root: Path) -> None:
+    git(root, "reset", "--hard", "HEAD", check=False)
+    git(root, "clean", "-fd", "research/historical_attack_event_backfill", check=False)
+
+
+def remote_head(root: Path) -> str:
+    git(root, "fetch", "origin", CAMPAIGN_BRANCH)
+    return git(root, "rev-parse", f"origin/{CAMPAIGN_BRANCH}")
+
+
+def assert_remote_unchanged(root: Path, expected_head: str) -> None:
+    actual = remote_head(root)
+    if actual != expected_head:
+        raise GuardFailure(f"STALE_WRITER_CONFLICT:{expected_head}!={actual}")
+
+
+def commit_and_push(root: Path, paths: list[Path], message: str, expected_head: str) -> str:
+    assert_remote_unchanged(root, expected_head)
+    git(root, "config", "user.name", "github-actions[bot]")
+    git(root, "config", "user.email", "41898282+github-actions[bot]@users.noreply.github.com")
+    git(root, "add", "--", *[p.as_posix() for p in paths])
+    if not git(root, "diff", "--cached", "--name-only"):
+        return expected_head
+    git(root, "commit", "-m", message)
+    new_head = git(root, "rev-parse", "HEAD")
+    git(root, "push", "origin", f"HEAD:{CAMPAIGN_BRANCH}")
+    visible = remote_head(root)
+    if visible != new_head:
+        raise GuardFailure(f"PUSHED_CHECKPOINT_NOT_VISIBLE:{new_head}!={visible}")
+    return new_head
+
+
+def systemic_source_failure(payload: dict) -> bool:
+    new_work = int(payload.get("new_work") or 0)
+    retryable = int(payload.get("retryable") or 0)
+    return (
+        new_work > 0
+        and retryable >= SYSTEMIC_RETRY_MIN
+        and retryable / new_work >= SYSTEMIC_RETRY_RATIO
+    )
