@@ -112,6 +112,103 @@ def select_episode_window(episodes: list[dict], anchor_episode_id: str, limit: i
     return selected
 
 
+def extract_source_timestamp(soup: BeautifulSoup) -> str | None:
+    candidates = []
+    for selector, attr in (
+        ('meta[property="article:published_time"]', "content"),
+        ('meta[name="article:published_time"]', "content"),
+        ('time[datetime]', "datetime"),
+    ):
+        node = soup.select_one(selector)
+        if node and node.get(attr):
+            candidates.append(str(node.get(attr)))
+    for value in candidates:
+        try:
+            return iso(parse_dt(value))
+        except Exception:
+            continue
+    return None
+
+
+def extract_article_text_from_soup(soup: BeautifulSoup) -> str:
+    for tag in soup.find_all(("script", "style", "nav", "header", "footer", "aside", "form", "svg", "noscript")):
+        tag.decompose()
+    container = soup.find("article") or soup.find("main")
+    if container is not None:
+        text = container.get_text(" ", strip=True)
+    else:
+        text = " ".join(p.get_text(" ", strip=True) for p in soup.find_all("p"))
+    return " ".join(text.split())[:50000]
+
+
+def fetch_suspilne_archive_day(session: requests.Session, local_day: str) -> tuple[list[str], str]:
+    year, month, day = local_day.split("-")
+    url = f"https://suspilne.media/lviv/archive/{year}/{int(month)}/{int(day)}/"
+    response = session.get(url, timeout=30)
+    response.raise_for_status()
+    soup = BeautifulSoup(response.text, "html.parser")
+    urls = set()
+    for link in soup.select('a[href]'):
+        href = str(link.get("href") or "")
+        if href.startswith("/lviv/"):
+            href = "https://suspilne.media" + href
+        if not href.startswith("https://suspilne.media/lviv/"):
+            continue
+        if "/archive/" in href:
+            continue
+        urls.add(href.split("#", 1)[0])
+    return sorted(urls), url
+
+
+def fetch_suspilne_articles_for_days(
+    local_days: list[str],
+    sleep_seconds: float,
+    max_articles_per_day: int = 80,
+) -> tuple[list[dict], dict]:
+    session = requests.Session()
+    session.headers.update(HEADERS)
+    seen_urls = set()
+    articles = []
+    archive_pages = []
+    article_requests = 0
+
+    for local_day in local_days:
+        urls, archive_url = fetch_suspilne_archive_day(session, local_day)
+        archive_pages.append({"local_day": local_day, "archive_url": archive_url, "article_links": len(urls)})
+        for url in urls[:max_articles_per_day]:
+            if url in seen_urls:
+                continue
+            seen_urls.add(url)
+            response = session.get(url, timeout=30)
+            article_requests += 1
+            response.raise_for_status()
+            soup = BeautifulSoup(response.text, "html.parser")
+            title_node = soup.select_one("h1")
+            title = " ".join(title_node.stripped_strings) if title_node else ""
+            text = extract_article_text_from_soup(soup)
+            published_at = extract_source_timestamp(soup)
+            if not title and not text:
+                continue
+            articles.append({
+                "url": str(response.url),
+                "title": title,
+                "text": text,
+                "published_at": published_at,
+                "archive_local_day": local_day,
+            })
+            time.sleep(sleep_seconds)
+
+    articles.sort(key=lambda x: ((x.get("published_at") or ""), x["url"]))
+    return articles, {
+        "source": "suspilne.media/lviv date archive",
+        "archive_days": len(local_days),
+        "archive_requests": len(local_days),
+        "article_requests": article_requests,
+        "unique_article_urls": len(seen_urls),
+        "archive_pages": archive_pages,
+    }
+
+
 def fetch_telegram_search(
     channel: str,
     query: str,
@@ -255,38 +352,42 @@ def build_pilot(
 
     search_start = min(parse_dt(ep["alert_start"]) for ep in selected) - timedelta(hours=3)
     search_end = max(parse_dt(ep["alert_end"]) for ep in selected) + timedelta(hours=72)
-    posts, fetch_meta = fetch_telegram_search(
-        channel,
-        monitor.CITY_CONFIG[city_key]["label"],
-        search_start,
-        search_end,
-        max_pages,
-        sleep_seconds,
-    )
+    local_days = sorted({str(ep["alert_start_date_kyiv"]) for ep in selected})
+    articles, fetch_meta = fetch_suspilne_articles_for_days(local_days, sleep_seconds)
 
     observations = []
-    for post in posts:
-        text = str(post.get("text") or "")
+    for article in articles:
+        text = " ".join(x for x in (str(article.get("title") or ""), str(article.get("text") or "")) if x)
         if not monitor.city_mentioned(city_key, text):
             continue
         if not ATTACK_DISCOVERY_RE.search(text):
             continue
-        row = classifier_row(channel, channel_label, post)
+        row = {
+            "source": "Suspilne Lviv archive",
+            "title": str(article.get("title") or "")[:240],
+            "url": article["url"],
+            "publisher": "Суспільне Львів",
+            "publisher_url": "https://suspilne.media/lviv/",
+            "published_at": article.get("published_at"),
+            "snippet": str(article.get("text") or "")[:1200],
+            "matched_text_excerpt": str(article.get("text") or "")[:50000],
+            "discovery_basis": "historical_source_local_html",
+        }
         matching = monitor.match_candidate_to_episodes(row, selected)
         decision = monitor.classify_candidate(row, city_key, selected, matching)
-        obs_id = canonical_observation_id(channel, int(post["message_id"]))
+        obs_id = hashlib.sha256(("html|" + article["url"]).encode("utf-8")).hexdigest()[:24]
         temporal = decision.get("temporal_binding") or {}
         observations.append(
             {
                 "observation_id": obs_id,
-                "source_type": "public_telegram",
-                "source": f"Telegram / {channel_label}",
-                "source_url": post["url"],
-                "telegram_channel": channel,
-                "telegram_message_id": int(post["message_id"]),
-                "source_timestamp": post["published_at"],
+                "source_type": "source_local_html",
+                "source": "Суспільне Львів",
+                "source_url": article["url"],
+                "telegram_channel": None,
+                "telegram_message_id": None,
+                "source_timestamp": article.get("published_at"),
                 "event_timestamp_if_stated": temporal.get("event_time"),
-                "excerpt": text[:1200],
+                "excerpt": str(article.get("text") or "")[:1200],
                 "matched_terms": matched_terms(text),
                 "event_types_supported": list(decision.get("event_types") or []),
                 "exact_city_binding": decision.get("exact_city_classification_evidence"),
@@ -296,16 +397,16 @@ def build_pilot(
                 "classification_outcome": decision.get("proposed_outcome"),
                 "classification_episode_id": decision.get("proposed_matched_episode_id"),
                 "classification_reason_codes": list(decision.get("reason_codes") or []),
-                "content_hash": content_hash(channel, post["message_id"], post["published_at"], text),
+                "content_hash": content_hash(article["url"], article.get("published_at"), text),
                 "provenance": {
-                    "retrieval_method": "https://t.me/s/<channel>?q=<city> bounded historical search",
-                    "query": monitor.CITY_CONFIG[city_key]["label"],
+                    "retrieval_method": "suspilne.media/lviv/archive/YYYY/M/D/ bounded date-local crawl",
+                    "query": article.get("archive_local_day"),
                     "classifier": "monitor_explosion_candidates.py current branch version",
                 },
             }
         )
 
-    observations.sort(key=lambda x: (x["source_timestamp"], x["telegram_message_id"]))
+    observations.sort(key=lambda x: ((x.get("source_timestamp") or ""), x["source_url"]))
     by_episode: dict[str, list[dict]] = {str(ep["episode_id"]): [] for ep in selected}
     for obs in observations:
         episode_id = str(obs.get("classification_episode_id") or "")
@@ -364,7 +465,7 @@ def build_pilot(
         "scope": {
             "max_alert_episodes": max_episodes,
             "selected_episode_count": len(selected),
-            "network_source": f"public Telegram @{channel}",
+            "network_source": "suspilne.media/lviv source-local date archives",
             "historical_baseline_mutated": False,
             "final_evidence_mutated": False,
             "live_metric_mutated": False,
@@ -385,6 +486,8 @@ def build_pilot(
             "search_window_end": iso(search_end),
             "rate_limit_sleep_seconds": sleep_seconds,
             "timeout_seconds": 30,
+            "fallback_telegram_source_not_used": f"@{channel}",
+            "fallback_reason": "public Telegram search did not provide sufficient historical depth in first pilot attempt",
         },
         "event_taxonomy": list(monitor.ATTACK_EVENT_TYPE_ORDER),
         "episode_results": episode_results,
