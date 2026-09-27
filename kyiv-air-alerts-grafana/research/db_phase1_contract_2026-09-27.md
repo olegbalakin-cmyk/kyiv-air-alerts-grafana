@@ -64,6 +64,15 @@ Future episode revision and alias history is outside Phase 1.
 
 The Phase-1 canonicalization contract is frozen as **alert-canonicalization-v1**.
 
+**alert-canonicalization-v1 defines deterministic identity, reconciliation, and interval-union operators. The set of observations eligible to enter those operators is declared by an explicit assembly profile.** The algorithm itself does not imply that every known alert source participates in every city's canonical assembly.
+
+Canonicalization provenance therefore has two independent identifiers:
+
+- **canonicalization_version** identifies the deterministic operators;
+- **assembly_profile** identifies which source observations are eligible inputs and any profile-specific source-composition rule.
+
+For any ingestion run that performs canonical episode construction, **assembly_profile is required provenance in ingestion_runs.parameters**. Phase 1 does not add a dedicated SQL column for it. assembly_profile is not encoded into legacy_episode_id and does not change the existing legacy ID algorithm.
+
 ### Stage A: source-record identity
 
 Each semantic upstream source record is represented once according to its versioned source_record_key.
@@ -92,13 +101,9 @@ UkraineAlarm timestamp precedence exists only for this Stage-B tolerance-equival
 
 ### Stage C: final episode assembly
 
-Effective canonicalization inputs come from:
+Take the observations designated **canonical_input** by the active **assembly_profile**.
 
-- historical/base alert source;
-- Alerts.in.ua static source;
-- reconciled UkraineAlarm bridge.
-
-Sort effective intervals by start and merge whenever:
+Sort those effective intervals by start and merge whenever:
 
 ~~~text
 next.start <= current.end
@@ -149,6 +154,14 @@ Phase 1 uses canonicalization_role, duplicate_of_observation_id, contributes_sta
 
 Every Phase-1 source family uses a deterministic SHA-256 source-record key with an explicit algorithm version.
 
+Frozen Phase-1 logical source_key values are:
+
+- **ukrainealarm_region_history**
+- **alerts_in_ua**
+- **vadimkin_official_data_uk**
+
+These logical source_key strings are distinct from the source_record_key algorithm-version identifiers below.
+
 Common normalization:
 
 - canonical JSON encoded as UTF-8;
@@ -164,6 +177,8 @@ Common normalization:
 Store both source_record_key_version and source_record_key. source_record_key is the 64-character lowercase SHA-256 hex digest.
 
 ### UkraineAlarm
+
+Logical source_key: **ukrainealarm_region_history**
 
 Version: **ukrainealarm-region-history-v1**
 
@@ -184,6 +199,8 @@ api_region_name is excluded from identity. No source-native alarm ID is currentl
 
 ### Alerts.in.ua
 
+Logical source_key: **alerts_in_ua**
+
 Version: **alerts-in-ua-v1**
 
 The same identity algorithm applies to static bridge observations and manual CSV recovery observations.
@@ -203,6 +220,8 @@ Filename, recovery artifact name, and acquisition path are excluded from identit
 ### Lviv historical source
 
 Logical retained source: **Vadimkin official_data_uk.csv**
+
+Logical source_key: **vadimkin_official_data_uk**
 
 Version: **vadimkin-official-data-uk-v1**
 
@@ -298,6 +317,14 @@ db_branch
 This represents the current production topology correctly: workflow definition/event on main, actual production checkout on site-prod.
 
 GitHub Actions identifiers and Git-specific provenance fields are nullable where required because a bootstrap import can be performed outside GitHub Actions. db_branch is nullable so the schema remains portable PostgreSQL.
+
+For every ingestion run that performs canonical episode construction, parameters must include the active assembly profile, for example:
+
+~~~json
+{
+  "assembly_profile": "lviv-historical-v1"
+}
+~~~
 
 A future output/delivery commit SHA is intentionally outside the Phase-1 ingestion transaction. It may later become materialization/deployment provenance.
 
@@ -398,6 +425,17 @@ No Phase-2 attack-event indexes are added.
 
 Lviv is the real Phase-1 pilot city.
 
+The frozen Lviv assembly profile is:
+
+~~~text
+assembly_profile = lviv-historical-v1
+canonical inputs =
+  vadimkin_official_data_uk
+  ukrainealarm_region_history
+~~~
+
+Under **lviv-historical-v1**, the Stage-C corpus is the merged frozen Vadimkin historical intervals plus persisted Lviv UkraineAlarm bridge intervals, followed by the normal overlap/touch union. Alerts.in.ua static continuity observations are not Lviv Stage-C canonical episode inputs under this profile and must not independently expand Lviv episode boundaries.
+
 Pinned inputs:
 
 ~~~text
@@ -439,7 +477,19 @@ start delta = 0.602 s
 end delta   = 3.684 s
 ~~~
 
+For the Lviv pilot, that retained Alerts.in.ua static/API match is **continuity/bootstrap evidence**, not an independent episode-source observation. Preserve it through ingestion/checkpoint provenance such as **initial_static_match** and related continuity fields. It does not need to become an alert_episode_sources row merely because it was used to prove initial continuity, and it has no Lviv boundary contribution under lviv-historical-v1. Do not fabricate an episode-source observation solely to fit the DB schema.
+
+If a future migration explicitly imports continuity evidence as semantic source observations, that migration must declare its own semantics. It is outside the Phase-1 Lviv pilot.
+
+The authoritative Lviv oracle source metadata remains exactly the two pinned canonical inputs: frozen_csv_ref/frozen_csv_blob and ukrainealarm_bridge_ref/ukrainealarm_bridge_blob.
+
 These oracle values are frozen.
+
+## Assembly profiles for other cities
+
+**lviv-historical-v1 does not apply to the other 22 cities.** Before another city is migrated, its actual current source-composition path must be frozen as an explicit assembly profile.
+
+The current general production path may include a historical adapter, an Alerts.in.ua seam, and a persisted UkraineAlarm continuation, but Phase 1 does not declare that combination a universal canonical profile for all cities. No universal source-precedence rule such as "UkraineAlarm > static Alerts.in.ua" is introduced by the Lviv profile.
 
 ## Recovery duplicate fixture contract
 
@@ -509,10 +559,11 @@ There is no remaining Phase-1 schema blocker before implementing the Lviv bootst
 
 The next implementation must:
 
-1. reproduce the 126/126 Lviv oracle exactly from the pinned inputs;
+1. reproduce the 126/126 Lviv oracle exactly from the pinned inputs under assembly_profile = lviv-historical-v1;
 2. implement the three frozen source_record_key algorithms exactly;
-3. preserve bootstrap-vs-retrieval provenance semantics;
+3. preserve bootstrap-vs-retrieval provenance semantics, including continuity-only Alerts.in.ua checkpoint metadata without inventing a Lviv Stage-C observation;
 4. implement the transaction/checkpoint contract with HTTP fetching outside the DB transaction;
-5. extract one frozen real recovery/API duplicate fixture before Stage-B precedence is considered test-complete.
+5. extract one frozen real recovery/API duplicate fixture before Stage-B precedence is considered test-complete;
+6. freeze each additional city's actual source-composition path as its own assembly profile before migration.
 
 No database becomes production-authoritative until the importer/canonicalizer and its oracle/fixture tests pass.
