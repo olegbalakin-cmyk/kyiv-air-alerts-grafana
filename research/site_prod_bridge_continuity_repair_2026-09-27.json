@@ -1,0 +1,866 @@
+{
+  "schema_version": 1,
+  "repair_date": "2026-09-27",
+  "repository": "olegbalakin-cmyk/kyiv-air-alerts-grafana",
+  "production_branch": "site-prod",
+  "parent_commit": "4a28113cb706a55a0b84cd3e249f29ab2633edbe",
+  "forensic_artifact": "research/site_prod_bridge_continuity_forensic_2026-09-27.json",
+  "forensic_verdict": "THREE-CITY CONTINUITY REPAIR READY",
+  "source_csvs": [
+    {
+      "name": "alerts_2026-09-24(1).csv",
+      "sha256": "4d59b612ca82e5fdb11e6d353206ac930a9a2b6b8f0ddafd0d603ad13f8c3b9b",
+      "file_id": "file_000000007428821094f2d492cd3b61a4"
+    },
+    {
+      "name": "alerts_2026-09-25(1).csv",
+      "sha256": "58f7f8867b875ab126bdd9081bbeb3566033beb9e8563f292850b435065691c9",
+      "file_id": "file_000000001b408210be459c6d3287e49c"
+    },
+    {
+      "name": "alerts_2026-09-26(1).csv",
+      "sha256": "b5ce219541ecf44f8e7be2be2fd8c4792ee13a7c7eb86f7f3862fb07a297df51",
+      "file_id": "file_0000000027a4821090fb7b0ef263c9d5"
+    },
+    {
+      "name": "alerts_2026-09-27(1).csv",
+      "sha256": "992a67d5504df4174fc5246898d95900a9c5592b782311e062fd201e0f8bf1ae",
+      "file_id": "file_00000000b68c8210b1a40adbaeea4d06"
+    }
+  ],
+  "source_filter": {
+    "country": "Україна",
+    "type": "Повітряна тривога",
+    "completed_only": true,
+    "timezone": "Europe/Kyiv",
+    "normalized_to": "UTC",
+    "exact_geographies": {
+      "kharkiv": {
+        "location": "м. Харків",
+        "region": "Харківська область",
+        "region_id": "1293"
+      },
+      "mykolaiv": {
+        "location": "Миколаївський район",
+        "region": "Миколаївська область",
+        "region_id": "98"
+      },
+      "sumy": {
+        "location": "Сумський район",
+        "region": "Сумська область",
+        "region_id": "114"
+      }
+    }
+  },
+  "match_tolerance_seconds": 15,
+  "bridge": {
+    "old_blob_sha": "7acc259b878e6b0e32ada4637883600f0f48b3c4",
+    "new_blob_sha": "47ffe89f3412476ba37ef8f900d6126dce51e0d9",
+    "pre_event_count": 1262,
+    "post_event_count": 1343,
+    "inserted_count": 81,
+    "deduplicated_against_existing_count": 0
+  },
+  "city_counts": {
+    "kharkiv": {
+      "pre": 86,
+      "recovered": 22,
+      "post": 108
+    },
+    "mykolaiv": {
+      "pre": 114,
+      "recovered": 34,
+      "post": 148
+    },
+    "sumy": {
+      "pre": 95,
+      "recovered": 25,
+      "post": 120
+    }
+  },
+  "recovery_episodes": {
+    "kharkiv": [
+      {
+        "start": "2026-09-25T06:08:22Z",
+        "end": "2026-09-25T06:46:37Z",
+        "source_files": [
+          "alerts_2026-09-25(1).csv"
+        ]
+      },
+      {
+        "start": "2026-09-25T07:01:47Z",
+        "end": "2026-09-25T10:12:53Z",
+        "source_files": [
+          "alerts_2026-09-25(1).csv"
+        ]
+      },
+      {
+        "start": "2026-09-25T14:28:52Z",
+        "end": "2026-09-25T15:02:39Z",
+        "source_files": [
+          "alerts_2026-09-25(1).csv"
+        ]
+      },
+      {
+        "start": "2026-09-25T15:04:15Z",
+        "end": "2026-09-25T15:34:53Z",
+        "source_files": [
+          "alerts_2026-09-25(1).csv"
+        ]
+      },
+      {
+        "start": "2026-09-25T17:57:32Z",
+        "end": "2026-09-25T19:10:56Z",
+        "source_files": [
+          "alerts_2026-09-25(1).csv"
+        ]
+      },
+      {
+        "start": "2026-09-25T20:32:24Z",
+        "end": "2026-09-25T20:56:31Z",
+        "source_files": [
+          "alerts_2026-09-25(1).csv"
+        ]
+      },
+      {
+        "start": "2026-09-25T22:32:46Z",
+        "end": "2026-09-25T22:54:22Z",
+        "source_files": [
+          "alerts_2026-09-26(1).csv"
+        ]
+      },
+      {
+        "start": "2026-09-25T23:09:09Z",
+        "end": "2026-09-26T01:51:14Z",
+        "source_files": [
+          "alerts_2026-09-26(1).csv"
+        ]
+      },
+      {
+        "start": "2026-09-26T03:57:19Z",
+        "end": "2026-09-26T06:11:56Z",
+        "source_files": [
+          "alerts_2026-09-26(1).csv"
+        ]
+      },
+      {
+        "start": "2026-09-26T07:01:04Z",
+        "end": "2026-09-26T07:28:56Z",
+        "source_files": [
+          "alerts_2026-09-26(1).csv"
+        ]
+      },
+      {
+        "start": "2026-09-26T07:58:42Z",
+        "end": "2026-09-26T11:52:30Z",
+        "source_files": [
+          "alerts_2026-09-26(1).csv"
+        ]
+      },
+      {
+        "start": "2026-09-26T12:21:34Z",
+        "end": "2026-09-26T15:25:36Z",
+        "source_files": [
+          "alerts_2026-09-26(1).csv"
+        ]
+      },
+      {
+        "start": "2026-09-26T15:37:42Z",
+        "end": "2026-09-26T17:05:52Z",
+        "source_files": [
+          "alerts_2026-09-26(1).csv"
+        ]
+      },
+      {
+        "start": "2026-09-26T17:35:12Z",
+        "end": "2026-09-26T17:57:11Z",
+        "source_files": [
+          "alerts_2026-09-26(1).csv"
+        ]
+      },
+      {
+        "start": "2026-09-26T18:16:06Z",
+        "end": "2026-09-26T19:23:39Z",
+        "source_files": [
+          "alerts_2026-09-26(1).csv"
+        ]
+      },
+      {
+        "start": "2026-09-26T19:31:11Z",
+        "end": "2026-09-26T19:42:36Z",
+        "source_files": [
+          "alerts_2026-09-26(1).csv"
+        ]
+      },
+      {
+        "start": "2026-09-26T21:52:52Z",
+        "end": "2026-09-26T22:14:01Z",
+        "source_files": [
+          "alerts_2026-09-27(1).csv"
+        ]
+      },
+      {
+        "start": "2026-09-26T22:17:11Z",
+        "end": "2026-09-27T01:23:08Z",
+        "source_files": [
+          "alerts_2026-09-27(1).csv"
+        ]
+      },
+      {
+        "start": "2026-09-27T01:44:53Z",
+        "end": "2026-09-27T02:44:22Z",
+        "source_files": [
+          "alerts_2026-09-27(1).csv"
+        ]
+      },
+      {
+        "start": "2026-09-27T03:07:54Z",
+        "end": "2026-09-27T03:32:13Z",
+        "source_files": [
+          "alerts_2026-09-27(1).csv"
+        ]
+      },
+      {
+        "start": "2026-09-27T04:07:16Z",
+        "end": "2026-09-27T04:45:20Z",
+        "source_files": [
+          "alerts_2026-09-27(1).csv"
+        ]
+      },
+      {
+        "start": "2026-09-27T05:58:25Z",
+        "end": "2026-09-27T08:25:00Z",
+        "source_files": [
+          "alerts_2026-09-27(1).csv"
+        ]
+      }
+    ],
+    "mykolaiv": [
+      {
+        "start": "2026-09-25T04:18:16Z",
+        "end": "2026-09-25T04:51:16Z",
+        "source_files": [
+          "alerts_2026-09-25(1).csv"
+        ]
+      },
+      {
+        "start": "2026-09-25T05:23:15Z",
+        "end": "2026-09-25T06:33:29Z",
+        "source_files": [
+          "alerts_2026-09-25(1).csv"
+        ]
+      },
+      {
+        "start": "2026-09-25T07:02:11Z",
+        "end": "2026-09-25T07:18:12Z",
+        "source_files": [
+          "alerts_2026-09-25(1).csv"
+        ]
+      },
+      {
+        "start": "2026-09-25T10:48:13Z",
+        "end": "2026-09-25T11:14:35Z",
+        "source_files": [
+          "alerts_2026-09-25(1).csv"
+        ]
+      },
+      {
+        "start": "2026-09-25T12:12:57Z",
+        "end": "2026-09-25T13:11:33Z",
+        "source_files": [
+          "alerts_2026-09-25(1).csv"
+        ]
+      },
+      {
+        "start": "2026-09-25T15:03:55Z",
+        "end": "2026-09-25T15:29:41Z",
+        "source_files": [
+          "alerts_2026-09-25(1).csv"
+        ]
+      },
+      {
+        "start": "2026-09-25T16:43:36Z",
+        "end": "2026-09-25T16:51:13Z",
+        "source_files": [
+          "alerts_2026-09-25(1).csv"
+        ]
+      },
+      {
+        "start": "2026-09-25T17:51:44Z",
+        "end": "2026-09-25T18:27:07Z",
+        "source_files": [
+          "alerts_2026-09-25(1).csv"
+        ]
+      },
+      {
+        "start": "2026-09-25T18:28:11Z",
+        "end": "2026-09-25T18:51:22Z",
+        "source_files": [
+          "alerts_2026-09-25(1).csv"
+        ]
+      },
+      {
+        "start": "2026-09-25T19:35:41Z",
+        "end": "2026-09-25T22:04:38Z",
+        "source_files": [
+          "alerts_2026-09-26(1).csv"
+        ]
+      },
+      {
+        "start": "2026-09-25T22:38:55Z",
+        "end": "2026-09-25T23:52:29Z",
+        "source_files": [
+          "alerts_2026-09-26(1).csv"
+        ]
+      },
+      {
+        "start": "2026-09-26T00:30:26Z",
+        "end": "2026-09-26T01:35:57Z",
+        "source_files": [
+          "alerts_2026-09-26(1).csv"
+        ]
+      },
+      {
+        "start": "2026-09-26T02:04:28Z",
+        "end": "2026-09-26T03:33:22Z",
+        "source_files": [
+          "alerts_2026-09-26(1).csv"
+        ]
+      },
+      {
+        "start": "2026-09-26T03:52:46Z",
+        "end": "2026-09-26T04:28:54Z",
+        "source_files": [
+          "alerts_2026-09-26(1).csv"
+        ]
+      },
+      {
+        "start": "2026-09-26T04:32:10Z",
+        "end": "2026-09-26T05:23:26Z",
+        "source_files": [
+          "alerts_2026-09-26(1).csv"
+        ]
+      },
+      {
+        "start": "2026-09-26T05:38:58Z",
+        "end": "2026-09-26T07:04:52Z",
+        "source_files": [
+          "alerts_2026-09-26(1).csv"
+        ]
+      },
+      {
+        "start": "2026-09-26T07:53:42Z",
+        "end": "2026-09-26T08:23:28Z",
+        "source_files": [
+          "alerts_2026-09-26(1).csv"
+        ]
+      },
+      {
+        "start": "2026-09-26T10:54:47Z",
+        "end": "2026-09-26T11:27:40Z",
+        "source_files": [
+          "alerts_2026-09-26(1).csv"
+        ]
+      },
+      {
+        "start": "2026-09-26T11:54:03Z",
+        "end": "2026-09-26T12:18:42Z",
+        "source_files": [
+          "alerts_2026-09-26(1).csv"
+        ]
+      },
+      {
+        "start": "2026-09-26T12:22:03Z",
+        "end": "2026-09-26T12:29:35Z",
+        "source_files": [
+          "alerts_2026-09-26(1).csv"
+        ]
+      },
+      {
+        "start": "2026-09-26T14:50:10Z",
+        "end": "2026-09-26T16:12:43Z",
+        "source_files": [
+          "alerts_2026-09-26(1).csv"
+        ]
+      },
+      {
+        "start": "2026-09-26T16:41:02Z",
+        "end": "2026-09-26T16:59:59Z",
+        "source_files": [
+          "alerts_2026-09-26(1).csv"
+        ]
+      },
+      {
+        "start": "2026-09-26T17:22:41Z",
+        "end": "2026-09-26T18:07:13Z",
+        "source_files": [
+          "alerts_2026-09-26(1).csv"
+        ]
+      },
+      {
+        "start": "2026-09-26T18:26:37Z",
+        "end": "2026-09-26T18:50:30Z",
+        "source_files": [
+          "alerts_2026-09-26(1).csv"
+        ]
+      },
+      {
+        "start": "2026-09-26T19:08:38Z",
+        "end": "2026-09-26T19:36:38Z",
+        "source_files": [
+          "alerts_2026-09-26(1).csv"
+        ]
+      },
+      {
+        "start": "2026-09-26T19:39:15Z",
+        "end": "2026-09-26T19:54:11Z",
+        "source_files": [
+          "alerts_2026-09-26(1).csv"
+        ]
+      },
+      {
+        "start": "2026-09-26T21:00:56Z",
+        "end": "2026-09-26T21:25:00Z",
+        "source_files": [
+          "alerts_2026-09-27(1).csv"
+        ]
+      },
+      {
+        "start": "2026-09-26T21:34:33Z",
+        "end": "2026-09-26T22:03:04Z",
+        "source_files": [
+          "alerts_2026-09-27(1).csv"
+        ]
+      },
+      {
+        "start": "2026-09-26T22:15:40Z",
+        "end": "2026-09-26T22:36:08Z",
+        "source_files": [
+          "alerts_2026-09-27(1).csv"
+        ]
+      },
+      {
+        "start": "2026-09-27T01:14:04Z",
+        "end": "2026-09-27T02:20:56Z",
+        "source_files": [
+          "alerts_2026-09-27(1).csv"
+        ]
+      },
+      {
+        "start": "2026-09-27T04:24:26Z",
+        "end": "2026-09-27T04:42:12Z",
+        "source_files": [
+          "alerts_2026-09-27(1).csv"
+        ]
+      },
+      {
+        "start": "2026-09-27T04:57:44Z",
+        "end": "2026-09-27T05:44:36Z",
+        "source_files": [
+          "alerts_2026-09-27(1).csv"
+        ]
+      },
+      {
+        "start": "2026-09-27T07:08:12Z",
+        "end": "2026-09-27T07:48:35Z",
+        "source_files": [
+          "alerts_2026-09-27(1).csv"
+        ]
+      },
+      {
+        "start": "2026-09-27T07:59:58Z",
+        "end": "2026-09-27T08:45:44Z",
+        "source_files": [
+          "alerts_2026-09-27(1).csv"
+        ]
+      }
+    ],
+    "sumy": [
+      {
+        "start": "2026-09-25T05:29:12Z",
+        "end": "2026-09-25T06:38:50Z",
+        "source_files": [
+          "alerts_2026-09-25(1).csv"
+        ]
+      },
+      {
+        "start": "2026-09-25T06:45:11Z",
+        "end": "2026-09-25T10:11:03Z",
+        "source_files": [
+          "alerts_2026-09-25(1).csv"
+        ]
+      },
+      {
+        "start": "2026-09-25T10:28:35Z",
+        "end": "2026-09-25T11:11:55Z",
+        "source_files": [
+          "alerts_2026-09-25(1).csv"
+        ]
+      },
+      {
+        "start": "2026-09-25T11:29:04Z",
+        "end": "2026-09-25T13:41:31Z",
+        "source_files": [
+          "alerts_2026-09-25(1).csv"
+        ]
+      },
+      {
+        "start": "2026-09-25T13:59:34Z",
+        "end": "2026-09-25T14:12:40Z",
+        "source_files": [
+          "alerts_2026-09-25(1).csv"
+        ]
+      },
+      {
+        "start": "2026-09-25T14:28:20Z",
+        "end": "2026-09-25T16:13:17Z",
+        "source_files": [
+          "alerts_2026-09-25(1).csv"
+        ]
+      },
+      {
+        "start": "2026-09-25T17:02:52Z",
+        "end": "2026-09-25T20:08:44Z",
+        "source_files": [
+          "alerts_2026-09-25(1).csv"
+        ]
+      },
+      {
+        "start": "2026-09-25T21:18:49Z",
+        "end": "2026-09-25T22:50:38Z",
+        "source_files": [
+          "alerts_2026-09-26(1).csv"
+        ]
+      },
+      {
+        "start": "2026-09-25T23:05:40Z",
+        "end": "2026-09-26T01:50:49Z",
+        "source_files": [
+          "alerts_2026-09-26(1).csv"
+        ]
+      },
+      {
+        "start": "2026-09-26T02:13:38Z",
+        "end": "2026-09-26T03:35:02Z",
+        "source_files": [
+          "alerts_2026-09-26(1).csv"
+        ]
+      },
+      {
+        "start": "2026-09-26T04:32:31Z",
+        "end": "2026-09-26T05:48:37Z",
+        "source_files": [
+          "alerts_2026-09-26(1).csv"
+        ]
+      },
+      {
+        "start": "2026-09-26T06:23:35Z",
+        "end": "2026-09-26T07:35:29Z",
+        "source_files": [
+          "alerts_2026-09-26(1).csv"
+        ]
+      },
+      {
+        "start": "2026-09-26T08:24:23Z",
+        "end": "2026-09-26T09:26:58Z",
+        "source_files": [
+          "alerts_2026-09-26(1).csv"
+        ]
+      },
+      {
+        "start": "2026-09-26T09:28:03Z",
+        "end": "2026-09-26T11:09:26Z",
+        "source_files": [
+          "alerts_2026-09-26(1).csv"
+        ]
+      },
+      {
+        "start": "2026-09-26T12:28:11Z",
+        "end": "2026-09-26T12:59:44Z",
+        "source_files": [
+          "alerts_2026-09-26(1).csv"
+        ]
+      },
+      {
+        "start": "2026-09-26T13:00:36Z",
+        "end": "2026-09-26T14:44:37Z",
+        "source_files": [
+          "alerts_2026-09-26(1).csv"
+        ]
+      },
+      {
+        "start": "2026-09-26T14:49:50Z",
+        "end": "2026-09-26T15:24:34Z",
+        "source_files": [
+          "alerts_2026-09-26(1).csv"
+        ]
+      },
+      {
+        "start": "2026-09-26T15:31:29Z",
+        "end": "2026-09-26T16:03:32Z",
+        "source_files": [
+          "alerts_2026-09-26(1).csv"
+        ]
+      },
+      {
+        "start": "2026-09-26T17:19:38Z",
+        "end": "2026-09-26T17:55:58Z",
+        "source_files": [
+          "alerts_2026-09-26(1).csv"
+        ]
+      },
+      {
+        "start": "2026-09-26T18:15:17Z",
+        "end": "2026-09-26T18:32:09Z",
+        "source_files": [
+          "alerts_2026-09-26(1).csv"
+        ]
+      },
+      {
+        "start": "2026-09-26T18:32:52Z",
+        "end": "2026-09-26T19:20:00Z",
+        "source_files": [
+          "alerts_2026-09-26(1).csv"
+        ]
+      },
+      {
+        "start": "2026-09-26T20:40:07Z",
+        "end": "2026-09-27T01:22:39Z",
+        "source_files": [
+          "alerts_2026-09-27(1).csv"
+        ]
+      },
+      {
+        "start": "2026-09-27T01:36:51Z",
+        "end": "2026-09-27T03:32:00Z",
+        "source_files": [
+          "alerts_2026-09-27(1).csv"
+        ]
+      },
+      {
+        "start": "2026-09-27T03:50:59Z",
+        "end": "2026-09-27T04:45:00Z",
+        "source_files": [
+          "alerts_2026-09-27(1).csv"
+        ]
+      },
+      {
+        "start": "2026-09-27T04:48:16Z",
+        "end": "2026-09-27T07:26:02Z",
+        "source_files": [
+          "alerts_2026-09-27(1).csv"
+        ]
+      }
+    ]
+  },
+  "continuity_proof": {
+    "kharkiv": {
+      "previous_verified_boundary": "2026-09-25T04:30:47.199413Z",
+      "previous_retained_event": {
+        "start": "2026-09-25T01:26:34.534051Z",
+        "end": "2026-09-25T01:58:37.396786Z"
+      },
+      "recovery_interval": {
+        "from_previous_retained_event_end_exclusive": "2026-09-25T01:58:37.396786Z",
+        "through_failed_poll_latest_completed_event": "2026-09-27T08:25:00.865326Z"
+      },
+      "first_recovered_episode": {
+        "start": "2026-09-25T06:08:22Z",
+        "end": "2026-09-25T06:46:37Z",
+        "source_files": [
+          "alerts_2026-09-25(1).csv"
+        ]
+      },
+      "last_recovered_episode": {
+        "start": "2026-09-27T05:58:25Z",
+        "end": "2026-09-27T08:25:00Z",
+        "source_files": [
+          "alerts_2026-09-27(1).csv"
+        ]
+      },
+      "pre_gap_overlap": {
+        "crossing_previous_poll_episode": null,
+        "exact_source_sequence_covers_boundary": true,
+        "explanation": "Exact-geography Alerts.in.ua sequence covers the interval after the previous retained event and across the previous verified poll boundary; no completed AIR episode is omitted before the first recovered episode."
+      },
+      "post_gap_official_overlap": {
+        "failed_run_history_completed_air_count": 19,
+        "recovered_tail_count": 19,
+        "recovered_tail_first": {
+          "start": "2026-09-25T15:04:15Z",
+          "end": "2026-09-25T15:34:53Z",
+          "source_files": [
+            "alerts_2026-09-25(1).csv"
+          ]
+        },
+        "recovered_tail_last": {
+          "start": "2026-09-27T05:58:25Z",
+          "end": "2026-09-27T08:25:00Z",
+          "source_files": [
+            "alerts_2026-09-27(1).csv"
+          ]
+        },
+        "failed_history_oldest": "2026-09-25T15:04:15.268574Z",
+        "failed_history_latest": "2026-09-27T08:25:00.865326Z",
+        "verification": "Exact retained UkraineAlarm snapshot boundary plus 19-row Alerts.in.ua tail match at 15-second tolerance."
+      },
+      "checkpoint_after": "2026-09-27T08:35:12.5754032Z",
+      "resulting_continuity": true,
+      "continuity_reason": "deterministic_continuity_restored_via_alertsinua_recovery"
+    },
+    "mykolaiv": {
+      "previous_verified_boundary": "2026-09-25T04:48:25.524483Z",
+      "previous_retained_event": {
+        "start": "2026-09-25T03:18:51.877988Z",
+        "end": "2026-09-25T03:37:29.874910Z"
+      },
+      "recovery_interval": {
+        "from_previous_retained_event_end_exclusive": "2026-09-25T03:37:29.874910Z",
+        "through_failed_poll_latest_completed_event": "2026-09-27T08:45:44Z"
+      },
+      "first_recovered_episode": {
+        "start": "2026-09-25T04:18:16Z",
+        "end": "2026-09-25T04:51:16Z",
+        "source_files": [
+          "alerts_2026-09-25(1).csv"
+        ]
+      },
+      "last_recovered_episode": {
+        "start": "2026-09-27T07:59:58Z",
+        "end": "2026-09-27T08:45:44Z",
+        "source_files": [
+          "alerts_2026-09-27(1).csv"
+        ]
+      },
+      "pre_gap_overlap": {
+        "crossing_previous_poll_episode": {
+          "start": "2026-09-25T04:18:16Z",
+          "end": "2026-09-25T04:51:16Z",
+          "source_files": [
+            "alerts_2026-09-25(1).csv"
+          ]
+        },
+        "exact_source_sequence_covers_boundary": true,
+        "explanation": "Alerts.in.ua recovery contains a completed episode crossing the previous verified poll boundary."
+      },
+      "post_gap_official_overlap": {
+        "failed_run_history_completed_air_count": 20,
+        "recovered_tail_count": 20,
+        "recovered_tail_first": {
+          "start": "2026-09-26T04:32:10Z",
+          "end": "2026-09-26T05:23:26Z",
+          "source_files": [
+            "alerts_2026-09-26(1).csv"
+          ]
+        },
+        "recovered_tail_last": {
+          "start": "2026-09-27T07:59:58Z",
+          "end": "2026-09-27T08:45:44Z",
+          "source_files": [
+            "alerts_2026-09-27(1).csv"
+          ]
+        },
+        "failed_history_oldest": "2026-09-26T04:32:10Z",
+        "failed_history_latest": "2026-09-27T08:45:44Z",
+        "verification": "Failed-run UkraineAlarm completed-AIR count is reproduced by the last exact-geography Alerts.in.ua sequence at one-second source resolution; method independently reproduces Kharkiv exact boundary."
+      },
+      "checkpoint_after": "2026-09-27T08:52:47.9926832Z",
+      "resulting_continuity": true,
+      "continuity_reason": "deterministic_continuity_restored_via_alertsinua_recovery"
+    },
+    "sumy": {
+      "previous_verified_boundary": "2026-09-25T04:40:11.528461Z",
+      "previous_retained_event": {
+        "start": "2026-09-25T03:50:11.562769Z",
+        "end": "2026-09-25T04:03:17.405687Z"
+      },
+      "recovery_interval": {
+        "from_previous_retained_event_end_exclusive": "2026-09-25T04:03:17.405687Z",
+        "through_failed_poll_latest_completed_event": "2026-09-27T07:26:02Z"
+      },
+      "first_recovered_episode": {
+        "start": "2026-09-25T05:29:12Z",
+        "end": "2026-09-25T06:38:50Z",
+        "source_files": [
+          "alerts_2026-09-25(1).csv"
+        ]
+      },
+      "last_recovered_episode": {
+        "start": "2026-09-27T04:48:16Z",
+        "end": "2026-09-27T07:26:02Z",
+        "source_files": [
+          "alerts_2026-09-27(1).csv"
+        ]
+      },
+      "pre_gap_overlap": {
+        "crossing_previous_poll_episode": null,
+        "exact_source_sequence_covers_boundary": true,
+        "explanation": "Exact-geography Alerts.in.ua sequence covers the interval after the previous retained event and across the previous verified poll boundary; no completed AIR episode is omitted before the first recovered episode."
+      },
+      "post_gap_official_overlap": {
+        "failed_run_history_completed_air_count": 19,
+        "recovered_tail_count": 19,
+        "recovered_tail_first": {
+          "start": "2026-09-25T17:02:52Z",
+          "end": "2026-09-25T20:08:44Z",
+          "source_files": [
+            "alerts_2026-09-25(1).csv"
+          ]
+        },
+        "recovered_tail_last": {
+          "start": "2026-09-27T04:48:16Z",
+          "end": "2026-09-27T07:26:02Z",
+          "source_files": [
+            "alerts_2026-09-27(1).csv"
+          ]
+        },
+        "failed_history_oldest": "2026-09-25T17:02:52Z",
+        "failed_history_latest": "2026-09-27T07:26:02Z",
+        "verification": "Failed-run UkraineAlarm completed-AIR count is reproduced by the last exact-geography Alerts.in.ua sequence at one-second source resolution; method independently reproduces Kharkiv exact boundary."
+      },
+      "checkpoint_after": "2026-09-27T08:44:35.2445320Z",
+      "resulting_continuity": true,
+      "continuity_reason": "deterministic_continuity_restored_via_alertsinua_recovery"
+    }
+  },
+  "validation": {
+    "expected_recovery_counts": {
+      "kharkiv": 22,
+      "mykolaiv": 34,
+      "sumy": 25
+    },
+    "expected_total": 81,
+    "actual_total": 81,
+    "internal_tolerance_duplicate_pairs": 0,
+    "existing_events_preserved": true,
+    "unrelated_city_event_count_changes": [],
+    "chronology_regression": false,
+    "json_schema_version": 3,
+    "initial_static_match_preserved": {
+      "kharkiv": true,
+      "mykolaiv": true,
+      "sumy": true
+    }
+  },
+  "protected_file_checks": {
+    "kyiv-air-alerts-grafana/scripts/update_data.py": {
+      "blob_sha": "7d7fde6d8c736cd754804dd051845cf59738d8c9",
+      "changed": false
+    },
+    "kyiv-air-alerts-grafana/tests/test_update_fallback.py": {
+      "blob_sha": "284e306d2403ec75db7ce2049c12e2a08463f117",
+      "changed": false
+    },
+    "kyiv-air-alerts-grafana/scripts/apply_ukrainealarm_bridge.py": {
+      "blob_sha": "9893f02f65f6392b2bdf67ea65da21ab2f239a71",
+      "changed": false
+    },
+    "fully_continuous_assertion_semantics_changed": false,
+    "exact_city_proxy_geographies_changed": false
+  },
+  "mutation_scope": [
+    "kyiv-air-alerts-grafana/data/ukrainealarm_bridge.json",
+    "research/site_prod_bridge_continuity_repair_2026-09-27.json"
+  ],
+  "verdict": "THREE-CITY CONTINUITY REPAIR COMMIT READY"
+}
