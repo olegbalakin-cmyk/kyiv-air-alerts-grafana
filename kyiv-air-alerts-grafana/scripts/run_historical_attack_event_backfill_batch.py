@@ -154,6 +154,50 @@ def load_city_episodes(city_key: str) -> list[dict]:
     )
 
 
+def freeze_campaign_snapshot(status: dict, versions: dict) -> None:
+    scanned = sum(int((row or {}).get("scanned_episodes") or 0) for row in (status.get("cities") or {}).values())
+    if scanned:
+        return
+    registry = source_registry()
+    ready = {row["city_key"]: row for row in replay_ready_cities()}
+    frozen_cities = [
+        key for key in (registry.get("priority") or sorted(ready))
+        if key in ready and ((registry.get("cities") or {}).get(key) or {}).get("discovery_status") == "DISCOVERY_READY"
+    ]
+    frozen_total = 0
+    for city_key in frozen_cities:
+        episodes, source_files = replay.load_historical_episodes(ROOT, city_key, monitor)
+        episodes = sorted(
+            [dict(ep) for ep in episodes],
+            key=lambda ep: (str(ep.get("alert_start") or ""), str(ep.get("episode_id") or "")),
+        )
+        expected = int(ready[city_key]["total_episodes"])
+        if len(episodes) != expected:
+            raise RuntimeError(f"FROZEN_EPISODE_COUNT_MISMATCH:{city_key}:{len(episodes)}!={expected}")
+        ids = [str(ep.get("episode_id") or "") for ep in episodes]
+        if any(not eid for eid in ids) or len(ids) != len(set(ids)):
+            raise RuntimeError(f"FROZEN_EPISODE_ID_INVALID:{city_key}")
+        row = (status.get("cities") or {}).get(city_key)
+        if row is None:
+            raise RuntimeError(f"FROZEN_CITY_MISSING_FROM_STATUS:{city_key}")
+        row["frozen_episode_ids"] = ids
+        row["frozen_episode_count"] = len(ids)
+        row["frozen_episode_source_blobs"] = [
+            {"path": rel, "sha": blob_for(ROOT / rel)}
+            for rel in source_files
+        ]
+        frozen_total += len(ids)
+    if frozen_total != 6863:
+        raise RuntimeError(f"FROZEN_CAMPAIGN_TOTAL_MISMATCH:{frozen_total}!=6863")
+    status["frozen_cities"] = frozen_cities
+    status["frozen_total_episodes"] = frozen_total
+    status["frozen_starting_head"] = git("rev-parse", "HEAD")
+    status["frozen_at"] = now_iso()
+    status["campaign_version"] = versions
+    status["source_registry_sha"] = versions["source_registry_sha"]
+    refresh_campaign_counts(status)
+
+
 def frozen_city_episodes(city_key: str, city_state: dict) -> list[dict]:
     live = load_city_episodes(city_key)
     frozen_ids = [str(x) for x in (city_state.get("frozen_episode_ids") or []) if str(x)]
@@ -644,6 +688,8 @@ def run_one_batch(args) -> dict:
             row["classifier_sha"] = versions["classifier_sha"]
             row["adapter_sha"] = versions["source_adapter_sha"]
 
+    freeze_campaign_snapshot(status, versions)
+
     live_ready = [row["city_key"] for row in replay_ready_cities()]
     frozen_ready = [str(x) for x in (status.get("frozen_cities") or [])]
     if frozen_ready:
@@ -735,6 +781,63 @@ def run_one_batch(args) -> dict:
     }
     batch_path = args.output_dir / args.campaign_id / city_key / f"batch_{batch_number:06d}.json"
     dump_json(batch_path, batch)
+
+    launch_artifact_path = RESEARCH / "historical_attack_event_backfill_campaign_launch_2026-09-27.json"
+    if not launch_artifact_path.exists():
+        frozen_universe = {
+            key: {
+                "total_episodes": int(((status.get("cities") or {}).get(key) or {}).get("total_episodes") or 0),
+                "ordered_episode_ids": list(((status.get("cities") or {}).get(key) or {}).get("frozen_episode_ids") or []),
+                "source_blobs": list(((status.get("cities") or {}).get(key) or {}).get("frozen_episode_source_blobs") or []),
+            }
+            for key in (status.get("frozen_cities") or [])
+        }
+        launch_artifact = {
+            "schema_version": 2,
+            "kind": "historical_attack_event_backfill_campaign_launch",
+            "generated_at": now_iso(),
+            "starting_head": status.get("frozen_starting_head"),
+            "campaign_id": args.campaign_id,
+            "campaign_methodology_version": versions["methodology_version"],
+            "checkpoint_schema": 2,
+            "frozen_code_version": versions,
+            "frozen_cities": list(status.get("frozen_cities") or []),
+            "frozen_city_universe": frozen_universe,
+            "per_city_totals": {key: row["total_episodes"] for key, row in frozen_universe.items()},
+            "total_episodes": int(status.get("frozen_total_episodes") or 0),
+            "first_workflow_run_id": os.getenv("GITHUB_RUN_ID"),
+            "first_completed_batch": {
+                "city_key": city_key,
+                "batch_number": batch_number,
+                "processed_count": len(selected),
+                "strict_event_positive_count": sum(x["event_positive_strict"] for x in results),
+                "sensitivity_only_count": sum(
+                    bool(x["event_positive_sensitivity"]) and not bool(x["event_positive_strict"])
+                    for x in results
+                ),
+                "needs_review_count": sum(x["classifier_result"] == "NEEDS_REVIEW" for x in results),
+                "source_retry_count": sum(x["classifier_result"] == "SOURCE_FETCH_RETRY_REQUIRED" for x in results),
+                "batch_path": str(batch_path.relative_to(CHECKOUT_ROOT)).replace(os.sep, "/"),
+            },
+            "checkpoint_proof": {
+                "status_path": str(STATUS_PATH.relative_to(CHECKOUT_ROOT)).replace(os.sep, "/"),
+                "persisted": True,
+            },
+            "scheduled_resume_proof": {
+                "workflow": ".github/workflows/historical-attack-event-backfill-scheduler.yml",
+                "enabled": True,
+                "campaign_id": args.campaign_id,
+            },
+            "stale_run_protection": True,
+            "protected_file_hashes": protected_blobs(),
+            "campaign_status_after_launch": status.get("progress") or {},
+            "ppo_air_defense_action_active": True,
+        }
+        dump_json(launch_artifact_path, launch_artifact)
+        status["launch_artifact_path"] = str(launch_artifact_path.relative_to(CHECKOUT_ROOT)).replace(os.sep, "/")
+        status["first_workflow_run_id"] = os.getenv("GITHUB_RUN_ID")
+        status["launch_artifact_written"] = True
+
     dump_json(STATUS_PATH, status)
     return {
         "ok": True,
