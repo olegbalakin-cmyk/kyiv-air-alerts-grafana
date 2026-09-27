@@ -280,6 +280,101 @@ def history_rows(client: UkraineAlarmClient, region_id: str, name: str) -> list[
     return sorted(unique.values(), key=lambda r: r["start"])
 
 
+
+def _completed_air_times(event: dict) -> tuple[datetime, datetime] | None:
+    if str(event.get("alert_type") or "").upper() != "AIR":
+        return None
+    start = parse_dt(event.get("start"))
+    end = parse_dt(event.get("end"))
+    if not event.get("city_key") or start is None or end is None or end <= start:
+        return None
+    return start, end
+
+
+def _manual_recovery_event(event: dict) -> bool:
+    return bool(
+        event.get("source") == "alerts.in.ua_manual_csv_recovery"
+        or event.get("source_kind") == "manual_csv_export"
+    )
+
+
+def _events_equivalent(a: dict, b: dict) -> bool:
+    if a.get("city_key") != b.get("city_key"):
+        return False
+    a_times = _completed_air_times(a)
+    b_times = _completed_air_times(b)
+    if a_times is None or b_times is None:
+        return False
+    return (
+        abs((a_times[0] - b_times[0]).total_seconds()) <= MATCH_TOLERANCE_SECONDS
+        and abs((a_times[1] - b_times[1]).total_seconds()) <= MATCH_TOLERANCE_SECONDS
+    )
+
+
+def _recovery_provenance(event: dict) -> dict:
+    return {
+        "original_recovery_source": event.get("source"),
+        "source_kind": event.get("source_kind"),
+        "source_files": list(event.get("source_files") or []),
+        "recovery_artifact": event.get("recovery_artifact"),
+        "original_recovery_start": event.get("start"),
+        "original_recovery_end": event.get("end"),
+    }
+
+
+def _merge_equivalent_events(existing: dict, incoming: dict) -> dict:
+    existing_manual = _manual_recovery_event(existing)
+    incoming_manual = _manual_recovery_event(incoming)
+
+    if existing_manual != incoming_manual:
+        manual = existing if existing_manual else incoming
+        api = incoming if existing_manual else existing
+        merged = dict(api)
+        merged["recovery_provenance"] = _recovery_provenance(manual)
+        return merged
+
+    merged = dict(existing)
+    if not existing_manual:
+        merged.update(incoming)
+        if existing.get("recovery_provenance") and not incoming.get("recovery_provenance"):
+            merged["recovery_provenance"] = existing["recovery_provenance"]
+    return merged
+
+
+def _find_equivalent_event_index(events: list[dict], event: dict) -> int | None:
+    exact_key = (event.get("city_key"), event.get("start"), event.get("end"))
+    for index, existing in enumerate(events):
+        if (existing.get("city_key"), existing.get("start"), existing.get("end")) == exact_key:
+            return index
+    for index, existing in enumerate(events):
+        if _events_equivalent(existing, event):
+            return index
+    return None
+
+
+def reconcile_completed_air_events(rows: list[dict]) -> list[dict]:
+    reconciled: list[dict] = []
+    for row in rows:
+        if not isinstance(row, dict):
+            continue
+        event = dict(row)
+        index = _find_equivalent_event_index(reconciled, event)
+        if index is None:
+            reconciled.append(event)
+        else:
+            reconciled[index] = _merge_equivalent_events(reconciled[index], event)
+    return reconciled
+
+
+def upsert_completed_air_event(events: list[dict], event: dict) -> None:
+    index = _find_equivalent_event_index(events, event)
+    if index is None:
+        events.append(dict(event))
+    else:
+        events[index] = _merge_equivalent_events(events[index], event)
+
+
+
 def match_static_event(api_rows: list[dict], static_rows: list[Alert]) -> dict | None:
     for api in api_rows:
         for bridge in static_rows:
@@ -385,11 +480,7 @@ def main() -> None:
     attempt_at = datetime.now(UTC)
     store["last_attempt_at"] = iso(attempt_at)
 
-    events = {
-        (e.get("city_key"), e.get("start"), e.get("end")): e
-        for e in store.get("events", [])
-        if isinstance(e, dict)
-    }
+    events = reconcile_completed_air_events(store.get("events", []))
     request_errors: dict[str, str] = {}
     fetched_keys: list[str] = []
 
@@ -449,7 +540,7 @@ def main() -> None:
                             "end": iso(row["end"]),
                             "alert_type": "AIR",
                         }
-                        events[(key, event["start"], event["end"])] = event
+                        upsert_completed_air_event(events, event)
 
                 store.setdefault("regions", {})[key] = {
                     "city_key": key,
@@ -496,7 +587,7 @@ def main() -> None:
         print(f"{TOKEN_ENV} is not configured and bridge store is empty; API continuation skipped")
 
     store["events"] = sorted(
-        events.values(), key=lambda e: (e.get("start") or "", e.get("city_key") or "")
+        events, key=lambda e: (e.get("start") or "", e.get("city_key") or "")
     )
     store["event_count"] = len(store["events"])
     STORE_FILE.write_text(json.dumps(store, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
