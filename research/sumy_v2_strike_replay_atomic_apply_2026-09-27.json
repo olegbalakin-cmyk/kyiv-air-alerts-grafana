@@ -1,0 +1,98 @@
+{
+  "schema_version": 1,
+  "artifact_type": "sumy_v2_strike_replay_atomic_apply",
+  "date": "2026-09-27",
+  "target_branch": "multicity-wip-2026-09-16",
+  "pre_apply_head": "41ccea99e42f1d07475b9c4357b52c6dab394f4e",
+  "implementation_source_commit": "be9fd7da3f356cb2e3651f2f7a208761716ed20b",
+  "implementation_apply": {
+    "method": "fast-forward target branch to exact proven implementation commit",
+    "semantic_conflict_with_newer_branch_state": false,
+    "files_changed": [
+      "kyiv-air-alerts-grafana/scripts/replay_explosion_history.py",
+      "kyiv-air-alerts-grafana/tests/test_historical_replay_strike_roles.py"
+    ],
+    "rule_scope": "completed factual атакував/атакувала/атакувало/атакували only; same retained statement must also contain exact Sumy city context and military/aerial/UAV context; existing temporal/sensitivity binding remains mandatory; same direct factual statement may supply same_attack_basis",
+    "air_defense_action_changed": false,
+    "retained_evidence_changed": false
+  },
+  "validation": {
+    "github_actions_run_id": 36342775408,
+    "github_actions_rerun_job_id": 108688097133,
+    "focused_strike_role_tests": "8 passed",
+    "historical_replay_helper_self_test": "PASS",
+    "monitor_classifier_self_test": "PASS",
+    "tests_passed": true
+  },
+  "sumy_real_replay": {
+    "mechanism": "actual existing replay_explosion_history.py in normal GitHub Actions worktrees",
+    "through": "2026-09-17",
+    "before": {
+      "input_head": "41ccea99e42f1d07475b9c4357b52c6dab394f4e",
+      "expected_denominator": 2297,
+      "reconstructed_denominator": 2297,
+      "qa_count": 19,
+      "strict": 189,
+      "sensitivity": 219
+    },
+    "after": {
+      "input_head": "be9fd7da3f356cb2e3651f2f7a208761716ed20b",
+      "expected_denominator": 2297,
+      "reconstructed_denominator": 2297,
+      "qa_count": 10,
+      "strict": 197,
+      "sensitivity": 228
+    }
+  },
+  "delta_audit": {
+    "removed_qa_ids": [
+      "232eb0da4edf28c2d1c726ab",
+      "38e791b343c6335f8082849d",
+      "6358accd9bb0bbf258970062",
+      "6f22822eb67990654c28d3e8",
+      "71eded846a321cdc6188fed9",
+      "88f59d26acd8ae4fd31c7511",
+      "dc2fcb0cd195adf9d564394f",
+      "f7ebb81f67fc6bc99cc8e836",
+      "fa15fdc4b36ac1cc5f5efbfe"
+    ],
+    "added_qa_ids": [],
+    "strict_delta": 8,
+    "sensitivity_delta": 9,
+    "unexplained_drift": false,
+    "previously_resolved_ids_remain_absent": [
+      "b103be64497fc7d33f5c7b3d",
+      "d6b1b9ffc10dafbc86e253c7"
+    ],
+    "note": "Eight removals become strict; 6358accd9bb0bbf258970062 becomes sensitivity because its retained near-boundary timing does not satisfy strict temporal binding."
+  },
+  "cross_city_regression": {
+    "clean": true,
+    "sevastopol": {
+      "baseline_strict": 38,
+      "post_strict": 38,
+      "baseline_sensitivity": 55,
+      "post_sensitivity": 55,
+      "baseline_changed_count": 0,
+      "post_changed_count": 0
+    },
+    "lviv": {
+      "baseline_strict": 12,
+      "post_strict": 12,
+      "baseline_sensitivity": 12,
+      "post_sensitivity": 12,
+      "baseline_changed_count": 0,
+      "post_changed_count": 0
+    }
+  },
+  "protected_state": {
+    "proof_reported_protected_files_unchanged": true,
+    "protected_blob_content_equal_before_after": true,
+    "site_prod_head_observed_before_apply": "5618ac64d2c479c3d22c616f6c54dfa924d1f094",
+    "active_6863_campaign_branch": "historical-attack-event-backfill-2026-09-27",
+    "active_6863_campaign_head_observed_before_apply": "5809bd677a93e6c2f6a1bff9cb7f6b5bde0c7c1e",
+    "netlify_project": "ukraine-air-alerts",
+    "netlify_production_deploy_observed_before_apply": "6aac63967b97f0812c8be949"
+  },
+  "verdict": "SUMY V2 STRIKE REPLAY FIX ATOMICALLY APPLIED"
+}
