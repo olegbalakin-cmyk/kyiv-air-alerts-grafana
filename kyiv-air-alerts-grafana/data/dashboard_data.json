@@ -2,34 +2,39 @@
   "meta": {
     "official_json_url": "https://data.kyivcity.gov.ua/dataset/statystyka-povitrianykh-tryvoh-u-misti-kyievi-dep-municipal/resource/5e4fb8a8-f0c8-4a12-885f-192d1f0dba75/data/download",
     "live_history_url": "https://kyiv.digital/storage/air-alert/stats.html",
+    "historical_base_mode": "committed_alerts_combined_fallback",
+    "historical_base_completed_alerts": 2508,
+    "municipal_source_available": false,
+    "municipal_source_warning": "WARNING: Kyiv municipal historical source unavailable (HTTPError: 404 Client Error: Not Found for url: https://data.kyivcity.gov.ua/dataset/statystyka-povitrianykh-tryvoh-u-misti-kyievi-dep-municipal/resource/5e4fb8a8-f0c8-4a12-885f-192d1f0dba75/data/download); retaining 2508 committed alerts from alerts_combined.json and continuing with live sources.",
     "official_completed_alerts": 2477,
-    "live_completed_alerts_parsed": 2507,
-    "live_alerts_added_after_official_cutoff": 31,
-    "combined_completed_alerts": 2508,
+    "live_completed_alerts_parsed": 2526,
+    "live_alerts_added_after_official_cutoff": 19,
+    "live_alerts_added_after_historical_cutoff": 19,
+    "combined_completed_alerts": 2527,
     "official_latest_start": "2026-09-21T03:40:56+03:00",
     "official_latest_end": "2026-09-21T04:30:23+03:00",
-    "live_latest_event_timestamp": "2026-09-25T05:14:00+03:00",
+    "live_latest_event_timestamp": "2026-09-27T09:05:00+03:00",
     "timezone": "Europe/Kyiv",
-    "generated_at": "2026-09-25T07:30:33.118771+03:00",
-    "analysis_end": "2026-09-24",
-    "current_day_excluded": "2026-09-25",
+    "generated_at": "2026-09-27T12:44:57.256695+03:00",
+    "analysis_end": "2026-09-26",
+    "current_day_excluded": "2026-09-27",
     "last_complete_month": "2026-08",
     "last_complete_week_start": "2026-09-14",
     "last_complete_week_end": "2026-09-20",
-    "short_start": "2026-08-28",
-    "short_end": "2026-09-24",
+    "short_start": "2026-08-30",
+    "short_end": "2026-09-26",
     "weekly_mode": "rolling_7d",
     "rolling_7d_definition": "7 completed calendar days, one point per completed day, timestamped by window end"
   },
   "kpis": [
     {
-      "period_start": "2026-08-28",
-      "period_end": "2026-09-24",
-      "alerts_28d": 189,
-      "alert_hours_28d": 197.018,
-      "avg_alert_duration_min_28d": 62.328,
+      "period_start": "2026-08-30",
+      "period_end": "2026-09-26",
+      "alerts_28d": 186,
+      "alert_hours_28d": 196.425,
+      "avg_alert_duration_min_28d": 63.454,
       "max_alerts_day": 12,
-      "max_alerts_day_date": "2026-08-28",
+      "max_alerts_day_date": "2026-08-31",
       "max_alert_hours_day": 19.03,
       "max_alert_hours_day_date": "2026-09-08"
     }
@@ -15443,25 +15448,27 @@
       "avg_daily_alert_hours": 7.539,
       "avg_alert_duration_min": 63.329,
       "alerts_started": 50
+    },
+    {
+      "time": "2026-09-25T00:00:00+03:00",
+      "week_start": "2026-09-19",
+      "week_end": "2026-09-25",
+      "alerts_per_day": 8.0,
+      "avg_daily_alert_hours": 8.582,
+      "avg_alert_duration_min": 64.933,
+      "alerts_started": 56
+    },
+    {
+      "time": "2026-09-26T00:00:00+03:00",
+      "week_start": "2026-09-20",
+      "week_end": "2026-09-26",
+      "alerts_per_day": 8.571,
+      "avg_daily_alert_hours": 9.974,
+      "avg_alert_duration_min": 70.099,
+      "alerts_started": 60
     }
   ],
   "daily28": [
-    {
-      "time": "2026-08-28T00:00:00+03:00",
-      "date": "2026-08-28",
-      "alerts_started": 12,
-      "total_alert_duration_minutes": 640.767,
-      "total_alert_duration_hours": 10.679,
-      "avg_alert_duration_minutes": 49.978
-    },
-    {
-      "time": "2026-08-29T00:00:00+03:00",
-      "date": "2026-08-29",
-      "alerts_started": 10,
-      "total_alert_duration_minutes": 647.783,
-      "total_alert_duration_hours": 10.796,
-      "avg_alert_duration_minutes": 64.778
-    },
     {
       "time": "2026-08-30T00:00:00+03:00",
       "date": "2026-08-30",
@@ -15669,6 +15676,22 @@
       "total_alert_duration_minutes": 665.0,
       "total_alert_duration_hours": 11.083,
       "avg_alert_duration_minutes": 133.0
+    },
+    {
+      "time": "2026-09-25T00:00:00+03:00",
+      "date": "2026-09-25",
+      "alerts_started": 10,
+      "total_alert_duration_minutes": 536.0,
+      "total_alert_duration_hours": 8.933,
+      "avg_alert_duration_minutes": 56.8
+    },
+    {
+      "time": "2026-09-26T00:00:00+03:00",
+      "date": "2026-09-26",
+      "alerts_started": 9,
+      "total_alert_duration_minutes": 717.0,
+      "total_alert_duration_hours": 11.95,
+      "avg_alert_duration_minutes": 78.0
     }
   ],
   "cities": {
@@ -15676,22 +15699,27 @@
       "meta": {
         "official_json_url": "https://data.kyivcity.gov.ua/dataset/statystyka-povitrianykh-tryvoh-u-misti-kyievi-dep-municipal/resource/5e4fb8a8-f0c8-4a12-885f-192d1f0dba75/data/download",
         "live_history_url": "https://kyiv.digital/storage/air-alert/stats.html",
+        "historical_base_mode": "committed_alerts_combined_fallback",
+        "historical_base_completed_alerts": 2508,
+        "municipal_source_available": false,
+        "municipal_source_warning": "WARNING: Kyiv municipal historical source unavailable (HTTPError: 404 Client Error: Not Found for url: https://data.kyivcity.gov.ua/dataset/statystyka-povitrianykh-tryvoh-u-misti-kyievi-dep-municipal/resource/5e4fb8a8-f0c8-4a12-885f-192d1f0dba75/data/download); retaining 2508 committed alerts from alerts_combined.json and continuing with live sources.",
         "official_completed_alerts": 2477,
-        "live_completed_alerts_parsed": 2507,
-        "live_alerts_added_after_official_cutoff": 31,
-        "combined_completed_alerts": 2508,
+        "live_completed_alerts_parsed": 2526,
+        "live_alerts_added_after_official_cutoff": 19,
+        "live_alerts_added_after_historical_cutoff": 19,
+        "combined_completed_alerts": 2527,
         "official_latest_start": "2026-09-21T03:40:56+03:00",
         "official_latest_end": "2026-09-21T04:30:23+03:00",
-        "live_latest_event_timestamp": "2026-09-25T05:14:00+03:00",
+        "live_latest_event_timestamp": "2026-09-27T09:05:00+03:00",
         "timezone": "Europe/Kyiv",
-        "generated_at": "2026-09-25T07:30:33.118771+03:00",
-        "analysis_end": "2026-09-24",
-        "current_day_excluded": "2026-09-25",
+        "generated_at": "2026-09-27T12:44:57.256695+03:00",
+        "analysis_end": "2026-09-26",
+        "current_day_excluded": "2026-09-27",
         "last_complete_month": "2026-08",
-        "last_complete_week_start": "2026-09-18",
-        "last_complete_week_end": "2026-09-24",
-        "short_start": "2026-08-28",
-        "short_end": "2026-09-24",
+        "last_complete_week_start": "2026-09-20",
+        "last_complete_week_end": "2026-09-26",
+        "short_start": "2026-08-30",
+        "short_end": "2026-09-26",
         "city": "kyiv",
         "city_label": "Київ",
         "city_level_only": true,
@@ -15704,21 +15732,21 @@
         "coverage_start": "2022-02-28",
         "weekly_mode": "rolling_7d",
         "rolling_7d_definition": "7 completed calendar days, one point per completed day, timestamped by window end",
-        "rolling_7d_analysis_end": "2026-09-24",
+        "rolling_7d_analysis_end": "2026-09-26",
         "first_rolling_7d_start": "2022-03-01",
         "first_rolling_7d_end": "2022-03-07",
-        "latest_rolling_7d_start": "2026-09-18",
-        "latest_rolling_7d_end": "2026-09-24"
+        "latest_rolling_7d_start": "2026-09-20",
+        "latest_rolling_7d_end": "2026-09-26"
       },
       "kpis": [
         {
-          "period_start": "2026-08-28",
-          "period_end": "2026-09-24",
-          "alerts_28d": 189,
-          "alert_hours_28d": 197.018,
-          "avg_alert_duration_min_28d": 62.328,
+          "period_start": "2026-08-30",
+          "period_end": "2026-09-26",
+          "alerts_28d": 186,
+          "alert_hours_28d": 196.425,
+          "avg_alert_duration_min_28d": 63.454,
           "max_alerts_day": 12,
-          "max_alerts_day_date": "2026-08-28",
+          "max_alerts_day_date": "2026-08-31",
           "max_alert_hours_day": 19.03,
           "max_alert_hours_day_date": "2026-09-08"
         }
@@ -31124,25 +31152,27 @@
           "avg_daily_alert_hours": 7.539,
           "avg_alert_duration_min": 63.329,
           "alerts_started": 50
+        },
+        {
+          "time": "2026-09-25T00:00:00+03:00",
+          "week_start": "2026-09-19",
+          "week_end": "2026-09-25",
+          "alerts_per_day": 8.0,
+          "avg_daily_alert_hours": 8.582,
+          "avg_alert_duration_min": 64.933,
+          "alerts_started": 56
+        },
+        {
+          "time": "2026-09-26T00:00:00+03:00",
+          "week_start": "2026-09-20",
+          "week_end": "2026-09-26",
+          "alerts_per_day": 8.571,
+          "avg_daily_alert_hours": 9.974,
+          "avg_alert_duration_min": 70.099,
+          "alerts_started": 60
         }
       ],
       "daily28": [
-        {
-          "time": "2026-08-28T00:00:00+03:00",
-          "date": "2026-08-28",
-          "alerts_started": 12,
-          "total_alert_duration_minutes": 640.767,
-          "total_alert_duration_hours": 10.679,
-          "avg_alert_duration_minutes": 49.978
-        },
-        {
-          "time": "2026-08-29T00:00:00+03:00",
-          "date": "2026-08-29",
-          "alerts_started": 10,
-          "total_alert_duration_minutes": 647.783,
-          "total_alert_duration_hours": 10.796,
-          "avg_alert_duration_minutes": 64.778
-        },
         {
           "time": "2026-08-30T00:00:00+03:00",
           "date": "2026-08-30",
@@ -31350,6 +31380,22 @@
           "total_alert_duration_minutes": 665.0,
           "total_alert_duration_hours": 11.083,
           "avg_alert_duration_minutes": 133.0
+        },
+        {
+          "time": "2026-09-25T00:00:00+03:00",
+          "date": "2026-09-25",
+          "alerts_started": 10,
+          "total_alert_duration_minutes": 536.0,
+          "total_alert_duration_hours": 8.933,
+          "avg_alert_duration_minutes": 56.8
+        },
+        {
+          "time": "2026-09-26T00:00:00+03:00",
+          "date": "2026-09-26",
+          "alerts_started": 9,
+          "total_alert_duration_minutes": 717.0,
+          "total_alert_duration_hours": 11.95,
+          "avg_alert_duration_minutes": 78.0
         }
       ]
     },
@@ -31360,44 +31406,44 @@
         "city_level_only": true,
         "hromada": "м. Харків та Харківська територіальна громада",
         "city_source_url": "https://raw.githubusercontent.com/Vadimkin/ukrainian-air-raid-sirens-dataset/main/datasets/official_data_uk.csv",
-        "city_completed_alerts": 3632,
+        "city_completed_alerts": 3655,
         "first_city_record": "2025-02-17T21:02:05+02:00",
-        "latest_city_record_start": "2026-09-25T04:26:34.534051+03:00",
-        "latest_city_record_end": "2026-09-25T04:58:37.396786+03:00",
+        "latest_city_record_start": "2026-09-27T11:30:42.679319+03:00",
+        "latest_city_record_end": "2026-09-27T12:04:05.417684+03:00",
         "data_source_kind": "exact-city history + Alerts.in.ua seam + official UkraineAlarm API",
         "timezone": "Europe/Kyiv",
-        "generated_at": "2026-09-25T07:55:28.749860+03:00",
-        "analysis_end": "2026-09-24",
-        "current_day_excluded": "2026-09-25",
+        "generated_at": "2026-09-27T13:14:25.607555+03:00",
+        "analysis_end": "2026-09-26",
+        "current_day_excluded": "2026-09-27",
         "last_complete_month": "2026-08",
-        "last_complete_week_start": "2026-09-18",
-        "last_complete_week_end": "2026-09-24",
-        "short_start": "2026-08-28",
-        "short_end": "2026-09-24",
+        "last_complete_week_start": "2026-09-20",
+        "last_complete_week_end": "2026-09-26",
+        "short_start": "2026-08-30",
+        "short_end": "2026-09-26",
         "first_city_level_date": "2025-02-17",
         "first_complete_month": "2025-03",
         "first_complete_week_start": "2025-02-18",
         "source_type": "exact_city",
         "coverage_start": "2025-02-17",
         "static_bridge_events": 86,
-        "ukrainealarm_bridge_events": 86,
+        "ukrainealarm_bridge_events": 128,
         "ukrainealarm_bridge_continuous": true,
         "ukrainealarm_api_region_id": "1293",
         "weekly_mode": "rolling_7d",
         "rolling_7d_definition": "7 completed calendar days, one point per completed day, timestamped by window end",
-        "rolling_7d_analysis_end": "2026-09-24",
+        "rolling_7d_analysis_end": "2026-09-26",
         "first_rolling_7d_start": "2025-02-18",
         "first_rolling_7d_end": "2025-02-24",
-        "latest_rolling_7d_start": "2026-09-18",
-        "latest_rolling_7d_end": "2026-09-24"
+        "latest_rolling_7d_start": "2026-09-20",
+        "latest_rolling_7d_end": "2026-09-26"
       },
       "kpis": [
         {
-          "period_start": "2026-08-28",
-          "period_end": "2026-09-24",
-          "alerts_28d": 205,
-          "alert_hours_28d": 446.065,
-          "avg_alert_duration_min_28d": 129.274,
+          "period_start": "2026-08-30",
+          "period_end": "2026-09-26",
+          "alerts_28d": 214,
+          "alert_hours_28d": 429.173,
+          "avg_alert_duration_min_28d": 95.377,
           "max_alerts_day": 15,
           "max_alerts_day_date": "2026-09-21",
           "max_alert_hours_day": 24.0,
@@ -36752,25 +36798,27 @@
           "avg_daily_alert_hours": 12.366,
           "avg_alert_duration_min": 81.15,
           "alerts_started": 64
+        },
+        {
+          "time": "2026-09-25T00:00:00+03:00",
+          "week_start": "2026-09-19",
+          "week_end": "2026-09-25",
+          "alerts_per_day": 9.571,
+          "avg_daily_alert_hours": 12.106,
+          "avg_alert_duration_min": 75.888,
+          "alerts_started": 67
+        },
+        {
+          "time": "2026-09-26T00:00:00+03:00",
+          "week_start": "2026-09-20",
+          "week_end": "2026-09-26",
+          "alerts_per_day": 10.0,
+          "avg_daily_alert_hours": 12.296,
+          "avg_alert_duration_min": 73.774,
+          "alerts_started": 70
         }
       ],
       "daily28": [
-        {
-          "time": "2026-08-28T00:00:00+03:00",
-          "date": "2026-08-28",
-          "alerts_started": 8,
-          "total_alert_duration_minutes": 1109.467,
-          "total_alert_duration_hours": 18.491,
-          "avg_alert_duration_minutes": 127.658
-        },
-        {
-          "time": "2026-08-29T00:00:00+03:00",
-          "date": "2026-08-29",
-          "alerts_started": 1,
-          "total_alert_duration_minutes": 1419.783,
-          "total_alert_duration_hours": 23.663,
-          "avg_alert_duration_minutes": 6585.05
-        },
         {
           "time": "2026-08-30T00:00:00+03:00",
           "date": "2026-08-30",
@@ -36978,6 +37026,22 @@
           "total_alert_duration_minutes": 767.469,
           "total_alert_duration_hours": 12.791,
           "avg_alert_duration_minutes": 59.036
+        },
+        {
+          "time": "2026-09-25T00:00:00+03:00",
+          "date": "2026-09-25",
+          "alerts_started": 8,
+          "total_alert_duration_minutes": 562.479,
+          "total_alert_duration_hours": 9.375,
+          "avg_alert_duration_minutes": 70.31
+        },
+        {
+          "time": "2026-09-26T00:00:00+03:00",
+          "date": "2026-09-26",
+          "alerts_started": 10,
+          "total_alert_duration_minutes": 953.237,
+          "total_alert_duration_hours": 15.887,
+          "avg_alert_duration_minutes": 95.324
         }
       ]
     },
@@ -36988,44 +37052,44 @@
         "city_level_only": true,
         "hromada": "м. Запоріжжя та Запорізька територіальна громада",
         "city_source_url": "https://raw.githubusercontent.com/Vadimkin/ukrainian-air-raid-sirens-dataset/main/datasets/official_data_uk.csv",
-        "city_completed_alerts": 2404,
+        "city_completed_alerts": 2413,
         "first_city_record": "2025-03-19T16:25:36+02:00",
-        "latest_city_record_start": "2026-09-25T00:51:32.499341+03:00",
-        "latest_city_record_end": "2026-09-25T07:20:30.201998+03:00",
+        "latest_city_record_start": "2026-09-26T20:06:20.374525+03:00",
+        "latest_city_record_end": "2026-09-26T20:57:06.707655+03:00",
         "data_source_kind": "exact-city history + Alerts.in.ua seam + official UkraineAlarm API",
         "timezone": "Europe/Kyiv",
-        "generated_at": "2026-09-25T07:55:28.749860+03:00",
-        "analysis_end": "2026-09-24",
-        "current_day_excluded": "2026-09-25",
+        "generated_at": "2026-09-27T13:14:25.607555+03:00",
+        "analysis_end": "2026-09-26",
+        "current_day_excluded": "2026-09-27",
         "last_complete_month": "2026-08",
-        "last_complete_week_start": "2026-09-18",
-        "last_complete_week_end": "2026-09-24",
-        "short_start": "2026-08-28",
-        "short_end": "2026-09-24",
+        "last_complete_week_start": "2026-09-20",
+        "last_complete_week_end": "2026-09-26",
+        "short_start": "2026-08-30",
+        "short_end": "2026-09-26",
         "first_city_level_date": "2025-03-19",
         "first_complete_month": "2025-04",
         "first_complete_week_start": "2025-03-20",
         "source_type": "exact_city",
         "coverage_start": "2025-03-19",
         "static_bridge_events": 55,
-        "ukrainealarm_bridge_events": 58,
+        "ukrainealarm_bridge_events": 67,
         "ukrainealarm_bridge_continuous": true,
         "ukrainealarm_api_region_id": "564",
         "weekly_mode": "rolling_7d",
         "rolling_7d_definition": "7 completed calendar days, one point per completed day, timestamped by window end",
-        "rolling_7d_analysis_end": "2026-09-24",
+        "rolling_7d_analysis_end": "2026-09-26",
         "first_rolling_7d_start": "2025-03-20",
         "first_rolling_7d_end": "2025-03-26",
-        "latest_rolling_7d_start": "2026-09-18",
-        "latest_rolling_7d_end": "2026-09-24"
+        "latest_rolling_7d_start": "2026-09-20",
+        "latest_rolling_7d_end": "2026-09-26"
       },
       "kpis": [
         {
-          "period_start": "2026-08-28",
-          "period_end": "2026-09-24",
-          "alerts_28d": 130,
-          "alert_hours_28d": 456.91,
-          "avg_alert_duration_min_28d": 210.881,
+          "period_start": "2026-08-30",
+          "period_end": "2026-09-26",
+          "alerts_28d": 133,
+          "alert_hours_28d": 477.114,
+          "avg_alert_duration_min_28d": 175.113,
           "max_alerts_day": 9,
           "max_alerts_day_date": "2026-09-08",
           "max_alert_hours_day": 24.0,
@@ -42102,25 +42166,27 @@
           "avg_daily_alert_hours": 18.939,
           "avg_alert_duration_min": 219.429,
           "alerts_started": 36
+        },
+        {
+          "time": "2026-09-25T00:00:00+03:00",
+          "week_start": "2026-09-19",
+          "week_end": "2026-09-25",
+          "alerts_per_day": 5.857,
+          "avg_daily_alert_hours": 18.934,
+          "avg_alert_duration_min": 194.13,
+          "alerts_started": 41
+        },
+        {
+          "time": "2026-09-26T00:00:00+03:00",
+          "week_start": "2026-09-20",
+          "week_end": "2026-09-26",
+          "alerts_per_day": 5.571,
+          "avg_daily_alert_hours": 19.084,
+          "avg_alert_duration_min": 185.558,
+          "alerts_started": 39
         }
       ],
       "daily28": [
-        {
-          "time": "2026-08-28T00:00:00+03:00",
-          "date": "2026-08-28",
-          "alerts_started": 7,
-          "total_alert_duration_minutes": 262.317,
-          "total_alert_duration_hours": 4.372,
-          "avg_alert_duration_minutes": 37.474
-        },
-        {
-          "time": "2026-08-29T00:00:00+03:00",
-          "date": "2026-08-29",
-          "alerts_started": 1,
-          "total_alert_duration_minutes": 965.5,
-          "total_alert_duration_hours": 16.092,
-          "avg_alert_duration_minutes": 6302.333
-        },
         {
           "time": "2026-08-30T00:00:00+03:00",
           "date": "2026-08-30",
@@ -42328,6 +42394,22 @@
           "total_alert_duration_minutes": 1120.412,
           "total_alert_duration_hours": 18.674,
           "avg_alert_duration_minutes": 160.059
+        },
+        {
+          "time": "2026-09-25T00:00:00+03:00",
+          "date": "2026-09-25",
+          "alerts_started": 8,
+          "total_alert_duration_minutes": 1323.132,
+          "total_alert_duration_hours": 22.052,
+          "avg_alert_duration_minutes": 166.366
+        },
+        {
+          "time": "2026-09-26T00:00:00+03:00",
+          "date": "2026-09-26",
+          "alerts_started": 3,
+          "total_alert_duration_minutes": 1116.937,
+          "total_alert_duration_hours": 18.616,
+          "avg_alert_duration_minutes": 369.712
         }
       ]
     },
@@ -42341,44 +42423,44 @@
         "coverage_start": "2025-01-10",
         "coverage_start_basis": "official_rollout",
         "city_source_url": "https://raw.githubusercontent.com/Vadimkin/ukrainian-air-raid-sirens-dataset/main/datasets/official_data_uk.csv",
-        "proxy_completed_alert_episodes": 1605,
+        "proxy_completed_alert_episodes": 1621,
         "first_proxy_record": "2025-01-10T02:36:07+02:00",
-        "latest_proxy_record_start": "2026-09-25T05:53:03.411438+03:00",
-        "latest_proxy_record_end": "2026-09-25T06:21:54.468052+03:00",
+        "latest_proxy_record_start": "2026-09-27T11:54:11.601898+03:00",
+        "latest_proxy_record_end": "2026-09-27T12:36:03.172634+03:00",
         "data_source_kind": "raion proxy history + Alerts.in.ua seam + official UkraineAlarm API",
         "timezone": "Europe/Kyiv",
-        "generated_at": "2026-09-25T07:55:28.749860+03:00",
-        "analysis_end": "2026-09-24",
-        "current_day_excluded": "2026-09-25",
+        "generated_at": "2026-09-27T13:14:25.607555+03:00",
+        "analysis_end": "2026-09-26",
+        "current_day_excluded": "2026-09-27",
         "last_complete_month": "2026-08",
-        "last_complete_week_start": "2026-09-18",
-        "last_complete_week_end": "2026-09-24",
-        "short_start": "2026-08-28",
-        "short_end": "2026-09-24",
+        "last_complete_week_start": "2026-09-20",
+        "last_complete_week_end": "2026-09-26",
+        "short_start": "2026-08-30",
+        "short_end": "2026-09-26",
         "first_city_level_date": "2025-01-10",
         "first_complete_month": "2025-02",
         "first_complete_week_start": "2025-01-11",
         "static_bridge_events": 47,
-        "ukrainealarm_bridge_events": 82,
+        "ukrainealarm_bridge_events": 98,
         "ukrainealarm_bridge_continuous": true,
         "ukrainealarm_api_region_id": "152",
         "weekly_mode": "rolling_7d",
         "rolling_7d_definition": "7 completed calendar days, one point per completed day, timestamped by window end",
-        "rolling_7d_analysis_end": "2026-09-24",
+        "rolling_7d_analysis_end": "2026-09-26",
         "first_rolling_7d_start": "2025-01-11",
         "first_rolling_7d_end": "2025-01-17",
-        "latest_rolling_7d_start": "2026-09-18",
-        "latest_rolling_7d_end": "2026-09-24"
+        "latest_rolling_7d_start": "2026-09-20",
+        "latest_rolling_7d_end": "2026-09-26"
       },
       "kpis": [
         {
-          "period_start": "2026-08-28",
-          "period_end": "2026-09-24",
-          "alerts_28d": 139,
-          "alert_hours_28d": 214.618,
-          "avg_alert_duration_min_28d": 92.534,
-          "max_alerts_day": 10,
-          "max_alerts_day_date": "2026-09-20",
+          "period_start": "2026-08-30",
+          "period_end": "2026-09-26",
+          "alerts_28d": 147,
+          "alert_hours_28d": 222.524,
+          "avg_alert_duration_min_28d": 91.26,
+          "max_alerts_day": 11,
+          "max_alerts_day_date": "2026-09-25",
           "max_alert_hours_day": 18.821,
           "max_alert_hours_day_date": "2026-09-24"
         }
@@ -48081,25 +48163,27 @@
           "avg_daily_alert_hours": 11.261,
           "avg_alert_duration_min": 89.236,
           "alerts_started": 53
+        },
+        {
+          "time": "2026-09-25T00:00:00+03:00",
+          "week_start": "2026-09-19",
+          "week_end": "2026-09-25",
+          "alerts_per_day": 8.286,
+          "avg_daily_alert_hours": 11.757,
+          "avg_alert_duration_min": 85.448,
+          "alerts_started": 58
+        },
+        {
+          "time": "2026-09-26T00:00:00+03:00",
+          "week_start": "2026-09-20",
+          "week_end": "2026-09-26",
+          "alerts_per_day": 8.286,
+          "avg_daily_alert_hours": 12.184,
+          "avg_alert_duration_min": 88.863,
+          "alerts_started": 58
         }
       ],
       "daily28": [
-        {
-          "time": "2026-08-28T00:00:00+03:00",
-          "date": "2026-08-28",
-          "alerts_started": 7,
-          "total_alert_duration_minutes": 430.017,
-          "total_alert_duration_hours": 7.167,
-          "avg_alert_duration_minutes": 59.317
-        },
-        {
-          "time": "2026-08-29T00:00:00+03:00",
-          "date": "2026-08-29",
-          "alerts_started": 3,
-          "total_alert_duration_minutes": 289.933,
-          "total_alert_duration_hours": 4.832,
-          "avg_alert_duration_minutes": 96.644
-        },
         {
           "time": "2026-08-30T00:00:00+03:00",
           "date": "2026-08-30",
@@ -48307,6 +48391,22 @@
           "total_alert_duration_minutes": 1129.253,
           "total_alert_duration_hours": 18.821,
           "avg_alert_duration_minutes": 282.313
+        },
+        {
+          "time": "2026-09-25T00:00:00+03:00",
+          "date": "2026-09-25",
+          "alerts_started": 11,
+          "total_alert_duration_minutes": 598.269,
+          "total_alert_duration_hours": 9.971,
+          "avg_alert_duration_minutes": 56.016
+        },
+        {
+          "time": "2026-09-26T00:00:00+03:00",
+          "date": "2026-09-26",
+          "alerts_started": 7,
+          "total_alert_duration_minutes": 596.007,
+          "total_alert_duration_hours": 9.933,
+          "avg_alert_duration_minutes": 91.707
         }
       ]
     },
@@ -48320,44 +48420,44 @@
         "coverage_start": "2025-01-23",
         "coverage_start_basis": "official_test_rollout",
         "city_source_url": "https://raw.githubusercontent.com/Vadimkin/ukrainian-air-raid-sirens-dataset/main/datasets/official_data_uk.csv",
-        "proxy_completed_alert_episodes": 721,
+        "proxy_completed_alert_episodes": 731,
         "first_proxy_record": "2025-01-23T06:48:19+02:00",
-        "latest_proxy_record_start": "2026-09-25T04:27:31.504250+03:00",
-        "latest_proxy_record_end": "2026-09-25T05:14:10.878820+03:00",
+        "latest_proxy_record_start": "2026-09-27T10:15:02.644010+03:00",
+        "latest_proxy_record_end": "2026-09-27T10:58:56.318952+03:00",
         "data_source_kind": "raion proxy history + Alerts.in.ua seam + official UkraineAlarm API",
         "timezone": "Europe/Kyiv",
-        "generated_at": "2026-09-25T07:55:28.749860+03:00",
-        "analysis_end": "2026-09-24",
-        "current_day_excluded": "2026-09-25",
+        "generated_at": "2026-09-27T13:14:25.607555+03:00",
+        "analysis_end": "2026-09-26",
+        "current_day_excluded": "2026-09-27",
         "last_complete_month": "2026-08",
-        "last_complete_week_start": "2026-09-18",
-        "last_complete_week_end": "2026-09-24",
-        "short_start": "2026-08-28",
-        "short_end": "2026-09-24",
+        "last_complete_week_start": "2026-09-20",
+        "last_complete_week_end": "2026-09-26",
+        "short_start": "2026-08-30",
+        "short_end": "2026-09-26",
         "first_city_level_date": "2025-01-23",
         "first_complete_month": "2025-02",
         "first_complete_week_start": "2025-01-24",
         "static_bridge_events": 33,
-        "ukrainealarm_bridge_events": 58,
+        "ukrainealarm_bridge_events": 68,
         "ukrainealarm_bridge_continuous": true,
         "ukrainealarm_api_region_id": "59",
         "weekly_mode": "rolling_7d",
         "rolling_7d_definition": "7 completed calendar days, one point per completed day, timestamped by window end",
-        "rolling_7d_analysis_end": "2026-09-24",
+        "rolling_7d_analysis_end": "2026-09-26",
         "first_rolling_7d_start": "2025-01-24",
         "first_rolling_7d_end": "2025-01-30",
-        "latest_rolling_7d_start": "2026-09-18",
-        "latest_rolling_7d_end": "2026-09-24"
+        "latest_rolling_7d_start": "2026-09-20",
+        "latest_rolling_7d_end": "2026-09-26"
       },
       "kpis": [
         {
-          "period_start": "2026-08-28",
-          "period_end": "2026-09-24",
-          "alerts_28d": 79,
-          "alert_hours_28d": 90.588,
-          "avg_alert_duration_min_28d": 68.801,
-          "max_alerts_day": 6,
-          "max_alerts_day_date": "2026-09-08",
+          "period_start": "2026-08-30",
+          "period_end": "2026-09-26",
+          "alerts_28d": 88,
+          "alert_hours_28d": 96.867,
+          "avg_alert_duration_min_28d": 66.046,
+          "max_alerts_day": 9,
+          "max_alerts_day_date": "2026-09-25",
           "max_alert_hours_day": 18.588,
           "max_alert_hours_day_date": "2026-09-24"
         }
@@ -53943,25 +54043,27 @@
           "avg_daily_alert_hours": 5.18,
           "avg_alert_duration_min": 65.922,
           "alerts_started": 33
+        },
+        {
+          "time": "2026-09-25T00:00:00+03:00",
+          "week_start": "2026-09-19",
+          "week_end": "2026-09-25",
+          "alerts_per_day": 5.286,
+          "avg_daily_alert_hours": 5.822,
+          "avg_alert_duration_min": 66.083,
+          "alerts_started": 37
+        },
+        {
+          "time": "2026-09-26T00:00:00+03:00",
+          "week_start": "2026-09-20",
+          "week_end": "2026-09-26",
+          "alerts_per_day": 4.857,
+          "avg_daily_alert_hours": 5.732,
+          "avg_alert_duration_min": 70.806,
+          "alerts_started": 34
         }
       ],
       "daily28": [
-        {
-          "time": "2026-08-28T00:00:00+03:00",
-          "date": "2026-08-28",
-          "alerts_started": 2,
-          "total_alert_duration_minutes": 86.383,
-          "total_alert_duration_hours": 1.44,
-          "avg_alert_duration_minutes": 43.192
-        },
-        {
-          "time": "2026-08-29T00:00:00+03:00",
-          "date": "2026-08-29",
-          "alerts_started": 0,
-          "total_alert_duration_minutes": 0.0,
-          "total_alert_duration_hours": 0.0,
-          "avg_alert_duration_minutes": null
-        },
         {
           "time": "2026-08-30T00:00:00+03:00",
           "date": "2026-08-30",
@@ -54169,6 +54271,22 @@
           "total_alert_duration_minutes": 1115.261,
           "total_alert_duration_hours": 18.588,
           "avg_alert_duration_minutes": 182.131
+        },
+        {
+          "time": "2026-09-25T00:00:00+03:00",
+          "date": "2026-09-25",
+          "alerts_started": 9,
+          "total_alert_duration_minutes": 360.13,
+          "total_alert_duration_hours": 6.002,
+          "avg_alert_duration_minutes": 40.014
+        },
+        {
+          "time": "2026-09-26T00:00:00+03:00",
+          "date": "2026-09-26",
+          "alerts_started": 2,
+          "total_alert_duration_minutes": 103.025,
+          "total_alert_duration_hours": 1.717,
+          "avg_alert_duration_minutes": 51.513
         }
       ]
     },
@@ -54182,42 +54300,42 @@
         "coverage_start": "2025-05-01",
         "coverage_start_basis": "official_rollout",
         "city_source_url": "https://raw.githubusercontent.com/Vadimkin/ukrainian-air-raid-sirens-dataset/main/datasets/official_data_uk.csv",
-        "proxy_completed_alert_episodes": 2313,
+        "proxy_completed_alert_episodes": 2327,
         "first_proxy_record": "2025-05-01T00:52:33+03:00",
-        "latest_proxy_record_start": "2026-09-25T04:27:28.643684+03:00",
-        "latest_proxy_record_end": "2026-09-25T06:23:37.179082+03:00",
+        "latest_proxy_record_start": "2026-09-27T11:49:42.042886+03:00",
+        "latest_proxy_record_end": "2026-09-27T12:15:32.033514+03:00",
         "data_source_kind": "raion proxy history + Alerts.in.ua seam + official UkraineAlarm API",
         "timezone": "Europe/Kyiv",
-        "generated_at": "2026-09-25T07:55:28.749860+03:00",
-        "analysis_end": "2026-09-24",
-        "current_day_excluded": "2026-09-25",
+        "generated_at": "2026-09-27T13:14:25.607555+03:00",
+        "analysis_end": "2026-09-26",
+        "current_day_excluded": "2026-09-27",
         "last_complete_month": "2026-08",
-        "last_complete_week_start": "2026-09-18",
-        "last_complete_week_end": "2026-09-24",
-        "short_start": "2026-08-28",
-        "short_end": "2026-09-24",
+        "last_complete_week_start": "2026-09-20",
+        "last_complete_week_end": "2026-09-26",
+        "short_start": "2026-08-30",
+        "short_end": "2026-09-26",
         "first_city_level_date": "2025-05-01",
         "first_complete_month": "2025-05",
         "first_complete_week_start": "2025-05-02",
         "static_bridge_events": 72,
-        "ukrainealarm_bridge_events": 79,
+        "ukrainealarm_bridge_events": 94,
         "ukrainealarm_bridge_continuous": true,
         "ukrainealarm_api_region_id": "44",
         "weekly_mode": "rolling_7d",
         "rolling_7d_definition": "7 completed calendar days, one point per completed day, timestamped by window end",
-        "rolling_7d_analysis_end": "2026-09-24",
+        "rolling_7d_analysis_end": "2026-09-26",
         "first_rolling_7d_start": "2025-05-02",
         "first_rolling_7d_end": "2025-05-08",
-        "latest_rolling_7d_start": "2026-09-18",
-        "latest_rolling_7d_end": "2026-09-24"
+        "latest_rolling_7d_start": "2026-09-20",
+        "latest_rolling_7d_end": "2026-09-26"
       },
       "kpis": [
         {
-          "period_start": "2026-08-28",
-          "period_end": "2026-09-24",
-          "alerts_28d": 185,
-          "alert_hours_28d": 169.635,
-          "avg_alert_duration_min_28d": 55.017,
+          "period_start": "2026-08-30",
+          "period_end": "2026-09-26",
+          "alerts_28d": 190,
+          "alert_hours_28d": 170.535,
+          "avg_alert_duration_min_28d": 53.853,
           "max_alerts_day": 13,
           "max_alerts_day_date": "2026-09-06",
           "max_alert_hours_day": 16.049,
@@ -58899,25 +59017,27 @@
           "avg_daily_alert_hours": 5.632,
           "avg_alert_duration_min": 44.634,
           "alerts_started": 53
+        },
+        {
+          "time": "2026-09-25T00:00:00+03:00",
+          "week_start": "2026-09-19",
+          "week_end": "2026-09-25",
+          "alerts_per_day": 7.429,
+          "avg_daily_alert_hours": 4.844,
+          "avg_alert_duration_min": 39.125,
+          "alerts_started": 52
+        },
+        {
+          "time": "2026-09-26T00:00:00+03:00",
+          "week_start": "2026-09-20",
+          "week_end": "2026-09-26",
+          "alerts_per_day": 7.0,
+          "avg_daily_alert_hours": 3.782,
+          "avg_alert_duration_min": 32.42,
+          "alerts_started": 49
         }
       ],
       "daily28": [
-        {
-          "time": "2026-08-28T00:00:00+03:00",
-          "date": "2026-08-28",
-          "alerts_started": 6,
-          "total_alert_duration_minutes": 248.633,
-          "total_alert_duration_hours": 4.144,
-          "avg_alert_duration_minutes": 41.439
-        },
-        {
-          "time": "2026-08-29T00:00:00+03:00",
-          "date": "2026-08-29",
-          "alerts_started": 2,
-          "total_alert_duration_minutes": 109.067,
-          "total_alert_duration_hours": 1.818,
-          "avg_alert_duration_minutes": 54.533
-        },
         {
           "time": "2026-08-30T00:00:00+03:00",
           "date": "2026-08-30",
@@ -59125,6 +59245,22 @@
           "total_alert_duration_minutes": 320.351,
           "total_alert_duration_hours": 5.339,
           "avg_alert_duration_minutes": 64.07
+        },
+        {
+          "time": "2026-09-25T00:00:00+03:00",
+          "date": "2026-09-25",
+          "alerts_started": 6,
+          "total_alert_duration_minutes": 221.976,
+          "total_alert_duration_hours": 3.7,
+          "avg_alert_duration_minutes": 36.996
+        },
+        {
+          "time": "2026-09-26T00:00:00+03:00",
+          "date": "2026-09-26",
+          "alerts_started": 7,
+          "total_alert_duration_minutes": 189.752,
+          "total_alert_duration_hours": 3.163,
+          "avg_alert_duration_minutes": 27.107
         }
       ]
     },
@@ -59138,42 +59274,42 @@
         "coverage_start": "2025-07-07",
         "coverage_start_basis": "official_rollout",
         "city_source_url": "https://raw.githubusercontent.com/Vadimkin/ukrainian-air-raid-sirens-dataset/main/datasets/official_data_uk.csv",
-        "proxy_completed_alert_episodes": 267,
+        "proxy_completed_alert_episodes": 271,
         "first_proxy_record": "2025-07-08T22:51:18+03:00",
-        "latest_proxy_record_start": "2026-09-25T03:46:47.240419+03:00",
-        "latest_proxy_record_end": "2026-09-25T04:14:03.986801+03:00",
+        "latest_proxy_record_start": "2026-09-26T18:09:39.290896+03:00",
+        "latest_proxy_record_end": "2026-09-26T18:25:50.312397+03:00",
         "data_source_kind": "raion proxy history + Alerts.in.ua seam + official UkraineAlarm API",
         "timezone": "Europe/Kyiv",
-        "generated_at": "2026-09-25T07:55:28.749860+03:00",
-        "analysis_end": "2026-09-24",
-        "current_day_excluded": "2026-09-25",
+        "generated_at": "2026-09-27T13:14:25.607555+03:00",
+        "analysis_end": "2026-09-26",
+        "current_day_excluded": "2026-09-27",
         "last_complete_month": "2026-08",
-        "last_complete_week_start": "2026-09-18",
-        "last_complete_week_end": "2026-09-24",
-        "short_start": "2026-08-28",
-        "short_end": "2026-09-24",
+        "last_complete_week_start": "2026-09-20",
+        "last_complete_week_end": "2026-09-26",
+        "short_start": "2026-08-30",
+        "short_end": "2026-09-26",
         "first_city_level_date": "2025-07-07",
         "first_complete_month": "2025-08",
         "first_complete_week_start": "2025-07-08",
         "static_bridge_events": 17,
-        "ukrainealarm_bridge_events": 39,
+        "ukrainealarm_bridge_events": 43,
         "ukrainealarm_bridge_continuous": true,
         "ukrainealarm_api_region_id": "134",
         "weekly_mode": "rolling_7d",
         "rolling_7d_definition": "7 completed calendar days, one point per completed day, timestamped by window end",
-        "rolling_7d_analysis_end": "2026-09-24",
+        "rolling_7d_analysis_end": "2026-09-26",
         "first_rolling_7d_start": "2025-07-08",
         "first_rolling_7d_end": "2025-07-14",
-        "latest_rolling_7d_start": "2026-09-18",
-        "latest_rolling_7d_end": "2026-09-24"
+        "latest_rolling_7d_start": "2026-09-20",
+        "latest_rolling_7d_end": "2026-09-26"
       },
       "kpis": [
         {
-          "period_start": "2026-08-28",
-          "period_end": "2026-09-24",
-          "alerts_28d": 45,
-          "alert_hours_28d": 48.739,
-          "avg_alert_duration_min_28d": 64.985,
+          "period_start": "2026-08-30",
+          "period_end": "2026-09-26",
+          "alerts_28d": 48,
+          "alert_hours_28d": 48.991,
+          "avg_alert_duration_min_28d": 61.239,
           "max_alerts_day": 5,
           "max_alerts_day_date": "2026-09-22",
           "max_alert_hours_day": 14.016,
@@ -63228,25 +63364,27 @@
           "avg_daily_alert_hours": 3.23,
           "avg_alert_duration_min": 75.358,
           "alerts_started": 18
+        },
+        {
+          "time": "2026-09-25T00:00:00+03:00",
+          "week_start": "2026-09-19",
+          "week_end": "2026-09-25",
+          "alerts_per_day": 2.714,
+          "avg_daily_alert_hours": 3.225,
+          "avg_alert_duration_min": 71.287,
+          "alerts_started": 19
+        },
+        {
+          "time": "2026-09-26T00:00:00+03:00",
+          "week_start": "2026-09-20",
+          "week_end": "2026-09-26",
+          "alerts_per_day": 2.857,
+          "avg_daily_alert_hours": 3.225,
+          "avg_alert_duration_min": 67.731,
+          "alerts_started": 20
         }
       ],
       "daily28": [
-        {
-          "time": "2026-08-28T00:00:00+03:00",
-          "date": "2026-08-28",
-          "alerts_started": 2,
-          "total_alert_duration_minutes": 67.133,
-          "total_alert_duration_hours": 1.119,
-          "avg_alert_duration_minutes": 33.567
-        },
-        {
-          "time": "2026-08-29T00:00:00+03:00",
-          "date": "2026-08-29",
-          "alerts_started": 0,
-          "total_alert_duration_minutes": 0.0,
-          "total_alert_duration_hours": 0.0,
-          "avg_alert_duration_minutes": null
-        },
         {
           "time": "2026-08-30T00:00:00+03:00",
           "date": "2026-08-30",
@@ -63454,6 +63592,22 @@
           "total_alert_duration_minutes": 840.951,
           "total_alert_duration_hours": 14.016,
           "avg_alert_duration_minutes": 191.376
+        },
+        {
+          "time": "2026-09-25T00:00:00+03:00",
+          "date": "2026-09-25",
+          "alerts_started": 3,
+          "total_alert_duration_minutes": 58.245,
+          "total_alert_duration_hours": 0.971,
+          "avg_alert_duration_minutes": 19.415
+        },
+        {
+          "time": "2026-09-26T00:00:00+03:00",
+          "date": "2026-09-26",
+          "alerts_started": 2,
+          "total_alert_duration_minutes": 24.012,
+          "total_alert_duration_hours": 0.4,
+          "avg_alert_duration_minutes": 12.006
         }
       ]
     },
@@ -63467,42 +63621,42 @@
         "coverage_start": "2025-08-01",
         "coverage_start_basis": "official_rollout",
         "city_source_url": "https://raw.githubusercontent.com/Vadimkin/ukrainian-air-raid-sirens-dataset/main/datasets/official_data_uk.csv",
-        "proxy_completed_alert_episodes": 1884,
+        "proxy_completed_alert_episodes": 1904,
         "first_proxy_record": "2025-08-01T00:00:00+03:00",
-        "latest_proxy_record_start": "2026-09-25T04:52:56.213417+03:00",
-        "latest_proxy_record_end": "2026-09-25T06:33:16.559579+03:00",
+        "latest_proxy_record_start": "2026-09-27T11:30:17.310034+03:00",
+        "latest_proxy_record_end": "2026-09-27T12:37:29.034528+03:00",
         "data_source_kind": "raion proxy history + Alerts.in.ua seam + official UkraineAlarm API",
         "timezone": "Europe/Kyiv",
-        "generated_at": "2026-09-25T07:55:28.749860+03:00",
-        "analysis_end": "2026-09-24",
-        "current_day_excluded": "2026-09-25",
+        "generated_at": "2026-09-27T13:14:25.607555+03:00",
+        "analysis_end": "2026-09-26",
+        "current_day_excluded": "2026-09-27",
         "last_complete_month": "2026-08",
-        "last_complete_week_start": "2026-09-18",
-        "last_complete_week_end": "2026-09-24",
-        "short_start": "2026-08-28",
-        "short_end": "2026-09-24",
+        "last_complete_week_start": "2026-09-20",
+        "last_complete_week_end": "2026-09-26",
+        "short_start": "2026-08-30",
+        "short_end": "2026-09-26",
         "first_city_level_date": "2025-08-01",
         "first_complete_month": "2025-08",
         "first_complete_week_start": "2025-08-02",
         "static_bridge_events": 65,
-        "ukrainealarm_bridge_events": 103,
+        "ukrainealarm_bridge_events": 123,
         "ukrainealarm_bridge_continuous": true,
         "ukrainealarm_api_region_id": "109",
         "weekly_mode": "rolling_7d",
         "rolling_7d_definition": "7 completed calendar days, one point per completed day, timestamped by window end",
-        "rolling_7d_analysis_end": "2026-09-24",
+        "rolling_7d_analysis_end": "2026-09-26",
         "first_rolling_7d_start": "2025-08-02",
         "first_rolling_7d_end": "2025-08-08",
-        "latest_rolling_7d_start": "2026-09-18",
-        "latest_rolling_7d_end": "2026-09-24"
+        "latest_rolling_7d_start": "2026-09-20",
+        "latest_rolling_7d_end": "2026-09-26"
       },
       "kpis": [
         {
-          "period_start": "2026-08-28",
-          "period_end": "2026-09-24",
-          "alerts_28d": 190,
-          "alert_hours_28d": 271.846,
-          "avg_alert_duration_min_28d": 85.822,
+          "period_start": "2026-08-30",
+          "period_end": "2026-09-26",
+          "alerts_28d": 197,
+          "alert_hours_28d": 283.548,
+          "avg_alert_duration_min_28d": 86.36,
           "max_alerts_day": 14,
           "max_alerts_day_date": "2026-09-23",
           "max_alert_hours_day": 18.126,
@@ -67332,25 +67486,27 @@
           "avg_daily_alert_hours": 12.255,
           "avg_alert_duration_min": 67.724,
           "alerts_started": 76
+        },
+        {
+          "time": "2026-09-25T00:00:00+03:00",
+          "week_start": "2026-09-19",
+          "week_end": "2026-09-25",
+          "alerts_per_day": 11.286,
+          "avg_daily_alert_hours": 13.156,
+          "avg_alert_duration_min": 69.941,
+          "alerts_started": 79
+        },
+        {
+          "time": "2026-09-26T00:00:00+03:00",
+          "week_start": "2026-09-20",
+          "week_end": "2026-09-26",
+          "alerts_per_day": 11.286,
+          "avg_daily_alert_hours": 14.039,
+          "avg_alert_duration_min": 74.558,
+          "alerts_started": 79
         }
       ],
       "daily28": [
-        {
-          "time": "2026-08-28T00:00:00+03:00",
-          "date": "2026-08-28",
-          "alerts_started": 9,
-          "total_alert_duration_minutes": 677.483,
-          "total_alert_duration_hours": 11.291,
-          "avg_alert_duration_minutes": 74.769
-        },
-        {
-          "time": "2026-08-29T00:00:00+03:00",
-          "date": "2026-08-29",
-          "alerts_started": 3,
-          "total_alert_duration_minutes": 382.017,
-          "total_alert_duration_hours": 6.367,
-          "avg_alert_duration_minutes": 127.339
-        },
         {
           "time": "2026-08-30T00:00:00+03:00",
           "date": "2026-08-30",
@@ -67558,6 +67714,22 @@
           "total_alert_duration_minutes": 1087.541,
           "total_alert_duration_hours": 18.126,
           "avg_alert_duration_minutes": 135.943
+        },
+        {
+          "time": "2026-09-25T00:00:00+03:00",
+          "date": "2026-09-25",
+          "alerts_started": 10,
+          "total_alert_duration_minutes": 925.357,
+          "total_alert_duration_hours": 15.423,
+          "avg_alert_duration_minutes": 92.536
+        },
+        {
+          "time": "2026-09-26T00:00:00+03:00",
+          "date": "2026-09-26",
+          "alerts_started": 9,
+          "total_alert_duration_minutes": 836.251,
+          "total_alert_duration_hours": 13.938,
+          "avg_alert_duration_minutes": 92.917
         }
       ]
     },
@@ -67571,42 +67743,42 @@
         "coverage_start": "2025-08-01",
         "coverage_start_basis": "official_rollout",
         "city_source_url": "https://raw.githubusercontent.com/Vadimkin/ukrainian-air-raid-sirens-dataset/main/datasets/official_data_uk.csv",
-        "proxy_completed_alert_episodes": 250,
+        "proxy_completed_alert_episodes": 251,
         "first_proxy_record": "2025-08-02T18:19:58+03:00",
-        "latest_proxy_record_start": "2026-09-24T23:28:50.039901+03:00",
-        "latest_proxy_record_end": "2026-09-24T23:59:05.138007+03:00",
+        "latest_proxy_record_start": "2026-09-25T16:16:58.382570+03:00",
+        "latest_proxy_record_end": "2026-09-25T16:47:33.968995+03:00",
         "data_source_kind": "raion proxy history + Alerts.in.ua seam + official UkraineAlarm API",
         "timezone": "Europe/Kyiv",
-        "generated_at": "2026-09-25T07:55:28.749860+03:00",
-        "analysis_end": "2026-09-24",
-        "current_day_excluded": "2026-09-25",
+        "generated_at": "2026-09-27T13:14:25.607555+03:00",
+        "analysis_end": "2026-09-26",
+        "current_day_excluded": "2026-09-27",
         "last_complete_month": "2026-08",
-        "last_complete_week_start": "2026-09-18",
-        "last_complete_week_end": "2026-09-24",
-        "short_start": "2026-08-28",
-        "short_end": "2026-09-24",
+        "last_complete_week_start": "2026-09-20",
+        "last_complete_week_end": "2026-09-26",
+        "short_start": "2026-08-30",
+        "short_end": "2026-09-26",
         "first_city_level_date": "2025-08-01",
         "first_complete_month": "2025-08",
         "first_complete_week_start": "2025-08-02",
         "static_bridge_events": 21,
-        "ukrainealarm_bridge_events": 38,
+        "ukrainealarm_bridge_events": 39,
         "ukrainealarm_bridge_continuous": true,
         "ukrainealarm_api_region_id": "112",
         "weekly_mode": "rolling_7d",
         "rolling_7d_definition": "7 completed calendar days, one point per completed day, timestamped by window end",
-        "rolling_7d_analysis_end": "2026-09-24",
+        "rolling_7d_analysis_end": "2026-09-26",
         "first_rolling_7d_start": "2025-08-02",
         "first_rolling_7d_end": "2025-08-08",
-        "latest_rolling_7d_start": "2026-09-18",
-        "latest_rolling_7d_end": "2026-09-24"
+        "latest_rolling_7d_start": "2026-09-20",
+        "latest_rolling_7d_end": "2026-09-26"
       },
       "kpis": [
         {
-          "period_start": "2026-08-28",
-          "period_end": "2026-09-24",
+          "period_start": "2026-08-30",
+          "period_end": "2026-09-26",
           "alerts_28d": 48,
-          "alert_hours_28d": 54.429,
-          "avg_alert_duration_min_28d": 68.036,
+          "alert_hours_28d": 54.538,
+          "avg_alert_duration_min_28d": 68.172,
           "max_alerts_day": 6,
           "max_alerts_day_date": "2026-09-12",
           "max_alert_hours_day": 15.499,
@@ -71436,25 +71608,27 @@
           "avg_daily_alert_hours": 3.055,
           "avg_alert_duration_min": 71.277,
           "alerts_started": 18
+        },
+        {
+          "time": "2026-09-25T00:00:00+03:00",
+          "week_start": "2026-09-19",
+          "week_end": "2026-09-25",
+          "alerts_per_day": 2.714,
+          "avg_daily_alert_hours": 3.128,
+          "avg_alert_duration_min": 69.135,
+          "alerts_started": 19
+        },
+        {
+          "time": "2026-09-26T00:00:00+03:00",
+          "week_start": "2026-09-20",
+          "week_end": "2026-09-26",
+          "alerts_per_day": 2.429,
+          "avg_daily_alert_hours": 3.007,
+          "avg_alert_duration_min": 74.291,
+          "alerts_started": 17
         }
       ],
       "daily28": [
-        {
-          "time": "2026-08-28T00:00:00+03:00",
-          "date": "2026-08-28",
-          "alerts_started": 1,
-          "total_alert_duration_minutes": 24.033,
-          "total_alert_duration_hours": 0.401,
-          "avg_alert_duration_minutes": 24.033
-        },
-        {
-          "time": "2026-08-29T00:00:00+03:00",
-          "date": "2026-08-29",
-          "alerts_started": 0,
-          "total_alert_duration_minutes": 0.0,
-          "total_alert_duration_hours": 0.0,
-          "avg_alert_duration_minutes": null
-        },
         {
           "time": "2026-08-30T00:00:00+03:00",
           "date": "2026-08-30",
@@ -71662,6 +71836,22 @@
           "total_alert_duration_minutes": 929.911,
           "total_alert_duration_hours": 15.499,
           "avg_alert_duration_minutes": 185.982
+        },
+        {
+          "time": "2026-09-25T00:00:00+03:00",
+          "date": "2026-09-25",
+          "alerts_started": 1,
+          "total_alert_duration_minutes": 30.593,
+          "total_alert_duration_hours": 0.51,
+          "avg_alert_duration_minutes": 30.593
+        },
+        {
+          "time": "2026-09-26T00:00:00+03:00",
+          "date": "2026-09-26",
+          "alerts_started": 0,
+          "total_alert_duration_minutes": 0.0,
+          "total_alert_duration_hours": 0.0,
+          "avg_alert_duration_minutes": null
         }
       ]
     },
@@ -71675,44 +71865,44 @@
         "coverage_start": "2025-08-06",
         "coverage_start_basis": "official_rollout",
         "city_source_url": "https://raw.githubusercontent.com/Vadimkin/ukrainian-air-raid-sirens-dataset/main/datasets/official_data_uk.csv",
-        "proxy_completed_alert_episodes": 2359,
+        "proxy_completed_alert_episodes": 2386,
         "first_proxy_record": "2025-08-06T00:00:00+03:00",
-        "latest_proxy_record_start": "2026-09-25T06:50:11.562769+03:00",
-        "latest_proxy_record_end": "2026-09-25T07:03:17.405687+03:00",
+        "latest_proxy_record_start": "2026-09-27T12:32:24.358468+03:00",
+        "latest_proxy_record_end": "2026-09-27T12:56:54.899097+03:00",
         "data_source_kind": "raion proxy history + Alerts.in.ua seam + official UkraineAlarm API",
         "timezone": "Europe/Kyiv",
-        "generated_at": "2026-09-25T07:55:28.749860+03:00",
-        "analysis_end": "2026-09-24",
-        "current_day_excluded": "2026-09-25",
+        "generated_at": "2026-09-27T13:14:25.607555+03:00",
+        "analysis_end": "2026-09-26",
+        "current_day_excluded": "2026-09-27",
         "last_complete_month": "2026-08",
-        "last_complete_week_start": "2026-09-18",
-        "last_complete_week_end": "2026-09-24",
-        "short_start": "2026-08-28",
-        "short_end": "2026-09-24",
+        "last_complete_week_start": "2026-09-20",
+        "last_complete_week_end": "2026-09-26",
+        "short_start": "2026-08-30",
+        "short_end": "2026-09-26",
         "first_city_level_date": "2025-08-06",
         "first_complete_month": "2025-09",
         "first_complete_week_start": "2025-08-07",
         "static_bridge_events": 80,
-        "ukrainealarm_bridge_events": 95,
+        "ukrainealarm_bridge_events": 140,
         "ukrainealarm_bridge_continuous": true,
         "ukrainealarm_api_region_id": "114",
         "weekly_mode": "rolling_7d",
         "rolling_7d_definition": "7 completed calendar days, one point per completed day, timestamped by window end",
-        "rolling_7d_analysis_end": "2026-09-24",
+        "rolling_7d_analysis_end": "2026-09-26",
         "first_rolling_7d_start": "2025-08-07",
         "first_rolling_7d_end": "2025-08-13",
-        "latest_rolling_7d_start": "2026-09-18",
-        "latest_rolling_7d_end": "2026-09-24"
+        "latest_rolling_7d_start": "2026-09-20",
+        "latest_rolling_7d_end": "2026-09-26"
       },
       "kpis": [
         {
-          "period_start": "2026-08-28",
-          "period_end": "2026-09-24",
-          "alerts_28d": 188,
-          "alert_hours_28d": 504.406,
-          "avg_alert_duration_min_28d": 159.578,
-          "max_alerts_day": 12,
-          "max_alerts_day_date": "2026-09-11",
+          "period_start": "2026-08-30",
+          "period_end": "2026-09-26",
+          "alerts_28d": 207,
+          "alert_hours_28d": 490.812,
+          "avg_alert_duration_min_28d": 117.361,
+          "max_alerts_day": 15,
+          "max_alerts_day_date": "2026-09-26",
           "max_alert_hours_day": 24.0,
           "max_alert_hours_day_date": "2026-08-30"
         }
@@ -75487,25 +75677,27 @@
           "avg_daily_alert_hours": 14.786,
           "avg_alert_duration_min": 108.947,
           "alerts_started": 57
+        },
+        {
+          "time": "2026-09-25T00:00:00+03:00",
+          "week_start": "2026-09-19",
+          "week_end": "2026-09-25",
+          "alerts_per_day": 8.571,
+          "avg_daily_alert_hours": 15.022,
+          "avg_alert_duration_min": 105.156,
+          "alerts_started": 60
+        },
+        {
+          "time": "2026-09-26T00:00:00+03:00",
+          "week_start": "2026-09-20",
+          "week_end": "2026-09-26",
+          "alerts_per_day": 9.857,
+          "avg_daily_alert_hours": 15.488,
+          "avg_alert_duration_min": 97.649,
+          "alerts_started": 69
         }
       ],
       "daily28": [
-        {
-          "time": "2026-08-28T00:00:00+03:00",
-          "date": "2026-08-28",
-          "alerts_started": 5,
-          "total_alert_duration_minutes": 1342.667,
-          "total_alert_duration_hours": 22.378,
-          "avg_alert_duration_minutes": 215.797
-        },
-        {
-          "time": "2026-08-29T00:00:00+03:00",
-          "date": "2026-08-29",
-          "alerts_started": 2,
-          "total_alert_duration_minutes": 1386.067,
-          "total_alert_duration_hours": 23.101,
-          "avg_alert_duration_minutes": 3401.883
-        },
         {
           "time": "2026-08-30T00:00:00+03:00",
           "date": "2026-08-30",
@@ -75713,6 +75905,22 @@
           "total_alert_duration_minutes": 904.438,
           "total_alert_duration_hours": 15.074,
           "avg_alert_duration_minutes": 100.493
+        },
+        {
+          "time": "2026-09-25T00:00:00+03:00",
+          "date": "2026-09-25",
+          "alerts_started": 11,
+          "total_alert_duration_minutes": 939.516,
+          "total_alert_duration_hours": 15.659,
+          "avg_alert_duration_minutes": 85.411
+        },
+        {
+          "time": "2026-09-26T00:00:00+03:00",
+          "date": "2026-09-26",
+          "alerts_started": 15,
+          "total_alert_duration_minutes": 973.634,
+          "total_alert_duration_hours": 16.227,
+          "avg_alert_duration_minutes": 82.419
         }
       ]
     },
@@ -75726,42 +75934,42 @@
         "coverage_start": "2025-08-21",
         "coverage_start_basis": "official_rollout",
         "city_source_url": "https://raw.githubusercontent.com/Vadimkin/ukrainian-air-raid-sirens-dataset/main/datasets/official_data_uk.csv",
-        "proxy_completed_alert_episodes": 384,
+        "proxy_completed_alert_episodes": 391,
         "first_proxy_record": "2025-08-21T00:00:00+03:00",
-        "latest_proxy_record_start": "2026-09-25T04:27:33.750164+03:00",
-        "latest_proxy_record_end": "2026-09-25T04:47:44.499752+03:00",
+        "latest_proxy_record_start": "2026-09-27T03:50:21.054828+03:00",
+        "latest_proxy_record_end": "2026-09-27T04:07:33.273149+03:00",
         "data_source_kind": "raion proxy history + Alerts.in.ua seam + official UkraineAlarm API",
         "timezone": "Europe/Kyiv",
-        "generated_at": "2026-09-25T07:55:28.749860+03:00",
-        "analysis_end": "2026-09-24",
-        "current_day_excluded": "2026-09-25",
+        "generated_at": "2026-09-27T13:14:25.607555+03:00",
+        "analysis_end": "2026-09-26",
+        "current_day_excluded": "2026-09-27",
         "last_complete_month": "2026-08",
-        "last_complete_week_start": "2026-09-18",
-        "last_complete_week_end": "2026-09-24",
-        "short_start": "2026-08-28",
-        "short_end": "2026-09-24",
+        "last_complete_week_start": "2026-09-20",
+        "last_complete_week_end": "2026-09-26",
+        "short_start": "2026-08-30",
+        "short_end": "2026-09-26",
         "first_city_level_date": "2025-08-21",
         "first_complete_month": "2025-09",
         "first_complete_week_start": "2025-08-22",
         "static_bridge_events": 26,
-        "ukrainealarm_bridge_events": 43,
+        "ukrainealarm_bridge_events": 50,
         "ukrainealarm_bridge_continuous": true,
         "ukrainealarm_api_region_id": "36",
         "weekly_mode": "rolling_7d",
         "rolling_7d_definition": "7 completed calendar days, one point per completed day, timestamped by window end",
-        "rolling_7d_analysis_end": "2026-09-24",
+        "rolling_7d_analysis_end": "2026-09-26",
         "first_rolling_7d_start": "2025-08-22",
         "first_rolling_7d_end": "2025-08-28",
-        "latest_rolling_7d_start": "2026-09-18",
-        "latest_rolling_7d_end": "2026-09-24"
+        "latest_rolling_7d_start": "2026-09-20",
+        "latest_rolling_7d_end": "2026-09-26"
       },
       "kpis": [
         {
-          "period_start": "2026-08-28",
-          "period_end": "2026-09-24",
-          "alerts_28d": 66,
-          "alert_hours_28d": 56.808,
-          "avg_alert_duration_min_28d": 51.644,
+          "period_start": "2026-08-30",
+          "period_end": "2026-09-26",
+          "alerts_28d": 68,
+          "alert_hours_28d": 58.459,
+          "avg_alert_duration_min_28d": 51.581,
           "max_alerts_day": 6,
           "max_alerts_day_date": "2026-09-20",
           "max_alert_hours_day": 11.615,
@@ -79403,25 +79611,27 @@
           "avg_daily_alert_hours": 3.463,
           "avg_alert_duration_min": 72.728,
           "alerts_started": 20
+        },
+        {
+          "time": "2026-09-25T00:00:00+03:00",
+          "week_start": "2026-09-19",
+          "week_end": "2026-09-25",
+          "alerts_per_day": 3.143,
+          "avg_daily_alert_hours": 3.492,
+          "avg_alert_duration_min": 66.659,
+          "alerts_started": 22
+        },
+        {
+          "time": "2026-09-26T00:00:00+03:00",
+          "week_start": "2026-09-20",
+          "week_end": "2026-09-26",
+          "alerts_per_day": 3.714,
+          "avg_daily_alert_hours": 3.752,
+          "avg_alert_duration_min": 60.602,
+          "alerts_started": 26
         }
       ],
       "daily28": [
-        {
-          "time": "2026-08-28T00:00:00+03:00",
-          "date": "2026-08-28",
-          "alerts_started": 5,
-          "total_alert_duration_minutes": 72.25,
-          "total_alert_duration_hours": 1.204,
-          "avg_alert_duration_minutes": 14.45
-        },
-        {
-          "time": "2026-08-29T00:00:00+03:00",
-          "date": "2026-08-29",
-          "alerts_started": 1,
-          "total_alert_duration_minutes": 11.717,
-          "total_alert_duration_hours": 0.195,
-          "avg_alert_duration_minutes": 11.717
-        },
         {
           "time": "2026-08-30T00:00:00+03:00",
           "date": "2026-08-30",
@@ -79629,6 +79839,22 @@
           "total_alert_duration_minutes": 696.881,
           "total_alert_duration_hours": 11.615,
           "avg_alert_duration_minutes": 348.441
+        },
+        {
+          "time": "2026-09-25T00:00:00+03:00",
+          "date": "2026-09-25",
+          "alerts_started": 4,
+          "total_alert_duration_minutes": 73.882,
+          "total_alert_duration_hours": 1.231,
+          "avg_alert_duration_minutes": 18.47
+        },
+        {
+          "time": "2026-09-26T00:00:00+03:00",
+          "date": "2026-09-26",
+          "alerts_started": 4,
+          "total_alert_duration_minutes": 109.139,
+          "total_alert_duration_hours": 1.819,
+          "avg_alert_duration_minutes": 27.285
         }
       ]
     },
@@ -79642,42 +79868,42 @@
         "coverage_start": "2025-09-01",
         "coverage_start_basis": "official_permanent_rollout",
         "city_source_url": "https://raw.githubusercontent.com/Vadimkin/ukrainian-air-raid-sirens-dataset/main/datasets/official_data_uk.csv",
-        "proxy_completed_alert_episodes": 1229,
+        "proxy_completed_alert_episodes": 1246,
         "first_proxy_record": "2025-09-01T10:18:56+03:00",
-        "latest_proxy_record_start": "2026-09-25T04:27:33.594246+03:00",
-        "latest_proxy_record_end": "2026-09-25T04:47:42.753355+03:00",
+        "latest_proxy_record_start": "2026-09-27T12:36:51.414352+03:00",
+        "latest_proxy_record_end": "2026-09-27T12:54:20.064675+03:00",
         "data_source_kind": "raion proxy history + Alerts.in.ua seam + official UkraineAlarm API",
         "timezone": "Europe/Kyiv",
-        "generated_at": "2026-09-25T07:55:28.749860+03:00",
-        "analysis_end": "2026-09-24",
-        "current_day_excluded": "2026-09-25",
+        "generated_at": "2026-09-27T13:14:25.607555+03:00",
+        "analysis_end": "2026-09-26",
+        "current_day_excluded": "2026-09-27",
         "last_complete_month": "2026-08",
-        "last_complete_week_start": "2026-09-18",
-        "last_complete_week_end": "2026-09-24",
-        "short_start": "2026-08-28",
-        "short_end": "2026-09-24",
+        "last_complete_week_start": "2026-09-20",
+        "last_complete_week_end": "2026-09-26",
+        "short_start": "2026-08-30",
+        "short_end": "2026-09-26",
         "first_city_level_date": "2025-09-01",
         "first_complete_month": "2025-09",
         "first_complete_week_start": "2025-09-02",
         "static_bridge_events": 56,
-        "ukrainealarm_bridge_events": 91,
+        "ukrainealarm_bridge_events": 108,
         "ukrainealarm_bridge_continuous": true,
         "ukrainealarm_api_region_id": "81",
         "weekly_mode": "rolling_7d",
         "rolling_7d_definition": "7 completed calendar days, one point per completed day, timestamped by window end",
-        "rolling_7d_analysis_end": "2026-09-24",
+        "rolling_7d_analysis_end": "2026-09-26",
         "first_rolling_7d_start": "2025-09-02",
         "first_rolling_7d_end": "2025-09-08",
-        "latest_rolling_7d_start": "2026-09-18",
-        "latest_rolling_7d_end": "2026-09-24"
+        "latest_rolling_7d_start": "2026-09-20",
+        "latest_rolling_7d_end": "2026-09-26"
       },
       "kpis": [
         {
-          "period_start": "2026-08-28",
-          "period_end": "2026-09-24",
-          "alerts_28d": 163,
-          "alert_hours_28d": 300.095,
-          "avg_alert_duration_min_28d": 110.464,
+          "period_start": "2026-08-30",
+          "period_end": "2026-09-26",
+          "alerts_28d": 170,
+          "alert_hours_28d": 296.064,
+          "avg_alert_duration_min_28d": 73.466,
           "max_alerts_day": 14,
           "max_alerts_day_date": "2026-09-20",
           "max_alert_hours_day": 24.0,
@@ -83220,25 +83446,27 @@
           "avg_daily_alert_hours": 10.975,
           "avg_alert_duration_min": 69.844,
           "alerts_started": 66
+        },
+        {
+          "time": "2026-09-25T00:00:00+03:00",
+          "week_start": "2026-09-19",
+          "week_end": "2026-09-25",
+          "alerts_per_day": 9.571,
+          "avg_daily_alert_hours": 11.399,
+          "avg_alert_duration_min": 71.869,
+          "alerts_started": 67
+        },
+        {
+          "time": "2026-09-26T00:00:00+03:00",
+          "week_start": "2026-09-20",
+          "week_end": "2026-09-26",
+          "alerts_per_day": 9.286,
+          "avg_daily_alert_hours": 10.995,
+          "avg_alert_duration_min": 71.561,
+          "alerts_started": 65
         }
       ],
       "daily28": [
-        {
-          "time": "2026-08-28T00:00:00+03:00",
-          "date": "2026-08-28",
-          "alerts_started": 6,
-          "total_alert_duration_minutes": 168.383,
-          "total_alert_duration_hours": 2.806,
-          "avg_alert_duration_minutes": 28.064
-        },
-        {
-          "time": "2026-08-29T00:00:00+03:00",
-          "date": "2026-08-29",
-          "alerts_started": 3,
-          "total_alert_duration_minutes": 1087.367,
-          "total_alert_duration_hours": 18.123,
-          "avg_alert_duration_minutes": 2141.922
-        },
         {
           "time": "2026-08-30T00:00:00+03:00",
           "date": "2026-08-30",
@@ -83446,6 +83674,22 @@
           "total_alert_duration_minutes": 703.35,
           "total_alert_duration_hours": 11.723,
           "avg_alert_duration_minutes": 140.67
+        },
+        {
+          "time": "2026-09-25T00:00:00+03:00",
+          "date": "2026-09-25",
+          "alerts_started": 8,
+          "total_alert_duration_minutes": 457.398,
+          "total_alert_duration_hours": 7.623,
+          "avg_alert_duration_minutes": 61.154
+        },
+        {
+          "time": "2026-09-26T00:00:00+03:00",
+          "date": "2026-09-26",
+          "alerts_started": 8,
+          "total_alert_duration_minutes": 556.531,
+          "total_alert_duration_hours": 9.276,
+          "avg_alert_duration_minutes": 73.566
         }
       ]
     },
@@ -83465,14 +83709,14 @@
         "latest_proxy_record_end": "2026-09-17T13:41:50.457837+03:00",
         "data_source_kind": "raion proxy history + Alerts.in.ua seam + official UkraineAlarm API",
         "timezone": "Europe/Kyiv",
-        "generated_at": "2026-09-25T07:55:28.749860+03:00",
-        "analysis_end": "2026-09-24",
-        "current_day_excluded": "2026-09-25",
+        "generated_at": "2026-09-27T13:14:25.607555+03:00",
+        "analysis_end": "2026-09-26",
+        "current_day_excluded": "2026-09-27",
         "last_complete_month": "2026-08",
-        "last_complete_week_start": "2026-09-18",
-        "last_complete_week_end": "2026-09-24",
-        "short_start": "2026-08-28",
-        "short_end": "2026-09-24",
+        "last_complete_week_start": "2026-09-20",
+        "last_complete_week_end": "2026-09-26",
+        "short_start": "2026-08-30",
+        "short_end": "2026-09-26",
         "first_city_level_date": "2025-09-01",
         "first_complete_month": "2025-09",
         "first_complete_week_start": "2025-09-02",
@@ -83482,16 +83726,16 @@
         "ukrainealarm_api_region_id": "90",
         "weekly_mode": "rolling_7d",
         "rolling_7d_definition": "7 completed calendar days, one point per completed day, timestamped by window end",
-        "rolling_7d_analysis_end": "2026-09-24",
+        "rolling_7d_analysis_end": "2026-09-26",
         "first_rolling_7d_start": "2025-09-02",
         "first_rolling_7d_end": "2025-09-08",
-        "latest_rolling_7d_start": "2026-09-18",
-        "latest_rolling_7d_end": "2026-09-24"
+        "latest_rolling_7d_start": "2026-09-20",
+        "latest_rolling_7d_end": "2026-09-26"
       },
       "kpis": [
         {
-          "period_start": "2026-08-28",
-          "period_end": "2026-09-24",
+          "period_start": "2026-08-30",
+          "period_end": "2026-09-26",
           "alerts_28d": 6,
           "alert_hours_28d": 5.071,
           "avg_alert_duration_min_28d": 50.706,
@@ -87037,25 +87281,27 @@
           "avg_daily_alert_hours": 0.0,
           "avg_alert_duration_min": null,
           "alerts_started": 0
+        },
+        {
+          "time": "2026-09-25T00:00:00+03:00",
+          "week_start": "2026-09-19",
+          "week_end": "2026-09-25",
+          "alerts_per_day": 0.0,
+          "avg_daily_alert_hours": 0.0,
+          "avg_alert_duration_min": null,
+          "alerts_started": 0
+        },
+        {
+          "time": "2026-09-26T00:00:00+03:00",
+          "week_start": "2026-09-20",
+          "week_end": "2026-09-26",
+          "alerts_per_day": 0.0,
+          "avg_daily_alert_hours": 0.0,
+          "avg_alert_duration_min": null,
+          "alerts_started": 0
         }
       ],
       "daily28": [
-        {
-          "time": "2026-08-28T00:00:00+03:00",
-          "date": "2026-08-28",
-          "alerts_started": 0,
-          "total_alert_duration_minutes": 0.0,
-          "total_alert_duration_hours": 0.0,
-          "avg_alert_duration_minutes": null
-        },
-        {
-          "time": "2026-08-29T00:00:00+03:00",
-          "date": "2026-08-29",
-          "alerts_started": 0,
-          "total_alert_duration_minutes": 0.0,
-          "total_alert_duration_hours": 0.0,
-          "avg_alert_duration_minutes": null
-        },
         {
           "time": "2026-08-30T00:00:00+03:00",
           "date": "2026-08-30",
@@ -87263,6 +87509,22 @@
           "total_alert_duration_minutes": 0.0,
           "total_alert_duration_hours": 0.0,
           "avg_alert_duration_minutes": null
+        },
+        {
+          "time": "2026-09-25T00:00:00+03:00",
+          "date": "2026-09-25",
+          "alerts_started": 0,
+          "total_alert_duration_minutes": 0.0,
+          "total_alert_duration_hours": 0.0,
+          "avg_alert_duration_minutes": null
+        },
+        {
+          "time": "2026-09-26T00:00:00+03:00",
+          "date": "2026-09-26",
+          "alerts_started": 0,
+          "total_alert_duration_minutes": 0.0,
+          "total_alert_duration_hours": 0.0,
+          "avg_alert_duration_minutes": null
         }
       ]
     },
@@ -87276,42 +87538,42 @@
         "coverage_start": "2025-09-03",
         "coverage_start_basis": "official_permanent_rollout",
         "city_source_url": "https://raw.githubusercontent.com/Vadimkin/ukrainian-air-raid-sirens-dataset/main/datasets/official_data_uk.csv",
-        "proxy_completed_alert_episodes": 1727,
+        "proxy_completed_alert_episodes": 1733,
         "first_proxy_record": "2025-09-03T00:00:00+03:00",
-        "latest_proxy_record_start": "2026-09-25T04:27:27.493891+03:00",
-        "latest_proxy_record_end": "2026-09-25T04:52:05.158762+03:00",
+        "latest_proxy_record_start": "2026-09-27T00:59:55.703808+03:00",
+        "latest_proxy_record_end": "2026-09-27T07:56:29.473375+03:00",
         "data_source_kind": "raion proxy history + Alerts.in.ua seam + official UkraineAlarm API",
         "timezone": "Europe/Kyiv",
-        "generated_at": "2026-09-25T07:55:28.749860+03:00",
-        "analysis_end": "2026-09-24",
-        "current_day_excluded": "2026-09-25",
+        "generated_at": "2026-09-27T13:14:25.607555+03:00",
+        "analysis_end": "2026-09-26",
+        "current_day_excluded": "2026-09-27",
         "last_complete_month": "2026-08",
-        "last_complete_week_start": "2026-09-18",
-        "last_complete_week_end": "2026-09-24",
-        "short_start": "2026-08-28",
-        "short_end": "2026-09-24",
+        "last_complete_week_start": "2026-09-20",
+        "last_complete_week_end": "2026-09-26",
+        "short_start": "2026-08-30",
+        "short_end": "2026-09-26",
         "first_city_level_date": "2025-09-03",
         "first_complete_month": "2025-10",
         "first_complete_week_start": "2025-09-04",
         "static_bridge_events": 60,
-        "ukrainealarm_bridge_events": 75,
+        "ukrainealarm_bridge_events": 83,
         "ukrainealarm_bridge_continuous": true,
         "ukrainealarm_api_region_id": "140",
         "weekly_mode": "rolling_7d",
         "rolling_7d_definition": "7 completed calendar days, one point per completed day, timestamped by window end",
-        "rolling_7d_analysis_end": "2026-09-24",
+        "rolling_7d_analysis_end": "2026-09-26",
         "first_rolling_7d_start": "2025-09-04",
         "first_rolling_7d_end": "2025-09-10",
-        "latest_rolling_7d_start": "2026-09-18",
-        "latest_rolling_7d_end": "2026-09-24"
+        "latest_rolling_7d_start": "2026-09-20",
+        "latest_rolling_7d_end": "2026-09-26"
       },
       "kpis": [
         {
-          "period_start": "2026-08-28",
-          "period_end": "2026-09-24",
-          "alerts_28d": 155,
-          "alert_hours_28d": 458.48,
-          "avg_alert_duration_min_28d": 177.272,
+          "period_start": "2026-08-30",
+          "period_end": "2026-09-26",
+          "alerts_28d": 148,
+          "alert_hours_28d": 474.504,
+          "avg_alert_duration_min_28d": 155.305,
           "max_alerts_day": 12,
           "max_alerts_day_date": "2026-09-16",
           "max_alert_hours_day": 24.0,
@@ -90815,38 +91077,40 @@
           "time": "2026-09-23T00:00:00+03:00",
           "week_start": "2026-09-17",
           "week_end": "2026-09-23",
-          "alerts_per_day": 8.143,
-          "avg_daily_alert_hours": 17.941,
-          "avg_alert_duration_min": 130.566,
-          "alerts_started": 57
+          "alerts_per_day": 8.286,
+          "avg_daily_alert_hours": 18.414,
+          "avg_alert_duration_min": 167.62,
+          "alerts_started": 58
         },
         {
           "time": "2026-09-24T00:00:00+03:00",
           "week_start": "2026-09-18",
           "week_end": "2026-09-24",
           "alerts_per_day": 6.857,
-          "avg_daily_alert_hours": 17.977,
-          "avg_alert_duration_min": 157.295,
+          "avg_daily_alert_hours": 19.796,
+          "avg_alert_duration_min": 186.569,
           "alerts_started": 48
+        },
+        {
+          "time": "2026-09-25T00:00:00+03:00",
+          "week_start": "2026-09-19",
+          "week_end": "2026-09-25",
+          "alerts_per_day": 5.857,
+          "avg_daily_alert_hours": 20.688,
+          "avg_alert_duration_min": 210.05,
+          "alerts_started": 41
+        },
+        {
+          "time": "2026-09-26T00:00:00+03:00",
+          "week_start": "2026-09-20",
+          "week_end": "2026-09-26",
+          "alerts_per_day": 5.429,
+          "avg_daily_alert_hours": 20.928,
+          "avg_alert_duration_min": 231.042,
+          "alerts_started": 38
         }
       ],
       "daily28": [
-        {
-          "time": "2026-08-28T00:00:00+03:00",
-          "date": "2026-08-28",
-          "alerts_started": 10,
-          "total_alert_duration_minutes": 1038.467,
-          "total_alert_duration_hours": 17.308,
-          "avg_alert_duration_minutes": 100.675
-        },
-        {
-          "time": "2026-08-29T00:00:00+03:00",
-          "date": "2026-08-29",
-          "alerts_started": 3,
-          "total_alert_duration_minutes": 1285.483,
-          "total_alert_duration_hours": 21.425,
-          "avg_alert_duration_minutes": 2262.489
-        },
         {
           "time": "2026-08-30T00:00:00+03:00",
           "date": "2026-08-30",
@@ -91042,18 +91306,34 @@
         {
           "time": "2026-09-23T00:00:00+03:00",
           "date": "2026-09-23",
-          "alerts_started": 9,
-          "total_alert_duration_minutes": 857.318,
-          "total_alert_duration_hours": 14.289,
-          "avg_alert_duration_minutes": 95.258
+          "alerts_started": 10,
+          "total_alert_duration_minutes": 1055.812,
+          "total_alert_duration_hours": 17.597,
+          "avg_alert_duration_minutes": 313.702
         },
         {
           "time": "2026-09-24T00:00:00+03:00",
           "date": "2026-09-24",
-          "alerts_started": 1,
-          "total_alert_duration_minutes": 874.517,
-          "total_alert_duration_hours": 14.575,
-          "avg_alert_duration_minutes": 874.517
+          "alerts_started": 0,
+          "total_alert_duration_minutes": 1440.0,
+          "total_alert_duration_hours": 24.0,
+          "avg_alert_duration_minutes": null
+        },
+        {
+          "time": "2026-09-25T00:00:00+03:00",
+          "date": "2026-09-25",
+          "alerts_started": 3,
+          "total_alert_duration_minutes": 1293.438,
+          "total_alert_duration_hours": 21.557,
+          "avg_alert_duration_minutes": 217.41
+        },
+        {
+          "time": "2026-09-26T00:00:00+03:00",
+          "date": "2026-09-26",
+          "alerts_started": 3,
+          "total_alert_duration_minutes": 1227.966,
+          "total_alert_duration_hours": 20.466,
+          "avg_alert_duration_minutes": 414.943
         }
       ]
     },
@@ -91067,42 +91347,42 @@
         "coverage_start": "2025-11-04",
         "coverage_start_basis": "official_rollout",
         "city_source_url": "https://raw.githubusercontent.com/Vadimkin/ukrainian-air-raid-sirens-dataset/main/datasets/official_data_uk.csv",
-        "proxy_completed_alert_episodes": 1550,
+        "proxy_completed_alert_episodes": 1569,
         "first_proxy_record": "2025-11-04T00:00:00+02:00",
-        "latest_proxy_record_start": "2026-09-25T06:15:10.777501+03:00",
-        "latest_proxy_record_end": "2026-09-25T06:46:56.344304+03:00",
+        "latest_proxy_record_start": "2026-09-27T12:26:53.820384+03:00",
+        "latest_proxy_record_end": "2026-09-27T12:46:28.156510+03:00",
         "data_source_kind": "raion proxy history + Alerts.in.ua seam + official UkraineAlarm API",
         "timezone": "Europe/Kyiv",
-        "generated_at": "2026-09-25T07:55:28.749860+03:00",
-        "analysis_end": "2026-09-24",
-        "current_day_excluded": "2026-09-25",
+        "generated_at": "2026-09-27T13:14:25.607555+03:00",
+        "analysis_end": "2026-09-26",
+        "current_day_excluded": "2026-09-27",
         "last_complete_month": "2026-08",
-        "last_complete_week_start": "2026-09-18",
-        "last_complete_week_end": "2026-09-24",
-        "short_start": "2026-08-28",
-        "short_end": "2026-09-24",
+        "last_complete_week_start": "2026-09-20",
+        "last_complete_week_end": "2026-09-26",
+        "short_start": "2026-08-30",
+        "short_end": "2026-09-26",
         "first_city_level_date": "2025-11-04",
         "first_complete_month": "2025-12",
         "first_complete_week_start": "2025-11-05",
         "static_bridge_events": 81,
-        "ukrainealarm_bridge_events": 108,
+        "ukrainealarm_bridge_events": 127,
         "ukrainealarm_bridge_continuous": true,
         "ukrainealarm_api_region_id": "104",
         "weekly_mode": "rolling_7d",
         "rolling_7d_definition": "7 completed calendar days, one point per completed day, timestamped by window end",
-        "rolling_7d_analysis_end": "2026-09-24",
+        "rolling_7d_analysis_end": "2026-09-26",
         "first_rolling_7d_start": "2025-11-05",
         "first_rolling_7d_end": "2025-11-11",
-        "latest_rolling_7d_start": "2026-09-18",
-        "latest_rolling_7d_end": "2026-09-24"
+        "latest_rolling_7d_start": "2026-09-20",
+        "latest_rolling_7d_end": "2026-09-26"
       },
       "kpis": [
         {
-          "period_start": "2026-08-28",
-          "period_end": "2026-09-24",
-          "alerts_28d": 209,
-          "alert_hours_28d": 129.869,
-          "avg_alert_duration_min_28d": 37.283,
+          "period_start": "2026-08-30",
+          "period_end": "2026-09-26",
+          "alerts_28d": 227,
+          "alert_hours_28d": 139.508,
+          "avg_alert_duration_min_28d": 36.874,
           "max_alerts_day": 20,
           "max_alerts_day_date": "2026-09-18",
           "max_alert_hours_day": 11.378,
@@ -94045,25 +94325,27 @@
           "avg_daily_alert_hours": 6.352,
           "avg_alert_duration_min": 33.653,
           "alerts_started": 80
+        },
+        {
+          "time": "2026-09-25T00:00:00+03:00",
+          "week_start": "2026-09-19",
+          "week_end": "2026-09-25",
+          "alerts_per_day": 10.714,
+          "avg_daily_alert_hours": 6.347,
+          "avg_alert_duration_min": 35.541,
+          "alerts_started": 75
+        },
+        {
+          "time": "2026-09-26T00:00:00+03:00",
+          "week_start": "2026-09-20",
+          "week_end": "2026-09-26",
+          "alerts_per_day": 10.286,
+          "avg_daily_alert_hours": 6.051,
+          "avg_alert_duration_min": 35.298,
+          "alerts_started": 72
         }
       ],
       "daily28": [
-        {
-          "time": "2026-08-28T00:00:00+03:00",
-          "date": "2026-08-28",
-          "alerts_started": 3,
-          "total_alert_duration_minutes": 166.567,
-          "total_alert_duration_hours": 2.776,
-          "avg_alert_duration_minutes": 47.444
-        },
-        {
-          "time": "2026-08-29T00:00:00+03:00",
-          "date": "2026-08-29",
-          "alerts_started": 2,
-          "total_alert_duration_minutes": 76.133,
-          "total_alert_duration_hours": 1.269,
-          "avg_alert_duration_minutes": 38.067
-        },
         {
           "time": "2026-08-30T00:00:00+03:00",
           "date": "2026-08-30",
@@ -94271,6 +94553,22 @@
           "total_alert_duration_minutes": 426.53,
           "total_alert_duration_hours": 7.109,
           "avg_alert_duration_minutes": 40.975
+        },
+        {
+          "time": "2026-09-25T00:00:00+03:00",
+          "date": "2026-09-25",
+          "alerts_started": 15,
+          "total_alert_duration_minutes": 457.978,
+          "total_alert_duration_hours": 7.633,
+          "avg_alert_duration_minutes": 28.919
+        },
+        {
+          "time": "2026-09-26T00:00:00+03:00",
+          "date": "2026-09-26",
+          "alerts_started": 8,
+          "total_alert_duration_minutes": 363.114,
+          "total_alert_duration_hours": 6.052,
+          "avg_alert_duration_minutes": 45.389
         }
       ]
     },
@@ -94284,42 +94582,42 @@
         "coverage_start": "2025-08-30",
         "coverage_start_basis": "source_observed_cross_source_validated",
         "city_source_url": "https://raw.githubusercontent.com/Vadimkin/ukrainian-air-raid-sirens-dataset/main/datasets/official_data_uk.csv",
-        "proxy_completed_alert_episodes": 1440,
+        "proxy_completed_alert_episodes": 1450,
         "first_proxy_record": "2025-08-30T00:00:00+03:00",
-        "latest_proxy_record_start": "2026-09-24T21:43:14.397092+03:00",
-        "latest_proxy_record_end": "2026-09-24T21:52:41.954853+03:00",
+        "latest_proxy_record_start": "2026-09-27T10:56:00.355570+03:00",
+        "latest_proxy_record_end": "2026-09-27T11:45:44.935991+03:00",
         "data_source_kind": "raion proxy history + Alerts.in.ua seam + official UkraineAlarm API",
         "timezone": "Europe/Kyiv",
-        "generated_at": "2026-09-25T07:55:28.749860+03:00",
-        "analysis_end": "2026-09-24",
-        "current_day_excluded": "2026-09-25",
+        "generated_at": "2026-09-27T13:14:25.607555+03:00",
+        "analysis_end": "2026-09-26",
+        "current_day_excluded": "2026-09-27",
         "last_complete_month": "2026-08",
-        "last_complete_week_start": "2026-09-18",
-        "last_complete_week_end": "2026-09-24",
-        "short_start": "2026-08-28",
-        "short_end": "2026-09-24",
+        "last_complete_week_start": "2026-09-20",
+        "last_complete_week_end": "2026-09-26",
+        "short_start": "2026-08-30",
+        "short_end": "2026-09-26",
         "first_city_level_date": "2025-08-30",
         "first_complete_month": "2025-09",
         "first_complete_week_start": "2025-08-31",
         "static_bridge_events": 52,
-        "ukrainealarm_bridge_events": 52,
+        "ukrainealarm_bridge_events": 63,
         "ukrainealarm_bridge_continuous": true,
         "ukrainealarm_api_region_id": "132",
         "weekly_mode": "rolling_7d",
         "rolling_7d_definition": "7 completed calendar days, one point per completed day, timestamped by window end",
-        "rolling_7d_analysis_end": "2026-09-24",
+        "rolling_7d_analysis_end": "2026-09-26",
         "first_rolling_7d_start": "2025-08-31",
         "first_rolling_7d_end": "2025-09-06",
-        "latest_rolling_7d_start": "2026-09-18",
-        "latest_rolling_7d_end": "2026-09-24"
+        "latest_rolling_7d_start": "2026-09-20",
+        "latest_rolling_7d_end": "2026-09-26"
       },
       "kpis": [
         {
-          "period_start": "2026-08-28",
-          "period_end": "2026-09-24",
-          "alerts_28d": 121,
-          "alert_hours_28d": 112.103,
-          "avg_alert_duration_min_28d": 55.588,
+          "period_start": "2026-08-30",
+          "period_end": "2026-09-26",
+          "alerts_28d": 120,
+          "alert_hours_28d": 102.949,
+          "avg_alert_duration_min_28d": 51.475,
           "max_alerts_day": 10,
           "max_alerts_day_date": "2026-09-09",
           "max_alert_hours_day": 12.299,
@@ -97880,25 +98178,27 @@
           "avg_daily_alert_hours": 3.013,
           "avg_alert_duration_min": 45.198,
           "alerts_started": 28
+        },
+        {
+          "time": "2026-09-25T00:00:00+03:00",
+          "week_start": "2026-09-19",
+          "week_end": "2026-09-25",
+          "alerts_per_day": 3.571,
+          "avg_daily_alert_hours": 2.65,
+          "avg_alert_duration_min": 44.527,
+          "alerts_started": 25
+        },
+        {
+          "time": "2026-09-26T00:00:00+03:00",
+          "week_start": "2026-09-20",
+          "week_end": "2026-09-26",
+          "alerts_per_day": 3.429,
+          "avg_daily_alert_hours": 2.572,
+          "avg_alert_duration_min": 45.014,
+          "alerts_started": 24
         }
       ],
       "daily28": [
-        {
-          "time": "2026-08-28T00:00:00+03:00",
-          "date": "2026-08-28",
-          "alerts_started": 7,
-          "total_alert_duration_minutes": 502.4,
-          "total_alert_duration_hours": 8.373,
-          "avg_alert_duration_minutes": 88.35
-        },
-        {
-          "time": "2026-08-29T00:00:00+03:00",
-          "date": "2026-08-29",
-          "alerts_started": 2,
-          "total_alert_duration_minutes": 310.733,
-          "total_alert_duration_hours": 5.179,
-          "avg_alert_duration_minutes": 97.342
-        },
         {
           "time": "2026-08-30T00:00:00+03:00",
           "date": "2026-08-30",
@@ -98106,6 +98406,22 @@
           "total_alert_duration_minutes": 170.381,
           "total_alert_duration_hours": 2.84,
           "avg_alert_duration_minutes": 34.076
+        },
+        {
+          "time": "2026-09-25T00:00:00+03:00",
+          "date": "2026-09-25",
+          "alerts_started": 4,
+          "total_alert_duration_minutes": 98.412,
+          "total_alert_duration_hours": 1.64,
+          "avg_alert_duration_minutes": 24.603
+        },
+        {
+          "time": "2026-09-26T00:00:00+03:00",
+          "date": "2026-09-26",
+          "alerts_started": 4,
+          "total_alert_duration_minutes": 165.484,
+          "total_alert_duration_hours": 2.758,
+          "avg_alert_duration_minutes": 41.371
         }
       ]
     },
@@ -98119,42 +98435,42 @@
         "coverage_start": "2025-11-05",
         "coverage_start_basis": "source_observed_cross_source_validated",
         "city_source_url": "https://raw.githubusercontent.com/Vadimkin/ukrainian-air-raid-sirens-dataset/main/datasets/official_data_uk.csv",
-        "proxy_completed_alert_episodes": 1739,
+        "proxy_completed_alert_episodes": 1774,
         "first_proxy_record": "2025-11-05T02:19:54+02:00",
-        "latest_proxy_record_start": "2026-09-25T06:18:51.877988+03:00",
-        "latest_proxy_record_end": "2026-09-25T06:37:29.874910+03:00",
+        "latest_proxy_record_start": "2026-09-27T12:14:31.936607+03:00",
+        "latest_proxy_record_end": "2026-09-27T12:45:50.444703+03:00",
         "data_source_kind": "raion proxy history + Alerts.in.ua seam + official UkraineAlarm API",
         "timezone": "Europe/Kyiv",
-        "generated_at": "2026-09-25T07:55:28.749860+03:00",
-        "analysis_end": "2026-09-24",
-        "current_day_excluded": "2026-09-25",
+        "generated_at": "2026-09-27T13:14:25.607555+03:00",
+        "analysis_end": "2026-09-26",
+        "current_day_excluded": "2026-09-27",
         "last_complete_month": "2026-08",
-        "last_complete_week_start": "2026-09-18",
-        "last_complete_week_end": "2026-09-24",
-        "short_start": "2026-08-28",
-        "short_end": "2026-09-24",
+        "last_complete_week_start": "2026-09-20",
+        "last_complete_week_end": "2026-09-26",
+        "short_start": "2026-08-30",
+        "short_end": "2026-09-26",
         "first_city_level_date": "2025-11-05",
         "first_complete_month": "2025-12",
         "first_complete_week_start": "2025-11-06",
         "static_bridge_events": 88,
-        "ukrainealarm_bridge_events": 114,
+        "ukrainealarm_bridge_events": 168,
         "ukrainealarm_bridge_continuous": true,
         "ukrainealarm_api_region_id": "98",
         "weekly_mode": "rolling_7d",
         "rolling_7d_definition": "7 completed calendar days, one point per completed day, timestamped by window end",
-        "rolling_7d_analysis_end": "2026-09-24",
+        "rolling_7d_analysis_end": "2026-09-26",
         "first_rolling_7d_start": "2025-11-06",
         "first_rolling_7d_end": "2025-11-12",
-        "latest_rolling_7d_start": "2026-09-18",
-        "latest_rolling_7d_end": "2026-09-24"
+        "latest_rolling_7d_start": "2026-09-20",
+        "latest_rolling_7d_end": "2026-09-26"
       },
       "kpis": [
         {
-          "period_start": "2026-08-28",
-          "period_end": "2026-09-24",
-          "alerts_28d": 246,
-          "alert_hours_28d": 215.122,
-          "avg_alert_duration_min_28d": 52.367,
+          "period_start": "2026-08-30",
+          "period_end": "2026-09-26",
+          "alerts_28d": 262,
+          "alert_hours_28d": 223.564,
+          "avg_alert_duration_min_28d": 51.198,
           "max_alerts_day": 17,
           "max_alerts_day_date": "2026-09-20",
           "max_alert_hours_day": 14.404,
@@ -101088,25 +101404,27 @@
           "avg_daily_alert_hours": 9.56,
           "avg_alert_duration_min": 45.625,
           "alerts_started": 88
+        },
+        {
+          "time": "2026-09-25T00:00:00+03:00",
+          "week_start": "2026-09-19",
+          "week_end": "2026-09-25",
+          "alerts_per_day": 12.429,
+          "avg_daily_alert_hours": 9.744,
+          "avg_alert_duration_min": 47.782,
+          "alerts_started": 87
+        },
+        {
+          "time": "2026-09-26T00:00:00+03:00",
+          "week_start": "2026-09-20",
+          "week_end": "2026-09-26",
+          "alerts_per_day": 12.857,
+          "avg_daily_alert_hours": 10.13,
+          "avg_alert_duration_min": 46.782,
+          "alerts_started": 90
         }
       ],
       "daily28": [
-        {
-          "time": "2026-08-28T00:00:00+03:00",
-          "date": "2026-08-28",
-          "alerts_started": 10,
-          "total_alert_duration_minutes": 521.7,
-          "total_alert_duration_hours": 8.695,
-          "avg_alert_duration_minutes": 49.66
-        },
-        {
-          "time": "2026-08-29T00:00:00+03:00",
-          "date": "2026-08-29",
-          "alerts_started": 3,
-          "total_alert_duration_minutes": 233.217,
-          "total_alert_duration_hours": 3.887,
-          "avg_alert_duration_minutes": 77.739
-        },
         {
           "time": "2026-08-30T00:00:00+03:00",
           "date": "2026-08-30",
@@ -101314,6 +101632,22 @@
           "total_alert_duration_minutes": 484.62,
           "total_alert_duration_hours": 8.077,
           "avg_alert_duration_minutes": 42.158
+        },
+        {
+          "time": "2026-09-25T00:00:00+03:00",
+          "date": "2026-09-25",
+          "alerts_started": 13,
+          "total_alert_duration_minutes": 487.752,
+          "total_alert_duration_hours": 8.129,
+          "avg_alert_duration_minutes": 42.491
+        },
+        {
+          "time": "2026-09-26T00:00:00+03:00",
+          "date": "2026-09-26",
+          "alerts_started": 16,
+          "total_alert_duration_minutes": 773.708,
+          "total_alert_duration_hours": 12.895,
+          "avg_alert_duration_minutes": 44.317
         }
       ]
     },
@@ -101333,14 +101667,14 @@
         "latest_proxy_record_end": "2026-09-24T23:59:05.460002+03:00",
         "data_source_kind": "raion proxy history + Alerts.in.ua seam + official UkraineAlarm API",
         "timezone": "Europe/Kyiv",
-        "generated_at": "2026-09-25T07:55:28.749860+03:00",
-        "analysis_end": "2026-09-24",
-        "current_day_excluded": "2026-09-25",
+        "generated_at": "2026-09-27T13:14:25.607555+03:00",
+        "analysis_end": "2026-09-26",
+        "current_day_excluded": "2026-09-27",
         "last_complete_month": "2026-08",
-        "last_complete_week_start": "2026-09-18",
-        "last_complete_week_end": "2026-09-24",
-        "short_start": "2026-08-28",
-        "short_end": "2026-09-24",
+        "last_complete_week_start": "2026-09-20",
+        "last_complete_week_end": "2026-09-26",
+        "short_start": "2026-08-30",
+        "short_end": "2026-09-26",
         "first_city_level_date": "2025-11-06",
         "first_complete_month": "2025-12",
         "first_complete_week_start": "2025-11-07",
@@ -101350,19 +101684,19 @@
         "ukrainealarm_api_region_id": "39",
         "weekly_mode": "rolling_7d",
         "rolling_7d_definition": "7 completed calendar days, one point per completed day, timestamped by window end",
-        "rolling_7d_analysis_end": "2026-09-24",
+        "rolling_7d_analysis_end": "2026-09-26",
         "first_rolling_7d_start": "2025-11-07",
         "first_rolling_7d_end": "2025-11-13",
-        "latest_rolling_7d_start": "2026-09-18",
-        "latest_rolling_7d_end": "2026-09-24"
+        "latest_rolling_7d_start": "2026-09-20",
+        "latest_rolling_7d_end": "2026-09-26"
       },
       "kpis": [
         {
-          "period_start": "2026-08-28",
-          "period_end": "2026-09-24",
-          "alerts_28d": 30,
-          "alert_hours_28d": 25.955,
-          "avg_alert_duration_min_28d": 51.909,
+          "period_start": "2026-08-30",
+          "period_end": "2026-09-26",
+          "alerts_28d": 29,
+          "alert_hours_28d": 25.792,
+          "avg_alert_duration_min_28d": 53.363,
           "max_alerts_day": 6,
           "max_alerts_day_date": "2026-09-24",
           "max_alert_hours_day": 9.431,
@@ -104287,25 +104621,27 @@
           "avg_daily_alert_hours": 1.517,
           "avg_alert_duration_min": 70.815,
           "alerts_started": 9
+        },
+        {
+          "time": "2026-09-25T00:00:00+03:00",
+          "week_start": "2026-09-19",
+          "week_end": "2026-09-25",
+          "alerts_per_day": 1.286,
+          "avg_daily_alert_hours": 1.517,
+          "avg_alert_duration_min": 70.815,
+          "alerts_started": 9
+        },
+        {
+          "time": "2026-09-26T00:00:00+03:00",
+          "week_start": "2026-09-20",
+          "week_end": "2026-09-26",
+          "alerts_per_day": 1.143,
+          "avg_daily_alert_hours": 1.472,
+          "avg_alert_duration_min": 77.275,
+          "alerts_started": 8
         }
       ],
       "daily28": [
-        {
-          "time": "2026-08-28T00:00:00+03:00",
-          "date": "2026-08-28",
-          "alerts_started": 1,
-          "total_alert_duration_minutes": 9.75,
-          "total_alert_duration_hours": 0.163,
-          "avg_alert_duration_minutes": 9.75
-        },
-        {
-          "time": "2026-08-29T00:00:00+03:00",
-          "date": "2026-08-29",
-          "alerts_started": 0,
-          "total_alert_duration_minutes": 0.0,
-          "total_alert_duration_hours": 0.0,
-          "avg_alert_duration_minutes": null
-        },
         {
           "time": "2026-08-30T00:00:00+03:00",
           "date": "2026-08-30",
@@ -104513,6 +104849,22 @@
           "total_alert_duration_minutes": 565.841,
           "total_alert_duration_hours": 9.431,
           "avg_alert_duration_minutes": 94.307
+        },
+        {
+          "time": "2026-09-25T00:00:00+03:00",
+          "date": "2026-09-25",
+          "alerts_started": 0,
+          "total_alert_duration_minutes": 0.0,
+          "total_alert_duration_hours": 0.0,
+          "avg_alert_duration_minutes": null
+        },
+        {
+          "time": "2026-09-26T00:00:00+03:00",
+          "date": "2026-09-26",
+          "alerts_started": 0,
+          "total_alert_duration_minutes": 0.0,
+          "total_alert_duration_hours": 0.0,
+          "avg_alert_duration_minutes": null
         }
       ]
     },
@@ -104532,14 +104884,14 @@
         "latest_proxy_record_end": "2026-09-17T13:41:41.009227+03:00",
         "data_source_kind": "raion proxy history + Alerts.in.ua seam + official UkraineAlarm API",
         "timezone": "Europe/Kyiv",
-        "generated_at": "2026-09-25T07:55:28.749860+03:00",
-        "analysis_end": "2026-09-24",
-        "current_day_excluded": "2026-09-25",
+        "generated_at": "2026-09-27T13:14:25.607555+03:00",
+        "analysis_end": "2026-09-26",
+        "current_day_excluded": "2026-09-27",
         "last_complete_month": "2026-08",
-        "last_complete_week_start": "2026-09-18",
-        "last_complete_week_end": "2026-09-24",
-        "short_start": "2026-08-28",
-        "short_end": "2026-09-24",
+        "last_complete_week_start": "2026-09-20",
+        "last_complete_week_end": "2026-09-26",
+        "short_start": "2026-08-30",
+        "short_end": "2026-09-26",
         "first_city_level_date": "2025-11-06",
         "first_complete_month": "2025-12",
         "first_complete_week_start": "2025-11-07",
@@ -104549,16 +104901,16 @@
         "ukrainealarm_api_region_id": "66",
         "weekly_mode": "rolling_7d",
         "rolling_7d_definition": "7 completed calendar days, one point per completed day, timestamped by window end",
-        "rolling_7d_analysis_end": "2026-09-24",
+        "rolling_7d_analysis_end": "2026-09-26",
         "first_rolling_7d_start": "2025-11-07",
         "first_rolling_7d_end": "2025-11-13",
-        "latest_rolling_7d_start": "2026-09-18",
-        "latest_rolling_7d_end": "2026-09-24"
+        "latest_rolling_7d_start": "2026-09-20",
+        "latest_rolling_7d_end": "2026-09-26"
       },
       "kpis": [
         {
-          "period_start": "2026-08-28",
-          "period_end": "2026-09-24",
+          "period_start": "2026-08-30",
+          "period_end": "2026-09-26",
           "alerts_28d": 3,
           "alert_hours_28d": 1.052,
           "avg_alert_duration_min_28d": 21.039,
@@ -107486,25 +107838,27 @@
           "avg_daily_alert_hours": 0.0,
           "avg_alert_duration_min": null,
           "alerts_started": 0
+        },
+        {
+          "time": "2026-09-25T00:00:00+03:00",
+          "week_start": "2026-09-19",
+          "week_end": "2026-09-25",
+          "alerts_per_day": 0.0,
+          "avg_daily_alert_hours": 0.0,
+          "avg_alert_duration_min": null,
+          "alerts_started": 0
+        },
+        {
+          "time": "2026-09-26T00:00:00+03:00",
+          "week_start": "2026-09-20",
+          "week_end": "2026-09-26",
+          "alerts_per_day": 0.0,
+          "avg_daily_alert_hours": 0.0,
+          "avg_alert_duration_min": null,
+          "alerts_started": 0
         }
       ],
       "daily28": [
-        {
-          "time": "2026-08-28T00:00:00+03:00",
-          "date": "2026-08-28",
-          "alerts_started": 0,
-          "total_alert_duration_minutes": 0.0,
-          "total_alert_duration_hours": 0.0,
-          "avg_alert_duration_minutes": null
-        },
-        {
-          "time": "2026-08-29T00:00:00+03:00",
-          "date": "2026-08-29",
-          "alerts_started": 0,
-          "total_alert_duration_minutes": 0.0,
-          "total_alert_duration_hours": 0.0,
-          "avg_alert_duration_minutes": null
-        },
         {
           "time": "2026-08-30T00:00:00+03:00",
           "date": "2026-08-30",
@@ -107712,6 +108066,22 @@
           "total_alert_duration_minutes": 0.0,
           "total_alert_duration_hours": 0.0,
           "avg_alert_duration_minutes": null
+        },
+        {
+          "time": "2026-09-25T00:00:00+03:00",
+          "date": "2026-09-25",
+          "alerts_started": 0,
+          "total_alert_duration_minutes": 0.0,
+          "total_alert_duration_hours": 0.0,
+          "avg_alert_duration_minutes": null
+        },
+        {
+          "time": "2026-09-26T00:00:00+03:00",
+          "date": "2026-09-26",
+          "alerts_started": 0,
+          "total_alert_duration_minutes": 0.0,
+          "total_alert_duration_hours": 0.0,
+          "avg_alert_duration_minutes": null
         }
       ]
     },
@@ -107731,14 +108101,14 @@
         "latest_proxy_record_end": "2026-09-22T00:21:21.286884+03:00",
         "data_source_kind": "raion proxy history + Alerts.in.ua seam + official UkraineAlarm API",
         "timezone": "Europe/Kyiv",
-        "generated_at": "2026-09-25T07:55:28.749860+03:00",
-        "analysis_end": "2026-09-24",
-        "current_day_excluded": "2026-09-25",
+        "generated_at": "2026-09-27T13:14:25.607555+03:00",
+        "analysis_end": "2026-09-26",
+        "current_day_excluded": "2026-09-27",
         "last_complete_month": "2026-08",
-        "last_complete_week_start": "2026-09-18",
-        "last_complete_week_end": "2026-09-24",
-        "short_start": "2026-08-28",
-        "short_end": "2026-09-24",
+        "last_complete_week_start": "2026-09-20",
+        "last_complete_week_end": "2026-09-26",
+        "short_start": "2026-08-30",
+        "short_end": "2026-09-26",
         "first_city_level_date": "2025-11-06",
         "first_complete_month": "2025-12",
         "first_complete_week_start": "2025-11-07",
@@ -107748,16 +108118,16 @@
         "ukrainealarm_api_region_id": "68",
         "weekly_mode": "rolling_7d",
         "rolling_7d_definition": "7 completed calendar days, one point per completed day, timestamped by window end",
-        "rolling_7d_analysis_end": "2026-09-24",
+        "rolling_7d_analysis_end": "2026-09-26",
         "first_rolling_7d_start": "2025-11-07",
         "first_rolling_7d_end": "2025-11-13",
-        "latest_rolling_7d_start": "2026-09-18",
-        "latest_rolling_7d_end": "2026-09-24"
+        "latest_rolling_7d_start": "2026-09-20",
+        "latest_rolling_7d_end": "2026-09-26"
       },
       "kpis": [
         {
-          "period_start": "2026-08-28",
-          "period_end": "2026-09-24",
+          "period_start": "2026-08-30",
+          "period_end": "2026-09-26",
           "alerts_28d": 7,
           "alert_hours_28d": 4.509,
           "avg_alert_duration_min_28d": 38.648,
@@ -110685,25 +111055,27 @@
           "avg_daily_alert_hours": 0.098,
           "avg_alert_duration_min": 41.348,
           "alerts_started": 1
+        },
+        {
+          "time": "2026-09-25T00:00:00+03:00",
+          "week_start": "2026-09-19",
+          "week_end": "2026-09-25",
+          "alerts_per_day": 0.143,
+          "avg_daily_alert_hours": 0.098,
+          "avg_alert_duration_min": 41.348,
+          "alerts_started": 1
+        },
+        {
+          "time": "2026-09-26T00:00:00+03:00",
+          "week_start": "2026-09-20",
+          "week_end": "2026-09-26",
+          "alerts_per_day": 0.143,
+          "avg_daily_alert_hours": 0.098,
+          "avg_alert_duration_min": 41.348,
+          "alerts_started": 1
         }
       ],
       "daily28": [
-        {
-          "time": "2026-08-28T00:00:00+03:00",
-          "date": "2026-08-28",
-          "alerts_started": 0,
-          "total_alert_duration_minutes": 0.0,
-          "total_alert_duration_hours": 0.0,
-          "avg_alert_duration_minutes": null
-        },
-        {
-          "time": "2026-08-29T00:00:00+03:00",
-          "date": "2026-08-29",
-          "alerts_started": 0,
-          "total_alert_duration_minutes": 0.0,
-          "total_alert_duration_hours": 0.0,
-          "avg_alert_duration_minutes": null
-        },
         {
           "time": "2026-08-30T00:00:00+03:00",
           "date": "2026-08-30",
@@ -110911,6 +111283,22 @@
           "total_alert_duration_minutes": 0.0,
           "total_alert_duration_hours": 0.0,
           "avg_alert_duration_minutes": null
+        },
+        {
+          "time": "2026-09-25T00:00:00+03:00",
+          "date": "2026-09-25",
+          "alerts_started": 0,
+          "total_alert_duration_minutes": 0.0,
+          "total_alert_duration_hours": 0.0,
+          "avg_alert_duration_minutes": null
+        },
+        {
+          "time": "2026-09-26T00:00:00+03:00",
+          "date": "2026-09-26",
+          "alerts_started": 0,
+          "total_alert_duration_minutes": 0.0,
+          "total_alert_duration_hours": 0.0,
+          "avg_alert_duration_minutes": null
         }
       ]
     },
@@ -110930,14 +111318,14 @@
         "latest_proxy_record_end": "2026-09-25T04:14:04.227036+03:00",
         "data_source_kind": "raion proxy history + Alerts.in.ua seam + official UkraineAlarm API",
         "timezone": "Europe/Kyiv",
-        "generated_at": "2026-09-25T07:55:28.749860+03:00",
-        "analysis_end": "2026-09-24",
-        "current_day_excluded": "2026-09-25",
+        "generated_at": "2026-09-27T13:14:25.607555+03:00",
+        "analysis_end": "2026-09-26",
+        "current_day_excluded": "2026-09-27",
         "last_complete_month": "2026-08",
-        "last_complete_week_start": "2026-09-18",
-        "last_complete_week_end": "2026-09-24",
-        "short_start": "2026-08-28",
-        "short_end": "2026-09-24",
+        "last_complete_week_start": "2026-09-20",
+        "last_complete_week_end": "2026-09-26",
+        "short_start": "2026-08-30",
+        "short_end": "2026-09-26",
         "first_city_level_date": "2025-11-06",
         "first_complete_month": "2025-12",
         "first_complete_week_start": "2025-11-07",
@@ -110947,19 +111335,19 @@
         "ukrainealarm_api_region_id": "119",
         "weekly_mode": "rolling_7d",
         "rolling_7d_definition": "7 completed calendar days, one point per completed day, timestamped by window end",
-        "rolling_7d_analysis_end": "2026-09-24",
+        "rolling_7d_analysis_end": "2026-09-26",
         "first_rolling_7d_start": "2025-11-07",
         "first_rolling_7d_end": "2025-11-13",
-        "latest_rolling_7d_start": "2026-09-18",
-        "latest_rolling_7d_end": "2026-09-24"
+        "latest_rolling_7d_start": "2026-09-20",
+        "latest_rolling_7d_end": "2026-09-26"
       },
       "kpis": [
         {
-          "period_start": "2026-08-28",
-          "period_end": "2026-09-24",
+          "period_start": "2026-08-30",
+          "period_end": "2026-09-26",
           "alerts_28d": 20,
-          "alert_hours_28d": 23.685,
-          "avg_alert_duration_min_28d": 71.055,
+          "alert_hours_28d": 23.482,
+          "avg_alert_duration_min_28d": 70.447,
           "max_alerts_day": 3,
           "max_alerts_day_date": "2026-09-01",
           "max_alert_hours_day": 10.958,
@@ -113884,25 +114272,27 @@
           "avg_daily_alert_hours": 1.822,
           "avg_alert_duration_min": 127.519,
           "alerts_started": 6
+        },
+        {
+          "time": "2026-09-25T00:00:00+03:00",
+          "week_start": "2026-09-19",
+          "week_end": "2026-09-25",
+          "alerts_per_day": 0.857,
+          "avg_daily_alert_hours": 1.806,
+          "avg_alert_duration_min": 126.423,
+          "alerts_started": 6
+        },
+        {
+          "time": "2026-09-26T00:00:00+03:00",
+          "week_start": "2026-09-20",
+          "week_end": "2026-09-26",
+          "alerts_per_day": 0.857,
+          "avg_daily_alert_hours": 1.806,
+          "avg_alert_duration_min": 126.423,
+          "alerts_started": 6
         }
       ],
       "daily28": [
-        {
-          "time": "2026-08-28T00:00:00+03:00",
-          "date": "2026-08-28",
-          "alerts_started": 1,
-          "total_alert_duration_minutes": 23.491,
-          "total_alert_duration_hours": 0.392,
-          "avg_alert_duration_minutes": 23.491
-        },
-        {
-          "time": "2026-08-29T00:00:00+03:00",
-          "date": "2026-08-29",
-          "alerts_started": 0,
-          "total_alert_duration_minutes": 0.0,
-          "total_alert_duration_hours": 0.0,
-          "avg_alert_duration_minutes": null
-        },
         {
           "time": "2026-08-30T00:00:00+03:00",
           "date": "2026-08-30",
@@ -114110,6 +114500,22 @@
           "total_alert_duration_minutes": 657.455,
           "total_alert_duration_hours": 10.958,
           "avg_alert_duration_minutes": 318.73
+        },
+        {
+          "time": "2026-09-25T00:00:00+03:00",
+          "date": "2026-09-25",
+          "alerts_started": 1,
+          "total_alert_duration_minutes": 11.331,
+          "total_alert_duration_hours": 0.189,
+          "avg_alert_duration_minutes": 11.331
+        },
+        {
+          "time": "2026-09-26T00:00:00+03:00",
+          "date": "2026-09-26",
+          "alerts_started": 0,
+          "total_alert_duration_minutes": 0.0,
+          "total_alert_duration_hours": 0.0,
+          "avg_alert_duration_minutes": null
         }
       ]
     },
@@ -114129,14 +114535,14 @@
         "latest_proxy_record_end": "2026-09-24T12:41:51.479733+03:00",
         "data_source_kind": "raion proxy history + Alerts.in.ua seam + official UkraineAlarm API",
         "timezone": "Europe/Kyiv",
-        "generated_at": "2026-09-25T07:55:28.749860+03:00",
-        "analysis_end": "2026-09-24",
-        "current_day_excluded": "2026-09-25",
+        "generated_at": "2026-09-27T13:14:25.607555+03:00",
+        "analysis_end": "2026-09-26",
+        "current_day_excluded": "2026-09-27",
         "last_complete_month": "2026-08",
-        "last_complete_week_start": "2026-09-18",
-        "last_complete_week_end": "2026-09-24",
-        "short_start": "2026-08-28",
-        "short_end": "2026-09-24",
+        "last_complete_week_start": "2026-09-20",
+        "last_complete_week_end": "2026-09-26",
+        "short_start": "2026-08-30",
+        "short_end": "2026-09-26",
         "first_city_level_date": "2025-11-06",
         "first_complete_month": "2025-12",
         "first_complete_week_start": "2025-11-07",
@@ -114146,16 +114552,16 @@
         "ukrainealarm_api_region_id": "137",
         "weekly_mode": "rolling_7d",
         "rolling_7d_definition": "7 completed calendar days, one point per completed day, timestamped by window end",
-        "rolling_7d_analysis_end": "2026-09-24",
+        "rolling_7d_analysis_end": "2026-09-26",
         "first_rolling_7d_start": "2025-11-07",
         "first_rolling_7d_end": "2025-11-13",
-        "latest_rolling_7d_start": "2026-09-18",
-        "latest_rolling_7d_end": "2026-09-24"
+        "latest_rolling_7d_start": "2026-09-20",
+        "latest_rolling_7d_end": "2026-09-26"
       },
       "kpis": [
         {
-          "period_start": "2026-08-28",
-          "period_end": "2026-09-24",
+          "period_start": "2026-08-30",
+          "period_end": "2026-09-26",
           "alerts_28d": 12,
           "alert_hours_28d": 9.784,
           "avg_alert_duration_min_28d": 48.92,
@@ -117083,25 +117489,27 @@
           "avg_daily_alert_hours": 1.021,
           "avg_alert_duration_min": 107.244,
           "alerts_started": 4
+        },
+        {
+          "time": "2026-09-25T00:00:00+03:00",
+          "week_start": "2026-09-19",
+          "week_end": "2026-09-25",
+          "alerts_per_day": 0.571,
+          "avg_daily_alert_hours": 1.021,
+          "avg_alert_duration_min": 107.244,
+          "alerts_started": 4
+        },
+        {
+          "time": "2026-09-26T00:00:00+03:00",
+          "week_start": "2026-09-20",
+          "week_end": "2026-09-26",
+          "alerts_per_day": 0.571,
+          "avg_daily_alert_hours": 1.021,
+          "avg_alert_duration_min": 107.244,
+          "alerts_started": 4
         }
       ],
       "daily28": [
-        {
-          "time": "2026-08-28T00:00:00+03:00",
-          "date": "2026-08-28",
-          "alerts_started": 0,
-          "total_alert_duration_minutes": 0.0,
-          "total_alert_duration_hours": 0.0,
-          "avg_alert_duration_minutes": null
-        },
-        {
-          "time": "2026-08-29T00:00:00+03:00",
-          "date": "2026-08-29",
-          "alerts_started": 0,
-          "total_alert_duration_minutes": 0.0,
-          "total_alert_duration_hours": 0.0,
-          "avg_alert_duration_minutes": null
-        },
         {
           "time": "2026-08-30T00:00:00+03:00",
           "date": "2026-08-30",
@@ -117309,6 +117717,22 @@
           "total_alert_duration_minutes": 321.931,
           "total_alert_duration_hours": 5.366,
           "avg_alert_duration_minutes": 160.966
+        },
+        {
+          "time": "2026-09-25T00:00:00+03:00",
+          "date": "2026-09-25",
+          "alerts_started": 0,
+          "total_alert_duration_minutes": 0.0,
+          "total_alert_duration_hours": 0.0,
+          "avg_alert_duration_minutes": null
+        },
+        {
+          "time": "2026-09-26T00:00:00+03:00",
+          "date": "2026-09-26",
+          "alerts_started": 0,
+          "total_alert_duration_minutes": 0.0,
+          "total_alert_duration_hours": 0.0,
+          "avg_alert_duration_minutes": null
         }
       ]
     },
@@ -117322,39 +117746,39 @@
         "source_url": "https://t.me/s/razvozhaev",
         "source_provenance": "occupation_administration",
         "source_scope_note": "City-level signal. Source provenance is the occupation administration; this label is descriptive and does not imply recognition.",
-        "completed_alert_episodes_used": 541,
+        "completed_alert_episodes_used": 546,
         "incomplete_or_anomalous_historical_events_excluded": 8,
-        "latest_complete_end": "2026-09-24T02:15:38+03:00",
+        "latest_complete_end": "2026-09-27T02:16:25+03:00",
         "verified_source_corrections_applied": 1,
         "timezone": "Europe/Kyiv",
-        "generated_at": "2026-09-25T07:55:42.357514+03:00",
-        "analysis_end": "2026-09-24",
-        "current_day_excluded": "2026-09-25",
+        "generated_at": "2026-09-27T13:14:36.512505+03:00",
+        "analysis_end": "2026-09-26",
+        "current_day_excluded": "2026-09-27",
         "last_complete_month": "2026-08",
-        "last_complete_week_start": "2026-09-18",
-        "last_complete_week_end": "2026-09-24",
-        "short_start": "2026-08-28",
-        "short_end": "2026-09-24",
+        "last_complete_week_start": "2026-09-20",
+        "last_complete_week_end": "2026-09-26",
+        "short_start": "2026-08-30",
+        "short_end": "2026-09-26",
         "first_city_level_date": "2023-09-25",
         "first_complete_month": "2023-10",
         "first_complete_week_start": "2023-09-26",
         "weekly_mode": "rolling_7d",
         "rolling_7d_definition": "7 completed calendar days, one point per completed day, timestamped by window end",
-        "rolling_7d_analysis_end": "2026-09-24",
+        "rolling_7d_analysis_end": "2026-09-26",
         "first_rolling_7d_start": "2023-09-26",
         "first_rolling_7d_end": "2023-10-02",
-        "latest_rolling_7d_start": "2026-09-18",
-        "latest_rolling_7d_end": "2026-09-24"
+        "latest_rolling_7d_start": "2026-09-20",
+        "latest_rolling_7d_end": "2026-09-26"
       },
       "kpis": [
         {
-          "period_start": "2026-08-28",
-          "period_end": "2026-09-24",
-          "alerts_28d": 67,
-          "alert_hours_28d": 63.191,
-          "avg_alert_duration_min_28d": 56.589,
+          "period_start": "2026-08-30",
+          "period_end": "2026-09-26",
+          "alerts_28d": 66,
+          "alert_hours_28d": 61.434,
+          "avg_alert_duration_min_28d": 55.849,
           "max_alerts_day": 5,
-          "max_alerts_day_date": "2026-08-28",
+          "max_alerts_day_date": "2026-09-08",
           "max_alert_hours_day": 8.661,
           "max_alert_hours_day_date": "2026-09-08"
         }
@@ -127442,25 +127866,27 @@
           "avg_daily_alert_hours": 1.618,
           "avg_alert_duration_min": 48.548,
           "alerts_started": 14
+        },
+        {
+          "time": "2026-09-25T00:00:00+03:00",
+          "week_start": "2026-09-19",
+          "week_end": "2026-09-25",
+          "alerts_per_day": 2.0,
+          "avg_daily_alert_hours": 1.543,
+          "avg_alert_duration_min": 46.295,
+          "alerts_started": 14
+        },
+        {
+          "time": "2026-09-26T00:00:00+03:00",
+          "week_start": "2026-09-20",
+          "week_end": "2026-09-26",
+          "alerts_per_day": 2.0,
+          "avg_daily_alert_hours": 1.781,
+          "avg_alert_duration_min": 53.418,
+          "alerts_started": 14
         }
       ],
       "daily28": [
-        {
-          "time": "2026-08-28T00:00:00+03:00",
-          "date": "2026-08-28",
-          "alerts_started": 5,
-          "total_alert_duration_minutes": 321.717,
-          "total_alert_duration_hours": 5.362,
-          "avg_alert_duration_minutes": 70.76
-        },
-        {
-          "time": "2026-08-29T00:00:00+03:00",
-          "date": "2026-08-29",
-          "alerts_started": 0,
-          "total_alert_duration_minutes": 32.083,
-          "total_alert_duration_hours": 0.535,
-          "avg_alert_duration_minutes": null
-        },
         {
           "time": "2026-08-30T00:00:00+03:00",
           "date": "2026-08-30",
@@ -127668,6 +128094,22 @@
           "total_alert_duration_minutes": 26.433,
           "total_alert_duration_hours": 0.441,
           "avg_alert_duration_minutes": 26.433
+        },
+        {
+          "time": "2026-09-25T00:00:00+03:00",
+          "date": "2026-09-25",
+          "alerts_started": 2,
+          "total_alert_duration_minutes": 71.267,
+          "total_alert_duration_hours": 1.188,
+          "avg_alert_duration_minutes": 35.633
+        },
+        {
+          "time": "2026-09-26T00:00:00+03:00",
+          "date": "2026-09-26",
+          "alerts_started": 2,
+          "total_alert_duration_minutes": 177.15,
+          "total_alert_duration_hours": 2.953,
+          "avg_alert_duration_minutes": 88.575
         }
       ]
     }
@@ -150973,9 +151415,9 @@
         "lviv_alerts_per_day": 0.286,
         "lviv_avg_daily_alert_hours": 0.092,
         "lviv_avg_alert_duration_min": 19.321,
-        "chernihiv_alerts_per_day": 8.143,
-        "chernihiv_avg_daily_alert_hours": 17.941,
-        "chernihiv_avg_alert_duration_min": 130.566,
+        "chernihiv_alerts_per_day": 8.286,
+        "chernihiv_avg_daily_alert_hours": 18.414,
+        "chernihiv_avg_alert_duration_min": 167.62,
         "odesa_alerts_per_day": 11.429,
         "odesa_avg_daily_alert_hours": 6.962,
         "odesa_avg_alert_duration_min": 36.552,
@@ -151046,8 +151488,8 @@
         "lviv_avg_daily_alert_hours": 0.0,
         "lviv_avg_alert_duration_min": null,
         "chernihiv_alerts_per_day": 6.857,
-        "chernihiv_avg_daily_alert_hours": 17.977,
-        "chernihiv_avg_alert_duration_min": 157.295,
+        "chernihiv_avg_daily_alert_hours": 19.796,
+        "chernihiv_avg_alert_duration_min": 186.569,
         "odesa_alerts_per_day": 11.429,
         "odesa_avg_daily_alert_hours": 6.352,
         "odesa_avg_alert_duration_min": 33.653,
@@ -151075,6 +151517,150 @@
         "sevastopol_alerts_per_day": 2.0,
         "sevastopol_avg_daily_alert_hours": 1.618,
         "sevastopol_avg_alert_duration_min": 48.548
+      },
+      {
+        "time": "2026-09-25T00:00:00+03:00",
+        "kyiv_alerts_per_day": 8.0,
+        "kyiv_avg_daily_alert_hours": 8.582,
+        "kyiv_avg_alert_duration_min": 64.933,
+        "kharkiv_alerts_per_day": 9.571,
+        "kharkiv_avg_daily_alert_hours": 12.106,
+        "kharkiv_avg_alert_duration_min": 75.888,
+        "zaporizhzhia_alerts_per_day": 5.857,
+        "zaporizhzhia_avg_daily_alert_hours": 18.934,
+        "zaporizhzhia_avg_alert_duration_min": 194.13,
+        "cherkasy_alerts_per_day": 8.286,
+        "cherkasy_avg_daily_alert_hours": 11.757,
+        "cherkasy_avg_alert_duration_min": 85.448,
+        "zhytomyr_alerts_per_day": 5.286,
+        "zhytomyr_avg_daily_alert_hours": 5.822,
+        "zhytomyr_avg_alert_duration_min": 66.083,
+        "dnipro_alerts_per_day": 7.429,
+        "dnipro_avg_daily_alert_hours": 4.844,
+        "dnipro_avg_alert_duration_min": 39.125,
+        "khmelnytskyi_alerts_per_day": 2.714,
+        "khmelnytskyi_avg_daily_alert_hours": 3.225,
+        "khmelnytskyi_avg_alert_duration_min": 71.287,
+        "poltava_alerts_per_day": 11.286,
+        "poltava_avg_daily_alert_hours": 13.156,
+        "poltava_avg_alert_duration_min": 69.941,
+        "rivne_alerts_per_day": 2.714,
+        "rivne_avg_daily_alert_hours": 3.128,
+        "rivne_avg_alert_duration_min": 69.135,
+        "sumy_alerts_per_day": 8.571,
+        "sumy_avg_daily_alert_hours": 15.022,
+        "sumy_avg_alert_duration_min": 105.156,
+        "vinnytsia_alerts_per_day": 3.143,
+        "vinnytsia_avg_daily_alert_hours": 3.492,
+        "vinnytsia_avg_alert_duration_min": 66.659,
+        "kropyvnytskyi_alerts_per_day": 9.571,
+        "kropyvnytskyi_avg_daily_alert_hours": 11.399,
+        "kropyvnytskyi_avg_alert_duration_min": 71.869,
+        "lviv_alerts_per_day": 0.0,
+        "lviv_avg_daily_alert_hours": 0.0,
+        "lviv_avg_alert_duration_min": null,
+        "chernihiv_alerts_per_day": 5.857,
+        "chernihiv_avg_daily_alert_hours": 20.688,
+        "chernihiv_avg_alert_duration_min": 210.05,
+        "odesa_alerts_per_day": 10.714,
+        "odesa_avg_daily_alert_hours": 6.347,
+        "odesa_avg_alert_duration_min": 35.541,
+        "kherson_alerts_per_day": 3.571,
+        "kherson_avg_daily_alert_hours": 2.65,
+        "kherson_avg_alert_duration_min": 44.527,
+        "mykolaiv_alerts_per_day": 12.429,
+        "mykolaiv_avg_daily_alert_hours": 9.744,
+        "mykolaiv_avg_alert_duration_min": 47.782,
+        "lutsk_alerts_per_day": 1.286,
+        "lutsk_avg_daily_alert_hours": 1.517,
+        "lutsk_avg_alert_duration_min": 70.815,
+        "uzhhorod_alerts_per_day": 0.0,
+        "uzhhorod_avg_daily_alert_hours": 0.0,
+        "uzhhorod_avg_alert_duration_min": null,
+        "ivano_frankivsk_alerts_per_day": 0.143,
+        "ivano_frankivsk_avg_daily_alert_hours": 0.098,
+        "ivano_frankivsk_avg_alert_duration_min": 41.348,
+        "ternopil_alerts_per_day": 0.857,
+        "ternopil_avg_daily_alert_hours": 1.806,
+        "ternopil_avg_alert_duration_min": 126.423,
+        "chernivtsi_alerts_per_day": 0.571,
+        "chernivtsi_avg_daily_alert_hours": 1.021,
+        "chernivtsi_avg_alert_duration_min": 107.244,
+        "sevastopol_alerts_per_day": 2.0,
+        "sevastopol_avg_daily_alert_hours": 1.543,
+        "sevastopol_avg_alert_duration_min": 46.295
+      },
+      {
+        "time": "2026-09-26T00:00:00+03:00",
+        "kyiv_alerts_per_day": 8.571,
+        "kyiv_avg_daily_alert_hours": 9.974,
+        "kyiv_avg_alert_duration_min": 70.099,
+        "kharkiv_alerts_per_day": 10.0,
+        "kharkiv_avg_daily_alert_hours": 12.296,
+        "kharkiv_avg_alert_duration_min": 73.774,
+        "zaporizhzhia_alerts_per_day": 5.571,
+        "zaporizhzhia_avg_daily_alert_hours": 19.084,
+        "zaporizhzhia_avg_alert_duration_min": 185.558,
+        "cherkasy_alerts_per_day": 8.286,
+        "cherkasy_avg_daily_alert_hours": 12.184,
+        "cherkasy_avg_alert_duration_min": 88.863,
+        "zhytomyr_alerts_per_day": 4.857,
+        "zhytomyr_avg_daily_alert_hours": 5.732,
+        "zhytomyr_avg_alert_duration_min": 70.806,
+        "dnipro_alerts_per_day": 7.0,
+        "dnipro_avg_daily_alert_hours": 3.782,
+        "dnipro_avg_alert_duration_min": 32.42,
+        "khmelnytskyi_alerts_per_day": 2.857,
+        "khmelnytskyi_avg_daily_alert_hours": 3.225,
+        "khmelnytskyi_avg_alert_duration_min": 67.731,
+        "poltava_alerts_per_day": 11.286,
+        "poltava_avg_daily_alert_hours": 14.039,
+        "poltava_avg_alert_duration_min": 74.558,
+        "rivne_alerts_per_day": 2.429,
+        "rivne_avg_daily_alert_hours": 3.007,
+        "rivne_avg_alert_duration_min": 74.291,
+        "sumy_alerts_per_day": 9.857,
+        "sumy_avg_daily_alert_hours": 15.488,
+        "sumy_avg_alert_duration_min": 97.649,
+        "vinnytsia_alerts_per_day": 3.714,
+        "vinnytsia_avg_daily_alert_hours": 3.752,
+        "vinnytsia_avg_alert_duration_min": 60.602,
+        "kropyvnytskyi_alerts_per_day": 9.286,
+        "kropyvnytskyi_avg_daily_alert_hours": 10.995,
+        "kropyvnytskyi_avg_alert_duration_min": 71.561,
+        "lviv_alerts_per_day": 0.0,
+        "lviv_avg_daily_alert_hours": 0.0,
+        "lviv_avg_alert_duration_min": null,
+        "chernihiv_alerts_per_day": 5.429,
+        "chernihiv_avg_daily_alert_hours": 20.928,
+        "chernihiv_avg_alert_duration_min": 231.042,
+        "odesa_alerts_per_day": 10.286,
+        "odesa_avg_daily_alert_hours": 6.051,
+        "odesa_avg_alert_duration_min": 35.298,
+        "kherson_alerts_per_day": 3.429,
+        "kherson_avg_daily_alert_hours": 2.572,
+        "kherson_avg_alert_duration_min": 45.014,
+        "mykolaiv_alerts_per_day": 12.857,
+        "mykolaiv_avg_daily_alert_hours": 10.13,
+        "mykolaiv_avg_alert_duration_min": 46.782,
+        "lutsk_alerts_per_day": 1.143,
+        "lutsk_avg_daily_alert_hours": 1.472,
+        "lutsk_avg_alert_duration_min": 77.275,
+        "uzhhorod_alerts_per_day": 0.0,
+        "uzhhorod_avg_daily_alert_hours": 0.0,
+        "uzhhorod_avg_alert_duration_min": null,
+        "ivano_frankivsk_alerts_per_day": 0.143,
+        "ivano_frankivsk_avg_daily_alert_hours": 0.098,
+        "ivano_frankivsk_avg_alert_duration_min": 41.348,
+        "ternopil_alerts_per_day": 0.857,
+        "ternopil_avg_daily_alert_hours": 1.806,
+        "ternopil_avg_alert_duration_min": 126.423,
+        "chernivtsi_alerts_per_day": 0.571,
+        "chernivtsi_avg_daily_alert_hours": 1.021,
+        "chernivtsi_avg_alert_duration_min": 107.244,
+        "sevastopol_alerts_per_day": 2.0,
+        "sevastopol_avg_daily_alert_hours": 1.781,
+        "sevastopol_avg_alert_duration_min": 53.418
       }
     ]
   },
@@ -151119,7 +151705,7 @@
         "proxy_raion": null,
         "weekly_mode": "rolling_7d",
         "first_rolling_7d_start": "2022-03-01",
-        "latest_rolling_7d_end": "2026-09-24"
+        "latest_rolling_7d_end": "2026-09-26"
       },
       "kharkiv": {
         "label": "Харків",
@@ -151130,7 +151716,7 @@
         "proxy_raion": null,
         "weekly_mode": "rolling_7d",
         "first_rolling_7d_start": "2025-02-18",
-        "latest_rolling_7d_end": "2026-09-24"
+        "latest_rolling_7d_end": "2026-09-26"
       },
       "zaporizhzhia": {
         "label": "Запоріжжя",
@@ -151141,7 +151727,7 @@
         "proxy_raion": null,
         "weekly_mode": "rolling_7d",
         "first_rolling_7d_start": "2025-03-20",
-        "latest_rolling_7d_end": "2026-09-24"
+        "latest_rolling_7d_end": "2026-09-26"
       },
       "cherkasy": {
         "label": "Черкаси (Черкаський район)",
@@ -151152,7 +151738,7 @@
         "proxy_raion": "Черкаський район",
         "weekly_mode": "rolling_7d",
         "first_rolling_7d_start": "2025-01-11",
-        "latest_rolling_7d_end": "2026-09-24"
+        "latest_rolling_7d_end": "2026-09-26"
       },
       "zhytomyr": {
         "label": "Житомир (Житомирський район)",
@@ -151163,7 +151749,7 @@
         "proxy_raion": "Житомирський район",
         "weekly_mode": "rolling_7d",
         "first_rolling_7d_start": "2025-01-24",
-        "latest_rolling_7d_end": "2026-09-24"
+        "latest_rolling_7d_end": "2026-09-26"
       },
       "dnipro": {
         "label": "Дніпро (Дніпровський район)",
@@ -151174,7 +151760,7 @@
         "proxy_raion": "Дніпровський район",
         "weekly_mode": "rolling_7d",
         "first_rolling_7d_start": "2025-05-02",
-        "latest_rolling_7d_end": "2026-09-24"
+        "latest_rolling_7d_end": "2026-09-26"
       },
       "khmelnytskyi": {
         "label": "Хмельницький (Хмельницький район)",
@@ -151185,7 +151771,7 @@
         "proxy_raion": "Хмельницький район",
         "weekly_mode": "rolling_7d",
         "first_rolling_7d_start": "2025-07-08",
-        "latest_rolling_7d_end": "2026-09-24"
+        "latest_rolling_7d_end": "2026-09-26"
       },
       "poltava": {
         "label": "Полтава (Полтавський район)",
@@ -151196,7 +151782,7 @@
         "proxy_raion": "Полтавський район",
         "weekly_mode": "rolling_7d",
         "first_rolling_7d_start": "2025-08-02",
-        "latest_rolling_7d_end": "2026-09-24"
+        "latest_rolling_7d_end": "2026-09-26"
       },
       "rivne": {
         "label": "Рівне (Рівненський район)",
@@ -151207,7 +151793,7 @@
         "proxy_raion": "Рівненський район",
         "weekly_mode": "rolling_7d",
         "first_rolling_7d_start": "2025-08-02",
-        "latest_rolling_7d_end": "2026-09-24"
+        "latest_rolling_7d_end": "2026-09-26"
       },
       "sumy": {
         "label": "Суми (Сумський район)",
@@ -151218,7 +151804,7 @@
         "proxy_raion": "Сумський район",
         "weekly_mode": "rolling_7d",
         "first_rolling_7d_start": "2025-08-07",
-        "latest_rolling_7d_end": "2026-09-24"
+        "latest_rolling_7d_end": "2026-09-26"
       },
       "vinnytsia": {
         "label": "Вінниця (Вінницький район)",
@@ -151229,7 +151815,7 @@
         "proxy_raion": "Вінницький район",
         "weekly_mode": "rolling_7d",
         "first_rolling_7d_start": "2025-08-22",
-        "latest_rolling_7d_end": "2026-09-24"
+        "latest_rolling_7d_end": "2026-09-26"
       },
       "kropyvnytskyi": {
         "label": "Кропивницький (Кропивницький район)",
@@ -151240,7 +151826,7 @@
         "proxy_raion": "Кропивницький район",
         "weekly_mode": "rolling_7d",
         "first_rolling_7d_start": "2025-09-02",
-        "latest_rolling_7d_end": "2026-09-24"
+        "latest_rolling_7d_end": "2026-09-26"
       },
       "lviv": {
         "label": "Львів (Львівський район)",
@@ -151251,7 +151837,7 @@
         "proxy_raion": "Львівський район",
         "weekly_mode": "rolling_7d",
         "first_rolling_7d_start": "2025-09-02",
-        "latest_rolling_7d_end": "2026-09-24"
+        "latest_rolling_7d_end": "2026-09-26"
       },
       "chernihiv": {
         "label": "Чернігів (Чернігівський район)",
@@ -151262,7 +151848,7 @@
         "proxy_raion": "Чернігівський район",
         "weekly_mode": "rolling_7d",
         "first_rolling_7d_start": "2025-09-04",
-        "latest_rolling_7d_end": "2026-09-24"
+        "latest_rolling_7d_end": "2026-09-26"
       },
       "odesa": {
         "label": "Одеса (Одеський район)",
@@ -151273,7 +151859,7 @@
         "proxy_raion": "Одеський район",
         "weekly_mode": "rolling_7d",
         "first_rolling_7d_start": "2025-11-05",
-        "latest_rolling_7d_end": "2026-09-24"
+        "latest_rolling_7d_end": "2026-09-26"
       },
       "kherson": {
         "label": "Херсон (Херсонський район)",
@@ -151285,7 +151871,7 @@
         "proxy_raion": "Херсонський район",
         "weekly_mode": "rolling_7d",
         "first_rolling_7d_start": "2025-08-31",
-        "latest_rolling_7d_end": "2026-09-24"
+        "latest_rolling_7d_end": "2026-09-26"
       },
       "mykolaiv": {
         "label": "Миколаїв (Миколаївський район)",
@@ -151297,7 +151883,7 @@
         "proxy_raion": "Миколаївський район",
         "weekly_mode": "rolling_7d",
         "first_rolling_7d_start": "2025-11-06",
-        "latest_rolling_7d_end": "2026-09-24"
+        "latest_rolling_7d_end": "2026-09-26"
       },
       "lutsk": {
         "label": "Луцьк (Луцький район)",
@@ -151309,7 +151895,7 @@
         "proxy_raion": "Луцький район",
         "weekly_mode": "rolling_7d",
         "first_rolling_7d_start": "2025-11-07",
-        "latest_rolling_7d_end": "2026-09-24"
+        "latest_rolling_7d_end": "2026-09-26"
       },
       "uzhhorod": {
         "label": "Ужгород (Ужгородський район)",
@@ -151321,7 +151907,7 @@
         "proxy_raion": "Ужгородський район",
         "weekly_mode": "rolling_7d",
         "first_rolling_7d_start": "2025-11-07",
-        "latest_rolling_7d_end": "2026-09-24"
+        "latest_rolling_7d_end": "2026-09-26"
       },
       "ivano_frankivsk": {
         "label": "Івано-Франківськ (Івано-Франківський район)",
@@ -151333,7 +151919,7 @@
         "proxy_raion": "Івано-Франківський район",
         "weekly_mode": "rolling_7d",
         "first_rolling_7d_start": "2025-11-07",
-        "latest_rolling_7d_end": "2026-09-24"
+        "latest_rolling_7d_end": "2026-09-26"
       },
       "ternopil": {
         "label": "Тернопіль (Тернопільський район)",
@@ -151345,7 +151931,7 @@
         "proxy_raion": "Тернопільський район",
         "weekly_mode": "rolling_7d",
         "first_rolling_7d_start": "2025-11-07",
-        "latest_rolling_7d_end": "2026-09-24"
+        "latest_rolling_7d_end": "2026-09-26"
       },
       "chernivtsi": {
         "label": "Чернівці (Чернівецький район)",
@@ -151357,7 +151943,7 @@
         "proxy_raion": "Чернівецький район",
         "weekly_mode": "rolling_7d",
         "first_rolling_7d_start": "2025-11-07",
-        "latest_rolling_7d_end": "2026-09-24"
+        "latest_rolling_7d_end": "2026-09-26"
       },
       "sevastopol": {
         "label": "Севастополь (сигнали окупаційної адміністрації)",
@@ -151369,7 +151955,7 @@
         "source_provenance": "occupation_administration",
         "weekly_mode": "rolling_7d",
         "first_rolling_7d_start": "2023-09-26",
-        "latest_rolling_7d_end": "2026-09-24"
+        "latest_rolling_7d_end": "2026-09-26"
       }
     },
     "proxy_cross_source_match_tolerance_seconds": 15,
@@ -151391,9 +151977,9 @@
         "cross_source_match_tolerance_seconds": 15.0
       },
       "event_store_file": "data/ukrainealarm_bridge.json",
-      "event_count": 1262,
-      "last_attempt_at": "2026-09-25T04:30:46.569111Z",
-      "last_successful_fetch_at": "2026-09-25T04:55:28.740146Z",
+      "event_count": 1540,
+      "last_attempt_at": "2026-09-27T09:45:06.065759Z",
+      "last_successful_fetch_at": "2026-09-27T10:14:25.597950Z",
       "last_fetch_error": null,
       "required_rows": [
         "cherkasy",
@@ -151448,110 +152034,110 @@
           "primary_region": "м. Харків та Харківська територіальна громада",
           "primary_continuous": true,
           "static_bridge_events_applied": 86,
-          "api_bridge_events_applied": 86,
-          "latest_record_end": "2026-09-25T04:58:37.396786+03:00",
+          "api_bridge_events_applied": 128,
+          "latest_record_end": "2026-09-27T12:04:05.417684+03:00",
           "continuity_reason": "history_reaches_previous_poll",
-          "last_checked_at": "2026-09-25T04:30:47.199413Z",
+          "last_checked_at": "2026-09-27T09:46:16.966438Z",
           "last_error": null
         },
         "zaporizhzhia": {
           "primary_region": "м. Запоріжжя та Запорізька територіальна громада",
           "primary_continuous": true,
           "static_bridge_events_applied": 55,
-          "api_bridge_events_applied": 58,
-          "latest_record_end": "2026-09-25T07:20:30.201998+03:00",
+          "api_bridge_events_applied": 67,
+          "latest_record_end": "2026-09-26T20:57:06.707655+03:00",
           "continuity_reason": "history_reaches_previous_poll",
-          "last_checked_at": "2026-09-25T04:31:57.749217Z",
+          "last_checked_at": "2026-09-27T09:49:47.288184Z",
           "last_error": null
         },
         "cherkasy": {
           "primary_region": "Черкаський район",
           "primary_continuous": true,
           "static_bridge_events_applied": 47,
-          "api_bridge_events_applied": 82,
-          "latest_record_end": "2026-09-25T06:21:54.468052+03:00",
+          "api_bridge_events_applied": 98,
+          "latest_record_end": "2026-09-27T12:36:03.172634+03:00",
           "continuity_reason": "history_reaches_previous_poll",
-          "last_checked_at": "2026-09-25T04:33:08.267581Z",
+          "last_checked_at": "2026-09-27T09:53:18.154317Z",
           "last_error": null
         },
         "zhytomyr": {
           "primary_region": "Житомирський район",
           "primary_continuous": true,
           "static_bridge_events_applied": 33,
-          "api_bridge_events_applied": 58,
-          "latest_record_end": "2026-09-25T05:14:10.878820+03:00",
+          "api_bridge_events_applied": 68,
+          "latest_record_end": "2026-09-27T10:58:56.318952+03:00",
           "continuity_reason": "history_reaches_previous_poll",
-          "last_checked_at": "2026-09-25T04:34:18.782328Z",
+          "last_checked_at": "2026-09-27T09:54:28.546080Z",
           "last_error": null
         },
         "dnipro": {
           "primary_region": "Дніпровський район",
           "primary_continuous": true,
           "static_bridge_events_applied": 72,
-          "api_bridge_events_applied": 79,
-          "latest_record_end": "2026-09-25T06:23:37.179082+03:00",
+          "api_bridge_events_applied": 94,
+          "latest_record_end": "2026-09-27T12:15:32.033514+03:00",
           "continuity_reason": "history_reaches_previous_poll",
-          "last_checked_at": "2026-09-25T04:35:29.334017Z",
+          "last_checked_at": "2026-09-27T09:55:38.690044Z",
           "last_error": null
         },
         "khmelnytskyi": {
           "primary_region": "Хмельницький район",
           "primary_continuous": true,
           "static_bridge_events_applied": 17,
-          "api_bridge_events_applied": 39,
-          "latest_record_end": "2026-09-25T04:14:03.986801+03:00",
+          "api_bridge_events_applied": 43,
+          "latest_record_end": "2026-09-26T18:25:50.312397+03:00",
           "continuity_reason": "history_reaches_previous_poll",
-          "last_checked_at": "2026-09-25T04:36:39.911436Z",
+          "last_checked_at": "2026-09-27T09:56:49.080488Z",
           "last_error": null
         },
         "poltava": {
           "primary_region": "Полтавський район",
           "primary_continuous": true,
           "static_bridge_events_applied": 65,
-          "api_bridge_events_applied": 103,
-          "latest_record_end": "2026-09-25T06:33:16.559579+03:00",
+          "api_bridge_events_applied": 123,
+          "latest_record_end": "2026-09-27T12:37:29.034528+03:00",
           "continuity_reason": "history_reaches_previous_poll",
-          "last_checked_at": "2026-09-25T04:37:50.449387Z",
+          "last_checked_at": "2026-09-27T09:58:00.280188Z",
           "last_error": null
         },
         "rivne": {
           "primary_region": "Рівненський район",
           "primary_continuous": true,
           "static_bridge_events_applied": 21,
-          "api_bridge_events_applied": 38,
-          "latest_record_end": "2026-09-24T23:59:05.138007+03:00",
+          "api_bridge_events_applied": 39,
+          "latest_record_end": "2026-09-25T16:47:33.968995+03:00",
           "continuity_reason": "history_reaches_previous_poll",
-          "last_checked_at": "2026-09-25T04:39:00.977904Z",
+          "last_checked_at": "2026-09-27T09:59:10.414999Z",
           "last_error": null
         },
         "sumy": {
           "primary_region": "Сумський район",
           "primary_continuous": true,
           "static_bridge_events_applied": 80,
-          "api_bridge_events_applied": 95,
-          "latest_record_end": "2026-09-25T07:03:17.405687+03:00",
+          "api_bridge_events_applied": 140,
+          "latest_record_end": "2026-09-27T12:56:54.899097+03:00",
           "continuity_reason": "history_reaches_previous_poll",
-          "last_checked_at": "2026-09-25T04:40:11.528461Z",
+          "last_checked_at": "2026-09-27T10:00:20.574567Z",
           "last_error": null
         },
         "vinnytsia": {
           "primary_region": "Вінницький район",
           "primary_continuous": true,
           "static_bridge_events_applied": 26,
-          "api_bridge_events_applied": 43,
-          "latest_record_end": "2026-09-25T04:47:44.499752+03:00",
+          "api_bridge_events_applied": 50,
+          "latest_record_end": "2026-09-27T04:07:33.273149+03:00",
           "continuity_reason": "history_reaches_previous_poll",
-          "last_checked_at": "2026-09-25T04:41:22.039917Z",
+          "last_checked_at": "2026-09-27T10:01:31.047189Z",
           "last_error": null
         },
         "kropyvnytskyi": {
           "primary_region": "Кропивницький район",
           "primary_continuous": true,
           "static_bridge_events_applied": 56,
-          "api_bridge_events_applied": 91,
-          "latest_record_end": "2026-09-25T04:47:42.753355+03:00",
+          "api_bridge_events_applied": 108,
+          "latest_record_end": "2026-09-27T12:54:20.064675+03:00",
           "continuity_reason": "history_reaches_previous_poll",
-          "last_checked_at": "2026-09-25T04:42:32.597144Z",
+          "last_checked_at": "2026-09-27T10:02:41.462657Z",
           "last_error": null
         },
         "lviv": {
@@ -151561,47 +152147,47 @@
           "api_bridge_events_applied": 20,
           "latest_record_end": "2026-09-17T13:41:50.457837+03:00",
           "continuity_reason": "history_reaches_previous_poll",
-          "last_checked_at": "2026-09-25T04:43:43.326448Z",
+          "last_checked_at": "2026-09-27T10:03:51.862721Z",
           "last_error": null
         },
         "chernihiv": {
           "primary_region": "Чернігівський район",
           "primary_continuous": true,
           "static_bridge_events_applied": 60,
-          "api_bridge_events_applied": 75,
-          "latest_record_end": "2026-09-25T04:52:05.158762+03:00",
+          "api_bridge_events_applied": 83,
+          "latest_record_end": "2026-09-27T07:56:29.473375+03:00",
           "continuity_reason": "history_reaches_previous_poll",
-          "last_checked_at": "2026-09-25T04:44:53.874094Z",
+          "last_checked_at": "2026-09-27T10:05:02.816817Z",
           "last_error": null
         },
         "odesa": {
           "primary_region": "Одеський район",
           "primary_continuous": true,
           "static_bridge_events_applied": 81,
-          "api_bridge_events_applied": 108,
-          "latest_record_end": "2026-09-25T06:46:56.344304+03:00",
+          "api_bridge_events_applied": 127,
+          "latest_record_end": "2026-09-27T12:46:28.156510+03:00",
           "continuity_reason": "history_reaches_previous_poll",
-          "last_checked_at": "2026-09-25T04:46:04.422883Z",
+          "last_checked_at": "2026-09-27T10:06:12.956642Z",
           "last_error": null
         },
         "kherson": {
           "primary_region": "Херсонський район",
           "primary_continuous": true,
           "static_bridge_events_applied": 52,
-          "api_bridge_events_applied": 52,
-          "latest_record_end": "2026-09-24T21:52:41.954853+03:00",
+          "api_bridge_events_applied": 63,
+          "latest_record_end": "2026-09-27T11:45:44.935991+03:00",
           "continuity_reason": "history_reaches_previous_poll",
-          "last_checked_at": "2026-09-25T04:47:14.983079Z",
+          "last_checked_at": "2026-09-27T10:07:23.539505Z",
           "last_error": null
         },
         "mykolaiv": {
           "primary_region": "Миколаївський район",
           "primary_continuous": true,
           "static_bridge_events_applied": 88,
-          "api_bridge_events_applied": 114,
-          "latest_record_end": "2026-09-25T06:37:29.874910+03:00",
+          "api_bridge_events_applied": 168,
+          "latest_record_end": "2026-09-27T12:45:50.444703+03:00",
           "continuity_reason": "history_reaches_previous_poll",
-          "last_checked_at": "2026-09-25T04:48:25.524483Z",
+          "last_checked_at": "2026-09-27T10:08:33.935712Z",
           "last_error": null
         },
         "lutsk": {
@@ -151611,7 +152197,7 @@
           "api_bridge_events_applied": 29,
           "latest_record_end": "2026-09-24T23:59:05.460002+03:00",
           "continuity_reason": "history_reaches_previous_poll",
-          "last_checked_at": "2026-09-25T04:50:46.547447Z",
+          "last_checked_at": "2026-09-27T10:09:44.324911Z",
           "last_error": null
         },
         "uzhhorod": {
@@ -151621,7 +152207,7 @@
           "api_bridge_events_applied": 20,
           "latest_record_end": "2026-09-17T13:41:41.009227+03:00",
           "continuity_reason": "history_reaches_previous_poll",
-          "last_checked_at": "2026-09-25T04:51:57.059599Z",
+          "last_checked_at": "2026-09-27T10:10:54.460185Z",
           "last_error": null
         },
         "ivano_frankivsk": {
@@ -151631,7 +152217,7 @@
           "api_bridge_events_applied": 21,
           "latest_record_end": "2026-09-22T00:21:21.286884+03:00",
           "continuity_reason": "history_reaches_previous_poll",
-          "last_checked_at": "2026-09-25T04:53:07.714897Z",
+          "last_checked_at": "2026-09-27T10:12:04.902102Z",
           "last_error": null
         },
         "ternopil": {
@@ -151641,7 +152227,7 @@
           "api_bridge_events_applied": 27,
           "latest_record_end": "2026-09-25T04:14:04.227036+03:00",
           "continuity_reason": "history_reaches_previous_poll",
-          "last_checked_at": "2026-09-25T04:54:18.219301Z",
+          "last_checked_at": "2026-09-27T10:13:15.044658Z",
           "last_error": null
         },
         "chernivtsi": {
@@ -151651,7 +152237,7 @@
           "api_bridge_events_applied": 24,
           "latest_record_end": "2026-09-24T12:41:51.479733+03:00",
           "continuity_reason": "history_reaches_previous_poll",
-          "last_checked_at": "2026-09-25T04:55:28.739946Z",
+          "last_checked_at": "2026-09-27T10:14:25.597792Z",
           "last_error": null
         }
       }
@@ -151659,19 +152245,19 @@
     "weekly_mode": "rolling_7d",
     "rolling_7d_definition": "7 completed calendar days; adjacent points overlap by 6 days",
     "upstream_freshness": {
-      "checked_at": "2026-09-25T04:55:55.096892+00:00",
+      "checked_at": "2026-09-27T10:14:46.076767+00:00",
       "warning_threshold_hours": 48.0,
-      "latest_proxy_event_end": "2026-09-25T04:03:17.405687+00:00",
-      "latest_proxy_event_lag_hours": 0.88,
+      "latest_proxy_event_end": "2026-09-27T09:56:54.899097+00:00",
+      "latest_proxy_event_lag_hours": 0.3,
       "upstream_file_commit_at": "2026-09-08T03:44:23+00:00",
-      "upstream_file_commit_lag_hours": 409.19,
+      "upstream_file_commit_lag_hours": 462.51,
       "status": "stale",
       "warning": true,
       "check_error": null
     },
     "effective_freshness": {
       "source": "official UkraineAlarm API regionHistory bridge",
-      "last_successful_fetch_at": "2026-09-25T04:55:28.740146+00:00",
+      "last_successful_fetch_at": "2026-09-27T10:14:25.597950+00:00",
       "fetch_age_hours": 0.01,
       "fresh": true,
       "required_rows": [
@@ -151738,8 +152324,8 @@
       "year_2025_kmva_cumulative": 171,
       "year_2025_note": "The five-person difference could not be attributed to specific attacks in public sources; the audited attack-level reconstruction is used in the chart.",
       "confirmed_revision_records": 0,
-      "pending_review_candidates": 20,
-      "generated_at": "2026-09-25T07:55:54.237187+03:00"
+      "pending_review_candidates": 30,
+      "generated_at": "2026-09-27T13:14:45.389915+03:00"
     },
     "monthly": [
       {
