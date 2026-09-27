@@ -52,7 +52,7 @@ jobs:
           fi
 
           BASE_HEAD="$(git rev-parse HEAD)"
-          OUT="$(cd kyiv-air-alerts-grafana && python scripts/run_historical_attack_event_backfill_batch.py             --campaign-id historical-attack-events-v1-2026-09-27             --city-key auto             --batch-size 50             --output-dir ../research/historical_attack_event_backfill             --resume)"
+          OUT="$(cd kyiv-air-alerts-grafana && python scripts/run_historical_attack_event_backfill_batch.py             --campaign-id historical-attack-events-v2-2026-09-27             --city-key auto             --batch-size 50             --output-dir ../research/historical_attack_event_backfill             --resume)"
           printf '%s\n' "$OUT"
           NEW_WORK="$(python -c 'import json,sys; print(json.load(sys.stdin).get("new_work",0))' <<<"$OUT")"
           if [ "$NEW_WORK" = "0" ]; then
