@@ -89,15 +89,15 @@
 
 
     <section id="timeOfDaySection" class="comparison-section hidden">
-      <div class="section-heading heatmap-heading">
+      <div class="section-heading time-profile-heading">
         <div>
           <div class="eyebrow">Час доби · тест</div>
-          <h2>Коли тривога найчастіше активна</h2>
-          <p>Кожна клітинка — 15 хвилин. Насиченість кольору показує, наскільки часто цей слот був під тривогою відносно інших слотів у тому самому місті або районі та в обраному діапазоні.</p>
+          <h2>Коли протягом доби тривога найчастіше активна</h2>
+          <p>Доба поділена на 15-хвилинні інтервали. 100% — найчастіший інтервал у вибраному місті/районі та діапазоні; решта значень показані відносно нього.</p>
         </div>
-        <div class="control heatmap-period-control">
+        <div class="control time-profile-period-control">
           <label for="timeOfDayRange">Діапазон</label>
-          <select id="timeOfDayRange" aria-label="Діапазон heatmap часу доби">
+          <select id="timeOfDayRange" aria-label="Діапазон добового профілю">
             <option value="7d">7 днів</option>
             <option value="30d">30 днів</option>
             <option value="90d">90 днів</option>
@@ -106,17 +106,10 @@
           </select>
         </div>
       </div>
-      <article class="panel heatmap-card">
-        <div id="timeOfDayMeta" class="heatmap-meta"></div>
-        <div class="heatmap-scroll">
-          <div id="timeOfDayHeatmap" class="time-of-day-heatmap" role="grid" aria-label="Heatmap часу доби"></div>
-        </div>
-        <div class="heatmap-legend" aria-hidden="true">
-          <span>Рідше</span>
-          <span class="heatmap-legend-bar"></span>
-          <span>Частіше</span>
-        </div>
-        <p class="chart-subtitle heatmap-note">Колір нормалізовано окремо для кожного міста/району й діапазону: найчастіший 15-хвилинний слот = 100% відносної інтенсивності. Наведіть курсор на клітинку, щоб побачити фактичну частку часу під тривогою.</p>
+      <article class="panel chart-card wide time-profile-card">
+        <div id="timeOfDayMeta" class="time-profile-meta"></div>
+        <div class="chart-wrap time-profile-chart"><canvas id="timeOfDayChart"></canvas></div>
+        <p class="chart-subtitle time-profile-note">100% — не частка часу під тривогою, а відносний максимум для цього міста/району та діапазону. У підказці показано також фактичну частку часу під тривогою.</p>
       </article>
     </section>
 
@@ -244,6 +237,26 @@
           <p class="chart-subtitle">Середня тривалість тривог, що почалися в обраному періоді; тривалість відноситься до періоду старту.</p>
           <div class="chart-wrap"><canvas id="compareDurationChart"></canvas></div>
         </article>
+        <article id="compareTimeOfDayCard" class="panel chart-card wide">
+          <div class="time-profile-card-heading">
+            <div>
+              <h3>Добовий профіль тривог</h3>
+              <p class="chart-subtitle">Порівняння форми добового патерну. Кожне місто/район нормалізовано окремо: його власний найчастіший 15-хвилинний інтервал = 100%.</p>
+            </div>
+            <div class="control time-profile-compare-control">
+              <label for="compareTimeOfDayRange">Діапазон</label>
+              <select id="compareTimeOfDayRange" aria-label="Діапазон добового профілю для порівняння">
+                <option value="7d">7 днів</option>
+                <option value="30d">30 днів</option>
+                <option value="90d">90 днів</option>
+                <option value="year">Рік</option>
+                <option value="all">Від початку даних</option>
+              </select>
+            </div>
+          </div>
+          <p id="compareTimeOfDayNote" class="chart-subtitle"></p>
+          <div class="chart-wrap time-profile-chart"><canvas id="compareTimeOfDayChart"></canvas></div>
+        </article>
         <article id="compareExplosionsCard" class="panel chart-card wide hidden">
           <h3>Частка тривог із повідомленнями про вибухи</h3>
           <p class="chart-subtitle">Ковзне 90-денне вікно з кроком відображення 7 днів. Strict-метрика: підтверджене повідомлення саме про вибухи в місті, зіставлене з конкретною тривогою.</p>
@@ -339,7 +352,7 @@
         <li><strong>Годин під тривогою/добу</strong> — увесь час, проведений під тривогою в обраному періоді, поділений на кількість днів. Якщо інтервали тривог перекриваються, час не рахується двічі. Якщо тривога проходить через північ, її час розподіляється між відповідними календарними днями.</li>
         <li><strong>Середня тривалість тривоги</strong> — середня тривалість усіх тривог, що почалися в обраному періоді. Якщо тривога закінчилася вже після завершення періоду, вся її тривалість залишається в періоді, коли вона почалася.</li>
         <li><strong>Тривоги з повідомленнями про вибухи</strong> — тестова strict-метрика лише для міст із завершеним ручним аудитом: у чисельник входять alert episodes, для яких є підтверджене exact-city повідомлення про вибухи, що припадає на цю тривогу. Для динаміки використовується ковзне 90-денне вікно; на графіку відображається одна точка кожні 7 днів, а перші 89 днів покриття не показуються.</li>
-        <li><strong>Heatmap часу доби (тест).</strong> Доба поділена на 96 15-хвилинних слотів у часовій зоні Europe/Kyiv. Для кожного слота рахується частка фактичного часу, проведеного під тривогою, серед усього доступного часу цього слота за обраний діапазон. Колір нормалізується відносно найвищого значення в тому самому місті/районі й діапазоні; переходи на літній/зимовий час зважуються за реальною тривалістю.</li>
+        <li><strong>Добовий профіль тривог (тест).</strong> Доба поділена на 96 15-хвилинних слотів у часовій зоні Europe/Kyiv. Для кожного слота рахується частка фактичного часу, проведеного під тривогою, а потім ряд нормалізується: найвище значення для вибраного міста/району та діапазону = 100%. У порівнянні кожен ряд нормалізується до власного максимуму; переходи на літній/зимовий час зважуються за реальною тривалістю.</li>
       </ul>
 
       <p><strong>Як працює порівняння міст.</strong> Якщо обрано два або три міста, графіки показують тільки ті періоди, які є одночасно в усіх вибраних рядах. Так міста з різною датою початку покриття не порівнюються на різних часових відрізках.</p>

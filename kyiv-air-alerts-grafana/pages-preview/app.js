@@ -8,6 +8,7 @@ const DATA_URL = "data.json";
 const EXPLOSION_LIVE_URL = "https://raw.githubusercontent.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/multicity-wip-2026-09-16/kyiv-air-alerts-grafana/data/explosions_test.json";
 const COLORS = ["#62a0ea", "#8ff0a4", "#f8e45c"];
 const EXPLOSION_COLOR = "#ff9f43";
+const TIME_PROFILE_COLOR = "#ef4444";
 const GRID = "rgba(148,163,184,.16)";
 const TEXT = "#b8c4cf";
 const HEATMAP_RANGES = ["7d", "30d", "90d", "year", "all"];
@@ -149,6 +150,7 @@ function updateUrl() {
   params.set("compare", $("comparePeriod").value);
   if ($("rolling7dYear")?.value) params.set("year", $("rolling7dYear").value);
   if ($("timeOfDayRange")?.value) params.set("tod", $("timeOfDayRange").value);
+  if ($("compareTimeOfDayRange")?.value) params.set("ctod", $("compareTimeOfDayRange").value);
   history.replaceState(null, "", `${location.pathname}?${params.toString()}`);
 }
 
@@ -172,55 +174,163 @@ function renderTimeOfDay(key) {
   section.classList.remove("hidden");
 
   const peakText = period.peak_slot
-    ? `Найвище значення: ${period.peak_slot} · ${fmt(period.peak_alert_share_pct, 1)}% часу під тривогою.`
+    ? `Пік: ${period.peak_slot} · ${fmt(period.peak_alert_share_pct, 1)}% фактичного часу під тривогою.`
     : "У цьому діапазоні немає часу під тривогою.";
   $("timeOfDayMeta").textContent =
     `${period.range_start} — ${period.range_end} · ${period.days} завершених днів. ${peakText}`;
 
-  const slots = new Map(period.slots.map(slot => [Number(slot.index), slot]));
-  const grid = $("timeOfDayHeatmap");
-  grid.innerHTML = "";
+  if (state.charts.timeOfDayChart) state.charts.timeOfDayChart.destroy();
+  const labels = period.slots.map(slot => slot.start);
+  const values = period.slots.map(slot => Number(slot.relative_intensity) || 0);
+  const shares = period.slots.map(slot => Number(slot.alert_share_pct) || 0);
+  const intervalLabels = period.slots.map(slot => slot.label);
 
-  const corner = document.createElement("div");
-  corner.className = "heatmap-corner";
-  grid.appendChild(corner);
-
-  for (let hour = 0; hour < 24; hour += 1) {
-    const label = document.createElement("div");
-    label.className = "heatmap-hour";
-    label.textContent = String(hour).padStart(2, "0");
-    grid.appendChild(label);
-  }
-
-  for (let quarter = 0; quarter < 4; quarter += 1) {
-    const rowLabel = document.createElement("div");
-    rowLabel.className = "heatmap-quarter";
-    rowLabel.textContent = `:${String(quarter * 15).padStart(2, "0")}`;
-    grid.appendChild(rowLabel);
-
-    for (let hour = 0; hour < 24; hour += 1) {
-      const index = hour * 4 + quarter;
-      const slot = slots.get(index) || {
-        label: `${String(hour).padStart(2, "0")}:${String(quarter * 15).padStart(2, "0")}`,
-        alert_share_pct: 0,
-        relative_intensity: 0
-      };
-      const relative = Math.max(0, Math.min(100, Number(slot.relative_intensity) || 0));
-      const share = Math.max(0, Number(slot.alert_share_pct) || 0);
-      const alpha = relative > 0 ? 0.08 + 0.84 * (relative / 100) : 0.035;
-
-      const cell = document.createElement("div");
-      cell.className = "heatmap-cell";
-      cell.style.backgroundColor = `rgba(239,68,68,${alpha.toFixed(3)})`;
-      cell.dataset.relative = String(relative);
-      const title = `${slot.label}: ${fmt(share, 1)}% часу під тривогою · ${fmt(relative, 0)}% від пікового слота`;
-      cell.title = title;
-      cell.setAttribute("aria-label", title);
-      cell.setAttribute("role", "gridcell");
-      cell.setAttribute("tabindex", "0");
-      grid.appendChild(cell);
+  state.charts.timeOfDayChart = new Chart($("timeOfDayChart"), {
+    type: "line",
+    data: {
+      labels,
+      datasets: [{
+        label: "Відносна інтенсивність",
+        data: values,
+        alertShares: shares,
+        intervalLabels,
+        borderColor: TIME_PROFILE_COLOR,
+        backgroundColor: "rgba(239,68,68,.16)",
+        fill: true,
+        borderWidth: 2,
+        pointRadius: 0,
+        pointHoverRadius: 4,
+        pointHitRadius: 10,
+        tension: 0
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      animation: false,
+      interaction: { mode: "index", intersect: false },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          mode: "index",
+          intersect: false,
+          callbacks: {
+            title(items) {
+              const i = items?.[0]?.dataIndex ?? 0;
+              return intervalLabels[i] || labels[i] || "";
+            },
+            label(context) {
+              const i = context.dataIndex;
+              return `Відносна інтенсивність: ${fmt(values[i], 0)}% · фактично під тривогою ${fmt(shares[i], 1)}% часу`;
+            }
+          }
+        }
+      },
+      scales: {
+        x: {
+          ticks: { color: TEXT, autoSkip: true, maxTicksLimit: 9, maxRotation: 0 },
+          grid: { color: GRID },
+          title: { display: true, text: "Час доби", color: TEXT }
+        },
+        y: {
+          min: 0,
+          max: 100,
+          ticks: { color: TEXT, callback: value => `${value}%` },
+          grid: { color: GRID },
+          title: { display: true, text: "Відносна інтенсивність", color: TEXT }
+        }
+      }
     }
+  });
+}
+
+function renderTimeOfDayComparison(keys) {
+  const root = state.data.time_of_day_heatmap_test;
+  const select = $("compareTimeOfDayRange");
+  const note = $("compareTimeOfDayNote");
+  const canvas = $("compareTimeOfDayChart");
+  if (!root?.cities || !select || !canvas) return;
+
+  const range = HEATMAP_RANGES.includes(select.value) ? select.value : "30d";
+  const usable = keys
+    .map(key => ({ key, period: root.cities?.[key]?.periods?.[range] }))
+    .filter(item => item.period?.slots?.length);
+
+  if (state.charts.compareTimeOfDayChart) {
+    state.charts.compareTimeOfDayChart.destroy();
+    delete state.charts.compareTimeOfDayChart;
   }
+
+  if (!usable.length) {
+    if (note) note.textContent = "Немає добового профілю для обраних міст.";
+    return;
+  }
+
+  const labels = usable[0].period.slots.map(slot => slot.start);
+  const intervalLabels = usable[0].period.slots.map(slot => slot.label);
+  const datasets = usable.map((item, idx) => ({
+    label: labelFor(item.key),
+    data: item.period.slots.map(slot => Number(slot.relative_intensity) || 0),
+    alertShares: item.period.slots.map(slot => Number(slot.alert_share_pct) || 0),
+    borderColor: COLORS[idx % COLORS.length],
+    backgroundColor: COLORS[idx % COLORS.length] + "18",
+    borderWidth: 2,
+    pointRadius: 0,
+    pointHoverRadius: 4,
+    pointHitRadius: 10,
+    tension: 0,
+    fill: false
+  }));
+
+  if (note) {
+    const ranges = usable
+      .map(item => `${labelFor(item.key)}: ${item.period.range_start} — ${item.period.range_end}`)
+      .join(" · ");
+    note.textContent =
+      `Кожен ряд нормалізовано окремо: власний найчастіший 15-хвилинний слот = 100%. ${ranges}`;
+  }
+
+  state.charts.compareTimeOfDayChart = new Chart(canvas, {
+    type: "line",
+    data: { labels, datasets },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      animation: false,
+      interaction: { mode: "index", intersect: false },
+      plugins: {
+        legend: { labels: { color: TEXT, boxWidth: 14, usePointStyle: true } },
+        tooltip: {
+          mode: "index",
+          intersect: false,
+          callbacks: {
+            title(items) {
+              const i = items?.[0]?.dataIndex ?? 0;
+              return intervalLabels[i] || labels[i] || "";
+            },
+            label(context) {
+              const share = context.dataset.alertShares?.[context.dataIndex];
+              return `${context.dataset.label}: ${fmt(context.parsed.y, 0)}% від власного піку · фактично ${fmt(share, 1)}% часу`;
+            }
+          }
+        }
+      },
+      scales: {
+        x: {
+          ticks: { color: TEXT, autoSkip: true, maxTicksLimit: 9, maxRotation: 0 },
+          grid: { color: GRID },
+          title: { display: true, text: "Час доби", color: TEXT }
+        },
+        y: {
+          min: 0,
+          max: 100,
+          ticks: { color: TEXT, callback: value => `${value}%` },
+          grid: { color: GRID },
+          title: { display: true, text: "Відносна інтенсивність", color: TEXT }
+        }
+      }
+    }
+  });
 }
 
 function renderFreshness() {
@@ -735,6 +845,7 @@ function renderComparison() {
   metricChart("compareAlertsChart", "alerts_per_day", "Тривог/день");
   metricChart("compareHoursChart", "avg_daily_alert_hours", "Годин/добу");
   metricChart("compareDurationChart", "avg_alert_duration_min", "Хвилин");
+  renderTimeOfDayComparison(keys);
   renderExplosionComparison(keys);
 
   const casualtyCard = $("compareCasualtiesCard");
@@ -914,7 +1025,7 @@ function bind() {
     renderRolling7d($("citySelect").value);
     updateUrl();
   });
-  for (const id of ["compareA", "compareB", "compareC", "comparePeriod"]) $(id).addEventListener("change", renderComparison);
+  for (const id of ["compareA", "compareB", "compareC", "comparePeriod", "compareTimeOfDayRange"]) $(id).addEventListener("change", renderComparison);
   setupTableSorting();
   $("copyLink").addEventListener("click", async () => {
     try {
@@ -956,6 +1067,7 @@ async function init() {
   const cDefault = validOptionalParam("c", keys, defaults[2] || "");
   const compareDefault = validParam("compare", ["monthly", "weekly"], "monthly");
   const heatmapDefault = validParam("tod", HEATMAP_RANGES, "30d");
+  const compareTimeOfDayDefault = validParam("ctod", HEATMAP_RANGES, "30d");
 
   fillSelect($("citySelect"), keys, cityDefault);
   fillSelect($("compareA"), keys, aDefault);
@@ -964,6 +1076,7 @@ async function init() {
   $("cityPeriod").value = periodDefault;
   $("comparePeriod").value = compareDefault;
   $("timeOfDayRange").value = heatmapDefault;
+  $("compareTimeOfDayRange").value = compareTimeOfDayDefault;
 
   const generated = state.data.meta?.generated_at || state.data.cities?.kyiv?.meta?.generated_at;
   $("updatedAt").textContent = generated ? `Дані згенеровано ${String(generated).replace("T", " ").slice(0, 19)}` : "";
