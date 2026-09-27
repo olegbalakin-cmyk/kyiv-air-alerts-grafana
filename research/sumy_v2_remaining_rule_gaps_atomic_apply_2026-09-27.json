@@ -1,0 +1,125 @@
+{
+  "schema_version": "sumy-v2-remaining-rule-gaps-atomic-apply-v1",
+  "generated_date": "2026-09-27",
+  "repository": "olegbalakin-cmyk/kyiv-air-alerts-grafana",
+  "branch": "multicity-wip-2026-09-16",
+  "pre_apply_head": "29364ca6d1275e9fbbca657f5f20a2ec4f7eb179",
+  "proof_implementation_source_sha": "97fc2f5e74d697ddb9e09abac7acbbfc942acf4f",
+  "proof_artifact_sha": "5933163cbe6b1868fb313e8058c0fd213fc0d7c8",
+  "semantic_conflict_with_newer_branch_state": false,
+  "implementation_commit": "1bb62eeacf5cdb2799acd985266e94740b5e1923",
+  "implementation_files_changed": [
+    "kyiv-air-alerts-grafana/scripts/replay_explosion_history.py",
+    "kyiv-air-alerts-grafana/tests/test_historical_replay_remaining_v2_roles.py"
+  ],
+  "source_blob_shas": {
+    "kyiv-air-alerts-grafana/scripts/replay_explosion_history.py": "01102db8dc2a2f685213fca52db03b946c5ff621",
+    "kyiv-air-alerts-grafana/tests/test_historical_replay_remaining_v2_roles.py": "aa283cfcb51099b897da6c7cd5b5e8466ff48fc4"
+  },
+  "fresh_verification": {
+    "workflow_run_id": 36345486611,
+    "rerun_job_id": 108694765697,
+    "status": "success",
+    "focused_and_inherited_tests_passed": true,
+    "replay_self_test_passed": true,
+    "monitor_self_test_passed": true,
+    "sumy_baseline_replay_passed": true,
+    "sumy_post_fix_replay_passed": true,
+    "cross_city_regression_step_passed": true,
+    "exact_delta_assertion_passed": true,
+    "artifact_upload_passed": true
+  },
+  "replay_before": {
+    "denominator_expected": 2297,
+    "denominator_reconstructed": 2297,
+    "qa_count": 10,
+    "strict": 197,
+    "sensitivity": 228
+  },
+  "replay_after": {
+    "denominator_expected": 2297,
+    "denominator_reconstructed": 2297,
+    "qa_count": 5,
+    "strict": 201,
+    "sensitivity": 233
+  },
+  "exact_qa_delta": {
+    "removed_qa_ids": [
+      "2b3df2af5d1a6eb3a0a5b5e6",
+      "57813e54f364c6ea1c31b79d",
+      "b350026329e2fb7dee324d0b",
+      "bc17e3913b1f9a7b78cf8af7",
+      "d4ca36a6f8fdb93684f7b2c2"
+    ],
+    "added_qa_ids": [],
+    "five_target_ids_removed": true,
+    "out_of_scope_qa_ids_remaining": [
+      "2c7ad2e0b42e1350e305a18f",
+      "402035df8980628fa245c4e8",
+      "45050b31bdcf42a5f8054e8d",
+      "90a484f51b321e0950e31b60",
+      "c69285b7ffb05693c3393895"
+    ],
+    "five_out_of_scope_qa_ids_unchanged": true
+  },
+  "metric_delta": {
+    "denominator": {
+      "before": 2297,
+      "after": 2297,
+      "delta": 0
+    },
+    "qa": {
+      "before": 10,
+      "after": 5,
+      "delta": -5
+    },
+    "strict": {
+      "before": 197,
+      "after": 201,
+      "delta": 4
+    },
+    "sensitivity": {
+      "before": 228,
+      "after": 233,
+      "delta": 5
+    },
+    "unexplained_drift": false
+  },
+  "cross_city_regression": {
+    "clean": true,
+    "cities": {
+      "sevastopol": {
+        "qa_before": 0,
+        "qa_after": 0,
+        "strict_before": 38,
+        "strict_after": 38,
+        "sensitivity_before": 55,
+        "sensitivity_after": 55
+      },
+      "lviv": {
+        "qa_before": 0,
+        "qa_after": 0,
+        "strict_before": 12,
+        "strict_after": 12,
+        "sensitivity_before": 12,
+        "sensitivity_after": 12
+      }
+    }
+  },
+  "protected_state_verification": {
+    "implementation_diff_exactly_allowed_two_files": true,
+    "retained_evidence_modified": false,
+    "source_slices_modified": false,
+    "persistent_qa_status_modified": false,
+    "canonical_metrics_modified": false,
+    "production_data_modified": false,
+    "site_prod_modified": false,
+    "dashboard_data_modified": false,
+    "replay_protected_files_unchanged": true,
+    "active_6863_campaign_branch": "historical-attack-event-backfill-2026-09-27",
+    "active_6863_campaign_head_before": "5809bd677a93e6c2f6a1bff9cb7f6b5bde0c7c1e",
+    "active_6863_campaign_head_after": "5809bd677a93e6c2f6a1bff9cb7f6b5bde0c7c1e",
+    "active_6863_campaign_unchanged": true
+  },
+  "verdict": "SUMY REMAINING V2 RULE FIXES ATOMICALLY APPLIED — QA 5"
+}
