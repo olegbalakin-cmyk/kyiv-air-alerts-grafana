@@ -1,0 +1,211 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-09-27T00:00:00Z",
+  "branch": "multicity-wip-2026-09-16",
+  "input_head": "35edd5f039f240a245812e2a184599b5c70ca89a",
+  "scope": "read-only source inventory + coverage preflight; no crawl/replay/evidence/baseline/metric/dashboard/production mutation",
+  "scope_expansion_note": "Filename retained for continuity. This preflight is source-coverage infrastructure for historical attack-event enrichment. PPO is context/mechanism; target event taxonomy is explosion, impact, arrival, strike, damage, fire.",
+  "architecture": [
+    "networked source discovery",
+    "deterministic evidence artifact",
+    "offline current classifier",
+    "dry historical replay",
+    "QA"
+  ],
+  "source_classes": {
+    "AUTONOMOUS_TELEGRAM_PUBLIC": "public t.me/s history/search; bounded pagination; no Telegram API credentials",
+    "AUTONOMOUS_HTML": "direct public HTML source family observed in retained provenance; adapter completeness still requires pilot validation",
+    "AUTONOMOUS_OFFICIAL_API_OR_PAGE": "official public page/API source family observed in retained provenance",
+    "LOCAL_RETAINED_CORPUS_ONLY": "retained repo evidence useful for provenance/controls only",
+    "REQUIRES_ARCHIVE_OR_EXPORT": "known source without deterministic public historical retrieval",
+    "UNUSABLE_FOR_DETERMINISTIC_REPLAY": "unstable aggregator/mirror or non-deterministic locator"
+  },
+  "historical_replay_coverage": {
+    "cherkasy": [
+      1548,
+      1548
+    ],
+    "chernihiv": [
+      1677,
+      557
+    ],
+    "chernivtsi": [
+      113,
+      0
+    ],
+    "dnipro": [
+      2259,
+      1697
+    ],
+    "ivano_frankivsk": [
+      103,
+      0
+    ],
+    "kharkiv": [
+      3565,
+      2378
+    ],
+    "kherson": [
+      1412,
+      0
+    ],
+    "khmelnytskyi": [
+      248,
+      0
+    ],
+    "kropyvnytskyi": [
+      1161,
+      0
+    ],
+    "kyiv": [
+      2456,
+      2446
+    ],
+    "lutsk": [
+      135,
+      0
+    ],
+    "lviv": [
+      126,
+      126
+    ],
+    "mykolaiv": [
+      1648,
+      1097
+    ],
+    "odesa": [
+      1465,
+      976
+    ],
+    "poltava": [
+      1805,
+      0
+    ],
+    "rivne": [
+      232,
+      0
+    ],
+    "sevastopol": [
+      527,
+      527
+    ],
+    "sumy": [
+      2297,
+      2297
+    ],
+    "ternopil": [
+      125,
+      0
+    ],
+    "uzhhorod": [
+      92,
+      0
+    ],
+    "vinnytsia": [
+      362,
+      0
+    ],
+    "zaporizhzhia": [
+      2365,
+      2365
+    ],
+    "zhytomyr": [
+      685,
+      0
+    ]
+  },
+  "observed_autonomous_source_families": {
+    "telegram_public": [
+      "suspilnechernihiv",
+      "suspilnednipro",
+      "suspilnekherson",
+      "suspilnemykolaiv",
+      "suspilnesumy",
+      "sumygo",
+      "suspilnenews",
+      "prokuraturasumy",
+      "Sumy_news_ODA",
+      "zap_gp_gov_ua",
+      "Crimeanwind"
+    ],
+    "html": [
+      "suspilne.media",
+      "24tv.ua",
+      "pravda.com.ua",
+      "ukrinform.ua",
+      "radiosvoboda.org",
+      "fakty.com.ua"
+    ],
+    "official": [
+      "npu.gov.ua",
+      "su.npu.gov.ua",
+      "zp.npu.gov.ua",
+      "zoda.gov.ua",
+      "gur.gov.ua",
+      "chernigiv-rada.gov.ua"
+    ]
+  },
+  "retained_evidence_cities": [
+    "cherkasy",
+    "chernihiv",
+    "dnipro",
+    "kharkiv",
+    "kherson",
+    "kropyvnytskyi",
+    "kyiv",
+    "lviv",
+    "mykolaiv",
+    "odesa",
+    "sevastopol",
+    "sumy",
+    "zaporizhzhia",
+    "zhytomyr"
+  ],
+  "readiness": {
+    "READY_FOR_AUTONOMOUS_PPO_DISCOVERY": [
+      "cherkasy",
+      "lviv",
+      "sevastopol",
+      "sumy",
+      "zaporizhzhia"
+    ],
+    "PARTIAL_SOURCE_COVERAGE": [
+      "chernihiv",
+      "dnipro",
+      "kharkiv",
+      "kyiv",
+      "mykolaiv",
+      "odesa"
+    ],
+    "RETAINED_CORPUS_ONLY": [
+      "kherson",
+      "kropyvnytskyi",
+      "zhytomyr"
+    ],
+    "SOURCE_INPUT_REQUIRED": [
+      "chernivtsi",
+      "ivano_frankivsk",
+      "khmelnytskyi",
+      "lutsk",
+      "poltava",
+      "rivne",
+      "ternopil",
+      "uzhhorod",
+      "vinnytsia"
+    ]
+  },
+  "readiness_counts": {
+    "READY_FOR_AUTONOMOUS_PPO_DISCOVERY": 5,
+    "PARTIAL_SOURCE_COVERAGE": 6,
+    "RETAINED_CORPUS_ONLY": 3,
+    "SOURCE_INPUT_REQUIRED": 9
+  },
+  "caveats": [
+    "Autonomous source family means current repo provenance shows a directly retrievable public family; historical completeness is not yet proven.",
+    "Readiness does not reuse historical classification verdicts as current truth.",
+    "Separate Sumy 21-case source-retention recovery remains out of scope.",
+    "No autonomous historical crawler may run until expanded attack-event classifier hardening + control replay is clean."
+  ],
+  "preflight_complete": true,
+  "verdict": "HISTORICAL PPO SOURCE PREFLIGHT COMPLETE"
+}
