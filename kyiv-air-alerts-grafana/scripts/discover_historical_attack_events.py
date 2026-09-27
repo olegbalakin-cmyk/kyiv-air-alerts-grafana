@@ -562,17 +562,28 @@ def build_pilot(
                     linked_telegram_posts.append(post)
                 time.sleep(sleep_seconds)
 
+    linked_candidate_rows = []
+    linked_candidate_decisions = {}
     for post in linked_telegram_posts:
         text = str(post.get("text") or "")
         if not monitor.city_mentioned(city_key, text) or not ATTACK_DISCOVERY_RE.search(text):
             continue
         row = classifier_row(str(post["channel"]), str(post["channel"]), post)
         row["discovery_basis"] = "article_linked_public_telegram_exact_post"
+        row["candidate_id"] = canonical_observation_id(str(post["channel"]), int(post["message_id"]))
+        row["city_key"] = city_key
         matching = monitor.match_candidate_to_episodes(row, selected)
+        active = monitor.exact_active_episodes_at(parse_dt(post["published_at"]), selected)
+        active_ids = [str(ep.get("episode_id") or "") for ep in active]
+        if len(active_ids) == 1:
+            row["matched_episode_id"] = active_ids[0]
         decision = monitor.classify_candidate(row, city_key, selected, matching)
+        row["status"] = str(decision.get("proposed_outcome") or "needs_review")
+        linked_candidate_rows.append(row)
+        linked_candidate_decisions[row["candidate_id"]] = decision
         temporal = decision.get("temporal_binding") or {}
         observations.append({
-            "observation_id": canonical_observation_id(str(post["channel"]), int(post["message_id"])),
+            "observation_id": row["candidate_id"],
             "source_type": "article_linked_public_telegram",
             "source": f"Telegram / {post['channel']}",
             "source_url": post["url"],
@@ -599,6 +610,41 @@ def build_pilot(
                 "classifier": "monitor_explosion_candidates.py current branch version",
             },
         })
+
+    composition_diagnostics = {}
+    for episode_id in sorted(TARGET_RECOVERY_EPISODES & selected_ids):
+        target_episode = next((ep for ep in selected if str(ep.get("episode_id") or "") == episode_id), None)
+        candidates = [row for row in linked_candidate_rows if str(row.get("matched_episode_id") or "") == episode_id]
+        if target_episode and candidates:
+            composition = monitor.compose_episode_candidates(city_key, target_episode, candidates, selected)
+        else:
+            composition = {
+                "target_episode_id": episode_id,
+                "city_key": city_key,
+                "final_composed_verdict": "no_composed_strict",
+                "reason_codes": ["NO_LINKED_TELEGRAM_CANDIDATES_FOR_TARGET"],
+            }
+        composition_diagnostics[episode_id] = {
+            "candidate_ids": [str(row.get("candidate_id") or "") for row in candidates],
+            "candidates": [
+                {
+                    "candidate_id": str(row.get("candidate_id") or ""),
+                    "url": row.get("url"),
+                    "published_at": row.get("published_at"),
+                    "text": str(row.get("title") or ""),
+                    "decision": {
+                        "outcome": linked_candidate_decisions.get(str(row.get("candidate_id") or ""), {}).get("proposed_outcome"),
+                        "temporal_binding": linked_candidate_decisions.get(str(row.get("candidate_id") or ""), {}).get("temporal_binding"),
+                        "strict_explosion": linked_candidate_decisions.get(str(row.get("candidate_id") or ""), {}).get("strict_explosion_evidence"),
+                        "air_context": linked_candidate_decisions.get(str(row.get("candidate_id") or ""), {}).get("air_military_context"),
+                        "same_attack": linked_candidate_decisions.get(str(row.get("candidate_id") or ""), {}).get("same_attack_context"),
+                        "reason_codes": linked_candidate_decisions.get(str(row.get("candidate_id") or ""), {}).get("reason_codes"),
+                    },
+                }
+                for row in candidates
+            ],
+            "composition": composition,
+        }
 
     for source_cfg in TARGETED_SECONDARY_SOURCES:
         if source_cfg["target_episode_id"] not in selected_ids:
@@ -761,6 +807,7 @@ def build_pilot(
                 "unique_exact_posts_requested": len(linked_telegram_seen),
                 "resolved_posts": len(linked_telegram_posts),
                 "fetches": linked_telegram_fetches,
+                "composition_diagnostics": composition_diagnostics,
             },
             "targeted_secondary_html": {
                 "configured_sources": len(TARGETED_SECONDARY_SOURCES),
@@ -863,7 +910,13 @@ def main() -> None:
     )
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(result, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-    print(json.dumps({"verdict": result["verdict"], "summary": result["summary"], "controls": result["controls"], "retrieval": result["retrieval"]}, ensure_ascii=False, indent=2))
+    print(json.dumps({
+        "verdict": result["verdict"],
+        "summary": result["summary"],
+        "controls": result["controls"],
+        "recovery_preflight": result.get("recovery_preflight"),
+        "retrieval": result["retrieval"],
+    }, ensure_ascii=False, indent=2))
     if result["verdict"].endswith("BLOCKED"):
         raise SystemExit(2)
 
