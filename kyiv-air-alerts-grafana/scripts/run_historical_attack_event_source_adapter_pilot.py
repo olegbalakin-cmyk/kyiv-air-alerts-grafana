@@ -39,8 +39,9 @@ PROTECTED_RELATIVE = [
     "data/dashboard_data.json",
 ]
 DISCOVERY_RE = re.compile(
-    r"(?:взрыв|вибух|пво|ппо|ракет|дрон|бпла|беспил|безпіл|удар|"
-    r"попад|влуч|прилет|приліт|пожар|пожеж|поврежд|пошкод|атак)",
+    r"(?:взрыв|вибух|пво|ппо|протиповітр|противовоздуш|ракет|дрон|бпла|беспил|безпіл|удар|"
+    r"попад|влуч|прилет|приліт|пожар|пожеж|поврежд|пошкод|атак|"
+    r"працю|работ|робот|чути|чутно|слышно)",
     re.IGNORECASE,
 )
 
@@ -280,6 +281,9 @@ def observation_from_post(post: dict, selected: list[dict]) -> dict:
         "excerpt": str(post.get("text") or "")[:1200],
         "matched_terms": source_matched_terms(str(post.get("text") or "")),
         "event_types_supported": event_types,
+        "air_defense_context": bool(decision.get("air_defense_context")),
+        "air_defense_action": bool(decision.get("air_defense_action")),
+        "interception_claim": bool(decision.get("interception_claim")),
         "exact_city_binding": decision.get("exact_city_classification_evidence"),
         "air_attack_context": decision.get("air_military_context"),
         "same_attack_context": decision.get("same_attack_context"),
