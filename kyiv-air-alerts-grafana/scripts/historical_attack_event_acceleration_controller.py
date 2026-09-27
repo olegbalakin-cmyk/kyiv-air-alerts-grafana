@@ -346,3 +346,315 @@ def systemic_source_failure(payload: dict) -> bool:
         and retryable >= SYSTEMIC_RETRY_MIN
         and retryable / new_work >= SYSTEMIC_RETRY_RATIO
     )
+
+
+def transition_state(
+    state: dict,
+    *,
+    scheduled: bool,
+    clean: bool,
+    did_work: bool,
+    complete: bool,
+    run_id: str | None,
+    progress_before: int,
+    progress_after: int,
+    timestamp: str,
+    reason: str | None = None,
+) -> dict:
+    out = copy.deepcopy(state)
+    phase = out["phase"]
+    if complete:
+        out["phase"] = PHASE_COMPLETE
+        out["clean_scheduled_runs"] = 0
+        out["fallback_reason"] = None
+        out["last_progress_before"] = progress_before
+        out["last_progress_after"] = progress_after
+        out["last_success_at"] = timestamp
+        out["updated_at"] = timestamp
+        if scheduled:
+            out["last_scheduler_run_id"] = run_id
+        return out
+    if not clean:
+        out["clean_scheduled_runs"] = 0
+        out["failed_or_guarded_runs"] = int(out.get("failed_or_guarded_runs") or 0) + 1
+        out["fallback_reason"] = reason or "UNSPECIFIED_GUARD_FAILURE"
+        if phase in {PHASE_2X, PHASE_4X}:
+            out["phase"] = PHASE_FALLBACK
+        out["last_progress_before"] = progress_before
+        out["last_progress_after"] = progress_after
+        out["updated_at"] = timestamp
+        if scheduled:
+            out["last_scheduler_run_id"] = run_id
+        return out
+    if not scheduled or not did_work:
+        return out
+    if phase == PHASE_CONTROL:
+        out["phase"] = PHASE_2X
+        out["clean_scheduled_runs"] = 0
+        out["stage1_started_at"] = out.get("stage1_started_at") or timestamp
+        out["fallback_reason"] = None
+    elif phase == PHASE_2X:
+        streak = int(out.get("clean_scheduled_runs") or 0) + 1
+        if streak >= STAGE1_PROMOTION_RUNS:
+            out["phase"] = PHASE_4X
+            out["clean_scheduled_runs"] = 0
+            out["stage2_started_at"] = out.get("stage2_started_at") or timestamp
+        else:
+            out["clean_scheduled_runs"] = streak
+        out["fallback_reason"] = None
+    elif phase == PHASE_FALLBACK:
+        out["phase"] = PHASE_2X
+        out["clean_scheduled_runs"] = 0
+        out["stage1_started_at"] = timestamp
+        out["fallback_reason"] = None
+    elif phase == PHASE_4X:
+        out["clean_scheduled_runs"] = int(out.get("clean_scheduled_runs") or 0) + 1
+        out["fallback_reason"] = None
+    out["last_scheduler_run_id"] = run_id
+    out["last_progress_before"] = progress_before
+    out["last_progress_after"] = progress_after
+    out["last_success_at"] = timestamp
+    out["updated_at"] = timestamp
+    return out
+
+
+def persist_state(root: Path, old_state: dict, new_state_doc: dict, expected_head: str, message: str) -> str:
+    if old_state == new_state_doc:
+        return expected_head
+    dump_json(root / STATE_REL, new_state_doc)
+    return commit_and_push(root, [STATE_REL], message, expected_head)
+
+
+def persist_guard_after_refresh(
+    root: Path,
+    event_name: str,
+    run_id: str | None,
+    reason: str,
+) -> tuple[dict, str]:
+    git(root, "fetch", "origin", CAMPAIGN_BRANCH)
+    git(root, "reset", "--hard", f"origin/{CAMPAIGN_BRANCH}")
+    head = git(root, "rev-parse", "HEAD")
+    status = load_json(root / STATUS_REL)
+    launch = load_json(root / LAUNCH_REL)
+    validate_status_contract(root, status, launch)
+    state = load_json(root / STATE_REL)
+    validate_state_contract(state, status)
+    before, _, _ = campaign_progress(status)
+    updated = transition_state(
+        state,
+        scheduled=event_name == "schedule",
+        clean=False,
+        did_work=False,
+        complete=False,
+        run_id=run_id,
+        progress_before=before,
+        progress_after=before,
+        timestamp=now_iso(),
+        reason=reason,
+    )
+    head = persist_state(
+        root,
+        state,
+        updated,
+        head,
+        "Record historical backfill acceleration safety fallback",
+    )
+    return updated, head
+
+
+def summary(
+    before: dict,
+    after: dict,
+    processed_before: int,
+    processed_after: int,
+    batches_attempted: int,
+    batches_committed: int,
+    new_episodes: int,
+    clean: bool,
+    fallback_reason: str | None,
+    complete: bool,
+    *,
+    head: str | None = None,
+) -> dict:
+    return {
+        "campaign_id": CAMPAIGN_ID,
+        "phase_before": before.get("phase"),
+        "phase_after": after.get("phase"),
+        "processed_before": processed_before,
+        "processed_after": processed_after,
+        "batches_attempted": batches_attempted,
+        "batches_committed": batches_committed,
+        "new_episodes_processed": new_episodes,
+        "clean_run": "YES" if clean else "NO",
+        "clean_run_streak": int(after.get("clean_scheduled_runs") or 0),
+        "fallback_reason": fallback_reason,
+        "campaign_complete": "YES" if complete else "NO",
+        "campaign_head": head,
+    }
+
+
+def run_controller(root: Path, event_name: str, run_id: str | None) -> dict:
+    root = root.resolve()
+    status = load_json(root / STATUS_REL)
+    launch = load_json(root / LAUNCH_REL)
+    validate_status_contract(root, status, launch)
+    verify_protected(root, launch)
+    initial_launch_blob = launch_blob(root)
+    state = load_json(root / STATE_REL) if (root / STATE_REL).exists() else new_state(status, now_iso())
+    validate_state_contract(state, status)
+    phase_before = state["phase"]
+    processed_before, total, terminal_before = campaign_progress(status)
+    if state["phase"] == PHASE_COMPLETE:
+        if processed_before != total or terminal_before != total:
+            raise GuardFailure("COMPLETE_STATE_WITH_INCOMPLETE_CAMPAIGN")
+        return summary(
+            state, state, processed_before, processed_before,
+            0, 0, 0, True, None, True, head=git(root, "rev-parse", "HEAD")
+        )
+    if processed_before == total and terminal_before == total:
+        updated = transition_state(
+            state, scheduled=event_name == "schedule", clean=True, did_work=False, complete=True,
+            run_id=run_id, progress_before=processed_before, progress_after=processed_before,
+            timestamp=now_iso(),
+        )
+        head = persist_state(
+            root, state, updated, git(root, "rev-parse", "HEAD"),
+            "Mark historical backfill acceleration complete"
+        )
+        return summary(
+            state, updated, processed_before, processed_before,
+            0, 0, 0, True, None, True, head=head
+        )
+
+    seen_observations = collect_observation_ids(root)
+    max_batches = phase_batch_limit(phase_before)
+    batches_attempted = 0
+    batches_committed = 0
+    new_episodes = 0
+    metadata_transitions = 0
+    expected_head = git(root, "rev-parse", "HEAD")
+    guard_reason: str | None = None
+
+    try:
+        while batches_committed < max_batches:
+            status_before_doc = load_json(root / STATUS_REL)
+            launch_before_doc = load_json(root / LAUNCH_REL)
+            validate_status_contract(root, status_before_doc, launch_before_doc)
+            verify_protected(root, launch_before_doc)
+            if launch_blob(root) != initial_launch_blob:
+                raise GuardFailure("LAUNCH_ARTIFACT_MUTATED")
+            episode_before = episode_snapshot(status_before_doc)
+            progress0, _, _ = campaign_progress(status_before_doc)
+            batches_attempted += 1
+            payload = run_worker(root)
+
+            status_after_doc = load_json(root / STATUS_REL)
+            launch_after_doc = load_json(root / LAUNCH_REL)
+            validate_status_contract(root, status_after_doc, launch_after_doc)
+            verify_protected(root, launch_after_doc)
+            if launch_blob(root) != initial_launch_blob:
+                raise GuardFailure("LAUNCH_ARTIFACT_MUTATED")
+            episode_after = episode_snapshot(status_after_doc)
+            validate_episode_progress(episode_before, episode_after)
+            progress1, _, _ = campaign_progress(status_after_doc)
+            if progress1 < progress0:
+                raise GuardFailure(f"CHECKPOINT_PROGRESS_REGRESSION:{progress0}->{progress1}")
+
+            new_work = int(payload.get("new_work") or 0)
+            if new_work == 0:
+                dirty_status = git(root, "status", "--porcelain", "--", STATUS_REL.as_posix())
+                if dirty_status:
+                    ensure_expected_dirty_paths(root, None, metadata_only=True)
+                    expected_head = commit_and_push(
+                        root, [STATUS_REL],
+                        "Advance historical attack-event campaign state",
+                        expected_head,
+                    )
+                    metadata_transitions += 1
+                    if metadata_transitions > 8:
+                        raise GuardFailure("EXCESSIVE_METADATA_ONLY_TRANSITIONS")
+                    continue
+                break
+
+            batch_path_str = str(payload.get("batch_path") or "")
+            if not batch_path_str:
+                raise GuardFailure("WORKER_BATCH_PATH_MISSING")
+            batch_rel = Path(batch_path_str)
+            if batch_rel.is_absolute():
+                try:
+                    batch_rel = batch_rel.relative_to(root)
+                except ValueError as exc:
+                    raise GuardFailure("WORKER_BATCH_PATH_OUTSIDE_CHECKOUT") from exc
+            batch_path = root / batch_rel
+            if not batch_path.exists():
+                raise GuardFailure("WORKER_BATCH_FILE_MISSING")
+            ensure_expected_dirty_paths(root, batch_rel)
+            new_ids = validate_new_batch_observations(batch_path, seen_observations)
+            source_guard = systemic_source_failure(payload)
+            expected_head = commit_and_push(
+                root, [STATUS_REL, batch_rel],
+                "Checkpoint historical attack-event backfill",
+                expected_head,
+            )
+            seen_observations.update(new_ids)
+            batches_committed += 1
+            new_episodes += max(0, progress1 - progress0)
+            if source_guard:
+                guard_reason = (
+                    f"SYSTEMIC_SOURCE_FAILURE:retryable={int(payload.get('retryable') or 0)}/"
+                    f"new_work={new_work}"
+                )
+                break
+    except GuardFailure as exc:
+        guard_reason = str(exc)
+        rollback_worker(root)
+
+    status_final = load_json(root / STATUS_REL)
+    processed_after, total_after, terminal_after = campaign_progress(status_final)
+    complete = processed_after == total_after and terminal_after == total_after
+    scheduled = event_name == "schedule"
+    did_work = batches_committed > 0
+    clean = guard_reason is None and did_work
+    if not did_work and not complete and guard_reason is None:
+        guard_reason = "NO_ELIGIBLE_WORK_BEFORE_COMPLETION"
+        clean = False
+
+    if guard_reason and "STALE_WRITER_CONFLICT" in guard_reason:
+        updated, expected_head = persist_guard_after_refresh(root, event_name, run_id, guard_reason)
+        status_final = load_json(root / STATUS_REL)
+        processed_after, total_after, terminal_after = campaign_progress(status_final)
+        complete = processed_after == total_after and terminal_after == total_after
+    else:
+        refreshed_state = load_json(root / STATE_REL)
+        validate_state_contract(refreshed_state, status_final)
+        updated = transition_state(
+            refreshed_state,
+            scheduled=scheduled,
+            clean=clean,
+            did_work=did_work,
+            complete=complete,
+            run_id=run_id,
+            progress_before=processed_before,
+            progress_after=processed_after,
+            timestamp=now_iso(),
+            reason=guard_reason,
+        )
+        expected_head = persist_state(
+            root, refreshed_state, updated, expected_head,
+            "Update historical backfill acceleration state"
+        )
+
+    launch_final = load_json(root / LAUNCH_REL)
+    validate_status_contract(root, status_final, launch_final)
+    verify_protected(root, launch_final)
+    if launch_blob(root) != initial_launch_blob:
+        raise GuardFailure("LAUNCH_ARTIFACT_MUTATED_AFTER_RUN")
+    result = summary(
+        state, updated, processed_before, processed_after,
+        batches_attempted, batches_committed, new_episodes,
+        guard_reason is None, guard_reason, complete, head=expected_head
+    )
+    if guard_reason:
+        print(json.dumps(result, ensure_ascii=False, sort_keys=True))
+        raise GuardFailure(guard_reason)
+    return result
