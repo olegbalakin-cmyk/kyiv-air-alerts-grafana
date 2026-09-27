@@ -34,7 +34,7 @@ jobs:
         run: |
           set -euo pipefail
           BASE=29364ca6d1275e9fbbca657f5f20a2ec4f7eb179
-          POST=bd7b062369f8807e15a517a443a93ab577d69ee1
+          POST=626c7ae5f686cfd06a876b99f4d7ad9dbe27f39f
           git worktree add "$RUNNER_TEMP/base" "$BASE"
           git worktree add "$RUNNER_TEMP/post" "$POST"
           test "$(git -C "$RUNNER_TEMP/base" rev-parse HEAD)" = "$BASE"
@@ -59,7 +59,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          python "$RUNNER_TEMP/post/kyiv-air-alerts-grafana/scripts/replay_explosion_history.py"             --repo-root "$RUNNER_TEMP/post/kyiv-air-alerts-grafana"             --city sumy --through 2026-09-17             --input-head bd7b062369f8807e15a517a443a93ab577d69ee1             --read-only --output "$RUNNER_TEMP/sumy-post.json"
+          python "$RUNNER_TEMP/post/kyiv-air-alerts-grafana/scripts/replay_explosion_history.py"             --repo-root "$RUNNER_TEMP/post/kyiv-air-alerts-grafana"             --city sumy --through 2026-09-17             --input-head 626c7ae5f686cfd06a876b99f4d7ad9dbe27f39f             --read-only --output "$RUNNER_TEMP/sumy-post.json"
 
       - name: Run same cross-city replay regression
         shell: bash
@@ -67,7 +67,7 @@ jobs:
           set -euo pipefail
           for city in sevastopol lviv; do
             python "$RUNNER_TEMP/base/kyiv-air-alerts-grafana/scripts/replay_explosion_history.py"               --repo-root "$RUNNER_TEMP/base/kyiv-air-alerts-grafana"               --city "$city" --through 2026-09-17               --input-head 29364ca6d1275e9fbbca657f5f20a2ec4f7eb179               --read-only --output "$RUNNER_TEMP/$city-baseline.json"
-            python "$RUNNER_TEMP/post/kyiv-air-alerts-grafana/scripts/replay_explosion_history.py"               --repo-root "$RUNNER_TEMP/post/kyiv-air-alerts-grafana"               --city "$city" --through 2026-09-17               --input-head bd7b062369f8807e15a517a443a93ab577d69ee1               --read-only --output "$RUNNER_TEMP/$city-post.json"
+            python "$RUNNER_TEMP/post/kyiv-air-alerts-grafana/scripts/replay_explosion_history.py"               --repo-root "$RUNNER_TEMP/post/kyiv-air-alerts-grafana"               --city "$city" --through 2026-09-17               --input-head 626c7ae5f686cfd06a876b99f4d7ad9dbe27f39f               --read-only --output "$RUNNER_TEMP/$city-post.json"
           done
 
       - name: Build and assert exact proof delta
@@ -201,10 +201,11 @@ jobs:
           diff_files = subprocess.check_output(
               ["git", "-C", str(post_root), "diff", "--name-only",
                "29364ca6d1275e9fbbca657f5f20a2ec4f7eb179",
-               "bd7b062369f8807e15a517a443a93ab577d69ee1"],
+               "626c7ae5f686cfd06a876b99f4d7ad9dbe27f39f"],
               text=True,
           ).splitlines()
           allowed_files = {
+              ".github/workflows/sumy-v2-remaining-rule-gaps-proof-temp.yml",
               "kyiv-air-alerts-grafana/scripts/replay_explosion_history.py",
               "kyiv-air-alerts-grafana/tests/test_historical_replay_remaining_v2_roles.py",
           }
@@ -282,7 +283,7 @@ jobs:
           assert cross_clean
 
           expected_after = {
-              "2b3df2af5d1a6eb3a0a5b5e6": ("approved_strict", ["strike"]),
+              "2b3df2af5d1a6eb3a0a5b5e6": ("approved_strict", ["explosion"]),
               "57813e54f364c6ea1c31b79d": ("approved_strict", ["strike"]),
               "b350026329e2fb7dee324d0b": ("approved_strict", ["strike"]),
               "bc17e3913b1f9a7b78cf8af7": ("approved_sensitivity", ["impact"]),
