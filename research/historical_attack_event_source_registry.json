@@ -1,0 +1,188 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-09-27T12:46:00Z",
+  "starting_head": "1f17c2c46ad0677289cdf7a14800edd5555cbf31",
+  "replay_status_path": "research/historical_replay_status_current.json",
+  "replay_status_blob": "b04f110c81b03522898c0c45a3c632eb96f759fa",
+  "discovery_contract": {
+    "replay_ready_requires": [
+      "source_status=READY",
+      "expected_alert_episodes=reconstructed_alert_episodes"
+    ],
+    "source_failure_is_negative": false,
+    "exact_url_only_is_complete_coverage": false,
+    "late_damage_fire_window_hours": 72,
+    "ppo_is_context_not_numerator_event": true
+  },
+  "priority": [
+    "lviv",
+    "sevastopol",
+    "cherkasy",
+    "sumy",
+    "zaporizhzhia"
+  ],
+  "cities": {
+    "cherkasy": {
+      "city_key": "cherkasy",
+      "discovery_status": "DISCOVERY_READY",
+      "adapter_type": "SourceLocalHtmlArchiveAdapter",
+      "source_family": "suspilne.media/cherkasy",
+      "domain": "https://suspilne.media/cherkasy/",
+      "section": "cherkasy",
+      "discovery_method": "bounded source-local date archive crawl + article-linked public Telegram context",
+      "bounded_date_time_strategy": "alert local day through alert end +72h; max 220 unique archive days per batch",
+      "coverage_basis": "retained evidence contains repeated Suspilne Cherkasy historical sources; existing generic Suspilne archive adapter supports arbitrary section keys",
+      "rate_limits": {
+        "timeout_seconds": 15,
+        "max_retries": 2,
+        "rate_limit_seconds": 0.2,
+        "max_archive_articles_per_day": 80
+      },
+      "source_families": [
+        {
+          "adapter_type": "SourceLocalHtmlArchiveAdapter",
+          "source_family": "suspilne.media/cherkasy",
+          "domain": "suspilne.media",
+          "section": "cherkasy",
+          "publisher": "Суспільне Черкаси",
+          "enabled": true,
+          "max_linked_telegram_posts": 12
+        }
+      ]
+    },
+    "kyiv": {
+      "city_key": "kyiv",
+      "discovery_status": "SOURCE_ADAPTER_REQUIRED",
+      "adapter_type": null,
+      "source_family": null,
+      "domain": null,
+      "discovery_method": null,
+      "bounded_date_time_strategy": null,
+      "coverage_basis": "historical source inventory classifies Kyiv as PARTIAL_SOURCE_COVERAGE; no complete deterministic historical discovery family is validated for autonomous campaign use",
+      "rate_limits": null,
+      "source_families": [],
+      "reason": "SOURCE_ADAPTER_REQUIRED"
+    },
+    "lviv": {
+      "city_key": "lviv",
+      "discovery_status": "DISCOVERY_READY",
+      "adapter_type": "SourceLocalHtmlArchiveAdapter",
+      "source_family": "suspilne.media/lviv",
+      "domain": "https://suspilne.media/lviv/",
+      "section": "lviv",
+      "discovery_method": "bounded source-local date archive crawl + article-linked public Telegram context",
+      "bounded_date_time_strategy": "alert local day through alert end +72h; max 220 unique archive days per batch",
+      "coverage_basis": "existing 40-episode Lviv pilot validates the source-local Suspilne adapter path; exact-URL secondary sources remain controls only",
+      "rate_limits": {
+        "timeout_seconds": 15,
+        "max_retries": 2,
+        "rate_limit_seconds": 0.2,
+        "max_archive_articles_per_day": 80
+      },
+      "source_families": [
+        {
+          "adapter_type": "SourceLocalHtmlArchiveAdapter",
+          "source_family": "suspilne.media/lviv",
+          "domain": "suspilne.media",
+          "section": "lviv",
+          "publisher": "Суспільне Львів",
+          "enabled": true,
+          "max_linked_telegram_posts": 12
+        },
+        {
+          "adapter_type": "ExactUrlHtmlPreflightAdapter",
+          "source_family": "targeted_secondary_html_control",
+          "enabled": false,
+          "reason": "exact-URL controls do not constitute complete city-history discovery coverage"
+        }
+      ]
+    },
+    "sevastopol": {
+      "city_key": "sevastopol",
+      "discovery_status": "DISCOVERY_READY",
+      "adapter_type": "PublicTelegramAdapter",
+      "source_family": "telegram/Crimeanwind",
+      "domain": "https://t.me/Crimeanwind",
+      "channel": "Crimeanwind",
+      "discovery_method": "bounded public Telegram web search/history",
+      "bounded_date_time_strategy": "earliest batch alert -3h through latest alert end +72h; max 60 pages",
+      "coverage_basis": "existing Sevastopol adapter pilot validates deterministic public Crimeanwind retrieval without Telegram API credentials",
+      "rate_limits": {
+        "timeout_seconds": 15,
+        "max_retries": 2,
+        "rate_limit_seconds": 0.2,
+        "max_pages": 60
+      },
+      "source_families": [
+        {
+          "adapter_type": "PublicTelegramAdapter",
+          "source_family": "telegram/Crimeanwind",
+          "channel": "Crimeanwind",
+          "publisher": "Crimeanwind",
+          "city_query": "Севастополь",
+          "queries": [
+            "Севастополь"
+          ],
+          "max_pages": 60,
+          "enabled": true
+        }
+      ]
+    },
+    "sumy": {
+      "city_key": "sumy",
+      "discovery_status": "DISCOVERY_READY",
+      "adapter_type": "SourceLocalHtmlArchiveAdapter",
+      "source_family": "suspilne.media/sumy",
+      "domain": "https://suspilne.media/sumy/",
+      "section": "sumy",
+      "discovery_method": "bounded source-local date archive crawl + article-linked public Telegram context",
+      "bounded_date_time_strategy": "alert local day through alert end +72h; max 220 unique archive days per batch",
+      "coverage_basis": "source inventory marks Sumy ready for autonomous discovery and retained evidence is dominated by Suspilne Sumy with additional Telegram controls",
+      "rate_limits": {
+        "timeout_seconds": 15,
+        "max_retries": 2,
+        "rate_limit_seconds": 0.2,
+        "max_archive_articles_per_day": 80
+      },
+      "source_families": [
+        {
+          "adapter_type": "SourceLocalHtmlArchiveAdapter",
+          "source_family": "suspilne.media/sumy",
+          "domain": "suspilne.media",
+          "section": "sumy",
+          "publisher": "Суспільне Суми",
+          "enabled": true,
+          "max_linked_telegram_posts": 12
+        }
+      ]
+    },
+    "zaporizhzhia": {
+      "city_key": "zaporizhzhia",
+      "discovery_status": "DISCOVERY_READY",
+      "adapter_type": "SourceLocalHtmlArchiveAdapter",
+      "source_family": "suspilne.media/zaporizhzhia",
+      "domain": "https://suspilne.media/zaporizhzhia/",
+      "section": "zaporizhzhia",
+      "discovery_method": "bounded source-local date archive crawl + article-linked public Telegram context",
+      "bounded_date_time_strategy": "alert local day through alert end +72h; max 220 unique archive days per batch",
+      "coverage_basis": "source inventory marks Zaporizhzhia ready for autonomous discovery and retained evidence includes a substantial Suspilne Zaporizhzhia source family",
+      "rate_limits": {
+        "timeout_seconds": 15,
+        "max_retries": 2,
+        "rate_limit_seconds": 0.2,
+        "max_archive_articles_per_day": 80
+      },
+      "source_families": [
+        {
+          "adapter_type": "SourceLocalHtmlArchiveAdapter",
+          "source_family": "suspilne.media/zaporizhzhia",
+          "domain": "suspilne.media",
+          "section": "zaporizhzhia",
+          "publisher": "Суспільне Запоріжжя",
+          "enabled": true,
+          "max_linked_telegram_posts": 12
+        }
+      ]
+    }
+  }
+}
