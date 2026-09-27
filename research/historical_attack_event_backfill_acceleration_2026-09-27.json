@@ -1,0 +1,179 @@
+{
+  "schema_version": 1,
+  "kind": "historical_attack_event_backfill_staged_acceleration_acceptance",
+  "generated_at": "2026-09-27T18:19:30Z",
+  "campaign_id": "historical-attack-events-v2-2026-09-27",
+  "methodology_version": "historical-attack-event-air-defense-action-v2",
+  "starting_main_head": "8c9c212c6854bbd83c5a65227e256b13676d4428",
+  "starting_campaign_branch_head": "cb307c1abba67891948a3aeb47c93e4bd03704ea",
+  "starting_processed_count": 50,
+  "total_episodes": 6863,
+  "scheduler": {
+    "branch": "main",
+    "path": ".github/workflows/historical-attack-event-backfill-scheduler.yml",
+    "old_cadence": "17 */6 * * *",
+    "new_cadence": "17 */3 * * *",
+    "workflow_dispatch_preserved": true,
+    "concurrency_group": "historical-attack-event-backfill-writer",
+    "cancel_in_progress": false,
+    "campaign_checkout_branch": "historical-attack-event-backfill-2026-09-27",
+    "batch_size": 50,
+    "per_batch_checkpointing": true,
+    "parallel_matrix_writers": false
+  },
+  "phase_state_schema": {
+    "schema_version": 1,
+    "state_path": "research/historical_attack_event_backfill_acceleration_state.json",
+    "fields": [
+      "schema_version",
+      "campaign_id",
+      "campaign_version",
+      "frozen_total_episodes",
+      "phase",
+      "clean_scheduled_runs",
+      "failed_or_guarded_runs",
+      "last_scheduler_run_id",
+      "last_progress_before",
+      "last_progress_after",
+      "last_success_at",
+      "stage1_started_at",
+      "stage2_started_at",
+      "fallback_reason",
+      "updated_at"
+    ],
+    "phases": [
+      "CONTROL",
+      "ACCELERATED_2X",
+      "ACCELERATED_4X",
+      "SAFETY_FALLBACK",
+      "COMPLETE"
+    ],
+    "initial_phase": "CONTROL"
+  },
+  "control_resume_requirement": {
+    "initial_launch_run_counts": false,
+    "requires_scheduled_resume": true,
+    "requires_new_work": true,
+    "requires_monotonic_progress": true,
+    "manual_dispatch_promotes": false,
+    "next_phase_after_clean_scheduled_resume": "ACCELERATED_2X"
+  },
+  "stage1": {
+    "phase": "ACCELERATED_2X",
+    "batch_size": 50,
+    "max_batches_per_run": 2,
+    "theoretical_max_episodes_per_day": 800,
+    "promotion_requires_consecutive_clean_scheduled_runs": 8
+  },
+  "stage2": {
+    "phase": "ACCELERATED_4X",
+    "batch_size": 50,
+    "max_batches_per_run": 4,
+    "theoretical_max_episodes_per_day": 1600
+  },
+  "fallback": {
+    "phase": "SAFETY_FALLBACK",
+    "batch_size": 50,
+    "max_batches_per_run": 1,
+    "exact_reason_persisted": true,
+    "clean_fallback_run_returns_to": "ACCELERATED_2X",
+    "direct_return_to_accelerated_4x": false,
+    "triggers": [
+      "worker_or_checkpoint_failure",
+      "duplicate_observation_id",
+      "terminal_same_version_episode_regression",
+      "stale_writer_conflict",
+      "protected_file_mutation",
+      "campaign_version_mismatch",
+      "frozen_universe_drift",
+      "checkpoint_progress_regression",
+      "systemic_source_failure"
+    ]
+  },
+  "clean_run_guards": {
+    "campaign_version_and_methodology": true,
+    "checkpoint_schema": true,
+    "frozen_universe_vs_launch_artifact": true,
+    "protected_hashes_vs_launch_artifact": true,
+    "duplicate_observation_ids": true,
+    "terminal_same_version_episode_rerun_or_regression": true,
+    "stale_writer_remote_head": true,
+    "monotonic_progress": true,
+    "pushed_checkpoint_visibility": true,
+    "systemic_source_failure": true
+  },
+  "transition_tests": {
+    "validation_workflow_run_id": 36340187471,
+    "validation_workflow_conclusion": "success",
+    "python_compile": "PASS",
+    "control_resume_gate": "PASS",
+    "manual_does_not_promote": "PASS",
+    "stage1_eight_run_promotion": "PASS",
+    "stage1_failure_fallback": "PASS",
+    "stage2_failure_fallback": "PASS",
+    "fallback_recovery_to_stage1_only": "PASS",
+    "synthetic_guard_injection": "PASS",
+    "completion_idempotence": "PASS"
+  },
+  "live_read_only_inspection": {
+    "phase": "CONTROL",
+    "max_batches_per_run": 1,
+    "batch_size": 50,
+    "processed": 50,
+    "terminal": 50,
+    "total": 6863,
+    "protected_file_count": 19,
+    "frozen_universe_unchanged": true,
+    "campaign_checkout_clean_after_inspection": true
+  },
+  "idempotence_test": {
+    "no_work_state_mutation": false,
+    "result": "PASS"
+  },
+  "protected_file_hashes": {
+    "kyiv-air-alerts-grafana/data/explosion_audited_baseline.json": "5bbd2b771559eac2966aeec65d6e3b5487b9c1a9",
+    "kyiv-air-alerts-grafana/data/explosion_review_queue.json": "e6ed6776ae326a18a07978b1979dd3b265096bf0",
+    "kyiv-air-alerts-grafana/data/explosion_candidate_monitor_state.json": "3c8658880c6b93a00fb8ddbec2c4eaeed6d3f2cc",
+    "kyiv-air-alerts-grafana/data/explosion_candidate_monitor_last_run.json": "1552b13a2a9361be968cea4f09876cc20f96572f",
+    "kyiv-air-alerts-grafana/data/explosions_test.json": "3109dc02d2292efa59eddd26b34292cab2b554ab",
+    "kyiv-air-alerts-grafana/data/dashboard_data.json": "85e1d5cacfbe0af1530bbf584cb63ebdfef463e6",
+    "kyiv-air-alerts-grafana/data/explosion_research/cherkasy/final_evidence.json": "5dd59bb3c4076d2a27ee6f77464ec0be507d2cd7",
+    "kyiv-air-alerts-grafana/data/explosion_research/chernihiv/final_evidence.json": "708644ea2cf5673d56f8cc73104c2fa17c72fd93",
+    "kyiv-air-alerts-grafana/data/explosion_research/dnipro/final_evidence.json": "99758ae2a7d888593ffd863cc53cd9f48bf34f5a",
+    "kyiv-air-alerts-grafana/data/explosion_research/kharkiv/final_evidence.json": "dcbbb3a2cf96276f23672d8e6e497626740c7947",
+    "kyiv-air-alerts-grafana/data/explosion_research/kherson/final_evidence.json": "243b36904ea715fef0d100656f0822100009ca9b",
+    "kyiv-air-alerts-grafana/data/explosion_research/kropyvnytskyi/final_evidence.json": "ab21e5608a2d0600538b7a5b4d3cee77f5eb9f7b",
+    "kyiv-air-alerts-grafana/data/explosion_research/kyiv/final_evidence.json": "dd21e37b5903e53ef4be90b23133a14a1b7aa613",
+    "kyiv-air-alerts-grafana/data/explosion_research/lviv/final_evidence.json": "bc6b04e0892e430f8a055f2a7d54b41dfd00715b",
+    "kyiv-air-alerts-grafana/data/explosion_research/mykolaiv/final_evidence.json": "fe10f780d988917a0f742400d774ac8b20466ffd",
+    "kyiv-air-alerts-grafana/data/explosion_research/odesa/final_evidence.json": "1ed4cf2a52b02c7b1ffb36fa7f7737e81543e428",
+    "kyiv-air-alerts-grafana/data/explosion_research/sevastopol/final_evidence.json": "931a575dbd9b3fc4c90579bfbbb9ad54d8e70a62",
+    "kyiv-air-alerts-grafana/data/explosion_research/sumy/final_evidence.json": "7c0a4a64b3d7000cd10e8f1b846b1e57641d8a4d",
+    "kyiv-air-alerts-grafana/data/explosion_research/zaporizhzhia/final_evidence.json": "afc2702bfeb0b599dbec00d251362450b2d292e1"
+  },
+  "campaign_state_integrity": {
+    "checkpoint_schema": 2,
+    "status": "RUNNING",
+    "processed": 50,
+    "terminal": 50,
+    "total": 6863,
+    "methodology_version": "historical-attack-event-air-defense-action-v2",
+    "frozen_total_episodes": 6863,
+    "frozen_universe_matches_launch": true,
+    "protected_files_unchanged_on_campaign_branch": true,
+    "progress_preserved": true
+  },
+  "implementation": {
+    "main_implementation_head": "178101dfc1fbe83db52708efcae4039fe6c539bb",
+    "campaign_state_initialization_commit": "5b527a849dc0a352ef4ad4d98af05ab9a72aa143",
+    "controller_path": "kyiv-air-alerts-grafana/scripts/historical_attack_event_acceleration_controller.py",
+    "scheduler_path": ".github/workflows/historical-attack-event-backfill-scheduler.yml",
+    "main_concurrent_existing_workflow_commit": {
+      "sha": "c3817572c35904073baa182a481c43fbe0267e9d",
+      "message": "Update Kyiv air-alert and casualty data",
+      "author": "github-actions[bot]",
+      "excluded_from_campaign_integrity_assessment": true
+    }
+  },
+  "verdict": "6863 CAMPAIGN STAGED ACCELERATION READY"
+}
