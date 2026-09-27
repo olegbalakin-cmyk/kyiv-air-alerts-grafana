@@ -658,3 +658,157 @@ def run_controller(root: Path, event_name: str, run_id: str | None) -> dict:
         print(json.dumps(result, ensure_ascii=False, sort_keys=True))
         raise GuardFailure(guard_reason)
     return result
+
+
+def inspect_current(root: Path) -> dict:
+    root = root.resolve()
+    status = load_json(root / STATUS_REL)
+    launch = load_json(root / LAUNCH_REL)
+    state = load_json(root / STATE_REL)
+    validate_status_contract(root, status, launch)
+    validate_state_contract(state, status)
+    protected = verify_protected(root, launch)
+    collect_observation_ids(root)
+    processed, total, terminal = campaign_progress(status)
+    return {
+        "ok": True,
+        "campaign_id": CAMPAIGN_ID,
+        "phase": state["phase"],
+        "max_batches_per_run": phase_batch_limit(state["phase"]),
+        "batch_size": BATCH_SIZE,
+        "processed": processed,
+        "terminal": terminal,
+        "total": total,
+        "protected_file_count": len(protected),
+        "frozen_universe_unchanged": True,
+    }
+
+
+def self_test() -> dict:
+    timestamp = "2026-09-27T00:00:00Z"
+    status = {
+        "campaign_version": {"methodology_version": METHODOLOGY_VERSION},
+        "progress": {"processed": 50, "total": FROZEN_TOTAL, "terminal": 50},
+    }
+    base = new_state(status, timestamp)
+    assert phase_batch_limit(PHASE_CONTROL) == 1
+    assert phase_batch_limit(PHASE_2X) == 2
+    assert phase_batch_limit(PHASE_4X) == 4
+    assert phase_batch_limit(PHASE_FALLBACK) == 1
+
+    manual = transition_state(
+        base, scheduled=False, clean=True, did_work=True, complete=False, run_id="m",
+        progress_before=50, progress_after=100, timestamp=timestamp,
+    )
+    assert manual == base
+
+    stage1 = transition_state(
+        base, scheduled=True, clean=True, did_work=True, complete=False, run_id="1",
+        progress_before=50, progress_after=100, timestamp=timestamp,
+    )
+    assert stage1["phase"] == PHASE_2X and stage1["clean_scheduled_runs"] == 0
+
+    cur = stage1
+    for i in range(7):
+        cur = transition_state(
+            cur, scheduled=True, clean=True, did_work=True, complete=False, run_id=str(i + 2),
+            progress_before=100 + i, progress_after=101 + i, timestamp=timestamp,
+        )
+        assert cur["phase"] == PHASE_2X
+        assert cur["clean_scheduled_runs"] == i + 1
+    cur = transition_state(
+        cur, scheduled=True, clean=True, did_work=True, complete=False, run_id="9",
+        progress_before=107, progress_after=108, timestamp=timestamp,
+    )
+    assert cur["phase"] == PHASE_4X and cur["clean_scheduled_runs"] == 0
+
+    stage1_failure = transition_state(
+        stage1, scheduled=True, clean=False, did_work=True, complete=False, run_id="f1",
+        progress_before=100, progress_after=150, timestamp=timestamp, reason="SYNTHETIC_GUARD",
+    )
+    assert stage1_failure["phase"] == PHASE_FALLBACK
+    assert stage1_failure["clean_scheduled_runs"] == 0
+
+    stage2_failure = transition_state(
+        cur, scheduled=True, clean=False, did_work=True, complete=False, run_id="f2",
+        progress_before=108, progress_after=158, timestamp=timestamp, reason="SYNTHETIC_GUARD",
+    )
+    assert stage2_failure["phase"] == PHASE_FALLBACK
+
+    recovered = transition_state(
+        stage1_failure, scheduled=True, clean=True, did_work=True, complete=False, run_id="r1",
+        progress_before=150, progress_after=200, timestamp=timestamp,
+    )
+    assert recovered["phase"] == PHASE_2X
+    assert recovered["clean_scheduled_runs"] == 0
+
+    idle = transition_state(
+        recovered, scheduled=True, clean=True, did_work=False, complete=False, run_id="idle",
+        progress_before=200, progress_after=200, timestamp=timestamp,
+    )
+    assert idle == recovered
+
+    complete = transition_state(
+        recovered, scheduled=True, clean=True, did_work=True, complete=True, run_id="done",
+        progress_before=6813, progress_after=6863, timestamp=timestamp,
+    )
+    assert complete["phase"] == PHASE_COMPLETE
+    complete_idle = transition_state(
+        complete, scheduled=True, clean=True, did_work=False, complete=True, run_id="done2",
+        progress_before=6863, progress_after=6863, timestamp=timestamp,
+    )
+    assert complete_idle["phase"] == PHASE_COMPLETE
+
+    assert systemic_source_failure({"new_work": 50, "retryable": 25})
+    assert not systemic_source_failure({"new_work": 50, "retryable": 5})
+
+    return {
+        "ok": True,
+        "batch_size": BATCH_SIZE,
+        "phase_batch_limits": {
+            PHASE_CONTROL: 1,
+            PHASE_2X: 2,
+            PHASE_4X: 4,
+            PHASE_FALLBACK: 1,
+        },
+        "control_resume_gate": "PASS",
+        "manual_does_not_promote": "PASS",
+        "stage1_eight_run_promotion": "PASS",
+        "stage1_failure_fallback": "PASS",
+        "stage2_failure_fallback": "PASS",
+        "fallback_recovery_to_stage1_only": "PASS",
+        "idempotence_no_work": "PASS",
+        "completion_idempotence": "PASS",
+        "synthetic_guard_injection": "PASS",
+        "systemic_source_failure_guard": "PASS",
+    }
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser()
+    sub = parser.add_subparsers(dest="command", required=True)
+    sub.add_parser("self-test")
+    inspect_p = sub.add_parser("inspect")
+    inspect_p.add_argument("--checkout-root", type=Path, required=True)
+    run_p = sub.add_parser("run")
+    run_p.add_argument("--checkout-root", type=Path, required=True)
+    run_p.add_argument("--event-name", required=True)
+    run_p.add_argument("--run-id")
+    args = parser.parse_args()
+    try:
+        if args.command == "self-test":
+            print(json.dumps(self_test(), ensure_ascii=False, indent=2, sort_keys=True))
+            return 0
+        if args.command == "inspect":
+            print(json.dumps(inspect_current(args.checkout_root), ensure_ascii=False, sort_keys=True))
+            return 0
+        result = run_controller(args.checkout_root, args.event_name, args.run_id)
+        print(json.dumps(result, ensure_ascii=False, sort_keys=True))
+        return 0
+    except GuardFailure as exc:
+        print(json.dumps({"ok": False, "error": str(exc)}, ensure_ascii=False, sort_keys=True))
+        return 2
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
