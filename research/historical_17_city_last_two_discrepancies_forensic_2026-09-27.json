@@ -1,0 +1,243 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-09-27",
+  "task": "read-only forensic reconciliation of final Chernihiv deficit and Kharkiv excess",
+  "starting_head": "7490e4b271fec4512a69f6915e5ba08158b0d093",
+  "reconciliation_starting_head": "9eb0cebbe7fec92c6ead61bdb401488a37611525",
+  "authoritative_preflight": {
+    "path": "research/historical_public_upstream_17_city_recovery_preflight_2026-09-27.json",
+    "commit": "7490e4b271fec4512a69f6915e5ba08158b0d093",
+    "upstream_repository": "Vadimkin/ukrainian-air-raid-sirens-dataset",
+    "upstream_path": "datasets/official_data_uk.csv",
+    "upstream_commit": "58ee75bc20113181b9ddf8029d4cbf3a62d8cd10",
+    "upstream_blob_sha": "71d70c0ca54968f530d596cf315616fa858800e1",
+    "expected": 17087,
+    "canonical_union": 17087,
+    "unresolved": 1,
+    "unexplained_excess": 1,
+    "duplicate_canonical_ids": 0
+  },
+  "canonical_identity_rule": "sha256(city_key + '|' + UTC alert_start + '|' + UTC alert_end)[:24] after canonical interval union",
+  "chernihiv": {
+    "authoritative_expected_city_count": 1677,
+    "reconstructed_city_count": 1676,
+    "discrepancy": "one frozen-baseline episode has no recoverable canonical identity in the allowed evidence",
+    "missing_episode_id": null,
+    "missing_start": null,
+    "missing_end": null,
+    "exact_identity_status": "NOT_ESTABLISHED_FROM_ALLOWED_REPO_EVIDENCE",
+    "geography": {
+      "city_key": "chernihiv",
+      "production_adapter": "production_proxy_assembled",
+      "proxy_oblast": "Чернігівська область",
+      "proxy_raion": "Чернігівський район",
+      "exact_city_only": false,
+      "note": "The historical denominator is a validated Chernihiv proxy stream: matching Chernihiv-raion rows plus explicit Chernihiv-oblast rows; it is not an exact-city hromada denominator."
+    },
+    "denominator_provenance": {
+      "parent": "chernihiv-P3",
+      "range_local_start_date": [
+        "2026-06-07",
+        "2026-09-17"
+      ],
+      "frozen_denominator": 561,
+      "record_path": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/chernihiv_P3_result.json",
+      "record_commit": "faaa1ec5c92f5ad3c41eaec6b9cb1e2c77def972",
+      "partition_contract_path": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/RESEARCH_SLICES_2026-09-18.csv",
+      "city_frozen_denominator": 1677
+    },
+    "reproducibility": {
+      "exact_upstream_p3_canonical_intervals": 490,
+      "retained_primary_unique_additions_p3": 70,
+      "canonical_p3_total": 560,
+      "frozen_p3_total": 561,
+      "delta": -1,
+      "p1": {
+        "expected": 557,
+        "before_boundary_exclusion": 558,
+        "after_boundary_exclusion": 557
+      },
+      "p2": {
+        "expected": 559,
+        "reconstructed": 559
+      },
+      "p3_first_reconstructed": {
+        "episode_id": "93eab49b806ffca70d112485",
+        "start": "2026-06-06T21:12:48Z",
+        "end": "2026-06-07T01:04:11Z"
+      },
+      "p3_last_reconstructed": {
+        "episode_id": "2e401d3e9dc445fa0246dde7",
+        "start": "2026-09-17T19:11:48.280903Z",
+        "end": "2026-09-17T19:58:45.814695Z"
+      },
+      "upstream_to_assembled_non_1to1_mappings": 0,
+      "retained_rows_bridging_two_upstream_p3_intervals": 0,
+      "timestamp_identity_mismatches": 0,
+      "geography_ambiguities": 0
+    },
+    "source_history_checks": [
+      {
+        "fact": "exact upstream file was already fixed before the P3 baseline was written",
+        "commit": "58ee75bc20113181b9ddf8029d4cbf3a62d8cd10",
+        "date": "2026-09-08",
+        "blob_sha": "71d70c0ca54968f530d596cf315616fa858800e1"
+      },
+      {
+        "fact": "Chernihiv proxy parser/config existed and its interval union logic was unchanged for the baseline",
+        "commit": "ad1e443043bcbabd5448389bda1d81e096e6d541",
+        "date": "2026-09-16"
+      },
+      {
+        "fact": "Alerts.in.ua multicity static bridge payload was committed before the P3 baseline",
+        "commit": "50144ecc281c1a3e810fecde4f2e07a4b6ae16ab",
+        "date": "2026-09-17"
+      },
+      {
+        "fact": "UkraineAlarm bridge store was committed before the P3 baseline and is unchanged in the audited starting state",
+        "commit": "e23479ef250396d441cfe68814768be8134c761d",
+        "date": "2026-09-17",
+        "blob_sha": "9b2922b0863ff6f3dba6e84f2348ad0e4b111d41"
+      },
+      {
+        "fact": "P3 result asserting denominator 561 was committed after those inputs",
+        "commit": "faaa1ec5c92f5ad3c41eaec6b9cb1e2c77def972",
+        "date": "2026-09-19"
+      },
+      {
+        "fact": "later tiny repair bridge does not list or alter Chernihiv; affected parents are Kharkiv-P6, Sumy-P4, Zaporizhzhia-P4",
+        "commit": "7ca8e3789e5b038f2070fd7a12b0515aaf316bf2",
+        "date": "2026-09-20"
+      }
+    ],
+    "timestamp_equivalence": {
+      "seconds_level_difference": false,
+      "timezone_normalization_mismatch": false,
+      "start_time_drift": false,
+      "end_time_drift": false,
+      "source_close_reopen_difference": false,
+      "source_split_merge_difference": false,
+      "historical_cutoff_boundary": false,
+      "note": "No absent raw interval exists to normalize. All 490 pinned-upstream P3 intervals survive assembled identity 1:1; retained material adds 70 more. The unsupported +1 exists only as the frozen count 561."
+    },
+    "primary_root_cause": "EXPECTED_BASELINE_ERROR",
+    "secondary_contributing_causes": [
+      "Original 561 count has no retained episode-level identity/provenance sufficient to reconstruct a 561st canonical interval."
+    ],
+    "proposed_repair": "Do not invent or add a corpus episode. Correct chernihiv-P3 frozen denominator from 561 to 560 and Chernihiv city expected count from 1677 to 1676, or recover additional retained primary evidence that supplies an exact start/end identity before any corpus addition.",
+    "deterministic_corpus_addition_possible": false
+  },
+  "kharkiv": {
+    "authoritative_expected_city_count": 3565,
+    "reconstructed_city_count": 3566,
+    "excess_episode_id": "30e0080db2e490337f98d277",
+    "canonical_start": "2025-02-17T19:02:05Z",
+    "canonical_end": "2025-02-17T21:54:42Z",
+    "local_start": "2025-02-17T21:02:05+02:00",
+    "local_end": "2025-02-17T23:54:42+02:00",
+    "source": "exact pinned upstream CSV",
+    "source_geography": {
+      "level": "hromada",
+      "oblast": "Харківська область",
+      "raion": "Харківський район",
+      "hromada": "м. Харків та Харківська територіальна громада",
+      "classification": "exact Kharkiv city/hromada",
+      "oblast_wide": false
+    },
+    "raw_source_rows": [
+      {
+        "csv_row": 64204,
+        "level": "hromada",
+        "oblast": "Харківська область",
+        "raion": "Харківський район",
+        "hromada": "м. Харків та Харківська територіальна громада",
+        "alert_type": "AIR by dataset semantics; no explicit alert_type field exposed in this CSV row",
+        "started_at": "2025-02-17 19:02:05+00:00",
+        "finished_at": "2025-02-17 21:54:42+00:00"
+      },
+      {
+        "csv_row": 178115,
+        "level": "hromada",
+        "oblast": "Харківська область",
+        "raion": "Харківський район",
+        "hromada": "м. Харків та Харківська територіальна громада",
+        "alert_type": "AIR by dataset semantics; no explicit alert_type field exposed in this CSV row",
+        "started_at": "2025-02-17 19:02:05+00:00",
+        "finished_at": "2025-02-17 21:54:42+00:00"
+      }
+    ],
+    "duplicate_raw_rows_note": "The two upstream rows have identical canonical start/end and are deduplicated by the existing exact-city parser into one canonical episode.",
+    "retained_primary_support": [],
+    "overlaps_existing_expected_kharkiv_episode": false,
+    "exact_adapter_valid_from": "2025-02-17T19:02:05+00:00",
+    "boundary_fact": "The excess episode starts exactly at the exact-city adapter valid_from transition boundary.",
+    "parent": {
+      "id": "kharkiv-P1",
+      "range_local_start_date": [
+        "2025-02-17",
+        "2025-06-20"
+      ],
+      "frozen_denominator": 593,
+      "reconstructed_before_fix": 594
+    },
+    "timestamp_equivalence": {
+      "seconds_level_difference": false,
+      "timezone_normalization_mismatch": false,
+      "start_time_drift": false,
+      "end_time_drift": false,
+      "source_close_reopen_difference": false,
+      "source_split_merge_difference": false,
+      "historical_cutoff_boundary": true,
+      "exact_duplicate_rows": true
+    },
+    "geography_check": "PASS — exact Kharkiv hromada in Kharkiv oblast/raion; not oblast-wide and not another settlement.",
+    "primary_root_cause": "HISTORICAL_CUTOFF_ERROR",
+    "secondary_contributing_causes": [
+      "Existing transition-boundary exclusion logic is only applied to parents represented in the subslice manifest; Kharkiv-P1 is not represented there, so its exact-valid_from boundary seed survives."
+    ],
+    "proposed_repair": "Apply the existing exact-adapter transition-boundary exclusion to kharkiv-P1 and exclude canonical episode 30e0080db2e490337f98d277 from the frozen historical denominator/corpus assembly.",
+    "deterministic_repair_possible": true
+  },
+  "relationship": {
+    "related": false,
+    "verdict": "NO",
+    "rationale": "Chernihiv is an unsupported frozen-count identity (+1 expected without a recoverable interval); Kharkiv is a separately identified valid_from transition-boundary seed. No city mapping, timestamp normalization, source row, or canonical-ID path links them."
+  },
+  "hypothetical": {
+    "required_contract_scenario": {
+      "expected": 17087,
+      "chernihiv_final": 1676,
+      "kharkiv_final": 3565,
+      "reconstructed_total_after_safe_kharkiv_exclusion": 17086,
+      "unresolved": 1,
+      "unexplained_excess": 0,
+      "duplicate_canonical_ids": 0,
+      "all_17_cities_reconciled": false,
+      "reason": "No evidence-supported 1677th Chernihiv identity exists to add."
+    },
+    "identity_consistent_baseline_correction_scenario": {
+      "corrected_expected_total": 17086,
+      "reconstructed_total": 17086,
+      "chernihiv_expected_and_reconstructed": 1676,
+      "kharkiv_expected_and_reconstructed": 3565,
+      "unresolved": 0,
+      "unexplained_excess": 0,
+      "duplicate_canonical_ids": 0,
+      "all_17_cities_reconciled": true,
+      "note": "This scenario requires correcting the Chernihiv frozen baseline and therefore does not satisfy the user's required expected=17087 acceptance contract."
+    }
+  },
+  "protected_state": {
+    "final_branch_reset_to_authoritative_preflight_before_artifact_commit": true,
+    "operational_alert_corpus_unchanged": true,
+    "historical_source_slices_unchanged": true,
+    "historical_evidence_unchanged": true,
+    "replay_qa_status_unchanged": true,
+    "classifier_unchanged": true,
+    "active_6863_campaign_unchanged": true,
+    "active_6863_campaign_observed_sha": "5809bd677a93e6c2f6a1bff9cb7f6b5bde0c7c1e",
+    "site_prod_unchanged": true,
+    "production_dashboard_data_unchanged": true
+  },
+  "verdict": "BLOCKED — CHERNIHIV FROZEN BASELINE 561 HAS NO RECOVERABLE 561ST EPISODE ID; REQUIRED 17087 IDENTITY RECONCILIATION CANNOT BE PROVEN"
+}
