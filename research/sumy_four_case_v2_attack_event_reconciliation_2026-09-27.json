@@ -1,0 +1,255 @@
+{
+  "schema_version": 1,
+  "artifact_type": "sumy_four_case_v2_attack_event_reconciliation",
+  "branch": "multicity-wip-2026-09-16",
+  "starting_head": "5bb57e3388ea6c408613b6a169661996a62aed49",
+  "diagnostic_only": true,
+  "methodology": "historical-attack-event-air-defense-action-v2",
+  "scope": {
+    "target_episode_ids": [
+      "232eb0da4edf28c2d1c726ab",
+      "6f22822eb67990654c28d3e8",
+      "71eded846a321cdc6188fed9",
+      "88f59d26acd8ae4fd31c7511"
+    ],
+    "web_research_performed": false,
+    "external_source_retrieval_performed": false,
+    "classifier_mutated": false,
+    "replay_mutated": false,
+    "evidence_mutated": false,
+    "provenance_mutated": false,
+    "qa_or_status_mutated": false,
+    "canonical_metrics_mutated": false
+  },
+  "v2_event_positive_classes": [
+    "explosion",
+    "impact",
+    "arrival",
+    "strike",
+    "damage",
+    "fire",
+    "air_defense_action"
+  ],
+  "baseline": {
+    "authoritative_precondition_artifact": "research/sumy_current_replay_precondition_2026-09-27.json",
+    "authoritative_precondition_commit": "7ad52d55e02d85dc14e6ece4b68f304f6540bbfc",
+    "fresh_replay_workflow_run_id": 36312334527,
+    "fresh_replay_run_attempt": 4,
+    "fresh_replay_job_id": 108683099568,
+    "fresh_replay_artifact_id": 10939042797,
+    "executed_checkout_head": "e8f10ead03f868e4d636b1e6a9be8c2e581feccc",
+    "semantic_input_identity_with_starting_head": true,
+    "semantic_input_identity_basis": "The Sumy replay code, classifier dependency, requirements, audited baseline, Sumy final evidence, source slices, and replay workflow retain the same Git blob identities as the authoritative current-replay precondition; branch drift since that precondition did not change the Sumy replay inputs. The fresh rerun used the repository's unchanged replay_explosion_history.py through the existing GitHub Actions checkout path.",
+    "expected_denominator": 2297,
+    "reconstructed_denominator": 2297,
+    "qa_count": 19,
+    "replayed_strict_count": 189,
+    "replayed_sensitivity_count": 219,
+    "changed_count": 19,
+    "errors": 0,
+    "protected_files_unchanged_in_fresh_replay": true,
+    "all_four_targets_present_in_qa": true,
+    "previously_resolved_ids_absent": {
+      "b103be64497fc7d33f5c7b3d": true,
+      "d6b1b9ffc10dafbc86e253c7": true
+    }
+  },
+  "targets": [
+    {
+      "episode_id": "232eb0da4edf28c2d1c726ab",
+      "alert_start": "2026-03-13T19:28:45Z",
+      "alert_end": "2026-03-14T05:47:26Z",
+      "retained_source": "https://suspilne.media/sumy/1263844-pogorilo-vse-u-sumah-pisla-ataki-bezpilotnika-zgoriv-budinok-ta-poskodzeno-se-desat-osel/",
+      "retained_excerpt": "Близько 04:30 російський ударний БпЛА атакував Ковпаківський район міста Суми.",
+      "retained_source_local_context": {
+        "single_retained_incident": true,
+        "deterministic_source_local_anchor": false,
+        "complete_adjacent_source_segment_retained": false,
+        "source_fetch_status": "OK",
+        "retained_chunk_count": 14,
+        "publication_or_message_timestamp": null,
+        "publication_or_message_timestamp_status": "not_retained_in_current_repo_inputs"
+      },
+      "retained_event_time": "~2026-03-14T04:30:00+02:00",
+      "exact_city_support": true,
+      "air_attack_uav_ppo_context": {
+        "air_attack_or_uav": true,
+        "ppo": false,
+        "basis": "російський ударний БпЛА атакував ... міста Суми"
+      },
+      "current_replay_event_types": [],
+      "v2_supported_event_types": ["strike"],
+      "temporal_binding": {
+        "supported": true,
+        "code": "TEMPORAL_REVIEWED_VALIDATED_BINDING",
+        "episode_specific": true,
+        "basis": "Retained ~04:30 event time is inside the matched alert and the fresh replay preserves a unique reviewed episode binding."
+      },
+      "same_attack_requirement_under_v2": {
+        "required_as_separate_linkage": false,
+        "reason": "The retained statement itself directly describes the UAV attack/strike in Sumy at the episode-specific time; it does not require linking two separate statements."
+      },
+      "current_legacy_blocker": [
+        "NO_STRICT_EXPLOSION_EVIDENCE",
+        "AIR_CONTEXT_NOT_LINKED_TO_EVENT"
+      ],
+      "v2_diagnostic_classification": "V2_EVENT_POSITIVE_LEGACY_REPLAY_BLOCK"
+    },
+    {
+      "episode_id": "6f22822eb67990654c28d3e8",
+      "alert_start": "2026-08-16T15:43:31Z",
+      "alert_end": "2026-08-17T03:27:09Z",
+      "retained_source": "https://suspilne.media/sumy/1380462-masovana-ataka-sumi-so-vidomo/",
+      "retained_excerpt": "У ніч на 17 серпня, після 23:00, російські ударні БпЛА масовано атакували Суми.",
+      "retained_source_local_context": {
+        "single_retained_incident": true,
+        "deterministic_source_local_anchor": false,
+        "complete_adjacent_source_segment_retained": false,
+        "source_fetch_status": "OK",
+        "retained_chunk_count": 17,
+        "publication_or_message_timestamp": null,
+        "publication_or_message_timestamp_status": "not_retained_in_current_repo_inputs"
+      },
+      "retained_event_time": "2026-08-16/17 night, after ~23:00",
+      "exact_city_support": true,
+      "air_attack_uav_ppo_context": {
+        "air_attack_or_uav": true,
+        "ppo": false,
+        "basis": "російські ударні БпЛА масовано атакували Суми"
+      },
+      "current_replay_event_types": ["aerial_attack", "strike"],
+      "v2_supported_event_types": ["strike"],
+      "temporal_binding": {
+        "supported": true,
+        "code": "TEMPORAL_REVIEWED_VALIDATED_BINDING",
+        "episode_specific": true,
+        "basis": "Retained night interval after ~23:00 is bound to the matched alert episode."
+      },
+      "same_attack_requirement_under_v2": {
+        "required_as_separate_linkage": false,
+        "reason": "The retained statement directly describes the mass UAV attack on Sumy within the bound episode; separate same-attack linkage is unnecessary under v2."
+      },
+      "current_legacy_blocker": [
+        "NO_STRICT_EXPLOSION_EVIDENCE",
+        "AIR_CONTEXT_NOT_LINKED_TO_EVENT"
+      ],
+      "v2_diagnostic_classification": "V2_EVENT_POSITIVE_LEGACY_REPLAY_BLOCK"
+    },
+    {
+      "episode_id": "71eded846a321cdc6188fed9",
+      "alert_start": "2026-05-26T04:39:39Z",
+      "alert_end": "2026-05-26T06:00:24Z",
+      "retained_source": "https://suspilne.media/amp/sumy/1315753-krim-togo-so-zgorilo-vse-u-vodi-so-rozpovidaut-ocevidci-pro-udari-po-sumah/",
+      "retained_excerpt": "Близько 08:00 ударні БпЛА атакували приватний сектор Сум.",
+      "retained_source_local_context": {
+        "single_retained_incident": true,
+        "deterministic_source_local_anchor": false,
+        "complete_adjacent_source_segment_retained": false,
+        "source_fetch_status": "OK",
+        "retained_chunk_count": 11,
+        "publication_or_message_timestamp": null,
+        "publication_or_message_timestamp_status": "not_retained_in_current_repo_inputs",
+        "excluded_derived_fragment": "An earlier research artifact recorded a derived 'два дрони поцілили' fragment, but the underlying retained source chunk/anchor is not present in current replay inputs; it is not used here."
+      },
+      "retained_event_time": "2026-05-26 близько 08:00",
+      "exact_city_support": true,
+      "air_attack_uav_ppo_context": {
+        "air_attack_or_uav": true,
+        "ppo": false,
+        "basis": "ударні БпЛА атакували приватний сектор Сум"
+      },
+      "current_replay_event_types": [],
+      "v2_supported_event_types": ["strike"],
+      "temporal_binding": {
+        "supported": true,
+        "code": "TEMPORAL_REVIEWED_VALIDATED_BINDING",
+        "episode_specific": true,
+        "basis": "Retained ~08:00 event time lies inside the matched 07:39:39-09:00:24 Kyiv alert episode."
+      },
+      "same_attack_requirement_under_v2": {
+        "required_as_separate_linkage": false,
+        "reason": "The retained statement itself directly states that strike UAVs attacked the private sector of Sumy at the episode-specific time."
+      },
+      "current_legacy_blocker": [
+        "NO_STRICT_EXPLOSION_EVIDENCE",
+        "AIR_CONTEXT_NOT_LINKED_TO_EVENT"
+      ],
+      "v2_diagnostic_classification": "V2_EVENT_POSITIVE_LEGACY_REPLAY_BLOCK"
+    },
+    {
+      "episode_id": "88f59d26acd8ae4fd31c7511",
+      "alert_start": "2026-07-02T10:16:53Z",
+      "alert_end": "2026-07-02T11:12:12Z",
+      "retained_source": "https://suspilne.media/sumy/1345582-troe-civilnih-postrazdali-vnaslidok-ataki-rosijskogo-bpla-po-avtozapravnij-stancii-u-sumah/",
+      "retained_excerpt": "Близько 13:40 російський БпЛА атакував АЗС у Зарічному районі Сум.",
+      "retained_source_local_context": {
+        "single_retained_incident": true,
+        "deterministic_source_local_anchor": false,
+        "complete_adjacent_source_segment_retained": false,
+        "source_fetch_status": "OK",
+        "retained_chunk_count": 11,
+        "publication_or_message_timestamp": null,
+        "publication_or_message_timestamp_status": "not_retained_in_current_repo_inputs"
+      },
+      "retained_event_time": "2026-07-02 ~13:40",
+      "exact_city_support": true,
+      "air_attack_uav_ppo_context": {
+        "air_attack_or_uav": true,
+        "ppo": false,
+        "basis": "російський БпЛА атакував АЗС у Зарічному районі Сум"
+      },
+      "current_replay_event_types": [],
+      "v2_supported_event_types": ["strike"],
+      "temporal_binding": {
+        "supported": true,
+        "code": "TEMPORAL_REVIEWED_VALIDATED_BINDING",
+        "episode_specific": true,
+        "basis": "Retained ~13:40 event time lies inside the matched alert episode."
+      },
+      "same_attack_requirement_under_v2": {
+        "required_as_separate_linkage": false,
+        "reason": "The retained sentence directly establishes the UAV strike against the filling station in Sumy within the bound episode."
+      },
+      "current_legacy_blocker": [
+        "NO_STRICT_EXPLOSION_EVIDENCE",
+        "AIR_CONTEXT_NOT_LINKED_TO_EVENT"
+      ],
+      "v2_diagnostic_classification": "V2_EVENT_POSITIVE_LEGACY_REPLAY_BLOCK"
+    }
+  ],
+  "summary": {
+    "v2_event_positive_legacy_replay_block_count": 4,
+    "genuinely_unsupported_by_retained_evidence_count": 0,
+    "systematic_legacy_mismatch_found": true,
+    "supported_systemic_observation": "Across these four cases, direct factual UAV attack wording is episode-specific, exact-city and temporally bound, but the Sumy historical adapter does not promote 'атакував/атакували' into the accepted strike role. The fresh replay therefore reports NO_STRICT_EXPLOSION_EVIDENCE and AIR_CONTEXT_NOT_LINKED_TO_EVENT even though v2 accepts strike independently of explosion.",
+    "do_not_generalize_beyond_four_cases": true
+  },
+  "implementation_scope": {
+    "implement_now": false,
+    "smallest_file": "kyiv-air-alerts-grafana/scripts/replay_explosion_history.py",
+    "smallest_function": "historical_review_roles",
+    "current_legacy_gate": "In the Sumy branch, the historical event-role boolean accepts strict_attack_event_signal plus explicit 'вдар/ударив/завдав авіаудар' forms but deliberately does not recognize factual 'атакував/атакували' wording. Without that event role, review provenance exposes no explosion_evidence and no same_attack_basis, so classify_candidate fails base_event_ok.",
+    "proposed_v2_acceptance_rule": "For retained Sumy historical evidence, recognize a direct factual 'атакув...' statement as v2 strike only when the same retained statement provides exact-city and military/UAV attack context and the existing reviewed temporal binding is episode-specific. Treat the direct statement as self-contained event/attack binding; do not require a second statement to establish same-attack context. Do not broaden warnings, predictions or threat-only wording.",
+    "why_this_is_smallest": "Existing monitor classification already accepts a reviewed event role with exact-city, air context and episode-specific temporal proof; once the direct retained attack sentence is promoted to strike/event evidence, the same sentence can supply the intrinsic same-attack basis without changing general live-classifier behavior.",
+    "not_justified_by_these_four_cases": [
+      "No separate air_defense_action implementation change is justified by these four cases because none relies on PPO activity.",
+      "No external source recovery is required for these four v2 determinations."
+    ],
+    "required_regression_tests": [
+      "Positive retained-text fixtures for all four target excerpts: each must resolve as v2 strike with the same episode-specific binding.",
+      "Verify all four target IDs leave historical QA after the shared adapter fix, with denominator unchanged.",
+      "Verify b103be64497fc7d33f5c7b3d and d6b1b9ffc10dafbc86e253c7 remain absent from QA.",
+      "Verify the other 15 current Sumy QA IDs do not change solely because of this targeted direct-strike rule unless their retained text independently satisfies the same rule.",
+      "Negative threat/warning controls: 'можлива атака', 'загроза удару', predicted PPO activity, or generic same-date Sumy context must not become event-positive.",
+      "Negative geography/temporal controls: region-only wording or an attack outside the bound alert must not become event-positive.",
+      "Keep existing explosion/impact/arrival/strike/damage/fire positive controls unchanged."
+    ],
+    "expected_effect_on_four_targets": "All four should be accepted as v2 event-positive strike episodes and should no longer remain in historical QA solely because strict_explosion/same_attack_context legacy roles are absent. No denominator change is expected."
+  },
+  "protected_files_unchanged": true,
+  "artifact_policy": {
+    "path": "research/sumy_four_case_v2_attack_event_reconciliation_2026-09-27.json",
+    "only_artifact_should_be_committed": true
+  },
+  "verdict": "SUMY V2 LEGACY-GATE MISMATCH CONFIRMED — READY FOR SHARED REPLAY FIX"
+}
