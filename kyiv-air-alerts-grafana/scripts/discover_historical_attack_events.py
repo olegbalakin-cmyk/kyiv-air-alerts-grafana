@@ -29,6 +29,21 @@ ATTACK_DISCOVERY_RE = re.compile(
     re.IGNORECASE,
 )
 PPO_RE = re.compile(r"\b(?:ппо|протиповітр\w*)", re.IGNORECASE)
+TELEGRAM_POST_RE = re.compile(
+    r"https?://(?:t\.me|telegram\.me)/(?:s/)?([A-Za-z0-9_]+)/([0-9]+)",
+    re.IGNORECASE,
+)
+TARGETED_SECONDARY_SOURCES = (
+    {
+        "target_episode_id": "6cd77c20720eafece633c1ad",
+        "source": "ТСН",
+        "url": "https://lviv.tsn.ua/lviv/u-lvovi-hrymliat-vybukhy-3015458.html",
+    },
+)
+TARGET_RECOVERY_EPISODES = {
+    "498d07cfea5ac7e9090a08e3",
+    "6cd77c20720eafece633c1ad",
+}
 
 
 def parse_dt(value: str) -> datetime:
@@ -130,6 +145,99 @@ def extract_source_timestamp(soup: BeautifulSoup) -> str | None:
     return None
 
 
+def extract_linked_telegram_refs(soup: BeautifulSoup) -> list[dict]:
+    refs = {}
+    for link in soup.select("a[href]"):
+        href = str(link.get("href") or "")
+        match = TELEGRAM_POST_RE.search(href)
+        if not match:
+            continue
+        channel = match.group(1)
+        message_id = int(match.group(2))
+        refs[(channel.casefold(), message_id)] = {
+            "channel": channel,
+            "message_id": message_id,
+            "url": f"https://t.me/{channel}/{message_id}",
+        }
+    return [refs[key] for key in sorted(refs)]
+
+
+def parse_exact_telegram_post_html(html: str, channel: str, message_id: int) -> dict | None:
+    soup = BeautifulSoup(html, "html.parser")
+    for wrap in soup.select(".tgme_widget_message_wrap, .tgme_widget_message"):
+        msg = wrap.select_one(".tgme_widget_message") if "tgme_widget_message_wrap" in (wrap.get("class") or []) else wrap
+        if not msg:
+            continue
+        post = str(msg.get("data-post") or "")
+        match = re.search(r"/([0-9]+)$", post)
+        if not match or int(match.group(1)) != message_id:
+            continue
+        time_el = wrap.select_one("time[datetime]") or msg.select_one("time[datetime]")
+        if not time_el:
+            continue
+        text_el = wrap.select_one(".tgme_widget_message_text") or msg.select_one(".tgme_widget_message_text")
+        text = " ".join(text_el.stripped_strings) if text_el else ""
+        return {
+            "channel": channel,
+            "message_id": message_id,
+            "published_at": iso(parse_dt(time_el["datetime"])),
+            "text": text,
+            "url": f"https://t.me/{channel}/{message_id}",
+        }
+    return None
+
+
+def fetch_exact_linked_telegram_post(
+    session: requests.Session,
+    channel: str,
+    message_id: int,
+) -> tuple[dict | None, dict]:
+    attempts = []
+    urls = (
+        f"https://t.me/s/{channel}/{message_id}",
+        f"https://t.me/{channel}/{message_id}?embed=1&mode=tme",
+    )
+    for url in urls:
+        try:
+            response = session.get(url, timeout=15)
+            attempts.append({"url": url, "status_code": response.status_code})
+            if response.status_code != 200:
+                continue
+            parsed = parse_exact_telegram_post_html(response.text, channel, message_id)
+            if parsed:
+                parsed["retrieval_url"] = url
+                return parsed, {"attempts": attempts, "resolved": True}
+        except requests.RequestException as exc:
+            attempts.append({"url": url, "error": f"{type(exc).__name__}: {exc}"})
+    return None, {"attempts": attempts, "resolved": False}
+
+
+def fetch_targeted_secondary_article(
+    session: requests.Session,
+    source_cfg: dict,
+) -> tuple[dict, dict]:
+    response = session.get(source_cfg["url"], timeout=15)
+    response.raise_for_status()
+    soup = BeautifulSoup(response.text, "html.parser")
+    title_node = soup.select_one("h1")
+    title = " ".join(title_node.stripped_strings) if title_node else ""
+    published_at = extract_source_timestamp(soup)
+    text = extract_article_text_from_soup(soup)
+    return {
+        "url": str(response.url),
+        "title": title,
+        "text": text,
+        "published_at": published_at,
+        "source": source_cfg["source"],
+        "target_episode_id": source_cfg["target_episode_id"],
+    }, {
+        "url": source_cfg["url"],
+        "status_code": response.status_code,
+        "published_at": published_at,
+        "bytes": len(response.content),
+    }
+
+
 def extract_article_text_from_soup(soup: BeautifulSoup) -> str:
     for tag in soup.find_all(("script", "style", "nav", "header", "footer", "aside", "form", "svg", "noscript")):
         tag.decompose()
@@ -194,8 +302,9 @@ def fetch_suspilne_articles_for_days(
             soup = BeautifulSoup(response.text, "html.parser")
             title_node = soup.select_one("h1")
             title = " ".join(title_node.stripped_strings) if title_node else ""
-            text = extract_article_text_from_soup(soup)
+            telegram_links = extract_linked_telegram_refs(soup)
             published_at = extract_source_timestamp(soup)
+            text = extract_article_text_from_soup(soup)
             if not title and not text:
                 continue
             articles.append({
@@ -204,6 +313,7 @@ def fetch_suspilne_articles_for_days(
                 "text": text,
                 "published_at": published_at,
                 "archive_local_day": local_day,
+                "telegram_links": telegram_links,
             })
             time.sleep(sleep_seconds)
 
@@ -363,6 +473,18 @@ def build_pilot(
     search_end = max(parse_dt(ep["alert_end"]) for ep in selected) + timedelta(hours=72)
     local_days = sorted({str(ep["alert_start_date_kyiv"]) for ep in selected})
     articles, fetch_meta = fetch_suspilne_articles_for_days(local_days, sleep_seconds)
+    retained_controls_by_url = {
+        str(row.get("source_url") or ""): str(row.get("episode_id") or "")
+        for row in (evidence.get("strict_events") or [])
+        if str(row.get("episode_id") or "") in selected_ids and row.get("source_url")
+    }
+    network_session = requests.Session()
+    network_session.headers.update(HEADERS)
+    linked_telegram_seen = set()
+    linked_telegram_fetches = []
+    linked_telegram_posts = []
+    targeted_secondary_fetches = []
+    targeted_secondary_articles = []
 
     observations = []
     for article in articles:
@@ -386,8 +508,7 @@ def build_pilot(
         decision = monitor.classify_candidate(row, city_key, selected, matching)
         obs_id = hashlib.sha256(("html|" + article["url"]).encode("utf-8")).hexdigest()[:24]
         temporal = decision.get("temporal_binding") or {}
-        observations.append(
-            {
+        article_observation = {
                 "observation_id": obs_id,
                 "source_type": "source_local_html",
                 "source": "Суспільне Львів",
@@ -413,7 +534,130 @@ def build_pilot(
                     "classifier": "monitor_explosion_candidates.py current branch version",
                 },
             }
-        )
+        observations.append(article_observation)
+
+        retained_episode_id = retained_controls_by_url.get(article["url"])
+        if (
+            retained_episode_id in TARGET_RECOVERY_EPISODES
+            and decision.get("proposed_outcome") != "approved_strict"
+        ):
+            for ref in (article.get("telegram_links") or [])[:6]:
+                key = (str(ref["channel"]).casefold(), int(ref["message_id"]))
+                if key in linked_telegram_seen or len(linked_telegram_seen) >= 12:
+                    continue
+                linked_telegram_seen.add(key)
+                post, meta = fetch_exact_linked_telegram_post(
+                    network_session, str(ref["channel"]), int(ref["message_id"])
+                )
+                linked_telegram_fetches.append({
+                    "parent_article_url": article["url"],
+                    "retained_episode_id": retained_episode_id,
+                    "channel": ref["channel"],
+                    "message_id": ref["message_id"],
+                    **meta,
+                })
+                if post:
+                    post["parent_article_url"] = article["url"]
+                    post["retained_episode_id"] = retained_episode_id
+                    linked_telegram_posts.append(post)
+                time.sleep(sleep_seconds)
+
+    for post in linked_telegram_posts:
+        text = str(post.get("text") or "")
+        if not monitor.city_mentioned(city_key, text) or not ATTACK_DISCOVERY_RE.search(text):
+            continue
+        row = classifier_row(str(post["channel"]), str(post["channel"]), post)
+        row["discovery_basis"] = "article_linked_public_telegram_exact_post"
+        matching = monitor.match_candidate_to_episodes(row, selected)
+        decision = monitor.classify_candidate(row, city_key, selected, matching)
+        temporal = decision.get("temporal_binding") or {}
+        observations.append({
+            "observation_id": canonical_observation_id(str(post["channel"]), int(post["message_id"])),
+            "source_type": "article_linked_public_telegram",
+            "source": f"Telegram / {post['channel']}",
+            "source_url": post["url"],
+            "telegram_channel": post["channel"],
+            "telegram_message_id": int(post["message_id"]),
+            "source_timestamp": post["published_at"],
+            "event_timestamp_if_stated": temporal.get("event_time"),
+            "excerpt": text[:1200],
+            "matched_terms": matched_terms(text),
+            "event_types_supported": list(decision.get("event_types") or []),
+            "exact_city_binding": decision.get("exact_city_classification_evidence"),
+            "air_attack_context": decision.get("air_military_context"),
+            "same_attack_context": decision.get("same_attack_context"),
+            "temporal_binding": temporal,
+            "classification_outcome": decision.get("proposed_outcome"),
+            "classification_episode_id": decision.get("proposed_matched_episode_id"),
+            "classification_reason_codes": list(decision.get("reason_codes") or []),
+            "content_hash": content_hash(post["channel"], post["message_id"], post["published_at"], text),
+            "provenance": {
+                "retrieval_method": "exact public Telegram post linked from retained Suspilne article",
+                "parent_article_url": post["parent_article_url"],
+                "retained_episode_id": post["retained_episode_id"],
+                "retrieval_url": post.get("retrieval_url"),
+                "classifier": "monitor_explosion_candidates.py current branch version",
+            },
+        })
+
+    for source_cfg in TARGETED_SECONDARY_SOURCES:
+        if source_cfg["target_episode_id"] not in selected_ids:
+            continue
+        try:
+            article, meta = fetch_targeted_secondary_article(network_session, source_cfg)
+            targeted_secondary_fetches.append({**meta, "target_episode_id": source_cfg["target_episode_id"], "resolved": True})
+            targeted_secondary_articles.append(article)
+        except Exception as exc:
+            targeted_secondary_fetches.append({
+                "url": source_cfg["url"],
+                "target_episode_id": source_cfg["target_episode_id"],
+                "resolved": False,
+                "error": f"{type(exc).__name__}: {exc}",
+            })
+
+    for article in targeted_secondary_articles:
+        text = " ".join(x for x in (str(article.get("title") or ""), str(article.get("text") or "")) if x)
+        row = {
+            "source": f"Targeted secondary HTML / {article['source']}",
+            "title": str(article.get("title") or "")[:240],
+            "url": article["url"],
+            "publisher": article["source"],
+            "publisher_url": article["url"],
+            "published_at": article.get("published_at"),
+            "snippet": str(article.get("text") or "")[:1200],
+            "matched_text_excerpt": str(article.get("text") or "")[:5000],
+            "discovery_basis": "targeted_secondary_html_preflight",
+        }
+        matching = monitor.match_candidate_to_episodes(row, selected)
+        decision = monitor.classify_candidate(row, city_key, selected, matching)
+        temporal = decision.get("temporal_binding") or {}
+        observations.append({
+            "observation_id": hashlib.sha256(("targeted-html|" + article["url"]).encode("utf-8")).hexdigest()[:24],
+            "source_type": "targeted_secondary_html_preflight",
+            "source": article["source"],
+            "source_url": article["url"],
+            "telegram_channel": None,
+            "telegram_message_id": None,
+            "source_timestamp": article.get("published_at"),
+            "event_timestamp_if_stated": temporal.get("event_time"),
+            "excerpt": str(article.get("text") or "")[:1200],
+            "matched_terms": matched_terms(text),
+            "event_types_supported": list(decision.get("event_types") or []),
+            "exact_city_binding": decision.get("exact_city_classification_evidence"),
+            "air_attack_context": decision.get("air_military_context"),
+            "same_attack_context": decision.get("same_attack_context"),
+            "temporal_binding": temporal,
+            "classification_outcome": decision.get("proposed_outcome"),
+            "classification_episode_id": decision.get("proposed_matched_episode_id"),
+            "classification_reason_codes": list(decision.get("reason_codes") or []),
+            "content_hash": content_hash(article["url"], article.get("published_at"), text),
+            "provenance": {
+                "retrieval_method": "exact-URL targeted secondary HTML preflight",
+                "target_episode_id": article["target_episode_id"],
+                "source_family_onboarded": False,
+                "classifier": "monitor_explosion_candidates.py current branch version",
+            },
+        })
 
     observations.sort(key=lambda x: ((x.get("source_timestamp") or ""), x["source_url"]))
     by_episode: dict[str, list[dict]] = {str(ep["episode_id"]): [] for ep in selected}
@@ -464,6 +708,22 @@ def build_pilot(
     anchor_rediscovered = anchor["episode_id"] in discovered_strict_ids
     retained_controls_rediscovered = sorted(set(controls) & discovered_strict_ids)
     newly_strict_episode_ids = sorted(discovered_strict_ids - set(controls))
+    target_recovery = {}
+    for episode_id in sorted(TARGET_RECOVERY_EPISODES & selected_ids):
+        target_obs = [
+            obs for obs in observations
+            if obs.get("classification_episode_id") == episode_id
+            or (obs.get("provenance") or {}).get("retained_episode_id") == episode_id
+            or (obs.get("provenance") or {}).get("target_episode_id") == episode_id
+        ]
+        strict_target_obs = [obs for obs in target_obs if obs.get("classification_outcome") == "approved_strict"]
+        target_recovery[episode_id] = {
+            "recovered_strict": episode_id in discovered_strict_ids,
+            "strict_observation_ids": [obs["observation_id"] for obs in strict_target_obs],
+            "strict_source_types": sorted({str(obs.get("source_type") or "") for obs in strict_target_obs}),
+            "observation_count": len(target_obs),
+        }
+    target_recovery_clean = all(row["recovered_strict"] for row in target_recovery.values())
 
     return {
         "schema_version": 1,
@@ -497,11 +757,29 @@ def build_pilot(
             "timeout_seconds": 15,
             "fallback_telegram_source_not_used": f"@{channel}",
             "fallback_reason": "public Telegram search did not provide sufficient historical depth in first pilot attempt",
+            "article_linked_telegram": {
+                "unique_exact_posts_requested": len(linked_telegram_seen),
+                "resolved_posts": len(linked_telegram_posts),
+                "fetches": linked_telegram_fetches,
+            },
+            "targeted_secondary_html": {
+                "configured_sources": len(TARGETED_SECONDARY_SOURCES),
+                "resolved_articles": len(targeted_secondary_articles),
+                "fetches": targeted_secondary_fetches,
+                "source_family_onboarded": False,
+            },
         },
         "event_taxonomy": list(monitor.ATTACK_EVENT_TYPE_ORDER),
         "episode_results": episode_results,
         "canonical_events": canonical_events,
         "evidence_observations": observations,
+        "recovery_preflight": {
+            "target_episode_ids": sorted(TARGET_RECOVERY_EPISODES & selected_ids),
+            "results": target_recovery,
+            "all_target_controls_recovered_strict": target_recovery_clean,
+            "classifier_semantic_widening_used": False,
+            "targeted_secondary_source_family_onboarded": False,
+        },
         "controls": {
             "retained_strict_control_episode_ids_in_window": controls,
             "retained_control_count": len(controls),
@@ -531,7 +809,7 @@ def build_pilot(
         "metric_rule": "An alert episode contributes at most 1 to the numerator when has_confirmed_event=true. Multiple observations/events do not inflate the numerator.",
         "verdict": (
             "HISTORICAL ATTACK-EVENT DISCOVERY PILOT CLEAN"
-            if observations and anchor_rediscovered
+            if observations and anchor_rediscovered and target_recovery_clean and not newly_strict_episode_ids
             else "HISTORICAL ATTACK-EVENT DISCOVERY PILOT BLOCKED"
         ),
     }
@@ -545,6 +823,9 @@ def self_test() -> None:
     selected = select_episode_window(fake, "e5", 5)
     assert [x["episode_id"] for x in selected] == ["e3", "e4", "e5", "e6", "e7"]
     assert matched_terms("У Львові влучання пошкодило будинок і спричинило пожежу") == ["impact", "damage", "fire"]
+    fake_html = '<a href="https://t.me/andriysadovyi/3345">x</a><a href="https://telegram.me/test_channel/42">y</a>'
+    refs = extract_linked_telegram_refs(BeautifulSoup(fake_html, "html.parser"))
+    assert [(x["channel"], x["message_id"]) for x in refs] == [("andriysadovyi", 3345), ("test_channel", 42)]
     print("Historical attack-event pilot helper self-test OK")
 
 
