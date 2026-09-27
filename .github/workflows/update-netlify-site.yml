@@ -43,6 +43,9 @@ jobs:
       - name: Test municipal-source fallback
         run: python tests/test_update_fallback.py
 
+      - name: Test bridge checkpoint persistence semantics
+        run: python scripts/validate_bridge_checkpoint.py self-test
+
       - name: Update base data
         run: python scripts/update_data.py
 
@@ -64,10 +67,56 @@ jobs:
       - name: Add cross-source validated proxy rows
         run: python scripts/extend_remaining_proxies.py
 
+      - name: Snapshot previous UkraineAlarm bridge checkpoint
+        run: cp data/ukrainealarm_bridge.json "${RUNNER_TEMP}/ukrainealarm_bridge_before.json"
+
       - name: Apply verified Alerts.in.ua and UkraineAlarm bridge
         env:
           UKRAINEALARM_API_TOKEN: ${{ secrets.UKRAINEALARM_API_TOKEN }}
         run: python scripts/apply_ukrainealarm_bridge.py
+
+      - name: Validate verified UkraineAlarm bridge checkpoint
+        run: |
+          python scripts/validate_bridge_checkpoint.py validate \
+            --candidate data/ukrainealarm_bridge.json \
+            --summary data/dashboard_data.json \
+            --baseline "${RUNNER_TEMP}/ukrainealarm_bridge_before.json" \
+            --diagnostic "${RUNNER_TEMP}/ukrainealarm_bridge_fetch.json"
+
+      - name: Persist verified UkraineAlarm bridge checkpoint
+        working-directory: .
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git fetch origin site-prod
+          git show origin/site-prod:kyiv-air-alerts-grafana/data/ukrainealarm_bridge.json > "${RUNNER_TEMP}/ukrainealarm_bridge_remote.json"
+
+          python kyiv-air-alerts-grafana/scripts/validate_bridge_checkpoint.py validate \
+            --candidate kyiv-air-alerts-grafana/data/ukrainealarm_bridge.json \
+            --summary kyiv-air-alerts-grafana/data/dashboard_data.json \
+            --baseline "${RUNNER_TEMP}/ukrainealarm_bridge_before.json" \
+            --remote "${RUNNER_TEMP}/ukrainealarm_bridge_remote.json" \
+            --diagnostic "${RUNNER_TEMP}/ukrainealarm_bridge_fetch.json"
+
+          git add kyiv-air-alerts-grafana/data/ukrainealarm_bridge.json
+          if git diff --cached --quiet; then
+            echo "Verified bridge checkpoint unchanged; no checkpoint commit required"
+          else
+            git commit -m "Persist verified UkraineAlarm bridge checkpoint"
+            if ! git push origin HEAD:site-prod; then
+              echo "Checkpoint push rejected; refusing to overwrite a newer site-prod checkpoint"
+              exit 1
+            fi
+          fi
+
+      - name: Upload UkraineAlarm bridge fetch diagnostics
+        uses: actions/upload-artifact@v4
+        with:
+          name: ukrainealarm-bridge-fetch-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/ukrainealarm_bridge_fetch.json
+          retention-days: 7
 
       - name: Add Sevastopol exact-city series
         run: python scripts/add_sevastopol_exact.py
