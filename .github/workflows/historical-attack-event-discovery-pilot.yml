@@ -1,0 +1,64 @@
+name: Historical attack-event discovery pilot
+
+on:
+  push:
+    branches: [multicity-wip-2026-09-16]
+    paths:
+      - "kyiv-air-alerts-grafana/scripts/discover_historical_attack_events.py"
+      - ".github/workflows/historical-attack-event-discovery-pilot.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  lviv-pilot:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Check out WIP branch
+        uses: actions/checkout@v4
+        with:
+          ref: multicity-wip-2026-09-16
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: kyiv-air-alerts-grafana/requirements.txt
+
+      - name: Install dependencies
+        working-directory: kyiv-air-alerts-grafana
+        run: pip install -r requirements.txt
+
+      - name: Self-test worker
+        working-directory: kyiv-air-alerts-grafana
+        run: python scripts/discover_historical_attack_events.py --self-test
+
+      - name: Run Lviv 40-episode pilot
+        working-directory: kyiv-air-alerts-grafana
+        run: |
+          python scripts/discover_historical_attack_events.py             --city lviv             --max-episodes 40             --output ../research/historical_attack_event_discovery_pilot_lviv_2026-09-27.json
+
+      - name: Verify protected files unchanged
+        run: |
+          test -z "$(git status --porcelain -- kyiv-air-alerts-grafana/data/explosion_audited_baseline.json)"
+          test -z "$(git status --porcelain -- kyiv-air-alerts-grafana/data/explosion_review_queue.json)"
+          test -z "$(git status --porcelain -- kyiv-air-alerts-grafana/data/explosion_candidate_monitor_state.json)"
+          test -z "$(git status --porcelain -- kyiv-air-alerts-grafana/data/explosion_candidate_monitor_last_run.json)"
+          test -z "$(git status --porcelain -- kyiv-air-alerts-grafana/data/explosions_test.json)"
+          test -z "$(git status --porcelain -- kyiv-air-alerts-grafana/data/dashboard_data.json)"
+          test -z "$(git status --porcelain -- kyiv-air-alerts-grafana/data/explosion_research/lviv/final_evidence.json)"
+
+      - name: Commit pilot artifact
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add research/historical_attack_event_discovery_pilot_lviv_2026-09-27.json
+          if git diff --cached --quiet; then
+            echo "No artifact change"
+          else
+            git commit -m "Record Lviv historical attack-event discovery pilot"
+            git push origin HEAD:multicity-wip-2026-09-16
+          fi
