@@ -285,7 +285,9 @@ def historical_review_roles(city: str, row: dict, monitor) -> tuple[dict, str]:
     exact_city = False
     explosion = False
     air_context = False
-    direct_strike_segment = None
+    direct_event_segment = None
+    direct_event_type = None
+    direct_event_basis = None
 
     if city == "sevastopol":
         # Sevastopol's frozen final_evidence corpus stores reviewed factual
@@ -303,54 +305,127 @@ def historical_review_roles(city: str, row: dict, monitor) -> tuple[dict, str]:
         )
     elif city == "sumy":
         # Sumy's frozen corpus stores reviewed Ukrainian factual summaries.
-        # Preserve only facts explicit in the retained summary. In particular,
-        # a strike/hit is not synthesized into explosion evidence.
+        # Preserve only facts explicit in the retained summary.
         city_pattern = r"\b(?:сум|суми|сумах|сумами)\b"
-        exact_city = bool(
-            # "Сум" is the genitive form of the city name; it does not match
-            # "Сумської"/"Сумщини".
-            re.search(city_pattern, low)
+        exact_city = bool(re.search(city_pattern, low))
+
+        adversary = (
+            r"(?:рф|росі(?:я|йськ\w*)|ворож\w*|окупант\w*|"
+            r"військ\w*\s+рф)"
         )
-        # V2 historical-only normalization for direct factual strikes. Keep
-        # this deliberately narrower than generic "атакув..." so forecasts
-        # such as "може атакувати" / "атакуватиме" cannot become events.
-        # Exact-city and military/UAV context must occur in the same retained
-        # statement that contains the completed attack verb.
+        negative_or_modal = (
+            r"\b(?:не|без|може|можуть|можлива|можливий|можливе|"
+            r"ймовірн\w*|очіку\w*|прогноз\w*|загроз\w*|плану\w*|"
+            r"атакуватиме|атакуватимуть)\b"
+        )
+        historical_cue = r"\b(?:торік|минул\w*\s+рок\w*|раніше)\b"
+        nonmilitary_strike = (
+            r"\b(?:теплов\w*|сонячн\w*|страйк\w*|турнір\w*|"
+            r"матч\w*|спорт\w*)\b"
+        )
+        figurative_impact = r"\b(?:десятк\w*|мішен\w*|ціл\w*)\b"
+        physical_location = (
+            r"\b(?:біля|поблизу|на|у|в)\s+"
+            r"(?:дитяч\w*|майданчик\w*|будинк\w*|дороз\w*|"
+            r"вулиц\w*|подвір\w*|парк\w*|школ\w*|азс|сто|"
+            r"підприємств\w*|сектор\w*|район\w*)"
+        )
+
+        # Reviewed summaries can keep exact-city context before a semicolon and
+        # the linked factual event after it. A second explicitly named audited
+        # city invalidates inheritance of Sumy context.
         for part in evidence_parts:
-            for segment in re.split(r"(?<=[.!?;])\s+|\n+", part):
+            for segment in re.split(r"(?<=[.!?])\s+|\n+", part):
                 segment = " ".join(segment.split())
                 segment_low = segment.casefold()
-                if not re.search(r"\bатакув(?:ав|ала|ало|али)\b", segment_low):
-                    continue
                 if not re.search(city_pattern, segment_low):
                     continue
-                if not (
-                    monitor.air_military_context(segment)
-                    or re.search(
-                        r"\b(?:авіаудар\w*|італмас\w*|геран\w*|ланцет\w*)\b",
+                mentioned_cities = monitor.audited_cities_in_text(segment)
+                if any(named_city != "sumy" for named_city in mentioned_cities):
+                    continue
+                if re.search(historical_cue, segment_low):
+                    continue
+
+                completed_attack = bool(
+                    re.search(r"\bатакув(?:ав|ала|ало|али)\b", segment_low)
+                )
+                attack_noun = bool(
+                    re.search(rf"\b{adversary}\b.{{0,45}}\bатак\w*\b", segment_low)
+                    or re.search(rf"\bатак\w*\b.{{0,45}}\b{adversary}\b", segment_low)
+                )
+                adversary_strike = bool(
+                    re.search(
+                        rf"\b{adversary}\b.{{0,45}}\bудар(?:у|и|ів|ом|ами)?\b",
                         segment_low,
                     )
+                    or re.search(
+                        rf"\bудар(?:у|и|ів|ом|ами)?\b.{{0,45}}\b{adversary}\b",
+                        segment_low,
+                    )
+                )
+                if (
+                    (completed_attack or attack_noun or adversary_strike)
+                    and not re.search(negative_or_modal, segment_low)
+                    and not re.search(nonmilitary_strike, segment_low)
                 ):
-                    continue
-                direct_strike_segment = segment
-                break
-            if direct_strike_segment:
+                    direct_event_segment = segment
+                    direct_event_type = "strike"
+                    direct_event_basis = (
+                        "reviewed_direct_v2_strike_same_statement_exact_city_air_context"
+                    )
+                    break
+
+                factual_impact_noun = bool(
+                    re.search(
+                        r"\b(?:зафіксован\w*|ставс\w*|бул\w*)?.{0,24}"
+                        r"\bвлучанн\w*\b",
+                        segment_low,
+                    )
+                )
+                if (
+                    factual_impact_noun
+                    and not re.search(negative_or_modal, segment_low)
+                    and not re.search(figurative_impact, segment_low)
+                ):
+                    direct_event_segment = segment
+                    direct_event_type = "impact"
+                    direct_event_basis = "reviewed_direct_v2_impact_noun_exact_city"
+                    break
+
+                enemy_uav_fall = bool(
+                    re.search(
+                        rf"\b{adversary}\b.{{0,40}}\b(?:дрон\w*|бпла|безпілот\w*)\b"
+                        rf".{{0,80}}\b(?:упав|впав)\b",
+                        segment_low,
+                    )
+                    or re.search(
+                        rf"\b(?:дрон\w*|бпла|безпілот\w*)\b.{{0,40}}\b{adversary}\b"
+                        rf".{{0,80}}\b(?:упав|впав)\b",
+                        segment_low,
+                    )
+                )
+                if (
+                    enemy_uav_fall
+                    and re.search(physical_location, segment_low)
+                    and not re.search(negative_or_modal, segment_low)
+                ):
+                    direct_event_segment = segment
+                    direct_event_type = "impact"
+                    direct_event_basis = "reviewed_enemy_uav_physical_fall_exact_city"
+                    break
+            if direct_event_segment:
                 break
 
-        # Reuse the frozen current classifier's event semantics and
-        # normalize reviewed Ukrainian summaries for linguistic forms that the
-        # live lexical layer does not spell explicitly (for example "вдарив").
-        # The legacy variable name is retained, but this role is the monitor's
-        # unified attack-event gate, so a direct v2 strike is valid here.
         explosion = bool(
             monitor.strict_explosion_signal(evidence)
             or re.search(r"\bвдар\w*\b", low)
             or re.search(r"\b(?:ударив|ударила|ударили|ударило)\b", low)
             or re.search(
-                r"\b(?:завдав|завдала|завдали|наніс|нанесла|нанесли)\b.{0,40}\bавіаудар\w*\b",
+                r"\b(?:завдав|завдала|завдали|наніс|нанесла|нанесли)\b"
+                r".{0,40}\bавіаудар\w*\b",
                 low,
             )
-            or direct_strike_segment
+            or direct_event_segment
         )
         air_context = bool(
             monitor.air_military_context(evidence)
@@ -358,6 +433,7 @@ def historical_review_roles(city: str, row: dict, monitor) -> tuple[dict, str]:
                 r"\b(?:авіаудар\w*|італмас\w*|геран\w*|ланцет\w*)\b",
                 low,
             )
+            or direct_event_segment
         )
     else:
         return {}, evidence
@@ -383,20 +459,20 @@ def historical_review_roles(city: str, row: dict, monitor) -> tuple[dict, str]:
     if explosion:
         roles["explosion_evidence"] = {
             "present": True,
-            "evidence_text": (direct_strike_segment or evidence)[:1200],
+            "evidence_text": (direct_event_segment or evidence)[:1200],
         }
-        if direct_strike_segment:
-            roles["explosion_evidence"]["event_types"] = ["strike"]
+        if direct_event_segment:
+            roles["explosion_evidence"]["event_types"] = [direct_event_type]
     if air_context:
         roles["aerial_war_evidence"] = {
             "present": True,
             "evidence_text": evidence[:1200],
         }
-    if direct_strike_segment:
+    if direct_event_segment:
         roles["same_attack_basis"] = {
             "present": True,
-            "basis": "reviewed_direct_v2_strike_same_statement_exact_city_air_context",
-            "evidence_text": direct_strike_segment[:1200],
+            "basis": direct_event_basis,
+            "evidence_text": direct_event_segment[:1200],
         }
     elif exact_city and explosion and air_context:
         roles["same_attack_basis"] = {
