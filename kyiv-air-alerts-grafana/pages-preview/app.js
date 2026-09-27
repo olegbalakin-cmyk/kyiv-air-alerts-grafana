@@ -1119,7 +1119,7 @@ async function init() {
   while (defaults.length < 3 && keys[defaults.length]) defaults.push(keys[defaults.length]);
 
   const cityDefault = validParam("city", keys, defaults[0] || keys[0]);
-  const periodDefault = validParam("period", ["monthly", "weekly", "rolling30", "rolling90"], "monthly");
+  const periodDefault = validParam("period", ["monthly", "weekly", "rolling30", "rolling90"], "rolling90");
   const aDefault = validParam("a", keys, defaults[0] || keys[0]);
   const bDefault = validParam("b", keys, defaults[1] || keys[0]);
   const cDefault = validOptionalParam("c", keys, defaults[2] || "");
