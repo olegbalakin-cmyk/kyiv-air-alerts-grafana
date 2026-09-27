@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "generated_at": "2026-09-27T12:46:00Z",
   "starting_head": "1f17c2c46ad0677289cdf7a14800edd5555cbf31",
   "replay_status_path": "research/historical_replay_status_current.json",
@@ -12,7 +12,23 @@
     "source_failure_is_negative": false,
     "exact_url_only_is_complete_coverage": false,
     "late_damage_fire_window_hours": 72,
-    "ppo_is_context_not_numerator_event": true
+    "air_defense_rule": "confirmed actual air-defense action bound to an alert episode is an event-positive attack-event class",
+    "air_defense_prediction_warning_rule": "possible, predicted, readiness, capability, or warning-only PPO is contextual evidence only and does not set air_defense_action",
+    "interception_claim_rule": "interception_claim remains a separate attribute and is not required for air_defense_action",
+    "discovery_terms_include_actual_air_defense_language": [
+      "ппо",
+      "пво",
+      "протиповітр*",
+      "противовоздуш*",
+      "працює",
+      "працювала",
+      "робота",
+      "чути",
+      "чутно",
+      "слышно",
+      "работает",
+      "работала"
+    ]
   },
   "priority": [
     "lviv",
@@ -184,5 +200,6 @@
         }
       ]
     }
-  }
+  },
+  "methodology_version": "historical-attack-event-air-defense-action-v2"
 }
