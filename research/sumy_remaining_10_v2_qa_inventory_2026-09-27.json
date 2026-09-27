@@ -1,0 +1,403 @@
+{
+  "schema_version": 1,
+  "artifact_type": "sumy_remaining_10_v2_qa_inventory",
+  "date": "2026-09-27",
+  "branch": "multicity-wip-2026-09-16",
+  "starting_head": "fe98b81eb182ae9315f1daaae76f5c40cdd949e4",
+  "replay_input_head": "be9fd7da3f356cb2e3651f2f7a208761716ed20b",
+  "replay_input_equivalence_note": "Starting HEAD is two commits ahead of replay_input_head only by the atomic-apply research artifact and historical_replay_status_current.json; replay/classifier/data inputs are unchanged.",
+  "fresh_real_replay": {
+    "workflow_run_id": 36343649298,
+    "rerun_job_id": 108690071424,
+    "script": "kyiv-air-alerts-grafana/scripts/replay_explosion_history.py",
+    "city": "sumy",
+    "through": "2026-09-17",
+    "expected_denominator": 2297,
+    "reconstructed_denominator": 2297,
+    "strict": 197,
+    "sensitivity": 228,
+    "qa_count": 10,
+    "protected_files_unchanged": true,
+    "qa_episode_ids": [
+      "2b3df2af5d1a6eb3a0a5b5e6",
+      "2c7ad2e0b42e1350e305a18f",
+      "402035df8980628fa245c4e8",
+      "45050b31bdcf42a5f8054e8d",
+      "57813e54f364c6ea1c31b79d",
+      "90a484f51b321e0950e31b60",
+      "b350026329e2fb7dee324d0b",
+      "bc17e3913b1f9a7b78cf8af7",
+      "c69285b7ffb05693c3393895",
+      "d4ca36a6f8fdb93684f7b2c2"
+    ]
+  },
+  "v2_event_positive_classes": [
+    "explosion",
+    "impact",
+    "arrival",
+    "strike",
+    "damage",
+    "fire",
+    "air_defense_action"
+  ],
+  "classification_counts": {
+    "READY_FROM_RETAINED_EXISTING_RULES": 1,
+    "SYSTEMATIC_RULE_GAP": 5,
+    "BINDING_GAP": 0,
+    "RETAINED_EVIDENCE_INSUFFICIENT": 0,
+    "SOURCE_RECOVERY_REQUIRED": 4,
+    "OTHER": 0
+  },
+  "episodes": [
+    {
+      "episode_id": "2b3df2af5d1a6eb3a0a5b5e6",
+      "alert_start": "2026-03-02T12:48:15Z",
+      "alert_end": "2026-03-02T17:22:47Z",
+      "current_replay_reason_codes": [
+        "ATTACK_EVENT_TYPES:explosion",
+        "EXACT_CITY_EVENT_TEXT",
+        "MATCH_UNIQUE",
+        "NO_AIR_MILITARY_CONTEXT",
+        "REVIEW_PROVENANCE_TEMPORAL_BINDING_USED",
+        "REVIEW_PROVENANCE_USABLE",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "TEMPORAL_REVIEWED_VALIDATED_BINDING"
+      ],
+      "retained_source": "https://suspilne.media/sumy/1253662-u-sumah-cerez-udar-bpla-poskodzena-civilna-infrastruktura/",
+      "retained_evidence_excerpt": "Близько 17:00 у Сумах був вибух; у Зарічному районі підтверджені два російські удари менш ніж за пів години.",
+      "source_date": "2026-03-02",
+      "source_timestamp_retained": null,
+      "explicit_event_time_text": "Близько 17:00",
+      "exact_city_support": true,
+      "temporal_binding": "TEMPORAL_REVIEWED_VALIDATED_BINDING",
+      "current_detected_event_types": ["explosion"],
+      "v2_supported_event_types": ["explosion", "strike"],
+      "same_attack_basis": null,
+      "deterministic_from_retained": true,
+      "current_blocker": "Replay recognizes explosion but does not treat direct factual 'два російські удари' as reusable strike/military-attack context.",
+      "bucket": "SYSTEMATIC_RULE_GAP"
+    },
+    {
+      "episode_id": "2c7ad2e0b42e1350e305a18f",
+      "alert_start": "2025-10-06T16:55:09Z",
+      "alert_end": "2025-10-06T22:34:48Z",
+      "current_replay_reason_codes": [
+        "AIR_CONTEXT_NOT_LINKED_TO_EVENT",
+        "AIR_MILITARY_CONTEXT",
+        "MATCH_UNIQUE",
+        "NO_EXACT_CITY_EVENT_TEXT",
+        "REVIEW_PROVENANCE_TEMPORAL_BINDING_USED",
+        "REVIEW_PROVENANCE_USABLE",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "TEMPORAL_REVIEWED_VALIDATED_BINDING"
+      ],
+      "retained_source": "https://t.me/s/sumygo?before=130740",
+      "retained_evidence_excerpt": "SUMY GO повідомляв про «Італмас» над містом і вибух о 21:29.",
+      "source_date": "2025-10-06",
+      "source_timestamp_retained": null,
+      "explicit_event_time_text": "21:29",
+      "exact_city_support": false,
+      "temporal_binding": "TEMPORAL_REVIEWED_VALIDATED_BINDING",
+      "current_detected_event_types": [],
+      "v2_supported_event_types": ["explosion"],
+      "same_attack_basis": null,
+      "deterministic_from_retained": false,
+      "current_blocker": "The excerpt supports UAV context plus explosion, but 'над містом' does not itself establish Sumy; retained source-retention audit has no complete source segment.",
+      "bucket": "SOURCE_RECOVERY_REQUIRED"
+    },
+    {
+      "episode_id": "402035df8980628fa245c4e8",
+      "alert_start": "2026-06-18T17:50:00Z",
+      "alert_end": "2026-06-18T20:46:26Z",
+      "current_replay_reason_codes": [
+        "AIR_CONTEXT_NOT_LINKED_TO_EVENT",
+        "AIR_MILITARY_CONTEXT",
+        "MATCH_UNIQUE",
+        "NO_EXACT_CITY_EVENT_TEXT",
+        "NO_STRICT_TEMPORAL_BINDING",
+        "REVIEW_PROVENANCE_SENSITIVITY_BINDING_USED",
+        "REVIEW_PROVENANCE_USABLE",
+        "STRICT_EXPLOSION_EVIDENCE"
+      ],
+      "retained_source": "https://www.odindoma.sumy.ua/2026/06/19/",
+      "retained_evidence_excerpt": "Пізно ввечері 18 червня БпЛА «Молнія» влучив у житловий сектор обласного центру; точнішого часу джерело не дає.",
+      "source_date": "2026-06-18",
+      "source_timestamp_retained": null,
+      "explicit_event_time_text": "Пізно ввечері 18 червня",
+      "exact_city_support": false,
+      "temporal_binding": "reviewed sensitivity binding: inferred_same_attack; no strict temporal binding",
+      "current_detected_event_types": [],
+      "v2_supported_event_types": ["impact"],
+      "same_attack_basis": "inferred_same_attack sensitivity binding only",
+      "deterministic_from_retained": false,
+      "current_blocker": "Impact is explicit, but retained text lacks exact-city wording and exact event time; no complete retained source segment is available to establish those roles.",
+      "bucket": "SOURCE_RECOVERY_REQUIRED"
+    },
+    {
+      "episode_id": "45050b31bdcf42a5f8054e8d",
+      "alert_start": "2026-07-06T17:33:50Z",
+      "alert_end": "2026-07-06T19:17:53Z",
+      "current_replay_reason_codes": [
+        "ATTACK_EVENT_TYPES:explosion",
+        "EXACT_CITY_EVENT_TEXT",
+        "MATCH_UNIQUE",
+        "NO_AIR_MILITARY_CONTEXT",
+        "REVIEW_PROVENANCE_TEMPORAL_BINDING_USED",
+        "REVIEW_PROVENANCE_USABLE",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "TEMPORAL_REVIEWED_VALIDATED_BINDING"
+      ],
+      "retained_source": "https://t.me/s/suspilnesumy?before=46132",
+      "retained_evidence_excerpt": "О 20:35 у Сумах знову було чути вибух; це вже інший alert episode.",
+      "source_date": "2026-07-06",
+      "source_timestamp_retained": null,
+      "explicit_event_time_text": "20:35",
+      "exact_city_support": true,
+      "temporal_binding": "TEMPORAL_REVIEWED_VALIDATED_BINDING",
+      "current_detected_event_types": ["explosion"],
+      "v2_supported_event_types": ["explosion"],
+      "same_attack_basis": null,
+      "deterministic_from_retained": false,
+      "current_blocker": "Retained text proves an exact-city explosion in the bound alert but does not establish military/aerial causation; removing that gate would broaden methodology, so additional source context is required.",
+      "bucket": "SOURCE_RECOVERY_REQUIRED"
+    },
+    {
+      "episode_id": "57813e54f364c6ea1c31b79d",
+      "alert_start": "2026-07-25T12:47:22Z",
+      "alert_end": "2026-07-26T13:08:13Z",
+      "current_replay_reason_codes": [
+        "EXACT_CITY_EVENT_TEXT",
+        "MATCH_UNIQUE",
+        "NO_AIR_MILITARY_CONTEXT",
+        "NO_STRICT_EXPLOSION_EVIDENCE",
+        "REVIEW_PROVENANCE_TEMPORAL_BINDING_USED",
+        "REVIEW_PROVENANCE_USABLE",
+        "TEMPORAL_REVIEWED_VALIDATED_BINDING"
+      ],
+      "retained_source": "https://suspilne.media/sumy/1359158-golovni-novini-sumsini-udari-kab-i-bpla-zagibli-ta-poraneni-situacia-na-fronti/",
+      "retained_evidence_excerpt": "Уночі РФ атакувала у Сумах підприємство харчової промисловості, АЗС, СТО та вантажівку.",
+      "source_date": "2026-07-25",
+      "source_timestamp_retained": null,
+      "explicit_event_time_text": "Уночі",
+      "exact_city_support": true,
+      "temporal_binding": "TEMPORAL_REVIEWED_VALIDATED_BINDING",
+      "current_detected_event_types": [],
+      "v2_supported_event_types": ["strike"],
+      "same_attack_basis": null,
+      "deterministic_from_retained": true,
+      "current_blocker": "Direct factual 'РФ атакувала у Сумах ...' is a strike statement, but the replay does not recognize this reusable adversary-attack wording as event-positive military attack context.",
+      "bucket": "SYSTEMATIC_RULE_GAP"
+    },
+    {
+      "episode_id": "90a484f51b321e0950e31b60",
+      "alert_start": "2025-08-20T10:17:18Z",
+      "alert_end": "2025-08-20T10:46:50Z",
+      "current_replay_reason_codes": [
+        "ATTACK_EVENT_TYPES:explosion",
+        "EXACT_CITY_EVENT_TEXT",
+        "MATCH_UNIQUE",
+        "NO_AIR_MILITARY_CONTEXT",
+        "NO_STRICT_TEMPORAL_BINDING",
+        "REVIEW_PROVENANCE_SENSITIVITY_BINDING_USED",
+        "REVIEW_PROVENANCE_USABLE",
+        "STRICT_EXPLOSION_EVIDENCE"
+      ],
+      "retained_source": "https://24tv.ua/sumah-progrimiv-vibuh_n2897888",
+      "retained_evidence_excerpt": "Близько 13:24 у Сумах пролунав вибух усередині alert episode, але джерело не підтвердило причину вибуху.",
+      "source_date": "2025-08-20",
+      "source_timestamp_retained": null,
+      "explicit_event_time_text": "13:24 local",
+      "exact_city_support": true,
+      "temporal_binding": "retained sensitivity binding exists; explicit 13:24 local time is inside 10:17:18Z-10:46:50Z alert but was not structured into reviewed temporal_binding",
+      "current_detected_event_types": ["explosion"],
+      "v2_supported_event_types": ["explosion"],
+      "same_attack_basis": "inferred_same_attack sensitivity binding",
+      "deterministic_from_retained": true,
+      "current_blocker": "Structured provenance omitted the explicit retained event time; this can be repaired deterministically from retained material without a code/methodology change.",
+      "bucket": "READY_FROM_RETAINED_EXISTING_RULES"
+    },
+    {
+      "episode_id": "b350026329e2fb7dee324d0b",
+      "alert_start": "2025-09-04T09:54:01Z",
+      "alert_end": "2025-09-05T05:44:58Z",
+      "current_replay_reason_codes": [
+        "EXACT_CITY_EVENT_TEXT",
+        "MATCH_UNIQUE",
+        "NO_AIR_MILITARY_CONTEXT",
+        "REVIEW_PROVENANCE_TEMPORAL_BINDING_USED",
+        "REVIEW_PROVENANCE_USABLE",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "TEMPORAL_REVIEWED_VALIDATED_BINDING"
+      ],
+      "retained_source": "https://suspilne.media/sumy/1108108-ulamok-u-ditace-lizko-i-vibiti-sibki-v-budinkah-vijska-rf-vnoci-atakuvali-sumi/",
+      "retained_evidence_excerpt": "Жителі Сум повідомили про початок російської атаки близько 01:00 та три вибухи.",
+      "source_date": "2025-09-04",
+      "source_timestamp_retained": null,
+      "explicit_event_time_text": "близько 01:00",
+      "exact_city_support": true,
+      "temporal_binding": "TEMPORAL_REVIEWED_VALIDATED_BINDING",
+      "current_detected_event_types": [],
+      "v2_supported_event_types": ["explosion", "strike"],
+      "same_attack_basis": "same retained statement links Russian attack and three explosions",
+      "deterministic_from_retained": true,
+      "current_blocker": "Replay does not use explicit 'російська атака' in the same exact-city statement as reusable military-attack context for the linked explosions/strike.",
+      "bucket": "SYSTEMATIC_RULE_GAP"
+    },
+    {
+      "episode_id": "bc17e3913b1f9a7b78cf8af7",
+      "alert_start": "2026-02-17T12:16:42Z",
+      "alert_end": "2026-02-17T16:26:28Z",
+      "current_replay_reason_codes": [
+        "EXACT_CITY_EVENT_TEXT",
+        "MATCH_UNIQUE",
+        "NO_AIR_MILITARY_CONTEXT",
+        "NO_STRICT_TEMPORAL_BINDING",
+        "REVIEW_PROVENANCE_SENSITIVITY_BINDING_USED",
+        "REVIEW_PROVENANCE_USABLE",
+        "STRICT_EXPLOSION_EVIDENCE"
+      ],
+      "retained_source": "https://suspilne.media/sumy/1242330-vibuhi-u-sumah-17-lutogo-so-vidomo/",
+      "retained_evidence_excerpt": "Близько 14:10 у середмісті Сум зафіксовано влучання; найближчий наступний frozen alert почався о 14:16.",
+      "source_date": "2026-02-17",
+      "source_timestamp_retained": null,
+      "explicit_event_time_text": "14:10 local",
+      "exact_city_support": true,
+      "temporal_binding": "reviewed sensitivity binding: near_boundary, 6 minutes before alert start",
+      "current_detected_event_types": [],
+      "v2_supported_event_types": ["impact"],
+      "same_attack_basis": "near_boundary sensitivity binding",
+      "deterministic_from_retained": true,
+      "current_blocker": "Direct factual noun 'влучання' is not recognized as v2 impact even though exact-city and reviewed near-boundary sensitivity binding are retained.",
+      "bucket": "SYSTEMATIC_RULE_GAP"
+    },
+    {
+      "episode_id": "c69285b7ffb05693c3393895",
+      "alert_start": "2025-10-08T17:44:30Z",
+      "alert_end": "2025-10-08T23:17:39Z",
+      "current_replay_reason_codes": [
+        "AIR_CONTEXT_NOT_LINKED_TO_EVENT",
+        "AIR_MILITARY_CONTEXT",
+        "MATCH_UNIQUE",
+        "NO_EXACT_CITY_EVENT_TEXT",
+        "REVIEW_PROVENANCE_TEMPORAL_BINDING_USED",
+        "REVIEW_PROVENANCE_USABLE",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "TEMPORAL_REVIEWED_VALIDATED_BINDING"
+      ],
+      "retained_source": "https://t.me/s/sumygo?before=131089",
+      "retained_evidence_excerpt": "SUMY GO повідомив про «Італмас» над містом, вибухи о 21:18-21:20 і влучання по місту.",
+      "source_date": "2025-10-08",
+      "source_timestamp_retained": null,
+      "explicit_event_time_text": "21:18-21:20",
+      "exact_city_support": false,
+      "temporal_binding": "TEMPORAL_REVIEWED_VALIDATED_BINDING",
+      "current_detected_event_types": [],
+      "v2_supported_event_types": ["explosion", "impact"],
+      "same_attack_basis": null,
+      "deterministic_from_retained": false,
+      "current_blocker": "UAV, explosions and impact are explicit, but 'містом' lacks retained antecedent proving Sumy; source-retention audit has no complete source segment.",
+      "bucket": "SOURCE_RECOVERY_REQUIRED"
+    },
+    {
+      "episode_id": "d4ca36a6f8fdb93684f7b2c2",
+      "alert_start": "2026-08-22T12:16:51Z",
+      "alert_end": "2026-08-22T16:09:13Z",
+      "current_replay_reason_codes": [
+        "AIR_CONTEXT_NOT_LINKED_TO_EVENT",
+        "AIR_MILITARY_CONTEXT",
+        "EXACT_CITY_EVENT_TEXT",
+        "MATCH_UNIQUE",
+        "NO_STRICT_EXPLOSION_EVIDENCE",
+        "REVIEW_PROVENANCE_TEMPORAL_BINDING_USED",
+        "REVIEW_PROVENANCE_USABLE",
+        "TEMPORAL_REVIEWED_VALIDATED_BINDING"
+      ],
+      "retained_source": "https://suspilne.media/sumy/1380474-golovni-novini-sumsini-ataki-na-infrastrukturu-zagibli-civilni-ta-situacia-na-prikordonni/",
+      "retained_evidence_excerpt": "У Сумах близько 18:00 російський дрон упав біля дитячого майданчика.",
+      "source_date": "2026-08-22",
+      "source_timestamp_retained": null,
+      "explicit_event_time_text": "близько 18:00",
+      "exact_city_support": true,
+      "temporal_binding": "TEMPORAL_REVIEWED_VALIDATED_BINDING",
+      "current_detected_event_types": [],
+      "v2_supported_event_types": ["impact"],
+      "same_attack_basis": null,
+      "deterministic_from_retained": true,
+      "current_blocker": "Completed factual enemy-UAV 'упав' at an exact-city location is not recognized as v2 impact/physical arrival.",
+      "bucket": "SYSTEMATIC_RULE_GAP"
+    }
+  ],
+  "systematic_reusable_gaps": [
+    {
+      "gap": "explicit_adversary_attack_or_strike_wording",
+      "affected_episode_ids": [
+        "2b3df2af5d1a6eb3a0a5b5e6",
+        "57813e54f364c6ea1c31b79d",
+        "b350026329e2fb7dee324d0b"
+      ],
+      "retained_wording": [
+        "підтверджені два російські удари",
+        "РФ атакувала у Сумах ...",
+        "початок російської атаки ... та три вибухи"
+      ],
+      "v2_event_class": "strike (and linked explosion where explicitly present)",
+      "current_blocking_logic": "Current replay requires a narrower air/military context signal and does not consistently convert direct adversary attack/strike wording into an event-positive role.",
+      "narrowest_reusable_rule": "When the same retained statement is factual/completed, names the adversary attack/strike, is exact-city, and has accepted temporal binding, recognize the direct attack/strike wording as strike context; where explosions are in that same attack statement, allow that statement to supply same-attack military context.",
+      "negative_controls_required": [
+        "threat/warning/future attack wording",
+        "generic historical recap without episode binding",
+        "attack wording about another locality",
+        "figurative/non-military uses",
+        "uncertain or attributed speculation without factual establishment"
+      ]
+    },
+    {
+      "gap": "direct_impact_noun",
+      "affected_episode_ids": ["bc17e3913b1f9a7b78cf8af7"],
+      "retained_wording": ["зафіксовано влучання"],
+      "v2_event_class": "impact",
+      "current_blocking_logic": "Replay retains the event and sensitivity binding but does not emit an impact event type for the noun form.",
+      "narrowest_reusable_rule": "Recognize completed factual exact-city 'влучання' as impact when the retained statement has accepted strict or sensitivity temporal binding.",
+      "negative_controls_required": [
+        "negated/no-impact statements",
+        "possible/expected/forecast impact wording",
+        "impact in another locality",
+        "unbound historical mentions"
+      ]
+    },
+    {
+      "gap": "enemy_uav_fell_as_physical_impact",
+      "affected_episode_ids": ["d4ca36a6f8fdb93684f7b2c2"],
+      "retained_wording": ["російський дрон упав біля дитячого майданчика"],
+      "v2_event_class": "impact",
+      "current_blocking_logic": "Replay sees exact-city and UAV context but does not map completed factual 'упав/впав' of an enemy UAV at a physical location to impact.",
+      "narrowest_reusable_rule": "Recognize completed factual enemy-UAV 'упав/впав' at an exact-city physical location as impact when accepted temporal binding is present.",
+      "negative_controls_required": [
+        "planned/possible fall",
+        "loss of signal without physical fall",
+        "training/non-hostile aircraft",
+        "another locality",
+        "unbound retrospective mentions"
+      ]
+    }
+  ],
+  "recommended_next_scope": {
+    "type": "combination",
+    "implementation": [
+      "One shared narrow strike/attack-context replay fix for 2b3df2af5d1a6eb3a0a5b5e6, 57813e54f364c6ea1c31b79d, b350026329e2fb7dee324d0b.",
+      "Two narrow reusable impact lexical rules covering bc17e3913b1f9a7b78cf8af7 and d4ca36a6f8fdb93684f7b2c2.",
+      "One deterministic retained-provenance repair for 90a484f51b321e0950e31b60 to structure its explicit 13:24 event time."
+    ],
+    "source_recovery": [
+      "Recover/retain enough source context for exact-city linkage in 2c7ad2e0b42e1350e305a18f and c69285b7ffb05693c3393895.",
+      "Recover exact-city/time context for 402035df8980628fa245c4e8 while preserving its existing sensitivity-only status unless stronger retained timing is established.",
+      "Recover military/aerial causal context for 45050b31bdcf42a5f8054e8d; do not remove the context gate merely because an exact-city explosion occurred during the alert."
+    ]
+  },
+  "protected_state": {
+    "protected_files_unchanged": true,
+    "active_6863_campaign_branch": "historical-attack-event-backfill-2026-09-27",
+    "active_6863_campaign_head_before": "5809bd677a93e6c2f6a1bff9cb7f6b5bde0c7c1e"
+  },
+  "verdict": "SUMY REMAINING 10 V2 QA INVENTORIED — NEXT REPAIR SCOPE IDENTIFIED"
+}
