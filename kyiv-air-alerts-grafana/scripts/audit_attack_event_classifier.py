@@ -27,9 +27,23 @@ def legacy_strict_explosion_signal(text: str) -> bool:
     return False
 
 
-def classify_all(queue: list[dict], state: dict, signal) -> dict[str, dict]:
-    original = m.strict_attack_event_signal
+def legacy_relative_alert_chronology_relation(row: dict, episodes: list[dict]) -> dict:
+    return {
+        "relation": None,
+        "event_time": None,
+        "alert_time": None,
+        "offset_minutes": None,
+        "episode_specific": False,
+        "supported_episode_ids": [],
+        "episode_id": None,
+    }
+
+
+def classify_all(queue: list[dict], state: dict, signal, relative_relation) -> dict[str, dict]:
+    original_signal = m.strict_attack_event_signal
+    original_relative = m.relative_alert_chronology_relation
     m.strict_attack_event_signal = signal
+    m.relative_alert_chronology_relation = relative_relation
     try:
         out = {}
         for item in queue:
@@ -49,10 +63,12 @@ def classify_all(queue: list[dict], state: dict, signal) -> dict[str, dict]:
                 "candidate_strict_present": bool((decision.get("candidate_evidence") or {}).get("strict_explosion", {}).get("present")),
                 "event_types": list(decision.get("event_types") or []),
                 "reason_codes": list(decision.get("reason_codes") or []),
+                "temporal_code": (decision.get("temporal_binding") or {}).get("code"),
             }
         return out
     finally:
-        m.strict_attack_event_signal = original
+        m.strict_attack_event_signal = original_signal
+        m.relative_alert_chronology_relation = original_relative
 
 
 def main() -> None:
@@ -61,8 +77,18 @@ def main() -> None:
     if not isinstance(queue, list):
         raise RuntimeError("queue is not a list")
 
-    old = classify_all(queue, state, legacy_strict_explosion_signal)
-    new = classify_all(queue, state, m.strict_attack_event_signal)
+    old = classify_all(
+        queue,
+        state,
+        legacy_strict_explosion_signal,
+        legacy_relative_alert_chronology_relation,
+    )
+    new = classify_all(
+        queue,
+        state,
+        m.strict_attack_event_signal,
+        m.relative_alert_chronology_relation,
+    )
 
     changes = []
     uncontrolled = []
@@ -74,7 +100,9 @@ def main() -> None:
             continue
         gained_strict = (not before["candidate_strict_present"]) and after["candidate_strict_present"]
         consequence_types = sorted(set(after["event_types"]) & {"damage", "fire"})
-        targeted = gained_strict and bool(consequence_types)
+        targeted_damage_fire = gained_strict and bool(consequence_types)
+        targeted_relative_chronology = after.get("temporal_code") == "TEMPORAL_RELATIVE_ALERT_CHRONOLOGY"
+        targeted = targeted_damage_fire or targeted_relative_chronology
         row = {
             "candidate_id": cid,
             "city_key": after["city_key"],
@@ -83,7 +111,10 @@ def main() -> None:
             "old_episode_id": before["proposed_matched_episode_id"],
             "new_episode_id": after["proposed_matched_episode_id"],
             "event_types": after["event_types"],
-            "targeted_damage_fire_widening": targeted,
+            "old_temporal_code": before.get("temporal_code"),
+            "new_temporal_code": after.get("temporal_code"),
+            "targeted_damage_fire_widening": targeted_damage_fire,
+            "targeted_relative_chronology": targeted_relative_chronology,
         }
         changes.append(row)
         if not targeted:
@@ -96,6 +127,7 @@ def main() -> None:
         "evaluated_candidates": len(new),
         "changed_candidate_count": len(changes),
         "targeted_damage_fire_widening_count": sum(1 for row in changes if row["targeted_damage_fire_widening"]),
+        "targeted_relative_chronology_count": sum(1 for row in changes if row["targeted_relative_chronology"]),
         "uncontrolled_drift_count": len(uncontrolled),
         "approved_regression_count": len(regressions),
         "changes": changes,
