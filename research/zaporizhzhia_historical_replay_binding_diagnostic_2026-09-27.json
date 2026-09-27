@@ -1,0 +1,2284 @@
+{
+  "schema_version": 1,
+  "generated_for_date": "2026-09-27",
+  "repository": "olegbalakin-cmyk/kyiv-air-alerts-grafana",
+  "branch": "multicity-wip-2026-09-16",
+  "scope": "read-only Zaporizhzhia historical replay binding/reconciliation diagnostic; no denominator rebuild, no historical web research, no mutating replay",
+  "input_blobs": {
+    "repository_head_at_analysis": "664dd37e9b07eeed584e37467b3bc4a52dad02c1",
+    "historical_replay_status_current": {
+      "path": "research/historical_replay_status_current.json",
+      "blob_sha": "6a45e1b5cd052dbc4a417d04b1b962b3d8de245f",
+      "status_input_head": "6ed005c6b23cc3d0251d776260ab49f71eabc071"
+    },
+    "zaporizhzhia_final_evidence": {
+      "path": "kyiv-air-alerts-grafana/data/explosion_research/zaporizhzhia/final_evidence.json",
+      "blob_sha": "4b3559386bdd8515f24498dfaac47ef67542b679"
+    },
+    "historical_audited_baseline": {
+      "path": "kyiv-air-alerts-grafana/data/explosion_audited_baseline.json",
+      "blob_sha": "5bbd2b771559eac2966aeec65d6e3b5487b9c1a9"
+    },
+    "current_historical_replay_tool": {
+      "path": "kyiv-air-alerts-grafana/scripts/replay_explosion_history.py",
+      "blob_sha": "7509d9f391d206a2b052ff35ee8993ced33c6936"
+    },
+    "current_hardened_monitor": {
+      "path": "kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py",
+      "blob_sha": "eefd63aeebc17347b750f61115842be6c53a79da"
+    },
+    "canonical_episode_builder": {
+      "path": "kyiv-air-alerts-grafana/scripts/build_explosion_source_slices.py",
+      "blob_sha": "4bd6adc9b696cb56e6a7d02ed0abaf632c4dead2"
+    },
+    "attack_event_hardening_control": {
+      "path": "research/attack_event_classifier_hardening_control_replay_2026-09-27.json",
+      "blob_sha": "28cbeb816bb2860a273aef6ac6d83582ea8ad407"
+    },
+    "prior_zaporizhzhia_audits": [
+      {
+        "path": "research/zaporizhzhia_explosion_enrichment_slice2_results.json",
+        "blob_sha": "0ff0f3151dedc6dec636760191173bcf61f968a0"
+      },
+      {
+        "path": "research/zaporizhzhia_explosion_enrichment_slice3_results.json",
+        "blob_sha": "ef4fa282e1cdbae89e5433e713a4665e1fa769dd"
+      },
+      {
+        "path": "research/explosion_monitor_zaporizhzhia_final_source_identification_2026-09-24.json",
+        "blob_sha": "3bf44aab9924b9bd6ea0ecc7cf5590e80e32c792"
+      },
+      {
+        "path": "research/zaporizhzhia_explosion_confirmed_miss_reconciliation.json",
+        "blob_sha": "ab95968377da58acfef6504505d1860225dab0dc"
+      }
+    ],
+    "reconstructed_alert_episode_corpus": [
+      {
+        "path": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P1a_alerts.json",
+        "blob_sha": "dc9cff5e26d1e38d73e823ec69ba261b933940a8"
+      },
+      {
+        "path": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P1b_alerts.json",
+        "blob_sha": "9dba2195b25276b164a568a1df35ccd9764c1b9f"
+      },
+      {
+        "path": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P2a_alerts.json",
+        "blob_sha": "43b93b64f9dbe13d03279b99c814498ce79858cc"
+      },
+      {
+        "path": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P2b_alerts.json",
+        "blob_sha": "b6c5e43f01444425167a361ed9a27d9245c43d95"
+      },
+      {
+        "path": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P3a_alerts.json",
+        "blob_sha": "3a09ebc810a16dff4393bbd629e1756ec9fca227"
+      },
+      {
+        "path": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P3b_alerts.json",
+        "blob_sha": "e43a5b3eaa1bb2e49d1a822e0af15ae4e25e2eae"
+      },
+      {
+        "path": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P4a_alerts.json",
+        "blob_sha": "9acbce13d059beab2eb352f922943224cf134d5c"
+      },
+      {
+        "path": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P4b_alerts.json",
+        "blob_sha": "3f34bd993e38afc527968eac1073c3f7396094a4"
+      },
+      {
+        "path": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P4c_alerts.json",
+        "blob_sha": "0c4cbde0a9653b7b8be6605e75489203ce9bdd3b"
+      },
+      {
+        "path": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P4c1_alerts.json",
+        "blob_sha": "70ffc7efb52119eaef063f0ba0f52620ab28e12a"
+      },
+      {
+        "path": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P4c2_alerts.json",
+        "blob_sha": "38703faac7384a6ed7cafa2314834f475646a04c"
+      }
+    ]
+  },
+  "denominator_verification": {
+    "expected_alert_episodes": 2365,
+    "reconstructed_alert_episodes": 2365,
+    "denominator_gap": 0,
+    "confirmed_2365_of_2365": true
+  },
+  "current_blocker_reproduction": {
+    "unbound_counted_evidence_records": 23,
+    "strict_events_records": 169,
+    "sensitivity_only_events_records": 55,
+    "expected_baseline_strict_n": 169,
+    "expected_baseline_sensitivity_n": 224,
+    "replayable_current_binding_strict_n": 146,
+    "replayable_current_binding_sensitivity_n": 201,
+    "blocker_root_cause": "All 23 current UNBOUND_COUNTED_EVIDENCE records are strict_events[23..45]. Each retains `matched_alert_start_kyiv`; the current replay START_FIELDS tuple omits that field, so binding falls through to `missing_episode_binding`. Every retained start equals one and only one current canonical episode start (delta 0 s), well inside the existing ±90 s reconciliation rule."
+  },
+  "unbound_records": [
+    {
+      "evidence_identifier": "strict_events[23]",
+      "stored_candidate_id": null,
+      "source_url": "https://weukraine.tv/novyny/droni-atakuvali-zaporizhzhja-horit-pidprijemstvo/",
+      "local_date": "2025-06-18",
+      "old_counted_status": "strict",
+      "retained_event_evidence_text": "Після початку тривоги в Запоріжжі приблизно за 16 хвилин пролунали перші вибухи; місто атакували ударні БпЛА.",
+      "retained_basis": "strict: exact-city UAV attack; event interval is inside the matched alert.",
+      "stored_event_timestamp": "~00:27-01:40",
+      "stored_episode_id": null,
+      "retained_matched_alert_start_kyiv": "2025-06-18T00:09:15+03:00",
+      "current_binding_result": {
+        "episode_id": null,
+        "method": "missing_episode_binding",
+        "candidate_episode_ids": []
+      },
+      "current_binding_failure_reason": "`matched_alert_start_kyiv` is retained on the record but is absent from replay START_FIELDS and DAY_FIELDS, so current binder reaches missing_episode_binding.",
+      "deterministic_reconciliation": {
+        "canonical_episode_id": "e12d26d1c2062a9585ec9519",
+        "canonical_alert_start": "2025-06-17T21:09:15Z",
+        "canonical_alert_end": "2025-06-17T23:28:17Z",
+        "retained_start_delta_seconds": 0,
+        "candidates_within_existing_90_second_rule": 1,
+        "method": "retained_matched_alert_start_kyiv_within_existing_90s_rule",
+        "canonical_identity_rule": "SHA256(`${city_key}|${start_utc_z}|${end_utc_z}`)[:24]"
+      },
+      "current_hardened_classifier_static_reconstruction": {
+        "proposed_outcome_after_deterministic_rebind_and_current_generated_temporal_provenance": "approved_strict",
+        "exact_city_present": true,
+        "strict_attack_event_present": true,
+        "attack_event_types": [
+          "explosion"
+        ],
+        "air_military_context_present": true,
+        "same_attack_context_present": true,
+        "exact_city_segments": [
+          "Після початку тривоги в Запоріжжі приблизно за 16 хвилин пролунали перші вибухи;"
+        ],
+        "strict_attack_event_segments": [
+          "Після початку тривоги в Запоріжжі приблизно за 16 хвилин пролунали перші вибухи;"
+        ],
+        "note": "Static reconstruction of current monitor lexical/segment gates; strict historical adapter supplies only reviewed temporal binding for Zaporizhzhia unless additional retained review roles are migrated."
+      },
+      "retained_prior_audit_provenance_support": null,
+      "blocker_classification": "DETERMINISTIC_REBIND",
+      "repair_action": "REBIND_ONLY",
+      "repair_rationale": "Add/read the already-retained `matched_alert_start_kyiv` through the existing start-match path; exact current start match (0 s) yields one canonical episode and current hardened gates remain strict."
+    },
+    {
+      "evidence_identifier": "strict_events[24]",
+      "stored_candidate_id": null,
+      "source_url": "https://www.rbc.ua/rus/news/zaporizhzhi-prolunali-vibuhi-mozhliviy-udar-1750617456.html",
+      "local_date": "2025-06-22",
+      "old_counted_status": "strict",
+      "retained_event_evidence_text": "Увечері під час повітряної атаки в Запоріжжі пролунали сильні вибухи; повідомлялося про загрозу ударних БпЛА.",
+      "retained_basis": "strict: exact-city aerial-war evidence and time falls inside the matched alert.",
+      "stored_event_timestamp": "~21:16",
+      "stored_episode_id": null,
+      "retained_matched_alert_start_kyiv": "2025-06-22T20:13:22+03:00",
+      "current_binding_result": {
+        "episode_id": null,
+        "method": "missing_episode_binding",
+        "candidate_episode_ids": []
+      },
+      "current_binding_failure_reason": "`matched_alert_start_kyiv` is retained on the record but is absent from replay START_FIELDS and DAY_FIELDS, so current binder reaches missing_episode_binding.",
+      "deterministic_reconciliation": {
+        "canonical_episode_id": "843005edc6568568c2a292fa",
+        "canonical_alert_start": "2025-06-22T17:13:22Z",
+        "canonical_alert_end": "2025-06-23T00:05:17Z",
+        "retained_start_delta_seconds": 0,
+        "candidates_within_existing_90_second_rule": 1,
+        "method": "retained_matched_alert_start_kyiv_within_existing_90s_rule",
+        "canonical_identity_rule": "SHA256(`${city_key}|${start_utc_z}|${end_utc_z}`)[:24]"
+      },
+      "current_hardened_classifier_static_reconstruction": {
+        "proposed_outcome_after_deterministic_rebind_and_current_generated_temporal_provenance": "approved_strict",
+        "exact_city_present": true,
+        "strict_attack_event_present": true,
+        "attack_event_types": [
+          "explosion"
+        ],
+        "air_military_context_present": true,
+        "same_attack_context_present": true,
+        "exact_city_segments": [
+          "Увечері під час повітряної атаки в Запоріжжі пролунали сильні вибухи;"
+        ],
+        "strict_attack_event_segments": [
+          "Увечері під час повітряної атаки в Запоріжжі пролунали сильні вибухи;"
+        ],
+        "note": "Static reconstruction of current monitor lexical/segment gates; strict historical adapter supplies only reviewed temporal binding for Zaporizhzhia unless additional retained review roles are migrated."
+      },
+      "retained_prior_audit_provenance_support": null,
+      "blocker_classification": "DETERMINISTIC_REBIND",
+      "repair_action": "REBIND_ONLY",
+      "repair_rationale": "Add/read the already-retained `matched_alert_start_kyiv` through the existing start-match path; exact current start match (0 s) yields one canonical episode and current hardened gates remain strict."
+    },
+    {
+      "evidence_identifier": "strict_events[25]",
+      "stored_candidate_id": null,
+      "source_url": "https://www.pravda.com.ua/news/2025/06/25/7518597/",
+      "local_date": "2025-06-24",
+      "old_counted_status": "strict",
+      "retained_event_evidence_text": "Після першої години ночі в Запоріжжі повідомляли про вибухи та повторний удар на тлі повітряної атаки.",
+      "retained_basis": "strict: exact-city aerial-war event inside the cross-midnight alert that started June 24.",
+      "stored_event_timestamp": "~01:00-02:12 on 2025-06-25",
+      "stored_episode_id": null,
+      "retained_matched_alert_start_kyiv": "2025-06-24T22:45:04+03:00",
+      "current_binding_result": {
+        "episode_id": null,
+        "method": "missing_episode_binding",
+        "candidate_episode_ids": []
+      },
+      "current_binding_failure_reason": "`matched_alert_start_kyiv` is retained on the record but is absent from replay START_FIELDS and DAY_FIELDS, so current binder reaches missing_episode_binding.",
+      "deterministic_reconciliation": {
+        "canonical_episode_id": "c7006b3ec3bd8928ce7a36bd",
+        "canonical_alert_start": "2025-06-24T19:45:04Z",
+        "canonical_alert_end": "2025-06-25T01:15:47Z",
+        "retained_start_delta_seconds": 0,
+        "candidates_within_existing_90_second_rule": 1,
+        "method": "retained_matched_alert_start_kyiv_within_existing_90s_rule",
+        "canonical_identity_rule": "SHA256(`${city_key}|${start_utc_z}|${end_utc_z}`)[:24]"
+      },
+      "current_hardened_classifier_static_reconstruction": {
+        "proposed_outcome_after_deterministic_rebind_and_current_generated_temporal_provenance": "approved_strict",
+        "exact_city_present": true,
+        "strict_attack_event_present": true,
+        "attack_event_types": [
+          "explosion",
+          "strike"
+        ],
+        "air_military_context_present": true,
+        "same_attack_context_present": true,
+        "exact_city_segments": [
+          "Після першої години ночі в Запоріжжі повідомляли про вибухи та повторний удар на тлі повітряної атаки."
+        ],
+        "strict_attack_event_segments": [
+          "Після першої години ночі в Запоріжжі повідомляли про вибухи та повторний удар на тлі повітряної атаки."
+        ],
+        "note": "Static reconstruction of current monitor lexical/segment gates; strict historical adapter supplies only reviewed temporal binding for Zaporizhzhia unless additional retained review roles are migrated."
+      },
+      "retained_prior_audit_provenance_support": null,
+      "blocker_classification": "DETERMINISTIC_REBIND",
+      "repair_action": "REBIND_ONLY",
+      "repair_rationale": "Add/read the already-retained `matched_alert_start_kyiv` through the existing start-match path; exact current start match (0 s) yields one canonical episode and current hardened gates remain strict."
+    },
+    {
+      "evidence_identifier": "strict_events[26]",
+      "stored_candidate_id": null,
+      "source_url": "https://24tv.ua/zaporizhzhi-pratsyuye-ppo-trivaye-masovana-atka-bpla_n2856733",
+      "local_date": "2025-06-27",
+      "old_counted_status": "strict",
+      "retained_event_evidence_text": "У Запоріжжі під час масованої атаки БпЛА працювала ППО і пролунали вибухи.",
+      "retained_basis": "strict: exact-city UAV attack with event time inside the matched alert.",
+      "stored_event_timestamp": "~01:32-01:38",
+      "stored_episode_id": null,
+      "retained_matched_alert_start_kyiv": "2025-06-27T01:01:06+03:00",
+      "current_binding_result": {
+        "episode_id": null,
+        "method": "missing_episode_binding",
+        "candidate_episode_ids": []
+      },
+      "current_binding_failure_reason": "`matched_alert_start_kyiv` is retained on the record but is absent from replay START_FIELDS and DAY_FIELDS, so current binder reaches missing_episode_binding.",
+      "deterministic_reconciliation": {
+        "canonical_episode_id": "7666b549078065271f0033f3",
+        "canonical_alert_start": "2025-06-26T22:01:06Z",
+        "canonical_alert_end": "2025-06-26T23:47:11Z",
+        "retained_start_delta_seconds": 0,
+        "candidates_within_existing_90_second_rule": 1,
+        "method": "retained_matched_alert_start_kyiv_within_existing_90s_rule",
+        "canonical_identity_rule": "SHA256(`${city_key}|${start_utc_z}|${end_utc_z}`)[:24]"
+      },
+      "current_hardened_classifier_static_reconstruction": {
+        "proposed_outcome_after_deterministic_rebind_and_current_generated_temporal_provenance": "approved_strict",
+        "exact_city_present": true,
+        "strict_attack_event_present": true,
+        "attack_event_types": [
+          "explosion"
+        ],
+        "air_military_context_present": true,
+        "same_attack_context_present": true,
+        "exact_city_segments": [
+          "У Запоріжжі під час масованої атаки БпЛА працювала ППО і пролунали вибухи."
+        ],
+        "strict_attack_event_segments": [
+          "У Запоріжжі під час масованої атаки БпЛА працювала ППО і пролунали вибухи."
+        ],
+        "note": "Static reconstruction of current monitor lexical/segment gates; strict historical adapter supplies only reviewed temporal binding for Zaporizhzhia unless additional retained review roles are migrated."
+      },
+      "retained_prior_audit_provenance_support": null,
+      "blocker_classification": "DETERMINISTIC_REBIND",
+      "repair_action": "REBIND_ONLY",
+      "repair_rationale": "Add/read the already-retained `matched_alert_start_kyiv` through the existing start-match path; exact current start match (0 s) yields one canonical episode and current hardened gates remain strict."
+    },
+    {
+      "evidence_identifier": "strict_events[27]",
+      "stored_candidate_id": null,
+      "source_url": "https://news.telegraf.com.ua/ukr/ukraina/2025-06-29/5913357-zaporizhzhya-atakuvali-bezpilotniki-ta-raketi-e-poshkodzhennya-u-misti",
+      "local_date": "2025-06-28",
+      "old_counted_status": "strict",
+      "retained_event_evidence_text": "У ніч проти 29 червня Запоріжжя атакували ракетами й ударними БпЛА; ОВА повідомила про ракетний удар, коли повітряна тривога тривала.",
+      "retained_basis": "strict: exact-city aerial-war strike explicitly reported while the matched cross-midnight alert was active.",
+      "stored_event_timestamp": "night of 2025-06-29; exact minute not stated",
+      "stored_episode_id": null,
+      "retained_matched_alert_start_kyiv": "2025-06-28T21:17:02+03:00",
+      "current_binding_result": {
+        "episode_id": null,
+        "method": "missing_episode_binding",
+        "candidate_episode_ids": []
+      },
+      "current_binding_failure_reason": "`matched_alert_start_kyiv` is retained on the record but is absent from replay START_FIELDS and DAY_FIELDS, so current binder reaches missing_episode_binding.",
+      "deterministic_reconciliation": {
+        "canonical_episode_id": "6dc2c1209865b6cf7e7f8699",
+        "canonical_alert_start": "2025-06-28T18:17:02Z",
+        "canonical_alert_end": "2025-06-29T01:56:03Z",
+        "retained_start_delta_seconds": 0,
+        "candidates_within_existing_90_second_rule": 1,
+        "method": "retained_matched_alert_start_kyiv_within_existing_90s_rule",
+        "canonical_identity_rule": "SHA256(`${city_key}|${start_utc_z}|${end_utc_z}`)[:24]"
+      },
+      "current_hardened_classifier_static_reconstruction": {
+        "proposed_outcome_after_deterministic_rebind_and_current_generated_temporal_provenance": "needs_review",
+        "exact_city_present": true,
+        "strict_attack_event_present": false,
+        "attack_event_types": [],
+        "air_military_context_present": true,
+        "same_attack_context_present": false,
+        "exact_city_segments": [
+          "У ніч проти 29 червня Запоріжжя атакували ракетами й ударними БпЛА;"
+        ],
+        "strict_attack_event_segments": [],
+        "note": "Static reconstruction of current monitor lexical/segment gates; strict historical adapter supplies only reviewed temporal binding for Zaporizhzhia unless additional retained review roles are migrated."
+      },
+      "retained_prior_audit_provenance_support": {
+        "available": true,
+        "artifact": "research/zaporizhzhia_explosion_enrichment_slice2_results.json",
+        "artifact_blob_sha": "0ff0f3151dedc6dec636760191173bcf61f968a0",
+        "json_path": "$.positive_candidate_records[12]",
+        "retained_source_urls": [
+          "https://24tv.ua/masovaniy-raketniy-obstril-ukrayini-29-chervnya-shho-vidomo-pro_n2858051"
+        ],
+        "exact_city_basis": "exact_city",
+        "attack_event_basis": "confirmed_missile_impact",
+        "aerial_war_basis": "missile_strike",
+        "event_time_basis": "2025-06-29 ~03:00 Europe/Kyiv",
+        "target_episode_attribution": {
+          "status": "target_episode_supported",
+          "basis": "inside cross-midnight target alert starting 2025-06-28 21:17; not the later 05:46 episode"
+        },
+        "sufficient_for_review_provenance_repair": true
+      },
+      "blocker_classification": "CURRENT_RULE_DOWNGRADE",
+      "repair_action": "PROVENANCE_REPAIR",
+      "repair_rationale": "Binding is deterministic, but the condensed final_evidence text alone fails current segment/alias gates. Existing structured audit provenance already retains exact-city attack-event, aerial-war and episode-specific facts; migrate those factual roles into current review_provenance without using the old strict label as authority and without new web research."
+    },
+    {
+      "evidence_identifier": "strict_events[28]",
+      "stored_candidate_id": null,
+      "source_url": "https://zprz.city/news/view/hati-majzhe-nemae-ale-golovne-shho-mi-zhivi-ochevidtsi-rozpovili-pro-ataku-shahediv-na-zaporizhzhya-video",
+      "local_date": "2025-07-01",
+      "old_counted_status": "strict",
+      "retained_event_evidence_text": "Приблизно о 02:00 російські війська завдали чотирьох ударів по Запоріжжю та району, зокрема ударними БпЛА.",
+      "retained_basis": "strict: exact-city UAV attack time is inside the matched alert; attack independently corroborated by national/public sources.",
+      "stored_event_timestamp": "~02:00",
+      "stored_episode_id": null,
+      "retained_matched_alert_start_kyiv": "2025-07-01T01:19:49+03:00",
+      "current_binding_result": {
+        "episode_id": null,
+        "method": "missing_episode_binding",
+        "candidate_episode_ids": []
+      },
+      "current_binding_failure_reason": "`matched_alert_start_kyiv` is retained on the record but is absent from replay START_FIELDS and DAY_FIELDS, so current binder reaches missing_episode_binding.",
+      "deterministic_reconciliation": {
+        "canonical_episode_id": "b41d83d707e66b203d6d1794",
+        "canonical_alert_start": "2025-06-30T22:19:49Z",
+        "canonical_alert_end": "2025-06-30T23:57:49Z",
+        "retained_start_delta_seconds": 0,
+        "candidates_within_existing_90_second_rule": 1,
+        "method": "retained_matched_alert_start_kyiv_within_existing_90s_rule",
+        "canonical_identity_rule": "SHA256(`${city_key}|${start_utc_z}|${end_utc_z}`)[:24]"
+      },
+      "current_hardened_classifier_static_reconstruction": {
+        "proposed_outcome_after_deterministic_rebind_and_current_generated_temporal_provenance": "approved_strict",
+        "exact_city_present": true,
+        "strict_attack_event_present": true,
+        "attack_event_types": [
+          "strike"
+        ],
+        "air_military_context_present": true,
+        "same_attack_context_present": true,
+        "exact_city_segments": [
+          "Приблизно о 02:00 російські війська завдали чотирьох ударів по Запоріжжю та району, зокрема ударними БпЛА."
+        ],
+        "strict_attack_event_segments": [
+          "Приблизно о 02:00 російські війська завдали чотирьох ударів по Запоріжжю та району, зокрема ударними БпЛА."
+        ],
+        "note": "Static reconstruction of current monitor lexical/segment gates; strict historical adapter supplies only reviewed temporal binding for Zaporizhzhia unless additional retained review roles are migrated."
+      },
+      "retained_prior_audit_provenance_support": null,
+      "blocker_classification": "DETERMINISTIC_REBIND",
+      "repair_action": "REBIND_ONLY",
+      "repair_rationale": "Add/read the already-retained `matched_alert_start_kyiv` through the existing start-match path; exact current start match (0 s) yields one canonical episode and current hardened gates remain strict."
+    },
+    {
+      "evidence_identifier": "strict_events[29]",
+      "stored_candidate_id": null,
+      "source_url": "https://24tv.ua/zaporizhzhi-chuli-vibuhi-pratsyuye-ppo_n2863628",
+      "local_date": "2025-07-05",
+      "old_counted_status": "strict",
+      "retained_event_evidence_text": "У Запоріжжі під час атаки БпЛА працювала ППО та було чути вибухи близько другої ночі.",
+      "retained_basis": "strict: exact-city UAV/PPO event inside the cross-midnight matched alert.",
+      "stored_event_timestamp": "~01:47-02:01 on 2025-07-06",
+      "stored_episode_id": null,
+      "retained_matched_alert_start_kyiv": "2025-07-05T23:59:01+03:00",
+      "current_binding_result": {
+        "episode_id": null,
+        "method": "missing_episode_binding",
+        "candidate_episode_ids": []
+      },
+      "current_binding_failure_reason": "`matched_alert_start_kyiv` is retained on the record but is absent from replay START_FIELDS and DAY_FIELDS, so current binder reaches missing_episode_binding.",
+      "deterministic_reconciliation": {
+        "canonical_episode_id": "c53264679115cd2fbe52c53a",
+        "canonical_alert_start": "2025-07-05T20:59:01Z",
+        "canonical_alert_end": "2025-07-05T23:32:06Z",
+        "retained_start_delta_seconds": 0,
+        "candidates_within_existing_90_second_rule": 1,
+        "method": "retained_matched_alert_start_kyiv_within_existing_90s_rule",
+        "canonical_identity_rule": "SHA256(`${city_key}|${start_utc_z}|${end_utc_z}`)[:24]"
+      },
+      "current_hardened_classifier_static_reconstruction": {
+        "proposed_outcome_after_deterministic_rebind_and_current_generated_temporal_provenance": "approved_strict",
+        "exact_city_present": true,
+        "strict_attack_event_present": true,
+        "attack_event_types": [
+          "explosion"
+        ],
+        "air_military_context_present": true,
+        "same_attack_context_present": true,
+        "exact_city_segments": [
+          "У Запоріжжі під час атаки БпЛА працювала ППО та було чути вибухи близько другої ночі."
+        ],
+        "strict_attack_event_segments": [
+          "У Запоріжжі під час атаки БпЛА працювала ППО та було чути вибухи близько другої ночі."
+        ],
+        "note": "Static reconstruction of current monitor lexical/segment gates; strict historical adapter supplies only reviewed temporal binding for Zaporizhzhia unless additional retained review roles are migrated."
+      },
+      "retained_prior_audit_provenance_support": null,
+      "blocker_classification": "DETERMINISTIC_REBIND",
+      "repair_action": "REBIND_ONLY",
+      "repair_rationale": "Add/read the already-retained `matched_alert_start_kyiv` through the existing start-match path; exact current start match (0 s) yields one canonical episode and current hardened gates remain strict."
+    },
+    {
+      "evidence_identifier": "strict_events[30]",
+      "stored_candidate_id": null,
+      "source_url": "https://24tv.ua/zaporizhzhi-prolunali-vibuhi_n2864255",
+      "local_date": "2025-07-07",
+      "old_counted_status": "strict",
+      "retained_event_evidence_text": "Після оголошення тривоги в Запоріжжі пролунали вибухи; ОВА повідомляла про атаку дронів по місту.",
+      "retained_basis": "strict: exact-city drone attack and event time inside the matched alert.",
+      "stored_event_timestamp": "~10:20",
+      "stored_episode_id": null,
+      "retained_matched_alert_start_kyiv": "2025-07-07T09:27:24+03:00",
+      "current_binding_result": {
+        "episode_id": null,
+        "method": "missing_episode_binding",
+        "candidate_episode_ids": []
+      },
+      "current_binding_failure_reason": "`matched_alert_start_kyiv` is retained on the record but is absent from replay START_FIELDS and DAY_FIELDS, so current binder reaches missing_episode_binding.",
+      "deterministic_reconciliation": {
+        "canonical_episode_id": "202349ba336c5c0ac6cac5d7",
+        "canonical_alert_start": "2025-07-07T06:27:24Z",
+        "canonical_alert_end": "2025-07-07T07:47:38Z",
+        "retained_start_delta_seconds": 0,
+        "candidates_within_existing_90_second_rule": 1,
+        "method": "retained_matched_alert_start_kyiv_within_existing_90s_rule",
+        "canonical_identity_rule": "SHA256(`${city_key}|${start_utc_z}|${end_utc_z}`)[:24]"
+      },
+      "current_hardened_classifier_static_reconstruction": {
+        "proposed_outcome_after_deterministic_rebind_and_current_generated_temporal_provenance": "approved_strict",
+        "exact_city_present": true,
+        "strict_attack_event_present": true,
+        "attack_event_types": [
+          "explosion"
+        ],
+        "air_military_context_present": true,
+        "same_attack_context_present": true,
+        "exact_city_segments": [
+          "Після оголошення тривоги в Запоріжжі пролунали вибухи;"
+        ],
+        "strict_attack_event_segments": [
+          "Після оголошення тривоги в Запоріжжі пролунали вибухи;"
+        ],
+        "note": "Static reconstruction of current monitor lexical/segment gates; strict historical adapter supplies only reviewed temporal binding for Zaporizhzhia unless additional retained review roles are migrated."
+      },
+      "retained_prior_audit_provenance_support": null,
+      "blocker_classification": "DETERMINISTIC_REBIND",
+      "repair_action": "REBIND_ONLY",
+      "repair_rationale": "Add/read the already-retained `matched_alert_start_kyiv` through the existing start-match path; exact current start match (0 s) yields one canonical episode and current hardened gates remain strict."
+    },
+    {
+      "evidence_identifier": "strict_events[31]",
+      "stored_candidate_id": null,
+      "source_url": "https://www.pravda.com.ua/news/2025/07/09/7520826/",
+      "local_date": "2025-07-09",
+      "old_counted_status": "strict",
+      "retained_event_evidence_text": "На тлі повідомлення Повітряних сил про швидкісну ціль біля Запоріжжя місцеві медіа повідомили про вибух у місті.",
+      "retained_basis": "strict: exact-city explosion with confirmed aerial threat inside the matched alert.",
+      "stored_event_timestamp": "~23:34",
+      "stored_episode_id": null,
+      "retained_matched_alert_start_kyiv": "2025-07-09T22:58:53+03:00",
+      "current_binding_result": {
+        "episode_id": null,
+        "method": "missing_episode_binding",
+        "candidate_episode_ids": []
+      },
+      "current_binding_failure_reason": "`matched_alert_start_kyiv` is retained on the record but is absent from replay START_FIELDS and DAY_FIELDS, so current binder reaches missing_episode_binding.",
+      "deterministic_reconciliation": {
+        "canonical_episode_id": "4b5505f1a437fdf606709c66",
+        "canonical_alert_start": "2025-07-09T19:58:53Z",
+        "canonical_alert_end": "2025-07-10T00:35:17Z",
+        "retained_start_delta_seconds": 0,
+        "candidates_within_existing_90_second_rule": 1,
+        "method": "retained_matched_alert_start_kyiv_within_existing_90s_rule",
+        "canonical_identity_rule": "SHA256(`${city_key}|${start_utc_z}|${end_utc_z}`)[:24]"
+      },
+      "current_hardened_classifier_static_reconstruction": {
+        "proposed_outcome_after_deterministic_rebind_and_current_generated_temporal_provenance": "approved_strict",
+        "exact_city_present": true,
+        "strict_attack_event_present": true,
+        "attack_event_types": [
+          "explosion"
+        ],
+        "air_military_context_present": true,
+        "same_attack_context_present": true,
+        "exact_city_segments": [
+          "На тлі повідомлення Повітряних сил про швидкісну ціль біля Запоріжжя місцеві медіа повідомили про вибух у місті."
+        ],
+        "strict_attack_event_segments": [
+          "На тлі повідомлення Повітряних сил про швидкісну ціль біля Запоріжжя місцеві медіа повідомили про вибух у місті."
+        ],
+        "note": "Static reconstruction of current monitor lexical/segment gates; strict historical adapter supplies only reviewed temporal binding for Zaporizhzhia unless additional retained review roles are migrated."
+      },
+      "retained_prior_audit_provenance_support": null,
+      "blocker_classification": "DETERMINISTIC_REBIND",
+      "repair_action": "REBIND_ONLY",
+      "repair_rationale": "Add/read the already-retained `matched_alert_start_kyiv` through the existing start-match path; exact current start match (0 s) yields one canonical episode and current hardened gates remain strict."
+    },
+    {
+      "evidence_identifier": "strict_events[32]",
+      "stored_candidate_id": null,
+      "source_url": "https://24tv.ua/vibuhi-prolunali-zaporizhzhi_n2869108",
+      "local_date": "2025-07-13",
+      "old_counted_status": "strict",
+      "retained_event_evidence_text": "За кілька хвилин після початку тривоги в Запоріжжі пролунали вибухи на тлі загрози швидкісних повітряних цілей.",
+      "retained_basis": "strict: exact-city aerial-war event immediately after start of the matched alert.",
+      "stored_event_timestamp": "~12:43-12:47",
+      "stored_episode_id": null,
+      "retained_matched_alert_start_kyiv": "2025-07-13T12:41:46+03:00",
+      "current_binding_result": {
+        "episode_id": null,
+        "method": "missing_episode_binding",
+        "candidate_episode_ids": []
+      },
+      "current_binding_failure_reason": "`matched_alert_start_kyiv` is retained on the record but is absent from replay START_FIELDS and DAY_FIELDS, so current binder reaches missing_episode_binding.",
+      "deterministic_reconciliation": {
+        "canonical_episode_id": "67a904a0ab96455cefbc5ba9",
+        "canonical_alert_start": "2025-07-13T09:41:46Z",
+        "canonical_alert_end": "2025-07-13T10:02:32Z",
+        "retained_start_delta_seconds": 0,
+        "candidates_within_existing_90_second_rule": 1,
+        "method": "retained_matched_alert_start_kyiv_within_existing_90s_rule",
+        "canonical_identity_rule": "SHA256(`${city_key}|${start_utc_z}|${end_utc_z}`)[:24]"
+      },
+      "current_hardened_classifier_static_reconstruction": {
+        "proposed_outcome_after_deterministic_rebind_and_current_generated_temporal_provenance": "approved_strict",
+        "exact_city_present": true,
+        "strict_attack_event_present": true,
+        "attack_event_types": [
+          "explosion"
+        ],
+        "air_military_context_present": true,
+        "same_attack_context_present": true,
+        "exact_city_segments": [
+          "За кілька хвилин після початку тривоги в Запоріжжі пролунали вибухи на тлі загрози швидкісних повітряних цілей."
+        ],
+        "strict_attack_event_segments": [
+          "За кілька хвилин після початку тривоги в Запоріжжі пролунали вибухи на тлі загрози швидкісних повітряних цілей."
+        ],
+        "note": "Static reconstruction of current monitor lexical/segment gates; strict historical adapter supplies only reviewed temporal binding for Zaporizhzhia unless additional retained review roles are migrated."
+      },
+      "retained_prior_audit_provenance_support": null,
+      "blocker_classification": "DETERMINISTIC_REBIND",
+      "repair_action": "REBIND_ONLY",
+      "repair_rationale": "Add/read the already-retained `matched_alert_start_kyiv` through the existing start-match path; exact current start match (0 s) yields one canonical episode and current hardened gates remain strict."
+    },
+    {
+      "evidence_identifier": "strict_events[33]",
+      "stored_candidate_id": null,
+      "source_url": "https://24tv.ua/zaporizkiy-oblasti-chutno-vibuhi-regioni-pratsyuye-ppo_n2870275",
+      "local_date": "2025-07-14",
+      "old_counted_status": "strict",
+      "retained_event_evidence_text": "Під час тривалої тривоги дрони рухалися на Запоріжжя, у місті неодноразово лунали вибухи та працювала ППО.",
+      "retained_basis": "strict: exact-city UAV/PPO evidence within one matched alert episode; counted once.",
+      "stored_event_timestamp": "~21:19-23:26",
+      "stored_episode_id": null,
+      "retained_matched_alert_start_kyiv": "2025-07-14T19:34:28+03:00",
+      "current_binding_result": {
+        "episode_id": null,
+        "method": "missing_episode_binding",
+        "candidate_episode_ids": []
+      },
+      "current_binding_failure_reason": "`matched_alert_start_kyiv` is retained on the record but is absent from replay START_FIELDS and DAY_FIELDS, so current binder reaches missing_episode_binding.",
+      "deterministic_reconciliation": {
+        "canonical_episode_id": "806894d4170f39a8155e8485",
+        "canonical_alert_start": "2025-07-14T16:34:28Z",
+        "canonical_alert_end": "2025-07-15T05:00:04Z",
+        "retained_start_delta_seconds": 0,
+        "candidates_within_existing_90_second_rule": 1,
+        "method": "retained_matched_alert_start_kyiv_within_existing_90s_rule",
+        "canonical_identity_rule": "SHA256(`${city_key}|${start_utc_z}|${end_utc_z}`)[:24]"
+      },
+      "current_hardened_classifier_static_reconstruction": {
+        "proposed_outcome_after_deterministic_rebind_and_current_generated_temporal_provenance": "approved_strict",
+        "exact_city_present": true,
+        "strict_attack_event_present": true,
+        "attack_event_types": [
+          "explosion"
+        ],
+        "air_military_context_present": true,
+        "same_attack_context_present": true,
+        "exact_city_segments": [
+          "Під час тривалої тривоги дрони рухалися на Запоріжжя, у місті неодноразово лунали вибухи та працювала ППО."
+        ],
+        "strict_attack_event_segments": [
+          "Під час тривалої тривоги дрони рухалися на Запоріжжя, у місті неодноразово лунали вибухи та працювала ППО."
+        ],
+        "note": "Static reconstruction of current monitor lexical/segment gates; strict historical adapter supplies only reviewed temporal binding for Zaporizhzhia unless additional retained review roles are migrated."
+      },
+      "retained_prior_audit_provenance_support": null,
+      "blocker_classification": "DETERMINISTIC_REBIND",
+      "repair_action": "REBIND_ONLY",
+      "repair_rationale": "Add/read the already-retained `matched_alert_start_kyiv` through the existing start-match path; exact current start match (0 s) yields one canonical episode and current hardened gates remain strict."
+    },
+    {
+      "evidence_identifier": "strict_events[34]",
+      "stored_candidate_id": null,
+      "source_url": "https://www.ukrinform.ua/rubric-regions/4015392-ataka-droniv-u-zaporizzi-ta-dnipri-prolunali-vibuhi.html",
+      "local_date": "2025-07-15",
+      "old_counted_status": "strict",
+      "retained_event_evidence_text": "Пізно ввечері в Запоріжжі пролунали вибухи під час атаки ворожих БпЛА після початку повітряної тривоги.",
+      "retained_basis": "strict: exact-city UAV attack explicitly tied to the active matched alert; separate earlier no-alert impact was excluded.",
+      "stored_event_timestamp": "late evening; exact minute not stated",
+      "stored_episode_id": null,
+      "retained_matched_alert_start_kyiv": "2025-07-15T20:58:08+03:00",
+      "current_binding_result": {
+        "episode_id": null,
+        "method": "missing_episode_binding",
+        "candidate_episode_ids": []
+      },
+      "current_binding_failure_reason": "`matched_alert_start_kyiv` is retained on the record but is absent from replay START_FIELDS and DAY_FIELDS, so current binder reaches missing_episode_binding.",
+      "deterministic_reconciliation": {
+        "canonical_episode_id": "56a73633ee7030cb00e61fcf",
+        "canonical_alert_start": "2025-07-15T17:58:08Z",
+        "canonical_alert_end": "2025-07-15T22:28:18Z",
+        "retained_start_delta_seconds": 0,
+        "candidates_within_existing_90_second_rule": 1,
+        "method": "retained_matched_alert_start_kyiv_within_existing_90s_rule",
+        "canonical_identity_rule": "SHA256(`${city_key}|${start_utc_z}|${end_utc_z}`)[:24]"
+      },
+      "current_hardened_classifier_static_reconstruction": {
+        "proposed_outcome_after_deterministic_rebind_and_current_generated_temporal_provenance": "approved_strict",
+        "exact_city_present": true,
+        "strict_attack_event_present": true,
+        "attack_event_types": [
+          "explosion"
+        ],
+        "air_military_context_present": true,
+        "same_attack_context_present": true,
+        "exact_city_segments": [
+          "Пізно ввечері в Запоріжжі пролунали вибухи під час атаки ворожих БпЛА після початку повітряної тривоги."
+        ],
+        "strict_attack_event_segments": [
+          "Пізно ввечері в Запоріжжі пролунали вибухи під час атаки ворожих БпЛА після початку повітряної тривоги."
+        ],
+        "note": "Static reconstruction of current monitor lexical/segment gates; strict historical adapter supplies only reviewed temporal binding for Zaporizhzhia unless additional retained review roles are migrated."
+      },
+      "retained_prior_audit_provenance_support": null,
+      "blocker_classification": "DETERMINISTIC_REBIND",
+      "repair_action": "REBIND_ONLY",
+      "repair_rationale": "Add/read the already-retained `matched_alert_start_kyiv` through the existing start-match path; exact current start match (0 s) yields one canonical episode and current hardened gates remain strict."
+    },
+    {
+      "evidence_identifier": "strict_events[35]",
+      "stored_candidate_id": null,
+      "source_url": "https://24tv.ua/zaporizhzhi-lunayut-vibuhi-misti-pratsyuye-ppo_n2872883",
+      "local_date": "2025-07-18",
+      "old_counted_status": "strict",
+      "retained_event_evidence_text": "Під час тривоги над Запоріжжям фіксували групу дронів, у місті працювала ППО і лунали вибухи.",
+      "retained_basis": "strict: exact-city UAV/PPO event inside the matched alert.",
+      "stored_event_timestamp": "~02:52",
+      "stored_episode_id": null,
+      "retained_matched_alert_start_kyiv": "2025-07-18T01:50:39+03:00",
+      "current_binding_result": {
+        "episode_id": null,
+        "method": "missing_episode_binding",
+        "candidate_episode_ids": []
+      },
+      "current_binding_failure_reason": "`matched_alert_start_kyiv` is retained on the record but is absent from replay START_FIELDS and DAY_FIELDS, so current binder reaches missing_episode_binding.",
+      "deterministic_reconciliation": {
+        "canonical_episode_id": "1781440c8942002c1a65c25c",
+        "canonical_alert_start": "2025-07-17T22:50:39Z",
+        "canonical_alert_end": "2025-07-17T23:56:41Z",
+        "retained_start_delta_seconds": 0,
+        "candidates_within_existing_90_second_rule": 1,
+        "method": "retained_matched_alert_start_kyiv_within_existing_90s_rule",
+        "canonical_identity_rule": "SHA256(`${city_key}|${start_utc_z}|${end_utc_z}`)[:24]"
+      },
+      "current_hardened_classifier_static_reconstruction": {
+        "proposed_outcome_after_deterministic_rebind_and_current_generated_temporal_provenance": "needs_review",
+        "exact_city_present": false,
+        "strict_attack_event_present": false,
+        "attack_event_types": [],
+        "air_military_context_present": true,
+        "same_attack_context_present": false,
+        "exact_city_segments": [],
+        "strict_attack_event_segments": [],
+        "note": "Static reconstruction of current monitor lexical/segment gates; strict historical adapter supplies only reviewed temporal binding for Zaporizhzhia unless additional retained review roles are migrated."
+      },
+      "retained_prior_audit_provenance_support": {
+        "available": true,
+        "artifact": "research/zaporizhzhia_explosion_enrichment_slice3_results.json",
+        "artifact_blob_sha": "ef4fa282e1cdbae89e5433e713a4665e1fa769dd",
+        "json_path": "$.positive_candidate_records[5]",
+        "retained_source_urls": [
+          "https://www.ukrinform.ua/rubric-regions/4016236-zaporizza-atakuut-rosijski-droni-pracue-ppo.html"
+        ],
+        "exact_city_basis": "Ukrinform explicitly reports explosions in Zaporizhzhia and UAV activity over multiple city districts.",
+        "attack_event_basis": "Explicit 'у місті пролунали вибухи'; this is separate explosion evidence, not PVO-only wording.",
+        "aerial_war_basis": "three strike UAVs currently over the city; Shaheds attacking city districts",
+        "event_time_basis": "contemporaneous current-attack statement during the 2025-07-18 01:50:39-02:56:41 city alert; source does not assign publication time as event time",
+        "target_episode_attribution": {
+          "status": "target_episode_supported",
+          "basis": "semantic current-attack attribution while the target alert is active; no other same-night city alert overlaps the described current attack"
+        },
+        "sufficient_for_review_provenance_repair": true
+      },
+      "blocker_classification": "CURRENT_RULE_DOWNGRADE",
+      "repair_action": "PROVENANCE_REPAIR",
+      "repair_rationale": "Binding is deterministic, but the condensed final_evidence text alone fails current segment/alias gates. Existing structured audit provenance already retains exact-city attack-event, aerial-war and episode-specific facts; migrate those factual roles into current review_provenance without using the old strict label as authority and without new web research."
+    },
+    {
+      "evidence_identifier": "strict_events[36]",
+      "stored_candidate_id": null,
+      "source_url": "https://24tv.ua/ataka-shahedami-18-lipnya-2025-ukrayini-de-zagroza-udaru-de-trivoga_n2873563",
+      "local_date": "2025-07-18",
+      "old_counted_status": "strict",
+      "retained_event_evidence_text": "Увечері БпЛА рухалися на Запоріжжя; близько 22:25 у місті було чути вибухи від роботи ППО.",
+      "retained_basis": "strict: exact-city UAV/PPO event inside the matched alert.",
+      "stored_event_timestamp": "~22:25",
+      "stored_episode_id": null,
+      "retained_matched_alert_start_kyiv": "2025-07-18T21:12:02+03:00",
+      "current_binding_result": {
+        "episode_id": null,
+        "method": "missing_episode_binding",
+        "candidate_episode_ids": []
+      },
+      "current_binding_failure_reason": "`matched_alert_start_kyiv` is retained on the record but is absent from replay START_FIELDS and DAY_FIELDS, so current binder reaches missing_episode_binding.",
+      "deterministic_reconciliation": {
+        "canonical_episode_id": "c0367099eed49727686e61af",
+        "canonical_alert_start": "2025-07-18T18:12:02Z",
+        "canonical_alert_end": "2025-07-19T05:23:50Z",
+        "retained_start_delta_seconds": 0,
+        "candidates_within_existing_90_second_rule": 1,
+        "method": "retained_matched_alert_start_kyiv_within_existing_90s_rule",
+        "canonical_identity_rule": "SHA256(`${city_key}|${start_utc_z}|${end_utc_z}`)[:24]"
+      },
+      "current_hardened_classifier_static_reconstruction": {
+        "proposed_outcome_after_deterministic_rebind_and_current_generated_temporal_provenance": "needs_review",
+        "exact_city_present": true,
+        "strict_attack_event_present": false,
+        "attack_event_types": [],
+        "air_military_context_present": true,
+        "same_attack_context_present": false,
+        "exact_city_segments": [
+          "Увечері БпЛА рухалися на Запоріжжя;"
+        ],
+        "strict_attack_event_segments": [],
+        "note": "Static reconstruction of current monitor lexical/segment gates; strict historical adapter supplies only reviewed temporal binding for Zaporizhzhia unless additional retained review roles are migrated."
+      },
+      "retained_prior_audit_provenance_support": {
+        "available": true,
+        "artifact": "research/zaporizhzhia_explosion_enrichment_slice3_results.json",
+        "artifact_blob_sha": "ef4fa282e1cdbae89e5433e713a4665e1fa769dd",
+        "json_path": "$.historical_comparison.disagreements[1]",
+        "retained_source_urls": [
+          "https://24tv.ua/ataka-shahedami-18-lipnya-2025-ukrayini-de-zagroza-udaru-de-trivoga_n2873563"
+        ],
+        "diagnosis": "The frozen Slice 3 row retained no source or raw hit. Post-freeze canonical evidence points to a 24 Kanal Shahed live chronology with a ~22:25 exact-city explosion entry. Because the page never survived into the frozen row, primary diagnosis remains retrieval/retention; the source form repeats the previously seen live-feed/body-segmentation family.",
+        "historical_evidence_provenance": {
+          "artifact": "kyiv-air-alerts-grafana/data/explosion_research/zaporizhzhia/final_evidence.json",
+          "path": "strict_events[36]",
+          "event_time_kyiv": "~22:25",
+          "source_url": "https://24tv.ua/ataka-shahedami-18-lipnya-2025-ukrayini-de-zagroza-udaru-de-trivoga_n2873563",
+          "evidence": "Увечері БпЛА рухалися на Запоріжжя; близько 22:25 у місті було чути вибухи від роботи ППО.",
+          "basis": "strict: exact-city UAV/PPO event inside the matched alert."
+        },
+        "prior_independent_discovery_verdict": "no_source_hit",
+        "sufficient_for_review_provenance_repair": true
+      },
+      "blocker_classification": "CURRENT_RULE_DOWNGRADE",
+      "repair_action": "PROVENANCE_REPAIR",
+      "repair_rationale": "Binding is deterministic, but the condensed final_evidence text alone fails current segment/alias gates. Existing structured audit provenance already retains exact-city attack-event, aerial-war and episode-specific facts; migrate those factual roles into current review_provenance without using the old strict label as authority and without new web research."
+    },
+    {
+      "evidence_identifier": "strict_events[37]",
+      "stored_candidate_id": null,
+      "source_url": "https://24tv.ua/zaporizhzhi-prolunali-vibuhi_n2873752/",
+      "local_date": "2025-07-19",
+      "old_counted_status": "strict",
+      "retained_event_evidence_text": "Повітряну тривогу оголосили о 10:02, а приблизно за п'ять хвилин з'явилося повідомлення про вибухи в Запоріжжі на тлі загрози авіаційних засобів ураження.",
+      "retained_basis": "strict: exact-city aerial-war event immediately after start of the matched alert.",
+      "stored_event_timestamp": "~10:07",
+      "stored_episode_id": null,
+      "retained_matched_alert_start_kyiv": "2025-07-19T10:02:18+03:00",
+      "current_binding_result": {
+        "episode_id": null,
+        "method": "missing_episode_binding",
+        "candidate_episode_ids": []
+      },
+      "current_binding_failure_reason": "`matched_alert_start_kyiv` is retained on the record but is absent from replay START_FIELDS and DAY_FIELDS, so current binder reaches missing_episode_binding.",
+      "deterministic_reconciliation": {
+        "canonical_episode_id": "c4e92e077e05dbfd52daeb9e",
+        "canonical_alert_start": "2025-07-19T07:02:18Z",
+        "canonical_alert_end": "2025-07-19T07:38:46Z",
+        "retained_start_delta_seconds": 0,
+        "candidates_within_existing_90_second_rule": 1,
+        "method": "retained_matched_alert_start_kyiv_within_existing_90s_rule",
+        "canonical_identity_rule": "SHA256(`${city_key}|${start_utc_z}|${end_utc_z}`)[:24]"
+      },
+      "current_hardened_classifier_static_reconstruction": {
+        "proposed_outcome_after_deterministic_rebind_and_current_generated_temporal_provenance": "approved_strict",
+        "exact_city_present": true,
+        "strict_attack_event_present": true,
+        "attack_event_types": [
+          "explosion"
+        ],
+        "air_military_context_present": true,
+        "same_attack_context_present": true,
+        "exact_city_segments": [
+          "Повітряну тривогу оголосили о 10:02, а приблизно за п'ять хвилин з'явилося повідомлення про вибухи в Запоріжжі на тлі загрози авіаційних засобів ураження."
+        ],
+        "strict_attack_event_segments": [
+          "Повітряну тривогу оголосили о 10:02, а приблизно за п'ять хвилин з'явилося повідомлення про вибухи в Запоріжжі на тлі загрози авіаційних засобів ураження."
+        ],
+        "note": "Static reconstruction of current monitor lexical/segment gates; strict historical adapter supplies only reviewed temporal binding for Zaporizhzhia unless additional retained review roles are migrated."
+      },
+      "retained_prior_audit_provenance_support": null,
+      "blocker_classification": "DETERMINISTIC_REBIND",
+      "repair_action": "REBIND_ONLY",
+      "repair_rationale": "Add/read the already-retained `matched_alert_start_kyiv` through the existing start-match path; exact current start match (0 s) yields one canonical episode and current hardened gates remain strict."
+    },
+    {
+      "evidence_identifier": "strict_events[38]",
+      "stored_candidate_id": null,
+      "source_url": "https://www.rbc.ua/rus/news/zaporizhzhi-cherez-ataku-rf-spalahnula-pozhezha-1752957275.html",
+      "local_date": "2025-07-19",
+      "old_counted_status": "strict",
+      "retained_event_evidence_text": "Під час вечірньої тривоги російський БпЛА атакував Запоріжжя; внаслідок атаки на підприємстві виникла пожежа.",
+      "retained_basis": "strict: exact-city UAV attack during the matched alert; distinct from the morning episode.",
+      "stored_event_timestamp": "~22:45-23:30",
+      "stored_episode_id": null,
+      "retained_matched_alert_start_kyiv": "2025-07-19T21:25:23+03:00",
+      "current_binding_result": {
+        "episode_id": null,
+        "method": "missing_episode_binding",
+        "candidate_episode_ids": []
+      },
+      "current_binding_failure_reason": "`matched_alert_start_kyiv` is retained on the record but is absent from replay START_FIELDS and DAY_FIELDS, so current binder reaches missing_episode_binding.",
+      "deterministic_reconciliation": {
+        "canonical_episode_id": "48826b9dbadd8eaee6601c9c",
+        "canonical_alert_start": "2025-07-19T18:25:23Z",
+        "canonical_alert_end": "2025-07-19T22:48:54Z",
+        "retained_start_delta_seconds": 0,
+        "candidates_within_existing_90_second_rule": 1,
+        "method": "retained_matched_alert_start_kyiv_within_existing_90s_rule",
+        "canonical_identity_rule": "SHA256(`${city_key}|${start_utc_z}|${end_utc_z}`)[:24]"
+      },
+      "current_hardened_classifier_static_reconstruction": {
+        "proposed_outcome_after_deterministic_rebind_and_current_generated_temporal_provenance": "needs_review",
+        "exact_city_present": true,
+        "strict_attack_event_present": false,
+        "attack_event_types": [],
+        "air_military_context_present": true,
+        "same_attack_context_present": false,
+        "exact_city_segments": [
+          "Під час вечірньої тривоги російський БпЛА атакував Запоріжжя;"
+        ],
+        "strict_attack_event_segments": [],
+        "note": "Static reconstruction of current monitor lexical/segment gates; strict historical adapter supplies only reviewed temporal binding for Zaporizhzhia unless additional retained review roles are migrated."
+      },
+      "retained_prior_audit_provenance_support": {
+        "available": true,
+        "artifact": "research/zaporizhzhia_explosion_enrichment_slice3_results.json",
+        "artifact_blob_sha": "ef4fa282e1cdbae89e5433e713a4665e1fa769dd",
+        "json_path": "$.positive_candidate_records[6]",
+        "retained_source_urls": [
+          "https://www.ukrinform.ua/rubric-regions/4016844-u-zaporizzi-progrimili-vibuhi.html"
+        ],
+        "exact_city_basis": "Ukrinform correspondent explicitly reports explosions heard in Zaporizhzhia city.",
+        "attack_event_basis": "Explicit city explosions during Russian UAV attack.",
+        "aerial_war_basis": "group of UAVs heading toward Zaporizhzhia; strike-UAV threat",
+        "event_time_basis": "contemporaneous current-attack statement on 2025-07-20 shortly after midnight; publication timestamp is retained separately and is not substituted for event time",
+        "target_episode_attribution": {
+          "status": "target_episode_supported",
+          "basis": "inside the only city alert spanning the current attack: 2025-07-19 21:25:23 to 2025-07-20 01:48:54 Europe/Kyiv"
+        },
+        "sufficient_for_review_provenance_repair": true
+      },
+      "blocker_classification": "CURRENT_RULE_DOWNGRADE",
+      "repair_action": "PROVENANCE_REPAIR",
+      "repair_rationale": "Binding is deterministic, but the condensed final_evidence text alone fails current segment/alias gates. Existing structured audit provenance already retains exact-city attack-event, aerial-war and episode-specific facts; migrate those factual roles into current review_provenance without using the old strict label as authority and without new web research."
+    },
+    {
+      "evidence_identifier": "strict_events[39]",
+      "stored_candidate_id": null,
+      "source_url": "https://24tv.ua/bpla-atakuyut-zaporizhzhya-pratsyuye-ppo_n2877320",
+      "local_date": "2025-07-24",
+      "old_counted_status": "strict",
+      "retained_event_evidence_text": "Після початку тривоги через атаку БпЛА в Запоріжжі працювала ППО та було чути вибухи.",
+      "retained_basis": "strict: exact-city UAV/PPO event inside the matched alert.",
+      "stored_event_timestamp": "~02:16",
+      "stored_episode_id": null,
+      "retained_matched_alert_start_kyiv": "2025-07-24T02:08:13+03:00",
+      "current_binding_result": {
+        "episode_id": null,
+        "method": "missing_episode_binding",
+        "candidate_episode_ids": []
+      },
+      "current_binding_failure_reason": "`matched_alert_start_kyiv` is retained on the record but is absent from replay START_FIELDS and DAY_FIELDS, so current binder reaches missing_episode_binding.",
+      "deterministic_reconciliation": {
+        "canonical_episode_id": "6b8944c3a3d0cbb98d1dd6c3",
+        "canonical_alert_start": "2025-07-23T23:08:13Z",
+        "canonical_alert_end": "2025-07-24T00:16:26Z",
+        "retained_start_delta_seconds": 0,
+        "candidates_within_existing_90_second_rule": 1,
+        "method": "retained_matched_alert_start_kyiv_within_existing_90s_rule",
+        "canonical_identity_rule": "SHA256(`${city_key}|${start_utc_z}|${end_utc_z}`)[:24]"
+      },
+      "current_hardened_classifier_static_reconstruction": {
+        "proposed_outcome_after_deterministic_rebind_and_current_generated_temporal_provenance": "approved_strict",
+        "exact_city_present": true,
+        "strict_attack_event_present": true,
+        "attack_event_types": [
+          "explosion"
+        ],
+        "air_military_context_present": true,
+        "same_attack_context_present": true,
+        "exact_city_segments": [
+          "Після початку тривоги через атаку БпЛА в Запоріжжі працювала ППО та було чути вибухи."
+        ],
+        "strict_attack_event_segments": [
+          "Після початку тривоги через атаку БпЛА в Запоріжжі працювала ППО та було чути вибухи."
+        ],
+        "note": "Static reconstruction of current monitor lexical/segment gates; strict historical adapter supplies only reviewed temporal binding for Zaporizhzhia unless additional retained review roles are migrated."
+      },
+      "retained_prior_audit_provenance_support": null,
+      "blocker_classification": "DETERMINISTIC_REBIND",
+      "repair_action": "REBIND_ONLY",
+      "repair_rationale": "Add/read the already-retained `matched_alert_start_kyiv` through the existing start-match path; exact current start match (0 s) yields one canonical episode and current hardened gates remain strict."
+    },
+    {
+      "evidence_identifier": "strict_events[40]",
+      "stored_candidate_id": null,
+      "source_url": "https://www.ukrinform.ua/rubric-regions/4019018-zaporizza-atakuut-vorozi-droni.html",
+      "local_date": "2025-07-25",
+      "old_counted_status": "strict",
+      "retained_event_evidence_text": "Уночі ворожі дрони атакували Запоріжжя; в місті пролунали вибухи й працювала ППО, тривога тривала.",
+      "retained_basis": "strict: exact-city UAV attack inside the cross-midnight matched alert.",
+      "stored_event_timestamp": "~02:06-02:12 on 2025-07-26",
+      "stored_episode_id": null,
+      "retained_matched_alert_start_kyiv": "2025-07-25T21:54:26+03:00",
+      "current_binding_result": {
+        "episode_id": null,
+        "method": "missing_episode_binding",
+        "candidate_episode_ids": []
+      },
+      "current_binding_failure_reason": "`matched_alert_start_kyiv` is retained on the record but is absent from replay START_FIELDS and DAY_FIELDS, so current binder reaches missing_episode_binding.",
+      "deterministic_reconciliation": {
+        "canonical_episode_id": "9571bb4b5340eb3a198c0169",
+        "canonical_alert_start": "2025-07-25T18:54:26Z",
+        "canonical_alert_end": "2025-07-26T00:52:34Z",
+        "retained_start_delta_seconds": 0,
+        "candidates_within_existing_90_second_rule": 1,
+        "method": "retained_matched_alert_start_kyiv_within_existing_90s_rule",
+        "canonical_identity_rule": "SHA256(`${city_key}|${start_utc_z}|${end_utc_z}`)[:24]"
+      },
+      "current_hardened_classifier_static_reconstruction": {
+        "proposed_outcome_after_deterministic_rebind_and_current_generated_temporal_provenance": "needs_review",
+        "exact_city_present": true,
+        "strict_attack_event_present": false,
+        "attack_event_types": [],
+        "air_military_context_present": true,
+        "same_attack_context_present": false,
+        "exact_city_segments": [
+          "Уночі ворожі дрони атакували Запоріжжя;"
+        ],
+        "strict_attack_event_segments": [],
+        "note": "Static reconstruction of current monitor lexical/segment gates; strict historical adapter supplies only reviewed temporal binding for Zaporizhzhia unless additional retained review roles are migrated."
+      },
+      "retained_prior_audit_provenance_support": {
+        "available": true,
+        "artifact": "research/zaporizhzhia_explosion_enrichment_slice3_results.json",
+        "artifact_blob_sha": "ef4fa282e1cdbae89e5433e713a4665e1fa769dd",
+        "json_path": "$.positive_candidate_records[8]",
+        "retained_source_urls": [
+          "https://www.ukrinform.ua/rubric-regions/4019018-zaporizza-atakuut-vorozi-droni.html"
+        ],
+        "exact_city_basis": "Ukrinform explicitly says the explosions occurred in Zaporizhzhia city.",
+        "attack_event_basis": "Explicit explosions during attack by Russian strike UAVs.",
+        "aerial_war_basis": "strike UAVs moving toward/attacking Zaporizhzhia",
+        "event_time_basis": "contemporaneous current-attack statement after midnight 2025-07-26; publication time retained separately, not used as event-time substitute",
+        "target_episode_attribution": {
+          "status": "target_episode_supported",
+          "basis": "belongs to alert-start-date 2025-07-25 episode spanning 21:54:26-03:52:34 Europe/Kyiv; not reassigned to later 2025-07-26 alerts"
+        },
+        "sufficient_for_review_provenance_repair": true
+      },
+      "blocker_classification": "CURRENT_RULE_DOWNGRADE",
+      "repair_action": "PROVENANCE_REPAIR",
+      "repair_rationale": "Binding is deterministic, but the condensed final_evidence text alone fails current segment/alias gates. Existing structured audit provenance already retains exact-city attack-event, aerial-war and episode-specific facts; migrate those factual roles into current review_provenance without using the old strict label as authority and without new web research."
+    },
+    {
+      "evidence_identifier": "strict_events[41]",
+      "stored_candidate_id": null,
+      "source_url": "https://www.pravda.com.ua/news/2025/07/27/7523678/",
+      "local_date": "2025-07-27",
+      "old_counted_status": "strict",
+      "retained_event_evidence_text": "Увечері під час повітряної тривоги в Запоріжжі пролунали вибухи на тлі загрози ударних БпЛА.",
+      "retained_basis": "strict: exact-city aerial-war event explicitly reported during the matched alert.",
+      "stored_event_timestamp": "late evening; exact minute not stated",
+      "stored_episode_id": null,
+      "retained_matched_alert_start_kyiv": "2025-07-27T22:11:36+03:00",
+      "current_binding_result": {
+        "episode_id": null,
+        "method": "missing_episode_binding",
+        "candidate_episode_ids": []
+      },
+      "current_binding_failure_reason": "`matched_alert_start_kyiv` is retained on the record but is absent from replay START_FIELDS and DAY_FIELDS, so current binder reaches missing_episode_binding.",
+      "deterministic_reconciliation": {
+        "canonical_episode_id": "783f99fd0c0fcd91758637bf",
+        "canonical_alert_start": "2025-07-27T19:11:36Z",
+        "canonical_alert_end": "2025-07-28T01:39:50Z",
+        "retained_start_delta_seconds": 0,
+        "candidates_within_existing_90_second_rule": 1,
+        "method": "retained_matched_alert_start_kyiv_within_existing_90s_rule",
+        "canonical_identity_rule": "SHA256(`${city_key}|${start_utc_z}|${end_utc_z}`)[:24]"
+      },
+      "current_hardened_classifier_static_reconstruction": {
+        "proposed_outcome_after_deterministic_rebind_and_current_generated_temporal_provenance": "approved_strict",
+        "exact_city_present": true,
+        "strict_attack_event_present": true,
+        "attack_event_types": [
+          "explosion"
+        ],
+        "air_military_context_present": true,
+        "same_attack_context_present": true,
+        "exact_city_segments": [
+          "Увечері під час повітряної тривоги в Запоріжжі пролунали вибухи на тлі загрози ударних БпЛА."
+        ],
+        "strict_attack_event_segments": [
+          "Увечері під час повітряної тривоги в Запоріжжі пролунали вибухи на тлі загрози ударних БпЛА."
+        ],
+        "note": "Static reconstruction of current monitor lexical/segment gates; strict historical adapter supplies only reviewed temporal binding for Zaporizhzhia unless additional retained review roles are migrated."
+      },
+      "retained_prior_audit_provenance_support": null,
+      "blocker_classification": "DETERMINISTIC_REBIND",
+      "repair_action": "REBIND_ONLY",
+      "repair_rationale": "Add/read the already-retained `matched_alert_start_kyiv` through the existing start-match path; exact current start match (0 s) yields one canonical episode and current hardened gates remain strict."
+    },
+    {
+      "evidence_identifier": "strict_events[42]",
+      "stored_candidate_id": null,
+      "source_url": "https://akzent.zp.ua/u-zaporizhzhi-prolunaly-dva-vybuhy-persha-ofitsijna-informatsiya/",
+      "local_date": "2025-08-10",
+      "old_counted_status": "strict",
+      "retained_event_evidence_text": "Близько 17:55 у Запоріжжі пролунали два вибухи після оголошення тривоги; попередньо місто атакували КАБами.",
+      "retained_basis": "strict: exact-city aerial strike inside the matched alert; attack corroborated by official/public-broadcaster reporting.",
+      "stored_event_timestamp": "~17:55",
+      "stored_episode_id": null,
+      "retained_matched_alert_start_kyiv": "2025-08-10T17:44:05+03:00",
+      "current_binding_result": {
+        "episode_id": null,
+        "method": "missing_episode_binding",
+        "candidate_episode_ids": []
+      },
+      "current_binding_failure_reason": "`matched_alert_start_kyiv` is retained on the record but is absent from replay START_FIELDS and DAY_FIELDS, so current binder reaches missing_episode_binding.",
+      "deterministic_reconciliation": {
+        "canonical_episode_id": "f706350461f63c69d13324d4",
+        "canonical_alert_start": "2025-08-10T14:44:05Z",
+        "canonical_alert_end": "2025-08-10T15:35:04Z",
+        "retained_start_delta_seconds": 0,
+        "candidates_within_existing_90_second_rule": 1,
+        "method": "retained_matched_alert_start_kyiv_within_existing_90s_rule",
+        "canonical_identity_rule": "SHA256(`${city_key}|${start_utc_z}|${end_utc_z}`)[:24]"
+      },
+      "current_hardened_classifier_static_reconstruction": {
+        "proposed_outcome_after_deterministic_rebind_and_current_generated_temporal_provenance": "approved_strict",
+        "exact_city_present": true,
+        "strict_attack_event_present": true,
+        "attack_event_types": [
+          "explosion"
+        ],
+        "air_military_context_present": true,
+        "same_attack_context_present": true,
+        "exact_city_segments": [
+          "Близько 17:55 у Запоріжжі пролунали два вибухи після оголошення тривоги;"
+        ],
+        "strict_attack_event_segments": [
+          "Близько 17:55 у Запоріжжі пролунали два вибухи після оголошення тривоги;"
+        ],
+        "note": "Static reconstruction of current monitor lexical/segment gates; strict historical adapter supplies only reviewed temporal binding for Zaporizhzhia unless additional retained review roles are migrated."
+      },
+      "retained_prior_audit_provenance_support": null,
+      "blocker_classification": "DETERMINISTIC_REBIND",
+      "repair_action": "REBIND_ONLY",
+      "repair_rationale": "Add/read the already-retained `matched_alert_start_kyiv` through the existing start-match path; exact current start match (0 s) yields one canonical episode and current hardened gates remain strict."
+    },
+    {
+      "evidence_identifier": "strict_events[43]",
+      "stored_candidate_id": null,
+      "source_url": "https://www.rbc.ua/rus/news/zaporizhzhi-bulo-chuti-vibuhi-povidomlyalos-1755069197.html",
+      "local_date": "2025-08-13",
+      "old_counted_status": "strict",
+      "retained_event_evidence_text": "У Запоріжжі під час повітряної тривоги було чути вибухи; ППО працювала по ворожому розвідувальному БпЛА.",
+      "retained_basis": "strict: exact-city aerial-war/PPO event explicitly during the matched alert.",
+      "stored_event_timestamp": "~09:27-09:40",
+      "stored_episode_id": null,
+      "retained_matched_alert_start_kyiv": "2025-08-13T09:27:20+03:00",
+      "current_binding_result": {
+        "episode_id": null,
+        "method": "missing_episode_binding",
+        "candidate_episode_ids": []
+      },
+      "current_binding_failure_reason": "`matched_alert_start_kyiv` is retained on the record but is absent from replay START_FIELDS and DAY_FIELDS, so current binder reaches missing_episode_binding.",
+      "deterministic_reconciliation": {
+        "canonical_episode_id": "2051acef367704cf87e65ddc",
+        "canonical_alert_start": "2025-08-13T06:27:20Z",
+        "canonical_alert_end": "2025-08-13T06:40:26Z",
+        "retained_start_delta_seconds": 0,
+        "candidates_within_existing_90_second_rule": 1,
+        "method": "retained_matched_alert_start_kyiv_within_existing_90s_rule",
+        "canonical_identity_rule": "SHA256(`${city_key}|${start_utc_z}|${end_utc_z}`)[:24]"
+      },
+      "current_hardened_classifier_static_reconstruction": {
+        "proposed_outcome_after_deterministic_rebind_and_current_generated_temporal_provenance": "approved_strict",
+        "exact_city_present": true,
+        "strict_attack_event_present": true,
+        "attack_event_types": [
+          "explosion"
+        ],
+        "air_military_context_present": true,
+        "same_attack_context_present": true,
+        "exact_city_segments": [
+          "У Запоріжжі під час повітряної тривоги було чути вибухи;"
+        ],
+        "strict_attack_event_segments": [
+          "У Запоріжжі під час повітряної тривоги було чути вибухи;"
+        ],
+        "note": "Static reconstruction of current monitor lexical/segment gates; strict historical adapter supplies only reviewed temporal binding for Zaporizhzhia unless additional retained review roles are migrated."
+      },
+      "retained_prior_audit_provenance_support": null,
+      "blocker_classification": "DETERMINISTIC_REBIND",
+      "repair_action": "REBIND_ONLY",
+      "repair_rationale": "Add/read the already-retained `matched_alert_start_kyiv` through the existing start-match path; exact current start match (0 s) yields one canonical episode and current hardened gates remain strict."
+    },
+    {
+      "evidence_identifier": "strict_events[44]",
+      "stored_candidate_id": null,
+      "source_url": "https://www.ukrinform.ua/rubric-regions/4026787-vijska-rf-vdarili-po-zaporizzu-raketami-tipu-iskander-policia.html",
+      "local_date": "2025-08-18",
+      "old_counted_status": "strict",
+      "retained_event_evidence_text": "Російські війська завдали по Запоріжжю ракетних ударів приблизно о 09:05 та 09:10.",
+      "retained_basis": "strict: exact-city missile strike times are inside the matched alert.",
+      "stored_event_timestamp": "09:05-09:10",
+      "stored_episode_id": null,
+      "retained_matched_alert_start_kyiv": "2025-08-18T08:56:47+03:00",
+      "current_binding_result": {
+        "episode_id": null,
+        "method": "missing_episode_binding",
+        "candidate_episode_ids": []
+      },
+      "current_binding_failure_reason": "`matched_alert_start_kyiv` is retained on the record but is absent from replay START_FIELDS and DAY_FIELDS, so current binder reaches missing_episode_binding.",
+      "deterministic_reconciliation": {
+        "canonical_episode_id": "9c8229fbab1da4901030100a",
+        "canonical_alert_start": "2025-08-18T05:56:47Z",
+        "canonical_alert_end": "2025-08-18T06:28:46Z",
+        "retained_start_delta_seconds": 0,
+        "candidates_within_existing_90_second_rule": 1,
+        "method": "retained_matched_alert_start_kyiv_within_existing_90s_rule",
+        "canonical_identity_rule": "SHA256(`${city_key}|${start_utc_z}|${end_utc_z}`)[:24]"
+      },
+      "current_hardened_classifier_static_reconstruction": {
+        "proposed_outcome_after_deterministic_rebind_and_current_generated_temporal_provenance": "approved_strict",
+        "exact_city_present": true,
+        "strict_attack_event_present": true,
+        "attack_event_types": [
+          "strike"
+        ],
+        "air_military_context_present": true,
+        "same_attack_context_present": true,
+        "exact_city_segments": [
+          "Російські війська завдали по Запоріжжю ракетних ударів приблизно о 09:05 та 09:10."
+        ],
+        "strict_attack_event_segments": [
+          "Російські війська завдали по Запоріжжю ракетних ударів приблизно о 09:05 та 09:10."
+        ],
+        "note": "Static reconstruction of current monitor lexical/segment gates; strict historical adapter supplies only reviewed temporal binding for Zaporizhzhia unless additional retained review roles are migrated."
+      },
+      "retained_prior_audit_provenance_support": null,
+      "blocker_classification": "DETERMINISTIC_REBIND",
+      "repair_action": "REBIND_ONLY",
+      "repair_rationale": "Add/read the already-retained `matched_alert_start_kyiv` through the existing start-match path; exact current start match (0 s) yields one canonical episode and current hardened gates remain strict."
+    },
+    {
+      "evidence_identifier": "strict_events[45]",
+      "stored_candidate_id": null,
+      "source_url": "https://news.liga.net/ua/politics/news/rosiia-masovano-atakuvala-ukrainu-krylatymy-raketamy",
+      "local_date": "2025-08-21",
+      "old_counted_status": "strict",
+      "retained_event_evidence_text": "Під час масованої ракетної атаки близько 05:25-05:30 у Запоріжжі пролунали щонайменше два сильні вибухи.",
+      "retained_basis": "strict: exact-city cruise-missile attack inside the matched alert.",
+      "stored_event_timestamp": "~05:25-05:30",
+      "stored_episode_id": null,
+      "retained_matched_alert_start_kyiv": "2025-08-21T02:49:34+03:00",
+      "current_binding_result": {
+        "episode_id": null,
+        "method": "missing_episode_binding",
+        "candidate_episode_ids": []
+      },
+      "current_binding_failure_reason": "`matched_alert_start_kyiv` is retained on the record but is absent from replay START_FIELDS and DAY_FIELDS, so current binder reaches missing_episode_binding.",
+      "deterministic_reconciliation": {
+        "canonical_episode_id": "7ffb26d8e21f7fb8a7348b2b",
+        "canonical_alert_start": "2025-08-20T23:49:34Z",
+        "canonical_alert_end": "2025-08-21T03:25:21Z",
+        "retained_start_delta_seconds": 0,
+        "candidates_within_existing_90_second_rule": 1,
+        "method": "retained_matched_alert_start_kyiv_within_existing_90s_rule",
+        "canonical_identity_rule": "SHA256(`${city_key}|${start_utc_z}|${end_utc_z}`)[:24]"
+      },
+      "current_hardened_classifier_static_reconstruction": {
+        "proposed_outcome_after_deterministic_rebind_and_current_generated_temporal_provenance": "approved_strict",
+        "exact_city_present": true,
+        "strict_attack_event_present": true,
+        "attack_event_types": [
+          "explosion"
+        ],
+        "air_military_context_present": true,
+        "same_attack_context_present": true,
+        "exact_city_segments": [
+          "Під час масованої ракетної атаки близько 05:25-05:30 у Запоріжжі пролунали щонайменше два сильні вибухи."
+        ],
+        "strict_attack_event_segments": [
+          "Під час масованої ракетної атаки близько 05:25-05:30 у Запоріжжі пролунали щонайменше два сильні вибухи."
+        ],
+        "note": "Static reconstruction of current monitor lexical/segment gates; strict historical adapter supplies only reviewed temporal binding for Zaporizhzhia unless additional retained review roles are migrated."
+      },
+      "retained_prior_audit_provenance_support": null,
+      "blocker_classification": "DETERMINISTIC_REBIND",
+      "repair_action": "REBIND_ONLY",
+      "repair_rationale": "Add/read the already-retained `matched_alert_start_kyiv` through the existing start-match path; exact current start match (0 s) yields one canonical episode and current hardened gates remain strict."
+    }
+  ],
+  "blocker_classification_summary": {
+    "counts": {
+      "DETERMINISTIC_REBIND": 18,
+      "STALE_EPISODE_ID": 0,
+      "DUPLICATE_COUNTED_EVIDENCE": 0,
+      "CURRENT_RULE_DOWNGRADE": 5,
+      "GENUINELY_AMBIGUOUS_BINDING": 0,
+      "DATA_INTEGRITY_ERROR": 0
+    },
+    "evidence_identifiers": {
+      "DETERMINISTIC_REBIND": [
+        "strict_events[23]",
+        "strict_events[24]",
+        "strict_events[25]",
+        "strict_events[26]",
+        "strict_events[28]",
+        "strict_events[29]",
+        "strict_events[30]",
+        "strict_events[31]",
+        "strict_events[32]",
+        "strict_events[33]",
+        "strict_events[34]",
+        "strict_events[37]",
+        "strict_events[39]",
+        "strict_events[41]",
+        "strict_events[42]",
+        "strict_events[43]",
+        "strict_events[44]",
+        "strict_events[45]"
+      ],
+      "STALE_EPISODE_ID": [],
+      "DUPLICATE_COUNTED_EVIDENCE": [],
+      "CURRENT_RULE_DOWNGRADE": [
+        "strict_events[27]",
+        "strict_events[35]",
+        "strict_events[36]",
+        "strict_events[38]",
+        "strict_events[40]"
+      ],
+      "GENUINELY_AMBIGUOUS_BINDING": [],
+      "DATA_INTEGRITY_ERROR": []
+    },
+    "interpretation": "Five records are CURRENT_RULE_DOWNGRADE only in the as-is replay candidate representation: condensed final_evidence text fails current lexical/segment/alias gates. All five have already-retained structured audit provenance sufficient for a provenance-only repair; no old strict label is used as current authority."
+  },
+  "strict_sensitivity_set_reconciliation": {
+    "expected_strict_episode_ids": [
+      "006c04a81119cd9a5e366cdb",
+      "00a0fe746b1980456b94d0cb",
+      "01bbce18153bcf3fb06bfa85",
+      "01e043b7e9553b7edddfc386",
+      "061f39cf16ac184b702f210f",
+      "06f89d2120f4e66c08a0f9f5",
+      "07e99a3114d5dce1c7bfb683",
+      "098b23131a9e481f85e56aec",
+      "0a267008ea28eb0fbf4808c2",
+      "0c495f3ec3c2020af36b24bc",
+      "0c67b57472d4f8f79d745541",
+      "1066e522283ff14f622327cf",
+      "13e5207d022d17cfd7ee6c19",
+      "167618925fd2b060cfa9c2fe",
+      "17208f5f6efe265c41d5fa68",
+      "1781440c8942002c1a65c25c",
+      "19313dfecc19b71819f7a000",
+      "1a0b9c2c8b593c16dd36af74",
+      "1a59d49c130eed3e82dd517d",
+      "1cf4b55dbaaef2eb3cee8eb1",
+      "1dd834e016b3bed690de2973",
+      "1e0664ff7844f29a5ee2bb53",
+      "202349ba336c5c0ac6cac5d7",
+      "2051acef367704cf87e65ddc",
+      "206f69cd684942feb9c1285d",
+      "211b0d0c6e6786b84e0a6915",
+      "2231050bc683bfab95cd6437",
+      "23371bee083381cd79cf93a2",
+      "242be033424116880cb5ac71",
+      "246453160ef742d4dce69790",
+      "24c872e10e37becbd3f30992",
+      "2589c31113466bc0dad61ad1",
+      "28787e0f92d83bdb5ee44e99",
+      "288f2c3fe22c13ade033c850",
+      "2c6f8ce81c83aef308916e30",
+      "2f384f6e855a7d5f73a8ee19",
+      "30214f41a8366c84d497a640",
+      "30f0140667f8b487a9e04788",
+      "311349383a05ad4a837dc970",
+      "319d4432a8528fe156bcc567",
+      "33fef5b76da452da68129be5",
+      "3908215d89f8b657ac70b537",
+      "3b326f33c806e4e93ef752ae",
+      "3e571bf27fcaa6d922665535",
+      "3fbc7461b6da87389435d052",
+      "430c798170a149d706024a81",
+      "45e9cce2ddfe56582af9555a",
+      "48826b9dbadd8eaee6601c9c",
+      "4986bef6d046cc4014d5b389",
+      "49afd37de69b5dda10df6d3a",
+      "4b5505f1a437fdf606709c66",
+      "4bed22300441e824dbb776d9",
+      "4d1a69adfb40266b088dc442",
+      "4dfc0af35ff48d0fb1c39ff9",
+      "4e60c0e06170b87a4cd42988",
+      "534a391be41a0a8e0c4237eb",
+      "565a575eb696cb87ddcab38d",
+      "566cf4ea1584d270257cb83b",
+      "56a73633ee7030cb00e61fcf",
+      "573c596e88106904bd5e2f25",
+      "595a6190dfab3accc8428c5c",
+      "5ab398d8b6fb78421e33ab77",
+      "5b43e627ba4831b3ad71b315",
+      "5c730c2e66d8a4264a357421",
+      "6045a2d1ccfe4848dbf8f31a",
+      "619e44f4093b50547d320e98",
+      "640f4ab9fc846ec0b9fe39c8",
+      "64a90cfe4c5dd59a328befb6",
+      "668658cd0144ed423b815ca1",
+      "67a904a0ab96455cefbc5ba9",
+      "68046107668aad7c9f51499d",
+      "6b7ba70bf5f6686e6b51519f",
+      "6b8944c3a3d0cbb98d1dd6c3",
+      "6cf411ed1ba704c725efc257",
+      "6dc2c1209865b6cf7e7f8699",
+      "6e911dd78a3f47765d361aa0",
+      "6ff462c250a59f733b93a3cc",
+      "719a5f22c90f6cc6cc3b0f79",
+      "764104c7ce8eb3b6703a33ec",
+      "7666b549078065271f0033f3",
+      "783f99fd0c0fcd91758637bf",
+      "79d527fe4e87135fa7c2a199",
+      "7ab7953ea67f124d164ec7ab",
+      "7afc90b9df18780246f1b995",
+      "7b5468865b1ec758817c4659",
+      "7f40d4bdf35d4c91159113c1",
+      "7ffb26d8e21f7fb8a7348b2b",
+      "806894d4170f39a8155e8485",
+      "80ba9194a8f2ae4b4321a98b",
+      "81047aeff448a71665a131b8",
+      "835683aa84a1a0dc5aa82abd",
+      "83b4235e8c11bcd5c3a0268b",
+      "843005edc6568568c2a292fa",
+      "8632e216d41f3f898d03a1e8",
+      "87348c2c06d552d2ad0fc751",
+      "8770bd1436782473a91df122",
+      "8a5aec03a0420e5f64f7c6b2",
+      "8c05b7fc08e91711acebc02a",
+      "8da4bd319ba34e8d89de95f7",
+      "8fbe1d38fffb22768c60e6b0",
+      "91168e2093aac422d1c2fdf6",
+      "917368ae74bf82a0f5ba5842",
+      "91c500b18b12860b6530d769",
+      "9280ecea079e223790ecd234",
+      "9571bb4b5340eb3a198c0169",
+      "96064d56ad504b8f25add9bb",
+      "97d4ad163a9936c845ef29d0",
+      "989a3167ca65f3b54e6eb3bb",
+      "9a83cb276478ff27d5f0689d",
+      "9c8229fbab1da4901030100a",
+      "9e3ba4f7407c6d8ad7a27607",
+      "a07f46f6e66f83ebd04c32a5",
+      "a1b945ddc1baf001e45d6826",
+      "a1c6c895daaef7e1ff8f500d",
+      "a303c6b6b782ce0d29c741d0",
+      "a3745cf85586ae4f9c5156cd",
+      "a4acd033a648cd0b4e2819f8",
+      "ab9337a0170c2549a94a35fb",
+      "abadfaa348ae865665a005b4",
+      "ad099cc47e1feaf4685bb8f4",
+      "b35f7cadc556a5cb0a8c2b18",
+      "b3d11227a82aceb93d5bf798",
+      "b41d83d707e66b203d6d1794",
+      "b4bfdf83c1078164dd00627c",
+      "b7355c0a49718cedfd3e85d6",
+      "b7c7da1cbd1cdbf7fbe7974b",
+      "b7d28541e30468af2123d170",
+      "be1b680bad3728c6a5c3ee35",
+      "c0367099eed49727686e61af",
+      "c138680a6beb87a4aa8be6fc",
+      "c1d947bd6240f8549c0e385a",
+      "c2ff7b13072937c80cccf7fc",
+      "c4e92e077e05dbfd52daeb9e",
+      "c53264679115cd2fbe52c53a",
+      "c68776ede26641548f79a108",
+      "c7006b3ec3bd8928ce7a36bd",
+      "c905a26da009ac41894db1fa",
+      "ca3ecafd3d1e8309e63a2ce5",
+      "cac44098bced8d1d5cdd7170",
+      "cb1cbd742ccca93aff6a86af",
+      "cb823242980fa8a10e3c0d01",
+      "cddc9de313621dc2726766f7",
+      "cf12245b5767340b36bb934b",
+      "dce5564c1647ac9931a1f6cf",
+      "dea5fb2817b4d8e20372b063",
+      "debf786e32ffef77a472d5f1",
+      "e12d26d1c2062a9585ec9519",
+      "e2630c4122c3e58517c93e19",
+      "e367e13dc8ce9a263b1a3a88",
+      "e6044efeb051aabde9f47246",
+      "e93fb1e618fafbbabc1d2b6d",
+      "eab8ba4779ef8231c4e1ad88",
+      "eaf31fbacef9643618ab3265",
+      "eb63cd9cb7460558bdc9bb8d",
+      "f3e999546f5f6d6b894bf05d",
+      "f5052bba62e43674bedfc358",
+      "f52bac5c3b7bd8b3c4a8954a",
+      "f61b72a82702d4c06c5ddbb0",
+      "f642bf83e43e2bcc225205d9",
+      "f6cc4f50b7300b6427258821",
+      "f706350461f63c69d13324d4",
+      "f888e7bbf74f6718b57c109a",
+      "f925608b4627f59f007d56d4",
+      "fa1e9624ec208634260fa6cb",
+      "fc093d9b07028be0e3b4dc6e",
+      "fc414b73d276a1c27a30396b",
+      "fe1c6e1ccc192996f0726784",
+      "febf22a1f559d6c761c8d850",
+      "fede442dc1bf79856b68b936"
+    ],
+    "replayable_current_strict_episode_ids": [
+      "006c04a81119cd9a5e366cdb",
+      "00a0fe746b1980456b94d0cb",
+      "01bbce18153bcf3fb06bfa85",
+      "01e043b7e9553b7edddfc386",
+      "061f39cf16ac184b702f210f",
+      "06f89d2120f4e66c08a0f9f5",
+      "07e99a3114d5dce1c7bfb683",
+      "098b23131a9e481f85e56aec",
+      "0a267008ea28eb0fbf4808c2",
+      "0c495f3ec3c2020af36b24bc",
+      "0c67b57472d4f8f79d745541",
+      "1066e522283ff14f622327cf",
+      "13e5207d022d17cfd7ee6c19",
+      "167618925fd2b060cfa9c2fe",
+      "17208f5f6efe265c41d5fa68",
+      "19313dfecc19b71819f7a000",
+      "1a0b9c2c8b593c16dd36af74",
+      "1a59d49c130eed3e82dd517d",
+      "1cf4b55dbaaef2eb3cee8eb1",
+      "1dd834e016b3bed690de2973",
+      "1e0664ff7844f29a5ee2bb53",
+      "206f69cd684942feb9c1285d",
+      "211b0d0c6e6786b84e0a6915",
+      "2231050bc683bfab95cd6437",
+      "23371bee083381cd79cf93a2",
+      "242be033424116880cb5ac71",
+      "246453160ef742d4dce69790",
+      "24c872e10e37becbd3f30992",
+      "2589c31113466bc0dad61ad1",
+      "28787e0f92d83bdb5ee44e99",
+      "288f2c3fe22c13ade033c850",
+      "2c6f8ce81c83aef308916e30",
+      "2f384f6e855a7d5f73a8ee19",
+      "30214f41a8366c84d497a640",
+      "30f0140667f8b487a9e04788",
+      "311349383a05ad4a837dc970",
+      "319d4432a8528fe156bcc567",
+      "33fef5b76da452da68129be5",
+      "3908215d89f8b657ac70b537",
+      "3b326f33c806e4e93ef752ae",
+      "3e571bf27fcaa6d922665535",
+      "3fbc7461b6da87389435d052",
+      "430c798170a149d706024a81",
+      "45e9cce2ddfe56582af9555a",
+      "4986bef6d046cc4014d5b389",
+      "49afd37de69b5dda10df6d3a",
+      "4bed22300441e824dbb776d9",
+      "4d1a69adfb40266b088dc442",
+      "4dfc0af35ff48d0fb1c39ff9",
+      "4e60c0e06170b87a4cd42988",
+      "534a391be41a0a8e0c4237eb",
+      "565a575eb696cb87ddcab38d",
+      "566cf4ea1584d270257cb83b",
+      "573c596e88106904bd5e2f25",
+      "595a6190dfab3accc8428c5c",
+      "5ab398d8b6fb78421e33ab77",
+      "5b43e627ba4831b3ad71b315",
+      "5c730c2e66d8a4264a357421",
+      "6045a2d1ccfe4848dbf8f31a",
+      "619e44f4093b50547d320e98",
+      "640f4ab9fc846ec0b9fe39c8",
+      "64a90cfe4c5dd59a328befb6",
+      "668658cd0144ed423b815ca1",
+      "68046107668aad7c9f51499d",
+      "6b7ba70bf5f6686e6b51519f",
+      "6cf411ed1ba704c725efc257",
+      "6e911dd78a3f47765d361aa0",
+      "6ff462c250a59f733b93a3cc",
+      "719a5f22c90f6cc6cc3b0f79",
+      "764104c7ce8eb3b6703a33ec",
+      "79d527fe4e87135fa7c2a199",
+      "7ab7953ea67f124d164ec7ab",
+      "7afc90b9df18780246f1b995",
+      "7b5468865b1ec758817c4659",
+      "7f40d4bdf35d4c91159113c1",
+      "80ba9194a8f2ae4b4321a98b",
+      "81047aeff448a71665a131b8",
+      "835683aa84a1a0dc5aa82abd",
+      "83b4235e8c11bcd5c3a0268b",
+      "8632e216d41f3f898d03a1e8",
+      "87348c2c06d552d2ad0fc751",
+      "8770bd1436782473a91df122",
+      "8a5aec03a0420e5f64f7c6b2",
+      "8c05b7fc08e91711acebc02a",
+      "8da4bd319ba34e8d89de95f7",
+      "8fbe1d38fffb22768c60e6b0",
+      "91168e2093aac422d1c2fdf6",
+      "917368ae74bf82a0f5ba5842",
+      "91c500b18b12860b6530d769",
+      "9280ecea079e223790ecd234",
+      "96064d56ad504b8f25add9bb",
+      "97d4ad163a9936c845ef29d0",
+      "989a3167ca65f3b54e6eb3bb",
+      "9a83cb276478ff27d5f0689d",
+      "9e3ba4f7407c6d8ad7a27607",
+      "a07f46f6e66f83ebd04c32a5",
+      "a1b945ddc1baf001e45d6826",
+      "a1c6c895daaef7e1ff8f500d",
+      "a303c6b6b782ce0d29c741d0",
+      "a3745cf85586ae4f9c5156cd",
+      "a4acd033a648cd0b4e2819f8",
+      "ab9337a0170c2549a94a35fb",
+      "abadfaa348ae865665a005b4",
+      "ad099cc47e1feaf4685bb8f4",
+      "b35f7cadc556a5cb0a8c2b18",
+      "b3d11227a82aceb93d5bf798",
+      "b4bfdf83c1078164dd00627c",
+      "b7355c0a49718cedfd3e85d6",
+      "b7c7da1cbd1cdbf7fbe7974b",
+      "b7d28541e30468af2123d170",
+      "be1b680bad3728c6a5c3ee35",
+      "c138680a6beb87a4aa8be6fc",
+      "c1d947bd6240f8549c0e385a",
+      "c2ff7b13072937c80cccf7fc",
+      "c68776ede26641548f79a108",
+      "c905a26da009ac41894db1fa",
+      "ca3ecafd3d1e8309e63a2ce5",
+      "cac44098bced8d1d5cdd7170",
+      "cb1cbd742ccca93aff6a86af",
+      "cb823242980fa8a10e3c0d01",
+      "cddc9de313621dc2726766f7",
+      "cf12245b5767340b36bb934b",
+      "dce5564c1647ac9931a1f6cf",
+      "dea5fb2817b4d8e20372b063",
+      "debf786e32ffef77a472d5f1",
+      "e2630c4122c3e58517c93e19",
+      "e367e13dc8ce9a263b1a3a88",
+      "e6044efeb051aabde9f47246",
+      "e93fb1e618fafbbabc1d2b6d",
+      "eab8ba4779ef8231c4e1ad88",
+      "eaf31fbacef9643618ab3265",
+      "eb63cd9cb7460558bdc9bb8d",
+      "f3e999546f5f6d6b894bf05d",
+      "f5052bba62e43674bedfc358",
+      "f52bac5c3b7bd8b3c4a8954a",
+      "f61b72a82702d4c06c5ddbb0",
+      "f642bf83e43e2bcc225205d9",
+      "f6cc4f50b7300b6427258821",
+      "f888e7bbf74f6718b57c109a",
+      "f925608b4627f59f007d56d4",
+      "fa1e9624ec208634260fa6cb",
+      "fc093d9b07028be0e3b4dc6e",
+      "fc414b73d276a1c27a30396b",
+      "fe1c6e1ccc192996f0726784",
+      "febf22a1f559d6c761c8d850",
+      "fede442dc1bf79856b68b936"
+    ],
+    "expected_sensitivity_episode_ids": [
+      "006c04a81119cd9a5e366cdb",
+      "00a0fe746b1980456b94d0cb",
+      "01bbce18153bcf3fb06bfa85",
+      "01e043b7e9553b7edddfc386",
+      "061f39cf16ac184b702f210f",
+      "06b4bb088c8f2369c6008877",
+      "06f89d2120f4e66c08a0f9f5",
+      "0744d6223b8ea26bed032e98",
+      "07e99a3114d5dce1c7bfb683",
+      "098b23131a9e481f85e56aec",
+      "0a267008ea28eb0fbf4808c2",
+      "0c495f3ec3c2020af36b24bc",
+      "0c67b57472d4f8f79d745541",
+      "0cf4652920dbe445308166bf",
+      "0e4c1406eaed3f880effca88",
+      "0edc1d73c3a86e149371bfbf",
+      "0f3baf8fd6a1d60aebf86443",
+      "1066e522283ff14f622327cf",
+      "13e5207d022d17cfd7ee6c19",
+      "14c595c6a1d86f1f2fd674f0",
+      "1530e1f590ebd6d015fe959c",
+      "167618925fd2b060cfa9c2fe",
+      "17208f5f6efe265c41d5fa68",
+      "1781440c8942002c1a65c25c",
+      "19313dfecc19b71819f7a000",
+      "1a0b9c2c8b593c16dd36af74",
+      "1a59d49c130eed3e82dd517d",
+      "1cf4b55dbaaef2eb3cee8eb1",
+      "1dd834e016b3bed690de2973",
+      "1e0664ff7844f29a5ee2bb53",
+      "1e434d0fa5abfd518ad07d1e",
+      "202349ba336c5c0ac6cac5d7",
+      "2051acef367704cf87e65ddc",
+      "206f69cd684942feb9c1285d",
+      "20d3006e9b11c097a46c62fa",
+      "211b0d0c6e6786b84e0a6915",
+      "2231050bc683bfab95cd6437",
+      "23371bee083381cd79cf93a2",
+      "239593f66b300e7e5e5d5ee7",
+      "242be033424116880cb5ac71",
+      "246453160ef742d4dce69790",
+      "24c872e10e37becbd3f30992",
+      "2589c31113466bc0dad61ad1",
+      "28787e0f92d83bdb5ee44e99",
+      "288f2c3fe22c13ade033c850",
+      "2c6f8ce81c83aef308916e30",
+      "2f384f6e855a7d5f73a8ee19",
+      "30214f41a8366c84d497a640",
+      "30f0140667f8b487a9e04788",
+      "311349383a05ad4a837dc970",
+      "319d4432a8528fe156bcc567",
+      "33fef5b76da452da68129be5",
+      "346a641e15ccea7088044327",
+      "34f24323fc6452455fa2d49a",
+      "3908215d89f8b657ac70b537",
+      "3b326f33c806e4e93ef752ae",
+      "3e2f458677f9437a49e7e591",
+      "3e571bf27fcaa6d922665535",
+      "3fbc7461b6da87389435d052",
+      "415f67e66e79ab4fd14156c9",
+      "423aa51b0556c2384502308a",
+      "430c798170a149d706024a81",
+      "439dd02977fa33b202c9b18a",
+      "45e9cce2ddfe56582af9555a",
+      "46d000204fa2ce6725290eb2",
+      "481cb4ea7ea80bda589823c2",
+      "48826b9dbadd8eaee6601c9c",
+      "4986bef6d046cc4014d5b389",
+      "49afd37de69b5dda10df6d3a",
+      "4b5505f1a437fdf606709c66",
+      "4bed22300441e824dbb776d9",
+      "4d1a69adfb40266b088dc442",
+      "4dfc0af35ff48d0fb1c39ff9",
+      "4e60c0e06170b87a4cd42988",
+      "4f5dbe150242353e5fb20d25",
+      "4f75b69d5e6fcda6577522b6",
+      "534a391be41a0a8e0c4237eb",
+      "54f663d0f8527961ccec99b5",
+      "565a575eb696cb87ddcab38d",
+      "566cf4ea1584d270257cb83b",
+      "56a73633ee7030cb00e61fcf",
+      "573c596e88106904bd5e2f25",
+      "595a6190dfab3accc8428c5c",
+      "5aab735a0224bbe5ca081c49",
+      "5ab398d8b6fb78421e33ab77",
+      "5b43e627ba4831b3ad71b315",
+      "5c730c2e66d8a4264a357421",
+      "5c9bca9045a2f1944c804a93",
+      "5da4fc649a38d4796ebbcf94",
+      "5da7b3379fcabbe8e0192679",
+      "6045a2d1ccfe4848dbf8f31a",
+      "619e44f4093b50547d320e98",
+      "63626c238d0111b9aca18f6a",
+      "640f4ab9fc846ec0b9fe39c8",
+      "64a90cfe4c5dd59a328befb6",
+      "668658cd0144ed423b815ca1",
+      "67a904a0ab96455cefbc5ba9",
+      "67ff7c9997086c504388f49a",
+      "68046107668aad7c9f51499d",
+      "69b6767287e18383f94758c2",
+      "6abcb5d9e66b76a94e3f4a59",
+      "6b7ba70bf5f6686e6b51519f",
+      "6b8944c3a3d0cbb98d1dd6c3",
+      "6cf411ed1ba704c725efc257",
+      "6dc2c1209865b6cf7e7f8699",
+      "6e911dd78a3f47765d361aa0",
+      "6f2bab19aebbb357896550ea",
+      "6f9108fe0f387d7eda862a8e",
+      "6ff462c250a59f733b93a3cc",
+      "719a5f22c90f6cc6cc3b0f79",
+      "764104c7ce8eb3b6703a33ec",
+      "7666b549078065271f0033f3",
+      "783f99fd0c0fcd91758637bf",
+      "79d527fe4e87135fa7c2a199",
+      "7ab7953ea67f124d164ec7ab",
+      "7afc90b9df18780246f1b995",
+      "7b5468865b1ec758817c4659",
+      "7f40d4bdf35d4c91159113c1",
+      "7f4501f4cdd0878df2a234f9",
+      "7fef165b3eb0ada83014cc42",
+      "7ffb26d8e21f7fb8a7348b2b",
+      "806894d4170f39a8155e8485",
+      "80ba9194a8f2ae4b4321a98b",
+      "81047aeff448a71665a131b8",
+      "835683aa84a1a0dc5aa82abd",
+      "83b4235e8c11bcd5c3a0268b",
+      "843005edc6568568c2a292fa",
+      "8632e216d41f3f898d03a1e8",
+      "87348c2c06d552d2ad0fc751",
+      "8770bd1436782473a91df122",
+      "896f80a6ec6e9d98ab2d0998",
+      "8a5aec03a0420e5f64f7c6b2",
+      "8c05b7fc08e91711acebc02a",
+      "8da4bd319ba34e8d89de95f7",
+      "8e1943fdc2945cace0295a1c",
+      "8fbe1d38fffb22768c60e6b0",
+      "90287df3a5b42ef1fbfd54ed",
+      "91168e2093aac422d1c2fdf6",
+      "917368ae74bf82a0f5ba5842",
+      "91c500b18b12860b6530d769",
+      "9280ecea079e223790ecd234",
+      "9571bb4b5340eb3a198c0169",
+      "96064d56ad504b8f25add9bb",
+      "97d4ad163a9936c845ef29d0",
+      "989a3167ca65f3b54e6eb3bb",
+      "9a83cb276478ff27d5f0689d",
+      "9c8229fbab1da4901030100a",
+      "9cd61600bca66175896b4ffb",
+      "9e3ba4f7407c6d8ad7a27607",
+      "a07f46f6e66f83ebd04c32a5",
+      "a1b945ddc1baf001e45d6826",
+      "a1c6c895daaef7e1ff8f500d",
+      "a303c6b6b782ce0d29c741d0",
+      "a3745cf85586ae4f9c5156cd",
+      "a38685d31aaf9e9513937865",
+      "a4acd033a648cd0b4e2819f8",
+      "ab9337a0170c2549a94a35fb",
+      "abadfaa348ae865665a005b4",
+      "ad099cc47e1feaf4685bb8f4",
+      "b028e832237e77eaa79796c3",
+      "b234a0c7d8f8be45ee429a21",
+      "b35f7cadc556a5cb0a8c2b18",
+      "b3d11227a82aceb93d5bf798",
+      "b41d83d707e66b203d6d1794",
+      "b4bfdf83c1078164dd00627c",
+      "b7355c0a49718cedfd3e85d6",
+      "b7c7da1cbd1cdbf7fbe7974b",
+      "b7d28541e30468af2123d170",
+      "b882d1c472d058338d714368",
+      "bb93b8a772c7c84e92dd19c4",
+      "be1b680bad3728c6a5c3ee35",
+      "c0367099eed49727686e61af",
+      "c138680a6beb87a4aa8be6fc",
+      "c1d947bd6240f8549c0e385a",
+      "c2ff7b13072937c80cccf7fc",
+      "c4e92e077e05dbfd52daeb9e",
+      "c53264679115cd2fbe52c53a",
+      "c68776ede26641548f79a108",
+      "c7006b3ec3bd8928ce7a36bd",
+      "c81a2f2768f3748e94e9652f",
+      "c905a26da009ac41894db1fa",
+      "ca0eea29202a568bcc05f63f",
+      "ca3ecafd3d1e8309e63a2ce5",
+      "cac44098bced8d1d5cdd7170",
+      "cb1cbd742ccca93aff6a86af",
+      "cb823242980fa8a10e3c0d01",
+      "cba5d5e39cee8937a53c87da",
+      "cddc9de313621dc2726766f7",
+      "cf12245b5767340b36bb934b",
+      "dae0c072af8121619094833b",
+      "dce5564c1647ac9931a1f6cf",
+      "dde8f8a1890af198a9a1991d",
+      "de5b0f4ca0bfb3b5d8120661",
+      "dea5fb2817b4d8e20372b063",
+      "debf786e32ffef77a472d5f1",
+      "e12d26d1c2062a9585ec9519",
+      "e2343ddef99dd25928a0193e",
+      "e2399a792236e770164d872c",
+      "e2630c4122c3e58517c93e19",
+      "e367e13dc8ce9a263b1a3a88",
+      "e6044efeb051aabde9f47246",
+      "e85f229d18835c42e98fc981",
+      "e93fb1e618fafbbabc1d2b6d",
+      "eab8ba4779ef8231c4e1ad88",
+      "eaf31fbacef9643618ab3265",
+      "eb63cd9cb7460558bdc9bb8d",
+      "ed66a9deb84458e4703825f8",
+      "f3e999546f5f6d6b894bf05d",
+      "f5052bba62e43674bedfc358",
+      "f52bac5c3b7bd8b3c4a8954a",
+      "f61b72a82702d4c06c5ddbb0",
+      "f642bf83e43e2bcc225205d9",
+      "f6cc4f50b7300b6427258821",
+      "f706350461f63c69d13324d4",
+      "f888e7bbf74f6718b57c109a",
+      "f925608b4627f59f007d56d4",
+      "fa1e9624ec208634260fa6cb",
+      "fc093d9b07028be0e3b4dc6e",
+      "fc414b73d276a1c27a30396b",
+      "fe1c6e1ccc192996f0726784",
+      "fe254698ebd959a88510a8be",
+      "fe409f8610e5bed52f6d5cb7",
+      "febf22a1f559d6c761c8d850",
+      "fede442dc1bf79856b68b936"
+    ],
+    "replayable_current_sensitivity_episode_ids": [
+      "006c04a81119cd9a5e366cdb",
+      "00a0fe746b1980456b94d0cb",
+      "01bbce18153bcf3fb06bfa85",
+      "01e043b7e9553b7edddfc386",
+      "061f39cf16ac184b702f210f",
+      "06b4bb088c8f2369c6008877",
+      "06f89d2120f4e66c08a0f9f5",
+      "0744d6223b8ea26bed032e98",
+      "07e99a3114d5dce1c7bfb683",
+      "098b23131a9e481f85e56aec",
+      "0a267008ea28eb0fbf4808c2",
+      "0c495f3ec3c2020af36b24bc",
+      "0c67b57472d4f8f79d745541",
+      "0cf4652920dbe445308166bf",
+      "0e4c1406eaed3f880effca88",
+      "0edc1d73c3a86e149371bfbf",
+      "0f3baf8fd6a1d60aebf86443",
+      "1066e522283ff14f622327cf",
+      "13e5207d022d17cfd7ee6c19",
+      "14c595c6a1d86f1f2fd674f0",
+      "1530e1f590ebd6d015fe959c",
+      "167618925fd2b060cfa9c2fe",
+      "17208f5f6efe265c41d5fa68",
+      "19313dfecc19b71819f7a000",
+      "1a0b9c2c8b593c16dd36af74",
+      "1a59d49c130eed3e82dd517d",
+      "1cf4b55dbaaef2eb3cee8eb1",
+      "1dd834e016b3bed690de2973",
+      "1e0664ff7844f29a5ee2bb53",
+      "1e434d0fa5abfd518ad07d1e",
+      "206f69cd684942feb9c1285d",
+      "20d3006e9b11c097a46c62fa",
+      "211b0d0c6e6786b84e0a6915",
+      "2231050bc683bfab95cd6437",
+      "23371bee083381cd79cf93a2",
+      "239593f66b300e7e5e5d5ee7",
+      "242be033424116880cb5ac71",
+      "246453160ef742d4dce69790",
+      "24c872e10e37becbd3f30992",
+      "2589c31113466bc0dad61ad1",
+      "28787e0f92d83bdb5ee44e99",
+      "288f2c3fe22c13ade033c850",
+      "2c6f8ce81c83aef308916e30",
+      "2f384f6e855a7d5f73a8ee19",
+      "30214f41a8366c84d497a640",
+      "30f0140667f8b487a9e04788",
+      "311349383a05ad4a837dc970",
+      "319d4432a8528fe156bcc567",
+      "33fef5b76da452da68129be5",
+      "346a641e15ccea7088044327",
+      "34f24323fc6452455fa2d49a",
+      "3908215d89f8b657ac70b537",
+      "3b326f33c806e4e93ef752ae",
+      "3e2f458677f9437a49e7e591",
+      "3e571bf27fcaa6d922665535",
+      "3fbc7461b6da87389435d052",
+      "415f67e66e79ab4fd14156c9",
+      "423aa51b0556c2384502308a",
+      "430c798170a149d706024a81",
+      "439dd02977fa33b202c9b18a",
+      "45e9cce2ddfe56582af9555a",
+      "46d000204fa2ce6725290eb2",
+      "481cb4ea7ea80bda589823c2",
+      "4986bef6d046cc4014d5b389",
+      "49afd37de69b5dda10df6d3a",
+      "4bed22300441e824dbb776d9",
+      "4d1a69adfb40266b088dc442",
+      "4dfc0af35ff48d0fb1c39ff9",
+      "4e60c0e06170b87a4cd42988",
+      "4f5dbe150242353e5fb20d25",
+      "4f75b69d5e6fcda6577522b6",
+      "534a391be41a0a8e0c4237eb",
+      "54f663d0f8527961ccec99b5",
+      "565a575eb696cb87ddcab38d",
+      "566cf4ea1584d270257cb83b",
+      "573c596e88106904bd5e2f25",
+      "595a6190dfab3accc8428c5c",
+      "5aab735a0224bbe5ca081c49",
+      "5ab398d8b6fb78421e33ab77",
+      "5b43e627ba4831b3ad71b315",
+      "5c730c2e66d8a4264a357421",
+      "5c9bca9045a2f1944c804a93",
+      "5da4fc649a38d4796ebbcf94",
+      "5da7b3379fcabbe8e0192679",
+      "6045a2d1ccfe4848dbf8f31a",
+      "619e44f4093b50547d320e98",
+      "63626c238d0111b9aca18f6a",
+      "640f4ab9fc846ec0b9fe39c8",
+      "64a90cfe4c5dd59a328befb6",
+      "668658cd0144ed423b815ca1",
+      "67ff7c9997086c504388f49a",
+      "68046107668aad7c9f51499d",
+      "69b6767287e18383f94758c2",
+      "6abcb5d9e66b76a94e3f4a59",
+      "6b7ba70bf5f6686e6b51519f",
+      "6cf411ed1ba704c725efc257",
+      "6e911dd78a3f47765d361aa0",
+      "6f2bab19aebbb357896550ea",
+      "6f9108fe0f387d7eda862a8e",
+      "6ff462c250a59f733b93a3cc",
+      "719a5f22c90f6cc6cc3b0f79",
+      "764104c7ce8eb3b6703a33ec",
+      "79d527fe4e87135fa7c2a199",
+      "7ab7953ea67f124d164ec7ab",
+      "7afc90b9df18780246f1b995",
+      "7b5468865b1ec758817c4659",
+      "7f40d4bdf35d4c91159113c1",
+      "7f4501f4cdd0878df2a234f9",
+      "7fef165b3eb0ada83014cc42",
+      "80ba9194a8f2ae4b4321a98b",
+      "81047aeff448a71665a131b8",
+      "835683aa84a1a0dc5aa82abd",
+      "83b4235e8c11bcd5c3a0268b",
+      "8632e216d41f3f898d03a1e8",
+      "87348c2c06d552d2ad0fc751",
+      "8770bd1436782473a91df122",
+      "896f80a6ec6e9d98ab2d0998",
+      "8a5aec03a0420e5f64f7c6b2",
+      "8c05b7fc08e91711acebc02a",
+      "8da4bd319ba34e8d89de95f7",
+      "8e1943fdc2945cace0295a1c",
+      "8fbe1d38fffb22768c60e6b0",
+      "90287df3a5b42ef1fbfd54ed",
+      "91168e2093aac422d1c2fdf6",
+      "917368ae74bf82a0f5ba5842",
+      "91c500b18b12860b6530d769",
+      "9280ecea079e223790ecd234",
+      "96064d56ad504b8f25add9bb",
+      "97d4ad163a9936c845ef29d0",
+      "989a3167ca65f3b54e6eb3bb",
+      "9a83cb276478ff27d5f0689d",
+      "9cd61600bca66175896b4ffb",
+      "9e3ba4f7407c6d8ad7a27607",
+      "a07f46f6e66f83ebd04c32a5",
+      "a1b945ddc1baf001e45d6826",
+      "a1c6c895daaef7e1ff8f500d",
+      "a303c6b6b782ce0d29c741d0",
+      "a3745cf85586ae4f9c5156cd",
+      "a38685d31aaf9e9513937865",
+      "a4acd033a648cd0b4e2819f8",
+      "ab9337a0170c2549a94a35fb",
+      "abadfaa348ae865665a005b4",
+      "ad099cc47e1feaf4685bb8f4",
+      "b028e832237e77eaa79796c3",
+      "b234a0c7d8f8be45ee429a21",
+      "b35f7cadc556a5cb0a8c2b18",
+      "b3d11227a82aceb93d5bf798",
+      "b4bfdf83c1078164dd00627c",
+      "b7355c0a49718cedfd3e85d6",
+      "b7c7da1cbd1cdbf7fbe7974b",
+      "b7d28541e30468af2123d170",
+      "b882d1c472d058338d714368",
+      "bb93b8a772c7c84e92dd19c4",
+      "be1b680bad3728c6a5c3ee35",
+      "c138680a6beb87a4aa8be6fc",
+      "c1d947bd6240f8549c0e385a",
+      "c2ff7b13072937c80cccf7fc",
+      "c68776ede26641548f79a108",
+      "c81a2f2768f3748e94e9652f",
+      "c905a26da009ac41894db1fa",
+      "ca0eea29202a568bcc05f63f",
+      "ca3ecafd3d1e8309e63a2ce5",
+      "cac44098bced8d1d5cdd7170",
+      "cb1cbd742ccca93aff6a86af",
+      "cb823242980fa8a10e3c0d01",
+      "cba5d5e39cee8937a53c87da",
+      "cddc9de313621dc2726766f7",
+      "cf12245b5767340b36bb934b",
+      "dae0c072af8121619094833b",
+      "dce5564c1647ac9931a1f6cf",
+      "dde8f8a1890af198a9a1991d",
+      "de5b0f4ca0bfb3b5d8120661",
+      "dea5fb2817b4d8e20372b063",
+      "debf786e32ffef77a472d5f1",
+      "e2343ddef99dd25928a0193e",
+      "e2399a792236e770164d872c",
+      "e2630c4122c3e58517c93e19",
+      "e367e13dc8ce9a263b1a3a88",
+      "e6044efeb051aabde9f47246",
+      "e85f229d18835c42e98fc981",
+      "e93fb1e618fafbbabc1d2b6d",
+      "eab8ba4779ef8231c4e1ad88",
+      "eaf31fbacef9643618ab3265",
+      "eb63cd9cb7460558bdc9bb8d",
+      "ed66a9deb84458e4703825f8",
+      "f3e999546f5f6d6b894bf05d",
+      "f5052bba62e43674bedfc358",
+      "f52bac5c3b7bd8b3c4a8954a",
+      "f61b72a82702d4c06c5ddbb0",
+      "f642bf83e43e2bcc225205d9",
+      "f6cc4f50b7300b6427258821",
+      "f888e7bbf74f6718b57c109a",
+      "f925608b4627f59f007d56d4",
+      "fa1e9624ec208634260fa6cb",
+      "fc093d9b07028be0e3b4dc6e",
+      "fc414b73d276a1c27a30396b",
+      "fe1c6e1ccc192996f0726784",
+      "fe254698ebd959a88510a8be",
+      "fe409f8610e5bed52f6d5cb7",
+      "febf22a1f559d6c761c8d850",
+      "fede442dc1bf79856b68b936"
+    ],
+    "strict_ids_missing_from_replay": [
+      "1781440c8942002c1a65c25c",
+      "202349ba336c5c0ac6cac5d7",
+      "2051acef367704cf87e65ddc",
+      "48826b9dbadd8eaee6601c9c",
+      "4b5505f1a437fdf606709c66",
+      "56a73633ee7030cb00e61fcf",
+      "67a904a0ab96455cefbc5ba9",
+      "6b8944c3a3d0cbb98d1dd6c3",
+      "6dc2c1209865b6cf7e7f8699",
+      "7666b549078065271f0033f3",
+      "783f99fd0c0fcd91758637bf",
+      "7ffb26d8e21f7fb8a7348b2b",
+      "806894d4170f39a8155e8485",
+      "843005edc6568568c2a292fa",
+      "9571bb4b5340eb3a198c0169",
+      "9c8229fbab1da4901030100a",
+      "b41d83d707e66b203d6d1794",
+      "c0367099eed49727686e61af",
+      "c4e92e077e05dbfd52daeb9e",
+      "c53264679115cd2fbe52c53a",
+      "c7006b3ec3bd8928ce7a36bd",
+      "e12d26d1c2062a9585ec9519",
+      "f706350461f63c69d13324d4"
+    ],
+    "strict_ids_unexpectedly_added": [],
+    "sensitivity_ids_missing_from_replay": [
+      "1781440c8942002c1a65c25c",
+      "202349ba336c5c0ac6cac5d7",
+      "2051acef367704cf87e65ddc",
+      "48826b9dbadd8eaee6601c9c",
+      "4b5505f1a437fdf606709c66",
+      "56a73633ee7030cb00e61fcf",
+      "67a904a0ab96455cefbc5ba9",
+      "6b8944c3a3d0cbb98d1dd6c3",
+      "6dc2c1209865b6cf7e7f8699",
+      "7666b549078065271f0033f3",
+      "783f99fd0c0fcd91758637bf",
+      "7ffb26d8e21f7fb8a7348b2b",
+      "806894d4170f39a8155e8485",
+      "843005edc6568568c2a292fa",
+      "9571bb4b5340eb3a198c0169",
+      "9c8229fbab1da4901030100a",
+      "b41d83d707e66b203d6d1794",
+      "c0367099eed49727686e61af",
+      "c4e92e077e05dbfd52daeb9e",
+      "c53264679115cd2fbe52c53a",
+      "c7006b3ec3bd8928ce7a36bd",
+      "e12d26d1c2062a9585ec9519",
+      "f706350461f63c69d13324d4"
+    ],
+    "sensitivity_ids_unexpectedly_added": [],
+    "difference_id_to_blocker_records": {
+      "1781440c8942002c1a65c25c": [
+        "strict_events[35]"
+      ],
+      "202349ba336c5c0ac6cac5d7": [
+        "strict_events[30]"
+      ],
+      "2051acef367704cf87e65ddc": [
+        "strict_events[43]"
+      ],
+      "48826b9dbadd8eaee6601c9c": [
+        "strict_events[38]"
+      ],
+      "4b5505f1a437fdf606709c66": [
+        "strict_events[31]"
+      ],
+      "56a73633ee7030cb00e61fcf": [
+        "strict_events[34]"
+      ],
+      "67a904a0ab96455cefbc5ba9": [
+        "strict_events[32]"
+      ],
+      "6b8944c3a3d0cbb98d1dd6c3": [
+        "strict_events[39]"
+      ],
+      "6dc2c1209865b6cf7e7f8699": [
+        "strict_events[27]"
+      ],
+      "7666b549078065271f0033f3": [
+        "strict_events[26]"
+      ],
+      "783f99fd0c0fcd91758637bf": [
+        "strict_events[41]"
+      ],
+      "7ffb26d8e21f7fb8a7348b2b": [
+        "strict_events[45]"
+      ],
+      "806894d4170f39a8155e8485": [
+        "strict_events[33]"
+      ],
+      "843005edc6568568c2a292fa": [
+        "strict_events[24]"
+      ],
+      "9571bb4b5340eb3a198c0169": [
+        "strict_events[40]"
+      ],
+      "9c8229fbab1da4901030100a": [
+        "strict_events[44]"
+      ],
+      "b41d83d707e66b203d6d1794": [
+        "strict_events[28]"
+      ],
+      "c0367099eed49727686e61af": [
+        "strict_events[36]"
+      ],
+      "c4e92e077e05dbfd52daeb9e": [
+        "strict_events[37]"
+      ],
+      "c53264679115cd2fbe52c53a": [
+        "strict_events[29]"
+      ],
+      "c7006b3ec3bd8928ce7a36bd": [
+        "strict_events[25]"
+      ],
+      "e12d26d1c2062a9585ec9519": [
+        "strict_events[23]"
+      ],
+      "f706350461f63c69d13324d4": [
+        "strict_events[42]"
+      ]
+    },
+    "strict_mismatch_fully_explained_by_unbound_counted_evidence": true,
+    "sensitivity_mismatch_fully_explained_by_unbound_counted_evidence": true,
+    "second_independent_id_count_bug_found": false,
+    "duplicate_counted_target_episode_ids": [],
+    "note": "Current source-level ID-count mismatches are exactly 169-146=23 and 224-201=23. The five as-is classifier gaps are a post-binding current-rule/provenance issue, not a second cause of the present ID-count mismatches."
+  },
+  "minimal_repair_plan": {
+    "common_binding_repair": {
+      "action": "Add `matched_alert_start_kyiv` to the historical replay START_FIELDS (or equivalently normalize that retained field into an existing start field before bind).",
+      "rule_change": false,
+      "matching_tolerance_change": false,
+      "evidence_change": false,
+      "effect": "All 23 counted records enter the already-existing exact/±90-second canonical start reconciliation path and bind uniquely."
+    },
+    "per_record_repair_action_counts": {
+      "REBIND_ONLY": 18,
+      "PROVENANCE_REPAIR": 5,
+      "DEDUP_ONLY": 0,
+      "CLASSIFICATION_DOWNGRADE": 0,
+      "MANUAL_QA_REQUIRED": 0
+    },
+    "provenance_repairs": {
+      "count": 5,
+      "evidence_identifiers": [
+        "strict_events[27]",
+        "strict_events[35]",
+        "strict_events[36]",
+        "strict_events[38]",
+        "strict_events[40]"
+      ],
+      "requirement": "Migrate only factual, already-retained structured audit roles (exact-city event, attack-event evidence, aerial-war context, same-attack/temporal target) into current review_provenance for these records. Do not import old final classifications as authority and do not weaken classifier gates.",
+      "external_research_required": false
+    },
+    "classification_downgrade_repairs": {
+      "count": 0,
+      "note": "None required because every as-is classifier gap has sufficient retained structured provenance for a current review-provenance repair."
+    }
+  },
+  "repairability_assessment": {
+    "total_unbound_counted_evidence_records": 23,
+    "deterministically_repairable_count": 23,
+    "as_is_current_rule_downgrade_count": 5,
+    "classification_downgrade_required_after_retained_provenance_repair_count": 0,
+    "genuinely_ambiguous_count": 0,
+    "manual_qa_required_count": 0,
+    "new_external_source_research_required": false,
+    "external_research_cases": [],
+    "research_verdict": "NO_NEW_EXTERNAL_RESEARCH_REQUIRED"
+  },
+  "protected_file_verification": {
+    "before_commit_blob_shas": {
+      "kyiv-air-alerts-grafana/data/explosion_audited_baseline.json": "5bbd2b771559eac2966aeec65d6e3b5487b9c1a9",
+      "kyiv-air-alerts-grafana/data/explosion_review_queue.json": "e6ed6776ae326a18a07978b1979dd3b265096bf0",
+      "kyiv-air-alerts-grafana/data/explosion_candidate_monitor_state.json": "3c8658880c6b93a00fb8ddbec2c4eaeed6d3f2cc",
+      "kyiv-air-alerts-grafana/data/explosion_candidate_monitor_last_run.json": "1552b13a2a9361be968cea4f09876cc20f96572f",
+      "kyiv-air-alerts-grafana/data/explosions_test.json": "3109dc02d2292efa59eddd26b34292cab2b554ab",
+      "kyiv-air-alerts-grafana/data/dashboard_data.json": "85e1d5cacfbe0af1530bbf584cb63ebdfef463e6",
+      "kyiv-air-alerts-grafana/data/explosion_research/zaporizhzhia/final_evidence.json": "4b3559386bdd8515f24498dfaac47ef67542b679",
+      "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P1a_alerts.json": "dc9cff5e26d1e38d73e823ec69ba261b933940a8",
+      "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P1b_alerts.json": "9dba2195b25276b164a568a1df35ccd9764c1b9f",
+      "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P2a_alerts.json": "43b93b64f9dbe13d03279b99c814498ce79858cc",
+      "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P2b_alerts.json": "b6c5e43f01444425167a361ed9a27d9245c43d95",
+      "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P3a_alerts.json": "3a09ebc810a16dff4393bbd629e1756ec9fca227",
+      "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P3b_alerts.json": "e43a5b3eaa1bb2e49d1a822e0af15ae4e25e2eae",
+      "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P4a_alerts.json": "9acbce13d059beab2eb352f922943224cf134d5c",
+      "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P4b_alerts.json": "3f34bd993e38afc527968eac1073c3f7396094a4",
+      "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P4c_alerts.json": "0c4cbde0a9653b7b8be6605e75489203ce9bdd3b",
+      "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P4c1_alerts.json": "70ffc7efb52119eaef063f0ba0f52620ab28e12a",
+      "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P4c2_alerts.json": "38703faac7384a6ed7cafa2314834f475646a04c"
+    },
+    "protected_paths_mutated_by_diagnostic": false,
+    "diagnostic_write_scope": [
+      "research/zaporizhzhia_historical_replay_binding_diagnostic_2026-09-27.json"
+    ],
+    "verification_basis": "The diagnostic is computed read-only from current blobs and the planned commit writes only the new research artifact. Post-commit tree equality for every protected blob is verified separately before final response."
+  },
+  "verdict": "ZAPORIZHZHIA BINDING REPAIR READY"
+}
