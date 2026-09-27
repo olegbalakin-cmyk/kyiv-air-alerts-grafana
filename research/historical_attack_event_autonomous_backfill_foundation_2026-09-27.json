@@ -14,7 +14,8 @@
     "late_damage_fire_window_hours": 72,
     "same_campaign_resume_requires_same_versions": true,
     "scheduled_resume_declared": true,
-    "scheduled_resume_activation_note": "GitHub cron executes the workflow only after this workflow exists on the repository default branch; the campaign branch itself remains isolated and no full campaign is started by this foundation task."
+    "scheduled_resume_activation_note": "Default-branch scheduler is installed and remains a no-op while scanned_episodes == 0; after an explicit first campaign batch, it resumes bounded work on the isolated campaign branch.",
+    "scheduler_workflow": ".github/workflows/historical-attack-event-backfill-scheduler.yml"
   },
   "code_version_identity": {
     "classifier_sha": "eefd63aeebc17347b750f61115842be6c53a79da",
@@ -122,7 +123,9 @@
     "no_force_push": true,
     "stale_writer_guard": true,
     "batch_checkpoint_atomic_commit": true,
-    "full_campaign_started": false
+    "full_campaign_started": false,
+    "scheduler_on_default_branch": true,
+    "scheduler_dormant_until_explicit_campaign_start": true
   },
   "acceptance_test_results": {
     "classifier_drift": {
@@ -211,7 +214,8 @@
     "research/historical_attack_event_source_registry.json",
     "research/historical_attack_event_backfill_status.json",
     ".github/workflows/historical-attack-event-backfill.yml",
-    "research/historical_attack_event_autonomous_backfill_foundation_2026-09-27.json"
+    "research/historical_attack_event_autonomous_backfill_foundation_2026-09-27.json",
+    ".github/workflows/historical-attack-event-backfill-scheduler.yml"
   ],
   "checks": {
     "source_adapter_self_test": true,
@@ -231,5 +235,12 @@
     },
     "protected_files_unchanged": true
   },
-  "verdict": "AUTONOMOUS HISTORICAL ATTACK-EVENT BACKFILL FOUNDATION READY"
+  "verdict": "AUTONOMOUS HISTORICAL ATTACK-EVENT BACKFILL FOUNDATION READY",
+  "scheduler_installation": {
+    "default_branch": "main",
+    "workflow": ".github/workflows/historical-attack-event-backfill-scheduler.yml",
+    "commit_sha": "ad6cfc4c2783f2f008f1e6e07892557ed02ca231",
+    "activates_only_after_scanned_episodes_gt_0": true,
+    "full_campaign_started_by_foundation_task": false
+  }
 }
