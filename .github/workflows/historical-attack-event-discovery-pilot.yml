@@ -1,30 +1,45 @@
 name: Historical attack-event discovery pilot
 
 on:
+  workflow_dispatch:
+    inputs:
+      city_key:
+        description: "Next-city key, or auto for deterministic selection"
+        required: false
+        default: "auto"
+        type: string
+      max_episodes:
+        description: "Maximum alert episodes in the bounded next-city pilot"
+        required: false
+        default: "40"
+        type: string
   push:
     branches: [multicity-wip-2026-09-16]
     paths:
-      - "kyiv-air-alerts-grafana/scripts/discover_historical_attack_events.py"
-      - "kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py"
       - ".github/workflows/historical-attack-event-discovery-pilot.yml"
-  workflow_dispatch:
 
 concurrency:
-  group: historical-attack-event-discovery-pilot
-  cancel-in-progress: true
+  group: historical-attack-event-source-adapter-pilot
+  cancel-in-progress: false
 
 permissions:
   contents: write
 
 jobs:
-  lviv-pilot:
+  adapter-pilot:
+    if: ${{ github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, 'Run reusable attack-event adapter pilot') }}
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 30
+    env:
+      TASK_STARTING_HEAD: "31482913d2aa1335f313db375fb88aaed30e0c5f"
+      PILOT_CITY_KEY: ${{ inputs.city_key || 'auto' }}
+      PILOT_MAX_EPISODES: ${{ inputs.max_episodes || '40' }}
     steps:
       - name: Check out WIP branch
         uses: actions/checkout@v4
         with:
           ref: multicity-wip-2026-09-16
+          fetch-depth: 0
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -37,16 +52,19 @@ jobs:
         working-directory: kyiv-air-alerts-grafana
         run: pip install -r requirements.txt
 
-      - name: Self-test worker
+      - name: Run refactor QA and one bounded next-city pilot
         working-directory: kyiv-air-alerts-grafana
-        run: python scripts/discover_historical_attack_events.py --self-test
-
-      - name: Run Lviv 40-episode pilot
-        working-directory: kyiv-air-alerts-grafana
+        env:
+          GITHUB_WORKFLOW_RUN_ID: ${{ github.run_id }}
         run: |
-          python scripts/discover_historical_attack_events.py             --city lviv             --max-episodes 40             --output ../research/historical_attack_event_discovery_pilot_lviv_2026-09-27.json
+          rm -rf /tmp/attack-event-adapter-pilot
+          mkdir -p /tmp/attack-event-adapter-pilot
+          python scripts/run_historical_attack_event_source_adapter_pilot.py \
+            --city-key "$PILOT_CITY_KEY" \
+            --max-episodes "$PILOT_MAX_EPISODES" \
+            --output-dir /tmp/attack-event-adapter-pilot
 
-      - name: Verify protected files unchanged
+      - name: Refresh branch before artifact commit
         run: |
           test -z "$(git status --porcelain -- kyiv-air-alerts-grafana/data/explosion_audited_baseline.json)"
           test -z "$(git status --porcelain -- kyiv-air-alerts-grafana/data/explosion_review_queue.json)"
@@ -54,18 +72,32 @@ jobs:
           test -z "$(git status --porcelain -- kyiv-air-alerts-grafana/data/explosion_candidate_monitor_last_run.json)"
           test -z "$(git status --porcelain -- kyiv-air-alerts-grafana/data/explosions_test.json)"
           test -z "$(git status --porcelain -- kyiv-air-alerts-grafana/data/dashboard_data.json)"
-          test -z "$(git status --porcelain -- kyiv-air-alerts-grafana/data/explosion_research/lviv/final_evidence.json)"
+          test -z "$(git status --porcelain -- 'kyiv-air-alerts-grafana/data/explosion_research/**/final_evidence.json')"
+          git fetch origin multicity-wip-2026-09-16
+          git rebase origin/multicity-wip-2026-09-16
 
-      - name: Commit pilot artifact
+      - name: Install generated artifacts
         run: |
+          PILOT_REPO_PATH="$(cat /tmp/attack-event-adapter-pilot/pilot_repo_path.txt)"
+          mkdir -p "$(dirname "$PILOT_REPO_PATH")"
+          cp /tmp/attack-event-adapter-pilot/refactor.json research/historical_attack_event_source_adapter_refactor_2026-09-27.json
+          cp /tmp/attack-event-adapter-pilot/pilot.json "$PILOT_REPO_PATH"
+          printf '%s\n' "$PILOT_REPO_PATH" > /tmp/attack-event-adapter-pilot/pilot_repo_path_after_rebase.txt
+
+      - name: Verify only pilot artifacts are staged
+        run: |
+          PILOT_REPO_PATH="$(cat /tmp/attack-event-adapter-pilot/pilot_repo_path_after_rebase.txt)"
+          CHANGED="$(git status --porcelain --untracked-files=all | awk '{print $2}' | sort)"
+          EXPECTED="$(printf '%s\n%s\n'             'research/historical_attack_event_source_adapter_refactor_2026-09-27.json'             "$PILOT_REPO_PATH" | sort)"
+          test "$CHANGED" = "$EXPECTED"
+          git diff --exit-code --             kyiv-air-alerts-grafana/data/explosion_audited_baseline.json             kyiv-air-alerts-grafana/data/explosion_review_queue.json             kyiv-air-alerts-grafana/data/explosion_candidate_monitor_state.json             kyiv-air-alerts-grafana/data/explosion_candidate_monitor_last_run.json             kyiv-air-alerts-grafana/data/explosions_test.json             kyiv-air-alerts-grafana/data/dashboard_data.json
+          test -z "$(git status --porcelain -- 'kyiv-air-alerts-grafana/data/explosion_research/**/final_evidence.json')"
+
+      - name: Commit pilot artifacts
+        run: |
+          PILOT_REPO_PATH="$(cat /tmp/attack-event-adapter-pilot/pilot_repo_path_after_rebase.txt)"
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add research/historical_attack_event_discovery_pilot_lviv_2026-09-27.json
-          if git diff --cached --quiet; then
-            echo "No artifact change"
-          else
-            git commit -m "Record Lviv historical attack-event discovery pilot"
-            git fetch origin multicity-wip-2026-09-16
-            git rebase origin/multicity-wip-2026-09-16
-            git push origin HEAD:multicity-wip-2026-09-16
-          fi
+          git add research/historical_attack_event_source_adapter_refactor_2026-09-27.json "$PILOT_REPO_PATH"
+          git commit -m "Record reusable attack-event adapter pilot"
+          git push origin HEAD:multicity-wip-2026-09-16
