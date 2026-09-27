@@ -1,0 +1,180 @@
+{
+  "schema_version": 1,
+  "verdict": "PHASE-1 LVIV CANONICALIZATION PROOF PASSED",
+  "original_contract_commit": "2ffc4c19231cccf5c8d9e703d4fe88c4928ddd5c",
+  "amended_contract_commit": "afde03f4ae71c8f7581266641dea040c72c3d0ef",
+  "proof_branch": "db-phase1-lviv-proof-v2-2026-09-27",
+  "proof_base": "afde03f4ae71c8f7581266641dea040c72c3d0ef",
+  "canonicalization_version": "alert-canonicalization-v1",
+  "assembly_profile": "lviv-historical-v1",
+  "logical_source_keys": [
+    "ukrainealarm_region_history",
+    "alerts_in_ua",
+    "vadimkin_official_data_uk"
+  ],
+  "source_record_key_versions": {
+    "ukrainealarm_region_history": "ukrainealarm-region-history-v1",
+    "alerts_in_ua": "alerts-in-ua-v1",
+    "vadimkin_official_data_uk": "vadimkin-official-data-uk-v1"
+  },
+  "pinned_inputs": {
+    "vadimkin": {
+      "repository": "Vadimkin/ukrainian-air-raid-sirens-dataset",
+      "path": "datasets/official_data_uk.csv",
+      "ref": "58ee75bc20113181b9ddf8029d4cbf3a62d8cd10",
+      "blob": "71d70c0ca54968f530d596cf315616fa858800e1"
+    },
+    "ukrainealarm_bridge": {
+      "repository": "olegbalakin-cmyk/kyiv-air-alerts-grafana",
+      "path": "kyiv-air-alerts-grafana/data/ukrainealarm_bridge.json",
+      "ref": "e23479ef250396d441cfe68814768be8134c761d",
+      "blob": "9b2922b0863ff6f3dba6e84f2348ad0e4b111d41"
+    },
+    "oracle": {
+      "repository": "olegbalakin-cmyk/kyiv-air-alerts-grafana",
+      "path": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/lviv-replay_alerts.json",
+      "ref": "9ffc0510d40c8be760d8b0262959d931a8dcdaf5",
+      "blob": "925b3fb2c328560d746c73a640936b8f10b0fbe4"
+    }
+  },
+  "fixture_hashes": {
+    "vadimkin_rows": "b612df25ca56bb56aece3d8d880ebff82205e326dcd6b900e4ebfc0109868b6c",
+    "ukrainealarm_bridge": "5b688e10af05b024b038f21c44a1d0e82f7b2668cf7d2dc1e0504d850b6a6a8c",
+    "oracle": "a63cb1d8e14b076e5b29ca6986e029851f0db806abf7f929e25e92457f360cfd",
+    "recovery_api_duplicate": "a58973a0a981dafc075f910f96b99897ae8c4321e8be3cd341cd83a5c069e61a"
+  },
+  "raw_rows_by_source": {
+    "vadimkin_official_data_uk": 1621,
+    "ukrainealarm_region_history": 20,
+    "alerts_in_ua_lviv_stage_c": 0
+  },
+  "semantic_source_observations_by_source": {
+    "vadimkin_official_data_uk": 120,
+    "ukrainealarm_region_history": 20,
+    "alerts_in_ua_lviv_stage_c": 0
+  },
+  "vadimkin_premerge_diagnostics": {
+    "raw_rows": 1621,
+    "before_coverage": 723,
+    "semantic_observations": 120,
+    "duplicate_marker_rows": 778
+  },
+  "merged_historical_episode_count": 120,
+  "ukrainealarm_interval_count": 20,
+  "api_overlap_refinement_count": 14,
+  "api_additions": 6,
+  "canonical_episode_count": 126,
+  "unique_legacy_id_count": 126,
+  "missing_oracle_ids": [],
+  "unexpected_oracle_ids": [],
+  "interval_mismatches": [],
+  "duplicate_ids": [],
+  "previous_blocker_regression": {
+    "api_interval_is_canonical_input": true,
+    "alerts_in_ua_static_in_stage_c": false,
+    "expected_episode_present": true,
+    "expected_id": "b3df9090f7264ddbd726e113",
+    "incorrect_expanded_id_present": false,
+    "result": "PASS"
+  },
+  "boundary_contribution_validation": {
+    "passed": true,
+    "errors": []
+  },
+  "determinism": {
+    "identical_rerun": true,
+    "reversed_source_order": true,
+    "deterministic_alternative_order": true,
+    "idempotent_output": true
+  },
+  "idempotence": true,
+  "recovery_fixture": {
+    "fixture_sha256": "a58973a0a981dafc075f910f96b99897ae8c4321e8be3cd341cd83a5c069e61a",
+    "source_ref": {
+      "path": "kyiv-air-alerts-grafana/data/ukrainealarm_bridge.json",
+      "ref": "1bacbc46302f44a79bd0c6125816c3451772daa1",
+      "repository": "olegbalakin-cmyk/kyiv-air-alerts-grafana"
+    },
+    "api_source_record_key": "efae9e474ae811256dd277c0352c35a847fac4ff3d55162a2ae12bf0d314db96",
+    "manual_source_record_key": "b8ecc4c296fb80f443b6d57bde377607146e6ee8f7eab1b8c12566235c67c76e",
+    "api_canonical_json": "{\"alert_type\":\"AIR\",\"city_key\":\"kharkiv\",\"end_at\":\"2026-09-25T15:34:53.446657Z\",\"region_id\":\"1293\",\"start_at\":\"2026-09-25T15:04:15.268574Z\",\"version\":\"ukrainealarm-region-history-v1\"}",
+    "manual_canonical_json": "{\"alert_type\":\"AIR\",\"city_key\":\"kharkiv\",\"end_at\":\"2026-09-25T15:34:53.000000Z\",\"start_at\":\"2026-09-25T15:04:15.000000Z\",\"version\":\"alerts-in-ua-v1\"}",
+    "stage_b": {
+      "matched": true,
+      "sign_convention": "manual_minus_api",
+      "start_delta_ms_exact": -268.574,
+      "end_delta_ms_exact": -446.657,
+      "start_delta_ms": -269,
+      "end_delta_ms": -447,
+      "effective_start_at": "2026-09-25T15:04:15.268574Z",
+      "effective_end_at": "2026-09-25T15:34:53.446657Z",
+      "api_role": "canonical_input",
+      "manual_role": "duplicate_alias"
+    },
+    "retained_observations": 2,
+    "effective_bridge_intervals": 1,
+    "effective_start_at": "2026-09-25T15:04:15.268574Z",
+    "effective_end_at": "2026-09-25T15:34:53.446657Z",
+    "manual_duplicate_of": "efae9e474ae811256dd277c0352c35a847fac4ff3d55162a2ae12bf0d314db96",
+    "recovery_provenance_preserved": true,
+    "static_manual_same_key_collision": "NO",
+    "static_collision_basis": "manual start 2026-09-25T15:04:15Z is after retained static coverage_end_exclusive 2026-09-16T21:00:00Z"
+  },
+  "bootstrap": {
+    "ingestion_run": {
+      "run_kind": "bootstrap_import",
+      "canonicalization_version": "alert-canonicalization-v1",
+      "parameters": {
+        "assembly_profile": "lviv-historical-v1"
+      }
+    },
+    "checkpoint_candidate": {
+      "source_key": "ukrainealarm_region_history",
+      "city_key": "lviv",
+      "stream_key": "region_id:90:AIR",
+      "checkpoint_seq": 1,
+      "checkpoint_kind": "bootstrap",
+      "previous_checkpoint": null,
+      "checked_at": "2026-09-17T20:14:45.777900Z",
+      "continuity_verified": true,
+      "continuity_method": "static_alertsinua_event_matches_api",
+      "continuity_anchor_at": null,
+      "observed_oldest_start_at": "2026-06-08T11:14:26.815429Z",
+      "observed_latest_end_at": "2026-09-17T10:41:50.457837Z",
+      "observed_record_count": 20,
+      "metadata": {
+        "initial_static_match": {
+          "api_end": "2026-09-12T22:14:23.315771Z",
+          "api_start": "2026-09-12T22:00:05.398348Z",
+          "end_delta_seconds": 3.684,
+          "start_delta_seconds": 0.602,
+          "static_end": "2026-09-13T01:14:27+03:00",
+          "static_start": "2026-09-13T01:00:06+03:00"
+        },
+        "poll_overlap_verified": null,
+        "api_region_name": "Львівський район",
+        "region_id": "90",
+        "kind": "proxy",
+        "target": "Львівський район",
+        "oblast": "Львівська область",
+        "last_error": null,
+        "observed_latest_end_is_coverage_watermark": false
+      }
+    },
+    "alerts_in_ua_static_episode_observation_created": false
+  },
+  "tests": {
+    "command": "python -m unittest discover -s tests -p \"test_*.py\"",
+    "run": 15,
+    "passed": 15,
+    "failed": 0,
+    "notes": "Initial bare-runner full-suite attempt had 2 import errors because bs4 was absent; requirements.txt declares beautifulsoup4. After installing declared requirements, the requested full unittest discovery passed 15/15. New Phase-1 subset passed 14/14."
+  },
+  "ddl_changed": false,
+  "ddl_applied": false,
+  "postgresql_created": false,
+  "db_connection_attempted": false,
+  "neon_touched": false,
+  "production_files_changed": false,
+  "historical_data_changed": false
+}
