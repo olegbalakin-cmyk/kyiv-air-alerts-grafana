@@ -1,0 +1,511 @@
+{
+  "schema_version": 1,
+  "artifact_type": "historical_replay_preflight_real_replay_divergence_diagnostic",
+  "generated_for_date": "2026-09-27",
+  "repository": "olegbalakin-cmyk/kyiv-air-alerts-grafana",
+  "branch": "multicity-wip-2026-09-16",
+  "scope": {
+    "city_key": "zaporizhzhia",
+    "mutation_policy": "Read-only forensic diagnostic. No evidence, loader, classifier, baseline, state, status, dashboard, or QA mutation. Only this research artifact is created.",
+    "external_research_performed": false,
+    "binding_repair_rollback": false,
+    "qa_repairs_performed": false
+  },
+  "authoritative_inputs": {
+    "failed_preflight": {
+      "path": "research/zaporizhzhia_binding_repair_preflight_2026-09-27.json",
+      "commit": "3a073a9bdb49b0100436e2aff1af6146d9892775",
+      "blob_sha": "5a1e23805365d758118b0a0a23cfcded0a7f836c",
+      "input_head": "8c4cf2c241d4f34cd428904153184bb758d909d1",
+      "verdict": "ZAPORIZHZHIA ATOMIC REPAIR READY"
+    },
+    "applied_result": {
+      "path": "research/zaporizhzhia_binding_repair_applied_2026-09-27.json",
+      "reporting_commit": "197b1b2ee12970f00b29a41131c5910bd2be9d48",
+      "blob_sha": "3f820c9f99c0407bcd638541e31d2eaed7d2d4f2",
+      "applied_repair_commit": "e8f10ead03f868e4d636b1e6a9be8c2e581feccc",
+      "applied_repair_parent": "e323c829b2be6251ee225a884695445dc9edc793"
+    },
+    "diagnostic_branch_head_before_artifact": "10d597eaad066f581b4f96ec852f80efc46cbad6"
+  },
+  "input_hash_comparison": {
+    "preflight_model": {
+      "replay_loader_blob_sha": "7509d9f391d206a2b052ff35ee8993ced33c6936",
+      "monitor_classifier_blob_sha": "eefd63aeebc17347b750f61115842be6c53a79da",
+      "zaporizhzhia_final_evidence_blob_sha": "4b3559386bdd8515f24498dfaac47ef67542b679",
+      "audited_baseline_blob_sha": "5bbd2b771559eac2966aeec65d6e3b5487b9c1a9",
+      "historical_source_slice_blobs": {
+        "zaporizhzhia-P1a_alerts.json": "dc9cff5e26d1e38d73e823ec69ba261b933940a8",
+        "zaporizhzhia-P1b_alerts.json": "9dba2195b25276b164a568a1df35ccd9764c1b9f",
+        "zaporizhzhia-P2a_alerts.json": "43b93b64f9dbe13d03279b99c814498ce79858cc",
+        "zaporizhzhia-P2b_alerts.json": "b6c5e43f01444425167a361ed9a27d9245c43d95",
+        "zaporizhzhia-P3a_alerts.json": "3a09ebc810a16dff4393bbd629e1756ec9fca227",
+        "zaporizhzhia-P3b_alerts.json": "e43a5b3eaa1bb2e49d1a822e0af15ae4e25e2eae",
+        "zaporizhzhia-P4a_alerts.json": "9acbce13d059beab2eb352f922943224cf134d5c",
+        "zaporizhzhia-P4b_alerts.json": "3f34bd993e38afc527968eac1073c3f7396094a4",
+        "zaporizhzhia-P4c_alerts.json": "0c4cbde0a9653b7b8be6605e75489203ce9bdd3b",
+        "zaporizhzhia-P4c1_alerts.json": "70ffc7efb52119eaef063f0ba0f52620ab28e12a",
+        "zaporizhzhia-P4c2_alerts.json": "38703faac7384a6ed7cafa2314834f475646a04c"
+      }
+    },
+    "real_replay_after_apply": {
+      "replay_loader_blob_sha": "f2a8f11324dfb0d1db7d9ecda513f194268bced9",
+      "monitor_classifier_blob_sha": "eefd63aeebc17347b750f61115842be6c53a79da",
+      "zaporizhzhia_final_evidence_blob_sha": "afc2702bfeb0b599dbec00d251362450b2d292e1",
+      "audited_baseline_blob_sha": "5bbd2b771559eac2966aeec65d6e3b5487b9c1a9",
+      "source_slice_set_unchanged_from_preflight": true
+    },
+    "material_drift": {
+      "classifier_changed": false,
+      "baseline_changed": false,
+      "source_slices_changed": false,
+      "loader_changed": true,
+      "loader_change": "Added matched_alert_start_kyiv to START_FIELDS only.",
+      "final_evidence_changed": true,
+      "final_evidence_change": "Added review_provenance objects to exactly five strict_events records; retained factual evidence text and old labels otherwise unchanged.",
+      "other_evidence_drift_detected": false
+    }
+  },
+  "execution_paths": {
+    "preflight_model_path": {
+      "reproduced": true,
+      "real_replay_executable_called": false,
+      "all_2365_alert_episodes_classified": false,
+      "all_retained_evidence_passed_through_current_hardened_classifier": false,
+      "execution_method": "Isolated in-memory temporary model of loader/classifier contracts.",
+      "result": {
+        "denominator": "2365/2365",
+        "unbound_counted_evidence": 0,
+        "strict": "169/169",
+        "sensitivity": "224/224",
+        "manual_qa": 0
+      },
+      "baseline_behavior": "Non-target historical statuses were carried forward; the model evaluated the 23 binding repairs and five proposed provenance repairs without running the full episode-by-episode replay reconciliation.",
+      "missing_current_rule_roles": "For the five provenance targets, proposed review_provenance roles were injected directly into the model and treated as classifier-visible."
+    },
+    "real_replay_path": {
+      "reproduced": true,
+      "executable": "kyiv-air-alerts-grafana/scripts/replay_explosion_history.py",
+      "workflow_run_id": 36312334697,
+      "rerun_job_id": 108602780084,
+      "input_head": "e8f10ead03f868e4d636b1e6a9be8c2e581feccc",
+      "result": {
+        "denominator": "2365/2365",
+        "unbound_counted_evidence": 0,
+        "source_status": "READY",
+        "strict": "62/169",
+        "sensitivity": "73/224",
+        "manual_qa": 151,
+        "reconciliation": {
+          "STRICT_DOWNGRADE": 107,
+          "NEW_AMBIGUOUS": 44
+        },
+        "protected_files_unchanged": true
+      }
+    }
+  },
+  "stage_by_stage_divergence": {
+    "episode_binding": {
+      "diverged": false,
+      "detail": "Loader repair binds all 18 deterministic Zaporizhzhia cases; remaining unbound counted evidence is 0."
+    },
+    "candidate_construction": {
+      "diverged": true,
+      "first_divergence": true,
+      "detail": "Real candidate_from_history() does not copy persisted row.review_provenance. It always replaces it with history_provenance(...)."
+    },
+    "evidence_normalization": {
+      "diverged_downstream": true,
+      "detail": "Because persisted role provenance is absent from the constructed candidate, normalization/classifier cannot consume those persisted roles."
+    },
+    "review_provenance_parsing": {
+      "diverged_downstream": true,
+      "detail": "reviewed_provenance_adapter parses the synthetic history_provenance, not the persisted five repair objects."
+    },
+    "exact_city_gate": {
+      "diverged_downstream": true
+    },
+    "strict_attack_event_gate": {
+      "diverged_downstream": true
+    },
+    "aerial_war_linkage": {
+      "diverged_downstream": true
+    },
+    "same_attack_composition": {
+      "diverged_downstream": true
+    },
+    "temporal_binding": {
+      "diverged": false,
+      "detail": "For the five targets, synthetic history_provenance supplies validated episode binding, explaining REVIEW_PROVENANCE_TEMPORAL_BINDING_USED."
+    },
+    "final_classification": {
+      "diverged": true
+    },
+    "baseline_reconciliation": {
+      "diverged": true,
+      "detail": "Full real replay exposes 151 current-rule mismatches that the preflight model did not evaluate."
+    }
+  },
+  "exact_first_divergence_stage": "CANDIDATE_CONSTRUCTION: replay_explosion_history.candidate_from_history drops persisted row.review_provenance and rebuilds provenance with history_provenance().",
+  "root_cause_codes": [
+    "PREFLIGHT_DID_NOT_RUN_REAL_REPLAY",
+    "BASELINE_STATUS_CARRIED_FORWARD_WITHOUT_RECLASSIFICATION",
+    "OTHER_MODEL_REAL_REPLAY_DIVERGENCE:PERSISTED_REVIEW_PROVENANCE_DROPPED_BY_HISTORICAL_REPLAY_CANDIDATE_ADAPTER"
+  ],
+  "non_causes": [
+    "PROVENANCE_SCHEMA_NOT_ACCEPTED_BY_REAL_CLASSIFIER",
+    "PROVENANCE_BOOLEAN_ROLE_WITHOUT_REQUIRED_EVIDENCE_SEGMENT",
+    "ATTACK_EVENT_ROLE_NOT_MAPPED_TO_CURRENT_GATE",
+    "EXACT_CITY_ROLE_NOT_MAPPED_TO_CURRENT_GATE",
+    "SAME_ATTACK_ROLE_NOT_MAPPED_TO_CURRENT_GATE"
+  ],
+  "provenance_contract_analysis": {
+    "classifier_fields_actually_read": [
+      "review_provenance.schema_version",
+      "review_provenance.target_episode_id",
+      "review_provenance.exact_city_evidence",
+      "review_provenance.explosion_evidence",
+      "review_provenance.aerial_war_evidence",
+      "review_provenance.same_attack_basis",
+      "review_provenance.temporal"
+    ],
+    "replay_adapter_problem": "The historical replay candidate adapter never transfers persisted row.review_provenance, so these fields are unreachable in this path even though the classifier supports them.",
+    "boolean_present_is_classifier_sufficient": true,
+    "evidence_text_segments_required_for_boolean_review_roles": false,
+    "explosion_evidence_compatible_with_broader_attack_event_schema": true,
+    "same_attack_basis_present_sufficient_at_classifier_level": true,
+    "aerial_war_linkage_contract": "aerial_war_evidence.present plus same_attack_basis.present can satisfy reviewed linkage when the provenance is usable and reaches the classifier.",
+    "smallest_valid_classifier_level_contract": {
+      "schema_version": 1,
+      "target_episode_id": "<canonical episode id>",
+      "exact_city_evidence": {
+        "present": true
+      },
+      "explosion_evidence": {
+        "present": true
+      },
+      "aerial_war_evidence": {
+        "present": true
+      },
+      "same_attack_basis": {
+        "present": true
+      },
+      "temporal": {
+        "status": "validated_episode_binding",
+        "validated_by_review": true,
+        "episode_specific": true,
+        "temporal_evidence_type": "frozen_historical_audit_episode_binding",
+        "neighboring_alert_check": {
+          "passed": true
+        }
+      }
+    },
+    "smallest_valid_end_to_end_replay_contract": {
+      "persisted_contract": {
+        "schema_version": 1,
+        "target_episode_id": "<canonical episode id>",
+        "exact_city_evidence": {
+          "present": true
+        },
+        "explosion_evidence": {
+          "present": true
+        },
+        "aerial_war_evidence": {
+          "present": true
+        },
+        "same_attack_basis": {
+          "present": true
+        },
+        "temporal": {
+          "status": "validated_episode_binding",
+          "validated_by_review": true,
+          "episode_specific": true,
+          "temporal_evidence_type": "frozen_historical_audit_episode_binding",
+          "neighboring_alert_check": {
+            "passed": true
+          }
+        }
+      },
+      "adapter_requirement": "candidate_from_history must preserve or deterministically merge the persisted row.review_provenance into the candidate before monitor.classify_candidate().",
+      "identified": true,
+      "applied_in_this_task": false
+    }
+  },
+  "five_provenance_schema_diagnostics": [
+    {
+      "evidence_identifier": "strict_events[27]",
+      "target_episode_id": "6dc2c1209865b6cf7e7f8699",
+      "persisted_fields_classifier_would_accept": [
+        "exact_city_evidence.present",
+        "explosion_evidence.present",
+        "aerial_war_evidence.present",
+        "same_attack_basis.present",
+        "temporal validated episode binding"
+      ],
+      "persisted_fields_seen_by_real_historical_replay_classifier": [],
+      "persisted_review_provenance_dropped_at": "candidate_from_history",
+      "actual_synthetic_provenance_seen_by_classifier": "history_provenance(...): validated temporal binding, but no Zaporizhzhia reviewed factual role mapping",
+      "replayed_status": "AMBIGUOUS",
+      "category": "STRICT_DOWNGRADE",
+      "reason_codes": [
+        "AIR_CONTEXT_NOT_LINKED_TO_EVENT",
+        "AIR_MILITARY_CONTEXT",
+        "EXACT_CITY_EVENT_TEXT",
+        "MATCH_UNIQUE",
+        "NO_STRICT_EXPLOSION_EVIDENCE",
+        "REVIEW_PROVENANCE_TEMPORAL_BINDING_USED",
+        "REVIEW_PROVENANCE_USABLE",
+        "TEMPORAL_REVIEWED_VALIDATED_BINDING"
+      ],
+      "diagnosis": "The persisted repair object is valid at the classifier interface but is ignored by the real historical replay adapter. The reason codes describe missing roles in the synthetic candidate, not rejection of the persisted schema."
+    },
+    {
+      "evidence_identifier": "strict_events[35]",
+      "target_episode_id": "1781440c8942002c1a65c25c",
+      "persisted_fields_classifier_would_accept": [
+        "exact_city_evidence.present",
+        "explosion_evidence.present",
+        "aerial_war_evidence.present",
+        "same_attack_basis.present",
+        "temporal validated episode binding"
+      ],
+      "persisted_fields_seen_by_real_historical_replay_classifier": [],
+      "persisted_review_provenance_dropped_at": "candidate_from_history",
+      "actual_synthetic_provenance_seen_by_classifier": "history_provenance(...): validated temporal binding, but no Zaporizhzhia reviewed factual role mapping",
+      "replayed_status": "AMBIGUOUS",
+      "category": "STRICT_DOWNGRADE",
+      "reason_codes": [
+        "AIR_CONTEXT_NOT_LINKED_TO_EVENT",
+        "AIR_MILITARY_CONTEXT",
+        "MATCH_UNIQUE",
+        "NO_EXACT_CITY_EVENT_TEXT",
+        "NO_STRICT_EXPLOSION_EVIDENCE",
+        "REVIEW_PROVENANCE_TEMPORAL_BINDING_USED",
+        "REVIEW_PROVENANCE_USABLE",
+        "TEMPORAL_REVIEWED_VALIDATED_BINDING"
+      ],
+      "diagnosis": "The persisted repair object is valid at the classifier interface but is ignored by the real historical replay adapter. The reason codes describe missing roles in the synthetic candidate, not rejection of the persisted schema."
+    },
+    {
+      "evidence_identifier": "strict_events[36]",
+      "target_episode_id": "c0367099eed49727686e61af",
+      "persisted_fields_classifier_would_accept": [
+        "exact_city_evidence.present",
+        "explosion_evidence.present",
+        "aerial_war_evidence.present",
+        "same_attack_basis.present",
+        "temporal validated episode binding"
+      ],
+      "persisted_fields_seen_by_real_historical_replay_classifier": [],
+      "persisted_review_provenance_dropped_at": "candidate_from_history",
+      "actual_synthetic_provenance_seen_by_classifier": "history_provenance(...): validated temporal binding, but no Zaporizhzhia reviewed factual role mapping",
+      "replayed_status": "AMBIGUOUS",
+      "category": "STRICT_DOWNGRADE",
+      "reason_codes": [
+        "AIR_CONTEXT_NOT_LINKED_TO_EVENT",
+        "AIR_MILITARY_CONTEXT",
+        "EXACT_CITY_EVENT_TEXT",
+        "MATCH_UNIQUE",
+        "NO_STRICT_EXPLOSION_EVIDENCE",
+        "REVIEW_PROVENANCE_TEMPORAL_BINDING_USED",
+        "REVIEW_PROVENANCE_USABLE",
+        "TEMPORAL_REVIEWED_VALIDATED_BINDING"
+      ],
+      "diagnosis": "The persisted repair object is valid at the classifier interface but is ignored by the real historical replay adapter. The reason codes describe missing roles in the synthetic candidate, not rejection of the persisted schema."
+    },
+    {
+      "evidence_identifier": "strict_events[38]",
+      "target_episode_id": "48826b9dbadd8eaee6601c9c",
+      "persisted_fields_classifier_would_accept": [
+        "exact_city_evidence.present",
+        "explosion_evidence.present",
+        "aerial_war_evidence.present",
+        "same_attack_basis.present",
+        "temporal validated episode binding"
+      ],
+      "persisted_fields_seen_by_real_historical_replay_classifier": [],
+      "persisted_review_provenance_dropped_at": "candidate_from_history",
+      "actual_synthetic_provenance_seen_by_classifier": "history_provenance(...): validated temporal binding, but no Zaporizhzhia reviewed factual role mapping",
+      "replayed_status": "AMBIGUOUS",
+      "category": "STRICT_DOWNGRADE",
+      "reason_codes": [
+        "AIR_CONTEXT_NOT_LINKED_TO_EVENT",
+        "AIR_MILITARY_CONTEXT",
+        "EXACT_CITY_EVENT_TEXT",
+        "MATCH_UNIQUE",
+        "NO_STRICT_EXPLOSION_EVIDENCE",
+        "REVIEW_PROVENANCE_TEMPORAL_BINDING_USED",
+        "REVIEW_PROVENANCE_USABLE",
+        "TEMPORAL_REVIEWED_VALIDATED_BINDING"
+      ],
+      "diagnosis": "The persisted repair object is valid at the classifier interface but is ignored by the real historical replay adapter. The reason codes describe missing roles in the synthetic candidate, not rejection of the persisted schema."
+    },
+    {
+      "evidence_identifier": "strict_events[40]",
+      "target_episode_id": "9571bb4b5340eb3a198c0169",
+      "persisted_fields_classifier_would_accept": [
+        "exact_city_evidence.present",
+        "explosion_evidence.present",
+        "aerial_war_evidence.present",
+        "same_attack_basis.present",
+        "temporal validated episode binding"
+      ],
+      "persisted_fields_seen_by_real_historical_replay_classifier": [],
+      "persisted_review_provenance_dropped_at": "candidate_from_history",
+      "actual_synthetic_provenance_seen_by_classifier": "history_provenance(...): validated temporal binding, but no Zaporizhzhia reviewed factual role mapping",
+      "replayed_status": "AMBIGUOUS",
+      "category": "STRICT_DOWNGRADE",
+      "reason_codes": [
+        "AIR_CONTEXT_NOT_LINKED_TO_EVENT",
+        "AIR_MILITARY_CONTEXT",
+        "EXACT_CITY_EVENT_TEXT",
+        "MATCH_UNIQUE",
+        "NO_STRICT_EXPLOSION_EVIDENCE",
+        "REVIEW_PROVENANCE_TEMPORAL_BINDING_USED",
+        "REVIEW_PROVENANCE_USABLE",
+        "TEMPORAL_REVIEWED_VALIDATED_BINDING"
+      ],
+      "diagnosis": "The persisted repair object is valid at the classifier interface but is ignored by the real historical replay adapter. The reason codes describe missing roles in the synthetic candidate, not rejection of the persisted schema."
+    }
+  ],
+  "qa_151_decomposition": {
+    "total": 151,
+    "strict_downgrade": 107,
+    "new_ambiguous": 44,
+    "provenance_targets_among_strict_downgrades": 5,
+    "non_target_of_provenance_repair": 146,
+    "non_target_breakdown": {
+      "STRICT_DOWNGRADE": 102,
+      "NEW_AMBIGUOUS": 44
+    },
+    "pre_existing_hidden_classification_qa": 146,
+    "binding_masked_provenance_target_classification_failures": 5,
+    "genuinely_new_regressions_caused_by_atomic_mutation": 0,
+    "proof": [
+      "Classifier blob is identical before and after the atomic repair.",
+      "Historical source-slice blobs are identical before and after.",
+      "The atomic evidence mutation adds provenance only to five records.",
+      "Those five persisted provenance objects are unreachable in the real replay adapter, so they cannot cause the other 146 changes.",
+      "The loader change changes deterministic binding only; applied validation found 0 changed previously valid targets, 0 new ambiguous bindings, and 0 non-target regressions."
+    ],
+    "interpretation": "All 151 reflect pre-existing current-rule replayability/classification debt. 146 were hidden by the earlier shortcut. The five target failures were additionally masked by their prior unbound state and became observable once binding was repaired."
+  },
+  "counterfactual_replays": {
+    "counterfactual_1_parent_as_is": {
+      "input_head": "e323c829b2be6251ee225a884695445dc9edc793",
+      "execution_extent": "Actual replay cannot enter full city classification because source validation is blocked by counted evidence bindings.",
+      "denominator": "2365/2365",
+      "unbound_counted_evidence": 23,
+      "frozen_replayable_strict_ids": 146,
+      "frozen_replayable_sensitivity_ids": 201,
+      "strict_replayed": null,
+      "sensitivity_replayed": null,
+      "qa_count": null,
+      "blocker": "UNBOUND_COUNTED_EVIDENCE"
+    },
+    "counterfactual_2_loader_only": {
+      "filesystem_delta": "Only matched_alert_start_kyiv added to START_FIELDS; five persisted provenance additions omitted.",
+      "separately_executed_as_distinct_checkout": false,
+      "equivalence_proof": "The only difference between loader-only and the applied loader+5 filesystem is five persisted row.review_provenance objects. candidate_from_history never reads or copies row.review_provenance, so the executable classification path is equivalent at candidate/classifier input for all episodes.",
+      "result": {
+        "denominator": "2365/2365",
+        "unbound_counted_evidence": 0,
+        "strict": 62,
+        "sensitivity": 73,
+        "qa_count": 151,
+        "reconciliation": {
+          "STRICT_DOWNGRADE": 107,
+          "NEW_AMBIGUOUS": 44
+        }
+      },
+      "confidence": "DETERMINISTIC_FROM_EXECUTION_PATH_AND_DIRECT_LOADER_PLUS_5_RERUN"
+    },
+    "counterfactual_3_loader_plus_exact_five_provenance": {
+      "input_head": "e8f10ead03f868e4d636b1e6a9be8c2e581feccc",
+      "directly_executed": true,
+      "workflow_run_id": 36312334697,
+      "rerun_job_id": 108602780084,
+      "result": {
+        "denominator": "2365/2365",
+        "unbound_counted_evidence": 0,
+        "strict": 62,
+        "sensitivity": 73,
+        "qa_count": 151,
+        "reconciliation": {
+          "STRICT_DOWNGRADE": 107,
+          "NEW_AMBIGUOUS": 44
+        }
+      }
+    }
+  },
+  "evidence_and_code_drift_check": {
+    "classifier_code_changed_between_preflight_and_real_replay": false,
+    "intended_loader_change_only": true,
+    "retained_source_slices_changed": false,
+    "baseline_changed": false,
+    "factual_zaporizhzhia_evidence_text_changed_outside_five_provenance_objects": false,
+    "five_provenance_objects_added": true,
+    "conclusion": "The 169/224/0 prediction cannot be explained by classifier, source-corpus, or baseline drift."
+  },
+  "other_preflight_audit": [
+    {
+      "path": "research/cherkasy_source_recovery_batch1_preflight.json",
+      "requires_revalidation": false,
+      "evidence": "Workflow run 36312108288 job 108599936318 applied the temporary append to final_evidence.json and invoked replay_explosion_history.py as a subprocess for current, single-target, and combined replays.",
+      "conclusion": "Uses the same real city replay executable after temporary mutation."
+    },
+    {
+      "path": "research/sumy_source_recovery_batch1_preflight.json",
+      "requires_revalidation": false,
+      "evidence": "Fresh actual replay/QA workflow run 36310493055 detected QA-ID drift and stopped before temporary source mutation.",
+      "conclusion": "No READY claim was issued from an in-memory approximation."
+    },
+    {
+      "path": "research/kyiv_historical_alert_corpus_gap_diagnostic_2026-09-27.json",
+      "requires_revalidation": true,
+      "evidence": "The READY verdict was based on dry corpus reconstruction to 2456/2456, not a post-mutation execution of the same real replay path.",
+      "post_apply_context": "The later repair artifact did run the real replay in workflow 36312039362 job 108599775512 and found classification QA, so corpus completeness was repaired but the original READY methodology does not meet the new universal mutation-preflight contract."
+    }
+  ],
+  "authoritative_future_preflight_contract": {
+    "rule": "A mutation preflight may claim READY only if the exact temporary filesystem mutation is followed by the same real replay executable/workflow used after commit.",
+    "prohibited_shortcut": "Do not infer final strict/sensitivity equality from a custom in-memory approximation or from frozen baseline labels.",
+    "reusable_mechanism": {
+      "steps": [
+        "Create an isolated checkout/worktree at the frozen parent commit.",
+        "Apply the exact intended filesystem patch byte-for-byte in that checkout.",
+        "Run kyiv-air-alerts-grafana/scripts/replay_explosion_history.py for the affected city with the same through date and read-only mode used post-apply.",
+        "Compare denominator, source blockers, strict and sensitivity episode-ID sets, QA categories/IDs, errors, and protected-file hashes against the synchronized current-before replay.",
+        "Restore/delete the isolated checkout. READY is allowed only when the real replay output satisfies the declared mutation contract."
+      ],
+      "authoritative_command": "python kyiv-air-alerts-grafana/scripts/replay_explosion_history.py --repo-root \"$TMP/kyiv-air-alerts-grafana\" --city zaporizhzhia --through 2026-09-17 --read-only --output \"$OUT/zaporizhzhia.json\"",
+      "authoritative_workflow_equivalent": ".github/workflows/historical-replay-city.yml"
+    }
+  },
+  "protected_file_verification": {
+    "before_artifact_commit_blob_shas": {
+      "kyiv-air-alerts-grafana/data/explosion_research/zaporizhzhia/final_evidence.json": "afc2702bfeb0b599dbec00d251362450b2d292e1",
+      "kyiv-air-alerts-grafana/scripts/replay_explosion_history.py": "f2a8f11324dfb0d1db7d9ecda513f194268bced9",
+      "kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py": "eefd63aeebc17347b750f61115842be6c53a79da",
+      "kyiv-air-alerts-grafana/data/explosion_audited_baseline.json": "5bbd2b771559eac2966aeec65d6e3b5487b9c1a9",
+      "kyiv-air-alerts-grafana/data/explosion_review_queue.json": "e6ed6776ae326a18a07978b1979dd3b265096bf0",
+      "kyiv-air-alerts-grafana/data/explosion_candidate_monitor_state.json": "3c8658880c6b93a00fb8ddbec2c4eaeed6d3f2cc",
+      "kyiv-air-alerts-grafana/data/explosion_candidate_monitor_last_run.json": "1552b13a2a9361be968cea4f09876cc20f96572f",
+      "kyiv-air-alerts-grafana/data/explosions_test.json": "3109dc02d2292efa59eddd26b34292cab2b554ab",
+      "kyiv-air-alerts-grafana/data/dashboard_data.json": "85e1d5cacfbe0af1530bbf584cb63ebdfef463e6",
+      "research/historical_replay_status_current.json": "b04f110c81b03522898c0c45a3c632eb96f759fa"
+    },
+    "qa_bundle_blobs_before_artifact_commit": {
+      "research/historical_replay_qa/cherkasy.json": "dc339e5a78e862f23a11720132ec8e221bc67964",
+      "research/historical_replay_qa/index.json": "185539aa2c3edda3e3f87a75b520155d130b91eb",
+      "research/historical_replay_qa/kyiv.json": "f752c94a8525d8ddb650f01911d3a2b1a308e5b2",
+      "research/historical_replay_qa/sumy.json": "a58ad47eaa3103451fba01b0d47f5b30a8259476"
+    },
+    "verification_rule": "After committing this artifact, refetch all listed blobs and the QA bundle directory; all must exactly match. Commit diff must contain only this diagnostic artifact.",
+    "protected_files_unchanged": null
+  },
+  "real_replay_reproduced": true,
+  "preflight_result_reproduced": true,
+  "smallest_valid_provenance_contract_identified": true,
+  "verdict": "ZAPORIZHZHIA PREFLIGHT DIVERGENCE EXPLAINED — SAFE NEXT REPAIR PATH IDENTIFIED"
+}
