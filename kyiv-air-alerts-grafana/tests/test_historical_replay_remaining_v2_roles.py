@@ -135,6 +135,15 @@ def test_future_possible_threat_and_generic_warning_are_not_direct_events():
         )
 
 
+
+def test_unrelated_negation_does_not_cancel_completed_attack_fact():
+    got = roles(
+        "Після 01:00 російські безпілотники масовано атакували Суми; "
+        "точніше event time джерело не дає."
+    )
+    assert got["explosion_evidence"]["event_types"] == ["strike"]
+    assert got["same_attack_basis"]["present"] is True
+
 def test_other_locality_and_oblast_only_are_not_direct_events():
     controls = [
         "У Сумах оголосили тривогу; РФ атакувала Харків.",
