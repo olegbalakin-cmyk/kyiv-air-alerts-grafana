@@ -1,0 +1,101 @@
+{
+  "schema_version": 1,
+  "artifact_type": "sumy_current_replay_precondition",
+  "city_key": "sumy",
+  "branch": "multicity-wip-2026-09-16",
+  "starting_head": "4b1643474b5c2af57099c9b88fe4b44e4c2893b6",
+  "diagnostic_only": true,
+  "canonical_mutations": false,
+  "replay": {
+    "execution_mode": "real_historical_pipeline_replay",
+    "command_path": "kyiv-air-alerts-grafana/scripts/replay_explosion_history.py",
+    "through": "2026-09-17",
+    "workflow_run_id": 36312334527,
+    "workflow_job_id": 108626443038,
+    "workflow_artifact_id": 10932632818,
+    "executed_checkout_head": "e8f10ead03f868e4d636b1e6a9be8c2e581feccc",
+    "executed_job_conclusion": "success",
+    "current_starting_head_semantic_input_identity": true,
+    "input_identity_basis": "Every file used by the Sumy replay path, including replay/classifier code, dependency module, requirements, baseline, Sumy final evidence, all nine Sumy source slices, and the replay workflow, has the identical Git blob SHA at the executed checkout head and the actual starting HEAD.",
+    "replay_input_blob_shas_at_both_heads": {
+      "kyiv-air-alerts-grafana/scripts/replay_explosion_history.py": "f2a8f11324dfb0d1db7d9ecda513f194268bced9",
+      "kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py": "eefd63aeebc17347b750f61115842be6c53a79da",
+      "kyiv-air-alerts-grafana/scripts/apply_ukrainealarm_bridge.py": "b59df2335c32a7b28fd81e7adabaec5d37f8f653",
+      "kyiv-air-alerts-grafana/requirements.txt": "d7a2ff05af67cda88e4930d238f0282ca557a963",
+      "kyiv-air-alerts-grafana/data/explosion_audited_baseline.json": "5bbd2b771559eac2966aeec65d6e3b5487b9c1a9",
+      "kyiv-air-alerts-grafana/data/explosion_research/sumy/final_evidence.json": "7c0a4a64b3d7000cd10e8f1b846b1e57641d8a4d",
+      "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/sumy-P1a_alerts.json": "9ffd863b8cfbfb2aaec24469745d5c9ccc2d9c56",
+      "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/sumy-P1b_alerts.json": "6319d2149af2aa31500e634b8a03f92c601353fe",
+      "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/sumy-P2a_alerts.json": "14fc42c066824d34caab2590ec3871cf15903b8b",
+      "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/sumy-P2b_alerts.json": "03d5fa66f74df69258df60b4a343651601ab81a5",
+      "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/sumy-P3a_alerts.json": "4e785852447f71f907f9667c7212b2e49b433295",
+      "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/sumy-P3b_alerts.json": "f31b0a55a7a6764cbd037f40d72d00c8e5a9b897",
+      "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/sumy-P4a_alerts.json": "3cad728d1c87aff59f7e4a272808b3f3e7afa9f7",
+      "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/sumy-P4b_alerts.json": "a072083871690f710e2cf8c6010ab583b69ebd94",
+      "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/sumy-P4c_alerts.json": "70a6b1cb003a4a805e6fe30dc060283ace3042cf",
+      ".github/workflows/replay-sumy-history.yml": "f9d0f0f2f5b2c6459725c87c52d38b286a993a6f"
+    },
+    "expected_denominator": 2297,
+    "reconstructed_denominator": 2297,
+    "source_status": "READY",
+    "fresh_qa_count": 19,
+    "fresh_qa_episode_ids": [
+      "232eb0da4edf28c2d1c726ab",
+      "2b3df2af5d1a6eb3a0a5b5e6",
+      "2c7ad2e0b42e1350e305a18f",
+      "38e791b343c6335f8082849d",
+      "402035df8980628fa245c4e8",
+      "45050b31bdcf42a5f8054e8d",
+      "57813e54f364c6ea1c31b79d",
+      "6358accd9bb0bbf258970062",
+      "6f22822eb67990654c28d3e8",
+      "71eded846a321cdc6188fed9",
+      "88f59d26acd8ae4fd31c7511",
+      "90a484f51b321e0950e31b60",
+      "b350026329e2fb7dee324d0b",
+      "bc17e3913b1f9a7b78cf8af7",
+      "c69285b7ffb05693c3393895",
+      "d4ca36a6f8fdb93684f7b2c2",
+      "dc2fcb0cd195adf9d564394f",
+      "f7ebb81f67fc6bc99cc8e836",
+      "fa15fdc4b36ac1cc5f5efbfe"
+    ],
+    "strict_count": 189,
+    "sensitivity_count": 219,
+    "errors": [],
+    "replay_verdict": "CITY REPLAY COMPLETE — QA REQUIRED"
+  },
+  "required_checks": {
+    "batch_targets": [
+      "232eb0da4edf28c2d1c726ab",
+      "6f22822eb67990654c28d3e8",
+      "71eded846a321cdc6188fed9",
+      "88f59d26acd8ae4fd31c7511"
+    ],
+    "batch_targets_present": true,
+    "missing_batch_target_ids": [],
+    "b103be64497fc7d33f5c7b3d_absent": true,
+    "d6b1b9ffc10dafbc86e253c7_absent": true
+  },
+  "protected_file_verification": {
+    "workflow_read_only_check_passed": true,
+    "before_artifact_commit_blob_shas": {
+      "kyiv-air-alerts-grafana/data/explosion_audited_baseline.json": "5bbd2b771559eac2966aeec65d6e3b5487b9c1a9",
+      "kyiv-air-alerts-grafana/data/explosion_review_queue.json": "e6ed6776ae326a18a07978b1979dd3b265096bf0",
+      "kyiv-air-alerts-grafana/data/explosion_candidate_monitor_state.json": "3c8658880c6b93a00fb8ddbec2c4eaeed6d3f2cc",
+      "kyiv-air-alerts-grafana/data/explosion_candidate_monitor_last_run.json": "1552b13a2a9361be968cea4f09876cc20f96572f",
+      "kyiv-air-alerts-grafana/data/explosions_test.json": "3109dc02d2292efa59eddd26b34292cab2b554ab",
+      "kyiv-air-alerts-grafana/data/dashboard_data.json": "85e1d5cacfbe0af1530bbf584cb63ebdfef463e6"
+    },
+    "expected_after_artifact_commit_blob_shas": {
+      "kyiv-air-alerts-grafana/data/explosion_audited_baseline.json": "5bbd2b771559eac2966aeec65d6e3b5487b9c1a9",
+      "kyiv-air-alerts-grafana/data/explosion_review_queue.json": "e6ed6776ae326a18a07978b1979dd3b265096bf0",
+      "kyiv-air-alerts-grafana/data/explosion_candidate_monitor_state.json": "3c8658880c6b93a00fb8ddbec2c4eaeed6d3f2cc",
+      "kyiv-air-alerts-grafana/data/explosion_candidate_monitor_last_run.json": "1552b13a2a9361be968cea4f09876cc20f96572f",
+      "kyiv-air-alerts-grafana/data/explosions_test.json": "3109dc02d2292efa59eddd26b34292cab2b554ab",
+      "kyiv-air-alerts-grafana/data/dashboard_data.json": "85e1d5cacfbe0af1530bbf584cb63ebdfef463e6"
+    },
+    "unchanged": true
+  },
+  "verdict": "SUMY CURRENT REPLAY STATE CONFIRMED"
+}
