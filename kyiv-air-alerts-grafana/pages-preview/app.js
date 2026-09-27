@@ -598,7 +598,24 @@ function renderShortHorizon(key) {
     }],
     "Годин",
     "bar",
-    { plugins: { legend: { display: false }, tooltip: { mode: "index", intersect: false } } }
+    {
+      layout: { padding: { right: 70 } },
+      plugins: { legend: { display: false }, tooltip: { mode: "index", intersect: false } },
+      scales: {
+        x: {
+          offset: true,
+          ticks: { color: TEXT, maxRotation: 0, autoSkip: true },
+          grid: { color: GRID }
+        },
+        y: {
+          beginAtZero: true,
+          ticks: { color: TEXT },
+          grid: { color: GRID },
+          title: { display: true, text: "Годин", color: TEXT },
+          afterFit: scale => { scale.width = 62; }
+        }
+      }
+    }
   );
 
   const explosion = explosionCity(key);
@@ -668,21 +685,27 @@ function renderShortHorizon(key) {
         tooltip: { mode: "index", intersect: false }
       },
       scales: {
-        x: { ticks: { color: TEXT, maxRotation: 0, autoSkip: true }, grid: { color: GRID } },
+        x: {
+          offset: true,
+          ticks: { color: TEXT, maxRotation: 0, autoSkip: true },
+          grid: { color: GRID }
+        },
         yAlerts: {
           position: "left",
           beginAtZero: true,
           stacked: true,
           ticks: { color: TEXT, precision: 0 },
           grid: { color: GRID },
-          title: { display: true, text: "Кількість тривог", color: TEXT }
+          title: { display: true, text: "Кількість тривог", color: TEXT },
+          afterFit: scale => { scale.width = 62; }
         },
         yDuration: {
           position: "right",
           beginAtZero: true,
           ticks: { color: TEXT },
           grid: { drawOnChartArea: false },
-          title: { display: true, text: "Середня тривалість, хв", color: TEXT }
+          title: { display: true, text: "Середня тривалість, хв", color: TEXT },
+          afterFit: scale => { scale.width = 70; }
         }
       }
     }
