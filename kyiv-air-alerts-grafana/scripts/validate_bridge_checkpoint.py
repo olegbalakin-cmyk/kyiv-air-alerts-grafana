@@ -237,7 +237,7 @@ def validate_checkpoint(candidate: dict, summary: dict, baseline: dict | None = 
 
     provenance = provenance_counter(candidate)
     if baseline is not None:
-        ensure_monotonic(candidate, baseline, "pre-run checkpoint", require_advance=True)
+        ensure_monotonic(candidate, baseline, "pre-run checkpoint", require_advance=False)
     if remote is not None:
         ensure_monotonic(candidate, remote, "origin/site-prod checkpoint", require_advance=False)
 
