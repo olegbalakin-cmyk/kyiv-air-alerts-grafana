@@ -1,0 +1,186 @@
+name: Historical public-upstream 17-city recovery preflight
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - historical-public-upstream-recovery-preflight-2026-09-27
+    paths:
+      - .github/workflows/historical-public-upstream-recovery-preflight.yml
+
+permissions:
+  contents: write
+
+jobs:
+  preflight:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      STARTING_HEAD: 9eb0cebbe7fec92c6ead61bdb401488a37611525
+      FORENSIC_SHA: 87c0993fe87037729a947a812cc70f8d8fac729a
+      UPSTREAM_BLOB_EXPECTED: 71d70c0ca54968f530d596cf315616fa858800e1
+      PREFLIGHT_BRANCH: historical-public-upstream-recovery-preflight-2026-09-27
+      OUTPUT_PATH: research/historical_public_upstream_17_city_recovery_preflight_2026-09-27.json
+      WORKFLOW_PATH: .github/workflows/historical-public-upstream-recovery-preflight.yml
+
+    steps:
+      - name: Checkout isolated preflight branch
+        uses: actions/checkout@v4
+        with:
+          ref: historical-public-upstream-recovery-preflight-2026-09-27
+          fetch-depth: 0
+
+      - name: Verify checkout ancestry and protected branch isolation
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git merge-base "$STARTING_HEAD" HEAD)" = "$STARTING_HEAD"
+          test "$(git rev-parse "$STARTING_HEAD")" = "$STARTING_HEAD"
+          echo "checkout_head=$(git rev-parse HEAD)"
+          echo "starting_head=$STARTING_HEAD"
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install runtime dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pip install --disable-pip-version-check --quiet requests beautifulsoup4
+
+      - name: Fetch exact public upstream blob
+        id: upstream
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/ukrainian-air-raid-sirens-dataset.git
+          git clone --mirror --quiet             https://github.com/Vadimkin/ukrainian-air-raid-sirens-dataset.git             /tmp/ukrainian-air-raid-sirens-dataset.git
+
+          if ! git -C /tmp/ukrainian-air-raid-sirens-dataset.git cat-file -e "$UPSTREAM_BLOB_EXPECTED^{blob}" 2>/dev/null; then
+            echo "UPSTREAM_BLOB_MISMATCH"
+            exit 42
+          fi
+
+          path_match="$(git -C /tmp/ukrainian-air-raid-sirens-dataset.git rev-list --all --objects             | awk -v sha="$UPSTREAM_BLOB_EXPECTED" '$1 == sha && $2 == "datasets/official_data_uk.csv" {print; exit}')"
+          if [ -z "$path_match" ]; then
+            echo "UPSTREAM_BLOB_MISMATCH"
+            echo "Blob exists but is not proven at datasets/official_data_uk.csv"
+            exit 42
+          fi
+
+          git -C /tmp/ukrainian-air-raid-sirens-dataset.git cat-file blob "$UPSTREAM_BLOB_EXPECTED"             > /tmp/official_data_uk.csv
+          actual="$(git hash-object /tmp/official_data_uk.csv)"
+          echo "upstream_blob_actual=$actual"
+          if [ "$actual" != "$UPSTREAM_BLOB_EXPECTED" ]; then
+            echo "UPSTREAM_BLOB_MISMATCH"
+            exit 42
+          fi
+
+          upstream_commit=""
+          while IFS= read -r commit; do
+            blob="$(git -C /tmp/ukrainian-air-raid-sirens-dataset.git rev-parse               "$commit:datasets/official_data_uk.csv" 2>/dev/null || true)"
+            if [ "$blob" = "$UPSTREAM_BLOB_EXPECTED" ]; then
+              upstream_commit="$commit"
+              break
+            fi
+          done < <(git -C /tmp/ukrainian-air-raid-sirens-dataset.git rev-list --all -- datasets/official_data_uk.csv)
+
+          if [ -z "$upstream_commit" ]; then
+            echo "UPSTREAM_BLOB_MISMATCH"
+            echo "No upstream commit maps the required path to the required blob"
+            exit 42
+          fi
+
+          echo "upstream_commit=$upstream_commit"
+          echo "actual=$actual" >> "$GITHUB_OUTPUT"
+          echo "commit=$upstream_commit" >> "$GITHUB_OUTPUT"
+
+      - name: Materialize authoritative forensic inventory
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch --no-tags origin "$FORENSIC_SHA"
+          git show "$FORENSIC_SHA:research/historical_17_city_corpus_gap_forensic_inventory_2026-09-27.json"             > /tmp/historical_17_city_corpus_gap_forensic_inventory_2026-09-27.json
+          python - <<'PY'
+          import json
+          p="/tmp/historical_17_city_corpus_gap_forensic_inventory_2026-09-27.json"
+          d=json.load(open(p, encoding="utf-8"))
+          assert d["aggregate_totals"]["expected_episodes"] == 17087
+          assert d["aggregate_totals"]["reconstructed_episodes"] == 6705
+          assert d["aggregate_totals"]["missing_episodes"] == 10382
+          assert d["aggregate_totals"]["recovery_class_counts"]["PRIMARY_DATA_PRESENT_NOT_LOADED"] == 573
+          assert d["replay_through"] == "2026-09-17"
+          assert d["corpus_model"]["exact_upstream_snapshot_reference"]["recorded_git_blob_sha"] == "71d70c0ca54968f530d596cf315616fa858800e1"
+          print("forensic_inventory_verified")
+          PY
+
+      - name: Run one-shot 17-city read-only reconciliation
+        shell: bash
+        run: |
+          set -euo pipefail
+          python kyiv-air-alerts-grafana/scripts/historical_public_upstream_recovery_preflight.py             --upstream /tmp/official_data_uk.csv             --upstream-blob-expected "$UPSTREAM_BLOB_EXPECTED"             --upstream-blob-actual "${{ steps.upstream.outputs.actual }}"             --upstream-commit "${{ steps.upstream.outputs.commit }}"             --forensic /tmp/historical_17_city_corpus_gap_forensic_inventory_2026-09-27.json             --output "$OUTPUT_PATH"             --starting-head "$STARTING_HEAD"             --workflow-run-id "$GITHUB_RUN_ID"
+
+      - name: Verify read-only operational scope
+        shell: bash
+        run: |
+          set -euo pipefail
+          mapfile -t changed < <(git status --porcelain=v1 | sed -E 's/^.. //')
+          printf 'workspace_change=%s\n' "${changed[@]:-}"
+          if [ "${#changed[@]}" -ne 1 ] || [ "${changed[0]}" != "$OUTPUT_PATH" ]; then
+            echo "Unexpected workspace mutation"
+            git status --short
+            exit 1
+          fi
+
+          python - <<'PY'
+          import json
+          p="research/historical_public_upstream_17_city_recovery_preflight_2026-09-27.json"
+          d=json.load(open(p, encoding="utf-8"))
+          assert d["isolation"]["operational_data_mutated"] is False
+          assert d["isolation"]["active_6863_campaign_unchanged_by_this_task"] is True
+          print(json.dumps(d["aggregate"], ensure_ascii=False, indent=2))
+          print("VERDICT:", d["verdict"])
+          PY
+
+      - name: Persist only research result and disable bootstrap trigger
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+          p=Path(".github/workflows/historical-public-upstream-recovery-preflight.yml")
+          text=p.read_text(encoding="utf-8")
+          start=text.index("  push:\n")
+          end=text.index("\npermissions:", start)
+          text=text[:start] + text[end:]
+          p.write_text(text, encoding="utf-8")
+          PY
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "$OUTPUT_PATH" "$WORKFLOW_PATH"
+
+          mapfile -t staged < <(git diff --cached --name-only)
+          printf 'staged=%s\n' "${staged[@]}"
+          if [ "${#staged[@]}" -ne 2 ]; then
+            echo "Unexpected staged file count"
+            exit 1
+          fi
+          if ! printf '%s\n' "${staged[@]}" | grep -Fxq "$OUTPUT_PATH"; then
+            echo "Missing output artifact from staged set"
+            exit 1
+          fi
+          if ! printf '%s\n' "${staged[@]}" | grep -Fxq "$WORKFLOW_PATH"; then
+            echo "Missing workflow bootstrap-disable change from staged set"
+            exit 1
+          fi
+
+          git commit -m "Add 17-city public-upstream recovery preflight artifact"
+          artifact_commit="$(git rev-parse HEAD)"
+          echo "artifact_commit=$artifact_commit"
+          git push origin "HEAD:$PREFLIGHT_BRANCH"
+
+          echo "Final workflow trigger block:"
+          sed -n '1,12p' "$WORKFLOW_PATH"
