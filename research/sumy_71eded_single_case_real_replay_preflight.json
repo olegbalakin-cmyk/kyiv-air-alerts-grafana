@@ -1,0 +1,174 @@
+{
+  "schema_version": 1,
+  "artifact_type": "sumy_single_case_real_replay_preflight",
+  "branch": "multicity-wip-2026-09-16",
+  "starting_head": "7ad52d55e02d85dc14e6ece4b68f304f6540bbfc",
+  "target_episode_id": "71eded846a321cdc6188fed9",
+  "scope": {
+    "single_episode_only": true,
+    "web_research_performed": false,
+    "external_source_retrieval_performed": false,
+    "canonical_evidence_mutated": false,
+    "persistent_qa_or_status_mutated": false,
+    "classifier_logic_mutated": false
+  },
+  "precondition": {
+    "authoritative_artifact": "research/sumy_current_replay_precondition_2026-09-27.json",
+    "authoritative_artifact_commit": "7ad52d55e02d85dc14e6ece4b68f304f6540bbfc",
+    "starting_head_matches_authoritative_artifact_commit": true,
+    "subsequent_branch_commit_observed_before_artifact_publication": "42a6620698fddc4f22b25fce5412e0539f040ffc",
+    "subsequent_commit_changed_only": [
+      "research/sumy_88f59d_single_case_real_replay_preflight.json"
+    ],
+    "replay_inputs_changed_since_starting_head": false
+  },
+  "fresh_real_replay": {
+    "execution_mode": "real_historical_pipeline_replay",
+    "command_path": "kyiv-air-alerts-grafana/scripts/replay_explosion_history.py",
+    "workflow_run_id": 36312334527,
+    "workflow_run_attempt": 3,
+    "workflow_job_id": 108630064935,
+    "workflow_artifact_id": 10932807651,
+    "workflow_conclusion": "success",
+    "executed_checkout_head": "e8f10ead03f868e4d636b1e6a9be8c2e581feccc",
+    "current_starting_head_semantic_input_identity": true,
+    "semantic_identity_basis": "The authoritative current-replay precondition proves identical Git blob SHAs for every Sumy replay input between the executed checkout and the starting replay state; the only commit from that state to the starting HEAD adds the precondition research artifact. The replay artifact was downloaded and target 71eded846a321cdc6188fed9 was inspected directly.",
+    "expected_denominator": 2297,
+    "reconstructed_denominator": 2297,
+    "qa_count": 19,
+    "strict_count": 189,
+    "sensitivity_count": 219,
+    "target_present_in_qa": true,
+    "target_current_classification": "AMBIGUOUS",
+    "target_frozen_old_classification": "STRICT",
+    "target_current_reason_codes": [
+      "AIR_CONTEXT_NOT_LINKED_TO_EVENT",
+      "AIR_MILITARY_CONTEXT",
+      "EXACT_CITY_EVENT_TEXT",
+      "MATCH_UNIQUE",
+      "NO_STRICT_EXPLOSION_EVIDENCE",
+      "REVIEW_PROVENANCE_TEMPORAL_BINDING_USED",
+      "REVIEW_PROVENANCE_USABLE",
+      "TEMPORAL_REVIEWED_VALIDATED_BINDING"
+    ],
+    "previously_resolved_ids_absent": {
+      "b103be64497fc7d33f5c7b3d": true,
+      "d6b1b9ffc10dafbc86e253c7": true
+    },
+    "errors": [],
+    "protected_files_unchanged": true
+  },
+  "retained_material": {
+    "retained_source_available": true,
+    "source_url": "https://suspilne.media/amp/sumy/1315753-krim-togo-so-zgorilo-vse-u-vodi-so-rozpovidaut-ocevidci-pro-udari-po-sumah/",
+    "retained_excerpt": "Близько 08:00 ударні БпЛА атакували приватний сектор Сум.",
+    "retained_decision_text": "strict: exact city, UAV, approximate event time inside frozen episode",
+    "retained_event_time_kyiv": "2026-05-26 близько 08:00",
+    "alert_start_utc": "2026-05-26T04:39:39Z",
+    "alert_end_utc": "2026-05-26T06:00:24Z",
+    "temporal_relation": "retained ~08:00 event time is inside the matched 07:39:39-09:00:24 Kyiv alert episode",
+    "exact_city_evidence": {
+      "present": true,
+      "basis": "приватний сектор Сум"
+    },
+    "air_attack_context": {
+      "present": true,
+      "basis": "ударні БпЛА атакували"
+    },
+    "supported_current_event_types": [],
+    "same_attack_basis_under_current_rules": false,
+    "source_local_adjacent_context_retained_as_text_in_current_replay_or_source_retention_inputs": false,
+    "source_local_anchor": {
+      "exists": false,
+      "deterministic_to_exact_event": false
+    },
+    "retained_source_fetch_metadata": {
+      "status": "OK",
+      "http_status": 200,
+      "retained_chunk_count": 11,
+      "retained_content_sha256": "4034c7596bcd165521cbdf8bd8fd19cc5c48d66ffe1efe4a38eeffdee027db19",
+      "chunk_text_retained_in_current_repo_inputs": false,
+      "publication_or_message_timestamp_retained": false
+    },
+    "source_retention_triage": "NO_COMPLETE_SOURCE_SEGMENT",
+    "source_retention_candidate_count": 0,
+    "source_retention_missing_roles": [
+      "strict_explosion",
+      "same_attack_context"
+    ],
+    "prior_research_note_not_used_as_source_retention_evidence": {
+      "path": "research/sumy_source_recovery_batch1_preflight.json",
+      "recorded_fragment": "Уранці 26 травня у Сумах російські військові атакували місто ударними безпілотниками. Близько 8-ї ранку два дрони поцілили по приватному сектору.",
+      "reason_not_used": "That earlier artifact records a derived review fragment, but its own preflight stopped before any temporary mutation and the underlying retained source chunk/anchor is not present in the current replay/source-retention inputs. Reusing it as if it were retained source material would add unsupported provenance in this no-retrieval preflight."
+    },
+    "inspected_repo_references": [
+      "kyiv-air-alerts-grafana/data/explosion_research/sumy/final_evidence.json",
+      "research/sumy_remaining_19_source_recovery_inventory.json",
+      "research/historical_replay_source_retention/sumy.json",
+      "research/historical_replay_qa/sumy.json",
+      "research/sumy_source_recovery_batch1_preflight.json"
+    ]
+  },
+  "temporary_repair": {
+    "supported": false,
+    "applied": false,
+    "additions": [],
+    "summary": "No temporary source-retention repair was applied. Current retained replay/source-retention inputs preserve exact-city, UAV/air-attack context and episode-specific timing, but no retained complete source segment supplies a current-rule event-positive signal together with same-attack support. The previously derived 'два дрони поцілили' text is not backed by retained source chunk text or an anchor in the current inputs, so appending it here would add unsupported provenance.",
+    "source_files_modified": []
+  },
+  "real_replay_proof": {
+    "before_classification": "AMBIGUOUS",
+    "after_classification": "AMBIGUOUS",
+    "resulting_event_types": [],
+    "resulting_reason_codes": [
+      "AIR_CONTEXT_NOT_LINKED_TO_EVENT",
+      "AIR_MILITARY_CONTEXT",
+      "EXACT_CITY_EVENT_TEXT",
+      "MATCH_UNIQUE",
+      "NO_STRICT_EXPLOSION_EVIDENCE",
+      "REVIEW_PROVENANCE_TEMPORAL_BINDING_USED",
+      "REVIEW_PROVENANCE_USABLE",
+      "TEMPORAL_REVIEWED_VALIDATED_BINDING"
+    ],
+    "target_removed_from_qa": false,
+    "acceptance_proof_status": "BLOCKED_BEFORE_MUTATION_NO_SUPPORTED_REPAIR",
+    "note": "Because no supported append-only repair exists in the currently retained source inputs, the fresh real replay is also the no-mutation post-attempt state. No in-memory classifier approximation is used as acceptance proof."
+  },
+  "regression_check": {
+    "before_qa_count": 19,
+    "temporary_qa_count_after_repair": 19,
+    "added_qa_ids": [],
+    "unrelated_removed_qa_ids": [],
+    "strict_count_before": 189,
+    "strict_count_after_noop": 189,
+    "sensitivity_count_before": 219,
+    "sensitivity_count_after_noop": 219,
+    "strict_drift_outside_target": false,
+    "sensitivity_drift_outside_target": false,
+    "denominator_unchanged": true,
+    "denominator": "2297 / 2297",
+    "previously_resolved_ids_remain_absent": true
+  },
+  "restoration": {
+    "temporary_source_mutation_performed": false,
+    "source_files_restored_byte_for_byte": true,
+    "proof": "No evidence/source file was modified during this preflight.",
+    "final_evidence_git_blob_sha_before_and_after": "7c0a4a64b3d7000cd10e8f1b846b1e57641d8a4d"
+  },
+  "protected_files": {
+    "unchanged": true,
+    "blob_shas_verified_before_artifact_commit": {
+      "kyiv-air-alerts-grafana/data/explosion_audited_baseline.json": "5bbd2b771559eac2966aeec65d6e3b5487b9c1a9",
+      "kyiv-air-alerts-grafana/data/explosion_review_queue.json": "e6ed6776ae326a18a07978b1979dd3b265096bf0",
+      "kyiv-air-alerts-grafana/data/explosion_candidate_monitor_state.json": "3c8658880c6b93a00fb8ddbec2c4eaeed6d3f2cc",
+      "kyiv-air-alerts-grafana/data/explosion_candidate_monitor_last_run.json": "1552b13a2a9361be968cea4f09876cc20f96572f",
+      "kyiv-air-alerts-grafana/data/explosions_test.json": "3109dc02d2292efa59eddd26b34292cab2b554ab",
+      "kyiv-air-alerts-grafana/data/dashboard_data.json": "85e1d5cacfbe0af1530bbf584cb63ebdfef463e6"
+    }
+  },
+  "artifact_policy": {
+    "path": "research/sumy_71eded_single_case_real_replay_preflight.json",
+    "only_artifact_should_be_committed": true
+  },
+  "verdict": "BLOCKED — NO COMPLETE RETAINED SOURCE SEGMENT SUPPORTS A CURRENT-RULE EVENT-POSITIVE ROLE AND SAME-ATTACK BASIS; EXTERNAL RETRIEVAL WOULD BE REQUIRED"
+}
