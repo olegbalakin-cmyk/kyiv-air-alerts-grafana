@@ -1,0 +1,142 @@
+{
+  "schema_version": 1,
+  "kind": "lviv_historical_attack_event_source_coverage_gap_analysis",
+  "generated_at": "2026-09-27T09:40:00Z",
+  "branch": "multicity-wip-2026-09-16",
+  "scope": {
+    "city_key": "lviv",
+    "target_episode_ids": [
+      "498d07cfea5ac7e9090a08e3",
+      "6cd77c20720eafece633c1ad"
+    ],
+    "read_only_analysis": true,
+    "baseline_mutated": false,
+    "final_evidence_mutated": false,
+    "live_metric_mutated": false,
+    "dashboard_mutated": false,
+    "production_mutated": false
+  },
+  "inputs": {
+    "pilot_artifact": "research/historical_attack_event_discovery_pilot_lviv_2026-09-27.json",
+    "pilot_blob": "fe1fb15def4579b2f52794e38878a9cfd6ccf446",
+    "retained_evidence": "kyiv-air-alerts-grafana/data/explosion_research/lviv/final_evidence.json",
+    "retained_evidence_blob": "bc6b04e0892e430f8a055f2a7d54b41dfd00715b",
+    "classifier": "kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py",
+    "classifier_blob": "a6e51fd691c61ed026722f0e81d5ad6a086a3b22"
+  },
+  "pilot_control_coverage": {
+    "retained_strict_controls_in_window": 7,
+    "rediscovered_strict_controls": 5,
+    "missed_strict_controls": 2,
+    "rediscovery_rate": 0.714286
+  },
+  "cases": [
+    {
+      "episode_id": "498d07cfea5ac7e9090a08e3",
+      "retained_event_id": "LVI-20260108-01",
+      "canonical_episode": {
+        "alert_start_utc": "2026-01-08T21:35:35Z",
+        "alert_end_utc": "2026-01-08T22:11:53Z"
+      },
+      "retained_source": "https://suspilne.media/lviv/1199498-na-lvivsini-prolunali-vibuhi-so-vidomo-pro-obstril-9-sicna/",
+      "pilot_discovery": {
+        "source_found": true,
+        "outcome": "needs_review",
+        "temporal_code": "TEMPORAL_EXPLICIT_ALERT_RELATION_AMBIGUOUS_DATE",
+        "supported_episode_ids": [
+          "498d07cfea5ac7e9090a08e3",
+          "6f81c9d79579d37aefc0e1ce"
+        ]
+      },
+      "source_local_evidence": {
+        "exact_city_explosion": true,
+        "explicit_during_alert_wording": true,
+        "deterministic_relative_chronology": {
+          "alert_start_local": "23:36",
+          "relation": "10 minutes later explosions heard in the city",
+          "derived_event_time_local_approx": "23:46",
+          "derived_event_time_utc_approx": "2026-01-08T21:46:00Z",
+          "inside_target_episode": true
+        },
+        "article_linked_telegram_context": [
+          {
+            "channel": "andriysadovyi",
+            "message_id": 3345,
+            "url": "https://t.me/andriysadovyi/3345",
+            "observed_clock": "21:49",
+            "evidence": "У Львові чути вибухи!!! Всі в укриття!",
+            "inside_target_episode": true
+          },
+          {
+            "channel": "andriysadovyi",
+            "message_id": 3346,
+            "url": "https://t.me/andriysadovyi/3346",
+            "observed_clock": "21:56",
+            "evidence": "Після оголошення повітряної тривоги у Львові було чути серію вибухів.",
+            "inside_target_episode": true
+          }
+        ]
+      },
+      "root_cause": "TEMPORAL_EXTRACTION_GAP_NOT_SOURCE_COVERAGE_GAP",
+      "explanation": "The Suspilne article was discovered, but the current article adapter does not convert the source's relative chronology or article-linked Telegram live context into episode-specific temporal evidence. Publication-local-date fallback therefore sees two intersecting alert episodes.",
+      "preferred_recovery": "Follow t.me links already present in the article and inspect a tightly bounded neighboring-message context; feed the explicit live Telegram observation to the unchanged current classifier.",
+      "fallback_recovery": "Add a conservative source-local relative-chronology parser for patterns such as alert HH:MM + N minutes later exact-city explosions.",
+      "classifier_semantic_widening_required": false,
+      "status": "AUTONOMOUS_RECOVERABLE_WITH_SOURCE_ADAPTER"
+    },
+    {
+      "episode_id": "6cd77c20720eafece633c1ad",
+      "retained_event_id": "LVI-20260205-01",
+      "canonical_episode": {
+        "alert_start_utc": "2026-02-05T14:08:13Z",
+        "alert_end_utc": "2026-02-05T15:05:06Z"
+      },
+      "retained_source": "https://suspilne.media/lviv/1216592-u-lvovi-prolunali-vibuhi-pracuvala-ppo/",
+      "pilot_discovery": {
+        "source_found": true,
+        "outcome": "approved_sensitivity",
+        "temporal_code": "NO_STRICT_TEMPORAL_BINDING",
+        "inferred_episode_id": "6cd77c20720eafece633c1ad"
+      },
+      "primary_source_evidence": {
+        "exact_city_explosion_title": true,
+        "exact_city_air_defense_context": true,
+        "stated_alert_interval_local": [
+          "15:50",
+          "17:05"
+        ],
+        "stated_drone_course_time_local": "16:19",
+        "explicit_explosion_event_time": false,
+        "publication_time_used_as_event_time": false,
+        "linked_official_telegram_context": "shows drone approach/over-city/neutralization but no explicit exact-city explosion observation tied to a clock"
+      },
+      "alternative_contemporaneous_source": {
+        "source": "TSN",
+        "url": "https://lviv.tsn.ua/lviv/u-lvovi-hrymliat-vybukhy-3015458.html",
+        "publication_local": "2026-02-05 17:33",
+        "evidence": "У Львові пролунали вибухи під час повітряної тривоги 5 лютого.",
+        "air_context": "Над містом кружляє російський дрон.",
+        "source_family_status": "not yet onboarded into deterministic historical discovery"
+      },
+      "root_cause": "PRIMARY_SOURCE_TEMPORAL_GAP_PLUS_SOURCE_FAMILY_COVERAGE_GAP",
+      "explanation": "The Suspilne article is sufficient for sensitivity under current rules but not strict because publication time is intentionally not treated as event time and the linked official messages do not independently state an exact-city explosion. A separate contemporary HTML source does contain explicit during-alert explosion wording.",
+      "preferred_recovery": "Run a targeted read-only classifier preflight for the contemporary secondary HTML source, then onboard the source family only if it passes the same exact-city/air/temporal controls.",
+      "classifier_semantic_widening_required": false,
+      "do_not_do": [
+        "do not treat HTML publication time as strict event time",
+        "do not broaden trusted_live_source from Telegram to arbitrary HTML",
+        "do not force the retained historical strict label as current truth"
+      ],
+      "status": "RECOVERABLE_WITH_ADDITIONAL_SOURCE_FAMILY_PREFLIGHT"
+    }
+  ],
+  "overall": {
+    "source_found_for_both_controls": true,
+    "existing_suspilne_only_strict_recovery": 0,
+    "existing_suspilne_plus_adapter_recoverable": 1,
+    "additional_source_family_needed": 1,
+    "classifier_rule_widening_needed": 0,
+    "recommended_next_step": "Implement bounded article-linked Telegram context adapter for Lviv and run a targeted read-only preflight of the TSN Feb-5 source through the current classifier; then rerun the same 40-episode pilot before any scale-out."
+  },
+  "verdict": "LVIV SOURCE-COVERAGE GAP ANALYSIS COMPLETE — TWO RECOVERY PATHS IDENTIFIED"
+}
