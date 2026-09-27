@@ -2223,13 +2223,17 @@ def classify_candidate(row: dict, city_key: str, episodes: list[dict], matching:
         if city_mentioned(city_key, segment) and controlled_blast_nonmilitary_signal(segment)
     ]
     controlled = bool(controlled_event_segments)
-    whole_message_event = any(strict_explosion_signal(segment) for segment in segments)
+    whole_message_non_air_defense_event = any(
+        strict_attack_event_signal(segment)
+        and any(event_type != "air_defense_action" for event_type in attack_event_types(segment))
+        for segment in segments
+    )
     pvo_only_complete_message = (
         trusted_live_source(row)
         and exact["present"]
         and not strict["present"]
-        and not whole_message_event
-        and "ппо" in normalize_evidence_text(text)
+        and not whole_message_non_air_defense_event
+        and bool(AIR_DEFENSE_CONTEXT_RE.search(normalize_evidence_text(text)))
     )
     fulltext_requires_review = (
         row.get("discovery_basis") == "publisher_fulltext"
@@ -2857,7 +2861,7 @@ def self_test() -> None:
     # and audited aerial-war vocabulary includes KAB/Banderol.
     assert explosion_relevant("У Львові було гучно, працювала ППО")
     assert explosion_relevant("У Львові зафіксували влучання")
-    assert not strict_explosion_signal("У Києві працюють сили ППО")
+    assert strict_explosion_signal("У Києві працюють сили ППО")
     assert not strict_explosion_signal("У Полтаві було гучно")
     assert strict_explosion_signal("У Дніпрі пролунав вибух")
     assert air_military_context("Повідомляли про КАБ у напрямку міста")
