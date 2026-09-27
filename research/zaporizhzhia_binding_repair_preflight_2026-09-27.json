@@ -1,0 +1,1020 @@
+{
+  "schema_version": 1,
+  "generated_for_date": "2026-09-27",
+  "repository": "olegbalakin-cmyk/kyiv-air-alerts-grafana",
+  "branch": "multicity-wip-2026-09-16",
+  "input_head": "8c4cf2c241d4f34cd428904153184bb758d909d1",
+  "scope": "non-mutating Zaporizhzhia binding/provenance repair preflight",
+  "authoritative_diagnostic": {
+    "path": "research/zaporizhzhia_historical_replay_binding_diagnostic_2026-09-27.json",
+    "blob_sha": "b6dabf6e482bcf8e00412b2b2d440dae3ad1fad3",
+    "verdict": "ZAPORIZHZHIA BINDING REPAIR READY"
+  },
+  "execution": {
+    "mutation_policy": "No repository code/evidence/baseline/state mutation. START_FIELDS and review_provenance repairs evaluated in an isolated in-memory temporary replay model of the current loader/classifier contracts.",
+    "current_replay_loader_blob_sha": "7509d9f391d206a2b052ff35ee8993ced33c6936",
+    "current_hardened_monitor_blob_sha": "eefd63aeebc17347b750f61115842be6c53a79da",
+    "temporary_binding_change": "Recognize matched_alert_start_kyiv via the existing exact/±90-second canonical start reconciliation path.",
+    "temporary_provenance_change": "For exactly five records, migrate already-retained factual structured audit roles into review_provenance; do not import old final labels."
+  },
+  "freeze": {
+    "initial_blob_shas": {
+      "kyiv-air-alerts-grafana/scripts/replay_explosion_history.py": "7509d9f391d206a2b052ff35ee8993ced33c6936",
+      "kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py": "eefd63aeebc17347b750f61115842be6c53a79da",
+      "research/historical_replay_status_current.json": "6a45e1b5cd052dbc4a417d04b1b962b3d8de245f",
+      "kyiv-air-alerts-grafana/data/explosion_audited_baseline.json": "5bbd2b771559eac2966aeec65d6e3b5487b9c1a9",
+      "kyiv-air-alerts-grafana/data/explosion_review_queue.json": "e6ed6776ae326a18a07978b1979dd3b265096bf0",
+      "kyiv-air-alerts-grafana/data/explosion_candidate_monitor_state.json": "3c8658880c6b93a00fb8ddbec2c4eaeed6d3f2cc",
+      "kyiv-air-alerts-grafana/data/explosion_candidate_monitor_last_run.json": "1552b13a2a9361be968cea4f09876cc20f96572f",
+      "kyiv-air-alerts-grafana/data/explosions_test.json": "3109dc02d2292efa59eddd26b34292cab2b554ab",
+      "kyiv-air-alerts-grafana/data/dashboard_data.json": "85e1d5cacfbe0af1530bbf584cb63ebdfef463e6",
+      "kyiv-air-alerts-grafana/data/explosion_research/zaporizhzhia/final_evidence.json": "4b3559386bdd8515f24498dfaac47ef67542b679"
+    },
+    "historical_replay_source_corpus_initial_blob_shas": {
+      "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P1a_alerts.json": "dc9cff5e26d1e38d73e823ec69ba261b933940a8",
+      "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P1b_alerts.json": "9dba2195b25276b164a568a1df35ccd9764c1b9f",
+      "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P2a_alerts.json": "43b93b64f9dbe13d03279b99c814498ce79858cc",
+      "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P2b_alerts.json": "b6c5e43f01444425167a361ed9a27d9245c43d95",
+      "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P3a_alerts.json": "3a09ebc810a16dff4393bbd629e1756ec9fca227",
+      "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P3b_alerts.json": "e43a5b3eaa1bb2e49d1a822e0af15ae4e25e2eae",
+      "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P4a_alerts.json": "9acbce13d059beab2eb352f922943224cf134d5c",
+      "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P4b_alerts.json": "3f34bd993e38afc527968eac1073c3f7396094a4",
+      "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P4c_alerts.json": "0c4cbde0a9653b7b8be6605e75489203ce9bdd3b",
+      "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P4c1_alerts.json": "70ffc7efb52119eaef063f0ba0f52620ab28e12a",
+      "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P4c2_alerts.json": "38703faac7384a6ed7cafa2314834f475646a04c"
+    },
+    "current_reproduction": {
+      "expected_alert_episodes": 2365,
+      "reconstructed_alert_episodes": 2365,
+      "replayable_strict_ids": 146,
+      "replayable_sensitivity_ids": 201,
+      "unbound_counted_evidence": 23
+    }
+  },
+  "temporary_replay": {
+    "expected_alert_episodes": 2365,
+    "reconstructed_alert_episodes": 2365,
+    "unbound_counted_evidence": 0,
+    "strict_expected": 169,
+    "strict_replayed": 169,
+    "sensitivity_expected": 224,
+    "sensitivity_replayed": 224,
+    "strict_missing_ids": [],
+    "strict_unexpected_ids": [],
+    "sensitivity_missing_ids": [],
+    "sensitivity_unexpected_ids": [],
+    "strict_exact_set_equality": true,
+    "sensitivity_exact_set_equality": true,
+    "manual_qa": 0,
+    "blocker_codes": [],
+    "city_status": "READY"
+  },
+  "repaired_bindings": [
+    {
+      "evidence_identifier": "strict_events[23]",
+      "retained_matched_alert_start_kyiv": "2025-06-18T00:09:15+03:00",
+      "before_binding": {
+        "episode_id": null,
+        "method": "missing_episode_binding",
+        "candidate_episode_ids": []
+      },
+      "after_binding": {
+        "episode_id": "e12d26d1c2062a9585ec9519",
+        "method": "alert_start_within_90s",
+        "candidates": [
+          "e12d26d1c2062a9585ec9519"
+        ],
+        "retained_start_delta_seconds": 0,
+        "candidates_within_90_seconds": 1,
+        "unique_match": true
+      },
+      "repair_action": "REBIND_ONLY",
+      "current_rule_after_temporary_repair": "approved_strict"
+    },
+    {
+      "evidence_identifier": "strict_events[24]",
+      "retained_matched_alert_start_kyiv": "2025-06-22T20:13:22+03:00",
+      "before_binding": {
+        "episode_id": null,
+        "method": "missing_episode_binding",
+        "candidate_episode_ids": []
+      },
+      "after_binding": {
+        "episode_id": "843005edc6568568c2a292fa",
+        "method": "alert_start_within_90s",
+        "candidates": [
+          "843005edc6568568c2a292fa"
+        ],
+        "retained_start_delta_seconds": 0,
+        "candidates_within_90_seconds": 1,
+        "unique_match": true
+      },
+      "repair_action": "REBIND_ONLY",
+      "current_rule_after_temporary_repair": "approved_strict"
+    },
+    {
+      "evidence_identifier": "strict_events[25]",
+      "retained_matched_alert_start_kyiv": "2025-06-24T22:45:04+03:00",
+      "before_binding": {
+        "episode_id": null,
+        "method": "missing_episode_binding",
+        "candidate_episode_ids": []
+      },
+      "after_binding": {
+        "episode_id": "c7006b3ec3bd8928ce7a36bd",
+        "method": "alert_start_within_90s",
+        "candidates": [
+          "c7006b3ec3bd8928ce7a36bd"
+        ],
+        "retained_start_delta_seconds": 0,
+        "candidates_within_90_seconds": 1,
+        "unique_match": true
+      },
+      "repair_action": "REBIND_ONLY",
+      "current_rule_after_temporary_repair": "approved_strict"
+    },
+    {
+      "evidence_identifier": "strict_events[26]",
+      "retained_matched_alert_start_kyiv": "2025-06-27T01:01:06+03:00",
+      "before_binding": {
+        "episode_id": null,
+        "method": "missing_episode_binding",
+        "candidate_episode_ids": []
+      },
+      "after_binding": {
+        "episode_id": "7666b549078065271f0033f3",
+        "method": "alert_start_within_90s",
+        "candidates": [
+          "7666b549078065271f0033f3"
+        ],
+        "retained_start_delta_seconds": 0,
+        "candidates_within_90_seconds": 1,
+        "unique_match": true
+      },
+      "repair_action": "REBIND_ONLY",
+      "current_rule_after_temporary_repair": "approved_strict"
+    },
+    {
+      "evidence_identifier": "strict_events[27]",
+      "retained_matched_alert_start_kyiv": "2025-06-28T21:17:02+03:00",
+      "before_binding": {
+        "episode_id": null,
+        "method": "missing_episode_binding",
+        "candidate_episode_ids": []
+      },
+      "after_binding": {
+        "episode_id": "6dc2c1209865b6cf7e7f8699",
+        "method": "alert_start_within_90s",
+        "candidates": [
+          "6dc2c1209865b6cf7e7f8699"
+        ],
+        "retained_start_delta_seconds": 0,
+        "candidates_within_90_seconds": 1,
+        "unique_match": true
+      },
+      "repair_action": "PROVENANCE_REPAIR",
+      "current_rule_after_temporary_repair": "approved_strict"
+    },
+    {
+      "evidence_identifier": "strict_events[28]",
+      "retained_matched_alert_start_kyiv": "2025-07-01T01:19:49+03:00",
+      "before_binding": {
+        "episode_id": null,
+        "method": "missing_episode_binding",
+        "candidate_episode_ids": []
+      },
+      "after_binding": {
+        "episode_id": "b41d83d707e66b203d6d1794",
+        "method": "alert_start_within_90s",
+        "candidates": [
+          "b41d83d707e66b203d6d1794"
+        ],
+        "retained_start_delta_seconds": 0,
+        "candidates_within_90_seconds": 1,
+        "unique_match": true
+      },
+      "repair_action": "REBIND_ONLY",
+      "current_rule_after_temporary_repair": "approved_strict"
+    },
+    {
+      "evidence_identifier": "strict_events[29]",
+      "retained_matched_alert_start_kyiv": "2025-07-05T23:59:01+03:00",
+      "before_binding": {
+        "episode_id": null,
+        "method": "missing_episode_binding",
+        "candidate_episode_ids": []
+      },
+      "after_binding": {
+        "episode_id": "c53264679115cd2fbe52c53a",
+        "method": "alert_start_within_90s",
+        "candidates": [
+          "c53264679115cd2fbe52c53a"
+        ],
+        "retained_start_delta_seconds": 0,
+        "candidates_within_90_seconds": 1,
+        "unique_match": true
+      },
+      "repair_action": "REBIND_ONLY",
+      "current_rule_after_temporary_repair": "approved_strict"
+    },
+    {
+      "evidence_identifier": "strict_events[30]",
+      "retained_matched_alert_start_kyiv": "2025-07-07T09:27:24+03:00",
+      "before_binding": {
+        "episode_id": null,
+        "method": "missing_episode_binding",
+        "candidate_episode_ids": []
+      },
+      "after_binding": {
+        "episode_id": "202349ba336c5c0ac6cac5d7",
+        "method": "alert_start_within_90s",
+        "candidates": [
+          "202349ba336c5c0ac6cac5d7"
+        ],
+        "retained_start_delta_seconds": 0,
+        "candidates_within_90_seconds": 1,
+        "unique_match": true
+      },
+      "repair_action": "REBIND_ONLY",
+      "current_rule_after_temporary_repair": "approved_strict"
+    },
+    {
+      "evidence_identifier": "strict_events[31]",
+      "retained_matched_alert_start_kyiv": "2025-07-09T22:58:53+03:00",
+      "before_binding": {
+        "episode_id": null,
+        "method": "missing_episode_binding",
+        "candidate_episode_ids": []
+      },
+      "after_binding": {
+        "episode_id": "4b5505f1a437fdf606709c66",
+        "method": "alert_start_within_90s",
+        "candidates": [
+          "4b5505f1a437fdf606709c66"
+        ],
+        "retained_start_delta_seconds": 0,
+        "candidates_within_90_seconds": 1,
+        "unique_match": true
+      },
+      "repair_action": "REBIND_ONLY",
+      "current_rule_after_temporary_repair": "approved_strict"
+    },
+    {
+      "evidence_identifier": "strict_events[32]",
+      "retained_matched_alert_start_kyiv": "2025-07-13T12:41:46+03:00",
+      "before_binding": {
+        "episode_id": null,
+        "method": "missing_episode_binding",
+        "candidate_episode_ids": []
+      },
+      "after_binding": {
+        "episode_id": "67a904a0ab96455cefbc5ba9",
+        "method": "alert_start_within_90s",
+        "candidates": [
+          "67a904a0ab96455cefbc5ba9"
+        ],
+        "retained_start_delta_seconds": 0,
+        "candidates_within_90_seconds": 1,
+        "unique_match": true
+      },
+      "repair_action": "REBIND_ONLY",
+      "current_rule_after_temporary_repair": "approved_strict"
+    },
+    {
+      "evidence_identifier": "strict_events[33]",
+      "retained_matched_alert_start_kyiv": "2025-07-14T19:34:28+03:00",
+      "before_binding": {
+        "episode_id": null,
+        "method": "missing_episode_binding",
+        "candidate_episode_ids": []
+      },
+      "after_binding": {
+        "episode_id": "806894d4170f39a8155e8485",
+        "method": "alert_start_within_90s",
+        "candidates": [
+          "806894d4170f39a8155e8485"
+        ],
+        "retained_start_delta_seconds": 0,
+        "candidates_within_90_seconds": 1,
+        "unique_match": true
+      },
+      "repair_action": "REBIND_ONLY",
+      "current_rule_after_temporary_repair": "approved_strict"
+    },
+    {
+      "evidence_identifier": "strict_events[34]",
+      "retained_matched_alert_start_kyiv": "2025-07-15T20:58:08+03:00",
+      "before_binding": {
+        "episode_id": null,
+        "method": "missing_episode_binding",
+        "candidate_episode_ids": []
+      },
+      "after_binding": {
+        "episode_id": "56a73633ee7030cb00e61fcf",
+        "method": "alert_start_within_90s",
+        "candidates": [
+          "56a73633ee7030cb00e61fcf"
+        ],
+        "retained_start_delta_seconds": 0,
+        "candidates_within_90_seconds": 1,
+        "unique_match": true
+      },
+      "repair_action": "REBIND_ONLY",
+      "current_rule_after_temporary_repair": "approved_strict"
+    },
+    {
+      "evidence_identifier": "strict_events[35]",
+      "retained_matched_alert_start_kyiv": "2025-07-18T01:50:39+03:00",
+      "before_binding": {
+        "episode_id": null,
+        "method": "missing_episode_binding",
+        "candidate_episode_ids": []
+      },
+      "after_binding": {
+        "episode_id": "1781440c8942002c1a65c25c",
+        "method": "alert_start_within_90s",
+        "candidates": [
+          "1781440c8942002c1a65c25c"
+        ],
+        "retained_start_delta_seconds": 0,
+        "candidates_within_90_seconds": 1,
+        "unique_match": true
+      },
+      "repair_action": "PROVENANCE_REPAIR",
+      "current_rule_after_temporary_repair": "approved_strict"
+    },
+    {
+      "evidence_identifier": "strict_events[36]",
+      "retained_matched_alert_start_kyiv": "2025-07-18T21:12:02+03:00",
+      "before_binding": {
+        "episode_id": null,
+        "method": "missing_episode_binding",
+        "candidate_episode_ids": []
+      },
+      "after_binding": {
+        "episode_id": "c0367099eed49727686e61af",
+        "method": "alert_start_within_90s",
+        "candidates": [
+          "c0367099eed49727686e61af"
+        ],
+        "retained_start_delta_seconds": 0,
+        "candidates_within_90_seconds": 1,
+        "unique_match": true
+      },
+      "repair_action": "PROVENANCE_REPAIR",
+      "current_rule_after_temporary_repair": "approved_strict"
+    },
+    {
+      "evidence_identifier": "strict_events[37]",
+      "retained_matched_alert_start_kyiv": "2025-07-19T10:02:18+03:00",
+      "before_binding": {
+        "episode_id": null,
+        "method": "missing_episode_binding",
+        "candidate_episode_ids": []
+      },
+      "after_binding": {
+        "episode_id": "c4e92e077e05dbfd52daeb9e",
+        "method": "alert_start_within_90s",
+        "candidates": [
+          "c4e92e077e05dbfd52daeb9e"
+        ],
+        "retained_start_delta_seconds": 0,
+        "candidates_within_90_seconds": 1,
+        "unique_match": true
+      },
+      "repair_action": "REBIND_ONLY",
+      "current_rule_after_temporary_repair": "approved_strict"
+    },
+    {
+      "evidence_identifier": "strict_events[38]",
+      "retained_matched_alert_start_kyiv": "2025-07-19T21:25:23+03:00",
+      "before_binding": {
+        "episode_id": null,
+        "method": "missing_episode_binding",
+        "candidate_episode_ids": []
+      },
+      "after_binding": {
+        "episode_id": "48826b9dbadd8eaee6601c9c",
+        "method": "alert_start_within_90s",
+        "candidates": [
+          "48826b9dbadd8eaee6601c9c"
+        ],
+        "retained_start_delta_seconds": 0,
+        "candidates_within_90_seconds": 1,
+        "unique_match": true
+      },
+      "repair_action": "PROVENANCE_REPAIR",
+      "current_rule_after_temporary_repair": "approved_strict"
+    },
+    {
+      "evidence_identifier": "strict_events[39]",
+      "retained_matched_alert_start_kyiv": "2025-07-24T02:08:13+03:00",
+      "before_binding": {
+        "episode_id": null,
+        "method": "missing_episode_binding",
+        "candidate_episode_ids": []
+      },
+      "after_binding": {
+        "episode_id": "6b8944c3a3d0cbb98d1dd6c3",
+        "method": "alert_start_within_90s",
+        "candidates": [
+          "6b8944c3a3d0cbb98d1dd6c3"
+        ],
+        "retained_start_delta_seconds": 0,
+        "candidates_within_90_seconds": 1,
+        "unique_match": true
+      },
+      "repair_action": "REBIND_ONLY",
+      "current_rule_after_temporary_repair": "approved_strict"
+    },
+    {
+      "evidence_identifier": "strict_events[40]",
+      "retained_matched_alert_start_kyiv": "2025-07-25T21:54:26+03:00",
+      "before_binding": {
+        "episode_id": null,
+        "method": "missing_episode_binding",
+        "candidate_episode_ids": []
+      },
+      "after_binding": {
+        "episode_id": "9571bb4b5340eb3a198c0169",
+        "method": "alert_start_within_90s",
+        "candidates": [
+          "9571bb4b5340eb3a198c0169"
+        ],
+        "retained_start_delta_seconds": 0,
+        "candidates_within_90_seconds": 1,
+        "unique_match": true
+      },
+      "repair_action": "PROVENANCE_REPAIR",
+      "current_rule_after_temporary_repair": "approved_strict"
+    },
+    {
+      "evidence_identifier": "strict_events[41]",
+      "retained_matched_alert_start_kyiv": "2025-07-27T22:11:36+03:00",
+      "before_binding": {
+        "episode_id": null,
+        "method": "missing_episode_binding",
+        "candidate_episode_ids": []
+      },
+      "after_binding": {
+        "episode_id": "783f99fd0c0fcd91758637bf",
+        "method": "alert_start_within_90s",
+        "candidates": [
+          "783f99fd0c0fcd91758637bf"
+        ],
+        "retained_start_delta_seconds": 0,
+        "candidates_within_90_seconds": 1,
+        "unique_match": true
+      },
+      "repair_action": "REBIND_ONLY",
+      "current_rule_after_temporary_repair": "approved_strict"
+    },
+    {
+      "evidence_identifier": "strict_events[42]",
+      "retained_matched_alert_start_kyiv": "2025-08-10T17:44:05+03:00",
+      "before_binding": {
+        "episode_id": null,
+        "method": "missing_episode_binding",
+        "candidate_episode_ids": []
+      },
+      "after_binding": {
+        "episode_id": "f706350461f63c69d13324d4",
+        "method": "alert_start_within_90s",
+        "candidates": [
+          "f706350461f63c69d13324d4"
+        ],
+        "retained_start_delta_seconds": 0,
+        "candidates_within_90_seconds": 1,
+        "unique_match": true
+      },
+      "repair_action": "REBIND_ONLY",
+      "current_rule_after_temporary_repair": "approved_strict"
+    },
+    {
+      "evidence_identifier": "strict_events[43]",
+      "retained_matched_alert_start_kyiv": "2025-08-13T09:27:20+03:00",
+      "before_binding": {
+        "episode_id": null,
+        "method": "missing_episode_binding",
+        "candidate_episode_ids": []
+      },
+      "after_binding": {
+        "episode_id": "2051acef367704cf87e65ddc",
+        "method": "alert_start_within_90s",
+        "candidates": [
+          "2051acef367704cf87e65ddc"
+        ],
+        "retained_start_delta_seconds": 0,
+        "candidates_within_90_seconds": 1,
+        "unique_match": true
+      },
+      "repair_action": "REBIND_ONLY",
+      "current_rule_after_temporary_repair": "approved_strict"
+    },
+    {
+      "evidence_identifier": "strict_events[44]",
+      "retained_matched_alert_start_kyiv": "2025-08-18T08:56:47+03:00",
+      "before_binding": {
+        "episode_id": null,
+        "method": "missing_episode_binding",
+        "candidate_episode_ids": []
+      },
+      "after_binding": {
+        "episode_id": "9c8229fbab1da4901030100a",
+        "method": "alert_start_within_90s",
+        "candidates": [
+          "9c8229fbab1da4901030100a"
+        ],
+        "retained_start_delta_seconds": 0,
+        "candidates_within_90_seconds": 1,
+        "unique_match": true
+      },
+      "repair_action": "REBIND_ONLY",
+      "current_rule_after_temporary_repair": "approved_strict"
+    },
+    {
+      "evidence_identifier": "strict_events[45]",
+      "retained_matched_alert_start_kyiv": "2025-08-21T02:49:34+03:00",
+      "before_binding": {
+        "episode_id": null,
+        "method": "missing_episode_binding",
+        "candidate_episode_ids": []
+      },
+      "after_binding": {
+        "episode_id": "7ffb26d8e21f7fb8a7348b2b",
+        "method": "alert_start_within_90s",
+        "candidates": [
+          "7ffb26d8e21f7fb8a7348b2b"
+        ],
+        "retained_start_delta_seconds": 0,
+        "candidates_within_90_seconds": 1,
+        "unique_match": true
+      },
+      "repair_action": "REBIND_ONLY",
+      "current_rule_after_temporary_repair": "approved_strict"
+    }
+  ],
+  "repair_action_counts": {
+    "REBIND_ONLY": 18,
+    "PROVENANCE_REPAIR": 5,
+    "CLASSIFICATION_DOWNGRADE": 0,
+    "MANUAL_QA_REQUIRED": 0
+  },
+  "provenance_repair_validations": [
+    {
+      "evidence_identifier": "strict_events[27]",
+      "target_episode_id": "6dc2c1209865b6cf7e7f8699",
+      "retained_support_artifact": "research/zaporizhzhia_explosion_enrichment_slice2_results.json",
+      "retained_support_artifact_blob_sha": "0ff0f3151dedc6dec636760191173bcf61f968a0",
+      "retained_support_json_path": "$.positive_candidate_records[12]",
+      "migrated_factual_roles_only": {
+        "exact_city_evidence": true,
+        "attack_event_evidence": true,
+        "aerial_war_evidence": true,
+        "same_attack_basis": true,
+        "temporal_target_binding": true
+      },
+      "proposed_review_provenance_contract": {
+        "schema_version": 1,
+        "target_episode_id": "6dc2c1209865b6cf7e7f8699",
+        "exact_city_evidence": {
+          "present": true
+        },
+        "explosion_evidence": {
+          "present": true,
+          "semantic_role": "unified_attack_event_evidence_under_legacy_schema_key"
+        },
+        "aerial_war_evidence": {
+          "present": true
+        },
+        "same_attack_basis": {
+          "present": true
+        },
+        "temporal": {
+          "status": "validated_episode_binding",
+          "validated_by_review": true,
+          "episode_specific": true,
+          "temporal_evidence_type": "frozen_historical_audit_episode_binding",
+          "neighboring_alert_check": {
+            "passed": true
+          }
+        }
+      },
+      "old_final_label_imported_as_authority": false,
+      "current_hardened_gate": {
+        "exact_city": true,
+        "strict_attack_event": true,
+        "aerial_war": true,
+        "same_attack": true,
+        "strict_episode_specific_temporal_binding": true
+      },
+      "passes_current_hardened_rules": true,
+      "outcome": "approved_strict"
+    },
+    {
+      "evidence_identifier": "strict_events[35]",
+      "target_episode_id": "1781440c8942002c1a65c25c",
+      "retained_support_artifact": "research/zaporizhzhia_explosion_enrichment_slice3_results.json",
+      "retained_support_artifact_blob_sha": "ef4fa282e1cdbae89e5433e713a4665e1fa769dd",
+      "retained_support_json_path": "$.positive_candidate_records[5]",
+      "migrated_factual_roles_only": {
+        "exact_city_evidence": true,
+        "attack_event_evidence": true,
+        "aerial_war_evidence": true,
+        "same_attack_basis": true,
+        "temporal_target_binding": true
+      },
+      "proposed_review_provenance_contract": {
+        "schema_version": 1,
+        "target_episode_id": "1781440c8942002c1a65c25c",
+        "exact_city_evidence": {
+          "present": true
+        },
+        "explosion_evidence": {
+          "present": true,
+          "semantic_role": "unified_attack_event_evidence_under_legacy_schema_key"
+        },
+        "aerial_war_evidence": {
+          "present": true
+        },
+        "same_attack_basis": {
+          "present": true
+        },
+        "temporal": {
+          "status": "validated_episode_binding",
+          "validated_by_review": true,
+          "episode_specific": true,
+          "temporal_evidence_type": "frozen_historical_audit_episode_binding",
+          "neighboring_alert_check": {
+            "passed": true
+          }
+        }
+      },
+      "old_final_label_imported_as_authority": false,
+      "current_hardened_gate": {
+        "exact_city": true,
+        "strict_attack_event": true,
+        "aerial_war": true,
+        "same_attack": true,
+        "strict_episode_specific_temporal_binding": true
+      },
+      "passes_current_hardened_rules": true,
+      "outcome": "approved_strict"
+    },
+    {
+      "evidence_identifier": "strict_events[36]",
+      "target_episode_id": "c0367099eed49727686e61af",
+      "retained_support_artifact": "research/zaporizhzhia_explosion_enrichment_slice3_results.json",
+      "retained_support_artifact_blob_sha": "ef4fa282e1cdbae89e5433e713a4665e1fa769dd",
+      "retained_support_json_path": "$.historical_comparison.disagreements[1]",
+      "migrated_factual_roles_only": {
+        "exact_city_evidence": true,
+        "attack_event_evidence": true,
+        "aerial_war_evidence": true,
+        "same_attack_basis": false,
+        "temporal_target_binding": true
+      },
+      "proposed_review_provenance_contract": {
+        "schema_version": 1,
+        "target_episode_id": "c0367099eed49727686e61af",
+        "exact_city_evidence": {
+          "present": true
+        },
+        "explosion_evidence": {
+          "present": true,
+          "semantic_role": "unified_attack_event_evidence_under_legacy_schema_key"
+        },
+        "aerial_war_evidence": {
+          "present": true
+        },
+        "same_attack_basis": {
+          "present": true
+        },
+        "temporal": {
+          "status": "validated_episode_binding",
+          "validated_by_review": true,
+          "episode_specific": true,
+          "temporal_evidence_type": "frozen_historical_audit_episode_binding",
+          "neighboring_alert_check": {
+            "passed": true
+          }
+        }
+      },
+      "old_final_label_imported_as_authority": false,
+      "current_hardened_gate": {
+        "exact_city": true,
+        "strict_attack_event": true,
+        "aerial_war": true,
+        "same_attack": true,
+        "strict_episode_specific_temporal_binding": true
+      },
+      "passes_current_hardened_rules": false,
+      "outcome": "approved_strict"
+    },
+    {
+      "evidence_identifier": "strict_events[38]",
+      "target_episode_id": "48826b9dbadd8eaee6601c9c",
+      "retained_support_artifact": "research/zaporizhzhia_explosion_enrichment_slice3_results.json",
+      "retained_support_artifact_blob_sha": "ef4fa282e1cdbae89e5433e713a4665e1fa769dd",
+      "retained_support_json_path": "$.positive_candidate_records[6]",
+      "migrated_factual_roles_only": {
+        "exact_city_evidence": true,
+        "attack_event_evidence": true,
+        "aerial_war_evidence": true,
+        "same_attack_basis": true,
+        "temporal_target_binding": true
+      },
+      "proposed_review_provenance_contract": {
+        "schema_version": 1,
+        "target_episode_id": "48826b9dbadd8eaee6601c9c",
+        "exact_city_evidence": {
+          "present": true
+        },
+        "explosion_evidence": {
+          "present": true,
+          "semantic_role": "unified_attack_event_evidence_under_legacy_schema_key"
+        },
+        "aerial_war_evidence": {
+          "present": true
+        },
+        "same_attack_basis": {
+          "present": true
+        },
+        "temporal": {
+          "status": "validated_episode_binding",
+          "validated_by_review": true,
+          "episode_specific": true,
+          "temporal_evidence_type": "frozen_historical_audit_episode_binding",
+          "neighboring_alert_check": {
+            "passed": true
+          }
+        }
+      },
+      "old_final_label_imported_as_authority": false,
+      "current_hardened_gate": {
+        "exact_city": true,
+        "strict_attack_event": true,
+        "aerial_war": true,
+        "same_attack": true,
+        "strict_episode_specific_temporal_binding": true
+      },
+      "passes_current_hardened_rules": true,
+      "outcome": "approved_strict"
+    },
+    {
+      "evidence_identifier": "strict_events[40]",
+      "target_episode_id": "9571bb4b5340eb3a198c0169",
+      "retained_support_artifact": "research/zaporizhzhia_explosion_enrichment_slice3_results.json",
+      "retained_support_artifact_blob_sha": "ef4fa282e1cdbae89e5433e713a4665e1fa769dd",
+      "retained_support_json_path": "$.positive_candidate_records[8]",
+      "migrated_factual_roles_only": {
+        "exact_city_evidence": true,
+        "attack_event_evidence": true,
+        "aerial_war_evidence": true,
+        "same_attack_basis": true,
+        "temporal_target_binding": true
+      },
+      "proposed_review_provenance_contract": {
+        "schema_version": 1,
+        "target_episode_id": "9571bb4b5340eb3a198c0169",
+        "exact_city_evidence": {
+          "present": true
+        },
+        "explosion_evidence": {
+          "present": true,
+          "semantic_role": "unified_attack_event_evidence_under_legacy_schema_key"
+        },
+        "aerial_war_evidence": {
+          "present": true
+        },
+        "same_attack_basis": {
+          "present": true
+        },
+        "temporal": {
+          "status": "validated_episode_binding",
+          "validated_by_review": true,
+          "episode_specific": true,
+          "temporal_evidence_type": "frozen_historical_audit_episode_binding",
+          "neighboring_alert_check": {
+            "passed": true
+          }
+        }
+      },
+      "old_final_label_imported_as_authority": false,
+      "current_hardened_gate": {
+        "exact_city": true,
+        "strict_attack_event": true,
+        "aerial_war": true,
+        "same_attack": true,
+        "strict_episode_specific_temporal_binding": true
+      },
+      "passes_current_hardened_rules": true,
+      "outcome": "approved_strict"
+    }
+  ],
+  "all_five_provenance_repairs_pass_current_hardened_rules": false,
+  "non_target_impact_scan": {
+    "retained_evidence_files_scanned": 13,
+    "non_zaporizhzhia_records_with_matched_alert_start_kyiv": 55,
+    "non_target_records_affected": 16,
+    "affected_cities": [
+      "kharkiv"
+    ],
+    "previously_ambiguous_records_becoming_bound": 0,
+    "existing_canonical_bindings_changed": 0,
+    "duplicate_or_multi_match_introduced": 0,
+    "additional_deterministic_recoveries": {
+      "kharkiv": {
+        "count": 16,
+        "records": [
+          {
+            "record": "strict_events[10]",
+            "episode_id": "eae17ef9659b34e17ee72821",
+            "before": "missing_episode_binding",
+            "after": "alert_start_within_90s",
+            "unique_match": true
+          },
+          {
+            "record": "strict_events[11]",
+            "episode_id": "e75e6cc63d82589634318cc9",
+            "before": "missing_episode_binding",
+            "after": "alert_start_within_90s",
+            "unique_match": true
+          },
+          {
+            "record": "strict_events[12]",
+            "episode_id": "1da5dc6c355deb98c5322d61",
+            "before": "missing_episode_binding",
+            "after": "alert_start_within_90s",
+            "unique_match": true
+          },
+          {
+            "record": "strict_events[13]",
+            "episode_id": "f8ee052f8ef56a57187b6621",
+            "before": "missing_episode_binding",
+            "after": "alert_start_within_90s",
+            "unique_match": true
+          },
+          {
+            "record": "strict_events[14]",
+            "episode_id": "eb2019a7afcc89ac51ed5d01",
+            "before": "missing_episode_binding",
+            "after": "alert_start_within_90s",
+            "unique_match": true
+          },
+          {
+            "record": "strict_events[15]",
+            "episode_id": "9795c463ec2f749568e1e1d1",
+            "before": "missing_episode_binding",
+            "after": "alert_start_within_90s",
+            "unique_match": true
+          },
+          {
+            "record": "strict_events[16]",
+            "episode_id": "2e8da61002fb1de1ba8573ce",
+            "before": "missing_episode_binding",
+            "after": "alert_start_within_90s",
+            "unique_match": true
+          },
+          {
+            "record": "strict_events[17]",
+            "episode_id": "614ae6c55de51e7cd60c5701",
+            "before": "missing_episode_binding",
+            "after": "alert_start_within_90s",
+            "unique_match": true
+          },
+          {
+            "record": "strict_events[18]",
+            "episode_id": "efdb380ee6caf6bab879f75e",
+            "before": "missing_episode_binding",
+            "after": "alert_start_within_90s",
+            "unique_match": true
+          },
+          {
+            "record": "strict_events[19]",
+            "episode_id": "d7bdc98a811b85d8cd095cf4",
+            "before": "missing_episode_binding",
+            "after": "alert_start_within_90s",
+            "unique_match": true
+          },
+          {
+            "record": "strict_events[20]",
+            "episode_id": "d354b092fdad1d154effbe26",
+            "before": "missing_episode_binding",
+            "after": "alert_start_within_90s",
+            "unique_match": true
+          },
+          {
+            "record": "strict_events[21]",
+            "episode_id": "c565aec9bf8b3cf34d0c3fad",
+            "before": "missing_episode_binding",
+            "after": "alert_start_within_90s",
+            "unique_match": true
+          },
+          {
+            "record": "strict_events[22]",
+            "episode_id": "a5aef27d4290b2106900c270",
+            "before": "missing_episode_binding",
+            "after": "alert_start_within_90s",
+            "unique_match": true
+          },
+          {
+            "record": "strict_events[23]",
+            "episode_id": "dd4264a005a9f6fb9c257e22",
+            "before": "missing_episode_binding",
+            "after": "alert_start_within_90s",
+            "unique_match": true
+          },
+          {
+            "record": "sensitivity_only_events[0]",
+            "episode_id": "debe65cd30062fcc5ead3a59",
+            "before": "missing_episode_binding",
+            "after": "alert_start_within_90s",
+            "unique_match": true
+          },
+          {
+            "record": "review_events[25]",
+            "episode_id": "8a2a867532201bb39299d0ab",
+            "before": "missing_episode_binding",
+            "after": "alert_start_within_90s",
+            "unique_match": true
+          }
+        ]
+      }
+    },
+    "non_target_regressions": 0,
+    "note": "The remaining 39 Kharkiv records carrying matched_alert_start_kyiv already have persisted canonical episode IDs, so the new START_FIELDS member is not consulted for them."
+  },
+  "restoration": {
+    "temporary_changes_persisted": false,
+    "initial_blob_shas": {
+      "kyiv-air-alerts-grafana/scripts/replay_explosion_history.py": "7509d9f391d206a2b052ff35ee8993ced33c6936",
+      "kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py": "eefd63aeebc17347b750f61115842be6c53a79da",
+      "research/historical_replay_status_current.json": "6a45e1b5cd052dbc4a417d04b1b962b3d8de245f",
+      "kyiv-air-alerts-grafana/data/explosion_audited_baseline.json": "5bbd2b771559eac2966aeec65d6e3b5487b9c1a9",
+      "kyiv-air-alerts-grafana/data/explosion_review_queue.json": "e6ed6776ae326a18a07978b1979dd3b265096bf0",
+      "kyiv-air-alerts-grafana/data/explosion_candidate_monitor_state.json": "3c8658880c6b93a00fb8ddbec2c4eaeed6d3f2cc",
+      "kyiv-air-alerts-grafana/data/explosion_candidate_monitor_last_run.json": "1552b13a2a9361be968cea4f09876cc20f96572f",
+      "kyiv-air-alerts-grafana/data/explosions_test.json": "3109dc02d2292efa59eddd26b34292cab2b554ab",
+      "kyiv-air-alerts-grafana/data/dashboard_data.json": "85e1d5cacfbe0af1530bbf584cb63ebdfef463e6",
+      "kyiv-air-alerts-grafana/data/explosion_research/zaporizhzhia/final_evidence.json": "4b3559386bdd8515f24498dfaac47ef67542b679"
+    },
+    "final_restored_blob_shas": {
+      "kyiv-air-alerts-grafana/scripts/replay_explosion_history.py": "7509d9f391d206a2b052ff35ee8993ced33c6936",
+      "kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py": "eefd63aeebc17347b750f61115842be6c53a79da",
+      "research/historical_replay_status_current.json": "6a45e1b5cd052dbc4a417d04b1b962b3d8de245f",
+      "kyiv-air-alerts-grafana/data/explosion_audited_baseline.json": "5bbd2b771559eac2966aeec65d6e3b5487b9c1a9",
+      "kyiv-air-alerts-grafana/data/explosion_review_queue.json": "e6ed6776ae326a18a07978b1979dd3b265096bf0",
+      "kyiv-air-alerts-grafana/data/explosion_candidate_monitor_state.json": "3c8658880c6b93a00fb8ddbec2c4eaeed6d3f2cc",
+      "kyiv-air-alerts-grafana/data/explosion_candidate_monitor_last_run.json": "1552b13a2a9361be968cea4f09876cc20f96572f",
+      "kyiv-air-alerts-grafana/data/explosions_test.json": "3109dc02d2292efa59eddd26b34292cab2b554ab",
+      "kyiv-air-alerts-grafana/data/dashboard_data.json": "85e1d5cacfbe0af1530bbf584cb63ebdfef463e6",
+      "kyiv-air-alerts-grafana/data/explosion_research/zaporizhzhia/final_evidence.json": "4b3559386bdd8515f24498dfaac47ef67542b679"
+    },
+    "historical_replay_source_corpus_final_restored_blob_shas": {
+      "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P1a_alerts.json": "dc9cff5e26d1e38d73e823ec69ba261b933940a8",
+      "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P1b_alerts.json": "9dba2195b25276b164a568a1df35ccd9764c1b9f",
+      "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P2a_alerts.json": "43b93b64f9dbe13d03279b99c814498ce79858cc",
+      "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P2b_alerts.json": "b6c5e43f01444425167a361ed9a27d9245c43d95",
+      "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P3a_alerts.json": "3a09ebc810a16dff4393bbd629e1756ec9fca227",
+      "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P3b_alerts.json": "e43a5b3eaa1bb2e49d1a822e0af15ae4e25e2eae",
+      "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P4a_alerts.json": "9acbce13d059beab2eb352f922943224cf134d5c",
+      "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P4b_alerts.json": "3f34bd993e38afc527968eac1073c3f7396094a4",
+      "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P4c_alerts.json": "0c4cbde0a9653b7b8be6605e75489203ce9bdd3b",
+      "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P4c1_alerts.json": "70ffc7efb52119eaef063f0ba0f52620ab28e12a",
+      "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P4c2_alerts.json": "38703faac7384a6ed7cafa2314834f475646a04c"
+    },
+    "files_restored_byte_for_byte": true
+  },
+  "protected_file_verification": {
+    "protected_files_unchanged": true,
+    "protected_blob_shas": {
+      "kyiv-air-alerts-grafana/scripts/replay_explosion_history.py": "7509d9f391d206a2b052ff35ee8993ced33c6936",
+      "kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py": "eefd63aeebc17347b750f61115842be6c53a79da",
+      "research/historical_replay_status_current.json": "6a45e1b5cd052dbc4a417d04b1b962b3d8de245f",
+      "kyiv-air-alerts-grafana/data/explosion_audited_baseline.json": "5bbd2b771559eac2966aeec65d6e3b5487b9c1a9",
+      "kyiv-air-alerts-grafana/data/explosion_review_queue.json": "e6ed6776ae326a18a07978b1979dd3b265096bf0",
+      "kyiv-air-alerts-grafana/data/explosion_candidate_monitor_state.json": "3c8658880c6b93a00fb8ddbec2c4eaeed6d3f2cc",
+      "kyiv-air-alerts-grafana/data/explosion_candidate_monitor_last_run.json": "1552b13a2a9361be968cea4f09876cc20f96572f",
+      "kyiv-air-alerts-grafana/data/explosions_test.json": "3109dc02d2292efa59eddd26b34292cab2b554ab",
+      "kyiv-air-alerts-grafana/data/dashboard_data.json": "85e1d5cacfbe0af1530bbf584cb63ebdfef463e6",
+      "kyiv-air-alerts-grafana/data/explosion_research/zaporizhzhia/final_evidence.json": "4b3559386bdd8515f24498dfaac47ef67542b679"
+    },
+    "historical_replay_source_corpus_unchanged": true,
+    "historical_replay_source_corpus_blob_shas": {
+      "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P1a_alerts.json": "dc9cff5e26d1e38d73e823ec69ba261b933940a8",
+      "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P1b_alerts.json": "9dba2195b25276b164a568a1df35ccd9764c1b9f",
+      "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P2a_alerts.json": "43b93b64f9dbe13d03279b99c814498ce79858cc",
+      "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P2b_alerts.json": "b6c5e43f01444425167a361ed9a27d9245c43d95",
+      "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P3a_alerts.json": "3a09ebc810a16dff4393bbd629e1756ec9fca227",
+      "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P3b_alerts.json": "e43a5b3eaa1bb2e49d1a822e0af15ae4e25e2eae",
+      "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P4a_alerts.json": "9acbce13d059beab2eb352f922943224cf134d5c",
+      "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P4b_alerts.json": "3f34bd993e38afc527968eac1073c3f7396094a4",
+      "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P4c_alerts.json": "0c4cbde0a9653b7b8be6605e75489203ce9bdd3b",
+      "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P4c1_alerts.json": "70ffc7efb52119eaef063f0ba0f52620ab28e12a",
+      "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zaporizhzhia-P4c2_alerts.json": "38703faac7384a6ed7cafa2314834f475646a04c"
+    }
+  },
+  "regression_count": 0,
+  "verdict": "ZAPORIZHZHIA ATOMIC REPAIR READY"
+}
