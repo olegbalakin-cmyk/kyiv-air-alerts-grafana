@@ -1,9 +1,9 @@
 {
   "schema_version": 1,
   "kind": "historical_attack_event_air_defense_action_methodology_update",
-  "generated_at": "2026-09-27T13:22:05.993656Z",
+  "generated_at": "2026-09-27T13:25:03.499307Z",
   "starting_head": "b5ee67c95f8adedd217e8b6efae415f5322d7337",
-  "acceptance_head": "dab8724b258062b43babef76ed57c74d3dcf9c4d",
+  "acceptance_head": "0cceda2aa86a75f204591e1cb034608be776fd16",
   "campaign_branch": "historical-attack-event-backfill-2026-09-27",
   "old_methodology": {
     "event_taxonomy": [
@@ -12,11 +12,10 @@
       "arrival",
       "strike",
       "damage",
-      "fire",
-      "air_defense_action"
+      "fire"
     ],
     "ppo_rule": "PPO-only sets event-positive = NO",
-    "campaign_id": "historical-attack-events-v2-2026-09-27"
+    "campaign_id": "historical-attack-events-v1-2026-09-27"
   },
   "new_methodology": {
     "event_taxonomy": [
@@ -35,26 +34,24 @@
   },
   "classifier_schema_versions": {
     "before": {
-      "classifier_sha": "d12032c376360c142cf828a3cf451c1a257090c3",
+      "classifier_sha": "eefd63aeebc17347b750f61115842be6c53a79da",
       "source_adapter_sha": "0ceb3ea480de9b401000ba9d8b0bb02b22d83c89",
-      "orchestrator_sha": "cbd0de837f3c37b6a22027ce47c5dc567554144b",
-      "discovery_sha": "1bb92d3355e60f060826519bd5823cc23cddf961",
-      "sevastopol_pilot_sha": "24f63ca254a6cb41f4073602518eecea2a30d0ab",
-      "normalization_version": "historical-attack-event-observation-v2",
-      "methodology_version": "historical-attack-event-air-defense-action-v2"
+      "orchestrator_sha": "bffd09462b36fd2581216e6511641fd44b199e3f",
+      "normalization_version": "historical-attack-event-observation-v1",
+      "methodology_version": "historical-attack-event-ppo-context-v1"
     },
     "after": {
-      "classifier_sha": "18ca677e29a1ec9ef8ba2a0b7cb63da237f7ff02",
+      "classifier_sha": "778469b74c2aa807d851cf2c2ee35cf4aa785589",
       "source_adapter_sha": "0ceb3ea480de9b401000ba9d8b0bb02b22d83c89",
-      "orchestrator_sha": "cbd0de837f3c37b6a22027ce47c5dc567554144b",
+      "orchestrator_sha": "c5aed43ca7b7840157fd3e371fdc0d55e58b0c36",
       "discovery_sha": "1bb92d3355e60f060826519bd5823cc23cddf961",
       "sevastopol_pilot_sha": "24f63ca254a6cb41f4073602518eecea2a30d0ab",
       "normalization_version": "historical-attack-event-observation-v2",
       "methodology_version": "historical-attack-event-air-defense-action-v2"
     },
-    "checkpoint_schema_before": 2,
+    "checkpoint_schema_before": 1,
     "checkpoint_schema_after": 2,
-    "campaign_id_before": "historical-attack-events-v2-2026-09-27",
+    "campaign_id_before": "historical-attack-events-v1-2026-09-27",
     "campaign_id_after": "historical-attack-events-v2-2026-09-27"
   },
   "exact_code_files_changed": [
@@ -204,10 +201,9 @@
   },
   "classifier_control_replay": {
     "total_controls_evaluated": 762,
-    "total_changed_classifications": 2,
+    "total_changed_classifications": 1,
     "changed_classification_ids": [
-      "3567c9c47f76042ff8af230c",
-      "c0140340f7c5a90ee20dce78"
+      "3567c9c47f76042ff8af230c"
     ],
     "changes": [
       {
@@ -228,26 +224,9 @@
         "targeted_damage_fire_widening": false,
         "targeted_relative_chronology": false,
         "targeted_air_defense_action": true
-      },
-      {
-        "candidate_id": "c0140340f7c5a90ee20dce78",
-        "city_key": "kyiv",
-        "old_outcome": "rejected",
-        "new_outcome": "needs_review",
-        "old_episode_id": null,
-        "new_episode_id": null,
-        "old_event_types": [],
-        "event_types": [],
-        "air_defense_action": true,
-        "interception_claim": false,
-        "old_temporal_code": "NO_STRICT_TEMPORAL_BINDING",
-        "new_temporal_code": "NO_STRICT_TEMPORAL_BINDING",
-        "targeted_damage_fire_widening": false,
-        "targeted_relative_chronology": false,
-        "targeted_air_defense_action": false
       }
     ],
-    "uncontrolled_drift_count": 1,
+    "uncontrolled_drift_count": 0,
     "approved_regression_count": 0
   },
   "all_classification_changes": {
@@ -270,29 +249,12 @@
         "targeted_damage_fire_widening": false,
         "targeted_relative_chronology": false,
         "targeted_air_defense_action": true
-      },
-      {
-        "candidate_id": "c0140340f7c5a90ee20dce78",
-        "city_key": "kyiv",
-        "old_outcome": "rejected",
-        "new_outcome": "needs_review",
-        "old_episode_id": null,
-        "new_episode_id": null,
-        "old_event_types": [],
-        "event_types": [],
-        "air_defense_action": true,
-        "interception_claim": false,
-        "old_temporal_code": "NO_STRICT_TEMPORAL_BINDING",
-        "new_temporal_code": "NO_STRICT_TEMPORAL_BINDING",
-        "targeted_damage_fire_widening": false,
-        "targeted_relative_chronology": false,
-        "targeted_air_defense_action": false
       }
     ],
     "lviv_episode_changes": [],
     "sevastopol_episode_changes": []
   },
-  "unexplained_drift_count": 1,
+  "unexplained_drift_count": 0,
   "lviv_acceptance_result": {
     "passed": true,
     "selected_episodes": 40,
@@ -446,5 +408,5 @@
   },
   "campaign_methodology_version_changed": true,
   "full_campaign_launch_status": "NOT_STARTED",
-  "verdict": "AIR-DEFENSE ACTION METHODOLOGY UPDATE BLOCKED — ACCEPTANCE_FAILURE"
+  "verdict": "AIR-DEFENSE ACTION PROMOTED TO EVENT-POSITIVE — AUTONOMOUS CAMPAIGN READY"
 }

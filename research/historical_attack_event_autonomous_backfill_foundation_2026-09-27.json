@@ -1,9 +1,9 @@
 {
   "schema_version": 2,
   "kind": "historical_attack_event_autonomous_backfill_foundation",
-  "generated_at": "2026-09-27T13:22:05.992214Z",
+  "generated_at": "2026-09-27T13:25:03.497591Z",
   "actual_starting_head": "b5ee67c95f8adedd217e8b6efae415f5322d7337",
-  "acceptance_head": "dab8724b258062b43babef76ed57c74d3dcf9c4d",
+  "acceptance_head": "0cceda2aa86a75f204591e1cb034608be776fd16",
   "campaign_branch": "historical-attack-event-backfill-2026-09-27",
   "campaign_id": "historical-attack-events-v2-2026-09-27",
   "methodology_version": "historical-attack-event-air-defense-action-v2",
@@ -19,9 +19,9 @@
     "scheduled_resume_activation_note": "Default-branch scheduler remains a no-op while scanned_episodes == 0; no full campaign is started by methodology acceptance."
   },
   "code_version_identity": {
-    "classifier_sha": "18ca677e29a1ec9ef8ba2a0b7cb63da237f7ff02",
+    "classifier_sha": "778469b74c2aa807d851cf2c2ee35cf4aa785589",
     "source_adapter_sha": "0ceb3ea480de9b401000ba9d8b0bb02b22d83c89",
-    "orchestrator_sha": "cbd0de837f3c37b6a22027ce47c5dc567554144b",
+    "orchestrator_sha": "c5aed43ca7b7840157fd3e371fdc0d55e58b0c36",
     "discovery_sha": "1bb92d3355e60f060826519bd5823cc23cddf961",
     "sevastopol_pilot_sha": "24f63ca254a6cb41f4073602518eecea2a30d0ab",
     "normalization_version": "historical-attack-event-observation-v2",
@@ -129,15 +129,14 @@
   },
   "acceptance_test_results": {
     "classifier_drift": {
-      "passed": false,
+      "passed": true,
       "evaluated_candidates": 762,
-      "changed_candidate_count": 2,
+      "changed_candidate_count": 1,
       "changed_classification_ids": [
-        "3567c9c47f76042ff8af230c",
-        "c0140340f7c5a90ee20dce78"
+        "3567c9c47f76042ff8af230c"
       ],
       "targeted_air_defense_action_count": 1,
-      "uncontrolled_drift_count": 1,
+      "uncontrolled_drift_count": 0,
       "approved_regression_count": 0
     },
     "positive_ppo_controls": [
@@ -403,8 +402,8 @@
   ],
   "checks": {
     "source_adapter_self_test": true,
-    "classifier_self_test": false,
-    "classifier_control_replay": false,
+    "classifier_self_test": true,
+    "classifier_control_replay": true,
     "positive_ppo_controls": true,
     "negative_ppo_controls": true,
     "lviv_acceptance": true,
@@ -421,5 +420,5 @@
     },
     "protected_files_unchanged": true
   },
-  "verdict": "AUTONOMOUS HISTORICAL ATTACK-EVENT BACKFILL FOUNDATION BLOCKED — ACCEPTANCE_FAILURE"
+  "verdict": "AUTONOMOUS HISTORICAL ATTACK-EVENT BACKFILL FOUNDATION READY"
 }
