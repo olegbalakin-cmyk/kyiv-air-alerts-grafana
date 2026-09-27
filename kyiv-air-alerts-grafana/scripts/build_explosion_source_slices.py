@@ -201,7 +201,25 @@ def reconcile_parent_boundaries(
     subslice_rows: list[dict[str, str]],
 ) -> list[dict]:
     parent_rows = {row["task_id"]: row for row in load_csv(PARENTS_CSV)}
-    represented = sorted({row["parent_task_id"] for row in subslice_rows})
+    represented_ids = {row["parent_task_id"] for row in subslice_rows}
+
+    # Exact-city adapters can begin on a transition boundary that is itself a
+    # source episode. Reconcile that boundary for the matching first parent even
+    # when the parent has no research subslice row, using the same deterministic
+    # valid_from rule as represented parents.
+    for parent_id, parent in parent_rows.items():
+        city_key = parent["city_key"]
+        smeta = source_meta.get(city_key) or {}
+        if smeta.get("type") != "production_exact_city_assembled":
+            continue
+        valid_from = smeta.get("valid_from")
+        if not valid_from:
+            continue
+        candidate = datetime.fromisoformat(valid_from).astimezone(TZ)
+        if parent["episode_start_date_from"] == candidate.date().isoformat():
+            represented_ids.add(parent_id)
+
+    represented = sorted(represented_ids)
     exclusions: list[dict] = []
 
     for parent_id in represented:
