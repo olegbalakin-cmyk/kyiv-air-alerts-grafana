@@ -1,11 +1,11 @@
 {
   "schema_version": 1,
   "kind": "historical_attack_event_discovery_pilot",
-  "generated_at": "2026-09-27T12:27:52.479741Z",
+  "generated_at": "2026-09-27T12:30:22.159487Z",
   "city_key": "sevastopol",
   "city": "Севастополь",
-  "starting_head": "d0d57789905e819b200e4eade009b177ca83d480",
-  "workflow_run_id": "36319002315",
+  "starting_head": "f886bb7a9b3042e20ee6b2b036f4a819b6d97d42",
+  "workflow_run_id": "36319142178",
   "selection": {
     "rule": "complete corpus + no active blocker + retained positive control + deterministic autonomous public source; prefer smallest episode universe; tie-break city_key",
     "anchor": {
@@ -88,7 +88,12 @@
       "source_timestamp": "2026-07-31T23:13:09Z",
       "event_timestamp_if_stated": null,
       "excerpt": "🔥 В Севастополе прилет с детонацией, разгорается пожар Всего прозвучало 8 взрывов, потом было зарево и детонация, сообщают подписчики. Сейчас горит или на позиции 475 Центра РЭБ (территория отмечена красным) на мысе Фиолент или дальше, на высотах Кая-Баш под Балаклавой, где позиции росПВО. За 15 минут шлейф дыма уже растянулся на 1-2 километра. Кстати, откуда-то оттуда стрелял \"Панцирь\". 📷 наш подписчик Кто знает подробности или снял фото/видео - пишите в наш бот (анонимно) 👇 @crimeanwind_newsbot",
-      "matched_terms": [],
+      "matched_terms": [
+        "explosion_discovery",
+        "impact_arrival_discovery",
+        "fire_discovery",
+        "air_defense_context"
+      ],
       "event_types_supported": [],
       "exact_city_binding": {
         "present": false,
@@ -168,7 +173,12 @@
       "source_timestamp": "2026-08-01T04:35:48Z",
       "event_timestamp_if_stated": null,
       "excerpt": "🔥 В Севастополе возникли пожары после прилетов по позициям росРЭБ и росПВО , сообщает мониторинговая группа \"Крымского ветра\" со ссылкой на данные спутниковой съемки Ночью мы публиковали фото пожара от нашего подписчика и не могли определить, прилетело по РЭБ или ПВО, но как оказалось, туда и туда. Всего подписчики насчитали 8 взрывов, сколько из них было прилетов, неизвестно. 1. На мысе Фиолент - 475-й отдельный центр радиоэлектронной борьбы (в/ч 60135) — подразделение ЧФ рф, на вооружении которого состоят мощные комплексы радиоэлектронной борьбы, включая системы стратегического назначения. На вооружении состоят стратегический комплекс РЭБ «Мурманск-БН», мобильные системы «Красуха-2» и «Красуха-4», а также станции помех «Житель» и «Инфауна». В ночь с 26 на 27 июля 2026 года ГУР поразило там станцию ​​комплекса РЭБ \"Мурманск-БН\". 2. Район высот Кая-Баш - позиция в/ч ПВО. Кто знает подробности или снял фото/видео - пишите в наш бот (анонимно) 👇 @crimeanwind_newsbot",
-      "matched_terms": [],
+      "matched_terms": [
+        "explosion_discovery",
+        "impact_arrival_discovery",
+        "fire_discovery",
+        "air_defense_context"
+      ],
       "event_types_supported": [],
       "exact_city_binding": {
         "present": false,
@@ -242,7 +252,9 @@
       "source_timestamp": "2026-08-01T04:46:02Z",
       "event_timestamp_if_stated": null,
       "excerpt": "В Севастополе в 03.24 и в 03.55 были взрывы и пуски ракет, в 05.10-05.20 снова 4 взрыва и пуска. 🎥 наш подписчик Прислать информацию, фото, видео (анонимно): ➡️ @crimeanwind_newsbot",
-      "matched_terms": [],
+      "matched_terms": [
+        "explosion_discovery"
+      ],
       "event_types_supported": [],
       "exact_city_binding": {
         "present": false,
@@ -322,7 +334,11 @@
       "source_timestamp": "2026-08-01T05:10:13Z",
       "event_timestamp_if_stated": null,
       "excerpt": "🔥 В Севастополе прилет с детонацией, разгорается пожар  Всего прозвучало 8 взрывов, потом было зарево и детонация, сообщают подписчики.  Сейчас горит или на позиции 475 Центра РЭБ (территория отмечена красным) на мысе Фиолент или дальше, на высотах Кая-Баш…",
-      "matched_terms": [],
+      "matched_terms": [
+        "explosion_discovery",
+        "impact_arrival_discovery",
+        "fire_discovery"
+      ],
       "event_types_supported": [],
       "exact_city_binding": {
         "present": false,
@@ -805,21 +821,37 @@
     "missed_control_diagnostics": [
       {
         "episode_id": "05300b71bb2c1311bddc3527",
-        "gap_code": "SOURCE_NOT_DISCOVERED",
+        "gap_code": "CURRENT_RULE_DOWNGRADE",
         "retained_source_urls": [
           "https://t.me/s/Crimeanwind?before=106206"
         ],
-        "retained_event_clock_tokens": [],
-        "retrieved_observation_ids": []
+        "retained_event_clock_tokens": [
+          "03.00",
+          "03:00",
+          "05.10",
+          "05.20",
+          "05:10",
+          "05:20"
+        ],
+        "retrieved_observation_ids": [
+          "258f1c43a4de98b3537b84c7"
+        ]
       },
       {
         "episode_id": "0ed9d9044dde6bc06645e064",
-        "gap_code": "SOURCE_NOT_DISCOVERED",
+        "gap_code": "CURRENT_RULE_DOWNGRADE",
         "retained_source_urls": [
           "https://t.me/s/Crimeanwind?before=106206"
         ],
-        "retained_event_clock_tokens": [],
-        "retrieved_observation_ids": []
+        "retained_event_clock_tokens": [
+          "03.00",
+          "03.24",
+          "03:00",
+          "03:24"
+        ],
+        "retrieved_observation_ids": [
+          "258f1c43a4de98b3537b84c7"
+        ]
       },
       {
         "episode_id": "a94b7665358a92d17b405839",
@@ -827,7 +859,12 @@
         "retained_source_urls": [
           "https://t.me/s/Crimeanwind?before=106206"
         ],
-        "retained_event_clock_tokens": [],
+        "retained_event_clock_tokens": [
+          "03.00",
+          "03:00",
+          "23.49",
+          "23:49"
+        ],
         "retrieved_observation_ids": [
           "08216d65ff753536b6c7d760"
         ]

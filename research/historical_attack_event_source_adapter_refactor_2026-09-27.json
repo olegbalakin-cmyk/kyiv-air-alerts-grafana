@@ -1,9 +1,9 @@
 {
   "schema_version": 1,
   "kind": "historical_attack_event_source_adapter_refactor",
-  "generated_at": "2026-09-27T12:27:52.560455Z",
+  "generated_at": "2026-09-27T12:30:22.239575Z",
   "task_starting_head": "31482913d2aa1335f313db375fb88aaed30e0c5f",
-  "workflow_input_head": "d0d57789905e819b200e4eade009b177ca83d480",
+  "workflow_input_head": "f886bb7a9b3042e20ee6b2b036f4a819b6d97d42",
   "files_inspected_for_duplicate_adapter_functionality": [
     "kyiv-air-alerts-grafana/scripts/discover_historical_attack_events.py",
     "kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py",
@@ -87,7 +87,7 @@
     "passed": true,
     "return_code": 0,
     "old_blob": "e744d3c4458331decd4a8d4508c3756668580469",
-    "new_blob": "4c2233f03975b5fb62e2f6b705ca0ee06b7b749d",
+    "new_blob": "e02cff8fad042ad3bf2cf6d1768dc69213a91924",
     "behaviorally_equivalent": true,
     "expected_provenance_only_differences": [
       "generated_at changes",
@@ -103,7 +103,7 @@
     ],
     "targeted_secondary_control_recovered": true,
     "targeted_secondary_source_family_onboarded": false,
-    "stdout_tail": "               },\n                \"air_context\": {\n                  \"present\": true,\n                  \"segments\": [\n                    \"У Львові працює ППО.\",\n                    \"У Львові працює ППО.\"\n                  ],\n                  \"evidence_sources\": [\n                    \"candidate_evidence\"\n                  ]\n                },\n                \"same_attack\": {\n                  \"present\": false,\n                  \"reason\": \"missing_explosion_or_air_context\",\n                  \"evidence_sources\": []\n                },\n                \"reason_codes\": [\n                  \"MATCH_UNIQUE\",\n                  \"EXACT_CITY_EVENT_TEXT\",\n                  \"NO_STRICT_EXPLOSION_EVIDENCE\",\n                  \"AIR_MILITARY_CONTEXT\",\n                  \"AIR_CONTEXT_NOT_LINKED_TO_EVENT\",\n                  \"NO_STRICT_TEMPORAL_BINDING\",\n                  \"PVO_ONLY_COMPLETE_MESSAGE\"\n                ]\n              }\n            }\n          ],\n          \"composition\": {\n            \"target_episode_id\": \"6cd77c20720eafece633c1ad\",\n            \"city_key\": \"lviv\",\n            \"final_composed_verdict\": \"no_composed_strict\",\n            \"contributing_candidate_ids\": [],\n            \"anchor_candidate_id\": null,\n            \"reason_codes\": [\n              \"NO_SAFE_EPISODE_LEVEL_COMPOSITION\"\n            ],\n            \"candidate_count_considered\": 0,\n            \"temporal_anchor_candidate_ids\": [],\n            \"air_context_candidate_ids\": []\n          }\n        }\n      }\n    },\n    \"targeted_secondary_html\": {\n      \"configured_sources\": 1,\n      \"resolved_articles\": 1,\n      \"fetches\": [\n        {\n          \"url\": \"https://lviv.tsn.ua/lviv/u-lvovi-hrymliat-vybukhy-3015458.html\",\n          \"status_code\": 200,\n          \"published_at\": \"2026-02-05T15:33:12Z\",\n          \"bytes\": 169136,\n          \"source_family_onboarded\": false,\n          \"target_episode_id\": \"6cd77c20720eafece633c1ad\",\n          \"resolved\": true\n        }\n      ],\n      \"source_family_onboarded\": false\n    }\n  }\n}\n"
+    "stdout_tail": "               },\n                \"air_context\": {\n                  \"present\": true,\n                  \"segments\": [\n                    \"У Львові працює ППО.\",\n                    \"У Львові працює ППО.\"\n                  ],\n                  \"evidence_sources\": [\n                    \"candidate_evidence\"\n                  ]\n                },\n                \"same_attack\": {\n                  \"present\": false,\n                  \"reason\": \"missing_explosion_or_air_context\",\n                  \"evidence_sources\": []\n                },\n                \"reason_codes\": [\n                  \"MATCH_UNIQUE\",\n                  \"EXACT_CITY_EVENT_TEXT\",\n                  \"NO_STRICT_EXPLOSION_EVIDENCE\",\n                  \"AIR_MILITARY_CONTEXT\",\n                  \"AIR_CONTEXT_NOT_LINKED_TO_EVENT\",\n                  \"NO_STRICT_TEMPORAL_BINDING\",\n                  \"PVO_ONLY_COMPLETE_MESSAGE\"\n                ]\n              }\n            }\n          ],\n          \"composition\": {\n            \"target_episode_id\": \"6cd77c20720eafece633c1ad\",\n            \"city_key\": \"lviv\",\n            \"final_composed_verdict\": \"no_composed_strict\",\n            \"contributing_candidate_ids\": [],\n            \"anchor_candidate_id\": null,\n            \"reason_codes\": [\n              \"NO_SAFE_EPISODE_LEVEL_COMPOSITION\"\n            ],\n            \"candidate_count_considered\": 0,\n            \"temporal_anchor_candidate_ids\": [],\n            \"air_context_candidate_ids\": []\n          }\n        }\n      }\n    },\n    \"targeted_secondary_html\": {\n      \"configured_sources\": 1,\n      \"resolved_articles\": 1,\n      \"fetches\": [\n        {\n          \"url\": \"https://lviv.tsn.ua/lviv/u-lvovi-hrymliat-vybukhy-3015458.html\",\n          \"status_code\": 200,\n          \"published_at\": \"2026-02-05T15:33:12Z\",\n          \"bytes\": 169009,\n          \"source_family_onboarded\": false,\n          \"target_episode_id\": \"6cd77c20720eafece633c1ad\",\n          \"resolved\": true\n        }\n      ],\n      \"source_family_onboarded\": false\n    }\n  }\n}\n"
   },
   "protected_blobs_before": {
     "kyiv-air-alerts-grafana/data/explosion_audited_baseline.json": "5bbd2b771559eac2966aeec65d6e3b5487b9c1a9",
@@ -173,7 +173,7 @@
     "rule": "complete current corpus; no active blocker; retained positive control; deterministic autonomous public source; smallest episode universe; tie-break city_key",
     "selected_city": "sevastopol"
   },
-  "pilot_workflow_run_id": "36319002315",
+  "pilot_workflow_run_id": "36319142178",
   "blocker": null,
   "verdict": "ATTACK-EVENT SOURCE ADAPTER REFACTOR CLEAN"
 }
