@@ -1,0 +1,173 @@
+{
+  "schema_version": 1,
+  "artifact_type": "sumy_single_case_real_replay_preflight",
+  "branch": "multicity-wip-2026-09-16",
+  "starting_head": "7ad52d55e02d85dc14e6ece4b68f304f6540bbfc",
+  "target_episode_id": "88f59d26acd8ae4fd31c7511",
+  "scope": {
+    "single_episode_only": true,
+    "web_research_performed": false,
+    "external_source_retrieval_performed": false,
+    "canonical_evidence_mutated": false,
+    "persistent_qa_or_status_mutated": false,
+    "classifier_logic_mutated": false
+  },
+  "precondition": {
+    "authoritative_artifact": "research/sumy_current_replay_precondition_2026-09-27.json",
+    "authoritative_artifact_commit": "7ad52d55e02d85dc14e6ece4b68f304f6540bbfc",
+    "starting_head_matches_authoritative_artifact_commit": true,
+    "authoritative_parent_to_starting_head_compare": {
+      "base": "4b1643474b5c2af57099c9b88fe4b44e4c2893b6",
+      "head": "7ad52d55e02d85dc14e6ece4b68f304f6540bbfc",
+      "changed_paths": [
+        "research/sumy_current_replay_precondition_2026-09-27.json"
+      ],
+      "replay_inputs_changed": false
+    }
+  },
+  "fresh_real_replay": {
+    "execution_mode": "real_historical_pipeline_replay",
+    "command_path": "kyiv-air-alerts-grafana/scripts/replay_explosion_history.py",
+    "workflow_run_id": 36312334527,
+    "workflow_run_attempt": 3,
+    "workflow_job_id": 108630064935,
+    "workflow_artifact_id": 10932807651,
+    "workflow_conclusion": "success",
+    "executed_checkout_head": "e8f10ead03f868e4d636b1e6a9be8c2e581feccc",
+    "current_starting_head_semantic_input_identity": true,
+    "semantic_identity_basis": "The authoritative precondition proves identical Git blob SHAs for every Sumy replay input between the executed checkout and the starting replay state; the only commit from that state to the starting HEAD adds the precondition research artifact.",
+    "expected_denominator": 2297,
+    "reconstructed_denominator": 2297,
+    "qa_count": 19,
+    "strict_count": 189,
+    "sensitivity_count": 219,
+    "target_present_in_qa": true,
+    "target_current_classification": "AMBIGUOUS",
+    "target_frozen_old_classification": "STRICT",
+    "target_current_reason_codes": [
+      "AIR_CONTEXT_NOT_LINKED_TO_EVENT",
+      "AIR_MILITARY_CONTEXT",
+      "EXACT_CITY_EVENT_TEXT",
+      "MATCH_UNIQUE",
+      "NO_STRICT_EXPLOSION_EVIDENCE",
+      "REVIEW_PROVENANCE_TEMPORAL_BINDING_USED",
+      "REVIEW_PROVENANCE_USABLE",
+      "TEMPORAL_REVIEWED_VALIDATED_BINDING"
+    ],
+    "previously_resolved_ids_absent": {
+      "b103be64497fc7d33f5c7b3d": true,
+      "d6b1b9ffc10dafbc86e253c7": true
+    },
+    "errors": [],
+    "protected_files_unchanged": true
+  },
+  "retained_material": {
+    "retained_source_available": true,
+    "source_url": "https://suspilne.media/sumy/1345582-troe-civilnih-postrazdali-vnaslidok-ataki-rosijskogo-bpla-po-avtozapravnij-stancii-u-sumah/",
+    "retained_excerpt": "Близько 13:40 російський БпЛА атакував АЗС у Зарічному районі Сум.",
+    "retained_decision_text": "strict: exact-city aerial-war evidence with event time/interval inside matched episode",
+    "event_time_kyiv": "2026-07-02 ~13:40",
+    "alert_start_utc": "2026-07-02T10:16:53Z",
+    "alert_end_utc": "2026-07-02T11:12:12Z",
+    "temporal_relation": "retained event time is inside the matched alert episode",
+    "exact_city_evidence": {
+      "present": true,
+      "basis": "Зарічному районі Сум"
+    },
+    "air_attack_context": {
+      "present": true,
+      "basis": "російський БпЛА атакував АЗС"
+    },
+    "supported_current_event_types": [],
+    "same_attack_basis_under_current_rules": false,
+    "source_local_adjacent_context_retained_as_text_in_repo": false,
+    "source_local_anchor": {
+      "exists": false,
+      "deterministic_to_exact_event": false
+    },
+    "retained_source_fetch_metadata": {
+      "status": "OK",
+      "http_status": 200,
+      "retained_chunk_count": 11,
+      "retained_content_sha256": "4aff2f4e33cf232c9616fa8bae984efee680b20c1adfd2e4d31f41e5eec6fe01",
+      "chunk_text_retained_in_current_repo_inputs": false,
+      "publication_or_message_timestamp_retained": false
+    },
+    "source_retention_triage": "NO_COMPLETE_SOURCE_SEGMENT",
+    "source_retention_candidate_count": 0,
+    "source_retention_missing_roles": [
+      "strict_explosion",
+      "same_attack_context"
+    ],
+    "inspected_repo_references": [
+      "kyiv-air-alerts-grafana/data/explosion_research/sumy/final_evidence.json",
+      "kyiv-air-alerts-grafana/data/explosion_research/sumy/sumy-P4a_result.json",
+      "kyiv-air-alerts-grafana/data/explosion_research/sumy/sumy_P4_result.json",
+      "research/sumy_remaining_19_source_recovery_inventory.json",
+      "research/historical_replay_source_retention/sumy.json",
+      "research/historical_replay_qa/sumy.json"
+    ]
+  },
+  "temporary_repair": {
+    "supported": false,
+    "applied": false,
+    "additions": [],
+    "summary": "No temporary source-retention repair was applied. The retained text supports exact-city, UAV/air-attack context, and episode-specific timing, but contains no current-taxonomy event-positive signal such as explosion, impact, arrival, strike, damage, fire, or air-defense action, and no reviewed same-attack basis. Adding either role would require unsupported provenance or new external retrieval.",
+    "source_files_modified": []
+  },
+  "real_replay_proof": {
+    "before_classification": "AMBIGUOUS",
+    "after_classification": "AMBIGUOUS",
+    "resulting_event_types": [],
+    "resulting_reason_codes": [
+      "AIR_CONTEXT_NOT_LINKED_TO_EVENT",
+      "AIR_MILITARY_CONTEXT",
+      "EXACT_CITY_EVENT_TEXT",
+      "MATCH_UNIQUE",
+      "NO_STRICT_EXPLOSION_EVIDENCE",
+      "REVIEW_PROVENANCE_TEMPORAL_BINDING_USED",
+      "REVIEW_PROVENANCE_USABLE",
+      "TEMPORAL_REVIEWED_VALIDATED_BINDING"
+    ],
+    "target_removed_from_qa": false,
+    "acceptance_proof_status": "BLOCKED_BEFORE_MUTATION_NO_SUPPORTED_REPAIR",
+    "note": "Because no supported append-only repair exists in retained material, the fresh real replay is also the no-mutation post-attempt state; no in-memory classifier approximation is used as acceptance proof."
+  },
+  "regression_check": {
+    "before_qa_count": 19,
+    "temporary_qa_count_after_repair": 19,
+    "added_qa_ids": [],
+    "unrelated_removed_qa_ids": [],
+    "strict_count_before": 189,
+    "strict_count_after_noop": 189,
+    "sensitivity_count_before": 219,
+    "sensitivity_count_after_noop": 219,
+    "strict_drift_outside_target": false,
+    "sensitivity_drift_outside_target": false,
+    "denominator_unchanged": true,
+    "denominator": "2297 / 2297",
+    "previously_resolved_ids_remain_absent": true
+  },
+  "restoration": {
+    "temporary_source_mutation_performed": false,
+    "source_files_restored_byte_for_byte": true,
+    "proof": "No evidence/source file was modified during this preflight; the starting HEAD remains unchanged before artifact publication.",
+    "final_evidence_git_blob_sha": "7c0a4a64b3d7000cd10e8f1b846b1e57641d8a4d"
+  },
+  "protected_files": {
+    "unchanged_during_fresh_replay": true,
+    "starting_blob_shas": {
+      "kyiv-air-alerts-grafana/data/explosion_audited_baseline.json": "5bbd2b771559eac2966aeec65d6e3b5487b9c1a9",
+      "kyiv-air-alerts-grafana/data/explosion_review_queue.json": "e6ed6776ae326a18a07978b1979dd3b265096bf0",
+      "kyiv-air-alerts-grafana/data/explosion_candidate_monitor_state.json": "3c8658880c6b93a00fb8ddbec2c4eaeed6d3f2cc",
+      "kyiv-air-alerts-grafana/data/explosion_candidate_monitor_last_run.json": "1552b13a2a9361be968cea4f09876cc20f96572f",
+      "kyiv-air-alerts-grafana/data/explosions_test.json": "3109dc02d2292efa59eddd26b34292cab2b554ab",
+      "kyiv-air-alerts-grafana/data/dashboard_data.json": "85e1d5cacfbe0af1530bbf584cb63ebdfef463e6"
+    }
+  },
+  "artifact_policy": {
+    "path": "research/sumy_88f59d_single_case_real_replay_preflight.json",
+    "only_artifact_should_be_committed": true
+  },
+  "verdict": "BLOCKED — NO COMPLETE RETAINED SOURCE SEGMENT SUPPORTS A CURRENT-TAXONOMY EVENT-POSITIVE ROLE AND SAME-ATTACK BASIS; EXTERNAL RETRIEVAL WOULD BE REQUIRED"
+}
