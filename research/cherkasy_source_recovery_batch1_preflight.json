@@ -1,0 +1,571 @@
+{
+  "artifact_type": "append_only_source_retention_preflight",
+  "authoritative_inputs": {
+    "final_evidence_git_blob_sha": "dee0019310bb4b4888a77b957c944b05919f9ce5",
+    "final_evidence_path": "kyiv-air-alerts-grafana/data/explosion_research/cherkasy/final_evidence.json",
+    "monitor_git_blob_sha": "eefd63aeebc17347b750f61115842be6c53a79da",
+    "qa_git_blob_sha": "a91b3c1773d89103bca6b91c92a1193967b2ab36",
+    "qa_path": "research/historical_replay_qa/cherkasy.json",
+    "recovery_inventory_git_blob_sha": "99f21de9824cbbe030813c1d45ed7b64dcce538d",
+    "recovery_inventory_path": "research/cherkasy_remaining_34_source_recovery_inventory.json",
+    "replay_tool_git_blob_sha": "7509d9f391d206a2b052ff35ee8993ced33c6936",
+    "source_retention_git_blob_sha": "037dd670f031fd9b9d15ec903d27e9b25137588c",
+    "source_retention_path": "research/historical_replay_source_retention/cherkasy.json"
+  },
+  "branch": "multicity-wip-2026-09-16",
+  "cases": [
+    {
+      "current_retained_evidence": [
+        {
+          "binding": {
+            "candidates": [
+              "2aef6fef78547b13c04b5de7"
+            ],
+            "episode_id": "2aef6fef78547b13c04b5de7",
+            "method": "alert_start_within_90s"
+          },
+          "bucket": "strict_events",
+          "candidate_id": "e494172f878c24b39a0028a8",
+          "evidence": "Suspilne reported an explosion in Cherkasy at 23:25 and a subsequent series during a Russian UAV attack. — strict: exact_city + aerial_war + event_time_inside_episode",
+          "source_url": "https://suspilne.media/cherkasy/1191166-armia-rf-atakuvala-cerkasinu-u-nic-na-18-grudna-udarnimi-bezpilotnikami/"
+        }
+      ],
+      "current_rule_check_after_append": {
+        "air_context_pass": true,
+        "bucket": "strict_events",
+        "event_classification_pass": true,
+        "event_types": [
+          "damage"
+        ],
+        "exact_city_pass": true,
+        "proposed_outcome": "approved_strict",
+        "reason_codes": [
+          "MATCH_UNIQUE",
+          "EXACT_CITY_EVENT_TEXT",
+          "STRICT_EXPLOSION_EVIDENCE",
+          "ATTACK_EVENT_TYPES:damage",
+          "AIR_MILITARY_CONTEXT",
+          "SAME_ATTACK_CONTEXT_SUPPORTED",
+          "TEMPORAL_REVIEWED_VALIDATED_BINDING",
+          "REVIEW_PROVENANCE_USABLE",
+          "REVIEW_PROVENANCE_TEMPORAL_BINDING_USED"
+        ],
+        "row_index": 37,
+        "same_attack_pass": true,
+        "temporal_code": "TEMPORAL_REVIEWED_VALIDATED_BINDING",
+        "temporal_pass": true
+      },
+      "episode_id": "2aef6fef78547b13c04b5de7",
+      "exact_city_evidence": "дронової атаки на Черкаси",
+      "frozen_old_status": "STRICT",
+      "missing_source_roles": [
+        "exact_city",
+        "strict_explosion",
+        "air_military_context"
+      ],
+      "new_regression_ids": [],
+      "non_target_drift": [],
+      "old_qa_category": "STRICT_DOWNGRADE",
+      "patch_record": {
+        "bucket": "strict_events",
+        "new_evidence": "Suspilne reported an explosion in Cherkasy at 23:25 and a subsequent series during a Russian UAV attack. — source-retention supplement: Унаслідок дронової атаки на Черкаси є пошкодження інфраструктури, повідомив керівник Черкаської ОВА Ігор Табурець.",
+        "old_evidence": "Suspilne reported an explosion in Cherkasy at 23:25 and a subsequent series during a Russian UAV attack.",
+        "row_index": 37
+      },
+      "reason_codes": [
+        "MATCH_UNIQUE",
+        "NO_AIR_MILITARY_CONTEXT",
+        "NO_EXACT_CITY_EVENT_TEXT",
+        "NO_STRICT_EXPLOSION_EVIDENCE",
+        "REVIEW_PROVENANCE_TEMPORAL_BINDING_USED",
+        "REVIEW_PROVENANCE_USABLE",
+        "TEMPORAL_REVIEWED_VALIDATED_BINDING"
+      ],
+      "recovered_minimal_fragment": "Унаслідок дронової атаки на Черкаси є пошкодження інфраструктури, повідомив керівник Черкаської ОВА Ігор Табурець.",
+      "regression_count": 0,
+      "replayed_status": "AMBIGUOUS",
+      "retained_source": "https://suspilne.media/cherkasy/1191166-armia-rf-atakuvala-cerkasinu-u-nic-na-18-grudna-udarnimi-bezpilotnikami/",
+      "same_attack_composition_basis": "Same retained Suspilne article and same overnight 17/18 December drone attack; the supplement directly links attack consequence to Черкаси and does not borrow the prior-night PPO item.",
+      "source_file_sha256_before_test": "f863e419d3767798c497d83bcd06c49efb02f785c98627eb6d660ee8c23cc042",
+      "source_local_verification": {
+        "all_components_present": true,
+        "components": [
+          {
+            "present": true,
+            "text": "Унаслідок дронової атаки на Черкаси є пошкодження інфраструктури, повідомив керівник Черкаської ОВА Ігор Табурець."
+          }
+        ],
+        "content_hash_matches_inventory": true,
+        "expected_retained_content_sha256": "6415584ec5e7ed2c8808b961d70e29965b5c8f58974313e2fbb2c5ee5e6a1887",
+        "fresh_source_content_sha256": "6415584ec5e7ed2c8808b961d70e29965b5c8f58974313e2fbb2c5ee5e6a1887",
+        "http_status": 200,
+        "resolved_url": "https://suspilne.media/cherkasy/1191166-armia-rf-atakuvala-cerkasinu-u-nic-na-18-grudna-udarnimi-bezpilotnikami/",
+        "status": "OK"
+      },
+      "target_removed_from_qa": true,
+      "temporal_evidence": "Existing frozen reviewed binding to the 23:25 explosion remains unchanged; supplement is same overnight drone attack in the retained source.",
+      "temporary_post_single_repair_qa_count": 33,
+      "temporary_replay_result": "CITY REPLAY COMPLETE — QA REQUIRED",
+      "verdict": "ELIGIBLE_FOR_ATOMIC_SOURCE_REPAIR"
+    },
+    {
+      "current_retained_evidence": [
+        {
+          "binding": {
+            "candidates": [
+              "2d71c76ca60e3344054b2f29"
+            ],
+            "episode_id": "2d71c76ca60e3344054b2f29",
+            "method": "alert_start_within_90s"
+          },
+          "bucket": "strict_events",
+          "candidate_id": "0b5e14c1e919aa0d7c1dc7bd",
+          "evidence": "The first of seven explosions in Cherkasy was heard at 23:18 during the Russian drone attack; the alert began at 22:20. — strict: exact city, aerial-war context, timed event inside the cross-midnight frozen episode",
+          "source_url": "https://suspilne.media/cherkasy/1009129-u-nic-na-4-travna-u-cerkasah-bulo-cutno-vibuhi-rosiani-atakuvali-dronami/"
+        }
+      ],
+      "current_rule_check_after_append": {
+        "air_context_pass": true,
+        "bucket": "strict_events",
+        "event_classification_pass": true,
+        "event_types": [
+          "explosion"
+        ],
+        "exact_city_pass": true,
+        "proposed_outcome": "approved_strict",
+        "reason_codes": [
+          "MATCH_UNIQUE",
+          "EXACT_CITY_EVENT_TEXT",
+          "STRICT_EXPLOSION_EVIDENCE",
+          "ATTACK_EVENT_TYPES:explosion",
+          "AIR_MILITARY_CONTEXT",
+          "SAME_ATTACK_CONTEXT_SUPPORTED",
+          "TEMPORAL_REVIEWED_VALIDATED_BINDING",
+          "REVIEW_PROVENANCE_USABLE",
+          "REVIEW_PROVENANCE_TEMPORAL_BINDING_USED"
+        ],
+        "row_index": 20,
+        "same_attack_pass": true,
+        "temporal_code": "TEMPORAL_REVIEWED_VALIDATED_BINDING",
+        "temporal_pass": true
+      },
+      "episode_id": "2d71c76ca60e3344054b2f29",
+      "exact_city_evidence": "атакували Черкаси ... Перший вибух у Черкасах",
+      "frozen_old_status": "STRICT",
+      "missing_source_roles": [
+        "exact_city",
+        "strict_explosion",
+        "air_military_context"
+      ],
+      "new_regression_ids": [],
+      "non_target_drift": [],
+      "old_qa_category": "STRICT_DOWNGRADE",
+      "patch_record": {
+        "bucket": "strict_events",
+        "new_evidence": "The first of seven explosions in Cherkasy was heard at 23:18 during the Russian drone attack; the alert began at 22:20. — source-retention supplement: У ніч проти 4 травня росіяни атакували Черкаси та область ударними безпілотниками — Перший вибух у Черкасах пролунав о 23:18.",
+        "old_evidence": "The first of seven explosions in Cherkasy was heard at 23:18 during the Russian drone attack; the alert began at 22:20.",
+        "row_index": 20
+      },
+      "reason_codes": [
+        "MATCH_UNIQUE",
+        "NO_AIR_MILITARY_CONTEXT",
+        "NO_EXACT_CITY_EVENT_TEXT",
+        "NO_STRICT_EXPLOSION_EVIDENCE",
+        "REVIEW_PROVENANCE_TEMPORAL_BINDING_USED",
+        "REVIEW_PROVENANCE_USABLE",
+        "TEMPORAL_REVIEWED_VALIDATED_BINDING"
+      ],
+      "recovered_minimal_fragment": "У ніч проти 4 травня росіяни атакували Черкаси та область ударними безпілотниками — Перший вибух у Черкасах пролунав о 23:18.",
+      "regression_count": 0,
+      "replayed_status": "AMBIGUOUS",
+      "retained_source": "https://suspilne.media/cherkasy/1009129-u-nic-na-4-travna-u-cerkasah-bulo-cutno-vibuhi-rosiani-atakuvali-dronami/",
+      "same_attack_composition_basis": "Deterministic source-local composition of two statements in the same Suspilne attack chronology: the overnight strike-UAV attack on Cherkasy and its first exact-city explosion at 23:18; no intervening separate incident.",
+      "source_file_sha256_before_test": "f863e419d3767798c497d83bcd06c49efb02f785c98627eb6d660ee8c23cc042",
+      "source_local_verification": {
+        "all_components_present": true,
+        "components": [
+          {
+            "present": true,
+            "text": "У ніч проти 4 травня росіяни атакували Черкаси та область ударними безпілотниками."
+          },
+          {
+            "present": true,
+            "text": "Перший вибух у Черкасах пролунав о 23:18."
+          }
+        ],
+        "content_hash_matches_inventory": true,
+        "expected_retained_content_sha256": "b84b23c12307397813f8e40f7ff28aaa87069c1b77fe921c8da76a618fcec817",
+        "fresh_source_content_sha256": "b84b23c12307397813f8e40f7ff28aaa87069c1b77fe921c8da76a618fcec817",
+        "http_status": 200,
+        "resolved_url": "https://suspilne.media/cherkasy/1009129-u-nic-na-4-travna-u-cerkasah-bulo-cutno-vibuhi-rosiani-atakuvali-dronami/",
+        "status": "OK"
+      },
+      "target_removed_from_qa": true,
+      "temporal_evidence": "First explosion at 23:18, inside the frozen episode that began at 22:20 local time.",
+      "temporary_post_single_repair_qa_count": 33,
+      "temporary_replay_result": "CITY REPLAY COMPLETE — QA REQUIRED",
+      "verdict": "ELIGIBLE_FOR_ATOMIC_SOURCE_REPAIR"
+    },
+    {
+      "current_retained_evidence": [
+        {
+          "binding": {
+            "candidates": [
+              "2e0c503d42b611fcfb0d74cc"
+            ],
+            "episode_id": "2e0c503d42b611fcfb0d74cc",
+            "method": "alert_start_within_90s"
+          },
+          "bucket": "strict_events",
+          "candidate_id": "40d557fc6499cb0155ae712c",
+          "evidence": "Suspilne reported explosions heard in Cherkasy during the air alert in a Russian drone attack. — strict: exact_city + aerial_war + explicit_during_alert",
+          "source_url": "https://suspilne.media/cherkasy/1221984-armia-rf-atakuvala-cerkasinu-dronami/"
+        }
+      ],
+      "current_rule_check_after_append": {
+        "air_context_pass": true,
+        "bucket": "strict_events",
+        "event_classification_pass": true,
+        "event_types": [
+          "explosion"
+        ],
+        "exact_city_pass": true,
+        "proposed_outcome": "approved_strict",
+        "reason_codes": [
+          "MATCH_UNIQUE",
+          "EXACT_CITY_EVENT_TEXT",
+          "STRICT_EXPLOSION_EVIDENCE",
+          "ATTACK_EVENT_TYPES:explosion",
+          "AIR_MILITARY_CONTEXT",
+          "SAME_ATTACK_CONTEXT_SUPPORTED",
+          "TEMPORAL_REVIEWED_VALIDATED_BINDING",
+          "REVIEW_PROVENANCE_USABLE",
+          "REVIEW_PROVENANCE_TEMPORAL_BINDING_USED"
+        ],
+        "row_index": 40,
+        "same_attack_pass": true,
+        "temporal_code": "TEMPORAL_REVIEWED_VALIDATED_BINDING",
+        "temporal_pass": true
+      },
+      "episode_id": "2e0c503d42b611fcfb0d74cc",
+      "exact_city_evidence": "У Черкасах ... було чутно вибухи",
+      "frozen_old_status": "STRICT",
+      "missing_source_roles": [
+        "exact_city",
+        "strict_explosion",
+        "air_military_context"
+      ],
+      "new_regression_ids": [],
+      "non_target_drift": [],
+      "old_qa_category": "STRICT_DOWNGRADE",
+      "patch_record": {
+        "bucket": "strict_events",
+        "new_evidence": "Suspilne reported explosions heard in Cherkasy during the air alert in a Russian drone attack. — source-retention supplement: У Черкасах проти ночі на 27 січня під час повітряної тривоги було чутно вибухи.",
+        "old_evidence": "Suspilne reported explosions heard in Cherkasy during the air alert in a Russian drone attack.",
+        "row_index": 40
+      },
+      "reason_codes": [
+        "MATCH_UNIQUE",
+        "NO_AIR_MILITARY_CONTEXT",
+        "NO_EXACT_CITY_EVENT_TEXT",
+        "NO_STRICT_EXPLOSION_EVIDENCE",
+        "REVIEW_PROVENANCE_TEMPORAL_BINDING_USED",
+        "REVIEW_PROVENANCE_USABLE",
+        "TEMPORAL_REVIEWED_VALIDATED_BINDING"
+      ],
+      "recovered_minimal_fragment": "У Черкасах проти ночі на 27 січня під час повітряної тривоги було чутно вибухи.",
+      "regression_count": 0,
+      "replayed_status": "AMBIGUOUS",
+      "retained_source": "https://suspilne.media/cherkasy/1221984-armia-rf-atakuvala-cerkasinu-dronami/",
+      "same_attack_composition_basis": "Exact city, explosion and air-alert context co-occur in one retained-source sentence; no cross-incident composition.",
+      "source_file_sha256_before_test": "f863e419d3767798c497d83bcd06c49efb02f785c98627eb6d660ee8c23cc042",
+      "source_local_verification": {
+        "all_components_present": true,
+        "components": [
+          {
+            "present": true,
+            "text": "У Черкасах проти ночі на 27 січня під час повітряної тривоги було чутно вибухи."
+          }
+        ],
+        "content_hash_matches_inventory": true,
+        "expected_retained_content_sha256": "99be633750ecb025c552f8345e492926c9dfb110b5656ab61d438d09326078ec",
+        "fresh_source_content_sha256": "99be633750ecb025c552f8345e492926c9dfb110b5656ab61d438d09326078ec",
+        "http_status": 200,
+        "resolved_url": "https://suspilne.media/cherkasy/1221984-armia-rf-atakuvala-cerkasinu-dronami/",
+        "status": "OK"
+      },
+      "target_removed_from_qa": true,
+      "temporal_evidence": "The retained source explicitly says the Cherkasy explosions occurred during the overnight air alert on 27 January.",
+      "temporary_post_single_repair_qa_count": 33,
+      "temporary_replay_result": "CITY REPLAY COMPLETE — QA REQUIRED",
+      "verdict": "ELIGIBLE_FOR_ATOMIC_SOURCE_REPAIR"
+    },
+    {
+      "current_retained_evidence": [
+        {
+          "binding": {
+            "candidates": [
+              "484842ab6691a38b559ac789"
+            ],
+            "episode_id": "484842ab6691a38b559ac789",
+            "method": "alert_start_within_90s"
+          },
+          "bucket": "strict_events",
+          "candidate_id": "1d5d0227c19595e7402bd088",
+          "evidence": "The first explosion in Cherkasy was reported at about 08:45 during a mass Russian UAV attack. — strict: exact city, aerial-war context, timed event inside the frozen episode",
+          "source_url": "https://fakty.com.ua/ua/proisshestvija/20250428-vybuhy-v-cherkasah-shho-stalosya-sogodni-28-kvitnya-2025/"
+        }
+      ],
+      "current_rule_check_after_append": {
+        "air_context_pass": true,
+        "bucket": "strict_events",
+        "event_classification_pass": true,
+        "event_types": [
+          "explosion",
+          "damage"
+        ],
+        "exact_city_pass": true,
+        "proposed_outcome": "approved_strict",
+        "reason_codes": [
+          "MATCH_UNIQUE",
+          "EXACT_CITY_EVENT_TEXT",
+          "STRICT_EXPLOSION_EVIDENCE",
+          "ATTACK_EVENT_TYPES:explosion,damage",
+          "AIR_MILITARY_CONTEXT",
+          "SAME_ATTACK_CONTEXT_SUPPORTED",
+          "TEMPORAL_REVIEWED_VALIDATED_BINDING",
+          "REVIEW_PROVENANCE_USABLE",
+          "REVIEW_PROVENANCE_TEMPORAL_BINDING_USED"
+        ],
+        "row_index": 19,
+        "same_attack_pass": true,
+        "temporal_code": "TEMPORAL_REVIEWED_VALIDATED_BINDING",
+        "temporal_pass": true
+      },
+      "episode_id": "484842ab6691a38b559ac789",
+      "exact_city_evidence": "вибухів у Черкасах",
+      "frozen_old_status": "STRICT",
+      "missing_source_roles": [
+        "exact_city",
+        "strict_explosion",
+        "air_military_context"
+      ],
+      "new_regression_ids": [],
+      "non_target_drift": [],
+      "old_qa_category": "STRICT_DOWNGRADE",
+      "patch_record": {
+        "bucket": "strict_events",
+        "new_evidence": "The first explosion in Cherkasy was reported at about 08:45 during a mass Russian UAV attack. — source-retention supplement: За чотири години вибухів у Черкасах 28 квітня запущені росіянами дрони пошкодили об’єкт газового господарства.",
+        "old_evidence": "The first explosion in Cherkasy was reported at about 08:45 during a mass Russian UAV attack.",
+        "row_index": 19
+      },
+      "reason_codes": [
+        "MATCH_UNIQUE",
+        "NO_AIR_MILITARY_CONTEXT",
+        "NO_EXACT_CITY_EVENT_TEXT",
+        "NO_STRICT_EXPLOSION_EVIDENCE",
+        "REVIEW_PROVENANCE_TEMPORAL_BINDING_USED",
+        "REVIEW_PROVENANCE_USABLE",
+        "TEMPORAL_REVIEWED_VALIDATED_BINDING"
+      ],
+      "recovered_minimal_fragment": "За чотири години вибухів у Черкасах 28 квітня запущені росіянами дрони пошкодили об’єкт газового господарства.",
+      "regression_count": 0,
+      "replayed_status": "AMBIGUOUS",
+      "retained_source": "https://fakty.com.ua/ua/proisshestvija/20250428-vybuhy-v-cherkasah-shho-stalosya-sogodni-28-kvitnya-2025/",
+      "same_attack_composition_basis": "Single retained-source sentence ties Cherkasy explosions, Russian drones and attack damage; no unrelated incident or publication-time inference.",
+      "source_file_sha256_before_test": "f863e419d3767798c497d83bcd06c49efb02f785c98627eb6d660ee8c23cc042",
+      "source_local_verification": {
+        "all_components_present": true,
+        "components": [
+          {
+            "present": true,
+            "text": "За чотири години вибухів у Черкасах 28 квітня запущені росіянами дрони пошкодили об’єкт газового господарства."
+          }
+        ],
+        "content_hash_matches_inventory": true,
+        "expected_retained_content_sha256": "f23b0665a1ebefe80001eba4df29c4f2db9bee4b33615fcf65bf9492a08e8d79",
+        "fresh_source_content_sha256": "f23b0665a1ebefe80001eba4df29c4f2db9bee4b33615fcf65bf9492a08e8d79",
+        "http_status": 200,
+        "resolved_url": "https://fakty.com.ua/ua/proisshestvija/20250428-vybuhy-v-cherkasah-shho-stalosya-sogodni-28-kvitnya-2025/",
+        "status": "OK"
+      },
+      "target_removed_from_qa": true,
+      "temporal_evidence": "28 April four-hour attack window corresponds to the frozen 08:13–12:56 local alert; existing reviewed episode binding is retained.",
+      "temporary_post_single_repair_qa_count": 33,
+      "temporary_replay_result": "CITY REPLAY COMPLETE — QA REQUIRED",
+      "verdict": "ELIGIBLE_FOR_ATOMIC_SOURCE_REPAIR"
+    }
+  ],
+  "city_key": "cherkasy",
+  "combined_patch_records": {
+    "2aef6fef78547b13c04b5de7": {
+      "bucket": "strict_events",
+      "new_evidence": "Suspilne reported an explosion in Cherkasy at 23:25 and a subsequent series during a Russian UAV attack. — source-retention supplement: Унаслідок дронової атаки на Черкаси є пошкодження інфраструктури, повідомив керівник Черкаської ОВА Ігор Табурець.",
+      "old_evidence": "Suspilne reported an explosion in Cherkasy at 23:25 and a subsequent series during a Russian UAV attack.",
+      "row_index": 37
+    },
+    "2d71c76ca60e3344054b2f29": {
+      "bucket": "strict_events",
+      "new_evidence": "The first of seven explosions in Cherkasy was heard at 23:18 during the Russian drone attack; the alert began at 22:20. — source-retention supplement: У ніч проти 4 травня росіяни атакували Черкаси та область ударними безпілотниками — Перший вибух у Черкасах пролунав о 23:18.",
+      "old_evidence": "The first of seven explosions in Cherkasy was heard at 23:18 during the Russian drone attack; the alert began at 22:20.",
+      "row_index": 20
+    },
+    "2e0c503d42b611fcfb0d74cc": {
+      "bucket": "strict_events",
+      "new_evidence": "Suspilne reported explosions heard in Cherkasy during the air alert in a Russian drone attack. — source-retention supplement: У Черкасах проти ночі на 27 січня під час повітряної тривоги було чутно вибухи.",
+      "old_evidence": "Suspilne reported explosions heard in Cherkasy during the air alert in a Russian drone attack.",
+      "row_index": 40
+    },
+    "484842ab6691a38b559ac789": {
+      "bucket": "strict_events",
+      "new_evidence": "The first explosion in Cherkasy was reported at about 08:45 during a mass Russian UAV attack. — source-retention supplement: За чотири години вибухів у Черкасах 28 квітня запущені росіянами дрони пошкодили об’єкт газового господарства.",
+      "old_evidence": "The first explosion in Cherkasy was reported at about 08:45 during a mass Russian UAV attack.",
+      "row_index": 19
+    }
+  },
+  "current_before_drift_verification": {
+    "added_ids": [],
+    "dropped_ids": [],
+    "exact_set_match": true,
+    "fresh_current_replay_qa_count": 34,
+    "passed": true,
+    "persistent_qa_count": 34,
+    "replay_error_count": 0
+  },
+  "generated_at_utc": "2026-09-27T10:18:39.886917Z",
+  "input_head": "07876a9f80547d07b1f68c74f13d2052abb27eef",
+  "live_control_and_self_tests": {
+    "attack_event_control_replay": {
+      "passed": true,
+      "return_code": 0,
+      "stderr_tail": "",
+      "stdout_tail": "{\n  \"schema_version\": 1,\n  \"evaluated_candidates\": 762,\n  \"changed_candidate_count\": 0,\n  \"targeted_damage_fire_widening_count\": 0,\n  \"targeted_relative_chronology_count\": 0,\n  \"uncontrolled_drift_count\": 0,\n  \"approved_regression_count\": 0,\n  \"changes\": [],\n  \"uncontrolled_drift\": [],\n  \"approved_regressions\": [],\n  \"verdict\": \"ATTACK-EVENT CLASSIFIER CONTROL REPLAY CLEAN\"\n}\n"
+    },
+    "monitor_self_test": {
+      "passed": true,
+      "return_code": 0,
+      "stderr_tail": "",
+      "stdout_tail": "Provenance hardening frozen replay OK: 50/50 approvals (35 strict, 15 sensitivity); 2/2 deterministic negatives; 58/58 no-adapter regression; 20/20 episode replay (15 strict, 1 sensitivity, 4 unresolved); 8/8 transitions (7 strict, 1 sensitivity -> needs_review); 50 ordinary unreviewed controls; 3/3 composition-positive recomputations; strict episode event IDs unique (18/18); 50 ordinary unreviewed identity controls (persisted deltas=0, adapter widening=0); future-run unexpected status changes=0; stale unique+MATCH_NONE=0; matching refresh checked=660\nSelf-test OK: 23 audited cities; classification requirements IR01-IR20 covered; PVO-only, controlled-blast, and publisher-branding guards; KAB/UAV/missile context; episode-specific explicit/clock/live temporal attribution; near-boundary and conservative single-episode sensitivity; late discovery; overlap/near-duplicate guards; dry replay purity\n"
+    }
+  },
+  "protected_file_verification": {
+    "after": {
+      "kyiv-air-alerts-grafana/data/dashboard_data.json": {
+        "git_blob_sha": "85e1d5cacfbe0af1530bbf584cb63ebdfef463e6",
+        "sha256": "0783769b7311079f7c850f2a031d2e3246b04084d0acdadbc08fbf5756d41f38"
+      },
+      "kyiv-air-alerts-grafana/data/explosion_audited_baseline.json": {
+        "git_blob_sha": "5bbd2b771559eac2966aeec65d6e3b5487b9c1a9",
+        "sha256": "6b1ef220a09e543a0fd9374aab030ed5adac2c6a2b63bb36561a3c22d1da1518"
+      },
+      "kyiv-air-alerts-grafana/data/explosion_candidate_monitor_last_run.json": {
+        "git_blob_sha": "1552b13a2a9361be968cea4f09876cc20f96572f",
+        "sha256": "d912957ed4874b07c81247c1a8c478bfc3d789cc2318ba34d5f4733e71f8ad31"
+      },
+      "kyiv-air-alerts-grafana/data/explosion_candidate_monitor_state.json": {
+        "git_blob_sha": "3c8658880c6b93a00fb8ddbec2c4eaeed6d3f2cc",
+        "sha256": "c5abee4f85615b6527b278a72380fecd3e0109d36d91c315fc41fde3eb19bf66"
+      },
+      "kyiv-air-alerts-grafana/data/explosion_research/cherkasy/final_evidence.json": {
+        "git_blob_sha": "dee0019310bb4b4888a77b957c944b05919f9ce5",
+        "sha256": "f863e419d3767798c497d83bcd06c49efb02f785c98627eb6d660ee8c23cc042"
+      },
+      "kyiv-air-alerts-grafana/data/explosion_review_queue.json": {
+        "git_blob_sha": "e6ed6776ae326a18a07978b1979dd3b265096bf0",
+        "sha256": "980ecf73bd50312babdf6c9b4671bc4e05fd200eb103ba3993ffbe759bb2e2ee"
+      },
+      "kyiv-air-alerts-grafana/data/explosions_test.json": {
+        "git_blob_sha": "3109dc02d2292efa59eddd26b34292cab2b554ab",
+        "sha256": "a4d9eca5c1359a06f8a20047020ab7a54bab34e57e331f93fdeedb5499ea897c"
+      }
+    },
+    "before": {
+      "kyiv-air-alerts-grafana/data/dashboard_data.json": {
+        "git_blob_sha": "85e1d5cacfbe0af1530bbf584cb63ebdfef463e6",
+        "sha256": "0783769b7311079f7c850f2a031d2e3246b04084d0acdadbc08fbf5756d41f38"
+      },
+      "kyiv-air-alerts-grafana/data/explosion_audited_baseline.json": {
+        "git_blob_sha": "5bbd2b771559eac2966aeec65d6e3b5487b9c1a9",
+        "sha256": "6b1ef220a09e543a0fd9374aab030ed5adac2c6a2b63bb36561a3c22d1da1518"
+      },
+      "kyiv-air-alerts-grafana/data/explosion_candidate_monitor_last_run.json": {
+        "git_blob_sha": "1552b13a2a9361be968cea4f09876cc20f96572f",
+        "sha256": "d912957ed4874b07c81247c1a8c478bfc3d789cc2318ba34d5f4733e71f8ad31"
+      },
+      "kyiv-air-alerts-grafana/data/explosion_candidate_monitor_state.json": {
+        "git_blob_sha": "3c8658880c6b93a00fb8ddbec2c4eaeed6d3f2cc",
+        "sha256": "c5abee4f85615b6527b278a72380fecd3e0109d36d91c315fc41fde3eb19bf66"
+      },
+      "kyiv-air-alerts-grafana/data/explosion_research/cherkasy/final_evidence.json": {
+        "git_blob_sha": "dee0019310bb4b4888a77b957c944b05919f9ce5",
+        "sha256": "f863e419d3767798c497d83bcd06c49efb02f785c98627eb6d660ee8c23cc042"
+      },
+      "kyiv-air-alerts-grafana/data/explosion_review_queue.json": {
+        "git_blob_sha": "e6ed6776ae326a18a07978b1979dd3b265096bf0",
+        "sha256": "980ecf73bd50312babdf6c9b4671bc4e05fd200eb103ba3993ffbe759bb2e2ee"
+      },
+      "kyiv-air-alerts-grafana/data/explosions_test.json": {
+        "git_blob_sha": "3109dc02d2292efa59eddd26b34292cab2b554ab",
+        "sha256": "a4d9eca5c1359a06f8a20047020ab7a54bab34e57e331f93fdeedb5499ea897c"
+      }
+    },
+    "unchanged": true
+  },
+  "schema_version": 1,
+  "scope": {
+    "canonical_source_repairs_applied": false,
+    "dry_run_only": true,
+    "full_23_city_orchestrator_run": false,
+    "other_cities_touched": false,
+    "target_episode_ids": [
+      "2aef6fef78547b13c04b5de7",
+      "2d71c76ca60e3344054b2f29",
+      "2e0c503d42b611fcfb0d74cc",
+      "484842ab6691a38b559ac789"
+    ]
+  },
+  "source_file_integrity": {
+    "canonical_mutation_performed": false,
+    "final_git_blob_sha": "dee0019310bb4b4888a77b957c944b05919f9ce5",
+    "final_sha256": "f863e419d3767798c497d83bcd06c49efb02f785c98627eb6d660ee8c23cc042",
+    "initial_git_blob_sha": "dee0019310bb4b4888a77b957c944b05919f9ce5",
+    "initial_sha256": "f863e419d3767798c497d83bcd06c49efb02f785c98627eb6d660ee8c23cc042",
+    "restored_byte_for_byte": true,
+    "temporary_mutation_performed": true
+  },
+  "source_recovery_methodology": {
+    "append_only": true,
+    "classifier_rules_changed": false,
+    "existing_evidence_rewritten": false,
+    "publication_time_used_as_event_time": false,
+    "source_scope": "Only already-retained target source URLs; no new-source search."
+  },
+  "summary": {
+    "combined_replay_error_count": 0,
+    "controls_clean": true,
+    "eligible_count": 4,
+    "eligible_ids": [
+      "2aef6fef78547b13c04b5de7",
+      "2d71c76ca60e3344054b2f29",
+      "2e0c503d42b611fcfb0d74cc",
+      "484842ab6691a38b559ac789"
+    ],
+    "new_new_ambiguous": [],
+    "new_regressions": [],
+    "new_strict_downgrade": [],
+    "non_target_drift": [],
+    "protected_files_unchanged": true,
+    "source_file_restored_byte_for_byte": true,
+    "targets_removed_from_qa_in_dry_run": [
+      "2aef6fef78547b13c04b5de7",
+      "2d71c76ca60e3344054b2f29",
+      "2e0c503d42b611fcfb0d74cc",
+      "484842ab6691a38b559ac789"
+    ],
+    "temporary_post_repair_qa_count": 30,
+    "unresolved_count": 0,
+    "unresolved_ids": [],
+    "verdict": "CHERKASY BATCH 1 READY FOR ATOMIC APPLY"
+  },
+  "workflow_run_id": "36312108288"
+}
