@@ -107,6 +107,7 @@ def version_identity() -> dict:
         "orchestrator_sha": blob_for(Path(__file__).resolve()),
         "discovery_sha": blob_for(ROOT / "scripts" / "discover_historical_attack_events.py"),
         "sevastopol_pilot_sha": blob_for(ROOT / "scripts" / "run_historical_attack_event_source_adapter_pilot.py"),
+        "source_registry_sha": blob_for(REGISTRY_PATH),
         "normalization_version": NORMALIZATION_VERSION,
         "methodology_version": METHODOLOGY_VERSION,
     }
@@ -151,6 +152,29 @@ def load_city_episodes(city_key: str) -> list[dict]:
         [dict(ep) for ep in episodes],
         key=lambda ep: (str(ep.get("alert_start") or ""), str(ep.get("episode_id") or "")),
     )
+
+
+def frozen_city_episodes(city_key: str, city_state: dict) -> list[dict]:
+    live = load_city_episodes(city_key)
+    frozen_ids = [str(x) for x in (city_state.get("frozen_episode_ids") or []) if str(x)]
+    if not frozen_ids:
+        raise RuntimeError(f"FROZEN_EPISODE_UNIVERSE_MISSING:{city_key}")
+    if len(frozen_ids) != len(set(frozen_ids)):
+        raise RuntimeError(f"FROZEN_EPISODE_UNIVERSE_DUPLICATE_IDS:{city_key}")
+    expected = int(city_state.get("total_episodes") or 0)
+    if len(frozen_ids) != expected:
+        raise RuntimeError(
+            f"FROZEN_EPISODE_UNIVERSE_COUNT_MISMATCH:{city_key}:{len(frozen_ids)}!={expected}"
+        )
+    digest = hashlib.sha256("\n".join(frozen_ids).encode("utf-8")).hexdigest()
+    frozen_digest = str(city_state.get("frozen_episode_ids_sha256") or "")
+    if frozen_digest and digest != frozen_digest:
+        raise RuntimeError(f"FROZEN_EPISODE_UNIVERSE_HASH_MISMATCH:{city_key}")
+    by_id = {str(ep.get("episode_id") or ""): ep for ep in live}
+    missing = [eid for eid in frozen_ids if eid not in by_id]
+    if missing:
+        raise RuntimeError(f"FROZEN_EPISODE_UNIVERSE_DRIFT:{city_key}:missing={len(missing)}")
+    return [by_id[eid] for eid in frozen_ids]
 
 
 def campaign_status_template(campaign_id: str, versions: dict) -> dict:
@@ -574,6 +598,36 @@ def refresh_city_counts(city_state: dict) -> None:
     city_state["terminal_episodes"] = sum(terminal_state(str(x.get("state") or "")) for x in states.values())
     city_state["retryable_episodes"] = sum(str(x.get("state") or "") == "SOURCE_FETCH_RETRY_REQUIRED" for x in states.values())
     city_state["qa_episodes"] = sum(bool(x.get("qa_reasons")) for x in states.values())
+    city_state["strict_event_positive"] = sum(str(x.get("state") or "") == "STRICT_EVENT_POSITIVE" for x in states.values())
+    city_state["sensitivity_only_event_positive"] = sum(str(x.get("state") or "") == "SENSITIVITY_EVENT_POSITIVE" for x in states.values())
+    city_state["no_confirmed_event"] = sum(str(x.get("state") or "") == "NO_CONFIRMED_EVENT" for x in states.values())
+    city_state["needs_review"] = sum(str(x.get("state") or "") == "NEEDS_REVIEW" for x in states.values())
+    city_state["source_retry_required"] = sum(str(x.get("state") or "") == "SOURCE_FETCH_RETRY_REQUIRED" for x in states.values())
+    city_state["observations_found"] = sum(int(x.get("observation_count") or 0) for x in states.values())
+
+
+def refresh_campaign_counts(status: dict) -> None:
+    frozen_cities = [str(x) for x in (status.get("frozen_cities") or [])]
+    rows = [
+        (status.get("cities") or {}).get(key) or {}
+        for key in frozen_cities
+        if key in (status.get("cities") or {})
+    ]
+    total = int(status.get("frozen_total_episodes") or sum(int(row.get("total_episodes") or 0) for row in rows))
+    processed = sum(int(row.get("scanned_episodes") or 0) for row in rows)
+    terminal = sum(int(row.get("terminal_episodes") or 0) for row in rows)
+    status["progress"] = {
+        "processed": processed,
+        "total": total,
+        "terminal": terminal,
+        "display": f"{processed} / {total}",
+    }
+    if processed == 0:
+        status["status"] = "QUEUED"
+    elif rows and all(str(row.get("status") or "") in {"COMPLETE", "BLOCKED_SOURCE_FAILURE", "BLOCKED_SOURCE_ADAPTER"} for row in rows):
+        status["status"] = "COMPLETE" if terminal == total else "BLOCKED"
+    else:
+        status["status"] = "RUNNING"
 
 
 def run_one_batch(args) -> dict:
@@ -590,7 +644,15 @@ def run_one_batch(args) -> dict:
             row["classifier_sha"] = versions["classifier_sha"]
             row["adapter_sha"] = versions["source_adapter_sha"]
 
-    ready = [row["city_key"] for row in replay_ready_cities()]
+    live_ready = [row["city_key"] for row in replay_ready_cities()]
+    frozen_ready = [str(x) for x in (status.get("frozen_cities") or [])]
+    if frozen_ready:
+        missing_ready = [key for key in frozen_ready if key not in live_ready]
+        if missing_ready:
+            raise RuntimeError("FROZEN_CITY_REPLAY_READINESS_DRIFT:" + ",".join(missing_ready))
+        ready = frozen_ready
+    else:
+        ready = live_ready
     if args.city_key == "auto":
         priority = registry.get("priority") or sorted(ready)
         city_key = next((
@@ -611,11 +673,12 @@ def run_one_batch(args) -> dict:
     city_state = (status.get("cities") or {}).get(city_key)
     if not city_state:
         raise RuntimeError(f"CITY_NOT_REPLAY_READY:{city_key}")
-    episodes = load_city_episodes(city_key)
+    episodes = frozen_city_episodes(city_key, city_state)
     selected = select_work(episodes, city_state, args.batch_size, args.start_index, args.resume)
     if not selected:
         city_state["status"] = "COMPLETE"
         city_state["updated_at"] = now_iso()
+        refresh_campaign_counts(status)
         status["updated_at"] = now_iso()
         dump_json(STATUS_PATH, status)
         return {"ok": True, "new_work": 0, "city_key": city_key, "reason": "CITY_COMPLETE"}
@@ -635,6 +698,7 @@ def run_one_batch(args) -> dict:
             "qa_reasons": result["qa_reasons"],
             "attempts": attempts,
             "batch": batch_number,
+            "observation_count": len(result.get("source_observation_ids") or []),
             "updated_at": now_iso(),
         }
 
@@ -651,6 +715,7 @@ def run_one_batch(args) -> dict:
     else:
         city_state["status"] = "RUNNING"
     city_state["updated_at"] = now_iso()
+    refresh_campaign_counts(status)
     status["updated_at"] = now_iso()
 
     batch = {
