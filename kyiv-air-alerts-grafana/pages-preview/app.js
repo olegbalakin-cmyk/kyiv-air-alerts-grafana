@@ -171,73 +171,55 @@ function renderTimeOfDay(key) {
   }
   section.classList.remove("hidden");
 
+  const peakText = period.peak_slot
+    ? `Найвище значення: ${period.peak_slot} · ${fmt(period.peak_alert_share_pct, 1)}% часу під тривогою.`
+    : "У цьому діапазоні немає часу під тривогою.";
   $("timeOfDayMeta").textContent =
-    `${period.range_start} — ${period.range_end} · ${period.days} завершених днів`;
+    `${period.range_start} — ${period.range_end} · ${period.days} завершених днів. ${peakText}`;
 
   const slots = new Map(period.slots.map(slot => [Number(slot.index), slot]));
-  const rootGrid = $("timeOfDayHeatmap");
-  rootGrid.innerHTML = "";
+  const grid = $("timeOfDayHeatmap");
+  grid.innerHTML = "";
 
-  for (let blockStart = 0; blockStart < 24; blockStart += 6) {
-    const block = document.createElement("section");
-    block.className = "heatmap-block";
-    block.setAttribute("aria-label", `${String(blockStart).padStart(2, "0")}:00–${String(blockStart + 6).padStart(2, "0")}:00`);
+  const corner = document.createElement("div");
+  corner.className = "heatmap-corner";
+  grid.appendChild(corner);
 
-    const title = document.createElement("h4");
-    title.className = "heatmap-block-title";
-    title.textContent =
-      `${String(blockStart).padStart(2, "0")}:00–${String(blockStart + 6).padStart(2, "0")}:00`;
-    block.appendChild(title);
+  for (let hour = 0; hour < 24; hour += 1) {
+    const label = document.createElement("div");
+    label.className = "heatmap-hour";
+    label.textContent = String(hour).padStart(2, "0");
+    grid.appendChild(label);
+  }
 
-    const grid = document.createElement("div");
-    grid.className = "heatmap-mini-grid";
-    grid.setAttribute("role", "grid");
+  for (let quarter = 0; quarter < 4; quarter += 1) {
+    const rowLabel = document.createElement("div");
+    rowLabel.className = "heatmap-quarter";
+    rowLabel.textContent = `:${String(quarter * 15).padStart(2, "0")}`;
+    grid.appendChild(rowLabel);
 
-    const corner = document.createElement("div");
-    corner.className = "heatmap-corner";
-    grid.appendChild(corner);
+    for (let hour = 0; hour < 24; hour += 1) {
+      const index = hour * 4 + quarter;
+      const slot = slots.get(index) || {
+        label: `${String(hour).padStart(2, "0")}:${String(quarter * 15).padStart(2, "0")}`,
+        alert_share_pct: 0,
+        relative_intensity: 0
+      };
+      const relative = Math.max(0, Math.min(100, Number(slot.relative_intensity) || 0));
+      const share = Math.max(0, Number(slot.alert_share_pct) || 0);
+      const alpha = relative > 0 ? 0.08 + 0.84 * (relative / 100) : 0.035;
 
-    for (let hour = blockStart; hour < blockStart + 6; hour += 1) {
-      const label = document.createElement("div");
-      label.className = "heatmap-hour";
-      label.textContent = String(hour).padStart(2, "0");
-      grid.appendChild(label);
+      const cell = document.createElement("div");
+      cell.className = "heatmap-cell";
+      cell.style.backgroundColor = `rgba(239,68,68,${alpha.toFixed(3)})`;
+      cell.dataset.relative = String(relative);
+      const title = `${slot.label}: ${fmt(share, 1)}% часу під тривогою · ${fmt(relative, 0)}% від пікового слота`;
+      cell.title = title;
+      cell.setAttribute("aria-label", title);
+      cell.setAttribute("role", "gridcell");
+      cell.setAttribute("tabindex", "0");
+      grid.appendChild(cell);
     }
-
-    for (let quarter = 0; quarter < 4; quarter += 1) {
-      const rowLabel = document.createElement("div");
-      rowLabel.className = "heatmap-quarter";
-      rowLabel.textContent = `:${String(quarter * 15).padStart(2, "0")}`;
-      grid.appendChild(rowLabel);
-
-      for (let hour = blockStart; hour < blockStart + 6; hour += 1) {
-        const index = hour * 4 + quarter;
-        const slot = slots.get(index) || {
-          label: `${String(hour).padStart(2, "0")}:${String(quarter * 15).padStart(2, "0")}`,
-          alert_share_pct: 0,
-          relative_intensity: 0
-        };
-        const relative = Math.max(0, Math.min(100, Number(slot.relative_intensity) || 0));
-        const share = Math.max(0, Number(slot.alert_share_pct) || 0);
-        const alpha = relative > 0 ? 0.08 + 0.84 * (relative / 100) : 0.035;
-
-        const cell = document.createElement("div");
-        cell.className = "heatmap-cell";
-        if (relative >= 99.995 && relative > 0) cell.classList.add("heatmap-cell-peak");
-        cell.style.backgroundColor = `rgba(98,160,234,${alpha.toFixed(3)})`;
-        cell.dataset.relative = String(relative);
-        const cellTitle =
-          `${slot.label}: ${fmt(share, 1)}% часу під тривогою · ${fmt(relative, 0)}% від пікового слота`;
-        cell.title = cellTitle;
-        cell.setAttribute("aria-label", cellTitle);
-        cell.setAttribute("role", "gridcell");
-        cell.setAttribute("tabindex", "0");
-        grid.appendChild(cell);
-      }
-    }
-
-    block.appendChild(grid);
-    rootGrid.appendChild(block);
   }
 }
 
