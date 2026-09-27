@@ -3017,7 +3017,7 @@ def self_test() -> None:
         ),
         (
             "ppo-action-plus-explosion",
-            "У Полтаві під час повітряної тривоги чути вибухи. Працює ППО.",
+            "У Полтаві під час повітряної тривоги чути вибухи — працює ППО.",
             ["explosion", "air_defense_action"],
             False,
         ),
@@ -3054,7 +3054,7 @@ def self_test() -> None:
     # Explicit explosion + PPO remains strict and now preserves both event types.
     air_defense_positive_cases = (
         "У Полтаві під час повітряної тривоги вибухи, які було чутно у місті — робота нашої ППО.",
-        "У Полтаві чути вибухи. Працює ППО.",
+        "У Полтаві чути вибухи — працює ППО.",
         "Полтава: лунають вибухи — працює ППО.",
     )
     for title in air_defense_positive_cases:
