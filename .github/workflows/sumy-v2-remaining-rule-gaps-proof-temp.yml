@@ -229,6 +229,7 @@ jobs:
               },
               "removed_qa_ids": removed,
               "added_qa_ids": added,
+              "added_qa_rows": {eid: pmap[eid] for eid in added},
               "targets_removed": targets == set(removed),
               "out_of_scope_qa_unchanged": (
                   out_scope == p_ids
