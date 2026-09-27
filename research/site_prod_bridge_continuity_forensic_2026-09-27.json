@@ -1,0 +1,373 @@
+{
+  "schema_version": 1,
+  "forensic_date": "2026-09-27",
+  "repository": "olegbalakin-cmyk/kyiv-air-alerts-grafana",
+  "production_branch": "site-prod",
+  "scope": {
+    "cities": [
+      "kharkiv",
+      "mykolaiv",
+      "sumy"
+    ],
+    "mode": "read_only_forensic_except_this_report_artifact",
+    "forbidden_changes_respected": [
+      "municipal fallback",
+      "kyiv-air-alerts-grafana/scripts/update_data.py",
+      "kyiv-air-alerts-grafana/tests/test_update_fallback.py",
+      "production data",
+      "workflow"
+    ]
+  },
+  "failed_workflow": {
+    "run_id": 36306579810,
+    "job_id": 108584308540,
+    "checkout_commit": "6d435010ebe1568bc96b83966f28c9037a18d997",
+    "failed_step": "Verify production dataset",
+    "bridge_step_conclusion": "success",
+    "qa_23_city_conclusion": "success",
+    "verification_failure": {
+      "effective_freshness_fully_continuous": false,
+      "uncovered_rows": [
+        "kharkiv",
+        "mykolaiv",
+        "sumy"
+      ]
+    },
+    "artifacts_retained": false,
+    "artifact_count": 0,
+    "commit_updated_production_data_step": "skipped"
+  },
+  "protected_production_blobs_before_report": {
+    "kyiv-air-alerts-grafana/data/ukrainealarm_bridge.json": "7acc259b878e6b0e32ada4637883600f0f48b3c4",
+    "kyiv-air-alerts-grafana/data/dashboard_data.json": "8e68e9f9caca4e2bf304dabfef0955cd3d341a3d",
+    "kyiv-air-alerts-grafana/data/dashboard_qa.json": "75b8fb455e99dd5175ec204a300d989e7225bbba"
+  },
+  "architecture": {
+    "current_site_prod_logic": {
+      "source_file": "kyiv-air-alerts-grafana/scripts/apply_ukrainealarm_bridge.py",
+      "source_blob_sha": "9893f02f65f6392b2bdf67ea65da21ab2f239a71",
+      "continuity_test": "if previous row is continuous and has last_checked_at, current oldest_history_start must be <= previous last_checked_at",
+      "pass_reason": "history_reaches_previous_poll",
+      "fail_reason": "history_window_no_longer_reaches_previous_poll",
+      "fetched_history_is_added_to_event_store_only_when_continuous": true
+    },
+    "workflow_checkpoint_coupling": {
+      "schedule": "15 */4 * * *",
+      "bridge_fetch_happens_before_dashboard_verification": true,
+      "production_data_commit_happens_after_dashboard_verification": true,
+      "consequence": "A successful bridge poll can be lost when any later verification step fails. The next bounded regionHistory window can then move past the last committed poll boundary."
+    },
+    "ukrainealarm_api_behavior": {
+      "endpoint": "https://api.ukrainealarm.com/api/v3/alerts/regionHistory",
+      "documented_behavior": "returns the last 25 alerts for a region",
+      "documented_parameters": [
+        "regionId"
+      ],
+      "deterministic_deeper_pagination_verified": false,
+      "docs": [
+        "https://github.com/UkraineAlarm/UkraineAlarm-javascript/blob/master/docs/AlertsApi.md",
+        "https://github.com/UkraineAlarm/UkraineAlarm-python"
+      ]
+    }
+  },
+  "retained_source_inventory": {
+    "site_prod_bridge_store": {
+      "blob_sha": "7acc259b878e6b0e32ada4637883600f0f48b3c4",
+      "last_attempt_at": "2026-09-25T04:30:46.569111Z",
+      "last_successful_fetch_at": "2026-09-25T04:55:28.740146Z",
+      "event_count": 1262,
+      "covers_target_seam_after_previous_poll": false
+    },
+    "failed_run_logs": {
+      "available": true,
+      "exact_history_count_and_overlap_result_retained": true,
+      "exact_oldest_and_latest_history_timestamps_retained_in_log": {
+        "kharkiv": false,
+        "mykolaiv": false,
+        "sumy": false
+      },
+      "note": "The site-prod bridge step prints region id, filtered history count, static-match boolean and poll-overlap boolean, but not oldest_history_start/latest_history_end."
+    },
+    "failed_run_artifacts": {
+      "available": false,
+      "count": 0
+    },
+    "simultaneous_main_official_snapshot": {
+      "commit": "337f92de02f210c387766564ab9f32468556634a",
+      "bridge_blob_sha": "ee025dfd411185b225a1fb50659dbe82744d9b64",
+      "fetch_at": "2026-09-27T08:35:12.645299Z",
+      "use": "Exact Kharkiv failed-run bounds only. The site-prod Kharkiv bridge log completed at 2026-09-27T08:35:12.5754032Z against the same regionHistory endpoint and region id 1293, with the same completed AIR count 19."
+    },
+    "alerts_in_ua_static_bridge": {
+      "source": "alerts.in.ua manual CSV export",
+      "base_meta_blob_sha": "f3ddda2e9e2adbf2269948bf51cacc0809c67db6",
+      "additional_meta_blob_sha": "f35f8d1d0e839b4da05ee0469a116096f1a46c5c",
+      "coverage_start": "2026-09-07T00:00:00+03:00",
+      "coverage_end_exclusive": "2026-09-17T00:00:00+03:00",
+      "covers_2026_09_25_to_27_seam": false
+    },
+    "alerts_in_ua_current_history_capability": {
+      "endpoint_template": "https://api.alerts.in.ua/v1/regions/{uid}/alerts/month_ago.json",
+      "period": "month_ago",
+      "authentication_required": true,
+      "rate_limit": "2 requests per minute for history",
+      "record_fields_include": [
+        "location_uid",
+        "location_title",
+        "location_type",
+        "started_at",
+        "finished_at",
+        "alert_type",
+        "location_oblast",
+        "location_raion"
+      ],
+      "daily_csv_export_available_in_web_history_ui": true,
+      "docs": "https://devs.alerts.in.ua/",
+      "export_documentation": "https://blog.alerts.in.ua/p/summer-2024-updates",
+      "current_seam_payload_already_retained_in_repo_or_project_library": false,
+      "note": "The project-retained daily alerts.in.ua CSV inputs inspected for this forensic stop at 2026-09-18, so 2026-09-25 through 2026-09-27 requires a new exact-location fetch/export."
+    },
+    "stale_historical_production_source": {
+      "source": "Vadimkin official_data_uk.csv",
+      "usable_for_target_seam": false,
+      "reason": "The failed workflow reported the upstream file as stale; it does not provide retained target-date coverage for these rows."
+    }
+  },
+  "cities": {
+    "kharkiv": {
+      "production_geography": {
+        "kind": "exact",
+        "target": "м. Харків та Харківська територіальна громада",
+        "ukrainealarm_region_id": "1293",
+        "alerts_in_ua_exact_location_uid": "1293"
+      },
+      "previous_committed": {
+        "continuous": true,
+        "continuity_reason": "history_reaches_previous_poll",
+        "poll_overlap_verified": true,
+        "last_checked_at": "2026-09-25T04:30:47.199413Z",
+        "latest_retained_event": {
+          "start": "2026-09-25T01:26:34.534051Z",
+          "end": "2026-09-25T01:58:37.396786Z"
+        }
+      },
+      "failed_run_observation": {
+        "history_completed_air_count": 19,
+        "poll_overlap": false,
+        "http_retry_or_error": [
+          {
+            "status": 401,
+            "attempt": 1,
+            "action": "retry after 70 second guard interval",
+            "final_result": "success"
+          }
+        ],
+        "continuity_reason": "history_window_no_longer_reaches_previous_poll",
+        "oldest_history_start": "2026-09-25T15:04:15.268574Z",
+        "latest_history_end": "2026-09-27T08:25:00.865326Z",
+        "timestamp_provenance": "same-second retained official regionHistory snapshot in main commit 337f92de02f210c387766564ab9f32468556634a; site-prod log count and region id match",
+        "exactness": "exact_forensic_reconstruction"
+      },
+      "continuity_proof_gap": {
+        "start_exclusive": "2026-09-25T04:30:47.199413Z",
+        "end_exclusive": "2026-09-25T15:04:15.268574Z",
+        "duration": "10:33:28.069161",
+        "status": "exact",
+        "interpretation": "No retained deterministic source proves whether additional completed AIR episodes began in this interval."
+      },
+      "stored_event_gap": {
+        "from_previous_latest_retained_event_end": "2026-09-25T01:58:37.396786Z",
+        "through_failed_run_latest_history_end": "2026-09-27T08:25:00.865326Z",
+        "status": "exact_observed_right_bound",
+        "interpretation": "The persisted site-prod bridge contains no later Kharkiv events. The failed run observed 19 completed AIR rows after the previous poll but did not add them because continuity was false."
+      },
+      "confirmed_missing_from_persisted_store": {
+        "yes": true,
+        "exact_failed_run_completed_air_rows_not_retained": 19,
+        "missing_inside_unverified_seam_confirmed": false
+      },
+      "recovery_class": "REQUIRES_NEW_SEAM_SOURCE",
+      "recovery_source": {
+        "source": "alerts.in.ua",
+        "exact_location": "м. Харків та Харківська територіальна громада",
+        "uid": "1293",
+        "required_interval": {
+          "start": "2026-09-25T04:30:47.199413Z",
+          "end_at_least": "2026-09-25T15:04:15.268574Z"
+        }
+      }
+    },
+    "mykolaiv": {
+      "production_geography": {
+        "kind": "proxy",
+        "target": "Миколаївський район",
+        "ukrainealarm_region_id": "98",
+        "alerts_in_ua_exact_location_uid": "98"
+      },
+      "previous_committed": {
+        "continuous": true,
+        "continuity_reason": "history_reaches_previous_poll",
+        "poll_overlap_verified": true,
+        "last_checked_at": "2026-09-25T04:48:25.524483Z",
+        "latest_retained_event": {
+          "start": "2026-09-25T03:18:51.877988Z",
+          "end": "2026-09-25T03:37:29.874910Z"
+        }
+      },
+      "failed_run_observation": {
+        "log_completed_at": "2026-09-27T08:52:47.9926832Z",
+        "history_completed_air_count": 20,
+        "poll_overlap": false,
+        "http_retry_or_error": [],
+        "continuity_reason": "history_window_no_longer_reaches_previous_poll",
+        "oldest_history_start": null,
+        "latest_history_end": null,
+        "timestamp_provenance": "not retained in workflow log; no workflow artifact; commit step skipped",
+        "exactness": "unrecoverable_from_retained_failed_run_material"
+      },
+      "continuity_proof_gap": {
+        "start_exclusive": "2026-09-25T04:48:25.524483Z",
+        "end_exclusive": null,
+        "end_constraint": "failed-run oldest_history_start was strictly greater than 2026-09-25T04:48:25.524483Z and no later than the 2026-09-27T08:52:47.9926832Z fetch completion",
+        "status": "exact_end_not_retained",
+        "interpretation": "The existence of a proof gap is certain; its exact right boundary is not recoverable from retained run material."
+      },
+      "stored_event_gap": {
+        "from_previous_latest_retained_event_end": "2026-09-25T03:37:29.874910Z",
+        "through_failed_run_latest_history_end": null,
+        "status": "right_bound_not_retained",
+        "interpretation": "The failed run observed 20 completed AIR rows, all with starts after the previous poll boundary because poll_overlap was false, but did not retain them."
+      },
+      "confirmed_missing_from_persisted_store": {
+        "yes": true,
+        "exact_failed_run_completed_air_rows_not_retained": 20,
+        "missing_inside_unverified_seam_confirmed": false
+      },
+      "recovery_class": "REQUIRES_NEW_SEAM_SOURCE",
+      "recovery_source": {
+        "source": "alerts.in.ua",
+        "exact_location": "Миколаївський район",
+        "uid": "98",
+        "required_interval": {
+          "start": "2026-09-25T04:48:25.524483Z",
+          "end_conservative": "2026-09-27T08:52:47.9926832Z"
+        },
+        "reason_for_conservative_end": "The failed-run oldest_history_start was not retained; covering through the failed poll time strictly contains the unknown seam."
+      }
+    },
+    "sumy": {
+      "production_geography": {
+        "kind": "proxy",
+        "target": "Сумський район",
+        "ukrainealarm_region_id": "114",
+        "alerts_in_ua_exact_location_uid": "114"
+      },
+      "previous_committed": {
+        "continuous": true,
+        "continuity_reason": "history_reaches_previous_poll",
+        "poll_overlap_verified": true,
+        "last_checked_at": "2026-09-25T04:40:11.528461Z",
+        "latest_retained_event": {
+          "start": "2026-09-25T03:50:11.562769Z",
+          "end": "2026-09-25T04:03:17.405687Z"
+        }
+      },
+      "failed_run_observation": {
+        "log_completed_at": "2026-09-27T08:44:35.2445320Z",
+        "history_completed_air_count": 19,
+        "poll_overlap": false,
+        "http_retry_or_error": [],
+        "continuity_reason": "history_window_no_longer_reaches_previous_poll",
+        "oldest_history_start": null,
+        "latest_history_end": null,
+        "timestamp_provenance": "not retained in workflow log; no workflow artifact; commit step skipped",
+        "exactness": "unrecoverable_from_retained_failed_run_material"
+      },
+      "continuity_proof_gap": {
+        "start_exclusive": "2026-09-25T04:40:11.528461Z",
+        "end_exclusive": null,
+        "end_constraint": "failed-run oldest_history_start was strictly greater than 2026-09-25T04:40:11.528461Z and no later than the 2026-09-27T08:44:35.2445320Z fetch completion",
+        "status": "exact_end_not_retained",
+        "interpretation": "The existence of a proof gap is certain; its exact right boundary is not recoverable from retained run material."
+      },
+      "stored_event_gap": {
+        "from_previous_latest_retained_event_end": "2026-09-25T04:03:17.405687Z",
+        "through_failed_run_latest_history_end": null,
+        "status": "right_bound_not_retained",
+        "interpretation": "The failed run observed 19 completed AIR rows, all with starts after the previous poll boundary because poll_overlap was false, but did not retain them."
+      },
+      "confirmed_missing_from_persisted_store": {
+        "yes": true,
+        "exact_failed_run_completed_air_rows_not_retained": 19,
+        "missing_inside_unverified_seam_confirmed": false
+      },
+      "recovery_class": "REQUIRES_NEW_SEAM_SOURCE",
+      "recovery_source": {
+        "source": "alerts.in.ua",
+        "exact_location": "Сумський район",
+        "uid": "114",
+        "required_interval": {
+          "start": "2026-09-25T04:40:11.528461Z",
+          "end_conservative": "2026-09-27T08:44:35.2445320Z"
+        },
+        "reason_for_conservative_end": "The failed-run oldest_history_start was not retained; covering through the failed poll time strictly contains the unknown seam."
+      }
+    }
+  },
+  "actual_missing_episode_assessment": {
+    "confirmed_missing_from_persisted_site_prod_event_store": true,
+    "counts_observed_but_not_retained": {
+      "kharkiv": 19,
+      "mykolaiv": 20,
+      "sumy": 19
+    },
+    "confirmed_missing_episode_within_the_unverified_seam_itself": false,
+    "explanation": "The current bounded API proves later completed AIR episodes existed and were not persisted for these rows. It does not reveal whether additional episodes occurred in the interval already aged out before the failed poll."
+  },
+  "root_cause": {
+    "classification": "B",
+    "primary": "The bounded current regionHistory window moved beyond the last committed poll boundary because bridge/checkpoint state was coupled to the later dashboard commit. Multiple later workflow failures prevented successful intermediate bridge polls from becoming durable.",
+    "real_data_gap_A": "not established for the seam; only a proof gap is established",
+    "continuity_logic_bug_C": false,
+    "note": "The existing poll-overlap test is conservative and correct for a bounded moving history window. The architecture failed to persist verified checkpoints before unrelated later failures."
+  },
+  "option_evaluation": {
+    "option_1_persist_checkpoint_independently": {
+      "verdict": "RECOMMENDED_DURABLE_FIX",
+      "constraints": [
+        "Persist a city continuity watermark only after that city's overlap has been verified.",
+        "Persist raw fetched observations independently even if later dashboard verification fails.",
+        "Do not mark a city continuous merely because a fetch succeeded."
+      ]
+    },
+    "option_2_alternate_watermark": {
+      "verdict": "DO_NOT_USE_AS_A_SHORTCUT",
+      "reason": "A retained event match or later event overlap does not prove that no unseen alert occurred between the previous poll and the bounded current history. Use only a watermark/source that proves every part of the interval."
+    },
+    "option_3_one_time_seam_recovery": {
+      "verdict": "REQUIRED_NOW",
+      "source": "alerts.in.ua exact-location history or daily CSV export",
+      "validation": [
+        "Use only UID/location 1293 for Kharkiv exact hromada, 98 for Mykolaiv raion, and 114 for Sumy raion.",
+        "Filter to completed air_raid records.",
+        "Cover from the previous committed last_checked_at through at least the failed poll/current official overlap.",
+        "Cross-check overlapping Alerts.in.ua and UkraineAlarm episodes with the existing deterministic timestamp tolerance before restoring continuity.",
+        "After repair, resume unchanged poll-overlap continuity."
+      ]
+    },
+    "option_4_deeper_regionHistory": {
+      "verdict": "NOT_AVAILABLE_IN_VERIFIED_CURRENT_API",
+      "reason": "Official v3 documentation describes regionHistory as the last 25 alerts and documents only regionId; no deterministic pagination/depth parameter was verified."
+    }
+  },
+  "safest_minimal_repair": {
+    "immediate": "Fetch/export alerts.in.ua exact-location history for the three targets, cover the entire conservative recovery intervals, validate overlap against UkraineAlarm, append only verified completed AIR episodes, then restore the continuity checkpoint and rerun production verification.",
+    "durable_follow_up": "Persist verified per-city bridge checkpoints/raw poll observations immediately after the bridge step so later dashboard/casualty/verification failures cannot erase continuity evidence.",
+    "fully_continuous_semantics_change": false
+  },
+  "production_data_unchanged_by_forensic": true,
+  "readiness": {
+    "status": "BLOCKED",
+    "blocker": "Exact failed-run oldest_history_start/latest_history_end were not retained for mykolaiv and sumy. A new alerts.in.ua exact-location history/CSV fetch is required to close those seams; the forensic must not fabricate those timestamps."
+  }
+}
