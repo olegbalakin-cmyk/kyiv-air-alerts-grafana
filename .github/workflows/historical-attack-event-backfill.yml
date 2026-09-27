@@ -118,7 +118,7 @@ jobs:
       CITY_KEY: ${{ inputs.city_key || 'auto' }}
       BATCH_SIZE: ${{ inputs.batch_size || '50' }}
       MAX_BATCHES: ${{ inputs.max_batches_per_run || '1' }}
-      RESUME: ${{ inputs.resume == false && 'false' || 'true' }}
+      RESUME: ${{ github.event_name == 'workflow_dispatch' && inputs.resume == false && 'false' || 'true' }}
     steps:
       - uses: actions/checkout@v4
         with:
