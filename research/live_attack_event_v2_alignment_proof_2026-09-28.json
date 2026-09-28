@@ -1,0 +1,213 @@
+{
+  "schema_version": 1,
+  "kind": "live_attack_event_v2_alignment_proof",
+  "generated_at": "2026-09-28T09:26:14.875769Z",
+  "authoritative_starting_head": "aa35a25038095a795f6792c22ab8cd8f097aca79",
+  "main_starting_head": "807edf0bf545573615da8c158e0003f0cd65915d",
+  "campaign_starting_head": "40c9be8b142ff529e43be8e5d324dd374e8f3cef",
+  "fresh_heads_at_proof_start": {
+    "authoritative": "aa35a25038095a795f6792c22ab8cd8f097aca79",
+    "main": "807edf0bf545573615da8c158e0003f0cd65915d",
+    "campaign": "40c9be8b142ff529e43be8e5d324dd374e8f3cef"
+  },
+  "proof_branch": "live-attack-event-v2-alignment-proof-2026-09-28",
+  "proof_code_commit": "d9357b43d5704a3e1983245030d0a7677ecc6f3b",
+  "proof_orchestration_commit": "ada72bc394bba7feae7d9e0ec8f4855ee8d753a2",
+  "live_monitor_last_successful_run": {
+    "conclusion": "success",
+    "createdAt": "2026-09-28T05:30:15Z",
+    "databaseId": 36382186489,
+    "event": "schedule",
+    "headSha": "bfcbf792b504cf61827982e017b2595948be1cfe",
+    "status": "completed"
+  },
+  "live_monitor_pre_state": {
+    "started_at": "2026-09-28T05:30:28.385198Z",
+    "finished_at": "2026-09-28T05:54:24.979450Z",
+    "ok": true,
+    "review_queue_size": 879,
+    "new_alert_episodes": 13,
+    "new_review_candidates": 33,
+    "errors": {}
+  },
+  "historical_v2_contract": {
+    "methodology_version": "historical-attack-event-air-defense-action-v2",
+    "canonical_event_taxonomy": [
+      "explosion",
+      "impact",
+      "arrival",
+      "strike",
+      "damage",
+      "fire",
+      "air_defense_action"
+    ],
+    "numerator_rule": "one alert episode contributes at most 1 when strict/sensitivity evidence supports >=1 canonical event class",
+    "classes": {
+      "explosion": {
+        "positive_when": "explicit explosion event plus exact-city, attack/air-context and alert-temporal gates",
+        "negative_when": "non-military controlled blast, wrong city, or unbound time"
+      },
+      "impact": {
+        "positive_when": "explicit hit/impact plus the same geography/context/time gates",
+        "negative_when": "threat or non-event use"
+      },
+      "arrival": {
+        "positive_when": "explicit arrival/prylit plus the same gates",
+        "negative_when": "unbound or wrong-city mention"
+      },
+      "strike": {
+        "positive_when": "actual strike wording; threat-of-strike wording excluded",
+        "negative_when": "threat-only strike wording"
+      },
+      "damage": {
+        "positive_when": "damage explicitly attack-caused",
+        "negative_when": "ordinary/accidental damage or mere co-presence with alert"
+      },
+      "fire": {
+        "positive_when": "fire explicitly attack-caused",
+        "negative_when": "ordinary fire or mere co-presence with alert"
+      },
+      "air_defense_action": {
+        "positive_when": "confirmed actual air-defense operation, including explicit working/operated PPO or named PPO interception, with exact-city and alert binding",
+        "negative_when": "possible/predicted/readiness/capability/warning-only PPO, wrong city, or unbound time"
+      }
+    },
+    "ppo_examples": {
+      "ППО працює": "event-positive action under v2 when exact-city and alert binding pass",
+      "ППО збила БпЛА": "event-positive air_defense_action; interception_claim=true when gates pass",
+      "intercepted missile/drone": "positive only when actual interception is attributed/bound to the target city/alert",
+      "explosion attributed to PPO": "explosion + air_defense_action; explosion remains event-positive",
+      "retrospective interception": "requires episode-specific temporal binding; publication time alone is insufficient",
+      "regional interception": "not exact-city positive",
+      "time-unbound interception": "not strict/sensitivity positive without valid temporal basis"
+    },
+    "strict_vs_sensitivity": "strict requires episode-specific temporal proof; sensitivity is limited to the existing near-boundary/inferred-same-attack rules and still requires exact-city/event/air-context gates",
+    "provenance_fields": [
+      "event_types",
+      "air_defense_context",
+      "air_defense_action",
+      "interception_claim",
+      "exact_city_classification_evidence",
+      "air_military_context",
+      "same_attack_context",
+      "temporal_binding",
+      "reason_codes"
+    ]
+  },
+  "event_type_contract": {
+    "explosion": {
+      "positive_when": "explicit explosion event plus exact-city, attack/air-context and alert-temporal gates",
+      "negative_when": "non-military controlled blast, wrong city, or unbound time"
+    },
+    "impact": {
+      "positive_when": "explicit hit/impact plus the same geography/context/time gates",
+      "negative_when": "threat or non-event use"
+    },
+    "arrival": {
+      "positive_when": "explicit arrival/prylit plus the same gates",
+      "negative_when": "unbound or wrong-city mention"
+    },
+    "strike": {
+      "positive_when": "actual strike wording; threat-of-strike wording excluded",
+      "negative_when": "threat-only strike wording"
+    },
+    "damage": {
+      "positive_when": "damage explicitly attack-caused",
+      "negative_when": "ordinary/accidental damage or mere co-presence with alert"
+    },
+    "fire": {
+      "positive_when": "fire explicitly attack-caused",
+      "negative_when": "ordinary fire or mere co-presence with alert"
+    },
+    "air_defense_action": {
+      "positive_when": "confirmed actual air-defense operation, including explicit working/operated PPO or named PPO interception, with exact-city and alert binding",
+      "negative_when": "possible/predicted/readiness/capability/warning-only PPO, wrong city, or unbound time"
+    }
+  },
+  "discovery_before": {
+    "strategy": "single explosion-centric Google News query",
+    "network": {}
+  },
+  "discovery_after": {
+    "strategy": "five bounded query families merged by existing deterministic candidate identity before classification",
+    "families": [
+      "explosion",
+      "impact_arrival",
+      "strike",
+      "attack_consequence",
+      "air_defense_action"
+    ],
+    "network": {}
+  },
+  "query_strategy": "bounded family queries; discovery broad, classifier conservative; family results merged before classification",
+  "ppo_contract_before": "legacy live: PPO-only complete Telegram message rejected; confirmed interception without explosion not event-positive",
+  "ppo_contract_after": "historical v2: confirmed actual air-defense action is canonical event-positive; prediction/readiness remains negative; exact-city and temporal gates preserved",
+  "files_changed": [
+    "kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py",
+    ".github/workflows/live-attack-event-v2-alignment-proof.yml",
+    "research/live_attack_event_v2_alignment_proof_2026-09-28.json"
+  ],
+  "unit_tests": {},
+  "existing_regression_tests": {
+    "proof_monitor_self_test": "",
+    "campaign_v2_self_test": ""
+  },
+  "queue_dry_replay": {},
+  "classification_changes": [],
+  "unexpected_changes": [],
+  "cross_contract_regression": {},
+  "network_proof": {},
+  "protected_state": {
+    "all_unchanged": true,
+    "files": {
+      "kyiv-air-alerts-grafana/data/explosion_audited_baseline.json": {
+        "authoritative_start": "81ecc48ed64b7e78449df903afb082e9f92531e5",
+        "proof_head": "81ecc48ed64b7e78449df903afb082e9f92531e5",
+        "unchanged": true
+      },
+      "kyiv-air-alerts-grafana/data/explosion_daily_alert_seed.json": {
+        "authoritative_start": "87580a91719f78eaff7a0b5878c3d8ef57f0b02d",
+        "proof_head": "87580a91719f78eaff7a0b5878c3d8ef57f0b02d",
+        "unchanged": true
+      },
+      "kyiv-air-alerts-grafana/data/explosion_candidate_monitor_state.json": {
+        "authoritative_start": "4caaa7a84e87db65885d18a9c098e095fdf51b43",
+        "proof_head": "4caaa7a84e87db65885d18a9c098e095fdf51b43",
+        "unchanged": true
+      },
+      "kyiv-air-alerts-grafana/data/explosion_review_queue.json": {
+        "authoritative_start": "833076eec2a2f479361d60c3fb803e8005207e94",
+        "proof_head": "833076eec2a2f479361d60c3fb803e8005207e94",
+        "unchanged": true
+      },
+      "kyiv-air-alerts-grafana/data/explosion_candidate_monitor_last_run.json": {
+        "authoritative_start": "d507f4c27ddd2ad5c540a927b48428c378f5d349",
+        "proof_head": "d507f4c27ddd2ad5c540a927b48428c378f5d349",
+        "unchanged": true
+      },
+      "kyiv-air-alerts-grafana/data/explosions_test.json": {
+        "authoritative_start": "d00647c0b76ce254145d258a8d8ddc7e8529d8e4",
+        "proof_head": "d00647c0b76ce254145d258a8d8ddc7e8529d8e4",
+        "unchanged": true
+      },
+      "kyiv-air-alerts-grafana/data/dashboard_data.json": {
+        "authoritative_start": "37cf1b61a32ac6ecb8a120ee96cdb1661269c727",
+        "proof_head": "37cf1b61a32ac6ecb8a120ee96cdb1661269c727",
+        "unchanged": true
+      }
+    }
+  },
+  "6863_campaign_before_after": {
+    "before": "40c9be8b142ff529e43be8e5d324dd374e8f3cef",
+    "after": "40c9be8b142ff529e43be8e5d324dd374e8f3cef",
+    "unchanged": true
+  },
+  "6863_mutated_by_this_task": false,
+  "recommended_atomic_apply_scope": [
+    "kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py only",
+    "retain bounded query-family discovery and merge/dedupe",
+    "retain v2 air_defense_action classifier semantics and explicit event_types persistence",
+    "do not apply proof workflow or proof artifact to production runtime"
+  ],
+  "verdict": "LIVE ATTACK-EVENT V2 ALIGNMENT PROOF FAILED — DO NOT APPLY"
+}
