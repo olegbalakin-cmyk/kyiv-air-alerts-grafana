@@ -1,0 +1,143 @@
+{
+  "schema_version": "db-phase1-live-poll-persistence-adapter-proof-v1",
+  "base_git_sha": "54aefb6f557c6a512a9213dee9971d2db26107e6",
+  "implementation_sha": "f43c588cf835118afec6939db4cedbacd6209c85",
+  "workflow_run_id": "36450326850",
+  "substantive_workflow_run_id": "36449303272",
+  "substantive_implementation_sha": "e5f396860d0effc4c7a85b24d3d73ec69706c322",
+  "old_persistence_blob": "06f3098df63d7aaf2348c366b6a351901926cb53",
+  "new_persistence_blob": "ed014e61fc6186fa9daf91c763c847e7df2f0306",
+  "ddl_blob": "3b8af7940b23aae03a4f6b434d90d97dde10bfc0",
+  "stream_identity": {
+    "source_key": "ukrainealarm_region_history",
+    "city_key": "lviv",
+    "stream_key": "region_id:90:AIR"
+  },
+  "lock_key_version": "phase1-stream-lock-v1",
+  "lock_key": -6396446657197887000,
+  "neon_project_id": "green-cake-44216048",
+  "proof_branch_id": "br-cold-sky-b5jhai9p",
+  "proof_branch_name": "lviv-phase1-live-poll-adapter-e2e-2026-09-28",
+  "parent_branch_id": "br-young-feather-b5q19nli",
+  "direct_unpooled": true,
+  "proof_mode": "artifact_recovery",
+  "initial_counts": {
+    "ingestion_runs": 1,
+    "alert_episodes": 126,
+    "alert_episode_sources": 140,
+    "ingestion_checkpoints": 1
+  },
+  "initial_checkpoint": {
+    "checkpoint_id": "40a0d262-2a79-405b-8e06-1af6e28bc908",
+    "checkpoint_seq": 1,
+    "checkpoint_kind": "bootstrap"
+  },
+  "poll_a_run_id": "6954e122-ad24-4e24-9a2c-8e24f5d326a5",
+  "poll_a_checkpoint_id": "7284c48d-352a-4a9a-a14f-055e3e2f8ee0",
+  "poll_a_seq": 2,
+  "poll_a_retry_run_id": "4532b0cb-fce8-4086-9693-44866c08a759",
+  "poll_a_retry_exact_retry": true,
+  "poll_b_run_id": "cee543af-5d4e-4070-9941-e3f913df5587",
+  "poll_b_checkpoint_id": "ffd426c0-d3fb-437c-a15b-2f6aa6df8ebf",
+  "poll_b_seq": 3,
+  "poll_c_run_id": "b6631552-1580-4f73-bea7-713871c84d6a",
+  "poll_d_run_id": "0e231b5a-c337-48da-828d-bb8af43a3407",
+  "concurrent_writer_c_pid": 1998,
+  "concurrent_writer_d_pid": 2001,
+  "waiting_lock_evidence": [
+    {
+      "pid": 1998,
+      "granted": true,
+      "mode": "ExclusiveLock",
+      "classid": 2805678503,
+      "objid": 3036425871,
+      "objsubid": 1
+    },
+    {
+      "pid": 2001,
+      "granted": false,
+      "mode": "ExclusiveLock",
+      "classid": 2805678503,
+      "objid": 3036425871,
+      "objsubid": 1
+    }
+  ],
+  "writer_c_postlock_seq": 3,
+  "writer_c_committed_seq": 4,
+  "writer_d_postlock_seq": 4,
+  "writer_d_committed_seq": 5,
+  "concurrency_evidence_scope": "Committed C/D append semantics are persisted in seq4/seq5 from substantive run 36449303272; server-side wait and independent PIDs were re-proven in green recovery run 36450326850 with rollback-only real-adapter callbacks, leaving state unchanged.",
+  "recovery_probe_c_postlock_seq": 5,
+  "recovery_probe_d_postlock_seq": 5,
+  "recovery_probe_rollback_only": true,
+  "recovery_probe_state_unchanged": true,
+  "final_counts": {
+    "ingestion_runs": 6,
+    "alert_episodes": 126,
+    "alert_episode_sources": 140,
+    "ingestion_checkpoints": 5
+  },
+  "checkpoint_history": [
+    1,
+    2,
+    3,
+    4,
+    5
+  ],
+  "checkpoint_links": [
+    {
+      "seq": 1,
+      "checkpoint_id": "40a0d262-2a79-405b-8e06-1af6e28bc908",
+      "previous_checkpoint_id": null,
+      "kind": "bootstrap"
+    },
+    {
+      "seq": 2,
+      "checkpoint_id": "7284c48d-352a-4a9a-a14f-055e3e2f8ee0",
+      "previous_checkpoint_id": "40a0d262-2a79-405b-8e06-1af6e28bc908",
+      "kind": "poll",
+      "poll": "A"
+    },
+    {
+      "seq": 3,
+      "checkpoint_id": "ffd426c0-d3fb-437c-a15b-2f6aa6df8ebf",
+      "previous_checkpoint_id": "7284c48d-352a-4a9a-a14f-055e3e2f8ee0",
+      "kind": "poll",
+      "poll": "B"
+    },
+    {
+      "seq": 4,
+      "checkpoint_id": "f1a3cf10-52f0-4a0b-91d3-1bc1196509e9",
+      "previous_checkpoint_id": "ffd426c0-d3fb-437c-a15b-2f6aa6df8ebf",
+      "kind": "poll",
+      "poll": "C"
+    },
+    {
+      "seq": 5,
+      "checkpoint_id": "1f725f04-638d-41f0-92d1-3da43ba27a06",
+      "previous_checkpoint_id": "f1a3cf10-52f0-4a0b-91d3-1bc1196509e9",
+      "kind": "poll",
+      "poll": "D"
+    }
+  ],
+  "canonical_episode_identity_stable": true,
+  "canonical_source_identity_stable": true,
+  "protected_branch_isolation": {
+    "primary": true,
+    "accepted_bootstrap": true,
+    "accepted_live_e2e": true,
+    "accepted_previous_concurrency": true,
+    "old_blocked_concurrency": true
+  },
+  "site_prod_at_start": "5864bab6a09e087a6fc7bdabacef45409c3ac88c",
+  "site_prod_at_end": "5864bab6a09e087a6fc7bdabacef45409c3ac88c",
+  "main_at_start": "8c5ed2a9fce73427cb53c888599a8a1751d9dc00",
+  "main_at_end": "8c5ed2a9fce73427cb53c888599a8a1751d9dc00",
+  "site_prod_modified": false,
+  "main_modified": false,
+  "production_publication": false,
+  "credentials_exposed": false,
+  "test_count": 41,
+  "test_result": "PASS",
+  "verdict": "PHASE-1 LIVE POLL PERSISTENCE ADAPTER PROVEN"
+}
