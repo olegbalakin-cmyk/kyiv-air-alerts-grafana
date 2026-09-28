@@ -32,7 +32,9 @@ jobs:
           cache-dependency-path: kyiv-air-alerts-grafana/requirements.txt
 
       - name: Install dependencies
-        run: pip install -r kyiv-air-alerts-grafana/requirements.txt
+        run: |
+          pip install -r kyiv-air-alerts-grafana/requirements.txt
+          pip install pytest
 
       - name: Verify immutable inputs
         shell: bash
@@ -131,7 +133,8 @@ jobs:
           set -euo pipefail
           test "$(git rev-parse HEAD:kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py)" = "b55fe2ed082958917c74f95bca2fd6bc137bcaae"
           test "$(git rev-parse HEAD:kyiv-air-alerts-grafana/data/explosion_research/cherkasy/final_evidence.json)" = "433b901ec49279fb865294a7c1e9a5328cf1b46a"
-          git status --short
+          find kyiv-air-alerts-grafana -type d -name __pycache__ -prune -exec rm -rf {} +
+          test -z "$(git status --porcelain)"
 
       - name: Upload proof replay
         if: always()
