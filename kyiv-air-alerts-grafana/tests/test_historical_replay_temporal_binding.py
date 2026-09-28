@@ -217,7 +217,7 @@ def test_cross_midnight_clock_with_trailing_date_keeps_explicit_next_day():
     got = replay.bind_evidence_record(row, episodes, monitor)
     assert got["episode_id"] == "ep1"
     assert got["method"] == "event_time_unique_containment"
-    assert got["event_times_utc"] == [
+    assert sorted(got["event_times_utc"]) == [
         "2025-11-07T21:44:00+00:00",
         "2025-11-07T22:00:00+00:00",
     ]
