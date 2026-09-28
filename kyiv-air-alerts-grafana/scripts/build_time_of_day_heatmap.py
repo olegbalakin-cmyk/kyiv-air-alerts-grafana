@@ -284,6 +284,32 @@ def period_summary(alerts: list[Alert], start_day: date, end_day: date) -> dict:
     }
 
 
+def rolling_window_row(
+    alerts: list[Alert],
+    coverage_day: date,
+    end_day: date,
+    window_days: int,
+    *,
+    partial: bool = False,
+) -> dict | None:
+    start_day = end_day - timedelta(days=window_days - 1)
+    if start_day < coverage_day:
+        return None
+    summary = period_summary(alerts, start_day, end_day)
+    return {
+        "time": datetime.combine(end_day, time.min, tzinfo=TZ).isoformat(),
+        "window_start": start_day.isoformat(),
+        "window_end": end_day.isoformat(),
+        "window_days": window_days,
+        "alerts_per_day": round(summary["alerts_started"] / window_days, 3),
+        "avg_daily_alert_hours": round(summary["alert_hours"] / window_days, 3),
+        "avg_alert_duration_min": summary["avg_alert_duration_min"],
+        "alerts_started": summary["alerts_started"],
+        "is_partial_period": partial,
+        "partial_through": end_day.isoformat() if partial else None,
+    }
+
+
 def rolling_window_series(
     alerts: list[Alert],
     coverage_day: date,
@@ -292,22 +318,9 @@ def rolling_window_series(
 ) -> list[dict]:
     rows = []
     for end_day in endpoints:
-        start_day = end_day - timedelta(days=window_days - 1)
-        if start_day < coverage_day:
-            continue
-        summary = period_summary(alerts, start_day, end_day)
-        rows.append(
-            {
-                "time": datetime.combine(end_day, time.min, tzinfo=TZ).isoformat(),
-                "window_start": start_day.isoformat(),
-                "window_end": end_day.isoformat(),
-                "window_days": window_days,
-                "alerts_per_day": round(summary["alerts_started"] / window_days, 3),
-                "avg_daily_alert_hours": round(summary["alert_hours"] / window_days, 3),
-                "avg_alert_duration_min": summary["avg_alert_duration_min"],
-                "alerts_started": summary["alerts_started"],
-            }
-        )
+        row = rolling_window_row(alerts, coverage_day, end_day, window_days)
+        if row is not None:
+            rows.append(row)
     return rows
 
 def coverage_start(dashboard: dict, key: str, alerts: list[Alert]) -> date:
@@ -404,7 +417,36 @@ def main() -> None:
             "periods": periods,
         }
 
-        weekly_rows = dashboard.get("cities", {}).get(key, {}).get("weekly", [])
+        city_output = dashboard.get("cities", {}).get(key, {})
+
+        # Preview-only current incomplete calendar month, through the latest
+        # completed day. Historical completed months stay unchanged.
+        monthly_rows = city_output.get("monthly", [])
+        month_start = end_day.replace(day=1)
+        if month_start.month == 12:
+            next_month_start = date(month_start.year + 1, 1, 1)
+        else:
+            next_month_start = date(month_start.year, month_start.month + 1, 1)
+        month_last_day = next_month_start - timedelta(days=1)
+        if end_day < month_last_day and month_start >= start_day:
+            summary = period_summary(alerts, month_start, end_day)
+            elapsed_days = summary["days"]
+            partial_month_row = {
+                "time": datetime.combine(month_start, time.min, tzinfo=TZ).isoformat(),
+                "month": month_start.strftime("%Y-%m"),
+                "alerts_per_day": round(summary["alerts_started"] / elapsed_days, 3),
+                "avg_daily_alert_hours": round(summary["alert_hours"] / elapsed_days, 3),
+                "avg_alert_duration_min": summary["avg_alert_duration_min"],
+                "alerts_started": summary["alerts_started"],
+                "is_partial_period": True,
+                "partial_through": end_day.isoformat(),
+            }
+            if not monthly_rows or monthly_rows[-1].get("month") != partial_month_row["month"]:
+                monthly_rows.append(partial_month_row)
+
+        # Keep the regular weekly display cadence, and add one current rolling
+        # slice through the latest completed day if it falls after that cadence.
+        weekly_rows = city_output.get("weekly", [])
         endpoints = []
         for row in weekly_rows:
             endpoint_value = row.get("week_end") or str(row.get("time", ""))[:10]
@@ -415,12 +457,28 @@ def main() -> None:
             except ValueError:
                 continue
         endpoints = sorted(set(endpoints))
-        dashboard["cities"][key]["rolling30"] = rolling_window_series(
-            alerts, start_day, endpoints, 30
-        )
-        dashboard["cities"][key]["rolling90"] = rolling_window_series(
-            alerts, start_day, endpoints, 90
-        )
+        last_regular_endpoint = endpoints[-1] if endpoints else None
+
+        rolling30 = rolling_window_series(alerts, start_day, endpoints, 30)
+        rolling90 = rolling_window_series(alerts, start_day, endpoints, 90)
+
+        if last_regular_endpoint is None or last_regular_endpoint < end_day:
+            current7 = rolling_window_row(alerts, start_day, end_day, 7, partial=True)
+            if current7 is not None:
+                current7["week_start"] = current7["window_start"]
+                current7["week_end"] = current7["window_end"]
+                weekly_rows.append(current7)
+
+            current30 = rolling_window_row(alerts, start_day, end_day, 30, partial=True)
+            if current30 is not None:
+                rolling30.append(current30)
+
+            current90 = rolling_window_row(alerts, start_day, end_day, 90, partial=True)
+            if current90 is not None:
+                rolling90.append(current90)
+
+        city_output["rolling30"] = rolling30
+        city_output["rolling90"] = rolling90
 
         table_periods = {}
         for period, requested_days in table_specs.items():

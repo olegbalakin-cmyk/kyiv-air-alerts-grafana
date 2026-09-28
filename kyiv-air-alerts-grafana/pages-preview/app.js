@@ -9,6 +9,7 @@ const EXPLOSION_LIVE_URL = "https://raw.githubusercontent.com/olegbalakin-cmyk/k
 const COLORS = ["#62a0ea", "#8ff0a4", "#f8e45c"];
 const EXPLOSION_COLOR = "#ff9f43";
 const TIME_PROFILE_COLOR = "#ef4444";
+const PARTIAL_PERIOD_DASH = [3, 4];
 const GRID = "rgba(148,163,184,.16)";
 const TEXT = "#b8c4cf";
 const HEATMAP_RANGES = ["7d", "30d", "90d", "year", "all"];
@@ -108,7 +109,59 @@ function setChart(id, labels, datasets, yTitle, type = "line", extra = {}) {
   });
 }
 
-function seriesDataset(label, values, color, dashed = false) {
+function isPartialPeriod(row) {
+  return Boolean(row?.is_partial_period);
+}
+
+function partialSegment(rows, color) {
+  return {
+    borderDash(ctx) {
+      return isPartialPeriod(rows?.[ctx.p1DataIndex]) ? PARTIAL_PERIOD_DASH : undefined;
+    },
+    borderColor(ctx) {
+      return isPartialPeriod(rows?.[ctx.p1DataIndex]) ? color + "99" : undefined;
+    }
+  };
+}
+
+const partialPeriodBarPlugin = {
+  id: "partialPeriodBar",
+  afterDatasetsDraw(chart, _args, options) {
+    const rows = options?.rows || [];
+    const datasetIndices = options?.datasetIndices || [];
+    const partialIndices = rows
+      .map((row, index) => isPartialPeriod(row) ? index : -1)
+      .filter(index => index >= 0);
+    if (!partialIndices.length || !datasetIndices.length) return;
+
+    const ctx = chart.ctx;
+    ctx.save();
+    ctx.setLineDash([5, 4]);
+    ctx.lineWidth = 2;
+
+    for (const datasetIndex of datasetIndices) {
+      const meta = chart.getDatasetMeta(datasetIndex);
+      const dataset = chart.data.datasets[datasetIndex];
+      for (const dataIndex of partialIndices) {
+        const element = meta.data?.[dataIndex];
+        if (!element) continue;
+        const props = element.getProps(["x", "y", "base", "width"], true);
+        const left = props.x - props.width / 2 + 1;
+        const top = Math.min(props.y, props.base) + 1;
+        const width = Math.max(0, props.width - 2);
+        const height = Math.max(1, Math.abs(props.base - props.y) - 2);
+        const border = Array.isArray(dataset.borderColor)
+          ? dataset.borderColor[dataIndex]
+          : dataset.borderColor;
+        ctx.strokeStyle = border || TEXT;
+        ctx.strokeRect(left, top, width, height);
+      }
+    }
+    ctx.restore();
+  }
+};
+
+function seriesDataset(label, values, color, dashed = false, rows = null) {
   return {
     label,
     data: values,
@@ -118,6 +171,7 @@ function seriesDataset(label, values, color, dashed = false) {
     pointHoverRadius: 0,
     borderWidth: 2,
     borderDash: dashed ? [7, 5] : [],
+    segment: rows ? partialSegment(rows, color) : undefined,
     tension: 0,
     spanGaps: true
   };
@@ -417,9 +471,9 @@ function renderCity() {
           label: "Годин під тривогою / добу",
           data: rows.map(r => r.avg_daily_alert_hours),
           yAxisID: "yHours",
-          backgroundColor: COLORS[0] + "77",
-          borderColor: COLORS[0],
-          borderWidth: 1
+          backgroundColor: rows.map(r => isPartialPeriod(r) ? COLORS[0] + "22" : COLORS[0] + "77"),
+          borderColor: rows.map(() => COLORS[0]),
+          borderWidth: rows.map(r => isPartialPeriod(r) ? 0 : 1)
         },
         {
           type: "line",
@@ -432,11 +486,13 @@ function renderCity() {
           pointHoverRadius: 0,
           borderWidth: 2,
           borderDash: dashed ? [7, 5] : [],
+          segment: partialSegment(rows, COLORS[1]),
           tension: 0,
           spanGaps: true
         }
       ]
     },
+    plugins: [partialPeriodBarPlugin],
     options: {
       responsive: true,
       maintainAspectRatio: false,
@@ -444,7 +500,17 @@ function renderCity() {
       interaction: { mode: "index", intersect: false },
       plugins: {
         legend: { labels: { color: TEXT, boxWidth: 14, usePointStyle: true } },
-        tooltip: { mode: "index", intersect: false }
+        tooltip: {
+          mode: "index",
+          intersect: false,
+          callbacks: {
+            footer(items) {
+              const i = items?.[0]?.dataIndex ?? -1;
+              return isPartialPeriod(rows[i]) ? "Поточний неповний період" : "";
+            }
+          }
+        },
+        partialPeriodBar: { rows, datasetIndices: [0] }
       },
       scales: {
         x: { ticks: { color: TEXT, maxRotation: 0, autoSkip: true }, grid: { color: GRID } },
@@ -466,7 +532,7 @@ function renderCity() {
     }
   });
 
-  setChart("cityDurationChart", labels, [seriesDataset(labelFor(key), rows.map(r => r.avg_alert_duration_min), COLORS[2], dashed)], "Хвилин");
+  setChart("cityDurationChart", labels, [seriesDataset(labelFor(key), rows.map(r => r.avg_alert_duration_min), COLORS[2], dashed, rows)], "Хвилин");
 
   renderTimeOfDay(key);
   renderRolling7d(key);
@@ -524,9 +590,9 @@ function renderRolling7d(key) {
           label: "Годин під тривогою / добу",
           data: rows.map(r => r.avg_daily_alert_hours),
           yAxisID: "yHours",
-          backgroundColor: COLORS[0] + "77",
-          borderColor: COLORS[0],
-          borderWidth: 1
+          backgroundColor: rows.map(r => isPartialPeriod(r) ? COLORS[0] + "22" : COLORS[0] + "77"),
+          borderColor: rows.map(() => COLORS[0]),
+          borderWidth: rows.map(r => isPartialPeriod(r) ? 0 : 1)
         },
         {
           type: "line",
@@ -539,11 +605,13 @@ function renderRolling7d(key) {
           pointHoverRadius: 0,
           borderWidth: 2,
           borderDash: dashed ? [7, 5] : [],
+          segment: partialSegment(rows, COLORS[1]),
           tension: 0,
           spanGaps: true
         }
       ]
     },
+    plugins: [partialPeriodBarPlugin],
     options: {
       responsive: true,
       maintainAspectRatio: false,
@@ -551,7 +619,17 @@ function renderRolling7d(key) {
       interaction: { mode: "index", intersect: false },
       plugins: {
         legend: { labels: { color: TEXT, boxWidth: 14, usePointStyle: true } },
-        tooltip: { mode: "index", intersect: false }
+        tooltip: {
+          mode: "index",
+          intersect: false,
+          callbacks: {
+            footer(items) {
+              const i = items?.[0]?.dataIndex ?? -1;
+              return isPartialPeriod(rows[i]) ? "Поточний неповний період" : "";
+            }
+          }
+        },
+        partialPeriodBar: { rows, datasetIndices: [0] }
       },
       scales: {
         x: { ticks: { color: TEXT, maxRotation: 0, autoSkip: true }, grid: { color: GRID } },
@@ -576,7 +654,7 @@ function renderRolling7d(key) {
   setChart(
     "rolling7dDurationChart",
     labels,
-    [seriesDataset(labelFor(key), rows.map(r => r.avg_alert_duration_min), COLORS[2], dashed)],
+    [seriesDataset(labelFor(key), rows.map(r => r.avg_alert_duration_min), COLORS[2], dashed, rows)],
     "Хвилин"
   );
 }
@@ -865,7 +943,8 @@ function renderComparison() {
       labelFor(key),
       shared.map(x => x.rows[idx]?.[metric] ?? null),
       COLORS[idx],
-      sourceType(key) === "raion_proxy"
+      sourceType(key) === "raion_proxy",
+      shared.map(x => x.rows[idx])
     ));
     setChart(id, labels, datasets, yTitle);
   };
@@ -1059,7 +1138,7 @@ function renderMethodology() {
   const periodMethodology = $("periodMethodology");
   if (periodMethodology) {
     periodMethodology.innerHTML = rolling
-      ? "<strong>Які дні потрапляють у розрахунки.</strong> Усі показники рахуються лише по завершених календарних днях. Сьогоднішній день не враховується. Картки вгорі і блок «Останні 28 завершених днів» охоплюють рівно останні 28 завершених днів — до вчора включно; у короткому горизонті кожен день показаний окремо. На місячному графіку показуються лише повні календарні місяці. У режимі «Ковзні 7 днів» кожна точка охоплює 7 завершених календарних днів і датована останнім днем цього вікна; сусідні точки перекриваються на 6 днів. Перше вікно, яке могло б включати неповний стартовий день покриття, не показується."
+      ? "<strong>Які дні потрапляють у розрахунки.</strong> Усі показники рахуються лише по завершених календарних днях. Сьогоднішній день не враховується. Картки вгорі і блок «Останні 28 завершених днів» охоплюють рівно останні 28 завершених днів — до вчора включно; у короткому горизонті кожен день показаний окремо. Завершені періоди показуються суцільно. Поточний неповний календарний місяць додається окремо до останнього завершеного дня і позначається пунктиром. Для «Ковзних 7/30/90 днів» регулярні точки мають тижневий крок; якщо після останньої регулярної точки вже є нові завершені дні, додається поточний зріз до останнього завершеного дня і він також позначається пунктиром. Перше вікно, яке могло б включати неповний стартовий день покриття, не показується."
       : "<strong>Які дні потрапляють у розрахунки.</strong> Усі показники рахуються лише по завершених календарних днях. Сьогоднішній день не враховується. Картки вгорі і блок «Останні 28 завершених днів» охоплюють рівно останні 28 завершених днів — до вчора включно; у короткому горизонті кожен день показаний окремо. На місячному графіку показуються лише повні календарні місяці, а на тижневому — лише повні тижні з понеділка до неділі. Якщо дані для міста починаються посеред місяця або тижня, цей перший неповний період не показується.";
   }
 

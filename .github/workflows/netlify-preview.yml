@@ -146,6 +146,18 @@ jobs:
                   assert float(row["alert_hours"]) >= 0, (key, period)
                   assert row["avg_alert_duration_min"] is None or float(row["avg_alert_duration_min"]) >= 0, (key, period)
 
+          for key in data["multicity_meta"]["production_city_keys"]:
+              built_city = data["cities"][key]
+              for period_name in ("monthly", "weekly", "rolling30", "rolling90"):
+                  period_rows = built_city.get(period_name, [])
+                  partial_rows = [row for row in period_rows if row.get("is_partial_period")]
+                  assert len(partial_rows) <= 1, (key, period_name)
+                  if partial_rows:
+                      assert period_rows[-1] == partial_rows[-1], (key, period_name)
+                      assert partial_rows[-1].get("partial_through"), (key, period_name)
+              monthly_partial = [row for row in built_city.get("monthly", []) if row.get("is_partial_period")]
+              assert len(monthly_partial) == 1, key
+
           assert heat["meta"]["test_only"] is True
           assert heat["meta"]["slot_minutes"] == 15
           assert heat["meta"]["city_count"] == 23
@@ -191,6 +203,8 @@ jobs:
           grep -q 'id="allCitiesRange"' kyiv-air-alerts-grafana/pages-preview/index.html
           grep -q "function renderTimeOfDay" kyiv-air-alerts-grafana/pages-preview/app.js
           grep -q "function renderTimeOfDayComparison" kyiv-air-alerts-grafana/pages-preview/app.js
+          grep -q "partialPeriodBarPlugin" kyiv-air-alerts-grafana/pages-preview/app.js
+          grep -q "isPartialPeriod" kyiv-air-alerts-grafana/pages-preview/app.js
           grep -q "time_of_day_heatmap_test" kyiv-air-alerts-grafana/pages-preview/app.js
           grep -q "state.data.explosion_metric_test" kyiv-air-alerts-grafana/pages-preview/app.js
           grep -q "methodology-detail-grid" kyiv-air-alerts-grafana/pages-preview/index.html
