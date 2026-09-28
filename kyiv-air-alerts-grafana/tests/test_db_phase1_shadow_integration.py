@@ -1,12 +1,15 @@
 from __future__ import annotations
 
 import builtins
+import copy
 import inspect
 import json
 import sys
 import types
 import unittest
+from datetime import datetime, timezone
 from pathlib import Path
+from tempfile import TemporaryDirectory
 from unittest.mock import patch
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -84,6 +87,27 @@ class ShadowIntegrationTests(unittest.TestCase):
         self.assertEqual(FAKE_ENV["GITHUB_SHA"], provenance["workflow_sha"])
         self.assertTrue(provenance["parameters"]["shadow"])
 
+    def test_shadow_provenance_separates_workflow_and_checked_out_input(self):
+        env = {
+            **FAKE_ENV,
+            "GITHUB_REF": "refs/heads/main",
+            "GITHUB_SHA": "a" * 40,
+            "PHASE1_INPUT_REPOSITORY": FAKE_ENV["GITHUB_REPOSITORY"],
+            "PHASE1_INPUT_REF": "site-prod",
+            "PHASE1_INPUT_SHA": "b" * 40,
+        }
+        got = shadow.build_shadow_persistence_payload(
+            self.canonical_payload,
+            checkpoint_state=self.ua_fixture["checkpoint_state"],
+            env=env,
+        )
+        provenance = got["run_provenance"]
+        self.assertEqual("refs/heads/main", provenance["workflow_ref"])
+        self.assertEqual("a" * 40, provenance["workflow_sha"])
+        self.assertEqual("site-prod", provenance["input_ref"])
+        self.assertEqual("b" * 40, provenance["input_sha"])
+        self.assertNotEqual(provenance["workflow_sha"], provenance["input_sha"])
+
     def test_alertsinua_is_absent_from_shadow_source_rows(self):
         got = shadow.build_shadow_persistence_payload(
             self.canonical_payload, checkpoint_state=self.ua_fixture["checkpoint_state"], env=FAKE_ENV
@@ -154,6 +178,274 @@ class ShadowIntegrationTests(unittest.TestCase):
                     ukrainealarm_observations=self.ua_obs, checkpoint_state=self.ua_fixture["checkpoint_state"],
                     env=FAKE_ENV,
                 )
+
+    def test_shadow_fail_open_swallows_only_shadow_failure_and_writes_diagnostic(self):
+        fake = types.ModuleType("db_phase1_shadow")
+        def fail(*args, **kwargs):
+            raise RuntimeError("forced db fail")
+        fake.persist_shadow_payload = fail
+        with TemporaryDirectory() as tmp, patch.dict(
+            sys.modules, {"db_phase1_shadow": fake}
+        ), patch.object(
+            bridge, "canonicalize_lviv", return_value=self.canonical_payload
+        ):
+            diagnostic = Path(tmp) / "phase1.json"
+            env = {
+                **FAKE_ENV,
+                "PHASE1_DB_SHADOW_FAILURE_POLICY": "fail_open",
+                "PHASE1_DB_SHADOW_DIAGNOSTIC": str(diagnostic),
+            }
+            result = bridge.persist_lviv_shadow_if_enabled(
+                lviv_fetched_this_run=True,
+                vadimkin_observations=self.vad_obs,
+                ukrainealarm_observations=self.ua_obs,
+                checkpoint_state=self.ua_fixture["checkpoint_state"],
+                env=env,
+            )
+            self.assertIsNone(result)
+            payload = json.loads(diagnostic.read_text(encoding="utf-8"))
+            self.assertEqual("failed", payload["status"])
+            self.assertEqual("fail_open", payload["failure_policy"])
+            self.assertEqual("RuntimeError", payload["error_type"])
+            self.assertFalse(payload["credentials_exposed"])
+
+    def test_shadow_fail_closed_remains_default_and_propagates(self):
+        fake = types.ModuleType("db_phase1_shadow")
+        def fail(*args, **kwargs):
+            raise RuntimeError("db fail closed")
+        fake.persist_shadow_payload = fail
+        with patch.dict(sys.modules, {"db_phase1_shadow": fake}), patch.object(
+            bridge, "canonicalize_lviv", return_value=self.canonical_payload
+        ):
+            with self.assertRaisesRegex(RuntimeError, "db fail closed"):
+                bridge.persist_lviv_shadow_if_enabled(
+                    lviv_fetched_this_run=True,
+                    vadimkin_observations=self.vad_obs,
+                    ukrainealarm_observations=self.ua_obs,
+                    checkpoint_state=self.ua_fixture["checkpoint_state"],
+                    env=FAKE_ENV,
+                )
+
+    def test_shadow_failure_diagnostic_redacts_database_url_password_and_tokens(self):
+        with TemporaryDirectory() as tmp:
+            diagnostic = Path(tmp) / "phase1.json"
+            fake_url = "postgresql://user:super-secret-password@example.test/neondb"
+            fake_api_key = "fake-neon-api-key"
+            fake_ua_token = "fake-ukrainealarm-token"
+            env = {
+                **FAKE_ENV,
+                "PHASE1_DATABASE_URL": fake_url,
+                "NEON_API_KEY": fake_api_key,
+                "UKRAINEALARM_API_TOKEN": fake_ua_token,
+                "PHASE1_DB_SHADOW_FAILURE_POLICY": "fail_open",
+                "PHASE1_DB_SHADOW_DIAGNOSTIC": str(diagnostic),
+            }
+            exc = RuntimeError(
+                f"connect failed {fake_url} {fake_api_key} {fake_ua_token}"
+            )
+            payload = bridge._shadow_failure_diagnostic(exc, env, "fail_open")
+            bridge._write_shadow_diagnostic(payload, env)
+            raw = diagnostic.read_text(encoding="utf-8")
+            self.assertNotIn(fake_url, raw)
+            self.assertNotIn("super-secret-password", raw)
+            self.assertNotIn(fake_api_key, raw)
+            self.assertNotIn(fake_ua_token, raw)
+            self.assertIn("[REDACTED]", raw)
+
+    def test_invalid_failure_policy_is_rejected(self):
+        with self.assertRaisesRegex(RuntimeError, "must be one of"):
+            bridge.phase1_db_shadow_failure_policy(
+                {"PHASE1_DB_SHADOW_FAILURE_POLICY": "ignore_everything"}
+            )
+
+    def test_real_bridge_fail_open_forced_db_failure_preserves_product_bytes(self):
+        fixed_now = datetime(2026, 9, 28, 18, 30, 0, tzinfo=timezone.utc)
+
+        class FixedDateTime(datetime):
+            @classmethod
+            def now(cls, tz=None):
+                return fixed_now if tz is None else fixed_now.astimezone(tz)
+
+        cfg = {
+            "lviv": {
+                "label": "Львів",
+                "oblast": "Львівська область",
+                "raion": "Львівський район",
+                "coverage_start": "2025-09-01",
+                "coverage_basis": "official_rollout",
+            }
+        }
+        history = [
+            {
+                "start": bridge.parse_dt(row["start"]),
+                "end": bridge.parse_dt(row["end"]),
+            }
+            for row in self.ua_fixture["events"]
+        ]
+        proxy_alerts = [
+            bridge.Alert(
+                start=bridge.parse_dt(row["start"]).astimezone(bridge.TZ),
+                end=bridge.parse_dt(row["end"]).astimezone(bridge.TZ),
+                source="deterministic-test",
+            )
+            for row in self.canonical_payload["episodes"]
+        ]
+        static_alert = proxy_alerts[-1]
+        initial_store = {
+            "schema_version": bridge.STORE_SCHEMA_VERSION,
+            "source_url": bridge.HISTORY_URL,
+            "regions": {
+                "lviv": {
+                    "city_key": "lviv",
+                    "kind": "proxy",
+                    "target": "Львівський район",
+                    "oblast": "Львівська область",
+                    "region_id": "90",
+                    "api_region_name": "Львівський район",
+                    "continuous": True,
+                    "last_checked_at": "2026-09-17T10:30:00Z",
+                }
+            },
+            "events": [],
+        }
+        static_info = {
+            "source": "deterministic-test",
+            "coverage_start": "2025-09-01T00:00:00Z",
+            "coverage_end_exclusive": "2026-09-29T00:00:00Z",
+            "payload_files": ["deterministic"],
+            "completed_event_rows": 1,
+            "cross_source_match_tolerance_seconds": bridge.MATCH_TOLERANCE_SECONDS,
+        }
+
+        with TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            dashboard = root / "dashboard_data.json"
+            store = root / "ukrainealarm_bridge.json"
+            diagnostic = root / "phase1_db_shadow.json"
+            baseline_dashboard = (
+                json.dumps(
+                    {
+                        "cities": {},
+                        "multicity_meta": {"production_city_keys": ["lviv"]},
+                    },
+                    ensure_ascii=False,
+                    indent=2,
+                )
+                + "\n"
+            ).encode("utf-8")
+            baseline_store = (
+                json.dumps(initial_store, ensure_ascii=False, indent=2) + "\n"
+            ).encode("utf-8")
+
+            common = [
+                patch.object(bridge, "DATA_FILE", dashboard),
+                patch.object(bridge, "STORE_FILE", store),
+                patch.object(bridge, "datetime", FixedDateTime),
+                patch.object(bridge.exactmod, "CITY_CONFIG", {}),
+                patch.object(bridge.extended, "configure_all_proxies", return_value=cfg),
+                patch.object(
+                    bridge,
+                    "load_static_bridge",
+                    return_value=({"lviv": [static_alert]}, static_info),
+                ),
+                patch.object(
+                    bridge,
+                    "load_store",
+                    side_effect=lambda: copy.deepcopy(initial_store),
+                ),
+                patch.object(
+                    bridge.base,
+                    "fetch_proxy_alerts_with_phase1",
+                    return_value=({"lviv": proxy_alerts}, self.vad_obs),
+                ),
+                patch.object(
+                    bridge.exactmod,
+                    "fetch_city_alerts",
+                    return_value={},
+                ),
+                patch.object(bridge, "history_rows", return_value=history),
+            ]
+
+            def run(env):
+                dashboard.write_bytes(baseline_dashboard)
+                store.write_bytes(baseline_store)
+                with common[0], common[1], common[2], common[3], common[4], common[5], common[6], common[7], common[8], common[9], patch.dict(
+                    bridge.os.environ, env, clear=False
+                ):
+                    bridge.main()
+                return dashboard.read_bytes(), store.read_bytes()
+
+            off_dashboard, off_store = run(
+                {
+                    "UKRAINEALARM_API_TOKEN": "deterministic-token",
+                    "PHASE1_DB_SHADOW": "0",
+                }
+            )
+
+            fake_url = "postgresql://user:fake-db-secret@example.test/neondb"
+            with patch.object(
+                shadow,
+                "connect_database",
+                side_effect=RuntimeError(f"forced DB failure {fake_url}"),
+            ):
+                on_dashboard, on_store = run(
+                    {
+                        "UKRAINEALARM_API_TOKEN": "deterministic-token",
+                        "PHASE1_DB_SHADOW": "1",
+                        "PHASE1_DATABASE_URL": fake_url,
+                        "PHASE1_DB_BRANCH": "forced-failure-branch",
+                        "PHASE1_DB_SHADOW_FAILURE_POLICY": "fail_open",
+                        "PHASE1_DB_SHADOW_DIAGNOSTIC": str(diagnostic),
+                        "GITHUB_REPOSITORY": FAKE_ENV["GITHUB_REPOSITORY"],
+                        "GITHUB_WORKFLOW": "Update Ukraine air-alert production data",
+                        "GITHUB_REF": "refs/heads/main",
+                        "GITHUB_SHA": "a" * 40,
+                        "GITHUB_RUN_ID": "456",
+                        "GITHUB_RUN_ATTEMPT": "1",
+                        "PHASE1_INPUT_REPOSITORY": FAKE_ENV["GITHUB_REPOSITORY"],
+                        "PHASE1_INPUT_REF": "site-prod",
+                        "PHASE1_INPUT_SHA": "b" * 40,
+                    }
+                )
+
+            self.assertEqual(off_dashboard, on_dashboard)
+            self.assertEqual(off_store, on_store)
+            diag = json.loads(diagnostic.read_text(encoding="utf-8"))
+            self.assertEqual("failed", diag["status"])
+            self.assertEqual("fail_open", diag["failure_policy"])
+            self.assertEqual("a" * 40, diag["workflow_sha"])
+            self.assertEqual("b" * 40, diag["input_sha"])
+            self.assertNotIn(fake_url, diagnostic.read_text(encoding="utf-8"))
+            self.assertNotIn("fake-db-secret", diagnostic.read_text(encoding="utf-8"))
+
+            dashboard.write_bytes(baseline_dashboard)
+            store.write_bytes(baseline_store)
+            with patch.object(
+                shadow,
+                "connect_database",
+                side_effect=RuntimeError("forced fail-closed DB failure"),
+            ):
+                with self.assertRaisesRegex(RuntimeError, "forced fail-closed"):
+                    run(
+                        {
+                            "UKRAINEALARM_API_TOKEN": "deterministic-token",
+                            "PHASE1_DB_SHADOW": "1",
+                            "PHASE1_DATABASE_URL": fake_url,
+                            "PHASE1_DB_BRANCH": "forced-failure-branch",
+                            "PHASE1_DB_SHADOW_FAILURE_POLICY": "fail_closed",
+                            "GITHUB_REPOSITORY": FAKE_ENV["GITHUB_REPOSITORY"],
+                            "GITHUB_WORKFLOW": "Update Ukraine air-alert production data",
+                            "GITHUB_REF": "refs/heads/main",
+                            "GITHUB_SHA": "a" * 40,
+                            "GITHUB_RUN_ID": "456",
+                            "GITHUB_RUN_ATTEMPT": "1",
+                            "PHASE1_INPUT_REPOSITORY": FAKE_ENV["GITHUB_REPOSITORY"],
+                            "PHASE1_INPUT_REF": "site-prod",
+                            "PHASE1_INPUT_SHA": "b" * 40,
+                        }
+                    )
+            self.assertEqual(baseline_dashboard, dashboard.read_bytes())
+            self.assertEqual(baseline_store, store.read_bytes())
 
     def test_real_bridge_uses_phase1_proxy_fetch_once(self):
         source = inspect.getsource(bridge.main)

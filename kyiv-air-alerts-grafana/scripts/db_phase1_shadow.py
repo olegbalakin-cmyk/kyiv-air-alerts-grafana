@@ -5,7 +5,11 @@ import os
 from collections.abc import Mapping
 from typing import Any, Callable
 
-from db_phase1_persistence import SCHEMA_VERSION, persist_phase1_payload
+from db_phase1_persistence import (
+    SCHEMA_VERSION,
+    persist_phase1_payload,
+    read_current_checkpoint,
+)
 
 SOURCE_KEY = "ukrainealarm_region_history"
 CITY_KEY = "lviv"
@@ -80,12 +84,22 @@ def _poll_checkpoint(canonical_payload: Mapping[str, Any], checkpoint_state: Map
 
 
 def _run_provenance(canonical_payload: Mapping[str, Any], env: Mapping[str, str]) -> dict[str, Any]:
-    input_sha = str(env.get("GITHUB_SHA") or "").strip()
-    if not input_sha:
-        raise RuntimeError("shadow poll requires GITHUB_SHA for input provenance")
-    repository = str(env.get("GITHUB_REPOSITORY") or "").strip() or None
+    workflow_sha = str(env.get("GITHUB_SHA") or "").strip()
+    if not workflow_sha:
+        raise RuntimeError("shadow poll requires GITHUB_SHA for workflow provenance")
+    workflow_repository = str(env.get("GITHUB_REPOSITORY") or "").strip() or None
     workflow_ref = str(env.get("GITHUB_REF") or "").strip() or None
     workflow_name = str(env.get("GITHUB_WORKFLOW") or "").strip() or None
+
+    input_repository = (
+        str(env.get("PHASE1_INPUT_REPOSITORY") or "").strip()
+        or workflow_repository
+    )
+    input_ref = str(env.get("PHASE1_INPUT_REF") or "").strip() or workflow_ref
+    input_sha = str(env.get("PHASE1_INPUT_SHA") or "").strip() or workflow_sha
+    if not input_sha:
+        raise RuntimeError("shadow poll requires input SHA provenance")
+
     run_id = str(env.get("GITHUB_RUN_ID") or "").strip()
     run_attempt = str(env.get("GITHUB_RUN_ATTEMPT") or "").strip()
     profile = canonical_payload["assembly_profile"]
@@ -94,18 +108,17 @@ def _run_provenance(canonical_payload: Mapping[str, Any], env: Mapping[str, str]
         "schema_version": SCHEMA_VERSION,
         "canonicalization_version": canonical_payload["canonicalization_version"],
         "assembly_profile": profile,
-        "workflow_repository": repository,
+        "workflow_repository": workflow_repository,
         "workflow_name": workflow_name,
         "workflow_ref": workflow_ref,
-        "workflow_sha": input_sha,
-        "input_repository": repository,
-        "input_ref": workflow_ref,
+        "workflow_sha": workflow_sha,
+        "input_repository": input_repository,
+        "input_ref": input_ref,
         "input_sha": input_sha,
         "github_run_id": int(run_id) if run_id else None,
         "github_run_attempt": int(run_attempt) if run_attempt else None,
         "parameters": {"assembly_profile": profile, "shadow": True},
     }
-
 
 def build_shadow_persistence_payload(canonical_payload: Mapping[str, Any], *, checkpoint_state: Mapping[str, Any], env: Mapping[str, str]) -> dict[str, Any]:
     region_id = str(checkpoint_state.get("region_id") or "").strip()
@@ -143,6 +156,7 @@ def persist_shadow_payload(canonical_payload: Mapping[str, Any], *, checkpoint_s
         raise RuntimeError("shadow poll stream identity is missing region_id")
     factory = connect_factory or connect_database
     connection = factory(database_url)
+    checkpoint = None
     try:
         result = persist_phase1_payload(
             connection,
@@ -155,14 +169,36 @@ def persist_shadow_payload(canonical_payload: Mapping[str, Any], *, checkpoint_s
             source_observations=payload["source_observations"],
             checkpoint_candidate=payload["checkpoint_candidate"],
         )
+        cursor = connection.cursor()
+        try:
+            checkpoint = read_current_checkpoint(
+                cursor,
+                payload["source_key"],
+                payload["city_key"],
+                payload["stream_key"],
+            )
+        finally:
+            close_cursor = getattr(cursor, "close", None)
+            if callable(close_cursor):
+                close_cursor()
+        if checkpoint is None:
+            raise RuntimeError(
+                "shadow persistence committed but current checkpoint could not be resolved"
+            )
     finally:
         close = getattr(connection, "close", None)
         if callable(close):
             close()
-    _LAST_PAYLOAD = payload
-    _LAST_RESULT = result
-    return result
 
+    output = dict(result)
+    output["checkpoint_id"] = str(checkpoint["checkpoint_id"])
+    output["checkpoint_seq"] = int(checkpoint["checkpoint_seq"])
+    output["db_branch"] = db_branch
+    output["workflow_sha"] = payload["run_provenance"].get("workflow_sha")
+    output["input_sha"] = payload["run_provenance"].get("input_sha")
+    _LAST_PAYLOAD = payload
+    _LAST_RESULT = output
+    return output
 
 def last_shadow_payload() -> dict[str, Any] | None:
     return _LAST_PAYLOAD
