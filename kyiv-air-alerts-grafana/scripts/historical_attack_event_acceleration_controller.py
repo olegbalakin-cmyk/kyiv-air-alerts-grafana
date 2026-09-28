@@ -57,6 +57,37 @@ TERMINAL_STATES = {
 }
 
 
+OBSERVATION_DEDUPE_SCHEMA_VERSION = 1
+OBSERVATION_DEDUPE_SEMANTICS = "campaign-wide-canonical-observation-dedupe-v1"
+OBSERVATION_CANONICAL_FIELDS = (
+    "source_family",
+    "source_type",
+    "source_url",
+    "telegram_channel",
+    "telegram_message_id",
+    "source_timestamp",
+    "excerpt",
+    "content_hash",
+    "matched_discovery_terms",
+    "event_types",
+    "exact_city_evidence",
+    "aerial_war_context",
+    "same_attack_context",
+    "air_defense_context",
+    "air_defense_action",
+    "interception_claim",
+)
+OBSERVATION_CONTEXT_FIELDS = (
+    "event_timestamp_if_stated",
+    "temporal_binding",
+    "classifier_reason_codes",
+    "classification_outcome",
+    "classification_episode_id",
+    "candidate_matching",
+    "retrieval_provenance",
+)
+
+
 class GuardFailure(RuntimeError):
     pass
 
@@ -230,23 +261,150 @@ def validate_episode_progress(before: dict[str, tuple[str, str]], after: dict[st
                 raise GuardFailure(f"TERMINAL_EPISODE_RERUN_OR_REGRESSION:{key}:{old_state}->{current[0]}")
 
 
-def collect_observation_ids(root: Path) -> set[str]:
-    seen: set[str] = set()
+def observation_payload_hash(row: dict) -> str:
+    payload = json.dumps(row, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
+    return hashlib.sha256(payload.encode("utf-8")).hexdigest()
+
+
+def canonical_observation_payload(row: dict) -> dict:
+    return {
+        key: copy.deepcopy((row or {}).get(key))
+        for key in OBSERVATION_CANONICAL_FIELDS
+    }
+
+
+def canonical_observation_hash(row: dict) -> str:
+    return observation_payload_hash(canonical_observation_payload(row))
+
+
+def observation_context_payload(row: dict) -> dict:
+    return {
+        key: copy.deepcopy((row or {}).get(key))
+        for key in OBSERVATION_CONTEXT_FIELDS
+    }
+
+
+def observation_index_entry(row: dict, batch_path: str) -> dict:
+    return {
+        "row": copy.deepcopy(row),
+        "batch_path": batch_path,
+        "canonical_hash": canonical_observation_hash(row),
+        "payload_hash": observation_payload_hash(row),
+    }
+
+
+def collect_observation_index(root: Path) -> dict[str, dict]:
+    index: dict[str, dict] = {}
     batch_root = root / BATCH_ROOT_REL
     if not batch_root.exists():
-        return seen
+        return index
     for path in sorted(batch_root.glob("*/batch_*.json")):
         doc = load_json(path)
         local: set[str] = set()
+        rel = path.relative_to(root).as_posix()
         for row in doc.get("observations") or []:
             oid = str((row or {}).get("observation_id") or "")
             if not oid:
                 continue
-            if oid in local or oid in seen:
-                raise GuardFailure(f"DUPLICATE_OBSERVATION_ID:{oid}:{path.relative_to(root).as_posix()}")
+            if oid in local or oid in index:
+                raise GuardFailure(f"DUPLICATE_OBSERVATION_ID:{oid}:{rel}")
             local.add(oid)
-        seen.update(local)
-    return seen
+            index[oid] = observation_index_entry(row, rel)
+    return index
+
+
+def collect_observation_ids(root: Path) -> set[str]:
+    return set(collect_observation_index(root))
+
+
+def episode_reference_ids_for_observation(doc: dict, observation_id: str) -> list[str]:
+    out = []
+    for result in doc.get("episode_results") or []:
+        refs = [str(x) for x in (result.get("source_observation_ids") or []) if x]
+        if observation_id in refs:
+            eid = str(result.get("episode_id") or "")
+            if eid:
+                out.append(eid)
+    return sorted(set(out))
+
+
+def canonicalize_new_batch_observations(
+    batch_path: Path,
+    observation_index: dict[str, dict],
+) -> tuple[set[str], dict]:
+    doc = load_json(batch_path)
+    retained = []
+    local: dict[str, dict] = {}
+    duplicates = []
+
+    for row in doc.get("observations") or []:
+        if not isinstance(row, dict):
+            retained.append(row)
+            continue
+        oid = str(row.get("observation_id") or "")
+        if not oid:
+            retained.append(row)
+            continue
+
+        prior = local.get(oid)
+        scope = "batch"
+        if prior is None:
+            prior = observation_index.get(oid)
+            scope = "campaign"
+
+        if prior is not None:
+            candidate_canonical_hash = canonical_observation_hash(row)
+            if candidate_canonical_hash != str(prior.get("canonical_hash") or ""):
+                raise GuardFailure(
+                    f"OBSERVATION_ID_PAYLOAD_CONFLICT:{oid}:{batch_path.name}"
+                )
+            candidate_payload_hash = observation_payload_hash(row)
+            prior_payload_hash = str(prior.get("payload_hash") or "")
+            duplicates.append({
+                "observation_id": oid,
+                "scope": scope,
+                "equivalence": (
+                    "EXACT_DUPLICATE"
+                    if candidate_payload_hash == prior_payload_hash
+                    else "EQUIVALENT_DETERMINISTIC_DUPLICATE"
+                ),
+                "canonical_payload_hash": candidate_canonical_hash,
+                "original_payload_hash": prior_payload_hash,
+                "regenerated_payload_hash": candidate_payload_hash,
+                "original_batch_path": prior.get("batch_path"),
+                "episode_reference_ids": episode_reference_ids_for_observation(doc, oid),
+                "original_context": observation_context_payload(prior.get("row") or {}),
+                "regenerated_context": observation_context_payload(row),
+            })
+            continue
+
+        entry = observation_index_entry(row, batch_path.name)
+        local[oid] = entry
+        retained.append(row)
+
+    resolved_ids = set(observation_index) | set(local)
+    for result in doc.get("episode_results") or []:
+        eid = str(result.get("episode_id") or "")
+        for raw_oid in result.get("source_observation_ids") or []:
+            oid = str(raw_oid or "")
+            if oid and oid not in resolved_ids:
+                raise GuardFailure(
+                    f"DANGLING_OBSERVATION_REFERENCE:{eid}:{oid}:{batch_path.name}"
+                )
+
+    metadata = {
+        "schema_version": OBSERVATION_DEDUPE_SCHEMA_VERSION,
+        "semantics": OBSERVATION_DEDUPE_SEMANTICS,
+        "equivalent_duplicate_occurrences": len(duplicates),
+        "equivalent_duplicate_ids": sorted({x["observation_id"] for x in duplicates}),
+        "duplicates": duplicates,
+    }
+    if duplicates:
+        doc["observations"] = retained
+        doc["campaign_observation_dedupe"] = metadata
+        dump_json(batch_path, doc)
+
+    return set(local), metadata
 
 
 def validate_new_batch_observations(batch_path: Path, seen: set[str]) -> set[str]:
@@ -260,7 +418,6 @@ def validate_new_batch_observations(batch_path: Path, seen: set[str]) -> set[str
             raise GuardFailure(f"DUPLICATE_OBSERVATION_ID:{oid}:{batch_path.name}")
         local.add(oid)
     return local
-
 
 def run_worker(root: Path) -> dict:
     proc = run_cmd([
@@ -537,7 +694,8 @@ def run_controller(root: Path, event_name: str, run_id: str | None) -> dict:
             0, 0, 0, True, None, True, head=head
         )
 
-    seen_observations = collect_observation_ids(root)
+    observation_index = collect_observation_index(root)
+    seen_observations = set(observation_index)
     max_batches = phase_batch_limit(phase_before)
     batches_attempted = 0
     batches_committed = 0
@@ -600,7 +758,13 @@ def run_controller(root: Path, event_name: str, run_id: str | None) -> dict:
             if not batch_path.exists():
                 raise GuardFailure("WORKER_BATCH_FILE_MISSING")
             ensure_expected_dirty_paths(root, batch_rel)
+            canonical_new_ids, _dedupe_metadata = canonicalize_new_batch_observations(
+                batch_path, observation_index
+            )
+            ensure_expected_dirty_paths(root, batch_rel)
             new_ids = validate_new_batch_observations(batch_path, seen_observations)
+            if new_ids != canonical_new_ids:
+                raise GuardFailure("OBSERVATION_CANONICALIZATION_ID_SET_MISMATCH")
             source_guard = systemic_source_failure(payload)
             expected_head = commit_and_push(
                 root, [STATUS_REL, batch_rel],
@@ -608,6 +772,12 @@ def run_controller(root: Path, event_name: str, run_id: str | None) -> dict:
                 expected_head,
             )
             seen_observations.update(new_ids)
+            committed_doc = load_json(batch_path)
+            committed_rel = batch_rel.as_posix()
+            for row in committed_doc.get("observations") or []:
+                oid = str((row or {}).get("observation_id") or "")
+                if oid:
+                    observation_index[oid] = observation_index_entry(row, committed_rel)
             batches_committed += 1
             new_episodes += max(0, progress1 - progress0)
             if source_guard:
@@ -658,6 +828,7 @@ def run_controller(root: Path, event_name: str, run_id: str | None) -> dict:
     launch_final = load_json(root / LAUNCH_REL)
     validate_status_contract(root, status_final, launch_final)
     verify_protected(root, launch_final)
+    collect_observation_ids(root)
     if launch_blob(root) != initial_launch_blob:
         raise GuardFailure("LAUNCH_ARTIFACT_MUTATED_AFTER_RUN")
     result = summary(
@@ -770,6 +941,186 @@ def worktree_guard_self_test() -> dict:
     }
 
 
+
+def observation_dedupe_self_test() -> dict:
+    base = {
+        "observation_id": "obs-x",
+        "source_family": "example.invalid/city",
+        "source_type": "source_local_html",
+        "source_url": "https://example.invalid/a",
+        "telegram_channel": None,
+        "telegram_message_id": None,
+        "source_timestamp": "2026-01-01T00:00:00Z",
+        "event_timestamp_if_stated": None,
+        "excerpt": "У місті було чути вибух.",
+        "content_hash": "content-a",
+        "matched_discovery_terms": ["explosion"],
+        "event_types": ["explosion"],
+        "exact_city_evidence": {"present": True},
+        "aerial_war_context": {"present": True},
+        "same_attack_context": {"present": True},
+        "temporal_binding": {"present": False, "code": "NO_STRICT_TEMPORAL_BINDING"},
+        "classifier_reason_codes": ["MATCH_NONE"],
+        "classification_outcome": "needs_review",
+        "classification_episode_id": None,
+        "candidate_matching": {"outcome": "no_match", "matched_episode_ids": []},
+        "retrieval_provenance": {"adapter": "SourceLocalHtmlArchiveAdapter"},
+        "air_defense_context": False,
+        "air_defense_action": False,
+        "interception_claim": False,
+    }
+    other = copy.deepcopy(base)
+    other.update({
+        "observation_id": "obs-y",
+        "source_url": "https://example.invalid/b",
+        "content_hash": "content-b",
+    })
+    prior_index = {
+        "obs-x": observation_index_entry(
+            base,
+            "research/historical_attack_event_backfill/test/batch_000001.json",
+        )
+    }
+
+    with tempfile.TemporaryDirectory(prefix="historical-backfill-observation-dedupe-") as tmp:
+        root = Path(tmp)
+
+        cross_path = root / "batch_cross.json"
+        cross = {
+            "episode_results": [{
+                "episode_id": "e2",
+                "source_observation_ids": ["obs-x", "obs-y"],
+            }],
+            "observations": [copy.deepcopy(base), copy.deepcopy(other)],
+        }
+        dump_json(cross_path, cross)
+        new_ids, metadata = canonicalize_new_batch_observations(cross_path, prior_index)
+        cross_after = load_json(cross_path)
+        assert new_ids == {"obs-y"}
+        assert [x["observation_id"] for x in cross_after["observations"]] == ["obs-y"]
+        assert cross_after["episode_results"][0]["source_observation_ids"] == ["obs-x", "obs-y"]
+        assert metadata["equivalent_duplicate_ids"] == ["obs-x"]
+        assert metadata["duplicates"][0]["equivalence"] == "EXACT_DUPLICATE"
+        first_pass = cross_path.read_text(encoding="utf-8")
+        canonicalize_new_batch_observations(cross_path, prior_index)
+        assert cross_path.read_text(encoding="utf-8") == first_pass
+
+        inside_path = root / "batch_inside.json"
+        dump_json(inside_path, {
+            "episode_results": [{
+                "episode_id": "e1",
+                "source_observation_ids": ["obs-x"],
+            }],
+            "observations": [copy.deepcopy(base), copy.deepcopy(base)],
+        })
+        inside_ids, inside_meta = canonicalize_new_batch_observations(inside_path, {})
+        inside_after = load_json(inside_path)
+        assert inside_ids == {"obs-x"}
+        assert len(inside_after["observations"]) == 1
+        assert inside_meta["equivalent_duplicate_ids"] == ["obs-x"]
+
+        equivalent_path = root / "batch_equivalent.json"
+        contextual = copy.deepcopy(base)
+        contextual["event_timestamp_if_stated"] = "2026-01-01T00:10:00Z"
+        contextual["temporal_binding"] = {
+            "present": True,
+            "code": "SOURCE_STATED_EVENT_TIME",
+            "episode_specific": True,
+            "episode_id": "e3",
+        }
+        contextual["classifier_reason_codes"] = ["MATCH_UNIQUE"]
+        contextual["classification_outcome"] = "approved_strict"
+        contextual["classification_episode_id"] = "e3"
+        contextual["candidate_matching"] = {
+            "outcome": "unique_match",
+            "matched_episode_ids": ["e3"],
+            "matched_episode_id": "e3",
+        }
+        contextual["retrieval_provenance"] = {
+            "adapter": "SourceLocalHtmlArchiveAdapter",
+            "archive_local_day": "2026-01-02",
+        }
+        dump_json(equivalent_path, {
+            "episode_results": [{
+                "episode_id": "e3",
+                "source_observation_ids": ["obs-x"],
+            }],
+            "observations": [contextual],
+        })
+        equivalent_ids, equivalent_meta = canonicalize_new_batch_observations(
+            equivalent_path, prior_index
+        )
+        assert equivalent_ids == set()
+        assert load_json(equivalent_path)["episode_results"][0]["source_observation_ids"] == ["obs-x"]
+        assert equivalent_meta["duplicates"][0]["equivalence"] == "EQUIVALENT_DETERMINISTIC_DUPLICATE"
+
+        conflict_path = root / "batch_conflict.json"
+        conflicting = copy.deepcopy(base)
+        conflicting["excerpt"] = "Матеріально інший нормалізований вміст."
+        conflicting["content_hash"] = "content-conflict"
+        dump_json(conflict_path, {
+            "episode_results": [],
+            "observations": [conflicting],
+        })
+        conflict_blocked = False
+        try:
+            canonicalize_new_batch_observations(conflict_path, prior_index)
+        except GuardFailure as exc:
+            conflict_blocked = str(exc).startswith(
+                "OBSERVATION_ID_PAYLOAD_CONFLICT:obs-x:"
+            )
+        assert conflict_blocked
+
+        distinct_path = root / "batch_distinct.json"
+        dump_json(distinct_path, {
+            "episode_results": [],
+            "observations": [copy.deepcopy(base), copy.deepcopy(other)],
+        })
+        distinct_ids, _ = canonicalize_new_batch_observations(distinct_path, {})
+        assert distinct_ids == {"obs-x", "obs-y"}
+        assert len(load_json(distinct_path)["observations"]) == 2
+
+        dangling_path = root / "batch_dangling.json"
+        dump_json(dangling_path, {
+            "episode_results": [{
+                "episode_id": "e4",
+                "source_observation_ids": ["missing-observation"],
+            }],
+            "observations": [],
+        })
+        dangling_blocked = False
+        try:
+            canonicalize_new_batch_observations(dangling_path, prior_index)
+        except GuardFailure as exc:
+            dangling_blocked = str(exc).startswith("DANGLING_OBSERVATION_REFERENCE:e4:")
+        assert dangling_blocked
+
+    version = '{"methodology_version":"test"}'
+    stable_before = {"lviv:e1": ("NO_CONFIRMED_EVENT", version)}
+    validate_episode_progress(stable_before, {"lviv:e1": ("NO_CONFIRMED_EVENT", version)})
+    terminal_regression_blocked = False
+    try:
+        validate_episode_progress(
+            stable_before,
+            {"lviv:e1": ("STRICT_EVENT_POSITIVE", version)},
+        )
+    except GuardFailure as exc:
+        terminal_regression_blocked = str(exc).startswith("TERMINAL_EPISODE_RERUN_OR_REGRESSION:")
+    assert terminal_regression_blocked
+
+    return {
+        "exact_duplicate_across_batches": "PASS",
+        "episode_reference_preserved": "PASS",
+        "global_observation_uniqueness": "PASS",
+        "duplicate_inside_generated_batch": "PASS",
+        "equivalent_context_duplicate": "PASS",
+        "same_id_conflicting_payload": "PASS",
+        "different_observation_ids_untouched": "PASS",
+        "dangling_observation_reference_guard": "PASS",
+        "resume_retry_observation_idempotence": "PASS",
+        "terminal_episode_retry_regression_guard": "PASS",
+    }
+
 def self_test() -> dict:
     timestamp = "2026-09-27T00:00:00Z"
     status = {
@@ -848,6 +1199,7 @@ def self_test() -> dict:
     assert systemic_source_failure({"new_work": 50, "retryable": 25})
     assert not systemic_source_failure({"new_work": 50, "retryable": 5})
     guard_tests = worktree_guard_self_test()
+    dedupe_tests = observation_dedupe_self_test()
 
     return {
         "ok": True,
@@ -869,6 +1221,7 @@ def self_test() -> dict:
         "synthetic_guard_injection": "PASS",
         "systemic_source_failure_guard": "PASS",
         **guard_tests,
+        **dedupe_tests,
     }
 
 
