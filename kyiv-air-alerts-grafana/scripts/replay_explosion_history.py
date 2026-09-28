@@ -984,8 +984,18 @@ def historical_review_roles(city: str, row: dict, monitor) -> tuple[dict, str]:
         conflicting_named_city = any(
             named_city != city for named_city in mentioned_cities
         )
+        reviewed_english_exact_city = bool(
+            city == "chernihiv"
+            and reviewed_episode_relation
+            and re.search(
+                r"\b(?:in|inside|within)\s+Chernihiv\b",
+                evidence,
+                flags=re.IGNORECASE,
+            )
+        )
         exact_city = bool(
             reviewed_exact_city
+            or reviewed_english_exact_city
             or city in mentioned_cities
         )
         explosion = bool(event_segments)

@@ -106,6 +106,25 @@ def test_chernihiv_reviewed_event_and_sensitivity_linkage():
     assert decision["proposed_outcome"] == "approved_sensitivity"
 
 
+def test_chernihiv_reviewed_english_exact_city_sensitivity_role():
+    row = {
+        "evidence": (
+            "Suspilne reports a morning Russian UAV attack with impacts at two "
+            "locations inside Chernihiv; the early-morning alert is the only "
+            "strong same-attack match found, but no exact impact minute or "
+            "explicit during-alert statement was published."
+        ),
+        "decision": "sensitivity_inferred_same_attack",
+    }
+    got = roles("chernihiv", row)
+    assert got["exact_city_evidence"]["present"] is True
+    assert got["explosion_evidence"]["event_types"] == ["impact"]
+    assert got["aerial_war_evidence"]["present"] is True
+    assert got["same_attack_basis"]["present"] is True
+    decision = classify("chernihiv", row, bucket="sensitivity_only_events")
+    assert decision["proposed_outcome"] == "approved_sensitivity"
+
+
 def test_chernihiv_missing_review_contract_stays_unresolved():
     row = {
         "evidence": (
