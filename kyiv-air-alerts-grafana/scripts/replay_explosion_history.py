@@ -228,7 +228,7 @@ def parse_temporal_field_datetime(value, field: str, monitor) -> datetime | None
         return None
     text = str(value).strip()
     has_explicit_zone = bool(
-        re.search(r"(?:Z|[+-]\\d{2}:?\\d{2}|Europe/Kyiv)\\b", text, flags=re.I)
+        re.search(r"(?:Z|[+-]\d{2}:?\d{2}|Europe/Kyiv)\b", text, flags=re.I)
     )
     if not has_explicit_zone and field == "alert_start_utc":
         return dt.replace(tzinfo=monitor.UTC)
@@ -247,7 +247,7 @@ def retained_local_date(row: dict, monitor) -> str | None:
         if not value:
             continue
         text = str(value).strip()
-        if re.fullmatch(r"\\d{4}-\\d{2}-\\d{2}", text):
+        if re.fullmatch(r"\d{4}-\d{2}-\d{2}", text):
             return text
         dt = parse_temporal_field_datetime(value, field, monitor)
         if dt is not None:
@@ -259,15 +259,15 @@ def retained_event_datetimes(row: dict, monitor) -> list[datetime]:
     result: list[datetime] = []
     seen: set[str] = set()
     full_pattern = re.compile(
-        r"\\d{4}-\\d{2}-\\d{2}[T ]\\d{1,2}:\\d{2}"
-        r"(?::\\d{2}(?:\\.\\d+)?)?"
-        r"(?:\\s*(?:Z|[+-]\\d{2}:?\\d{2}|Europe/Kyiv))?",
+        r"\d{4}-\d{2}-\d{2}[T ]\d{1,2}:\d{2}"
+        r"(?::\d{2}(?:\.\d+)?)?"
+        r"(?:\s*(?:Z|[+-]\d{2}:?\d{2}|Europe/Kyiv))?",
         flags=re.I,
     )
     clock_pattern = re.compile(
-        r"(?<![\\d:])(?P<hour>[01]?\\d|2[0-3]):(?P<minute>[0-5]\\d)"
-        r"(?::(?P<second>[0-5]\\d(?:\\.\\d+)?))?"
-        r"(?:\\s*(?P<zone>Z|[+-]\\d{2}:?\\d{2}|Europe/Kyiv))?",
+        r"(?<![\d:])(?P<hour>[01]?\d|2[0-3]):(?P<minute>[0-5]\d)"
+        r"(?::(?P<second>[0-5]\d(?:\.\d+)?))?"
+        r"(?:\s*(?P<zone>Z|[+-]\d{2}:?\d{2}|Europe/Kyiv))?",
         flags=re.I,
     )
     anchor_day = retained_local_date(row, monitor)
