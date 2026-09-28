@@ -1,0 +1,71 @@
+{
+  "schema_version": 1,
+  "kind": "historical_attack_event_backfill_worktree_guard_fix",
+  "generated_at": "2026-09-28T05:04:11Z",
+  "starting_main_head": "cafd78ea28d878306e8f8a4dfa98ab3d5cf176b0",
+  "starting_campaign_head": "5afa0d656ffcd1413fda13ca58613c3df8725c24",
+  "starting_processed": 50,
+  "total": 6863,
+  "root_cause": {
+    "status_false_positive": "changed_paths() used git(), whose stdout.strip() removed the leading porcelain status-space from the first row; row[3:] then corrupted research/... to esearch/..., so the already-allowed checkpoint path failed the exact allowlist comparison",
+    "bytecode_pollution": "campaign worker imports generated untracked kyiv-air-alerts-grafana/scripts/__pycache__/*.pyc in the campaign checkout"
+  },
+  "falsely_flagged": [
+    "research/historical_attack_event_backfill_status.json (rendered as esearch/... by parser bug)",
+    "kyiv-air-alerts-grafana/scripts/__pycache__/*.pyc"
+  ],
+  "controller_workflow_files_changed": [
+    "kyiv-air-alerts-grafana/scripts/historical_attack_event_acceleration_controller.py",
+    ".github/workflows/historical-attack-event-backfill-scheduler.yml"
+  ],
+  "allowlist_before": [
+    "research/historical_attack_event_backfill_status.json",
+    "worker-declared exact batch_path"
+  ],
+  "allowlist_after": [
+    "research/historical_attack_event_backfill_status.json",
+    "worker-declared exact batch_path"
+  ],
+  "allowlist_note": "No directory-wide allowlist added; the fix preserves exact-path enforcement and corrects porcelain parsing.",
+  "bytecode_prevention": {
+    "mechanism": "PYTHONDONTWRITEBYTECODE=1",
+    "workflow_job_env": true,
+    "controller_process_default": true
+  },
+  "focused_tests": {
+    "expected_status_and_batch_mutation": "PASS",
+    "python_bytecode_prevention": "PASS",
+    "unexpected_mutation_guard": "PASS",
+    "protected_mutation_guard": "PASS",
+    "full_controller_self_test": "PASS"
+  },
+  "real_resume": {
+    "workflow_run_id": "36374211974",
+    "rerun_attempt_job_id": "108794001034",
+    "event_name": "schedule",
+    "batches_attempted": 1,
+    "batches_committed": 1,
+    "processed_before": 50,
+    "processed_after": 100,
+    "terminal_before": 50,
+    "terminal_after": 100,
+    "lviv_scanned_before": 50,
+    "lviv_scanned_after": 100,
+    "batch_commit_sha": "e2891858ec59a7639b31224c5a966fca7c53dd40",
+    "final_campaign_head": "9aae65593a927e32f25bbd0c477e7ce77400737e",
+    "phase_before": "CONTROL",
+    "phase_after": "ACCELERATED_2X",
+    "fallback_reason": null
+  },
+  "safety": {
+    "protected_files_unchanged": true,
+    "frozen_universe_unchanged": true,
+    "stale_writer_protection_preserved": true,
+    "duplicate_terminal_same_version_protection_preserved": true,
+    "campaign_version_mismatch_guard_preserved": true,
+    "unexpected_mutation_guard_preserved": true,
+    "bytecode_pollution_in_successful_run": false
+  },
+  "main_fix_commit_sha": "7b95aa535d9991655460e3e2c8226854ebc53286",
+  "verdict": "6863 CAMPAIGN WORKTREE GUARD FIXED — CONTROL RESUME SUCCESSFUL"
+}
