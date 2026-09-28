@@ -1,0 +1,91 @@
+name: Cherkasy authoritative post-apply replay
+on:
+  push:
+    branches: [cherkasy-systematic-atomic-apply-runner-2026-09-28]
+permissions:
+  contents: read
+  actions: read
+jobs:
+  replay:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    env:
+      IMPLEMENTATION: 9410b167eb234b9e8f951149580355c5c1e371bb
+      THROUGH: "2026-09-17"
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.IMPLEMENTATION }}
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: kyiv-air-alerts-grafana/requirements.txt
+      - run: pip install -r kyiv-air-alerts-grafana/requirements.txt
+      - name: Capture refs and campaign before
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin multicity-wip-2026-09-16 historical-attack-event-backfill-2026-09-27 main site-prod
+          python - <<'PY'
+          import json, subprocess, pathlib
+          def rev(r): return subprocess.check_output(["git","rev-parse",r],text=True).strip()
+          status=json.loads(subprocess.check_output(["git","show","origin/historical-attack-event-backfill-2026-09-27:research/historical_attack_event_backfill_status.json"],text=True))
+          p=status.get("progress") or {}
+          print("REFS_BEFORE="+json.dumps({
+            "authoritative":rev("origin/multicity-wip-2026-09-16"),
+            "campaign":rev("origin/historical-attack-event-backfill-2026-09-27"),
+            "main":rev("origin/main"),"site_prod":rev("origin/site-prod"),
+            "campaign_progress":{"processed":p.get("processed"),"total":p.get("total"),"terminal":p.get("terminal"),"status":status.get("status")}
+          },sort_keys=True))
+          PY
+      - name: Run authoritative replay set
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/replays"
+          for city in cherkasy lviv sevastopol sumy zaporizhzhia kyiv; do
+            python kyiv-air-alerts-grafana/scripts/replay_explosion_history.py               --repo-root "$GITHUB_WORKSPACE/kyiv-air-alerts-grafana" --city "$city" --through "$THROUGH"               --input-head "$IMPLEMENTATION" --read-only --output "$RUNNER_TEMP/replays/$city.json"
+          done
+      - name: Verify post-apply exact state
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json, os
+          from pathlib import Path
+          d=Path(os.environ["RUNNER_TEMP"])/"replays"
+          remaining=["1211cf659b50b8f60a118e85","2e52d5a124fddfe369687035","3a8c3baa43001ec2f94b53c8","58624e812ef70a85166d09c6","7dc902b97fda7ea1d146c907","99e50f8c16d1cd74340dc32d","c1cb52e1672fd669808bc5c8","f0b75832ea028fd6b1b5ff75","f57f2f50c537719982254887","f732ee21dee348389b0971cd"]
+          expected={"lviv":[126,12,12,0],"sevastopol":[527,38,55,0],"sumy":[2297,204,238,0],"zaporizhzhia":[2365,62,73,151],"kyiv":[2456,140,144,260]}
+          out={}
+          for city in ["cherkasy","lviv","sevastopol","sumy","zaporizhzhia","kyiv"]:
+            j=json.loads((d/f"{city}.json").read_text())
+            ch=j.get("changed_episodes") or []; ids=sorted(x["episode_id"] for x in ch if x.get("episode_id"))
+            out[city]={"denominator":j.get("episodes_checked"),"strict":j.get("replayed_strict_episodes"),"sensitivity":j.get("replayed_sensitivity_episodes"),"qa":len(ch)+len(j.get("errors") or []),"qa_ids":ids,"errors":j.get("errors") or [],"ppo_related_changes":j.get("ppo_related_changes") or [],"protected_files_unchanged":j.get("protected_files_unchanged")}
+          c=out["cherkasy"]
+          assert [c["denominator"],c["strict"],c["sensitivity"],c["qa"]]==[1548,49,49,10],c
+          assert c["qa_ids"]==sorted(remaining),c
+          assert not c["errors"] and c["protected_files_unchanged"] is True,c
+          for city,e in expected.items():
+            x=out[city]; assert [x["denominator"],x["strict"],x["sensitivity"],x["qa"]]==e,(city,x)
+            assert not x["errors"] and x["protected_files_unchanged"] is True,(city,x)
+          print("POST_REPLAY="+json.dumps(out,sort_keys=True,separators=(",",":")))
+          PY
+      - name: Capture refs and campaign after
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin multicity-wip-2026-09-16 historical-attack-event-backfill-2026-09-27 main site-prod
+          python - <<'PY'
+          import json, subprocess
+          def rev(r): return subprocess.check_output(["git","rev-parse",r],text=True).strip()
+          status=json.loads(subprocess.check_output(["git","show","origin/historical-attack-event-backfill-2026-09-27:research/historical_attack_event_backfill_status.json"],text=True))
+          p=status.get("progress") or {}
+          print("REFS_AFTER="+json.dumps({
+            "authoritative":rev("origin/multicity-wip-2026-09-16"),
+            "campaign":rev("origin/historical-attack-event-backfill-2026-09-27"),
+            "main":rev("origin/main"),"site_prod":rev("origin/site-prod"),
+            "campaign_progress":{"processed":p.get("processed"),"total":p.get("total"),"terminal":p.get("terminal"),"status":status.get("status")}
+          },sort_keys=True))
+          PY
