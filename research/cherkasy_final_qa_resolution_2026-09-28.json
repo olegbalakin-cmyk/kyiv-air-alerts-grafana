@@ -1,0 +1,255 @@
+{
+  "schema_version": "cherkasy-final-qa-resolution-v1",
+  "kind": "read_only_final_cherkasy_qa_resolution",
+  "generated_date": "2026-09-28",
+  "repository": "olegbalakin-cmyk/kyiv-air-alerts-grafana",
+  "branch": "multicity-wip-2026-09-16",
+  "authoritative_head_examined": "7b62564d64487e64aa3fc7754793ec8eaa741d42",
+  "accepted_state": {
+    "structural_semantics_apply_commit": "69a88096562512f3db5469cc4ad659b226e7872c",
+    "structural_semantics_artifact_commit": "7b62564d64487e64aa3fc7754793ec8eaa741d42",
+    "fresh_replay_run_id": 36458278479,
+    "fresh_replay_artifact_id": 10986312500,
+    "replay_artifact_digest": "sha256:e5e5bc6d3f99357713f92bf1ba05747e7d43f2183cba3bef7c60b6cdaf6599de",
+    "denominator": 1548,
+    "strict": 57,
+    "sensitivity": 58,
+    "qa": 1,
+    "qa_episode_ids": [
+      "f57f2f50c537719982254887"
+    ]
+  },
+  "repo_material_inspected": [
+    {
+      "path": "research/historical_replay_status_current.json",
+      "blob": "9ef72355f75071f40364ea110ff9dbba07ffe151",
+      "finding": "Current Cherkasy status is 1548 / 57 / 58 / 1; sole QA episode is f57f2f50c537719982254887."
+    },
+    {
+      "path": "research/cherkasy_current_qa_root_cause_inventory_2026-09-28.json",
+      "blob": "ba80aaa1a3b15c5fdc9e152be5b1413cec4d5b30",
+      "finding": "Frozen status SENSITIVITY; replay status AMBIGUOUS; candidate 22c4bfde4d3fed788da8d76e; retained source 24 Kanal; historical failure centered on exact-city and missing persisted semantic roles."
+    },
+    {
+      "path": "research/cherkasy_remaining_8_manual_resolution_inventory_2026-09-28.json",
+      "blob": "65011824e51579d0c06ed0c3529f793cc6896f1c",
+      "finding": "Prior manual conclusion was REMAINS_AMBIGUOUS because near/outskirts wording did not satisfy exact-city; this task did not reuse the old 8-case set as the current QA universe."
+    },
+    {
+      "path": "kyiv-air-alerts-grafana/data/explosion_research/cherkasy/final_evidence.json",
+      "blob": "433b901ec49279fb865294a7c1e9a5328cf1b46a",
+      "finding": "Current retained row remains sensitivity_only_events with alert_start_kyiv 2025-02-22T21:27:12+02:00, event_time_kyiv 2025-02-22 22:44, 24 Kanal URL, and evidence placing explosions on the outskirts of Cherkasy."
+    },
+    {
+      "path": "research/cherkasy_remaining_7_atomic_evidence_repair_2026-09-28.json",
+      "blob": "2b50658905aff5dfb413dcc1be0ed5bde333092b",
+      "finding": "Episode f57f2f50c537719982254887 was deliberately untouched and remained ambiguous while seven other cases were repaired."
+    },
+    {
+      "path": "research/cherkasy_two_retained_evidence_atomic_repair_2026-09-28.json",
+      "blob": "7ca6028e86a79880cc0bb1b8c63052f633769750",
+      "finding": "Episode remained in the expected true-ambiguity set; it was not one of the two retained-evidence-gap targets."
+    },
+    {
+      "path": "research/cherkasy_systematic_fix_atomic_apply_2026-09-28.json",
+      "blob": "e019cfc2f500a0220e8d77e3369cad543285d14a",
+      "finding": "Systematic rule fixes did not target or resolve this case as a code gap."
+    },
+    {
+      "path": "research/cherkasy_remaining_structural_semantics_atomic_apply_2026-09-28.json",
+      "blob": "70540700f7f41b262feff478b6874a0cd049c20a",
+      "finding": "Accepted structural replay leaves exactly this episode in QA at 1548 / 57 / 58 / 1."
+    },
+    {
+      "source": "GitHub Actions artifact replay_cherkasy_atomic_apply.json",
+      "run_id": 36458278479,
+      "artifact_id": 10986312500,
+      "finding": "Fresh replay marks this episode NEW_AMBIGUOUS; frozen_old_status=SENSITIVITY; replayed_status=AMBIGUOUS; candidate 22c4bfde4d3fed788da8d76e; retained binding is unique to this episode."
+    }
+  ],
+  "episode_reconstruction": {
+    "episode_id": "f57f2f50c537719982254887",
+    "canonical_alert_interval_utc": {
+      "start": "2025-02-22T19:27:12Z",
+      "end": "2025-02-23T02:31:03Z"
+    },
+    "canonical_alert_interval_kyiv": {
+      "start": "2025-02-22T21:27:12+02:00",
+      "end": "2025-02-23T04:31:03+02:00"
+    },
+    "frozen_old_classification": "SENSITIVITY",
+    "current_replay_classification": "AMBIGUOUS",
+    "current_reconciliation_category": "NEW_AMBIGUOUS",
+    "candidate_ids": [
+      "22c4bfde4d3fed788da8d76e"
+    ],
+    "retained_binding": {
+      "method": "alert_start_within_90s",
+      "outcome": "unique_match",
+      "reason": "frozen_historical_audit_episode_binding"
+    },
+    "current_replay_reason_codes": [
+      "AIR_CONTEXT_NOT_LINKED_TO_EVENT",
+      "AIR_MILITARY_CONTEXT",
+      "MATCH_UNIQUE",
+      "NO_EXACT_CITY_EVENT_TEXT",
+      "NO_STRICT_EXPLOSION_EVIDENCE",
+      "NO_STRICT_TEMPORAL_BINDING",
+      "REVIEW_PROVENANCE_SENSITIVITY_BINDING_USED",
+      "REVIEW_PROVENANCE_USABLE"
+    ],
+    "retained_evidence": "24 Канал о 22:44 зафіксував вибухи на околицях Черкас під час атаки російського БпЛА. — sensitivity: near_boundary; location not exact-city enough for strict",
+    "prior_research_conclusion": "REMAINS_AMBIGUOUS; exact-city was the substantive blocker."
+  },
+  "sources_inspected": [
+    {
+      "url": "https://24tv.ua/cherkasah-prolunali-vibuhi_n2759662",
+      "source_type": "known retained source / established Ukrainian outlet",
+      "publication_time_local": "2025-02-22T22:47:00+02:00",
+      "event_time_local": "2025-02-22T22:44:00+02:00",
+      "event_time_utc": "2025-02-22T20:44:00Z",
+      "evidence": "Body places the explosions on the outskirts of Cherkasy; it reports a Russian strike UAV moving toward Cherkasy and PPO operating near Cherkasy/on the city outskirts.",
+      "role": "Confirms actual event, aerial attack context, same-attack chronology and in-alert timing; does not deterministically establish an event inside Cherkasy city."
+    },
+    {
+      "url": "https://t.me/suspilnecherkasy/39849",
+      "source_type": "source-local Suspilne Telegram post cited by 24 Kanal",
+      "source_rendered_time": "20:44 on Telegram web context",
+      "evidence": "Contemporary Suspilne post states that PPO was operating near Cherkasy and on the city outskirts.",
+      "role": "Confirms actual air-defense action source-locally. Geographic wording remains near/outskirts, not deterministic exact-city."
+    },
+    {
+      "url": "https://t.me/suspilnecherkasy/39848",
+      "source_type": "source-local Suspilne Telegram preceding post",
+      "source_rendered_time": "20:38 on Telegram web context",
+      "evidence": "Reports a strike UAV moving toward Cherkasy.",
+      "role": "Confirms aerial threat immediately before the PPO action and supports same-attack composition, but is not itself an attack event."
+    },
+    {
+      "url": "https://t.me/suspilnecherkasy/39845",
+      "source_type": "source-local Suspilne Telegram alert post",
+      "source_rendered_time": "19:27 on Telegram web context",
+      "evidence": "Cherkasy district air alert post in the same source-local chronology.",
+      "role": "Supports chronology; canonical alert interval remains authoritative for episode boundaries."
+    },
+    {
+      "url": "https://suspilne.media/cherkasy/954855-v-oblasti-culi-vibuhi-podrobici-ataki-na-cerkasinu-vnoci-23-lutogo/",
+      "source_type": "correct-night Suspilne follow-up",
+      "publication_time_local": "2025-02-23T08:39:00+02:00",
+      "event_time": "overnight 2025-02-22/23; article explicitly gives 21:27 local alert start for Cherkasy and Zolotonosha districts",
+      "evidence": "Reports explosions and actual PPO during the Russian strike-UAV attack, with 27 UAVs destroyed within the region.",
+      "role": "Strong region-level corroboration of attack/event context, but does not localize the qualifying event to Cherkasy city."
+    },
+    {
+      "url": "https://provce.ck.ua/na-cherkashchyni-zakhysnyky-znyshchyly-27-vorozhykh-bpla/",
+      "source_type": "local outlet quoting Cherkasy OVA head Ihor Taburets",
+      "publication_time_local": "2025-02-23T09:25:00+02:00",
+      "event_time": "overnight 2025-02-22/23",
+      "evidence": "OVA says 27 Russian UAVs were destroyed in the Cherkasy-region sky by PPO/mobile fire groups/EW.",
+      "role": "Confirms actual defensive action in the region; cannot be promoted to exact Cherkasy city."
+    },
+    {
+      "url": "https://t.me/s/kpszsu?after=29324",
+      "source_type": "Air Force Telegram",
+      "event_interval": "night of 2025-02-23, attack beginning 2025-02-22T19:00:00+02:00",
+      "evidence": "National strike involved 267 UAVs plus ballistic missiles.",
+      "role": "Corroborates the broader aerial attack; no city-level event localization."
+    },
+    {
+      "url": "https://suspilne.media/cherkasy/952815-u-nic-na-22-lutogo-na-cerkasini-pracuvala-ppo-rosiani-atakuvali-dronami/",
+      "source_type": "previously cited Suspilne follow-up",
+      "excluded": true,
+      "exclusion_reason": "Wrong night for this episode: it describes the night of 21→22 February and an alert beginning 21 February at 21:16, not the target 22→23 February alert."
+    }
+  ],
+  "semantic_gate_assessment": {
+    "source_observation": {
+      "status": "PASS",
+      "basis": "24 Kanal plus direct Suspilne Telegram source-local chronology."
+    },
+    "actual_attack_event": {
+      "status": "PASS_AT_NEAR_CITY_LOCATION",
+      "basis": "Explosions are reported at 22:44 and Suspilne directly reports actual PPO action, not mere readiness.",
+      "supported_types": [
+        "explosion",
+        "air_defense_action"
+      ]
+    },
+    "exact_city": {
+      "status": "FAIL_AMBIGUOUS",
+      "basis": "The most specific contemporaneous wording is 'near Cherkasy' / 'on the city outskirts'. The regional follow-up is explicitly oblast-level. A broad headline saying 'in Cherkasy' cannot override more specific body/source-local geography under the existing contract."
+    },
+    "attack_or_aerial_context": {
+      "status": "PASS",
+      "basis": "A Russian strike UAV was reported moving toward Cherkasy immediately before the event; correct-night follow-up confirms the Russian strike-UAV attack."
+    },
+    "same_attack": {
+      "status": "PASS",
+      "basis": "The source-local sequence puts the strike UAV warning and actual PPO action in one continuous target-alert chronology; no competing incident is needed to compose the event."
+    },
+    "temporal_binding": {
+      "status": "PASS_RESEARCH_EVIDENCE",
+      "basis": "24 Kanal gives the event at 22:44 local, which is inside the canonical 21:27:12–04:31:03 local alert. No publication time is substituted for event time."
+    },
+    "canonical_episode_binding": {
+      "status": "PASS",
+      "basis": "Existing frozen audit binding uniquely maps candidate 22c4bfde4d3fed788da8d76e to this episode."
+    }
+  },
+  "event_type_tests": {
+    "explosion": {
+      "supported": true,
+      "exact_city_supported": false,
+      "notes": "Actual explosion signal at 22:44, but detailed geography is outskirts/near Cherkasy."
+    },
+    "impact_or_arrival": {
+      "supported": false
+    },
+    "strike": {
+      "supported": false,
+      "notes": "Attack context is supported, but no city-level strike/arrival event is documented."
+    },
+    "damage": {
+      "supported": false,
+      "notes": "No explicit attack-caused damage in Cherkasy city for this incident."
+    },
+    "fire": {
+      "supported": false,
+      "notes": "No explicit attack-caused fire in Cherkasy city for this incident."
+    },
+    "air_defense_action": {
+      "supported": true,
+      "actual_action": true,
+      "exact_city_supported": false,
+      "notes": "Actual PPO action is directly reported, but only near Cherkasy/on city outskirts and region-wide."
+    }
+  },
+  "context_bleed_assessment": {
+    "multi_incident_risk": "LOW",
+    "geographic_context_bleed_risk": "MATERIAL",
+    "explanation": "Event/time/attack identity is coherent. The unresolved risk is geographic: upgrading near-city/outskirts or oblast-level PPO to a Cherkasy-city event would violate the exact-city contract."
+  },
+  "post_research_remaining_failed_gates": [
+    "EXACT_CITY_EVENT"
+  ],
+  "sensitivity_assessment": {
+    "eligible": false,
+    "reason": "Sensitivity cannot be used to relax the exact-city requirement. Under the accepted contract it only tolerates an accepted weaker episode-binding basis after the base event roles are established."
+  },
+  "final_decision": "IRREDUCIBLE_AMBIGUITY",
+  "proposed_evidence_only_repair": {
+    "justified": false,
+    "append": null,
+    "evidence_needed_to_change_decision": "A contemporary source must explicitly place a qualifying explosion/impact/arrival/strike/attack-caused damage or fire, or confirmed actual PPO action, in Cherkasy city during this canonical alert and within the same attack."
+  },
+  "protected_state_before_artifact_commit": {
+    "kyiv-air-alerts-grafana/data/explosion_research/cherkasy/final_evidence.json": "433b901ec49279fb865294a7c1e9a5328cf1b46a",
+    "kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py": "b55fe2ed082958917c74f95bca2fd6bc137bcaae",
+    "kyiv-air-alerts-grafana/scripts/replay_explosion_history.py": "c54165fb7c34d885f51e26e98063203335d1a788",
+    "kyiv-air-alerts-grafana/data/explosion_candidate_monitor_state.json": "d0a351aad10241179ede6f0e9f1ed28d1cc1f5cf",
+    "kyiv-air-alerts-grafana/data/explosion_candidate_monitor_last_run.json": "f5a2869acdaf8ab18fd3a94f7258c7f656342d23",
+    "kyiv-air-alerts-grafana/data/explosion_review_queue.json": "1a0e530789b9e2ec7e82577c6b0d21457c2e77b8"
+  },
+  "mutation_statement": "This task creates only this research artifact. It does not modify Cherkasy historical evidence, classifier, replay logic, live monitor or live operational state, denominator, DB/Neon, production UX/site-prod, other cities, or historical-attack-event-backfill-2026-09-27.",
+  "verdict": "CHERKASY FINAL QA CASE CONFIRMED IRREDUCIBLE AMBIGUITY"
+}
