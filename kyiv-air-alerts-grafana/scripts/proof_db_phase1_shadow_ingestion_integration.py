@@ -171,25 +171,113 @@ def replay_stack(bundle: dict[str, Any], counters: dict[str, int]) -> ExitStack:
     return stack
 
 
-def run_replay(bundle: dict[str, Any], *, shadow: bool, target: Path) -> dict[str, Any]:
+def run_replay(
+    bundle: dict[str, Any],
+    *,
+    shadow: bool,
+    target: Path,
+    extra_env: dict[str, str] | None = None,
+    force_db_failure: bool = False,
+) -> dict[str, Any]:
     dashboard, store = copy_baseline(target)
-    FrozenDateTime.frozen = datetime.fromisoformat(os.environ["PROOF_FROZEN_TIME"].replace("Z", "+00:00"))
+    FrozenDateTime.frozen = datetime.fromisoformat(
+        os.environ["PROOF_FROZEN_TIME"].replace("Z", "+00:00")
+    )
     counters: dict[str, int] = {}
-    env = {"UKRAINEALARM_API_TOKEN": "captured-proof-token", "PHASE1_DB_SHADOW": "1" if shadow else "0"}
+    env = {
+        "UKRAINEALARM_API_TOKEN": "captured-proof-token",
+        "PHASE1_DB_SHADOW": "1" if shadow else "0",
+    }
     if not shadow:
         env.update({"PHASE1_DATABASE_URL": "", "PHASE1_DB_BRANCH": ""})
+    if extra_env:
+        env.update(extra_env)
     with replay_stack(bundle, counters), ExitStack() as stack:
         stack.enter_context(patch.object(bridge, "DATA_FILE", dashboard))
         stack.enter_context(patch.object(bridge, "STORE_FILE", store))
         stack.enter_context(patch.object(bridge, "datetime", FrozenDateTime))
         stack.enter_context(patch.dict(os.environ, env, clear=False))
+        if force_db_failure:
+            import db_phase1_shadow as shadow_module
+
+            def forced_connect_failure(database_url: str):
+                raise RuntimeError(
+                    f"forced shadow DB failure for {database_url}"
+                )
+
+            stack.enter_context(
+                patch.object(
+                    shadow_module,
+                    "connect_database",
+                    side_effect=forced_connect_failure,
+                )
+            )
         bridge.main()
-    require(counters.get("phase1_fetch") == 1, f"real bridge phase1 fetch count !=1: {counters}")
+    require(
+        counters.get("phase1_fetch") == 1,
+        f"real bridge phase1 fetch count !=1: {counters}",
+    )
     require(counters.get("proxy_http") == 1, f"proxy HTTP count !=1: {counters}")
     return {
         "dashboard_hash": file_hash(dashboard),
         "bridge_hash": file_hash(store),
         "counters": counters,
+    }
+
+
+def run_replay_expect_shadow_failure(
+    bundle: dict[str, Any],
+    *,
+    target: Path,
+    extra_env: dict[str, str],
+) -> dict[str, Any]:
+    dashboard, store = copy_baseline(target)
+    before_dashboard = file_hash(dashboard)
+    before_store = file_hash(store)
+    FrozenDateTime.frozen = datetime.fromisoformat(
+        os.environ["PROOF_FROZEN_TIME"].replace("Z", "+00:00")
+    )
+    counters: dict[str, int] = {}
+    env = {
+        "UKRAINEALARM_API_TOKEN": "captured-proof-token",
+        "PHASE1_DB_SHADOW": "1",
+        **extra_env,
+    }
+    caught = None
+    with replay_stack(bundle, counters), ExitStack() as stack:
+        stack.enter_context(patch.object(bridge, "DATA_FILE", dashboard))
+        stack.enter_context(patch.object(bridge, "STORE_FILE", store))
+        stack.enter_context(patch.object(bridge, "datetime", FrozenDateTime))
+        stack.enter_context(patch.dict(os.environ, env, clear=False))
+        import db_phase1_shadow as shadow_module
+
+        def forced_connect_failure(database_url: str):
+            raise RuntimeError(f"forced shadow DB failure for {database_url}")
+
+        stack.enter_context(
+            patch.object(
+                shadow_module,
+                "connect_database",
+                side_effect=forced_connect_failure,
+            )
+        )
+        try:
+            bridge.main()
+        except RuntimeError as exc:
+            caught = exc
+    require(caught is not None, "fail-closed forced DB failure did not propagate")
+    require(
+        file_hash(dashboard) == before_dashboard,
+        "fail-closed wrote dashboard product file",
+    )
+    require(
+        file_hash(store) == before_store,
+        "fail-closed wrote UkraineAlarm bridge product file",
+    )
+    return {
+        "error_type": type(caught).__name__,
+        "dashboard_unchanged": True,
+        "bridge_unchanged": True,
     }
 
 
@@ -204,16 +292,72 @@ def prepare() -> int:
     off = run_replay(bundle, shadow=False, target=Path(os.environ["RUNNER_TEMP"]) / "off")
     require("db_phase1_shadow" not in sys.modules, "shadow OFF imported db_phase1_shadow")
     require("psycopg" not in sys.modules, "shadow OFF imported psycopg")
+    diagnostic = Path(os.environ["RUNNER_TEMP"]) / "phase1_db_shadow_fail_open.json"
+    fake_url = "postgresql://proof-user:fake-proof-secret@invalid.example/neondb"
+    fail_open = run_replay(
+        bundle,
+        shadow=True,
+        target=Path(os.environ["RUNNER_TEMP"]) / "fail-open",
+        extra_env={
+            "PHASE1_DATABASE_URL": fake_url,
+            "PHASE1_DB_BRANCH": "forced-failure-branch",
+            "PHASE1_DB_SHADOW_FAILURE_POLICY": "fail_open",
+            "PHASE1_DB_SHADOW_DIAGNOSTIC": str(diagnostic),
+            "PHASE1_INPUT_REPOSITORY": os.environ.get("GITHUB_REPOSITORY", ""),
+            "PHASE1_INPUT_REF": "site-prod",
+            "PHASE1_INPUT_SHA": "b" * 40,
+        },
+        force_db_failure=True,
+    )
+    require(
+        fail_open["dashboard_hash"] == off["dashboard_hash"],
+        "fail-open dashboard differs from shadow OFF",
+    )
+    require(
+        fail_open["bridge_hash"] == off["bridge_hash"],
+        "fail-open bridge differs from shadow OFF",
+    )
+    diag = json.loads(diagnostic.read_text(encoding="utf-8"))
+    require(diag["status"] == "failed", f"wrong fail-open diagnostic: {diag}")
+    require(diag["failure_policy"] == "fail_open", f"wrong policy: {diag}")
+    require(diag["credentials_exposed"] is False, f"credential flag wrong: {diag}")
+    raw_diag = diagnostic.read_text(encoding="utf-8")
+    require(fake_url not in raw_diag, "fake DB URL leaked into diagnostic")
+    require("fake-proof-secret" not in raw_diag, "fake DB password leaked into diagnostic")
+
+    fail_closed = run_replay_expect_shadow_failure(
+        bundle,
+        target=Path(os.environ["RUNNER_TEMP"]) / "fail-closed",
+        extra_env={
+            "PHASE1_DATABASE_URL": fake_url,
+            "PHASE1_DB_BRANCH": "forced-failure-branch",
+            "PHASE1_DB_SHADOW_FAILURE_POLICY": "fail_closed",
+            "PHASE1_DB_SHADOW_DIAGNOSTIC": str(
+                Path(os.environ["RUNNER_TEMP"]) / "phase1_db_shadow_fail_closed.json"
+            ),
+        },
+    )
+
     state = {
         "captured_input_hash": digest,
         "proof_frozen_time": os.environ["PROOF_FROZEN_TIME"],
         "shadow_off_dashboard_hash": off["dashboard_hash"],
         "shadow_off_bridge_hash": off["bridge_hash"],
+        "fail_open_dashboard_hash": fail_open["dashboard_hash"],
+        "fail_open_bridge_hash": fail_open["bridge_hash"],
+        "fail_open_fault_injection_test": "PASS",
+        "fail_open_diagnostic": diag,
+        "fail_closed_regression": "PASS",
+        "fail_closed_result": fail_closed,
     }
-    Path(os.environ["PROOF_STATE"]).write_text(json.dumps(state, indent=2, sort_keys=True) + "\n")
+    Path(os.environ["PROOF_STATE"]).write_text(
+        json.dumps(state, indent=2, sort_keys=True) + "\n"
+    )
     print("capture hash =", digest)
     print("shadow OFF dashboard =", off["dashboard_hash"])
     print("shadow OFF bridge =", off["bridge_hash"])
+    print("fail-open fault injection = PASS")
+    print("fail-closed regression = PASS")
     return 0
 
 
