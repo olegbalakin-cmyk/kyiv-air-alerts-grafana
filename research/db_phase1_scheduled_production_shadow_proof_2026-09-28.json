@@ -1,0 +1,97 @@
+{
+  "site_prod_runtime_commit": "3abdb3d70ff703c88ce019a4c5baac38263591cc",
+  "main_shadow_enable_commit": "35416a1a7d0ef3bb02762b8e336003e13844848d",
+  "prod_shadow_branch_id": "br-bold-mode-b5rub8pq",
+  "prod_shadow_branch_name": "lviv-phase1-production-shadow-2026-09-28",
+  "secret_name_present": true,
+  "branch_variable_match": true,
+  "secret_value_exposed": false,
+  "configuration_guard": {
+    "run_id": 36470710616,
+    "result": "PASS",
+    "database_url_present": true,
+    "branch_id_match": true
+  },
+  "first_production_shadow_run_id": 36470761961,
+  "first_production_shadow_run_conclusion": "success",
+  "workflow_sha": "35416a1a7d0ef3bb02762b8e336003e13844848d",
+  "site_prod_input_sha": "3abdb3d70ff703c88ce019a4c5baac38263591cc",
+  "provenance_separation_pass": true,
+  "shadow_run_id": "c7f5fdb7-d2f1-44a9-8aba-1e45a215d84f",
+  "shadow_diagnostic_status": "succeeded",
+  "shadow_failure_policy": "fail_open",
+  "shadow_enabled": true,
+  "shadow_stats": {
+    "episodes_inserted": 0,
+    "episodes_existing": 126,
+    "source_observations_inserted": 0,
+    "source_observations_existing": 140,
+    "source_observations_last_seen_updated": 140,
+    "checkpoints_inserted": 1,
+    "exact_retry": false
+  },
+  "checkpoint_before": {
+    "checkpoint_seq": 1,
+    "checkpoint_id": "40a0d262-2a79-405b-8e06-1af6e28bc908"
+  },
+  "checkpoint_created": {
+    "checkpoint_seq": 2,
+    "checkpoint_id": "c8cc6b92-e46e-4a87-8bae-0d169aee4fae",
+    "previous_checkpoint_id": "40a0d262-2a79-405b-8e06-1af6e28bc908",
+    "created_by_run_id": "c7f5fdb7-d2f1-44a9-8aba-1e45a215d84f",
+    "continuity_verified": true
+  },
+  "checkpoint_after": {
+    "checkpoint_seq": 2,
+    "checkpoint_id": "c8cc6b92-e46e-4a87-8bae-0d169aee4fae"
+  },
+  "db_counts_before": {
+    "ingestion_runs": 1,
+    "alert_episodes": 126,
+    "alert_episode_sources": 140,
+    "ingestion_checkpoints": 1
+  },
+  "db_counts_after": {
+    "ingestion_runs": 2,
+    "alert_episodes": 126,
+    "alert_episode_sources": 140,
+    "ingestion_checkpoints": 2
+  },
+  "mutation_accounting_pass": true,
+  "production_dataset_verification": {
+    "status": "PASS",
+    "detail": "Production dataset verified: 23 rows; rolling 7-day series enabled"
+  },
+  "production_publication_success": true,
+  "site_prod_after_run": "d5482d2976c29bec2c31ab6c843a2cdc1cfe1cad",
+  "fail_open_fault_injection_test": "PASS",
+  "fail_closed_regression": "PASS",
+  "fail_open_proof_run_id": 36465772076,
+  "canonical_blob": "2437cce7d434f34574b19dbd857ee9625de0e0b4",
+  "persistence_blob": "ed014e61fc6186fa9daf91c763c847e7df2f0306",
+  "ddl_blob": "3b8af7940b23aae03a4f6b434d90d97dde10bfc0",
+  "frozen_contracts_pass": true,
+  "protected_neon_branch_isolation": {
+    "status": "PASS",
+    "criterion": "production github_run_id 36470761961 absent from every protected branch",
+    "protected_branches": {
+      "br-wandering-sunset-b5835alw": {"production_run_rows": 0, "counts": [0, 0, 0, 0], "max_checkpoint_seq": null},
+      "br-young-feather-b5q19nli": {"production_run_rows": 0, "counts": [1, 126, 140, 1], "max_checkpoint_seq": 1},
+      "br-still-sea-b5062r40": {"production_run_rows": 0, "counts": [2, 126, 140, 1], "max_checkpoint_seq": 1},
+      "br-small-wind-b5yah69o": {"production_run_rows": 0, "counts": [3, 126, 140, 3], "max_checkpoint_seq": 3},
+      "br-calm-cherry-b56fsh4i": {"production_run_rows": 0, "counts": [2, 126, 140, 2], "max_checkpoint_seq": 2},
+      "br-cold-sky-b5jhai9p": {"production_run_rows": 0, "counts": [6, 126, 140, 5], "max_checkpoint_seq": 5},
+      "br-quiet-tooth-b51ewryz": {"production_run_rows": 0, "counts": [3, 126, 140, 2], "max_checkpoint_seq": 2}
+    }
+  },
+  "explosion_guard": 0,
+  "json_remains_authoritative": true,
+  "frontend_db_read_enabled": false,
+  "db_cutover_performed": false,
+  "credentials_exposed": false,
+  "diagnostic_artifact": {
+    "id": 10992881001,
+    "name": "phase1-db-shadow-36470761961-1"
+  },
+  "verdict": "PHASE-1 SCHEDULED PRODUCTION SHADOW ENABLED AND PROVEN"
+}
