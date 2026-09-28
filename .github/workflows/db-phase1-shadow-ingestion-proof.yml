@@ -1,0 +1,260 @@
+name: Phase-1 Shadow Ingestion Integration Proof
+
+on:
+  push:
+    branches:
+      - db-phase1-shadow-integration-v2-2026-09-28
+    paths-ignore:
+      - kyiv-air-alerts-grafana/research/db_phase1_shadow_ingestion_integration_proof_2026-09-28.json
+
+permissions:
+  contents: read
+
+concurrency:
+  group: phase1-shadow-ingestion-integration-v2-proof
+  cancel-in-progress: false
+
+jobs:
+  prove:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      NEON_API_KEY: ${{ secrets.NEON_API_KEY }}
+      NEON_PROJECT_ID: ${{ vars.NEON_PROJECT_ID }}
+      UKRAINEALARM_API_TOKEN: ${{ secrets.UKRAINEALARM_API_TOKEN }}
+      EXPECTED_PROJECT_ID: green-cake-44216048
+      INTEGRATION_BASE_SHA: bf5420305663b21982afe2fa662b4f1f229dfff4
+      SITE_PROD_BASELINE: bf5420305663b21982afe2fa662b4f1f229dfff4
+      MAIN_BASELINE: 8c5ed2a9fce73427cb53c888599a8a1751d9dc00
+      DDL_BLOB: 3b8af7940b23aae03a4f6b434d90d97dde10bfc0
+      CANONICAL_BLOB: 2437cce7d434f34574b19dbd857ee9625de0e0b4
+      PERSISTENCE_BLOB: ed014e61fc6186fa9daf91c763c847e7df2f0306
+      PARENT_BRANCH_ID: br-young-feather-b5q19nli
+      PRIMARY_BRANCH_ID: br-wandering-sunset-b5835alw
+      LIVE_E2E_BRANCH_ID: br-still-sea-b5062r40
+      CONCURRENCY_BRANCH_ID: br-small-wind-b5yah69o
+      BLOCKED_BRANCH_ID: br-calm-cherry-b56fsh4i
+      ADAPTER_BRANCH_ID: br-cold-sky-b5jhai9p
+      PROOF_BRANCH_NAME: lviv-phase1-shadow-integration-v2-e2e-2026-09-28
+      DB_NAME: neondb
+      ROLE_NAME: neondb_owner
+
+    steps:
+      - name: Checkout implementation branch
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Freeze proof paths, time, and production refs
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo preflight > "$RUNNER_TEMP/fail_stage.txt"
+          test "$(git rev-parse HEAD^)" = "$INTEGRATION_BASE_SHA"
+          test -z "$(git status --porcelain)"
+          git fetch --no-tags origin \
+            +refs/heads/site-prod:refs/remotes/origin/site-prod \
+            +refs/heads/main:refs/remotes/origin/main
+          SITE_PROD_AT_START="$(git rev-parse origin/site-prod)"
+          MAIN_AT_START="$(git rev-parse origin/main)"
+          echo "FROZEN_SITE_PROD_BASELINE=$SITE_PROD_BASELINE" >> "$GITHUB_ENV"
+          echo "FROZEN_MAIN_BASELINE=$MAIN_BASELINE" >> "$GITHUB_ENV"
+          echo "SITE_PROD_AT_START=$SITE_PROD_AT_START" >> "$GITHUB_ENV"
+          echo "MAIN_AT_START=$MAIN_AT_START" >> "$GITHUB_ENV"
+          echo "PROOF_FROZEN_TIME=$(date -u +'%Y-%m-%dT%H:%M:%SZ')" >> "$GITHUB_ENV"
+          echo "CAPTURE_BUNDLE=$RUNNER_TEMP/db_phase1_shadow_capture.json" >> "$GITHUB_ENV"
+          echo "PROOF_STATE=$RUNNER_TEMP/db_phase1_shadow_prepare.json" >> "$GITHUB_ENV"
+          echo "PROOF_RESULT=$RUNNER_TEMP/db_phase1_shadow_ingestion_integration_proof_2026-09-28.json" >> "$GITHUB_ENV"
+
+      - name: Verify frozen blobs and explosion guard
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo frozen_blob_verification > "$RUNNER_TEMP/fail_stage.txt"
+          test "$(git hash-object kyiv-air-alerts-grafana/db/migrations/001_phase1_core.sql)" = "$DDL_BLOB"
+          test "$(git hash-object kyiv-air-alerts-grafana/scripts/db_phase1_persistence.py)" = "$PERSISTENCE_BLOB"
+          test "$(git hash-object kyiv-air-alerts-grafana/scripts/db_phase1_lviv_canonical.py)" = "$CANONICAL_BLOB"
+          test "$(grep -Eio 'explosion|вибух' kyiv-air-alerts-grafana/pages-preview/app.js | wc -l)" = "0"
+          test "$(grep -Eio 'explosion|вибух' kyiv-air-alerts-grafana/pages-preview/index.html | wc -l)" = "0"
+
+      - name: Install Phase-1 DB requirements
+        working-directory: kyiv-air-alerts-grafana
+        run: python -m pip install -r requirements-db-phase1.txt
+
+      - name: Run all Phase-1 tests
+        working-directory: kyiv-air-alerts-grafana
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo phase1_tests > "$RUNNER_TEMP/fail_stage.txt"
+          python -m unittest discover -s tests -p "test_db_phase1*.py" -v 2>&1 | tee "$RUNNER_TEMP/phase1_tests.log"
+          count="$(grep -Eo 'Ran [0-9]+ tests?' "$RUNNER_TEMP/phase1_tests.log" | tail -1 | grep -Eo '[0-9]+')"
+          test "$count" = "51"
+          echo "PHASE1_TEST_COUNT=$count" >> "$GITHUB_ENV"
+          echo "PHASE1_TEST_RESULT=PASS" >> "$GITHUB_ENV"
+
+      - name: Run bridge dedup regression functions
+        working-directory: kyiv-air-alerts-grafana
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo bridge_regression_tests > "$RUNNER_TEMP/fail_stage.txt"
+          python - <<'PY'
+          import runpy
+          ns = runpy.run_path('tests/test_ukrainealarm_bridge_dedup.py')
+          tests = sorted((n, f) for n, f in ns.items() if n.startswith('test_') and callable(f))
+          for name, fn in tests:
+              fn()
+              print('PASS', name)
+          assert len(tests) == 9
+          PY
+
+      - name: Capture production inputs once and prove shadow OFF
+        working-directory: kyiv-air-alerts-grafana
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo source_capture_and_shadow_off > "$RUNNER_TEMP/fail_stage.txt"
+          test -n "${UKRAINEALARM_API_TOKEN:-}"
+          python scripts/proof_db_phase1_shadow_ingestion_integration.py prepare
+
+      - name: Verify Neon configuration and create disposable child
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo neon_branch_creation > "$RUNNER_TEMP/fail_stage.txt"
+          test -n "${NEON_API_KEY:-}"
+          test -n "${NEON_PROJECT_ID:-}"
+          test "$NEON_PROJECT_ID" = "$EXPECTED_PROJECT_ID"
+          python - <<'PY'
+          import json, os, urllib.parse, urllib.request
+          api='https://console.neon.tech/api/v2'; key=os.environ['NEON_API_KEY']; project=os.environ['NEON_PROJECT_ID']
+          name=os.environ['PROOF_BRANCH_NAME']; parent=os.environ['PARENT_BRANCH_ID']; db=os.environ['DB_NAME']; role=os.environ['ROLE_NAME']
+          headers={'Authorization': f'Bearer {key}', 'Content-Type':'application/json'}
+          def request(method, path, body=None):
+              data=None if body is None else json.dumps(body).encode()
+              req=urllib.request.Request(api+path, data=data, headers=headers, method=method)
+              with urllib.request.urlopen(req, timeout=60) as response: return json.load(response)
+          existing=request('GET', f'/projects/{project}/branches?search={urllib.parse.quote(name)}').get('branches', [])
+          if any(b.get('name') == name for b in existing):
+              raise SystemExit('PHASE-1 SHADOW INGESTION INTEGRATION BLOCKED: disposable proof branch name already exists')
+          created=request('POST', f'/projects/{project}/branches', {'branch':{'name':name,'parent_id':parent},'endpoints':[{'type':'read_write'}]})
+          branch=created['branch']; branch_id=branch['id']
+          if branch.get('parent_id') != parent: raise SystemExit('created proof branch has wrong parent')
+          def uri(branch_id):
+              q=urllib.parse.urlencode({'branch_id':branch_id,'database_name':db,'role_name':role,'pooled':'false'})
+              payload=request('GET', f'/projects/{project}/connection_uri?{q}')
+              value=payload.get('uri') or payload.get('connection_uri')
+              parsed=urllib.parse.urlparse(value or '')
+              if not value or not parsed.hostname or '-pooler' in parsed.hostname: raise SystemExit('direct/unpooled PostgreSQL connection unavailable')
+              print(f'::add-mask::{value}')
+              return value
+          urls={
+              'PHASE1_DATABASE_URL':uri(branch_id),
+              'PHASE1_PRIMARY_DATABASE_URL':uri(os.environ['PRIMARY_BRANCH_ID']),
+              'PHASE1_BOOTSTRAP_DATABASE_URL':uri(parent),
+              'PHASE1_LIVE_E2E_DATABASE_URL':uri(os.environ['LIVE_E2E_BRANCH_ID']),
+              'PHASE1_CONCURRENCY_DATABASE_URL':uri(os.environ['CONCURRENCY_BRANCH_ID']),
+              'PHASE1_BLOCKED_DATABASE_URL':uri(os.environ['BLOCKED_BRANCH_ID']),
+              'PHASE1_ADAPTER_DATABASE_URL':uri(os.environ['ADAPTER_BRANCH_ID']),
+          }
+          with open(os.environ['GITHUB_ENV'], 'a', encoding='utf-8') as h:
+              h.write(f'PHASE1_DB_BRANCH={branch_id}\n')
+              for k,v in urls.items(): h.write(f'{k}={v}\n')
+          print('proof branch id =', branch_id)
+          print('direct unpooled = true')
+          PY
+
+      - name: Run first shadow replay and exact retry through real bridge
+        working-directory: kyiv-air-alerts-grafana
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo real_shadow_on_and_retry > "$RUNNER_TEMP/fail_stage.txt"
+          python scripts/proof_db_phase1_shadow_ingestion_integration.py prove
+
+      - name: Reconfirm production refs and patch artifact
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo production_isolation_recheck > "$RUNNER_TEMP/fail_stage.txt"
+          git fetch --no-tags origin +refs/heads/site-prod:refs/remotes/origin/site-prod +refs/heads/main:refs/remotes/origin/main
+          SITE_PROD_AT_END="$(git rev-parse origin/site-prod)"
+          MAIN_AT_END="$(git rev-parse origin/main)"
+          python - "$PROOF_RESULT" "$SITE_PROD_AT_END" "$MAIN_AT_END" <<'PY'
+          import json, sys
+          from pathlib import Path
+          p=Path(sys.argv[1]); obj=json.loads(p.read_text())
+          obj['site_prod_at_end']=sys.argv[2]; obj['main_at_end']=sys.argv[3]
+          movement={}
+          if obj['site_prod_at_start'] != obj['site_prod_at_end']: movement['site_prod']=[obj['site_prod_at_start'],obj['site_prod_at_end']]
+          if obj['main_at_start'] != obj['main_at_end']: movement['main']=[obj['main_at_start'],obj['main_at_end']]
+          if movement: obj['external_ref_movement_during_proof']=movement
+          obj['site_prod_modified']=False; obj['main_modified']=False
+          p.write_text(json.dumps(obj, indent=2, sort_keys=True)+'\n')
+          PY
+
+      - name: Verify final success contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo final_contract > "$RUNNER_TEMP/fail_stage.txt"
+          python - "$PROOF_RESULT" <<'PY'
+          import json, os, sys
+          from pathlib import Path
+          o=json.loads(Path(sys.argv[1]).read_text())
+          assert o['verdict']=='PHASE-1 SHADOW INGESTION INTEGRATION PROVEN'
+          assert o['product_output_parity'] is True and o['ignored_volatile_fields']==[]
+          assert o['db_final_checkpoint_history']==[1,2]
+          assert o['retry_exact_retry'] is True
+          assert o['shadow_off_dashboard_hash']==o['shadow_on_dashboard_hash']
+          assert o['shadow_off_bridge_hash']==o['shadow_on_bridge_hash']
+          assert all(o['protected_branch_isolation'].values())
+          assert o['persistence_blob']==os.environ['PERSISTENCE_BLOB']
+          assert o['canonical_blob']==os.environ['CANONICAL_BLOB']
+          assert o['ddl_blob']==os.environ['DDL_BLOB']
+          assert o['scheduled_shadow_enabled'] is False
+          assert o['production_publication'] is False and o['netlify_triggered'] is False
+          assert o['credentials_exposed'] is False and o['test_count']==51
+          PY
+
+      - name: Capture blocked proof state on failure
+        if: ${{ failure() }}
+        shell: bash
+        run: |
+          set +e
+          python - <<'PY'
+          import json, os
+          from pathlib import Path
+          p=Path(os.environ['PROOF_RESULT'])
+          try: o=json.loads(p.read_text()) if p.exists() else {}
+          except Exception: o={}
+          stage=Path(os.environ['RUNNER_TEMP'])/'fail_stage.txt'
+          o['verdict']='PHASE-1 SHADOW INGESTION INTEGRATION BLOCKED'
+          o.setdefault('failing_stage', stage.read_text().strip() if stage.exists() else 'unknown')
+          o.setdefault('integration_base_sha', os.environ.get('INTEGRATION_BASE_SHA'))
+          o.setdefault('integration_commit_sha', os.environ.get('GITHUB_SHA'))
+          o.setdefault('workflow_run_id', os.environ.get('GITHUB_RUN_ID'))
+          o.setdefault('proof_branch_id', os.environ.get('PHASE1_DB_BRANCH'))
+          o.setdefault('proof_branch_name', os.environ.get('PROOF_BRANCH_NAME'))
+          o.setdefault('real_entrypoint_reached', False); o.setdefault('db_transaction_committed', False)
+          o.setdefault('product_output_parity', None); o.setdefault('credentials_exposed', False)
+          p.write_text(json.dumps(o, indent=2, sort_keys=True, default=str)+'\n')
+          PY
+
+      - name: Upload machine-readable proof
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: db-phase1-shadow-ingestion-integration-proof
+          path: |
+            ${{ runner.temp }}/db_phase1_shadow_ingestion_integration_proof_2026-09-28.json
+            ${{ runner.temp }}/db_phase1_shadow_prepare.json
+            ${{ runner.temp }}/phase1_tests.log
+          if-no-files-found: warn
+          retention-days: 30

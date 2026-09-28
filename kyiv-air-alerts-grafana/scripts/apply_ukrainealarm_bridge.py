@@ -17,6 +17,7 @@ import add_duration_unit_switch as exactmod
 import expand_multicity_production as base
 import extend_remaining_proxies as extended
 from update_data import Alert, TZ, build_outputs
+from db_phase1_lviv_canonical import canonicalize_lviv, ukrainealarm_rows_to_observations
 
 ROOT = Path(__file__).resolve().parents[1]
 DATA_FILE = ROOT / "data" / "dashboard_data.json"
@@ -281,6 +282,43 @@ def history_rows(client: UkraineAlarmClient, region_id: str, name: str) -> list[
 
 
 
+def history_events(
+    history: list[dict],
+    *,
+    city_key: str,
+    region_id: str,
+    api_region_name: str,
+) -> list[dict]:
+    return [
+        {
+            "city_key": city_key,
+            "region_id": region_id,
+            "api_region_name": api_region_name,
+            "start": iso(row["start"]),
+            "end": iso(row["end"]),
+            "alert_type": "AIR",
+        }
+        for row in history
+    ]
+
+
+def lviv_phase1_observations_from_history(
+    history: list[dict],
+    *,
+    region_id: str,
+    api_region_name: str,
+) -> list[dict]:
+    return ukrainealarm_rows_to_observations(
+        history_events(
+            history,
+            city_key="lviv",
+            region_id=region_id,
+            api_region_name=api_region_name,
+        ),
+        historical_end_exclusive=None,
+    )
+
+
 def _completed_air_times(event: dict) -> tuple[datetime, datetime] | None:
     if str(event.get("alert_type") or "").upper() != "AIR":
         return None
@@ -458,6 +496,78 @@ def specs(proxy_cfg: dict[str, dict]) -> dict[str, dict]:
     return out
 
 
+def phase1_db_shadow_enabled(env=None) -> bool:
+    source_env = os.environ if env is None else env
+    return str(source_env.get("PHASE1_DB_SHADOW", "0")).strip() == "1"
+
+
+def persist_lviv_shadow_if_enabled(
+    *,
+    lviv_fetched_this_run: bool,
+    vadimkin_observations: list[dict],
+    ukrainealarm_observations: list[dict],
+    checkpoint_state: dict | None,
+    env=None,
+):
+    source_env = os.environ if env is None else env
+    if not phase1_db_shadow_enabled(source_env):
+        return None
+
+    missing = []
+    if not lviv_fetched_this_run:
+        missing.append("current Lviv UkraineAlarm fetch")
+    if not vadimkin_observations:
+        missing.append("current-run Vadimkin observations")
+    if not ukrainealarm_observations:
+        missing.append("current-run UkraineAlarm observations")
+    state = checkpoint_state or {}
+    region_id = str(state.get("region_id") or "").strip()
+    if not region_id:
+        missing.append("resolved Lviv region_id")
+    if not bool(state.get("continuous")):
+        missing.append("verified Lviv continuity")
+    if missing:
+        raise RuntimeError(
+            "PHASE1_DB_SHADOW=1 requires fresh verified Lviv inputs: "
+            + ", ".join(missing)
+        )
+
+    ua_region_ids = {
+        str((observation.get("provenance") or {}).get("region_id") or "")
+        for observation in ukrainealarm_observations
+    }
+    if ua_region_ids != {region_id}:
+        raise RuntimeError(
+            "PHASE1_DB_SHADOW=1 Lviv UkraineAlarm observations do not match "
+            f"resolved region_id={region_id}: {sorted(ua_region_ids)}"
+        )
+
+    canonical_payload = canonicalize_lviv(
+        vadimkin_observations,
+        ukrainealarm_observations,
+        checkpoint_state=state,
+    )
+    if canonical_payload.get("boundary_errors"):
+        raise RuntimeError(
+            "PHASE1_DB_SHADOW=1 canonical boundary errors: "
+            f"{canonical_payload['boundary_errors']}"
+        )
+    source_keys = [
+        str(observation.get("source_key") or "")
+        for observation in canonical_payload.get("source_observations", [])
+    ]
+    if any(key == "alerts-in-ua" or key.startswith("alerts_in_ua") for key in source_keys):
+        raise RuntimeError("Alerts.in.ua must not become a Phase-1 canonical source observation")
+
+    # Deliberately late: shadow OFF must not require the DB adapter or psycopg.
+    from db_phase1_shadow import persist_shadow_payload
+
+    return persist_shadow_payload(
+        canonical_payload,
+        checkpoint_state=state,
+        env=source_env,
+    )
+
 def main() -> None:
     data = json.loads(DATA_FILE.read_text(encoding="utf-8"))
     cities = data.setdefault("cities", {})
@@ -473,7 +583,10 @@ def main() -> None:
         raise RuntimeError(f"Static bridge has no completed events for: {missing_static}")
 
     exact_base = exactmod.fetch_city_alerts()
-    proxy_base = base.fetch_proxy_alerts()
+    proxy_base, lviv_vadimkin_observations = base.fetch_proxy_alerts_with_phase1()
+    lviv_ukrainealarm_observations: list[dict] = []
+    lviv_checkpoint_state: dict | None = None
+    lviv_fetched_this_run = False
     store = load_store()
     store["static_bridge"] = static_info
     store["match_tolerance_seconds"] = MATCH_TOLERANCE_SECONDS
@@ -515,6 +628,21 @@ def main() -> None:
 
             try:
                 history = history_rows(client, region_id, api_name or spec["display_target"])
+                product_history_events = history_events(
+                    history,
+                    city_key=key,
+                    region_id=region_id,
+                    api_region_name=api_name or spec["display_target"],
+                )
+                current_lviv_observations = (
+                    lviv_phase1_observations_from_history(
+                        history,
+                        region_id=region_id,
+                        api_region_name=api_name or spec["display_target"],
+                    )
+                    if key == "lviv"
+                    else []
+                )
                 checked_at = datetime.now(UTC)
                 oldest = min((r["start"] for r in history), default=None)
                 latest = max((r["end"] for r in history), default=None)
@@ -531,15 +659,7 @@ def main() -> None:
                     reason = "static_alertsinua_event_matches_api" if continuous else "no_verified_static_api_event_match"
 
                 if continuous:
-                    for row in history:
-                        event = {
-                            "city_key": key,
-                            "region_id": region_id,
-                            "api_region_name": api_name or spec["display_target"],
-                            "start": iso(row["start"]),
-                            "end": iso(row["end"]),
-                            "alert_type": "AIR",
-                        }
+                    for event in product_history_events:
                         upsert_completed_air_event(events, event)
 
                 store.setdefault("regions", {})[key] = {
@@ -559,6 +679,10 @@ def main() -> None:
                     "last_checked_at": iso(checked_at),
                     "last_error": None,
                 }
+                if key == "lviv":
+                    lviv_ukrainealarm_observations = current_lviv_observations
+                    lviv_checkpoint_state = dict(store["regions"][key])
+                    lviv_fetched_this_run = True
                 fetched_keys.append(key)
                 print(
                     f"[{index}/{len(required_keys)}] {key}: continuous={continuous} "
@@ -590,6 +714,14 @@ def main() -> None:
         events, key=lambda e: (e.get("start") or "", e.get("city_key") or "")
     )
     store["event_count"] = len(store["events"])
+
+    persist_lviv_shadow_if_enabled(
+        lviv_fetched_this_run=lviv_fetched_this_run,
+        vadimkin_observations=lviv_vadimkin_observations,
+        ukrainealarm_observations=lviv_ukrainealarm_observations,
+        checkpoint_state=lviv_checkpoint_state,
+    )
+
     STORE_FILE.write_text(json.dumps(store, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
     now_local = datetime.now(TZ)
