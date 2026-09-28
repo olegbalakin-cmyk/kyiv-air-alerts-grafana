@@ -45,3 +45,20 @@ jobs:
           print("YAML parse PASS")
           print("Scheduled shadow workflow contract PASS")
           PY
+
+      - name: Check production-shadow secret and variable wiring
+        env:
+          PHASE1_PROD_SHADOW_DATABASE_URL: ${{ secrets.PHASE1_PROD_SHADOW_DATABASE_URL }}
+          PHASE1_PROD_SHADOW_BRANCH_ID: ${{ vars.PHASE1_PROD_SHADOW_BRANCH_ID }}
+        shell: bash
+        run: |
+          if [ -n "${PHASE1_PROD_SHADOW_DATABASE_URL:-}" ]; then
+            echo "PHASE1_PROD_SHADOW_DATABASE_URL_PRESENT=true"
+          else
+            echo "PHASE1_PROD_SHADOW_DATABASE_URL_PRESENT=false"
+          fi
+          if [ "${PHASE1_PROD_SHADOW_BRANCH_ID:-}" = "br-bold-mode-b5rub8pq" ]; then
+            echo "PHASE1_PROD_SHADOW_BRANCH_ID_MATCH=true"
+          else
+            echo "PHASE1_PROD_SHADOW_BRANCH_ID_MATCH=false"
+          fi
