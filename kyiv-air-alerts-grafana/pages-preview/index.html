@@ -33,6 +33,7 @@
     </div>
     <div class="header-actions">
       <div id="updatedAt" class="updated-at"></div>
+      <button id="showTour" class="ghost-button" type="button">Показати тур</button>
       <button id="copyLink" class="ghost-button" type="button">Скопіювати посилання</button>
     </div>
   </header>
@@ -274,7 +275,7 @@
       </section>
     </section>
 
-    <section class="comparison-section">
+    <section id="allCitiesSection" class="comparison-section">
       <div class="section-heading all-cities-heading">
         <div>
           <div class="eyebrow">Огляд</div>
@@ -384,6 +385,23 @@
     <span>Дані та код: <a href="https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana">GitHub</a></span>
     <span>Зауваження до даних: @olbalakin у Telegram</span>
   </footer>
+
+  <div id="introTour" class="tour-root hidden" aria-hidden="true">
+    <div class="tour-backdrop"></div>
+    <aside class="tour-card" role="dialog" aria-modal="true" aria-labelledby="tourTitle" aria-describedby="tourText">
+      <div class="tour-card-top">
+        <span id="tourProgress" class="tour-progress"></span>
+        <button id="tourClose" class="tour-close" type="button" aria-label="Закрити тур">×</button>
+      </div>
+      <h2 id="tourTitle"></h2>
+      <p id="tourText"></p>
+      <div class="tour-actions">
+        <button id="tourPrev" class="ghost-button" type="button">Назад</button>
+        <button id="tourSkip" class="tour-skip" type="button">Пропустити</button>
+        <button id="tourNext" class="tour-primary" type="button">Далі</button>
+      </div>
+    </aside>
+  </div>
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
   <script src="app.js"></script>

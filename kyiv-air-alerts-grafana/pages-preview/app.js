@@ -10,6 +10,41 @@ const COLORS = ["#62a0ea", "#8ff0a4", "#f8e45c"];
 const EXPLOSION_COLOR = "#ff9f43";
 const TIME_PROFILE_COLOR = "#ef4444";
 const PARTIAL_PERIOD_DASH = [3, 4];
+const TOUR_STORAGE_KEY = "air-alerts-intro-tour-v1";
+const TOUR_STEPS = [
+  {
+    selector: ".controls-panel",
+    title: "Оберіть місто і період",
+    text: "Тут можна змінити місто та масштаб графіків. За замовчуванням відкривається ковзне 90-денне вікно."
+  },
+  {
+    selector: "#cityIntensityChart",
+    closest: ".chart-card",
+    title: "Як читати головний графік",
+    text: "Стовпчики показують середній час під тривогою на добу, лінія — середню кількість тривог на день. Пунктиром позначений поточний неповний зріз."
+  },
+  {
+    selector: "#cityIntensityChart",
+    closest: ".chart-card",
+    title: "Легенда — це перемикач",
+    text: "Натисніть на назву показника в легенді графіка, щоб тимчасово приховати його. Натисніть ще раз — і показник повернеться. Можете спробувати прямо зараз."
+  },
+  {
+    selector: "#timeOfDaySection",
+    title: "Добовий профіль",
+    text: "Цей графік показує, у які години тривога відносно частіше активна. 100% — власний максимум вибраного міста й періоду, а не 100% часу під тривогою."
+  },
+  {
+    selector: ".comparison-controls",
+    title: "Порівнюйте міста",
+    text: "Оберіть два або три міста. Порівняльні графіки використовують лише спільні для вибраних рядів періоди."
+  },
+  {
+    selector: "#allCitiesSection",
+    title: "Огляд усіх міст",
+    text: "У нижній таблиці можна швидко порівняти всі 23 ряди та змінити горизонт: 7, 30, 90 днів, рік або від початку спільних даних."
+  }
+];
 const GRID = "rgba(148,163,184,.16)";
 const TEXT = "#b8c4cf";
 const HEATMAP_RANGES = ["7d", "30d", "90d", "year", "all"];
@@ -1054,6 +1089,7 @@ function changeTableSort(column) {
     state.tableSort = { key: column.key, direction: column.defaultDirection };
   }
   renderAllCitiesTable();
+  maybeStartIntroTour();
 }
 
 function setupTableSorting() {
@@ -1128,6 +1164,116 @@ function renderAllCitiesTable() {
   updateTableSortHeaders();
 }
 
+let tourStepIndex = 0;
+let activeTourTarget = null;
+
+function tourWasSeen() {
+  try {
+    return localStorage.getItem(TOUR_STORAGE_KEY) === "1";
+  } catch {
+    return false;
+  }
+}
+
+function markTourSeen() {
+  try {
+    localStorage.setItem(TOUR_STORAGE_KEY, "1");
+  } catch {
+    // Tour remains usable without browser storage.
+  }
+}
+
+function resolveTourTarget(step) {
+  let target = document.querySelector(step.selector);
+  if (target && step.closest) target = target.closest(step.closest);
+  return target;
+}
+
+function clearTourTarget() {
+  if (activeTourTarget) activeTourTarget.classList.remove("tour-target");
+  activeTourTarget = null;
+}
+
+function showTourStep(index) {
+  const root = $("introTour");
+  if (!root) return;
+
+  const direction = index >= tourStepIndex ? 1 : -1;
+  let nextIndex = index;
+  let target = null;
+  while (nextIndex >= 0 && nextIndex < TOUR_STEPS.length) {
+    target = resolveTourTarget(TOUR_STEPS[nextIndex]);
+    if (target && target.getClientRects().length) break;
+    nextIndex += direction;
+  }
+  if (!target || nextIndex < 0 || nextIndex >= TOUR_STEPS.length) {
+    finishIntroTour();
+    return;
+  }
+
+  tourStepIndex = nextIndex;
+  const step = TOUR_STEPS[tourStepIndex];
+  clearTourTarget();
+  activeTourTarget = target;
+  activeTourTarget.classList.add("tour-target");
+
+  $("tourTitle").textContent = step.title;
+  $("tourText").textContent = step.text;
+  $("tourProgress").textContent = String(tourStepIndex + 1) + " / " + String(TOUR_STEPS.length);
+  $("tourPrev").disabled = tourStepIndex === 0;
+  $("tourNext").textContent = tourStepIndex === TOUR_STEPS.length - 1 ? "Готово" : "Далі";
+
+  root.classList.remove("hidden");
+  root.setAttribute("aria-hidden", "false");
+  document.body.classList.add("tour-open");
+
+  const reduceMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  target.scrollIntoView({
+    behavior: reduceMotion ? "auto" : "smooth",
+    block: "center",
+    inline: "nearest"
+  });
+}
+
+function startIntroTour() {
+  tourStepIndex = 0;
+  showTourStep(0);
+}
+
+function finishIntroTour() {
+  const root = $("introTour");
+  clearTourTarget();
+  if (root) {
+    root.classList.add("hidden");
+    root.setAttribute("aria-hidden", "true");
+  }
+  document.body.classList.remove("tour-open");
+  markTourSeen();
+}
+
+function bindIntroTour() {
+  $("showTour")?.addEventListener("click", startIntroTour);
+  $("tourNext")?.addEventListener("click", () => {
+    if (tourStepIndex >= TOUR_STEPS.length - 1) finishIntroTour();
+    else showTourStep(tourStepIndex + 1);
+  });
+  $("tourPrev")?.addEventListener("click", () => {
+    if (tourStepIndex > 0) showTourStep(tourStepIndex - 1);
+  });
+  $("tourSkip")?.addEventListener("click", finishIntroTour);
+  $("tourClose")?.addEventListener("click", finishIntroTour);
+  document.addEventListener("keydown", event => {
+    if (event.key === "Escape" && !$("introTour")?.classList.contains("hidden")) finishIntroTour();
+  });
+}
+
+function maybeStartIntroTour() {
+  if (tourWasSeen()) return;
+  window.setTimeout(() => {
+    if ($("introTour")?.classList.contains("hidden")) startIntroTour();
+  }, 450);
+}
+
 function renderMethodology() {
   const rolling = rolling7dEnabled();
   const cityWeeklyOption = $("cityWeeklyOption");
@@ -1164,6 +1310,7 @@ function bind() {
   });
   for (const id of ["compareA", "compareB", "compareC", "comparePeriod", "compareTimeOfDayRange"]) $(id).addEventListener("change", renderComparison);
   setupTableSorting();
+  bindIntroTour();
   $("copyLink").addEventListener("click", async () => {
     try {
       await navigator.clipboard.writeText(location.href);
