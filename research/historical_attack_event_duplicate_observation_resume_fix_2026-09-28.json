@@ -1,0 +1,282 @@
+{
+  "schema_version": 1,
+  "kind": "historical_attack_event_duplicate_observation_resume_fix",
+  "generated_date": "2026-09-28",
+  "campaign_id": "historical-attack-events-v2-2026-09-27",
+  "campaign_branch": "historical-attack-event-backfill-2026-09-27",
+  "starting_main_head": "15e9887894f0ab78c4e3fc4b6743e070fd85d83c",
+  "starting_campaign_head": "205d0b84e83b2d18a25ad2e7d2a01a8aca6e6999",
+  "starting_processed": 100,
+  "starting_terminal": 100,
+  "starting_phase": "SAFETY_FALLBACK",
+  "starting_lviv_scanned": 100,
+  "starting_lviv_terminal": 100,
+  "starting_last_completed_batch": 2,
+  "starting_last_scheduler_run_id": "36387746434",
+  "failed_run_id": 36387746434,
+  "failed_run_attempt": 1,
+  "failed_observation_id": "72c62034bdbd3f5d45163428",
+  "failed_error": "DUPLICATE_OBSERVATION_ID:72c62034bdbd3f5d45163428:batch_000003.json",
+  "original_persisted_batch": "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/lviv/batch_000002.json",
+  "original_persisted_batch_blob": "def851dbb1fc9f45971bccbe6c6f4c8a50e1bdcc",
+  "original_observation": {
+    "observation_id": "72c62034bdbd3f5d45163428",
+    "source_family": "suspilne.media/lviv",
+    "source_type": "source_local_html",
+    "source_url": "https://suspilne.media/lviv/1317607-u-lvovi-na-vulici-uzgorodskij-pid-cas-pozezi-v-kvartiri-zaginula-92-ricna-zinka/",
+    "telegram_channel": null,
+    "telegram_message_id": null,
+    "source_timestamp": "2026-05-28T10:41:46Z",
+    "event_timestamp_if_stated": null,
+    "excerpt": "У Львові на вулиці Ужгородській під час пожежі в квартирі загинула 92-річна жінка На вулиці Ужгородській у Львові 28 травня сталася пожежа у квартирі чотириповерхового житлового будинку. Під час гасіння вогню рятувальники виявили тіло 92-річної жінки без ознак життя. Як повідомили на Facebook-сторінці ГУ ДСНС Львівщини, о 09:42 до рятувальників надійшло повідомлення про пожежу. Загорання виникло в квартирі на першому поверсі чотириповерхового житлового будинку. Помешкання було сильно задимлене. Поблизу газової плити вогнеборці виявили тіло 92-річної власниці без ознак життя. Помешкання у якому сталась пожежа. Facebook/ГУ ДСНС Львівщини Пожежу загасили о 09:59. Площа займання становила близько 0,5 кв. м — горіли речі домашнього вжитку. Причини виникнення загорання та обставини події встановлюють правоохоронці. Читати ще Читати ще На Львівщині під час пожежі в житловому будинку загинув 72-річний чоловік",
+    "content_hash": "7cb70ea2b6c38db8dd4710006df7e1258bd7de997eaf19236a9ecd802b364802",
+    "matched_discovery_terms": [
+      "fire"
+    ],
+    "event_types": [],
+    "exact_city_evidence_present": true,
+    "aerial_war_context_present": false,
+    "same_attack_context_present": false,
+    "classification_outcome": "needs_review",
+    "classification_episode_id": null,
+    "candidate_matching_outcome": "no_match",
+    "air_defense_context": false,
+    "air_defense_action": false,
+    "interception_claim": false,
+    "retrieval_provenance": {
+      "adapter": "SourceLocalHtmlArchiveAdapter",
+      "archive_local_day": "2026-05-28",
+      "archive_url": "https://suspilne.media/lviv/archive/2026/5/28/",
+      "late_window_hours": 72
+    }
+  },
+  "original_observation_payload_hash": "3f64a5a9b43d5920871991c9951a85a36884a410863e621e96e813cf64c230c9",
+  "original_observation_canonical_hash": "c464242f6f079a9feee47632a44f2fd3220306b0ccce1ace1138c64264c539a1",
+  "reconstructed_duplicate_payload_hash": "3f64a5a9b43d5920871991c9951a85a36884a410863e621e96e813cf64c230c9",
+  "reconstructed_duplicate_canonical_hash": "c464242f6f079a9feee47632a44f2fd3220306b0ccce1ace1138c64264c539a1",
+  "reconstructed_payload_equivalence": "EXACT_DUPLICATE",
+  "reconstructed_payload_equals_original": true,
+  "reconstructed_duplicate_episode_reference_ids": [],
+  "reconstructed_attempt_duplicate_count": 3,
+  "reconstructed_attempt_duplicate_ids": [
+    "02a14a097154843178bfcb1c",
+    "053a3c1dbdbc4c99a1b3c163",
+    "72c62034bdbd3f5d45163428"
+  ],
+  "duplicate_root_cause": {
+    "adapter": "SourceLocalHtmlArchiveAdapter",
+    "mechanism": "Batch-level local_days_for_batch() unions every Kyiv-local calendar day from each selected alert start through alert_end + 72 hours. Adjacent batches therefore intentionally overlap archive retrieval days. The same canonical Suspilne article URL is deterministically rediscovered.",
+    "batch_2_overlap_days": [
+      "2026-05-27",
+      "2026-05-28",
+      "2026-05-29",
+      "2026-05-30"
+    ],
+    "batch_3_overlap_days": [
+      "2026-05-27",
+      "2026-05-28",
+      "2026-05-29",
+      "2026-05-30"
+    ],
+    "target_archive_day": "2026-05-28",
+    "batch_3_episode_contributors_to_target_archive_day": [
+      {
+        "episode_id": "ce789c77763da51bdfb43b24",
+        "alert_start": "2026-05-27T09:25:10Z",
+        "alert_end": "2026-05-27T10:14:46Z"
+      },
+      {
+        "episode_id": "51cb11cfb7392bc2f3922b91",
+        "alert_start": "2026-05-27T18:56:46Z",
+        "alert_end": "2026-05-27T19:33:33Z"
+      },
+      {
+        "episode_id": "b51eb14283693e13a5bcff14",
+        "alert_start": "2026-05-28T19:57:19Z",
+        "alert_end": "2026-05-28T20:51:30Z"
+      }
+    ],
+    "episode_specific_cause": false,
+    "note": "The archive fetch is driven by the union of batch local days, not by one episode-to-source lookup. The failed observation itself matched no alert episode in either generation."
+  },
+  "observation_identity_contract": {
+    "function_paths": [
+      "kyiv-air-alerts-grafana/scripts/run_historical_attack_event_backfill_batch.py::classify_row",
+      "kyiv-air-alerts-grafana/scripts/historical_attack_event_sources.py::canonical_observation_id",
+      "kyiv-air-alerts-grafana/scripts/historical_attack_event_sources.py::content_hash",
+      "kyiv-air-alerts-grafana/scripts/historical_attack_event_sources.py::canonical_url"
+    ],
+    "html_observation_id": "sha256(source_type + '|' + source_url)[:24]",
+    "telegram_observation_id": "sha256('telegram|' + channel + '|' + message_id)[:24]",
+    "hash_algorithm": "SHA-256, first 24 hex chars for observation_id",
+    "html_content_hash": "sha256(source_url + '\\n' + source_timestamp + '\\n' + excerpt)",
+    "telegram_content_hash": "sha256(channel + '\\n' + message_id + '\\n' + source_timestamp + '\\n' + excerpt)",
+    "url_normalization": "Source adapter canonical_url strips URL fragments and trims whitespace before classify_row receives source_url.",
+    "determinism_assumptions": [
+      "Stable canonical source URL for non-Telegram observations.",
+      "Stable channel/message_id pair for Telegram observations.",
+      "Stable extracted source timestamp and normalized article/post text for content equivalence."
+    ]
+  },
+  "dedupe_design": {
+    "pattern": "Controller-side campaign-global canonical observation dedupe after worker batch generation and before artifact validation/commit.",
+    "campaign_wide_uniqueness": "One observation_id may be physically persisted in observations[] only once across committed batches.",
+    "episode_provenance": "Later episode_results.source_observation_ids are preserved even when an equivalent repeated observation row is removed from the later observations[]. Every reference is checked to resolve to either a prior campaign observation or a retained new observation.",
+    "audit_metadata": "Later batch stores campaign_observation_dedupe metadata describing equivalent repeated observations, original batch, full/canonical hashes, context comparison, and episode references.",
+    "existing_committed_batches_modified": false,
+    "batch_1_unchanged": true,
+    "batch_2_unchanged": true
+  },
+  "conflict_semantics": {
+    "diagnostic": "OBSERVATION_ID_PAYLOAD_CONFLICT",
+    "behavior": "HARD_FAILURE",
+    "silent_keep_old": false,
+    "silent_replace": false,
+    "contradictory_merge": false,
+    "canonical_fields": [
+      "source_family",
+      "source_type",
+      "source_url",
+      "telegram_channel",
+      "telegram_message_id",
+      "source_timestamp",
+      "excerpt",
+      "content_hash",
+      "matched_discovery_terms",
+      "event_types",
+      "exact_city_evidence",
+      "aerial_war_context",
+      "same_attack_context",
+      "air_defense_context",
+      "air_defense_action",
+      "interception_claim"
+    ],
+    "context_fields_recorded_but_not_identity_conflicts": [
+      "event_timestamp_if_stated",
+      "temporal_binding",
+      "classifier_reason_codes",
+      "classification_outcome",
+      "classification_episode_id",
+      "candidate_matching",
+      "retrieval_provenance"
+    ],
+    "rationale": "Context fields may legitimately depend on the selected alert-episode set of the current batch; source/content and classification-critical canonical evidence must remain identical."
+  },
+  "implementation_files_changed": [
+    "kyiv-air-alerts-grafana/scripts/historical_attack_event_acceleration_controller.py"
+  ],
+  "temporary_proof_orchestration": {
+    "proof_branch": "historical-attack-event-duplicate-proof-2026-09-28",
+    "proof_workflow_run_id": 36393597286,
+    "workflow_note": "A temporary main workflow was added only to execute the isolated proof against a local bare remote, then removed. It is absent from final main.",
+    "add_workflow_commit": "e54eae38ef2939940b8e898d6bff577b9ac82f11",
+    "remove_workflow_commit": "807edf0bf545573615da8c158e0003f0cd65915d",
+    "proof_branch_artifact_commit": "25a0a59d6ba9bb01c79ddc9ccbb7c71504380c4c"
+  },
+  "tests": {
+    "controller_self_test": "PASS",
+    "exact_duplicate_across_batches": "PASS",
+    "duplicate_inside_generated_batch": "PASS",
+    "equivalent_context_duplicate": "PASS",
+    "same_id_conflicting_payload": "PASS",
+    "different_observation_ids_untouched": "PASS",
+    "episode_reference_preserved": "PASS",
+    "dangling_observation_reference_guard": "PASS",
+    "resume_retry_observation_idempotence": "PASS",
+    "terminal_episode_retry_regression_guard": "PASS",
+    "unexpected_worktree_mutation_guard": "PASS",
+    "protected_file_guard": "PASS",
+    "python_bytecode_prevention": "PASS",
+    "stale_writer_code_path_preserved": "PASS"
+  },
+  "isolated_proof": {
+    "result": "PASS",
+    "workflow_run_id": 36393597286,
+    "proof_branch": "historical-attack-event-duplicate-proof-2026-09-28",
+    "proof_artifact": "research/historical_attack_event_duplicate_observation_isolated_proof_2026-09-28.json",
+    "processed_before": 100,
+    "processed_after": 126,
+    "terminal_before": 100,
+    "terminal_after": 126,
+    "lviv_scanned_before": 100,
+    "lviv_scanned_after": 126,
+    "batches_attempted": 1,
+    "batches_committed": 1,
+    "phase_before": "SAFETY_FALLBACK",
+    "phase_after": "SAFETY_FALLBACK",
+    "target_persisted_count_after": 1,
+    "global_persisted_duplicate_count_after": 0,
+    "equivalent_duplicate_occurrences": 3,
+    "protected_files_unchanged": true,
+    "frozen_universe_unchanged": true
+  },
+  "real_resume": {
+    "run_id": 36387746434,
+    "run_attempt": 2,
+    "event": "schedule",
+    "result": "SUCCESS",
+    "processed_before": 100,
+    "processed_after": 126,
+    "terminal_before": 100,
+    "terminal_after": 126,
+    "lviv_scanned_before": 100,
+    "lviv_scanned_after": 126,
+    "lviv_terminal_before": 100,
+    "lviv_terminal_after": 126,
+    "lviv_status_after": "COMPLETE",
+    "batches_attempted": 1,
+    "batches_committed": 1,
+    "new_episodes_processed": 26,
+    "phase_before": "SAFETY_FALLBACK",
+    "phase_after": "ACCELERATED_2X",
+    "campaign_checkpoint_persisted": true,
+    "stale_writer_protection_preserved": true,
+    "fallback_reason_after": null
+  },
+  "persisted_observation_integrity": {
+    "committed_lviv_batch_blobs": {
+      "batch_000001": "b8a90771184adde93bbd3c5b5946059e502acf65",
+      "batch_000002": "def851dbb1fc9f45971bccbe6c6f4c8a50e1bdcc",
+      "batch_000003": "c278ec2d871244523d9b1c71256c2d1017f4b71a"
+    },
+    "persisted_unique_observation_ids": 321,
+    "global_duplicate_count_before": 0,
+    "global_duplicate_count_after": 0,
+    "failed_observation_persisted_count_after": 1,
+    "failed_observation_location_after": "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/lviv/batch_000002.json",
+    "observations_disappeared": false,
+    "conflicting_observation_suppressed": false
+  },
+  "protected_files_before": "MATCH_LAUNCH_BASELINE_19_OF_19",
+  "protected_files_after": "MATCH_LAUNCH_BASELINE; controller post-run verify_protected passed; campaign progress commits changed only batch_000003, status, and acceleration state",
+  "frozen_universe_before": {
+    "total": 6863,
+    "cities": [
+      "lviv",
+      "sevastopol",
+      "cherkasy",
+      "sumy",
+      "zaporizhzhia"
+    ],
+    "unchanged": true
+  },
+  "frozen_universe_after": {
+    "total": 6863,
+    "cities": [
+      "lviv",
+      "sevastopol",
+      "cherkasy",
+      "sumy",
+      "zaporizhzhia"
+    ],
+    "unchanged": true
+  },
+  "campaign_version_result": "UNCHANGED_AND_MATCHED_FROZEN_BLOBS",
+  "main_fix_commit": "eb15561636e4435d16e8298a3833e4b025715b5e",
+  "campaign_batch_commits": [
+    "5429c662920e5f76f5e4a45053a048ad94b4bb31",
+    "6192ccc5827688c5f77e4c62ac6969bda4a476f1"
+  ],
+  "final_campaign_progress_head": "6192ccc5827688c5f77e4c62ac6969bda4a476f1",
+  "verdict": "6863 DUPLICATE OBSERVATION FIXED — CAMPAIGN RESUME SUCCESSFUL"
+}
