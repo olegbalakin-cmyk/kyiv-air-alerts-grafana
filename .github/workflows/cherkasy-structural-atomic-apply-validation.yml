@@ -1,0 +1,130 @@
+name: Cherkasy structural atomic apply validation
+
+on:
+  push:
+    branches:
+      - cherkasy-structural-atomic-apply-validation-2026-09-28
+    paths:
+      - ".github/workflows/cherkasy-structural-atomic-apply-validation.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout exact apply commit
+        uses: actions/checkout@v4
+        with:
+          ref: 69a88096562512f3db5469cc4ad659b226e7872c
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: kyiv-air-alerts-grafana/requirements.txt
+
+      - name: Install dependencies
+        run: |
+          pip install -r kyiv-air-alerts-grafana/requirements.txt
+          pip install pytest
+
+      - name: Verify exact apply and immutable inputs
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "69a88096562512f3db5469cc4ad659b226e7872c"
+          test "$(git rev-parse HEAD:kyiv-air-alerts-grafana/scripts/replay_explosion_history.py)" = "c54165fb7c34d885f51e26e98063203335d1a788"
+          test "$(git rev-parse HEAD:kyiv-air-alerts-grafana/tests/test_historical_replay_cherkasy_roles.py)" = "85bad40104a0a425894b857dfaa8fdd1a1d7afff"
+          test "$(git rev-parse HEAD:kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py)" = "b55fe2ed082958917c74f95bca2fd6bc137bcaae"
+          test "$(git rev-parse HEAD:kyiv-air-alerts-grafana/data/explosion_research/cherkasy/final_evidence.json)" = "433b901ec49279fb865294a7c1e9a5328cf1b46a"
+
+      - name: Run regression tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          python kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py --self-test
+          python kyiv-air-alerts-grafana/scripts/replay_explosion_history.py --self-test
+          pytest -q \
+            kyiv-air-alerts-grafana/tests/test_historical_replay_cherkasy_roles.py \
+            kyiv-air-alerts-grafana/tests/test_historical_replay_remaining_v2_roles.py \
+            kyiv-air-alerts-grafana/tests/test_historical_replay_strike_roles.py
+
+      - name: Run fresh read-only Cherkasy replay
+        shell: bash
+        run: |
+          set -euo pipefail
+          python kyiv-air-alerts-grafana/scripts/replay_explosion_history.py \
+            --repo-root "$GITHUB_WORKSPACE/kyiv-air-alerts-grafana" \
+            --city cherkasy \
+            --through 2026-09-17 \
+            --input-head "69a88096562512f3db5469cc4ad659b226e7872c" \
+            --read-only \
+            --output "$RUNNER_TEMP/replay_cherkasy_atomic_apply.json"
+
+      - name: Assert corrected contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+          p = Path(os.environ["RUNNER_TEMP"], "replay_cherkasy_atomic_apply.json")
+          d = json.loads(p.read_text(encoding="utf-8"))
+          assert d["status"] == "COMPLETE", d["status"]
+          assert d["episodes_checked"] == 1548, d["episodes_checked"]
+          assert d["replayed_strict_episodes"] == 57, d["replayed_strict_episodes"]
+          assert d["replayed_sensitivity_episodes"] == 58, d["replayed_sensitivity_episodes"]
+          assert d["protected_files_unchanged"] is True
+          assert d.get("errors") == [], d.get("errors")
+          qa = [r["episode_id"] for r in d.get("changed_episodes") or []]
+          assert qa == ["f57f2f50c537719982254887"], qa
+          expected = {
+              "1211cf659b50b8f60a118e85": "STRICT",
+              "2e52d5a124fddfe369687035": "STRICT",
+              "3a8c3baa43001ec2f94b53c8": "SENSITIVITY",
+          }
+          diag = d.get("evidence_episode_diagnostics") or {}
+          actual = {k: diag[k]["replayed_status"] for k in expected}
+          assert actual == expected, actual
+          accepted = sorted(r["episode_id"] for r in d.get("accepted_evidence_backed_upgrades") or [])
+          assert accepted == sorted([
+              "1211cf659b50b8f60a118e85",
+              "2e52d5a124fddfe369687035",
+              "f0b75832ea028fd6b1b5ff75",
+          ]), accepted
+          source = d.get("source_validation") or {}
+          assert source.get("expected_alert_episodes") == 1548, source
+          assert source.get("reconstructed_alert_episodes") == 1548, source
+          print(json.dumps({
+              "denominator": d["episodes_checked"],
+              "strict": d["replayed_strict_episodes"],
+              "sensitivity": d["replayed_sensitivity_episodes"],
+              "qa_ids": qa,
+              "target_statuses": actual,
+              "accepted_upgrade_ids": accepted
+          }, ensure_ascii=False, indent=2))
+          PY
+
+      - name: Verify clean exact checkout
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          find kyiv-air-alerts-grafana -type d -name __pycache__ -prune -exec rm -rf {} +
+          test -z "$(git status --porcelain)"
+
+      - name: Upload replay artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cherkasy-structural-atomic-apply-validation-${{ github.run_id }}
+          path: ${{ runner.temp }}/replay_cherkasy_atomic_apply.json
+          if-no-files-found: warn
+          retention-days: 30
