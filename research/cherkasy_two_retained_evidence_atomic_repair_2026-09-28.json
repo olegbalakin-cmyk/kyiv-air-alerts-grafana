@@ -1,0 +1,259 @@
+{
+  "schema_version": "cherkasy-two-retained-evidence-atomic-repair-v1",
+  "kind": "historical_replay_retained_evidence_atomic_repair",
+  "generated_date": "2026-09-28",
+  "repository": "olegbalakin-cmyk/kyiv-air-alerts-grafana",
+  "branch": "multicity-wip-2026-09-16",
+  "starting_authoritative_head": "f446dce2f850c0a958ae4eba9f55d3e9b91f6f77",
+  "accepted_live_v2": {
+    "run_id": 36404244648,
+    "run_attempt": 2,
+    "verdict": "LIVE-V2 REAL RUN ACCEPTED",
+    "atomic_apply_commit": "960561136e6c6863bdea31b35b14b389180e0847",
+    "expected_monitor_blob": "b55fe2ed082958917c74f95bca2fd6bc137bcaae",
+    "real_run_output_commit": "947789f7b976c3ba1f1608a78e376c65443dc247"
+  },
+  "pre_repair": {
+    "authoritative_head_at_final_guard": "f446dce2f850c0a958ae4eba9f55d3e9b91f6f77",
+    "evidence_blob": "5dd59bb3c4076d2a27ee6f77464ec0be507d2cd7",
+    "denominator": 1548,
+    "strict": 49,
+    "sensitivity": 49,
+    "qa": 10,
+    "qa_episode_ids": [
+      "1211cf659b50b8f60a118e85",
+      "2e52d5a124fddfe369687035",
+      "3a8c3baa43001ec2f94b53c8",
+      "58624e812ef70a85166d09c6",
+      "7dc902b97fda7ea1d146c907",
+      "99e50f8c16d1cd74340dc32d",
+      "c1cb52e1672fd669808bc5c8",
+      "f0b75832ea028fd6b1b5ff75",
+      "f57f2f50c537719982254887",
+      "f732ee21dee348389b0971cd"
+    ],
+    "expected_true_ambiguity_ids": [
+      "1211cf659b50b8f60a118e85",
+      "2e52d5a124fddfe369687035",
+      "3a8c3baa43001ec2f94b53c8",
+      "58624e812ef70a85166d09c6",
+      "7dc902b97fda7ea1d146c907",
+      "f0b75832ea028fd6b1b5ff75",
+      "f57f2f50c537719982254887",
+      "f732ee21dee348389b0971cd"
+    ],
+    "retained_evidence_gap_ids": [
+      "99e50f8c16d1cd74340dc32d",
+      "c1cb52e1672fd669808bc5c8"
+    ]
+  },
+  "targets": [
+    {
+      "episode_id": "99e50f8c16d1cd74340dc32d",
+      "alert_start": "2025-03-02T19:14:35Z",
+      "alert_end": "2025-03-03T00:57:37Z",
+      "source_url": "https://suspilne.media/cherkasy/961187-hodilo-hodorom-vse-virobnictvo-pokazali-naslidki-dronovoi-ataki-na-cerkasi/",
+      "retained_evidence_before": "Суспільне описує наслідки нічної атаки БпЛА в Черкасах; власник за відеонаглядом датував подію 02:12 і свідок чув вибух.",
+      "recovered_source_local_evidence": "Суспільне повідомляє, що у Черкасах внаслідок нічної атаки ударних БпЛА горіла меблева фабрика, а власник сказав, що о 02:12 водій на підприємстві чув вибух.",
+      "recovered_roles": {
+        "exact_city": "Черкаси",
+        "attack_event": "вибух",
+        "air_military_context": "нічна атака ударних БпЛА",
+        "same_attack": "event-local wording links the Cherkasy site and explosion to the same overnight UAV attack",
+        "temporal": "02:12, no added precision beyond source",
+        "supported_event_types": [
+          "explosion"
+        ]
+      }
+    },
+    {
+      "episode_id": "c1cb52e1672fd669808bc5c8",
+      "alert_start": "2025-02-24T19:35:30Z",
+      "alert_end": "2025-02-25T05:29:28Z",
+      "source_url": "https://fakty.com.ua/ua/proisshestvija/20250225-vybuhy-v-cherkasah-do-mista-letily-zapushheni-rosiyanamy-rakety/",
+      "retained_evidence_before": "Факти ICTV повідомили, що орієнтовно о 06:09 в обласному центрі було гучно через ліквідацію крилатих ракет під час ракетно-дронової атаки.",
+      "recovered_source_local_evidence": "Факти ICTV повідомляють про вибухи в Черкасах під час ракетно-дронової атаки РФ і уточнюють, що орієнтовно о 06:09 в обласному центрі стало гучно через ліквідацію крилатих ракет.",
+      "recovered_roles": {
+        "exact_city": "вибухи в Черкасах",
+        "attack_event": "вибухи / actual cruise-missile neutralization",
+        "air_military_context": "ракетно-дронова атака РФ; крилаті ракети",
+        "same_attack": "source-local wording places the Cherkasy explosions inside the same missile-drone attack",
+        "temporal": "approximately 06:09 local, no added precision beyond source",
+        "supported_event_types": [
+          "explosion"
+        ]
+      }
+    }
+  ],
+  "repair": {
+    "commit": "0a4fc02e3548fc054f607109087b8e790cfaa66c",
+    "evidence_blob_before": "5dd59bb3c4076d2a27ee6f77464ec0be507d2cd7",
+    "evidence_blob_after": "35cfcf87981edf5863784b9430007d98177fce6e",
+    "changed_files": [
+      "kyiv-air-alerts-grafana/data/explosion_research/cherkasy/final_evidence.json"
+    ],
+    "line_stats": {
+      "additions": 2,
+      "deletions": 2,
+      "changes": 4
+    },
+    "append_only_semantics": true,
+    "append_only_note": "Both existing records and their prior evidence text were preserved; each evidence string received only a source-retention supplement. No unrelated evidence record was deleted or rewritten.",
+    "concurrent_branch_note": "A concurrent unrelated authoritative-branch commit landed between the final HEAD read and the GitHub contents write. The repair commit inherited newer work and its own diff is limited to the single Cherkasy evidence file; no newer work was overwritten or reverted."
+  },
+  "fresh_replay": {
+    "run_id": 36441111925,
+    "run_attempt": 1,
+    "input_head": "0a4fc02e3548fc054f607109087b8e790cfaa66c",
+    "conclusion": "success",
+    "artifact_id": 10978416731,
+    "artifact_name": "historical-replay-city-cherkasy-0a4fc02e3548fc054f607109087b8e790cfaa66c",
+    "denominator_before": 1548,
+    "denominator_after": 1548,
+    "strict_before": 49,
+    "strict_after": 51,
+    "sensitivity_before": 49,
+    "sensitivity_after": 51,
+    "qa_before": 10,
+    "qa_after": 8,
+    "qa_ids_removed": [
+      "99e50f8c16d1cd74340dc32d",
+      "c1cb52e1672fd669808bc5c8"
+    ],
+    "qa_ids_added": [],
+    "remaining_qa_ids": [
+      "1211cf659b50b8f60a118e85",
+      "2e52d5a124fddfe369687035",
+      "3a8c3baa43001ec2f94b53c8",
+      "58624e812ef70a85166d09c6",
+      "7dc902b97fda7ea1d146c907",
+      "f0b75832ea028fd6b1b5ff75",
+      "f57f2f50c537719982254887",
+      "f732ee21dee348389b0971cd"
+    ],
+    "remaining_eight_unchanged": true,
+    "unrelated_classification_changes": [],
+    "per_target": {
+      "99e50f8c16d1cd74340dc32d": {
+        "final_status": "STRICT",
+        "removed_from_qa": true,
+        "supported_event_types": [
+          "explosion"
+        ],
+        "exact_city": true,
+        "attack_event": true,
+        "air_military_context": true,
+        "same_attack_context": true,
+        "temporal_binding": true,
+        "reason_codes": [
+          "AIR_MILITARY_CONTEXT",
+          "ATTACK_EVENT_TYPES:explosion",
+          "EXACT_CITY_EVENT_TEXT",
+          "MATCH_UNIQUE",
+          "REVIEW_PROVENANCE_TEMPORAL_BINDING_USED",
+          "REVIEW_PROVENANCE_USABLE",
+          "SAME_ATTACK_CONTEXT_SUPPORTED",
+          "STRICT_EXPLOSION_EVIDENCE",
+          "TEMPORAL_REVIEWED_VALIDATED_BINDING"
+        ]
+      },
+      "c1cb52e1672fd669808bc5c8": {
+        "final_status": "STRICT",
+        "removed_from_qa": true,
+        "supported_event_types": [
+          "explosion"
+        ],
+        "exact_city": true,
+        "attack_event": true,
+        "air_military_context": true,
+        "same_attack_context": true,
+        "temporal_binding": true,
+        "reason_codes": [
+          "AIR_MILITARY_CONTEXT",
+          "ATTACK_EVENT_TYPES:explosion",
+          "EXACT_CITY_EVENT_TEXT",
+          "MATCH_UNIQUE",
+          "REVIEW_PROVENANCE_TEMPORAL_BINDING_USED",
+          "REVIEW_PROVENANCE_USABLE",
+          "SAME_ATTACK_CONTEXT_SUPPORTED",
+          "STRICT_EXPLOSION_EVIDENCE",
+          "TEMPORAL_REVIEWED_VALIDATED_BINDING"
+        ]
+      }
+    }
+  },
+  "protected_state_checks": {
+    "classifier_code": {
+      "path": "kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py",
+      "before": "b55fe2ed082958917c74f95bca2fd6bc137bcaae",
+      "after": "b55fe2ed082958917c74f95bca2fd6bc137bcaae",
+      "unchanged": true
+    },
+    "replay_code": {
+      "path": "kyiv-air-alerts-grafana/scripts/replay_explosion_history.py",
+      "before": "376e7946356bfcafae92ca41e0d405523d4e9377",
+      "after": "376e7946356bfcafae92ca41e0d405523d4e9377",
+      "unchanged": true
+    },
+    "audited_baseline": {
+      "before": "81ecc48ed64b7e78449df903afb082e9f92531e5",
+      "after": "81ecc48ed64b7e78449df903afb082e9f92531e5",
+      "unchanged": true
+    },
+    "review_queue": {
+      "before": "1a0e530789b9e2ec7e82577c6b0d21457c2e77b8",
+      "after": "1a0e530789b9e2ec7e82577c6b0d21457c2e77b8",
+      "unchanged": true
+    },
+    "monitor_state": {
+      "before": "d0a351aad10241179ede6f0e9f1ed28d1cc1f5cf",
+      "after": "d0a351aad10241179ede6f0e9f1ed28d1cc1f5cf",
+      "unchanged": true
+    },
+    "monitor_last_run": {
+      "before": "f5a2869acdaf8ab18fd3a94f7258c7f656342d23",
+      "after": "f5a2869acdaf8ab18fd3a94f7258c7f656342d23",
+      "unchanged": true
+    },
+    "explosions_test": {
+      "before": "d3ee54e230ef343f2194cff1ecc41cc30613c834",
+      "after": "d3ee54e230ef343f2194cff1ecc41cc30613c834",
+      "unchanged": true
+    },
+    "dashboard_data": {
+      "before": "fc6028ab319e149e6e2c4c8ccc530fb51b271984",
+      "after": "fc6028ab319e149e6e2c4c8ccc530fb51b271984",
+      "unchanged": true
+    },
+    "sumy_evidence": {
+      "before": "79b29e65adbc3af6e968210bc40e0bcdb5b3662a",
+      "after": "79b29e65adbc3af6e968210bc40e0bcdb5b3662a",
+      "unchanged": true
+    },
+    "replay_artifact_protected_files_unchanged": true
+  },
+  "campaign_isolation": {
+    "branch": "historical-attack-event-backfill-2026-09-27",
+    "current_observed_head": "ef4b8006801dede91e1eddbc8f14171e4ecfa085",
+    "mutated_by_this_task": false,
+    "note": "No write in this task targeted the 6863 campaign branch."
+  },
+  "production_isolation": {
+    "site_prod_current_observed_head": "5864bab6a09e087a6fc7bdabacef45409c3ac88c",
+    "main_current_observed_head": "8c5ed2a9fce73427cb53c888599a8a1751d9dc00",
+    "site_prod_mutated_by_this_task": false,
+    "production_ux_mutated_by_this_task": false,
+    "note": "No write in this task targeted site-prod, production UX, or main."
+  },
+  "unrelated_drift_audit": {
+    "post_replay_authoritative_head": "3517854f964b84a072b606da85c1647a0b24ec39",
+    "post_replay_head_change_from_repair_commit": [
+      "research/historical_replay_status_current.json"
+    ],
+    "expected_workflow_status_update_only": true,
+    "no_new_qa_ids": true,
+    "no_unrelated_qa_disappearances": true,
+    "strict_sensitivity_delta_fully_explained_by_targets": true
+  },
+  "final_verdict": "CHERKASY TWO RETAINED-EVIDENCE GAPS RESOLVED — QA 8 REMAIN"
+}
