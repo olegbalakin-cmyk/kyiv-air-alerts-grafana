@@ -103,7 +103,7 @@
       "alert_start_kyiv": "2025-03-04T23:19:06+02:00",
       "event_time_kyiv": "2025-03-05 ~00:30",
       "source_url": "https://suspilne.media/cherkasy/961333-vibuhi-bila-cerkas-u-nic-na-5-berezna-so-vidomo-pro-naslidki-ataki-sahediv/",
-      "evidence": "Суспільне повідомило про вибухи в обласному центрі близько 00:30 під час атаки ударних БпЛА; тривога почалась о 23:19.",
+      "evidence": "Суспільне повідомило про вибухи в обласному центрі близько 00:30 під час атаки ударних БпЛА; тривога почалась о 23:19. Ручне семантичне доповнення: під час атаки ударних БпЛА близько 00:30 вибухи було чутно як поблизу міста, так і в обласному центрі (Черкасах); для exact-city позитиву використовується лише компонент «в обласному центрі».",
       "decision_basis": "strict: exact_city + aerial_attack + event_time_inside_episode"
     },
     {
@@ -364,8 +364,11 @@
       "matched_episode_start": "2026-04-03T21:01:44+03:00",
       "event_time": "2026-04-03T21:24:00+03:00",
       "source_url": "https://24tv.ua/povitryana-trivoga-03042026-yakih-oblastyah-fiksuyut-shahedi_n3042318/",
-      "evidence": "О 21:24 у Черкасах було чутно вибухи; о 21:11 Повітряні сили повідомляли про БпЛА на Черкаси зі сходу.",
-      "basis": "exact_city_timed_inside_alert"
+      "evidence": "О 21:24 у Черкасах було чутно вибухи; о 21:11 Повітряні сили повідомляли про БпЛА на Черкаси зі сходу. Ручне семантичне доповнення: о 21:24 у Черкасах було чутно вибухи під час російської атаки ударними БпЛА; це підтверджує окремий матеріал Суспільного про події у Черкасах і Черкаському районі того вечора.",
+      "basis": "exact_city_timed_inside_alert",
+      "supplemental_source_urls": [
+        "https://suspilne.media/cherkasy/1281160-vibuhi-u-cerkasah-uveceri-3-kvitna-podrobici-ataki-rf/"
+      ]
     },
     {
       "matched_episode_start": "2026-04-14T17:18:22+03:00",
@@ -412,7 +415,7 @@
       "matched_episode_start": "2026-09-04T07:24:51+03:00",
       "event_time": "2026-09-04T09:20:00+03:00",
       "source_url": "https://suspilne.media/cherkasy/1394920-na-cerkasini-4-veresna-lunali-vibuhi-so-vidomo-pro-dronovu-ataku-rf/",
-      "evidence": "О 09:20 у Черкасах було чутно вибух під час атаки РФ; на Черкащині знешкодили ракету та 11 БпЛА.",
+      "evidence": "О 09:20 у Черкасах було чутно вибух під час атаки РФ; на Черкащині знешкодили ракету та 11 БпЛА. Ручне семантичне доповнення: о 09:20 4 вересня у Черкасах було чутно вибух під час атаки російської армії. Подія прив'язана лише до цього епізоду тривоги.",
       "basis": "exact_city_time_inside_alert"
     }
   ],
@@ -421,8 +424,13 @@
       "alert_start_kyiv": "2025-02-13T22:28:36+02:00",
       "event_time_kyiv": "2025-02-14 ~01:42",
       "source_url": "https://24tv.ua/cherkasah-pratsyuye-ppo_n2752764",
-      "evidence": "24 Канал о 01:42 передав повідомлення Суспільного про вибухи поблизу Черкас і на околицях під час атаки Shahed.",
-      "decision_basis": "sensitivity: near_boundary; location not exact-city enough for strict"
+      "evidence": "24 Канал о 01:42 передав повідомлення Суспільного про вибухи поблизу Черкас і на околицях під час атаки Shahed. Ручне семантичне доповнення: о 01:43 під час атаки Shahed у Черкасах Суспільне повідомило про фактичну роботу ППО. Вибухи поблизу міста та на околицях не використовуються як міська подія.",
+      "decision_basis": "sensitivity: near_boundary; location not exact-city enough for strict",
+      "publication_time": "2025-02-14T01:47:00+02:00",
+      "supplemental_source_urls": [
+        "https://24tv.ua/ataka-dronami-kamikadze-13022025-de-ruhayutsya-bpla-lunaye-trivoga_n2752690",
+        "https://suspilne.media/948223-vibuhi-u-kievi-ataka-na-sumi-ta-sud-zobovazav-ssa-viplacuvati-inozemni-dopomogu-golovni-novini-ranku-14-lutogo/"
+      ]
     },
     {
       "alert_start_kyiv": "2025-02-22T21:27:12+02:00",
@@ -435,21 +443,25 @@
       "matched_alert_episode_start": "2025-04-23T21:29:06+03:00",
       "event_time": "night of 2025-04-24, explicitly during alert",
       "source_url": "https://suspilne.media/cherkasy/1001167-na-cerkasini-24-kvitna-bulo-cuti-zvuki-vibuhiv-so-vidomo-pro-dronovu-ataku/",
-      "evidence": "The article says explosions were heard in Cherkasy on the night of 24 April during an alert and describes a Russian UAV attack.",
-      "decision_basis": "sensitivity/inferred_same_attack: frozen cross-midnight episode starts 23 Apr 21:29; the article was published 24 Apr 08:05 but internally labels the 21:29 alert as 24 Apr"
+      "evidence": "The article says explosions were heard in Cherkasy on the night of 24 April during an alert and describes a Russian UAV attack. Ручне семантичне доповнення: у Черкасах у ніч на 24 квітня під час повітряної тривоги було чутно вибухи; Суспільне описує цю ж ніч як російську атаку БпЛА. Сучасна місцева хронологія підтверджує, що цей cross-midnight епізод тривав до відбою о 06:11; точного часу вибухів джерело не наводить.",
+      "decision_basis": "sensitivity/inferred_same_attack: frozen cross-midnight episode starts 23 Apr 21:29; the article was published 24 Apr 08:05 but internally labels the 21:29 alert as 24 Apr",
+      "publication_time": "2025-04-24T08:05:00+03:00",
+      "supplemental_source_urls": [
+        "https://t.me/s/novadoba?before=35498"
+      ]
     },
     {
       "alert_episode_start_date_kyiv": "2026-03-24",
       "alert_episode_start": "2026-03-24T09:17:43Z",
       "event_time_kyiv": "2026-03-24 14:46 and 15:31",
       "source_url": "https://suspilne.media/cherkasy/1271482-vibuhi-na-cerkasini-vden-24-berezna-so-vidomo-pro-rosijsku-ataku/",
-      "evidence": "Suspilne reported explosions on Cherkasy region and air-defense activity in Cherkasy at 14:46 and 15:31 during the same Russian drone attack.",
+      "evidence": "Suspilne reported explosions on Cherkasy region and air-defense activity in Cherkasy at 14:46 and 15:31 during the same Russian drone attack. Ручне семантичне доповнення: о 14:46 у Черкасах кореспонденти Суспільного повідомили про фактичну роботу ППО під час атаки ударних БпЛА; повторно роботу ППО у Черкасах було чутно о 15:31. Регіональне повідомлення про вибухи не використовується як міська подія.",
       "decision": "sensitivity_only: inferred_same_attack; exact-city PPO activity but explosion wording is regional"
     },
     {
       "matched_episode_start": "2026-07-01T22:16:29+03:00",
       "source_url": "https://suspilne.media/cherkasy/1343218-vibuhi-u-cerkasah-u-nic-na-2-lipna-so-vidomo-pro-ataku-rf/",
-      "evidence": "У Черкасах у ніч на 2 липня було чутно вибух; матеріал підтверджує російську ракетно-дронову атаку, але не подає точного часу вибуху.",
+      "evidence": "У Черкасах у ніч на 2 липня було чутно вибух; матеріал підтверджує російську ракетно-дронову атаку, але не подає точного часу вибуху. Ручне семантичне доповнення лише для sensitivity: у Черкасах у ніч на 2 липня було чутно вибух під час тієї самої російської ракетно-дронової атаки. Подія не має event-specific міського часу; час 02:50 районної події не переноситься на міський вибух.",
       "basis": "inferred_same_attack"
     }
   ],
