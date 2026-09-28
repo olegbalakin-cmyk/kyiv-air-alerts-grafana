@@ -1,0 +1,1495 @@
+{
+  "schema_version": 1,
+  "kind": "historical_replay_legacy_temporal_binding_atomic_apply",
+  "date": "2026-09-28",
+  "authoritative_branch": "multicity-wip-2026-09-16",
+  "authoritative_starting_head": "7c19220a1835cc76048bcec026295dcd78177f63",
+  "compatibility_audit": {
+    "pre_apply": {
+      "proof_base": "7c19220a1835cc76048bcec026295dcd78177f63",
+      "authoritative_head_at_first_check": "7c19220a1835cc76048bcec026295dcd78177f63",
+      "intervening_commits": [],
+      "relevant_input_drift": false,
+      "verdict": "COMPATIBLE"
+    },
+    "fresh_guard_immediately_before_apply": {
+      "authoritative_head": "7c19220a1835cc76048bcec026295dcd78177f63",
+      "unchanged": true
+    },
+    "post_apply_concurrent_commits_preserved": {
+      "head_before_artifact": "375d8c5ce4abd1f4bc8f50d9110debcacb2318c9",
+      "commits": [
+        {
+          "commit": "664634cfa88a368ac34e694a9ae6605d1825655b",
+          "message": "Publish historical replay QA bundles",
+          "paths": [
+            "research/historical_replay_qa/cherkasy.json",
+            "research/historical_replay_qa/index.json",
+            "research/historical_replay_qa/kyiv.json",
+            "research/historical_replay_qa/sumy.json",
+            "research/historical_replay_qa/zaporizhzhia.json"
+          ],
+          "interfering": false
+        },
+        {
+          "commit": "375d8c5ce4abd1f4bc8f50d9110debcacb2318c9",
+          "message": "Update historical replay status",
+          "paths": [
+            "research/historical_replay_status_current.json"
+          ],
+          "interfering": false
+        }
+      ],
+      "relevant_input_drift": false
+    }
+  },
+  "proof": {
+    "implementation_commit": "1312f045a24862fbd9065d5f0388fe717ad76b98",
+    "tests_commit": "5bf62f0bfa3b0cdda4757b5f125bbac80e80d992",
+    "tested_proof_head": "59da154f972342decfb0605284b4297089839cda",
+    "proof_artifact_commit": "5ecec4947b25b6247ea1b99dbeb5b274f91b4852",
+    "proof_run": 36467744239,
+    "adjudication_commit": "84dd0c8f9eb2375ee0682660ab556cccaa677931"
+  },
+  "corrected_acceptance_contract": {
+    "unbound_before": 93,
+    "deterministic_recovered": 78,
+    "unbound_after": 15,
+    "recovery_methods": {
+      "legacy_start_alias": 60,
+      "event_time_unique_containment": 18
+    },
+    "remaining_blockers": {
+      "EVENT_OUTSIDE_CURRENT_CANONICAL_CORPUS": 13,
+      "OLD_LONG_ALERT_SPLIT_WITHOUT_EVENT_CLOCK": 1,
+      "MULTI_EVENT_MULTI_EPISODE_AMBIGUITY": 1
+    }
+  },
+  "source_blobs": {
+    "implementation_script": {
+      "path": "kyiv-air-alerts-grafana/scripts/replay_explosion_history.py",
+      "proof_source_commit": "1312f045a24862fbd9065d5f0388fe717ad76b98",
+      "proof_blob": "11ccbe36927398ecfb276a4a98ddada564eef375",
+      "authoritative_before_blob": "c54165fb7c34d885f51e26e98063203335d1a788",
+      "authoritative_after_blob": "11ccbe36927398ecfb276a4a98ddada564eef375"
+    },
+    "focused_test": {
+      "path": "kyiv-air-alerts-grafana/tests/test_historical_replay_temporal_binding.py",
+      "implementation_commit_blob": "0e971bb9c72c468690e0c1baddd5ef7b7e49332f",
+      "tested_source_commit": "5bf62f0bfa3b0cdda4757b5f125bbac80e80d992",
+      "tested_blob": "810acfdaa70e6ecb161f320437b5dc4e8fcbc249",
+      "authoritative_before_blob": null,
+      "authoritative_after_blob": "810acfdaa70e6ecb161f320437b5dc4e8fcbc249",
+      "note": "The later tested blob adds only the focused review_events fallback-disable regression guard; replay implementation remains exactly the 1312f045 implementation blob."
+    }
+  },
+  "apply": {
+    "commit": "e8719e400fce10cf327069652f4c7c12db016306",
+    "tree": "8954e789631c55f134f16cf5531f771e90b56d12",
+    "exact_changed_files": [
+      "kyiv-air-alerts-grafana/scripts/replay_explosion_history.py",
+      "kyiv-air-alerts-grafana/tests/test_historical_replay_temporal_binding.py"
+    ]
+  },
+  "tests": {
+    "accepted_proof": {
+      "run": 36467744239,
+      "self_test": "PASS",
+      "pytest": "53 passed",
+      "script_blob": "11ccbe36927398ecfb276a4a98ddada564eef375",
+      "focused_test_blob": "810acfdaa70e6ecb161f320437b5dc4e8fcbc249"
+    },
+    "exact_apply_commit": {
+      "input_head": "e8719e400fce10cf327069652f4c7c12db016306",
+      "smoke_workflow_run": 36471167912,
+      "smoke_workflow": "PASS",
+      "replay_self_test": "PASS",
+      "deterministic_preflight_repeatability": "PASS",
+      "current_source_preflight_run": 36471167992,
+      "current_source_preflight_workflow": "PASS",
+      "historical_replay_orchestrator_run": 36471168556,
+      "orchestrator_workflow": "PASS",
+      "note": "The authoritative push smoke workflow does not invoke pytest. The 53-test pytest result was not re-executed after the branch ref move; acceptance relies on byte identity with the accepted proof blobs plus fresh exact-SHA source preflight and city replays. This is recorded explicitly rather than silently treating it as a fresh pytest run."
+    }
+  },
+  "seven_city_validation": {
+    "fresh_input_head": "e8719e400fce10cf327069652f4c7c12db016306",
+    "fresh_preflight_run": 36471167992,
+    "fresh_orchestrator_run": 36471168556,
+    "unbound_positive_records_before": 93,
+    "unbound_positive_records_after": 15,
+    "deterministic_recovered": 78,
+    "recovery_methods": {
+      "legacy_start_alias": 60,
+      "event_time_unique_containment": 18
+    },
+    "cities": {
+      "chernihiv": {
+        "denominator": 1676,
+        "frozen_strict": 39,
+        "recovered_strict_canonical_ids": [
+          "ed0b021f3af2e915fccc5add"
+        ],
+        "frozen_sensitivity": 43,
+        "recovered_sensitivity_only_canonical_ids": [],
+        "recovered_sensitivity_canonical_ids": [
+          "ed0b021f3af2e915fccc5add"
+        ],
+        "unbound_before": 1,
+        "unbound_after": 0,
+        "newly_bound_record_ids": [
+          "ec6494ce9e2adf86cfa18091"
+        ],
+        "newly_bound_canonical_ids": [
+          "ed0b021f3af2e915fccc5add"
+        ],
+        "remaining_unbound_record_ids": [],
+        "source_preflight_before": "BLOCKED",
+        "source_preflight_after": "READY",
+        "fresh_source_status": "READY",
+        "fresh_blocker_codes": []
+      },
+      "dnipro": {
+        "denominator": 2259,
+        "frozen_strict": 180,
+        "recovered_strict_canonical_ids": [
+          "b08e65e78300e35f8899addf",
+          "73ca6ebea005641f9c3ade3f",
+          "7480846808e19922b2b8ab92",
+          "5b10bb901d97c885ced76a27"
+        ],
+        "frozen_sensitivity": 187,
+        "recovered_sensitivity_only_canonical_ids": [],
+        "recovered_sensitivity_canonical_ids": [
+          "5b10bb901d97c885ced76a27",
+          "73ca6ebea005641f9c3ade3f",
+          "7480846808e19922b2b8ab92",
+          "b08e65e78300e35f8899addf"
+        ],
+        "unbound_before": 5,
+        "unbound_after": 1,
+        "newly_bound_record_ids": [
+          "8ba888f1b3ec75f28e49804d",
+          "5eb03b7ae4bf93f68fe303b1",
+          "673dafe3fbf0499ae61bc761",
+          "30eac2e5e36e959a0b01ceaa"
+        ],
+        "newly_bound_canonical_ids": [
+          "b08e65e78300e35f8899addf",
+          "73ca6ebea005641f9c3ade3f",
+          "7480846808e19922b2b8ab92",
+          "5b10bb901d97c885ced76a27"
+        ],
+        "remaining_unbound_record_ids": [
+          "2793d79590a849624744439a"
+        ],
+        "source_preflight_before": "BLOCKED",
+        "source_preflight_after": "BLOCKED",
+        "fresh_source_status": "BLOCKED",
+        "fresh_blocker_codes": [
+          "UNBOUND_COUNTED_EVIDENCE",
+          "STRICT_ID_COUNT_MISMATCH",
+          "SENSITIVITY_ID_COUNT_MISMATCH"
+        ]
+      },
+      "kharkiv": {
+        "denominator": 3565,
+        "frozen_strict": 288,
+        "recovered_strict_canonical_ids": [
+          "43a0db1167dbd64b84529f68"
+        ],
+        "frozen_sensitivity": 308,
+        "recovered_sensitivity_only_canonical_ids": [],
+        "recovered_sensitivity_canonical_ids": [
+          "43a0db1167dbd64b84529f68"
+        ],
+        "unbound_before": 2,
+        "unbound_after": 1,
+        "newly_bound_record_ids": [
+          "1c407e47b199835aa2de40a5"
+        ],
+        "newly_bound_canonical_ids": [
+          "43a0db1167dbd64b84529f68"
+        ],
+        "remaining_unbound_record_ids": [
+          "2725fd45c6f6a33d61fe04a8"
+        ],
+        "source_preflight_before": "BLOCKED",
+        "source_preflight_after": "BLOCKED",
+        "fresh_source_status": "BLOCKED",
+        "fresh_blocker_codes": [
+          "UNBOUND_COUNTED_EVIDENCE",
+          "STRICT_ID_COUNT_MISMATCH",
+          "SENSITIVITY_ID_COUNT_MISMATCH"
+        ]
+      },
+      "kherson": {
+        "denominator": 1412,
+        "frozen_strict": 9,
+        "recovered_strict_canonical_ids": [
+          "8d56e633bd6cbbe8b865c179"
+        ],
+        "frozen_sensitivity": 9,
+        "recovered_sensitivity_only_canonical_ids": [],
+        "recovered_sensitivity_canonical_ids": [
+          "8d56e633bd6cbbe8b865c179"
+        ],
+        "unbound_before": 8,
+        "unbound_after": 7,
+        "newly_bound_record_ids": [
+          "7549e692f75a636437d0b7ea"
+        ],
+        "newly_bound_canonical_ids": [
+          "8d56e633bd6cbbe8b865c179"
+        ],
+        "remaining_unbound_record_ids": [
+          "8237340ab735032f39db197c",
+          "aea1ffbdace229409cec0c16",
+          "e7b33cc9d7a37efc3ad2a51c",
+          "283fdd8775dd3f46a54c2e2c",
+          "8e7ef06ae0a9fa2e019fb17d",
+          "8aa162150ee5a23c622c8532",
+          "79fa40f617d42897a5dbba14"
+        ],
+        "source_preflight_before": "BLOCKED",
+        "source_preflight_after": "BLOCKED",
+        "fresh_source_status": "BLOCKED",
+        "fresh_blocker_codes": [
+          "UNBOUND_COUNTED_EVIDENCE",
+          "UNBOUND_COUNTED_EVIDENCE",
+          "UNBOUND_COUNTED_EVIDENCE",
+          "UNBOUND_COUNTED_EVIDENCE",
+          "UNBOUND_COUNTED_EVIDENCE",
+          "UNBOUND_COUNTED_EVIDENCE",
+          "UNBOUND_COUNTED_EVIDENCE",
+          "STRICT_ID_COUNT_MISMATCH",
+          "SENSITIVITY_ID_COUNT_MISMATCH"
+        ]
+      },
+      "kropyvnytskyi": {
+        "denominator": 1161,
+        "frozen_strict": 38,
+        "recovered_strict_canonical_ids": [
+          "b3f618909f36a1a3ad17ff28",
+          "2fd3ea94dff16c77b8b90ef9",
+          "fc818b775efda756675ae531",
+          "d7f17fc6a8fad2cc54eb814d",
+          "0b507481c67b0d09bb794d9f"
+        ],
+        "frozen_sensitivity": 38,
+        "recovered_sensitivity_only_canonical_ids": [],
+        "recovered_sensitivity_canonical_ids": [
+          "0b507481c67b0d09bb794d9f",
+          "2fd3ea94dff16c77b8b90ef9",
+          "b3f618909f36a1a3ad17ff28",
+          "d7f17fc6a8fad2cc54eb814d",
+          "fc818b775efda756675ae531"
+        ],
+        "unbound_before": 5,
+        "unbound_after": 0,
+        "newly_bound_record_ids": [
+          "617141abe551c0510cc95268",
+          "3f3f70dfcd105e0bd9e6bc82",
+          "cfeb664641e9025e12ade0ae",
+          "cb248faf7ee82e9f482ca387",
+          "1ecf5c25ace11744fd9ccd75"
+        ],
+        "newly_bound_canonical_ids": [
+          "b3f618909f36a1a3ad17ff28",
+          "2fd3ea94dff16c77b8b90ef9",
+          "fc818b775efda756675ae531",
+          "d7f17fc6a8fad2cc54eb814d",
+          "0b507481c67b0d09bb794d9f"
+        ],
+        "remaining_unbound_record_ids": [],
+        "source_preflight_before": "BLOCKED",
+        "source_preflight_after": "READY",
+        "fresh_source_status": "READY",
+        "fresh_blocker_codes": []
+      },
+      "mykolaiv": {
+        "denominator": 1648,
+        "frozen_strict": 122,
+        "recovered_strict_canonical_ids": [
+          "52b96e2d04ba16b498490cc6",
+          "a7374e592e591114d3516612",
+          "7dd83bb193754d74030f4754"
+        ],
+        "frozen_sensitivity": 135,
+        "recovered_sensitivity_only_canonical_ids": [],
+        "recovered_sensitivity_canonical_ids": [
+          "52b96e2d04ba16b498490cc6",
+          "7dd83bb193754d74030f4754",
+          "a7374e592e591114d3516612"
+        ],
+        "unbound_before": 6,
+        "unbound_after": 3,
+        "newly_bound_record_ids": [
+          "01c545e16401677212a3a3b2",
+          "28f7e3993823590d37ef6ae8",
+          "133d84c39a0988ec75becebd"
+        ],
+        "newly_bound_canonical_ids": [
+          "52b96e2d04ba16b498490cc6",
+          "a7374e592e591114d3516612",
+          "7dd83bb193754d74030f4754"
+        ],
+        "remaining_unbound_record_ids": [
+          "7be92b6ec25e3649c106e66f",
+          "114d46148bb629164cde2392",
+          "058b9b70b3e39ca67db9af5d"
+        ],
+        "source_preflight_before": "BLOCKED",
+        "source_preflight_after": "BLOCKED",
+        "fresh_source_status": "BLOCKED",
+        "fresh_blocker_codes": [
+          "UNBOUND_COUNTED_EVIDENCE",
+          "UNBOUND_COUNTED_EVIDENCE",
+          "UNBOUND_COUNTED_EVIDENCE",
+          "STRICT_ID_COUNT_MISMATCH",
+          "SENSITIVITY_ID_COUNT_MISMATCH"
+        ]
+      },
+      "odesa": {
+        "denominator": 1465,
+        "frozen_strict": 155,
+        "recovered_strict_canonical_ids": [
+          "c31fd5cf8b35c6f339001b1b",
+          "d542c993525b28194b1c7a2a",
+          "67669823779d55dd1c83d8bd",
+          "dd7cc696c684027403ecfee7",
+          "5c80b8564d3dfb2b5bbc0009",
+          "e323d39758f2f3c709ba2245",
+          "f63cce85a23d3c223ece82fc",
+          "8ae14ff974d9ba0f7024bb3d",
+          "cbc10e11efc749340fd3c671",
+          "c118f406afef40bdef16305e",
+          "4b6ebfac3f163ec202eba048",
+          "fd6dfb9b5da9cc5c7061e675",
+          "3b66674d4e10c145cc259cd0",
+          "e46297a5d90e57ed26b52582",
+          "83879bfd0ac94619d920df80",
+          "6238ce76093cccaa6169c86a",
+          "0fcbdf95a182db70e0463914",
+          "80e0d77b588516b4dfaf57b0",
+          "e5901d85fcca140ec518e1bd",
+          "c5804ab0cde2d7ee2aceaeda",
+          "b60d7e0c325440d1c5763cc2",
+          "16674fb773f4f3ec8f0580f1",
+          "3ff92d351c6640549642ed7f",
+          "520ffc694f361f26ca63b94b",
+          "857b848c772fa910c4bf9a2e",
+          "20e80ad990af310c6799d7ea",
+          "d9d9c262e36d45fc4aa09b06",
+          "69f506010e8e866b02582ae3",
+          "60cdf638573ad37f61a084e9",
+          "adb9c6325cf160dfa9863aa1",
+          "000e770efbc73f2d4aa2a8ad",
+          "166376a0017e4532f660fdd1",
+          "c40e9a8d8a0ed402d16dd8f3",
+          "d35d0e876d699f2d915f0a21",
+          "e3bffd636330f074902370a8",
+          "0d2f8b3aa2785b6f348ca300",
+          "af1de97fc1dd258e2d6aa58a",
+          "74cbf3664c8951d4a22f8d7f",
+          "ac9d7e29ae494351be66a610",
+          "06ee4e17a480f61a992008e7",
+          "9997d42da9c54ddf4049f308",
+          "a40ccbce70e2aa30d9b98c35",
+          "fe249a12db46b9d6c70f3c80",
+          "34f8f345fbb7c47aa1d75b64",
+          "409783c683dac8fbdfc7f48e",
+          "86e309fe77b13e7a9b4d9c47",
+          "565e7af23c90a03a04bec72a",
+          "7036da7f8b8183f9ea62b540",
+          "d869c76c47d94c051cb7cd96",
+          "ce01e3e3893ba296efa1f2c5",
+          "1719304ee93c7567e2f78407",
+          "67bac75f5eef1bb7b404923e",
+          "6b09e7a618ba751b9047efa5",
+          "3fc87aa2e2f33c0bd6ccf756",
+          "6bc70793d0a700a211257ffd",
+          "4bb8aac092b9b46bf6290dba",
+          "567fc59635cc6173c023937c",
+          "29b67ca7dc3f9b58a645b733",
+          "2edbf09094e7df753d8154eb",
+          "fa9cdf93cadf1d5913dca19c",
+          "d0fbbb91ac522e16d664dcfb",
+          "f47353b7b530713e90944b28"
+        ],
+        "frozen_sensitivity": 161,
+        "recovered_sensitivity_only_canonical_ids": [
+          "97520570adf7edb1d45095c6"
+        ],
+        "recovered_sensitivity_canonical_ids": [
+          "000e770efbc73f2d4aa2a8ad",
+          "06ee4e17a480f61a992008e7",
+          "0d2f8b3aa2785b6f348ca300",
+          "0fcbdf95a182db70e0463914",
+          "166376a0017e4532f660fdd1",
+          "16674fb773f4f3ec8f0580f1",
+          "1719304ee93c7567e2f78407",
+          "20e80ad990af310c6799d7ea",
+          "29b67ca7dc3f9b58a645b733",
+          "2edbf09094e7df753d8154eb",
+          "34f8f345fbb7c47aa1d75b64",
+          "3b66674d4e10c145cc259cd0",
+          "3fc87aa2e2f33c0bd6ccf756",
+          "3ff92d351c6640549642ed7f",
+          "409783c683dac8fbdfc7f48e",
+          "4b6ebfac3f163ec202eba048",
+          "4bb8aac092b9b46bf6290dba",
+          "520ffc694f361f26ca63b94b",
+          "565e7af23c90a03a04bec72a",
+          "567fc59635cc6173c023937c",
+          "5c80b8564d3dfb2b5bbc0009",
+          "60cdf638573ad37f61a084e9",
+          "6238ce76093cccaa6169c86a",
+          "67669823779d55dd1c83d8bd",
+          "67bac75f5eef1bb7b404923e",
+          "69f506010e8e866b02582ae3",
+          "6b09e7a618ba751b9047efa5",
+          "6bc70793d0a700a211257ffd",
+          "7036da7f8b8183f9ea62b540",
+          "74cbf3664c8951d4a22f8d7f",
+          "80e0d77b588516b4dfaf57b0",
+          "83879bfd0ac94619d920df80",
+          "857b848c772fa910c4bf9a2e",
+          "86e309fe77b13e7a9b4d9c47",
+          "8ae14ff974d9ba0f7024bb3d",
+          "97520570adf7edb1d45095c6",
+          "9997d42da9c54ddf4049f308",
+          "a40ccbce70e2aa30d9b98c35",
+          "ac9d7e29ae494351be66a610",
+          "adb9c6325cf160dfa9863aa1",
+          "af1de97fc1dd258e2d6aa58a",
+          "b60d7e0c325440d1c5763cc2",
+          "c118f406afef40bdef16305e",
+          "c31fd5cf8b35c6f339001b1b",
+          "c40e9a8d8a0ed402d16dd8f3",
+          "c5804ab0cde2d7ee2aceaeda",
+          "cbc10e11efc749340fd3c671",
+          "ce01e3e3893ba296efa1f2c5",
+          "d0fbbb91ac522e16d664dcfb",
+          "d35d0e876d699f2d915f0a21",
+          "d542c993525b28194b1c7a2a",
+          "d869c76c47d94c051cb7cd96",
+          "d9d9c262e36d45fc4aa09b06",
+          "dd7cc696c684027403ecfee7",
+          "e323d39758f2f3c709ba2245",
+          "e3bffd636330f074902370a8",
+          "e46297a5d90e57ed26b52582",
+          "e5901d85fcca140ec518e1bd",
+          "f47353b7b530713e90944b28",
+          "f63cce85a23d3c223ece82fc",
+          "fa9cdf93cadf1d5913dca19c",
+          "fd6dfb9b5da9cc5c7061e675",
+          "fe249a12db46b9d6c70f3c80"
+        ],
+        "unbound_before": 66,
+        "unbound_after": 3,
+        "newly_bound_record_ids": [
+          "2635e13030e7ede5c6a9646a",
+          "cd3347bbe2dc7aff35866a2d",
+          "7ffeb76f7b9c301650392381",
+          "8cd8c01593ea76df3d64a4b2",
+          "48b2a8201172e24f4338a94a",
+          "8f9d22c8a91f3c80b8e9d24b",
+          "1f2febff5815a756c711fc20",
+          "d30feb0d48f68b4f6a6b44a1",
+          "b49c1af64689c2f3468e3b4f",
+          "65fd11b75146b7819acbf988",
+          "14d33efb94a2ed284ebecf4c",
+          "9dd57f8c1629ce398d576522",
+          "7994f633acca8784b8a410bb",
+          "3593fef001b2559e4730bca3",
+          "cb655458391263e9f674a0f5",
+          "168357bb233c7dd161323fc6",
+          "7b892bac9f04ecaba47aa6a8",
+          "94e27e63a978f5bf9bd1c065",
+          "381b3a666cd53e7bda6f0092",
+          "9ac5ab208ea57382d1ab3f72",
+          "c25d5f982346bc48a9d24157",
+          "28c0d82eabbd92ca07ee375c",
+          "7c4186b0bdc1d43ed4af3cec",
+          "039fce39465c4a6ae052e12e",
+          "58447552dac3d60fb9834d1e",
+          "7f0dec16dcd57cb8d6267986",
+          "20b2d66f662bf66152059a13",
+          "8880143ef054610a62224057",
+          "d282473878fb4016468b4c28",
+          "a3e6d1280b0b4ccadf92d623",
+          "6815032d2f3c5790bb69ef08",
+          "699bb1b93fd87df669bc9064",
+          "02ecf9ace0882c64b15cb0c0",
+          "19fe49b788fc5360a03a8e74",
+          "bd49936f50e5690a50ff4acb",
+          "6513127ad31b24c09dd7edbb",
+          "88d43e58fee6bb30ee1abbcc",
+          "2096253605fb59257a554b77",
+          "1b4507f9bea7ce6967f41034",
+          "ac7899d1bc4cb634bc3e8dbd",
+          "66aab773aafa25fd9836907b",
+          "2986748af499096daa2c48c8",
+          "d6fb4cdd8674ad5078f824c9",
+          "869934260dfc711d6fe8a57a",
+          "940bc2293957bc21f601bbd4",
+          "2f61d0233a21ec62e7587d7f",
+          "437c88ff5694a8a9c66179a1",
+          "6dd40b1d4ec078952073595a",
+          "6e359f1f126dfa201ef7c85a",
+          "ffea90461210a67a3482e457",
+          "85f3587f05b036383e17f09d",
+          "95f3c92ae65cd4cdc3d757da",
+          "74104d950679964be2b7182b",
+          "319e1fa5aefc01ab39ce8504",
+          "9ef9d82a86a50b6c56a0c9cd",
+          "9002c5b962b6c2b68a05572d",
+          "c97738d763d1b1a24f831e9c",
+          "72c7b69f94be5e67ed54bd3f",
+          "91bdd0f528d94fa23ca319eb",
+          "c69a06bf7af6a025147a3de3",
+          "8d5780ce4e070c91bd498a02",
+          "d2d78bfc54b6ab0fd47907fd",
+          "91056d9e1a713e7023a1b555"
+        ],
+        "newly_bound_canonical_ids": [
+          "c31fd5cf8b35c6f339001b1b",
+          "d542c993525b28194b1c7a2a",
+          "67669823779d55dd1c83d8bd",
+          "dd7cc696c684027403ecfee7",
+          "5c80b8564d3dfb2b5bbc0009",
+          "e323d39758f2f3c709ba2245",
+          "f63cce85a23d3c223ece82fc",
+          "8ae14ff974d9ba0f7024bb3d",
+          "cbc10e11efc749340fd3c671",
+          "c118f406afef40bdef16305e",
+          "4b6ebfac3f163ec202eba048",
+          "fd6dfb9b5da9cc5c7061e675",
+          "3b66674d4e10c145cc259cd0",
+          "e46297a5d90e57ed26b52582",
+          "83879bfd0ac94619d920df80",
+          "6238ce76093cccaa6169c86a",
+          "0fcbdf95a182db70e0463914",
+          "80e0d77b588516b4dfaf57b0",
+          "e5901d85fcca140ec518e1bd",
+          "c5804ab0cde2d7ee2aceaeda",
+          "b60d7e0c325440d1c5763cc2",
+          "16674fb773f4f3ec8f0580f1",
+          "3ff92d351c6640549642ed7f",
+          "520ffc694f361f26ca63b94b",
+          "857b848c772fa910c4bf9a2e",
+          "20e80ad990af310c6799d7ea",
+          "d9d9c262e36d45fc4aa09b06",
+          "69f506010e8e866b02582ae3",
+          "60cdf638573ad37f61a084e9",
+          "adb9c6325cf160dfa9863aa1",
+          "000e770efbc73f2d4aa2a8ad",
+          "166376a0017e4532f660fdd1",
+          "c40e9a8d8a0ed402d16dd8f3",
+          "d35d0e876d699f2d915f0a21",
+          "e3bffd636330f074902370a8",
+          "0d2f8b3aa2785b6f348ca300",
+          "af1de97fc1dd258e2d6aa58a",
+          "74cbf3664c8951d4a22f8d7f",
+          "ac9d7e29ae494351be66a610",
+          "06ee4e17a480f61a992008e7",
+          "9997d42da9c54ddf4049f308",
+          "a40ccbce70e2aa30d9b98c35",
+          "fe249a12db46b9d6c70f3c80",
+          "34f8f345fbb7c47aa1d75b64",
+          "409783c683dac8fbdfc7f48e",
+          "86e309fe77b13e7a9b4d9c47",
+          "565e7af23c90a03a04bec72a",
+          "7036da7f8b8183f9ea62b540",
+          "d869c76c47d94c051cb7cd96",
+          "ce01e3e3893ba296efa1f2c5",
+          "1719304ee93c7567e2f78407",
+          "67bac75f5eef1bb7b404923e",
+          "6b09e7a618ba751b9047efa5",
+          "3fc87aa2e2f33c0bd6ccf756",
+          "6bc70793d0a700a211257ffd",
+          "4bb8aac092b9b46bf6290dba",
+          "567fc59635cc6173c023937c",
+          "29b67ca7dc3f9b58a645b733",
+          "2edbf09094e7df753d8154eb",
+          "fa9cdf93cadf1d5913dca19c",
+          "d0fbbb91ac522e16d664dcfb",
+          "f47353b7b530713e90944b28",
+          "97520570adf7edb1d45095c6"
+        ],
+        "remaining_unbound_record_ids": [
+          "c9170f2906d0e18731a81fa2",
+          "503a0c99d1b5f9fe9c447c0e",
+          "0c2c1c3a0cbbbea7b7d2ccde"
+        ],
+        "source_preflight_before": "BLOCKED",
+        "source_preflight_after": "BLOCKED",
+        "fresh_source_status": "BLOCKED",
+        "fresh_blocker_codes": [
+          "UNBOUND_COUNTED_EVIDENCE",
+          "UNBOUND_COUNTED_EVIDENCE",
+          "UNBOUND_COUNTED_EVIDENCE",
+          "STRICT_ID_COUNT_MISMATCH",
+          "SENSITIVITY_ID_COUNT_MISMATCH"
+        ]
+      }
+    },
+    "source_ready_after_apply": [
+      "chernihiv",
+      "kropyvnytskyi"
+    ],
+    "exact_newly_bound_records": [
+      {
+        "record_id": "ec6494ce9e2adf86cfa18091",
+        "city": "chernihiv",
+        "bucket": "strict_events",
+        "index": 16,
+        "binding_method": "event_time_unique_containment",
+        "canonical_episode_id": "ed0b021f3af2e915fccc5add"
+      },
+      {
+        "record_id": "8ba888f1b3ec75f28e49804d",
+        "city": "dnipro",
+        "bucket": "strict_events",
+        "index": 41,
+        "binding_method": "event_time_unique_containment",
+        "canonical_episode_id": "b08e65e78300e35f8899addf"
+      },
+      {
+        "record_id": "5eb03b7ae4bf93f68fe303b1",
+        "city": "dnipro",
+        "bucket": "strict_events",
+        "index": 43,
+        "binding_method": "event_time_unique_containment",
+        "canonical_episode_id": "73ca6ebea005641f9c3ade3f"
+      },
+      {
+        "record_id": "673dafe3fbf0499ae61bc761",
+        "city": "dnipro",
+        "bucket": "strict_events",
+        "index": 45,
+        "binding_method": "event_time_unique_containment",
+        "canonical_episode_id": "7480846808e19922b2b8ab92"
+      },
+      {
+        "record_id": "30eac2e5e36e959a0b01ceaa",
+        "city": "dnipro",
+        "bucket": "strict_events",
+        "index": 79,
+        "binding_method": "event_time_unique_containment",
+        "canonical_episode_id": "5b10bb901d97c885ced76a27"
+      },
+      {
+        "record_id": "1c407e47b199835aa2de40a5",
+        "city": "kharkiv",
+        "bucket": "strict_events",
+        "index": 7,
+        "binding_method": "event_time_unique_containment",
+        "canonical_episode_id": "43a0db1167dbd64b84529f68"
+      },
+      {
+        "record_id": "7549e692f75a636437d0b7ea",
+        "city": "kherson",
+        "bucket": "strict_events",
+        "index": 2,
+        "binding_method": "event_time_unique_containment",
+        "canonical_episode_id": "8d56e633bd6cbbe8b865c179"
+      },
+      {
+        "record_id": "617141abe551c0510cc95268",
+        "city": "kropyvnytskyi",
+        "bucket": "strict_events",
+        "index": 4,
+        "binding_method": "event_time_unique_containment",
+        "canonical_episode_id": "b3f618909f36a1a3ad17ff28"
+      },
+      {
+        "record_id": "3f3f70dfcd105e0bd9e6bc82",
+        "city": "kropyvnytskyi",
+        "bucket": "strict_events",
+        "index": 8,
+        "binding_method": "event_time_unique_containment",
+        "canonical_episode_id": "2fd3ea94dff16c77b8b90ef9"
+      },
+      {
+        "record_id": "cfeb664641e9025e12ade0ae",
+        "city": "kropyvnytskyi",
+        "bucket": "strict_events",
+        "index": 9,
+        "binding_method": "event_time_unique_containment",
+        "canonical_episode_id": "fc818b775efda756675ae531"
+      },
+      {
+        "record_id": "cb248faf7ee82e9f482ca387",
+        "city": "kropyvnytskyi",
+        "bucket": "strict_events",
+        "index": 11,
+        "binding_method": "event_time_unique_containment",
+        "canonical_episode_id": "d7f17fc6a8fad2cc54eb814d"
+      },
+      {
+        "record_id": "1ecf5c25ace11744fd9ccd75",
+        "city": "kropyvnytskyi",
+        "bucket": "strict_events",
+        "index": 24,
+        "binding_method": "event_time_unique_containment",
+        "canonical_episode_id": "0b507481c67b0d09bb794d9f"
+      },
+      {
+        "record_id": "01c545e16401677212a3a3b2",
+        "city": "mykolaiv",
+        "bucket": "strict_events",
+        "index": 14,
+        "binding_method": "event_time_unique_containment",
+        "canonical_episode_id": "52b96e2d04ba16b498490cc6"
+      },
+      {
+        "record_id": "28f7e3993823590d37ef6ae8",
+        "city": "mykolaiv",
+        "bucket": "strict_events",
+        "index": 15,
+        "binding_method": "event_time_unique_containment",
+        "canonical_episode_id": "a7374e592e591114d3516612"
+      },
+      {
+        "record_id": "133d84c39a0988ec75becebd",
+        "city": "mykolaiv",
+        "bucket": "strict_events",
+        "index": 30,
+        "binding_method": "event_time_unique_containment",
+        "canonical_episode_id": "7dd83bb193754d74030f4754"
+      },
+      {
+        "record_id": "2635e13030e7ede5c6a9646a",
+        "city": "odesa",
+        "bucket": "strict_events",
+        "index": 23,
+        "binding_method": "legacy_start_alias",
+        "canonical_episode_id": "c31fd5cf8b35c6f339001b1b"
+      },
+      {
+        "record_id": "cd3347bbe2dc7aff35866a2d",
+        "city": "odesa",
+        "bucket": "strict_events",
+        "index": 24,
+        "binding_method": "legacy_start_alias",
+        "canonical_episode_id": "d542c993525b28194b1c7a2a"
+      },
+      {
+        "record_id": "7ffeb76f7b9c301650392381",
+        "city": "odesa",
+        "bucket": "strict_events",
+        "index": 25,
+        "binding_method": "legacy_start_alias",
+        "canonical_episode_id": "67669823779d55dd1c83d8bd"
+      },
+      {
+        "record_id": "8cd8c01593ea76df3d64a4b2",
+        "city": "odesa",
+        "bucket": "strict_events",
+        "index": 26,
+        "binding_method": "legacy_start_alias",
+        "canonical_episode_id": "dd7cc696c684027403ecfee7"
+      },
+      {
+        "record_id": "48b2a8201172e24f4338a94a",
+        "city": "odesa",
+        "bucket": "strict_events",
+        "index": 27,
+        "binding_method": "legacy_start_alias",
+        "canonical_episode_id": "5c80b8564d3dfb2b5bbc0009"
+      },
+      {
+        "record_id": "8f9d22c8a91f3c80b8e9d24b",
+        "city": "odesa",
+        "bucket": "strict_events",
+        "index": 28,
+        "binding_method": "legacy_start_alias",
+        "canonical_episode_id": "e323d39758f2f3c709ba2245"
+      },
+      {
+        "record_id": "1f2febff5815a756c711fc20",
+        "city": "odesa",
+        "bucket": "strict_events",
+        "index": 29,
+        "binding_method": "legacy_start_alias",
+        "canonical_episode_id": "f63cce85a23d3c223ece82fc"
+      },
+      {
+        "record_id": "d30feb0d48f68b4f6a6b44a1",
+        "city": "odesa",
+        "bucket": "strict_events",
+        "index": 30,
+        "binding_method": "legacy_start_alias",
+        "canonical_episode_id": "8ae14ff974d9ba0f7024bb3d"
+      },
+      {
+        "record_id": "b49c1af64689c2f3468e3b4f",
+        "city": "odesa",
+        "bucket": "strict_events",
+        "index": 31,
+        "binding_method": "legacy_start_alias",
+        "canonical_episode_id": "cbc10e11efc749340fd3c671"
+      },
+      {
+        "record_id": "65fd11b75146b7819acbf988",
+        "city": "odesa",
+        "bucket": "strict_events",
+        "index": 32,
+        "binding_method": "legacy_start_alias",
+        "canonical_episode_id": "c118f406afef40bdef16305e"
+      },
+      {
+        "record_id": "14d33efb94a2ed284ebecf4c",
+        "city": "odesa",
+        "bucket": "strict_events",
+        "index": 33,
+        "binding_method": "legacy_start_alias",
+        "canonical_episode_id": "4b6ebfac3f163ec202eba048"
+      },
+      {
+        "record_id": "9dd57f8c1629ce398d576522",
+        "city": "odesa",
+        "bucket": "strict_events",
+        "index": 34,
+        "binding_method": "legacy_start_alias",
+        "canonical_episode_id": "fd6dfb9b5da9cc5c7061e675"
+      },
+      {
+        "record_id": "7994f633acca8784b8a410bb",
+        "city": "odesa",
+        "bucket": "strict_events",
+        "index": 35,
+        "binding_method": "legacy_start_alias",
+        "canonical_episode_id": "3b66674d4e10c145cc259cd0"
+      },
+      {
+        "record_id": "3593fef001b2559e4730bca3",
+        "city": "odesa",
+        "bucket": "strict_events",
+        "index": 36,
+        "binding_method": "legacy_start_alias",
+        "canonical_episode_id": "e46297a5d90e57ed26b52582"
+      },
+      {
+        "record_id": "cb655458391263e9f674a0f5",
+        "city": "odesa",
+        "bucket": "strict_events",
+        "index": 37,
+        "binding_method": "legacy_start_alias",
+        "canonical_episode_id": "83879bfd0ac94619d920df80"
+      },
+      {
+        "record_id": "168357bb233c7dd161323fc6",
+        "city": "odesa",
+        "bucket": "strict_events",
+        "index": 38,
+        "binding_method": "legacy_start_alias",
+        "canonical_episode_id": "6238ce76093cccaa6169c86a"
+      },
+      {
+        "record_id": "7b892bac9f04ecaba47aa6a8",
+        "city": "odesa",
+        "bucket": "strict_events",
+        "index": 39,
+        "binding_method": "legacy_start_alias",
+        "canonical_episode_id": "0fcbdf95a182db70e0463914"
+      },
+      {
+        "record_id": "94e27e63a978f5bf9bd1c065",
+        "city": "odesa",
+        "bucket": "strict_events",
+        "index": 40,
+        "binding_method": "legacy_start_alias",
+        "canonical_episode_id": "80e0d77b588516b4dfaf57b0"
+      },
+      {
+        "record_id": "381b3a666cd53e7bda6f0092",
+        "city": "odesa",
+        "bucket": "strict_events",
+        "index": 41,
+        "binding_method": "legacy_start_alias",
+        "canonical_episode_id": "e5901d85fcca140ec518e1bd"
+      },
+      {
+        "record_id": "9ac5ab208ea57382d1ab3f72",
+        "city": "odesa",
+        "bucket": "strict_events",
+        "index": 42,
+        "binding_method": "legacy_start_alias",
+        "canonical_episode_id": "c5804ab0cde2d7ee2aceaeda"
+      },
+      {
+        "record_id": "c25d5f982346bc48a9d24157",
+        "city": "odesa",
+        "bucket": "strict_events",
+        "index": 43,
+        "binding_method": "legacy_start_alias",
+        "canonical_episode_id": "b60d7e0c325440d1c5763cc2"
+      },
+      {
+        "record_id": "28c0d82eabbd92ca07ee375c",
+        "city": "odesa",
+        "bucket": "strict_events",
+        "index": 44,
+        "binding_method": "legacy_start_alias",
+        "canonical_episode_id": "16674fb773f4f3ec8f0580f1"
+      },
+      {
+        "record_id": "7c4186b0bdc1d43ed4af3cec",
+        "city": "odesa",
+        "bucket": "strict_events",
+        "index": 45,
+        "binding_method": "legacy_start_alias",
+        "canonical_episode_id": "3ff92d351c6640549642ed7f"
+      },
+      {
+        "record_id": "039fce39465c4a6ae052e12e",
+        "city": "odesa",
+        "bucket": "strict_events",
+        "index": 46,
+        "binding_method": "legacy_start_alias",
+        "canonical_episode_id": "520ffc694f361f26ca63b94b"
+      },
+      {
+        "record_id": "58447552dac3d60fb9834d1e",
+        "city": "odesa",
+        "bucket": "strict_events",
+        "index": 47,
+        "binding_method": "legacy_start_alias",
+        "canonical_episode_id": "857b848c772fa910c4bf9a2e"
+      },
+      {
+        "record_id": "7f0dec16dcd57cb8d6267986",
+        "city": "odesa",
+        "bucket": "strict_events",
+        "index": 48,
+        "binding_method": "legacy_start_alias",
+        "canonical_episode_id": "20e80ad990af310c6799d7ea"
+      },
+      {
+        "record_id": "20b2d66f662bf66152059a13",
+        "city": "odesa",
+        "bucket": "strict_events",
+        "index": 49,
+        "binding_method": "legacy_start_alias",
+        "canonical_episode_id": "d9d9c262e36d45fc4aa09b06"
+      },
+      {
+        "record_id": "8880143ef054610a62224057",
+        "city": "odesa",
+        "bucket": "strict_events",
+        "index": 50,
+        "binding_method": "legacy_start_alias",
+        "canonical_episode_id": "69f506010e8e866b02582ae3"
+      },
+      {
+        "record_id": "d282473878fb4016468b4c28",
+        "city": "odesa",
+        "bucket": "strict_events",
+        "index": 51,
+        "binding_method": "legacy_start_alias",
+        "canonical_episode_id": "60cdf638573ad37f61a084e9"
+      },
+      {
+        "record_id": "a3e6d1280b0b4ccadf92d623",
+        "city": "odesa",
+        "bucket": "strict_events",
+        "index": 52,
+        "binding_method": "legacy_start_alias",
+        "canonical_episode_id": "adb9c6325cf160dfa9863aa1"
+      },
+      {
+        "record_id": "6815032d2f3c5790bb69ef08",
+        "city": "odesa",
+        "bucket": "strict_events",
+        "index": 53,
+        "binding_method": "legacy_start_alias",
+        "canonical_episode_id": "000e770efbc73f2d4aa2a8ad"
+      },
+      {
+        "record_id": "699bb1b93fd87df669bc9064",
+        "city": "odesa",
+        "bucket": "strict_events",
+        "index": 54,
+        "binding_method": "legacy_start_alias",
+        "canonical_episode_id": "166376a0017e4532f660fdd1"
+      },
+      {
+        "record_id": "02ecf9ace0882c64b15cb0c0",
+        "city": "odesa",
+        "bucket": "strict_events",
+        "index": 55,
+        "binding_method": "legacy_start_alias",
+        "canonical_episode_id": "c40e9a8d8a0ed402d16dd8f3"
+      },
+      {
+        "record_id": "19fe49b788fc5360a03a8e74",
+        "city": "odesa",
+        "bucket": "strict_events",
+        "index": 56,
+        "binding_method": "legacy_start_alias",
+        "canonical_episode_id": "d35d0e876d699f2d915f0a21"
+      },
+      {
+        "record_id": "bd49936f50e5690a50ff4acb",
+        "city": "odesa",
+        "bucket": "strict_events",
+        "index": 57,
+        "binding_method": "legacy_start_alias",
+        "canonical_episode_id": "e3bffd636330f074902370a8"
+      },
+      {
+        "record_id": "6513127ad31b24c09dd7edbb",
+        "city": "odesa",
+        "bucket": "strict_events",
+        "index": 58,
+        "binding_method": "legacy_start_alias",
+        "canonical_episode_id": "0d2f8b3aa2785b6f348ca300"
+      },
+      {
+        "record_id": "88d43e58fee6bb30ee1abbcc",
+        "city": "odesa",
+        "bucket": "strict_events",
+        "index": 59,
+        "binding_method": "legacy_start_alias",
+        "canonical_episode_id": "af1de97fc1dd258e2d6aa58a"
+      },
+      {
+        "record_id": "2096253605fb59257a554b77",
+        "city": "odesa",
+        "bucket": "strict_events",
+        "index": 60,
+        "binding_method": "legacy_start_alias",
+        "canonical_episode_id": "74cbf3664c8951d4a22f8d7f"
+      },
+      {
+        "record_id": "1b4507f9bea7ce6967f41034",
+        "city": "odesa",
+        "bucket": "strict_events",
+        "index": 61,
+        "binding_method": "legacy_start_alias",
+        "canonical_episode_id": "ac9d7e29ae494351be66a610"
+      },
+      {
+        "record_id": "ac7899d1bc4cb634bc3e8dbd",
+        "city": "odesa",
+        "bucket": "strict_events",
+        "index": 62,
+        "binding_method": "legacy_start_alias",
+        "canonical_episode_id": "06ee4e17a480f61a992008e7"
+      },
+      {
+        "record_id": "66aab773aafa25fd9836907b",
+        "city": "odesa",
+        "bucket": "strict_events",
+        "index": 63,
+        "binding_method": "legacy_start_alias",
+        "canonical_episode_id": "9997d42da9c54ddf4049f308"
+      },
+      {
+        "record_id": "2986748af499096daa2c48c8",
+        "city": "odesa",
+        "bucket": "strict_events",
+        "index": 64,
+        "binding_method": "legacy_start_alias",
+        "canonical_episode_id": "a40ccbce70e2aa30d9b98c35"
+      },
+      {
+        "record_id": "d6fb4cdd8674ad5078f824c9",
+        "city": "odesa",
+        "bucket": "strict_events",
+        "index": 65,
+        "binding_method": "legacy_start_alias",
+        "canonical_episode_id": "fe249a12db46b9d6c70f3c80"
+      },
+      {
+        "record_id": "869934260dfc711d6fe8a57a",
+        "city": "odesa",
+        "bucket": "strict_events",
+        "index": 66,
+        "binding_method": "legacy_start_alias",
+        "canonical_episode_id": "34f8f345fbb7c47aa1d75b64"
+      },
+      {
+        "record_id": "940bc2293957bc21f601bbd4",
+        "city": "odesa",
+        "bucket": "strict_events",
+        "index": 67,
+        "binding_method": "legacy_start_alias",
+        "canonical_episode_id": "409783c683dac8fbdfc7f48e"
+      },
+      {
+        "record_id": "2f61d0233a21ec62e7587d7f",
+        "city": "odesa",
+        "bucket": "strict_events",
+        "index": 68,
+        "binding_method": "legacy_start_alias",
+        "canonical_episode_id": "86e309fe77b13e7a9b4d9c47"
+      },
+      {
+        "record_id": "437c88ff5694a8a9c66179a1",
+        "city": "odesa",
+        "bucket": "strict_events",
+        "index": 69,
+        "binding_method": "legacy_start_alias",
+        "canonical_episode_id": "565e7af23c90a03a04bec72a"
+      },
+      {
+        "record_id": "6dd40b1d4ec078952073595a",
+        "city": "odesa",
+        "bucket": "strict_events",
+        "index": 70,
+        "binding_method": "legacy_start_alias",
+        "canonical_episode_id": "7036da7f8b8183f9ea62b540"
+      },
+      {
+        "record_id": "6e359f1f126dfa201ef7c85a",
+        "city": "odesa",
+        "bucket": "strict_events",
+        "index": 71,
+        "binding_method": "legacy_start_alias",
+        "canonical_episode_id": "d869c76c47d94c051cb7cd96"
+      },
+      {
+        "record_id": "ffea90461210a67a3482e457",
+        "city": "odesa",
+        "bucket": "strict_events",
+        "index": 72,
+        "binding_method": "legacy_start_alias",
+        "canonical_episode_id": "ce01e3e3893ba296efa1f2c5"
+      },
+      {
+        "record_id": "85f3587f05b036383e17f09d",
+        "city": "odesa",
+        "bucket": "strict_events",
+        "index": 73,
+        "binding_method": "legacy_start_alias",
+        "canonical_episode_id": "1719304ee93c7567e2f78407"
+      },
+      {
+        "record_id": "95f3c92ae65cd4cdc3d757da",
+        "city": "odesa",
+        "bucket": "strict_events",
+        "index": 74,
+        "binding_method": "legacy_start_alias",
+        "canonical_episode_id": "67bac75f5eef1bb7b404923e"
+      },
+      {
+        "record_id": "74104d950679964be2b7182b",
+        "city": "odesa",
+        "bucket": "strict_events",
+        "index": 75,
+        "binding_method": "legacy_start_alias",
+        "canonical_episode_id": "6b09e7a618ba751b9047efa5"
+      },
+      {
+        "record_id": "319e1fa5aefc01ab39ce8504",
+        "city": "odesa",
+        "bucket": "strict_events",
+        "index": 76,
+        "binding_method": "legacy_start_alias",
+        "canonical_episode_id": "3fc87aa2e2f33c0bd6ccf756"
+      },
+      {
+        "record_id": "9ef9d82a86a50b6c56a0c9cd",
+        "city": "odesa",
+        "bucket": "strict_events",
+        "index": 77,
+        "binding_method": "legacy_start_alias",
+        "canonical_episode_id": "6bc70793d0a700a211257ffd"
+      },
+      {
+        "record_id": "9002c5b962b6c2b68a05572d",
+        "city": "odesa",
+        "bucket": "strict_events",
+        "index": 78,
+        "binding_method": "legacy_start_alias",
+        "canonical_episode_id": "4bb8aac092b9b46bf6290dba"
+      },
+      {
+        "record_id": "c97738d763d1b1a24f831e9c",
+        "city": "odesa",
+        "bucket": "strict_events",
+        "index": 79,
+        "binding_method": "legacy_start_alias",
+        "canonical_episode_id": "567fc59635cc6173c023937c"
+      },
+      {
+        "record_id": "72c7b69f94be5e67ed54bd3f",
+        "city": "odesa",
+        "bucket": "strict_events",
+        "index": 80,
+        "binding_method": "legacy_start_alias",
+        "canonical_episode_id": "29b67ca7dc3f9b58a645b733"
+      },
+      {
+        "record_id": "91bdd0f528d94fa23ca319eb",
+        "city": "odesa",
+        "bucket": "strict_events",
+        "index": 81,
+        "binding_method": "legacy_start_alias",
+        "canonical_episode_id": "2edbf09094e7df753d8154eb"
+      },
+      {
+        "record_id": "c69a06bf7af6a025147a3de3",
+        "city": "odesa",
+        "bucket": "strict_events",
+        "index": 117,
+        "binding_method": "event_time_unique_containment",
+        "canonical_episode_id": "fa9cdf93cadf1d5913dca19c"
+      },
+      {
+        "record_id": "8d5780ce4e070c91bd498a02",
+        "city": "odesa",
+        "bucket": "strict_events",
+        "index": 132,
+        "binding_method": "event_time_unique_containment",
+        "canonical_episode_id": "d0fbbb91ac522e16d664dcfb"
+      },
+      {
+        "record_id": "d2d78bfc54b6ab0fd47907fd",
+        "city": "odesa",
+        "bucket": "strict_events",
+        "index": 147,
+        "binding_method": "event_time_unique_containment",
+        "canonical_episode_id": "f47353b7b530713e90944b28"
+      },
+      {
+        "record_id": "91056d9e1a713e7023a1b555",
+        "city": "odesa",
+        "bucket": "sensitivity_only_events",
+        "index": 2,
+        "binding_method": "legacy_start_alias",
+        "canonical_episode_id": "97520570adf7edb1d45095c6"
+      }
+    ],
+    "exact_remaining_unbound_records": [
+      {
+        "record_id": "2793d79590a849624744439a",
+        "city": "dnipro",
+        "bucket": "strict_events",
+        "index": 74,
+        "binding_method": "event_time_ambiguous_containment",
+        "root_cause": "MULTI_EVENT_MULTI_EPISODE_AMBIGUITY",
+        "candidate_episode_ids": [
+          "00c24c9cccd9e66de7eba62b",
+          "ed19badd30731bd1aeb7e326"
+        ]
+      },
+      {
+        "record_id": "2725fd45c6f6a33d61fe04a8",
+        "city": "kharkiv",
+        "bucket": "strict_events",
+        "index": 1,
+        "binding_method": "event_time_no_containing_episode",
+        "root_cause": "EVENT_OUTSIDE_CURRENT_CANONICAL_CORPUS",
+        "candidate_episode_ids": []
+      },
+      {
+        "record_id": "8237340ab735032f39db197c",
+        "city": "kherson",
+        "bucket": "strict_events",
+        "index": 1,
+        "binding_method": "event_time_no_containing_episode",
+        "root_cause": "EVENT_OUTSIDE_CURRENT_CANONICAL_CORPUS",
+        "candidate_episode_ids": []
+      },
+      {
+        "record_id": "aea1ffbdace229409cec0c16",
+        "city": "kherson",
+        "bucket": "strict_events",
+        "index": 3,
+        "binding_method": "event_time_no_containing_episode",
+        "root_cause": "EVENT_OUTSIDE_CURRENT_CANONICAL_CORPUS",
+        "candidate_episode_ids": []
+      },
+      {
+        "record_id": "e7b33cc9d7a37efc3ad2a51c",
+        "city": "kherson",
+        "bucket": "strict_events",
+        "index": 4,
+        "binding_method": "event_time_no_containing_episode",
+        "root_cause": "EVENT_OUTSIDE_CURRENT_CANONICAL_CORPUS",
+        "candidate_episode_ids": []
+      },
+      {
+        "record_id": "283fdd8775dd3f46a54c2e2c",
+        "city": "kherson",
+        "bucket": "strict_events",
+        "index": 5,
+        "binding_method": "event_time_no_containing_episode",
+        "root_cause": "EVENT_OUTSIDE_CURRENT_CANONICAL_CORPUS",
+        "candidate_episode_ids": []
+      },
+      {
+        "record_id": "8e7ef06ae0a9fa2e019fb17d",
+        "city": "kherson",
+        "bucket": "strict_events",
+        "index": 6,
+        "binding_method": "event_time_no_containing_episode",
+        "root_cause": "EVENT_OUTSIDE_CURRENT_CANONICAL_CORPUS",
+        "candidate_episode_ids": []
+      },
+      {
+        "record_id": "8aa162150ee5a23c622c8532",
+        "city": "kherson",
+        "bucket": "strict_events",
+        "index": 7,
+        "binding_method": "event_time_no_containing_episode",
+        "root_cause": "EVENT_OUTSIDE_CURRENT_CANONICAL_CORPUS",
+        "candidate_episode_ids": []
+      },
+      {
+        "record_id": "79fa40f617d42897a5dbba14",
+        "city": "kherson",
+        "bucket": "strict_events",
+        "index": 8,
+        "binding_method": "event_time_no_containing_episode",
+        "root_cause": "EVENT_OUTSIDE_CURRENT_CANONICAL_CORPUS",
+        "candidate_episode_ids": []
+      },
+      {
+        "record_id": "7be92b6ec25e3649c106e66f",
+        "city": "mykolaiv",
+        "bucket": "strict_events",
+        "index": 6,
+        "binding_method": "event_time_no_containing_episode",
+        "root_cause": "EVENT_OUTSIDE_CURRENT_CANONICAL_CORPUS",
+        "candidate_episode_ids": []
+      },
+      {
+        "record_id": "114d46148bb629164cde2392",
+        "city": "mykolaiv",
+        "bucket": "strict_events",
+        "index": 7,
+        "binding_method": "ambiguous_alert_start",
+        "root_cause": "OLD_LONG_ALERT_SPLIT_WITHOUT_EVENT_CLOCK",
+        "candidate_episode_ids": []
+      },
+      {
+        "record_id": "058b9b70b3e39ca67db9af5d",
+        "city": "mykolaiv",
+        "bucket": "strict_events",
+        "index": 26,
+        "binding_method": "event_time_no_containing_episode",
+        "root_cause": "EVENT_OUTSIDE_CURRENT_CANONICAL_CORPUS",
+        "candidate_episode_ids": []
+      },
+      {
+        "record_id": "c9170f2906d0e18731a81fa2",
+        "city": "odesa",
+        "bucket": "strict_events",
+        "index": 139,
+        "binding_method": "event_time_no_containing_episode",
+        "root_cause": "EVENT_OUTSIDE_CURRENT_CANONICAL_CORPUS",
+        "candidate_episode_ids": []
+      },
+      {
+        "record_id": "503a0c99d1b5f9fe9c447c0e",
+        "city": "odesa",
+        "bucket": "strict_events",
+        "index": 140,
+        "binding_method": "event_time_no_containing_episode",
+        "root_cause": "EVENT_OUTSIDE_CURRENT_CANONICAL_CORPUS",
+        "candidate_episode_ids": []
+      },
+      {
+        "record_id": "0c2c1c3a0cbbbea7b7d2ccde",
+        "city": "odesa",
+        "bucket": "strict_events",
+        "index": 141,
+        "binding_method": "event_time_no_containing_episode",
+        "root_cause": "EVENT_OUTSIDE_CURRENT_CANONICAL_CORPUS",
+        "candidate_episode_ids": []
+      }
+    ]
+  },
+  "dnipro_ambiguous_record": {
+    "record_id": "2793d79590a849624744439a",
+    "status": "UNBOUND",
+    "root_cause": "MULTI_EVENT_MULTI_EPISODE_AMBIGUITY",
+    "event_times_local": [
+      "14:45 Europe/Kyiv",
+      "15:39 Europe/Kyiv"
+    ],
+    "candidate_episode_ids": [
+      "00c24c9cccd9e66de7eba62b",
+      "ed19badd30731bd1aeb7e326"
+    ],
+    "forced_binding": false
+  },
+  "clean_city_regression": {
+    "input_head": "e8719e400fce10cf327069652f4c7c12db016306",
+    "cities": {
+      "lviv": {
+        "input_head": "e8719e400fce10cf327069652f4c7c12db016306",
+        "denominator": 126,
+        "replayed_strict": 12,
+        "replayed_sensitivity": 12,
+        "status": "READY",
+        "manual_qa_count": 0,
+        "qa_episode_ids": [],
+        "verdict": "CITY REPLAY CLEAN",
+        "protected_files_unchanged": true
+      },
+      "sevastopol": {
+        "input_head": "e8719e400fce10cf327069652f4c7c12db016306",
+        "denominator": 527,
+        "replayed_strict": 38,
+        "replayed_sensitivity": 55,
+        "status": "READY",
+        "manual_qa_count": 0,
+        "qa_episode_ids": [],
+        "verdict": "CITY REPLAY CLEAN",
+        "protected_files_unchanged": true
+      },
+      "sumy": {
+        "input_head": "e8719e400fce10cf327069652f4c7c12db016306",
+        "denominator": 2297,
+        "replayed_strict": 204,
+        "replayed_sensitivity": 238,
+        "status": "READY",
+        "manual_qa_count": 0,
+        "qa_episode_ids": [],
+        "verdict": "CITY REPLAY CLEAN",
+        "protected_files_unchanged": true
+      },
+      "cherkasy": {
+        "input_head": "e8719e400fce10cf327069652f4c7c12db016306",
+        "denominator": 1548,
+        "replayed_strict": 57,
+        "replayed_sensitivity": 58,
+        "status": "QA_REQUIRED",
+        "manual_qa_count": 1,
+        "qa_episode_ids": [
+          "f57f2f50c537719982254887"
+        ],
+        "verdict": "CITY REPLAY COMPLETE — QA REQUIRED",
+        "protected_files_unchanged": true
+      }
+    },
+    "no_binding_regression": true,
+    "cherkasy_expected_state_confirmed": true,
+    "sumy_expected_state_confirmed": true
+  },
+  "protected_state_audit": {
+    "historical_evidence_changed_by_apply": false,
+    "canonical_alert_corpus_changed_by_apply": false,
+    "source_slices_changed_by_apply": false,
+    "audited_baseline_changed_by_apply": false,
+    "classifier_changed_by_apply": false,
+    "live_v2_monitor_changed_by_apply": false,
+    "live_operational_files_changed_by_apply": false,
+    "casualty_files_changed_by_apply": false,
+    "main_touched_by_task": false,
+    "site_prod_touched_by_task": false,
+    "campaign_branch_touched_by_task": false,
+    "db_neon_touched_by_task": false,
+    "concurrent_generated_commits_preserved": true,
+    "fresh_preflight_protected_files_unchanged": true,
+    "fresh_preflight_live_controls_all_pass": true
+  },
+  "final_verdict": "LEGACY TEMPORAL BINDING ADAPTER ATOMIC APPLY ACCEPTED — 78 HISTORICAL POSITIVES RECOVERED / 15 BLOCKERS REMAIN"
+}
