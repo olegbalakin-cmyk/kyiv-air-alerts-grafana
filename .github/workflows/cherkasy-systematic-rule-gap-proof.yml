@@ -65,10 +65,28 @@ jobs:
           set -euo pipefail
           python kyiv-air-alerts-grafana/scripts/replay_explosion_history.py --self-test
           python kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py --self-test
-          python -m pytest -q \
-            kyiv-air-alerts-grafana/tests/test_historical_replay_cherkasy_roles.py \
-            kyiv-air-alerts-grafana/tests/test_historical_replay_strike_roles.py \
-            kyiv-air-alerts-grafana/tests/test_historical_replay_remaining_v2_roles.py
+          python - <<'PY'
+          import importlib.util
+          from pathlib import Path
+          paths = [
+              Path("kyiv-air-alerts-grafana/tests/test_historical_replay_cherkasy_roles.py"),
+              Path("kyiv-air-alerts-grafana/tests/test_historical_replay_strike_roles.py"),
+              Path("kyiv-air-alerts-grafana/tests/test_historical_replay_remaining_v2_roles.py"),
+          ]
+          count = 0
+          for path in paths:
+              spec = importlib.util.spec_from_file_location(path.stem, path)
+              module = importlib.util.module_from_spec(spec)
+              assert spec and spec.loader
+              spec.loader.exec_module(module)
+              for name in sorted(dir(module)):
+                  fn = getattr(module, name)
+                  if name.startswith("test_") and callable(fn):
+                      fn()
+                      count += 1
+                      print("PASS", path.name, name)
+          print(f"Focused tests passed: {count}")
+          PY
 
       - name: Create authoritative comparison worktree
         shell: bash
