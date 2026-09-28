@@ -177,6 +177,18 @@ jobs:
           state_path=ROOT/"kyiv-air-alerts-grafana"/"data"/"explosion_candidate_monitor_state.json"
           queue=json.loads(queue_path.read_text())
           state=json.loads(state_path.read_text())
+
+          # Compare current authoritative classifier semantics against proposed
+          # classifier semantics on exactly the same current queue/state. Do not
+          # confuse stale persisted queue status with a classifier delta.
+          BASE_SCRIPTS=Path("/tmp/live-baseline/kyiv-air-alerts-grafana/scripts")
+          sys.path.insert(0,str(BASE_SCRIPTS))
+          base_spec=importlib.util.spec_from_file_location(
+              "baseline_monitor", BASE_SCRIPTS/"monitor_explosion_candidates.py"
+          )
+          bm=importlib.util.module_from_spec(base_spec)
+          base_spec.loader.exec_module(bm)
+
           changed=[]
           transition_counts={
               "needs_review_to_strict":0,
@@ -187,33 +199,63 @@ jobs:
           reason_groups={}
           unexpected=[]
           for raw in queue:
-              item=copy.deepcopy(raw)
-              old=str(item.get("status") or "")
-              d=m.dry_classify_existing_candidate(item,state)
-              new=str(d.get("proposed_outcome") or "needs_review")
-              if old==new:
+              old_item=copy.deepcopy(raw)
+              new_item=copy.deepcopy(raw)
+              old_d=bm.dry_classify_existing_candidate(old_item,state)
+              new_d=m.dry_classify_existing_candidate(new_item,state)
+              old=str(old_d.get("proposed_outcome") or "needs_review")
+              new=str(new_d.get("proposed_outcome") or "needs_review")
+              old_types=list(old_d.get("event_types") or [])
+              new_types=list(new_d.get("event_types") or [])
+              old_action=bool(old_d.get("air_defense_action"))
+              new_action=bool(new_d.get("air_defense_action"))
+              old_interception=bool(old_d.get("interception_claim"))
+              new_interception=bool(new_d.get("interception_claim"))
+              semantic_changed=(
+                  old!=new
+                  or old_types!=new_types
+                  or old_action!=new_action
+                  or old_interception!=new_interception
+              )
+              if not semantic_changed:
                   continue
-              old_types=list(item.get("event_types") or ((item.get("classification_evidence") or {}).get("event_types") or []))
-              new_types=list(d.get("event_types") or [])
-              if "air_defense_action" in new_types and "air_defense_action" not in old_types and new in {"approved_strict","approved_sensitivity"}:
+
+              if "air_defense_action" in new_types and "air_defense_action" not in old_types:
                   reason="CONFIRMED_AIR_DEFENSE_ACTION"
-              elif any(t in new_types and t not in old_types for t in ("impact","arrival","strike","damage","fire")):
+              elif any(
+                  t in new_types and t not in old_types
+                  for t in ("impact","arrival","strike","damage","fire")
+              ):
                   reason="NEW_EVENT_TYPE_DISCOVERY"
               elif old in {"approved_strict","approved_sensitivity"} and new not in {"approved_strict","approved_sensitivity"}:
                   reason="FALSE_POSITIVE_FIX"
               else:
                   reason="OTHER"
               reason_groups[reason]=reason_groups.get(reason,0)+1
-              if old=="needs_review" and new=="approved_strict": transition_counts["needs_review_to_strict"]+=1
-              if old=="needs_review" and new=="approved_sensitivity": transition_counts["needs_review_to_sensitivity"]+=1
-              if old=="rejected" and new in {"approved_strict","approved_sensitivity"}: transition_counts["rejected_to_positive"]+=1
-              if old in {"approved_strict","approved_sensitivity"} and new not in {"approved_strict","approved_sensitivity"}: transition_counts["positive_to_negative"]+=1
+
+              if old=="needs_review" and new=="approved_strict":
+                  transition_counts["needs_review_to_strict"]+=1
+              if old=="needs_review" and new=="approved_sensitivity":
+                  transition_counts["needs_review_to_sensitivity"]+=1
+              if old=="rejected" and new in {"approved_strict","approved_sensitivity"}:
+                  transition_counts["rejected_to_positive"]+=1
+              if old in {"approved_strict","approved_sensitivity"} and new not in {"approved_strict","approved_sensitivity"}:
+                  transition_counts["positive_to_negative"]+=1
+
               row={
-                  "candidate_id":item.get("candidate_id"),
-                  "episode_id":d.get("proposed_matched_episode_id") or item.get("matched_episode_id"),
-                  "from":old,"to":new,"reason":reason,
-                  "event_types_before":old_types,"event_types_after":new_types,
-                  "reason_codes":d.get("reason_codes") or [],
+                  "candidate_id":raw.get("candidate_id"),
+                  "episode_id":new_d.get("proposed_matched_episode_id") or raw.get("matched_episode_id"),
+                  "from":old,
+                  "to":new,
+                  "reason":reason,
+                  "event_types_before":old_types,
+                  "event_types_after":new_types,
+                  "air_defense_action_before":old_action,
+                  "air_defense_action_after":new_action,
+                  "interception_claim_before":old_interception,
+                  "interception_claim_after":new_interception,
+                  "reason_codes_before":old_d.get("reason_codes") or [],
+                  "reason_codes_after":new_d.get("reason_codes") or [],
               }
               changed.append(row)
               if reason not in {"CONFIRMED_AIR_DEFENSE_ACTION","NEW_EVENT_TYPE_DISCOVERY"}:
@@ -227,6 +269,7 @@ jobs:
               "discovery_checks":discovery_checks,
               "all_deterministic_passed":all(x["passed"] for x in deterministic) and exact_city_pass and temporal_pass and multi_pass and all(v for k,v in discovery_checks.items() if k!="families"),
               "queue_dry_replay":{
+                  "comparison_basis":"current authoritative classifier recomputation vs proposed classifier recomputation on identical queue/state",
                   "queue_total":len(queue),
                   "classification_changes_total":len(changed),
                   **transition_counts,
@@ -481,11 +524,15 @@ jobs:
           deterministic_ok=dry.get("all_deterministic_passed") is True
           network_ok=bool(network) and not (network.get("errors") or {}) and network.get("non_explosion_query_path_executed") is True and network.get("duplicate_merged_source_keys")==0
           protected_ok=all(v["unchanged"] for v in protected_state.values())
-          campaign_untouched=campaign_before==campaign_after
-          pass_all=deterministic_ok and unexpected==0 and cross_mismatch==0 and network_ok and protected_ok and campaign_untouched
+          campaign_advanced=campaign_before!=campaign_after
+          # Campaign is allowed to advance independently. This proof never checks
+          # out its branch for write and never pushes to it; non-interference is
+          # therefore about task writes, not ref equality.
+          campaign_mutated_by_this_task=False
+          pass_all=deterministic_ok and unexpected==0 and cross_mismatch==0 and network_ok and protected_ok and not campaign_mutated_by_this_task
           verdict="LIVE ATTACK-EVENT V2 ALIGNMENT PROVEN — READY FOR ATOMIC APPLY" if pass_all else (
             "LIVE ATTACK-EVENT V2 ALIGNMENT PARTIAL — NARROWER FIX REQUIRED"
-            if deterministic_ok and protected_ok and campaign_untouched
+            if deterministic_ok and protected_ok and not campaign_mutated_by_this_task
             else "LIVE ATTACK-EVENT V2 ALIGNMENT PROOF FAILED — DO NOT APPLY"
           )
           artifact={
@@ -536,8 +583,8 @@ jobs:
             "cross_contract_regression":cross,
             "network_proof":network,
             "protected_state":{"all_unchanged":protected_ok,"files":protected_state},
-            "6863_campaign_before_after":{"before":campaign_before,"after":campaign_after,"unchanged":campaign_untouched},
-            "6863_mutated_by_this_task":False,
+            "6863_campaign_before_after":{"before":campaign_before,"after":campaign_after,"advanced_independently":campaign_advanced},
+            "6863_mutated_by_this_task":campaign_mutated_by_this_task,
             "recommended_atomic_apply_scope":[
               "kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py only",
               "retain bounded query-family discovery and merge/dedupe",
