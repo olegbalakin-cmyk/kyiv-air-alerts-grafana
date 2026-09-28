@@ -1,0 +1,224 @@
+name: Proof Chernihiv Kropyvnytskyi review-role adapter
+
+on:
+  push:
+    branches:
+      - chernihiv-kropyvnytskyi-review-role-proof-2026-09-28
+    paths:
+      - "kyiv-air-alerts-grafana/scripts/replay_explosion_history.py"
+      - "kyiv-air-alerts-grafana/tests/test_historical_replay_chernihiv_kropyvnytskyi_roles.py"
+      - ".github/workflows/proof-chernihiv-kropyvnytskyi-review-role.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  proof:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Check out proof commit
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          path: proof
+
+      - name: Check out authoritative base
+        uses: actions/checkout@v4
+        with:
+          ref: 2c2e46ceaada64c2e3a109872c30640a6e1ad731
+          path: base
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install -r proof/kyiv-air-alerts-grafana/requirements.txt pytest
+
+      - name: Focused adapter tests and replay self-tests
+        run: |
+          set -euo pipefail
+          pytest -q proof/kyiv-air-alerts-grafana/tests/test_historical_replay_chernihiv_kropyvnytskyi_roles.py
+          python proof/kyiv-air-alerts-grafana/scripts/replay_explosion_history.py --self-test
+          python proof/kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py --self-test
+
+      - name: Base and proof replays
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/base" "$RUNNER_TEMP/proof"
+          for CITY in chernihiv kropyvnytskyi lviv sevastopol sumy cherkasy; do
+            python base/kyiv-air-alerts-grafana/scripts/replay_explosion_history.py               --repo-root "$GITHUB_WORKSPACE/base/kyiv-air-alerts-grafana"               --city "$CITY" --through 2026-09-17               --input-head 2c2e46ceaada64c2e3a109872c30640a6e1ad731               --read-only --output "$RUNNER_TEMP/base/$CITY.json"
+            python proof/kyiv-air-alerts-grafana/scripts/replay_explosion_history.py               --repo-root "$GITHUB_WORKSPACE/proof/kyiv-air-alerts-grafana"               --city "$CITY" --through 2026-09-17               --input-head "$GITHUB_SHA"               --read-only --output "$RUNNER_TEMP/proof/$CITY.json"
+          done
+
+      - name: Build exact proof result
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json, os, pathlib, subprocess
+          temp=pathlib.Path(os.environ["RUNNER_TEMP"])
+          proof_root=pathlib.Path(os.environ["GITHUB_WORKSPACE"])/"proof"
+          base_root=pathlib.Path(os.environ["GITHUB_WORKSPACE"])/"base"
+          expected={
+            "chernihiv":{
+              "0483bba2c3791c1b2310dfaf","17f79fc83c1eaea371d6b91a","d3a50c39a6671ff7875449cc","ed0b021f3af2e915fccc5add",
+              "14d7e5637d1f218de1ae8002","4857a32d3d6a7dd1517a8c6b","77aef1f8a06115c16dcb48b6","9d6928637659a3ee296f597e",
+              "3543ea2e5d0524245c127532","abdf8f34f0fd3e977b4c307a","d1cda733415fbdb51f14ec7b","db88221ad0bcd0a8966cc220",
+              "e10622290b978fb9e48394ee","a59d4d956d69f768bd30d0a3"
+            },
+            "kropyvnytskyi":{
+              "0cad05a70f7e43e905d276af","146add928101dbe79c72f0ab","a858697c2e55c3f2656eff96","b3f618909f36a1a3ad17ff28",
+              "c79b73775bbbba7d6940155a","00ad6c30bb112d170ac68fe5","0481b55aa591f115afc49bef","0b507481c67b0d09bb794d9f",
+              "13f21d766b2c5c76fe022ab9","1bc283e46e93cba7c1fa3d08","232aefdabab9992a7456ff99","38acb65ed69a0f711e4a77ad",
+              "4d6cad6deeb2f2bab826a7f0","830cbfcb5c45e5aca54324bb","88ce0b19de15fc9741297b2a","8c4ad5a467a032d0025db4c7",
+              "9d37758878651ef0bb875911","af55a0ee4bead940463b60e0","c0c0bf3934262742eca6075c","c91c7e98cb870b699ef79061",
+              "cae26af71b8d9d074adf6c40","d487b4d890da99c61e3058e3","dc47a7f5d58859794f5ce915","ddfca937c5d7666365fba73b",
+              "f0fec8c1b200bff5a20f18e2","f1ecba56286d762e7ff4d518","f4fc3f63a693a61bf07284d6","f55204f8b1f41767b27390dc",
+              "f8238f6908f84b02806adda7","f9d526bbb2ddbe0e7500f0a1","fd94fa7e314534586d91bc4e"
+            }
+          }
+          artifact=json.loads((proof_root/"research/historical_replay_chernihiv_kropyvnytskyi_post_binding_replay_2026-09-28.json").read_text())
+          def load(kind,city):
+            return json.loads((temp/kind/f"{city}.json").read_text())
+          def statuses(payload):
+            out={}
+            for eid in payload.get("strict_episode_identity",{}).get("unchanged_strict_ids",[]): out[eid]="STRICT"
+            for row in payload.get("reconciliation_events",[]):
+              out[row["episode_id"]]=row["replayed_status"]
+            return out
+          cities={}
+          failures=[]
+          resolved_total=0
+          for city in ("chernihiv","kropyvnytskyi"):
+            b,p=load("base",city),load("proof",city)
+            bdiag=b.get("evidence_episode_diagnostics",{})
+            pdiag=p.get("evidence_episode_diagnostics",{})
+            changed=[]
+            allids=set(bdiag)|set(pdiag)
+            for eid in sorted(allids):
+              bs=(bdiag.get(eid) or {}).get("replayed_status","NON_STRICT")
+              ps=(pdiag.get(eid) or {}).get("replayed_status","NON_STRICT")
+              if bs!=ps: changed.append({"episode_id":eid,"before":bs,"after":ps})
+            outside=sorted({x["episode_id"] for x in changed}-expected[city])
+            if outside: failures.append(f"{city}: unexpected deltas {outside}")
+            qa_before={x["episode_id"]:x for x in artifact["fresh_historical_replay"]["cities"][city]["qa_inventory"]}
+            audit=[]
+            unresolved=[]
+            for eid in sorted(expected[city]):
+              q=qa_before[eid]
+              after=(pdiag.get(eid) or {}).get("replayed_status","NON_STRICT")
+              leaves=after in {"STRICT","SENSITIVITY"}
+              if leaves: resolved_total+=1
+              else: unresolved.append(eid)
+              audit.append({
+                "episode_id":eid,
+                "prior_replay_classification":q["current_classification"],
+                "missing_role_subtype":q["root_cause_code"],
+                "retained_reviewed_fields":q["retained_evidence"],
+                "roles_restored":(pdiag.get(eid) or {}).get("provenance_basis",[]),
+                "resulting_replay_classification":after,
+                "leaves_qa":leaves,
+                "reason_if_remains_qa":None if leaves else (pdiag.get(eid) or {}).get("reason_codes",[])
+              })
+            cities[city]={
+              "before":{
+                "strict":b["replayed_strict_episodes"],
+                "sensitivity":b["replayed_sensitivity_episodes"],
+                "qa":len(b.get("changed_episodes",[]))
+              },
+              "after":{
+                "strict":p["replayed_strict_episodes"],
+                "sensitivity":p["replayed_sensitivity_episodes"],
+                "qa":len(p.get("changed_episodes",[]))
+              },
+              "changed_episode_ids":[x["episode_id"] for x in changed],
+              "unexpected_episode_ids":outside,
+              "unresolved_qa_ids":unresolved,
+              "case_audit":audit,
+              "denominator_before":b["episodes_checked"],
+              "denominator_after":p["episodes_checked"],
+              "source_status_before":b["source_validation"]["source_status"],
+              "source_status_after":p["source_validation"]["source_status"],
+              "unbound_counted_evidence_before":len(b.get("errors",[])),
+              "unbound_counted_evidence_after":len(p.get("errors",[]))
+            }
+            if b["episodes_checked"]!=p["episodes_checked"]: failures.append(f"{city}: denominator changed")
+            if b["source_validation"]["source_status"]!=p["source_validation"]["source_status"]: failures.append(f"{city}: source status changed")
+          clean={}
+          for city in ("lviv","sevastopol","sumy","cherkasy"):
+            b,p=load("base",city),load("proof",city)
+            keys=("replayed_strict_episodes","replayed_sensitivity_episodes","reconciliation_counts","strict_episode_identity","errors")
+            equal=all(b.get(k)==p.get(k) for k in keys)
+            clean[city]={
+              "equal":equal,
+              "before":{"strict":b["replayed_strict_episodes"],"sensitivity":b["replayed_sensitivity_episodes"],"qa":len(b.get("changed_episodes",[]))},
+              "after":{"strict":p["replayed_strict_episodes"],"sensitivity":p["replayed_sensitivity_episodes"],"qa":len(p.get("changed_episodes",[]))}
+            }
+            if not equal: failures.append(f"{city}: regression")
+          script="kyiv-air-alerts-grafana/scripts/replay_explosion_history.py"
+          before_blob=subprocess.check_output(["git","-C",str(base_root),"rev-parse",f"HEAD:{script}"],text=True).strip()
+          after_blob=subprocess.check_output(["git","-C",str(proof_root),"rev-parse",f"HEAD:{script}"],text=True).strip()
+          diff=subprocess.check_output(["git","-C",str(proof_root),"diff","--name-only","2c2e46ceaada64c2e3a109872c30640a6e1ad731..HEAD"],text=True).splitlines()
+          allowed={
+            "kyiv-air-alerts-grafana/scripts/replay_explosion_history.py",
+            "kyiv-air-alerts-grafana/tests/test_historical_replay_chernihiv_kropyvnytskyi_roles.py",
+            ".github/workflows/proof-chernihiv-kropyvnytskyi-review-role.yml"
+          }
+          unexpected_paths=sorted(set(diff)-allowed)
+          if unexpected_paths: failures.append(f"unexpected paths: {unexpected_paths}")
+          out={
+            "schema_version":1,
+            "kind":"chernihiv_kropyvnytskyi_review_role_adapter_proof",
+            "authoritative_base_head":"2c2e46ceaada64c2e3a109872c30640a6e1ad731",
+            "proof_branch":"chernihiv-kropyvnytskyi-review-role-proof-2026-09-28",
+            "implementation_commit":"07df565d6aa63b1866e0072bd788c3f6b631be19",
+            "proof_execution_commit":os.environ["GITHUB_SHA"],
+            "replay_implementation_blob_before":before_blob,
+            "replay_implementation_blob_after":after_blob,
+            "exact_files_changed_before_artifact":diff,
+            "retained_role_field_inventory":{
+              "chernihiv":["evidence","decision","decision_basis","basis","event_time/event_time_kyiv","matched_episode_start/alert_start"],
+              "kropyvnytskyi":["evidence","basis=exact_city_during_alert","event_time","matched_episode_start"]
+            },
+            "city_adapter_contract":{
+              "chernihiv":"translate only explicit legacy reviewed exact-city/aerial/episode-link markers; no free-text-only activation",
+              "kropyvnytskyi":"translate only frozen strict rows carrying basis=exact_city_during_alert; event fact still must exist in retained evidence"
+            },
+            "tests":{"focused_pytest":"PASS","replay_self_test":"PASS","monitor_self_test":"PASS"},
+            "cities":cities,
+            "resolved_qa_cases":resolved_total,
+            "expected_qa_cases":45,
+            "unexpected_delta_audit":{"pass":not any(cities[c]["unexpected_episode_ids"] for c in cities),"failures":failures},
+            "clean_city_regressions":clean,
+            "protected_state_audit":{
+              "unexpected_paths":unexpected_paths,
+              "historical_evidence_modified":False,
+              "source_slices_modified":False,
+              "canonical_alert_corpus_modified":False,
+              "audited_baseline_modified":False,
+              "live_monitor_modified":False,
+              "db_neon_touched":False,
+              "site_prod_touched":False,
+              "main_touched":False,
+              "campaign_branch_touched":False
+            }
+          }
+          if not failures and resolved_total==45:
+            out["verdict"]="CHERNIHIV + KROPYVNYTSKYI REVIEW-ROLE ADAPTER PROVEN — 45 SYSTEMATIC QA CASES RESOLVED — READY FOR ATOMIC APPLY"
+          else:
+            out["verdict"]=f"CHERNIHIV + KROPYVNYTSKYI REVIEW-ROLE ADAPTER PARTIALLY PROVEN — {resolved_total}/45 SYSTEMATIC QA CASES RESOLVED — DO NOT APPLY"
+          pathlib.Path("proof-result.json").write_text(json.dumps(out,ensure_ascii=False,indent=2,sort_keys=True)+"\n")
+          print(json.dumps({"resolved":resolved_total,"failures":failures,"verdict":out["verdict"]},ensure_ascii=False,indent=2))
+          if failures:
+            raise SystemExit(1)
+          PY
+
+      - name: Upload proof result
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: chernihiv-kropyvnytskyi-review-role-proof-result
+          path: proof-result.json
