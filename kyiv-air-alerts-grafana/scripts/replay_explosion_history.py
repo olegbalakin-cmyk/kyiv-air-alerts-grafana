@@ -631,7 +631,13 @@ def historical_review_roles(city: str, row: dict, monitor) -> tuple[dict, str]:
             "basis": direct_event_basis,
             "evidence_text": direct_event_segment[:1200],
         }
-    elif exact_city and explosion and air_context and not conflicting_named_city:
+    elif (
+        city != "cherkasy"
+        and exact_city
+        and explosion
+        and air_context
+        and not conflicting_named_city
+    ):
         roles["same_attack_basis"] = {
             "present": True,
             "basis": "reviewed_factual_summary_links_exact_city_explosion_and_air_context",
