@@ -268,6 +268,7 @@ def test_multiple_event_times_in_different_episodes_are_not_collapsed_to_one():
 def test_new_temporal_fallback_can_be_disabled_for_review_only_evidence():
     episodes = [
         episode("ep1", "2026-06-21T05:00:00Z", "2026-06-21T06:00:00Z"),
+        episode("ep2", "2026-06-21T08:00:00Z", "2026-06-21T09:00:00Z"),
     ]
     row = {
         "alert_start_date": "2026-06-21",
@@ -283,4 +284,4 @@ def test_new_temporal_fallback_can_be_disabled_for_review_only_evidence():
     assert enabled["episode_id"] == "ep1"
     assert enabled["method"] == "event_time_unique_containment"
     assert disabled["episode_id"] is None
-    assert disabled["method"] == "unique_episode_on_recorded_local_day" or disabled["method"] == "ambiguous_local_day"
+    assert disabled["method"] == "ambiguous_local_day"
