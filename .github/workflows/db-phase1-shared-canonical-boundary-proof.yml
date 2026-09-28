@@ -1,0 +1,95 @@
+name: Prove Phase-1 shared canonical boundary
+
+on:
+  push:
+    branches:
+      - db-phase1-lviv-canonical-boundary-2026-09-28
+    paths-ignore:
+      - "kyiv-air-alerts-grafana/research/db_phase1_shared_canonical_payload_boundary_proof_2026-09-28.json"
+
+permissions:
+  contents: read
+
+jobs:
+  prove:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout proof branch
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: kyiv-air-alerts-grafana/requirements.txt
+
+      - name: Install production Python dependencies
+        shell: bash
+        run: python -m pip install -r kyiv-air-alerts-grafana/requirements.txt
+
+      - name: Verify branch and production base
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REF_NAME" = "db-phase1-lviv-canonical-boundary-2026-09-28"
+          test "$(git rev-parse HEAD^)" = "82494701ae8b49b9780eb42d535e0990fd889151"
+          git fetch --no-tags origin \
+            82494701ae8b49b9780eb42d535e0990fd889151 \
+            73b841c0d3adfeff078bbf427efaecc5db985973
+
+      - name: Verify frozen persistence contracts
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD:kyiv-air-alerts-grafana/scripts/db_phase1_persistence.py)" = "06f3098df63d7aaf2348c366b6a351901926cb53"
+          test "$(git rev-parse HEAD:kyiv-air-alerts-grafana/db/migrations/001_phase1_core.sql)" = "3b8af7940b23aae03a4f6b434d90d97dde10bfc0"
+
+      - name: Prepare detached reference worktrees
+        shell: bash
+        run: |
+          set -euo pipefail
+          git worktree add --detach /tmp/phase1-accepted 73b841c0d3adfeff078bbf427efaecc5db985973
+          git worktree add --detach /tmp/site-prod-baseline 82494701ae8b49b9780eb42d535e0990fd889151
+
+      - name: Run shared-boundary proof
+        shell: bash
+        run: |
+          set -euo pipefail
+          python kyiv-air-alerts-grafana/scripts/proof_db_phase1_shared_canonical_boundary.py \
+            --accepted-worktree /tmp/phase1-accepted \
+            --production-worktree /tmp/site-prod-baseline \
+            --current-worktree "$GITHUB_WORKSPACE" \
+            --output "$RUNNER_TEMP/db_phase1_shared_canonical_payload_boundary_proof_2026-09-28.json"
+
+      - name: Run Phase-1 regressions
+        working-directory: kyiv-air-alerts-grafana
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m unittest discover -s tests -p "test_db_phase1*.py" -v
+
+      - name: Verify explosion guard
+        working-directory: kyiv-air-alerts-grafana
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+          for path in (Path("pages-preview/app.js"), Path("pages-preview/index.html")):
+              text = path.read_text(encoding="utf-8")
+              assert text.lower().count("explosion") == 0, path
+              assert text.casefold().count("вибух") == 0, path
+          print("explosion guard intact")
+          PY
+
+      - name: Upload machine-readable proof
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: db-phase1-shared-canonical-boundary-proof
+          path: ${{ runner.temp }}/db_phase1_shared_canonical_payload_boundary_proof_2026-09-28.json
+          if-no-files-found: error

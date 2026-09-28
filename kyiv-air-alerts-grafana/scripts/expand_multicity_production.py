@@ -9,6 +9,7 @@ from pathlib import Path
 from statistics import mean
 
 from update_data import Alert, TZ, build_outputs, daterange, http_session, round3, union_daily_seconds
+from db_phase1_lviv_canonical import vadimkin_rows_to_observations
 
 ROOT = Path(__file__).resolve().parents[1]
 DASHBOARD = ROOT / "grafana" / "dashboard.json"
@@ -89,17 +90,12 @@ def union_alerts(intervals: list[tuple[datetime, datetime]]) -> list[Alert]:
     return [Alert(start=start, end=end, source="vadimkin_raion_or_oblast_union") for start, end in merged]
 
 
-def fetch_proxy_alerts() -> dict[str, list[Alert]]:
-    session = http_session()
-    response = session.get(CITY_SOURCE_URL, timeout=120)
-    response.raise_for_status()
-    text = response.content.decode("utf-8-sig")
-
+def _proxy_alerts_from_rows(rows: list[dict[str, str]]) -> dict[str, list[Alert]]:
     by_oblast = {cfg["oblast"]: key for key, cfg in PROXY_CONFIG.items()}
     intervals: dict[str, list[tuple[datetime, datetime]]] = {key: [] for key in PROXY_KEYS}
     seen: dict[str, set[tuple[str, str, str]]] = {key: set() for key in PROXY_KEYS}
 
-    for row in csv.DictReader(io.StringIO(text)):
+    for row in rows:
         oblast = (row.get("oblast") or "").strip()
         key = by_oblast.get(oblast)
         if not key:
@@ -137,6 +133,27 @@ def fetch_proxy_alerts() -> dict[str, list[Alert]]:
         if not alerts:
             raise RuntimeError(f"No proxy alerts found for {CITY_LABELS[key]}")
     return result
+
+
+def proxy_alerts_and_lviv_observations_from_rows(
+    rows: list[dict[str, str]],
+) -> tuple[dict[str, list[Alert]], list[dict]]:
+    lviv_observations, _ = vadimkin_rows_to_observations(rows)
+    return _proxy_alerts_from_rows(rows), lviv_observations
+
+
+def fetch_proxy_alerts_with_phase1() -> tuple[dict[str, list[Alert]], list[dict]]:
+    session = http_session()
+    response = session.get(CITY_SOURCE_URL, timeout=120)
+    response.raise_for_status()
+    payload = response.content.decode("utf-8-sig")
+    rows = list(csv.DictReader(io.StringIO(payload)))
+    return proxy_alerts_and_lviv_observations_from_rows(rows)
+
+
+def fetch_proxy_alerts() -> dict[str, list[Alert]]:
+    alerts, _ = fetch_proxy_alerts_with_phase1()
+    return alerts
 
 
 def enrich_weekly(output: dict, alerts: list[Alert]) -> None:
