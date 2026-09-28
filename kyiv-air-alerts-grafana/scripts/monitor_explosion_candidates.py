@@ -2929,7 +2929,7 @@ def self_test() -> None:
     # and audited aerial-war vocabulary includes KAB/Banderol.
     assert explosion_relevant("У Львові було гучно, працювала ППО")
     assert explosion_relevant("У Львові зафіксували влучання")
-    assert not strict_explosion_signal("У Києві працюють сили ППО")
+    assert strict_explosion_signal("У Києві працюють сили ППО")
     assert not strict_explosion_signal("У Полтаві було гучно")
     assert strict_explosion_signal("У Дніпрі пролунав вибух")
     assert air_military_context("Повідомляли про КАБ у напрямку міста")
@@ -2938,6 +2938,10 @@ def self_test() -> None:
     assert explicit_alert_relation("Вибух стався після оголошення тривоги")
     assert explicit_alert_relation("У місті пролунав вибух, коли тривала повітряна тривога")
     assert attack_event_types("У Полтаві влучання пошкодило будинок і спричинило пожежу") == ["impact", "damage", "fire"]
+    assert attack_event_types("У Полтаві працює ППО") == ["air_defense_action"]
+    assert not air_defense_action_signal("У Полтаві можлива робота ППО")
+    assert not air_defense_action_signal("У Полтаві не лякайтеся, може бути чутно роботу ППО")
+    assert not air_defense_action_signal("У Полтаві ППО готова до роботи")
     assert strict_attack_event_signal("У Полтаві внаслідок атаки БпЛА пошкоджено будинок")
     assert strict_attack_event_signal("У Полтаві після удару БпЛА виникла пожежа")
     assert not strict_attack_event_signal("У Полтаві під час повітряної тривоги сталася пожежа у квартирі")
@@ -3289,16 +3293,17 @@ def self_test() -> None:
     assert conflicting_decision["proposed_outcome"] == "approved_sensitivity"
     assert conflicting_decision["sensitivity_basis"] == "near_boundary"
 
-    # IR14 deterministic PVO-only rejection.
+    # IR14 deterministic predicted-PVO rejection remains intact.
     pvo_only = {
         **strict_base,
-        "title": "У Полтаві працює ППО. БпЛА заходять на місто.",
+        "title": "У Полтаві можлива робота ППО. БпЛА заходять на місто.",
         "snippet": "",
         "source": "Telegram / СУСПІЛЬНЕ НОВИНИ",
         "publisher": "СУСПІЛЬНЕ НОВИНИ",
     }
     pvo_decision = classify_candidate(pvo_only, "poltava", [poltava_ep])
     assert pvo_decision["proposed_outcome"] == "rejected"
+    assert not pvo_decision["air_defense_action"]
     assert "PVO_ONLY_COMPLETE_MESSAGE" in pvo_decision["reason_codes"]
 
     # IR16: dry classification of an existing needs_review row is pure and does
