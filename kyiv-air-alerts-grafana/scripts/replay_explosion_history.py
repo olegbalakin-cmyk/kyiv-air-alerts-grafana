@@ -252,6 +252,9 @@ def retained_local_date(row: dict, monitor) -> str | None:
         dt = parse_temporal_field_datetime(value, field, monitor)
         if dt is not None:
             return dt.astimezone(KYIV_TZ).date().isoformat()
+        explicit_day = re.search(r"\b\d{4}-\d{2}-\d{2}\b", text)
+        if explicit_day:
+            return explicit_day.group(0)
     return None
 
 
@@ -259,9 +262,16 @@ def retained_event_datetimes(row: dict, monitor) -> list[datetime]:
     result: list[datetime] = []
     seen: set[str] = set()
     full_pattern = re.compile(
-        r"\d{4}-\d{2}-\d{2}[T ]\d{1,2}:\d{2}"
+        r"\d{4}-\d{2}-\d{2}[T ]\s*~?\s*\d{1,2}:\d{2}"
         r"(?::\d{2}(?:\.\d+)?)?"
         r"(?:\s*(?:Z|[+-]\d{2}:?\d{2}|Europe/Kyiv))?",
+        flags=re.I,
+    )
+    dated_clock_pattern = re.compile(
+        r"(?<![\d:])(?P<hour>[01]?\d|2[0-3]):(?P<minute>[0-5]\d)"
+        r"(?::(?P<second>[0-5]\d(?:\.\d+)?))?"
+        r"(?:\s*(?P<zone>Z|[+-]\d{2}:?\d{2}|Europe/Kyiv))?"
+        r"\s+(?P<day>\d{4}-\d{2}-\d{2})\b",
         flags=re.I,
     )
     clock_pattern = re.compile(
@@ -280,6 +290,13 @@ def retained_event_datetimes(row: dict, monitor) -> list[datetime]:
             seen.add(key)
             result.append(dt)
 
+    def clock_token(match, day: str) -> str:
+        second = match.group("second")
+        clock = f'{int(match.group("hour")):02d}:{match.group("minute")}'
+        clock += f":{second}" if second else ":00"
+        zone = (match.group("zone") or "").strip()
+        return f"{day}T{clock}{zone}"
+
     for field in EVENT_TIME_FIELDS:
         value = row.get(field)
         if not value:
@@ -288,7 +305,11 @@ def retained_event_datetimes(row: dict, monitor) -> list[datetime]:
         spans = []
         for match in full_pattern.finditer(text):
             spans.append(match.span())
-            add(parse_temporal_field_datetime(match.group(0), field, monitor))
+            normalized = re.sub(r"([T ])\s*~\s*", r"\1", match.group(0), count=1)
+            add(parse_temporal_field_datetime(normalized, field, monitor))
+        for match in dated_clock_pattern.finditer(text):
+            spans.append(match.span())
+            add(parse_temporal_field_datetime(clock_token(match, match.group("day")), field, monitor))
 
         if not anchor_day:
             continue
@@ -298,15 +319,7 @@ def retained_event_datetimes(row: dict, monitor) -> list[datetime]:
                 residual[idx] = " "
         residual_text = "".join(residual)
         for match in clock_pattern.finditer(residual_text):
-            second = match.group("second")
-            clock = f'{int(match.group("hour")):02d}:{match.group("minute")}'
-            if second:
-                clock += f":{second}"
-            else:
-                clock += ":00"
-            zone = (match.group("zone") or "").strip()
-            token = f"{anchor_day}T{clock}{zone}"
-            add(parse_temporal_field_datetime(token, field, monitor))
+            add(parse_temporal_field_datetime(clock_token(match, anchor_day), field, monitor))
     return result
 
 
