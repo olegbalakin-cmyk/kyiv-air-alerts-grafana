@@ -1,0 +1,63 @@
+{
+  "base_commit": "c96340736f95bcd97ba032862f3cd9c3a2e7827f",
+  "implementation_commit": "150f8bc77c80422d9ac24a066d18303e741223b0",
+  "ddl_blob": "3b8af7940b23aae03a4f6b434d90d97dde10bfc0",
+  "canonicalization_version": "alert-canonicalization-v1",
+  "assembly_profile": "lviv-historical-v1",
+  "files_changed": [
+    "kyiv-air-alerts-grafana/db/README.md",
+    "kyiv-air-alerts-grafana/requirements-db-phase1.txt",
+    "kyiv-air-alerts-grafana/scripts/db_phase1_lviv_import.py",
+    "kyiv-air-alerts-grafana/scripts/db_phase1_persistence.py",
+    "kyiv-air-alerts-grafana/tests/test_db_phase1_persistence.py",
+    "kyiv-air-alerts-grafana/research/db_phase1_persistence_adapter_proof_2026-09-28.json"
+  ],
+  "dry_run": {
+    "canonical_episode_count": 126,
+    "source_observation_count": 140,
+    "vadimkin_count": 120,
+    "ukrainealarm_count": 20,
+    "checkpoint_candidate_count": 1,
+    "oracle_parity": "PASS"
+  },
+  "tests": {
+    "command": "python -m unittest discover -s tests -p \"test_db_phase1*.py\"",
+    "run": 23,
+    "passed": 23,
+    "failed": 0
+  },
+  "transaction_contract": {
+    "advisory_lock_before_checkpoint_reread": true,
+    "checkpoint_reread_before_mutation": true,
+    "rollback_on_error": true,
+    "exact_retry_checkpoint_noop": true
+  },
+  "retry_contract": {
+    "episode_insert_count": 0,
+    "source_insert_count": 0,
+    "source_last_seen_update_count": 140,
+    "checkpoint_insert_count": 0
+  },
+  "initial_bootstrap_simulation": {
+    "ingestion_run_count": 1,
+    "episode_insert_count": 126,
+    "source_insert_count": 140,
+    "checkpoint_insert_count": 1
+  },
+  "lock_contract": {
+    "version": "phase1-stream-lock-v1",
+    "lviv_key": -6396446657197887857,
+    "signed_bigint": true,
+    "deterministic": true,
+    "two_session_concurrency_proven": false
+  },
+  "optional_db_dependency": "psycopg[binary]>=3,<4",
+  "production_requirements_modified": false,
+  "live_neon_touched": false,
+  "ddl_changed": false,
+  "production_files_changed": false,
+  "credentials_obtained": false,
+  "credentials_persisted": false,
+  "live_postgresql_adapter_execution": false,
+  "concurrency_gate": "PHASE-1 SAME-STREAM CONCURRENCY ENVIRONMENT-BLOCKED"
+}
