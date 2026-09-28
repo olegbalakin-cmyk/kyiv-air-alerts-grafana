@@ -142,6 +142,7 @@ def classify_sensitivity(row, episode):
         "sensitivity_only_events",
         episode["episode_id"],
         monitor,
+        episode,
     )
     return monitor.classify_candidate(
         candidate,
