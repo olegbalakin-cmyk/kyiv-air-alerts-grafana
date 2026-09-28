@@ -4,9 +4,9 @@
 
 .all-cities-heading{gap:18px;flex-wrap:wrap}.all-cities-period-control{min-width:220px;width:220px;flex:0 0 220px}@media(max-width:620px){.all-cities-period-control{width:100%;min-width:100%;flex-basis:100%}}
 
-.tour-root{position:fixed;inset:0;z-index:2000;pointer-events:none}
-.tour-backdrop{position:absolute;inset:0;background:rgba(3,7,11,.72);pointer-events:auto}
-.tour-card{position:fixed;right:20px;bottom:20px;z-index:2004;width:min(390px,calc(100vw - 32px));background:#111820;border:1px solid #40505f;border-radius:14px;padding:18px;box-shadow:0 20px 55px rgba(0,0,0,.5);pointer-events:auto}
+.tour-root{position:fixed;inset:0;z-index:4000;pointer-events:none}
+.tour-backdrop{position:absolute;inset:0;background:transparent;pointer-events:none}
+.tour-card{position:fixed;right:20px;bottom:20px;z-index:4002;width:min(390px,calc(100vw - 32px));background:#111820;border:1px solid #40505f;border-radius:14px;padding:18px;box-shadow:0 20px 55px rgba(0,0,0,.5);pointer-events:auto}
 .tour-card-top{display:flex;align-items:center;justify-content:space-between;gap:12px}
 .tour-progress{font-size:12px;color:#8fa1b1;letter-spacing:.05em}
 .tour-close{border:0;background:transparent;color:#aebbc6;font-size:25px;line-height:1;padding:2px 6px;cursor:pointer}
@@ -17,7 +17,7 @@
 .tour-skip{border:0;background:transparent;color:#94a3b0;padding:9px 7px;cursor:pointer}
 .tour-primary{background:#dceeff;color:#0b1620;border:1px solid #dceeff;border-radius:8px;padding:9px 13px;font-weight:700;cursor:pointer}
 .tour-primary:hover{background:#fff}
-.tour-target{position:relative!important;z-index:2002!important;outline:3px solid #79bfff!important;outline-offset:5px!important;box-shadow:0 0 0 9px rgba(98,160,234,.2)!important}
+.tour-target{position:relative!important;z-index:3999!important;outline:3px solid #79bfff!important;outline-offset:5px!important;box-shadow:0 0 0 9px rgba(98,160,234,.2),0 0 0 9999px rgba(3,7,11,.72)!important}
 .tour-open .tour-target{pointer-events:auto}
 .tour-actions button:focus-visible,.tour-close:focus-visible,#showTour:focus-visible{outline:2px solid #79bfff;outline-offset:2px}
 @media(max-width:620px){.tour-card{left:12px;right:12px;bottom:12px;width:auto;padding:16px}.tour-actions{flex-wrap:wrap}.tour-actions .ghost-button{margin-right:0}.tour-skip{margin-left:auto}}

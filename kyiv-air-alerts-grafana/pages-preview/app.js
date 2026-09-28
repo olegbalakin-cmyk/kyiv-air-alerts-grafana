@@ -10,7 +10,7 @@ const COLORS = ["#62a0ea", "#8ff0a4", "#f8e45c"];
 const EXPLOSION_COLOR = "#ff9f43";
 const TIME_PROFILE_COLOR = "#ef4444";
 const PARTIAL_PERIOD_DASH = [3, 4];
-const TOUR_STORAGE_KEY = "air-alerts-intro-tour-v1";
+const TOUR_STORAGE_KEY = "air-alerts-intro-tour-v2";
 const TOUR_STEPS = [
   {
     selector: ".controls-panel",
@@ -1089,7 +1089,6 @@ function changeTableSort(column) {
     state.tableSort = { key: column.key, direction: column.defaultDirection };
   }
   renderAllCitiesTable();
-  maybeStartIntroTour();
 }
 
 function setupTableSorting() {
@@ -1269,9 +1268,11 @@ function bindIntroTour() {
 
 function maybeStartIntroTour() {
   if (tourWasSeen()) return;
-  window.setTimeout(() => {
-    if ($("introTour")?.classList.contains("hidden")) startIntroTour();
-  }, 450);
+  window.requestAnimationFrame(() => {
+    window.requestAnimationFrame(() => {
+      if ($("introTour")?.classList.contains("hidden")) startIntroTour();
+    });
+  });
 }
 
 function renderMethodology() {
@@ -1374,6 +1375,7 @@ async function init() {
   renderCity();
   renderComparison();
   renderAllCitiesTable();
+  maybeStartIntroTour();
 }
 
 init().catch(err => {
