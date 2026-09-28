@@ -8,8 +8,12 @@ import json
 import os
 import subprocess
 import sys
+import tempfile
 from datetime import datetime, timezone
 from pathlib import Path
+
+# Prevent campaign worker imports from polluting the checkout with __pycache__/\*.pyc.
+os.environ.setdefault("PYTHONDONTWRITEBYTECODE", "1")
 
 CAMPAIGN_ID = "historical-attack-events-v2-2026-09-27"
 CAMPAIGN_BRANCH = "historical-attack-event-backfill-2026-09-27"
@@ -284,7 +288,14 @@ def run_worker(root: Path) -> dict:
 
 
 def changed_paths(root: Path) -> set[str]:
-    rows = [x for x in git(root, "status", "--porcelain", "--untracked-files=all").splitlines() if x.strip()]
+    # Porcelain v1 uses leading status columns. Do not route this through git(),
+    # whose .strip() would remove the leading space from the first row and
+    # corrupt paths such as "research/..." into "esearch/...".
+    proc = run_cmd(
+        ["git", "status", "--porcelain", "--untracked-files=all"],
+        root,
+    )
+    rows = [x for x in proc.stdout.splitlines() if x.strip()]
     out: set[str] = set()
     for row in rows:
         path = row[3:].strip()
@@ -684,6 +695,81 @@ def inspect_current(root: Path) -> dict:
     }
 
 
+
+def worktree_guard_self_test() -> dict:
+    with tempfile.TemporaryDirectory(prefix="historical-backfill-guard-") as tmp:
+        root = Path(tmp)
+        run_cmd(["git", "init"], root)
+        run_cmd(["git", "config", "user.name", "guard-self-test"], root)
+        run_cmd(["git", "config", "user.email", "guard-self-test@example.invalid"], root)
+
+        status_path = root / STATUS_REL
+        status_path.parent.mkdir(parents=True, exist_ok=True)
+        status_path.write_text("{}\n", encoding="utf-8")
+        run_cmd(["git", "add", "--", STATUS_REL.as_posix()], root)
+        run_cmd(["git", "commit", "-m", "baseline"], root)
+
+        # Expected campaign outputs: the checkpoint plus exactly one declared batch.
+        status_path.write_text('{"progress": {"processed": 50}}\n', encoding="utf-8")
+        batch_rel = BATCH_ROOT_REL / "lviv" / "batch_000002.json"
+        batch_path = root / batch_rel
+        batch_path.parent.mkdir(parents=True, exist_ok=True)
+        batch_path.write_text("{}\n", encoding="utf-8")
+        ensure_expected_dirty_paths(root, batch_rel)
+        assert STATUS_REL.as_posix() in changed_paths(root)
+
+        run_cmd(["git", "reset", "--hard", "HEAD"], root)
+        run_cmd(["git", "clean", "-fd"], root)
+
+        unrelated = root / "unrelated.txt"
+        unrelated.write_text("unexpected\n", encoding="utf-8")
+        unexpected_blocked = False
+        try:
+            ensure_expected_dirty_paths(root, None, metadata_only=True)
+        except GuardFailure as exc:
+            unexpected_blocked = str(exc) == "UNEXPECTED_WORKTREE_MUTATION:unrelated.txt"
+        assert unexpected_blocked
+
+        run_cmd(["git", "clean", "-fd"], root)
+
+        protected_rel = Path("protected.txt")
+        protected_path = root / protected_rel
+        protected_path.write_text("safe\n", encoding="utf-8")
+        expected_protected_blob = blob(root, protected_rel)
+        protected_path.write_text("mutated\n", encoding="utf-8")
+        protected_blocked = False
+        try:
+            verify_protected(root, {"protected_file_hashes": {protected_rel.as_posix(): expected_protected_blob}})
+        except GuardFailure as exc:
+            protected_blocked = str(exc) == f"PROTECTED_FILE_MUTATION:{protected_rel.as_posix()}"
+        assert protected_blocked
+
+    with tempfile.TemporaryDirectory(prefix="historical-backfill-bytecode-") as tmp:
+        root = Path(tmp)
+        (root / "probe_module.py").write_text("VALUE = 1\n", encoding="utf-8")
+        env = os.environ.copy()
+        env["PYTHONDONTWRITEBYTECODE"] = "1"
+        proc = subprocess.run(
+            [sys.executable, "-c", "import probe_module; assert probe_module.VALUE == 1"],
+            cwd=root,
+            env=env,
+            text=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            check=False,
+        )
+        assert proc.returncode == 0, proc.stderr or proc.stdout
+        assert not list(root.rglob("*.pyc"))
+        assert not list(root.rglob("__pycache__"))
+
+    return {
+        "expected_status_and_batch_mutation": "PASS",
+        "python_bytecode_prevention": "PASS",
+        "unexpected_mutation_guard": "PASS",
+        "protected_mutation_guard": "PASS",
+    }
+
+
 def self_test() -> dict:
     timestamp = "2026-09-27T00:00:00Z"
     status = {
@@ -761,6 +847,7 @@ def self_test() -> dict:
 
     assert systemic_source_failure({"new_work": 50, "retryable": 25})
     assert not systemic_source_failure({"new_work": 50, "retryable": 5})
+    guard_tests = worktree_guard_self_test()
 
     return {
         "ok": True,
@@ -781,6 +868,7 @@ def self_test() -> dict:
         "completion_idempotence": "PASS",
         "synthetic_guard_injection": "PASS",
         "systemic_source_failure_guard": "PASS",
+        **guard_tests,
     }
 
 

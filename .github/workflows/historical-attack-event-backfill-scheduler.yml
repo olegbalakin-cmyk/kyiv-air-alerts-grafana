@@ -16,6 +16,8 @@ jobs:
   resume:
     runs-on: ubuntu-latest
     timeout-minutes: 165
+    env:
+      PYTHONDONTWRITEBYTECODE: "1"
     steps:
       - name: Check out scheduler/controller from main
         uses: actions/checkout@v4
