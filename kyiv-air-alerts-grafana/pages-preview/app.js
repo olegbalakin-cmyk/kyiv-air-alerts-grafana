@@ -84,6 +84,24 @@ function typeText(key) { return sourceType(key) === "raion_proxy" ? "Дані п
 function rolling7dEnabled() {
   return state.data.multicity_meta?.weekly_mode === "rolling_7d";
 }
+
+function fillSelect(select, keys, current, allowEmpty = false) {
+  select.innerHTML = "";
+  if (allowEmpty) {
+    const empty = document.createElement("option");
+    empty.value = "";
+    empty.textContent = "— не обирати —";
+    empty.selected = current === "";
+    select.appendChild(empty);
+  }
+  for (const key of keys) {
+    const opt = document.createElement("option");
+    opt.value = key;
+    opt.textContent = labelFor(key);
+    opt.selected = key === current;
+    select.appendChild(opt);
+  }
+}
 function chartOptions(yTitle, extra = {}) {
   return {
     responsive: true,
