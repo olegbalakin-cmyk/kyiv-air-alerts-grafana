@@ -1,0 +1,115 @@
+name: Multicity casualty production promotion proof
+
+on:
+  push:
+    branches: [multicity-casualties-prod-proof-2026-09-28]
+    paths:
+      - ".github/workflows/multicity-casualties-prod-proof.yml"
+      - "kyiv-air-alerts-grafana/scripts/update_casualties.py"
+      - "kyiv-air-alerts-grafana/scripts/add_casualty_panel.py"
+      - "kyiv-air-alerts-grafana/data/casualties/**"
+      - "kyiv-air-alerts-grafana/pages-preview/app.js"
+      - "kyiv-air-alerts-grafana/pages-preview/index.html"
+      - "kyiv-air-alerts-grafana/tests/test_multicity_casualty_promotion.py"
+
+permissions:
+  contents: read
+
+jobs:
+  proof:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Check out isolated proof branch
+        uses: actions/checkout@v4
+        with:
+          ref: multicity-casualties-prod-proof-2026-09-28
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install existing project dependencies
+        working-directory: kyiv-air-alerts-grafana
+        run: pip install -r requirements.txt
+
+      - name: Snapshot production-equivalent input
+        run: cp kyiv-air-alerts-grafana/data/dashboard_data.json /tmp/dashboard_data_before_casualties.json
+
+      - name: Build 23-city casualty data without network discovery
+        working-directory: kyiv-air-alerts-grafana
+        run: python scripts/update_casualties.py --no-network
+
+      - name: Build 23-city casualty Grafana panels without deployment
+        working-directory: kyiv-air-alerts-grafana
+        run: python scripts/add_casualty_panel.py
+
+      - name: Run focused casualty promotion proof
+        working-directory: kyiv-air-alerts-grafana
+        env:
+          CASUALTY_PROOF_BEFORE: /tmp/dashboard_data_before_casualties.json
+        run: python tests/test_multicity_casualty_promotion.py | tee /tmp/casualty-proof-test.json
+
+      - name: Build local static production-equivalent fixture
+        run: |
+          rm -rf _site
+          mkdir -p _site
+          cp kyiv-air-alerts-grafana/pages-preview/index.html _site/index.html
+          cp kyiv-air-alerts-grafana/pages-preview/styles.css _site/styles.css
+          cp kyiv-air-alerts-grafana/pages-preview/app.js _site/app.js
+          cp kyiv-air-alerts-grafana/data/dashboard_data.json _site/data.json
+          python - <<'PY'
+          from pathlib import Path
+
+          p = Path("_site/app.js")
+          text = p.read_text(encoding="utf-8")
+          live = 'const DATA_URL = "https://raw.githubusercontent.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/site-prod/kyiv-air-alerts-grafana/data/dashboard_data.json";'
+          local = 'const DATA_URL = "./data.json";'
+          assert text.count(live) == 1
+          p.write_text(text.replace(live, local), encoding="utf-8")
+          assert local in p.read_text(encoding="utf-8")
+          PY
+          test -s _site/index.html
+          test -s _site/styles.css
+          test -s _site/app.js
+          test -s _site/data.json
+          node --check _site/app.js
+
+      - name: Record no-deploy proof result
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          test_result = json.loads(Path("/tmp/casualty-proof-test.json").read_text(encoding="utf-8").strip().splitlines()[-1])
+          result = {
+              "ok": True,
+              "test_result": test_result,
+              "static_build": {
+                  "ok": True,
+                  "fixture_data_url": "./data.json",
+                  "production_data_url_unchanged_in_repository": True,
+                  "node_syntax_check": True,
+              },
+              "deploys": {
+                  "netlify": False,
+                  "grafana": False,
+                  "casualty_draft_preview": False,
+              },
+          }
+          Path("/tmp/multicity-casualty-proof-result.json").write_text(
+              json.dumps(result, ensure_ascii=False, indent=2) + "\n",
+              encoding="utf-8",
+          )
+          print(json.dumps(result, ensure_ascii=False))
+          PY
+
+      - name: Upload proof diagnostics only
+        uses: actions/upload-artifact@v4
+        with:
+          name: multicity-casualty-production-promotion-proof
+          path: |
+            /tmp/multicity-casualty-proof-result.json
+            /tmp/casualty-proof-test.json
+          retention-days: 30
