@@ -30,15 +30,20 @@ jobs:
           ref: site-prod
           fetch-depth: 0
 
+      - name: Record Phase-1 checked-out input provenance
+        working-directory: .
+        shell: bash
+        run: echo "PHASE1_INPUT_SHA=$(git rev-parse HEAD)" >> "$GITHUB_ENV"
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.12"
           cache: pip
-          cache-dependency-path: kyiv-air-alerts-grafana/requirements.txt
+          cache-dependency-path: kyiv-air-alerts-grafana/requirements-db-phase1.txt
 
       - name: Install dependencies
-        run: pip install -r requirements.txt
+        run: pip install -r requirements-db-phase1.txt
 
       - name: Test municipal-source fallback
         run: python tests/test_update_fallback.py
@@ -73,7 +78,69 @@ jobs:
       - name: Apply verified Alerts.in.ua and UkraineAlarm bridge
         env:
           UKRAINEALARM_API_TOKEN: ${{ secrets.UKRAINEALARM_API_TOKEN }}
+          PHASE1_DB_SHADOW: "1"
+          PHASE1_DATABASE_URL: ${{ secrets.PHASE1_PROD_SHADOW_DATABASE_URL }}
+          PHASE1_DB_BRANCH: ${{ vars.PHASE1_PROD_SHADOW_BRANCH_ID }}
+          PHASE1_DB_SHADOW_FAILURE_POLICY: fail_open
+          PHASE1_DB_SHADOW_DIAGNOSTIC: ${{ runner.temp }}/phase1_db_shadow.json
+          PHASE1_INPUT_REPOSITORY: ${{ github.repository }}
+          PHASE1_INPUT_REF: site-prod
+          PHASE1_INPUT_SHA: ${{ env.PHASE1_INPUT_SHA }}
         run: python scripts/apply_ukrainealarm_bridge.py
+
+      - name: Upload Phase-1 DB shadow diagnostic
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: phase1-db-shadow-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/phase1_db_shadow.json
+          if-no-files-found: warn
+          retention-days: 30
+
+      - name: Summarize Phase-1 DB shadow diagnostic
+        if: always()
+        env:
+          PHASE1_DIAGNOSTIC_PATH: ${{ runner.temp }}/phase1_db_shadow.json
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          path = Path(os.environ["PHASE1_DIAGNOSTIC_PATH"])
+          if not path.exists():
+              print("::warning::Phase-1 DB shadow diagnostic missing")
+              raise SystemExit(0)
+
+          diagnostic = json.loads(path.read_text(encoding="utf-8"))
+          status = diagnostic.get("status")
+          if status == "succeeded":
+              safe = {
+                  "db_branch": diagnostic.get("db_branch"),
+                  "run_id": diagnostic.get("run_id"),
+                  "checkpoint_id": diagnostic.get("checkpoint_id"),
+                  "checkpoint_seq": diagnostic.get("checkpoint_seq"),
+                  "episodes_inserted": diagnostic.get("episodes_inserted"),
+                  "episodes_existing": diagnostic.get("episodes_existing"),
+                  "source_observations_inserted": diagnostic.get("source_observations_inserted"),
+                  "source_observations_existing": diagnostic.get("source_observations_existing"),
+                  "source_observations_last_seen_updated": diagnostic.get("source_observations_last_seen_updated"),
+                  "checkpoints_inserted": diagnostic.get("checkpoints_inserted"),
+                  "exact_retry": diagnostic.get("exact_retry"),
+                  "workflow_sha": diagnostic.get("workflow_sha"),
+                  "input_sha": diagnostic.get("input_sha"),
+              }
+              print("Phase-1 DB shadow succeeded:", json.dumps(safe, sort_keys=True))
+          elif status == "failed":
+              print(
+                  "::warning::Phase-1 DB shadow failed open; "
+                  f"error_type={diagnostic.get('error_type')} "
+                  f"db_branch={diagnostic.get('db_branch')}"
+              )
+          else:
+              print(f"::warning::Unexpected Phase-1 DB shadow diagnostic status: {status!r}")
+          PY
 
       - name: Validate verified UkraineAlarm bridge checkpoint
         run: |
