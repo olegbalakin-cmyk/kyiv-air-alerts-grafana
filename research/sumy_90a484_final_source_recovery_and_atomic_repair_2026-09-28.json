@@ -1,0 +1,246 @@
+{
+  "schema_version": "sumy-90a484-final-source-recovery-and-atomic-repair-v1",
+  "generated_date": "2026-09-28",
+  "repository": "olegbalakin-cmyk/kyiv-air-alerts-grafana",
+  "branch": "multicity-wip-2026-09-16",
+  "starting_head": "13113bef51b568bca5ea30ba90a9fe3428153118",
+  "target_episode_id": "90a484f51b321e0950e31b60",
+  "scope_note": "Only the final Sumy QA episode was researched and repaired. Resolved episode 402035df8980628fa245c4e8 was not reopened.",
+  "pre_repair_replay": {
+    "execution": "fresh actual GitHub Actions rerun on the last semantically identical Sumy replay-input commit",
+    "workflow_run_id": 36379577749,
+    "run_attempt": 2,
+    "workflow_job_id": 108792360039,
+    "workflow_artifact_id": 10952915547,
+    "input_head": "cc39d553aa02c2189b4fe1512a06a5bbc995d24b",
+    "semantic_equivalence_to_starting_head": true,
+    "semantic_equivalence_basis": "Compare cc39d553aa02c2189b4fe1512a06a5bbc995d24b..13113bef51b568bca5ea30ba90a9fe3428153118 changed only casualty monitor/status files plus research status/artifact; no Sumy final_evidence, Sumy source slice, replay script, or classifier input changed.",
+    "expected_denominator": 2297,
+    "reconstructed_denominator": 2297,
+    "strict": 204,
+    "sensitivity": 237,
+    "qa_count": 1,
+    "qa_episode_ids": [
+      "90a484f51b321e0950e31b60"
+    ],
+    "target_reason_codes": [
+      "ATTACK_EVENT_TYPES:explosion",
+      "EXACT_CITY_EVENT_TEXT",
+      "MATCH_UNIQUE",
+      "NO_AIR_MILITARY_CONTEXT",
+      "NO_STRICT_TEMPORAL_BINDING",
+      "REVIEW_PROVENANCE_SENSITIVITY_BINDING_USED",
+      "REVIEW_PROVENANCE_USABLE",
+      "STRICT_EXPLOSION_EVIDENCE"
+    ],
+    "protected_files_unchanged": true,
+    "errors": []
+  },
+  "recovered_sources": [
+    {
+      "role": "retained exact-city explosion + alert chronology",
+      "url": "https://24tv.ua/sumah-progrimiv-vibuh_n2897888",
+      "displayed_publication_time": "2025-08-20 13:35",
+      "publication_time_precision": "minute",
+      "publication_timezone_note": "Page does not print a timezone label; Ukrainian site-local display is treated as Europe/Kyiv for audit metadata only. Publication time is not used as event time.",
+      "excerpt": "Вдень у середу, 20 серпня, в Сумах було гучно. Зазначимо, що в Сумському районі тривогу оголосили о 13:17. Вже о 13:24 в Сумах чули звук вибуху.",
+      "excerpt_sha256": "8744904b0ae6820b30e7ca471dfa2dde19003b90d7445a5dbba2d6a0c73f4370",
+      "upstream_source_url": "https://t.me/suspilnesumy/37207",
+      "upstream_fetch_note": "The 24 Kanal article explicitly attributes the 13:24 report to Suspilne. The accessible Telegram rendering did not expose the post text/timestamp, so no Telegram timestamp was invented."
+    },
+    {
+      "role": "same-day retrospective Russian-military attribution for the daytime event",
+      "url": "https://24tv.ua/sumi-masovano-atakuyut-shahedi-oblasti-chuli-vibuhi_n2898223",
+      "displayed_publication_time": "2025-08-20 21:24",
+      "publication_time_precision": "minute",
+      "publication_timezone_note": "Page does not print a timezone label; Ukrainian site-local display is treated as Europe/Kyiv for audit metadata only. Publication time is not used as event time.",
+      "excerpt": "Вдень 20 серпня російська армія завдала першого удару по Сумах. У Сумському районі тривогу оголосили о 13:17, а за кілька хвилин в місті було гучно. Подробиць тієї атаки наразі нема.",
+      "excerpt_sha256": "bfff92930dc830d8fc07d9a3ba03eb39f808ca74d590461f5ffdcfcdac679990",
+      "excluded_article_context": "The separate evening Shahed episode around 21:19 is not used to attribute the ~13:24 daytime event."
+    }
+  ],
+  "evidence_assessment": {
+    "exact_city_basis": "Both accessible reports explicitly identify Sumy; the retrospective source states that the Russian military carried out the first daytime strike on Sumy.",
+    "explosion_basis": "The retained article states that at 13:24 a sound of an explosion was heard in Sumy.",
+    "air_military_context_basis": "The retrospective article explicitly identifies the same daytime sequence as a strike by the Russian military and immediately anchors it to the 13:17 alert followed by a loud sound in the city.",
+    "same_attack_basis": "Event-local chronology matches across the two reports: daytime 20 August, Sumy, alert at 13:17, loud sound a few minutes later; the retained report resolves that sound to the 13:24 explosion. This does not rely on the separate evening Shahed attack.",
+    "temporal_binding_basis": "The retained event time ~13:24 Europe/Kyiv falls inside the target alert 13:17:18–13:46:50. No exact event seconds were synthesized.",
+    "timestamp_precision": "event time minute-level approximate; alert boundaries second-level from frozen corpus",
+    "neighboring_alert_check": {
+      "passed": true,
+      "source_slice": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/sumy-P1a_alerts.json",
+      "source_slice_blob": "9ffd863b8cfbfb2aaec24469745d5c9ccc2d9c56",
+      "previous_episode": {
+        "episode_id": "be40973f68280e11e50d6e86",
+        "alert_end_utc": "2025-08-20T09:47:23Z",
+        "alert_end_kyiv": "2025-08-20T12:47:23+03:00"
+      },
+      "target_episode": {
+        "episode_id": "90a484f51b321e0950e31b60",
+        "alert_start_utc": "2025-08-20T10:17:18Z",
+        "alert_start_kyiv": "2025-08-20T13:17:18+03:00",
+        "alert_end_utc": "2025-08-20T10:46:50Z",
+        "alert_end_kyiv": "2025-08-20T13:46:50+03:00"
+      },
+      "next_episode": {
+        "episode_id": "0ae256d54c71033b9a589430",
+        "alert_start_utc": "2025-08-20T11:50:38Z",
+        "alert_start_kyiv": "2025-08-20T14:50:38+03:00"
+      },
+      "conclusion": "13:24 is uniquely inside the target episode and outside both neighboring alerts."
+    }
+  },
+  "temporary_repair": {
+    "branch": "sumy-90a484-source-preflight-2026-09-28",
+    "base_head": "13113bef51b568bca5ea30ba90a9fe3428153118",
+    "preflight_commit": "91819b8fde98cab675705d9d6e947b7c06823228",
+    "description": "Append one sensitivity_only_events record containing the recovered source/provenance, plus a one-line temporary workflow branch trigger solely to execute the real replay on the isolated branch.",
+    "evidence_blob_before": "74b6d3fc6d6e9e18643d38de5c47b45e4d7033ea",
+    "candidate_evidence_blob": "79b29e65adbc3af6e968210bc40e0bcdb5b3662a",
+    "workflow_blob_before": "f9d0f0f2f5b2c6459725c87c52d38b286a993a6f",
+    "temporary_workflow_blob": "220b44d532641ba615217469b86bb6ef4c9bd53a",
+    "append_only_evidence_diff": {
+      "additions": 50,
+      "deletions": 0
+    },
+    "temporary_workflow_diff": {
+      "additions": 1,
+      "deletions": 0
+    },
+    "cleanup": "After proof, the temporary branch ref was reset to its base head; no temporary workflow modification remains on that branch."
+  },
+  "preflight_replay": {
+    "workflow_run_id": 36381077313,
+    "workflow_artifact_id": 10952472737,
+    "input_head": "91819b8fde98cab675705d9d6e947b7c06823228",
+    "status": "COMPLETE",
+    "verdict": "CITY REPLAY CLEAN",
+    "expected_denominator": 2297,
+    "reconstructed_denominator": 2297,
+    "strict": 204,
+    "sensitivity": 238,
+    "qa_count": 0,
+    "target_removed_in_preflight": true,
+    "target_classification_after_temporary_repair": "SENSITIVITY",
+    "new_qa_ids": [],
+    "changed_episode_ids": [],
+    "errors": [],
+    "protected_files_unchanged": true,
+    "unrelated_drift": false
+  },
+  "repair": {
+    "commit_sha": "28f92e5d072d44bd0fd0072d2917c2ed543f0ad2",
+    "parent_sha": "13113bef51b568bca5ea30ba90a9fe3428153118",
+    "changed_files": [
+      "kyiv-air-alerts-grafana/data/explosion_research/sumy/final_evidence.json"
+    ],
+    "additions": 50,
+    "deletions": 0,
+    "append_only": true,
+    "classifier_code_changed": false,
+    "other_sumy_evidence_deleted_or_overwritten": false,
+    "other_cities_changed": false,
+    "final_evidence_blob_before": "74b6d3fc6d6e9e18643d38de5c47b45e4d7033ea",
+    "final_evidence_blob_after": "79b29e65adbc3af6e968210bc40e0bcdb5b3662a",
+    "exact_preflight_candidate_reused": true
+  },
+  "post_repair_replay": {
+    "workflow_run_id": 36381143294,
+    "workflow_artifact_id": 10951924670,
+    "input_head": "28f92e5d072d44bd0fd0072d2917c2ed543f0ad2",
+    "status": "COMPLETE",
+    "verdict": "CITY REPLAY CLEAN",
+    "expected_denominator": 2297,
+    "reconstructed_denominator": 2297,
+    "strict": 204,
+    "sensitivity": 238,
+    "qa_count": 0,
+    "remaining_qa_ids": [],
+    "added_qa_ids": [],
+    "changed_episode_ids": [],
+    "errors": [],
+    "ppo_related_changes": [],
+    "protected_files_unchanged": true
+  },
+  "persistent_status_publication": {
+    "orchestrator_run_id": 36381143545,
+    "status_commit_sha": "a248f2eed872dc196f56e602ba68cbc8691b75f1",
+    "status_file": "research/historical_replay_status_current.json",
+    "status_file_blob": "52c8d254ad25b6b26c039129a68ec04545ca8d1b",
+    "sumy_status": "READY",
+    "manual_qa_count": 0,
+    "qa_episode_ids": [],
+    "replayed_strict_episodes": 204,
+    "replayed_sensitivity_episodes": 238,
+    "changed_count": 0,
+    "error_count": 0,
+    "ppo_related_change_count": 0,
+    "protected_files_unchanged": true,
+    "note": "This was an automatic orchestrator status-only commit after the repair; it was not part of the evidence repair commit."
+  },
+  "cross_city_and_protected_state": {
+    "current_23_city_preflight_run_id": 36381143339,
+    "current_23_city_preflight_conclusion": "success",
+    "current_23_city_protected_files_check": "success",
+    "orchestrator_run_id": 36381143545,
+    "replayed_cities_with_success": [
+      "cherkasy",
+      "kyiv",
+      "sevastopol",
+      "lviv",
+      "sumy",
+      "zaporizhzhia"
+    ],
+    "repair_commit_changed_only_sumy_final_evidence": true,
+    "classifier_unchanged": true,
+    "alert_corpus_unchanged": true,
+    "production_dashboard_data_unchanged": true,
+    "site_prod_untouched": true,
+    "main_untouched": true,
+    "protected_files_unchanged": true
+  },
+  "auxiliary_qa_bundle_status_race": {
+    "workflow_run_id": 36381143406,
+    "conclusion": "failure",
+    "failed_job": "qa (sumy, 1)",
+    "failure_reason": "The bundle job read the pre-repair persistent status (QA=[90a484...]) at repair commit 28f92e5..., while its fresh replay was already QA=[]. It raised an explicit status-vs-fresh-replay drift error.",
+    "classification": "EXPECTED_TRANSIENT_STATUS_RACE_NOT_REPLAY_REGRESSION",
+    "later_resolved_by_status_commit": "a248f2eed872dc196f56e602ba68cbc8691b75f1"
+  },
+  "active_6863_campaign": {
+    "branch": "historical-attack-event-backfill-2026-09-27",
+    "head_before_preflight": "9aae65593a927e32f25bbd0c477e7ce77400737e",
+    "head_before_artifact": "9aae65593a927e32f25bbd0c477e7ce77400737e",
+    "unchanged_during_task": true,
+    "mutated_by_this_task": false
+  },
+  "delta_audit": {
+    "qa": {
+      "before": 1,
+      "after": 0,
+      "delta": -1
+    },
+    "strict": {
+      "before": 204,
+      "after": 204,
+      "delta": 0
+    },
+    "sensitivity": {
+      "before": 237,
+      "after": 238,
+      "delta": 1
+    },
+    "denominator": {
+      "before": 2297,
+      "after": 2297,
+      "delta": 0
+    },
+    "removed_qa_ids": [
+      "90a484f51b321e0950e31b60"
+    ],
+    "added_qa_ids": [],
+    "unexplained_drift": false
+  },
+  "artifact_path": "research/sumy_90a484_final_source_recovery_and_atomic_repair_2026-09-28.json",
+  "verdict": "SUMY 90A484 EVIDENCE REPAIR APPLIED — SUMY HISTORICAL REPLAY QA CLEAN"
+}
