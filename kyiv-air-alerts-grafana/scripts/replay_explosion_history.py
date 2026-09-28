@@ -810,7 +810,14 @@ def history_provenance(
         return provenance
     return None
 
-def candidate_from_history(city: str, row: dict, bucket: str, target_id: str, monitor) -> dict:
+def candidate_from_history(
+    city: str,
+    row: dict,
+    bucket: str,
+    target_id: str,
+    monitor,
+    target_episode: dict | None = None,
+) -> dict:
     text = evidence_text(row)
     source_url = str(row.get("source_url") or "")
     cid_seed = f"{city}|{target_id}|{bucket}|{source_url}|{text}"
