@@ -652,17 +652,18 @@ def retained_event_times(row: dict, monitor) -> list[datetime]:
         if not raw:
             continue
         text = str(raw)
-        # Keep the first fully-qualified timestamp and any additional HH:MM
-        # clocks on that same retained local date.
-        first = parse_historical_datetime(text, monitor)
-        if first is None:
+        # Historical audit fields can contain an approximation marker between
+        # the date and clock ("2025-02-14 ~01:42") or multiple retained clocks.
+        day_match = re.search(r"(?<!\d)(\d{4}-\d{2}-\d{2})(?!\d)", text)
+        if not day_match:
             continue
-        values.append(first)
-        local_day = first.astimezone(KYIV_TZ).date()
-        first_clock = (first.astimezone(KYIV_TZ).hour, first.astimezone(KYIV_TZ).minute)
+        try:
+            local_day = datetime.fromisoformat(day_match.group(1)).date()
+        except ValueError:
+            continue
         for match in re.finditer(r"(?<!\d)(\d{1,2}):(\d{2})(?!\d)", text):
             hour, minute = map(int, match.groups())
-            if hour > 23 or minute > 59 or (hour, minute) == first_clock:
+            if hour > 23 or minute > 59:
                 continue
             values.append(
                 datetime(
@@ -1287,12 +1288,12 @@ def replay_city(repo_root: Path, city: str, through: str, output: Path, input_he
                 "ppo_related": any(ppo_related(text) for text in texts),
             }
             reconciliation_events.append(row)
+            if row["ppo_related"]:
+                ppo_changes.append(row)
             if evidence_backed_sensitivity_to_strict_upgrade(row, decision_by_candidate):
                 accepted_upgrades.append(row)
                 continue
             changed.append(row)
-            if row["ppo_related"]:
-                ppo_changes.append(row)
 
         evidence_episode_diagnostics = {}
         for eid in sorted(candidates_by_episode):
