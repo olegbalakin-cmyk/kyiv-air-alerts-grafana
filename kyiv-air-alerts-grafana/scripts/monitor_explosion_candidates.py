@@ -723,8 +723,27 @@ def trusted_live_source(row: dict) -> bool:
     return str(row.get("source") or "").startswith("Telegram /")
 
 
+def cherkasy_genitive_city_event(segment: str) -> bool:
+    """Narrow exact-city support for the reviewed phrase 'жителі Черкас ... вибухи'."""
+    low = normalize_evidence_text(segment)
+    if not re.search(r"(?<![\w-])черкас(?![\w-])", low):
+        return False
+    return bool(
+        re.search(
+            r"\bжителі\s+черкас\b.{0,80}\b(?:чул\w*|чут\w*)\b"
+            r".{0,35}\bвибух\w*",
+            low,
+        )
+    )
+
+
 def exact_city_classification_evidence(city_key: str, row: dict) -> dict:
-    segments = [segment for segment in classification_segments(row) if city_mentioned(city_key, segment)]
+    segments = [
+        segment
+        for segment in classification_segments(row)
+        if city_mentioned(city_key, segment)
+        or (city_key == "cherkasy" and cherkasy_genitive_city_event(segment))
+    ]
     return {"present": bool(segments), "segments": segments[:4]}
 
 

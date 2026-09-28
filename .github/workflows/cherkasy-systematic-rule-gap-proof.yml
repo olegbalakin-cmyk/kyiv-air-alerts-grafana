@@ -1,0 +1,130 @@
+name: Cherkasy systematic-rule-gap proof
+
+on:
+  push:
+    branches:
+      - cherkasy-systematic-rule-gap-proof-2026-09-28
+    paths:
+      - "kyiv-air-alerts-grafana/scripts/replay_explosion_history.py"
+      - "kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py"
+      - "kyiv-air-alerts-grafana/tests/test_historical_replay_cherkasy_roles.py"
+      - ".github/workflows/cherkasy-systematic-rule-gap-proof.yml"
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  proof:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    env:
+      AUTHORITATIVE_HEAD: f41d2a2a7d267d6b41579724281258212ab26cd1
+      THROUGH: "2026-09-17"
+      AUTHORITATIVE_BRANCH: multicity-wip-2026-09-16
+      CAMPAIGN_BRANCH: historical-attack-event-backfill-2026-09-27
+
+    steps:
+      - name: Checkout proof code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: kyiv-air-alerts-grafana/requirements.txt
+
+      - name: Install dependencies
+        run: pip install -r kyiv-air-alerts-grafana/requirements.txt
+
+      - name: Verify ancestry and capture protected refs
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git merge-base "$AUTHORITATIVE_HEAD" HEAD)" = "$AUTHORITATIVE_HEAD"
+          git fetch origin "$AUTHORITATIVE_BRANCH" "$CAMPAIGN_BRANCH" main
+          python - <<'PY'
+          import json, os, subprocess
+          from pathlib import Path
+          def rev(ref):
+              return subprocess.check_output(["git", "rev-parse", ref], text=True).strip()
+          payload = {
+              "authoritative_before": rev("origin/" + os.environ["AUTHORITATIVE_BRANCH"]),
+              "campaign_before": rev("origin/" + os.environ["CAMPAIGN_BRANCH"]),
+              "main_before": rev("origin/main"),
+          }
+          Path(os.environ["RUNNER_TEMP"], "refs_before.json").write_text(json.dumps(payload, indent=2) + "\n")
+          PY
+
+      - name: Run focused and existing tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          python kyiv-air-alerts-grafana/scripts/replay_explosion_history.py --self-test
+          python kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py --self-test
+          python -m pytest -q \
+            kyiv-air-alerts-grafana/tests/test_historical_replay_cherkasy_roles.py \
+            kyiv-air-alerts-grafana/tests/test_historical_replay_strike_roles.py \
+            kyiv-air-alerts-grafana/tests/test_historical_replay_remaining_v2_roles.py
+
+      - name: Create authoritative comparison worktree
+        shell: bash
+        run: |
+          set -euo pipefail
+          git worktree add "$RUNNER_TEMP/authoritative" "$AUTHORITATIVE_HEAD"
+
+      - name: Run before and after replay set
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/replays"
+          for city in cherkasy lviv sevastopol sumy zaporizhzhia kyiv; do
+            python "$RUNNER_TEMP/authoritative/kyiv-air-alerts-grafana/scripts/replay_explosion_history.py" \
+              --repo-root "$RUNNER_TEMP/authoritative/kyiv-air-alerts-grafana" \
+              --city "$city" --through "$THROUGH" --input-head "$AUTHORITATIVE_HEAD" \
+              --read-only --output "$RUNNER_TEMP/replays/before_${city}.json"
+            python kyiv-air-alerts-grafana/scripts/replay_explosion_history.py \
+              --repo-root "$GITHUB_WORKSPACE/kyiv-air-alerts-grafana" \
+              --city "$city" --through "$THROUGH" --input-head "$GITHUB_SHA" \
+              --read-only --output "$RUNNER_TEMP/replays/after_${city}.json"
+          done
+
+      - name: Verify proof checkout remains clean
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -z "$(git status --porcelain)"
+
+      - name: Capture protected refs after
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin "$AUTHORITATIVE_BRANCH" "$CAMPAIGN_BRANCH" main
+          python - <<'PY'
+          import json, os, subprocess
+          from pathlib import Path
+          def rev(ref):
+              return subprocess.check_output(["git", "rev-parse", ref], text=True).strip()
+          payload = {
+              "authoritative_after": rev("origin/" + os.environ["AUTHORITATIVE_BRANCH"]),
+              "campaign_after": rev("origin/" + os.environ["CAMPAIGN_BRANCH"]),
+              "main_after": rev("origin/main"),
+          }
+          Path(os.environ["RUNNER_TEMP"], "refs_after.json").write_text(json.dumps(payload, indent=2) + "\n")
+          PY
+
+      - name: Upload proof runtime
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cherkasy-systematic-rule-gap-proof-${{ github.sha }}
+          path: |
+            ${{ runner.temp }}/refs_before.json
+            ${{ runner.temp }}/refs_after.json
+            ${{ runner.temp }}/replays/*.json
+          if-no-files-found: warn
+          retention-days: 30
