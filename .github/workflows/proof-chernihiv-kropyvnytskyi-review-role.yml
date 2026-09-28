@@ -23,6 +23,7 @@ jobs:
         with:
           ref: ${{ github.sha }}
           path: proof
+          fetch-depth: 0
 
       - name: Check out authoritative base
         uses: actions/checkout@v4
