@@ -220,17 +220,33 @@ jobs:
               if not semantic_changed:
                   continue
 
+              explanation=None
               if "air_defense_action" in new_types and "air_defense_action" not in old_types:
                   reason="CONFIRMED_AIR_DEFENSE_ACTION"
+                  explanation="v2 adds canonical confirmed air-defense action"
               elif any(
                   t in new_types and t not in old_types
                   for t in ("impact","arrival","strike","damage","fire")
               ):
                   reason="NEW_EVENT_TYPE_DISCOVERY"
+                  explanation="v2 canonical event-type enrichment"
+              elif (
+                  old=="rejected"
+                  and new=="needs_review"
+                  and "PVO_ONLY_COMPLETE_MESSAGE" in (old_d.get("reason_codes") or [])
+                  and "PVO_ONLY_COMPLETE_MESSAGE" not in (new_d.get("reason_codes") or [])
+              ):
+                  reason="OTHER"
+                  explanation="v2 narrows the legacy PVO-only deterministic reject for mixed-message context; case remains non-positive and moves to manual review"
               elif old in {"approved_strict","approved_sensitivity"} and new not in {"approved_strict","approved_sensitivity"}:
                   reason="FALSE_POSITIVE_FIX"
+                  explanation="proposed classifier removes a previous positive"
+              elif old==new and (old_action!=new_action or old_interception!=new_interception):
+                  reason="OTHER"
+                  explanation="v2 provenance attribute enrichment only; classification status unchanged"
               else:
                   reason="OTHER"
+                  explanation="unclassified semantic delta"
               reason_groups[reason]=reason_groups.get(reason,0)+1
 
               if old=="needs_review" and new=="approved_strict":
@@ -254,12 +270,23 @@ jobs:
                   "air_defense_action_after":new_action,
                   "interception_claim_before":old_interception,
                   "interception_claim_after":new_interception,
+                  "status_changed":old!=new,
+                  "explanation":explanation,
                   "reason_codes_before":old_d.get("reason_codes") or [],
                   "reason_codes_after":new_d.get("reason_codes") or [],
               }
               changed.append(row)
-              if reason not in {"CONFIRMED_AIR_DEFENSE_ACTION","NEW_EVENT_TYPE_DISCOVERY"}:
+              expected_status_change=(
+                  old==new
+                  or reason in {"CONFIRMED_AIR_DEFENSE_ACTION","NEW_EVENT_TYPE_DISCOVERY"}
+                  or explanation=="v2 narrows the legacy PVO-only deterministic reject for mixed-message context; case remains non-positive and moves to manual review"
+              )
+              if old!=new and not expected_status_change:
                   unexpected.append(row)
+
+          status_changes=[x for x in changed if x["status_changed"]]
+          field_only_changes=[x for x in changed if not x["status_changed"]]
+          expected_status_changes=[x for x in status_changes if x not in unexpected]
 
           out={
               "deterministic_tests":deterministic,
@@ -272,11 +299,17 @@ jobs:
                   "comparison_basis":"current authoritative classifier recomputation vs proposed classifier recomputation on identical queue/state",
                   "queue_total":len(queue),
                   "classification_changes_total":len(changed),
+                  "status_transitions_total":len(status_changes),
+                  "field_only_semantic_changes_total":len(field_only_changes),
+                  "expected_status_transitions_total":len(expected_status_changes),
                   **transition_counts,
+                  "rejected_to_needs_review":sum(x["from"]=="rejected" and x["to"]=="needs_review" for x in status_changes),
                   "changed_episode_ids":sorted({str(x["episode_id"]) for x in changed if x.get("episode_id")}),
                   "changed_candidate_ids":[str(x["candidate_id"]) for x in changed if x.get("candidate_id")],
                   "changes_by_reason":reason_groups,
                   "changes":changed,
+                  "expected_status_transitions":expected_status_changes,
+                  "field_only_semantic_changes":field_only_changes,
                   "unexpected_changes":unexpected,
                   "unexpected_status_transitions":len(unexpected),
               },
@@ -362,9 +395,11 @@ jobs:
             python - <<'PY'
           import copy
           import json
+          import sys
           from collections import Counter
           from pathlib import Path
-          import scripts.monitor_explosion_candidates as m
+          sys.path.insert(0,str(Path.cwd()/"scripts"))
+          import monitor_explosion_candidates as m
 
           started=m.now_utc()
           state=m.ensure_state()
@@ -373,10 +408,22 @@ jobs:
               queue=[]
           due=m.due_checks(state,started)
           due={k:v for k,v in due.items() if v}
-          if not due:
-              raise SystemExit("NO_CURRENT_DUE_ALERTS_FOR_NETWORK_PROOF")
-          city_key="sumy" if "sumy" in due else sorted(due)[0]
-          city_due=due[city_key]
+          if due:
+              city_key="sumy" if "sumy" in due else sorted(due)[0]
+              city_due=due[city_key]
+              proof_input_basis="currently_due_checks"
+          else:
+              candidates=[]
+              for key,cstate in (state.get("cities") or {}).items():
+                  for ep in cstate.get("episodes") or []:
+                      end=m.parse_dt(ep.get("alert_end"))
+                      if end:
+                          candidates.append((end,key,ep))
+              if not candidates:
+                  raise SystemExit("NO_COMPLETED_ALERT_INPUT_FOR_NETWORK_PROOF")
+              _end,city_key,ep=max(candidates,key=lambda x:x[0])
+              city_due=[(ep,{"label":"bounded-proof-current-completed-alert"})]
+              proof_input_basis="latest_completed_alert_fallback"
           earliest=min(m.parse_dt(ep.get("alert_start")) or started for ep,_ in city_due)
 
           telegram_errors=m.refresh_telegram_cache(state,started)
@@ -409,6 +456,7 @@ jobs:
           duplicate_keys=len(rows)-len({(x.get("url"),x.get("title")) for x in rows})
           out={
               "mode":"bounded_real_network_discovery",
+              "input_basis":proof_input_basis,
               "city_key":city_key,
               "alerts_checked":len(city_due),
               "cities_searched":1,
