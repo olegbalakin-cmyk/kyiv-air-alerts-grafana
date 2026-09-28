@@ -7,9 +7,11 @@ import gzip
 import io
 import json
 import os
+import re
 import time
 from datetime import date, datetime, timezone
 from pathlib import Path
+from urllib.parse import urlsplit
 
 import requests
 
@@ -501,6 +503,127 @@ def phase1_db_shadow_enabled(env=None) -> bool:
     return str(source_env.get("PHASE1_DB_SHADOW", "0")).strip() == "1"
 
 
+_SHADOW_FAILURE_POLICIES = {"fail_closed", "fail_open"}
+_SHADOW_SENSITIVE_ENV_KEYS = (
+    "PHASE1_DATABASE_URL",
+    "PHASE1_PROD_SHADOW_DATABASE_URL",
+    "NEON_API_KEY",
+    "UKRAINEALARM_API_TOKEN",
+)
+
+
+def phase1_db_shadow_failure_policy(env=None) -> str:
+    source_env = os.environ if env is None else env
+    policy = str(
+        source_env.get("PHASE1_DB_SHADOW_FAILURE_POLICY", "fail_closed")
+    ).strip()
+    if policy not in _SHADOW_FAILURE_POLICIES:
+        raise RuntimeError(
+            "PHASE1_DB_SHADOW_FAILURE_POLICY must be one of: fail_closed, fail_open"
+        )
+    return policy
+
+
+def _sanitize_shadow_error_message(exc: Exception, env) -> str:
+    message = str(exc)
+    for key in _SHADOW_SENSITIVE_ENV_KEYS:
+        value = str(env.get(key) or "").strip()
+        if not value:
+            continue
+        candidates = [value]
+        if key in {"PHASE1_DATABASE_URL", "PHASE1_PROD_SHADOW_DATABASE_URL"}:
+            try:
+                parsed = urlsplit(value)
+                if parsed.password:
+                    candidates.append(parsed.password)
+            except ValueError:
+                pass
+        for candidate in sorted(set(candidates), key=len, reverse=True):
+            if candidate:
+                message = message.replace(candidate, "[REDACTED]")
+    message = re.sub(
+        r"(?i)postgres(?:ql)?://[^\\s'\\\"]+",
+        "postgresql://[REDACTED]",
+        message,
+    )
+    return message[:2000]
+
+
+def _write_shadow_diagnostic(payload: dict, env) -> None:
+    path = str(env.get("PHASE1_DB_SHADOW_DIAGNOSTIC") or "").strip()
+    if not path:
+        return
+    raw = json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n"
+    for key in _SHADOW_SENSITIVE_ENV_KEYS:
+        value = str(env.get(key) or "").strip()
+        if value and value in raw:
+            raise RuntimeError(
+                f"refusing to write Phase-1 shadow diagnostic containing {key}"
+            )
+        if key in {"PHASE1_DATABASE_URL", "PHASE1_PROD_SHADOW_DATABASE_URL"} and value:
+            try:
+                password = urlsplit(value).password
+            except ValueError:
+                password = None
+            if password and password in raw:
+                raise RuntimeError(
+                    "refusing to write Phase-1 shadow diagnostic containing DB password"
+                )
+    target = Path(path)
+    target.parent.mkdir(parents=True, exist_ok=True)
+    target.write_text(raw, encoding="utf-8")
+
+
+def _shadow_success_diagnostic(result: dict, env, policy: str) -> dict:
+    stats = dict(result.get("stats") or {})
+    return {
+        "shadow_enabled": True,
+        "failure_policy": policy,
+        "status": "succeeded",
+        "db_branch": str(env.get("PHASE1_DB_BRANCH") or "").strip() or None,
+        "run_id": result.get("run_id"),
+        "checkpoint_id": result.get("checkpoint_id"),
+        "checkpoint_seq": result.get("checkpoint_seq"),
+        "episodes_inserted": int(stats.get("episodes_inserted", 0)),
+        "episodes_existing": int(stats.get("episodes_existing", 0)),
+        "source_observations_inserted": int(
+            stats.get("source_observations_inserted", 0)
+        ),
+        "source_observations_existing": int(
+            stats.get("source_observations_existing", 0)
+        ),
+        "source_observations_last_seen_updated": int(
+            stats.get("source_observations_last_seen_updated", 0)
+        ),
+        "checkpoints_inserted": int(stats.get("checkpoints_inserted", 0)),
+        "exact_retry": bool(stats.get("exact_retry", False)),
+        "workflow_sha": result.get("workflow_sha")
+        or str(env.get("GITHUB_SHA") or "").strip()
+        or None,
+        "input_sha": result.get("input_sha")
+        or str(env.get("PHASE1_INPUT_SHA") or "").strip()
+        or str(env.get("GITHUB_SHA") or "").strip()
+        or None,
+        "credentials_exposed": False,
+    }
+
+
+def _shadow_failure_diagnostic(exc: Exception, env, policy: str) -> dict:
+    return {
+        "shadow_enabled": True,
+        "failure_policy": policy,
+        "status": "failed",
+        "error_type": type(exc).__name__,
+        "sanitized_error_message": _sanitize_shadow_error_message(exc, env),
+        "workflow_sha": str(env.get("GITHUB_SHA") or "").strip() or None,
+        "input_sha": str(env.get("PHASE1_INPUT_SHA") or "").strip()
+        or str(env.get("GITHUB_SHA") or "").strip()
+        or None,
+        "db_branch": str(env.get("PHASE1_DB_BRANCH") or "").strip() or None,
+        "credentials_exposed": False,
+    }
+
+
 def persist_lviv_shadow_if_enabled(
     *,
     lviv_fetched_this_run: bool,
@@ -513,60 +636,92 @@ def persist_lviv_shadow_if_enabled(
     if not phase1_db_shadow_enabled(source_env):
         return None
 
-    missing = []
-    if not lviv_fetched_this_run:
-        missing.append("current Lviv UkraineAlarm fetch")
-    if not vadimkin_observations:
-        missing.append("current-run Vadimkin observations")
-    if not ukrainealarm_observations:
-        missing.append("current-run UkraineAlarm observations")
-    state = checkpoint_state or {}
-    region_id = str(state.get("region_id") or "").strip()
-    if not region_id:
-        missing.append("resolved Lviv region_id")
-    if not bool(state.get("continuous")):
-        missing.append("verified Lviv continuity")
-    if missing:
-        raise RuntimeError(
-            "PHASE1_DB_SHADOW=1 requires fresh verified Lviv inputs: "
-            + ", ".join(missing)
+    policy = phase1_db_shadow_failure_policy(source_env)
+    try:
+        missing = []
+        if not lviv_fetched_this_run:
+            missing.append("current Lviv UkraineAlarm fetch")
+        if not vadimkin_observations:
+            missing.append("current-run Vadimkin observations")
+        if not ukrainealarm_observations:
+            missing.append("current-run UkraineAlarm observations")
+        state = checkpoint_state or {}
+        region_id = str(state.get("region_id") or "").strip()
+        if not region_id:
+            missing.append("resolved Lviv region_id")
+        if not bool(state.get("continuous")):
+            missing.append("verified Lviv continuity")
+        if missing:
+            raise RuntimeError(
+                "PHASE1_DB_SHADOW=1 requires fresh verified Lviv inputs: "
+                + ", ".join(missing)
+            )
+
+        ua_region_ids = {
+            str((observation.get("provenance") or {}).get("region_id") or "")
+            for observation in ukrainealarm_observations
+        }
+        if ua_region_ids != {region_id}:
+            raise RuntimeError(
+                "PHASE1_DB_SHADOW=1 Lviv UkraineAlarm observations do not match "
+                f"resolved region_id={region_id}: {sorted(ua_region_ids)}"
+            )
+
+        canonical_payload = canonicalize_lviv(
+            vadimkin_observations,
+            ukrainealarm_observations,
+            checkpoint_state=state,
         )
+        if canonical_payload.get("boundary_errors"):
+            raise RuntimeError(
+                "PHASE1_DB_SHADOW=1 canonical boundary errors: "
+                f"{canonical_payload['boundary_errors']}"
+            )
+        source_keys = [
+            str(observation.get("source_key") or "")
+            for observation in canonical_payload.get("source_observations", [])
+        ]
+        if any(
+            key == "alerts-in-ua" or key.startswith("alerts_in_ua")
+            for key in source_keys
+        ):
+            raise RuntimeError(
+                "Alerts.in.ua must not become a Phase-1 canonical source observation"
+            )
 
-    ua_region_ids = {
-        str((observation.get("provenance") or {}).get("region_id") or "")
-        for observation in ukrainealarm_observations
-    }
-    if ua_region_ids != {region_id}:
-        raise RuntimeError(
-            "PHASE1_DB_SHADOW=1 Lviv UkraineAlarm observations do not match "
-            f"resolved region_id={region_id}: {sorted(ua_region_ids)}"
+        # Deliberately late: shadow OFF must not require the DB adapter or psycopg.
+        from db_phase1_shadow import persist_shadow_payload
+
+        result = persist_shadow_payload(
+            canonical_payload,
+            checkpoint_state=state,
+            env=source_env,
         )
-
-    canonical_payload = canonicalize_lviv(
-        vadimkin_observations,
-        ukrainealarm_observations,
-        checkpoint_state=state,
-    )
-    if canonical_payload.get("boundary_errors"):
-        raise RuntimeError(
-            "PHASE1_DB_SHADOW=1 canonical boundary errors: "
-            f"{canonical_payload['boundary_errors']}"
+        _write_shadow_diagnostic(
+            _shadow_success_diagnostic(result, source_env, policy),
+            source_env,
         )
-    source_keys = [
-        str(observation.get("source_key") or "")
-        for observation in canonical_payload.get("source_observations", [])
-    ]
-    if any(key == "alerts-in-ua" or key.startswith("alerts_in_ua") for key in source_keys):
-        raise RuntimeError("Alerts.in.ua must not become a Phase-1 canonical source observation")
-
-    # Deliberately late: shadow OFF must not require the DB adapter or psycopg.
-    from db_phase1_shadow import persist_shadow_payload
-
-    return persist_shadow_payload(
-        canonical_payload,
-        checkpoint_state=state,
-        env=source_env,
-    )
+        return result
+    except Exception as exc:
+        diagnostic = _shadow_failure_diagnostic(exc, source_env, policy)
+        try:
+            _write_shadow_diagnostic(diagnostic, source_env)
+        except Exception as diagnostic_exc:
+            print(
+                "Phase-1 DB shadow diagnostic write failed: "
+                f"{type(diagnostic_exc).__name__}: "
+                f"{_sanitize_shadow_error_message(diagnostic_exc, source_env)}",
+                flush=True,
+            )
+        if policy == "fail_open":
+            print(
+                "Phase-1 DB shadow failed open: "
+                f"{diagnostic['error_type']}: "
+                f"{diagnostic['sanitized_error_message']}",
+                flush=True,
+            )
+            return None
+        raise
 
 def main() -> None:
     data = json.loads(DATA_FILE.read_text(encoding="utf-8"))
