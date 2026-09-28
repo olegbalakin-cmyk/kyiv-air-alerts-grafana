@@ -109,8 +109,8 @@ def test_chernihiv_reviewed_event_and_sensitivity_linkage():
 def test_chernihiv_missing_review_contract_stays_unresolved():
     row = {
         "evidence": (
-            "У Чернігові пролунав вибух під час атаки БпЛА; "
-            "Повітряні сили попереджали про дрон."
+            "У Чернігові пролунав вибух. "
+            "Повітряні сили окремо попереджали про дрон."
         )
     }
     assert roles("chernihiv", row) == {}
