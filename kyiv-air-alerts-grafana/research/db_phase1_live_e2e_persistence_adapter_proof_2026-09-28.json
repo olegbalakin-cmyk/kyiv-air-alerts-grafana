@@ -1,0 +1,180 @@
+{
+  "schema_version": "db-phase1-live-e2e-persistence-adapter-proof-v1",
+  "verdict": "PHASE-1 LIVE E2E PERSISTENCE ADAPTER PROVEN",
+  "generated_from": {
+    "workflow_run_id": "36407705040",
+    "workflow_artifact_id": "10962649440",
+    "workflow_artifact_name": "db-phase1-live-e2e-result",
+    "workflow_artifact_digest": "sha256:241c9794735a44e0203cbf15b82b7031972925812bbb9ccdfb95051b2919f63f",
+    "detailed_result_sha256": "a0aafd650d571859c95300a06ce91864c14c8ed62912ce74356092f326ff0860"
+  },
+  "git": {
+    "base_sha": "0b73188f5b680ffb5eeb2f3c5bd39add2a937c41",
+    "implementation_sha": "150f8bc77c80422d9ac24a066d18303e741223b0",
+    "workflow_sha": "7b2899e4ab92de855e2a741f482c57ec3e6dbac1",
+    "ddl_blob": "3b8af7940b23aae03a4f6b434d90d97dde10bfc0",
+    "persistence_blob": "06f3098df63d7aaf2348c366b6a351901926cb53",
+    "importer_blob": "7f2c1d90fb719e296e4dbb2cc96c6ec492e25ad8"
+  },
+  "neon": {
+    "project_id": "green-cake-44216048",
+    "branch_id": "br-still-sea-b5062r40",
+    "branch_name": "lviv-phase1-adapter-e2e-2026-09-28",
+    "parent_branch_id": "br-wandering-sunset-b5835alw",
+    "pooled_connection": false
+  },
+  "gates": {
+    "tests": {
+      "run": 23,
+      "passed": 23,
+      "failed": 0,
+      "result": "PASS"
+    },
+    "dry_run": {
+      "canonical_episodes": 126,
+      "source_observations": 140,
+      "vadimkin": 120,
+      "ukrainealarm": 20,
+      "checkpoint_candidates": 1,
+      "missing_ids": [],
+      "unexpected_ids": [],
+      "mismatches": [],
+      "duplicate_identities": [],
+      "boundary_failures": [],
+      "bad_regression_id_absent": "7dd411c2a2587efc740a1a66",
+      "expected_regression_id_present": "b3df9090f7264ddbd726e113",
+      "oracle": "PASS"
+    },
+    "inherited_schema": {
+      "ddl_reapplied": false,
+      "constraints_indexes": "PASS"
+    }
+  },
+  "baseline_counts": {
+    "ingestion_runs": 0,
+    "alert_episodes": 0,
+    "alert_episode_sources": 0,
+    "ingestion_checkpoints": 0
+  },
+  "first_apply": {
+    "run_id": "cd293bae-0215-4c45-bf14-739a6cfc0633",
+    "counts": {
+      "ingestion_runs": 1,
+      "alert_episodes": 126,
+      "alert_episode_sources": 140,
+      "ingestion_checkpoints": 1
+    },
+    "mutations": {
+      "episodes_inserted": 126,
+      "episodes_existing": 0,
+      "source_observations_inserted": 140,
+      "source_observations_existing": 0,
+      "source_observations_last_seen_updated": 0,
+      "checkpoints_inserted": 1,
+      "exact_retry": false
+    },
+    "source_state": {
+      "vadimkin": 120,
+      "ukrainealarm": 20,
+      "alerts_in_ua_episode_observations": 0,
+      "bound": 140,
+      "canonical_input": 140,
+      "duplicate_alias": 0
+    },
+    "oracle": "PASS"
+  },
+  "second_apply": {
+    "run_id": "827f585e-0e22-4f04-96ac-83e10bc90700",
+    "counts": {
+      "ingestion_runs": 2,
+      "alert_episodes": 126,
+      "alert_episode_sources": 140,
+      "ingestion_checkpoints": 1
+    },
+    "mutations": {
+      "episodes_inserted": 0,
+      "episodes_existing": 126,
+      "source_observations_inserted": 0,
+      "source_observations_existing": 140,
+      "source_observations_last_seen_updated": 140,
+      "checkpoints_inserted": 0,
+      "exact_retry": true
+    },
+    "source_state": {
+      "vadimkin": 120,
+      "ukrainealarm": 20,
+      "alerts_in_ua_episode_observations": 0,
+      "bound": 140,
+      "canonical_input": 140,
+      "duplicate_alias": 0
+    },
+    "oracle": "PASS"
+  },
+  "checkpoint_comparison": {
+    "checkpoint_id": "169e8b12-9966-4cab-9330-0a0762d53781",
+    "checkpoint_seq": 1,
+    "identity_unchanged": true,
+    "count_after_retry": 1,
+    "retry_created_checkpoint": false,
+    "retry_regressed_checkpoint": false
+  },
+  "identity_comparison": {
+    "episodes": {
+      "count": 126,
+      "exact_identity_set_unchanged": true,
+      "second_run_created_or_updated": 0,
+      "first_snapshot_sha256": "75577445d781ded0763d02829b5e2a489b3c50ba2a575c506748e8e08f27f20a"
+    },
+    "source_observations": {
+      "count": 140,
+      "exact_identity_set_unchanged": true,
+      "first_snapshot_sha256": "57cc5407706d8f98fe67c0c6bf371c16c878b350b5784c429946bf81632d60d6"
+    }
+  },
+  "provenance_comparison": {
+    "first_persisted_unchanged": true,
+    "first_persisted_by_run_id": "cd293bae-0215-4c45-bf14-739a6cfc0633",
+    "last_seen_advanced_to_run_id": "827f585e-0e22-4f04-96ac-83e10bc90700",
+    "last_seen_updated": 140,
+    "expected_last_seen_updates": 140,
+    "result": "PASS"
+  },
+  "isolation_checks": {
+    "primary": {
+      "branch_id": "br-wandering-sunset-b5835alw",
+      "counts": {
+        "ingestion_runs": 0,
+        "alert_episodes": 0,
+        "alert_episode_sources": 0,
+        "ingestion_checkpoints": 0
+      },
+      "unchanged": true
+    },
+    "accepted_bootstrap": {
+      "branch_id": "br-young-feather-b5q19nli",
+      "counts": {
+        "ingestion_runs": 1,
+        "alert_episodes": 126,
+        "alert_episode_sources": 140,
+        "ingestion_checkpoints": 1
+      },
+      "checkpoint_id": "40a0d262-2a79-405b-8e06-1af6e28bc908",
+      "checkpoint_seq": 1,
+      "unchanged": true
+    },
+    "blocked_concurrency": {
+      "branch_id": "br-calm-cherry-b56fsh4i",
+      "counts": {
+        "ingestion_runs": 2,
+        "alert_episodes": 126,
+        "alert_episode_sources": 140,
+        "ingestion_checkpoints": 2
+      },
+      "metadata_unchanged": true,
+      "counts_unchanged": true
+    }
+  },
+  "credentials_exposed": false,
+  "same_stream_concurrency_verdict": "PHASE-1 SAME-STREAM CONCURRENCY ENVIRONMENT-BLOCKED",
+  "successful_e2e_branch_left_in_place": true
+}
