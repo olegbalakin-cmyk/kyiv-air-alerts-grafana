@@ -33,6 +33,7 @@
     </div>
     <div class="header-actions">
       <div id="updatedAt" class="updated-at"></div>
+      <button id="showTour" class="ghost-button" type="button">Показати тур</button>
       <button id="copyLink" class="ghost-button" type="button">Скопіювати посилання</button>
     </div>
   </header>
@@ -49,7 +50,9 @@
         <label for="cityPeriod">Період графіків</label>
         <select id="cityPeriod">
           <option value="monthly">Місяці</option>
-          <option id="cityWeeklyOption" value="weekly">Тижні</option>
+          <option id="cityWeeklyOption" value="weekly">Ковзні 7 днів</option>
+          <option value="rolling30">Ковзні 30 днів</option>
+          <option value="rolling90">Ковзні 90 днів</option>
         </select>
       </div>
     </section>
@@ -85,12 +88,38 @@
       <article class="panel chart-card wide">
         <h3>Інтенсивність тривог</h3>
         <p class="chart-subtitle">Стовпчики: сумарний час під тривогою в обраному періоді ÷ кількість календарних днів. Лінія: кількість тривог, що почалися в періоді ÷ кількість днів.</p>
+        <p class="chart-interaction-hint">Натисніть на показник у легенді, щоб приховати або повернути його.</p>
         <div class="chart-wrap"><canvas id="cityIntensityChart"></canvas></div>
       </article>
       <article class="panel chart-card wide">
         <h3>Середня повна тривалість однієї тривоги</h3>
         <p class="chart-subtitle">Середнє повної тривалості всіх тривог, що почалися в обраному періоді. Якщо тривога закінчилася вже після завершення періоду, вся її тривалість відноситься до періоду старту.</p>
         <div class="chart-wrap"><canvas id="cityDurationChart"></canvas></div>
+      </article>
+    </section>
+
+    <section id="timeOfDaySection" class="comparison-section hidden">
+      <div class="section-heading time-profile-heading">
+        <div>
+          <div class="eyebrow">Час доби</div>
+          <h2>Коли протягом доби тривога найчастіше активна</h2>
+          <p>Доба поділена на 15-хвилинні інтервали. 100% — найчастіший інтервал у вибраному місті/районі та діапазоні; решта значень показані відносно нього.</p>
+        </div>
+        <div class="control time-profile-period-control">
+          <label for="timeOfDayRange">Діапазон</label>
+          <select id="timeOfDayRange" aria-label="Діапазон добового профілю">
+            <option value="7d">7 днів</option>
+            <option value="30d">30 днів</option>
+            <option value="90d">90 днів</option>
+            <option value="year">Рік</option>
+            <option value="all">Від початку даних</option>
+          </select>
+        </div>
+      </div>
+      <article class="panel chart-card wide time-profile-card">
+        <div id="timeOfDayMeta" class="time-profile-meta"></div>
+        <div class="chart-wrap time-profile-chart"><canvas id="timeOfDayChart"></canvas></div>
+        <p class="chart-subtitle time-profile-note">100% — не частка часу під тривогою, а відносний максимум для цього міста/району та діапазону. У підказці показано також фактичну частку часу під тривогою.</p>
       </article>
     </section>
 
@@ -179,15 +208,45 @@
           <p class="chart-subtitle">Середнє повної тривалості тривог, що почалися в обраному періоді; тривалість відноситься до періоду старту.</p>
           <div class="chart-wrap"><canvas id="compareDurationChart"></canvas></div>
         </article>
+        <article id="compareTimeOfDayCard" class="panel chart-card wide">
+          <div class="time-profile-card-heading">
+            <div>
+              <h3>Добовий профіль тривог</h3>
+              <p class="chart-subtitle">Порівняння форми добового патерну. Кожне місто/район нормалізовано окремо: його власний найчастіший 15-хвилинний інтервал = 100%.</p>
+            </div>
+            <div class="control time-profile-compare-control">
+              <label for="compareTimeOfDayRange">Діапазон</label>
+              <select id="compareTimeOfDayRange" aria-label="Діапазон добового профілю для порівняння">
+                <option value="7d">7 днів</option>
+                <option value="30d">30 днів</option>
+                <option value="90d">90 днів</option>
+                <option value="year">Рік</option>
+                <option value="all">Від початку даних</option>
+              </select>
+            </div>
+          </div>
+          <p id="compareTimeOfDayNote" class="chart-subtitle"></p>
+          <div class="chart-wrap time-profile-chart"><canvas id="compareTimeOfDayChart"></canvas></div>
+        </article>
       </section>
     </section>
 
-    <section class="comparison-section">
-      <div class="section-heading">
+    <section id="allCitiesSection" class="comparison-section">
+      <div class="section-heading all-cities-heading">
         <div>
-          <div class="eyebrow">Останні 28 днів</div>
+          <div class="eyebrow">Огляд</div>
           <h2>Усі міста</h2>
-          <p>Швидкий огляд поточного 28-денного вікна. Якщо для міста використовуються дані відповідного району, вони можуть включати події в інших населених пунктах цього району.</p>
+          <p id="allCitiesRangeNote">Порівняння ключових показників за спільний часовий діапазон.</p>
+        </div>
+        <div class="control all-cities-period-control">
+          <label for="allCitiesRange">Діапазон</label>
+          <select id="allCitiesRange" aria-label="Діапазон для таблиці всіх міст">
+            <option value="7d">7 днів</option>
+            <option value="30d">30 днів</option>
+            <option value="90d">90 днів</option>
+            <option value="year">Рік</option>
+            <option value="common">Від початку спільних даних</option>
+          </select>
         </div>
       </div>
       <div class="panel table-panel">
@@ -269,7 +328,11 @@
 
       <p><strong>Що поки не включено.</strong> Донецьк і Луганськ не показуються: для них потрібна окрема методологія побудови ряду.</p>
 
-      <p class="muted"><strong>Технічна примітка про стик джерел.</strong> Для перевірки безперервності ряду між сусідніми джерелами одна й та сама подія може вважатися збігом, якщо timestamp відрізняється не більш ніж на 15 секунд. Це лише допуск для валідації: самі часи подій не пересуваються і не округлюються.</p>
+            <p><strong>Таблиця «Усі міста».</strong> Усі 23 ряди порівнюються на одному спільному часовому вікні. «Від початку спільних даних» означає період від найпізнішої дати старту серед усіх включених рядів до спільної останньої завершеної дати.</p>
+
+      <p><strong>Добовий профіль.</strong> Доба поділена на 96 15-хвилинних слотів у часовій зоні Europe/Kyiv. Для кожного слота рахується частка фактичного часу, проведеного під тривогою, а потім ряд нормалізується: найвище значення для вибраного міста/району та діапазону = 100%. У порівнянні кожен ряд нормалізується до власного максимуму.</p>
+
+<p class="muted"><strong>Технічна примітка про стик джерел.</strong> Для перевірки безперервності ряду між сусідніми джерелами одна й та сама подія може вважатися збігом, якщо timestamp відрізняється не більш ніж на 15 секунд. Це лише допуск для валідації: самі часи подій не пересуваються і не округлюються.</p>
       <p id="methodologyDynamic" class="hidden"></p>
     </section>
   </main>
@@ -278,6 +341,23 @@
     <span>Дані та код: <a href="https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana">GitHub</a></span>
     <span>Зауваження до даних: @olbalakin у Telegram</span>
   </footer>
+
+  <div id="introTour" class="tour-root hidden" aria-hidden="true">
+    <div class="tour-backdrop"></div>
+    <aside class="tour-card" role="dialog" aria-modal="true" aria-labelledby="tourTitle" aria-describedby="tourText">
+      <div class="tour-card-top">
+        <span id="tourProgress" class="tour-progress"></span>
+        <button id="tourClose" class="tour-close" type="button" aria-label="Закрити тур">×</button>
+      </div>
+      <h2 id="tourTitle"></h2>
+      <p id="tourText"></p>
+      <div class="tour-actions">
+        <button id="tourPrev" class="ghost-button" type="button">Назад</button>
+        <button id="tourSkip" class="tour-skip" type="button">Пропустити</button>
+        <button id="tourNext" class="tour-primary" type="button">Далі</button>
+      </div>
+    </aside>
+  </div>
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
   <script src="app.js"></script>
