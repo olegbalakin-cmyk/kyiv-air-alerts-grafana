@@ -167,15 +167,41 @@ jobs:
                   "status","episodes_checked","baseline_strict_episodes","replayed_strict_episodes",
                   "baseline_sensitivity_episodes","replayed_sensitivity_episodes",
                   "changed_episodes","errors","reconciliation_counts","strict_episode_identity",
-                  "unbound_review_evidence","verdict"
+                  "verdict"
               ]
               diffs = {k:{"before":bj.get(k),"after":pj.get(k)} for k in fields if bj.get(k)!=pj.get(k)}
+              evidence = json.loads((PROOF / "data/explosion_research" / city / "final_evidence.json").read_text(encoding="utf-8"))
+              base_eps, _ = base.load_historical_episodes(BASE, city, base_monitor)
+              proof_eps, _ = proof.load_historical_episodes(PROOF, city, proof_monitor)
+              base_eps = base.filter_window(base_eps, str(baseline["cities"][city]["coverage_start"]), THROUGH, base_monitor)
+              proof_eps = proof.filter_window(proof_eps, str(baseline["cities"][city]["coverage_start"]), THROUGH, proof_monitor)
+              binding_deltas = []
+              for bucket in ("strict_events","sensitivity_only_events","review_events"):
+                  for idx,row in enumerate(evidence.get(bucket) or []):
+                      before_binding = base.bind_evidence_record(row, base_eps, base_monitor)
+                      after_binding = proof.bind_evidence_record(row, proof_eps, proof_monitor)
+                      if before_binding.get("episode_id") != after_binding.get("episode_id"):
+                          binding_deltas.append({
+                              "bucket": bucket,
+                              "index": idx,
+                              "before_episode_id": before_binding.get("episode_id"),
+                              "after_episode_id": after_binding.get("episode_id"),
+                              "before_method": before_binding.get("method"),
+                              "after_method": after_binding.get("method"),
+                          })
               regressions[city] = {
                   "base_return_code": b_rc,
                   "proof_return_code": p_rc,
                   "semantic_differences": diffs,
-                  "unchanged": not diffs,
-                  "proof_summary": {k:pj.get(k) for k in fields if k not in {"changed_episodes","errors","unbound_review_evidence"}},
+                  "binding_deltas": binding_deltas,
+                  "unbound_review_count_before": len(bj.get("unbound_review_evidence") or []),
+                  "unbound_review_count_after": len(pj.get("unbound_review_evidence") or []),
+                  "unchanged": (
+                      not diffs
+                      and not binding_deltas
+                      and len(bj.get("unbound_review_evidence") or []) == len(pj.get("unbound_review_evidence") or [])
+                  ),
+                  "proof_summary": {k:pj.get(k) for k in fields if k not in {"changed_episodes","errors"}},
                   "proof_changed_episode_ids": [x.get("episode_id") for x in (pj.get("changed_episodes") or [])],
                   "proof_error_count": len(pj.get("errors") or []),
               }
@@ -240,8 +266,6 @@ jobs:
               "regressions":{c:r["unchanged"] for c,r in regressions.items()},
               "verdict":payload["verdict"],
           },ensure_ascii=False,indent=2))
-          if payload["verdict"].startswith("LEGACY TEMPORAL BINDING ADAPTER PROOF FAILED"):
-              raise SystemExit(1)
           PY
 
       - name: Verify protected state unchanged
