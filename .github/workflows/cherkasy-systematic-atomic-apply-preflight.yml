@@ -1,0 +1,91 @@
+name: Cherkasy systematic atomic-apply preflight
+
+on:
+  push:
+    branches:
+      - cherkasy-systematic-atomic-apply-preflight-2026-09-28
+    paths:
+      - ".github/workflows/cherkasy-systematic-atomic-apply-preflight.yml"
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  preflight:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      AUTHORITATIVE_HEAD: c711e7b853d7265c23e5a0a50daae9bf4a03a880
+      INVENTORY_COMMIT: f41d2a2a7d267d6b41579724281258212ab26cd1
+      THROUGH: "2026-09-17"
+    steps:
+      - name: Checkout exact authoritative head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ env.AUTHORITATIVE_HEAD }}
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: kyiv-air-alerts-grafana/requirements.txt
+
+      - name: Install dependencies
+        run: pip install -r kyiv-air-alerts-grafana/requirements.txt
+
+      - name: Verify compatible authoritative drift
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$AUTHORITATIVE_HEAD"
+          test "$(git merge-base "$INVENTORY_COMMIT" HEAD)" = "$INVENTORY_COMMIT"
+          git diff --quiet "$INVENTORY_COMMIT" HEAD --             kyiv-air-alerts-grafana/scripts/replay_explosion_history.py             kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py             kyiv-air-alerts-grafana/data/explosion_research/cherkasy/final_evidence.json             kyiv-air-alerts-grafana/data/explosion_audited_baseline.json
+          echo "COMPATIBLE_AUTHORITATIVE_DRIFT=YES"
+
+      - name: Run fresh Cherkasy replay read-only
+        shell: bash
+        run: |
+          set -euo pipefail
+          python kyiv-air-alerts-grafana/scripts/replay_explosion_history.py             --repo-root "$GITHUB_WORKSPACE/kyiv-air-alerts-grafana"             --city cherkasy             --through "$THROUGH"             --input-head "$AUTHORITATIVE_HEAD"             --read-only             --output "$RUNNER_TEMP/cherkasy_pre.json"
+
+      - name: Verify exact pre-apply state and QA universe
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json, os
+          from pathlib import Path
+          replay=json.loads(Path(os.environ["RUNNER_TEMP"],"cherkasy_pre.json").read_text())
+          inv=json.loads(Path("research/cherkasy_current_qa_root_cause_inventory_2026-09-28.json").read_text())
+          changed=replay.get("changed_episodes") or []
+          qa=sorted(x["episode_id"] for x in changed if isinstance(x,dict) and x.get("episode_id"))
+          expected=sorted(inv["qa_episode_ids"])
+          summary={
+            "input_head": os.environ["AUTHORITATIVE_HEAD"],
+            "denominator": replay.get("episodes_checked"),
+            "strict": replay.get("replayed_strict_episodes"),
+            "sensitivity": replay.get("replayed_sensitivity_episodes"),
+            "qa": len(changed)+(len(replay.get("errors") or [])),
+            "qa_episode_ids": qa,
+            "errors": replay.get("errors") or [],
+            "protected_files_unchanged": replay.get("protected_files_unchanged"),
+          }
+          print("PREFLIGHT_SUMMARY="+json.dumps(summary,sort_keys=True,separators=(",",":")))
+          assert summary["denominator"] == 1548, summary
+          assert summary["strict"] == 29, summary
+          assert summary["sensitivity"] == 29, summary
+          assert summary["qa"] == 30, summary
+          assert qa == expected, {"actual":qa,"expected":expected}
+          assert not summary["errors"], summary
+          assert summary["protected_files_unchanged"] is True, summary
+          print("PREFLIGHT_VERDICT=COMPATIBLE")
+          PY
+
+      - name: Verify tracked checkout remains clean
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -z "$(git status --porcelain)"
