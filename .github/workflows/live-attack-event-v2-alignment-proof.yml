@@ -1,0 +1,565 @@
+name: Live attack-event v2 alignment isolated proof
+
+on:
+  push:
+    branches: [live-attack-event-v2-alignment-proof-2026-09-28]
+    paths:
+      - ".github/workflows/live-attack-event-v2-alignment-proof.yml"
+
+permissions:
+  contents: write
+  actions: read
+
+concurrency:
+  group: live-attack-event-v2-alignment-proof-2026-09-28
+  cancel-in-progress: false
+
+jobs:
+  proof:
+    runs-on: ubuntu-latest
+    timeout-minutes: 165
+    env:
+      AUTHORITATIVE_STARTING_HEAD: aa35a25038095a795f6792c22ab8cd8f097aca79
+      MAIN_STARTING_HEAD: 807edf0bf545573615da8c158e0003f0cd65915d
+      CAMPAIGN_STARTING_HEAD: 40c9be8b142ff529e43be8e5d324dd374e8f3cef
+      PROOF_BRANCH: live-attack-event-v2-alignment-proof-2026-09-28
+      PROOF_CODE_COMMIT: d9357b43d5704a3e1983245030d0a7677ecc6f3b
+      ARTIFACT: research/live_attack_event_v2_alignment_proof_2026-09-28.json
+
+    steps:
+      - name: Check out isolated proof branch
+        uses: actions/checkout@v4
+        with:
+          ref: live-attack-event-v2-alignment-proof-2026-09-28
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: kyiv-air-alerts-grafana/requirements.txt
+
+      - name: Install dependencies
+        working-directory: kyiv-air-alerts-grafana
+        run: pip install -r requirements.txt
+
+      - name: Fetch authoritative refs and prepare isolated worktrees
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin             multicity-wip-2026-09-16             main             historical-attack-event-backfill-2026-09-27             site-prod
+          printf '%s\n' "$(git rev-parse origin/multicity-wip-2026-09-16)" > /tmp/authoritative_head_now
+          printf '%s\n' "$(git rev-parse origin/main)" > /tmp/main_head_now
+          printf '%s\n' "$(git rev-parse origin/historical-attack-event-backfill-2026-09-27)" > /tmp/campaign_head_before
+          git worktree add --detach /tmp/live-baseline "$AUTHORITATIVE_STARTING_HEAD"
+          git worktree add --detach /tmp/campaign-v2 origin/historical-attack-event-backfill-2026-09-27
+          git show origin/site-prod:kyiv-air-alerts-grafana/data/alerts_combined.json > /tmp/prod-kyiv-alerts.json
+          git show origin/site-prod:kyiv-air-alerts-grafana/data/sevastopol_events.json > /tmp/prod-sevastopol-events.json
+
+      - name: Resolve latest successful live-monitor run
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          gh run list             --repo "$GITHUB_REPOSITORY"             --workflow explosion-monitor-wip.yml             --limit 30             --json databaseId,status,conclusion,createdAt,headSha,event             > /tmp/live_runs.json || printf '[]\n' > /tmp/live_runs.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          rows=json.loads(Path("/tmp/live_runs.json").read_text())
+          successes=[r for r in rows if r.get("conclusion")=="success"]
+          latest=successes[0] if successes else {}
+          Path("/tmp/latest_live_run.json").write_text(json.dumps(latest, indent=2)+"\n")
+          print(json.dumps(latest, indent=2))
+          PY
+
+      - name: Run current and historical-v2 self-tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          (
+            cd kyiv-air-alerts-grafana
+            python scripts/monitor_explosion_candidates.py --self-test
+          ) | tee /tmp/proof_self_test.txt
+          (
+            cd /tmp/campaign-v2/kyiv-air-alerts-grafana
+            python scripts/monitor_explosion_candidates.py --self-test
+            python scripts/run_historical_attack_event_backfill_batch.py --self-test
+          ) | tee /tmp/campaign_self_test.txt
+
+      - name: Run deterministic contract and dry-replay proof
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import copy, importlib.util, json, sys
+          from pathlib import Path
+          from datetime import datetime, timedelta, timezone
+
+          ROOT=Path.cwd()
+          SCRIPTS=ROOT/"kyiv-air-alerts-grafana"/"scripts"
+          sys.path.insert(0, str(SCRIPTS))
+          spec=importlib.util.spec_from_file_location("proof_monitor", SCRIPTS/"monitor_explosion_candidates.py")
+          m=importlib.util.module_from_spec(spec)
+          spec.loader.exec_module(m)
+
+          dt=datetime(2026,9,27,10,0,tzinfo=timezone.utc)
+          ep=m.make_episode("poltava", dt, dt+timedelta(hours=1))
+          base={
+              "publisher":"СУСПІЛЬНЕ НОВИНИ",
+              "publisher_url":None,
+              "published_at":m.iso(dt+timedelta(minutes=30)),
+              "snippet":"",
+              "resolved_url":None,
+              "matched_text_excerpt":None,
+              "source":"Telegram / СУСПІЛЬНЕ НОВИНИ",
+          }
+          cases=[
+              ("impact", "У Полтаві під час повітряної тривоги БпЛА влучив у будинок.", "approved_strict", ["impact"]),
+              ("damage", "У Полтаві під час повітряної тривоги внаслідок атаки БпЛА пошкоджено будинок.", "approved_strict", ["damage"]),
+              ("fire", "У Полтаві під час повітряної тривоги після удару БпЛА виникла пожежа.", "approved_strict", ["strike","fire"]),
+              ("ordinary_fire", "У Полтаві під час повітряної тривоги сталася пожежа у квартирі.", "not_positive", []),
+              ("accidental_damage", "У Полтаві під час повітряної тривоги пошкоджено водогін через аварію.", "not_positive", []),
+              ("ppo_actual", "У Полтаві під час повітряної тривоги працює ППО.", "approved_strict", ["air_defense_action"]),
+              ("ppo_interception", "У Полтаві під час повітряної тривоги ППО збила БпЛА.", "approved_strict", ["air_defense_action"]),
+              ("ppo_prediction", "У Полтаві під час повітряної тривоги можлива робота ППО.", "not_positive", []),
+              ("ppo_ready", "У Полтаві під час повітряної тривоги ППО готова до роботи.", "not_positive", []),
+          ]
+          deterministic=[]
+          for cid,title,expected,expected_types in cases:
+              row={**base,"candidate_id":cid,"title":title}
+              d=m.classify_candidate(row,"poltava",[ep])
+              positive=d["proposed_outcome"] in {"approved_strict","approved_sensitivity"}
+              passed=(d["proposed_outcome"]==expected if expected!="not_positive" else not positive)
+              if expected_types:
+                  passed=passed and all(x in d.get("event_types",[]) for x in expected_types)
+              deterministic.append({
+                  "id":cid,"text":title,"outcome":d["proposed_outcome"],
+                  "event_types":d.get("event_types",[]),
+                  "air_defense_context":bool(d.get("air_defense_context")),
+                  "air_defense_action":bool(d.get("air_defense_action")),
+                  "interception_claim":bool(d.get("interception_claim")),
+                  "passed":bool(passed),
+              })
+
+          regional={**base,"candidate_id":"regional","title":"На Полтавщині ППО збила БпЛА."}
+          rd=m.classify_candidate(regional,"poltava",[ep])
+          exact_city_pass=rd["proposed_outcome"] not in {"approved_strict","approved_sensitivity"}
+
+          outside={**base,"candidate_id":"outside","title":"У Полтаві ППО збила БпЛА.","published_at":m.iso(dt+timedelta(hours=4))}
+          od=m.classify_candidate(outside,"poltava",[ep])
+          temporal_pass=od["proposed_outcome"] not in {"approved_strict","approved_sensitivity"}
+
+          sumy_ep=m.make_episode("sumy",dt,dt+timedelta(hours=1))
+          multi={
+              **base,
+              "candidate_id":"multi",
+              "title":"Вночі росіяни атакували Україну безпілотниками — сили ППО збили БпЛА. Російські дрони двічі атакували Суми, зокрема вдарили біля житлового будинку.",
+              "source":"Telegram / Українська правда",
+              "publisher":"Українська правда",
+          }
+          md=m.classify_candidate(multi,"sumy",[sumy_ep])
+          multi_pass=md["proposed_outcome"]!="approved_strict"
+
+          q=dict(m.google_news_query_families("Суми"))
+          discovery_checks={
+              "families":list(q),
+              "impact_without_explosion":"влучив" in q["impact_arrival"],
+              "arrival_without_explosion":"приліт" in q["impact_arrival"],
+              "strike_without_explosion":"атакував" in q["strike"],
+              "damage_attack_causal_query":"пошкоджено" in q["attack_consequence"] and "атака" in q["attack_consequence"],
+              "fire_attack_causal_query":"пожежа" in q["attack_consequence"] and "атака" in q["attack_consequence"],
+              "air_defense_action_query":"ППО збила" in q["air_defense_action"],
+          }
+
+          queue_path=ROOT/"kyiv-air-alerts-grafana"/"data"/"explosion_review_queue.json"
+          state_path=ROOT/"kyiv-air-alerts-grafana"/"data"/"explosion_candidate_monitor_state.json"
+          queue=json.loads(queue_path.read_text())
+          state=json.loads(state_path.read_text())
+          changed=[]
+          transition_counts={
+              "needs_review_to_strict":0,
+              "needs_review_to_sensitivity":0,
+              "rejected_to_positive":0,
+              "positive_to_negative":0,
+          }
+          reason_groups={}
+          unexpected=[]
+          for raw in queue:
+              item=copy.deepcopy(raw)
+              old=str(item.get("status") or "")
+              d=m.dry_classify_existing_candidate(item,state)
+              new=str(d.get("proposed_outcome") or "needs_review")
+              if old==new:
+                  continue
+              old_types=list(item.get("event_types") or ((item.get("classification_evidence") or {}).get("event_types") or []))
+              new_types=list(d.get("event_types") or [])
+              if "air_defense_action" in new_types and "air_defense_action" not in old_types and new in {"approved_strict","approved_sensitivity"}:
+                  reason="CONFIRMED_AIR_DEFENSE_ACTION"
+              elif any(t in new_types and t not in old_types for t in ("impact","arrival","strike","damage","fire")):
+                  reason="NEW_EVENT_TYPE_DISCOVERY"
+              elif old in {"approved_strict","approved_sensitivity"} and new not in {"approved_strict","approved_sensitivity"}:
+                  reason="FALSE_POSITIVE_FIX"
+              else:
+                  reason="OTHER"
+              reason_groups[reason]=reason_groups.get(reason,0)+1
+              if old=="needs_review" and new=="approved_strict": transition_counts["needs_review_to_strict"]+=1
+              if old=="needs_review" and new=="approved_sensitivity": transition_counts["needs_review_to_sensitivity"]+=1
+              if old=="rejected" and new in {"approved_strict","approved_sensitivity"}: transition_counts["rejected_to_positive"]+=1
+              if old in {"approved_strict","approved_sensitivity"} and new not in {"approved_strict","approved_sensitivity"}: transition_counts["positive_to_negative"]+=1
+              row={
+                  "candidate_id":item.get("candidate_id"),
+                  "episode_id":d.get("proposed_matched_episode_id") or item.get("matched_episode_id"),
+                  "from":old,"to":new,"reason":reason,
+                  "event_types_before":old_types,"event_types_after":new_types,
+                  "reason_codes":d.get("reason_codes") or [],
+              }
+              changed.append(row)
+              if reason not in {"CONFIRMED_AIR_DEFENSE_ACTION","NEW_EVENT_TYPE_DISCOVERY"}:
+                  unexpected.append(row)
+
+          out={
+              "deterministic_tests":deterministic,
+              "exact_city_negative":{"passed":exact_city_pass,"outcome":rd["proposed_outcome"]},
+              "temporal_negative":{"passed":temporal_pass,"outcome":od["proposed_outcome"]},
+              "multi_incident_negative":{"passed":multi_pass,"outcome":md["proposed_outcome"],"reason_codes":md.get("reason_codes") or []},
+              "discovery_checks":discovery_checks,
+              "all_deterministic_passed":all(x["passed"] for x in deterministic) and exact_city_pass and temporal_pass and multi_pass and all(v for k,v in discovery_checks.items() if k!="families"),
+              "queue_dry_replay":{
+                  "queue_total":len(queue),
+                  "classification_changes_total":len(changed),
+                  **transition_counts,
+                  "changed_episode_ids":sorted({str(x["episode_id"]) for x in changed if x.get("episode_id")}),
+                  "changed_candidate_ids":[str(x["candidate_id"]) for x in changed if x.get("candidate_id")],
+                  "changes_by_reason":reason_groups,
+                  "changes":changed,
+                  "unexpected_changes":unexpected,
+                  "unexpected_status_transitions":len(unexpected),
+              },
+          }
+          Path("/tmp/deterministic_dry.json").write_text(json.dumps(out,ensure_ascii=False,indent=2)+"\n")
+          print(json.dumps({
+              "deterministic_pass":out["all_deterministic_passed"],
+              "queue_total":len(queue),
+              "changes":len(changed),
+              "unexpected":len(unexpected),
+              "reasons":reason_groups,
+          },ensure_ascii=False,indent=2))
+          if not out["all_deterministic_passed"]:
+              raise SystemExit("deterministic contract failure")
+          PY
+
+      - name: Run cross-contract v2 semantic comparison
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat > /tmp/contract_eval.py <<'PY'
+          import importlib.util,json,sys
+          from pathlib import Path
+          from datetime import datetime,timedelta,timezone
+          scripts=Path(sys.argv[1])
+          sys.path.insert(0,str(scripts))
+          spec=importlib.util.spec_from_file_location("contract_monitor",scripts/"monitor_explosion_candidates.py")
+          m=importlib.util.module_from_spec(spec); spec.loader.exec_module(m)
+          dt=datetime(2026,9,27,10,0,tzinfo=timezone.utc)
+          specs=[
+            ("lviv","Львові","У Львові під час повітряної тривоги пролунав вибух."),
+            ("sevastopol","Севастополі","У Севастополі під час повітряної тривоги БпЛА влучив у будинок."),
+            ("sumy","Сумах","У Сумах під час повітряної тривоги внаслідок атаки БпЛА пошкоджено будинок."),
+            ("cherkasy","Черкасах","У Черкасах під час повітряної тривоги після удару БпЛА виникла пожежа."),
+            ("zaporizhzhia","Запоріжжі","У Запоріжжі під час повітряної тривоги чути вибухи — працює ППО."),
+            ("kyiv","Києві","У Києві під час повітряної тривоги ППО збила БпЛА."),
+          ]
+          rows=[]
+          for city,_loc,text in specs:
+            ep=m.make_episode(city,dt,dt+timedelta(hours=1))
+            row={"candidate_id":"x-"+city,"title":text,"snippet":"","publisher":"СУСПІЛЬНЕ НОВИНИ","publisher_url":None,"published_at":m.iso(dt+timedelta(minutes=30)),"resolved_url":None,"matched_text_excerpt":None,"source":"Telegram / СУСПІЛЬНЕ НОВИНИ"}
+            d=m.classify_candidate(row,city,[ep])
+            rows.append({"city":city,"text":text,"outcome":d.get("proposed_outcome"),"event_types":d.get("event_types") or [],"air_defense_action":bool(d.get("air_defense_action")),"interception_claim":bool(d.get("interception_claim"))})
+          # Two global safety controls.
+          ep=m.make_episode("kyiv",dt,dt+timedelta(hours=1))
+          for name,text in [
+            ("ppo_prediction","У Києві під час повітряної тривоги можлива робота ППО."),
+            ("multi_incident","Вночі ППО збила БпЛА над Україною. У Києві окремо повідомили про повітряну тривогу."),
+          ]:
+            row={"candidate_id":name,"title":text,"snippet":"","publisher":"Test","publisher_url":None,"published_at":m.iso(dt+timedelta(minutes=30)),"resolved_url":None,"matched_text_excerpt":None,"source":"Google News RSS"}
+            d=m.classify_candidate(row,"kyiv",[ep])
+            rows.append({"city":"kyiv","case":name,"text":text,"outcome":d.get("proposed_outcome"),"event_types":d.get("event_types") or [],"air_defense_action":bool(d.get("air_defense_action")),"interception_claim":bool(d.get("interception_claim"))})
+          print(json.dumps(rows,ensure_ascii=False))
+          PY
+          python /tmp/contract_eval.py "$PWD/kyiv-air-alerts-grafana/scripts" > /tmp/live_contract.json
+          python /tmp/contract_eval.py "/tmp/campaign-v2/kyiv-air-alerts-grafana/scripts" > /tmp/v2_contract.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          live=json.loads(Path("/tmp/live_contract.json").read_text())
+          v2=json.loads(Path("/tmp/v2_contract.json").read_text())
+          mismatches=[]
+          for a,b in zip(live,v2):
+              keys=("outcome","event_types","air_defense_action","interception_claim")
+              if any(a.get(k)!=b.get(k) for k in keys):
+                  mismatches.append({"live":a,"v2":b})
+          out={"cases":len(live),"live":live,"v2":v2,"mismatches":mismatches,"unexplained_live_v2_semantic_mismatches":len(mismatches)}
+          Path("/tmp/cross_contract.json").write_text(json.dumps(out,ensure_ascii=False,indent=2)+"\n")
+          print(json.dumps({"cases":len(live),"mismatches":len(mismatches)},indent=2))
+          if mismatches:
+              raise SystemExit("cross-contract mismatch")
+          PY
+
+      - name: Run isolated before/after network discovery
+        if: success()
+        env:
+          UKRAINEALARM_API_TOKEN: ${{ secrets.UKRAINEALARM_API_TOKEN }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/network-before /tmp/network-after
+          cp -a /tmp/live-baseline/kyiv-air-alerts-grafana /tmp/network-before
+          cp -a "$PWD/kyiv-air-alerts-grafana" /tmp/network-after
+          cp /tmp/network-before/data/explosion_review_queue.json /tmp/network-before-queue-start.json
+          cp /tmp/network-after/data/explosion_review_queue.json /tmp/network-after-queue-start.json
+          (
+            cd /tmp/network-before
+            python scripts/monitor_explosion_candidates.py               --kyiv-alerts-file /tmp/prod-kyiv-alerts.json               --sevastopol-events-file /tmp/prod-sevastopol-events.json
+          ) > /tmp/network-before.stdout
+          (
+            cd /tmp/network-after
+            python scripts/monitor_explosion_candidates.py               --kyiv-alerts-file /tmp/prod-kyiv-alerts.json               --sevastopol-events-file /tmp/prod-sevastopol-events.json
+          ) > /tmp/network-after.stdout
+          python - <<'PY'
+          import json
+          from collections import Counter
+          from pathlib import Path
+
+          def load(p): return json.loads(Path(p).read_text())
+          before_report=load("/tmp/network-before/data/explosion_candidate_monitor_last_run.json")
+          after_report=load("/tmp/network-after/data/explosion_candidate_monitor_last_run.json")
+          before_start=load("/tmp/network-before-queue-start.json")
+          after_start=load("/tmp/network-after-queue-start.json")
+          before_queue=load("/tmp/network-before/data/explosion_review_queue.json")
+          after_queue=load("/tmp/network-after/data/explosion_review_queue.json")
+          b0={str(x.get("candidate_id")) for x in before_start}
+          a0={str(x.get("candidate_id")) for x in after_start}
+          bnew=[x for x in before_queue if str(x.get("candidate_id")) not in b0]
+          anew=[x for x in after_queue if str(x.get("candidate_id")) not in a0]
+          event_counts=Counter()
+          status_counts=Counter()
+          for x in anew:
+              for t in x.get("event_types") or ((x.get("classification_evidence") or {}).get("event_types") or []):
+                  event_counts[str(t)]+=1
+              status_counts[str(x.get("status") or "")]+=1
+          search_rows=list((after_report.get("searches") or {}).values())
+          families=Counter()
+          for row in search_rows:
+              for k,v in (row.get("query_family_result_counts") or {}).items():
+                  families[k]+=int(v or 0)
+          non_explosion_executed=any(
+              k!="explosion" and any(k in (r.get("query_urls") or {}) for r in search_rows)
+              for k in ("impact_arrival","strike","attack_consequence","air_defense_action")
+          )
+          out={
+              "before":{
+                  "alerts_checked":before_report.get("due_checks_at_cutoff"),
+                  "cities_searched":len(before_report.get("cities_searched") or []),
+                  "new_candidates":before_report.get("new_review_candidates"),
+                  "review_queue_size":before_report.get("review_queue_size"),
+                  "errors":before_report.get("errors") or {},
+                  "new_candidate_ids":[x.get("candidate_id") for x in bnew],
+              },
+              "after":{
+                  "alerts_checked":after_report.get("due_checks_at_cutoff"),
+                  "cities_searched":len(after_report.get("cities_searched") or []),
+                  "new_candidates":after_report.get("new_review_candidates"),
+                  "review_queue_size":after_report.get("review_queue_size"),
+                  "errors":after_report.get("errors") or {},
+                  "google_query_family_results":dict(families),
+                  "telegram_results":sum(int(r.get("telegram_results") or 0) for r in search_rows),
+                  "event_type_counts":dict(event_counts),
+                  "auto_strict":status_counts.get("approved_strict",0),
+                  "auto_sensitivity":status_counts.get("approved_sensitivity",0),
+                  "needs_review":status_counts.get("needs_review",0),
+                  "rejected":status_counts.get("rejected",0),
+                  "new_candidate_ids":[x.get("candidate_id") for x in anew],
+                  "non_explosion_query_path_executed":non_explosion_executed,
+              },
+              "duplicate_candidate_ids_after":len(after_queue)-len({str(x.get("candidate_id")) for x in after_queue if x.get("candidate_id")}),
+              "new_candidates_before_after_delta":len(anew)-len(bnew),
+          }
+          Path("/tmp/network_proof.json").write_text(json.dumps(out,ensure_ascii=False,indent=2)+"\n")
+          print(json.dumps(out,ensure_ascii=False,indent=2))
+          if out["after"]["errors"]:
+              raise SystemExit("network proof errors")
+          if not non_explosion_executed:
+              raise SystemExit("non-explosion query path did not execute")
+          if out["duplicate_candidate_ids_after"] != 0:
+              raise SystemExit("duplicate candidates after family merge")
+          PY
+
+      - name: Build proof artifact
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin historical-attack-event-backfill-2026-09-27
+          git rev-parse origin/historical-attack-event-backfill-2026-09-27 > /tmp/campaign_head_after
+          python - <<'PY'
+          import hashlib,json,os,subprocess
+          from pathlib import Path
+
+          ROOT=Path.cwd()
+          def load(path,default):
+              p=Path(path)
+              if not p.exists(): return default
+              try: return json.loads(p.read_text())
+              except Exception: return default
+          def text(path): return Path(path).read_text().strip() if Path(path).exists() else ""
+          def blob(path,ref="HEAD"):
+              try: return subprocess.check_output(["git","rev-parse",f"{ref}:{path}"],text=True).strip()
+              except Exception: return None
+
+          protected=[
+            "kyiv-air-alerts-grafana/data/explosion_audited_baseline.json",
+            "kyiv-air-alerts-grafana/data/explosion_daily_alert_seed.json",
+            "kyiv-air-alerts-grafana/data/explosion_candidate_monitor_state.json",
+            "kyiv-air-alerts-grafana/data/explosion_review_queue.json",
+            "kyiv-air-alerts-grafana/data/explosion_candidate_monitor_last_run.json",
+            "kyiv-air-alerts-grafana/data/explosions_test.json",
+            "kyiv-air-alerts-grafana/data/dashboard_data.json",
+          ]
+          start=os.environ["AUTHORITATIVE_STARTING_HEAD"]
+          protected_state={}
+          for p in protected:
+              protected_state[p]={"authoritative_start":blob(p,start),"proof_head":blob(p,"HEAD")}
+              protected_state[p]["unchanged"]=protected_state[p]["authoritative_start"]==protected_state[p]["proof_head"]
+
+          dry=load("/tmp/deterministic_dry.json",{})
+          cross=load("/tmp/cross_contract.json",{})
+          network=load("/tmp/network_proof.json",{})
+          last=load("kyiv-air-alerts-grafana/data/explosion_candidate_monitor_last_run.json",{})
+          latest_run=load("/tmp/latest_live_run.json",{})
+          campaign_before=text("/tmp/campaign_head_before")
+          campaign_after=text("/tmp/campaign_head_after")
+
+          historical_contract={
+            "methodology_version":"historical-attack-event-air-defense-action-v2",
+            "canonical_event_taxonomy":["explosion","impact","arrival","strike","damage","fire","air_defense_action"],
+            "numerator_rule":"one alert episode contributes at most 1 when strict/sensitivity evidence supports >=1 canonical event class",
+            "classes":{
+              "explosion":{"positive_when":"explicit explosion event plus exact-city, attack/air-context and alert-temporal gates","negative_when":"non-military controlled blast, wrong city, or unbound time"},
+              "impact":{"positive_when":"explicit hit/impact plus the same geography/context/time gates","negative_when":"threat or non-event use"},
+              "arrival":{"positive_when":"explicit arrival/prylit plus the same gates","negative_when":"unbound or wrong-city mention"},
+              "strike":{"positive_when":"actual strike wording; threat-of-strike wording excluded","negative_when":"threat-only strike wording"},
+              "damage":{"positive_when":"damage explicitly attack-caused","negative_when":"ordinary/accidental damage or mere co-presence with alert"},
+              "fire":{"positive_when":"fire explicitly attack-caused","negative_when":"ordinary fire or mere co-presence with alert"},
+              "air_defense_action":{"positive_when":"confirmed actual air-defense operation, including explicit working/operated PPO or named PPO interception, with exact-city and alert binding","negative_when":"possible/predicted/readiness/capability/warning-only PPO, wrong city, or unbound time"},
+            },
+            "ppo_examples":{
+              "ППО працює":"event-positive action under v2 when exact-city and alert binding pass",
+              "ППО збила БпЛА":"event-positive air_defense_action; interception_claim=true when gates pass",
+              "intercepted missile/drone":"positive only when actual interception is attributed/bound to the target city/alert",
+              "explosion attributed to PPO":"explosion + air_defense_action; explosion remains event-positive",
+              "retrospective interception":"requires episode-specific temporal binding; publication time alone is insufficient",
+              "regional interception":"not exact-city positive",
+              "time-unbound interception":"not strict/sensitivity positive without valid temporal basis",
+            },
+            "strict_vs_sensitivity":"strict requires episode-specific temporal proof; sensitivity is limited to the existing near-boundary/inferred-same-attack rules and still requires exact-city/event/air-context gates",
+            "provenance_fields":["event_types","air_defense_context","air_defense_action","interception_claim","exact_city_classification_evidence","air_military_context","same_attack_context","temporal_binding","reason_codes"],
+          }
+
+          unexpected=((dry.get("queue_dry_replay") or {}).get("unexpected_status_transitions"))
+          cross_mismatch=cross.get("unexplained_live_v2_semantic_mismatches")
+          deterministic_ok=dry.get("all_deterministic_passed") is True
+          network_ok=bool(network) and not ((network.get("after") or {}).get("errors")) and (network.get("after") or {}).get("non_explosion_query_path_executed") is True and network.get("duplicate_candidate_ids_after")==0
+          protected_ok=all(v["unchanged"] for v in protected_state.values())
+          campaign_untouched=campaign_before==campaign_after
+          pass_all=deterministic_ok and unexpected==0 and cross_mismatch==0 and network_ok and protected_ok and campaign_untouched
+          verdict="LIVE ATTACK-EVENT V2 ALIGNMENT PROVEN — READY FOR ATOMIC APPLY" if pass_all else (
+            "LIVE ATTACK-EVENT V2 ALIGNMENT PARTIAL — NARROWER FIX REQUIRED"
+            if deterministic_ok and protected_ok and campaign_untouched
+            else "LIVE ATTACK-EVENT V2 ALIGNMENT PROOF FAILED — DO NOT APPLY"
+          )
+          artifact={
+            "schema_version":1,
+            "kind":"live_attack_event_v2_alignment_proof",
+            "generated_at":__import__("datetime").datetime.now(__import__("datetime").timezone.utc).isoformat().replace("+00:00","Z"),
+            "authoritative_starting_head":os.environ["AUTHORITATIVE_STARTING_HEAD"],
+            "main_starting_head":os.environ["MAIN_STARTING_HEAD"],
+            "campaign_starting_head":os.environ["CAMPAIGN_STARTING_HEAD"],
+            "fresh_heads_at_proof_start":{
+              "authoritative":text("/tmp/authoritative_head_now"),
+              "main":text("/tmp/main_head_now"),
+              "campaign":campaign_before,
+            },
+            "proof_branch":os.environ["PROOF_BRANCH"],
+            "proof_code_commit":os.environ["PROOF_CODE_COMMIT"],
+            "proof_orchestration_commit":os.getenv("GITHUB_SHA"),
+            "live_monitor_last_successful_run":latest_run,
+            "live_monitor_pre_state":{
+              "started_at":last.get("started_at"),"finished_at":last.get("finished_at"),"ok":last.get("ok"),
+              "review_queue_size":last.get("review_queue_size"),"new_alert_episodes":last.get("new_alert_episodes"),
+              "new_review_candidates":last.get("new_review_candidates"),"errors":last.get("errors") or {},
+            },
+            "historical_v2_contract":historical_contract,
+            "event_type_contract":historical_contract["classes"],
+            "discovery_before":{
+              "strategy":"single explosion-centric Google News query",
+              "network":network.get("before") or {},
+            },
+            "discovery_after":{
+              "strategy":"five bounded query families merged by existing deterministic candidate identity before classification",
+              "families":["explosion","impact_arrival","strike","attack_consequence","air_defense_action"],
+              "network":network.get("after") or {},
+            },
+            "query_strategy":"bounded family queries; discovery broad, classifier conservative; family results merged before classification",
+            "ppo_contract_before":"legacy live: PPO-only complete Telegram message rejected; confirmed interception without explosion not event-positive",
+            "ppo_contract_after":"historical v2: confirmed actual air-defense action is canonical event-positive; prediction/readiness remains negative; exact-city and temporal gates preserved",
+            "files_changed":[
+              "kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py",
+              ".github/workflows/live-attack-event-v2-alignment-proof.yml",
+              "research/live_attack_event_v2_alignment_proof_2026-09-28.json"
+            ],
+            "unit_tests":dry,
+            "existing_regression_tests":{"proof_monitor_self_test":text("/tmp/proof_self_test.txt"),"campaign_v2_self_test":text("/tmp/campaign_self_test.txt")},
+            "queue_dry_replay":dry.get("queue_dry_replay") or {},
+            "classification_changes":(dry.get("queue_dry_replay") or {}).get("changes") or [],
+            "unexpected_changes":(dry.get("queue_dry_replay") or {}).get("unexpected_changes") or [],
+            "cross_contract_regression":cross,
+            "network_proof":network,
+            "protected_state":{"all_unchanged":protected_ok,"files":protected_state},
+            "6863_campaign_before_after":{"before":campaign_before,"after":campaign_after,"unchanged":campaign_untouched},
+            "6863_mutated_by_this_task":False,
+            "recommended_atomic_apply_scope":[
+              "kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py only",
+              "retain bounded query-family discovery and merge/dedupe",
+              "retain v2 air_defense_action classifier semantics and explicit event_types persistence",
+              "do not apply proof workflow or proof artifact to production runtime"
+            ],
+            "verdict":verdict,
+          }
+          Path(os.environ["ARTIFACT"]).write_text(json.dumps(artifact,ensure_ascii=False,indent=2)+"\n")
+          print(json.dumps({"verdict":verdict,"artifact":os.environ["ARTIFACT"],"unexpected":unexpected,"cross_mismatch":cross_mismatch,"network_ok":network_ok},ensure_ascii=False,indent=2))
+          PY
+
+      - name: Commit proof artifact separately
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "$ARTIFACT"
+          git commit -m "Record live attack-event v2 alignment proof"
+          for attempt in 1 2 3; do
+            git fetch origin "$PROOF_BRANCH"
+            if git rebase "origin/$PROOF_BRANCH" && git push origin "HEAD:$PROOF_BRANCH"; then
+              exit 0
+            fi
+            git rebase --abort || true
+            if [ "$attempt" -eq 3 ]; then
+              exit 1
+            fi
+            sleep $((attempt * 2))
+          done
