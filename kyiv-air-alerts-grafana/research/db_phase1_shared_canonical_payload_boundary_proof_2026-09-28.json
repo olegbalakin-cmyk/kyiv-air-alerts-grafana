@@ -1,0 +1,115 @@
+{
+  "accepted_episode_count": 126,
+  "accepted_input_hashes": {
+    "oracle": "a63cb1d8e14b076e5b29ca6986e029851f0db806abf7f929e25e92457f360cfd",
+    "ukrainealarm_bridge": "5b688e10af05b024b038f21c44a1d0e82f7b2668cf7d2dc1e0504d850b6a6a8c",
+    "vadimkin_rows": "b612df25ca56bb56aece3d8d880ebff82205e326dcd6b900e4ebfc0109868b6c"
+  },
+  "accepted_phase1_reference_sha": "73b841c0d3adfeff078bbf427efaecc5db985973",
+  "accepted_source_observation_count": 140,
+  "binding_match": true,
+  "binding_mismatches": [],
+  "checkpoint_candidate_match": true,
+  "checkpoint_mismatches": [],
+  "credentials_exposed": false,
+  "db_access_performed": false,
+  "ddl_blob_after": "3b8af7940b23aae03a4f6b434d90d97dde10bfc0",
+  "ddl_blob_before": "3b8af7940b23aae03a4f6b434d90d97dde10bfc0",
+  "determinism_checks": {
+    "duplicate_observation_idempotence": true,
+    "normal_vs_reversed": true,
+    "repeated_invocation": true
+  },
+  "episode_identity_match": true,
+  "episode_mismatches": [],
+  "explosion_guard": {
+    "app.js": {
+      "explosion": 0,
+      "вибух": 0
+    },
+    "index.html": {
+      "explosion": 0,
+      "вибух": 0
+    }
+  },
+  "missing_episode_ids": [],
+  "missing_source_record_keys": [],
+  "neon_branch_created": false,
+  "persistence_blob_after": "06f3098df63d7aaf2348c366b6a351901926cb53",
+  "persistence_blob_before": "06f3098df63d7aaf2348c366b6a351901926cb53",
+  "product_baseline_hash": "bc8114339cbd4ee4bb4183b244a56415b64c5e8a86bba1a7770b6ee2858d608f",
+  "product_output_parity": "PASS",
+  "product_refactored_hash": "bc8114339cbd4ee4bb4183b244a56415b64c5e8a86bba1a7770b6ee2858d608f",
+  "production_base_sha": "82494701ae8b49b9780eb42d535e0990fd889151",
+  "production_files_published": false,
+  "production_parity_input_hashes": {
+    "alerts_in_ua_bridge_additional": "30ee66416fe2f9544b80e4caea28f2f02d897cae84a3f18828504dd98353fc7d",
+    "alerts_in_ua_bridge_primary": "b90d1fc0da352d1cb5276dada1b32068444e41e224f46b237ee5609dc1e11bee",
+    "ukrainealarm_bridge_store": "a1a513b5104cf8c7785e1273c89ebff5b2df2c55b329e24dc6417130acbb6a98",
+    "vadimkin_rows": "b612df25ca56bb56aece3d8d880ebff82205e326dcd6b900e4ebfc0109868b6c"
+  },
+  "refactored_episode_count": 126,
+  "refactored_source_observation_count": 140,
+  "regression_checks": {
+    "expected_present": true,
+    "known_bad_absent": true
+  },
+  "schema_version": "db-phase1-shared-canonical-payload-boundary-proof-v1",
+  "shared_canonical_entrypoint": "canonicalize_lviv",
+  "shared_canonical_module": "scripts/db_phase1_lviv_canonical.py",
+  "source_observation_mismatches": [],
+  "source_record_key_match": true,
+  "source_split": {
+    "accepted": {
+      "ukrainealarm_region_history": 20,
+      "vadimkin_official_data_uk": 120
+    },
+    "refactored": {
+      "ukrainealarm_region_history": 20,
+      "vadimkin_official_data_uk": 120
+    }
+  },
+  "unexpected_episode_ids": [],
+  "unexpected_source_record_keys": [],
+  "verdict": "PHASE-1 SHARED CANONICAL PAYLOAD BOUNDARY BLOCKED",
+  "proof_actions_run_id": 36439301389,
+  "proof_artifact_id": 10976533313,
+  "refactor_implementation_commit": "e8590fb17fba42b859bc13b1444ecf206630c208",
+  "phase1_regression_tests": {
+    "run": 31,
+    "passed": 31
+  },
+  "subproof_against_frozen_production_base": "PHASE-1 SHARED CANONICAL PAYLOAD BOUNDARY PROVEN",
+  "final_isolation_guard": {
+    "result": "FAIL_PRODUCTION_HEAD_DRIFT",
+    "initial_site_prod_sha": "82494701ae8b49b9780eb42d535e0990fd889151",
+    "final_site_prod_sha": "5864bab6a09e087a6fc7bdabacef45409c3ac88c",
+    "site_prod_ahead_by": 2,
+    "site_prod_changed_files": [
+      "kyiv-air-alerts-grafana/data/alerts_combined.json",
+      "kyiv-air-alerts-grafana/data/casualties/review_queue.json",
+      "kyiv-air-alerts-grafana/data/casualties/source_state.json",
+      "kyiv-air-alerts-grafana/data/dashboard_data.json",
+      "kyiv-air-alerts-grafana/data/dashboard_qa.json",
+      "kyiv-air-alerts-grafana/data/sevastopol_events.json",
+      "kyiv-air-alerts-grafana/data/ukrainealarm_bridge.json",
+      "kyiv-air-alerts-grafana/grafana/dashboard.json"
+    ],
+    "initial_main_sha": "bf670b4fa0a464d758836d16744d31b20bb72010",
+    "final_main_sha": "8c5ed2a9fce73427cb53c888599a8a1751d9dc00",
+    "main_ahead_by": 1,
+    "main_changed_files": [
+      "kyiv-air-alerts-grafana/data/alerts_combined.json",
+      "kyiv-air-alerts-grafana/data/casualties/review_queue.json",
+      "kyiv-air-alerts-grafana/data/casualties/source_state.json",
+      "kyiv-air-alerts-grafana/data/dashboard_data.json",
+      "kyiv-air-alerts-grafana/data/ukrainealarm_bridge.json"
+    ],
+    "refactor_branch_modified_site_prod": false,
+    "refactor_branch_modified_main": false,
+    "reason": "Protected refs advanced externally after the initial baseline guard. Current site-prod changed production parity inputs, including data/ukrainealarm_bridge.json, so the successful parity proof against 82494701 cannot establish parity with the now-current production input."
+  },
+  "blocked_stage": "final production isolation / current product-parity authority",
+  "canonical_parity_against_accepted_reference": "PASS",
+  "product_output_parity_against_initial_frozen_base": "PASS"
+}
