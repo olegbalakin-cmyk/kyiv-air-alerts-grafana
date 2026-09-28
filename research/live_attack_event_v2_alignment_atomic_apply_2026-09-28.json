@@ -1,0 +1,255 @@
+{
+  "schema_version": 1,
+  "kind": "live_attack_event_v2_alignment_atomic_apply",
+  "generated_at": "2026-09-28T14:51:00Z",
+  "starting_authoritative_head": "2c4151bd5a9412f9017dc1f2308da35489515b69",
+  "starting_main_head": "bf670b4fa0a464d758836d16744d31b20bb72010",
+  "starting_campaign_head": "4e0ebd1382299ea3d5f957491f8c5b6a919f01b0",
+  "starting_site_prod_head": "82494701ae8b49b9780eb42d535e0990fd889151",
+  "proof_code_commit": "4c6a7ff803b8518b01749d0407cfe26861ede2ac",
+  "proof_artifact_commit": "489ac3f4b2a9eb3cf4b6a162c29fb69318704f00",
+  "compatibility_check": {
+    "result": "COMPATIBLE",
+    "proof_base_head": "aa35a25038095a795f6792c22ab8cd8f097aca79",
+    "implementation_file": "kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py",
+    "starting_authoritative_blob": "a0ed9dcaedd86d2fbd71d32065ffa52acbae29aa",
+    "proof_base_blob": "a0ed9dcaedd86d2fbd71d32065ffa52acbae29aa",
+    "proof_final_blob": "b55fe2ed082958917c74f95bca2fd6bc137bcaae",
+    "same_logic_drift": false,
+    "note": "The authoritative monitor blob exactly matched the proof base before apply. The implementation commit later appeared in the authoritative lineage while validation was in progress; no duplicate implementation write was made."
+  },
+  "implementation_file": "kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py",
+  "blob_before": "a0ed9dcaedd86d2fbd71d32065ffa52acbae29aa",
+  "blob_after": "b55fe2ed082958917c74f95bca2fd6bc137bcaae",
+  "implementation_commit": "960561136e6c6863bdea31b35b14b389180e0847",
+  "implementation_commit_files": [
+    "kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py"
+  ],
+  "pre_apply_queue_size": 901,
+  "pre_apply_state": {
+    "authoritative_head": "2c4151bd5a9412f9017dc1f2308da35489515b69",
+    "last_run_at": "2026-09-28T09:33:34.254986Z",
+    "monitor_blob": "a0ed9dcaedd86d2fbd71d32065ffa52acbae29aa"
+  },
+  "dry_replay": {
+    "queue_total": 901,
+    "semantic_changes": 38,
+    "status_changes": 2,
+    "unexpected_status_changes": 0,
+    "rejected_to_needs_review": 2,
+    "rejected_to_needs_review_candidate_ids": [
+      "b86db2df843cea4d6dabbff7",
+      "3567c9c47f76042ff8af230c"
+    ],
+    "needs_review_to_strict": 0,
+    "needs_review_to_sensitivity": 0,
+    "rejected_to_positive": 0,
+    "positive_to_negative": 0,
+    "recomputation_basis": "All 38 proof-affected candidate records remained present with identical classification inputs; 22 newly-added pre-apply queue records contained no PPO/PVO action vocabulary and remained needs_review. Therefore the proven 38 semantic / 2 status / 0 unexpected transition result carries forward to the 901-row queue without unexplained auto-positive transitions."
+  },
+  "tests": {
+    "monitor_self_test": "PASS",
+    "update_metric_self_test": "PASS",
+    "workflow_validation": "PASS",
+    "workflow_steps": {
+      "production_inputs": "PASS",
+      "baseline_sync": "PASS",
+      "self_test_explosion_automation": "PASS",
+      "poll_and_discovery": "PASS",
+      "rebuild_strict_kpi_and_rolling90": "PASS",
+      "validate_automation_output": "PASS",
+      "commit_live_state": "PASS"
+    },
+    "self_test_log_summary": "23 audited cities; classification requirements IR01-IR20 covered; PPO/PVO, controlled-blast, publisher-branding, air-context, temporal, near-boundary, overlap/near-duplicate, and dry-replay guards passed."
+  },
+  "real_run_id": 36404244648,
+  "real_run_attempt": 2,
+  "real_run_trigger": "schedule/retry-attempt-2",
+  "real_run_conclusion": "success",
+  "real_run_started_at": "2026-09-28T12:10:57.684251Z",
+  "real_run_finished_at": "2026-09-28T12:41:21.309561Z",
+  "real_run_state_commit": "947789f7b976c3ba1f1608a78e376c65443dc247",
+  "new_alert_episodes": 22,
+  "due_checks": {
+    "due_at_cutoff": 62,
+    "checked_at_cutoff": 62,
+    "unchecked_at_cutoff": 0,
+    "became_due_during_run": 2
+  },
+  "cities_searched": [
+    "cherkasy",
+    "chernihiv",
+    "dnipro",
+    "kharkiv",
+    "kherson",
+    "kropyvnytskyi",
+    "kyiv",
+    "mykolaiv",
+    "odesa",
+    "poltava",
+    "sumy",
+    "vinnytsia",
+    "zaporizhzhia",
+    "zhytomyr"
+  ],
+  "query_family_results": {
+    "explosion": 134,
+    "impact_arrival": 158,
+    "strike": 186,
+    "attack_consequence": 0,
+    "air_defense_action": 3
+  },
+  "all_five_query_families_executed": true,
+  "google_raw_family_hits": 481,
+  "google_results_after_family_merge": 401,
+  "telegram_results": 116,
+  "merged_source_count": 517,
+  "duplicate_source_keys": 0,
+  "duplicate_family_hits_collapsed": 80,
+  "new_candidates": 289,
+  "event_type_counts": {
+    "explosion": 16,
+    "impact": 96,
+    "arrival": 5,
+    "strike": 95,
+    "damage": 50,
+    "fire": 41,
+    "air_defense_action": 2
+  },
+  "auto_strict": 0,
+  "auto_sensitivity": 0,
+  "ppo_candidates": [
+    {
+      "candidate_id": "cadecdab42377bc8103848f6",
+      "city": "kyiv",
+      "final_status": "rejected",
+      "event_types": [],
+      "air_defense_context": true,
+      "air_defense_action": false,
+      "interception_claim": false,
+      "exact_city": false,
+      "temporal_binding": false,
+      "temporal_code": "NO_STRICT_TEMPORAL_BINDING",
+      "outcome_reason": "Generic/national air-defense report; no exact-city event binding and no episode-specific temporal binding."
+    },
+    {
+      "candidate_id": "e319a7c8921669b9d52a7794",
+      "city": "kyiv",
+      "final_status": "needs_review",
+      "event_types": [
+        "air_defense_action"
+      ],
+      "air_defense_context": true,
+      "air_defense_action": true,
+      "interception_claim": false,
+      "exact_city": true,
+      "same_attack": true,
+      "temporal_binding": false,
+      "temporal_code": "NO_STRICT_TEMPORAL_BINDING",
+      "outcome_reason": "Confirmed factual PPO action, but no episode-specific temporal binding; not auto-positive."
+    },
+    {
+      "candidate_id": "cf018d6a9b4e66fee97a7c2b",
+      "city": "kyiv",
+      "final_status": "needs_review",
+      "event_types": [
+        "air_defense_action"
+      ],
+      "air_defense_context": true,
+      "air_defense_action": true,
+      "interception_claim": true,
+      "exact_city": true,
+      "same_attack": true,
+      "temporal_binding": false,
+      "temporal_code": "NO_STRICT_TEMPORAL_BINDING",
+      "outcome_reason": "Confirmed interception claim, but no episode-specific temporal binding; not auto-positive."
+    }
+  ],
+  "queue_before_after": {
+    "before": 901,
+    "after": 1190,
+    "delta": 289,
+    "removed": 0
+  },
+  "coverage_before_after": {
+    "coverage_regressions": 0,
+    "post_run_coverage_end": "2026-09-27"
+  },
+  "state_integrity": {
+    "passed": true,
+    "monitor_state_advanced_monotonically": true,
+    "already_checked_episode_regressions": 0,
+    "episode_duplicate_cities": [],
+    "duplicate_candidate_ids": 0,
+    "existing_approved_items_before": 69,
+    "existing_approved_items_missing_after": 0,
+    "strict_total_before": 1830,
+    "strict_total_after": 1830,
+    "strict_count_decreased": false,
+    "coverage_end_regressions": 0,
+    "rolling90_missing_cities": [],
+    "queue_json_parsed": true,
+    "last_run_queue_size_matches_committed_queue": true,
+    "stale_writer_overwrite_detected": false
+  },
+  "production_alert_ingestion_health": {
+    "checked_run_id": 36423169848,
+    "workflow_conclusion": "success",
+    "production_rows": 23,
+    "effective_freshness_fully_continuous": true,
+    "warning": false,
+    "verification": "Production dataset verified: 23 rows; official UkraineAlarm bridge fully covers stale upstream-dependent rows; warning removed."
+  },
+  "historical_evidence_protection": {
+    "passed": true,
+    "implementation_commit_only_monitor_file": true,
+    "real_run_state_commit_files": [
+      "kyiv-air-alerts-grafana/data/dashboard_data.json",
+      "kyiv-air-alerts-grafana/data/explosion_candidate_monitor_last_run.json",
+      "kyiv-air-alerts-grafana/data/explosion_candidate_monitor_state.json",
+      "kyiv-air-alerts-grafana/data/explosion_review_queue.json",
+      "kyiv-air-alerts-grafana/data/explosions_test.json"
+    ],
+    "historical_final_evidence_mutated": false,
+    "historical_replay_source_evidence_mutated": false
+  },
+  "campaign_before_after": {
+    "head_before": "4e0ebd1382299ea3d5f957491f8c5b6a919f01b0",
+    "head_after": "ef4b8006801dede91e1eddbc8f14171e4ecfa085",
+    "progress_before": {
+      "processed": 226,
+      "total": 6863,
+      "terminal": 226,
+      "status": "RUNNING",
+      "phase": "ACCELERATED_2X"
+    },
+    "progress_after": {
+      "processed": 326,
+      "total": 6863,
+      "terminal": 326,
+      "status": "RUNNING",
+      "phase": "ACCELERATED_2X"
+    },
+    "advanced_independently": true
+  },
+  "campaign_mutated_by_this_task": false,
+  "subsequent_clean_monitor_confirmation": {
+    "run_id": 36429283626,
+    "conclusion": "success",
+    "state_commit": "f446dce2f850c0a958ae4eba9f55d3e9b91f6f77",
+    "monitor_blob": "b55fe2ed082958917c74f95bca2fd6bc137bcaae",
+    "errors": {},
+    "unchecked_due_checks_at_cutoff": 0,
+    "note": "A later scheduled cycle also completed cleanly after the required real run; no duplicate dispatch was started."
+  },
+  "unexpected_drift": {
+    "semantic_monitor_drift": false,
+    "concurrent_branch_activity": [
+      "947789f7b976c3ba1f1608a78e376c65443dc247 live-monitor state commit",
+      "c18d9a24d5e65084fb5b70d266b9b415238b7b4f unrelated casualty-monitor state commit",
+      "f446dce2f850c0a958ae4eba9f55d3e9b91f6f77 later live-monitor state commit"
+    ],
+    "trigger_mode_note": "The required post-apply real run was the already-running schedule/retry attempt 2, so no duplicate workflow_dispatch run was started."
+  },
+  "verdict": "LIVE ATTACK-EVENT V2 APPLIED — REAL MONITOR RUN CLEAN"
+}
