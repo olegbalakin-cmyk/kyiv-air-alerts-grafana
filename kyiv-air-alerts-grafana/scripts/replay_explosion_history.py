@@ -60,6 +60,21 @@ START_FIELDS = (
     "episode_start",
     "matched_start",
 )
+LEGACY_START_FIELDS = (
+    "alert_episode_start_kyiv",
+    "alert_start_utc",
+)
+EVENT_TIME_FIELDS = (
+    "event_time",
+    "event_time_kyiv",
+    "event_time_local",
+)
+RECORDED_DATE_FIELDS = (
+    "alert_start_date",
+    "episode_start_date",
+    "matched_episode_start_date_kyiv",
+    "local_date",
+)
 EVIDENCE_FIELDS = ("evidence", "evidence_text", "text", "excerpt", "quote")
 BASIS_FIELDS = ("decision_basis", "basis", "decision", "reason")
 
@@ -207,46 +222,314 @@ def episode_index(episodes: list[dict]) -> tuple[dict[str, dict], dict[str, list
     return by_id, by_day
 
 
-def bind_evidence_record(row: dict, episodes: list[dict], monitor) -> dict:
+def parse_temporal_field_datetime(value, field: str, monitor) -> datetime | None:
+    dt = parse_historical_datetime(value, monitor)
+    if dt is None:
+        return None
+    text = str(value).strip()
+    has_explicit_zone = bool(
+        re.search(r"(?:Z|[+-]\d{2}:?\d{2}|Europe/Kyiv)\b", text, flags=re.I)
+    )
+    if not has_explicit_zone and field == "alert_start_utc":
+        return dt.replace(tzinfo=monitor.UTC)
+    if not has_explicit_zone and field in {
+        "alert_episode_start_kyiv",
+        "event_time_kyiv",
+        "event_time_local",
+    }:
+        return dt.replace(tzinfo=KYIV_TZ)
+    return dt
+
+
+def retained_local_date(row: dict, monitor) -> str | None:
+    for field in START_FIELDS + LEGACY_START_FIELDS + RECORDED_DATE_FIELDS:
+        value = row.get(field)
+        if not value:
+            continue
+        text = str(value).strip()
+        if re.fullmatch(r"\d{4}-\d{2}-\d{2}", text):
+            return text
+        dt = parse_temporal_field_datetime(value, field, monitor)
+        if dt is not None:
+            return dt.astimezone(KYIV_TZ).date().isoformat()
+        explicit_day = re.search(r"\b\d{4}-\d{2}-\d{2}\b", text)
+        if explicit_day:
+            return explicit_day.group(0)
+    return None
+
+
+def retained_event_datetimes(row: dict, monitor) -> list[datetime]:
+    result: list[datetime] = []
+    seen: set[str] = set()
+    full_pattern = re.compile(
+        r"\d{4}-\d{2}-\d{2}[T ]\s*~?\s*\d{1,2}:\d{2}"
+        r"(?::\d{2}(?:\.\d+)?)?"
+        r"(?:\s*(?:Z|[+-]\d{2}:?\d{2}|Europe/Kyiv))?",
+        flags=re.I,
+    )
+    dated_clock_pattern = re.compile(
+        r"(?<![\d:])(?P<hour>[01]?\d|2[0-3]):(?P<minute>[0-5]\d)"
+        r"(?::(?P<second>[0-5]\d(?:\.\d+)?))?"
+        r"(?:\s*(?P<zone>Z|[+-]\d{2}:?\d{2}|Europe/Kyiv))?"
+        r"\s+(?P<day>\d{4}-\d{2}-\d{2})\b",
+        flags=re.I,
+    )
+    clock_pattern = re.compile(
+        r"(?<![\d:])(?P<hour>[01]?\d|2[0-3]):(?P<minute>[0-5]\d)"
+        r"(?::(?P<second>[0-5]\d(?:\.\d+)?))?"
+        r"(?:\s*(?P<zone>Z|[+-]\d{2}:?\d{2}|Europe/Kyiv))?",
+        flags=re.I,
+    )
+    anchor_day = retained_local_date(row, monitor)
+
+    def add(dt: datetime | None) -> None:
+        if dt is None:
+            return
+        key = dt.astimezone(monitor.UTC).isoformat()
+        if key not in seen:
+            seen.add(key)
+            result.append(dt)
+
+    def clock_token(match, day: str) -> str:
+        second = match.group("second")
+        clock = f'{int(match.group("hour")):02d}:{match.group("minute")}'
+        clock += f":{second}" if second else ":00"
+        zone = (match.group("zone") or "").strip()
+        return f"{day}T{clock}{zone}"
+
+    for field in EVENT_TIME_FIELDS:
+        value = row.get(field)
+        if not value:
+            continue
+        text = str(value).strip()
+        spans = []
+        for match in full_pattern.finditer(text):
+            spans.append(match.span())
+            normalized = re.sub(r"([T ])\s*~\s*", r"\1", match.group(0), count=1)
+            add(parse_temporal_field_datetime(normalized, field, monitor))
+        for match in dated_clock_pattern.finditer(text):
+            spans.append(match.span())
+            add(parse_temporal_field_datetime(clock_token(match, match.group("day")), field, monitor))
+
+        if not anchor_day:
+            continue
+        residual = list(text)
+        for a, b in spans:
+            for idx in range(a, b):
+                residual[idx] = " "
+        residual_text = "".join(residual)
+        for match in clock_pattern.finditer(residual_text):
+            add(parse_temporal_field_datetime(clock_token(match, anchor_day), field, monitor))
+    return result
+
+
+def bind_start_datetime(
+    dt: datetime,
+    episodes: list[dict],
+    monitor,
+    success_method: str | None = None,
+) -> dict:
+    exact = []
+    dt_utc = dt.astimezone(monitor.UTC)
+    for ep in episodes:
+        start = monitor.parse_dt(ep.get("alert_start"))
+        if start and abs((start - dt_utc).total_seconds()) <= 90:
+            exact.append(ep)
+    if len(exact) == 1:
+        return {
+            "episode_id": str(exact[0]["episode_id"]),
+            "method": success_method or "alert_start_within_90s",
+            "candidates": [str(exact[0]["episode_id"])],
+        }
+
+    minute = dt.astimezone(KYIV_TZ).strftime("%Y-%m-%dT%H:%M")
+    minute_rows = []
+    for ep in episodes:
+        start = monitor.parse_dt(ep.get("alert_start"))
+        if start and start.astimezone(KYIV_TZ).strftime("%Y-%m-%dT%H:%M") == minute:
+            minute_rows.append(ep)
+    if len(minute_rows) == 1:
+        return {
+            "episode_id": str(minute_rows[0]["episode_id"]),
+            "method": success_method or "alert_start_same_local_minute",
+            "candidates": [str(minute_rows[0]["episode_id"])],
+        }
+    return {
+        "episode_id": None,
+        "method": "ambiguous_alert_start",
+        "candidates": [str(ep["episode_id"]) for ep in (exact or minute_rows)],
+    }
+
+
+def legacy_start_alias_binding(row: dict, episodes: list[dict], monitor) -> dict | None:
+    failures = []
+    for field in LEGACY_START_FIELDS:
+        value = row.get(field)
+        if not value:
+            continue
+        dt = parse_temporal_field_datetime(value, field, monitor)
+        if dt is None:
+            continue
+        bound = bind_start_datetime(dt, episodes, monitor, "legacy_start_alias")
+        bound["binding_field"] = field
+        if bound.get("episode_id"):
+            return bound
+        failures.append(bound)
+    if failures:
+        candidates = sorted({
+            eid
+            for failure in failures
+            for eid in failure.get("candidates") or []
+        })
+        return {
+            "episode_id": None,
+            "method": "ambiguous_legacy_start_alias",
+            "candidates": candidates,
+        }
+    return None
+
+
+def event_time_unique_containment_binding(row: dict, episodes: list[dict], monitor) -> dict | None:
+    event_times = retained_event_datetimes(row, monitor)
+    if not event_times:
+        return None
+
+    per_time_candidates: list[list[str]] = []
+    all_candidates: set[str] = set()
+    for event_dt in event_times:
+        event_utc = event_dt.astimezone(monitor.UTC)
+        matches = []
+        for ep in episodes:
+            start = monitor.parse_dt(ep.get("alert_start"))
+            end = monitor.parse_dt(ep.get("alert_end"))
+            if start and end and start <= event_utc <= end:
+                matches.append(str(ep["episode_id"]))
+        per_time_candidates.append(sorted(matches))
+        all_candidates.update(matches)
+
+    if len(all_candidates) == 1 and all(
+        candidates == sorted(all_candidates) for candidates in per_time_candidates
+    ):
+        target = next(iter(all_candidates))
+        return {
+            "episode_id": target,
+            "method": "event_time_unique_containment",
+            "candidates": [target],
+            "event_times_utc": [
+                dt.astimezone(monitor.UTC).isoformat() for dt in event_times
+            ],
+        }
+
+    method = (
+        "event_time_no_containing_episode"
+        if not all_candidates
+        else "event_time_ambiguous_containment"
+    )
+    return {
+        "episode_id": None,
+        "method": method,
+        "candidates": sorted(all_candidates),
+        "event_times_utc": [
+            dt.astimezone(monitor.UTC).isoformat() for dt in event_times
+        ],
+        "per_time_candidates": per_time_candidates,
+    }
+
+
+def bind_evidence_record(
+    row: dict,
+    episodes: list[dict],
+    monitor,
+    allow_new_temporal_fallback: bool = True,
+) -> dict:
     by_id, by_day = episode_index(episodes)
-    explicit_id = str(row.get("episode_id") or row.get("matched_episode_id") or row.get("alert_episode_id") or "")
+    explicit_id = str(
+        row.get("episode_id")
+        or row.get("matched_episode_id")
+        or row.get("alert_episode_id")
+        or ""
+    )
     if explicit_id:
         if explicit_id in by_id:
-            return {"episode_id": explicit_id, "method": "persisted_episode_id", "candidates": [explicit_id]}
-        return {"episode_id": None, "method": "unknown_persisted_episode_id", "candidates": [explicit_id]}
+            result = {
+                "episode_id": explicit_id,
+                "method": "persisted_episode_id",
+                "candidates": [explicit_id],
+            }
+            if allow_new_temporal_fallback:
+                conflicts = []
+                for fallback in (
+                    legacy_start_alias_binding(row, episodes, monitor),
+                    event_time_unique_containment_binding(row, episodes, monitor),
+                ):
+                    fallback_id = (fallback or {}).get("episode_id")
+                    if fallback_id and fallback_id != explicit_id:
+                        conflicts.append({
+                            "method": fallback.get("method"),
+                            "episode_id": fallback_id,
+                        })
+                if conflicts:
+                    result["temporal_conflicts"] = conflicts
+            return result
+        return {
+            "episode_id": None,
+            "method": "unknown_persisted_episode_id",
+            "candidates": [explicit_id],
+        }
 
+    ordinary_start_failure = None
     raw = next((row.get(k) for k in START_FIELDS if row.get(k)), None)
     dt = parse_historical_datetime(raw, monitor)
     if dt is not None:
-        exact = []
-        dt_utc = dt.astimezone(monitor.UTC)
-        for ep in episodes:
-            start = monitor.parse_dt(ep.get("alert_start"))
-            if start and abs((start - dt_utc).total_seconds()) <= 90:
-                exact.append(ep)
-        if len(exact) == 1:
-            return {"episode_id": str(exact[0]["episode_id"]), "method": "alert_start_within_90s", "candidates": [str(exact[0]["episode_id"])]}
-        minute = dt.astimezone(KYIV_TZ).strftime("%Y-%m-%dT%H:%M")
-        minute_rows = []
-        for ep in episodes:
-            start = monitor.parse_dt(ep.get("alert_start"))
-            if start and start.astimezone(KYIV_TZ).strftime("%Y-%m-%dT%H:%M") == minute:
-                minute_rows.append(ep)
-        if len(minute_rows) == 1:
-            return {"episode_id": str(minute_rows[0]["episode_id"]), "method": "alert_start_same_local_minute", "candidates": [str(minute_rows[0]["episode_id"])]}
-        return {"episode_id": None, "method": "ambiguous_alert_start", "candidates": [str(ep["episode_id"]) for ep in (exact or minute_rows)]}
+        bound = bind_start_datetime(dt, episodes, monitor)
+        if bound.get("episode_id"):
+            return bound
+        ordinary_start_failure = bound
+    else:
+        day = None
+        for field in START_FIELDS + RECORDED_DATE_FIELDS:
+            if row.get(field):
+                day = local_day(row.get(field), monitor)
+                if day:
+                    break
+        if day:
+            rows = by_day.get(day, [])
+            if len(rows) == 1:
+                return {
+                    "episode_id": str(rows[0]["episode_id"]),
+                    "method": "unique_episode_on_recorded_local_day",
+                    "candidates": [str(rows[0]["episode_id"])],
+                }
+
+    if allow_new_temporal_fallback:
+        legacy = legacy_start_alias_binding(row, episodes, monitor)
+        if legacy and legacy.get("episode_id"):
+            return legacy
+
+        event_binding = event_time_unique_containment_binding(row, episodes, monitor)
+        if event_binding and event_binding.get("episode_id"):
+            return event_binding
+
+        if event_binding is not None:
+            return event_binding
+        if legacy is not None:
+            return legacy
+    if ordinary_start_failure is not None:
+        return ordinary_start_failure
 
     day = None
-    for field in START_FIELDS + ("alert_start_date", "episode_start_date", "matched_episode_start_date_kyiv", "local_date"):
+    for field in START_FIELDS + RECORDED_DATE_FIELDS:
         if row.get(field):
             day = local_day(row.get(field), monitor)
             if day:
                 break
     if day:
         rows = by_day.get(day, [])
-        if len(rows) == 1:
-            return {"episode_id": str(rows[0]["episode_id"]), "method": "unique_episode_on_recorded_local_day", "candidates": [str(rows[0]["episode_id"])]}
-        return {"episode_id": None, "method": "ambiguous_local_day", "candidates": [str(ep["episode_id"]) for ep in rows]}
+        return {
+            "episode_id": None,
+            "method": "ambiguous_local_day",
+            "candidates": [str(ep["episode_id"]) for ep in rows],
+        }
     return {"episode_id": None, "method": "missing_episode_binding", "candidates": []}
 
 
@@ -928,7 +1211,12 @@ def evidence_validation(evidence: dict, baseline_city: dict, episodes: list[dict
     bound_status: dict[str, str] = {}
     for bucket in bindings:
         for row in evidence.get(bucket) or []:
-            binding = bind_evidence_record(row, episodes, monitor)
+            binding = bind_evidence_record(
+                row,
+                episodes,
+                monitor,
+                allow_new_temporal_fallback=bucket in {"strict_events", "sensitivity_only_events"},
+            )
             bindings[bucket].append({"row": row, "binding": binding})
             eid = binding.get("episode_id")
             if not eid:
@@ -1229,7 +1517,12 @@ def replay_city(repo_root: Path, city: str, through: str, output: Path, input_he
         unbound_review_evidence = []
         for bucket in ("strict_events", "sensitivity_only_events", "review_events"):
             for row in evidence.get(bucket) or []:
-                binding = bind_evidence_record(row, episodes, monitor)
+                binding = bind_evidence_record(
+                    row,
+                    episodes,
+                    monitor,
+                    allow_new_temporal_fallback=bucket in {"strict_events", "sensitivity_only_events"},
+                )
                 target_id = binding.get("episode_id")
                 if not target_id:
                     record = {"code": "UNBOUND_HISTORICAL_EVIDENCE", "bucket": bucket, "binding": binding, "evidence": evidence_text(row)[:500]}
