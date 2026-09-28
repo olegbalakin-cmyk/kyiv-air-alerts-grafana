@@ -1,7 +1,7 @@
 const state = {
   data: null,
   charts: {},
-  tableSort: { key: "alerts", direction: "desc" }
+  tableSort: { key: "label", direction: "asc" }
 };
 
 const DATA_URL = "https://raw.githubusercontent.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/site-prod/kyiv-air-alerts-grafana/data/dashboard_data.json";
@@ -685,7 +685,14 @@ function renderCasualties(key) {
           callbacks: {
             footer(items) {
               const i = items?.[0]?.dataIndex ?? -1;
-              return isPartialPeriod(displayRows[i]) ? "Поточний неповний місяць · дані можуть доповнюватися" : "";
+              if (!isPartialPeriod(displayRows[i])) return "";
+              const coverage = displayRows[i]?.baseline_coverage_through;
+              if (coverage) {
+                const parts = String(coverage).split("-");
+                const formatted = parts.length === 3 ? `${parts[2]}.${parts[1]}.${parts[0]}` : coverage;
+                return `Базове покриття: до ${formatted} · поточний місяць може доповнюватися`;
+              }
+              return "Поточний неповний місяць · дані можуть доповнюватися";
             }
           }
         },
@@ -741,6 +748,10 @@ function isMissingSortValue(value) {
 
 function compareTableRows(a, b) {
   const { key, direction } = state.tableSort;
+  if (key === "label" && direction === "asc") {
+    if (a.key === "kyiv") return -1;
+    if (b.key === "kyiv") return 1;
+  }
   const av = a[key];
   const bv = b[key];
   const aMissing = isMissingSortValue(av);
