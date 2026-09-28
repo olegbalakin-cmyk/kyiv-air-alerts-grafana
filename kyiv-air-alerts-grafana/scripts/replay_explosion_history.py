@@ -436,7 +436,12 @@ def event_time_unique_containment_binding(row: dict, episodes: list[dict], monit
     }
 
 
-def bind_evidence_record(row: dict, episodes: list[dict], monitor) -> dict:
+def bind_evidence_record(
+    row: dict,
+    episodes: list[dict],
+    monitor,
+    allow_new_temporal_fallback: bool = True,
+) -> dict:
     by_id, by_day = episode_index(episodes)
     explicit_id = str(
         row.get("episode_id")
@@ -451,19 +456,20 @@ def bind_evidence_record(row: dict, episodes: list[dict], monitor) -> dict:
                 "method": "persisted_episode_id",
                 "candidates": [explicit_id],
             }
-            conflicts = []
-            for fallback in (
-                legacy_start_alias_binding(row, episodes, monitor),
-                event_time_unique_containment_binding(row, episodes, monitor),
-            ):
-                fallback_id = (fallback or {}).get("episode_id")
-                if fallback_id and fallback_id != explicit_id:
-                    conflicts.append({
-                        "method": fallback.get("method"),
-                        "episode_id": fallback_id,
-                    })
-            if conflicts:
-                result["temporal_conflicts"] = conflicts
+            if allow_new_temporal_fallback:
+                conflicts = []
+                for fallback in (
+                    legacy_start_alias_binding(row, episodes, monitor),
+                    event_time_unique_containment_binding(row, episodes, monitor),
+                ):
+                    fallback_id = (fallback or {}).get("episode_id")
+                    if fallback_id and fallback_id != explicit_id:
+                        conflicts.append({
+                            "method": fallback.get("method"),
+                            "episode_id": fallback_id,
+                        })
+                if conflicts:
+                    result["temporal_conflicts"] = conflicts
             return result
         return {
             "episode_id": None,
@@ -495,18 +501,19 @@ def bind_evidence_record(row: dict, episodes: list[dict], monitor) -> dict:
                     "candidates": [str(rows[0]["episode_id"])],
                 }
 
-    legacy = legacy_start_alias_binding(row, episodes, monitor)
-    if legacy and legacy.get("episode_id"):
-        return legacy
+    if allow_new_temporal_fallback:
+        legacy = legacy_start_alias_binding(row, episodes, monitor)
+        if legacy and legacy.get("episode_id"):
+            return legacy
 
-    event_binding = event_time_unique_containment_binding(row, episodes, monitor)
-    if event_binding and event_binding.get("episode_id"):
-        return event_binding
+        event_binding = event_time_unique_containment_binding(row, episodes, monitor)
+        if event_binding and event_binding.get("episode_id"):
+            return event_binding
 
-    if event_binding is not None:
-        return event_binding
-    if legacy is not None:
-        return legacy
+        if event_binding is not None:
+            return event_binding
+        if legacy is not None:
+            return legacy
     if ordinary_start_failure is not None:
         return ordinary_start_failure
 
@@ -1204,7 +1211,12 @@ def evidence_validation(evidence: dict, baseline_city: dict, episodes: list[dict
     bound_status: dict[str, str] = {}
     for bucket in bindings:
         for row in evidence.get(bucket) or []:
-            binding = bind_evidence_record(row, episodes, monitor)
+            binding = bind_evidence_record(
+                row,
+                episodes,
+                monitor,
+                allow_new_temporal_fallback=bucket in {"strict_events", "sensitivity_only_events"},
+            )
             bindings[bucket].append({"row": row, "binding": binding})
             eid = binding.get("episode_id")
             if not eid:
@@ -1505,7 +1517,12 @@ def replay_city(repo_root: Path, city: str, through: str, output: Path, input_he
         unbound_review_evidence = []
         for bucket in ("strict_events", "sensitivity_only_events", "review_events"):
             for row in evidence.get(bucket) or []:
-                binding = bind_evidence_record(row, episodes, monitor)
+                binding = bind_evidence_record(
+                    row,
+                    episodes,
+                    monitor,
+                    allow_new_temporal_fallback=bucket in {"strict_events", "sensitivity_only_events"},
+                )
                 target_id = binding.get("episode_id")
                 if not target_id:
                     record = {"code": "UNBOUND_HISTORICAL_EVIDENCE", "bucket": bucket, "binding": binding, "evidence": evidence_text(row)[:500]}
