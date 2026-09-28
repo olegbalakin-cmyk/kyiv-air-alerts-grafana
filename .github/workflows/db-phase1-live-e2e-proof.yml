@@ -1,0 +1,590 @@
+name: Phase-1 Live E2E Persistence Adapter Proof
+
+on:
+  push:
+    branches:
+      - db-phase1-live-e2e-proof-2026-09-28
+    paths:
+      - .github/workflows/db-phase1-live-e2e-proof.yml
+      - kyiv-air-alerts-grafana/scripts/db_phase1_live_e2e_proof.py
+
+permissions:
+  contents: read
+
+jobs:
+  live-e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      NEON_API_KEY: ${{ secrets.NEON_API_KEY }}
+      NEON_PROJECT_ID: ${{ vars.NEON_PROJECT_ID }}
+      E2E_EXPECTED_PROJECT_ID: green-cake-44216048
+      E2E_PARENT_BRANCH_ID: br-wandering-sunset-b5835alw
+      E2E_ACCEPTED_BRANCH_ID: br-young-feather-b5q19nli
+      E2E_ACCEPTED_CHECKPOINT_ID: 40a0d262-2a79-405b-8e06-1af6e28bc908
+      E2E_BLOCKED_BRANCH_ID: br-calm-cherry-b56fsh4i
+      E2E_BRANCH_NAME: lviv-phase1-adapter-e2e-2026-09-28
+      E2E_DB_NAME: neondb
+      E2E_ROLE_NAME: neondb_owner
+      PHASE1_IMPLEMENTATION_COMMIT: 150f8bc77c80422d9ac24a066d18303e741223b0
+      PHASE1_DDL_BLOB: 3b8af7940b23aae03a4f6b434d90d97dde10bfc0
+
+    steps:
+      - name: Checkout proof branch
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Set runner-scoped proof paths
+        shell: bash
+        run: |
+          echo "E2E_RESULT=$RUNNER_TEMP/db_phase1_live_e2e_result.json" >> "$GITHUB_ENV"
+          echo "E2E_IDENTITIES=$RUNNER_TEMP/db_phase1_live_e2e_identities.json" >> "$GITHUB_ENV"
+          echo "E2E_BRANCH_META=$RUNNER_TEMP/db_phase1_live_e2e_branch_meta.json" >> "$GITHUB_ENV"
+          echo "E2E_FAILURE_SNAPSHOT=$RUNNER_TEMP/db_phase1_live_e2e_failure_snapshot.json" >> "$GITHUB_ENV"
+
+      - name: Install committed Phase-1 DB requirements
+        working-directory: kyiv-air-alerts-grafana
+        run: python -m pip install -r requirements-db-phase1.txt
+
+      - name: Run committed Phase-1 tests
+        working-directory: kyiv-air-alerts-grafana
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m unittest discover -s tests -p "test_db_phase1*.py" 2>&1 | tee "$RUNNER_TEMP/phase1_tests.log"
+
+      - name: Run and verify importer dry-run
+        working-directory: kyiv-air-alerts-grafana
+        shell: bash
+        run: |
+          set -euo pipefail
+          python scripts/db_phase1_lviv_import.py --dry-run 2>&1 | tee "$RUNNER_TEMP/phase1_dry_run.log"
+          grep -Fx "canonical episodes = 126" "$RUNNER_TEMP/phase1_dry_run.log"
+          grep -Fx "source observations = 140" "$RUNNER_TEMP/phase1_dry_run.log"
+          grep -Fx "Vadimkin = 120" "$RUNNER_TEMP/phase1_dry_run.log"
+          grep -Fx "UkraineAlarm = 20" "$RUNNER_TEMP/phase1_dry_run.log"
+          grep -Fx "checkpoint candidates = 1" "$RUNNER_TEMP/phase1_dry_run.log"
+          grep -Fx "oracle parity = PASS" "$RUNNER_TEMP/phase1_dry_run.log"
+          python - <<'PY'
+          import sys
+          sys.path.insert(0, "scripts")
+          from db_phase1_lviv_import import build_lviv_persistence_payload
+
+          payload = build_lviv_persistence_payload()
+          validation = payload["validation"]
+          required_empty = {
+              "missing_ids": validation["missing_ids"],
+              "unexpected_ids": validation["unexpected_ids"],
+              "interval_mismatches": validation["interval_mismatches"],
+              "duplicate_ids": validation["duplicate_ids"],
+              "boundary_errors": validation["boundary_errors"],
+          }
+          bad = {key: value for key, value in required_empty.items() if value}
+          if bad:
+              raise SystemExit(f"dry-run oracle detail failure: {bad}")
+          episode_ids = {row["legacy_episode_id"] for row in payload["episodes"]}
+          bad_regression = "7dd411c2a2587efc740a1a66"
+          expected_regression = "b3df9090f7264ddbd726e113"
+          if bad_regression in episode_ids:
+              raise SystemExit("bad regression ID is present")
+          if expected_regression not in episode_ids:
+              raise SystemExit("expected regression ID is absent")
+          if validation["blocker_regression"] != "PASS":
+              raise SystemExit("blocker regression gate failed")
+          print("missing IDs = []")
+          print("unexpected IDs = []")
+          print("mismatches = []")
+          print("duplicate identities = []")
+          print("boundary failures = []")
+          print("regression IDs = PASS")
+          PY
+
+      - name: Inspect committed importer CLI
+        working-directory: kyiv-air-alerts-grafana
+        run: python scripts/db_phase1_lviv_import.py --help
+
+      - name: Verify secure Neon API secret path
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ -z "${NEON_API_KEY:-}" ]; then
+            echo "BLOCKED - SECURE GITHUB ACTIONS DATABASE SECRET UNAVAILABLE"
+            exit 78
+          fi
+          if [ -z "${NEON_PROJECT_ID:-}" ]; then
+            echo "BLOCKED - REQUIRED GITHUB REPOSITORY VARIABLE NEON_PROJECT_ID UNAVAILABLE"
+            exit 78
+          fi
+          if [ "$NEON_PROJECT_ID" != "$E2E_EXPECTED_PROJECT_ID" ]; then
+            echo "BLOCKED - NEON_PROJECT_ID DOES NOT MATCH REQUIRED PROJECT"
+            exit 78
+          fi
+          python - <<'PY'
+          import json
+          import os
+          import urllib.request
+
+          project_id = os.environ["NEON_PROJECT_ID"]
+          request = urllib.request.Request(
+              f"https://console.neon.tech/api/v2/projects/{project_id}",
+              headers={"Authorization": f"Bearer {os.environ['NEON_API_KEY']}"},
+          )
+          with urllib.request.urlopen(request, timeout=30) as response:
+              payload = json.load(response)
+          project = payload.get("project", payload)
+          if project.get("id") != project_id:
+              raise SystemExit("Neon API secret does not resolve the required project")
+          print("secure GitHub Actions Neon credential path = YES")
+          PY
+
+      - name: Create fresh Neon branch and inject masked database URLs
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          import os
+          import urllib.parse
+          import urllib.request
+
+          api = "https://console.neon.tech/api/v2"
+          key = os.environ["NEON_API_KEY"]
+          project = os.environ["NEON_PROJECT_ID"]
+          parent = os.environ["E2E_PARENT_BRANCH_ID"]
+          accepted = os.environ["E2E_ACCEPTED_BRANCH_ID"]
+          blocked = os.environ["E2E_BLOCKED_BRANCH_ID"]
+          branch_name = os.environ["E2E_BRANCH_NAME"]
+          db = os.environ["E2E_DB_NAME"]
+          role = os.environ["E2E_ROLE_NAME"]
+          headers = {"Authorization": f"Bearer {key}", "Content-Type": "application/json"}
+
+          def request_json(method, path, body=None):
+              data = None if body is None else json.dumps(body).encode("utf-8")
+              req = urllib.request.Request(api + path, data=data, headers=headers, method=method)
+              with urllib.request.urlopen(req, timeout=60) as response:
+                  return json.load(response)
+
+          existing = request_json(
+              "GET",
+              f"/projects/{project}/branches?search={urllib.parse.quote(branch_name)}",
+          ).get("branches", [])
+          exact = [b for b in existing if b.get("name") == branch_name]
+          if exact:
+              b = exact[0]
+              print(f"EXISTING_E2E_BRANCH_ID = {b.get('id')}")
+              print(f"EXISTING_E2E_BRANCH_PARENT = {b.get('parent_id')}")
+              print(f"EXISTING_E2E_BRANCH_CREATED_AT = {b.get('created_at')}")
+              print(f"EXISTING_E2E_BRANCH_UPDATED_AT = {b.get('updated_at')}")
+              raise SystemExit("Refusing to reuse an existing Neon E2E branch")
+
+          blocked_before_payload = request_json(
+              "GET",
+              f"/projects/{project}/branches/{blocked}",
+          )
+          blocked_before = blocked_before_payload.get("branch", blocked_before_payload)
+
+          created = request_json(
+              "POST",
+              f"/projects/{project}/branches",
+              {
+                  "branch": {"name": branch_name, "parent_id": parent},
+                  "endpoints": [{"type": "read_write"}],
+              },
+          )
+          branch = created["branch"]
+          branch_id = branch["id"]
+          if branch.get("parent_id") != parent:
+              raise SystemExit("Created Neon branch has the wrong parent")
+
+          def connection_uri(branch_id):
+              query = urllib.parse.urlencode(
+                  {
+                      "branch_id": branch_id,
+                      "database_name": db,
+                      "role_name": role,
+                      "pooled": "false",
+                  }
+              )
+              payload = request_json("GET", f"/projects/{project}/connection_uri?{query}")
+              uri = payload.get("uri") or payload.get("connection_uri")
+              if not uri:
+                  raise SystemExit("Neon connection URI response was empty")
+              return uri
+
+          target_url = connection_uri(branch_id)
+          primary_url = connection_uri(parent)
+          accepted_url = connection_uri(accepted)
+          for uri in (target_url, primary_url, accepted_url):
+              print(f"::add-mask::{uri}")
+
+          with open(os.environ["GITHUB_ENV"], "a", encoding="utf-8") as handle:
+              handle.write(f"PHASE1_E2E_DATABASE_URL={target_url}\n")
+              handle.write(f"PHASE1_PRIMARY_DATABASE_URL={primary_url}\n")
+              handle.write(f"PHASE1_ACCEPTED_DATABASE_URL={accepted_url}\n")
+              handle.write(f"PHASE1_E2E_BRANCH_ID={branch_id}\n")
+
+          meta = {
+              "neon_project_id": project,
+              "neon_branch_id": branch_id,
+              "neon_branch_name": branch_name,
+              "neon_parent_branch_id": parent,
+              "blocked_branch_before": {
+                  "id": blocked_before.get("id"),
+                  "name": blocked_before.get("name"),
+                  "parent_id": blocked_before.get("parent_id"),
+                  "created_at": blocked_before.get("created_at"),
+                  "updated_at": blocked_before.get("updated_at"),
+              },
+              "connection_obtained": True,
+              "pooled_connection": False,
+          }
+          with open(os.environ["E2E_BRANCH_META"], "w", encoding="utf-8") as handle:
+              json.dump(meta, handle, indent=2, sort_keys=True)
+              handle.write("\n")
+
+          print(f"Neon E2E branch ID = {branch_id}")
+          print(f"Neon E2E branch name = {branch_name}")
+          print(f"Neon parent branch = {parent}")
+          print("connection obtained = YES")
+          print("pooled connection = NO")
+          PY
+
+      - name: Verify live inherited baseline
+        working-directory: kyiv-air-alerts-grafana
+        run: >-
+          python scripts/db_phase1_live_e2e_proof.py baseline
+          --meta "$E2E_BRANCH_META"
+          --tests "$RUNNER_TEMP/phase1_tests.log"
+          --dry "$RUNNER_TEMP/phase1_dry_run.log"
+          --identities "$E2E_IDENTITIES"
+          --result "$E2E_RESULT"
+
+      - name: Verify frozen inherited schema contract
+        working-directory: kyiv-air-alerts-grafana
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object db/migrations/001_phase1_core.sql)" = "$PHASE1_DDL_BLOB"
+          python - <<'PY'
+          import os
+          import psycopg
+
+          expected_constraints = {
+              "ingestion_runs_github_attempt_check",
+              "ingestion_runs_parameters_object_check",
+              "ingestion_runs_stats_object_check",
+              "ingestion_runs_error_object_check",
+              "ingestion_runs_status_time_check",
+              "ingestion_runs_succeeded_commit_check",
+              "ingestion_runs_commit_time_check",
+              "ingestion_runs_finished_time_check",
+              "ingestion_runs_commit_before_finish_check",
+              "alert_episodes_legacy_id_format_check",
+              "alert_episodes_state_interval_check",
+              "alert_episodes_open_legacy_id_check",
+              "alert_episodes_canonicalization_version_check",
+              "alert_episodes_updated_time_check",
+              "alert_episodes_legacy_episode_id_key",
+              "alert_episodes_exact_interval_key",
+              "alert_episode_sources_record_key_format_check",
+              "alert_episode_sources_raw_sha256_format_check",
+              "alert_episode_sources_interval_check",
+              "alert_episode_sources_binding_check",
+              "alert_episode_sources_duplicate_role_check",
+              "alert_episode_sources_no_self_duplicate_check",
+              "alert_episode_sources_noninput_boundary_check",
+              "alert_episode_sources_boundary_binding_check",
+              "alert_episode_sources_provenance_object_check",
+              "alert_episode_sources_seen_time_check",
+              "alert_episode_sources_record_identity_key",
+              "ingestion_checkpoints_seq_check",
+              "ingestion_checkpoints_previous_presence_check",
+              "ingestion_checkpoints_no_self_previous_check",
+              "ingestion_checkpoints_observed_count_check",
+              "ingestion_checkpoints_continuity_method_check",
+              "ingestion_checkpoints_observed_interval_check",
+              "ingestion_checkpoints_cursor_object_check",
+              "ingestion_checkpoints_metadata_object_check",
+              "ingestion_checkpoints_identity_stream_key",
+              "ingestion_checkpoints_previous_same_stream_fk",
+          }
+          expected_indexes = {
+              "alert_episodes_open_interval_uidx",
+              "alert_episodes_city_start_idx",
+              "alert_episode_sources_episode_idx",
+              "alert_episode_sources_source_time_idx",
+              "ingestion_checkpoints_stream_seq_uidx",
+              "ingestion_runs_status_started_idx",
+          }
+          with psycopg.connect(os.environ["PHASE1_E2E_DATABASE_URL"]) as conn:
+              with conn.cursor() as cur:
+                  cur.execute("""
+                      SELECT conname
+                      FROM pg_constraint
+                      WHERE connamespace = 'public'::regnamespace
+                  """)
+                  constraints = {row[0] for row in cur.fetchall()}
+                  cur.execute("""
+                      SELECT indexname
+                      FROM pg_indexes
+                      WHERE schemaname = 'public'
+                  """)
+                  indexes = {row[0] for row in cur.fetchall()}
+          missing_constraints = sorted(expected_constraints - constraints)
+          missing_indexes = sorted(expected_indexes - indexes)
+          if missing_constraints or missing_indexes:
+              raise SystemExit(
+                  f"schema contract missing constraints={missing_constraints} indexes={missing_indexes}"
+              )
+          print("frozen schema constraints/indexes = PASS")
+          PY
+
+      - name: Run first real importer apply
+        working-directory: kyiv-air-alerts-grafana
+        shell: bash
+        run: |
+          set -euo pipefail
+          python scripts/db_phase1_lviv_import.py \
+            --apply \
+            --database-url-env PHASE1_E2E_DATABASE_URL \
+            --db-branch "$PHASE1_E2E_BRANCH_ID" \
+            2>&1 | tee "$RUNNER_TEMP/first_apply.log"
+
+      - name: Verify first committed state and capture identities
+        working-directory: kyiv-air-alerts-grafana
+        run: >-
+          python scripts/db_phase1_live_e2e_proof.py first
+          --identities "$E2E_IDENTITIES"
+          --result "$E2E_RESULT"
+
+      - name: Run exact retry importer apply
+        working-directory: kyiv-air-alerts-grafana
+        shell: bash
+        run: |
+          set -euo pipefail
+          python scripts/db_phase1_lviv_import.py \
+            --apply \
+            --database-url-env PHASE1_E2E_DATABASE_URL \
+            --db-branch "$PHASE1_E2E_BRANCH_ID" \
+            2>&1 | tee "$RUNNER_TEMP/second_apply.log"
+
+      - name: Verify retry identity stability and parent isolation
+        working-directory: kyiv-air-alerts-grafana
+        run: >-
+          python scripts/db_phase1_live_e2e_proof.py second
+          --identities "$E2E_IDENTITIES"
+          --result "$E2E_RESULT"
+
+      - name: Verify blocked-branch isolation and finalize proof metadata
+        working-directory: kyiv-air-alerts-grafana
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          import os
+          import urllib.parse
+          import urllib.request
+          from pathlib import Path
+          import psycopg
+          from psycopg.rows import dict_row
+
+          api = "https://console.neon.tech/api/v2"
+          key = os.environ["NEON_API_KEY"]
+          project = os.environ["NEON_PROJECT_ID"]
+          blocked = os.environ["E2E_BLOCKED_BRANCH_ID"]
+          db = os.environ["E2E_DB_NAME"]
+          role = os.environ["E2E_ROLE_NAME"]
+          headers = {"Authorization": f"Bearer {key}", "Content-Type": "application/json"}
+
+          def request_json(method, path):
+              req = urllib.request.Request(api + path, headers=headers, method=method)
+              with urllib.request.urlopen(req, timeout=60) as response:
+                  return json.load(response)
+
+          def connection_uri(branch_id):
+              query = urllib.parse.urlencode(
+                  {
+                      "branch_id": branch_id,
+                      "database_name": db,
+                      "role_name": role,
+                      "pooled": "false",
+                  }
+              )
+              payload = request_json("GET", f"/projects/{project}/connection_uri?{query}")
+              uri = payload.get("uri") or payload.get("connection_uri")
+              if not uri:
+                  raise SystemExit("Neon connection URI response was empty")
+              print(f"::add-mask::{uri}")
+              return uri
+
+          def counts(url):
+              with psycopg.connect(url, row_factory=dict_row, connect_timeout=10) as conn:
+                  with conn.cursor() as cur:
+                      cur.execute(
+                          """
+                          SELECT
+                            (SELECT count(*) FROM ingestion_runs)::int ingestion_runs,
+                            (SELECT count(*) FROM alert_episodes)::int alert_episodes,
+                            (SELECT count(*) FROM alert_episode_sources)::int alert_episode_sources,
+                            (SELECT count(*) FROM ingestion_checkpoints)::int ingestion_checkpoints
+                          """
+                      )
+                      return dict(cur.fetchone())
+
+          meta = json.loads(Path(os.environ["E2E_BRANCH_META"]).read_text())
+          before = meta["blocked_branch_before"]
+          after_payload = request_json("GET", f"/projects/{project}/branches/{blocked}")
+          after = after_payload.get("branch", after_payload)
+          stable_fields = ("id", "name", "parent_id", "created_at", "updated_at")
+          if any(before.get(k) != after.get(k) for k in stable_fields):
+              raise SystemExit("blocked concurrency branch metadata changed during E2E proof")
+
+          blocked_url = connection_uri(blocked)
+          blocked_counts = counts(blocked_url)
+          expected_blocked = {
+              "ingestion_runs": 2,
+              "alert_episodes": 126,
+              "alert_episode_sources": 140,
+              "ingestion_checkpoints": 2,
+          }
+          if blocked_counts != expected_blocked:
+              raise SystemExit(f"blocked concurrency branch counts changed: {blocked_counts}")
+
+          accepted_checkpoint = None
+          with psycopg.connect(
+              os.environ["PHASE1_ACCEPTED_DATABASE_URL"],
+              row_factory=dict_row,
+              connect_timeout=10,
+          ) as conn:
+              with conn.cursor() as cur:
+                  cur.execute(
+                      "SELECT checkpoint_id::text checkpoint_id, checkpoint_seq "
+                      "FROM current_ingestion_checkpoints"
+                  )
+                  accepted_checkpoint = dict(cur.fetchone())
+          if accepted_checkpoint != {
+              "checkpoint_id": os.environ["E2E_ACCEPTED_CHECKPOINT_ID"],
+              "checkpoint_seq": 1,
+          }:
+              raise SystemExit(
+                  f"accepted bootstrap checkpoint changed: {accepted_checkpoint}"
+              )
+
+          result_path = Path(os.environ["E2E_RESULT"])
+          result = json.loads(result_path.read_text())
+          identities = json.loads(Path(os.environ["E2E_IDENTITIES"]).read_text())
+          result["git"] = {
+              "implementation_sha": os.environ["PHASE1_IMPLEMENTATION_COMMIT"],
+              "workflow_sha": os.environ["GITHUB_SHA"],
+              "ddl_blob": os.environ["PHASE1_DDL_BLOB"],
+          }
+          result["first_persisted_identity_snapshot"] = identities
+          result.setdefault("parent_isolation", {})["accepted_checkpoint"] = accepted_checkpoint
+          result["isolation_checks"] = {
+              "primary_unchanged": result["parent_isolation"]["primary_unchanged"],
+              "accepted_bootstrap_branch_unchanged": result["parent_isolation"][
+                  "accepted_bootstrap_branch_unchanged"
+              ],
+              "accepted_checkpoint_unchanged": True,
+              "blocked_concurrency_branch": {
+                  "branch_id": blocked,
+                  "metadata_unchanged": True,
+                  "counts": blocked_counts,
+                  "counts_unchanged": True,
+              },
+          }
+          result["credentials_exposed"] = False
+          result["verdict"] = "PHASE-1 LIVE E2E PERSISTENCE ADAPTER PROVEN"
+          result_path.write_text(json.dumps(result, indent=2, sort_keys=True) + "\n")
+          print("blocked concurrency branch isolation = PASS")
+          print("accepted bootstrap checkpoint isolation = PASS")
+          print("final proof metadata = COMPLETE")
+          PY
+
+      - name: Capture partial database state on failure
+        if: ${{ failure() }}
+        working-directory: kyiv-air-alerts-grafana
+        shell: bash
+        run: |
+          set +e
+          python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          out = {
+              "schema_version": "db-phase1-live-e2e-result-v1",
+              "workflow_run_id": os.environ.get("GITHUB_RUN_ID"),
+              "workflow_sha": os.environ.get("GITHUB_SHA"),
+              "neon_project_id": os.environ.get("NEON_PROJECT_ID"),
+              "neon_branch_id": os.environ.get("PHASE1_E2E_BRANCH_ID"),
+              "neon_branch_name": os.environ.get("E2E_BRANCH_NAME"),
+              "neon_parent_branch_id": os.environ.get("E2E_PARENT_BRANCH_ID"),
+              "ddl_blob": os.environ.get("PHASE1_DDL_BLOB"),
+              "implementation_sha": os.environ.get("PHASE1_IMPLEMENTATION_COMMIT"),
+              "credentials_exposed": False,
+              "verdict": "PHASE-1 LIVE E2E PERSISTENCE ADAPTER BLOCKED",
+          }
+          result_path = Path(os.environ["E2E_RESULT"])
+          if result_path.exists():
+              try:
+                  out.update(json.loads(result_path.read_text()))
+              except Exception:
+                  pass
+
+          url = os.environ.get("PHASE1_E2E_DATABASE_URL")
+          if url:
+              try:
+                  import psycopg
+                  from psycopg.rows import dict_row
+                  with psycopg.connect(url, row_factory=dict_row, connect_timeout=10) as conn:
+                      with conn.cursor() as cur:
+                          cur.execute(
+                              """
+                              SELECT
+                                (SELECT count(*) FROM ingestion_runs)::int ingestion_runs,
+                                (SELECT count(*) FROM alert_episodes)::int alert_episodes,
+                                (SELECT count(*) FROM alert_episode_sources)::int alert_episode_sources,
+                                (SELECT count(*) FROM ingestion_checkpoints)::int ingestion_checkpoints
+                              """
+                          )
+                          out["observed_database_state"] = dict(cur.fetchone())
+                          cur.execute(
+                              "SELECT run_id::text run_id,status,stats "
+                              "FROM ingestion_runs ORDER BY started_at,run_id"
+                          )
+                          out["observed_runs"] = [dict(row) for row in cur.fetchall()]
+                          cur.execute(
+                              "SELECT checkpoint_id::text checkpoint_id,checkpoint_seq "
+                              "FROM ingestion_checkpoints ORDER BY checkpoint_seq,checkpoint_id"
+                          )
+                          out["observed_checkpoints"] = [dict(row) for row in cur.fetchall()]
+                  out["database_reachable_for_failure_snapshot"] = True
+              except Exception as exc:
+                  out["database_reachable_for_failure_snapshot"] = False
+                  out["failure_snapshot_error_type"] = type(exc).__name__
+          result_path.write_text(json.dumps(out, indent=2, sort_keys=True, default=str) + "\n")
+          Path(os.environ["E2E_FAILURE_SNAPSHOT"]).write_text(
+              json.dumps(out, indent=2, sort_keys=True, default=str) + "\n"
+          )
+          print("partial failure evidence captured")
+          PY
+          exit 0
+
+      - name: Upload machine-readable proof result
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: db-phase1-live-e2e-result
+          path: |
+            ${{ runner.temp }}/db_phase1_live_e2e_result.json
+            ${{ runner.temp }}/db_phase1_live_e2e_identities.json
+            ${{ runner.temp }}/db_phase1_live_e2e_branch_meta.json
+            ${{ runner.temp }}/db_phase1_live_e2e_failure_snapshot.json
+          if-no-files-found: warn
+          retention-days: 30
