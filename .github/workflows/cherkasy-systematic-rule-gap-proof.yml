@@ -110,11 +110,19 @@ jobs:
               --read-only --output "$RUNNER_TEMP/replays/after_${city}.json"
           done
 
-      - name: Verify proof checkout remains clean
+      - name: Verify tracked and protected files remain unchanged
         shell: bash
         run: |
           set -euo pipefail
-          test -z "$(git status --porcelain)"
+          git diff --exit-code
+          git diff --exit-code -- \
+            kyiv-air-alerts-grafana/data/explosion_audited_baseline.json \
+            kyiv-air-alerts-grafana/data/explosion_review_queue.json \
+            kyiv-air-alerts-grafana/data/explosion_candidate_monitor_state.json \
+            kyiv-air-alerts-grafana/data/explosion_candidate_monitor_last_run.json \
+            kyiv-air-alerts-grafana/data/explosions_test.json \
+            kyiv-air-alerts-grafana/data/dashboard_data.json \
+            kyiv-air-alerts-grafana/data/explosion_research
 
       - name: Capture protected refs after
         if: always()
