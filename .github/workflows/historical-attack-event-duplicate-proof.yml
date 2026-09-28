@@ -1,0 +1,169 @@
+name: Historical attack-event duplicate isolated proof
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/historical-attack-event-duplicate-proof.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  proof:
+    runs-on: ubuntu-latest
+    timeout-minutes: 165
+    env:
+      PYTHONDONTWRITEBYTECODE: "1"
+      PROOF_BRANCH: historical-attack-event-duplicate-proof-2026-09-28
+    steps:
+      - name: Check out controller from main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          path: scheduler
+          fetch-depth: 1
+
+      - name: Check out isolated campaign proof branch
+        uses: actions/checkout@v4
+        with:
+          ref: historical-attack-event-duplicate-proof-2026-09-28
+          path: campaign
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: campaign/kyiv-air-alerts-grafana/requirements.txt
+
+      - name: Install campaign dependencies
+        working-directory: campaign/kyiv-air-alerts-grafana
+        run: pip install -r requirements.txt
+
+      - name: Run focused controller tests
+        run: |
+          python scheduler/kyiv-air-alerts-grafana/scripts/historical_attack_event_acceleration_controller.py self-test \
+            | tee /tmp/duplicate-controller-self-test.json
+
+      - name: Point controller stale-writer checks at isolated local remote
+        run: |
+          PROOF_HEAD="$(git -C campaign rev-parse HEAD)"
+          git clone --bare campaign /tmp/historical-attack-event-proof-remote.git
+          git --git-dir=/tmp/historical-attack-event-proof-remote.git update-ref \
+            refs/heads/historical-attack-event-backfill-2026-09-27 "$PROOF_HEAD"
+          git -C campaign remote set-url origin /tmp/historical-attack-event-proof-remote.git
+
+      - name: Run one isolated real campaign batch
+        run: |
+          python scheduler/kyiv-air-alerts-grafana/scripts/historical_attack_event_acceleration_controller.py run \
+            --checkout-root campaign \
+            --event-name workflow_dispatch \
+            --run-id isolated-proof-2026-09-28 \
+            | tee /tmp/duplicate-controller-proof.json
+
+      - name: Record isolated proof checks
+        shell: bash
+        run: |
+          python - <<'PY'
+          import collections
+          import hashlib
+          import json
+          import subprocess
+          from pathlib import Path
+
+          root = Path("campaign")
+          campaign_id = "historical-attack-events-v2-2026-09-27"
+          batch_root = root / "research/historical_attack_event_backfill" / campaign_id
+          status = json.loads((root / "research/historical_attack_event_backfill_status.json").read_text())
+          state = json.loads((root / "research/historical_attack_event_backfill_acceleration_state.json").read_text())
+          launch = json.loads((root / "research/historical_attack_event_backfill_campaign_launch_2026-09-27.json").read_text())
+          batch2_path = batch_root / "lviv/batch_000002.json"
+          batch3_path = batch_root / "lviv/batch_000003.json"
+          batch2 = json.loads(batch2_path.read_text())
+          batch3 = json.loads(batch3_path.read_text())
+          target = "72c62034bdbd3f5d45163428"
+
+          def canonical_json_hash(value):
+              raw = json.dumps(value, ensure_ascii=False, sort_keys=True, separators=(",", ":")).encode()
+              return hashlib.sha256(raw).hexdigest()
+
+          obs2 = next(x for x in batch2["observations"] if x.get("observation_id") == target)
+          duplicate_meta = batch3.get("campaign_observation_dedupe") or {}
+          target_meta = next(x for x in duplicate_meta.get("duplicates") or [] if x.get("observation_id") == target)
+
+          counts = collections.Counter()
+          for path in sorted(batch_root.glob("*/batch_*.json")):
+              doc = json.loads(path.read_text())
+              for row in doc.get("observations") or []:
+                  oid = str((row or {}).get("observation_id") or "")
+                  if oid:
+                      counts[oid] += 1
+          duplicate_ids = sorted(k for k, v in counts.items() if v > 1)
+
+          protected = {}
+          protected_ok = True
+          for rel, expected in (launch.get("protected_file_hashes") or {}).items():
+              actual = subprocess.check_output(
+                  ["git", "-C", str(root), "hash-object", rel], text=True
+              ).strip()
+              protected[rel] = {"expected": expected, "actual": actual, "match": actual == expected}
+              protected_ok = protected_ok and actual == expected
+
+          frozen_count = sum(
+              len(((status.get("cities") or {}).get(city) or {}).get("frozen_episode_ids") or [])
+              for city in status.get("frozen_cities") or []
+          )
+          lviv = status["cities"]["lviv"]
+          proof_stdout = Path("/tmp/duplicate-controller-proof.json").read_text().strip().splitlines()
+          summary = json.loads(proof_stdout[-1])
+          self_test = json.loads(Path("/tmp/duplicate-controller-self-test.json").read_text())
+
+          proof = {
+              "schema_version": 1,
+              "kind": "historical_attack_event_duplicate_observation_isolated_proof",
+              "campaign_id": campaign_id,
+              "starting_campaign_head": "205d0b84e83b2d18a25ad2e7d2a01a8aca6e6999",
+              "controller_commit": "__GITHUB_SHA__",
+              "controller_self_test": self_test,
+              "controller_summary": summary,
+              "processed_after": status["progress"]["processed"],
+              "terminal_after": status["progress"]["terminal"],
+              "lviv_scanned_after": lviv["scanned_episodes"],
+              "lviv_terminal_after": lviv["terminal_episodes"],
+              "lviv_last_completed_batch": lviv["last_completed_batch"],
+              "phase_after": state["phase"],
+              "target_observation_id": target,
+              "target_persisted_count": counts[target],
+              "global_duplicate_ids": duplicate_ids,
+              "global_duplicate_count": len(duplicate_ids),
+              "batch3_duplicate_metadata": duplicate_meta,
+              "target_duplicate_metadata": target_meta,
+              "original_observation_payload_hash": canonical_json_hash(obs2),
+              "reconstructed_observation_payload_hash": target_meta["regenerated_payload_hash"],
+              "canonical_payload_hash": target_meta["canonical_payload_hash"],
+              "payload_equivalence": target_meta["equivalence"],
+              "episode_reference_ids": target_meta.get("episode_reference_ids") or [],
+              "batch3_observation_count": len(batch3.get("observations") or []),
+              "batch3_episode_result_count": len(batch3.get("episode_results") or []),
+              "protected_files_unchanged": protected_ok,
+              "protected_files": protected,
+              "frozen_total_from_ids": frozen_count,
+              "frozen_total_expected": 6863,
+              "frozen_universe_unchanged": frozen_count == 6863,
+          }
+          out = root / "research/historical_attack_event_duplicate_observation_isolated_proof_2026-09-28.json"
+          out.write_text(json.dumps(proof, ensure_ascii=False, indent=2) + "\n")
+          PY
+          sed -i "s/__GITHUB_SHA__/$GITHUB_SHA/" campaign/research/historical_attack_event_duplicate_observation_isolated_proof_2026-09-28.json
+
+      - name: Persist proof only on isolated proof branch
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          git -C campaign config user.name "github-actions[bot]"
+          git -C campaign config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git -C campaign add research/historical_attack_event_duplicate_observation_isolated_proof_2026-09-28.json
+          git -C campaign commit -m "Record duplicate observation isolated proof"
+          git -C campaign remote set-url origin "https://x-access-token:$GH_TOKEN@github.com/$GITHUB_REPOSITORY.git"
+          git -C campaign push origin "HEAD:$PROOF_BRANCH"
