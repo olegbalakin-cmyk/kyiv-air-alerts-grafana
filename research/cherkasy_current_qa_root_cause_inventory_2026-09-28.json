@@ -6233,20 +6233,41 @@
       "kyiv-air-alerts-grafana/data/explosions_test.json": "d00647c0b76ce254145d258a8d8ddc7e8529d8e4",
       "kyiv-air-alerts-grafana/data/dashboard_data.json": "37cf1b61a32ac6ecb8a120ee96cdb1661269c727"
     },
-    "other_city_evidence": "UNCHANGED_BY_DESIGN; artifact commit will be verified as one-file-only",
-    "classifier_code": "UNCHANGED_BY_DESIGN",
-    "replay_code": "UNCHANGED_BY_DESIGN",
-    "alert_corpus": "UNCHANGED_BY_DESIGN",
+    "other_city_evidence": "UNCHANGED; verified by one-file-only commit scope",
+    "classifier_code": "UNCHANGED; blob SHA identical",
+    "replay_code": "UNCHANGED; blob SHA identical",
+    "alert_corpus": "UNCHANGED; artifact-only commit scope",
     "site_prod_head_before": "3b044bd30ebf72b7fe6b15cabf4ab69f19f18121",
     "main_head_before": "15e9887894f0ab78c4e3fc4b6743e070fd85d83c",
-    "artifact_only_mutation_expected": true
+    "artifact_only_mutation_expected": true,
+    "after_blob_shas": {
+      "kyiv-air-alerts-grafana/data/explosion_research/cherkasy/final_evidence.json": "5dd59bb3c4076d2a27ee6f77464ec0be507d2cd7",
+      "kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py": "eefd63aeebc17347b750f61115842be6c53a79da",
+      "kyiv-air-alerts-grafana/scripts/replay_explosion_history.py": "01102db8dc2a2f685213fca52db03b946c5ff621",
+      "kyiv-air-alerts-grafana/data/explosion_audited_baseline.json": "81ecc48ed64b7e78449df903afb082e9f92531e5",
+      "kyiv-air-alerts-grafana/data/explosion_review_queue.json": "833076eec2a2f479361d60c3fb803e8005207e94",
+      "kyiv-air-alerts-grafana/data/explosion_candidate_monitor_state.json": "4caaa7a84e87db65885d18a9c098e095fdf51b43",
+      "kyiv-air-alerts-grafana/data/explosion_candidate_monitor_last_run.json": "d507f4c27ddd2ad5c540a927b48428c378f5d349",
+      "kyiv-air-alerts-grafana/data/explosions_test.json": "d00647c0b76ce254145d258a8d8ddc7e8529d8e4",
+      "kyiv-air-alerts-grafana/data/dashboard_data.json": "37cf1b61a32ac6ecb8a120ee96cdb1661269c727"
+    },
+    "verified_equal_before_after": true,
+    "artifact_creation_commit": "178eeff5fd2d48f9ad4a0f6205548f7e747f227e",
+    "artifact_creation_commit_changed_files": [
+      "research/cherkasy_current_qa_root_cause_inventory_2026-09-28.json"
+    ],
+    "site_prod_head_after": "3b044bd30ebf72b7fe6b15cabf4ab69f19f18121",
+    "main_head_after": "15e9887894f0ab78c4e3fc4b6743e070fd85d83c",
+    "site_prod_unchanged": true,
+    "main_unchanged": true
   },
   "6863_campaign_before_after": {
     "branch": "historical-attack-event-backfill-2026-09-27",
     "head_before": "9aae65593a927e32f25bbd0c477e7ce77400737e",
-    "head_after": null,
-    "unchanged": null,
-    "note": "head_after is verified after artifact commit; this artifact itself does not mutate the campaign branch."
+    "head_after": "9aae65593a927e32f25bbd0c477e7ce77400737e",
+    "unchanged": true,
+    "note": "head_after is verified after artifact commit; this artifact itself does not mutate the campaign branch.",
+    "mutated_by_this_task": false
   },
   "verdict": "CHERKASY CURRENT QA INVENTORY COMPLETE — SYSTEMATIC FIX WAVE IDENTIFIED"
 }
