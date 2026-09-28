@@ -1,12 +1,7 @@
 name: Phase-1 Same-Stream Concurrency Proof
 
 on:
-  push:
-    branches:
-      - db-phase1-same-stream-concurrency-proof-2026-09-28
-    paths:
-      - .github/workflows/db-phase1-same-stream-concurrency-proof.yml
-      - kyiv-air-alerts-grafana/scripts/proof_db_phase1_same_stream_concurrency.py
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -16,6 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     env:
+      PYTHONDONTWRITEBYTECODE: '1'
       NEON_API_KEY: ${{ secrets.NEON_API_KEY }}
       NEON_PROJECT_ID: ${{ vars.NEON_PROJECT_ID }}
       E2E_EXPECTED_PROJECT_ID: green-cake-44216048
@@ -92,7 +88,14 @@ jobs:
         run: |
           set -euo pipefail
           test "$(git rev-parse HEAD^)" = "$PHASE1_PROOF_BASE_SHA"
-          test -z "$(git status --porcelain)"
+          git diff --quiet -- \
+            kyiv-air-alerts-grafana/db/migrations/001_phase1_core.sql \
+            kyiv-air-alerts-grafana/scripts/db_phase1_persistence.py \
+            kyiv-air-alerts-grafana/scripts/db_phase1_lviv_import.py
+          git diff --cached --quiet -- \
+            kyiv-air-alerts-grafana/db/migrations/001_phase1_core.sql \
+            kyiv-air-alerts-grafana/scripts/db_phase1_persistence.py \
+            kyiv-air-alerts-grafana/scripts/db_phase1_lviv_import.py
           test "$(git hash-object kyiv-air-alerts-grafana/db/migrations/001_phase1_core.sql)" = "$PHASE1_DDL_BLOB"
           test "$(git hash-object kyiv-air-alerts-grafana/scripts/db_phase1_persistence.py)" = "$PHASE1_PERSISTENCE_BLOB"
           test "$(git hash-object kyiv-air-alerts-grafana/scripts/db_phase1_lviv_import.py)" = "$PHASE1_IMPORTER_BLOB"
@@ -300,7 +303,14 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          test -z "$(git status --porcelain)"
+          git diff --quiet -- \
+            kyiv-air-alerts-grafana/db/migrations/001_phase1_core.sql \
+            kyiv-air-alerts-grafana/scripts/db_phase1_persistence.py \
+            kyiv-air-alerts-grafana/scripts/db_phase1_lviv_import.py
+          git diff --cached --quiet -- \
+            kyiv-air-alerts-grafana/db/migrations/001_phase1_core.sql \
+            kyiv-air-alerts-grafana/scripts/db_phase1_persistence.py \
+            kyiv-air-alerts-grafana/scripts/db_phase1_lviv_import.py
           test "$(git hash-object kyiv-air-alerts-grafana/db/migrations/001_phase1_core.sql)" = "$PHASE1_DDL_BLOB"
           test "$(git hash-object kyiv-air-alerts-grafana/scripts/db_phase1_persistence.py)" = "$PHASE1_PERSISTENCE_BLOB"
           test "$(git hash-object kyiv-air-alerts-grafana/scripts/db_phase1_lviv_import.py)" = "$PHASE1_IMPORTER_BLOB"

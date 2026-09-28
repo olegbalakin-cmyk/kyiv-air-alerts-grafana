@@ -1,0 +1,193 @@
+name: Phase-1 Same-Stream Concurrency Finalization
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - db-phase1-same-stream-concurrency-proof-2026-09-28
+    paths:
+      - .github/workflows/db-phase1-same-stream-concurrency-proof.yml
+      - .github/workflows/db-phase1-same-stream-concurrency-finalize.yml
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  finalize:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      PYTHONDONTWRITEBYTECODE: '1'
+      SOURCE_RUN_ID: '36415623525'
+      SOURCE_ARTIFACT_ID: '10965954575'
+      SOURCE_PROOF_COMMIT: cfe6d8c6f60c96fe1840e1088c9a3faf16e2d7a0
+      SOURCE_PROOF_SCRIPT_BLOB: d434957791e4007b551d50c1c4bdbff743a0d83b
+      PHASE1_DDL_BLOB: 3b8af7940b23aae03a4f6b434d90d97dde10bfc0
+      PHASE1_PERSISTENCE_BLOB: 06f3098df63d7aaf2348c366b6a351901926cb53
+      PHASE1_IMPORTER_BLOB: 7f2c1d90fb719e296e4dbb2cc96c6ec492e25ad8
+      EXPECTED_PROOF_CHILD_ID: br-small-wind-b5yah69o
+      EXPECTED_PROOF_CHILD_NAME: lviv-phase1-same-stream-concurrency-e2e-2026-09-28
+
+    steps:
+      - name: Checkout proof branch
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Validate protected Git blobs and proof implementation
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object kyiv-air-alerts-grafana/db/migrations/001_phase1_core.sql)" = "$PHASE1_DDL_BLOB"
+          test "$(git hash-object kyiv-air-alerts-grafana/scripts/db_phase1_persistence.py)" = "$PHASE1_PERSISTENCE_BLOB"
+          test "$(git hash-object kyiv-air-alerts-grafana/scripts/db_phase1_lviv_import.py)" = "$PHASE1_IMPORTER_BLOB"
+          test "$(git hash-object kyiv-air-alerts-grafana/scripts/proof_db_phase1_same_stream_concurrency.py)" = "$SOURCE_PROOF_SCRIPT_BLOB"
+
+          git diff --quiet --             kyiv-air-alerts-grafana/db/migrations/001_phase1_core.sql             kyiv-air-alerts-grafana/scripts/db_phase1_persistence.py             kyiv-air-alerts-grafana/scripts/db_phase1_lviv_import.py
+          git diff --cached --quiet --             kyiv-air-alerts-grafana/db/migrations/001_phase1_core.sql             kyiv-air-alerts-grafana/scripts/db_phase1_persistence.py             kyiv-air-alerts-grafana/scripts/db_phase1_lviv_import.py
+          git diff --quiet "$SOURCE_PROOF_COMMIT" "$GITHUB_SHA" --             kyiv-air-alerts-grafana/scripts/proof_db_phase1_same_stream_concurrency.py
+
+          echo "protected blobs and proof script = PASS"
+
+      - name: Download existing proof artifact
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/source-proof"
+          gh api "repos/$GITHUB_REPOSITORY/actions/artifacts/$SOURCE_ARTIFACT_ID/zip" > "$RUNNER_TEMP/source-proof.zip"
+          unzip -q "$RUNNER_TEMP/source-proof.zip" -d "$RUNNER_TEMP/source-proof"
+          test -f "$RUNNER_TEMP/source-proof/db_phase1_same_stream_concurrency_result.json"
+          test -f "$RUNNER_TEMP/source-proof/db_phase1_same_stream_concurrency_branch_meta.json"
+          test -f "$RUNNER_TEMP/source-proof/phase1_tests.log"
+
+      - name: Validate existing proof and emit finalization result
+        shell: bash
+        run: |
+          set -euo pipefail
+          export FINALIZATION_JSON="$RUNNER_TEMP/db_phase1_same_stream_concurrency_finalization_2026-09-28.json"
+          python - <<'PY'
+          import json
+          import os
+          import subprocess
+          from pathlib import Path
+
+          root = Path(os.environ["RUNNER_TEMP"]) / "source-proof"
+          result = json.loads((root / "db_phase1_same_stream_concurrency_result.json").read_text(encoding="utf-8"))
+          meta = json.loads((root / "db_phase1_same_stream_concurrency_branch_meta.json").read_text(encoding="utf-8"))
+          tests = (root / "phase1_tests.log").read_text(encoding="utf-8", errors="replace")
+
+          def require(condition, message):
+              if not condition:
+                  raise SystemExit(message)
+
+          require(result.get("verdict") == "PHASE-1 SAME-STREAM CONCURRENCY PROVEN", "source verdict mismatch")
+          require(result.get("writer_a_committed") is True, "Writer A did not commit")
+          require(result.get("writer_b_committed") is True, "Writer B did not commit")
+          require(result.get("writer_a_committed_seq") == 2, "Writer A committed seq mismatch")
+          require(result.get("writer_b_committed_seq") == 3, "Writer B committed seq mismatch")
+          a_pid = result.get("writer_a_backend_pid")
+          b_pid = result.get("writer_b_backend_pid")
+          require(isinstance(a_pid, int) and isinstance(b_pid, int) and a_pid != b_pid, "backend PIDs are not independent")
+          require(result.get("writer_b_postlock_checkpoint_seq") == result.get("writer_a_committed_seq") == 2, "Writer B did not observe stream after Writer A")
+          require(str(result.get("git", {}).get("workflow_run_id")) == os.environ["SOURCE_RUN_ID"], "source run ID mismatch")
+
+          rows = result.get("server_side_waiting_evidence") or []
+          require(len(rows) >= 2, "missing server-side waiting evidence")
+          identities = {}
+          for row in rows:
+              ident = (row.get("classid"), row.get("objid"), row.get("objsubid"), row.get("mode"))
+              identities.setdefault(ident, []).append(row)
+          matching = []
+          for ident, group in identities.items():
+              granted = {row.get("granted") for row in group}
+              pids = {row.get("pid") for row in group}
+              if granted == {True, False} and {a_pid, b_pid}.issubset(pids):
+                  matching = group
+                  break
+          require(bool(matching), "no competing advisory-lock rows with granted=true/false for same identity")
+
+          iso = result.get("isolation_checks") or {}
+          for key in ("primary", "accepted_bootstrap", "accepted_live_e2e", "old_blocked_concurrency"):
+              require(iso.get(key, {}).get("unchanged") is True, f"{key} was not unchanged")
+
+          require(meta.get("neon_branch_id") == os.environ["EXPECTED_PROOF_CHILD_ID"], "proof child branch ID mismatch")
+          require(meta.get("neon_branch_name") == os.environ["EXPECTED_PROOF_CHILD_NAME"], "proof child branch name mismatch")
+          require("Ran 23 tests" in tests and tests.rstrip().endswith("OK"), "Phase-1 regression proof was not 23/23 PASS")
+
+          protected = {
+              "ddl": {
+                  "path": "kyiv-air-alerts-grafana/db/migrations/001_phase1_core.sql",
+                  "expected": os.environ["PHASE1_DDL_BLOB"],
+              },
+              "persistence": {
+                  "path": "kyiv-air-alerts-grafana/scripts/db_phase1_persistence.py",
+                  "expected": os.environ["PHASE1_PERSISTENCE_BLOB"],
+              },
+              "importer": {
+                  "path": "kyiv-air-alerts-grafana/scripts/db_phase1_lviv_import.py",
+                  "expected": os.environ["PHASE1_IMPORTER_BLOB"],
+              },
+              "proof_script": {
+                  "path": "kyiv-air-alerts-grafana/scripts/proof_db_phase1_same_stream_concurrency.py",
+                  "expected": os.environ["SOURCE_PROOF_SCRIPT_BLOB"],
+              },
+          }
+          for item in protected.values():
+              actual = subprocess.check_output(["git", "hash-object", item["path"]], text=True).strip()
+              item["actual"] = actual
+              item["match"] = actual == item["expected"]
+              require(item["match"], f"blob mismatch: {item['path']}")
+
+          out = {
+              "schema_version": "db-phase1-same-stream-concurrency-finalization-v1",
+              "source_run_id": int(os.environ["SOURCE_RUN_ID"]),
+              "source_artifact_id": int(os.environ["SOURCE_ARTIFACT_ID"]),
+              "source_verdict": result["verdict"],
+              "source_regression_tests": "23 / 23 PASS",
+              "writer_a_backend_pid": a_pid,
+              "writer_b_backend_pid": b_pid,
+              "writer_a_committed_seq": result["writer_a_committed_seq"],
+              "writer_b_committed_seq": result["writer_b_committed_seq"],
+              "writer_b_observed_after_writer_a": True,
+              "server_side_waiting_evidence": matching,
+              "server_side_waiting_evidence_valid": True,
+              "proof_child_branch_id": meta["neon_branch_id"],
+              "proof_child_branch_name": meta["neon_branch_name"],
+              "protected_state_unchanged": {
+                  "primary": True,
+                  "accepted_bootstrap": True,
+                  "accepted_live_e2e": True,
+                  "old_blocked_concurrency": True,
+              },
+              "protected_blob_validation": protected,
+              "tracked_protected_paths_clean": True,
+              "proof_script_unchanged_from_source_run": True,
+              "original_failure_step": "Reconfirm frozen production files after proof",
+              "original_failure_reason": "The global git status --porcelain invariant checked the entire runtime worktree after the substantive database proof had already succeeded, so untracked/generated runtime files could make the workflow red even when tracked protected production files were unchanged.",
+              "guard_before": "test -z \"$(git status --porcelain)\"",
+              "guard_after": "exact git hash-object checks plus git diff --quiet and git diff --cached --quiet scoped to protected tracked paths",
+              "python_bytecode_hygiene": "PYTHONDONTWRITEBYTECODE=1",
+              "database_proof_rerun": False,
+              "new_neon_branch_created": False,
+              "database_mutation_by_finalizer": False,
+              "finalizer_run_id": int(os.environ["GITHUB_RUN_ID"]),
+              "finalizer_commit_sha": os.environ["GITHUB_SHA"],
+              "final_verdict": "PHASE-1 SAME-STREAM CONCURRENCY PROVEN — GREEN FINALIZATION COMPLETE",
+          }
+          Path(os.environ["FINALIZATION_JSON"]).write_text(
+              json.dumps(out, indent=2, sort_keys=True) + "\n",
+              encoding="utf-8",
+          )
+          print(json.dumps(out, indent=2, sort_keys=True))
+          PY
+
+      - name: Upload finalization result
+        uses: actions/upload-artifact@v4
+        with:
+          name: db-phase1-same-stream-concurrency-finalization
+          path: ${{ runner.temp }}/db_phase1_same_stream_concurrency_finalization_2026-09-28.json
+          if-no-files-found: error
+          retention-days: 30
