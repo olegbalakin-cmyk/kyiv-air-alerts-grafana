@@ -121,7 +121,7 @@ jobs:
       - name: Add Sevastopol exact-city series
         run: python scripts/add_sevastopol_exact.py
 
-      - name: Restore rolling 7-day series for all cities
+      - name: Build rolling windows, partial periods, time-of-day profile, and shared table ranges
         run: python scripts/apply_site_rolling_7d.py
 
       - name: Update Kyiv casualty series and review queue
@@ -154,6 +154,26 @@ jobs:
           assert fresh.get('fully_continuous') is True, fresh
           assert not fresh.get('warning'), fresh
           assert data.get('multicity_meta', {}).get('weekly_mode') == 'rolling_7d'
+          assert data.get('multicity_meta', {}).get('rolling_window_periods') == ['weekly', 'rolling30', 'rolling90']
+          profile = data.get('time_of_day_profile', {})
+          assert profile.get('meta', {}).get('city_count') == 23, profile.get('meta')
+          assert profile.get('meta', {}).get('slot_minutes') == 15, profile.get('meta')
+          assert set(profile.get('meta', {}).get('periods', [])) == {'7d', '30d', '90d', 'year', 'all'}
+          assert len(profile.get('cities', {})) == 23
+          table = data.get('all_cities_table', {})
+          assert table.get('meta', {}).get('city_count') == 23, table.get('meta')
+          assert set(table.get('meta', {}).get('periods', [])) == {'7d', '30d', '90d', 'year', 'common'}
+          assert table.get('meta', {}).get('common_start') <= table.get('meta', {}).get('common_end')
+          assert len(table.get('cities', {})) == 23
+          for key in keys:
+              city = data.get('cities', {}).get(key, {})
+              assert city.get('rolling30'), key
+              assert city.get('rolling90'), key
+              partial_months = [row for row in city.get('monthly', []) if row.get('is_partial_period')]
+              assert len(partial_months) <= 1, (key, partial_months)
+              if partial_months:
+                  assert city.get('monthly', [])[-1] is partial_months[-1]
+                  assert partial_months[-1].get('partial_through')
           bad = [
               key for key in keys
               if data.get('cities', {}).get(key, {}).get('meta', {}).get('weekly_mode') != 'rolling_7d'
