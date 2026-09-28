@@ -304,6 +304,141 @@ def historical_review_roles(city: str, row: dict, monitor) -> tuple[dict, str]:
                 low,
             )
         )
+    elif city == "cherkasy":
+        # Cherkasy retained audit rows sometimes contain reviewed factual-role
+        # annotations that the historical adapter previously discarded.
+        # Do not infer roles merely from the historical strict bucket.
+        review_parts = [
+            str(row.get(key)).strip()
+            for key in BASIS_FIELDS
+            if row.get(key) and str(row.get(key)).strip()
+        ]
+        review_basis = " — ".join(review_parts)
+        review_low = review_basis.casefold()
+        reviewed_factual_contract = bool(
+            "aerial_war" in review_low
+            or "aerial-war" in review_low
+            or "missile-attack context" in review_low
+        )
+        reviewed_cross_segment_contract = str(row.get("basis") or "").strip().casefold() in {
+            "exact_city_time_inside_alert",
+            "exact_city_timed_inside_alert",
+        }
+        if not (reviewed_factual_contract or reviewed_cross_segment_contract):
+            return {}, evidence
+
+        cherkasy_named = re.compile(
+            r"(?<![\w-])(?:cherkasy|черкаси|черкасах|черкасами)(?![\w-])",
+            flags=re.IGNORECASE,
+        )
+        english_explosion = re.compile(
+            r"\b(?:explosion(?:s)?|blast(?:s)?|bang(?:s)?)\b",
+            flags=re.IGNORECASE,
+        )
+        english_air = re.compile(
+            r"\b(?:air alert|aerial|missile(?:s)?|drone(?:s)?|uav(?:s)?|"
+            r"strike[- ]?uav|air[- ]?defen[cs]e|missile[- ]?danger)\b",
+            flags=re.IGNORECASE,
+        )
+
+        def cherkasy_genitive_event(segment: str) -> bool:
+            segment_low = segment.casefold()
+            return bool(
+                re.search(
+                    r"\bжителі\s+черкас\b.{0,80}\b(?:чул\w*|чут\w*)\b"
+                    r".{0,35}\bвибух\w*",
+                    segment_low,
+                )
+            )
+
+        def city_event_local(segment: str) -> bool:
+            return bool(cherkasy_named.search(segment) or cherkasy_genitive_event(segment))
+
+        def reviewed_attack_event(segment: str) -> bool:
+            return bool(monitor.strict_explosion_signal(segment) or english_explosion.search(segment))
+
+        def reviewed_air_context(segment: str) -> bool:
+            return bool(monitor.air_military_context(segment) or english_air.search(segment))
+
+        segments = [
+            " ".join(part.split())
+            for part in re.split(r"(?<=[.!?;])\s+|\n+", evidence)
+            if part and part.strip()
+        ]
+        event_segments = [
+            (idx, segment)
+            for idx, segment in enumerate(segments)
+            if city_event_local(segment) and reviewed_attack_event(segment)
+        ]
+        exact_city = bool(event_segments)
+        explosion = bool(event_segments)
+        air_context = any(reviewed_air_context(segment) for segment in segments)
+        direct_event_segment = next(
+            (segment for _, segment in event_segments if reviewed_air_context(segment)),
+            None,
+        )
+        if direct_event_segment:
+            direct_event_type = "explosion"
+            direct_event_basis = "reviewed_cherkasy_same_segment_factual_roles"
+
+        # Preserve cross-segment same-attack only when the retained reviewed
+        # summary contains an explicit relation. Article co-occurrence alone
+        # remains insufficient.
+        if (
+            direct_event_segment is None
+            and event_segments
+            and air_context
+            and not any(
+                named_city != "cherkasy"
+                for named_city in monitor.audited_cities_in_text(evidence)
+            )
+        ):
+            for event_idx, event_segment in event_segments:
+                event_low = event_segment.casefold()
+                adjacent = []
+                if event_idx > 0:
+                    adjacent.append(segments[event_idx - 1])
+                if event_idx + 1 < len(segments):
+                    adjacent.append(segments[event_idx + 1])
+                for context_segment in adjacent:
+                    if not reviewed_air_context(context_segment):
+                        continue
+                    context_low = context_segment.casefold()
+                    event_during_attack = bool(
+                        re.search(r"\bпід\s+час\s+(?:російськ\w+\s+)?атак\w*", event_low)
+                    )
+                    context_city_local = bool(
+                        cherkasy_named.search(context_segment)
+                        or re.search(r"^(?:у|в)\s+міст\w*\b", context_low)
+                    )
+                    explicit_prior_link = bool(re.search(r"\bперед\s+цим\b", context_low))
+                    completed_attack = bool(
+                        re.search(
+                            r"\b(?:армія\s+рф|місто)\b.{0,35}\bатакув\w*\b",
+                            context_low,
+                        )
+                    )
+                    city_anaphora = bool(
+                        re.search(r"^(?:у|в)\s+міст\w*\b", context_low)
+                        and (
+                            "ппо" in context_low
+                            or "бпла" in context_low
+                            or "дрон" in context_low
+                        )
+                    )
+                    if (
+                        (event_during_attack and context_city_local)
+                        or explicit_prior_link
+                        or completed_attack
+                        or city_anaphora
+                    ):
+                        direct_event_segment = event_segment
+                        direct_event_type = "explosion"
+                        direct_event_basis = "reviewed_cherkasy_explicit_cross_segment_same_attack"
+                        break
+                if direct_event_segment:
+                    break
+
     elif city == "sumy":
         # Sumy's frozen corpus stores reviewed Ukrainian factual summaries.
         # Preserve only facts explicit in the retained summary.
@@ -496,7 +631,13 @@ def historical_review_roles(city: str, row: dict, monitor) -> tuple[dict, str]:
             "basis": direct_event_basis,
             "evidence_text": direct_event_segment[:1200],
         }
-    elif exact_city and explosion and air_context and not conflicting_named_city:
+    elif (
+        city != "cherkasy"
+        and exact_city
+        and explosion
+        and air_context
+        and not conflicting_named_city
+    ):
         roles["same_attack_basis"] = {
             "present": True,
             "basis": "reviewed_factual_summary_links_exact_city_explosion_and_air_context",
@@ -1016,6 +1157,27 @@ def replay_city(repo_root: Path, city: str, through: str, output: Path, input_he
             if row["ppo_related"]:
                 ppo_changes.append(row)
 
+        evidence_episode_diagnostics = {}
+        for eid in sorted(candidates_by_episode):
+            contributor_ids = sorted(
+                str(candidate.get("candidate_id") or "")
+                for candidate in candidates_by_episode.get(eid, [])
+            )
+            evidence_episode_diagnostics[eid] = {
+                "replayed_status": new_status.get(eid, "NON_STRICT"),
+                "candidate_contributor_ids": contributor_ids,
+                "reason_codes": sorted({
+                    code
+                    for cid in contributor_ids
+                    for code in decision_by_candidate.get(cid, {}).get("reason_codes", [])
+                }),
+                "provenance_basis": [
+                    decision_by_candidate[cid].get("provenance_basis")
+                    for cid in contributor_ids
+                    if cid in decision_by_candidate
+                ],
+            }
+
         old_strict = {eid for eid, st in old_status.items() if st == "STRICT"}
         new_strict = {eid for eid, st in new_status.items() if st == "STRICT"}
         old_sens = {eid for eid, st in old_status.items() if st in {"STRICT", "SENSITIVITY"}}
@@ -1041,6 +1203,7 @@ def replay_city(repo_root: Path, city: str, through: str, output: Path, input_he
             "replayed_sensitivity_episodes": len(new_sens),
             "unchanged_episodes": counts["UNCHANGED_STRICT"] + counts["UNCHANGED_NON_STRICT"],
             "changed_episodes": changed,
+            "evidence_episode_diagnostics": evidence_episode_diagnostics,
             "new_strict": [r for r in changed if r["category"] == "NEW_STRICT"],
             "downgraded_strict": [r for r in changed if r["category"] == "STRICT_DOWNGRADE"],
             "strict_to_sensitivity": [r for r in changed if r["category"] == "STRICT_TO_SENSITIVITY"],
