@@ -17,6 +17,7 @@ import add_duration_unit_switch as exactmod
 import expand_multicity_production as base
 import extend_remaining_proxies as extended
 from update_data import Alert, TZ, build_outputs
+from db_phase1_lviv_canonical import ukrainealarm_rows_to_observations
 
 ROOT = Path(__file__).resolve().parents[1]
 DATA_FILE = ROOT / "data" / "dashboard_data.json"
@@ -281,6 +282,43 @@ def history_rows(client: UkraineAlarmClient, region_id: str, name: str) -> list[
 
 
 
+def history_events(
+    history: list[dict],
+    *,
+    city_key: str,
+    region_id: str,
+    api_region_name: str,
+) -> list[dict]:
+    return [
+        {
+            "city_key": city_key,
+            "region_id": region_id,
+            "api_region_name": api_region_name,
+            "start": iso(row["start"]),
+            "end": iso(row["end"]),
+            "alert_type": "AIR",
+        }
+        for row in history
+    ]
+
+
+def lviv_phase1_observations_from_history(
+    history: list[dict],
+    *,
+    region_id: str,
+    api_region_name: str,
+) -> list[dict]:
+    return ukrainealarm_rows_to_observations(
+        history_events(
+            history,
+            city_key="lviv",
+            region_id=region_id,
+            api_region_name=api_region_name,
+        ),
+        historical_end_exclusive=None,
+    )
+
+
 def _completed_air_times(event: dict) -> tuple[datetime, datetime] | None:
     if str(event.get("alert_type") or "").upper() != "AIR":
         return None
@@ -515,6 +553,21 @@ def main() -> None:
 
             try:
                 history = history_rows(client, region_id, api_name or spec["display_target"])
+                product_history_events = history_events(
+                    history,
+                    city_key=key,
+                    region_id=region_id,
+                    api_region_name=api_name or spec["display_target"],
+                )
+                _lviv_phase1_source_observations = (
+                    lviv_phase1_observations_from_history(
+                        history,
+                        region_id=region_id,
+                        api_region_name=api_name or spec["display_target"],
+                    )
+                    if key == "lviv"
+                    else []
+                )
                 checked_at = datetime.now(UTC)
                 oldest = min((r["start"] for r in history), default=None)
                 latest = max((r["end"] for r in history), default=None)
@@ -531,15 +584,7 @@ def main() -> None:
                     reason = "static_alertsinua_event_matches_api" if continuous else "no_verified_static_api_event_match"
 
                 if continuous:
-                    for row in history:
-                        event = {
-                            "city_key": key,
-                            "region_id": region_id,
-                            "api_region_name": api_name or spec["display_target"],
-                            "start": iso(row["start"]),
-                            "end": iso(row["end"]),
-                            "alert_type": "AIR",
-                        }
+                    for event in product_history_events:
                         upsert_completed_air_event(events, event)
 
                 store.setdefault("regions", {})[key] = {

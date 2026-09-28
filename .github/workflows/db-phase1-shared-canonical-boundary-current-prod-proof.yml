@@ -1,0 +1,350 @@
+name: Prove Phase-1 shared canonical boundary against current production
+
+on:
+  push:
+    branches:
+      - db-phase1-lviv-canonical-boundary-current-prod-2026-09-28
+    paths-ignore:
+      - "kyiv-air-alerts-grafana/research/db_phase1_shared_canonical_payload_boundary_current_prod_proof_2026-09-28.json"
+
+permissions:
+  contents: read
+
+jobs:
+  prove:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout proof branch
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: kyiv-air-alerts-grafana/requirements.txt
+
+      - name: Install production Python dependencies
+        shell: bash
+        run: python -m pip install -r kyiv-air-alerts-grafana/requirements.txt
+
+      - name: Freeze and verify current production target
+        shell: bash
+        run: |
+          set -euo pipefail
+          EXPECTED_SITE_PROD="5864bab6a09e087a6fc7bdabacef45409c3ac88c"
+          OLD_PRODUCTION_BASE="82494701ae8b49b9780eb42d535e0990fd889151"
+          ACCEPTED_PHASE1="73b841c0d3adfeff078bbf427efaecc5db985973"
+          PREVIOUS_IMPL="e8590fb17fba42b859bc13b1444ecf206630c208"
+          git fetch --no-tags origin \
+            +refs/heads/site-prod:refs/remotes/origin/site-prod \
+            "$OLD_PRODUCTION_BASE" \
+            "$ACCEPTED_PHASE1" \
+            "$PREVIOUS_IMPL"
+          SITE_PROD_AT_START="$(git rev-parse origin/site-prod)"
+          test "$SITE_PROD_AT_START" = "$EXPECTED_SITE_PROD"
+          test "$GITHUB_REF_NAME" = "db-phase1-lviv-canonical-boundary-current-prod-2026-09-28"
+          test "$(git rev-parse HEAD^)" = "$EXPECTED_SITE_PROD"
+          test "$(git rev-list --count "$EXPECTED_SITE_PROD"..HEAD)" = "1"
+          echo "SITE_PROD_AT_START=$SITE_PROD_AT_START" >> "$GITHUB_ENV"
+
+      - name: Verify production delta and refactor surface isolation
+        shell: bash
+        run: |
+          set -euo pipefail
+          OLD="82494701ae8b49b9780eb42d535e0990fd889151"
+          CURRENT="5864bab6a09e087a6fc7bdabacef45409c3ac88c"
+          PREVIOUS_IMPL="e8590fb17fba42b859bc13b1444ecf206630c208"
+          test "$(git rev-list --count "$OLD".."$CURRENT")" = "2"
+          git diff --name-only "$OLD" "$CURRENT" | sort > "$RUNNER_TEMP/production-delta-files.txt"
+          git diff-tree --no-commit-id --name-only -r "$PREVIOUS_IMPL" | sort > "$RUNNER_TEMP/refactor-files.txt"
+          if comm -12 "$RUNNER_TEMP/production-delta-files.txt" "$RUNNER_TEMP/refactor-files.txt" | grep -q .; then
+            echo "REFRACTOR_SURFACE_CONFLICT=true"
+            comm -12 "$RUNNER_TEMP/production-delta-files.txt" "$RUNNER_TEMP/refactor-files.txt"
+            exit 1
+          fi
+          echo "REFRACTOR_SURFACE_CONFLICT=false"
+
+      - name: Verify current production data rollback guard before proof
+        shell: bash
+        run: |
+          set -euo pipefail
+          BASE="5864bab6a09e087a6fc7bdabacef45409c3ac88c"
+          for path in \
+            kyiv-air-alerts-grafana/data/dashboard_data.json \
+            kyiv-air-alerts-grafana/data/ukrainealarm_bridge.json \
+            kyiv-air-alerts-grafana/data/alerts_combined.json \
+            kyiv-air-alerts-grafana/data/dashboard_qa.json
+          do
+            test "$(git rev-parse "$BASE:$path")" = "$(git rev-parse "HEAD:$path")"
+          done
+          if git diff --name-only "$BASE" HEAD -- kyiv-air-alerts-grafana/data | grep -q .; then
+            echo "Implementation commit unexpectedly changes tracked production data"
+            exit 1
+          fi
+
+      - name: Verify frozen persistence contracts
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD:kyiv-air-alerts-grafana/scripts/db_phase1_persistence.py)" = "06f3098df63d7aaf2348c366b6a351901926cb53"
+          test "$(git rev-parse HEAD:kyiv-air-alerts-grafana/db/migrations/001_phase1_core.sql)" = "3b8af7940b23aae03a4f6b434d90d97dde10bfc0"
+
+      - name: Prepare detached reference worktrees
+        shell: bash
+        run: |
+          set -euo pipefail
+          git worktree add --detach /tmp/phase1-accepted 73b841c0d3adfeff078bbf427efaecc5db985973
+          git worktree add --detach /tmp/site-prod-current 5864bab6a09e087a6fc7bdabacef45409c3ac88c
+
+      - name: Prove canonical and current-product parity
+        shell: bash
+        run: |
+          set -euo pipefail
+          python kyiv-air-alerts-grafana/scripts/proof_db_phase1_shared_canonical_boundary.py \
+            --accepted-worktree /tmp/phase1-accepted \
+            --production-worktree /tmp/site-prod-current \
+            --current-worktree "$GITHUB_WORKSPACE" \
+            --output "$RUNNER_TEMP/shared-boundary-base.json"
+
+      - name: Run Phase-1 regressions
+        working-directory: kyiv-air-alerts-grafana
+        shell: bash
+        run: |
+          set -euo pipefail
+          set +e
+          python -m unittest discover -s tests -p "test_db_phase1*.py" -v > "$RUNNER_TEMP/phase1-tests.log" 2>&1
+          rc=$?
+          set -e
+          cat "$RUNNER_TEMP/phase1-tests.log"
+          test "$rc" = "0"
+          count="$(grep -Eo 'Ran [0-9]+ tests?' "$RUNNER_TEMP/phase1-tests.log" | tail -1 | grep -Eo '[0-9]+')"
+          test "$count" = "31"
+          echo "PHASE1_TEST_COUNT=$count" >> "$GITHUB_ENV"
+          echo "PHASE1_TEST_RESULT=PASS" >> "$GITHUB_ENV"
+
+      - name: Capture site-prod end ref
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch --no-tags origin +refs/heads/site-prod:refs/remotes/origin/site-prod
+          SITE_PROD_AT_END="$(git rev-parse origin/site-prod)"
+          echo "SITE_PROD_AT_END=$SITE_PROD_AT_END" >> "$GITHUB_ENV"
+          echo "site_prod_at_start=$SITE_PROD_AT_START"
+          echo "site_prod_at_end=$SITE_PROD_AT_END"
+
+      - name: Build current-production proof artifact
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - \
+            "$RUNNER_TEMP/shared-boundary-base.json" \
+            "$RUNNER_TEMP/db_phase1_shared_canonical_payload_boundary_current_prod_proof_2026-09-28.json" \
+            "$SITE_PROD_AT_START" \
+            "$SITE_PROD_AT_END" \
+            "$PHASE1_TEST_COUNT" \
+            "$PHASE1_TEST_RESULT" \
+            "$GITHUB_WORKSPACE" \
+            "/tmp/site-prod-current" <<'PY'
+          import hashlib
+          import json
+          import subprocess
+          import sys
+          from pathlib import Path
+
+          base_path = Path(sys.argv[1])
+          output_path = Path(sys.argv[2])
+          site_prod_at_start = sys.argv[3]
+          site_prod_at_end = sys.argv[4]
+          phase1_test_count = int(sys.argv[5])
+          phase1_test_result = sys.argv[6]
+          current_root = Path(sys.argv[7])
+          production_root = Path(sys.argv[8])
+
+          OLD = "82494701ae8b49b9780eb42d535e0990fd889151"
+          CURRENT = "5864bab6a09e087a6fc7bdabacef45409c3ac88c"
+          PREVIOUS_IMPL = "e8590fb17fba42b859bc13b1444ecf206630c208"
+          ACCEPTED = "73b841c0d3adfeff078bbf427efaecc5db985973"
+          EXPECTED_PERSISTENCE = "06f3098df63d7aaf2348c366b6a351901926cb53"
+          EXPECTED_DDL = "3b8af7940b23aae03a4f6b434d90d97dde10bfc0"
+          DATA_PATHS = (
+              "data/dashboard_data.json",
+              "data/ukrainealarm_bridge.json",
+              "data/alerts_combined.json",
+              "data/dashboard_qa.json",
+          )
+
+          def git(*args):
+              return subprocess.check_output(["git", *args], cwd=current_root, text=True).strip()
+
+          def sha256_file(path):
+              return hashlib.sha256(Path(path).read_bytes()).hexdigest()
+
+          def canonical_hash(value):
+              raw = json.dumps(value, ensure_ascii=False, sort_keys=True, separators=(",", ":")).encode("utf-8")
+              return hashlib.sha256(raw).hexdigest()
+
+          base = json.loads(base_path.read_text(encoding="utf-8"))
+          delta_commits = [x for x in git("rev-list", "--reverse", f"{OLD}..{CURRENT}").splitlines() if x]
+          delta_files = [x for x in git("diff", "--name-only", OLD, CURRENT).splitlines() if x]
+          impl_files = set(x for x in git("diff-tree", "--no-commit-id", "--name-only", "-r", PREVIOUS_IMPL).splitlines() if x)
+          overlap = sorted(impl_files & set(delta_files))
+
+          production_app = production_root / "kyiv-air-alerts-grafana"
+          current_app = current_root / "kyiv-air-alerts-grafana"
+          data_before = {path: sha256_file(production_app / path) for path in DATA_PATHS}
+          data_after = {path: sha256_file(current_app / path) for path in DATA_PATHS}
+
+          split = base["source_split"]["refactored"]
+          product_inputs = base["production_parity_input_hashes"]
+          explosion_guard = {
+              f"pages-preview/{name}": base["explosion_guard"][name]
+              for name in ("app.js", "index.html")
+          }
+
+          episode_identity_ok = bool(base["episode_identity_match"])
+          source_key_ok = bool(base["source_record_key_match"])
+          binding_ok = bool(base["binding_match"])
+          checkpoint_ok = bool(base["checkpoint_candidate_match"])
+          determinism_ok = all(base["determinism_checks"].values())
+          data_guard = "PASS" if data_before == data_after else "FAIL"
+          refactor_surface_conflict = bool(overlap)
+          persistence_blob = base["persistence_blob_after"]
+          ddl_blob = base["ddl_blob_after"]
+          success = all((
+              base["verdict"] == "PHASE-1 SHARED CANONICAL PAYLOAD BOUNDARY PROVEN",
+              len(delta_commits) == 2,
+              not refactor_surface_conflict,
+              base["refactored_episode_count"] == 126,
+              base["refactored_source_observation_count"] == 140,
+              split.get("vadimkin_official_data_uk") == 120,
+              split.get("ukrainealarm_region_history") == 20,
+              split.get("alerts_in_ua", 0) == 0,
+              episode_identity_ok,
+              source_key_ok,
+              binding_ok,
+              checkpoint_ok,
+              determinism_ok,
+              base["product_output_parity"] == "PASS",
+              data_guard == "PASS",
+              persistence_blob == EXPECTED_PERSISTENCE,
+              ddl_blob == EXPECTED_DDL,
+              phase1_test_count == 31,
+              phase1_test_result == "PASS",
+              all(v == 0 for counts in explosion_guard.values() for v in counts.values()),
+              base["regression_checks"]["expected_present"],
+              base["regression_checks"]["known_bad_absent"],
+          ))
+
+          artifact = {
+              "schema_version": "db-phase1-shared-canonical-payload-boundary-current-prod-proof-v1",
+              "current_site_prod_sha": CURRENT,
+              "site_prod_at_start": site_prod_at_start,
+              "site_prod_at_end": site_prod_at_end,
+              "site_prod_moved_during_proof": site_prod_at_start != site_prod_at_end,
+              "old_production_base_sha": OLD,
+              "production_delta_commit_count": len(delta_commits),
+              "production_delta_commits": delta_commits,
+              "production_delta_changed_files": delta_files,
+              "refactor_surface_conflict": refactor_surface_conflict,
+              "refactor_surface_overlap": overlap,
+              "previous_implementation_sha": PREVIOUS_IMPL,
+              "current_replayed_implementation_sha": git("rev-parse", "HEAD"),
+              "accepted_phase1_reference_sha": ACCEPTED,
+              "shared_canonical_module": "scripts/db_phase1_lviv_canonical.py",
+              "shared_canonical_entrypoint": "canonicalize_lviv",
+              "canonical_episode_count": base["refactored_episode_count"],
+              "canonical_source_observation_count": base["refactored_source_observation_count"],
+              "source_split": {
+                  "Vadimkin": split.get("vadimkin_official_data_uk", 0),
+                  "UkraineAlarm": split.get("ukrainealarm_region_history", 0),
+                  "Alerts.in.ua": split.get("alerts_in_ua", 0),
+              },
+              "episode_identity_parity": "PASS" if episode_identity_ok else "FAIL",
+              "source_record_key_parity": "PASS" if source_key_ok else "FAIL",
+              "binding_parity": "PASS" if binding_ok else "FAIL",
+              "checkpoint_candidate_parity": "PASS" if checkpoint_ok else "FAIL",
+              "determinism_parity": "PASS" if determinism_ok else "FAIL",
+              "determinism_checks": base["determinism_checks"],
+              "regression_checks": {
+                  "b3df9090f7264ddbd726e113": "present" if base["regression_checks"]["expected_present"] else "missing",
+                  "7dd411c2a2587efc740a1a66": "absent" if base["regression_checks"]["known_bad_absent"] else "present",
+              },
+              "current_product_baseline_input_hash": canonical_hash(product_inputs),
+              "current_product_baseline_input_components": product_inputs,
+              "current_product_baseline_output_hash": base["product_baseline_hash"],
+              "current_product_refactored_output_hash": base["product_refactored_hash"],
+              "current_product_output_parity": base["product_output_parity"],
+              "current_product_ignored_fields": [],
+              "current_data_file_hashes_before": data_before,
+              "current_data_file_hashes_after": data_after,
+              "production_data_rollback_guard": data_guard,
+              "persistence_blob": persistence_blob,
+              "ddl_blob": ddl_blob,
+              "phase1_test_count": phase1_test_count,
+              "phase1_test_result": phase1_test_result,
+              "explosion_guard": explosion_guard,
+              "missing_episode_ids": base["missing_episode_ids"],
+              "unexpected_episode_ids": base["unexpected_episode_ids"],
+              "episode_mismatches": base["episode_mismatches"],
+              "missing_source_record_keys": base["missing_source_record_keys"],
+              "unexpected_source_record_keys": base["unexpected_source_record_keys"],
+              "source_observation_mismatches": base["source_observation_mismatches"],
+              "binding_mismatches": base["binding_mismatches"],
+              "checkpoint_mismatches": base["checkpoint_mismatches"],
+              "db_access_performed": False,
+              "neon_access_performed": False,
+              "production_publication_performed": False,
+              "credentials_exposed": False,
+              "verdict": (
+                  "PHASE-1 SHARED CANONICAL PAYLOAD BOUNDARY PROVEN AGAINST CURRENT PRODUCTION"
+                  if success
+                  else "PHASE-1 CURRENT-PRODUCTION CANONICAL BOUNDARY REVALIDATION BLOCKED"
+              ),
+          }
+          output_path.write_text(json.dumps(artifact, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+          print(json.dumps(artifact, ensure_ascii=False, sort_keys=True))
+          raise SystemExit(0 if success else 1)
+          PY
+
+      - name: Verify proof artifact contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - "$RUNNER_TEMP/db_phase1_shared_canonical_payload_boundary_current_prod_proof_2026-09-28.json" <<'PY'
+          import json
+          import sys
+          from pathlib import Path
+          obj = json.loads(Path(sys.argv[1]).read_text(encoding="utf-8"))
+          assert obj["verdict"] == "PHASE-1 SHARED CANONICAL PAYLOAD BOUNDARY PROVEN AGAINST CURRENT PRODUCTION"
+          assert obj["current_site_prod_sha"] == "5864bab6a09e087a6fc7bdabacef45409c3ac88c"
+          assert obj["canonical_episode_count"] == 126
+          assert obj["canonical_source_observation_count"] == 140
+          assert obj["source_split"] == {"Vadimkin": 120, "UkraineAlarm": 20, "Alerts.in.ua": 0}
+          assert obj["episode_identity_parity"] == "PASS"
+          assert obj["source_record_key_parity"] == "PASS"
+          assert obj["binding_parity"] == "PASS"
+          assert obj["checkpoint_candidate_parity"] == "PASS"
+          assert obj["determinism_parity"] == "PASS"
+          assert obj["current_product_output_parity"] == "PASS"
+          assert obj["production_data_rollback_guard"] == "PASS"
+          assert obj["phase1_test_count"] == 31
+          assert obj["phase1_test_result"] == "PASS"
+          assert obj["persistence_blob"] == "06f3098df63d7aaf2348c366b6a351901926cb53"
+          assert obj["ddl_blob"] == "3b8af7940b23aae03a4f6b434d90d97dde10bfc0"
+          assert obj["db_access_performed"] is False
+          assert obj["neon_access_performed"] is False
+          assert obj["production_publication_performed"] is False
+          assert obj["credentials_exposed"] is False
+          PY
+
+      - name: Upload machine-readable proof
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: db-phase1-shared-canonical-boundary-current-prod-proof
+          path: ${{ runner.temp }}/db_phase1_shared_canonical_payload_boundary_current_prod_proof_2026-09-28.json
+          if-no-files-found: error
