@@ -1,0 +1,78 @@
+{
+  "database_mutation_by_finalizer": false,
+  "database_proof_rerun": false,
+  "final_verdict": "PHASE-1 SAME-STREAM CONCURRENCY PROVEN — GREEN FINALIZATION COMPLETE",
+  "finalizer_commit_sha": "b3e39785948729e61d712e5caf6826af61c7c1f4",
+  "finalizer_run_id": 36419229572,
+  "guard_after": "exact git hash-object checks plus git diff --quiet and git diff --cached --quiet scoped to protected tracked paths",
+  "guard_before": "test -z \"$(git status --porcelain)\"",
+  "new_neon_branch_created": false,
+  "original_failure_reason": "The global git status --porcelain invariant checked the entire runtime worktree after the substantive database proof had already succeeded, so untracked/generated runtime files could make the workflow red even when tracked protected production files were unchanged.",
+  "original_failure_step": "Reconfirm frozen production files after proof",
+  "proof_child_branch_id": "br-small-wind-b5yah69o",
+  "proof_child_branch_name": "lviv-phase1-same-stream-concurrency-e2e-2026-09-28",
+  "proof_script_unchanged_from_source_run": true,
+  "protected_blob_validation": {
+    "ddl": {
+      "actual": "3b8af7940b23aae03a4f6b434d90d97dde10bfc0",
+      "expected": "3b8af7940b23aae03a4f6b434d90d97dde10bfc0",
+      "match": true,
+      "path": "kyiv-air-alerts-grafana/db/migrations/001_phase1_core.sql"
+    },
+    "importer": {
+      "actual": "7f2c1d90fb719e296e4dbb2cc96c6ec492e25ad8",
+      "expected": "7f2c1d90fb719e296e4dbb2cc96c6ec492e25ad8",
+      "match": true,
+      "path": "kyiv-air-alerts-grafana/scripts/db_phase1_lviv_import.py"
+    },
+    "persistence": {
+      "actual": "06f3098df63d7aaf2348c366b6a351901926cb53",
+      "expected": "06f3098df63d7aaf2348c366b6a351901926cb53",
+      "match": true,
+      "path": "kyiv-air-alerts-grafana/scripts/db_phase1_persistence.py"
+    },
+    "proof_script": {
+      "actual": "d434957791e4007b551d50c1c4bdbff743a0d83b",
+      "expected": "d434957791e4007b551d50c1c4bdbff743a0d83b",
+      "match": true,
+      "path": "kyiv-air-alerts-grafana/scripts/proof_db_phase1_same_stream_concurrency.py"
+    }
+  },
+  "protected_state_unchanged": {
+    "accepted_bootstrap": true,
+    "accepted_live_e2e": true,
+    "old_blocked_concurrency": true,
+    "primary": true
+  },
+  "python_bytecode_hygiene": "PYTHONDONTWRITEBYTECODE=1",
+  "schema_version": "db-phase1-same-stream-concurrency-finalization-v1",
+  "server_side_waiting_evidence": [
+    {
+      "classid": 2805678503,
+      "granted": true,
+      "mode": "ExclusiveLock",
+      "objid": 3036425871,
+      "objsubid": 1,
+      "pid": 788
+    },
+    {
+      "classid": 2805678503,
+      "granted": false,
+      "mode": "ExclusiveLock",
+      "objid": 3036425871,
+      "objsubid": 1,
+      "pid": 789
+    }
+  ],
+  "server_side_waiting_evidence_valid": true,
+  "source_artifact_id": 10965954575,
+  "source_regression_tests": "23 / 23 PASS",
+  "source_run_id": 36415623525,
+  "source_verdict": "PHASE-1 SAME-STREAM CONCURRENCY PROVEN",
+  "tracked_protected_paths_clean": true,
+  "writer_a_backend_pid": 788,
+  "writer_a_committed_seq": 2,
+  "writer_b_backend_pid": 789,
+  "writer_b_committed_seq": 3,
+  "writer_b_observed_after_writer_a": true
+}
