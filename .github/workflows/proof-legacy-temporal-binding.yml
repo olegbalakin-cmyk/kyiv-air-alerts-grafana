@@ -100,7 +100,12 @@ jobs:
                   rows = evidence.get(bucket) or []
                   for idx, row in enumerate(rows):
                       b = base.bind_evidence_record(row, base_eps, base_monitor)
-                      a = proof.bind_evidence_record(row, proof_eps, proof_monitor)
+                      a = proof.bind_evidence_record(
+                          row,
+                          proof_eps,
+                          proof_monitor,
+                          allow_new_temporal_fallback=bucket in {"strict_events", "sensitivity_only_events"},
+                      )
                       item = {
                           "record_id": rec_id(city,bucket,idx,row),
                           "city": city,
@@ -179,7 +184,12 @@ jobs:
               for bucket in ("strict_events","sensitivity_only_events","review_events"):
                   for idx,row in enumerate(evidence.get(bucket) or []):
                       before_binding = base.bind_evidence_record(row, base_eps, base_monitor)
-                      after_binding = proof.bind_evidence_record(row, proof_eps, proof_monitor)
+                      after_binding = proof.bind_evidence_record(
+                          row,
+                          proof_eps,
+                          proof_monitor,
+                          allow_new_temporal_fallback=bucket in {"strict_events", "sensitivity_only_events"},
+                      )
                       if before_binding.get("episode_id") != after_binding.get("episode_id"):
                           binding_deltas.append({
                               "bucket": bucket,
