@@ -596,7 +596,58 @@ def controlled_blast_nonmilitary_signal(text: str) -> bool:
     return controlled_blast_signal(text) and not military_strike_event_signal(text)
 
 
-ATTACK_EVENT_TYPE_ORDER = ("explosion", "impact", "arrival", "strike", "damage", "fire")
+AIR_DEFENSE_CONTEXT_RE = re.compile(r"\b(?:ппо|пво|протиповітр\w*|противовоздуш\w*)", re.IGNORECASE)
+AIR_DEFENSE_ACTUAL_RE = re.compile(
+    r"(?:"
+    r"(?:\bппо\b|\bпво\b|протиповітр\w*|противовоздуш\w*).{0,35}"
+    r"(?:працю(?:є|ють|вала|вали)|відпрацю\w*|работа(?:ет|ют|ла|ли)|отработа\w*)|"
+    r"(?:працю(?:є|ють|вала|вали)|відпрацю\w*|работа(?:ет|ют|ла|ли)|отработа\w*).{0,35}"
+    r"(?:\bппо\b|\bпво\b|протиповітр\w*|противовоздуш\w*)|"
+    r"(?:чути|чутно|було\s+чутно|слышно).{0,40}(?:робот\w*|работ\w*).{0,35}"
+    r"(?:\bппо\b|\bпво\b|протиповітр\w*|противовоздуш\w*)|"
+    r"(?:робот\w*|работ\w*).{0,35}(?:\bппо\b|\bпво\b|протиповітр\w*|противовоздуш\w*)"
+    r")",
+    re.IGNORECASE,
+)
+AIR_DEFENSE_PREDICTIVE_RE = re.compile(
+    r"(?:можлив\w*|може|можуть|можливо|может|могут|возможн\w*|"
+    r"готов\w*|напоготові|очіку\w*|ожида\w*|ймовірн\w*|вероятн\w*)"
+    r".{0,60}(?:ппо|пво|протиповітр\w*|противовоздуш\w*|робот\w*|работ\w*|чути|чутно|слышно)|"
+    r"(?:ппо|пво|протиповітр\w*|противовоздуш\w*).{0,60}"
+    r"(?:можлив\w*|може|можуть|можливо|может|могут|возможн\w*|готов\w*|напоготові|очіку\w*|ожида\w*)",
+    re.IGNORECASE,
+)
+INTERCEPTION_CLAIM_RE = re.compile(
+    r"(?:збит\w*|збил\w*|знищен\w*|знешкоджен\w*|перехоп\w*|"
+    r"сбит\w*|сбил\w*|уничтожен\w*|перехвачен\w*)",
+    re.IGNORECASE,
+)
+
+def air_defense_context_signal(text: str) -> bool:
+    low = normalize_evidence_text(text)
+    return bool(low and AIR_DEFENSE_CONTEXT_RE.search(low))
+
+
+def interception_claim_signal(text: str) -> bool:
+    low = normalize_evidence_text(text)
+    return bool(low and INTERCEPTION_CLAIM_RE.search(low))
+
+
+def air_defense_action_signal(text: str) -> bool:
+    """Confirmed actual air-defense activity, excluding warning/readiness language."""
+    low = normalize_evidence_text(text)
+    if not low or not AIR_DEFENSE_CONTEXT_RE.search(low):
+        return False
+    if AIR_DEFENSE_PREDICTIVE_RE.search(low):
+        return False
+    if AIR_DEFENSE_ACTUAL_RE.search(low):
+        return True
+    # An explicit interception by named/mentioned air defense is itself evidence
+    # that air defense actually operated; interception remains a separate flag.
+    return interception_claim_signal(low)
+
+
+ATTACK_EVENT_TYPE_ORDER = ("explosion", "impact", "arrival", "strike", "damage", "fire", "air_defense_action")
 
 
 def attack_event_types(text: str) -> list[str]:
@@ -621,6 +672,8 @@ def attack_event_types(text: str) -> list[str]:
         found.add("damage")
     if re.search(r"\b(?:пожеж\w*|загор\w*|займан\w*)", low):
         found.add("fire")
+    if air_defense_action_signal(low):
+        found.add("air_defense_action")
     return [event_type for event_type in ATTACK_EVENT_TYPE_ORDER if event_type in found]
 
 
@@ -643,6 +696,8 @@ def strict_attack_event_signal(text: str) -> bool:
         return False
     event_types = attack_event_types(low)
     if any(event_type in event_types for event_type in ("explosion", "impact", "arrival", "strike")):
+        return True
+    if "air_defense_action" in event_types:
         return True
     if any(event_type in event_types for event_type in ("damage", "fire")):
         return attack_consequence_signal(low)
@@ -1250,67 +1305,117 @@ def telegram_candidates_for_city(state: dict, city_key: str, earliest: datetime,
     return list(dedup.values())
 
 
+GOOGLE_NEWS_QUERY_FAMILIES = (
+    (
+        "explosion",
+        '(вибух OR вибухи OR "було чутно" OR "пролунали вибухи" OR "чули вибухи")',
+    ),
+    (
+        "impact_arrival",
+        '(влучання OR влучив OR влучила OR влучили OR приліт OR прильот)',
+    ),
+    (
+        "strike",
+        '(удар OR вдарив OR вдарила OR вдарили OR атакував OR атакувала OR атакували OR "завдав удару" OR "завдала удару")',
+    ),
+    (
+        "attack_consequence",
+        '((пошкоджено OR пошкодження OR пожежа OR загоряння) (атака OR атакував OR атакувала OR удар OR влучання OR БпЛА OR безпілотник OR дрон OR ракета))',
+    ),
+    (
+        "air_defense_action",
+        '("працює ППО" OR "працювала ППО" OR "ППО збила" OR "ППО збили" OR "ППО знищила" OR "ППО знищили" OR "ППО перехопила" OR "збито БпЛА" OR "знищено БпЛА" OR "мобільна вогнева група збила")',
+    ),
+)
+
+
+def google_news_query_families(city_label: str) -> list[tuple[str, str]]:
+    return [
+        (family, f'"{city_label}" {expression} when:8d')
+        for family, expression in GOOGLE_NEWS_QUERY_FAMILIES
+    ]
+
+
 def google_news_query(city_label: str) -> str:
-    return (
-        f'"{city_label}" '
-        '(вибух OR вибухи OR "було чутно" OR "пролунали вибухи" OR "чули вибухи") '
-        'when:8d'
-    )
+    # Backward-compatible legacy explosion query used for before/after proof.
+    return google_news_query_families(city_label)[0][1]
 
 
-def search_city_news(city_key: str, earliest: datetime, now: datetime) -> tuple[list[dict], str, dict]:
+def search_city_news(city_key: str, earliest: datetime, now: datetime) -> tuple[list[dict], str | None, dict]:
     label = CITY_CONFIG[city_key]["label"]
-    url = f"{GOOGLE_NEWS_URL}?q={quote_plus(google_news_query(label))}&hl=uk&gl=UA&ceid=UA:uk"
-    response = requests.get(
-        url,
-        headers={
-            "User-Agent": "ukraine-air-alerts-explosion-monitor/1.0",
-            "Accept-Language": "uk,en;q=0.7",
-        },
-        timeout=45,
-    )
-    response.raise_for_status()
-    root = ET.fromstring(response.content)
     lower_bound = earliest - timedelta(hours=3)
     upper_bound = now + timedelta(hours=1)
-    rows = []
+    merged = {}
     fulltext_fetches = 0
     fulltext_rescued_candidates = 0
-    for item in root.findall(".//item"):
-        title = clean_text(item.findtext("title") or "")
-        description = clean_text(item.findtext("description") or "")
-        link = (item.findtext("link") or "").strip()
-        published = parse_pubdate(item.findtext("pubDate"))
-        source_el = item.find("source")
-        publisher = clean_text(source_el.text or "") if source_el is not None else ""
-        publisher_url = (source_el.attrib.get("url") or "").strip() if source_el is not None else ""
-        if not title or not link:
-            continue
-        if published and not (lower_bound <= published <= upper_bound):
-            continue
+    query_urls = {}
+    family_result_counts = {}
 
-        fetcher = fetch_publisher_fulltext if fulltext_fetches < MAX_FULLTEXT_FETCHES_PER_CITY else None
-        row, fetched, rescued = build_google_news_candidate(
-            city_key,
-            title,
-            description,
-            link,
-            publisher,
-            publisher_url,
-            iso(published) if published else None,
-            fulltext_fetcher=fetcher,
+    for family, query in google_news_query_families(label):
+        url = f"{GOOGLE_NEWS_URL}?q={quote_plus(query)}&hl=uk&gl=UA&ceid=UA:uk"
+        query_urls[family] = url
+        response = requests.get(
+            url,
+            headers={
+                "User-Agent": "ukraine-air-alerts-explosion-monitor/1.0",
+                "Accept-Language": "uk,en;q=0.7",
+            },
+            timeout=45,
         )
-        if fetched:
-            fulltext_fetches += 1
-        if rescued:
-            fulltext_rescued_candidates += 1
-        if row:
-            rows.append(row)
+        response.raise_for_status()
+        root = ET.fromstring(response.content)
+        family_rows = []
 
-    dedup = {(r["url"], r["title"]): r for r in rows}
-    return list(dedup.values()), url, {
+        for item in root.findall(".//item"):
+            title = clean_text(item.findtext("title") or "")
+            description = clean_text(item.findtext("description") or "")
+            link = (item.findtext("link") or "").strip()
+            published = parse_pubdate(item.findtext("pubDate"))
+            source_el = item.find("source")
+            publisher = clean_text(source_el.text or "") if source_el is not None else ""
+            publisher_url = (source_el.attrib.get("url") or "").strip() if source_el is not None else ""
+            if not title or not link:
+                continue
+            if published and not (lower_bound <= published <= upper_bound):
+                continue
+
+            fetcher = fetch_publisher_fulltext if fulltext_fetches < MAX_FULLTEXT_FETCHES_PER_CITY else None
+            row, fetched, rescued = build_google_news_candidate(
+                city_key,
+                title,
+                description,
+                link,
+                publisher,
+                publisher_url,
+                iso(published) if published else None,
+                fulltext_fetcher=fetcher,
+            )
+            if fetched:
+                fulltext_fetches += 1
+            if rescued:
+                fulltext_rescued_candidates += 1
+            if not row:
+                continue
+            row["discovery_query_families"] = [family]
+            family_rows.append(row)
+
+        family_dedup = {(r["url"], r["title"]): r for r in family_rows}
+        family_result_counts[family] = len(family_dedup)
+        for key, row in family_dedup.items():
+            if key not in merged:
+                merged[key] = row
+                continue
+            families = set(merged[key].get("discovery_query_families") or [])
+            families.update(row.get("discovery_query_families") or [])
+            merged[key]["discovery_query_families"] = sorted(families)
+
+    primary_url = query_urls.get("explosion")
+    return list(merged.values()), primary_url, {
         "fulltext_fetches": fulltext_fetches,
         "fulltext_rescued_candidates": fulltext_rescued_candidates,
+        "query_urls": query_urls,
+        "query_family_result_counts": family_result_counts,
+        "results_after_family_merge": len(merged),
     }
 
 
@@ -2138,6 +2243,9 @@ def classify_candidate(row: dict, city_key: str, episodes: list[dict], matching:
     candidate_exact = exact_city_classification_evidence(city_key, row)
     candidate_strict = strict_explosion_evidence(city_key, row)
     candidate_event_types = list(candidate_strict.get("event_types") or [])
+    candidate_air_defense_context = air_defense_context_signal(classification_text(row))
+    candidate_air_defense_action = air_defense_action_signal(classification_text(row))
+    candidate_interception_claim = interception_claim_signal(classification_text(row))
     candidate_air = air_military_context_evidence(row)
     candidate_same_attack = same_attack_context_evidence(
         city_key, row, candidate_strict, candidate_air
@@ -2183,13 +2291,17 @@ def classify_candidate(row: dict, city_key: str, episodes: list[dict], matching:
         if city_mentioned(city_key, segment) and controlled_blast_nonmilitary_signal(segment)
     ]
     controlled = bool(controlled_event_segments)
-    whole_message_event = any(strict_explosion_signal(segment) for segment in segments)
+    whole_message_non_air_defense_event = any(
+        strict_attack_event_signal(segment)
+        and any(event_type != "air_defense_action" for event_type in attack_event_types(segment))
+        for segment in segments
+    )
     pvo_only_complete_message = (
         trusted_live_source(row)
         and exact["present"]
         and not strict["present"]
-        and not whole_message_event
-        and "ппо" in normalize_evidence_text(text)
+        and not whole_message_non_air_defense_event
+        and bool(AIR_DEFENSE_CONTEXT_RE.search(normalize_evidence_text(text)))
     )
     fulltext_requires_review = (
         row.get("discovery_basis") == "publisher_fulltext"
@@ -2293,6 +2405,9 @@ def classify_candidate(row: dict, city_key: str, episodes: list[dict], matching:
         "exact_city_classification_evidence": exact,
         "strict_explosion_evidence": strict,
         "event_types": candidate_event_types,
+        "air_defense_context": candidate_air_defense_context,
+        "air_defense_action": candidate_air_defense_action,
+        "interception_claim": candidate_interception_claim,
         "air_military_context": air,
         "same_attack_context": same_attack,
         "temporal_binding": temporal,
@@ -2307,6 +2422,9 @@ def classification_evidence_payload(decision: dict) -> dict:
         "exact_city": decision["exact_city_classification_evidence"],
         "strict_explosion": decision["strict_explosion_evidence"],
         "event_types": list(decision.get("event_types") or []),
+        "air_defense_context": bool(decision.get("air_defense_context")),
+        "air_defense_action": bool(decision.get("air_defense_action")),
+        "interception_claim": bool(decision.get("interception_claim")),
         "air_military_context": decision["air_military_context"],
         "same_attack_context": decision["same_attack_context"],
         "temporal_binding": decision["temporal_binding"],
@@ -2891,6 +3009,16 @@ def self_test() -> None:
     )
     assert rescued_row and fetched and rescued and rescued_row["discovery_basis"] == "publisher_fulltext"
 
+    discovery_queries = dict(google_news_query_families("Полтава"))
+    assert "вибух" in discovery_queries["explosion"]
+    assert "влучив" in discovery_queries["impact_arrival"]
+    assert "приліт" in discovery_queries["impact_arrival"]
+    assert "атакував" in discovery_queries["strike"]
+    assert "пошкоджено" in discovery_queries["attack_consequence"]
+    assert "пожежа" in discovery_queries["attack_consequence"]
+    assert "ППО збила" in discovery_queries["air_defense_action"]
+    assert len(discovery_queries) == len(GOOGLE_NEWS_QUERY_FAMILIES)
+
     strict_base = {
         "title": "У Полтаві під час повітряної тривоги пролунали вибухи",
         "publisher": "Test",
@@ -2956,26 +3084,55 @@ def self_test() -> None:
     retrospective_damage_decision = classify_candidate(retrospective_damage, "poltava", [poltava_ep])
     assert retrospective_damage_decision["proposed_outcome"] not in {"approved_strict", "approved_sensitivity"}, retrospective_damage_decision
 
-    # Mandatory: Kyiv PVO-only must never be strict.
-    kyiv_ep = make_episode("kyiv", dt, dt + timedelta(hours=1))
-    kyiv_pvo = {
-        **strict_base,
-        "title": "Київ — повітряна тривога через загрозу дронів. У столиці працює ППО.",
-        "snippet": "",
-        "source": "Telegram / СУСПІЛЬНЕ НОВИНИ",
-        "publisher": "СУСПІЛЬНЕ НОВИНИ",
-    }
-    kyiv_pvo_decision = classify_candidate(kyiv_pvo, "kyiv", [kyiv_ep])
-    assert kyiv_pvo_decision["proposed_outcome"] != "approved_strict"
-    assert not kyiv_pvo_decision["strict_explosion_evidence"]["present"]
-    assert "PVO_ONLY_COMPLETE_MESSAGE" in kyiv_pvo_decision["reason_codes"]
+    # Air-defense action is now a canonical event class. It must still pass
+    # exact-city, same-attack/air-context and temporal attribution gates.
+    ppo_action_controls = (
+        (
+            "ppo-action-only",
+            "У Полтаві під час повітряної тривоги працює ППО.",
+            ["air_defense_action"],
+            False,
+        ),
+        (
+            "ppo-action-plus-explosion",
+            "У Полтаві під час повітряної тривоги чути вибухи — працює ППО.",
+            ["explosion", "air_defense_action"],
+            False,
+        ),
+        (
+            "ppo-interception",
+            "У Полтаві під час повітряної тривоги ППО збила БпЛА.",
+            ["air_defense_action"],
+            True,
+        ),
+    )
+    for label, title, expected_types, expected_interception in ppo_action_controls:
+        row = {**strict_base, "candidate_id": label, "title": title, "snippet": ""}
+        decision = classify_candidate(row, "poltava", [poltava_ep])
+        assert decision["air_defense_context"], decision
+        assert decision["air_defense_action"], decision
+        assert decision["interception_claim"] is expected_interception, decision
+        assert decision["event_types"] == expected_types, decision
+        assert decision["proposed_outcome"] == "approved_strict", decision
 
-    # Air-defense hardening invariant: PPO explains an observed explosion; it
-    # does not negate that explosion. Explicit explosion evidence remains
-    # strict-eligible when city/episode attribution is independently satisfied.
+    # Prediction, warning and generic readiness/capability remain non-events.
+    ppo_negative_controls = (
+        "У Полтаві під час повітряної тривоги можлива робота ППО.",
+        "У Полтаві під час повітряної тривоги не лякайтеся, може бути чутно роботу ППО.",
+        "У Полтаві під час повітряної тривоги ППО готова до роботи.",
+    )
+    for title in ppo_negative_controls:
+        row = {**strict_base, "title": title, "snippet": ""}
+        decision = classify_candidate(row, "poltava", [poltava_ep])
+        assert decision["air_defense_context"], decision
+        assert not decision["air_defense_action"], decision
+        assert "air_defense_action" not in decision["event_types"], decision
+        assert decision["proposed_outcome"] != "approved_strict", decision
+
+    # Explicit explosion + PPO remains strict and now preserves both event types.
     air_defense_positive_cases = (
         "У Полтаві під час повітряної тривоги вибухи, які було чутно у місті — робота нашої ППО.",
-        "У Полтаві чути вибухи. Працює ППО.",
+        "У Полтаві чути вибухи — працює ППО.",
         "Полтава: лунають вибухи — працює ППО.",
     )
     for title in air_defense_positive_cases:
@@ -2988,29 +3145,12 @@ def self_test() -> None:
         }
         decision = classify_candidate(row, "poltava", [poltava_ep])
         assert decision["strict_explosion_evidence"]["present"], decision
+        assert decision["air_defense_action"], decision
+        assert "air_defense_action" in decision["event_types"], decision
         assert decision["air_military_context"]["present"], decision
         assert decision["same_attack_context"]["present"], decision
         assert decision["proposed_outcome"] == "approved_strict", decision
         assert "PVO_ONLY_COMPLETE_MESSAGE" not in decision["reason_codes"], decision
-
-    # Air-defense wording alone is context, not explosion evidence.
-    air_defense_negative_cases = (
-        "У Полтаві працює ППО.",
-        "У Полтаві наші сили ППО збили БпЛА.",
-        "У Полтаві Повітряні сили повідомляють про роботу ППО.",
-    )
-    for title in air_defense_negative_cases:
-        row = {
-            **strict_base,
-            "title": title,
-            "snippet": "",
-            "source": "Telegram / СУСПІЛЬНЕ НОВИНИ",
-            "publisher": "СУСПІЛЬНЕ НОВИНИ",
-        }
-        decision = classify_candidate(row, "poltava", [poltava_ep])
-        assert not decision["strict_explosion_evidence"]["present"], decision
-        assert decision["proposed_outcome"] != "approved_strict", decision
-        assert "PVO_ONLY_COMPLETE_MESSAGE" in decision["reason_codes"], decision
 
     # Mandatory: Vinnytsia regional/quarry wording plus publisher branding is
     # neither semantic exact-city evidence nor strict.
@@ -4227,6 +4367,9 @@ def main() -> None:
             "fulltext_fetches": int(google_stats.get("fulltext_fetches") or 0),
             "fulltext_rescued_candidates": int(google_stats.get("fulltext_rescued_candidates") or 0),
             "query_url": query_url,
+            "query_urls": google_stats.get("query_urls") or {},
+            "query_family_result_counts": google_stats.get("query_family_result_counts") or {},
+            "results_after_family_merge": int(google_stats.get("results_after_family_merge") or 0),
             "google_error": google_error,
         }
         for _, check in city_due:
