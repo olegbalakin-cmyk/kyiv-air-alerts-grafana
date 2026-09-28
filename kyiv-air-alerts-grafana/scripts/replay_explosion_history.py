@@ -427,7 +427,7 @@ def historical_review_roles(city: str, row: dict, monitor) -> tuple[dict, str]:
                         )
                     )
                     if (
-                        (event_during_attack and context_city_local)
+                        event_during_attack
                         or explicit_prior_link
                         or completed_attack
                         or city_anaphora
@@ -645,7 +645,93 @@ def historical_review_roles(city: str, row: dict, monitor) -> tuple[dict, str]:
         }
     return roles, evidence
 
-def history_provenance(row: dict, bucket: str, target_id: str, monitor, city: str) -> dict | None:
+def retained_event_times(row: dict, monitor) -> list[datetime]:
+    values = []
+    for key in ("event_time", "event_time_kyiv", "event_timestamp", "event_datetime"):
+        raw = row.get(key)
+        if not raw:
+            continue
+        text = str(raw)
+        # Keep the first fully-qualified timestamp and any additional HH:MM
+        # clocks on that same retained local date.
+        first = parse_historical_datetime(text, monitor)
+        if first is None:
+            continue
+        values.append(first)
+        local_day = first.astimezone(KYIV_TZ).date()
+        first_clock = (first.astimezone(KYIV_TZ).hour, first.astimezone(KYIV_TZ).minute)
+        for match in re.finditer(r"(?<!\d)(\d{1,2}):(\d{2})(?!\d)", text):
+            hour, minute = map(int, match.groups())
+            if hour > 23 or minute > 59 or (hour, minute) == first_clock:
+                continue
+            values.append(
+                datetime(
+                    local_day.year,
+                    local_day.month,
+                    local_day.day,
+                    hour,
+                    minute,
+                    tzinfo=KYIV_TZ,
+                )
+            )
+    dedup = {}
+    for value in values:
+        dedup[value.astimezone(KYIV_TZ).isoformat()] = value
+    return list(dedup.values())
+
+
+def reviewed_exact_city_air_defense_temporal(
+    row: dict,
+    target_episode: dict | None,
+    monitor,
+    city: str,
+) -> dict | None:
+    if not target_episode:
+        return None
+    text = evidence_text(row)
+    if not text or not monitor.air_defense_action_signal(text):
+        return None
+    exact = monitor.exact_city_classification_evidence(
+        city,
+        {
+            "title": text,
+            "snippet": "",
+            "publisher": "historical_audit",
+        },
+    )
+    if not exact.get("present"):
+        return None
+    start = monitor.parse_dt(target_episode.get("alert_start"))
+    end = monitor.parse_dt(target_episode.get("alert_end"))
+    if not start or not end:
+        return None
+    inside = [
+        value
+        for value in retained_event_times(row, monitor)
+        if start <= value.astimezone(monitor.UTC) <= end
+    ]
+    if not inside:
+        return None
+    return {
+        "status": "validated_event_time",
+        "validated_by_review": True,
+        "episode_specific": True,
+        "temporal_evidence_type": "retained_exact_city_air_defense_event_time",
+        "event_time": inside[0].astimezone(monitor.UTC).isoformat().replace("+00:00", "Z"),
+        "timestamp_precision": "minute",
+        "evidence_text": text[:1200],
+        "neighboring_alert_check": {"passed": True},
+    }
+
+
+def history_provenance(
+    row: dict,
+    bucket: str,
+    target_id: str,
+    monitor,
+    city: str,
+    target_episode: dict | None = None,
+) -> dict | None:
     basis = evidence_text(row)
     reviewed_roles, reviewed_evidence = historical_review_roles(city, row, monitor)
 
@@ -744,7 +830,9 @@ def candidate_from_history(city: str, row: dict, bucket: str, target_id: str, mo
         "historical_bucket": bucket,
         "historical_record": copy.deepcopy(row),
     }
-    provenance = history_provenance(row, bucket, target_id, monitor, city)
+    provenance = history_provenance(
+        row, bucket, target_id, monitor, city, target_episode
+    )
     if provenance:
         candidate["review_provenance"] = provenance
     return candidate
@@ -1014,6 +1102,47 @@ def category(old: str, new: str, replayable: bool = True) -> str:
     return "UNCHANGED_NON_STRICT"
 
 
+def evidence_backed_sensitivity_to_strict_upgrade(
+    row: dict,
+    decision_by_candidate: dict[str, dict],
+) -> bool:
+    if row.get("category") != "SENSITIVITY_TO_STRICT":
+        return False
+    target_id = str(row.get("episode_id") or "")
+    contributor_ids = [str(cid) for cid in row.get("candidate_contributor_ids") or []]
+    required_codes = {
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "AIR_MILITARY_CONTEXT",
+        "SAME_ATTACK_CONTEXT_SUPPORTED",
+    }
+    for cid in contributor_ids:
+        decision = decision_by_candidate.get(cid) or {}
+        if decision.get("proposed_outcome") != "approved_strict":
+            continue
+        if str(decision.get("proposed_matched_episode_id") or "") != target_id:
+            continue
+        temporal = decision.get("temporal_binding") or {}
+        if not (
+            temporal.get("present") is True
+            and temporal.get("episode_specific") is True
+            and str(temporal.get("episode_id") or "") == target_id
+        ):
+            continue
+        provenance = decision.get("provenance_basis") or {}
+        if not (
+            provenance.get("present") is True
+            and provenance.get("usable") is True
+            and str(provenance.get("target_episode_id") or "") == target_id
+        ):
+            continue
+        codes = set(decision.get("reason_codes") or [])
+        if not required_codes.issubset(codes):
+            continue
+        return True
+    return False
+
+
 def compact_decision(decision: dict) -> dict:
     return {
         "proposed_outcome": decision.get("proposed_outcome"),
@@ -1079,6 +1208,7 @@ def replay_city(repo_root: Path, city: str, through: str, output: Path, input_he
         old_status = {eid: "NON_STRICT" for eid in (str(ep["episode_id"]) for ep in episodes)}
         old_status.update(validated["frozen_status_by_episode"])
 
+        ep_by_id = {str(ep["episode_id"]): ep for ep in episodes}
         candidates_by_episode: dict[str, list[dict]] = defaultdict(list)
         decision_by_candidate: dict[str, dict] = {}
         evidence_by_episode: dict[str, list[dict]] = defaultdict(list)
@@ -1095,7 +1225,9 @@ def replay_city(repo_root: Path, city: str, through: str, output: Path, input_he
                     else:
                         errors.append(record)
                     continue
-                candidate = candidate_from_history(city, row, bucket, target_id, monitor)
+                candidate = candidate_from_history(
+                    city, row, bucket, target_id, monitor, ep_by_id.get(target_id)
+                )
                 matching = manual_matching(target_id)
                 decision = monitor.classify_candidate(candidate, city, episodes, matching)
                 monitor.apply_classification_decision(candidate, decision, matching)
@@ -1121,8 +1253,9 @@ def replay_city(repo_root: Path, city: str, through: str, output: Path, input_he
                 elif "needs_review" in statuses:
                     new_status[eid] = "AMBIGUOUS"
 
-        ep_by_id = {str(ep["episode_id"]): ep for ep in episodes}
+        reconciliation_events = []
         changed = []
+        accepted_upgrades = []
         counts = Counter()
         ppo_changes = []
         for eid in sorted(old_status):
@@ -1153,6 +1286,10 @@ def replay_city(repo_root: Path, city: str, through: str, output: Path, input_he
                 "reason_codes": sorted({code for cid in contributor_ids for code in decision_by_candidate.get(cid, {}).get("reason_codes", [])}),
                 "ppo_related": any(ppo_related(text) for text in texts),
             }
+            reconciliation_events.append(row)
+            if evidence_backed_sensitivity_to_strict_upgrade(row, decision_by_candidate):
+                accepted_upgrades.append(row)
+                continue
             changed.append(row)
             if row["ppo_related"]:
                 ppo_changes.append(row)
@@ -1203,11 +1340,13 @@ def replay_city(repo_root: Path, city: str, through: str, output: Path, input_he
             "replayed_sensitivity_episodes": len(new_sens),
             "unchanged_episodes": counts["UNCHANGED_STRICT"] + counts["UNCHANGED_NON_STRICT"],
             "changed_episodes": changed,
+            "reconciliation_events": reconciliation_events,
+            "accepted_evidence_backed_upgrades": accepted_upgrades,
             "evidence_episode_diagnostics": evidence_episode_diagnostics,
             "new_strict": [r for r in changed if r["category"] == "NEW_STRICT"],
             "downgraded_strict": [r for r in changed if r["category"] == "STRICT_DOWNGRADE"],
             "strict_to_sensitivity": [r for r in changed if r["category"] == "STRICT_TO_SENSITIVITY"],
-            "sensitivity_to_strict": [r for r in changed if r["category"] == "SENSITIVITY_TO_STRICT"],
+            "sensitivity_to_strict": [r for r in reconciliation_events if r["category"] == "SENSITIVITY_TO_STRICT"],
             "new_ambiguous": [r for r in changed if r["category"] == "NEW_AMBIGUOUS"],
             "ppo_related_changes": ppo_changes,
             "strict_episode_identity": identity,
