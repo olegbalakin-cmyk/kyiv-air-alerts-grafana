@@ -1,0 +1,47 @@
+name: Validate scheduled shadow main candidate
+
+on:
+  push:
+    branches:
+      - db-phase1-scheduled-shadow-main-2026-09-28
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Validate YAML and scheduled-shadow contract
+        run: |
+          python -m pip install pyyaml
+          python - <<'PY'
+          from pathlib import Path
+          import yaml
+
+          path = Path(".github/workflows/update-netlify-site.yml")
+          raw = path.read_text(encoding="utf-8")
+          doc = yaml.safe_load(raw)
+          assert isinstance(doc, dict)
+          assert 'schedule:\n    - cron: "15 */4 * * *"' in raw
+          assert "group: update-netlify-site" in raw
+          assert "cancel-in-progress: true" in raw
+          assert "requirements-db-phase1.txt" in raw
+          assert 'PHASE1_DB_SHADOW: "1"' in raw
+          assert "PHASE1_PROD_SHADOW_DATABASE_URL" in raw
+          assert "PHASE1_PROD_SHADOW_BRANCH_ID" in raw
+          assert "PHASE1_DB_SHADOW_FAILURE_POLICY: fail_open" in raw
+          assert "PHASE1_DB_SHADOW_DIAGNOSTIC:" in raw
+          assert "PHASE1_INPUT_SHA=$(git rev-parse HEAD)" in raw
+          assert "PHASE1_INPUT_REF: site-prod" in raw
+          assert "PHASE1_INPUT_REPOSITORY:" in raw
+          assert "NEON_API_KEY" not in raw
+          assert "continue-on-error" not in raw
+          assert "phase1-db-shadow-" in raw
+          print("YAML parse PASS")
+          print("Scheduled shadow workflow contract PASS")
+          PY
