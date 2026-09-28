@@ -1,0 +1,259 @@
+name: Proof legacy temporal binding
+
+on:
+  push:
+    branches:
+      - historical-replay-legacy-temporal-binding-proof-2026-09-28
+    paths:
+      - "kyiv-air-alerts-grafana/scripts/replay_explosion_history.py"
+      - "kyiv-air-alerts-grafana/tests/test_historical_replay_temporal_binding.py"
+      - ".github/workflows/proof-legacy-temporal-binding.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  proof:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout proof
+        uses: actions/checkout@v4
+        with:
+          path: proof
+          fetch-depth: 0
+
+      - name: Checkout authoritative base
+        uses: actions/checkout@v4
+        with:
+          ref: 7c19220a1835cc76048bcec026295dcd78177f63
+          path: base
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install -r proof/kyiv-air-alerts-grafana/requirements.txt pytest
+
+      - name: Focused and regression tests
+        run: |
+          set -euo pipefail
+          python proof/kyiv-air-alerts-grafana/scripts/replay_explosion_history.py --self-test
+          pytest -q             proof/kyiv-air-alerts-grafana/tests/test_historical_replay_temporal_binding.py             proof/kyiv-air-alerts-grafana/tests/test_historical_replay_cherkasy_roles.py             proof/kyiv-air-alerts-grafana/tests/test_historical_replay_remaining_v2_roles.py             proof/kyiv-air-alerts-grafana/tests/test_historical_replay_strike_roles.py
+
+      - name: Build binding proof
+        env:
+          BASE_HEAD: 7c19220a1835cc76048bcec026295dcd78177f63
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import copy
+          import hashlib
+          import importlib.util
+          import json
+          import os
+          import subprocess
+          from collections import Counter
+          from pathlib import Path
+
+          ROOT = Path.cwd()
+          BASE = ROOT / "base" / "kyiv-air-alerts-grafana"
+          PROOF = ROOT / "proof" / "kyiv-air-alerts-grafana"
+          TARGETS = ["chernihiv","dnipro","kharkiv","kherson","kropyvnytskyi","mykolaiv","odesa"]
+          CLEAN = ["lviv","sevastopol","sumy","cherkasy"]
+          THROUGH = "2026-09-17"
+
+          def load_module(name, path):
+              spec = importlib.util.spec_from_file_location(name, path)
+              mod = importlib.util.module_from_spec(spec)
+              assert spec and spec.loader
+              spec.loader.exec_module(mod)
+              return mod
+
+          base = load_module("replay_base_proof", BASE / "scripts/replay_explosion_history.py")
+          proof = load_module("replay_candidate_proof", PROOF / "scripts/replay_explosion_history.py")
+          base_monitor = base.import_monitor(BASE)
+          proof_monitor = proof.import_monitor(PROOF)
+          baseline = json.loads((PROOF / "data/explosion_audited_baseline.json").read_text(encoding="utf-8"))
+
+          def rec_id(city, bucket, idx, row):
+              raw = json.dumps(row, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
+              return hashlib.sha256(f"{city}|{bucket}|{idx}|{raw}".encode()).hexdigest()[:24]
+
+          def audit_city(city):
+              base_row = baseline["cities"][city]
+              base_eps, _ = base.load_historical_episodes(BASE, city, base_monitor)
+              proof_eps, _ = proof.load_historical_episodes(PROOF, city, proof_monitor)
+              base_eps = base.filter_window(base_eps, str(base_row["coverage_start"]), THROUGH, base_monitor)
+              proof_eps = proof.filter_window(proof_eps, str(base_row["coverage_start"]), THROUGH, proof_monitor)
+              assert [x["episode_id"] for x in base_eps] == [x["episode_id"] for x in proof_eps]
+              evidence = json.loads((PROOF / "data/explosion_research" / city / "final_evidence.json").read_text(encoding="utf-8"))
+              before = base.evidence_validation(evidence, base_row, base_eps, base_monitor)
+              after = proof.evidence_validation(evidence, base_row, proof_eps, proof_monitor)
+              newly = []
+              still = []
+              for bucket in ("strict_events","sensitivity_only_events"):
+                  rows = evidence.get(bucket) or []
+                  for idx, row in enumerate(rows):
+                      b = base.bind_evidence_record(row, base_eps, base_monitor)
+                      a = proof.bind_evidence_record(row, proof_eps, proof_monitor)
+                      item = {
+                          "record_id": rec_id(city,bucket,idx,row),
+                          "city": city,
+                          "bucket": bucket,
+                          "index": idx,
+                          "source_url": row.get("source_url"),
+                          "old_counted_status": base.history_status(row,bucket),
+                          "before_binding": b,
+                          "after_binding": a,
+                          "retained_temporal_fields": {
+                              k: row.get(k) for k in (
+                                  "episode_id","matched_episode_id","alert_episode_id",
+                                  "matched_episode_start","matched_alert_episode_start",
+                                  "alert_episode_start","alert_start","alert_start_kyiv",
+                                  "alert_start_local","matched_alert_start",
+                                  "matched_alert_start_kyiv","episode_start","matched_start",
+                                  "alert_episode_start_kyiv","alert_start_utc",
+                                  "event_time","event_time_kyiv","event_time_local"
+                              ) if row.get(k) is not None
+                          },
+                      }
+                      if not b.get("episode_id") and a.get("episode_id"):
+                          newly.append(item)
+                      if not a.get("episode_id"):
+                          still.append(item)
+              before_source = base.validate_city_sources(BASE, city, base_row, THROUGH, base_monitor)
+              after_source = proof.validate_city_sources(PROOF, city, base_row, THROUGH, proof_monitor)
+              return {
+                  "frozen_strict_count": int(base_row.get("strict_n") or 0),
+                  "frozen_sensitivity_count": int(base_row.get("sensitivity_n") or 0),
+                  "denominator": int(base_row.get("total_alerts") or 0),
+                  "recoverable_canonical_strict_ids_before": before["strict_ids"],
+                  "recoverable_canonical_sensitivity_ids_before": before["sensitivity_ids"],
+                  "canonical_strict_ids_after": after["strict_ids"],
+                  "canonical_sensitivity_ids_after": after["sensitivity_ids"],
+                  "unbound_before": sum(1 for bucket in before["bindings"] for x in before["bindings"][bucket] if bucket in {"strict_events","sensitivity_only_events"} and not x["binding"].get("episode_id")),
+                  "unbound_after": sum(1 for bucket in after["bindings"] for x in after["bindings"][bucket] if bucket in {"strict_events","sensitivity_only_events"} and not x["binding"].get("episode_id")),
+                  "newly_bound": newly,
+                  "still_unbound": still,
+                  "source_status_before": before_source["source_status"],
+                  "source_status_after": after_source["source_status"],
+                  "blocking_codes_after": [x.get("code") for x in after_source["blocking_reasons"]],
+              }
+
+          cities = {city:audit_city(city) for city in TARGETS}
+          recovered = [x for city in TARGETS for x in cities[city]["newly_bound"]]
+          remaining = [x for city in TARGETS for x in cities[city]["still_unbound"]]
+          methods = Counter(x["after_binding"].get("method") for x in recovered)
+
+          def run_city(mod, repo_root, city, out):
+              try:
+                  rc = mod.replay_city(repo_root, city, THROUGH, out, None)
+              except SystemExit as exc:
+                  rc = int(exc.code or 0)
+              return rc, json.loads(out.read_text(encoding="utf-8"))
+
+          regressions = {}
+          tmp = ROOT / "_proof_out"
+          tmp.mkdir(exist_ok=True)
+          for city in CLEAN:
+              b_rc,bj = run_city(base, BASE, city, tmp/f"base-{city}.json")
+              p_rc,pj = run_city(proof, PROOF, city, tmp/f"proof-{city}.json")
+              fields = [
+                  "status","episodes_checked","baseline_strict_episodes","replayed_strict_episodes",
+                  "baseline_sensitivity_episodes","replayed_sensitivity_episodes",
+                  "changed_episodes","errors","reconciliation_counts","strict_episode_identity",
+                  "unbound_review_evidence","verdict"
+              ]
+              diffs = {k:{"before":bj.get(k),"after":pj.get(k)} for k in fields if bj.get(k)!=pj.get(k)}
+              regressions[city] = {
+                  "base_return_code": b_rc,
+                  "proof_return_code": p_rc,
+                  "semantic_differences": diffs,
+                  "unchanged": not diffs,
+                  "proof_summary": {k:pj.get(k) for k in fields if k not in {"changed_episodes","errors","unbound_review_evidence"}},
+                  "proof_changed_episode_ids": [x.get("episode_id") for x in (pj.get("changed_episodes") or [])],
+                  "proof_error_count": len(pj.get("errors") or []),
+              }
+
+          base_replay_blob = subprocess.check_output(
+              ["git","-C",str(ROOT/"base"),"rev-parse","HEAD:kyiv-air-alerts-grafana/scripts/replay_explosion_history.py"],
+              text=True,
+          ).strip()
+          proof_replay_blob = subprocess.check_output(
+              ["git","-C",str(ROOT/"proof"),"rev-parse","HEAD:kyiv-air-alerts-grafana/scripts/replay_explosion_history.py"],
+              text=True,
+          ).strip()
+          proof_head = subprocess.check_output(["git","-C",str(ROOT/"proof"),"rev-parse","HEAD"],text=True).strip()
+
+          exact_ok = (
+              len(recovered)==79 and len(remaining)==14
+              and methods == Counter({"legacy_start_alias":60,"event_time_unique_containment":19})
+          )
+          city_unbound = {c:[cities[c]["unbound_before"],cities[c]["unbound_after"]] for c in TARGETS}
+          expected_after = {"chernihiv":0,"dnipro":0,"kharkiv":1,"kherson":7,"kropyvnytskyi":0,"mykolaiv":3,"odesa":3}
+          blockers_ok = all(city_unbound[c][1]==n for c,n in expected_after.items())
+          regression_ok = all(x["unchanged"] for x in regressions.values())
+
+          payload = {
+              "schema_version":1,
+              "kind":"historical_replay_legacy_temporal_binding_proof_runtime",
+              "authoritative_base_head":os.environ["BASE_HEAD"],
+              "proof_head_tested":proof_head,
+              "replay_implementation_blob_before":base_replay_blob,
+              "replay_implementation_blob_after":proof_replay_blob,
+              "tests":"PASS",
+              "seven_city":cities,
+              "unbound_counted_positive_before":sum(x["unbound_before"] for x in cities.values()),
+              "unbound_counted_positive_after":sum(x["unbound_after"] for x in cities.values()),
+              "deterministic_recovered_count":len(recovered),
+              "recovery_methods":dict(sorted(methods.items())),
+              "newly_bound_records":recovered,
+              "remaining_unbound_records":remaining,
+              "fully_preflight_reconciled":[c for c,x in cities.items() if x["source_status_after"]=="READY"],
+              "already_clean_city_regressions":regressions,
+              "checks":{
+                  "exact_79_recovered":len(recovered)==79,
+                  "exact_14_remaining":len(remaining)==14,
+                  "method_split_60_19":methods==Counter({"legacy_start_alias":60,"event_time_unique_containment":19}),
+                  "per_city_remaining_matches_diagnosis":blockers_ok,
+                  "clean_city_regressions_zero":regression_ok,
+              },
+              "verdict": (
+                  "LEGACY TEMPORAL BINDING ADAPTER PROVEN — 79 DETERMINISTIC HISTORICAL POSITIVES RECOVERED / 14 BLOCKERS REMAIN — READY FOR ATOMIC APPLY"
+                  if exact_ok and blockers_ok and regression_ok
+                  else "LEGACY TEMPORAL BINDING ADAPTER PROOF FAILED — DO NOT APPLY"
+              ),
+          }
+          out=ROOT/"legacy-temporal-binding-runtime-proof.json"
+          out.write_text(json.dumps(payload,ensure_ascii=False,indent=2,sort_keys=True)+"\n",encoding="utf-8")
+          print(json.dumps({
+              "unbound":[payload["unbound_counted_positive_before"],payload["unbound_counted_positive_after"]],
+              "recovered":payload["deterministic_recovered_count"],
+              "methods":payload["recovery_methods"],
+              "remaining_by_city":{c:cities[c]["unbound_after"] for c in TARGETS},
+              "fully_preflight_reconciled":payload["fully_preflight_reconciled"],
+              "regressions":{c:r["unchanged"] for c,r in regressions.items()},
+              "verdict":payload["verdict"],
+          },ensure_ascii=False,indent=2))
+          if payload["verdict"].startswith("LEGACY TEMPORAL BINDING ADAPTER PROOF FAILED"):
+              raise SystemExit(1)
+          PY
+
+      - name: Verify protected state unchanged
+        run: |
+          set -euo pipefail
+          test -z "$(git -C proof status --porcelain --             kyiv-air-alerts-grafana/data/explosion_audited_baseline.json             kyiv-air-alerts-grafana/data/explosion_review_queue.json             kyiv-air-alerts-grafana/data/explosion_candidate_monitor_state.json             kyiv-air-alerts-grafana/data/explosion_candidate_monitor_last_run.json             kyiv-air-alerts-grafana/data/explosions_test.json             kyiv-air-alerts-grafana/data/dashboard_data.json             kyiv-air-alerts-grafana/data/explosion_research             kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices)"
+
+      - name: Upload proof
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: legacy-temporal-binding-runtime-proof
+          path: legacy-temporal-binding-runtime-proof.json
+          if-no-files-found: error
+          retention-days: 30
