@@ -1,0 +1,103 @@
+name: Refresh production derived UX data
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/refresh-production-derived.yml"
+
+concurrency:
+  group: refresh-production-derived
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: kyiv-air-alerts-grafana
+    steps:
+      - name: Check out production site branch
+        uses: actions/checkout@v4
+        with:
+          ref: site-prod
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: kyiv-air-alerts-grafana/requirements.txt
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Build production derived UX data
+        run: python scripts/apply_site_rolling_7d.py
+
+      - name: Verify derived UX data
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          data = json.loads(Path("data/dashboard_data.json").read_text(encoding="utf-8"))
+          keys = data.get("multicity_meta", {}).get("production_city_keys", [])
+          assert len(keys) == 23, len(keys)
+          assert data.get("multicity_meta", {}).get("rolling_window_periods") == ["weekly", "rolling30", "rolling90"]
+
+          profile = data.get("time_of_day_profile", {})
+          assert profile.get("meta", {}).get("city_count") == 23
+          assert profile.get("meta", {}).get("slot_minutes") == 15
+          assert set(profile.get("meta", {}).get("periods", [])) == {"7d", "30d", "90d", "year", "all"}
+          assert len(profile.get("cities", {})) == 23
+
+          table = data.get("all_cities_table", {})
+          assert table.get("meta", {}).get("city_count") == 23
+          assert set(table.get("meta", {}).get("periods", [])) == {"7d", "30d", "90d", "year", "common"}
+          assert table.get("meta", {}).get("common_start") <= table.get("meta", {}).get("common_end")
+          assert len(table.get("cities", {})) == 23
+
+          for key in keys:
+              city = data.get("cities", {}).get(key, {})
+              assert city.get("weekly"), key
+              assert city.get("rolling30"), key
+              assert city.get("rolling90"), key
+              partial = [row for row in city.get("monthly", []) if row.get("is_partial_period")]
+              assert len(partial) <= 1, (key, partial)
+              if partial:
+                  assert city.get("monthly", [])[-1] is partial[-1]
+                  assert partial[-1].get("partial_through")
+          print("Derived production UX data verified for 23 rows")
+          PY
+
+      - name: Commit derived production data
+        working-directory: .
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add kyiv-air-alerts-grafana/data/dashboard_data.json
+          if git diff --cached --quiet; then
+            echo "Derived production data already current"
+            exit 0
+          fi
+          git commit -m "Refresh production derived UX data"
+          for attempt in 1 2 3; do
+            git fetch origin site-prod
+            if git rebase origin/site-prod && git push origin HEAD:site-prod; then
+              exit 0
+            fi
+            git rebase --abort || true
+            if [ "$attempt" -eq 3 ]; then
+              echo "Push failed after 3 attempts"
+              exit 1
+            fi
+            sleep $((attempt * 2))
+          done
