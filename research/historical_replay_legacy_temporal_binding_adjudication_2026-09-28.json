@@ -1,0 +1,401 @@
+{
+  "schema_version": 1,
+  "kind": "historical_replay_legacy_temporal_binding_adjudication",
+  "date": "2026-09-28",
+  "authoritative_branch": "multicity-wip-2026-09-16",
+  "authoritative_head_checked": "7c19220a1835cc76048bcec026295dcd78177f63",
+  "proof_branch": "historical-replay-legacy-temporal-binding-proof-2026-09-28",
+  "proof_head_checked_before_adjudication": "c600410b5a8180905b500db332f9d0edfea44d99",
+  "proof_implementation_commit": "1312f045a24862fbd9065d5f0388fe717ad76b98",
+  "proof_artifact_commit": "5ecec4947b25b6247ea1b99dbeb5b274f91b4852",
+  "proof_run": 36467744239,
+  "original_inventory_expectation": {
+    "unbound_before": 93,
+    "deterministic_recoveries": 79,
+    "unresolved": 14,
+    "method_split": {
+      "legacy_start_alias": 60,
+      "event_time_unique_containment": 19
+    }
+  },
+  "actual_proof_result": {
+    "unbound_before": 93,
+    "deterministic_recoveries": 78,
+    "unresolved": 15,
+    "method_split": {
+      "legacy_start_alias": 60,
+      "event_time_unique_containment": 18
+    },
+    "tests": {
+      "self_test": "PASS",
+      "pytest": "53 passed",
+      "workflow_run_status": "success",
+      "protected_state_step": "PASS"
+    }
+  },
+  "fresh_compatibility_check": {
+    "relevant_input_drift": false,
+    "cleanup_commit_after_proof_artifact": {
+      "commit": "c600410b5a8180905b500db332f9d0edfea44d99",
+      "change": "removed only .github/workflows/proof-legacy-temporal-binding.yml",
+      "interfering": false
+    },
+    "blobs": {
+      "authoritative_replay_implementation": "c54165fb7c34d885f51e26e98063203335d1a788",
+      "proof_replay_implementation": "11ccbe36927398ecfb276a4a98ddada564eef375",
+      "dnipro_final_evidence_authoritative_and_proof": "99758ae2a7d888593ffd863cc53cd9f48bf34f5a",
+      "sumy_final_evidence_authoritative_and_proof": "79b29e65adbc3af6e968210bc40e0bcdb5b3662a",
+      "canonical_episode_id_builder_authoritative_and_proof": "b6c3ff1d47db22e00cb73c2be209d488bd343df0",
+      "classifier_monitor_authoritative_and_proof": "b55fe2ed082958917c74f95bca2fd6bc137bcaae"
+    },
+    "dnipro_source_slice_blobs_authoritative_equal_proof": {
+      "dnipro-P1a_alerts.json": "7bff2e06a3e738b2fce192d10ece433949ef6175",
+      "dnipro-P1b_alerts.json": "d4ef19271b01c2b70fc809fff39d4be7acf132fc",
+      "dnipro-P3a_alerts.json": "c4cccc88426c3ffaabe6b6483520c48769291cd3",
+      "dnipro-P3b_alerts.json": "21338771cf0eea0c62d99f2fd528aa35153be593",
+      "dnipro-P4a_alerts.json": "3663fc380205da6b1187813e7c18e0b27a42f6f1",
+      "dnipro-P4b_alerts.json": "9dbc98ab5bce498c0746a57ad42e846ef294656d",
+      "dnipro-historical-recovery_alerts.json": "1395c92aa5c8d5200d8413dffea02aaedc1b5444"
+    },
+    "sumy_source_slice_blobs_authoritative_equal_proof": {
+      "sumy-P1a_alerts.json": "9ffd863b8cfbfb2aaec24469745d5c9ccc2d9c56",
+      "sumy-P1b_alerts.json": "6319d2149af2aa31500e634b8a03f92c601353fe",
+      "sumy-P2a_alerts.json": "14fc42c066824d34caab2590ec3871cf15903b8b",
+      "sumy-P2b_alerts.json": "03d5fa66f74df69258df60b4a343651601ab81a5",
+      "sumy-P3a_alerts.json": "4e785852447f71f907f9667c7212b2e49b433295",
+      "sumy-P3b_alerts.json": "f31b0a55a7a6764cbd037f40d72d00c8e5a9b897",
+      "sumy-P4a_alerts.json": "3cad728d1c87aff59f7e4a272808b3f3e7afa9f7",
+      "sumy-P4b_alerts.json": "a072083871690f710e2cf8c6010ab583b69ebd94",
+      "sumy-P4c_alerts.json": "70a6b1cb003a4a805e6fe30dc060283ace3042cf"
+    },
+    "canonical_episode_id_contract": "SHA256(f\"{city_key}|{start_utc_z}|{end_utc_z}\")[:24]"
+  },
+  "dnipro_record_reconstruction": {
+    "record_id": "2793d79590a849624744439a",
+    "city": "dnipro",
+    "bucket": "strict_events",
+    "final_evidence_index_zero_based": 74,
+    "originating_research_file": "kyiv-air-alerts-grafana/data/explosion_research/dnipro/dnipro_P2_result.json",
+    "originating_research_index_zero_based": 34,
+    "old_counted_classification": "STRICT",
+    "source_url": "https://24tv.ua/dnipro-skolihnula-seriya-vibuhiv_n3003501",
+    "retained_evidence_text": "Після попередження про БпЛА та тривоги близько 14:31 у Дніпрі о 14:45 і 15:39 пролунали вибухи.",
+    "retained_basis": "exact_city; confirmed_air_war; timed_inside_alert",
+    "retained_legacy_alert_start": "2026-02-05 ~14:31",
+    "retained_event_times_local": [
+      "2026-02-05 14:45 Europe/Kyiv",
+      "2026-02-05 15:39 Europe/Kyiv"
+    ],
+    "source_page": {
+      "displayed_article_timestamp_local": "2026-02-05 15:41 Europe/Kyiv",
+      "separate_update_timestamp_exposed": null,
+      "chronology_summary": "The source reports explosions at 14:45 and, later, another explosion at 15:39 during a drone-threat context.",
+      "publication_timestamp_used_as_event_time": false
+    },
+    "retained_ids": {
+      "episode_id": null,
+      "matched_episode_id": null,
+      "alert_episode_id": null,
+      "candidate_ids": [],
+      "source_observation_ids": []
+    },
+    "old_binding": {
+      "method": "ambiguous_alert_start",
+      "candidate_episode_ids": [],
+      "matched_episode_id": null,
+      "reason": "The retained ~14:31 value is not within 90 seconds or the same local minute as a current canonical alert start."
+    },
+    "proof_binding": {
+      "method": "event_time_ambiguous_containment",
+      "candidate_episode_ids": [
+        "00c24c9cccd9e66de7eba62b",
+        "ed19badd30731bd1aeb7e326"
+      ],
+      "per_time_candidates": [
+        {
+          "event_time_local": "2026-02-05 14:45 Europe/Kyiv",
+          "candidate_episode_ids": [
+            "00c24c9cccd9e66de7eba62b"
+          ]
+        },
+        {
+          "event_time_local": "2026-02-05 15:39 Europe/Kyiv",
+          "candidate_episode_ids": [
+            "ed19badd30731bd1aeb7e326"
+          ]
+        }
+      ]
+    },
+    "same_attack_or_composition_context": {
+      "source_local_context": "Both explosion reports are presented in one article under an ongoing drone-attack context; the second is explicitly described as another explosion.",
+      "retained_row_composition": "One historical STRICT row contains both qualifying event times.",
+      "episode_identity_attribution": "No retained field states which one of the two current canonical episodes supplied the single historical positive count."
+    }
+  },
+  "dnipro_canonical_timeline": [
+    {
+      "canonical_episode_id": "00c24c9cccd9e66de7eba62b",
+      "start_utc": "2026-02-05T11:02:13Z",
+      "start_local": "2026-02-05T13:02:13+02:00",
+      "end_utc": "2026-02-05T13:08:11Z",
+      "end_local": "2026-02-05T15:08:11+02:00",
+      "retained_event_time_local": "2026-02-05T14:45:00+02:00",
+      "event_inside": true,
+      "source_slice": "dnipro-historical-recovery_alerts.json",
+      "upstream_observation": {
+        "repository": "Vadimkin/ukrainian-air-raid-sirens-dataset",
+        "path": "datasets/official_data_uk.csv",
+        "git_blob_sha": "71d70c0ca54968f530d596cf315616fa858800e1",
+        "parsed_start_utc": "2026-02-05T11:02:13Z",
+        "parsed_end_utc": "2026-02-05T13:08:11Z"
+      }
+    },
+    {
+      "canonical_episode_id": "ed19badd30731bd1aeb7e326",
+      "start_utc": "2026-02-05T13:20:14Z",
+      "start_local": "2026-02-05T15:20:14+02:00",
+      "end_utc": "2026-02-05T15:20:38Z",
+      "end_local": "2026-02-05T17:20:38+02:00",
+      "retained_event_time_local": "2026-02-05T15:39:00+02:00",
+      "event_inside": true,
+      "source_slice": "dnipro-historical-recovery_alerts.json",
+      "upstream_observation": {
+        "repository": "Vadimkin/ukrainian-air-raid-sirens-dataset",
+        "path": "datasets/official_data_uk.csv",
+        "git_blob_sha": "71d70c0ca54968f530d596cf315616fa858800e1",
+        "parsed_start_utc": "2026-02-05T13:20:14Z",
+        "parsed_end_utc": "2026-02-05T15:20:38Z"
+      }
+    }
+  ],
+  "dnipro_timeline_conclusion": {
+    "gap_between_episodes_local": "00:12:03",
+    "genuinely_distinct_canonical_episodes": true,
+    "id_normalization_artifact": false,
+    "reason": "The episodes have different canonical start/end intervals separated by an all-clear gap; the unchanged canonical ID function hashes city plus those distinct UTC boundaries."
+  },
+  "dnipro_source_adjudication": {
+    "meaning_14_45": "A qualifying explosion in Dnipro during the first canonical alert episode.",
+    "meaning_15_39": "A later, explicitly separate qualifying explosion ('another explosion') in Dnipro during the second canonical alert episode.",
+    "exactly_one_episode_deterministically_selectable": false,
+    "root_cause_class": "MULTI_EVENT_MULTI_EPISODE_AMBIGUITY",
+    "outcome": "C",
+    "interpretation": "The legacy row represents qualifying events in two different current alert episodes. The binding adapter is correct not to collapse or arbitrarily choose one; deciding whether both episodes should become independently event-positive is a separate evidence/model reconciliation task."
+  },
+  "sumy_review_event_scope_audit": {
+    "final_fallback_scope": [
+      "strict_events",
+      "sensitivity_only_events"
+    ],
+    "counted_positive_scope_excludes_review_events": true,
+    "review_history_status": "AMBIGUOUS",
+    "unrestricted_intermediate_new_review_bindings": [
+      {
+        "review_index_zero_based": 3,
+        "source_url": "https://smr.gov.ua/uk/novini/podiji/37136-sumska-hromada-vorozhi-ataky-ta-ikhni-naslidky-17-chervnia-2026-roku.html",
+        "event_time_kyiv": "2026-06-17 ~15:30",
+        "would_bind_episode_id": "6bedb3ba675e7e982b2595d8"
+      },
+      {
+        "review_index_zero_based": 11,
+        "source_url": "https://t.me/s/suspilnesumy?before=46535",
+        "event_time_kyiv": "2026-07-18 ~20:40-21:19",
+        "would_bind_episode_id": "28ee19b39e8a10527582bf21"
+      }
+    ],
+    "semantic_verdict": "CORRECTLY_SCOPED",
+    "rationale": [
+      "review_events are not frozen counted positives being reconciled to strict/sensitivity counts",
+      "the adapter proof targets canonical reconciliation of already-counted historical positives",
+      "binding a review row feeds it into candidate classification/composition and can change replay semantics rather than merely recover a frozen positive identity",
+      "the final implementation therefore disables the new temporal fallback for review_events"
+    ],
+    "final_sumy_regression": {
+      "binding_deltas": [],
+      "strict": 204,
+      "sensitivity": 238,
+      "verdict": "CITY REPLAY CLEAN"
+    }
+  },
+  "final_proof_revalidation": {
+    "legacy_start_recoveries": 60,
+    "event_time_unique_containment_recoveries": 18,
+    "total_recovered": 78,
+    "remaining": 15,
+    "exact_remaining_blocker_composition": {
+      "EVENT_OUTSIDE_CURRENT_CANONICAL_CORPUS": 13,
+      "OLD_LONG_ALERT_SPLIT_WITHOUT_EVENT_CLOCK": 1,
+      "MULTI_EVENT_MULTI_EPISODE_AMBIGUITY": 1,
+      "total": 15
+    },
+    "exact_final_15_blocker_set": [
+      {
+        "record_id": "2793d79590a849624744439a",
+        "city": "dnipro",
+        "bucket": "strict_events",
+        "index": 74,
+        "binding_method": "event_time_ambiguous_containment",
+        "root_cause": "MULTI_EVENT_MULTI_EPISODE_AMBIGUITY",
+        "candidate_episode_ids": [
+          "00c24c9cccd9e66de7eba62b",
+          "ed19badd30731bd1aeb7e326"
+        ]
+      },
+      {
+        "record_id": "2725fd45c6f6a33d61fe04a8",
+        "city": "kharkiv",
+        "bucket": "strict_events",
+        "index": 1,
+        "binding_method": "event_time_no_containing_episode",
+        "root_cause": "EVENT_OUTSIDE_CURRENT_CANONICAL_CORPUS",
+        "candidate_episode_ids": []
+      },
+      {
+        "record_id": "8237340ab735032f39db197c",
+        "city": "kherson",
+        "bucket": "strict_events",
+        "index": 1,
+        "binding_method": "event_time_no_containing_episode",
+        "root_cause": "EVENT_OUTSIDE_CURRENT_CANONICAL_CORPUS",
+        "candidate_episode_ids": []
+      },
+      {
+        "record_id": "aea1ffbdace229409cec0c16",
+        "city": "kherson",
+        "bucket": "strict_events",
+        "index": 3,
+        "binding_method": "event_time_no_containing_episode",
+        "root_cause": "EVENT_OUTSIDE_CURRENT_CANONICAL_CORPUS",
+        "candidate_episode_ids": []
+      },
+      {
+        "record_id": "e7b33cc9d7a37efc3ad2a51c",
+        "city": "kherson",
+        "bucket": "strict_events",
+        "index": 4,
+        "binding_method": "event_time_no_containing_episode",
+        "root_cause": "EVENT_OUTSIDE_CURRENT_CANONICAL_CORPUS",
+        "candidate_episode_ids": []
+      },
+      {
+        "record_id": "283fdd8775dd3f46a54c2e2c",
+        "city": "kherson",
+        "bucket": "strict_events",
+        "index": 5,
+        "binding_method": "event_time_no_containing_episode",
+        "root_cause": "EVENT_OUTSIDE_CURRENT_CANONICAL_CORPUS",
+        "candidate_episode_ids": []
+      },
+      {
+        "record_id": "8e7ef06ae0a9fa2e019fb17d",
+        "city": "kherson",
+        "bucket": "strict_events",
+        "index": 6,
+        "binding_method": "event_time_no_containing_episode",
+        "root_cause": "EVENT_OUTSIDE_CURRENT_CANONICAL_CORPUS",
+        "candidate_episode_ids": []
+      },
+      {
+        "record_id": "8aa162150ee5a23c622c8532",
+        "city": "kherson",
+        "bucket": "strict_events",
+        "index": 7,
+        "binding_method": "event_time_no_containing_episode",
+        "root_cause": "EVENT_OUTSIDE_CURRENT_CANONICAL_CORPUS",
+        "candidate_episode_ids": []
+      },
+      {
+        "record_id": "79fa40f617d42897a5dbba14",
+        "city": "kherson",
+        "bucket": "strict_events",
+        "index": 8,
+        "binding_method": "event_time_no_containing_episode",
+        "root_cause": "EVENT_OUTSIDE_CURRENT_CANONICAL_CORPUS",
+        "candidate_episode_ids": []
+      },
+      {
+        "record_id": "7be92b6ec25e3649c106e66f",
+        "city": "mykolaiv",
+        "bucket": "strict_events",
+        "index": 6,
+        "binding_method": "event_time_no_containing_episode",
+        "root_cause": "EVENT_OUTSIDE_CURRENT_CANONICAL_CORPUS",
+        "candidate_episode_ids": []
+      },
+      {
+        "record_id": "114d46148bb629164cde2392",
+        "city": "mykolaiv",
+        "bucket": "strict_events",
+        "index": 7,
+        "binding_method": "ambiguous_alert_start",
+        "root_cause": "OLD_LONG_ALERT_SPLIT_WITHOUT_EVENT_CLOCK",
+        "candidate_episode_ids": []
+      },
+      {
+        "record_id": "058b9b70b3e39ca67db9af5d",
+        "city": "mykolaiv",
+        "bucket": "strict_events",
+        "index": 26,
+        "binding_method": "event_time_no_containing_episode",
+        "root_cause": "EVENT_OUTSIDE_CURRENT_CANONICAL_CORPUS",
+        "candidate_episode_ids": []
+      },
+      {
+        "record_id": "c9170f2906d0e18731a81fa2",
+        "city": "odesa",
+        "bucket": "strict_events",
+        "index": 139,
+        "binding_method": "event_time_no_containing_episode",
+        "root_cause": "EVENT_OUTSIDE_CURRENT_CANONICAL_CORPUS",
+        "candidate_episode_ids": []
+      },
+      {
+        "record_id": "503a0c99d1b5f9fe9c447c0e",
+        "city": "odesa",
+        "bucket": "strict_events",
+        "index": 140,
+        "binding_method": "event_time_no_containing_episode",
+        "root_cause": "EVENT_OUTSIDE_CURRENT_CANONICAL_CORPUS",
+        "candidate_episode_ids": []
+      },
+      {
+        "record_id": "0c2c1c3a0cbbbea7b7d2ccde",
+        "city": "odesa",
+        "bucket": "strict_events",
+        "index": 141,
+        "binding_method": "event_time_no_containing_episode",
+        "root_cause": "EVENT_OUTSIDE_CURRENT_CANONICAL_CORPUS",
+        "candidate_episode_ids": []
+      }
+    ],
+    "deterministic_record_missed": false,
+    "reason": "All 15 remaining records fall into non-structural categories recorded by the proof: outside current canonical corpus, old long-alert split without event clock, or the Dnipro multi-event/multi-episode case.",
+    "clean_city_binding_changed": false,
+    "records_outside_counted_positive_scope_gained_binding": false
+  },
+  "corrected_structural_contract": {
+    "unbound_before": 93,
+    "deterministic_recoveries": 78,
+    "unresolved_records": 15,
+    "method_split": {
+      "legacy_start_alias": 60,
+      "event_time_unique_containment": 18
+    },
+    "count_contract_confirmed": true,
+    "note": "The original 79/14 expectation was wrong for the structural adapter. The Dnipro row is not a missing deterministic one-episode bind; it spans two canonical episodes and belongs to separate evidence reconciliation."
+  },
+  "protected_state_result": {
+    "implementation_changed_in_adjudication": false,
+    "historical_evidence_changed_in_adjudication": false,
+    "canonical_corpus_changed_in_adjudication": false,
+    "classifier_changed_in_adjudication": false,
+    "authoritative_branch_touched": false,
+    "db_neon_touched": false,
+    "site_prod_touched": false,
+    "campaign_branch_touched": false,
+    "existing_proof_artifact_changed": false,
+    "only_new_research_artifact_intended": true
+  },
+  "apply_gate": "DO NOT APPLY CODE IN THIS TASK",
+  "final_verdict": "DNIPRO LEGACY RECORD REPRESENTS MULTIPLE CANONICAL EPISODES — REQUIRES SEPARATE EVIDENCE RECONCILIATION"
+}
