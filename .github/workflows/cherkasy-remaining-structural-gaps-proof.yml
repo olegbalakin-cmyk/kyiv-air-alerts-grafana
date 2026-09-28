@@ -1,0 +1,143 @@
+name: Cherkasy remaining structural gaps proof
+
+on:
+  push:
+    branches:
+      - cherkasy-remaining-structural-gaps-proof-2026-09-28
+    paths:
+      - ".github/workflows/cherkasy-remaining-structural-gaps-proof.yml"
+      - "kyiv-air-alerts-grafana/scripts/replay_explosion_history.py"
+      - "kyiv-air-alerts-grafana/tests/test_historical_replay_cherkasy_roles.py"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  prove:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout exact proof branch
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: kyiv-air-alerts-grafana/requirements.txt
+
+      - name: Install dependencies
+        run: pip install -r kyiv-air-alerts-grafana/requirements.txt
+
+      - name: Verify immutable inputs
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD:kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py)" = "b55fe2ed082958917c74f95bca2fd6bc137bcaae"
+          test "$(git rev-parse HEAD:kyiv-air-alerts-grafana/data/explosion_research/cherkasy/final_evidence.json)" = "433b901ec49279fb865294a7c1e9a5328cf1b46a"
+          git diff --exit-code 84512efe9fa1bf4f9bfe234250782b6ac69e78bf --             kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py             kyiv-air-alerts-grafana/data/explosion_research/cherkasy/final_evidence.json
+
+      - name: Run classifier and replay regression tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          python kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py --self-test
+          python kyiv-air-alerts-grafana/scripts/replay_explosion_history.py --self-test
+          pytest -q             kyiv-air-alerts-grafana/tests/test_historical_replay_cherkasy_roles.py             kyiv-air-alerts-grafana/tests/test_historical_replay_remaining_v2_roles.py             kyiv-air-alerts-grafana/tests/test_historical_replay_strike_roles.py
+
+      - name: Run canonical Cherkasy replay
+        shell: bash
+        run: |
+          set -euo pipefail
+          HEAD_SHA="$(git rev-parse HEAD)"
+          python kyiv-air-alerts-grafana/scripts/replay_explosion_history.py             --repo-root "$GITHUB_WORKSPACE/kyiv-air-alerts-grafana"             --city cherkasy             --through 2026-09-17             --input-head "$HEAD_SHA"             --read-only             --output "$RUNNER_TEMP/replay_cherkasy_structural_proof.json"
+
+      - name: Assert success contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          path = Path(os.environ["RUNNER_TEMP"], "replay_cherkasy_structural_proof.json")
+          data = json.loads(path.read_text(encoding="utf-8"))
+
+          assert data["status"] == "COMPLETE", data["status"]
+          assert data["episodes_checked"] == 1548, data["episodes_checked"]
+          assert data["replayed_strict_episodes"] == 57, data["replayed_strict_episodes"]
+          assert data["replayed_sensitivity_episodes"] == 57, data["replayed_sensitivity_episodes"]
+          assert data["protected_files_unchanged"] is True
+          assert data.get("errors") == [], data.get("errors")
+
+          qa_ids = [row["episode_id"] for row in data.get("changed_episodes") or []]
+          assert qa_ids == ["f57f2f50c537719982254887"], qa_ids
+
+          accepted = sorted(
+              row["episode_id"] for row in data.get("accepted_evidence_backed_upgrades") or []
+          )
+          assert accepted == sorted([
+              "1211cf659b50b8f60a118e85",
+              "2e52d5a124fddfe369687035",
+              "f0b75832ea028fd6b1b5ff75",
+          ]), accepted
+
+          expected = {
+              "1211cf659b50b8f60a118e85": "STRICT",
+              "2e52d5a124fddfe369687035": "STRICT",
+              "7dc902b97fda7ea1d146c907": "STRICT",
+              "f0b75832ea028fd6b1b5ff75": "STRICT",
+              "3a8c3baa43001ec2f94b53c8": "SENSITIVITY",
+              "f57f2f50c537719982254887": "AMBIGUOUS",
+          }
+          diagnostics = data.get("evidence_episode_diagnostics") or {}
+          actual = {episode_id: diagnostics[episode_id]["replayed_status"] for episode_id in expected}
+          assert actual == expected, actual
+
+          reconciliation = data.get("reconciliation_events") or []
+          reconciliation_ids = sorted(row["episode_id"] for row in reconciliation)
+          assert reconciliation_ids == sorted([
+              "1211cf659b50b8f60a118e85",
+              "2e52d5a124fddfe369687035",
+              "f0b75832ea028fd6b1b5ff75",
+              "f57f2f50c537719982254887",
+          ]), reconciliation_ids
+
+          source = data.get("source_validation") or {}
+          assert source.get("expected_alert_episodes") == 1548, source
+          assert source.get("reconstructed_alert_episodes") == 1548, source
+
+          print(json.dumps({
+              "denominator": data["episodes_checked"],
+              "strict": data["replayed_strict_episodes"],
+              "sensitivity": data["replayed_sensitivity_episodes"],
+              "qa_ids": qa_ids,
+              "accepted_upgrade_ids": accepted,
+              "target_statuses": actual,
+              "reconciliation_event_ids": reconciliation_ids,
+          }, ensure_ascii=False, indent=2))
+          PY
+
+      - name: Verify immutable inputs after proof
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD:kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py)" = "b55fe2ed082958917c74f95bca2fd6bc137bcaae"
+          test "$(git rev-parse HEAD:kyiv-air-alerts-grafana/data/explosion_research/cherkasy/final_evidence.json)" = "433b901ec49279fb865294a7c1e9a5328cf1b46a"
+          git status --short
+
+      - name: Upload proof replay
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cherkasy-remaining-structural-gaps-proof-${{ github.sha }}
+          path: ${{ runner.temp }}/replay_cherkasy_structural_proof.json
+          if-no-files-found: warn
+          retention-days: 30
