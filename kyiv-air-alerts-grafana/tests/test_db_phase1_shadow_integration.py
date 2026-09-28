@@ -7,6 +7,7 @@ import sys
 import types
 import unittest
 from pathlib import Path
+from tempfile import TemporaryDirectory
 from unittest.mock import patch
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -84,6 +85,27 @@ class ShadowIntegrationTests(unittest.TestCase):
         self.assertEqual(FAKE_ENV["GITHUB_SHA"], provenance["workflow_sha"])
         self.assertTrue(provenance["parameters"]["shadow"])
 
+    def test_shadow_provenance_separates_workflow_and_checked_out_input(self):
+        env = {
+            **FAKE_ENV,
+            "GITHUB_REF": "refs/heads/main",
+            "GITHUB_SHA": "a" * 40,
+            "PHASE1_INPUT_REPOSITORY": FAKE_ENV["GITHUB_REPOSITORY"],
+            "PHASE1_INPUT_REF": "site-prod",
+            "PHASE1_INPUT_SHA": "b" * 40,
+        }
+        got = shadow.build_shadow_persistence_payload(
+            self.canonical_payload,
+            checkpoint_state=self.ua_fixture["checkpoint_state"],
+            env=env,
+        )
+        provenance = got["run_provenance"]
+        self.assertEqual("refs/heads/main", provenance["workflow_ref"])
+        self.assertEqual("a" * 40, provenance["workflow_sha"])
+        self.assertEqual("site-prod", provenance["input_ref"])
+        self.assertEqual("b" * 40, provenance["input_sha"])
+        self.assertNotEqual(provenance["workflow_sha"], provenance["input_sha"])
+
     def test_alertsinua_is_absent_from_shadow_source_rows(self):
         got = shadow.build_shadow_persistence_payload(
             self.canonical_payload, checkpoint_state=self.ua_fixture["checkpoint_state"], env=FAKE_ENV
@@ -154,6 +176,85 @@ class ShadowIntegrationTests(unittest.TestCase):
                     ukrainealarm_observations=self.ua_obs, checkpoint_state=self.ua_fixture["checkpoint_state"],
                     env=FAKE_ENV,
                 )
+
+    def test_shadow_fail_open_swallows_only_shadow_failure_and_writes_diagnostic(self):
+        fake = types.ModuleType("db_phase1_shadow")
+        def fail(*args, **kwargs):
+            raise RuntimeError("forced db fail")
+        fake.persist_shadow_payload = fail
+        with TemporaryDirectory() as tmp, patch.dict(
+            sys.modules, {"db_phase1_shadow": fake}
+        ), patch.object(
+            bridge, "canonicalize_lviv", return_value=self.canonical_payload
+        ):
+            diagnostic = Path(tmp) / "phase1.json"
+            env = {
+                **FAKE_ENV,
+                "PHASE1_DB_SHADOW_FAILURE_POLICY": "fail_open",
+                "PHASE1_DB_SHADOW_DIAGNOSTIC": str(diagnostic),
+            }
+            result = bridge.persist_lviv_shadow_if_enabled(
+                lviv_fetched_this_run=True,
+                vadimkin_observations=self.vad_obs,
+                ukrainealarm_observations=self.ua_obs,
+                checkpoint_state=self.ua_fixture["checkpoint_state"],
+                env=env,
+            )
+            self.assertIsNone(result)
+            payload = json.loads(diagnostic.read_text(encoding="utf-8"))
+            self.assertEqual("failed", payload["status"])
+            self.assertEqual("fail_open", payload["failure_policy"])
+            self.assertEqual("RuntimeError", payload["error_type"])
+            self.assertFalse(payload["credentials_exposed"])
+
+    def test_shadow_fail_closed_remains_default_and_propagates(self):
+        fake = types.ModuleType("db_phase1_shadow")
+        def fail(*args, **kwargs):
+            raise RuntimeError("db fail closed")
+        fake.persist_shadow_payload = fail
+        with patch.dict(sys.modules, {"db_phase1_shadow": fake}), patch.object(
+            bridge, "canonicalize_lviv", return_value=self.canonical_payload
+        ):
+            with self.assertRaisesRegex(RuntimeError, "db fail closed"):
+                bridge.persist_lviv_shadow_if_enabled(
+                    lviv_fetched_this_run=True,
+                    vadimkin_observations=self.vad_obs,
+                    ukrainealarm_observations=self.ua_obs,
+                    checkpoint_state=self.ua_fixture["checkpoint_state"],
+                    env=FAKE_ENV,
+                )
+
+    def test_shadow_failure_diagnostic_redacts_database_url_password_and_tokens(self):
+        with TemporaryDirectory() as tmp:
+            diagnostic = Path(tmp) / "phase1.json"
+            fake_url = "postgresql://user:super-secret-password@example.test/neondb"
+            fake_api_key = "fake-neon-api-key"
+            fake_ua_token = "fake-ukrainealarm-token"
+            env = {
+                **FAKE_ENV,
+                "PHASE1_DATABASE_URL": fake_url,
+                "NEON_API_KEY": fake_api_key,
+                "UKRAINEALARM_API_TOKEN": fake_ua_token,
+                "PHASE1_DB_SHADOW_FAILURE_POLICY": "fail_open",
+                "PHASE1_DB_SHADOW_DIAGNOSTIC": str(diagnostic),
+            }
+            exc = RuntimeError(
+                f"connect failed {fake_url} {fake_api_key} {fake_ua_token}"
+            )
+            payload = bridge._shadow_failure_diagnostic(exc, env, "fail_open")
+            bridge._write_shadow_diagnostic(payload, env)
+            raw = diagnostic.read_text(encoding="utf-8")
+            self.assertNotIn(fake_url, raw)
+            self.assertNotIn("super-secret-password", raw)
+            self.assertNotIn(fake_api_key, raw)
+            self.assertNotIn(fake_ua_token, raw)
+            self.assertIn("[REDACTED]", raw)
+
+    def test_invalid_failure_policy_is_rejected(self):
+        with self.assertRaisesRegex(RuntimeError, "must be one of"):
+            bridge.phase1_db_shadow_failure_policy(
+                {"PHASE1_DB_SHADOW_FAILURE_POLICY": "ignore_everything"}
+            )
 
     def test_real_bridge_uses_phase1_proxy_fetch_once(self):
         source = inspect.getsource(bridge.main)
