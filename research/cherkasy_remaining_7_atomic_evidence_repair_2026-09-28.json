@@ -1,0 +1,218 @@
+{
+  "schema_version": 1,
+  "kind": "cherkasy_remaining_7_atomic_evidence_repair_audit",
+  "generated_date": "2026-09-28",
+  "repository": "olegbalakin-cmyk/kyiv-air-alerts-grafana",
+  "branch": "multicity-wip-2026-09-16",
+  "authoritative_starting_head": "5bb5a95c3cfba1d0b82707ec55a59fc33d40a049",
+  "inventory": {
+    "commit": "5bb5a95c3cfba1d0b82707ec55a59fc33d40a049",
+    "artifact": "research/cherkasy_remaining_8_manual_resolution_inventory_2026-09-28.json",
+    "artifact_blob": "65011824e51579d0c06ed0c3529f793cc6896f1c"
+  },
+  "evidence": {
+    "path": "kyiv-air-alerts-grafana/data/explosion_research/cherkasy/final_evidence.json",
+    "before_blob": "35cfcf87981edf5863784b9430007d98177fce6e",
+    "after_blob": "433b901ec49279fb865294a7c1e9a5328cf1b46a",
+    "repair_commit": "4e7ec2fa407b49e57849680ae5335a71e49da625",
+    "repaired_episode_ids": [
+      "1211cf659b50b8f60a118e85",
+      "2e52d5a124fddfe369687035",
+      "3a8c3baa43001ec2f94b53c8",
+      "58624e812ef70a85166d09c6",
+      "7dc902b97fda7ea1d146c907",
+      "f0b75832ea028fd6b1b5ff75",
+      "f732ee21dee348389b0971cd"
+    ],
+    "deliberately_untouched_episode_id": "f57f2f50c537719982254887",
+    "untouched_episode_verified_identical": true,
+    "repair_commit_changed_files": [
+      "kyiv-air-alerts-grafana/data/explosion_research/cherkasy/final_evidence.json"
+    ],
+    "mutation_statement": "One evidence-only commit modified exactly seven target evidence rows. No classifier, replay, DB, production UX, live monitor state, or campaign branch was modified."
+  },
+  "accepted_decisions": {
+    "1211cf659b50b8f60a118e85": {
+      "decision": "RECOVERABLE_STRICT",
+      "event_type": "air_defense_action"
+    },
+    "2e52d5a124fddfe369687035": {
+      "decision": "RECOVERABLE_STRICT",
+      "event_type": "air_defense_action"
+    },
+    "3a8c3baa43001ec2f94b53c8": {
+      "decision": "RECOVERABLE_SENSITIVITY",
+      "event_type": "explosion",
+      "strict_gate": "STRICT_TEMPORAL_BINDING"
+    },
+    "58624e812ef70a85166d09c6": {
+      "decision": "RECOVERABLE_STRICT",
+      "event_type": "explosion"
+    },
+    "7dc902b97fda7ea1d146c907": {
+      "decision": "RECOVERABLE_STRICT",
+      "event_type": "explosion"
+    },
+    "f0b75832ea028fd6b1b5ff75": {
+      "decision": "RECOVERABLE_STRICT",
+      "event_type": "explosion"
+    },
+    "f732ee21dee348389b0971cd": {
+      "decision": "RECOVERABLE_STRICT",
+      "event_type": "explosion"
+    },
+    "f57f2f50c537719982254887": {
+      "decision": "REMAINS_AMBIGUOUS",
+      "event_type": null
+    }
+  },
+  "replay": {
+    "before": {
+      "run_id": 36441111925,
+      "input_head": "0a4fc02e3548fc054f607109087b8e790cfaa66c",
+      "denominator": 1548,
+      "strict": 51,
+      "sensitivity": 51,
+      "qa": 8,
+      "qa_episode_ids": [
+        "1211cf659b50b8f60a118e85",
+        "2e52d5a124fddfe369687035",
+        "3a8c3baa43001ec2f94b53c8",
+        "58624e812ef70a85166d09c6",
+        "7dc902b97fda7ea1d146c907",
+        "f0b75832ea028fd6b1b5ff75",
+        "f57f2f50c537719982254887",
+        "f732ee21dee348389b0971cd"
+      ]
+    },
+    "after": {
+      "run_id": 36449367569,
+      "input_head": "4e7ec2fa407b49e57849680ae5335a71e49da625",
+      "workflow_conclusion": "success",
+      "cherkasy_artifact_id": 10981922761,
+      "denominator": 1548,
+      "strict": 54,
+      "sensitivity": 57,
+      "qa": 3,
+      "qa_episode_ids": [
+        "7dc902b97fda7ea1d146c907",
+        "f0b75832ea028fd6b1b5ff75",
+        "f57f2f50c537719982254887"
+      ],
+      "protected_files_unchanged": true,
+      "source_validation_errors": []
+    },
+    "expected_by_task": {
+      "denominator": 1548,
+      "strict": 57,
+      "sensitivity": 58,
+      "qa": 1,
+      "qa_episode_ids": [
+        "f57f2f50c537719982254887"
+      ]
+    },
+    "expected_contract_met": false
+  },
+  "actual_target_outcomes": {
+    "1211cf659b50b8f60a118e85": {
+      "replayed_status": "SENSITIVITY",
+      "accepted_status": "STRICT",
+      "match": false,
+      "blocking_reason": "NO_STRICT_TEMPORAL_BINDING"
+    },
+    "2e52d5a124fddfe369687035": {
+      "replayed_status": "SENSITIVITY",
+      "accepted_status": "STRICT",
+      "match": false,
+      "blocking_reason": "NO_STRICT_TEMPORAL_BINDING"
+    },
+    "3a8c3baa43001ec2f94b53c8": {
+      "replayed_status": "SENSITIVITY",
+      "accepted_status": "SENSITIVITY_ONLY",
+      "match": true,
+      "strict_block_preserved": "NO_STRICT_TEMPORAL_BINDING"
+    },
+    "58624e812ef70a85166d09c6": {
+      "replayed_status": "STRICT",
+      "accepted_status": "STRICT",
+      "match": true
+    },
+    "7dc902b97fda7ea1d146c907": {
+      "replayed_status": "AMBIGUOUS",
+      "accepted_status": "STRICT",
+      "match": false,
+      "blocking_reason": "AIR_CONTEXT_NOT_LINKED_TO_EVENT"
+    },
+    "f0b75832ea028fd6b1b5ff75": {
+      "replayed_status": "STRICT",
+      "accepted_status": "STRICT",
+      "match": true,
+      "reconciliation_category": "SENSITIVITY_TO_STRICT"
+    },
+    "f57f2f50c537719982254887": {
+      "replayed_status": "AMBIGUOUS",
+      "accepted_status": "REMAINS_AMBIGUOUS",
+      "match": true,
+      "untouched": true
+    },
+    "f732ee21dee348389b0971cd": {
+      "replayed_status": "STRICT",
+      "accepted_status": "STRICT",
+      "match": true
+    }
+  },
+  "invariants": {
+    "monitor_blob_before": "b55fe2ed082958917c74f95bca2fd6bc137bcaae",
+    "monitor_blob_after": "b55fe2ed082958917c74f95bca2fd6bc137bcaae",
+    "monitor_unchanged": true,
+    "replay_blob_before": "376e7946356bfcafae92ca41e0d405523d4e9377",
+    "replay_blob_after": "376e7946356bfcafae92ca41e0d405523d4e9377",
+    "replay_unchanged": true,
+    "denominator_unchanged": true,
+    "non_target_qa_appeared": false,
+    "f57_untouched_and_qa": true,
+    "three_a8_sensitivity_only": true
+  },
+  "diagnosis": {
+    "stop_rule_applied": true,
+    "summary": "The requested 1548 / 57 strict / 58 sensitivity / QA 1 state did not materialize with unchanged classifier/replay code, so no further classifier or replay mutation was attempted.",
+    "blockers": [
+      {
+        "episodes": [
+          "1211cf659b50b8f60a118e85",
+          "2e52d5a124fddfe369687035"
+        ],
+        "finding": "The evidence now establishes exact-city air_defense_action, aerial context and same-attack context, but the unchanged classifier returns NO_STRICT_TEMPORAL_BINDING for these historical PPO clock observations."
+      },
+      {
+        "episodes": [
+          "7dc902b97fda7ea1d146c907"
+        ],
+        "finding": "The unchanged classifier retains AIR_CONTEXT_NOT_LINKED_TO_EVENT. The retained event-local wording says the Cherkasy explosion occurred during the Russian attack, while the separate UAV/interception context is not safely composed under the no-aggregate-borrowing rule."
+      },
+      {
+        "episodes": [
+          "f0b75832ea028fd6b1b5ff75"
+        ],
+        "finding": "The episode correctly replays STRICT, but because its frozen evidence status is SENSITIVITY, the replay categorizes it as SENSITIVITY_TO_STRICT and therefore includes it in changed/QA reconciliation."
+      }
+    ],
+    "contract_incompatibility": "The canonical replay defines QA_REQUIRED from any changed frozen status. Therefore a frozen SENSITIVITY episode that legitimately becomes STRICT remains a changed reconciliation item. With unchanged replay semantics, the task's simultaneous requirement for SENSITIVITY→STRICT promotions and QA=1 cannot be satisfied solely by appending evidence while preserving frozen baseline semantics."
+  },
+  "workflow_side_effect": {
+    "commit": "ce31adf95a261b96ca556b4ed1e567cd7d96a970",
+    "message": "Update historical replay status",
+    "path": "research/historical_replay_status_current.json",
+    "note": "Automatically generated by the canonical historical replay orchestrator after the evidence push; not a manual implementation mutation."
+  },
+  "regression_checks": {
+    "denominator_exact_1548": true,
+    "no_previously_positive_loss": false,
+    "note_on_positive_loss": "Frozen strict episode 7dc902b97fda7ea1d146c907 still replays AMBIGUOUS, so the 'no previously positive episode is lost' gate does not pass.",
+    "no_non_target_qa_episode": true,
+    "only_target_episode_reconciliation_changes": true,
+    "expected_remaining_qa_set_met": false,
+    "expected_counts_met": false
+  },
+  "final_verdict": "CHERKASY REMAINING-7 EVIDENCE REPAIR STOPPED — EXPECTED REPLAY CONTRACT NOT MET; ACTUAL 1548 / 54 STRICT / 57 SENSITIVITY / QA 3"
+}
