@@ -1,0 +1,1033 @@
+{
+  "schema_version": 1,
+  "kind": "chernihiv_kropyvnytskyi_review_role_adapter_proof",
+  "authoritative_base_head": "2c2e46ceaada64c2e3a109872c30640a6e1ad731",
+  "proof_branch": "chernihiv-kropyvnytskyi-review-role-proof-2026-09-28",
+  "implementation_commit": "dd3d14149a1797ceaa3352397a78d388fe016727",
+  "proof_execution_commit": "f682949b1f0075a8eea77b09bf996b313e3af626",
+  "proof_run_id": 36477426380,
+  "proof_run_artifact_id": 10994325382,
+  "replay_implementation_blob_before": "11ccbe36927398ecfb276a4a98ddada564eef375",
+  "replay_implementation_blob_after": "99b13318a3bd53013a798bd4c66c87c4aed6f45b",
+  "exact_files_changed_before_artifact": [
+    ".github/workflows/proof-chernihiv-kropyvnytskyi-review-role.yml",
+    "kyiv-air-alerts-grafana/scripts/replay_explosion_history.py",
+    "kyiv-air-alerts-grafana/tests/test_historical_replay_chernihiv_kropyvnytskyi_roles.py"
+  ],
+  "retained_role_field_inventory": {
+    "chernihiv": [
+      "evidence",
+      "decision",
+      "decision_basis",
+      "basis",
+      "event_time/event_time_kyiv",
+      "matched_episode_start/alert_start"
+    ],
+    "kropyvnytskyi": [
+      "evidence",
+      "basis=exact_city_during_alert",
+      "event_time",
+      "matched_episode_start"
+    ]
+  },
+  "city_adapter_contract": {
+    "chernihiv": "Translate only explicit legacy reviewed exact-city/aerial/episode-link markers; recognize explicit retained English exact-city wording such as 'inside Chernihiv' only under an existing reviewed episode-relation marker; no free-text-only activation.",
+    "kropyvnytskyi": "Translate only frozen reviewed strict rows carrying basis=exact_city_during_alert; an actual attack-event fact must still exist in retained evidence."
+  },
+  "tests": {
+    "focused_pytest": "PASS (13 tests)",
+    "replay_self_test": "PASS",
+    "monitor_self_test": "PASS"
+  },
+  "cities": {
+    "chernihiv": {
+      "before": {
+        "strict": 27,
+        "sensitivity": 29,
+        "qa": 14
+      },
+      "after": {
+        "strict": 39,
+        "sensitivity": 43,
+        "qa": 0
+      },
+      "changed_episode_ids": [
+        "0483bba2c3791c1b2310dfaf",
+        "14d7e5637d1f218de1ae8002",
+        "17f79fc83c1eaea371d6b91a",
+        "3543ea2e5d0524245c127532",
+        "4857a32d3d6a7dd1517a8c6b",
+        "77aef1f8a06115c16dcb48b6",
+        "9d6928637659a3ee296f597e",
+        "a59d4d956d69f768bd30d0a3",
+        "abdf8f34f0fd3e977b4c307a",
+        "d1cda733415fbdb51f14ec7b",
+        "d3a50c39a6671ff7875449cc",
+        "db88221ad0bcd0a8966cc220",
+        "e10622290b978fb9e48394ee",
+        "ed0b021f3af2e915fccc5add"
+      ],
+      "unexpected_episode_ids": [],
+      "unresolved_qa_ids": [],
+      "denominator_before": 1676,
+      "denominator_after": 1676,
+      "source_status_before": "READY",
+      "source_status_after": "READY",
+      "unbound_counted_evidence_before": 0,
+      "unbound_counted_evidence_after": 0,
+      "case_audit": [
+        {
+          "episode_id": "0483bba2c3791c1b2310dfaf",
+          "prior_replay_classification": "AMBIGUOUS",
+          "missing_role_subtype": "MISSING_REVIEWED_ATTACK_CONTEXT_ROLE",
+          "retained_reviewed_fields": [
+            "О 14:31 у Чернігові пролунали вибухи під час російської атаки на об'єкти критичної інфраструктури. — strict: exact_city + aerial_war + time_match"
+          ],
+          "roles_restored": [
+            "exact_city",
+            "event_fact",
+            "attack_context",
+            "same_attack",
+            "temporal"
+          ],
+          "resulting_replay_classification": "STRICT",
+          "leaves_qa": true,
+          "reason_if_remains_qa": null
+        },
+        {
+          "episode_id": "14d7e5637d1f218de1ae8002",
+          "prior_replay_classification": "AMBIGUOUS",
+          "missing_role_subtype": "MISSING_REVIEWED_SAME_ATTACK_LINKAGE",
+          "retained_reviewed_fields": [
+            "У Чернігові о 11:12 було чутно вибух; тривогу в Чернігівському районі оголосили о 10:59, ПС повідомляли про реактивний БпЛА РФ курсом на місто. — strict: exact_city+aerial_context+matched_alert"
+          ],
+          "roles_restored": [
+            "exact_city",
+            "event_fact",
+            "attack_context",
+            "same_attack",
+            "temporal"
+          ],
+          "resulting_replay_classification": "STRICT",
+          "leaves_qa": true,
+          "reason_if_remains_qa": null
+        },
+        {
+          "episode_id": "17f79fc83c1eaea371d6b91a",
+          "prior_replay_classification": "AMBIGUOUS",
+          "missing_role_subtype": "MISSING_REVIEWED_ATTACK_CONTEXT_ROLE",
+          "retained_reviewed_fields": [
+            "Близько 05:00 у Чернігові пролунав вибух під час атаки РФ, після удару загорівся приватний будинок. — exact_city_event_time_inside_alert — strict"
+          ],
+          "roles_restored": [
+            "exact_city",
+            "event_fact",
+            "attack_context",
+            "same_attack",
+            "temporal"
+          ],
+          "resulting_replay_classification": "STRICT",
+          "leaves_qa": true,
+          "reason_if_remains_qa": null
+        },
+        {
+          "episode_id": "3543ea2e5d0524245c127532",
+          "prior_replay_classification": "AMBIGUOUS",
+          "missing_role_subtype": "MISSING_REVIEWED_FACT_ROLE_ADAPTER",
+          "retained_reviewed_fields": [
+            "The Chernihiv-district alert was followed by an AFU UAV warning toward Chernihiv and a reported UAV hit on an enterprise in the north of Chernihiv before the all-clear. — strict_exact_city_in_episode"
+          ],
+          "roles_restored": [
+            "exact_city",
+            "event_fact",
+            "attack_context",
+            "same_attack",
+            "temporal"
+          ],
+          "resulting_replay_classification": "STRICT",
+          "leaves_qa": true,
+          "reason_if_remains_qa": null
+        },
+        {
+          "episode_id": "4857a32d3d6a7dd1517a8c6b",
+          "prior_replay_classification": "AMBIGUOUS",
+          "missing_role_subtype": "MISSING_REVIEWED_SAME_ATTACK_LINKAGE",
+          "retained_reviewed_fields": [
+            "Близько 06:30 у Чернігові пролунав вибух; російський БпЛА впав у приватному секторі та спричинив пожежу. — exact_city_event_time_inside_alert — strict"
+          ],
+          "roles_restored": [
+            "exact_city",
+            "event_fact",
+            "attack_context",
+            "same_attack",
+            "temporal"
+          ],
+          "resulting_replay_classification": "STRICT",
+          "leaves_qa": true,
+          "reason_if_remains_qa": null
+        },
+        {
+          "episode_id": "77aef1f8a06115c16dcb48b6",
+          "prior_replay_classification": "AMBIGUOUS",
+          "missing_role_subtype": "MISSING_REVIEWED_SAME_ATTACK_LINKAGE",
+          "retained_reviewed_fields": [
+            "Близько 16:00 у Чернігові пролунали вибухи; поліція підтвердила атаку міста російськими ударними БпЛА. — strict: exact_city + aerial_war + time_match"
+          ],
+          "roles_restored": [
+            "exact_city",
+            "event_fact",
+            "attack_context",
+            "same_attack",
+            "temporal"
+          ],
+          "resulting_replay_classification": "STRICT",
+          "leaves_qa": true,
+          "reason_if_remains_qa": null
+        },
+        {
+          "episode_id": "9d6928637659a3ee296f597e",
+          "prior_replay_classification": "AMBIGUOUS",
+          "missing_role_subtype": "MISSING_REVIEWED_SAME_ATTACK_LINKAGE",
+          "retained_reviewed_fields": [
+            "У Чернігові о 20:30 та 21:30 чули вибухи; міськрада підтвердила падіння російського БпЛА у промисловій зоні міста. — strict: exact_city + aerial_war + time_match; one numerator for one alert episode"
+          ],
+          "roles_restored": [
+            "exact_city",
+            "event_fact",
+            "attack_context",
+            "same_attack",
+            "temporal"
+          ],
+          "resulting_replay_classification": "STRICT",
+          "leaves_qa": true,
+          "reason_if_remains_qa": null
+        },
+        {
+          "episode_id": "a59d4d956d69f768bd30d0a3",
+          "prior_replay_classification": "AMBIGUOUS",
+          "missing_role_subtype": "MISSING_REVIEWED_EVENT_AND_SAME_ATTACK_LINKAGE",
+          "retained_reviewed_fields": [
+            "Увечері 29 листопада БпЛА атакував підприємство в Чернігові; contemporaneous city-council reporting falls within the earlier evening alert episode. — inferred_same_attack — sensitivity_only"
+          ],
+          "roles_restored": [
+            "exact_city",
+            "event_fact",
+            "attack_context",
+            "same_attack",
+            "sensitivity_binding"
+          ],
+          "resulting_replay_classification": "SENSITIVITY",
+          "leaves_qa": true,
+          "reason_if_remains_qa": null
+        },
+        {
+          "episode_id": "abdf8f34f0fd3e977b4c307a",
+          "prior_replay_classification": "AMBIGUOUS",
+          "missing_role_subtype": "MISSING_REVIEWED_FACT_ROLE_ADAPTER",
+          "retained_reviewed_fields": [
+            "A new Chernihiv-district alert is followed by multiple explosions heard in Chernihiv; the same feed later reports Russian strikes on critical infrastructure in the city. — strict_exact_city_in_episode"
+          ],
+          "roles_restored": [
+            "exact_city",
+            "event_fact",
+            "attack_context",
+            "same_attack",
+            "temporal"
+          ],
+          "resulting_replay_classification": "STRICT",
+          "leaves_qa": true,
+          "reason_if_remains_qa": null
+        },
+        {
+          "episode_id": "d1cda733415fbdb51f14ec7b",
+          "prior_replay_classification": "AMBIGUOUS",
+          "missing_role_subtype": "MISSING_REVIEWED_FACT_ROLE_ADAPTER",
+          "retained_reviewed_fields": [
+            "Public Suspilne Chernihiv feed shows a Chernihiv-district alert, then explosions heard in Chernihiv and an AFU warning of UAVs over the north and south of the city, before the all-clear. — strict_exact_city_in_episode"
+          ],
+          "roles_restored": [
+            "exact_city",
+            "event_fact",
+            "attack_context",
+            "same_attack",
+            "temporal"
+          ],
+          "resulting_replay_classification": "STRICT",
+          "leaves_qa": true,
+          "reason_if_remains_qa": null
+        },
+        {
+          "episode_id": "d3a50c39a6671ff7875449cc",
+          "prior_replay_classification": "AMBIGUOUS",
+          "missing_role_subtype": "MISSING_REVIEWED_ATTACK_CONTEXT_ROLE",
+          "retained_reviewed_fields": [
+            "Міськрада фіксує удари в Чернігові орієнтовно о 19:18 по енергооб'єкту та близько 20:30 по багатоповерхівці; обидва в одному alert episode. — exact_city_event_times_inside_one_alert — strict"
+          ],
+          "roles_restored": [
+            "exact_city",
+            "event_fact",
+            "attack_context",
+            "same_attack",
+            "temporal"
+          ],
+          "resulting_replay_classification": "STRICT",
+          "leaves_qa": true,
+          "reason_if_remains_qa": null
+        },
+        {
+          "episode_id": "db88221ad0bcd0a8966cc220",
+          "prior_replay_classification": "AMBIGUOUS",
+          "missing_role_subtype": "MISSING_REVIEWED_FACT_ROLE_ADAPTER",
+          "retained_reviewed_fields": [
+            "During the Chernihiv-district alert, Suspilne correspondents reported repeated explosions in Chernihiv and the MVA said the city was under a mass Russian attack. — strict_exact_city_in_episode_cross_midnight"
+          ],
+          "roles_restored": [
+            "exact_city",
+            "event_fact",
+            "attack_context",
+            "same_attack",
+            "temporal"
+          ],
+          "resulting_replay_classification": "STRICT",
+          "leaves_qa": true,
+          "reason_if_remains_qa": null
+        },
+        {
+          "episode_id": "e10622290b978fb9e48394ee",
+          "prior_replay_classification": "AMBIGUOUS",
+          "missing_role_subtype": "MISSING_REVIEWED_FACT_ROLE_ADAPTER",
+          "retained_reviewed_fields": [
+            "Suspilne reports a morning Russian UAV attack with impacts at two locations inside Chernihiv; the early-morning alert is the only strong same-attack match found, but no exact impact minute or explicit during-alert statement was published. — sensitivity_inferred_same_attack"
+          ],
+          "roles_restored": [
+            "exact_city",
+            "event_fact",
+            "attack_context",
+            "same_attack",
+            "sensitivity_binding"
+          ],
+          "resulting_replay_classification": "SENSITIVITY",
+          "leaves_qa": true,
+          "reason_if_remains_qa": null
+        },
+        {
+          "episode_id": "ed0b021f3af2e915fccc5add",
+          "prior_replay_classification": "AMBIGUOUS",
+          "missing_role_subtype": "MISSING_REVIEWED_ATTACK_CONTEXT_ROLE",
+          "retained_reviewed_fields": [
+            "У Чернігові о 15:11 зафіксували повторне влучання, а о 15:23 — ще один вибух по об'єкту критичної інфраструктури; обидва в одному alert episode. — exact_city_event_times_inside_one_alert — strict"
+          ],
+          "roles_restored": [
+            "exact_city",
+            "event_fact",
+            "attack_context",
+            "same_attack",
+            "temporal"
+          ],
+          "resulting_replay_classification": "STRICT",
+          "leaves_qa": true,
+          "reason_if_remains_qa": null
+        }
+      ]
+    },
+    "kropyvnytskyi": {
+      "before": {
+        "strict": 7,
+        "sensitivity": 7,
+        "qa": 31
+      },
+      "after": {
+        "strict": 38,
+        "sensitivity": 38,
+        "qa": 0
+      },
+      "changed_episode_ids": [
+        "00ad6c30bb112d170ac68fe5",
+        "0481b55aa591f115afc49bef",
+        "0b507481c67b0d09bb794d9f",
+        "0cad05a70f7e43e905d276af",
+        "13f21d766b2c5c76fe022ab9",
+        "146add928101dbe79c72f0ab",
+        "1bc283e46e93cba7c1fa3d08",
+        "232aefdabab9992a7456ff99",
+        "38acb65ed69a0f711e4a77ad",
+        "4d6cad6deeb2f2bab826a7f0",
+        "830cbfcb5c45e5aca54324bb",
+        "88ce0b19de15fc9741297b2a",
+        "8c4ad5a467a032d0025db4c7",
+        "9d37758878651ef0bb875911",
+        "a858697c2e55c3f2656eff96",
+        "af55a0ee4bead940463b60e0",
+        "b3f618909f36a1a3ad17ff28",
+        "c0c0bf3934262742eca6075c",
+        "c79b73775bbbba7d6940155a",
+        "c91c7e98cb870b699ef79061",
+        "cae26af71b8d9d074adf6c40",
+        "d487b4d890da99c61e3058e3",
+        "dc47a7f5d58859794f5ce915",
+        "ddfca937c5d7666365fba73b",
+        "f0fec8c1b200bff5a20f18e2",
+        "f1ecba56286d762e7ff4d518",
+        "f4fc3f63a693a61bf07284d6",
+        "f55204f8b1f41767b27390dc",
+        "f8238f6908f84b02806adda7",
+        "f9d526bbb2ddbe0e7500f0a1",
+        "fd94fa7e314534586d91bc4e"
+      ],
+      "unexpected_episode_ids": [],
+      "unresolved_qa_ids": [],
+      "denominator_before": 1161,
+      "denominator_after": 1161,
+      "source_status_before": "READY",
+      "source_status_after": "READY",
+      "unbound_counted_evidence_before": 0,
+      "unbound_counted_evidence_after": 0,
+      "case_audit": [
+        {
+          "episode_id": "00ad6c30bb112d170ac68fe5",
+          "prior_replay_classification": "AMBIGUOUS",
+          "missing_role_subtype": "MISSING_REVIEWED_FACT_ROLE_ADAPTER",
+          "retained_reviewed_fields": [
+            "Exact-city explosion at 15:55 during the 15:29-16:24 alert; the report places it in the context of the ongoing Russian drone attack. — exact_city_during_alert"
+          ],
+          "roles_restored": [
+            "exact_city",
+            "event_fact",
+            "attack_context",
+            "same_attack",
+            "temporal"
+          ],
+          "resulting_replay_classification": "STRICT",
+          "leaves_qa": true,
+          "reason_if_remains_qa": null
+        },
+        {
+          "episode_id": "0481b55aa591f115afc49bef",
+          "prior_replay_classification": "AMBIGUOUS",
+          "missing_role_subtype": "MISSING_REVIEWED_FACT_ROLE_ADAPTER",
+          "retained_reviewed_fields": [
+            "Exact-city explosion at 17:56 during the 17:44-18:04 alert, two minutes after a reactive-UAV warning toward Kropyvnytskyi. — exact_city_during_alert"
+          ],
+          "roles_restored": [
+            "exact_city",
+            "event_fact",
+            "attack_context",
+            "same_attack",
+            "temporal"
+          ],
+          "resulting_replay_classification": "STRICT",
+          "leaves_qa": true,
+          "reason_if_remains_qa": null
+        },
+        {
+          "episode_id": "0b507481c67b0d09bb794d9f",
+          "prior_replay_classification": "AMBIGUOUS",
+          "missing_role_subtype": "MISSING_REVIEWED_FACT_ROLE_ADAPTER",
+          "retained_reviewed_fields": [
+            "Four exact-city explosions beginning 01:11 occurred during the 00:47-01:33 Kropyvnytskyi-district alert. — exact_city_during_alert"
+          ],
+          "roles_restored": [
+            "exact_city",
+            "event_fact",
+            "attack_context",
+            "same_attack",
+            "temporal"
+          ],
+          "resulting_replay_classification": "STRICT",
+          "leaves_qa": true,
+          "reason_if_remains_qa": null
+        },
+        {
+          "episode_id": "0cad05a70f7e43e905d276af",
+          "prior_replay_classification": "AMBIGUOUS",
+          "missing_role_subtype": "MISSING_REVIEWED_SAME_ATTACK_LINKAGE",
+          "retained_reviewed_fields": [
+            "Перший вибух у Кропивницькому пролунав о 04:35; під час тієї самої тривалої ракетно-дронової тривоги місто неодноразово атакували повітряні цілі. — exact_city_during_alert"
+          ],
+          "roles_restored": [
+            "exact_city",
+            "event_fact",
+            "attack_context",
+            "same_attack",
+            "temporal"
+          ],
+          "resulting_replay_classification": "STRICT",
+          "leaves_qa": true,
+          "reason_if_remains_qa": null
+        },
+        {
+          "episode_id": "13f21d766b2c5c76fe022ab9",
+          "prior_replay_classification": "AMBIGUOUS",
+          "missing_role_subtype": "MISSING_REVIEWED_FACT_ROLE_ADAPTER",
+          "retained_reviewed_fields": [
+            "A second exact-city explosion at 08:05 fell in the separate 07:38-08:21 alert, with another reactive-UAV warning toward Kropyvnytskyi. — exact_city_during_alert"
+          ],
+          "roles_restored": [
+            "exact_city",
+            "event_fact",
+            "attack_context",
+            "same_attack",
+            "temporal"
+          ],
+          "resulting_replay_classification": "STRICT",
+          "leaves_qa": true,
+          "reason_if_remains_qa": null
+        },
+        {
+          "episode_id": "146add928101dbe79c72f0ab",
+          "prior_replay_classification": "AMBIGUOUS",
+          "missing_role_subtype": "MISSING_REVIEWED_SAME_ATTACK_LINKAGE",
+          "retained_reviewed_fields": [
+            "О 02:37 у Кропивницькому було чути вибухи; під час тривоги Повітряні сили попереджали про БпЛА в напрямку міста. — exact_city_during_alert"
+          ],
+          "roles_restored": [
+            "exact_city",
+            "event_fact",
+            "attack_context",
+            "same_attack",
+            "temporal"
+          ],
+          "resulting_replay_classification": "STRICT",
+          "leaves_qa": true,
+          "reason_if_remains_qa": null
+        },
+        {
+          "episode_id": "1bc283e46e93cba7c1fa3d08",
+          "prior_replay_classification": "AMBIGUOUS",
+          "missing_role_subtype": "MISSING_REVIEWED_FACT_ROLE_ADAPTER",
+          "retained_reviewed_fields": [
+            "Exact-city explosion at 23:23 during the alert that began 22:33; the Air Force reported reactive UAVs toward Kropyvnytskyi. — exact_city_during_alert"
+          ],
+          "roles_restored": [
+            "exact_city",
+            "event_fact",
+            "attack_context",
+            "same_attack",
+            "temporal"
+          ],
+          "resulting_replay_classification": "STRICT",
+          "leaves_qa": true,
+          "reason_if_remains_qa": null
+        },
+        {
+          "episode_id": "232aefdabab9992a7456ff99",
+          "prior_replay_classification": "AMBIGUOUS",
+          "missing_role_subtype": "MISSING_REVIEWED_FACT_ROLE_ADAPTER",
+          "retained_reviewed_fields": [
+            "Exact-city explosion at 18:57 during the separate 18:33-19:10 alert, three minutes after a missile warning toward Kropyvnytskyi. — exact_city_during_alert"
+          ],
+          "roles_restored": [
+            "exact_city",
+            "event_fact",
+            "attack_context",
+            "same_attack",
+            "temporal"
+          ],
+          "resulting_replay_classification": "STRICT",
+          "leaves_qa": true,
+          "reason_if_remains_qa": null
+        },
+        {
+          "episode_id": "38acb65ed69a0f711e4a77ad",
+          "prior_replay_classification": "AMBIGUOUS",
+          "missing_role_subtype": "MISSING_REVIEWED_FACT_ROLE_ADAPTER",
+          "retained_reviewed_fields": [
+            "Exact-city explosion at 22:58 explicitly reported during the 22:40-23:09 air alert. — exact_city_during_alert"
+          ],
+          "roles_restored": [
+            "exact_city",
+            "event_fact",
+            "attack_context",
+            "same_attack",
+            "temporal"
+          ],
+          "resulting_replay_classification": "STRICT",
+          "leaves_qa": true,
+          "reason_if_remains_qa": null
+        },
+        {
+          "episode_id": "4d6cad6deeb2f2bab826a7f0",
+          "prior_replay_classification": "AMBIGUOUS",
+          "missing_role_subtype": "MISSING_REVIEWED_FACT_ROLE_ADAPTER",
+          "retained_reviewed_fields": [
+            "Exact-city explosions at 20:46, 21:18 and 21:39 were within one 20:05-23:49 alert during a confirmed Russian reactive-drone attack on the city. — exact_city_during_alert"
+          ],
+          "roles_restored": [
+            "exact_city",
+            "event_fact",
+            "attack_context",
+            "same_attack",
+            "temporal"
+          ],
+          "resulting_replay_classification": "STRICT",
+          "leaves_qa": true,
+          "reason_if_remains_qa": null
+        },
+        {
+          "episode_id": "830cbfcb5c45e5aca54324bb",
+          "prior_replay_classification": "AMBIGUOUS",
+          "missing_role_subtype": "MISSING_REVIEWED_FACT_ROLE_ADAPTER",
+          "retained_reviewed_fields": [
+            "Exact-city explosion at 02:19 during the Kropyvnytskyi-district alert; the same night a confirmed Russian drone attack hit the district. — exact_city_during_alert"
+          ],
+          "roles_restored": [
+            "exact_city",
+            "event_fact",
+            "attack_context",
+            "same_attack",
+            "temporal"
+          ],
+          "resulting_replay_classification": "STRICT",
+          "leaves_qa": true,
+          "reason_if_remains_qa": null
+        },
+        {
+          "episode_id": "88ce0b19de15fc9741297b2a",
+          "prior_replay_classification": "AMBIGUOUS",
+          "missing_role_subtype": "MISSING_REVIEWED_FACT_ROLE_ADAPTER",
+          "retained_reviewed_fields": [
+            "Exact-city explosion at 03:17 occurred in the separate alert that began 02:53, after an Air Force warning about a reactive UAV in the oblast. — exact_city_during_alert"
+          ],
+          "roles_restored": [
+            "exact_city",
+            "event_fact",
+            "attack_context",
+            "same_attack",
+            "temporal"
+          ],
+          "resulting_replay_classification": "STRICT",
+          "leaves_qa": true,
+          "reason_if_remains_qa": null
+        },
+        {
+          "episode_id": "8c4ad5a467a032d0025db4c7",
+          "prior_replay_classification": "AMBIGUOUS",
+          "missing_role_subtype": "MISSING_REVIEWED_FACT_ROLE_ADAPTER",
+          "retained_reviewed_fields": [
+            "Exact-city explosion at 07:27 during the 07:00-07:32 alert after warning of a Russian reactive UAV toward Kropyvnytskyi. — exact_city_during_alert"
+          ],
+          "roles_restored": [
+            "exact_city",
+            "event_fact",
+            "attack_context",
+            "same_attack",
+            "temporal"
+          ],
+          "resulting_replay_classification": "STRICT",
+          "leaves_qa": true,
+          "reason_if_remains_qa": null
+        },
+        {
+          "episode_id": "9d37758878651ef0bb875911",
+          "prior_replay_classification": "AMBIGUOUS",
+          "missing_role_subtype": "MISSING_REVIEWED_FACT_ROLE_ADAPTER",
+          "retained_reviewed_fields": [
+            "Exact-city explosion at 23:30 occurred during the separate alert that began 22:55, marked as drone threat. — exact_city_during_alert"
+          ],
+          "roles_restored": [
+            "exact_city",
+            "event_fact",
+            "attack_context",
+            "same_attack",
+            "temporal"
+          ],
+          "resulting_replay_classification": "STRICT",
+          "leaves_qa": true,
+          "reason_if_remains_qa": null
+        },
+        {
+          "episode_id": "a858697c2e55c3f2656eff96",
+          "prior_replay_classification": "AMBIGUOUS",
+          "missing_role_subtype": "MISSING_REVIEWED_SAME_ATTACK_LINKAGE",
+          "retained_reviewed_fields": [
+            "О 02:43 у Кропивницькому було чути вибух; перед цим Повітряні сили попередили про БпЛА в напрямку міста, а тривога тривала з 00:22. — exact_city_during_alert"
+          ],
+          "roles_restored": [
+            "exact_city",
+            "event_fact",
+            "attack_context",
+            "same_attack",
+            "temporal"
+          ],
+          "resulting_replay_classification": "STRICT",
+          "leaves_qa": true,
+          "reason_if_remains_qa": null
+        },
+        {
+          "episode_id": "af55a0ee4bead940463b60e0",
+          "prior_replay_classification": "AMBIGUOUS",
+          "missing_role_subtype": "MISSING_REVIEWED_FACT_ROLE_ADAPTER",
+          "retained_reviewed_fields": [
+            "Exact-city explosion at 02:42 during the 02:00-02:55 alert, after an Air Force reactive-drone warning toward Kropyvnytskyi. — exact_city_during_alert"
+          ],
+          "roles_restored": [
+            "exact_city",
+            "event_fact",
+            "attack_context",
+            "same_attack",
+            "temporal"
+          ],
+          "resulting_replay_classification": "STRICT",
+          "leaves_qa": true,
+          "reason_if_remains_qa": null
+        },
+        {
+          "episode_id": "b3f618909f36a1a3ad17ff28",
+          "prior_replay_classification": "AMBIGUOUS",
+          "missing_role_subtype": "MISSING_REVIEWED_SAME_ATTACK_LINKAGE",
+          "retained_reviewed_fields": [
+            "О 09:42 у Кропивницькому пролунав вибух; під час тривоги Повітряні сили повідомляли про БпЛА поблизу міста. — exact_city_during_alert"
+          ],
+          "roles_restored": [
+            "exact_city",
+            "event_fact",
+            "attack_context",
+            "same_attack",
+            "temporal"
+          ],
+          "resulting_replay_classification": "STRICT",
+          "leaves_qa": true,
+          "reason_if_remains_qa": null
+        },
+        {
+          "episode_id": "c0c0bf3934262742eca6075c",
+          "prior_replay_classification": "AMBIGUOUS",
+          "missing_role_subtype": "MISSING_REVIEWED_FACT_ROLE_ADAPTER",
+          "retained_reviewed_fields": [
+            "Ten exact-city explosions were heard from 02:30 to 03:30 while the 21:21-05:42 alert was active; missiles/UAVs were reported near Kropyvnytskyi. — exact_city_during_alert"
+          ],
+          "roles_restored": [
+            "exact_city",
+            "event_fact",
+            "attack_context",
+            "same_attack",
+            "temporal"
+          ],
+          "resulting_replay_classification": "STRICT",
+          "leaves_qa": true,
+          "reason_if_remains_qa": null
+        },
+        {
+          "episode_id": "c79b73775bbbba7d6940155a",
+          "prior_replay_classification": "AMBIGUOUS",
+          "missing_role_subtype": "MISSING_REVIEWED_SAME_ATTACK_LINKAGE",
+          "retained_reviewed_fields": [
+            "О 01:17 у Кропивницькому пролунав вибух; перед цим Повітряні сили повідомили про дрони в напрямку міста під час тривоги. — exact_city_during_alert"
+          ],
+          "roles_restored": [
+            "exact_city",
+            "event_fact",
+            "attack_context",
+            "same_attack",
+            "temporal"
+          ],
+          "resulting_replay_classification": "STRICT",
+          "leaves_qa": true,
+          "reason_if_remains_qa": null
+        },
+        {
+          "episode_id": "c91c7e98cb870b699ef79061",
+          "prior_replay_classification": "AMBIGUOUS",
+          "missing_role_subtype": "MISSING_REVIEWED_FACT_ROLE_ADAPTER",
+          "retained_reviewed_fields": [
+            "Exact-city explosion at 19:32 during the 19:09-19:38 alert; the Air Force warned of a UAV moving toward Kropyvnytskyi. — exact_city_during_alert"
+          ],
+          "roles_restored": [
+            "exact_city",
+            "event_fact",
+            "attack_context",
+            "same_attack",
+            "temporal"
+          ],
+          "resulting_replay_classification": "STRICT",
+          "leaves_qa": true,
+          "reason_if_remains_qa": null
+        },
+        {
+          "episode_id": "cae26af71b8d9d074adf6c40",
+          "prior_replay_classification": "AMBIGUOUS",
+          "missing_role_subtype": "MISSING_REVIEWED_FACT_ROLE_ADAPTER",
+          "retained_reviewed_fields": [
+            "More than ten exact-city explosions from 05:55 to 06:18 occurred during the separate 03:56-07:37 alert in a confirmed Russian drone attack on city critical infrastructure. — exact_city_during_alert"
+          ],
+          "roles_restored": [
+            "exact_city",
+            "event_fact",
+            "attack_context",
+            "same_attack",
+            "temporal"
+          ],
+          "resulting_replay_classification": "STRICT",
+          "leaves_qa": true,
+          "reason_if_remains_qa": null
+        },
+        {
+          "episode_id": "d487b4d890da99c61e3058e3",
+          "prior_replay_classification": "AMBIGUOUS",
+          "missing_role_subtype": "MISSING_REVIEWED_FACT_ROLE_ADAPTER",
+          "retained_reviewed_fields": [
+            "Exact-city explosions at 01:29 and 02:10 occurred inside one 21:27-05:13 alert during a confirmed Russian combined air attack. — exact_city_during_alert"
+          ],
+          "roles_restored": [
+            "exact_city",
+            "event_fact",
+            "attack_context",
+            "same_attack",
+            "temporal"
+          ],
+          "resulting_replay_classification": "STRICT",
+          "leaves_qa": true,
+          "reason_if_remains_qa": null
+        },
+        {
+          "episode_id": "dc47a7f5d58859794f5ce915",
+          "prior_replay_classification": "AMBIGUOUS",
+          "missing_role_subtype": "MISSING_REVIEWED_FACT_ROLE_ADAPTER",
+          "retained_reviewed_fields": [
+            "Exact-city explosion at 16:38 during the 16:18-22:15 alert; a Russian reactive drone struck central Kropyvnytskyi (a second explosion at 19:54 was in the same episode). — exact_city_during_alert"
+          ],
+          "roles_restored": [
+            "exact_city",
+            "event_fact",
+            "attack_context",
+            "same_attack",
+            "temporal"
+          ],
+          "resulting_replay_classification": "STRICT",
+          "leaves_qa": true,
+          "reason_if_remains_qa": null
+        },
+        {
+          "episode_id": "ddfca937c5d7666365fba73b",
+          "prior_replay_classification": "AMBIGUOUS",
+          "missing_role_subtype": "MISSING_REVIEWED_FACT_ROLE_ADAPTER",
+          "retained_reviewed_fields": [
+            "Seven exact-city explosions from 14:58 to 15:33 occurred during one alert after missile warnings specifically toward Kropyvnytskyi. — exact_city_during_alert"
+          ],
+          "roles_restored": [
+            "exact_city",
+            "event_fact",
+            "attack_context",
+            "same_attack",
+            "temporal"
+          ],
+          "resulting_replay_classification": "STRICT",
+          "leaves_qa": true,
+          "reason_if_remains_qa": null
+        },
+        {
+          "episode_id": "f0fec8c1b200bff5a20f18e2",
+          "prior_replay_classification": "AMBIGUOUS",
+          "missing_role_subtype": "MISSING_REVIEWED_FACT_ROLE_ADAPTER",
+          "retained_reviewed_fields": [
+            "Exact-city explosion at 22:06 and a later series at 22:36 occurred in the same alert; a Russian drone strike caused a fire at a city enterprise. — exact_city_during_alert"
+          ],
+          "roles_restored": [
+            "exact_city",
+            "event_fact",
+            "attack_context",
+            "same_attack",
+            "temporal"
+          ],
+          "resulting_replay_classification": "STRICT",
+          "leaves_qa": true,
+          "reason_if_remains_qa": null
+        },
+        {
+          "episode_id": "f1ecba56286d762e7ff4d518",
+          "prior_replay_classification": "AMBIGUOUS",
+          "missing_role_subtype": "MISSING_REVIEWED_FACT_ROLE_ADAPTER",
+          "retained_reviewed_fields": [
+            "Exact-city explosion at 16:18 during the long 06:46-16:42 alert, after strike- and reactive-drone warnings toward Kropyvnytskyi. — exact_city_during_alert"
+          ],
+          "roles_restored": [
+            "exact_city",
+            "event_fact",
+            "attack_context",
+            "same_attack",
+            "temporal"
+          ],
+          "resulting_replay_classification": "STRICT",
+          "leaves_qa": true,
+          "reason_if_remains_qa": null
+        },
+        {
+          "episode_id": "f4fc3f63a693a61bf07284d6",
+          "prior_replay_classification": "AMBIGUOUS",
+          "missing_role_subtype": "MISSING_REVIEWED_FACT_ROLE_ADAPTER",
+          "retained_reviewed_fields": [
+            "Exact-city explosions at 09:33 and 09:54 occurred during the 08:46-10:21 Kropyvnytskyi-district alert under drone threat. — exact_city_during_alert"
+          ],
+          "roles_restored": [
+            "exact_city",
+            "event_fact",
+            "attack_context",
+            "same_attack",
+            "temporal"
+          ],
+          "resulting_replay_classification": "STRICT",
+          "leaves_qa": true,
+          "reason_if_remains_qa": null
+        },
+        {
+          "episode_id": "f55204f8b1f41767b27390dc",
+          "prior_replay_classification": "AMBIGUOUS",
+          "missing_role_subtype": "MISSING_REVIEWED_FACT_ROLE_ADAPTER",
+          "retained_reviewed_fields": [
+            "Exact-city explosion at 22:45 during the 22:22-23:34 alert, two minutes after the Air Force reported a UAV toward Kropyvnytskyi. — exact_city_during_alert"
+          ],
+          "roles_restored": [
+            "exact_city",
+            "event_fact",
+            "attack_context",
+            "same_attack",
+            "temporal"
+          ],
+          "resulting_replay_classification": "STRICT",
+          "leaves_qa": true,
+          "reason_if_remains_qa": null
+        },
+        {
+          "episode_id": "f8238f6908f84b02806adda7",
+          "prior_replay_classification": "AMBIGUOUS",
+          "missing_role_subtype": "MISSING_REVIEWED_FACT_ROLE_ADAPTER",
+          "retained_reviewed_fields": [
+            "Exact-city explosions at 21:08 and 21:35 occurred in the 20:30-21:38 alert; a Russian drone hit Victory Park in Kropyvnytskyi. — exact_city_during_alert"
+          ],
+          "roles_restored": [
+            "exact_city",
+            "event_fact",
+            "attack_context",
+            "same_attack",
+            "temporal"
+          ],
+          "resulting_replay_classification": "STRICT",
+          "leaves_qa": true,
+          "reason_if_remains_qa": null
+        },
+        {
+          "episode_id": "f9d526bbb2ddbe0e7500f0a1",
+          "prior_replay_classification": "AMBIGUOUS",
+          "missing_role_subtype": "MISSING_REVIEWED_FACT_ROLE_ADAPTER",
+          "retained_reviewed_fields": [
+            "Exact-city explosion at about 10:00 during the 09:12-11:23 alert, immediately after an Air Force warning about Banderol munitions on/past Kropyvnytskyi. — exact_city_during_alert"
+          ],
+          "roles_restored": [
+            "exact_city",
+            "event_fact",
+            "attack_context",
+            "same_attack",
+            "temporal"
+          ],
+          "resulting_replay_classification": "STRICT",
+          "leaves_qa": true,
+          "reason_if_remains_qa": null
+        },
+        {
+          "episode_id": "fd94fa7e314534586d91bc4e",
+          "prior_replay_classification": "AMBIGUOUS",
+          "missing_role_subtype": "MISSING_REVIEWED_FACT_ROLE_ADAPTER",
+          "retained_reviewed_fields": [
+            "Exact-city explosion at 11:59 occurred during the separate 11:41-12:08 Kropyvnytskyi-district alert, also classified as drone threat. — exact_city_during_alert"
+          ],
+          "roles_restored": [
+            "exact_city",
+            "event_fact",
+            "attack_context",
+            "same_attack",
+            "temporal"
+          ],
+          "resulting_replay_classification": "STRICT",
+          "leaves_qa": true,
+          "reason_if_remains_qa": null
+        }
+      ]
+    }
+  },
+  "resolved_qa_cases": 45,
+  "expected_qa_cases": 45,
+  "unexpected_delta_audit": {
+    "pass": true,
+    "failures": []
+  },
+  "clean_city_regressions": {
+    "lviv": {
+      "before": {
+        "strict": 12,
+        "sensitivity": 12,
+        "qa": 0
+      },
+      "after": {
+        "strict": 12,
+        "sensitivity": 12,
+        "qa": 0
+      },
+      "equal": true
+    },
+    "sevastopol": {
+      "before": {
+        "strict": 38,
+        "sensitivity": 55,
+        "qa": 0
+      },
+      "after": {
+        "strict": 38,
+        "sensitivity": 55,
+        "qa": 0
+      },
+      "equal": true
+    },
+    "sumy": {
+      "before": {
+        "strict": 204,
+        "sensitivity": 238,
+        "qa": 0
+      },
+      "after": {
+        "strict": 204,
+        "sensitivity": 238,
+        "qa": 0
+      },
+      "equal": true
+    },
+    "cherkasy": {
+      "before": {
+        "strict": 57,
+        "sensitivity": 58,
+        "qa": 1
+      },
+      "after": {
+        "strict": 57,
+        "sensitivity": 58,
+        "qa": 1
+      },
+      "equal": true
+    }
+  },
+  "denominator_source_preflight_regression": {
+    "chernihiv": {
+      "denominator": "1676/1676",
+      "source_preflight": "READY",
+      "unbound_counted_evidence": 0
+    },
+    "kropyvnytskyi": {
+      "denominator": "1161/1161",
+      "source_preflight": "READY",
+      "unbound_counted_evidence": 0
+    }
+  },
+  "protected_state_audit": {
+    "historical_evidence_modified": false,
+    "source_slices_modified": false,
+    "canonical_alert_corpus_modified": false,
+    "audited_baseline_modified": false,
+    "live_monitor_modified": false,
+    "casualty_system_modified": false,
+    "db_neon_touched": false,
+    "site_prod_touched": false,
+    "main_touched": false,
+    "campaign_branch_touched": false,
+    "unexpected_paths": []
+  },
+  "verdict": "CHERNIHIV + KROPYVNYTSKYI REVIEW-ROLE ADAPTER PROVEN — 45 SYSTEMATIC QA CASES RESOLVED — READY FOR ATOMIC APPLY"
+}
