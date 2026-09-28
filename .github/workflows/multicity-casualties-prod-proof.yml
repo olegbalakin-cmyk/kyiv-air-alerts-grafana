@@ -34,6 +34,15 @@ jobs:
         working-directory: kyiv-air-alerts-grafana
         run: pip install -r requirements.txt
 
+      - name: Verify fresh production base and package pristine local-runtime input
+        run: |
+          git fetch origin site-prod --depth=1
+          SITE_PROD_HEAD="$(git rev-parse origin/site-prod)"
+          PROOF_HEAD="$(git rev-parse HEAD)"
+          test "$SITE_PROD_HEAD" = "d5482d2976c29bec2c31ab6c843a2cdc1cfe1cad"
+          printf '{"site_prod_head":"%s","proof_head":"%s"}\n' "$SITE_PROD_HEAD" "$PROOF_HEAD" > /tmp/multicity-runtime-provenance.json
+          tar -czf /tmp/multicity-casualty-runtime-input.tgz kyiv-air-alerts-grafana
+
       - name: Snapshot production-equivalent input
         run: cp kyiv-air-alerts-grafana/data/dashboard_data.json /tmp/dashboard_data_before_casualties.json
 
@@ -112,4 +121,13 @@ jobs:
           path: |
             /tmp/multicity-casualty-proof-result.json
             /tmp/casualty-proof-test.json
+          retention-days: 30
+
+      - name: Upload pristine isolated runtime input
+        uses: actions/upload-artifact@v4
+        with:
+          name: multicity-casualty-runtime-input
+          path: |
+            /tmp/multicity-casualty-runtime-input.tgz
+            /tmp/multicity-runtime-provenance.json
           retention-days: 30
