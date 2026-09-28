@@ -1,0 +1,1075 @@
+{
+  "schema_version": "cherkasy-systematic-fix-atomic-apply-v1",
+  "verdict": "CHERKASY SYSTEMATIC FIXES APPLIED — QA 30→10 CLEAN",
+  "repository": "olegbalakin-cmyk/kyiv-air-alerts-grafana",
+  "authoritative_branch": "multicity-wip-2026-09-16",
+  "starting_head": "c711e7b853d7265c23e5a0a50daae9bf4a03a880",
+  "inventory_commit": "f41d2a2a7d267d6b41579724281258212ab26cd1",
+  "proof_code_commit": "86bad4ca780aab752b251c3da1bd5661376c8e2c",
+  "proof_artifact_commit": "7149333c2f00ebc2189f97773320b425d9637ebd",
+  "preflight_run_id": 36399220941,
+  "preflight_note": "Substantive checks all passed; workflow conclusion was failure only because a final git-status check rejected runtime-generated untracked files. Tracked/protected replay state was clean.",
+  "pre_replay_state": {
+    "denominator_expected": 1548,
+    "denominator_reconstructed": 1548,
+    "strict": 29,
+    "sensitivity": 29,
+    "QA": 30,
+    "errors": []
+  },
+  "pre_QA_ids": [
+    "1211cf659b50b8f60a118e85",
+    "2e52d5a124fddfe369687035",
+    "3a8c3baa43001ec2f94b53c8",
+    "4dcfd4e2f9d8ed59c0d9cbdc",
+    "55fe7b2b2c6d38b7222a6c12",
+    "58624e812ef70a85166d09c6",
+    "742487e7882ef7e9e54a1409",
+    "750530dec9a40c82528122d2",
+    "76adf73a290c475b221ed5e3",
+    "7dc902b97fda7ea1d146c907",
+    "89154a5cff1beec27948012a",
+    "8e9fc0a92a8374d44f1e09c4",
+    "99e50f8c16d1cd74340dc32d",
+    "a6d4f1aaf5941686c7b8eb57",
+    "b67b490bdd33c079a5690d04",
+    "b7cd4e95db5a5b0e1baa612c",
+    "bc42010683ba744c2fdccd12",
+    "bc60b5c3fb6b4c8e7ec8db45",
+    "be3bc05f86b83b8e69b626ce",
+    "c1cb52e1672fd669808bc5c8",
+    "d6046c49723be6301d7ef070",
+    "d6c4c1c34d4acd4582754133",
+    "d74a9f0b1416462270803b62",
+    "db523b0bfab122b1d6106b40",
+    "e2dac3d08930c88ed3d2f6c7",
+    "f0b75832ea028fd6b1b5ff75",
+    "f52595d4c5235cc5564dcde9",
+    "f57f2f50c537719982254887",
+    "f732ee21dee348389b0971cd",
+    "fdb6569e1702843e0ef54e9f"
+  ],
+  "ported_files": [
+    "kyiv-air-alerts-grafana/scripts/replay_explosion_history.py",
+    "kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py",
+    "kyiv-air-alerts-grafana/tests/test_historical_replay_cherkasy_roles.py"
+  ],
+  "implementation_diff_summary": {
+    "files_changed": 3,
+    "replay_explosion_history": {
+      "additions": 164,
+      "deletions": 1,
+      "blob_before": "01102db8dc2a2f685213fca52db03b946c5ff621",
+      "blob_after": "376e7946356bfcafae92ca41e0d405523d4e9377"
+    },
+    "monitor_explosion_candidates": {
+      "additions": 20,
+      "deletions": 1,
+      "blob_before": "eefd63aeebc17347b750f61115842be6c53a79da",
+      "blob_after": "a0ed9dcaedd86d2fbd71d32065ffa52acbae29aa"
+    },
+    "test_historical_replay_cherkasy_roles": {
+      "additions": 109,
+      "deletions": 0,
+      "blob_before": null,
+      "blob_after": "26fd9b71d386c5cd28991fcbfc2f710a7de20cb6"
+    },
+    "proof_only_workflow_ported": false,
+    "evidence_changed": false
+  },
+  "implementation_commit": "9410b167eb234b9e8f951149580355c5c1e371bb",
+  "tests": {
+    "pre_commit_validation_run_id": 36399441231,
+    "result": "PASS",
+    "focused_tests_passed": 27,
+    "replay_helper_self_test": "PASS",
+    "monitor_self_test": "PASS",
+    "required_controls": {
+      "reviewed_role_positive": "PASS",
+      "reviewed_role_absence_negative": "PASS",
+      "explicit_reviewed_same_attack_positive": "PASS",
+      "article_cooccurrence_negative": "PASS",
+      "cherkasy_genitive_positive": "PASS",
+      "regional_false_positive_negatives": "PASS",
+      "mandatory_ambiguity_controls": "PASS",
+      "no_generic_cherkas_alias_behavior": "PASS"
+    }
+  },
+  "post_replay_run_id": 36399634016,
+  "post_replay_state": {
+    "denominator_expected": 1548,
+    "denominator_reconstructed": 1548,
+    "strict": 49,
+    "sensitivity": 49,
+    "QA": 10,
+    "errors": [],
+    "protected_files_unchanged": true
+  },
+  "systematic_target_ids": [
+    "4dcfd4e2f9d8ed59c0d9cbdc",
+    "55fe7b2b2c6d38b7222a6c12",
+    "742487e7882ef7e9e54a1409",
+    "750530dec9a40c82528122d2",
+    "76adf73a290c475b221ed5e3",
+    "89154a5cff1beec27948012a",
+    "8e9fc0a92a8374d44f1e09c4",
+    "a6d4f1aaf5941686c7b8eb57",
+    "b67b490bdd33c079a5690d04",
+    "b7cd4e95db5a5b0e1baa612c",
+    "bc42010683ba744c2fdccd12",
+    "bc60b5c3fb6b4c8e7ec8db45",
+    "be3bc05f86b83b8e69b626ce",
+    "d6046c49723be6301d7ef070",
+    "d6c4c1c34d4acd4582754133",
+    "d74a9f0b1416462270803b62",
+    "db523b0bfab122b1d6106b40",
+    "e2dac3d08930c88ed3d2f6c7",
+    "f52595d4c5235cc5564dcde9",
+    "fdb6569e1702843e0ef54e9f"
+  ],
+  "resolved_systematic_ids": [
+    "4dcfd4e2f9d8ed59c0d9cbdc",
+    "55fe7b2b2c6d38b7222a6c12",
+    "742487e7882ef7e9e54a1409",
+    "750530dec9a40c82528122d2",
+    "76adf73a290c475b221ed5e3",
+    "89154a5cff1beec27948012a",
+    "8e9fc0a92a8374d44f1e09c4",
+    "a6d4f1aaf5941686c7b8eb57",
+    "b67b490bdd33c079a5690d04",
+    "b7cd4e95db5a5b0e1baa612c",
+    "bc42010683ba744c2fdccd12",
+    "bc60b5c3fb6b4c8e7ec8db45",
+    "be3bc05f86b83b8e69b626ce",
+    "d6046c49723be6301d7ef070",
+    "d6c4c1c34d4acd4582754133",
+    "d74a9f0b1416462270803b62",
+    "db523b0bfab122b1d6106b40",
+    "e2dac3d08930c88ed3d2f6c7",
+    "f52595d4c5235cc5564dcde9",
+    "fdb6569e1702843e0ef54e9f"
+  ],
+  "removed_QA_ids": [
+    "4dcfd4e2f9d8ed59c0d9cbdc",
+    "55fe7b2b2c6d38b7222a6c12",
+    "742487e7882ef7e9e54a1409",
+    "750530dec9a40c82528122d2",
+    "76adf73a290c475b221ed5e3",
+    "89154a5cff1beec27948012a",
+    "8e9fc0a92a8374d44f1e09c4",
+    "a6d4f1aaf5941686c7b8eb57",
+    "b67b490bdd33c079a5690d04",
+    "b7cd4e95db5a5b0e1baa612c",
+    "bc42010683ba744c2fdccd12",
+    "bc60b5c3fb6b4c8e7ec8db45",
+    "be3bc05f86b83b8e69b626ce",
+    "d6046c49723be6301d7ef070",
+    "d6c4c1c34d4acd4582754133",
+    "d74a9f0b1416462270803b62",
+    "db523b0bfab122b1d6106b40",
+    "e2dac3d08930c88ed3d2f6c7",
+    "f52595d4c5235cc5564dcde9",
+    "fdb6569e1702843e0ef54e9f"
+  ],
+  "remaining_QA_ids": [
+    "1211cf659b50b8f60a118e85",
+    "2e52d5a124fddfe369687035",
+    "3a8c3baa43001ec2f94b53c8",
+    "58624e812ef70a85166d09c6",
+    "7dc902b97fda7ea1d146c907",
+    "99e50f8c16d1cd74340dc32d",
+    "c1cb52e1672fd669808bc5c8",
+    "f0b75832ea028fd6b1b5ff75",
+    "f57f2f50c537719982254887",
+    "f732ee21dee348389b0971cd"
+  ],
+  "added_QA_ids": [],
+  "changed_episode_ids": [
+    "4dcfd4e2f9d8ed59c0d9cbdc",
+    "55fe7b2b2c6d38b7222a6c12",
+    "742487e7882ef7e9e54a1409",
+    "750530dec9a40c82528122d2",
+    "76adf73a290c475b221ed5e3",
+    "89154a5cff1beec27948012a",
+    "8e9fc0a92a8374d44f1e09c4",
+    "a6d4f1aaf5941686c7b8eb57",
+    "b67b490bdd33c079a5690d04",
+    "b7cd4e95db5a5b0e1baa612c",
+    "bc42010683ba744c2fdccd12",
+    "bc60b5c3fb6b4c8e7ec8db45",
+    "be3bc05f86b83b8e69b626ce",
+    "d6046c49723be6301d7ef070",
+    "d6c4c1c34d4acd4582754133",
+    "d74a9f0b1416462270803b62",
+    "db523b0bfab122b1d6106b40",
+    "e2dac3d08930c88ed3d2f6c7",
+    "f52595d4c5235cc5564dcde9",
+    "fdb6569e1702843e0ef54e9f"
+  ],
+  "post_replay_frozen_baseline_changed_episode_ids": [
+    "1211cf659b50b8f60a118e85",
+    "2e52d5a124fddfe369687035",
+    "3a8c3baa43001ec2f94b53c8",
+    "58624e812ef70a85166d09c6",
+    "7dc902b97fda7ea1d146c907",
+    "99e50f8c16d1cd74340dc32d",
+    "c1cb52e1672fd669808bc5c8",
+    "f0b75832ea028fd6b1b5ff75",
+    "f57f2f50c537719982254887",
+    "f732ee21dee348389b0971cd"
+  ],
+  "reason_code_changes": [
+    {
+      "episode_id": "4dcfd4e2f9d8ed59c0d9cbdc",
+      "old_classification": "AMBIGUOUS",
+      "new_classification": "STRICT",
+      "fix_responsible": "A",
+      "evidence_roles_used": [
+        "aerial_war_evidence",
+        "exact_city_evidence",
+        "explosion_evidence",
+        "same_attack_basis",
+        "temporal_binding"
+      ],
+      "reason_codes_before": [
+        "MATCH_UNIQUE",
+        "NO_AIR_MILITARY_CONTEXT",
+        "NO_EXACT_CITY_EVENT_TEXT",
+        "NO_STRICT_EXPLOSION_EVIDENCE",
+        "REVIEW_PROVENANCE_TEMPORAL_BINDING_USED",
+        "REVIEW_PROVENANCE_USABLE",
+        "TEMPORAL_REVIEWED_VALIDATED_BINDING"
+      ],
+      "reason_codes_after": [
+        "AIR_MILITARY_CONTEXT",
+        "EXACT_CITY_EVENT_TEXT",
+        "MATCH_UNIQUE",
+        "REVIEW_PROVENANCE_TEMPORAL_BINDING_USED",
+        "REVIEW_PROVENANCE_USABLE",
+        "SAME_ATTACK_CONTEXT_SUPPORTED",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "TEMPORAL_REVIEWED_VALIDATED_BINDING"
+      ]
+    },
+    {
+      "episode_id": "55fe7b2b2c6d38b7222a6c12",
+      "old_classification": "AMBIGUOUS",
+      "new_classification": "STRICT",
+      "fix_responsible": "A",
+      "evidence_roles_used": [
+        "aerial_war_evidence",
+        "exact_city_evidence",
+        "explosion_evidence",
+        "same_attack_basis",
+        "temporal_binding"
+      ],
+      "reason_codes_before": [
+        "MATCH_UNIQUE",
+        "NO_AIR_MILITARY_CONTEXT",
+        "NO_EXACT_CITY_EVENT_TEXT",
+        "NO_STRICT_EXPLOSION_EVIDENCE",
+        "REVIEW_PROVENANCE_TEMPORAL_BINDING_USED",
+        "REVIEW_PROVENANCE_USABLE",
+        "TEMPORAL_REVIEWED_VALIDATED_BINDING"
+      ],
+      "reason_codes_after": [
+        "AIR_MILITARY_CONTEXT",
+        "EXACT_CITY_EVENT_TEXT",
+        "MATCH_UNIQUE",
+        "REVIEW_PROVENANCE_TEMPORAL_BINDING_USED",
+        "REVIEW_PROVENANCE_USABLE",
+        "SAME_ATTACK_CONTEXT_SUPPORTED",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "TEMPORAL_REVIEWED_VALIDATED_BINDING"
+      ]
+    },
+    {
+      "episode_id": "742487e7882ef7e9e54a1409",
+      "old_classification": "AMBIGUOUS",
+      "new_classification": "STRICT",
+      "fix_responsible": "B",
+      "evidence_roles_used": [
+        "aerial_war_evidence",
+        "exact_city_evidence",
+        "explosion_evidence",
+        "same_attack_basis",
+        "temporal_binding"
+      ],
+      "reason_codes_before": [
+        "AIR_CONTEXT_NOT_LINKED_TO_EVENT",
+        "AIR_MILITARY_CONTEXT",
+        "ATTACK_EVENT_TYPES:explosion",
+        "EXACT_CITY_EVENT_TEXT",
+        "MATCH_UNIQUE",
+        "REVIEW_PROVENANCE_TEMPORAL_BINDING_USED",
+        "REVIEW_PROVENANCE_USABLE",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "TEMPORAL_REVIEWED_VALIDATED_BINDING"
+      ],
+      "reason_codes_after": [
+        "AIR_MILITARY_CONTEXT",
+        "ATTACK_EVENT_TYPES:explosion",
+        "EXACT_CITY_EVENT_TEXT",
+        "MATCH_UNIQUE",
+        "REVIEW_PROVENANCE_TEMPORAL_BINDING_USED",
+        "REVIEW_PROVENANCE_USABLE",
+        "SAME_ATTACK_CONTEXT_SUPPORTED",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "TEMPORAL_REVIEWED_VALIDATED_BINDING"
+      ]
+    },
+    {
+      "episode_id": "750530dec9a40c82528122d2",
+      "old_classification": "AMBIGUOUS",
+      "new_classification": "STRICT",
+      "fix_responsible": "A",
+      "evidence_roles_used": [
+        "aerial_war_evidence",
+        "exact_city_evidence",
+        "explosion_evidence",
+        "same_attack_basis",
+        "temporal_binding"
+      ],
+      "reason_codes_before": [
+        "MATCH_UNIQUE",
+        "NO_AIR_MILITARY_CONTEXT",
+        "NO_EXACT_CITY_EVENT_TEXT",
+        "NO_STRICT_EXPLOSION_EVIDENCE",
+        "REVIEW_PROVENANCE_TEMPORAL_BINDING_USED",
+        "REVIEW_PROVENANCE_USABLE",
+        "TEMPORAL_REVIEWED_VALIDATED_BINDING"
+      ],
+      "reason_codes_after": [
+        "AIR_MILITARY_CONTEXT",
+        "EXACT_CITY_EVENT_TEXT",
+        "MATCH_UNIQUE",
+        "REVIEW_PROVENANCE_TEMPORAL_BINDING_USED",
+        "REVIEW_PROVENANCE_USABLE",
+        "SAME_ATTACK_CONTEXT_SUPPORTED",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "TEMPORAL_REVIEWED_VALIDATED_BINDING"
+      ]
+    },
+    {
+      "episode_id": "76adf73a290c475b221ed5e3",
+      "old_classification": "AMBIGUOUS",
+      "new_classification": "STRICT",
+      "fix_responsible": "A",
+      "evidence_roles_used": [
+        "aerial_war_evidence",
+        "exact_city_evidence",
+        "explosion_evidence",
+        "same_attack_basis",
+        "temporal_binding"
+      ],
+      "reason_codes_before": [
+        "MATCH_UNIQUE",
+        "NO_AIR_MILITARY_CONTEXT",
+        "NO_EXACT_CITY_EVENT_TEXT",
+        "NO_STRICT_EXPLOSION_EVIDENCE",
+        "REVIEW_PROVENANCE_TEMPORAL_BINDING_USED",
+        "REVIEW_PROVENANCE_USABLE",
+        "TEMPORAL_REVIEWED_VALIDATED_BINDING"
+      ],
+      "reason_codes_after": [
+        "AIR_MILITARY_CONTEXT",
+        "EXACT_CITY_EVENT_TEXT",
+        "MATCH_UNIQUE",
+        "REVIEW_PROVENANCE_TEMPORAL_BINDING_USED",
+        "REVIEW_PROVENANCE_USABLE",
+        "SAME_ATTACK_CONTEXT_SUPPORTED",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "TEMPORAL_REVIEWED_VALIDATED_BINDING"
+      ]
+    },
+    {
+      "episode_id": "89154a5cff1beec27948012a",
+      "old_classification": "AMBIGUOUS",
+      "new_classification": "STRICT",
+      "fix_responsible": "A",
+      "evidence_roles_used": [
+        "aerial_war_evidence",
+        "exact_city_evidence",
+        "explosion_evidence",
+        "same_attack_basis",
+        "temporal_binding"
+      ],
+      "reason_codes_before": [
+        "MATCH_UNIQUE",
+        "NO_AIR_MILITARY_CONTEXT",
+        "NO_EXACT_CITY_EVENT_TEXT",
+        "NO_STRICT_EXPLOSION_EVIDENCE",
+        "REVIEW_PROVENANCE_TEMPORAL_BINDING_USED",
+        "REVIEW_PROVENANCE_USABLE",
+        "TEMPORAL_REVIEWED_VALIDATED_BINDING"
+      ],
+      "reason_codes_after": [
+        "AIR_MILITARY_CONTEXT",
+        "EXACT_CITY_EVENT_TEXT",
+        "MATCH_UNIQUE",
+        "REVIEW_PROVENANCE_TEMPORAL_BINDING_USED",
+        "REVIEW_PROVENANCE_USABLE",
+        "SAME_ATTACK_CONTEXT_SUPPORTED",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "TEMPORAL_REVIEWED_VALIDATED_BINDING"
+      ]
+    },
+    {
+      "episode_id": "8e9fc0a92a8374d44f1e09c4",
+      "old_classification": "AMBIGUOUS",
+      "new_classification": "STRICT",
+      "fix_responsible": "B",
+      "evidence_roles_used": [
+        "aerial_war_evidence",
+        "exact_city_evidence",
+        "explosion_evidence",
+        "same_attack_basis",
+        "temporal_binding"
+      ],
+      "reason_codes_before": [
+        "AIR_CONTEXT_NOT_LINKED_TO_EVENT",
+        "AIR_MILITARY_CONTEXT",
+        "ATTACK_EVENT_TYPES:explosion",
+        "EXACT_CITY_EVENT_TEXT",
+        "MATCH_UNIQUE",
+        "REVIEW_PROVENANCE_TEMPORAL_BINDING_USED",
+        "REVIEW_PROVENANCE_USABLE",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "TEMPORAL_REVIEWED_VALIDATED_BINDING"
+      ],
+      "reason_codes_after": [
+        "AIR_MILITARY_CONTEXT",
+        "ATTACK_EVENT_TYPES:explosion",
+        "EXACT_CITY_EVENT_TEXT",
+        "MATCH_UNIQUE",
+        "REVIEW_PROVENANCE_TEMPORAL_BINDING_USED",
+        "REVIEW_PROVENANCE_USABLE",
+        "SAME_ATTACK_CONTEXT_SUPPORTED",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "TEMPORAL_REVIEWED_VALIDATED_BINDING"
+      ]
+    },
+    {
+      "episode_id": "a6d4f1aaf5941686c7b8eb57",
+      "old_classification": "AMBIGUOUS",
+      "new_classification": "STRICT",
+      "fix_responsible": "A",
+      "evidence_roles_used": [
+        "aerial_war_evidence",
+        "exact_city_evidence",
+        "explosion_evidence",
+        "same_attack_basis",
+        "temporal_binding"
+      ],
+      "reason_codes_before": [
+        "MATCH_UNIQUE",
+        "NO_AIR_MILITARY_CONTEXT",
+        "NO_EXACT_CITY_EVENT_TEXT",
+        "NO_STRICT_EXPLOSION_EVIDENCE",
+        "REVIEW_PROVENANCE_TEMPORAL_BINDING_USED",
+        "REVIEW_PROVENANCE_USABLE",
+        "TEMPORAL_REVIEWED_VALIDATED_BINDING"
+      ],
+      "reason_codes_after": [
+        "AIR_MILITARY_CONTEXT",
+        "EXACT_CITY_EVENT_TEXT",
+        "MATCH_UNIQUE",
+        "REVIEW_PROVENANCE_TEMPORAL_BINDING_USED",
+        "REVIEW_PROVENANCE_USABLE",
+        "SAME_ATTACK_CONTEXT_SUPPORTED",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "TEMPORAL_REVIEWED_VALIDATED_BINDING"
+      ]
+    },
+    {
+      "episode_id": "b67b490bdd33c079a5690d04",
+      "old_classification": "AMBIGUOUS",
+      "new_classification": "STRICT",
+      "fix_responsible": "A",
+      "evidence_roles_used": [
+        "aerial_war_evidence",
+        "exact_city_evidence",
+        "explosion_evidence",
+        "same_attack_basis",
+        "temporal_binding"
+      ],
+      "reason_codes_before": [
+        "MATCH_UNIQUE",
+        "NO_AIR_MILITARY_CONTEXT",
+        "NO_EXACT_CITY_EVENT_TEXT",
+        "NO_STRICT_EXPLOSION_EVIDENCE",
+        "REVIEW_PROVENANCE_TEMPORAL_BINDING_USED",
+        "REVIEW_PROVENANCE_USABLE",
+        "TEMPORAL_REVIEWED_VALIDATED_BINDING"
+      ],
+      "reason_codes_after": [
+        "AIR_MILITARY_CONTEXT",
+        "EXACT_CITY_EVENT_TEXT",
+        "MATCH_UNIQUE",
+        "REVIEW_PROVENANCE_TEMPORAL_BINDING_USED",
+        "REVIEW_PROVENANCE_USABLE",
+        "SAME_ATTACK_CONTEXT_SUPPORTED",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "TEMPORAL_REVIEWED_VALIDATED_BINDING"
+      ]
+    },
+    {
+      "episode_id": "b7cd4e95db5a5b0e1baa612c",
+      "old_classification": "AMBIGUOUS",
+      "new_classification": "STRICT",
+      "fix_responsible": "A",
+      "evidence_roles_used": [
+        "aerial_war_evidence",
+        "exact_city_evidence",
+        "explosion_evidence",
+        "same_attack_basis",
+        "temporal_binding"
+      ],
+      "reason_codes_before": [
+        "MATCH_UNIQUE",
+        "NO_AIR_MILITARY_CONTEXT",
+        "NO_EXACT_CITY_EVENT_TEXT",
+        "NO_STRICT_EXPLOSION_EVIDENCE",
+        "REVIEW_PROVENANCE_TEMPORAL_BINDING_USED",
+        "REVIEW_PROVENANCE_USABLE",
+        "TEMPORAL_REVIEWED_VALIDATED_BINDING"
+      ],
+      "reason_codes_after": [
+        "AIR_MILITARY_CONTEXT",
+        "EXACT_CITY_EVENT_TEXT",
+        "MATCH_UNIQUE",
+        "REVIEW_PROVENANCE_TEMPORAL_BINDING_USED",
+        "REVIEW_PROVENANCE_USABLE",
+        "SAME_ATTACK_CONTEXT_SUPPORTED",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "TEMPORAL_REVIEWED_VALIDATED_BINDING"
+      ]
+    },
+    {
+      "episode_id": "bc42010683ba744c2fdccd12",
+      "old_classification": "AMBIGUOUS",
+      "new_classification": "STRICT",
+      "fix_responsible": "B",
+      "evidence_roles_used": [
+        "aerial_war_evidence",
+        "exact_city_evidence",
+        "explosion_evidence",
+        "same_attack_basis",
+        "temporal_binding"
+      ],
+      "reason_codes_before": [
+        "AIR_CONTEXT_NOT_LINKED_TO_EVENT",
+        "AIR_MILITARY_CONTEXT",
+        "ATTACK_EVENT_TYPES:explosion",
+        "EXACT_CITY_EVENT_TEXT",
+        "MATCH_UNIQUE",
+        "REVIEW_PROVENANCE_TEMPORAL_BINDING_USED",
+        "REVIEW_PROVENANCE_USABLE",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "TEMPORAL_REVIEWED_VALIDATED_BINDING"
+      ],
+      "reason_codes_after": [
+        "AIR_MILITARY_CONTEXT",
+        "ATTACK_EVENT_TYPES:explosion",
+        "EXACT_CITY_EVENT_TEXT",
+        "MATCH_UNIQUE",
+        "REVIEW_PROVENANCE_TEMPORAL_BINDING_USED",
+        "REVIEW_PROVENANCE_USABLE",
+        "SAME_ATTACK_CONTEXT_SUPPORTED",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "TEMPORAL_REVIEWED_VALIDATED_BINDING"
+      ]
+    },
+    {
+      "episode_id": "bc60b5c3fb6b4c8e7ec8db45",
+      "old_classification": "AMBIGUOUS",
+      "new_classification": "STRICT",
+      "fix_responsible": "A",
+      "evidence_roles_used": [
+        "aerial_war_evidence",
+        "exact_city_evidence",
+        "explosion_evidence",
+        "same_attack_basis",
+        "temporal_binding"
+      ],
+      "reason_codes_before": [
+        "MATCH_UNIQUE",
+        "NO_AIR_MILITARY_CONTEXT",
+        "NO_EXACT_CITY_EVENT_TEXT",
+        "NO_STRICT_EXPLOSION_EVIDENCE",
+        "REVIEW_PROVENANCE_TEMPORAL_BINDING_USED",
+        "REVIEW_PROVENANCE_USABLE",
+        "TEMPORAL_REVIEWED_VALIDATED_BINDING"
+      ],
+      "reason_codes_after": [
+        "AIR_MILITARY_CONTEXT",
+        "EXACT_CITY_EVENT_TEXT",
+        "MATCH_UNIQUE",
+        "REVIEW_PROVENANCE_TEMPORAL_BINDING_USED",
+        "REVIEW_PROVENANCE_USABLE",
+        "SAME_ATTACK_CONTEXT_SUPPORTED",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "TEMPORAL_REVIEWED_VALIDATED_BINDING"
+      ]
+    },
+    {
+      "episode_id": "be3bc05f86b83b8e69b626ce",
+      "old_classification": "AMBIGUOUS",
+      "new_classification": "STRICT",
+      "fix_responsible": "A",
+      "evidence_roles_used": [
+        "aerial_war_evidence",
+        "exact_city_evidence",
+        "explosion_evidence",
+        "same_attack_basis",
+        "temporal_binding"
+      ],
+      "reason_codes_before": [
+        "MATCH_UNIQUE",
+        "NO_AIR_MILITARY_CONTEXT",
+        "NO_EXACT_CITY_EVENT_TEXT",
+        "NO_STRICT_EXPLOSION_EVIDENCE",
+        "REVIEW_PROVENANCE_TEMPORAL_BINDING_USED",
+        "REVIEW_PROVENANCE_USABLE",
+        "TEMPORAL_REVIEWED_VALIDATED_BINDING"
+      ],
+      "reason_codes_after": [
+        "AIR_MILITARY_CONTEXT",
+        "EXACT_CITY_EVENT_TEXT",
+        "MATCH_UNIQUE",
+        "REVIEW_PROVENANCE_TEMPORAL_BINDING_USED",
+        "REVIEW_PROVENANCE_USABLE",
+        "SAME_ATTACK_CONTEXT_SUPPORTED",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "TEMPORAL_REVIEWED_VALIDATED_BINDING"
+      ]
+    },
+    {
+      "episode_id": "d6046c49723be6301d7ef070",
+      "old_classification": "AMBIGUOUS",
+      "new_classification": "STRICT",
+      "fix_responsible": "A",
+      "evidence_roles_used": [
+        "aerial_war_evidence",
+        "exact_city_evidence",
+        "explosion_evidence",
+        "same_attack_basis",
+        "temporal_binding"
+      ],
+      "reason_codes_before": [
+        "MATCH_UNIQUE",
+        "NO_AIR_MILITARY_CONTEXT",
+        "NO_EXACT_CITY_EVENT_TEXT",
+        "NO_STRICT_EXPLOSION_EVIDENCE",
+        "REVIEW_PROVENANCE_TEMPORAL_BINDING_USED",
+        "REVIEW_PROVENANCE_USABLE",
+        "TEMPORAL_REVIEWED_VALIDATED_BINDING"
+      ],
+      "reason_codes_after": [
+        "AIR_MILITARY_CONTEXT",
+        "EXACT_CITY_EVENT_TEXT",
+        "MATCH_UNIQUE",
+        "REVIEW_PROVENANCE_TEMPORAL_BINDING_USED",
+        "REVIEW_PROVENANCE_USABLE",
+        "SAME_ATTACK_CONTEXT_SUPPORTED",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "TEMPORAL_REVIEWED_VALIDATED_BINDING"
+      ]
+    },
+    {
+      "episode_id": "d6c4c1c34d4acd4582754133",
+      "old_classification": "AMBIGUOUS",
+      "new_classification": "STRICT",
+      "fix_responsible": "A",
+      "evidence_roles_used": [
+        "aerial_war_evidence",
+        "exact_city_evidence",
+        "explosion_evidence",
+        "same_attack_basis",
+        "temporal_binding"
+      ],
+      "reason_codes_before": [
+        "MATCH_UNIQUE",
+        "NO_AIR_MILITARY_CONTEXT",
+        "NO_EXACT_CITY_EVENT_TEXT",
+        "NO_STRICT_EXPLOSION_EVIDENCE",
+        "REVIEW_PROVENANCE_TEMPORAL_BINDING_USED",
+        "REVIEW_PROVENANCE_USABLE",
+        "TEMPORAL_REVIEWED_VALIDATED_BINDING"
+      ],
+      "reason_codes_after": [
+        "AIR_MILITARY_CONTEXT",
+        "EXACT_CITY_EVENT_TEXT",
+        "MATCH_UNIQUE",
+        "REVIEW_PROVENANCE_TEMPORAL_BINDING_USED",
+        "REVIEW_PROVENANCE_USABLE",
+        "SAME_ATTACK_CONTEXT_SUPPORTED",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "TEMPORAL_REVIEWED_VALIDATED_BINDING"
+      ]
+    },
+    {
+      "episode_id": "d74a9f0b1416462270803b62",
+      "old_classification": "AMBIGUOUS",
+      "new_classification": "STRICT",
+      "fix_responsible": "A",
+      "evidence_roles_used": [
+        "aerial_war_evidence",
+        "exact_city_evidence",
+        "explosion_evidence",
+        "same_attack_basis",
+        "temporal_binding"
+      ],
+      "reason_codes_before": [
+        "MATCH_UNIQUE",
+        "NO_AIR_MILITARY_CONTEXT",
+        "NO_EXACT_CITY_EVENT_TEXT",
+        "NO_STRICT_EXPLOSION_EVIDENCE",
+        "REVIEW_PROVENANCE_TEMPORAL_BINDING_USED",
+        "REVIEW_PROVENANCE_USABLE",
+        "TEMPORAL_REVIEWED_VALIDATED_BINDING"
+      ],
+      "reason_codes_after": [
+        "AIR_MILITARY_CONTEXT",
+        "EXACT_CITY_EVENT_TEXT",
+        "MATCH_UNIQUE",
+        "REVIEW_PROVENANCE_TEMPORAL_BINDING_USED",
+        "REVIEW_PROVENANCE_USABLE",
+        "SAME_ATTACK_CONTEXT_SUPPORTED",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "TEMPORAL_REVIEWED_VALIDATED_BINDING"
+      ]
+    },
+    {
+      "episode_id": "db523b0bfab122b1d6106b40",
+      "old_classification": "AMBIGUOUS",
+      "new_classification": "STRICT",
+      "fix_responsible": "A",
+      "evidence_roles_used": [
+        "aerial_war_evidence",
+        "exact_city_evidence",
+        "explosion_evidence",
+        "same_attack_basis",
+        "temporal_binding"
+      ],
+      "reason_codes_before": [
+        "MATCH_UNIQUE",
+        "NO_AIR_MILITARY_CONTEXT",
+        "NO_EXACT_CITY_EVENT_TEXT",
+        "NO_STRICT_EXPLOSION_EVIDENCE",
+        "REVIEW_PROVENANCE_TEMPORAL_BINDING_USED",
+        "REVIEW_PROVENANCE_USABLE",
+        "TEMPORAL_REVIEWED_VALIDATED_BINDING"
+      ],
+      "reason_codes_after": [
+        "AIR_MILITARY_CONTEXT",
+        "EXACT_CITY_EVENT_TEXT",
+        "MATCH_UNIQUE",
+        "REVIEW_PROVENANCE_TEMPORAL_BINDING_USED",
+        "REVIEW_PROVENANCE_USABLE",
+        "SAME_ATTACK_CONTEXT_SUPPORTED",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "TEMPORAL_REVIEWED_VALIDATED_BINDING"
+      ]
+    },
+    {
+      "episode_id": "e2dac3d08930c88ed3d2f6c7",
+      "old_classification": "AMBIGUOUS",
+      "new_classification": "STRICT",
+      "fix_responsible": "B",
+      "evidence_roles_used": [
+        "aerial_war_evidence",
+        "exact_city_evidence",
+        "explosion_evidence",
+        "same_attack_basis",
+        "temporal_binding"
+      ],
+      "reason_codes_before": [
+        "AIR_CONTEXT_NOT_LINKED_TO_EVENT",
+        "AIR_MILITARY_CONTEXT",
+        "ATTACK_EVENT_TYPES:explosion",
+        "EXACT_CITY_EVENT_TEXT",
+        "MATCH_UNIQUE",
+        "REVIEW_PROVENANCE_TEMPORAL_BINDING_USED",
+        "REVIEW_PROVENANCE_USABLE",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "TEMPORAL_REVIEWED_VALIDATED_BINDING"
+      ],
+      "reason_codes_after": [
+        "AIR_MILITARY_CONTEXT",
+        "ATTACK_EVENT_TYPES:explosion",
+        "EXACT_CITY_EVENT_TEXT",
+        "MATCH_UNIQUE",
+        "REVIEW_PROVENANCE_TEMPORAL_BINDING_USED",
+        "REVIEW_PROVENANCE_USABLE",
+        "SAME_ATTACK_CONTEXT_SUPPORTED",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "TEMPORAL_REVIEWED_VALIDATED_BINDING"
+      ]
+    },
+    {
+      "episode_id": "f52595d4c5235cc5564dcde9",
+      "old_classification": "AMBIGUOUS",
+      "new_classification": "STRICT",
+      "fix_responsible": "C",
+      "evidence_roles_used": [
+        "aerial_war_evidence",
+        "exact_city_evidence",
+        "explosion_evidence",
+        "same_attack_basis",
+        "temporal_binding"
+      ],
+      "reason_codes_before": [
+        "AIR_CONTEXT_NOT_LINKED_TO_EVENT",
+        "AIR_MILITARY_CONTEXT",
+        "MATCH_UNIQUE",
+        "NO_EXACT_CITY_EVENT_TEXT",
+        "NO_STRICT_EXPLOSION_EVIDENCE",
+        "REVIEW_PROVENANCE_TEMPORAL_BINDING_USED",
+        "REVIEW_PROVENANCE_USABLE",
+        "TEMPORAL_REVIEWED_VALIDATED_BINDING"
+      ],
+      "reason_codes_after": [
+        "AIR_MILITARY_CONTEXT",
+        "ATTACK_EVENT_TYPES:explosion",
+        "EXACT_CITY_EVENT_TEXT",
+        "MATCH_UNIQUE",
+        "REVIEW_PROVENANCE_TEMPORAL_BINDING_USED",
+        "REVIEW_PROVENANCE_USABLE",
+        "SAME_ATTACK_CONTEXT_SUPPORTED",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "TEMPORAL_REVIEWED_VALIDATED_BINDING"
+      ]
+    },
+    {
+      "episode_id": "fdb6569e1702843e0ef54e9f",
+      "old_classification": "AMBIGUOUS",
+      "new_classification": "STRICT",
+      "fix_responsible": "A",
+      "evidence_roles_used": [
+        "aerial_war_evidence",
+        "exact_city_evidence",
+        "explosion_evidence",
+        "same_attack_basis",
+        "temporal_binding"
+      ],
+      "reason_codes_before": [
+        "MATCH_UNIQUE",
+        "NO_AIR_MILITARY_CONTEXT",
+        "NO_EXACT_CITY_EVENT_TEXT",
+        "NO_STRICT_EXPLOSION_EVIDENCE",
+        "REVIEW_PROVENANCE_TEMPORAL_BINDING_USED",
+        "REVIEW_PROVENANCE_USABLE",
+        "TEMPORAL_REVIEWED_VALIDATED_BINDING"
+      ],
+      "reason_codes_after": [
+        "AIR_MILITARY_CONTEXT",
+        "EXACT_CITY_EVENT_TEXT",
+        "MATCH_UNIQUE",
+        "REVIEW_PROVENANCE_TEMPORAL_BINDING_USED",
+        "REVIEW_PROVENANCE_USABLE",
+        "SAME_ATTACK_CONTEXT_SUPPORTED",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "TEMPORAL_REVIEWED_VALIDATED_BINDING"
+      ]
+    }
+  ],
+  "PPO_related_changes": {
+    "before": [
+      "1211cf659b50b8f60a118e85",
+      "f52595d4c5235cc5564dcde9"
+    ],
+    "after": [
+      "1211cf659b50b8f60a118e85"
+    ],
+    "unexpected": []
+  },
+  "retained_evidence_gap_ids": [
+    "99e50f8c16d1cd74340dc32d",
+    "c1cb52e1672fd669808bc5c8"
+  ],
+  "true_ambiguity_ids": [
+    "1211cf659b50b8f60a118e85",
+    "2e52d5a124fddfe369687035",
+    "3a8c3baa43001ec2f94b53c8",
+    "58624e812ef70a85166d09c6",
+    "7dc902b97fda7ea1d146c907",
+    "f0b75832ea028fd6b1b5ff75",
+    "f57f2f50c537719982254887",
+    "f732ee21dee348389b0971cd"
+  ],
+  "mandatory_negative_controls": {
+    "58624e812ef70a85166d09c6": {
+      "remaining_QA": true,
+      "same_attack_auto_composed": false
+    },
+    "7dc902b97fda7ea1d146c907": {
+      "remaining_QA": true,
+      "same_attack_auto_composed": false
+    }
+  },
+  "strict_before_after": [
+    29,
+    49
+  ],
+  "sensitivity_before_after": [
+    29,
+    49
+  ],
+  "QA_before_after": [
+    30,
+    10
+  ],
+  "denominator_before_after": [
+    "1548 / 1548",
+    "1548 / 1548"
+  ],
+  "cross_city_regression": {
+    "validation_run_id": 36399441231,
+    "post_apply_run_id": 36399634016,
+    "lviv": {
+      "before": {
+        "strict": 12,
+        "sensitivity": 12,
+        "QA": 0
+      },
+      "after": {
+        "strict": 12,
+        "sensitivity": 12,
+        "QA": 0
+      },
+      "changed_ids": []
+    },
+    "sevastopol": {
+      "before": {
+        "strict": 38,
+        "sensitivity": 55,
+        "QA": 0
+      },
+      "after": {
+        "strict": 38,
+        "sensitivity": 55,
+        "QA": 0
+      },
+      "changed_ids": []
+    },
+    "sumy": {
+      "before": {
+        "strict": 204,
+        "sensitivity": 238,
+        "QA": 0
+      },
+      "after": {
+        "strict": 204,
+        "sensitivity": 238,
+        "QA": 0
+      },
+      "changed_ids": []
+    },
+    "zaporizhzhia": {
+      "before": {
+        "strict": 62,
+        "sensitivity": 73,
+        "QA": 151
+      },
+      "after": {
+        "strict": 62,
+        "sensitivity": 73,
+        "QA": 151
+      },
+      "changed_ids": []
+    },
+    "kyiv": {
+      "before": {
+        "strict": 140,
+        "sensitivity": 144,
+        "QA": 260
+      },
+      "after": {
+        "strict": 140,
+        "sensitivity": 144,
+        "QA": 260
+      },
+      "changed_ids": []
+    },
+    "result": "NO_UNRELATED_CROSS_CITY_DRIFT"
+  },
+  "protected_state": {
+    "all_data_explosion_research_final_evidence_changed": [],
+    "alert_corpus_changed": false,
+    "explosion_audited_baseline": {
+      "before": "81ecc48ed64b7e78449df903afb082e9f92531e5",
+      "after": "81ecc48ed64b7e78449df903afb082e9f92531e5"
+    },
+    "explosion_review_queue": {
+      "before": "833076eec2a2f479361d60c3fb803e8005207e94",
+      "after": "833076eec2a2f479361d60c3fb803e8005207e94"
+    },
+    "explosion_candidate_monitor_state": {
+      "before": "4caaa7a84e87db65885d18a9c098e095fdf51b43",
+      "after": "4caaa7a84e87db65885d18a9c098e095fdf51b43"
+    },
+    "explosion_candidate_monitor_last_run": {
+      "before": "d507f4c27ddd2ad5c540a927b48428c378f5d349",
+      "after": "d507f4c27ddd2ad5c540a927b48428c378f5d349"
+    },
+    "explosions_test": {
+      "before": "d00647c0b76ce254145d258a8d8ddc7e8529d8e4",
+      "after": "d00647c0b76ce254145d258a8d8ddc7e8529d8e4"
+    },
+    "dashboard_data": {
+      "before": "37cf1b61a32ac6ecb8a120ee96cdb1661269c727",
+      "after": "37cf1b61a32ac6ecb8a120ee96cdb1661269c727"
+    },
+    "cherkasy_final_evidence": {
+      "before": "5dd59bb3c4076d2a27ee6f77464ec0be507d2cd7",
+      "after": "5dd59bb3c4076d2a27ee6f77464ec0be507d2cd7"
+    },
+    "main_before": "807edf0bf545573615da8c158e0003f0cd65915d",
+    "main_after": "807edf0bf545573615da8c158e0003f0cd65915d",
+    "site_prod_before": "3b044bd30ebf72b7fe6b15cabf4ab69f19f18121",
+    "site_prod_after": "3b044bd30ebf72b7fe6b15cabf4ab69f19f18121",
+    "result": "UNCHANGED_BY_TASK"
+  },
+  "campaign_6863_head_before": "40c9be8b142ff529e43be8e5d324dd374e8f3cef",
+  "campaign_6863_head_after": "40c9be8b142ff529e43be8e5d324dd374e8f3cef",
+  "campaign_6863_progress_before": {
+    "processed": 126,
+    "total": 6863,
+    "terminal": 126,
+    "status": "RUNNING",
+    "phase": "ACCELERATED_2X"
+  },
+  "campaign_6863_progress_after": {
+    "processed": 126,
+    "total": 6863,
+    "terminal": 126,
+    "status": "RUNNING",
+    "phase": "ACCELERATED_2X"
+  },
+  "campaign_mutated_by_this_task": false,
+  "authoritative_post_implementation_autonomous_or_concurrent_movement": [
+    {
+      "commit": "bd7c7d5ca8d17c45dc40eee4c78ded106d4e314a",
+      "message": "Update historical replay status",
+      "scope": [
+        "research/historical_replay_status_current.json"
+      ],
+      "affects_cherkasy_fix_scope": false
+    },
+    {
+      "commit": "7b3a8485e0c99f9cc42a5774ad37b61dc5929d9f",
+      "message": "Add first-visit guided tour to preview",
+      "scope": [
+        "deploy/netlify-preview-release.txt",
+        "kyiv-air-alerts-grafana/pages-preview/app.js",
+        "kyiv-air-alerts-grafana/pages-preview/index.html",
+        "kyiv-air-alerts-grafana/pages-preview/styles.css"
+      ],
+      "affects_cherkasy_fix_scope": false
+    }
+  ],
+  "unexpected_drift": [],
+  "artifact_commit": "SELF",
+  "artifact_commit_note": "The commit containing this content is reported externally because a content-addressed commit SHA cannot be embedded into the file it hashes."
+}
