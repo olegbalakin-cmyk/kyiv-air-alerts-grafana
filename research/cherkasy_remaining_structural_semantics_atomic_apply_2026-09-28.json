@@ -1,0 +1,129 @@
+{
+  "schema_version": 1,
+  "kind": "cherkasy_remaining_structural_semantics_atomic_apply",
+  "old_expected_head": "84512efe9fa1bf4f9bfe234250782b6ac69e78bf",
+  "accepted_starting_head": "a055c3776b92bdaa6b57d42d4de36c0941c2f0d1",
+  "compatibility_audit": {
+    "verdict": "NEW AUTHORITATIVE HEAD ACCEPTED AS NON-INTERFERING WITH PROVEN CHERKASY STRUCTURAL DIFF",
+    "commits_since_old_expected_head": [
+      {
+        "sha": "a055c3776b92bdaa6b57d42d4de36c0941c2f0d1",
+        "message": "Update alert-gated casualty review queue",
+        "changed_files": [
+          "kyiv-air-alerts-grafana/data/casualties/candidate_monitor_last_run.json",
+          "kyiv-air-alerts-grafana/data/casualties/candidate_monitor_state.json",
+          "kyiv-air-alerts-grafana/data/casualties/multicity_review_queue.json"
+        ],
+        "assessment": "non-interfering casualty operational JSON only"
+      }
+    ],
+    "intended_files_unchanged_before_apply": true,
+    "cherkasy_evidence_unchanged_before_apply": true,
+    "replay_inputs_unchanged_before_apply": true,
+    "classifier_semantics_unchanged_before_apply": true,
+    "denominator_and_episode_identity_unchanged_before_apply": true,
+    "expected_qa_universe_unchanged_before_apply": true
+  },
+  "proof": {
+    "proof_branch": "cherkasy-remaining-structural-gaps-proof-2026-09-28",
+    "proof_head": "1e2f9f30e1e77a7a163bcc9bcc5a6f3d8be2b162",
+    "artifact": "research/cherkasy_remaining_structural_gaps_proof_2026-09-28.json",
+    "corrected_contract": {
+      "denominator": 1548,
+      "strict": 57,
+      "sensitivity": 58,
+      "qa": 1
+    }
+  },
+  "apply": {
+    "starting_head": "a055c3776b92bdaa6b57d42d4de36c0941c2f0d1",
+    "apply_commit": "69a88096562512f3db5469cc4ad659b226e7872c",
+    "changed_files": [
+      "kyiv-air-alerts-grafana/scripts/replay_explosion_history.py",
+      "kyiv-air-alerts-grafana/tests/test_historical_replay_cherkasy_roles.py"
+    ],
+    "blobs": {
+      "kyiv-air-alerts-grafana/scripts/replay_explosion_history.py": {
+        "before": "376e7946356bfcafae92ca41e0d405523d4e9377",
+        "after": "c54165fb7c34d885f51e26e98063203335d1a788"
+      },
+      "kyiv-air-alerts-grafana/tests/test_historical_replay_cherkasy_roles.py": {
+        "before": "26fd9b71d386c5cd28991fcbfc2f710a7de20cb6",
+        "after": "85bad40104a0a425894b857dfaa8fdd1a1d7afff"
+      }
+    }
+  },
+  "immutable_inputs": {
+    "live_monitor_blob": "b55fe2ed082958917c74f95bca2fd6bc137bcaae",
+    "cherkasy_final_evidence_blob": "433b901ec49279fb865294a7c1e9a5328cf1b46a",
+    "evidence_modified": false,
+    "live_monitor_modified": false
+  },
+  "validation": {
+    "branch": "cherkasy-structural-atomic-apply-validation-2026-09-28",
+    "workflow_commit": "35b7310931516e9473c3f322df4da3351508dfca",
+    "run_id": 36458278479,
+    "result": "SUCCESS",
+    "exact_checkout_commit": "69a88096562512f3db5469cc4ad659b226e7872c",
+    "monitor_self_test": "PASS",
+    "replay_self_test": "PASS",
+    "pytest": "34/34 PASS",
+    "fresh_read_only_replay": "PASS",
+    "protected_checkout_clean": "PASS",
+    "replay_artifact_id": 10986312500
+  },
+  "replay": {
+    "denominator": 1548,
+    "strict": 57,
+    "sensitivity": 58,
+    "qa": 1,
+    "qa_episode_ids": [
+      "f57f2f50c537719982254887"
+    ],
+    "target_results": {
+      "1211cf659b50b8f60a118e85": "STRICT",
+      "2e52d5a124fddfe369687035": "STRICT",
+      "3a8c3baa43001ec2f94b53c8": "SENSITIVITY"
+    },
+    "accepted_evidence_backed_upgrades": [
+      "1211cf659b50b8f60a118e85",
+      "2e52d5a124fddfe369687035",
+      "f0b75832ea028fd6b1b5ff75"
+    ],
+    "unexpected_episode_deltas": []
+  },
+  "post_apply_concurrent_commit": {
+    "sha": "789d33b1d6686498b52adc1f627b864cf7aa5dc1",
+    "message": "Update historical replay status",
+    "changed_files": [
+      "research/historical_replay_status_current.json"
+    ],
+    "assessment": "generated replay status only; no replay input, evidence, classifier, monitor, or denominator semantics changed",
+    "cherkasy_status_recorded": {
+      "denominator": 1548,
+      "strict": 57,
+      "sensitivity": 58,
+      "qa": 1,
+      "qa_episode_ids": [
+        "f57f2f50c537719982254887"
+      ]
+    }
+  },
+  "protected_state": {
+    "cherkasy_evidence": "UNCHANGED",
+    "sumy_evidence": "UNCHANGED BY APPLY COMMIT",
+    "live_v2_monitor": "UNCHANGED",
+    "casualty_state": "NO TASK MUTATION; pre-existing unrelated casualty commit preserved",
+    "site_prod": "NOT TOUCHED",
+    "main": "NOT TOUCHED",
+    "historical_attack_event_backfill_branch": "NOT TOUCHED",
+    "db_neon": "NOT TOUCHED"
+  },
+  "protected_refs_observed_after_validation": {
+    "main": "8c5ed2a9fce73427cb53c888599a8a1751d9dc00",
+    "site_prod": "bf5420305663b21982afe2fa662b4f1f229dfff4",
+    "historical_attack_event_backfill_2026_09_27": "6edc41df21b7112c939e035fb244fa5876c37620",
+    "proof_branch": "1e2f9f30e1e77a7a163bcc9bcc5a6f3d8be2b162"
+  },
+  "verdict": "CHERKASY STRUCTURAL SEMANTICS ATOMIC APPLY ACCEPTED — 1548 / 57 STRICT / 58 SENSITIVITY / QA 1"
+}
