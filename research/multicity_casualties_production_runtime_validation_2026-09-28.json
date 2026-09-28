@@ -1,0 +1,137 @@
+{
+  "date": "2026-09-28",
+  "site_prod_head": "d5482d2976c29bec2c31ab6c843a2cdc1cfe1cad",
+  "proof_head_tested": "8ad57efb820e3313e0c9aea6faa72f2ada8e9842",
+  "compatibility": {
+    "site_prod_moved": false,
+    "behind_by": 0,
+    "proof_ahead_by": 17,
+    "production_dashboard_blob": "08256696603a2cbc04e9bcc66b2c2502ad3d7ede",
+    "proof_dashboard_blob_before_build": "08256696603a2cbc04e9bcc66b2c2502ad3d7ede",
+    "production_grafana_blob": "e9949c976cd1aab4b4b9724afdb7d61e86d94d67",
+    "proof_grafana_blob_before_build": "e9949c976cd1aab4b4b9724afdb7d61e86d94d67",
+    "verdict": "fresh production-equivalent data state confirmed; no rebase required"
+  },
+  "tests": {
+    "github_actions_run": 36479469513,
+    "python_github_actions": "3.12",
+    "python_local": "3.13.5",
+    "command": "CASUALTY_PROOF_BEFORE=/mnt/data/casruntime/before.json python tests/test_multicity_casualty_promotion.py",
+    "result": "PASS",
+    "test_count": 1,
+    "assertion_scope": "23-city exact set/totals, duplicate/negative checks, Kyiv compatibility, zero series, frontend lookup, Grafana selectors, non-casualty semantic invariance"
+  },
+  "generated": {
+    "city_count": 23,
+    "monthly_rows_each": 56,
+    "duplicate_months": 0,
+    "negative_counts": 0,
+    "totals": {
+      "kyiv": 454,
+      "kharkiv": 339,
+      "sevastopol": 22,
+      "cherkasy": 2,
+      "zhytomyr": 12,
+      "dnipro": 214,
+      "khmelnytskyi": 10,
+      "poltava": 84,
+      "rivne": 1,
+      "sumy": 158,
+      "vinnytsia": 31,
+      "kropyvnytskyi": 9,
+      "lviv": 29,
+      "chernihiv": 105,
+      "mykolaiv": 106,
+      "lutsk": 10,
+      "uzhhorod": 0,
+      "ivano-frankivsk": 3,
+      "ternopil": 41,
+      "chernivtsi": 5,
+      "odesa": 171,
+      "zaporizhzhia": 316,
+      "kherson": 163
+    }
+  },
+  "kyiv_compatibility": true,
+  "grafana": {
+    "generation": "PASS",
+    "casualty_rows": 1,
+    "city_panels": 23,
+    "all_city_keys_represented": true,
+    "production_api_called": false
+  },
+  "static_build": {
+    "result": "PASS",
+    "data_url_override": "./data.json temporary only",
+    "source_app_sha256": "78822315869245ea05434d1b813753b5cd6cc03f418d912284f904a96c661b1a",
+    "runtime_app_sha256": "15ac564f5292122c0fa994a8aa9a1bbac0d9f3c1223584b80dec8a6b8cfdd7bc",
+    "node_check": "PASS"
+  },
+  "browser_runtime": {
+    "environment": "Playwright Python + Chromium 144.0.7559.96",
+    "executed": false,
+    "attempts": [
+      {
+        "navigation": "http://127.0.0.1:8765/index.html",
+        "result": "net::ERR_BLOCKED_BY_ADMINISTRATOR"
+      },
+      {
+        "navigation": "file:///mnt/data/casruntime/_site/index.html",
+        "result": "net::ERR_BLOCKED_BY_ADMINISTRATOR"
+      }
+    ],
+    "city_results": null,
+    "stale_state": null,
+    "missing_series": null,
+    "console_errors": null,
+    "verdict": "runtime gate not executed because browser navigation was blocked by sandbox administrator policy before page execution"
+  },
+  "durability": {
+    "result": "PASS",
+    "second_run_city_count": 23,
+    "second_run_totals_intact": true,
+    "second_run_kyiv_compatibility": true,
+    "only_semantic_delta_between_run1_and_run2": [
+      "casualties.meta.generated_at",
+      "casualties_by_city.kyiv.meta.generated_at"
+    ]
+  },
+  "non_casualty_regression": {
+    "result": "PASS",
+    "method": "focused test strips casualties/casualties_by_city and asserts full remaining JSON equality against fresh production-equivalent input",
+    "unexpected_diffs": []
+  },
+  "promotion_file_set": [
+    "kyiv-air-alerts-grafana/scripts/update_casualties.py",
+    "kyiv-air-alerts-grafana/scripts/add_casualty_panel.py",
+    "kyiv-air-alerts-grafana/data/casualties/master_20cities_manifest.json",
+    "kyiv-air-alerts-grafana/data/casualties/master_20cities_monthly_wide.csv",
+    "kyiv-air-alerts-grafana/data/casualties/cities/odesa/manifest.json",
+    "kyiv-air-alerts-grafana/data/casualties/cities/odesa/odesa_air_attack_deaths_monthly.csv",
+    "kyiv-air-alerts-grafana/data/casualties/cities/zaporizhzhia/manifest.json",
+    "kyiv-air-alerts-grafana/data/casualties/cities/zaporizhzhia/zaporizhzhia_air_attack_deaths_monthly.csv",
+    "kyiv-air-alerts-grafana/data/casualties/cities/kherson/manifest.json",
+    "kyiv-air-alerts-grafana/data/casualties/cities/kherson/kherson_air_attack_deaths_monthly.csv",
+    "kyiv-air-alerts-grafana/pages-preview/app.js",
+    "kyiv-air-alerts-grafana/pages-preview/index.html"
+  ],
+  "styles_css_required": false,
+  "generated_future_cutover_outputs": [
+    "kyiv-air-alerts-grafana/data/dashboard_data.json",
+    "kyiv-air-alerts-grafana/grafana/dashboard.json"
+  ],
+  "deployed": {
+    "netlify": false,
+    "grafana": false,
+    "preview": false
+  },
+  "protected_state": {
+    "site_prod": "unchanged",
+    "main": "unchanged",
+    "db_neon": "untouched",
+    "historical_replay": "untouched",
+    "live_attack_event_monitor": "untouched",
+    "6863_campaign": "untouched"
+  },
+  "verdict": "23-CITY CASUALTY PRODUCTION PROMOTION STILL BLOCKED — RUNTIME GATE NOT EXECUTED"
+}
