@@ -1,0 +1,580 @@
+{
+  "schema_version": 1,
+  "kind": "historical_attack_event_duplicate_observation_isolated_proof",
+  "campaign_id": "historical-attack-events-v2-2026-09-27",
+  "starting_campaign_head": "205d0b84e83b2d18a25ad2e7d2a01a8aca6e6999",
+  "controller_commit": "e54eae38ef2939940b8e898d6bff577b9ac82f11",
+  "controller_self_test": {
+    "batch_size": 50,
+    "completion_idempotence": "PASS",
+    "control_resume_gate": "PASS",
+    "dangling_observation_reference_guard": "PASS",
+    "different_observation_ids_untouched": "PASS",
+    "duplicate_inside_generated_batch": "PASS",
+    "episode_reference_preserved": "PASS",
+    "equivalent_context_duplicate": "PASS",
+    "exact_duplicate_across_batches": "PASS",
+    "expected_status_and_batch_mutation": "PASS",
+    "fallback_recovery_to_stage1_only": "PASS",
+    "global_observation_uniqueness": "PASS",
+    "idempotence_no_work": "PASS",
+    "manual_does_not_promote": "PASS",
+    "ok": true,
+    "phase_batch_limits": {
+      "ACCELERATED_2X": 2,
+      "ACCELERATED_4X": 4,
+      "CONTROL": 1,
+      "SAFETY_FALLBACK": 1
+    },
+    "protected_mutation_guard": "PASS",
+    "python_bytecode_prevention": "PASS",
+    "resume_retry_observation_idempotence": "PASS",
+    "same_id_conflicting_payload": "PASS",
+    "stage1_eight_run_promotion": "PASS",
+    "stage1_failure_fallback": "PASS",
+    "stage2_failure_fallback": "PASS",
+    "synthetic_guard_injection": "PASS",
+    "systemic_source_failure_guard": "PASS",
+    "terminal_episode_retry_regression_guard": "PASS",
+    "unexpected_mutation_guard": "PASS"
+  },
+  "controller_summary": {
+    "batches_attempted": 1,
+    "batches_committed": 1,
+    "campaign_complete": "NO",
+    "campaign_head": "a2fc40084fc5022fb702138dd0df124fb6d53dae",
+    "campaign_id": "historical-attack-events-v2-2026-09-27",
+    "clean_run": "YES",
+    "clean_run_streak": 0,
+    "fallback_reason": null,
+    "new_episodes_processed": 26,
+    "phase_after": "SAFETY_FALLBACK",
+    "phase_before": "SAFETY_FALLBACK",
+    "processed_after": 126,
+    "processed_before": 100
+  },
+  "processed_after": 126,
+  "terminal_after": 126,
+  "lviv_scanned_after": 126,
+  "lviv_terminal_after": 126,
+  "lviv_last_completed_batch": 3,
+  "phase_after": "SAFETY_FALLBACK",
+  "target_observation_id": "72c62034bdbd3f5d45163428",
+  "target_persisted_count": 1,
+  "global_duplicate_ids": [],
+  "global_duplicate_count": 0,
+  "batch3_duplicate_metadata": {
+    "schema_version": 1,
+    "semantics": "campaign-wide-canonical-observation-dedupe-v1",
+    "equivalent_duplicate_occurrences": 3,
+    "equivalent_duplicate_ids": [
+      "02a14a097154843178bfcb1c",
+      "053a3c1dbdbc4c99a1b3c163",
+      "72c62034bdbd3f5d45163428"
+    ],
+    "duplicates": [
+      {
+        "observation_id": "72c62034bdbd3f5d45163428",
+        "scope": "campaign",
+        "equivalence": "EXACT_DUPLICATE",
+        "canonical_payload_hash": "c464242f6f079a9feee47632a44f2fd3220306b0ccce1ace1138c64264c539a1",
+        "original_payload_hash": "3f64a5a9b43d5920871991c9951a85a36884a410863e621e96e813cf64c230c9",
+        "regenerated_payload_hash": "3f64a5a9b43d5920871991c9951a85a36884a410863e621e96e813cf64c230c9",
+        "original_batch_path": "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/lviv/batch_000002.json",
+        "episode_reference_ids": [],
+        "original_context": {
+          "event_timestamp_if_stated": null,
+          "temporal_binding": {
+            "present": false,
+            "code": "NO_STRICT_TEMPORAL_BINDING",
+            "evidence_type": null,
+            "evidence": null,
+            "event_time": null,
+            "event_interval": null,
+            "message_time": null,
+            "episode_specific": false,
+            "supported_episode_ids": [],
+            "episode_id": null,
+            "near_boundary": {
+              "present": false,
+              "episode_specific": false,
+              "supported_episode_ids": [],
+              "episode_id": null
+            },
+            "evidence_sources": []
+          },
+          "classifier_reason_codes": [
+            "MATCH_NONE",
+            "EXACT_CITY_EVENT_TEXT",
+            "NO_STRICT_EXPLOSION_EVIDENCE",
+            "NO_AIR_MILITARY_CONTEXT",
+            "NO_STRICT_TEMPORAL_BINDING"
+          ],
+          "classification_outcome": "needs_review",
+          "classification_episode_id": null,
+          "candidate_matching": {
+            "outcome": "no_match",
+            "matched_episode_ids": [],
+            "logical_episode_groups": [],
+            "matched_episode_id": null,
+            "reason": "publication_outside_all_tracked_alert_windows"
+          },
+          "retrieval_provenance": {
+            "adapter": "SourceLocalHtmlArchiveAdapter",
+            "archive_local_day": "2026-05-28",
+            "archive_url": "https://suspilne.media/lviv/archive/2026/5/28/",
+            "late_window_hours": 72
+          }
+        },
+        "regenerated_context": {
+          "event_timestamp_if_stated": null,
+          "temporal_binding": {
+            "present": false,
+            "code": "NO_STRICT_TEMPORAL_BINDING",
+            "evidence_type": null,
+            "evidence": null,
+            "event_time": null,
+            "event_interval": null,
+            "message_time": null,
+            "episode_specific": false,
+            "supported_episode_ids": [],
+            "episode_id": null,
+            "near_boundary": {
+              "present": false,
+              "episode_specific": false,
+              "supported_episode_ids": [],
+              "episode_id": null
+            },
+            "evidence_sources": []
+          },
+          "classifier_reason_codes": [
+            "MATCH_NONE",
+            "EXACT_CITY_EVENT_TEXT",
+            "NO_STRICT_EXPLOSION_EVIDENCE",
+            "NO_AIR_MILITARY_CONTEXT",
+            "NO_STRICT_TEMPORAL_BINDING"
+          ],
+          "classification_outcome": "needs_review",
+          "classification_episode_id": null,
+          "candidate_matching": {
+            "outcome": "no_match",
+            "matched_episode_ids": [],
+            "logical_episode_groups": [],
+            "matched_episode_id": null,
+            "reason": "publication_outside_all_tracked_alert_windows"
+          },
+          "retrieval_provenance": {
+            "adapter": "SourceLocalHtmlArchiveAdapter",
+            "archive_local_day": "2026-05-28",
+            "archive_url": "https://suspilne.media/lviv/archive/2026/5/28/",
+            "late_window_hours": 72
+          }
+        }
+      },
+      {
+        "observation_id": "053a3c1dbdbc4c99a1b3c163",
+        "scope": "campaign",
+        "equivalence": "EXACT_DUPLICATE",
+        "canonical_payload_hash": "f26e7bb46b0f6eab5d901c850fbc2648929b7d9315f8ba26ab342760f0dfe5a2",
+        "original_payload_hash": "2391ab810cac5c751df8a9c46762636df346ac0b2b05d7c2761593e4ebe95721",
+        "regenerated_payload_hash": "2391ab810cac5c751df8a9c46762636df346ac0b2b05d7c2761593e4ebe95721",
+        "original_batch_path": "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/lviv/batch_000002.json",
+        "episode_reference_ids": [],
+        "original_context": {
+          "event_timestamp_if_stated": null,
+          "temporal_binding": {
+            "present": false,
+            "code": "NO_STRICT_TEMPORAL_BINDING",
+            "evidence_type": null,
+            "evidence": null,
+            "event_time": null,
+            "event_interval": null,
+            "message_time": null,
+            "episode_specific": false,
+            "supported_episode_ids": [],
+            "episode_id": null,
+            "near_boundary": {
+              "present": false,
+              "episode_specific": false,
+              "supported_episode_ids": [],
+              "episode_id": null
+            },
+            "evidence_sources": []
+          },
+          "classifier_reason_codes": [
+            "MATCH_NONE",
+            "EXACT_CITY_EVENT_TEXT",
+            "STRICT_EXPLOSION_EVIDENCE",
+            "ATTACK_EVENT_TYPES:damage",
+            "NO_AIR_MILITARY_CONTEXT",
+            "NO_STRICT_TEMPORAL_BINDING"
+          ],
+          "classification_outcome": "needs_review",
+          "classification_episode_id": null,
+          "candidate_matching": {
+            "outcome": "no_match",
+            "matched_episode_ids": [],
+            "logical_episode_groups": [],
+            "matched_episode_id": null,
+            "reason": "publication_outside_all_tracked_alert_windows"
+          },
+          "retrieval_provenance": {
+            "adapter": "SourceLocalHtmlArchiveAdapter",
+            "archive_local_day": "2026-05-29",
+            "archive_url": "https://suspilne.media/lviv/archive/2026/5/29/",
+            "late_window_hours": 72
+          }
+        },
+        "regenerated_context": {
+          "event_timestamp_if_stated": null,
+          "temporal_binding": {
+            "present": false,
+            "code": "NO_STRICT_TEMPORAL_BINDING",
+            "evidence_type": null,
+            "evidence": null,
+            "event_time": null,
+            "event_interval": null,
+            "message_time": null,
+            "episode_specific": false,
+            "supported_episode_ids": [],
+            "episode_id": null,
+            "near_boundary": {
+              "present": false,
+              "episode_specific": false,
+              "supported_episode_ids": [],
+              "episode_id": null
+            },
+            "evidence_sources": []
+          },
+          "classifier_reason_codes": [
+            "MATCH_NONE",
+            "EXACT_CITY_EVENT_TEXT",
+            "STRICT_EXPLOSION_EVIDENCE",
+            "ATTACK_EVENT_TYPES:damage",
+            "NO_AIR_MILITARY_CONTEXT",
+            "NO_STRICT_TEMPORAL_BINDING"
+          ],
+          "classification_outcome": "needs_review",
+          "classification_episode_id": null,
+          "candidate_matching": {
+            "outcome": "no_match",
+            "matched_episode_ids": [],
+            "logical_episode_groups": [],
+            "matched_episode_id": null,
+            "reason": "publication_outside_all_tracked_alert_windows"
+          },
+          "retrieval_provenance": {
+            "adapter": "SourceLocalHtmlArchiveAdapter",
+            "archive_local_day": "2026-05-29",
+            "archive_url": "https://suspilne.media/lviv/archive/2026/5/29/",
+            "late_window_hours": 72
+          }
+        }
+      },
+      {
+        "observation_id": "02a14a097154843178bfcb1c",
+        "scope": "campaign",
+        "equivalence": "EXACT_DUPLICATE",
+        "canonical_payload_hash": "b813eebf180195bcc7d62d9c4c5b165e5abe2c73a56f82befd69b7cd66cdc480",
+        "original_payload_hash": "f6231226d1a5babbc6dbda1222239f5d028809f0be89069e1f6c70ff60950ea0",
+        "regenerated_payload_hash": "f6231226d1a5babbc6dbda1222239f5d028809f0be89069e1f6c70ff60950ea0",
+        "original_batch_path": "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/lviv/batch_000002.json",
+        "episode_reference_ids": [],
+        "original_context": {
+          "event_timestamp_if_stated": null,
+          "temporal_binding": {
+            "present": false,
+            "code": "NO_STRICT_TEMPORAL_BINDING",
+            "evidence_type": null,
+            "evidence": null,
+            "event_time": null,
+            "event_interval": null,
+            "message_time": null,
+            "episode_specific": false,
+            "supported_episode_ids": [],
+            "episode_id": null,
+            "near_boundary": {
+              "present": false,
+              "episode_specific": false,
+              "supported_episode_ids": [],
+              "episode_id": null
+            },
+            "evidence_sources": []
+          },
+          "classifier_reason_codes": [
+            "MATCH_NONE",
+            "EXACT_CITY_EVENT_TEXT",
+            "NO_STRICT_EXPLOSION_EVIDENCE",
+            "NO_AIR_MILITARY_CONTEXT",
+            "NO_STRICT_TEMPORAL_BINDING"
+          ],
+          "classification_outcome": "needs_review",
+          "classification_episode_id": null,
+          "candidate_matching": {
+            "outcome": "no_match",
+            "matched_episode_ids": [],
+            "logical_episode_groups": [],
+            "matched_episode_id": null,
+            "reason": "publication_outside_all_tracked_alert_windows"
+          },
+          "retrieval_provenance": {
+            "adapter": "SourceLocalHtmlArchiveAdapter",
+            "archive_local_day": "2026-05-30",
+            "archive_url": "https://suspilne.media/lviv/archive/2026/5/30/",
+            "late_window_hours": 72
+          }
+        },
+        "regenerated_context": {
+          "event_timestamp_if_stated": null,
+          "temporal_binding": {
+            "present": false,
+            "code": "NO_STRICT_TEMPORAL_BINDING",
+            "evidence_type": null,
+            "evidence": null,
+            "event_time": null,
+            "event_interval": null,
+            "message_time": null,
+            "episode_specific": false,
+            "supported_episode_ids": [],
+            "episode_id": null,
+            "near_boundary": {
+              "present": false,
+              "episode_specific": false,
+              "supported_episode_ids": [],
+              "episode_id": null
+            },
+            "evidence_sources": []
+          },
+          "classifier_reason_codes": [
+            "MATCH_NONE",
+            "EXACT_CITY_EVENT_TEXT",
+            "NO_STRICT_EXPLOSION_EVIDENCE",
+            "NO_AIR_MILITARY_CONTEXT",
+            "NO_STRICT_TEMPORAL_BINDING"
+          ],
+          "classification_outcome": "needs_review",
+          "classification_episode_id": null,
+          "candidate_matching": {
+            "outcome": "no_match",
+            "matched_episode_ids": [],
+            "logical_episode_groups": [],
+            "matched_episode_id": null,
+            "reason": "publication_outside_all_tracked_alert_windows"
+          },
+          "retrieval_provenance": {
+            "adapter": "SourceLocalHtmlArchiveAdapter",
+            "archive_local_day": "2026-05-30",
+            "archive_url": "https://suspilne.media/lviv/archive/2026/5/30/",
+            "late_window_hours": 72
+          }
+        }
+      }
+    ]
+  },
+  "target_duplicate_metadata": {
+    "observation_id": "72c62034bdbd3f5d45163428",
+    "scope": "campaign",
+    "equivalence": "EXACT_DUPLICATE",
+    "canonical_payload_hash": "c464242f6f079a9feee47632a44f2fd3220306b0ccce1ace1138c64264c539a1",
+    "original_payload_hash": "3f64a5a9b43d5920871991c9951a85a36884a410863e621e96e813cf64c230c9",
+    "regenerated_payload_hash": "3f64a5a9b43d5920871991c9951a85a36884a410863e621e96e813cf64c230c9",
+    "original_batch_path": "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/lviv/batch_000002.json",
+    "episode_reference_ids": [],
+    "original_context": {
+      "event_timestamp_if_stated": null,
+      "temporal_binding": {
+        "present": false,
+        "code": "NO_STRICT_TEMPORAL_BINDING",
+        "evidence_type": null,
+        "evidence": null,
+        "event_time": null,
+        "event_interval": null,
+        "message_time": null,
+        "episode_specific": false,
+        "supported_episode_ids": [],
+        "episode_id": null,
+        "near_boundary": {
+          "present": false,
+          "episode_specific": false,
+          "supported_episode_ids": [],
+          "episode_id": null
+        },
+        "evidence_sources": []
+      },
+      "classifier_reason_codes": [
+        "MATCH_NONE",
+        "EXACT_CITY_EVENT_TEXT",
+        "NO_STRICT_EXPLOSION_EVIDENCE",
+        "NO_AIR_MILITARY_CONTEXT",
+        "NO_STRICT_TEMPORAL_BINDING"
+      ],
+      "classification_outcome": "needs_review",
+      "classification_episode_id": null,
+      "candidate_matching": {
+        "outcome": "no_match",
+        "matched_episode_ids": [],
+        "logical_episode_groups": [],
+        "matched_episode_id": null,
+        "reason": "publication_outside_all_tracked_alert_windows"
+      },
+      "retrieval_provenance": {
+        "adapter": "SourceLocalHtmlArchiveAdapter",
+        "archive_local_day": "2026-05-28",
+        "archive_url": "https://suspilne.media/lviv/archive/2026/5/28/",
+        "late_window_hours": 72
+      }
+    },
+    "regenerated_context": {
+      "event_timestamp_if_stated": null,
+      "temporal_binding": {
+        "present": false,
+        "code": "NO_STRICT_TEMPORAL_BINDING",
+        "evidence_type": null,
+        "evidence": null,
+        "event_time": null,
+        "event_interval": null,
+        "message_time": null,
+        "episode_specific": false,
+        "supported_episode_ids": [],
+        "episode_id": null,
+        "near_boundary": {
+          "present": false,
+          "episode_specific": false,
+          "supported_episode_ids": [],
+          "episode_id": null
+        },
+        "evidence_sources": []
+      },
+      "classifier_reason_codes": [
+        "MATCH_NONE",
+        "EXACT_CITY_EVENT_TEXT",
+        "NO_STRICT_EXPLOSION_EVIDENCE",
+        "NO_AIR_MILITARY_CONTEXT",
+        "NO_STRICT_TEMPORAL_BINDING"
+      ],
+      "classification_outcome": "needs_review",
+      "classification_episode_id": null,
+      "candidate_matching": {
+        "outcome": "no_match",
+        "matched_episode_ids": [],
+        "logical_episode_groups": [],
+        "matched_episode_id": null,
+        "reason": "publication_outside_all_tracked_alert_windows"
+      },
+      "retrieval_provenance": {
+        "adapter": "SourceLocalHtmlArchiveAdapter",
+        "archive_local_day": "2026-05-28",
+        "archive_url": "https://suspilne.media/lviv/archive/2026/5/28/",
+        "late_window_hours": 72
+      }
+    }
+  },
+  "original_observation_payload_hash": "3f64a5a9b43d5920871991c9951a85a36884a410863e621e96e813cf64c230c9",
+  "reconstructed_observation_payload_hash": "3f64a5a9b43d5920871991c9951a85a36884a410863e621e96e813cf64c230c9",
+  "canonical_payload_hash": "c464242f6f079a9feee47632a44f2fd3220306b0ccce1ace1138c64264c539a1",
+  "payload_equivalence": "EXACT_DUPLICATE",
+  "episode_reference_ids": [],
+  "batch3_observation_count": 62,
+  "batch3_episode_result_count": 26,
+  "protected_files_unchanged": true,
+  "protected_files": {
+    "kyiv-air-alerts-grafana/data/explosion_audited_baseline.json": {
+      "expected": "5bbd2b771559eac2966aeec65d6e3b5487b9c1a9",
+      "actual": "5bbd2b771559eac2966aeec65d6e3b5487b9c1a9",
+      "match": true
+    },
+    "kyiv-air-alerts-grafana/data/explosion_review_queue.json": {
+      "expected": "e6ed6776ae326a18a07978b1979dd3b265096bf0",
+      "actual": "e6ed6776ae326a18a07978b1979dd3b265096bf0",
+      "match": true
+    },
+    "kyiv-air-alerts-grafana/data/explosion_candidate_monitor_state.json": {
+      "expected": "3c8658880c6b93a00fb8ddbec2c4eaeed6d3f2cc",
+      "actual": "3c8658880c6b93a00fb8ddbec2c4eaeed6d3f2cc",
+      "match": true
+    },
+    "kyiv-air-alerts-grafana/data/explosion_candidate_monitor_last_run.json": {
+      "expected": "1552b13a2a9361be968cea4f09876cc20f96572f",
+      "actual": "1552b13a2a9361be968cea4f09876cc20f96572f",
+      "match": true
+    },
+    "kyiv-air-alerts-grafana/data/explosions_test.json": {
+      "expected": "3109dc02d2292efa59eddd26b34292cab2b554ab",
+      "actual": "3109dc02d2292efa59eddd26b34292cab2b554ab",
+      "match": true
+    },
+    "kyiv-air-alerts-grafana/data/dashboard_data.json": {
+      "expected": "85e1d5cacfbe0af1530bbf584cb63ebdfef463e6",
+      "actual": "85e1d5cacfbe0af1530bbf584cb63ebdfef463e6",
+      "match": true
+    },
+    "kyiv-air-alerts-grafana/data/explosion_research/cherkasy/final_evidence.json": {
+      "expected": "5dd59bb3c4076d2a27ee6f77464ec0be507d2cd7",
+      "actual": "5dd59bb3c4076d2a27ee6f77464ec0be507d2cd7",
+      "match": true
+    },
+    "kyiv-air-alerts-grafana/data/explosion_research/chernihiv/final_evidence.json": {
+      "expected": "708644ea2cf5673d56f8cc73104c2fa17c72fd93",
+      "actual": "708644ea2cf5673d56f8cc73104c2fa17c72fd93",
+      "match": true
+    },
+    "kyiv-air-alerts-grafana/data/explosion_research/dnipro/final_evidence.json": {
+      "expected": "99758ae2a7d888593ffd863cc53cd9f48bf34f5a",
+      "actual": "99758ae2a7d888593ffd863cc53cd9f48bf34f5a",
+      "match": true
+    },
+    "kyiv-air-alerts-grafana/data/explosion_research/kharkiv/final_evidence.json": {
+      "expected": "dcbbb3a2cf96276f23672d8e6e497626740c7947",
+      "actual": "dcbbb3a2cf96276f23672d8e6e497626740c7947",
+      "match": true
+    },
+    "kyiv-air-alerts-grafana/data/explosion_research/kherson/final_evidence.json": {
+      "expected": "243b36904ea715fef0d100656f0822100009ca9b",
+      "actual": "243b36904ea715fef0d100656f0822100009ca9b",
+      "match": true
+    },
+    "kyiv-air-alerts-grafana/data/explosion_research/kropyvnytskyi/final_evidence.json": {
+      "expected": "ab21e5608a2d0600538b7a5b4d3cee77f5eb9f7b",
+      "actual": "ab21e5608a2d0600538b7a5b4d3cee77f5eb9f7b",
+      "match": true
+    },
+    "kyiv-air-alerts-grafana/data/explosion_research/kyiv/final_evidence.json": {
+      "expected": "dd21e37b5903e53ef4be90b23133a14a1b7aa613",
+      "actual": "dd21e37b5903e53ef4be90b23133a14a1b7aa613",
+      "match": true
+    },
+    "kyiv-air-alerts-grafana/data/explosion_research/lviv/final_evidence.json": {
+      "expected": "bc6b04e0892e430f8a055f2a7d54b41dfd00715b",
+      "actual": "bc6b04e0892e430f8a055f2a7d54b41dfd00715b",
+      "match": true
+    },
+    "kyiv-air-alerts-grafana/data/explosion_research/mykolaiv/final_evidence.json": {
+      "expected": "fe10f780d988917a0f742400d774ac8b20466ffd",
+      "actual": "fe10f780d988917a0f742400d774ac8b20466ffd",
+      "match": true
+    },
+    "kyiv-air-alerts-grafana/data/explosion_research/odesa/final_evidence.json": {
+      "expected": "1ed4cf2a52b02c7b1ffb36fa7f7737e81543e428",
+      "actual": "1ed4cf2a52b02c7b1ffb36fa7f7737e81543e428",
+      "match": true
+    },
+    "kyiv-air-alerts-grafana/data/explosion_research/sevastopol/final_evidence.json": {
+      "expected": "931a575dbd9b3fc4c90579bfbbb9ad54d8e70a62",
+      "actual": "931a575dbd9b3fc4c90579bfbbb9ad54d8e70a62",
+      "match": true
+    },
+    "kyiv-air-alerts-grafana/data/explosion_research/sumy/final_evidence.json": {
+      "expected": "7c0a4a64b3d7000cd10e8f1b846b1e57641d8a4d",
+      "actual": "7c0a4a64b3d7000cd10e8f1b846b1e57641d8a4d",
+      "match": true
+    },
+    "kyiv-air-alerts-grafana/data/explosion_research/zaporizhzhia/final_evidence.json": {
+      "expected": "afc2702bfeb0b599dbec00d251362450b2d292e1",
+      "actual": "afc2702bfeb0b599dbec00d251362450b2d292e1",
+      "match": true
+    }
+  },
+  "frozen_total_from_ids": 6863,
+  "frozen_total_expected": 6863,
+  "frozen_universe_unchanged": true
+}
