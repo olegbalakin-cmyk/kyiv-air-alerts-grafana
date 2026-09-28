@@ -1,0 +1,218 @@
+{
+  "schema_version": 1,
+  "kind": "cherkasy_remaining_structural_gaps_proof",
+  "starting_head": "84512efe9fa1bf4f9bfe234250782b6ac69e78bf",
+  "proof_input_head": "9a9aeb4ca7e69c610471d358e9f1cd51b21beaee",
+  "proof_branch": "cherkasy-remaining-structural-gaps-proof-2026-09-28",
+  "evidence_blob_before": "433b901ec49279fb865294a7c1e9a5328cf1b46a",
+  "evidence_blob_after": "433b901ec49279fb865294a7c1e9a5328cf1b46a",
+  "monitor_blob_before": "b55fe2ed082958917c74f95bca2fd6bc137bcaae",
+  "monitor_blob_after": "b55fe2ed082958917c74f95bca2fd6bc137bcaae",
+  "replay_blob_before": "376e7946356bfcafae92ca41e0d405523d4e9377",
+  "replay_blob_after": "c54165fb7c34d885f51e26e98063203335d1a788",
+  "classifier_files_changed": [
+    "kyiv-air-alerts-grafana/scripts/replay_explosion_history.py"
+  ],
+  "replay_files_changed": [
+    "kyiv-air-alerts-grafana/scripts/replay_explosion_history.py"
+  ],
+  "test_files_changed": [
+    "kyiv-air-alerts-grafana/tests/test_historical_replay_cherkasy_roles.py"
+  ],
+  "proof_workflow_files_added": [
+    ".github/workflows/cherkasy-remaining-structural-gaps-proof.yml"
+  ],
+  "before": {
+    "denominator": 1548,
+    "strict": 54,
+    "sensitivity": 57,
+    "qa": 3
+  },
+  "episode_trace": {
+    "1211cf659b50b8f60a118e85": {
+      "event_type": "air_defense_action",
+      "city_binding": "exact_city Cherkasy actual PPO action",
+      "retained_event_time_kyiv": "2026-03-24 14:46 and 15:31",
+      "alert_start": "2026-03-24T09:17:43Z",
+      "alert_end": "2026-03-24T15:53:27Z",
+      "old_temporal_path": "sensitivity provenance supplied sensitivity_binding only; retained event_time_kyiv was not converted into reviewed temporal binding",
+      "old_rejection_reason": "NO_STRICT_TEMPORAL_BINDING",
+      "responsible_condition": "history_provenance(sensitivity_only_events) omitted temporal; strict classifier requires base_event_ok and strict_episode_id",
+      "proof_result": "STRICT",
+      "proof_temporal_binding": {
+        "code": "TEMPORAL_REVIEWED_VALIDATED_BINDING",
+        "event_time": "2026-03-24T12:46:00Z",
+        "episode_specific": true
+      }
+    },
+    "2e52d5a124fddfe369687035": {
+      "event_type": "air_defense_action",
+      "city_binding": "exact_city Cherkasy actual PPO action",
+      "retained_event_time_kyiv": "2025-02-14 ~01:42",
+      "alert_start": "2025-02-13T20:28:36Z",
+      "alert_end": "2025-02-14T00:22:00Z",
+      "old_temporal_path": "sensitivity provenance supplied near_boundary sensitivity binding only; retained approximate event clock was not validated against bound episode",
+      "old_rejection_reason": "NO_STRICT_TEMPORAL_BINDING",
+      "responsible_condition": "history_provenance(sensitivity_only_events) omitted temporal; monitor event clock extraction is attack-event-word based and does not bridge this retained PPO clock",
+      "proof_result": "STRICT",
+      "proof_temporal_binding": {
+        "code": "TEMPORAL_REVIEWED_VALIDATED_BINDING",
+        "event_time": "2025-02-13T23:42:00Z",
+        "episode_specific": true
+      }
+    },
+    "7dc902b97fda7ea1d146c907": {
+      "event_type": "explosion",
+      "city_binding": "exact-city explosion in Cherkasy",
+      "retained_evidence_relation": "event segment explicitly says the Cherkasy explosion was during the Russian attack; adjacent aerial context is regional",
+      "alert_start": "2026-09-04T04:24:51Z",
+      "alert_end": "2026-09-04T08:23:27Z",
+      "old_air_context_path": "reviewed cross-segment same-attack rule required event_during_attack AND context_city_local",
+      "old_rejection_reason": "AIR_CONTEXT_NOT_LINKED_TO_EVENT",
+      "responsible_condition": "historical_review_roles Cherkasy cross-segment relation rejected explicit during-attack linkage when adjacent aerial context was regional",
+      "proof_result": "STRICT"
+    },
+    "3a8c3baa43001ec2f94b53c8": {
+      "event_type": "explosion",
+      "city_binding": "exact city",
+      "retained_event_time_kyiv": null,
+      "old_rejection_reason": "NO_STRICT_TEMPORAL_BINDING",
+      "proof_result": "SENSITIVITY",
+      "invariant": "remains sensitivity-only because no event-specific strict time exists"
+    },
+    "f0b75832ea028fd6b1b5ff75": {
+      "frozen_historical_classification": "SENSITIVITY",
+      "current_classifier_classification": "STRICT",
+      "strict_basis": [
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "AIR_MILITARY_CONTEXT",
+        "SAME_ATTACK_CONTEXT_SUPPORTED",
+        "TEMPORAL_EXPLICIT_ALERT_RELATION"
+      ],
+      "old_reconciliation_path": "every non-UNCHANGED reconciliation category was appended to changed_episodes; city workflow treated changed_episodes as manual QA",
+      "old_qa_condition": "SENSITIVITY_TO_STRICT was not distinguished from unsafe reconciliation changes",
+      "proof_result": "STRICT with evidence-backed upgrade retained in reconciliation audit but excluded from manual QA"
+    },
+    "f57f2f50c537719982254887": {
+      "proof_result": "AMBIGUOUS",
+      "reason_codes": [
+        "NO_EXACT_CITY_EVENT_TEXT",
+        "NO_STRICT_EXPLOSION_EVIDENCE",
+        "NO_STRICT_TEMPORAL_BINDING",
+        "AIR_CONTEXT_NOT_LINKED_TO_EVENT"
+      ],
+      "invariant": "remains the sole manual QA episode"
+    }
+  },
+  "classifier_rule_change": {
+    "retained_ppo_temporal_rule": "For a retained historical sensitivity record, use structured retained event_time/event_time_kyiv as strict temporal evidence only when the evidence text deterministically confirms actual air-defense action, the action is exact-city, and the parsed retained clock falls inside the already-bound alert episode.",
+    "guards": [
+      "no episode-ID special cases",
+      "no Cherkasy-specific ID hardcoding",
+      "possible/predictive PPO is not promoted",
+      "untimed events remain sensitivity-only",
+      "monitor code unchanged"
+    ],
+    "cross_segment_rule": "An exact-city event segment that explicitly states it occurred during the attack can link to adjacent aerial context even when that adjacent context is regional, provided no different audited city is named; mere co-occurrence remains insufficient."
+  },
+  "reconciliation_rule_change": {
+    "old_rule": "all non-UNCHANGED transitions were manual-QA changes",
+    "new_rule": "retain every transition in reconciliation_events, but exclude SENSITIVITY_TO_STRICT from manual QA only when a contributor deterministically produces approved_strict for the same episode with exact-city, strict-event, air-context, same-attack, episode-specific temporal, and usable reviewed provenance gates all satisfied",
+    "negative_control": "an unexplained/ambiguous upgrade without usable provenance or episode-specific temporal binding remains QA"
+  },
+  "target_episode_results": {
+    "1211cf659b50b8f60a118e85": "STRICT",
+    "2e52d5a124fddfe369687035": "STRICT",
+    "7dc902b97fda7ea1d146c907": "STRICT",
+    "f0b75832ea028fd6b1b5ff75": "STRICT_NO_RECONCILIATION_QA",
+    "3a8c3baa43001ec2f94b53c8": "SENSITIVITY_ONLY",
+    "f57f2f50c537719982254887": "QA_AMBIGUOUS"
+  },
+  "unexpected_episode_deltas": [],
+  "regression_tests": {
+    "proof_run_id": 36453890436,
+    "proof_head": "9a9aeb4ca7e69c610471d358e9f1cd51b21beaee",
+    "monitor_self_test": "PASS",
+    "replay_self_test": "PASS",
+    "pytest": "34/34 PASS",
+    "canonical_cherkasy_replay": "PASS",
+    "immutable_input_checks_before": "PASS",
+    "immutable_input_checks_after": "PASS",
+    "overall_workflow_conclusion": "failure",
+    "overall_failure_reason": "success-contract assertion expected replayed_sensitivity_episodes=57 but canonical replay returned 58"
+  },
+  "proof_attempts": [
+    {
+      "run_id": 36453515361,
+      "result": "FAIL_BEFORE_REPLAY",
+      "reason": "proof runner lacked pytest; monitor/replay self-tests passed and immutable input checks passed"
+    },
+    {
+      "run_id": 36453615280,
+      "result": "FAIL_BEFORE_REPLAY",
+      "reason": "adapter plumbing NameError: target_episode passed at call site but missing from candidate_from_history signature"
+    },
+    {
+      "run_id": 36453694418,
+      "result": "FAIL_BEFORE_REPLAY",
+      "reason": "33/34 tests passed; synthetic proof helper failed to pass bound episode"
+    },
+    {
+      "run_id": 36453890436,
+      "result": "SEMANTIC_PROOF_COMPLETE_CONTRACT_MISMATCH",
+      "reason": "34/34 tests and canonical replay passed; aggregate sensitivity contract contradicted replay state semantics"
+    }
+  ],
+  "after": {
+    "denominator": 1548,
+    "strict": 57,
+    "sensitivity": 58,
+    "qa": 1,
+    "qa_episode_ids": [
+      "f57f2f50c537719982254887"
+    ]
+  },
+  "remaining_qa_episode_ids": [
+    "f57f2f50c537719982254887"
+  ],
+  "reconciliation_event_ids": [
+    "1211cf659b50b8f60a118e85",
+    "2e52d5a124fddfe369687035",
+    "f0b75832ea028fd6b1b5ff75",
+    "f57f2f50c537719982254887"
+  ],
+  "accepted_evidence_backed_upgrade_ids": [
+    "1211cf659b50b8f60a118e85",
+    "2e52d5a124fddfe369687035",
+    "f0b75832ea028fd6b1b5ff75"
+  ],
+  "semantic_contract_blocker": {
+    "requested_after": {
+      "denominator": 1548,
+      "strict": 57,
+      "sensitivity": 57,
+      "qa": 1
+    },
+    "canonical_after": {
+      "denominator": 1548,
+      "strict": 57,
+      "sensitivity": 58,
+      "qa": 1
+    },
+    "definition_in_replay": "replayed_sensitivity_episodes = count(status in {STRICT, SENSITIVITY})",
+    "contradiction": "With 57 STRICT episodes and 3a8c3baa43001ec2f94b53c8 required to remain SENSITIVITY-only, the union count cannot be 57; it is at least 58. The canonical replay returns exactly 58.",
+    "action": "STOP: do not change evidence, classifier semantics, or metric accounting merely to force 57."
+  },
+  "commits_created": [
+    "153d6dc27b0649d808905bac61ba1e6501717ec0",
+    "9850dc63bd86aed48f157ffa7eb4888eb58e51fa",
+    "1b7182d1aeb9aabc688e6386cdbf6c6eb247d023",
+    "b131424e2e929ec837092588be65c685549c0afe",
+    "3ce4e183310a283cd41a0a000c99508609c3fbfc",
+    "2535758f3ee22af4b2e399a4ca96632f36406cf5",
+    "797cd473409e8b26c8194f597418f19794e9be40",
+    "9a9aeb4ca7e69c610471d358e9f1cd51b21beaee"
+  ],
+  "verdict": "CHERKASY STRUCTURAL SEMANTICS PROVEN; REQUESTED 57/57/1 AGGREGATE CONTRACT IS INTERNALLY INCONSISTENT — STOPPED BEFORE ATOMIC APPLY"
+}
