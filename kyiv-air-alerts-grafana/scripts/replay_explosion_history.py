@@ -875,6 +875,171 @@ def historical_review_roles(city: str, row: dict, monitor) -> tuple[dict, str]:
             )
             or direct_event_segment
         )
+    elif city in {"chernihiv", "kropyvnytskyi"}:
+        # These two frozen corpora retain reviewed role contracts in legacy
+        # decision/basis fields.  Translate only those explicit reviewed
+        # contracts; never promote free article text on its own.
+        review_parts = [
+            str(row.get(key)).strip()
+            for key in BASIS_FIELDS
+            if row.get(key) and str(row.get(key)).strip()
+        ]
+        review_basis = " — ".join(review_parts)
+        review_low = review_basis.casefold()
+
+        if city == "kropyvnytskyi":
+            reviewed_exact_city = (
+                str(row.get("basis") or "").strip().casefold()
+                == "exact_city_during_alert"
+            )
+            reviewed_episode_relation = reviewed_exact_city
+            reviewed_air_context = reviewed_exact_city
+            if not reviewed_exact_city:
+                return {}, evidence
+        else:
+            reviewed_exact_city = bool(
+                re.search(r"\bexact[_ -]?city\b", review_low)
+                or "strict_exact_city_in_episode" in review_low
+            )
+            reviewed_episode_relation = bool(
+                re.search(
+                    r"(?:time[_ -]?match|matched[_ -]?alert|inside[_ -]?(?:one[_ -]?)?alert|"
+                    r"during[_ -]?alert|in[_ -]?episode|same[_ -]?attack|cross[_ -]?midnight)",
+                    review_low,
+                )
+            )
+            reviewed_air_context = bool(
+                re.search(r"aerial[_ -]?(?:war|context|attack)", review_low)
+                or re.search(
+                    r"(?:matched[_ -]?alert|inside[_ -]?(?:one[_ -]?)?alert|"
+                    r"during[_ -]?alert|in[_ -]?episode|cross[_ -]?midnight)",
+                    review_low,
+                )
+            )
+            if not reviewed_episode_relation:
+                return {}, evidence
+
+        segments = [
+            " ".join(part.split())
+            for part in re.split(r"(?<=[.!?;])\s+|\n+", evidence)
+            if part and part.strip()
+        ]
+        english_air = re.compile(
+            r"\b(?:air alert|aerial|missile(?:s)?|drone(?:s)?|uav(?:s)?|"
+            r"air force|afu|reactive[- ]?uav|drone threat|missile warning(?:s)?|"
+            r"combined air attack|russian (?:drone |missile |air )?attack|alert episode)\b",
+            flags=re.IGNORECASE,
+        )
+        english_explosion = re.compile(
+            r"\b(?:explosion(?:s)?|blast(?:s)?|bang(?:s)?)\b",
+            flags=re.IGNORECASE,
+        )
+        english_impact = re.compile(
+            r"\b(?:impact(?:s|ed)?|hit|hits)\b",
+            flags=re.IGNORECASE,
+        )
+        english_strike = re.compile(
+            r"\b(?:strike|strikes|struck)\b",
+            flags=re.IGNORECASE,
+        )
+
+        def reviewed_event_type(segment: str) -> str | None:
+            existing = monitor.attack_event_types(segment)
+            for event_type in (
+                "explosion",
+                "impact",
+                "arrival",
+                "strike",
+                "air_defense_action",
+                "damage",
+                "fire",
+            ):
+                if event_type in existing and monitor.strict_attack_event_signal(segment):
+                    return event_type
+            if english_explosion.search(segment):
+                return "explosion"
+            if english_impact.search(segment):
+                return "impact"
+            if english_strike.search(segment):
+                return "strike"
+            segment_low = segment.casefold()
+            completed_air_attack = bool(
+                re.search(r"\bатакув(?:ав|ала|ало|али)\b", segment_low)
+                and re.search(r"\b(?:бпла|безпілот\w*|дрон\w*|повітрян\w*)\b", segment_low)
+            )
+            if completed_air_attack:
+                return "strike"
+            return None
+
+        event_segments = []
+        event_types = []
+        for segment in segments:
+            event_type = reviewed_event_type(segment)
+            if event_type:
+                event_segments.append(segment)
+                if event_type not in event_types:
+                    event_types.append(event_type)
+
+        mentioned_cities = monitor.audited_cities_in_text(evidence)
+        conflicting_named_city = any(
+            named_city != city for named_city in mentioned_cities
+        )
+        reviewed_english_exact_city = bool(
+            city == "chernihiv"
+            and reviewed_episode_relation
+            and re.search(
+                r"\b(?:in|inside|within)\s+Chernihiv\b",
+                evidence,
+                flags=re.IGNORECASE,
+            )
+        )
+        exact_city = bool(
+            reviewed_exact_city
+            or reviewed_english_exact_city
+            or city in mentioned_cities
+        )
+        explosion = bool(event_segments)
+        air_context = bool(
+            reviewed_air_context
+            or any(monitor.air_military_context(segment) for segment in segments)
+            or any(english_air.search(segment) for segment in segments)
+        )
+        same_attack = bool(
+            exact_city
+            and explosion
+            and air_context
+            and reviewed_episode_relation
+            and not conflicting_named_city
+        )
+
+        roles = {}
+        if exact_city:
+            roles["exact_city_evidence"] = {
+                "present": True,
+                "evidence_text": evidence[:1200],
+            }
+        if explosion:
+            roles["explosion_evidence"] = {
+                "present": True,
+                "evidence_text": event_segments[0][:1200],
+                "event_types": event_types,
+            }
+        if air_context:
+            roles["aerial_war_evidence"] = {
+                "present": True,
+                "evidence_text": (review_basis or evidence)[:1200],
+            }
+        if same_attack:
+            roles["same_attack_basis"] = {
+                "present": True,
+                "basis": (
+                    "reviewed_kropyvnytskyi_exact_city_during_alert"
+                    if city == "kropyvnytskyi"
+                    else "reviewed_chernihiv_legacy_episode_relation"
+                ),
+                "evidence_text": (review_basis or evidence)[:1200],
+            }
+        return roles, evidence
     else:
         return {}, evidence
 
