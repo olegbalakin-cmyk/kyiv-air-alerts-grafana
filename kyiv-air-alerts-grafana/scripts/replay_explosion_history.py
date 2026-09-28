@@ -807,6 +807,11 @@ def history_provenance(
             },
         }
         provenance.update(reviewed_roles)
+        strict_air_defense_temporal = reviewed_exact_city_air_defense_temporal(
+            row, target_episode, monitor, city
+        )
+        if strict_air_defense_temporal is not None:
+            provenance["temporal"] = strict_air_defense_temporal
         return provenance
     return None
 
