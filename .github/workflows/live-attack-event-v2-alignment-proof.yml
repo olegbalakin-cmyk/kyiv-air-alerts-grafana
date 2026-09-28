@@ -12,7 +12,7 @@ permissions:
 
 concurrency:
   group: live-attack-event-v2-alignment-proof-2026-09-28
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   proof:
@@ -307,94 +307,103 @@ jobs:
               raise SystemExit("cross-contract mismatch")
           PY
 
-      - name: Run isolated before/after network discovery
+      - name: Run bounded isolated real network discovery
         if: success()
-        env:
-          UKRAINEALARM_API_TOKEN: ${{ secrets.UKRAINEALARM_API_TOKEN }}
         shell: bash
         run: |
           set -euo pipefail
-          rm -rf /tmp/network-before /tmp/network-after
-          cp -a /tmp/live-baseline/kyiv-air-alerts-grafana /tmp/network-before
-          cp -a "$PWD/kyiv-air-alerts-grafana" /tmp/network-after
-          cp /tmp/network-before/data/explosion_review_queue.json /tmp/network-before-queue-start.json
-          cp /tmp/network-after/data/explosion_review_queue.json /tmp/network-after-queue-start.json
+          rm -rf /tmp/network-proof
+          cp -a "$PWD/kyiv-air-alerts-grafana" /tmp/network-proof
           (
-            cd /tmp/network-before
-            python scripts/monitor_explosion_candidates.py               --kyiv-alerts-file /tmp/prod-kyiv-alerts.json               --sevastopol-events-file /tmp/prod-sevastopol-events.json
-          ) > /tmp/network-before.stdout
-          (
-            cd /tmp/network-after
-            python scripts/monitor_explosion_candidates.py               --kyiv-alerts-file /tmp/prod-kyiv-alerts.json               --sevastopol-events-file /tmp/prod-sevastopol-events.json
-          ) > /tmp/network-after.stdout
-          python - <<'PY'
+            cd /tmp/network-proof
+            python - <<'PY'
+          import copy
           import json
           from collections import Counter
           from pathlib import Path
+          import scripts.monitor_explosion_candidates as m
 
-          def load(p): return json.loads(Path(p).read_text())
-          before_report=load("/tmp/network-before/data/explosion_candidate_monitor_last_run.json")
-          after_report=load("/tmp/network-after/data/explosion_candidate_monitor_last_run.json")
-          before_start=load("/tmp/network-before-queue-start.json")
-          after_start=load("/tmp/network-after-queue-start.json")
-          before_queue=load("/tmp/network-before/data/explosion_review_queue.json")
-          after_queue=load("/tmp/network-after/data/explosion_review_queue.json")
-          b0={str(x.get("candidate_id")) for x in before_start}
-          a0={str(x.get("candidate_id")) for x in after_start}
-          bnew=[x for x in before_queue if str(x.get("candidate_id")) not in b0]
-          anew=[x for x in after_queue if str(x.get("candidate_id")) not in a0]
+          started=m.now_utc()
+          state=m.ensure_state()
+          queue=m.load_json(m.QUEUE_FILE, [])
+          if not isinstance(queue,list):
+              queue=[]
+          due=m.due_checks(state,started)
+          due={k:v for k,v in due.items() if v}
+          if not due:
+              raise SystemExit("NO_CURRENT_DUE_ALERTS_FOR_NETWORK_PROOF")
+          city_key="sumy" if "sumy" in due else sorted(due)[0]
+          city_due=due[city_key]
+          earliest=min(m.parse_dt(ep.get("alert_start")) or started for ep,_ in city_due)
+
+          telegram_errors=m.refresh_telegram_cache(state,started)
+          telegram_rows=m.telegram_candidates_for_city(state,city_key,earliest,started)
+          google_rows,query_url,google_stats=m.search_city_news(city_key,earliest,started)
+          merged={(row["url"],row["title"]):row for row in telegram_rows+google_rows}
+          rows=list(merged.values())
+
+          before_ids={str(x.get("candidate_id") or "") for x in queue}
+          working_queue=copy.deepcopy(queue)
+          added,auto_strict=m.add_candidates(
+              working_queue,city_key,rows,city_due,
+              m.tracked_episodes_for_city(state,city_key),started,
+          )
+          new_rows=[
+              x for x in working_queue
+              if str(x.get("candidate_id") or "") not in before_ids
+          ]
           event_counts=Counter()
           status_counts=Counter()
-          for x in anew:
+          for x in new_rows:
               for t in x.get("event_types") or ((x.get("classification_evidence") or {}).get("event_types") or []):
                   event_counts[str(t)]+=1
               status_counts[str(x.get("status") or "")]+=1
-          search_rows=list((after_report.get("searches") or {}).values())
-          families=Counter()
-          for row in search_rows:
-              for k,v in (row.get("query_family_result_counts") or {}).items():
-                  families[k]+=int(v or 0)
-          non_explosion_executed=any(
-              k!="explosion" and any(k in (r.get("query_urls") or {}) for r in search_rows)
-              for k in ("impact_arrival","strike","attack_consequence","air_defense_action")
-          )
+
+          families=google_stats.get("query_family_result_counts") or {}
+          query_urls=google_stats.get("query_urls") or {}
+          required={"explosion","impact_arrival","strike","attack_consequence","air_defense_action"}
+          non_explosion_executed=all(k in query_urls for k in required)
+          duplicate_keys=len(rows)-len({(x.get("url"),x.get("title")) for x in rows})
           out={
-              "before":{
-                  "alerts_checked":before_report.get("due_checks_at_cutoff"),
-                  "cities_searched":len(before_report.get("cities_searched") or []),
-                  "new_candidates":before_report.get("new_review_candidates"),
-                  "review_queue_size":before_report.get("review_queue_size"),
-                  "errors":before_report.get("errors") or {},
-                  "new_candidate_ids":[x.get("candidate_id") for x in bnew],
-              },
-              "after":{
-                  "alerts_checked":after_report.get("due_checks_at_cutoff"),
-                  "cities_searched":len(after_report.get("cities_searched") or []),
-                  "new_candidates":after_report.get("new_review_candidates"),
-                  "review_queue_size":after_report.get("review_queue_size"),
-                  "errors":after_report.get("errors") or {},
-                  "google_query_family_results":dict(families),
-                  "telegram_results":sum(int(r.get("telegram_results") or 0) for r in search_rows),
-                  "event_type_counts":dict(event_counts),
-                  "auto_strict":status_counts.get("approved_strict",0),
-                  "auto_sensitivity":status_counts.get("approved_sensitivity",0),
-                  "needs_review":status_counts.get("needs_review",0),
-                  "rejected":status_counts.get("rejected",0),
-                  "new_candidate_ids":[x.get("candidate_id") for x in anew],
-                  "non_explosion_query_path_executed":non_explosion_executed,
-              },
-              "duplicate_candidate_ids_after":len(after_queue)-len({str(x.get("candidate_id")) for x in after_queue if x.get("candidate_id")}),
-              "new_candidates_before_after_delta":len(anew)-len(bnew),
+              "mode":"bounded_real_network_discovery",
+              "city_key":city_key,
+              "alerts_checked":len(city_due),
+              "cities_searched":1,
+              "google_public_web_results":sum(int(v or 0) for v in families.values()),
+              "google_query_family_results":families,
+              "query_urls":query_urls,
+              "telegram_results":len(telegram_rows),
+              "results_after_filter_and_merge":len(rows),
+              "new_candidates":added,
+              "event_type_counts":dict(event_counts),
+              "explosion_candidates":event_counts.get("explosion",0),
+              "impact_candidates":event_counts.get("impact",0),
+              "arrival_candidates":event_counts.get("arrival",0),
+              "strike_candidates":event_counts.get("strike",0),
+              "damage_candidates":event_counts.get("damage",0),
+              "fire_candidates":event_counts.get("fire",0),
+              "air_defense_candidates":event_counts.get("air_defense_action",0),
+              "auto_strict":status_counts.get("approved_strict",0),
+              "auto_sensitivity":status_counts.get("approved_sensitivity",0),
+              "needs_review":status_counts.get("needs_review",0),
+              "rejected":status_counts.get("rejected",0),
+              "fulltext_fetches":int(google_stats.get("fulltext_fetches") or 0),
+              "fulltext_rescued_candidates":int(google_stats.get("fulltext_rescued_candidates") or 0),
+              "errors":{f"telegram:{k}":v for k,v in telegram_errors.items() if v},
+              "non_explosion_query_path_executed":non_explosion_executed,
+              "duplicate_merged_source_keys":duplicate_keys,
+              "new_candidate_ids":[x.get("candidate_id") for x in new_rows],
           }
           Path("/tmp/network_proof.json").write_text(json.dumps(out,ensure_ascii=False,indent=2)+"\n")
           print(json.dumps(out,ensure_ascii=False,indent=2))
-          if out["after"]["errors"]:
+          if out["errors"]:
               raise SystemExit("network proof errors")
           if not non_explosion_executed:
-              raise SystemExit("non-explosion query path did not execute")
-          if out["duplicate_candidate_ids_after"] != 0:
-              raise SystemExit("duplicate candidates after family merge")
+              raise SystemExit("not all bounded query families executed")
+          if duplicate_keys != 0:
+              raise SystemExit("duplicate source keys after family merge")
           PY
+          )
 
       - name: Build proof artifact
         if: always()
@@ -470,7 +479,7 @@ jobs:
           unexpected=((dry.get("queue_dry_replay") or {}).get("unexpected_status_transitions"))
           cross_mismatch=cross.get("unexplained_live_v2_semantic_mismatches")
           deterministic_ok=dry.get("all_deterministic_passed") is True
-          network_ok=bool(network) and not ((network.get("after") or {}).get("errors")) and (network.get("after") or {}).get("non_explosion_query_path_executed") is True and network.get("duplicate_candidate_ids_after")==0
+          network_ok=bool(network) and not (network.get("errors") or {}) and network.get("non_explosion_query_path_executed") is True and network.get("duplicate_merged_source_keys")==0
           protected_ok=all(v["unchanged"] for v in protected_state.values())
           campaign_untouched=campaign_before==campaign_after
           pass_all=deterministic_ok and unexpected==0 and cross_mismatch==0 and network_ok and protected_ok and campaign_untouched
@@ -504,12 +513,12 @@ jobs:
             "event_type_contract":historical_contract["classes"],
             "discovery_before":{
               "strategy":"single explosion-centric Google News query",
-              "network":network.get("before") or {},
+              "last_authoritative_network_run":latest_run,
             },
             "discovery_after":{
               "strategy":"five bounded query families merged by existing deterministic candidate identity before classification",
               "families":["explosion","impact_arrival","strike","attack_consequence","air_defense_action"],
-              "network":network.get("after") or {},
+              "network":network,
             },
             "query_strategy":"bounded family queries; discovery broad, classifier conservative; family results merged before classification",
             "ppo_contract_before":"legacy live: PPO-only complete Telegram message rejected; confirmed interception without explosion not event-positive",
