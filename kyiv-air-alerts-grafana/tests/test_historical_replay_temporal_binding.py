@@ -204,3 +204,62 @@ def test_known_old_long_alert_split_without_event_clock_remains_unresolved():
     }
     got = replay.bind_evidence_record(row, episodes, monitor)
     assert got["episode_id"] is None
+
+
+def test_cross_midnight_clock_with_trailing_date_keeps_explicit_next_day():
+    episodes = [
+        episode("ep1", "2025-11-07T19:24:20Z", "2025-11-08T05:33:11Z")
+    ]
+    row = {
+        "alert_episode_start": "2025-11-07 23:26",
+        "event_time": "23:44 і після 00:00 2025-11-08",
+    }
+    got = replay.bind_evidence_record(row, episodes, monitor)
+    assert got["episode_id"] == "ep1"
+    assert got["method"] == "event_time_unique_containment"
+    assert got["event_times_utc"] == [
+        "2025-11-07T21:44:00+00:00",
+        "2025-11-07T22:00:00+00:00",
+    ]
+
+
+def test_approximate_full_datetime_keeps_its_explicit_day():
+    episodes = [
+        episode("wrong-day", "2025-03-05T01:00:00Z", "2025-03-05T02:00:00Z"),
+    ]
+    row = {
+        "alert_episode_start": "2025-03-05T23:28:00+02:00",
+        "event_time": "2025-03-06 ~03:50 Europe/Kyiv",
+    }
+    got = replay.bind_evidence_record(row, episodes, monitor)
+    assert got["episode_id"] is None
+    assert got["method"] == "event_time_no_containing_episode"
+    assert got["event_times_utc"] == ["2025-03-06T01:50:00+00:00"]
+
+
+def test_event_clock_can_use_explicit_date_retained_in_prose_start_field():
+    episodes = [
+        episode("ep1", "2026-03-04T00:36:19Z", "2026-03-04T02:59:13Z"),
+    ]
+    row = {
+        "alert_episode_start": "2026-03-04 до 04:27 (точна хвилина не вказана)",
+        "event_time": "~04:27",
+    }
+    got = replay.bind_evidence_record(row, episodes, monitor)
+    assert got["episode_id"] == "ep1"
+    assert got["method"] == "event_time_unique_containment"
+
+
+def test_multiple_event_times_in_different_episodes_are_not_collapsed_to_one():
+    episodes = [
+        episode("first", "2026-02-05T11:02:13Z", "2026-02-05T13:08:11Z"),
+        episode("second", "2026-02-05T13:20:14Z", "2026-02-05T15:20:38Z"),
+    ]
+    row = {
+        "alert_episode_start": "2026-02-05 ~14:31",
+        "event_time": "14:45; 15:39",
+    }
+    got = replay.bind_evidence_record(row, episodes, monitor)
+    assert got["episode_id"] is None
+    assert got["method"] == "event_time_ambiguous_containment"
+    assert got["per_time_candidates"] == [["first"], ["second"]]
