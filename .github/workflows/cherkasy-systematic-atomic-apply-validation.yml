@@ -1,0 +1,85 @@
+name: Cherkasy atomic-apply validation
+on:
+  push:
+    branches: [cherkasy-systematic-atomic-apply-validation-2026-09-28]
+permissions:
+  contents: read
+  actions: read
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    env:
+      BASE: c711e7b853d7265c23e5a0a50daae9bf4a03a880
+      THROUGH: "2026-09-17"
+    steps:
+      - uses: actions/checkout@v4
+        with: {fetch-depth: 0}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: kyiv-air-alerts-grafana/requirements.txt
+      - run: pip install -r kyiv-air-alerts-grafana/requirements.txt
+      - name: Focused tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          python kyiv-air-alerts-grafana/scripts/replay_explosion_history.py --self-test
+          python kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py --self-test
+          python - <<'PY'
+          import importlib.util
+          from pathlib import Path
+          paths=[
+            Path("kyiv-air-alerts-grafana/tests/test_historical_replay_cherkasy_roles.py"),
+            Path("kyiv-air-alerts-grafana/tests/test_historical_replay_strike_roles.py"),
+            Path("kyiv-air-alerts-grafana/tests/test_historical_replay_remaining_v2_roles.py"),
+          ]
+          n=0
+          for path in paths:
+            spec=importlib.util.spec_from_file_location(path.stem,path)
+            m=importlib.util.module_from_spec(spec); spec.loader.exec_module(m)
+            for name in sorted(dir(m)):
+              fn=getattr(m,name)
+              if name.startswith("test_") and callable(fn):
+                fn(); n+=1; print("PASS",path.name,name)
+          print("FOCUSED_TESTS_PASSED",n)
+          PY
+      - name: Replay current base and candidate
+        shell: bash
+        run: |
+          set -euo pipefail
+          git worktree add "$RUNNER_TEMP/base" "$BASE"
+          mkdir -p "$RUNNER_TEMP/replays"
+          for city in cherkasy lviv sevastopol sumy zaporizhzhia kyiv; do
+            python "$RUNNER_TEMP/base/kyiv-air-alerts-grafana/scripts/replay_explosion_history.py"               --repo-root "$RUNNER_TEMP/base/kyiv-air-alerts-grafana" --city "$city" --through "$THROUGH"               --input-head "$BASE" --read-only --output "$RUNNER_TEMP/replays/before_$city.json"
+            python kyiv-air-alerts-grafana/scripts/replay_explosion_history.py               --repo-root "$GITHUB_WORKSPACE/kyiv-air-alerts-grafana" --city "$city" --through "$THROUGH"               --input-head "$GITHUB_SHA" --read-only --output "$RUNNER_TEMP/replays/after_$city.json"
+          done
+      - name: Assert exact deltas
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json, os
+          from pathlib import Path
+          d=Path(os.environ["RUNNER_TEMP"])/"replays"
+          exp={"lviv":(12,12,0),"sevastopol":(38,55,0),"sumy":(204,238,0),"zaporizhzhia":(62,73,151),"kyiv":(140,144,260)}
+          def s(p):
+            j=json.loads(p.read_text()); ch=j.get("changed_episodes") or []
+            return {"den":j.get("episodes_checked"),"strict":j.get("replayed_strict_episodes"),"sens":j.get("replayed_sensitivity_episodes"),"qa":len(ch)+len(j.get("errors") or []),"ids":sorted(x["episode_id"] for x in ch if x.get("episode_id")),"errors":j.get("errors") or [],"ppo":j.get("ppo_related_changes") or []}
+          b=s(d/"before_cherkasy.json"); a=s(d/"after_cherkasy.json")
+          assert (b["den"],b["strict"],b["sens"],b["qa"])==(1548,29,29,30),(b,a)
+          assert (a["den"],a["strict"],a["sens"],a["qa"])==(1548,49,49,10),(b,a)
+          systematic=set(["4dcfd4e2f9d8ed59c0d9cbdc","55fe7b2b2c6d38b7222a6c12","742487e7882ef7e9e54a1409","750530dec9a40c82528122d2","76adf73a290c475b221ed5e3","89154a5cff1beec27948012a","8e9fc0a92a8374d44f1e09c4","a6d4f1aaf5941686c7b8eb57","b67b490bdd33c079a5690d04","b7cd4e95db5a5b0e1baa612c","bc42010683ba744c2fdccd12","bc60b5c3fb6b4c8e7ec8db45","be3bc05f86b83b8e69b626ce","d6046c49723be6301d7ef070","d6c4c1c34d4acd4582754133","d74a9f0b1416462270803b62","db523b0bfab122b1d6106b40","e2dac3d08930c88ed3d2f6c7","f52595d4c5235cc5564dcde9","fdb6569e1702843e0ef54e9f"])
+          remaining=set(["1211cf659b50b8f60a118e85","2e52d5a124fddfe369687035","3a8c3baa43001ec2f94b53c8","58624e812ef70a85166d09c6","7dc902b97fda7ea1d146c907","99e50f8c16d1cd74340dc32d","c1cb52e1672fd669808bc5c8","f0b75832ea028fd6b1b5ff75","f57f2f50c537719982254887","f732ee21dee348389b0971cd"])
+          assert set(b["ids"])-set(a["ids"])==systematic
+          assert set(a["ids"])==remaining
+          for city,v in exp.items():
+            x=s(d/f"before_{city}.json"); y=s(d/f"after_{city}.json")
+            assert (x["strict"],x["sens"],x["qa"])==v,(city,x)
+            assert (y["strict"],y["sens"],y["qa"])==v,(city,y)
+            assert x["ids"]==y["ids"],(city,x["ids"],y["ids"])
+          print("VALIDATION_OK",json.dumps({"before":b,"after":a},sort_keys=True))
+          PY
+      - name: Protected tracked files unchanged
+        run: |
+          git diff --exit-code --             kyiv-air-alerts-grafana/data/explosion_audited_baseline.json             kyiv-air-alerts-grafana/data/explosion_review_queue.json             kyiv-air-alerts-grafana/data/explosion_candidate_monitor_state.json             kyiv-air-alerts-grafana/data/explosion_candidate_monitor_last_run.json             kyiv-air-alerts-grafana/data/explosions_test.json             kyiv-air-alerts-grafana/data/dashboard_data.json             kyiv-air-alerts-grafana/data/explosion_research
