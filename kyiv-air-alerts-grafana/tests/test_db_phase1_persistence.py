@@ -497,5 +497,217 @@ class PersistenceAdapterTests(unittest.TestCase):
         )
 
 
+    def poll_payload(self, label, *, checked_at=None):
+        payload = copy.deepcopy(self.payload)
+        ordinal = {"A": 1, "B": 2, "C": 3, "D": 4}.get(label, 9)
+        payload["run_provenance"] = copy.deepcopy(payload["run_provenance"])
+        payload["run_provenance"]["run_kind"] = "live_poll_unit_test"
+        payload["run_provenance"]["parameters"] = {
+            **payload["run_provenance"].get("parameters", {}),
+            "proof_only": True,
+            "poll_label": label,
+        }
+        payload["checkpoint_candidate"] = {
+            "source_key": payload["source_key"],
+            "city_key": payload["city_key"],
+            "stream_key": payload["stream_key"],
+            "checkpoint_kind": "poll",
+            "checked_at": checked_at or f"2026-09-28T1{ordinal}:00:00Z",
+            "continuity_verified": False,
+            "continuity_method": None,
+            "continuity_anchor_at": None,
+            "observed_oldest_start_at": "2025-09-01T00:00:00Z",
+            "observed_latest_end_at": "2026-09-28T09:00:00Z",
+            "observed_record_count": 20,
+            "cursor": {"proof_only": True, "poll": label, "ordinal": ordinal},
+            "metadata": {
+                "proof_only": True,
+                "kind": "live_poll_unit_test",
+                "poll": label,
+            },
+        }
+        return payload
+
+    def sorted_checkpoints(self, connection):
+        return sorted(
+            connection.state["checkpoints"].values(),
+            key=lambda row: row["checkpoint_seq"],
+        )
+
+    def test_bootstrap_candidate_after_nonbootstrap_chain_fails(self):
+        connection = FakeConnection()
+        self.persist(connection)
+        self.persist(connection, self.poll_payload("A"), start="2026-09-28T10:00:00+00:00")
+        before = copy.deepcopy(connection.state)
+        with self.assertRaises(CheckpointConflict):
+            self.persist(connection, self.payload, start="2026-09-28T10:10:00+00:00")
+        self.assertEqual(connection.state, before)
+
+    def test_poll_with_no_current_checkpoint_fails_and_rolls_back(self):
+        connection = FakeConnection()
+        with self.assertRaises(CheckpointConflict):
+            self.persist(connection, self.poll_payload("A"), start="2026-09-28T10:20:00+00:00")
+        self.assertEqual(connection.state["runs"], {})
+        self.assertEqual(connection.state["episodes"], {})
+        self.assertEqual(connection.state["sources"], {})
+        self.assertEqual(connection.state["checkpoints"], {})
+        self.assertEqual(connection.commit_count, 0)
+        self.assertEqual(connection.rollback_count, 1)
+
+    def test_poll_a_appends_seq2_and_links_actual_seq1(self):
+        connection = FakeConnection()
+        self.persist(connection)
+        seq1 = self.sorted_checkpoints(connection)[0]
+        result = self.persist(
+            connection,
+            self.poll_payload("A"),
+            start="2026-09-28T10:30:00+00:00",
+        )
+        checkpoints = self.sorted_checkpoints(connection)
+        self.assertEqual([row["checkpoint_seq"] for row in checkpoints], [1, 2])
+        self.assertEqual(checkpoints[1]["checkpoint_kind"], "poll")
+        self.assertEqual(checkpoints[1]["previous_checkpoint_id"], seq1["checkpoint_id"])
+        self.assertEqual(result["stats"]["episodes_inserted"], 0)
+        self.assertEqual(result["stats"]["source_observations_inserted"], 0)
+        self.assertEqual(result["stats"]["checkpoints_inserted"], 1)
+        self.assertFalse(result["stats"]["exact_retry"])
+
+    def test_poll_a_exact_retry_does_not_advance_and_preserves_canonical_identities(self):
+        connection = FakeConnection()
+        self.persist(connection)
+        poll_a = self.poll_payload("A")
+        self.persist(connection, poll_a, start="2026-09-28T10:40:00+00:00")
+        seq2 = self.sorted_checkpoints(connection)[1]
+        episode_ids = {
+            key: row["episode_uid"] for key, row in connection.state["episodes"].items()
+        }
+        source_ids = {
+            key: row["source_observation_id"] for key, row in connection.state["sources"].items()
+        }
+
+        result = self.persist(
+            connection,
+            poll_a,
+            start="2026-09-28T10:50:00+00:00",
+        )
+
+        checkpoints = self.sorted_checkpoints(connection)
+        self.assertEqual([row["checkpoint_seq"] for row in checkpoints], [1, 2])
+        self.assertEqual(checkpoints[1]["checkpoint_id"], seq2["checkpoint_id"])
+        self.assertEqual(result["stats"]["episodes_inserted"], 0)
+        self.assertEqual(result["stats"]["source_observations_inserted"], 0)
+        self.assertEqual(result["stats"]["checkpoints_inserted"], 0)
+        self.assertTrue(result["stats"]["exact_retry"])
+        self.assertEqual(
+            episode_ids,
+            {key: row["episode_uid"] for key, row in connection.state["episodes"].items()},
+        )
+        self.assertEqual(
+            source_ids,
+            {
+                key: row["source_observation_id"]
+                for key, row in connection.state["sources"].items()
+            },
+        )
+
+    def test_poll_b_after_poll_a_appends_seq3_and_links_actual_seq2(self):
+        connection = FakeConnection()
+        self.persist(connection)
+        self.persist(connection, self.poll_payload("A"), start="2026-09-28T11:00:00+00:00")
+        seq2 = self.sorted_checkpoints(connection)[1]
+        result = self.persist(
+            connection,
+            self.poll_payload("B"),
+            start="2026-09-28T11:10:00+00:00",
+        )
+        checkpoints = self.sorted_checkpoints(connection)
+        self.assertEqual([row["checkpoint_seq"] for row in checkpoints], [1, 2, 3])
+        self.assertEqual(checkpoints[2]["previous_checkpoint_id"], seq2["checkpoint_id"])
+        self.assertEqual(result["stats"]["checkpoints_inserted"], 1)
+        self.assertFalse(result["stats"]["exact_retry"])
+
+    def test_poll_sequence_is_derived_after_lock_and_checkpoint_reread(self):
+        connection = FakeConnection()
+        self.persist(connection)
+        self.persist(connection, self.poll_payload("A"), start="2026-09-28T11:20:00+00:00")
+        connection.events.clear()
+        connection.marker_counts.clear()
+
+        self.persist(
+            connection,
+            self.poll_payload("B"),
+            start="2026-09-28T11:30:00+00:00",
+        )
+
+        events = connection.events
+        checkpoints = self.sorted_checkpoints(connection)
+        self.assertEqual(checkpoints[-1]["checkpoint_seq"], 3)
+        self.assertEqual(events[0:3], ["BEGIN", "LOCK", "CHECKPOINT_REREAD"])
+        checkpoint_decision = events.index("CHECKPOINT_INSERT")
+        self.assertLess(events.index("LOCK"), events.index("CHECKPOINT_REREAD"))
+        self.assertLess(events.index("CHECKPOINT_REREAD"), events.index("RUN_INSERT"))
+        self.assertLess(events.index("CHECKPOINT_REREAD"), checkpoint_decision)
+        self.assertLess(checkpoint_decision, events.index("RUN_FINALIZE"))
+        self.assertLess(events.index("RUN_FINALIZE"), events.index("COMMIT"))
+
+    def test_poll_rejects_caller_supplied_checkpoint_seq(self):
+        connection = FakeConnection()
+        self.persist(connection)
+        before = copy.deepcopy(connection.state)
+        poll = self.poll_payload("A")
+        poll["checkpoint_candidate"]["checkpoint_seq"] = 999
+        with self.assertRaises(CheckpointConflict):
+            self.persist(connection, poll, start="2026-09-28T11:40:00+00:00")
+        self.assertEqual(connection.state, before)
+
+    def test_poll_rejects_caller_supplied_previous_checkpoint_id(self):
+        connection = FakeConnection()
+        self.persist(connection)
+        before = copy.deepcopy(connection.state)
+        poll = self.poll_payload("A")
+        poll["checkpoint_candidate"]["previous_checkpoint_id"] = uuid.uuid4()
+        with self.assertRaises(CheckpointConflict):
+            self.persist(connection, poll, start="2026-09-28T11:50:00+00:00")
+        self.assertEqual(connection.state, before)
+
+    def test_poll_checkpoint_insert_failure_rolls_back_run_and_last_seen_mutations(self):
+        seed = FakeConnection()
+        self.persist(seed)
+        before = copy.deepcopy(seed.state)
+        connection = FakeConnection(state=before, fail_marker="CHECKPOINT_INSERT")
+        with self.assertRaisesRegex(RuntimeError, "injected failure"):
+            self.persist(
+                connection,
+                self.poll_payload("A"),
+                start="2026-09-28T12:00:00+00:00",
+            )
+        self.assertEqual(connection.state, before)
+        self.assertEqual(connection.commit_count, 0)
+        self.assertEqual(connection.rollback_count, 1)
+
+    def test_poll_exact_retry_reuses_timestamp_and_json_semantic_normalization(self):
+        connection = FakeConnection()
+        self.persist(connection)
+        poll = self.poll_payload("A", checked_at="2026-09-28T13:00:00+03:00")
+        self.persist(connection, poll, start="2026-09-28T12:10:00+00:00")
+        retry = copy.deepcopy(poll)
+        retry["checkpoint_candidate"]["checked_at"] = "2026-09-28T10:00:00Z"
+        retry["checkpoint_candidate"]["cursor"] = json.dumps(
+            retry["checkpoint_candidate"]["cursor"],
+            sort_keys=True,
+        )
+        retry["checkpoint_candidate"]["metadata"] = json.dumps(
+            retry["checkpoint_candidate"]["metadata"],
+            sort_keys=True,
+        )
+        result = self.persist(connection, retry, start="2026-09-28T12:20:00+00:00")
+        self.assertTrue(result["stats"]["exact_retry"])
+        self.assertEqual(result["stats"]["checkpoints_inserted"], 0)
+        self.assertEqual(
+            [row["checkpoint_seq"] for row in self.sorted_checkpoints(connection)],
+            [1, 2],
+        )
+
+
 if __name__ == "__main__":
     unittest.main()

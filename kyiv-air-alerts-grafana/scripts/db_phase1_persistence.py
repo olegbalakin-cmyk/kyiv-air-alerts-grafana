@@ -473,6 +473,58 @@ def checkpoint_semantically_equal(existing: Mapping[str, Any], candidate: Mappin
     )
 
 
+def _insert_checkpoint(
+    cursor: Any,
+    candidate: Mapping[str, Any],
+    *,
+    checkpoint_seq: int,
+    previous_checkpoint_id: Any,
+    run_id: uuid.UUID,
+) -> Any:
+    cursor.execute(
+        """/* PHASE1:CHECKPOINT_INSERT */
+        INSERT INTO ingestion_checkpoints (
+            source_key, city_key, stream_key, checkpoint_seq, checkpoint_kind,
+            previous_checkpoint_id, checked_at, continuity_verified, continuity_method,
+            continuity_anchor_at, observed_oldest_start_at, observed_latest_end_at,
+            observed_record_count, cursor, metadata, created_by_run_id
+        ) VALUES (
+            %s, %s, %s, %s, %s,
+            %s, %s, %s, %s,
+            %s, %s, %s,
+            %s, %s::jsonb, %s::jsonb, %s
+        )
+        RETURNING checkpoint_id
+        """,
+        (
+            candidate["source_key"],
+            candidate["city_key"],
+            candidate["stream_key"],
+            checkpoint_seq,
+            candidate["checkpoint_kind"],
+            previous_checkpoint_id,
+            candidate["checked_at"],
+            bool(candidate["continuity_verified"]),
+            candidate.get("continuity_method"),
+            candidate.get("continuity_anchor_at"),
+            candidate.get("observed_oldest_start_at"),
+            candidate.get("observed_latest_end_at"),
+            candidate.get("observed_record_count"),
+            (
+                None
+                if candidate.get("cursor") is None
+                else json.dumps(candidate.get("cursor"), ensure_ascii=False, sort_keys=True)
+            ),
+            json.dumps(candidate.get("metadata", {}), ensure_ascii=False, sort_keys=True),
+            run_id,
+        ),
+    )
+    inserted = _mapping_row(cursor.fetchone(), ("checkpoint_id",))
+    if not inserted:
+        raise RuntimeError("checkpoint insert did not return checkpoint_id")
+    return inserted["checkpoint_id"]
+
+
 def persist_bootstrap_checkpoint(
     cursor: Any,
     candidate: Mapping[str, Any],
@@ -508,49 +560,75 @@ def persist_bootstrap_checkpoint(
             )
         return current_checkpoint["checkpoint_id"], False, True
 
-    cursor.execute(
-        """/* PHASE1:CHECKPOINT_INSERT */
-        INSERT INTO ingestion_checkpoints (
-            source_key, city_key, stream_key, checkpoint_seq, checkpoint_kind,
-            previous_checkpoint_id, checked_at, continuity_verified, continuity_method,
-            continuity_anchor_at, observed_oldest_start_at, observed_latest_end_at,
-            observed_record_count, cursor, metadata, created_by_run_id
-        ) VALUES (
-            %s, %s, %s, %s, %s,
-            %s, %s, %s, %s,
-            %s, %s, %s,
-            %s, %s::jsonb, %s::jsonb, %s
-        )
-        RETURNING checkpoint_id
-        """,
-        (
-            candidate["source_key"],
-            candidate["city_key"],
-            candidate["stream_key"],
-            candidate["checkpoint_seq"],
-            candidate["checkpoint_kind"],
-            candidate.get("previous_checkpoint_id"),
-            candidate["checked_at"],
-            bool(candidate["continuity_verified"]),
-            candidate.get("continuity_method"),
-            candidate.get("continuity_anchor_at"),
-            candidate.get("observed_oldest_start_at"),
-            candidate.get("observed_latest_end_at"),
-            candidate.get("observed_record_count"),
-            (
-                None
-                if candidate.get("cursor") is None
-                else json.dumps(candidate.get("cursor"), ensure_ascii=False, sort_keys=True)
-            ),
-            json.dumps(candidate.get("metadata", {}), ensure_ascii=False, sort_keys=True),
-            run_id,
-        ),
+    checkpoint_id = _insert_checkpoint(
+        cursor,
+        candidate,
+        checkpoint_seq=1,
+        previous_checkpoint_id=None,
+        run_id=run_id,
     )
-    inserted = _mapping_row(cursor.fetchone(), ("checkpoint_id",))
-    if not inserted:
-        raise RuntimeError("checkpoint insert did not return checkpoint_id")
-    return inserted["checkpoint_id"], True, False
+    return checkpoint_id, True, False
 
+
+def persist_poll_checkpoint(
+    cursor: Any,
+    candidate: Mapping[str, Any],
+    *,
+    current_checkpoint: Mapping[str, Any] | None,
+    run_id: uuid.UUID,
+) -> tuple[Any, bool, bool]:
+    if candidate.get("checkpoint_kind") != "poll":
+        raise CheckpointConflict("Phase-1 poll candidate must have checkpoint_kind=poll")
+
+    forbidden_chain_fields = [
+        field for field in ("checkpoint_seq", "previous_checkpoint_id") if field in candidate
+    ]
+    if forbidden_chain_fields:
+        raise CheckpointConflict(
+            "poll candidate must omit transaction-derived chain fields: "
+            + ", ".join(forbidden_chain_fields)
+        )
+
+    if current_checkpoint is None:
+        raise CheckpointConflict("poll checkpoint cannot start a stream; bootstrap is required")
+
+    if checkpoint_semantically_equal(current_checkpoint, candidate):
+        return current_checkpoint["checkpoint_id"], False, True
+
+    next_seq = int(current_checkpoint["checkpoint_seq"]) + 1
+    checkpoint_id = _insert_checkpoint(
+        cursor,
+        candidate,
+        checkpoint_seq=next_seq,
+        previous_checkpoint_id=current_checkpoint["checkpoint_id"],
+        run_id=run_id,
+    )
+    return checkpoint_id, True, False
+
+
+def persist_checkpoint_candidate(
+    cursor: Any,
+    candidate: Mapping[str, Any],
+    *,
+    current_checkpoint: Mapping[str, Any] | None,
+    run_id: uuid.UUID,
+) -> tuple[Any, bool, bool]:
+    checkpoint_kind = candidate.get("checkpoint_kind")
+    if checkpoint_kind == "bootstrap":
+        return persist_bootstrap_checkpoint(
+            cursor,
+            candidate,
+            current_checkpoint=current_checkpoint,
+            run_id=run_id,
+        )
+    if checkpoint_kind == "poll":
+        return persist_poll_checkpoint(
+            cursor,
+            candidate,
+            current_checkpoint=current_checkpoint,
+            run_id=run_id,
+        )
+    raise CheckpointConflict(f"unsupported checkpoint_kind={checkpoint_kind!r}")
 
 def persist_phase1_payload(
     connection: Any,
@@ -564,6 +642,7 @@ def persist_phase1_payload(
     source_observations: list[Mapping[str, Any]],
     checkpoint_candidate: Mapping[str, Any],
     now_factory: Callable[[], datetime] | None = None,
+    post_lock_callback: Callable[[Mapping[str, Any] | None], None] | None = None,
 ) -> dict[str, Any]:
     """Persist one already-built Phase-1 payload as one all-or-nothing transaction."""
     now = now_factory or (lambda: datetime.now(timezone.utc))
@@ -573,6 +652,8 @@ def persist_phase1_payload(
         cursor.execute("/* PHASE1:BEGIN */ BEGIN")
         acquire_stream_lock(cursor, source_key, city_key, stream_key)
         current_checkpoint = read_current_checkpoint(cursor, source_key, city_key, stream_key)
+        if post_lock_callback is not None:
+            post_lock_callback(current_checkpoint)
 
         started_at = now()
         insert_ingestion_run(
@@ -619,7 +700,7 @@ def persist_phase1_payload(
                 stats["source_observations_existing"] += 1
                 stats["source_observations_last_seen_updated"] += 1
 
-        _, checkpoint_inserted, checkpoint_exact_retry = persist_bootstrap_checkpoint(
+        _, checkpoint_inserted, checkpoint_exact_retry = persist_checkpoint_candidate(
             cursor,
             checkpoint_candidate,
             current_checkpoint=current_checkpoint,
