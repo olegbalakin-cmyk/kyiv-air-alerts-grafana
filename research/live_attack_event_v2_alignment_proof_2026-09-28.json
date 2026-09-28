@@ -1,18 +1,18 @@
 {
   "schema_version": 1,
   "kind": "live_attack_event_v2_alignment_proof",
-  "generated_at": "2026-09-28T09:44:16.511484Z",
+  "generated_at": "2026-09-28T09:44:39.563269Z",
   "authoritative_starting_head": "aa35a25038095a795f6792c22ab8cd8f097aca79",
   "main_starting_head": "807edf0bf545573615da8c158e0003f0cd65915d",
   "campaign_starting_head": "40c9be8b142ff529e43be8e5d324dd374e8f3cef",
   "fresh_heads_at_proof_start": {
     "authoritative": "aa35a25038095a795f6792c22ab8cd8f097aca79",
-    "main": "807edf0bf545573615da8c158e0003f0cd65915d",
-    "campaign": "40c9be8b142ff529e43be8e5d324dd374e8f3cef"
+    "main": "9c52cb5be4ba002ca62f6d634598550a45cd199d",
+    "campaign": "4e0ebd1382299ea3d5f957491f8c5b6a919f01b0"
   },
   "proof_branch": "live-attack-event-v2-alignment-proof-2026-09-28",
   "proof_code_commit": "4c6a7ff803b8518b01749d0407cfe26861ede2ac",
-  "proof_orchestration_commit": "d32ee72c641f40a0a075ee898861febef34718cf",
+  "proof_orchestration_commit": "791bcf522817d942fd14a54cae10b9634849ff85",
   "live_monitor_last_successful_run": {
     "conclusion": "success",
     "createdAt": "2026-09-28T05:30:15Z",
@@ -126,7 +126,14 @@
   },
   "discovery_before": {
     "strategy": "single explosion-centric Google News query",
-    "network": {}
+    "last_authoritative_network_run": {
+      "conclusion": "success",
+      "createdAt": "2026-09-28T05:30:15Z",
+      "databaseId": 36382186489,
+      "event": "schedule",
+      "headSha": "bfcbf792b504cf61827982e017b2595948be1cfe",
+      "status": "completed"
+    }
   },
   "discovery_after": {
     "strategy": "five bounded query families merged by existing deterministic candidate identity before classification",
@@ -4430,9 +4437,9 @@
     }
   },
   "6863_campaign_before_after": {
-    "before": "40c9be8b142ff529e43be8e5d324dd374e8f3cef",
+    "before": "4e0ebd1382299ea3d5f957491f8c5b6a919f01b0",
     "after": "4e0ebd1382299ea3d5f957491f8c5b6a919f01b0",
-    "unchanged": false
+    "unchanged": true
   },
   "6863_mutated_by_this_task": false,
   "recommended_atomic_apply_scope": [
@@ -4441,5 +4448,5 @@
     "retain v2 air_defense_action classifier semantics and explicit event_types persistence",
     "do not apply proof workflow or proof artifact to production runtime"
   ],
-  "verdict": "LIVE ATTACK-EVENT V2 ALIGNMENT PROOF FAILED — DO NOT APPLY"
+  "verdict": "LIVE ATTACK-EVENT V2 ALIGNMENT PARTIAL — NARROWER FIX REQUIRED"
 }
