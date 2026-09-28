@@ -1,0 +1,222 @@
+{
+  "schema_version": "sumy-402035-atomic-evidence-repair-v1",
+  "generated_date": "2026-09-28",
+  "repository": "olegbalakin-cmyk/kyiv-air-alerts-grafana",
+  "branch": "multicity-wip-2026-09-16",
+  "target_episode_id": "402035df8980628fa245c4e8",
+  "starting_head": "8b03ce53b7d8a71867c5d2d13a60c2e84b8e8415",
+  "authoritative_recovery": {
+    "path": "research/sumy_402035_temporal_binding_recovery_2026-09-27.json",
+    "artifact_commit": "3a73d1303b07dbd238bf76b887db916220c65331",
+    "verdict": "SUMY 402035 TEMPORAL BINDING RECOVERED — READY FOR APPEND-ONLY EVIDENCE REPAIR"
+  },
+  "pre_repair_replay": {
+    "execution": "fresh actual GitHub Actions Sumy current-rules replay rerun during this task on the last semantically identical Sumy replay-input commit",
+    "workflow_run_id": 36347034347,
+    "run_attempt": 2,
+    "workflow_job_id": 108792215185,
+    "input_head": "2f2ce7a5e66f02d991b0e271f2e2ff5ec3c8c4d5",
+    "semantic_equivalence_to_starting_head": true,
+    "semantic_equivalence_basis": "Compare 2f2ce7a5e66f02d991b0e271f2e2ff5ec3c8c4d5..8b03ce53b7d8a71867c5d2d13a60c2e84b8e8415 shows no changes to Sumy final_evidence, Sumy source slices, replay_explosion_history.py, or monitor_explosion_candidates.py.",
+    "expected_denominator": 2297,
+    "reconstructed_denominator": 2297,
+    "strict": 204,
+    "sensitivity": 236,
+    "qa_count": 2,
+    "qa_episode_ids": [
+      "402035df8980628fa245c4e8",
+      "90a484f51b321e0950e31b60"
+    ],
+    "target_present": true,
+    "protected_files_unchanged": true,
+    "errors": 0
+  },
+  "repair": {
+    "commit_sha": "cc39d553aa02c2189b4fe1512a06a5bbc995d24b",
+    "changed_files": [
+      "kyiv-air-alerts-grafana/data/explosion_research/sumy/final_evidence.json"
+    ],
+    "final_evidence_blob_before": "cb4413104bf9e834be10f49abc4041621f396c1b",
+    "final_evidence_blob_after": "74b6d3fc6d6e9e18643d38de5c47b45e4d7033ea",
+    "append_only": true,
+    "additions": 66,
+    "deletions": 0,
+    "existing_target_record_preserved": true,
+    "appended_record": {
+      "bucket": "sensitivity_only_events",
+      "matched_episode_id": "402035df8980628fa245c4e8",
+      "matched_episode_start": "2026-06-18T17:50:00Z",
+      "matched_episode_start_date_kyiv": "2026-06-18",
+      "event_time_kyiv": "after 2026-06-18T23:00:00+03:00 and before 2026-06-18T23:36:00+03:00",
+      "source_url": "https://t.me/suspilnesumy/45416",
+      "evidence": "О 20:35Z Суспільне Суми повідомило: «Ще вибух в Сумах.» Наступне повідомлення 45417 у тій самій source-local sequence пов'язує подію з влучанням російської «Молнії» у технічний поверх багатоповерхівки у Ковпаківському районі Сум; офіційна атрибуція Сумської МВА підтверджує цю саму подію та її наслідки/пошкодження.",
+      "decision": "sensitivity_only: inferred_same_attack; recovered exact-city, aerial/military, source-local same-attack, and bounded event-time provenance place the event inside the matched alert without synthesizing an exact event minute",
+      "recovered_temporal_provenance": {
+        "source_name": "Suspilne Sumy Telegram",
+        "source_url": "https://t.me/suspilnesumy/45416",
+        "source_message_id": 45416,
+        "source_publication_time_utc_minute": "2026-06-18T20:35Z",
+        "source_publication_time_precision": "minute",
+        "source_timezone": "UTC",
+        "exact_seconds_recovered": false,
+        "exact_seconds_synthesized": false,
+        "exact_city_context": "Sumy",
+        "source_local_sequence": [
+          {
+            "message_id": 45416,
+            "url": "https://t.me/suspilnesumy/45416",
+            "publication_time_utc_minute": "2026-06-18T20:35Z",
+            "text": "Ще вибух в Сумах."
+          },
+          {
+            "message_id": 45417,
+            "url": "https://t.me/suspilnesumy/45417",
+            "publication_time_utc_minute": "2026-06-18T21:06Z",
+            "text": "Було влучання російської «Молнії» у технічний поверх багатоповерхівки у Ковпаківському районі Сум.",
+            "relationship_to_previous": "subsequent source-local same-attack attribution"
+          }
+        ],
+        "same_attack_basis": "Consecutive source-local messages 45416 -> 45417 with no competing Sumy attack introduced between them; independently corroborated by Kordon.Media and Sumy MVA same-event identity.",
+        "corroborating_temporal_source": {
+          "source_url": "https://kordon.media/dron-molniya-vdaryv-po-bagatopoverhivczi-v-sumah-naslidky-ataky/",
+          "stated_event_time": "after 23:00 Europe/Kyiv",
+          "timezone": "Europe/Kyiv"
+        },
+        "local_event_time_bound": {
+          "lower_exclusive": "2026-06-18T23:00:00+03:00",
+          "upper_exclusive": "2026-06-18T23:36:00+03:00"
+        },
+        "normalized_utc_event_time_bound": {
+          "lower_exclusive": "2026-06-18T20:00:00Z",
+          "upper_exclusive": "2026-06-18T20:36:00Z"
+        },
+        "target_alert_utc": {
+          "start": "2026-06-18T17:50:00Z",
+          "end": "2026-06-18T20:46:26Z"
+        },
+        "entire_bound_inside_target_alert": true,
+        "authoritative_attribution": {
+          "authority": "Sumy MVA",
+          "source_url": "https://t.me/serhii_kryvosheienko/1781",
+          "role": "same-event exact-city/military attribution and consequences"
+        },
+        "supported_event_types": [
+          "explosion",
+          "impact",
+          "damage"
+        ],
+        "temporal_precision_note": "Publication timestamp is minute-level; no exact event second or minute is synthesized."
+      }
+    }
+  },
+  "post_repair_replay": {
+    "execution": "actual GitHub Actions Sumy read-only replay on exact repair commit",
+    "workflow_run_id": 36379577749,
+    "workflow_job_id": 108792360039,
+    "workflow_artifact_id": 10951914402,
+    "input_head": "cc39d553aa02c2189b4fe1512a06a5bbc995d24b",
+    "status": "COMPLETE",
+    "expected_denominator": 2297,
+    "reconstructed_denominator": 2297,
+    "strict": 204,
+    "sensitivity": 237,
+    "qa_count": 1,
+    "qa_episode_ids": [
+      "90a484f51b321e0950e31b60"
+    ],
+    "changed_episode_ids": [
+      "90a484f51b321e0950e31b60"
+    ],
+    "target_removed_from_qa": true,
+    "target_replayed_status": "SENSITIVITY",
+    "target_classification": "approved_sensitivity / unchanged frozen sensitivity",
+    "supported_event_types": [
+      "explosion",
+      "impact",
+      "damage"
+    ],
+    "errors": 0,
+    "protected_files_unchanged": true
+  },
+  "delta_audit": {
+    "qa": {
+      "before": 2,
+      "after": 1,
+      "delta": -1
+    },
+    "removed_qa_ids": [
+      "402035df8980628fa245c4e8"
+    ],
+    "added_qa_ids": [],
+    "remaining_qa_ids": [
+      "90a484f51b321e0950e31b60"
+    ],
+    "denominator": {
+      "before": 2297,
+      "after": 2297,
+      "delta": 0
+    },
+    "strict": {
+      "before": 204,
+      "after": 204,
+      "delta": 0
+    },
+    "sensitivity": {
+      "before": 236,
+      "after": 237,
+      "delta": 1
+    },
+    "target_only_qa_removal": true,
+    "no_unrelated_qa_removal": true,
+    "strict_sensitivity_delta_fully_explained": true,
+    "existing_previously_resolved_sumy_episodes_remain_resolved": true,
+    "unexplained_drift": false
+  },
+  "classification_verification": {
+    "methodology": "accepted existing v2 / frozen monitor_explosion_candidates.py",
+    "classifier_code_changed": false,
+    "methodology_changed": false,
+    "exact_city_binding": "YES",
+    "military_aerial_causation": "YES",
+    "same_attack_basis": "YES",
+    "temporal_binding": "YES",
+    "temporal_bound_entirely_inside_target_alert": true,
+    "resulting_event_types": [
+      "explosion",
+      "impact",
+      "damage"
+    ],
+    "final_status": "SENSITIVITY"
+  },
+  "parallel_isolation": {
+    "excluded_target": "90a484f51b321e0950e31b60",
+    "modified_by_this_repair": false,
+    "pre_repair_status": "AMBIGUOUS/QA",
+    "post_repair_status": "AMBIGUOUS/QA",
+    "unchanged_by_this_repair": true
+  },
+  "protected_state": {
+    "repair_compare_base": "8b03ce53b7d8a71867c5d2d13a60c2e84b8e8415",
+    "repair_compare_head": "cc39d553aa02c2189b4fe1512a06a5bbc995d24b",
+    "only_repair_file_changed": "kyiv-air-alerts-grafana/data/explosion_research/sumy/final_evidence.json",
+    "replay_explosion_history_unchanged": true,
+    "classifier_logic_unchanged": true,
+    "taxonomy_unchanged": true,
+    "other_sumy_evidence_records_overwritten_or_deleted": false,
+    "other_cities_unchanged_by_repair": true,
+    "historical_17_city_alert_corpus_unchanged_by_repair": true,
+    "site_prod_unchanged_by_repair": true,
+    "production_dashboard_data_unchanged_by_repair": true,
+    "active_6863_campaign": {
+      "branch": "historical-attack-event-backfill-2026-09-27",
+      "head_at_task_start": "5afa0d656ffcd1413fda13ca58613c3df8725c24",
+      "head_before_artifact_commit": "5afa0d656ffcd1413fda13ca58613c3df8725c24",
+      "unchanged_during_repair": true,
+      "frozen_total_episodes": 6863,
+      "note": "5afa0d6 predates this task and only updated the campaign acceleration-state guard counter; this repair did not touch the campaign branch or its checkpoints."
+    },
+    "protected_files_unchanged_except_intended_evidence_provenance_addition": true
+  },
+  "artifact_path": "research/sumy_402035_atomic_evidence_repair_2026-09-28.json",
+  "verdict": "SUMY 402035 EVIDENCE REPAIR APPLIED — ONE OR FEWER QA REMAIN"
+}
