@@ -1,0 +1,61 @@
+name: Multicity casualty final runtime proof
+
+on:
+  push:
+    branches:
+      - multicity-casualties-prod-proof-2026-09-28
+    paths:
+      - ".github/workflows/multicity-casualty-final-runtime-proof.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  final-runtime-proof:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Check out exact triggered proof commit
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 1
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install real Chart.js 4.4.7
+        run: |
+          rm -rf /tmp/chartpkg
+          mkdir -p /tmp/chartpkg
+          npm install --prefix /tmp/chartpkg --no-package-lock --no-save chart.js@4.4.7
+          test -s /tmp/chartpkg/node_modules/chart.js/dist/chart.umd.min.js
+          node -e "const p=require('/tmp/chartpkg/node_modules/chart.js/package.json'); if(p.version!=='4.4.7') process.exit(1); console.log(p.version)"
+
+      - name: Install Playwright and Chromium
+        run: |
+          python -m pip install --disable-pip-version-check playwright
+          python -m playwright install chromium
+          python -c "import importlib.metadata; print(importlib.metadata.version('playwright'))"
+
+      - name: Execute strict exact-current-base runtime proof
+        env:
+          CHART_JS_PATH: /tmp/chartpkg/node_modules/chart.js/dist/chart.umd.min.js
+        run: |
+          python kyiv-air-alerts-grafana/tests/run_multicity_casualty_final_runtime_proof.py
+
+      - name: Upload machine-readable proof result
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: multicity-casualties-final-runtime-exec-result
+          path: /tmp/multicity_casualties_final_runtime_exec_result.json
+          if-no-files-found: warn
+          retention-days: 30
