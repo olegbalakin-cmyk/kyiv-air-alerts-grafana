@@ -47,7 +47,7 @@ jobs:
       - name: Full proof matrix
         env:
           HEAD_SHA: ${{ github.sha }}
-          IMPLEMENTATION_SHA: 1f4131b91d5cd4f459b79c0211fe0d9c0a5f26d3
+          IMPLEMENTATION_SHA: 0595e1b20558f5513388ba47e32b69e2b35dc82b
           BASE_SHA: 5218e6a749e0c03543ee555bc196f6c7a3323777
           PROOF_BRANCH: dnipro-review-role-adapter-proof-2026-09-29
         run: |
@@ -304,7 +304,7 @@ jobs:
               },
               "ppo_audit": ppo_audit,
               "sensitivity_only_cases": [
-                  by_case["48fe2f8bc45c99e2ae636bc5b"],
+                  by_case["48fe2f8bc45c99e2ae636bc5"],
                   by_case["e6ed42d5b9e48e9f2019cb5b"],
               ],
               "dnipro_preflight_before": dnipro_preflight(proof/"base_preflight.json"),
@@ -381,7 +381,7 @@ jobs:
               if item["expected_kind"] == "preliminary_or_provisional":
                   assert "air_defense_action" not in item["event_types"]
               assert item["after_status"] == "STRICT"
-          assert by_case["48fe2f8bc45c99e2ae636bc5b"]["replay_bucket_after_adapter"] == "SENSITIVITY"
+          assert by_case["48fe2f8bc45c99e2ae636bc5"]["replay_bucket_after_adapter"] == "SENSITIVITY"
           assert by_case["e6ed42d5b9e48e9f2019cb5b"]["replay_bucket_after_adapter"] == "SENSITIVITY"
           assert all(not v["adapter_induced_episode_deltas"] for v in regressions.values())
           assert summary["protected_state"]["allowed_changed_files_only"]
