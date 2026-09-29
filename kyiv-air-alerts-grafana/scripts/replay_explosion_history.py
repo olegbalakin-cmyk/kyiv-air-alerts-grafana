@@ -38,6 +38,7 @@ REQUIRED_CATEGORIES = (
     "NEW_SENSITIVITY",
     "NEW_AMBIGUOUS",
     "UNREPLAYABLE_MISSING_EVIDENCE",
+    "LEGACY_MULTI_EVENT_SPLIT",
 )
 CONTROL_EXPECTATIONS = {
     "2c5bbc0aeba9e25e4eec7b09": False,
@@ -321,6 +322,179 @@ def retained_event_datetimes(row: dict, monitor) -> list[datetime]:
         for match in clock_pattern.finditer(residual_text):
             add(parse_temporal_field_datetime(clock_token(match, anchor_day), field, monitor))
     return result
+
+
+def historical_record_id(city: str, bucket: str, index: int, row: dict) -> str:
+    """Stable identity for one retained legacy evidence parent row."""
+    canonical = json.dumps(
+        row,
+        ensure_ascii=False,
+        sort_keys=True,
+        separators=(",", ":"),
+    )
+    seed = f"{city}|{bucket}|{index}|{canonical}"
+    return hashlib.sha256(seed.encode("utf-8")).hexdigest()[:24]
+
+
+def _has_discrete_multi_event_time_list(row: dict) -> bool:
+    """Require an explicit list, not a vague interval or publication clock."""
+    clock = r"(?:[01]?\d|2[0-3]):[0-5]\d"
+    for field in EVENT_TIME_FIELDS:
+        value = row.get(field)
+        if not value:
+            continue
+        text = str(value)
+        if len(re.findall(clock, text)) < 2:
+            continue
+        if ";" in text:
+            return True
+        if re.search(
+            rf"{clock}\s*(?:,|\b(?:і|та|and)\b)\s*(?:[^0-9]{{0,12}})?{clock}",
+            text,
+            flags=re.I,
+        ):
+            return True
+    return False
+
+
+def _event_segment_for_time(row: dict, event_dt: datetime, monitor) -> str:
+    evidence = " — ".join(
+        str(row.get(key)).strip()
+        for key in EVIDENCE_FIELDS
+        if row.get(key) and str(row.get(key)).strip()
+    )
+    if not evidence:
+        return ""
+    local = event_dt.astimezone(KYIV_TZ)
+    clocks = {
+        local.strftime("%H:%M"),
+        f"{local.hour}:{local.strftime('%M')}",
+    }
+    segments = [
+        " ".join(part.split())
+        for part in re.split(r"(?<=[.!?;])\s+|\n+", evidence)
+        if part and part.strip()
+    ]
+    matching = [
+        segment
+        for segment in segments
+        if any(clock in segment for clock in clocks)
+    ]
+    if not matching:
+        return ""
+    return next(
+        (segment for segment in matching if monitor.strict_attack_event_signal(segment)),
+        matching[0],
+    )
+
+
+def expand_historical_evidence_observations(
+    city: str,
+    bucket: str,
+    index: int,
+    row: dict,
+    episodes: list[dict],
+    monitor,
+    allow_new_temporal_fallback: bool = True,
+) -> list[dict]:
+    """Normalize one retained parent row into zero/one/many event-level observations.
+
+    Splitting is intentionally narrow:
+    - the ordinary binder must be blocked by multi-time containment;
+    - the retained event-time field must be an explicit discrete list;
+    - each child is tied to one retained clock and a source-evidence segment;
+    - publication timestamps are never consulted;
+    - identical event clocks are deduplicated before child creation.
+    """
+    parent_id = historical_record_id(city, bucket, index, row)
+    initial = bind_evidence_record(
+        row,
+        episodes,
+        monitor,
+        allow_new_temporal_fallback=allow_new_temporal_fallback,
+    )
+    ordinary = {
+        "parent_record_id": parent_id,
+        "observation_id": parent_id,
+        "is_split_child": False,
+        "event_fact_present": None,
+        "event_time_utc": None,
+        "event_evidence": None,
+        "row": row,
+        "binding": initial,
+    }
+    if initial.get("episode_id"):
+        return [ordinary]
+    if initial.get("method") != "event_time_ambiguous_containment":
+        return [ordinary]
+    if not _has_discrete_multi_event_time_list(row):
+        return [ordinary]
+
+    event_times = retained_event_datetimes(row, monitor)
+    if len(event_times) < 2:
+        return [ordinary]
+
+    children = []
+    seen_observations = set()
+    for ordinal, event_dt in enumerate(event_times):
+        event_utc = event_dt.astimezone(monitor.UTC)
+        segment = _event_segment_for_time(row, event_dt, monitor)
+        event_fact_present = bool(
+            segment and monitor.strict_attack_event_signal(segment)
+        )
+        observation_seed = (
+            f"{parent_id}|{event_utc.isoformat()}|{segment}"
+        )
+        observation_id = hashlib.sha256(
+            observation_seed.encode("utf-8")
+        ).hexdigest()[:24]
+        if observation_id in seen_observations:
+            continue
+        seen_observations.add(observation_id)
+
+        child = copy.deepcopy(row)
+        for field in EVENT_TIME_FIELDS:
+            child.pop(field, None)
+        child["event_time"] = event_dt.astimezone(KYIV_TZ).isoformat()
+        if segment:
+            for field in EVIDENCE_FIELDS:
+                child.pop(field, None)
+            child["evidence"] = segment
+        child["_historical_parent_record"] = copy.deepcopy(row)
+        child["_historical_parent_record_id"] = parent_id
+        child["_historical_event_observation_id"] = observation_id
+        child["_historical_event_ordinal"] = ordinal
+        child["_historical_event_time_utc"] = event_utc.isoformat()
+
+        binding = bind_evidence_record(
+            child,
+            episodes,
+            monitor,
+            allow_new_temporal_fallback=allow_new_temporal_fallback,
+        )
+        binding = dict(binding)
+        binding.update({
+            "parent_record_id": parent_id,
+            "observation_id": observation_id,
+            "split_reason": "explicit_retained_multi_event_list",
+            "event_time_utc": event_utc.isoformat(),
+        })
+        children.append({
+            "parent_record_id": parent_id,
+            "observation_id": observation_id,
+            "is_split_child": True,
+            "event_fact_present": event_fact_present,
+            "event_time_utc": event_utc.isoformat(),
+            "event_evidence": segment,
+            "row": child,
+            "binding": binding,
+        })
+
+    if len(children) < 2 or not any(
+        child["event_fact_present"] for child in children
+    ):
+        return [ordinary]
+    return children
 
 
 def bind_start_datetime(
@@ -875,6 +1049,221 @@ def historical_review_roles(city: str, row: dict, monitor) -> tuple[dict, str]:
             )
             or direct_event_segment
         )
+    elif city == "dnipro":
+        # Dnipro's frozen corpus retains reviewed role contracts in decision/
+        # basis fields. Translate only those reviewed contracts. Free article
+        # text, city naming, publication metadata, proximity, or generic PVO
+        # wording alone must never create a replay role.
+        review_parts = [
+            str(row.get(key)).strip()
+            for key in BASIS_FIELDS
+            if row.get(key) and str(row.get(key)).strip()
+        ]
+        review_basis = " — ".join(review_parts)
+        review_low = review_basis.casefold()
+        reviewed_strict = bool(
+            str(row.get("decision") or "").strip().casefold() == "strict"
+            or re.search(r"(?:^|[^a-z])strict(?:[^a-z]|$)|strict[_ -]", review_low)
+        )
+        reviewed_sensitivity = bool(
+            "sensitivity" in review_low
+            or str(row.get("decision") or "").strip().casefold()
+            in {"sensitivity", "sensitivity_only", "sensitivity_inferred_same_attack"}
+        )
+        if not (reviewed_strict or reviewed_sensitivity):
+            return {}, evidence
+
+        reviewed_exact_city = bool(
+            re.search(r"\bexact[_ -]?city\b", review_low)
+            or "exact-city" in review_low
+        )
+        reviewed_episode_relation = bool(
+            re.search(
+                r"(?:timed?[_ -]?inside[_ -]?(?:matched[_ -]?)?(?:alert|episode)|"
+                r"exact[_ -]?time[_ -]?inside[_ -]?(?:(?:the|one)[_ -]?)?(?:frozen[_ -]?)?(?:alert|episode)|"
+                r"approx(?:imate)?[_ -]?time[_ -]?inside[_ -]?(?:(?:the|one)[_ -]?)?(?:frozen[_ -]?)?(?:alert|episode)|"
+                r"event[_ -]?(?:inside|within)[_ -]?(?:(?:the|one)[_ -]?)?(?:frozen[_ -]?)?(?:alert|episode)|"
+                r"event[_ -]?during[_ -]?(?:matched[_ -]?)?alert|"
+                r"explicit[_ -]?(?:ongoing[_ -]?)?alert|"
+                r"explicit[_ -]?during[_ -]?(?:matched[_ -]?)?alert|"
+                r"inside[_ -]?(?:one[_ -]?)?(?:alert|episode)|"
+                r"matched[_ -]?(?:alert|episode)|"
+                r"cross[_ -]?midnight|separate[_ -](?:realert|same[_ -]day|late)[_ -]?episode|"
+                r"timed[_ -]?inside[_ -]?proxy[_ -]?alert|"
+                r"approximate[_ -]?time[_ -]?inside[_ -]?alert|"
+                r"exact[_ -]?city[_ -]?event[_ -]?inside[_ -]?episode|"
+                r"inferred[_ -]?same[_ -]?attack|confirmed[_ -]?same[_ -]?attack|"
+                r"near[_ -]?boundary|event[_ -]?precedes[_ -]?alert)",
+                review_low,
+            )
+            or (
+                ("inside" in review_low or "within" in review_low)
+                and ("alert" in review_low or "episode" in review_low)
+            )
+            or (
+                "separate" in review_low
+                and ("realert" in review_low or "episode" in review_low)
+            )
+        )
+
+        reviewed_air_context = bool(
+            re.search(
+                r"(?:confirmed[_ -]?air[_ -]?war|aerial[_ -]?(?:war|attack|context)|"
+                r"(?:drone|uav|missile|ballistic|rocket|shahed)[_ -]?(?:attack|context|threat)?|"
+                r"\b(?:бпла|безпілот\w*|дрон\w*|ракет\w*|баліст\w*|шахед\w*|ппо)\b)",
+                review_low,
+            )
+        )
+        dnipro_named = re.compile(
+            r"(?<![\w-])(?:dnipro|дніпро|дніпрі|дніпра|дніпром)(?![\w-])",
+            flags=re.IGNORECASE,
+        )
+        english_explosion = re.compile(
+            r"\b(?:explosion(?:s)?|blast(?:s)?|bang(?:s)?)\b",
+            flags=re.IGNORECASE,
+        )
+        english_impact = re.compile(
+            r"\b(?:impact(?:s|ed)?|hit|hits|arrival(?:s)?)\b",
+            flags=re.IGNORECASE,
+        )
+        english_strike = re.compile(
+            r"\b(?:strike|strikes|struck)\b",
+            flags=re.IGNORECASE,
+        )
+        specific_air = re.compile(
+            r"\b(?:бпла|безпілот\w*|дрон\w*|ракет\w*|баліст\w*|шахед\w*|"
+            r"ппо|uav(?:s)?|drone(?:s)?|missile(?:s)?|ballistic|rocket(?:s)?|"
+            r"shahed(?:s)?|air[- ]?defen[cs]e|aerial|air force|"
+            r"high[- ]?speed target|fast[- ]?target|повітрян\w*\s+сил\w*|"
+            r"повітрян\w*\s+атак\w*|швидкісн\w*\s+ціл\w*)\b",
+            flags=re.IGNORECASE,
+        )
+        segments = [
+            " ".join(part.split())
+            for part in re.split(r"(?<=[.!?;])\s+|\n+", evidence)
+            if part and part.strip()
+        ]
+        mentioned_cities = monitor.audited_cities_in_text(evidence)
+        conflicting_named_city = any(
+            named_city != "dnipro" for named_city in mentioned_cities
+        )
+        reviewed_evidence_city = bool(dnipro_named.search(evidence))
+        reviewed_exact_city_annotation = bool(
+            re.search(r"\bexact[- ]city\s+report\b", evidence, flags=re.IGNORECASE)
+        )
+        exact_city = bool(
+            (
+                reviewed_exact_city
+                or reviewed_evidence_city
+                or reviewed_exact_city_annotation
+            )
+            and not conflicting_named_city
+        )
+
+        def dnipro_reviewed_event_types(segment: str) -> list[str]:
+            event_types = []
+            segment_low = segment.casefold()
+            threat_or_modal_event = bool(
+                re.search(
+                    r"\b(?:можлив\w*|ймовірн\w*|загроз\w*|очікуван\w*|"
+                    r"could|might|may|possible|likely|threat)\b.{0,45}"
+                    r"\b(?:вибух\w*|удар\w*|влучанн\w*|explosion\w*|"
+                    r"blast\w*|impact\w*|strike\w*)\b",
+                    segment_low,
+                )
+            )
+            strict_signal = (
+                monitor.strict_attack_event_signal(segment)
+                and not threat_or_modal_event
+            )
+            if strict_signal:
+                for event_type in monitor.attack_event_types(segment):
+                    if (
+                        event_type == "air_defense_action"
+                        and not monitor.air_defense_action_signal(segment)
+                    ):
+                        continue
+                    if event_type not in event_types:
+                        event_types.append(event_type)
+            if english_explosion.search(segment) and "explosion" not in event_types:
+                event_types.append("explosion")
+            if english_impact.search(segment) and "impact" not in event_types:
+                event_types.append("impact")
+            if english_strike.search(segment) and "strike" not in event_types:
+                event_types.append("strike")
+            # A few retained Dnipro reviewed summaries use "було/стало гучно"
+            # as the factual event wording. Accept it only behind an explicit
+            # strict exact-city + air-war + episode-relation review contract.
+            reviewed_loud_fact = bool(
+                reviewed_strict
+                and exact_city
+                and reviewed_episode_relation
+                and (
+                    reviewed_air_context
+                    or specific_air.search(evidence)
+                )
+                and re.search(
+                    r"\bгучн\w*\b|\bгупал\w*\b|"
+                    r"\b(?:was|were)\s+(?:very\s+)?loud\b",
+                    segment_low,
+                )
+            )
+            if reviewed_loud_fact and "explosion" not in event_types:
+                event_types.append("explosion")
+            return event_types
+
+        event_segments = []
+        event_types = []
+        for segment in segments:
+            types = dnipro_reviewed_event_types(segment)
+            if not types:
+                continue
+            event_segments.append(segment)
+            for event_type in types:
+                if event_type not in event_types:
+                    event_types.append(event_type)
+
+        explosion = bool(event_segments)
+        air_context = bool(
+            reviewed_air_context
+            or any(specific_air.search(segment) for segment in segments)
+        )
+        same_attack = bool(
+            exact_city
+            and explosion
+            and air_context
+            and reviewed_episode_relation
+            and not conflicting_named_city
+        )
+
+        roles = {}
+        if exact_city:
+            roles["exact_city_evidence"] = {
+                "present": True,
+                "evidence_text": (review_basis if reviewed_exact_city else evidence)[:1200],
+            }
+        if explosion:
+            roles["explosion_evidence"] = {
+                "present": True,
+                "evidence_text": event_segments[0][:1200],
+                "event_types": event_types,
+            }
+        if air_context:
+            roles["aerial_war_evidence"] = {
+                "present": True,
+                "evidence_text": (review_basis or evidence)[:1200],
+            }
+        if same_attack:
+            roles["same_attack_basis"] = {
+                "present": True,
+                "basis": (
+                    "reviewed_dnipro_sensitivity_same_attack_relation"
+                    if reviewed_sensitivity and not reviewed_strict
+                    else "reviewed_dnipro_exact_city_event_air_context_episode_relation"
+                ),
+                "evidence_text": (review_basis or evidence)[:1200],
+            }
+        return roles, evidence
     elif city in {"chernihiv", "kropyvnytskyi"}:
         # These two frozen corpora retain reviewed role contracts in legacy
         # decision/basis fields.  Translate only those explicit reviewed
@@ -1273,7 +1662,14 @@ def candidate_from_history(
 ) -> dict:
     text = evidence_text(row)
     source_url = str(row.get("source_url") or "")
+    parent_record = row.get("_historical_parent_record")
+    if not isinstance(parent_record, dict):
+        parent_record = row
+    parent_record_id = row.get("_historical_parent_record_id")
+    observation_id = row.get("_historical_event_observation_id")
     cid_seed = f"{city}|{target_id}|{bucket}|{source_url}|{text}"
+    if observation_id:
+        cid_seed += f"|observation:{observation_id}"
     candidate = {
         "candidate_id": hashlib.sha256(cid_seed.encode("utf-8")).hexdigest()[:24],
         "city_key": city,
@@ -1289,8 +1685,24 @@ def candidate_from_history(
         "discovery_basis": "historical_audit_retained_evidence",
         "matched_episode_id": target_id,
         "historical_bucket": bucket,
-        "historical_record": copy.deepcopy(row),
+        "historical_record": copy.deepcopy(parent_record),
     }
+    if parent_record_id:
+        candidate["historical_parent_record_id"] = str(parent_record_id)
+    if observation_id:
+        candidate["historical_event_observation"] = {
+            "observation_id": str(observation_id),
+            "event_time_utc": row.get("_historical_event_time_utc"),
+            "ordinal": row.get("_historical_event_ordinal"),
+            "evidence_text": next(
+                (
+                    str(row.get(key)).strip()
+                    for key in EVIDENCE_FIELDS
+                    if row.get(key) and str(row.get(key)).strip()
+                ),
+                "",
+            )[:1200],
+        }
     provenance = history_provenance(
         row, bucket, target_id, monitor, city, target_episode
     )
@@ -1370,39 +1782,169 @@ def filter_window(episodes: list[dict], coverage_start: str, through: str, monit
     return out
 
 
-def evidence_validation(evidence: dict, baseline_city: dict, episodes: list[dict], monitor) -> dict:
+def evidence_validation(
+    evidence: dict,
+    baseline_city: dict,
+    episodes: list[dict],
+    monitor,
+    city: str = "",
+) -> dict:
     errors = []
     bindings = {"strict_events": [], "sensitivity_only_events": [], "review_events": []}
     bound_status: dict[str, str] = {}
+    split_records = []
+
     for bucket in bindings:
-        for row in evidence.get(bucket) or []:
-            binding = bind_evidence_record(
-                row,
-                episodes,
-                monitor,
-                allow_new_temporal_fallback=bucket in {"strict_events", "sensitivity_only_events"},
-            )
-            bindings[bucket].append({"row": row, "binding": binding})
-            eid = binding.get("episode_id")
-            if not eid:
-                if bucket in {"strict_events", "sensitivity_only_events"}:
-                    errors.append({"code": "UNBOUND_COUNTED_EVIDENCE", "bucket": bucket, "binding": binding, "evidence": evidence_text(row)[:500]})
-                continue
-            proposed = history_status(row, bucket)
-            old = bound_status.get(eid)
-            if old and old != proposed:
-                errors.append({"code": "CONFLICTING_FROZEN_EPISODE_STATUS", "episode_id": eid, "statuses": sorted({old, proposed})})
-            if proposed == "STRICT" or old is None:
-                bound_status[eid] = proposed
+        allow_split = bucket in {"strict_events", "sensitivity_only_events"}
+        for index, row in enumerate(evidence.get(bucket) or []):
+            if city:
+                observations = expand_historical_evidence_observations(
+                    city,
+                    bucket,
+                    index,
+                    row,
+                    episodes,
+                    monitor,
+                    allow_new_temporal_fallback=allow_split,
+                )
+            else:
+                binding = bind_evidence_record(
+                    row,
+                    episodes,
+                    monitor,
+                    allow_new_temporal_fallback=allow_split,
+                )
+                observations = [{
+                    "parent_record_id": None,
+                    "observation_id": None,
+                    "is_split_child": False,
+                    "event_fact_present": None,
+                    "event_time_utc": None,
+                    "event_evidence": None,
+                    "row": row,
+                    "binding": binding,
+                }]
 
-    strict_ids = sorted(eid for eid, status in bound_status.items() if status == "STRICT")
-    sensitivity_ids = sorted(eid for eid, status in bound_status.items() if status in {"STRICT", "SENSITIVITY"})
-    if len(strict_ids) != int(baseline_city.get("strict_n") or 0):
-        errors.append({"code": "STRICT_ID_COUNT_MISMATCH", "expected": baseline_city.get("strict_n"), "bound": len(strict_ids)})
-    if len(sensitivity_ids) != int(baseline_city.get("sensitivity_n") or 0):
-        errors.append({"code": "SENSITIVITY_ID_COUNT_MISMATCH", "expected": baseline_city.get("sensitivity_n"), "bound": len(sensitivity_ids)})
-    return {"errors": errors, "bindings": bindings, "frozen_status_by_episode": bound_status, "strict_ids": strict_ids, "sensitivity_ids": sensitivity_ids}
+            if len(observations) > 1 and any(
+                observation.get("is_split_child") for observation in observations
+            ):
+                split_records.append({
+                    "city": city,
+                    "bucket": bucket,
+                    "parent_record_id": observations[0]["parent_record_id"],
+                    "legacy_parent_status": history_status(row, bucket),
+                    "source_url": row.get("source_url"),
+                    "retained_event_time": row.get("event_time"),
+                    "children": [
+                        {
+                            "observation_id": observation["observation_id"],
+                            "event_time_utc": observation["event_time_utc"],
+                            "event_fact_present": observation["event_fact_present"],
+                            "episode_id": observation["binding"].get("episode_id"),
+                            "binding_method": observation["binding"].get("method"),
+                            "binding_candidates": observation["binding"].get("candidates") or [],
+                            "evidence": observation.get("event_evidence"),
+                        }
+                        for observation in observations
+                    ],
+                })
 
+            for observation in observations:
+                binding = observation["binding"]
+                bindings[bucket].append({
+                    "row": row,
+                    "parent_record_id": observation.get("parent_record_id"),
+                    "observation_id": observation.get("observation_id"),
+                    "is_split_child": observation.get("is_split_child"),
+                    "event_fact_present": observation.get("event_fact_present"),
+                    "binding": binding,
+                })
+
+                if (
+                    observation.get("is_split_child")
+                    and observation.get("event_fact_present") is False
+                ):
+                    continue
+
+                eid = binding.get("episode_id")
+                if not eid:
+                    if bucket in {"strict_events", "sensitivity_only_events"}:
+                        errors.append({
+                            "code": "UNBOUND_COUNTED_EVIDENCE",
+                            "bucket": bucket,
+                            "parent_record_id": observation.get("parent_record_id"),
+                            "observation_id": observation.get("observation_id"),
+                            "binding": binding,
+                            "evidence": evidence_text(observation["row"])[:500],
+                        })
+                    continue
+
+                proposed = history_status(row, bucket)
+                old = bound_status.get(eid)
+                if old and old != proposed:
+                    errors.append({
+                        "code": "CONFLICTING_FROZEN_EPISODE_STATUS",
+                        "episode_id": eid,
+                        "statuses": sorted({old, proposed}),
+                    })
+                if proposed == "STRICT" or old is None:
+                    bound_status[eid] = proposed
+
+    strict_ids = sorted(
+        eid for eid, status in bound_status.items() if status == "STRICT"
+    )
+    sensitivity_ids = sorted(
+        eid for eid, status in bound_status.items()
+        if status in {"STRICT", "SENSITIVITY"}
+    )
+
+    strict_split_extra = 0
+    sensitivity_split_extra = 0
+    for split in split_records:
+        bound_ids = {
+            str(child.get("episode_id"))
+            for child in split["children"]
+            if child.get("event_fact_present") is True and child.get("episode_id")
+        }
+        extra = max(0, len(bound_ids) - 1)
+        if split["bucket"] == "strict_events":
+            strict_split_extra += extra
+            sensitivity_split_extra += extra
+        elif split["bucket"] == "sensitivity_only_events":
+            sensitivity_split_extra += extra
+
+    expected_strict = int(baseline_city.get("strict_n") or 0) + strict_split_extra
+    expected_sensitivity = (
+        int(baseline_city.get("sensitivity_n") or 0) + sensitivity_split_extra
+    )
+    if len(strict_ids) != expected_strict:
+        errors.append({
+            "code": "STRICT_ID_COUNT_MISMATCH",
+            "expected_legacy_rows": baseline_city.get("strict_n"),
+            "explained_multi_event_episode_gain": strict_split_extra,
+            "expected_canonical_episode_ids": expected_strict,
+            "bound": len(strict_ids),
+        })
+    if len(sensitivity_ids) != expected_sensitivity:
+        errors.append({
+            "code": "SENSITIVITY_ID_COUNT_MISMATCH",
+            "expected_legacy_rows": baseline_city.get("sensitivity_n"),
+            "explained_multi_event_episode_gain": sensitivity_split_extra,
+            "expected_canonical_episode_ids": expected_sensitivity,
+            "bound": len(sensitivity_ids),
+        })
+    return {
+        "errors": errors,
+        "bindings": bindings,
+        "frozen_status_by_episode": bound_status,
+        "strict_ids": strict_ids,
+        "sensitivity_ids": sensitivity_ids,
+        "legacy_multi_event_splits": split_records,
+        "explained_multi_event_episode_gain": {
+            "strict": strict_split_extra,
+            "sensitivity": sensitivity_split_extra,
+        },
+    }
 
 def validate_city_sources(repo_root: Path, city: str, baseline_city: dict, through: str, monitor) -> dict:
     inv = source_inventory(repo_root, city, monitor)
@@ -1432,7 +1974,9 @@ def validate_city_sources(repo_root: Path, city: str, baseline_city: dict, throu
 
     evidence_check = None
     if evidence is not None and len(episodes) == expected_alerts:
-        evidence_check = evidence_validation(evidence, baseline_city, episodes, monitor)
+        evidence_check = evidence_validation(
+            evidence, baseline_city, episodes, monitor, city
+        )
         reasons.extend(evidence_check["errors"])
 
     return {
@@ -1448,6 +1992,13 @@ def validate_city_sources(repo_root: Path, city: str, baseline_city: dict, throu
         "evidence_validation": {
             "frozen_strict_ids": (evidence_check or {}).get("strict_ids", []),
             "frozen_sensitivity_ids": (evidence_check or {}).get("sensitivity_ids", []),
+            "legacy_multi_event_splits": (evidence_check or {}).get(
+                "legacy_multi_event_splits", []
+            ),
+            "explained_multi_event_episode_gain": (evidence_check or {}).get(
+                "explained_multi_event_episode_gain",
+                {"strict": 0, "sensitivity": 0},
+            ),
         },
     }
 
@@ -1670,7 +2221,9 @@ def replay_city(repo_root: Path, city: str, through: str, output: Path, input_he
         episodes = filter_window(episodes, str(baseline_city["coverage_start"]), through, monitor)
         evidence_path = repo_root / source["inventory"]["final_evidence"]
         evidence = load_json(evidence_path)
-        validated = evidence_validation(evidence, baseline_city, episodes, monitor)
+        validated = evidence_validation(
+            evidence, baseline_city, episodes, monitor, city
+        )
         old_status = {eid: "NON_STRICT" for eid in (str(ep["episode_id"]) for ep in episodes)}
         old_status.update(validated["frozen_status_by_episode"])
 
@@ -1680,31 +2233,80 @@ def replay_city(repo_root: Path, city: str, through: str, output: Path, input_he
         evidence_by_episode: dict[str, list[dict]] = defaultdict(list)
         errors = []
         unbound_review_evidence = []
+        ignored_nonqualifying_split_children = []
+        seen_candidate_ids: set[tuple[str, str]] = set()
         for bucket in ("strict_events", "sensitivity_only_events", "review_events"):
-            for row in evidence.get(bucket) or []:
-                binding = bind_evidence_record(
+            allow_split = bucket in {"strict_events", "sensitivity_only_events"}
+            for index, row in enumerate(evidence.get(bucket) or []):
+                observations = expand_historical_evidence_observations(
+                    city,
+                    bucket,
+                    index,
                     row,
                     episodes,
                     monitor,
-                    allow_new_temporal_fallback=bucket in {"strict_events", "sensitivity_only_events"},
+                    allow_new_temporal_fallback=allow_split,
                 )
-                target_id = binding.get("episode_id")
-                if not target_id:
-                    record = {"code": "UNBOUND_HISTORICAL_EVIDENCE", "bucket": bucket, "binding": binding, "evidence": evidence_text(row)[:500]}
-                    if bucket == "review_events":
-                        unbound_review_evidence.append(record)
-                    else:
-                        errors.append(record)
-                    continue
-                candidate = candidate_from_history(
-                    city, row, bucket, target_id, monitor, ep_by_id.get(target_id)
-                )
-                matching = manual_matching(target_id)
-                decision = monitor.classify_candidate(candidate, city, episodes, matching)
-                monitor.apply_classification_decision(candidate, decision, matching)
-                candidates_by_episode[target_id].append(candidate)
-                decision_by_candidate[candidate["candidate_id"]] = compact_decision(decision)
-                evidence_by_episode[target_id].append({"candidate_id": candidate["candidate_id"], "bucket": bucket, "source_url": row.get("source_url"), "evidence": evidence_text(row)[:1200], "binding": binding})
+                for observation in observations:
+                    binding = observation["binding"]
+                    if (
+                        observation.get("is_split_child")
+                        and observation.get("event_fact_present") is False
+                    ):
+                        ignored_nonqualifying_split_children.append({
+                            "parent_record_id": observation.get("parent_record_id"),
+                            "observation_id": observation.get("observation_id"),
+                            "event_time_utc": observation.get("event_time_utc"),
+                            "binding": binding,
+                            "evidence": observation.get("event_evidence"),
+                        })
+                        continue
+
+                    target_id = binding.get("episode_id")
+                    if not target_id:
+                        record = {
+                            "code": "UNBOUND_HISTORICAL_EVIDENCE",
+                            "bucket": bucket,
+                            "parent_record_id": observation.get("parent_record_id"),
+                            "observation_id": observation.get("observation_id"),
+                            "binding": binding,
+                            "evidence": evidence_text(observation["row"])[:500],
+                        }
+                        if bucket == "review_events":
+                            unbound_review_evidence.append(record)
+                        else:
+                            errors.append(record)
+                        continue
+
+                    candidate = candidate_from_history(
+                        city,
+                        observation["row"],
+                        bucket,
+                        target_id,
+                        monitor,
+                        ep_by_id.get(target_id),
+                    )
+                    candidate_key = (target_id, str(candidate["candidate_id"]))
+                    if candidate_key in seen_candidate_ids:
+                        continue
+                    seen_candidate_ids.add(candidate_key)
+                    matching = manual_matching(target_id)
+                    decision = monitor.classify_candidate(
+                        candidate, city, episodes, matching
+                    )
+                    monitor.apply_classification_decision(candidate, decision, matching)
+                    candidates_by_episode[target_id].append(candidate)
+                    decision_by_candidate[candidate["candidate_id"]] = compact_decision(decision)
+                    evidence_by_episode[target_id].append({
+                        "candidate_id": candidate["candidate_id"],
+                        "bucket": bucket,
+                        "source_url": row.get("source_url"),
+                        "evidence": evidence_text(observation["row"])[:1200],
+                        "binding": binding,
+                        "parent_record_id": observation.get("parent_record_id"),
+                        "observation_id": observation.get("observation_id"),
+                        "event_time_utc": observation.get("event_time_utc"),
+                    })
 
         new_status = {eid: "NON_STRICT" for eid in old_status}
         composition_by_episode = {}
@@ -1757,6 +2359,15 @@ def replay_city(repo_root: Path, city: str, through: str, output: Path, input_he
                 "reason_codes": sorted({code for cid in contributor_ids for code in decision_by_candidate.get(cid, {}).get("reason_codes", [])}),
                 "ppo_related": any(ppo_related(text) for text in texts),
             }
+            if city == "dnipro" and cat in {
+                "STRICT_DOWNGRADE",
+                "NEW_AMBIGUOUS",
+                "STRICT_TO_SENSITIVITY",
+                "SENSITIVITY_TO_STRICT",
+                "NEW_STRICT",
+                "NEW_SENSITIVITY",
+            }:
+                row["reconciliation_reason"] = "HISTORICAL_REVIEW_ROLE_RECOVERY"
             reconciliation_events.append(row)
             if row["ppo_related"]:
                 ppo_changes.append(row)
@@ -1764,6 +2375,29 @@ def replay_city(repo_root: Path, city: str, through: str, output: Path, input_he
                 accepted_upgrades.append(row)
                 continue
             changed.append(row)
+
+        split_reconciliation_events = []
+        for split in validated.get("legacy_multi_event_splits") or []:
+            bound_episode_ids = sorted({
+                str(child.get("episode_id"))
+                for child in split.get("children") or []
+                if child.get("event_fact_present") is True and child.get("episode_id")
+            })
+            for eid in bound_episode_ids:
+                split_reconciliation_events.append({
+                    "episode_id": eid,
+                    "category": "LEGACY_MULTI_EVENT_SPLIT",
+                    "reconciliation_reason": "LEGACY_MULTI_EVENT_SPLIT",
+                    "parent_record_id": split.get("parent_record_id"),
+                    "legacy_parent_status": split.get("legacy_parent_status"),
+                    "source_url": split.get("source_url"),
+                    "retained_event_time": split.get("retained_event_time"),
+                    "sibling_episode_ids": bound_episode_ids,
+                    "replayed_status": new_status.get(eid, "NON_STRICT"),
+                    "children": split.get("children") or [],
+                })
+        counts["LEGACY_MULTI_EVENT_SPLIT"] += len(split_reconciliation_events)
+        reconciliation_events = split_reconciliation_events + reconciliation_events
 
         evidence_episode_diagnostics = {}
         for eid in sorted(candidates_by_episode):
@@ -1805,9 +2439,11 @@ def replay_city(repo_root: Path, city: str, through: str, output: Path, input_he
             "input_head": actual_head,
             "status": "COMPLETE",
             "episodes_checked": len(episodes),
-            "baseline_strict_episodes": len(old_strict),
+            "baseline_strict_episodes": int(baseline_city.get("strict_n") or 0),
+            "canonicalized_legacy_strict_episodes": len(old_strict),
             "replayed_strict_episodes": len(new_strict),
-            "baseline_sensitivity_episodes": len(old_sens),
+            "baseline_sensitivity_episodes": int(baseline_city.get("sensitivity_n") or 0),
+            "canonicalized_legacy_sensitivity_episodes": len(old_sens),
             "replayed_sensitivity_episodes": len(new_sens),
             "unchanged_episodes": counts["UNCHANGED_STRICT"] + counts["UNCHANGED_NON_STRICT"],
             "changed_episodes": changed,
@@ -1824,12 +2460,14 @@ def replay_city(repo_root: Path, city: str, through: str, output: Path, input_he
             "reconciliation_counts": {name: counts[name] for name in REQUIRED_CATEGORIES},
             "errors": errors,
             "unbound_review_evidence": unbound_review_evidence,
+            "ignored_nonqualifying_split_children": ignored_nonqualifying_split_children,
+            "legacy_multi_event_splits": validated.get("legacy_multi_event_splits") or [],
             "source_validation": source,
             "source_files": source_files + [source["inventory"]["final_evidence"]],
             "methodology": {
                 "classification_module": "frozen monitor_explosion_candidates.py",
                 "network_access": "blocked",
-                "historical_evidence_adapter": "retained audited evidence text plus frozen episode binding; publication time is never synthesized from event time",
+                "historical_evidence_adapter": "retained audited parent evidence with event-level observation expansion only for explicit discrete multi-event lists; publication time is never synthesized from event time",
                 "composition": "current compose_episode_candidates applied only when retained candidate fields/provenance support it",
                 "unchanged_source_corpus_omitted": True,
             },
