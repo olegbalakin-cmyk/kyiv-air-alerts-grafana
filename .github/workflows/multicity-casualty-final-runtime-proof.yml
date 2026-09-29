@@ -1,0 +1,138 @@
+name: Multicity casualty final runtime proof v2
+
+on:
+  push:
+    branches:
+      - multicity-casualties-prod-proof-2026-09-28
+    paths:
+      - ".github/workflows/multicity-casualty-final-runtime-proof.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  environment-preflight:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: kyiv-air-alerts-grafana
+    steps:
+      - name: Check out exact triggered proof commit
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 1
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install production Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements-db-phase1.txt
+
+      - name: Record and probe production Python dependencies
+        run: |
+          python - <<'PY'
+          import requests
+          import bs4
+          import psycopg
+          print("requests", requests.__version__)
+          print("bs4", bs4.__version__)
+          print("psycopg", psycopg.__version__)
+          PY
+          python -m py_compile scripts/update_casualties.py
+          python -m py_compile scripts/add_casualty_panel.py
+
+      - name: Set up Node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install and verify real Chart.js 4.4.7
+        working-directory: .
+        run: |
+          rm -rf /tmp/chartpkg
+          mkdir -p /tmp/chartpkg
+          npm install --prefix /tmp/chartpkg --no-package-lock --no-save chart.js@4.4.7
+          test -s /tmp/chartpkg/node_modules/chart.js/dist/chart.umd.js
+          node -e "const p=require('/tmp/chartpkg/node_modules/chart.js/package.json'); if(p.version!=='4.4.7') process.exit(1); console.log('chart.js', p.version)"
+          sha256sum /tmp/chartpkg/node_modules/chart.js/dist/chart.umd.js
+
+      - name: Install Playwright and Chromium
+        working-directory: .
+        run: |
+          python -m pip install --disable-pip-version-check playwright
+          python -m playwright install chromium
+          python -c "import importlib.metadata; print('playwright', importlib.metadata.version('playwright'))"
+          python - <<'PY'
+          from playwright.sync_api import sync_playwright
+          with sync_playwright() as p:
+              browser = p.chromium.launch(headless=True)
+              print("browser", browser.version)
+              browser.close()
+          PY
+
+  runtime-proof:
+    needs: environment-preflight
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    defaults:
+      run:
+        working-directory: kyiv-air-alerts-grafana
+    steps:
+      - name: Check out exact triggered proof commit
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 1
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install production Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements-db-phase1.txt
+
+      - name: Set up Node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install real Chart.js 4.4.7
+        working-directory: .
+        run: |
+          rm -rf /tmp/chartpkg
+          mkdir -p /tmp/chartpkg
+          npm install --prefix /tmp/chartpkg --no-package-lock --no-save chart.js@4.4.7
+          test -s /tmp/chartpkg/node_modules/chart.js/dist/chart.umd.js
+          node -e "const p=require('/tmp/chartpkg/node_modules/chart.js/package.json'); if(p.version!=='4.4.7') process.exit(1); console.log('chart.js', p.version)"
+          sha256sum /tmp/chartpkg/node_modules/chart.js/dist/chart.umd.js
+
+      - name: Install Playwright and Chromium
+        working-directory: .
+        run: |
+          python -m pip install --disable-pip-version-check playwright
+          python -m playwright install chromium
+          python -c "import importlib.metadata; print('playwright', importlib.metadata.version('playwright'))"
+
+      - name: Execute strict exact-current-base runtime proof
+        env:
+          CHART_JS_PATH: /tmp/chartpkg/node_modules/chart.js/dist/chart.umd.js
+        run: |
+          python tests/run_multicity_casualty_final_runtime_proof_v2.py
+
+      - name: Upload machine-readable proof result
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: multicity-casualties-final-runtime-exec-result
+          path: /tmp/multicity_casualties_final_runtime_exec_result.json
+          if-no-files-found: warn
+          retention-days: 30
