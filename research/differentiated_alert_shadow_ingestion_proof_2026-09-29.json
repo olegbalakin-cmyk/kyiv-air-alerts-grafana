@@ -1,0 +1,194 @@
+{
+  "authoritative_head": "0173b9b5663ddb9f8d64120b929ad9e8c85517b8",
+  "authoritative_head_at_branch_creation": "0173b9b5663ddb9f8d64120b929ad9e8c85517b8",
+  "proof_branch": "differentiated-alert-shadow-ingestion-proof-2026-09-29",
+  "schema_proof_commit": "8d8ff2468edda2fc7229377c67a8eb30409e75af",
+  "authoritative_drift": {
+    "from": "61e8c9096d5fb12168b08f64d997c07718f3aab5",
+    "to": "0173b9b5663ddb9f8d64120b929ad9e8c85517b8",
+    "classification": "UNRELATED_CASUALTY_DATA_ONLY",
+    "relevant_ingestion_schema_episode_replay_monitor_drift": false,
+    "changed_files": [
+      "kyiv-air-alerts-grafana/data/casualties/candidate_monitor_last_run.json",
+      "kyiv-air-alerts-grafana/data/casualties/candidate_monitor_state.json",
+      "kyiv-air-alerts-grafana/data/casualties/multicity_review_queue.json"
+    ]
+  },
+  "source_inputs": {
+    "kyiv": {
+      "classification": "STORED_RAW",
+      "fresh_live_raw_gate": false,
+      "source": "Kyiv Digital official /open-api/air-alert/state",
+      "captured_on": "2026-09-29",
+      "source_state_at": "2026-09-29 09:36:04",
+      "current": {
+        "state": 1,
+        "causes": [
+          "drone"
+        ],
+        "last_cause": "drone"
+      },
+      "note": "Direct official capture was accepted in the prerequisite transition proof, but a fresh raw HTTP response could not be obtained in this execution environment. It is therefore not claimed as LIVE_RAW.",
+      "proof_fixture_blob": "7065e8b5de8c2f6a42a66518c89ae76af2efd062"
+    },
+    "ukrainealarm": {
+      "classification": "STORED_RAW",
+      "accepted_upstream_blob": "2db2e194b216d5c44e23d6d3ad9c1834f878dca0",
+      "provenance_repo": "andreyyaremenko-ops/deye-dashboard",
+      "provenance_ref": "633507a83ef4130c5ae77d4337b8354812747551",
+      "provenance_path": "apps/api/test/fixtures/ukrainealarm-alerts-2026-09-14.json",
+      "selected_region_id": "147",
+      "selected_region_type": "District",
+      "proof_fixture_blob": "12936fa23d8149b64c2e7ac5440918ce62ca6f7b",
+      "overlap": {
+        "levels": [
+          "Red",
+          "Yellow"
+        ],
+        "observation_count": 2,
+        "same_air_object": true
+      }
+    },
+    "alerts_in_ua": {
+      "classification": "STORED_RAW",
+      "accepted_upstream_blob": "c0b694d40d04b1e1c8eb6b2191358f2533a0fa7a",
+      "provenance_repo": "Unknown6656/cyd-hackathon-2026-track-3",
+      "provenance_ref": "aa9415831dc9707faad7831b22636ce251d29c37",
+      "provenance_path": "docs/recon/siren_aiu_raw.json",
+      "selected_alert_id": 261769,
+      "location_type": "raion",
+      "threat_count": 1,
+      "proof_fixture_blob": "1f4131167001a23f19f285b07fce6ee531ee502a"
+    }
+  },
+  "shadow_store": {
+    "implementation": "isolated local SQLite child-only store",
+    "permanent_neon_writes": false,
+    "production_db_writes": false,
+    "parent_write_api_exposed": false,
+    "tables": [
+      "alert_state_snapshot",
+      "alert_threat_observation"
+    ],
+    "transactional_failure_test": "PASS"
+  },
+  "adapter_results": {
+    "kyiv_stored_raw": "PASS",
+    "ukrainealarm_stored_raw_overlap": "PASS",
+    "alerts_in_ua_stored_raw_structured_threat": "PASS",
+    "zero_threat_snapshot": "PASS",
+    "fresh_live_raw": "NOT_PROVEN"
+  },
+  "binding_results": {
+    "BOUND": "PASS",
+    "AMBIGUOUS_episode_id_null": "PASS",
+    "UNBOUND_episode_id_null": "PASS",
+    "RAION_preserved_after_target_binding": "PASS",
+    "parent_mutation_interface_absent": "PASS"
+  },
+  "idempotency": {
+    "exact_replay": {
+      "first_run": {
+        "inserted_snapshots": 1,
+        "inserted_observations": 2
+      },
+      "second_run": {
+        "inserted_snapshots": 0,
+        "inserted_observations": 0
+      },
+      "result": "PASS"
+    },
+    "later_unchanged_poll": "PASS_NEW_SNAPSHOT_STABLE_COMPONENT_IDENTITY",
+    "restart_replay": "PASS"
+  },
+  "poll_progression": {
+    "sequence": "Yellow drone -> Yellow drone + Red missile -> Yellow drone -> AIR clear",
+    "distinct_snapshots": 4,
+    "red_disappearance_source_end_fabricated": false,
+    "parent_split": false,
+    "result": "PASS"
+  },
+  "failure_tests": {
+    "source_http_failure": "PASS",
+    "invalid_json": "PASS",
+    "unexpected_source_enum": "PASS_RAW_PRESERVED_NORMALIZED_UNKNOWN",
+    "persistence_failure": "PASS_ATOMIC_ROLLBACK",
+    "binding_ambiguity": "PASS_NULL_EPISODE",
+    "missing_target_geography": "PASS_NO_STORE_WRITE",
+    "source_failure_isolation": "PASS"
+  },
+  "geography_tests": {
+    "city": "PASS",
+    "raion": "PASS_REMAINS_RAION",
+    "ambiguous": "PASS",
+    "unbound": "PASS"
+  },
+  "cross_source_tests": {
+    "independent_preservation": "PASS",
+    "automatic_cross_source_merge": false
+  },
+  "parent_regression": {
+    "source_blob": "a1937e7d6d8da2a2d50cb0d013d1c5b6839ae4f9",
+    "current_city_count": 23,
+    "observed_episode_rows": 1397,
+    "baseline_global_sha256": "d1e408558a3d1977029564c44984dcf056d5e4b9c8d59054db8deaea6cbac10d",
+    "full_runtime_before_after_same_corpus_gate": "NOT_PROVEN",
+    "reason": "The isolated shadow runs had no parent write surface, but this execution did not run the complete accepted parent-corpus runtime comparator before and after the shadow store run."
+  },
+  "attack_event_regression": {
+    "source_blob": "d73a50cae2ac78c142459d9cee71ecefc618d69f",
+    "current_city_count": 23,
+    "baseline_global_sha256": "aba047359e2cba650635d578ede478a4c547e28e732b4d86ebf1109004e1eb1c",
+    "full_runtime_before_after_same_logic_gate": "NOT_PROVEN",
+    "reason": "Current accepted output was fingerprinted, but the same accepted attack-event/replay logic was not rerun before and after the isolated shadow ingestion in this environment."
+  },
+  "focused_tests": {
+    "local_executable_suite": {
+      "tests_run": 25,
+      "passed": 25,
+      "failed": 0,
+      "result": "PASS"
+    },
+    "repository_suite_path": "kyiv-air-alerts-grafana/tests/test_differentiated_alert_shadow_ingestion.py",
+    "repository_suite_cases": 18,
+    "accepted_schema_module_blob": "68b4f3df3b730a3d22f70d29a0d0cc09072c3a42",
+    "shadow_wrapper_blob": "5d4edeae1a4979acdac58b27a39adf8c58bdb95d",
+    "repository_test_blob": "825214bd03b058d0c6cc3bea10ae3ec55957fc07"
+  },
+  "production_writes": {
+    "production_branches": false,
+    "workflow_changes": false,
+    "production_json": false,
+    "permanent_neon": false,
+    "site_prod": false,
+    "main": false
+  },
+  "unknowns": [
+    "Fresh LIVE_RAW Kyiv payload was not obtained in this execution environment; the available Kyiv input is STORED_RAW.",
+    "The mandatory full parent-corpus runtime before/after comparator was not executed against the accepted current corpus.",
+    "The mandatory attack-event metric before/after rerun through the same accepted logic was not executed.",
+    "UkraineAlarm component-removal upstream semantics beyond the accepted stored overlap remain source-uncertain.",
+    "Alerts.in.ua alert.id stability across threat-composition changes remains unproven."
+  ],
+  "acceptance": {
+    "at_least_one_fresh_LIVE_RAW": false,
+    "kyiv_live_raw_end_to_end": false,
+    "ukrainealarm_real_overlap_persistence": true,
+    "alerts_in_ua_structured_threat_persistence": true,
+    "snapshots_independent_from_parent": true,
+    "zero_threat_snapshots": true,
+    "exact_replay_idempotent": true,
+    "unchanged_poll_no_fake_start": true,
+    "concurrent_threats_preserved": true,
+    "disappearance_no_fabricated_source_end": true,
+    "unknown_enums_raw_preserved": true,
+    "ambiguous_unbound_isolated": true,
+    "raion_preserved": true,
+    "restart_identity": true,
+    "source_failures_isolated": true,
+    "parent_runtime_fingerprint_gate": false,
+    "attack_event_runtime_regression_gate": false,
+    "no_production_changes": true
+  },
+  "verdict": "SHADOW INGESTION PROOF NOT READY"
+}

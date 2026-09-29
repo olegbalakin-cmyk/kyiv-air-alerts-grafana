@@ -1,0 +1,48 @@
+{
+  "proof_branch": "differentiated-alert-shadow-ingestion-proof-2026-09-29",
+  "local_suite": {
+    "command": "python -W error::ResourceWarning test_shadow.py",
+    "tests_run": 25,
+    "passed": 25,
+    "failed": 0,
+    "result": "PASS",
+    "coverage": [
+      "Kyiv stored raw canonicalization",
+      "clear/0-threat snapshot",
+      "UkraineAlarm Yellow+Red overlap",
+      "Alerts.in.ua field preservation",
+      "exact replay idempotency",
+      "later unchanged poll",
+      "changed state",
+      "restart/replay",
+      "BOUND",
+      "AMBIGUOUS",
+      "UNBOUND",
+      "RAION retention",
+      "unknown enum preservation",
+      "missing geography",
+      "invalid JSON",
+      "unexpected enum",
+      "atomic persistence failure",
+      "cross-source coexistence",
+      "parent mutation interface absent",
+      "parent input immutability",
+      "parent fingerprint determinism",
+      "metric fingerprint determinism",
+      "clear persistence",
+      "T0-T3 poll progression",
+      "HTTP/source failure isolation"
+    ]
+  },
+  "committed_focused_suite": {
+    "path": "kyiv-air-alerts-grafana/tests/test_differentiated_alert_shadow_ingestion.py",
+    "cases": 18,
+    "test_blob": "825214bd03b058d0c6cc3bea10ae3ec55957fc07"
+  },
+  "mandatory_gates_not_executed": [
+    "fresh LIVE_RAW Kyiv HTTP -> adapter -> persistence",
+    "full accepted parent-corpus runtime before/after comparator",
+    "same accepted attack-event/replay logic before/after rerun"
+  ],
+  "verdict": "FUNCTIONAL CHILD-PERSISTENCE TESTS PASS; OVERALL ACCEPTANCE BLOCKED"
+}
