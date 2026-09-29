@@ -1,0 +1,200 @@
+{
+  "schema_version": 1,
+  "task": "Vinnytsia 2026-02-03 historical replay reconciliation proof",
+  "authoritative": {
+    "branch": "multicity-wip-2026-09-16",
+    "head": "bdc0188020aa39cc8164ff58218e6aac4868f54b",
+    "replay_blob": "816e2a13f66bb453fc4bd765318d15443121325e",
+    "source_slice_blob": "47496f33f140c25466468873090c43bafeb20dad",
+    "preview_blob": "8a71218be9b0d5463aebe4005c21aea191fdae82",
+    "frozen": {
+      "denominator": 362,
+      "strict": 5,
+      "sensitivity": 7,
+      "strict_episode_start_dates": [
+        "2025-09-10",
+        "2026-02-03",
+        "2026-02-07",
+        "2026-03-24",
+        "2026-09-02"
+      ]
+    }
+  },
+  "proof_branch": "vinnytsia-2026-02-03-reconciliation-proof-2026-09-29",
+  "input_package": {
+    "filename": "vinnytsia_explosion_reaudit_final_2026-09-18.zip",
+    "zip_sha256": "9f85b266a28c7e0bb3970cef3265b8b8f22c55c9f808b6eb6cbf29f1ac7e4ce7",
+    "manifest_verified": true,
+    "file_hashes": {
+      "MANIFEST.sha256": "29efe8badbe07b6dab7af49110840f38110723641cedb87b3e37f49f696a1c4b",
+      "NEXT_TASK.md": "2f6b6a6e3effccfc36b31e7b9256a86e778382c05b77a9a8ae34d3fa85a8b146",
+      "city_explosion_metric_status_2026-09-18_updated.csv": "5d9a7137cb9ab4e2a9b28ea40d00052d9a6596d199dad9c359e0396b87de77ae",
+      "vinnytsia_explosion_reaudit.xlsx": "93082a42626435edb26d1e7d36970b5f316893cc80fa137ac25f86d857544e2e",
+      "vinnytsia_explosion_reaudit_notes.md": "c73f11b811bd9d034d161a269387392614ee161bf4012fbbf8da06b19b7d0199",
+      "vinnytsia_explosion_reaudit_summary.json": "461a191cb7585c9abc125f41c35e973369dcab326c1e882ac731928f0c55f1eb",
+      "vinnytsia_explosion_reports_final.csv": "735f98ae647158dc4e0d76c9d96f6a79ef4aac3304d868a4cdd0579b84727161",
+      "vinnytsia_tg_city_mentions.csv": "3c581050e585a3cf22242984896fd7f3da50eb7e572f9605a97edb6167108d6b"
+    },
+    "package_result": {
+      "denominator": 362,
+      "strict": 4,
+      "sensitivity": 6
+    },
+    "package_disputed_date_presence": {
+      "date": "2026-02-03",
+      "text_payload_match": false,
+      "xlsx_raw_xml_match": false,
+      "hidden_sheets": false,
+      "conclusion": "No retained trace in final package; absence is not an explicit rejection."
+    }
+  },
+  "discrepancy": {
+    "exact_date": "2026-02-03",
+    "arithmetic": "local 4/6 + one strict positive = frozen 5/7",
+    "other_local_positive_decisions_changed": 0
+  },
+  "canonical_episodes_2026_02_03": [
+    {
+      "episode_id": "178cd271e89c429089733c47",
+      "start_utc": "2026-02-02T23:07:00Z",
+      "end_utc": "2026-02-03T01:35:17Z",
+      "start_local": "2026-02-03T01:07:00+02:00",
+      "end_local": "2026-02-03T03:35:17+02:00"
+    },
+    {
+      "episode_id": "61509736be4dbc730fa1ad71",
+      "start_utc": "2026-02-03T03:28:54Z",
+      "end_utc": "2026-02-03T05:44:01Z",
+      "start_local": "2026-02-03T05:28:54+02:00",
+      "end_local": "2026-02-03T07:44:01+02:00"
+    },
+    {
+      "episode_id": "565311c5ef827d863889714d",
+      "start_utc": "2026-02-03T07:56:49Z",
+      "end_utc": "2026-02-03T08:38:14Z",
+      "start_local": "2026-02-03T09:56:49+02:00",
+      "end_local": "2026-02-03T10:38:14+02:00"
+    },
+    {
+      "episode_id": "0fb063506c605f3f7ebd1d73",
+      "start_utc": "2026-02-03T16:57:34Z",
+      "end_utc": "2026-02-03T17:19:09Z",
+      "start_local": "2026-02-03T18:57:34+02:00",
+      "end_local": "2026-02-03T19:19:09+02:00"
+    }
+  ],
+  "historical_provenance": {
+    "classification": "DATE_ONLY",
+    "origin_commit": "d03165a5c8510505625a1c794e79899ee7dcde23",
+    "origin_commit_message": "Add audited explosion metric preview input",
+    "origin_timestamp_utc": "2026-09-18T18:48:07Z",
+    "recovered": {
+      "frozen_row": true,
+      "strict_date": true,
+      "source_urls": false,
+      "excerpt": false,
+      "event_time": false,
+      "exact_city_basis": false,
+      "attack_context_basis": false,
+      "episode_binding": false
+    },
+    "note": "The origin commit added the ready-made Vinnytsia 362/5/7 row and 2026-02-03 date but retained no evidence row or binding."
+  },
+  "external_research": [
+    {
+      "source": "Suspilne",
+      "url": "https://suspilne.media/1229981-rosijska-masovana-ataka-v-nic-na-3-lutogo-so-vidomo-pro-naslidki/",
+      "retained_fact": "At 06:22, correspondents in Vinnytsia heard explosion sounds during the Russian mass aerial attack."
+    },
+    {
+      "source": "24 Kanal",
+      "url": "https://24tv.ua/vinnitsi-chutno-vibuhi-misto-letili-shahedi_n3001481",
+      "retained_fact": "Vinnytsia heard explosions at about 06:28 and 07:00; strike UAVs and then cruise missiles were moving toward the city."
+    }
+  ],
+  "disputed_event_assessment": {
+    "exact_city": "CONFIRMED",
+    "qualifying_event": "CONFIRMED_EXPLOSIONS",
+    "attack_context": "CONFIRMED_AERIAL_ATTACK",
+    "event_times_local": [
+      "2026-02-03T06:22:00+02:00",
+      "2026-02-03T06:28:00+02:00",
+      "2026-02-03T07:00:00+02:00"
+    ],
+    "canonical_episode_id": "61509736be4dbc730fa1ad71",
+    "temporal_binding": "UNIQUE_EVENT_TIME_CONTAINMENT",
+    "adjudication": "STRICT"
+  },
+  "normalized_evidence": {
+    "path": "kyiv-air-alerts-grafana/data/explosion_research/vinnytsia/final_evidence.json",
+    "blob": "a1a039d87b7728618ad85e86e39733df1b28c9cb",
+    "local_sha256": "6b26a67fc2d86707751830469cc767c2f6e4e0a5cc9b064e7ddab7a8b87b691b",
+    "expected_counts": {
+      "denominator": 362,
+      "strict": 5,
+      "sensitivity": 7,
+      "qa": 0
+    },
+    "strict_episode_ids": [
+      "202fb3f9846f8aaf8fb958f0",
+      "61509736be4dbc730fa1ad71",
+      "ad02595482a5c1e35f2a8638",
+      "226c7cb6fe4124fb3bd3a346",
+      "5c4daf5e8e07baa46b129f29"
+    ],
+    "sensitivity_only_episode_ids": [
+      "31dc1063610ef09321175fd8",
+      "f9aafb9b87fb1abc661b1e68"
+    ],
+    "duplicate_positive_episode_ids": 0,
+    "unexpected_positive_episodes": 0
+  },
+  "regression": {
+    "branch_diff_changed_files": [
+      "kyiv-air-alerts-grafana/data/explosion_research/vinnytsia/final_evidence.json",
+      "kyiv-air-alerts-grafana/tests/test_historical_replay_vinnytsia_reconciliation.py"
+    ],
+    "non_vinnytsia_semantic_input_file_deltas": 0,
+    "protected_file_deltas": 0,
+    "dynamic_non_target_replay_map_execution": "NOT_EXECUTED_IN_THIS_RUNTIME",
+    "reason": "Sandbox could not clone github.com due DNS, and no existing proof-branch push workflow or available workflow-dispatch action could execute the replay."
+  },
+  "tests": {
+    "focused_test_path": "kyiv-air-alerts-grafana/tests/test_historical_replay_vinnytsia_reconciliation.py",
+    "focused_test_blob": "37a626896b1bad68c32dc66258e29ca36d70c919",
+    "focused_test_commit": "2abd3168b464e31c045ffd5b8c76ab8628a2cd60",
+    "covers": [
+      "denominator 362",
+      "five strict / seven sensitivity unique canonical bindings",
+      "2026-02-03 strict classification and canonical binding",
+      "preserve four local strict positives",
+      "preserve 2025-10-30 and 2026-07-30 sensitivity-only",
+      "exclude precoverage 2025-07-16",
+      "no region-only promotion"
+    ],
+    "replay_self_test": "NOT_EXECUTED_IN_THIS_RUNTIME",
+    "inherited_historical_replay_tests": "NOT_EXECUTED_IN_THIS_RUNTIME",
+    "focused_tests": "NOT_EXECUTED_IN_THIS_RUNTIME",
+    "workflow_runs_on_proof_commit": 0
+  },
+  "protected_state": {
+    "authoritative_modified": false,
+    "baseline_modified": false,
+    "preview_modified": false,
+    "source_slice_modified": false,
+    "replay_modified": false,
+    "classifier_modified": false,
+    "monitor_modified": false,
+    "db_neon_touched": false,
+    "main_touched": false,
+    "site_prod_touched": false,
+    "campaign_6863_touched": false
+  },
+  "conclusion": {
+    "semantic_adjudication": "STRICT",
+    "frozen_baseline_semantically_supported": true,
+    "evidence_backed_expected_result": "362 / 5 / 7",
+    "runtime_acceptance_status": "PENDING_EXECUTION_ONLY",
+    "exact_verdict_if_runtime_tests_confirm_expected_QA0": "VINNYTSIA RECONCILIATION PROVEN — 2026-02-03 STRICT POSITIVE CONFIRMED — FROZEN 5/7 BASELINE VALID — QA0"
+  }
+}
