@@ -1,0 +1,566 @@
+{
+  "authoritative_head": "5b4b8ebbabd9bb47775b9d3e3fe2387db584f2b3",
+  "authoritative_branch": "multicity-wip-2026-09-16",
+  "research_timestamp": "2026-09-29 (Europe/Kyiv)",
+  "scope": {
+    "mode": "read-only / proof-only",
+    "implementation_changes": false,
+    "authoritative_branch_modified": false,
+    "db_neon_touched": false,
+    "production_branches_touched": false,
+    "attack_event_semantics_changed": false
+  },
+  "repository_guard": {
+    "start_head": "5b4b8ebbabd9bb47775b9d3e3fe2387db584f2b3",
+    "final_pre_artifact_head": "5b4b8ebbabd9bb47775b9d3e3fe2387db584f2b3",
+    "drift_during_research": false,
+    "start_head_commit_message": "Update explosion metric monitor state",
+    "start_head_author": "github-actions[bot]"
+  },
+  "evidence_levels": [
+    "RAW_PROVEN",
+    "OFFICIAL_SCHEMA",
+    "OFFICIAL_DOCUMENTATION",
+    "REPO_PROVEN",
+    "SECONDARY_CONFIRMED",
+    "INFERRED",
+    "UNKNOWN"
+  ],
+  "sources": {
+    "ukrainealarm": {
+      "upstream": "https://api.ukrainealarm.com/api/v3",
+      "direct_authenticated_access": {
+        "available": false,
+        "reason": "No safely available UkraineAlarm credential was present in the execution environment. No secret was created, printed, modified, requested from the user, or committed."
+      },
+      "current_shape": {
+        "evidence_level": "SECONDARY_CONFIRMED",
+        "provenance": [
+          {
+            "repository": "b-ovsepian/spoloh",
+            "commit": "fc6993f80e465628965d02c8d05a8188f4ec4a96",
+            "path": "docs/ukrainealarm-swagger.json",
+            "blob_sha": "65e6725423f4cb70a4c89707266bbd11ccc34587"
+          }
+        ],
+        "alert_fields": [
+          "regionId",
+          "regionType",
+          "type",
+          "lastUpdate",
+          "activeAlertLevels[]"
+        ],
+        "alert_level_fields": [
+          "alertLevel",
+          "reason",
+          "createdAt"
+        ],
+        "alert_level_values_observed_or_defined": [
+          "Yellow",
+          "Red"
+        ],
+        "alert_native_id": null,
+        "threat_native_id": null,
+        "threat_end_timestamp": null,
+        "structured_cause_separate_from_reason": false,
+        "reason_is_machine_taxonomy": false,
+        "array_ordering_guarantee_found": false
+      },
+      "raw_capture_status": {
+        "direct_upstream_capture_in_this_task": false,
+        "preserved_real_upstream_dump_available": true,
+        "evidence_level": "SECONDARY_CONFIRMED"
+      },
+      "transition_semantics": {
+        "overlapping_yellow_red": {
+          "status": "PROVEN",
+          "evidence_level": "SECONDARY_CONFIRMED",
+          "explanation": "A preserved real /alerts dump contains seven AIR objects with both Yellow and Red activeAlertLevels at the same time. In representative rows Yellow has an earlier createdAt and Red a later createdAt, while both remain inside one AIR object."
+        },
+        "red_replaces_yellow": {
+          "status": false,
+          "evidence_level": "SECONDARY_CONFIRMED",
+          "explanation": "The overlap snapshot shows Red can be added while Yellow remains active."
+        },
+        "same_level_multiple_components": {
+          "status": "UNKNOWN",
+          "evidence_level": "UNKNOWN"
+        },
+        "component_end_behavior": {
+          "status": "UNKNOWN",
+          "evidence_level": "UNKNOWN",
+          "explanation": "No alert-level end/status field exists in the observed current shape, and no before/after removal snapshot was directly captured."
+        },
+        "stable_native_air_alert_id": {
+          "status": false,
+          "evidence_level": "SECONDARY_CONFIRMED"
+        },
+        "stable_region_identity": {
+          "status": true,
+          "key": "regionId",
+          "evidence_level": "SECONDARY_CONFIRMED"
+        },
+        "complete_t0_to_t3_identity": {
+          "status": "NOT PROVEN",
+          "evidence_level": "UNKNOWN",
+          "explanation": "The overlap state is proven, but a complete Yellow-only -> Yellow+Red -> Yellow-only -> clear snapshot chain was not captured."
+        }
+      },
+      "history": {
+        "endpoint": "/alerts/regionHistory",
+        "representation": "RegionAlarmModel-style AIR intervals with startDate/endDate/duration/alertType; differentiated activeAlertLevels/reason/createdAt are not represented in the current mirrored schema.",
+        "transition_retention": "INTERVAL_ONLY",
+        "evidence_level": "SECONDARY_CONFIRMED",
+        "retention_window": "latest 25 alerts per region in the current mirrored schema",
+        "direct_history_payload_captured": false
+      }
+    },
+    "alerts_in_ua": {
+      "official_docs": "https://devs.alerts.in.ua/",
+      "direct_authenticated_access": {
+        "available": false,
+        "reason": "No safely available Alerts.in.ua credential was present in the execution environment. No secret was created, printed, modified, requested from the user, or committed."
+      },
+      "current_shape": {
+        "evidence_level": "OFFICIAL_SCHEMA",
+        "alert_fields": [
+          "id",
+          "location_uid",
+          "location_type",
+          "started_at",
+          "finished_at",
+          "updated_at",
+          "alert_type",
+          "alert_level",
+          "threats[]"
+        ],
+        "threat_fields": [
+          "threat_type",
+          "level",
+          "started_at",
+          "source_message"
+        ],
+        "threat_types_documented": [
+          "tactic_aircraft_activity",
+          "strategic_aircraft_activity",
+          "mig31k_departure",
+          "ballistic_missiles",
+          "cruise_missiles",
+          "unspecified_missiles",
+          "drones",
+          "guided_aerial_bombs",
+          "air_defense",
+          "unknown"
+        ],
+        "alert_native_id": "id",
+        "threat_native_id": null,
+        "threat_end_timestamp": null,
+        "threats_semantics": "current/open threat components inside the alert",
+        "source_message_is_free_text": true
+      },
+      "archived_raw_snapshot": {
+        "evidence_level": "SECONDARY_CONFIRMED",
+        "provenance": {
+          "repository": "Unknown6656/cyd-hackathon-2026-track-3",
+          "commit": "aa9415831dc9707faad7831b22636ce251d29c37",
+          "path": "docs/recon/siren_aiu_raw.json",
+          "blob_sha": "c0b694d40d04b1e1c8eb6b2191358f2533a0fa7a",
+          "captured_at_reported_by_file": "2026-09-16 10:53:15",
+          "source_label_in_file": "alerts.in.ua API"
+        },
+        "sample_counts": {
+          "total_records": 38,
+          "air_raid_records": 29,
+          "air_with_threats_property": 21,
+          "air_without_threats_property": 8,
+          "threat_rows": 21,
+          "multi_threat_air_records": 0
+        },
+        "field_sparsity_air_records": {
+          "id": "29/29 non-null",
+          "started_at": "29/29 non-null",
+          "finished_at": "0/29 non-null because this was an active snapshot",
+          "updated_at": "29/29 non-null",
+          "alert_level": "29/29 non-null",
+          "threats": "21/29 property present"
+        },
+        "field_sparsity_threat_rows": {
+          "threat_type": "21/21",
+          "level": "21/21",
+          "started_at": "21/21",
+          "source_message": "19/21",
+          "native_id": "0/21",
+          "finished_at_or_ended_at": "0/21"
+        }
+      },
+      "transition_semantics": {
+        "id_stable_across_level_change": {
+          "status": "NOT PROVEN",
+          "evidence_level": "UNKNOWN"
+        },
+        "updated_at_changes_on_threat_change": {
+          "status": "SCHEMA SUPPORTS LAST-UPDATE SEMANTICS; TRANSITION NOT RAW-CAPTURED",
+          "evidence_level": "OFFICIAL_SCHEMA"
+        },
+        "overlapping_threats_supported_by_model": {
+          "status": true,
+          "evidence_level": "OFFICIAL_SCHEMA"
+        },
+        "actual_yellow_red_overlap_observed": {
+          "status": "NOT PROVEN",
+          "evidence_level": "UNKNOWN"
+        },
+        "closed_threats_in_live_array": {
+          "status": false,
+          "evidence_level": "OFFICIAL_SCHEMA",
+          "explanation": "Official documentation defines threats[] as threats currently open within the alert."
+        },
+        "alert_level_equals_max_current_threat_level": {
+          "status": "NOT PROVEN FOR MULTI-THREAT CASE",
+          "evidence_level": "SECONDARY_CONFIRMED",
+          "explanation": "All archived one-threat examples matched their alert_level, but no concurrent multi-threat raw example was captured."
+        }
+      },
+      "history": {
+        "endpoint_pattern": "/v1/regions/{uid}/alerts/month_ago.json",
+        "documented_retention_window": "one month",
+        "transition_retention": "UNKNOWN",
+        "evidence_level": "OFFICIAL_DOCUMENTATION",
+        "explanation": "The official history example omits differentiated fields, while the generic Alert schema includes them. An authenticated current history payload was not captured, so live capability is not projected onto history."
+      }
+    },
+    "kyiv_official": {
+      "official_api_docs": "https://kyiv.digital/open-api/docs/air-alert.html",
+      "current_state_endpoint": "https://kyiv.digital/open-api/air-alert/state",
+      "history_endpoint": "https://kyiv.digital/open-api/air-alert/history",
+      "open_data_resource": "https://data.kyivcity.gov.ua/dataset/statystyka-povitrianykh-tryvoh-u-misti-kyievi-dep-municipal/resource/cbf3758e-031c-42b0-a477-e731cd79b261",
+      "current_schema": {
+        "evidence_level": "OFFICIAL_SCHEMA",
+        "state_is_severity_level": false,
+        "causes_is_array": true,
+        "multiple_causes_may_be_active_at_once": true,
+        "cause_values_documented": [
+          "drone",
+          "mig",
+          "missile",
+          "ballistic",
+          "missile-drone",
+          "massive-drone"
+        ],
+        "last_cause_semantics": "last threat announced among causes still active",
+        "clear_semantics": "causes=[] and last_cause=null",
+        "native_episode_id": null,
+        "native_cause_id": null,
+        "explicit_per_cause_end_timestamp": null
+      },
+      "direct_raw_state_capture": {
+        "evidence_level": "RAW_PROVEN",
+        "captured_on": "2026-09-29",
+        "minimal_payload": {
+          "current": {
+            "state": 1,
+            "causes": [
+              "drone"
+            ],
+            "last_cause": "drone",
+            "created_at": "2026-09-29 09:36:04"
+          },
+          "stats": {
+            "total_alerts": 2590,
+            "total_lasts_for": 10787705
+          }
+        }
+      },
+      "history_capture": {
+        "direct_raw_json_captured": false,
+        "reason": "The public history endpoint was discoverable, but the available web fetch path returned XML/unsupported content for direct inspection. No token or secret workaround was used.",
+        "secondary_consumer_evidence": {
+          "evidence_level": "SECONDARY_CONFIRMED",
+          "repository": "sergiiiavt/air-stat",
+          "commit": "ca76fee81e356d23815330462d6e55674513dcbc",
+          "path": "worker/index.ts",
+          "behavior": "Consumes history items with state, causes[], created_at. Repeated state=1 events while an episode is open are folded into the same parent interval; state=0 closes it."
+        }
+      },
+      "transition_semantics": {
+        "cause_change_without_all_clear": {
+          "status": true,
+          "evidence_level": "OFFICIAL_DOCUMENTATION",
+          "explanation": "Official KMDA rollout guidance says a new threat type replaces the previous message and no separate all-clear is announced between threat types."
+        },
+        "multiple_simultaneous_causes_supported": {
+          "status": true,
+          "evidence_level": "OFFICIAL_SCHEMA"
+        },
+        "actual_history_rows_for_one_full_transition_chain": {
+          "status": "NOT RAW-CAPTURED",
+          "evidence_level": "UNKNOWN"
+        },
+        "reconstructability": {
+          "status": "PARTIAL",
+          "evidence_level": "OFFICIAL_SCHEMA",
+          "explanation": "The model exposes set-valued causes plus event timestamps, and a current consumer reads repeated history events. Exact source-row chronology for a complete real episode was not directly captured in this task."
+        }
+      },
+      "history": {
+        "transition_retention": "PARTIAL",
+        "evidence_level": "SECONDARY_CONFIRMED",
+        "retention_window": "UNKNOWN",
+        "explanation": "There is strong evidence that history is an event stream with state/causes/created_at, but direct raw history rows were not captured and per-cause end timestamps/IDs are not exposed."
+      }
+    }
+  },
+  "raw_examples": [
+    {
+      "source": "UkraineAlarm",
+      "evidence_level": "SECONDARY_CONFIRMED",
+      "kind": "preserved real /alerts dump",
+      "provenance": {
+        "repository": "andreyyaremenko-ops/deye-dashboard",
+        "commit_introducing_real_dump": "66c182154ba4a5cd0120a5a206e8f87577615850",
+        "current_ref_inspected": "633507a83ef4130c5ae77d4337b8354812747551",
+        "path": "apps/api/test/fixtures/ukrainealarm-alerts-2026-09-14.json",
+        "blob_sha": "2db2e194b216d5c44e23d6d3ad9c1834f878dca0",
+        "commit_message_claim": "Real /regions and /alerts dumps added as fixtures"
+      },
+      "observation": {
+        "regionId": "147",
+        "regionName": "Бердянський район",
+        "regionType": "District",
+        "type": "AIR",
+        "lastUpdate": "2026-09-14T17:46:51.946207Z",
+        "activeAlertLevels": [
+          {
+            "alertLevel": "Red",
+            "reason": "Ракетна загроза (червоний рівень)",
+            "createdAt": "2026-09-14T17:46:52.157399Z"
+          },
+          {
+            "alertLevel": "Yellow",
+            "reason": "Дронова загроза (жовтий рівень)",
+            "createdAt": "2026-09-14T17:29:25.22846Z"
+          }
+        ]
+      },
+      "semantic_result": "A newer Red missile threat coexists with an older Yellow drone threat in one active AIR object. This is overlay behavior, not scalar replacement at the source-object level."
+    },
+    {
+      "source": "UkraineAlarm",
+      "evidence_level": "SECONDARY_CONFIRMED",
+      "kind": "same preserved real /alerts dump aggregate",
+      "observation": {
+        "air_objects": 27,
+        "air_objects_with_multiple_activeAlertLevels": 7,
+        "air_objects_with_both_red_and_yellow": 7
+      }
+    },
+    {
+      "source": "Alerts.in.ua",
+      "evidence_level": "SECONDARY_CONFIRMED",
+      "kind": "preserved active API response",
+      "provenance": {
+        "repository": "Unknown6656/cyd-hackathon-2026-track-3",
+        "commit": "aa9415831dc9707faad7831b22636ce251d29c37",
+        "path": "docs/recon/siren_aiu_raw.json",
+        "blob_sha": "c0b694d40d04b1e1c8eb6b2191358f2533a0fa7a"
+      },
+      "observation_summary": "29 active air_raid records; 21 carried threats[] and each had one threat at that snapshot. No concurrent Yellow+Red example was present."
+    },
+    {
+      "source": "Kyiv official",
+      "evidence_level": "RAW_PROVEN",
+      "kind": "direct current /air-alert/state response",
+      "endpoint": "https://kyiv.digital/open-api/air-alert/state",
+      "observation": {
+        "state": 1,
+        "causes": [
+          "drone"
+        ],
+        "last_cause": "drone",
+        "created_at": "2026-09-29 09:36:04",
+        "total_alerts": 2590
+      },
+      "note": "A prior same-task state capture had a missile cause and total_alerts=2585; total_alerts advanced, so those two snapshots are not treated as one episode transition."
+    }
+  ],
+  "transition_findings": {
+    "core_question": {
+      "answer": "The available source models do not justify treating Yellow and Red as mutually exclusive episode segments. UkraineAlarm has a real preserved snapshot where an older Yellow and newer Red coexist inside one AIR object. Alerts.in.ua models threats[] as the set of currently open threat components. Kyiv Digital models causes[] as a set where several causes may be active simultaneously.",
+      "strongest_evidence_level": "SECONDARY_CONFIRMED"
+    },
+    "ukrainealarm": {
+      "yellow_to_red_overlay": "PROVEN",
+      "red_to_yellow_component_removal": "NOT PROVEN",
+      "full_yellow_red_yellow_clear_chain": "NOT PROVEN",
+      "native_parent_id_stability": "NOT PROVEN / NO NATIVE ALERT ID OBSERVED"
+    },
+    "alerts_in_ua": {
+      "component_array_model": "OFFICIAL_SCHEMA",
+      "actual_multi_component_transition": "NOT PROVEN",
+      "alert_id_stability_across_transition": "NOT PROVEN"
+    },
+    "kyiv_official": {
+      "threat_change_without_clear": "OFFICIAL_DOCUMENTATION",
+      "multiple_active_causes_supported": "OFFICIAL_SCHEMA",
+      "full_history_row_chain": "NOT RAW-CAPTURED"
+    }
+  },
+  "history_retention": {
+    "ukrainealarm": {
+      "classification": "INTERVAL_ONLY",
+      "evidence_level": "SECONDARY_CONFIRMED"
+    },
+    "alerts_in_ua": {
+      "classification": "UNKNOWN",
+      "evidence_level": "OFFICIAL_DOCUMENTATION"
+    },
+    "kyiv_official": {
+      "classification": "PARTIAL",
+      "evidence_level": "SECONDARY_CONFIRMED"
+    }
+  },
+  "source_comparison": [
+    {
+      "source": "UkraineAlarm",
+      "stable_AIR_identity": "No alert-native ID; stable regionId+AIR type; complete T0-T3 identity not proven",
+      "machine_level": "Yes: Yellow/Red",
+      "structured_cause": "No separate machine cause observed",
+      "free_text_reason": "Yes, nullable/empty",
+      "threat_start": "activeAlertLevels[].createdAt",
+      "threat_end": "No explicit field observed",
+      "overlapping_threats": "PROVEN in preserved real /alerts dump",
+      "transition_timestamp": "createdAt per component; alert lastUpdate exists",
+      "history_preserves_transitions": "No",
+      "history_retention": "Latest 25 alerts per region in mirrored current schema",
+      "evidence_level": "SECONDARY_CONFIRMED"
+    },
+    {
+      "source": "Alerts.in.ua",
+      "stable_AIR_identity": "Alert id exists; stability through a level change not raw-proven",
+      "machine_level": "Yes: alert_level and threat.level",
+      "structured_cause": "Yes: threat_type",
+      "free_text_reason": "Yes: source_message",
+      "threat_start": "threat.started_at",
+      "threat_end": "No explicit per-threat field in current schema",
+      "overlapping_threats": "Supported by array/current-open model; actual Yellow+Red overlap not captured",
+      "transition_timestamp": "updated_at plus per-threat started_at",
+      "history_preserves_transitions": "UNKNOWN",
+      "history_retention": "One month documented",
+      "evidence_level": "OFFICIAL_SCHEMA + SECONDARY_CONFIRMED live snapshot"
+    },
+    {
+      "source": "Kyiv official open data/API",
+      "stable_AIR_identity": "No native episode ID observed; episode bounded by active/clear event sequence",
+      "machine_level": "No scalar severity field in current API; state is active/clear and causes carry threat type",
+      "structured_cause": "Yes: causes[] and last_cause",
+      "free_text_reason": "No free-text reason in current state schema",
+      "threat_start": "created_at on state/history events",
+      "threat_end": "No explicit per-cause end timestamp exposed",
+      "overlapping_threats": "Supported explicitly: several causes may be active at once",
+      "transition_timestamp": "created_at",
+      "history_preserves_transitions": "PARTIAL evidence; direct raw history not captured",
+      "history_retention": "UNKNOWN",
+      "evidence_level": "RAW_PROVEN current state + OFFICIAL_SCHEMA + SECONDARY_CONFIRMED history consumer"
+    }
+  ],
+  "project_data_loss": {
+    "evidence_level": "REPO_PROVEN",
+    "authoritative_head": "5b4b8ebbabd9bb47775b9d3e3fe2387db584f2b3",
+    "paths": {
+      "kyiv-air-alerts-grafana/scripts/update_data.py": {
+        "stores": [
+          "start",
+          "end",
+          "source"
+        ],
+        "loses": [
+          "alert level",
+          "structured threat cause",
+          "free-text reason/source_message",
+          "threat component start/end",
+          "upstream alert ID",
+          "upstream threat ID",
+          "transition history"
+        ]
+      },
+      "kyiv-air-alerts-grafana/scripts/apply_ukrainealarm_bridge.py": {
+        "ukrainealarm_history_ingestion": "Filters AIR history and reduces it to startDate/endDate intervals.",
+        "alerts_in_ua_static_ingestion": "Reads city_key,start,end CSV only.",
+        "persisted_bridge_shape": "city/region metadata plus AIR start/end; no differentiated state."
+      },
+      "kyiv-air-alerts-grafana/data/ukrainealarm_bridge.json": {
+        "differentiated_fields_present": false
+      },
+      "kyiv-air-alerts-grafana/data/alerts_in_ua_bridge_2026-09-07_16.meta.json": {
+        "exported_columns": [
+          "city_key",
+          "start",
+          "end"
+        ]
+      }
+    },
+    "recoverability": {
+      "future_live_data": "Recoverable if raw differentiated observations are preserved before interval collapse.",
+      "existing_project_static_intervals": "Not recoverable from current stored interval rows alone.",
+      "upstream_history": "Source-dependent: UkraineAlarm current history appears interval-only; Alerts.in.ua differentiated history retention is unknown; Kyiv history appears partially transition-aware."
+    }
+  },
+  "episode_semantics": {
+    "parent_definition_preserved": "AIR alert episode = continuous period from alert start until all-clear.",
+    "result": "Threat-level changes must be modeled as child observations/components of the parent episode unless source evidence independently proves a new episode boundary.",
+    "mutually_exclusive_segments_safe_as_canonical_model": false,
+    "overlapping_component_model_required": true,
+    "evidence": [
+      "UkraineAlarm preserved real /alerts dump has older Yellow + newer Red simultaneously inside one AIR object.",
+      "Alerts.in.ua official schema defines threats[] as currently open individual threats.",
+      "Kyiv Digital official schema says several causes may be active at once."
+    ]
+  },
+  "schema_constraints_for_next_task": [
+    "Keep AIR episode identity separate from geography, level, and threat cause.",
+    "Support zero-to-many concurrent threat/state components or observations per AIR episode.",
+    "Preserve source-native alert ID where available (Alerts.in.ua id); do not invent a native ID for sources that do not expose one.",
+    "Preserve stable source region identity and alert type for sources without a native alert ID.",
+    "Preserve raw machine level, structured cause/type, free-text reason/source_message, source timestamps, and source provenance separately.",
+    "Do not force Yellow/Red into mutually exclusive segments before component-end semantics are proven.",
+    "Because UkraineAlarm and Alerts.in.ua do not expose per-threat end timestamps in the observed current shape, preserve snapshots/events so component end times can be derived later by state differencing if justified.",
+    "Keep derived UI/max-severity state separate from raw child components.",
+    "Do not treat a threat change as a new denominator episode unless an all-clear/new-start boundary is observed."
+  ],
+  "unknowns": [
+    "UkraineAlarm: complete Yellow-only -> Yellow+Red -> Yellow-only -> clear raw snapshot chain was not captured.",
+    "UkraineAlarm: exact component-removal payload when Red ends while Yellow remains is not proven.",
+    "UkraineAlarm: whether multiple same-level activeAlertLevels can coexist is not proven.",
+    "Alerts.in.ua: a real concurrent Yellow+Red threats[] payload was not captured.",
+    "Alerts.in.ua: stability of alert id across a threat-composition change is not proven.",
+    "Alerts.in.ua: differentiated fields surviving in actual current history payload are not proven because authenticated history access was unavailable.",
+    "Kyiv: direct raw /history rows for one post-rollout transition episode were not captured.",
+    "Kyiv: exact history retention window is not established.",
+    "Kyiv: exact per-cause end semantics in raw history remain unproven."
+  ],
+  "verdict": {
+    "title": "RAW DIFFERENTIATED-ALERT TRANSITION PROOF",
+    "UkraineAlarm": {
+      "direct_raw_proof": "PARTIAL",
+      "direct_raw_proof_note": "No direct authenticated upstream capture in this environment; real upstream /alerts dumps preserved by third-party repos were inspected and therefore remain SECONDARY_CONFIRMED.",
+      "stable_AIR_episode_across_threat_changes": "NOT PROVEN",
+      "overlapping_threats": "PROVEN",
+      "historical_transition_retention": "INTERVAL_ONLY"
+    },
+    "Alerts.in.ua": {
+      "direct_raw_proof": "PARTIAL",
+      "direct_raw_proof_note": "No direct authenticated upstream capture in this environment; a preserved active API response was inspected as SECONDARY_CONFIRMED evidence.",
+      "stable_AIR_episode_across_threat_changes": "NOT PROVEN",
+      "overlapping_threats": "NOT PROVEN",
+      "historical_transition_retention": "UNKNOWN"
+    },
+    "Kyiv official": {
+      "direct_raw_proof": "PARTIAL",
+      "direct_raw_proof_note": "Current /state payload was directly captured (RAW_PROVEN); /history raw rows were not.",
+      "within_episode_cause_level_transitions_reconstructable": "PARTIAL",
+      "historical_transition_retention": "PARTIAL"
+    },
+    "EPISODE_SEMANTICS": "A Yellow-to-Red escalation does not safely imply a new AIR episode. The canonical parent must remain the continuous AIR period until all-clear, while differentiated threats are child state/components. UkraineAlarm proves Yellow and Red can coexist inside one active AIR object; Kyiv and Alerts.in.ua are also set-valued by schema.",
+    "NEXT_SCHEMA_CONSTRAINT": "Use parent AIR episode + 0..N timestamped source threat/state observations/components. Preserve source IDs where they exist, region/type identity where they do not, raw level/cause/reason/timestamps, and do not force mutually exclusive level segments or infer component end times without transition evidence."
+  }
+}
