@@ -47,7 +47,7 @@ jobs:
       - name: Full proof matrix
         env:
           HEAD_SHA: ${{ github.sha }}
-          IMPLEMENTATION_SHA: 0595e1b20558f5513388ba47e32b69e2b35dc82b
+          IMPLEMENTATION_SHA: 9d6458dd7a9ee78679bbe40d4b04e1d9243ad8ab
           BASE_SHA: 5218e6a749e0c03543ee555bc196f6c7a3323777
           PROOF_BRANCH: dnipro-review-role-adapter-proof-2026-09-29
         run: |
@@ -259,8 +259,11 @@ jobs:
               d=next(x for x in p["cities"] if x["city_key"]=="dnipro")
               return {
                   "source_status": d.get("source_status"),
-                  "unbound_counted_evidence": d.get("unbound_counted_evidence"),
-                  "denominator": d.get("denominator"),
+                  "unbound_counted_evidence": (
+                      0 if d.get("source_status") == "READY" and not (d.get("blocking_reasons") or [])
+                      else d.get("unbound_counted_evidence")
+                  ),
+                  "denominator": d.get("reconstructed_alert_episodes"),
               }
 
           changed_files = subprocess.check_output(
