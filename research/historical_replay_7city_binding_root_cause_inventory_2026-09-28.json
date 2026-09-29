@@ -1,18 +1,50 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "kind": "historical_replay_7city_binding_root_cause_inventory",
-  "date": "2026-09-28",
+  "artifact_path": "research/historical_replay_7city_binding_root_cause_inventory_2026-09-28.json",
+  "refreshed_date": "2026-09-29",
+  "metric": "% alert episodes with >=1 confirmed attack event",
+  "unit": "alert episode",
   "authoritative_branch": "multicity-wip-2026-09-16",
-  "authoritative_head_examined": "9f2599747b1691f651579f588c59d18129251259",
-  "authoritative_head_note": "HEAD advanced during the read-only investigation from 1e456fde1e71aa4f704171456ff1e998f259f899 to 9f2599747b1691f651579f588c59d18129251259. The intervening commit modified only live/generated protected output files; replay logic, historical evidence, source slices, audited baseline, and research/historical_replay_status_current.json were unchanged.",
+  "authoritative_head_examined": "d59be3e79834131dce207a3b924e17b20ac00a25",
   "replay_status_artifact": "research/historical_replay_status_current.json",
-  "replay_status_blob_sha": "9ef72355f75071f40364ea110ff9dbba07ffe151",
-  "replay_status_generated_at_utc": "2026-09-28T17:27:06.314355Z",
-  "replay_input_head": "69a88096562512f3db5469cc4ad659b226e7872c",
+  "replay_status_blob_sha": "ab998fe8474b3d9366466d366fe9cb1aa837f70d",
+  "replay_status_generated_at_utc": "2026-09-28T22:30:05.725065Z",
+  "replay_input_head": "2ecf86b2a2d424d77bfa4bb72196b094c0e3f28a",
+  "freshness": {
+    "branch_ahead_of_replay_input_commits": 8,
+    "changed_files_since_replay_input": [
+      "kyiv-air-alerts-grafana/data/casualties/candidate_monitor_last_run.json",
+      "kyiv-air-alerts-grafana/data/casualties/candidate_monitor_state.json",
+      "kyiv-air-alerts-grafana/data/casualties/multicity_review_queue.json",
+      "kyiv-air-alerts-grafana/data/dashboard_data.json",
+      "kyiv-air-alerts-grafana/data/explosion_candidate_monitor_last_run.json",
+      "kyiv-air-alerts-grafana/data/explosion_candidate_monitor_state.json",
+      "kyiv-air-alerts-grafana/data/explosion_review_queue.json",
+      "kyiv-air-alerts-grafana/data/explosions_test.json",
+      "research/historical_replay_remaining_15_blockers_adjudication_2026-09-29.json",
+      "research/historical_replay_status_current.json"
+    ],
+    "replay_or_historical_input_drift_since_replay_input": false,
+    "explanation": "Drift since replay input is limited to live/generated monitor/review/dashboard outputs plus research/status artifacts; replay script, audited baseline, target-five final_evidence, source slices and canonical historical alert inputs are unchanged.",
+    "record_adjudication_head": "5b4b8ebbabd9bb47775b9d3e3fe2387db584f2b3",
+    "changed_files_since_record_adjudication": [
+      "kyiv-air-alerts-grafana/data/casualties/candidate_monitor_last_run.json",
+      "kyiv-air-alerts-grafana/data/casualties/candidate_monitor_state.json",
+      "kyiv-air-alerts-grafana/data/casualties/multicity_review_queue.json",
+      "kyiv-air-alerts-grafana/data/dashboard_data.json",
+      "kyiv-air-alerts-grafana/data/explosion_candidate_monitor_last_run.json",
+      "kyiv-air-alerts-grafana/data/explosion_candidate_monitor_state.json",
+      "kyiv-air-alerts-grafana/data/explosion_review_queue.json",
+      "kyiv-air-alerts-grafana/data/explosions_test.json",
+      "research/historical_replay_remaining_15_blockers_adjudication_2026-09-29.json"
+    ],
+    "record_level_findings_still_applicable": true
+  },
   "current_23_city_status_counts": {
-    "BLOCKED": 17,
+    "BLOCKED": 15,
     "QA_REQUIRED": 3,
-    "READY": 3
+    "READY": 5
   },
   "current_23_city_status_summary": {
     "cherkasy": {
@@ -20,278 +52,280 @@
       "source_status": "READY",
       "expected_alert_episodes": 1548,
       "reconstructed_alert_episodes": 1548,
-      "replayed_strict_episodes": 57,
-      "replayed_sensitivity_episodes": 58,
-      "manual_qa_count": 1,
-      "blocker_frequencies": {}
+      "strict": 57,
+      "sensitivity": 58,
+      "qa": 1,
+      "blocker_codes": []
     },
     "chernihiv": {
-      "status": "BLOCKED",
-      "source_status": "BLOCKED",
+      "status": "READY",
+      "source_status": "READY",
       "expected_alert_episodes": 1676,
       "reconstructed_alert_episodes": 1676,
-      "replayed_strict_episodes": null,
-      "replayed_sensitivity_episodes": null,
-      "manual_qa_count": 0,
-      "blocker_frequencies": {
-        "UNBOUND_COUNTED_EVIDENCE": 1,
-        "STRICT_ID_COUNT_MISMATCH": 1,
-        "SENSITIVITY_ID_COUNT_MISMATCH": 1
-      }
+      "strict": 39,
+      "sensitivity": 43,
+      "qa": 0,
+      "blocker_codes": []
     },
     "chernivtsi": {
       "status": "BLOCKED",
       "source_status": "BLOCKED",
       "expected_alert_episodes": 113,
       "reconstructed_alert_episodes": 113,
-      "replayed_strict_episodes": null,
-      "replayed_sensitivity_episodes": null,
-      "manual_qa_count": 0,
-      "blocker_frequencies": {
-        "MISSING_FROZEN_HISTORICAL_EVIDENCE_CORPUS": 1
-      }
+      "strict": null,
+      "sensitivity": null,
+      "qa": 0,
+      "blocker_codes": [
+        "MISSING_FROZEN_HISTORICAL_EVIDENCE_CORPUS"
+      ]
     },
     "dnipro": {
       "status": "BLOCKED",
       "source_status": "BLOCKED",
       "expected_alert_episodes": 2259,
       "reconstructed_alert_episodes": 2259,
-      "replayed_strict_episodes": null,
-      "replayed_sensitivity_episodes": null,
-      "manual_qa_count": 0,
-      "blocker_frequencies": {
-        "UNBOUND_COUNTED_EVIDENCE": 5,
-        "STRICT_ID_COUNT_MISMATCH": 1,
-        "SENSITIVITY_ID_COUNT_MISMATCH": 1
-      }
+      "strict": null,
+      "sensitivity": null,
+      "qa": 0,
+      "blocker_codes": [
+        "UNBOUND_COUNTED_EVIDENCE",
+        "STRICT_ID_COUNT_MISMATCH",
+        "SENSITIVITY_ID_COUNT_MISMATCH"
+      ]
     },
     "ivano_frankivsk": {
       "status": "BLOCKED",
       "source_status": "BLOCKED",
       "expected_alert_episodes": 103,
       "reconstructed_alert_episodes": 103,
-      "replayed_strict_episodes": null,
-      "replayed_sensitivity_episodes": null,
-      "manual_qa_count": 0,
-      "blocker_frequencies": {
-        "MISSING_FROZEN_HISTORICAL_EVIDENCE_CORPUS": 1
-      }
+      "strict": null,
+      "sensitivity": null,
+      "qa": 0,
+      "blocker_codes": [
+        "MISSING_FROZEN_HISTORICAL_EVIDENCE_CORPUS"
+      ]
     },
     "kharkiv": {
       "status": "BLOCKED",
       "source_status": "BLOCKED",
       "expected_alert_episodes": 3565,
       "reconstructed_alert_episodes": 3565,
-      "replayed_strict_episodes": null,
-      "replayed_sensitivity_episodes": null,
-      "manual_qa_count": 0,
-      "blocker_frequencies": {
-        "UNBOUND_COUNTED_EVIDENCE": 2,
-        "STRICT_ID_COUNT_MISMATCH": 1,
-        "SENSITIVITY_ID_COUNT_MISMATCH": 1
-      }
+      "strict": null,
+      "sensitivity": null,
+      "qa": 0,
+      "blocker_codes": [
+        "UNBOUND_COUNTED_EVIDENCE",
+        "STRICT_ID_COUNT_MISMATCH",
+        "SENSITIVITY_ID_COUNT_MISMATCH"
+      ]
     },
     "kherson": {
       "status": "BLOCKED",
       "source_status": "BLOCKED",
       "expected_alert_episodes": 1412,
       "reconstructed_alert_episodes": 1412,
-      "replayed_strict_episodes": null,
-      "replayed_sensitivity_episodes": null,
-      "manual_qa_count": 0,
-      "blocker_frequencies": {
-        "UNBOUND_COUNTED_EVIDENCE": 8,
-        "STRICT_ID_COUNT_MISMATCH": 1,
-        "SENSITIVITY_ID_COUNT_MISMATCH": 1
-      }
+      "strict": null,
+      "sensitivity": null,
+      "qa": 0,
+      "blocker_codes": [
+        "UNBOUND_COUNTED_EVIDENCE",
+        "UNBOUND_COUNTED_EVIDENCE",
+        "UNBOUND_COUNTED_EVIDENCE",
+        "UNBOUND_COUNTED_EVIDENCE",
+        "UNBOUND_COUNTED_EVIDENCE",
+        "UNBOUND_COUNTED_EVIDENCE",
+        "UNBOUND_COUNTED_EVIDENCE",
+        "STRICT_ID_COUNT_MISMATCH",
+        "SENSITIVITY_ID_COUNT_MISMATCH"
+      ]
     },
     "khmelnytskyi": {
       "status": "BLOCKED",
       "source_status": "BLOCKED",
       "expected_alert_episodes": 248,
       "reconstructed_alert_episodes": 248,
-      "replayed_strict_episodes": null,
-      "replayed_sensitivity_episodes": null,
-      "manual_qa_count": 0,
-      "blocker_frequencies": {
-        "MISSING_FROZEN_HISTORICAL_EVIDENCE_CORPUS": 1
-      }
+      "strict": null,
+      "sensitivity": null,
+      "qa": 0,
+      "blocker_codes": [
+        "MISSING_FROZEN_HISTORICAL_EVIDENCE_CORPUS"
+      ]
     },
     "kropyvnytskyi": {
-      "status": "BLOCKED",
-      "source_status": "BLOCKED",
+      "status": "READY",
+      "source_status": "READY",
       "expected_alert_episodes": 1161,
       "reconstructed_alert_episodes": 1161,
-      "replayed_strict_episodes": null,
-      "replayed_sensitivity_episodes": null,
-      "manual_qa_count": 0,
-      "blocker_frequencies": {
-        "UNBOUND_COUNTED_EVIDENCE": 5,
-        "STRICT_ID_COUNT_MISMATCH": 1,
-        "SENSITIVITY_ID_COUNT_MISMATCH": 1
-      }
+      "strict": 38,
+      "sensitivity": 38,
+      "qa": 0,
+      "blocker_codes": []
     },
     "kyiv": {
       "status": "QA_REQUIRED",
       "source_status": "READY",
       "expected_alert_episodes": 2456,
       "reconstructed_alert_episodes": 2456,
-      "replayed_strict_episodes": 141,
-      "replayed_sensitivity_episodes": 145,
-      "manual_qa_count": 259,
-      "blocker_frequencies": {}
+      "strict": 141,
+      "sensitivity": 145,
+      "qa": 259,
+      "blocker_codes": []
     },
     "lutsk": {
       "status": "BLOCKED",
       "source_status": "BLOCKED",
       "expected_alert_episodes": 135,
       "reconstructed_alert_episodes": 135,
-      "replayed_strict_episodes": null,
-      "replayed_sensitivity_episodes": null,
-      "manual_qa_count": 0,
-      "blocker_frequencies": {
-        "MISSING_FROZEN_HISTORICAL_EVIDENCE_CORPUS": 1
-      }
+      "strict": null,
+      "sensitivity": null,
+      "qa": 0,
+      "blocker_codes": [
+        "MISSING_FROZEN_HISTORICAL_EVIDENCE_CORPUS"
+      ]
     },
     "lviv": {
       "status": "READY",
       "source_status": "READY",
       "expected_alert_episodes": 126,
       "reconstructed_alert_episodes": 126,
-      "replayed_strict_episodes": 12,
-      "replayed_sensitivity_episodes": 12,
-      "manual_qa_count": 0,
-      "blocker_frequencies": {}
+      "strict": 12,
+      "sensitivity": 12,
+      "qa": 0,
+      "blocker_codes": []
     },
     "mykolaiv": {
       "status": "BLOCKED",
       "source_status": "BLOCKED",
       "expected_alert_episodes": 1648,
       "reconstructed_alert_episodes": 1648,
-      "replayed_strict_episodes": null,
-      "replayed_sensitivity_episodes": null,
-      "manual_qa_count": 0,
-      "blocker_frequencies": {
-        "UNBOUND_COUNTED_EVIDENCE": 6,
-        "STRICT_ID_COUNT_MISMATCH": 1,
-        "SENSITIVITY_ID_COUNT_MISMATCH": 1
-      }
+      "strict": null,
+      "sensitivity": null,
+      "qa": 0,
+      "blocker_codes": [
+        "UNBOUND_COUNTED_EVIDENCE",
+        "UNBOUND_COUNTED_EVIDENCE",
+        "UNBOUND_COUNTED_EVIDENCE",
+        "STRICT_ID_COUNT_MISMATCH",
+        "SENSITIVITY_ID_COUNT_MISMATCH"
+      ]
     },
     "odesa": {
       "status": "BLOCKED",
       "source_status": "BLOCKED",
       "expected_alert_episodes": 1465,
       "reconstructed_alert_episodes": 1465,
-      "replayed_strict_episodes": null,
-      "replayed_sensitivity_episodes": null,
-      "manual_qa_count": 0,
-      "blocker_frequencies": {
-        "UNBOUND_COUNTED_EVIDENCE": 66,
-        "STRICT_ID_COUNT_MISMATCH": 1,
-        "SENSITIVITY_ID_COUNT_MISMATCH": 1
-      }
+      "strict": null,
+      "sensitivity": null,
+      "qa": 0,
+      "blocker_codes": [
+        "UNBOUND_COUNTED_EVIDENCE",
+        "UNBOUND_COUNTED_EVIDENCE",
+        "UNBOUND_COUNTED_EVIDENCE",
+        "STRICT_ID_COUNT_MISMATCH",
+        "SENSITIVITY_ID_COUNT_MISMATCH"
+      ]
     },
     "poltava": {
       "status": "BLOCKED",
       "source_status": "BLOCKED",
       "expected_alert_episodes": 1805,
       "reconstructed_alert_episodes": 1805,
-      "replayed_strict_episodes": null,
-      "replayed_sensitivity_episodes": null,
-      "manual_qa_count": 0,
-      "blocker_frequencies": {
-        "MISSING_FROZEN_HISTORICAL_EVIDENCE_CORPUS": 1
-      }
+      "strict": null,
+      "sensitivity": null,
+      "qa": 0,
+      "blocker_codes": [
+        "MISSING_FROZEN_HISTORICAL_EVIDENCE_CORPUS"
+      ]
     },
     "rivne": {
       "status": "BLOCKED",
       "source_status": "BLOCKED",
       "expected_alert_episodes": 232,
       "reconstructed_alert_episodes": 232,
-      "replayed_strict_episodes": null,
-      "replayed_sensitivity_episodes": null,
-      "manual_qa_count": 0,
-      "blocker_frequencies": {
-        "MISSING_FROZEN_HISTORICAL_EVIDENCE_CORPUS": 1
-      }
+      "strict": null,
+      "sensitivity": null,
+      "qa": 0,
+      "blocker_codes": [
+        "MISSING_FROZEN_HISTORICAL_EVIDENCE_CORPUS"
+      ]
     },
     "sevastopol": {
       "status": "READY",
       "source_status": "READY",
       "expected_alert_episodes": 527,
       "reconstructed_alert_episodes": 527,
-      "replayed_strict_episodes": 38,
-      "replayed_sensitivity_episodes": 55,
-      "manual_qa_count": 0,
-      "blocker_frequencies": {}
+      "strict": 38,
+      "sensitivity": 55,
+      "qa": 0,
+      "blocker_codes": []
     },
     "sumy": {
       "status": "READY",
       "source_status": "READY",
       "expected_alert_episodes": 2297,
       "reconstructed_alert_episodes": 2297,
-      "replayed_strict_episodes": 204,
-      "replayed_sensitivity_episodes": 238,
-      "manual_qa_count": 0,
-      "blocker_frequencies": {}
+      "strict": 204,
+      "sensitivity": 238,
+      "qa": 0,
+      "blocker_codes": []
     },
     "ternopil": {
       "status": "BLOCKED",
       "source_status": "BLOCKED",
       "expected_alert_episodes": 125,
       "reconstructed_alert_episodes": 125,
-      "replayed_strict_episodes": null,
-      "replayed_sensitivity_episodes": null,
-      "manual_qa_count": 0,
-      "blocker_frequencies": {
-        "MISSING_FROZEN_HISTORICAL_EVIDENCE_CORPUS": 1
-      }
+      "strict": null,
+      "sensitivity": null,
+      "qa": 0,
+      "blocker_codes": [
+        "MISSING_FROZEN_HISTORICAL_EVIDENCE_CORPUS"
+      ]
     },
     "uzhhorod": {
       "status": "BLOCKED",
       "source_status": "BLOCKED",
       "expected_alert_episodes": 92,
       "reconstructed_alert_episodes": 92,
-      "replayed_strict_episodes": null,
-      "replayed_sensitivity_episodes": null,
-      "manual_qa_count": 0,
-      "blocker_frequencies": {
-        "MISSING_FROZEN_HISTORICAL_EVIDENCE_CORPUS": 1
-      }
+      "strict": null,
+      "sensitivity": null,
+      "qa": 0,
+      "blocker_codes": [
+        "MISSING_FROZEN_HISTORICAL_EVIDENCE_CORPUS"
+      ]
     },
     "vinnytsia": {
       "status": "BLOCKED",
       "source_status": "BLOCKED",
       "expected_alert_episodes": 362,
       "reconstructed_alert_episodes": 362,
-      "replayed_strict_episodes": null,
-      "replayed_sensitivity_episodes": null,
-      "manual_qa_count": 0,
-      "blocker_frequencies": {
-        "MISSING_FROZEN_HISTORICAL_EVIDENCE_CORPUS": 1
-      }
+      "strict": null,
+      "sensitivity": null,
+      "qa": 0,
+      "blocker_codes": [
+        "MISSING_FROZEN_HISTORICAL_EVIDENCE_CORPUS"
+      ]
     },
     "zaporizhzhia": {
       "status": "QA_REQUIRED",
       "source_status": "READY",
       "expected_alert_episodes": 2365,
       "reconstructed_alert_episodes": 2365,
-      "replayed_strict_episodes": 62,
-      "replayed_sensitivity_episodes": 73,
-      "manual_qa_count": 151,
-      "blocker_frequencies": {}
+      "strict": 62,
+      "sensitivity": 73,
+      "qa": 151,
+      "blocker_codes": []
     },
     "zhytomyr": {
       "status": "BLOCKED",
       "source_status": "BLOCKED",
       "expected_alert_episodes": 685,
       "reconstructed_alert_episodes": 685,
-      "replayed_strict_episodes": null,
-      "replayed_sensitivity_episodes": null,
-      "manual_qa_count": 0,
-      "blocker_frequencies": {
-        "MISSING_FROZEN_HISTORICAL_EVIDENCE_CORPUS": 1
-      }
+      "strict": null,
+      "sensitivity": null,
+      "qa": 0,
+      "blocker_codes": [
+        "MISSING_FROZEN_HISTORICAL_EVIDENCE_CORPUS"
+      ]
     }
   },
   "target_cities": [
@@ -305,164 +339,149 @@
   ],
   "seven_city_fresh_status": {
     "chernihiv": {
-      "status": "BLOCKED",
+      "status": "READY",
       "denominator_expected": 1676,
       "denominator_reconstructed": 1676,
-      "frozen_strict": 39,
-      "frozen_sensitivity": 43,
-      "recoverable_strict_ids": 38,
-      "recoverable_sensitivity_ids": 42,
-      "unbound_counted_positive_records": 1,
-      "root_cause_counts": {
-        "MISSING_PERSISTED_EPISODE_ID_BUT_RECOVERABLE": 1
+      "frozen_positive_counts": {
+        "strict": 39,
+        "sensitivity": 43
       },
-      "deterministic_recovery": {
-        "strict": 1,
-        "sensitivity_only": 0,
-        "post_adapter_strict_ids": 39,
-        "post_adapter_sensitivity_ids": 43
+      "current_replay_positive_ids": {
+        "strict": 39,
+        "sensitivity": 43
       },
-      "notes": [
-        "final_evidence metadata still says alerts_total=1677, while audited baseline and current canonical corpus are 1676."
-      ]
+      "qa_count": 0,
+      "unbound_counted_positive_records": 0,
+      "root_cause_classes": [],
+      "disposition": "Exclude from blocker analysis; accepted temporal adapter now binds all counted positives cleanly."
     },
     "dnipro": {
       "status": "BLOCKED",
       "denominator_expected": 2259,
       "denominator_reconstructed": 2259,
-      "frozen_strict": 180,
-      "frozen_sensitivity": 187,
-      "recoverable_strict_ids": 175,
-      "recoverable_sensitivity_ids": 182,
-      "unbound_counted_positive_records": 5,
-      "root_cause_counts": {
-        "MISSING_PERSISTED_EPISODE_ID_BUT_RECOVERABLE": 5
+      "frozen_positive_counts": {
+        "strict": 180,
+        "sensitivity": 187
       },
-      "deterministic_recovery": {
-        "strict": 5,
-        "sensitivity_only": 0,
-        "post_adapter_strict_ids": 180,
-        "post_adapter_sensitivity_ids": 187
-      }
+      "current_replay_bound_canonical_ids": {
+        "strict": 179,
+        "sensitivity": 186
+      },
+      "unbound_counted_positive_records": 1,
+      "record_level_supported_canonical_ids_after_semantic_split": {
+        "strict": 181,
+        "sensitivity": 188
+      },
+      "root_cause_classes": {
+        "DETERMINISTIC_BINDING_ADAPTER_GAP": 1
+      },
+      "note": "One frozen STRICT row contains two independently timed Dnipro explosions that fall in two different existing canonical episodes. Current replay requires one evidence row -> one episode, so it leaves the row unbound. This is not a choice ambiguity: both canonical IDs are supported. A split proof would add one canonical positive episode relative to the frozen aggregate count."
     },
     "kharkiv": {
       "status": "BLOCKED",
       "denominator_expected": 3565,
       "denominator_reconstructed": 3565,
-      "frozen_strict": 288,
-      "frozen_sensitivity": 308,
-      "recoverable_strict_ids": 286,
-      "recoverable_sensitivity_ids": 306,
-      "unbound_counted_positive_records": 2,
-      "root_cause_counts": {
-        "MISSING_PERSISTED_EPISODE_ID_BUT_RECOVERABLE": 1,
+      "frozen_positive_counts": {
+        "strict": 288,
+        "sensitivity": 308
+      },
+      "current_replay_bound_canonical_ids": {
+        "strict": 287,
+        "sensitivity": 307
+      },
+      "unbound_counted_positive_records": 1,
+      "root_cause_classes": {
         "CANONICAL_ID_OR_CORPUS_INCONSISTENCY": 1
       },
-      "deterministic_recovery": {
-        "strict": 1,
-        "sensitivity_only": 0,
-        "post_adapter_strict_ids": 287,
-        "post_adapter_sensitivity_ids": 307
-      },
-      "evidence_dependent_remaining": 1
+      "note": "The retained 2025-03-06 ~03:50 exact-city Shahed event is inside a contemporaneously evidenced Kharkiv city alert 23:28-04:46, but that city episode is absent from the current canonical corpus. If separately proven and added, denominator would become 3566 and the positive would bind."
     },
     "kherson": {
       "status": "BLOCKED",
       "denominator_expected": 1412,
       "denominator_reconstructed": 1412,
-      "frozen_strict": 9,
-      "frozen_sensitivity": 9,
-      "recoverable_strict_ids": 1,
-      "recoverable_sensitivity_ids": 1,
-      "unbound_counted_positive_records": 8,
-      "root_cause_counts": {
-        "MISSING_PERSISTED_EPISODE_ID_BUT_RECOVERABLE": 1,
-        "CANONICAL_ID_OR_CORPUS_INCONSISTENCY": 7
+      "frozen_positive_counts": {
+        "strict": 9,
+        "sensitivity": 9
       },
-      "deterministic_recovery": {
-        "strict": 1,
-        "sensitivity_only": 0,
-        "post_adapter_strict_ids": 2,
-        "post_adapter_sensitivity_ids": 2
+      "current_replay_bound_canonical_ids": {
+        "strict": 2,
+        "sensitivity": 2
       },
-      "evidence_dependent_remaining": 7
+      "unbound_counted_positive_records": 7,
+      "root_cause_classes": {
+        "OTHER": 7
+      },
+      "other_subtype": "LEGACY_ALERT_SCOPE_OVEREXTENSION",
+      "note": "All seven remaining rows are real exact-city Kherson explosions, but the retained alert source establishes Kherson oblast alert scope, not a city alert. Correcting Telegram rendered clocks to UTC still leaves no valid city episode. These are retirement-ready historical positives, not replay-adapter failures."
     },
     "kropyvnytskyi": {
-      "status": "BLOCKED",
+      "status": "READY",
       "denominator_expected": 1161,
       "denominator_reconstructed": 1161,
-      "frozen_strict": 38,
-      "frozen_sensitivity": 38,
-      "recoverable_strict_ids": 33,
-      "recoverable_sensitivity_ids": 33,
-      "unbound_counted_positive_records": 5,
-      "root_cause_counts": {
-        "MISSING_PERSISTED_EPISODE_ID_BUT_RECOVERABLE": 5
+      "frozen_positive_counts": {
+        "strict": 38,
+        "sensitivity": 38
       },
-      "deterministic_recovery": {
-        "strict": 5,
-        "sensitivity_only": 0,
-        "post_adapter_strict_ids": 38,
-        "post_adapter_sensitivity_ids": 38
-      }
+      "current_replay_positive_ids": {
+        "strict": 38,
+        "sensitivity": 38
+      },
+      "qa_count": 0,
+      "unbound_counted_positive_records": 0,
+      "root_cause_classes": [],
+      "disposition": "Exclude from blocker analysis; accepted temporal adapter now binds all counted positives cleanly."
     },
     "mykolaiv": {
       "status": "BLOCKED",
       "denominator_expected": 1648,
       "denominator_reconstructed": 1648,
-      "frozen_strict": 122,
-      "frozen_sensitivity": 135,
-      "recoverable_strict_ids": 116,
-      "recoverable_sensitivity_ids": 129,
-      "unbound_counted_positive_records": 6,
-      "root_cause_counts": {
-        "MISSING_PERSISTED_EPISODE_ID_BUT_RECOVERABLE": 3,
-        "CANONICAL_ID_OR_CORPUS_INCONSISTENCY": 2,
-        "TRUE_BINDING_AMBIGUITY": 1
+      "frozen_positive_counts": {
+        "strict": 122,
+        "sensitivity": 135
       },
-      "deterministic_recovery": {
-        "strict": 3,
-        "sensitivity_only": 0,
-        "post_adapter_strict_ids": 119,
-        "post_adapter_sensitivity_ids": 132
+      "current_replay_bound_canonical_ids": {
+        "strict": 119,
+        "sensitivity": 132
       },
-      "evidence_dependent_remaining": 2,
-      "true_ambiguity_remaining": 1
+      "unbound_counted_positive_records": 3,
+      "deterministically_recoverable_after_evidence_time_repair": {
+        "strict": 122,
+        "sensitivity": 135
+      },
+      "root_cause_classes": {
+        "MISSING_PERSISTED_EPISODE_ID_BUT_RECOVERABLE": 1,
+        "SOURCE_RETENTION_GAP": 2
+      },
+      "note": "All three can be recovered to existing canonical episodes without changing denominator or episode IDs, but the retained evidence representation is wrong/incomplete: Telegram rendered UTC clocks were treated as Kyiv local, one old row omitted event clocks later recoverable from the retained source chronology, and one row confused a secondary publication time with the primary event time."
     },
     "odesa": {
       "status": "BLOCKED",
       "denominator_expected": 1465,
       "denominator_reconstructed": 1465,
-      "frozen_strict": 155,
-      "frozen_sensitivity": 161,
-      "recoverable_strict_ids": 90,
-      "recoverable_sensitivity_ids": 95,
-      "unbound_counted_positive_records": 66,
-      "root_cause_counts": {
-        "DETERMINISTIC_BINDING_ADAPTER_GAP": 60,
-        "MISSING_PERSISTED_EPISODE_ID_BUT_RECOVERABLE": 3,
-        "CANONICAL_ID_OR_CORPUS_INCONSISTENCY": 3
+      "frozen_positive_counts": {
+        "strict": 155,
+        "sensitivity": 161
       },
-      "deterministic_recovery": {
-        "strict": 62,
-        "sensitivity_only": 1,
-        "post_adapter_strict_ids": 152,
-        "post_adapter_sensitivity_ids": 158
+      "current_replay_bound_canonical_ids": {
+        "strict": 152,
+        "sensitivity": 158
       },
-      "evidence_dependent_remaining": 3
+      "unbound_counted_positive_records": 3,
+      "root_cause_classes": {
+        "OTHER": 3
+      },
+      "other_subtype": "LEGACY_ALERT_SCOPE_OVEREXTENSION",
+      "note": "The three remaining exact-city Odesa explosion rows occurred during Odesa district alerts, not evidenced city alerts. Current city-episode replay correctly refuses to fabricate a binding. They are retirement-ready."
     }
   },
   "binding_contract": {
     "canonical_episode_id": "SHA256(f\"{city_key}|{start_utc_z}|{end_utc_z}\")[:24]",
-    "implementation_source": "kyiv-air-alerts-grafana/scripts/build_explosion_source_slices.py:event_id",
-    "current_replay_bind_order": [
-      "episode_id | matched_episode_id | alert_episode_id, if present and found in current episode corpus",
-      "first recognized START_FIELDS timestamp; unique alert_start within +/-90 seconds",
-      "otherwise unique same-local-minute alert_start",
-      "otherwise unique episode on retained local day",
-      "otherwise unbound"
+    "persisted_id_fields": [
+      "episode_id",
+      "matched_episode_id",
+      "alert_episode_id"
     ],
-    "recognized_start_fields": [
+    "current_primary_start_fields": [
       "matched_episode_start",
       "matched_alert_episode_start",
       "alert_episode_start",
@@ -474,613 +493,543 @@
       "episode_start",
       "matched_start"
     ],
-    "important_current_limitations": [
-      "alert_start_utc and alert_episode_start_kyiv are not recognized start aliases",
-      "retained event_time/event_time_kyiv is not used for initial episode binding or to disambiguate multiple start candidates",
-      "clock-only event_time values are not combined with the retained episode/start date for deterministic interval lookup"
+    "accepted_legacy_start_aliases": [
+      "alert_episode_start_kyiv",
+      "alert_start_utc"
     ],
-    "persisted_id_audit": {
-      "explicit_positive_ids_present": {
-        "kharkiv": 125,
-        "mykolaiv": 25,
-        "other_five_cities": 0
+    "event_time_fields": [
+      "event_time",
+      "event_time_kyiv",
+      "event_time_local"
+    ],
+    "current_fallback_semantics": [
+      "Persisted canonical ID if present and valid.",
+      "Unique start match within 90 seconds or same local minute.",
+      "Accepted legacy start alias.",
+      "Retained event-time binding only when every retained event time resolves to the same single containing canonical episode.",
+      "Zero or multiple candidate episodes remain unbound."
+    ],
+    "replay_script_blob_sha": "99b13318a3bd53013a798bd4c66c87c4aed6f45b",
+    "important_remaining_limit": "The adapter still assumes one evidence record binds to at most one episode; it cannot represent Dnipro record 2793d79590a849624744439a, which contains two independently supported events in two episodes."
+  },
+  "frozen_vs_current_reconciliation": {
+    "chernihiv": {
+      "frozen": {
+        "strict": 39,
+        "sensitivity": 43
       },
-      "unknown_persisted_id_blockers": 0,
-      "conclusion": "No blocked target record is caused by a persisted canonical episode ID that points to a nonexistent current episode."
+      "current_bound_ids": {
+        "strict": 39,
+        "sensitivity": 43
+      },
+      "unbound": 0
     },
-    "positive_evidence_shape_summary": {
-      "chernihiv": {
-        "counted_positive_rows": 43,
-        "canonical_id_present": 0,
-        "recognized_start_present": 43,
-        "event_time_present": 43,
-        "source_url_present": 43,
-        "semantic_provenance_present": 43
+    "dnipro": {
+      "frozen": {
+        "strict": 180,
+        "sensitivity": 187
       },
-      "dnipro": {
-        "counted_positive_rows": 187,
-        "canonical_id_present": 0,
-        "recognized_start_present": 187,
-        "event_time_present": 187,
-        "source_url_present": 187,
-        "semantic_provenance_present": 187
+      "current_bound_ids": {
+        "strict": 179,
+        "sensitivity": 186
       },
-      "kharkiv": {
-        "counted_positive_rows": 308,
-        "canonical_id_present": 125,
-        "recognized_start_present": 308,
-        "event_time_present": 306,
-        "source_url_present": 308,
-        "semantic_provenance_present": 308
+      "unbound": 1,
+      "record_level_canonical_ids_supported_after_split": {
+        "strict": 181,
+        "sensitivity": 188
+      }
+    },
+    "kharkiv": {
+      "frozen": {
+        "strict": 288,
+        "sensitivity": 308
       },
-      "kherson": {
-        "counted_positive_rows": 9,
-        "canonical_id_present": 0,
-        "recognized_start_present": 9,
-        "event_time_present": 9,
-        "source_url_present": 9,
-        "semantic_provenance_present": 9
+      "current_bound_ids": {
+        "strict": 287,
+        "sensitivity": 307
       },
-      "kropyvnytskyi": {
-        "counted_positive_rows": 38,
-        "canonical_id_present": 0,
-        "recognized_start_present": 38,
-        "event_time_present": 38,
-        "source_url_present": 38,
-        "semantic_provenance_present": 38
+      "unbound": 1
+    },
+    "kherson": {
+      "frozen": {
+        "strict": 9,
+        "sensitivity": 9
       },
-      "mykolaiv": {
-        "counted_positive_rows": 135,
-        "canonical_id_present": 25,
-        "recognized_start_present": 110,
-        "extra_start_present": 25,
-        "event_time_present": 106,
-        "source_url_present": 135,
-        "semantic_provenance_present": 135
+      "current_bound_ids": {
+        "strict": 2,
+        "sensitivity": 2
       },
-      "odesa": {
-        "counted_positive_rows": 161,
-        "canonical_id_present": 0,
-        "recognized_start_present": 101,
-        "extra_start_present": 60,
-        "event_time_present": 158,
-        "source_url_present": 161,
-        "semantic_provenance_present": 161
+      "unbound": 7
+    },
+    "kropyvnytskyi": {
+      "frozen": {
+        "strict": 38,
+        "sensitivity": 38
       },
-      "source_observation_id_present_in_counted_positive_rows": 0
+      "current_bound_ids": {
+        "strict": 38,
+        "sensitivity": 38
+      },
+      "unbound": 0
+    },
+    "mykolaiv": {
+      "frozen": {
+        "strict": 122,
+        "sensitivity": 135
+      },
+      "current_bound_ids": {
+        "strict": 119,
+        "sensitivity": 132
+      },
+      "unbound": 3,
+      "after_deterministic_evidence_repair": {
+        "strict": 122,
+        "sensitivity": 135
+      }
+    },
+    "odesa": {
+      "frozen": {
+        "strict": 155,
+        "sensitivity": 161
+      },
+      "current_bound_ids": {
+        "strict": 152,
+        "sensitivity": 158
+      },
+      "unbound": 3
     }
   },
   "root_cause_groups": {
     "DETERMINISTIC_BINDING_ADAPTER_GAP": {
-      "blocked_positive_records": 60,
+      "blocked_records": 1,
       "cities": [
-        "odesa"
+        "dnipro"
       ],
-      "shared_input_shape": "Exact legacy alert start retained in alert_episode_start_kyiv or alert_start_utc; both values map one-to-one to current canonical episode starts, but neither field name is in replay START_FIELDS.",
-      "subcounts": {
-        "alert_episode_start_kyiv": 28,
-        "alert_start_utc": 32
-      },
-      "bucket_split": {
-        "strict": 59,
-        "sensitivity_only": 1
-      },
+      "subtype": "ONE_LEGACY_ROW_TWO_CANONICAL_EPISODES",
       "deterministic_repair_possible": true,
-      "required_work": "Replay adapter/code proof only; no evidence mutation."
+      "required_work": "Isolated replay/evidence-model split proof; do not force-select one episode and do not change classifier semantics."
     },
     "MISSING_PERSISTED_EPISODE_ID_BUT_RECOVERABLE": {
-      "blocked_positive_records": 19,
-      "cities": [
-        "chernihiv",
-        "dnipro",
-        "kharkiv",
-        "kherson",
-        "kropyvnytskyi",
-        "mykolaiv",
-        "odesa"
-      ],
-      "city_counts": {
-        "chernihiv": 1,
-        "dnipro": 5,
-        "kharkiv": 1,
-        "kherson": 1,
-        "kropyvnytskyi": 5,
-        "mykolaiv": 3,
-        "odesa": 3
-      },
-      "shared_input_shape": "No usable canonical ID; retained event timing plus retained date/old binding identifies exactly one current canonical episode. Some old alert starts drift beyond the replay +/-90 second tolerance or point to a pre-reconciliation episode shape.",
-      "deterministic_repair_possible": true,
-      "required_work": "Replay temporal-binding adapter proof only; require exactly one containing canonical episode and never synthesize event time from publication time."
-    },
-    "CANONICAL_ID_OR_CORPUS_INCONSISTENCY": {
-      "blocked_positive_records": 13,
-      "cities": [
-        "kharkiv",
-        "kherson",
-        "mykolaiv",
-        "odesa"
-      ],
-      "city_counts": {
-        "kharkiv": 1,
-        "kherson": 7,
-        "mykolaiv": 2,
-        "odesa": 3
-      },
-      "shared_input_shape": "Legacy counted evidence records an exact-city event and/or historical alert interval, but the current canonical alert corpus has no episode containing the retained event time. Adapter-only binding would invent an episode assignment.",
-      "deterministic_repair_possible": false,
-      "required_work": "Evidence/source and canonical-corpus reconciliation; do not weaken replay semantics."
-    },
-    "TRUE_BINDING_AMBIGUITY": {
-      "blocked_positive_records": 1,
+      "blocked_records": 1,
       "cities": [
         "mykolaiv"
       ],
-      "city_counts": {
-        "mykolaiv": 1
-      },
-      "shared_input_shape": "Retained evidence says a night attack/explosions occurred within one old long alert, while the current canonical corpus contains multiple plausible night episodes and no exact explosion time was retained.",
-      "deterministic_repair_possible": false,
-      "required_work": "Source recovery or preserve as ambiguity."
-    },
-    "COUNT_ONLY_LEGACY_EVIDENCE": {
-      "blocked_positive_records": 0,
-      "cities": []
+      "deterministic_repair_possible": true,
+      "required_work": "Evidence-time normalization/binding repair for record 7be92b6ec25e3649c106e66f; canonical episode already exists."
     },
     "SOURCE_RETENTION_GAP": {
-      "blocked_positive_records": 0,
+      "blocked_records": 2,
+      "cities": [
+        "mykolaiv"
+      ],
+      "deterministic_repair_possible_after_source_recovery": true,
+      "required_work": "Persist source-recovered event clocks/provenance for records 114d46148bb629164cde2392 and 058b9b70b3e39ca67db9af5d."
+    },
+    "CANONICAL_ID_OR_CORPUS_INCONSISTENCY": {
+      "blocked_records": 1,
+      "cities": [
+        "kharkiv"
+      ],
+      "deterministic_repair_possible": false,
+      "required_work": "Isolated canonical-corpus proof for the missing 2025-03-05 23:28 to 2025-03-06 04:46 Europe/Kyiv city alert; expected denominator 3565 -> 3566 if proven."
+    },
+    "COUNT_ONLY_LEGACY_EVIDENCE": {
+      "blocked_records": 0,
+      "cities": []
+    },
+    "TRUE_BINDING_AMBIGUITY": {
+      "blocked_records": 0,
       "cities": [],
-      "note": "No record is assigned primarily to this class; the sole true ambiguity would require additional source timing to resolve."
+      "note": "The previously ambiguous Mykolaiv night row is resolved by recovered source clocks; no irreducible binding ambiguity remains among these seven cities."
     },
     "OTHER": {
-      "blocked_positive_records": 0,
-      "cities": []
+      "blocked_records": 10,
+      "cities": [
+        "kherson",
+        "odesa"
+      ],
+      "subtype": "LEGACY_ALERT_SCOPE_OVEREXTENSION",
+      "city_counts": {
+        "kherson": 7,
+        "odesa": 3
+      },
+      "deterministic_disposition": true,
+      "required_work": "Evidence/baseline retirement proof. Sources support exact-city attack events but only oblast/raion alert scope, so they do not satisfy the current city-alert-episode denominator contract."
     }
   },
   "representative_records": [
     {
-      "city": "odesa",
-      "source_artifact": "kyiv-air-alerts-grafana/data/explosion_research/odesa/final_evidence.json",
-      "historical_bucket": "strict_events",
-      "source_url": "https://suspilne.media/odesa/1208354-rosia-vdarila-po-odesini-dvoma-balisticnimi-raketami-iskander-m/",
-      "old_counted_status": "STRICT",
-      "binding_information": {
-        "alert_episode_start_kyiv": "2026-01-07T14:33:36+02:00",
-        "event_time_kyiv": "~14:43"
-      },
-      "canonical_episode_id_present": false,
-      "deterministic_current_episode_id": "c31fd5cf8b35c6f339001b1",
-      "current_interval": [
-        "2026-01-07T12:33:36Z",
-        "2026-01-07T13:21:51Z"
-      ],
-      "root_cause": "DETERMINISTIC_BINDING_ADAPTER_GAP",
-      "exact_blocker": "alert_episode_start_kyiv is an exact retained canonical start alias but is absent from START_FIELDS."
-    },
-    {
-      "city": "chernihiv",
-      "source_artifact": "kyiv-air-alerts-grafana/data/explosion_research/chernihiv/final_evidence.json",
-      "historical_bucket": "strict_events",
-      "source_url": "https://suspilne.media/chernihiv/1182606-zafiksovani-povtorni-vlucanna-po-obektu-kriticnoi-infrastrukturi-u-cernigovi/",
-      "old_counted_status": "STRICT",
-      "binding_information": {
-        "matched_episode_start": "2025-12-06T14:51:54+02:00",
-        "event_time": "2025-12-06T15:11:00+02:00; 15:23:00+02:00"
-      },
-      "canonical_episode_id_present": false,
-      "deterministic_current_episode_id": "ed0b021f3af2e915fccc5add",
-      "current_interval": [
-        "2025-12-06T12:51:54Z",
-        "2025-12-06T21:59:35Z"
-      ],
-      "competing_start_tolerance_episode": {
-        "episode_id": "c8a2043114304a0b99be9071",
-        "interval": [
-          "2025-12-06T12:51:40Z",
-          "2025-12-06T12:51:46Z"
-        ]
-      },
-      "root_cause": "MISSING_PERSISTED_EPISODE_ID_BUT_RECOVERABLE",
-      "exact_blocker": "The +/-90 second start rule sees two candidates; retained event times fall only inside the long episode."
-    },
-    {
       "city": "dnipro",
+      "record_id": "2793d79590a849624744439a",
       "source_artifact": "kyiv-air-alerts-grafana/data/explosion_research/dnipro/final_evidence.json",
       "historical_bucket": "strict_events",
-      "source_url": "https://24tv.ua/dnipri-progrimili-vibuhi_n2947938",
-      "old_counted_status": "STRICT",
-      "binding_information": {
-        "alert_episode_start": "2025-11-06 ~15:01",
-        "event_time": "17:38, 17:43"
-      },
-      "canonical_episode_id_present": false,
-      "deterministic_current_episode_id": "b08e65e78300e35f8899addf",
-      "current_interval": [
-        "2025-11-06T13:56:08Z",
-        "2025-11-06T17:21:28Z"
+      "source_urls": [
+        "https://24tv.ua/dnipro-skolihnula-seriya-vibuhiv_n3003501"
       ],
-      "root_cause": "MISSING_PERSISTED_EPISODE_ID_BUT_RECOVERABLE",
-      "exact_blocker": "Current start drift exceeds tolerance, but the retained date plus event clocks identify one current episode."
-    },
-    {
-      "city": "kropyvnytskyi",
-      "source_artifact": "kyiv-air-alerts-grafana/data/explosion_research/kropyvnytskyi/final_evidence.json",
-      "historical_bucket": "strict_events",
-      "source_url": "https://suspilne.media/kropyvnytskiy/1223162-dronova-ataka-u-kropivnickomu-prolunav-zvuk-vibuhu/",
+      "source_observation_ids": [],
+      "retained_event_time": "2026-02-05 14:45; 15:39 Europe/Kyiv",
+      "retained_legacy_alert_start": "2026-02-05 ~14:31 Europe/Kyiv",
       "old_counted_status": "STRICT",
-      "binding_information": {
-        "matched_episode_start": "2026-01-26T08:58:00+02:00",
-        "event_time": "2026-01-26T09:42:00+02:00"
-      },
       "canonical_episode_id_present": false,
-      "deterministic_current_episode_id": "b3f618909f36a1a3ad17ff28",
-      "current_interval": [
-        "2026-01-26T07:06:13Z",
-        "2026-01-26T08:08:44Z"
+      "canonical_context": [
+        {
+          "episode_id": "00c24c9cccd9e66de7eba62b",
+          "start_utc": "2026-02-05T11:02:13Z",
+          "end_utc": "2026-02-05T13:08:11Z",
+          "start_local": "2026-02-05T13:02:13+02:00",
+          "end_local": "2026-02-05T15:08:11+02:00",
+          "event_local": "2026-02-05T14:45:00+02:00",
+          "event_utc": "2026-02-05T12:45:00Z",
+          "event_inside": true
+        },
+        {
+          "episode_id": "ed19badd30731bd1aeb7e326",
+          "start_utc": "2026-02-05T13:20:14Z",
+          "end_utc": "2026-02-05T15:20:38Z",
+          "start_local": "2026-02-05T15:20:14+02:00",
+          "end_local": "2026-02-05T17:20:38+02:00",
+          "event_local": "2026-02-05T15:39:00+02:00",
+          "event_utc": "2026-02-05T13:39:00Z",
+          "event_inside": true
+        }
       ],
-      "root_cause": "MISSING_PERSISTED_EPISODE_ID_BUT_RECOVERABLE",
-      "exact_blocker": "Legacy start is 493 seconds from current start, but event time is uniquely inside the current episode."
+      "deterministically_reconstructable": true,
+      "assigned_root_cause_class": "DETERMINISTIC_BINDING_ADAPTER_GAP",
+      "exact_blocker": "One legacy counted row contains two event times, each uniquely inside a different current canonical episode; one-row/one-episode replay binding cannot represent this."
     },
     {
       "city": "kharkiv",
+      "record_id": "2725fd45c6f6a33d61fe04a8",
       "source_artifact": "kyiv-air-alerts-grafana/data/explosion_research/kharkiv/final_evidence.json",
       "historical_bucket": "strict_events",
-      "source_url": "https://suspilne.media/kharkiv/1075329-rosia-vdarila-kabami-po-industrialnomu-rajonu-harkova-e-postrazdalij/",
-      "old_counted_status": "STRICT",
-      "binding_information": {
-        "matched_alert_episode_start": "2025-07-23T18:31:00+03:00",
-        "event_time": "2025-07-25T11:28:00+03:00"
-      },
-      "canonical_episode_id_present": false,
-      "deterministic_current_episode_id": "43a0db1167dbd64b84529f68",
-      "current_interval": [
-        "2025-07-25T08:04:46Z",
-        "2025-07-25T08:48:39Z"
+      "source_urls": [
+        "https://www.objectiv.tv/uk/objectively/2025/03/06/vibuh-prolunav-u-harkovi-ataka-shahediv/",
+        "https://t.me/s/air_alert_ua?before=173035",
+        "https://24tv.ua/ataka-shahedami-5-bereznya-2025-povitryana-trivoga-ukrayini-de_n2768670"
       ],
-      "root_cause": "MISSING_PERSISTED_EPISODE_ID_BUT_RECOVERABLE",
-      "exact_blocker": "Legacy evidence references a pre-reconciliation long-running alert; exact event time identifies the current episode."
+      "source_observation_ids": [],
+      "retained_event_time": "2025-03-06 ~03:50 Europe/Kyiv",
+      "retained_legacy_alert_start": "2025-03-05T23:28:00+02:00",
+      "old_counted_status": "STRICT",
+      "canonical_episode_id_present": false,
+      "canonical_context": [
+        {
+          "relation": "previous",
+          "episode_id": "cb4d84c97db70f7a08cdc74b",
+          "start_utc": "2025-03-05T19:08:24Z",
+          "end_utc": "2025-03-05T19:47:55Z",
+          "start_local": "2025-03-05T21:08:24+02:00",
+          "end_local": "2025-03-05T21:47:55+02:00"
+        },
+        {
+          "relation": "missing_expected_episode",
+          "expected_start_utc": "2025-03-05T21:28:00Z",
+          "expected_end_utc": "2025-03-06T02:46:00Z",
+          "expected_start_local": "2025-03-05T23:28:00+02:00",
+          "expected_end_local": "2025-03-06T04:46:00+02:00",
+          "event_utc": "2025-03-06T01:50:00Z",
+          "event_local": "2025-03-06T03:50:00+02:00"
+        },
+        {
+          "relation": "next",
+          "episode_id": "dca187e3bd85404598b1b6f9",
+          "start_utc": "2025-03-06T09:12:46Z",
+          "end_utc": "2025-03-06T09:34:27Z",
+          "start_local": "2025-03-06T11:12:46+02:00",
+          "end_local": "2025-03-06T11:34:27+02:00"
+        }
+      ],
+      "deterministically_reconstructable": false,
+      "assigned_root_cause_class": "CANONICAL_ID_OR_CORPUS_INCONSISTENCY",
+      "exact_blocker": "A qualifying city alert interval is externally evidenced but missing from the current canonical alert corpus."
     },
     {
       "city": "kherson",
+      "record_id": "8237340ab735032f39db197c",
       "source_artifact": "kyiv-air-alerts-grafana/data/explosion_research/kherson/final_evidence.json",
       "historical_bucket": "strict_events",
-      "source_url": "https://t.me/s/suspilnekherson?before=66288",
-      "old_counted_status": "STRICT",
-      "binding_information": {
-        "episode_start": "2026-08-02T14:38:00+03:00",
-        "event_time": "~15:21"
-      },
-      "canonical_episode_id_present": false,
-      "deterministic_current_episode_id": "8d56e633bd6cbbe8b865c179",
-      "current_interval": [
-        "2026-08-02T11:33:54Z",
-        "2026-08-02T12:46:21Z"
+      "source_urls": [
+        "https://t.me/s/suspilnekherson?before=66255"
       ],
-      "root_cause": "MISSING_PERSISTED_EPISODE_ID_BUT_RECOVERABLE",
-      "exact_blocker": "Start differs by more than replay tolerance; retained event time is uniquely inside the current canonical episode."
+      "source_observation_ids": [],
+      "retained_event_time": "retained as 20:30 Europe/Kyiv; best-supported source timestamp is 2026-08-01T20:30:00Z = 23:30 Europe/Kyiv",
+      "retained_legacy_alert_start": "retained 20:04 without explicit offset; source rendered timestamp 20:04Z",
+      "old_counted_status": "STRICT",
+      "canonical_episode_id_present": false,
+      "canonical_context": {
+        "event_utc": "2026-08-01T20:30:00Z",
+        "event_local": "2026-08-01T23:30:00+03:00",
+        "inside": false,
+        "previous": {
+          "episode_id": "0fee27f82ad2fd1da7256050",
+          "end_utc": "2026-08-01T18:04:52Z",
+          "distance_seconds": 8708
+        },
+        "next": {
+          "episode_id": "adc5a9cbaa2d08faa1b2da6f",
+          "start_utc": "2026-08-02T02:42:36Z",
+          "distance_seconds": 22356
+        }
+      },
+      "deterministically_reconstructable": false,
+      "assigned_root_cause_class": "OTHER",
+      "exact_blocker": "Only oblast alert scope is evidenced; UTC-corrected event time is outside every city episode, so binding would weaken the city-alert contract."
     },
     {
       "city": "mykolaiv",
+      "record_id": "7be92b6ec25e3649c106e66f",
       "source_artifact": "kyiv-air-alerts-grafana/data/explosion_research/mykolaiv/final_evidence.json",
       "historical_bucket": "strict_events",
-      "source_url": "https://suspilne.media/mykolaiv/1218650-u-mikolaevi-bulo-cutno-vibuh-2/",
-      "old_counted_status": "STRICT",
-      "binding_information": {
-        "episode_start": "2026-01-20T14:45:00",
-        "event_time": "~15:25"
-      },
-      "canonical_episode_id_present": false,
-      "deterministic_current_episode_id": "52b96e2d04ba16b498490cc6",
-      "current_interval": [
-        "2026-01-20T12:47:03Z",
-        "2026-01-20T13:47:09Z"
+      "source_urls": [
+        "https://t.me/s/suspilnemykolaiv/57820"
       ],
-      "root_cause": "MISSING_PERSISTED_EPISODE_ID_BUT_RECOVERABLE",
-      "exact_blocker": "Start is just outside tolerance; retained event clock plus date uniquely identifies the current episode."
+      "source_observation_ids": [],
+      "retained_event_time": "retained as 17:16 local; corrected source timestamp 2025-12-01T17:16:00Z = 19:16 Europe/Kyiv",
+      "retained_legacy_alert_start": "retained 2025-12-01 16:54 local; source-rendered 16:54Z",
+      "old_counted_status": "STRICT",
+      "canonical_episode_id_present": false,
+      "canonical_context": {
+        "episode_id": "7e7ada38d112e78babb90844",
+        "start_utc": "2025-12-01T16:54:43Z",
+        "end_utc": "2025-12-01T17:41:16Z",
+        "start_local": "2025-12-01T18:54:43+02:00",
+        "end_local": "2025-12-01T19:41:16+02:00",
+        "event_utc": "2025-12-01T17:16:00Z",
+        "event_local": "2025-12-01T19:16:00+02:00",
+        "event_inside": true
+      },
+      "deterministically_reconstructable": true,
+      "assigned_root_cause_class": "MISSING_PERSISTED_EPISODE_ID_BUT_RECOVERABLE",
+      "exact_blocker": "Retained Telegram rendered clock was interpreted as Kyiv local; UTC semantics map event and alert uniquely to existing episode 7e7ada38d112e78babb90844."
     },
     {
-      "city": "odesa",
-      "source_artifact": "kyiv-air-alerts-grafana/data/explosion_research/odesa/final_evidence.json",
+      "city": "mykolaiv",
+      "record_id": "114d46148bb629164cde2392",
+      "source_artifact": "kyiv-air-alerts-grafana/data/explosion_research/mykolaiv/final_evidence.json",
       "historical_bucket": "strict_events",
-      "source_url": "https://suspilne.media/odesa/1359504-rosijska-raketna-ataka-na-odesinu-poraneni-troe-ludej-sered-nih-ditina/",
-      "old_counted_status": "STRICT",
-      "binding_information": {
-        "episode_start": "2026-07-20T10:55:00+03:00",
-        "event_time": "2026-07-20T11:05:00+03:00/2026-07-20T11:41:00+03:00"
-      },
-      "canonical_episode_id_present": false,
-      "deterministic_current_episode_id": "fa9cdf93cadf1d5913dca19c",
-      "current_interval": [
-        "2026-07-20T06:16:03Z",
-        "2026-07-20T08:47:57Z"
+      "source_urls": [
+        "https://t.me/s/suspilnemykolaiv?before=58335"
       ],
-      "root_cause": "MISSING_PERSISTED_EPISODE_ID_BUT_RECOVERABLE",
-      "exact_blocker": "Legacy start no longer matches current start, but retained event times uniquely identify the current episode."
-    },
-    {
-      "city": "kherson",
-      "source_artifact": "kyiv-air-alerts-grafana/data/explosion_research/kherson/final_evidence.json",
-      "historical_bucket": "strict_events",
-      "source_url": "https://t.me/s/suspilnekherson?before=66255",
+      "source_observation_ids": [],
+      "retained_event_time": null,
+      "retained_legacy_alert_start": "2025-12-13T00:27:00 (retained without UTC correction)",
       "old_counted_status": "STRICT",
-      "binding_information": {
-        "episode_start": "2026-08-01T20:04:00+03:00",
-        "event_time": "~20:30"
-      },
       "canonical_episode_id_present": false,
-      "deterministic_reconstruction": false,
-      "current_corpus_context": {
-        "previous_episode": [
-          "2026-08-01T16:08:05Z",
-          "2026-08-01T16:24:42Z"
+      "canonical_context": {
+        "episode_id": "90e3489c770ee84f88d5c4cf",
+        "start_utc": "2025-12-13T00:26:47Z",
+        "end_utc": "2025-12-13T07:10:19Z",
+        "start_local": "2025-12-13T02:26:47+02:00",
+        "end_local": "2025-12-13T09:10:19+02:00",
+        "recovered_event_times_utc": [
+          "2025-12-13T03:46:00Z",
+          "2025-12-13T03:59:00Z",
+          "2025-12-13T04:03:00Z",
+          "2025-12-13T04:46:00Z",
+          "2025-12-13T05:19:00Z"
         ],
-        "next_episode": [
-          "2026-08-01T17:37:20Z",
-          "2026-08-01T18:04:52Z"
-        ]
+        "all_recovered_events_inside": true
       },
-      "root_cause": "CANONICAL_ID_OR_CORPUS_INCONSISTENCY",
-      "exact_blocker": "Retained event time is in a gap between current canonical episodes; adapter-only assignment would fabricate a binding."
-    },
-    {
-      "city": "kharkiv",
-      "source_artifact": "kyiv-air-alerts-grafana/data/explosion_research/kharkiv/final_evidence.json",
-      "historical_bucket": "strict_events",
-      "source_url": "https://www.objectiv.tv/uk/objectively/2025/03/06/vibuh-prolunav-u-harkovi-ataka-shahediv/",
-      "old_counted_status": "STRICT",
-      "binding_information": {
-        "alert_episode_start": "2025-03-05T23:28:00+02:00",
-        "event_time": "2025-03-06 ~03:50 Europe/Kyiv"
-      },
-      "canonical_episode_id_present": false,
-      "deterministic_reconstruction": false,
-      "root_cause": "CANONICAL_ID_OR_CORPUS_INCONSISTENCY",
-      "exact_blocker": "No current Kharkiv canonical episode contains the retained 03:50 local event time."
-    },
-    {
-      "city": "odesa",
-      "source_artifact": "kyiv-air-alerts-grafana/data/explosion_research/odesa/final_evidence.json",
-      "historical_bucket": "strict_events",
-      "source_url": "https://suspilne.media/odesa/1392326-v-odesi-pid-cas-povitranoi-trivogi-bulo-cutno-vibuhi-3/",
-      "old_counted_status": "STRICT",
-      "binding_information": {
-        "episode_start": "2026-08-31T20:37:00+03:00",
-        "event_time": "2026-08-31T22:29:00+03:00/2026-08-31T23:21:00+03:00"
-      },
-      "canonical_episode_id_present": false,
-      "deterministic_reconstruction": false,
-      "root_cause": "CANONICAL_ID_OR_CORPUS_INCONSISTENCY",
-      "exact_blocker": "Current Odesa canonical corpus has no episode on 2026-08-31 containing the retained event interval."
+      "deterministically_reconstructable": true,
+      "assigned_root_cause_class": "SOURCE_RETENTION_GAP",
+      "exact_blocker": "Retained row omitted event clocks; retained source chronology supplies exact-city explosion clocks, all uniquely inside existing episode 90e3489c770ee84f88d5c4cf."
     },
     {
       "city": "mykolaiv",
+      "record_id": "058b9b70b3e39ca67db9af5d",
       "source_artifact": "kyiv-air-alerts-grafana/data/explosion_research/mykolaiv/final_evidence.json",
       "historical_bucket": "strict_events",
-      "source_url": "https://t.me/s/suspilnemykolaiv?before=58335",
+      "source_urls": [
+        "https://www.pravda.com.ua/news/2026/03/04/8023857/",
+        "https://t.me/s/suspilnenews/63863"
+      ],
+      "source_observation_ids": [],
+      "retained_event_time": "retained ~16:00 Europe/Kyiv; corrected 2026-03-04T13:39:00Z = 15:39 Europe/Kyiv",
+      "retained_legacy_alert_start": "2026-03-04T15:22:00 retained from a later rendered alert clock, not the event-containing episode",
       "old_counted_status": "STRICT",
-      "binding_information": {
-        "episode_start": "2025-12-13T00:27:00",
-        "event_time": null
-      },
       "canonical_episode_id_present": false,
-      "deterministic_reconstruction": false,
-      "current_corpus_context": {
-        "plausible_night_episodes": [
-          {
-            "episode_id": "e4d2ae6a447744f2e77e08a2",
-            "interval": [
-              "2025-12-12T22:40:37Z",
-              "2025-12-13T00:10:13Z"
-            ]
-          },
-          {
-            "episode_id": "90e3489c770ee84f88d5c4cf",
-            "interval": [
-              "2025-12-13T00:26:47Z",
-              "2025-12-13T07:10:19Z"
-            ]
-          }
-        ]
+      "canonical_context": {
+        "episode_id": "63ec7dd62617f94945546a5b",
+        "start_utc": "2026-03-04T12:46:49Z",
+        "end_utc": "2026-03-04T13:42:31Z",
+        "start_local": "2026-03-04T14:46:49+02:00",
+        "end_local": "2026-03-04T15:42:31+02:00",
+        "event_utc": "2026-03-04T13:39:00Z",
+        "event_local": "2026-03-04T15:39:00+02:00",
+        "event_inside": true,
+        "distance_to_end_seconds": 211
       },
-      "root_cause": "TRUE_BINDING_AMBIGUITY",
-      "exact_blocker": "The retained summary gives no separate explosion time, while current reconciliation splits the night into more than one plausible canonical episode."
+      "deterministically_reconstructable": true,
+      "assigned_root_cause_class": "SOURCE_RETENTION_GAP",
+      "exact_blocker": "Retained ~16:00 is secondary publication time, not event time; primary source gives 13:39Z, uniquely inside existing episode 63ec7dd62617f94945546a5b."
+    },
+    {
+      "city": "odesa",
+      "record_id": "c9170f2906d0e18731a81fa2",
+      "source_artifact": "kyiv-air-alerts-grafana/data/explosion_research/odesa/final_evidence.json",
+      "historical_bucket": "strict_events",
+      "source_urls": [
+        "https://suspilne.media/odesa/1392326-v-odesi-pid-cas-povitranoi-trivogi-bulo-cutno-vibuhi-3/"
+      ],
+      "source_observation_ids": [],
+      "retained_event_time": "2026-08-31 22:29; 23:21 Europe/Kyiv",
+      "retained_legacy_alert_start": "2026-08-31T20:37:00+03:00 Odesa district",
+      "old_counted_status": "STRICT",
+      "canonical_episode_id_present": false,
+      "canonical_context": {
+        "first_event_utc": "2026-08-31T19:29:00Z",
+        "first_event_local": "2026-08-31T22:29:00+03:00",
+        "inside": false,
+        "previous": {
+          "episode_id": "a0990dfc24711661639d1126",
+          "end_utc": "2026-08-29T03:02:04Z"
+        },
+        "next": {
+          "episode_id": "91d93e58b18f7a1b9a79172b",
+          "start_utc": "2026-09-02T20:28:10Z"
+        }
+      },
+      "deterministically_reconstructable": false,
+      "assigned_root_cause_class": "OTHER",
+      "exact_blocker": "Only Odesa district alert scope is evidenced; the exact-city events have no containing city episode and should not be force-bound."
     }
   ],
   "cross_city_clusters": [
     {
-      "cluster": "LEGACY_START_ALIAS_NOT_ADAPTED",
-      "root_class": "DETERMINISTIC_BINDING_ADAPTER_GAP",
+      "cluster": "REGIONAL_OR_DISTRICT_ALERT_PROJECTED_TO_CITY",
       "affected_cities": [
-        "odesa"
-      ],
-      "blocked_positive_records": 60,
-      "shared_input_shape": [
-        "alert_episode_start_kyiv",
-        "alert_start_utc"
-      ],
-      "exact_current_replay_limitation": "Fields are absent from START_FIELDS even though their values exactly match current episode starts.",
-      "deterministic_repair_possible": true,
-      "required_work": "code proof"
-    },
-    {
-      "cluster": "EVENT_TIME_CANONICAL_REBIND",
-      "root_class": "MISSING_PERSISTED_EPISODE_ID_BUT_RECOVERABLE",
-      "affected_cities": [
-        "chernihiv",
-        "dnipro",
-        "kharkiv",
         "kherson",
-        "kropyvnytskyi",
-        "mykolaiv",
         "odesa"
       ],
-      "blocked_positive_records": 19,
-      "shared_input_shape": "Retained event time plus retained date uniquely falls inside exactly one current canonical episode after old-start drift/reconciliation.",
-      "exact_current_replay_limitation": "bind_evidence_record never uses retained event_time for primary binding/disambiguation.",
+      "blocked_records": 10,
+      "shared_input_shape": "Exact-city explosion evidence paired with Kherson oblast or Odesa district alert scope that legacy audit treated as a city alert.",
+      "current_replay_limitation_or_result": "Not a replay limitation. Current replay correctly refuses to bind because no city alert episode is evidenced.",
       "deterministic_repair_possible": true,
-      "required_work": "code proof"
+      "required_work": "Evidence/baseline retirement proof; no code weakening and no new source recovery required."
     },
     {
-      "cluster": "EVENT_OUTSIDE_CURRENT_CANONICAL_CORPUS",
-      "root_class": "CANONICAL_ID_OR_CORPUS_INCONSISTENCY",
+      "cluster": "TELEGRAM_RENDERED_CLOCK_PROVENANCE",
       "affected_cities": [
-        "kharkiv",
         "kherson",
-        "mykolaiv",
-        "odesa"
-      ],
-      "blocked_positive_records": 13,
-      "shared_input_shape": "Retained exact-city event time or historical alert interval has no containing current canonical episode.",
-      "deterministic_repair_possible": false,
-      "required_work": "evidence/source plus canonical corpus reconciliation"
-    },
-    {
-      "cluster": "OLD_LONG_ALERT_SPLIT_WITHOUT_EVENT_CLOCK",
-      "root_class": "TRUE_BINDING_AMBIGUITY",
-      "affected_cities": [
         "mykolaiv"
       ],
-      "blocked_positive_records": 1,
+      "overlapping_records": 10,
+      "shared_input_shape": "Telegram public-web rendered message clocks were historically copied/interpreted as Europe/Kyiv although source rendering aligns with UTC.",
+      "effect_by_city": {
+        "mykolaiv": "Correct/source-recovered clocks restore three deterministic bindings to existing episodes.",
+        "kherson": "Clock correction does not create a city alert; seven rows remain retirement-ready because only oblast alert scope is evidenced."
+      },
+      "required_work": "Evidence provenance normalization, not a broad classifier change."
+    },
+    {
+      "cluster": "ONE_LEGACY_ROW_TWO_CURRENT_EPISODES",
+      "affected_cities": [
+        "dnipro"
+      ],
+      "blocked_records": 1,
+      "current_replay_limitation": "One-row/one-episode binding contract cannot express two independently timed events in two existing canonical episodes.",
+      "deterministic_repair_possible": true,
+      "required_work": "Proof-only evidence/model split."
+    },
+    {
+      "cluster": "MISSING_CANONICAL_CITY_ALERT_EPISODE",
+      "affected_cities": [
+        "kharkiv"
+      ],
+      "blocked_records": 1,
       "deterministic_repair_possible": false,
-      "required_work": "source recovery or retain ambiguity"
+      "required_work": "Canonical-corpus proof."
     }
   ],
   "deterministic_vs_evidence_split": {
-    "total_unbound_counted_positive_records": 93,
-    "deterministic_structural_records": 79,
-    "deterministic_structural_cities": 7,
-    "deterministic_share_of_unbound": 0.8494623656,
-    "deterministic_breakdown": {
-      "legacy_start_alias_adapter": 60,
-      "event_time_unique_rebind": 19
+    "deterministic_structural": {
+      "blocked_records": 1,
+      "cities": [
+        "dnipro"
+      ],
+      "note": "One structural representation gap remains after the accepted temporal adapter."
     },
-    "cities_fully_clearable_at_binding_preflight_by_deterministic_adapter": [
-      "chernihiv",
-      "dnipro",
-      "kropyvnytskyi"
-    ],
-    "evidence_or_corpus_recovery_records": 13,
-    "evidence_or_corpus_recovery_cities": [
-      "kharkiv",
+    "evidence_or_corpus_side": {
+      "blocked_records": 14,
+      "cities": [
+        "kharkiv",
+        "kherson",
+        "mykolaiv",
+        "odesa"
+      ],
+      "breakdown": {
+        "source_sufficient_retirement": 10,
+        "deterministic_evidence_time_normalization_or_source_recovery": 3,
+        "canonical_corpus_repair": 1
+      }
+    },
+    "true_ambiguity": {
+      "blocked_records": 0,
+      "cities": []
+    },
+    "count_only_legacy": {
+      "blocked_records": 0,
+      "cities": []
+    }
+  },
+  "canonical_and_corpus_inconsistencies": [
+    {
+      "city": "kharkiv",
+      "record_id": "2725fd45c6f6a33d61fe04a8",
+      "finding": "Contemporaneous sources establish a Kharkiv city alert from 2025-03-05 23:28 to 2025-03-06 04:46 Europe/Kyiv containing the 03:50 attack event, but no corresponding canonical episode exists.",
+      "expected_denominator_if_proven": 3566,
+      "existing_episode_ids_change": false
+    }
+  ],
+  "recommended_first_proof_scope": {
+    "name": "KHerson + Odesa LEGACY REGIONAL/DISTRICT ALERT SCOPE RETIREMENT PROOF",
+    "implementation_applied": false,
+    "target_records": 10,
+    "target_cities": [
       "kherson",
-      "mykolaiv",
       "odesa"
     ],
-    "true_binding_ambiguity_records": 1,
-    "true_binding_ambiguity_cities": [
-      "mykolaiv"
+    "rationale": "Highest leverage deterministic evidence-side repair: ten remaining blockers across two cities are already source-sufficient and share one semantic defect. The proof should show they were historically counted using oblast/raion alert scope and therefore must be retired from city-episode positives without changing classifier/replay semantics.",
+    "proof_requirements": [
+      "No change to canonical alert corpus or episode IDs.",
+      "No weakening of city-alert temporal gate.",
+      "Reconcile frozen positive counts to the recoverable city-episode IDs: Kherson 9 -> 2 strict/sensitivity; Odesa 155 -> 152 strict and 161 -> 158 sensitivity.",
+      "Zero effect on Lviv, Sevastopol, Sumy, Cherkasy, Chernihiv or Kropyvnytskyi semantics.",
+      "No changes to replay/classifier code, live monitor, DB/Neon, production UX/site-prod or 6863 campaign branch."
     ],
-    "unresolved_after_deterministic_adapter": 14
+    "why_not_a_broader_replay_adapter": "No shared adapter pattern remains across 3+ blocked cities. The accepted temporal adapter already cleared Chernihiv and Kropyvnytskyi; broadening replay now would risk force-binding evidence that is semantically outside the city-alert contract."
   },
-  "canonical_and_corpus_inconsistencies": {
-    "unknown_persisted_episode_ids": 0,
-    "event_interval_vs_current_corpus_records": 13,
-    "event_interval_vs_current_corpus_by_city": {
-      "kharkiv": 1,
-      "kherson": 7,
-      "mykolaiv": 2,
-      "odesa": 3
+  "source_and_blob_fingerprints": {
+    "replay_script": "99b13318a3bd53013a798bd4c66c87c4aed6f45b",
+    "audited_baseline": "81ecc48ed64b7e78449df903afb082e9f92531e5",
+    "final_evidence": {
+      "dnipro": "99758ae2a7d888593ffd863cc53cd9f48bf34f5a",
+      "kharkiv": "dcbbb3a2cf96276f23672d8e6e497626740c7947",
+      "kherson": "243b36904ea715fef0d100656f0822100009ca9b",
+      "mykolaiv": "fe10f780d988917a0f742400d774ac8b20466ffd",
+      "odesa": "1ed4cf2a52b02c7b1ffb36fa7f7737e81543e428"
     },
-    "stale_metadata": [
-      {
-        "city": "chernihiv",
-        "artifact": "kyiv-air-alerts-grafana/data/explosion_research/chernihiv/final_evidence.json",
-        "field": "final_counts.alerts_total",
-        "stored": 1677,
-        "current_audited_baseline": 1676,
-        "current_reconstructed": 1676,
-        "impact": "metadata inconsistency; not the direct cause of the single counted-positive binding blocker"
-      }
-    ]
-  },
-  "recommended_first_proof_scope": {
-    "name": "LEGACY TEMPORAL BINDING ADAPTER PROOF",
-    "implementation": false,
-    "target_surface": "kyiv-air-alerts-grafana/scripts/replay_explosion_history.py::bind_evidence_record (or a narrow normalization helper called only by historical replay)",
-    "proposed_behavior": [
-      "Recognize alert_episode_start_kyiv and alert_start_utc as explicit legacy alert-start aliases.",
-      "Only when counted historical evidence remains unbound or start-ambiguous, parse retained event_time/event_time_kyiv/event_time_local without using publication time.",
-      "For clock-only event times, take the calendar date only from an explicit retained start/date field in the same record.",
-      "Bind only when retained event timing falls inside exactly one current canonical alert episode; multiple or zero candidates remain blocked.",
-      "Do not change classifier semantics, candidate composition, sensitivity rules, or canonical episode construction."
-    ],
-    "expected_binding_only_impact": {
-      "recovered_counted_positive_records": 79,
-      "affected_target_cities": 7,
-      "remaining_unbound_records": 14,
-      "post_adapter_expected_recoverable_ids": {
-        "chernihiv": {
-          "strict": 39,
-          "sensitivity": 43,
-          "remaining_unbound": 0
-        },
-        "dnipro": {
-          "strict": 180,
-          "sensitivity": 187,
-          "remaining_unbound": 0
-        },
-        "kharkiv": {
-          "strict": 287,
-          "sensitivity": 307,
-          "remaining_unbound": 1
-        },
-        "kherson": {
-          "strict": 2,
-          "sensitivity": 2,
-          "remaining_unbound": 7
-        },
-        "kropyvnytskyi": {
-          "strict": 38,
-          "sensitivity": 38,
-          "remaining_unbound": 0
-        },
-        "mykolaiv": {
-          "strict": 119,
-          "sensitivity": 132,
-          "remaining_unbound": 3
-        },
-        "odesa": {
-          "strict": 152,
-          "sensitivity": 158,
-          "remaining_unbound": 3
-        }
-      }
+    "historical_recovery_source_slices": {
+      "dnipro": "1395c92aa5c8d5200d8413dffea02aaedc1b5444",
+      "kharkiv": "72fba5fe0939a6a24083229dffb4012a794e14a3",
+      "kherson": "32c0f8085161985a258d927f4a4968d4b192a708",
+      "mykolaiv": "a8e0cd97da0ce309727d76ade776c79378c36ab7",
+      "odesa": "4374edf1f4faa3792077ea173fce42c1adf06791"
     },
-    "proof_guards": [
-      "No unexpected episode-level deltas.",
-      "No change to Lviv, Sevastopol, Sumy, or Cherkasy historical semantics.",
-      "No binding when zero or multiple current canonical episodes contain retained event timing.",
-      "No historical evidence mutation.",
-      "No DB/Neon, production UX/site-prod, live monitor, audited baseline, review queue, dashboard-data, or campaign-branch mutation."
-    ],
-    "rationale": "This is one narrowly scoped historical temporal-binding normalization/adaptation repair. It recovers 79 of 93 blocked counted positives across all seven target cities without changing what qualifies as an attack event."
+    "note": "Source-slice blobs were directly adjudicated at 5b4b8ebb... and no source-slice file changed between that head and the fresh authoritative head examined here."
   },
   "protected_state_confirmation": {
-    "task_mutation_scope": "research artifact only",
     "historical_evidence_modified": false,
     "source_slices_modified": false,
     "replay_logic_modified": false,
     "classifier_modified": false,
-    "live_monitor_modified": false,
-    "audited_baseline_modified": false,
-    "review_queue_modified": false,
-    "monitor_state_modified": false,
-    "dashboard_data_modified": false,
-    "campaign_branch_modified": false,
-    "site_prod_modified": false,
-    "concurrent_external_head_movement": {
-      "observed": true,
-      "from_head": "1e456fde1e71aa4f704171456ff1e998f259f899",
-      "to_head": "9f2599747b1691f651579f588c59d18129251259",
-      "commit_message": "Update explosion metric monitor state",
-      "files_changed": [
-        "kyiv-air-alerts-grafana/data/dashboard_data.json",
-        "kyiv-air-alerts-grafana/data/explosion_candidate_monitor_last_run.json",
-        "kyiv-air-alerts-grafana/data/explosion_candidate_monitor_state.json",
-        "kyiv-air-alerts-grafana/data/explosion_review_queue.json",
-        "kyiv-air-alerts-grafana/data/explosions_test.json"
-      ],
-      "relevance_to_inventory": "none; no replay/evidence/source-slice/baseline/status input changed"
-    }
+    "db_neon_touched": false,
+    "production_ux_site_prod_touched": false,
+    "campaign_branch_touched": false,
+    "cherkasy_reopened": false,
+    "sumy_reopened": false,
+    "zaporizhzhia_or_kyiv_worked": false,
+    "only_allowed_repository_mutation": "this research artifact update"
   },
-  "verdict": "7-CITY HISTORICAL BINDING INVENTORY COMPLETE — 79 DETERMINISTIC STRUCTURAL / 13 EVIDENCE-DEPENDENT / 1 TRUE AMBIGUITY"
+  "verdict": "7-CITY HISTORICAL BINDING INVENTORY COMPLETE — 1 DETERMINISTIC STRUCTURAL / 14 EVIDENCE-DEPENDENT / 0 TRUE AMBIGUITY"
 }
