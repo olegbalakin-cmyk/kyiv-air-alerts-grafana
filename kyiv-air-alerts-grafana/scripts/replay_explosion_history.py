@@ -1096,6 +1096,14 @@ def historical_review_roles(city: str, row: dict, monitor) -> tuple[dict, str]:
                 r"near[_ -]?boundary|event[_ -]?precedes[_ -]?alert)",
                 review_low,
             )
+            or (
+                ("inside" in review_low or "within" in review_low)
+                and ("alert" in review_low or "episode" in review_low)
+            )
+            or (
+                "separate" in review_low
+                and ("realert" in review_low or "episode" in review_low)
+            )
         )
 
         reviewed_air_context = bool(
@@ -1192,7 +1200,7 @@ def historical_review_roles(city: str, row: dict, monitor) -> tuple[dict, str]:
                 and reviewed_episode_relation
                 and (
                     reviewed_air_context
-                    or specific_air.search(segment)
+                    or specific_air.search(evidence)
                 )
                 and re.search(
                     r"\b(?:було|стало)\s+гучн\w*\b|"
