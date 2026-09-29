@@ -1,0 +1,29 @@
+name: Temporary historical backfill 8X post-apply validation
+
+on:
+  push:
+    branches:
+      - historical-backfill-8x-proof-2026-09-29
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      PYTHONDONTWRITEBYTECODE: "1"
+    steps:
+      - name: Check out applied main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Verify applied controller blob
+        run: |
+          test "$(git hash-object kyiv-air-alerts-grafana/scripts/historical_attack_event_acceleration_controller.py)" = "2ec14f2e8c37293f06d28d73983322b227d5ba84"
+      - name: Run applied controller self-test
+        run: python kyiv-air-alerts-grafana/scripts/historical_attack_event_acceleration_controller.py self-test
