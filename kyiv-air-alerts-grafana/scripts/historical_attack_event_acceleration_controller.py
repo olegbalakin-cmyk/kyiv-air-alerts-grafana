@@ -23,15 +23,17 @@ FROZEN_TOTAL = 6863
 BATCH_SIZE = 50
 STATE_SCHEMA = 1
 STAGE1_PROMOTION_RUNS = 8
+STAGE2_PROMOTION_RUNS = 3
 SYSTEMIC_RETRY_MIN = 20
 SYSTEMIC_RETRY_RATIO = 0.50
 
 PHASE_CONTROL = "CONTROL"
 PHASE_2X = "ACCELERATED_2X"
 PHASE_4X = "ACCELERATED_4X"
+PHASE_8X = "ACCELERATED_8X"
 PHASE_FALLBACK = "SAFETY_FALLBACK"
 PHASE_COMPLETE = "COMPLETE"
-PHASES = {PHASE_CONTROL, PHASE_2X, PHASE_4X, PHASE_FALLBACK, PHASE_COMPLETE}
+PHASES = {PHASE_CONTROL, PHASE_2X, PHASE_4X, PHASE_8X, PHASE_FALLBACK, PHASE_COMPLETE}
 
 STATE_REL = Path("research/historical_attack_event_backfill_acceleration_state.json")
 STATUS_REL = Path("research/historical_attack_event_backfill_status.json")
@@ -137,9 +139,21 @@ def phase_batch_limit(phase: str) -> int:
         PHASE_CONTROL: 1,
         PHASE_2X: 2,
         PHASE_4X: 4,
+        PHASE_8X: 8,
         PHASE_FALLBACK: 1,
         PHASE_COMPLETE: 0,
     }[phase]
+
+
+def execution_phase(state: dict, *, scheduled: bool) -> str:
+    phase = str(state["phase"])
+    if (
+        scheduled
+        and phase == PHASE_4X
+        and int(state.get("clean_scheduled_runs") or 0) >= STAGE2_PROMOTION_RUNS
+    ):
+        return PHASE_8X
+    return phase
 
 
 def campaign_progress(status: dict) -> tuple[int, int, int]:
@@ -163,6 +177,7 @@ def new_state(status: dict, timestamp: str) -> dict:
         "last_success_at": None,
         "stage1_started_at": None,
         "stage2_started_at": None,
+        "stage3_started_at": None,
         "fallback_reason": None,
         "updated_at": timestamp,
     }
@@ -546,7 +561,7 @@ def transition_state(
         out["clean_scheduled_runs"] = 0
         out["failed_or_guarded_runs"] = int(out.get("failed_or_guarded_runs") or 0) + 1
         out["fallback_reason"] = reason or "UNSPECIFIED_GUARD_FAILURE"
-        if phase in {PHASE_2X, PHASE_4X}:
+        if phase in {PHASE_2X, PHASE_4X, PHASE_8X}:
             out["phase"] = PHASE_FALLBACK
         out["last_progress_before"] = progress_before
         out["last_progress_after"] = progress_after
@@ -576,6 +591,15 @@ def transition_state(
         out["stage1_started_at"] = timestamp
         out["fallback_reason"] = None
     elif phase == PHASE_4X:
+        streak = int(out.get("clean_scheduled_runs") or 0) + 1
+        if streak >= STAGE2_PROMOTION_RUNS:
+            out["phase"] = PHASE_8X
+            out["clean_scheduled_runs"] = 0
+            out["stage3_started_at"] = out.get("stage3_started_at") or timestamp
+        else:
+            out["clean_scheduled_runs"] = streak
+        out["fallback_reason"] = None
+    elif phase == PHASE_8X:
         out["clean_scheduled_runs"] = int(out.get("clean_scheduled_runs") or 0) + 1
         out["fallback_reason"] = None
     out["last_scheduler_run_id"] = run_id
@@ -643,11 +667,15 @@ def summary(
     complete: bool,
     *,
     head: str | None = None,
+    phase_used: str | None = None,
 ) -> dict:
+    effective_phase = phase_used or str(before.get("phase"))
     return {
         "campaign_id": CAMPAIGN_ID,
         "phase_before": before.get("phase"),
+        "phase_used": effective_phase,
         "phase_after": after.get("phase"),
+        "max_batches_per_run": phase_batch_limit(effective_phase),
         "processed_before": processed_before,
         "processed_after": processed_after,
         "batches_attempted": batches_attempted,
@@ -671,6 +699,8 @@ def run_controller(root: Path, event_name: str, run_id: str | None) -> dict:
     state = load_json(root / STATE_REL) if (root / STATE_REL).exists() else new_state(status, now_iso())
     validate_state_contract(state, status)
     phase_before = state["phase"]
+    scheduled = event_name == "schedule"
+    phase_used = execution_phase(state, scheduled=scheduled)
     processed_before, total, terminal_before = campaign_progress(status)
     if state["phase"] == PHASE_COMPLETE:
         if processed_before != total or terminal_before != total:
@@ -696,7 +726,7 @@ def run_controller(root: Path, event_name: str, run_id: str | None) -> dict:
 
     observation_index = collect_observation_index(root)
     seen_observations = set(observation_index)
-    max_batches = phase_batch_limit(phase_before)
+    max_batches = phase_batch_limit(phase_used)
     batches_attempted = 0
     batches_committed = 0
     new_episodes = 0
@@ -793,7 +823,6 @@ def run_controller(root: Path, event_name: str, run_id: str | None) -> dict:
     status_final = load_json(root / STATUS_REL)
     processed_after, total_after, terminal_after = campaign_progress(status_final)
     complete = processed_after == total_after and terminal_after == total_after
-    scheduled = event_name == "schedule"
     did_work = batches_committed > 0
     clean = guard_reason is None and did_work
     if not did_work and not complete and guard_reason is None:
@@ -834,7 +863,8 @@ def run_controller(root: Path, event_name: str, run_id: str | None) -> dict:
     result = summary(
         state, updated, processed_before, processed_after,
         batches_attempted, batches_committed, new_episodes,
-        guard_reason is None, guard_reason, complete, head=expected_head
+        guard_reason is None, guard_reason, complete, head=expected_head,
+        phase_used=phase_used,
     )
     if guard_reason:
         print(json.dumps(result, ensure_ascii=False, sort_keys=True))
@@ -1121,6 +1151,57 @@ def observation_dedupe_self_test() -> dict:
         "terminal_episode_retry_regression_guard": "PASS",
     }
 
+def synthetic_8x_batch_loop_self_test() -> dict:
+    def run_fixture(available_episodes: int) -> dict:
+        with tempfile.TemporaryDirectory(prefix="historical-backfill-8x-synthetic-") as tmp:
+            root = Path(tmp)
+            remaining = available_episodes
+            batches_attempted = 0
+            batches_committed = 0
+            new_episodes_processed = 0
+            while batches_committed < phase_batch_limit(PHASE_8X) and remaining > 0:
+                batches_attempted += 1
+                batch_size = min(BATCH_SIZE, remaining)
+                batch_path = root / f"batch_{batches_attempted:06d}.json"
+                dump_json(batch_path, {
+                    "episode_results": [
+                        {"episode_id": f"synthetic-{batches_attempted}-{i}"}
+                        for i in range(batch_size)
+                    ]
+                })
+                persisted = load_json(batch_path)
+                committed = len(persisted["episode_results"])
+                assert committed == batch_size
+                batches_committed += 1
+                new_episodes_processed += committed
+                remaining -= committed
+            return {
+                "batches_attempted": batches_attempted,
+                "batches_committed": batches_committed,
+                "new_episodes_processed": new_episodes_processed,
+                "campaign_complete": remaining == 0,
+            }
+
+    full = run_fixture(8 * BATCH_SIZE)
+    assert full == {
+        "batches_attempted": 8,
+        "batches_committed": 8,
+        "new_episodes_processed": 400,
+        "campaign_complete": True,
+    }
+    incomplete_final = run_fixture(2 * BATCH_SIZE + 25)
+    assert incomplete_final == {
+        "batches_attempted": 3,
+        "batches_committed": 3,
+        "new_episodes_processed": 125,
+        "campaign_complete": True,
+    }
+    return {
+        "synthetic_8x_full_work": full,
+        "synthetic_8x_incomplete_final_batch": incomplete_final,
+    }
+
+
 def self_test() -> dict:
     timestamp = "2026-09-27T00:00:00Z"
     status = {
@@ -1131,6 +1212,7 @@ def self_test() -> dict:
     assert phase_batch_limit(PHASE_CONTROL) == 1
     assert phase_batch_limit(PHASE_2X) == 2
     assert phase_batch_limit(PHASE_4X) == 4
+    assert phase_batch_limit(PHASE_8X) == 8
     assert phase_batch_limit(PHASE_FALLBACK) == 1
 
     manual = transition_state(
@@ -1159,6 +1241,34 @@ def self_test() -> dict:
     )
     assert cur["phase"] == PHASE_4X and cur["clean_scheduled_runs"] == 0
 
+    stage2 = cur
+    for i in range(2):
+        stage2 = transition_state(
+            stage2, scheduled=True, clean=True, did_work=True, complete=False,
+            run_id=f"4x-{i + 1}", progress_before=108 + i, progress_after=109 + i,
+            timestamp=timestamp,
+        )
+        assert stage2["phase"] == PHASE_4X
+        assert stage2["clean_scheduled_runs"] == i + 1
+    stage3 = transition_state(
+        stage2, scheduled=True, clean=True, did_work=True, complete=False, run_id="4x-3",
+        progress_before=110, progress_after=111, timestamp=timestamp,
+    )
+    assert stage3["phase"] == PHASE_8X
+    assert stage3["clean_scheduled_runs"] == 0
+    assert stage3["stage3_started_at"] == timestamp
+
+    persisted_ready = copy.deepcopy(cur)
+    persisted_ready["clean_scheduled_runs"] = STAGE2_PROMOTION_RUNS
+    assert execution_phase(persisted_ready, scheduled=True) == PHASE_8X
+    assert execution_phase(persisted_ready, scheduled=False) == PHASE_4X
+    migrated_after_clean = transition_state(
+        persisted_ready, scheduled=True, clean=True, did_work=True, complete=False,
+        run_id="migration", progress_before=1503, progress_after=1903, timestamp=timestamp,
+    )
+    assert migrated_after_clean["phase"] == PHASE_8X
+    assert migrated_after_clean["clean_scheduled_runs"] == 0
+
     stage1_failure = transition_state(
         stage1, scheduled=True, clean=False, did_work=True, complete=False, run_id="f1",
         progress_before=100, progress_after=150, timestamp=timestamp, reason="SYNTHETIC_GUARD",
@@ -1172,16 +1282,32 @@ def self_test() -> dict:
     )
     assert stage2_failure["phase"] == PHASE_FALLBACK
 
+    ready_migration_failure = transition_state(
+        persisted_ready, scheduled=True, clean=False, did_work=True, complete=False,
+        run_id="f-migration", progress_before=1503, progress_after=1553,
+        timestamp=timestamp, reason="SYNTHETIC_GUARD",
+    )
+    assert ready_migration_failure["phase"] == PHASE_FALLBACK
+    assert ready_migration_failure["clean_scheduled_runs"] == 0
+
+    stage3_failure = transition_state(
+        stage3, scheduled=True, clean=False, did_work=True, complete=False, run_id="f3",
+        progress_before=111, progress_after=161, timestamp=timestamp, reason="SYNTHETIC_GUARD",
+    )
+    assert stage3_failure["phase"] == PHASE_FALLBACK
+    assert stage3_failure["clean_scheduled_runs"] == 0
+
     recovered = transition_state(
-        stage1_failure, scheduled=True, clean=True, did_work=True, complete=False, run_id="r1",
-        progress_before=150, progress_after=200, timestamp=timestamp,
+        stage3_failure, scheduled=True, clean=True, did_work=True, complete=False, run_id="r1",
+        progress_before=161, progress_after=211, timestamp=timestamp,
     )
     assert recovered["phase"] == PHASE_2X
     assert recovered["clean_scheduled_runs"] == 0
+    assert execution_phase(recovered, scheduled=True) == PHASE_2X
 
     idle = transition_state(
         recovered, scheduled=True, clean=True, did_work=False, complete=False, run_id="idle",
-        progress_before=200, progress_after=200, timestamp=timestamp,
+        progress_before=211, progress_after=211, timestamp=timestamp,
     )
     assert idle == recovered
 
@@ -1200,6 +1326,7 @@ def self_test() -> dict:
     assert not systemic_source_failure({"new_work": 50, "retryable": 5})
     guard_tests = worktree_guard_self_test()
     dedupe_tests = observation_dedupe_self_test()
+    synthetic_tests = synthetic_8x_batch_loop_self_test()
 
     return {
         "ok": True,
@@ -1208,22 +1335,27 @@ def self_test() -> dict:
             PHASE_CONTROL: 1,
             PHASE_2X: 2,
             PHASE_4X: 4,
+            PHASE_8X: 8,
             PHASE_FALLBACK: 1,
         },
         "control_resume_gate": "PASS",
         "manual_does_not_promote": "PASS",
         "stage1_eight_run_promotion": "PASS",
+        "stage2_three_run_promotion": "PASS",
+        "existing_4x_readiness_executes_8x": "PASS",
+        "failed_guarded_run_does_not_promote": "PASS",
         "stage1_failure_fallback": "PASS",
         "stage2_failure_fallback": "PASS",
+        "stage3_failure_fallback": "PASS",
         "fallback_recovery_to_stage1_only": "PASS",
         "idempotence_no_work": "PASS",
         "completion_idempotence": "PASS",
         "synthetic_guard_injection": "PASS",
         "systemic_source_failure_guard": "PASS",
+        **synthetic_tests,
         **guard_tests,
         **dedupe_tests,
     }
-
 
 def main() -> int:
     parser = argparse.ArgumentParser()
