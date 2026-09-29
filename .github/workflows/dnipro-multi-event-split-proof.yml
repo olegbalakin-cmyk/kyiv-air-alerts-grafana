@@ -1,0 +1,110 @@
+name: Dnipro multi-event split proof
+
+on:
+  push:
+    branches:
+      - dnipro-one-row-two-episodes-proof-2026-09-29
+
+permissions:
+  contents: read
+
+jobs:
+  proof:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: kyiv-air-alerts-grafana/requirements.txt
+
+      - name: Install dependencies
+        run: |
+          pip install -r kyiv-air-alerts-grafana/requirements.txt
+          pip install pytest
+
+      - name: Focused and temporal tests
+        run: |
+          pytest -q kyiv-air-alerts-grafana/tests/test_historical_replay_dnipro_multi_event_split.py
+          pytest -q kyiv-air-alerts-grafana/tests/test_historical_replay_temporal_binding.py
+          pytest -q kyiv-air-alerts-grafana/tests/test_historical_replay_chernihiv_kropyvnytskyi_roles.py
+
+      - name: Replay and monitor self-tests
+        run: |
+          python kyiv-air-alerts-grafana/scripts/replay_explosion_history.py --self-test
+          python kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py --self-test
+
+      - name: Dnipro source preflight and replay
+        env:
+          HEAD_SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          ROOT="$GITHUB_WORKSPACE/kyiv-air-alerts-grafana"
+          mkdir -p "$RUNNER_TEMP/proof"
+          set +e
+          python kyiv-air-alerts-grafana/scripts/replay_explosion_history.py             --repo-root "$ROOT" --through 2026-09-17 --input-head "$HEAD_SHA"             --read-only --preflight --output "$RUNNER_TEMP/proof/preflight.json"
+          PREFLIGHT_RC=$?
+          set -e
+          echo "global_preflight_rc=$PREFLIGHT_RC"
+          python - <<'PY'
+          import json, os
+          from pathlib import Path
+          p=json.loads(Path(os.environ["RUNNER_TEMP"],"proof","preflight.json").read_text())
+          d=next(x for x in p["cities"] if x["city_key"]=="dnipro")
+          print("DNIPRO_PREFLIGHT="+json.dumps(d,ensure_ascii=False,sort_keys=True))
+          PY
+          python kyiv-air-alerts-grafana/scripts/replay_explosion_history.py             --repo-root "$ROOT" --city dnipro --through 2026-09-17             --input-head "$HEAD_SHA" --read-only             --output "$RUNNER_TEMP/proof/dnipro.json"
+          python - <<'PY'
+          import json, os
+          from pathlib import Path
+          p=json.loads(Path(os.environ["RUNNER_TEMP"],"proof","dnipro.json").read_text())
+          keep={k:p.get(k) for k in [
+            "status","episodes_checked","baseline_strict_episodes",
+            "canonicalized_legacy_strict_episodes","replayed_strict_episodes",
+            "baseline_sensitivity_episodes","canonicalized_legacy_sensitivity_episodes",
+            "replayed_sensitivity_episodes","changed_episodes","errors",
+            "legacy_multi_event_splits","reconciliation_events",
+            "protected_files_unchanged","verdict"
+          ]}
+          print("DNIPRO_REPLAY="+json.dumps(keep,ensure_ascii=False,sort_keys=True))
+          PY
+
+      - name: Regression city replays
+        env:
+          HEAD_SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          ROOT="$GITHUB_WORKSPACE/kyiv-air-alerts-grafana"
+          for CITY in lviv sevastopol sumy cherkasy chernihiv kropyvnytskyi; do
+            python kyiv-air-alerts-grafana/scripts/replay_explosion_history.py               --repo-root "$ROOT" --city "$CITY" --through 2026-09-17               --input-head "$HEAD_SHA" --read-only               --output "$RUNNER_TEMP/proof/$CITY.json"
+          done
+          python - <<'PY'
+          import json, os
+          from pathlib import Path
+          out={}
+          for city in ["lviv","sevastopol","sumy","cherkasy","chernihiv","kropyvnytskyi"]:
+              p=json.loads(Path(os.environ["RUNNER_TEMP"],"proof",f"{city}.json").read_text())
+              out[city]={
+                  "status":p.get("status"),
+                  "strict":p.get("replayed_strict_episodes"),
+                  "sensitivity":p.get("replayed_sensitivity_episodes"),
+                  "qa":len(p.get("changed_episodes") or [])+len(p.get("errors") or []),
+                  "qa_ids":[x.get("episode_id") for x in p.get("changed_episodes") or [] if x.get("episode_id")],
+                  "verdict":p.get("verdict"),
+                  "protected_files_unchanged":p.get("protected_files_unchanged"),
+              }
+          print("REGRESSIONS="+json.dumps(out,ensure_ascii=False,sort_keys=True))
+          PY
+
+      - name: Upload proof outputs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: dnipro-multi-event-split-proof
+          path: ${{ runner.temp }}/proof
+          if-no-files-found: warn
