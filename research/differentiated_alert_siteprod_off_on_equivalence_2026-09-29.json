@@ -1,0 +1,182 @@
+{
+  "task": "current site-prod differentiated shadow OFF/ON executable equivalence proof",
+  "date": "2026-09-29",
+  "continuation_from": "77afbdd65ba7c2e0307439a7b8eb7e6161be0f6a",
+  "proof_branch": "differentiated-alert-siteprod-off-on-proof-2026-09-29",
+  "main_head_at_start": "e2da5058c726edce41d9ae997027d01df7c54c4c",
+  "main_head": "5195fd449cddc9c16508065434aa4aaecc2bdf5f",
+  "main_workflow_blob": "a451cb205be4cf5a597f3f72e04426c12868e3da",
+  "site_prod_frozen_base": "a06b82197c737e4311af3cb160ca662f9eff1e8f",
+  "site_prod_final_observed_head": "a06b82197c737e4311af3cb160ca662f9eff1e8f",
+  "production_updater_blob": "7d7fde6d8c736cd754804dd051845cf59738d8c9",
+  "integration_hook_blob": "f91508815243b21f0aab621c7417fdf22a8816a7",
+  "sidecar_blob": "f6e159f0ed18f7f29913fc6cfa2161563d9eb0a6",
+  "drift": {
+    "relevant_production_code_drift": "NO_DRIFT",
+    "site_prod_vs_previous_integration_proof": "NO_DRIFT",
+    "main_advanced_during_attempt": true,
+    "main_workflow_blob_unchanged": true,
+    "main_advance_classification": "RUNTIME_DATA_DRIFT",
+    "main_changed_files": [
+      "kyiv-air-alerts-grafana/data/alerts_combined.json",
+      "kyiv-air-alerts-grafana/data/casualties/review_queue.json",
+      "kyiv-air-alerts-grafana/data/casualties/source_state.json",
+      "kyiv-air-alerts-grafana/data/dashboard_data.json",
+      "kyiv-air-alerts-grafana/data/short_28d.csv",
+      "kyiv-air-alerts-grafana/data/ukrainealarm_bridge.json",
+      "kyiv-air-alerts-grafana/data/weekly.csv"
+    ]
+  },
+  "production_path": {
+    "workflow": "main:.github/workflows/update-netlify-site.yml",
+    "checkout_ref": "site-prod",
+    "updater": "kyiv-air-alerts-grafana/scripts/update_data.py",
+    "sequence_confirmed_from_current_workflow": [
+      "test_update_fallback.py",
+      "validate_bridge_checkpoint.py self-test",
+      "update_data.py",
+      "add_weekly_breakdown.py",
+      "render_dashboard.py",
+      "add_weekly_panels.py",
+      "add_duration_unit_switch.py",
+      "expand_multicity_production.py",
+      "extend_remaining_proxies.py",
+      "apply_ukrainealarm_bridge.py",
+      "validate_bridge_checkpoint.py validate",
+      "add_sevastopol_exact.py",
+      "apply_site_rolling_7d.py",
+      "update_casualties.py",
+      "configure_full_city_dashboard.py",
+      "add_casualty_panel.py",
+      "postprocess_compact_dashboard_qa.py",
+      "reconcile_bridge_freshness.py",
+      "verify production dataset",
+      "commit updated production data to site-prod"
+    ]
+  },
+  "execution_environment": {
+    "attempted_surface": "local/container plus GitHub connector",
+    "os": "Linux 6.18.44 x86_64",
+    "python": "3.13.5",
+    "working_directory": "/",
+    "github_actions": "NOT_EXECUTED",
+    "network_availability": "container DNS unavailable for github.com and production external sources",
+    "connector_capabilities": {
+      "repository_read_write": true,
+      "workflow_run_read": true,
+      "workflow_dispatch_action_available": false,
+      "generic_github_fetch_is_get_only": true
+    },
+    "local_dependencies_observed": {
+      "requests": "2.32.5",
+      "beautifulsoup4": "4.14.3",
+      "pytest": "9.0.2",
+      "psycopg": "MISSING"
+    }
+  },
+  "execution_blocker": {
+    "status": "BLOCKED_BY_AVAILABLE_EXECUTION_SURFACE",
+    "details": [
+      "The full frozen site-prod checkout cannot be cloned/materialized into the execution container through the available GitHub connector.",
+      "The execution container has no DNS/network access to GitHub or the production upstream sources.",
+      "The available GitHub connector exposes no workflow_dispatch action.",
+      "The user explicitly forbids substituting a push-trigger proof workflow for workflow_dispatch."
+    ],
+    "forbidden_substitutions_not_used": [
+      "code inspection as executable proof",
+      "branch diff as executable proof",
+      "focused harness as executable proof",
+      "previous runtime hashes as current proof",
+      "push-trigger temporary proof workflow"
+    ]
+  },
+  "frozen_inputs": [],
+  "shadow_off": {
+    "status": "NOT_PROVEN",
+    "updater_exit_status": null,
+    "differentiated_source_fetches": null,
+    "shadow_store_opened": null,
+    "child_snapshots_written": null,
+    "child_observations_written": null,
+    "reason": "actual frozen current production updater/pipeline could not be executed"
+  },
+  "shadow_on": {
+    "status": "NOT_PROVEN",
+    "updater_exit_status": null,
+    "shadow_attempted": null,
+    "per_source_status": null,
+    "snapshots_inserted": null,
+    "observations_inserted": null,
+    "BOUND": null,
+    "AMBIGUOUS": null,
+    "UNBOUND": null,
+    "reason": "actual frozen current production updater/pipeline could not be executed"
+  },
+  "publication_equivalence": {
+    "status": "NOT_PROVEN",
+    "files": [],
+    "authoritative_files_compared": 0,
+    "raw_hash_mismatches": null,
+    "semantic_delta_count": null
+  },
+  "parent_air_equivalence": {
+    "status": "NOT_PROVEN",
+    "off_global_sha256": null,
+    "on_global_sha256": null,
+    "semantic_delta_count": null,
+    "created": null,
+    "deleted": null,
+    "split": null,
+    "merged": null,
+    "start_shift": null,
+    "end_shift": null
+  },
+  "attack_event_equivalence": {
+    "status": "NOT_PROVEN",
+    "off_global_sha256": null,
+    "on_global_sha256": null,
+    "cities_with_denominator_strict_sensitivity_qa_delta": null,
+    "episode_level_delta_count": null
+  },
+  "forced_shadow_failure": {
+    "status": "NOT_PROVEN",
+    "updater_fail_open": "NOT_PROVEN",
+    "publication_semantic_deltas": null,
+    "parent_semantic_deltas": null,
+    "attack_event_semantic_deltas": null
+  },
+  "exact_replay": {
+    "status": "NOT_PROVEN_IN_INTEGRATED_PATH",
+    "prior_focused_harness_reference": {
+      "status": "PASS",
+      "first_run_snapshots": 3,
+      "first_run_observations": 3,
+      "exact_replay_snapshots": 0,
+      "exact_replay_observations": 0
+    }
+  },
+  "tests": {
+    "accepted_differentiated_suite": {
+      "fresh_status": "NOT_RUN",
+      "prior_accepted": "25/25 PASS"
+    },
+    "integration_suite": {
+      "fresh_status": "NOT_RUN",
+      "prior_accepted": "12/12 PASS"
+    },
+    "behavioral_mirror": {
+      "fresh_status": "NOT_RUN",
+      "prior_accepted": "18/18 PASS"
+    }
+  },
+  "production_writes": [],
+  "remaining_open_gates": [
+    "publication OFF/ON equivalence",
+    "parent AIR OFF/ON equivalence",
+    "attack-event OFF/ON equivalence",
+    "real-path forced shadow persistence failure fail-open",
+    "integrated-path exact replay idempotency",
+    "fresh regression suites"
+  ],
+  "verdict": "PRODUCTION SHADOW INTEGRATION PROOF NOT READY"
+}
