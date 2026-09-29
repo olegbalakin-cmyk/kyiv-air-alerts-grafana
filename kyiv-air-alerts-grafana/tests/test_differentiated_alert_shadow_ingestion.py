@@ -19,7 +19,7 @@ class T(unittest.TestCase):
  def test_03_ua_overlap(self):
   r=p.canonicalize_ukrainealarm(UA,observed_at="2026-09-14T17:47:00Z",target_city_key="zaporizhzhia",region_id="147");self.assertEqual({x["level_raw"] for x in r["threat_observations"]},{"Red","Yellow"});self.assertEqual({x["snapshot_key"] for x in r["threat_observations"]},{r["snapshot"]["snapshot_key"]})
  def test_04_aiu_fields(self):
-  r=p.canonicalize_alerts_in_ua(AIU,observed_at="2026-09-16T04:43:10Z",target_city_key="donetsk");x=r["threat_observations"][0];self.assertEqual((r["snapshot"]["source_alert_id"],r["snapshot"]["source_alert_level_raw"],x["cause_raw"],x["source_message_raw"]),("261769","red","unspecified_missiles","Ракетна загроза (червоний рівень)"))
+  r=p.canonicalize_alerts_in_ua(AIU,observed_at="2026-09-16T04:43:10Z",target_city_key="donetsk");x=r["threat_observations"][0];self.assertEqual((r["snapshot"]["source_alert_id"],r["snapshot"]["source_alert_level_raw"],x["cause_raw"],x["source_message_raw"]),(261769,"red","unspecified_missiles","Ракетна загроза (червоний рівень)"))
  def test_05_exact_replay_idempotent(self):
   s=self.store();r=p.bind(p.canonicalize_ukrainealarm(UA,observed_at="2026-09-14T17:47:00Z",target_city_key="x",region_id="147"),[]);self.assertEqual(s.persist(r),{"inserted_snapshots":1,"inserted_observations":2});self.assertEqual(s.persist(r),{"inserted_snapshots":0,"inserted_observations":0})
  def test_06_unchanged_later_poll(self):
