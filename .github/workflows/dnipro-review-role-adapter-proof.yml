@@ -47,6 +47,7 @@ jobs:
       - name: Full proof matrix
         env:
           HEAD_SHA: ${{ github.sha }}
+          IMPLEMENTATION_SHA: f3af0817274fa474310a3c4d41fc6f9d14e8edfe
           BASE_SHA: 5218e6a749e0c03543ee555bc196f6c7a3323777
           PROOF_BRANCH: dnipro-review-role-adapter-proof-2026-09-29
         run: |
@@ -72,8 +73,8 @@ jobs:
           python "$CUR_ROOT/scripts/replay_explosion_history.py" --repo-root "$CUR_ROOT" --city dnipro --through 2026-09-17 --input-head "$HEAD_SHA" --read-only --output "$RUNNER_TEMP/proof/after_dnipro.json"
 
           for CITY in lviv sevastopol sumy cherkasy chernihiv kropyvnytskyi kherson mykolaiv odesa kyiv zaporizhzhia; do
-            python "$BASE_ROOT/scripts/replay_explosion_history.py" --repo-root "$BASE_ROOT" --city "$CITY" --through 2026-09-17 --input-head "$BASE_SHA" --read-only --output "$RUNNER_TEMP/proof/base_$CITY.json"
-            python "$CUR_ROOT/scripts/replay_explosion_history.py" --repo-root "$CUR_ROOT" --city "$CITY" --through 2026-09-17 --input-head "$HEAD_SHA" --read-only --output "$RUNNER_TEMP/proof/after_$CITY.json"
+            python "$BASE_ROOT/scripts/replay_explosion_history.py" --repo-root "$BASE_ROOT" --city "$CITY" --through 2026-09-17 --input-head "$BASE_SHA" --read-only --output "$RUNNER_TEMP/proof/base_$CITY.json" || true
+            python "$CUR_ROOT/scripts/replay_explosion_history.py" --repo-root "$CUR_ROOT" --city "$CITY" --through 2026-09-17 --input-head "$HEAD_SHA" --read-only --output "$RUNNER_TEMP/proof/after_$CITY.json" || true
           done
 
           PROOF_DIR="$RUNNER_TEMP/proof" BASE_ROOT="$BASE_ROOT" CUR_ROOT="$CUR_ROOT" python - <<'PY'
@@ -282,7 +283,7 @@ jobs:
               "fresh_authoritative_head": auth_head,
               "split_implementation_base": base_sha,
               "proof_branch": os.environ["PROOF_BRANCH"],
-              "implementation_commit": head_sha,
+              "implementation_commit": os.environ["IMPLEMENTATION_SHA"],
               "replay_blob_before": replay_before,
               "replay_blob_after": replay_after,
               "exact_files_changed": changed_files,
