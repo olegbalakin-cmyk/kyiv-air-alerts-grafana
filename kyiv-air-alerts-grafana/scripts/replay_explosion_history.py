@@ -1049,6 +1049,189 @@ def historical_review_roles(city: str, row: dict, monitor) -> tuple[dict, str]:
             )
             or direct_event_segment
         )
+    elif city == "dnipro":
+        # Dnipro's frozen corpus retains reviewed role contracts in decision/
+        # basis fields. Translate only those reviewed contracts. Free article
+        # text, city naming, publication metadata, proximity, or generic PVO
+        # wording alone must never create a replay role.
+        review_parts = [
+            str(row.get(key)).strip()
+            for key in BASIS_FIELDS
+            if row.get(key) and str(row.get(key)).strip()
+        ]
+        review_basis = " — ".join(review_parts)
+        review_low = review_basis.casefold()
+        reviewed_strict = bool(
+            str(row.get("decision") or "").strip().casefold() == "strict"
+            or re.search(r"(?:^|[^a-z])strict(?:[^a-z]|$)|strict[_ -]", review_low)
+        )
+        reviewed_sensitivity = bool(
+            "sensitivity" in review_low
+            or str(row.get("decision") or "").strip().casefold()
+            in {"sensitivity", "sensitivity_only", "sensitivity_inferred_same_attack"}
+        )
+        if not (reviewed_strict or reviewed_sensitivity):
+            return {}, evidence
+
+        reviewed_exact_city = bool(
+            re.search(r"\bexact[_ -]?city\b", review_low)
+            or "exact-city" in review_low
+        )
+        reviewed_episode_relation = bool(
+            re.search(
+                r"(?:timed?[_ -]?inside[_ -]?(?:matched[_ -]?)?(?:alert|episode)|"
+                r"exact[_ -]?time[_ -]?inside[_ -]?(?:alert|episode)|"
+                r"event[_ -]?during[_ -]?(?:matched[_ -]?)?alert|"
+                r"explicit[_ -]?(?:ongoing[_ -]?)?alert|"
+                r"explicit[_ -]?during[_ -]?(?:matched[_ -]?)?alert|"
+                r"inside[_ -]?(?:one[_ -]?)?(?:alert|episode)|"
+                r"matched[_ -]?(?:alert|episode)|"
+                r"cross[_ -]?midnight|separate[_ -](?:realert|same[_ -]day|late)[_ -]?episode|"
+                r"timed[_ -]?inside[_ -]?proxy[_ -]?alert|"
+                r"approximate[_ -]?time[_ -]?inside[_ -]?alert|"
+                r"exact[_ -]?city[_ -]?event[_ -]?inside[_ -]?episode|"
+                r"inferred[_ -]?same[_ -]?attack|confirmed[_ -]?same[_ -]?attack|"
+                r"near[_ -]?boundary|event[_ -]?precedes[_ -]?alert)",
+                review_low,
+            )
+        )
+
+        reviewed_air_context = bool(
+            re.search(
+                r"(?:confirmed[_ -]?air[_ -]?war|aerial[_ -]?(?:war|attack|context)|"
+                r"(?:drone|uav|missile|ballistic|rocket|shahed)[_ -]?(?:attack|context|threat)?|"
+                r"\b(?:бпла|безпілот\w*|дрон\w*|ракет\w*|баліст\w*|шахед\w*|ппо)\b)",
+                review_low,
+            )
+        )
+        dnipro_named = re.compile(
+            r"(?<![\w-])(?:dnipro|дніпро|дніпрі|дніпра|дніпром)(?![\w-])",
+            flags=re.IGNORECASE,
+        )
+        english_explosion = re.compile(
+            r"\b(?:explosion(?:s)?|blast(?:s)?|bang(?:s)?)\b",
+            flags=re.IGNORECASE,
+        )
+        english_impact = re.compile(
+            r"\b(?:impact(?:s|ed)?|hit|hits|arrival(?:s)?)\b",
+            flags=re.IGNORECASE,
+        )
+        english_strike = re.compile(
+            r"\b(?:strike|strikes|struck)\b",
+            flags=re.IGNORECASE,
+        )
+        specific_air = re.compile(
+            r"\b(?:бпла|безпілот\w*|дрон\w*|ракет\w*|баліст\w*|шахед\w*|"
+            r"ппо|uav(?:s)?|drone(?:s)?|missile(?:s)?|ballistic|rocket(?:s)?|"
+            r"shahed(?:s)?|air[- ]?defen[cs]e|aerial)\b",
+            flags=re.IGNORECASE,
+        )
+        segments = [
+            " ".join(part.split())
+            for part in re.split(r"(?<=[.!?;])\s+|\n+", evidence)
+            if part and part.strip()
+        ]
+        mentioned_cities = monitor.audited_cities_in_text(evidence)
+        conflicting_named_city = any(
+            named_city != "dnipro" for named_city in mentioned_cities
+        )
+        reviewed_evidence_city = bool(dnipro_named.search(evidence))
+        exact_city = bool(
+            (reviewed_exact_city or reviewed_evidence_city)
+            and not conflicting_named_city
+        )
+
+        def dnipro_reviewed_event_types(segment: str) -> list[str]:
+            event_types = []
+            strict_signal = monitor.strict_attack_event_signal(segment)
+            if strict_signal:
+                for event_type in monitor.attack_event_types(segment):
+                    if (
+                        event_type == "air_defense_action"
+                        and not monitor.air_defense_action_signal(segment)
+                    ):
+                        continue
+                    if event_type not in event_types:
+                        event_types.append(event_type)
+            if english_explosion.search(segment) and "explosion" not in event_types:
+                event_types.append("explosion")
+            if english_impact.search(segment) and "impact" not in event_types:
+                event_types.append("impact")
+            if english_strike.search(segment) and "strike" not in event_types:
+                event_types.append("strike")
+            segment_low = segment.casefold()
+            # A few retained Dnipro reviewed summaries use "було/стало гучно"
+            # as the factual event wording. Accept it only behind an explicit
+            # strict exact-city + air-war + episode-relation review contract.
+            reviewed_loud_fact = bool(
+                reviewed_strict
+                and exact_city
+                and reviewed_episode_relation
+                and (
+                    reviewed_air_context
+                    or specific_air.search(segment)
+                )
+                and re.search(
+                    r"\b(?:було|стало)\s+гучн\w*\b|\bгучн\w*\s+(?:звук\w*|вибух\w*)",
+                    segment_low,
+                )
+            )
+            if reviewed_loud_fact and "explosion" not in event_types:
+                event_types.append("explosion")
+            return event_types
+
+        event_segments = []
+        event_types = []
+        for segment in segments:
+            types = dnipro_reviewed_event_types(segment)
+            if not types:
+                continue
+            event_segments.append(segment)
+            for event_type in types:
+                if event_type not in event_types:
+                    event_types.append(event_type)
+
+        explosion = bool(event_segments)
+        air_context = bool(
+            reviewed_air_context
+            or any(specific_air.search(segment) for segment in segments)
+        )
+        same_attack = bool(
+            exact_city
+            and explosion
+            and air_context
+            and reviewed_episode_relation
+            and not conflicting_named_city
+        )
+
+        roles = {}
+        if exact_city:
+            roles["exact_city_evidence"] = {
+                "present": True,
+                "evidence_text": (review_basis if reviewed_exact_city else evidence)[:1200],
+            }
+        if explosion:
+            roles["explosion_evidence"] = {
+                "present": True,
+                "evidence_text": event_segments[0][:1200],
+                "event_types": event_types,
+            }
+        if air_context:
+            roles["aerial_war_evidence"] = {
+                "present": True,
+                "evidence_text": (review_basis or evidence)[:1200],
+            }
+        if same_attack:
+            roles["same_attack_basis"] = {
+                "present": True,
+                "basis": (
+                    "reviewed_dnipro_sensitivity_same_attack_relation"
+                    if reviewed_sensitivity and not reviewed_strict
+                    else "reviewed_dnipro_exact_city_event_air_context_episode_relation"
+                ),
+                "evidence_text": (review_basis or evidence)[:1200],
+            }
+        return roles, evidence
     elif city in {"chernihiv", "kropyvnytskyi"}:
         # These two frozen corpora retain reviewed role contracts in legacy
         # decision/basis fields.  Translate only those explicit reviewed
@@ -2144,6 +2327,15 @@ def replay_city(repo_root: Path, city: str, through: str, output: Path, input_he
                 "reason_codes": sorted({code for cid in contributor_ids for code in decision_by_candidate.get(cid, {}).get("reason_codes", [])}),
                 "ppo_related": any(ppo_related(text) for text in texts),
             }
+            if city == "dnipro" and cat in {
+                "STRICT_DOWNGRADE",
+                "NEW_AMBIGUOUS",
+                "STRICT_TO_SENSITIVITY",
+                "SENSITIVITY_TO_STRICT",
+                "NEW_STRICT",
+                "NEW_SENSITIVITY",
+            }:
+                row["reconciliation_reason"] = "HISTORICAL_REVIEW_ROLE_RECOVERY"
             reconciliation_events.append(row)
             if row["ppo_related"]:
                 ppo_changes.append(row)

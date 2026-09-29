@@ -1,0 +1,401 @@
+name: Dnipro review-role adapter proof
+
+on:
+  push:
+    branches:
+      - dnipro-review-role-adapter-proof-2026-09-29
+    paths:
+      - "kyiv-air-alerts-grafana/scripts/replay_explosion_history.py"
+      - "kyiv-air-alerts-grafana/tests/test_historical_replay_dnipro_roles.py"
+      - ".github/workflows/dnipro-review-role-adapter-proof.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  proof:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: kyiv-air-alerts-grafana/requirements.txt
+
+      - name: Install dependencies
+        run: |
+          pip install -r kyiv-air-alerts-grafana/requirements.txt
+          pip install pytest
+
+      - name: Focused and inherited replay tests
+        run: |
+          pytest -q kyiv-air-alerts-grafana/tests/test_historical_replay_dnipro_roles.py
+          pytest -q kyiv-air-alerts-grafana/tests/test_historical_replay_dnipro_multi_event_split.py
+          pytest -q kyiv-air-alerts-grafana/tests/test_historical_replay_temporal_binding.py
+          pytest -q kyiv-air-alerts-grafana/tests/test_historical_replay_chernihiv_kropyvnytskyi_roles.py
+
+      - name: Replay and monitor self-tests
+        run: |
+          python kyiv-air-alerts-grafana/scripts/replay_explosion_history.py --self-test
+          python kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py --self-test
+
+      - name: Full proof matrix
+        env:
+          HEAD_SHA: ${{ github.sha }}
+          BASE_SHA: 5218e6a749e0c03543ee555bc196f6c7a3323777
+          PROOF_BRANCH: dnipro-review-role-adapter-proof-2026-09-29
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/proof"
+          git fetch origin multicity-wip-2026-09-16:refs/remotes/origin/multicity-wip-2026-09-16
+          git fetch origin dnipro-106qa-root-cause-inventory-2026-09-29:refs/remotes/origin/dnipro-106qa-root-cause-inventory-2026-09-29
+          git rev-parse origin/multicity-wip-2026-09-16 > "$RUNNER_TEMP/proof/authoritative_head.txt"
+          git show origin/dnipro-106qa-root-cause-inventory-2026-09-29:research/historical_replay_dnipro_106qa_root_cause_inventory_2026-09-29.json > "$RUNNER_TEMP/proof/inventory.json"
+
+          git worktree add --detach "$RUNNER_TEMP/base-checkout" "$BASE_SHA"
+          BASE_ROOT="$RUNNER_TEMP/base-checkout/kyiv-air-alerts-grafana"
+          CUR_ROOT="$GITHUB_WORKSPACE/kyiv-air-alerts-grafana"
+
+          set +e
+          python "$BASE_ROOT/scripts/replay_explosion_history.py" --repo-root "$BASE_ROOT" --through 2026-09-17 --input-head "$BASE_SHA" --read-only --preflight --output "$RUNNER_TEMP/proof/base_preflight.json"
+          echo $? > "$RUNNER_TEMP/proof/base_preflight_rc.txt"
+          python "$CUR_ROOT/scripts/replay_explosion_history.py" --repo-root "$CUR_ROOT" --through 2026-09-17 --input-head "$HEAD_SHA" --read-only --preflight --output "$RUNNER_TEMP/proof/after_preflight.json"
+          echo $? > "$RUNNER_TEMP/proof/after_preflight_rc.txt"
+          set -e
+
+          python "$BASE_ROOT/scripts/replay_explosion_history.py" --repo-root "$BASE_ROOT" --city dnipro --through 2026-09-17 --input-head "$BASE_SHA" --read-only --output "$RUNNER_TEMP/proof/base_dnipro.json"
+          python "$CUR_ROOT/scripts/replay_explosion_history.py" --repo-root "$CUR_ROOT" --city dnipro --through 2026-09-17 --input-head "$HEAD_SHA" --read-only --output "$RUNNER_TEMP/proof/after_dnipro.json"
+
+          for CITY in lviv sevastopol sumy cherkasy chernihiv kropyvnytskyi kherson mykolaiv odesa kyiv zaporizhzhia; do
+            python "$BASE_ROOT/scripts/replay_explosion_history.py" --repo-root "$BASE_ROOT" --city "$CITY" --through 2026-09-17 --input-head "$BASE_SHA" --read-only --output "$RUNNER_TEMP/proof/base_$CITY.json"
+            python "$CUR_ROOT/scripts/replay_explosion_history.py" --repo-root "$CUR_ROOT" --city "$CITY" --through 2026-09-17 --input-head "$HEAD_SHA" --read-only --output "$RUNNER_TEMP/proof/after_$CITY.json"
+          done
+
+          PROOF_DIR="$RUNNER_TEMP/proof" BASE_ROOT="$BASE_ROOT" CUR_ROOT="$CUR_ROOT" python - <<'PY'
+          import importlib.util, json, os, subprocess
+          from pathlib import Path
+
+          proof = Path(os.environ["PROOF_DIR"])
+          base_sha = os.environ["BASE_SHA"]
+          head_sha = os.environ["HEAD_SHA"]
+          base_root = Path(os.environ["BASE_ROOT"])
+          cur_root = Path(os.environ["CUR_ROOT"])
+          inventory = json.loads((proof / "inventory.json").read_text())
+          before = json.loads((proof / "base_dnipro.json").read_text())
+          after = json.loads((proof / "after_dnipro.json").read_text())
+
+          def load_module(path, name):
+              spec = importlib.util.spec_from_file_location(name, path)
+              mod = importlib.util.module_from_spec(spec)
+              assert spec and spec.loader
+              spec.loader.exec_module(mod)
+              return mod
+
+          cur_replay = load_module(cur_root / "scripts" / "replay_explosion_history.py", "cur_replay_proof")
+          base_replay = load_module(base_root / "scripts" / "replay_explosion_history.py", "base_replay_proof")
+          cur_monitor = cur_replay.import_monitor(cur_root)
+          base_monitor = base_replay.import_monitor(base_root)
+
+          expected_ids = set(inventory["reproduction"]["qa_episode_ids"])
+          cluster_by_id = {}
+          for cluster in inventory["root_cause_clusters"]:
+              for eid in cluster["expected_affected_episode_ids"]:
+                  cluster_by_id[eid] = cluster["root_cause"]
+
+          before_changes = {x["episode_id"]: x for x in before.get("changed_episodes") or []}
+          after_changes = {x["episode_id"]: x for x in after.get("changed_episodes") or []}
+          union = set(before_changes) | set(after_changes)
+
+          def replay_status(eid, side, other):
+              if eid in side:
+                  return side[eid]["replayed_status"]
+              if eid in other:
+                  return other[eid]["frozen_old_status"]
+              return None
+
+          actual_delta_ids = {
+              eid for eid in union
+              if replay_status(eid, before_changes, after_changes)
+              != replay_status(eid, after_changes, before_changes)
+          }
+
+          evidence = json.loads((cur_root / "data/explosion_research/dnipro/final_evidence.json").read_text())
+          episodes, _ = cur_replay.load_historical_episodes(cur_root, "dnipro", cur_monitor)
+          episodes = cur_replay.filter_window(episodes, evidence["coverage_start"], "2026-09-17", cur_monitor)
+          retained = {}
+          for bucket in ("strict_events", "sensitivity_only_events", "review_events"):
+              for idx, row in enumerate(evidence.get(bucket) or []):
+                  obs = cur_replay.expand_historical_evidence_observations(
+                      "dnipro", bucket, idx, row, episodes, cur_monitor,
+                      allow_new_temporal_fallback=bucket in {"strict_events", "sensitivity_only_events"},
+                  )
+                  for item in obs:
+                      eid = item["binding"].get("episode_id")
+                      if eid in expected_ids:
+                          roles, _ = cur_replay.historical_review_roles("dnipro", item["row"], cur_monitor)
+                          retained.setdefault(eid, []).append({
+                              "bucket": bucket,
+                              "row_index": idx,
+                              "retained_reviewed_fields": {
+                                  k: row.get(k) for k in cur_replay.BASIS_FIELDS if row.get(k)
+                              },
+                              "restored_roles": {
+                                  k: v for k, v in roles.items() if isinstance(v, dict) and v.get("present")
+                              },
+                          })
+
+          case_audit = []
+          for eid in sorted(expected_ids):
+              b = before_changes.get(eid)
+              a = after_changes.get(eid)
+              frozen = (b or a or {}).get("frozen_old_status")
+              before_status = b["replayed_status"] if b else frozen
+              after_status = a["replayed_status"] if a else frozen
+              case_audit.append({
+                  "episode_id": eid,
+                  "prior_frozen_canonical_bucket": frozen,
+                  "replay_bucket_before_adapter": before_status,
+                  "root_cause_cluster": cluster_by_id[eid],
+                  "retained_reviewed_fields": retained.get(eid, []),
+                  "restored_replay_roles": sorted({
+                      role for item in retained.get(eid, [])
+                      for role in item["restored_roles"]
+                  }),
+                  "replay_bucket_after_adapter": after_status,
+              })
+
+          strict_recovered = sum(
+              1 for x in case_audit
+              if x["replay_bucket_before_adapter"] != "STRICT"
+              and x["replay_bucket_after_adapter"] == "STRICT"
+          )
+          sensitivity_only_recovered = sum(
+              1 for x in case_audit
+              if x["replay_bucket_before_adapter"] == "AMBIGUOUS"
+              and x["replay_bucket_after_adapter"] == "SENSITIVITY"
+          )
+
+          split_events = [
+              x for x in after.get("reconciliation_events") or []
+              if x.get("category") == "LEGACY_MULTI_EVENT_SPLIT"
+          ]
+          split_parents = sorted({x.get("parent_record_id") for x in split_events})
+          split_targets = {
+              x["episode_id"]: x.get("replayed_status") for x in split_events
+              if x.get("episode_id") in {
+                  "00c24c9cccd9e66de7eba62b",
+                  "ed19badd30731bd1aeb7e326",
+              }
+          }
+
+          ppo = inventory["ppo_audit"]
+          ppo_audit = []
+          prelim = set(ppo["preliminary_episode_ids"])
+          actual = set(ppo["actual_confirmed_action_episode_ids"])
+          by_case = {x["episode_id"]: x for x in case_audit}
+          for eid in ppo["episode_ids"]:
+              role_rows = retained.get(eid, [])
+              event_types = sorted({
+                  t
+                  for item in role_rows
+                  for t in ((item["restored_roles"].get("explosion_evidence") or {}).get("event_types") or [])
+              })
+              ppo_audit.append({
+                  "episode_id": eid,
+                  "expected_kind": "preliminary_or_provisional" if eid in prelim else "actual_confirmed_action",
+                  "event_types": event_types,
+                  "after_status": by_case[eid]["replay_bucket_after_adapter"],
+              })
+
+          def counts(payload):
+              return {
+                  "denominator": payload.get("episodes_checked"),
+                  "strict": payload.get("replayed_strict_episodes"),
+                  "sensitivity": payload.get("replayed_sensitivity_episodes"),
+                  "qa": len(payload.get("changed_episodes") or []) + len(payload.get("errors") or []),
+                  "errors": len(payload.get("errors") or []),
+              }
+
+          base_eps, _ = base_replay.load_historical_episodes(base_root, "dnipro", base_monitor)
+          cur_eps, _ = cur_replay.load_historical_episodes(cur_root, "dnipro", cur_monitor)
+          def epmap(rows):
+              return {str(x["episode_id"]): (x.get("alert_start"), x.get("alert_end")) for x in rows}
+          bmap, cmap = epmap(base_eps), epmap(cur_eps)
+          additions = sorted(set(cmap) - set(bmap))
+          deletions = sorted(set(bmap) - set(cmap))
+          boundary = sorted(eid for eid in set(bmap) & set(cmap) if bmap[eid] != cmap[eid])
+
+          regressions = {}
+          regression_cities = [
+              "lviv","sevastopol","sumy","cherkasy","chernihiv","kropyvnytskyi",
+              "kherson","mykolaiv","odesa","kyiv","zaporizhzhia"
+          ]
+          for city in regression_cities:
+              bp = json.loads((proof / f"base_{city}.json").read_text())
+              ap = json.loads((proof / f"after_{city}.json").read_text())
+              bc = {x["episode_id"]: x for x in bp.get("changed_episodes") or []}
+              ac = {x["episode_id"]: x for x in ap.get("changed_episodes") or []}
+              ids = set(bc) | set(ac)
+              deltas = []
+              for eid in sorted(ids):
+                  bs = bc[eid]["replayed_status"] if eid in bc else ac[eid]["frozen_old_status"]
+                  aa = ac[eid]["replayed_status"] if eid in ac else bc[eid]["frozen_old_status"]
+                  if bs != aa:
+                      deltas.append({"episode_id": eid, "before": bs, "after": aa})
+              regressions[city] = {
+                  "before": counts(bp),
+                  "after": counts(ap),
+                  "adapter_induced_episode_deltas": deltas,
+              }
+
+          def dnipro_preflight(path):
+              p=json.loads(Path(path).read_text())
+              d=next(x for x in p["cities"] if x["city_key"]=="dnipro")
+              return {
+                  "source_status": d.get("source_status"),
+                  "unbound_counted_evidence": d.get("unbound_counted_evidence"),
+                  "denominator": d.get("denominator"),
+              }
+
+          changed_files = subprocess.check_output(
+              ["git","diff","--name-only",f"{base_sha}..{head_sha}"], text=True
+          ).splitlines()
+          replay_before = subprocess.check_output(
+              ["git","rev-parse",f"{base_sha}:kyiv-air-alerts-grafana/scripts/replay_explosion_history.py"], text=True
+          ).strip()
+          replay_after = subprocess.check_output(
+              ["git","rev-parse",f"{head_sha}:kyiv-air-alerts-grafana/scripts/replay_explosion_history.py"], text=True
+          ).strip()
+          auth_head=(proof/"authoritative_head.txt").read_text().strip()
+
+          cluster_counts = {}
+          for x in case_audit:
+              key=x["root_cause_cluster"]
+              cluster_counts[key]=cluster_counts.get(key,0)+1
+
+          summary = {
+              "fresh_authoritative_head": auth_head,
+              "split_implementation_base": base_sha,
+              "proof_branch": os.environ["PROOF_BRANCH"],
+              "implementation_commit": head_sha,
+              "replay_blob_before": replay_before,
+              "replay_blob_after": replay_after,
+              "exact_files_changed": changed_files,
+              "dnipro_retained_role_contract": {
+                  "fact": "explicit reviewed factual event wording, gated by retained strict/sensitivity review contract",
+                  "exact_city": "retained exact_city role or reviewed exact Dnipro-city factual summary; city naming alone is insufficient",
+                  "attack_context": "explicit retained aerial/UAV/missile/ballistic/PPO context; generic alert wording alone is insufficient",
+                  "same_attack": "explicit retained inside/during/matched-alert or inferred_same_attack relation; proximity alone is insufficient",
+                  "sensitivity": "retained sensitivity/inferred_same_attack creates sensitivity_binding without synthesized exact event minute",
+                  "ppo": "air_defense_action only when current monitor confirms actual action; preliminary/provisional PVO is not promoted",
+              },
+              "cluster_resolved_counts": cluster_counts,
+              "focused_tests": "passed earlier workflow step",
+              "split_helper_regression": {
+                  "split_parent_ids": split_parents,
+                  "split_targets": split_targets,
+                  "split_count": len(after.get("legacy_multi_event_splits") or []),
+              },
+              "ppo_audit": ppo_audit,
+              "sensitivity_only_cases": [
+                  by_case["48fe2f8bc45c99e2ae636bc5b"],
+                  by_case["e6ed42d5b9e48e9f2019cb5b"],
+              ],
+              "dnipro_preflight_before": dnipro_preflight(proof/"base_preflight.json"),
+              "dnipro_preflight_after": dnipro_preflight(proof/"after_preflight.json"),
+              "dnipro_replay_before": counts(before),
+              "dnipro_replay_after": counts(after),
+              "exact_106_case_resolution_count": sum(
+                  1 for x in case_audit
+                  if x["replay_bucket_before_adapter"] != x["replay_bucket_after_adapter"]
+              ),
+              "strict_recovered": strict_recovered,
+              "sensitivity_only_recovered": sensitivity_only_recovered,
+              "unresolved_qa_ids": sorted(after_changes),
+              "unexpected_episode_deltas": sorted(actual_delta_ids - expected_ids),
+              "actual_episode_deltas": sorted(actual_delta_ids),
+              "denominator_corpus_invariance": {
+                  "denominator_before": before.get("episodes_checked"),
+                  "denominator_after": after.get("episodes_checked"),
+                  "canonical_episode_additions": len(additions),
+                  "canonical_episode_deletions": len(deletions),
+                  "canonical_episode_boundary_changes": len(boundary),
+                  "canonical_episode_id_changes": len(additions)+len(deletions),
+              },
+              "regression_cities": regressions,
+              "case_audit": case_audit,
+              "protected_state": {
+                  "allowed_changed_files_only": set(changed_files) <= {
+                      "kyiv-air-alerts-grafana/scripts/replay_explosion_history.py",
+                      "kyiv-air-alerts-grafana/tests/test_historical_replay_dnipro_roles.py",
+                      ".github/workflows/dnipro-review-role-adapter-proof.yml",
+                  },
+                  "authoritative_branch_modified": False,
+                  "evidence_or_corpus_or_classifier_or_monitor_modified": not any(
+                      p.startswith("kyiv-air-alerts-grafana/data/")
+                      or p.endswith("monitor_explosion_candidates.py")
+                      for p in changed_files
+                  ),
+              },
+          }
+
+          expected_cluster_counts = {
+              "MISSING_CITY_REVIEW_ROLE_ADAPTER":59,
+              "MISSING_REVIEWED_FACT_ROLE":17,
+              "MISSING_REVIEWED_SAME_ATTACK_LINKAGE":23,
+              "MISSING_REVIEWED_EXACT_CITY_AND_FACT_ROLES":3,
+              "MISSING_REVIEWED_ATTACK_CONTEXT_ROLE":4,
+          }
+          assert auth_head == "93a7e702657a272b9bc3ffba6a5b843e75b66383"
+          assert summary["dnipro_preflight_before"]["source_status"] == "READY"
+          assert summary["dnipro_preflight_after"]["source_status"] == "READY"
+          assert summary["dnipro_preflight_after"]["unbound_counted_evidence"] == 0
+          assert summary["dnipro_replay_before"] == {"denominator":2259,"strict":77,"sensitivity":82,"qa":106,"errors":0}
+          assert summary["dnipro_replay_after"] == {"denominator":2259,"strict":181,"sensitivity":188,"qa":0,"errors":0}
+          assert cluster_counts == expected_cluster_counts
+          assert strict_recovered == 104
+          assert sensitivity_only_recovered == 2
+          assert set(actual_delta_ids) == expected_ids
+          assert summary["unexpected_episode_deltas"] == []
+          assert summary["unresolved_qa_ids"] == []
+          assert split_parents == ["2793d79590a849624744439a"]
+          assert split_targets == {
+              "00c24c9cccd9e66de7eba62b":"STRICT",
+              "ed19badd30731bd1aeb7e326":"STRICT",
+          }
+          assert summary["denominator_corpus_invariance"] == {
+              "denominator_before":2259,
+              "denominator_after":2259,
+              "canonical_episode_additions":0,
+              "canonical_episode_deletions":0,
+              "canonical_episode_boundary_changes":0,
+              "canonical_episode_id_changes":0,
+          }
+          for item in ppo_audit:
+              if item["expected_kind"] == "preliminary_or_provisional":
+                  assert "air_defense_action" not in item["event_types"]
+              assert item["after_status"] == "STRICT"
+          assert by_case["48fe2f8bc45c99e2ae636bc5b"]["replay_bucket_after_adapter"] == "SENSITIVITY"
+          assert by_case["e6ed42d5b9e48e9f2019cb5b"]["replay_bucket_after_adapter"] == "SENSITIVITY"
+          assert all(not v["adapter_induced_episode_deltas"] for v in regressions.values())
+          assert summary["protected_state"]["allowed_changed_files_only"]
+          assert summary["protected_state"]["evidence_or_corpus_or_classifier_or_monitor_modified"]
+
+          summary["verdict"] = "DNIPRO REVIEW-ROLE ADAPTER PROVEN — 106/106 STRUCTURAL QA CASES RESOLVED — SPLIT-AWARE REPLAY CLEAN — READY FOR COMBINED GUARDED APPLY"
+          (proof/"proof_summary.json").write_text(json.dumps(summary,ensure_ascii=False,indent=2,sort_keys=True)+"\n")
+          print("PROOF_SUMMARY="+json.dumps({k:v for k,v in summary.items() if k!="case_audit"},ensure_ascii=False,sort_keys=True))
+          print("CASE_AUDIT_COUNT="+str(len(case_audit)))
+          PY
+
+      - name: Upload proof outputs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: dnipro-review-role-adapter-proof
+          path: ${{ runner.temp }}/proof
+          if-no-files-found: warn
