@@ -982,22 +982,34 @@
     }
   ],
   "recommended_first_proof_scope": {
-    "name": "KHerson + Odesa LEGACY REGIONAL/DISTRICT ALERT SCOPE RETIREMENT PROOF",
+    "name": "DNIPRO ONE-LEGACY-ROW -> TWO-CANONICAL-EPISODES SPLIT PROOF",
     "implementation_applied": false,
-    "target_records": 10,
+    "target_records": 1,
     "target_cities": [
-      "kherson",
-      "odesa"
+      "dnipro"
     ],
-    "rationale": "Highest leverage deterministic evidence-side repair: ten remaining blockers across two cities are already source-sufficient and share one semantic defect. The proof should show they were historically counted using oblast/raion alert scope and therefore must be retired from city-episode positives without changing classifier/replay semantics.",
-    "proof_requirements": [
-      "No change to canonical alert corpus or episode IDs.",
-      "No weakening of city-alert temporal gate.",
-      "Reconcile frozen positive counts to the recoverable city-episode IDs: Kherson 9 -> 2 strict/sensitivity; Odesa 155 -> 152 strict and 161 -> 158 sensitivity.",
-      "Zero effect on Lviv, Sevastopol, Sumy, Cherkasy, Chernihiv or Kropyvnytskyi semantics.",
-      "No changes to replay/classifier code, live monitor, DB/Neon, production UX/site-prod or 6863 campaign branch."
+    "rationale": "This is the only remaining deterministic structural replay/evidence-model gap after the accepted temporal adapter. The retained row contains two independently timed, exact-city qualifying events, each uniquely inside a different existing canonical episode. No methodology weakening, canonical-corpus edit, or source recovery is required.",
+    "proposed_behavior": [
+      "Represent the single retained historical row as two episode-specific historical observations only for replay reconciliation/proof.",
+      "Bind the 14:45 local event to episode 00c24c9cccd9e66de7eba62b.",
+      "Bind the 15:39 local event to episode ed19badd30731bd1aeb7e326.",
+      "Do not force-select one episode and do not duplicate rows without explicit per-event timing.",
+      "Do not change classifier semantics, canonical episode construction, or general one-row binding behavior outside a narrowly proven historical split adapter."
     ],
-    "why_not_a_broader_replay_adapter": "No shared adapter pattern remains across 3+ blocked cities. The accepted temporal adapter already cleared Chernihiv and Kropyvnytskyi; broadening replay now would risk force-binding evidence that is semantically outside the city-alert contract."
+    "expected_impact": {
+      "current_frozen_strict_count": 180,
+      "current_recoverable_strict_ids": 179,
+      "supported_canonical_strict_ids_after_split": 181,
+      "note": "The split exposes that one frozen counted row actually supports two distinct canonical-positive episodes, so canonical positive episode count would be +1 relative to the legacy aggregate count."
+    },
+    "proof_guards": [
+      "No unexpected episode-level deltas outside the two identified Dnipro episodes.",
+      "No change to Lviv, Sevastopol, Sumy, Cherkasy, Chernihiv or Kropyvnytskyi semantics.",
+      "No canonical alert corpus or episode-ID changes.",
+      "No historical evidence mutation in proof-only stage.",
+      "No DB/Neon, production UX/site-prod, live monitor, audited baseline, review queue, dashboard-data, or campaign-branch mutation."
+    ],
+    "why_this_is_first": "The larger Kherson/Odesa cluster is evidence-side retirement, not a replay structural repair. Mykolaiv requires evidence provenance repair/source recovery, and Kharkiv requires canonical-corpus proof."
   },
   "source_and_blob_fingerprints": {
     "replay_script": "99b13318a3bd53013a798bd4c66c87c4aed6f45b",
