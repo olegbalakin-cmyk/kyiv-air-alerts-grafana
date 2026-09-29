@@ -1,0 +1,747 @@
+{
+  "schema_version": 1,
+  "kind": "historical_replay_dnipro_106qa_root_cause_inventory",
+  "date": "2026-09-29",
+  "metric": "% alert episodes with >=1 confirmed attack event",
+  "unit": "alert episode",
+  "scope": {
+    "city": "dnipro",
+    "read_only_root_cause_inventory": true,
+    "authoritative_branch": "multicity-wip-2026-09-16",
+    "split_proof_branch": "dnipro-one-row-two-episodes-proof-2026-09-29",
+    "research_branch": "dnipro-106qa-root-cause-inventory-2026-09-29",
+    "dnipro_split_apply_allowed": false,
+    "adapter_implementation_allowed": false,
+    "evidence_repair_allowed": false
+  },
+  "authoritative": {
+    "fresh_head": "93a7e702657a272b9bc3ffba6a5b843e75b66383",
+    "accepted_head": "93a7e702657a272b9bc3ffba6a5b843e75b66383",
+    "fresh_compare": "identical",
+    "relevant_drift": false
+  },
+  "proof_input": {
+    "implementation_commit": "5218e6a749e0c03543ee555bc196f6c7a3323777",
+    "replay_blob": "b8b321aaa9dcb84987867c58fd50e5868f0ca3b3",
+    "accepted_final_proof_head": "bdd7d23bd0c9fc2382ea233be893c9b8cce2c043",
+    "fresh_proof_branch_head": "bdd7d23bd0c9fc2382ea233be893c9b8cce2c043",
+    "accepted_runtime_input_head": "d787b0cf674700485e184cd6e38d8827c172032e",
+    "runtime_input_delta_from_implementation": [
+      ".github/workflows/dnipro-multi-event-split-proof.yml only"
+    ],
+    "workflow_run": 36562025669,
+    "workflow_artifact_id": 11029713417,
+    "workflow_artifact_sha256": "0c18d2ace608e50a080fd6fd71b261d5dd53aa4ee2e67885dc05e2a3b4f65cbb",
+    "note": "The runtime-input commit added only the proof workflow; replay, classifier, Dnipro evidence, source slices, baseline and episode semantics were identical to implementation commit."
+  },
+  "compatibility_guard": {
+    "result": "PASS",
+    "authoritative_unchanged_since_accepted_split_proof": true,
+    "proof_branch_unchanged_since_accepted_split_proof": true,
+    "checked_accepted_blobs": {
+      "classifier": "b55fe2ed082958917c74f95bca2fd6bc137bcaae",
+      "dnipro_final_evidence": "99758ae2a7d888593ffd863cc53cd9f48bf34f5a",
+      "audited_baseline": "81ecc48ed64b7e78449df903afb082e9f92531e5",
+      "dnipro_historical_recovery_slice": "1395c92aa5c8d5200d8413dffea02aaedc1b5444"
+    }
+  },
+  "reproduction": {
+    "source_status": "READY",
+    "denominator": 2259,
+    "strict": 77,
+    "sensitivity": 82,
+    "qa": 106,
+    "reconciliation_counts": {
+      "STRICT_DOWNGRADE": 104,
+      "NEW_AMBIGUOUS": 2
+    },
+    "canonicalized_legacy_inventory": {
+      "strict": 181,
+      "sensitivity": 188
+    },
+    "errors": 0,
+    "qa_episode_ids": [
+      "021a3a12da6032b095595682",
+      "034e4b84e9ffbbfc4bbad88f",
+      "0957567ff75e7302abac8757",
+      "0afa5343c468ddeda46d02bb",
+      "0e2808c6e454a76564ac9adf",
+      "10d45067a1767ecc4aa634db",
+      "117c53de080c6098e3d4bb15",
+      "151fed611bccfb758ed69945",
+      "17d4acd08d7e46b407e66bf9",
+      "1984b4983d1d4efa4593d785",
+      "1f2e11eeb6d2e6183e28d7bf",
+      "1f2e7a8f9aa6c909542c976b",
+      "1f5f1fcc0ee6c24fcf78b152",
+      "1fa5231579a4e79c91e8631a",
+      "1fa8414cbb701c1a39e208db",
+      "20a440c8260957862878f6da",
+      "21a1c9bf5ca205e9e9ad3278",
+      "24902f11d179e1c282254413",
+      "25f0ec186bf0db4a6c763707",
+      "26cb3cb4f51b72f74dea16ba",
+      "27c2b83213516798c8226a46",
+      "28bb86034a1c303a90f073aa",
+      "2d761cd17134fdf7cd9b903e",
+      "2dc696a94dc1aaf30c353e0d",
+      "2f91cdc91a5c9a3891e50007",
+      "2fa18ab70c01bc02a0dfc4bd",
+      "3091feae7bb63499d138b4cf",
+      "358eb658aa0ecc3465cec7a5",
+      "373760f59b74f6931afe4a44",
+      "38546d49cf7b7887e54beeee",
+      "3a9ac95a5564589f3dc5ac93",
+      "3b328cb211e696fc9f816ab6",
+      "3e3872dd8688f65669f5569b",
+      "3fa67b2d14f2eab5ce6cf177",
+      "42ee5754df49e847a7717828",
+      "463b44177afa6fe9839f549d",
+      "48458cb7abb88217d661a203",
+      "48fe2f8bc45c99e2ae636bc5",
+      "49155faadb5dc4ecc7942358",
+      "498232499b528ac9e47c8b4a",
+      "4aecd7d4c1acf01318ebe441",
+      "4b09d8cbcab71945ba46643f",
+      "4d9f1ec9db0b5ca5c6185a95",
+      "5551973d13df319ba5df0c9e",
+      "5b5536bbc9dea5befbf0dda6",
+      "6c4b6c42c8c497b4f54e616e",
+      "6e9c0db71c36e2a88f14236e",
+      "74a6d25c6bcc18f43d315442",
+      "7cd3363c27d2c687e8985be6",
+      "7d2ad8232514df29bf652fe2",
+      "7d86efa8fc85c5c39c2c601d",
+      "7eda7ce0d52dfef7cc3482df",
+      "814a790471818a16c9bacac9",
+      "8639a8bb1a8bb1ec0466c525",
+      "8d88ff0b6c18d66b6bb89356",
+      "8d9f5068fa71ce7203871579",
+      "8f9da4619ef6e79fa19131ff",
+      "9074b40a73dbc652bd716a0a",
+      "93891b413449b13017281b70",
+      "9396debce2c88abc195f18ed",
+      "93b874699be78ba8c0ca84ec",
+      "94171ca97ca83cda1bbb2038",
+      "955a7f04f2d6adae2ba28be1",
+      "96df14ce1dadf6f9a9091c4a",
+      "9a56c2377caf6f5574450d5d",
+      "9b5ba5c60c072f7b9208b599",
+      "9ce1ac41e66c7a24899d84a1",
+      "9e7a13eb10997f92a095bce7",
+      "a25ce40cae20a753bbc1d10e",
+      "a284f22a705290b3cd922b90",
+      "a2ad152c99a4efc45ad864aa",
+      "a4429e7d11dec33a974c0266",
+      "a4d26c170fa1fd1653d39a9f",
+      "ad7fef0c92256ea85dbb57ee",
+      "adfb4c9484e2ff42d5f7fc3f",
+      "aed037d903accd7f3e9516ad",
+      "b198c8fde416014556d4eaeb",
+      "b3cbda1114434668aaa80d67",
+      "b629003242cd146ed4dd2037",
+      "b98de27e03ea3210d20bb860",
+      "bbe140eaab2100148b380edc",
+      "c5cc9716dde7a4551850eed2",
+      "c8de5218704dede545e74f5f",
+      "ca3d3f9f337706aa9b1d3739",
+      "d3581798abfcb0261732109a",
+      "d66f32bb387fdd51ae90a75a",
+      "df2c8b4b1a9b19fca1884f2d",
+      "e059c073a9140b8cc891e1d5",
+      "e176bf355fdf74af2ef6e315",
+      "e4e1e424889a6daab344a48c",
+      "e4f40c94eb6e28bb4d4534a8",
+      "e5ea1989eb9e0f7555d0840c",
+      "e6ed42d5b9e48e9f2019cb5b",
+      "e7889c98345f79888576fe8a",
+      "e7f7b1e81890a65d0202b5bc",
+      "e806052bb2e1e283ebddcb2a",
+      "e876473dce917f2600709964",
+      "eac2c9d8c464e8e98f9091db",
+      "eb52847770a21287b94ca80b",
+      "ecac5d0391fc51a190a1f389",
+      "ed64cbb147e73ccc4627b6a9",
+      "f260de4d44f7f5e785cfc8da",
+      "f2bc86810b7a108359d8f976",
+      "fa70c66b92f344e89c20187a",
+      "fbf77ae49d3d28ec8c03bef5",
+      "fcf0d2e8712908e31befb7ea"
+    ]
+  },
+  "causality": {
+    "latent_qa_count": 106,
+    "direct_split_induced_regression_count": 0,
+    "evidence_rows_modified_by_split_count": 0,
+    "qa_children_of_target_parent_count": 0,
+    "qa_bindings_changed_by_split_count": 0,
+    "qa_binding_method_counts": {
+      "alert_start_within_90s": 106
+    },
+    "qa_observations_are_unsplit_parent_rows": 106,
+    "visibility_cause": "The split removed the sole UNBOUND_COUNTED_EVIDENCE blocker, changing Dnipro source_status BLOCKED→READY and exposing previously latent current-v2 reconciliation deltas.",
+    "target_parent": "2793d79590a849624744439a",
+    "target_episodes": [
+      {
+        "episode_id": "00c24c9cccd9e66de7eba62b",
+        "replayed_status": "STRICT",
+        "in_106_qa": false
+      },
+      {
+        "episode_id": "ed19badd30731bd1aeb7e326",
+        "replayed_status": "STRICT",
+        "in_106_qa": false
+      }
+    ]
+  },
+  "retained_evidence_audit": {
+    "source_file": "kyiv-air-alerts-grafana/data/explosion_research/dnipro/final_evidence.json",
+    "source_blob": "99758ae2a7d888593ffd863cc53cd9f48bf34f5a",
+    "bucket_counts": {
+      "strict_events": 180,
+      "sensitivity_only_events": 7,
+      "review_events": 7
+    },
+    "strict_key_patterns": {
+      "alert_episode_start|basis|decision|event_time|evidence|source_url": 56,
+      "alert_start|alert_start_date|decision_basis|event_time|evidence|source_url": 25,
+      "alert_start_kyiv|decision_basis|event_time_kyiv|evidence|source_url": 42,
+      "decision_basis|event_time|evidence|matched_alert_episode_start|source_url": 18,
+      "decision|event_time|evidence|matched_alert_start|source_url": 15,
+      "basis|event_time|evidence|matched_episode_start|source_url": 24
+    },
+    "qa_semantics_classes": {
+      "A_EXPLICIT_REVIEWED_SEMANTICS": 106,
+      "B_LEGACY_INFERRED_NOT_RETAINED": 0,
+      "C_INSUFFICIENT_RETAINED_EVIDENCE": 0,
+      "D_VALID_CURRENT_V2_DISAGREEMENT": 0
+    },
+    "finding": "All 106 QA rows retain a reviewed factual summary and/or decision/basis contract sufficient to identify the missing current-v2 role translation; no external research is required for this inventory."
+  },
+  "historical_review_role_comparison": {
+    "existing_explicit_city_handlers": {
+      "sevastopol": "reviewed English factual summaries",
+      "cherkasy": "reviewed basis contracts plus explicit same-attack relation",
+      "sumy": "reviewed Ukrainian factual summaries and direct v2 event roles",
+      "chernihiv": "legacy reviewed basis/decision role-contract adapter",
+      "kropyvnytskyi": "basis=exact_city_during_alert reviewed-role adapter"
+    },
+    "already_classified_parallel_patterns": {
+      "artifact": "research/historical_replay_kherson_mykolaiv_odesa_69qa_root_cause_inventory_2026-09-29.json",
+      "shared_labels": [
+        "MISSING_CITY_REVIEW_ROLE_ADAPTER",
+        "MISSING_REVIEWED_EXACT_CITY_AND_FACT_ROLES",
+        "MISSING_REVIEWED_FACT_ROLE",
+        "MISSING_REVIEWED_ATTACK_CONTEXT_ROLE",
+        "MISSING_REVIEWED_SAME_ATTACK_LINKAGE"
+      ]
+    },
+    "dnipro_handler_present": false,
+    "finding": "Dnipro uses equivalent explicit reviewed-role/basis representations, but historical_review_roles() falls through to no Dnipro translation."
+  },
+  "root_cause_clusters": [
+    {
+      "root_cause": "MISSING_CITY_REVIEW_ROLE_ADAPTER",
+      "retained_field_pattern": "Reviewed Dnipro evidence plus decision/basis explicitly encodes exact-city event, aerial-war context, and episode relation, but replay has no Dnipro branch in historical_review_roles(). Two rows are explicit sensitivity/inferred_same_attack contracts.",
+      "missing_replay_role": [
+        "exact_city_evidence",
+        "explosion_evidence/event_fact",
+        "aerial_war_evidence",
+        "same_attack_basis"
+      ],
+      "proposed_narrow_adapter_behavior": "Translate only explicit reviewed Dnipro role contracts. For sensitivity rows preserve sensitivity_binding and never synthesize an exact event time or promote to STRICT.",
+      "negative_controls": [
+        "historical strict bucket alone is insufficient",
+        "no publication-time inference",
+        "no exact-city inheritance from another named city",
+        "no threat/readiness/generic-PPO promotion",
+        "sensitivity inferred_same_attack stays sensitivity without strict temporal fact"
+      ],
+      "count": 59,
+      "structural_fix_possible": true,
+      "evidence_repair_needed": false,
+      "external_research_needed": false,
+      "reconciliation_types": {
+        "STRICT_DOWNGRADE": 57,
+        "NEW_AMBIGUOUS": 2
+      },
+      "expected_affected_episode_ids": [
+        "0957567ff75e7302abac8757",
+        "117c53de080c6098e3d4bb15",
+        "151fed611bccfb758ed69945",
+        "17d4acd08d7e46b407e66bf9",
+        "1984b4983d1d4efa4593d785",
+        "1f2e11eeb6d2e6183e28d7bf",
+        "1f5f1fcc0ee6c24fcf78b152",
+        "1fa5231579a4e79c91e8631a",
+        "1fa8414cbb701c1a39e208db",
+        "21a1c9bf5ca205e9e9ad3278",
+        "26cb3cb4f51b72f74dea16ba",
+        "27c2b83213516798c8226a46",
+        "28bb86034a1c303a90f073aa",
+        "2d761cd17134fdf7cd9b903e",
+        "2dc696a94dc1aaf30c353e0d",
+        "2f91cdc91a5c9a3891e50007",
+        "2fa18ab70c01bc02a0dfc4bd",
+        "373760f59b74f6931afe4a44",
+        "3e3872dd8688f65669f5569b",
+        "3fa67b2d14f2eab5ce6cf177",
+        "463b44177afa6fe9839f549d",
+        "48fe2f8bc45c99e2ae636bc5",
+        "498232499b528ac9e47c8b4a",
+        "4aecd7d4c1acf01318ebe441",
+        "4d9f1ec9db0b5ca5c6185a95",
+        "6c4b6c42c8c497b4f54e616e",
+        "74a6d25c6bcc18f43d315442",
+        "7d2ad8232514df29bf652fe2",
+        "7d86efa8fc85c5c39c2c601d",
+        "814a790471818a16c9bacac9",
+        "8639a8bb1a8bb1ec0466c525",
+        "8d88ff0b6c18d66b6bb89356",
+        "8f9da4619ef6e79fa19131ff",
+        "9074b40a73dbc652bd716a0a",
+        "93b874699be78ba8c0ca84ec",
+        "955a7f04f2d6adae2ba28be1",
+        "9a56c2377caf6f5574450d5d",
+        "9b5ba5c60c072f7b9208b599",
+        "9e7a13eb10997f92a095bce7",
+        "a25ce40cae20a753bbc1d10e",
+        "a284f22a705290b3cd922b90",
+        "a2ad152c99a4efc45ad864aa",
+        "aed037d903accd7f3e9516ad",
+        "b198c8fde416014556d4eaeb",
+        "b3cbda1114434668aaa80d67",
+        "b629003242cd146ed4dd2037",
+        "c5cc9716dde7a4551850eed2",
+        "c8de5218704dede545e74f5f",
+        "ca3d3f9f337706aa9b1d3739",
+        "d3581798abfcb0261732109a",
+        "df2c8b4b1a9b19fca1884f2d",
+        "e4f40c94eb6e28bb4d4534a8",
+        "e6ed42d5b9e48e9f2019cb5b",
+        "e7f7b1e81890a65d0202b5bc",
+        "e876473dce917f2600709964",
+        "eb52847770a21287b94ca80b",
+        "f260de4d44f7f5e785cfc8da",
+        "f2bc86810b7a108359d8f976",
+        "fa70c66b92f344e89c20187a"
+      ]
+    },
+    {
+      "root_cause": "MISSING_REVIEWED_FACT_ROLE",
+      "retained_field_pattern": "Current raw parser sees exact city and aerial context, while factual reviewed forms such as 'було гучно', 'пролунали вибухи', or reviewed interval wording are not translated into event-fact provenance.",
+      "missing_replay_role": [
+        "explosion_evidence/event_fact",
+        "same_attack_basis (consequential)"
+      ],
+      "proposed_narrow_adapter_behavior": "Preserve an event fact/type only where the retained Dnipro reviewed summary/basis explicitly marks a strict exact-city aerial-war event inside the frozen episode.",
+      "negative_controls": [
+        "no event fact from threat-only wording",
+        "no fire/damage fact without explicit attack causality",
+        "no same-attack from article co-occurrence alone"
+      ],
+      "count": 17,
+      "structural_fix_possible": true,
+      "evidence_repair_needed": false,
+      "external_research_needed": false,
+      "reconciliation_types": {
+        "STRICT_DOWNGRADE": 17
+      },
+      "expected_affected_episode_ids": [
+        "021a3a12da6032b095595682",
+        "0e2808c6e454a76564ac9adf",
+        "10d45067a1767ecc4aa634db",
+        "1f2e7a8f9aa6c909542c976b",
+        "38546d49cf7b7887e54beeee",
+        "6e9c0db71c36e2a88f14236e",
+        "9396debce2c88abc195f18ed",
+        "94171ca97ca83cda1bbb2038",
+        "a4d26c170fa1fd1653d39a9f",
+        "b98de27e03ea3210d20bb860",
+        "bbe140eaab2100148b380edc",
+        "d66f32bb387fdd51ae90a75a",
+        "e176bf355fdf74af2ef6e315",
+        "e5ea1989eb9e0f7555d0840c",
+        "e7889c98345f79888576fe8a",
+        "ecac5d0391fc51a190a1f389",
+        "fcf0d2e8712908e31befb7ea"
+      ]
+    },
+    {
+      "root_cause": "MISSING_REVIEWED_SAME_ATTACK_LINKAGE",
+      "retained_field_pattern": "Event fact, exact city and aerial context are recognized, but cross-clause/cross-segment linkage is lost even though retained reviewed basis says confirmed_air_war plus timed_inside_alert/exact-city episode relation.",
+      "missing_replay_role": [
+        "same_attack_basis"
+      ],
+      "proposed_narrow_adapter_behavior": "Emit same_attack_basis only from an explicit retained reviewed contract linking exact-city event, aerial-war context and the frozen episode.",
+      "negative_controls": [
+        "no linkage from same article alone",
+        "no linkage across another audited city",
+        "generic alert presence alone is insufficient"
+      ],
+      "count": 23,
+      "structural_fix_possible": true,
+      "evidence_repair_needed": false,
+      "external_research_needed": false,
+      "reconciliation_types": {
+        "STRICT_DOWNGRADE": 23
+      },
+      "expected_affected_episode_ids": [
+        "034e4b84e9ffbbfc4bbad88f",
+        "0afa5343c468ddeda46d02bb",
+        "20a440c8260957862878f6da",
+        "24902f11d179e1c282254413",
+        "25f0ec186bf0db4a6c763707",
+        "3091feae7bb63499d138b4cf",
+        "3a9ac95a5564589f3dc5ac93",
+        "3b328cb211e696fc9f816ab6",
+        "49155faadb5dc4ecc7942358",
+        "4b09d8cbcab71945ba46643f",
+        "5551973d13df319ba5df0c9e",
+        "5b5536bbc9dea5befbf0dda6",
+        "7cd3363c27d2c687e8985be6",
+        "7eda7ce0d52dfef7cc3482df",
+        "8d9f5068fa71ce7203871579",
+        "93891b413449b13017281b70",
+        "96df14ce1dadf6f9a9091c4a",
+        "9ce1ac41e66c7a24899d84a1",
+        "ad7fef0c92256ea85dbb57ee",
+        "e059c073a9140b8cc891e1d5",
+        "e4e1e424889a6daab344a48c",
+        "ed64cbb147e73ccc4627b6a9",
+        "fbf77ae49d3d28ec8c03bef5"
+      ]
+    },
+    {
+      "root_cause": "MISSING_REVIEWED_EXACT_CITY_AND_FACT_ROLES",
+      "retained_field_pattern": "Air context is recognized, while exact-city/event roles are lost from reviewed English factual summaries; retained basis explicitly states exact city and timed strict event.",
+      "missing_replay_role": [
+        "exact_city_evidence",
+        "explosion_evidence/event_fact",
+        "same_attack_basis (consequential)"
+      ],
+      "proposed_narrow_adapter_behavior": "Translate explicit reviewed Dnipro exact-city and factual-event roles, then link to air context only where the reviewed episode relation is explicit.",
+      "negative_controls": [
+        "no exact-city inheritance from publisher/article section",
+        "generic loud/noise wording without reviewed factual contract is insufficient"
+      ],
+      "count": 3,
+      "structural_fix_possible": true,
+      "evidence_repair_needed": false,
+      "external_research_needed": false,
+      "reconciliation_types": {
+        "STRICT_DOWNGRADE": 3
+      },
+      "expected_affected_episode_ids": [
+        "358eb658aa0ecc3465cec7a5",
+        "42ee5754df49e847a7717828",
+        "a4429e7d11dec33a974c0266"
+      ]
+    },
+    {
+      "root_cause": "MISSING_REVIEWED_ATTACK_CONTEXT_ROLE",
+      "retained_field_pattern": "Exact-city event fact is recognized, but reviewed aerial-war/attack-context role is lost; retained basis explicitly says aerial-war, missile-attack or matched attack context.",
+      "missing_replay_role": [
+        "aerial_war_evidence",
+        "same_attack_basis (consequential)"
+      ],
+      "proposed_narrow_adapter_behavior": "Translate only explicit reviewed aerial-war/missile/UAV context and use it for same-attack linkage only with explicit reviewed episode relation.",
+      "negative_controls": [
+        "generic non-military 'attack' is insufficient",
+        "no non-air military promotion",
+        "do not broaden PPO semantics"
+      ],
+      "count": 4,
+      "structural_fix_possible": true,
+      "evidence_repair_needed": false,
+      "external_research_needed": false,
+      "reconciliation_types": {
+        "STRICT_DOWNGRADE": 4
+      },
+      "expected_affected_episode_ids": [
+        "48458cb7abb88217d661a203",
+        "adfb4c9484e2ff42d5f7fc3f",
+        "e806052bb2e1e283ebddcb2a",
+        "eac2c9d8c464e8e98f9091db"
+      ]
+    }
+  ],
+  "strict_downgrade_audit": {
+    "total": 104,
+    "structural_replay_representation_gap": {
+      "count": 104,
+      "episode_ids": [
+        "021a3a12da6032b095595682",
+        "034e4b84e9ffbbfc4bbad88f",
+        "0957567ff75e7302abac8757",
+        "0afa5343c468ddeda46d02bb",
+        "0e2808c6e454a76564ac9adf",
+        "10d45067a1767ecc4aa634db",
+        "117c53de080c6098e3d4bb15",
+        "151fed611bccfb758ed69945",
+        "17d4acd08d7e46b407e66bf9",
+        "1984b4983d1d4efa4593d785",
+        "1f2e11eeb6d2e6183e28d7bf",
+        "1f2e7a8f9aa6c909542c976b",
+        "1f5f1fcc0ee6c24fcf78b152",
+        "1fa5231579a4e79c91e8631a",
+        "1fa8414cbb701c1a39e208db",
+        "20a440c8260957862878f6da",
+        "21a1c9bf5ca205e9e9ad3278",
+        "24902f11d179e1c282254413",
+        "25f0ec186bf0db4a6c763707",
+        "26cb3cb4f51b72f74dea16ba",
+        "27c2b83213516798c8226a46",
+        "28bb86034a1c303a90f073aa",
+        "2d761cd17134fdf7cd9b903e",
+        "2dc696a94dc1aaf30c353e0d",
+        "2f91cdc91a5c9a3891e50007",
+        "2fa18ab70c01bc02a0dfc4bd",
+        "3091feae7bb63499d138b4cf",
+        "358eb658aa0ecc3465cec7a5",
+        "373760f59b74f6931afe4a44",
+        "38546d49cf7b7887e54beeee",
+        "3a9ac95a5564589f3dc5ac93",
+        "3b328cb211e696fc9f816ab6",
+        "3e3872dd8688f65669f5569b",
+        "3fa67b2d14f2eab5ce6cf177",
+        "42ee5754df49e847a7717828",
+        "463b44177afa6fe9839f549d",
+        "48458cb7abb88217d661a203",
+        "49155faadb5dc4ecc7942358",
+        "498232499b528ac9e47c8b4a",
+        "4aecd7d4c1acf01318ebe441",
+        "4b09d8cbcab71945ba46643f",
+        "4d9f1ec9db0b5ca5c6185a95",
+        "5551973d13df319ba5df0c9e",
+        "5b5536bbc9dea5befbf0dda6",
+        "6c4b6c42c8c497b4f54e616e",
+        "6e9c0db71c36e2a88f14236e",
+        "74a6d25c6bcc18f43d315442",
+        "7cd3363c27d2c687e8985be6",
+        "7d2ad8232514df29bf652fe2",
+        "7d86efa8fc85c5c39c2c601d",
+        "7eda7ce0d52dfef7cc3482df",
+        "814a790471818a16c9bacac9",
+        "8639a8bb1a8bb1ec0466c525",
+        "8d88ff0b6c18d66b6bb89356",
+        "8d9f5068fa71ce7203871579",
+        "8f9da4619ef6e79fa19131ff",
+        "9074b40a73dbc652bd716a0a",
+        "93891b413449b13017281b70",
+        "9396debce2c88abc195f18ed",
+        "93b874699be78ba8c0ca84ec",
+        "94171ca97ca83cda1bbb2038",
+        "955a7f04f2d6adae2ba28be1",
+        "96df14ce1dadf6f9a9091c4a",
+        "9a56c2377caf6f5574450d5d",
+        "9b5ba5c60c072f7b9208b599",
+        "9ce1ac41e66c7a24899d84a1",
+        "9e7a13eb10997f92a095bce7",
+        "a25ce40cae20a753bbc1d10e",
+        "a284f22a705290b3cd922b90",
+        "a2ad152c99a4efc45ad864aa",
+        "a4429e7d11dec33a974c0266",
+        "a4d26c170fa1fd1653d39a9f",
+        "ad7fef0c92256ea85dbb57ee",
+        "adfb4c9484e2ff42d5f7fc3f",
+        "aed037d903accd7f3e9516ad",
+        "b198c8fde416014556d4eaeb",
+        "b3cbda1114434668aaa80d67",
+        "b629003242cd146ed4dd2037",
+        "b98de27e03ea3210d20bb860",
+        "bbe140eaab2100148b380edc",
+        "c5cc9716dde7a4551850eed2",
+        "c8de5218704dede545e74f5f",
+        "ca3d3f9f337706aa9b1d3739",
+        "d3581798abfcb0261732109a",
+        "d66f32bb387fdd51ae90a75a",
+        "df2c8b4b1a9b19fca1884f2d",
+        "e059c073a9140b8cc891e1d5",
+        "e176bf355fdf74af2ef6e315",
+        "e4e1e424889a6daab344a48c",
+        "e4f40c94eb6e28bb4d4534a8",
+        "e5ea1989eb9e0f7555d0840c",
+        "e7889c98345f79888576fe8a",
+        "e7f7b1e81890a65d0202b5bc",
+        "e806052bb2e1e283ebddcb2a",
+        "e876473dce917f2600709964",
+        "eac2c9d8c464e8e98f9091db",
+        "eb52847770a21287b94ca80b",
+        "ecac5d0391fc51a190a1f389",
+        "ed64cbb147e73ccc4627b6a9",
+        "f260de4d44f7f5e785cfc8da",
+        "f2bc86810b7a108359d8f976",
+        "fa70c66b92f344e89c20187a",
+        "fbf77ae49d3d28ec8c03bef5",
+        "fcf0d2e8712908e31befb7ea"
+      ]
+    },
+    "retained_evidence_repair_or_research_required": {
+      "count": 0,
+      "episode_ids": []
+    },
+    "valid_current_v2_downgrade": {
+      "count": 0,
+      "episode_ids": []
+    },
+    "irreducible_ambiguity": {
+      "count": 0,
+      "episode_ids": []
+    }
+  },
+  "new_ambiguous_audit": {
+    "total": 2,
+    "episode_ids": [
+      "48fe2f8bc45c99e2ae636bc5",
+      "e6ed42d5b9e48e9f2019cb5b"
+    ],
+    "classification": "missing reviewed-role translation on retained sensitivity/inferred_same_attack rows",
+    "genuine_source_ambiguity_count": 0,
+    "expected_post_adapter_status": "SENSITIVITY for both; do not promote to STRICT because exact event minute is explicitly absent."
+  },
+  "ppo_audit": {
+    "ppo_related_qa_count": 9,
+    "episode_ids": [
+      "151fed611bccfb758ed69945",
+      "1f5f1fcc0ee6c24fcf78b152",
+      "1fa5231579a4e79c91e8631a",
+      "2fa18ab70c01bc02a0dfc4bd",
+      "42ee5754df49e847a7717828",
+      "49155faadb5dc4ecc7942358",
+      "a2ad152c99a4efc45ad864aa",
+      "bbe140eaab2100148b380edc",
+      "eb52847770a21287b94ca80b"
+    ],
+    "structural_adapter_candidate_count": 9,
+    "evidence_repair_count": 0,
+    "valid_downgrade_count": 0,
+    "actual_confirmed_action_explicit_count": 6,
+    "actual_confirmed_action_episode_ids": [
+      "151fed611bccfb758ed69945",
+      "1f5f1fcc0ee6c24fcf78b152",
+      "1fa5231579a4e79c91e8631a",
+      "2fa18ab70c01bc02a0dfc4bd",
+      "49155faadb5dc4ecc7942358",
+      "bbe140eaab2100148b380edc"
+    ],
+    "preliminary_or_provisional_air_defense_attribution_count": 3,
+    "preliminary_episode_ids": [
+      "42ee5754df49e847a7717828",
+      "a2ad152c99a4efc45ad864aa",
+      "eb52847770a21287b94ca80b"
+    ],
+    "rule_preserved": "air_defense_action counts only actual confirmed action. Preliminary/generic PVO wording is not promoted; those three recover, if at all, from explicit explosion/attack-context roles."
+  },
+  "multi_event_interaction_audit": {
+    "retained_counted_rows_with_multi_clock_like_event_time_fields": 20,
+    "row_indices_zero_based": [
+      6,
+      12,
+      27,
+      28,
+      30,
+      41,
+      66,
+      69,
+      74,
+      89,
+      111,
+      115,
+      118,
+      139,
+      157,
+      162,
+      167,
+      168,
+      175,
+      179
+    ],
+    "split_helper_activated_rows": 1,
+    "split_helper_parent_ids": [
+      "2793d79590a849624744439a"
+    ],
+    "qa_cases_from_unintended_child_expansion": 0,
+    "other_legitimate_one_row_to_multi_episode_cases_found": 0,
+    "finding": "Nineteen other multi-clock-like rows are retained as same-episode/matched-alert bursts or an interval by reviewed basis; executable replay produced no additional legacy_multi_event_splits. The target parent is the sole cross-episode split."
+  },
+  "disposition_counts": {
+    "structural_adapter_candidates": 106,
+    "evidence_repair_required": 0,
+    "valid_v2_downgrades": 0,
+    "irreducible_ambiguity": 0
+  },
+  "evidence_repair_candidates": [],
+  "valid_v2_downgrade_candidates": [],
+  "expected_count_implication": {
+    "split_aware_candidate_inventory": {
+      "strict": 181,
+      "sensitivity": 188
+    },
+    "current_replay": {
+      "strict": 77,
+      "sensitivity": 82,
+      "qa": 106
+    },
+    "after_narrow_dnipro_review_role_adapter_proof_if_all_classified_patterns_recover_as_expected": {
+      "strict": 181,
+      "sensitivity": 188,
+      "qa": 0
+    },
+    "arithmetic": {
+      "strict_gain": 104,
+      "sensitivity_gain_from_strict_recovery": 104,
+      "sensitivity_only_recovery": 2
+    },
+    "remaining_difference_from_split_aware_inventory": {
+      "strict": 0,
+      "sensitivity": 0
+    },
+    "caveat": "This is a proof target implied by the classified retained semantics, not an implemented or executed adapter result."
+  },
+  "recommended_next_proof_scope": {
+    "task": "proof-only Dnipro historical review-role adapter; do not touch evidence or canonical alerts",
+    "expected_affected_qa_set": 106,
+    "minimum_regression_cities": [
+      "lviv",
+      "sevastopol",
+      "sumy",
+      "cherkasy",
+      "chernihiv",
+      "kropyvnytskyi",
+      "kherson",
+      "mykolaiv",
+      "odesa",
+      "kyiv",
+      "zaporizhzhia"
+    ],
+    "generic_multi_event_split_helper_independent_regression_required": true,
+    "generic_multi_event_split_negative_controls": [
+      "same-episode multi-clock rows",
+      "duplicate timestamps",
+      "vague intervals",
+      "publication-time second clock",
+      "one qualifying + one nonqualifying child",
+      "one bound + one ambiguous child"
+    ],
+    "do_not_implement_in_this_inventory": true
+  },
+  "protected_state_audit": {
+    "authoritative_branch_modified": false,
+    "dnipro_evidence_modified": false,
+    "dnipro_split_implementation_modified": false,
+    "canonical_alert_corpus_modified": false,
+    "audited_baseline_modified": false,
+    "replay_classifier_code_modified": false,
+    "source_slices_modified": false,
+    "live_v2_monitor_modified": false,
+    "kharkiv_touched": false,
+    "kherson_mykolaiv_odesa_work_touched": false,
+    "db_neon_touched": false,
+    "site_prod_touched": false,
+    "main_touched": false,
+    "campaign_6863_touched": false,
+    "research_branch_only_allowed_change": "research/historical_replay_dnipro_106qa_root_cause_inventory_2026-09-29.json"
+  },
+  "verdict": "DNIPRO 106-QA ROOT-CAUSE INVENTORY COMPLETE — 106/106 CLASSIFIED"
+}
