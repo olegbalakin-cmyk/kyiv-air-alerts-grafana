@@ -1127,7 +1127,7 @@ def historical_review_roles(city: str, row: dict, monitor) -> tuple[dict, str]:
             r"ппо|uav(?:s)?|drone(?:s)?|missile(?:s)?|ballistic|rocket(?:s)?|"
             r"shahed(?:s)?|air[- ]?defen[cs]e|aerial|air force|"
             r"high[- ]?speed target|fast[- ]?target|повітрян\w*\s+сил\w*|"
-            r"швидкісн\w*\s+ціл\w*)\b",
+            r"повітрян\w*\s+атак\w*|швидкісн\w*\s+ціл\w*)\b",
             flags=re.IGNORECASE,
         )
         segments = [
@@ -1220,7 +1220,6 @@ def historical_review_roles(city: str, row: dict, monitor) -> tuple[dict, str]:
         air_context = bool(
             reviewed_air_context
             or any(specific_air.search(segment) for segment in segments)
-            or any(monitor.air_military_context(segment) for segment in segments)
         )
         same_attack = bool(
             exact_city
