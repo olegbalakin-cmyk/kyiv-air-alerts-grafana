@@ -1203,9 +1203,8 @@ def historical_review_roles(city: str, row: dict, monitor) -> tuple[dict, str]:
                     or specific_air.search(evidence)
                 )
                 and re.search(
-                    r"\b(?:було|стало)\s+гучн\w*\b|"
-                    r"\bгучн\w*\s+(?:було|стало|звук\w*|вибух\w*)|"
-                    r"\bгупал\w*\b|\b(?:was|were)\s+(?:very\s+)?loud\b",
+                    r"\bгучн\w*\b|\bгупал\w*\b|"
+                    r"\b(?:was|were)\s+(?:very\s+)?loud\b",
                     segment_low,
                 )
             )
