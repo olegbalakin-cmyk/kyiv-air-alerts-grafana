@@ -1,0 +1,371 @@
+{
+  "schema_version": "1.0",
+  "task": "Kherson / Mykolaiv / Odesa retained-review-role adapter proof",
+  "date": "2026-09-29",
+  "scope": "proof-only; no authoritative apply",
+  "authoritative": {
+    "branch": "multicity-wip-2026-09-16",
+    "fresh_head": "8342a11f70351aa03a3555b7dcb91a0a98932483",
+    "starting_replay_blob": "816e2a13f66bb453fc4bd765318d15443121325e",
+    "replay_semantic_drift": false
+  },
+  "proof_branch": "kherson-mykolaiv-odesa-review-role-adapter-proof-2026-09-29",
+  "normalized_input": {
+    "commit": "1f6a0a70b7e675249bb10bfc22aef755f7a08b8c",
+    "blobs": {
+      "kyiv-air-alerts-grafana/data/explosion_audited_baseline.json": "d97f02849f089eb89757a3a255d4890dc10f403e",
+      "kyiv-air-alerts-grafana/data/explosion_research/kherson/final_evidence.json": "ae816bbc412fbe62f086adb4cefb2a5af65b2a07",
+      "kyiv-air-alerts-grafana/data/explosion_research/mykolaiv/final_evidence.json": "76e71e87abe702b8d5fd4126596265dfd362fa38",
+      "kyiv-air-alerts-grafana/data/explosion_research/odesa/final_evidence.json": "018052e3384b608b3bd7739fc828842d3565d490"
+    },
+    "data_changes_after_fixture": 0
+  },
+  "baseline_reproduction": {
+    "workflow_run": 36589664677,
+    "replay_self_test": "PASS",
+    "cities": {
+      "kherson": {
+        "denominator": 1412,
+        "strict": 1,
+        "sensitivity": 1,
+        "qa": 1
+      },
+      "mykolaiv": {
+        "denominator": 1648,
+        "strict": 83,
+        "sensitivity": 88,
+        "qa": 47
+      },
+      "odesa": {
+        "denominator": 1465,
+        "strict": 134,
+        "sensitivity": 137,
+        "qa": 21
+      }
+    },
+    "combined_qa": 69,
+    "reconciliation": {
+      "STRICT_DOWNGRADE": 58,
+      "NEW_AMBIGUOUS": 11
+    },
+    "verdict": "PASS"
+  },
+  "implementation": {
+    "commit": "21af22684cf71f3c66283fe337fbc061332e1356",
+    "replay_blob": "e1a6c793d680196724fbf70f09ed09a821912aca",
+    "focused_test_blob": "4c0b942e625896408a5a1ff69b2333b28f14cf2f",
+    "semantic_files": [
+      "kyiv-air-alerts-grafana/scripts/replay_explosion_history.py",
+      "kyiv-air-alerts-grafana/tests/test_historical_replay_kherson_mykolaiv_odesa_roles.py"
+    ]
+  },
+  "executable_proof": {
+    "workflow_run": 36591881733,
+    "result": "PASS",
+    "replay_self_test": "PASS",
+    "replay_focused_tests": {
+      "result": "PASS",
+      "passed": 102
+    },
+    "monitor_self_test": {
+      "result": "FAIL_KNOWN_UNRELATED",
+      "return_code": 1,
+      "case": "kyiv / e97e6e816f96832d02c8b2cd",
+      "reason": "known mutable Kyiv composition case; explicitly non-gating for this proof task"
+    }
+  },
+  "exact_changed_set": {
+    "expected": 68,
+    "actual": 68,
+    "missing": [],
+    "unexpected": [],
+    "episode_ids": [
+      "00b08f2b9580ef6eea60ef1a",
+      "02a2751504bfacb2ec6503ce",
+      "02e4db8d49b7601b3d7446fe",
+      "055313ee3ae19a1e0a3a47bb",
+      "09b8c6b9747f3a9f62ad4cc6",
+      "0fcbdf95a182db70e0463914",
+      "1719304ee93c7567e2f78407",
+      "1b48fcf7b905f19a33294cbb",
+      "217e4f5e945780bcdc5ed158",
+      "26a8e79e3fce387cd21dee54",
+      "479d062b48b26a4d89c98e6a",
+      "47b047538abd7a0fa92eac76",
+      "47c5b66fbbbb3a35bbfbf1a4",
+      "4aba2f1f8095069a74d38b78",
+      "4c6c66dc157f7fb99a4b8cce",
+      "4e84a56f5a27f6c8976ca197",
+      "4faf16fc3cb636a43bfe011b",
+      "5123edf8a281bf672b5e601f",
+      "53889f5fdca2c808a6d4fa2a",
+      "565e7af23c90a03a04bec72a",
+      "567fc59635cc6173c023937c",
+      "56d809afedd3fae42a78cf4b",
+      "593b3a3909c5b7a07e6b3571",
+      "5f793a176e54ee6af2e5695c",
+      "61dda124aa63938ea7ac1d90",
+      "6f3e8ef0789627e2d7b555aa",
+      "7036da7f8b8183f9ea62b540",
+      "71df20a26cfb2260dac1a65e",
+      "7a07b4145b3140aa322b2446",
+      "7af72163cab2a48cc315ad9c",
+      "7d6f19327fb6eb790149d6f5",
+      "80e0d77b588516b4dfaf57b0",
+      "83879bfd0ac94619d920df80",
+      "8634a4a6cf61b69ec4313972",
+      "8beeb878e475190e98997b8b",
+      "8d56e633bd6cbbe8b865c179",
+      "93028eac26413807e219be4b",
+      "97fac44b44c22af780bcc773",
+      "9d9dc7e6636d7088f86199d0",
+      "9f561fb7e3c914e1b7ac71e3",
+      "a3d9611213183868e09fc546",
+      "a40ccbce70e2aa30d9b98c35",
+      "a74cf5b1db2c5d972ad24495",
+      "a8ceb8b6e9d30459fa4c400a",
+      "b5f1a6b1abacb88c8eaaf613",
+      "b76ab528d797940a81987018",
+      "ba0855c1eb420fc0d12a0b20",
+      "bcd6d4b2fa478cf5608a8cbe",
+      "bd14868d1cad31872ff094de",
+      "bd2bb1fb6709a75c1bd2f90f",
+      "bd38b10fe4e7ce97147aed2a",
+      "bd6e217eb4a148aca0f3cd59",
+      "c23f4b00eec092645298a2fe",
+      "c3a153cd8171dca10e70386d",
+      "cf62df16190b3323633cf02a",
+      "deef615e8fee7a43d88370c1",
+      "df1453129301172f6aeefd82",
+      "e3bffd636330f074902370a8",
+      "e4c81463f4691679b016f248",
+      "e9b36b24ed82fe6dd27dd2ea",
+      "eabfa286027cde12f4c190fd",
+      "eef616f9c8e99c0006d5582d",
+      "f17920e3bec3828dbf033a73",
+      "f253c6e1323f00f8b9248279",
+      "f530b07f40de07076a4d4970",
+      "f72bc5d0ee3abb49319dda1d",
+      "fcb05d25da2ccbdee2caed26",
+      "fdf8f3e2aaaeaf4610e359fd"
+    ]
+  },
+  "clusters": {
+    "MISSING_REVIEWED_SAME_ATTACK_LINKAGE": {
+      "expected": 23,
+      "resolved": 23,
+      "episode_ids": [
+        "055313ee3ae19a1e0a3a47bb",
+        "1719304ee93c7567e2f78407",
+        "26a8e79e3fce387cd21dee54",
+        "47b047538abd7a0fa92eac76",
+        "47c5b66fbbbb3a35bbfbf1a4",
+        "4e84a56f5a27f6c8976ca197",
+        "5123edf8a281bf672b5e601f",
+        "565e7af23c90a03a04bec72a",
+        "7036da7f8b8183f9ea62b540",
+        "7af72163cab2a48cc315ad9c",
+        "80e0d77b588516b4dfaf57b0",
+        "8d56e633bd6cbbe8b865c179",
+        "93028eac26413807e219be4b",
+        "a3d9611213183868e09fc546",
+        "a74cf5b1db2c5d972ad24495",
+        "a8ceb8b6e9d30459fa4c400a",
+        "c23f4b00eec092645298a2fe",
+        "cf62df16190b3323633cf02a",
+        "df1453129301172f6aeefd82",
+        "eef616f9c8e99c0006d5582d",
+        "f17920e3bec3828dbf033a73",
+        "f530b07f40de07076a4d4970",
+        "fcb05d25da2ccbdee2caed26"
+      ]
+    },
+    "MISSING_CITY_REVIEW_ROLE_ADAPTER": {
+      "expected": 21,
+      "resolved": 21,
+      "episode_ids": [
+        "00b08f2b9580ef6eea60ef1a",
+        "02a2751504bfacb2ec6503ce",
+        "1b48fcf7b905f19a33294cbb",
+        "217e4f5e945780bcdc5ed158",
+        "593b3a3909c5b7a07e6b3571",
+        "5f793a176e54ee6af2e5695c",
+        "61dda124aa63938ea7ac1d90",
+        "6f3e8ef0789627e2d7b555aa",
+        "71df20a26cfb2260dac1a65e",
+        "7a07b4145b3140aa322b2446",
+        "7d6f19327fb6eb790149d6f5",
+        "8beeb878e475190e98997b8b",
+        "97fac44b44c22af780bcc773",
+        "9d9dc7e6636d7088f86199d0",
+        "9f561fb7e3c914e1b7ac71e3",
+        "bd14868d1cad31872ff094de",
+        "bd2bb1fb6709a75c1bd2f90f",
+        "e4c81463f4691679b016f248",
+        "eabfa286027cde12f4c190fd",
+        "f253c6e1323f00f8b9248279",
+        "f72bc5d0ee3abb49319dda1d"
+      ]
+    },
+    "MISSING_REVIEWED_FACT_ROLE": {
+      "expected": 15,
+      "resolved": 15,
+      "episode_ids": [
+        "02e4db8d49b7601b3d7446fe",
+        "0fcbdf95a182db70e0463914",
+        "479d062b48b26a4d89c98e6a",
+        "4c6c66dc157f7fb99a4b8cce",
+        "4faf16fc3cb636a43bfe011b",
+        "567fc59635cc6173c023937c",
+        "83879bfd0ac94619d920df80",
+        "b5f1a6b1abacb88c8eaaf613",
+        "b76ab528d797940a81987018",
+        "bcd6d4b2fa478cf5608a8cbe",
+        "bd38b10fe4e7ce97147aed2a",
+        "bd6e217eb4a148aca0f3cd59",
+        "e3bffd636330f074902370a8",
+        "e9b36b24ed82fe6dd27dd2ea",
+        "fdf8f3e2aaaeaf4610e359fd"
+      ]
+    },
+    "MISSING_REVIEWED_EXACT_CITY_AND_FACT_ROLES": {
+      "expected": 7,
+      "resolved": 7,
+      "episode_ids": [
+        "09b8c6b9747f3a9f62ad4cc6",
+        "56d809afedd3fae42a78cf4b",
+        "8634a4a6cf61b69ec4313972",
+        "a40ccbce70e2aa30d9b98c35",
+        "ba0855c1eb420fc0d12a0b20",
+        "c3a153cd8171dca10e70386d",
+        "deef615e8fee7a43d88370c1"
+      ]
+    },
+    "MISSING_REVIEWED_ATTACK_CONTEXT_ROLE": {
+      "expected": 2,
+      "resolved": 2,
+      "episode_ids": [
+        "4aba2f1f8095069a74d38b78",
+        "53889f5fdca2c808a6d4fa2a"
+      ]
+    }
+  },
+  "strict_sensitivity_arithmetic": {
+    "structural_to_strict": 58,
+    "structural_to_sensitivity": 10,
+    "evidence_repair_case_remaining_qa": 1
+  },
+  "final_replay": {
+    "kherson": {
+      "denominator": 1412,
+      "strict": 2,
+      "sensitivity": 2,
+      "qa": 0
+    },
+    "mykolaiv": {
+      "denominator": 1648,
+      "strict": 122,
+      "sensitivity": 134,
+      "qa": 1
+    },
+    "odesa": {
+      "denominator": 1465,
+      "strict": 152,
+      "sensitivity": 158,
+      "qa": 0
+    },
+    "combined_qa": 1,
+    "remaining_qa_ids": [
+      "05992c5cdaa538ec9552236b"
+    ]
+  },
+  "sole_unresolved_case": {
+    "city": "mykolaiv",
+    "episode_id": "05992c5cdaa538ec9552236b",
+    "root_cause": "RETAINED_EVIDENCE_INSUFFICIENT_EXACT_CITY_ROLE",
+    "final_bucket": "QA",
+    "changed_by_adapter": false
+  },
+  "ppo_audit": {
+    "593b3a3909c5b7a07e6b3571": "STRICT",
+    "9f561fb7e3c914e1b7ac71e3": "SENSITIVITY",
+    "f530b07f40de07076a4d4970": "STRICT",
+    "83879bfd0ac94619d920df80": "STRICT",
+    "fdf8f3e2aaaeaf4610e359fd": "STRICT",
+    "negative_controls": "PASS: possible/expected/warning/readiness PVO do not become air_defense_action"
+  },
+  "retired_row_audit": {
+    "kherson": {
+      "retired_record_ids": [
+        "8237340ab735032f39db197c",
+        "aea1ffbdace229409cec0c16",
+        "e7b33cc9d7a37efc3ad2a51c",
+        "283fdd8775dd3f46a54c2e2c",
+        "8e7ef06ae0a9fa2e019fb17d",
+        "8aa162150ee5a23c622c8532",
+        "79fa40f617d42897a5dbba14"
+      ],
+      "positive_bucket_regain": 0
+    },
+    "odesa": {
+      "retired_record_ids": [
+        "c9170f2906d0e18731a81fa2",
+        "503a0c99d1b5f9fe9c447c0e",
+        "0c2c1c3a0cbbbea7b7d2ccde"
+      ],
+      "positive_bucket_regain": 0
+    },
+    "result": "PASS"
+  },
+  "repaired_mykolaiv_target_audit": {
+    "63ec7dd62617f94945546a5b": "UNCHANGED_STRICT",
+    "7e7ada38d112e78babb90844": "UNCHANGED_STRICT",
+    "90e3489c770ee84f88d5c4cf": "UNCHANGED_STRICT",
+    "result": "PASS"
+  },
+  "denominator_corpus_invariance": {
+    "kherson": 1412,
+    "mykolaiv": 1648,
+    "odesa": 1465,
+    "canonical_additions": 0,
+    "canonical_deletions": 0,
+    "boundary_changes": 0,
+    "episode_id_changes": 0,
+    "basis": "no data/source-slice changes after normalized proof fixture plus identical before/after denominators"
+  },
+  "target_unexpected_delta_audit": {
+    "unexpected_target_city_episode_deltas": 0,
+    "note": "all target deltas equal exact structural 68-set; 05992 remains unchanged QA"
+  },
+  "non_target_regression_audit": {
+    "dnipro": 0,
+    "lviv": 0,
+    "sevastopol": 0,
+    "sumy": 0,
+    "cherkasy": 0,
+    "chernihiv": 0,
+    "kropyvnytskyi": 0,
+    "kyiv": 0,
+    "zaporizhzhia": 0,
+    "unit": "episode-level deltas",
+    "result": "PASS"
+  },
+  "protected_state_audit": {
+    "classifier_changed": false,
+    "monitor_code_changed": false,
+    "monitor_data_changed": false,
+    "canonical_corpus_changed": false,
+    "db_neon_touched": false,
+    "main_touched": false,
+    "site_prod_touched": false,
+    "campaign_6863_touched": false,
+    "authoritative_branch_touched": false,
+    "result": "PASS"
+  },
+  "inventory_source": {
+    "commit": "d36fd1bc5aee3c53c47bcfdbf00fdaba718e8587",
+    "artifact": "research/historical_replay_kherson_mykolaiv_odesa_69qa_root_cause_inventory_2026-09-29.json",
+    "blob": "13d6dc03e4141b14ed3af27b5e573bf888ff6abc"
+  },
+  "final_verdict": "KHERSON / MYKOLAIV / ODESA REVIEW-ROLE ADAPTER PROVEN — 68/68 STRUCTURAL QA CASES RESOLVED — KHerson QA0 / MYKOLAIV QA1 / ODESA QA0 — READY FOR ONE-RECORD MYKOLAIV EVIDENCE-REPAIR PROOF"
+}
