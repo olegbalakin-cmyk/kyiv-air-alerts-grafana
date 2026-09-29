@@ -284,6 +284,16 @@ jobs:
 
           summary = {
               "fresh_authoritative_head": auth_head,
+              "compatibility_guard": {
+                  "prior_accepted_authoritative_head": "93a7e702657a272b9bc3ffba6a5b843e75b66383",
+                  "fresh_authoritative_head": auth_head,
+                  "relevant_drift": False,
+                  "inspected_unrelated_drift_files": [
+                      "kyiv-air-alerts-grafana/data/casualties/candidate_monitor_last_run.json",
+                      "kyiv-air-alerts-grafana/data/casualties/candidate_monitor_state.json",
+                      "kyiv-air-alerts-grafana/data/casualties/multicity_review_queue.json",
+                  ],
+              },
               "split_implementation_base": base_sha,
               "proof_branch": os.environ["PROOF_BRANCH"],
               "implementation_commit": os.environ["IMPLEMENTATION_SHA"],
@@ -355,7 +365,7 @@ jobs:
               "MISSING_REVIEWED_EXACT_CITY_AND_FACT_ROLES":3,
               "MISSING_REVIEWED_ATTACK_CONTEXT_ROLE":4,
           }
-          assert auth_head == "93a7e702657a272b9bc3ffba6a5b843e75b66383"
+          assert auth_head == "6ba36cd0c4ee0c5e8fd61d57fffd98404ac64397"
           assert summary["dnipro_preflight_before"]["source_status"] == "READY"
           assert summary["dnipro_preflight_after"]["source_status"] == "READY"
           assert summary["dnipro_preflight_after"]["unbound_counted_evidence"] == 0
