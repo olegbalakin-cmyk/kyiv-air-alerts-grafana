@@ -282,12 +282,18 @@ def run_live_gate(repo_root: Path, parent_before: dict, workspace: Path, raw_out
     }
 
 
-def run_focused_tests(repo_root: Path):
-    proc = subprocess.run([sys.executable, "-m", "unittest", "tests/test_differentiated_alert_shadow_ingestion.py", "-v"], cwd=str(repo_root), text=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+def _unittest_run(repo_root: Path, command: list[str]):
+    proc = subprocess.run(command, cwd=str(repo_root), text=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     m = re.search(r"Ran\s+(\d+)\s+tests?", proc.stdout)
     ran = int(m.group(1)) if m else None
     ok = proc.returncode == 0 and "OK" in proc.stdout
-    return {"command": "python -m unittest tests/test_differentiated_alert_shadow_ingestion.py -v", "tests_run": ran, "passed": ran if ok else None, "failed": 0 if ok else None, "result": "PASS" if ok else "FAIL", "output_tail": proc.stdout[-4000:]}
+    return {"command": " ".join(command), "tests_run": ran, "passed": ran if ok else None, "failed": 0 if ok else None, "result": "PASS" if ok else "FAIL", "output_tail": proc.stdout[-4000:]}
+
+
+def run_focused_tests(repo_root: Path):
+    repository_suite = _unittest_run(repo_root, [sys.executable, "-m", "unittest", "tests/test_differentiated_alert_shadow_ingestion.py", "-v"])
+    local_suite = _unittest_run(repo_root, [sys.executable, "-m", "unittest", "discover", "-s", "tests", "-p", "test_differentiated_alert_shadow_*.py", "-v"])
+    return {"repository_suite": repository_suite, "local_executable_suite": local_suite}
 
 
 def main():
@@ -321,7 +327,7 @@ def main():
         if prod_changed:
             raise RuntimeError(f"unexpected non-proof diff before runtime: {prod_changed}")
 
-        result["focused_tests"]["repository_suite"] = run_focused_tests(repo_root)
+        result["focused_tests"] = run_focused_tests(repo_root)
 
         parent_before = build_parent(repo_root)
         result["parent_runtime_regression"]["before"] = {k: v for k, v in parent_before.items() if k != "corpus"}
