@@ -1,0 +1,145 @@
+{
+  "date": "2026-09-29",
+  "purpose": "final strict runtime gate for 23-city casualty production promotion; continuation only",
+  "final_guard": {
+    "site_prod_head": "a06b82197c737e4311af3cb160ca662f9eff1e8f",
+    "main_head": "5195fd449cddc9c16508065434aa4aaecc2bdf5f",
+    "proof_head_before_artifact": "2e4c061fa9fc184e68feda5ef76b570711ed90f0",
+    "site_prod_drift_from_previous_guard": {
+      "previous_head": "c21857e1c928876b1b89ddb1013fab08ce1a0e7f",
+      "commits_ahead": 2,
+      "classification": "generated/live data outputs only; no casualty/frontend source drift",
+      "changed_paths": [
+        "kyiv-air-alerts-grafana/data/alerts_combined.json",
+        "kyiv-air-alerts-grafana/data/casualties/review_queue.json",
+        "kyiv-air-alerts-grafana/data/casualties/source_state.json",
+        "kyiv-air-alerts-grafana/data/dashboard_data.json",
+        "kyiv-air-alerts-grafana/data/dashboard_qa.json",
+        "kyiv-air-alerts-grafana/data/sevastopol_events.json",
+        "kyiv-air-alerts-grafana/data/ukrainealarm_bridge.json",
+        "kyiv-air-alerts-grafana/grafana/dashboard.json"
+      ]
+    }
+  },
+  "exact_current_production_dashboard": {
+    "git_blob_sha": "f1fe8e7bc5fc44ce2ae533c786a14240c1ecbf05",
+    "remote_connector_chars": 14514002,
+    "remote_json_parse": "PASS",
+    "remote_facts": {
+      "production_city_count": 23,
+      "has_casualties_by_city": false,
+      "legacy_kyiv_rows": 56,
+      "legacy_kyiv_total": 454
+    },
+    "local_materialization": "BLOCKED",
+    "materialized_sha256": null,
+    "git_blob_identity_verified_after_local_materialization": false,
+    "blocker": "GitHub connector can read the exact 14.5 MB blob, but this execution surface provides no connector-to-container raw-file handoff for repository blobs. Shell and Playwright/Chromium have no external DNS (EAI_AGAIN), and current production updater artifacts do not contain dashboard_data.json. No stale or semantically equivalent file was substituted."
+  },
+  "proof_source": {
+    "branch": "multicity-casualties-prod-proof-2026-09-28",
+    "observed_head": "2e4c061fa9fc184e68feda5ef76b570711ed90f0",
+    "strict_runtime_head_tested": null,
+    "note": "Current source blobs were re-read and matched the previously proven promotion set, but no claim is made that this head passed the two remaining strict executable gates in this task.",
+    "promotion_source_blobs": {
+      "kyiv-air-alerts-grafana/scripts/update_casualties.py": "32c9f99b17a1d8da5f11d862b9825370366060ee",
+      "kyiv-air-alerts-grafana/scripts/add_casualty_panel.py": "991a7d40bed1cfd01abfc23624e0028219d8fb90",
+      "kyiv-air-alerts-grafana/data/casualties/master_20cities_manifest.json": "cdff7c9887dba0662bc44435048aa5449f7485cc",
+      "kyiv-air-alerts-grafana/data/casualties/master_20cities_monthly_wide.csv": "f3b7fdf6750e12d7b9af05ffd094bb47aa9ed801",
+      "kyiv-air-alerts-grafana/data/casualties/cities/odesa/manifest.json": "bc9e487f63cf4c67c0c9c86757c3ded04537ee24",
+      "kyiv-air-alerts-grafana/data/casualties/cities/odesa/odesa_air_attack_deaths_monthly.csv": "b51a2cd204b3a3c977025e7acd9311ba98e3a317",
+      "kyiv-air-alerts-grafana/data/casualties/cities/zaporizhzhia/manifest.json": "4dcfb6a14949820b4934a100063f549e22799e8b",
+      "kyiv-air-alerts-grafana/data/casualties/cities/zaporizhzhia/zaporizhzhia_air_attack_deaths_monthly.csv": "1b32d8808069b4499fda35b092fd56f51c64583f",
+      "kyiv-air-alerts-grafana/data/casualties/cities/kherson/manifest.json": "8f343b2fb01774ed476910d34489e03fbf190cb5",
+      "kyiv-air-alerts-grafana/data/casualties/cities/kherson/kherson_air_attack_deaths_monthly.csv": "5520e34c5d0696a167ed0eea378a8648c8836c49",
+      "kyiv-air-alerts-grafana/pages-preview/app.js": "9eb9af99a00fbe22606fe86880548ab1cd2a0cf5",
+      "kyiv-air-alerts-grafana/pages-preview/index.html": "1a76b8af2f3e07e9029fb0bda2198228ce889019"
+    }
+  },
+  "recovered_prior_runtime_artifact": {
+    "workflow_run": 36479469513,
+    "artifact_id": 10995951510,
+    "artifact_name": "multicity-casualty-runtime-input",
+    "zip_sha256": "5841294a580ad64dbf7bb5b14d66cd6eb9b9ec4f903261db5538d1ab06236bd3",
+    "provenance_site_prod_head": "d5482d2976c29bec2c31ab6c843a2cdc1cfe1cad",
+    "accepted_for_current_base": false,
+    "note": "Downloaded only to confirm a safe local source-tree recovery path. It is stale for the exact-current-production gate and was not substituted for a06b8219 production data."
+  },
+  "exact_current_base_builder": {
+    "command": "python scripts/update_casualties.py --no-network",
+    "executed_on_exact_current_base": false,
+    "result": "NOT EXECUTED — exact current production dashboard bytes were not materialized",
+    "before_sha256": null,
+    "after_sha256": null,
+    "city_count": null,
+    "exact_city_set": null,
+    "kyiv_compatibility": null,
+    "uzhhorod_zero_series": null
+  },
+  "real_chart_js": {
+    "production_expected_version": "4.4.7",
+    "production_index_reference": "https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js",
+    "jsdelivr_version_directory_verified": true,
+    "exact_source_materialized": false,
+    "source_sha256": null,
+    "actual_chart_version": null,
+    "local_cache_search": "no exact Chart.js 4.4.7 distribution found",
+    "shell_download": "BLOCKED by external DNS",
+    "playwright_download": "BLOCKED by external DNS (EAI_AGAIN)",
+    "browser_runtime_result": "NOT EXECUTED with real Chart.js 4.4.7"
+  },
+  "browser_environment": {
+    "playwright_python": "1.57.0",
+    "chromium": "144.0.7559.96",
+    "external_network": "unavailable",
+    "chart_sequence": [
+      "kyiv",
+      "kharkiv",
+      "uzhhorod",
+      "odesa",
+      "kyiv"
+    ],
+    "sequence_result": "NOT EXECUTED with real Chart.js",
+    "spot_checks": {
+      "dnipro": "NOT EXECUTED",
+      "zaporizhzhia": "NOT EXECUTED",
+      "kherson": "NOT EXECUTED"
+    },
+    "uzhhorod_real_chart": "NOT EXECUTED",
+    "missing_series_real_chart": "NOT EXECUTED",
+    "console_errors": null,
+    "page_errors": null,
+    "chart_errors": null
+  },
+  "exact_production_base_non_casualty_regression": {
+    "executed": false,
+    "unexpected_non_casualty_diffs": null,
+    "result": "NOT EXECUTED — exact current base not materialized"
+  },
+  "alternative_execution_paths_rejected": {
+    "existing_proof_workflow": ".github/workflows/multicity-casualties-prod-proof.yml is hard-pinned to site-prod d5482d2976c29bec2c31ab6c843a2cdc1cfe1cad and therefore cannot prove a06b8219 current production without source modification",
+    "temporary_workflow_commit": "not used because task permits only the validation artifact to be committed to the proof branch",
+    "stale_runtime_substitution": "not used",
+    "test_double": "not used"
+  },
+  "deployment": {
+    "netlify_production": false,
+    "netlify_preview": false,
+    "grafana": false
+  },
+  "protected_state": {
+    "site_prod": "not mutated",
+    "main": "not mutated",
+    "production_netlify": "not deployed",
+    "grafana_production": "not deployed",
+    "db_neon": "untouched",
+    "historical_replay": "untouched",
+    "live_attack_event_monitor": "untouched",
+    "campaign_6863": "untouched"
+  },
+  "strict_gate_failures": [
+    "exact current site-prod dashboard bytes were not materialized into executable local runtime, so no materialized SHA-256 / builder / exact-base regression proof exists",
+    "real Chart.js 4.4.7 bytes were not obtained in executable browser runtime, so Chart.version and real Chart instance lifecycle were not proven"
+  ],
+  "verdict": "23-CITY CASUALTY PRODUCTION PROMOTION STILL BLOCKED — EXACT CURRENT PRODUCTION DASHBOARD CANNOT BE MATERIALIZED INTO THIS EXECUTION SURFACE AND REAL CHART.JS 4.4.7 CANNOT BE LOADED WITHOUT VIOLATING THE NO-SOURCE-MUTATION GATE"
+}
