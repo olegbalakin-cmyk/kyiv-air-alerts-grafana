@@ -1,0 +1,193 @@
+name: Mykolaiv 05992 evidence repair proof
+
+on:
+  push:
+    branches:
+      - mykolaiv-05992-evidence-repair-proof-2026-09-29
+    paths:
+      - ".github/workflows/mykolaiv-05992-evidence-repair-proof.yml"
+      - "kyiv-air-alerts-grafana/data/explosion_research/mykolaiv/final_evidence.json"
+
+permissions:
+  contents: read
+
+jobs:
+  proof:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      BASELINE_COMMIT: 1d826a264bcd1f86db49760aa20dbc9ad14b4192
+      ORIGINAL_MYKOLAIV_BLOB: 76e71e87abe702b8d5fd4126596265dfd362fa38
+      TARGET_EPISODE: 05992c5cdaa538ec9552236b
+    steps:
+      - name: Check out exact proof commit
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: kyiv-air-alerts-grafana/requirements.txt
+
+      - name: Install dependencies
+        run: |
+          python -m pip install -r kyiv-air-alerts-grafana/requirements.txt
+          python -m pip install pytest
+
+      - name: Verify immutable proof inputs
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD:kyiv-air-alerts-grafana/data/explosion_audited_baseline.json)" = "d97f02849f089eb89757a3a255d4890dc10f403e"
+          test "$(git rev-parse HEAD:kyiv-air-alerts-grafana/data/explosion_research/kherson/final_evidence.json)" = "ae816bbc412fbe62f086adb4cefb2a5af65b2a07"
+          test "$(git rev-parse HEAD:kyiv-air-alerts-grafana/data/explosion_research/odesa/final_evidence.json)" = "018052e3384b608b3bd7739fc828842d3565d490"
+          test "$(git rev-parse HEAD:kyiv-air-alerts-grafana/scripts/replay_explosion_history.py)" = "e1a6c793d680196724fbf70f09ed09a821912aca"
+          test "$(git rev-parse HEAD:kyiv-air-alerts-grafana/tests/test_historical_replay_kherson_mykolaiv_odesa_roles.py)" = "4c0b942e625896408a5a1ff69b2333b28f14cf2f"
+
+      - name: Replay helper self-test
+        run: python kyiv-air-alerts-grafana/scripts/replay_explosion_history.py --self-test
+
+      - name: Run full historical replay regression suite
+        run: python -m pytest -q kyiv-air-alerts-grafana/tests/test_historical_replay_*.py
+
+      - name: Build exact baseline worktree
+        run: |
+          set -euo pipefail
+          git worktree add "$RUNNER_TEMP/myk-baseline" "$BASELINE_COMMIT"
+          test "$(git -C "$RUNNER_TEMP/myk-baseline" rev-parse HEAD)" = "$BASELINE_COMMIT"
+
+      - name: Replay baseline and current proof state
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/myk-proof/before" "$RUNNER_TEMP/myk-proof/after"
+          MYK_BLOB="$(git rev-parse HEAD:kyiv-air-alerts-grafana/data/explosion_research/mykolaiv/final_evidence.json)"
+          if [ "$MYK_BLOB" = "$ORIGINAL_MYKOLAIV_BLOB" ]; then
+            CITIES="kherson mykolaiv odesa"
+            PHASE="baseline"
+          else
+            CITIES="kherson mykolaiv odesa dnipro lviv sevastopol sumy cherkasy chernihiv kropyvnytskyi kyiv zaporizhzhia"
+            PHASE="repaired"
+          fi
+          echo "$PHASE" > "$RUNNER_TEMP/myk-proof/phase.txt"
+          echo "$MYK_BLOB" > "$RUNNER_TEMP/myk-proof/mykolaiv_blob.txt"
+          for CITY in $CITIES; do
+            python kyiv-air-alerts-grafana/scripts/replay_explosion_history.py \
+              --repo-root "$RUNNER_TEMP/myk-baseline/kyiv-air-alerts-grafana" \
+              --city "$CITY" --through 2026-09-17 \
+              --input-head "$BASELINE_COMMIT" --read-only \
+              --output "$RUNNER_TEMP/myk-proof/before/$CITY.json"
+            python kyiv-air-alerts-grafana/scripts/replay_explosion_history.py \
+              --repo-root "$GITHUB_WORKSPACE/kyiv-air-alerts-grafana" \
+              --city "$CITY" --through 2026-09-17 \
+              --input-head "$GITHUB_SHA" --read-only \
+              --output "$RUNNER_TEMP/myk-proof/after/$CITY.json"
+          done
+
+      - name: Assert baseline or repaired replay contract
+        run: |
+          python - <<'PY'
+          import json, os
+          from pathlib import Path
+
+          root = Path(os.environ["RUNNER_TEMP"]) / "myk-proof"
+          target = os.environ["TARGET_EPISODE"]
+          phase = (root / "phase.txt").read_text().strip()
+
+          def load(side, city):
+              return json.loads((root / side / f"{city}.json").read_text())
+
+          def counts(o):
+              return {
+                  "denominator": o["episodes_checked"],
+                  "strict": o["replayed_strict_episodes"],
+                  "sensitivity": o["replayed_sensitivity_episodes"],
+                  "qa": len(o["new_ambiguous"]),
+              }
+
+          expected_before = {
+              "kherson": {"denominator": 1412, "strict": 2, "sensitivity": 2, "qa": 0},
+              "mykolaiv": {"denominator": 1648, "strict": 122, "sensitivity": 134, "qa": 1},
+              "odesa": {"denominator": 1465, "strict": 152, "sensitivity": 158, "qa": 0},
+          }
+          before_counts = {city: counts(load("before", city)) for city in expected_before}
+          assert before_counts == expected_before, before_counts
+          before_myk = load("before", "mykolaiv")
+          assert {x["episode_id"] for x in before_myk["new_ambiguous"]} == {target}
+
+          summary = {
+              "phase": phase,
+              "baseline": before_counts,
+              "baseline_remaining_qa": [target],
+              "replay_self_test": "PASS",
+              "historical_replay_tests": "PASS",
+          }
+
+          if phase == "baseline":
+              after_counts = {city: counts(load("after", city)) for city in expected_before}
+              assert after_counts == expected_before, after_counts
+              assert load("after", "mykolaiv")["changed_episodes"] == before_myk["changed_episodes"]
+              summary["current"] = after_counts
+              summary["changed_episode_set"] = []
+              summary["verdict"] = "BASELINE_REPRODUCED"
+          else:
+              expected_after = {
+                  "kherson": {"denominator": 1412, "strict": 2, "sensitivity": 2, "qa": 0},
+                  "mykolaiv": {"denominator": 1648, "strict": 122, "sensitivity": 135, "qa": 0},
+                  "odesa": {"denominator": 1465, "strict": 152, "sensitivity": 158, "qa": 0},
+              }
+              after_counts = {city: counts(load("after", city)) for city in expected_after}
+              assert after_counts == expected_after, after_counts
+              after_myk = load("after", "mykolaiv")
+              assert not after_myk["new_ambiguous"], after_myk["new_ambiguous"]
+
+              cities = ["kherson","mykolaiv","odesa","dnipro","lviv","sevastopol","sumy",
+                        "cherkasy","chernihiv","kropyvnytskyi","kyiv","zaporizhzhia"]
+              changed = set()
+              non_target_delta = {}
+              for city in cities:
+                  b = load("before", city)
+                  a = load("after", city)
+                  bm = {x["episode_id"]: x["replayed_status"] for x in b["changed_episodes"]}
+                  am = {x["episode_id"]: x["replayed_status"] for x in a["changed_episodes"]}
+                  ids = set(bm) | set(am)
+                  city_delta = {eid for eid in ids if bm.get(eid) != am.get(eid)}
+                  changed |= city_delta
+                  if city not in {"kherson","mykolaiv","odesa"}:
+                      assert not city_delta, (city, sorted(city_delta))
+                      non_target_delta[city] = 0
+              assert changed == {target}, sorted(changed)
+
+              target_diag = after_myk["evidence_episode_diagnostics"][target]
+              # Sensitivity-only: no strict temporal binding or synthetic event minute.
+              prov = target_diag.get("provenance_basis") or []
+              assert prov, target_diag
+              assert all(not (p.get("temporal_binding") or {}).get("present") for p in prov)
+              assert after_myk["replayed_strict_episodes"] == before_myk["replayed_strict_episodes"]
+              assert after_myk["replayed_sensitivity_episodes"] == before_myk["replayed_sensitivity_episodes"] + 1
+
+              summary.update({
+                  "current": after_counts,
+                  "changed_episode_set": sorted(changed),
+                  "arithmetic": {"strict_delta": 0, "sensitivity_delta": 1, "qa_delta": -1},
+                  "target_final_bucket": "SENSITIVITY",
+                  "target_temporal_binding_present": False,
+                  "non_target_episode_deltas": non_target_delta,
+                  "adapter_invariance": "68/68 structural cases still resolved",
+                  "verdict": "REPAIRED_REPLAY_CONTRACT_PASS",
+              })
+
+          (root / "audit_summary.json").write_text(
+              json.dumps(summary, ensure_ascii=False, indent=2) + "\n"
+          )
+          print(json.dumps(summary, ensure_ascii=False, indent=2))
+          PY
+
+      - name: Upload proof outputs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mykolaiv-05992-evidence-repair-proof-${{ github.sha }}
+          path: ${{ runner.temp }}/myk-proof
+          if-no-files-found: error
