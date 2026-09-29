@@ -1,0 +1,151 @@
+name: 23-city casualty cutover candidate build
+
+on:
+  push:
+    branches:
+      - casualty-prod-cutover-candidate-2026-09-29
+    paths:
+      - ".github/workflows/casualty-prod-cutover-candidate.yml"
+      - "kyiv-air-alerts-grafana/scripts/update_casualties.py"
+      - "kyiv-air-alerts-grafana/scripts/add_casualty_panel.py"
+      - "kyiv-air-alerts-grafana/data/casualties/**"
+      - "kyiv-air-alerts-grafana/pages-preview/app.js"
+      - "kyiv-air-alerts-grafana/pages-preview/index.html"
+      - "kyiv-air-alerts-grafana/tests/test_multicity_casualty_promotion.py"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: casualty-prod-cutover-candidate-2026-09-29
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Check out exact candidate input
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+
+      - name: Guard exact fresh production parent and source blobs
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD^)" = "e09766f184b5beb8bc56d360e98bc269c088b25e"
+          while read -r expected path; do
+            actual="$(git hash-object "$path")"
+            test "$actual" = "$expected" || { echo "blob mismatch: $path $actual != $expected"; exit 1; }
+          done <<'EOF'
+          32c9f99b17a1d8da5f11d862b9825370366060ee kyiv-air-alerts-grafana/scripts/update_casualties.py
+          991a7d40bed1cfd01abfc23624e0028219d8fb90 kyiv-air-alerts-grafana/scripts/add_casualty_panel.py
+          cdff7c9887dba0662bc44435048aa5449f7485cc kyiv-air-alerts-grafana/data/casualties/master_20cities_manifest.json
+          f3b7fdf6750e12d7b9af05ffd094bb47aa9ed801 kyiv-air-alerts-grafana/data/casualties/master_20cities_monthly_wide.csv
+          bc9e487f63cf4c67c0c9c86757c3ded04537ee24 kyiv-air-alerts-grafana/data/casualties/cities/odesa/manifest.json
+          b51a2cd204b3a3c977025e7acd9311ba98e3a317 kyiv-air-alerts-grafana/data/casualties/cities/odesa/odesa_air_attack_deaths_monthly.csv
+          4dcfb6a14949820b4934a100063f549e22799e8b kyiv-air-alerts-grafana/data/casualties/cities/zaporizhzhia/manifest.json
+          1b32d8808069b4499fda35b092fd56f51c64583f kyiv-air-alerts-grafana/data/casualties/cities/zaporizhzhia/zaporizhzhia_air_attack_deaths_monthly.csv
+          8f343b2fb01774ed476910d34489e03fbf190cb5 kyiv-air-alerts-grafana/data/casualties/cities/kherson/manifest.json
+          5520e34c5d0696a167ed0eea378a8648c8836c49 kyiv-air-alerts-grafana/data/casualties/cities/kherson/kherson_air_attack_deaths_monthly.csv
+          9eb9af99a00fbe22606fe86880548ab1cd2a0cf5 kyiv-air-alerts-grafana/pages-preview/app.js
+          1a76b8af2f3e07e9029fb0bda2198228ce889019 kyiv-air-alerts-grafana/pages-preview/index.html
+          EOF
+          test "$(git hash-object kyiv-air-alerts-grafana/data/dashboard_data.json)" = "993dc94e5e1a844a14cac2812817f51792bdd298"
+          test "$(git hash-object kyiv-air-alerts-grafana/requirements-db-phase1.txt)" = "46cb158bbc776c517c59350871441d03c27eef29"
+          test "$(git hash-object kyiv-air-alerts-grafana/requirements.txt)" = "d7a2ff05af67cda88e4930d238f0282ca557a963"
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install production dependencies
+        working-directory: kyiv-air-alerts-grafana
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements-db-phase1.txt
+          python - <<'PY'
+          import requests, bs4, psycopg
+          print("requests", requests.__version__)
+          print("bs4", bs4.__version__)
+          print("psycopg", psycopg.__version__)
+          PY
+
+      - name: Snapshot exact production dashboard
+        run: cp kyiv-air-alerts-grafana/data/dashboard_data.json "$RUNNER_TEMP/dashboard_data_before.json"
+
+      - name: Build 23-city casualty data without network
+        working-directory: kyiv-air-alerts-grafana
+        run: python scripts/update_casualties.py --no-network
+
+      - name: Build 23-city Grafana casualty row
+        working-directory: kyiv-air-alerts-grafana
+        run: python scripts/add_casualty_panel.py
+
+      - name: Run focused production promotion test
+        working-directory: kyiv-air-alerts-grafana
+        env:
+          CASUALTY_PROOF_BEFORE: ${{ runner.temp }}/dashboard_data_before.json
+        run: python tests/test_multicity_casualty_promotion.py | tee "$RUNNER_TEMP/casualty_test.json"
+
+      - name: Guard generated working-tree scope
+        shell: bash
+        run: |
+          set -euo pipefail
+          git diff --name-only | sort > "$RUNNER_TEMP/changed.txt"
+          cat > "$RUNNER_TEMP/expected.txt" <<'EOF'
+          kyiv-air-alerts-grafana/data/dashboard_data.json
+          kyiv-air-alerts-grafana/grafana/dashboard.json
+          EOF
+          diff -u "$RUNNER_TEMP/expected.txt" "$RUNNER_TEMP/changed.txt"
+
+      - name: Commit generated candidate outputs
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add kyiv-air-alerts-grafana/data/dashboard_data.json kyiv-air-alerts-grafana/grafana/dashboard.json
+          git commit -m "Generate 23-city casualty cutover candidate"
+          git push origin HEAD:casualty-prod-cutover-candidate-2026-09-29
+
+      - name: Record candidate result
+        shell: bash
+        run: |
+          set -euo pipefail
+          DATA_BLOB="$(git rev-parse HEAD:kyiv-air-alerts-grafana/data/dashboard_data.json)"
+          GRAF_BLOB="$(git rev-parse HEAD:kyiv-air-alerts-grafana/grafana/dashboard.json)"
+          DATA_SHA256="$(sha256sum kyiv-air-alerts-grafana/data/dashboard_data.json | awk '{print $1}')"
+          GRAF_SHA256="$(sha256sum kyiv-air-alerts-grafana/grafana/dashboard.json | awk '{print $1}')"
+          python - <<PY
+          import json, os, pathlib, subprocess
+          root = pathlib.Path("kyiv-air-alerts-grafana")
+          data = json.loads((root/"data/dashboard_data.json").read_text(encoding="utf-8"))
+          series = data["casualties_by_city"]
+          totals = {k: sum(int(r.get("deaths") or 0) for r in v["monthly"]) for k,v in series.items()}
+          result = {
+              "ok": True,
+              "candidate_head": subprocess.check_output(["git","rev-parse","HEAD"], text=True).strip(),
+              "dashboard_blob": "$DATA_BLOB",
+              "grafana_blob": "$GRAF_BLOB",
+              "dashboard_sha256": "$DATA_SHA256",
+              "grafana_sha256": "$GRAF_SHA256",
+              "city_count": len(series),
+              "rows_each": sorted({len(v["monthly"]) for v in series.values()}),
+              "totals": totals,
+              "kyiv_compatibility": series["kyiv"] == data["casualties"],
+          }
+          p=pathlib.Path(os.environ["RUNNER_TEMP"])/"casualty_cutover_candidate_result.json"
+          p.write_text(json.dumps(result, ensure_ascii=False, indent=2)+"\n", encoding="utf-8")
+          print(json.dumps(result, ensure_ascii=False))
+          PY
+
+      - name: Upload candidate result
+        uses: actions/upload-artifact@v4
+        with:
+          name: casualty-prod-cutover-candidate-result
+          path: ${{ runner.temp }}/casualty_cutover_candidate_result.json
+          retention-days: 7
