@@ -1143,7 +1143,20 @@ def historical_review_roles(city: str, row: dict, monitor) -> tuple[dict, str]:
 
         def dnipro_reviewed_event_types(segment: str) -> list[str]:
             event_types = []
-            strict_signal = monitor.strict_attack_event_signal(segment)
+            segment_low = segment.casefold()
+            threat_or_modal_event = bool(
+                re.search(
+                    r"\b(?:можлив\w*|ймовірн\w*|загроз\w*|очікуван\w*|"
+                    r"could|might|may|possible|likely|threat)\b.{0,45}"
+                    r"\b(?:вибух\w*|удар\w*|влучанн\w*|explosion\w*|"
+                    r"blast\w*|impact\w*|strike\w*)\b",
+                    segment_low,
+                )
+            )
+            strict_signal = (
+                monitor.strict_attack_event_signal(segment)
+                and not threat_or_modal_event
+            )
             if strict_signal:
                 for event_type in monitor.attack_event_types(segment):
                     if (
@@ -1159,7 +1172,6 @@ def historical_review_roles(city: str, row: dict, monitor) -> tuple[dict, str]:
                 event_types.append("impact")
             if english_strike.search(segment) and "strike" not in event_types:
                 event_types.append("strike")
-            segment_low = segment.casefold()
             # A few retained Dnipro reviewed summaries use "було/стало гучно"
             # as the factual event wording. Accept it only behind an explicit
             # strict exact-city + air-war + episode-relation review contract.
