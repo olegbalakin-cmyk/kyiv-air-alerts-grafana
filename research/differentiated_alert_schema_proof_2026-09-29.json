@@ -1,0 +1,240 @@
+{
+  "authoritative_head": "61e8c9096d5fb12168b08f64d997c07718f3aab5",
+  "authoritative_head_final_guard": "61e8c9096d5fb12168b08f64d997c07718f3aab5",
+  "authoritative_drift": {
+    "from_last_known": "5b4b8ebbabd9bb47775b9d3e3fe2387db584f2b3",
+    "to_fresh_base": "61e8c9096d5fb12168b08f64d997c07718f3aab5",
+    "classification": "UNRELATED_RESEARCH_ONLY",
+    "changed_files": ["research/historical_replay_remaining_15_blockers_adjudication_2026-09-29.json"],
+    "relevant_ingestion_or_schema_drift": false
+  },
+  "proof_branch": "differentiated-alert-schema-proof-2026-09-29",
+  "proof_implementation_commit": "95bf6aaf19445509b6b1caea2cc2773c8120fb7f",
+  "accepted_transition_proof": {
+    "artifact_commit": "11c5cc13b0b530f76befa07306c0fbf41a003e54",
+    "artifact_path": "research/differentiated_alert_transition_proof_2026-09-29.json"
+  },
+  "phase1_compatibility_read_only": {
+    "site_prod_head_observed": "c21857e1c928876b1b89ddb1013fab08ce1a0e7f",
+    "migration_blob": "3b8af7940b23aae03a4f6b434d90d97dde10bfc0",
+    "existing_parent_table": "alert_episodes",
+    "existing_source_table": "alert_episode_sources",
+    "compatibility": "Candidate child tables can reference existing episode_uid while preserving nullable/QA binding semantics. No migration was applied."
+  },
+  "canonical_entities": {
+    "alert_episode": {
+      "storage": "EXISTING_UNCHANGED",
+      "role": "Canonical continuous AIR parent and denominator identity.",
+      "field_kinds": {
+        "episode_uid": "canonical identity",
+        "legacy_episode_id": "canonical identity",
+        "city_key": "source/canonical fact",
+        "start_at": "canonical episode boundary",
+        "end_at": "canonical episode boundary"
+      }
+    },
+    "alert_state_snapshot": {
+      "storage": "PERSIST",
+      "role": "One source alert/state snapshot at one poll time, including active-with-zero-components and clear snapshots.",
+      "field_kinds": {
+        "snapshot_key": "canonical identity",
+        "episode_uid": "canonical binding, nullable unless BOUND",
+        "binding_state": "derived binding fact",
+        "source_key": "source fact/provenance",
+        "source_alert_id": "source fact, optional",
+        "target_city_key": "project binding metadata",
+        "source_geo_scope": "source fact normalized without losing raw geography",
+        "source_geo_type_raw": "source fact",
+        "source_geo_id_raw": "source fact",
+        "observed_at": "observation metadata",
+        "source_state_at": "source fact, optional",
+        "source_alert_started_at": "source fact, optional",
+        "source_alert_ended_at": "source fact, optional",
+        "source_active": "source fact/adapter interpretation",
+        "source_alert_level_raw": "source fact, optional",
+        "source_state_raw": "source fact, optional",
+        "raw_sha256": "provenance",
+        "raw_object_path": "provenance"
+      }
+    },
+    "alert_threat_observation": {
+      "storage": "PERSIST",
+      "role": "One source threat/cause member observed inside one snapshot.",
+      "field_kinds": {
+        "threat_observation_key": "canonical identity",
+        "source_threat_id": "source fact, optional",
+        "component_signature": "inferred deterministic continuity key where justified",
+        "component_identity_basis": "inferred fact/provenance",
+        "level_raw": "source fact",
+        "cause_raw": "source fact",
+        "reason_raw": "source fact",
+        "source_message_raw": "source fact",
+        "source_started_at": "source fact, optional",
+        "source_ended_at": "source fact, optional only; never filled from absence"
+      }
+    },
+    "threat_component": {
+      "storage": "DERIVED_ONLY",
+      "role": "Continuity grouping across observations; may be inferred and is not treated as upstream object identity."
+    },
+    "component_interval": {
+      "storage": "DERIVED_ONLY",
+      "role": "Interval interpretation with uncertainty bounds and explicit end_basis."
+    },
+    "effective_severity": {
+      "storage": "DERIVED_ONLY",
+      "role": "Overall current severity computed from source observations; never episode identity."
+    }
+  },
+  "field_classification": {
+    "episode_id": "REQUIRED_FOR_BOUND_ROWS; nullable for AMBIGUOUS/UNBOUND until binding",
+    "source": "REQUIRED",
+    "source_alert_id": "OPTIONAL; native for Alerts.in.ua, absent in proven UkraineAlarm/Kyiv shapes",
+    "source_threat_id": "OPTIONAL/SOURCE_SPECIFIC_ONLY; no native ID proven in the three accepted shapes",
+    "observed_at": "REQUIRED",
+    "level_raw": "OPTIONAL; required when source exposes a component level",
+    "cause_raw": "OPTIONAL; required when source exposes a structured cause/threat type",
+    "reason_raw": "OPTIONAL; required when source exposes reason text",
+    "source_message_raw": "OPTIONAL; retained for Alerts.in.ua when present",
+    "source_started_at": "OPTIONAL; source fact only",
+    "source_ended_at": "OPTIONAL; source fact only, never inferred",
+    "is_active": "DERIVED/ADAPTER_FACT at snapshot level; individual membership is represented by presence in snapshot",
+    "raw_payload_hash": "REQUIRED provenance/dedup input",
+    "raw_object_path": "OPTIONAL provenance pointer",
+    "source_geography": "REQUIRED provenance/binding input",
+    "target_city_key": "REQUIRED project binding target and kept distinct from source geography",
+    "severity_normalized": "DERIVED per observation",
+    "threat_type_normalized": "DERIVED per observation",
+    "effective_severity": "DERIVED_ONLY",
+    "derived_component_interval": "DERIVED_ONLY"
+  },
+  "source_mappings": {
+    "ukrainealarm": {
+      "parent_identity": "EPISODE_BOUND; no native AIR alert ID proven",
+      "snapshot": "AIR object selected by regionId + type=AIR; object absence represents clear for that region in the proof adapter",
+      "components": "activeAlertLevels[] members are preserved independently",
+      "raw_fields": {"level_raw":"alertLevel","reason_raw":"reason","source_started_at":"createdAt","source_state_at":"lastUpdate"},
+      "normalization": {"Yellow":"yellow","Red":"red","Дронова загроза":"drone","Ракетна загроза":"missile_unspecified","other_reason":"unknown"},
+      "component_identity": "Deterministic inferred signature over source + region + AIR + raw reason + source_started_at; not claimed as upstream identity.",
+      "end_semantics": "No source component end is invented; disappearance gives an uncertainty bound.",
+      "history": "INTERVAL_ONLY"
+    },
+    "alerts_in_ua": {
+      "parent_identity": "source alert.id retained; stability across composition changes remains NOT_PROVEN",
+      "snapshot": "one Alert object; threats[] treated as currently open threats",
+      "raw_fields": {"source_alert_id":"id","source_alert_level_raw":"alert_level","source_state_at":"updated_at","source_alert_started_at":"started_at","source_alert_ended_at":"finished_at","cause_raw":"threat_type","level_raw":"level","source_started_at":"threat.started_at","source_message_raw":"source_message"},
+      "normalization": {"drones":"drone","ballistic_missiles":"missile_ballistic","cruise_missiles":"missile_cruise","unspecified_missiles":"missile_unspecified","tactic_aircraft_activity":"tactical_aircraft_activity","strategic_aircraft_activity":"strategic_aircraft_activity","mig31k_departure":"mig31k_departure","guided_aerial_bombs":"guided_aerial_bomb","air_defense":"air_defense","unknown":"unknown"},
+      "component_identity": "Deterministic inferred signature over source + location + alert type + alert start + threat_type + threat started_at; no native threat ID assumed.",
+      "scalar_alert_level": "Retained separately; not substituted for component history.",
+      "history": "UNKNOWN"
+    },
+    "kyiv_official": {
+      "parent_identity": "EPISODE_BOUND; no native episode ID proven",
+      "snapshot": "state + causes[] + last_cause + created_at",
+      "raw_fields": {"source_state_raw":"state","cause_raw":"causes[] member","source_last_cause_raw":"last_cause","source_state_at":"created_at"},
+      "normalization": {"drone":"drone","missile":"missile_unspecified","ballistic":"missile_ballistic","missile-drone":"missile_drone_combined","massive-drone":"massive_drone","mig":"mig","other":"unknown"},
+      "component_identity": "SNAPSHOT_ONLY in persisted source facts; any cross-snapshot same-cause continuity is explicitly inferred.",
+      "severity": "state is not mapped to Yellow/Red; component and effective severity remain unknown unless another explicit level exists.",
+      "history": "PARTIAL"
+    }
+  },
+  "identity_strategy": {
+    "snapshot_key": "versioned SHA-256 over source + source alert/geography locator + observed_at + source_state_at + raw payload hash",
+    "threat_observation_key": "versioned SHA-256 over snapshot_key + canonical threat fingerprint + deterministic duplicate ordinal after sorting",
+    "ukrainealarm_component": "DETERMINISTIC_INFERRED; collision risk if two distinct upstream components have same region, raw reason and source start; therefore not called native identity",
+    "alerts_in_ua_component": "DETERMINISTIC_INFERRED; same caution, because no native threat ID is documented",
+    "kyiv_component": "SNAPSHOT_ONLY persisted; ADJACENT_SNAPSHOT_INFERRED only in derived interval logic",
+    "versioning": "all deterministic identities are version-labelled so mapping/key changes can coexist"
+  },
+  "deduplication": {
+    "same_snapshot_replayed": "same snapshot_key and same threat_observation_keys; idempotent",
+    "same_component_new_poll": "new snapshot observation but stable inferred component signature where source supplies stable start/type fields",
+    "changed_source_message": "new threat observation retained; component signature unchanged when message is not part of component identity",
+    "array_order": "sorting canonical threat fingerprints makes keys independent of source array order",
+    "red_added": "same parent snapshot stream; additional child observation only",
+    "red_disappears": "absence closes only a derived component interval with bounds; no source end fabricated",
+    "all_threats_disappear_air_active": "zero-child active snapshot retained; parent AIR remains active",
+    "air_clear": "clear snapshot closes parent only through existing episode semantics; still-open child intervals get EPISODE_CLOSE_INFERRED bounds",
+    "process_restart": "replaying same stored snapshot remains idempotent"
+  },
+  "time_uncertainty": {
+    "end_basis_enum": ["SOURCE_EXPLICIT","SNAPSHOT_INFERRED","EPISODE_CLOSE_INFERRED","UNKNOWN"],
+    "minimum_derived_fields": ["last_seen_active_at","first_seen_inactive_at","end_lower_bound","end_upper_bound","source_ended_at","end_basis"],
+    "rule": "If a component is present at T1 and absent at T2, source_ended_at remains null; end_lower_bound=T1, end_upper_bound=T2, end_basis=SNAPSHOT_INFERRED. No exact derived_end_at is emitted unless SOURCE_EXPLICIT.",
+    "episode_close_rule": "If AIR clears while components were still present in the final active snapshot, each open derived child receives last_seen_active_at..episode_end as bounds and end_basis=EPISODE_CLOSE_INFERRED; source_ended_at remains null."
+  },
+  "episode_binding": {
+    "rule": "Use project target city + AIR type + safe temporal containment/overlap, with native/source identity where available. Differentiated data may bind only to an existing canonical episode in this proof.",
+    "outcomes": ["BOUND","AMBIGUOUS","UNBOUND"],
+    "guard": "AMBIGUOUS and UNBOUND keep episode_id null and cannot create, split, extend or otherwise mutate denominator episodes."
+  },
+  "geography": {
+    "canonical_scopes": ["CITY","HROMADA","RAION","OBLAST","OTHER"],
+    "source_scope": "stored independently with raw type/id",
+    "target_city": "stored independently as project target city",
+    "rule": "A RAION observation remains RAION even when attached to a city target; binding does not make it city-exact."
+  },
+  "derived_fields": {
+    "effective_severity": {
+      "persistence": "DERIVED_ONLY",
+      "rule": "max(red > yellow) across known active component severities; if no known component severity, optional source scalar alert_level fallback; otherwise unknown",
+      "cross_source": "never merge source components automatically; derive per chosen source view or explicit later reconciliation layer"
+    },
+    "threat_type_normalized": {"persistence":"DERIVED per observation while raw value retained","unknown_policy":"unknown rather than guessing"},
+    "component_interval": {"persistence":"DERIVED_ONLY","reason":"source evidence lacks reliable exact end timestamps and, for Kyiv, stable native per-cause IDs"}
+  },
+  "test_results": {
+    "focused_suite": "kyiv-air-alerts-grafana/tests/test_differentiated_alert_schema_v2.py",
+    "tests_run": 20,
+    "passed": 20,
+    "failed": 0,
+    "result": "PASS",
+    "tested_blobs": {
+      "proof_module": "68b4f3df3b730a3d22f70d29a0d0cc09072c3a42",
+      "focused_test": "591717c8e24dd11294a24b012e1349538637c824",
+      "candidate_sql": "3580847807c449df12b3d4a9ea062d69a8f6ec01"
+    },
+    "coverage": ["Case A Yellow->clear","Case B Yellow->Yellow+Red->Yellow->clear","Case C same severity multiple causes","Case D repeated identical polls","Case E component disappears between polls","Case F AIR closes with open children","Case G restart/replay idempotency","Case H cross-source taxonomies remain independent","Alerts.in.ua scalar-vs-component level separation","Kyiv no fake cause start or severity","missile-drone remains one distinct cause","all causes disappear while AIR remains active","poll-gap uncertainty bounds","changed source message retains new observation without fake component restart","BOUND/AMBIGUOUS/UNBOUND without episode mutation","source geography vs target city","effective severity derivation","parent entity unchanged","source-explicit end cannot be confused with inferred end","array order independence"]
+  },
+  "production_regression": {
+    "result": "PASS",
+    "method": "Proof branch adds only proof files. Existing production episode/attack-event source blobs are unchanged from authoritative base; proof adapters import no production loaders and binding test verifies no parent mutation.",
+    "production_city_count": 23,
+    "production_cities": ["poltava","uzhhorod","ivano_frankivsk","chernivtsi","ternopil","lviv","lutsk","rivne","khmelnytskyi","vinnytsia","zhytomyr","kropyvnytskyi","kyiv","kherson","odesa","mykolaiv","chernihiv","dnipro","cherkasy","sevastopol","kharkiv","sumy","zaporizhzhia"],
+    "authoritative_guard_blobs": {
+      "explosion_audited_baseline": "81ecc48ed64b7e78449df903afb082e9f92531e5",
+      "explosion_candidate_monitor_state": "a1937e7d6d8da2a2d50cb0d013d1c5b6839ae4f9",
+      "replay_explosion_history.py": "99b13318a3bd53013a798bd4c66c87c4aed6f45b",
+      "monitor_explosion_candidates.py": "b55fe2ed082958917c74f95bca2fd6bc137bcaae",
+      "explosion_preview_input.json": "8a71218be9b0d5463aebe4005c21aea191fdae82"
+    },
+    "baseline_totals": {"historical_denominator_sum":26405,"strict_attack_event_numerator_sum":1810,"sensitivity_sum":2004,"live_monitor_episode_rows":1397},
+    "checks": {"episode_count_per_city_unchanged":true,"episode_start_end_unchanged":true,"episode_identity_unchanged":true,"attack_event_binding_inputs_unchanged":true,"denominator_unchanged":true,"attack_event_metric_semantics_unchanged":true},
+    "note": "This is a non-mutating structural/blob regression proof, not a production ingestion run and not a DB migration."
+  },
+  "candidate_schema_path": "research/differentiated_alert_schema_candidate_2026-09-29.sql",
+  "unknowns": [
+    "UkraineAlarm: complete Yellow-only -> Yellow+Red -> Yellow-only -> clear raw upstream chain remains uncaptured; the transition test uses evidence-supported synthetic fixtures.",
+    "UkraineAlarm: exact upstream component-removal event semantics and same-level duplicate component behavior remain unproven.",
+    "Alerts.in.ua: alert.id stability across threat-composition changes is not proven.",
+    "Alerts.in.ua: real concurrent Yellow+Red threats[] and differentiated history retention remain unproven.",
+    "Kyiv: direct raw history chain and exact per-cause end semantics remain unproven; persisted cause identity therefore stays snapshot-only.",
+    "Cross-source reconciliation is intentionally deferred; observations from different sources are not auto-merged."
+  ],
+  "acceptance_criteria": {
+    "one_air_episode_multiple_simultaneous_threats": true,
+    "yellow_red_does_not_split_parent": true,
+    "raw_values_recoverable": true,
+    "explicit_vs_inferred_timestamps_distinct": true,
+    "repeated_snapshots_idempotent": true,
+    "overlapping_components_representable": true,
+    "missing_end_without_fabrication": true,
+    "multiple_source_taxonomies_coexist": true,
+    "geography_granularity_retained": true,
+    "unbound_ambiguous_cannot_mutate_denominator": true,
+    "production_episode_counts_unchanged": true,
+    "production_boundaries_unchanged": true,
+    "attack_event_metric_semantics_unchanged": true
+  },
+  "verdict": "READY FOR SHADOW INGESTION PROOF"
+}
