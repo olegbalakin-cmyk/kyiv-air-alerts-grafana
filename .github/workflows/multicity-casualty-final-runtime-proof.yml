@@ -36,7 +36,7 @@ jobs:
           rm -rf /tmp/chartpkg
           mkdir -p /tmp/chartpkg
           npm install --prefix /tmp/chartpkg --no-package-lock --no-save chart.js@4.4.7
-          test -s /tmp/chartpkg/node_modules/chart.js/dist/chart.umd.min.js
+          test -s /tmp/chartpkg/node_modules/chart.js/dist/chart.umd.js
           node -e "const p=require('/tmp/chartpkg/node_modules/chart.js/package.json'); if(p.version!=='4.4.7') process.exit(1); console.log(p.version)"
 
       - name: Install Playwright and Chromium
@@ -47,7 +47,7 @@ jobs:
 
       - name: Execute strict exact-current-base runtime proof
         env:
-          CHART_JS_PATH: /tmp/chartpkg/node_modules/chart.js/dist/chart.umd.min.js
+          CHART_JS_PATH: /tmp/chartpkg/node_modules/chart.js/dist/chart.umd.js
         run: |
           python kyiv-air-alerts-grafana/tests/run_multicity_casualty_final_runtime_proof.py
 
