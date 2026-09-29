@@ -24,8 +24,8 @@
       "coverage_start": "2026-07-13",
       "coverage_end": "2026-09-17",
       "denominator": 489,
-      "strict_n": 54,
-      "sensitivity_n": 54
+      "strict_n": 51,
+      "sensitivity_n": 51
     }
   },
   "strict_events": [
@@ -1003,27 +1003,6 @@
       "decision": "strict: exact_city+matched_alert+aerial"
     },
     {
-      "episode_start": "2026-08-31T20:37:00+03:00",
-      "event_time": "2026-08-31T22:29:00+03:00/2026-08-31T23:21:00+03:00",
-      "source_url": "https://suspilne.media/odesa/1392326-v-odesi-pid-cas-povitranoi-trivogi-bulo-cutno-vibuhi-3/",
-      "evidence": "Під час тривоги 20:37–23:26 і дронової загрози в Одесі повідомляли про серію вибухів з 22:29 до 23:21.",
-      "decision": "strict: exact_city+matched_alert+aerial"
-    },
-    {
-      "episode_start": "2026-09-01T02:09:00+03:00",
-      "event_time": "2026-09-01T02:15:00+03:00/2026-09-01T03:14:00+03:00",
-      "source_url": "https://suspilne.media/odesa/1392326-v-odesi-pid-cas-povitranoi-trivogi-bulo-cutno-vibuhi-3/",
-      "evidence": "У окремій тривозі 02:09–03:34 1 вересня в Одесі повідомили про вибухи о 02:15 та 03:14 на тлі повітряної атаки.",
-      "decision": "strict: exact_city+matched_alert+aerial"
-    },
-    {
-      "episode_start": "2026-09-02T01:56:00+03:00",
-      "event_time": "2026-09-02T02:33:00+03:00/2026-09-02T03:00:00+03:00",
-      "source_url": "https://suspilne.media/odesa/1393254-rf-atakuvala-odesu-poskodzeno-24-poverhivku-ofisi-ta-dva-navcalni-zakladi/",
-      "evidence": "Під час тривоги 01:56–06:06 і комбінованої повітряної загрози в Одесі повідомили про серію вибухів о 02:33 та близько 03:00.",
-      "decision": "strict: exact_city+matched_alert+aerial"
-    },
-    {
       "episode_start": "2026-09-04T04:45:00+03:00",
       "event_time": "2026-09-04T05:03:00+03:00",
       "source_url": "https://suspilne.media/odesa/1395246-masina-posicena-srapnellu-rf-atakuvala-zitlovij-budinok-v-odesi/",
@@ -1187,14 +1166,122 @@
       "source_url": "https://suspilne.media/odesa/1376938-rf-obstrilala-odesu-zaznav-poskodzen-zitlovij-budinok/",
       "evidence": "У matched alert реактивний БпЛА вдарив у 10-поверхівку Одеси, але в збереженому первинному матеріалі немає явного повідомлення про вибух.",
       "decision": "review: exact_city aerial impact; explicit explosion wording not retained"
+    },
+    {
+      "source_url": "https://suspilne.media/odesa/1392326-v-odesi-pid-cas-povitranoi-trivogi-bulo-cutno-vibuhi-3/",
+      "evidence": "Під час тривоги 20:37–23:26 і дронової загрози в Одесі повідомляли про серію вибухів з 22:29 до 23:21.",
+      "decision": "strict: exact_city+matched_alert+aerial",
+      "record_id": "c9170f2906d0e18731a81fa2",
+      "legacy_bucket": "strict_events",
+      "legacy_index": 139,
+      "legacy_counted_status": "STRICT",
+      "current_metric_role": "REVIEW_NON_COUNTED_RETIRED_LEGACY_POSITIVE",
+      "adjudication_class": "LEGACY_POSITIVE_RETIREMENT_READY",
+      "legacy_binding_fields": {
+        "episode_start": "2026-08-31T20:37:00+03:00",
+        "event_time": "2026-08-31T22:29:00+03:00/2026-08-31T23:21:00+03:00"
+      },
+      "normalization_provenance": {
+        "date": "2026-09-29",
+        "proof_branch": "remaining-13-evidence-normalization-proof-2026-09-29",
+        "accepted_adjudication_artifact": "research/historical_replay_remaining_15_blockers_adjudication_2026-09-29.json",
+        "accepted_adjudication_commit": "61e8c9096d5fb12168b08f64d997c07718f3aab5",
+        "reason": "Real qualifying exact-city attack event, but retained alert scope is oblast/district rather than a valid city alert episode under the current city-alert-episode metric.",
+        "retained_event_time": "2026-08-31 22:29; 23:21 Europe/Kyiv",
+        "retained_legacy_alert_start": "2026-08-31T20:37:00+03:00 Odesa district",
+        "best_supported_event_time": {
+          "local": [
+            "2026-08-31T22:29:00+03:00",
+            "2026-08-31T23:21:00+03:00"
+          ],
+          "utc": [
+            "2026-08-31T19:29:00Z",
+            "2026-08-31T20:21:00Z"
+          ]
+        },
+        "old_unbound_reason": "EVENT_OUTSIDE_CURRENT_CANONICAL_CORPUS",
+        "current_counted": false
+      }
+    },
+    {
+      "source_url": "https://suspilne.media/odesa/1392326-v-odesi-pid-cas-povitranoi-trivogi-bulo-cutno-vibuhi-3/",
+      "evidence": "У окремій тривозі 02:09–03:34 1 вересня в Одесі повідомили про вибухи о 02:15 та 03:14 на тлі повітряної атаки.",
+      "decision": "strict: exact_city+matched_alert+aerial",
+      "record_id": "503a0c99d1b5f9fe9c447c0e",
+      "legacy_bucket": "strict_events",
+      "legacy_index": 140,
+      "legacy_counted_status": "STRICT",
+      "current_metric_role": "REVIEW_NON_COUNTED_RETIRED_LEGACY_POSITIVE",
+      "adjudication_class": "LEGACY_POSITIVE_RETIREMENT_READY",
+      "legacy_binding_fields": {
+        "episode_start": "2026-09-01T02:09:00+03:00",
+        "event_time": "2026-09-01T02:15:00+03:00/2026-09-01T03:14:00+03:00"
+      },
+      "normalization_provenance": {
+        "date": "2026-09-29",
+        "proof_branch": "remaining-13-evidence-normalization-proof-2026-09-29",
+        "accepted_adjudication_artifact": "research/historical_replay_remaining_15_blockers_adjudication_2026-09-29.json",
+        "accepted_adjudication_commit": "61e8c9096d5fb12168b08f64d997c07718f3aab5",
+        "reason": "Real qualifying exact-city attack event, but retained alert scope is oblast/district rather than a valid city alert episode under the current city-alert-episode metric.",
+        "retained_event_time": "2026-09-01 02:15; 03:14 Europe/Kyiv",
+        "retained_legacy_alert_start": "2026-09-01T02:09:00+03:00 Odesa district",
+        "best_supported_event_time": {
+          "local": [
+            "2026-09-01T02:15:00+03:00",
+            "2026-09-01T03:14:00+03:00"
+          ],
+          "utc": [
+            "2026-08-31T23:15:00Z",
+            "2026-09-01T00:14:00Z"
+          ]
+        },
+        "old_unbound_reason": "EVENT_OUTSIDE_CURRENT_CANONICAL_CORPUS",
+        "current_counted": false
+      }
+    },
+    {
+      "source_url": "https://suspilne.media/odesa/1393254-rf-atakuvala-odesu-poskodzeno-24-poverhivku-ofisi-ta-dva-navcalni-zakladi/",
+      "evidence": "Під час тривоги 01:56–06:06 і комбінованої повітряної загрози в Одесі повідомили про серію вибухів о 02:33 та близько 03:00.",
+      "decision": "strict: exact_city+matched_alert+aerial",
+      "record_id": "0c2c1c3a0cbbbea7b7d2ccde",
+      "legacy_bucket": "strict_events",
+      "legacy_index": 141,
+      "legacy_counted_status": "STRICT",
+      "current_metric_role": "REVIEW_NON_COUNTED_RETIRED_LEGACY_POSITIVE",
+      "adjudication_class": "LEGACY_POSITIVE_RETIREMENT_READY",
+      "legacy_binding_fields": {
+        "episode_start": "2026-09-02T01:56:00+03:00",
+        "event_time": "2026-09-02T02:33:00+03:00/2026-09-02T03:00:00+03:00"
+      },
+      "normalization_provenance": {
+        "date": "2026-09-29",
+        "proof_branch": "remaining-13-evidence-normalization-proof-2026-09-29",
+        "accepted_adjudication_artifact": "research/historical_replay_remaining_15_blockers_adjudication_2026-09-29.json",
+        "accepted_adjudication_commit": "61e8c9096d5fb12168b08f64d997c07718f3aab5",
+        "reason": "Real qualifying exact-city attack event, but retained alert scope is oblast/district rather than a valid city alert episode under the current city-alert-episode metric.",
+        "retained_event_time": "2026-09-02 02:33; 03:00 Europe/Kyiv",
+        "retained_legacy_alert_start": "2026-09-02T01:56:00+03:00 Odesa district",
+        "best_supported_event_time": {
+          "local": [
+            "2026-09-02T02:33:00+03:00",
+            "2026-09-02T03:00:00+03:00"
+          ],
+          "utc": [
+            "2026-09-01T23:33:00Z",
+            "2026-09-02T00:00:00Z"
+          ]
+        },
+        "old_unbound_reason": "EVENT_OUTSIDE_CURRENT_CANONICAL_CORPUS",
+        "current_counted": false
+      }
     }
   ],
   "final_counts": {
     "alerts_total": 1465,
-    "strict_n": 155,
-    "strict_pct": 10.58,
-    "sensitivity_n": 161,
-    "sensitivity_pct": 10.99
+    "strict_n": 152,
+    "strict_pct": 10.38,
+    "sensitivity_n": 158,
+    "sensitivity_pct": 10.78
   },
   "strict_episode_start_dates": [
     "2025-11-09",
@@ -1336,9 +1423,6 @@
     "2026-08-22",
     "2026-08-24",
     "2026-08-27",
-    "2026-08-31",
-    "2026-09-01",
-    "2026-09-02",
     "2026-09-04",
     "2026-09-05",
     "2026-09-07",
@@ -1362,5 +1446,16 @@
     "duplicate_matched_alert_episodes_overall": [],
     "research_source": "canonical parent-slice result JSON only",
     "web_telegram_reresearch": false
+  },
+  "normalization_provenance": {
+    "date": "2026-09-29",
+    "proof_branch": "remaining-13-evidence-normalization-proof-2026-09-29",
+    "accepted_adjudication_artifact": "research/historical_replay_remaining_15_blockers_adjudication_2026-09-29.json",
+    "operation": "legacy_positive_retirement_to_non_counted_review",
+    "retired_record_ids": [
+      "c9170f2906d0e18731a81fa2",
+      "503a0c99d1b5f9fe9c447c0e",
+      "0c2c1c3a0cbbbea7b7d2ccde"
+    ]
   }
 }
