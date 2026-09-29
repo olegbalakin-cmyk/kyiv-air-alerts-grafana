@@ -133,14 +133,16 @@
     "observed_episode_rows": 1397,
     "baseline_global_sha256": "d1e408558a3d1977029564c44984dcf056d5e4b9c8d59054db8deaea6cbac10d",
     "full_runtime_before_after_same_corpus_gate": "NOT_PROVEN",
-    "reason": "The isolated shadow runs had no parent write surface, but this execution did not run the complete accepted parent-corpus runtime comparator before and after the shadow store run."
+    "reason": "The isolated shadow runs had no parent write surface, but this execution did not run the complete accepted parent-corpus runtime comparator before and after the shadow store run.",
+    "fingerprint_scope": "PROOF_START_AUTHORITATIVE_0173b9b_ONLY"
   },
   "attack_event_regression": {
     "source_blob": "d73a50cae2ac78c142459d9cee71ecefc618d69f",
     "current_city_count": 23,
     "baseline_global_sha256": "aba047359e2cba650635d578ede478a4c547e28e732b4d86ebf1109004e1eb1c",
     "full_runtime_before_after_same_logic_gate": "NOT_PROVEN",
-    "reason": "Current accepted output was fingerprinted, but the same accepted attack-event/replay logic was not rerun before and after the isolated shadow ingestion in this environment."
+    "reason": "Current accepted output was fingerprinted, but the same accepted attack-event/replay logic was not rerun before and after the isolated shadow ingestion in this environment.",
+    "fingerprint_scope": "PROOF_START_AUTHORITATIVE_0173b9b_ONLY"
   },
   "focused_tests": {
     "local_executable_suite": {
@@ -164,6 +166,7 @@
     "main": false
   },
   "unknowns": [
+    "Authoritative runtime attack-event data advanced during the proof; final guard is d59be3e79834131dce207a3b924e17b20ac00a25.",
     "Fresh LIVE_RAW Kyiv payload was not obtained in this execution environment; the available Kyiv input is STORED_RAW.",
     "The mandatory full parent-corpus runtime before/after comparator was not executed against the accepted current corpus.",
     "The mandatory attack-event metric before/after rerun through the same accepted logic was not executed.",
@@ -190,5 +193,20 @@
     "attack_event_runtime_regression_gate": false,
     "no_production_changes": true
   },
-  "verdict": "SHADOW INGESTION PROOF NOT READY"
+  "verdict": "SHADOW INGESTION PROOF NOT READY",
+  "authoritative_head_final_guard": "d59be3e79834131dce207a3b924e17b20ac00a25",
+  "final_guard_drift": {
+    "from_proof_base": "0173b9b5663ddb9f8d64120b929ad9e8c85517b8",
+    "to_final_guard": "d59be3e79834131dce207a3b924e17b20ac00a25",
+    "classification": "RUNTIME_ATTACK_EVENT_DATA_DRIFT_WITHOUT_CODE_SEMANTIC_DRIFT",
+    "changed_files": [
+      "kyiv-air-alerts-grafana/data/dashboard_data.json",
+      "kyiv-air-alerts-grafana/data/explosion_candidate_monitor_last_run.json",
+      "kyiv-air-alerts-grafana/data/explosion_candidate_monitor_state.json",
+      "kyiv-air-alerts-grafana/data/explosion_review_queue.json",
+      "kyiv-air-alerts-grafana/data/explosions_test.json"
+    ],
+    "ingestion_schema_episode_replay_monitor_code_changed": false,
+    "consequence": "Proof-start parent/metric fingerprints are not claimed as current-final fingerprints; mandatory runtime before/after regression gates remain NOT_PROVEN."
+  }
 }
