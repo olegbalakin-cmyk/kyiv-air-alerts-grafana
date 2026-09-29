@@ -1,0 +1,65 @@
+{
+  "schema_version": 1,
+  "city_key": "uzhhorod",
+  "coverage_start": "2025-11-06",
+  "coverage_end": "2026-09-17",
+  "purpose": "Replay-grade normalization of the frozen local reaudit package; no new source research.",
+  "strict_events": [
+    {
+      "event_id": "UZH-20260513-01",
+      "episode_id": "a6be449d43d1e5ba1754f46f",
+      "source_url": "https://suspilne.media/uzhhorod/1310486-bezpilotniki-nad-zakarpattam-13-travna-so-vidomo/",
+      "evidence": "В Ужгороді близько 16:30 було чути звуки вибухів під час підтвердженої атаки БпЛА; подія лежить усередині alert episode 14:55:36–17:58:49 Europe/Kyiv.",
+      "decision_basis": "strict: retained exact-city attack-event evidence + confirmed aerial-war context + episode-specific canonical binding",
+      "binding_method": "persisted_current_canonical_episode_id",
+      "historical_frozen_status": "included_strict",
+      "raw_record": {
+        "event_id": "UZH-20260513-01",
+        "date": "2026-05-13",
+        "event_time_local": "16:30",
+        "time_precision": "approx_minute",
+        "city_status": "exact_city",
+        "war_air_context": "confirmed",
+        "temporal_evidence": "exact_time_in_alert",
+        "production_alert_id": "UZH-ALERT-063",
+        "alert_start_local": "2026-05-13T14:55:36+03:00",
+        "alert_end_local": "2026-05-13T17:58:49+03:00",
+        "strict_count": "1",
+        "sensitivity_count": "1",
+        "final_status": "confirmed_strict",
+        "source_1": "https://suspilne.media/uzhhorod/1310486-bezpilotniki-nad-zakarpattam-13-travna-so-vidomo/",
+        "source_2": "https://zaxid.net/rosiyani_vdarili_bpla_po_kritichniy_infrastrukturi_na_zakarpatti_n1636937",
+        "source_3": "https://air-alarms.in.ua/region/zakarpatiia?filter=month&m=51",
+        "notes": "Суспільне: близько 16:30 в Ужгороді було чути звуки вибухів. Production proxy episode UZH-ALERT-063 = 14:55:36–17:58:49 Europe/Kyiv, тому подія лежить всередині точного епізоду."
+      },
+      "event_time": "2026-05-13 16:30 Europe/Kyiv"
+    }
+  ],
+  "sensitivity_only_events": [],
+  "review_events": [
+    {
+      "event_id": "UZH-20260401-LEAD",
+      "source_url": "https://suspilne.media/uzhhorod/1279010-pisla-ataki-rf-poskodzeno-obekti-energeticnoi-infrastrukturi-na-zakarpatti-so-vidomo/",
+      "evidence": "Удар підтверджено в районах Закарпаття, але retained evidence не дає достатньої exact-city прив'язки до міста Ужгород; подія не рахується.",
+      "decision_basis": "excluded_not_exact_city; non-counted negative control",
+      "raw_record": {
+        "event_id": "UZH-20260401-LEAD",
+        "date": "2026-04-01",
+        "city_status": "not_exact_city",
+        "war_air_context": "confirmed",
+        "temporal_evidence": "attack_during_alert",
+        "final_status": "excluded_not_exact_city"
+      }
+    }
+  ],
+  "final_counts": {
+    "alerts_total": 92,
+    "strict_n": 1,
+    "sensitivity_n": 1
+  },
+  "checks": {
+    "canonical_positive_ids_unique": true,
+    "strict_rows": 1,
+    "sensitivity_only_rows": 0
+  }
+}
