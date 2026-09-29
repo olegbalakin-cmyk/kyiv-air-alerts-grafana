@@ -1,0 +1,1240 @@
+{
+  "schema_version": 1,
+  "inventory_date": "2026-09-29",
+  "repository": "olegbalakin-cmyk/kyiv-air-alerts-grafana",
+  "authoritative_branch": "multicity-wip-2026-09-16",
+  "authoritative_head": "bdc0188020aa39cc8164ff58218e6aac4868f54b",
+  "authoritative_parent": "8342a11f70351aa03a3555b7dcb91a0a98932483",
+  "inventory_branch": "historical-replay-10city-corpus-recovery-inventory-2026-09-29",
+  "role": "read-only historical replay recovery inventory",
+  "metric": "% alert episodes with >=1 confirmed attack event",
+  "unit": "alert episode",
+  "replay_through": "2026-09-17",
+  "city_order": [
+    "chernivtsi",
+    "ivano_frankivsk",
+    "khmelnytskyi",
+    "lutsk",
+    "poltava",
+    "rivne",
+    "ternopil",
+    "uzhhorod",
+    "vinnytsia",
+    "zhytomyr"
+  ],
+  "protected_scope": {
+    "no_evidence_mutation": true,
+    "no_alert_slice_mutation": true,
+    "no_replay_or_classifier_change": true,
+    "no_baseline_change": true,
+    "no_db_neon": true,
+    "no_main_or_site_prod": true,
+    "no_6863_campaign": true,
+    "no_dnipro_kharkiv_kherson_mykolaiv_odesa_work": true,
+    "committed_paths": [
+      "research/historical_replay_10city_corpus_recovery_inventory_2026-09-29.json"
+    ]
+  },
+  "source_preflight": {
+    "latest_attempt": {
+      "run_id": 36580776110,
+      "job_id": 109448061184,
+      "conclusion": "failure_before_source_inventory",
+      "blocking_assertion": {
+        "component": "monitor_explosion_candidates.py --self-test",
+        "city_key": "kyiv",
+        "target_episode_id": "e97e6e816f96832d02c8b2cd",
+        "reason_code": "NO_SAFE_EPISODE_LEVEL_COMPOSITION"
+      },
+      "relevance": "unrelated non-hermetic/live-data monitor self-test issue; does not change the ten-city source inventory"
+    },
+    "last_successful_source_preflight": {
+      "run_id": 36492609746,
+      "job_id": 109164510694,
+      "artifact_id": 11001816812,
+      "result": "all ten target cities blocked only by MISSING_FROZEN_HISTORICAL_EVIDENCE_CORPUS"
+    },
+    "city_source_validation_reproduced_read_only": true,
+    "current_target_blocker_code": "MISSING_FROZEN_HISTORICAL_EVIDENCE_CORPUS"
+  },
+  "git_history_recovery": {
+    "prior_forensic_artifact": {
+      "path": "research/historical_17_city_corpus_gap_forensic_inventory_2026-09-27.json",
+      "commit": "87c0993fe87037729a947a812cc70f8d8fac729a",
+      "blob_sha": "ed9197dd2458ad4652de07941b2cc00d4cb85fc9"
+    },
+    "reachable_branch_tree_search_result": "No deleted/hidden replay-grade final_evidence was found for the nine non-Zhytomyr targets. Zhytomyr history contains only working_evidence.json versions, not final_evidence.json.",
+    "action_artifact_search_result": "No historical evidence corpus for a target city was found in discoverable workflow artifacts. Two Zhytomyr-named monitor runs had no artifacts; the retained preflight artifact is source-validation output, not evidence."
+  },
+  "cities": {
+    "chernivtsi": {
+      "city": "chernivtsi",
+      "denominator": 113,
+      "strict": 2,
+      "sensitivity": 2,
+      "alert_episode_corpus": {
+        "source_files": [
+          "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/chernivtsi-historical-recovery_alerts.json"
+        ],
+        "source_blob_sha": "901041e6487d19dff5ab2c5e8ba22f6fc1075d70",
+        "expected_denominator": 113,
+        "raw_slice_episodes": 113,
+        "episodes_inside_accepted_coverage": 113,
+        "difference": 0,
+        "episode_count": 113,
+        "unique_episode_ids": 113,
+        "duplicate_episode_ids": 0,
+        "invalid_start_end_intervals": 0,
+        "accepted_coverage": {
+          "start": "2025-11-06",
+          "end": "2026-09-17"
+        },
+        "assignment_rule": "alert start date in Europe/Kyiv",
+        "historical_cutoff": "2026-09-17",
+        "corrected_expected_count": 113,
+        "pre_repair_reconstructed_count": 0,
+        "complete": true,
+        "alert_corpus_work": "DONE",
+        "provenance": {
+          "corrected_reconciliation_artifact": "research/historical_17_city_corrected_baseline_reconciliation_2026-09-27.json",
+          "corrected_reconciliation_artifact_commit": "89f3304e91ae5bbf1bdeb7fd13f1a18b480e4e99",
+          "alert_corpus_materialization_commit": "5d170974829092aaa93b95ca77c3871f8976e08b",
+          "verified_public_upstream_repository": "Vadimkin/ukrainian-air-raid-sirens-dataset",
+          "verified_public_upstream_path": "datasets/official_data_uk.csv",
+          "verified_public_upstream_git_blob_sha": "71d70c0ca54968f530d596cf315616fa858800e1",
+          "denominator_source_type": "raion_proxy",
+          "production_adapter_type": "production_proxy_assembled",
+          "production_adapter_name": "Чернівецький район + explicit Чернівецька область",
+          "explicit_oblast_union": true,
+          "recovery_buckets": {
+            "verified_public_upstream_only": 93,
+            "retained_and_upstream": 13,
+            "retained_primary_only": 7
+          }
+        },
+        "remaining_issue": null
+      },
+      "historical_evidence_corpus": {
+        "final_evidence_present": false,
+        "working_evidence_present": false,
+        "working_evidence_path": null,
+        "working_evidence_blob_sha": null,
+        "historical_versions_found": [],
+        "history_classification": [
+          "NEVER_CREATED",
+          "PRESENT_AS_SUMMARY_ONLY"
+        ],
+        "retained_record_count": 0,
+        "frozen_positive_count": 2,
+        "reconstructable_count": 0,
+        "source_reinspection_count": 0,
+        "full_research_count": 2,
+        "date_summary_only_count": 2,
+        "aggregate_only_unidentified_positive_count": 0,
+        "retained_source_url_count": 0,
+        "retained_quote_excerpt_count": 0,
+        "retained_event_or_temporal_locator_count": 0,
+        "retained_exact_city_evidence_count": 0,
+        "retained_attack_event_fact_count": 0,
+        "retained_aerial_attack_context_count": 0,
+        "retained_same_attack_relation_count": 0,
+        "strict_date_or_daily_summary": [
+          "2026-01-24",
+          "2026-05-13"
+        ],
+        "evidence_like_non_frozen_material": null
+      },
+      "coverage_provenance": {
+        "accepted_start": "2025-11-06",
+        "source_audit_candidate_start": "2022-06-07",
+        "explanation_status": "DERIVED_BY_RECOVERY_LOGIC",
+        "explanation_basis": "source_observed",
+        "source_choice_reopen_required": false
+      },
+      "current_replay_blockers": [
+        "MISSING_FROZEN_HISTORICAL_EVIDENCE_CORPUS"
+      ],
+      "evidence_binding_errors_observed": [],
+      "replay_ready": false,
+      "recoverability_tier": "C",
+      "recommended_recovery_strategy": [
+        "R4"
+      ],
+      "external_web_research_required": true,
+      "recommended_next_proof": "Re-research the two frozen strict positive dates (2026-01-24, 2026-05-13), build replay-grade retained evidence with canonical episode binding, then prove replay 2 strict / 2 sensitivity."
+    },
+    "ivano_frankivsk": {
+      "city": "ivano_frankivsk",
+      "denominator": 103,
+      "strict": 6,
+      "sensitivity": 6,
+      "alert_episode_corpus": {
+        "source_files": [
+          "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/ivano_frankivsk-historical-recovery_alerts.json"
+        ],
+        "source_blob_sha": "66d55b75e490363b2b491f1b378f7463b36b8621",
+        "expected_denominator": 103,
+        "raw_slice_episodes": 103,
+        "episodes_inside_accepted_coverage": 103,
+        "difference": 0,
+        "episode_count": 103,
+        "unique_episode_ids": 103,
+        "duplicate_episode_ids": 0,
+        "invalid_start_end_intervals": 0,
+        "accepted_coverage": {
+          "start": "2025-11-06",
+          "end": "2026-09-17"
+        },
+        "assignment_rule": "alert start date in Europe/Kyiv",
+        "historical_cutoff": "2026-09-17",
+        "corrected_expected_count": 103,
+        "pre_repair_reconstructed_count": 0,
+        "complete": true,
+        "alert_corpus_work": "DONE",
+        "provenance": {
+          "corrected_reconciliation_artifact": "research/historical_17_city_corrected_baseline_reconciliation_2026-09-27.json",
+          "corrected_reconciliation_artifact_commit": "89f3304e91ae5bbf1bdeb7fd13f1a18b480e4e99",
+          "alert_corpus_materialization_commit": "5d170974829092aaa93b95ca77c3871f8976e08b",
+          "verified_public_upstream_repository": "Vadimkin/ukrainian-air-raid-sirens-dataset",
+          "verified_public_upstream_path": "datasets/official_data_uk.csv",
+          "verified_public_upstream_git_blob_sha": "71d70c0ca54968f530d596cf315616fa858800e1",
+          "denominator_source_type": "raion_proxy",
+          "production_adapter_type": "production_proxy_assembled",
+          "production_adapter_name": "Івано-Франківський район + explicit Івано-Франківська область",
+          "explicit_oblast_union": true,
+          "recovery_buckets": {
+            "verified_public_upstream_only": 83,
+            "retained_and_upstream": 14,
+            "retained_primary_only": 6
+          }
+        },
+        "remaining_issue": null
+      },
+      "historical_evidence_corpus": {
+        "final_evidence_present": false,
+        "working_evidence_present": false,
+        "working_evidence_path": null,
+        "working_evidence_blob_sha": null,
+        "historical_versions_found": [],
+        "history_classification": [
+          "NEVER_CREATED",
+          "PRESENT_AS_SUMMARY_ONLY"
+        ],
+        "retained_record_count": 0,
+        "frozen_positive_count": 6,
+        "reconstructable_count": 0,
+        "source_reinspection_count": 0,
+        "full_research_count": 6,
+        "date_summary_only_count": 6,
+        "aggregate_only_unidentified_positive_count": 0,
+        "retained_source_url_count": 0,
+        "retained_quote_excerpt_count": 0,
+        "retained_event_or_temporal_locator_count": 0,
+        "retained_exact_city_evidence_count": 0,
+        "retained_attack_event_fact_count": 0,
+        "retained_aerial_attack_context_count": 0,
+        "retained_same_attack_relation_count": 0,
+        "strict_date_or_daily_summary": [
+          "2025-11-19",
+          "2026-02-07",
+          "2026-03-24",
+          "2026-05-13",
+          "2026-07-30",
+          "2026-09-13"
+        ],
+        "evidence_like_non_frozen_material": null
+      },
+      "coverage_provenance": {
+        "accepted_start": "2025-11-06",
+        "source_audit_candidate_start": "2025-11-06",
+        "explanation_status": "DERIVED_BY_RECOVERY_LOGIC",
+        "explanation_basis": "source_observed",
+        "source_choice_reopen_required": false
+      },
+      "current_replay_blockers": [
+        "MISSING_FROZEN_HISTORICAL_EVIDENCE_CORPUS"
+      ],
+      "evidence_binding_errors_observed": [],
+      "replay_ready": false,
+      "recoverability_tier": "C",
+      "recommended_recovery_strategy": [
+        "R4"
+      ],
+      "external_web_research_required": true,
+      "recommended_next_proof": "Re-research the six frozen strict positive dates, retain source/evidence/temporal roles, bind to canonical episodes, then prove replay 6 strict / 6 sensitivity."
+    },
+    "khmelnytskyi": {
+      "city": "khmelnytskyi",
+      "denominator": 248,
+      "strict": 11,
+      "sensitivity": 12,
+      "alert_episode_corpus": {
+        "source_files": [
+          "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/khmelnytskyi-historical-recovery_alerts.json"
+        ],
+        "source_blob_sha": "454a58cb21acb891f0fd3f270af5877acf89bd2f",
+        "expected_denominator": 248,
+        "raw_slice_episodes": 248,
+        "episodes_inside_accepted_coverage": 248,
+        "difference": 0,
+        "episode_count": 248,
+        "unique_episode_ids": 248,
+        "duplicate_episode_ids": 0,
+        "invalid_start_end_intervals": 0,
+        "accepted_coverage": {
+          "start": "2025-07-07",
+          "end": "2026-09-17"
+        },
+        "assignment_rule": "alert start date in Europe/Kyiv",
+        "historical_cutoff": "2026-09-17",
+        "corrected_expected_count": 248,
+        "pre_repair_reconstructed_count": 0,
+        "complete": true,
+        "alert_corpus_work": "DONE",
+        "provenance": {
+          "corrected_reconciliation_artifact": "research/historical_17_city_corrected_baseline_reconciliation_2026-09-27.json",
+          "corrected_reconciliation_artifact_commit": "89f3304e91ae5bbf1bdeb7fd13f1a18b480e4e99",
+          "alert_corpus_materialization_commit": "5d170974829092aaa93b95ca77c3871f8976e08b",
+          "verified_public_upstream_repository": "Vadimkin/ukrainian-air-raid-sirens-dataset",
+          "verified_public_upstream_path": "datasets/official_data_uk.csv",
+          "verified_public_upstream_git_blob_sha": "71d70c0ca54968f530d596cf315616fa858800e1",
+          "denominator_source_type": "raion_proxy",
+          "production_adapter_type": "production_proxy_assembled",
+          "production_adapter_name": "Хмельницький район + explicit Хмельницька область",
+          "explicit_oblast_union": true,
+          "recovery_buckets": {
+            "verified_public_upstream_only": 229,
+            "retained_primary_only": 19
+          }
+        },
+        "remaining_issue": null
+      },
+      "historical_evidence_corpus": {
+        "final_evidence_present": false,
+        "working_evidence_present": false,
+        "working_evidence_path": null,
+        "working_evidence_blob_sha": null,
+        "historical_versions_found": [],
+        "history_classification": [
+          "NEVER_CREATED",
+          "PRESENT_AS_SUMMARY_ONLY"
+        ],
+        "retained_record_count": 0,
+        "frozen_positive_count": 12,
+        "reconstructable_count": 0,
+        "source_reinspection_count": 0,
+        "full_research_count": 12,
+        "date_summary_only_count": 11,
+        "aggregate_only_unidentified_positive_count": 1,
+        "retained_source_url_count": 0,
+        "retained_quote_excerpt_count": 0,
+        "retained_event_or_temporal_locator_count": 0,
+        "retained_exact_city_evidence_count": 0,
+        "retained_attack_event_fact_count": 0,
+        "retained_aerial_attack_context_count": 0,
+        "retained_same_attack_relation_count": 0,
+        "strict_date_or_daily_summary": [
+          "2025-09-02",
+          "2025-09-03",
+          "2025-12-27",
+          "2026-01-18",
+          "2026-04-01",
+          "2026-05-13",
+          "2026-09-02",
+          "2026-09-05",
+          "2026-09-09",
+          "2026-09-10",
+          "2026-09-13"
+        ],
+        "evidence_like_non_frozen_material": null
+      },
+      "coverage_provenance": {
+        "accepted_start": "2025-07-07",
+        "source_audit_candidate_start": "2025-07-26",
+        "explanation_status": "EXPLICITLY_PROVEN",
+        "explanation_basis": "official_rollout",
+        "source_choice_reopen_required": false
+      },
+      "current_replay_blockers": [
+        "MISSING_FROZEN_HISTORICAL_EVIDENCE_CORPUS"
+      ],
+      "evidence_binding_errors_observed": [],
+      "replay_ready": false,
+      "recoverability_tier": "C",
+      "recommended_recovery_strategy": [
+        "R4"
+      ],
+      "external_web_research_required": true,
+      "recommended_next_proof": "Re-research the 11 date-scoped strict positives and identify/research the one additional sensitivity-only positive whose episode/date identity is not retained; then prove replay 11 strict / 12 sensitivity."
+    },
+    "lutsk": {
+      "city": "lutsk",
+      "denominator": 135,
+      "strict": 12,
+      "sensitivity": 12,
+      "alert_episode_corpus": {
+        "source_files": [
+          "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/lutsk-historical-recovery_alerts.json"
+        ],
+        "source_blob_sha": "973d258a41d8afc5ebe0ed256f3dce197d0f60dd",
+        "expected_denominator": 135,
+        "raw_slice_episodes": 135,
+        "episodes_inside_accepted_coverage": 135,
+        "difference": 0,
+        "episode_count": 135,
+        "unique_episode_ids": 135,
+        "duplicate_episode_ids": 0,
+        "invalid_start_end_intervals": 0,
+        "accepted_coverage": {
+          "start": "2025-11-06",
+          "end": "2026-09-17"
+        },
+        "assignment_rule": "alert start date in Europe/Kyiv",
+        "historical_cutoff": "2026-09-17",
+        "corrected_expected_count": 135,
+        "pre_repair_reconstructed_count": 0,
+        "complete": true,
+        "alert_corpus_work": "DONE",
+        "provenance": {
+          "corrected_reconciliation_artifact": "research/historical_17_city_corrected_baseline_reconciliation_2026-09-27.json",
+          "corrected_reconciliation_artifact_commit": "89f3304e91ae5bbf1bdeb7fd13f1a18b480e4e99",
+          "alert_corpus_materialization_commit": "5d170974829092aaa93b95ca77c3871f8976e08b",
+          "verified_public_upstream_repository": "Vadimkin/ukrainian-air-raid-sirens-dataset",
+          "verified_public_upstream_path": "datasets/official_data_uk.csv",
+          "verified_public_upstream_git_blob_sha": "71d70c0ca54968f530d596cf315616fa858800e1",
+          "denominator_source_type": "raion_proxy",
+          "production_adapter_type": "production_proxy_assembled",
+          "production_adapter_name": "Луцький район + explicit Волинська область",
+          "explicit_oblast_union": true,
+          "recovery_buckets": {
+            "verified_public_upstream_only": 115,
+            "retained_primary_only": 16,
+            "retained_and_upstream": 4
+          }
+        },
+        "remaining_issue": null
+      },
+      "historical_evidence_corpus": {
+        "final_evidence_present": false,
+        "working_evidence_present": false,
+        "working_evidence_path": null,
+        "working_evidence_blob_sha": null,
+        "historical_versions_found": [],
+        "history_classification": [
+          "NEVER_CREATED",
+          "PRESENT_AS_SUMMARY_ONLY"
+        ],
+        "retained_record_count": 0,
+        "frozen_positive_count": 12,
+        "reconstructable_count": 0,
+        "source_reinspection_count": 0,
+        "full_research_count": 12,
+        "date_summary_only_count": 12,
+        "aggregate_only_unidentified_positive_count": 0,
+        "retained_source_url_count": 0,
+        "retained_quote_excerpt_count": 0,
+        "retained_event_or_temporal_locator_count": 0,
+        "retained_exact_city_evidence_count": 0,
+        "retained_attack_event_fact_count": 0,
+        "retained_aerial_attack_context_count": 0,
+        "retained_same_attack_relation_count": 0,
+        "strict_date_or_daily_summary": [
+          "2025-12-06",
+          "2026-01-01",
+          "2026-01-28",
+          "2026-01-28",
+          "2026-04-01",
+          "2026-05-13",
+          "2026-08-28",
+          "2026-09-03",
+          "2026-09-10",
+          "2026-09-10",
+          "2026-09-10",
+          "2026-09-12"
+        ],
+        "evidence_like_non_frozen_material": null
+      },
+      "coverage_provenance": {
+        "accepted_start": "2025-11-06",
+        "source_audit_candidate_start": "2025-11-06",
+        "explanation_status": "DERIVED_BY_RECOVERY_LOGIC",
+        "explanation_basis": "source_observed",
+        "source_choice_reopen_required": false
+      },
+      "current_replay_blockers": [
+        "MISSING_FROZEN_HISTORICAL_EVIDENCE_CORPUS"
+      ],
+      "evidence_binding_errors_observed": [],
+      "replay_ready": false,
+      "recoverability_tier": "C",
+      "recommended_recovery_strategy": [
+        "R4"
+      ],
+      "external_web_research_required": true,
+      "recommended_next_proof": "Re-research all 12 frozen strict positives, preserving same-day multiplicity (2026-01-28 x2; 2026-09-10 x3), bind each to a canonical episode, then prove replay 12 strict / 12 sensitivity."
+    },
+    "poltava": {
+      "city": "poltava",
+      "denominator": 1805,
+      "strict": 51,
+      "sensitivity": 53,
+      "alert_episode_corpus": {
+        "source_files": [
+          "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/poltava-historical-recovery_alerts.json"
+        ],
+        "source_blob_sha": "c138fdd06240c7c0360999e9f42b6fb4fa04cf89",
+        "expected_denominator": 1805,
+        "raw_slice_episodes": 1805,
+        "episodes_inside_accepted_coverage": 1805,
+        "difference": 0,
+        "episode_count": 1805,
+        "unique_episode_ids": 1805,
+        "duplicate_episode_ids": 0,
+        "invalid_start_end_intervals": 0,
+        "accepted_coverage": {
+          "start": "2025-08-01",
+          "end": "2026-09-17"
+        },
+        "assignment_rule": "alert start date in Europe/Kyiv",
+        "historical_cutoff": "2026-09-17",
+        "corrected_expected_count": 1805,
+        "pre_repair_reconstructed_count": 0,
+        "complete": true,
+        "alert_corpus_work": "DONE",
+        "provenance": {
+          "corrected_reconciliation_artifact": "research/historical_17_city_corrected_baseline_reconciliation_2026-09-27.json",
+          "corrected_reconciliation_artifact_commit": "89f3304e91ae5bbf1bdeb7fd13f1a18b480e4e99",
+          "alert_corpus_materialization_commit": "5d170974829092aaa93b95ca77c3871f8976e08b",
+          "verified_public_upstream_repository": "Vadimkin/ukrainian-air-raid-sirens-dataset",
+          "verified_public_upstream_path": "datasets/official_data_uk.csv",
+          "verified_public_upstream_git_blob_sha": "71d70c0ca54968f530d596cf315616fa858800e1",
+          "denominator_source_type": "raion_proxy",
+          "production_adapter_type": "production_proxy_assembled",
+          "production_adapter_name": "Полтавський район + explicit Полтавська область",
+          "explicit_oblast_union": true,
+          "recovery_buckets": {
+            "verified_public_upstream_only": 1731,
+            "retained_and_upstream": 1,
+            "retained_primary_only": 73
+          }
+        },
+        "remaining_issue": null
+      },
+      "historical_evidence_corpus": {
+        "final_evidence_present": false,
+        "working_evidence_present": false,
+        "working_evidence_path": null,
+        "working_evidence_blob_sha": null,
+        "historical_versions_found": [],
+        "history_classification": [
+          "NEVER_CREATED",
+          "PRESENT_AS_SUMMARY_ONLY"
+        ],
+        "retained_record_count": 0,
+        "frozen_positive_count": 53,
+        "reconstructable_count": 0,
+        "source_reinspection_count": 0,
+        "full_research_count": 53,
+        "date_summary_only_count": 51,
+        "aggregate_only_unidentified_positive_count": 2,
+        "retained_source_url_count": 0,
+        "retained_quote_excerpt_count": 0,
+        "retained_event_or_temporal_locator_count": 0,
+        "retained_exact_city_evidence_count": 0,
+        "retained_attack_event_fact_count": 0,
+        "retained_aerial_attack_context_count": 0,
+        "retained_same_attack_relation_count": 0,
+        "strict_date_or_daily_summary": {
+          "2025-08-29": 1,
+          "2025-09-17": 1,
+          "2025-10-02": 1,
+          "2025-10-06": 1,
+          "2025-10-15": 1,
+          "2025-10-17": 1,
+          "2025-12-05": 1,
+          "2026-01-04": 1,
+          "2026-02-11": 1,
+          "2026-02-22": 1,
+          "2026-02-25": 1,
+          "2026-03-03": 1,
+          "2026-03-23": 1,
+          "2026-03-30": 1,
+          "2026-04-01": 1,
+          "2026-04-03": 1,
+          "2026-04-07": 1,
+          "2026-04-08": 2,
+          "2026-04-19": 2,
+          "2026-04-27": 1,
+          "2026-05-02": 1,
+          "2026-05-04": 1,
+          "2026-05-13": 1,
+          "2026-05-16": 1,
+          "2026-05-22": 3,
+          "2026-05-25": 1,
+          "2026-05-26": 1,
+          "2026-05-28": 1,
+          "2026-05-30": 1,
+          "2026-06-04": 2,
+          "2026-06-05": 1,
+          "2026-06-06": 1,
+          "2026-06-11": 1,
+          "2026-06-18": 1,
+          "2026-06-20": 1,
+          "2026-06-23": 1,
+          "2026-07-01": 1,
+          "2026-07-07": 1,
+          "2026-07-17": 1,
+          "2026-07-20": 2,
+          "2026-07-29": 1,
+          "2026-08-11": 1,
+          "2026-08-16": 1,
+          "2026-08-28": 1,
+          "2026-09-05": 1
+        },
+        "evidence_like_non_frozen_material": null,
+        "special_assessment": {
+          "trend_available_in_preview": false,
+          "strict_daily_summary_retained": true,
+          "strict_daily_summary_count": 51,
+          "conclusion": "Poltava is not blocked by its 1805-episode denominator. Its distinctive problem is missing replay-grade evidence for 51 strict positives plus two sensitivity-only positives whose episode/date identity is not retained."
+        }
+      },
+      "coverage_provenance": {
+        "accepted_start": "2025-08-01",
+        "source_audit_candidate_start": "2025-08-01",
+        "explanation_status": "EXPLICITLY_PROVEN",
+        "explanation_basis": "official_rollout",
+        "source_choice_reopen_required": false
+      },
+      "current_replay_blockers": [
+        "MISSING_FROZEN_HISTORICAL_EVIDENCE_CORPUS"
+      ],
+      "evidence_binding_errors_observed": [],
+      "replay_ready": false,
+      "recoverability_tier": "C",
+      "recommended_recovery_strategy": [
+        "R4"
+      ],
+      "external_web_research_required": true,
+      "recommended_next_proof": "Run a dedicated positive-event re-research campaign: recover evidence for all 51 strict date-level positives (respecting same-day multiplicity) and identify/research the two additional sensitivity-only positives; then prove replay 51 strict / 53 sensitivity."
+    },
+    "rivne": {
+      "city": "rivne",
+      "denominator": 232,
+      "strict": 13,
+      "sensitivity": 13,
+      "alert_episode_corpus": {
+        "source_files": [
+          "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/rivne-historical-recovery_alerts.json"
+        ],
+        "source_blob_sha": "65272fd0ab04b0af4bdd677afa6ff3ef37ed3c78",
+        "expected_denominator": 232,
+        "raw_slice_episodes": 232,
+        "episodes_inside_accepted_coverage": 232,
+        "difference": 0,
+        "episode_count": 232,
+        "unique_episode_ids": 232,
+        "duplicate_episode_ids": 0,
+        "invalid_start_end_intervals": 0,
+        "accepted_coverage": {
+          "start": "2025-08-01",
+          "end": "2026-09-17"
+        },
+        "assignment_rule": "alert start date in Europe/Kyiv",
+        "historical_cutoff": "2026-09-17",
+        "corrected_expected_count": 232,
+        "pre_repair_reconstructed_count": 0,
+        "complete": true,
+        "alert_corpus_work": "DONE",
+        "provenance": {
+          "corrected_reconciliation_artifact": "research/historical_17_city_corrected_baseline_reconciliation_2026-09-27.json",
+          "corrected_reconciliation_artifact_commit": "89f3304e91ae5bbf1bdeb7fd13f1a18b480e4e99",
+          "alert_corpus_materialization_commit": "5d170974829092aaa93b95ca77c3871f8976e08b",
+          "verified_public_upstream_repository": "Vadimkin/ukrainian-air-raid-sirens-dataset",
+          "verified_public_upstream_path": "datasets/official_data_uk.csv",
+          "verified_public_upstream_git_blob_sha": "71d70c0ca54968f530d596cf315616fa858800e1",
+          "denominator_source_type": "raion_proxy",
+          "production_adapter_type": "production_proxy_assembled",
+          "production_adapter_name": "Рівненський район + explicit Рівненська область",
+          "explicit_oblast_union": true,
+          "recovery_buckets": {
+            "verified_public_upstream_only": 208,
+            "retained_primary_only": 24
+          }
+        },
+        "remaining_issue": null
+      },
+      "historical_evidence_corpus": {
+        "final_evidence_present": false,
+        "working_evidence_present": false,
+        "working_evidence_path": null,
+        "working_evidence_blob_sha": null,
+        "historical_versions_found": [],
+        "history_classification": [
+          "NEVER_CREATED",
+          "PRESENT_AS_SUMMARY_ONLY"
+        ],
+        "retained_record_count": 0,
+        "frozen_positive_count": 13,
+        "reconstructable_count": 0,
+        "source_reinspection_count": 0,
+        "full_research_count": 13,
+        "date_summary_only_count": 13,
+        "aggregate_only_unidentified_positive_count": 0,
+        "retained_source_url_count": 0,
+        "retained_quote_excerpt_count": 0,
+        "retained_event_or_temporal_locator_count": 0,
+        "retained_exact_city_evidence_count": 0,
+        "retained_attack_event_fact_count": 0,
+        "retained_aerial_attack_context_count": 0,
+        "retained_same_attack_relation_count": 0,
+        "strict_date_or_daily_summary": [
+          "2025-08-21",
+          "2025-09-02",
+          "2025-09-09",
+          "2025-09-13",
+          "2025-10-05",
+          "2025-12-23",
+          "2026-01-20",
+          "2026-02-07",
+          "2026-05-01",
+          "2026-05-13",
+          "2026-05-18",
+          "2026-09-05",
+          "2026-09-12"
+        ],
+        "evidence_like_non_frozen_material": {
+          "path": "kyiv-air-alerts-grafana/data/explosion_review_batches/rivne_batch_1.json",
+          "blob_sha": "90bfd9577e524ab0103da0d2ef1037a506ba60c8",
+          "record_count": 8,
+          "disposition": "all rejected; later non-aerial electrical incident; not evidence for the frozen 13 positives"
+        }
+      },
+      "coverage_provenance": {
+        "accepted_start": "2025-08-01",
+        "source_audit_candidate_start": "2025-08-01",
+        "explanation_status": "EXPLICITLY_PROVEN",
+        "explanation_basis": "official_rollout",
+        "source_choice_reopen_required": false
+      },
+      "current_replay_blockers": [
+        "MISSING_FROZEN_HISTORICAL_EVIDENCE_CORPUS"
+      ],
+      "evidence_binding_errors_observed": [],
+      "replay_ready": false,
+      "recoverability_tier": "C",
+      "recommended_recovery_strategy": [
+        "R4"
+      ],
+      "external_web_research_required": true,
+      "recommended_next_proof": "Re-research the 13 frozen strict dates and bind them to canonical episodes. The current rivne_batch_1 review material is post-baseline rejected non-aerial evidence and must not be reused as frozen positive evidence."
+    },
+    "ternopil": {
+      "city": "ternopil",
+      "denominator": 125,
+      "strict": 5,
+      "sensitivity": 5,
+      "alert_episode_corpus": {
+        "source_files": [
+          "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/ternopil-historical-recovery_alerts.json"
+        ],
+        "source_blob_sha": "9f8a779520741c06afc89f1e607699e4680e9357",
+        "expected_denominator": 125,
+        "raw_slice_episodes": 125,
+        "episodes_inside_accepted_coverage": 125,
+        "difference": 0,
+        "episode_count": 125,
+        "unique_episode_ids": 125,
+        "duplicate_episode_ids": 0,
+        "invalid_start_end_intervals": 0,
+        "accepted_coverage": {
+          "start": "2025-11-06",
+          "end": "2026-09-17"
+        },
+        "assignment_rule": "alert start date in Europe/Kyiv",
+        "historical_cutoff": "2026-09-17",
+        "corrected_expected_count": 125,
+        "pre_repair_reconstructed_count": 0,
+        "complete": true,
+        "alert_corpus_work": "DONE",
+        "provenance": {
+          "corrected_reconciliation_artifact": "research/historical_17_city_corrected_baseline_reconciliation_2026-09-27.json",
+          "corrected_reconciliation_artifact_commit": "89f3304e91ae5bbf1bdeb7fd13f1a18b480e4e99",
+          "alert_corpus_materialization_commit": "5d170974829092aaa93b95ca77c3871f8976e08b",
+          "verified_public_upstream_repository": "Vadimkin/ukrainian-air-raid-sirens-dataset",
+          "verified_public_upstream_path": "datasets/official_data_uk.csv",
+          "verified_public_upstream_git_blob_sha": "71d70c0ca54968f530d596cf315616fa858800e1",
+          "denominator_source_type": "raion_proxy",
+          "production_adapter_type": "production_proxy_assembled",
+          "production_adapter_name": "Тернопільський район + explicit Тернопільська область",
+          "explicit_oblast_union": true,
+          "recovery_buckets": {
+            "verified_public_upstream_only": 105,
+            "retained_and_upstream": 9,
+            "retained_primary_only": 11
+          }
+        },
+        "remaining_issue": null
+      },
+      "historical_evidence_corpus": {
+        "final_evidence_present": false,
+        "working_evidence_present": false,
+        "working_evidence_path": null,
+        "working_evidence_blob_sha": null,
+        "historical_versions_found": [],
+        "history_classification": [
+          "NEVER_CREATED",
+          "PRESENT_AS_SUMMARY_ONLY"
+        ],
+        "retained_record_count": 0,
+        "frozen_positive_count": 5,
+        "reconstructable_count": 0,
+        "source_reinspection_count": 0,
+        "full_research_count": 5,
+        "date_summary_only_count": 5,
+        "aggregate_only_unidentified_positive_count": 0,
+        "retained_source_url_count": 0,
+        "retained_quote_excerpt_count": 0,
+        "retained_event_or_temporal_locator_count": 0,
+        "retained_exact_city_evidence_count": 0,
+        "retained_attack_event_fact_count": 0,
+        "retained_aerial_attack_context_count": 0,
+        "retained_same_attack_relation_count": 0,
+        "strict_date_or_daily_summary": [
+          "2025-11-19",
+          "2026-03-24",
+          "2026-05-01",
+          "2026-09-02",
+          "2026-09-13"
+        ],
+        "evidence_like_non_frozen_material": null
+      },
+      "coverage_provenance": {
+        "accepted_start": "2025-11-06",
+        "source_audit_candidate_start": "2025-11-06",
+        "explanation_status": "DERIVED_BY_RECOVERY_LOGIC",
+        "explanation_basis": "source_observed/stable-start recovery logic",
+        "source_choice_reopen_required": false
+      },
+      "current_replay_blockers": [
+        "MISSING_FROZEN_HISTORICAL_EVIDENCE_CORPUS"
+      ],
+      "evidence_binding_errors_observed": [],
+      "replay_ready": false,
+      "recoverability_tier": "C",
+      "recommended_recovery_strategy": [
+        "R4"
+      ],
+      "external_web_research_required": true,
+      "recommended_next_proof": "Re-research the five frozen strict dates, retain replay-grade evidence and canonical bindings, then prove replay 5 strict / 5 sensitivity."
+    },
+    "uzhhorod": {
+      "city": "uzhhorod",
+      "denominator": 92,
+      "strict": 1,
+      "sensitivity": 1,
+      "alert_episode_corpus": {
+        "source_files": [
+          "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/uzhhorod-historical-recovery_alerts.json"
+        ],
+        "source_blob_sha": "1c2acc3a34ed29522735098acb794da565ef93fa",
+        "expected_denominator": 92,
+        "raw_slice_episodes": 92,
+        "episodes_inside_accepted_coverage": 92,
+        "difference": 0,
+        "episode_count": 92,
+        "unique_episode_ids": 92,
+        "duplicate_episode_ids": 0,
+        "invalid_start_end_intervals": 0,
+        "accepted_coverage": {
+          "start": "2025-11-06",
+          "end": "2026-09-17"
+        },
+        "assignment_rule": "alert start date in Europe/Kyiv",
+        "historical_cutoff": "2026-09-17",
+        "corrected_expected_count": 92,
+        "pre_repair_reconstructed_count": 0,
+        "complete": true,
+        "alert_corpus_work": "DONE",
+        "provenance": {
+          "corrected_reconciliation_artifact": "research/historical_17_city_corrected_baseline_reconciliation_2026-09-27.json",
+          "corrected_reconciliation_artifact_commit": "89f3304e91ae5bbf1bdeb7fd13f1a18b480e4e99",
+          "alert_corpus_materialization_commit": "5d170974829092aaa93b95ca77c3871f8976e08b",
+          "verified_public_upstream_repository": "Vadimkin/ukrainian-air-raid-sirens-dataset",
+          "verified_public_upstream_path": "datasets/official_data_uk.csv",
+          "verified_public_upstream_git_blob_sha": "71d70c0ca54968f530d596cf315616fa858800e1",
+          "denominator_source_type": "raion_proxy",
+          "production_adapter_type": "production_proxy_assembled",
+          "production_adapter_name": "Ужгородський район + explicit Закарпатська область",
+          "explicit_oblast_union": true,
+          "recovery_buckets": {
+            "verified_public_upstream_only": 72,
+            "retained_and_upstream": 17,
+            "retained_primary_only": 3
+          }
+        },
+        "remaining_issue": null
+      },
+      "historical_evidence_corpus": {
+        "final_evidence_present": false,
+        "working_evidence_present": false,
+        "working_evidence_path": null,
+        "working_evidence_blob_sha": null,
+        "historical_versions_found": [],
+        "history_classification": [
+          "NEVER_CREATED",
+          "PRESENT_AS_SUMMARY_ONLY"
+        ],
+        "retained_record_count": 0,
+        "frozen_positive_count": 1,
+        "reconstructable_count": 0,
+        "source_reinspection_count": 0,
+        "full_research_count": 1,
+        "date_summary_only_count": 1,
+        "aggregate_only_unidentified_positive_count": 0,
+        "retained_source_url_count": 0,
+        "retained_quote_excerpt_count": 0,
+        "retained_event_or_temporal_locator_count": 0,
+        "retained_exact_city_evidence_count": 0,
+        "retained_attack_event_fact_count": 0,
+        "retained_aerial_attack_context_count": 0,
+        "retained_same_attack_relation_count": 0,
+        "strict_date_or_daily_summary": [
+          "2026-05-13"
+        ],
+        "evidence_like_non_frozen_material": null
+      },
+      "coverage_provenance": {
+        "accepted_start": "2025-11-06",
+        "source_audit_candidate_start": "2025-11-06",
+        "explanation_status": "DERIVED_BY_RECOVERY_LOGIC",
+        "explanation_basis": "source_observed",
+        "source_choice_reopen_required": false
+      },
+      "current_replay_blockers": [
+        "MISSING_FROZEN_HISTORICAL_EVIDENCE_CORPUS"
+      ],
+      "evidence_binding_errors_observed": [],
+      "replay_ready": false,
+      "recoverability_tier": "C",
+      "recommended_recovery_strategy": [
+        "R4"
+      ],
+      "external_web_research_required": true,
+      "recommended_next_proof": "Re-research the sole frozen positive date 2026-05-13, create replay-grade evidence and bind it to the canonical episode, then prove replay 1 strict / 1 sensitivity."
+    },
+    "vinnytsia": {
+      "city": "vinnytsia",
+      "denominator": 362,
+      "strict": 5,
+      "sensitivity": 7,
+      "alert_episode_corpus": {
+        "source_files": [
+          "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/vinnytsia-historical-recovery_alerts.json"
+        ],
+        "source_blob_sha": "47496f33f140c25466468873090c43bafeb20dad",
+        "expected_denominator": 362,
+        "raw_slice_episodes": 362,
+        "episodes_inside_accepted_coverage": 362,
+        "difference": 0,
+        "episode_count": 362,
+        "unique_episode_ids": 362,
+        "duplicate_episode_ids": 0,
+        "invalid_start_end_intervals": 0,
+        "accepted_coverage": {
+          "start": "2025-08-21",
+          "end": "2026-09-17"
+        },
+        "assignment_rule": "alert start date in Europe/Kyiv",
+        "historical_cutoff": "2026-09-17",
+        "corrected_expected_count": 362,
+        "pre_repair_reconstructed_count": 0,
+        "complete": true,
+        "alert_corpus_work": "DONE",
+        "provenance": {
+          "corrected_reconciliation_artifact": "research/historical_17_city_corrected_baseline_reconciliation_2026-09-27.json",
+          "corrected_reconciliation_artifact_commit": "89f3304e91ae5bbf1bdeb7fd13f1a18b480e4e99",
+          "alert_corpus_materialization_commit": "5d170974829092aaa93b95ca77c3871f8976e08b",
+          "verified_public_upstream_repository": "Vadimkin/ukrainian-air-raid-sirens-dataset",
+          "verified_public_upstream_path": "datasets/official_data_uk.csv",
+          "verified_public_upstream_git_blob_sha": "71d70c0ca54968f530d596cf315616fa858800e1",
+          "denominator_source_type": "raion_proxy",
+          "production_adapter_type": "production_proxy_assembled",
+          "production_adapter_name": "Вінницький район + explicit Вінницька область",
+          "explicit_oblast_union": true,
+          "recovery_buckets": {
+            "verified_public_upstream_only": 332,
+            "retained_primary_only": 30
+          }
+        },
+        "remaining_issue": null
+      },
+      "historical_evidence_corpus": {
+        "final_evidence_present": false,
+        "working_evidence_present": false,
+        "working_evidence_path": null,
+        "working_evidence_blob_sha": null,
+        "historical_versions_found": [],
+        "history_classification": [
+          "NEVER_CREATED",
+          "PRESENT_AS_SUMMARY_ONLY"
+        ],
+        "retained_record_count": 0,
+        "frozen_positive_count": 7,
+        "reconstructable_count": 0,
+        "source_reinspection_count": 0,
+        "full_research_count": 7,
+        "date_summary_only_count": 5,
+        "aggregate_only_unidentified_positive_count": 2,
+        "retained_source_url_count": 0,
+        "retained_quote_excerpt_count": 0,
+        "retained_event_or_temporal_locator_count": 0,
+        "retained_exact_city_evidence_count": 0,
+        "retained_attack_event_fact_count": 0,
+        "retained_aerial_attack_context_count": 0,
+        "retained_same_attack_relation_count": 0,
+        "strict_date_or_daily_summary": [
+          "2025-09-10",
+          "2026-02-03",
+          "2026-02-07",
+          "2026-03-24",
+          "2026-09-02"
+        ],
+        "evidence_like_non_frozen_material": null
+      },
+      "coverage_provenance": {
+        "accepted_start": "2025-08-21",
+        "source_audit_candidate_start": "2022-06-09",
+        "explanation_status": "EXPLICITLY_PROVEN",
+        "explanation_basis": "official_rollout",
+        "source_choice_reopen_required": false
+      },
+      "current_replay_blockers": [
+        "MISSING_FROZEN_HISTORICAL_EVIDENCE_CORPUS"
+      ],
+      "evidence_binding_errors_observed": [],
+      "replay_ready": false,
+      "recoverability_tier": "C",
+      "recommended_recovery_strategy": [
+        "R4"
+      ],
+      "external_web_research_required": true,
+      "recommended_next_proof": "Re-research the five date-scoped strict positives and identify/research the two additional sensitivity-only positives whose episode/date identity is not retained; then prove replay 5 strict / 7 sensitivity."
+    },
+    "zhytomyr": {
+      "city": "zhytomyr",
+      "denominator": 685,
+      "strict": 19,
+      "sensitivity": 20,
+      "alert_episode_corpus": {
+        "source_files": [
+          "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zhytomyr-historical-recovery_alerts.json"
+        ],
+        "source_blob_sha": "9d8e3645c85f8d9d56af21f9603b8f9ce591bb8c",
+        "expected_denominator": 685,
+        "raw_slice_episodes": 685,
+        "episodes_inside_accepted_coverage": 685,
+        "difference": 0,
+        "episode_count": 685,
+        "unique_episode_ids": 685,
+        "duplicate_episode_ids": 0,
+        "invalid_start_end_intervals": 0,
+        "accepted_coverage": {
+          "start": "2025-01-23",
+          "end": "2026-09-17"
+        },
+        "assignment_rule": "alert start date in Europe/Kyiv",
+        "historical_cutoff": "2026-09-17",
+        "corrected_expected_count": 685,
+        "pre_repair_reconstructed_count": 0,
+        "complete": true,
+        "alert_corpus_work": "DONE",
+        "provenance": {
+          "corrected_reconciliation_artifact": "research/historical_17_city_corrected_baseline_reconciliation_2026-09-27.json",
+          "corrected_reconciliation_artifact_commit": "89f3304e91ae5bbf1bdeb7fd13f1a18b480e4e99",
+          "alert_corpus_materialization_commit": "5d170974829092aaa93b95ca77c3871f8976e08b",
+          "verified_public_upstream_repository": "Vadimkin/ukrainian-air-raid-sirens-dataset",
+          "verified_public_upstream_path": "datasets/official_data_uk.csv",
+          "verified_public_upstream_git_blob_sha": "71d70c0ca54968f530d596cf315616fa858800e1",
+          "denominator_source_type": "raion_proxy",
+          "production_adapter_type": "production_proxy_assembled",
+          "production_adapter_name": "Житомирський район + explicit Житомирська область",
+          "explicit_oblast_union": true,
+          "recovery_buckets": {
+            "verified_public_upstream_only": 648,
+            "retained_primary_only": 37
+          }
+        },
+        "remaining_issue": null
+      },
+      "historical_evidence_corpus": {
+        "final_evidence_present": false,
+        "working_evidence_present": true,
+        "working_evidence_path": "kyiv-air-alerts-grafana/data/explosion_research/zhytomyr/working_evidence.json",
+        "working_evidence_blob_sha": "1d442b1c190a812073491cbfebb462a35904d329",
+        "historical_versions_found": [
+          {
+            "commit": "4e1198061da4e344b0369b446c4bd2514fe46870",
+            "blob_sha": "925c5fb5c7de61d992d1c0ae7ce9161d0408ae5e",
+            "status": "in_progress",
+            "counted_strict_records": 11
+          },
+          {
+            "commit": "7c7d15c233a2f8718c9b83b0d7dad568eaca8677",
+            "blob_sha": "1d442b1c190a812073491cbfebb462a35904d329",
+            "status": "complete",
+            "counted_strict_records": 19,
+            "counted_sensitivity_only_records": 1,
+            "review_records": 1
+          }
+        ],
+        "history_classification": [
+          "PRESENT_ONLY_AS_WORKING_EVIDENCE"
+        ],
+        "retained_record_count": 21,
+        "frozen_positive_count": 20,
+        "reconstructable_count": 20,
+        "source_reinspection_count": 0,
+        "full_research_count": 0,
+        "date_summary_only_count": 0,
+        "aggregate_only_unidentified_positive_count": 0,
+        "retained_source_url_count": 20,
+        "retained_quote_excerpt_count": 20,
+        "retained_event_or_temporal_locator_count": 20,
+        "retained_exact_city_evidence_count": 20,
+        "retained_attack_event_fact_count": 20,
+        "retained_aerial_attack_context_count": 20,
+        "retained_same_attack_relation_count": 1,
+        "strict_date_or_daily_summary": [
+          "2025-03-30",
+          "2025-04-10",
+          "2025-04-23",
+          "2025-04-26",
+          "2025-05-07",
+          "2025-06-01",
+          "2025-07-09",
+          "2025-09-02",
+          "2025-09-10",
+          "2025-12-23",
+          "2026-03-24",
+          "2026-05-01",
+          "2026-05-12",
+          "2026-05-13",
+          "2026-07-23",
+          "2026-08-13",
+          "2026-08-19",
+          "2026-09-02",
+          "2026-09-05"
+        ],
+        "evidence_like_non_frozen_material": null,
+        "normalization_notes": {
+          "retained_positive_records": 20,
+          "target_counts": {
+            "strict": 19,
+            "sensitivity": 20
+          },
+          "bindability": "20/20 retain enough temporal/source material for canonical binding without new web research",
+          "special_bindings": [
+            {
+              "event_id": "zh_3",
+              "retained_alert_episode_start_date": "2025-09-10",
+              "retained_event_locator": "2025-09-10 06:15 Europe/Kyiv",
+              "canonical_episode_id": "cb8c92d5dfc79496d955b913",
+              "canonical_episode_start_date": "2025-09-09",
+              "issue": "retained start-date label is one day later than canonical episode start; exact retained event time resolves the binding"
+            },
+            {
+              "event_id": "zh_16",
+              "retained_locator": "03:05 publication; explicitly during alert",
+              "canonical_episode_id": "2a5cb3e55c012eecfd5feef4",
+              "canonical_episode_start_date": "2025-07-09",
+              "issue": "overnight binding must be normalized explicitly"
+            }
+          ],
+          "review_unmatched_candidate_count": 1,
+          "review_unmatched_candidate_date": "2026-08-09",
+          "review_unmatched_candidate_counted": false
+        }
+      },
+      "coverage_provenance": {
+        "accepted_start": "2025-01-23",
+        "source_audit_candidate_start": "2022-03-15",
+        "explanation_status": "EXPLICITLY_PROVEN",
+        "explanation_basis": "official_test_rollout",
+        "source_choice_reopen_required": false
+      },
+      "current_replay_blockers": [
+        "MISSING_FROZEN_HISTORICAL_EVIDENCE_CORPUS"
+      ],
+      "evidence_binding_errors_observed": [],
+      "replay_ready": false,
+      "recoverability_tier": "A",
+      "recommended_recovery_strategy": [
+        "R1"
+      ],
+      "external_web_research_required": false,
+      "recommended_next_proof": "Normalize the complete working_evidence.json into final replay schema, bind all 20 counted positives to current canonical episodes, explicitly reconcile zh_3 whose retained event time 2025-09-10 06:15 falls in a canonical episode that starts on 2025-09-09, and validate the overnight zh_16 binding; then prove replay 19 strict / 20 sensitivity without new web research."
+    }
+  },
+  "aggregate_totals": {
+    "alert_episode_denominator_total": 3900,
+    "strict_positive_episode_total": 125,
+    "sensitivity_positive_episode_union_total": 131,
+    "alert_corpus_complete_cities": 10,
+    "alert_corpus_needs_repair_cities": 0,
+    "fully_reconstructable_positive_episodes_from_repo": 20,
+    "targeted_source_reinspection_positive_episodes": 0,
+    "date_scoped_full_research_positive_episodes": 106,
+    "aggregate_only_positive_identity_unrecoverable_from_repo_history": 5,
+    "operational_full_research_positive_episodes": 111,
+    "currently_unrecoverable_from_known_repo_sources": 5,
+    "cities_likely_solvable_without_external_web_research": 1,
+    "cities_requiring_full_positive_event_research": 9
+  },
+  "recovery_waves": [
+    {
+      "wave": "A",
+      "basis": "repository-only recovery",
+      "cities": [
+        "zhytomyr"
+      ],
+      "strategy": "R1"
+    },
+    {
+      "wave": "B",
+      "basis": "small full positive-event re-research",
+      "cities": [
+        "uzhhorod",
+        "chernivtsi",
+        "ternopil",
+        "ivano_frankivsk",
+        "vinnytsia"
+      ],
+      "strategy": "R4"
+    },
+    {
+      "wave": "C",
+      "basis": "medium full positive-event re-research",
+      "cities": [
+        "khmelnytskyi",
+        "lutsk",
+        "rivne"
+      ],
+      "strategy": "R4"
+    },
+    {
+      "wave": "D",
+      "basis": "materially larger dedicated evidence campaign",
+      "cities": [
+        "poltava"
+      ],
+      "strategy": "R4"
+    }
+  ],
+  "classifications": {
+    "alert_episode_corpus": "ALERT EPISODE CORPUS COMPLETE",
+    "current_replay_readiness": "0/10 replay-ready because no target currently has replayable final_evidence.json that validates under current replay",
+    "recoverable_without_full_re_research": "1/10 (zhytomyr)"
+  },
+  "verdict": "10-CITY HISTORICAL REPLAY RECOVERY INVENTORY COMPLETE — 10/10 ALERT CORPORA COMPLETE — 1/10 RECOVERABLE WITHOUT FULL RE-RESEARCH"
+}
