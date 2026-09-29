@@ -4,7 +4,9 @@ from __future__ import annotations
 import csv
 import json
 import math
+import os
 import re
+import sys
 from collections import defaultdict
 from dataclasses import dataclass
 from datetime import date, datetime, time, timedelta, timezone
@@ -448,6 +450,18 @@ def main() -> None:
     (DATA_DIR / "alerts_combined.json").write_text(
         json.dumps(combined, ensure_ascii=False, indent=2), encoding="utf-8"
     )
+
+    if os.getenv("DIFFERENTIATED_ALERT_SHADOW", "").strip().lower() in {"1", "true", "yes", "on"}:
+        try:
+            from differentiated_alert_shadow_runtime import run_from_updater
+
+            run_from_updater(alerts)
+        except Exception as exc:
+            print(
+                "WARNING: differentiated alert shadow failed open: "
+                f"{type(exc).__name__}: {exc}",
+                file=sys.stderr,
+            )
 
     print(json.dumps(output["meta"], ensure_ascii=False, indent=2))
     print(json.dumps(output["kpis"][0], ensure_ascii=False, indent=2))
