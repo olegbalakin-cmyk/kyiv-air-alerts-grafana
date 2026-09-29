@@ -13,11 +13,12 @@
     "kyiv-air-alerts-grafana/data/explosion_research/khmelnytskyi/final_evidence.json",
     "kyiv-air-alerts-grafana/data/explosion_research/lutsk/final_evidence.json",
     "kyiv-air-alerts-grafana/data/explosion_research/uzhhorod/final_evidence.json",
-    "kyiv-air-alerts-grafana/data/explosion_research/zhytomyr/final_evidence.json"
+    "kyiv-air-alerts-grafana/data/explosion_research/zhytomyr/final_evidence.json",
+    "kyiv-air-alerts-grafana/research/sixcity_execution_result_temp.json"
   ],
-  "file_scope_guard_pass": true,
+  "file_scope_guard_pass": false,
   "inherited_historical_replay_tests": {
-    "log": "........................................................................ [ 78%]\n....................                                                     [100%]\n92 passed in 0.47s\n",
+    "log": "........................................................................ [ 78%]\n....................                                                     [100%]\n92 passed in 0.65s\n",
     "rc": 0
   },
   "kind": "sixcity_execution_result_temp",
@@ -95,7 +96,7 @@
       "proof_rc": 0
     }
   },
-  "proof_execution_sha": "4709914f709037d74c986d2c14c204214a1a5149",
+  "proof_execution_sha": "bd8f4da0cf4beca5795307bcf17b55632b51d330",
   "replay_self_test": {
     "log": "Historical replay helper self-test OK\n",
     "rc": 0
@@ -183,153 +184,10 @@
     "khmelnytskyi": {
       "canonicalized_legacy_sensitivity_episodes": 12,
       "canonicalized_legacy_strict_episodes": 11,
-      "changed_episodes": [
-        {
-          "alert_end": "2026-04-01T04:06:01Z",
-          "alert_start": "2026-04-01T01:24:35Z",
-          "candidate_contributor_ids": [
-            "3dbe29be33c4d34ad2b2d94f"
-          ],
-          "category": "NEW_AMBIGUOUS",
-          "composition_basis": {
-            "final_composed_verdict": "not_applicable"
-          },
-          "episode_id": "fe12864544a88735ebfd90a0",
-          "evidence": [
-            {
-              "binding": {
-                "candidates": [
-                  "fe12864544a88735ebfd90a0"
-                ],
-                "episode_id": "fe12864544a88735ebfd90a0",
-                "method": "persisted_episode_id"
-              },
-              "bucket": "sensitivity_only_events",
-              "candidate_id": "3dbe29be33c4d34ad2b2d94f",
-              "event_time_utc": null,
-              "evidence": "Під час другої ранкової хвилі російські дрони рухалися до Хмельницького, а в місті зафіксовано наслідки атаки. Direct exact-city auditory wording для цієї хвилі недостатнє, тому retained decision — sensitivity-only. — sensitivity: inferred_same_attack; exact-city consequences and retained aerial-attack relation, but direct exact-city auditory evidence is insufficient for strict",
-              "observation_id": "1c858bded146372ea3330a73",
-              "parent_record_id": "1c858bded146372ea3330a73",
-              "source_url": "https://suspilne.media/khmelnytskiy/1278290-hmelniccinu-atakuvali-sahedi-so-vidomo/"
-            }
-          ],
-          "frozen_old_status": "SENSITIVITY",
-          "local_date": "2026-04-01",
-          "matching_result": [
-            {
-              "logical_episode_groups": [
-                [
-                  "fe12864544a88735ebfd90a0"
-                ]
-              ],
-              "matched_episode_id": "fe12864544a88735ebfd90a0",
-              "matched_episode_ids": [
-                "fe12864544a88735ebfd90a0"
-              ],
-              "outcome": "unique_match",
-              "reason": "frozen_historical_audit_episode_binding"
-            }
-          ],
-          "ppo_related": false,
-          "provenance_basis": [
-            {
-              "air_military_context": {
-                "evidence_source": "review_provenance",
-                "present": false,
-                "segments": []
-              },
-              "exact_city": {
-                "evidence_source": "review_provenance",
-                "present": false,
-                "segments": []
-              },
-              "present": true,
-              "reason_codes": [
-                "REVIEW_PROVENANCE_USABLE",
-                "REVIEW_PROVENANCE_SENSITIVITY_BINDING_USED"
-              ],
-              "same_attack_context": {
-                "evidence_source": "review_provenance",
-                "present": false,
-                "reason": "no_reviewed_same_attack_basis",
-                "segments": []
-              },
-              "sensitivity_binding": {
-                "basis": "inferred_same_attack",
-                "episode_id": "fe12864544a88735ebfd90a0",
-                "evidence_source": "review_provenance",
-                "present": true,
-                "reason": "reviewed_episode_specific_sensitivity_binding",
-                "supported_episode_ids": [
-                  "fe12864544a88735ebfd90a0"
-                ]
-              },
-              "strict_explosion": {
-                "evidence_source": "review_provenance",
-                "present": false,
-                "segments": []
-              },
-              "target_episode_id": "fe12864544a88735ebfd90a0",
-              "temporal_binding": {
-                "code": "NO_REVIEWED_TEMPORAL_BINDING",
-                "episode_id": null,
-                "episode_specific": false,
-                "event_interval": null,
-                "event_time": null,
-                "evidence": null,
-                "evidence_sources": [],
-                "evidence_type": null,
-                "message_time": null,
-                "near_boundary": {
-                  "episode_id": null,
-                  "episode_specific": false,
-                  "present": false,
-                  "supported_episode_ids": []
-                },
-                "present": false,
-                "supported_episode_ids": [],
-                "timestamp_precision": null
-              },
-              "usable": true
-            }
-          ],
-          "reason_codes": [
-            "AIR_CONTEXT_NOT_LINKED_TO_EVENT",
-            "AIR_MILITARY_CONTEXT",
-            "EXACT_CITY_EVENT_TEXT",
-            "MATCH_UNIQUE",
-            "NO_STRICT_EXPLOSION_EVIDENCE",
-            "NO_STRICT_TEMPORAL_BINDING",
-            "REVIEW_PROVENANCE_SENSITIVITY_BINDING_USED",
-            "REVIEW_PROVENANCE_USABLE"
-          ],
-          "replayed_status": "AMBIGUOUS",
-          "temporal_basis": [
-            {
-              "code": "NO_STRICT_TEMPORAL_BINDING",
-              "episode_id": null,
-              "episode_specific": false,
-              "event_interval": null,
-              "event_time": null,
-              "evidence": null,
-              "evidence_sources": [],
-              "evidence_type": null,
-              "message_time": null,
-              "near_boundary": {
-                "episode_id": null,
-                "episode_specific": false,
-                "present": false,
-                "supported_episode_ids": []
-              },
-              "present": false,
-              "supported_episode_ids": []
-            }
-          ]
-        }
-      ],
+      "changed_episodes": [],
       "episodes_checked": 248,
       "errors": [],
-      "expected_match": false,
+      "expected_match": true,
       "frozen_sensitivity_ids": [
         "15fc5402f344cf7c96ea51f8",
         "2da4b5e50edfb1d0649e4443",
@@ -359,7 +217,7 @@
       ],
       "output_present": true,
       "rc": 0,
-      "replayed_sensitivity_episodes": 11,
+      "replayed_sensitivity_episodes": 12,
       "replayed_strict_episodes": 11,
       "source_status": "READY",
       "status": "COMPLETE",
@@ -508,322 +366,6 @@
       "canonicalized_legacy_strict_episodes": 19,
       "changed_episodes": [
         {
-          "alert_end": "2025-05-07T02:15:37Z",
-          "alert_start": "2025-05-06T23:53:10Z",
-          "candidate_contributor_ids": [
-            "44f06bb2d35a609cfebcc878"
-          ],
-          "category": "STRICT_DOWNGRADE",
-          "composition_basis": {
-            "final_composed_verdict": "not_applicable"
-          },
-          "episode_id": "2115c6d97d56543a5b1569e9",
-          "evidence": [
-            {
-              "binding": {
-                "candidates": [
-                  "2115c6d97d56543a5b1569e9"
-                ],
-                "episode_id": "2115c6d97d56543a5b1569e9",
-                "method": "persisted_episode_id"
-              },
-              "bucket": "strict_events",
-              "candidate_id": "44f06bb2d35a609cfebcc878",
-              "event_time_utc": null,
-              "evidence": "Житомир: У місті й передмісті чути вибух близько 04:00. Другий сигнал 02:53–05:15. Контекст замороженого аудиту: exact-city; підтверджена повітряна атака. — strict: retained exact-city attack-event evidence + confirmed aerial-war context + episode-specific canonical binding",
-              "observation_id": "c8571b94bec1012fa880cce7",
-              "parent_record_id": "c8571b94bec1012fa880cce7",
-              "source_url": "https://suspilne.media/zhytomyr/1011895-na-zitomirsini-ulamok-saheda-armii-rf-vpav-miz-dvoma-bagatopoverhivkami/"
-            }
-          ],
-          "frozen_old_status": "STRICT",
-          "local_date": "2025-05-07",
-          "matching_result": [
-            {
-              "logical_episode_groups": [
-                [
-                  "2115c6d97d56543a5b1569e9"
-                ]
-              ],
-              "matched_episode_id": "2115c6d97d56543a5b1569e9",
-              "matched_episode_ids": [
-                "2115c6d97d56543a5b1569e9"
-              ],
-              "outcome": "unique_match",
-              "reason": "frozen_historical_audit_episode_binding"
-            }
-          ],
-          "ppo_related": false,
-          "provenance_basis": [
-            {
-              "air_military_context": {
-                "evidence_source": "review_provenance",
-                "evidence_text": "city_status=exact_city | war_air_context=confirmed",
-                "present": true,
-                "segments": [
-                  "city_status=exact_city | war_air_context=confirmed"
-                ]
-              },
-              "exact_city": {
-                "evidence_source": "review_provenance",
-                "present": false,
-                "segments": []
-              },
-              "present": true,
-              "reason_codes": [
-                "REVIEW_PROVENANCE_USABLE",
-                "REVIEW_PROVENANCE_TEMPORAL_BINDING_USED"
-              ],
-              "same_attack_context": {
-                "evidence_source": "review_provenance",
-                "present": false,
-                "reason": "no_reviewed_same_attack_basis",
-                "segments": []
-              },
-              "sensitivity_binding": {
-                "basis": null,
-                "episode_id": null,
-                "evidence_source": "review_provenance",
-                "present": false,
-                "supported_episode_ids": []
-              },
-              "strict_explosion": {
-                "evidence_source": "review_provenance",
-                "present": false,
-                "segments": []
-              },
-              "target_episode_id": "2115c6d97d56543a5b1569e9",
-              "temporal_binding": {
-                "code": "TEMPORAL_REVIEWED_VALIDATED_BINDING",
-                "episode_id": "2115c6d97d56543a5b1569e9",
-                "episode_specific": true,
-                "event_interval": null,
-                "event_time": null,
-                "evidence": "Житомир: У місті й передмісті чути вибух близько 04:00. Другий сигнал 02:53–05:15. Контекст замороженого аудиту: exact-city; підтверджена повітряна атака. — strict: retained exact-city attack-event evidence + confirmed aerial-war context + episode-specific canonical binding",
-                "evidence_sources": [
-                  "review_provenance"
-                ],
-                "evidence_type": "frozen_historical_audit_episode_binding",
-                "message_time": null,
-                "near_boundary": {
-                  "episode_id": null,
-                  "episode_specific": false,
-                  "present": false,
-                  "supported_episode_ids": []
-                },
-                "present": true,
-                "publication_time": null,
-                "source_identity": null,
-                "supported_episode_ids": [
-                  "2115c6d97d56543a5b1569e9"
-                ],
-                "timestamp_precision": null,
-                "update_time": null
-              },
-              "usable": true
-            }
-          ],
-          "reason_codes": [
-            "AIR_CONTEXT_NOT_LINKED_TO_EVENT",
-            "AIR_MILITARY_CONTEXT",
-            "ATTACK_EVENT_TYPES:explosion",
-            "EXACT_CITY_EVENT_TEXT",
-            "MATCH_UNIQUE",
-            "REVIEW_PROVENANCE_TEMPORAL_BINDING_USED",
-            "REVIEW_PROVENANCE_USABLE",
-            "STRICT_EXPLOSION_EVIDENCE",
-            "TEMPORAL_REVIEWED_VALIDATED_BINDING"
-          ],
-          "replayed_status": "AMBIGUOUS",
-          "temporal_basis": [
-            {
-              "code": "TEMPORAL_REVIEWED_VALIDATED_BINDING",
-              "episode_id": "2115c6d97d56543a5b1569e9",
-              "episode_specific": true,
-              "event_interval": null,
-              "event_time": null,
-              "evidence": "Житомир: У місті й передмісті чути вибух близько 04:00. Другий сигнал 02:53–05:15. Контекст замороженого аудиту: exact-city; підтверджена повітряна атака. — strict: retained exact-city attack-event evidence + confirmed aerial-war context + episode-specific canonical binding",
-              "evidence_sources": [
-                "review_provenance"
-              ],
-              "evidence_type": "frozen_historical_audit_episode_binding",
-              "message_time": null,
-              "near_boundary": {
-                "episode_id": null,
-                "episode_specific": false,
-                "present": false,
-                "supported_episode_ids": []
-              },
-              "present": true,
-              "publication_time": null,
-              "source_identity": null,
-              "supported_episode_ids": [
-                "2115c6d97d56543a5b1569e9"
-              ],
-              "timestamp_precision": null,
-              "update_time": null
-            }
-          ]
-        },
-        {
-          "alert_end": "2026-03-24T15:55:46Z",
-          "alert_start": "2026-03-24T10:57:21Z",
-          "candidate_contributor_ids": [
-            "df719c9fb374c1a90f9d2c93"
-          ],
-          "category": "STRICT_DOWNGRADE",
-          "composition_basis": {
-            "final_composed_verdict": "not_applicable"
-          },
-          "episode_id": "4b455375a1f24ee82b68e67f",
-          "evidence": [
-            {
-              "binding": {
-                "candidates": [
-                  "4b455375a1f24ee82b68e67f"
-                ],
-                "episode_id": "4b455375a1f24ee82b68e67f",
-                "method": "persisted_episode_id"
-              },
-              "bucket": "strict_events",
-              "candidate_id": "df719c9fb374c1a90f9d2c93",
-              "event_time_utc": null,
-              "evidence": "Житомир: Кореспонденти підтверджують звук вибуху в Житомирі близько 17:00; поліція документує удар РФ. Контекст замороженого аудиту: exact-city; підтверджена повітряна атака. — strict: retained exact-city attack-event evidence + confirmed aerial-war context + episode-specific canonical binding",
-              "observation_id": "15b22a261012a4db46070bf6",
-              "parent_record_id": "15b22a261012a4db46070bf6",
-              "source_url": "https://suspilne.media/zhytomyr/1272162-vibuh-u-zitomiri-12-ricna-divcinka-otrimala-oskolkove-poranenna/"
-            }
-          ],
-          "frozen_old_status": "STRICT",
-          "local_date": "2026-03-24",
-          "matching_result": [
-            {
-              "logical_episode_groups": [
-                [
-                  "4b455375a1f24ee82b68e67f"
-                ]
-              ],
-              "matched_episode_id": "4b455375a1f24ee82b68e67f",
-              "matched_episode_ids": [
-                "4b455375a1f24ee82b68e67f"
-              ],
-              "outcome": "unique_match",
-              "reason": "frozen_historical_audit_episode_binding"
-            }
-          ],
-          "ppo_related": false,
-          "provenance_basis": [
-            {
-              "air_military_context": {
-                "evidence_source": "review_provenance",
-                "evidence_text": "city_status=exact_city | war_air_context=confirmed",
-                "present": true,
-                "segments": [
-                  "city_status=exact_city | war_air_context=confirmed"
-                ]
-              },
-              "exact_city": {
-                "evidence_source": "review_provenance",
-                "present": false,
-                "segments": []
-              },
-              "present": true,
-              "reason_codes": [
-                "REVIEW_PROVENANCE_USABLE",
-                "REVIEW_PROVENANCE_TEMPORAL_BINDING_USED"
-              ],
-              "same_attack_context": {
-                "evidence_source": "review_provenance",
-                "present": false,
-                "reason": "no_reviewed_same_attack_basis",
-                "segments": []
-              },
-              "sensitivity_binding": {
-                "basis": null,
-                "episode_id": null,
-                "evidence_source": "review_provenance",
-                "present": false,
-                "supported_episode_ids": []
-              },
-              "strict_explosion": {
-                "evidence_source": "review_provenance",
-                "present": false,
-                "segments": []
-              },
-              "target_episode_id": "4b455375a1f24ee82b68e67f",
-              "temporal_binding": {
-                "code": "TEMPORAL_REVIEWED_VALIDATED_BINDING",
-                "episode_id": "4b455375a1f24ee82b68e67f",
-                "episode_specific": true,
-                "event_interval": null,
-                "event_time": null,
-                "evidence": "Житомир: Кореспонденти підтверджують звук вибуху в Житомирі близько 17:00; поліція документує удар РФ. Контекст замороженого аудиту: exact-city; підтверджена повітряна атака. — strict: retained exact-city attack-event evidence + confirmed aerial-war context + episode-specific canonical binding",
-                "evidence_sources": [
-                  "review_provenance"
-                ],
-                "evidence_type": "frozen_historical_audit_episode_binding",
-                "message_time": null,
-                "near_boundary": {
-                  "episode_id": null,
-                  "episode_specific": false,
-                  "present": false,
-                  "supported_episode_ids": []
-                },
-                "present": true,
-                "publication_time": null,
-                "source_identity": null,
-                "supported_episode_ids": [
-                  "4b455375a1f24ee82b68e67f"
-                ],
-                "timestamp_precision": null,
-                "update_time": null
-              },
-              "usable": true
-            }
-          ],
-          "reason_codes": [
-            "AIR_CONTEXT_NOT_LINKED_TO_EVENT",
-            "AIR_MILITARY_CONTEXT",
-            "ATTACK_EVENT_TYPES:explosion",
-            "EXACT_CITY_EVENT_TEXT",
-            "MATCH_UNIQUE",
-            "REVIEW_PROVENANCE_TEMPORAL_BINDING_USED",
-            "REVIEW_PROVENANCE_USABLE",
-            "STRICT_EXPLOSION_EVIDENCE",
-            "TEMPORAL_REVIEWED_VALIDATED_BINDING"
-          ],
-          "replayed_status": "AMBIGUOUS",
-          "temporal_basis": [
-            {
-              "code": "TEMPORAL_REVIEWED_VALIDATED_BINDING",
-              "episode_id": "4b455375a1f24ee82b68e67f",
-              "episode_specific": true,
-              "event_interval": null,
-              "event_time": null,
-              "evidence": "Житомир: Кореспонденти підтверджують звук вибуху в Житомирі близько 17:00; поліція документує удар РФ. Контекст замороженого аудиту: exact-city; підтверджена повітряна атака. — strict: retained exact-city attack-event evidence + confirmed aerial-war context + episode-specific canonical binding",
-              "evidence_sources": [
-                "review_provenance"
-              ],
-              "evidence_type": "frozen_historical_audit_episode_binding",
-              "message_time": null,
-              "near_boundary": {
-                "episode_id": null,
-                "episode_specific": false,
-                "present": false,
-                "supported_episode_ids": []
-              },
-              "present": true,
-              "publication_time": null,
-              "source_identity": null,
-              "supported_episode_ids": [
-                "4b455375a1f24ee82b68e67f"
-              ],
-              "timestamp_precision": null,
-              "update_time": null
-            }
-          ]
-        },
-        {
           "alert_end": "2025-04-27T00:16:35Z",
           "alert_start": "2025-04-26T23:07:02Z",
           "candidate_contributor_ids": [
@@ -967,480 +509,6 @@
           ]
         },
         {
-          "alert_end": "2025-04-10T17:08:15Z",
-          "alert_start": "2025-04-10T14:02:56Z",
-          "candidate_contributor_ids": [
-            "810d94f3d9002b0734ae0d05"
-          ],
-          "category": "STRICT_DOWNGRADE",
-          "composition_basis": {
-            "final_composed_verdict": "not_applicable"
-          },
-          "episode_id": "a6c8305faed1014c44f1f8f4",
-          "evidence": [
-            {
-              "binding": {
-                "candidates": [
-                  "a6c8305faed1014c44f1f8f4"
-                ],
-                "episode_id": "a6c8305faed1014c44f1f8f4",
-                "method": "persisted_episode_id"
-              },
-              "bucket": "strict_events",
-              "candidate_id": "810d94f3d9002b0734ae0d05",
-              "event_time_utc": null,
-              "evidence": "Житомир: Тривога 17:02–20:08; за цей час у Житомирі та Озерному було чутно вибухи. Контекст замороженого аудиту: exact-city; підтверджена повітряна атака. — strict: retained exact-city attack-event evidence + confirmed aerial-war context + episode-specific canonical binding",
-              "observation_id": "70b758351cf5afdc1cbf9604",
-              "parent_record_id": "70b758351cf5afdc1cbf9604",
-              "source_url": "https://suspilne.media/zhytomyr/992065-v-ozernomu-na-zitomirsini-dron-vluciv-u-bagatopoverhivku-e-zagiblij/"
-            }
-          ],
-          "frozen_old_status": "STRICT",
-          "local_date": "2025-04-10",
-          "matching_result": [
-            {
-              "logical_episode_groups": [
-                [
-                  "a6c8305faed1014c44f1f8f4"
-                ]
-              ],
-              "matched_episode_id": "a6c8305faed1014c44f1f8f4",
-              "matched_episode_ids": [
-                "a6c8305faed1014c44f1f8f4"
-              ],
-              "outcome": "unique_match",
-              "reason": "frozen_historical_audit_episode_binding"
-            }
-          ],
-          "ppo_related": false,
-          "provenance_basis": [
-            {
-              "air_military_context": {
-                "evidence_source": "review_provenance",
-                "evidence_text": "city_status=exact_city | war_air_context=confirmed",
-                "present": true,
-                "segments": [
-                  "city_status=exact_city | war_air_context=confirmed"
-                ]
-              },
-              "exact_city": {
-                "evidence_source": "review_provenance",
-                "present": false,
-                "segments": []
-              },
-              "present": true,
-              "reason_codes": [
-                "REVIEW_PROVENANCE_USABLE",
-                "REVIEW_PROVENANCE_TEMPORAL_BINDING_USED"
-              ],
-              "same_attack_context": {
-                "evidence_source": "review_provenance",
-                "present": false,
-                "reason": "no_reviewed_same_attack_basis",
-                "segments": []
-              },
-              "sensitivity_binding": {
-                "basis": null,
-                "episode_id": null,
-                "evidence_source": "review_provenance",
-                "present": false,
-                "supported_episode_ids": []
-              },
-              "strict_explosion": {
-                "evidence_source": "review_provenance",
-                "present": false,
-                "segments": []
-              },
-              "target_episode_id": "a6c8305faed1014c44f1f8f4",
-              "temporal_binding": {
-                "code": "TEMPORAL_REVIEWED_VALIDATED_BINDING",
-                "episode_id": "a6c8305faed1014c44f1f8f4",
-                "episode_specific": true,
-                "event_interval": null,
-                "event_time": null,
-                "evidence": "Житомир: Тривога 17:02–20:08; за цей час у Житомирі та Озерному було чутно вибухи. Контекст замороженого аудиту: exact-city; підтверджена повітряна атака. — strict: retained exact-city attack-event evidence + confirmed aerial-war context + episode-specific canonical binding",
-                "evidence_sources": [
-                  "review_provenance"
-                ],
-                "evidence_type": "frozen_historical_audit_episode_binding",
-                "message_time": null,
-                "near_boundary": {
-                  "episode_id": null,
-                  "episode_specific": false,
-                  "present": false,
-                  "supported_episode_ids": []
-                },
-                "present": true,
-                "publication_time": null,
-                "source_identity": null,
-                "supported_episode_ids": [
-                  "a6c8305faed1014c44f1f8f4"
-                ],
-                "timestamp_precision": null,
-                "update_time": null
-              },
-              "usable": true
-            }
-          ],
-          "reason_codes": [
-            "AIR_CONTEXT_NOT_LINKED_TO_EVENT",
-            "AIR_MILITARY_CONTEXT",
-            "ATTACK_EVENT_TYPES:explosion",
-            "EXACT_CITY_EVENT_TEXT",
-            "MATCH_UNIQUE",
-            "REVIEW_PROVENANCE_TEMPORAL_BINDING_USED",
-            "REVIEW_PROVENANCE_USABLE",
-            "STRICT_EXPLOSION_EVIDENCE",
-            "TEMPORAL_REVIEWED_VALIDATED_BINDING"
-          ],
-          "replayed_status": "AMBIGUOUS",
-          "temporal_basis": [
-            {
-              "code": "TEMPORAL_REVIEWED_VALIDATED_BINDING",
-              "episode_id": "a6c8305faed1014c44f1f8f4",
-              "episode_specific": true,
-              "event_interval": null,
-              "event_time": null,
-              "evidence": "Житомир: Тривога 17:02–20:08; за цей час у Житомирі та Озерному було чутно вибухи. Контекст замороженого аудиту: exact-city; підтверджена повітряна атака. — strict: retained exact-city attack-event evidence + confirmed aerial-war context + episode-specific canonical binding",
-              "evidence_sources": [
-                "review_provenance"
-              ],
-              "evidence_type": "frozen_historical_audit_episode_binding",
-              "message_time": null,
-              "near_boundary": {
-                "episode_id": null,
-                "episode_specific": false,
-                "present": false,
-                "supported_episode_ids": []
-              },
-              "present": true,
-              "publication_time": null,
-              "source_identity": null,
-              "supported_episode_ids": [
-                "a6c8305faed1014c44f1f8f4"
-              ],
-              "timestamp_precision": null,
-              "update_time": null
-            }
-          ]
-        },
-        {
-          "alert_end": "2025-09-10T04:09:50Z",
-          "alert_start": "2025-09-09T19:17:40Z",
-          "candidate_contributor_ids": [
-            "72c90efce108a57032e2708d"
-          ],
-          "category": "STRICT_DOWNGRADE",
-          "composition_basis": {
-            "final_composed_verdict": "not_applicable"
-          },
-          "episode_id": "cb8c92d5dfc79496d955b913",
-          "evidence": [
-            {
-              "binding": {
-                "candidates": [
-                  "cb8c92d5dfc79496d955b913"
-                ],
-                "episode_id": "cb8c92d5dfc79496d955b913",
-                "method": "persisted_episode_id"
-              },
-              "bucket": "strict_events",
-              "candidate_id": "72c90efce108a57032e2708d",
-              "event_time_utc": null,
-              "evidence": "Житомир: Після повідомлень ПС о 06:10–06:11 і за кілька хвилин по тому в Житомирі чули вибухи. 06:15 є приблизною прив'язкою, не секундним виміром. Контекст замороженого аудиту: exact-city; підтверджена повітряна атака. — strict: retained exact-city attack-event evidence + confirmed aerial-war context + episode-specific canonical binding",
-              "observation_id": "03d7be3c17d93c1405c596e0",
-              "parent_record_id": "03d7be3c17d93c1405c596e0",
-              "source_url": "https://suspilne.media/zhytomyr/1111150-masovana-ataka-armii-rf-na-zitomirsini-e-zagiblij-ta-poraneni/"
-            }
-          ],
-          "frozen_old_status": "STRICT",
-          "local_date": "2025-09-09",
-          "matching_result": [
-            {
-              "logical_episode_groups": [
-                [
-                  "cb8c92d5dfc79496d955b913"
-                ]
-              ],
-              "matched_episode_id": "cb8c92d5dfc79496d955b913",
-              "matched_episode_ids": [
-                "cb8c92d5dfc79496d955b913"
-              ],
-              "outcome": "unique_match",
-              "reason": "frozen_historical_audit_episode_binding"
-            }
-          ],
-          "ppo_related": false,
-          "provenance_basis": [
-            {
-              "air_military_context": {
-                "evidence_source": "review_provenance",
-                "evidence_text": "city_status=exact_city | war_air_context=confirmed",
-                "present": true,
-                "segments": [
-                  "city_status=exact_city | war_air_context=confirmed"
-                ]
-              },
-              "exact_city": {
-                "evidence_source": "review_provenance",
-                "present": false,
-                "segments": []
-              },
-              "present": true,
-              "reason_codes": [
-                "REVIEW_PROVENANCE_USABLE",
-                "REVIEW_PROVENANCE_TEMPORAL_BINDING_USED"
-              ],
-              "same_attack_context": {
-                "evidence_source": "review_provenance",
-                "present": false,
-                "reason": "no_reviewed_same_attack_basis",
-                "segments": []
-              },
-              "sensitivity_binding": {
-                "basis": null,
-                "episode_id": null,
-                "evidence_source": "review_provenance",
-                "present": false,
-                "supported_episode_ids": []
-              },
-              "strict_explosion": {
-                "evidence_source": "review_provenance",
-                "present": false,
-                "segments": []
-              },
-              "target_episode_id": "cb8c92d5dfc79496d955b913",
-              "temporal_binding": {
-                "code": "TEMPORAL_REVIEWED_VALIDATED_BINDING",
-                "episode_id": "cb8c92d5dfc79496d955b913",
-                "episode_specific": true,
-                "event_interval": null,
-                "event_time": null,
-                "evidence": "Житомир: Після повідомлень ПС о 06:10–06:11 і за кілька хвилин по тому в Житомирі чули вибухи. 06:15 є приблизною прив'язкою, не секундним виміром. Контекст замороженого аудиту: exact-city; підтверджена повітряна атака. — strict: retained exact-city attack-event evidence + confirmed aerial-war context + episode-specific canonical binding",
-                "evidence_sources": [
-                  "review_provenance"
-                ],
-                "evidence_type": "frozen_historical_audit_episode_binding",
-                "message_time": null,
-                "near_boundary": {
-                  "episode_id": null,
-                  "episode_specific": false,
-                  "present": false,
-                  "supported_episode_ids": []
-                },
-                "present": true,
-                "publication_time": null,
-                "source_identity": null,
-                "supported_episode_ids": [
-                  "cb8c92d5dfc79496d955b913"
-                ],
-                "timestamp_precision": null,
-                "update_time": null
-              },
-              "usable": true
-            }
-          ],
-          "reason_codes": [
-            "AIR_CONTEXT_NOT_LINKED_TO_EVENT",
-            "AIR_MILITARY_CONTEXT",
-            "ATTACK_EVENT_TYPES:explosion",
-            "EXACT_CITY_EVENT_TEXT",
-            "MATCH_UNIQUE",
-            "REVIEW_PROVENANCE_TEMPORAL_BINDING_USED",
-            "REVIEW_PROVENANCE_USABLE",
-            "STRICT_EXPLOSION_EVIDENCE",
-            "TEMPORAL_REVIEWED_VALIDATED_BINDING"
-          ],
-          "replayed_status": "AMBIGUOUS",
-          "temporal_basis": [
-            {
-              "code": "TEMPORAL_REVIEWED_VALIDATED_BINDING",
-              "episode_id": "cb8c92d5dfc79496d955b913",
-              "episode_specific": true,
-              "event_interval": null,
-              "event_time": null,
-              "evidence": "Житомир: Після повідомлень ПС о 06:10–06:11 і за кілька хвилин по тому в Житомирі чули вибухи. 06:15 є приблизною прив'язкою, не секундним виміром. Контекст замороженого аудиту: exact-city; підтверджена повітряна атака. — strict: retained exact-city attack-event evidence + confirmed aerial-war context + episode-specific canonical binding",
-              "evidence_sources": [
-                "review_provenance"
-              ],
-              "evidence_type": "frozen_historical_audit_episode_binding",
-              "message_time": null,
-              "near_boundary": {
-                "episode_id": null,
-                "episode_specific": false,
-                "present": false,
-                "supported_episode_ids": []
-              },
-              "present": true,
-              "publication_time": null,
-              "source_identity": null,
-              "supported_episode_ids": [
-                "cb8c92d5dfc79496d955b913"
-              ],
-              "timestamp_precision": null,
-              "update_time": null
-            }
-          ]
-        },
-        {
-          "alert_end": "2025-04-26T21:44:52Z",
-          "alert_start": "2025-04-26T20:47:03Z",
-          "candidate_contributor_ids": [
-            "5c33c849dcd7b0c713fb4b85"
-          ],
-          "category": "STRICT_DOWNGRADE",
-          "composition_basis": {
-            "final_composed_verdict": "not_applicable"
-          },
-          "episode_id": "f0dff0f08466476a192f499d",
-          "evidence": [
-            {
-              "binding": {
-                "candidates": [
-                  "f0dff0f08466476a192f499d"
-                ],
-                "episode_id": "f0dff0f08466476a192f499d",
-                "method": "persisted_episode_id"
-              },
-              "bucket": "strict_events",
-              "candidate_id": "5c33c849dcd7b0c713fb4b85",
-              "event_time_utc": null,
-              "evidence": "Житомир: Тривога почалася 23:47; після повідомлення ПС о 00:25 за кілька хвилин у Житомирі почули серію вибухів; відбій 00:44. Контекст замороженого аудиту: exact-city; підтверджена повітряна атака. — strict: retained exact-city attack-event evidence + confirmed aerial-war context + episode-specific canonical binding",
-              "observation_id": "117a8f61eb3b2e327bb2f61a",
-              "parent_record_id": "117a8f61eb3b2e327bb2f61a",
-              "source_url": "https://suspilne.media/zhytomyr/1004283-ataka-droniv-na-zitomirsini-27-kvitna-poskodzeno-budinki-avtomobili-e-postrazdali/"
-            }
-          ],
-          "frozen_old_status": "STRICT",
-          "local_date": "2025-04-26",
-          "matching_result": [
-            {
-              "logical_episode_groups": [
-                [
-                  "f0dff0f08466476a192f499d"
-                ]
-              ],
-              "matched_episode_id": "f0dff0f08466476a192f499d",
-              "matched_episode_ids": [
-                "f0dff0f08466476a192f499d"
-              ],
-              "outcome": "unique_match",
-              "reason": "frozen_historical_audit_episode_binding"
-            }
-          ],
-          "ppo_related": false,
-          "provenance_basis": [
-            {
-              "air_military_context": {
-                "evidence_source": "review_provenance",
-                "evidence_text": "city_status=exact_city | war_air_context=confirmed",
-                "present": true,
-                "segments": [
-                  "city_status=exact_city | war_air_context=confirmed"
-                ]
-              },
-              "exact_city": {
-                "evidence_source": "review_provenance",
-                "present": false,
-                "segments": []
-              },
-              "present": true,
-              "reason_codes": [
-                "REVIEW_PROVENANCE_USABLE",
-                "REVIEW_PROVENANCE_TEMPORAL_BINDING_USED"
-              ],
-              "same_attack_context": {
-                "evidence_source": "review_provenance",
-                "present": false,
-                "reason": "no_reviewed_same_attack_basis",
-                "segments": []
-              },
-              "sensitivity_binding": {
-                "basis": null,
-                "episode_id": null,
-                "evidence_source": "review_provenance",
-                "present": false,
-                "supported_episode_ids": []
-              },
-              "strict_explosion": {
-                "evidence_source": "review_provenance",
-                "present": false,
-                "segments": []
-              },
-              "target_episode_id": "f0dff0f08466476a192f499d",
-              "temporal_binding": {
-                "code": "TEMPORAL_REVIEWED_VALIDATED_BINDING",
-                "episode_id": "f0dff0f08466476a192f499d",
-                "episode_specific": true,
-                "event_interval": null,
-                "event_time": null,
-                "evidence": "Житомир: Тривога почалася 23:47; після повідомлення ПС о 00:25 за кілька хвилин у Житомирі почули серію вибухів; відбій 00:44. Контекст замороженого аудиту: exact-city; підтверджена повітряна атака. — strict: retained exact-city attack-event evidence + confirmed aerial-war context + episode-specific canonical binding",
-                "evidence_sources": [
-                  "review_provenance"
-                ],
-                "evidence_type": "frozen_historical_audit_episode_binding",
-                "message_time": null,
-                "near_boundary": {
-                  "episode_id": null,
-                  "episode_specific": false,
-                  "present": false,
-                  "supported_episode_ids": []
-                },
-                "present": true,
-                "publication_time": null,
-                "source_identity": null,
-                "supported_episode_ids": [
-                  "f0dff0f08466476a192f499d"
-                ],
-                "timestamp_precision": null,
-                "update_time": null
-              },
-              "usable": true
-            }
-          ],
-          "reason_codes": [
-            "AIR_CONTEXT_NOT_LINKED_TO_EVENT",
-            "AIR_MILITARY_CONTEXT",
-            "ATTACK_EVENT_TYPES:explosion",
-            "EXACT_CITY_EVENT_TEXT",
-            "MATCH_UNIQUE",
-            "REVIEW_PROVENANCE_TEMPORAL_BINDING_USED",
-            "REVIEW_PROVENANCE_USABLE",
-            "STRICT_EXPLOSION_EVIDENCE",
-            "TEMPORAL_REVIEWED_VALIDATED_BINDING"
-          ],
-          "replayed_status": "AMBIGUOUS",
-          "temporal_basis": [
-            {
-              "code": "TEMPORAL_REVIEWED_VALIDATED_BINDING",
-              "episode_id": "f0dff0f08466476a192f499d",
-              "episode_specific": true,
-              "event_interval": null,
-              "event_time": null,
-              "evidence": "Житомир: Тривога почалася 23:47; після повідомлення ПС о 00:25 за кілька хвилин у Житомирі почули серію вибухів; відбій 00:44. Контекст замороженого аудиту: exact-city; підтверджена повітряна атака. — strict: retained exact-city attack-event evidence + confirmed aerial-war context + episode-specific canonical binding",
-              "evidence_sources": [
-                "review_provenance"
-              ],
-              "evidence_type": "frozen_historical_audit_episode_binding",
-              "message_time": null,
-              "near_boundary": {
-                "episode_id": null,
-                "episode_specific": false,
-                "present": false,
-                "supported_episode_ids": []
-              },
-              "present": true,
-              "publication_time": null,
-              "source_identity": null,
-              "supported_episode_ids": [
-                "f0dff0f08466476a192f499d"
-              ],
-              "timestamp_precision": null,
-              "update_time": null
-            }
-          ]
-        },
-        {
           "alert_end": "2026-05-12T02:56:21Z",
           "alert_start": "2026-05-12T01:22:42Z",
           "candidate_contributor_ids": [
@@ -1464,8 +532,8 @@
               "candidate_id": "73c642424db08e2851dce75a",
               "event_time_utc": null,
               "evidence": "Житомир: Дронова атака РФ саме на Житомир близько 05:00; мешканка описує вибухову хвилю. Тривога Житомирського району почалася близько 04:22 і тривала до близько 05:56. Контекст замороженого аудиту: exact-city; підтверджена повітряна атака. — strict: retained exact-city attack-event evidence + confirmed aerial-war context + episode-specific canonical binding",
-              "observation_id": "4ccb45b2e2f7baeb0f067cc1",
-              "parent_record_id": "4ccb45b2e2f7baeb0f067cc1",
+              "observation_id": "d365035d20cd53c1126232df",
+              "parent_record_id": "d365035d20cd53c1126232df",
               "source_url": "https://suspilne.media/zhytomyr/1310206-mene-vibuhovou-hvileu-zbilo-z-lizka-nadia-kuca-pro-naslidki-dronovoi-ataki-armii-rf-u-zitomiri/"
             }
           ],
@@ -1491,10 +559,10 @@
             {
               "air_military_context": {
                 "evidence_source": "review_provenance",
-                "evidence_text": "city_status=exact_city | war_air_context=confirmed",
+                "evidence_text": "city_status=exact_city | war_air_context=confirmed | temporal_evidence=exact_time_in_alert",
                 "present": true,
                 "segments": [
-                  "city_status=exact_city | war_air_context=confirmed"
+                  "city_status=exact_city | war_air_context=confirmed | temporal_evidence=exact_time_in_alert"
                 ]
               },
               "exact_city": {
@@ -1508,10 +576,14 @@
                 "REVIEW_PROVENANCE_TEMPORAL_BINDING_USED"
               ],
               "same_attack_context": {
+                "basis": "reviewed_exact_city_air_context_with_episode_specific_temporal_binding",
                 "evidence_source": "review_provenance",
-                "present": false,
-                "reason": "no_reviewed_same_attack_basis",
-                "segments": []
+                "evidence_text": "city_status=exact_city | war_air_context=confirmed | temporal_evidence=exact_time_in_alert",
+                "present": true,
+                "reason": "reviewed_same_attack_basis",
+                "segments": [
+                  "city_status=exact_city | war_air_context=confirmed | temporal_evidence=exact_time_in_alert"
+                ]
               },
               "sensitivity_binding": {
                 "basis": null,
@@ -1557,13 +629,13 @@
             }
           ],
           "reason_codes": [
-            "AIR_CONTEXT_NOT_LINKED_TO_EVENT",
             "AIR_MILITARY_CONTEXT",
             "EXACT_CITY_EVENT_TEXT",
             "MATCH_UNIQUE",
             "NO_STRICT_EXPLOSION_EVIDENCE",
             "REVIEW_PROVENANCE_TEMPORAL_BINDING_USED",
             "REVIEW_PROVENANCE_USABLE",
+            "SAME_ATTACK_CONTEXT_SUPPORTED",
             "TEMPORAL_REVIEWED_VALIDATED_BINDING"
           ],
           "replayed_status": "AMBIGUOUS",
@@ -1646,43 +718,38 @@
       ],
       "output_present": true,
       "rc": 0,
-      "replayed_sensitivity_episodes": 13,
-      "replayed_strict_episodes": 13,
+      "replayed_sensitivity_episodes": 18,
+      "replayed_strict_episodes": 18,
       "source_status": "READY",
       "status": "COMPLETE",
       "strict_episode_identity": {
         "aggregate_counts_equal_but_episode_identities_differ": false,
         "new_strict_only": [],
         "old_strict_only": [
-          "2115c6d97d56543a5b1569e9",
-          "4b455375a1f24ee82b68e67f",
-          "a6c8305faed1014c44f1f8f4",
-          "cb8c92d5dfc79496d955b913",
-          "f0dff0f08466476a192f499d",
           "f31e96d5a37850b487b9a312"
         ],
         "symmetric_difference": [
-          "2115c6d97d56543a5b1569e9",
-          "4b455375a1f24ee82b68e67f",
-          "a6c8305faed1014c44f1f8f4",
-          "cb8c92d5dfc79496d955b913",
-          "f0dff0f08466476a192f499d",
           "f31e96d5a37850b487b9a312"
         ],
         "unchanged_strict_ids": [
           "0791ed71cec2e64ff23a3765",
+          "2115c6d97d56543a5b1569e9",
           "22f460330073c1a5fc1c0665",
           "2a5cb3e55c012eecfd5feef4",
           "2fdc3756804f6e528c0c74ee",
           "439c1d9120ce4fcb66657d2d",
+          "4b455375a1f24ee82b68e67f",
           "5e72f4425165ab852b00f95b",
           "6774cf7296ec3eed0f51b216",
           "79e4f4e9335fed9de4613bfe",
           "805d0671f86e67c7aab54b38",
           "8fc73ee742417ef07b60f6ef",
+          "a6c8305faed1014c44f1f8f4",
           "afe3e790866f71f237df4ea3",
+          "cb8c92d5dfc79496d955b913",
           "dfc85759ea1b9c6b87df8989",
-          "ea95746ca61f9b85561be059"
+          "ea95746ca61f9b85561be059",
+          "f0dff0f08466476a192f499d"
         ]
       },
       "unbound_review_evidence": [
