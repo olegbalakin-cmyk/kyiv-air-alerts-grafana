@@ -1,0 +1,308 @@
+name: Vinnytsia reconciliation executable proof
+
+on:
+  push:
+    branches:
+      - vinnytsia-2026-02-03-reconciliation-proof-2026-09-29
+    paths:
+      - .github/workflows/vinnytsia-reconciliation-proof.yml
+
+permissions:
+  contents: read
+
+jobs:
+  executable-proof:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - name: Check out exact proof SHA
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+
+      - name: Check out authoritative base
+        uses: actions/checkout@v4
+        with:
+          ref: bdc0188020aa39cc8164ff58218e6aac4868f54b
+          path: authoritative
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+          cache-dependency-path: kyiv-air-alerts-grafana/requirements.txt
+
+      - name: Install test dependencies
+        run: |
+          python -m pip install -r kyiv-air-alerts-grafana/requirements.txt
+          python -m pip install pytest
+
+      - name: Verify immutable semantic guards
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD:kyiv-air-alerts-grafana/data/explosion_research/vinnytsia/final_evidence.json)" = "a1a039d87b7728618ad85e86e39733df1b28c9cb"
+          test "$(git rev-parse HEAD:kyiv-air-alerts-grafana/tests/test_historical_replay_vinnytsia_reconciliation.py)" = "37a626896b1bad68c32dc66258e29ca36d70c919"
+          test "$(git rev-parse HEAD:kyiv-air-alerts-grafana/scripts/replay_explosion_history.py)" = "816e2a13f66bb453fc4bd765318d15443121325e"
+          test "$(git rev-parse HEAD:kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/vinnytsia-historical-recovery_alerts.json)" = "47496f33f140c25466468873090c43bafeb20dad"
+          test "$(git rev-parse HEAD:kyiv-air-alerts-grafana/data/explosion_preview_input.json)" = "8a71218be9b0d5463aebe4005c21aea191fdae82"
+          test "$(git -C authoritative rev-parse HEAD)" = "bdc0188020aa39cc8164ff58218e6aac4868f54b"
+          test "$(git -C authoritative rev-parse HEAD:kyiv-air-alerts-grafana/scripts/replay_explosion_history.py)" = "816e2a13f66bb453fc4bd765318d15443121325e"
+          test "$(git -C authoritative rev-parse HEAD:kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/vinnytsia-historical-recovery_alerts.json)" = "47496f33f140c25466468873090c43bafeb20dad"
+          test "$(git -C authoritative rev-parse HEAD:kyiv-air-alerts-grafana/data/explosion_preview_input.json)" = "8a71218be9b0d5463aebe4005c21aea191fdae82"
+
+      - name: Focused Vinnytsia test
+        id: focused
+        working-directory: kyiv-air-alerts-grafana
+        run: pytest -q tests/test_historical_replay_vinnytsia_reconciliation.py
+
+      - name: Complete inherited historical replay suite
+        id: inherited
+        shell: bash
+        working-directory: kyiv-air-alerts-grafana
+        run: |
+          set +e
+          pytest -q tests/test_historical_replay_*.py 2>&1 | tee "$RUNNER_TEMP/inherited-proof.txt"
+          rc=${PIPESTATUS[0]}
+          set -e
+          echo "rc=$rc" >> "$GITHUB_OUTPUT"
+          if [ "$rc" -eq 0 ]; then echo "result=PASS" >> "$GITHUB_OUTPUT"; else echo "result=FAIL" >> "$GITHUB_OUTPUT"; fi
+          exit 0
+
+      - name: Reproduce inherited-suite failure on authoritative base
+        id: inherited_base
+        if: steps.inherited.outputs.rc != '0'
+        shell: bash
+        working-directory: authoritative/kyiv-air-alerts-grafana
+        run: |
+          set +e
+          pytest -q tests/test_historical_replay_*.py 2>&1 | tee "$RUNNER_TEMP/inherited-base.txt"
+          rc=${PIPESTATUS[0]}
+          set -e
+          echo "rc=$rc" >> "$GITHUB_OUTPUT"
+          if [ "$rc" -eq 0 ]; then echo "result=PASS" >> "$GITHUB_OUTPUT"; else echo "result=FAIL" >> "$GITHUB_OUTPUT"; fi
+          exit 0
+
+      - name: Replay helper self-test
+        id: selftest
+        working-directory: kyiv-air-alerts-grafana
+        run: python scripts/replay_explosion_history.py --self-test
+
+      - name: Execute Vinnytsia replay
+        shell: bash
+        run: |
+          set -euo pipefail
+          python kyiv-air-alerts-grafana/scripts/replay_explosion_history.py \
+            --repo-root "$GITHUB_WORKSPACE/kyiv-air-alerts-grafana" \
+            --city vinnytsia \
+            --through 2026-09-17 \
+            --input-head "$GITHUB_SHA" \
+            --read-only \
+            --output "$RUNNER_TEMP/vinnytsia.json"
+
+      - name: Validate exact Vinnytsia acceptance set
+        id: vinnytsia
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json, os
+          from pathlib import Path
+
+          p = json.loads(Path(os.environ['RUNNER_TEMP'], 'vinnytsia.json').read_text(encoding='utf-8'))
+          expected_strict = {
+              '202fb3f9846f8aaf8fb958f0',
+              '61509736be4dbc730fa1ad71',
+              'ad02595482a5c1e35f2a8638',
+              '226c7cb6fe4124fb3bd3a346',
+              '5c4daf5e8e07baa46b129f29',
+          }
+          expected_sens_only = {
+              '31dc1063610ef09321175fd8',
+              'f9aafb9b87fb1abc661b1e68',
+          }
+          diag = p.get('evidence_episode_diagnostics') or {}
+          strict = {eid for eid, row in diag.items() if row.get('replayed_status') == 'STRICT'}
+          sensitivity = {eid for eid, row in diag.items() if row.get('replayed_status') in {'STRICT','SENSITIVITY'}}
+          sens_only = sensitivity - strict
+          positives = sorted(sensitivity)
+          expected_all = expected_strict | expected_sens_only
+          missing = sorted(expected_all - sensitivity)
+          unexpected = sorted(sensitivity - expected_all)
+          qa_count = len(p.get('changed_episodes') or []) + len(p.get('errors') or []) + len(p.get('unbound_review_evidence') or [])
+          assert p.get('episodes_checked') == 362, p.get('episodes_checked')
+          assert p.get('replayed_strict_episodes') == 5, p.get('replayed_strict_episodes')
+          assert p.get('replayed_sensitivity_episodes') == 7, p.get('replayed_sensitivity_episodes')
+          assert qa_count == 0, qa_count
+          assert strict == expected_strict, (sorted(strict), sorted(expected_strict))
+          assert sens_only == expected_sens_only, (sorted(sens_only), sorted(expected_sens_only))
+          assert diag['61509736be4dbc730fa1ad71']['replayed_status'] == 'STRICT'
+          assert not missing, missing
+          assert not unexpected, unexpected
+          summary = {
+              'denominator': p['episodes_checked'],
+              'strict': p['replayed_strict_episodes'],
+              'sensitivity': p['replayed_sensitivity_episodes'],
+              'qa': qa_count,
+              'target_episode_id': '61509736be4dbc730fa1ad71',
+              'target_bucket': diag['61509736be4dbc730fa1ad71']['replayed_status'],
+              'strict_episode_ids': sorted(strict),
+              'sensitivity_only_episode_ids': sorted(sens_only),
+              'positive_episode_ids': positives,
+              'duplicate_positive_ids': len(positives) - len(set(positives)),
+              'missing_positive_ids': missing,
+              'unexpected_positive_ids': unexpected,
+              'protected_files_unchanged': p.get('protected_files_unchanged'),
+              'verdict': p.get('verdict'),
+          }
+          Path(os.environ['RUNNER_TEMP'], 'vinnytsia-summary.json').write_text(json.dumps(summary, indent=2, sort_keys=True)+'\n', encoding='utf-8')
+          print(json.dumps(summary, indent=2, sort_keys=True))
+          PY
+
+      - name: Build base/proof preflights for regression scope
+        shell: bash
+        run: |
+          set -euo pipefail
+          set +e
+          python authoritative/kyiv-air-alerts-grafana/scripts/replay_explosion_history.py \
+            --repo-root "$GITHUB_WORKSPACE/authoritative/kyiv-air-alerts-grafana" \
+            --through 2026-09-17 \
+            --input-head bdc0188020aa39cc8164ff58218e6aac4868f54b \
+            --read-only --preflight --output "$RUNNER_TEMP/preflight-base.json"
+          base_rc=$?
+          python kyiv-air-alerts-grafana/scripts/replay_explosion_history.py \
+            --repo-root "$GITHUB_WORKSPACE/kyiv-air-alerts-grafana" \
+            --through 2026-09-17 \
+            --input-head "$GITHUB_SHA" \
+            --read-only --preflight --output "$RUNNER_TEMP/preflight-proof.json"
+          proof_rc=$?
+          set -e
+          echo "base preflight rc=$base_rc; proof preflight rc=$proof_rc"
+          test -f "$RUNNER_TEMP/preflight-base.json"
+          test -f "$RUNNER_TEMP/preflight-proof.json"
+
+      - name: Compare all currently replayable non-target cities
+        id: regression
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json, os, subprocess
+          from pathlib import Path
+
+          temp = Path(os.environ['RUNNER_TEMP'])
+          ws = Path(os.environ['GITHUB_WORKSPACE'])
+          proof_sha = os.environ['GITHUB_SHA']
+          base_sha = 'bdc0188020aa39cc8164ff58218e6aac4868f54b'
+          base_pre = json.loads((temp/'preflight-base.json').read_text(encoding='utf-8'))
+          proof_pre = json.loads((temp/'preflight-proof.json').read_text(encoding='utf-8'))
+          ready_base = {r['city_key'] for r in base_pre.get('cities', []) if r.get('source_status') == 'READY'} - {'vinnytsia'}
+          ready_proof = {r['city_key'] for r in proof_pre.get('cities', []) if r.get('source_status') == 'READY'} - {'vinnytsia'}
+          required = {'dnipro','lviv','sevastopol','sumy','cherkasy','chernihiv','kropyvnytskyi','kyiv','zaporizhzhia'}
+          assert required <= ready_base, sorted(required-ready_base)
+          assert required <= ready_proof, sorted(required-ready_proof)
+          assert ready_base == ready_proof, {'base_only': sorted(ready_base-ready_proof), 'proof_only': sorted(ready_proof-ready_base)}
+          cities = sorted(ready_base)
+
+          def run(root, script, sha, city, out):
+              cmd = ['python', str(script), '--repo-root', str(root), '--city', city, '--through', '2026-09-17', '--input-head', sha, '--read-only', '--output', str(out)]
+              subprocess.run(cmd, check=True)
+
+          def load_map(path):
+              p = json.loads(path.read_text(encoding='utf-8'))
+              diag = p.get('evidence_episode_diagnostics') or {}
+              return p, {eid: row.get('replayed_status') for eid, row in diag.items()}
+
+          deltas = {}
+          checked = {}
+          for city in cities:
+              bo = temp/f'base-{city}.json'
+              po = temp/f'proof-{city}.json'
+              run(ws/'authoritative'/'kyiv-air-alerts-grafana', ws/'authoritative'/'kyiv-air-alerts-grafana'/'scripts'/'replay_explosion_history.py', base_sha, city, bo)
+              run(ws/'kyiv-air-alerts-grafana', ws/'kyiv-air-alerts-grafana'/'scripts'/'replay_explosion_history.py', proof_sha, city, po)
+              bp, bm = load_map(bo)
+              pp, pm = load_map(po)
+              episode_deltas = {eid: {'base': bm.get(eid), 'proof': pm.get(eid)} for eid in sorted(set(bm)|set(pm)) if bm.get(eid) != pm.get(eid)}
+              scalar = {}
+              for key in ['episodes_checked','replayed_strict_episodes','replayed_sensitivity_episodes']:
+                  if bp.get(key) != pp.get(key): scalar[key] = {'base': bp.get(key), 'proof': pp.get(key)}
+              if bp.get('strict_episode_identity') != pp.get('strict_episode_identity'):
+                  scalar['strict_episode_identity'] = {'base': bp.get('strict_episode_identity'), 'proof': pp.get('strict_episode_identity')}
+              if bp.get('changed_episodes') != pp.get('changed_episodes'):
+                  scalar['changed_episodes'] = {'base': bp.get('changed_episodes'), 'proof': pp.get('changed_episodes')}
+              if bp.get('errors') != pp.get('errors'):
+                  scalar['errors'] = {'base': bp.get('errors'), 'proof': pp.get('errors')}
+              if episode_deltas or scalar:
+                  deltas[city] = {'episode_deltas': episode_deltas, 'other_deltas': scalar}
+              checked[city] = {'episodes_checked': pp.get('episodes_checked'), 'strict': pp.get('replayed_strict_episodes'), 'sensitivity': pp.get('replayed_sensitivity_episodes')}
+          summary = {
+              'replayable_non_target_cities': cities,
+              'required_minimum_cities_present': sorted(required),
+              'unexpected_non_vinnytsia_episode_deltas': sum(len(v['episode_deltas']) for v in deltas.values()),
+              'cities_with_any_delta': sorted(deltas),
+              'deltas': deltas,
+              'checked': checked,
+          }
+          (temp/'non-target-regression.json').write_text(json.dumps(summary, indent=2, sort_keys=True)+'\n', encoding='utf-8')
+          print(json.dumps(summary, indent=2, sort_keys=True))
+          assert not deltas, deltas
+          PY
+
+      - name: Emit runtime proof record
+        if: always()
+        shell: bash
+        env:
+          INHERITED_RC: ${{ steps.inherited.outputs.rc }}
+          INHERITED_BASE_RC: ${{ steps.inherited_base.outputs.rc }}
+        run: |
+          python - <<'PY'
+          import json, os
+          from pathlib import Path
+          temp = Path(os.environ['RUNNER_TEMP'])
+          vin = json.loads((temp/'vinnytsia-summary.json').read_text(encoding='utf-8')) if (temp/'vinnytsia-summary.json').exists() else None
+          reg = json.loads((temp/'non-target-regression.json').read_text(encoding='utf-8')) if (temp/'non-target-regression.json').exists() else None
+          inherited_rc = os.environ.get('INHERITED_RC') or None
+          inherited_base_rc = os.environ.get('INHERITED_BASE_RC') or None
+          record = {
+              'github_actions_run_id': os.environ['GITHUB_RUN_ID'],
+              'run_sha': os.environ['GITHUB_SHA'],
+              'focused_test_result': 'PASS' if vin is not None else 'UNKNOWN_OR_FAILED_BEFORE_REPLAY',
+              'inherited_suite_result': 'PASS' if inherited_rc == '0' else 'FAIL',
+              'inherited_suite_rc': int(inherited_rc) if inherited_rc is not None else None,
+              'authoritative_reproduction_rc': int(inherited_base_rc) if inherited_base_rc not in (None,'') else None,
+              'replay_self_test_result': 'PASS' if vin is not None else 'UNKNOWN_OR_FAILED_BEFORE_REPLAY',
+              'executable_vinnytsia': vin,
+              'non_target_regression': reg,
+              'temporary_workflow_added': True,
+              'temporary_workflow_removed': False,
+              'runtime_acceptance_status': 'PASS' if vin is not None and reg is not None and inherited_rc == '0' else 'BLOCKED',
+          }
+          out = temp/'runtime-proof.json'
+          out.write_text(json.dumps(record, indent=2, sort_keys=True)+'\n', encoding='utf-8')
+          print('RUNTIME_PROOF_JSON_START')
+          print(out.read_text(encoding='utf-8'), end='')
+          print('RUNTIME_PROOF_JSON_END')
+          PY
+
+      - name: Upload runtime proof artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: vinnytsia-reconciliation-runtime-proof
+          path: |
+            ${{ runner.temp }}/runtime-proof.json
+            ${{ runner.temp }}/vinnytsia.json
+            ${{ runner.temp }}/vinnytsia-summary.json
+            ${{ runner.temp }}/non-target-regression.json
+            ${{ runner.temp }}/inherited-proof.txt
+            ${{ runner.temp }}/inherited-base.txt
+          if-no-files-found: warn
+          retention-days: 14
+
+      - name: Enforce inherited-suite acceptance gate
+        if: always()
+        shell: bash
+        run: test "${{ steps.inherited.outputs.rc }}" = "0"
