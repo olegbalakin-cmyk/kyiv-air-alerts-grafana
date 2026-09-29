@@ -1,0 +1,407 @@
+{
+  "verdict": "PHASE-1 PRODUCTION SHADOW STABILITY PROVEN",
+  "db_cutover": false,
+  "credentials_exposed": false,
+  "repository": "olegbalakin-cmyk/kyiv-air-alerts-grafana",
+  "project_id": "green-cake-44216048",
+  "production_shadow_branch": {
+    "branch_id": "br-bold-mode-b5rub8pq",
+    "name": "lviv-phase1-production-shadow-2026-09-28"
+  },
+  "accepted_baseline": {
+    "milestone": "PHASE-1 SCHEDULED PRODUCTION SHADOW ENABLED AND PROVEN",
+    "github_run_id": 36470761961,
+    "checkpoint": {
+      "seq": 2,
+      "checkpoint_id": "c8cc6b92-e46e-4a87-8bae-0d169aee4fae"
+    },
+    "db_counts_after": {
+      "ingestion_runs": 2,
+      "alert_episodes": 126,
+      "alert_episode_sources": 140,
+      "ingestion_checkpoints": 2
+    }
+  },
+  "current_refs": {
+    "main": "e2da5058c726edce41d9ae997027d01df7c54c4c",
+    "site_prod": "c21857e1c928876b1b89ddb1013fab08ce1a0e7f"
+  },
+  "main_drift": {
+    "base_sha": "35416a1a7d0ef3bb02762b8e336003e13844848d",
+    "current_sha": "e2da5058c726edce41d9ae997027d01df7c54c4c",
+    "commits": 1,
+    "classification": "normal_bot_data_only",
+    "commit": {
+      "sha": "e2da5058c726edce41d9ae997027d01df7c54c4c",
+      "author": "github-actions[bot]",
+      "message": "Update Kyiv air-alert and casualty data"
+    },
+    "changed_files": [
+      "kyiv-air-alerts-grafana/data/alerts_combined.json",
+      "kyiv-air-alerts-grafana/data/casualties/review_queue.json",
+      "kyiv-air-alerts-grafana/data/casualties/source_state.json",
+      "kyiv-air-alerts-grafana/data/dashboard_data.json",
+      "kyiv-air-alerts-grafana/data/short_28d.csv",
+      "kyiv-air-alerts-grafana/data/ukrainealarm_bridge.json",
+      "kyiv-air-alerts-grafana/data/weekly.csv"
+    ],
+    "updater_workflow_blob_unchanged": true
+  },
+  "scheduled_runs": [
+    {
+      "github_run_id": 36479624062,
+      "event": "schedule",
+      "conclusion": "success",
+      "workflow": "Update Ukraine air-alert production data",
+      "workflow_sha": "35416a1a7d0ef3bb02762b8e336003e13844848d",
+      "input_ref": "site-prod",
+      "input_sha": "d5482d2976c29bec2c31ab6c843a2cdc1cfe1cad",
+      "provenance_separation": true,
+      "db_run_id": "16da7551-0b50-4042-a401-5ee816c103c2",
+      "db_run": {
+        "run_kind": "shadow_poll",
+        "status": "succeeded",
+        "canonicalization_version": "alert-canonicalization-v1",
+        "parameters": {
+          "shadow": true,
+          "assembly_profile": "lviv-historical-v1"
+        },
+        "stats": {
+          "episodes_inserted": 0,
+          "episodes_existing": 126,
+          "source_observations_inserted": 0,
+          "source_observations_existing": 140,
+          "source_observations_last_seen_updated": 140,
+          "checkpoints_inserted": 1,
+          "exact_retry": false
+        }
+      },
+      "checkpoint": {
+        "seq": 3,
+        "checkpoint_id": "382df009-d7dd-4d77-8544-9b230b600d2b",
+        "previous_checkpoint_id": "c8cc6b92-e46e-4a87-8bae-0d169aee4fae",
+        "created_by_run_id": "16da7551-0b50-4042-a401-5ee816c103c2"
+      },
+      "production_dataset_verification": "PASS",
+      "site_prod_publication": {
+        "status": "success",
+        "resulting_sha": "4ef6502283868680c0e670226c17ae1fbc977557"
+      }
+    },
+    {
+      "github_run_id": 36504056933,
+      "event": "schedule",
+      "conclusion": "success",
+      "workflow": "Update Ukraine air-alert production data",
+      "workflow_sha": "35416a1a7d0ef3bb02762b8e336003e13844848d",
+      "input_ref": "site-prod",
+      "input_sha": "4ef6502283868680c0e670226c17ae1fbc977557",
+      "provenance_separation": true,
+      "db_run_id": "beb64e65-2a70-4f92-a9e6-2ecc44ee240a",
+      "db_run": {
+        "run_kind": "shadow_poll",
+        "status": "succeeded",
+        "canonicalization_version": "alert-canonicalization-v1",
+        "parameters": {
+          "shadow": true,
+          "assembly_profile": "lviv-historical-v1"
+        },
+        "stats": {
+          "episodes_inserted": 0,
+          "episodes_existing": 126,
+          "source_observations_inserted": 0,
+          "source_observations_existing": 140,
+          "source_observations_last_seen_updated": 140,
+          "checkpoints_inserted": 1,
+          "exact_retry": false
+        }
+      },
+      "checkpoint": {
+        "seq": 4,
+        "checkpoint_id": "b6472b9d-646b-43b9-81a3-f9d2317f1608",
+        "previous_checkpoint_id": "382df009-d7dd-4d77-8544-9b230b600d2b",
+        "created_by_run_id": "beb64e65-2a70-4f92-a9e6-2ecc44ee240a"
+      },
+      "production_dataset_verification": "PASS",
+      "site_prod_publication": {
+        "status": "success",
+        "resulting_sha": "c8fdbf902dc24c3ca20c826810ae6d3f255b6b95"
+      }
+    },
+    {
+      "github_run_id": 36522021631,
+      "event": "schedule",
+      "conclusion": "success",
+      "workflow": "Update Ukraine air-alert production data",
+      "workflow_sha": "e2da5058c726edce41d9ae997027d01df7c54c4c",
+      "input_ref": "site-prod",
+      "input_sha": "c8fdbf902dc24c3ca20c826810ae6d3f255b6b95",
+      "provenance_separation": true,
+      "db_run_id": "70e32ee9-d458-496f-82e3-3b4296613ea2",
+      "db_run": {
+        "run_kind": "shadow_poll",
+        "status": "succeeded",
+        "canonicalization_version": "alert-canonicalization-v1",
+        "parameters": {
+          "shadow": true,
+          "assembly_profile": "lviv-historical-v1"
+        },
+        "stats": {
+          "episodes_inserted": 0,
+          "episodes_existing": 126,
+          "source_observations_inserted": 0,
+          "source_observations_existing": 140,
+          "source_observations_last_seen_updated": 140,
+          "checkpoints_inserted": 1,
+          "exact_retry": false
+        }
+      },
+      "checkpoint": {
+        "seq": 5,
+        "checkpoint_id": "857358fc-0abc-40ad-92a8-eb1fbbe183f9",
+        "previous_checkpoint_id": "b6472b9d-646b-43b9-81a3-f9d2317f1608",
+        "created_by_run_id": "70e32ee9-d458-496f-82e3-3b4296613ea2"
+      },
+      "production_dataset_verification": "PASS",
+      "site_prod_publication": {
+        "status": "success",
+        "resulting_sha": "c21857e1c928876b1b89ddb1013fab08ce1a0e7f"
+      }
+    }
+  ],
+  "checkpoint_chain": [
+    {
+      "seq": 2,
+      "checkpoint_id": "c8cc6b92-e46e-4a87-8bae-0d169aee4fae",
+      "previous_checkpoint_id": "40a0d262-2a79-405b-8e06-1af6e28bc908",
+      "created_by_run_id": "c7f5fdb7-d2f1-44a9-8aba-1e45a215d84f"
+    },
+    {
+      "seq": 3,
+      "checkpoint_id": "382df009-d7dd-4d77-8544-9b230b600d2b",
+      "previous_checkpoint_id": "c8cc6b92-e46e-4a87-8bae-0d169aee4fae",
+      "created_by_run_id": "16da7551-0b50-4042-a401-5ee816c103c2"
+    },
+    {
+      "seq": 4,
+      "checkpoint_id": "b6472b9d-646b-43b9-81a3-f9d2317f1608",
+      "previous_checkpoint_id": "382df009-d7dd-4d77-8544-9b230b600d2b",
+      "created_by_run_id": "beb64e65-2a70-4f92-a9e6-2ecc44ee240a"
+    },
+    {
+      "seq": 5,
+      "checkpoint_id": "857358fc-0abc-40ad-92a8-eb1fbbe183f9",
+      "previous_checkpoint_id": "b6472b9d-646b-43b9-81a3-f9d2317f1608",
+      "created_by_run_id": "70e32ee9-d458-496f-82e3-3b4296613ea2"
+    }
+  ],
+  "db_counts": {
+    "before_natural_soak": {
+      "ingestion_runs": 2,
+      "alert_episodes": 126,
+      "alert_episode_sources": 140,
+      "ingestion_checkpoints": 2
+    },
+    "after_natural_soak": {
+      "ingestion_runs": 5,
+      "alert_episodes": 126,
+      "alert_episode_sources": 140,
+      "ingestion_checkpoints": 5
+    }
+  },
+  "runtime_contract": {
+    "phase1_db_shadow": true,
+    "db_failure_policy": "fail_open",
+    "input_ref": "site-prod",
+    "json_remains_authoritative": true,
+    "frontend_db_read_enabled": false,
+    "db_cutover": false,
+    "dashboard_json_url": "https://raw.githubusercontent.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/site-prod/kyiv-air-alerts-grafana/data/dashboard_data.json"
+  },
+  "frozen_blobs": {
+    "workflow": {
+      "path": ".github/workflows/update-netlify-site.yml",
+      "ref": "main",
+      "expected": "a451cb205be4cf5a597f3f72e04426c12868e3da",
+      "actual": "a451cb205be4cf5a597f3f72e04426c12868e3da"
+    },
+    "bridge": {
+      "path": "kyiv-air-alerts-grafana/scripts/apply_ukrainealarm_bridge.py",
+      "ref": "site-prod",
+      "expected": "ec86111454740ee56a3de7bd93cf2ec2597c910d",
+      "actual": "ec86111454740ee56a3de7bd93cf2ec2597c910d"
+    },
+    "shadow": {
+      "path": "kyiv-air-alerts-grafana/scripts/db_phase1_shadow.py",
+      "ref": "site-prod",
+      "expected": "1509421a1bab49558bc0b086c7bc220554713ebd",
+      "actual": "1509421a1bab49558bc0b086c7bc220554713ebd"
+    },
+    "canonical": {
+      "path": "kyiv-air-alerts-grafana/scripts/db_phase1_lviv_canonical.py",
+      "ref": "site-prod",
+      "expected": "2437cce7d434f34574b19dbd857ee9625de0e0b4",
+      "actual": "2437cce7d434f34574b19dbd857ee9625de0e0b4"
+    },
+    "persistence": {
+      "path": "kyiv-air-alerts-grafana/scripts/db_phase1_persistence.py",
+      "ref": "site-prod",
+      "expected": "ed014e61fc6186fa9daf91c763c847e7df2f0306",
+      "actual": "ed014e61fc6186fa9daf91c763c847e7df2f0306"
+    },
+    "ddl": {
+      "path": "kyiv-air-alerts-grafana/db/migrations/001_phase1_core.sql",
+      "ref": "site-prod",
+      "expected": "3b8af7940b23aae03a4f6b434d90d97dde10bfc0",
+      "actual": "3b8af7940b23aae03a4f6b434d90d97dde10bfc0"
+    }
+  },
+  "protected_neon_branch_isolation": {
+    "status": "PASS",
+    "protected_branches": {
+      "br-wandering-sunset-b5835alw": {
+        "accepted_counts": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "observed_counts": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "accepted_max_checkpoint_seq": null,
+        "observed_max_checkpoint_seq": null,
+        "soak_run_rows": 0
+      },
+      "br-young-feather-b5q19nli": {
+        "accepted_counts": [
+          1,
+          126,
+          140,
+          1
+        ],
+        "observed_counts": [
+          1,
+          126,
+          140,
+          1
+        ],
+        "accepted_max_checkpoint_seq": 1,
+        "observed_max_checkpoint_seq": 1,
+        "soak_run_rows": 0
+      },
+      "br-still-sea-b5062r40": {
+        "accepted_counts": [
+          2,
+          126,
+          140,
+          1
+        ],
+        "observed_counts": [
+          2,
+          126,
+          140,
+          1
+        ],
+        "accepted_max_checkpoint_seq": 1,
+        "observed_max_checkpoint_seq": 1,
+        "soak_run_rows": 0
+      },
+      "br-small-wind-b5yah69o": {
+        "accepted_counts": [
+          3,
+          126,
+          140,
+          3
+        ],
+        "observed_counts": [
+          3,
+          126,
+          140,
+          3
+        ],
+        "accepted_max_checkpoint_seq": 3,
+        "observed_max_checkpoint_seq": 3,
+        "soak_run_rows": 0
+      },
+      "br-calm-cherry-b56fsh4i": {
+        "accepted_counts": [
+          2,
+          126,
+          140,
+          2
+        ],
+        "observed_counts": [
+          2,
+          126,
+          140,
+          2
+        ],
+        "accepted_max_checkpoint_seq": 2,
+        "observed_max_checkpoint_seq": 2,
+        "soak_run_rows": 0
+      },
+      "br-cold-sky-b5jhai9p": {
+        "accepted_counts": [
+          6,
+          126,
+          140,
+          5
+        ],
+        "observed_counts": [
+          6,
+          126,
+          140,
+          5
+        ],
+        "accepted_max_checkpoint_seq": 5,
+        "observed_max_checkpoint_seq": 5,
+        "soak_run_rows": 0
+      },
+      "br-quiet-tooth-b51ewryz": {
+        "accepted_counts": [
+          3,
+          126,
+          140,
+          2
+        ],
+        "observed_counts": [
+          3,
+          126,
+          140,
+          2
+        ],
+        "accepted_max_checkpoint_seq": 2,
+        "observed_max_checkpoint_seq": 2,
+        "soak_run_rows": 0
+      }
+    },
+    "other_existing_probe_branches": {
+      "br-polished-haze-b5u6rpiz": {
+        "soak_run_rows": 0
+      },
+      "br-patient-water-b58f6vly": {
+        "soak_run_rows": 0
+      }
+    },
+    "only_production_shadow_branch_received_soak_runs": true
+  },
+  "credential_scan": {
+    "github_job_logs_checked": [
+      36479624062,
+      36504056933,
+      36522021631
+    ],
+    "database_url_rendered_masked": true,
+    "postgres_url_hits": 0,
+    "credentials_exposed": false
+  },
+  "proof_branch": {
+    "name": "db-phase1-production-shadow-stability-proof-2026-09-29",
+    "base_sha": "e2da5058c726edce41d9ae997027d01df7c54c4c",
+    "merge_to_main": false
+  }
+}
