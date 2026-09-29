@@ -1,0 +1,125 @@
+{
+  "date": "2026-09-29",
+  "purpose": "final strict executable continuation for 23-city casualty production promotion using a temporary push-trigger GitHub Actions workflow; no production cutover",
+  "accepted_scope_source": "user task in Pasted text(20260929-131819).txt",
+  "pre_execution_guard": {
+    "proof_branch": "multicity-casualties-prod-proof-2026-09-28",
+    "starting_proof_head": "8a112a082266903d83445020b09ecb6301b22183",
+    "fresh_site_prod_head": "e09766f184b5beb8bc56d360e98bc269c088b25e",
+    "fresh_main_head": "5195fd449cddc9c16508065434aa4aaecc2bdf5f",
+    "exact_dashboard_git_blob": "993dc94e5e1a844a14cac2812817f51792bdd298",
+    "promotion_blobs_fresh_confirmed_12_of_12": true,
+    "promotion_or_frontend_source_drift": false,
+    "site_prod_drift_from_previous_guard": {
+      "previous_head": "a06b82197c737e4311af3cb160ca662f9eff1e8f",
+      "classification": "generated/live-data outputs only; accepted promotion implementation/frontend blobs unchanged"
+    }
+  },
+  "proof_support": {
+    "runner_path": "kyiv-air-alerts-grafana/tests/run_multicity_casualty_final_runtime_proof.py",
+    "runner_commit": "3208311b0e6c22ad1fbd8cc8a2d2e7f54a582f5e",
+    "runner_local_precommit_sha256": "394387b8f177913b334853e23ccc031bef5a9f1f504d7b143961d5411a73fe53",
+    "note": "proof-only support file; accepted casualty promotion implementation was not modified"
+  },
+  "temporary_workflow": {
+    "path": ".github/workflows/multicity-casualty-final-runtime-proof.yml",
+    "initial_workflow_commit": "8a2992d72af91bcbaba643550f794033f7e64ae1",
+    "targeted_retry_workflow_commit": "cf6e0de245baed3199758a0dad7e3c109d12737a",
+    "removal_commit": "9b6a9b2a48ccad9ec6c2f062a7e5d7c7f75952a0",
+    "final_tree_contains_workflow": false,
+    "permissions": "contents: read",
+    "repository_write_logic": false
+  },
+  "attempt_1": {
+    "github_actions_run_id": 36576167085,
+    "tested_commit": "8a2992d72af91bcbaba643550f794033f7e64ae1",
+    "conclusion": "failure",
+    "classification": "pure workflow/tooling failure",
+    "blocker": "workflow required dist/chart.umd.min.js although the installed chart.js@4.4.7 npm package exposes the allowed dist/chart.umd.js bundle",
+    "semantic_or_runtime_gate_executed": false,
+    "retry_authorized": true
+  },
+  "attempt_2_targeted_retry": {
+    "github_actions_run_id": 36576283596,
+    "tested_commit": "cf6e0de245baed3199758a0dad7e3c109d12737a",
+    "conclusion": "failure",
+    "chart_js_install": {
+      "npm_package": "chart.js@4.4.7",
+      "source_path": "/tmp/chartpkg/node_modules/chart.js/dist/chart.umd.js",
+      "package_version": "4.4.7",
+      "bundle_sha256": null,
+      "bundle_sha256_status": "NOT RETAINED because the runner aborted before the proof result state was flushed"
+    },
+    "browser_tooling_install": {
+      "playwright_version": "1.63.0",
+      "chromium_downloaded": "Chrome for Testing 153.0.8010.12",
+      "chromium_runtime_version": null,
+      "chromium_runtime_version_status": "NOT EXECUTED; browser launch occurs after builder/focused-test gates"
+    },
+    "failure_classification": "second pure execution/tooling blocker after the one allowed targeted retry; not a casualty semantic/data/frontend failure",
+    "failed_step": "Execute strict exact-current-base runtime proof",
+    "failed_gate_reported_by_runner": "exact_current_builder",
+    "exact_error": "ModuleNotFoundError: No module named 'requests'",
+    "exact_command": "python scripts/update_casualties.py --no-network",
+    "root_cause": "update_casualties.py imports requests at module import time even in --no-network mode, but the temporary workflow did not install the project Python dependency before invoking the builder",
+    "builder_logic_reached": false,
+    "builder_semantics_failed": false,
+    "further_retry_permitted": false
+  },
+  "exact_current_dashboard": {
+    "frozen_site_prod_head": "e09766f184b5beb8bc56d360e98bc269c088b25e",
+    "git_blob_sha": "993dc94e5e1a844a14cac2812817f51792bdd298",
+    "runner_materialized_before_builder_invocation": true,
+    "materialized_sha256": null,
+    "materialized_sha256_status": "NOT RETAINED in uploaded result because exception handling replaced the in-progress result object before artifact flush"
+  },
+  "gates": {
+    "exact_current_dashboard_materialized": "PARTIALLY PROVEN: exact commit/blob checkout occurred before builder invocation, but byte SHA-256 was not retained in artifact",
+    "exact_current_builder": "NOT EXECUTED: Python import dependency blocker occurred before builder logic",
+    "city_count": null,
+    "exact_totals": "NOT EXECUTED",
+    "monthly_rows_each": null,
+    "kyiv_compatibility": "NOT EXECUTED",
+    "uzhhorod_zero_series": "NOT EXECUTED",
+    "unexpected_non_casualty_diffs": null,
+    "grafana_generation": "NOT EXECUTED",
+    "real_chart_js_loaded": "PACKAGE INSTALL VERIFIED; BROWSER IDENTITY GATE NOT EXECUTED",
+    "chart_version_runtime": null,
+    "real_city_switch": "NOT EXECUTED",
+    "real_uzhhorod_zero_chart": "NOT EXECUTED",
+    "real_missing_series_cleanup": "NOT EXECUTED",
+    "console_errors": null,
+    "page_errors": null,
+    "chart_errors": null,
+    "repeated_builder_durability": "NOT EXECUTED",
+    "focused_test": "NOT EXECUTED on exact-current base"
+  },
+  "uploaded_execution_artifact": {
+    "attempt_2_artifact_id": 11037871774,
+    "artifact_name": "multicity-casualties-final-runtime-exec-result",
+    "uploaded_zip_sha256": "7267e1d07f7c7045d3df3de5374c403c174280bfe96596ac7638f2f54e4b231f",
+    "extracted_json_sha256": "26cf9253b1be5c923ff90a9f4fda551ef7231fa5d67b60d7a3be24c7e9925dea",
+    "runner_reported_status": "FAILED",
+    "runner_reported_gate": "exact_current_builder",
+    "adjudication_note": "runner label is mechanically tied to the subprocess wrapper; artifact traceback shows failure occurred at import time before builder logic, so this task classifies it as an execution/tooling blocker rather than a semantic builder failure"
+  },
+  "production_write_audit": {
+    "site_prod_push": false,
+    "main_push": false,
+    "netlify_production": false,
+    "netlify_preview": false,
+    "grafana_deploy": false,
+    "neon_mutation": false,
+    "historical_replay_mutation": false,
+    "live_attack_event_monitor_mutation": false,
+    "campaign_6863_mutation": false,
+    "generated_production_outputs_committed": false
+  },
+  "protected_state_post_execution": {
+    "site_prod_head": "e09766f184b5beb8bc56d360e98bc269c088b25e",
+    "main_head": "5195fd449cddc9c16508065434aa4aaecc2bdf5f",
+    "proof_head_after_workflow_removal": "9b6a9b2a48ccad9ec6c2f062a7e5d7c7f75952a0",
+    "temporary_workflow_absent": true
+  },
+  "verdict": "23-CITY CASUALTY PRODUCTION PROMOTION STILL BLOCKED — SECOND TOOLING BLOCKER AFTER THE ONE ALLOWED RETRY: PYTHON REQUESTS DEPENDENCY WAS NOT INSTALLED, SO THE EXACT-CURRENT BUILDER NEVER EXECUTED"
+}
