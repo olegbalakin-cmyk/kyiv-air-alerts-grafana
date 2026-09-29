@@ -1,0 +1,194 @@
+name: 23-city casualty live production validation
+
+on:
+  push:
+    branches:
+      - multicity-casualties-production-cutover-record-2026-09-29
+    paths:
+      - ".github/workflows/multicity-casualties-production-live-validation.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  validate-live:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Check out validation branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install browser tooling
+        run: |
+          python -m pip install --disable-pip-version-check playwright requests
+          python -m playwright install chromium
+
+      - name: Validate live data endpoint and real browser
+        env:
+          LIVE_URL: https://ukraine-air-alerts.netlify.app
+          DATA_URL: https://raw.githubusercontent.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/site-prod/kyiv-air-alerts-grafana/data/dashboard_data.json
+          OUT: ${{ runner.temp }}/multicity_casualties_live_validation.json
+        run: |
+          python - <<'PY'
+          import json, os
+          from pathlib import Path
+          import requests
+          from playwright.sync_api import sync_playwright
+
+          EXPECTED = {
+              "kyiv": 454, "kharkiv": 339, "sevastopol": 22, "cherkasy": 2,
+              "zhytomyr": 12, "dnipro": 214, "khmelnytskyi": 10, "poltava": 84,
+              "rivne": 1, "sumy": 158, "vinnytsia": 31, "kropyvnytskyi": 9,
+              "lviv": 29, "chernihiv": 105, "mykolaiv": 106, "lutsk": 10,
+              "uzhhorod": 0, "ivano-frankivsk": 3, "ternopil": 41,
+              "chernivtsi": 5, "odesa": 171, "zaporizhzhia": 316, "kherson": 163,
+          }
+          data_url = os.environ["DATA_URL"]
+          live_url = os.environ["LIVE_URL"]
+
+          response = requests.get(data_url, timeout=60, headers={"Cache-Control":"no-cache"})
+          response.raise_for_status()
+          data = response.json()
+          series = data.get("casualties_by_city") or {}
+          assert set(series) == set(EXPECTED), (sorted(series), sorted(EXPECTED))
+          totals = {}
+          rows_each = {}
+          for key, expected in EXPECTED.items():
+              rows = series[key].get("monthly") or []
+              rows_each[key] = len(rows)
+              assert len(rows) == 56, (key, len(rows))
+              months = [r.get("month") for r in rows]
+              assert len(months) == len(set(months)), (key, "duplicate months")
+              assert all(int(r.get("deaths") or 0) >= 0 for r in rows), (key, "negative")
+              total = sum(int(r.get("deaths") or 0) for r in rows)
+              totals[key] = total
+              assert total == expected, (key, total, expected)
+          assert series["kyiv"] == data.get("casualties"), "Kyiv legacy compatibility mismatch"
+
+          console_errors, page_errors, failed_requests, warnings = [], [], [], []
+          with sync_playwright() as pw:
+              browser = pw.chromium.launch(headless=True)
+              chromium_version = browser.version
+              context = browser.new_context()
+              context.add_init_script("localStorage.setItem('air-alerts-intro-tour-v2','1')")
+              page = context.new_page()
+
+              def on_console(msg):
+                  if msg.type == "error":
+                      console_errors.append(msg.text)
+                  elif msg.type == "warning":
+                      warnings.append(msg.text)
+
+              page.on("console", on_console)
+              page.on("pageerror", lambda exc: page_errors.append(str(exc)))
+              page.on("requestfailed", lambda req: failed_requests.append(f"{req.method} {req.url}: {req.failure}"))
+              page.goto(live_url, wait_until="networkidle", timeout=120000)
+              page.wait_for_function(
+                  "() => typeof Chart === 'function' && !!Chart.getChart(document.getElementById('casualtyChart'))",
+                  timeout=120000,
+              )
+
+              chart_identity = page.evaluate("""() => ({
+                  typeof_chart: typeof Chart,
+                  version: Chart.version,
+                  has_registry: !!Chart.registry,
+                  has_getChart: typeof Chart.getChart === 'function',
+                  has_instances: !!Chart.instances
+              })""")
+              assert chart_identity["typeof_chart"] == "function", chart_identity
+              assert chart_identity["version"] == "4.4.7", chart_identity
+              assert chart_identity["has_registry"] and chart_identity["has_getChart"] and chart_identity["has_instances"], chart_identity
+
+              def summary():
+                  return page.evaluate("""() => {
+                      const canvas = document.getElementById('casualtyChart');
+                      const chart = Chart.getChart(canvas);
+                      const values = chart?.data?.datasets?.[0]?.data || [];
+                      return {
+                          exists: !!chart,
+                          id: chart?.id ?? null,
+                          rows: chart?.data?.labels?.length ?? 0,
+                          total: values.reduce((a,b) => a + (Number(b)||0), 0),
+                          section_visible: !document.getElementById('casualtySection').classList.contains('hidden'),
+                          city_value: document.getElementById('citySelect').value,
+                          eyebrow: document.getElementById('casualtyCityEyebrow').textContent
+                      };
+                  }""")
+
+              def switch_city(key, expected, previous_id=None):
+                  page.select_option("#citySelect", key)
+                  page.wait_for_timeout(150)
+                  cur = summary()
+                  assert cur["exists"], (key, cur)
+                  assert cur["rows"] == 56, (key, cur)
+                  assert cur["total"] == expected, (key, cur)
+                  assert cur["section_visible"], (key, cur)
+                  assert cur["city_value"] == key, (key, cur)
+                  replaced = True
+                  old_removed = True
+                  if previous_id is not None:
+                      replaced = cur["id"] != previous_id
+                      old_removed = bool(page.evaluate("oldId => !Chart.instances[oldId]", previous_id))
+                      assert replaced and old_removed, (key, cur, previous_id)
+                  cur["previous_chart_replaced"] = replaced
+                  cur["previous_chart_removed_from_registry"] = old_removed
+                  return cur
+
+              initial = summary()
+              assert initial["exists"] and initial["rows"] == 56 and initial["total"] == 454 and initial["city_value"] == "kyiv", initial
+              sequence = [{"city":"kyiv", **initial, "previous_chart_replaced":True, "previous_chart_removed_from_registry":True}]
+              prev = initial["id"]
+              for key in ["kharkiv","uzhhorod","odesa","kyiv"]:
+                  cur = switch_city(key, EXPECTED[key], prev)
+                  sequence.append({"city":key, **cur})
+                  prev = cur["id"]
+
+              spot_checks = {}
+              for key in ["dnipro","zaporizhzhia","kherson"]:
+                  cur = switch_city(key, EXPECTED[key], prev)
+                  spot_checks[key] = cur
+                  prev = cur["id"]
+
+              assert console_errors == [], console_errors
+              assert page_errors == [], page_errors
+              assert failed_requests == [], failed_requests
+              browser.close()
+
+          result = {
+              "ok": True,
+              "live_url": live_url,
+              "data_url": data_url,
+              "http_status": response.status_code,
+              "city_count": len(series),
+              "rows_each_unique": sorted(set(rows_each.values())),
+              "totals": totals,
+              "kyiv_compatibility": True,
+              "playwright_version": __import__("importlib.metadata").metadata.version("playwright"),
+              "chromium_version": chromium_version,
+              "chart_identity": chart_identity,
+              "switch_sequence": sequence,
+              "spot_checks": spot_checks,
+              "console_errors": console_errors,
+              "page_errors": page_errors,
+              "failed_requests": failed_requests,
+              "warnings": warnings,
+          }
+          Path(os.environ["OUT"]).write_text(json.dumps(result, ensure_ascii=False, indent=2)+"\n", encoding="utf-8")
+          print(json.dumps(result, ensure_ascii=False))
+          PY
+
+      - name: Upload live validation result
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: multicity-casualties-live-production-validation
+          path: ${{ runner.temp }}/multicity_casualties_live_validation.json
+          if-no-files-found: warn
+          retention-days: 30
