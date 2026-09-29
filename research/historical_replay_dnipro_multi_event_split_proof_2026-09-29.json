@@ -1,0 +1,260 @@
+{
+  "schema_version": 1,
+  "kind": "historical_replay_dnipro_multi_event_split_proof",
+  "date": "2026-09-29",
+  "metric": "% alert episodes with >=1 confirmed attack event",
+  "unit": "alert episode",
+  "authoritative_branch": "multicity-wip-2026-09-16",
+  "authoritative_base_head": "93a7e702657a272b9bc3ffba6a5b843e75b66383",
+  "proof_branch": "dnipro-one-row-two-episodes-proof-2026-09-29",
+  "implementation_commit": "5218e6a749e0c03543ee555bc196f6c7a3323777",
+  "replay_blob_before": "99b13318a3bd53013a798bd4c66c87c4aed6f45b",
+  "replay_blob_after": "b8b321aaa9dcb84987867c58fd50e5868f0ca3b3",
+  "compatibility_guard": {
+    "result": "PASS",
+    "accepted_adjudication_commit": "61e8c9096d5fb12168b08f64d997c07718f3aab5",
+    "relevant_drift": false,
+    "checked_blobs": {
+      "replay_script": "99b13318a3bd53013a798bd4c66c87c4aed6f45b",
+      "classifier": "b55fe2ed082958917c74f95bca2fd6bc137bcaae",
+      "dnipro_final_evidence": "99758ae2a7d888593ffd863cc53cd9f48bf34f5a",
+      "audited_baseline": "81ecc48ed64b7e78449df903afb082e9f92531e5",
+      "dnipro_historical_recovery_slice": "1395c92aa5c8d5200d8413dffea02aaedc1b5444"
+    },
+    "note": "Drift since adjudication was generated/live/research only; target evidence, replay, classifier, Dnipro source slices, baseline and episode-ID inputs were unchanged."
+  },
+  "target_parent": {
+    "record_id": "2793d79590a849624744439a",
+    "historical_bucket": "strict_events",
+    "index": 74,
+    "source_urls": [
+      "https://24tv.ua/dnipro-skolihnula-seriya-vibuhiv_n3003501"
+    ],
+    "source_observation_ids": [],
+    "retained_row": {
+      "alert_episode_start": "2026-02-05 ~14:31",
+      "event_time": "14:45; 15:39",
+      "source_url": "https://24tv.ua/dnipro-skolihnula-seriya-vibuhiv_n3003501",
+      "evidence": "Після попередження про БпЛА та тривоги близько 14:31 у Дніпрі о 14:45 і 15:39 пролунали вибухи.",
+      "decision": "strict",
+      "basis": "exact_city; confirmed_air_war; timed_inside_alert"
+    },
+    "stable_id_contract": "SHA256(\"dnipro|strict_events|74|\"+canonical_json(row))[:24]",
+    "legacy_count_semantics": "one counted STRICT row",
+    "representation_finding": "one retained parent contains two discrete, independently timestamped explosion observations; this is not a two-timestamp ambiguity for one event"
+  },
+  "child_events": [
+    {
+      "label": "A",
+      "event_local": "2026-02-05T14:45:00+02:00",
+      "event_utc": "2026-02-05T12:45:00Z",
+      "observation_id": "90817537f7b3bfadb49a9664",
+      "episode_id": "00c24c9cccd9e66de7eba62b",
+      "episode_local_interval": "2026-02-05T13:02:13+02:00/2026-02-05T15:08:11+02:00",
+      "binding_method": "event_time_unique_containment",
+      "gates": {
+        "actual_event": true,
+        "exact_city": true,
+        "attack_context": true,
+        "event_time_explicit_or_recoverable": true,
+        "unique_episode_containment": true,
+        "same_attack_context": true,
+        "final_classification": "STRICT"
+      }
+    },
+    {
+      "label": "B",
+      "event_local": "2026-02-05T15:39:00+02:00",
+      "event_utc": "2026-02-05T13:39:00Z",
+      "observation_id": "ffa868dc260c2b9d57a80304",
+      "episode_id": "ed19badd30731bd1aeb7e326",
+      "episode_local_interval": "2026-02-05T15:20:14+02:00/2026-02-05T17:20:38+02:00",
+      "binding_method": "event_time_unique_containment",
+      "gates": {
+        "actual_event": true,
+        "exact_city": true,
+        "attack_context": true,
+        "event_time_explicit_or_recoverable": true,
+        "unique_episode_containment": true,
+        "same_attack_context": true,
+        "final_classification": "STRICT"
+      }
+    }
+  ],
+  "all_clear_gap_seconds": 723,
+  "representation_contract": {
+    "parent_identity_preserved": true,
+    "child_event_timestamp_required": true,
+    "each_child_max_one_episode": true,
+    "same_episode_dedup": true,
+    "duplicate_observation_dedup": true,
+    "invalid_child_does_not_count": true,
+    "ambiguous_child_isolated_as_unbound": true,
+    "publication_time_never_creates_child": true,
+    "vague_interval_never_split": true,
+    "no_heuristic_two_timestamps_equals_two_events": true
+  },
+  "focused_tests": {
+    "workflow_run": 36562025669,
+    "job_id": 109384915436,
+    "focused_split_tests": "12 passed",
+    "existing_temporal_binding_tests": "19 passed",
+    "chernihiv_kropyvnytskyi_role_tests": "13 passed",
+    "replay_self_test": "PASS",
+    "live_monitor_self_test": "PASS"
+  },
+  "dnipro_preflight": {
+    "before": {
+      "source_status": "BLOCKED",
+      "denominator": 2259,
+      "frozen_strict_rows": 180,
+      "frozen_sensitivity_rows": 187,
+      "recoverable_canonical_strict_ids": 179,
+      "recoverable_canonical_sensitivity_ids": 186,
+      "unbound_counted_evidence": 1,
+      "blocker_record_id": "2793d79590a849624744439a"
+    },
+    "after": {
+      "source_status": "READY",
+      "denominator": 2259,
+      "canonicalized_legacy_strict_ids": 181,
+      "canonicalized_legacy_sensitivity_ids": 188,
+      "explained_multi_event_episode_gain": {
+        "strict": 1,
+        "sensitivity": 1
+      },
+      "unbound_counted_evidence": 0
+    }
+  },
+  "dnipro_full_replay": {
+    "status": "COMPLETE",
+    "frozen_legacy_row_counts": {
+      "strict": 180,
+      "sensitivity": 187
+    },
+    "canonicalized_legacy_episode_counts": {
+      "strict": 181,
+      "sensitivity": 188
+    },
+    "current_v2_replayed_episode_counts": {
+      "strict": 77,
+      "sensitivity": 82
+    },
+    "errors": 0,
+    "qa_changed_episodes": 106,
+    "changed_category_counts": {
+      "STRICT_DOWNGRADE": 104,
+      "NEW_AMBIGUOUS": 2
+    },
+    "target_episode_results": [
+      {
+        "episode_id": "00c24c9cccd9e66de7eba62b",
+        "replayed_status": "STRICT",
+        "reconciliation_reason": "LEGACY_MULTI_EVENT_SPLIT"
+      },
+      {
+        "episode_id": "ed19badd30731bd1aeb7e326",
+        "replayed_status": "STRICT",
+        "reconciliation_reason": "LEGACY_MULTI_EVENT_SPLIT"
+      }
+    ],
+    "target_episode_changes_under_current_v2": 0,
+    "unexpected_unrelated_episode_deltas": 106,
+    "acceptance_gate": "FAIL",
+    "investigation": "Removing the sole source-preflight blocker exposes a pre-existing broader Dnipro historical-role/current-v2 reconciliation gap. The split children themselves replay STRICT and are not among changed_episodes. This proof does not change classifier semantics or broaden scope to repair the 106 unrelated Dnipro deltas."
+  },
+  "reconciliation_semantics": {
+    "reason": "LEGACY_MULTI_EVENT_SPLIT",
+    "old_parent_record_count": 1,
+    "canonical_positive_episode_count": 2,
+    "second_episode_is_unexplained_NEW_STRICT": false,
+    "parent_record_id": "2793d79590a849624744439a",
+    "episode_ids": [
+      "00c24c9cccd9e66de7eba62b",
+      "ed19badd30731bd1aeb7e326"
+    ]
+  },
+  "denominator_corpus_invariance": {
+    "denominator": 2259,
+    "canonical_episode_additions": 0,
+    "canonical_episode_deletions": 0,
+    "canonical_episode_boundary_changes": 0,
+    "canonical_episode_id_changes": 0,
+    "source_slice_changes": 0
+  },
+  "regressions": {
+    "lviv": {
+      "strict": 12,
+      "sensitivity": 12,
+      "qa": 0,
+      "protected_files_unchanged": true
+    },
+    "sevastopol": {
+      "strict": 38,
+      "sensitivity": 55,
+      "qa": 0,
+      "protected_files_unchanged": true
+    },
+    "sumy": {
+      "strict": 204,
+      "sensitivity": 238,
+      "qa": 0,
+      "protected_files_unchanged": true
+    },
+    "cherkasy": {
+      "strict": 57,
+      "sensitivity": 58,
+      "qa": 1,
+      "qa_episode_ids": [
+        "f57f2f50c537719982254887"
+      ],
+      "protected_files_unchanged": true
+    },
+    "chernihiv": {
+      "strict": 39,
+      "sensitivity": 43,
+      "qa": 0,
+      "protected_files_unchanged": true
+    },
+    "kropyvnytskyi": {
+      "strict": 38,
+      "sensitivity": 38,
+      "qa": 0,
+      "protected_files_unchanged": true
+    }
+  },
+  "protected_state_audit": {
+    "authoritative_branch_modified": false,
+    "dnipro_historical_evidence_modified": false,
+    "canonical_alert_corpus_modified": false,
+    "audited_production_baseline_modified": false,
+    "classifier_modified": false,
+    "live_monitor_modified": false,
+    "db_neon_touched": false,
+    "site_prod_touched": false,
+    "main_touched": false,
+    "campaign_6863_touched": false,
+    "kharkiv_touched": false,
+    "kherson_mykolaiv_odesa_proof_touched": false,
+    "review_role_68_case_work_touched": false
+  },
+  "exact_commands": [
+    "pytest -q kyiv-air-alerts-grafana/tests/test_historical_replay_dnipro_multi_event_split.py",
+    "pytest -q kyiv-air-alerts-grafana/tests/test_historical_replay_temporal_binding.py",
+    "pytest -q kyiv-air-alerts-grafana/tests/test_historical_replay_chernihiv_kropyvnytskyi_roles.py",
+    "python kyiv-air-alerts-grafana/scripts/replay_explosion_history.py --self-test",
+    "python kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py --self-test",
+    "python kyiv-air-alerts-grafana/scripts/replay_explosion_history.py --repo-root <root> --through 2026-09-17 --input-head <proof-head> --read-only --preflight --output <preflight.json>",
+    "python kyiv-air-alerts-grafana/scripts/replay_explosion_history.py --repo-root <root> --city dnipro --through 2026-09-17 --input-head <proof-head> --read-only --output <dnipro.json>",
+    "same replay command for lviv, sevastopol, sumy, cherkasy, chernihiv, kropyvnytskyi"
+  ],
+  "workflow_proof": {
+    "run_id": 36562025669,
+    "job_id": 109384915436,
+    "conclusion": "success",
+    "uploaded_artifact_id": 11029713417,
+    "uploaded_zip_sha256": "0c18d2ace608e50a080fd6fd71b261d5dd53aa4ee2e67885dc05e2a3b4f65cbb"
+  },
+  "final_verdict": "DNIPRO MULTI-EVENT SPLIT REGRESSION DETECTED — DO NOT APPLY",
+  "verdict_note": "The one-row/two-episode representation itself is proven and both children remain STRICT. The requested success verdict is withheld because fresh full Dnipro replay has 106 unrelated episode-level deltas; acceptance requires unexpected_episode_deltas = 0."
+}
