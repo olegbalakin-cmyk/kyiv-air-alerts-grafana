@@ -1,109 +1,223 @@
 {
   "date": "2026-09-29",
-  "purpose": "final strict executable continuation for 23-city casualty production promotion using a temporary push-trigger GitHub Actions workflow; no production cutover",
-  "accepted_scope_source": "user task in Pasted text(20260929-131819).txt",
-  "pre_execution_guard": {
-    "proof_branch": "multicity-casualties-prod-proof-2026-09-28",
-    "starting_proof_head": "8a112a082266903d83445020b09ecb6301b22183",
-    "fresh_site_prod_head": "e09766f184b5beb8bc56d360e98bc269c088b25e",
-    "fresh_main_head": "5195fd449cddc9c16508065434aa4aaecc2bdf5f",
-    "exact_dashboard_git_blob": "993dc94e5e1a844a14cac2812817f51792bdd298",
+  "purpose": "final strict executable proof for 23-city casualty production promotion; no production cutover",
+  "proof_branch": "multicity-casualties-prod-proof-2026-09-28",
+  "successful_proof_commit": "accb061e422dd46cdcc359f9b0f6f38c056f0828",
+  "workflow_removal_commit": "64461b19619166d6d25af77526915fab571ae82c",
+  "fresh_guard": {
+    "site_prod_head": "e09766f184b5beb8bc56d360e98bc269c088b25e",
+    "main_head": "5195fd449cddc9c16508065434aa4aaecc2bdf5f",
+    "dashboard_git_blob": "993dc94e5e1a844a14cac2812817f51792bdd298",
+    "main_workflow_blob": "a451cb205be4cf5a597f3f72e04426c12868e3da",
+    "requirements_db_phase1_blob": "46cb158bbc776c517c59350871441d03c27eef29",
+    "requirements_blob": "d7a2ff05af67cda88e4930d238f0282ca557a963",
     "promotion_blobs_fresh_confirmed_12_of_12": true,
-    "promotion_or_frontend_source_drift": false,
-    "site_prod_drift_from_previous_guard": {
-      "previous_head": "a06b82197c737e4311af3cb160ca662f9eff1e8f",
-      "classification": "generated/live-data outputs only; accepted promotion implementation/frontend blobs unchanged"
+    "production_or_dependency_semantic_drift": false
+  },
+  "execution": {
+    "github_actions_run_id": 36580412742,
+    "conclusion": "success",
+    "execution_artifact_id": 11039692283,
+    "execution_artifact_name": "multicity-casualties-final-runtime-exec-result",
+    "execution_artifact_digest": "sha256:c05ed03d1e48d5df9f0a688cae8a3fe3773e33559c86f2ea9a1c4a5b650f2bab",
+    "targeted_retry_used": true,
+    "first_attempt": {
+      "run_id": 36580140810,
+      "conclusion": "failure",
+      "classification": "proof-harness bug only",
+      "failed_gate": "focused_test",
+      "root_cause": "proof-only focused test was symlinked into the exact-current runtime tree; Path.resolve() followed the symlink back to the proof worktree so the test read the proof-tree dashboard instead of the already-built exact-current dashboard",
+      "semantic_gates_already_passed_before_failure": [
+        "production-equivalent Python environment",
+        "promotion blob guard",
+        "exact current dashboard materialization",
+        "exact-current builder",
+        "23-city totals",
+        "Kyiv compatibility",
+        "non-casualty regression",
+        "Grafana generation"
+      ]
+    },
+    "retry_fix": "copy proof-only focused test into exact-current runtime tree instead of symlinking; casualty implementation unchanged"
+  },
+  "environment": {
+    "python_version": "3.12.14",
+    "dependencies": {
+      "requests": "2.34.2",
+      "bs4": "4.15.0",
+      "psycopg": "3.3.6"
+    },
+    "playwright_version": "1.63.0",
+    "chromium_version": "153.0.8010.12",
+    "chart_js": {
+      "package_version": "4.4.7",
+      "source_path": "/tmp/chartpkg/node_modules/chart.js/dist/chart.umd.js",
+      "bundle_sha256": "2812cb8825fdc57469eb2f7bb055e9429244e599920511ee477e828499b632cb",
+      "actual_chart_version": "4.4.7",
+      "typeof_chart": "function",
+      "chart_registry_present": true,
+      "chart_getChart_present": true
     }
   },
-  "proof_support": {
-    "runner_path": "kyiv-air-alerts-grafana/tests/run_multicity_casualty_final_runtime_proof.py",
-    "runner_commit": "3208311b0e6c22ad1fbd8cc8a2d2e7f54a582f5e",
-    "runner_local_precommit_sha256": "394387b8f177913b334853e23ccc031bef5a9f1f504d7b143961d5411a73fe53",
-    "note": "proof-only support file; accepted casualty promotion implementation was not modified"
-  },
-  "temporary_workflow": {
-    "path": ".github/workflows/multicity-casualty-final-runtime-proof.yml",
-    "initial_workflow_commit": "8a2992d72af91bcbaba643550f794033f7e64ae1",
-    "targeted_retry_workflow_commit": "cf6e0de245baed3199758a0dad7e3c109d12737a",
-    "removal_commit": "9b6a9b2a48ccad9ec6c2f062a7e5d7c7f75952a0",
-    "final_tree_contains_workflow": false,
-    "permissions": "contents: read",
-    "repository_write_logic": false
-  },
-  "attempt_1": {
-    "github_actions_run_id": 36576167085,
-    "tested_commit": "8a2992d72af91bcbaba643550f794033f7e64ae1",
-    "conclusion": "failure",
-    "classification": "pure workflow/tooling failure",
-    "blocker": "workflow required dist/chart.umd.min.js although the installed chart.js@4.4.7 npm package exposes the allowed dist/chart.umd.js bundle",
-    "semantic_or_runtime_gate_executed": false,
-    "retry_authorized": true
-  },
-  "attempt_2_targeted_retry": {
-    "github_actions_run_id": 36576283596,
-    "tested_commit": "cf6e0de245baed3199758a0dad7e3c109d12737a",
-    "conclusion": "failure",
-    "chart_js_install": {
-      "npm_package": "chart.js@4.4.7",
-      "source_path": "/tmp/chartpkg/node_modules/chart.js/dist/chart.umd.js",
-      "package_version": "4.4.7",
-      "bundle_sha256": null,
-      "bundle_sha256_status": "NOT RETAINED because the runner aborted before the proof result state was flushed"
-    },
-    "browser_tooling_install": {
-      "playwright_version": "1.63.0",
-      "chromium_downloaded": "Chrome for Testing 153.0.8010.12",
-      "chromium_runtime_version": null,
-      "chromium_runtime_version_status": "NOT EXECUTED; browser launch occurs after builder/focused-test gates"
-    },
-    "failure_classification": "second pure execution/tooling blocker after the one allowed targeted retry; not a casualty semantic/data/frontend failure",
-    "failed_step": "Execute strict exact-current-base runtime proof",
-    "failed_gate_reported_by_runner": "exact_current_builder",
-    "exact_error": "ModuleNotFoundError: No module named 'requests'",
-    "exact_command": "python scripts/update_casualties.py --no-network",
-    "root_cause": "update_casualties.py imports requests at module import time even in --no-network mode, but the temporary workflow did not install the project Python dependency before invoking the builder",
-    "builder_logic_reached": false,
-    "builder_semantics_failed": false,
-    "further_retry_permitted": false
-  },
   "exact_current_dashboard": {
-    "frozen_site_prod_head": "e09766f184b5beb8bc56d360e98bc269c088b25e",
+    "materialized": true,
     "git_blob_sha": "993dc94e5e1a844a14cac2812817f51792bdd298",
-    "runner_materialized_before_builder_invocation": true,
-    "materialized_sha256": null,
-    "materialized_sha256_status": "NOT RETAINED in uploaded result because exception handling replaced the in-progress result object before artifact flush"
+    "pre_builder_sha256": "fb4f337dd55da6860a316d91e9b9247e6de945f17853a665d99ae5304c78cec3",
+    "post_builder_sha256": "3ef6aa56b5ef3d8f2ab3a841844460b5bc317aae641c5145b99d603d006882d5",
+    "repeated_builder_sha256": "eeb59806d4838e3da0c44091b22da5574e5de973c4a1cc3f2e49787327b374e0"
   },
-  "gates": {
-    "exact_current_dashboard_materialized": "PARTIALLY PROVEN: exact commit/blob checkout occurred before builder invocation, but byte SHA-256 was not retained in artifact",
-    "exact_current_builder": "NOT EXECUTED: Python import dependency blocker occurred before builder logic",
-    "city_count": null,
-    "exact_totals": "NOT EXECUTED",
-    "monthly_rows_each": null,
-    "kyiv_compatibility": "NOT EXECUTED",
-    "uzhhorod_zero_series": "NOT EXECUTED",
-    "unexpected_non_casualty_diffs": null,
-    "grafana_generation": "NOT EXECUTED",
-    "real_chart_js_loaded": "PACKAGE INSTALL VERIFIED; BROWSER IDENTITY GATE NOT EXECUTED",
-    "chart_version_runtime": null,
-    "real_city_switch": "NOT EXECUTED",
-    "real_uzhhorod_zero_chart": "NOT EXECUTED",
-    "real_missing_series_cleanup": "NOT EXECUTED",
-    "console_errors": null,
-    "page_errors": null,
-    "chart_errors": null,
-    "repeated_builder_durability": "NOT EXECUTED",
-    "focused_test": "NOT EXECUTED on exact-current base"
+  "builder": {
+    "result": "PASS",
+    "exit": 0,
+    "city_count": 23,
+    "monthly_rows_each": 56,
+    "duplicate_months": 0,
+    "negative_counts": 0,
+    "kyiv_compatibility": true,
+    "uzhhorod_zero_series": true,
+    "totals": {
+      "kyiv": 454,
+      "kharkiv": 339,
+      "sevastopol": 22,
+      "cherkasy": 2,
+      "zhytomyr": 12,
+      "dnipro": 214,
+      "khmelnytskyi": 10,
+      "poltava": 84,
+      "rivne": 1,
+      "sumy": 158,
+      "vinnytsia": 31,
+      "kropyvnytskyi": 9,
+      "lviv": 29,
+      "chernihiv": 105,
+      "mykolaiv": 106,
+      "lutsk": 10,
+      "uzhhorod": 0,
+      "ivano-frankivsk": 3,
+      "ternopil": 41,
+      "chernivtsi": 5,
+      "odesa": 171,
+      "zaporizhzhia": 316,
+      "kherson": 163
+    }
   },
-  "uploaded_execution_artifact": {
-    "attempt_2_artifact_id": 11037871774,
-    "artifact_name": "multicity-casualties-final-runtime-exec-result",
-    "uploaded_zip_sha256": "7267e1d07f7c7045d3df3de5374c403c174280bfe96596ac7638f2f54e4b231f",
-    "extracted_json_sha256": "26cf9253b1be5c923ff90a9f4fda551ef7231fa5d67b60d7a3be24c7e9925dea",
-    "runner_reported_status": "FAILED",
-    "runner_reported_gate": "exact_current_builder",
-    "adjudication_note": "runner label is mechanically tied to the subprocess wrapper; artifact traceback shows failure occurred at import time before builder logic, so this task classifies it as an execution/tooling blocker rather than a semantic builder failure"
+  "non_casualty_regression": {
+    "result": "PASS",
+    "unexpected_non_casualty_diffs": 0
+  },
+  "grafana_generation": {
+    "result": "PASS",
+    "casualty_row_count": 1,
+    "casualty_row_id": 950,
+    "city_panels": 23,
+    "selectors_exact": true,
+    "kyiv_present": true,
+    "uzhhorod_present": true,
+    "unexpected_dashboard_diffs_after_normalization": 0,
+    "production_api_called": false
+  },
+  "browser_runtime": {
+    "result": "PASS",
+    "real_chart_js_4_4_7_loaded": true,
+    "city_switch_sequence": [
+      {
+        "city": "kyiv",
+        "rows": 56,
+        "total": 454,
+        "chart_exists": true,
+        "previous_chart_replaced": true,
+        "stale_previous_values_absent": true
+      },
+      {
+        "city": "kharkiv",
+        "rows": 56,
+        "total": 339,
+        "chart_exists": true,
+        "previous_chart_replaced": true,
+        "stale_previous_values_absent": true
+      },
+      {
+        "city": "uzhhorod",
+        "rows": 56,
+        "total": 0,
+        "chart_exists": true,
+        "previous_chart_replaced": true,
+        "stale_previous_values_absent": true
+      },
+      {
+        "city": "odesa",
+        "rows": 56,
+        "total": 171,
+        "chart_exists": true,
+        "previous_chart_replaced": true,
+        "stale_previous_values_absent": true
+      },
+      {
+        "city": "kyiv",
+        "rows": 56,
+        "total": 454,
+        "chart_exists": true,
+        "previous_chart_replaced": true,
+        "stale_previous_values_absent": true
+      }
+    ],
+    "spot_checks": {
+      "dnipro": {
+        "rows": 56,
+        "total": 214,
+        "chart_exists": true
+      },
+      "zaporizhzhia": {
+        "rows": 56,
+        "total": 316,
+        "chart_exists": true
+      },
+      "kherson": {
+        "rows": 56,
+        "total": 163,
+        "chart_exists": true
+      }
+    },
+    "uzhhorod_gate": {
+      "rows": 56,
+      "sum": 0,
+      "chart_instance_exists": true,
+      "casualty_section_visible": true,
+      "exception": null
+    },
+    "missing_series_cleanup": {
+      "previous_chart_destroyed": true,
+      "section_hidden": true,
+      "stale_values_absent": true,
+      "page_exception": false,
+      "chart_exception": false
+    },
+    "errors": {
+      "console_errors": [],
+      "page_errors": [],
+      "chart_errors": [],
+      "failed_app_requests": []
+    }
+  },
+  "repeated_builder": {
+    "result": "PASS",
+    "same_23_cities": true,
+    "same_totals": true,
+    "same_56_rows": true,
+    "kyiv_compatibility_unchanged": true,
+    "normalized_content_stable": true
+  },
+  "focused_test": {
+    "result": "PASS",
+    "city_count": 23,
+    "kyiv_compatibility": true,
+    "zero_death_series_valid": true,
+    "frontend_selected_city_lookup": true,
+    "grafana_city_panels": 23,
+    "non_casualty_semantic_invariance": true
   },
   "production_write_audit": {
+    "result": "PASS",
     "site_prod_push": false,
     "main_push": false,
     "netlify_production": false,
@@ -115,11 +229,10 @@
     "campaign_6863_mutation": false,
     "generated_production_outputs_committed": false
   },
-  "protected_state_post_execution": {
-    "site_prod_head": "e09766f184b5beb8bc56d360e98bc269c088b25e",
-    "main_head": "5195fd449cddc9c16508065434aa4aaecc2bdf5f",
-    "proof_head_after_workflow_removal": "9b6a9b2a48ccad9ec6c2f062a7e5d7c7f75952a0",
+  "protected_state": {
+    "main_head_after_proof": "5195fd449cddc9c16508065434aa4aaecc2bdf5f",
+    "site_prod_head_after_proof": "e09766f184b5beb8bc56d360e98bc269c088b25e",
     "temporary_workflow_absent": true
   },
-  "verdict": "23-CITY CASUALTY PRODUCTION PROMOTION STILL BLOCKED — SECOND TOOLING BLOCKER AFTER THE ONE ALLOWED RETRY: PYTHON REQUESTS DEPENDENCY WAS NOT INSTALLED, SO THE EXACT-CURRENT BUILDER NEVER EXECUTED"
+  "verdict": "23-CITY CASUALTY PRODUCTION PROMOTION PROVEN — EXACT CURRENT SITE-PROD BASE + PRODUCTION-EQUIVALENT PYTHON ENV + REAL CHART.JS 4.4.7 RUNTIME PASS — READY FOR GUARDED PRODUCTION CUTOVER"
 }
