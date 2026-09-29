@@ -1,0 +1,264 @@
+{
+  "schema_version": "1.0",
+  "task": "Mykolaiv 05992 one-record retained historical evidence repair proof",
+  "date": "2026-09-29",
+  "scope": "proof-only; no authoritative apply",
+  "authoritative": {
+    "branch": "multicity-wip-2026-09-16",
+    "requested_observed_head": "8342a11f70351aa03a3555b7dcb91a0a98932483",
+    "fresh_start_head": "bdc0188020aa39cc8164ff58218e6aac4868f54b",
+    "fresh_final_head": "bdc0188020aa39cc8164ff58218e6aac4868f54b",
+    "fresh_start_parent": "8342a11f70351aa03a3555b7dcb91a0a98932483",
+    "start_head_change": "bot-only alert-gated casualty review queue update",
+    "replay_blob": "816e2a13f66bb453fc4bd765318d15443121325e",
+    "replay_semantic_drift": false
+  },
+  "proof_branch": "mykolaiv-05992-evidence-repair-proof-2026-09-29",
+  "proof_input": {
+    "commit": "1d826a264bcd1f86db49760aa20dbc9ad14b4192",
+    "blobs": {
+      "kyiv-air-alerts-grafana/data/explosion_audited_baseline.json": "d97f02849f089eb89757a3a255d4890dc10f403e",
+      "kyiv-air-alerts-grafana/data/explosion_research/kherson/final_evidence.json": "ae816bbc412fbe62f086adb4cefb2a5af65b2a07",
+      "kyiv-air-alerts-grafana/data/explosion_research/mykolaiv/final_evidence.json": "76e71e87abe702b8d5fd4126596265dfd362fa38",
+      "kyiv-air-alerts-grafana/data/explosion_research/odesa/final_evidence.json": "018052e3384b608b3bd7739fc828842d3565d490",
+      "kyiv-air-alerts-grafana/scripts/replay_explosion_history.py": "e1a6c793d680196724fbf70f09ed09a821912aca",
+      "kyiv-air-alerts-grafana/tests/test_historical_replay_kherson_mykolaiv_odesa_roles.py": "4c0b942e625896408a5a1ff69b2333b28f14cf2f"
+    }
+  },
+  "baseline_reproduction": {
+    "workflow_run": 36603529852,
+    "result": "PASS",
+    "cities": {
+      "kherson": {
+        "denominator": 1412,
+        "strict": 2,
+        "sensitivity": 2,
+        "qa": 0
+      },
+      "mykolaiv": {
+        "denominator": 1648,
+        "strict": 122,
+        "sensitivity": 134,
+        "qa": 1
+      },
+      "odesa": {
+        "denominator": 1465,
+        "strict": 152,
+        "sensitivity": 158,
+        "qa": 0
+      }
+    },
+    "remaining_qa_ids": [
+      "05992c5cdaa538ec9552236b"
+    ]
+  },
+  "target": {
+    "city": "mykolaiv",
+    "episode_id": "05992c5cdaa538ec9552236b",
+    "frozen_bucket": "SENSITIVITY",
+    "source_url": "https://suspilne.media/mykolaiv/1262024-sahedi-atakuut-vid-ranku-naslidki-rosijskih-obstriliv-u-mikolaevi/",
+    "source": "Суспільне Миколаїв",
+    "event_date": "2026-03-12",
+    "publication_time": "not exposed by the retrieved source page; not used as event time"
+  },
+  "source_verification": {
+    "result": "SUFFICIENT",
+    "exact_city": {
+      "supported": true,
+      "basis": "The retained article explicitly says Mykolaiv was under attack by Russian UAVs and later refers to the attack on Mykolaiv/city."
+    },
+    "factual_attack_event": {
+      "supported": true,
+      "basis": "The article reports the actual Russian-UAV attack and explicitly confirms a second downing; replay normalizes the factual event as strike from the explicit attack statement."
+    },
+    "attack_context": {
+      "supported": true,
+      "basis": "Russian UAV/Shahed attack context is explicit."
+    },
+    "same_attack_linkage": {
+      "supported": true,
+      "strength": "strong_inferred_same_attack",
+      "basis": "The second downing is reported within the same article-level account of the morning Russian-UAV/Shahed attack on Mykolaiv."
+    },
+    "temporal_precision": {
+      "exact_event_minute_supported": false,
+      "basis": "No separate minute for the second downing is published; no minute was persisted or inferred."
+    }
+  },
+  "evidence_mutation": {
+    "file": "kyiv-air-alerts-grafana/data/explosion_research/mykolaiv/final_evidence.json",
+    "section": "sensitivity_only_events",
+    "record_index": 0,
+    "record_identity": {
+      "episode_start": "2026-03-12T08:04:00",
+      "source_url": "https://suspilne.media/mykolaiv/1262024-sahedi-atakuut-vid-ranku-naslidki-rosijskih-obstriliv-u-mikolaevi/",
+      "canonical_episode_id": "05992c5cdaa538ec9552236b"
+    },
+    "gate": {
+      "records_modified": 1,
+      "records_added": 0,
+      "records_deleted": 0
+    },
+    "fields": [
+      {
+        "field": "evidence",
+        "old_value": "Суспільне підтверджує другу ранкову тривогу о 08:04 та друге збиття під час ранкової Shahed-атаки, але не дає окремої хвилини вибуху для цього episode.",
+        "new_value": "Суспільне: від ранку 12 березня Миколаїв перебував під атакою російських безпілотників; у матеріалі про цю атаку підтверджено друге збиття. Окремої хвилини другого збиття не опубліковано.",
+        "source_support": "Explicit Mykolaiv city + Russian-UAV attack + confirmed second downing; no separate second-event minute.",
+        "why_required_by_replay": "Persist reviewed exact-city and factual attack wording instead of relying on publisher identity or an accidental negative phrase containing the word 'explosion'."
+      },
+      {
+        "field": "decision_basis",
+        "old_value": "sensitivity_only: strong_inferred_same_attack; exact explosion time not published",
+        "new_value": "sensitivity_only: exact_city + confirmed_drone_attack + confirmed_second_interception + strong_inferred_same_attack; exact event minute not published",
+        "source_support": "Reviewed roles are directly supported by the retained article; temporal precision remains absent.",
+        "why_required_by_replay": "The proven K/M/O adapter only recovers explicitly retained reviewed roles and must keep the target on sensitivity semantics."
+      }
+    ],
+    "unchanged_fields": {
+      "episode_start": "2026-03-12T08:04:00",
+      "event_time": null,
+      "source_url": "https://suspilne.media/mykolaiv/1262024-sahedi-atakuut-vid-ranku-naslidki-rosijskih-obstriliv-u-mikolaevi/"
+    },
+    "evidence_commit": "8ea7a46b595318eb4f795e62b712e4493d5d71fd",
+    "evidence_blob_after": "0860488bc18fb3c1a90b9e86df23001abb675c9c"
+  },
+  "replay_after": {
+    "workflow_run": 36603863027,
+    "result": "PASS",
+    "cities": {
+      "kherson": {
+        "denominator": 1412,
+        "strict": 2,
+        "sensitivity": 2,
+        "qa": 0
+      },
+      "mykolaiv": {
+        "denominator": 1648,
+        "strict": 122,
+        "sensitivity": 135,
+        "qa": 0
+      },
+      "odesa": {
+        "denominator": 1465,
+        "strict": 152,
+        "sensitivity": 158,
+        "qa": 0
+      }
+    },
+    "target_final_bucket": "SENSITIVITY",
+    "arithmetic": {
+      "strict_delta": 0,
+      "sensitivity_delta": 1,
+      "qa_delta": -1
+    }
+  },
+  "exact_episode_delta_gate": {
+    "expected_changed": [
+      "05992c5cdaa538ec9552236b"
+    ],
+    "actual_changed": [
+      "05992c5cdaa538ec9552236b"
+    ],
+    "expected_changed_count": 1,
+    "actual_changed_count": 1,
+    "unexpected": []
+  },
+  "temporal_guard": {
+    "exact_event_minute_added": false,
+    "strict_temporal_role_added": false,
+    "publication_time_reused_as_event_time": false,
+    "episode_boundary_changed": false,
+    "canonical_episode_changed": false,
+    "replay_temporal_binding_present": false,
+    "result": "PASS_SENSITIVITY_ONLY"
+  },
+  "ppo_guard": {
+    "source_confirms_second_downing": true,
+    "source_second_downing_sentence_explicitly_names_ppo": false,
+    "air_defense_action_role_persisted": false,
+    "explosion_inferred_from_interception": false,
+    "replay_event_types": [
+      "strike"
+    ],
+    "basis": "The normalized factual event comes from the explicit Russian-UAV attack statement; the second downing is retained as reviewed support without inventing a PPO label or an explosion.",
+    "result": "PASS"
+  },
+  "adapter_invariance": {
+    "adapter_blob": "e1a6c793d680196724fbf70f09ed09a821912aca",
+    "focused_test_blob": "4c0b942e625896408a5a1ff69b2333b28f14cf2f",
+    "prior_structural_proof_head": "c25b40e87686ed072471cef17f0bf2c6a4d8568a",
+    "structural_cases": "68/68 still resolved",
+    "adapter_changed_in_this_proof": false,
+    "focused_test_expectations_changed": false,
+    "result": "PASS"
+  },
+  "regression_suite": {
+    "workflow_run": 36603863027,
+    "replay_self_test": "PASS",
+    "historical_replay_pytest": {
+      "result": "PASS",
+      "passed": 102
+    },
+    "covered_families": [
+      "Kherson/Mykolaiv/Odesa focused role tests",
+      "Dnipro role/split tests",
+      "Chernihiv/Kropyvnytskyi tests",
+      "temporal-binding tests",
+      "all other test_historical_replay_*.py tests"
+    ],
+    "mutable_monitor_self_test_used_as_gate": false
+  },
+  "denominator_corpus_invariance": {
+    "denominators": {
+      "kherson": 1412,
+      "mykolaiv": 1648,
+      "odesa": 1465
+    },
+    "canonical_additions": 0,
+    "canonical_deletions": 0,
+    "boundary_changes": 0,
+    "episode_id_changes": 0,
+    "source_slice_changes": 0,
+    "baseline_changes": 0,
+    "kherson_evidence_changes": 0,
+    "odesa_evidence_changes": 0,
+    "result": "PASS"
+  },
+  "non_target_regression_audit": {
+    "dnipro": 0,
+    "lviv": 0,
+    "sevastopol": 0,
+    "sumy": 0,
+    "cherkasy": 0,
+    "chernihiv": 0,
+    "kropyvnytskyi": 0,
+    "kyiv": 0,
+    "zaporizhzhia": 0,
+    "unit": "episode-level deltas",
+    "result": "PASS"
+  },
+  "proof_branch_cleanup": {
+    "temporary_workflow_removed": true,
+    "cleanup_commit": "7321881002abd8aa6b24555a5622447741230040",
+    "diff_from_exact_proof_input_before_artifact": [
+      "kyiv-air-alerts-grafana/data/explosion_research/mykolaiv/final_evidence.json"
+    ]
+  },
+  "protected_state_audit": {
+    "authoritative_branch_modified_by_proof": false,
+    "main_touched": false,
+    "site_prod_touched": false,
+    "db_neon_touched": false,
+    "campaign_6863_touched": false,
+    "dnipro_touched": false,
+    "kharkiv_touched": false,
+    "ten_city_recovery_touched": false,
+    "replay_semantics_changed": false,
+    "classifier_semantics_changed": false,
+    "canonical_alert_corpus_changed": false,
+    "unrelated_historical_evidence_changed": false,
+    "result": "PASS"
+  },
+  "final_verdict": "MYKOLAIV 05992 EVIDENCE REPAIR PROVEN — ONE RECORD REPAIRED — SENSITIVITY RESTORED — KHerson / MYKOLAIV / ODESA REPLAY CLEAN"
+}
