@@ -1,6 +1,6 @@
 {
   "aggregate": {
-    "all_target_expected_match": false,
+    "all_target_expected_match": true,
     "denominator": 1376,
     "sensitivity": 53,
     "strict": 51
@@ -18,7 +18,7 @@
   ],
   "file_scope_guard_pass": false,
   "inherited_historical_replay_tests": {
-    "log": "........................................................................ [ 78%]\n....................                                                     [100%]\n92 passed in 0.65s\n",
+    "log": "........................................................................ [ 78%]\n....................                                                     [100%]\n92 passed in 0.43s\n",
     "rc": 0
   },
   "kind": "sixcity_execution_result_temp",
@@ -96,7 +96,7 @@
       "proof_rc": 0
     }
   },
-  "proof_execution_sha": "bd8f4da0cf4beca5795307bcf17b55632b51d330",
+  "proof_execution_sha": "aaa2955ce6aa121e0648b7584b6e022165387f68",
   "replay_self_test": {
     "log": "Historical replay helper self-test OK\n",
     "rc": 0
@@ -364,315 +364,10 @@
     "zhytomyr": {
       "canonicalized_legacy_sensitivity_episodes": 20,
       "canonicalized_legacy_strict_episodes": 19,
-      "changed_episodes": [
-        {
-          "alert_end": "2025-04-27T00:16:35Z",
-          "alert_start": "2025-04-26T23:07:02Z",
-          "candidate_contributor_ids": [
-            "0b22a11b64b752831b5dbf02"
-          ],
-          "category": "NEW_AMBIGUOUS",
-          "composition_basis": {
-            "final_composed_verdict": "not_applicable"
-          },
-          "episode_id": "4e9275e3435a847e225476df",
-          "evidence": [
-            {
-              "binding": {
-                "candidates": [
-                  "4e9275e3435a847e225476df"
-                ],
-                "episode_id": "4e9275e3435a847e225476df",
-                "method": "persisted_episode_id"
-              },
-              "bucket": "sensitivity_only_events",
-              "candidate_id": "0b22a11b64b752831b5dbf02",
-              "event_time_utc": null,
-              "evidence": "Житомир: О 02:05 у Житомирі почули гучний вибух; наступна тривога почалася о 02:07. Через сильний same-attack контекст подію лишено тільки в sensitivity, без автоматичного часового допуску. Контекст замороженого аудиту: exact-city; підтверджена повітряна атака; подія лишається sensitivity-only. — sensitivity: near_boundary + inferred_same_attack; retained explosion time precedes alert by 2 minutes; no automatic temporal tolerance",
-              "observation_id": "3ca3594d014671694775912b",
-              "parent_record_id": "3ca3594d014671694775912b",
-              "source_url": "https://suspilne.media/zhytomyr/1004283-ataka-droniv-na-zitomirsini-27-kvitna-poskodzeno-budinki-avtomobili-e-postrazdali/"
-            }
-          ],
-          "frozen_old_status": "SENSITIVITY",
-          "local_date": "2025-04-27",
-          "matching_result": [
-            {
-              "logical_episode_groups": [
-                [
-                  "4e9275e3435a847e225476df"
-                ]
-              ],
-              "matched_episode_id": "4e9275e3435a847e225476df",
-              "matched_episode_ids": [
-                "4e9275e3435a847e225476df"
-              ],
-              "outcome": "unique_match",
-              "reason": "frozen_historical_audit_episode_binding"
-            }
-          ],
-          "ppo_related": false,
-          "provenance_basis": [
-            {
-              "air_military_context": {
-                "evidence_source": "review_provenance",
-                "present": false,
-                "segments": []
-              },
-              "exact_city": {
-                "evidence_source": "review_provenance",
-                "present": false,
-                "segments": []
-              },
-              "present": true,
-              "reason_codes": [
-                "REVIEW_PROVENANCE_USABLE",
-                "REVIEW_PROVENANCE_SENSITIVITY_BINDING_USED"
-              ],
-              "same_attack_context": {
-                "evidence_source": "review_provenance",
-                "present": false,
-                "reason": "no_reviewed_same_attack_basis",
-                "segments": []
-              },
-              "sensitivity_binding": {
-                "basis": "near_boundary",
-                "episode_id": "4e9275e3435a847e225476df",
-                "evidence_source": "review_provenance",
-                "present": true,
-                "reason": "reviewed_episode_specific_sensitivity_binding",
-                "supported_episode_ids": [
-                  "4e9275e3435a847e225476df"
-                ]
-              },
-              "strict_explosion": {
-                "evidence_source": "review_provenance",
-                "present": false,
-                "segments": []
-              },
-              "target_episode_id": "4e9275e3435a847e225476df",
-              "temporal_binding": {
-                "code": "NO_REVIEWED_TEMPORAL_BINDING",
-                "episode_id": null,
-                "episode_specific": false,
-                "event_interval": null,
-                "event_time": null,
-                "evidence": null,
-                "evidence_sources": [],
-                "evidence_type": null,
-                "message_time": null,
-                "near_boundary": {
-                  "episode_id": null,
-                  "episode_specific": false,
-                  "present": false,
-                  "supported_episode_ids": []
-                },
-                "present": false,
-                "supported_episode_ids": [],
-                "timestamp_precision": null
-              },
-              "usable": true
-            }
-          ],
-          "reason_codes": [
-            "AIR_CONTEXT_NOT_LINKED_TO_EVENT",
-            "AIR_MILITARY_CONTEXT",
-            "ATTACK_EVENT_TYPES:explosion",
-            "EXACT_CITY_EVENT_TEXT",
-            "MATCH_UNIQUE",
-            "NO_STRICT_TEMPORAL_BINDING",
-            "REVIEW_PROVENANCE_SENSITIVITY_BINDING_USED",
-            "REVIEW_PROVENANCE_USABLE",
-            "STRICT_EXPLOSION_EVIDENCE"
-          ],
-          "replayed_status": "AMBIGUOUS",
-          "temporal_basis": [
-            {
-              "code": "NO_STRICT_TEMPORAL_BINDING",
-              "episode_id": null,
-              "episode_specific": false,
-              "event_interval": null,
-              "event_time": null,
-              "evidence": null,
-              "evidence_sources": [],
-              "evidence_type": null,
-              "message_time": null,
-              "near_boundary": {
-                "episode_id": null,
-                "episode_specific": false,
-                "present": false,
-                "supported_episode_ids": []
-              },
-              "present": false,
-              "supported_episode_ids": []
-            }
-          ]
-        },
-        {
-          "alert_end": "2026-05-12T02:56:21Z",
-          "alert_start": "2026-05-12T01:22:42Z",
-          "candidate_contributor_ids": [
-            "73c642424db08e2851dce75a"
-          ],
-          "category": "STRICT_DOWNGRADE",
-          "composition_basis": {
-            "final_composed_verdict": "not_applicable"
-          },
-          "episode_id": "f31e96d5a37850b487b9a312",
-          "evidence": [
-            {
-              "binding": {
-                "candidates": [
-                  "f31e96d5a37850b487b9a312"
-                ],
-                "episode_id": "f31e96d5a37850b487b9a312",
-                "method": "persisted_episode_id"
-              },
-              "bucket": "strict_events",
-              "candidate_id": "73c642424db08e2851dce75a",
-              "event_time_utc": null,
-              "evidence": "Житомир: Дронова атака РФ саме на Житомир близько 05:00; мешканка описує вибухову хвилю. Тривога Житомирського району почалася близько 04:22 і тривала до близько 05:56. Контекст замороженого аудиту: exact-city; підтверджена повітряна атака. — strict: retained exact-city attack-event evidence + confirmed aerial-war context + episode-specific canonical binding",
-              "observation_id": "d365035d20cd53c1126232df",
-              "parent_record_id": "d365035d20cd53c1126232df",
-              "source_url": "https://suspilne.media/zhytomyr/1310206-mene-vibuhovou-hvileu-zbilo-z-lizka-nadia-kuca-pro-naslidki-dronovoi-ataki-armii-rf-u-zitomiri/"
-            }
-          ],
-          "frozen_old_status": "STRICT",
-          "local_date": "2026-05-12",
-          "matching_result": [
-            {
-              "logical_episode_groups": [
-                [
-                  "f31e96d5a37850b487b9a312"
-                ]
-              ],
-              "matched_episode_id": "f31e96d5a37850b487b9a312",
-              "matched_episode_ids": [
-                "f31e96d5a37850b487b9a312"
-              ],
-              "outcome": "unique_match",
-              "reason": "frozen_historical_audit_episode_binding"
-            }
-          ],
-          "ppo_related": false,
-          "provenance_basis": [
-            {
-              "air_military_context": {
-                "evidence_source": "review_provenance",
-                "evidence_text": "city_status=exact_city | war_air_context=confirmed | temporal_evidence=exact_time_in_alert",
-                "present": true,
-                "segments": [
-                  "city_status=exact_city | war_air_context=confirmed | temporal_evidence=exact_time_in_alert"
-                ]
-              },
-              "exact_city": {
-                "evidence_source": "review_provenance",
-                "present": false,
-                "segments": []
-              },
-              "present": true,
-              "reason_codes": [
-                "REVIEW_PROVENANCE_USABLE",
-                "REVIEW_PROVENANCE_TEMPORAL_BINDING_USED"
-              ],
-              "same_attack_context": {
-                "basis": "reviewed_exact_city_air_context_with_episode_specific_temporal_binding",
-                "evidence_source": "review_provenance",
-                "evidence_text": "city_status=exact_city | war_air_context=confirmed | temporal_evidence=exact_time_in_alert",
-                "present": true,
-                "reason": "reviewed_same_attack_basis",
-                "segments": [
-                  "city_status=exact_city | war_air_context=confirmed | temporal_evidence=exact_time_in_alert"
-                ]
-              },
-              "sensitivity_binding": {
-                "basis": null,
-                "episode_id": null,
-                "evidence_source": "review_provenance",
-                "present": false,
-                "supported_episode_ids": []
-              },
-              "strict_explosion": {
-                "evidence_source": "review_provenance",
-                "present": false,
-                "segments": []
-              },
-              "target_episode_id": "f31e96d5a37850b487b9a312",
-              "temporal_binding": {
-                "code": "TEMPORAL_REVIEWED_VALIDATED_BINDING",
-                "episode_id": "f31e96d5a37850b487b9a312",
-                "episode_specific": true,
-                "event_interval": null,
-                "event_time": null,
-                "evidence": "Житомир: Дронова атака РФ саме на Житомир близько 05:00; мешканка описує вибухову хвилю. Тривога Житомирського району почалася близько 04:22 і тривала до близько 05:56. Контекст замороженого аудиту: exact-city; підтверджена повітряна атака. — strict: retained exact-city attack-event evidence + confirmed aerial-war context + episode-specific canonical binding",
-                "evidence_sources": [
-                  "review_provenance"
-                ],
-                "evidence_type": "frozen_historical_audit_episode_binding",
-                "message_time": null,
-                "near_boundary": {
-                  "episode_id": null,
-                  "episode_specific": false,
-                  "present": false,
-                  "supported_episode_ids": []
-                },
-                "present": true,
-                "publication_time": null,
-                "source_identity": null,
-                "supported_episode_ids": [
-                  "f31e96d5a37850b487b9a312"
-                ],
-                "timestamp_precision": null,
-                "update_time": null
-              },
-              "usable": true
-            }
-          ],
-          "reason_codes": [
-            "AIR_MILITARY_CONTEXT",
-            "EXACT_CITY_EVENT_TEXT",
-            "MATCH_UNIQUE",
-            "NO_STRICT_EXPLOSION_EVIDENCE",
-            "REVIEW_PROVENANCE_TEMPORAL_BINDING_USED",
-            "REVIEW_PROVENANCE_USABLE",
-            "SAME_ATTACK_CONTEXT_SUPPORTED",
-            "TEMPORAL_REVIEWED_VALIDATED_BINDING"
-          ],
-          "replayed_status": "AMBIGUOUS",
-          "temporal_basis": [
-            {
-              "code": "TEMPORAL_REVIEWED_VALIDATED_BINDING",
-              "episode_id": "f31e96d5a37850b487b9a312",
-              "episode_specific": true,
-              "event_interval": null,
-              "event_time": null,
-              "evidence": "Житомир: Дронова атака РФ саме на Житомир близько 05:00; мешканка описує вибухову хвилю. Тривога Житомирського району почалася близько 04:22 і тривала до близько 05:56. Контекст замороженого аудиту: exact-city; підтверджена повітряна атака. — strict: retained exact-city attack-event evidence + confirmed aerial-war context + episode-specific canonical binding",
-              "evidence_sources": [
-                "review_provenance"
-              ],
-              "evidence_type": "frozen_historical_audit_episode_binding",
-              "message_time": null,
-              "near_boundary": {
-                "episode_id": null,
-                "episode_specific": false,
-                "present": false,
-                "supported_episode_ids": []
-              },
-              "present": true,
-              "publication_time": null,
-              "source_identity": null,
-              "supported_episode_ids": [
-                "f31e96d5a37850b487b9a312"
-              ],
-              "timestamp_precision": null,
-              "update_time": null
-            }
-          ]
-        }
-      ],
+      "changed_episodes": [],
       "episodes_checked": 685,
       "errors": [],
-      "expected_match": false,
+      "expected_match": true,
       "frozen_sensitivity_ids": [
         "0791ed71cec2e64ff23a3765",
         "2115c6d97d56543a5b1569e9",
@@ -718,19 +413,15 @@
       ],
       "output_present": true,
       "rc": 0,
-      "replayed_sensitivity_episodes": 18,
-      "replayed_strict_episodes": 18,
+      "replayed_sensitivity_episodes": 20,
+      "replayed_strict_episodes": 19,
       "source_status": "READY",
       "status": "COMPLETE",
       "strict_episode_identity": {
         "aggregate_counts_equal_but_episode_identities_differ": false,
         "new_strict_only": [],
-        "old_strict_only": [
-          "f31e96d5a37850b487b9a312"
-        ],
-        "symmetric_difference": [
-          "f31e96d5a37850b487b9a312"
-        ],
+        "old_strict_only": [],
+        "symmetric_difference": [],
         "unchanged_strict_ids": [
           "0791ed71cec2e64ff23a3765",
           "2115c6d97d56543a5b1569e9",
@@ -749,7 +440,8 @@
           "cb8c92d5dfc79496d955b913",
           "dfc85759ea1b9c6b87df8989",
           "ea95746ca61f9b85561be059",
-          "f0dff0f08466476a192f499d"
+          "f0dff0f08466476a192f499d",
+          "f31e96d5a37850b487b9a312"
         ]
       },
       "unbound_review_evidence": [
