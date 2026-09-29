@@ -1,0 +1,94 @@
+name: Remaining 13 evidence normalization proof
+
+on:
+  push:
+    branches:
+      - remaining-13-evidence-normalization-proof-2026-09-29
+    paths:
+      - ".github/workflows/remaining-13-evidence-normalization-proof.yml"
+      - "kyiv-air-alerts-grafana/data/explosion_research/kherson/final_evidence.json"
+      - "kyiv-air-alerts-grafana/data/explosion_research/mykolaiv/final_evidence.json"
+      - "kyiv-air-alerts-grafana/data/explosion_research/odesa/final_evidence.json"
+      - "kyiv-air-alerts-grafana/data/explosion_audited_baseline.json"
+
+permissions:
+  contents: read
+
+jobs:
+  proof:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: kyiv-air-alerts-grafana/requirements.txt
+
+      - name: Install dependencies
+        run: pip install -r kyiv-air-alerts-grafana/requirements.txt
+
+      - name: Self-tests
+        run: |
+          python kyiv-air-alerts-grafana/scripts/replay_explosion_history.py --self-test
+          python kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py --self-test
+
+      - name: Replay target and regression cities
+        env:
+          INPUT_SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          ROOT="$GITHUB_WORKSPACE/kyiv-air-alerts-grafana"
+          OUT="$RUNNER_TEMP/remaining-13-proof"
+          mkdir -p "$OUT"
+          test "$(git rev-parse HEAD)" = "$INPUT_SHA"
+          for CITY in kherson mykolaiv odesa lviv sevastopol sumy cherkasy chernihiv kropyvnytskyi; do
+            python kyiv-air-alerts-grafana/scripts/replay_explosion_history.py               --repo-root "$ROOT"               --city "$CITY"               --through 2026-09-17               --input-head "$INPUT_SHA"               --read-only               --output "$OUT/$CITY.json"
+          done
+
+      - name: Assert target source status and denominators
+        run: |
+          set -euo pipefail
+          OUT="$RUNNER_TEMP/remaining-13-proof"
+          jq -e '.status=="COMPLETE" and .source_validation.source_status=="READY" and .episodes_checked==1412' "$OUT/kherson.json"
+          jq -e '.status=="COMPLETE" and .source_validation.source_status=="READY" and .episodes_checked==1648' "$OUT/mykolaiv.json"
+          jq -e '.status=="COMPLETE" and .source_validation.source_status=="READY" and .episodes_checked==1465' "$OUT/odesa.json"
+
+      - name: Assert accepted regression counts
+        run: |
+          set -euo pipefail
+          OUT="$RUNNER_TEMP/remaining-13-proof"
+          jq -e '.replayed_strict_episodes==12 and .replayed_sensitivity_episodes==12 and (.changed_episodes|length)==0 and (.errors|length)==0' "$OUT/lviv.json"
+          jq -e '.replayed_strict_episodes==38 and .replayed_sensitivity_episodes==55 and (.changed_episodes|length)==0 and (.errors|length)==0' "$OUT/sevastopol.json"
+          jq -e '.replayed_strict_episodes==204 and .replayed_sensitivity_episodes==238 and (.changed_episodes|length)==0 and (.errors|length)==0' "$OUT/sumy.json"
+          jq -e '.replayed_strict_episodes==57 and .replayed_sensitivity_episodes==58 and (.changed_episodes|length)==1 and .changed_episodes[0].episode_id=="f57f2f50c537719982254887"' "$OUT/cherkasy.json"
+          jq -e '.replayed_strict_episodes==39 and .replayed_sensitivity_episodes==43 and (.changed_episodes|length)==0 and (.errors|length)==0' "$OUT/chernihiv.json"
+          jq -e '.replayed_strict_episodes==38 and .replayed_sensitivity_episodes==38 and (.changed_episodes|length)==0 and (.errors|length)==0' "$OUT/kropyvnytskyi.json"
+
+      - name: Emit compact summary
+        if: always()
+        run: |
+          OUT="$RUNNER_TEMP/remaining-13-proof"
+          for CITY in kherson mykolaiv odesa lviv sevastopol sumy cherkasy chernihiv kropyvnytskyi; do
+            test -f "$OUT/$CITY.json" || continue
+            jq '{city:.city_key,status,source_status:.source_validation.source_status,episodes_checked,strict:.replayed_strict_episodes,sensitivity:.replayed_sensitivity_episodes,qa:(.changed_episodes|length),errors:(.errors|length),unbound_review:(.unbound_review_evidence|length),reconciliation_counts,verdict}' "$OUT/$CITY.json"
+          done
+
+      - name: Verify protected runtime files unchanged by execution
+        if: always()
+        run: |
+          git diff --exit-code --             kyiv-air-alerts-grafana/data/explosion_review_queue.json             kyiv-air-alerts-grafana/data/explosion_candidate_monitor_state.json             kyiv-air-alerts-grafana/data/explosion_candidate_monitor_last_run.json             kyiv-air-alerts-grafana/data/explosions_test.json             kyiv-air-alerts-grafana/data/dashboard_data.json
+
+      - name: Upload proof replay outputs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: remaining-13-evidence-normalization-proof
+          path: ${{ runner.temp }}/remaining-13-proof/*.json
+          if-no-files-found: error
+          retention-days: 30
