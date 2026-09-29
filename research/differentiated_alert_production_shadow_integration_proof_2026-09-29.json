@@ -1,0 +1,293 @@
+{
+  "authoritative_base": "93a7e702657a272b9bc3ffba6a5b843e75b66383",
+  "authoritative_drift_at_start": "NO_DRIFT",
+  "proof_branch": "differentiated-alert-production-shadow-integration-proof-2026-09-29",
+  "implementation_head_before_artifact": "8605c37bc9eb8de8dd4ef110e2a06dca9a9b3464",
+  "previous_accepted_runtime_proof": "4f9b9e9654f982db19076b8a8bba7814f4ea4477",
+  "production_path": {
+    "current_schedule_definition": {
+      "branch": "main",
+      "workflow": ".github/workflows/update-netlify-site.yml",
+      "observed_main_head": "e2da5058c726edce41d9ae997027d01df7c54c4c",
+      "behavior": "scheduled workflow checks out site-prod and runs the production updater/pipeline"
+    },
+    "current_runtime": {
+      "branch": "site-prod",
+      "observed_site_prod_head": "a06b82197c737e4311af3cb160ca662f9eff1e8f",
+      "primary_updater": "kyiv-air-alerts-grafana/scripts/update_data.py",
+      "primary_updater_blob": "7d7fde6d8c736cd754804dd051845cf59738d8c9",
+      "python": "3.12",
+      "sequence": [
+        "update_data.py",
+        "add_weekly_breakdown.py",
+        "render_dashboard.py",
+        "add_weekly_panels.py",
+        "add_duration_unit_switch.py",
+        "expand_multicity_production.py",
+        "extend_remaining_proxies.py",
+        "apply_ukrainealarm_bridge.py",
+        "add_sevastopol_exact.py",
+        "apply_site_rolling_7d.py",
+        "update_casualties.py",
+        "configure_full_city_dashboard.py",
+        "add_casualty_panel.py",
+        "postprocess_compact_dashboard_qa.py",
+        "reconcile_bridge_freshness.py",
+        "verify production dataset",
+        "commit updated production data to site-prod"
+      ]
+    },
+    "authoritative_branch_legacy_workflow_note": ".github/workflows/update.yml resets to origin/main before execution; it is not treated as the current site-prod production runtime."
+  },
+  "integration_seam": {
+    "proof_updater": "kyiv-air-alerts-grafana/scripts/update_data.py",
+    "proof_updater_blob": "f91508815243b21f0aab621c7417fdf22a8816a7",
+    "sidecar": "kyiv-air-alerts-grafana/scripts/differentiated_alert_shadow_runtime.py",
+    "sidecar_blob": "f6e159f0ed18f7f29913fc6cfa2161563d9eb0a6",
+    "placement": "after all base update_data publication files are written; before stdout summary",
+    "semantics": "additive child-only; no read-back into AIR episodes, attack-event classification or publication",
+    "outer_failure_boundary": "updater catches all sidecar exceptions and continues"
+  },
+  "feature_flag": {
+    "name": "DIFFERENTIATED_ALERT_SHADOW",
+    "default": "OFF",
+    "off_behavior": "only environment check; sidecar module is not imported and no differentiated network/store work occurs"
+  },
+  "reused_implementation_blobs": {
+    "schema": "68b4f3df3b730a3d22f70d29a0d0cc09072c3a42",
+    "child_persistence": "5d4edeae1a4979acdac58b27a39adf8c58bdb95d",
+    "runtime_gates": "08c47934808a1195a8cdaeddbb7bd41850ff633a",
+    "repository_tests": "5d1ae17014ed2182605adbd1a641ad84a66460c5",
+    "local_extra_tests": "bd1b5e5cf63d58879760766058e8c64935770d9b"
+  },
+  "source_inputs": {
+    "kyiv": {
+      "classification": "LIVE_RAW",
+      "source": "https://kyiv.digital/open-api/air-alert/state",
+      "captured_payload_frozen_as": "kyiv-air-alerts-grafana/tests/fixtures/differentiated_alert_shadow/kyiv_live_raw_2026-09-29_111347.json",
+      "fixture_blob": "dbf8cccce475cba01aff52cb1645693b5ef2049a",
+      "raw_sha256": "840a7c486a5c7e369713e884aa8eb584039d06ad4203d0eca31400dc9b073859",
+      "observed_state": 0,
+      "observed_causes": [],
+      "source_created_at": "2026-09-29 11:13:47"
+    },
+    "ukrainealarm": {
+      "classification": "STORED_RAW",
+      "fixture": "ukrainealarm_overlap_stored_raw_2026-09-14.json",
+      "fixture_blob": "12936fa23d8149b64c2e7ac5440918ce62ca6f7b"
+    },
+    "alerts_in_ua": {
+      "classification": "STORED_RAW",
+      "fixture": "alerts_in_ua_stored_raw_2026-09-16.json",
+      "fixture_blob": "1f4131167001a23f19f285b07fce6ee531ee502a"
+    }
+  },
+  "shadow_store": {
+    "proof_target": "isolated local SQLite",
+    "production_neon_used": false,
+    "tables": [
+      "alert_state_snapshot",
+      "alert_threat_observation"
+    ],
+    "parent_mutation_api": false
+  },
+  "shadow_off_run": {
+    "scope": "sandbox focused integration harness",
+    "status": "PASS",
+    "attempted": false,
+    "differentiated_network_calls": 0,
+    "differentiated_store_opens": 0,
+    "note": "This proves disabled sidecar behavior, not a full current site-prod pipeline execution."
+  },
+  "shadow_on_run": {
+    "scope": "sandbox focused integration harness with frozen source payloads",
+    "status": "PASS",
+    "normal_test_process_exit": "success",
+    "sources_attempted": 3,
+    "sources_succeeded": 3,
+    "snapshots_inserted": 3,
+    "observations_inserted": 3,
+    "binding": {
+      "BOUND": 0,
+      "AMBIGUOUS": 0,
+      "UNBOUND": 3
+    },
+    "store_counts": {
+      "snapshots": 3,
+      "observations": 3
+    },
+    "note": "Child persistence is executable; full current site-prod updater sequence was not executed."
+  },
+  "publication_equivalence": {
+    "status": "NOT_PROVEN",
+    "semantic_deltas": null,
+    "raw_hashes": null,
+    "focused_sidecar_immutability_test": {
+      "status": "PASS",
+      "before_sha256": "80befda455809dd84b279e7af84c613f8f38ceea05f67682ba6ca768cf300340",
+      "after_sha256": "80befda455809dd84b279e7af84c613f8f38ceea05f67682ba6ca768cf300340"
+    },
+    "reason": "The available GitHub connector has no workflow_dispatch action and the execution container has no GitHub network access, so the full current site-prod production pipeline could not be run twice on identical frozen inputs."
+  },
+  "parent_episode_equivalence": {
+    "status": "NOT_PROVEN",
+    "semantic_deltas": null,
+    "previous_accepted_runtime_reference": {
+      "city_count": 23,
+      "episode_count": 1418,
+      "before_sha256": "ba8136741546ff7776230b8faef79a72a9c85eb66f819400d8b94c2071d25c87",
+      "after_sha256": "ba8136741546ff7776230b8faef79a72a9c85eb66f819400d8b94c2071d25c87",
+      "semantic_deltas": 0
+    },
+    "reason": "Accepted runtime result is retained as prior evidence, but the required repeat against this integration implementation was not executable here."
+  },
+  "attack_event_equivalence": {
+    "status": "NOT_PROVEN",
+    "cities_with_deltas": null,
+    "previous_accepted_runtime_reference": {
+      "before_sha256": "5b9d7b53e953a9752a0577ab70c373ea56266121f1cffd4c6aa150d6e82a9999",
+      "after_sha256": "5b9d7b53e953a9752a0577ab70c373ea56266121f1cffd4c6aa150d6e82a9999",
+      "semantic_deltas": 0
+    },
+    "reason": "Accepted runtime result is retained as prior evidence, but the required OFF-vs-ON repeat was not executable here."
+  },
+  "idempotency": {
+    "status": "PASS",
+    "first_run": {
+      "snapshots_inserted": 3,
+      "observations_inserted": 3
+    },
+    "exact_replay": {
+      "snapshots_inserted": 0,
+      "observations_inserted": 0
+    },
+    "final_counts": {
+      "snapshots": 3,
+      "observations": 3
+    }
+  },
+  "fail_open": {
+    "status": "PASS_IN_FOCUSED_HARNESS",
+    "store_open_failure": {
+      "shadow_status": "FAILED",
+      "exception_escaped": false,
+      "production_output_mutation": false
+    },
+    "per_source_persistence_failure": {
+      "shadow_status": "PARTIAL_FAILURE",
+      "failed_source": "kyiv",
+      "other_sources_succeeded": [
+        "ukrainealarm",
+        "alerts_in_ua"
+      ],
+      "final_counts": {
+        "snapshots": 2,
+        "observations": 3
+      }
+    },
+    "last_resort_boundary": {
+      "status": "PASS",
+      "exception_escaped": false
+    }
+  },
+  "source_isolation": {
+    "status": "PASS",
+    "forced_kyiv_fetch_failure": {
+      "kyiv": "FAILED",
+      "ukrainealarm": "SUCCEEDED",
+      "alerts_in_ua": "SUCCEEDED",
+      "final_counts": {
+        "snapshots": 2,
+        "observations": 3
+      }
+    }
+  },
+  "missing_configuration": {
+    "optional_source_credentials": {
+      "status": "PASS",
+      "ukrainealarm": "SKIPPED_NO_CREDENTIAL",
+      "alerts_in_ua": "SKIPPED_NO_CREDENTIAL",
+      "kyiv": "SUCCEEDED"
+    },
+    "missing_shadow_store": {
+      "status": "FAILED_OPEN_IN_FOCUSED_HARNESS",
+      "updater_boundary_exception_escaped": false
+    }
+  },
+  "tests": {
+    "accepted_repository_behavioral_suite": {
+      "result": "PASS",
+      "count": "18/18",
+      "execution": "sandbox mirror of accepted suite"
+    },
+    "accepted_local_behavioral_suite": {
+      "result": "PASS",
+      "count": "25/25",
+      "execution": "sandbox mirror of accepted suite"
+    },
+    "new_integration_suite": {
+      "result": "PASS",
+      "count": "12/12",
+      "execution": "sandbox focused harness"
+    },
+    "github_actions_proof_run": null
+  },
+  "production_writes": [],
+  "production_write_assertions": {
+    "permanent_neon": 0,
+    "site_prod": 0,
+    "main": 0,
+    "authoritative_branch": 0,
+    "scheduled_workflow_enablement": 0,
+    "production_deploy": 0
+  },
+  "proof_diff_classification": {
+    "apply_later_candidates": [
+      "kyiv-air-alerts-grafana/scripts/differentiated_alert_shadow_runtime.py",
+      "minimal feature-gated hook from kyiv-air-alerts-grafana/scripts/update_data.py"
+    ],
+    "proof_only": [
+      "proof_differentiated_alert_schema_v2.py",
+      "proof_differentiated_alert_shadow_ingestion.py",
+      "proof_differentiated_alert_runtime_gates.py",
+      "tests/test_differentiated_alert_shadow_ingestion.py",
+      "tests/test_differentiated_alert_shadow_local_extra.py",
+      "tests/test_differentiated_alert_production_shadow_integration.py",
+      "tests/fixtures/differentiated_alert_shadow/*",
+      "research/differentiated_alert_production_shadow_integration_proof_2026-09-29.json"
+    ]
+  },
+  "future_enablement_requirements": [
+    "Rebase/re-prove the minimal updater hook against the then-current site-prod update_data.py; the proof branch is rooted in the authoritative multicity branch while current production executes site-prod.",
+    "Execute the full current site-prod updater sequence twice on identical frozen inputs with DIFFERENTIATED_ALERT_SHADOW=0 and =1 and compare every authoritative artifact.",
+    "Repeat parent AIR corpus and attack-event metric comparators on the integration implementation.",
+    "Run forced shadow persistence and source failures through the real updater process and verify publication success/hash equality.",
+    "Choose/configure a durable production shadow child store before scheduled enablement; no permanent production Neon target was touched or proven here.",
+    "Only after all executable gates pass, add DIFFERENTIATED_ALERT_SHADOW=1 to the real main:.github/workflows/update-netlify-site.yml production step in a separate guarded task."
+  ],
+  "unknowns": [
+    "Full current site-prod OFF-vs-ON publication hashes.",
+    "Integration-repeat parent AIR corpus hashes.",
+    "Integration-repeat attack-event hashes and per-city delta count.",
+    "A production-durable differentiated child persistence target."
+  ],
+  "mandatory_gates": {
+    "real_current_production_updater_executable_proof": "NOT_PROVEN",
+    "default_off": "PASS",
+    "off_no_differentiated_work": "PASS",
+    "on_persists_child_evidence": "PASS_IN_FOCUSED_HARNESS",
+    "actual_source_snapshot_persists": "PASS_IN_FOCUSED_HARNESS",
+    "publication_equivalence": "NOT_PROVEN",
+    "parent_equivalence": "NOT_PROVEN",
+    "attack_event_equivalence": "NOT_PROVEN",
+    "exact_replay_idempotent": "PASS",
+    "persistence_failure_fail_open": "PASS_IN_FOCUSED_HARNESS",
+    "source_failure_fail_open": "PASS_IN_FOCUSED_HARNESS",
+    "missing_credentials_fail_open": "PASS_IN_FOCUSED_HARNESS",
+    "source_failure_isolation": "PASS",
+    "no_production_neon_writes": "PASS",
+    "no_site_prod_main_authoritative_apply": "PASS",
+    "scheduled_production_shadow_remains_disabled": "PASS"
+  },
+  "verdict": "PRODUCTION SHADOW INTEGRATION PROOF NOT READY"
+}
