@@ -272,7 +272,7 @@ def main() -> None:
     runtime_test = project / "tests/test_multicity_casualty_promotion.py"
     if runtime_test.exists() or runtime_test.is_symlink():
         runtime_test.unlink()
-    runtime_test.symlink_to(proof_test)
+    shutil.copy2(proof_test, runtime_test)
     env = dict(os.environ)
     env["CASUALTY_PROOF_BEFORE"] = str(before_dashboard_path)
     focused = run(
