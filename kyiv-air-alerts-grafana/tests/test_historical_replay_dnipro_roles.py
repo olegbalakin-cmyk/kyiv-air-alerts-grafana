@@ -120,3 +120,45 @@ def test_publication_metadata_does_not_create_roles():
     item = row("У Дніпрі оголосили повітряну тривогу.", basis="", decision="")
     item["published_at"] = "2026-01-01T10:05:00Z"
     assert roles(item) == {}
+
+
+def test_reviewed_legacy_loud_variants_restore_fact_only_behind_contract():
+    for text in [
+        "У Дніпрі гучно було о 03:00 під час атаки БпЛА.",
+        "У Дніпрі всю ніч гупало, летіли ракети.",
+        "Dnipro was loud during a ballistic alert episode.",
+    ]:
+        r = roles(row(text))
+        assert r["explosion_evidence"]["present"] is True
+
+
+def test_exact_city_report_annotation_is_reviewed_exact_city_not_publisher_location():
+    r = roles(
+        row(
+            "Exact-city report places explosions during the air alert; hostile UAV context.",
+            basis="strict — explicit during-alert wording",
+        )
+    )
+    assert r["exact_city_evidence"]["present"] is True
+    assert r["same_attack_basis"]["present"] is True
+
+
+def test_air_force_fast_target_context_can_supply_reviewed_attack_context():
+    r = roles(
+        row(
+            "Близько 10:44 у Дніпрі пролунав вибух; Повітряні сили попереджали про швидкісну ціль на місто.",
+            basis="strict_exact_time_inside_episode",
+        )
+    )
+    assert r["aerial_war_evidence"]["present"] is True
+    assert r["same_attack_basis"]["present"] is True
+
+
+def test_frozen_episode_wording_is_an_explicit_reviewed_episode_relation():
+    r = roles(
+        row(
+            "Explosions were reported in Dnipro while Russian drones threatened the city.",
+            basis="strict — exact city, UAV context, event within the frozen episode.",
+        )
+    )
+    assert r["same_attack_basis"]["present"] is True

@@ -1080,7 +1080,9 @@ def historical_review_roles(city: str, row: dict, monitor) -> tuple[dict, str]:
         reviewed_episode_relation = bool(
             re.search(
                 r"(?:timed?[_ -]?inside[_ -]?(?:matched[_ -]?)?(?:alert|episode)|"
-                r"exact[_ -]?time[_ -]?inside[_ -]?(?:alert|episode)|"
+                r"exact[_ -]?time[_ -]?inside[_ -]?(?:(?:the|one)[_ -]?)?(?:frozen[_ -]?)?(?:alert|episode)|"
+                r"approx(?:imate)?[_ -]?time[_ -]?inside[_ -]?(?:(?:the|one)[_ -]?)?(?:frozen[_ -]?)?(?:alert|episode)|"
+                r"event[_ -]?(?:inside|within)[_ -]?(?:(?:the|one)[_ -]?)?(?:frozen[_ -]?)?(?:alert|episode)|"
                 r"event[_ -]?during[_ -]?(?:matched[_ -]?)?alert|"
                 r"explicit[_ -]?(?:ongoing[_ -]?)?alert|"
                 r"explicit[_ -]?during[_ -]?(?:matched[_ -]?)?alert|"
@@ -1123,7 +1125,9 @@ def historical_review_roles(city: str, row: dict, monitor) -> tuple[dict, str]:
         specific_air = re.compile(
             r"\b(?:бпла|безпілот\w*|дрон\w*|ракет\w*|баліст\w*|шахед\w*|"
             r"ппо|uav(?:s)?|drone(?:s)?|missile(?:s)?|ballistic|rocket(?:s)?|"
-            r"shahed(?:s)?|air[- ]?defen[cs]e|aerial)\b",
+            r"shahed(?:s)?|air[- ]?defen[cs]e|aerial|air force|"
+            r"high[- ]?speed target|fast[- ]?target|повітрян\w*\s+сил\w*|"
+            r"швидкісн\w*\s+ціл\w*)\b",
             flags=re.IGNORECASE,
         )
         segments = [
@@ -1136,8 +1140,15 @@ def historical_review_roles(city: str, row: dict, monitor) -> tuple[dict, str]:
             named_city != "dnipro" for named_city in mentioned_cities
         )
         reviewed_evidence_city = bool(dnipro_named.search(evidence))
+        reviewed_exact_city_annotation = bool(
+            re.search(r"\bexact[- ]city\s+report\b", evidence, flags=re.IGNORECASE)
+        )
         exact_city = bool(
-            (reviewed_exact_city or reviewed_evidence_city)
+            (
+                reviewed_exact_city
+                or reviewed_evidence_city
+                or reviewed_exact_city_annotation
+            )
             and not conflicting_named_city
         )
 
@@ -1184,7 +1195,9 @@ def historical_review_roles(city: str, row: dict, monitor) -> tuple[dict, str]:
                     or specific_air.search(segment)
                 )
                 and re.search(
-                    r"\b(?:було|стало)\s+гучн\w*\b|\bгучн\w*\s+(?:звук\w*|вибух\w*)",
+                    r"\b(?:було|стало)\s+гучн\w*\b|"
+                    r"\bгучн\w*\s+(?:було|стало|звук\w*|вибух\w*)|"
+                    r"\bгупал\w*\b|\b(?:was|were)\s+(?:very\s+)?loud\b",
                     segment_low,
                 )
             )
@@ -1207,6 +1220,7 @@ def historical_review_roles(city: str, row: dict, monitor) -> tuple[dict, str]:
         air_context = bool(
             reviewed_air_context
             or any(specific_air.search(segment) for segment in segments)
+            or any(monitor.air_military_context(segment) for segment in segments)
         )
         same_attack = bool(
             exact_city
