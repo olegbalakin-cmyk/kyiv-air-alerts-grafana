@@ -1,0 +1,209 @@
+{
+  "date": "2026-09-29",
+  "task": "23-city casualty production cutover",
+  "production_branch": "site-prod",
+  "pre_cutover_site_prod_sha": "e09766f184b5beb8bc56d360e98bc269c088b25e",
+  "fresh_drift_audit": {
+    "compared_to_proven_base": "e09766f184b5beb8bc56d360e98bc269c088b25e",
+    "status": "identical",
+    "intervening_commits": 0,
+    "relevant_drift": false
+  },
+  "proven_source_blobs": {
+    "kyiv-air-alerts-grafana/scripts/update_casualties.py": "32c9f99b17a1d8da5f11d862b9825370366060ee",
+    "kyiv-air-alerts-grafana/scripts/add_casualty_panel.py": "991a7d40bed1cfd01abfc23624e0028219d8fb90",
+    "kyiv-air-alerts-grafana/data/casualties/master_20cities_manifest.json": "cdff7c9887dba0662bc44435048aa5449f7485cc",
+    "kyiv-air-alerts-grafana/data/casualties/master_20cities_monthly_wide.csv": "f3b7fdf6750e12d7b9af05ffd094bb47aa9ed801",
+    "kyiv-air-alerts-grafana/data/casualties/cities/odesa/manifest.json": "bc9e487f63cf4c67c0c9c86757c3ded04537ee24",
+    "kyiv-air-alerts-grafana/data/casualties/cities/odesa/odesa_air_attack_deaths_monthly.csv": "b51a2cd204b3a3c977025e7acd9311ba98e3a317",
+    "kyiv-air-alerts-grafana/data/casualties/cities/zaporizhzhia/manifest.json": "4dcfb6a14949820b4934a100063f549e22799e8b",
+    "kyiv-air-alerts-grafana/data/casualties/cities/zaporizhzhia/zaporizhzhia_air_attack_deaths_monthly.csv": "1b32d8808069b4499fda35b092fd56f51c64583f",
+    "kyiv-air-alerts-grafana/data/casualties/cities/kherson/manifest.json": "8f343b2fb01774ed476910d34489e03fbf190cb5",
+    "kyiv-air-alerts-grafana/data/casualties/cities/kherson/kherson_air_attack_deaths_monthly.csv": "5520e34c5d0696a167ed0eea378a8648c8836c49",
+    "kyiv-air-alerts-grafana/pages-preview/app.js": "9eb9af99a00fbe22606fe86880548ab1cd2a0cf5",
+    "kyiv-air-alerts-grafana/pages-preview/index.html": "1a76b8af2f3e07e9029fb0bda2198228ce889019"
+  },
+  "pre_builder_dashboard": {
+    "blob": "993dc94e5e1a844a14cac2812817f51792bdd298",
+    "sha256": "fb4f337dd55da6860a316d91e9b9247e6de945f17853a665d99ae5304c78cec3"
+  },
+  "production_equivalent_builder": {
+    "candidate_branch": "casualty-prod-cutover-candidate-2026-09-29",
+    "setup_commit": "3ba8b226f4966c3cb25c9851e777a58a5aa08a28",
+    "generated_candidate_commit": "3392f00c52df154dc4f81b22a462d86bf66f17ee",
+    "github_actions_run": 36589670924,
+    "result": "PASS",
+    "python": "3.12.14",
+    "dependencies": {
+      "requests": "2.34.2",
+      "bs4": "4.15.0",
+      "psycopg": "3.3.6"
+    },
+    "no_network": true,
+    "city_count": 23,
+    "rows_each": 56,
+    "duplicate_months": 0,
+    "negative_values": 0,
+    "kyiv_compatibility": true,
+    "uzhhorod_zero_series": true,
+    "review_candidates": 43
+  },
+  "totals": {
+    "kyiv": 454,
+    "kharkiv": 339,
+    "sevastopol": 22,
+    "cherkasy": 2,
+    "zhytomyr": 12,
+    "dnipro": 214,
+    "khmelnytskyi": 10,
+    "poltava": 84,
+    "rivne": 1,
+    "sumy": 158,
+    "vinnytsia": 31,
+    "kropyvnytskyi": 9,
+    "lviv": 29,
+    "chernihiv": 105,
+    "mykolaiv": 106,
+    "lutsk": 10,
+    "uzhhorod": 0,
+    "ivano-frankivsk": 3,
+    "ternopil": 41,
+    "chernivtsi": 5,
+    "odesa": 171,
+    "zaporizhzhia": 316,
+    "kherson": 163
+  },
+  "generated_outputs": {
+    "dashboard_data": {
+      "blob": "59d7c96b5a0bb705718346c3ec6388be7db7354d",
+      "sha256": "17cb233766a2ee2b030ff8cfbe09e16884ad535224bd5fe957e75bbe53f9a3c0"
+    },
+    "grafana_dashboard": {
+      "blob": "4dac0045d6b19c99b6d4effb5ddef8b8fa287ebb",
+      "sha256": "82ae43d2b1d652b2e4303e38d35323ff54db5699899ac99323d75bc24977dd38"
+    }
+  },
+  "focused_validation": {
+    "result": "PASS",
+    "city_count": 23,
+    "exact_totals": true,
+    "rows_each_56": true,
+    "zero_series": true,
+    "kyiv_compatibility": true,
+    "frontend_selected_city_lookup": true,
+    "grafana_city_panels": 23,
+    "non_casualty_semantic_invariance": true,
+    "generated_worktree_changed_only": [
+      "kyiv-air-alerts-grafana/data/dashboard_data.json",
+      "kyiv-air-alerts-grafana/grafana/dashboard.json"
+    ]
+  },
+  "pre_push_concurrency_guard": {
+    "site_prod_sha_immediately_before_push": "e09766f184b5beb8bc56d360e98bc269c088b25e",
+    "expected_sha": "e09766f184b5beb8bc56d360e98bc269c088b25e",
+    "result": "PASS"
+  },
+  "cutover": {
+    "commit": "9e1492fbd136a480514e9422ed5d3d7f89e7c1df",
+    "tree": "4a2e0a0b2965f0dc43194923e1dc09bc3e6731da",
+    "resulting_site_prod_sha": "9e1492fbd136a480514e9422ed5d3d7f89e7c1df",
+    "parent": "e09766f184b5beb8bc56d360e98bc269c088b25e",
+    "changed_file_count": 14,
+    "force_push": false
+  },
+  "netlify": {
+    "site_id": "b5aafc46-7468-4070-baf1-db80a4d30501",
+    "production_url": "https://ukraine-air-alerts.netlify.app",
+    "github_actions_run": 36589925135,
+    "workflow_head_sha": "9e1492fbd136a480514e9422ed5d3d7f89e7c1df",
+    "workflow_conclusion": "success",
+    "deploy_id": "6abbd8552428fc628933ecf1",
+    "deploy_state": "ready",
+    "context": "production",
+    "published_at": "2026-09-29T15:25:17.006Z",
+    "commit_ref_note": "Netlify CLI deploy exposes commit_ref=null; GitHub deployment workflow head_sha binds this deploy to the cutover commit."
+  },
+  "live_validation": {
+    "github_actions_run": 36590589083,
+    "artifact_id": 11044100449,
+    "result": "PASS",
+    "live_url": "https://ukraine-air-alerts.netlify.app",
+    "data_url": "https://raw.githubusercontent.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/site-prod/kyiv-air-alerts-grafana/data/dashboard_data.json",
+    "http_status": 200,
+    "city_count": 23,
+    "rows_each": 56,
+    "kyiv_compatibility": true,
+    "playwright_version": "1.63.0",
+    "chromium_version": "153.0.8010.12",
+    "chart_js_version": "4.4.7",
+    "switch_sequence": [
+      {
+        "city": "kyiv",
+        "total": 454,
+        "rows": 56,
+        "previous_chart_replaced": true
+      },
+      {
+        "city": "kharkiv",
+        "total": 339,
+        "rows": 56,
+        "previous_chart_replaced": true
+      },
+      {
+        "city": "uzhhorod",
+        "total": 0,
+        "rows": 56,
+        "previous_chart_replaced": true
+      },
+      {
+        "city": "odesa",
+        "total": 171,
+        "rows": 56,
+        "previous_chart_replaced": true
+      },
+      {
+        "city": "kyiv",
+        "total": 454,
+        "rows": 56,
+        "previous_chart_replaced": true
+      }
+    ],
+    "spot_checks": {
+      "dnipro": 214,
+      "zaporizhzhia": 316,
+      "kherson": 163
+    },
+    "console_errors": [],
+    "page_errors": [],
+    "failed_requests": [],
+    "warnings": []
+  },
+  "scheduled_updater_durability": {
+    "naturally_observed_during_validation_window": false,
+    "manual_trigger_performed": false,
+    "note": "Optional check not triggered; accepted repeated-builder durability remains the prior proof."
+  },
+  "production_write_audit": {
+    "site_prod_mutated": true,
+    "mutation_scope": "single casualty cutover commit only",
+    "main_mutated": false,
+    "neon_db_mutated": false,
+    "historical_replay_mutated": false,
+    "live_attack_event_monitor_mutated": false,
+    "differentiated_alert_work_mutated": false,
+    "campaign_6863_mutated": false,
+    "research_artifact_added_to_site_prod": false,
+    "temporary_validation_workflows_added_to_site_prod": false
+  },
+  "rollback": {
+    "required": false,
+    "performed": false,
+    "reason": "All repository, deployment, live-data, and browser gates passed."
+  },
+  "protected_state": {
+    "current_site_prod_head": "9e1492fbd136a480514e9422ed5d3d7f89e7c1df",
+    "current_main_head_observed": "5195fd449cddc9c16508065434aa4aaecc2bdf5f",
+    "result": "PASS"
+  },
+  "verdict": "23-CITY CASUALTY PRODUCTION CUTOVER COMPLETE — 23 CITY SERIES LIVE — EXACT TOTALS + KYIV COMPATIBILITY + ZERO-SERIES FRONTEND PASS"
+}
