@@ -1,0 +1,23 @@
+name: Temporary historical backfill 8X proof
+
+on:
+  push:
+    branches:
+      - historical-backfill-8x-proof-2026-09-29
+
+permissions:
+  contents: read
+
+jobs:
+  proof:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      PYTHONDONTWRITEBYTECODE: "1"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Run controller self-test
+        run: python kyiv-air-alerts-grafana/scripts/historical_attack_event_acceleration_controller.py self-test
