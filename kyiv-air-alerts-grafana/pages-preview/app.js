@@ -12,65 +12,93 @@ const TIME_PROFILE_COLOR = "#ef4444";
 const PARTIAL_PERIOD_DASH = [3, 4];
 const TOUR_STORAGE_KEY = "air-alerts-intro-tour-v2";
 const TOUR_STEPS = [
-  {
-    selector: ".controls-panel",
-    title: "Оберіть місто і період",
-    text: "Тут можна змінити місто та масштаб графіків. За замовчуванням відкривається ковзне 90-денне вікно."
-  },
-  {
-    selector: "#cityIntensityChart",
-    closest: ".chart-card",
-    title: "Як читати головний графік",
-    text: "Стовпчики показують середній час під тривогою на добу, лінія — середню кількість тривог на день. Пунктиром позначений поточний неповний зріз."
-  },
-  {
-    selector: "#cityIntensityChart",
-    closest: ".chart-card",
-    title: "Легенда — це перемикач",
-    text: "Натисніть на назву показника в легенді графіка, щоб тимчасово приховати його. Натисніть ще раз — і показник повернеться. Можете спробувати прямо зараз."
-  },
-  {
-    selector: "#timeOfDaySection",
-    title: "Добовий профіль",
-    text: "Цей графік показує, у які години тривога відносно частіше активна. 100% — власний максимум вибраного міста й періоду, а не 100% часу під тривогою."
-  },
-  {
-    selector: ".comparison-controls",
-    title: "Порівнюйте міста",
-    text: "Оберіть два або три міста. Порівняльні графіки використовують лише спільні для вибраних рядів періоди."
-  },
-  {
-    selector: "#allCitiesSection",
-    title: "Огляд усіх міст",
-    text: "У нижній таблиці можна швидко порівняти всі 23 ряди та змінити горизонт: 7, 30, 90 днів, рік або від початку спільних даних."
-  }
+  {selector:".controls-panel",titleUk:"Оберіть місто і період",titleEn:"Choose a city and period",textUk:"Тут можна змінити місто та масштаб графіків. За замовчуванням відкривається ковзне 90-денне вікно.",textEn:"Change the city and chart time scale here. The default view is a rolling 90-day window."},
+  {selector:"#cityIntensityChart",closest:".chart-card",titleUk:"Як читати головний графік",titleEn:"How to read the main chart",textUk:"Стовпчики показують середній час під тривогою на добу, лінія — середню кількість тривог на день. Пунктиром позначений поточний неповний зріз.",textEn:"Bars show average hours under alert per day; the line shows average alerts per day. A dashed segment marks the current incomplete period."},
+  {selector:"#cityIntensityChart",closest:".chart-card",titleUk:"Легенда — це перемикач",titleEn:"The legend is interactive",textUk:"Натисніть на назву показника в легенді графіка, щоб тимчасово приховати його. Натисніть ще раз — і показник повернеться. Можете спробувати прямо зараз.",textEn:"Click a metric in the chart legend to hide it temporarily. Click it again to bring it back."},
+  {selector:"#timeOfDaySection",titleUk:"Добовий профіль",titleEn:"Time-of-day profile",textUk:"Цей графік показує, у які години тривога відносно частіше активна. 100% — власний максимум вибраного міста й періоду, а не 100% часу під тривогою.",textEn:"This chart shows when alerts are relatively more active during the day. 100% is the selected city's own peak for the chosen period, not 100% of time under alert."},
+  {selector:".comparison-controls",titleUk:"Порівнюйте міста",titleEn:"Compare cities",textUk:"Оберіть два або три міста. Порівняльні графіки використовують лише спільні для вибраних рядів періоди.",textEn:"Choose two or three cities. Comparison charts use only periods available in all selected series."},
+  {selector:"#allCitiesSection",titleUk:"Огляд усіх міст",titleEn:"All-city overview",textUk:"У нижній таблиці можна швидко порівняти всі 23 ряди та змінити горизонт: 7, 30, 90 днів, рік або від початку спільних даних.",textEn:"The table below compares all 23 series across 7, 30 or 90 days, one year, or the full common data period."}
 ];
 const GRID = "rgba(148,163,184,.16)";
 const TEXT = "#b8c4cf";
 const HEATMAP_RANGES = ["7d", "30d", "90d", "year", "all"];
 const TABLE_RANGES = ["7d", "30d", "90d", "year", "common"];
 const TABLE_SORT_COLUMNS = [
-  { key: "label", label: "Місто / ряд", defaultDirection: "asc" },
-  { key: "alerts", label: "Тривог", defaultDirection: "desc" },
-  { key: "hours", label: "Годин", defaultDirection: "desc" },
-  { key: "duration", label: "Сер. тривалість", defaultDirection: "desc" },
-  { key: "coverage", label: "Покриття", defaultDirection: "asc" }
+  { key:"label", labelUk:"Місто / ряд", labelEn:"City / series", defaultDirection:"asc" },
+  { key:"alerts", labelUk:"Тривог", labelEn:"Alerts", defaultDirection:"desc" },
+  { key:"hours", labelUk:"Годин", labelEn:"Hours", defaultDirection:"desc" },
+  { key:"duration", labelUk:"Сер. тривалість", labelEn:"Avg. duration", defaultDirection:"desc" },
+  { key:"coverage", labelUk:"Покриття", labelEn:"Coverage", defaultDirection:"asc" }
 ];
+
+
+const LANGUAGE_STORAGE_KEY="air-alerts-language-v1";
+const CITY_LABELS_EN={kyiv:"Kyiv",kharkiv:"Kharkiv",zaporizhzhia:"Zaporizhzhia",cherkasy:"Cherkasy (Cherkasy District)",zhytomyr:"Zhytomyr (Zhytomyr District)",dnipro:"Dnipro (Dnipro District)",khmelnytskyi:"Khmelnytskyi (Khmelnytskyi District)",poltava:"Poltava (Poltava District)",rivne:"Rivne (Rivne District)",sumy:"Sumy (Sumy District)",vinnytsia:"Vinnytsia (Vinnytsia District)",kropyvnytskyi:"Kropyvnytskyi (Kropyvnytskyi District)",lviv:"Lviv (Lviv District)",chernihiv:"Chernihiv (Chernihiv District)",odesa:"Odesa (Odesa District)",kherson:"Kherson (Kherson District)",mykolaiv:"Mykolaiv (Mykolaiv District)",lutsk:"Lutsk (Lutsk District)",uzhhorod:"Uzhhorod (Uzhhorod District)",ivano_frankivsk:"Ivano-Frankivsk (Ivano-Frankivsk District)","ivano-frankivsk":"Ivano-Frankivsk (Ivano-Frankivsk District)",ternopil:"Ternopil (Ternopil District)",chernivtsi:"Chernivtsi (Chernivtsi District)",sevastopol:"Sevastopol (signals from the occupation administration)"};
+const DISTRICT_LABELS_EN={cherkasy:"Cherkasy District",zhytomyr:"Zhytomyr District",dnipro:"Dnipro District",khmelnytskyi:"Khmelnytskyi District",poltava:"Poltava District",rivne:"Rivne District",sumy:"Sumy District",vinnytsia:"Vinnytsia District",kropyvnytskyi:"Kropyvnytskyi District",lviv:"Lviv District",chernihiv:"Chernihiv District",odesa:"Odesa District",kherson:"Kherson District",mykolaiv:"Mykolaiv District",lutsk:"Lutsk District",uzhhorod:"Uzhhorod District",ivano_frankivsk:"Ivano-Frankivsk District","ivano-frankivsk":"Ivano-Frankivsk District",ternopil:"Ternopil District",chernivtsi:"Chernivtsi District"};
+function initialLanguage(){const q=new URLSearchParams(location.search).get("lang");if(q==="en"||q==="uk")return q;try{const s=localStorage.getItem(LANGUAGE_STORAGE_KEY);if(s==="en"||s==="uk")return s;}catch{}return"uk";}
+let currentLanguage=initialLanguage();
+function tr(uk,en){return currentLanguage==="en"?en:uk;}
+function localeCode(){return currentLanguage==="en"?"en":"uk";}
+function tableColumnLabel(c){return tr(c.labelUk,c.labelEn);}
+function setLocalizedText(s,uk,en){const e=document.querySelector(s);if(e)e.textContent=tr(uk,en);}
+function setLocalizedAttr(s,a,uk,en){const e=document.querySelector(s);if(e)e.setAttribute(a,tr(uk,en));}
+function setOptionText(id,v,uk,en){const e=document.querySelector(`#${id} option[value="${v}"]`);if(e)e.textContent=tr(uk,en);}
+function setKpiLabel(id,uk,en){const e=$(id)?.closest(".kpi-card")?.querySelector(".kpi-label");if(e)e.textContent=tr(uk,en);}
+function setCardCopy(id,tu,te,su,se){const c=$(id)?.closest(".chart-card");if(!c)return;const h=c.querySelector("h3"),p=c.querySelector(".chart-subtitle");if(h)h.textContent=tr(tu,te);if(p)p.textContent=tr(su,se);}
+function setSectionHeading(id,eu,ee,tu,te,du,de){const h=$(id)?.querySelector(".section-heading");if(!h)return;const e=h.querySelector(".eyebrow"),t=h.querySelector("h2"),p=h.querySelector("p");if(e&&eu)e.textContent=tr(eu,ee);if(t)t.textContent=tr(tu,te);if(p)p.textContent=tr(du,de);}
+
+function methodologyHtml(){
+ if(currentLanguage!=="en")return null;
+ return `
+  <div class="eyebrow">Methodology</div><h2>How to read the data</h2>
+  <h3>What does the site show?</h3><p>The site shows the history of air alerts for 23 Ukrainian cities and monthly data on deaths caused by aerial attacks in those cities.</p><p>Kyiv, Kharkiv, Zaporizhzhia and Sevastopol use separate city-level alert series. The other 19 cities use the corresponding administrative district series. This is shown directly in the label, for example, “Lviv (Lviv District)”.</p><p>A district series is not a precise measure of alerts within the city alone: it may include signals that apply to other settlements in the district.</p>
+  <h3>Where does the data come from?</h3><p>For Kyiv, the main alert sources are <a href="https://data.kyivcity.gov.ua/dataset/statystyka-povitrianykh-tryvoh-u-misti-kyievi-dep-municipal/" target="_blank" rel="noopener noreferrer">Kyiv Open Data Portal</a> and <a href="https://kyiv.digital/storage/air-alert/stats.html" target="_blank" rel="noopener noreferrer">Kyiv Digital</a>. For Kharkiv, Zaporizhzhia and district-level series, the historical base is <a href="https://github.com/Vadimkin/ukrainian-air-raid-sirens-dataset" target="_blank" rel="noopener noreferrer">ukrainian-air-raid-sirens-dataset</a>, with newer data supplied by the official <a href="https://api.ukrainealarm.com/api/v3" target="_blank" rel="noopener noreferrer">UkraineAlarm API</a>.</p><p>For Sevastopol, the site uses public city-level alert and all-clear signals posted by the occupation administration’s Telegram channel <a href="https://t.me/s/razvozhaev" target="_blank" rel="noopener noreferrer">@razvozhaev</a>. Naming the source describes data provenance and does not imply recognition of the occupation administration.</p><p>The death series are reconstructed from public reports by official bodies and media. For ongoing monitoring of Kyiv, sources include <a href="https://suspilne.media/kyiv/" target="_blank" rel="noopener noreferrer">Suspilne Kyiv</a>, <a href="https://hromadske.ua/kyyiv" target="_blank" rel="noopener noreferrer">hromadske Kyiv</a> and <a href="https://www.pravda.com.ua/" target="_blank" rel="noopener noreferrer">Ukrainska Pravda</a>.</p>
+  <h3>How are the indicators calculated?</h3><p id="periodMethodology">Calculations use completed calendar days in the Europe/Kyiv time zone. Today is excluded. The 28-day indicators cover exactly the 28 completed days through yesterday.</p><ul class="methodology-metrics"><li><strong>Alerts per day</strong> — alerts that started in the selected period divided by calendar days.</li><li><strong>Hours under alert per day</strong> — total time under alert divided by days. Overlapping intervals are not counted twice. If an alert crosses midnight, its duration is split between the relevant calendar days.</li><li><strong>Average full alert duration</strong> — the average full duration of alerts that started in the selected period. If an alert ends in the next period, its full duration remains attributed to the period in which it started.</li></ul><p>City comparisons use only time periods available in all selected series.</p>
+  <h3>How are deaths counted?</h3><p>For all 23 cities, the site shows a reconstructed monthly series of deaths within the city’s administrative boundaries. This remains a city-level measure even where the alert series is district-level.</p><p>The series includes deaths causally linked to missile, drone and other aerial attacks. Ground combat and artillery shelling are excluded. If a person later dies from injuries sustained in an attack, the death is attributed to the month of that attack.</p><p>Unresolved cases that still require review are excluded from confirmed totals. The current month is incomplete and may be updated. Because the historical series is reconstructed from public reporting, it should not be read as a guaranteed complete registry of all deaths.</p>
+  <h3>What should be kept in mind?</h3><p>Different series begin on different dates. The start date is shown next to the selected city. The first incomplete period is not shown.</p><p>Donetsk and Luhansk are not yet included: they require a separate methodology, and oblast-level data are not substituted for city-level data.</p>
+  <details class="methodology-details"><summary>Series start dates</summary><div class="methodology-detail-grid"><div><strong>City-level data</strong><ul><li>Kyiv — 28.02.2022</li><li>Sevastopol — 25.09.2023</li><li>Kharkiv — 17.02.2025</li><li>Zaporizhzhia — 19.03.2025</li></ul></div><div><strong>District series: date confirmed by the transition to district-level alerts</strong><ul><li>Cherkasy — 10.01.2025</li><li>Zhytomyr — 23.01.2025</li><li>Dnipro — 01.05.2025</li><li>Khmelnytskyi — 07.07.2025</li><li>Poltava — 01.08.2025</li><li>Rivne — 01.08.2025</li><li>Sumy — 06.08.2025</li><li>Vinnytsia — 21.08.2025</li><li>Kropyvnytskyi — 01.09.2025</li><li>Lviv — 01.09.2025</li><li>Chernihiv — 03.09.2025</li><li>Odesa — 04.11.2025</li></ul></div><div><strong>District series: date derived from the appearance of a stable district series</strong><ul><li>Kherson — 30.08.2025</li><li>Mykolaiv — 05.11.2025</li><li>Lutsk — 06.11.2025</li><li>Uzhhorod — 06.11.2025</li><li>Ivano-Frankivsk — 06.11.2025</li><li>Ternopil — 06.11.2025</li><li>Chernivtsi — 06.11.2025</li></ul></div></div></details>
+  <details class="methodology-details"><summary>Technical source notes</summary><p>When continuity between adjacent sources is checked, two records may be treated as the same event if their timestamps differ by no more than 15 seconds. This tolerance is used only to validate the handoff between sources; event times themselves are neither shifted nor rounded.</p><p>Auxiliary sources used to verify source handoffs or close short gaps are not listed in the main description.</p><p>For Sevastopol, only complete “alert → all-clear” pairs are used. Incomplete episodes are not interpolated; a separate time correction is allowed only when there is direct external confirmation.</p></details>
+  <details class="methodology-details"><summary>Test features</summary><p><strong>Alerts with reported explosions.</strong> This is a test-only strict metric for cities with a completed manual audit. The numerator counts alert episodes with a confirmed report specifically of explosions in the city that can be matched to that alert. Trends use a rolling 90-day window, with one chart point every 7 days.</p><p><strong>Time-of-day alert profile.</strong> The day is divided into 96 15-minute intervals. For each interval, the share of actual time under alert is calculated and then normalized to that series’ own peak.</p></details>`;
+}
+function applyStaticLanguage(){
+ document.documentElement.lang=currentLanguage==="en"?"en":"uk";
+ document.title=tr("Статистика повітряних тривог у містах України — графіки та порівняння","Air alerts in Ukrainian cities — charts and comparisons");
+ const md=tr("Статистика повітряних тривог у Києві та обласних центрах України: кількість тривог, години під тривогою, середня тривалість, порівняння міст і дані про загиблих від повітряних атак.","Air-alert statistics for Kyiv and Ukrainian regional centres: alert counts, hours under alert, average duration, city comparisons and deaths from aerial attacks.");
+ document.querySelector('meta[name="description"]')?.setAttribute("content",md);document.querySelector('meta[property="og:locale"]')?.setAttribute("content",currentLanguage==="en"?"en_US":"uk_UA");document.querySelector('meta[property="og:site_name"]')?.setAttribute("content",tr("Повітряні тривоги — міста України","Air alerts — Ukrainian cities"));document.querySelector('meta[property="og:title"]')?.setAttribute("content",tr("Статистика повітряних тривог у містах України","Air-alert statistics in Ukrainian cities"));document.querySelector('meta[property="og:description"]')?.setAttribute("content",md);document.querySelector('meta[name="twitter:title"]')?.setAttribute("content",tr("Статистика повітряних тривог у містах України","Air-alert statistics in Ukrainian cities"));document.querySelector('meta[name="twitter:description"]')?.setAttribute("content",md);
+ setLocalizedText(".header-copy .eyebrow","Відкриті дані · міста України","Open data · Ukrainian cities");setLocalizedText(".header-copy h1","Повітряні тривоги","Air alerts");setLocalizedText(".header-copy .subtitle","Історичні дані про повітряні тривоги в обласних центрах України. Там, де тривога не оголошується окремо для міста, використовуються дані відповідного адміністративного району — це завжди явно позначено.","Historical air-alert data for Ukrainian regional centres. Where alerts are not issued separately for a city, the corresponding administrative district is used and clearly labelled.");
+ setLocalizedAttr("#languageSwitch","aria-label","Мова","Language");$("langUk")?.setAttribute("aria-pressed",currentLanguage==="uk"?"true":"false");$("langEn")?.setAttribute("aria-pressed",currentLanguage==="en"?"true":"false");setLocalizedText("#showTour","Показати тур","Show tour");setLocalizedText("#copyLink","Скопіювати посилання","Copy link");
+ setLocalizedAttr(".controls-panel","aria-label","Вибір міста і періоду","City and period selection");setLocalizedText('label[for="citySelect"]',"Місто","City");setLocalizedText('label[for="cityPeriod"]',"Період графіків","Chart period");setOptionText("cityPeriod","monthly","Місяці","Months");setOptionText("cityPeriod","rolling30","Ковзні 30 днів","Rolling 30 days");setOptionText("cityPeriod","rolling90","Ковзні 90 днів","Rolling 90 days");
+ setKpiLabel("kpiAlerts","Тривог за останні 28 завершених днів","Alerts in the last 28 completed days");setKpiLabel("kpiHours","Годин під тривогою за останні 28 завершених днів","Hours under alert in the last 28 completed days");setKpiLabel("kpiDuration","Середня тривалість тривог, що почалися за останні 28 завершених днів","Average duration of alerts that started in the last 28 completed days");setKpiLabel("kpiMaxDay","Найбільше тривог за день у цьому 28-денному вікні","Most alerts in one day within this 28-day window");setKpiLabel("kpiExplosionsPct","Тривог, під час яких повідомлялось про вибухи","Alerts with reported explosions");
+ setCardCopy("cityIntensityChart","Інтенсивність тривог","Alert intensity","Стовпчики: сумарний час під тривогою в обраному періоді ÷ кількість календарних днів. Лінія: кількість тривог, що почалися в періоді ÷ кількість днів.","Bars: total time under alert in the selected period ÷ calendar days. Line: alerts that started in the period ÷ days.");setCardCopy("cityDurationChart","Середня тривалість однієї тривоги","Average duration of one alert","Середня тривалість усіх тривог, що почалися в обраному періоді. Якщо тривога закінчилася вже після завершення періоду, вся її тривалість відноситься до періоду старту.","Average full duration of alerts that started in the selected period. If an alert ends after the period, its full duration is attributed to the period in which it started.");
+ setSectionHeading("timeOfDaySection","Час доби · тест","Time of day · test","Коли протягом доби тривога найчастіше активна","When alerts are most often active during the day","Доба поділена на 15-хвилинні інтервали. 100% — найчастіший інтервал у вибраному місті/районі та діапазоні; решта значень показані відносно нього.","The day is divided into 15-minute intervals. 100% is the most active interval for the selected city/district and range; all other values are relative to it.");setLocalizedText('label[for="timeOfDayRange"]',"Діапазон","Range");setLocalizedAttr("#timeOfDayRange","aria-label","Діапазон добового профілю","Time-of-day profile range");for(const [v,u,e] of [["7d","7 днів","7 days"],["30d","30 днів","30 days"],["90d","90 днів","90 days"],["year","Рік","Year"],["all","Від початку даних","From start of data"]])setOptionText("timeOfDayRange",v,u,e);setLocalizedText("#timeOfDaySection .time-profile-note","100% — не частка часу під тривогою, а відносний максимум для цього міста/району та діапазону. У підказці показано також фактичну частку часу під тривогою.","100% is not the share of time under alert; it is the relative peak for this city/district and range. The tooltip also shows the actual share of time under alert.");
+ setSectionHeading("rolling7dSection","Ковзні 7 днів","Rolling 7 days","Динаміка за 7-денним вікном","7-day rolling trend","Кожна точка охоплює 7 завершених календарних днів і датована останнім днем вікна; сусідні точки перекриваються на 6 днів. За замовчуванням показано поточний календарний рік.","Each point covers 7 completed calendar days and is dated by the window’s final day; adjacent points overlap by 6 days. The current calendar year is shown by default.");setLocalizedText('label[for="rolling7dYear"]',"Рік","Year");setLocalizedAttr("#rolling7dYear","aria-label","Рік для 7-денного вікна","Year for the 7-day window");setCardCopy("rolling7dIntensityChart","Інтенсивність тривог","Alert intensity","Стовпчики: середній час під тривогою на добу за 7 днів. Лінія: середня кількість тривог на день за ті самі 7 днів.","Bars: average hours under alert per day across 7 days. Line: average alerts per day across the same 7 days.");setCardCopy("rolling7dDurationChart","Середня тривалість однієї тривоги","Average duration of one alert","Середня тривалість тривог, що почалися у відповідному 7-денному вікні.","Average duration of alerts that started within the corresponding 7-day window.");
+ setSectionHeading("shortHorizonSection","Короткий горизонт","Short horizon","Останні 28 завершених днів","Last 28 completed days","Щоденний розріз для обраного міста. Сьогоднішній день не включається.","Daily view for the selected city. Today is excluded.");setCardCopy("daily28HoursChart","Сумарний час під тривогою за день","Total time under alert per day","Скільки годин кожної календарної доби припало на повітряну тривогу. Якщо інтервали перекриваються, час не рахується двічі; тривога через північ розподіляється між відповідними днями.","Hours of each calendar day spent under air alert. Overlapping intervals are not counted twice; an alert crossing midnight is split between the relevant days.");setCardCopy("daily28AlertsDurationChart","Кількість тривог і середня тривалість за день","Alert count and average duration per day","Стовпчики — кількість тривог, що почалися цього дня. Лінія — середня тривалість тривог, що почалися цього дня.","Bars show alerts that started that day. The line shows the average duration of alerts that started that day.");
+ setSectionHeading("casualtySection","","","Загиблі від повітряних атак РФ","Deaths from Russian aerial attacks","Пізні смерті від поранень віднесені до місяця самої атаки. Наземні бої та артилерійські обстріли не включені.","Deaths occurring later from attack-related injuries are attributed to the month of the attack. Ground combat and artillery shelling are excluded.");
+ setSectionHeading("comparisonSection","Порівняння","Comparison","Порівняння обраних міст","Compare selected cities","Для коректності графіки показують лише періоди, які одночасно є в усіх обраних рядах.","Charts use only periods that are available in all selected series.");for(const [id,u,e] of [["compareA","Місто A","City A"],["compareB","Місто B","City B"],["compareC","Місто C (необов’язково)","City C (optional)"],["comparePeriod","Період","Period"]])setLocalizedText(`label[for="${id}"]`,u,e);setOptionText("comparePeriod","monthly","Місяці","Months");
+ setCardCopy("compareAlertsChart","Середня кількість тривог на день","Average alerts per day","Кількість тривог, що почалися в обраному періоді ÷ кількість календарних днів.","Alerts that started in the selected period ÷ calendar days.");setCardCopy("compareHoursChart","Середній час під тривогою на добу","Average time under alert per day","Сумарний час під тривогою в обраному періоді ÷ кількість календарних днів.","Total time under alert in the selected period ÷ calendar days.");setCardCopy("compareDurationChart","Середня тривалість однієї тривоги","Average duration of one alert","Середня тривалість тривог, що почалися в обраному періоді; тривалість відноситься до періоду старту.","Average duration of alerts that started in the selected period; duration is attributed to the period in which the alert started.");setCardCopy("compareTimeOfDayChart","Добовий профіль тривог","Time-of-day alert profile","Порівняння форми добового патерну. Кожне місто/район нормалізовано окремо: його власний найчастіший 15-хвилинний інтервал = 100%.","Comparison of the daily pattern. Each city/district is normalized separately: its own most active 15-minute interval = 100%.");setLocalizedText('label[for="compareTimeOfDayRange"]',"Діапазон","Range");setLocalizedAttr("#compareTimeOfDayRange","aria-label","Діапазон добового профілю для порівняння","Time-of-day comparison range");for(const [v,u,e] of [["7d","7 днів","7 days"],["30d","30 днів","30 days"],["90d","90 днів","90 days"],["year","Рік","Year"],["all","Від початку даних","From start of data"]])setOptionText("compareTimeOfDayRange",v,u,e);setCardCopy("compareExplosionsChart","Частка тривог із повідомленнями про вибухи","Share of alerts with reported explosions","Ковзне 90-денне вікно з кроком відображення 7 днів. Strict-метрика: підтверджене повідомлення саме про вибухи в місті, зіставлене з конкретною тривогою.","Rolling 90-day window, displayed every 7 days. Strict metric: a confirmed report specifically of explosions in the city, matched to a particular alert.");setCardCopy("compareCasualtiesChart","Загиблі від повітряних атак РФ","Deaths from Russian aerial attacks","Підтверджені смерті за місяцем атаки. Наземні бої та артилерійські обстріли не включені.","Confirmed deaths by month of attack. Ground combat and artillery shelling are excluded.");
+ setSectionHeading("allCitiesSection","Огляд","Overview","Усі міста","All cities","Порівняння ключових показників за спільний часовий діапазон.","Comparison of key indicators over a common time range.");setLocalizedText('label[for="allCitiesRange"]',"Діапазон","Range");setLocalizedAttr("#allCitiesRange","aria-label","Діапазон для таблиці всіх міст","Range for the all-cities table");for(const [v,u,e] of [["7d","7 днів","7 days"],["30d","30 днів","30 days"],["90d","90 днів","90 days"],["year","Рік","Year"],["common","Від початку спільних даних","From start of common data"]])setOptionText("allCitiesRange",v,u,e);
+ const meth=$("methodologySection")||document.querySelector(".methodology");if(meth&&currentLanguage==="en")meth.innerHTML=methodologyHtml();
+ const fs=document.querySelectorAll("footer span");if(fs[0])fs[0].innerHTML=tr('Дані та код: <a href="https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana">GitHub</a>','Data and code: <a href="https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana">GitHub</a>');if(fs[1])fs[1].textContent=tr("Зауваження до даних: @olbalakin у Telegram","Data corrections: @olbalakin on Telegram");setLocalizedAttr("#tourClose","aria-label","Закрити тур","Close tour");setLocalizedText("#tourPrev","Назад","Back");setLocalizedText("#tourSkip","Пропустити","Skip");setLocalizedText("#tourNext","Далі","Next");
+}
+function renderGeneratedAt(){if(!state.data)return;const g=state.data.meta?.generated_at||state.data.cities?.kyiv?.meta?.generated_at;$("updatedAt").textContent=g?tr(`Дані згенеровано ${String(g).replace("T"," ").slice(0,19)}`,`Data generated ${String(g).replace("T"," ").slice(0,19)}`):"";}
+function setLanguage(lang,persist=true){const next=lang==="en"?"en":"uk";if(next!==currentLanguage){const p=new URLSearchParams(location.search);p.set("lang",next);location.search=p.toString();return;}if(persist){try{localStorage.setItem(LANGUAGE_STORAGE_KEY,next);}catch{}}}
+function bindLanguageSwitch(){$("langUk")?.addEventListener("click",()=>setLanguage("uk"));$("langEn")?.addEventListener("click",()=>setLanguage("en"));}
 
 function $(id) { return document.getElementById(id); }
 function fmt(v, digits = 1) {
   return v === null || v === undefined || Number.isNaN(Number(v)) ? "—" : Number(v).toFixed(digits);
 }
 function labelFor(key) {
-  const mm = state.data.multicity_meta?.cities?.[key];
-  return mm?.label || state.data.cities?.[key]?.meta?.city_label || key;
+  if(currentLanguage==="en"&&CITY_LABELS_EN[key])return CITY_LABELS_EN[key];
+  const mm=state.data.multicity_meta?.cities?.[key];
+  return mm?.label||state.data.cities?.[key]?.meta?.city_label||key;
 }
 function cityKeys() {
   const keys = [...(state.data.multicity_meta?.production_city_keys || Object.keys(state.data.cities || {}))];
   return keys.sort((a, b) => {
     if (a === "kyiv") return -1;
     if (b === "kyiv") return 1;
-    return labelFor(a).localeCompare(labelFor(b), "uk", { sensitivity: "base" });
+    return labelFor(a).localeCompare(labelFor(b), localeCode(), { sensitivity: "base" });
   });
 }
 function sourceType(key) {
@@ -82,7 +110,8 @@ function coverageStart(key) {
 function proxyRaion(key) {
   return state.data.multicity_meta?.cities?.[key]?.proxy_raion || state.data.cities?.[key]?.meta?.proxy_raion || null;
 }
-function typeText(key) { return sourceType(key) === "raion_proxy" ? "Дані по району" : "Дані по місту"; }
+function typeText(key){return sourceType(key)==="raion_proxy"?tr("Дані по району","District data"):tr("Дані по місту","City data");}
+function districtText(key){const raw=proxyRaion(key);return currentLanguage==="en"?(DISTRICT_LABELS_EN[key]||raw):raw;}
 function rolling7dEnabled() {
   return state.data.multicity_meta?.weekly_mode === "rolling_7d";
 }
@@ -104,7 +133,7 @@ function fillSelect(select, keys, current, allowEmpty = false) {
   if (allowEmpty) {
     const empty = document.createElement("option");
     empty.value = "";
-    empty.textContent = "— не обирати —";
+    empty.textContent = tr("— не обирати —","— none —");
     empty.selected = current === "";
     select.appendChild(empty);
   }
@@ -235,6 +264,7 @@ function validOptionalParam(name, values, fallback) {
 }
 function updateUrl() {
   const params = new URLSearchParams();
+  params.set("lang", currentLanguage);
   params.set("city", $("citySelect").value);
   params.set("period", $("cityPeriod").value);
   params.set("a", $("compareA").value);
@@ -268,10 +298,10 @@ function renderTimeOfDay(key) {
   section.classList.remove("hidden");
 
   const peakText = period.peak_slot
-    ? `Пік: ${period.peak_slot} · ${fmt(period.peak_alert_share_pct, 1)}% фактичного часу під тривогою.`
-    : "У цьому діапазоні немає часу під тривогою.";
+    ? tr(`Пік: ${period.peak_slot} · ${fmt(period.peak_alert_share_pct, 1)}% фактичного часу під тривогою.`,`Peak: ${period.peak_slot} · ${fmt(period.peak_alert_share_pct, 1)}% of actual time under alert.`)
+    : tr("У цьому діапазоні немає часу під тривогою.","No time under alert in this range.");
   $("timeOfDayMeta").textContent =
-    `${period.range_start} — ${period.range_end} · ${period.days} завершених днів. ${peakText}`;
+    tr(`${period.range_start} — ${period.range_end} · ${period.days} завершених днів. ${peakText}`,`${period.range_start} — ${period.range_end} · ${period.days} completed days. ${peakText}`);
 
   if (state.charts.timeOfDayChart) state.charts.timeOfDayChart.destroy();
   const labels = period.slots.map(slot => slot.start);
@@ -284,7 +314,7 @@ function renderTimeOfDay(key) {
     data: {
       labels,
       datasets: [{
-        label: "Відносна інтенсивність",
+        label: tr("Відносна інтенсивність","Relative intensity"),
         data: values,
         alertShares: shares,
         intervalLabels,
@@ -315,7 +345,7 @@ function renderTimeOfDay(key) {
             },
             label(context) {
               const i = context.dataIndex;
-              return `Відносна інтенсивність: ${fmt(values[i], 0)}% · фактично під тривогою ${fmt(shares[i], 1)}% часу`;
+              return tr(`Відносна інтенсивність: ${fmt(values[i],0)}% · фактично під тривогою ${fmt(shares[i],1)}% часу`,`Relative intensity: ${fmt(values[i],0)}% · actually under alert ${fmt(shares[i],1)}% of the time`);
             }
           }
         }
@@ -324,14 +354,14 @@ function renderTimeOfDay(key) {
         x: {
           ticks: { color: TEXT, autoSkip: true, maxTicksLimit: 9, maxRotation: 0 },
           grid: { color: GRID },
-          title: { display: true, text: "Час доби", color: TEXT }
+          title: { display: true, text: tr("Час доби","Time of day"), color: TEXT }
         },
         y: {
           min: 0,
           max: 100,
           ticks: { color: TEXT, callback: value => `${value}%` },
           grid: { color: GRID },
-          title: { display: true, text: "Відносна інтенсивність", color: TEXT }
+          title: { display: true, text: tr("Відносна інтенсивність","Relative intensity"), color: TEXT }
         }
       }
     }
@@ -356,7 +386,7 @@ function renderTimeOfDayComparison(keys) {
   }
 
   if (!usable.length) {
-    if (note) note.textContent = "Немає добового профілю для обраних міст.";
+    if(note)note.textContent=tr("Немає добового профілю для обраних міст.","No time-of-day profile is available for the selected cities.");
     return;
   }
 
@@ -381,7 +411,7 @@ function renderTimeOfDayComparison(keys) {
       .map(item => `${labelFor(item.key)}: ${item.period.range_start} — ${item.period.range_end}`)
       .join(" · ");
     note.textContent =
-      `Кожен ряд нормалізовано окремо: власний найчастіший 15-хвилинний слот = 100%. ${ranges}`;
+      tr(`Кожен ряд нормалізовано окремо: власний найчастіший 15-хвилинний слот = 100%. ${ranges}`,`Each series is normalized separately: its own most active 15-minute interval = 100%. ${ranges}`);
   }
 
   state.charts.compareTimeOfDayChart = new Chart(canvas, {
@@ -404,7 +434,7 @@ function renderTimeOfDayComparison(keys) {
             },
             label(context) {
               const share = context.dataset.alertShares?.[context.dataIndex];
-              return `${context.dataset.label}: ${fmt(context.parsed.y, 0)}% від власного піку · фактично ${fmt(share, 1)}% часу`;
+              return tr(`${context.dataset.label}: ${fmt(context.parsed.y,0)}% від власного піку · фактично ${fmt(share,1)}% часу`,`${context.dataset.label}: ${fmt(context.parsed.y,0)}% of its own peak · actually ${fmt(share,1)}% of the time`);
             }
           }
         }
@@ -413,14 +443,14 @@ function renderTimeOfDayComparison(keys) {
         x: {
           ticks: { color: TEXT, autoSkip: true, maxTicksLimit: 9, maxRotation: 0 },
           grid: { color: GRID },
-          title: { display: true, text: "Час доби", color: TEXT }
+          title: { display: true, text: tr("Час доби","Time of day"), color: TEXT }
         },
         y: {
           min: 0,
           max: 100,
           ticks: { color: TEXT, callback: value => `${value}%` },
           grid: { color: GRID },
-          title: { display: true, text: "Відносна інтенсивність", color: TEXT }
+          title: { display: true, text: tr("Відносна інтенсивність","Relative intensity"), color: TEXT }
         }
       }
     }
@@ -435,20 +465,21 @@ function renderFreshness() {
     return;
   }
   const last = fresh.latest_proxy_event_end || fresh.last_successful_fetch_at;
-  banner.textContent = `⚠ Дані біля правого краю можуть бути неповними. Останнє підтверджене оновлення: ${last ? String(last).slice(0, 10) : "невідомо"}. Нулі після цієї точки не слід трактувати як гарантовану відсутність тривог.`;
+  banner.textContent=tr(`⚠ Дані біля правого краю можуть бути неповними. Останнє підтверджене оновлення: ${last?String(last).slice(0,10):"невідомо"}. Нулі після цієї точки не слід трактувати як гарантовану відсутність тривог.`,`⚠ Data near the right edge may be incomplete. Last confirmed update: ${last?String(last).slice(0,10):"unknown"}. Zeros after that point should not be read as guaranteed absence of alerts.`);
   banner.classList.remove("hidden");
 }
 
 function renderDatasetSummary() {
+  applyStaticLanguage();
   const keys = cityKeys();
   const exact = keys.filter(k => sourceType(k) === "exact_city").length;
   const proxy = keys.filter(k => sourceType(k) === "raion_proxy").length;
-  $("datasetSummary").innerHTML = [
-    `${keys.length} ряди`,
-    `${exact} ряди з даними по місту`,
-    `${proxy} рядів за даними районів`,
-    "Донецьк і Луганськ поки не включені"
-  ].map(x => `<span class="summary-pill">${x}</span>`).join("");
+  $("datasetSummary").innerHTML=[
+    tr(`${keys.length} ряди`,`${keys.length} series`),
+    tr(`${exact} ряди з даними по місту`,`${exact} city-level series`),
+    tr(`${proxy} рядів за даними районів`,`${proxy} district-level series`),
+    tr("Донецьк і Луганськ поки не включені","Donetsk and Luhansk are not yet included")
+  ].map(x=>`<span class="summary-pill">${x}</span>`).join("");
 }
 
 function renderCity() {
@@ -461,17 +492,17 @@ function renderCity() {
   const type = sourceType(key);
   const coverage = coverageStart(key);
   const badgeClass = type === "raion_proxy" ? "proxy" : "exact";
-  const raion = proxyRaion(key);
+  const raion = districtText(key);
   $("cityMeta").innerHTML = [
     `<span class="badge ${badgeClass}">${typeText(key)}</span>`,
-    coverage ? `<span class="badge">Покриття з ${coverage}</span>` : "",
+    coverage ? `<span class="badge">${tr("Покриття з","Coverage from")} ${coverage}</span>` : "",
     raion ? `<span class="badge">${raion}</span>` : ""
   ].join("");
 
   const kpi = city.kpis?.[0] || {};
   $("kpiAlerts").textContent = fmt(kpi.alerts_28d, 0);
-  $("kpiHours").textContent = `${fmt(kpi.alert_hours_28d, 1)} год`;
-  $("kpiDuration").textContent = `${fmt(kpi.avg_alert_duration_min_28d, 1)} хв`;
+  $("kpiHours").textContent = `${fmt(kpi.alert_hours_28d, 1)} ${tr("год","hr")}`;
+  $("kpiDuration").textContent = `${fmt(kpi.avg_alert_duration_min_28d, 1)} ${tr("хв","min")}`;
   $("kpiMaxDay").textContent = fmt(kpi.max_alerts_day, 0);
   $("kpiMaxDayDate").textContent = kpi.max_alerts_day_date || "";
 
@@ -484,9 +515,9 @@ function renderCity() {
       : Number(explosion.strict_n);
     explosionCard.classList.remove("hidden");
     $("kpiExplosionsPct").textContent = `≈${fmt(explosionEstimateValue.mid, 1)}%`;
-    $("kpiExplosionsRange").textContent = `Оцінюваний діапазон: ${fmt(explosionEstimateValue.low, 1)}–${fmt(explosionEstimateValue.high, 1)}%`;
-    $("kpiExplosionsCount").textContent = `Консервативно ${explosion.strict_n}; розширено ${sensitivityN} із ${explosion.total_alerts} тривог · весь доступний період`;
-    explosionCard.title = "Орієнтовне значення — середина між консервативною та розширеною оцінкою. Діапазон відображає класифікаційну невизначеність і не є статистичним довірчим інтервалом.";
+    $("kpiExplosionsRange").textContent=tr(`Оцінюваний діапазон: ${fmt(explosionEstimateValue.low,1)}–${fmt(explosionEstimateValue.high,1)}%`,`Estimated range: ${fmt(explosionEstimateValue.low,1)}–${fmt(explosionEstimateValue.high,1)}%`);
+    $("kpiExplosionsCount").textContent=tr(`Консервативно ${explosion.strict_n}; розширено ${sensitivityN} із ${explosion.total_alerts} тривог · весь доступний період`,`Conservative ${explosion.strict_n}; expanded ${sensitivityN} of ${explosion.total_alerts} alerts · full available period`);
+    explosionCard.title=tr("Орієнтовне значення — середина між консервативною та розширеною оцінкою. Діапазон відображає класифікаційну невизначеність і не є статистичним довірчим інтервалом.","The indicative value is the midpoint between the conservative and expanded estimates. The range reflects classification uncertainty and is not a statistical confidence interval.");
   } else {
     explosionCard.classList.add("hidden");
     explosionCard.removeAttribute("title");
@@ -503,7 +534,7 @@ function renderCity() {
       datasets: [
         {
           type: "bar",
-          label: "Годин під тривогою / добу",
+          label: tr("Годин під тривогою / добу","Hours under alert / day"),
           data: rows.map(r => r.avg_daily_alert_hours),
           yAxisID: "yHours",
           backgroundColor: rows.map(r => isPartialPeriod(r) ? COLORS[0] + "22" : COLORS[0] + "77"),
@@ -512,7 +543,7 @@ function renderCity() {
         },
         {
           type: "line",
-          label: "Тривог / день",
+          label: tr("Тривог / день","Alerts / day"),
           data: rows.map(r => r.alerts_per_day),
           yAxisID: "yAlerts",
           borderColor: COLORS[1],
@@ -541,7 +572,7 @@ function renderCity() {
           callbacks: {
             footer(items) {
               const i = items?.[0]?.dataIndex ?? -1;
-              return isPartialPeriod(rows[i]) ? "Поточний неповний період" : "";
+              return isPartialPeriod(rows[i])?tr("Поточний неповний період","Current incomplete period"):"";
             }
           }
         },
@@ -554,14 +585,14 @@ function renderCity() {
           beginAtZero: true,
           ticks: { color: TEXT },
           grid: { color: GRID },
-          title: { display: true, text: "Годин / добу", color: TEXT }
+          title: { display: true, text: tr("Годин / добу","Hours / day"), color: TEXT }
         },
         yAlerts: {
           position: "right",
           beginAtZero: true,
           ticks: { color: TEXT },
           grid: { drawOnChartArea: false },
-          title: { display: true, text: "Тривог / день", color: TEXT }
+          title: { display: true, text: tr("Тривог / день","Alerts / day"), color: TEXT }
         }
       }
     }
@@ -622,7 +653,7 @@ function renderRolling7d(key) {
       datasets: [
         {
           type: "bar",
-          label: "Годин під тривогою / добу",
+          label: tr("Годин під тривогою / добу","Hours under alert / day"),
           data: rows.map(r => r.avg_daily_alert_hours),
           yAxisID: "yHours",
           backgroundColor: rows.map(r => isPartialPeriod(r) ? COLORS[0] + "22" : COLORS[0] + "77"),
@@ -631,7 +662,7 @@ function renderRolling7d(key) {
         },
         {
           type: "line",
-          label: "Тривог / день",
+          label: tr("Тривог / день","Alerts / day"),
           data: rows.map(r => r.alerts_per_day),
           yAxisID: "yAlerts",
           borderColor: COLORS[1],
@@ -660,7 +691,7 @@ function renderRolling7d(key) {
           callbacks: {
             footer(items) {
               const i = items?.[0]?.dataIndex ?? -1;
-              return isPartialPeriod(rows[i]) ? "Поточний неповний період" : "";
+              return isPartialPeriod(rows[i])?tr("Поточний неповний період","Current incomplete period"):"";
             }
           }
         },
@@ -673,14 +704,14 @@ function renderRolling7d(key) {
           beginAtZero: true,
           ticks: { color: TEXT },
           grid: { color: GRID },
-          title: { display: true, text: "Годин / добу", color: TEXT }
+          title: { display: true, text: tr("Годин / добу","Hours / day"), color: TEXT }
         },
         yAlerts: {
           position: "right",
           beginAtZero: true,
           ticks: { color: TEXT },
           grid: { drawOnChartArea: false },
-          title: { display: true, text: "Тривог / день", color: TEXT }
+          title: { display: true, text: tr("Тривог / день","Alerts / day"), color: TEXT }
         }
       }
     }
@@ -700,15 +731,15 @@ function renderShortHorizon(key) {
   const range = $("daily28Range");
   if (range) {
     range.textContent = labels.length
-      ? `Щоденний розріз для ${labelFor(key)}: ${labels[0]} — ${labels[labels.length - 1]}. Сьогоднішній день не включається.`
-      : `Для ${labelFor(key)} немає доступного 28-денного ряду.`;
+      ? tr(`Щоденний розріз для ${labelFor(key)}: ${labels[0]} — ${labels[labels.length-1]}. Сьогоднішній день не включається.`,`Daily view for ${labelFor(key)}: ${labels[0]} — ${labels[labels.length-1]}. Today is excluded.`)
+      : tr(`Для ${labelFor(key)} немає доступного 28-денного ряду.`,`No 28-day series is available for ${labelFor(key)}.`);
   }
 
   setChart(
     "daily28HoursChart",
     labels,
     [{
-      label: "Годин під тривогою",
+      label: tr("Годин під тривогою","Hours under alert"),
       data: rows.map(r => r.total_alert_duration_hours),
       backgroundColor: COLORS[0] + "88",
       borderColor: COLORS[0],
@@ -743,7 +774,7 @@ function renderShortHorizon(key) {
   const alertBarDatasets = explosion ? [
     {
       type: "bar",
-      label: "Інші тривоги",
+      label: tr("Інші тривоги","Other alerts"),
       data: regularAlerts,
       yAxisID: "yAlerts",
       stack: "alerts",
@@ -753,7 +784,7 @@ function renderShortHorizon(key) {
     },
     {
       type: "bar",
-      label: "З повідомленням про вибухи",
+      label: tr("З повідомленням про вибухи","With reported explosions"),
       data: explosionAlerts,
       yAxisID: "yAlerts",
       stack: "alerts",
@@ -763,7 +794,7 @@ function renderShortHorizon(key) {
     }
   ] : [{
     type: "bar",
-    label: "Тривог, що почалися",
+    label: tr("Тривог, що почалися","Alerts started"),
     data: rows.map(r => r.alerts_started),
     yAxisID: "yAlerts",
     backgroundColor: COLORS[1] + "77",
@@ -779,7 +810,7 @@ function renderShortHorizon(key) {
         ...alertBarDatasets,
         {
           type: "line",
-          label: "Середня тривалість, хв",
+          label: tr("Середня тривалість, хв","Average duration, min"),
           data: rows.map(r => r.avg_alert_duration_minutes),
           yAxisID: "yDuration",
           borderColor: COLORS[2],
@@ -814,7 +845,7 @@ function renderShortHorizon(key) {
           stacked: true,
           ticks: { color: TEXT, precision: 0 },
           grid: { color: GRID },
-          title: { display: true, text: "Кількість тривог", color: TEXT },
+          title: { display: true, text: tr("Кількість тривог","Number of alerts"), color: TEXT },
           afterFit: scale => { scale.width = 62; }
         },
         yDuration: {
@@ -822,7 +853,7 @@ function renderShortHorizon(key) {
           beginAtZero: true,
           ticks: { color: TEXT },
           grid: { drawOnChartArea: false },
-          title: { display: true, text: "Середня тривалість, хв", color: TEXT },
+          title: { display: true, text: tr("Середня тривалість, хв","Average duration, min"), color: TEXT },
           afterFit: scale => { scale.width = 70; }
         }
       }
@@ -847,15 +878,15 @@ function renderCasualties(key) {
   const meta = series?.meta || {};
   const total = rows.reduce((sum, r) => sum + (Number(r.deaths) || 0), 0);
   const unresolved = Number(meta.unresolved_review_cases || 0);
-  $("casualtySourceNote").textContent = unresolved
-    ? `Підтверджений ряд: ${total} смертей. ${unresolved} невирішених review-кейсів не включено. Реконструкція за публічно доступними повідомленнями офіційних органів і медіа.`
-    : `Підтверджений ряд: ${total} смертей. Реконструкція за публічно доступними повідомленнями офіційних органів і медіа.`;
+  $("casualtySourceNote").textContent=unresolved
+    ?tr(`Підтверджений ряд: ${total} загиблих. Невирішених випадків, що потребують перевірки: ${unresolved}; їх не включено. Реконструкція за публічно доступними повідомленнями офіційних органів і медіа.`,`Confirmed series: ${total} deaths. Unresolved cases requiring review: ${unresolved}; they are excluded. Reconstructed from publicly available reports by official bodies and media.`)
+    :tr(`Підтверджений ряд: ${total} загиблих. Реконструкція за публічно доступними повідомленнями офіційних органів і медіа.`,`Confirmed series: ${total} deaths. Reconstructed from publicly available reports by official bodies and media.`);
   const labels = rows.map(r => r.month || String(r.time || "").slice(0, 7));
   setChart(
     "casualtyChart",
     labels,
-    [{ label: "Загиблих", data: rows.map(r => r.deaths), backgroundColor: "#62a0ea99", borderColor: "#62a0ea", borderWidth: 1 }],
-    "Кількість загиблих",
+    [{ label: tr("Загиблих","Deaths"), data: rows.map(r => r.deaths), backgroundColor: "#62a0ea99", borderColor: "#62a0ea", borderWidth: 1 }],
+    tr("Кількість загиблих","Number of deaths"),
     "bar",
     { plugins: { legend: { display: false }, tooltip: { mode: "index", intersect: false } } }
   );
@@ -949,16 +980,16 @@ function renderExplosionComparison(keys) {
           beginAtZero: true,
           ticks: { color: TEXT, callback: value => `${value}%` },
           grid: { color: GRID },
-          title: { display: true, text: "% тривог із повідомленнями про вибухи", color: TEXT }
+          title: { display: true, text: tr("% тривог із повідомленнями про вибухи","% of alerts with reported explosions"), color: TEXT }
         }
       }
     }
   );
 
-  const rangeNote = "Лінії показують консервативну strict-оцінку; агрегований KPI для міста вище подається як орієнтовне midpoint-значення з діапазоном strict–sensitivity. Це класифікаційна невизначеність, не довірчий інтервал.";
-  note.textContent = missingKeys.length
-    ? `Ковзні 90 днів, strict; на графіку показано одну точку кожні 7 днів, і кожна точка = n/N за попередні 90 завершених днів. Поки немає завершеного explosion-ряду: ${missingKeys.map(labelFor).join(", ")}. ${rangeNote}`
-    : `Ковзні 90 днів, strict; на графіку показано одну точку кожні 7 днів, і кожна точка = n/N за попередні 90 завершених днів. Перемикач «Період» вище на цей графік не впливає. ${rangeNote}`;
+  const rangeNote=tr("Лінії показують консервативну strict-оцінку; агрегований KPI для міста вище подається як орієнтовне midpoint-значення з діапазоном strict–sensitivity. Це класифікаційна невизначеність, не довірчий інтервал.","Lines show the conservative strict estimate; the city KPI above is an indicative midpoint with a strict–sensitivity range. This is classification uncertainty, not a confidence interval.");
+  note.textContent=missingKeys.length
+    ?tr(`Ковзні 90 днів, strict; на графіку показано одну точку кожні 7 днів, і кожна точка = n/N за попередні 90 завершених днів. Поки немає завершеного explosion-ряду: ${missingKeys.map(labelFor).join(", ")}. ${rangeNote}`,`Rolling 90 days, strict; one point every 7 days, each equal to n/N over the previous 90 completed days. No completed explosion series yet for: ${missingKeys.map(labelFor).join(", ")}. ${rangeNote}`)
+    :tr(`Ковзні 90 днів, strict; на графіку показано одну точку кожні 7 днів, і кожна точка = n/N за попередні 90 завершених днів. Перемикач «Період» вище на цей графік не впливає. ${rangeNote}`,`Rolling 90 days, strict; one point every 7 days, each equal to n/N over the previous 90 completed days. The Period control above does not affect this chart. ${rangeNote}`);
 }
 
 function renderComparison() {
@@ -966,11 +997,9 @@ function renderComparison() {
   const period = $("comparePeriod").value;
   const shared = sharedRows(keys, period);
   const labels = shared.map(x => x.time);
-  let countLabel = "міс.";
-  if (period === "weekly") countLabel = rolling7dEnabled() ? "7-денних вікон" : "тиж.";
-  const note = shared.length
-    ? `Спільний ряд для ${keys.length} міст: ${labels[0]} — ${labels[labels.length - 1]} (${shared.length} ${countLabel}).`
-    : "Немає спільних періодів для цієї комбінації.";
+  let countLabel=tr("міс.","months");
+  if(period==="weekly")countLabel=rolling7dEnabled()?tr("7-денних вікон","7-day windows"):tr("тиж.","weeks");
+  const note=shared.length?tr(`Спільний ряд для ${keys.length} міст: ${labels[0]} — ${labels[labels.length-1]} (${shared.length} ${countLabel}).`,`Common series for ${keys.length} cities: ${labels[0]} — ${labels[labels.length-1]} (${shared.length} ${countLabel}).`):tr("Немає спільних періодів для цієї комбінації.","No common periods are available for this combination.");
   $("comparisonNote").textContent = note;
 
   const metricChart = (id, metric, yTitle) => {
@@ -984,9 +1013,9 @@ function renderComparison() {
     setChart(id, labels, datasets, yTitle);
   };
 
-  metricChart("compareAlertsChart", "alerts_per_day", "Тривог/день");
-  metricChart("compareHoursChart", "avg_daily_alert_hours", "Годин/добу");
-  metricChart("compareDurationChart", "avg_alert_duration_min", "Хвилин");
+  metricChart("compareAlertsChart","alerts_per_day",tr("Тривог/день","Alerts/day"));
+  metricChart("compareHoursChart","avg_daily_alert_hours",tr("Годин/добу","Hours/day"));
+  metricChart("compareDurationChart","avg_alert_duration_min",tr("Хвилин","Minutes"));
   renderTimeOfDayComparison(keys);
   renderExplosionComparison(keys);
 
@@ -1025,13 +1054,11 @@ function renderComparison() {
       "compareCasualtiesChart",
       casualtyLabels,
       casualtyDatasets,
-      "Кількість загиблих",
+      tr("Кількість загиблих","Number of deaths"),
       "bar",
       { plugins: { legend: { labels: { color: TEXT, boxWidth: 14, usePointStyle: true } }, tooltip: { mode: "index", intersect: false } } }
     );
-    casualtyNote.textContent = missingCasualtyKeys.length
-      ? `Помісячний confirmed-ряд. Немає готового casualty-ряду: ${missingCasualtyKeys.map(labelFor).join(", ")}.`
-      : "Помісячний confirmed-ряд для всіх обраних міст. Перемикач «Період» вище впливає лише на графіки тривог.";
+    casualtyNote.textContent=missingCasualtyKeys.length?tr(`Помісячний підтверджений ряд. Немає готового ряду загиблих: ${missingCasualtyKeys.map(labelFor).join(", ")}.`,`Monthly confirmed series. No completed death series for: ${missingCasualtyKeys.map(labelFor).join(", ")}.`):tr("Помісячний підтверджений ряд для всіх обраних міст. Перемикач «Період» вище впливає лише на графіки тривог.","Monthly confirmed series for all selected cities. The Period control above affects only the alert charts.");
   }
 
   updateUrl();
@@ -1048,17 +1075,17 @@ function compareTableRows(a, b) {
   const aMissing = isMissingSortValue(av);
   const bMissing = isMissingSortValue(bv);
 
-  if (aMissing && bMissing) return a.label.localeCompare(b.label, "uk");
+  if (aMissing && bMissing) return a.label.localeCompare(b.label,localeCode());
   if (aMissing) return 1;
   if (bMissing) return -1;
 
   let cmp;
   if (key === "label" || key === "coverage") {
-    cmp = String(av).localeCompare(String(bv), "uk", { numeric: true, sensitivity: "base" });
+    cmp=String(av).localeCompare(String(bv),localeCode(),{numeric:true,sensitivity:"base"});
   } else {
     cmp = Number(av) - Number(bv);
   }
-  if (cmp === 0) cmp = a.label.localeCompare(b.label, "uk");
+  if (cmp === 0) cmp = a.label.localeCompare(b.label,localeCode());
   return direction === "asc" ? cmp : -cmp;
 }
 
@@ -1069,14 +1096,13 @@ function updateTableSortHeaders() {
     if (!th) return;
     const active = state.tableSort.key === column.key;
     const arrow = active ? (state.tableSort.direction === "asc" ? " ↑" : " ↓") : " ↕";
-    th.textContent = column.label + arrow;
+    const columnLabel=tableColumnLabel(column);
+    th.textContent=columnLabel+arrow;
     th.dataset.sortKey = column.key;
     th.setAttribute("aria-sort", active ? (state.tableSort.direction === "asc" ? "ascending" : "descending") : "none");
     th.setAttribute("role", "button");
     th.tabIndex = 0;
-    th.title = active
-      ? `Сортування: ${state.tableSort.direction === "asc" ? "за зростанням" : "за спаданням"}. Натисніть, щоб змінити напрямок.`
-      : `Сортувати за колонкою «${column.label}»`;
+    th.title=active?tr(`Сортування: ${state.tableSort.direction==="asc"?"за зростанням":"за спаданням"}. Натисніть, щоб змінити напрямок.`,`Sorted ${state.tableSort.direction==="asc"?"ascending":"descending"}. Click to change direction.`):tr(`Сортувати за колонкою «${columnLabel}»`,`Sort by “${columnLabel}”`);
     th.style.cursor = "pointer";
     th.style.userSelect = "none";
   });
@@ -1112,13 +1138,7 @@ function renderAllCitiesTable() {
   const range = TABLE_RANGES.includes($("allCitiesRange")?.value)
     ? $("allCitiesRange").value
     : "30d";
-  const periodLabels = {
-    "7d": "7 днів",
-    "30d": "30 днів",
-    "90d": "90 днів",
-    "year": "Рік",
-    "common": "Від початку спільних даних"
-  };
+  const periodLabels={"7d":tr("7 днів","7 days"),"30d":tr("30 днів","30 days"),"90d":tr("90 днів","90 days"),"year":tr("Рік","Year"),"common":tr("Від початку спільних даних","From start of common data")};
   const root = state.data.all_cities_table_test;
   const cities = root?.cities || {};
 
@@ -1143,7 +1163,7 @@ function renderAllCitiesTable() {
       <td><button class="table-city-link" data-city="${r.key}" type="button">${r.label}</button></td>
       <td>${fmt(r.alerts, 0)}</td>
       <td>${fmt(r.hours, 1)}</td>
-      <td>${fmt(r.duration, 1)} хв</td>
+      <td>${fmt(r.duration,1)} ${tr("хв","min")}</td>
       <td>${r.coverage || "—"}</td>
     </tr>`).join("");
 
@@ -1151,8 +1171,7 @@ function renderAllCitiesTable() {
   if (note) {
     const sample = rows.find(r => r.rangeStart && r.rangeEnd);
     const dates = sample ? `${sample.rangeStart} — ${sample.rangeEnd}` : "—";
-    note.textContent =
-      `${periodLabels[range]} · ${dates}. Усі 23 ряди рахуються на одному спільному часовому вікні.`;
+    note.textContent=tr(`${periodLabels[range]} · ${dates}. Усі 23 ряди рахуються на одному спільному часовому вікні.`,`${periodLabels[range]} · ${dates}. All 23 series use the same common time window.`);
   }
 
   document.querySelectorAll(".table-city-link").forEach(btn => btn.addEventListener("click", () => {
@@ -1216,11 +1235,11 @@ function showTourStep(index) {
   activeTourTarget = target;
   activeTourTarget.classList.add("tour-target");
 
-  $("tourTitle").textContent = step.title;
-  $("tourText").textContent = step.text;
+  $("tourTitle").textContent=tr(step.titleUk,step.titleEn);
+  $("tourText").textContent=tr(step.textUk,step.textEn);
   $("tourProgress").textContent = String(tourStepIndex + 1) + " / " + String(TOUR_STEPS.length);
   $("tourPrev").disabled = tourStepIndex === 0;
-  $("tourNext").textContent = tourStepIndex === TOUR_STEPS.length - 1 ? "Готово" : "Далі";
+  $("tourNext").textContent=tourStepIndex===TOUR_STEPS.length-1?tr("Готово","Done"):tr("Далі","Next");
 
   root.classList.remove("hidden");
   root.setAttribute("aria-hidden", "false");
@@ -1275,23 +1294,11 @@ function maybeStartIntroTour() {
   });
 }
 
-function renderMethodology() {
-  const rolling = rolling7dEnabled();
-  const cityWeeklyOption = $("cityWeeklyOption");
-  const compareWeeklyOption = $("compareWeeklyOption");
-  if (cityWeeklyOption) cityWeeklyOption.textContent = rolling ? "Ковзні 7 днів" : "Тижні";
-  if (compareWeeklyOption) compareWeeklyOption.textContent = rolling ? "Ковзні 7 днів" : "Тижні";
-
-  const periodMethodology = $("periodMethodology");
-  if (periodMethodology) {
-    periodMethodology.innerHTML = rolling
-      ? "<strong>Які дні потрапляють у розрахунки.</strong> Усі показники рахуються лише по завершених календарних днях. Сьогоднішній день не враховується. Картки вгорі і блок «Останні 28 завершених днів» охоплюють рівно останні 28 завершених днів — до вчора включно; у короткому горизонті кожен день показаний окремо. Завершені періоди показуються суцільно. Поточний неповний календарний місяць додається окремо до останнього завершеного дня і позначається пунктиром. Для «Ковзних 7/30/90 днів» регулярні точки мають тижневий крок; якщо після останньої регулярної точки вже є нові завершені дні, додається поточний зріз до останнього завершеного дня і він також позначається пунктиром. Перше вікно, яке могло б включати неповний стартовий день покриття, не показується."
-      : "<strong>Які дні потрапляють у розрахунки.</strong> Усі показники рахуються лише по завершених календарних днях. Сьогоднішній день не враховується. Картки вгорі і блок «Останні 28 завершених днів» охоплюють рівно останні 28 завершених днів — до вчора включно; у короткому горизонті кожен день показаний окремо. На місячному графіку показуються лише повні календарні місяці, а на тижневому — лише повні тижні з понеділка до неділі. Якщо дані для міста починаються посеред місяця або тижня, цей перший неповний період не показується.";
-  }
-
-  const tolerance = state.data.multicity_meta?.proxy_cross_source_match_tolerance_seconds || 15;
-  const deferred = Object.keys(state.data.multicity_meta?.deferred || {});
-  $("methodologyDynamic").textContent = `Cross-source continuity перевіряється по конкретних подіях; технічний допуск збігу timestamp — ${tolerance} с. ${deferred.length ? `Не включені: ${deferred.join(", ")}.` : ""}`;
+function renderMethodology(){
+ const rolling=rolling7dEnabled(),cw=$("cityWeeklyOption"),pw=$("compareWeeklyOption");
+ if(cw)cw.textContent=rolling?tr("Ковзні 7 днів","Rolling 7 days"):tr("Тижні","Weeks");
+ if(pw)pw.textContent=rolling?tr("Ковзні 7 днів","Rolling 7 days"):tr("Тижні","Weeks");
+ const p=$("periodMethodology");if(p)p.textContent=rolling?tr("У розрахунках використовуються лише завершені календарні дні за часовою зоною Europe/Kyiv. Сьогоднішній день не враховується. Показники за останні 28 днів охоплюють рівно 28 завершених днів до вчора включно. Ковзні 7-, 30- і 90-денні показники будуються лише тоді, коли для всього вікна вже є дані. Поточний неповний зріз, якщо він показаний, позначається пунктиром.","Calculations use completed calendar days in the Europe/Kyiv time zone. Today is excluded. The 28-day indicators cover exactly the 28 completed days through yesterday. Rolling 7-, 30- and 90-day indicators are calculated only when data are available for the full window. A current incomplete period, where shown, is marked with a dashed segment."):tr("У розрахунках використовуються лише завершені календарні дні за часовою зоною Europe/Kyiv. Сьогоднішній день не враховується. Показники за останні 28 днів охоплюють рівно 28 завершених днів до вчора включно. На місячних і тижневих графіках перший неповний період не показується.","Calculations use completed calendar days in the Europe/Kyiv time zone. Today is excluded. The 28-day indicators cover exactly the 28 completed days through yesterday. On monthly and weekly charts, the first incomplete period is not shown.");
 }
 
 function bind() {
@@ -1312,13 +1319,14 @@ function bind() {
   for (const id of ["compareA", "compareB", "compareC", "comparePeriod", "compareTimeOfDayRange"]) $(id).addEventListener("change", renderComparison);
   setupTableSorting();
   bindIntroTour();
+  bindLanguageSwitch();
   $("copyLink").addEventListener("click", async () => {
     try {
       await navigator.clipboard.writeText(location.href);
-      $("copyLink").textContent = "Скопійовано";
-      setTimeout(() => { $("copyLink").textContent = "Скопіювати посилання"; }, 1200);
-    } catch {
-      $("copyLink").textContent = "Не вдалося";
+      $("copyLink").textContent=tr("Скопійовано","Copied");
+      setTimeout(()=>{$("copyLink").textContent=tr("Скопіювати посилання","Copy link");},1200);
+    }catch{
+      $("copyLink").textContent=tr("Не вдалося","Failed");
     }
   });
 }
@@ -1365,8 +1373,7 @@ async function init() {
   $("compareTimeOfDayRange").value = compareTimeOfDayDefault;
   $("allCitiesRange").value = allCitiesRangeDefault;
 
-  const generated = state.data.meta?.generated_at || state.data.cities?.kyiv?.meta?.generated_at;
-  $("updatedAt").textContent = generated ? `Дані згенеровано ${String(generated).replace("T", " ").slice(0, 19)}` : "";
+  renderGeneratedAt();
 
   renderDatasetSummary();
   renderFreshness();
@@ -1378,8 +1385,10 @@ async function init() {
   maybeStartIntroTour();
 }
 
-init().catch(err => {
+applyStaticLanguage();
+
+init().catch(err=>{
   console.error(err);
-  $("freshnessBanner").textContent = `Не вдалося завантажити сайт: ${err.message}`;
+  $("freshnessBanner").textContent=tr(`Не вдалося завантажити сайт: ${err.message}`,`Failed to load the site: ${err.message}`);
   $("freshnessBanner").classList.remove("hidden");
 });
