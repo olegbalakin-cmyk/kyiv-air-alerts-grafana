@@ -36,3 +36,5 @@ def test_poltava_reaudit_review_rows_are_noncounted_and_unbound():
     }
     assert all(row["decision"] == "REVIEW_NONCOUNTED" for row in reviews)
     assert all(row["canonical_episode_id"] is None for row in reviews)
+
+# Temporary proof trigger commit; retained test semantics unchanged.
