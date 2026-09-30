@@ -23,7 +23,6 @@ jobs:
     env:
       CHILD_BRANCH_ID: br-icy-forest-b5mfyezq
       CHILD_DB_HOST: ep-shy-truth-b5ngaye8-pooler.c-7.us-east-2.aws.neon.tech
-      PROOF_RESULT_PATH: ${{ runner.temp }}/differentiated_alert_postgres_child_persistence_runtime.json
 
     steps:
       - name: Check out isolated proof branch
@@ -67,6 +66,8 @@ jobs:
         run: python -m unittest tests/test_differentiated_alert_postgres.py -v
 
       - name: Run real Neon child persistence proof
+        env:
+          PROOF_RESULT_PATH: ${{ runner.temp }}/differentiated_alert_postgres_child_persistence_runtime.json
         run: python scripts/proof_differentiated_alert_postgres_child_persistence.py
 
       - name: Upload proof artifact
