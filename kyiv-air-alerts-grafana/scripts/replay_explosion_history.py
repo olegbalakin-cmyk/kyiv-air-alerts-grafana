@@ -1264,6 +1264,213 @@ def historical_review_roles(city: str, row: dict, monitor) -> tuple[dict, str]:
                 "evidence_text": (review_basis or evidence)[:1200],
             }
         return roles, evidence
+    elif city in {"kherson", "mykolaiv", "odesa"}:
+        # These frozen corpora retain reviewed semantic contracts in decision/
+        # basis fields. Recover only roles explicitly supported by that retained
+        # review plus the retained factual summary. Do not infer roles from
+        # publication metadata, alert proximity, publisher identity, or the
+        # historical bucket itself.
+        review_parts = [
+            str(row.get(key)).strip()
+            for key in BASIS_FIELDS
+            if row.get(key) and str(row.get(key)).strip()
+        ]
+        review_basis = " — ".join(review_parts)
+        review_low = review_basis.casefold()
+        if not review_basis:
+            return {}, evidence
+
+        city_patterns = {
+            "kherson": re.compile(
+                r"(?<![\w-])(?:kherson|херсон|херсоні|херсона|херсоном)(?![\w-])",
+                flags=re.IGNORECASE,
+            ),
+            "mykolaiv": re.compile(
+                r"(?<![\w-])(?:mykolaiv|nikolaev|миколаїв(?:і|а|у|ом)?|миколаєв(?:і|а|у|ом)?)(?![\w-])",
+                flags=re.IGNORECASE,
+            ),
+            "odesa": re.compile(
+                r"(?<![\w-])(?:odesa|odessa|одес\w*)(?![\w-])",
+                flags=re.IGNORECASE,
+            ),
+        }
+        city_pattern = city_patterns[city]
+        mentioned_cities = monitor.audited_cities_in_text(evidence)
+        conflicting_named_city = any(
+            named_city != city for named_city in mentioned_cities
+        )
+
+        reviewed_exact_city = bool(
+            re.search(r"\bexact[_ -]?city\b|exact-city", review_low)
+            or "exact-city" in low
+            or city_pattern.search(evidence)
+        )
+        reviewed_episode_relation = bool(
+            re.search(
+                r"(?:inside|within|during|matched|same[_ -]?attack|"
+                r"separate[_ -]?matched|cross[_ -]?midnight|"
+                r"assigned[_ -]?by[_ -]?alert[_ -]?start|"
+                r"near[_ -]?boundary|pre[_ -]?alert|"
+                r"inferred[_ -]?same[_ -]?attack|"
+                r"explicit(?:ly)?[_ -]?during)",
+                review_low,
+            )
+            or "exact_city_during_alert" in review_low
+            or "exact_city_explicitly_during_alert" in review_low
+            or "exact_city_event_inside_frozen_episode" in review_low
+            or "exact-city event inside" in review_low
+            or "inside the same aerial-alert episode" in review_low
+        )
+        reviewed_air_context = bool(
+            re.search(
+                r"(?:aerial[_ -]?war|aerial[_ -]?attack|confirmed[_ -]?drone|"
+                r"drone|uav|shahed|missile|ballistic|air[_ -]?defen[cs]e|ppo|"
+                r"бпла|безпілот\w*|дрон\w*|шахед\w*|ракет\w*|баліст\w*|ппо|"
+                r"повітрян\w*\s+(?:атак|тривог))",
+                review_low,
+            )
+            or (
+                "matched alert episode" in review_low
+                or "inside matched alert" in review_low
+                or "inside the same aerial-alert episode" in review_low
+            )
+            or monitor.air_military_context(evidence)
+            or bool(
+                re.search(
+                    r"\b(?:drone(?:s)?|uav(?:s)?|shahed(?:s)?|missile(?:s)?|ballistic|"
+                    r"air[- ]?defen[cs]e|russian[- ]?drone|reactive[- ]?drone(?:s)?|"
+                    r"hostile[- ]?uav(?:s)?|"
+                    r"бпла|безпілот\w*|дрон\w*|шахед\w*|ракет\w*|баліст\w*|ппо)\b",
+                    evidence,
+                    flags=re.IGNORECASE,
+                )
+            )
+            or bool(
+                re.search(
+                    r"\b(?:російськ\w*|ворож\w*|рф)\b.{0,45}\bатак\w*\b",
+                    evidence,
+                    flags=re.IGNORECASE,
+                )
+            )
+        )
+
+        segments = [
+            " ".join(part.split())
+            for part in re.split(r"(?<=[.!?;])\s+|\n+", evidence)
+            if part and part.strip()
+        ]
+        english_event_patterns = (
+            ("explosion", re.compile(r"\b(?:explosion(?:s)?|blast(?:s)?|bang(?:s)?)\b", re.I)),
+            ("impact", re.compile(r"\b(?:impact(?:s|ed)?|hit|hits|arrival(?:s)?)\b", re.I)),
+            ("strike", re.compile(r"\b(?:attack(?:ed|s)?|strike(?:s|d)?|struck)\b", re.I)),
+        )
+        ukrainian_strike = re.compile(
+            r"\b(?:атакув(?:ав|ала|ало|али)|ударив|ударила|ударили|"
+            r"завдав|завдала|завдали)\b",
+            flags=re.IGNORECASE,
+        )
+        reviewed_attack_noun = re.compile(
+            r"(?:\b(?:рф|російськ\w*|ворож\w*)\b.{0,45}\bатак\w*\b|"
+            r"\bатак\w*\b.{0,45}\b(?:рф|російськ\w*|ворож\w*)\b)",
+            flags=re.IGNORECASE,
+        )
+        ukrainian_impact = re.compile(
+            r"\b(?:влучанн\w*|приліт\w*|прильот\w*)\b",
+            flags=re.IGNORECASE,
+        )
+        threat_or_modal = re.compile(
+            r"\b(?:можлив\w*|ймовірн\w*|очікуван\w*|загроз\w*|"
+            r"possible|likely|might|may|could|threat)\b",
+            flags=re.IGNORECASE,
+        )
+
+        pvo_non_action = re.compile(
+            r"\b(?:можлив\w*|ймовірн\w*|очіку\w*|попереджа\w*|готов\w*|"
+            r"readiness|ready|possible|expected|warning)\b.{0,45}\b(?:ппо|air[- ]?defen[cs]e)\b"
+            r"|\b(?:ппо|air[- ]?defen[cs]e)\b.{0,45}\b(?:можлив\w*|ймовірн\w*|"
+            r"очіку\w*|попереджа\w*|готов\w*|readiness|ready|possible|expected|warning)\b",
+            flags=re.IGNORECASE,
+        )
+        event_segments = []
+        event_types = []
+        for segment in segments:
+            types = []
+            if monitor.strict_attack_event_signal(segment):
+                for event_type in monitor.attack_event_types(segment):
+                    if event_type == "air_defense_action" and (
+                        not monitor.air_defense_action_signal(segment)
+                        or pvo_non_action.search(segment)
+                    ):
+                        continue
+                    if event_type not in types:
+                        types.append(event_type)
+            for event_type, pattern in english_event_patterns:
+                if not pattern.search(segment):
+                    continue
+                modal_event = bool(
+                    re.search(
+                        r"\b(?:possible|likely|might|may|could|expected|warning of|"
+                        r"threat of)\b.{0,35}\b(?:explosion|blast|impact|strike)\w*\b",
+                        segment,
+                        flags=re.IGNORECASE,
+                    )
+                )
+                if not modal_event and event_type not in types:
+                    types.append(event_type)
+            if (
+                (ukrainian_strike.search(segment) or reviewed_attack_noun.search(segment))
+                and not threat_or_modal.search(segment)
+                and "strike" not in types
+            ):
+                types.append("strike")
+            if ukrainian_impact.search(segment) and not threat_or_modal.search(segment):
+                if "impact" not in types:
+                    types.append("impact")
+            if (
+                monitor.air_defense_action_signal(segment)
+                and not pvo_non_action.search(segment)
+                and "air_defense_action" not in types
+            ):
+                types.append("air_defense_action")
+            if types:
+                event_segments.append(segment)
+                for event_type in types:
+                    if event_type not in event_types:
+                        event_types.append(event_type)
+
+        factual_event = bool(event_segments)
+        exact_city = bool(reviewed_exact_city and not conflicting_named_city)
+        same_attack = bool(
+            exact_city
+            and factual_event
+            and reviewed_air_context
+            and reviewed_episode_relation
+        )
+
+        roles = {}
+        if exact_city:
+            roles["exact_city_evidence"] = {
+                "present": True,
+                "evidence_text": (review_basis if "exact" in review_low else evidence)[:1200],
+            }
+        if factual_event:
+            roles["explosion_evidence"] = {
+                "present": True,
+                "evidence_text": event_segments[0][:1200],
+                "event_types": event_types,
+            }
+        if reviewed_air_context:
+            roles["aerial_war_evidence"] = {
+                "present": True,
+                "evidence_text": (review_basis or evidence)[:1200],
+            }
+        if same_attack:
+            roles["same_attack_basis"] = {
+                "present": True,
+                "basis": "reviewed_kherson_mykolaiv_odesa_retained_role_contract",
+                "evidence_text": (review_basis or evidence)[:1200],
+            }
+        return roles, evidence
     elif city in {"chernihiv", "kropyvnytskyi"}:
         # These two frozen corpora retain reviewed role contracts in legacy
         # decision/basis fields.  Translate only those explicit reviewed

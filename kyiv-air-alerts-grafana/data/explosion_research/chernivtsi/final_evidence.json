@@ -1,0 +1,74 @@
+{
+  "schema_version": 1,
+  "city_key": "chernivtsi",
+  "coverage_start": "2025-11-06",
+  "coverage_end": "2026-09-17",
+  "purpose": "Replay-grade normalization of the frozen local reaudit package; no new source research.",
+  "strict_events": [
+    {
+      "event_id": "CHV-20260125-01",
+      "episode_id": "de08ae6ce18e0c4e9868378c",
+      "source_url": "https://suspilne.media/chernivtsi/1222600-pid-cas-povitranoi-trivogi-nad-cernivcami-zbili-dva-rosijski-bezpilotniki/",
+      "evidence": "У Чернівцях близько 23:30 було чути вибухи під час атаки російських БпЛА; повторний звук після опівночі належить тому самому alert episode.",
+      "decision_basis": "strict: retained exact-city attack-event evidence + confirmed aerial-war context + episode-specific canonical binding",
+      "binding_method": "persisted_current_canonical_episode_id",
+      "historical_frozen_status": "included_strict",
+      "raw_record": {
+        "event_id": "CHV-20260125-01",
+        "date": "2026-01-25",
+        "event_time_local": "2026-01-24T23:30:00+02:00",
+        "time_precision": "approx_minute",
+        "city_status": "exact_city",
+        "war_air_context": "confirmed",
+        "temporal_evidence": "exact_time_in_alert",
+        "alert_start_local": "2026-01-24T23:07:00+02:00",
+        "alert_end_local": "2026-01-25T00:26:00+02:00",
+        "strict_count": "1",
+        "sensitivity_count": "1",
+        "final_status": "included_strict",
+        "source_1": "https://suspilne.media/chernivtsi/1222600-pid-cas-povitranoi-trivogi-nad-cernivcami-zbili-dva-rosijski-bezpilotniki/",
+        "source_2": "https://24.cv.ua/chernivtsi-atakuvaly-vorozhi-drony-meshkantsi-povidomlyayut-pro-vybuhy/",
+        "notes": "Residents reported first explosion sounds in Chernivtsi around 23:30 and another after 00:00; both fall inside one alert episode. Count once."
+      },
+      "event_time": "2026-01-24 23:30 Europe/Kyiv"
+    },
+    {
+      "event_id": "CHV-20260513-01",
+      "episode_id": "66fc1defbaf633f7e3dbcc17",
+      "source_url": "https://suspilne.media/chernivtsi/1310618-pid-cas-povitranoi-trivogi-nad-bukovinou-zbili-sist-bezpilotnikiv/",
+      "evidence": "Під час повітряної тривоги у Чернівцях було чути вибухи; ППО працювала по російських БпЛА. Retained audit відносить це до довгого денного alert episode.",
+      "decision_basis": "strict: retained exact-city attack-event evidence + confirmed aerial-war context + episode-specific canonical binding",
+      "binding_method": "persisted_current_canonical_episode_id",
+      "historical_frozen_status": "included_strict",
+      "raw_record": {
+        "event_id": "CHV-20260513-01",
+        "date": "2026-05-13",
+        "event_time_local": "afternoon",
+        "time_precision": "coarse",
+        "city_status": "exact_city",
+        "war_air_context": "confirmed",
+        "temporal_evidence": "explicit_during_alert",
+        "alert_start_local": "2026-05-13T11:58:00+03:00",
+        "alert_end_local": "",
+        "strict_count": "1",
+        "sensitivity_count": "1",
+        "final_status": "included_strict",
+        "source_1": "https://suspilne.media/chernivtsi/1310618-pid-cas-povitranoi-trivogi-nad-bukovinou-zbili-sist-bezpilotnikiv/",
+        "source_2": "https://fakty.com.ua/ua/proisshestvija/20260513-vybuhy-u-chernivtsyah-13-travnya-syly-ppo-pratsyuyut-po-rosijskyh-bpla/",
+        "notes": "Facts ICTV reports explosions in Chernivtsi while PVO was operating; Suspilne says the city alert began at 11:58."
+      }
+    }
+  ],
+  "sensitivity_only_events": [],
+  "review_events": [],
+  "final_counts": {
+    "alerts_total": 113,
+    "strict_n": 2,
+    "sensitivity_n": 2
+  },
+  "checks": {
+    "canonical_positive_ids_unique": true,
+    "strict_rows": 2,
+    "sensitivity_only_rows": 0
+  }
+}
