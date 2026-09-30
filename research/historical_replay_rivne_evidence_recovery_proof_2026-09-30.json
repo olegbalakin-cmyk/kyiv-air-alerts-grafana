@@ -2787,7 +2787,7 @@
       "source_url": "https://suspilne.media/rivne/1233924-dvoe-ludej-otrimali-poranenna-armia-rf-atakuvala-rivnensinu-7-lutogo/",
       "source_title": "Загинув чоловік через атаку армії РФ на Рівненщині 7 лютого — начальник ОВА",
       "publication_datetime": "2026-02-07T09:08:00+02:00",
-      "factual_summary": "Під час атаки армії РФ о 06:55 у Рівному було чути вибухи; о 06:46 Повітряні сили повідомили про БпЛА курсом на Рівне, а наслідки атаки включали загиблого в обласному центрі.",
+      "factual_summary": "Під час атаки армії РФ ударними БпЛА о 06:55 у Рівному було чути вибухи. Перед цим о 06:46 Повітряні сили повідомили про БпЛА курсом на Рівне; наслідки атаки включали загиблого в обласному центрі.",
       "reported_event_time": "2026-02-07T06:55:00+02:00",
       "exact_city_evidence": "Rivne city is explicit in the retained source statement.",
       "qualifying_event_evidence": "Factual explosion / confirmed air-defense action / attack-caused consequence is explicit.",
@@ -3147,30 +3147,103 @@
     "delta_strict": 0,
     "delta_sensitivity": 0
   },
-  "replay_result": null,
-  "qa": null,
-  "tests": {
-    "self_test": null,
-    "historical_replay_suite": null,
-    "focused_rivne": null
+  "replay_result": {
+    "run_id": 36687480088,
+    "proof_run_head": "5f4d7d78d78570e6f36aeaead8c4bb7b88dd68f4",
+    "status": "COMPLETE",
+    "episodes_checked": 232,
+    "strict": 13,
+    "sensitivity": 13,
+    "changed_episodes": 0,
+    "errors": 0,
+    "protected_files_unchanged": true,
+    "replay_verdict": "CITY REPLAY CLEAN",
+    "strict_episode_identity": {
+      "aggregate_counts_equal_but_episode_identities_differ": false,
+      "new_strict_only": [],
+      "old_strict_only": [],
+      "symmetric_difference": [],
+      "unchanged_strict_ids": [
+        "30360edb6c58f30a8a770974",
+        "306fbb22f7356839a902a80c",
+        "5065ee65e6b3d9ef0ce365cf",
+        "7d255bed7072f60502b07ceb",
+        "7e902cf3136c3df84d1fc758",
+        "83363241e6dcabdc432be441",
+        "8d433555c714dbe7cc1985c9",
+        "9b796acb29256400a172c388",
+        "a77f486661e77a776137dbe3",
+        "ab4696eb424ba82f0b2c2b8c",
+        "c293666818985e94fe545e75",
+        "cd034b8fcbf76c47a365beef",
+        "d280de57ad4d95125620d22f"
+      ]
+    }
   },
-  "non_target_regression": null,
+  "qa": {
+    "count": 0,
+    "unresolved_cases": 0,
+    "sensitivity_only_cases": 0,
+    "replay_changed_episodes": 0,
+    "replay_errors": 0,
+    "duplicate_counted_canonical_ids": 0
+  },
+  "tests": {
+    "self_test": {
+      "result": "PASS",
+      "detail": "Historical replay helper self-test OK"
+    },
+    "historical_replay_suite": {
+      "result": "PASS",
+      "passed": 99
+    },
+    "focused_rivne": {
+      "result": "PASS",
+      "passed": 7
+    }
+  },
+  "non_target_regression": {
+    "replayable_non_rivne_cities": [
+      "cherkasy",
+      "chernihiv",
+      "kropyvnytskyi",
+      "kyiv",
+      "lviv",
+      "sevastopol",
+      "sumy",
+      "zaporizhzhia"
+    ],
+    "city_count": 8,
+    "unexpected_non_rivne_semantic_paths": 0,
+    "unexpected_non_rivne_episode_deltas": 0,
+    "deltas": []
+  },
   "corpus_invariance": {
     "before": 232,
     "after": 232,
     "added": 0,
     "removed": 0,
     "boundary_changes": 0,
-    "episode_id_changes": 0
+    "episode_id_changes": 0,
+    "byte_identical_source_slice": true
   },
   "protected_state_audit": {
     "authoritative_branch_modified": false,
     "canonical_alert_corpus_modified": false,
     "rivne_source_slice_modified": false,
     "replay_code_modified": false,
+    "classifier_modified": false,
     "db_neon_modified": false,
     "main_modified": false,
-    "site_prod_modified": false
+    "site_prod_modified": false,
+    "temporary_workflow_removed": true,
+    "final_semantic_paths": [
+      "kyiv-air-alerts-grafana/data/explosion_research/rivne/final_evidence.json",
+      "kyiv-air-alerts-grafana/tests/test_historical_replay_rivne_recovery.py",
+      "research/historical_replay_rivne_evidence_recovery_proof_2026-09-30.json"
+    ]
   },
-  "verdict": "PENDING_EXECUTABLE_REPLAY"
+  "verdict": "RIVNE HISTORICAL EVIDENCE RECOVERY PROVEN — 232 ALERT EPISODES — 13 STRICT / 13 SENSITIVITY — QA0 — FROZEN BASELINE VALID",
+  "final_evidence_blob": "c7c244dc682285597c68ac23be87d3ae8a31a39e",
+  "focused_test_blob": "0368330f87987ebaf5da0ed8758e78712f2f96ba"
 }
