@@ -1,0 +1,172 @@
+name: Rivne historical evidence recovery proof CI temp
+
+on:
+  push:
+    branches:
+      - rivne-historical-evidence-recovery-proof-2026-09-30
+
+permissions:
+  contents: read
+
+jobs:
+  proof:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Check out proof branch
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check out authoritative base
+        uses: actions/checkout@v4
+        with:
+          ref: 2478faf4b0aa98a6e3ac11d41b42776d2e777161
+          path: authoritative-base
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: kyiv-air-alerts-grafana/requirements.txt
+
+      - name: Install dependencies
+        run: pip install -r kyiv-air-alerts-grafana/requirements.txt
+
+      - name: Replay helper self-test
+        run: python kyiv-air-alerts-grafana/scripts/replay_explosion_history.py --self-test
+
+      - name: Historical replay tests
+        run: pytest -q kyiv-air-alerts-grafana/tests/test_historical_replay_*.py
+
+      - name: Focused Rivne recovery tests
+        run: pytest -q kyiv-air-alerts-grafana/tests/test_historical_replay_rivne_recovery.py
+
+      - name: Rivne executable replay
+        shell: bash
+        run: |
+          set -euo pipefail
+          HEAD="$(git rev-parse HEAD)"
+          python kyiv-air-alerts-grafana/scripts/replay_explosion_history.py             --repo-root "$GITHUB_WORKSPACE/kyiv-air-alerts-grafana"             --city rivne             --through 2026-09-17             --input-head "$HEAD"             --read-only             --output "$RUNNER_TEMP/rivne-replay.json"
+          python - <<'PY'
+          import json, os
+          from pathlib import Path
+          p=json.loads(Path(os.environ["RUNNER_TEMP"],"rivne-replay.json").read_text(encoding="utf-8"))
+          assert p["status"]=="COMPLETE", p
+          assert p["episodes_checked"]==232, p
+          assert p["replayed_strict_episodes"]==13, p
+          assert p["replayed_sensitivity_episodes"]==13, p
+          assert p["changed_episodes"]==[], p
+          assert p["errors"]==[], p
+          assert p["protected_files_unchanged"] is True, p
+          print(json.dumps({
+            "status":p["status"],
+            "episodes_checked":p["episodes_checked"],
+            "strict":p["replayed_strict_episodes"],
+            "sensitivity":p["replayed_sensitivity_episodes"],
+            "changed":len(p["changed_episodes"]),
+            "errors":len(p["errors"]),
+            "protected_files_unchanged":p["protected_files_unchanged"],
+            "verdict":p["verdict"],
+            "strict_episode_identity":p["strict_episode_identity"],
+          },ensure_ascii=False,indent=2))
+          PY
+
+      - name: Non-Rivne semantic regression
+        shell: bash
+        run: |
+          set -euo pipefail
+          BASE="$GITHUB_WORKSPACE/authoritative-base/kyiv-air-alerts-grafana"
+          PROOF="$GITHUB_WORKSPACE/kyiv-air-alerts-grafana"
+          BASE_HEAD="$(git -C "$GITHUB_WORKSPACE/authoritative-base" rev-parse HEAD)"
+          PROOF_HEAD="$(git rev-parse HEAD)"
+          mkdir -p "$RUNNER_TEMP/base" "$RUNNER_TEMP/proof"
+          set +e
+          python "$PROOF/scripts/replay_explosion_history.py" --repo-root "$BASE" --through 2026-09-17 --input-head "$BASE_HEAD" --read-only --preflight --output "$RUNNER_TEMP/base/preflight.json"
+          BASE_RC=$?
+          python "$PROOF/scripts/replay_explosion_history.py" --repo-root "$PROOF" --through 2026-09-17 --input-head "$PROOF_HEAD" --read-only --preflight --output "$RUNNER_TEMP/proof/preflight.json"
+          PROOF_RC=$?
+          set -e
+          test -f "$RUNNER_TEMP/base/preflight.json"
+          test -f "$RUNNER_TEMP/proof/preflight.json"
+          python - <<'PY' > "$RUNNER_TEMP/ready-cities.txt"
+          import json, os
+          from pathlib import Path
+          b=json.loads(Path(os.environ["RUNNER_TEMP"],"base","preflight.json").read_text())
+          p=json.loads(Path(os.environ["RUNNER_TEMP"],"proof","preflight.json").read_text())
+          bs={x["city_key"] for x in b["cities"] if x["source_status"]=="READY"}
+          ps={x["city_key"] for x in p["cities"] if x["source_status"]=="READY"}
+          for city in sorted((bs & ps)-{"rivne"}):
+              print(city)
+          PY
+          while IFS= read -r CITY; do
+            test -n "$CITY"
+            python "$PROOF/scripts/replay_explosion_history.py" --repo-root "$BASE" --city "$CITY" --through 2026-09-17 --input-head "$BASE_HEAD" --read-only --output "$RUNNER_TEMP/base/$CITY.json"
+            python "$PROOF/scripts/replay_explosion_history.py" --repo-root "$PROOF" --city "$CITY" --through 2026-09-17 --input-head "$PROOF_HEAD" --read-only --output "$RUNNER_TEMP/proof/$CITY.json"
+          done < "$RUNNER_TEMP/ready-cities.txt"
+          python - <<'PY'
+          import json, os
+          from pathlib import Path
+          root=Path(os.environ["RUNNER_TEMP"])
+          cities=[x.strip() for x in (root/"ready-cities.txt").read_text().splitlines() if x.strip()]
+          keys=[
+            "status","episodes_checked","baseline_strict_episodes","canonicalized_legacy_strict_episodes",
+            "replayed_strict_episodes","baseline_sensitivity_episodes","canonicalized_legacy_sensitivity_episodes",
+            "replayed_sensitivity_episodes","changed_episodes","reconciliation_counts","errors",
+            "strict_episode_identity","protected_files_unchanged"
+          ]
+          deltas=[]
+          for city in cities:
+              b=json.loads((root/"base"/f"{city}.json").read_text())
+              p=json.loads((root/"proof"/f"{city}.json").read_text())
+              diff={k:[b.get(k),p.get(k)] for k in keys if b.get(k)!=p.get(k)}
+              if diff: deltas.append({"city":city,"diff":diff})
+          result={
+            "replayable_non_rivne_cities":cities,
+            "city_count":len(cities),
+            "unexpected_non_rivne_semantic_paths":len(deltas),
+            "unexpected_non_rivne_episode_deltas":sum(1 for x in deltas if any(k in x["diff"] for k in ["episodes_checked","replayed_strict_episodes","replayed_sensitivity_episodes","strict_episode_identity"])),
+            "deltas":deltas,
+          }
+          (root/"non-rivne-regression.json").write_text(json.dumps(result,ensure_ascii=False,indent=2)+"\n")
+          print(json.dumps(result,ensure_ascii=False,indent=2))
+          assert not deltas, result
+          PY
+
+      - name: Corpus invariance and protected diff
+        shell: bash
+        run: |
+          set -euo pipefail
+          cmp authoritative-base/kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/rivne-historical-recovery_alerts.json               kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/rivne-historical-recovery_alerts.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          a=json.loads(Path("authoritative-base/kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/rivne-historical-recovery_alerts.json").read_text())
+          b=json.loads(Path("kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/rivne-historical-recovery_alerts.json").read_text())
+          ai={x["episode_id"]:(x["alert_start"],x["alert_end"]) for x in a["episodes"]}
+          bi={x["episode_id"]:(x["alert_start"],x["alert_end"]) for x in b["episodes"]}
+          assert len(ai)==232==len(bi)
+          assert ai==bi
+          print("Rivne corpus invariance: before=232 after=232 added=0 removed=0 boundary_changes=0 episode_id_changes=0")
+          PY
+          mapfile -t CHANGED < <(git diff --name-only 2478faf4b0aa98a6e3ac11d41b42776d2e777161...HEAD)
+          printf '%s\n' "${CHANGED[@]}"
+          ALLOWED_RE='^(kyiv-air-alerts-grafana/data/explosion_research/rivne/final_evidence.json|kyiv-air-alerts-grafana/tests/test_historical_replay_rivne_recovery.py|research/historical_replay_rivne_evidence_recovery_proof_2026-09-30.json|\.github/workflows/rivne-proof-ci-temp.yml)$'
+          for f in "${CHANGED[@]}"; do
+            [[ "$f" =~ $ALLOWED_RE ]] || { echo "Unexpected changed path: $f"; exit 1; }
+          done
+
+      - name: Upload proof outputs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: rivne-historical-evidence-recovery-proof
+          path: |
+            ${{ runner.temp }}/rivne-replay.json
+            ${{ runner.temp }}/non-rivne-regression.json
+            ${{ runner.temp }}/base/preflight.json
+            ${{ runner.temp }}/proof/preflight.json
+          if-no-files-found: warn
+          retention-days: 30
