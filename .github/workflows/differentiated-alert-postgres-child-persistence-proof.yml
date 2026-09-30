@@ -1,0 +1,79 @@
+name: Differentiated Postgres child persistence proof
+
+on:
+  push:
+    branches:
+      - differentiated-alert-postgres-child-persistence-proof-2026-09-30
+    paths:
+      - ".github/workflows/differentiated-alert-postgres-child-persistence-proof.yml"
+      - "kyiv-air-alerts-grafana/scripts/proof_differentiated_alert_postgres_child_persistence.py"
+      - "kyiv-air-alerts-grafana/scripts/differentiated_alert_postgres.py"
+      - "kyiv-air-alerts-grafana/tests/test_differentiated_alert_postgres.py"
+
+permissions:
+  contents: read
+
+jobs:
+  prove:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: kyiv-air-alerts-grafana
+    env:
+      CHILD_BRANCH_ID: br-icy-forest-b5mfyezq
+      CHILD_DB_HOST: ep-shy-truth-b5ngaye8-pooler.c-7.us-east-2.aws.neon.tech
+      PROOF_RESULT_PATH: ${{ runner.temp }}/differentiated_alert_postgres_child_persistence_runtime.json
+
+    steps:
+      - name: Check out isolated proof branch
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: kyiv-air-alerts-grafana/requirements-db-phase1.txt
+
+      - name: Install PostgreSQL proof dependencies
+        run: pip install -r requirements-db-phase1.txt
+
+      - name: Derive disposable child URL without printing credentials
+        env:
+          BASE_DATABASE_URL: ${{ secrets.PHASE1_PROD_SHADOW_DATABASE_URL }}
+        shell: bash
+        run: |
+          python - <<'PY'
+          import os
+          from urllib.parse import urlsplit, urlunsplit
+
+          base = os.environ["BASE_DATABASE_URL"]
+          child_host = os.environ["CHILD_DB_HOST"]
+          parts = urlsplit(base)
+          if not parts.username:
+              raise SystemExit("database secret has no username")
+          userinfo = parts.username
+          if parts.password is not None:
+              userinfo += ":" + parts.password
+          port = f":{parts.port}" if parts.port else ""
+          child = urlunsplit((parts.scheme, f"{userinfo}@{child_host}{port}", parts.path, parts.query, parts.fragment))
+          with open(os.environ["GITHUB_ENV"], "a", encoding="utf-8") as fh:
+              fh.write("CHILD_DATABASE_URL=" + child + "\n")
+          print("Disposable child URL derived; credentials not printed.")
+          PY
+
+      - name: Run focused adapter regression tests
+        run: python -m unittest tests/test_differentiated_alert_postgres.py -v
+
+      - name: Run real Neon child persistence proof
+        run: python scripts/proof_differentiated_alert_postgres_child_persistence.py
+
+      - name: Upload proof artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: differentiated-alert-postgres-child-persistence-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/differentiated_alert_postgres_child_persistence_runtime.json
+          if-no-files-found: warn
+          retention-days: 30
