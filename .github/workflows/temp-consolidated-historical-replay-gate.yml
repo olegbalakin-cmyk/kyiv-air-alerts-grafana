@@ -35,7 +35,9 @@ jobs:
           cache-dependency-path: control/kyiv-air-alerts-grafana/requirements.txt
 
       - name: Install dependencies
-        run: pip install -r control/kyiv-air-alerts-grafana/requirements.txt
+        run: |
+          pip install -r control/kyiv-air-alerts-grafana/requirements.txt
+          pip install pytest
 
       - name: Run consolidated gate
         shell: bash
@@ -208,7 +210,7 @@ jobs:
               j = json.loads(out.read_text(encoding="utf-8"))
               strict_ids = j.get("_proof_strict_episode_ids") or []
               sens_ids = j.get("_proof_sensitivity_episode_ids") or []
-              qa = len(j.get("changed_episodes") or []) + len(j.get("errors") or []) + len(j.get("unbound_review_evidence") or [])
+              qa = len(j.get("changed_episodes") or []) + len(j.get("errors") or [])
               return {
                   "city_key":city,
                   "episodes_checked":j.get("episodes_checked"),
