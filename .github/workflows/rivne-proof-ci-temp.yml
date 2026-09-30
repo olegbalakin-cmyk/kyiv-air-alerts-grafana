@@ -33,7 +33,7 @@ jobs:
           cache-dependency-path: kyiv-air-alerts-grafana/requirements.txt
 
       - name: Install dependencies
-        run: pip install -r kyiv-air-alerts-grafana/requirements.txt
+        run: pip install -r kyiv-air-alerts-grafana/requirements.txt pytest
 
       - name: Replay helper self-test
         run: python kyiv-air-alerts-grafana/scripts/replay_explosion_history.py --self-test
