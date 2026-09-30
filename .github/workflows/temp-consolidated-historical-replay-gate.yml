@@ -1,0 +1,411 @@
+name: Temporary consolidated historical replay gate
+
+on:
+  push:
+    branches:
+      - historical-replay-consolidated-authoritative-apply-2026-09-30
+    paths:
+      - ".github/workflows/temp-consolidated-historical-replay-gate.yml"
+      - "research/.consolidated_replay_verify_target"
+      - "research/historical_replay_consolidated_authoritative_apply_2026-09-30.json"
+      - "kyiv-air-alerts-grafana/scripts/replay_explosion_history.py"
+      - "kyiv-air-alerts-grafana/data/explosion_audited_baseline.json"
+      - "kyiv-air-alerts-grafana/data/explosion_research/**/final_evidence.json"
+      - "kyiv-air-alerts-grafana/tests/test_historical_replay_*.py"
+
+permissions:
+  contents: read
+
+jobs:
+  gate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - name: Checkout control branch
+        uses: actions/checkout@v4
+        with:
+          path: control
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: control/kyiv-air-alerts-grafana/requirements.txt
+
+      - name: Install dependencies
+        run: pip install -r control/kyiv-air-alerts-grafana/requirements.txt
+
+      - name: Run consolidated gate
+        shell: bash
+        env:
+          BASE_SHA: dd58e1213e54cc6a5a2a29e56daab04ef78b818d
+        run: |
+          set -euo pipefail
+          cat > "$RUNNER_TEMP/consolidated_gate.py" <<'PY'
+          from __future__ import annotations
+          import hashlib, json, os, re, shutil, subprocess, sys, tempfile
+          from pathlib import Path
+
+          WS = Path(os.environ["GITHUB_WORKSPACE"])
+          CONTROL = WS / "control"
+          BASE_SHA = os.environ["BASE_SHA"]
+          THROUGH = "2026-09-17"
+          TEMP_WORKFLOW = ".github/workflows/temp-consolidated-historical-replay-gate.yml"
+          VERIFY_MARKER = "research/.consolidated_replay_verify_target"
+          PROOF_ARTIFACT = "research/historical_replay_consolidated_authoritative_apply_2026-09-30.json"
+          TARGETS = [
+              "kherson","mykolaiv","odesa","zhytomyr","uzhhorod","chernivtsi",
+              "ivano_frankivsk","khmelnytskyi","lutsk","vinnytsia","poltava","ternopil","rivne"
+          ]
+          HMO = ["kherson","mykolaiv","odesa"]
+          RECOVERY = ["zhytomyr","uzhhorod","chernivtsi","ivano_frankivsk","khmelnytskyi","lutsk","vinnytsia","poltava","ternopil","rivne"]
+          EXPECTED = {
+              "kherson": (1412,2,2,0), "mykolaiv": (1648,122,135,0), "odesa": (1465,152,158,0),
+              "zhytomyr": (685,19,20,0), "uzhhorod": (92,1,1,0), "chernivtsi": (113,2,2,0),
+              "ivano_frankivsk": (103,6,6,0), "khmelnytskyi": (248,11,12,0), "lutsk": (135,12,12,0),
+              "vinnytsia": (362,5,7,0), "poltava": (1805,51,53,0), "ternopil": (125,5,5,0), "rivne": (232,13,13,0),
+              "dnipro": (2259,181,188,0),
+          }
+          PROOF_SHA = {
+              "kherson":"ff922cdd241566f3d40cb528d38a06872c1789bf",
+              "mykolaiv":"ff922cdd241566f3d40cb528d38a06872c1789bf",
+              "odesa":"ff922cdd241566f3d40cb528d38a06872c1789bf",
+              "zhytomyr":"ac996b81a602a44a8e696a4266fbba16e8915d13",
+              "uzhhorod":"ac996b81a602a44a8e696a4266fbba16e8915d13",
+              "chernivtsi":"ac996b81a602a44a8e696a4266fbba16e8915d13",
+              "ivano_frankivsk":"ac996b81a602a44a8e696a4266fbba16e8915d13",
+              "khmelnytskyi":"ac996b81a602a44a8e696a4266fbba16e8915d13",
+              "lutsk":"ac996b81a602a44a8e696a4266fbba16e8915d13",
+              "vinnytsia":"f7afaef7fc3824790ea1b03aac978e6cc26a78de",
+              "poltava":"19dbb98663f8c7bb8e6fe2c92ffea853f5a0f5b8",
+              "ternopil":"b8b875f24f9e226e768723a3b3c8515c0aca02b3",
+              "rivne":"c8ffbf5394006db97aa30a776466581f1428ec93",
+          }
+          HMO_BLOBS = {
+              "kyiv-air-alerts-grafana/scripts/replay_explosion_history.py":"e1a6c793d680196724fbf70f09ed09a821912aca",
+              "kyiv-air-alerts-grafana/data/explosion_audited_baseline.json":"d97f02849f089eb89757a3a255d4890dc10f403e",
+              "kyiv-air-alerts-grafana/data/explosion_research/kherson/final_evidence.json":"ae816bbc412fbe62f086adb4cefb2a5af65b2a07",
+              "kyiv-air-alerts-grafana/data/explosion_research/mykolaiv/final_evidence.json":"0860488bc18fb3c1a90b9e86df23001abb675c9c",
+              "kyiv-air-alerts-grafana/data/explosion_research/odesa/final_evidence.json":"018052e3384b608b3bd7739fc828842d3565d490",
+              "kyiv-air-alerts-grafana/tests/test_historical_replay_kherson_mykolaiv_odesa_roles.py":"4c0b942e625896408a5a1ff69b2333b28f14cf2f",
+          }
+          RECOVERY_BLOBS = {
+              "kyiv-air-alerts-grafana/data/explosion_research/zhytomyr/final_evidence.json":"7ba2c06c965fc6f393d372d37d8dea0f0b497211",
+              "kyiv-air-alerts-grafana/data/explosion_research/uzhhorod/final_evidence.json":"91576eb7da3b3c8847610408b5dee41c36ea345d",
+              "kyiv-air-alerts-grafana/data/explosion_research/chernivtsi/final_evidence.json":"8913b0b372dcbfee912fed5e2c2688484e19fd8f",
+              "kyiv-air-alerts-grafana/data/explosion_research/ivano_frankivsk/final_evidence.json":"6793e513cfe1c0fdcd9a830681239e2adc968253",
+              "kyiv-air-alerts-grafana/data/explosion_research/khmelnytskyi/final_evidence.json":"9193c8afbaf95a01fe65927b24bfa616f33a7",
+              "kyiv-air-alerts-grafana/data/explosion_research/lutsk/final_evidence.json":"d585863da61c29534510812ca717c3899bf9dd1a",
+              "kyiv-air-alerts-grafana/data/explosion_research/vinnytsia/final_evidence.json":"a1a039d87b7728618ad85e86e39733df1b28c9cb",
+              "kyiv-air-alerts-grafana/tests/test_historical_replay_vinnytsia_reconciliation.py":"37a626896b1bad68c32dc66258e29ca36d70c919",
+              "kyiv-air-alerts-grafana/data/explosion_research/poltava/final_evidence.json":"242ed9932e9871cc6296ee532e3d589caafcc91e",
+              "kyiv-air-alerts-grafana/tests/test_historical_replay_poltava_reaudit.py":"ccd1dcb791dcea207394af6cbed3f5606ff128e7",
+              "kyiv-air-alerts-grafana/data/explosion_research/ternopil/final_evidence.json":"d24f1c911158c082bba6dc53d47d495737334d7d",
+              "kyiv-air-alerts-grafana/tests/test_historical_replay_ternopil_recovery.py":"2c3f16cd07761838c62aa8338a6835a42d92c4e9",
+              "kyiv-air-alerts-grafana/data/explosion_research/rivne/final_evidence.json":"c7c244dc682285597c68ac23be87d3ae8a31a39e",
+              "kyiv-air-alerts-grafana/tests/test_historical_replay_rivne_recovery.py":"0368330f87987ebaf5da0ed8758e78712f2f96ba",
+          }
+          # Correct a typo-proofed constant if source task spelling is exact.
+          RECOVERY_BLOBS["kyiv-air-alerts-grafana/data/explosion_research/khmelnytskyi/final_evidence.json"] = "9193c8afbaf96af5a01fe65927b24bfa616f33a7"
+
+          def run(cmd, cwd=None, env=None, check=False):
+              p = subprocess.run(cmd, cwd=cwd, env=env, text=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+              if check and p.returncode:
+                  raise RuntimeError(f"command failed rc={p.returncode}: {' '.join(map(str,cmd))}\n{p.stdout[-8000:]}")
+              return p
+
+          def git(cwd, *args, check=True):
+              return run(["git", *args], cwd=cwd, check=check).stdout.strip()
+
+          control_head = git(CONTROL, "rev-parse", "HEAD")
+          marker = CONTROL / VERIFY_MARKER
+          target_sha = marker.read_text(encoding="utf-8").strip() if marker.exists() and marker.read_text(encoding="utf-8").strip() else control_head
+          if target_sha != control_head:
+              git(CONTROL, "fetch", "origin", target_sha)
+              target_dir = Path(os.environ["RUNNER_TEMP"]) / "target-authoritative"
+              if target_dir.exists():
+                  shutil.rmtree(target_dir)
+              git(CONTROL, "worktree", "add", "--detach", str(target_dir), target_sha)
+          else:
+              target_dir = CONTROL
+          target_head = git(target_dir, "rev-parse", "HEAD")
+          if target_head != target_sha:
+              raise RuntimeError(f"target head mismatch {target_head} != {target_sha}")
+
+          def blob(cwd, path):
+              p = run(["git","rev-parse",f"HEAD:{path}"], cwd=cwd)
+              return p.stdout.strip() if p.returncode == 0 else None
+
+          current_blobs = {p:blob(target_dir,p) for p in {**HMO_BLOBS, **RECOVERY_BLOBS}}
+          hmo_match = all(current_blobs.get(p) == s for p,s in HMO_BLOBS.items())
+          recovery_match = all(current_blobs.get(p) == s for p,s in RECOVERY_BLOBS.items())
+          phase = "FULL" if hmo_match and recovery_match else ("HMO" if hmo_match else "BASELINE")
+
+          changed_paths = [x for x in git(target_dir, "diff", "--name-only", f"{BASE_SHA}..{target_head}").splitlines() if x]
+          allowed = {TEMP_WORKFLOW, VERIFY_MARKER, PROOF_ARTIFACT}
+          if phase in {"HMO","FULL"}:
+              allowed |= set(HMO_BLOBS)
+          if phase == "FULL":
+              allowed |= set(RECOVERY_BLOBS)
+          unexpected_paths = sorted(set(changed_paths) - allowed)
+
+          def test_result(cmd, cwd):
+              p = run(cmd, cwd=cwd)
+              m = re.search(r"(\d+) passed", p.stdout)
+              return {"rc":p.returncode, "passed":int(m.group(1)) if m else None, "tail":"\n".join(p.stdout.splitlines()[-12:])}
+
+          code_root = target_dir / "kyiv-air-alerts-grafana"
+          monitor_test = test_result([sys.executable, str(code_root/"scripts/monitor_explosion_candidates.py"), "--self-test"], target_dir)
+          replay_test = test_result([sys.executable, str(code_root/"scripts/replay_explosion_history.py"), "--self-test"], target_dir)
+          hist_files = sorted(str(p) for p in (code_root/"tests").glob("test_historical_replay_*.py"))
+          historical_pytest = test_result([sys.executable,"-m","pytest","-q",*hist_files], target_dir)
+          focused_names = [
+              "test_historical_replay_kherson_mykolaiv_odesa_roles.py",
+              "test_historical_replay_vinnytsia_reconciliation.py",
+              "test_historical_replay_poltava_reaudit.py",
+              "test_historical_replay_ternopil_recovery.py",
+              "test_historical_replay_rivne_recovery.py",
+          ]
+          focused = {}
+          for name in focused_names:
+              p = code_root/"tests"/name
+              focused[name] = test_result([sys.executable,"-m","pytest","-q",str(p)], target_dir) if p.exists() else None
+
+          def instrument(checkout, tag):
+              src = checkout/"kyiv-air-alerts-grafana/scripts/replay_explosion_history.py"
+              text = src.read_text(encoding="utf-8")
+              needle = '        payload["verdict"] = "CITY REPLAY COMPLETE — QA REQUIRED" if changed or errors else "CITY REPLAY CLEAN"'
+              if text.count(needle) != 1:
+                  raise RuntimeError(f"instrumentation needle count={text.count(needle)} for {tag}")
+              repl = (
+                  '        payload["_proof_strict_episode_ids"] = sorted(new_strict)\n'
+                  '        payload["_proof_sensitivity_episode_ids"] = sorted(new_sens)\n'
+                  + needle
+              )
+              out = Path(os.environ["RUNNER_TEMP"])/f"replay_instrumented_{tag}.py"
+              out.write_text(text.replace(needle,repl,1), encoding="utf-8")
+              return out
+
+          def ids_hash(ids):
+              return hashlib.sha256(("\n".join(ids)+"\n").encode("utf-8")).hexdigest()
+
+          def replay_city(checkout, city, tag):
+              head = git(checkout,"rev-parse","HEAD")
+              script = instrument(checkout, tag)
+              out = Path(os.environ["RUNNER_TEMP"])/f"{tag}_{city}.json"
+              env = dict(os.environ)
+              env["PYTHONPATH"] = str(checkout/"kyiv-air-alerts-grafana/scripts")
+              p = run([
+                  sys.executable, str(script),
+                  "--repo-root", str(checkout/"kyiv-air-alerts-grafana"),
+                  "--city", city, "--through", THROUGH,
+                  "--input-head", head, "--read-only", "--output", str(out)
+              ], cwd=checkout, env=env)
+              if not out.exists():
+                  return {"city_key":city,"status":"ERROR","errors":[f"replay rc={p.returncode}",p.stdout[-4000:]]}
+              j = json.loads(out.read_text(encoding="utf-8"))
+              strict_ids = j.get("_proof_strict_episode_ids") or []
+              sens_ids = j.get("_proof_sensitivity_episode_ids") or []
+              qa = len(j.get("changed_episodes") or []) + len(j.get("errors") or []) + len(j.get("unbound_review_evidence") or [])
+              return {
+                  "city_key":city,
+                  "episodes_checked":j.get("episodes_checked"),
+                  "strict":j.get("replayed_strict_episodes"),
+                  "sensitivity":j.get("replayed_sensitivity_episodes"),
+                  "QA":qa,
+                  "strict_episode_ids_sha256":ids_hash(strict_ids),
+                  "sensitivity_episode_ids_sha256":ids_hash(sens_ids),
+                  "status":j.get("status"),
+                  "verdict":j.get("verdict"),
+                  "errors":j.get("errors") or [],
+                  "_strict_ids":strict_ids,
+                  "_sensitivity_ids":sens_ids,
+                  "_rc":p.returncode,
+              }
+
+          def preflight(checkout, tag):
+              head = git(checkout,"rev-parse","HEAD")
+              out = Path(os.environ["RUNNER_TEMP"])/f"preflight_{tag}.json"
+              p = run([
+                  sys.executable, str(checkout/"kyiv-air-alerts-grafana/scripts/replay_explosion_history.py"),
+                  "--repo-root", str(checkout/"kyiv-air-alerts-grafana"),
+                  "--through", THROUGH, "--input-head", head, "--read-only", "--preflight", "--output", str(out)
+              ], cwd=checkout)
+              if not out.exists():
+                  raise RuntimeError(f"preflight {tag} produced no output rc={p.returncode}: {p.stdout[-5000:]}")
+              return json.loads(out.read_text(encoding="utf-8")), p.returncode
+
+          def matrix(checkout, tag, keep_ids):
+              pf, pf_rc = preflight(checkout, tag)
+              rows = {}
+              for c in pf.get("cities") or []:
+                  city = c.get("city_key")
+                  source_status = c.get("source_status")
+                  if source_status == "READY":
+                      row = replay_city(checkout, city, f"{tag}_{city}")
+                      row["preflight_status"] = source_status
+                  else:
+                      row = {
+                          "city_key":city,
+                          "episodes_checked":c.get("expected_alert_episodes") or c.get("reconstructed_alert_episodes"),
+                          "strict":None, "sensitivity":None, "QA":None,
+                          "strict_episode_ids_sha256":None, "sensitivity_episode_ids_sha256":None,
+                          "status":"BLOCKED", "verdict":None,
+                          "errors":c.get("blocker_codes") or c.get("errors") or [],
+                          "preflight_status":source_status,
+                      }
+                  if city not in keep_ids:
+                      row.pop("_strict_ids",None); row.pop("_sensitivity_ids",None)
+                  row.pop("_rc",None)
+                  rows[city]=row
+              return rows, {"rc":pf_rc,"verdict":pf.get("verdict"),"ready_city_count":pf.get("ready_city_count"),"blocked_city_count":pf.get("blocked_city_count")}
+
+          after, after_preflight = matrix(target_dir, "after", set(TARGETS))
+          semantic_paths = sorted(set(changed_paths) - {TEMP_WORKFLOW,VERIFY_MARKER,PROOF_ARTIFACT})
+          if not semantic_paths:
+              before = json.loads(json.dumps(after))
+              before_preflight = dict(after_preflight)
+          else:
+              base_dir = Path(os.environ["RUNNER_TEMP"])/"base"
+              if base_dir.exists(): shutil.rmtree(base_dir)
+              git(CONTROL, "worktree", "add", "--detach", str(base_dir), BASE_SHA)
+              before, before_preflight = matrix(base_dir, "before", set())
+
+          proof_rows = {}
+          reconcile = {}
+          phase_targets = HMO if phase == "HMO" else (TARGETS if phase == "FULL" else [])
+          proof_dirs = {}
+          for city in phase_targets:
+              sha = PROOF_SHA[city]
+              if sha not in proof_dirs:
+                  git(CONTROL, "fetch", "origin", sha)
+                  d = Path(os.environ["RUNNER_TEMP"])/f"proof_{sha[:10]}"
+                  if d.exists(): shutil.rmtree(d)
+                  git(CONTROL, "worktree", "add", "--detach", str(d), sha)
+                  proof_dirs[sha]=d
+              ref = replay_city(proof_dirs[sha], city, f"proof_{city}")
+              proof_rows[city] = {k:v for k,v in ref.items() if not k.startswith("_")}
+              cur = after.get(city) or {}
+              cs = cur.get("_strict_ids") or []
+              cp = cur.get("_sensitivity_ids") or []
+              rs = ref.get("_strict_ids") or []
+              rp = ref.get("_sensitivity_ids") or []
+              reconcile[city] = {
+                  "missing_accepted_strict_ids":sorted(set(rs)-set(cs)),
+                  "unexpected_strict_ids":sorted(set(cs)-set(rs)),
+                  "missing_accepted_sensitivity_ids":sorted(set(rp)-set(cp)),
+                  "unexpected_sensitivity_ids":sorted(set(cp)-set(rp)),
+                  "duplicate_counted_strict_ids":len(cs)-len(set(cs)),
+                  "duplicate_counted_sensitivity_ids":len(cp)-len(set(cp)),
+                  "accepted_strict_sha256":ids_hash(rs),
+                  "accepted_sensitivity_sha256":ids_hash(rp),
+              }
+
+          def row_expected(city):
+              r=after.get(city) or {}
+              e=EXPECTED[city]
+              return (r.get("episodes_checked"),r.get("strict"),r.get("sensitivity"),r.get("QA")) == e
+
+          target_count_checks = {c:row_expected(c) for c in phase_targets}
+          exact_sets_ok = all(
+              not x["missing_accepted_strict_ids"] and not x["unexpected_strict_ids"] and
+              not x["missing_accepted_sensitivity_ids"] and not x["unexpected_sensitivity_ids"] and
+              x["duplicate_counted_strict_ids"]==0 and x["duplicate_counted_sensitivity_ids"]==0
+              for x in reconcile.values()
+          ) if reconcile else True
+
+          def public_row(r):
+              return {k:v for k,v in r.items() if not k.startswith("_")}
+
+          non_target_deltas=[]
+          for city in sorted(set(before)|set(after)):
+              if city in TARGETS: continue
+              a=public_row(after.get(city) or {})
+              b=public_row(before.get(city) or {})
+              keys=["episodes_checked","strict","sensitivity","QA","strict_episode_ids_sha256","sensitivity_episode_ids_sha256","status","preflight_status","errors"]
+              delta={k:[b.get(k),a.get(k)] for k in keys if b.get(k)!=a.get(k)}
+              if delta: non_target_deltas.append({"city_key":city,"delta":delta})
+
+          def aggregate(cities):
+              rows=[after[c] for c in cities]
+              if any(r.get("episodes_checked") is None or r.get("strict") is None or r.get("sensitivity") is None for r in rows):
+                  return None
+              return {
+                  "episodes":sum(r["episodes_checked"] for r in rows),
+                  "strict":sum(r["strict"] for r in rows),
+                  "sensitivity":sum(r["sensitivity"] for r in rows),
+                  "QA":sum(r["QA"] or 0 for r in rows),
+              }
+
+          hmo_agg=aggregate(HMO) if all(c in after for c in HMO) else None
+          recovery_agg=aggregate(RECOVERY) if all(c in after for c in RECOVERY) else None
+          total_agg=aggregate(TARGETS) if all(c in after for c in TARGETS) else None
+          dnipro_ok = "dnipro" in after and row_expected("dnipro")
+
+          monitor_blob = blob(target_dir,"kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py")
+          replay_blob = blob(target_dir,"kyiv-air-alerts-grafana/scripts/replay_explosion_history.py")
+          baseline_blob = blob(target_dir,"kyiv-air-alerts-grafana/data/explosion_audited_baseline.json")
+          tests_ok = monitor_test["rc"]==0 and replay_test["rc"]==0 and historical_pytest["rc"]==0 and all(v is None or v["rc"]==0 for v in focused.values())
+          protected_ok = not unexpected_paths and monitor_blob=="927dc89df0b52edd52cb31a126b0d57ca492a278"
+          regression_ok = not non_target_deltas
+
+          verdict = "BASELINE CAPTURE BLOCKED"
+          green=False
+          if phase=="BASELINE":
+              green = tests_ok and protected_ok and regression_ok
+              verdict = "BASELINE CAPTURE GREEN" if green else "BASELINE CAPTURE BLOCKED"
+          elif phase=="HMO":
+              green = tests_ok and protected_ok and regression_ok and dnipro_ok and all(target_count_checks.values()) and exact_sets_ok and hmo_agg=={"episodes":4525,"strict":276,"sensitivity":295,"QA":0}
+              verdict = "H/M/O STAGING GATE GREEN" if green else "H/M/O STAGING GATE BLOCKED"
+          else:
+              green = (
+                  tests_ok and protected_ok and regression_ok and dnipro_ok and all(target_count_checks.values()) and exact_sets_ok and
+                  hmo_agg=={"episodes":4525,"strict":276,"sensitivity":295,"QA":0} and
+                  recovery_agg=={"episodes":3900,"strict":125,"sensitivity":131,"QA":0} and
+                  total_agg=={"episodes":8425,"strict":401,"sensitivity":426,"QA":0}
+              )
+              verdict = "CONSOLIDATED HISTORICAL REPLAY APPLY PROVEN ON FRESH AUTHORITATIVE BASE" if green else "CONSOLIDATED HISTORICAL REPLAY APPLY BLOCKED"
+
+          result={
+              "schema_version":1,
+              "control_head":control_head,
+              "target_head":target_head,
+              "base_head":BASE_SHA,
+              "phase":phase,
+              "green":green,
+              "verdict":verdict,
+              "changed_paths":changed_paths,
+              "unexpected_paths":unexpected_paths,
+              "semantic_paths":semantic_paths,
+              "monitor_blob":monitor_blob,
+              "replay_blob":replay_blob,
+              "baseline_blob":baseline_blob,
+              "monitor_self_test":monitor_test,
+              "replay_self_test":replay_test,
+              "historical_replay_pytest":historical_pytest,
+              "focused_tests":focused,
+              "before_preflight":before_preflight,
+              "after_preflight":after_preflight,
+              "before_matrix":{c:public_row(r) for c,r in sorted(before.items())},
+              "after_matrix":{c:public_row(r) for c,r in sorted(after.items())},
+              "target_episode_ids":{c:{
+                  "strict":after[c].get("_strict_ids") or [],
+                  "sensitivity":after[c].get("_sensitivity_ids") or []
+              } for c in phase_targets if c in after},
+              "proof_rows":proof_rows,
+              "exact_episode_set_reconciliation":reconcile,
+              "target_count_checks":target_count_checks,
+              "hmo_aggregate":hmo_agg,
+              "recovery_aggregate":recovery_agg,
+              "target_13_aggregate":total_agg,
+              "dnipro_control":{"ok":dnipro_ok,"row":public_row(after.get("dnipro") or {})},
+              "non_target_regression":{"count":len(non_target_deltas),"deltas":non_target_deltas},
+              "protected_state":{"unexpected_path_count":len(unexpected_paths),"monitor_blob_unchanged":monitor_blob=="927dc89df0b52edd52cb31a126b0d57ca492a278"},
+          }
+          print("GATE_RESULT_JSON="+json.dumps(result,ensure_ascii=True,separators=(",",":"),sort_keys=True))
+          if not green:
+              raise SystemExit(1)
+          PY
+          python "$RUNNER_TEMP/consolidated_gate.py"
