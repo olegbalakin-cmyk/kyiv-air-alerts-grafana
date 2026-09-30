@@ -42,7 +42,7 @@ jobs:
       - name: Run consolidated gate
         shell: bash
         env:
-          BASE_SHA: dd58e1213e54cc6a5a2a29e56daab04ef78b818d
+          BASE_SHA: a10ce7506f83ba5163a6b6971e156b68412dba51
         run: |
           set -euo pipefail
           cat > "$RUNNER_TEMP/consolidated_gate.py" <<'PY'
@@ -57,6 +57,7 @@ jobs:
           TEMP_WORKFLOW = ".github/workflows/temp-consolidated-historical-replay-gate.yml"
           VERIFY_MARKER = "research/.consolidated_replay_verify_target"
           PROOF_ARTIFACT = "research/historical_replay_consolidated_authoritative_apply_2026-09-30.json"
+          TERNOPIL_FIXTURE = "research/historical_replay_ternopil_evidence_recovery_proof_2026-09-30.json"
           TARGETS = [
               "kherson","mykolaiv","odesa","zhytomyr","uzhhorod","chernivtsi",
               "ivano_frankivsk","khmelnytskyi","lutsk","vinnytsia","poltava","ternopil","rivne"
@@ -146,7 +147,7 @@ jobs:
           phase = "FULL" if hmo_match and recovery_match else ("HMO" if hmo_match else "BASELINE")
 
           changed_paths = [x for x in git(target_dir, "diff", "--name-only", f"{BASE_SHA}..{target_head}").splitlines() if x]
-          allowed = {TEMP_WORKFLOW, VERIFY_MARKER, PROOF_ARTIFACT}
+          allowed = {TEMP_WORKFLOW, VERIFY_MARKER, PROOF_ARTIFACT, TERNOPIL_FIXTURE}
           if phase in {"HMO","FULL"}:
               allowed |= set(HMO_BLOBS)
           if phase == "FULL":
