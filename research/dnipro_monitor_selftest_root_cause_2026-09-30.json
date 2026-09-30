@@ -1,0 +1,131 @@
+{
+  "date": "2026-09-30",
+  "task": "Dnipro monitor self-test causal isolation",
+  "authoritative_head": "e5d81607e5881391503eadc537ee3a8dda4f23b7",
+  "research_branch": "dnipro-monitor-selftest-root-cause-research-2026-09-30",
+  "fixed_base": "6ba36cd0c4ee0c5e8fd61d57fffd98404ac64397",
+  "monitor_blob": "b55fe2ed082958917c74f95bca2fd6bc137bcaae",
+  "replay_blobs": {
+    "old": "99b13318a3bd53013a798bd4c66c87c4aed6f45b",
+    "new": "816e2a13f66bb453fc4bd765318d15443121325e"
+  },
+  "data_bundles": {
+    "old": {
+      "data/dashboard_data.json": "4f5c730dd06f5734c905f4bfce4c10b45a838f01",
+      "data/explosion_candidate_monitor_last_run.json": "3e353793f05e85861575c6d739e95c61b27408dd",
+      "data/explosion_candidate_monitor_state.json": "9091f4e8984fa31f8ffb8f41e7de8a1ab683db98",
+      "data/explosion_review_queue.json": "5424b94f3d9fc132e1c67d6a2ce728a1c6d0bc8c",
+      "data/explosions_test.json": "70b64578d2ddccc6e3a625b004832e1407d51788"
+    },
+    "new": {
+      "data/dashboard_data.json": "7d5b7722cdf7c510b4995e8a7baaadb7fadc3241",
+      "data/explosion_candidate_monitor_last_run.json": "7caa3987c44b2e763ac2b1b18a4c15af05a1169a",
+      "data/explosion_candidate_monitor_state.json": "2aa0f9ab5d405859fb05e8cd4a364cc0853b17c4",
+      "data/explosion_review_queue.json": "325ccd2645d18ca3f5a5996b57f7be936cfe615f",
+      "data/explosions_test.json": "371d8eeb7ee72d96875994c380063f2b34383653"
+    }
+  },
+  "matrix": {
+    "A": {
+      "replay": "old",
+      "data": "old",
+      "exit_code": 0,
+      "result": "PASS"
+    },
+    "B": {
+      "replay": "old",
+      "data": "new",
+      "exit_code": 1,
+      "result": "FAIL",
+      "failure": {
+        "assertion": "result[\"final_composed_verdict\"] == \"approved_strict\"",
+        "target_episode_id": "e97e6e816f96832d02c8b2cd",
+        "city_key": "kyiv",
+        "expected": "approved_strict",
+        "actual": "no_composed_strict",
+        "reason_codes": [
+          "NO_SAFE_EPISODE_LEVEL_COMPOSITION"
+        ],
+        "candidate_count_considered": 2,
+        "contributing_candidate_ids": [],
+        "anchor_candidate_id": null,
+        "temporal_anchor_candidate_ids": [],
+        "air_context_candidate_ids": [
+          "4bdc4c0a5f95dc1e01632d22"
+        ]
+      }
+    },
+    "C": {
+      "replay": "new",
+      "data": "old",
+      "exit_code": 0,
+      "result": "PASS"
+    },
+    "D": {
+      "replay": "new",
+      "data": "new",
+      "exit_code": 1,
+      "result": "FAIL",
+      "failure": {
+        "assertion": "result[\"final_composed_verdict\"] == \"approved_strict\"",
+        "target_episode_id": "e97e6e816f96832d02c8b2cd",
+        "city_key": "kyiv",
+        "expected": "approved_strict",
+        "actual": "no_composed_strict",
+        "reason_codes": [
+          "NO_SAFE_EPISODE_LEVEL_COMPOSITION"
+        ],
+        "candidate_count_considered": 2,
+        "contributing_candidate_ids": [],
+        "anchor_candidate_id": null,
+        "temporal_anchor_candidate_ids": [],
+        "air_context_candidate_ids": [
+          "4bdc4c0a5f95dc1e01632d22"
+        ]
+      }
+    }
+  },
+  "causal_classification": "PRE-EXISTING GENERATED MONITOR-DATA DRIFT",
+  "mechanism": {
+    "target_episode_id": "e97e6e816f96832d02c8b2cd",
+    "composition_fixture": {
+      "anchor_candidate_id": "73d817926f66c8dce397b91b",
+      "context_candidate_id": "4bdc4c0a5f95dc1e01632d22"
+    },
+    "old_state": {
+      "active_representation_at_anchor_message_time": [
+        {
+          "episode_id": "e97e6e816f96832d02c8b2cd",
+          "alert_start": "2026-09-23T07:24:00Z",
+          "alert_end": "2026-09-23T09:29:00Z"
+        }
+      ]
+    },
+    "new_state": {
+      "active_representations_at_anchor_message_time": [
+        {
+          "episode_id": "e97e6e816f96832d02c8b2cd",
+          "alert_start": "2026-09-23T07:24:00Z",
+          "alert_end": "2026-09-23T09:29:00Z"
+        },
+        {
+          "episode_id": "782041e0741ad4cee3d3180e",
+          "alert_start": "2026-09-23T07:24:05Z",
+          "alert_end": "2026-09-23T09:29:45Z"
+        }
+      ]
+    },
+    "anchor_message_time": "2026-09-23T07:55:51Z",
+    "explanation": "The composition self-test recomputes contributor classification from queue + monitor state. temporal_binding_evidence treats trusted contemporaneous live wording as episode-specific only when exact_active_episodes_at(message_time) returns exactly one raw episode. OLD state has only e97 active at 07:55:51Z, so 73d817... is a temporal anchor. NEW state adds near-duplicate raw representation 782041... covering the same instant; exact_active_episodes_at returns both raw IDs, so the live temporal binding becomes ambiguous and no temporal anchor is available. match_candidate_to_episodes separately reconciles the pair as one logical near-duplicate window, but temporal_binding_evidence does not collapse those representations. The replay blob is irrelevant to this path, as demonstrated by B failing with old replay and C passing with new replay."
+  },
+  "dnipro_replay_semantics_can_remain_authoritative": true,
+  "separate_monitor_generated_data_repair_required": true,
+  "repair_scope": "Generated monitor state / temporal-binding handling of near-duplicate alert representations; do not change Dnipro replay semantics as a response to this failure.",
+  "proof": {
+    "workflow_run_id": 36673940232,
+    "workflow_job_id": 109754710322,
+    "uploaded_matrix_artifact_id": 11079391616
+  },
+  "protected_state": "No authoritative/protected branch, runtime code, generated data, historical evidence, classifier, DB/Neon, main, site-prod, 6863, H/M/O, six-city recovery, or Vinnytsia changes were made.",
+  "exact_verdict": "PRE-EXISTING GENERATED MONITOR-DATA DRIFT"
+}
