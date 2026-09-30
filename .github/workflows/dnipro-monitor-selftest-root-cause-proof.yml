@@ -20,6 +20,10 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Install monitor runtime dependencies
+        shell: bash
+        run: python3 -m pip install -r kyiv-air-alerts-grafana/requirements.txt
+
       - name: Materialize fixed-base 2x2 cells
         shell: bash
         run: |
