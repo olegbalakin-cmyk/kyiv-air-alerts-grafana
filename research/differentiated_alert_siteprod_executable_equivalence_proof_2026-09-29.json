@@ -1,0 +1,203 @@
+{
+  "schema_version": 1,
+  "verdict": "CURRENT SITE-PROD DIFFERENTIATED SHADOW OFF/ON EQUIVALENCE PROVEN",
+  "ready_for": "READY FOR DIFFERENTIATED POSTGRES CHILD-PERSISTENCE PROOF",
+  "db_cutover": "NO",
+  "frozen_production_base_sha": "9a0769ff49735cdb870abeb913ffb869f39e5e88",
+  "evidence_aggregation": {
+    "rule": "Full executable run supplies production-equivalence/fail-open gates; focused correction run supplies exact-replay idempotency only.",
+    "full_executable_run_id": 36702343875,
+    "full_executable_head_sha": "759006cc1948bf0342c75cb3668118d2bbbd367d",
+    "exact_replay_correction_run_id": 36754087461,
+    "exact_replay_correction_head_sha": "27099686c982b6a01ac49566fa567bbb06934b56"
+  },
+  "runtime_implementation_identity": {
+    "candidate_updater_blob_full_run": "eb2a5330fc73eb8c36920401dd3f9dfd2fac595a",
+    "candidate_updater_blob_correction_run": "eb2a5330fc73eb8c36920401dd3f9dfd2fac595a",
+    "sidecar_blob_full_run": "f6e159f0ed18f7f29913fc6cfa2161563d9eb0a6",
+    "sidecar_blob_correction_run": "f6e159f0ed18f7f29913fc6cfa2161563d9eb0a6",
+    "candidate_updater_unchanged": true,
+    "sidecar_unchanged": true,
+    "full_proof_runner_blob": "4967ce0e43b30ada6e509711c69d44e21e9da255",
+    "exact_replay_correction_runner_blob": "1f85389ee6d0d7b2356ee132e925fc93d6a02ef2",
+    "exact_replay_correction_test_blob": "db699936013905cbe54b2c1d8aa18b9e91f86e81"
+  },
+  "full_executable_run": {
+    "run_id": 36702343875,
+    "head_sha": "759006cc1948bf0342c75cb3668118d2bbbd367d",
+    "artifact": {
+      "id": 11091756277,
+      "name": "differentiated-alert-siteprod-equivalence-36702343875-1",
+      "digest": "sha256:2af116801c974d0ed11a50fc9aca8048515c27d42609819cc3d3602d74818785"
+    },
+    "ukrainealarm_auth_preflight": {
+      "status": "PASS",
+      "token_present": true,
+      "direct_probe_status": 200,
+      "subprocess_probe_status": 200,
+      "capture_probe_status": 200
+    },
+    "frozen_inputs": {
+      "request_count": 68,
+      "identical": true,
+      "off_manifest_sha256": "00eff9c49a44fdff1197e29013d93543b49ab92dde08384fe150583428c37f36",
+      "on_manifest_sha256": "00eff9c49a44fdff1197e29013d93543b49ab92dde08384fe150583428c37f36"
+    },
+    "publication_equivalence": {
+      "same_path_set": true,
+      "raw_hash_delta_count": 0,
+      "semantic_delta_count": 0,
+      "volatile_field_exclusions": []
+    },
+    "off_artifact_hashes": {
+      "data/alerts_combined.json": "7e63721189d70ba5894c099a30853c29c24e1ccfb5a7ebe4bae1d5bea766d8fa",
+      "data/casualties/review_queue.json": "3e8362de3e6d08387c577d68c2b44c1872a2653ec608055e59c865b24adb0e21",
+      "data/casualties/source_state.json": "0f1ba7424bea1a9384fcc0a2c53f0221b6cba78211cc90b808be48dc5decf3ef",
+      "data/dashboard_data.json": "3ae9d0e3b8fd851822eb8ec01cd3b9f7c30bc2c779307d33f1cb3b85e4c29d99",
+      "data/dashboard_qa.json": "80b2a950c6db1152476a1a9f37c08ebb8205ce358f6c3a1e31c840d5586307dc",
+      "data/sevastopol_events.json": "0c3c07d708fd2a827feec3fba5f51737c14e88a8390370696d140a8e71cc555c",
+      "data/short_28d.csv": "889a8a62a8eb8f1133ab01debd2abc79a25435e916b2fe3b278b4605acb325bb",
+      "data/ukrainealarm_bridge.json": "a2c1a208427e488abc0316c83e7bb5ddac5d57bb9e6c48ee904fee0dbc485808",
+      "grafana/dashboard.json": "5cfe00c4cbdb682b56ee88230cd70d20ff5df05b14c5b89f55c9b4d72606ef9e"
+    },
+    "on_artifact_hashes": {
+      "data/alerts_combined.json": "7e63721189d70ba5894c099a30853c29c24e1ccfb5a7ebe4bae1d5bea766d8fa",
+      "data/casualties/review_queue.json": "3e8362de3e6d08387c577d68c2b44c1872a2653ec608055e59c865b24adb0e21",
+      "data/casualties/source_state.json": "0f1ba7424bea1a9384fcc0a2c53f0221b6cba78211cc90b808be48dc5decf3ef",
+      "data/dashboard_data.json": "3ae9d0e3b8fd851822eb8ec01cd3b9f7c30bc2c779307d33f1cb3b85e4c29d99",
+      "data/dashboard_qa.json": "80b2a950c6db1152476a1a9f37c08ebb8205ce358f6c3a1e31c840d5586307dc",
+      "data/sevastopol_events.json": "0c3c07d708fd2a827feec3fba5f51737c14e88a8390370696d140a8e71cc555c",
+      "data/short_28d.csv": "889a8a62a8eb8f1133ab01debd2abc79a25435e916b2fe3b278b4605acb325bb",
+      "data/ukrainealarm_bridge.json": "a2c1a208427e488abc0316c83e7bb5ddac5d57bb9e6c48ee904fee0dbc485808",
+      "grafana/dashboard.json": "5cfe00c4cbdb682b56ee88230cd70d20ff5df05b14c5b89f55c9b4d72606ef9e"
+    },
+    "parent_air_equivalence": {
+      "status": "PASS",
+      "city_count": 23,
+      "global_semantic_delta": 0,
+      "created": 0,
+      "deleted": 0,
+      "split": 0,
+      "merged": 0,
+      "start_shift": 0,
+      "end_shift": 0
+    },
+    "attack_event_equivalence": {
+      "status": "PASS",
+      "cities_with_metric_delta": 0
+    },
+    "on_child_persistence": {
+      "attempted": true,
+      "status": "SUCCEEDED",
+      "inserted_snapshots": 3,
+      "inserted_observations": 3,
+      "store_counts": {
+        "snapshots": 3,
+        "observations": 3
+      }
+    },
+    "forced_shadow_failure": {
+      "shadow_status": "FAILED",
+      "pipeline_exit": "success",
+      "publication_delta_count_vs_off": 0
+    },
+    "regression_tests": {
+      "shadow_ingestion": "PASS",
+      "shadow_local_extra": "PASS",
+      "production_integration": "PASS"
+    },
+    "credentials_exposed": false,
+    "production_writes": 0,
+    "exact_replay_from_this_run": {
+      "accepted_as_gate": false,
+      "reason": "Original runner invoked replay without effective differentiated runtime env; result was DISABLED and therefore not valid idempotency evidence.",
+      "attempted": false,
+      "status": "DISABLED",
+      "inserted_snapshots": 0,
+      "inserted_observations": 0,
+      "store_counts": null
+    }
+  },
+  "exact_replay_correction_run": {
+    "run_id": 36754087461,
+    "head_sha": "27099686c982b6a01ac49566fa567bbb06934b56",
+    "artifact": {
+      "id": 11115742527,
+      "name": "differentiated-alert-exact-replay-correction-36754087461-1",
+      "digest": "sha256:48337fcf77991bf29bb0ffa5409fbde00d2254677248f308104e2df60e5ecb77"
+    },
+    "proof_scope": "focused_exact_replay_correction_only",
+    "external_network_required": false,
+    "frozen_parent_corpus": "data/alerts_combined.json",
+    "frozen_now": "2026-09-29T09:13:47Z",
+    "first_run": {
+      "attempted": true,
+      "status": "SUCCEEDED",
+      "inserted_snapshots": 3,
+      "inserted_observations": 3,
+      "store_counts": {
+        "snapshots": 3,
+        "observations": 3
+      }
+    },
+    "second_exact_replay": {
+      "attempted": true,
+      "status": "SUCCEEDED",
+      "inserted_snapshots": 0,
+      "inserted_observations": 0,
+      "store_counts": {
+        "snapshots": 3,
+        "observations": 3
+      },
+      "gate_pass": true
+    },
+    "fresh_process_third_replay": {
+      "attempted": true,
+      "status": "SUCCEEDED",
+      "inserted_snapshots": 0,
+      "inserted_observations": 0,
+      "store_counts": {
+        "snapshots": 3,
+        "observations": 3
+      },
+      "gate_pass": true
+    },
+    "final_store_counts_equal": true,
+    "disabled_zero_zero_rejected": true,
+    "regression_test_count": 2,
+    "regression_tests_status": "PASS",
+    "production_writes": 0
+  },
+  "production_guard": {
+    "final_main_sha": "940c806509318cd7b82a31400760b5023c2d6770",
+    "final_site_prod_sha": "928a566b7a8dc7916c93810eaafe319da3b28ee4",
+    "production_workflow_blob": "a451cb205be4cf5a597f3f72e04426c12868e3da",
+    "site_prod_updater_blob": "7d7fde6d8c736cd754804dd051845cf59738d8c9",
+    "drift_from_frozen_base_classification": "GENERATED_RUNTIME_DATA_ONLY",
+    "drift_paths": [
+      "kyiv-air-alerts-grafana/data/alerts_combined.json",
+      "kyiv-air-alerts-grafana/data/casualties/review_queue.json",
+      "kyiv-air-alerts-grafana/data/casualties/source_state.json",
+      "kyiv-air-alerts-grafana/data/dashboard_data.json",
+      "kyiv-air-alerts-grafana/data/dashboard_qa.json",
+      "kyiv-air-alerts-grafana/data/sevastopol_events.json",
+      "kyiv-air-alerts-grafana/data/short_28d.csv",
+      "kyiv-air-alerts-grafana/data/ukrainealarm_bridge.json",
+      "kyiv-air-alerts-grafana/grafana/dashboard.json"
+    ],
+    "relevant_code_semantic_drift": false,
+    "rebase_performed": false
+  },
+  "safety": {
+    "main_modified_by_task": false,
+    "site_prod_modified_by_task": false,
+    "permanent_neon_touched": false,
+    "production_deploy_performed": false,
+    "production_writes": 0,
+    "credentials_exposed": false
+  },
+  "cleanup": {
+    "temporary_workflow_path": ".github/workflows/differentiated-alert-siteprod-equivalence-proof.yml",
+    "temporary_workflow_absent_at_final_head": true
+  }
+}
