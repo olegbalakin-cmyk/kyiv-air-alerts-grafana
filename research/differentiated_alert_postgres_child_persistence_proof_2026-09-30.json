@@ -1,37 +1,45 @@
 {
   "schema_version": 1,
-  "status": "BLOCKED",
-  "blocker": {
-    "code": "NEON_BRANCH_LIMIT_EXCEEDED",
-    "operation": "create disposable child branch",
-    "requested_name": "differentiated-alert-postgres-child-persistence-proof-2026-09-30",
-    "requested_parent_id": "br-young-feather-b5q19nli",
-    "neon_error": "branches limit exceeded",
-    "mutation_before_failure": false,
-    "safe_resolution_required": "Free one Neon branch slot or raise the project branch limit; do not reuse/reset an existing proof branch."
-  },
-  "requested_success_verdict_emitted": false,
-  "requested_ready_for_emitted": false,
+  "status": "PASS",
+  "verdict": "DIFFERENTIATED POSTGRES CHILD-PERSISTENCE PROVEN",
+  "ready_for": "READY FOR DIFFERENTIATED NEON SHADOW INTEGRATION PROOF",
   "db_cutover": "NO",
   "git": {
     "proof_branch": "differentiated-alert-postgres-child-persistence-proof-2026-09-30",
-    "source_accepted_proof_head": "4834dfe734c1a993ba941444ea5f12046cd88cd7",
+    "resumed_from_head": "2333ea92e38672e123332b082efb10f37f9f5aaf",
     "accepted_runtime_blobs_unchanged": true,
     "candidate_updater_blob": "eb2a5330fc73eb8c36920401dd3f9dfd2fac595a",
     "differentiated_sidecar_blob": "f6e159f0ed18f7f29913fc6cfa2161563d9eb0a6",
     "schema_candidate_blob": "3580847807c449df12b3d4a9ea062d69a8f6ec01",
     "postgres_adapter_blob": "3cd9c9c5fc0676550aeb1cfa117894e1fc91e85f",
-    "focused_test_blob": "67b3b48896780a2a12d8bc932def0719500b6f69"
+    "focused_test_blob": "67b3b48896780a2a12d8bc932def0719500b6f69",
+    "proof_harness_commit": "7877d9a52fa0350d1e12a6c25984a9247312927e",
+    "accepted_proof_workflow_head": "e8d1c9bf378418e35169b770e119bd324d9fd9e8"
   },
   "neon": {
     "project_id": "green-cake-44216048",
-    "clean_parent_branch_id": "br-young-feather-b5q19nli",
+    "parent_branch_id": "br-young-feather-b5q19nli",
+    "parent_branch_name": "lviv-phase1-tx-pilot-2026-09-27",
+    "disposable_proof_branch_id": "br-icy-forest-b5mfyezq",
+    "disposable_proof_branch_name": "differentiated-alert-postgres-child-persistence-proof-2026-09-30",
+    "disposable_parent_lsn": "0/1EDC9C0",
+    "disposable_parent_timestamp": "2026-09-30T18:49:07Z",
     "permanent_production_shadow_branch_id": "br-bold-mode-b5rub8pq",
-    "disposable_proof_branch_id": null,
-    "ddl_applied": false,
-    "child_data_written": false
+    "disposable_branch_left_available_for_review": true
+  },
+  "ddl": {
+    "source_path": "research/differentiated_alert_schema_candidate_2026-09-29.sql",
+    "git_blob": "3580847807c449df12b3d4a9ea062d69a8f6ec01",
+    "applied_only_to_disposable_child": true,
+    "application_status": "PASS"
+  },
+  "adapter": {
+    "path": "kyiv-air-alerts-grafana/scripts/differentiated_alert_postgres.py",
+    "git_blob": "3cd9c9c5fc0676550aeb1cfa117894e1fc91e85f",
+    "accepted_implementation_changed": false
   },
   "clean_parent_guard": {
+    "fingerprint_method": "md5(string_agg(to_jsonb(row)::text,'' ORDER BY primary_uuid::text)) for each parent table",
     "pre_counts": {
       "ingestion_runs": 1,
       "alert_episodes": 126,
@@ -47,71 +55,246 @@
       "max_checkpoint_seq": 1
     },
     "pre_fingerprints_md5": {
-      "alert_episodes": "1697e31f3b720e5183530625341dc97d",
-      "alert_episode_sources": "b8de9154c8c518f7df216bb90b2c024c",
       "ingestion_runs": "c6f4a8e5af54f0bebf86773c48bf8dc5",
+      "alert_episodes": "6b557406ab169f9fa7d0dde63bcec121",
+      "alert_episode_sources": "dccc2fa4fbc8fae6b7e1b7f9d9d2c2f3",
       "ingestion_checkpoints": "2a982250b3dc8e3b11e96dc859e83acb"
     },
     "post_fingerprints_md5": {
+      "ingestion_runs": "c6f4a8e5af54f0bebf86773c48bf8dc5",
+      "alert_episodes": "6b557406ab169f9fa7d0dde63bcec121",
+      "alert_episode_sources": "dccc2fa4fbc8fae6b7e1b7f9d9d2c2f3",
+      "ingestion_checkpoints": "2a982250b3dc8e3b11e96dc859e83acb"
+    },
+    "byte_semantic_fingerprints_identical": true,
+    "parent_modified": false,
+    "historical_blocked_artifact_fingerprints_preserved": {
       "alert_episodes": "1697e31f3b720e5183530625341dc97d",
       "alert_episode_sources": "b8de9154c8c518f7df216bb90b2c024c",
       "ingestion_runs": "c6f4a8e5af54f0bebf86773c48bf8dc5",
-      "ingestion_checkpoints": "2a982250b3dc8e3b11e96dc859e83acb"
-    },
-    "identical": true
+      "ingestion_checkpoints": "2a982250b3dc8e3b11e96dc859e83acb",
+      "note": "Prior artifact used a different deterministic serialization/order for the two multi-row tables; its own pre/post values were identical. Fresh continuation uses one explicitly recorded primary-UUID ordering before and after the child proof."
+    }
   },
-  "permanent_production_shadow_guard": {
-    "counts_observed_after_blocker": {
-      "ingestion_runs": 13,
-      "alert_episodes": 126,
-      "alert_episode_sources": 140,
-      "ingestion_checkpoints": 13,
-      "max_checkpoint_seq": 13
-    },
-    "touched_by_task": false
-  },
-  "git_only_implementation": {
-    "schema_candidate_copied_from_accepted_schema_proof_without_semantic_change": true,
-    "adapter_path": "kyiv-air-alerts-grafana/scripts/differentiated_alert_postgres.py",
-    "focused_test_path": "kyiv-air-alerts-grafana/tests/test_differentiated_alert_postgres.py",
-    "adapter_has_parent_mutation_api": false,
-    "transaction_rollback_path_present": true,
-    "idempotency_by_snapshot_key_and_threat_observation_key": true,
-    "raw_values_preserved_in_typed_columns_and_snapshot_provenance": true
-  },
-  "local_focused_tests": {
+  "child_schema_verification": {
     "status": "PASS",
-    "test_count": 7,
-    "scope": [
-      "BOUND parent resolution",
-      "AMBIGUOUS/UNBOUND parent-reference rejection",
-      "missing BOUND parent rejection",
-      "exact retry",
-      "later poll creates new identities",
-      "forced rollback after snapshot",
-      "no parent mutation SQL"
+    "tables": [
+      "alert_state_snapshots",
+      "alert_threat_observations"
     ],
-    "caveat": "These are local fake-connection adapter tests, not accepted Neon PostgreSQL proof evidence."
+    "columns_verified": true,
+    "primary_keys_verified": true,
+    "unique_constraints_verified": true,
+    "check_constraints_verified": true,
+    "foreign_keys_verified": true,
+    "indexes_verified": true,
+    "on_delete_restrict_verified": true,
+    "key_constraints": [
+      "alert_state_snapshots_binding_check",
+      "alert_state_snapshots_episode_uid_fkey ON DELETE RESTRICT",
+      "alert_state_snapshots_episode_source_observation_id_fkey ON DELETE RESTRICT",
+      "alert_threat_observations_snapshot_uid_fkey ON DELETE RESTRICT",
+      "alert_threat_observations_end_after_start_check"
+    ]
   },
-  "unexecuted_required_neon_gates": [
-    "schema application and pg_catalog/information_schema verification",
-    "real-source fixture persistence",
-    "PROOF_SYNTHETIC_BOUNDING_CASE",
-    "PostgreSQL constraint rejection suite",
-    "exact replay in Neon",
-    "fresh-process exact replay in Neon",
-    "later-poll semantics in Neon",
-    "atomic rollback in Neon",
-    "fresh-query raw source-fact preservation",
-    "post-proof parent fingerprint after child mutations"
-  ],
-  "safety": {
+  "proof_execution": {
+    "accepted_run_id": 36764464630,
+    "accepted_run_head_sha": "e8d1c9bf378418e35169b770e119bd324d9fd9e8",
+    "conclusion": "success",
+    "artifact_id": 11119399075,
+    "artifact_name": "differentiated-alert-postgres-child-persistence-36764464630-1",
+    "artifact_digest": "sha256:8ea5181d441689d5b684da1bd1275d8d79f3515061e9553738cd7a3c2e51bfc8",
+    "regression_tests": {
+      "status": "PASS",
+      "test_count": 7
+    },
+    "credentials_exposed": false
+  },
+  "real_fixture_persistence": {
+    "status": "PASS",
+    "frozen_observed_at": "2026-09-29T09:13:47Z",
+    "first_run": {
+      "inserted_snapshots": 3,
+      "inserted_observations": 3,
+      "existing_snapshots": 0,
+      "existing_observations": 0
+    },
+    "records": [
+      {
+        "source": "kyiv_official",
+        "target_city_key": "kyiv",
+        "binding_state": "UNBOUND",
+        "episode_uid": null,
+        "threat_count": 0,
+        "snapshot_key": "50e831a624da1f19cb3f398b2ca454eb4e22629ca184dee502abbc375fd5bb99"
+      },
+      {
+        "source": "ukrainealarm",
+        "target_city_key": "zaporizhzhia",
+        "binding_state": "UNBOUND",
+        "episode_uid": null,
+        "threat_count": 2,
+        "snapshot_key": "cd6c1d3c5f43ec172c05bc815281139bd933009cdbaeadf7a22978a17a30ea66"
+      },
+      {
+        "source": "alerts_in_ua",
+        "target_city_key": "donetsk",
+        "binding_state": "UNBOUND",
+        "episode_uid": null,
+        "threat_count": 1,
+        "snapshot_key": "56ddee107b195ee0bdc8d1bec2eb8767a013e9f273067609ff4161310f49c683"
+      }
+    ],
+    "false_binding": false
+  },
+  "synthetic_bound_case": {
+    "status": "PASS",
+    "marker": "PROOF_SYNTHETIC_BOUNDING_CASE",
+    "binding_state": "BOUND",
+    "expected_episode_uid": "3b4932ba-d14d-4ea9-b78f-36f1aa2e5fc6",
+    "persisted_episode_uid": "3b4932ba-d14d-4ea9-b78f-36f1aa2e5fc6",
+    "target_city_key": "lviv",
+    "inserted_snapshots": 1,
+    "inserted_observations": 0,
+    "parent_mutation": false
+  },
+  "constraint_rejections": {
+    "status": "PASS",
+    "cases": [
+      {
+        "case": "BOUND + null episode",
+        "rejected": true,
+        "constraint": "alert_state_snapshots_binding_check"
+      },
+      {
+        "case": "UNBOUND + non-null episode",
+        "rejected": true,
+        "constraint": "alert_state_snapshots_binding_check"
+      },
+      {
+        "case": "AMBIGUOUS + non-null episode",
+        "rejected": true,
+        "constraint": "alert_state_snapshots_binding_check"
+      },
+      {
+        "case": "nonexistent parent FK",
+        "rejected": true,
+        "constraint": "alert_state_snapshots_episode_uid_fkey"
+      },
+      {
+        "case": "nonexistent snapshot FK",
+        "rejected": true,
+        "constraint": "alert_threat_observations_snapshot_uid_fkey"
+      },
+      {
+        "case": "source_ended_at < source_started_at",
+        "rejected": true,
+        "constraint": "alert_threat_observations_end_after_start_check"
+      }
+    ]
+  },
+  "exact_replay": {
+    "status": "PASS",
+    "second_run": {
+      "inserted_snapshots": 0,
+      "inserted_observations": 0,
+      "existing_snapshots": 3,
+      "existing_observations": 3
+    }
+  },
+  "fresh_process_replay": {
+    "status": "PASS",
+    "returncode": 0,
+    "inserted_snapshots": 0,
+    "inserted_observations": 0,
+    "existing_snapshots": 3,
+    "existing_observations": 3,
+    "store_counts": {
+      "snapshots": 3,
+      "observations": 3
+    }
+  },
+  "later_legitimate_poll": {
+    "status": "PASS",
+    "source": "ukrainealarm",
+    "observed_at": "2026-09-29T09:18:47Z",
+    "binding_state": "UNBOUND",
+    "episode_uid": null,
+    "inserted_snapshots": 1,
+    "inserted_observations": 2,
+    "over_deduplicated": false
+  },
+  "rollback_proof": {
+    "status": "PASS",
+    "injected_failure_after_snapshot": true,
+    "error_type": "RuntimeError",
+    "before_counts": {
+      "snapshots": 5,
+      "observations": 5
+    },
+    "after_counts": {
+      "snapshots": 5,
+      "observations": 5
+    },
+    "snapshot_residue": 0,
+    "observation_residue": 0
+  },
+  "raw_value_preservation": {
+    "status": "PASS",
+    "provenance_snapshot_exact_for_all_real_records": true,
+    "provenance_threats_exact_for_all_real_records": true,
+    "raw_sha256_exact_for_all_real_records": true,
+    "all_real_unbound_episode_uid_null": true
+  },
+  "independent_post_run_child_check": {
+    "status": "PASS",
+    "snapshots": 5,
+    "observations": 5,
+    "real_source_bindings": [
+      {
+        "source": "kyiv_official",
+        "binding_state": "UNBOUND",
+        "episode_uid": null
+      },
+      {
+        "source": "ukrainealarm",
+        "binding_state": "UNBOUND",
+        "episode_uid": null
+      },
+      {
+        "source": "alerts_in_ua",
+        "binding_state": "UNBOUND",
+        "episode_uid": null
+      }
+    ],
+    "later_poll_distinct_snapshot": true,
+    "synthetic_bound_exact_parent_uid": true
+  },
+  "final_child_counts": {
+    "snapshots": 5,
+    "observations": 5
+  },
+  "production_guards": {
+    "main_expected_sha": "940c806509318cd7b82a31400760b5023c2d6770",
+    "main_final_sha": "940c806509318cd7b82a31400760b5023c2d6770",
     "main_touched": false,
+    "site_prod_expected_sha": "928a566b7a8dc7916c93810eaafe319da3b28ee4",
+    "site_prod_final_sha": "928a566b7a8dc7916c93810eaafe319da3b28ee4",
     "site_prod_touched": false,
+    "permanent_production_shadow_touched": false,
+    "permanent_production_shadow_migrated": false,
+    "production_workflow_changed": false,
+    "deploy": false,
+    "differentiated_production_enablement": false,
+    "db_cutover": false
+  },
+  "safety": {
+    "credentials_exposed": false,
+    "main_site_prod_touched": false,
     "permanent_production_branch_touched": false,
-    "clean_parent_branch_touched": false,
+    "clean_parent_modified": false,
     "deploy": false,
     "db_cutover": false,
-    "credentials_exposed": false
+    "proof_branch_merged": false
   }
 }
