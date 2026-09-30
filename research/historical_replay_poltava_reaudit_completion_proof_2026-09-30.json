@@ -1,0 +1,715 @@
+{
+  "schema_version": 1,
+  "kind": "historical_replay_poltava_reaudit_completion_proof",
+  "date": "2026-09-30",
+  "authoritative_branch": "multicity-wip-2026-09-16",
+  "authoritative_head_guard": "e5d81607e5881391503eadc537ee3a8dda4f23b7",
+  "proof_branch": "poltava-historical-reaudit-completion-proof-2026-09-29",
+  "proof_base": "bdc0188020aa39cc8164ff58218e6aac4868f54b",
+  "input_archives": [
+    {
+      "logical_input": "poltava_reaudit_partial_01(1).zip",
+      "uploaded_name": "poltava_reaudit_partial_01(1).zip",
+      "sha256": "4a792ac4a9fc33d86d18819f0841fa439a9fad3c52aa305d6acff4bfd14a389e"
+    },
+    {
+      "logical_input": "poltava_explosion_reports_final(2).zip",
+      "uploaded_name": "poltava_explosion_reports_final(1).zip",
+      "sha256": "2daf4bd91de0e71efe321b49dc9a592b3a1185ff05069f2bea83dac7d964ceaa"
+    }
+  ],
+  "denominator": {
+    "episodes": 1805,
+    "unique_ids": 1805,
+    "duplicates": 0,
+    "invalid_intervals": 0,
+    "coverage_start": "2025-08-01",
+    "coverage_end": "2026-09-17"
+  },
+  "decision_table_16": [
+    {
+      "candidate_id": "POL-20260330-REV",
+      "exact_city": "yes",
+      "qualifying_event": "yes",
+      "attack_context": "yes",
+      "event_time_temporal_relation": "~22:50 during active alert",
+      "canonical_episode_id": "5f44b47f05ea68287f9ecca8",
+      "decision": "STRICT",
+      "reason": "Exact-city explosions and attack context; canonical containment resolves the old date-only review."
+    },
+    {
+      "candidate_id": "POL-20260408-REV",
+      "exact_city": "yes",
+      "qualifying_event": "yes",
+      "attack_context": "yes",
+      "event_time_temporal_relation": "~14:00 during active alert",
+      "canonical_episode_id": "17a012f823d515a62b68cc81",
+      "decision": "STRICT",
+      "reason": "Exact-city Suspilne evidence; distinct from the 07:57 morning episode."
+    },
+    {
+      "candidate_id": "POL-20260604-01",
+      "exact_city": "yes",
+      "qualifying_event": "yes",
+      "attack_context": "yes",
+      "event_time_temporal_relation": "20:48 local",
+      "canonical_episode_id": "4e0fa505ed655619a32b0420",
+      "decision": "STRICT",
+      "reason": "Corrected local time binds uniquely; 17:48 is not used."
+    },
+    {
+      "candidate_id": "POL-TG-20251016-01",
+      "exact_city": "yes",
+      "qualifying_event": "yes",
+      "attack_context": "yes",
+      "event_time_temporal_relation": "overnight / explicit during alert",
+      "canonical_episode_id": "3c81a9cec613ecb651103168",
+      "decision": "STRICT",
+      "reason": "Retained exact-city report plus same-attack roundup binds to the cross-night episode."
+    },
+    {
+      "candidate_id": "POL-TG-20260211-01",
+      "exact_city": "yes",
+      "qualifying_event": "yes",
+      "attack_context": "yes",
+      "event_time_temporal_relation": "night 11/12 / explicit during alert",
+      "canonical_episode_id": "e9cd2e46117c7566fdb43030",
+      "decision": "STRICT",
+      "reason": "Targeted case QA supplies attack context and a unique overnight episode."
+    },
+    {
+      "candidate_id": "POL-TG-20260222-01",
+      "exact_city": "yes",
+      "qualifying_event": "yes",
+      "attack_context": "yes",
+      "event_time_temporal_relation": "overnight / explicit during alert",
+      "canonical_episode_id": "4b687aa5dbe45d6c4d31b01d",
+      "decision": "STRICT",
+      "reason": "Same retained report pairs exact-city explosions with Russian UAV debris."
+    },
+    {
+      "candidate_id": "POL-TG-20260403-01",
+      "exact_city": "yes",
+      "qualifying_event": "yes",
+      "attack_context": "yes",
+      "event_time_temporal_relation": "~11:15 local",
+      "canonical_episode_id": "a413016cf156026dbdf1780a",
+      "decision": "STRICT",
+      "reason": "Case-bounded QA gives attack context and unique containment."
+    },
+    {
+      "candidate_id": "POL-TG-20260502-01",
+      "exact_city": "yes",
+      "qualifying_event": "yes",
+      "attack_context": "yes",
+      "event_time_temporal_relation": "~17:50 local",
+      "canonical_episode_id": "ced51a20d33bbfd755ce3d6e",
+      "decision": "STRICT",
+      "reason": "Case-bounded QA gives attack context and unique containment."
+    },
+    {
+      "candidate_id": "POL-TG-20260527-01",
+      "exact_city": "yes",
+      "qualifying_event": "yes",
+      "attack_context": "yes",
+      "event_time_temporal_relation": "~23:09 on 2026-05-26 / cross-midnight",
+      "canonical_episode_id": "c949a8c571d6c208ab649ce1",
+      "decision": "STRICT",
+      "reason": "Cross-midnight event binds to the active canonical episode."
+    },
+    {
+      "candidate_id": "POL-TG-20260528-EARLY",
+      "exact_city": "yes",
+      "qualifying_event": "yes",
+      "attack_context": "yes",
+      "event_time_temporal_relation": "two live reports around canonical episode onset; exact event minute not retained",
+      "canonical_episode_id": "520316fda82c2008d25773dd",
+      "decision": "SENSITIVITY_ONLY",
+      "reason": "Reviewed same-attack relation is episode-specific; publication time is not used as event time."
+    },
+    {
+      "candidate_id": "POL-TG-20260604-EARLY",
+      "exact_city": "yes",
+      "qualifying_event": "yes",
+      "attack_context": "yes",
+      "event_time_temporal_relation": "02:41/04:01/04:04 attack sequence",
+      "canonical_episode_id": "c7a1813d7fb5ee484b6c1801",
+      "decision": "STRICT",
+      "reason": "Distinct from evening 20:48 event; all early reports deduplicate to one episode."
+    },
+    {
+      "candidate_id": "POL-TG-20260611-01",
+      "exact_city": "yes",
+      "qualifying_event": "yes",
+      "attack_context": "yes",
+      "event_time_temporal_relation": "~03:10/03:15; repeated reports",
+      "canonical_episode_id": "ea36a49fbfea133aaad6ba77",
+      "decision": "STRICT",
+      "reason": "Three messages describe one attack episode; numerator deduplicated at episode level."
+    },
+    {
+      "candidate_id": "POL-TG-20260626-01",
+      "exact_city": "yes",
+      "qualifying_event": "yes",
+      "attack_context": "yes",
+      "event_time_temporal_relation": "~01:02 local during cross-night attack",
+      "canonical_episode_id": "44775fa815c10ada82cc09d0",
+      "decision": "SENSITIVITY_ONLY",
+      "reason": "Exact-city blast is temporally inside the combined attack; causal attribution remains ambiguous."
+    },
+    {
+      "candidate_id": "POL-TG-20260730-01",
+      "exact_city": "yes",
+      "qualifying_event": "yes",
+      "attack_context": "yes",
+      "event_time_temporal_relation": "~00:10 local",
+      "canonical_episode_id": "d62a04f19abb637af5f17245",
+      "decision": "STRICT",
+      "reason": "Exact-city report during documented mass UAV attack; unique episode."
+    },
+    {
+      "candidate_id": "POL-TG-20260816-01",
+      "exact_city": "yes",
+      "qualifying_event": "yes",
+      "attack_context": "yes",
+      "event_time_temporal_relation": "02:03 local",
+      "canonical_episode_id": "d2b936d2ef95a7dc544e70b0",
+      "decision": "STRICT",
+      "reason": "Targeted QA fixes the event inside the first early-morning canonical episode."
+    },
+    {
+      "candidate_id": "POL-TG-20260902-01",
+      "exact_city": "yes",
+      "qualifying_event": "yes",
+      "attack_context": "no",
+      "event_time_temporal_relation": "retained 01:56 publication/report time; no canonical episode",
+      "canonical_episode_id": null,
+      "decision": "REVIEW_NONCOUNTED",
+      "reason": "No legal canonical binding; date-only/publication-time binding is disallowed."
+    }
+  ],
+  "completed_event_ledger": [
+    {
+      "event_id": "POL-20250829-01",
+      "date": "2025-08-29",
+      "decision": "STRICT",
+      "canonical_episode_id": "2603a2e4bdb8100e166a3822",
+      "binding_method": "exact_time_containment"
+    },
+    {
+      "event_id": "POL-20250917-01",
+      "date": "2025-09-17",
+      "decision": "STRICT",
+      "canonical_episode_id": "6c2d492c0b92c3dc3b033a36",
+      "binding_method": "approximate_time_containment"
+    },
+    {
+      "event_id": "POL-20251003-01",
+      "date": "2025-10-03",
+      "decision": "STRICT",
+      "canonical_episode_id": "dd506b502c4c217608d13530",
+      "binding_method": "exact_time_containment"
+    },
+    {
+      "event_id": "POL-20251007-01",
+      "date": "2025-10-07",
+      "decision": "STRICT",
+      "canonical_episode_id": "82090571027924b864813759",
+      "binding_method": "exact_time_containment"
+    },
+    {
+      "event_id": "POL-TG-20251016-01",
+      "date": "2025-10-16",
+      "decision": "STRICT",
+      "canonical_episode_id": "3c81a9cec613ecb651103168",
+      "binding_method": "explicit_during_alert"
+    },
+    {
+      "event_id": "POL-20251018-01",
+      "date": "2025-10-18",
+      "decision": "STRICT",
+      "canonical_episode_id": "d223c770242660ce003f5a2b",
+      "binding_method": "explicit_during_alert"
+    },
+    {
+      "event_id": "POL-20251206-01",
+      "date": "2025-12-06",
+      "decision": "STRICT",
+      "canonical_episode_id": "85f172a61685b24a36d29929",
+      "binding_method": "approximate_time_containment"
+    },
+    {
+      "event_id": "POL-20260105-01",
+      "date": "2026-01-05",
+      "decision": "STRICT",
+      "canonical_episode_id": "540e50b8cb31cf2f3c86fc1a",
+      "binding_method": "exact_time_containment"
+    },
+    {
+      "event_id": "POL-20260125-01",
+      "date": "2026-01-25",
+      "decision": "REVIEW_NONCOUNTED",
+      "canonical_episode_id": null,
+      "binding_method": null
+    },
+    {
+      "event_id": "POL-TG-20260211-01",
+      "date": "2026-02-11",
+      "decision": "STRICT",
+      "canonical_episode_id": "e9cd2e46117c7566fdb43030",
+      "binding_method": "explicit_during_alert"
+    },
+    {
+      "event_id": "POL-TG-20260222-01",
+      "date": "2026-02-22",
+      "decision": "STRICT",
+      "canonical_episode_id": "4b687aa5dbe45d6c4d31b01d",
+      "binding_method": "explicit_during_alert"
+    },
+    {
+      "event_id": "POL-20260225-01",
+      "date": "2026-02-25",
+      "decision": "STRICT",
+      "canonical_episode_id": "a53943b6f5c3160de753ffca",
+      "binding_method": "approximate_time_containment"
+    },
+    {
+      "event_id": "POL-20260303-01",
+      "date": "2026-03-03",
+      "decision": "STRICT",
+      "canonical_episode_id": "1d25e0831f9490d993c4dc47",
+      "binding_method": "approximate_time_containment"
+    },
+    {
+      "event_id": "POL-20260324-01",
+      "date": "2026-03-24",
+      "decision": "STRICT",
+      "canonical_episode_id": "3ea5fe290a14ad598f64c6c9",
+      "binding_method": "approximate_time_containment"
+    },
+    {
+      "event_id": "POL-20260330-REV",
+      "date": "2026-03-30",
+      "decision": "STRICT",
+      "canonical_episode_id": "5f44b47f05ea68287f9ecca8",
+      "binding_method": "approximate_time_containment"
+    },
+    {
+      "event_id": "POL-20260401-01",
+      "date": "2026-04-01",
+      "decision": "STRICT",
+      "canonical_episode_id": "d507a7e6d8567086b3dc1002",
+      "binding_method": "exact_time_containment"
+    },
+    {
+      "event_id": "POL-TG-20260403-01",
+      "date": "2026-04-03",
+      "decision": "STRICT",
+      "canonical_episode_id": "a413016cf156026dbdf1780a",
+      "binding_method": "approximate_time_containment"
+    },
+    {
+      "event_id": "POL-20260407-01",
+      "date": "2026-04-07",
+      "decision": "STRICT",
+      "canonical_episode_id": "b5dbd7439f02896e2f6157d9",
+      "binding_method": "exact_time_containment"
+    },
+    {
+      "event_id": "POL-20260408-01",
+      "date": "2026-04-08",
+      "decision": "STRICT",
+      "canonical_episode_id": "1e5c13b5a2516f145ee7a57a",
+      "binding_method": "exact_time_containment"
+    },
+    {
+      "event_id": "POL-20260408-REV",
+      "date": "2026-04-08",
+      "decision": "STRICT",
+      "canonical_episode_id": "17a012f823d515a62b68cc81",
+      "binding_method": "approximate_time_containment"
+    },
+    {
+      "event_id": "POL-20260419-01",
+      "date": "2026-04-19",
+      "decision": "STRICT",
+      "canonical_episode_id": "bfb9b4be82ef454190bd1278",
+      "binding_method": "approximate_time_containment"
+    },
+    {
+      "event_id": "POL-20260419-02",
+      "date": "2026-04-19",
+      "decision": "STRICT",
+      "canonical_episode_id": "e42b654a914681e1df57ae9e",
+      "binding_method": "exact_time_containment"
+    },
+    {
+      "event_id": "POL-20260427-01",
+      "date": "2026-04-27",
+      "decision": "STRICT",
+      "canonical_episode_id": "bc2fc6e0d80a65847ddbb6ba",
+      "binding_method": "exact_time_containment"
+    },
+    {
+      "event_id": "POL-TG-20260502-01",
+      "date": "2026-05-02",
+      "decision": "STRICT",
+      "canonical_episode_id": "ced51a20d33bbfd755ce3d6e",
+      "binding_method": "approximate_time_containment"
+    },
+    {
+      "event_id": "POL-20260505-01",
+      "date": "2026-05-05",
+      "decision": "STRICT",
+      "canonical_episode_id": "45da43ffd56a406c37c1629a",
+      "binding_method": "explicit_during_alert"
+    },
+    {
+      "event_id": "POL-20260513-01",
+      "date": "2026-05-13",
+      "decision": "STRICT",
+      "canonical_episode_id": "92ea08a8f81a3f4ff104cbc3",
+      "binding_method": "approximate_time_containment"
+    },
+    {
+      "event_id": "POL-20260516-01",
+      "date": "2026-05-16",
+      "decision": "STRICT",
+      "canonical_episode_id": "6f273e8e1dd4fc8ebe715fcf",
+      "binding_method": "approximate_time_containment"
+    },
+    {
+      "event_id": "POL-20260522-01",
+      "date": "2026-05-22",
+      "decision": "STRICT",
+      "canonical_episode_id": "c62b4f2cb561af7fbdcd7052",
+      "binding_method": "exact_time_containment"
+    },
+    {
+      "event_id": "POL-20260522-02",
+      "date": "2026-05-22",
+      "decision": "STRICT",
+      "canonical_episode_id": "185758bb7cf50a72aa4660f5",
+      "binding_method": "exact_time_containment"
+    },
+    {
+      "event_id": "POL-20260522-03",
+      "date": "2026-05-22",
+      "decision": "STRICT",
+      "canonical_episode_id": "8fef31ef2bcb9bb3503e94d0",
+      "binding_method": "exact_time_containment"
+    },
+    {
+      "event_id": "POL-20260525-01",
+      "date": "2026-05-25",
+      "decision": "STRICT",
+      "canonical_episode_id": "3b822d52e1a5e1dbf79e0a2b",
+      "binding_method": "explicit_during_alert"
+    },
+    {
+      "event_id": "POL-TG-20260527-01",
+      "date": "2026-05-27",
+      "decision": "STRICT",
+      "canonical_episode_id": "c949a8c571d6c208ab649ce1",
+      "binding_method": "approximate_time_containment"
+    },
+    {
+      "event_id": "POL-20260528-01",
+      "date": "2026-05-28",
+      "decision": "STRICT",
+      "canonical_episode_id": "6a9ef164db388470c609a8a9",
+      "binding_method": "exact_time_containment"
+    },
+    {
+      "event_id": "POL-TG-20260528-EARLY",
+      "date": "2026-05-28",
+      "decision": "SENSITIVITY_ONLY",
+      "canonical_episode_id": "520316fda82c2008d25773dd",
+      "binding_method": "same_attack_unique_episode"
+    },
+    {
+      "event_id": "POL-20260530-01",
+      "date": "2026-05-30",
+      "decision": "STRICT",
+      "canonical_episode_id": "fdd6ca6c4763ac7dbe65c47b",
+      "binding_method": "approximate_time_containment"
+    },
+    {
+      "event_id": "POL-20260604-01",
+      "date": "2026-06-04",
+      "decision": "STRICT",
+      "canonical_episode_id": "4e0fa505ed655619a32b0420",
+      "binding_method": "exact_time_containment"
+    },
+    {
+      "event_id": "POL-TG-20260604-EARLY",
+      "date": "2026-06-04",
+      "decision": "STRICT",
+      "canonical_episode_id": "c7a1813d7fb5ee484b6c1801",
+      "binding_method": "exact_time_containment"
+    },
+    {
+      "event_id": "POL-20260605-01",
+      "date": "2026-06-05",
+      "decision": "STRICT",
+      "canonical_episode_id": "45569f2a3139a5b709c58f8e",
+      "binding_method": "approximate_time_containment"
+    },
+    {
+      "event_id": "POL-20260606-01",
+      "date": "2026-06-06",
+      "decision": "STRICT",
+      "canonical_episode_id": "3c864c1fa79c24f26196366a",
+      "binding_method": "approximate_time_containment"
+    },
+    {
+      "event_id": "POL-TG-20260611-01",
+      "date": "2026-06-11",
+      "decision": "STRICT",
+      "canonical_episode_id": "ea36a49fbfea133aaad6ba77",
+      "binding_method": "approximate_time_containment"
+    },
+    {
+      "event_id": "POL-20260618-01",
+      "date": "2026-06-18",
+      "decision": "STRICT",
+      "canonical_episode_id": "3060a5ee2e18130570fbad5a",
+      "binding_method": "approximate_time_containment"
+    },
+    {
+      "event_id": "POL-20260620-01",
+      "date": "2026-06-20",
+      "decision": "STRICT",
+      "canonical_episode_id": "6aff590cecdbe617b8b7da37",
+      "binding_method": "exact_time_containment"
+    },
+    {
+      "event_id": "POL-20260623-01",
+      "date": "2026-06-23",
+      "decision": "STRICT",
+      "canonical_episode_id": "ebed6977e3ea2f7abd5abe1a",
+      "binding_method": "explicit_during_alert"
+    },
+    {
+      "event_id": "POL-TG-20260626-01",
+      "date": "2026-06-26",
+      "decision": "SENSITIVITY_ONLY",
+      "canonical_episode_id": "44775fa815c10ada82cc09d0",
+      "binding_method": "exact_time_containment"
+    },
+    {
+      "event_id": "POL-20260701-01",
+      "date": "2026-07-01",
+      "decision": "STRICT",
+      "canonical_episode_id": "79b4e8407074efae63aab9ac",
+      "binding_method": "exact_time_containment"
+    },
+    {
+      "event_id": "POL-20260707-01",
+      "date": "2026-07-07",
+      "decision": "STRICT",
+      "canonical_episode_id": "ded4f077cfc9ef4ffcdabc0c",
+      "binding_method": "exact_time_containment"
+    },
+    {
+      "event_id": "POL-20260717-01",
+      "date": "2026-07-17",
+      "decision": "STRICT",
+      "canonical_episode_id": "71170993b9dcaa310ea42a7e",
+      "binding_method": "same_attack_unique_episode"
+    },
+    {
+      "event_id": "POL-20260720-01",
+      "date": "2026-07-20",
+      "decision": "STRICT",
+      "canonical_episode_id": "b6d45084abb7deab6bb60faa",
+      "binding_method": "approximate_time_containment"
+    },
+    {
+      "event_id": "POL-20260720-02",
+      "date": "2026-07-20",
+      "decision": "STRICT",
+      "canonical_episode_id": "ddf299e89c2de5c794d3fafc",
+      "binding_method": "exact_time_containment"
+    },
+    {
+      "event_id": "POL-TG-20260730-01",
+      "date": "2026-07-30",
+      "decision": "STRICT",
+      "canonical_episode_id": "d62a04f19abb637af5f17245",
+      "binding_method": "approximate_time_containment"
+    },
+    {
+      "event_id": "POL-20260811-01",
+      "date": "2026-08-11",
+      "decision": "STRICT",
+      "canonical_episode_id": "b85ef352e53b881060cd55c5",
+      "binding_method": "approximate_time_containment"
+    },
+    {
+      "event_id": "POL-TG-20260816-01",
+      "date": "2026-08-16",
+      "decision": "STRICT",
+      "canonical_episode_id": "d2b936d2ef95a7dc544e70b0",
+      "binding_method": "exact_time_containment"
+    },
+    {
+      "event_id": "POL-20260828-01",
+      "date": "2026-08-28",
+      "decision": "STRICT",
+      "canonical_episode_id": "cc20c0b74d0958bbc5bf11da",
+      "binding_method": "exact_time_containment"
+    },
+    {
+      "event_id": "POL-20260829-REV",
+      "date": "2026-08-29",
+      "decision": "REVIEW_NONCOUNTED",
+      "canonical_episode_id": null,
+      "binding_method": null
+    },
+    {
+      "event_id": "POL-20260901-01",
+      "date": "2026-09-01",
+      "decision": "REVIEW_NONCOUNTED",
+      "canonical_episode_id": null,
+      "binding_method": null
+    },
+    {
+      "event_id": "POL-TG-20260902-01",
+      "date": "2026-09-02",
+      "decision": "REVIEW_NONCOUNTED",
+      "canonical_episode_id": null,
+      "binding_method": null
+    },
+    {
+      "event_id": "POL-20260905-01",
+      "date": "2026-09-05",
+      "decision": "STRICT",
+      "canonical_episode_id": "88f41afa267757ffd24911de",
+      "binding_method": "exact_time_containment"
+    }
+  ],
+  "strict_canonical_episode_ids": [
+    "2603a2e4bdb8100e166a3822",
+    "6c2d492c0b92c3dc3b033a36",
+    "dd506b502c4c217608d13530",
+    "82090571027924b864813759",
+    "3c81a9cec613ecb651103168",
+    "d223c770242660ce003f5a2b",
+    "85f172a61685b24a36d29929",
+    "540e50b8cb31cf2f3c86fc1a",
+    "e9cd2e46117c7566fdb43030",
+    "4b687aa5dbe45d6c4d31b01d",
+    "a53943b6f5c3160de753ffca",
+    "1d25e0831f9490d993c4dc47",
+    "3ea5fe290a14ad598f64c6c9",
+    "5f44b47f05ea68287f9ecca8",
+    "d507a7e6d8567086b3dc1002",
+    "a413016cf156026dbdf1780a",
+    "b5dbd7439f02896e2f6157d9",
+    "1e5c13b5a2516f145ee7a57a",
+    "17a012f823d515a62b68cc81",
+    "bfb9b4be82ef454190bd1278",
+    "e42b654a914681e1df57ae9e",
+    "bc2fc6e0d80a65847ddbb6ba",
+    "ced51a20d33bbfd755ce3d6e",
+    "45da43ffd56a406c37c1629a",
+    "92ea08a8f81a3f4ff104cbc3",
+    "6f273e8e1dd4fc8ebe715fcf",
+    "c62b4f2cb561af7fbdcd7052",
+    "185758bb7cf50a72aa4660f5",
+    "8fef31ef2bcb9bb3503e94d0",
+    "3b822d52e1a5e1dbf79e0a2b",
+    "c949a8c571d6c208ab649ce1",
+    "6a9ef164db388470c609a8a9",
+    "fdd6ca6c4763ac7dbe65c47b",
+    "4e0fa505ed655619a32b0420",
+    "c7a1813d7fb5ee484b6c1801",
+    "45569f2a3139a5b709c58f8e",
+    "3c864c1fa79c24f26196366a",
+    "ea36a49fbfea133aaad6ba77",
+    "3060a5ee2e18130570fbad5a",
+    "6aff590cecdbe617b8b7da37",
+    "ebed6977e3ea2f7abd5abe1a",
+    "79b4e8407074efae63aab9ac",
+    "ded4f077cfc9ef4ffcdabc0c",
+    "71170993b9dcaa310ea42a7e",
+    "b6d45084abb7deab6bb60faa",
+    "ddf299e89c2de5c794d3fafc",
+    "d62a04f19abb637af5f17245",
+    "b85ef352e53b881060cd55c5",
+    "d2b936d2ef95a7dc544e70b0",
+    "cc20c0b74d0958bbc5bf11da",
+    "88f41afa267757ffd24911de"
+  ],
+  "sensitivity_only_canonical_episode_ids": [
+    "520316fda82c2008d25773dd",
+    "44775fa815c10ada82cc09d0"
+  ],
+  "review_noncounted": [
+    {
+      "event_id": "POL-20260125-01",
+      "date": "2026-01-25",
+      "reason": "Approximate event time ~02:00 falls outside the current canonical alert that ended 01:08; no permitted canonical binding."
+    },
+    {
+      "event_id": "POL-20260829-REV",
+      "date": "2026-08-29",
+      "reason": "Event time 22:11 has no current canonical alert episode; same-day canonical alerts ended by 08:55, so near/date-only binding is disallowed."
+    },
+    {
+      "event_id": "POL-20260901-01",
+      "date": "2026-09-01",
+      "reason": "Retained event ~10:40 has no current canonical Poltava alert episode; no permitted binding."
+    },
+    {
+      "event_id": "POL-TG-20260902-01",
+      "date": "2026-09-02",
+      "reason": "Retained early-night exact-city explosion report has no current canonical episode; counted binding would require a disallowed date/publication-time shortcut."
+    }
+  ],
+  "rejected": [],
+  "actual_counts": {
+    "denominator": 1805,
+    "strict": 51,
+    "sensitivity": 53,
+    "qa": 0,
+    "strict_logical_events": 51,
+    "sensitivity_only_logical_events": 2,
+    "review_noncounted": 4,
+    "total_logical_rows": 57
+  },
+  "comparison_to_frozen_51_53": {
+    "strict_delta": 0,
+    "sensitivity_delta": 0,
+    "frozen_baseline_valid": true,
+    "bounded_frozen_provenance_recovery_required": false
+  },
+  "executable_proof": {
+    "workflow_run_id": 36676222041,
+    "proof_input_head": "a62af5980a8aa1a6a99e3b16329ebd8bd84205b2",
+    "workflow_conclusion": "success",
+    "replay_self_test": "PASS — Historical replay helper self-test OK",
+    "historical_replay_tests": "PASS — 94 passed in 0.74s",
+    "poltava_replay": {
+      "episodes_checked": 1805,
+      "strict": 51,
+      "sensitivity": 53,
+      "qa": 0,
+      "verdict": "CITY REPLAY CLEAN",
+      "protected_files_unchanged": true
+    },
+    "non_target_regression": {
+      "unexpected_non_poltava_semantic_paths": 0,
+      "unexpected_non_poltava_episode_deltas": 0
+    },
+    "protected_state": "PASS"
+  },
+  "final_semantic_files": [
+    "kyiv-air-alerts-grafana/data/explosion_research/poltava/final_evidence.json",
+    "kyiv-air-alerts-grafana/tests/test_historical_replay_poltava_reaudit.py",
+    "research/historical_replay_poltava_reaudit_completion_proof_2026-09-30.json"
+  ],
+  "temporary_workflow_removed": true,
+  "verdict": "POLTAVA HISTORICAL REAUDIT COMPLETION PROVEN — 1805 ALERT EPISODES — 51 STRICT / 53 SENSITIVITY — QA0 — FROZEN BASELINE VALID"
+}
