@@ -11,9 +11,12 @@ from pathlib import Path
 from typing import Any, Callable, Mapping
 
 import proof_differentiated_alert_shadow_ingestion as shadow
+import differentiated_alert_postgres as postgres
 
 FEATURE_FLAG = "DIFFERENTIATED_ALERT_SHADOW"
 DB_ENV = "DIFFERENTIATED_ALERT_SHADOW_DB"
+BACKEND_ENV = "DIFFERENTIATED_ALERT_SHADOW_BACKEND"
+DATABASE_URL_ENV = "DIFFERENTIATED_ALERT_SHADOW_DATABASE_URL"
 DIAGNOSTIC_ENV = "DIFFERENTIATED_ALERT_SHADOW_DIAGNOSTIC"
 KYIV_INPUT_ENV = "DIFFERENTIATED_ALERT_SHADOW_KYIV_JSON"
 KYIV_INPUT_CLASS_ENV = "DIFFERENTIATED_ALERT_SHADOW_KYIV_INPUT_CLASS"
@@ -82,7 +85,41 @@ def _source_result(input_class: str) -> dict[str, Any]:
     }
 
 
-def _persist_one(store: shadow.ShadowStore, record: dict[str, Any], result: dict[str, Any]) -> None:
+class PostgresShadowStore:
+    """Minimal child-only store wrapper around the accepted PostgreSQL adapter."""
+
+    def __init__(self, database_url: str):
+        try:
+            import psycopg
+        except ImportError as exc:
+            raise RuntimeError("psycopg is required for differentiated postgres shadow backend") from exc
+        self.connection = psycopg.connect(database_url)
+
+    def persist(self, record: dict[str, Any]) -> dict[str, int]:
+        stats = postgres.persist_record(self.connection, record)
+        return {
+            "inserted_snapshots": stats["inserted_snapshots"],
+            "inserted_observations": stats["inserted_observations"],
+        }
+
+    def counts(self) -> dict[str, int]:
+        cursor = self.connection.cursor()
+        try:
+            cursor.execute("SELECT count(*) FROM alert_state_snapshots")
+            snapshots = cursor.fetchone()[0]
+            cursor.execute("SELECT count(*) FROM alert_threat_observations")
+            observations = cursor.fetchone()[0]
+            return {"snapshots": snapshots, "observations": observations}
+        finally:
+            close = getattr(cursor, "close", None)
+            if callable(close):
+                close()
+
+    def close(self) -> None:
+        self.connection.close()
+
+
+def _persist_one(store: Any, record: dict[str, Any], result: dict[str, Any]) -> None:
     persisted = store.persist(record)
     result["inserted_snapshots"] += persisted["inserted_snapshots"]
     result["inserted_observations"] += persisted["inserted_observations"]
@@ -96,7 +133,7 @@ def run_shadow(
     *,
     env: Mapping[str, str] | None = None,
     fetch_json: Callable[[str, int], Any] | None = None,
-    store_factory: Callable[[str], shadow.ShadowStore] | None = None,
+    store_factory: Callable[[str], Any] | None = None,
     now: datetime | None = None,
 ) -> dict[str, Any]:
     env = dict(os.environ if env is None else env)
@@ -116,18 +153,27 @@ def run_shadow(
 
     result["attempted"] = True
     observed_at = _utc_iso(now)
-    db_path = env.get(DB_ENV)
-    if not db_path:
-        result.update({"status": "FAILED", **_safe_error(RuntimeError(f"{DB_ENV} is required when {FEATURE_FLAG}=1"))})
+    backend = str(env.get(BACKEND_ENV, "sqlite") or "sqlite").strip().lower()
+    result["backend"] = backend
+    if backend not in {"sqlite", "postgres"}:
+        result.update({"status": "FAILED", **_safe_error(RuntimeError(f"unsupported {BACKEND_ENV}={backend!r}"))})
+        _write_diagnostic(env.get(DIAGNOSTIC_ENV), result)
+        return result
+
+    target_env = DATABASE_URL_ENV if backend == "postgres" else DB_ENV
+    store_target = env.get(target_env)
+    if not store_target:
+        result.update({"status": "FAILED", **_safe_error(RuntimeError(f"{target_env} is required when {FEATURE_FLAG}=1 and backend={backend}"))})
         _write_diagnostic(env.get(DIAGNOSTIC_ENV), result)
         return result
 
     fetch_json = shadow.fetch_json if fetch_json is None else fetch_json
-    store_factory = shadow.ShadowStore if store_factory is None else store_factory
+    if store_factory is None:
+        store_factory = PostgresShadowStore if backend == "postgres" else shadow.ShadowStore
     parents = parent_episodes_from_updater(alerts)
 
     try:
-        store = store_factory(db_path)
+        store = store_factory(store_target)
     except Exception as exc:
         result.update({"status": "FAILED", **_safe_error(exc)})
         _write_diagnostic(env.get(DIAGNOSTIC_ENV), result)
