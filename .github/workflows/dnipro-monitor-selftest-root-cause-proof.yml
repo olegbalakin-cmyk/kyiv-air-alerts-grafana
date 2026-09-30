@@ -1,0 +1,145 @@
+name: dnipro-monitor-selftest-root-cause-proof
+
+on:
+  push:
+    branches:
+      - dnipro-monitor-selftest-root-cause-research-2026-09-30
+    paths:
+      - .github/workflows/dnipro-monitor-selftest-root-cause-proof.yml
+
+permissions:
+  contents: read
+
+jobs:
+  matrix-proof:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout proof branch with full history
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Materialize fixed-base 2x2 cells
+        shell: bash
+        run: |
+          set -euo pipefail
+          BASE=6ba36cd0c4ee0c5e8fd61d57fffd98404ac64397
+          OLD_REPLAY_COMMIT=6ba36cd0c4ee0c5e8fd61d57fffd98404ac64397
+          NEW_REPLAY_COMMIT=2d4a13e002abff20fa6c8e9abfeee803a8dc5825
+          OLD_DATA_COMMIT=6ba36cd0c4ee0c5e8fd61d57fffd98404ac64397
+          NEW_DATA_COMMIT=5d4d19f05d4f319067633f5d0a9c41d41833d79f
+
+          REPLAY_PATH=scripts/replay_explosion_history.py
+          DATA_FILES=(
+            data/dashboard_data.json
+            data/explosion_candidate_monitor_last_run.json
+            data/explosion_candidate_monitor_state.json
+            data/explosion_review_queue.json
+            data/explosions_test.json
+          )
+
+          test "$(git rev-parse "$OLD_REPLAY_COMMIT:$REPLAY_PATH")" = "99b13318a3bd53013a798bd4c66c87c4aed6f45b"
+          test "$(git rev-parse "$NEW_REPLAY_COMMIT:$REPLAY_PATH")" = "816e2a13f66bb453fc4bd765318d15443121325e"
+
+          test "$(git rev-parse "$OLD_DATA_COMMIT:data/dashboard_data.json")" = "4f5c730dd06f5734c905f4bfce4c10b45a838f01"
+          test "$(git rev-parse "$OLD_DATA_COMMIT:data/explosion_candidate_monitor_last_run.json")" = "3e353793f05e85861575c6d739e95c61b27408dd"
+          test "$(git rev-parse "$OLD_DATA_COMMIT:data/explosion_candidate_monitor_state.json")" = "9091f4e8984fa31f8ffb8f41e7de8a1ab683db98"
+          test "$(git rev-parse "$OLD_DATA_COMMIT:data/explosion_review_queue.json")" = "5424b94f3d9fc132e1c67d6a2ce728a1c6d0bc8c"
+          test "$(git rev-parse "$OLD_DATA_COMMIT:data/explosions_test.json")" = "70b64578d2ddccc6e3a625b004832e1407d51788"
+
+          test "$(git rev-parse "$NEW_DATA_COMMIT:data/dashboard_data.json")" = "7d5b7722cdf7c510b4995e8a7baaadb7fadc3241"
+          test "$(git rev-parse "$NEW_DATA_COMMIT:data/explosion_candidate_monitor_last_run.json")" = "7caa3987c44b2e763ac2b1b18a4c15af05a1169a"
+          test "$(git rev-parse "$NEW_DATA_COMMIT:data/explosion_candidate_monitor_state.json")" = "2aa0f9ab5d405859fb05e8cd4a364cc0853b17c4"
+          test "$(git rev-parse "$NEW_DATA_COMMIT:data/explosion_review_queue.json")" = "325ccd2645d18ca3f5a5996b57f7be936cfe615f"
+          test "$(git rev-parse "$NEW_DATA_COMMIT:data/explosions_test.json")" = "371d8eeb7ee72d96875994c380063f2b34383653"
+
+          materialize() {
+            cell="$1"
+            replay_commit="$2"
+            data_commit="$3"
+            root="/tmp/dnipro-matrix/$cell"
+            mkdir -p "$root"
+            git archive "$BASE" | tar -x -C "$root"
+            git show "$replay_commit:$REPLAY_PATH" > "$root/$REPLAY_PATH"
+            for f in "${DATA_FILES[@]}"; do
+              git show "$data_commit:$f" > "$root/$f"
+            done
+          }
+
+          materialize A "$OLD_REPLAY_COMMIT" "$OLD_DATA_COMMIT"
+          materialize B "$OLD_REPLAY_COMMIT" "$NEW_DATA_COMMIT"
+          materialize C "$NEW_REPLAY_COMMIT" "$OLD_DATA_COMMIT"
+          materialize D "$NEW_REPLAY_COMMIT" "$NEW_DATA_COMMIT"
+
+      - name: Execute exact A B C D self-tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json
+          import pathlib
+          import subprocess
+          import sys
+
+          root = pathlib.Path("/tmp/dnipro-matrix")
+          matrix = {
+              "A": {"replay": "old", "data": "old"},
+              "B": {"replay": "old", "data": "new"},
+              "C": {"replay": "new", "data": "old"},
+              "D": {"replay": "new", "data": "new"},
+          }
+
+          for cell, meta in matrix.items():
+              proc = subprocess.run(
+                  [sys.executable, "scripts/monitor_explosion_candidates.py", "--self-test"],
+                  cwd=root / cell,
+                  capture_output=True,
+                  text=True,
+                  timeout=300,
+              )
+              meta["exit_code"] = proc.returncode
+              meta["result"] = "PASS" if proc.returncode == 0 else "FAIL"
+              meta["stdout"] = proc.stdout
+              meta["stderr"] = proc.stderr
+
+          payload = {
+              "fixed_base": "6ba36cd0c4ee0c5e8fd61d57fffd98404ac64397",
+              "replay_blobs": {
+                  "old": "99b13318a3bd53013a798bd4c66c87c4aed6f45b",
+                  "new": "816e2a13f66bb453fc4bd765318d15443121325e",
+              },
+              "data_blobs": {
+                  "old": {
+                      "data/dashboard_data.json": "4f5c730dd06f5734c905f4bfce4c10b45a838f01",
+                      "data/explosion_candidate_monitor_last_run.json": "3e353793f05e85861575c6d739e95c61b27408dd",
+                      "data/explosion_candidate_monitor_state.json": "9091f4e8984fa31f8ffb8f41e7de8a1ab683db98",
+                      "data/explosion_review_queue.json": "5424b94f3d9fc132e1c67d6a2ce728a1c6d0bc8c",
+                      "data/explosions_test.json": "70b64578d2ddccc6e3a625b004832e1407d51788",
+                  },
+                  "new": {
+                      "data/dashboard_data.json": "7d5b7722cdf7c510b4995e8a7baaadb7fadc3241",
+                      "data/explosion_candidate_monitor_last_run.json": "7caa3987c44b2e763ac2b1b18a4c15af05a1169a",
+                      "data/explosion_candidate_monitor_state.json": "2aa0f9ab5d405859fb05e8cd4a364cc0853b17c4",
+                      "data/explosion_review_queue.json": "325ccd2645d18ca3f5a5996b57f7be936cfe615f",
+                      "data/explosions_test.json": "371d8eeb7ee72d96875994c380063f2b34383653",
+                  },
+              },
+              "matrix": matrix,
+          }
+          out = pathlib.Path("dnipro_monitor_selftest_matrix_results.json")
+          out.write_text(json.dumps(payload, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+          print(out.read_text(encoding="utf-8"))
+
+          if matrix["A"]["result"] != "PASS":
+              raise SystemExit("last-green control A did not reproduce")
+          PY
+
+      - name: Upload matrix result
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: dnipro-monitor-selftest-matrix
+          path: dnipro_monitor_selftest_matrix_results.json
+          if-no-files-found: error
+          retention-days: 7
