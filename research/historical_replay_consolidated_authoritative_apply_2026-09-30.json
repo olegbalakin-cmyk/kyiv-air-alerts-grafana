@@ -1,0 +1,129 @@
+{
+  "schema_version": "1.0",
+  "task": "consolidated historical replay authoritative apply rescue",
+  "date": "2026-09-30",
+  "blocked_staging_head": "12ce4c984ce050e8975950d5329055b37aa11405",
+  "fresh_authoritative_base_head": "a10ce7506f83ba5163a6b6971e156b68412dba51",
+  "authoritative_drift_since_dd58e": {
+    "base": "dd58e1213e54cc6a5a2a29e56daab04ef78b818d",
+    "commits": 1,
+    "message": "Update alert-gated casualty review queue",
+    "paths": [
+      "kyiv-air-alerts-grafana/data/casualties/candidate_monitor_last_run.json",
+      "kyiv-air-alerts-grafana/data/casualties/candidate_monitor_state.json",
+      "kyiv-air-alerts-grafana/data/casualties/multicity_review_queue.json"
+    ],
+    "historical_relevance": false
+  },
+  "whitelist_contract_root_cause": "Accepted Ternopil focused test loads an immutable accepted proof fixture that was omitted from the original authoritative whitelist.",
+  "ternopil": {
+    "accepted_test_blob": "2c3f16cd07761838c62aa8338a6835a42d92c4e9",
+    "accepted_fixture_blob": "a361e6296386a1c14417f1903bc70eaf2b6b7fe1",
+    "fixture_path": "research/historical_replay_ternopil_evidence_recovery_proof_2026-09-30.json",
+    "prefixture_test_result": "3 passed, 2 failed (FileNotFoundError fixture)",
+    "postfixture_test_result": "5 passed",
+    "semantic_inertness": {
+      "replay_semantic_delta": 0,
+      "baseline_semantic_delta": 0,
+      "episode_set_delta": 0,
+      "monitor_delta": 0,
+      "structural_diff": [
+        "research/historical_replay_ternopil_evidence_recovery_proof_2026-09-30.json"
+      ]
+    }
+  },
+  "accepted_source_blobs": {
+    "kyiv-air-alerts-grafana/scripts/replay_explosion_history.py": "e1a6c793d680196724fbf70f09ed09a821912aca",
+    "kyiv-air-alerts-grafana/data/explosion_audited_baseline.json": "d97f02849f089eb89757a3a255d4890dc10f403e",
+    "kyiv-air-alerts-grafana/data/explosion_research/kherson/final_evidence.json": "ae816bbc412fbe62f086adb4cefb2a5af65b2a07",
+    "kyiv-air-alerts-grafana/data/explosion_research/mykolaiv/final_evidence.json": "0860488bc18fb3c1a90b9e86df23001abb675c9c",
+    "kyiv-air-alerts-grafana/data/explosion_research/odesa/final_evidence.json": "018052e3384b608b3bd7739fc828842d3565d490",
+    "kyiv-air-alerts-grafana/tests/test_historical_replay_kherson_mykolaiv_odesa_roles.py": "4c0b942e625896408a5a1ff69b2333b28f14cf2f",
+    "kyiv-air-alerts-grafana/data/explosion_research/zhytomyr/final_evidence.json": "7ba2c06c965fc6f393d372d37d8dea0f0b497211",
+    "kyiv-air-alerts-grafana/data/explosion_research/uzhhorod/final_evidence.json": "91576eb7da3b3c8847610408b5dee41c36ea345d",
+    "kyiv-air-alerts-grafana/data/explosion_research/chernivtsi/final_evidence.json": "8913b0b372dcbfee912fed5e2c2688484e19fd8f",
+    "kyiv-air-alerts-grafana/data/explosion_research/ivano_frankivsk/final_evidence.json": "6793e513cfe1c0fdcd9a830681239e2adc968253",
+    "kyiv-air-alerts-grafana/data/explosion_research/khmelnytskyi/final_evidence.json": "9193c8afbaf96af5a01fe65927b24bfa616f33a7",
+    "kyiv-air-alerts-grafana/data/explosion_research/lutsk/final_evidence.json": "d585863da61c29534510812ca717c3899bf9dd1a",
+    "kyiv-air-alerts-grafana/data/explosion_research/vinnytsia/final_evidence.json": "a1a039d87b7728618ad85e86e39733df1b28c9cb",
+    "kyiv-air-alerts-grafana/tests/test_historical_replay_vinnytsia_reconciliation.py": "37a626896b1bad68c32dc66258e29ca36d70c919",
+    "kyiv-air-alerts-grafana/data/explosion_research/poltava/final_evidence.json": "242ed9932e9871cc6296ee532e3d589caafcc91e",
+    "kyiv-air-alerts-grafana/tests/test_historical_replay_poltava_reaudit.py": "ccd1dcb791dcea207394af6cbed3f5606ff128e7",
+    "kyiv-air-alerts-grafana/data/explosion_research/ternopil/final_evidence.json": "d24f1c911158c082bba6dc53d47d495737334d7d",
+    "kyiv-air-alerts-grafana/tests/test_historical_replay_ternopil_recovery.py": "2c3f16cd07761838c62aa8338a6835a42d92c4e9",
+    "kyiv-air-alerts-grafana/data/explosion_research/rivne/final_evidence.json": "c7c244dc682285597c68ac23be87d3ae8a31a39e",
+    "kyiv-air-alerts-grafana/tests/test_historical_replay_rivne_recovery.py": "0368330f87987ebaf5da0ed8758e78712f2f96ba",
+    "research/historical_replay_ternopil_evidence_recovery_proof_2026-09-30.json": "a361e6296386a1c14417f1903bc70eaf2b6b7fe1"
+  },
+  "runtime_blobs": {
+    "authoritative_before": {
+      "replay": "816e2a13f66bb453fc4bd765318d15443121325e",
+      "baseline": "81ecc48ed64b7e78449df903afb082e9f92531e5",
+      "monitor": "927dc89df0b52edd52cb31a126b0d57ca492a278"
+    },
+    "staging": {
+      "replay": "e1a6c793d680196724fbf70f09ed09a821912aca",
+      "baseline": "d97f02849f089eb89757a3a255d4890dc10f403e",
+      "monitor": "927dc89df0b52edd52cb31a126b0d57ca492a278"
+    }
+  },
+  "gates": {
+    "prefixture_run": 36694505978,
+    "postfixture_run": 36694696603,
+    "monitor_self_test": "PASS",
+    "replay_self_test": "PASS",
+    "full_historical_replay_pytest": "120 passed",
+    "focused": {
+      "hmo": "10 passed",
+      "vinnytsia": "4 passed",
+      "poltava": "2 passed",
+      "ternopil": "5 passed",
+      "rivne": "7 passed"
+    }
+  },
+  "semantic_matrix": {
+    "hmo": {
+      "episodes": 4525,
+      "strict": 276,
+      "sensitivity": 295,
+      "qa": 0
+    },
+    "recovery_10": {
+      "episodes": 3900,
+      "strict": 125,
+      "sensitivity": 131,
+      "qa": 0
+    },
+    "target_13": {
+      "episodes": 8425,
+      "strict": 401,
+      "sensitivity": 426,
+      "qa": 0
+    },
+    "dnipro": {
+      "episodes": 2259,
+      "strict": 181,
+      "sensitivity": 188,
+      "qa": 0
+    },
+    "exact_episode_sets": {
+      "missing_accepted_ids": 0,
+      "unexpected_ids": 0,
+      "duplicate_counted_ids": 0
+    },
+    "global_non_target_regression": 0
+  },
+  "protected_state": {
+    "main_touched": false,
+    "site_prod_touched": false,
+    "db_neon_touched": false,
+    "campaign_6863_touched": false,
+    "kharkiv_corpus_evidence_touched": false,
+    "differentiated_alert_work_touched": false,
+    "casualty_semantics_touched": false,
+    "canonical_alert_corpora_touched": false,
+    "monitor_implementation_touched": false,
+    "production_ux_touched": false
+  },
+  "staging_verdict": "CONSOLIDATED HISTORICAL REPLAY APPLY PROVEN ON FRESH AUTHORITATIVE BASE"
+}
