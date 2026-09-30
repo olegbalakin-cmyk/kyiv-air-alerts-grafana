@@ -1,0 +1,180 @@
+name: Ternopil historical evidence recovery proof
+
+on:
+  push:
+    branches:
+      - ternopil-historical-evidence-recovery-proof-2026-09-30
+    paths:
+      - .github/workflows/ternopil-historical-evidence-recovery-proof.yml
+
+permissions:
+  contents: write
+
+jobs:
+  prove:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      AUTHORITATIVE_HEAD: 2478faf4b0aa98a6e3ac11d41b42776d2e777161
+      PROOF_BRANCH: ternopil-historical-evidence-recovery-proof-2026-09-30
+      ARTIFACT: research/historical_replay_ternopil_evidence_recovery_proof_2026-09-30.json
+      WORKFLOW: .github/workflows/ternopil-historical-evidence-recovery-proof.yml
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ternopil-historical-evidence-recovery-proof-2026-09-30
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: python -m pip install --quiet pytest requests beautifulsoup4
+
+      - name: Verify ancestry and protected source blobs
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git merge-base "$AUTHORITATIVE_HEAD" HEAD)" = "$AUTHORITATIVE_HEAD"
+          test "$(git rev-parse "$AUTHORITATIVE_HEAD:kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/ternopil-historical-recovery_alerts.json")" = "9f8a779520741c06afc89f1e607699e4680e9357"
+          test "$(git rev-parse "$AUTHORITATIVE_HEAD:kyiv-air-alerts-grafana/scripts/replay_explosion_history.py")" = "816e2a13f66bb453fc4bd765318d15443121325e"
+          test "$(git rev-parse HEAD:kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/ternopil-historical-recovery_alerts.json)" = "9f8a779520741c06afc89f1e607699e4680e9357"
+          test "$(git rev-parse HEAD:kyiv-air-alerts-grafana/scripts/replay_explosion_history.py)" = "816e2a13f66bb453fc4bd765318d15443121325e"
+
+      - name: Run self-test and historical replay tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd kyiv-air-alerts-grafana
+          python scripts/replay_explosion_history.py --self-test | tee /tmp/self-test.txt
+          pytest -q tests/test_historical_replay_*.py | tee /tmp/historical-tests.txt
+
+      - name: Run Ternopil replay
+        shell: bash
+        run: |
+          set -euo pipefail
+          python kyiv-air-alerts-grafana/scripts/replay_explosion_history.py \
+            --repo-root kyiv-air-alerts-grafana \
+            --city ternopil \
+            --through 2026-09-17 \
+            --output /tmp/ternopil-replay.json \
+            --input-head "$(git rev-parse HEAD)"
+          python - <<'PY'
+          import json
+          d=json.load(open("/tmp/ternopil-replay.json",encoding="utf-8"))
+          assert d["episodes_checked"] == 125, d
+          assert d["replayed_strict_episodes"] == 5, d
+          assert d["replayed_sensitivity_episodes"] == 5, d
+          assert d["changed_episodes"] == [], d
+          assert d["errors"] == [], d
+          assert d["verdict"] == "CITY REPLAY CLEAN", d
+          assert d["protected_files_unchanged"] is True, d
+          print(json.dumps({
+            "episodes_checked":d["episodes_checked"],
+            "strict":d["replayed_strict_episodes"],
+            "sensitivity":d["replayed_sensitivity_episodes"],
+            "qa":len(d["changed_episodes"])+len(d["errors"]),
+            "verdict":d["verdict"],
+          },indent=2))
+          PY
+
+      - name: Compare replayable non-target cities
+        shell: bash
+        run: |
+          set -euo pipefail
+          git worktree add --detach /tmp/auth "$AUTHORITATIVE_HEAD"
+          python - <<'PY'
+          import json, subprocess
+          from pathlib import Path
+
+          proof=Path(".").resolve()
+          auth=Path("/tmp/auth").resolve()
+          status=json.load(open(auth/"research/historical_replay_status_current.json",encoding="utf-8"))
+          cities=[
+            city for city,row in status["cities"].items()
+            if city!="ternopil" and row.get("source_status")=="READY"
+          ]
+          rows=[]
+          for city in cities:
+            a=Path("/tmp")/f"auth-{city}.json"
+            p=Path("/tmp")/f"proof-{city}.json"
+            for root,out in [(auth,p if False else a),(proof,p)]:
+              app=root/"kyiv-air-alerts-grafana"
+              cmd=[
+                "python",str(app/"scripts/replay_explosion_history.py"),
+                "--repo-root",str(app),
+                "--city",city,
+                "--through","2026-09-17",
+                "--output",str(out),
+                "--input-head",subprocess.check_output(["git","-C",str(root),"rev-parse","HEAD"],text=True).strip(),
+              ]
+              cp=subprocess.run(cmd,text=True,capture_output=True)
+              if cp.returncode not in (0,2):
+                raise SystemExit(f"{city} replay failed: {cp.stdout}\n{cp.stderr}")
+            da=json.load(open(a,encoding="utf-8"))
+            dp=json.load(open(p,encoding="utf-8"))
+            keys=[
+              "status","episodes_checked","replayed_strict_episodes",
+              "replayed_sensitivity_episodes","changed_episodes","errors",
+              "strict_episode_identity","verdict"
+            ]
+            delta={k:[da.get(k),dp.get(k)] for k in keys if da.get(k)!=dp.get(k)}
+            rows.append({"city":city,"delta":delta})
+          out={"cities_compared":cities,"results":rows,"unexpected_non_ternopil_episode_deltas":sum(bool(r["delta"]) for r in rows)}
+          json.dump(out,open("/tmp/non-target-regression.json","w",encoding="utf-8"),ensure_ascii=False,indent=2)
+          assert out["unexpected_non_ternopil_episode_deltas"] == 0, out
+          print(json.dumps(out,ensure_ascii=False,indent=2))
+          PY
+
+      - name: Finalize research artifact and remove temporary workflow
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json, subprocess
+          from pathlib import Path
+
+          artifact=Path("research/historical_replay_ternopil_evidence_recovery_proof_2026-09-30.json")
+          evidence=Path("kyiv-air-alerts-grafana/data/explosion_research/ternopil/final_evidence.json")
+          d=json.load(artifact.open(encoding="utf-8"))
+          replay=json.load(open("/tmp/ternopil-replay.json",encoding="utf-8"))
+          regression=json.load(open("/tmp/non-target-regression.json",encoding="utf-8"))
+          d["proof"]["semantic_tested_head"]=subprocess.check_output(["git","rev-parse","HEAD"],text=True).strip()
+          d["blobs"]["final_evidence"]=subprocess.check_output(["git","hash-object",str(evidence)],text=True).strip()
+          d["executable_replay"]={
+            "status":"PASS",
+            "episodes_checked":replay["episodes_checked"],
+            "strict":replay["replayed_strict_episodes"],
+            "sensitivity":replay["replayed_sensitivity_episodes"],
+            "qa":len(replay["changed_episodes"])+len(replay["errors"]),
+            "verdict":replay["verdict"],
+            "strict_episode_identity":replay["strict_episode_identity"],
+            "protected_files_unchanged":replay["protected_files_unchanged"],
+          }
+          d["tests"]={
+            "self_test":"PASS",
+            "historical_replay_suite":"PASS",
+            "focused_ternopil":"PASS"
+          }
+          d["non_target_regression"]=regression
+          d["protected_state"]["temporary_workflow_removed"]=True
+          d["final_verdict"]="TERNOPIL HISTORICAL EVIDENCE RECOVERY PROVEN — 125 ALERT EPISODES — 5 STRICT / 5 SENSITIVITY — QA0 — FROZEN BASELINE VALID"
+          artifact.write_text(json.dumps(d,ensure_ascii=False,indent=2)+"\n",encoding="utf-8")
+          PY
+          git rm "$WORKFLOW"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "$ARTIFACT"
+          git commit -m "Finalize Ternopil historical evidence recovery proof"
+          final_head="$(git rev-parse HEAD)"
+          python - "$ARTIFACT" "$final_head" <<'PY'
+          import json,sys
+          p,head=sys.argv[1:]
+          d=json.load(open(p,encoding="utf-8"))
+          d["proof"]["final_head"]=head
+          open(p,"w",encoding="utf-8").write(json.dumps(d,ensure_ascii=False,indent=2)+"\n")
+          PY
+          git add "$ARTIFACT"
+          git commit --amend --no-edit
+          git push origin "HEAD:$PROOF_BRANCH"
