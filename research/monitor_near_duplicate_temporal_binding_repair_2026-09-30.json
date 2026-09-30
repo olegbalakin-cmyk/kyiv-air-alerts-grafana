@@ -1,0 +1,260 @@
+{
+  "task": "monitor near-duplicate temporal binding repair",
+  "date": "2026-09-30",
+  "authoritative_head": "2478faf4b0aa98a6e3ac11d41b42776d2e777161",
+  "proof_branch": "monitor-near-duplicate-temporal-binding-repair-2026-09-30",
+  "executable_proof_head": "e0a221433c1f48f5afbb6e720c7d0f529590ccaf",
+  "proof_run": {
+    "id": 36687430976,
+    "conclusion": "success"
+  },
+  "blobs": {
+    "monitor_before": "b55fe2ed082958917c74f95bca2fd6bc137bcaae",
+    "monitor_after": "927dc89df0b52edd52cb31a126b0d57ca492a278",
+    "replay_before": "816e2a13f66bb453fc4bd765318d15443121325e",
+    "replay_after": "816e2a13f66bb453fc4bd765318d15443121325e"
+  },
+  "accepted_dnipro_causal_artifact": {
+    "path": "research/dnipro_monitor_selftest_root_cause_2026-09-30.json",
+    "blob": "ec6fe25a34423c35e53d4fdb119f9b141b7ae0c0",
+    "proof_run": 36673940232,
+    "classification": "PRE-EXISTING GENERATED MONITOR-DATA DRIFT",
+    "dnipro_replay_semantics_can_remain_authoritative": true
+  },
+  "implementation": {
+    "shared_helper": "logical_episode_support()",
+    "reuses": [
+      "same_episode_representation()",
+      "episode_representation_clusters()"
+    ],
+    "temporal_binding": "one logical cluster => episode_specific; preserve every raw ID; episode_id remains null for multiple raw representations",
+    "composition": "target must be in supported_episode_ids of the one logical cluster",
+    "tolerance_seconds_before": 90,
+    "tolerance_seconds_after": 90,
+    "arbitrary_raw_id_selection": false
+  },
+  "known_kyiv_fixture": {
+    "target_episode_id": "e97e6e816f96832d02c8b2cd",
+    "target_window": [
+      "2026-09-23T07:24:00Z",
+      "2026-09-23T09:29:00Z"
+    ],
+    "duplicate_episode_id": "782041e0741ad4cee3d3180e",
+    "duplicate_window": [
+      "2026-09-23T07:24:05Z",
+      "2026-09-23T09:29:45Z"
+    ],
+    "anchor_candidate_id": "73d817926f66c8dce397b91b",
+    "context_candidate_id": "4bdc4c0a5f95dc1e01632d22",
+    "anchor_message_time": "2026-09-23T07:55:51Z",
+    "raw_active_episode_ids": [
+      "782041e0741ad4cee3d3180e",
+      "e97e6e816f96832d02c8b2cd"
+    ],
+    "logical_clusters": [
+      [
+        "782041e0741ad4cee3d3180e",
+        "e97e6e816f96832d02c8b2cd"
+      ]
+    ],
+    "old_temporal": {
+      "present": false,
+      "code": "TEMPORAL_CONTEMPORANEOUS_LIVE_AMBIGUOUS_EPISODES",
+      "episode_specific": false,
+      "supported_episode_ids": [
+        "782041e0741ad4cee3d3180e",
+        "e97e6e816f96832d02c8b2cd"
+      ],
+      "episode_id": null
+    },
+    "repaired_temporal": {
+      "present": true,
+      "code": "TEMPORAL_CONTEMPORANEOUS_LIVE_WORDING",
+      "episode_specific": true,
+      "supported_episode_ids": [
+        "782041e0741ad4cee3d3180e",
+        "e97e6e816f96832d02c8b2cd"
+      ],
+      "logical_episode_groups": [
+        [
+          "782041e0741ad4cee3d3180e",
+          "e97e6e816f96832d02c8b2cd"
+        ]
+      ],
+      "episode_id": null
+    },
+    "old_composition": {
+      "verdict": "no_composed_strict",
+      "reason": "NO_SAFE_EPISODE_LEVEL_COMPOSITION",
+      "temporal_anchor_candidate_ids": [],
+      "air_context_candidate_ids": [
+        "4bdc4c0a5f95dc1e01632d22"
+      ]
+    },
+    "repaired_composition": {
+      "verdict": "approved_strict",
+      "anchor_candidate_id": "73d817926f66c8dce397b91b",
+      "contributing_candidate_ids": [
+        "73d817926f66c8dce397b91b",
+        "4bdc4c0a5f95dc1e01632d22"
+      ]
+    }
+  },
+  "genuine_ambiguity_regression": {
+    "current_state_cases_inspected": 9,
+    "cases_changed_to_episode_specific": 0,
+    "focused_cases": [
+      "two overlapping distinct windows",
+      "three transitive raw representations/one window",
+      "91-second outside-tolerance boundary",
+      "single raw episode"
+    ]
+  },
+  "classification_delta_inventory": {
+    "candidate_status_delta_count": 0,
+    "episode_composition_delta_count": 3,
+    "episode_composition_deltas": [
+      {
+        "city": "kyiv",
+        "episode_id": "f235928c329ca806d9dca5ed",
+        "candidate_ids": [
+          "5f807237ce10eb9d27bfc95f",
+          "7f98c09b95dcd4a2293dd750"
+        ],
+        "before": "no_composed_strict",
+        "after": "approved_strict",
+        "raw_active_representations": [
+          "8dba1d7945c2aec4e5152740",
+          "f235928c329ca806d9dca5ed"
+        ],
+        "logical_clusters": [
+          [
+            "8dba1d7945c2aec4e5152740",
+            "f235928c329ca806d9dca5ed"
+          ]
+        ],
+        "reason": "logical_representation_temporal_binding_change"
+      },
+      {
+        "city": "kyiv",
+        "episode_id": "52e655760b5a4c374350a876",
+        "candidate_ids": [
+          "19c021fd25b4a483304854f3",
+          "618a78f3839b3e70e5b24b20"
+        ],
+        "before": "no_composed_strict",
+        "after": "approved_strict",
+        "raw_active_representations": [
+          "52e655760b5a4c374350a876",
+          "aadd3f7ff3426126f463b17e"
+        ],
+        "logical_clusters": [
+          [
+            "52e655760b5a4c374350a876",
+            "aadd3f7ff3426126f463b17e"
+          ]
+        ],
+        "reason": "logical_representation_temporal_binding_change"
+      },
+      {
+        "city": "kyiv",
+        "episode_id": "e97e6e816f96832d02c8b2cd",
+        "candidate_ids": [
+          "73d817926f66c8dce397b91b",
+          "4bdc4c0a5f95dc1e01632d22"
+        ],
+        "before": "no_composed_strict",
+        "after": "approved_strict",
+        "raw_active_representations": [
+          "782041e0741ad4cee3d3180e",
+          "e97e6e816f96832d02c8b2cd"
+        ],
+        "logical_clusters": [
+          [
+            "782041e0741ad4cee3d3180e",
+            "e97e6e816f96832d02c8b2cd"
+          ]
+        ],
+        "reason": "logical_representation_temporal_binding_change"
+      }
+    ],
+    "interpretation": "All three deltas are explained repairs of the same raw-representation/logical-window inconsistency; no candidate status changed."
+  },
+  "generated_state_delta_inventory": {
+    "isolated_refresh": "python scripts/monitor_explosion_candidates.py --local-only",
+    "files": [
+      {
+        "path": "data/explosion_candidate_monitor_last_run.json",
+        "changed": true,
+        "before_sha256": "7d1cf73115990a5a19af92952dd5d7dd7fdb8d06f89624149d76de5d09521003",
+        "after_sha256": "38401997ae6af47db124d2a7c8211c2c3245965fd38acbc7b7e4fd921b59d841",
+        "json_diff_path_count": 199
+      },
+      {
+        "path": "data/explosion_candidate_monitor_state.json",
+        "changed": true,
+        "before_sha256": "0610a7def7de8269e3cf5ef7f16935627c4f849f48bb8a60c1c1ee5900a8e2b7",
+        "after_sha256": "8f40904d2ae96c688edd4b3198f1e1fc5328baa173b7752af44642fbee43bac4",
+        "json_diff_path_count": 1365
+      },
+      {
+        "path": "data/explosion_review_queue.json",
+        "changed": true,
+        "before_sha256": "4a45bbbc54fe8242432687d0eed469df20408b62f70cac06fd86298b0028acf8",
+        "after_sha256": "e122b5553d632934cd7a892b7b406b51054d07c09de3a02ead894ef0efca9518",
+        "json_diff_path_count": 127326
+      },
+      {
+        "path": "data/explosions_test.json",
+        "changed": false,
+        "sha256": "e6c1a1b35bc72fe5d05a67604645c2d18ddb4909e6f4ce2b591eb26e7c792504",
+        "json_diff_path_count": 0
+      },
+      {
+        "path": "data/dashboard_data.json",
+        "changed": false,
+        "sha256": "c78a83df35a60d6f83503960dcca82fde397f0c805832417e2b2171fa1f44544",
+        "json_diff_path_count": 0
+      }
+    ],
+    "new_review_candidates": 162,
+    "review_queue_size_after_refresh": 1881,
+    "matching_refresh_status_changes": 0,
+    "composition_refresh_candidate_status_changes": 0,
+    "strict_series_modified_by_discovery": false,
+    "interpretation": "Normal proof refresh produced time/network/discovery-owned churn in last_run/state/queue, including cached-bridge staleness reporting. Strict metric outputs were unchanged. Generated outputs were discarded and are not part of the apply."
+  },
+  "tests": {
+    "monitor_self_test": {
+      "result": "PASS",
+      "matching_refresh_checked": 1592
+    },
+    "replay_self_test": {
+      "result": "PASS"
+    },
+    "historical_replay_tests": {
+      "result": "PASS",
+      "passed": 92
+    },
+    "focused_monitor_tests": {
+      "result": "PASS",
+      "passed": 5
+    },
+    "monitor_specific_tests": {
+      "result": "PASS",
+      "passed": 5
+    }
+  },
+  "protected_state": {
+    "replay_script": "unchanged",
+    "historical_evidence": "not modified",
+    "canonical_alert_corpora": "not modified",
+    "db_neon": "not touched",
+    "main": "not modified",
+    "site_prod": "not modified",
+    "production_frontend": "not modified",
+    "proof_refresh_generated_outputs": "discarded/not committed"
+  },
+  "recommended_apply_decision": "GREEN — guarded authoritative apply of monitor repair, focused regression test, and proof artifact only after a fresh guard.",
+  "exact_verdict": "MONITOR NEAR-DUPLICATE TEMPORAL BINDING REPAIRED — LOGICAL ALERT-WINDOW SEMANTICS CONSISTENT — KYIV COMPOSITION RESTORED — GENUINE AMBIGUITY PRESERVED — DNIPRO REPLAY UNCHANGED"
+}

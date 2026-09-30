@@ -1585,6 +1585,32 @@ def episode_representation_clusters(episodes: list[dict]) -> list[list[dict]]:
     return sorted(clusters, key=lambda group: str(group[0].get("episode_id")) if group else "")
 
 
+def logical_episode_support(episodes: list[dict]) -> dict:
+    """Summarize raw episode rows at the shared logical alert-window level."""
+    clusters = episode_representation_clusters(episodes)
+    logical_groups = [
+        [str(ep["episode_id"]) for ep in cluster]
+        for cluster in clusters
+    ]
+    supported_ids = sorted(
+        episode_id
+        for group in logical_groups
+        for episode_id in group
+    )
+    specific = len(logical_groups) == 1
+    singleton_id = (
+        logical_groups[0][0]
+        if specific and len(logical_groups[0]) == 1
+        else None
+    )
+    return {
+        "episode_specific": specific,
+        "supported_episode_ids": supported_ids,
+        "logical_episode_groups": logical_groups,
+        "episode_id": singleton_id,
+    }
+
+
 def match_candidate_to_episodes(row: dict, episodes: list[dict]) -> dict:
     """
     Deterministic temporal matching only.
@@ -1622,15 +1648,12 @@ def match_candidate_to_episodes(row: dict, episodes: list[dict]) -> dict:
         }
 
     matched = sorted(raw_matches.values(), key=lambda ep: str(ep.get("episode_id")))
-    clusters = episode_representation_clusters(matched)
+    support = logical_episode_support(matched)
     matched_ids = [str(ep["episode_id"]) for ep in matched]
-    logical_groups = [
-        [str(ep["episode_id"]) for ep in cluster]
-        for cluster in clusters
-    ]
+    logical_groups = list(support["logical_episode_groups"])
 
-    if len(clusters) == 1:
-        singleton_id = logical_groups[0][0] if len(logical_groups[0]) == 1 else None
+    if support["episode_specific"]:
+        singleton_id = support["episode_id"]
         return {
             "outcome": "unique_match",
             "matched_episode_ids": matched_ids,
@@ -1919,15 +1942,21 @@ def relative_alert_chronology_relation(row: dict, episodes: list[dict]) -> dict:
     best_alert = candidates[0][1]
     selected = [x for x in candidates if x[0] == best_event and x[1] == best_alert]
     supported_ids = sorted({x[2] for x in selected})
-    specific = len(supported_ids) == 1
+    supported_set = set(supported_ids)
+    support = logical_episode_support([
+        ep for ep in episodes
+        if str(ep.get("episode_id") or "") in supported_set
+    ])
+    specific = bool(support["episode_specific"])
     return {
         "relation": "inside" if specific else None,
         "event_time": iso(best_event),
         "alert_time": iso(best_alert),
         "offset_minutes": offset_minutes,
         "episode_specific": specific,
-        "supported_episode_ids": supported_ids,
-        "episode_id": supported_ids[0] if specific else None,
+        "supported_episode_ids": list(support["supported_episode_ids"]),
+        "logical_episode_groups": list(support["logical_episode_groups"]),
+        "episode_id": support["episode_id"] if specific else None,
     }
 
 
@@ -2008,16 +2037,22 @@ def explicit_event_time_relation(
         and item[2] == best_time
     ]
     supported_ids = sorted({item[3] for item in selected})
+    supported_set = set(supported_ids)
+    support = logical_episode_support([
+        ep for ep in episodes
+        if str(ep.get("episode_id") or "") in supported_set
+    ])
     relations = sorted({item[0] for item in selected})
     relation = relations[0] if len(relations) == 1 else None
-    specific = relation is not None and len(supported_ids) == 1
+    specific = relation is not None and bool(support["episode_specific"])
     return {
         "relation": relation,
         "event_time": iso(best_time),
         "distance_seconds": best_distance,
         "episode_specific": specific,
-        "supported_episode_ids": supported_ids,
-        "episode_id": supported_ids[0] if specific else None,
+        "supported_episode_ids": list(support["supported_episode_ids"]),
+        "logical_episode_groups": list(support["logical_episode_groups"]),
+        "episode_id": support["episode_id"] if specific else None,
     }
 
 
@@ -2037,6 +2072,7 @@ def empty_near_boundary() -> dict:
         "present": False,
         "episode_specific": False,
         "supported_episode_ids": [],
+        "logical_episode_groups": [],
         "episode_id": None,
     }
 
@@ -2059,6 +2095,9 @@ def temporal_binding_evidence(row: dict, strict_evidence: dict, matching: dict, 
             "message_time": None,
             "episode_specific": True,
             "supported_episode_ids": list(relative.get("supported_episode_ids") or []),
+            "logical_episode_groups": [
+                list(group) for group in relative.get("logical_episode_groups") or []
+            ],
             "episode_id": relative.get("episode_id"),
             "near_boundary": empty_near_boundary(),
         }
@@ -2080,6 +2119,9 @@ def temporal_binding_evidence(row: dict, strict_evidence: dict, matching: dict, 
             "message_time": None,
             "episode_specific": specific,
             "supported_episode_ids": list(clock.get("supported_episode_ids") or []),
+            "logical_episode_groups": [
+                list(group) for group in clock.get("logical_episode_groups") or []
+            ],
             "episode_id": clock.get("episode_id"),
             "near_boundary": empty_near_boundary(),
         }
@@ -2093,6 +2135,9 @@ def temporal_binding_evidence(row: dict, strict_evidence: dict, matching: dict, 
             "distance_seconds": clock.get("distance_seconds"),
             "episode_specific": specific,
             "supported_episode_ids": list(clock.get("supported_episode_ids") or []),
+            "logical_episode_groups": [
+                list(group) for group in clock.get("logical_episode_groups") or []
+            ],
             "episode_id": clock.get("episode_id"),
         }
         return {
@@ -2109,6 +2154,9 @@ def temporal_binding_evidence(row: dict, strict_evidence: dict, matching: dict, 
             "message_time": None,
             "episode_specific": specific,
             "supported_episode_ids": list(clock.get("supported_episode_ids") or []),
+            "logical_episode_groups": [
+                list(group) for group in clock.get("logical_episode_groups") or []
+            ],
             "episode_id": clock.get("episode_id"),
             "near_boundary": near,
         }
@@ -2120,8 +2168,9 @@ def temporal_binding_evidence(row: dict, strict_evidence: dict, matching: dict, 
         and any(contemporaneous_live_wording(segment) for segment in event_segments)
     ):
         active = exact_active_episodes_at(published, episodes)
-        supported_ids = [str(ep.get("episode_id")) for ep in active]
-        specific = len(supported_ids) == 1
+        support = logical_episode_support(active)
+        supported_ids = list(support["supported_episode_ids"])
+        specific = bool(support["episode_specific"])
         return {
             "present": specific,
             "code": (
@@ -2136,15 +2185,17 @@ def temporal_binding_evidence(row: dict, strict_evidence: dict, matching: dict, 
             "message_time": iso(published),
             "episode_specific": specific,
             "supported_episode_ids": supported_ids,
-            "episode_id": supported_ids[0] if specific else None,
+            "logical_episode_groups": list(support["logical_episode_groups"]),
+            "episode_id": support["episode_id"] if specific else None,
             "near_boundary": empty_near_boundary(),
         }
 
     explicit_segment = next((segment for segment in event_segments if explicit_alert_relation(segment)), None)
     if explicit_segment:
         same_day = episodes_intersecting_local_day(row, episodes)
-        supported_ids = [str(ep.get("episode_id")) for ep in same_day]
-        specific = len(supported_ids) == 1
+        support = logical_episode_support(same_day)
+        supported_ids = list(support["supported_episode_ids"])
+        specific = bool(support["episode_specific"])
         return {
             "present": specific,
             "code": (
@@ -2163,7 +2214,8 @@ def temporal_binding_evidence(row: dict, strict_evidence: dict, matching: dict, 
             "message_time": None,
             "episode_specific": specific,
             "supported_episode_ids": supported_ids,
-            "episode_id": supported_ids[0] if specific else None,
+            "logical_episode_groups": list(support["logical_episode_groups"]),
+            "episode_id": support["episode_id"] if specific else None,
             "near_boundary": empty_near_boundary(),
         }
 
@@ -2177,6 +2229,7 @@ def temporal_binding_evidence(row: dict, strict_evidence: dict, matching: dict, 
         "message_time": None,
         "episode_specific": False,
         "supported_episode_ids": [],
+        "logical_episode_groups": [],
         "episode_id": None,
         "near_boundary": empty_near_boundary(),
     }
@@ -2191,31 +2244,34 @@ def single_episode_day_inference(row: dict, matching: dict, episodes: list[dict]
     episodes and is never treated as event-time proof.
     """
     same_day = episodes_intersecting_local_day(row, episodes)
-    day_ids = [str(ep.get("episode_id")) for ep in same_day]
+    support = logical_episode_support(same_day)
+    day_ids = list(support["supported_episode_ids"])
     local_day = publication_local_day(row)
-    if len(day_ids) != 1:
+    if not support["episode_specific"]:
         return {
             "present": False,
             "reason": "multiple_or_no_tracked_episodes_on_publication_local_date",
             "local_date": local_day.isoformat() if local_day else None,
             "supported_episode_ids": day_ids,
+            "logical_episode_groups": list(support["logical_episode_groups"]),
             "episode_id": None,
         }
-    episode_id = day_ids[0]
+    matching_ids = set(matching.get("matched_episode_ids") or [])
     present = (
         matching.get("outcome") == "unique_match"
-        and matching.get("matched_episode_id") == episode_id
+        and bool(matching_ids.intersection(day_ids))
     )
     return {
         "present": present,
         "reason": (
-            "single_episode_day_and_publication_window_consistent"
+            "single_logical_episode_day_and_publication_window_consistent"
             if present
-            else "single_episode_day_but_publication_window_not_consistent"
+            else "single_logical_episode_day_but_publication_window_not_consistent"
         ),
         "local_date": local_day.isoformat() if local_day else None,
         "supported_episode_ids": day_ids,
-        "episode_id": episode_id if present else None,
+        "logical_episode_groups": list(support["logical_episode_groups"]),
+        "episode_id": support["episode_id"] if present else None,
     }
 
 def dry_classify_existing_candidate(item: dict, state: dict) -> dict:
@@ -2385,7 +2441,10 @@ def classify_candidate(row: dict, city_key: str, episodes: list[dict], matching:
             if sensitivity_basis == "near_boundary"
             else "SENSITIVITY_INFERRED_SAME_ATTACK"
         )
-    elif base_event_ok and len(episodes_intersecting_local_day(row, episodes)) > 1:
+    elif (
+        base_event_ok
+        and len(episode_representation_clusters(episodes_intersecting_local_day(row, episodes))) > 1
+    ):
         reason_codes.append("MULTI_EPISODE_DATE_REQUIRES_EPISODE_SPECIFIC_TEMPORAL_PROOF")
 
     return {
@@ -2644,7 +2703,9 @@ def compose_episode_candidates(
             and decision["strict_explosion_evidence"].get("present")
             and temporal.get("present")
             and temporal.get("episode_specific")
-            and str(temporal.get("episode_id") or "") == target_id
+            and target_id in {
+                str(value) for value in temporal.get("supported_episode_ids") or []
+            }
         ):
             anchors.append((item, decision))
         if (
