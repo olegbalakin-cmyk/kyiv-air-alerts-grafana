@@ -17,7 +17,7 @@
   },
   "proof": {
     "branch": "ternopil-historical-evidence-recovery-proof-2026-09-30",
-    "semantic_tested_head": null,
+    "semantic_tested_head": "31154a05f67d00eba3aeeb7974a325340f051a1b",
     "final_head": null,
     "finalization_note": "pending proof-only GitHub Actions execution"
   },
@@ -25,7 +25,7 @@
     "replay_script": "816e2a13f66bb453fc4bd765318d15443121325e",
     "ternopil_source_slice": "9f8a779520741c06afc89f1e607699e4680e9357",
     "baseline": "81ecc48ed64b7e78449df903afb082e9f92531e5",
-    "final_evidence": null
+    "final_evidence": "d24f1c911158c082bba6dc53d47d495737334d7d"
   },
   "denominator": {
     "expected": 125,
@@ -2435,16 +2435,78 @@
     "exact_date_set_match": true
   },
   "executable_replay": {
-    "status": "PENDING_GITHUB_ACTIONS_PROOF"
+    "status": "PASS",
+    "episodes_checked": 125,
+    "strict": 5,
+    "sensitivity": 5,
+    "qa": 0,
+    "verdict": "CITY REPLAY CLEAN",
+    "strict_episode_identity": {
+      "aggregate_counts_equal_but_episode_identities_differ": false,
+      "new_strict_only": [],
+      "old_strict_only": [],
+      "symmetric_difference": [],
+      "unchanged_strict_ids": [
+        "210be7b00050df45a83a5dd0",
+        "5660359d9daba2bb22acbc03",
+        "a89f7436765f5d5137e1bb37",
+        "c955cc67c99c2bfda392999f",
+        "c9ba590a578eb6ca32b6bbdd"
+      ]
+    },
+    "protected_files_unchanged": true
   },
   "tests": {
-    "self_test": "PENDING",
-    "historical_replay_suite": "PENDING",
-    "focused_ternopil": "PENDING"
+    "self_test": "PASS",
+    "historical_replay_suite": "PASS",
+    "focused_ternopil": "PASS"
   },
   "non_target_regression": {
-    "status": "PENDING",
-    "unexpected_non_ternopil_episode_deltas": null
+    "cities_compared": [
+      "cherkasy",
+      "chernihiv",
+      "kropyvnytskyi",
+      "kyiv",
+      "lviv",
+      "sevastopol",
+      "sumy",
+      "zaporizhzhia"
+    ],
+    "results": [
+      {
+        "city": "cherkasy",
+        "delta": {}
+      },
+      {
+        "city": "chernihiv",
+        "delta": {}
+      },
+      {
+        "city": "kropyvnytskyi",
+        "delta": {}
+      },
+      {
+        "city": "kyiv",
+        "delta": {}
+      },
+      {
+        "city": "lviv",
+        "delta": {}
+      },
+      {
+        "city": "sevastopol",
+        "delta": {}
+      },
+      {
+        "city": "sumy",
+        "delta": {}
+      },
+      {
+        "city": "zaporizhzhia",
+        "delta": {}
+      }
+    ],
+    "unexpected_non_ternopil_episode_deltas": 0
   },
   "protected_state": {
     "authoritative_branch_modified": false,
@@ -2457,7 +2519,7 @@
     "main_modified": false,
     "site_prod_modified": false,
     "merge_performed": false,
-    "temporary_workflow_removed": null
+    "temporary_workflow_removed": true
   },
-  "final_verdict": "PENDING_EXECUTABLE_PROOF"
+  "final_verdict": "TERNOPIL HISTORICAL EVIDENCE RECOVERY PROVEN — 125 ALERT EPISODES — 5 STRICT / 5 SENSITIVITY — QA0 — FROZEN BASELINE VALID"
 }
