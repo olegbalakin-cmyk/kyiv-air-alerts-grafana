@@ -1,0 +1,141 @@
+{
+  "date": "2026-09-30",
+  "task": "differentiated alert site-prod durable shadow enablement",
+  "fresh_guards": {
+    "site_prod_head": "9a0769ff49735cdb870abeb913ffb869f39e5e88",
+    "main_head": "2ef5a766b81925095be536a95e5cda60696b73c9",
+    "updater_blob": "7d7fde6d8c736cd754804dd051845cf59738d8c9",
+    "workflow_blob": "a451cb205be4cf5a597f3f72e04426c12868e3da"
+  },
+  "accepted_proof_lineage": {
+    "schema": {
+      "branch": "differentiated-alert-schema-proof-2026-09-29",
+      "head": "8d8ff2468edda2fc7229377c67a8eb30409e75af",
+      "implementation_blob": "68b4f3df3b730a3d22f70d29a0d0cc09072c3a42"
+    },
+    "integration": {
+      "branch": "differentiated-alert-production-shadow-integration-proof-2026-09-29",
+      "head": "77afbdd65ba7c2e0307439a7b8eb7e6161be0f6a",
+      "runtime_blob": "f6e159f0ed18f7f29913fc6cfa2161563d9eb0a6"
+    },
+    "previous_off_on": {
+      "branch": "differentiated-alert-siteprod-off-on-proof-2026-09-29",
+      "head": "5e7d68622db7bd239f03f8963a52fd939bc90335"
+    }
+  },
+  "proof_branch": "differentiated-alert-siteprod-shadow-enable-proof-2026-09-30",
+  "proof_head": "f5f9eda5a1009fe5b3ade593e0f6c62ae357fd15",
+  "implementation_blobs": {
+    "scripts/update_data.py": "f3380983af880ff89fd6187ae4d74c0724a5c893",
+    "scripts/differentiated_alert_shadow_runtime.py": "d5551bff69745c7634a726fdcfb0c872dd1e7e17",
+    "scripts/differentiated_alert_postgres.py": "54b07bbc3ec031486b0b6c6074e8e5041090c182",
+    "scripts/proof_differentiated_alert_schema_v2.py": "68b4f3df3b730a3d22f70d29a0d0cc09072c3a42",
+    "scripts/proof_differentiated_alert_shadow_ingestion.py": "5d4edeae1a4979acdac58b27a39adf8c58bdb95d",
+    "scripts/proof_differentiated_alert_siteprod_shadow_enablement.py": "99a2ed606e4ebe637a9348fa17db664b0d94ccfb"
+  },
+  "durable_store_design": {
+    "project": "green-cake-44216048",
+    "branch_id": "br-bold-mode-b5rub8pq",
+    "database": "neondb",
+    "production_schema_planned": "differentiated_alert_shadow",
+    "child_tables": [
+      "alert_state_snapshot",
+      "alert_threat_observation"
+    ],
+    "parent_mutation_api": false
+  },
+  "pre_proof_db_inventory": {
+    "public_tables": [
+      "alert_episode_sources",
+      "alert_episodes",
+      "ingestion_checkpoints",
+      "ingestion_runs"
+    ],
+    "counts": {
+      "ingestion_runs": 10,
+      "alert_episodes": 126,
+      "alert_episode_sources": 140,
+      "ingestion_checkpoints": 10
+    },
+    "schema_metadata_md5": "54c9a7ddd9e270beec1e116754e2772a"
+  },
+  "proof_execution": {
+    "authoritative_run_id": 36677192887,
+    "prior_debug_runs": [
+      36677066270,
+      36677132018
+    ],
+    "result": "BLOCKED_DURING_FROZEN_INPUT_CAPTURE",
+    "blocker": {
+      "step": "current production apply_ukrainealarm_bridge.py followed by validate_bridge_checkpoint.py",
+      "observed": "UkraineAlarm regionHistory returned HTTP 401 across the production target set; bridge last_fetch_error became non-empty; checkpoint validation exited 1",
+      "consequence": "could not freeze a valid full current-production input set, so OFF/ON full-pipeline equivalence was not reached",
+      "no_bypass": "stored bridge summaries were not substituted for raw/current-run differentiated evidence"
+    }
+  },
+  "fresh_tests": {
+    "differentiated_and_postgres_unittest": {
+      "count": 60,
+      "status": "PASS"
+    },
+    "production_update_fallback": {
+      "count": 1,
+      "status": "PASS"
+    },
+    "bridge_checkpoint_selftest": {
+      "count": 1,
+      "status": "PASS"
+    },
+    "total_count": 62
+  },
+  "postgres_test_state": {
+    "isolated_schemas_observed": [
+      "differentiated_alert_shadow_proof_20260930_unittest",
+      "differentiated_alert_shadow_proof_36677192887_unittest"
+    ],
+    "public_phase1_counts_after": {
+      "ingestion_runs": 10,
+      "alert_episodes": 126,
+      "alert_episode_sources": 140,
+      "ingestion_checkpoints": 10
+    },
+    "production_schema_created": false
+  },
+  "gates": {
+    "default_off": "PASS_BY_CODE_AND_TEST",
+    "off_zero_differentiated_work": "NOT_REACHED_IN_FULL_PIPELINE",
+    "on_persists_real_differentiated_child_evidence": "NOT_REACHED",
+    "publication_equivalence": "NOT_REACHED",
+    "parent_air_equivalence": "NOT_REACHED",
+    "attack_event_equivalence": "NOT_REACHED",
+    "exact_replay_idempotency": "PASS_IN_FOCUSED_POSTGRES_TESTS_BUT_NOT_REACHED_IN_FULL_PIPELINE",
+    "persistence_failure_fail_open": "PASS_IN_FOCUSED_TESTS_BUT_NOT_REACHED_IN_FULL_PIPELINE",
+    "source_failure_isolation": "PASS_IN_FOCUSED_TESTS_BUT_NOT_REACHED_IN_FULL_PIPELINE",
+    "postgres_transaction_rollback": "PASS_IN_FOCUSED_POSTGRES_TESTS",
+    "fresh_regressions": "PASS",
+    "credentials_exposure": 0
+  },
+  "source_status_for_proposed_runtime": {
+    "kyiv": "LIVE_RAW supported",
+    "ukrainealarm": "SKIPPED_NO_LIVE_RAW_SOURCE unless a safe current-run raw reuse seam is added",
+    "alerts_in_ua": "SKIPPED_NO_LIVE_RAW_SOURCE"
+  },
+  "production_changes": {
+    "site_prod_apply_commit": null,
+    "main_workflow_enablement_commit": null,
+    "real_production_run_id": null,
+    "differentiated_production_diagnostic": null,
+    "durable_production_rows": null
+  },
+  "protected_state": {
+    "site_prod_unchanged": true,
+    "main_unchanged": true,
+    "multicity_wip_unchanged": true,
+    "historical_replay_unchanged": true,
+    "attack_event_classification_unchanged": true,
+    "frontend_unchanged": true,
+    "alert_denominator_unchanged": true,
+    "phase1_public_tables_unchanged": true
+  },
+  "verdict": "DIFFERENTIATED ALERT PRODUCTION SHADOW NOT READY — FULL CURRENT-PRODUCTION INPUT FREEZE GATE FAILED — UKRAINEALARM REGIONHISTORY HTTP 401 IN PROOF WORKFLOW"
+}
