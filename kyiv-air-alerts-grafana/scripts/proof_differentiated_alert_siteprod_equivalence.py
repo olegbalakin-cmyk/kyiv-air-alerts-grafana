@@ -141,8 +141,10 @@ def base_env(mode: str, frozen_now: str, token: str) -> dict[str, str]:
     env["PROOF_HTTP_MODE"] = mode
     env["PROOF_HTTP_DIR"] = str(CAPTURE_DIR)
     env["PROOF_FROZEN_NOW"] = frozen_now
-    # Proof-only timing override: preserve production request sequence while avoiding the\n    # 70-second production throttle during frozen-input capture/replay.\n    # Match the production UkraineAlarm guard during live capture. Replay remains local.
-    env["UKRAINEALARM_MIN_INTERVAL_SECONDS"] = "70" if mode == "capture" else "0"\n    env["PHASE1_DB_SHADOW"] = "0"\n    env["UKRAINEALARM_API_TOKEN"] = token
+    # Match the production UkraineAlarm guard during live capture. Replay remains local.
+    env["UKRAINEALARM_MIN_INTERVAL_SECONDS"] = "70" if mode == "capture" else "0"
+    env["PHASE1_DB_SHADOW"] = "0"
+    env["UKRAINEALARM_API_TOKEN"] = token
     for key in [
         "PHASE1_DATABASE_URL", "PHASE1_PROD_SHADOW_DATABASE_URL",
         "PHASE1_DB_BRANCH", "PHASE1_PROD_SHADOW_BRANCH_ID",
