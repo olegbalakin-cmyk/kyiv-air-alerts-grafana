@@ -1,0 +1,238 @@
+{
+  "schema_version": 1,
+  "status": "PASS",
+  "verdict": "DIFFERENTIATED NEON SHADOW INTEGRATION PROVEN",
+  "ready_for": "READY FOR DIFFERENTIATED SCHEDULED PRODUCTION SHADOW ENABLEMENT PROOF",
+  "db_cutover": "NO",
+  "git": {
+    "proof_branch": "differentiated-alert-neon-shadow-integration-proof-2026-09-30",
+    "accepted_predecessor": "f4a44819724371885045c61fc4b665f55f30c502",
+    "final_implementation_head": "fe2f25dc5313686b0f6d4e14481ede2979c30963",
+    "temporary_workflow_removed_before_artifact": true,
+    "candidate_updater_blob": "eb2a5330fc73eb8c36920401dd3f9dfd2fac595a",
+    "old_sidecar_blob": "f6e159f0ed18f7f29913fc6cfa2161563d9eb0a6",
+    "new_sidecar_backend_integration_blob": "fc9d009cd0a22e2b25ff8ec96d3f3fbeef2b3fff",
+    "postgres_adapter_blob": "3cd9c9c5fc0676550aeb1cfa117894e1fc91e85f",
+    "ddl_blob": "3580847807c449df12b3d4a9ea062d69a8f6ec01",
+    "updater_hook_unchanged": true,
+    "postgres_adapter_unchanged": true,
+    "ddl_unchanged": true
+  },
+  "neon": {
+    "project_id": "green-cake-44216048",
+    "disposable_branch_id": "br-icy-forest-b5mfyezq",
+    "disposable_branch_name": "differentiated-alert-postgres-child-persistence-proof-2026-09-30",
+    "parent_branch_id": "br-young-feather-b5q19nli",
+    "permanent_production_shadow_branch_id": "br-bold-mode-b5rub8pq",
+    "disposable_branch_left_available_for_review": true
+  },
+  "proof_execution": {
+    "verification_basis": [
+      "branch-only push workflow with contents:read",
+      "ordered regression steps completed before the real Neon harness reached child writes",
+      "independent post-run Neon queries verified row identities, counts, bindings, and parent fingerprints"
+    ],
+    "workflow_run_id_retrievable_via_available_connector": false,
+    "credentials_exposed": false
+  },
+  "baseline": {
+    "child_counts": {
+      "snapshots": 5,
+      "observations": 5
+    },
+    "parent_counts": {
+      "ingestion_runs": 1,
+      "alert_episodes": 126,
+      "alert_episode_sources": 140,
+      "ingestion_checkpoints": 1,
+      "max_checkpoint_seq": 1
+    },
+    "parent_fingerprints_md5": {
+      "ingestion_runs": "c6f4a8e5af54f0bebf86773c48bf8dc5",
+      "alert_episodes": "6b557406ab169f9fa7d0dde63bcec121",
+      "alert_episode_sources": "dccc2fa4fbc8fae6b7e1b7f9d9d2c2f3",
+      "ingestion_checkpoints": "2a982250b3dc8e3b11e96dc859e83acb"
+    }
+  },
+  "off_result": {
+    "attempted": false,
+    "status": "DISABLED",
+    "postgres_connection_required": false,
+    "child_counts_after": {
+      "snapshots": 5,
+      "observations": 5
+    },
+    "pass": true
+  },
+  "sqlite_regression": {
+    "status": "PASS",
+    "backend_default": "sqlite",
+    "first_run": {
+      "inserted_snapshots": 3,
+      "inserted_observations": 3
+    },
+    "exact_replay": {
+      "inserted_snapshots": 0,
+      "inserted_observations": 0
+    },
+    "final_counts": {
+      "snapshots": 3,
+      "observations": 3
+    }
+  },
+  "postgres_first_on": {
+    "observed_at": "2026-09-30T20:00:00Z",
+    "attempted": true,
+    "status": "SUCCEEDED",
+    "inserted_snapshots": 3,
+    "inserted_observations": 3,
+    "child_counts_after": {
+      "snapshots": 8,
+      "observations": 8
+    }
+  },
+  "source_bindings_first_on": [
+    {
+      "source": "alerts_in_ua",
+      "target_city_key": "donetsk",
+      "binding_state": "UNBOUND",
+      "episode_uid": null
+    },
+    {
+      "source": "kyiv_official",
+      "target_city_key": "kyiv",
+      "binding_state": "UNBOUND",
+      "episode_uid": null
+    },
+    {
+      "source": "ukrainealarm",
+      "target_city_key": "zaporizhzhia",
+      "binding_state": "UNBOUND",
+      "episode_uid": null
+    }
+  ],
+  "exact_replay": {
+    "observed_at": "2026-09-30T20:00:00Z",
+    "attempted": true,
+    "status": "SUCCEEDED",
+    "inserted_snapshots": 0,
+    "inserted_observations": 0,
+    "child_counts_after": {
+      "snapshots": 8,
+      "observations": 8
+    },
+    "pass": true
+  },
+  "fresh_process_replay": {
+    "observed_at": "2026-09-30T20:00:00Z",
+    "attempted": true,
+    "status": "SUCCEEDED",
+    "inserted_snapshots": 0,
+    "inserted_observations": 0,
+    "child_counts_after": {
+      "snapshots": 8,
+      "observations": 8
+    },
+    "evidence": "Only three 20:00 snapshots exist after initial, in-process replay, and fresh-process replay; proof harness invokes the fresh replay as a separate Python process.",
+    "pass": true
+  },
+  "later_poll": {
+    "observed_at": "2026-09-30T20:05:00Z",
+    "attempted": true,
+    "status": "SUCCEEDED",
+    "inserted_snapshots": 3,
+    "inserted_observations": 3,
+    "child_counts_after": {
+      "snapshots": 11,
+      "observations": 11
+    },
+    "pass": true
+  },
+  "connection_failure_fail_open": {
+    "attempted": true,
+    "status": "FAILED",
+    "deterministic_target": "127.0.0.1:1",
+    "run_from_updater_raised": false,
+    "production_output_mutation": false,
+    "child_counts_after": {
+      "snapshots": 11,
+      "observations": 11
+    },
+    "pass": true
+  },
+  "source_partial_failure": {
+    "observed_at": "2026-09-30T20:10:00Z",
+    "overall_status": "PARTIAL_FAILURE",
+    "failed_source": "kyiv",
+    "failed_source_reason_class": "malformed proof-only JSON",
+    "successful_sources": [
+      "ukrainealarm",
+      "alerts_in_ua"
+    ],
+    "inserted_snapshots": 2,
+    "inserted_observations": 3,
+    "observed_rows": {
+      "snapshots": 2,
+      "observations": 3,
+      "sources": [
+        "ukrainealarm",
+        "alerts_in_ua"
+      ]
+    },
+    "invalid_partial_child_state": false,
+    "pass": true
+  },
+  "final_child_counts": {
+    "snapshots": 13,
+    "observations": 14
+  },
+  "parent_post": {
+    "counts": {
+      "ingestion_runs": 1,
+      "alert_episodes": 126,
+      "alert_episode_sources": 140,
+      "ingestion_checkpoints": 1,
+      "max_checkpoint_seq": 1
+    },
+    "fingerprints_md5": {
+      "ingestion_runs": "c6f4a8e5af54f0bebf86773c48bf8dc5",
+      "alert_episodes": "6b557406ab169f9fa7d0dde63bcec121",
+      "alert_episode_sources": "dccc2fa4fbc8fae6b7e1b7f9d9d2c2f3",
+      "ingestion_checkpoints": "2a982250b3dc8e3b11e96dc859e83acb"
+    },
+    "identical_to_pre": true,
+    "parent_modified": false
+  },
+  "permanent_production_shadow": {
+    "counts": {
+      "ingestion_runs": 13,
+      "alert_episodes": 126,
+      "alert_episode_sources": 140,
+      "ingestion_checkpoints": 13,
+      "max_checkpoint_seq": 13
+    },
+    "differentiated_snapshot_table_present": false,
+    "differentiated_observation_table_present": false,
+    "touched": false,
+    "migrated": false
+  },
+  "production_guards": {
+    "main_final_sha": "940c806509318cd7b82a31400760b5023c2d6770",
+    "site_prod_final_sha": "928a566b7a8dc7916c93810eaafe319da3b28ee4",
+    "main_touched": false,
+    "site_prod_touched": false,
+    "permanent_production_shadow_touched": false,
+    "production_workflow_changed": false,
+    "deploy": false,
+    "differentiated_production_enablement": false,
+    "db_cutover": false
+  },
+  "safety": {
+    "credentials_exposed": false,
+    "proof_branch_merged": false,
+    "disposable_branch_reset": false,
+    "disposable_branch_deleted": false,
+    "parent_mutation": false,
+    "production_output_mutation": false
+  }
+}
