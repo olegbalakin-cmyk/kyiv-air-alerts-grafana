@@ -1,0 +1,117 @@
+{
+  "schema_version": 1,
+  "status": "BLOCKED",
+  "blocker": {
+    "code": "NEON_BRANCH_LIMIT_EXCEEDED",
+    "operation": "create disposable child branch",
+    "requested_name": "differentiated-alert-postgres-child-persistence-proof-2026-09-30",
+    "requested_parent_id": "br-young-feather-b5q19nli",
+    "neon_error": "branches limit exceeded",
+    "mutation_before_failure": false,
+    "safe_resolution_required": "Free one Neon branch slot or raise the project branch limit; do not reuse/reset an existing proof branch."
+  },
+  "requested_success_verdict_emitted": false,
+  "requested_ready_for_emitted": false,
+  "db_cutover": "NO",
+  "git": {
+    "proof_branch": "differentiated-alert-postgres-child-persistence-proof-2026-09-30",
+    "source_accepted_proof_head": "4834dfe734c1a993ba941444ea5f12046cd88cd7",
+    "accepted_runtime_blobs_unchanged": true,
+    "candidate_updater_blob": "eb2a5330fc73eb8c36920401dd3f9dfd2fac595a",
+    "differentiated_sidecar_blob": "f6e159f0ed18f7f29913fc6cfa2161563d9eb0a6",
+    "schema_candidate_blob": "3580847807c449df12b3d4a9ea062d69a8f6ec01",
+    "postgres_adapter_blob": "3cd9c9c5fc0676550aeb1cfa117894e1fc91e85f",
+    "focused_test_blob": "67b3b48896780a2a12d8bc932def0719500b6f69"
+  },
+  "neon": {
+    "project_id": "green-cake-44216048",
+    "clean_parent_branch_id": "br-young-feather-b5q19nli",
+    "permanent_production_shadow_branch_id": "br-bold-mode-b5rub8pq",
+    "disposable_proof_branch_id": null,
+    "ddl_applied": false,
+    "child_data_written": false
+  },
+  "clean_parent_guard": {
+    "pre_counts": {
+      "ingestion_runs": 1,
+      "alert_episodes": 126,
+      "alert_episode_sources": 140,
+      "ingestion_checkpoints": 1,
+      "max_checkpoint_seq": 1
+    },
+    "post_counts": {
+      "ingestion_runs": 1,
+      "alert_episodes": 126,
+      "alert_episode_sources": 140,
+      "ingestion_checkpoints": 1,
+      "max_checkpoint_seq": 1
+    },
+    "pre_fingerprints_md5": {
+      "alert_episodes": "1697e31f3b720e5183530625341dc97d",
+      "alert_episode_sources": "b8de9154c8c518f7df216bb90b2c024c",
+      "ingestion_runs": "c6f4a8e5af54f0bebf86773c48bf8dc5",
+      "ingestion_checkpoints": "2a982250b3dc8e3b11e96dc859e83acb"
+    },
+    "post_fingerprints_md5": {
+      "alert_episodes": "1697e31f3b720e5183530625341dc97d",
+      "alert_episode_sources": "b8de9154c8c518f7df216bb90b2c024c",
+      "ingestion_runs": "c6f4a8e5af54f0bebf86773c48bf8dc5",
+      "ingestion_checkpoints": "2a982250b3dc8e3b11e96dc859e83acb"
+    },
+    "identical": true
+  },
+  "permanent_production_shadow_guard": {
+    "counts_observed_after_blocker": {
+      "ingestion_runs": 13,
+      "alert_episodes": 126,
+      "alert_episode_sources": 140,
+      "ingestion_checkpoints": 13,
+      "max_checkpoint_seq": 13
+    },
+    "touched_by_task": false
+  },
+  "git_only_implementation": {
+    "schema_candidate_copied_from_accepted_schema_proof_without_semantic_change": true,
+    "adapter_path": "kyiv-air-alerts-grafana/scripts/differentiated_alert_postgres.py",
+    "focused_test_path": "kyiv-air-alerts-grafana/tests/test_differentiated_alert_postgres.py",
+    "adapter_has_parent_mutation_api": false,
+    "transaction_rollback_path_present": true,
+    "idempotency_by_snapshot_key_and_threat_observation_key": true,
+    "raw_values_preserved_in_typed_columns_and_snapshot_provenance": true
+  },
+  "local_focused_tests": {
+    "status": "PASS",
+    "test_count": 7,
+    "scope": [
+      "BOUND parent resolution",
+      "AMBIGUOUS/UNBOUND parent-reference rejection",
+      "missing BOUND parent rejection",
+      "exact retry",
+      "later poll creates new identities",
+      "forced rollback after snapshot",
+      "no parent mutation SQL"
+    ],
+    "caveat": "These are local fake-connection adapter tests, not accepted Neon PostgreSQL proof evidence."
+  },
+  "unexecuted_required_neon_gates": [
+    "schema application and pg_catalog/information_schema verification",
+    "real-source fixture persistence",
+    "PROOF_SYNTHETIC_BOUNDING_CASE",
+    "PostgreSQL constraint rejection suite",
+    "exact replay in Neon",
+    "fresh-process exact replay in Neon",
+    "later-poll semantics in Neon",
+    "atomic rollback in Neon",
+    "fresh-query raw source-fact preservation",
+    "post-proof parent fingerprint after child mutations"
+  ],
+  "safety": {
+    "main_touched": false,
+    "site_prod_touched": false,
+    "permanent_production_branch_touched": false,
+    "clean_parent_branch_touched": false,
+    "deploy": false,
+    "db_cutover": false,
+    "credentials_exposed": false
+  }
+}
