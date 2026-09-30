@@ -11,7 +11,7 @@ from differentiated_alert_postgres import PostgresShadowStore
 import proof_differentiated_alert_shadow_ingestion as shadow
 
 DSN = os.environ.get("DIFFERENTIATED_ALERT_SHADOW_DATABASE_URL", "")
-SCHEMA = "differentiated_alert_shadow_proof_20260930_unittest"
+SCHEMA = os.environ.get("PROOF_DIFFERENTIATED_SCHEMA", "differentiated_alert_shadow_proof_20260930") + "_unittest"
 FIXTURE = ROOT / "tests/fixtures/differentiated_alert_shadow/kyiv_live_raw_2026-09-29_111347.json"
 
 

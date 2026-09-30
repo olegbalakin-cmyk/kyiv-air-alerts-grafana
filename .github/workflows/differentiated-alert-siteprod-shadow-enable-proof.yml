@@ -39,7 +39,7 @@ jobs:
           DIFFERENTIATED_ALERT_SHADOW_DB_BRANCH: ${{ vars.PHASE1_PROD_SHADOW_BRANCH_ID }}
           PROOF_SITEPROD_BASE: 9a0769ff49735cdb870abeb913ffb869f39e5e88
           PROOF_RESULT_PATH: ${{ runner.temp }}/differentiated_alert_shadow_proof.json
-          PROOF_DIFFERENTIATED_SCHEMA: differentiated_alert_shadow_proof_20260930
+          PROOF_DIFFERENTIATED_SCHEMA: differentiated_alert_shadow_proof_${{ github.run_id }}
         run: python scripts/proof_differentiated_alert_siteprod_shadow_enablement.py
 
       - name: Upload proof artifact
