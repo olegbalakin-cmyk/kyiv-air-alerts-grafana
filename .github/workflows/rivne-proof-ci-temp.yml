@@ -83,22 +83,12 @@ jobs:
           BASE_HEAD="$(git -C "$GITHUB_WORKSPACE/authoritative-base" rev-parse HEAD)"
           PROOF_HEAD="$(git rev-parse HEAD)"
           mkdir -p "$RUNNER_TEMP/base" "$RUNNER_TEMP/proof"
-          set +e
-          python "$PROOF/scripts/replay_explosion_history.py" --repo-root "$BASE" --through 2026-09-17 --input-head "$BASE_HEAD" --read-only --preflight --output "$RUNNER_TEMP/base/preflight.json"
-          BASE_RC=$?
-          python "$PROOF/scripts/replay_explosion_history.py" --repo-root "$PROOF" --through 2026-09-17 --input-head "$PROOF_HEAD" --read-only --preflight --output "$RUNNER_TEMP/proof/preflight.json"
-          PROOF_RC=$?
-          set -e
-          test -f "$RUNNER_TEMP/base/preflight.json"
-          test -f "$RUNNER_TEMP/proof/preflight.json"
           python - <<'PY' > "$RUNNER_TEMP/ready-cities.txt"
-          import json, os
+          import json
           from pathlib import Path
-          b=json.loads(Path(os.environ["RUNNER_TEMP"],"base","preflight.json").read_text())
-          p=json.loads(Path(os.environ["RUNNER_TEMP"],"proof","preflight.json").read_text())
-          bs={x["city_key"] for x in b["cities"] if x["source_status"]=="READY"}
-          ps={x["city_key"] for x in p["cities"] if x["source_status"]=="READY"}
-          for city in sorted((bs & ps)-{"rivne"}):
+          b=json.loads(Path("authoritative-base/research/historical_replay_status_current.json").read_text())
+          cities=b["cities"]
+          for city in sorted(k for k,v in cities.items() if v.get("source_status")=="READY" and k!="rivne"):
               print(city)
           PY
           while IFS= read -r CITY; do
@@ -166,7 +156,5 @@ jobs:
           path: |
             ${{ runner.temp }}/rivne-replay.json
             ${{ runner.temp }}/non-rivne-regression.json
-            ${{ runner.temp }}/base/preflight.json
-            ${{ runner.temp }}/proof/preflight.json
           if-no-files-found: warn
           retention-days: 30
