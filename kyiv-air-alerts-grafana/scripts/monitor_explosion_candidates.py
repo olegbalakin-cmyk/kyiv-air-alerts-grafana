@@ -1738,6 +1738,100 @@ def exact_active_episodes_at(moment: datetime, episodes: list[dict]) -> list[dic
     return sorted(rows.values(), key=lambda ep: str(ep.get("episode_id") or ""))
 
 
+UKRAINIAN_MONTH_NUMBER = {
+    "січня": 1,
+    "лютого": 2,
+    "березня": 3,
+    "квітня": 4,
+    "травня": 5,
+    "червня": 6,
+    "липня": 7,
+    "серпня": 8,
+    "вересня": 9,
+    "жовтня": 10,
+    "листопада": 11,
+    "грудня": 12,
+}
+DATED_LIVE_UPDATE_PREFIX_RE = re.compile(
+    r"^\s*(?:(?:всі\s+події|оновлено|доповнено)\s+)?"
+    r"(?P<day>\d{1,2})\s+"
+    r"(?P<month>січня|лютого|березня|квітня|травня|червня|липня|серпня|вересня|жовтня|листопада|грудня)\s+"
+    r"(?P<hour>\d{1,2})[:.](?P<minute>\d{2})\b",
+    re.IGNORECASE,
+)
+LIVE_UPDATE_EVENT_PROXIMITY_CHARS = 160
+LIVE_UPDATE_CONTEXT_DAY_RADIUS = 2
+
+
+def dated_live_update_event_times(text: str, published: datetime) -> list[datetime]:
+    """
+    Parse a bounded dated live-update prefix such as "26 квітня 22:48 ...".
+
+    The date+time must begin the normalized event segment (optionally after a
+    live-feed label) and be followed closely by an attack-event signal. The
+    article/archive timestamp supplies only the year context; candidate years
+    are limited to the article day +/- two local calendar days, including the
+    New Year boundary. Returned timestamps are UTC.
+    """
+    low = normalize_evidence_text(text)
+    if not low:
+        return []
+    match = DATED_LIVE_UPDATE_PREFIX_RE.match(low)
+    if not match:
+        return []
+
+    event_hits = list(
+        re.finditer(
+            r"(?:вибух\w*|влуч\w*|поціл\w*|приліт\w*|вдарил\w*|"
+            r"(?:завдал\w*|нанес\w*).{0,50}удар\w*)",
+            low,
+        )
+    )
+    if not event_hits:
+        return []
+    if not any(
+        0 <= event.start() - match.end() <= LIVE_UPDATE_EVENT_PROXIMITY_CHARS
+        for event in event_hits
+    ):
+        return []
+
+    day = int(match.group("day"))
+    month = UKRAINIAN_MONTH_NUMBER.get(match.group("month").casefold())
+    hour = int(match.group("hour"))
+    minute = int(match.group("minute"))
+    if month is None or hour > 23 or minute > 59:
+        return []
+
+    published_local = published.astimezone(KYIV_TZ)
+    candidates = []
+    for year in (
+        published_local.year - 1,
+        published_local.year,
+        published_local.year + 1,
+    ):
+        try:
+            local_dt = datetime(
+                year, month, day, hour, minute, tzinfo=KYIV_TZ
+            )
+        except ValueError:
+            continue
+        day_distance = abs((local_dt.date() - published_local.date()).days)
+        if day_distance > LIVE_UPDATE_CONTEXT_DAY_RADIUS:
+            continue
+        candidates.append(
+            (
+                day_distance,
+                abs((local_dt - published_local).total_seconds()),
+                local_dt,
+            )
+        )
+
+    if not candidates:
+        return []
+    candidates.sort(key=lambda item: (item[0], item[1], item[2]))
+    return [candidates[0][2].astimezone(UTC)]
+
+
 def event_clock_mentions(text: str) -> list[tuple[int, int]]:
     low = normalize_evidence_text(text)
     event_hits = list(
@@ -1887,37 +1981,53 @@ def explicit_event_time_relation(
         }
 
     published_local = published.astimezone(KYIV_TZ)
-    local_day = published_local.date()
-    # A clock-only source statement normally belongs to the publication local
-    # day. Previous-day fallback is reserved for genuinely near-midnight
-    # publication, where a late report can describe an event before midnight.
-    # This prevents daytime reports such as "8 February ... at 08:48" from
-    # accidentally binding to an unrelated alert at the same clock on 7 February.
-    day_offsets = (0, -1) if published_local.hour < 6 else (0,)
-    candidates = []
     limit = SENSITIVITY_NEAR_BOUNDARY_MAX_MINUTES * 60
-    for segment in event_segments:
-        for hour, minute in event_clock_mentions(segment):
-            for day_offset in day_offsets:
-                day = local_day + timedelta(days=day_offset)
-                event_dt = datetime(
-                    day.year, day.month, day.day, hour, minute, tzinfo=KYIV_TZ
-                ).astimezone(UTC)
-                for ep in episodes:
-                    episode_id = str(ep.get("episode_id") or "")
-                    start = parse_dt(ep.get("alert_start"))
-                    end = parse_dt(ep.get("alert_end"))
-                    if not episode_id or not start or not end:
-                        continue
-                    if start <= event_dt <= end:
-                        candidates.append(("inside", 0.0, event_dt, episode_id))
-                        continue
-                    before = (start - event_dt).total_seconds()
-                    after = (event_dt - end).total_seconds()
-                    if 0 < before <= limit:
-                        candidates.append(("near_before", before, event_dt, episode_id))
-                    elif 0 < after <= limit:
-                        candidates.append(("near_after", after, event_dt, episode_id))
+
+    # A dated live-feed prefix is more specific than a clock-only expression.
+    # If present and valid, use it directly rather than inferring the local date
+    # from publication time.
+    dated_event_times = sorted({
+        event_dt
+        for segment in event_segments
+        for event_dt in dated_live_update_event_times(segment, published)
+    })
+
+    event_times = list(dated_event_times)
+    if not event_times:
+        local_day = published_local.date()
+        # A clock-only source statement normally belongs to the publication local
+        # day. Previous-day fallback is reserved for genuinely near-midnight
+        # publication, where a late report can describe an event before midnight.
+        # This prevents daytime reports such as "8 February ... at 08:48" from
+        # accidentally binding to an unrelated alert at the same clock on 7 February.
+        day_offsets = (0, -1) if published_local.hour < 6 else (0,)
+        for segment in event_segments:
+            for hour, minute in event_clock_mentions(segment):
+                for day_offset in day_offsets:
+                    day = local_day + timedelta(days=day_offset)
+                    event_times.append(
+                        datetime(
+                            day.year, day.month, day.day, hour, minute, tzinfo=KYIV_TZ
+                        ).astimezone(UTC)
+                    )
+
+    candidates = []
+    for event_dt in sorted(set(event_times)):
+        for ep in episodes:
+            episode_id = str(ep.get("episode_id") or "")
+            start = parse_dt(ep.get("alert_start"))
+            end = parse_dt(ep.get("alert_end"))
+            if not episode_id or not start or not end:
+                continue
+            if start <= event_dt <= end:
+                candidates.append(("inside", 0.0, event_dt, episode_id))
+                continue
+            before = (start - event_dt).total_seconds()
+            after = (event_dt - end).total_seconds()
+            if 0 < before <= limit:
+                candidates.append(("near_before", before, event_dt, episode_id))
+            elif 0 < after <= limit:
+                candidates.append(("near_after", after, event_dt, episode_id))
 
     if not candidates:
         return {
