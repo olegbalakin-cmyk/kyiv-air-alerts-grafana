@@ -64,28 +64,30 @@ def neutralize_units(panel):
 
 
 def retarget_duration_overrides(panel_id: int, panel: dict) -> None:
-    duration_names = {
-        12: ("Годин на добу", "Час під тривогою на добу"),
-        14: ("Годин на добу", "Час під тривогою на добу"),
-        20: ("Годин під тривогою", "Час під тривогою"),
-        21: ("Середня тривалість, хв", "Середня тривалість"),
-    }
-    old_new = duration_names.get(panel_id)
+    override_names = {
+        12: {"Годин на добу": "Час під тривогою на добу"},
+        14: {"Годин на добу": "Час під тривогою на добу"},
+        20: {"Годин під тривогою": "Час під тривогою"},
+        21: {
+            "Кількість тривог": "Активних тривог",
+            "Середня тривалість, хв": "Середня тривалість активних тривог",
+            "Середня тривалість": "Середня тривалість активних тривог",
+        },
+    }.get(panel_id, {})
     for override in panel.get("fieldConfig", {}).get("overrides", []):
         matcher = override.get("matcher", {})
         name = matcher.get("options")
-        if old_new and name == old_new[0]:
-            matcher["options"] = old_new[1]
-            name = old_new[1]
+        if name in override_names:
+            matcher["options"] = override_names[name]
+            name = matcher["options"]
         for prop in override.get("properties", []):
             if prop.get("id") == "unit":
                 prop["value"] = "short"
             elif prop.get("id") == "custom.axisLabel":
-                if panel_id == 21 and name == "Кількість тривог":
-                    prop["value"] = "Кількість тривог"
+                if panel_id == 21 and name == "Активних тривог":
+                    prop["value"] = "Активних тривог"
                 else:
                     prop["value"] = "Тривалість"
-
 
 def parse_source_dt(value: str) -> datetime:
     dt = datetime.fromisoformat(value.strip())
@@ -506,12 +508,12 @@ def main():
             [TIME_COL, {"selector": "value", "text": "Час під тривогою", "type": "number"}],
         ),
         21: (
-            "${city:text}: останні 28 завершених днів — кількість тривог і середня тривалість (${duration_unit:text})",
-            f'{city_base}.daily28.{{"time": time, "alerts_started": alerts_started, "avg_duration": "${{duration_unit}}" = "hours" ? avg_alert_duration_minutes / 60 : avg_alert_duration_minutes}}',
+            "${city:text}: останні 28 завершених днів — активні тривоги і їхня середня тривалість (${duration_unit:text})",
+            f'{city_base}.daily28.{{\"time\": time, \"active_alerts\": active_alerts, \"avg_active_duration\": \"${{duration_unit}}\" = \"hours\" ? avg_active_alert_duration_minutes / 60 : avg_active_alert_duration_minutes}}',
             [
                 TIME_COL,
-                {"selector": "alerts_started", "text": "Кількість тривог", "type": "number"},
-                {"selector": "avg_duration", "text": "Середня тривалість", "type": "number"},
+                {"selector": "active_alerts", "text": "Активних тривог", "type": "number"},
+                {"selector": "avg_active_duration", "text": "Середня тривалість активних тривог", "type": "number"},
             ],
         ),
     }
@@ -522,6 +524,11 @@ def main():
             continue
         panel["title"] = title
         set_query(panel, root, columns)
+        if panel_id == 21:
+            panel["description"] = (
+                "Стовпчики — кількість логічних тривог, активних хоча б частину доби; "
+                "лінія — середня тривалість їхніх активних відрізків у межах цієї доби."
+            )
         if panel_id in {2, 3, 12, 13, 14, 15, 20, 21}:
             neutralize_units(panel)
             retarget_duration_overrides(panel_id, panel)
