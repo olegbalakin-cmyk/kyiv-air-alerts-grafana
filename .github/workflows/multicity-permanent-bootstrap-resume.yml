@@ -1,0 +1,161 @@
+name: Resume multicity permanent bootstrap
+
+on:
+  push:
+    branches:
+      - multicity-scheduled-production-shadow-enablement-resume-2026-10-01
+    paths:
+      - ".github/workflows/multicity-permanent-bootstrap-resume.yml"
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  bootstrap:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - name: Verify production workflow quiescent
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          active="$(
+            gh api "repos/${GITHUB_REPOSITORY}/actions/runs?per_page=100" \
+              --jq '[.workflow_runs[] | select(.path==".github/workflows/update-netlify-site.yml" and (.status=="queued" or .status=="in_progress" or .status=="waiting" or .status=="pending" or .status=="requested"))] | length'
+          )"
+          test "$active" = "0" || { echo "Production workflow not quiescent: active=$active"; exit 1; }
+
+      - name: Check out continuation proof
+        uses: actions/checkout@v4
+        with:
+          path: proof
+
+      - name: Check out fresh site-prod
+        uses: actions/checkout@v4
+        with:
+          ref: site-prod
+          path: current
+          fetch-depth: 0
+
+      - name: Check out accepted frozen production
+        uses: actions/checkout@v4
+        with:
+          ref: 928a566b7a8dc7916c93810eaafe319da3b28ee4
+          path: frozen
+
+      - name: Record enablement base
+        shell: bash
+        run: |
+          set -euo pipefail
+          sha="$(git -C current rev-parse HEAD)"
+          echo "ENABLEMENT_BASE_SITE_PROD_SHA=$sha" >> "$GITHUB_ENV"
+          echo "Enablement base site-prod: $sha"
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: current/kyiv-air-alerts-grafana/requirements-db-phase1.txt
+
+      - name: Install runtime dependencies
+        run: pip install -r current/kyiv-air-alerts-grafana/requirements-db-phase1.txt
+
+      - name: Pin Vadimkin inputs
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fsSL "https://raw.githubusercontent.com/Vadimkin/ukrainian-air-raid-sirens-dataset/f69787d35e30243be5ea9090108e769cc971ff55/datasets/official_data_uk.csv" -o "${RUNNER_TEMP}/vadimkin-current.csv"
+          curl -fsSL "https://raw.githubusercontent.com/Vadimkin/ukrainian-air-raid-sirens-dataset/58ee75bc20113181b9ddf8029d4cbf3a62d8cd10/datasets/official_data_uk.csv" -o "${RUNNER_TEMP}/vadimkin-frozen.csv"
+          sha256sum "${RUNNER_TEMP}/vadimkin-current.csv" "${RUNNER_TEMP}/vadimkin-frozen.csv"
+
+      - name: Reconstruct current and frozen canonical corpora
+        shell: bash
+        run: |
+          set -euo pipefail
+          cp proof/kyiv-air-alerts-grafana/scripts/export_multicity_canonical.py current/kyiv-air-alerts-grafana/scripts/
+          cp proof/kyiv-air-alerts-grafana/scripts/export_multicity_canonical.py frozen/kyiv-air-alerts-grafana/scripts/
+          (
+            cd current/kyiv-air-alerts-grafana
+            python scripts/export_multicity_canonical.py \
+              --vadimkin-csv "${RUNNER_TEMP}/vadimkin-current.csv" \
+              --site-prod-sha "${ENABLEMENT_BASE_SITE_PROD_SHA}" \
+              --vadimkin-sha "f69787d35e30243be5ea9090108e769cc971ff55" \
+              --output "${RUNNER_TEMP}/current_boundary.json"
+          )
+          (
+            cd frozen/kyiv-air-alerts-grafana
+            python scripts/export_multicity_canonical.py \
+              --vadimkin-csv "${RUNNER_TEMP}/vadimkin-frozen.csv" \
+              --site-prod-sha "928a566b7a8dc7916c93810eaafe319da3b28ee4" \
+              --vadimkin-sha "58ee75bc20113181b9ddf8029d4cbf3a62d8cd10" \
+              --output "${RUNNER_TEMP}/frozen_boundary.json"
+          )
+
+      - name: Recheck quiescence and frozen site-prod ref
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          active="$(
+            gh api "repos/${GITHUB_REPOSITORY}/actions/runs?per_page=100" \
+              --jq '[.workflow_runs[] | select(.path==".github/workflows/update-netlify-site.yml" and (.status=="queued" or .status=="in_progress" or .status=="waiting" or .status=="pending" or .status=="requested"))] | length'
+          )"
+          test "$active" = "0" || { echo "Production workflow became active: active=$active"; exit 1; }
+          live="$(gh api "repos/${GITHUB_REPOSITORY}/branches/site-prod" --jq .commit.sha)"
+          test "$live" = "${ENABLEMENT_BASE_SITE_PROD_SHA}" || {
+            echo "site-prod moved during freeze: ${ENABLEMENT_BASE_SITE_PROD_SHA} -> $live"
+            exit 1
+          }
+
+      - name: Guarded permanent bootstrap and exact replay
+        shell: bash
+        env:
+          DATABASE_URL: ${{ secrets.PHASE1_PROD_SHADOW_DATABASE_URL }}
+          DB_BRANCH: ${{ vars.PHASE1_PROD_SHADOW_BRANCH_ID }}
+        run: |
+          set -euo pipefail
+          python proof/kyiv-air-alerts-grafana/scripts/resume_multicity_bootstrap.py \
+            --mode bootstrap \
+            --current-boundary "${RUNNER_TEMP}/current_boundary.json" \
+            --frozen-boundary "${RUNNER_TEMP}/frozen_boundary.json" \
+            --runtime-scripts current/kyiv-air-alerts-grafana/scripts \
+            --db-url "$DATABASE_URL" \
+            --db-branch "$DB_BRANCH" \
+            --enablement-base "${ENABLEMENT_BASE_SITE_PROD_SHA}" \
+            --current-vadimkin-ref "f69787d35e30243be5ea9090108e769cc971ff55" \
+            --current-vadimkin-blob "71d70c0ca54968f530d596cf315616fa858800e1" \
+            --output "${RUNNER_TEMP}/bootstrap_result.json"
+
+      - name: Fresh-process replay
+        shell: bash
+        env:
+          DATABASE_URL: ${{ secrets.PHASE1_PROD_SHADOW_DATABASE_URL }}
+          DB_BRANCH: ${{ vars.PHASE1_PROD_SHADOW_BRANCH_ID }}
+        run: |
+          set -euo pipefail
+          python proof/kyiv-air-alerts-grafana/scripts/resume_multicity_bootstrap.py \
+            --mode replay \
+            --current-boundary "${RUNNER_TEMP}/current_boundary.json" \
+            --runtime-scripts current/kyiv-air-alerts-grafana/scripts \
+            --db-url "$DATABASE_URL" \
+            --db-branch "$DB_BRANCH" \
+            --enablement-base "${ENABLEMENT_BASE_SITE_PROD_SHA}" \
+            --current-vadimkin-ref "f69787d35e30243be5ea9090108e769cc971ff55" \
+            --current-vadimkin-blob "71d70c0ca54968f530d596cf315616fa858800e1" \
+            --output "${RUNNER_TEMP}/fresh_replay_result.json"
+
+      - name: Upload bootstrap proof
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: multicity-permanent-bootstrap-resume-${{ github.run_id }}
+          path: |
+            ${{ runner.temp }}/bootstrap_result.json
+            ${{ runner.temp }}/fresh_replay_result.json
+            ${{ runner.temp }}/current_boundary.json
+          if-no-files-found: warn
+          retention-days: 30
