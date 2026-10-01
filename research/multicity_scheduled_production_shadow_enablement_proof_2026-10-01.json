@@ -1,0 +1,179 @@
+{
+  "proof_kind": "multicity_scheduled_production_shadow_enablement_proof",
+  "verdict": "BLOCKED_CURRENT_PRODUCTION_CANONICAL_DRIFT",
+  "proof_branch": "multicity-scheduled-production-shadow-enablement-proof-2026-10-01",
+  "final_head": null,
+  "final_head_note": "This artifact is the final proof-branch commit payload and cannot self-reference its containing commit SHA. Report the artifact-creation commit as final proof HEAD.",
+  "accepted_persistence_proof_head": "85a50f55e162d83be0751c556c34c4b538bb4890",
+  "accepted_adapter_blob": "c1c0085372b23ae19f4b1edbc6c814f9d6d51a21",
+  "accepted_repair_blob": "3169a37b11fa66f1f619f190ca26c3cc1bc458f5",
+  "main_pre_sha": "949bebc374626c03ea65fc311d1da1f07e59e3a6",
+  "main_post_sha": "a615ce9e6d40fe6b8b3915863806306f7829adbb",
+  "site_prod_pre_sha": "b7582821a939e33e156e812215c2ed901e4edb19",
+  "site_prod_runtime_staged_sha": "b005bb6aadc021ca4ccf39942242f665d96c4a2d",
+  "enablement_base_site_prod_sha": "2866cfe4c3a9ae40f23134986b6222c016c5a99b",
+  "current_vadimkin_pinned_ref": "f69787d35e30243be5ea9090108e769cc971ff55",
+  "legacy_phase1_final_frozen_db": {
+    "ingestion_runs": 18,
+    "alert_episodes": 126,
+    "alert_episode_sources": 140,
+    "ingestion_checkpoints": 18,
+    "max_checkpoint_seq": 18,
+    "lviv_parent_fingerprint": "1697e31f3b720e5183530625341dc97d",
+    "lviv_source_fingerprint": "d7326510d326a8456c488dcfa1f568d7",
+    "checkpoint_fingerprint": "2e7548caf59ce199c1c7bd1877780676"
+  },
+  "legacy_phase1_shadow_disabled": true,
+  "transition": {
+    "initial_invalid_workflow_run_id": 36870536341,
+    "initial_invalid_workflow_conclusion": "failure",
+    "corrected_workflow_commit": "a615ce9e6d40fe6b8b3915863806306f7829adbb",
+    "corrected_transition_run_id": 36870695754,
+    "event": "push",
+    "conclusion": "success",
+    "production_qa": "pass",
+    "site_prod_publication": "success",
+    "multicity_shadow_status": "disabled",
+    "permanent_neon_shadow_writes": 0
+  },
+  "permanent_lviv_repair": {
+    "workflow_run_id": 36874200599,
+    "conclusion": "success",
+    "repair_ingestion_run_id": "4d881774-cc37-4077-9621-bb128ab8380d",
+    "post_repair": {
+      "ingestion_runs": 19,
+      "alert_episodes": 126,
+      "alert_episode_sources": 143,
+      "ingestion_checkpoints": 18,
+      "max_checkpoint_seq": 18,
+      "alerts_in_ua_source_observations": 3
+    },
+    "repaired_episode_uid_to_legacy_episode_id": {
+      "575f370c-6e99-4623-8219-f8fbdfd6c978": "7dd411c2a2587efc740a1a66",
+      "c90e7b05-1982-461f-945f-53d8130c627b": "c2cd9a96768756d84c250735",
+      "451c8a2c-248a-41e5-b49e-31af3f44631f": "94ce779cf047984e881bfdd5"
+    },
+    "post_repair_lviv_parent_fingerprint": "f2d4823d986afb4908b49e98125d6263",
+    "post_repair_lviv_source_fingerprint": "9f6c011d2dcdc962335f54a4cd595f99",
+    "checkpoint_fingerprint_unchanged": "2e7548caf59ce199c1c7bd1877780676"
+  },
+  "shadow_runtime": {
+    "multicity_canonical_postgres_blob": "c1c0085372b23ae19f4b1edbc6c814f9d6d51a21",
+    "multicity_shadow_payload_blob": "2628fe674f0984ca7b369252c5958d28e3ded2e9",
+    "multicity_canonical_shadow_blob": "6101d9f2da5e10b7554f1fc5d15b90d390d33f2f",
+    "generalized_lviv_repair_blob": "c40667f07c3f1ac6a67df773af1c58fefc2dd9a9",
+    "update_data_hook_blob": "92a2984868bdd4096208e4b02776d0d49b415d66",
+    "apply_ukrainealarm_bridge_hook_blob": "976752269907d7501be60e98d73b0df9f40f016d",
+    "add_sevastopol_exact_hook_blob": "e4c091a677622eb28e504b0592a89e4d92d5fe02",
+    "second_upstream_fetch": false,
+    "same_run_canonical_payload": true,
+    "source_provenance_coverage": "partial"
+  },
+  "proof_tests": {
+    "run_id": 36869976104,
+    "conclusion": "success",
+    "tests_run": 50,
+    "result": "PASS",
+    "fixed_input_off_on_output_equivalence": "PASS",
+    "deterministic_invalid_db_fail_open": "PASS",
+    "credential_sanitization": "PASS",
+    "persistence_regression": "PASS",
+    "lviv_repair_regression": "PASS"
+  },
+  "accepted_frozen_corpus": {
+    "site_prod_ref": "928a566b7a8dc7916c93810eaafe319da3b28ee4",
+    "vadimkin_ref": "58ee75bc20113181b9ddf8029d4cbf3a62d8cd10",
+    "corpus_sha256": "8e9f3660039de4e0490db25229fe1760f5926b6b73490c8a325b9abc7555971b",
+    "episode_count": 27866,
+    "city_count": 23,
+    "open_episode_count": 0
+  },
+  "current_production_corpus": {
+    "drift_gate_run_id": 36874874282,
+    "drift_gate_conclusion": "failure",
+    "corpus_sha256": "980e4c00d968664872ea5ebd6f72581c7997bcfb1a38aed504a020d0b444b8ce",
+    "episode_count": 27948,
+    "city_count": 23,
+    "open_episode_count": 0,
+    "boundary_error_count": 0,
+    "daily_current_production_parity": "PASS",
+    "per_city_counts": {
+      "cherkasy": 1637,
+      "chernihiv": 1760,
+      "chernivtsi": 117,
+      "dnipro": 2359,
+      "ivano_frankivsk": 105,
+      "kharkiv": 3699,
+      "kherson": 1459,
+      "khmelnytskyi": 279,
+      "kropyvnytskyi": 1271,
+      "kyiv": 2560,
+      "lutsk": 155,
+      "lviv": 126,
+      "mykolaiv": 1830,
+      "odesa": 1596,
+      "poltava": 1931,
+      "rivne": 274,
+      "sevastopol": 548,
+      "sumy": 2414,
+      "ternopil": 135,
+      "uzhhorod": 92,
+      "vinnytsia": 410,
+      "zaporizhzhia": 2437,
+      "zhytomyr": 754
+    }
+  },
+  "current_production_semantic_drift": {
+    "frozen_exact_retained": 27864,
+    "frozen_missing_from_current": 2,
+    "stop_condition_triggered": true,
+    "rows": [
+      {
+        "city_key": "cherkasy",
+        "frozen": {
+          "start_at": "2026-09-30T07:41:55.394018Z",
+          "end_at": "2026-09-30T08:45:08.294769Z",
+          "legacy_episode_id": "bf257aa6eec95163da3d6e83"
+        },
+        "current_overlapping_replacement": {
+          "start_at": "2026-09-30T02:02:42.067496Z",
+          "end_at": "2026-09-30T18:03:04.653473Z",
+          "legacy_episode_id": "afcef7b230c5de2744537b72"
+        }
+      },
+      {
+        "city_key": "poltava",
+        "frozen": {
+          "start_at": "2026-09-30T13:45:54.742331Z",
+          "end_at": "2026-09-30T15:30:23.570835Z",
+          "legacy_episode_id": "edcd6d1baa0ae94f6c61260c"
+        },
+        "current_overlapping_replacement": {
+          "start_at": "2026-09-30T11:33:40.554164Z",
+          "end_at": "2026-09-30T19:23:26.328094Z",
+          "legacy_episode_id": "391a673766d8d512d54fcf52"
+        }
+      }
+    ]
+  },
+  "permanent_bootstrap": {
+    "attempted": false,
+    "reason": "Blocked by current-production historical canonical drift gate before bootstrap."
+  },
+  "scheduled_multicity_shadow": {
+    "enabled": false,
+    "reason": "Blocked before enablement by historical canonical drift."
+  },
+  "natural_scheduled_acceptance_run": null,
+  "legacy_checkpoint_frozen": true,
+  "json_remains_authoritative": true,
+  "differentiated_production_shadow_enabled": false,
+  "differentiated_table_count": 0,
+  "attack_events_in_neon": false,
+  "attack_event_table_count": 0,
+  "credentials_exposed": false,
+  "frontend_db_read": false,
+  "db_cutover": false,
+  "temporary_proof_workflows_removed": true,
+  "next_required_action": "Reconcile the two current-production historical boundary supersessions against the accepted frozen corpus before any permanent multicity bootstrap or scheduled shadow enablement."
+}
