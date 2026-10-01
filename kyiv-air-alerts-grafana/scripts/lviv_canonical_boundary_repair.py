@@ -113,7 +113,7 @@ def _guard_collisions(c):
 def _provenance(t,pre):
     return {"source_family":"alerts_in_ua_static_bridge","frozen_production_ref":FROZEN_PRODUCTION_REF,"raw_object_path":RAW_OBJECT_PATH,"git_blob_sha":RAW_OBJECT_GIT_BLOB_SHA,"decoded_csv_sha256":DECODED_CSV_SHA256,"lviv_rows_sha256":LVIV_ROWS_SHA256,"raw_local_start":t.raw_local_start,"raw_local_end":t.raw_local_end,"utc_normalized_start":t.static_start,"utc_normalized_end":t.static_end,"repair_reason":"production_boundary_supersedes_phase1","canonical_preimage":pre}
 
-def repair(connection,dry_run=False,force_failure_after_first_source=False,inspector=inspect_state):
+def repair(connection,dry_run=False,force_failure_after_first_source=False,inspector=inspect_state,db_branch=None):
     c=connection.cursor()
     try:
         c.execute("/* LVIV_BOUNDARY_REPAIR:BEGIN */ BEGIN")
@@ -123,7 +123,8 @@ def repair(connection,dry_run=False,force_failure_after_first_source=False,inspe
         _guard_collisions(c)
         if dry_run:
             connection.rollback(); return {"status":"dry_run","writes":0,"plan":repair_plan()}
-        c.execute("""/* LVIV_BOUNDARY_REPAIR:RUN_INSERT */ INSERT INTO ingestion_runs(run_kind,source_key,city_key,db_branch,schema_version,canonicalization_version,status,started_at,parameters,stats) VALUES('canonical_boundary_repair',%s,'lviv','br-icy-forest-b5mfyezq',%s,%s,'running',now(),%s::jsonb,'{}'::jsonb) RETURNING run_id""",(SOURCE_KEY,SCHEMA_VERSION,CANONICALIZATION_VERSION,json.dumps({"repair":REPAIR_NAME,"frozen_production_ref":FROZEN_PRODUCTION_REF,"reconciliation_proof_head":RECONCILIATION_PROOF_HEAD,"affected_episode_count":3},sort_keys=True)))
+        if not db_branch: raise RepairBlocked("db_branch must be supplied explicitly")
+        c.execute("""/* LVIV_BOUNDARY_REPAIR:RUN_INSERT */ INSERT INTO ingestion_runs(run_kind,source_key,city_key,db_branch,schema_version,canonicalization_version,status,started_at,parameters,stats) VALUES('canonical_boundary_repair',%s,'lviv',%s,%s,%s,'running',now(),%s::jsonb,'{}'::jsonb) RETURNING run_id""",(SOURCE_KEY,db_branch,SCHEMA_VERSION,CANONICALIZATION_VERSION,json.dumps({"repair":REPAIR_NAME,"frozen_production_ref":FROZEN_PRODUCTION_REF,"reconciliation_proof_head":RECONCILIATION_PROOF_HEAD,"affected_episode_count":3},sort_keys=True)))
         run_id=c.fetchone()[0]
         for i,(t,k) in enumerate(zip(TARGETS,EXPECTED_SOURCE_RECORD_KEYS)):
             pre,key=t.source_identity
@@ -151,11 +152,11 @@ def _connect(url):
         import psycopg2; return psycopg2.connect(url)
 
 def main():
-    p=argparse.ArgumentParser(); p.add_argument("--dry-run",action="store_true"); p.add_argument("--force-failure-after-first-source",action="store_true"); a=p.parse_args()
+    p=argparse.ArgumentParser(); p.add_argument("--dry-run",action="store_true"); p.add_argument("--force-failure-after-first-source",action="store_true"); p.add_argument("--db-branch",default=os.environ.get("DB_BRANCH")); a=p.parse_args()
     url=os.environ.get("DATABASE_URL")
     if not url: raise SystemExit("DATABASE_URL is required")
     conn=_connect(url)
-    try: print(json.dumps(repair(conn,dry_run=a.dry_run,force_failure_after_first_source=a.force_failure_after_first_source),sort_keys=True,separators=(",",":")))
+    try: print(json.dumps(repair(conn,dry_run=a.dry_run,force_failure_after_first_source=a.force_failure_after_first_source,db_branch=a.db_branch),sort_keys=True,separators=(",",":")))
     finally: conn.close()
     return 0
 if __name__=="__main__": raise SystemExit(main())
