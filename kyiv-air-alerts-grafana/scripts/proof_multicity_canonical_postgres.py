@@ -24,11 +24,11 @@ def utc(v):
     return d.astimezone(timezone.utc).isoformat().replace("+00:00","Z")
 
 def q1(cur,sql):
-    cur.execute(sql); return cur.fetchone()[0]
+    cur.execute(sql); row=cur.fetchone(); return next(iter(row.values())) if isinstance(row,dict) else row[0]
 
 def fp(cur,table,order,where=""):
     cur.execute(f"SELECT md5(coalesce(string_agg(to_jsonb(x)::text,E'\\n' ORDER BY {order}),'')) FROM (SELECT * FROM {table} {where}) x")
-    return cur.fetchone()[0]
+    row=cur.fetchone(); return next(iter(row.values())) if isinstance(row,dict) else row[0]
 
 def snap(conn):
     with conn.cursor() as c:
