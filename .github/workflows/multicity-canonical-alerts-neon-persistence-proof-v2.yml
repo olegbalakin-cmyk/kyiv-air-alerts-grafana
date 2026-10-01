@@ -1,0 +1,330 @@
+name: Multicity canonical alerts Neon persistence proof v2
+
+on:
+  push:
+    branches:
+      - multicity-canonical-alerts-neon-persistence-proof-v2-2026-10-01
+    paths:
+      - ".github/workflows/multicity-canonical-alerts-neon-persistence-proof-v2.yml"
+      - "kyiv-air-alerts-grafana/scripts/multicity_canonical_postgres.py"
+      - "kyiv-air-alerts-grafana/tests/test_multicity_canonical_postgres.py"
+
+permissions:
+  contents: read
+
+jobs:
+  prove:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: kyiv-air-alerts-grafana
+    env:
+      SITE_PROD_SHA: 928a566b7a8dc7916c93810eaafe319da3b28ee4
+      VADIMKIN_SHA: 58ee75bc20113181b9ddf8029d4cbf3a62d8cd10
+      CORPUS_SHA: 8e9f3660039de4e0490db25229fe1760f5926b6b73490c8a325b9abc7555971b
+      CHILD_BRANCH_ID: br-icy-forest-b5mfyezq
+      CHILD_DB_HOST: ep-shy-truth-b5ngaye8-pooler.c-7.us-east-2.aws.neon.tech
+      PROOF_RESULT: ${{ runner.temp }}/multicity_canonical_alerts_neon_persistence_runtime.json
+      BOUNDARY_RESULT: ${{ runner.temp }}/multicity_canonical_boundary.json
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: kyiv-air-alerts-grafana/requirements-db-phase1.txt
+
+      - name: Install dependencies
+        run: pip install -r requirements-db-phase1.txt
+
+      - name: Freeze accepted production artifacts
+        shell: bash
+        run: |
+          set -euo pipefail
+          for path in \
+            data/dashboard_data.json \
+            data/alerts_combined.json \
+            data/ukrainealarm_bridge.json \
+            data/alerts_in_ua_bridge_2026-09-07_16.csv.gz.b64 \
+            data/alerts_in_ua_bridge_2026-09-07_16.meta.json \
+            data/alerts_in_ua_bridge_additional_2026-09-07_16.csv.gz.b64 \
+            data/alerts_in_ua_bridge_additional_2026-09-07_16.meta.json \
+            data/sevastopol_events.json
+          do
+            curl --fail --silent --show-error --location \
+              "https://raw.githubusercontent.com/${GITHUB_REPOSITORY}/${SITE_PROD_SHA}/kyiv-air-alerts-grafana/${path}" \
+              --output "${path}"
+          done
+          curl --fail --silent --show-error --location \
+            "https://raw.githubusercontent.com/Vadimkin/ukrainian-air-raid-sirens-dataset/${VADIMKIN_SHA}/datasets/official_data_uk.csv" \
+            --output "${RUNNER_TEMP}/official_data_uk.csv"
+
+      - name: Regenerate exact frozen corpus
+        shell: bash
+        run: |
+          set -euo pipefail
+          python scripts/export_multicity_canonical.py \
+            --vadimkin-csv "${RUNNER_TEMP}/official_data_uk.csv" \
+            --site-prod-sha "${SITE_PROD_SHA}" \
+            --vadimkin-sha "${VADIMKIN_SHA}" \
+            --output "${BOUNDARY_RESULT}"
+          python - <<'PY'
+          import json, os
+          o=json.load(open(os.environ["BOUNDARY_RESULT"],encoding="utf-8"))
+          assert o["boundary_proven"] is True
+          assert o["city_count"] == 23
+          assert o["total_episode_count"] == 27866
+          assert o["open_episode_count"] == 0
+          assert len(o["boundary_errors"]) == 0
+          assert o["corpus_sha256"] == os.environ["CORPUS_SHA"]
+          counts={k:v["episode_count"] for k,v in o["per_city"].items()}
+          assert counts["kropyvnytskyi"] == 1268
+          print("FROZEN CORPUS INTEGRITY PASS", o["corpus_sha256"], o["total_episode_count"])
+          PY
+
+      - name: Derive disposable target URL
+        env:
+          BASE_DATABASE_URL: ${{ secrets.PHASE1_PROD_SHADOW_DATABASE_URL }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import os
+          from urllib.parse import urlsplit,urlunsplit
+          p=urlsplit(os.environ["BASE_DATABASE_URL"])
+          if not p.username: raise SystemExit("missing DB username")
+          auth=p.username + ((":"+p.password) if p.password is not None else "")
+          port=f":{p.port}" if p.port else ""
+          child=urlunsplit((p.scheme,f"{auth}@{os.environ['CHILD_DB_HOST']}{port}",p.path,p.query,p.fragment))
+          print("::add-mask::"+child)
+          with open(os.environ["GITHUB_ENV"],"a",encoding="utf-8") as f: f.write("CHILD_DATABASE_URL="+child+"\n")
+          print("Disposable target URL derived; credentials not printed.")
+          PY
+
+      - name: Run focused and regression tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m unittest tests/test_multicity_canonical_postgres.py -v
+          python -m unittest tests/test_db_phase1_persistence.py -v
+          python -m unittest tests/test_lviv_canonical_boundary_repair.py -v
+          python -m unittest tests/test_differentiated_alert_postgres.py -v
+
+      - name: Real Neon forced rollback and successful import
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import copy, hashlib, json, os
+          from collections import Counter
+          from datetime import datetime, timezone
+          import psycopg
+          from psycopg.rows import dict_row
+          import sys
+          sys.path.insert(0,"scripts")
+          import multicity_canonical_postgres as mc
+
+          CORPUS=os.environ["CORPUS_SHA"]
+          BOUNDARY=json.load(open(os.environ["BOUNDARY_RESULT"],encoding="utf-8"))
+          episodes=BOUNDARY["episodes"]
+          expected_counts={k:v["episode_count"] for k,v in BOUNDARY["per_city"].items()}
+          repaired={
+            "575f370c-6e99-4623-8219-f8fbdfd6c978":"7dd411c2a2587efc740a1a66",
+            "c90e7b05-1982-461f-945f-53d8130c627b":"c2cd9a96768756d84c250735",
+            "451c8a2c-248a-41e5-b49e-31af3f44631f":"94ce779cf047984e881bfdd5",
+          }
+
+          def utc(v):
+              if isinstance(v,datetime): d=v
+              else:
+                  s=str(v); s=s[:-1]+"+00:00" if s.endswith("Z") else s; d=datetime.fromisoformat(s)
+              return d.astimezone(timezone.utc).isoformat().replace("+00:00","Z")
+
+          def fp(cur, table, order, where=""):
+              cur.execute(f"SELECT md5(coalesce(string_agg(to_jsonb(x)::text,E'\\n' ORDER BY {order}),'')) FROM (SELECT * FROM {table} {where}) x")
+              return cur.fetchone()[0]
+
+          def snap(conn):
+              with conn.cursor() as c:
+                  q=lambda sql: (c.execute(sql),c.fetchone()[0])[1]
+                  counts={
+                    "ingestion_runs":q("SELECT count(*) FROM ingestion_runs"),
+                    "alert_episodes":q("SELECT count(*) FROM alert_episodes"),
+                    "alert_episode_sources":q("SELECT count(*) FROM alert_episode_sources"),
+                    "ingestion_checkpoints":q("SELECT count(*) FROM ingestion_checkpoints"),
+                    "max_checkpoint_seq":q("SELECT coalesce(max(checkpoint_seq),0) FROM ingestion_checkpoints"),
+                    "alert_state_snapshots":q("SELECT count(*) FROM alert_state_snapshots"),
+                    "alert_threat_observations":q("SELECT count(*) FROM alert_threat_observations"),
+                    "non_lviv_episodes":q("SELECT count(*) FROM alert_episodes WHERE city_key<>'lviv'"),
+                  }
+                  fps={
+                    "lviv":fp(c,"alert_episodes","x.episode_uid::text","WHERE city_key='lviv'"),
+                    "sources":fp(c,"alert_episode_sources","x.source_observation_id::text"),
+                    "checkpoints":fp(c,"ingestion_checkpoints","x.checkpoint_id::text"),
+                    "snapshots":fp(c,"alert_state_snapshots","x.snapshot_uid::text"),
+                    "threats":fp(c,"alert_threat_observations","x.threat_observation_uid::text"),
+                    "repair_run":fp(c,"ingestion_runs","x.run_id::text","WHERE run_id='2dad3093-0600-4de3-9dc1-5f578140c47e'::uuid"),
+                  }
+              conn.rollback()
+              return {"counts":counts,"fingerprints":fps}
+
+          def prov():
+              return {
+                "run_kind":"multicity_canonical_bootstrap_proof",
+                "workflow_repository":os.environ.get("GITHUB_REPOSITORY"),
+                "workflow_name":os.environ.get("GITHUB_WORKFLOW"),
+                "workflow_ref":os.environ.get("GITHUB_REF"),
+                "workflow_sha":os.environ.get("GITHUB_SHA"),
+                "input_repository":"olegbalakin-cmyk/kyiv-air-alerts-grafana",
+                "input_ref":"site-prod",
+                "input_sha":os.environ["SITE_PROD_SHA"],
+                "github_run_id":int(os.environ["GITHUB_RUN_ID"]),
+                "github_run_attempt":int(os.environ["GITHUB_RUN_ATTEMPT"]),
+                "schema_version":"001_phase1_core",
+                "canonicalization_version":"alert-canonicalization-v1",
+                "parameters":{
+                  "production_city_count":23,"canonical_episode_count":27866,
+                  "corpus_sha256":CORPUS,"source_provenance_coverage":"partial",
+                  "preexisting_lviv_episode_count":126,
+                },
+              }
+
+          with psycopg.connect(os.environ["CHILD_DATABASE_URL"],row_factory=dict_row) as conn:
+              pre=snap(conn)
+              assert pre["counts"]=={"ingestion_runs":2,"alert_episodes":126,"alert_episode_sources":143,"ingestion_checkpoints":1,"max_checkpoint_seq":1,"alert_state_snapshots":13,"alert_threat_observations":14,"non_lviv_episodes":0}
+
+              frozen={(x["city_key"],x["alert_type"],utc(x["start_at"]),utc(x["end_at"]),x["episode_state"],x["legacy_episode_id"]) for x in episodes if x["city_key"]=="lviv"}
+              with conn.cursor() as c:
+                  c.execute("SELECT episode_uid,legacy_episode_id,city_key,alert_type,start_at,end_at,episode_state FROM alert_episodes WHERE city_key='lviv'")
+                  db=list(c.fetchall())
+              conn.rollback()
+              actual={(x["city_key"],x["alert_type"],utc(x["start_at"]),utc(x["end_at"]),x["episode_state"],x["legacy_episode_id"]) for x in db}
+              mappings={str(x["episode_uid"]):x["legacy_episode_id"] for x in db if str(x["episode_uid"]) in repaired}
+              assert len(frozen)==126 and len(db)==126 and frozen==actual and mappings==repaired
+              print("LVIV COMPATIBILITY PASS 126/126 mismatch=0")
+
+              pf=mc.preflight(conn,episodes)
+              summary={k:pf[k] for k in ("exact_existing","missing_to_insert","conflicting_legacy_id","conflicting_exact_interval","semantic_conflict","duplicate_candidate_legacy_id","duplicate_candidate_interval")}
+              assert summary=={"exact_existing":126,"missing_to_insert":27740,"conflicting_legacy_id":0,"conflicting_exact_interval":0,"semantic_conflict":0,"duplicate_candidate_legacy_id":0,"duplicate_candidate_interval":0}
+              assert {x["city_key"] for x in pf["exact_existing_rows"]}=={"lviv"}
+              print("PREFLIGHT PASS",json.dumps(summary,sort_keys=True))
+
+              try:
+                  mc.persist_canonical_episodes(conn,episodes,provenance=prov(),db_branch=os.environ["CHILD_BRANCH_ID"],force_failure_after_new=100)
+                  raise AssertionError("forced failure did not fire")
+              except mc.ForcedMulticityFailure:
+                  pass
+              rolled=snap(conn)
+              assert rolled==pre
+              print("FORCED ROLLBACK PASS after_new=100 zero_residue=true")
+
+              out=mc.persist_canonical_episodes(conn,episodes,provenance=prov(),db_branch=os.environ["CHILD_BRANCH_ID"])
+              assert out["status"]=="persisted" and out["episodes_inserted"]==27740 and out["episodes_existing"]==126 and out["episodes_updated"]==0
+              post=snap(conn)
+              assert post["counts"]=={"ingestion_runs":3,"alert_episodes":27866,"alert_episode_sources":143,"ingestion_checkpoints":1,"max_checkpoint_seq":1,"alert_state_snapshots":13,"alert_threat_observations":14,"non_lviv_episodes":27740}
+              for k in pre["fingerprints"]: assert pre["fingerprints"][k]==post["fingerprints"][k], k
+
+              with conn.cursor() as c:
+                  c.execute("SELECT city_key,alert_type,start_at,end_at,episode_state,legacy_episode_id,canonicalization_version FROM alert_episodes")
+                  rows=list(c.fetchall())
+              conn.rollback()
+              def rec(x): return (x["city_key"],x["alert_type"],utc(x["start_at"]),utc(x["end_at"]),x["episode_state"],x["legacy_episode_id"],x["canonicalization_version"])
+              exp={rec(x) for x in episodes}; got={rec(x) for x in rows}
+              city_counts=dict(Counter(x["city_key"] for x in rows))
+              assert len(rows)==27866 and len(city_counts)==23 and exp==got and city_counts==expected_counts
+              print("FULL DB PARITY PASS 27866/27866 23/23")
+
+              retry=mc.persist_canonical_episodes(conn,episodes,provenance=prov(),db_branch=os.environ["CHILD_BRANCH_ID"])
+              assert retry["status"]=="already_persisted" and retry["writes"]==0 and snap(conn)==post
+              print("EXACT REPLAY PASS already_persisted writes=0")
+
+              tests={}
+              cases=[]
+              a=copy.deepcopy(episodes[0]); a["end_at"]="2030-01-01T00:00:00Z"; cases.append(("existing_legacy_changed_boundary",[a]))
+              b=copy.deepcopy(episodes[0]); b["legacy_episode_id"]="0"*24; cases.append(("exact_interval_different_legacy",[b]))
+              d=copy.deepcopy(episodes[:1]); d.append(copy.deepcopy(d[0])); cases.append(("duplicate_input",d))
+              e=copy.deepcopy(episodes[0]); e["end_at"]=e["start_at"]; cases.append(("invalid_interval",[e]))
+              e=copy.deepcopy(episodes[0]); e["city_key"]=""; cases.append(("empty_city",[e]))
+              e=copy.deepcopy(episodes[0]); e["alert_type"]=""; cases.append(("empty_type",[e]))
+              e=copy.deepcopy(episodes[0]); e["canonicalization_version"]="unsupported-v2"; cases.append(("unsupported_version",[e]))
+              for name,candidate in cases:
+                  try: mc.persist_canonical_episodes(conn,candidate,provenance=prov(),db_branch=os.environ["CHILD_BRANCH_ID"])
+                  except Exception as exc:
+                      assert snap(conn)==post
+                      tests[name]=type(exc).__name__
+                  else: raise AssertionError(name+" unexpectedly succeeded")
+              print("CONFLICT REJECTION PASS",json.dumps(tests,sort_keys=True))
+
+          result={
+            "runtime_verdict":"MULTICITY CANONICAL ALERTS NEON PERSISTENCE PROVEN",
+            "proof_branch":"multicity-canonical-alerts-neon-persistence-proof-v2-2026-10-01",
+            "runtime_head":os.environ["GITHUB_SHA"],
+            "workflow_run_id":int(os.environ["GITHUB_RUN_ID"]),
+            "predecessor_repair_head":"299bb5dd2101facae9f70dc7c885851575505212",
+            "original_blocked_proof_head":"8b6dff2bcf813b13f09bf5efd6078f393e76c494",
+            "frozen_production_ref":os.environ["SITE_PROD_SHA"],
+            "frozen_vadimkin_ref":os.environ["VADIMKIN_SHA"],
+            "canonical_corpus_sha256":CORPUS,
+            "city_count":23,"total_episode_count":27866,"open_episode_count":0,
+            "per_city_counts":expected_counts,
+            "lviv_compatibility":{"frozen":126,"db":126,"mismatches":0,"repaired_mappings":repaired},
+            "preflight":summary,
+            "forced_rollback":{"after_new":100,"exact_pre_state_restored":True,"residue":0},
+            "successful_ingestion_run_id":out["run_id"],
+            "successful_import":{"episodes_inserted":27740,"episodes_existing":126,"episodes_updated":0},
+            "post_state":post,
+            "full_db_parity":{"exact":True,"rows":27866,"cities":23,"missing":0,"extra":0},
+            "lviv_fingerprint_preserved":True,"source_fingerprint_preserved":True,
+            "checkpoint_fingerprint_preserved":True,"differentiated_fingerprints_preserved":True,
+            "exact_replay":{"status":"already_persisted","writes":0},
+            "fresh_process_replay":"pending",
+            "conflict_rejection":tests,
+            "source_provenance_coverage":"partial",
+            "prompt_count_correction":{"kropyvnytskyi":1268,"reason":"mechanically regenerated frozen corpus; 126 contradicts total 27866 and accepted corpus SHA"},
+            "attack_events_in_neon":False,"db_cutover":False,"credentials_exposed":False
+          }
+          with open(os.environ["PROOF_RESULT"],"w",encoding="utf-8") as f: json.dump(result,f,indent=2,sort_keys=True)
+          print("SUCCESSFUL INGESTION RUN",out["run_id"])
+          PY
+
+      - name: Fresh-process exact replay
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json,os,sys
+          import psycopg
+          from psycopg.rows import dict_row
+          sys.path.insert(0,"scripts")
+          import multicity_canonical_postgres as mc
+          b=json.load(open(os.environ["BOUNDARY_RESULT"],encoding="utf-8"))
+          prov={"run_kind":"multicity_canonical_bootstrap_proof","schema_version":"001_phase1_core","canonicalization_version":"alert-canonicalization-v1","parameters":{"corpus_sha256":os.environ["CORPUS_SHA"]}}
+          with psycopg.connect(os.environ["CHILD_DATABASE_URL"],row_factory=dict_row) as c:
+              out=mc.persist_canonical_episodes(c,b["episodes"],provenance=prov,db_branch=os.environ["CHILD_BRANCH_ID"])
+              assert out["status"]=="already_persisted" and out["writes"]==0
+              with c.cursor() as cur:
+                  cur.execute("SELECT count(*) FROM ingestion_runs"); runs=cur.fetchone()[0]
+                  cur.execute("SELECT count(*) FROM alert_episodes"); eps=cur.fetchone()[0]
+                  cur.execute("SELECT count(*) FROM alert_episode_sources"); src=cur.fetchone()[0]
+                  cur.execute("SELECT count(*) FROM ingestion_checkpoints"); chk=cur.fetchone()[0]
+              c.rollback()
+              assert (runs,eps,src,chk)==(3,27866,143,1)
+          p=os.environ["PROOF_RESULT"]; o=json.load(open(p,encoding="utf-8"))
+          o["fresh_process_replay"]={"status":"already_persisted","writes":0,"post_counts":[runs,eps,src,chk]}
+          with open(p,"w",encoding="utf-8") as f: json.dump(o,f,indent=2,sort_keys=True)
+          print("FRESH PROCESS REPLAY PASS already_persisted writes=0")
+          PY
+
+      - name: Upload proof
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: multicity-canonical-alerts-neon-persistence-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            ${{ runner.temp }}/multicity_canonical_alerts_neon_persistence_runtime.json
+            ${{ runner.temp }}/multicity_canonical_boundary.json
+          if-no-files-found: warn
+          retention-days: 30
