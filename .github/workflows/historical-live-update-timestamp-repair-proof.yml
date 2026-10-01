@@ -1,0 +1,48 @@
+name: Historical live-update timestamp repair proof
+
+on:
+  push:
+    branches:
+      - historical-live-update-timestamp-repair-proof-2026-10-01
+    paths:
+      - "kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py"
+      - "kyiv-air-alerts-grafana/tests/test_historical_live_update_timestamp_repair.py"
+      - ".github/workflows/historical-live-update-timestamp-repair-proof.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  focused-proof:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check out proof branch
+        uses: actions/checkout@v4
+        with:
+          ref: historical-live-update-timestamp-repair-proof-2026-10-01
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: kyiv-air-alerts-grafana/requirements.txt
+
+      - name: Install dependencies
+        working-directory: kyiv-air-alerts-grafana
+        run: pip install -r requirements.txt
+
+      - name: Run existing classifier self-test
+        working-directory: kyiv-air-alerts-grafana
+        run: python scripts/monitor_explosion_candidates.py --self-test
+
+      - name: Run focused live-update timestamp proof
+        working-directory: kyiv-air-alerts-grafana
+        run: python tests/test_historical_live_update_timestamp_repair.py
+
+      - name: Guard frozen campaign batches
+        run: |
+          test "$(git diff --name-only 71cb6f6fbe856cc7b96759310fe9cc9c71cc0453...HEAD -- 'research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/**' | wc -l)" -eq 0
+          echo "Frozen campaign batch diff = 0"
