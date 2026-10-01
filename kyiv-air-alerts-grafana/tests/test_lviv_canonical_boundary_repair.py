@@ -238,7 +238,7 @@ class TestTransactionControl(unittest.TestCase):
     def test_forced_failure_rolls_back_after_source_insert(self):
         c = FakeConnection()
         with self.assertRaises(r.ForcedRepairFailure):
-            r.repair(c, force_failure_after_first_source=True, inspector=pristine_inspector)
+            r.repair(c, force_failure_after_first_source=True, inspector=pristine_inspector,db_branch="br-test")
         self.assertEqual(c.commits, 0)
         self.assertEqual(c.rollbacks, 1)
         self.assertTrue(any("RUN_INSERT" in x for x in c.cur.commands))
@@ -247,7 +247,7 @@ class TestTransactionControl(unittest.TestCase):
 
     def test_exact_retry_is_zero_write(self):
         c = FakeConnection()
-        out = r.repair(c, inspector=repaired_inspector)
+        out = r.repair(c, inspector=repaired_inspector,db_branch="br-test")
         self.assertEqual(out["status"], "already_repaired")
         self.assertEqual(out["writes"], 0)
         self.assertEqual(c.commits, 0)
@@ -255,8 +255,8 @@ class TestTransactionControl(unittest.TestCase):
         self.assertFalse(any("RUN_INSERT" in x for x in c.cur.commands))
 
     def test_fresh_connection_retry_is_zero_write(self):
-        a = r.repair(FakeConnection(), inspector=repaired_inspector)
-        b = r.repair(FakeConnection(), inspector=repaired_inspector)
+        a = r.repair(FakeConnection(,db_branch="br-test"), inspector=repaired_inspector)
+        b = r.repair(FakeConnection(,db_branch="br-test"), inspector=repaired_inspector)
         self.assertEqual((a["writes"], b["writes"]), (0, 0))
 
 
