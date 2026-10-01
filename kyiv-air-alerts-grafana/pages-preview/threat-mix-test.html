@@ -11,8 +11,9 @@
     .threat-test-shell{max-width:1440px;margin:0 auto;padding:38px 24px 48px}
     .threat-test-header{display:flex;justify-content:space-between;align-items:flex-start;gap:24px;margin-bottom:22px}
     .threat-test-header h1{margin-bottom:10px}
-    .threat-test-header .subtitle{max-width:900px}
-    .demo-banner{border:1px solid #8a6d24;background:#29220e;color:#ffe28a;border-radius:10px;padding:12px 14px;margin:14px 0 18px;line-height:1.5}
+    .threat-test-header .subtitle{max-width:920px}
+    .test-banner{border:1px solid #375a7a;background:#102235;color:#cce6ff;border-radius:10px;padding:12px 14px;margin:14px 0 18px;line-height:1.5}
+    .error-banner{border-color:#7b3434;background:#2b1212;color:#ffd0d0}
     .threat-panel{padding:18px}
     .threat-panel h2{font-size:22px;margin-bottom:8px}
     .threat-chart{height:480px}
@@ -21,7 +22,7 @@
     .threat-note strong{color:#e7edf3}
     .threat-actions{display:flex;gap:8px;flex-wrap:wrap}
     .threat-actions a{text-decoration:none}
-    .threat-status{display:inline-block;font-size:12px;padding:5px 9px;border-radius:999px;border:1px solid #745f1b;background:#2b2511;color:#ffe38b;margin-bottom:10px}
+    .threat-status{display:inline-block;font-size:12px;padding:5px 9px;border-radius:999px;border:1px solid #315b77;background:#10283a;color:#bfe8ff;margin-bottom:10px}
     .real-state{margin-top:16px;padding:14px;border-radius:10px;background:#101820;border:1px solid #2d3a46;color:#aebbc6;font-size:13px;line-height:1.55}
     .real-state strong{color:#e7edf3}
     @media(max-width:800px){
@@ -38,33 +39,33 @@
       <div>
         <div class="eyebrow" id="eyebrow">Диференційовані тривоги · тест</div>
         <h1 id="title">З чого складався час під тривогою</h1>
-        <p class="subtitle" id="subtitle">Кожен стовпчик — один завершений день. 100% = увесь час, коли цього дня була активна повітряна тривога.</p>
+        <p class="subtitle" id="subtitle">Кожен стовпчик — один завершений день. 100% = увесь час повітряної тривоги цього дня.</p>
       </div>
       <div class="threat-actions">
-        <a class="ghost-button" id="langUk" href="?lang=uk">Українська</a>
-        <a class="ghost-button" id="langEn" href="?lang=en">English</a>
+        <a class="ghost-button" href="?lang=uk">Українська</a>
+        <a class="ghost-button" href="?lang=en">English</a>
         <a class="ghost-button" id="backLink" href="./?lang=uk">← До тестового сайту</a>
       </div>
     </div>
 
-    <div class="demo-banner" id="demoBanner">
-      <strong>Макет інтерфейсу.</strong> Значення на графіку синтетичні й потрібні лише для перевірки того, як читатиметься візуалізація. Реальна історія differentiated-станів ще не накопичена.
+    <div class="test-banner" id="testBanner">
+      <strong>Тестова сторінка з фактичними даними Kyiv Digital.</strong> Продакшен не змінено.
     </div>
 
     <article class="panel threat-panel">
-      <span class="threat-status" id="status">ДЕМО · НЕ ФАКТИЧНІ ДАНІ</span>
-      <h2 id="chartTitle">Розподіл часу тривог за типом загрози · останні 28 днів</h2>
-      <p class="chart-subtitle" id="chartSubtitle">День із тривогами завжди сумує до 100%. Якщо одночасно активні два або більше різних типів загроз, цей час віднесено до «Комбінованої».</p>
+      <span class="threat-status" id="status">TEST · KYIV DIGITAL HISTORY</span>
+      <h2 id="chartTitle">Розподіл часу тривог за причиною · завершені дні</h2>
+      <p class="chart-subtitle" id="chartSubtitle">Причина береться на рівні alert episode. Якщо episode має кілька causes, його час віднесено до «Комбінованої».</p>
       <div class="chart-wrap threat-chart"><canvas id="threatMixChart"></canvas></div>
 
       <div class="threat-notes">
-        <div class="threat-note" id="noteDenominator"><strong>Denominator:</strong> сумарний фактичний час під повітряною тривогою за день, а не 24 години.</div>
-        <div class="threat-note" id="noteCombined"><strong>Комбінована:</strong> одночасно активні ≥2 різні групи загроз. Одна й та сама хвилина не рахується двічі.</div>
-        <div class="threat-note" id="noteTooltip"><strong>Tooltip:</strong> показує не лише частку, а й хвилини відповідного типу та загальну тривалість тривог цього дня.</div>
+        <div class="threat-note" id="noteDenominator"><strong>100%:</strong> сумарний час повітряної тривоги за день, а не 24 години.</div>
+        <div class="threat-note" id="noteCombined"><strong>Комбінована:</strong> episode із двома або більше causes; <code>missile-drone</code> також віднесено сюди.</div>
+        <div class="threat-note" id="noteTooltip"><strong>Tooltip:</strong> частка, хвилини категорії та загальний час під тривогою цього дня.</div>
       </div>
 
       <div class="real-state" id="realState">
-        <strong>Стан реальних даних:</strong> на момент побудови макета немає достатньої historical differentiated series для чесного 28-денного графіка. Коли накопичення почнеться, вікно має показувати максимум 28 днів — від першого дня з достатнім покриттям, без штучних нулів до цієї дати.
+        <strong>Обмеження:</strong> historical API дозволяє класифікувати завершені alert episodes за causes, але не відновлює зміни cause всередині одного episode. Тому це не true threat-active-time.
       </div>
     </article>
   </main>
@@ -79,40 +80,58 @@
       uk: {
         eyebrow: "Диференційовані тривоги · тест",
         title: "З чого складався час під тривогою",
-        subtitle: "Кожен стовпчик — один завершений день. 100% = увесь час, коли цього дня була активна повітряна тривога.",
+        subtitle: "Кожен стовпчик — один завершений день. 100% = увесь час повітряної тривоги цього дня.",
         back: "← До тестового сайту",
-        demo: "<strong>Макет інтерфейсу.</strong> Значення на графіку синтетичні й потрібні лише для перевірки того, як читатиметься візуалізація. Реальна історія differentiated-станів ще не накопичена.",
-        status: "ДЕМО · НЕ ФАКТИЧНІ ДАНІ",
-        chartTitle: "Розподіл часу тривог за типом загрози · останні 28 днів",
-        chartSubtitle: "День із тривогами завжди сумує до 100%. Якщо одночасно активні два або більше різних типів загроз, цей час віднесено до «Комбінованої».",
-        denominator: "<strong>Denominator:</strong> сумарний фактичний час під повітряною тривогою за день, а не 24 години.",
-        combined: "<strong>Комбінована:</strong> одночасно активні ≥2 різні групи загроз. Одна й та сама хвилина не рахується двічі.",
-        tooltip: "<strong>Tooltip:</strong> показує не лише частку, а й хвилини відповідного типу та загальну тривалість тривог цього дня.",
-        realState: "<strong>Стан реальних даних:</strong> на момент побудови макета немає достатньої historical differentiated series для чесного 28-денного графіка. Коли накопичення почнеться, вікно має показувати максимум 28 днів — від першого дня з достатнім покриттям, без штучних нулів до цієї дати.",
-        labels: ["БпЛА","Ракетна","Авіаційна / МіГ","Комбінована","Невизначена"],
-        y: "% часу тривог",
+        banner: "<strong>Тестова сторінка з фактичними даними Kyiv Digital.</strong> Продакшен не змінено.",
+        status: "TEST · KYIV DIGITAL HISTORY",
+        chartTitle: "Розподіл часу тривог за причиною · завершені дні",
+        chartSubtitle: "Причина береться на рівні alert episode. Якщо episode має кілька causes, його час віднесено до «Комбінованої».",
+        denominator: "<strong>100%:</strong> сумарний час повітряної тривоги за день, а не 24 години.",
+        combined: "<strong>Комбінована:</strong> episode із двома або більше causes; <code>missile-drone</code> також віднесено сюди.",
+        tooltip: "<strong>Tooltip:</strong> частка, хвилини категорії та загальний час під тривогою цього дня.",
+        limitation: "<strong>Обмеження:</strong> historical API дозволяє класифікувати завершені alert episodes за causes, але не відновлює зміни cause всередині одного episode. Тому це не true threat-active-time.",
+        loadError: "<strong>Не вдалося завантажити preview data.</strong> Перевір GitHub Pages build.",
         noAlerts: "Тривог не було",
         total: "Усього під тривогою",
-        minutes: "хв"
+        minutes: "хв",
+        y: "% часу тривог",
+        labels: {
+          "drone": "БпЛА",
+          "massive-drone": "Масована атака БпЛА",
+          "missile": "Ракетна",
+          "ballistic": "Балістична",
+          "mig": "МіГ-31К",
+          "combined": "Комбінована",
+          "unknown": "Інше / невизначене"
+        }
       },
       en: {
         eyebrow: "Differentiated alerts · test",
         title: "What time under alert consisted of",
-        subtitle: "Each bar is one completed day. 100% = all time during which an air alert was active that day.",
+        subtitle: "Each bar is one completed day. 100% = all air-alert time during that day.",
         back: "← Back to test site",
-        demo: "<strong>Interface mock-up.</strong> Values in the chart are synthetic and are used only to test readability. A real historical differentiated-state series has not accumulated yet.",
-        status: "DEMO · NOT OBSERVED DATA",
-        chartTitle: "Share of alert time by threat type · last 28 days",
-        chartSubtitle: "A day with alerts always sums to 100%. When two or more distinct threat types are active at the same time, that interval is assigned to “Combined”.",
-        denominator: "<strong>Denominator:</strong> actual total air-alert time during the day, not 24 hours.",
-        combined: "<strong>Combined:</strong> ≥2 distinct threat groups active simultaneously. The same minute is never counted twice.",
-        tooltip: "<strong>Tooltip:</strong> shows both the share and minutes for the category, plus total alert duration that day.",
-        realState: "<strong>Real-data status:</strong> there is not yet enough historical differentiated series for an honest 28-day chart. Once accumulation starts, the window should show at most 28 days from the first day with sufficient coverage, with no artificial zeros before that date.",
-        labels: ["UAV","Missile","Aircraft / MiG","Combined","Unknown"],
-        y: "% of alert time",
+        banner: "<strong>Test page using observed Kyiv Digital data.</strong> Production is unchanged.",
+        status: "TEST · KYIV DIGITAL HISTORY",
+        chartTitle: "Share of alert time by cause · completed days",
+        chartSubtitle: "The cause is assigned at alert-episode level. If an episode has multiple causes, its time is assigned to “Combined”.",
+        denominator: "<strong>100%:</strong> total air-alert time during the day, not 24 hours.",
+        combined: "<strong>Combined:</strong> an episode with two or more causes; <code>missile-drone</code> is also assigned here.",
+        tooltip: "<strong>Tooltip:</strong> category share, category minutes, and total alert time for the day.",
+        limitation: "<strong>Limitation:</strong> the historical API supports cause classification of completed alert episodes but does not reconstruct cause changes within one episode. This is not true threat-active-time.",
+        loadError: "<strong>Preview data could not be loaded.</strong> Check the GitHub Pages build.",
         noAlerts: "No alerts",
         total: "Total time under alert",
-        minutes: "min"
+        minutes: "min",
+        y: "% of alert time",
+        labels: {
+          "drone": "UAV",
+          "massive-drone": "Mass UAV attack",
+          "missile": "Missile",
+          "ballistic": "Ballistic",
+          "mig": "MiG-31K",
+          "combined": "Combined",
+          "unknown": "Other / unknown"
+        }
       }
     }[lang];
 
@@ -121,104 +140,133 @@
       if (!el) return;
       if (html) el.innerHTML = value; else el.textContent = value;
     };
+
     set("eyebrow", copy.eyebrow);
     set("title", copy.title);
     set("subtitle", copy.subtitle);
     set("backLink", copy.back);
     document.getElementById("backLink").href = "./?lang=" + lang;
-    set("demoBanner", copy.demo, true);
+    set("testBanner", copy.banner, true);
     set("status", copy.status);
     set("chartTitle", copy.chartTitle);
     set("chartSubtitle", copy.chartSubtitle);
     set("noteDenominator", copy.denominator, true);
     set("noteCombined", copy.combined, true);
     set("noteTooltip", copy.tooltip, true);
-    set("realState", copy.realState, true);
+    set("realState", copy.limitation, true);
 
-    const rows = [
-      ["03.09",215,[58,17,0,19,6]],["04.09",0,[0,0,0,0,0]],["05.09",91,[42,0,0,46,12]],
-      ["06.09",163,[15,31,9,38,7]],["07.09",74,[73,0,0,18,9]],["08.09",286,[28,18,4,45,5]],
-      ["09.09",132,[51,12,0,29,8]],["10.09",47,[0,67,0,21,12]],["11.09",305,[34,20,5,38,3]],
-      ["12.09",0,[0,0,0,0,0]],["13.09",118,[64,0,7,24,5]],["14.09",196,[22,24,13,35,6]],
-      ["15.09",68,[79,0,0,15,6]],["16.09",244,[39,16,0,41,4]],["17.09",101,[33,29,0,30,8]],
-      ["18.09",57,[61,0,18,14,7]],["19.09",312,[25,22,8,42,3]],["20.09",0,[0,0,0,0,0]],
-      ["21.09",84,[69,0,0,23,8]],["22.09",227,[31,26,5,34,4]],["23.09",143,[47,10,0,37,6]],
-      ["24.09",66,[0,55,14,23,8]],["25.09",278,[36,19,6,36,3]],["26.09",109,[62,0,0,31,7]],
-      ["27.09",188,[27,28,10,30,5]],["28.09",0,[0,0,0,0,0]],["29.09",254,[41,13,0,42,4]],
-      ["30.09",121,[56,9,0,29,6]]
-    ];
-    const colors = ["#62a0ea","#f8e45c","#c061cb","#ff7b72","#7f8c99"];
-    const labels = rows.map(r => r[0]);
-    const datasets = copy.labels.map((label, idx) => ({
-      label,
-      data: rows.map(r => r[2][idx]),
-      backgroundColor: colors[idx],
-      borderColor: colors[idx],
-      borderWidth: 0,
-      stack: "alert-time"
-    }));
+    const colors = {
+      "drone": "#62a0ea",
+      "massive-drone": "#3dd6b5",
+      "missile": "#f8e45c",
+      "ballistic": "#ff9b54",
+      "mig": "#c061cb",
+      "combined": "#ff7b72",
+      "unknown": "#7f8c99"
+    };
 
-    new Chart(document.getElementById("threatMixChart"), {
-      type: "bar",
-      data: { labels, datasets },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        animation: false,
-        interaction: { mode: "index", intersect: false },
-        plugins: {
-          legend: {
-            position: "top",
-            labels: { color: "#b8c4cf", boxWidth: 14, usePointStyle: true }
-          },
-          tooltip: {
-            mode: "index",
-            intersect: false,
-            filter(ctx) {
-              const total = rows[ctx.dataIndex][1];
-              return total > 0 && Number(ctx.raw) > 0;
+    const formatDate = iso => {
+      const [y,m,d] = iso.split("-");
+      return d + "." + m;
+    };
+
+    fetch("kyiv-threat-mix-data.json", {cache:"no-store"})
+      .then(r => {
+        if (!r.ok) throw new Error("HTTP " + r.status);
+        return r.json();
+      })
+      .then(data => {
+        const rows = Array.isArray(data.rows) ? data.rows : [];
+        if (!rows.length) throw new Error("No rows");
+
+        const ordered = ["drone","massive-drone","missile","ballistic","mig","combined","unknown"];
+        const used = ordered.filter(key => rows.some(r => Number(r.minutes?.[key] || 0) > 0));
+        const labels = rows.map(r => formatDate(r.date));
+        const datasets = used.map(key => ({
+          key,
+          label: copy.labels[key] || key,
+          data: rows.map(r => Number(r.shares?.[key] || 0)),
+          backgroundColor: colors[key],
+          borderColor: colors[key],
+          borderWidth: 0,
+          stack: "alert-time"
+        }));
+
+        const meta = data.meta || {};
+        const start = meta.visible_start || rows[0].date;
+        const end = meta.visible_end || rows[rows.length - 1].date;
+        set("chartTitle", copy.chartTitle + " · " + start + " — " + end);
+
+        new Chart(document.getElementById("threatMixChart"), {
+          type: "bar",
+          data: { labels, datasets },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            animation: false,
+            interaction: { mode: "index", intersect: false },
+            plugins: {
+              legend: {
+                position: "top",
+                labels: { color: "#b8c4cf", boxWidth: 14, usePointStyle: true }
+              },
+              tooltip: {
+                mode: "index",
+                intersect: false,
+                filter(ctx) {
+                  const total = Number(rows[ctx.dataIndex].total_minutes || 0);
+                  return total > 0 && Number(ctx.raw) > 0;
+                },
+                callbacks: {
+                  title(items) {
+                    if (!items.length) return "";
+                    const i = items[0].dataIndex;
+                    const date = rows[i].date;
+                    return Number(rows[i].total_minutes || 0) === 0 ? date + " · " + copy.noAlerts : date;
+                  },
+                  label(ctx) {
+                    const row = rows[ctx.dataIndex];
+                    const key = ctx.dataset.key;
+                    const pct = Number(ctx.raw || 0);
+                    const mins = Number(row.minutes?.[key] || 0);
+                    return " " + ctx.dataset.label + ": " + pct.toFixed(1) + "% · " + mins.toFixed(0) + " " + copy.minutes;
+                  },
+                  footer(items) {
+                    if (!items.length) return "";
+                    const total = Number(rows[items[0].dataIndex].total_minutes || 0);
+                    if (!total) return "";
+                    const h = Math.floor(total / 60);
+                    const m = Math.round(total - h * 60);
+                    return copy.total + ": " + (h ? h + " h " : "") + m + " " + copy.minutes;
+                  }
+                }
+              }
             },
-            callbacks: {
-              title(items) {
-                if (!items.length) return "";
-                const i = items[0].dataIndex;
-                return rows[i][1] === 0 ? labels[i] + " · " + copy.noAlerts : labels[i];
+            scales: {
+              x: {
+                stacked: true,
+                ticks: { color: "#b8c4cf", maxRotation: 0, autoSkip: true, maxTicksLimit: 14 },
+                grid: { color: "rgba(148,163,184,.10)" }
               },
-              label(ctx) {
-                const total = rows[ctx.dataIndex][1];
-                if (!total) return "";
-                const pct = Number(ctx.raw);
-                const mins = total * pct / 100;
-                return " " + ctx.dataset.label + ": " + pct.toFixed(0) + "% · " + mins.toFixed(0) + " " + copy.minutes;
-              },
-              footer(items) {
-                if (!items.length) return "";
-                const total = rows[items[0].dataIndex][1];
-                if (!total) return "";
-                const h = Math.floor(total / 60);
-                const m = total % 60;
-                return copy.total + ": " + (h ? h + " h " : "") + m + " " + copy.minutes;
+              y: {
+                stacked: true,
+                min: 0,
+                max: 100,
+                ticks: { color: "#b8c4cf", callback: v => v + "%" },
+                grid: { color: "rgba(148,163,184,.16)" },
+                title: { display: true, text: copy.y, color: "#b8c4cf" }
               }
             }
           }
-        },
-        scales: {
-          x: {
-            stacked: true,
-            ticks: { color: "#b8c4cf", maxRotation: 0, autoSkip: true, maxTicksLimit: 14 },
-            grid: { color: "rgba(148,163,184,.10)" }
-          },
-          y: {
-            stacked: true,
-            min: 0,
-            max: 100,
-            ticks: { color: "#b8c4cf", callback: v => v + "%" },
-            grid: { color: "rgba(148,163,184,.16)" },
-            title: { display: true, text: copy.y, color: "#b8c4cf" }
-          }
-        }
-      }
-    });
+        });
+      })
+      .catch(err => {
+        console.error(err);
+        const banner = document.getElementById("testBanner");
+        banner.classList.add("error-banner");
+        banner.innerHTML = copy.loadError;
+        set("status", "TEST · DATA LOAD ERROR");
+      });
   </script>
 </body>
 </html>
