@@ -95,6 +95,7 @@ def test_exact_case7_episode_association():
     assert observation["candidate_matching"]["reason"] == "publication_outside_all_tracked_alert_windows"
     assert observation["temporal_binding"]["code"] == "NO_STRICT_TEMPORAL_BINDING"
     assert observation["event_types"] == ["impact"]
+    assert observation["content_hash"] == "f3b8f807fd2f9788c463684efd7b7b1ecbe048915cb6139982dc9248b3c40328"
     assert observation["exact_city_evidence"]["present"] is True
     assert observation["aerial_war_context"]["present"] is True
     assert observation["same_attack_context"]["present"] is True
@@ -130,7 +131,12 @@ def test_exact_case7_episode_association():
         retrieval_provenance=observation["retrieval_provenance"],
     )
     assert replayed_observation["observation_id"] == CASE7_OBSERVATION_ID
-    assert replayed_observation["content_hash"] == observation["content_hash"]
+    # The committed observation excerpt is intentionally truncated to 1200 chars;
+    # its frozen content_hash was computed from the longer pre-truncation text and
+    # therefore is guarded above, not recomputed from this lossy replay fixture.
+    assert replayed_observation["source_url"] == observation["source_url"]
+    assert replayed_observation["source_timestamp"] == observation["source_timestamp"]
+    assert replayed_observation["excerpt"] == observation["excerpt"]
     assert replayed_observation["classification_outcome"] == "approved_strict"
     assert replayed_observation["classification_episode_id"] == CASE7_EPISODE_ID
     assert replayed_observation["event_timestamp_if_stated"] == "2026-04-26T19:48:00Z"
