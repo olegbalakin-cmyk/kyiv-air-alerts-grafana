@@ -20,8 +20,6 @@ jobs:
       VADIMKIN_SHA: 58ee75bc20113181b9ddf8029d4cbf3a62d8cd10
       CHILD_BRANCH_ID: br-icy-forest-b5mfyezq
       CHILD_DB_HOST: ep-shy-truth-b5ngaye8-pooler.c-7.us-east-2.aws.neon.tech
-      PROOF_RESULT: ${{ runner.temp }}/multicity_canonical_alerts_neon_persistence_runtime.json
-      BOUNDARY_RESULT: ${{ runner.temp }}/multicity_canonical_boundary.json
 
     steps:
       - name: Check out proof branch
@@ -67,7 +65,7 @@ jobs:
             --vadimkin-csv "${RUNNER_TEMP}/official_data_uk.csv" \
             --site-prod-sha "${SITE_PROD_SHA}" \
             --vadimkin-sha "${VADIMKIN_SHA}" \
-            --output "${BOUNDARY_RESULT}"
+            --output "${RUNNER_TEMP}/multicity_canonical_boundary.json"
 
       - name: Derive disposable target URL
         env:
@@ -104,16 +102,16 @@ jobs:
         run: |
           set -euo pipefail
           python scripts/proof_multicity_canonical_postgres.py prove \
-            --boundary "${BOUNDARY_RESULT}" \
-            --result "${PROOF_RESULT}"
+            --boundary "${RUNNER_TEMP}/multicity_canonical_boundary.json" \
+            --result "${RUNNER_TEMP}/multicity_canonical_alerts_neon_persistence_runtime.json"
 
       - name: Run fresh-process replay
         shell: bash
         run: |
           set -euo pipefail
           python scripts/proof_multicity_canonical_postgres.py retry \
-            --boundary "${BOUNDARY_RESULT}" \
-            --result "${PROOF_RESULT}"
+            --boundary "${RUNNER_TEMP}/multicity_canonical_boundary.json" \
+            --result "${RUNNER_TEMP}/multicity_canonical_alerts_neon_persistence_runtime.json"
 
       - name: Upload proof
         if: always()
