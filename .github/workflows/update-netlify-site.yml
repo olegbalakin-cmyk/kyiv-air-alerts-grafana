@@ -20,6 +20,8 @@ jobs:
   update-site:
     runs-on: ubuntu-latest
     timeout-minutes: 60
+    env:
+      MULTICITY_CANONICAL_PAYLOAD_PATH: ${{ runner.temp }}/multicity_canonical_payload.json
     defaults:
       run:
         working-directory: kyiv-air-alerts-grafana
@@ -78,7 +80,7 @@ jobs:
       - name: Apply verified Alerts.in.ua and UkraineAlarm bridge
         env:
           UKRAINEALARM_API_TOKEN: ${{ secrets.UKRAINEALARM_API_TOKEN }}
-          PHASE1_DB_SHADOW: "1"
+          PHASE1_DB_SHADOW: "0"
           PHASE1_DATABASE_URL: ${{ secrets.PHASE1_PROD_SHADOW_DATABASE_URL }}
           PHASE1_DB_BRANCH: ${{ vars.PHASE1_PROD_SHADOW_BRANCH_ID }}
           PHASE1_DB_SHADOW_FAILURE_POLICY: fail_open
@@ -187,6 +189,51 @@ jobs:
 
       - name: Add Sevastopol exact-city series
         run: python scripts/add_sevastopol_exact.py
+
+      - name: Run multicity canonical DB shadow (disabled transition)
+        env:
+          MULTICITY_CANONICAL_DB_SHADOW: "0"
+          MULTICITY_CANONICAL_DATABASE_URL: ${{ secrets.PHASE1_PROD_SHADOW_DATABASE_URL }}
+          MULTICITY_CANONICAL_DB_BRANCH: ${{ vars.PHASE1_PROD_SHADOW_BRANCH_ID }}
+          MULTICITY_CANONICAL_DB_SHADOW_FAILURE_POLICY: fail_open
+          MULTICITY_CANONICAL_DB_SHADOW_DIAGNOSTIC: ${{ runner.temp }}/multicity_canonical_db_shadow.json
+          MULTICITY_CANONICAL_DASHBOARD_PATH: data/dashboard_data.json
+          MULTICITY_CANONICAL_INPUT_REPOSITORY: ${{ github.repository }}
+          MULTICITY_CANONICAL_INPUT_REF: site-prod
+          MULTICITY_CANONICAL_INPUT_SHA: ${{ env.PHASE1_INPUT_SHA }}
+        run: python scripts/multicity_canonical_shadow.py
+
+      - name: Upload multicity canonical DB shadow diagnostic
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: multicity-canonical-db-shadow-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/multicity_canonical_db_shadow.json
+          if-no-files-found: warn
+          retention-days: 30
+
+      - name: Summarize multicity canonical DB shadow diagnostic
+        if: always()
+        env:
+          MULTICITY_DIAGNOSTIC_PATH: ${{ runner.temp }}/multicity_canonical_db_shadow.json
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+          path = Path(os.environ["MULTICITY_DIAGNOSTIC_PATH"])
+          if not path.exists():
+              print("::warning::Multicity canonical DB shadow diagnostic missing")
+              raise SystemExit(0)
+          d = json.loads(path.read_text(encoding="utf-8"))
+          safe = {k: d.get(k) for k in (
+              "status","db_branch","city_count","canonical_episode_count","corpus_sha256",
+              "episodes_inserted","episodes_existing","episodes_updated","writes","run_id",
+              "workflow_sha","input_sha","error_type"
+          )}
+          print("Multicity canonical DB shadow:", json.dumps(safe, sort_keys=True))
+          PY
 
       - name: Build rolling windows, partial periods, time-of-day profile, and shared table ranges
         run: python scripts/apply_site_rolling_7d.py
