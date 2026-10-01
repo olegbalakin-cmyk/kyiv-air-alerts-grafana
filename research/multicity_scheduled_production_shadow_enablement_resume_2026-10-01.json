@@ -1,0 +1,147 @@
+{
+  "proof_kind": "multicity_scheduled_production_shadow_enablement_resume",
+  "verdict": "MULTICITY SCHEDULED PRODUCTION SHADOW ENABLED AND PROVEN",
+  "branch": "multicity-scheduled-production-shadow-enablement-resume-2026-10-01",
+  "enablement": {
+    "main_sha": "3d0404c240b9a83e846ab25424d8ebbd82f2805c",
+    "only_runtime_change": "MULTICITY_CANONICAL_DB_SHADOW 0 -> 1",
+    "frontend_changed": false,
+    "db_cutover": false
+  },
+  "bootstrap": {
+    "run": 36918355446,
+    "site_prod_sha": "9539887094c3196c482ffed4fa510bfb6b3150b3",
+    "parents": 27966,
+    "sha256": "9a602d7b2a932e4b30cd64d5029cba7d3ca6d608f4a10aba606f9b2ac585fc0b",
+    "inserted": 27840,
+    "existing": 126,
+    "updated": 0,
+    "db_parity": "EXACT",
+    "run_id": "ec4682d9-1d06-48e5-a560-9caf6afb2e1e",
+    "checkpoint_count": 18,
+    "checkpoint_max_seq": 18,
+    "replay_status": "already_persisted",
+    "replay_writes": 0,
+    "frozen_exact_retained": 27864,
+    "accepted_supersessions": [
+      "cherkasy",
+      "poltava"
+    ],
+    "unexpected_drift": 0,
+    "pinned_ref": "f69787d35e30243be5ea9090108e769cc971ff55",
+    "pinned_blob": "71d70c0ca54968f530d596cf315616fa858800e1"
+  },
+  "push": {
+    "run": 36918554947,
+    "event": "push",
+    "conclusion": "success",
+    "head_sha": "3d0404c240b9a83e846ab25424d8ebbd82f2805c",
+    "job": 110558535536,
+    "qa": "PASS",
+    "publication": "PASS",
+    "site_prod_sha": "f22752a2412a17b56777fcd3de868b1b7f154e32",
+    "diagnostic": {
+      "status": "succeeded",
+      "cities": 23,
+      "parents": 27981,
+      "sha256": "579a6a1e832dd7f709b9c9d133a2d9f901c44100beb03d6980059c97dde34fc5",
+      "existing": 27966,
+      "inserted": 15,
+      "updated": 0,
+      "writes": 17,
+      "run_id": "ed37dde6-da8e-40fd-9bd9-84d2a5b78b4f"
+    },
+    "db_parity": {
+      "status": "PASS",
+      "reconstructed_parents": 27981,
+      "reconstructed_sha256": "579a6a1e832dd7f709b9c9d133a2d9f901c44100beb03d6980059c97dde34fc5",
+      "retained_prior_parents": 0,
+      "existing_parent_updates": 0
+    },
+    "published_qa": {
+      "ok": true,
+      "production_rows": 23,
+      "errors": []
+    }
+  },
+  "schedule": {
+    "run": 36922008009,
+    "event": "schedule",
+    "first_natural_after_enablement": true,
+    "conclusion": "success",
+    "head_sha": "3d0404c240b9a83e846ab25424d8ebbd82f2805c",
+    "job": 110570094790,
+    "qa": "PASS",
+    "publication": "PASS",
+    "site_prod_sha": "7984cb9ce5a87a1cda0fa539c8a904518e552949",
+    "diagnostic": {
+      "status": "succeeded",
+      "cities": 23,
+      "parents": 27985,
+      "sha256": "cb682c7f15bb1989408baed44c939262525f25160589d79b5b87a6c6924af5e0",
+      "existing": 27980,
+      "inserted": 5,
+      "updated": 0,
+      "writes": 7,
+      "run_id": "b029242a-00a3-44f2-85a3-6408494844f7"
+    },
+    "db_parity": {
+      "status": "PASS",
+      "db_rows_as_of_commit": 27986,
+      "reconstructed_current_parents": 27985,
+      "reconstructed_sha256": "cb682c7f15bb1989408baed44c939262525f25160589d79b5b87a6c6924af5e0",
+      "retained_prior_parents": 1,
+      "retained_sumy": {
+        "episode_uid": "bb437236-c528-4d52-96aa-1d1fc2bd79e2",
+        "legacy_id": "40290f7bd60015c3ae63e33e",
+        "start": "2026-10-01T15:37:40.391383Z",
+        "old_end": "2026-10-01T17:42:08.033210Z",
+        "replacement_uid": "1849d369-4fd9-4f8b-890e-7336ac821c3b",
+        "replacement_end": "2026-10-01T20:33:50.283568Z"
+      },
+      "existing_parent_updates": 0,
+      "previous_episode_uids_preserved": true
+    },
+    "published_qa": {
+      "ok": true,
+      "production_rows": 23,
+      "errors": []
+    }
+  },
+  "db_state": {
+    "project": "green-cake-44216048",
+    "branch": "br-bold-mode-b5rub8pq",
+    "ingestion_runs": 22,
+    "parents": 27986,
+    "source_rows": 143,
+    "checkpoint_count": 18,
+    "checkpoint_max_seq": 18,
+    "legacy_phase1_target_runs": 0,
+    "push_parent_updates": 0,
+    "schedule_parent_updates": 0,
+    "differentiated_tables": false,
+    "attack_event_table": false
+  },
+  "invariants": {
+    "canonical_parent_shadow_active_23_cities": true,
+    "legacy_lviv_phase1_shadow_retired": true,
+    "legacy_phase1_writes": 0,
+    "checkpoint_frozen": true,
+    "previous_episode_uids_preserved": true,
+    "differentiated_writes": false,
+    "attack_event_writes": false,
+    "json_authoritative": true,
+    "frontend_db_read": false,
+    "db_cutover": false
+  },
+  "parity_method": "Used only uploaded run diagnostics, published site-prod commits/QA, the accepted bootstrap artifact, and read-only permanent DB state as-of each target ingestion commit. Canonical JSON was serialized in production city order and SHA-256 matched each run diagnostic exactly. No second production upstream fetch and no replay.",
+  "cleanup": {
+    "removed": [
+      ".github/workflows/multicity-permanent-bootstrap-resume.yml"
+    ],
+    "cleanup_commit": "79c8478f35938acafa29fdfc77197d23521716a0",
+    "temporary_proof_workflows_removed": true
+  },
+  "ready_for_differentiated_scheduled_production_shadow_enablement_proof": true,
+  "attack_events_in_neon": "NO"
+}
