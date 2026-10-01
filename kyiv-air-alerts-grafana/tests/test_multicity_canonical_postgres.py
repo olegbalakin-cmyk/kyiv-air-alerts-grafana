@@ -33,6 +33,19 @@ class Cursor:
             uid=str(uuid.uuid4()); s["episodes"].append({"episode_uid":uid,"legacy_episode_id":params[0],"city_key":params[1],"alert_type":params[2],"start_at":params[3],"end_at":params[4],"episode_state":params[5],"canonicalization_version":params[6],"created_by_run_id":str(params[7]),"updated_by_run_id":str(params[8])}); self.one=(uid,); return
         if "PHASE1:RUN_FINALIZE" in sql: return
         raise AssertionError(sql)
+    def executemany(self, sql, seq):
+        self.commands.append(sql)
+        if "MULTICITY:BULK_EPISODE_INSERT" not in sql:
+            raise AssertionError(sql)
+        for params in seq:
+            self.c.state["episodes"].append({
+                "episode_uid":str(uuid.uuid4()),"legacy_episode_id":params[0],
+                "city_key":params[1],"alert_type":params[2],"start_at":params[3],
+                "end_at":params[4],"episode_state":params[5],
+                "canonicalization_version":params[6],
+                "created_by_run_id":str(params[7]),"updated_by_run_id":str(params[8])
+            })
+
     def fetchone(self): return self.one
     def fetchall(self): return self.many
     def close(self): pass
