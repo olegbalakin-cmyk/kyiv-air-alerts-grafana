@@ -1,0 +1,117 @@
+{
+  "schema_version": 1,
+  "proof": "historical-live-update-timestamp-repair-proof-2026-10-01",
+  "verdict": "LIVE-UPDATE TIMESTAMP REPAIR PROVEN",
+  "frozen_base_sha": "71cb6f6fbe856cc7b96759310fe9cc9c71cc0453",
+  "proof_execution_head": "4db73e0cf37db6d96df83662ecbd9f8e14b27638",
+  "proof_head_semantics": "proof_execution_head is the exact commit tested by the successful focused GitHub Actions run; this artifact is committed afterward and does not alter implementation or tests",
+  "changed_implementation_files": [
+    "kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py"
+  ],
+  "focused_test_files": [
+    "kyiv-air-alerts-grafana/tests/test_historical_live_update_timestamp_repair.py"
+  ],
+  "proof_workflow": [
+    ".github/workflows/historical-live-update-timestamp-repair-proof.yml"
+  ],
+  "implementation": {
+    "scope": "bounded dated live-update/event timestamp parsing only",
+    "accepted_defect": "EMBEDDED_LIVE_UPDATE_TIMESTAMP_NOT_PARSED",
+    "grammar_example": "26 квітня 22:48",
+    "supported_ukrainian_month_names": [
+      "січня",
+      "лютого",
+      "березня",
+      "квітня",
+      "травня",
+      "червня",
+      "липня",
+      "серпня",
+      "вересня",
+      "жовтня",
+      "листопада",
+      "грудня"
+    ],
+    "timezone": "Europe/Kyiv",
+    "date_context": "explicit day/month/time; year selected from bounded article publication context (+/-2 local calendar days, including year boundary)",
+    "guard": "date+time must be a segment-leading live-update prefix, optionally after a bounded live-feed label, and be followed within 160 characters by an existing attack-event signal; no generic date-anywhere parsing",
+    "precedence": "valid dated embedded event timestamps are evaluated before the pre-existing clock-only grammar; publication-time matching remains unchanged",
+    "existing_clock_grammar_preserved": true
+  },
+  "case_7": {
+    "city_key": "sumy",
+    "episode_id": "ae2718c10fcdc7079dbb220a",
+    "alert_start": "2026-04-26T17:53:05Z",
+    "alert_end": "2026-04-26T20:06:11Z",
+    "observation_id": "7f9455ee73cf2aaa84b9d6e3",
+    "frozen_batch": "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/sumy/batch_000029.json",
+    "frozen_source_timestamp": "2026-04-26T06:45:05Z",
+    "frozen_content_hash": "f3b8f807fd2f9788c463684efd7b7b1ecbe048915cb6139982dc9248b3c40328",
+    "embedded_timestamp_text": "26 квітня 22:48",
+    "parsed_embedded_timestamp": "2026-04-26T19:48:00Z",
+    "before": {
+      "observation_classification": "needs_review",
+      "target_classification": "NO_CONFIRMED_EVENT",
+      "candidate_matching_outcome": "no_match",
+      "candidate_matching_reason": "publication_outside_all_tracked_alert_windows",
+      "temporal_binding_code": "NO_STRICT_TEMPORAL_BINDING"
+    },
+    "after_focused_replay": {
+      "observation_id_preserved": true,
+      "source_url_preserved": true,
+      "source_timestamp_preserved": true,
+      "stored_excerpt_preserved": true,
+      "publication_matching_outcome": "no_match",
+      "temporal_binding_code": "TEMPORAL_EXPLICIT_EVENT_TIME_INSIDE_EPISODE",
+      "temporal_binding_episode_specific": true,
+      "supported_episode_ids": [
+        "ae2718c10fcdc7079dbb220a"
+      ],
+      "matched_episode_id": "ae2718c10fcdc7079dbb220a",
+      "observation_classification": "approved_strict",
+      "target_classification": "STRICT_EVENT_POSITIVE",
+      "confirmed_event_types": [
+        "impact"
+      ]
+    }
+  },
+  "focused_test_results": {
+    "github_actions_run_id": 36922005164,
+    "tested_head": "4db73e0cf37db6d96df83662ecbd9f8e14b27638",
+    "conclusion": "success",
+    "existing_classifier_self_test": "PASS",
+    "tests_passed": 7,
+    "tests": {
+      "proven_case_syntax": "PASS",
+      "existing_clock_grammar_regression": "PASS",
+      "exact_case7_episode_association_and_target_level_replay": "PASS",
+      "outside_alert_control": "PASS",
+      "false_date_control": "PASS",
+      "publication_time_fallback": "PASS",
+      "adjacent_alert_guard": "PASS"
+    }
+  },
+  "mutation_guards": {
+    "base_to_tested_head_changed_paths": [
+      ".github/workflows/historical-live-update-timestamp-repair-proof.yml",
+      "kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py",
+      "kyiv-air-alerts-grafana/tests/test_historical_live_update_timestamp_repair.py"
+    ],
+    "frozen_campaign_batch_count": 139,
+    "frozen_campaign_subtree_sha_base": "d83c2fdc52b7296dc9f9910f3a70726dc1690e3b",
+    "frozen_campaign_subtree_sha_tested_head": "d83c2fdc52b7296dc9f9910f3a70726dc1690e3b",
+    "campaign_batch_diff_count": 0,
+    "accepted_batch_artifacts_modified": false,
+    "source_registry_modified": false,
+    "canonical_alert_corpus_modified": false,
+    "db_or_neon_touched": false,
+    "deployment_performed": false,
+    "cases_17_18_touched": false
+  },
+  "execution_scope": {
+    "fresh_network_retrieval": false,
+    "committed_frozen_inputs_used": true,
+    "full_campaign_rerun": false,
+    "historical_incorporation": false
+  }
+}
