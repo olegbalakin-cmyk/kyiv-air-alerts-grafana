@@ -190,9 +190,9 @@ jobs:
       - name: Add Sevastopol exact-city series
         run: python scripts/add_sevastopol_exact.py
 
-      - name: Run multicity canonical DB shadow (disabled transition)
+      - name: Run multicity canonical DB shadow
         env:
-          MULTICITY_CANONICAL_DB_SHADOW: "0"
+          MULTICITY_CANONICAL_DB_SHADOW: "1"
           MULTICITY_CANONICAL_DATABASE_URL: ${{ secrets.PHASE1_PROD_SHADOW_DATABASE_URL }}
           MULTICITY_CANONICAL_DB_BRANCH: ${{ vars.PHASE1_PROD_SHADOW_BRANCH_ID }}
           MULTICITY_CANONICAL_DB_SHADOW_FAILURE_POLICY: fail_open
