@@ -1,0 +1,294 @@
+{
+  "proof_kind": "multicity_current_boundary_drift_reconciliation",
+  "verdict": "CURRENT_PRODUCTION_CANONICAL_DRIFT_RECONCILIATION_PROVEN",
+  "reconciliation_branch": "multicity-current-boundary-drift-reconciliation-2026-10-01",
+  "predecessor_head": "24cd9548a98af10591cbda5e281d9e4b800ef137",
+  "accepted_enablement_artifact": "research/multicity_scheduled_production_shadow_enablement_proof_2026-10-01.json",
+  "scope": {
+    "cities": [
+      "cherkasy",
+      "poltava"
+    ],
+    "dates": [
+      "2026-09-30"
+    ],
+    "neon_mutation": false,
+    "production_mutation": false,
+    "permanent_bootstrap_attempted": false,
+    "scheduled_multicity_shadow_enabled": false,
+    "legacy_phase1_shadow_reenabled": false,
+    "db_cutover": false
+  },
+  "frozen_assembly": {
+    "site_prod_ref": "928a566b7a8dc7916c93810eaafe319da3b28ee4",
+    "vadimkin_ref": "58ee75bc20113181b9ddf8029d4cbf3a62d8cd10",
+    "vadimkin_official_data_uk_blob": "71d70c0ca54968f530d596cf315616fa858800e1",
+    "alerts_in_ua_static_blob": "1ece234379381b4d7c0d10f851a86aa61aa958f6",
+    "alerts_in_ua_static_meta_blob": "f3ddda2e9e2adbf2269948bf51cacc0809c67db6",
+    "alerts_in_ua_static_coverage_end_exclusive": "2026-09-17T00:00:00+03:00",
+    "ukrainealarm_bridge_blob": "7c58215b3c9248adc3defabafce85a07e0fcc236",
+    "corpus_sha256": "8e9f3660039de4e0490db25229fe1760f5926b6b73490c8a325b9abc7555971b",
+    "episode_count": 27866
+  },
+  "current_assembly": {
+    "site_prod_ref": "2866cfe4c3a9ae40f23134986b6222c016c5a99b",
+    "vadimkin_ref": "f69787d35e30243be5ea9090108e769cc971ff55",
+    "vadimkin_official_data_uk_blob": "71d70c0ca54968f530d596cf315616fa858800e1",
+    "alerts_in_ua_static_blob": "1ece234379381b4d7c0d10f851a86aa61aa958f6",
+    "alerts_in_ua_static_meta_blob": "f3ddda2e9e2adbf2269948bf51cacc0809c67db6",
+    "alerts_in_ua_static_coverage_end_exclusive": "2026-09-17T00:00:00+03:00",
+    "ukrainealarm_bridge_blob": "d5a05d9899f77ab742275854065d6c85bf96b16a",
+    "corpus_sha256": "980e4c00d968664872ea5ebd6f72581c7997bcfb1a38aed504a020d0b444b8ce",
+    "episode_count": 27948,
+    "city_count": 23,
+    "open_episode_count": 0,
+    "boundary_error_count": 0
+  },
+  "source_family_diff": {
+    "production_assembly_code_changed_for_target_proxy_path": false,
+    "vadimkin_changed": false,
+    "vadimkin_note": "Frozen and current pinned refs resolve datasets/official_data_uk.csv to the identical Git blob 71d70c0ca54968f530d596cf315616fa858800e1. The frozen source commit is from 2026-09-08; no target-window change can originate from the pinned Vadimkin input.",
+    "alerts_in_ua_static_changed": false,
+    "alerts_in_ua_static_note": "The static payload and metadata blobs are identical at both production refs and coverage ends before 2026-09-30.",
+    "ukrainealarm_history_changed": true,
+    "causal_checkpoint_commit": {
+      "sha": "c95a3bb7037614361379b6a3a70ec96ad182306f",
+      "parent_sha": "928a566b7a8dc7916c93810eaafe319da3b28ee4",
+      "message": "Persist verified UkraineAlarm bridge checkpoint",
+      "author": "github-actions[bot]",
+      "committed_at": "2026-09-30T20:55:30Z",
+      "note": "Both superseding source intervals were first added together in this verified checkpoint commit directly on top of the frozen production ref."
+    },
+    "union_semantics": "Production union_alerts sorts by start and merges every overlapping or touching interval; a containing later observation therefore supersedes the nested shorter interval at the canonical parent boundary."
+  },
+  "cases": {
+    "cherkasy": {
+      "city_key": "cherkasy",
+      "proxy_target": "Черкаський район",
+      "ukrainealarm_region_id": "152",
+      "frozen_episode": {
+        "start_at": "2026-09-30T07:41:55.394018Z",
+        "end_at": "2026-09-30T08:45:08.294769Z",
+        "legacy_episode_id": "bf257aa6eec95163da3d6e83"
+      },
+      "current_replacement": {
+        "start_at": "2026-09-30T02:02:42.067496Z",
+        "end_at": "2026-09-30T18:03:04.653473Z",
+        "legacy_episode_id": "afcef7b230c5de2744537b72"
+      },
+      "frozen_source_intervals_overlapping_or_touching": [
+        {
+          "source": "ukrainealarm_official_api_bridge",
+          "region_id": "152",
+          "api_region_name": "Черкаський район",
+          "start_at": "2026-09-30T07:41:55.394018Z",
+          "end_at": "2026-09-30T08:45:08.294769Z",
+          "contributes_start_boundary": true,
+          "contributes_end_boundary": true
+        }
+      ],
+      "current_source_intervals_overlapping_or_touching": [
+        {
+          "source": "ukrainealarm_official_api_bridge",
+          "region_id": "152",
+          "api_region_name": "Черкаський район",
+          "start_at": "2026-09-30T02:02:42.067496Z",
+          "end_at": "2026-09-30T18:03:04.653473Z",
+          "introduced_in_checkpoint_commit": "c95a3bb7037614361379b6a3a70ec96ad182306f",
+          "contributes_start_boundary": true,
+          "contributes_end_boundary": true
+        },
+        {
+          "source": "ukrainealarm_official_api_bridge",
+          "region_id": "152",
+          "api_region_name": "Черкаський район",
+          "start_at": "2026-09-30T07:41:55.394018Z",
+          "end_at": "2026-09-30T08:45:08.294769Z",
+          "retained_from_frozen": true,
+          "nested_inside_current_replacement": true,
+          "contributes_start_boundary": false,
+          "contributes_end_boundary": false
+        }
+      ],
+      "excluded_source_families": [
+        {
+          "source": "vadimkin_proxy",
+          "reason": "Pinned official_data_uk.csv blob is identical frozen/current and predates the target window; no source change for 2026-09-30."
+        },
+        {
+          "source": "alerts_in_ua_static",
+          "reason": "Static coverage ends 2026-09-17T00:00:00+03:00; no target-window interval."
+        }
+      ],
+      "frozen_region_poll": {
+        "history_completed_air_count": 19,
+        "latest_history_end": "2026-09-30T08:45:08.294769Z",
+        "last_checked_at": "2026-09-30T16:37:04.292400Z",
+        "continuous": true,
+        "poll_overlap_verified": true
+      },
+      "first_superseding_region_poll": {
+        "history_completed_air_count": 20,
+        "latest_history_end": "2026-09-30T19:52:28.914046Z",
+        "last_checked_at": "2026-09-30T20:34:12.677485Z",
+        "continuous": true,
+        "poll_overlap_verified": true
+      },
+      "neighboring_non_touching_source_intervals": {
+        "before": {
+          "start_at": "2026-09-29T23:47:27.188679Z",
+          "end_at": "2026-09-30T01:31:45.666850Z"
+        },
+        "after": {
+          "start_at": "2026-09-30T18:48:07.634872Z",
+          "end_at": "2026-09-30T19:52:28.914046Z"
+        }
+      },
+      "exact_causal_difference": "A later verified UkraineAlarm regionHistory poll added one completed AIR observation 2026-09-30T02:02:42.067496Z -> 2026-09-30T18:03:04.653473Z. It strictly contains the previously persisted API observation. Unchanged overlap-union semantics expands the canonical parent to the containing interval.",
+      "source_correction_or_addition": "late additional UkraineAlarm history observation; the old short observation was not deleted or rewritten",
+      "other_frozen_episodes_absorbed": [],
+      "affected_frozen_episode_ids": [
+        "bf257aa6eec95163da3d6e83"
+      ],
+      "reconciliation_direction": "CURRENT_PRODUCTION_BOUNDARY_SUPERSEDES_FROZEN",
+      "current_boundary_legitimate": true,
+      "current_production_wrong": false,
+      "required_migration_semantics": {
+        "classification": "stale historical boundary",
+        "permanent_neon_action_in_this_task": "none",
+        "resume_bootstrap_action": "Insert only the current canonical replacement when the guarded multicity bootstrap is resumed, because permanent Neon currently has no non-Lviv parents.",
+        "identity_rule_if_old_parent_exists_elsewhere": "If a database already contains the frozen parent, update that same episode_uid in place to the current start/end and legacy_episode_id after exact precondition checks; do not insert a second overlapping parent."
+      }
+    },
+    "poltava": {
+      "city_key": "poltava",
+      "proxy_target": "Полтавський район",
+      "ukrainealarm_region_id": "109",
+      "frozen_episode": {
+        "start_at": "2026-09-30T13:45:54.742331Z",
+        "end_at": "2026-09-30T15:30:23.570835Z",
+        "legacy_episode_id": "edcd6d1baa0ae94f6c61260c"
+      },
+      "current_replacement": {
+        "start_at": "2026-09-30T11:33:40.554164Z",
+        "end_at": "2026-09-30T19:23:26.328094Z",
+        "legacy_episode_id": "391a673766d8d512d54fcf52"
+      },
+      "frozen_source_intervals_overlapping_or_touching": [
+        {
+          "source": "ukrainealarm_official_api_bridge",
+          "region_id": "109",
+          "api_region_name": "Полтавський район",
+          "start_at": "2026-09-30T13:45:54.742331Z",
+          "end_at": "2026-09-30T15:30:23.570835Z",
+          "contributes_start_boundary": true,
+          "contributes_end_boundary": true
+        }
+      ],
+      "current_source_intervals_overlapping_or_touching": [
+        {
+          "source": "ukrainealarm_official_api_bridge",
+          "region_id": "109",
+          "api_region_name": "Полтавський район",
+          "start_at": "2026-09-30T11:33:40.554164Z",
+          "end_at": "2026-09-30T19:23:26.328094Z",
+          "introduced_in_checkpoint_commit": "c95a3bb7037614361379b6a3a70ec96ad182306f",
+          "contributes_start_boundary": true,
+          "contributes_end_boundary": true
+        },
+        {
+          "source": "ukrainealarm_official_api_bridge",
+          "region_id": "109",
+          "api_region_name": "Полтавський район",
+          "start_at": "2026-09-30T13:45:54.742331Z",
+          "end_at": "2026-09-30T15:30:23.570835Z",
+          "retained_from_frozen": true,
+          "nested_inside_current_replacement": true,
+          "contributes_start_boundary": false,
+          "contributes_end_boundary": false
+        }
+      ],
+      "excluded_source_families": [
+        {
+          "source": "vadimkin_proxy",
+          "reason": "Pinned official_data_uk.csv blob is identical frozen/current and predates the target window; no source change for 2026-09-30."
+        },
+        {
+          "source": "alerts_in_ua_static",
+          "reason": "Static coverage ends 2026-09-17T00:00:00+03:00; no target-window interval."
+        }
+      ],
+      "frozen_region_poll": {
+        "history_completed_air_count": 19,
+        "latest_history_end": "2026-09-30T15:30:23.570835Z",
+        "last_checked_at": "2026-09-30T16:41:44.875629Z",
+        "continuous": true,
+        "poll_overlap_verified": true
+      },
+      "first_superseding_region_poll": {
+        "history_completed_air_count": 20,
+        "latest_history_end": "2026-09-30T19:23:26.328094Z",
+        "last_checked_at": "2026-09-30T20:38:53.283300Z",
+        "continuous": true,
+        "poll_overlap_verified": true
+      },
+      "neighboring_non_touching_source_intervals": {
+        "before": {
+          "start_at": "2026-09-30T03:51:40.090878Z",
+          "end_at": "2026-09-30T10:47:22.243921Z"
+        },
+        "nested_earlier_observation": {
+          "start_at": "2026-09-30T07:42:53.168426Z",
+          "end_at": "2026-09-30T08:44:24.942331Z"
+        },
+        "after_at_current_base": {
+          "start_at": "2026-09-30T23:57:39.246735Z",
+          "end_at": "2026-10-01T00:15:48.153427Z"
+        }
+      },
+      "exact_causal_difference": "A later verified UkraineAlarm regionHistory poll added one completed AIR observation 2026-09-30T11:33:40.554164Z -> 2026-09-30T19:23:26.328094Z. It strictly contains the previously persisted API observation. Unchanged overlap-union semantics expands the canonical parent to the containing interval.",
+      "source_correction_or_addition": "late additional UkraineAlarm history observation; the old short observation was not deleted or rewritten",
+      "other_frozen_episodes_absorbed": [],
+      "affected_frozen_episode_ids": [
+        "edcd6d1baa0ae94f6c61260c"
+      ],
+      "reconciliation_direction": "CURRENT_PRODUCTION_BOUNDARY_SUPERSEDES_FROZEN",
+      "current_boundary_legitimate": true,
+      "current_production_wrong": false,
+      "required_migration_semantics": {
+        "classification": "stale historical boundary",
+        "permanent_neon_action_in_this_task": "none",
+        "resume_bootstrap_action": "Insert only the current canonical replacement when the guarded multicity bootstrap is resumed, because permanent Neon currently has no non-Lviv parents.",
+        "identity_rule_if_old_parent_exists_elsewhere": "If a database already contains the frozen parent, update that same episode_uid in place to the current start/end and legacy_episode_id after exact precondition checks; do not insert a second overlapping parent."
+      }
+    }
+  },
+  "historical_semantics": {
+    "frozen_exact_retained": 27864,
+    "frozen_total": 27866,
+    "missing_frozen_total": 2,
+    "current_boundary_errors": 0,
+    "conclusion": "The only two non-retained frozen episodes are exactly the Cherkasy and Poltava rows reconciled here. Because the current corpus has zero boundary errors, no other retained frozen parent can overlap either current replacement. Therefore each replacement absorbs exactly one frozen canonical episode and does not merge multiple frozen canonical parents."
+  },
+  "permanent_neon_read_only_check": {
+    "branch_id": "br-bold-mode-b5rub8pq",
+    "ingestion_runs": 19,
+    "alert_episodes": 126,
+    "alert_episode_sources": 143,
+    "ingestion_checkpoints": 18,
+    "max_checkpoint_seq": 18,
+    "alerts_in_ua_sources": 3,
+    "non_lviv_episodes": 0,
+    "lviv_parent_fingerprint": "f2d4823d986afb4908b49e98125d6263",
+    "lviv_source_fingerprint": "9f6c011d2dcdc962335f54a4cd595f99",
+    "checkpoint_fingerprint": "2e7548caf59ce199c1c7bd1877780676",
+    "mutation": false
+  },
+  "conclusion": {
+    "both_current_larger_boundaries_proven_legitimate_supersessions": true,
+    "ready_to_resume_multicity_scheduled_production_shadow_enablement": true,
+    "bootstrap_performed": false,
+    "scheduled_enablement_performed": false,
+    "db_cutover": false
+  }
+}
