@@ -1,0 +1,141 @@
+name: Current production canonical drift gate
+
+on:
+  push:
+    branches:
+      - multicity-scheduled-production-shadow-enablement-proof-2026-10-01
+    paths:
+      - ".github/workflows/current-production-canonical-drift-gate.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  gate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out proof runtime
+        uses: actions/checkout@v4
+        with:
+          path: proof
+      - name: Check out enablement-base site-prod
+        uses: actions/checkout@v4
+        with:
+          ref: 2866cfe4c3a9ae40f23134986b6222c016c5a99b
+          path: current
+      - name: Check out accepted frozen production
+        uses: actions/checkout@v4
+        with:
+          ref: 928a566b7a8dc7916c93810eaafe319da3b28ee4
+          path: frozen
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install runtime dependencies
+        run: pip install -r current/kyiv-air-alerts-grafana/requirements-db-phase1.txt
+      - name: Pin Vadimkin inputs
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fsSL "https://raw.githubusercontent.com/Vadimkin/ukrainian-air-raid-sirens-dataset/f69787d35e30243be5ea9090108e769cc971ff55/datasets/official_data_uk.csv" -o "${RUNNER_TEMP}/vadimkin-current.csv"
+          curl -fsSL "https://raw.githubusercontent.com/Vadimkin/ukrainian-air-raid-sirens-dataset/58ee75bc20113181b9ddf8029d4cbf3a62d8cd10/datasets/official_data_uk.csv" -o "${RUNNER_TEMP}/vadimkin-frozen.csv"
+          sha256sum "${RUNNER_TEMP}/vadimkin-current.csv" "${RUNNER_TEMP}/vadimkin-frozen.csv"
+      - name: Reconstruct current and frozen canonical boundaries
+        shell: bash
+        run: |
+          set -euo pipefail
+          cp proof/kyiv-air-alerts-grafana/scripts/export_multicity_canonical.py current/kyiv-air-alerts-grafana/scripts/
+          cp proof/kyiv-air-alerts-grafana/scripts/export_multicity_canonical.py frozen/kyiv-air-alerts-grafana/scripts/
+          (
+            cd current/kyiv-air-alerts-grafana
+            python scripts/export_multicity_canonical.py               --vadimkin-csv "${RUNNER_TEMP}/vadimkin-current.csv"               --site-prod-sha "2866cfe4c3a9ae40f23134986b6222c016c5a99b"               --vadimkin-sha "f69787d35e30243be5ea9090108e769cc971ff55"               --output "${RUNNER_TEMP}/current_boundary.json"
+          )
+          (
+            cd frozen/kyiv-air-alerts-grafana
+            python scripts/export_multicity_canonical.py               --vadimkin-csv "${RUNNER_TEMP}/vadimkin-frozen.csv"               --site-prod-sha "928a566b7a8dc7916c93810eaafe319da3b28ee4"               --vadimkin-sha "58ee75bc20113181b9ddf8029d4cbf3a62d8cd10"               --output "${RUNNER_TEMP}/frozen_boundary.json"
+          )
+      - name: Prove frozen subset retention and current corpus validity
+        shell: bash
+        run: |
+          python - <<'PY'
+          import hashlib, json, os
+          from pathlib import Path
+
+          rt = Path(os.environ["RUNNER_TEMP"])
+          cur = json.loads((rt/"current_boundary.json").read_text())
+          old = json.loads((rt/"frozen_boundary.json").read_text())
+          accepted_sha = "8e9f3660039de4e0490db25229fe1760f5926b6b73490c8a325b9abc7555971b"
+          assert old["corpus_sha256"] == accepted_sha, old["corpus_sha256"]
+          assert old["total_episode_count"] == 27866
+          assert old["city_count"] == 23 and old["open_episode_count"] == 0
+          assert old["boundary_proven"] is True and not old["boundary_errors"]
+          assert cur["city_count"] == 23 and cur["open_episode_count"] == 0
+          assert cur["boundary_proven"] is True and not cur["boundary_errors"]
+
+          def fullkey(x):
+              return (x["city_key"], x["alert_type"], x["start_at"], x["end_at"], x["episode_state"], x["legacy_episode_id"])
+          old_rows = old["episodes"]
+          cur_rows = cur["episodes"]
+          cur_full = {fullkey(x) for x in cur_rows}
+          frozen_missing = [x for x in old_rows if fullkey(x) not in cur_full]
+
+          old_by_legacy = {x["legacy_episode_id"]: x for x in old_rows}
+          cur_by_legacy = {x["legacy_episode_id"]: x for x in cur_rows}
+          boundary_changed = 0
+          city_changed = 0
+          legacy_id_changed = 0
+          for legacy, x in old_by_legacy.items():
+              y = cur_by_legacy.get(legacy)
+              if y is None:
+                  continue
+              if (x["start_at"],x["end_at"]) != (y["start_at"],y["end_at"]):
+                  boundary_changed += 1
+              if x["city_key"] != y["city_key"]:
+                  city_changed += 1
+          old_interval = {(x["city_key"],x["start_at"],x["end_at"]):x["legacy_episode_id"] for x in old_rows}
+          cur_interval = {(x["city_key"],x["start_at"],x["end_at"]):x["legacy_episode_id"] for x in cur_rows}
+          for k,v in old_interval.items():
+              if k in cur_interval and cur_interval[k] != v:
+                  legacy_id_changed += 1
+
+          cur_legacy = [x["legacy_episode_id"] for x in cur_rows]
+          cur_intervals = [(x["city_key"],x["alert_type"],x["start_at"],x["end_at"]) for x in cur_rows]
+          duplicate_legacy = len(cur_legacy)-len(set(cur_legacy))
+          duplicate_interval = len(cur_intervals)-len(set(cur_intervals))
+          assert not frozen_missing, len(frozen_missing)
+          assert boundary_changed == 0
+          assert city_changed == 0
+          assert legacy_id_changed == 0
+          assert duplicate_legacy == 0
+          assert duplicate_interval == 0
+
+          result = {
+              "enablement_base_site_prod_sha":"2866cfe4c3a9ae40f23134986b6222c016c5a99b",
+              "current_vadimkin_ref":"f69787d35e30243be5ea9090108e769cc971ff55",
+              "accepted_frozen_site_prod_sha":"928a566b7a8dc7916c93810eaafe319da3b28ee4",
+              "accepted_frozen_corpus_sha256":accepted_sha,
+              "accepted_frozen_episode_count":27866,
+              "frozen_exact_retained":27866,
+              "frozen_missing_from_current":0,
+              "frozen_boundary_changed":0,
+              "frozen_legacy_id_changed":0,
+              "frozen_city_changed":0,
+              "current_city_count":cur["city_count"],
+              "current_episode_count":cur["total_episode_count"],
+              "current_open_episode_count":cur["open_episode_count"],
+              "current_corpus_sha256":cur["corpus_sha256"],
+              "current_boundary_error_count":len(cur["boundary_errors"]),
+              "current_duplicate_legacy_ids":duplicate_legacy,
+              "current_duplicate_exact_intervals":duplicate_interval,
+              "current_daily_parity":all(v["daily28_parity"] for v in cur["per_city"].values()),
+              "per_city_counts":{k:v["episode_count"] for k,v in cur["per_city"].items()},
+          }
+          (rt/"current_drift_gate.json").write_text(json.dumps(result,indent=2,sort_keys=True)+"\n")
+          print(json.dumps(result,indent=2,sort_keys=True))
+          PY
+      - name: Upload drift gate
+        uses: actions/upload-artifact@v4
+        with:
+          name: current-production-canonical-drift-gate-${{ github.run_id }}
+          path: ${{ runner.temp }}/current_drift_gate.json
+          retention-days: 30
