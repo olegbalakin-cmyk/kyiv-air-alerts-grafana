@@ -1,0 +1,209 @@
+{
+  "proof_kind": "lviv_canonical_boundary_reconciliation_proof",
+  "status": "proven",
+  "verdict": "LVIV CANONICAL-BOUNDARY RECONCILIATION PROVEN",
+  "proof_branch": "lviv-canonical-boundary-reconciliation-proof-2026-10-01",
+  "accepted_predecessor_head": "8b6dff2bcf813b13f09bf5efd6078f393e76c494",
+  "frozen_production_ref": "928a566b7a8dc7916c93810eaafe319da3b28ee4",
+  "root_cause": {
+    "accepted": "different_source_assembly",
+    "phase1_sources": [
+      "vadimkin_official_data_uk",
+      "ukrainealarm_region_history"
+    ],
+    "frozen_production_sources": [
+      "vadimkin_or_proxy_historical",
+      "alerts_in_ua_static_bridge",
+      "ukrainealarm_region_history"
+    ],
+    "reconciliation_direction_all_three": "PRODUCTION_BOUNDARY_SUPERSEDES_PHASE1"
+  },
+  "mechanical_static_decode": {
+    "path": "kyiv-air-alerts-grafana/data/alerts_in_ua_bridge_2026-09-07_16.csv.gz.b64",
+    "git_blob_sha": "1ece234379381b4d7c0d10f851a86aa61aa958f6",
+    "decoded_csv_sha256": "ba48bf85bd62e7f127dd1703bfcb9d38b4b960690adf1243175ce59366ec4d5a",
+    "lviv_rows_sha256": "2c9f256c75ac79c523ce826b3d48703bce2e83f0749b98092a1d8dc83c3f7e90",
+    "lviv_completed_event_count": 3,
+    "rows": [
+      {
+        "utc_date": "2026-09-12",
+        "raw_start": "2026-09-13T01:00:06+03:00",
+        "raw_end": "2026-09-13T01:14:27+03:00",
+        "utc_start": "2026-09-12T22:00:06Z",
+        "utc_end": "2026-09-12T22:14:27Z"
+      },
+      {
+        "utc_date": "2026-09-13",
+        "raw_start": "2026-09-13T05:32:14+03:00",
+        "raw_end": "2026-09-13T09:11:11+03:00",
+        "utc_start": "2026-09-13T02:32:14Z",
+        "utc_end": "2026-09-13T06:11:11Z"
+      },
+      {
+        "utc_date": "2026-09-15",
+        "raw_start": "2026-09-15T19:44:13+03:00",
+        "raw_end": "2026-09-15T20:09:02+03:00",
+        "utc_start": "2026-09-15T16:44:13Z",
+        "utc_end": "2026-09-15T17:09:02Z"
+      }
+    ]
+  },
+  "production_union_verification": {
+    "implementation_path": "kyiv-air-alerts-grafana/scripts/apply_ukrainealarm_bridge.py",
+    "implementation_blob_sha": "ec86111454740ee56a3de7bd93cf2ec2597c910d",
+    "function": "union_alerts",
+    "semantics": "Sort by start. Start a new merged interval only when alert.start > current_end; otherwise keep the earliest start and extend current_end only when alert.end > current_end.",
+    "all_three_reconstructed": true,
+    "episodes": [
+      {
+        "utc_date": "2026-09-12",
+        "episode_uid": "575f370c-6e99-4623-8219-f8fbdfd6c978",
+        "phase1_legacy_episode_id": "b3df9090f7264ddbd726e113",
+        "production_legacy_episode_id": "7dd411c2a2587efc740a1a66",
+        "phase1_interval": {
+          "start": "2026-09-12T22:00:05.398348Z",
+          "end": "2026-09-12T22:14:23.315771Z",
+          "sole_source_row": "ukrainealarm_region_history"
+        },
+        "static_interval": {
+          "start": "2026-09-12T22:00:06Z",
+          "end": "2026-09-12T22:14:27Z"
+        },
+        "production_interval": {
+          "start": "2026-09-12T22:00:05.398348Z",
+          "end": "2026-09-12T22:14:27Z"
+        },
+        "start_boundary_contributor": "ukrainealarm_region_history",
+        "end_boundary_contributor": "alerts_in_ua_static_bridge",
+        "reconstructed": true,
+        "reconciliation_direction": "PRODUCTION_BOUNDARY_SUPERSEDES_PHASE1"
+      },
+      {
+        "utc_date": "2026-09-13",
+        "episode_uid": "c90e7b05-1982-461f-945f-53d8130c627b",
+        "phase1_legacy_episode_id": "202d8d1527183a6282ccf1e2",
+        "production_legacy_episode_id": "c2cd9a96768756d84c250735",
+        "phase1_interval": {
+          "start": "2026-09-13T02:32:14.172141Z",
+          "end": "2026-09-13T06:11:11.976953Z",
+          "sole_source_row": "ukrainealarm_region_history"
+        },
+        "static_interval": {
+          "start": "2026-09-13T02:32:14Z",
+          "end": "2026-09-13T06:11:11Z"
+        },
+        "production_interval": {
+          "start": "2026-09-13T02:32:14Z",
+          "end": "2026-09-13T06:11:11.976953Z"
+        },
+        "start_boundary_contributor": "alerts_in_ua_static_bridge",
+        "end_boundary_contributor": "ukrainealarm_region_history",
+        "reconstructed": true,
+        "reconciliation_direction": "PRODUCTION_BOUNDARY_SUPERSEDES_PHASE1"
+      },
+      {
+        "utc_date": "2026-09-15",
+        "episode_uid": "451c8a2c-248a-41e5-b49e-31af3f44631f",
+        "phase1_legacy_episode_id": "b24ba103214a22f4d5e65ce4",
+        "production_legacy_episode_id": "94ce779cf047984e881bfdd5",
+        "phase1_interval": {
+          "start": "2026-09-15T16:44:13.025549Z",
+          "end": "2026-09-15T17:08:51.287249Z",
+          "sole_source_row": "ukrainealarm_region_history"
+        },
+        "static_interval": {
+          "start": "2026-09-15T16:44:13Z",
+          "end": "2026-09-15T17:09:02Z"
+        },
+        "production_interval": {
+          "start": "2026-09-15T16:44:13Z",
+          "end": "2026-09-15T17:09:02Z"
+        },
+        "start_boundary_contributor": "alerts_in_ua_static_bridge",
+        "end_boundary_contributor": "alerts_in_ua_static_bridge",
+        "reconstructed": true,
+        "reconciliation_direction": "PRODUCTION_BOUNDARY_SUPERSEDES_PHASE1"
+      }
+    ]
+  },
+  "neon_read_only_verification": {
+    "project_id": "green-cake-44216048",
+    "branch_id": "br-icy-forest-b5mfyezq",
+    "fk_catalog": [
+      {
+        "constraint": "alert_episode_sources_episode_uid_fkey",
+        "referencing_table": "alert_episode_sources",
+        "referencing_column": "episode_uid",
+        "referenced_table": "alert_episodes",
+        "referenced_column": "episode_uid"
+      },
+      {
+        "constraint": "alert_state_snapshots_episode_uid_fkey",
+        "referencing_table": "alert_state_snapshots",
+        "referencing_column": "episode_uid",
+        "referenced_table": "alert_episodes",
+        "referenced_column": "episode_uid"
+      }
+    ],
+    "additional_fk_bearing_tables": [],
+    "affected_episode_dependencies": [
+      {
+        "episode_uid": "575f370c-6e99-4623-8219-f8fbdfd6c978",
+        "alert_episode_sources": 1,
+        "alert_state_snapshots": 0
+      },
+      {
+        "episode_uid": "c90e7b05-1982-461f-945f-53d8130c627b",
+        "alert_episode_sources": 1,
+        "alert_state_snapshots": 0
+      },
+      {
+        "episode_uid": "451c8a2c-248a-41e5-b49e-31af3f44631f",
+        "alert_episode_sources": 1,
+        "alert_state_snapshots": 0
+      }
+    ],
+    "fingerprint_method": "md5(coalesce(string_agg(to_jsonb(row)::text, E'\\n' ORDER BY to_jsonb(row)::text), ''))",
+    "pre_state": {
+      "ingestion_runs": 1,
+      "alert_episodes": 126,
+      "alert_episode_sources": 140,
+      "ingestion_checkpoints": 1,
+      "max_checkpoint_seq": 1,
+      "alert_state_snapshots": 13,
+      "alert_threat_observations": 14,
+      "alert_state_snapshots_md5": "f1b361222d3b9428bd74519f873a9ce3",
+      "alert_threat_observations_md5": "7ca8f9930c8b645c733b35797aad96f6"
+    },
+    "post_state": {
+      "ingestion_runs": 1,
+      "alert_episodes": 126,
+      "alert_episode_sources": 140,
+      "ingestion_checkpoints": 1,
+      "max_checkpoint_seq": 1,
+      "alert_state_snapshots": 13,
+      "alert_threat_observations": 14,
+      "alert_state_snapshots_md5": "f1b361222d3b9428bd74519f873a9ce3",
+      "alert_threat_observations_md5": "7ca8f9930c8b645c733b35797aad96f6"
+    },
+    "counts_equal_pre_post": true,
+    "differentiated_child_fingerprints_equal_pre_post": true,
+    "neon_mutation": false
+  },
+  "safety": {
+    "credentials_exposed": false,
+    "neon_mutation": false,
+    "main_touched": false,
+    "site_prod_touched": false,
+    "multicity_wip_touched": false,
+    "repair_performed": false,
+    "multicity_persistence_resumed": false,
+    "deploy": false,
+    "db_cutover": false
+  },
+  "next_gate": "READY FOR LVIV CANONICAL-BOUNDARY REPAIR PROOF",
+  "multicity_persistence_gate": "DO NOT RESUME MULTICITY PERSISTENCE YET",
+  "db_cutover": "NO",
+  "final_head": null,
+  "final_head_note": "A Git commit cannot contain its own commit SHA without changing that SHA. The exact final branch HEAD is reported in the execution result after this artifact is committed."
+}
