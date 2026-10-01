@@ -15,6 +15,7 @@ from urllib.parse import urlsplit
 
 import requests
 
+import multicity_shadow_payload
 import add_duration_unit_switch as exactmod
 import expand_multicity_production as base
 import extend_remaining_proxies as extended
@@ -903,6 +904,7 @@ def main() -> None:
                 "ukrainealarm_api_region_id": region_status.get("region_id"),
             }
         )
+        multicity_shadow_payload.record_city_alerts(key, combined, producer="apply_ukrainealarm_bridge")
         out = build_outputs(combined, now_local, meta)
         exactmod.enrich_weekly(out, combined)
         first_day = datetime.fromisoformat(cfg["valid_from"]).astimezone(TZ).date()
@@ -940,6 +942,7 @@ def main() -> None:
                 "ukrainealarm_api_region_id": region_status.get("region_id"),
             }
         )
+        multicity_shadow_payload.record_city_alerts(key, combined, producer="apply_ukrainealarm_bridge")
         out = build_outputs(combined, now_local, meta)
         base.enrich_weekly(out, combined)
         base.trim_to_complete_coverage(out, date.fromisoformat(cfg["coverage_start"]))
