@@ -10,6 +10,7 @@ CHECKOUT_ROOT = ROOT.parent
 sys.path.insert(0, str(ROOT / "scripts"))
 
 import monitor_explosion_candidates as monitor
+import run_historical_attack_event_backfill_batch as batch_runner
 
 
 UTC = timezone.utc
@@ -115,6 +116,35 @@ def test_exact_case7_episode_association():
     assert decision["proposed_matched_episode_id"] == CASE7_EPISODE_ID
     assert decision["proposed_outcome"] == "approved_strict"
 
+    # Replay the frozen observation through the committed batch normalization and
+    # target-level aggregation logic, without any network retrieval or writes.
+    replayed_observation = batch_runner.classify_row(
+        "sumy",
+        row,
+        episodes,
+        source_family=observation["source_family"],
+        source_type=observation["source_type"],
+        source_timestamp=observation["source_timestamp"],
+        excerpt=observation["excerpt"],
+        source_url=observation["source_url"],
+        retrieval_provenance=observation["retrieval_provenance"],
+    )
+    assert replayed_observation["observation_id"] == CASE7_OBSERVATION_ID
+    assert replayed_observation["content_hash"] == observation["content_hash"]
+    assert replayed_observation["classification_outcome"] == "approved_strict"
+    assert replayed_observation["classification_episode_id"] == CASE7_EPISODE_ID
+    assert replayed_observation["event_timestamp_if_stated"] == "2026-04-26T19:48:00Z"
+
+    replayed_episode = next(
+        result for result in batch_runner.episode_results(
+            "sumy", episodes, [replayed_observation], True
+        )
+        if result["episode_id"] == CASE7_EPISODE_ID
+    )
+    assert replayed_episode["classifier_result"] == "STRICT_EVENT_POSITIVE"
+    assert replayed_episode["event_positive_strict"] is True
+    assert replayed_episode["confirmed_event_types"] == ["impact"]
+
 
 def test_outside_alert_control():
     observation, _, episodes = load_case7()
@@ -193,6 +223,8 @@ if __name__ == "__main__":
                 "matched_episode_id": decision["proposed_matched_episode_id"],
                 "temporal_code": decision["temporal_binding"]["code"],
                 "publication_matching_outcome": decision["matching"]["outcome"],
+                "target_after": "STRICT_EVENT_POSITIVE",
+                "observation_id_preserved": CASE7_OBSERVATION_ID,
                 "tests_passed": len(tests),
             },
             ensure_ascii=False,
