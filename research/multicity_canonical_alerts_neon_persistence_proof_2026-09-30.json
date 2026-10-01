@@ -1,0 +1,200 @@
+{
+  "proof_kind": "multicity_canonical_alerts_neon_persistence_proof",
+  "status": "blocked_before_neon_writes",
+  "verdict": "MULTICITY CANONICAL ALERTS NEON PERSISTENCE NOT PROVEN",
+  "blocker": "LVIV COMPATIBILITY GATE FAILED",
+  "git_proof_branch": "multicity-canonical-alerts-neon-persistence-proof-2026-09-30",
+  "accepted_predecessor_head": "d86ae05a7f306c86896d363c9916742a9dee9f00",
+  "production_frozen_site_prod_sha": "928a566b7a8dc7916c93810eaafe319da3b28ee4",
+  "production_frozen_site_prod_semantic_drift_after_freeze": false,
+  "production_fresh_observed_site_prod_sha_at_finalization": "783ad5d4d6e71af457cde0ee58dd591a9f4a0cc1",
+  "main_fresh_observed_sha_at_finalization": "2bab08b33015d136df5c46277135b283ef454458",
+  "multicity_wip_fresh_observed_sha_at_finalization": "2c12252d6cdcc4701017f6a704c61b133ea2851e",
+  "canonical_boundary": {
+    "proven": true,
+    "proof_run_id": 36816630480,
+    "proof_run_conclusion": "success",
+    "artifact_id": 11141228922,
+    "source": "current production builder boundary before aggregation",
+    "vadimkin_frozen_sha": "58ee75bc20113181b9ddf8029d4cbf3a62d8cd10",
+    "corpus_sha256": "8e9f3660039de4e0490db25229fe1760f5926b6b73490c8a325b9abc7555971b",
+    "city_count": 23,
+    "total_episode_count": 27866,
+    "open_episode_count": 0,
+    "boundary_error_count": 0,
+    "per_city_episode_counts": {
+      "kyiv": 2549,
+      "kharkiv": 3687,
+      "zaporizhzhia": 2429,
+      "cherkasy": 1634,
+      "zhytomyr": 752,
+      "dnipro": 2351,
+      "khmelnytskyi": 278,
+      "poltava": 1926,
+      "rivne": 273,
+      "sumy": 2409,
+      "vinnytsia": 409,
+      "kropyvnytskyi": 1268,
+      "lviv": 126,
+      "chernihiv": 1752,
+      "odesa": 1593,
+      "kherson": 1455,
+      "mykolaiv": 1823,
+      "lutsk": 155,
+      "uzhhorod": 92,
+      "ivano_frankivsk": 105,
+      "ternopil": 135,
+      "chernivtsi": 117,
+      "sevastopol": 548
+    },
+    "production_city_keys": [
+      "kyiv",
+      "kharkiv",
+      "zaporizhzhia",
+      "cherkasy",
+      "zhytomyr",
+      "dnipro",
+      "khmelnytskyi",
+      "poltava",
+      "rivne",
+      "sumy",
+      "vinnytsia",
+      "kropyvnytskyi",
+      "lviv",
+      "chernihiv",
+      "odesa",
+      "kherson",
+      "mykolaiv",
+      "lutsk",
+      "uzhhorod",
+      "ivano_frankivsk",
+      "ternopil",
+      "chernivtsi",
+      "sevastopol"
+    ],
+    "source_provenance_coverage": "partial",
+    "source_provenance_explanation": "Final canonical intervals are exposed losslessly by the production boundary, but a uniform lossless contributing source-observation record is not exposed for every city/source. No source observations were fabricated."
+  },
+  "canonicalization_version_guard": {
+    "version": "alert-canonicalization-v1",
+    "passed": true,
+    "reason": "Production final sets are overlap/touch-union fixed points and use the same interval construction semantics; differentiated shadow-only updater drift does not alter alert intervals."
+  },
+  "pre_neon_state": {
+    "branch_id": "br-icy-forest-b5mfyezq",
+    "ingestion_runs": 1,
+    "alert_episodes": 126,
+    "alert_episode_sources": 140,
+    "ingestion_checkpoints": 1,
+    "max_checkpoint_seq": 1,
+    "alert_state_snapshots": 13,
+    "alert_threat_observations": 14
+  },
+  "lviv_compatibility": {
+    "passed": false,
+    "production_episode_count": 126,
+    "db_episode_count": 126,
+    "mismatch_count": 3,
+    "action": "STOP before writes; existing rows were not updated",
+    "mismatches": [
+      {
+        "production": {
+          "legacy_episode_id": "7dd411c2a2587efc740a1a66",
+          "start_at": "2026-09-12T22:00:05.398348Z",
+          "end_at": "2026-09-12T22:14:27Z"
+        },
+        "neon": {
+          "legacy_episode_id": "b3df9090f7264ddbd726e113",
+          "start_at": "2026-09-12T22:00:05.398348Z",
+          "end_at": "2026-09-12T22:14:23.315771Z",
+          "episode_uid": "575f370c-6e99-4623-8219-f8fbdfd6c978"
+        }
+      },
+      {
+        "production": {
+          "legacy_episode_id": "c2cd9a96768756d84c250735",
+          "start_at": "2026-09-13T02:32:14Z",
+          "end_at": "2026-09-13T06:11:11.976953Z"
+        },
+        "neon": {
+          "legacy_episode_id": "202d8d1527183a6282ccf1e2",
+          "start_at": "2026-09-13T02:32:14.172141Z",
+          "end_at": "2026-09-13T06:11:11.976953Z",
+          "episode_uid": "c90e7b05-1982-461f-945f-53d8130c627b"
+        }
+      },
+      {
+        "production": {
+          "legacy_episode_id": "94ce779cf047984e881bfdd5",
+          "start_at": "2026-09-15T16:44:13Z",
+          "end_at": "2026-09-15T17:09:02Z"
+        },
+        "neon": {
+          "legacy_episode_id": "b24ba103214a22f4d5e65ce4",
+          "start_at": "2026-09-15T16:44:13.025549Z",
+          "end_at": "2026-09-15T17:08:51.287249Z",
+          "episode_uid": "451c8a2c-248a-41e5-b49e-31af3f44631f"
+        }
+      }
+    ]
+  },
+  "rollback_result": "not_run_because_lviv_compatibility_gate_failed_before_writes",
+  "successful_import_result": "not_run",
+  "per_city_exact_db_parity": "not_run",
+  "exact_replay": "not_run",
+  "fresh_process_replay": "not_run",
+  "conflict_rejection": "not_run",
+  "existing_lviv_row_identity_preservation": "preserved_by_no_write_stop",
+  "differentiated_child_immutability": {
+    "pre_counts": {
+      "alert_state_snapshots": 13,
+      "alert_threat_observations": 14
+    },
+    "post_counts": {
+      "alert_state_snapshots": 13,
+      "alert_threat_observations": 14
+    },
+    "pre_fingerprints": {
+      "snapshots_md5": "6f01af9b44546d936f245591bac4bc26",
+      "threats_md5": "cf4bc00a69fbfbda4eeaba817b200a17"
+    },
+    "post_fingerprints": {
+      "snapshots_md5": "6f01af9b44546d936f245591bac4bc26",
+      "threats_md5": "cf4bc00a69fbfbda4eeaba817b200a17"
+    },
+    "identical": true
+  },
+  "checkpoint_pre_post": {
+    "pre": {
+      "count": 1,
+      "max_seq": 1
+    },
+    "post": {
+      "count": 1,
+      "max_seq": 1
+    },
+    "unchanged": true
+  },
+  "post_neon_state": {
+    "ingestion_runs": 1,
+    "alert_episodes": 126,
+    "alert_episode_sources": 140,
+    "ingestion_checkpoints": 1,
+    "max_checkpoint_seq": 1,
+    "alert_state_snapshots": 13,
+    "alert_threat_observations": 14
+  },
+  "safety": {
+    "permanent_production_shadow_touched": false,
+    "main_touched": false,
+    "site_prod_touched": false,
+    "multicity_wip_touched": false,
+    "deploy": false,
+    "credentials_exposed": false,
+    "db_cutover": false,
+    "neon_mutation_performed": false,
+    "attack_events_imported": false
+  },
+  "temporary_workflow_removed": true,
+  "final_head_note": "The final branch HEAD is the commit that adds this blocked proof artifact; its SHA is reported in the execution response because a Git commit cannot contain its own SHA without changing that SHA."
+}
