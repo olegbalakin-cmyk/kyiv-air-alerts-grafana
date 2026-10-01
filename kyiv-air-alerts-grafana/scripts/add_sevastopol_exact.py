@@ -10,6 +10,7 @@ from pathlib import Path
 import requests
 from bs4 import BeautifulSoup
 
+import multicity_shadow_payload
 import expand_multicity_production as multi
 from update_data import Alert, TZ, build_outputs
 
@@ -317,6 +318,8 @@ def generic_comparison(cities: dict, keys: list[str], period: str) -> list[dict]
 
 def main() -> None:
     store, fetch_meta = update_event_store()
+    alerts_for_shadow = [Alert(start=datetime.fromisoformat(p["start"]).astimezone(TZ), end=datetime.fromisoformat(p["end"]).astimezone(TZ), source="sevastopol_occupation_admin_telegram") for p in store.get("pairs", []) if datetime.fromisoformat(p["end"]).astimezone(TZ) > datetime.fromisoformat(p["start"]).astimezone(TZ)]
+    multicity_shadow_payload.record_city_alerts(CITY_KEY, alerts_for_shadow, producer="add_sevastopol_exact")
     output = build_city_output(store)
 
     data = json.loads(DATA_FILE.read_text(encoding="utf-8"))
