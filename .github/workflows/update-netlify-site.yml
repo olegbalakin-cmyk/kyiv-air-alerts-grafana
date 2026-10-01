@@ -20,8 +20,6 @@ jobs:
   update-site:
     runs-on: ubuntu-latest
     timeout-minutes: 60
-    env:
-      MULTICITY_CANONICAL_PAYLOAD_PATH: ${{ runner.temp }}/multicity_canonical_payload.json
     defaults:
       run:
         working-directory: kyiv-air-alerts-grafana
@@ -35,7 +33,9 @@ jobs:
       - name: Record Phase-1 checked-out input provenance
         working-directory: .
         shell: bash
-        run: echo "PHASE1_INPUT_SHA=$(git rev-parse HEAD)" >> "$GITHUB_ENV"
+        run: |
+          echo "PHASE1_INPUT_SHA=$(git rev-parse HEAD)" >> "$GITHUB_ENV"
+          echo "MULTICITY_CANONICAL_PAYLOAD_PATH=${RUNNER_TEMP}/multicity_canonical_payload.json" >> "$GITHUB_ENV"
 
       - name: Set up Python
         uses: actions/setup-python@v5
