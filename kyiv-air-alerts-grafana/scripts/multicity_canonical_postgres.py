@@ -343,19 +343,52 @@ def persist_canonical_episodes(
             started_at=datetime.now(tz=UTC),
         )
 
-        for row in rows:
-            _episode_uid, inserted = persist_episode(cursor, row, run_id=run_id)
-            if inserted:
+        existing_count = classification["exact_existing"]
+
+        if force_failure_after_new is not None:
+            # The rollback proof intentionally exercises the established single-row
+            # persistence contract for a deterministic, meaningful prefix.
+            for row in classification["missing_rows"]:
+                _episode_uid, inserted = persist_episode(cursor, row, run_id=run_id)
+                if not inserted:
+                    raise MulticityPersistenceConflict(
+                        "preflight missing row became existing inside the locked transaction"
+                    )
                 inserted_count += 1
-                if (
-                    force_failure_after_new is not None
-                    and inserted_count == force_failure_after_new
-                ):
+                if inserted_count == force_failure_after_new:
                     raise ForcedMulticityFailure(
                         f"forced failure after {force_failure_after_new} new episodes"
                     )
-            else:
-                existing_count += 1
+        else:
+            # Full historical bootstrap: preflight already established that these
+            # rows are missing and conflict-free in this transaction. Batch only
+            # the INSERTs; PostgreSQL uniqueness constraints remain the race guard.
+            missing = classification["missing_rows"]
+            if missing:
+                cursor.executemany(
+                    """/* MULTICITY:BULK_EPISODE_INSERT */
+                    INSERT INTO alert_episodes (
+                        legacy_episode_id, city_key, alert_type, start_at, end_at,
+                        episode_state, canonicalization_version,
+                        created_by_run_id, updated_by_run_id
+                    ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+                    """,
+                    [
+                        (
+                            row["legacy_episode_id"],
+                            row["city_key"],
+                            row["alert_type"],
+                            row["start_at"],
+                            row["end_at"],
+                            row["episode_state"],
+                            row["canonicalization_version"],
+                            run_id,
+                            run_id,
+                        )
+                        for row in missing
+                    ],
+                )
+                inserted_count = len(missing)
 
         finished_at = datetime.now(tz=UTC)
         stats = {
