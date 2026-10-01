@@ -1,0 +1,81 @@
+name: Historical suite fresh proof
+
+on:
+  push:
+    branches:
+      - historical-suite-fresh-proof-2026-10-01
+
+permissions:
+  contents: read
+
+jobs:
+  historical-suite-fresh-proof:
+    runs-on: ubuntu-latest
+    env:
+      TEST_BASE: 108fc20af0370c1106d3ae9cedad41974588ca38
+    steps:
+      - name: Checkout exact pushed commit
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+
+      - name: Prove disposable semantic identity
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "TEST_BASE=${TEST_BASE}"
+          echo "DISPOSABLE_SHA=$(git rev-parse HEAD)"
+          echo "DISPOSABLE_PARENT=$(git rev-parse HEAD^)"
+          test "$(git rev-parse HEAD^)" = "${TEST_BASE}"
+
+          changed="$(git diff --name-only "${TEST_BASE}" HEAD)"
+          echo "DIFF_FROM_TEST_BASE_BEGIN"
+          printf '%s\n' "${changed}"
+          echo "DIFF_FROM_TEST_BASE_END"
+          test "${changed}" = ".github/workflows/historical-suite-fresh-proof.yml"
+
+          check_blob() {
+            path="$1"
+            base_blob="$(git rev-parse "${TEST_BASE}:${path}")"
+            head_blob="$(git rev-parse "HEAD:${path}")"
+            echo "BLOB ${path} TEST_BASE=${base_blob} HEAD=${head_blob}"
+            test "${base_blob}" = "${head_blob}"
+          }
+
+          check_blob "kyiv-air-alerts-grafana/scripts/replay_explosion_history.py"
+          check_blob "kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py"
+          check_blob "kyiv-air-alerts-grafana/data/explosion_audited_baseline.json"
+          check_blob "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/kharkiv-historical-recovery_alerts.json"
+          check_blob "kyiv-air-alerts-grafana/data/explosion_research/kharkiv/final_evidence.json"
+
+          echo "SEMANTIC_IDENTITY_GUARD=PASS"
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install requirements
+        run: pip install -r kyiv-air-alerts-grafana/requirements.txt
+
+      - name: Monitor self-test
+        run: python kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py --self-test
+
+      - name: Replay self-test
+        run: python kyiv-air-alerts-grafana/scripts/replay_explosion_history.py --self-test
+
+      - name: Historical replay pytest
+        run: python -m pytest -q kyiv-air-alerts-grafana/tests/test_historical_replay_*.py
+
+      - name: Confirm no tracked-file mutation
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          tracked_mutations="$(git status --porcelain --untracked-files=no | wc -l | tr -d ' ')"
+          echo "TRACKED_FILE_MUTATION_COUNT=${tracked_mutations}"
+          if [ "${tracked_mutations}" -ne 0 ]; then
+            git status --porcelain --untracked-files=no
+            exit 1
+          fi
