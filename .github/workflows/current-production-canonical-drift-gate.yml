@@ -102,6 +102,14 @@ jobs:
           cur_intervals = [(x["city_key"],x["alert_type"],x["start_at"],x["end_at"]) for x in cur_rows]
           duplicate_legacy = len(cur_legacy)-len(set(cur_legacy))
           duplicate_interval = len(cur_intervals)-len(set(cur_intervals))
+          if frozen_missing:
+              print("FROZEN_MISSING_ROWS=" + json.dumps(frozen_missing, ensure_ascii=False, sort_keys=True))
+              for row in frozen_missing:
+                  city=row["city_key"]
+                  start=row["start_at"]
+                  end=row["end_at"]
+                  nearby=[x for x in cur_rows if x["city_key"]==city and not (x["end_at"] < start or x["start_at"] > end)]
+                  print("CURRENT_NEARBY=" + json.dumps({"frozen":row,"nearby":nearby}, ensure_ascii=False, sort_keys=True))
           assert not frozen_missing, len(frozen_missing)
           assert boundary_changed == 0
           assert city_changed == 0
