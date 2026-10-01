@@ -26,8 +26,9 @@ jobs:
           set -euo pipefail
           echo "TEST_BASE=${TEST_BASE}"
           echo "DISPOSABLE_SHA=$(git rev-parse HEAD)"
-          echo "DISPOSABLE_PARENT=$(git rev-parse HEAD^)"
-          test "$(git rev-parse HEAD^)" = "${TEST_BASE}"
+          merge_base="$(git merge-base "${TEST_BASE}" HEAD)"
+          echo "MERGE_BASE=${merge_base}"
+          test "${merge_base}" = "${TEST_BASE}"
 
           changed="$(git diff --name-only "${TEST_BASE}" HEAD)"
           echo "DIFF_FROM_TEST_BASE_BEGIN"
@@ -58,6 +59,9 @@ jobs:
 
       - name: Install requirements
         run: pip install -r kyiv-air-alerts-grafana/requirements.txt
+
+      - name: Install pytest runner
+        run: pip install pytest
 
       - name: Monitor self-test
         run: python kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py --self-test
