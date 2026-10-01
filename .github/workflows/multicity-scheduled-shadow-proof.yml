@@ -1,0 +1,31 @@
+name: Multicity scheduled shadow proof
+
+on:
+  push:
+    branches:
+      - multicity-scheduled-production-shadow-enablement-proof-2026-10-01
+    paths:
+      - ".github/workflows/multicity-scheduled-shadow-proof.yml"
+      - "kyiv-air-alerts-grafana/scripts/**"
+      - "kyiv-air-alerts-grafana/tests/**"
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: kyiv-air-alerts-grafana
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: kyiv-air-alerts-grafana/requirements-db-phase1.txt
+      - run: pip install -r requirements-db-phase1.txt
+      - name: Focused proof tests
+        run: |
+          python -m unittest             tests.test_multicity_canonical_postgres             tests.test_multicity_canonical_shadow             tests.test_lviv_canonical_boundary_repair             tests.test_db_phase1_persistence
