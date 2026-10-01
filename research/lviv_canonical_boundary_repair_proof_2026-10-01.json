@@ -1,0 +1,322 @@
+{
+  "proof_kind": "lviv_canonical_boundary_repair_proof",
+  "status": "proven",
+  "verdict": "LVIV CANONICAL-BOUNDARY REPAIR PROVEN",
+  "proof_branch": "lviv-canonical-boundary-repair-proof-2026-10-01",
+  "final_head": null,
+  "final_head_note": "A Git commit cannot contain its own commit SHA without changing that SHA. The exact final proof-branch HEAD is reported by the execution result after this artifact commit.",
+  "accepted_reconciliation_head": "16cad19f8862960ea50820288eb32fabd8e3dc68",
+  "frozen_production_ref": "928a566b7a8dc7916c93810eaafe319da3b28ee4",
+  "neon": {
+    "project_id": "green-cake-44216048",
+    "disposable_branch_id": "br-icy-forest-b5mfyezq",
+    "disposable_branch_name": "differentiated-alert-postgres-child-persistence-proof-2026-09-30",
+    "parent_branch_id": "br-young-feather-b5q19nli",
+    "permanent_shadow_branch_id": "br-bold-mode-b5rub8pq"
+  },
+  "frozen_static_evidence": {
+    "raw_object_path": "kyiv-air-alerts-grafana/data/alerts_in_ua_bridge_2026-09-07_16.csv.gz.b64",
+    "git_blob_sha": "1ece234379381b4d7c0d10f851a86aa61aa958f6",
+    "decoded_csv_sha256": "ba48bf85bd62e7f127dd1703bfcb9d38b4b960690adf1243175ce59366ec4d5a",
+    "lviv_rows_sha256": "2c9f256c75ac79c523ce826b3d48703bce2e83f0749b98092a1d8dc83c3f7e90",
+    "source_key": "alerts_in_ua",
+    "source_record_key_version": "alerts-in-ua-v1"
+  },
+  "pre_state": {
+    "counts": {
+      "ingestion_runs": 1,
+      "alert_episodes": 126,
+      "alert_episode_sources": 140,
+      "ingestion_checkpoints": 1,
+      "max_checkpoint_seq": 1,
+      "alert_state_snapshots": 13,
+      "alert_threat_observations": 14,
+      "lviv_episodes": 126
+    },
+    "fingerprints_md5": {
+      "alert_episodes": "bda96078514c1f499d0b2b11f51379a4",
+      "alert_episode_sources": "6051ce195f101c941e8fc9db1ed9948a",
+      "ingestion_checkpoints": "2a982250b3dc8e3b11e96dc859e83acb",
+      "alert_state_snapshots": "f1b361222d3b9428bd74519f873a9ce3",
+      "alert_threat_observations": "7ca8f9930c8b645c733b35797aad96f6",
+      "non_target_123_episodes": "304ef1d8e5b62f8eebf27f4285b52669",
+      "non_target_sources": "75f5484b642d1a2177d6ccf77e97e54e"
+    },
+    "exact_lviv_126_rows_queried_before_mutation": true,
+    "target_precondition_result": "PASS",
+    "target_source_contract": "exactly one bound canonical_input ukrainealarm_region_history observation per target; old contributor flags true/true",
+    "collision_guards": {
+      "existing_static_source_record_keys": 0,
+      "existing_new_legacy_episode_ids": 0,
+      "existing_new_exact_parent_intervals": 0
+    }
+  },
+  "repair_plan": [
+    {
+      "episode_uid": "575f370c-6e99-4623-8219-f8fbdfd6c978",
+      "old": {
+        "start_at": "2026-09-12T22:00:05.398348Z",
+        "end_at": "2026-09-12T22:14:23.315771Z",
+        "legacy_episode_id": "b3df9090f7264dd726e113"
+      },
+      "new": {
+        "start_at": "2026-09-12T22:00:05.398348Z",
+        "end_at": "2026-09-12T22:14:27Z",
+        "legacy_episode_id": "7dd411c2a2587efc740a1a66"
+      },
+      "static_source": {
+        "start_at": "2026-09-12T22:00:06Z",
+        "end_at": "2026-09-12T22:14:27Z",
+        "raw_local_start": "2026-09-13T01:00:06+03:00",
+        "raw_local_end": "2026-09-13T01:14:27+03:00",
+        "source_record_key": "980d8771eb46bca4bc542aa98c987795f254e01ce4fc59d25b1e4cd0fb55c7e0"
+      },
+      "contributor_flags": {
+        "ukrainealarm": {
+          "start": true,
+          "end": false
+        },
+        "alerts_in_ua": {
+          "start": false,
+          "end": true
+        }
+      }
+    },
+    {
+      "episode_uid": "c90e7b05-1982-461f-945f-53d8130c627b",
+      "old": {
+        "start_at": "2026-09-13T02:32:14.172141Z",
+        "end_at": "2026-09-13T06:11:11.976953Z",
+        "legacy_episode_id": "202d8d1527183a6282ccf1e2"
+      },
+      "new": {
+        "start_at": "2026-09-13T02:32:14Z",
+        "end_at": "2026-09-13T06:11:11.976953Z",
+        "legacy_episode_id": "c2cd9a96768756d84c250735"
+      },
+      "static_source": {
+        "start_at": "2026-09-13T02:32:14Z",
+        "end_at": "2026-09-13T06:11:11Z",
+        "raw_local_start": "2026-09-13T05:32:14+03:00",
+        "raw_local_end": "2026-09-13T09:11:11+03:00",
+        "source_record_key": "828e721a803eb19280ff3b20182314e3196dba48516a780fd050639136354664"
+      },
+      "contributor_flags": {
+        "ukrainealarm": {
+          "start": false,
+          "end": true
+        },
+        "alerts_in_ua": {
+          "start": true,
+          "end": false
+        }
+      }
+    },
+    {
+      "episode_uid": "451c8a2c-248a-41e5-b49e-31af3f44631f",
+      "old": {
+        "start_at": "2026-09-15T16:44:13.025549Z",
+        "end_at": "2026-09-15T17:08:51.287249Z",
+        "legacy_episode_id": "b24ba103214a22f4d5e65ce4"
+      },
+      "new": {
+        "start_at": "2026-09-15T16:44:13Z",
+        "end_at": "2026-09-15T17:09:02Z",
+        "legacy_episode_id": "94ce779cf047984e881bfdd5"
+      },
+      "static_source": {
+        "start_at": "2026-09-15T16:44:13Z",
+        "end_at": "2026-09-15T17:09:02Z",
+        "raw_local_start": "2026-09-15T19:44:13+03:00",
+        "raw_local_end": "2026-09-15T20:09:02+03:00",
+        "source_record_key": "9c827b4b944729c82daafc29b42acd7146752920e6871a6ff39962e18b785b91"
+      },
+      "contributor_flags": {
+        "ukrainealarm": {
+          "start": false,
+          "end": false
+        },
+        "alerts_in_ua": {
+          "start": true,
+          "end": true
+        }
+      }
+    }
+  ],
+  "identity_checks": {
+    "source_record_keys_recomputed_with": "db_phase1_core.alerts_in_ua_source_record_key",
+    "source_record_keys_match_expected": true,
+    "legacy_episode_ids_recomputed_with": "db_phase1_core.legacy_episode_id",
+    "legacy_episode_ids_match_expected": true,
+    "episode_uid_preserved": true
+  },
+  "forced_rollback": {
+    "result": "PASS",
+    "forced_run_id": "51d84b45-2773-41eb-bd91-191ba62043e8",
+    "failure_injected_after": "repair ingestion_run insert and first static source insert",
+    "failure": "deterministic division by zero inside transaction",
+    "residue": {
+      "repair_run_rows": 0,
+      "static_source_rows": 0
+    },
+    "post_rollback_counts": {
+      "ingestion_runs": 1,
+      "alert_episodes": 126,
+      "alert_episode_sources": 140,
+      "ingestion_checkpoints": 1,
+      "max_checkpoint_seq": 1,
+      "alert_state_snapshots": 13,
+      "alert_threat_observations": 14
+    },
+    "all_pre_repair_fingerprints_identical": true
+  },
+  "successful_repair": {
+    "result": "PASS",
+    "transaction_count": 1,
+    "repair_ingestion_run_id": "2dad3093-0600-4de3-9dc1-5f578140c47e",
+    "run_kind": "canonical_boundary_repair",
+    "source_key": "alerts_in_ua",
+    "city_key": "lviv",
+    "canonicalization_version": "alert-canonicalization-v1",
+    "parent_updates": 3,
+    "inserted_source_observations": 3,
+    "contributor_updates": 3,
+    "checkpoint_changes": 0,
+    "source_retrieved_at_preserved_semantics": true,
+    "existing_ukrainealarm_last_seen_unchanged": true,
+    "source_native_id_for_new_static_rows": null,
+    "raw_sha256_for_new_static_rows": null
+  },
+  "post_state": {
+    "counts": {
+      "ingestion_runs": 2,
+      "alert_episodes": 126,
+      "alert_episode_sources": 143,
+      "ingestion_checkpoints": 1,
+      "max_checkpoint_seq": 1,
+      "alert_state_snapshots": 13,
+      "alert_threat_observations": 14,
+      "lviv_episodes": 126
+    },
+    "fingerprints_md5": {
+      "alert_episodes": "aff237177559be3b5ca8f4ca0ed00d79",
+      "alert_episode_sources": "54294429cf09acc8c2a1a3ad304a53c3",
+      "ingestion_runs": "c39f73a568360ccabf36e16611feff7b",
+      "ingestion_checkpoints": "2a982250b3dc8e3b11e96dc859e83acb",
+      "alert_state_snapshots": "f1b361222d3b9428bd74519f873a9ce3",
+      "alert_threat_observations": "7ca8f9930c8b645c733b35797aad96f6",
+      "non_target_123_episodes": "304ef1d8e5b62f8eebf27f4285b52669"
+    },
+    "repair_static_source_count": 3,
+    "parents_updated_by_repair_run": 3,
+    "contributor_or_containment_errors": 0
+  },
+  "parity_gate": {
+    "result": "PASS",
+    "db_lviv_episode_count": 126,
+    "frozen_production_lviv_episode_count": 126,
+    "method": "Compose the accepted frozen-production reconciliation at 16cad19f8862960ea50820288eb32fabd8e3dc68 with the exact pre-repair 126-row DB snapshot: the accepted reconciliation identifies exactly the three stale Phase-1 boundaries and their frozen-production replacements. Verify those three replacements exactly and prove the other 123 episode rows are unchanged by deterministic fingerprint.",
+    "production_union_semantics": "Sort by start; start a new merged interval only when start > current_end; otherwise retain earliest start and extend end only when later.",
+    "repaired_target_count": 3,
+    "repaired_targets_match_frozen_production": true,
+    "non_target_count": 123,
+    "non_target_rows_unchanged": true,
+    "extra_episode_count": 0,
+    "missing_episode_count": 0,
+    "boundary_mismatch_count": 0,
+    "legacy_id_mismatch_count": 0
+  },
+  "source_validation": {
+    "result": "PASS",
+    "bound_canonical_input_containment_errors": 0,
+    "contributor_flag_equality_errors": 0,
+    "exact_start_contributor_present_each_target": true,
+    "exact_end_contributor_present_each_target": true,
+    "other_137_existing_source_observation_contributor_flags_modified": 0
+  },
+  "retry_proof": {
+    "result": "PASS",
+    "github_actions_run_id": 36849109685,
+    "workflow_head": "dd3e267c750e07770b2bac547095d4b7b8fd4ac7",
+    "workflow_conclusion": "success",
+    "test_count": 50,
+    "exact_retry": {
+      "status": "already_repaired",
+      "writes": 0
+    },
+    "fresh_process_retry": {
+      "status": "already_repaired",
+      "writes": 0
+    },
+    "counts_stable": true,
+    "duplicate_static_observations": 0,
+    "second_ingestion_run_created": false,
+    "temporary_workflow_removed_before_final_proof_head": true
+  },
+  "immutability": {
+    "differentiated_children": {
+      "result": "PASS",
+      "alert_state_snapshots_count_before": 13,
+      "alert_state_snapshots_count_after": 13,
+      "alert_state_snapshots_md5_before": "f1b361222d3b9428bd74519f873a9ce3",
+      "alert_state_snapshots_md5_after": "f1b361222d3b9428bd74519f873a9ce3",
+      "alert_threat_observations_count_before": 14,
+      "alert_threat_observations_count_after": 14,
+      "alert_threat_observations_md5_before": "7ca8f9930c8b645c733b35797aad96f6",
+      "alert_threat_observations_md5_after": "7ca8f9930c8b645c733b35797aad96f6"
+    },
+    "checkpoint": {
+      "result": "PASS",
+      "count_before": 1,
+      "count_after": 1,
+      "max_seq_before": 1,
+      "max_seq_after": 1,
+      "md5_before": "2a982250b3dc8e3b11e96dc859e83acb",
+      "md5_after": "2a982250b3dc8e3b11e96dc859e83acb"
+    }
+  },
+  "safety": {
+    "parent_branch_touched": false,
+    "parent_branch_repair_runs": 0,
+    "parent_branch_repair_sources": 0,
+    "permanent_production_shadow_touched": false,
+    "permanent_shadow_repair_runs": 0,
+    "permanent_shadow_repair_sources": 0,
+    "permanent_shadow_observed_counts": {
+      "ingestion_runs": 17,
+      "alert_episodes": 126,
+      "alert_episode_sources": 140,
+      "ingestion_checkpoints": 17,
+      "max_checkpoint_seq": 17
+    },
+    "main_touched": false,
+    "main_start_head": "2bab08b33015d136df5c46277135b283ef454458",
+    "main_end_head": "2bab08b33015d136df5c46277135b283ef454458",
+    "site_prod_touched": false,
+    "site_prod_start_head": "bdb92bacd41f8602f0fc606f50295e950958f8a1",
+    "site_prod_end_head": "bdb92bacd41f8602f0fc606f50295e950958f8a1",
+    "multicity_wip_touched_by_this_task": false,
+    "multicity_wip_start_head": "7f006685db650600ac3fe524ff9c931bbe891da7",
+    "multicity_wip_end_head_observed": "108fc20af0370c1106d3ae9cedad41974588ca38",
+    "multicity_wip_external_movement_note": "Observed concurrent branch movement to commit 'Use real Kyiv Digital data in threat preview'; no write operation in this proof targeted multicity-wip-2026-09-16.",
+    "deploy": false,
+    "production_json_changed": false,
+    "production_workflow_changed": false,
+    "frontend_changed": false,
+    "multicity_import_resumed": false,
+    "attack_events_imported": false,
+    "differentiated_production_shadow_enabled": false,
+    "credentials_exposed": false,
+    "db_cutover": false
+  },
+  "implementation": {
+    "script": "kyiv-air-alerts-grafana/scripts/lviv_canonical_boundary_repair.py",
+    "tests": "kyiv-air-alerts-grafana/tests/test_lviv_canonical_boundary_repair.py",
+    "historical_canonicalizer_modified": false,
+    "old_fixtures_or_oracles_modified": false
+  },
+  "next_gate": "READY TO RESUME MULTICITY CANONICAL ALERTS NEON PERSISTENCE PROOF",
+  "differentiated_child_state": "PRESERVED",
+  "checkpoint_state": "PRESERVED",
+  "db_cutover": "NO"
+}
