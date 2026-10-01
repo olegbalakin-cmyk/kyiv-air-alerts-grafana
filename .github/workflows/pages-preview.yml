@@ -32,6 +32,34 @@ jobs:
         with:
           enablement: true
 
+      - name: Fetch Kyiv Digital differentiated history
+        run: |
+          curl -fsS \
+            -H 'Accept: application/json' \
+            'https://kyiv.digital/open-api/air-alert/history' \
+            -o /tmp/kyiv-air-alert-history.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          p = Path("/tmp/kyiv-air-alert-history.json")
+          data = json.loads(p.read_text(encoding="utf-8"))
+          print("kyiv_history_bytes=", p.stat().st_size)
+          print("kyiv_history_root_type=", type(data).__name__)
+          if isinstance(data, dict):
+              print("kyiv_history_root_keys=", sorted(data.keys()))
+              for key, value in data.items():
+                  if isinstance(value, list):
+                      print("kyiv_history_list_key=", key, "count=", len(value))
+                      if value:
+                          print("kyiv_history_first_item=", json.dumps(value[0], ensure_ascii=False)[:3000])
+                      break
+          elif isinstance(data, list):
+              print("kyiv_history_count=", len(data))
+              if data:
+                  print("kyiv_history_first_item=", json.dumps(data[0], ensure_ascii=False)[:3000])
+          PY
+
       - name: Assemble preview site
         run: |
           mkdir -p _site
@@ -39,6 +67,7 @@ jobs:
           cp kyiv-air-alerts-grafana/pages-preview/styles.css _site/styles.css
           cp kyiv-air-alerts-grafana/pages-preview/app.js _site/app.js
           cp kyiv-air-alerts-grafana/pages-preview/threat-mix-test.html _site/threat-mix-test.html
+          cp /tmp/kyiv-air-alert-history.json _site/kyiv-air-alert-history.json
           cp kyiv-air-alerts-grafana/data/dashboard_data.json _site/data.json
           touch _site/.nojekyll
 
