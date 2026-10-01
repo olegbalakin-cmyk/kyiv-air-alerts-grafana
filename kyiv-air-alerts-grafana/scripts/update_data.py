@@ -10,6 +10,8 @@ from collections import defaultdict
 from dataclasses import dataclass
 from datetime import date, datetime, time, timedelta, timezone
 from pathlib import Path
+
+import multicity_shadow_payload
 from statistics import mean
 from typing import Iterable
 from zoneinfo import ZoneInfo
@@ -466,6 +468,7 @@ def main() -> None:
         "live_latest_event_timestamp": live_latest_event.isoformat() if live_latest_event else None,
     }
 
+    multicity_shadow_payload.record_city_alerts("kyiv", alerts, producer="update_data")
     output = build_outputs(alerts, now_local, meta)
     (DATA_DIR / "dashboard_data.json").write_text(
         json.dumps(output, ensure_ascii=False, indent=2), encoding="utf-8"
