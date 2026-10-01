@@ -85,6 +85,19 @@ class TestMulticity(unittest.TestCase):
         r2=m.persist_canonical_episodes(Connection(copy.deepcopy(state)),[self.b,self.c],provenance=prov(),db_branch="proof")
         self.assertEqual((r1["writes"],r2["writes"]),(0,0))
 
+    def test_protected_state_and_lviv_uid_immutability(self):
+        state={"episodes":[copy.deepcopy(self.a)],"runs":[],"sources":[{"id":"src"}],"checkpoints":[{"seq":1}],"snapshots":[{"id":"snap"}],"threats":[{"id":"threat"}]}
+        c=Connection(state); before=copy.deepcopy(c.state)
+        m.persist_canonical_episodes(c,[self.a,self.b],provenance=prov(),db_branch="proof")
+        self.assertEqual(c.state["episodes"][0]["episode_uid"],before["episodes"][0]["episode_uid"])
+        for key in ("sources","checkpoints","snapshots","threats"):
+            self.assertEqual(c.state[key],before[key])
+
+    def test_duplicate_classification_covers_legacy_and_interval(self):
+        x=m.scan_candidates([self.b,copy.deepcopy(self.b)])
+        self.assertEqual(x["duplicate_candidate_legacy_id"],1)
+        self.assertEqual(x["duplicate_candidate_interval"],1)
+
     def test_rejections(self):
         bad=copy.deepcopy(self.b); bad["end_at"]=bad["start_at"]
         with self.assertRaises(m.CorpusValidationError): m.scan_candidates([bad])
