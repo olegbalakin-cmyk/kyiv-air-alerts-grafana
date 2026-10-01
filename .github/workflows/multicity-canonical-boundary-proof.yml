@@ -1,0 +1,79 @@
+name: Multicity canonical boundary proof
+
+on:
+  push:
+    branches:
+      - multicity-canonical-alerts-neon-persistence-proof-2026-09-30
+    paths:
+      - ".github/workflows/multicity-canonical-boundary-proof.yml"
+      - "kyiv-air-alerts-grafana/scripts/export_multicity_canonical.py"
+
+permissions:
+  contents: read
+
+jobs:
+  prove-boundary:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: kyiv-air-alerts-grafana
+    env:
+      SITE_PROD_SHA: 928a566b7a8dc7916c93810eaafe319da3b28ee4
+      VADIMKIN_SHA: 58ee75bc20113181b9ddf8029d4cbf3a62d8cd10
+
+    steps:
+      - name: Check out proof branch
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install production dependencies
+        run: pip install -r requirements.txt
+
+      - name: Freeze production artifacts
+        shell: bash
+        run: |
+          set -euo pipefail
+          for path in \
+            data/dashboard_data.json \
+            data/alerts_combined.json \
+            data/ukrainealarm_bridge.json \
+            data/alerts_in_ua_bridge_2026-09-07_16.csv.gz.b64 \
+            data/alerts_in_ua_bridge_2026-09-07_16.meta.json \
+            data/alerts_in_ua_bridge_additional_2026-09-07_16.csv.gz.b64 \
+            data/alerts_in_ua_bridge_additional_2026-09-07_16.meta.json \
+            data/sevastopol_events.json
+          do
+            curl --fail --silent --show-error --location \
+              "https://raw.githubusercontent.com/${GITHUB_REPOSITORY}/${SITE_PROD_SHA}/kyiv-air-alerts-grafana/${path}" \
+              --output "${path}"
+          done
+
+      - name: Freeze Vadimkin source revision
+        shell: bash
+        run: |
+          curl --fail --silent --show-error --location \
+            "https://raw.githubusercontent.com/Vadimkin/ukrainian-air-raid-sirens-dataset/${VADIMKIN_SHA}/datasets/official_data_uk.csv" \
+            --output "${RUNNER_TEMP}/official_data_uk.csv"
+
+      - name: Prove canonical boundary
+        shell: bash
+        run: |
+          python scripts/export_multicity_canonical.py \
+            --vadimkin-csv "${RUNNER_TEMP}/official_data_uk.csv" \
+            --site-prod-sha "${SITE_PROD_SHA}" \
+            --vadimkin-sha "${VADIMKIN_SHA}" \
+            --output "${RUNNER_TEMP}/multicity_canonical_boundary.json"
+
+      - name: Upload boundary artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: multicity-canonical-boundary-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/multicity_canonical_boundary.json
+          if-no-files-found: warn
+          retention-days: 30
