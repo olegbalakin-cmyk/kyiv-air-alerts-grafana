@@ -1,0 +1,46 @@
+name: Historical source-coverage repair proof
+
+on:
+  push:
+    branches:
+      - historical-source-coverage-repair-proof-2026-10-01
+    paths:
+      - "research/historical_attack_event_source_registry.json"
+      - "kyiv-air-alerts-grafana/scripts/run_historical_attack_event_backfill_batch.py"
+      - "kyiv-air-alerts-grafana/tests/test_historical_source_coverage_repair.py"
+      - ".github/workflows/historical-source-coverage-repair-proof.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  focused-proof:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: historical-source-coverage-repair-proof-2026-10-01
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: kyiv-air-alerts-grafana/requirements.txt
+      - name: Install dependencies
+        working-directory: kyiv-air-alerts-grafana
+        run: pip install -r requirements.txt
+      - name: Existing classifier self-test
+        working-directory: kyiv-air-alerts-grafana
+        run: python scripts/monitor_explosion_candidates.py --self-test
+      - name: Existing Step-1 timestamp proof
+        working-directory: kyiv-air-alerts-grafana
+        run: python tests/test_historical_live_update_timestamp_repair.py
+      - name: Focused source-coverage proof
+        working-directory: kyiv-air-alerts-grafana
+        run: python tests/test_historical_source_coverage_repair.py
+      - name: Guard frozen campaign batches
+        run: |
+          test "$(git diff --name-only 7296e910fef9e3b7bb448444791407eed1bae03f...HEAD -- 'research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/**' | wc -l)" -eq 0
+          test "$(find research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27 -name 'batch_*.json' | wc -l)" -eq 139
+          echo "Frozen campaign batch diff = 0; batch count = 139"
