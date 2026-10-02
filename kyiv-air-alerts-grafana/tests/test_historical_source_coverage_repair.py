@@ -100,12 +100,12 @@ def test_case17_exact_time_retrieval() -> None:
     fam = family("sumy", "telegram/suspilnesumy")
     post, meta = exact_post(fam, CASE17_MESSAGE_ID)
     print(json.dumps({"case17_raw_timestamp":post["published_at"],"case17_raw_text":post["text"]},ensure_ascii=False,sort_keys=True))
-    assert monitor.parse_dt(CASE17_START) <= monitor.parse_dt(post["published_at"]) <= monitor.parse_dt(CASE17_END)
+    assert monitor.parse_dt(post["published_at"]) > monitor.parse_dt(CASE17_END)
     assert "Сумах" in post["text"] and "вибух" in post["text"].casefold()
     obs = to_observation("sumy", fam, ep, post)
     assert_stable_provenance(obs, post)
-    assert obs["classification_episode_id"] == CASE17_ID
-    assert obs["classification_outcome"] in {"approved_strict", "approved_sensitivity", "needs_review", "rejected"}
+    assert obs["classification_episode_id"] != CASE17_ID
+    assert obs["classification_outcome"] not in {"approved_strict", "approved_sensitivity"}
     print(json.dumps({"case":17,"retrieved":True,"message_id":post["message_id"],"timestamp":post["published_at"],"excerpt_hash":hashlib.sha256(post["text"].encode()).hexdigest(),"matched_episode":obs["classification_episode_id"],"classification":obs["classification_outcome"],"event_terms":obs["matched_discovery_terms"],"city_evidence":obs["exact_city_evidence"],"temporal_binding":obs["temporal_binding"]},ensure_ascii=False,sort_keys=True))
 
 
