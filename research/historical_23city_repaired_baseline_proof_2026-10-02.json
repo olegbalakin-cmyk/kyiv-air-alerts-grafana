@@ -1,0 +1,66 @@
+{
+  "schema_version": 1,
+  "proof": "historical-23city-repaired-baseline-proof-2026-10-02",
+  "verdict": "23-CITY REPAIRED BASELINE PROVEN",
+  "base_head": "0950a9602661ceac526f9c38c58bed2a974c73f4",
+  "tested_head": "71e26537bfe6810221375870b171feefd3fafafd",
+  "accepted_semantic_repairs": {
+    "live_update_timestamp": {
+      "accepted_tested_head": "4db73e0cf37db6d96df83662ecbd9f8e14b27638",
+      "accepted_final_proof_head": "7296e910fef9e3b7bb448444791407eed1bae03f",
+      "transferred_behavior": "dated Ukrainian live-update prefix resolves explicit local event timestamp and supports episode-specific temporal binding",
+      "proven_example": {
+        "input": "26 квітня 22:48",
+        "resolved_utc": "2026-04-26T19:48:00Z",
+        "episode_id": "ae2718c10fcdc7079dbb220a"
+      }
+    },
+    "sevastopol_exact_city": {
+      "accepted_tested_head": "a5a232b810deb109411a420ec7eec87fa5872622",
+      "accepted_final_proof_head": "a208892ef6ba1437e8cfb2244e6863f1203803db",
+      "transferred_behavior": "bounded exact-city alias севастополе through existing token-bounded matcher"
+    }
+  },
+  "exact_changed_implementation_files": [
+    "kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py"
+  ],
+  "proof_only_files": [
+    "kyiv-air-alerts-grafana/tests/test_historical_23city_repaired_baseline_proof.py",
+    ".github/workflows/historical-23city-repaired-baseline-proof.yml",
+    "research/historical_23city_repaired_baseline_proof_2026-10-02.json"
+  ],
+  "excluded_step2_source_coverage": {
+    "telegram/suspilnesumy": "not imported",
+    "telegram/razvozhaev": "not imported",
+    "retrieval_changes": "not imported",
+    "guard": "PASS"
+  },
+  "github_actions": {
+    "final_focused_run_id": 36976519731,
+    "final_focused_job_id": 110741426751,
+    "conclusion": "success",
+    "jobs": 1,
+    "classifier_self_test": "PASS",
+    "accepted_repair_semantic_tests": {
+      "passed": 12,
+      "failed": 0
+    },
+    "existing_multicity_temporal_replay_unit_tests": {
+      "passed": 24,
+      "failed": 0
+    }
+  },
+  "corpus_mutation_guards": {
+    "data/explosion_research/*/final_evidence.json": "UNCHANGED",
+    "historical_source_slices": "UNCHANGED",
+    "historical_attack_event_backfill": "UNCHANGED / absent from frozen base and not added",
+    "source_registry_and_retrieval": "UNCHANGED / not added",
+    "canonical_alert_and_data_state": "UNCHANGED",
+    "dashboard_and_production_state": "UNCHANGED",
+    "scope_allowlist": "PASS",
+    "db_neon": "UNTOUCHED"
+  },
+  "historical_data_mutations": 0,
+  "incorporation": "NO",
+  "deploy": "NO"
+}
