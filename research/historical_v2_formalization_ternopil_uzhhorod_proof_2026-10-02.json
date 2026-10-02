@@ -1,0 +1,107 @@
+{
+  "authoritative_evidence_mutations": 0,
+  "cities": {
+    "ternopil": {
+      "blocker": null,
+      "bound_observations": 5,
+      "canonical_episodes": 125,
+      "canonical_source_files": [
+        "data/explosion_metric_handoff/source_slices/ternopil-historical-recovery_alerts.json"
+      ],
+      "city_key": "ternopil",
+      "classifier_pipeline_exceptions": 0,
+      "counted_evidence_unbound": 0,
+      "duplicate_targets": 0,
+      "evidence_records_read": 5,
+      "extra_targets": 0,
+      "malformed_provenance": 0,
+      "mechanically_unrepresentable": 0,
+      "missing_targets": 0,
+      "needs_review": 0,
+      "no_confirmed_event": 120,
+      "normalized_observations": 5,
+      "sensitivity_positives": 0,
+      "strict_positives": 5,
+      "target_state_sha256": "d989a8c1dfc65965cc6ac07cb1d30c711d9e93f272eaf950db7c6aacf17e4e73",
+      "unbound_observations": 0,
+      "unresolved_evidence_bindings": 0,
+      "unresolved_items": [],
+      "verdict": "CITY V2 FORMALIZATION PROVEN"
+    },
+    "uzhhorod": {
+      "blocker": null,
+      "bound_observations": 1,
+      "canonical_episodes": 92,
+      "canonical_source_files": [
+        "data/explosion_metric_handoff/source_slices/uzhhorod-historical-recovery_alerts.json"
+      ],
+      "city_key": "uzhhorod",
+      "classifier_pipeline_exceptions": 0,
+      "counted_evidence_unbound": 0,
+      "duplicate_targets": 0,
+      "evidence_records_read": 2,
+      "extra_targets": 0,
+      "malformed_provenance": 0,
+      "mechanically_unrepresentable": 0,
+      "missing_targets": 0,
+      "needs_review": 0,
+      "no_confirmed_event": 91,
+      "normalized_observations": 2,
+      "sensitivity_positives": 0,
+      "strict_positives": 1,
+      "target_state_sha256": "88e785cf041df191205e166944b0a3f65f187cda3730a5631a2d058ddad4ea93",
+      "unbound_observations": 1,
+      "unresolved_evidence_bindings": 1,
+      "unresolved_items": [
+        {
+          "candidate_episode_ids": [],
+          "event_time": null,
+          "evidence_id": "8a57a18888b5c38502ae9714",
+          "reason": "unresolved_evidence_binding"
+        }
+      ],
+      "verdict": "CITY V2 FORMALIZATION PROVEN"
+    }
+  },
+  "city_set": [
+    "ternopil",
+    "uzhhorod"
+  ],
+  "common_base": "fb563dc410fe6614263bdc8d4eb55025a987e950",
+  "incorporation": "NO",
+  "methodology_version": "historical-attack-event-air-defense-action-v2",
+  "mode": "FREEZE_EXISTING_EVIDENCE",
+  "mutation_guards": {
+    "authoritative_inputs_unchanged": true,
+    "db_neon": "UNTOUCHED",
+    "deployment": "NO",
+    "guarded_input_sha256_after": {
+      "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/ternopil-historical-recovery_alerts.json": "1f91fe5cf80bb85969055317947de65bc595c2e324330247670d1baa5f6c98e5",
+      "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/uzhhorod-historical-recovery_alerts.json": "41ba1c95e4800d2e77f0d295290a9263f5fc520799a62a356c1505c587a0d1c9",
+      "kyiv-air-alerts-grafana/data/explosion_research/ternopil/final_evidence.json": "bda9327ee19ac5359a999317d53f1cb6bf002136985eb3a7982854c135fdd6ce",
+      "kyiv-air-alerts-grafana/data/explosion_research/uzhhorod/final_evidence.json": "5d39c68fca47a48d3bcd93d14d579f6c60cd0f2918c4e41ec7b803a718790384",
+      "kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py": "499df82ee4a0e9997f31c381850241bc19667ffc2b3882e7a1123df52c900c18",
+      "kyiv-air-alerts-grafana/scripts/replay_explosion_history.py": "5df4be4ae6a0518dbde7b89cafbfeae76cc23170a84071afd4f6771a9ef301bf"
+    },
+    "guarded_input_sha256_before": {
+      "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/ternopil-historical-recovery_alerts.json": "1f91fe5cf80bb85969055317947de65bc595c2e324330247670d1baa5f6c98e5",
+      "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/uzhhorod-historical-recovery_alerts.json": "41ba1c95e4800d2e77f0d295290a9263f5fc520799a62a356c1505c587a0d1c9",
+      "kyiv-air-alerts-grafana/data/explosion_research/ternopil/final_evidence.json": "bda9327ee19ac5359a999317d53f1cb6bf002136985eb3a7982854c135fdd6ce",
+      "kyiv-air-alerts-grafana/data/explosion_research/uzhhorod/final_evidence.json": "5d39c68fca47a48d3bcd93d14d579f6c60cd0f2918c4e41ec7b803a718790384",
+      "kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py": "499df82ee4a0e9997f31c381850241bc19667ffc2b3882e7a1123df52c900c18",
+      "kyiv-air-alerts-grafana/scripts/replay_explosion_history.py": "5df4be4ae6a0518dbde7b89cafbfeae76cc23170a84071afd4f6771a9ef301bf"
+    },
+    "historical_evidence_mutations": 0,
+    "production_dashboard_data": "UNTOUCHED",
+    "scope_allowlist": "PASS",
+    "unexpected_changed_paths_before_artifact": []
+  },
+  "normalization_version": "historical-attack-event-observation-v2",
+  "overall_blocker": null,
+  "overall_verdict": "PROVEN",
+  "proof": "historical-v2-formalization-ternopil-ivano-frankivsk-proof-2026-10-02",
+  "public_web_research": "NO",
+  "schema_version": 2,
+  "source_discovery": "NO",
+  "tested_head": "2423c2f47a0330051b74cb01a71b87fe85de05b0"
+}
