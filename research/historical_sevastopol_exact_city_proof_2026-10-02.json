@@ -1,0 +1,113 @@
+{
+  "schema_version": 1,
+  "proof": "historical-sevastopol-exact-city-proof-2026-10-02",
+  "verdict": "SEVASTOPOL EXACT-CITY REPAIR PROVEN",
+  "predecessor_head": "209df693c0c034a8137eee5b8cfd1a295ca086ed",
+  "proof_execution_head": "a5a232b810deb109411a420ec7eec87fa5872622",
+  "final_proof_head": "artifact_commit; resolve branch HEAD after this artifact commit",
+  "final_proof_head_semantics": "The artifact commit is intentionally metadata-only. Its resulting SHA is the final proof HEAD reported externally; embedding that SHA in its own contents would be circular.",
+  "github_actions_run_id": 36968318299,
+  "focused_run_conclusion": "success",
+  "implementation": {
+    "architecture": "Existing ALL_CITY_CONFIG alias registry plus token-bounded regex city_mentioned matcher",
+    "matching_rule": "(?<![\\w-])<escaped alias>(?![\\w-]) after casefold/whitespace normalization",
+    "semantic_change": "Added Russian locative alias 'севастополе' for configured city 'sevastopol'; no new morphology/NLP dependency and no generic substring matching",
+    "aliases_after": [
+      "севастополь",
+      "севастополі",
+      "севастополе",
+      "севастополя",
+      "севастополю",
+      "севастополем"
+    ],
+    "forms_proven": [
+      "Севастополь",
+      "Севастополі",
+      "Севастополе"
+    ]
+  },
+  "case_18": {
+    "city": "sevastopol",
+    "episode_id": "6069b17ec096cae0912ad9bd",
+    "alert_start": "2026-09-04T11:48:14Z",
+    "alert_end": "2026-09-04T12:13:20Z",
+    "source_family": "telegram/razvozhaev",
+    "telegram_message_id": 23590,
+    "source_timestamp": "2026-09-04T12:00:47Z",
+    "before": {
+      "exact_city_evidence_present": false,
+      "candidate_matching": "unique_match",
+      "classification_outcome": "needs_review",
+      "classification_episode_id": null
+    },
+    "after": {
+      "exact_city_evidence_present": true,
+      "candidate_matching": {
+        "outcome": "unique_match",
+        "matched_episode_id": "6069b17ec096cae0912ad9bd",
+        "reason": "publication_within_unique_tracked_alert_window"
+      },
+      "temporal_binding": {
+        "code": "TEMPORAL_CONTEMPORANEOUS_LIVE_WORDING",
+        "episode_id": "6069b17ec096cae0912ad9bd",
+        "episode_specific": true,
+        "message_time": "2026-09-04T12:00:47Z"
+      },
+      "matched_episode": "6069b17ec096cae0912ad9bd",
+      "air_defense_context": true,
+      "air_defense_action": true,
+      "interception_claim": true,
+      "classifier_reason_codes": [
+        "MATCH_UNIQUE",
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "ATTACK_EVENT_TYPES:air_defense_action",
+        "AIR_MILITARY_CONTEXT",
+        "SAME_ATTACK_CONTEXT_SUPPORTED",
+        "TEMPORAL_CONTEMPORANEOUS_LIVE_WORDING"
+      ],
+      "classification_outcome": "approved_strict",
+      "target_level_outcome": "STRICT_EVENT_POSITIVE",
+      "event_positive_strict": true,
+      "confirmed_event_types": [
+        "air_defense_action"
+      ]
+    }
+  },
+  "focused_tests": {
+    "base_form": "PASS",
+    "ukrainian_locative": "PASS",
+    "russian_locative": "PASS",
+    "case_18_exact_replay": "PASS",
+    "false_positive_fragment_guard": "PASS",
+    "wrong_city_guard": "PASS"
+  },
+  "regression_guards": {
+    "classifier_self_test": "PASS",
+    "step_1_live_update_timestamp_tests": "PASS — 7/7",
+    "step_2_source_coverage_controls": "PASS — 7/7",
+    "frozen_campaign_batch_count": 139,
+    "frozen_campaign_batch_diff_count": 0,
+    "source_registry_modified": false,
+    "source_adapters_modified": false,
+    "discovery_queries_modified": false,
+    "attack_event_semantics_modified": false,
+    "temporal_semantics_modified": false,
+    "canonical_alerts_modified": false,
+    "accepted_batch_artifacts_modified": false,
+    "dashboard_data_modified": false
+  },
+  "scope": {
+    "full_campaign_rerun": false,
+    "recovery_scan": false,
+    "incorporation": false,
+    "db_or_neon_touched": false,
+    "deployment_performed": false
+  },
+  "changed_paths_before_artifact": [
+    ".github/workflows/historical-sevastopol-exact-city-proof.yml",
+    "kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py",
+    "kyiv-air-alerts-grafana/tests/test_historical_sevastopol_exact_city_proof.py"
+  ],
+  "conclusion": "The exact-city defect exposed by blind case 18 is repaired in proof only. The repair uses the existing configured alias registry and token-bounded matcher, adds only the mechanically justified Russian locative 'севастополе', preserves city-context semantics, and causes the already retrieved in-alert official observation to pass the normal classifier as approved_strict with target-level STRICT_EVENT_POSITIVE."
+}
