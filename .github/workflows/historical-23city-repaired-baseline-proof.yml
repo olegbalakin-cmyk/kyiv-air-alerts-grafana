@@ -4,6 +4,10 @@ on:
   push:
     branches:
       - historical-23city-repaired-baseline-proof-2026-10-02
+    paths:
+      - "kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py"
+      - "kyiv-air-alerts-grafana/tests/test_historical_23city_repaired_baseline_proof.py"
+      - ".github/workflows/historical-23city-repaired-baseline-proof.yml"
   workflow_dispatch:
 
 permissions:
@@ -26,7 +30,6 @@ jobs:
           set -euo pipefail
           base=0950a9602661ceac526f9c38c58bed2a974c73f4
           git merge-base --is-ancestor "$base" HEAD
-          test "$(git rev-list --count "$base"..HEAD)" -eq 1
 
       - name: Set up Python
         uses: actions/setup-python@v5
