@@ -83,7 +83,7 @@ def main() -> int:
     if len(campaign_dirs) != 1:
         raise SystemExit(f"campaign-dir discovery invariant failed: {len(campaign_dirs)}")
     campaign_dir = campaign_dirs[0]
-    batches = sorted(p for p in campaign_dir.glob("*.json") if p.is_file())
+    batches = sorted(p for p in campaign_dir.rglob("*.json") if p.is_file())
     if len(batches) != EXPECTED_BATCHES:
         raise SystemExit(f"batch-count invariant failed: {len(batches)} != {EXPECTED_BATCHES}")
 
