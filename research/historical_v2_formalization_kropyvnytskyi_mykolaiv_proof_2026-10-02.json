@@ -1,0 +1,185 @@
+{
+  "schema_version": 1,
+  "kind": "historical_v2_existing_evidence_formalization_proof",
+  "mode": "REBIND_EXISTING_EVIDENCE",
+  "methodology": "historical-attack-event-air-defense-action-v2",
+  "normalization": "retained-final-evidence-via-replay_explosion_history-current",
+  "generated_at": "2026-10-02T07:33:35.672030Z",
+  "proof_branch": "historical-v2-formalization-kropyvnytskyi-mykolaiv-proof-2026-10-02",
+  "base_head": "fb563dc410fe6614263bdc8d4eb55025a987e950",
+  "tested_head": "a89a85daf32d7896086b37ca6557abf28a39904f",
+  "github_run_id": "36979169917",
+  "city_set": [
+    "kropyvnytskyi",
+    "mykolaiv"
+  ],
+  "expected_canonical_counts": {
+    "kropyvnytskyi": 1161,
+    "mykolaiv": 1648
+  },
+  "cities": {
+    "kropyvnytskyi": {
+      "city_key": "kropyvnytskyi",
+      "verdict": "CITY V2 FORMALIZATION PROVEN",
+      "blocker": null,
+      "blockers": [],
+      "counts": {
+        "canonical_episodes": 1161,
+        "evidence_records_read": 39,
+        "normalized_observations": 39,
+        "bound_observations": 39,
+        "unbound_observations": 0,
+        "non_event_split_observations": 0,
+        "malformed_provenance": 0,
+        "strict_positives": 38,
+        "sensitivity_positives": 0,
+        "no_confirmed_event": 1122,
+        "needs_review": 1,
+        "missing_targets": 0,
+        "duplicate_targets": 0,
+        "extra_targets": 0,
+        "unresolved_evidence_bindings": 0
+      },
+      "unresolved_items": [],
+      "target_state_sha256": "d34a4079f97e96bf9f75126788bcaf5db9460786ba25e89a8f07e9c1e849352d",
+      "normalized_observation_sha256": "8d59994decc817b27e275f84999675814927fa5c39ee5ce4b22ac75bf5481781",
+      "input_hashes": {
+        "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/kropyvnytskyi-historical-recovery_alerts.json": {
+          "git_blob_sha": "7b3b42c0cd86476d867f83296eb031d4ccb54d44",
+          "sha256": "6c5d599297ccf53ee0fc7811bb31ffb4b06f8a1620c2175e8d660deaf4167fdc"
+        },
+        "kyiv-air-alerts-grafana/data/explosion_research/kropyvnytskyi/final_evidence.json": {
+          "git_blob_sha": "ab21e5608a2d0600538b7a5b4d3cee77f5eb9f7b",
+          "sha256": "9fd71198c58e885ba43b11272bf7f7be55de9ca5800373a6679ade28c9bcdbc2"
+        }
+      },
+      "guards": {
+        "expected_canonical_count": 1161,
+        "evidence_contract_count": 1161,
+        "coverage_start": "2025-09-01",
+        "coverage_end": "2026-09-17",
+        "canonical_ids_unique": true,
+        "every_canonical_episode_represented_once": true,
+        "normalization_accounting_pass": true,
+        "authoritative_inputs_unchanged": true,
+        "classifier_pipeline_exceptions": 0,
+        "processed_other_cities": false,
+        "public_web_research": false,
+        "source_discovery": false,
+        "db_neon_touched": false,
+        "production_dashboard_mutated": false,
+        "incorporation": false
+      },
+      "diagnostic_hashes": {
+        "classifier_git_blob": "89b1be41909c6622339ce8a82d9ac2d982b82481",
+        "replay_helper_git_blob": "e1a6c793d680196724fbf70f09ed09a821912aca"
+      }
+    },
+    "mykolaiv": {
+      "city_key": "mykolaiv",
+      "verdict": "CITY V2 FORMALIZATION PROVEN",
+      "blocker": null,
+      "blockers": [],
+      "counts": {
+        "canonical_episodes": 1648,
+        "evidence_records_read": 137,
+        "normalized_observations": 137,
+        "bound_observations": 136,
+        "unbound_observations": 1,
+        "non_event_split_observations": 0,
+        "malformed_provenance": 0,
+        "strict_positives": 122,
+        "sensitivity_positives": 13,
+        "no_confirmed_event": 1512,
+        "needs_review": 1,
+        "missing_targets": 0,
+        "duplicate_targets": 0,
+        "extra_targets": 0,
+        "unresolved_evidence_bindings": 1
+      },
+      "unresolved_items": [
+        {
+          "evidence_id": "044b87d46abe3bbf760023f1",
+          "stable_source_identifier": "https://www.nikpravda.com.ua/na-mykolayivshhyni-ogolosyly-povitryanu-tryvogu-cherez-reaktyvnyj-shahed-u-mykolayevi-prolunav-vybuh/",
+          "event_time": "2026-07-16 morning; exact minute not reported",
+          "reason": "missing_episode_binding",
+          "candidate_episode_ids": []
+        }
+      ],
+      "target_state_sha256": "357cf4fc1eb761ba266d97058e23700605ef46ba23087b5fab7955883b9cdeeb",
+      "normalized_observation_sha256": "de6b56400af034566f48a73b3a15f014b98aa11364815e5e6ce9915d9e7547ff",
+      "input_hashes": {
+        "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/mykolaiv-P2a_alerts.json": {
+          "git_blob_sha": "590d5db1b3bbffe7c49c771a45b0de4ffda06daf",
+          "sha256": "4026cedb1929a7f7971d886d0d26f9b87859fa73e4d582c45d960d5d3782e589"
+        },
+        "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/mykolaiv-P2b_alerts.json": {
+          "git_blob_sha": "af160376d07c0dc2903e5ff1a62b429292a3fd55",
+          "sha256": "0ed767b360cd6bae1c57148f121053e4b26821faf3c4a62c5bce508c3bda9998"
+        },
+        "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/mykolaiv-P3a_alerts.json": {
+          "git_blob_sha": "a6f0dbbc775d1806ddbdf46cc6cdd69e3cfadc96",
+          "sha256": "ada3ccb6b076f4a35f635e4e3799ba35700ea143dbad6fbf22db53b169a16da8"
+        },
+        "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/mykolaiv-P3b_alerts.json": {
+          "git_blob_sha": "768608a366e1eddecf692487ec2252bbefedaa9d",
+          "sha256": "e25932d04a8023b938c931a5981339d547c6dee6724182d92477ad80e9fc2d73"
+        },
+        "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/mykolaiv-historical-recovery_alerts.json": {
+          "git_blob_sha": "a8e0cd97da0ce309727d76ade776c79378c36ab7",
+          "sha256": "fd04bbee46174f3ed26c5c6efa2c7c6992aeface121b763abf569631da4db057"
+        },
+        "kyiv-air-alerts-grafana/data/explosion_research/mykolaiv/final_evidence.json": {
+          "git_blob_sha": "0860488bc18fb3c1a90b9e86df23001abb675c9c",
+          "sha256": "f224cb01ef2149033d5ba6882c8469816f892116cc15664304f4dbe58eec4584"
+        }
+      },
+      "guards": {
+        "expected_canonical_count": 1648,
+        "evidence_contract_count": 1648,
+        "coverage_start": "2025-11-05",
+        "coverage_end": "2026-09-17",
+        "canonical_ids_unique": true,
+        "every_canonical_episode_represented_once": true,
+        "normalization_accounting_pass": true,
+        "authoritative_inputs_unchanged": true,
+        "classifier_pipeline_exceptions": 0,
+        "processed_other_cities": false,
+        "public_web_research": false,
+        "source_discovery": false,
+        "db_neon_touched": false,
+        "production_dashboard_mutated": false,
+        "incorporation": false
+      },
+      "diagnostic_hashes": {
+        "classifier_git_blob": "89b1be41909c6622339ce8a82d9ac2d982b82481",
+        "replay_helper_git_blob": "e1a6c793d680196724fbf70f09ed09a821912aca"
+      }
+    }
+  },
+  "determinism": {
+    "kropyvnytskyi": {
+      "pass": true,
+      "target_state_sha256_first": "d34a4079f97e96bf9f75126788bcaf5db9460786ba25e89a8f07e9c1e849352d",
+      "target_state_sha256_second": "d34a4079f97e96bf9f75126788bcaf5db9460786ba25e89a8f07e9c1e849352d"
+    },
+    "mykolaiv": {
+      "pass": true,
+      "target_state_sha256_first": "357cf4fc1eb761ba266d97058e23700605ef46ba23087b5fab7955883b9cdeeb",
+      "target_state_sha256_second": "357cf4fc1eb761ba266d97058e23700605ef46ba23087b5fab7955883b9cdeeb"
+    }
+  },
+  "mutation_guards": {
+    "public_web_research": "NO",
+    "source_discovery": "NO",
+    "authoritative_evidence_mutations": 0,
+    "db_neon_mutations": 0,
+    "production_dashboard_mutations": 0,
+    "incorporation": "NO",
+    "processed_city_set_exact": [
+      "kropyvnytskyi",
+      "mykolaiv"
+    ]
+  },
+  "overall_verdict": "PROVEN"
+}
