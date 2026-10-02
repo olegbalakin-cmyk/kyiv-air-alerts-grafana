@@ -1,0 +1,124 @@
+{
+  "schema_version": 2,
+  "proof": "historical-v2-formalization-vinnytsia-zhytomyr-proof-2026-10-02",
+  "common_base": "fb563dc410fe6614263bdc8d4eb55025a987e950",
+  "tested_head": "eaa77e2c2714d68a25dcd581c3194c1d394eb00a",
+  "city_set": [
+    "vinnytsia",
+    "zhytomyr"
+  ],
+  "mode": "FREEZE_EXISTING_EVIDENCE",
+  "methodology_version": "historical-attack-event-air-defense-action-v2",
+  "classifier_implementation_sha256": "499df82ee4a0e9997f31c381850241bc19667ffc2b3882e7a1123df52c900c18",
+  "cities": {
+    "vinnytsia": {
+      "verdict": "CITY V2 FORMALIZATION PROVEN",
+      "counts": {
+        "canonical_episodes": 362,
+        "evidence_records_read": 7,
+        "normalized_observations": 7,
+        "bound_observations": 7,
+        "unbound_observations": 0,
+        "malformed_provenance": 0,
+        "strict_positives": 5,
+        "sensitivity_positives": 2,
+        "no_confirmed_event": 355,
+        "needs_review": 0,
+        "missing_targets": 0,
+        "duplicate_targets": 0,
+        "extra_targets": 0,
+        "unresolved_evidence_bindings": 0,
+        "excluded_research_records_preserved": 6,
+        "semantic_guard_checked": 7
+      },
+      "unresolved_items": [],
+      "blocker": null,
+      "target_state_sha256": "2c7f096b5041b6efae48c95db36bfb445dfdc598898d83d35cc8c253360d8d7a",
+      "canonical_discovery": {
+        "exact_expected_count": true,
+        "candidate_sources": [
+          {
+            "path": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/vinnytsia-historical-recovery_alerts.json",
+            "episode_ids": 362
+          },
+          {
+            "path": "kyiv-air-alerts-grafana/data/explosion_review_queue.json",
+            "episode_ids": 1
+          }
+        ]
+      },
+      "input_sha256": "f2933b1c3cb13571cb50a9b612783731a95e3754eb99da026e90fa33254b819b"
+    },
+    "zhytomyr": {
+      "verdict": "CITY V2 FORMALIZATION PROVEN",
+      "counts": {
+        "canonical_episodes": 685,
+        "evidence_records_read": 21,
+        "normalized_observations": 21,
+        "bound_observations": 20,
+        "unbound_observations": 1,
+        "malformed_provenance": 0,
+        "strict_positives": 19,
+        "sensitivity_positives": 1,
+        "no_confirmed_event": 665,
+        "needs_review": 0,
+        "missing_targets": 0,
+        "duplicate_targets": 0,
+        "extra_targets": 0,
+        "unresolved_evidence_bindings": 1,
+        "excluded_research_records_preserved": 0,
+        "semantic_guard_checked": 21
+      },
+      "unresolved_items": [
+        {
+          "evidence_id": "zh_r1",
+          "stable_source_identifier": "https://suspilne.media/zhytomyr/1374812-vnoci-9-serpna-zitomirsinu-atakuvali-reaktivni-droni-vijsk-rf-e-vlucanna-ta-postrazdali/",
+          "event_time": "2026-08-09",
+          "reason": "NO_UNIQUE_EPISODE_BINDING",
+          "candidate_episode_ids": [
+            "5a2ace9be2f56a219fc478d6",
+            "3d9e6569a254ffdb8b339b69",
+            "11c78a9d9c8fed8cdbb5783d"
+          ],
+          "bucket": "review"
+        }
+      ],
+      "blocker": null,
+      "target_state_sha256": "224a286578fba06c6ca5853bb0eee8c8b54c901836b5b77a54f5786c4bbe7546",
+      "canonical_discovery": {
+        "exact_expected_count": true,
+        "candidate_sources": [
+          {
+            "path": "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/zhytomyr-historical-recovery_alerts.json",
+            "episode_ids": 685
+          },
+          {
+            "path": "kyiv-air-alerts-grafana/data/explosion_research/zhytomyr/final_evidence.json",
+            "episode_ids": 20
+          }
+        ]
+      },
+      "input_sha256": "b2f27f0686e39ea754bdc3515b9b116220c4606702542a80ff04444b3f63621b"
+    }
+  },
+  "mutation_guards": {
+    "assigned_evidence_sha256_before": {
+      "kyiv-air-alerts-grafana/data/explosion_research/vinnytsia/final_evidence.json": "f2933b1c3cb13571cb50a9b612783731a95e3754eb99da026e90fa33254b819b",
+      "kyiv-air-alerts-grafana/data/explosion_research/zhytomyr/final_evidence.json": "b2f27f0686e39ea754bdc3515b9b116220c4606702542a80ff04444b3f63621b"
+    },
+    "assigned_evidence_sha256_after": {
+      "kyiv-air-alerts-grafana/data/explosion_research/vinnytsia/final_evidence.json": "f2933b1c3cb13571cb50a9b612783731a95e3754eb99da026e90fa33254b819b",
+      "kyiv-air-alerts-grafana/data/explosion_research/zhytomyr/final_evidence.json": "b2f27f0686e39ea754bdc3515b9b116220c4606702542a80ff04444b3f63621b"
+    },
+    "assigned_evidence_unchanged": true,
+    "historical_source_evidence_inputs_unchanged": true,
+    "public_web_research": "NO",
+    "source_discovery": "NO",
+    "db_neon": "UNTOUCHED",
+    "deploy": "NO",
+    "production_dashboard_data": "UNTOUCHED",
+    "authoritative_evidence_mutations": 0,
+    "incorporation": "NO"
+  },
+  "overall_verdict": "PROVEN"
+}
