@@ -1,0 +1,441 @@
+{
+  "final_verdict": "DIFFERENTIATED SCHEDULED PRODUCTION SHADOW ENABLED AND PROVEN",
+  "proof_date": "2026-10-02",
+  "task_scope": "FINAL PHASE K POST-AUDIT AND PROOF CLOSURE ONLY",
+  "accepted_predecessor_chain": {
+    "source_seam": {
+      "verdict": "DIFFERENTIATED SAME-RUN SOURCE SEAM PROVEN",
+      "run_id": 36973362739,
+      "artifact_commit": "f4964ece26dfa8c35308a8bb8127bf0024083e42",
+      "control_acquisitions": {
+        "kyiv_official": 0,
+        "ukrainealarm": 0,
+        "alerts_in_ua": 0
+      },
+      "capture_only_acquisitions": {
+        "kyiv_official": 1,
+        "ukrainealarm": 1,
+        "alerts_in_ua": 1
+      },
+      "capture_plus_shadow_acquisitions": {
+        "kyiv_official": 1,
+        "ukrainealarm": 1,
+        "alerts_in_ua": 1
+      },
+      "stored_only_sidecar_network_requests": 0,
+      "missing_input_strict_test": "PASS",
+      "capture_failure_policy": "fail-open",
+      "product_parity": "byte-for-byte PASS",
+      "credentials_exposed": false
+    },
+    "disposable_credential_wiring": {
+      "status": "PROVEN",
+      "disposable_branch_id": "br-quiet-hat-b5z5hdqu",
+      "parent_branch_id": "br-bold-mode-b5rub8pq"
+    },
+    "phase_e": {
+      "verdict": "DIFFERENTIATED PHASE E CURRENT LIVE INPUT AND DISPOSABLE PERSISTENCE PROVEN",
+      "run_id": 36987383554,
+      "head_sha": "40a743bdc2b655006aa4a807a8096204203b3027",
+      "logical_acquisitions": {
+        "kyiv_official": 1,
+        "ukrainealarm": 1,
+        "alerts_in_ua": 1
+      },
+      "all_http_200": true,
+      "strict_json_and_schema": "PASS",
+      "first_persistence": {
+        "snapshots": 3,
+        "observations": 2
+      },
+      "binding": {
+        "BOUND": 0,
+        "UNBOUND": 3,
+        "AMBIGUOUS": 0
+      },
+      "sidecar_network_requests": 0,
+      "exact_replay": {
+        "snapshots_inserted": 0,
+        "observations_inserted": 0
+      },
+      "fresh_process_replay": {
+        "snapshots_inserted": 0,
+        "observations_inserted": 0
+      },
+      "orphan_refs": 0,
+      "observations_without_snapshot": 0,
+      "invalid_binding_combinations": 0,
+      "duplicate_identities": 0,
+      "parent_fingerprints_unchanged": true,
+      "legacy_checkpoint_seq": 18
+    },
+    "phase_f": {
+      "verdict": "PROVEN",
+      "deterministic_child_failure_atomic_rollback": true,
+      "differentiated_state_after_failure": {
+        "snapshots": 3,
+        "observations": 2
+      },
+      "partial_residue": false,
+      "product_parity": "PASS"
+    },
+    "phase_g": {
+      "status": "COMPLETE",
+      "site_prod_runtime_landing_commit": "2645e6df43389dee1cef45443450cc38eb4fe4f7"
+    },
+    "phase_h": {
+      "status": "COMPLETE",
+      "permanent_branch_id": "br-bold-mode-b5rub8pq",
+      "additive_differentiated_schema_applied": true,
+      "destructive_or_core_migration": false
+    },
+    "phase_i": {
+      "status": "COMPLETE",
+      "enablement_commit": "b203d66088295d1ddff70bc3e10e98f3748dfb98",
+      "production_architecture": {
+        "canonical_23_city_parent_shadow": "ON",
+        "differentiated_source_capture": "ON",
+        "differentiated_child_shadow": "ON",
+        "differentiated_sidecar_input_mode": "stored_only",
+        "legacy_lviv_phase1_db_shadow": "RETIRED",
+        "json_authoritative": true,
+        "frontend_db_read": false,
+        "attack_event_neon_persistence": false,
+        "db_cutover": false
+      }
+    },
+    "phase_j": {
+      "verdict": "PROVEN",
+      "run_id": 36989807398,
+      "event": "push",
+      "head_sha": "b203d66088295d1ddff70bc3e10e98f3748dfb98",
+      "run_attempt": 1,
+      "status": "completed",
+      "conclusion": "success",
+      "logical_acquisitions": {
+        "kyiv_official": 1,
+        "ukrainealarm": 1,
+        "alerts_in_ua": 1
+      },
+      "first_permanent_differentiated_persistence": {
+        "snapshots": 3,
+        "observations": 2
+      },
+      "binding": {
+        "BOUND": 0,
+        "UNBOUND": 3,
+        "AMBIGUOUS": 0
+      },
+      "sidecar_network_requests": 0,
+      "production_output_mutation": false,
+      "product_hash_parity": "PASS",
+      "orphan_refs": 0,
+      "legacy_checkpoint_seq": 18,
+      "child_row_observed_at": "2026-10-02T09:26:56.116Z"
+    }
+  },
+  "phase_k": {
+    "verdict": "PHASE K NATURAL SCHEDULE PROVEN",
+    "run_identity": {
+      "run_id": 37007454624,
+      "workflow_name": "Update Ukraine air-alert production data",
+      "workflow_id": 360885782,
+      "run_number": 99,
+      "event": "schedule",
+      "head_sha": "b203d66088295d1ddff70bc3e10e98f3748dfb98",
+      "run_attempt": 1,
+      "created_at": "2026-10-02T12:34:06Z",
+      "completed_at": "2026-10-02T12:59:01Z",
+      "status": "completed",
+      "conclusion": "success",
+      "genuine_natural_schedule": true,
+      "chronologically_after_enablement": true,
+      "not_workflow_dispatch": true,
+      "not_push": true,
+      "not_rerun_masquerading_as_first_schedule": true
+    },
+    "step_audit": {
+      "differentiated_paths": "success",
+      "production_output_guard_before_shadow": "success",
+      "source_capture": "success",
+      "differentiated_postgres_shadow": "success",
+      "product_output_mutation_guard_after_shadow": "success",
+      "differentiated_diagnostics_upload": "success",
+      "normal_product_pipeline": "success",
+      "alerts_in_ua_and_ukrainealarm_bridge": "success",
+      "multicity_canonical_db_shadow": "success",
+      "qa_23_city_dataset": "success",
+      "verify_production_dataset": "success",
+      "commit_updated_production_data": "success",
+      "whole_job": "success"
+    },
+    "source_capture_diagnostic": {
+      "attempted": true,
+      "status": "SUCCEEDED",
+      "credentials_exposed": false,
+      "production_output_mutation": false,
+      "logical_acquisition_counts": {
+        "kyiv_official": 1,
+        "ukrainealarm": 1,
+        "alerts_in_ua": 1
+      },
+      "sources": {
+        "kyiv_official": {
+          "status": "SUCCEEDED",
+          "http_status": 200,
+          "bytes": 146,
+          "sha256": "b6837706cc140f5ebe33c2cde0dcbbe4876dcf0591d486e158b1c115c1c03034",
+          "source_response_sha256": "b6837706cc140f5ebe33c2cde0dcbbe4876dcf0591d486e158b1c115c1c03034"
+        },
+        "ukrainealarm": {
+          "status": "SUCCEEDED",
+          "http_status": 200,
+          "bytes": 447,
+          "sha256": "80783960fe5c5baefe0a7d7fe680fd103382c590948c3f0dcf2f2a196de1353a",
+          "source_response_sha256": "3cc46fec696be362f8a4640eb40561941f93fabb6fee03aafb6654dab803a020"
+        },
+        "alerts_in_ua": {
+          "status": "SUCCEEDED",
+          "http_status": 200,
+          "bytes": 577,
+          "sha256": "e246f41e79ea6d0eb0d3fe0a3f4cb3c9e8731c79975baf134a21d43102fb8b7c",
+          "source_response_sha256": "69cfe9d958b76d9a43df36237fab3ec2e7c3f06cbc4850954e3ab4a6912ed5ea"
+        }
+      }
+    },
+    "differentiated_persistence_diagnostic": {
+      "attempted": true,
+      "backend": "postgres",
+      "input_mode": "stored_only",
+      "status": "SUCCEEDED",
+      "sidecar_network_requests": 0,
+      "inserted_snapshots": 3,
+      "inserted_observations": 2,
+      "existing_or_replayed_snapshots": 0,
+      "existing_or_replayed_observations": 0,
+      "existing_or_replayed_basis": "Derived from accepted pre-K permanent 3/2 plus diagnostic inserts 3/2 yielding diagnostic store_counts 6/4, with zero duplicate identities in the fresh DB audit.",
+      "binding": {
+        "BOUND": 0,
+        "UNBOUND": 3,
+        "AMBIGUOUS": 0
+      },
+      "store_counts_after_phase_k": {
+        "snapshots": 6,
+        "observations": 4
+      },
+      "production_output_mutation": false,
+      "fail_open_diagnostic_status": "SUCCESS PATH; fail-open path not exercised in Phase K. Failure-isolation continuity is accepted from Phase F and runtime blobs are unchanged from the Phase G landing commit."
+    },
+    "publication": {
+      "successful": true,
+      "input_workflow_head_sha": "b203d66088295d1ddff70bc3e10e98f3748dfb98",
+      "checked_out_site_prod_input_sha": "965ec959c6152cae3a4bb8b842265e5a11fa8bc6",
+      "resulting_main_generated_data_commit": "e85429924dfd0f1759c09c0919d361f762b665e4",
+      "resulting_main_parent": "b203d66088295d1ddff70bc3e10e98f3748dfb98",
+      "resulting_site_prod_bridge_checkpoint_commit": "1e5a58f8ba55bfe1f4abeef8e14e6871f5ea3efb",
+      "resulting_site_prod_final_production_data_commit": "8d2459000286b2f9852f88f29adae838bca08648",
+      "site_prod_chain": [
+        "965ec959c6152cae3a4bb8b842265e5a11fa8bc6",
+        "1e5a58f8ba55bfe1f4abeef8e14e6871f5ea3efb",
+        "8d2459000286b2f9852f88f29adae838bca08648"
+      ],
+      "differentiated_failure_blocked_publication": false,
+      "differentiated_shadow_mutated_product_output_outside_publication_pipeline": false
+    },
+    "canonical_parent_shadow_diagnostic": {
+      "status": "succeeded",
+      "workflow_sha": "b203d66088295d1ddff70bc3e10e98f3748dfb98",
+      "input_sha": "965ec959c6152cae3a4bb8b842265e5a11fa8bc6",
+      "permanent_branch_id": "br-bold-mode-b5rub8pq",
+      "city_count": 23,
+      "canonical_episode_count_in_input_corpus": 28052,
+      "episodes_existing_for_input_corpus": 28042,
+      "episodes_inserted": 10,
+      "episodes_updated": 0,
+      "source_observations_inserted": 0
+    }
+  },
+  "fresh_post_k_freeze": {
+    "main_sha": "e85429924dfd0f1759c09c0919d361f762b665e4",
+    "main_commit_message": "Update Kyiv air-alert and casualty data",
+    "main_parent_sha": "b203d66088295d1ddff70bc3e10e98f3748dfb98",
+    "site_prod_sha": "8d2459000286b2f9852f88f29adae838bca08648",
+    "site_prod_commit_message": "Update production air-alert and casualty data",
+    "current_refs_equal_run_99_publication_refs": true,
+    "workflow_blob_unchanged_since_enablement": true,
+    "workflow_blob_sha": "3d89a5205245be91c865bbad3147693726411688",
+    "drift_classification": "NO SEMANTIC DRIFT. Current main movement is the run-99 generated-data commit only; current site-prod is the run-99 production-data commit. Runtime script blobs remain identical to the accepted Phase G landing.",
+    "runtime_blob_continuity": {
+      "differentiated_alert_postgres_py": "3cd9c9c5fc0676550aeb1cfa117894e1fc91e85f",
+      "differentiated_alert_shadow_runtime_py": "19f452e23b45aab8fc219f54c132282237845775",
+      "differentiated_alert_source_capture_py": "0b23c4a1681b6cab065f8f27eee69eb6cd6c471f",
+      "multicity_canonical_shadow_py": "6101d9f2da5e10b7554f1fc5d15b90d390d33f2f",
+      "phase_g_equals_phase_k_input_equals_current_site_prod": true
+    }
+  },
+  "neon": {
+    "project_id": "green-cake-44216048",
+    "permanent_branch_id": "br-bold-mode-b5rub8pq",
+    "permanent_branch_name": "lviv-phase1-production-shadow-2026-09-28",
+    "permanent_branch_state": "ready",
+    "disposable_branch_id": "br-quiet-hat-b5z5hdqu",
+    "database_urls_recorded": false
+  },
+  "permanent_parent_audit": {
+    "alert_episodes": 28055,
+    "distinct_city_key_count": 23,
+    "alert_episode_sources": 143,
+    "ingestion_runs": 27,
+    "dangling_alert_episode_source_refs": 0,
+    "canonical_parent_structural_invalid_count": 0,
+    "unexplained_city_regression": false,
+    "lviv_canonical_regression_attributable_to_differentiated_shadow": false,
+    "lviv_rows_touched_by_differentiated_named_ingestion_runs": 0,
+    "retained_lviv_repair_lineage": {
+      "count": 3,
+      "repair_run_kind": "canonical_boundary_repair",
+      "repair_run_id": "4d881774-cc37-4077-9621-bb128ab8380d",
+      "note": "The fresh table total need not equal the latest input-corpus canonical_episode_count. The three-row Lviv repair lineage predates Phase K and is not post-K semantic drift."
+    },
+    "phase_k_parent_rows_created_merely_to_obtain_bound_child_result": false,
+    "basis": "Phase K child binding distribution is BOUND=0/UNBOUND=3/AMBIGUOUS=0; the independent canonical parent shadow inserted 10 input-corpus episodes and updated 0."
+  },
+  "differentiated_child_audit": {
+    "current_counts": {
+      "snapshots": 6,
+      "threat_observations": 4
+    },
+    "current_binding": {
+      "BOUND": 0,
+      "UNBOUND": 6,
+      "AMBIGUOUS": 0
+    },
+    "orphan_non_null_episode_uid": 0,
+    "invalid_binding_state_episode_uid_combinations": 0,
+    "observations_without_snapshot": 0,
+    "duplicate_snapshot_identity": 0,
+    "duplicate_observation_identity": 0,
+    "phase_j_rows": {
+      "observed_at": "2026-10-02T09:26:56.116Z",
+      "snapshots": 3,
+      "threat_observations": 2,
+      "source_snapshot_counts": {
+        "kyiv_official": 1,
+        "ukrainealarm": 1,
+        "alerts_in_ua": 1
+      }
+    },
+    "phase_k_rows": {
+      "observed_at": "2026-10-02T12:34:21.715Z",
+      "snapshots": 3,
+      "threat_observations": 2,
+      "source_snapshot_counts": {
+        "kyiv_official": 1,
+        "ukrainealarm": 1,
+        "alerts_in_ua": 1
+      }
+    },
+    "later_child_rows_after_phase_k": 0,
+    "schema_constraint_result": "PASS",
+    "accepted_constraints_present": {
+      "snapshot_binding_check": true,
+      "snapshot_episode_uid_fk": true,
+      "snapshot_episode_source_observation_fk": true,
+      "snapshot_key_unique": true,
+      "snapshot_raw_sha256_format_check": true,
+      "threat_snapshot_uid_fk": true,
+      "threat_observation_key_unique": true,
+      "threat_source_end_after_start_check": true,
+      "threat_component_signature_format_check": true
+    }
+  },
+  "replay_and_idempotence_continuity": {
+    "phase_e_exact_replay": {
+      "snapshots_inserted": 0,
+      "observations_inserted": 0
+    },
+    "phase_e_fresh_process_replay": {
+      "snapshots_inserted": 0,
+      "observations_inserted": 0
+    },
+    "production_unique_snapshot_identity_constraint_present": true,
+    "production_unique_threat_observation_identity_constraint_present": true,
+    "fresh_duplicate_snapshot_identity_count": 0,
+    "fresh_duplicate_observation_identity_count": 0,
+    "extra_execution_required": false
+  },
+  "legacy_phase1_freeze_audit": {
+    "source_key": "ukrainealarm_region_history",
+    "city_key": "lviv",
+    "stream_key": "region_id:90:AIR",
+    "current_checkpoint_seq": 18,
+    "checkpoint_kind": "poll",
+    "checked_at": "2026-10-01T12:53:17.906Z",
+    "created_by_run_id": "3853ca5f-176f-48c4-b00e-160cdd7e10db",
+    "rows_after_seq18": 0,
+    "differentiated_shadow_advanced_legacy_stream": false,
+    "phase1_db_shadow_production_semantics": "RETIRED/OFF",
+    "workflow_phase1_db_shadow_value": "0"
+  },
+  "attack_event_isolation_audit": {
+    "attack_event_production_tables_introduced": false,
+    "explosion_event_production_tables_introduced": false,
+    "suspicious_public_attack_or_explosion_table_count": 0,
+    "historical_attack_event_rows_written_to_neon_by_this_milestone": false,
+    "alert_threat_observations_is_attack_event_classification": false,
+    "assertion": "ATTACK EVENTS IN NEON = NO"
+  },
+  "json_frontend_authority_audit": {
+    "json_remains_authoritative": true,
+    "frontend_neon_read": false,
+    "canonical_parent_shadow_only": true,
+    "differentiated_child_shadow_only": true,
+    "db_cutover": false,
+    "frontend_data_source": "generated data/dashboard_data.json via raw GitHub JSON/static product data",
+    "default_branch_code_search_neon_tech_hits": 0,
+    "default_branch_code_search_alert_state_snapshots_hits": 0
+  },
+  "credential_audit": {
+    "postgres_url_literal_hits_in_phase_k_job_log": 0,
+    "neon_api_key_value_leaks_in_phase_k_job_log": 0,
+    "database_url_value_leaks_in_phase_k_job_log": 0,
+    "unsafe_token_api_key_cookie_password_lines": 0,
+    "raw_secret_bearing_env_values_in_proof_artifact": false,
+    "credentials_exposed": false
+  },
+  "source_request_equivalence_evidence": {
+    "phase_k_logical_acquisitions": {
+      "kyiv_official": 1,
+      "ukrainealarm": 1,
+      "alerts_in_ua": 1
+    },
+    "phase_k_all_source_capture_status": "SUCCEEDED",
+    "phase_k_sidecar_network_requests": 0,
+    "stored_only_semantics": true
+  },
+  "final_gate": {
+    "phase_j_proven": true,
+    "phase_k_proven": true,
+    "final_permanent_audit_clean": true,
+    "publication_success": true,
+    "canonical_23_city_parent_structurally_valid": true,
+    "differentiated_child_integrity_clean": true,
+    "legacy_checkpoint_frozen_at_seq18": true,
+    "attack_event_persistence_absent": true,
+    "json_authoritative": true,
+    "frontend_neon_read": false,
+    "credentials_exposed": false,
+    "db_cutover": false
+  },
+  "final_assertions": [
+    "DIFFERENTIATED SCHEDULED PRODUCTION SHADOW ENABLED AND PROVEN",
+    "23-CITY CANONICAL PARENT SHADOW REMAINS ACTIVE",
+    "DIFFERENTIATED CHILD SHADOW ACTIVE",
+    "LEGACY LVIV PHASE-1 DB SHADOW REMAINS RETIRED",
+    "LEGACY PHASE-1 CHECKPOINT REMAINS FROZEN AT SEQ18",
+    "JSON REMAINS AUTHORITATIVE",
+    "ATTACK EVENTS IN NEON = NO",
+    "CREDENTIALS EXPOSED = NO",
+    "DB CUTOVER = NO"
+  ]
+}
