@@ -1,0 +1,363 @@
+name: Historical blind freeze Odesa proof
+
+on:
+  push:
+    branches:
+      - historical-blind-freeze-odesa-proof-2026-10-02
+    paths:
+      - ".github/workflows/historical-blind-freeze-odesa-proof-2026-10-02.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  freeze:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      PYTHONDONTWRITEBYTECODE: "1"
+
+    steps:
+      - name: Check out exact accepted Odesa formalization HEAD
+        uses: actions/checkout@v4
+        with:
+          ref: 130f1bdef1bb2479e9b992d26009472930e91987
+          fetch-depth: 0
+
+      - name: Verify exact accepted source and final-artifact relationship
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "130f1bdef1bb2479e9b992d26009472930e91987"
+          test "$(git rev-parse HEAD^)" = "e67d80200d8dbd0b18c1440c2fdaca12363017d3"
+          test "$(git status --porcelain --untracked-files=all)" = ""
+          changed="$(git diff --name-only e67d80200d8dbd0b18c1440c2fdaca12363017d3..130f1bdef1bb2479e9b992d26009472930e91987)"
+          test "$changed" = "research/historical_v2_formalization_odesa_proof_2026-10-02.json"
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install accepted repository Python requirements
+        run: python -m pip install --disable-pip-version-check -r kyiv-air-alerts-grafana/requirements.txt
+
+      - name: Freeze exactly five Odesa cases
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from __future__ import annotations
+
+          import hashlib
+          import importlib.util
+          import json
+          import subprocess
+          import sys
+          from collections import Counter
+          from pathlib import Path
+
+          ACCEPTED_HEAD = "130f1bdef1bb2479e9b992d26009472930e91987"
+          ACCEPTED_TESTED_HEAD = "e67d80200d8dbd0b18c1440c2fdaca12363017d3"
+          CITY = "odesa"
+          CASE_START = 106
+          EXPECTED_NO_CONFIRMED = 1304
+          SEED = "20261002-23city-blind-v1"
+          EXPECTED_TARGET_STATE_SHA256 = "82d865dd1a8ade144ffe05ca07c1cb47c7fe8fb790dd28160661062ccebdf015"
+          ACCEPTED_ARTIFACT_REL = "research/historical_v2_formalization_odesa_proof_2026-10-02.json"
+          OUTPUT = Path("research/historical_blind_freeze_odesa_2026-10-02.json")
+
+          checkout = Path.cwd()
+          source_path = checkout / "kyiv-air-alerts-grafana" / "scripts" / "prove_historical_v2_formalization_odesa.py"
+          accepted_artifact_path = checkout / ACCEPTED_ARTIFACT_REL
+
+          head = subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip()
+          if head != ACCEPTED_HEAD:
+              raise SystemExit(f"WRONG_ACCEPTED_HEAD:{head}")
+
+          parent = subprocess.check_output(["git", "rev-parse", "HEAD^"], text=True).strip()
+          if parent != ACCEPTED_TESTED_HEAD:
+              raise SystemExit(f"WRONG_ACCEPTED_TESTED_PARENT:{parent}")
+
+          final_commit_changed = subprocess.check_output(
+              ["git", "diff", "--name-only", f"{ACCEPTED_TESTED_HEAD}..{ACCEPTED_HEAD}"],
+              text=True,
+          ).splitlines()
+          if final_commit_changed != [ACCEPTED_ARTIFACT_REL]:
+              raise SystemExit("CITY BLIND SAMPLE FREEZE BLOCKED:FINAL_ARTIFACT_COMMIT_DRIFT")
+
+          accepted_artifact = json.loads(accepted_artifact_path.read_text(encoding="utf-8"))
+          if accepted_artifact.get("verdict") != "ODESA V2 FORMALIZATION PROVEN":
+              raise SystemExit("CITY BLIND SAMPLE FREEZE BLOCKED:ACCEPTED_FORMALIZATION_NOT_PROVEN")
+          if accepted_artifact.get("tested_head") != ACCEPTED_TESTED_HEAD:
+              raise SystemExit("CITY BLIND SAMPLE FREEZE BLOCKED:ACCEPTED_TESTED_HEAD_MISMATCH")
+          if accepted_artifact.get("counts", {}).get("no_confirmed_event") != EXPECTED_NO_CONFIRMED:
+              raise SystemExit(
+                  "CITY BLIND FREEZE BLOCKED — NO_CONFIRMED COUNT MISMATCH:"
+                  f"{accepted_artifact.get('counts', {}).get('no_confirmed_event')}!={EXPECTED_NO_CONFIRMED}"
+              )
+          if accepted_artifact.get("target_state_sha256") != EXPECTED_TARGET_STATE_SHA256:
+              raise SystemExit("CITY BLIND SAMPLE FREEZE BLOCKED:ACCEPTED_TARGET_STATE_HASH_MISMATCH")
+
+          spec = importlib.util.spec_from_file_location("accepted_odesa_formalization_proof", source_path)
+          if spec is None or spec.loader is None:
+              raise RuntimeError("CANNOT_IMPORT_ACCEPTED_FORMALIZATION")
+          proof = importlib.util.module_from_spec(spec)
+          spec.loader.exec_module(proof)
+
+          captured: dict[str, object] = {}
+          candidate_keys: set[tuple[str, str]] = set()
+
+          original_json_sha = proof.json_sha
+          def capture_json_sha(value):
+              if (
+                  isinstance(value, list)
+                  and value
+                  and all(
+                      isinstance(row, dict)
+                      and list(row.keys()) == ["episode_id", "state"]
+                      for row in value
+                  )
+              ):
+                  captured["target_rows"] = [dict(row) for row in value]
+              return original_json_sha(value)
+          proof.json_sha = capture_json_sha
+
+          original_dump = proof.dump
+          def capture_dump(payload):
+              captured["proof_payload"] = json.loads(json.dumps(payload))
+          proof.dump = capture_dump
+
+          original_git = proof.git
+          def accepted_final_git(*args: str, check: bool = True) -> str:
+              out = original_git(*args, check=check)
+              if (
+                  len(args) >= 3
+                  and args[0] == "diff"
+                  and args[1] == "--name-only"
+                  and args[2] == f"{proof.COMMON_BASE}..{ACCEPTED_HEAD}"
+              ):
+                  kept = [
+                      line
+                      for line in out.splitlines()
+                      if line and line != ACCEPTED_ARTIFACT_REL
+                  ]
+                  return "\n".join(kept)
+              return out
+          proof.git = accepted_final_git
+
+          original_load_historical_episodes = proof.replay.load_historical_episodes
+          def capture_load_historical_episodes(repo_root, city, monitor):
+              if city != CITY:
+                  raise RuntimeError(f"OUT_OF_SCOPE_CITY:{city}")
+              episodes, sources = original_load_historical_episodes(repo_root, city, monitor)
+              captured["loaded_source_files"] = list(sources)
+              return episodes, sources
+          proof.replay.load_historical_episodes = capture_load_historical_episodes
+
+          original_filter_window = proof.replay.filter_window
+          def capture_filter_window(episodes, coverage_start, coverage_end, monitor):
+              filtered = original_filter_window(episodes, coverage_start, coverage_end, monitor)
+              captured["episodes"] = [dict(ep) for ep in filtered]
+              return filtered
+          proof.replay.filter_window = capture_filter_window
+
+          original_candidate_from_history = proof.replay.candidate_from_history
+          def capture_candidate_from_history(city, row, bucket, target_id, monitor, episode):
+              if city != CITY:
+                  raise RuntimeError(f"OUT_OF_SCOPE_CITY:{city}")
+              candidate = original_candidate_from_history(
+                  city, row, bucket, target_id, monitor, episode
+              )
+              candidate_keys.add((
+                  str(target_id),
+                  str(candidate.get("candidate_id") or ""),
+              ))
+              return candidate
+          proof.replay.candidate_from_history = capture_candidate_from_history
+
+          old_argv = sys.argv[:]
+          try:
+              sys.argv = [
+                  source_path.name,
+                  "--expected-tested-head",
+                  ACCEPTED_HEAD,
+              ]
+              rc = proof.main()
+          finally:
+              sys.argv = old_argv
+              proof.json_sha = original_json_sha
+              proof.dump = original_dump
+              proof.git = original_git
+              proof.replay.load_historical_episodes = original_load_historical_episodes
+              proof.replay.filter_window = original_filter_window
+              proof.replay.candidate_from_history = original_candidate_from_history
+
+          if rc != 0:
+              raise SystemExit(f"CITY BLIND SAMPLE FREEZE BLOCKED:FORMALIZATION_RC:{rc}")
+
+          summary = dict(captured.get("proof_payload") or {})
+          if summary.get("verdict") != "ODESA V2 FORMALIZATION PROVEN":
+              raise SystemExit(
+                  "CITY BLIND SAMPLE FREEZE BLOCKED:"
+                  + ",".join(summary.get("blockers") or ["FORMALIZATION_NOT_PROVEN"])
+              )
+          if summary.get("counts", {}).get("no_confirmed_event") != EXPECTED_NO_CONFIRMED:
+              raise SystemExit(
+                  "CITY BLIND FREEZE BLOCKED — NO_CONFIRMED COUNT MISMATCH:"
+                  f"{summary.get('counts', {}).get('no_confirmed_event')}!={EXPECTED_NO_CONFIRMED}"
+              )
+          if summary.get("target_state_sha256") != EXPECTED_TARGET_STATE_SHA256:
+              raise SystemExit("CITY BLIND SAMPLE FREEZE BLOCKED:TARGET_STATE_HASH_MISMATCH")
+          if summary.get("public_web_research") != "NO":
+              raise SystemExit("CITY BLIND SAMPLE FREEZE BLOCKED:PUBLIC_WEB_GUARD")
+          if summary.get("source_discovery") != "NO":
+              raise SystemExit("CITY BLIND SAMPLE FREEZE BLOCKED:SOURCE_DISCOVERY_GUARD")
+          if summary.get("authoritative_evidence_mutations") != 0:
+              raise SystemExit("CITY BLIND SAMPLE FREEZE BLOCKED:AUTHORITATIVE_MUTATION_GUARD")
+
+          target_rows = list(captured.get("target_rows") or [])
+          episodes = list(captured.get("episodes") or [])
+          canonical_count = int(summary.get("counts", {}).get("canonical_episodes") or 0)
+          if len(target_rows) != canonical_count:
+              raise SystemExit("CITY BLIND SAMPLE FREEZE BLOCKED:TARGET_ROW_CAPTURE_MISMATCH")
+          if len(episodes) != canonical_count:
+              raise SystemExit("CITY BLIND SAMPLE FREEZE BLOCKED:EPISODE_CAPTURE_MISMATCH")
+
+          state_by_episode = {
+              str(row["episode_id"]): str(row["state"])
+              for row in target_rows
+          }
+          eligible_before = sorted(
+              eid
+              for eid, state in state_by_episode.items()
+              if state == "NO_CONFIRMED_EVENT"
+          )
+          if len(eligible_before) != EXPECTED_NO_CONFIRMED:
+              raise SystemExit(
+                  "CITY BLIND FREEZE BLOCKED — NO_CONFIRMED COUNT MISMATCH:"
+                  f"{len(eligible_before)}!={EXPECTED_NO_CONFIRMED}"
+              )
+
+          prior_researched_episodes: list[str] = []
+          prior_set = set(prior_researched_episodes)
+          eligible_after = [eid for eid in eligible_before if eid not in prior_set]
+          exclusions_count = len(eligible_before) - len(eligible_after)
+
+          ranked: list[tuple[str, str]] = []
+          for episode_id in eligible_after:
+              rank = hashlib.sha256(
+                  f"{SEED}|{CITY}|{episode_id}".encode("utf-8")
+              ).hexdigest()
+              ranked.append((rank, episode_id))
+          ranked.sort(key=lambda row: (row[0], row[1]))
+          chosen = ranked[:5]
+          if len(chosen) != 5:
+              raise SystemExit("CITY BLIND SAMPLE FREEZE BLOCKED:SELECTION_COUNT")
+
+          episode_by_id = {
+              str(ep.get("episode_id") or ""): ep
+              for ep in episodes
+              if ep.get("episode_id")
+          }
+          observation_counts = Counter(target_id for target_id, _ in candidate_keys)
+
+          selected_cases = []
+          for offset, (rank, episode_id) in enumerate(chosen):
+              ep = episode_by_id.get(episode_id)
+              if ep is None:
+                  raise SystemExit(
+                      f"CITY BLIND SAMPLE FREEZE BLOCKED:MISSING_EPISODE:{episode_id}"
+                  )
+              alert_start = ep.get("alert_start")
+              alert_end = ep.get("alert_end")
+              if not alert_start or not alert_end:
+                  raise SystemExit(
+                      f"CITY BLIND SAMPLE FREEZE BLOCKED:MISSING_ALERT_BOUNDS:{episode_id}"
+                  )
+              selected_cases.append({
+                  "case": CASE_START + offset,
+                  "city_key": CITY,
+                  "episode_id": episode_id,
+                  "alert_start": str(alert_start),
+                  "alert_end": str(alert_end),
+                  "final_outcome": state_by_episode[episode_id],
+                  "observation_count": int(observation_counts.get(episode_id, 0)),
+                  "rank": rank,
+              })
+
+          for row in selected_cases:
+              if row["final_outcome"] != "NO_CONFIRMED_EVENT":
+                  raise SystemExit("CITY BLIND SAMPLE FREEZE BLOCKED:NON_NO_CONFIRMED_SELECTION")
+
+          compact_sample = json.dumps(
+              selected_cases,
+              ensure_ascii=False,
+              separators=(",", ":"),
+              sort_keys=False,
+          ).encode("utf-8")
+          city_sample_sha256 = hashlib.sha256(compact_sample).hexdigest()
+
+          result = {
+              "schema_version": 1,
+              "verdict": "CITY BLIND SAMPLE FROZEN",
+              "city": CITY,
+              "source_accepted_head": ACCEPTED_HEAD,
+              "source_accepted_tested_head": ACCEPTED_TESTED_HEAD,
+              "source_target_state_sha256": EXPECTED_TARGET_STATE_SHA256,
+              "selection_seed": SEED,
+              "eligible_count_before_exclusions": len(eligible_before),
+              "prior_researched_episodes": prior_researched_episodes,
+              "exclusions_count": exclusions_count,
+              "eligible_count_after_exclusions": len(eligible_after),
+              "selected_cases": selected_cases,
+              "CITY_SAMPLE_SHA256": city_sample_sha256,
+              "mutation_guards": {
+                  "research_performed": "NO",
+                  "public_web": "NO",
+                  "source_discovery": "NO",
+                  "db_neon": "UNTOUCHED",
+                  "deploy": "NO",
+                  "authoritative_data_mutations": 0,
+                  "reconstruction_city_scope": [CITY],
+                  "network_during_reconstruction": "BLOCKED_BY_ACCEPTED_PROOF",
+                  "accepted_checkout_head_exact": head == ACCEPTED_HEAD,
+                  "accepted_final_artifact_only_delta": final_commit_changed == [ACCEPTED_ARTIFACT_REL],
+                  "accepted_target_state_hash_exact": summary.get("target_state_sha256") == EXPECTED_TARGET_STATE_SHA256,
+              },
+          }
+
+          OUTPUT.parent.mkdir(parents=True, exist_ok=True)
+          OUTPUT.write_text(
+              json.dumps(result, ensure_ascii=False, indent=2, sort_keys=False) + "\n",
+              encoding="utf-8",
+          )
+
+          print("__FREEZE_JSON_BEGIN__")
+          print(OUTPUT.read_text(encoding="utf-8"), end="")
+          print("__FREEZE_JSON_END__")
+          PY
+
+      - name: Verify read-only mutation guard
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "130f1bdef1bb2479e9b992d26009472930e91987"
+          status="$(git status --porcelain --untracked-files=all)"
+          printf '%s\n' "$status"
+          unexpected="$(printf '%s\n' "$status" | awk '$0 != "?? research/historical_blind_freeze_odesa_2026-10-02.json" && $0 != ""')"
+          test -z "$unexpected"
+          test -f research/historical_blind_freeze_odesa_2026-10-02.json
+          echo "authoritative data mutations = 0"
+          echo "DB/Neon = untouched"
+          echo "deploy = no"
+          echo "public web = no"
+          echo "source discovery = no"
+
+      - name: Upload compact freeze artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: historical-blind-freeze-odesa-2026-10-02
+          path: research/historical_blind_freeze_odesa_2026-10-02.json
+          if-no-files-found: error
+          retention-days: 30
