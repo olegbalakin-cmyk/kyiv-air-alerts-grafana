@@ -14,6 +14,8 @@ jobs:
   freeze:
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    env:
+      PYTHONDONTWRITEBYTECODE: "1"
 
     steps:
       - name: Check out exact accepted formalization HEAD
