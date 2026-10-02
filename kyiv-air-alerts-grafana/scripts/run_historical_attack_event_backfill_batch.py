@@ -513,7 +513,16 @@ def discover_batch(city_key: str, episodes: list[dict], cfg: dict) -> tuple[list
                 meta["late_window_hours"] = LATE_WINDOW_HOURS
                 for post in posts.values():
                     text = str(post.get("text") or "")
-                    if not monitor.city_mentioned(city_key, text) or not DISCOVERY_RE.search(text):
+                    retrieval_city_terms = [
+                        str(term).casefold()
+                        for term in (family.get("retrieval_city_terms") or [])
+                        if str(term).strip()
+                    ]
+                    source_city_match = (
+                        monitor.city_mentioned(city_key, text)
+                        or any(term in text.casefold() for term in retrieval_city_terms)
+                    )
+                    if not source_city_match or not DISCOVERY_RE.search(text):
                         continue
                     row = telegram_candidate(city_key, family, post, "bounded_public_telegram_search")
                     observations.append(classify_row(
