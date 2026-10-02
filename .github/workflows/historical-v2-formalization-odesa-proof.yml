@@ -1,0 +1,69 @@
+name: Historical v2 formalization Odesa proof
+
+on:
+  push:
+    branches:
+      - historical-v2-formalization-odesa-proof-2026-10-02
+    paths:
+      - kyiv-air-alerts-grafana/scripts/prove_historical_v2_formalization_odesa.py
+      - .github/workflows/historical-v2-formalization-odesa-proof.yml
+
+permissions:
+  contents: write
+
+concurrency:
+  group: historical-v2-formalization-odesa-proof-2026-10-02
+  cancel-in-progress: false
+
+jobs:
+  prove:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout proof branch
+        uses: actions/checkout@v4
+        with:
+          ref: historical-v2-formalization-odesa-proof-2026-10-02
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install repository Python requirements
+        run: python -m pip install -r kyiv-air-alerts-grafana/requirements.txt
+
+      - name: Verify tested HEAD and common-base ancestry
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          git merge-base --is-ancestor fb563dc410fe6614263bdc8d4eb55025a987e950 "$GITHUB_SHA"
+
+      - name: Run bounded Odesa formalization proof
+        shell: bash
+        env:
+          PYTHONDONTWRITEBYTECODE: '1'
+        run: |
+          set -euo pipefail
+          python kyiv-air-alerts-grafana/scripts/prove_historical_v2_formalization_odesa.py \
+            --expected-tested-head "$GITHUB_SHA"
+
+      - name: Guard exact worktree mutation
+        shell: bash
+        run: |
+          set -euo pipefail
+          mapfile -t changed < <(git status --porcelain | sed -E 's/^.. //')
+          printf '%s\n' "${changed[@]}"
+          test "${#changed[@]}" -eq 1
+          test "${changed[0]}" = "research/historical_v2_formalization_odesa_proof_2026-10-02.json"
+
+      - name: Commit compact proof artifact
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -- research/historical_v2_formalization_odesa_proof_2026-10-02.json
+          git commit -m "Record Odesa historical v2 formalization proof"
+          git push origin HEAD:historical-v2-formalization-odesa-proof-2026-10-02
