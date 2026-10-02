@@ -1,0 +1,143 @@
+name: Historical v2 formalization Kropyvnytskyi Mykolaiv proof
+
+on:
+  push:
+    branches:
+      - historical-v2-formalization-kropyvnytskyi-mykolaiv-proof-2026-10-02
+    paths:
+      - "kyiv-air-alerts-grafana/scripts/formalize_historical_v2_existing_evidence.py"
+      - ".github/workflows/historical-v2-formalization-kropyvnytskyi-mykolaiv-proof.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  formalization-proof:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Check out exact proof branch
+        uses: actions/checkout@v4
+        with:
+          ref: historical-v2-formalization-kropyvnytskyi-mykolaiv-proof-2026-10-02
+          fetch-depth: 0
+
+      - name: Verify exact common-base ancestry
+        shell: bash
+        run: |
+          set -euo pipefail
+          base=fb563dc410fe6614263bdc8d4eb55025a987e950
+          git merge-base --is-ancestor "$base" HEAD
+          test "$(git rev-list --count "$base"..HEAD)" -le 2
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: kyiv-air-alerts-grafana/requirements.txt
+
+      - name: Install focused dependencies
+        working-directory: kyiv-air-alerts-grafana
+        run: |
+          pip install -r requirements.txt
+
+      - name: Classifier and replay helper self-tests
+        working-directory: kyiv-air-alerts-grafana
+        run: |
+          python scripts/monitor_explosion_candidates.py --self-test
+          python scripts/replay_explosion_history.py --self-test
+
+      - name: Formalize assigned cities from retained evidence
+        working-directory: kyiv-air-alerts-grafana
+        env:
+          NO_PROXY: "*"
+          no_proxy: "*"
+          HTTP_PROXY: "http://127.0.0.1:9"
+          HTTPS_PROXY: "http://127.0.0.1:9"
+          ALL_PROXY: "http://127.0.0.1:9"
+        run: |
+          python scripts/formalize_historical_v2_existing_evidence.py             --output ../research/historical_v2_formalization_kropyvnytskyi_mykolaiv_proof_2026-10-02.json
+
+      - name: Validate compact artifact and hard invariants
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          p = Path("research/historical_v2_formalization_kropyvnytskyi_mykolaiv_proof_2026-10-02.json")
+          d = json.loads(p.read_text(encoding="utf-8"))
+          assert d["city_set"] == ["kropyvnytskyi", "mykolaiv"]
+          assert d["methodology"] == "historical-attack-event-air-defense-action-v2"
+          assert d["mode"] == "REBIND_EXISTING_EVIDENCE"
+          assert d["overall_verdict"] in {"PROVEN", "BLOCKED"}
+
+          for city, expected in [("kropyvnytskyi", 1161), ("mykolaiv", 1648)]:
+              row = d["cities"][city]
+              c = row["counts"]
+              assert c["canonical_episodes"] == expected
+              assert c["missing_targets"] == 0
+              assert c["duplicate_targets"] == 0
+              assert c["extra_targets"] == 0
+              assert (
+                  c["strict_positives"]
+                  + c["sensitivity_positives"]
+                  + c["no_confirmed_event"]
+                  + c["needs_review"]
+              ) == expected
+              assert d["determinism"][city]["pass"] is True
+              assert row["guards"]["processed_other_cities"] is False
+              assert row["guards"]["public_web_research"] is False
+              assert row["guards"]["source_discovery"] is False
+              assert row["guards"]["db_neon_touched"] is False
+              assert row["guards"]["production_dashboard_mutated"] is False
+              assert row["guards"]["incorporation"] is False
+
+          assert d["mutation_guards"]["authoritative_evidence_mutations"] == 0
+          assert d["mutation_guards"]["db_neon_mutations"] == 0
+          assert d["mutation_guards"]["production_dashboard_mutations"] == 0
+          print("compact artifact invariant validation PASS")
+          PY
+
+      - name: Repository mutation guards
+        shell: bash
+        run: |
+          set -euo pipefail
+          base=fb563dc410fe6614263bdc8d4eb55025a987e950
+
+          test -z "$(git diff --name-only "$base"...HEAD -- 'kyiv-air-alerts-grafana/data/explosion_research/*/final_evidence.json')"
+          test -z "$(git diff --name-only "$base"...HEAD -- 'kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/**')"
+          test -z "$(git diff --name-only "$base"...HEAD -- 'kyiv-air-alerts-grafana/data/**')"
+          test -z "$(git diff --name-only "$base"...HEAD -- 'kyiv-air-alerts-grafana/grafana/**' 'kyiv-air-alerts-grafana/pages-preview/**' 'deploy/**')"
+          test -z "$(git diff --name-only "$base"...HEAD -- 'research/historical_attack_event_backfill/**' 'research/historical_attack_event_backfill_status.json')"
+          test -z "$(git diff --name-only "$base"...HEAD -- 'research/historical_attack_event_source_registry.json' 'kyiv-air-alerts-grafana/scripts/historical_attack_event_sources.py' 'kyiv-air-alerts-grafana/scripts/discover_historical_attack_events.py')"
+
+          unexpected="$(git diff --name-only "$base"...HEAD | grep -Ev '^(kyiv-air-alerts-grafana/scripts/formalize_historical_v2_existing_evidence\.py|\.github/workflows/historical-v2-formalization-kropyvnytskyi-mykolaiv-proof\.yml)$' || true)"
+          test -z "$unexpected"
+
+          echo "authoritative evidence diff = 0"
+          echo "canonical source-slice diff = 0"
+          echo "DB/production paths diff = 0"
+          echo "source discovery implementation diff = 0"
+          echo "scope allowlist = PASS"
+
+      - name: Commit compact proof artifact only
+        shell: bash
+        run: |
+          set -euo pipefail
+          artifact=research/historical_v2_formalization_kropyvnytskyi_mykolaiv_proof_2026-10-02.json
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git add "$artifact"
+          staged="$(git diff --cached --name-only)"
+          test "$staged" = "$artifact"
+
+          git commit -m "Add Kropyvnytskyi Mykolaiv v2 formalization proof"
+          git push origin HEAD:historical-v2-formalization-kropyvnytskyi-mykolaiv-proof-2026-10-02
+
+          echo "final_head=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
