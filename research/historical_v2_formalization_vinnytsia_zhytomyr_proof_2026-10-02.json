@@ -1,0 +1,584 @@
+{
+  "schema_version": 1,
+  "proof": "historical-v2-formalization-vinnytsia-zhytomyr-proof-2026-10-02",
+  "common_base": "fb563dc410fe6614263bdc8d4eb55025a987e950",
+  "tested_head": "a49f8834e8a0d736ebe4da81c9cb74222d78363f",
+  "city_set": [
+    "vinnytsia",
+    "zhytomyr"
+  ],
+  "mode": "FREEZE_EXISTING_EVIDENCE",
+  "methodology_version": "historical-attack-event-air-defense-action-v2",
+  "expected_canonical_counts": {
+    "vinnytsia": 362,
+    "zhytomyr": 685
+  },
+  "probe": {
+    "canonical_candidates": {
+      "vinnytsia": [
+        {
+          "path": "kyiv-air-alerts-grafana/data/explosion_audited_baseline.json",
+          "node": {
+            "type": "dict",
+            "keys": [
+              "coverage_end",
+              "coverage_start",
+              "label",
+              "rolling90",
+              "sensitivity_n",
+              "sensitivity_pct",
+              "strict_daily",
+              "strict_n",
+              "strict_pct",
+              "total_alerts"
+            ],
+            "len": 10
+          },
+          "episode_like_count": -1,
+          "record_keys": []
+        },
+        {
+          "path": "kyiv-air-alerts-grafana/data/explosion_baseline_2026-09-17.json",
+          "node": {
+            "type": "dict",
+            "keys": [
+              "coverage_end",
+              "coverage_start",
+              "label",
+              "rolling90",
+              "sensitivity_n",
+              "sensitivity_pct",
+              "strict_daily",
+              "strict_n",
+              "strict_pct",
+              "total_alerts"
+            ],
+            "len": 10
+          },
+          "episode_like_count": -1,
+          "record_keys": []
+        },
+        {
+          "path": "kyiv-air-alerts-grafana/data/explosion_daily_alert_seed.json",
+          "node": {
+            "type": "dict",
+            "keys": [
+              "baseline_total_alerts",
+              "coverage_start",
+              "daily_alerts",
+              "label",
+              "seed_total_alerts"
+            ],
+            "len": 5
+          },
+          "episode_like_count": -1,
+          "record_keys": []
+        }
+      ],
+      "zhytomyr": [
+        {
+          "path": "kyiv-air-alerts-grafana/data/explosion_audited_baseline.json",
+          "node": {
+            "type": "dict",
+            "keys": [
+              "coverage_end",
+              "coverage_start",
+              "label",
+              "rolling90",
+              "sensitivity_n",
+              "sensitivity_pct",
+              "strict_daily",
+              "strict_n",
+              "strict_pct",
+              "total_alerts"
+            ],
+            "len": 10
+          },
+          "episode_like_count": -1,
+          "record_keys": []
+        },
+        {
+          "path": "kyiv-air-alerts-grafana/data/explosion_daily_alert_seed.json",
+          "node": {
+            "type": "dict",
+            "keys": [
+              "baseline_total_alerts",
+              "coverage_start",
+              "daily_alerts",
+              "label",
+              "seed_total_alerts"
+            ],
+            "len": 5
+          },
+          "episode_like_count": -1,
+          "record_keys": []
+        }
+      ]
+    },
+    "evidence_shapes": {
+      "vinnytsia": {
+        "type": "dict",
+        "keys": [
+          "city_key",
+          "city_label",
+          "coverage_end",
+          "coverage_start",
+          "excluded_events",
+          "final_counts",
+          "final_positive_episode_ids",
+          "frozen_denominator",
+          "qa",
+          "review_events",
+          "schema_version",
+          "sensitivity_only_events",
+          "source_package",
+          "status",
+          "strict_episode_start_dates",
+          "strict_events"
+        ],
+        "len": 16,
+        "children": {
+          "source_package": {
+            "type": "dict",
+            "keys": [
+              "local_package_result",
+              "name",
+              "reconciliation_added_date",
+              "reconciliation_basis",
+              "sha256"
+            ],
+            "len": 5
+          },
+          "strict_events": {
+            "type": "list",
+            "len": 5,
+            "sample_keys": [
+              "decision_basis",
+              "event_id",
+              "event_time",
+              "evidence",
+              "matched_episode_id",
+              "matched_episode_start",
+              "raw_record",
+              "source_url",
+              "source_url_2"
+            ]
+          },
+          "sensitivity_only_events": {
+            "type": "list",
+            "len": 2,
+            "sample_keys": [
+              "basis",
+              "decision",
+              "event_id",
+              "evidence",
+              "local_date",
+              "matched_episode_id",
+              "raw_record",
+              "source_url",
+              "source_url_2"
+            ]
+          },
+          "review_events": {
+            "type": "list",
+            "len": 0,
+            "sample_keys": []
+          },
+          "excluded_events": {
+            "type": "list",
+            "len": 6,
+            "sample_keys": [
+              "date",
+              "decision",
+              "event_id",
+              "evidence",
+              "source_url"
+            ]
+          },
+          "final_counts": {
+            "type": "dict",
+            "keys": [
+              "denominator",
+              "qa",
+              "sensitivity",
+              "strict"
+            ],
+            "len": 4
+          },
+          "strict_episode_start_dates": {
+            "type": "list",
+            "len": 5,
+            "sample_keys": []
+          },
+          "final_positive_episode_ids": {
+            "type": "dict",
+            "keys": [
+              "sensitivity_only",
+              "strict"
+            ],
+            "len": 2
+          },
+          "qa": {
+            "type": "list",
+            "len": 0,
+            "sample_keys": []
+          }
+        }
+      },
+      "zhytomyr": {
+        "type": "dict",
+        "keys": [
+          "checks",
+          "city_key",
+          "coverage_end",
+          "coverage_start",
+          "final_counts",
+          "input_working_evidence_blob",
+          "purpose",
+          "review_events",
+          "schema_version",
+          "sensitivity_only_events",
+          "strict_events"
+        ],
+        "len": 11,
+        "children": {
+          "strict_events": {
+            "type": "list",
+            "len": 19,
+            "sample_keys": [
+              "binding_method",
+              "decision_basis",
+              "episode_id",
+              "event_id",
+              "evidence",
+              "historical_frozen_status",
+              "raw_record",
+              "source_url"
+            ]
+          },
+          "sensitivity_only_events": {
+            "type": "list",
+            "len": 1,
+            "sample_keys": [
+              "binding_method",
+              "decision_basis",
+              "episode_id",
+              "event_id",
+              "evidence",
+              "historical_frozen_status",
+              "raw_record",
+              "source_url"
+            ]
+          },
+          "review_events": {
+            "type": "list",
+            "len": 1,
+            "sample_keys": [
+              "candidate_id",
+              "decision_basis",
+              "evidence",
+              "raw_record",
+              "source_url"
+            ]
+          },
+          "final_counts": {
+            "type": "dict",
+            "keys": [
+              "alerts_total",
+              "sensitivity_n",
+              "strict_n"
+            ],
+            "len": 3
+          },
+          "checks": {
+            "type": "dict",
+            "keys": [
+              "canonical_positive_ids_unique",
+              "review_noncounted_rows",
+              "sensitivity_only_rows",
+              "strict_rows"
+            ],
+            "len": 4
+          }
+        }
+      }
+    },
+    "classifier_ast": {
+      "sha256": "499df82ee4a0e9997f31c381850241bc19667ffc2b3882e7a1123df52c900c18",
+      "relevant_callables": [
+        {
+          "name": "make_episode",
+          "args": [
+            "city_key",
+            "start",
+            "end",
+            "source"
+          ]
+        },
+        {
+          "name": "load_kyiv_alert_episodes",
+          "args": [
+            "path"
+          ]
+        },
+        {
+          "name": "load_sevastopol_alert_episodes",
+          "args": [
+            "path"
+          ]
+        },
+        {
+          "name": "special_source_alerts",
+          "args": [
+            "kyiv_alerts_path",
+            "sevastopol_events_path"
+          ]
+        },
+        {
+          "name": "poll_alerts",
+          "args": [
+            "kyiv_alerts_path",
+            "sevastopol_events_path"
+          ]
+        },
+        {
+          "name": "normalize_evidence_text",
+          "args": [
+            "value"
+          ]
+        },
+        {
+          "name": "classification_text",
+          "args": [
+            "row"
+          ]
+        },
+        {
+          "name": "classification_segments",
+          "args": [
+            "row"
+          ]
+        },
+        {
+          "name": "explicit_alert_relation",
+          "args": [
+            "text"
+          ]
+        },
+        {
+          "name": "explicit_during_alert",
+          "args": [
+            "text"
+          ]
+        },
+        {
+          "name": "exact_city_classification_evidence",
+          "args": [
+            "city_key",
+            "row"
+          ]
+        },
+        {
+          "name": "strict_explosion_evidence",
+          "args": [
+            "city_key",
+            "row"
+          ]
+        },
+        {
+          "name": "air_military_context_evidence",
+          "args": [
+            "row"
+          ]
+        },
+        {
+          "name": "same_attack_context_evidence",
+          "args": [
+            "city_key",
+            "row",
+            "strict_evidence",
+            "air_evidence"
+          ]
+        },
+        {
+          "name": "reviewed_provenance_adapter",
+          "args": [
+            "row",
+            "city_key",
+            "episodes",
+            "matching"
+          ]
+        },
+        {
+          "name": "merge_reviewed_temporal",
+          "args": [
+            "candidate",
+            "reviewed"
+          ]
+        },
+        {
+          "name": "reviewed_composition_binding_for_target",
+          "args": [
+            "row",
+            "target_id"
+          ]
+        },
+        {
+          "name": "tracked_episodes_for_city",
+          "args": [
+            "state",
+            "city_key"
+          ]
+        },
+        {
+          "name": "same_episode_representation",
+          "args": [
+            "left",
+            "right"
+          ]
+        },
+        {
+          "name": "episode_representation_clusters",
+          "args": [
+            "episodes"
+          ]
+        },
+        {
+          "name": "logical_episode_support",
+          "args": [
+            "episodes"
+          ]
+        },
+        {
+          "name": "match_candidate_to_episodes",
+          "args": [
+            "row",
+            "episodes"
+          ]
+        },
+        {
+          "name": "classification_matching_is_stale",
+          "args": [
+            "item",
+            "matching"
+          ]
+        },
+        {
+          "name": "matched_episode_rows",
+          "args": [
+            "matching",
+            "episodes"
+          ]
+        },
+        {
+          "name": "episodes_intersecting_local_day",
+          "args": [
+            "row",
+            "episodes"
+          ]
+        },
+        {
+          "name": "exact_active_episodes_at",
+          "args": [
+            "moment",
+            "episodes"
+          ]
+        },
+        {
+          "name": "relative_alert_chronology_relation",
+          "args": [
+            "row",
+            "episodes"
+          ]
+        },
+        {
+          "name": "explicit_event_time_binding",
+          "args": [
+            "row",
+            "event_segments",
+            "matching",
+            "episodes"
+          ]
+        },
+        {
+          "name": "temporal_binding_evidence",
+          "args": [
+            "row",
+            "strict_evidence",
+            "matching",
+            "episodes"
+          ]
+        },
+        {
+          "name": "single_episode_day_inference",
+          "args": [
+            "row",
+            "matching",
+            "episodes"
+          ]
+        },
+        {
+          "name": "dry_classify_existing_candidate",
+          "args": [
+            "item",
+            "state"
+          ]
+        },
+        {
+          "name": "classify_candidate",
+          "args": [
+            "row",
+            "city_key",
+            "episodes",
+            "matching"
+          ]
+        },
+        {
+          "name": "classification_evidence_payload",
+          "args": [
+            "decision"
+          ]
+        },
+        {
+          "name": "apply_classification_decision",
+          "args": [
+            "item",
+            "decision",
+            "matching"
+          ]
+        },
+        {
+          "name": "compose_episode_candidates",
+          "args": [
+            "city_key",
+            "target_episode",
+            "candidates",
+            "episodes"
+          ]
+        },
+        {
+          "name": "apply_episode_composition",
+          "args": [
+            "queue",
+            "state",
+            "target_episode_ids"
+          ]
+        }
+      ]
+    }
+  },
+  "authoritative_input_sha256": {
+    "kyiv-air-alerts-grafana/data/explosion_research/vinnytsia/final_evidence.json": "f2933b1c3cb13571cb50a9b612783731a95e3754eb99da026e90fa33254b819b",
+    "kyiv-air-alerts-grafana/data/explosion_research/zhytomyr/final_evidence.json": "b2f27f0686e39ea754bdc3515b9b116220c4606702542a80ff04444b3f63621b"
+  },
+  "verdict": "PROBE_ONLY_NEEDS_MECHANICAL_MAPPING",
+  "mutation_guards": {
+    "public_web_research": "NO",
+    "source_discovery": "NO",
+    "db_neon": "UNTOUCHED",
+    "deploy": "NO",
+    "production_dashboard_data": "UNTOUCHED",
+    "authoritative_evidence_mutations": 0,
+    "incorporation": "NO"
+  }
+}
