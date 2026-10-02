@@ -256,6 +256,31 @@ def main() -> int:
                 if h == EXPECTED_ORIGINAL_HASH:
                     hash_search_matches.append({"kind":"delimited","sep":sep_name,"order":order_name,"newline":final_nl})
 
+
+    state_rows_status_fields = []
+    for cty, eid, sp in frozen_states:
+        spd = sp if isinstance(sp, dict) else {"state": sp}
+        state_rows_status_fields.append({
+            "city_key": cty,
+            "episode_id": eid,
+            "batch": spd.get("batch"),
+            "observation_count": spd.get("observation_count"),
+            "state": spd.get("state"),
+        })
+    status_field_hash_variants = {}
+    status_field_sets = [
+        ("city_episode_batch_obs_state", ["city_key","episode_id","batch","observation_count","state"]),
+        ("city_episode_batch_state", ["city_key","episode_id","batch","state"]),
+        ("city_episode_obs_state", ["city_key","episode_id","observation_count","state"]),
+        ("city_episode_state", ["city_key","episode_id","state"]),
+    ]
+    for name, fields in status_field_sets:
+        rows = [{k:r.get(k) for k in fields} for r in state_rows_status_fields]
+        for sort_keys in (True, False):
+            for compact in (True, False):
+                raw = json.dumps(rows, ensure_ascii=False, sort_keys=sort_keys, **({"separators":(",",":")} if compact else {}))
+                status_field_hash_variants[f"{name}|sort={sort_keys}|compact={compact}"] = sha256_bytes(raw.encode("utf-8"))
+
     control_obs = {}
     case18_obs = []
     classifier_results = collections.Counter()
@@ -311,6 +336,7 @@ def main() -> int:
         "target_state_examples": frozen_state_examples,
         "target_hash_variants": state_rows_variants,
         "target_hash_search_matches": hash_search_matches,
+        "status_field_hash_variants": status_field_hash_variants,
         "classifier_result_counts": dict(classifier_results),
         "observation_count_direct": obs_count,
         "control_records": control_obs,
