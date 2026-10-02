@@ -27,6 +27,17 @@ jobs:
           set -euo pipefail
           git merge-base --is-ancestor fb563dc410fe6614263bdc8d4eb55025a987e950 HEAD
 
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install proof runtime dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pip install --disable-pip-version-check requests beautifulsoup4
+
       - name: Run bounded stream-09 worker
         shell: bash
         run: |
