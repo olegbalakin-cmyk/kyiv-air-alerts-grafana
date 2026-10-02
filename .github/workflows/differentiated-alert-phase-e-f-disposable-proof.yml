@@ -163,7 +163,7 @@ jobs:
                       hp.update(json.dumps(row, separators=(",", ":"), ensure_ascii=False).encode())
                       hp.update(b"\n")
 
-                  cur.execute("""SELECT source_observation_uid::text, episode_uid::text, source_key,
+                  cur.execute("""SELECT source_observation_id::text, episode_uid::text, source_key,
                                         source_start_at::text, source_end_at::text
                                  FROM alert_episode_sources ORDER BY source_observation_uid""")
                   hs = hashlib.sha256()
@@ -559,7 +559,7 @@ jobs:
                   h.update(json.dumps(row, separators=(",", ":"), ensure_ascii=False).encode())
                   h.update(b"\n")
                   count += 1
-              cur.execute("""SELECT source_observation_uid::text, episode_uid::text, source_key,
+              cur.execute("""SELECT source_observation_id::text, episode_uid::text, source_key,
                                     source_start_at::text, source_end_at::text
                              FROM alert_episode_sources ORDER BY source_observation_uid""")
               hs = hashlib.sha256()
