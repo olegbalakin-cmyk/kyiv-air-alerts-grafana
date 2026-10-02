@@ -1,0 +1,130 @@
+name: Historical blind freeze Kharkiv proof
+
+on:
+  push:
+    branches:
+      - historical-blind-freeze-kharkiv-proof-2026-10-02
+    paths-ignore:
+      - research/historical_blind_freeze_kharkiv_2026-10-02.json
+
+permissions:
+  contents: write
+
+concurrency:
+  group: historical-blind-freeze-kharkiv-proof-2026-10-02
+  cancel-in-progress: false
+
+jobs:
+  freeze:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      PYTHONDONTWRITEBYTECODE: "1"
+    steps:
+      - name: Checkout proof branch
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: historical-blind-freeze-kharkiv-proof-2026-10-02
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install bounded runtime dependencies
+        run: pip install -r kyiv-air-alerts-grafana/requirements.txt
+
+      - name: Stage proof wrapper and checkout exact accepted HEAD
+        shell: bash
+        run: |
+          set -euo pipefail
+          cp kyiv-air-alerts-grafana/scripts/historical_blind_freeze_kharkiv.py /tmp/historical_blind_freeze_kharkiv.py
+          git checkout --detach 79397290b0d51ca49bf15d6e5890ffc3ce631ce3
+          test "$(git rev-parse HEAD)" = "79397290b0d51ca49bf15d6e5890ffc3ce631ce3"
+
+      - name: Run one-city blind freeze on exact accepted HEAD
+        shell: bash
+        run: |
+          set -euo pipefail
+          python /tmp/historical_blind_freeze_kharkiv.py
+
+      - name: Verify accepted-head worktree mutation
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import subprocess
+          allowed = {"research/historical_blind_freeze_kharkiv_2026-10-02.json"}
+          rows = subprocess.check_output(
+              ["git", "status", "--porcelain", "--untracked-files=all"],
+              text=True,
+          ).splitlines()
+          paths = set()
+          for row in rows:
+              if not row.strip():
+                  continue
+              path = row[3:].strip()
+              if " -> " in path:
+                  path = path.split(" -> ", 1)[1]
+              paths.add(path)
+          if paths != allowed:
+              raise SystemExit(f"Unexpected accepted-head worktree paths: {sorted(paths)}")
+          print("accepted-head mutation guard PASS")
+          PY
+
+      - name: Return to proof branch and commit compact freeze artifact
+        shell: bash
+        run: |
+          set -euo pipefail
+          cp research/historical_blind_freeze_kharkiv_2026-10-02.json /tmp/kharkiv_freeze.json
+          git checkout historical-blind-freeze-kharkiv-proof-2026-10-02
+          cp /tmp/kharkiv_freeze.json research/historical_blind_freeze_kharkiv_2026-10-02.json
+
+          python - <<'PY'
+          import subprocess
+          allowed = {"research/historical_blind_freeze_kharkiv_2026-10-02.json"}
+          rows = subprocess.check_output(
+              ["git", "status", "--porcelain", "--untracked-files=all"],
+              text=True,
+          ).splitlines()
+          paths = set()
+          for row in rows:
+              if not row.strip():
+                  continue
+              path = row[3:].strip()
+              if " -> " in path:
+                  path = path.split(" -> ", 1)[1]
+              paths.add(path)
+          if paths != allowed:
+              raise SystemExit(f"Unexpected proof-branch worktree paths: {sorted(paths)}")
+          print("proof-branch mutation allowlist PASS")
+          PY
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add research/historical_blind_freeze_kharkiv_2026-10-02.json
+          git commit -m "Record Kharkiv blind sample freeze"
+          git push origin HEAD:historical-blind-freeze-kharkiv-proof-2026-10-02
+
+      - name: Emit compact result
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p = Path("research/historical_blind_freeze_kharkiv_2026-10-02.json")
+          d = json.loads(p.read_text(encoding="utf-8"))
+          print(json.dumps({
+              "verdict": d["verdict"],
+              "city": d["city"],
+              "source_accepted_head": d["source_accepted_head"],
+              "reconstruction_checkout_head": d["reconstruction_checkout_head"],
+              "eligible_before": d["eligible_count_before_exclusions"],
+              "excluded": d["exclusions_count"],
+              "eligible_after": d["eligible_count_after_exclusions"],
+              "selected_cases": d["selected_cases"],
+              "CITY_SAMPLE_SHA256": d["CITY_SAMPLE_SHA256"],
+              "formalization_match": d["formalization_guard"]["match"],
+              "mutation_guards": d["mutation_guards"],
+          }, ensure_ascii=False))
+          PY
