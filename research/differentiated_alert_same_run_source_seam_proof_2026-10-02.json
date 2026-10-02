@@ -1,0 +1,131 @@
+{
+  "proof_branch": "differentiated-alert-same-run-source-seam-proof-2026-10-02",
+  "base_site_prod_sha": "3c34e52d859e9793d0f10aa93fea4e7cdd7b2228",
+  "fresh_freeze": {
+    "main": "b7f2778d4d3e7c72cec64237914cdd51e5621e8f",
+    "site_prod": "3c34e52d859e9793d0f10aa93fea4e7cdd7b2228",
+    "semantic_drift": false
+  },
+  "source_ownership_map": {
+    "kyiv_official": {
+      "accepted_request": "GET https://kyiv.digital/open-api/air-alert/state",
+      "authentication": "none",
+      "accepted_response": "current-state JSON object",
+      "current_production_exact_payload": false,
+      "current_network_owner": "none for this exact payload",
+      "future_network_owner": "differentiated_alert_source_capture",
+      "stored_input_env": "DIFFERENTIATED_ALERT_SHADOW_KYIV_JSON",
+      "capture_transport_retries": "none",
+      "shadow_flag_changes_logical_acquisition_count": false
+    },
+    "ukrainealarm": {
+      "accepted_request": "GET https://api.ukrainealarm.com/api/v3/alerts",
+      "authentication": "Authorization header using existing UKRAINEALARM_API_TOKEN; value never recorded",
+      "accepted_response": "region objects with activeAlerts[]; exact accepted regionId=147 selected mechanically",
+      "current_production_exact_payload": false,
+      "current_network_owner": "existing production client owns /regions and /alerts/regionHistory only; neither is equivalent",
+      "future_network_owner": "differentiated_alert_source_capture",
+      "stored_input_env": "DIFFERENTIATED_ALERT_SHADOW_UKRAINEALARM_JSON",
+      "capture_transport_retries": "none",
+      "shadow_flag_changes_logical_acquisition_count": false
+    },
+    "alerts_in_ua": {
+      "accepted_request": "GET https://ubilling.net.ua/aerialalerts/?json=true&source=aiu&raw",
+      "authentication": "none",
+      "accepted_response": "raw alerts.in.ua active-alert array; exact active AIR Donetsk-raion object selected mechanically",
+      "current_production_exact_payload": false,
+      "current_network_owner": "none for this exact payload; committed historical/static bridge is not equivalent",
+      "future_network_owner": "differentiated_alert_source_capture",
+      "stored_input_env": "DIFFERENTIATED_ALERT_SHADOW_ALERTS_IN_UA_JSON",
+      "capture_transport_retries": "none",
+      "shadow_flag_changes_logical_acquisition_count": false
+    }
+  },
+  "implementation": {
+    "accepted_sidecar_predecessor_blob": "fc9d009cd0a22e2b25ff8ec96d3f3fbeef2b3fff",
+    "capture_blob": "0b23c4a1681b6cab065f8f27eee69eb6cd6c471f",
+    "stored_only_runtime_blob": "19f452e23b45aab8fc219f54c132282237845775",
+    "deterministic_test_blob": "ba0a38f32577404af15a8e4e37b8f5863b65110c"
+  },
+  "deterministic_proof": {
+    "workflow_run": 36973362739,
+    "tests_run": 5,
+    "tests_passed": 5,
+    "request_counts": {
+      "control": {
+        "kyiv_official": 0,
+        "ukrainealarm": 0,
+        "alerts_in_ua": 0
+      },
+      "capture_only": {
+        "kyiv_official": 1,
+        "ukrainealarm": 1,
+        "alerts_in_ua": 1
+      },
+      "capture_plus_shadow": {
+        "kyiv_official": 1,
+        "ukrainealarm": 1,
+        "alerts_in_ua": 1
+      }
+    },
+    "capture_plus_shadow_equals_capture_only": true,
+    "strict_missing_input": "PASS_EXPLICIT_ZERO_NETWORK_ZERO_STORE_OPEN",
+    "deterministic_capture_failure": "PASS_FAIL_OPEN_PRODUCT_UNCHANGED",
+    "genuine_normal_error_propagates": true
+  },
+  "live_capture": {
+    "workflow_run": 36973362739,
+    "captured_at": "2026-10-02T06:24:12.664977Z",
+    "logical_acquisition_counts": {
+      "kyiv_official": 1,
+      "ukrainealarm": 1,
+      "alerts_in_ua": 1
+    },
+    "sources": {
+      "kyiv_official": {
+        "http_status": 200,
+        "source_response_bytes": 146,
+        "source_response_sha256": "dc2c2fbe31466e5512364ab8db35f4b572df45871f4385e1e062f9b999a6da67",
+        "accepted_input_bytes": 146,
+        "accepted_input_sha256": "dc2c2fbe31466e5512364ab8db35f4b572df45871f4385e1e062f9b999a6da67"
+      },
+      "ukrainealarm": {
+        "http_status": 200,
+        "source_response_bytes": 16950,
+        "source_response_sha256": "3b17ff300471fa1e77994e1ec2309b45da9b255ed34d188f868d0db35ff9b661",
+        "accepted_input_bytes": 447,
+        "accepted_input_sha256": "a82c00e019c6fd7cfbed6a3848d42b9ceebbc3c46046d6f0840c9fea5a7ce854"
+      },
+      "alerts_in_ua": {
+        "http_status": 200,
+        "source_response_bytes": 24834,
+        "source_response_sha256": "1d2d826d69fd6b21915ce3695bdd4638786da7a4f55b7589a981839e4b84a573",
+        "accepted_input_bytes": 577,
+        "accepted_input_sha256": "e904d314c3e5395a062a84d2b699e1685195b041e936c4df6055a557ae14bf71"
+      }
+    },
+    "stored_only_parse": {
+      "status": "SUCCEEDED",
+      "sidecar_network_requests": 0,
+      "inserted_snapshots_local": 3,
+      "inserted_observations_local": 2,
+      "binding": {
+        "BOUND": 0,
+        "AMBIGUOUS": 0,
+        "UNBOUND": 3
+      }
+    },
+    "exact_replay": {
+      "inserted_snapshots": 0,
+      "inserted_observations": 0
+    },
+    "product_parity": "PASS_BYTE_FOR_BYTE",
+    "raw_payloads_committed": false,
+    "raw_payloads_uploaded": false,
+    "credentials_exposed": false
+  },
+  "permanent_neon_mutations": 0,
+  "disposable_neon_mutations": 0,
+  "attack_event_neon_writes": 0,
+  "verdict": "DIFFERENTIATED SAME-RUN SOURCE SEAM PROVEN"
+}
