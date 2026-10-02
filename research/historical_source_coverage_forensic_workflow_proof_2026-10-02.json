@@ -1,0 +1,131 @@
+{
+  "schema_version": 1,
+  "verdict": "AUTONOMOUS 6-CITY SOURCE-COVERAGE FORENSIC PROVEN",
+  "authoritative_start_head": "acd01dfbe8e520a93ccf827f3179e3cdc6cfc3e5",
+  "authoritative_head_after_run": "acd01dfbe8e520a93ccf827f3179e3cdc6cfc3e5",
+  "proof_branch": "historical-source-coverage-forensic-workflow-proof-2026-10-02",
+  "implementation_commit": "651afd20cc275264416df90bb5e6a0f5e6ccca8a",
+  "implementation_files": [
+    ".github/workflows/historical-source-coverage-forensic.yml",
+    "kyiv-air-alerts-grafana/scripts/audit_historical_source_coverage.py",
+    "kyiv-air-alerts-grafana/tests/test_historical_source_coverage_forensic.py"
+  ],
+  "focused_tests": {
+    "status": "PASS",
+    "count": 10,
+    "actions_job_id": 110957066216
+  },
+  "workflow_run": {
+    "id": 37042890331,
+    "head_sha": "651afd20cc275264416df90bb5e6a0f5e6ccca8a",
+    "conclusion": "success"
+  },
+  "aggregate_job": {
+    "id": 110957592708,
+    "conclusion": "success"
+  },
+  "actions_artifact": {
+    "id": 11243585277,
+    "name": "historical-source-coverage-forensic-summary",
+    "digest": "sha256:2487d7c07482fdefd0f7b4124858e85f816ab983e530342faefcb5d594fed0da"
+  },
+  "summary_sha256": "9b8d27c7dff5d538dc5fd19f436629f56a87ab20bfea22459823daa1f18ca46f",
+  "kherson_calibration": "PASS",
+  "kherson_calibration_dimensions": {
+    "canonical_coverage": "PROVEN_COMPLETE",
+    "search_coverage": "PARTIAL",
+    "result_retention": "NOT_PROVEN",
+    "strict_adjudication": "PROVEN_COMPLETE",
+    "slices": {
+      "P1": "PARTIAL",
+      "P2": "BLOCKED",
+      "P3": "PARTIAL"
+    },
+    "canonical_episodes": 1412,
+    "original_strict": 9,
+    "current_strict": 2
+  },
+  "cities": [
+    {
+      "city": "kherson",
+      "canonical_episodes": 1412,
+      "original_strict": 9,
+      "current_strict": 2,
+      "canonical_coverage": "PROVEN_COMPLETE",
+      "search_coverage": "PARTIAL",
+      "result_retention": "NOT_PROVEN",
+      "strict_adjudication": "PROVEN_COMPLETE",
+      "reaudit_needed": true
+    },
+    {
+      "city": "zaporizhzhia",
+      "canonical_episodes": 2365,
+      "original_strict": 169,
+      "current_strict": 169,
+      "canonical_coverage": "PROVEN_COMPLETE",
+      "search_coverage": "PARTIAL",
+      "result_retention": "NOT_PROVEN",
+      "strict_adjudication": "PARTIAL",
+      "reaudit_needed": true
+    },
+    {
+      "city": "chernihiv",
+      "canonical_episodes": 1676,
+      "original_strict": 39,
+      "current_strict": 39,
+      "canonical_coverage": "PROVEN_COMPLETE",
+      "search_coverage": "PARTIAL",
+      "result_retention": "NOT_PROVEN",
+      "strict_adjudication": "PROVEN_COMPLETE",
+      "reaudit_needed": true
+    },
+    {
+      "city": "sevastopol",
+      "canonical_episodes": 527,
+      "original_strict": 38,
+      "current_strict": 38,
+      "canonical_coverage": "PROVEN_COMPLETE",
+      "search_coverage": "PARTIAL",
+      "result_retention": "NOT_PROVEN",
+      "strict_adjudication": "PROVEN_COMPLETE",
+      "reaudit_needed": true
+    },
+    {
+      "city": "sumy",
+      "canonical_episodes": 2297,
+      "original_strict": 204,
+      "current_strict": 204,
+      "canonical_coverage": "PROVEN_COMPLETE",
+      "search_coverage": "PARTIAL",
+      "result_retention": "NOT_PROVEN",
+      "strict_adjudication": "PROVEN_COMPLETE",
+      "reaudit_needed": true
+    },
+    {
+      "city": "kyiv",
+      "canonical_episodes": 2456,
+      "original_strict": 377,
+      "current_strict": 377,
+      "canonical_coverage": "PROVEN_COMPLETE",
+      "search_coverage": "PARTIAL",
+      "result_retention": "NOT_PROVEN",
+      "strict_adjudication": "PARTIAL",
+      "reaudit_needed": true
+    }
+  ],
+  "caveats": {
+    "blind_qa_counts": "The repository/history scanner reports only blind-QA verdicts mechanically persisted in Git-visible evidence. Kherson case 73 is a frozen sample identity in an Actions artifact, but its later manual research verdict is not present in the Git-visible evidence scanned by this proof; the Kherson search-coverage classification does not depend on that counter because P3 itself proves Telegram archive was not used and P2 is blocked.",
+    "current_strict_semantics": "current_strict is the currently retained/accepted baseline strict count. Where current replay is QA_REQUIRED (Zaporizhzhia, Kyiv), replay candidates remain non-final and strict_adjudication is PARTIAL."
+  },
+  "protected_state": {
+    "actions_runner_git_status": "CLEAN",
+    "historical_evidence_mutations": 0,
+    "canonical_alert_mutations": 0,
+    "db_neon_mutations": 0,
+    "incorporation": "NO",
+    "deploy": "NO",
+    "authoritative_branch_mutations": 0,
+    "public_web_attack_research": "NO",
+    "new_source_discovery": "NO"
+  }
+}
