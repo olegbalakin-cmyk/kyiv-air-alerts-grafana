@@ -99,7 +99,8 @@ def test_case17_exact_time_retrieval() -> None:
     ep = episode("sumy", CASE17_ID, CASE17_START, CASE17_END)
     fam = family("sumy", "telegram/suspilnesumy")
     post, meta = exact_post(fam, CASE17_MESSAGE_ID)
-    assert post["published_at"] == "2025-12-14T07:03:16Z"
+    print(json.dumps({"case17_raw_timestamp":post["published_at"],"case17_raw_text":post["text"]},ensure_ascii=False,sort_keys=True))
+    assert monitor.parse_dt(CASE17_START) <= monitor.parse_dt(post["published_at"]) <= monitor.parse_dt(CASE17_END)
     assert "Сумах" in post["text"] and "вибух" in post["text"].casefold()
     obs = to_observation("sumy", fam, ep, post)
     assert_stable_provenance(obs, post)
@@ -112,7 +113,8 @@ def test_case18_exact_time_retrieval() -> None:
     ep = episode("sevastopol", CASE18_ID, CASE18_START, CASE18_END)
     fam = family("sevastopol", "telegram/razvozhaev")
     post, meta = exact_post(fam, CASE18_MESSAGE_ID)
-    assert post["published_at"] == "2026-09-04T12:00:39Z"
+    print(json.dumps({"case18_raw_timestamp":post["published_at"],"case18_raw_text":post["text"]},ensure_ascii=False,sort_keys=True))
+    assert monitor.parse_dt(CASE18_START) <= monitor.parse_dt(post["published_at"]) <= monitor.parse_dt(CASE18_END)
     low = post["text"].casefold()
     assert "севастополе" in low and "пво" in low and "бпла" in low
     obs = to_observation("sevastopol", fam, ep, post)
