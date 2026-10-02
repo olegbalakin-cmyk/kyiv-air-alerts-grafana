@@ -47,6 +47,69 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements-db-phase1.txt
 
+      - name: Declare differentiated shadow ephemeral paths
+        shell: bash
+        run: |
+          echo "DIFFERENTIATED_ALERT_SHADOW_KYIV_JSON=${RUNNER_TEMP}/differentiated-shadow-kyiv.json" >> "$GITHUB_ENV"
+          echo "DIFFERENTIATED_ALERT_SHADOW_UKRAINEALARM_JSON=${RUNNER_TEMP}/differentiated-shadow-ukrainealarm.json" >> "$GITHUB_ENV"
+          echo "DIFFERENTIATED_ALERT_SHADOW_ALERTS_IN_UA_JSON=${RUNNER_TEMP}/differentiated-shadow-alerts-in-ua.json" >> "$GITHUB_ENV"
+          echo "DIFFERENTIATED_ALERT_SOURCE_CAPTURE_DIAGNOSTIC=${RUNNER_TEMP}/differentiated-shadow-capture.json" >> "$GITHUB_ENV"
+          echo "DIFFERENTIATED_ALERT_SHADOW_DIAGNOSTIC=${RUNNER_TEMP}/differentiated-shadow-persistence.json" >> "$GITHUB_ENV"
+
+      - name: Guard production output before differentiated shadow
+        shell: bash
+        run: sha256sum data/dashboard_data.json | awk '{print $1}' > "${RUNNER_TEMP}/differentiated-shadow-product-before.sha256"
+
+      - name: Capture differentiated same-run current-state inputs
+        env:
+          DIFFERENTIATED_ALERT_SOURCE_CAPTURE: "1"
+          UKRAINEALARM_API_TOKEN: ${{ secrets.UKRAINEALARM_API_TOKEN }}
+        run: python scripts/differentiated_alert_source_capture.py
+
+      - name: Run differentiated PostgreSQL shadow from frozen same-run inputs
+        env:
+          DIFFERENTIATED_ALERT_SHADOW: "1"
+          DIFFERENTIATED_ALERT_SHADOW_BACKEND: postgres
+          DIFFERENTIATED_ALERT_SHADOW_DATABASE_URL: ${{ secrets.PHASE1_PROD_SHADOW_DATABASE_URL }}
+          DIFFERENTIATED_ALERT_SHADOW_INPUT_MODE: stored_only
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json
+          import os
+          import sys
+          sys.path.insert(0, "scripts")
+          import differentiated_alert_shadow_runtime as runtime
+          result = runtime.run_from_updater([], env=os.environ)
+          safe = {
+              "status": result.get("status"),
+              "sidecar_network_requests": result.get("sidecar_network_requests"),
+              "inserted_snapshots": result.get("inserted_snapshots"),
+              "inserted_observations": result.get("inserted_observations"),
+              "binding": result.get("binding"),
+              "store_counts": result.get("store_counts"),
+              "production_output_mutation": result.get("production_output_mutation"),
+          }
+          print("Differentiated production shadow:", json.dumps(safe, sort_keys=True))
+          PY
+
+      - name: Verify differentiated shadow did not mutate production output
+        shell: bash
+        run: |
+          sha256sum data/dashboard_data.json | awk '{print $1}' > "${RUNNER_TEMP}/differentiated-shadow-product-after.sha256"
+          cmp "${RUNNER_TEMP}/differentiated-shadow-product-before.sha256" "${RUNNER_TEMP}/differentiated-shadow-product-after.sha256"
+
+      - name: Upload differentiated shadow diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: differentiated-shadow-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            ${{ runner.temp }}/differentiated-shadow-capture.json
+            ${{ runner.temp }}/differentiated-shadow-persistence.json
+          if-no-files-found: warn
+          retention-days: 30
+
       - name: Test municipal-source fallback
         run: python tests/test_update_fallback.py
 
