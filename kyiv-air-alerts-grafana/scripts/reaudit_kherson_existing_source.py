@@ -123,12 +123,21 @@ def nearby(moment,ordered,starts):
 def row(post):
     text=str(post.get("text") or "")
     return {"source":f"Telegram / {LABEL}","title":text[:240] or f"Telegram post {post['message_id']}","url":post["source_url"],"publisher":LABEL,"publisher_url":f"https://t.me/{CHANNEL}","published_at":post["published_at_utc"],"snippet":text[:1200],"discovery_basis":"full_public_history_local_snapshot"}
+def strict_event_time(record):
+    v=str(record.get("event_time") or "")
+    if re.fullmatch(r"~?\d{1,2}:\d{2}",v):
+        anchor=str(record.get("episode_start") or record.get("matched_alert_episode_start") or "")
+        base=anchor[:10]; offm=re.search(r"([+-]\d{2}:\d{2})$",anchor); off=offm.group(1) if offm else "+00:00"
+        return dt(f"{base}T{v.lstrip('~')}:00{off}")
+    return dt(v)
+
 def baseline_ids(final,eps):
-    by={iso(dt(e["alert_start"])):str(e["episode_id"]) for e in eps}; out=[]
-    for x in final.get("strict_events") or []:
-        v=x.get("matched_alert_episode_start") or x.get("episode_start"); key=iso(dt(v)) if dt(v) else ""
-        if key not in by: raise ValueError(f"unbound baseline control:{v}")
-        out.append(by[key])
+    out=[]
+    for record in final.get("strict_events") or []:
+        moment=strict_event_time(record)
+        hits=[str(e["episode_id"]) for e in eps if moment and dt(e["alert_start"])<=moment<=dt(e["alert_end"])]
+        if len(hits)!=1: raise ValueError(f"retained strict control not uniquely bound by event_time:{record.get('event_time')}:{hits}")
+        out.append(hits[0])
     if len(out)!=2 or len(set(out))!=2: raise ValueError("baseline strict controls !=2")
     return sorted(out)
 def classify(snapshot,eps,clf,src):
