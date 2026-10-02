@@ -125,13 +125,20 @@ def main() -> int:
 
     current_slice_paths = sorted(slice_dir.glob(f"{CITY}-*_alerts.json"))
     current_slice_rels = [p.relative_to(CHECKOUT_ROOT).as_posix() for p in current_slice_paths]
-    base_slice_pattern = (
-        f":(glob)kyiv-air-alerts-grafana/data/explosion_metric_handoff/"
-        f"source_slices/{CITY}-*_alerts.json"
+    base_slice_prefix = (
+        f"kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/{CITY}-"
     )
     base_slice_rels = sorted(
-        x for x in git("ls-tree", "-r", "--name-only", COMMON_BASE, "--", base_slice_pattern).splitlines()
-        if x
+        x
+        for x in git(
+            "ls-tree",
+            "-r",
+            "--name-only",
+            COMMON_BASE,
+            "--",
+            "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices",
+        ).splitlines()
+        if x.startswith(base_slice_prefix) and x.endswith("_alerts.json")
     )
     if current_slice_rels != base_slice_rels:
         blockers.append("CANONICAL_SOURCE_SLICE_SET_DRIFT")
