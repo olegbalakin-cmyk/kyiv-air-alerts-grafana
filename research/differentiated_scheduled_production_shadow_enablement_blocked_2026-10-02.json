@@ -1,7 +1,7 @@
 {
   "task": "CONTINUE EXISTING BLOCKED DIFFERENTIATED SCHEDULED PRODUCTION SHADOW ENABLEMENT PROOF",
   "proof_branch": "differentiated-alert-same-run-source-seam-proof-2026-10-02",
-  "current_proof_head_before_artifact": "ae0d95d7bdefd2b23a9b642c59c88752522f4d29",
+  "current_proof_head_before_artifact": "8c861c7f537369534fc9fc0c5e6a71f968bd9878",
   "fresh_refs": {
     "main": "b7f2778d4d3e7c72cec64237914cdd51e5621e8f",
     "site_prod": "3c34e52d859e9793d0f10aa93fea4e7cdd7b2228"
@@ -33,63 +33,47 @@
     "credentials_exposed": false
   },
   "phase_e": {
-    "verdict": "BLOCKED_AFTER_VALID_FROZEN_SOURCE_SET_BEFORE_DB_PERSISTENCE",
-    "execution_run": 36977221162,
-    "execution_head": "ae0d95d7bdefd2b23a9b642c59c88752522f4d29",
-    "capture": {
-      "captured_at": "2026-10-02T07:11:08.212615Z",
+    "verdict": "BLOCKED_AFTER_DISPOSABLE_DB_WIRING_PROVEN_BEFORE_DB_PERSISTENCE",
+    "execution_run": 36979653486,
+    "execution_head": "8c861c7f537369534fc9fc0c5e6a71f968bd9878",
+    "credential_wiring": {
+      "status": "PROVEN",
+      "method": "NEON_API_KEY + Neon CLI branch identity + Neon CLI connection-string",
+      "project_id": "green-cake-44216048",
+      "branch_id": "br-quiet-hat-b5z5hdqu",
+      "parent_id": "br-bold-mode-b5rub8pq",
+      "database_name": "neondb",
+      "role_name": "neondb_owner",
+      "connection_string_recorded": false,
+      "credentials_exposed": false,
+      "live_acquisition_started_only_after_preflight": true
+    },
+    "live_acquisition": {
+      "status": "FAILED",
       "logical_acquisition_counts": {
         "kyiv_official": 1,
-        "ukrainealarm": 1,
-        "alerts_in_ua": 1
+        "ukrainealarm": 0,
+        "alerts_in_ua": 0
       },
       "kyiv_official": {
-        "status": "SUCCEEDED",
         "http_status": 200,
-        "accepted_input_bytes": 146,
-        "accepted_input_sha256": "dc2c2fbe31466e5512364ab8db35f4b572df45871f4385e1e062f9b999a6da67",
-        "source_response_bytes": 145,
-        "source_response_sha256": "b4699310f93a93918fce2d1dd944b5005737c63c1749842c55121ca42a2605d2",
-        "json_parse": "PASS",
-        "accepted_schema_validation": "PASS"
+        "source_response_bytes": 245,
+        "source_response_sha256": "6f89efa5752f1bc803a24afaf3262697910f4536593fb395d14964ba65f77e5d",
+        "first_non_whitespace_category": "<",
+        "json_parse_success": false,
+        "accepted_schema_validation_success": false,
+        "classification": "NOT_JSON"
       },
-      "ukrainealarm": {
-        "status": "SUCCEEDED",
-        "http_status": 200,
-        "accepted_input_bytes": 447,
-        "accepted_input_sha256": "a82c00e019c6fd7cfbed6a3848d42b9ceebbc3c46046d6f0840c9fea5a7ce854",
-        "source_response_bytes": 16968,
-        "source_response_sha256": "5b3cfdede3187ae4b2ed2b689bf7eb8357eefabaf28e7dc98c866db80e943eaa",
-        "parse_schema": "PASS"
-      },
-      "alerts_in_ua": {
-        "status": "SUCCEEDED",
-        "http_status": 200,
-        "accepted_input_bytes": 577,
-        "accepted_input_sha256": "e904d314c3e5395a062a84d2b699e1685195b041e936c4df6055a557ae14bf71",
-        "source_response_bytes": 36393,
-        "source_response_sha256": "3e65d0e501954406e9d0bf399c5d2274d7af94e8848d066283a30b01f01617e2",
-        "parse_schema": "PASS"
-      },
-      "frozen_same_run_set": "PROVEN",
-      "raw_payloads_uploaded": false,
+      "stop_reason": "PHASE_E_CURRENT_KYIV_SOURCE_NOT_JSON",
+      "outer_retry_loop": false,
+      "second_actions_retry": false,
       "credentials_exposed": false
     },
     "persistence": {
       "started": false,
       "committed": false,
-      "failure_stage": "pre_connection_database_url_derivation",
-      "observed_env": "PERMANENT_DB_URL empty",
-      "secret_reference": "secrets.MULTICITY_CANONICAL_DATABASE_URL",
-      "production_workflow_known_wiring": "MULTICITY_CANONICAL_DATABASE_URL <- secrets.PHASE1_PROD_SHADOW_DATABASE_URL",
-      "blocker_classification": "PHASE_E_DISPOSABLE_DB_CREDENTIAL_WIRING_UNAVAILABLE",
-      "disposable_post_failure_state": {
-        "alert_state_snapshots": 0,
-        "alert_threat_observations": 0,
-        "legacy_phase1_checkpoint_seq": 18
-      }
-    },
-    "retry_policy": "No second live acquisition or automatic retry was performed after run 36977221162. The valid frozen raw payloads existed only in runner temp and were deliberately not uploaded."
+      "reason": "live source set failed before complete 1/1/1 freeze"
+    }
   },
   "neon_guard": {
     "permanent_branch": "br-bold-mode-b5rub8pq",
@@ -98,22 +82,18 @@
       "distinct_cities": 23,
       "alert_episode_sources": 143,
       "ingestion_runs": 24,
-      "canonical_structural_invalid_rows": 0,
-      "dangling_episode_sources": 0,
       "differentiated_tables_absent": true,
+      "legacy_phase1_checkpoint_seq": 18,
       "attack_event_state_absent": true
     },
     "disposable_branch": "br-quiet-hat-b5z5hdqu",
     "disposable_parent": "br-bold-mode-b5rub8pq",
     "disposable": {
-      "alert_episodes": 28021,
-      "distinct_cities": 23,
-      "alert_episode_sources": 143,
-      "ingestion_runs": 24,
       "alert_state_snapshots": 0,
-      "alert_threat_observations": 0
+      "alert_threat_observations": 0,
+      "legacy_phase1_checkpoint_seq": 18
     },
-    "legacy_phase1_checkpoint_seq": 18,
+    "permanent_phase_e_writes": 0,
     "attack_event_neon_writes": 0
   },
   "mutations": {
@@ -136,18 +116,17 @@
     ]
   },
   "safe_continuation_point": {
-    "action": "Resume Phase E only from a future execution with corrected disposable DB credential wiring. Do not redo Phases A-D or the proven same-run source seam.",
-    "source_status": "Current invocation proved one accepted valid same-run three-source set, but those raw payloads were not retained and must not be treated as reusable future live input.",
-    "prerequisite": "Correct proof-only DB credential wiring to the existing disposable branch br-quiet-hat-b5z5hdqu, then perform a future single fresh Phase E acquisition under the same bounded contract.",
+    "action": "Resume Phase E only after a future accepted Kyiv response is valid JSON matching the accepted schema. Disposable credential wiring is already proven and should not be redesigned unless relevant workflow drift occurs.",
+    "prerequisite": "One future bounded fresh acquisition may be attempted under the same exact source contract after a fresh drift/state guard.",
     "neon_branch_to_reuse": "br-quiet-hat-b5z5hdqu",
     "disposable_baseline_to_expect": {
       "alert_state_snapshots": 0,
       "alert_threat_observations": 0
     },
-    "do_not_repeat_in_this_invocation": true
+    "do_not_retry_again_in_this_invocation": true
   },
   "overall_verdict": "DIFFERENTIATED SCHEDULED PRODUCTION SHADOW ENABLEMENT BLOCKED",
-  "reason": "PHASE_E_DISPOSABLE_DB_CREDENTIAL_WIRING_UNAVAILABLE",
+  "reason": "PHASE_E_CURRENT_KYIV_SOURCE_NOT_JSON",
   "credentials_exposed": false,
   "db_cutover": false
 }
