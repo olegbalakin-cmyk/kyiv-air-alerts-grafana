@@ -1,0 +1,61 @@
+name: Historical blind freeze Vinnytsia proof
+
+on:
+  push:
+    branches:
+      - historical-blind-freeze-vinnytsia-proof-2026-10-02
+    paths:
+      - "kyiv-air-alerts-grafana/scripts/historical_blind_freeze_vinnytsia.py"
+      - ".github/workflows/historical-blind-freeze-vinnytsia-proof.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  freeze:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out proof branch
+        uses: actions/checkout@v4
+        with:
+          ref: historical-blind-freeze-vinnytsia-proof-2026-10-02
+          fetch-depth: 0
+
+      - name: Verify accepted source ancestry
+        shell: bash
+        run: |
+          set -euo pipefail
+          git merge-base --is-ancestor a8eeaf13d51d3e16582212c85cd69a9e6c09685d HEAD
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Run bounded Vinnytsia freeze
+        shell: bash
+        run: |
+          set -euo pipefail
+          python kyiv-air-alerts-grafana/scripts/historical_blind_freeze_vinnytsia.py
+
+      - name: Verify mutation boundary
+        shell: bash
+        run: |
+          set -euo pipefail
+          git diff --exit-code a8eeaf13d51d3e16582212c85cd69a9e6c09685d -- \
+            kyiv-air-alerts-grafana/data \
+            research/historical_v2_formalization_vinnytsia_zhytomyr_proof_2026-10-02.json
+          status="$(git status --porcelain)"
+          test "$status" = "?? research/historical_blind_freeze_vinnytsia_2026-10-02.json"
+
+      - name: Commit compact freeze artifact
+        shell: bash
+        run: |
+          set -euo pipefail
+          artifact="research/historical_blind_freeze_vinnytsia_2026-10-02.json"
+          test -f "$artifact"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "$artifact"
+          git commit -m "Record Vinnytsia blind freeze"
+          git push origin HEAD:historical-blind-freeze-vinnytsia-proof-2026-10-02
