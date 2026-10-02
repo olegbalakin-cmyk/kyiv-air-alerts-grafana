@@ -1,0 +1,56 @@
+name: Historical 23-city blind sample manifest proof
+
+on:
+  push:
+    branches:
+      - historical-23city-blind-sample-manifest-proof-2026-10-02
+    paths:
+      - kyiv-air-alerts-grafana/scripts/build_historical_23city_blind_sample_manifest.py
+      - .github/workflows/historical-23city-blind-sample-manifest-proof.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  actions: read
+
+jobs:
+  freeze:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout proof branch
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Verify exact proof branch
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REF_NAME" = "historical-23city-blind-sample-manifest-proof-2026-10-02"
+
+      - name: Build and verify manifest
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          python kyiv-air-alerts-grafana/scripts/build_historical_23city_blind_sample_manifest.py | tee /tmp/manifest-proof.json
+          test -f research/historical_23city_blind_sample_manifest_2026-10-02.json
+
+      - name: Verify bounded working-tree mutation
+        shell: bash
+        run: |
+          set -euo pipefail
+          git status --short
+          unexpected="$(git status --short | awk '$0 != "?? research/historical_23city_blind_sample_manifest_2026-10-02.json" && $0 != ""')"
+          test -z "$unexpected"
+
+      - name: Commit final compact manifest
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add research/historical_23city_blind_sample_manifest_2026-10-02.json
+          git commit -m "Freeze 23-city 115-case blind sample manifest"
+          git push origin HEAD:historical-23city-blind-sample-manifest-proof-2026-10-02
