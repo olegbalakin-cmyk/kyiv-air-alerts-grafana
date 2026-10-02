@@ -1,0 +1,97 @@
+name: Historical source coverage forensic
+
+on:
+  push:
+    branches:
+      - historical-source-coverage-forensic-workflow-proof-2026-10-02
+    paths:
+      - '.github/workflows/historical-source-coverage-forensic.yml'
+      - 'kyiv-air-alerts-grafana/scripts/audit_historical_source_coverage.py'
+      - 'kyiv-air-alerts-grafana/tests/test_historical_source_coverage_forensic.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  AUTHORITATIVE_HEAD: acd01dfbe8e520a93ccf827f3179e3cdc6cfc3e5
+  PYTHONDONTWRITEBYTECODE: '1'
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Fetch all accessible branch refs
+        run: git fetch --prune origin '+refs/heads/*:refs/remotes/origin/*'
+      - name: Focused forensic tests
+        run: python -m pytest -q -p no:cacheprovider kyiv-air-alerts-grafana/tests/test_historical_source_coverage_forensic.py
+      - name: Verify tests left repository clean
+        run: test -z "$(git status --porcelain)"
+
+  city:
+    needs: tests
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        city: [kherson, zaporizhzhia, chernihiv, sevastopol, sumy, kyiv]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Fetch all accessible branch refs
+        run: git fetch --prune origin '+refs/heads/*:refs/remotes/origin/*'
+      - name: Audit city
+        run: |
+          out="$RUNNER_TEMP/historical-source-coverage-forensic"
+          mkdir -p "$out"
+          python kyiv-air-alerts-grafana/scripts/audit_historical_source_coverage.py city             --city "${{ matrix.city }}"             --authoritative-head "$AUTHORITATIVE_HEAD"             --output-dir "$out"
+      - name: Verify repository clean
+        if: always()
+        run: test -z "$(git status --porcelain)"
+      - name: Upload city forensic
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: historical-source-coverage-forensic-${{ matrix.city }}
+          path: ${{ runner.temp }}/historical-source-coverage-forensic/${{ matrix.city }}.*
+          if-no-files-found: error
+          retention-days: 30
+
+  aggregate:
+    needs: city
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Fetch all accessible branch refs
+        run: git fetch --prune origin '+refs/heads/*:refs/remotes/origin/*'
+      - name: Download all city artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: historical-source-coverage-forensic-*
+          path: ${{ runner.temp }}/city-results
+          merge-multiple: true
+      - name: Aggregate and enforce Kherson calibration
+        run: |
+          out="$RUNNER_TEMP/historical-source-coverage-forensic"
+          mkdir -p "$out"
+          python kyiv-air-alerts-grafana/scripts/audit_historical_source_coverage.py aggregate             --input-dir "$RUNNER_TEMP/city-results"             --output-dir "$out"             --authoritative-head "$AUTHORITATIVE_HEAD"             --protected-state CLEAN             --fail-on-calibration
+          cat "$out/summary.json"
+          cat "$out/manifest.json"
+      - name: Verify aggregate left repository clean
+        if: always()
+        run: test -z "$(git status --porcelain)"
+      - name: Upload aggregate forensic
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: historical-source-coverage-forensic-summary
+          path: ${{ runner.temp }}/historical-source-coverage-forensic/*
+          if-no-files-found: error
+          retention-days: 30
