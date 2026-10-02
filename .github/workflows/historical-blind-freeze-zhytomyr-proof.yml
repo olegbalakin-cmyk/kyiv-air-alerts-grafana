@@ -1,0 +1,54 @@
+name: Historical blind freeze Zhytomyr proof
+
+on:
+  pull_request:
+    branches:
+      - historical-v2-formalization-vinnytsia-zhytomyr-proof-2026-10-02
+    paths:
+      - "kyiv-air-alerts-grafana/scripts/historical_blind_freeze_zhytomyr.py"
+      - ".github/workflows/historical-blind-freeze-zhytomyr-proof.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  freeze:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out proof branch
+        uses: actions/checkout@v4
+        with:
+          ref: historical-blind-freeze-zhytomyr-proof-2026-10-02
+          fetch-depth: 0
+
+      - name: Materialize exact accepted source checkout
+        shell: bash
+        run: |
+          set -euo pipefail
+          git cat-file -e a8eeaf13d51d3e16582212c85cd69a9e6c09685d^{commit}
+          git worktree add --detach /tmp/accepted-source a8eeaf13d51d3e16582212c85cd69a9e6c09685d
+          test "$(git -C /tmp/accepted-source rev-parse HEAD)" = "a8eeaf13d51d3e16582212c85cd69a9e6c09685d"
+
+      - name: Run bounded Zhytomyr freeze selector
+        shell: bash
+        run: |
+          set -euo pipefail
+          python kyiv-air-alerts-grafana/scripts/historical_blind_freeze_zhytomyr.py \
+            --source-root /tmp/accepted-source \
+            --output "$GITHUB_WORKSPACE/research/historical_blind_freeze_zhytomyr_2026-10-02.json"
+
+      - name: Commit compact freeze artifact
+        shell: bash
+        run: |
+          set -euo pipefail
+          artifact="research/historical_blind_freeze_zhytomyr_2026-10-02.json"
+          test -f "$artifact"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "$artifact"
+          if git diff --cached --quiet; then
+            echo "artifact unchanged"
+          else
+            git commit -m "Freeze Zhytomyr blind sample 151-155"
+            git push origin HEAD:historical-blind-freeze-zhytomyr-proof-2026-10-02
+          fi
