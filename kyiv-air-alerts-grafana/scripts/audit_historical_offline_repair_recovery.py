@@ -12,9 +12,9 @@ import sys
 from typing import Any
 
 REPO = pathlib.Path(__file__).resolve().parents[2]
-CAMPAIGN_REL = pathlib.Path("research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27")
-STATUS_REL = pathlib.Path("research/historical_attack_event_backfill_status.json")
-MONITOR_REL = pathlib.Path("kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py")
+CAMPAIGN_SUFFIX = pathlib.Path("research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27")
+STATUS_NAME = "historical_attack_event_backfill_status.json"
+MONITOR_NAME = "monitor_explosion_candidates.py"
 OUT_REL = pathlib.Path("research/historical_offline_repair_recovery_scan_2026-10-02.json")
 FROZEN_HEAD = "71cb6f6fbe856cc7b96759310fe9cc9c71cc0453"
 IMPLEMENTATION_HEAD = "a208892ef6ba1437e8cfb2244e6863f1203803db"
@@ -72,8 +72,17 @@ def ast_signatures(source: str):
                 rows.append({"name": name, "args": args, "lineno": n.lineno})
     return sorted(rows, key=lambda x: (x["lineno"], x["name"]))
 
+def unique_path(pattern: str, kind: str) -> pathlib.Path:
+    hits = sorted(p for p in REPO.glob(pattern) if p.is_file())
+    if len(hits) != 1:
+        raise SystemExit(f"{kind} discovery invariant failed: {len(hits)} matches for {pattern}")
+    return hits[0]
+
 def main() -> int:
-    campaign_dir = REPO / CAMPAIGN_REL
+    campaign_dirs = sorted(p for p in REPO.glob("**/" + CAMPAIGN_SUFFIX.as_posix()) if p.is_dir())
+    if len(campaign_dirs) != 1:
+        raise SystemExit(f"campaign-dir discovery invariant failed: {len(campaign_dirs)}")
+    campaign_dir = campaign_dirs[0]
     batches = sorted(p for p in campaign_dir.glob("*.json") if p.is_file())
     if len(batches) != EXPECTED_BATCHES:
         raise SystemExit(f"batch-count invariant failed: {len(batches)} != {EXPECTED_BATCHES}")
@@ -81,7 +90,8 @@ def main() -> int:
     head = git("rev-parse", "HEAD").strip()
     base = git("merge-base", IMPLEMENTATION_HEAD, head).strip()
     first = json.loads(batches[0].read_text(encoding="utf-8"))
-    status = json.loads((REPO / STATUS_REL).read_text(encoding="utf-8"))
+    status_path = unique_path("**/research/" + STATUS_NAME, "status")
+    status = json.loads(status_path.read_text(encoding="utf-8"))
 
     # Aggregate structural information across the local corpus only.
     keysets = collections.Counter()
@@ -93,10 +103,12 @@ def main() -> int:
         corpus_hasher.update(p.relative_to(REPO).as_posix().encode("utf-8") + b"\0" + raw + b"\0")
         keyset_counts(json.loads(raw), keysets)
 
-    current_source = (REPO / MONITOR_REL).read_text(encoding="utf-8")
-    frozen_source = git("show", f"{FROZEN_HEAD}:{MONITOR_REL.as_posix()}")
+    monitor_path = unique_path("**/scripts/" + MONITOR_NAME, "monitor")
+    monitor_rel = monitor_path.relative_to(REPO).as_posix()
+    current_source = monitor_path.read_text(encoding="utf-8")
+    frozen_source = git("show", f"{FROZEN_HEAD}:{monitor_rel}")
 
-    test_dir = REPO / "kyiv-air-alerts-grafana/tests"
+    test_dir = monitor_path.parent.parent / "tests"
     proof_tests = []
     for p in sorted(test_dir.glob("*historical*proof*.py")):
         try:
@@ -139,6 +151,7 @@ def main() -> int:
         "source_network_calls": 0,
     }
     out = REPO / OUT_REL
+    out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(json.dumps(diag, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     print(jdump(diag))
     return 0
