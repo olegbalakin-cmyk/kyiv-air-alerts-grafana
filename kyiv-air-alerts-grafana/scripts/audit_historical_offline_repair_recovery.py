@@ -205,6 +205,57 @@ def main() -> int:
         for cty in sorted({x[0] for x in frozen_states})
     })
 
+
+    # Brute-force a bounded family of explicit canonical-state serializations.
+    simple_rows = [
+        {"city_key": cty, "episode_id": eid, "state": (sp.get("state") if isinstance(sp, dict) else sp)}
+        for cty, eid, sp in frozen_states
+    ]
+    hash_search_matches = []
+    row_field_variants = [
+        ("city_key", "episode_id", "state"),
+        ("city", "episode_id", "state"),
+        ("city_key", "episode_id", "outcome"),
+        ("city", "episode_id", "outcome"),
+        ("city_key", "episode_id", "classifier_result"),
+        ("city", "episode_id", "classifier_result"),
+    ]
+    for city_field, id_field, state_field in row_field_variants:
+        rows = [{city_field:r["city_key"], id_field:r["episode_id"], state_field:r["state"]} for r in simple_rows]
+        objects = [
+            ("list", rows),
+            ("wrapped_targets", {"targets": rows}),
+            ("wrapped_target_states", {"target_states": rows}),
+            ("wrapped_episode_states", {"episode_states": rows}),
+        ]
+        for obj_name, obj in objects:
+            for sort_keys in (True, False):
+                for ensure_ascii in (True, False):
+                    for compact in (True, False):
+                        kwargs = {"sort_keys":sort_keys, "ensure_ascii":ensure_ascii}
+                        if compact:
+                            kwargs["separators"] = (",", ":")
+                        raw = json.dumps(obj, **kwargs)
+                        for suffix in ("", "\n"):
+                            h = sha256_bytes((raw+suffix).encode("utf-8"))
+                            if h == EXPECTED_ORIGINAL_HASH:
+                                hash_search_matches.append({
+                                    "kind":"json", "fields":[city_field,id_field,state_field],
+                                    "object":obj_name, "sort_keys":sort_keys,
+                                    "ensure_ascii":ensure_ascii, "compact":compact,
+                                    "newline":bool(suffix)
+                                })
+    for sep_name, sep in (("tab","\t"),("comma",","),("pipe","|")):
+        for order_name, order in (
+            ("city_id_state", ("city_key","episode_id","state")),
+            ("id_city_state", ("episode_id","city_key","state")),
+        ):
+            raw = "\n".join(sep.join(str(r[k]) for k in order) for r in simple_rows)
+            for final_nl in (False, True):
+                h=sha256_bytes((raw+("\n" if final_nl else "")).encode("utf-8"))
+                if h == EXPECTED_ORIGINAL_HASH:
+                    hash_search_matches.append({"kind":"delimited","sep":sep_name,"order":order_name,"newline":final_nl})
+
     control_obs = {}
     case18_obs = []
     classifier_results = collections.Counter()
@@ -259,6 +310,7 @@ def main() -> int:
         "target_state_count": len(frozen_states),
         "target_state_examples": frozen_state_examples,
         "target_hash_variants": state_rows_variants,
+        "target_hash_search_matches": hash_search_matches,
         "classifier_result_counts": dict(classifier_results),
         "observation_count_direct": obs_count,
         "control_records": control_obs,
@@ -267,6 +319,9 @@ def main() -> int:
         "git_grep_case18": grep_case18[:50],
         "status_city_shapes": city_status_shapes,
         "current_function_windows": {
+            "classification_text": source_window(current_source, "classification_text", after=80),
+            "classification_segments": source_window(current_source, "classification_segments", after=80),
+            "match_candidate_to_episodes": source_window(current_source, "match_candidate_to_episodes", after=100),
             "dated_live_update_event_times": source_window(current_source, "dated_live_update_event_times"),
             "exact_city_classification_evidence": source_window(current_source, "exact_city_classification_evidence"),
             "classify_candidate": source_window(current_source, "classify_candidate", after=220),
