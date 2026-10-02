@@ -29,7 +29,6 @@ jobs:
           echo "DIFFERENTIATED_ALERT_SHADOW_UKRAINEALARM_JSON=${RUNNER_TEMP}/phase-e-ukrainealarm.json" >> "$GITHUB_ENV"
           echo "DIFFERENTIATED_ALERT_SHADOW_ALERTS_IN_UA_JSON=${RUNNER_TEMP}/phase-e-alerts-in-ua.json" >> "$GITHUB_ENV"
           echo "DIFFERENTIATED_ALERT_SOURCE_CAPTURE_DIAGNOSTIC=${RUNNER_TEMP}/phase-e-capture.json" >> "$GITHUB_ENV"
-          echo "DIFFERENTIATED_PROOF_NEON_HOST=ep-blue-dew-b5jvusuv-pooler.c-7.us-east-2.aws.neon.tech" >> "$GITHUB_ENV"
 
       - uses: actions/setup-python@v5
         with:
@@ -39,6 +38,203 @@ jobs:
 
       - name: Install dependencies
         run: pip install -r requirements-db-phase1.txt
+
+      - name: Resolve and prove exact disposable Neon wiring before live acquisition
+        env:
+          NEON_API_KEY: ${{ secrets.NEON_API_KEY }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          PROJECT_ID="green-cake-44216048"
+          BRANCH_ID="br-quiet-hat-b5z5hdqu"
+          PARENT_ID="br-bold-mode-b5rub8pq"
+          DATABASE_NAME="neondb"
+          ROLE_NAME="neondb_owner"
+          SAFE="${RUNNER_TEMP}/phase-e-db-wiring-preflight.json"
+          BRANCH_META="${RUNNER_TEMP}/phase-e-branch-meta.json"
+
+          fail_safe() {
+            local reason="$1"
+            REASON="$reason" SAFE="$SAFE" PROJECT_ID="$PROJECT_ID" BRANCH_ID="$BRANCH_ID" PARENT_ID="$PARENT_ID" DATABASE_NAME="$DATABASE_NAME" ROLE_NAME="$ROLE_NAME" python - <<'PY'
+          import json, os
+          from pathlib import Path
+          Path(os.environ["SAFE"]).write_text(json.dumps({
+              "status": "FAILED",
+              "reason": os.environ["REASON"],
+              "project_id": os.environ["PROJECT_ID"],
+              "branch_id": os.environ["BRANCH_ID"],
+              "expected_parent_id": os.environ["PARENT_ID"],
+              "database_name": os.environ["DATABASE_NAME"],
+              "role_name": os.environ["ROLE_NAME"],
+              "connection_string_recorded": False,
+              "credentials_exposed": False,
+          }, sort_keys=True, indent=2) + "\n")
+          PY
+          }
+
+          if [[ -z "${NEON_API_KEY:-}" ]]; then
+            fail_safe "PHASE_E_NEON_API_KEY_UNAVAILABLE_IN_PROOF_CONTEXT"
+            exit 1
+          fi
+          echo "::add-mask::${NEON_API_KEY}"
+
+          if ! npx --yes neon@latest api "/projects/${PROJECT_ID}/branches/${BRANCH_ID}" > "$BRANCH_META" 2>"${RUNNER_TEMP}/phase-e-neon-branch.stderr"; then
+            fail_safe "PHASE_E_DISPOSABLE_CONNECTION_RESOLUTION_FAILED"
+            exit 1
+          fi
+
+          if ! BRANCH_META="$BRANCH_META" SAFE="$SAFE" PROJECT_ID="$PROJECT_ID" BRANCH_ID="$BRANCH_ID" PARENT_ID="$PARENT_ID" DATABASE_NAME="$DATABASE_NAME" ROLE_NAME="$ROLE_NAME" python - <<'PY'
+          import json, os, sys
+          from pathlib import Path
+          raw = json.loads(Path(os.environ["BRANCH_META"]).read_text())
+          branch = raw.get("branch", raw)
+          ok = (
+              str(branch.get("id")) == os.environ["BRANCH_ID"]
+              and str(branch.get("project_id")) == os.environ["PROJECT_ID"]
+              and str(branch.get("parent_id")) == os.environ["PARENT_ID"]
+          )
+          if not ok:
+              Path(os.environ["SAFE"]).write_text(json.dumps({
+                  "status": "FAILED",
+                  "reason": "PHASE_E_DISPOSABLE_BRANCH_IDENTITY_MISMATCH",
+                  "project_id": os.environ["PROJECT_ID"],
+                  "branch_id": os.environ["BRANCH_ID"],
+                  "observed_branch_id": branch.get("id"),
+                  "expected_parent_id": os.environ["PARENT_ID"],
+                  "observed_parent_id": branch.get("parent_id"),
+                  "database_name": os.environ["DATABASE_NAME"],
+                  "role_name": os.environ["ROLE_NAME"],
+                  "connection_string_recorded": False,
+                  "credentials_exposed": False,
+              }, sort_keys=True, indent=2) + "\n")
+              sys.exit(1)
+          PY
+          then
+            exit 1
+          fi
+
+          if ! DB_URL="$(npx --yes neon@latest connection-string "$BRANCH_ID"               --project-id "$PROJECT_ID"               --database-name "$DATABASE_NAME"               --role-name "$ROLE_NAME"               --ssl require 2>"${RUNNER_TEMP}/phase-e-neon-cs.stderr")"; then
+            fail_safe "PHASE_E_DISPOSABLE_CONNECTION_RESOLUTION_FAILED"
+            exit 1
+          fi
+          if [[ -z "$DB_URL" ]]; then
+            fail_safe "PHASE_E_DISPOSABLE_CONNECTION_RESOLUTION_FAILED"
+            exit 1
+          fi
+
+          echo "::add-mask::$DB_URL"
+          export PHASE_E_DISPOSABLE_DATABASE_URL="$DB_URL"
+
+          PROJECT_ID="$PROJECT_ID" BRANCH_ID="$BRANCH_ID" PARENT_ID="$PARENT_ID" DATABASE_NAME="$DATABASE_NAME" ROLE_NAME="$ROLE_NAME" SAFE="$SAFE" python - <<'PY'
+          import hashlib
+          import json
+          import os
+          import sys
+          from pathlib import Path
+          import psycopg
+
+          safe_path = Path(os.environ["SAFE"])
+          try:
+              with psycopg.connect(os.environ["PHASE_E_DISPOSABLE_DATABASE_URL"]) as conn:
+                  cur = conn.cursor()
+                  cur.execute("""
+                    SELECT
+                      to_regclass('public.alert_state_snapshots') IS NOT NULL,
+                      to_regclass('public.alert_threat_observations') IS NOT NULL,
+                      (SELECT count(*)::int FROM alert_state_snapshots),
+                      (SELECT count(*)::int FROM alert_threat_observations),
+                      (SELECT count(*)::int FROM alert_episodes),
+                      (SELECT count(DISTINCT city_key)::int FROM alert_episodes),
+                      (SELECT count(*)::int FROM alert_episode_sources),
+                      (SELECT count(*)::int FROM alert_episode_sources s
+                         LEFT JOIN alert_episodes e ON e.episode_uid=s.episode_uid
+                         WHERE s.episode_uid IS NULL OR e.episode_uid IS NULL),
+                      (SELECT max(checkpoint_seq)::int FROM current_ingestion_checkpoints
+                         WHERE city_key='lviv' AND source_key='ukrainealarm_region_history')
+                  """)
+                  (snap_table, obs_table, snapshots, observations, episodes,
+                   cities, episode_sources, dangling, legacy_seq) = cur.fetchone()
+
+                  cur.execute("""SELECT episode_uid::text, legacy_episode_id, city_key, alert_type,
+                                        start_at::text, end_at::text
+                                 FROM alert_episodes ORDER BY episode_uid""")
+                  hp = hashlib.sha256()
+                  for row in cur:
+                      hp.update(json.dumps(row, separators=(",", ":"), ensure_ascii=False).encode())
+                      hp.update(b"\n")
+
+                  cur.execute("""SELECT source_observation_uid::text, episode_uid::text, source_key,
+                                        source_start_at::text, source_end_at::text
+                                 FROM alert_episode_sources ORDER BY source_observation_uid""")
+                  hs = hashlib.sha256()
+                  for row in cur:
+                      hs.update(json.dumps(row, separators=(",", ":"), ensure_ascii=False).encode())
+                      hs.update(b"\n")
+
+                  cur.execute("""SELECT checkpoint_id::text, source_key, city_key, stream_key,
+                                        checkpoint_seq::text, checkpoint_kind,
+                                        previous_checkpoint_id::text, checked_at::text,
+                                        continuity_verified
+                                 FROM ingestion_checkpoints ORDER BY checkpoint_id""")
+                  hc = hashlib.sha256()
+                  for row in cur:
+                      hc.update(json.dumps(row, separators=(",", ":"), ensure_ascii=False).encode())
+                      hc.update(b"\n")
+
+              state_ok = (
+                  snap_table and obs_table
+                  and snapshots == 0 and observations == 0
+                  and episodes > 0 and cities == 23
+                  and dangling == 0 and legacy_seq == 18
+              )
+              safe = {
+                  "status": "SUCCEEDED" if state_ok else "FAILED",
+                  "reason": None if state_ok else "PHASE_E_DISPOSABLE_DB_IDENTITY_OR_STATE_MISMATCH",
+                  "credential_resolution_method": "NEON_API_KEY + neon api branch identity + neon connection-string",
+                  "project_id": os.environ["PROJECT_ID"],
+                  "branch_id": os.environ["BRANCH_ID"],
+                  "parent_id": os.environ["PARENT_ID"],
+                  "database_name": os.environ["DATABASE_NAME"],
+                  "role_name": os.environ["ROLE_NAME"],
+                  "connection_succeeds": True,
+                  "differentiated_schema_present": bool(snap_table and obs_table),
+                  "alert_state_snapshots": snapshots,
+                  "alert_threat_observations": observations,
+                  "alert_episodes": episodes,
+                  "distinct_cities": cities,
+                  "alert_episode_sources": episode_sources,
+                  "dangling_episode_sources": dangling,
+                  "legacy_phase1_checkpoint_seq": legacy_seq,
+                  "alert_episodes_sha256": hp.hexdigest(),
+                  "alert_episode_sources_sha256": hs.hexdigest(),
+                  "ingestion_checkpoints_sha256": hc.hexdigest(),
+                  "connection_string_recorded": False,
+                  "credentials_exposed": False,
+              }
+              safe_path.write_text(json.dumps(safe, sort_keys=True, indent=2) + "\n")
+              if not state_ok:
+                  sys.exit(1)
+          except Exception as exc:
+              safe_path.write_text(json.dumps({
+                  "status": "FAILED",
+                  "reason": "PHASE_E_DISPOSABLE_DB_IDENTITY_OR_STATE_MISMATCH",
+                  "project_id": os.environ["PROJECT_ID"],
+                  "branch_id": os.environ["BRANCH_ID"],
+                  "database_name": os.environ["DATABASE_NAME"],
+                  "role_name": os.environ["ROLE_NAME"],
+                  "connection_succeeds": False,
+                  "error_type": type(exc).__name__,
+                  "connection_string_recorded": False,
+                  "credentials_exposed": False,
+              }, sort_keys=True, indent=2) + "\n")
+              raise
+          PY
+
+          {
+            echo "PHASE_E_DISPOSABLE_DATABASE_URL<<__PHASE_E_DB_URL__"
+            echo "$DB_URL"
+            echo "__PHASE_E_DB_URL__"
+          } >> "$GITHUB_ENV"
 
       - name: Guard product hash before Phase E
         shell: bash
@@ -341,23 +537,16 @@ jobs:
 
       - name: Phase E first PostgreSQL persistence on existing disposable branch
         env:
-          PERMANENT_DB_URL: ${{ secrets.MULTICITY_CANONICAL_DATABASE_URL }}
+          PHASE_E_DB_TARGET: "br-quiet-hat-b5z5hdqu"
         shell: bash
         run: |
           python - <<'PY'
-          import hashlib, json, os, re, sys
+          import hashlib, json, os, sys
           from datetime import datetime
           from pathlib import Path
           import psycopg
           sys.path.insert(0, "scripts")
           import differentiated_alert_shadow_runtime as runtime
-
-          def disposable_url():
-              base = os.environ["PERMANENT_DB_URL"]
-              host = os.environ["DIFFERENTIATED_PROOF_NEON_HOST"]
-              out, n = re.subn(r"(?<=@)[^/:?]+", host, base, count=1)
-              assert n == 1 and host in out
-              return out
 
           def parent_fingerprint(conn):
               cur = conn.cursor()
@@ -402,7 +591,7 @@ jobs:
                   "legacy_phase1_checkpoint_seq": legacy_seq,
               }
 
-          db = disposable_url()
+          db = os.environ["PHASE_E_DISPOSABLE_DATABASE_URL"]
           with psycopg.connect(db) as conn:
               before = parent_fingerprint(conn)
               cur = conn.cursor()
@@ -455,18 +644,16 @@ jobs:
 
       - name: Phase E exact replay same process contract
         env:
-          PERMANENT_DB_URL: ${{ secrets.MULTICITY_CANONICAL_DATABASE_URL }}
+          PHASE_E_DB_TARGET: "br-quiet-hat-b5z5hdqu"
         shell: bash
         run: |
           python - <<'PY'
-          import json, os, re, sys
+          import json, os, sys
           from datetime import datetime
           from pathlib import Path
           sys.path.insert(0, "scripts")
           import differentiated_alert_shadow_runtime as runtime
-          base = os.environ["PERMANENT_DB_URL"]
-          db, n = re.subn(r"(?<=@)[^/:?]+", os.environ["DIFFERENTIATED_PROOF_NEON_HOST"], base, count=1)
-          assert n == 1
+          db = os.environ["PHASE_E_DISPOSABLE_DATABASE_URL"]
           cap = json.loads(Path(os.environ["DIFFERENTIATED_ALERT_SOURCE_CAPTURE_DIAGNOSTIC"]).read_text())
           now = datetime.fromisoformat(cap["captured_at"].replace("Z", "+00:00"))
           env = dict(os.environ)
@@ -490,17 +677,16 @@ jobs:
 
       - name: Phase E fresh-process replay
         env:
-          PERMANENT_DB_URL: ${{ secrets.MULTICITY_CANONICAL_DATABASE_URL }}
+          PHASE_E_DB_TARGET: "br-quiet-hat-b5z5hdqu"
         shell: bash
         run: |
           python - <<'PY'
-          import json, os, re, sys
+          import json, os, sys
           from datetime import datetime
           from pathlib import Path
           sys.path.insert(0, "scripts")
           import differentiated_alert_shadow_runtime as runtime
-          db, n = re.subn(r"(?<=@)[^/:?]+", os.environ["DIFFERENTIATED_PROOF_NEON_HOST"], os.environ["PERMANENT_DB_URL"], count=1)
-          assert n == 1
+          db = os.environ["PHASE_E_DISPOSABLE_DATABASE_URL"]
           cap = json.loads(Path(os.environ["DIFFERENTIATED_ALERT_SOURCE_CAPTURE_DIAGNOSTIC"]).read_text())
           now = datetime.fromisoformat(cap["captured_at"].replace("Z", "+00:00"))
           env = dict(os.environ)
@@ -523,15 +709,14 @@ jobs:
 
       - name: Phase E binding and raw-value invariants
         env:
-          PERMANENT_DB_URL: ${{ secrets.MULTICITY_CANONICAL_DATABASE_URL }}
+          PHASE_E_DB_TARGET: "br-quiet-hat-b5z5hdqu"
         shell: bash
         run: |
           python - <<'PY'
-          import json, os, re
+          import json, os
           from pathlib import Path
           import psycopg
-          db, n = re.subn(r"(?<=@)[^/:?]+", os.environ["DIFFERENTIATED_PROOF_NEON_HOST"], os.environ["PERMANENT_DB_URL"], count=1)
-          assert n == 1
+          db = os.environ["PHASE_E_DISPOSABLE_DATABASE_URL"]
           cap = json.loads(Path(os.environ["DIFFERENTIATED_ALERT_SOURCE_CAPTURE_DIAGNOSTIC"]).read_text())
           observed = cap["captured_at"]
           with psycopg.connect(db) as conn:
@@ -595,11 +780,11 @@ jobs:
 
       - name: Phase F injected child transaction failure rolls back
         env:
-          PERMANENT_DB_URL: ${{ secrets.MULTICITY_CANONICAL_DATABASE_URL }}
+          PHASE_E_DB_TARGET: "br-quiet-hat-b5z5hdqu"
         shell: bash
         run: |
           python - <<'PY'
-          import json, os, re, sys
+          import json, os, sys
           from datetime import datetime, timedelta
           from pathlib import Path
           import psycopg
@@ -607,8 +792,7 @@ jobs:
           import differentiated_alert_postgres as pg
           import proof_differentiated_alert_shadow_ingestion as shadow
 
-          db, n = re.subn(r"(?<=@)[^/:?]+", os.environ["DIFFERENTIATED_PROOF_NEON_HOST"], os.environ["PERMANENT_DB_URL"], count=1)
-          assert n == 1
+          db = os.environ["PHASE_E_DISPOSABLE_DATABASE_URL"]
           cap = json.loads(Path(os.environ["DIFFERENTIATED_ALERT_SOURCE_CAPTURE_DIAGNOSTIC"]).read_text())
           observed = datetime.fromisoformat(cap["captured_at"].replace("Z", "+00:00")) + timedelta(seconds=1)
           payload = json.loads(Path(os.environ["DIFFERENTIATED_ALERT_SHADOW_KYIV_JSON"]).read_text())
@@ -668,6 +852,7 @@ jobs:
           from pathlib import Path
           temp = Path(os.environ["RUNNER_TEMP"])
           names = [
+              "phase-e-db-wiring-preflight.json",
               "phase-e-capture-safe.json", "phase-e-first.json", "phase-e-replay.json",
               "phase-e-fresh-replay.json", "phase-e-invariants.json", "phase-f-failure.json"
           ]
