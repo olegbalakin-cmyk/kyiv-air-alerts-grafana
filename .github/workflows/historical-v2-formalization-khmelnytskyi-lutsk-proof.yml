@@ -1,0 +1,108 @@
+name: Historical v2 formalization Stream 6 proof
+
+on:
+  push:
+    branches:
+      - historical-v2-formalization-khmelnytskyi-lutsk-proof-2026-10-02
+    paths-ignore:
+      - research/historical_v2_formalization_khmelnytskyi_lutsk_proof_2026-10-02.json
+  pull_request:
+    branches:
+      - main
+    paths-ignore:
+      - research/historical_v2_formalization_khmelnytskyi_lutsk_proof_2026-10-02.json
+
+permissions:
+  contents: write
+
+concurrency:
+  group: historical-v2-formalization-khmelnytskyi-lutsk-proof-2026-10-02
+  cancel-in-progress: false
+
+jobs:
+  formalize:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: historical-v2-formalization-khmelnytskyi-lutsk-proof-2026-10-02
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install bounded worker dependencies
+        run: python -m pip install --disable-pip-version-check requests beautifulsoup4
+
+      - name: Run one-job formalization
+        id: formalize
+        shell: bash
+        run: |
+          set +e
+          python kyiv-air-alerts-grafana/scripts/historical_v2_formalize_khmelnytskyi_lutsk.py
+          rc=$?
+          echo "worker_exit_code=$rc" >> "$GITHUB_OUTPUT"
+          test -f research/historical_v2_formalization_khmelnytskyi_lutsk_proof_2026-10-02.json
+          exit 0
+
+      - name: Verify mutation allowlist
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import subprocess
+          allowed = {"research/historical_v2_formalization_khmelnytskyi_lutsk_proof_2026-10-02.json"}
+          rows = subprocess.check_output(["git", "status", "--porcelain"], text=True).splitlines()
+          changed = set()
+          for line in rows:
+              if not line.strip():
+                  continue
+              path = line[3:].strip()
+              if " -> " in path:
+                  path = path.split(" -> ", 1)[1]
+              changed.add(path)
+          unexpected = changed - allowed
+          assert not unexpected, f"unexpected mutations: {sorted(unexpected)}"
+          assert allowed <= changed, f"proof artifact missing from worktree: {sorted(changed)}"
+          print("mutation allowlist PASS")
+          PY
+
+      - name: Commit compact proof artifact
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add research/historical_v2_formalization_khmelnytskyi_lutsk_proof_2026-10-02.json
+          git commit -m "Record Stream 6 historical v2 formalization proof"
+          git push origin HEAD:historical-v2-formalization-khmelnytskyi-lutsk-proof-2026-10-02
+
+      - name: Emit compact result
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p = Path("research/historical_v2_formalization_khmelnytskyi_lutsk_proof_2026-10-02.json")
+          d = json.loads(p.read_text(encoding="utf-8"))
+          print("overall_verdict=", d["overall_verdict"])
+          print("overall_blocker=", d.get("overall_blocker"))
+          for city, row in d["cities"].items():
+              print(city, {
+                  "verdict": row["verdict"],
+                  "canonical": row["canonical_episodes"],
+                  "evidence_records": row["evidence_records_read"],
+                  "normalized": row["normalized_observations"],
+                  "bound": row["bound_observations"],
+                  "unbound": row["unbound_observations"],
+                  "strict": row["strict_positives"],
+                  "sensitivity": row["sensitivity_positives"],
+                  "no_confirmed": row["no_confirmed_event"],
+                  "needs_review": row["needs_review"],
+                  "unresolved": row["unresolved_evidence_bindings"],
+                  "sha": row["target_state_sha256"],
+                  "blocker": row.get("blocker"),
+              })
+          PY
