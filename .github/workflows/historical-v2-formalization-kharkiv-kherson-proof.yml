@@ -1,0 +1,71 @@
+name: Historical v2 formalization Kharkiv Kherson proof
+
+on:
+  push:
+    branches:
+      - historical-v2-formalization-kharkiv-kherson-proof-2026-10-02
+    paths-ignore:
+      - research/historical_v2_formalization_kharkiv_kherson_proof_2026-10-02.json
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  prove:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout proof branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref_name }}
+          fetch-depth: 0
+
+      - name: Run bounded formalization
+        run: |
+          python kyiv-air-alerts-grafana/scripts/historical_v2_formalization_existing_evidence.py \
+            --expected-head "${{ github.sha }}"
+
+      - name: Verify proof-only worktree mutation
+        run: |
+          python - <<'PY'
+          import subprocess
+          from pathlib import Path
+          allowed = {"research/historical_v2_formalization_kharkiv_kherson_proof_2026-10-02.json"}
+          rows = subprocess.check_output(
+              ["git", "status", "--porcelain", "--untracked-files=all"],
+              text=True,
+          ).splitlines()
+          paths = {row[3:] for row in rows if len(row) >= 4}
+          if paths != allowed:
+              raise SystemExit(f"Unexpected worktree paths: {sorted(paths)}")
+          if not Path(next(iter(allowed))).exists():
+              raise SystemExit("Proof artifact missing")
+          print("proof-only worktree guard PASS")
+          PY
+
+      - name: Commit compact proof artifact
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add research/historical_v2_formalization_kharkiv_kherson_proof_2026-10-02.json
+          git commit -m "Record Kharkiv Kherson historical v2 formalization proof"
+          git push origin "HEAD:${{ github.ref_name }}"
+
+      - name: Enforce proof verdict
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p = Path("research/historical_v2_formalization_kharkiv_kherson_proof_2026-10-02.json")
+          doc = json.loads(p.read_text(encoding="utf-8"))
+          blocked = {
+              city: row.get("blockers")
+              for city, row in (doc.get("cities") or {}).items()
+              if row.get("verdict") != "CITY V2 FORMALIZATION PROVEN"
+          }
+          if blocked:
+              raise SystemExit(f"Formalization blocked: {blocked}")
+          print(doc.get("final_verdict"))
+          PY
