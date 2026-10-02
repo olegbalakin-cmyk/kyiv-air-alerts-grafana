@@ -14,6 +14,8 @@ permissions:
 jobs:
   prove:
     runs-on: ubuntu-latest
+    env:
+      PYTHONDONTWRITEBYTECODE: "1"
     timeout-minutes: 30
     steps:
       - name: Checkout proof branch
