@@ -1,0 +1,137 @@
+{
+  "schema_version": 1,
+  "proof": "historical-source-coverage-repair-proof-2026-10-01",
+  "verdict": "SOURCE-COVERAGE REPAIR BLOCKED",
+  "predecessor_head": "7296e910fef9e3b7bb448444791407eed1bae03f",
+  "proof_execution_head": "ad47f61d8a5b88b1d19902b68e2b385b45fdec0e",
+  "final_proof_head": "artifact_commit; resolve branch HEAD after this artifact commit",
+  "final_proof_head_semantics": "The artifact commit is intentionally metadata-only. Its resulting SHA is the final proof HEAD reported externally; embedding that SHA in its own contents would be circular.",
+  "github_actions_run_id": 36966395569,
+  "focused_run_conclusion": "success",
+  "added_source_families": [
+    {
+      "source_family": "telegram/suspilnesumy",
+      "city": "sumy",
+      "adapter": "PublicTelegramAdapter",
+      "selection_reason": "publisher-native Suspilne Sumy live channel; smallest direct path to the blind-research live report; no new adapter or unrestricted web fallback"
+    },
+    {
+      "source_family": "telegram/razvozhaev",
+      "city": "sevastopol",
+      "adapter": "PublicTelegramAdapter",
+      "selection_reason": "official/local primary public channel; smallest deterministic path to the exact-alert air-defense operational claim; claim remains attributed"
+    }
+  ],
+  "source_policies": {
+    "telegram/suspilnesumy": {
+      "identity": "Official Suspilne Sumy public Telegram @suspilnesumy",
+      "city_scope": "Sumy",
+      "retrieval": "bounded public Telegram web via existing PublicTelegramAdapter",
+      "timestamp": "Telegram time datetime normalized to UTC",
+      "stable_id": "sha256(telegram|channel|message_id)[:24]",
+      "content_hash": "sha256(channel,message_id,source_timestamp,excerpt)",
+      "dedup": "channel+message_id; episode numerator remains binary",
+      "failure": "configured-family fetch failure is retry-required, never negative evidence",
+      "claim_treatment": "normal frozen methodology"
+    },
+    "telegram/razvozhaev": {
+      "identity": "Official public Telegram @razvozhaev of Russian-installed Sevastopol governor",
+      "city_scope": "Sevastopol; source-specific Russian locative permitted only in retrieval filter",
+      "retrieval": "bounded public Telegram web via existing PublicTelegramAdapter",
+      "timestamp": "Telegram time datetime normalized to UTC",
+      "stable_id": "sha256(telegram|channel|message_id)[:24]",
+      "content_hash": "sha256(channel,message_id,source_timestamp,excerpt)",
+      "dedup": "channel+message_id; episode numerator remains binary",
+      "failure": "configured-family fetch failure is retry-required, never negative evidence",
+      "claim_treatment": "attributed operational claim; not independently verified by source admission"
+    }
+  },
+  "cases": {
+    "17": {
+      "city": "sumy",
+      "episode_id": "9e87e464ea93d32b31a09a3d",
+      "alert_start": "2025-12-14T06:20:53Z",
+      "alert_end": "2025-12-14T07:41:32Z",
+      "before": {
+        "blind_verdict": "PROBABLE_FALSE_NEGATIVE",
+        "root_cause": "Stage 1 / SOURCE_NOT_IN_FROZEN_REGISTRY"
+      },
+      "retrieved": {
+        "source_family": "telegram/suspilnesumy",
+        "telegram_message_id": 40582,
+        "source_url": "https://t.me/suspilnesumy/40582",
+        "source_timestamp": "2025-12-14T09:03:57Z",
+        "excerpt_hash_sha256": "77b4bd4264fee827057d724a086b08f4718b521a43de8713beaee433f0ddbd27",
+        "event_terms": [
+          "explosion"
+        ],
+        "city_evidence": true
+      },
+      "after": {
+        "candidate_matching": "no_match",
+        "temporal_binding": "NO_STRICT_TEMPORAL_BINDING",
+        "matched_episode": null,
+        "classification": "needs_review"
+      },
+      "blocker": "Publisher-native Telegram timestamp is 09:03:57Z (11:03:57 Europe/Kyiv), after the target alert ended at 07:41:32Z. Therefore the accepted blind note '~09:03 explosion in Sumy' cannot serve as exact-time evidence for this episode without overriding source timestamp semantics.",
+      "success_condition_met": false
+    },
+    "18": {
+      "city": "sevastopol",
+      "episode_id": "6069b17ec096cae0912ad9bd",
+      "alert_start": "2026-09-04T11:48:14Z",
+      "alert_end": "2026-09-04T12:13:20Z",
+      "before": {
+        "blind_verdict": "CONFIRMED_FALSE_NEGATIVE",
+        "root_cause": "Stage 1 / SOURCE_NOT_IN_FROZEN_REGISTRY"
+      },
+      "retrieved": {
+        "source_family": "telegram/razvozhaev",
+        "telegram_message_id": 23590,
+        "source_url": "https://t.me/razvozhaev/23590",
+        "source_timestamp": "2026-09-04T12:00:47Z",
+        "excerpt_hash_sha256": "5938d4b07331f8a06aa8bbec20ca05cc9dcaacd4f9a5fde6a2c65af88625e80f",
+        "event_terms": [
+          "air_defense_action",
+          "air_defense_context",
+          "interception_claim"
+        ],
+        "attributed_claim": "Russian-installed local authority says air defense/mobile fire groups were repelling the attack and one UAV had been downed"
+      },
+      "after": {
+        "publication_time_inside_alert": true,
+        "candidate_matching": "unique_match at matching layer",
+        "classifier_exact_city_evidence": false,
+        "matched_episode": null,
+        "classification": "needs_review"
+      },
+      "blocker": "Source retrieval is repaired, but frozen classifier exact-city aliases do not recognize Russian locative 'Севастополе'. Source-only remediation therefore cannot promote/bind this observation without a separate classifier/city-alias semantic change.",
+      "success_condition_met": false
+    }
+  },
+  "negative_controls": {
+    "sumy_threat_only": "PASS — non-positive",
+    "sevastopol_alert_only": "PASS — non-positive",
+    "adjacent_episode": "PASS — evidence outside target alert did not bind to target",
+    "duplicate_source": "PASS — identical Telegram observation dedupes by channel+message_id; episode aggregation remains binary"
+  },
+  "regression_guards": {
+    "step1_timestamp_repair": "PASS — all 7 predecessor focused tests passed in run 36966395569",
+    "classifier_self_test": "PASS",
+    "frozen_campaign_batch_count": 139,
+    "frozen_campaign_batch_diff_count": 0,
+    "accepted_batch_artifacts_modified": false,
+    "full_campaign_rerun": false,
+    "recovery_scan": false,
+    "incorporation": false,
+    "db_or_neon_touched": false,
+    "deployment_performed": false
+  },
+  "changed_paths": [
+    ".github/workflows/historical-source-coverage-repair-proof.yml",
+    "kyiv-air-alerts-grafana/scripts/run_historical_attack_event_backfill_batch.py",
+    "kyiv-air-alerts-grafana/tests/test_historical_source_coverage_repair.py",
+    "research/historical_attack_event_source_registry.json"
+  ],
+  "conclusion": "Both source gaps have viable bounded source paths, but the requested GREEN conditions are not met: case 17's cited live explosion is outside the target alert under publisher-native timestamp semantics, and case 18 retrieval reaches normal classification but exposes an additional frozen exact-city lexical gap. No classifier semantics were broadened in this proof."
+}
