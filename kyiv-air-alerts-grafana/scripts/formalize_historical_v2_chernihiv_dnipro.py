@@ -374,11 +374,11 @@ def process_city(city: str, monitor) -> dict:
                         block(summary, f"CLASSIFIER_EXCEPTION:{obs_id}:{type(exc).__name__}")
                         continue
 
-                    reason_codes = [
-                        str(code)
-                        for code in (decision.get("reason_codes") or [])
-                    ]
-                    if any("PROVENANCE" in code.upper() for code in reason_codes):
+                    reviewed_adapter = decision.get("review_provenance_adapter") or {}
+                    if (
+                        reviewed_adapter.get("present") is True
+                        and reviewed_adapter.get("usable") is not True
+                    ):
                         summary["malformed_provenance"] += 1
 
                     candidate_key = (target_id, str(candidate.get("candidate_id") or ""))
