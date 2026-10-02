@@ -1,0 +1,162 @@
+{
+  "authoritative_evidence_mutations": 0,
+  "cities": {
+    "poltava": {
+      "blocker": null,
+      "bound_observations": 53,
+      "canonical_episodes": 1805,
+      "canonical_source_files": [
+        "data/explosion_metric_handoff/source_slices/poltava-historical-recovery_alerts.json"
+      ],
+      "city_key": "poltava",
+      "classifier_pipeline_exceptions": 0,
+      "counted_evidence_unbound": 0,
+      "duplicate_targets": 0,
+      "evidence_records_read": 57,
+      "extra_targets": 0,
+      "malformed_provenance": 0,
+      "mechanically_unrepresentable": 0,
+      "missing_targets": 0,
+      "needs_review": 0,
+      "no_confirmed_event": 1752,
+      "normalized_observations": 57,
+      "sensitivity_positives": 2,
+      "strict_positives": 51,
+      "target_state_sha256": "617ee7003f79df6bc99422b57778d6f9c097f53c96b0166dc056c74ba5f27be9",
+      "unbound_observations": 4,
+      "unresolved_evidence_bindings": 4,
+      "unresolved_items": [
+        {
+          "candidate_episode_ids": [],
+          "event_time": null,
+          "evidence_id": "2ce0ee160ccc11160f2e94bf",
+          "reason": "unresolved_evidence_binding"
+        },
+        {
+          "candidate_episode_ids": [],
+          "event_time": null,
+          "evidence_id": "22025c47b67afb291c49a06d",
+          "reason": "unresolved_evidence_binding"
+        },
+        {
+          "candidate_episode_ids": [],
+          "event_time": null,
+          "evidence_id": "1e077f200436b584d159a7c2",
+          "reason": "unresolved_evidence_binding"
+        },
+        {
+          "candidate_episode_ids": [],
+          "event_time": null,
+          "evidence_id": "e4440181ae63da525b7e75cf",
+          "reason": "unresolved_evidence_binding"
+        }
+      ],
+      "verdict": "CITY V2 FORMALIZATION PROVEN"
+    },
+    "rivne": {
+      "blocker": null,
+      "bound_observations": 13,
+      "canonical_episodes": 232,
+      "canonical_source_files": [
+        "data/explosion_metric_handoff/source_slices/rivne-historical-recovery_alerts.json"
+      ],
+      "city_key": "rivne",
+      "classifier_pipeline_exceptions": 0,
+      "counted_evidence_unbound": 0,
+      "duplicate_targets": 0,
+      "evidence_records_read": 19,
+      "extra_targets": 0,
+      "malformed_provenance": 0,
+      "mechanically_unrepresentable": 0,
+      "missing_targets": 0,
+      "needs_review": 0,
+      "no_confirmed_event": 219,
+      "normalized_observations": 19,
+      "sensitivity_positives": 0,
+      "strict_positives": 13,
+      "target_state_sha256": "eebda03f93045670d9abf36b7e961290479a429e7f282a1d925ee6a36b4c8b38",
+      "unbound_observations": 6,
+      "unresolved_evidence_bindings": 6,
+      "unresolved_items": [
+        {
+          "candidate_episode_ids": [],
+          "event_time": null,
+          "evidence_id": "7efbf37ec5f1f10a22efe1b1",
+          "reason": "unresolved_evidence_binding"
+        },
+        {
+          "candidate_episode_ids": [],
+          "event_time": null,
+          "evidence_id": "cfa94e9f5ce8860433ff7f06",
+          "reason": "unresolved_evidence_binding"
+        },
+        {
+          "candidate_episode_ids": [],
+          "event_time": null,
+          "evidence_id": "770bffb14a0312f08eb84bfb",
+          "reason": "unresolved_evidence_binding"
+        },
+        {
+          "candidate_episode_ids": [],
+          "event_time": null,
+          "evidence_id": "2107cb851dc15032ea3bb953",
+          "reason": "unresolved_evidence_binding"
+        },
+        {
+          "candidate_episode_ids": [],
+          "event_time": null,
+          "evidence_id": "70f4d2fefd3bc981ccae5185",
+          "reason": "unresolved_evidence_binding"
+        },
+        {
+          "candidate_episode_ids": [],
+          "event_time": null,
+          "evidence_id": "7fcaa6fc1f23bfc003a8b115",
+          "reason": "unresolved_evidence_binding"
+        }
+      ],
+      "verdict": "CITY V2 FORMALIZATION PROVEN"
+    }
+  },
+  "city_set": [
+    "poltava",
+    "rivne"
+  ],
+  "common_base": "fb563dc410fe6614263bdc8d4eb55025a987e950",
+  "incorporation": "NO",
+  "methodology_version": "historical-attack-event-air-defense-action-v2",
+  "mode": "FREEZE_EXISTING_EVIDENCE",
+  "mutation_guards": {
+    "authoritative_inputs_unchanged": true,
+    "db_neon": "UNTOUCHED",
+    "deployment": "NO",
+    "guarded_input_sha256_after": {
+      "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/poltava-historical-recovery_alerts.json": "99f46bbe8ac20c37a95c49efea1fc1cffc5dd4a4df5697d034a0a354df54b9c8",
+      "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/rivne-historical-recovery_alerts.json": "baca85b9749c0bfb2cb239c34530a879c7db7a844f7ed6a5de84934e1b685b46",
+      "kyiv-air-alerts-grafana/data/explosion_research/poltava/final_evidence.json": "aea6c86398f699de1c2fa9cc7dd32a8ce47f9fc1ae84a2c841011387b63a8102",
+      "kyiv-air-alerts-grafana/data/explosion_research/rivne/final_evidence.json": "d818bafa0648970a01a4ab9ab766c7af25f2f2bf6abb56be9ac1c7fbf4d51d78",
+      "kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py": "499df82ee4a0e9997f31c381850241bc19667ffc2b3882e7a1123df52c900c18",
+      "kyiv-air-alerts-grafana/scripts/replay_explosion_history.py": "5df4be4ae6a0518dbde7b89cafbfeae76cc23170a84071afd4f6771a9ef301bf"
+    },
+    "guarded_input_sha256_before": {
+      "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/poltava-historical-recovery_alerts.json": "99f46bbe8ac20c37a95c49efea1fc1cffc5dd4a4df5697d034a0a354df54b9c8",
+      "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/rivne-historical-recovery_alerts.json": "baca85b9749c0bfb2cb239c34530a879c7db7a844f7ed6a5de84934e1b685b46",
+      "kyiv-air-alerts-grafana/data/explosion_research/poltava/final_evidence.json": "aea6c86398f699de1c2fa9cc7dd32a8ce47f9fc1ae84a2c841011387b63a8102",
+      "kyiv-air-alerts-grafana/data/explosion_research/rivne/final_evidence.json": "d818bafa0648970a01a4ab9ab766c7af25f2f2bf6abb56be9ac1c7fbf4d51d78",
+      "kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py": "499df82ee4a0e9997f31c381850241bc19667ffc2b3882e7a1123df52c900c18",
+      "kyiv-air-alerts-grafana/scripts/replay_explosion_history.py": "5df4be4ae6a0518dbde7b89cafbfeae76cc23170a84071afd4f6771a9ef301bf"
+    },
+    "historical_evidence_mutations": 0,
+    "production_dashboard_data": "UNTOUCHED",
+    "scope_allowlist": "PASS",
+    "unexpected_changed_paths_before_artifact": []
+  },
+  "normalization_version": "historical-attack-event-observation-v2",
+  "overall_blocker": null,
+  "overall_verdict": "PROVEN",
+  "proof": "historical-v2-formalization-poltava-rivne-proof-2026-10-02",
+  "public_web_research": "NO",
+  "schema_version": 2,
+  "source_discovery": "NO",
+  "tested_head": "817422f0ecb45354dd70b4f54f5326673035af25"
+}
