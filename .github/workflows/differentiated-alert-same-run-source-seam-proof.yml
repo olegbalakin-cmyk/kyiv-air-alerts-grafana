@@ -22,14 +22,16 @@ jobs:
     defaults:
       run:
         working-directory: kyiv-air-alerts-grafana
-    env:
-      DIFFERENTIATED_ALERT_SHADOW_KYIV_JSON: ${{ runner.temp }}/differentiated-kyiv.json
-      DIFFERENTIATED_ALERT_SHADOW_UKRAINEALARM_JSON: ${{ runner.temp }}/differentiated-ukrainealarm.json
-      DIFFERENTIATED_ALERT_SHADOW_ALERTS_IN_UA_JSON: ${{ runner.temp }}/differentiated-alerts-in-ua.json
-      DIFFERENTIATED_ALERT_SOURCE_CAPTURE_DIAGNOSTIC: ${{ runner.temp }}/differentiated-source-capture.json
-
     steps:
       - uses: actions/checkout@v4
+
+      - name: Declare ephemeral stored-input paths
+        shell: bash
+        run: |
+          echo "DIFFERENTIATED_ALERT_SHADOW_KYIV_JSON=${RUNNER_TEMP}/differentiated-kyiv.json" >> "$GITHUB_ENV"
+          echo "DIFFERENTIATED_ALERT_SHADOW_UKRAINEALARM_JSON=${RUNNER_TEMP}/differentiated-ukrainealarm.json" >> "$GITHUB_ENV"
+          echo "DIFFERENTIATED_ALERT_SHADOW_ALERTS_IN_UA_JSON=${RUNNER_TEMP}/differentiated-alerts-in-ua.json" >> "$GITHUB_ENV"
+          echo "DIFFERENTIATED_ALERT_SOURCE_CAPTURE_DIAGNOSTIC=${RUNNER_TEMP}/differentiated-source-capture.json" >> "$GITHUB_ENV"
 
       - uses: actions/setup-python@v5
         with:
