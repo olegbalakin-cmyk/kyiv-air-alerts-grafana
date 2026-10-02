@@ -1,0 +1,107 @@
+{
+  "authoritative_evidence_mutations": 0,
+  "cities": {
+    "khmelnytskyi": {
+      "blocker": null,
+      "bound_observations": 12,
+      "canonical_episodes": 248,
+      "canonical_source_files": [
+        "data/explosion_metric_handoff/source_slices/khmelnytskyi-historical-recovery_alerts.json"
+      ],
+      "city_key": "khmelnytskyi",
+      "classifier_pipeline_exceptions": 0,
+      "counted_evidence_unbound": 0,
+      "duplicate_targets": 0,
+      "evidence_records_read": 12,
+      "extra_targets": 0,
+      "malformed_provenance": 0,
+      "mechanically_unrepresentable": 0,
+      "missing_targets": 0,
+      "needs_review": 0,
+      "no_confirmed_event": 236,
+      "normalized_observations": 12,
+      "sensitivity_positives": 1,
+      "strict_positives": 11,
+      "target_state_sha256": "12954a115508770917bed9cc3905a12511ba41026ddf27be992e746535688c08",
+      "unbound_observations": 0,
+      "unresolved_evidence_bindings": 0,
+      "unresolved_items": [],
+      "verdict": "CITY V2 FORMALIZATION PROVEN"
+    },
+    "lutsk": {
+      "blocker": null,
+      "bound_observations": 12,
+      "canonical_episodes": 135,
+      "canonical_source_files": [
+        "data/explosion_metric_handoff/source_slices/lutsk-historical-recovery_alerts.json"
+      ],
+      "city_key": "lutsk",
+      "classifier_pipeline_exceptions": 0,
+      "counted_evidence_unbound": 0,
+      "duplicate_targets": 0,
+      "evidence_records_read": 13,
+      "extra_targets": 0,
+      "malformed_provenance": 0,
+      "mechanically_unrepresentable": 0,
+      "missing_targets": 0,
+      "needs_review": 0,
+      "no_confirmed_event": 123,
+      "normalized_observations": 13,
+      "sensitivity_positives": 0,
+      "strict_positives": 12,
+      "target_state_sha256": "070d41c2ffa045778caf3b60b2b1752a1152432c2b492444b9406cc3fe045ec7",
+      "unbound_observations": 1,
+      "unresolved_evidence_bindings": 1,
+      "unresolved_items": [
+        {
+          "candidate_episode_ids": [],
+          "event_time": null,
+          "evidence_id": "26417e4d2749357b151ed81c",
+          "reason": "unresolved_evidence_binding"
+        }
+      ],
+      "verdict": "CITY V2 FORMALIZATION PROVEN"
+    }
+  },
+  "city_set": [
+    "khmelnytskyi",
+    "lutsk"
+  ],
+  "common_base": "fb563dc410fe6614263bdc8d4eb55025a987e950",
+  "incorporation": "NO",
+  "methodology_version": "historical-attack-event-air-defense-action-v2",
+  "mode": "FREEZE_EXISTING_EVIDENCE",
+  "mutation_guards": {
+    "authoritative_inputs_unchanged": true,
+    "db_neon": "UNTOUCHED",
+    "deployment": "NO",
+    "guarded_input_sha256_after": {
+      "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/khmelnytskyi-historical-recovery_alerts.json": "001d8cb4b2dc8147b935c112f5d9d6c499e77fe1e818decf60365f6b7a19aed7",
+      "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/lutsk-historical-recovery_alerts.json": "ba1248f6ac525190020f4bd1c0aaa2cd45d6ce8861483306ae638ec75e532de4",
+      "kyiv-air-alerts-grafana/data/explosion_research/khmelnytskyi/final_evidence.json": "eacd402c90cffbd1cc4007a6cf7f6d795f99e46dce14dd568fecf13e75699a20",
+      "kyiv-air-alerts-grafana/data/explosion_research/lutsk/final_evidence.json": "25e22b97aadb9d4adcdcbf754a9d83da0d99abede3527257a8b158116b314e6e",
+      "kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py": "499df82ee4a0e9997f31c381850241bc19667ffc2b3882e7a1123df52c900c18",
+      "kyiv-air-alerts-grafana/scripts/replay_explosion_history.py": "5df4be4ae6a0518dbde7b89cafbfeae76cc23170a84071afd4f6771a9ef301bf"
+    },
+    "guarded_input_sha256_before": {
+      "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/khmelnytskyi-historical-recovery_alerts.json": "001d8cb4b2dc8147b935c112f5d9d6c499e77fe1e818decf60365f6b7a19aed7",
+      "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/lutsk-historical-recovery_alerts.json": "ba1248f6ac525190020f4bd1c0aaa2cd45d6ce8861483306ae638ec75e532de4",
+      "kyiv-air-alerts-grafana/data/explosion_research/khmelnytskyi/final_evidence.json": "eacd402c90cffbd1cc4007a6cf7f6d795f99e46dce14dd568fecf13e75699a20",
+      "kyiv-air-alerts-grafana/data/explosion_research/lutsk/final_evidence.json": "25e22b97aadb9d4adcdcbf754a9d83da0d99abede3527257a8b158116b314e6e",
+      "kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py": "499df82ee4a0e9997f31c381850241bc19667ffc2b3882e7a1123df52c900c18",
+      "kyiv-air-alerts-grafana/scripts/replay_explosion_history.py": "5df4be4ae6a0518dbde7b89cafbfeae76cc23170a84071afd4f6771a9ef301bf"
+    },
+    "historical_evidence_mutations": 0,
+    "production_dashboard_data": "UNTOUCHED",
+    "scope_allowlist": "PASS",
+    "unexpected_changed_paths_before_artifact": []
+  },
+  "normalization_version": "historical-attack-event-observation-v2",
+  "overall_blocker": null,
+  "overall_verdict": "PROVEN",
+  "proof": "historical-v2-formalization-khmelnytskyi-lutsk-proof-2026-10-02",
+  "public_web_research": "NO",
+  "schema_version": 2,
+  "source_discovery": "NO",
+  "tested_head": "1ed3b4df55acef8cffddf00456508eec85ee36a8"
+}
