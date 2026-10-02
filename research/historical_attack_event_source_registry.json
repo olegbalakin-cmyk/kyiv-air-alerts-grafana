@@ -120,9 +120,9 @@
       "source_family": "telegram/Crimeanwind",
       "domain": "https://t.me/Crimeanwind",
       "channel": "Crimeanwind",
-      "discovery_method": "bounded public Telegram web search/history",
+      "discovery_method": "bounded public Telegram web search/history across the retained Crimeanwind family plus one official/local primary-source family",
       "bounded_date_time_strategy": "earliest batch alert -3h through latest alert end +72h; max 60 pages",
-      "coverage_basis": "existing Sevastopol adapter pilot validates deterministic public Crimeanwind retrieval without Telegram API credentials",
+      "coverage_basis": "Existing Crimeanwind coverage is preserved; proof-only remediation adds the official public Telegram channel @razvozhaev because it deterministically publishes Sevastopol alert and air-defense operational claims that were outside the frozen registry.",
       "rate_limits": {
         "timeout_seconds": 15,
         "max_retries": 2,
@@ -141,6 +141,40 @@
           ],
           "max_pages": 60,
           "enabled": true
+        },
+        {
+          "adapter_type": "PublicTelegramAdapter",
+          "source_family": "telegram/razvozhaev",
+          "channel": "razvozhaev",
+          "publisher": "Михаил Развожаев — официальный Telegram",
+          "city_query": "Севастополе",
+          "queries": [
+            "Севастополе"
+          ],
+          "retrieval_city_terms": [
+            "севастополе"
+          ],
+          "max_pages": 60,
+          "enabled": true,
+          "source_policy": {
+            "source_identity": "Official public Telegram channel @razvozhaev of the Russian-installed Sevastopol governor",
+            "city_scope": "Sevastopol city; retrieval additionally recognizes the source-specific Russian locative 'Севастополе' only for discovery filtering",
+            "retrieval_method": "Bounded public Telegram web search through the existing PublicTelegramAdapter; no Telegram API credentials and no unrestricted web fallback",
+            "timestamp_semantics": "Telegram message <time datetime> is parsed as an absolute timestamp and normalized to UTC; edited-display time does not replace original publication time",
+            "provenance_fields": [
+              "source_family",
+              "source_url",
+              "telegram_channel",
+              "telegram_message_id",
+              "source_timestamp",
+              "retrieval_provenance"
+            ],
+            "stable_id": "sha256('telegram|<channel>|<message_id>')[:24]",
+            "content_hash": "sha256(channel,message_id,source_timestamp,excerpt)",
+            "dedup_behavior": "Same Telegram channel+message_id deduplicates to one observation; episode-level event positivity remains binary across equivalent source observations",
+            "failure_behavior": "Fetch/search failure makes configured-family coverage incomplete and retry-required; it is never treated as negative evidence",
+            "claim_treatment": "Operational claims are retained as attributed claims of the Russian-installed local authority and are not silently converted into independently verified facts; the existing attack-event methodology determines strict/sensitivity/review"
+          }
         }
       ]
     },
@@ -151,9 +185,9 @@
       "source_family": "suspilne.media/sumy",
       "domain": "https://suspilne.media/sumy/",
       "section": "sumy",
-      "discovery_method": "bounded source-local date archive crawl + article-linked public Telegram context",
+      "discovery_method": "bounded source-local date archive crawl + article-linked public Telegram context + bounded publisher-native public Telegram live-report search",
       "bounded_date_time_strategy": "alert local day through alert end +72h; max 220 unique archive days per batch",
-      "coverage_basis": "source inventory marks Sumy ready for autonomous discovery and retained evidence is dominated by Suspilne Sumy with additional Telegram controls",
+      "coverage_basis": "Existing Suspilne Sumy archive coverage is preserved; proof-only remediation adds the publisher-native @suspilnesumy live channel to recover time-specific attack reporting that is not independently discoverable from the article archive.",
       "rate_limits": {
         "timeout_seconds": 15,
         "max_retries": 2,
@@ -169,6 +203,37 @@
           "publisher": "Суспільне Суми",
           "enabled": true,
           "max_linked_telegram_posts": 12
+        },
+        {
+          "adapter_type": "PublicTelegramAdapter",
+          "source_family": "telegram/suspilnesumy",
+          "channel": "suspilnesumy",
+          "publisher": "Суспільне Суми",
+          "city_query": "вибух",
+          "queries": [
+            "вибух"
+          ],
+          "max_pages": 60,
+          "enabled": true,
+          "source_policy": {
+            "source_identity": "Official Suspilne Sumy public Telegram channel @suspilnesumy",
+            "city_scope": "Sumy city; candidate text must still satisfy the frozen city matcher",
+            "retrieval_method": "Bounded public Telegram web search through the existing PublicTelegramAdapter; no Telegram API credentials and no unrestricted web fallback",
+            "timestamp_semantics": "Telegram message <time datetime> is parsed as an absolute timestamp and normalized to UTC; edited-display time does not replace original publication time",
+            "provenance_fields": [
+              "source_family",
+              "source_url",
+              "telegram_channel",
+              "telegram_message_id",
+              "source_timestamp",
+              "retrieval_provenance"
+            ],
+            "stable_id": "sha256('telegram|<channel>|<message_id>')[:24]",
+            "content_hash": "sha256(channel,message_id,source_timestamp,excerpt)",
+            "dedup_behavior": "Same Telegram channel+message_id deduplicates to one observation; episode-level event positivity remains binary across equivalent source observations",
+            "failure_behavior": "Fetch/search failure makes configured-family coverage incomplete and retry-required; it is never treated as negative evidence",
+            "claim_treatment": "Publisher-native live reporting is passed unchanged to the existing attack-event methodology; source admission does not force a positive classification"
+          }
         }
       ]
     },
