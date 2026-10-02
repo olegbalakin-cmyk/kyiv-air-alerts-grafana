@@ -1,0 +1,26 @@
+name: Historical v2 formalization Poltava Rivne proof
+
+on:
+  push:
+    branches:
+      - historical-v2-formalization-poltava-rivne-proof-2026-10-02
+    paths:
+      - scripts/proof_historical_v2_formalization_poltava_rivne.py
+      - .github/workflows/historical-v2-formalization-poltava-rivne-proof.yml
+
+permissions:
+  contents: write
+
+jobs:
+  formalize:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - name: Checkout proof branch
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Run bounded Stream 7 formalization
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: python3 scripts/proof_historical_v2_formalization_poltava_rivne.py
