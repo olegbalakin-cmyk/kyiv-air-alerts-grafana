@@ -1,0 +1,564 @@
+{
+  "schema_version": "attack-event-neon-persistence-contract-v1",
+  "step": 1,
+  "status": "PASS",
+  "verdict": "ATTACK-EVENT NEON PERSISTENCE CONTRACT FROZEN",
+  "readiness": "READY FOR A SEPARATE DISPOSABLE-NEON PERSISTENCE PROOF; NOT AUTHORIZED FOR NEON WRITES IN STEP 1",
+  "baseline": {
+    "accepted_predecessor": {
+      "verdict": "DIFFERENTIATED SCHEDULED PRODUCTION SHADOW ENABLED AND PROVEN",
+      "branch": "differentiated-alert-scheduled-production-shadow-enablement-proof-2026-10-02",
+      "artifact": "research/differentiated_alert_scheduled_production_shadow_enablement_proof_2026-10-02.json",
+      "commit": "7c823cd96ec709e1c38f286442b462edf38d9fb2"
+    },
+    "permanent_neon": {
+      "project": "green-cake-44216048",
+      "branch": "br-bold-mode-b5rub8pq",
+      "observed_contract_tables": [
+        "ingestion_runs",
+        "alert_episodes",
+        "alert_episode_sources",
+        "ingestion_checkpoints",
+        "alert_state_snapshots",
+        "alert_threat_observations",
+        "current_ingestion_checkpoints"
+      ],
+      "attack_or_explosion_tables_at_accepted_baseline": 0
+    },
+    "authoritative_product_source": "JSON",
+    "db_cutover": false
+  },
+  "fresh_git_guard": {
+    "main_sha_before_branch_creation": "e85429924dfd0f1759c09c0919d361f762b665e4",
+    "main_message": "Update Kyiv air-alert and casualty data",
+    "site_prod_sha": "8d2459000286b2f9852f88f29adae838bca08648",
+    "site_prod_message": "Update production air-alert and casualty data",
+    "semantic_drift_detected": false,
+    "drift_assessment": "Observed movement is normal generated-data movement; no semantic drift affecting canonical alert, differentiated shadow, attack classifier/output semantics, or historical attack-event pipeline was identified.",
+    "proof_branch_preexisted": false
+  },
+  "inspected_attack_event_producer_paths": [
+    {
+      "path": "kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py",
+      "role": "current attack-event candidate classifier, exact-city/temporal binding, reviewed-provenance adapter, episode-level composition",
+      "accepted_current_semantic_ref": "historical-23city-repaired-baseline-proof-2026-10-02",
+      "accepted_current_semantic_head": "fb563dc410fe6614263bdc8d4eb55025a987e950"
+    },
+    {
+      "path": "kyiv-air-alerts-grafana/scripts/replay_explosion_history.py",
+      "role": "offline replay/normalization of historical final_evidence into episode-level outcomes",
+      "accepted_current_semantic_ref": "historical-23city-repaired-baseline-proof-2026-10-02"
+    },
+    {
+      "path": "kyiv-air-alerts-grafana/scripts/run_historical_attack_event_backfill_batch.py",
+      "role": "historical batch discovery, normalized source observations, episode_results, campaign checkpoints",
+      "frozen_campaign_ref": "historical-attack-event-backfill-2026-09-27",
+      "git_blob_sha": "cb2791bd309abacf4c3aae8fee0d1a8f038220b2"
+    },
+    {
+      "path": "kyiv-air-alerts-grafana/scripts/historical_attack_event_sources.py",
+      "role": "bounded source adapters, source timestamps, content hashing, Telegram observation identity",
+      "frozen_campaign_ref": "historical-attack-event-backfill-2026-09-27",
+      "git_blob_sha": "0ceb3ea480de9b401000ba9d8b0bb02b22d83c89"
+    },
+    {
+      "path": "kyiv-air-alerts-grafana/scripts/historical_attack_event_acceleration_controller.py",
+      "role": "campaign version guard, global observation deduplication, terminal-state monotonicity, batch orchestration"
+    },
+    {
+      "path": ".github/workflows/historical-attack-event-backfill-scheduler.yml",
+      "role": "scheduled historical backfill resume workflow"
+    },
+    {
+      "path": "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/<city>/batch_*.json",
+      "role": "frozen five-city normalized batch outputs containing observations and episode_results",
+      "frozen_campaign_head": "71cb6f6fbe856cc7b96759310fe9cc9c71cc0453"
+    },
+    {
+      "path": "kyiv-air-alerts-grafana/data/explosion_research/<city>/final_evidence.json",
+      "role": "curated historical evidence inputs consumed by replay; heterogeneous older representation, not the persistence schema"
+    },
+    {
+      "path": "research/historical_v2_18city_acceptance_2026-10-02.json",
+      "role": "accepted formalization summary for 18 cities"
+    },
+    {
+      "path": "research/historical_offline_repair_recovery_scan_2026-10-02.json",
+      "role": "deterministic repaired five-city target-state proof over frozen campaign inputs; no incorporation/network mutation"
+    },
+    {
+      "path": "research/historical_23city_blind_sample_manifest_2026-10-02.json",
+      "role": "read-only 115-case blind-sample freeze; not an incorporation layer"
+    },
+    {
+      "path": "research/historical_blind_freeze_<city>_2026-10-02.json or accepted Actions artifact",
+      "role": "per-city blind sample freezes; research/source discovery/incorporation disabled"
+    }
+  ],
+  "current_canonical_event_representation": {
+    "conclusion": "The repository does not currently expose one single materialized 23-city attack-event file. The mechanically authoritative representation is episode-level classification state reconstructed from accepted frozen roots. The mature five-city campaign serializes that state directly as batch JSON episode_results plus observations; the other 18 cities are accepted through the formalization/replay proofs from frozen final_evidence and canonical alerts.",
+    "producer": {
+      "classifier": "kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py",
+      "batch_producer": "kyiv-air-alerts-grafana/scripts/run_historical_attack_event_backfill_batch.py",
+      "offline_replay": "kyiv-air-alerts-grafana/scripts/replay_explosion_history.py"
+    },
+    "canonical_batch_output_pattern": "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/<city>/batch_*.json",
+    "serialization": "UTF-8 JSON",
+    "canonical_grain": "one classification outcome per historical canonical AIR alert episode",
+    "representative_positive": {
+      "source_path": "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/lviv/batch_000001.json",
+      "shape": {
+        "episode_id": "a0e59d07f8af013260163cc9",
+        "city": "lviv",
+        "alert_start": "2025-10-05T00:50:20Z",
+        "alert_end": "2025-10-05T06:00:15Z",
+        "discovery_coverage_status": "COMPLETE_FOR_CONFIGURED_FAMILIES",
+        "source_observation_ids": [
+          "743c48f35b9bc1efaaebe12c",
+          "b8a0ded7ecae16ebb9cb5cc4"
+        ],
+        "event_types_found": [
+          "damage",
+          "explosion",
+          "impact"
+        ],
+        "classifier_result": "SENSITIVITY_EVENT_POSITIVE",
+        "qa_reasons": [
+          "CURRENT_RULE_DOWNGRADE"
+        ],
+        "event_positive_strict": false,
+        "event_positive_sensitivity": true,
+        "confirmed_event_types": [],
+        "sensitivity_event_types": [
+          "damage",
+          "explosion",
+          "impact"
+        ]
+      }
+    },
+    "representative_no_event": {
+      "source_path": "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/lviv/batch_000001.json",
+      "shape": {
+        "episode_id": "b6bdcdab5875c553d87509f1",
+        "city": "lviv",
+        "alert_start": "2025-09-01T07:19:00Z",
+        "alert_end": "2025-09-01T07:40:44Z",
+        "source_observation_ids": [],
+        "event_types_found": [],
+        "classifier_result": "NO_CONFIRMED_EVENT",
+        "qa_reasons": [],
+        "event_positive_strict": false,
+        "event_positive_sensitivity": false
+      }
+    },
+    "representative_unresolved": {
+      "source_path": "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/lviv/batch_000001.json",
+      "shape": {
+        "episode_id": "a0e9cfed0043356fe207107f",
+        "city": "lviv",
+        "alert_start": "2025-09-02T21:45:15Z",
+        "alert_end": "2025-09-03T00:43:54Z",
+        "classifier_result": "NEEDS_REVIEW",
+        "qa_reasons": [
+          "CURRENT_RULE_DOWNGRADE",
+          "MULTI_INCIDENT_CONTEXT_RISK",
+          "TEMPORAL_AMBIGUITY"
+        ],
+        "event_types_found": [
+          "explosion"
+        ],
+        "event_positive_strict": false,
+        "event_positive_sensitivity": false
+      }
+    },
+    "distinctions": {
+      "event": "episode-level interpreted positive outcome; current repo metric counts at most one modeled attack event for one historical alert episode",
+      "evidence": "normalized source observation(s) whose contents and classifier evidence support/reject/review the episode outcome",
+      "source_document_or_report": "the external article/Telegram post identified by source URL/native identifiers; raw document is not itself the event",
+      "classifier_result": "STRICT_EVENT_POSITIVE, SENSITIVITY_EVENT_POSITIVE, NO_CONFIRMED_EVENT, or NEEDS_REVIEW for accepted terminal historical state",
+      "human_review": "review_provenance and curated/frozen accepted evidence, not an untracked mutable override flag",
+      "alert_episode": "historical canonical AIR alert window used as the classification grain and temporal binding target"
+    }
+  },
+  "semantic_definitions": {
+    "ATTACK_EVENT": "A downstream interpreted historical positive outcome at the current repository grain of one historical canonical AIR alert episode. It exists only for accepted STRICT_EVENT_POSITIVE or SENSITIVITY_EVENT_POSITIVE classification. Multiple reports, event-type labels, or explosion mentions inside the same modeled alert episode are evidence for that episode-level event and do not create additional v1 attack_events.",
+    "SOURCE_EVIDENCE": "A normalized source observation used by the historical classifier/replay, with source identity/reference, source timestamp when present, bounded excerpt or normalized evidence payload, content hash, classifier evidence fields, retrieval provenance, and immutable origin artifact reference.",
+    "CLASSIFICATION_VERDICT": "The versioned episode-level interpretation over a frozen evidence set. Accepted persistence states are STRICT_EVENT_POSITIVE, SENSITIVITY_EVENT_POSITIVE, NO_CONFIRMED_EVENT, and NEEDS_REVIEW. SOURCE_FETCH_RETRY_REQUIRED and SOURCE_ADAPTER_REQUIRED are operational/incomplete states and are not eligible as accepted historical truth.",
+    "ALERT_LINK": "A separate conservative relationship from the interpreted historical classification/event to public.alert_episodes. It is not inferred from public.alert_threat_observations and does not modify canonical parent boundaries.",
+    "HUMAN_REVIEW_OVERRIDE": "The current repository semantics are evidence-backed review_provenance plus accepted curated/frozen proof artifacts. A review may contribute exact-city, event, air-context, same-attack, or temporal evidence. It must be preserved as provenance on a classification revision; it must not silently overwrite a prior machine classification.",
+    "separation_rule": "public.alert_threat_observations records contemporaneous differentiated alert/threat source observations. attack_events records downstream interpreted historical events. They are different concepts and must not be merged."
+  },
+  "event_identity": {
+    "attack_event_key_version": "attack-event-key-v1",
+    "grain": "HISTORICAL_ALERT_EPISODE",
+    "reason": "This exactly matches the current repository counting/modeling semantics without inventing a physical-event discriminator that the accepted data does not consistently contain.",
+    "canonicalization": {
+      "city_key": "NFC-normalized and trimmed; must equal the accepted canonical city key, not a display label",
+      "historical_episode_id": "accepted 24-hex episode_id; validate against the accepted episode interval identity where mechanically available",
+      "timestamp": "parse as timezone-aware instant, convert to UTC, serialize exactly as YYYY-MM-DDTHH:MM:SS.ffffffZ",
+      "serialization": "UTF-8 JSON array, ensure_ascii=false, separators=(',', ':'), no whitespace, no trailing newline",
+      "hash": "lower-case hex SHA-256"
+    },
+    "canonical_input_tuple": [
+      "attack-event-key-v1",
+      "HISTORICAL_ALERT_EPISODE",
+      "<city_key>",
+      "<historical_episode_id>",
+      "<alert_start_utc_microseconds>",
+      "<alert_end_utc_microseconds>"
+    ],
+    "event_key_rule": "attack_event_key = sha256(canonical_serialized_input_tuple).hexdigest()",
+    "applies_only_to_positive_verdicts": true,
+    "no_event_or_review_event_key": null,
+    "replay_properties": {
+      "stable_across_exact_replay": true,
+      "database_id_independent": true,
+      "processing_time_independent": true,
+      "row_order_independent": true,
+      "mutable_display_text_independent": true
+    },
+    "split_guard": "v1 intentionally models one interpreted event per historical alert episode. If accepted semantics later require two distinct attack events inside the same unchanged alert episode, do not mint two v1 rows. Freeze a new attack-event-key-v2 contract with a mechanically evidenced event discriminator. This prevents silent collapse of distinct future events."
+  },
+  "classification_identity": {
+    "classification_key_version": "attack-event-classification-key-v1",
+    "evidence_set_rule": {
+      "member": [
+        "<observation_id>",
+        "<content_sha256>"
+      ],
+      "ordering": "lexicographic by observation_id, then content_sha256",
+      "serialization": "UTF-8 JSON array, ensure_ascii=false, separators=(',', ':'), no whitespace, no trailing newline",
+      "evidence_set_sha256": "SHA-256 of the serialized sorted member array"
+    },
+    "review_provenance_rule": "If review_provenance is non-empty, SHA-256 canonical JSON with ensure_ascii=false, sort_keys=true, separators=(',', ':'), no trailing newline; otherwise null.",
+    "canonical_input_tuple": [
+      "attack-event-classification-key-v1",
+      "<city_key>",
+      "<historical_episode_id>",
+      "<alert_start_utc_microseconds>",
+      "<alert_end_utc_microseconds>",
+      "<verdict>",
+      "<sorted_event_types_json>",
+      "<sorted_qa_reasons_json>",
+      "<classifier_blob_sha>",
+      "<classifier_methodology_version>",
+      "<normalization_version>",
+      "<evidence_set_sha256>",
+      "<review_provenance_sha256_or_null>"
+    ],
+    "rule": "classification_key = sha256(canonical_serialized_input_tuple).hexdigest()",
+    "correction_property": "Any semantic change in verdict, event types, accepted evidence set, classifier version, or review provenance produces a new immutable classification row."
+  },
+  "alert_episode_linkage_contract": {
+    "parent_table": "public.alert_episodes",
+    "states": {
+      "BOUND": "Exactly one mechanically valid canonical parent satisfies all binding predicates.",
+      "UNBOUND": "No mechanically valid canonical parent satisfies all predicates.",
+      "AMBIGUOUS": "More than one mechanically valid candidate exists, or the historical evidence/classification does not uniquely establish the required parent."
+    },
+    "required_for_BOUND": [
+      "classification city_key exactly equals parent city_key",
+      "parent alert_type = 'AIR'",
+      "parent episode_state = 'closed'",
+      "parent canonicalization_version = 'alert-canonicalization-v1'",
+      "classification alert_start_at and parent start_at are the same UTC instant with no tolerance expansion",
+      "classification alert_end_at and parent end_at are the same UTC instant with no tolerance expansion",
+      "historical_episode_id validates against the accepted deterministic episode identity for the same city/start/end; an unexplained ID mismatch is not auto-bound",
+      "the exact predicate set returns exactly one parent row"
+    ],
+    "storage_invariant": {
+      "BOUND": "alert_episode_uid non-null and FK-valid",
+      "UNBOUND": "alert_episode_uid NULL",
+      "AMBIGUOUS": "alert_episode_uid NULL"
+    },
+    "forbidden": [
+      "nearest-time guessing",
+      "selecting the most plausible overlapping parent",
+      "expanding or shifting alert boundaries to force a match",
+      "modifying public.alert_episodes to make binding succeed",
+      "using publication time by itself as event time",
+      "using public.alert_threat_observations as a substitute for attack-event evidence"
+    ],
+    "stronger_existing_rule_preserved": "Current classifier only approves strict episode linkage from episode-specific temporal evidence and treats multi-episode ambiguity as review. Publication-time matching can build a candidate set but does not itself prove event time."
+  },
+  "provenance_contract": {
+    "required_classification_provenance": [
+      "origin_repository",
+      "origin_ref",
+      "origin_commit_sha",
+      "origin_artifact_path",
+      "origin_artifact_blob_sha when mechanically available",
+      "origin_target_state_sha256 when the accepted state is reconstructed rather than materialized",
+      "classifier_blob_sha",
+      "classifier_methodology_version",
+      "normalization_version",
+      "evidence_set_sha256",
+      "verdict",
+      "event_types",
+      "qa_reasons",
+      "classifier_reason_codes",
+      "human_review_state and review_provenance",
+      "originating_frozen_case_id when classification came from an accepted frozen/adjudicated case",
+      "city and historical episode identity/bounds",
+      "binding_state and optional alert_episode_uid"
+    ],
+    "required_source_evidence_provenance": [
+      "observation_id",
+      "source_family when present",
+      "source_type",
+      "source_url or source-native identifier when present",
+      "Telegram channel/message id when applicable",
+      "source/publication timestamp when present",
+      "event timestamp if explicitly stated and parsed",
+      "bounded excerpt or normalized evidence payload",
+      "content_sha256 and hash basis",
+      "observation classifier outcome and classification episode id when present",
+      "classifier evidence payload",
+      "retrieval provenance",
+      "origin artifact path/ref/blob",
+      "raw object path only when an immutable raw object already exists"
+    ],
+    "explicitly_not_invented": {
+      "numeric_confidence": "The current pipeline uses categorical strict/sensitivity/review outcomes, not a stable numeric confidence score.",
+      "fetched_or_observed_timestamp": "Not consistently present on every frozen historical source observation; do not fabricate one.",
+      "structured_casualty_counts": "Not a canonical structured field of the current attack-event output.",
+      "structured_damage_counts": "Damage may be an event-type/evidence signal, but the current canonical attack-event output has no stable structured damage-count contract.",
+      "weapon_field": "Weapon-family text can appear in classifier evidence, but no stable standalone canonical weapon column is justified for v1."
+    }
+  },
+  "raw_evidence_preservation": {
+    "selected_option": "B",
+    "contract": "Persist normalized evidence plus content SHA and immutable artifact/raw-object references. Do not duplicate large raw source documents in Postgres.",
+    "source_native_hash": "Use the frozen source observation content_hash when available and semantically defined.",
+    "fallback_hash": "If a legacy accepted evidence record lacks a source-native content hash, compute content_sha256 from the canonical normalized evidence payload and set content_hash_basis='NORMALIZED_EVIDENCE'; never label that fallback as a raw-document hash.",
+    "audit_proof": "A persisted classification must be traceable through attack_event_sources to exact frozen evidence records and through origin artifact/ref/blob fields to the immutable accepted input."
+  },
+  "candidate_relational_model": {
+    "table_order": [
+      "public.attack_event_classifications",
+      "public.attack_events",
+      "public.attack_event_sources"
+    ],
+    "tables": {
+      "public.attack_event_classifications": {
+        "purpose": "Append-only semantic revisions for every accepted historical episode outcome, including NO_CONFIRMED_EVENT and NEEDS_REVIEW. This keeps non-events out of attack_events while preserving the complete classifier/audit state.",
+        "primary_key": "classification_uid UUID",
+        "deterministic_unique_identity": "classification_key_version + classification_key (SHA-256 contract above)",
+        "null_semantics": {
+          "positive_tier": "STRICT or SENSITIVITY only for positive verdicts; NULL for NO_CONFIRMED_EVENT/NEEDS_REVIEW",
+          "alert_episode_uid": "non-null only when binding_state=BOUND",
+          "review_provenance_sha256": "NULL when no review provenance participates",
+          "originating_frozen_case_id": "NULL unless an accepted frozen/adjudicated case is the origin",
+          "classified_at": "nullable because the frozen semantic state is reproducible without inventing a classification wall-clock"
+        },
+        "deletion_behavior": "All FKs ON DELETE RESTRICT; classification history is not cascaded away."
+      },
+      "public.attack_events": {
+        "purpose": "Stable interpreted attack-event entity for episode-level positive history only. It points to the currently accepted classification revision and carries the current conservative parent binding.",
+        "primary_key": "attack_event_uid UUID",
+        "deterministic_unique_identity": "attack_event_key_version + attack_event_key (SHA-256 contract above)",
+        "null_semantics": {
+          "alert_episode_uid": "non-null only when binding_state=BOUND",
+          "created_by_run_id": "nullable for imported frozen history if no shared ingestion_run is used",
+          "updated_by_run_id": "nullable under the same rule"
+        },
+        "status_semantics": {
+          "ACTIVE": "current classification is positive",
+          "WITHDRAWN": "same stable v1 event identity was previously positive but current accepted classification is non-positive",
+          "SUPERSEDED": "boundaries/identity semantics changed and a replacement event identity is accepted"
+        },
+        "application_invariant": "current_classification_uid must describe the same city/historical episode/bounds as the event. ACTIVE must point to a positive verdict; WITHDRAWN may point to a non-positive revision. Enforce transactionally in the future adapter; candidate DDL does not hide this cross-table invariant in a trigger.",
+        "deletion_behavior": "ON DELETE RESTRICT; corrections never hard-delete event history."
+      },
+      "public.attack_event_sources": {
+        "purpose": "Normalized evidence rows attached to an immutable classification revision. The table may contain evidence for positive, review, or rejected/non-event classification states.",
+        "primary_key": "attack_event_source_uid UUID",
+        "deterministic_unique_identity": "source_link_key_version + source_link_key; exact tuple to be SHA-256 of [version, classification_key, observation_id, content_sha256]",
+        "null_semantics": {
+          "source_family": "nullable for older accepted normalized evidence lacking a family label",
+          "source_url": "nullable only when source-native identity is otherwise preserved; missing source reference remains an audit/QA signal",
+          "source_timestamp": "nullable if the accepted source did not expose publication time",
+          "event_timestamp_if_stated": "nullable unless explicitly present and parsed",
+          "raw_object_path": "nullable when immutable Git artifact provenance is sufficient and no separate raw object exists"
+        },
+        "deletion_behavior": "classification FK ON DELETE RESTRICT; no cascade."
+      }
+    },
+    "why_no_separate_reviews_table": "Current repository semantics expose review_provenance as evidence attached to a classification, not a first-class stream of multiple reviewer actions. A fourth table would add architecture without preserving additional current semantics. If review actions later become independently versioned records, add a table in a later additive contract.",
+    "why_no_direct_raw_documents_table": "Large raw documents are already represented by source URLs and immutable artifacts/hashes; duplicating them in Postgres is not justified for v1."
+  },
+  "candidate_ddl": "-- CANDIDATE ONLY. STEP 1 CONTRACT FREEZE. DO NOT EXECUTE IN THIS MILESTONE.\n-- Additive extension only. Existing canonical alert and differentiated tables remain unchanged.\n\nCREATE TABLE public.attack_event_classifications (\n    classification_uid UUID PRIMARY KEY DEFAULT gen_random_uuid(),\n\n    classification_key_version TEXT NOT NULL,\n    classification_key TEXT NOT NULL UNIQUE,\n\n    historical_episode_id TEXT NOT NULL,\n    city_key TEXT NOT NULL,\n    alert_type TEXT NOT NULL DEFAULT 'AIR',\n    alert_start_at TIMESTAMPTZ NOT NULL,\n    alert_end_at TIMESTAMPTZ NOT NULL,\n\n    verdict TEXT NOT NULL,\n    is_event BOOLEAN NOT NULL,\n    positive_tier TEXT,\n\n    event_types TEXT[] NOT NULL DEFAULT '{}'::text[],\n    qa_reasons TEXT[] NOT NULL DEFAULT '{}'::text[],\n    classifier_reason_codes TEXT[] NOT NULL DEFAULT '{}'::text[],\n\n    classifier_blob_sha TEXT NOT NULL,\n    classifier_methodology_version TEXT NOT NULL,\n    normalization_version TEXT NOT NULL,\n\n    evidence_set_sha256 TEXT NOT NULL,\n    review_provenance_sha256 TEXT,\n    human_review_state TEXT NOT NULL DEFAULT 'NONE',\n    review_provenance JSONB NOT NULL DEFAULT '{}'::jsonb,\n    originating_frozen_case_id TEXT,\n\n    binding_state TEXT NOT NULL,\n    alert_episode_uid UUID\n        REFERENCES public.alert_episodes(episode_uid) ON DELETE RESTRICT,\n\n    origin_repository TEXT NOT NULL,\n    origin_ref TEXT NOT NULL,\n    origin_commit_sha TEXT NOT NULL,\n    origin_artifact_path TEXT NOT NULL,\n    origin_artifact_blob_sha TEXT,\n    origin_target_state_sha256 TEXT,\n    origin_workflow_run_id BIGINT,\n    classified_at TIMESTAMPTZ,\n\n    supersedes_classification_uid UUID\n        REFERENCES public.attack_event_classifications(classification_uid) ON DELETE RESTRICT,\n    revision_reason TEXT,\n    correction_provenance JSONB NOT NULL DEFAULT '{}'::jsonb,\n\n    persisted_by_run_id UUID\n        REFERENCES public.ingestion_runs(run_id) ON DELETE RESTRICT,\n    created_at TIMESTAMPTZ NOT NULL DEFAULT now(),\n\n    CONSTRAINT attack_event_classifications_key_version_check\n        CHECK (classification_key_version = 'attack-event-classification-key-v1'),\n    CONSTRAINT attack_event_classifications_key_format_check\n        CHECK (classification_key ~ '^[0-9a-f]{64}$'),\n    CONSTRAINT attack_event_classifications_episode_id_check\n        CHECK (historical_episode_id ~ '^[0-9a-f]{24}$'),\n    CONSTRAINT attack_event_classifications_city_check\n        CHECK (btrim(city_key) <> ''),\n    CONSTRAINT attack_event_classifications_alert_type_check\n        CHECK (alert_type = 'AIR'),\n    CONSTRAINT attack_event_classifications_interval_check\n        CHECK (alert_end_at > alert_start_at),\n    CONSTRAINT attack_event_classifications_verdict_check\n        CHECK (\n            verdict IN (\n                'STRICT_EVENT_POSITIVE',\n                'SENSITIVITY_EVENT_POSITIVE',\n                'NO_CONFIRMED_EVENT',\n                'NEEDS_REVIEW'\n            )\n        ),\n    CONSTRAINT attack_event_classifications_positive_check\n        CHECK (\n            (verdict = 'STRICT_EVENT_POSITIVE' AND is_event AND positive_tier = 'STRICT')\n            OR\n            (verdict = 'SENSITIVITY_EVENT_POSITIVE' AND is_event AND positive_tier = 'SENSITIVITY')\n            OR\n            (verdict IN ('NO_CONFIRMED_EVENT', 'NEEDS_REVIEW') AND NOT is_event AND positive_tier IS NULL)\n        ),\n    CONSTRAINT attack_event_classifications_classifier_sha_check\n        CHECK (classifier_blob_sha ~ '^[0-9a-f]{40}$'),\n    CONSTRAINT attack_event_classifications_evidence_sha_check\n        CHECK (evidence_set_sha256 ~ '^[0-9a-f]{64}$'),\n    CONSTRAINT attack_event_classifications_review_sha_check\n        CHECK (review_provenance_sha256 IS NULL OR review_provenance_sha256 ~ '^[0-9a-f]{64}$'),\n    CONSTRAINT attack_event_classifications_origin_commit_check\n        CHECK (origin_commit_sha ~ '^[0-9a-f]{40}$'),\n    CONSTRAINT attack_event_classifications_origin_state_sha_check\n        CHECK (origin_target_state_sha256 IS NULL OR origin_target_state_sha256 ~ '^[0-9a-f]{64}$'),\n    CONSTRAINT attack_event_classifications_review_state_check\n        CHECK (human_review_state IN ('NONE', 'NEEDS_REVIEW', 'REVIEWED_EVIDENCE')),\n    CONSTRAINT attack_event_classifications_binding_state_check\n        CHECK (binding_state IN ('BOUND', 'AMBIGUOUS', 'UNBOUND')),\n    CONSTRAINT attack_event_classifications_binding_check\n        CHECK (\n            (binding_state = 'BOUND' AND alert_episode_uid IS NOT NULL)\n            OR\n            (binding_state IN ('AMBIGUOUS', 'UNBOUND') AND alert_episode_uid IS NULL)\n        )\n);\n\nCREATE INDEX attack_event_classifications_episode_idx\n    ON public.attack_event_classifications (city_key, historical_episode_id, created_at);\n\nCREATE INDEX attack_event_classifications_parent_idx\n    ON public.attack_event_classifications (alert_episode_uid, created_at)\n    WHERE alert_episode_uid IS NOT NULL;\n\nCREATE INDEX attack_event_classifications_verdict_idx\n    ON public.attack_event_classifications (verdict, city_key, alert_start_at);\n\n\nCREATE TABLE public.attack_events (\n    attack_event_uid UUID PRIMARY KEY DEFAULT gen_random_uuid(),\n\n    attack_event_key_version TEXT NOT NULL,\n    attack_event_key TEXT NOT NULL UNIQUE,\n    event_grain TEXT NOT NULL,\n\n    historical_episode_id TEXT NOT NULL,\n    city_key TEXT NOT NULL,\n    alert_type TEXT NOT NULL DEFAULT 'AIR',\n    alert_start_at TIMESTAMPTZ NOT NULL,\n    alert_end_at TIMESTAMPTZ NOT NULL,\n\n    event_status TEXT NOT NULL,\n    current_classification_uid UUID NOT NULL\n        REFERENCES public.attack_event_classifications(classification_uid) ON DELETE RESTRICT,\n\n    binding_state TEXT NOT NULL,\n    alert_episode_uid UUID\n        REFERENCES public.alert_episodes(episode_uid) ON DELETE RESTRICT,\n\n    correction_provenance JSONB NOT NULL DEFAULT '{}'::jsonb,\n    created_by_run_id UUID\n        REFERENCES public.ingestion_runs(run_id) ON DELETE RESTRICT,\n    updated_by_run_id UUID\n        REFERENCES public.ingestion_runs(run_id) ON DELETE RESTRICT,\n    created_at TIMESTAMPTZ NOT NULL DEFAULT now(),\n    updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),\n\n    CONSTRAINT attack_events_key_version_check\n        CHECK (attack_event_key_version = 'attack-event-key-v1'),\n    CONSTRAINT attack_events_key_format_check\n        CHECK (attack_event_key ~ '^[0-9a-f]{64}$'),\n    CONSTRAINT attack_events_grain_check\n        CHECK (event_grain = 'HISTORICAL_ALERT_EPISODE'),\n    CONSTRAINT attack_events_episode_id_check\n        CHECK (historical_episode_id ~ '^[0-9a-f]{24}$'),\n    CONSTRAINT attack_events_city_check\n        CHECK (btrim(city_key) <> ''),\n    CONSTRAINT attack_events_alert_type_check\n        CHECK (alert_type = 'AIR'),\n    CONSTRAINT attack_events_interval_check\n        CHECK (alert_end_at > alert_start_at),\n    CONSTRAINT attack_events_status_check\n        CHECK (event_status IN ('ACTIVE', 'WITHDRAWN', 'SUPERSEDED')),\n    CONSTRAINT attack_events_binding_state_check\n        CHECK (binding_state IN ('BOUND', 'AMBIGUOUS', 'UNBOUND')),\n    CONSTRAINT attack_events_binding_check\n        CHECK (\n            (binding_state = 'BOUND' AND alert_episode_uid IS NOT NULL)\n            OR\n            (binding_state IN ('AMBIGUOUS', 'UNBOUND') AND alert_episode_uid IS NULL)\n        ),\n    CONSTRAINT attack_events_historical_episode_unique\n        UNIQUE (city_key, historical_episode_id)\n);\n\nCREATE INDEX attack_events_active_city_time_idx\n    ON public.attack_events (city_key, alert_start_at)\n    WHERE event_status = 'ACTIVE';\n\nCREATE INDEX attack_events_parent_idx\n    ON public.attack_events (alert_episode_uid)\n    WHERE alert_episode_uid IS NOT NULL;\n\n\nCREATE TABLE public.attack_event_sources (\n    attack_event_source_uid UUID PRIMARY KEY DEFAULT gen_random_uuid(),\n\n    source_link_key_version TEXT NOT NULL,\n    source_link_key TEXT NOT NULL UNIQUE,\n\n    classification_uid UUID NOT NULL\n        REFERENCES public.attack_event_classifications(classification_uid) ON DELETE RESTRICT,\n\n    observation_id TEXT NOT NULL,\n    source_family TEXT,\n    source_type TEXT NOT NULL,\n    source_url TEXT,\n    telegram_channel TEXT,\n    telegram_message_id BIGINT,\n\n    source_timestamp TIMESTAMPTZ,\n    event_timestamp_if_stated TIMESTAMPTZ,\n    excerpt TEXT,\n\n    content_sha256 TEXT NOT NULL,\n    content_hash_basis TEXT NOT NULL,\n\n    observation_classification_outcome TEXT,\n    classification_episode_id TEXT,\n    evidence_payload JSONB NOT NULL,\n    retrieval_provenance JSONB NOT NULL DEFAULT '{}'::jsonb,\n\n    origin_artifact_path TEXT NOT NULL,\n    origin_git_ref TEXT NOT NULL,\n    origin_git_blob_sha TEXT,\n    raw_object_path TEXT,\n\n    created_at TIMESTAMPTZ NOT NULL DEFAULT now(),\n\n    CONSTRAINT attack_event_sources_key_version_check\n        CHECK (source_link_key_version = 'attack-event-source-link-key-v1'),\n    CONSTRAINT attack_event_sources_key_format_check\n        CHECK (source_link_key ~ '^[0-9a-f]{64}$'),\n    CONSTRAINT attack_event_sources_content_sha_check\n        CHECK (content_sha256 ~ '^[0-9a-f]{64}$'),\n    CONSTRAINT attack_event_sources_hash_basis_check\n        CHECK (content_hash_basis IN ('SOURCE_NATIVE', 'NORMALIZED_EVIDENCE')),\n    CONSTRAINT attack_event_sources_telegram_pair_check\n        CHECK (\n            (telegram_channel IS NULL AND telegram_message_id IS NULL)\n            OR\n            (telegram_channel IS NOT NULL AND telegram_message_id IS NOT NULL)\n        ),\n    CONSTRAINT attack_event_sources_observation_outcome_check\n        CHECK (\n            observation_classification_outcome IS NULL\n            OR observation_classification_outcome IN (\n                'approved_strict',\n                'approved_sensitivity',\n                'needs_review',\n                'rejected'\n            )\n        ),\n    CONSTRAINT attack_event_sources_classification_observation_unique\n        UNIQUE (classification_uid, observation_id, content_sha256)\n);\n\nCREATE INDEX attack_event_sources_classification_idx\n    ON public.attack_event_sources (classification_uid);\n\nCREATE INDEX attack_event_sources_url_idx\n    ON public.attack_event_sources (source_url)\n    WHERE source_url IS NOT NULL;\n\nCREATE INDEX attack_event_sources_source_time_idx\n    ON public.attack_event_sources (source_type, source_timestamp);\n",
+  "relationship_matrix": {
+    "public.alert_episodes": {
+      "classification": "OPTIONAL FK",
+      "relationship": "attack_event_classifications.alert_episode_uid and attack_events.alert_episode_uid when binding_state=BOUND",
+      "reason": "Canonical AIR parent is the only mechanically valid parent relationship; unbound/ambiguous historical classifications remain persistable without forcing a link."
+    },
+    "public.alert_episode_sources": {
+      "classification": "NO RELATIONSHIP",
+      "reason": "These rows are provenance for alert canonicalization, not historical attack evidence, and multicity source provenance is intentionally partial."
+    },
+    "public.alert_state_snapshots": {
+      "classification": "NO RELATIONSHIP",
+      "reason": "Contemporaneous differentiated source snapshots are a separate model and are not historical interpreted attack events."
+    },
+    "public.alert_threat_observations": {
+      "classification": "NO RELATIONSHIP",
+      "reason": "Explicit project invariant: alert_threat_observations != attack_events."
+    },
+    "public.ingestion_runs": {
+      "classification": "OPTIONAL FK",
+      "relationship": "persisted_by_run_id / created_by_run_id / updated_by_run_id may reference the future persistence proof run",
+      "reason": "Useful for DB-write provenance, but frozen historical semantic identity and exact replay must not depend on a new run row."
+    }
+  },
+  "historical_backfill_input_contract": {
+    "external_web_calls_allowed": false,
+    "moving_evidence_allowed": false,
+    "five_city_frozen_source": {
+      "cities": [
+        "lviv",
+        "sevastopol",
+        "cherkasy",
+        "sumy",
+        "zaporizhzhia"
+      ],
+      "campaign_id": "historical-attack-events-v2-2026-09-27",
+      "frozen_campaign_head": "71cb6f6fbe856cc7b96759310fe9cc9c71cc0453",
+      "frozen_status_blob_sha": "615b380b51c0da7aa052bad06222c12785090986",
+      "batch_pattern": "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/<city>/batch_*.json",
+      "batch_count": 139,
+      "frozen_episode_count": 6863,
+      "repaired_target_state_head": "5d18ef85a66384f189ede5ca5654d750f60f088b",
+      "repaired_target_state_sha256": "652bda9bc4037d263e7e1090455ff4df5387d1f4f1a73a8c5e160d7ce62132f5",
+      "repaired_distribution": {
+        "STRICT_EVENT_POSITIVE": 104,
+        "SENSITIVITY_EVENT_POSITIVE": 15,
+        "NO_CONFIRMED_EVENT": 5417,
+        "NEEDS_REVIEW": 1327
+      },
+      "note": "The repaired target state is deterministic offline reconstruction over unchanged frozen batch inputs; the proof explicitly performed no incorporation."
+    },
+    "eighteen_city_frozen_source": {
+      "acceptance_head": "31aa7a8f8f57ff090f24814ef3c62137eebebf16",
+      "artifact": "research/historical_v2_18city_acceptance_2026-10-02.json",
+      "common_repaired_baseline_head": "fb563dc410fe6614263bdc8d4eb55025a987e950",
+      "source_evidence_pattern": "kyiv-air-alerts-grafana/data/explosion_research/<city>/final_evidence.json at the accepted worker/formalization refs",
+      "episode_count": 19542,
+      "distribution": {
+        "STRICT_EVENT_POSITIVE": 913,
+        "SENSITIVITY_EVENT_POSITIVE": 48,
+        "NO_CONFIRMED_EVENT": 18113,
+        "NEEDS_REVIEW": 468
+      }
+    },
+    "combined_mechanically_available_snapshot": {
+      "city_count": 23,
+      "episode_count": 26405,
+      "distribution": {
+        "STRICT_EVENT_POSITIVE": 1017,
+        "SENSITIVITY_EVENT_POSITIVE": 63,
+        "NO_CONFIRMED_EVENT": 23530,
+        "NEEDS_REVIEW": 1795
+      },
+      "active_positive_event_count_under_v1_grain": 1080,
+      "note": "This is the accepted classified historical corpus, not the full current public.alert_episodes population. Parent binding must be proved separately against the current canonical DB before any insert."
+    },
+    "blind_qa_status": {
+      "manifest": "research/historical_23city_blind_sample_manifest_2026-10-02.json",
+      "manifest_head": "b3f2f8b58011d1e7af30ed239689209274d5dd11",
+      "case_count": 115,
+      "manifest_sha256": "672859f46e836a8c931be0b4c5f3c0c39df4c8765c43a0b7b67b88054f98797f",
+      "semantics": "read-only sample freeze",
+      "incorporated_into_historical_truth": false,
+      "rule": "Do not import blind-QA findings merely because they were researched or sampled. Only a separately accepted repair/incorporation proof may change persistence input."
+    },
+    "reproducibility": "Persistence input must be materialized in the future from these exact accepted refs/hashes with network blocked. The persistence proof must record the derived snapshot hash before any DB write."
+  },
+  "correction_revision_policy": {
+    "selected_model": "stable event identity with append-only immutable classification revisions and an auditable current pointer/status on attack_events",
+    "rules": [
+      "Never overwrite or delete an old attack_event_classifications row.",
+      "A changed verdict/evidence set/classifier/review provenance creates a new classification_key and a new classification row linked through supersedes_classification_uid.",
+      "If the v1 episode-level event identity remains the same, update only attack_events.current_classification_uid, event_status, binding fields, updated_by_run_id, and correction_provenance in the same transaction after verifying the expected prior classification.",
+      "If canonical historical alert boundaries change, recompute attack_event_key; mark the old event SUPERSEDED and create the replacement identity rather than rewriting the old key.",
+      "If a positive becomes NO_CONFIRMED_EVENT or NEEDS_REVIEW, keep the event row for audit and mark it WITHDRAWN; do not silently delete it.",
+      "If two v1 event identities are merged because canonical episode identity changes, preserve both prior event rows as SUPERSEDED and record replacement keys in correction_provenance.",
+      "If one event is split only because the canonical alert episode itself splits, each new episode receives its own v1 key. If two physical events must coexist inside one unchanged alert episode, v1 cannot represent that distinction safely and a separately frozen v2 identity contract is required."
+    ],
+    "consequence_for_idempotence": "Exact replay of the same frozen semantic snapshot must create no new classification, event, source-evidence, or ingestion-run row. Semantic conflicts on an existing deterministic key abort instead of updating by accident."
+  },
+  "idempotence_requirements": [
+    "Compute all deterministic keys before opening a write transaction.",
+    "Preflight existing rows by deterministic key and compare all semantic columns.",
+    "Existing key + exact semantic equality = existing/no-op.",
+    "Existing key + semantic mismatch = hard conflict/rollback.",
+    "Insert evidence only after its classification is established; exact source_link replay is a no-op.",
+    "If the entire frozen snapshot is already persisted, return before creating a new public.ingestion_runs row.",
+    "No identity input may include DB-generated UUID, processing time, row order, current wall-clock, or mutable display text.",
+    "A forced-failure proof in STEP 2 must leave zero partial classification/event/source rows."
+  ],
+  "explicit_exclusions": [
+    "No ALTER/DROP of existing production tables.",
+    "No change to public.alert_episodes.",
+    "No change to public.alert_episode_sources.",
+    "No change to public.alert_state_snapshots.",
+    "No change to public.alert_threat_observations.",
+    "No legacy seq18 advancement.",
+    "No frontend-output effect.",
+    "No website authority switch.",
+    "No DB cutover.",
+    "No historical backfill run in STEP 1.",
+    "No current public-web research or source discovery.",
+    "No new attack classification in STEP 1.",
+    "No inference of events absent from accepted pipeline state.",
+    "No structured casualty/damage schema invented for v1.",
+    "No raw large-document duplication in Postgres.",
+    "No persistence of SOURCE_FETCH_RETRY_REQUIRED or SOURCE_ADAPTER_REQUIRED as accepted historical truth."
+  ],
+  "deferred_non_blocking_followups": [
+    "There is no single materialized 23-city persistence snapshot yet. STEP 2 must first materialize and hash one from the accepted frozen roots, offline and read-only, before touching a disposable Neon branch.",
+    "Blind-QA freezes are not incorporation proofs. Any later accepted blind-QA corrections must become new classification revisions rather than silently altering the STEP 1 frozen source state.",
+    "The v1 event grain intentionally cannot represent multiple independently identified physical events within one unchanged alert episode; that future semantic expansion requires attack-event-key-v2."
+  ],
+  "unresolved_questions": [],
+  "readiness_gate": {
+    "existing_attack_pipeline_mechanically_identified": true,
+    "current_canonical_output_known": true,
+    "attack_event_semantics_unambiguous": true,
+    "deterministic_identity_specified": true,
+    "alert_binding_conservative_and_mechanical": true,
+    "provenance_sufficient_for_later_audit": true,
+    "candidate_schema_additive": true,
+    "replay_idempotence_defined": true,
+    "frozen_historical_input_identified": true,
+    "no_neon_mutation_occurred": true,
+    "no_production_mutation_occurred": true,
+    "pass": true
+  },
+  "proof_artifact_contract": {
+    "proof_branch": "attack-event-neon-persistence-contract-2026-10-02",
+    "branch_base_main_sha": "e85429924dfd0f1759c09c0919d361f762b665e4",
+    "artifact_path": "research/attack_event_neon_persistence_contract_2026-10-02.json",
+    "runtime_code_modified": false,
+    "workflow_files_modified": false,
+    "migrations_modified": false,
+    "site_prod_modified": false,
+    "expected_commit_scope": [
+      "research/attack_event_neon_persistence_contract_2026-10-02.json"
+    ]
+  },
+  "safety": {
+    "ATTACK EVENTS IN NEON": "NO",
+    "PRODUCTION MUTATED": "NO",
+    "DB CUTOVER": "NO",
+    "neon_branch_created": false,
+    "permanent_neon_modified": false,
+    "site_prod_modified": false,
+    "production_workflow_modified": false,
+    "historical_backfill_run": false,
+    "external_web_research": false,
+    "source_discovery_run": false,
+    "attack_classification_run": false
+  }
+}
