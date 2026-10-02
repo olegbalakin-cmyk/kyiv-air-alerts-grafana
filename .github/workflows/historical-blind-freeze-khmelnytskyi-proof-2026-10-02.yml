@@ -1,0 +1,294 @@
+name: Historical blind freeze Khmelnytskyi proof
+
+on:
+  push:
+    branches:
+      - historical-blind-freeze-khmelnytskyi-proof-2026-10-02
+    paths:
+      - ".github/workflows/historical-blind-freeze-khmelnytskyi-proof-2026-10-02.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  freeze:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      PYTHONDONTWRITEBYTECODE: "1"
+
+    steps:
+      - name: Check out exact accepted formalization HEAD
+        uses: actions/checkout@v4
+        with:
+          ref: cf20d7f411688de9d2684b8baac63c796bfa090e
+          fetch-depth: 0
+
+      - name: Verify exact accepted source
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "cf20d7f411688de9d2684b8baac63c796bfa090e"
+          test "$(git status --porcelain --untracked-files=all)" = ""
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install accepted local dependencies
+        run: python -m pip install --disable-pip-version-check requests beautifulsoup4
+
+      - name: Freeze exactly five Khmelnytskyi cases
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from __future__ import annotations
+
+          import hashlib
+          import importlib.util
+          import json
+          import socket
+          import subprocess
+          from collections import Counter
+          from pathlib import Path
+
+          ACCEPTED_HEAD = "cf20d7f411688de9d2684b8baac63c796bfa090e"
+          CITY = "khmelnytskyi"
+          CASE_START = 76
+          EXPECTED_NO_CONFIRMED = 236
+          SEED = "20261002-23city-blind-v1"
+          EXPECTED_TARGET_STATE_SHA256 = "12954a115508770917bed9cc3905a12511ba41026ddf27be992e746535688c08"
+          OUTPUT = Path("research/historical_blind_freeze_khmelnytskyi_2026-10-02.json")
+
+          checkout = Path.cwd()
+          source_path = checkout / "kyiv-air-alerts-grafana" / "scripts" / "historical_v2_formalize_khmelnytskyi_lutsk.py"
+          accepted_artifact_path = checkout / "research" / "historical_v2_formalization_khmelnytskyi_lutsk_proof_2026-10-02.json"
+
+          head = subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip()
+          if head != ACCEPTED_HEAD:
+              raise SystemExit(f"WRONG_ACCEPTED_HEAD:{head}")
+
+          accepted_artifact = json.loads(accepted_artifact_path.read_text(encoding="utf-8"))
+          accepted_city = accepted_artifact["cities"][CITY]
+          if accepted_city["no_confirmed_event"] != EXPECTED_NO_CONFIRMED:
+              raise SystemExit(
+                  f"CITY BLIND FREEZE BLOCKED — NO_CONFIRMED COUNT MISMATCH:"
+                  f"{accepted_city['no_confirmed_event']}!={EXPECTED_NO_CONFIRMED}"
+              )
+          if accepted_city["target_state_sha256"] != EXPECTED_TARGET_STATE_SHA256:
+              raise SystemExit(
+                  "CITY BLIND SAMPLE FREEZE BLOCKED:ACCEPTED_TARGET_STATE_HASH_MISMATCH"
+              )
+
+          spec = importlib.util.spec_from_file_location("accepted_formalize_khmelnytskyi_lutsk", source_path)
+          if spec is None or spec.loader is None:
+              raise RuntimeError("CANNOT_IMPORT_ACCEPTED_FORMALIZATION")
+          formalize = importlib.util.module_from_spec(spec)
+          spec.loader.exec_module(formalize)
+
+          captured: dict[str, object] = {}
+          candidate_keys: set[tuple[str, str]] = set()
+
+          original_stable_json = formalize.stable_json
+          def capture_stable_json(value):
+              if (
+                  isinstance(value, list)
+                  and value
+                  and all(
+                      isinstance(row, dict)
+                      and list(row.keys()) == ["episode_id", "state"]
+                      for row in value
+                  )
+              ):
+                  captured["target_rows"] = [dict(row) for row in value]
+              return original_stable_json(value)
+          formalize.stable_json = capture_stable_json
+
+          original_load_historical_episodes = formalize.replay.load_historical_episodes
+          def capture_load_historical_episodes(repo_root, city, monitor):
+              if city != CITY:
+                  raise RuntimeError(f"OUT_OF_SCOPE_CITY:{city}")
+              episodes, sources = original_load_historical_episodes(repo_root, city, monitor)
+              captured["episodes"] = [dict(ep) for ep in episodes]
+              captured["source_files"] = list(sources)
+              return episodes, sources
+          formalize.replay.load_historical_episodes = capture_load_historical_episodes
+
+          original_candidate_from_history = formalize.replay.candidate_from_history
+          def capture_candidate_from_history(city, row, bucket, target_id, monitor, episode):
+              if city != CITY:
+                  raise RuntimeError(f"OUT_OF_SCOPE_CITY:{city}")
+              candidate = original_candidate_from_history(
+                  city, row, bucket, target_id, monitor, episode
+              )
+              candidate_keys.add((
+                  str(target_id),
+                  str(candidate.get("candidate_id") or ""),
+              ))
+              return candidate
+          formalize.replay.candidate_from_history = capture_candidate_from_history
+
+          original_connect = socket.socket.connect
+          original_create_connection = socket.create_connection
+          def blocked_connect(self, address):
+              raise RuntimeError(f"NETWORK_BLOCKED:{address}")
+          def blocked_create_connection(address, *args, **kwargs):
+              raise RuntimeError(f"NETWORK_BLOCKED:{address}")
+          socket.socket.connect = blocked_connect
+          socket.create_connection = blocked_create_connection
+          try:
+              summary = formalize.formalize_city(CITY)
+          finally:
+              socket.socket.connect = original_connect
+              socket.create_connection = original_create_connection
+
+          if summary["verdict"] != "CITY V2 FORMALIZATION PROVEN":
+              raise SystemExit(
+                  "CITY BLIND SAMPLE FREEZE BLOCKED:"
+                  + str(summary.get("blocker") or "FORMALIZATION_NOT_PROVEN")
+              )
+          if summary["no_confirmed_event"] != EXPECTED_NO_CONFIRMED:
+              raise SystemExit(
+                  f"CITY BLIND FREEZE BLOCKED — NO_CONFIRMED COUNT MISMATCH:"
+                  f"{summary['no_confirmed_event']}!={EXPECTED_NO_CONFIRMED}"
+              )
+          if summary["target_state_sha256"] != EXPECTED_TARGET_STATE_SHA256:
+              raise SystemExit("CITY BLIND SAMPLE FREEZE BLOCKED:TARGET_STATE_HASH_MISMATCH")
+
+          target_rows = list(captured.get("target_rows") or [])
+          episodes = list(captured.get("episodes") or [])
+          if len(target_rows) != summary["canonical_episodes"]:
+              raise SystemExit("CITY BLIND SAMPLE FREEZE BLOCKED:TARGET_ROW_CAPTURE_MISMATCH")
+
+          state_by_episode = {
+              str(row["episode_id"]): str(row["state"])
+              for row in target_rows
+          }
+          eligible_before = sorted(
+              eid for eid, state in state_by_episode.items()
+              if state == "NO_CONFIRMED_EVENT"
+          )
+          if len(eligible_before) != EXPECTED_NO_CONFIRMED:
+              raise SystemExit(
+                  f"CITY BLIND FREEZE BLOCKED — NO_CONFIRMED COUNT MISMATCH:"
+                  f"{len(eligible_before)}!={EXPECTED_NO_CONFIRMED}"
+              )
+
+          prior_researched_episodes: list[str] = []
+          prior_set = set(prior_researched_episodes)
+          eligible_after = [eid for eid in eligible_before if eid not in prior_set]
+          exclusions_count = len(eligible_before) - len(eligible_after)
+
+          ranked = []
+          for episode_id in eligible_after:
+              rank = hashlib.sha256(
+                  f"{SEED}|{CITY}|{episode_id}".encode("utf-8")
+              ).hexdigest()
+              ranked.append((rank, episode_id))
+          ranked.sort(key=lambda row: (row[0], row[1]))
+          chosen = ranked[:5]
+          if len(chosen) != 5:
+              raise SystemExit("CITY BLIND SAMPLE FREEZE BLOCKED:SELECTION_COUNT")
+
+          episode_by_id = {
+              str(ep.get("episode_id") or ""): ep
+              for ep in episodes
+              if ep.get("episode_id")
+          }
+          observation_counts = Counter(target_id for target_id, _ in candidate_keys)
+
+          selected_cases = []
+          for offset, (rank, episode_id) in enumerate(chosen):
+              ep = episode_by_id.get(episode_id)
+              if ep is None:
+                  raise SystemExit(f"CITY BLIND SAMPLE FREEZE BLOCKED:MISSING_EPISODE:{episode_id}")
+              alert_start = ep.get("alert_start")
+              alert_end = ep.get("alert_end")
+              if not alert_start or not alert_end:
+                  raise SystemExit(f"CITY BLIND SAMPLE FREEZE BLOCKED:MISSING_ALERT_BOUNDS:{episode_id}")
+              selected_cases.append({
+                  "case": CASE_START + offset,
+                  "city_key": CITY,
+                  "episode_id": episode_id,
+                  "alert_start": str(alert_start),
+                  "alert_end": str(alert_end),
+                  "final_outcome": state_by_episode[episode_id],
+                  "observation_count": int(observation_counts.get(episode_id, 0)),
+                  "rank": rank,
+              })
+
+          for row in selected_cases:
+              if row["final_outcome"] != "NO_CONFIRMED_EVENT":
+                  raise SystemExit("CITY BLIND SAMPLE FREEZE BLOCKED:NON_NO_CONFIRMED_SELECTION")
+
+          compact_sample = json.dumps(
+              selected_cases,
+              ensure_ascii=False,
+              separators=(",", ":"),
+              sort_keys=False,
+          ).encode("utf-8")
+          city_sample_sha256 = hashlib.sha256(compact_sample).hexdigest()
+
+          result = {
+              "schema_version": 1,
+              "verdict": "CITY BLIND SAMPLE FROZEN",
+              "city": CITY,
+              "source_accepted_head": ACCEPTED_HEAD,
+              "source_target_state_sha256": EXPECTED_TARGET_STATE_SHA256,
+              "selection_seed": SEED,
+              "eligible_count_before_exclusions": len(eligible_before),
+              "prior_researched_episodes": prior_researched_episodes,
+              "exclusions_count": exclusions_count,
+              "eligible_count_after_exclusions": len(eligible_after),
+              "selected_cases": selected_cases,
+              "CITY_SAMPLE_SHA256": city_sample_sha256,
+              "mutation_guards": {
+                  "research_performed": "NO",
+                  "public_web": "NO",
+                  "source_discovery": "NO",
+                  "db_neon": "UNTOUCHED",
+                  "deploy": "NO",
+                  "authoritative_data_mutations": 0,
+                  "reconstruction_city_scope": [CITY],
+                  "network_during_reconstruction": "BLOCKED",
+                  "accepted_checkout_head_exact": head == ACCEPTED_HEAD,
+                  "accepted_target_state_hash_exact": summary["target_state_sha256"] == EXPECTED_TARGET_STATE_SHA256,
+              },
+          }
+
+          OUTPUT.parent.mkdir(parents=True, exist_ok=True)
+          OUTPUT.write_text(
+              json.dumps(result, ensure_ascii=False, indent=2, sort_keys=False) + "\n",
+              encoding="utf-8",
+          )
+
+          print("__FREEZE_JSON_BEGIN__")
+          print(OUTPUT.read_text(encoding="utf-8"), end="")
+          print("__FREEZE_JSON_END__")
+          PY
+
+      - name: Verify read-only mutation guard
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "cf20d7f411688de9d2684b8baac63c796bfa090e"
+          status="$(git status --porcelain --untracked-files=all)"
+          printf '%s\n' "$status"
+          unexpected="$(printf '%s\n' "$status" | awk '$0 != "?? research/historical_blind_freeze_khmelnytskyi_2026-10-02.json" && $0 != ""')"
+          test -z "$unexpected"
+          test -f research/historical_blind_freeze_khmelnytskyi_2026-10-02.json
+          echo "authoritative data mutations = 0"
+          echo "DB/Neon = untouched"
+          echo "deploy = no"
+          echo "public web = no"
+          echo "source discovery = no"
+
+      - name: Upload compact freeze artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: historical-blind-freeze-khmelnytskyi-2026-10-02
+          path: research/historical_blind_freeze_khmelnytskyi_2026-10-02.json
+          if-no-files-found: error
+          retention-days: 30
