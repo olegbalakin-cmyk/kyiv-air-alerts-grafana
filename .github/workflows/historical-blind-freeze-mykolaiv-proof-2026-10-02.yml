@@ -67,7 +67,7 @@ jobs:
 
           checkout = Path.cwd()
           source_path = checkout / "kyiv-air-alerts-grafana" / "scripts" / "formalize_historical_v2_existing_evidence.py"
-          accepted_artifact_path = checkout / "research" / "historical_v2_formalization_mykolaiv_mykolaiv_proof_2026-10-02.json"
+          accepted_artifact_path = checkout / "research" / "historical_v2_formalization_kropyvnytskyi_mykolaiv_proof_2026-10-02.json"
 
           head = subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip()
           if head != ACCEPTED_HEAD:
