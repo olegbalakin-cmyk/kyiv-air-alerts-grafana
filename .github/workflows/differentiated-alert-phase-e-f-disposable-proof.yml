@@ -44,11 +44,268 @@ jobs:
         shell: bash
         run: sha256sum data/dashboard_data.json | awk '{print $1}' > "${RUNNER_TEMP}/phase-e-product-before.sha256"
 
-      - name: Capture one frozen Phase E source set
+      - name: Capture one bounded Phase E source set with safe response diagnostics
         env:
           DIFFERENTIATED_ALERT_SOURCE_CAPTURE: "1"
           UKRAINEALARM_API_TOKEN: ${{ secrets.UKRAINEALARM_API_TOKEN }}
-        run: python scripts/differentiated_alert_source_capture.py
+        shell: bash
+        run: |
+          python - <<'PY'
+          import hashlib
+          import json
+          import os
+          import sys
+          from datetime import datetime, timezone
+          from pathlib import Path
+
+          import requests
+
+          sys.path.insert(0, "scripts")
+          import differentiated_alert_source_capture as capture
+
+          diag_path = Path(os.environ["DIFFERENTIATED_ALERT_SOURCE_CAPTURE_DIAGNOSTIC"])
+          temp = Path(os.environ["RUNNER_TEMP"])
+
+          def utc_now():
+              return datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
+
+          def first_non_whitespace_category(body):
+              stripped = body.lstrip(b" \t\r\n")
+              if not stripped:
+                  return "none"
+              first = stripped[:1]
+              if first in (b"{", b"[", b"<"):
+                  return first.decode("ascii")
+              return "other"
+
+          def reason_for(source, kind):
+              prefix = {
+                  "kyiv_official": "KYIV",
+                  "ukrainealarm": "UKRAINEALARM",
+                  "alerts_in_ua": "ALERTS_IN_UA",
+              }[source]
+              return f"PHASE_E_CURRENT_{prefix}_SOURCE_{kind}"
+
+          result = {
+              "capture_enabled": True,
+              "status": "FAILED",
+              "captured_at": utc_now(),
+              "logical_acquisition_counts": {
+                  "kyiv_official": 0,
+                  "ukrainealarm": 0,
+                  "alerts_in_ua": 0,
+              },
+              "sources": {},
+              "credentials_exposed": False,
+              "production_output_mutation": False,
+              "bounded_resume": True,
+              "outer_retry_loop": False,
+          }
+
+          specs = [
+              (
+                  "kyiv_official",
+                  capture.KYIV_URL,
+                  {"Accept": "application/json", "User-Agent": "kyiv-air-alerts-grafana/differentiated-capture"},
+                  capture.KYIV_OUTPUT_ENV,
+                  False,
+              ),
+              (
+                  "ukrainealarm",
+                  capture.UA_URL,
+                  {
+                      "Accept": "application/json",
+                      "Authorization": str(os.environ.get(capture.UA_TOKEN_ENV, "")).strip(),
+                      "User-Agent": "kyiv-air-alerts-grafana/differentiated-capture",
+                  },
+                  capture.UA_OUTPUT_ENV,
+                  True,
+              ),
+              (
+                  "alerts_in_ua",
+                  capture.AIU_URL,
+                  {"Accept": "application/json", "User-Agent": "kyiv-air-alerts-grafana/differentiated-capture"},
+                  capture.AIU_OUTPUT_ENV,
+                  False,
+              ),
+          ]
+
+          def persist_safe_artifact():
+              diag_path.parent.mkdir(parents=True, exist_ok=True)
+              diag_path.write_text(
+                  json.dumps(result, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
+                  encoding="utf-8",
+              )
+              safe = {
+                  "captured_at": result["captured_at"],
+                  "logical_acquisition_counts": result["logical_acquisition_counts"],
+                  "sources": result["sources"],
+                  "stop_reason": result.get("stop_reason"),
+                  "status": result["status"],
+                  "credentials_exposed": False,
+              }
+              (temp / "phase-e-capture-safe.json").write_text(
+                  json.dumps(safe, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
+                  encoding="utf-8",
+              )
+
+          for source, url, headers, output_env, needs_token in specs:
+              row = {
+                  "source": source,
+                  "status": "NOT_ATTEMPTED",
+                  "logical_acquisition_count": 0,
+                  "captured_at": None,
+                  "http_status": None,
+                  "accepted_input_bytes": None,
+                  "accepted_input_sha256": None,
+                  "json_parse_success": False,
+                  "accepted_schema_validation_success": False,
+                  "transport_retries_attributable": "none_in_capture_client",
+              }
+              result["sources"][source] = row
+
+              output_path = str(os.environ.get(output_env, "")).strip()
+              token = str(os.environ.get(capture.UA_TOKEN_ENV, "")).strip()
+              if not output_path:
+                  row.update({"status": "FAILED", "classification": "LOCAL_INPUT_CONFIGURATION_FAILURE", "error_type": "MissingOutputPath"})
+                  result["stop_reason"] = reason_for(source, "LOCAL_CONFIGURATION_FAILURE")
+                  break
+              if needs_token and not token:
+                  row.update({"status": "FAILED", "classification": "LOCAL_INPUT_CONFIGURATION_FAILURE", "error_type": "MissingCredential"})
+                  result["stop_reason"] = reason_for(source, "MISSING_CREDENTIAL")
+                  break
+
+              result["logical_acquisition_counts"][source] += 1
+              row["logical_acquisition_count"] = 1
+              response = None
+              try:
+                  response = requests.get(url, headers=headers, timeout=30)
+                  row["captured_at"] = utc_now()
+                  body = response.content
+                  row["http_status"] = int(response.status_code)
+                  row["source_response_bytes"] = len(body)
+                  row["source_response_sha256"] = hashlib.sha256(body).hexdigest()
+                  row["first_non_whitespace_category"] = first_non_whitespace_category(body)
+                  if source == "kyiv_official":
+                      row.update({
+                          "final_url": str(response.url),
+                          "redirect_count": len(response.history),
+                          "content_type": response.headers.get("Content-Type"),
+                          "content_encoding": response.headers.get("Content-Encoding"),
+                          "content_length_header": response.headers.get("Content-Length"),
+                          "actual_received_byte_count": len(body),
+                          "received_body_sha256": hashlib.sha256(body).hexdigest(),
+                          "empty_after_whitespace": len(body.strip()) == 0,
+                      })
+
+                  try:
+                      response.raise_for_status()
+                  except requests.HTTPError as exc:
+                      row.update({
+                          "status": "FAILED",
+                          "classification": "HTTP_FAILURE",
+                          "error_type": type(exc).__name__,
+                      })
+                      result["stop_reason"] = reason_for(source, "HTTP_FAILURE")
+                      break
+
+                  if len(body.strip()) == 0:
+                      row.update({
+                          "status": "FAILED",
+                          "classification": "EMPTY_RESPONSE",
+                          "error_type": "EmptyResponse",
+                      })
+                      result["stop_reason"] = reason_for(source, "EMPTY_RESPONSE")
+                      break
+
+                  try:
+                      payload = response.json()
+                      row["json_parse_success"] = True
+                  except Exception as exc:
+                      category = row["first_non_whitespace_category"]
+                      malformed = category in ("{", "[")
+                      row.update({
+                          "status": "FAILED",
+                          "classification": "MALFORMED_JSON" if malformed else "NOT_JSON",
+                          "error_type": type(exc).__name__,
+                      })
+                      result["stop_reason"] = reason_for(source, "MALFORMED_JSON" if malformed else "NOT_JSON")
+                      break
+
+                  try:
+                      accepted = capture._accepted_input(source, payload)
+                      row["accepted_schema_validation_success"] = True
+                  except Exception as exc:
+                      row.update({
+                          "status": "FAILED",
+                          "classification": "SCHEMA_DRIFT",
+                          "error_type": type(exc).__name__,
+                          "error": capture.sanitize(exc),
+                      })
+                      result["stop_reason"] = reason_for(source, "SCHEMA_DRIFT")
+                      break
+
+                  meta = capture._write_payload(output_path, accepted)
+                  row.update({
+                      "status": "SUCCEEDED",
+                      "classification": "ACCEPTED_VALID_JSON",
+                      "bytes": meta["bytes"],
+                      "sha256": meta["sha256"],
+                      "accepted_input_bytes": meta["bytes"],
+                      "accepted_input_sha256": meta["sha256"],
+                      "stored_input_env": output_env,
+                  })
+              except requests.RequestException as exc:
+                  row.update({
+                      "status": "FAILED",
+                      "classification": "HTTP_FAILURE",
+                      "error_type": type(exc).__name__,
+                  })
+                  result["stop_reason"] = reason_for(source, "HTTP_FAILURE")
+                  break
+              except Exception as exc:
+                  row.update({
+                      "status": "FAILED",
+                      "classification": "LOCAL_CAPTURE_FAILURE",
+                      "error_type": type(exc).__name__,
+                      "error": capture.sanitize(exc),
+                  })
+                  result["stop_reason"] = reason_for(source, "LOCAL_CAPTURE_FAILURE")
+                  break
+
+          succeeded = [s for s, row in result["sources"].items() if row["status"] == "SUCCEEDED"]
+          if len(succeeded) == 3:
+              result["status"] = "SUCCEEDED"
+              result["stop_reason"] = None
+          elif succeeded:
+              result["status"] = "PARTIAL_FAILURE"
+          else:
+              result["status"] = "FAILED"
+
+          persist_safe_artifact()
+          print(json.dumps({
+              "status": result["status"],
+              "stop_reason": result.get("stop_reason"),
+              "logical_acquisition_counts": result["logical_acquisition_counts"],
+              "sources": {
+                  k: {
+                      "status": v.get("status"),
+                      "classification": v.get("classification"),
+                      "http_status": v.get("http_status"),
+                      "json_parse_success": v.get("json_parse_success"),
+                      "accepted_schema_validation_success": v.get("accepted_schema_validation_success"),
+                      "source_response_bytes": v.get("source_response_bytes"),
+                      "source_response_sha256": v.get("source_response_sha256"),
+                      "first_non_whitespace_category": v.get("first_non_whitespace_category"),
+                  }
+                  for k, v in result["sources"].items()
+              },
+              "credentials_exposed": False,
+          }, sort_keys=True))
+
+          if result["status"] != "SUCCEEDED":
+              raise SystemExit(1)
+          PY
 
       - name: Validate frozen source set
         shell: bash
@@ -122,14 +379,41 @@ jobs:
                   hs.update(json.dumps(row, separators=(",", ":"), ensure_ascii=False).encode())
                   hs.update(b"\n")
                   scount += 1
+              cur.execute("""SELECT checkpoint_id::text, source_key, city_key, stream_key,
+                                    checkpoint_seq::text, checkpoint_kind,
+                                    previous_checkpoint_id::text, checked_at::text,
+                                    continuity_verified
+                             FROM ingestion_checkpoints ORDER BY checkpoint_id""")
+              hc = hashlib.sha256()
+              ccount = 0
+              for row in cur:
+                  hc.update(json.dumps(row, separators=(",", ":"), ensure_ascii=False).encode())
+                  hc.update(b"\n")
+                  ccount += 1
+              cur.execute("""SELECT checkpoint_seq::int
+                             FROM current_ingestion_checkpoints
+                             WHERE city_key='lviv' AND source_key='ukrainealarm_region_history'
+                             ORDER BY checkpoint_seq::int DESC LIMIT 1""")
+              legacy_seq = cur.fetchone()[0]
               return {
                   "alert_episodes_count": count, "alert_episodes_sha256": h.hexdigest(),
                   "alert_episode_sources_count": scount, "alert_episode_sources_sha256": hs.hexdigest(),
+                  "ingestion_checkpoints_count": ccount, "ingestion_checkpoints_sha256": hc.hexdigest(),
+                  "legacy_phase1_checkpoint_seq": legacy_seq,
               }
 
           db = disposable_url()
           with psycopg.connect(db) as conn:
               before = parent_fingerprint(conn)
+              cur = conn.cursor()
+              cur.execute("SELECT count(*)::int FROM alert_state_snapshots")
+              child_before_snapshots = cur.fetchone()[0]
+              cur.execute("SELECT count(*)::int FROM alert_threat_observations")
+              child_before_observations = cur.fetchone()[0]
+          assert (child_before_snapshots, child_before_observations) == (0, 0), (
+              child_before_snapshots, child_before_observations
+          )
+          assert before["legacy_phase1_checkpoint_seq"] == 18, before
           cap = json.loads(Path(os.environ["DIFFERENTIATED_ALERT_SOURCE_CAPTURE_DIAGNOSTIC"]).read_text())
           now = datetime.fromisoformat(cap["captured_at"].replace("Z", "+00:00"))
           env = dict(os.environ)
@@ -154,6 +438,10 @@ jobs:
               "inserted_observations": result["inserted_observations"],
               "binding": result["binding"],
               "store_counts": result["store_counts"],
+              "child_before": {
+                  "snapshots": child_before_snapshots,
+                  "observations": child_before_observations,
+              },
               "parent_before": before,
               "parent_after": after,
               "parent_unchanged": True,
