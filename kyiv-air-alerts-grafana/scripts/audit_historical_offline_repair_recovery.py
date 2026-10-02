@@ -281,6 +281,84 @@ def main() -> int:
                 raw = json.dumps(rows, ensure_ascii=False, sort_keys=sort_keys, **({"separators":(",",":")} if compact else {}))
                 status_field_hash_variants[f"{name}|sort={sort_keys}|compact={compact}"] = sha256_bytes(raw.encode("utf-8"))
 
+
+    ordering_hash_matches = []
+    frozen_city_order = [c for c in (status.get("frozen_cities") or []) if c in cities and c != "kyiv"]
+    if not frozen_city_order:
+        frozen_city_order = [c for c in cities.keys() if c != "kyiv"]
+    orderings = {}
+    # Frozen status insertion order.
+    orderings["status_insertion"] = [
+        (cty, eid, sp)
+        for cty in frozen_city_order
+        for eid, sp in ((cities.get(cty) or {}).get("episode_states") or {}).items()
+    ]
+    # Explicit frozen episode-id order retained in each city status.
+    orderings["frozen_episode_ids"] = [
+        (cty, eid, ((cities.get(cty) or {}).get("episode_states") or {}).get(eid))
+        for cty in frozen_city_order
+        for eid in ((cities.get(cty) or {}).get("frozen_episode_ids") or [])
+    ]
+    # Global lexical fallback.
+    orderings["lexical"] = frozen_states
+
+    for ordering_name, ordered in orderings.items():
+        bases = []
+        for cty,eid,sp in ordered:
+            spd = sp if isinstance(sp, dict) else {"state":sp}
+            bases.append({
+                "city_key":cty, "city":cty, "episode_id":eid,
+                "batch":spd.get("batch"), "observation_count":spd.get("observation_count"),
+                "state":spd.get("state"), "qa_reasons":spd.get("qa_reasons"),
+                "attempts":spd.get("attempts")
+            })
+        fieldsets = [
+            ["city_key","episode_id","state"],
+            ["city_key","episode_id","batch","observation_count","state"],
+            ["city_key","episode_id","batch","observation_count","qa_reasons","state"],
+            ["city_key","episode_id","attempts","batch","observation_count","qa_reasons","state"],
+            ["city","episode_id","state"],
+            ["episode_id","state"],
+        ]
+        for fields in fieldsets:
+            rows=[{k:r.get(k) for k in fields} for r in bases]
+            for sort_keys in (True,False):
+                for compact in (True,False):
+                    raw=json.dumps(rows,ensure_ascii=False,sort_keys=sort_keys,**({"separators":(",",":")} if compact else {}))
+                    for nl in ("","\n"):
+                        h=sha256_bytes((raw+nl).encode("utf-8"))
+                        if h==EXPECTED_ORIGINAL_HASH:
+                            ordering_hash_matches.append({
+                                "ordering":ordering_name,"fields":fields,"sort_keys":sort_keys,
+                                "compact":compact,"newline":bool(nl)
+                            })
+
+    episode_rows_all=[]
+    for p in batches:
+        batch=json.loads(p.read_text(encoding="utf-8"))
+        for er in batch.get("episode_results") or []:
+            episode_rows_all.append(dict(er))
+    episode_rows_all.sort(key=lambda r:(str(r.get("city") or ""),str(r.get("episode_id") or "")))
+    episode_result_hash_variants={}
+    for name, rows in [
+        ("full_episode_results", episode_rows_all),
+        ("core_episode_results", [
+            {k:r.get(k) for k in ("city","episode_id","alert_start","alert_end","classifier_result")}
+            for r in episode_rows_all
+        ]),
+        ("core_with_sources", [
+            {k:r.get(k) for k in ("city","episode_id","alert_start","alert_end","classifier_result","source_observation_ids")}
+            for r in episode_rows_all
+        ]),
+    ]:
+        for sort_keys in (True,False):
+            for compact in (True,False):
+                raw=json.dumps(rows,ensure_ascii=False,sort_keys=sort_keys,**({"separators":(",",":")} if compact else {}))
+                h=sha256_bytes(raw.encode("utf-8"))
+                episode_result_hash_variants[f"{name}|sort={sort_keys}|compact={compact}"]=h
+                if h==EXPECTED_ORIGINAL_HASH:
+                    ordering_hash_matches.append({"ordering":"episode_results_lexical","variant":name,"sort_keys":sort_keys,"compact":compact})
+
     control_obs = {}
     case18_obs = []
     classifier_results = collections.Counter()
@@ -337,6 +415,9 @@ def main() -> int:
         "target_hash_variants": state_rows_variants,
         "target_hash_search_matches": hash_search_matches,
         "status_field_hash_variants": status_field_hash_variants,
+        "ordering_hash_matches": ordering_hash_matches,
+        "episode_result_hash_variants": episode_result_hash_variants,
+        "frozen_city_order": frozen_city_order,
         "classifier_result_counts": dict(classifier_results),
         "observation_count_direct": obs_count,
         "control_records": control_obs,
