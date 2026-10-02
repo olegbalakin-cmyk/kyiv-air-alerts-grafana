@@ -53,6 +53,7 @@ jobs:
           import importlib.util
           import json
           import subprocess
+          import sys
           from collections import Counter
           from pathlib import Path
 
@@ -66,7 +67,9 @@ jobs:
           OUTPUT = Path("research/historical_blind_freeze_kherson_2026-10-02.json")
 
           checkout = Path.cwd()
-          source_path = checkout / "kyiv-air-alerts-grafana" / "scripts" / "historical_v2_formalization_existing_evidence.py"
+          scripts_dir = checkout / "kyiv-air-alerts-grafana" / "scripts"
+          sys.path.insert(0, str(scripts_dir))
+          source_path = scripts_dir / "historical_v2_formalization_existing_evidence.py"
           accepted_artifact_path = checkout / "research" / "historical_v2_formalization_kharkiv_kherson_proof_2026-10-02.json"
 
           head = subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip()
