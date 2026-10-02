@@ -162,6 +162,78 @@ def main() -> int:
                 },
             }
 
+
+    # Targeted local-only diagnostics for canonical target-state serialization and controls.
+    frozen_states = []
+    frozen_state_examples = {}
+    for city, payload in cities.items():
+        if city == "kyiv" or not isinstance(payload, dict):
+            continue
+        state_map = payload.get("episode_states") or {}
+        if not isinstance(state_map, dict):
+            continue
+        for episode_id, state_payload in state_map.items():
+            frozen_states.append((city, episode_id, state_payload))
+            if len(frozen_state_examples) < 6:
+                frozen_state_examples[f"{city}:{episode_id}"] = state_payload
+    frozen_states.sort(key=lambda x: (x[0], x[1]))
+
+    state_rows_variants = {}
+    def add_variant(name, rows):
+        payload = jdump(rows).encode("utf-8")
+        state_rows_variants[name] = sha256_bytes(payload)
+
+    add_variant("city_episode_state_payload", [
+        {"city_key": cty, "episode_id": eid, "state": sp}
+        for cty, eid, sp in frozen_states
+    ])
+    add_variant("city_episode_state_string", [
+        {"city_key": cty, "episode_id": eid, "state": (sp.get("state") if isinstance(sp, dict) else sp)}
+        for cty, eid, sp in frozen_states
+    ])
+    add_variant("city_episode_outcome_string", [
+        {"city": cty, "episode_id": eid, "outcome": (sp.get("state") if isinstance(sp, dict) else sp)}
+        for cty, eid, sp in frozen_states
+    ])
+    add_variant("triples", [
+        [cty, eid, (sp.get("state") if isinstance(sp, dict) else sp)]
+        for cty, eid, sp in frozen_states
+    ])
+    add_variant("state_dict_nested", {
+        cty: {eid: (sp.get("state") if isinstance(sp, dict) else sp)
+              for c, eid, sp in frozen_states if c == cty}
+        for cty in sorted({x[0] for x in frozen_states})
+    })
+
+    control_obs = {}
+    case18_obs = []
+    classifier_results = collections.Counter()
+    obs_count = 0
+    for p in batches:
+        batch = json.loads(p.read_text(encoding="utf-8"))
+        for er in batch.get("episode_results") or []:
+            classifier_results[str(er.get("classifier_result"))] += 1
+        for obs in batch.get("observations") or []:
+            obs_count += 1
+            oid = str(obs.get("observation_id") or "")
+            if oid == "7f9455ee73cf2aaa84b9d6e3":
+                control_obs["case7"] = {"batch": p.relative_to(REPO).as_posix(), "observation": obs}
+            if str(obs.get("classification_episode_id") or "") == "6069b17ec096cae0912ad9bd" or "6069b17ec096cae0912ad9bd" in json.dumps(obs.get("candidate_matching") or {}):
+                case18_obs.append({"batch": p.relative_to(REPO).as_posix(), "observation": obs})
+        for er in batch.get("episode_results") or []:
+            if str(er.get("episode_id") or "") == "6069b17ec096cae0912ad9bd":
+                control_obs["case18_target"] = {"batch": p.relative_to(REPO).as_posix(), "episode_result": er}
+
+    # Also capture observations in the case-18 batch whose text contains the newly accepted locative.
+    for p in batches:
+        if "sevastopol" not in p.as_posix():
+            continue
+        batch = json.loads(p.read_text(encoding="utf-8"))
+        if any(str(er.get("episode_id") or "") == "6069b17ec096cae0912ad9bd" for er in batch.get("episode_results") or []):
+            for obs in batch.get("observations") or []:
+                if "севастополе" in str(obs.get("excerpt") or "").casefold():
+                    case18_obs.append({"batch": p.relative_to(REPO).as_posix(), "observation": obs})
+
     diag = {
         "mode": "diagnostic_preflight",
         "head": head,
@@ -184,6 +256,13 @@ def main() -> int:
         "monitor_frozen_candidate_functions": ast_signatures(frozen_source),
         "proof_tests": proof_tests,
         "git_grep_expected_hash": grep_hash[:50],
+        "target_state_count": len(frozen_states),
+        "target_state_examples": frozen_state_examples,
+        "target_hash_variants": state_rows_variants,
+        "classifier_result_counts": dict(classifier_results),
+        "observation_count_direct": obs_count,
+        "control_records": control_obs,
+        "case18_relevant_observations": case18_obs,
         "git_grep_case7": grep_case7[:50],
         "git_grep_case18": grep_case18[:50],
         "status_city_shapes": city_status_shapes,
