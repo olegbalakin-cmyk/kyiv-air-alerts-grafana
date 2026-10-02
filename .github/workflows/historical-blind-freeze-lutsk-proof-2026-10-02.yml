@@ -63,8 +63,8 @@ jobs:
           OUTPUT = Path("research/historical_blind_freeze_lutsk_2026-10-02.json")
 
           checkout = Path.cwd()
-          source_path = checkout / "kyiv-air-alerts-grafana" / "scripts" / "historical_v2_formalize_lutsk_lutsk.py"
-          accepted_artifact_path = checkout / "research" / "historical_v2_formalization_lutsk_lutsk_proof_2026-10-02.json"
+          source_path = checkout / "kyiv-air-alerts-grafana" / "scripts" / "historical_v2_formalize_khmelnytskyi_lutsk.py"
+          accepted_artifact_path = checkout / "research" / "historical_v2_formalization_khmelnytskyi_lutsk_proof_2026-10-02.json"
 
           head = subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip()
           if head != ACCEPTED_HEAD:
@@ -82,7 +82,7 @@ jobs:
                   "CITY BLIND SAMPLE FREEZE BLOCKED:ACCEPTED_TARGET_STATE_HASH_MISMATCH"
               )
 
-          spec = importlib.util.spec_from_file_location("accepted_formalize_lutsk_lutsk", source_path)
+          spec = importlib.util.spec_from_file_location("accepted_formalize_khmelnytskyi_lutsk", source_path)
           if spec is None or spec.loader is None:
               raise RuntimeError("CANNOT_IMPORT_ACCEPTED_FORMALIZATION")
           formalize = importlib.util.module_from_spec(spec)
