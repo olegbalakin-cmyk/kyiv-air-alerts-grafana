@@ -1,0 +1,81 @@
+name: Historical 23-city repaired baseline proof
+
+on:
+  push:
+    branches:
+      - historical-23city-repaired-baseline-proof-2026-10-02
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  focused-proof:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Check out exact proof branch
+        uses: actions/checkout@v4
+        with:
+          ref: historical-23city-repaired-baseline-proof-2026-10-02
+          fetch-depth: 0
+
+      - name: Verify frozen base ancestry
+        shell: bash
+        run: |
+          set -euo pipefail
+          base=0950a9602661ceac526f9c38c58bed2a974c73f4
+          git merge-base --is-ancestor "$base" HEAD
+          test "$(git rev-list --count "$base"..HEAD)" -eq 1
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: kyiv-air-alerts-grafana/requirements.txt
+
+      - name: Install focused test dependencies
+        working-directory: kyiv-air-alerts-grafana
+        run: |
+          pip install -r requirements.txt
+          pip install pytest
+
+      - name: Classifier self-test
+        working-directory: kyiv-air-alerts-grafana
+        run: python scripts/monitor_explosion_candidates.py --self-test
+
+      - name: Accepted repaired-baseline semantic tests
+        working-directory: kyiv-air-alerts-grafana
+        run: python -m pytest -q tests/test_historical_23city_repaired_baseline_proof.py
+
+      - name: Existing multicity temporal replay tests
+        working-directory: kyiv-air-alerts-grafana
+        run: python -m pytest -q tests/test_historical_replay_temporal_binding.py tests/test_monitor_near_duplicate_temporal_binding.py
+
+      - name: Corpus and production mutation guards
+        shell: bash
+        run: |
+          set -euo pipefail
+          base=0950a9602661ceac526f9c38c58bed2a974c73f4
+
+          test -z "$(git diff --name-only "$base"...HEAD -- 'kyiv-air-alerts-grafana/data/explosion_research/*/final_evidence.json')"
+          test -z "$(git diff --name-only "$base"...HEAD -- 'kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/**')"
+          test -z "$(git diff --name-only "$base"...HEAD -- 'research/historical_attack_event_backfill/**')"
+
+          test -z "$(git diff --name-only "$base"...HEAD --             'research/historical_attack_event_source_registry.json'             'kyiv-air-alerts-grafana/scripts/historical_attack_event_sources.py'             'kyiv-air-alerts-grafana/scripts/discover_historical_attack_events.py')"
+
+          test -z "$(git diff --name-only "$base"...HEAD --             'kyiv-air-alerts-grafana/data/**'             'kyiv-air-alerts-grafana/grafana/**'             'kyiv-air-alerts-grafana/pages-preview/**'             'deploy/**')"
+
+          unexpected="$(git diff --name-only "$base"...HEAD | grep -Ev '^(kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates\.py|kyiv-air-alerts-grafana/tests/test_historical_23city_repaired_baseline_proof\.py|\.github/workflows/historical-23city-repaired-baseline-proof\.yml)$' || true)"
+          test -z "$unexpected"
+
+          git diff "$base"...HEAD -- kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py | grep -F 'севастополе' >/dev/null
+          git diff "$base"...HEAD -- kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py | grep -F 'DATED_LIVE_UPDATE_PREFIX_RE' >/dev/null
+
+          echo "final_evidence diff = 0"
+          echo "historical source slices diff = 0"
+          echo "canonical/data state diff = 0"
+          echo "dashboard/production state diff = 0"
+          echo "Step-2 source registry/retrieval diff = 0"
+          echo "scope allowlist = PASS"
