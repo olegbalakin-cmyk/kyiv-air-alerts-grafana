@@ -66,6 +66,42 @@ def _write_payload(path: str, payload: Any) -> dict[str, Any]:
     }
 
 
+def _accepted_input(source: str, payload: Any) -> Any:
+    if source == "kyiv_official":
+        if not isinstance(payload, dict) or not isinstance(payload.get("current", payload), dict):
+            raise ValueError("Kyiv current-state payload is not an object")
+        return payload
+
+    if source == "ukrainealarm":
+        rows = payload.get("raw") if isinstance(payload, dict) and isinstance(payload.get("raw"), list) else payload
+        if not isinstance(rows, list):
+            raise ValueError("UkraineAlarm /alerts payload is not an array")
+        matches = [row for row in rows if isinstance(row, dict) and str(row.get("regionId")) == "147"]
+        if len(matches) != 1:
+            raise ValueError(f"UkraineAlarm accepted regionId=147 matches={len(matches)}")
+        return matches[0]
+
+    if source == "alerts_in_ua":
+        rows = payload.get("raw") if isinstance(payload, dict) else payload
+        if not isinstance(rows, list):
+            raise ValueError("Alerts.in.ua raw payload does not contain a raw array")
+        matches = [
+            row for row in rows
+            if isinstance(row, dict)
+            and str(row.get("alert_type", "")).lower() == "air_raid"
+            and row.get("finished_at") is None
+            and (
+                str(row.get("location_uid")) == "53"
+                or str(row.get("location_title", "")).strip() == "Донецький район"
+            )
+        ]
+        if len(matches) != 1:
+            raise ValueError(f"Alerts.in.ua accepted Donetsk-raion active AIR matches={len(matches)}")
+        return matches[0]
+
+    raise ValueError(f"unsupported differentiated source {source!r}")
+
+
 def capture_sources(
     *,
     env: Mapping[str, str] | None = None,
@@ -145,14 +181,23 @@ def capture_sources(
             result["logical_acquisition_counts"][source] += 1
             sr["logical_acquisition_count"] = 1
             status, payload = fetch(url, headers=headers, timeout=30)
-            meta = _write_payload(output_path, payload)
+            response_body = canonical_bytes(payload)
+            accepted = _accepted_input(source, payload)
+            meta = _write_payload(output_path, accepted)
             sr.update({
                 "status": "SUCCEEDED",
                 "http_status": int(status),
+                "source_response_bytes": len(response_body),
+                "source_response_sha256": hashlib.sha256(response_body).hexdigest(),
                 "bytes": meta["bytes"],
                 "sha256": meta["sha256"],
                 "stored_input_env": output_env,
-                "transport_retries_attributable": "transport_client_specific",
+                "accepted_object_selection": {
+                    "kyiv_official": "current-state response",
+                    "ukrainealarm": "exact regionId=147 object",
+                    "alerts_in_ua": "exact active AIR Donetsk-raion object (location_uid=53 or exact title)",
+                }[source],
+                "transport_retries_attributable": "none_in_capture_client",
             })
         except Exception as exc:
             sr.update({"status": "FAILED", "error_type": type(exc).__name__, "error": sanitize(exc)})
