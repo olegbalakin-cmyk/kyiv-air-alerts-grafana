@@ -36,7 +36,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          python kyiv-air-alerts-grafana/scripts/historical_blind_freeze_vinnytsia.py
+          PYTHONDONTWRITEBYTECODE=1 python kyiv-air-alerts-grafana/scripts/historical_blind_freeze_vinnytsia.py
 
       - name: Verify mutation boundary
         shell: bash
