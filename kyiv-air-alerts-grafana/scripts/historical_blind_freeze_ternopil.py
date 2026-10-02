@@ -18,7 +18,7 @@ sys.path.insert(0, str(SCRIPT_DIR))
 
 import historical_v2_formalize_ternopil_uzhhorod as accepted
 
-CITY = "ternopil"
+# Proof-only selector: no network retrieval, source discovery, or authoritative mutation.\nCITY = "ternopil"
 SOURCE_ACCEPTED_HEAD = "19637504db967003c4e0465957dc7bd2bf5fbc58"
 EXPECTED_NO_CONFIRMED = 120
 EXPECTED_TARGET_STATE_SHA256 = "d989a8c1dfc65965cc6ac07cb1d30c711d9e93f272eaf950db7c6aacf17e4e73"
