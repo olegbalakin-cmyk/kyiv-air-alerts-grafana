@@ -1,0 +1,118 @@
+name: Historical blind freeze Dnipro proof
+
+on:
+  push:
+    branches:
+      - historical-blind-freeze-dnipro-proof-2026-10-02
+    paths:
+      - "proof/select_blind_dnipro.py"
+      - ".github/workflows/historical-blind-freeze-dnipro-proof.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  freeze:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Check out proof branch
+        uses: actions/checkout@v4
+        with:
+          ref: historical-blind-freeze-dnipro-proof-2026-10-02
+          fetch-depth: 0
+          path: proofrepo
+
+      - name: Check out exact accepted source HEAD
+        uses: actions/checkout@v4
+        with:
+          ref: 1998919036b4832fc3555b54c9854e6cfe24a696
+          fetch-depth: 0
+          path: accepted
+
+      - name: Verify frozen inputs
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git -C accepted rev-parse HEAD)" = "1998919036b4832fc3555b54c9854e6cfe24a696"
+          test -z "$(git -C accepted status --porcelain --untracked-files=all)"
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: accepted/kyiv-air-alerts-grafana/requirements.txt
+
+      - name: Install accepted local dependencies
+        run: pip install -r accepted/kyiv-air-alerts-grafana/requirements.txt
+
+      - name: Run bounded Dnipro freeze
+        working-directory: proofrepo
+        env:
+          PYTHONDONTWRITEBYTECODE: "1"
+        run: |
+          set -euo pipefail
+          python proof/select_blind_dnipro.py ../accepted
+
+      - name: Verify compact freeze artifact
+        working-directory: proofrepo
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          p = Path("research/historical_blind_freeze_dnipro_2026-10-02.json")
+          d = json.loads(p.read_text(encoding="utf-8"))
+          assert d["verdict"] == "CITY BLIND SAMPLE FROZEN"
+          assert d["city"] == "dnipro"
+          assert d["cases"] == "56-60"
+          assert d["source_accepted_head"] == "1998919036b4832fc3555b54c9854e6cfe24a696"
+          assert d["eligible_count_before_exclusions"] == 2068
+          assert d["prior_episodes_excluded"] == 0
+          assert d["eligible_count_after_exclusions"] == 2068
+          assert len(d["selected_cases"]) == 5
+          assert [x["case"] for x in d["selected_cases"]] == [56,57,58,59,60]
+          assert all(x["city_key"] == "dnipro" for x in d["selected_cases"])
+          assert all(x["final_outcome"] == "NO_CONFIRMED_EVENT" for x in d["selected_cases"])
+          assert len({x["episode_id"] for x in d["selected_cases"]}) == 5
+          assert len(d["CITY_SAMPLE_SHA256"]) == 64
+          g = d["mutation_guards"]
+          assert g["research_performed"] == "NO"
+          assert g["public_web"] == "NO"
+          assert g["source_discovery"] == "NO"
+          assert g["authoritative_evidence_mutations"] == 0
+          assert g["db_neon"] == "UNTOUCHED"
+          assert g["deploy"] == "NO"
+          print("freeze invariants = PASS")
+          PY
+
+      - name: Accepted source mutation guard
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -z "$(git -C accepted status --porcelain --untracked-files=all)"
+          echo "accepted source checkout mutations = 0"
+          echo "research performed = NO"
+          echo "public web = NO"
+          echo "source discovery = NO"
+          echo "DB/Neon = untouched"
+
+      - name: Print compact freeze artifact
+        working-directory: proofrepo
+        run: |
+          echo '__CITY_FREEZE_ARTIFACT_BEGIN__'
+          cat research/historical_blind_freeze_dnipro_2026-10-02.json
+          echo '__CITY_FREEZE_ARTIFACT_END__'
+
+      - name: Upload compact freeze artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: historical-blind-freeze-dnipro-2026-10-02
+          path: proofrepo/research/historical_blind_freeze_dnipro_2026-10-02.json
+          if-no-files-found: error
+          retention-days: 30
