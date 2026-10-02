@@ -57,6 +57,13 @@ def bounded_search(source_family: dict, ep: dict, query: str) -> tuple[list[dict
     return adapter.search(source_family["channel"], query, start, end, max_pages=source_family["max_pages"])
 
 
+def exact_post(source_family: dict, message_id: int) -> tuple[dict, dict]:
+    adapter = PublicTelegramAdapter(NetworkBounds(timeout_seconds=15, max_retries=2, rate_limit_seconds=0.2))
+    post, meta = adapter.fetch_exact_post(source_family["channel"], message_id)
+    assert post is not None, meta
+    return post, meta
+
+
 def to_observation(city_key: str, source_family: dict, ep: dict, post: dict) -> dict:
     row = batch_runner.telegram_candidate(city_key, source_family, post, "bounded_public_telegram_search")
     return batch_runner.classify_row(
@@ -91,8 +98,7 @@ def assert_stable_provenance(obs: dict, post: dict) -> None:
 def test_case17_exact_time_retrieval() -> None:
     ep = episode("sumy", CASE17_ID, CASE17_START, CASE17_END)
     fam = family("sumy", "telegram/suspilnesumy")
-    posts, meta = bounded_search(fam, ep, fam["queries"][0])
-    post = next(row for row in posts if row["message_id"] == CASE17_MESSAGE_ID)
+    post, meta = exact_post(fam, CASE17_MESSAGE_ID)
     assert post["published_at"] == "2025-12-14T07:03:16Z"
     assert "Сумах" in post["text"] and "вибух" in post["text"].casefold()
     obs = to_observation("sumy", fam, ep, post)
@@ -105,8 +111,7 @@ def test_case17_exact_time_retrieval() -> None:
 def test_case18_exact_time_retrieval() -> None:
     ep = episode("sevastopol", CASE18_ID, CASE18_START, CASE18_END)
     fam = family("sevastopol", "telegram/razvozhaev")
-    posts, meta = bounded_search(fam, ep, fam["queries"][0])
-    post = next(row for row in posts if row["message_id"] == CASE18_MESSAGE_ID)
+    post, meta = exact_post(fam, CASE18_MESSAGE_ID)
     assert post["published_at"] == "2026-09-04T12:00:39Z"
     low = post["text"].casefold()
     assert "севастополе" in low and "пво" in low and "бпла" in low
