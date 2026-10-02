@@ -6,6 +6,7 @@ import json
 import os
 import subprocess
 import sys
+sys.dont_write_bytecode = True
 from copy import deepcopy
 from pathlib import Path
 from typing import Any
