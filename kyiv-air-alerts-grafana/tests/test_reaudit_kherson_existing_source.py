@@ -89,3 +89,58 @@ def test_frozen_blobs_exact():
     assert m.BLOBS[str(m.FINAL)]=="ae816bbc412fbe62f086adb4cefb2a5af65b2a07"
     assert m.BLOBS[str(m.CLASSIFIER)]=="927dc89df0b52edd52cb31a126b0d57ca492a278"
     assert m.BLOBS[str(m.ADAPTER)]=="0ceb3ea480de9b401000ba9d8b0bb02b22d83c89"
+
+
+def test_retry_recovers_transient(monkeypatch):
+    class E(Exception): response=None
+    class Req: RequestException=E
+    class NB:
+        def __init__(self,**kw): pass
+    class HTTP:
+        def __init__(self): self.n=0
+        def get(self,u,timeout_seconds=None):
+            self.n+=1
+            if self.n==1: raise E("reset")
+            return type("R",(),{"url":u,"status_code":200,"text":"ok"})()
+    class PTA:
+        def __init__(self,b): self.http=HTTP()
+    src=type("S",(),{"NetworkBounds":NB,"PublicTelegramAdapter":PTA,"requests":Req})
+    monkeypatch.setattr(m.time,"sleep",lambda _:None)
+    r=m.live_fetch(src)(None)
+    assert r.get("error") is None and r["attempt_count"]==2
+
+class FakeClassifier:
+    def __init__(self): self.city=[]
+    def candidate_id(self,city,u,t): return "c"
+    def match_candidate_to_episodes(self,r,eps): return {"outcome":"unique_match","matched_episode_ids":[eps[0]["episode_id"]],"matched_episode_id":eps[0]["episode_id"],"logical_episode_groups":[]}
+    def classify_candidate(self,r,city,eps,matching):
+        self.city.append(city)
+        return {"proposed_outcome":"needs_review","proposed_matched_episode_id":None,"event_types":["explosion"],"exact_city_classification_evidence":{"present":True},"strict_explosion_evidence":{"present":True},"air_military_context":{"present":False},"same_attack_context":{"present":False},"temporal_binding":{"present":False},"reason_codes":["X"]}
+    def apply_matching_result(self,item,matching): item["matched_episode_id"]=matching["matched_episode_id"]
+    def compose_episode_candidates(self,*a,**k): return {"final_composed_verdict":"no_composed_strict"}
+class FakeSource:
+    @staticmethod
+    def canonical_observation_id(ch,mid): return f"o{mid}"
+
+def test_classifier_city_key_kherson():
+    eps=[{"episode_id":"e","alert_start":m.iso(m.START),"alert_end":m.iso(m.START+timedelta(hours=1)),"alert_start_date_kyiv":"2025-08-30"}]
+    fc=FakeClassifier(); m.classify([post(1,m.START+timedelta(minutes=5))],eps,fc,FakeSource)
+    assert fc.city==["kherson"]
+
+def test_seven_retired_not_auto_restored():
+    rec=[]
+    for i in range(7):
+        rec.append({"current_metric_role":"REVIEW_NON_COUNTED_RETIRED_LEGACY_POSITIVE","normalization_provenance":{"best_supported_event_time":{"utc":m.iso(m.START+timedelta(days=i))}}})
+    eps=[{"episode_id":"e","alert_start":m.iso(m.START),"alert_end":m.iso(m.START+timedelta(minutes=1))}]
+    r=m.retired({"review_events":rec},[],{"strict_ids":set()},eps)
+    assert r=={"total":7,"source_context_retrieved":0,"currently_strict":0,"remain_non_counted":7}
+
+def test_case73_oracle_reads_normal_pipeline_output_only():
+    c={"by_episode":{},"strict_ids":set(),"sensitivity_ids":set(),"review_ids":set()}
+    r=m.case73(c)
+    assert r["source_retrieved"] is False and r["classification"]=="NONE" and r["recovered_strict"] is False
+
+def test_protected_paths_include_all_required_live_outputs():
+    names={str(x) for x in m.PROTECTED}
+    for suffix in ["data/explosion_candidate_monitor_state.json","data/explosion_candidate_monitor_last_run.json","data/explosion_review_queue.json","data/explosions_test.json","data/dashboard_data.json"]:
+        assert any(x.endswith(suffix) for x in names)
