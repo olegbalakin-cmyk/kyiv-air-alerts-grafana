@@ -1,0 +1,205 @@
+name: Differentiated same-run source seam proof
+
+on:
+  push:
+    branches:
+      - differentiated-alert-same-run-source-seam-proof-2026-10-02
+    paths:
+      - ".github/workflows/differentiated-alert-same-run-source-seam-proof.yml"
+      - "kyiv-air-alerts-grafana/scripts/differentiated_alert_source_capture.py"
+      - "kyiv-air-alerts-grafana/scripts/differentiated_alert_shadow_runtime.py"
+      - "kyiv-air-alerts-grafana/scripts/differentiated_alert_postgres.py"
+      - "kyiv-air-alerts-grafana/scripts/proof_differentiated_alert_*.py"
+      - "kyiv-air-alerts-grafana/tests/test_differentiated_alert_same_run_source_seam.py"
+
+permissions:
+  contents: read
+
+jobs:
+  source-seam:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: kyiv-air-alerts-grafana
+    env:
+      DIFFERENTIATED_ALERT_SHADOW_KYIV_JSON: ${{ runner.temp }}/differentiated-kyiv.json
+      DIFFERENTIATED_ALERT_SHADOW_UKRAINEALARM_JSON: ${{ runner.temp }}/differentiated-ukrainealarm.json
+      DIFFERENTIATED_ALERT_SHADOW_ALERTS_IN_UA_JSON: ${{ runner.temp }}/differentiated-alerts-in-ua.json
+      DIFFERENTIATED_ALERT_SOURCE_CAPTURE_DIAGNOSTIC: ${{ runner.temp }}/differentiated-source-capture.json
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: kyiv-air-alerts-grafana/requirements-db-phase1.txt
+
+      - name: Install dependencies
+        run: pip install -r requirements-db-phase1.txt
+
+      - name: Deterministic source seam gates
+        run: python -m unittest tests/test_differentiated_alert_same_run_source_seam.py -v
+
+      - name: Prove genuine normal error still propagates
+        shell: bash
+        run: |
+          set +e
+          python - <<'PY'
+          raise RuntimeError("normal-production-error-sentinel")
+          PY
+          rc=$?
+          set -e
+          test "$rc" -ne 0
+          echo "normal_error_exit_code=$rc" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Hash product before auxiliary capture
+        shell: bash
+        run: sha256sum data/dashboard_data.json | awk '{print $1}' > "${RUNNER_TEMP}/product-before.sha256"
+
+      - name: Capture accepted differentiated sources once
+        env:
+          DIFFERENTIATED_ALERT_SOURCE_CAPTURE: "1"
+          UKRAINEALARM_API_TOKEN: ${{ secrets.UKRAINEALARM_API_TOKEN }}
+        run: python scripts/differentiated_alert_source_capture.py
+
+      - name: Validate live capture and freeze metadata
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json, os
+          from pathlib import Path
+          d = json.loads(Path(os.environ["DIFFERENTIATED_ALERT_SOURCE_CAPTURE_DIAGNOSTIC"]).read_text())
+          assert d["status"] == "SUCCEEDED", d
+          assert d["logical_acquisition_counts"] == {
+              "kyiv_official": 1,
+              "ukrainealarm": 1,
+              "alerts_in_ua": 1,
+          }, d["logical_acquisition_counts"]
+          assert d["credentials_exposed"] is False
+          for source, row in d["sources"].items():
+              assert row["status"] == "SUCCEEDED", (source, row)
+              assert row["sha256"] and row["bytes"] > 0
+          print(json.dumps({
+              "status": d["status"],
+              "captured_at": d["captured_at"],
+              "logical_acquisition_counts": d["logical_acquisition_counts"],
+              "sources": {
+                  k: {
+                      "status": v["status"],
+                      "http_status": v["http_status"],
+                      "source_response_bytes": v.get("source_response_bytes"),
+                      "source_response_sha256": v.get("source_response_sha256"),
+                      "accepted_input_bytes": v["bytes"],
+                      "accepted_input_sha256": v["sha256"],
+                      "accepted_object_selection": v.get("accepted_object_selection"),
+                  } for k, v in d["sources"].items()
+              },
+              "credentials_exposed": False,
+          }, sort_keys=True))
+          PY
+
+      - name: Strict stored-only live parse and local child persistence
+        env:
+          DIFFERENTIATED_ALERT_SHADOW: "1"
+          DIFFERENTIATED_ALERT_SHADOW_DB: ${{ runner.temp }}/differentiated-shadow.sqlite
+          DIFFERENTIATED_ALERT_SHADOW_INPUT_MODE: stored_only
+          DIFFERENTIATED_ALERT_SHADOW_DIAGNOSTIC: ${{ runner.temp }}/differentiated-shadow-first.json
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json, os, sys
+          from datetime import datetime
+          from pathlib import Path
+          sys.path.insert(0, "scripts")
+          import differentiated_alert_shadow_runtime as runtime
+          cap = json.loads(Path(os.environ["DIFFERENTIATED_ALERT_SOURCE_CAPTURE_DIAGNOSTIC"]).read_text())
+          now = datetime.fromisoformat(cap["captured_at"].replace("Z", "+00:00"))
+          def forbidden(*args, **kwargs):
+              raise AssertionError("stored_only sidecar attempted upstream network")
+          result = runtime.run_shadow([], fetch_json=forbidden, now=now)
+          assert result["status"] == "SUCCEEDED", result
+          assert result["sidecar_network_requests"] == 0, result
+          print(json.dumps({
+              "status": result["status"],
+              "sidecar_network_requests": result["sidecar_network_requests"],
+              "inserted_snapshots": result["inserted_snapshots"],
+              "inserted_observations": result["inserted_observations"],
+              "binding": result["binding"],
+          }, sort_keys=True))
+          PY
+
+      - name: Exact frozen replay is idempotent
+        env:
+          DIFFERENTIATED_ALERT_SHADOW: "1"
+          DIFFERENTIATED_ALERT_SHADOW_DB: ${{ runner.temp }}/differentiated-shadow.sqlite
+          DIFFERENTIATED_ALERT_SHADOW_INPUT_MODE: stored_only
+          DIFFERENTIATED_ALERT_SHADOW_DIAGNOSTIC: ${{ runner.temp }}/differentiated-shadow-replay.json
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json, os, sys
+          from datetime import datetime
+          from pathlib import Path
+          sys.path.insert(0, "scripts")
+          import differentiated_alert_shadow_runtime as runtime
+          cap = json.loads(Path(os.environ["DIFFERENTIATED_ALERT_SOURCE_CAPTURE_DIAGNOSTIC"]).read_text())
+          now = datetime.fromisoformat(cap["captured_at"].replace("Z", "+00:00"))
+          def forbidden(*args, **kwargs):
+              raise AssertionError("stored_only replay attempted upstream network")
+          result = runtime.run_shadow([], fetch_json=forbidden, now=now)
+          assert result["status"] == "SUCCEEDED", result
+          assert result["sidecar_network_requests"] == 0, result
+          assert result["inserted_snapshots"] == 0, result
+          assert result["inserted_observations"] == 0, result
+          print(json.dumps({
+              "status": result["status"],
+              "sidecar_network_requests": result["sidecar_network_requests"],
+              "inserted_snapshots": result["inserted_snapshots"],
+              "inserted_observations": result["inserted_observations"],
+          }, sort_keys=True))
+          PY
+
+      - name: Product output remains byte-identical
+        shell: bash
+        run: |
+          sha256sum data/dashboard_data.json | awk '{print $1}' > "${RUNNER_TEMP}/product-after.sha256"
+          cmp "${RUNNER_TEMP}/product-before.sha256" "${RUNNER_TEMP}/product-after.sha256"
+          echo "product_parity=PASS" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Build metadata-only proof artifact
+        if: always()
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json, os
+          from pathlib import Path
+          temp = Path(os.environ["RUNNER_TEMP"])
+          def load(name):
+              p = temp / name
+              return json.loads(p.read_text()) if p.exists() else None
+          cap = load("differentiated-source-capture.json")
+          first = load("differentiated-shadow-first.json")
+          replay = load("differentiated-shadow-replay.json")
+          out = {
+              "capture": cap,
+              "shadow_first": first,
+              "shadow_replay": replay,
+              "raw_payloads_uploaded": False,
+              "credentials_exposed": False,
+          }
+          Path("same-run-source-seam-live-metadata.json").write_text(
+              json.dumps(out, ensure_ascii=False, indent=2, sort_keys=True) + "\n"
+          )
+          PY
+
+      - name: Upload metadata only
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: differentiated-same-run-source-seam-metadata-${{ github.run_id }}-${{ github.run_attempt }}
+          path: kyiv-air-alerts-grafana/same-run-source-seam-live-metadata.json
+          if-no-files-found: warn
+          retention-days: 14
