@@ -8,7 +8,7 @@ on:
       - ".github/workflows/historical-blind-freeze-mykolaiv-proof-2026-10-02.yml"
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   freeze:
@@ -268,6 +268,16 @@ jobs:
           echo "deploy = no"
           echo "public web = no"
           echo "source discovery = no"
+
+      - name: Commit compact freeze artifact to proof branch
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          artifact="research/historical_blind_freeze_mykolaiv_2026-10-02.json"
+          content="$(base64 -w0 "$artifact")"
+          gh api --method PUT             "repos/${GITHUB_REPOSITORY}/contents/${artifact}"             -f message="Add Mykolaiv blind freeze artifact"             -f content="$content"             -f branch="historical-blind-freeze-mykolaiv-proof-2026-10-02"
 
       - name: Upload compact freeze artifact
         uses: actions/upload-artifact@v4
