@@ -22,6 +22,9 @@ jobs:
           ref: ${{ github.ref_name }}
           fetch-depth: 0
 
+      - name: Install bounded runtime dependencies
+        run: pip install -r kyiv-air-alerts-grafana/requirements.txt
+
       - name: Run bounded formalization
         run: |
           python kyiv-air-alerts-grafana/scripts/historical_v2_formalization_existing_evidence.py \
