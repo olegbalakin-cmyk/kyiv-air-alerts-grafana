@@ -127,6 +127,41 @@ def main() -> int:
         if isinstance(states, list) and states:
             city_shapes[city] = sorted(states[0].keys())
 
+    grep_hash = subprocess.run(
+        ["git", "grep", "-n", EXPECTED_ORIGINAL_HASH],
+        cwd=REPO, text=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE
+    ).stdout.splitlines()
+    grep_case7 = subprocess.run(
+        ["git", "grep", "-n", "7f9455ee73cf2aaa84b9d6e3"],
+        cwd=REPO, text=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE
+    ).stdout.splitlines()
+    grep_case18 = subprocess.run(
+        ["git", "grep", "-n", "6069b17ec096cae0912ad9bd"],
+        cwd=REPO, text=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE
+    ).stdout.splitlines()
+
+    def source_window(source: str, func_name: str, before: int = 2, after: int = 120) -> str:
+        lines = source.splitlines()
+        needle = "def " + func_name + "("
+        for idx, line in enumerate(lines):
+            if line.lstrip().startswith(needle):
+                return "\n".join(lines[max(0, idx-before):min(len(lines), idx+after)])
+        return ""
+
+    city_status_shapes = {}
+    for city, payload in cities.items():
+        if isinstance(payload, dict):
+            city_status_shapes[city] = {
+                "keys": sorted(payload.keys()),
+                "value_types": {k: type(v).__name__ for k, v in payload.items()},
+                "nested_dict_keys": {
+                    k: sorted(v.keys())[:50] for k, v in payload.items() if isinstance(v, dict)
+                },
+                "list_lengths": {
+                    k: len(v) for k, v in payload.items() if isinstance(v, list)
+                },
+            }
+
     diag = {
         "mode": "diagnostic_preflight",
         "head": head,
@@ -148,6 +183,20 @@ def main() -> int:
         "monitor_current_candidate_functions": ast_signatures(current_source),
         "monitor_frozen_candidate_functions": ast_signatures(frozen_source),
         "proof_tests": proof_tests,
+        "git_grep_expected_hash": grep_hash[:50],
+        "git_grep_case7": grep_case7[:50],
+        "git_grep_case18": grep_case18[:50],
+        "status_city_shapes": city_status_shapes,
+        "current_function_windows": {
+            "dated_live_update_event_times": source_window(current_source, "dated_live_update_event_times"),
+            "exact_city_classification_evidence": source_window(current_source, "exact_city_classification_evidence"),
+            "classify_candidate": source_window(current_source, "classify_candidate", after=220),
+            "apply_classification_decision": source_window(current_source, "apply_classification_decision", after=120),
+        },
+        "frozen_function_windows": {
+            "exact_city_classification_evidence": source_window(frozen_source, "exact_city_classification_evidence"),
+            "classify_candidate": source_window(frozen_source, "classify_candidate", after=220),
+        },
         "source_network_calls": 0,
     }
     out = REPO / OUT_REL
