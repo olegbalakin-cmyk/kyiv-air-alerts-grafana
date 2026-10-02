@@ -1,0 +1,118 @@
+name: Historical Kherson existing-source re-audit
+
+on:
+  push:
+    branches:
+      - historical-kherson-existing-source-reaudit-proof-2026-10-02
+    paths:
+      - ".github/workflows/historical-kherson-existing-source-reaudit.yml"
+      - "kyiv-air-alerts-grafana/scripts/reaudit_kherson_existing_source.py"
+      - "kyiv-air-alerts-grafana/tests/test_reaudit_kherson_existing_source.py"
+
+permissions:
+  contents: read
+
+env:
+  PROOF_BASE_HEAD: 8bc23f7a784f8017ed9950a57c4ecab995c2970f
+  CURRENT_AUTHORITATIVE_HEAD_AT_PROOF_START: 8bc23f7a784f8017ed9950a57c4ecab995c2970f
+  PYTHONDONTWRITEBYTECODE: "1"
+
+jobs:
+  focused-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: kyiv-air-alerts-grafana/requirements.txt
+      - name: Install dependencies
+        working-directory: kyiv-air-alerts-grafana
+        run: pip install -r requirements.txt pytest
+      - name: Verify proof branch ancestry and frozen input blobs
+        shell: bash
+        run: |
+          set -euo pipefail
+          git merge-base --is-ancestor "$PROOF_BASE_HEAD" HEAD
+          test "$(git rev-parse "$PROOF_BASE_HEAD:kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/kherson-historical-recovery_alerts.json")" = "32c0f8085161985a258d927f4a4968d4b192a708"
+          test "$(git rev-parse "$PROOF_BASE_HEAD:kyiv-air-alerts-grafana/data/explosion_research/kherson/final_evidence.json")" = "ae816bbc412fbe62f086adb4cefb2a5af65b2a07"
+          test "$(git rev-parse "$PROOF_BASE_HEAD:kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py")" = "927dc89df0b52edd52cb31a126b0d57ca492a278"
+          test "$(git rev-parse "$PROOF_BASE_HEAD:kyiv-air-alerts-grafana/scripts/historical_attack_event_sources.py")" = "0ceb3ea480de9b401000ba9d8b0bb02b22d83c89"
+      - name: Focused deterministic tests
+        working-directory: kyiv-air-alerts-grafana
+        run: pytest -q tests/test_reaudit_kherson_existing_source.py
+
+  full-history-research:
+    needs: focused-tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: kyiv-air-alerts-grafana/requirements.txt
+      - name: Install dependencies
+        working-directory: kyiv-air-alerts-grafana
+        run: pip install -r requirements.txt
+      - name: Capture protected hashes before research
+        shell: bash
+        run: |
+          set -euo pipefail
+          sha256sum \
+            kyiv-air-alerts-grafana/data/explosion_research/kherson/final_evidence.json \
+            kyiv-air-alerts-grafana/data/explosion_audited_baseline.json \
+            kyiv-air-alerts-grafana/data/explosion_review_queue.json \
+            kyiv-air-alerts-grafana/data/explosion_candidate_monitor_state.json \
+            kyiv-air-alerts-grafana/data/explosion_candidate_monitor_last_run.json \
+            kyiv-air-alerts-grafana/data/explosions_test.json \
+            kyiv-air-alerts-grafana/data/dashboard_data.json \
+            kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/kherson-historical-recovery_alerts.json \
+            > /tmp/protected-before.sha256
+      - name: Run complete existing-source pass
+        id: reaudit
+        shell: bash
+        run: |
+          set +e
+          rm -rf /tmp/kherson-reaudit
+          mkdir -p /tmp/kherson-reaudit
+          python kyiv-air-alerts-grafana/scripts/reaudit_kherson_existing_source.py \
+            --repo . \
+            --proof-base-head "$PROOF_BASE_HEAD" \
+            --current-authoritative-head-at-start "$CURRENT_AUTHORITATIVE_HEAD_AT_PROOF_START" \
+            --out /tmp/kherson-reaudit
+          rc=$?
+          echo "rc=$rc" >> "$GITHUB_OUTPUT"
+          exit 0
+      - name: Verify protected hashes after research
+        shell: bash
+        run: |
+          set -euo pipefail
+          sha256sum -c /tmp/protected-before.sha256
+          git diff --exit-code -- \
+            kyiv-air-alerts-grafana/data/explosion_research/kherson/final_evidence.json \
+            kyiv-air-alerts-grafana/data/explosion_audited_baseline.json \
+            kyiv-air-alerts-grafana/data/explosion_review_queue.json \
+            kyiv-air-alerts-grafana/data/explosion_candidate_monitor_state.json \
+            kyiv-air-alerts-grafana/data/explosion_candidate_monitor_last_run.json \
+            kyiv-air-alerts-grafana/data/explosions_test.json \
+            kyiv-air-alerts-grafana/data/dashboard_data.json \
+            kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/kherson-historical-recovery_alerts.json
+      - name: Upload immutable research artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: historical-kherson-existing-source-reaudit
+          path: /tmp/kherson-reaudit/
+          if-no-files-found: error
+          retention-days: 30
+      - name: Enforce proof verdict
+        shell: bash
+        run: test "${{ steps.reaudit.outputs.rc }}" = "0"
