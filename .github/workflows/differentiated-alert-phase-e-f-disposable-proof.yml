@@ -1,0 +1,404 @@
+name: Differentiated Phase E F disposable proof
+
+on:
+  push:
+    branches:
+      - differentiated-alert-same-run-source-seam-proof-2026-10-02
+    paths:
+      - ".github/workflows/differentiated-alert-phase-e-f-disposable-proof.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  phase-e-f:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: kyiv-air-alerts-grafana
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Declare ephemeral proof paths
+        shell: bash
+        run: |
+          echo "DIFFERENTIATED_ALERT_SHADOW_KYIV_JSON=${RUNNER_TEMP}/phase-e-kyiv.json" >> "$GITHUB_ENV"
+          echo "DIFFERENTIATED_ALERT_SHADOW_UKRAINEALARM_JSON=${RUNNER_TEMP}/phase-e-ukrainealarm.json" >> "$GITHUB_ENV"
+          echo "DIFFERENTIATED_ALERT_SHADOW_ALERTS_IN_UA_JSON=${RUNNER_TEMP}/phase-e-alerts-in-ua.json" >> "$GITHUB_ENV"
+          echo "DIFFERENTIATED_ALERT_SOURCE_CAPTURE_DIAGNOSTIC=${RUNNER_TEMP}/phase-e-capture.json" >> "$GITHUB_ENV"
+          echo "DIFFERENTIATED_PROOF_NEON_HOST=ep-blue-dew-b5jvusuv-pooler.c-7.us-east-2.aws.neon.tech" >> "$GITHUB_ENV"
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: kyiv-air-alerts-grafana/requirements-db-phase1.txt
+
+      - name: Install dependencies
+        run: pip install -r requirements-db-phase1.txt
+
+      - name: Guard product hash before Phase E
+        shell: bash
+        run: sha256sum data/dashboard_data.json | awk '{print $1}' > "${RUNNER_TEMP}/phase-e-product-before.sha256"
+
+      - name: Capture one frozen Phase E source set
+        env:
+          DIFFERENTIATED_ALERT_SOURCE_CAPTURE: "1"
+          UKRAINEALARM_API_TOKEN: ${{ secrets.UKRAINEALARM_API_TOKEN }}
+        run: python scripts/differentiated_alert_source_capture.py
+
+      - name: Validate frozen source set
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json, os
+          from pathlib import Path
+          d = json.loads(Path(os.environ["DIFFERENTIATED_ALERT_SOURCE_CAPTURE_DIAGNOSTIC"]).read_text())
+          assert d["status"] == "SUCCEEDED", d
+          assert d["logical_acquisition_counts"] == {
+              "kyiv_official": 1, "ukrainealarm": 1, "alerts_in_ua": 1
+          }, d
+          assert d["credentials_exposed"] is False
+          for source, row in d["sources"].items():
+              assert row["status"] == "SUCCEEDED", (source, row)
+          Path(os.environ["RUNNER_TEMP"], "phase-e-capture-safe.json").write_text(
+              json.dumps({
+                  "captured_at": d["captured_at"],
+                  "logical_acquisition_counts": d["logical_acquisition_counts"],
+                  "sources": {
+                      k: {
+                          "http_status": v["http_status"],
+                          "accepted_input_sha256": v["sha256"],
+                          "accepted_input_bytes": v["bytes"],
+                          "source_response_sha256": v.get("source_response_sha256"),
+                          "source_response_bytes": v.get("source_response_bytes"),
+                      } for k, v in d["sources"].items()
+                  },
+                  "credentials_exposed": False,
+              }, sort_keys=True, indent=2) + "\n"
+          )
+          PY
+
+      - name: Phase E first PostgreSQL persistence on existing disposable branch
+        env:
+          PERMANENT_DB_URL: ${{ secrets.MULTICITY_CANONICAL_DATABASE_URL }}
+        shell: bash
+        run: |
+          python - <<'PY'
+          import hashlib, json, os, re, sys
+          from datetime import datetime
+          from pathlib import Path
+          import psycopg
+          sys.path.insert(0, "scripts")
+          import differentiated_alert_shadow_runtime as runtime
+
+          def disposable_url():
+              base = os.environ["PERMANENT_DB_URL"]
+              host = os.environ["DIFFERENTIATED_PROOF_NEON_HOST"]
+              out, n = re.subn(r"(?<=@)[^/:?]+", host, base, count=1)
+              assert n == 1 and host in out
+              return out
+
+          def parent_fingerprint(conn):
+              cur = conn.cursor()
+              cur.execute("""SELECT episode_uid::text, legacy_episode_id, city_key, alert_type,
+                                    start_at::text, end_at::text
+                             FROM alert_episodes ORDER BY episode_uid""")
+              h = hashlib.sha256()
+              count = 0
+              for row in cur:
+                  h.update(json.dumps(row, separators=(",", ":"), ensure_ascii=False).encode())
+                  h.update(b"\n")
+                  count += 1
+              cur.execute("""SELECT source_observation_uid::text, episode_uid::text, source_key,
+                                    source_start_at::text, source_end_at::text
+                             FROM alert_episode_sources ORDER BY source_observation_uid""")
+              hs = hashlib.sha256()
+              scount = 0
+              for row in cur:
+                  hs.update(json.dumps(row, separators=(",", ":"), ensure_ascii=False).encode())
+                  hs.update(b"\n")
+                  scount += 1
+              return {
+                  "alert_episodes_count": count, "alert_episodes_sha256": h.hexdigest(),
+                  "alert_episode_sources_count": scount, "alert_episode_sources_sha256": hs.hexdigest(),
+              }
+
+          db = disposable_url()
+          with psycopg.connect(db) as conn:
+              before = parent_fingerprint(conn)
+          cap = json.loads(Path(os.environ["DIFFERENTIATED_ALERT_SOURCE_CAPTURE_DIAGNOSTIC"]).read_text())
+          now = datetime.fromisoformat(cap["captured_at"].replace("Z", "+00:00"))
+          env = dict(os.environ)
+          env.update({
+              runtime.FEATURE_FLAG: "1",
+              runtime.BACKEND_ENV: "postgres",
+              runtime.DATABASE_URL_ENV: db,
+              runtime.INPUT_MODE_ENV: runtime.STORED_ONLY_MODE,
+          })
+          def forbidden(*args, **kwargs):
+              raise AssertionError("stored_only PostgreSQL sidecar attempted network")
+          result = runtime.run_shadow([], env=env, fetch_json=forbidden, now=now)
+          assert result["status"] == "SUCCEEDED", result
+          assert result["sidecar_network_requests"] == 0, result
+          with psycopg.connect(db) as conn:
+              after = parent_fingerprint(conn)
+          assert after == before, (before, after)
+          safe = {
+              "status": result["status"],
+              "sidecar_network_requests": result["sidecar_network_requests"],
+              "inserted_snapshots": result["inserted_snapshots"],
+              "inserted_observations": result["inserted_observations"],
+              "binding": result["binding"],
+              "store_counts": result["store_counts"],
+              "parent_before": before,
+              "parent_after": after,
+              "parent_unchanged": True,
+              "db_branch": "br-quiet-hat-b5z5hdqu",
+          }
+          Path(os.environ["RUNNER_TEMP"], "phase-e-first.json").write_text(
+              json.dumps(safe, sort_keys=True, indent=2) + "\n"
+          )
+          print(json.dumps(safe, sort_keys=True))
+          PY
+
+      - name: Phase E exact replay same process contract
+        env:
+          PERMANENT_DB_URL: ${{ secrets.MULTICITY_CANONICAL_DATABASE_URL }}
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json, os, re, sys
+          from datetime import datetime
+          from pathlib import Path
+          sys.path.insert(0, "scripts")
+          import differentiated_alert_shadow_runtime as runtime
+          base = os.environ["PERMANENT_DB_URL"]
+          db, n = re.subn(r"(?<=@)[^/:?]+", os.environ["DIFFERENTIATED_PROOF_NEON_HOST"], base, count=1)
+          assert n == 1
+          cap = json.loads(Path(os.environ["DIFFERENTIATED_ALERT_SOURCE_CAPTURE_DIAGNOSTIC"]).read_text())
+          now = datetime.fromisoformat(cap["captured_at"].replace("Z", "+00:00"))
+          env = dict(os.environ)
+          env.update({
+              runtime.FEATURE_FLAG: "1", runtime.BACKEND_ENV: "postgres",
+              runtime.DATABASE_URL_ENV: db, runtime.INPUT_MODE_ENV: runtime.STORED_ONLY_MODE,
+          })
+          result = runtime.run_shadow([], env=env, fetch_json=lambda *a, **k: (_ for _ in ()).throw(AssertionError("network")), now=now)
+          assert result["status"] == "SUCCEEDED", result
+          assert result["sidecar_network_requests"] == 0
+          assert result["inserted_snapshots"] == 0, result
+          assert result["inserted_observations"] == 0, result
+          Path(os.environ["RUNNER_TEMP"], "phase-e-replay.json").write_text(
+              json.dumps({
+                  "status": result["status"], "sidecar_network_requests": 0,
+                  "inserted_snapshots": 0, "inserted_observations": 0,
+                  "store_counts": result["store_counts"],
+              }, sort_keys=True, indent=2) + "\n"
+          )
+          PY
+
+      - name: Phase E fresh-process replay
+        env:
+          PERMANENT_DB_URL: ${{ secrets.MULTICITY_CANONICAL_DATABASE_URL }}
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json, os, re, sys
+          from datetime import datetime
+          from pathlib import Path
+          sys.path.insert(0, "scripts")
+          import differentiated_alert_shadow_runtime as runtime
+          db, n = re.subn(r"(?<=@)[^/:?]+", os.environ["DIFFERENTIATED_PROOF_NEON_HOST"], os.environ["PERMANENT_DB_URL"], count=1)
+          assert n == 1
+          cap = json.loads(Path(os.environ["DIFFERENTIATED_ALERT_SOURCE_CAPTURE_DIAGNOSTIC"]).read_text())
+          now = datetime.fromisoformat(cap["captured_at"].replace("Z", "+00:00"))
+          env = dict(os.environ)
+          env.update({
+              runtime.FEATURE_FLAG: "1", runtime.BACKEND_ENV: "postgres",
+              runtime.DATABASE_URL_ENV: db, runtime.INPUT_MODE_ENV: runtime.STORED_ONLY_MODE,
+          })
+          result = runtime.run_shadow([], env=env, fetch_json=lambda *a, **k: (_ for _ in ()).throw(AssertionError("network")), now=now)
+          assert result["status"] == "SUCCEEDED", result
+          assert result["sidecar_network_requests"] == 0
+          assert (result["inserted_snapshots"], result["inserted_observations"]) == (0, 0), result
+          Path(os.environ["RUNNER_TEMP"], "phase-e-fresh-replay.json").write_text(
+              json.dumps({
+                  "status": result["status"], "sidecar_network_requests": 0,
+                  "inserted_snapshots": 0, "inserted_observations": 0,
+                  "store_counts": result["store_counts"],
+              }, sort_keys=True, indent=2) + "\n"
+          )
+          PY
+
+      - name: Phase E binding and raw-value invariants
+        env:
+          PERMANENT_DB_URL: ${{ secrets.MULTICITY_CANONICAL_DATABASE_URL }}
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json, os, re
+          from pathlib import Path
+          import psycopg
+          db, n = re.subn(r"(?<=@)[^/:?]+", os.environ["DIFFERENTIATED_PROOF_NEON_HOST"], os.environ["PERMANENT_DB_URL"], count=1)
+          assert n == 1
+          cap = json.loads(Path(os.environ["DIFFERENTIATED_ALERT_SOURCE_CAPTURE_DIAGNOSTIC"]).read_text())
+          observed = cap["captured_at"]
+          with psycopg.connect(db) as conn:
+              cur = conn.cursor()
+              cur.execute("""
+                SELECT binding_state, count(*)::int,
+                       count(*) FILTER (WHERE episode_uid IS NULL)::int
+                FROM alert_state_snapshots
+                WHERE observed_at = %s
+                GROUP BY binding_state ORDER BY binding_state
+              """, (observed,))
+              binding_rows = cur.fetchall()
+              cur.execute("""
+                SELECT count(*)::int
+                FROM alert_state_snapshots s
+                LEFT JOIN alert_episodes p ON p.episode_uid=s.episode_uid
+                WHERE s.observed_at=%s
+                  AND s.binding_state='BOUND'
+                  AND p.episode_uid IS NULL
+              """, (observed,))
+              bad_bound = cur.fetchone()[0]
+              cur.execute("""
+                SELECT count(*)::int
+                FROM alert_state_snapshots
+                WHERE observed_at=%s
+                  AND binding_state IN ('UNBOUND','AMBIGUOUS')
+                  AND episode_uid IS NOT NULL
+              """, (observed,))
+              bad_null = cur.fetchone()[0]
+              cur.execute("""
+                SELECT source_key, source_state_raw, source_alert_level_raw, source_geo_scope
+                FROM alert_state_snapshots WHERE observed_at=%s ORDER BY source_key
+              """, (observed,))
+              snapshots = cur.fetchall()
+              cur.execute("""
+                SELECT s.source_key, t.level_raw, t.cause_raw, t.reason_raw
+                FROM alert_threat_observations t
+                JOIN alert_state_snapshots s ON s.snapshot_uid=t.snapshot_uid
+                WHERE s.observed_at=%s
+                ORDER BY s.source_key, t.threat_observation_key
+              """, (observed,))
+              threats = cur.fetchall()
+          assert bad_bound == 0
+          assert bad_null == 0
+          for state, total, nulls in binding_rows:
+              if state in ("UNBOUND", "AMBIGUOUS"):
+                  assert nulls == total
+          safe = {
+              "binding_rows": binding_rows,
+              "bad_bound_parent_refs": bad_bound,
+              "bad_unbound_or_ambiguous_refs": bad_null,
+              "snapshot_raw_field_projection": snapshots,
+              "threat_raw_field_projection": threats,
+              "nearest_time_guessing": False,
+          }
+          Path(os.environ["RUNNER_TEMP"], "phase-e-invariants.json").write_text(
+              json.dumps(safe, ensure_ascii=False, sort_keys=True, indent=2) + "\n"
+          )
+          print(json.dumps(safe, ensure_ascii=False, sort_keys=True))
+          PY
+
+      - name: Phase F injected child transaction failure rolls back
+        env:
+          PERMANENT_DB_URL: ${{ secrets.MULTICITY_CANONICAL_DATABASE_URL }}
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json, os, re, sys
+          from datetime import datetime, timedelta
+          from pathlib import Path
+          import psycopg
+          sys.path.insert(0, "scripts")
+          import differentiated_alert_postgres as pg
+          import proof_differentiated_alert_shadow_ingestion as shadow
+
+          db, n = re.subn(r"(?<=@)[^/:?]+", os.environ["DIFFERENTIATED_PROOF_NEON_HOST"], os.environ["PERMANENT_DB_URL"], count=1)
+          assert n == 1
+          cap = json.loads(Path(os.environ["DIFFERENTIATED_ALERT_SOURCE_CAPTURE_DIAGNOSTIC"]).read_text())
+          observed = datetime.fromisoformat(cap["captured_at"].replace("Z", "+00:00")) + timedelta(seconds=1)
+          payload = json.loads(Path(os.environ["DIFFERENTIATED_ALERT_SHADOW_KYIV_JSON"]).read_text())
+          record = shadow.canonicalize_kyiv(
+              payload, observed_at=observed.isoformat().replace("+00:00", "Z"),
+              target_city_key="kyiv", raw_object_path=os.environ["DIFFERENTIATED_ALERT_SHADOW_KYIV_JSON"]
+          )
+          record["snapshot"]["binding_state"] = "UNBOUND"
+          record["snapshot"]["episode_id"] = None
+
+          with psycopg.connect(db) as conn:
+              cur = conn.cursor()
+              cur.execute("SELECT count(*)::int FROM alert_state_snapshots")
+              before_s = cur.fetchone()[0]
+              cur.execute("SELECT count(*)::int FROM alert_threat_observations")
+              before_o = cur.fetchone()[0]
+              try:
+                  pg.persist_records(
+                      conn, [record],
+                      after_snapshot_hook=lambda rec, uid: (_ for _ in ()).throw(RuntimeError("injected-phase-f-child-failure"))
+                  )
+                  raise AssertionError("injected child failure did not propagate")
+              except RuntimeError as exc:
+                  assert str(exc) == "injected-phase-f-child-failure"
+              cur = conn.cursor()
+              cur.execute("SELECT count(*)::int FROM alert_state_snapshots")
+              after_s = cur.fetchone()[0]
+              cur.execute("SELECT count(*)::int FROM alert_threat_observations")
+              after_o = cur.fetchone()[0]
+          assert (after_s, after_o) == (before_s, before_o), ((before_s, before_o), (after_s, after_o))
+          safe = {
+              "injected_error": "injected-phase-f-child-failure",
+              "before": {"snapshots": before_s, "observations": before_o},
+              "after": {"snapshots": after_s, "observations": after_o},
+              "partial_residue": False,
+              "transactional_rollback": True,
+          }
+          Path(os.environ["RUNNER_TEMP"], "phase-f-failure.json").write_text(
+              json.dumps(safe, sort_keys=True, indent=2) + "\n"
+          )
+          print(json.dumps(safe, sort_keys=True))
+          PY
+
+      - name: Product parity after Phase E F
+        shell: bash
+        run: |
+          sha256sum data/dashboard_data.json | awk '{print $1}' > "${RUNNER_TEMP}/phase-e-product-after.sha256"
+          cmp "${RUNNER_TEMP}/phase-e-product-before.sha256" "${RUNNER_TEMP}/phase-e-product-after.sha256"
+          echo "phase_e_f_product_parity=PASS" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Build metadata-only Phase E F artifact
+        if: always()
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json, os
+          from pathlib import Path
+          temp = Path(os.environ["RUNNER_TEMP"])
+          names = [
+              "phase-e-capture-safe.json", "phase-e-first.json", "phase-e-replay.json",
+              "phase-e-fresh-replay.json", "phase-e-invariants.json", "phase-f-failure.json"
+          ]
+          out = {}
+          for name in names:
+              p = temp / name
+              out[name] = json.loads(p.read_text()) if p.exists() else None
+          out["db_branch"] = "br-quiet-hat-b5z5hdqu"
+          out["raw_payloads_uploaded"] = False
+          out["credentials_exposed"] = False
+          Path("phase-e-f-disposable-proof-metadata.json").write_text(
+              json.dumps(out, ensure_ascii=False, indent=2, sort_keys=True) + "\n"
+          )
+          PY
+
+      - name: Upload metadata only
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: differentiated-phase-e-f-metadata-${{ github.run_id }}-${{ github.run_attempt }}
+          path: kyiv-air-alerts-grafana/phase-e-f-disposable-proof-metadata.json
+          if-no-files-found: warn
+          retention-days: 14
