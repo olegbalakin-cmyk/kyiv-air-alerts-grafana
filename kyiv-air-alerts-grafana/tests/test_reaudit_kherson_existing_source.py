@@ -144,3 +144,15 @@ def test_protected_paths_include_all_required_live_outputs():
     names={str(x) for x in m.PROTECTED}
     for suffix in ["data/explosion_candidate_monitor_state.json","data/explosion_candidate_monitor_last_run.json","data/explosion_review_queue.json","data/explosions_test.json","data/dashboard_data.json"]:
         assert any(x.endswith(suffix) for x in names)
+
+
+def test_retained_strict_controls_bind_by_event_time_containment():
+    eps=[
+        {"episode_id":"a","alert_start":"2025-11-28T19:47:24Z","alert_end":"2025-11-28T20:13:58Z"},
+        {"episode_id":"b","alert_start":"2026-08-02T11:33:54Z","alert_end":"2026-08-02T12:46:21Z"},
+    ]
+    final={"strict_events":[
+        {"matched_alert_episode_start":"2025-11-28T21:47:00+02:00","event_time":"2025-11-28T22:08:00+02:00"},
+        {"episode_start":"2026-08-02T14:38:00+03:00","event_time":"~15:21"},
+    ]}
+    assert m.baseline_ids(final,eps)==["a","b"]
