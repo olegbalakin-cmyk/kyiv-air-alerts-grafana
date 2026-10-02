@@ -412,7 +412,7 @@ def main() -> int:
 
     artifact = {
         "schema_version": 2,
-        "proof": "historical-v2-formalization-ternopil-ivano-frankivsk-proof-2026-10-02",
+        "proof": "historical-v2-formalization-ternopil-uzhhorod-proof-2026-10-02",
         "mode": "FREEZE_EXISTING_EVIDENCE",
         "city_set": list(CITY_SET),
         "common_base": COMMON_BASE,
