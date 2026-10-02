@@ -1,102 +1,100 @@
 {
-  "schema_version": 1,
-  "proof": "historical-v2-formalization-chernivtsi-ivano-frankivsk-proof-2026-10-02",
-  "mode": "FREEZE_EXISTING_EVIDENCE",
+  "authoritative_evidence_mutations": 0,
+  "cities": {
+    "chernivtsi": {
+      "blocker": null,
+      "bound_observations": 2,
+      "canonical_episodes": 113,
+      "canonical_source_files": [
+        "data/explosion_metric_handoff/source_slices/chernivtsi-historical-recovery_alerts.json"
+      ],
+      "city_key": "chernivtsi",
+      "classifier_pipeline_exceptions": 0,
+      "counted_evidence_unbound": 0,
+      "duplicate_targets": 0,
+      "evidence_records_read": 2,
+      "extra_targets": 0,
+      "malformed_provenance": 0,
+      "mechanically_unrepresentable": 0,
+      "missing_targets": 0,
+      "needs_review": 0,
+      "no_confirmed_event": 111,
+      "normalized_observations": 2,
+      "sensitivity_positives": 0,
+      "strict_positives": 2,
+      "target_state_sha256": "61f4a8cd7abfae55ec30538b01eab0e50bad8c1ba9c2fed9c0f508cb6cbbbcfb",
+      "unbound_observations": 0,
+      "unresolved_evidence_bindings": 0,
+      "unresolved_items": [],
+      "verdict": "CITY V2 FORMALIZATION PROVEN"
+    },
+    "ivano_frankivsk": {
+      "blocker": null,
+      "bound_observations": 6,
+      "canonical_episodes": 103,
+      "canonical_source_files": [
+        "data/explosion_metric_handoff/source_slices/ivano_frankivsk-historical-recovery_alerts.json"
+      ],
+      "city_key": "ivano_frankivsk",
+      "classifier_pipeline_exceptions": 0,
+      "counted_evidence_unbound": 0,
+      "duplicate_targets": 0,
+      "evidence_records_read": 6,
+      "extra_targets": 0,
+      "malformed_provenance": 0,
+      "mechanically_unrepresentable": 0,
+      "missing_targets": 0,
+      "needs_review": 0,
+      "no_confirmed_event": 97,
+      "normalized_observations": 6,
+      "sensitivity_positives": 0,
+      "strict_positives": 6,
+      "target_state_sha256": "246a54c2f9bf382688a22cfee4e55b571b1f083b2f3fc86176054e75ace1cd79",
+      "unbound_observations": 0,
+      "unresolved_evidence_bindings": 0,
+      "unresolved_items": [],
+      "verdict": "CITY V2 FORMALIZATION PROVEN"
+    }
+  },
   "city_set": [
     "chernivtsi",
     "ivano_frankivsk"
   ],
   "common_base": "fb563dc410fe6614263bdc8d4eb55025a987e950",
-  "tested_head": "c17a0a395c8bf9f9b6bf1a17501b27bf09ce0560",
+  "incorporation": "NO",
   "methodology_version": "historical-attack-event-air-defense-action-v2",
-  "normalization_version": "historical-attack-event-observation-v2",
-  "overall_verdict": "BLOCKED",
-  "overall_blocker": "ONE_OR_MORE_CITIES_BLOCKED",
-  "cities": {
-    "chernivtsi": {
-      "city_key": "chernivtsi",
-      "verdict": "CITY V2 FORMALIZATION BLOCKED",
-      "blocker": "CANONICAL_COUNT_MISMATCH:20!=113;MECHANICALLY_UNREPRESENTABLE_EVIDENCE:1",
-      "canonical_episodes": 20,
-      "evidence_records_read": 1,
-      "normalized_observations": 1,
-      "bound_observations": 0,
-      "unbound_observations": 1,
-      "malformed_provenance": 0,
-      "strict_positives": 0,
-      "sensitivity_positives": 0,
-      "no_confirmed_event": 20,
-      "needs_review": 0,
-      "missing_targets": 0,
-      "duplicate_targets": 0,
-      "extra_targets": 0,
-      "unresolved_evidence_bindings": 1,
-      "unresolved_items": [
-        {
-          "evidence_id": "chernivtsi:1:8a06a47b764a9f21f237",
-          "event_time": null,
-          "reason": "unrecognized_leaf_without_classifiable_content",
-          "candidate_episode_ids": []
-        }
-      ],
-      "target_state_sha256": "3bd1f8aa6b16035ed2208cbb9a6a52098b542159b4b300fa109432a9b8a8c653",
-      "mechanically_unrepresentable": 1,
-      "classifier_exceptions": []
-    },
-    "ivano_frankivsk": {
-      "city_key": "ivano_frankivsk",
-      "verdict": "CITY V2 FORMALIZATION BLOCKED",
-      "blocker": "CANONICAL_COUNT_MISMATCH:20!=103;MECHANICALLY_UNREPRESENTABLE_EVIDENCE:1",
-      "canonical_episodes": 20,
-      "evidence_records_read": 1,
-      "normalized_observations": 1,
-      "bound_observations": 0,
-      "unbound_observations": 1,
-      "malformed_provenance": 0,
-      "strict_positives": 0,
-      "sensitivity_positives": 0,
-      "no_confirmed_event": 20,
-      "needs_review": 0,
-      "missing_targets": 0,
-      "duplicate_targets": 0,
-      "extra_targets": 0,
-      "unresolved_evidence_bindings": 1,
-      "unresolved_items": [
-        {
-          "evidence_id": "ivano_frankivsk:1:5a42739ed8005be988e1",
-          "event_time": null,
-          "reason": "unrecognized_leaf_without_classifiable_content",
-          "candidate_episode_ids": []
-        }
-      ],
-      "target_state_sha256": "072f7af69e44b110fef2260c135b1f588c5e242a2f246563581df66580177512",
-      "mechanically_unrepresentable": 1,
-      "classifier_exceptions": []
-    }
-  },
+  "mode": "FREEZE_EXISTING_EVIDENCE",
   "mutation_guards": {
-    "guarded_input_sha256_before": {
-      "kyiv-air-alerts-grafana/data/ukrainealarm_bridge.json": "6058809feda9e536ef948209cd5bdd68e5ec5e40e0eb4b99b776a61953b788bf",
-      "kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py": "499df82ee4a0e9997f31c381850241bc19667ffc2b3882e7a1123df52c900c18",
-      "kyiv-air-alerts-grafana/data/explosion_research/chernivtsi/final_evidence.json": "8d36ac8ca006a83b2106fde501224ce33c4ee70d9722e4ccdfa122d993ce88d8",
-      "kyiv-air-alerts-grafana/data/explosion_research/ivano_frankivsk/final_evidence.json": "20dae0f13dc42624a53e877c22ec6b2ba1f8c6f56fc9e0024b629617305e1035"
-    },
-    "guarded_input_sha256_after": {
-      "kyiv-air-alerts-grafana/data/ukrainealarm_bridge.json": "6058809feda9e536ef948209cd5bdd68e5ec5e40e0eb4b99b776a61953b788bf",
-      "kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py": "499df82ee4a0e9997f31c381850241bc19667ffc2b3882e7a1123df52c900c18",
-      "kyiv-air-alerts-grafana/data/explosion_research/chernivtsi/final_evidence.json": "8d36ac8ca006a83b2106fde501224ce33c4ee70d9722e4ccdfa122d993ce88d8",
-      "kyiv-air-alerts-grafana/data/explosion_research/ivano_frankivsk/final_evidence.json": "20dae0f13dc42624a53e877c22ec6b2ba1f8c6f56fc9e0024b629617305e1035"
-    },
     "authoritative_inputs_unchanged": true,
-    "unexpected_changed_paths_before_artifact": [],
-    "scope_allowlist": "PASS",
     "db_neon": "UNTOUCHED",
     "deployment": "NO",
+    "guarded_input_sha256_after": {
+      "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/chernivtsi-historical-recovery_alerts.json": "e26b2833451cf25c896f5d16255e3921c0667bcb0f5988db8befda08bdd6f20b",
+      "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/ivano_frankivsk-historical-recovery_alerts.json": "0c95da46959d954a1839704df3eb589a8a9cd031984ec0daf078ff55896054dc",
+      "kyiv-air-alerts-grafana/data/explosion_research/chernivtsi/final_evidence.json": "8d36ac8ca006a83b2106fde501224ce33c4ee70d9722e4ccdfa122d993ce88d8",
+      "kyiv-air-alerts-grafana/data/explosion_research/ivano_frankivsk/final_evidence.json": "20dae0f13dc42624a53e877c22ec6b2ba1f8c6f56fc9e0024b629617305e1035",
+      "kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py": "499df82ee4a0e9997f31c381850241bc19667ffc2b3882e7a1123df52c900c18",
+      "kyiv-air-alerts-grafana/scripts/replay_explosion_history.py": "5df4be4ae6a0518dbde7b89cafbfeae76cc23170a84071afd4f6771a9ef301bf"
+    },
+    "guarded_input_sha256_before": {
+      "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/chernivtsi-historical-recovery_alerts.json": "e26b2833451cf25c896f5d16255e3921c0667bcb0f5988db8befda08bdd6f20b",
+      "kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/ivano_frankivsk-historical-recovery_alerts.json": "0c95da46959d954a1839704df3eb589a8a9cd031984ec0daf078ff55896054dc",
+      "kyiv-air-alerts-grafana/data/explosion_research/chernivtsi/final_evidence.json": "8d36ac8ca006a83b2106fde501224ce33c4ee70d9722e4ccdfa122d993ce88d8",
+      "kyiv-air-alerts-grafana/data/explosion_research/ivano_frankivsk/final_evidence.json": "20dae0f13dc42624a53e877c22ec6b2ba1f8c6f56fc9e0024b629617305e1035",
+      "kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py": "499df82ee4a0e9997f31c381850241bc19667ffc2b3882e7a1123df52c900c18",
+      "kyiv-air-alerts-grafana/scripts/replay_explosion_history.py": "5df4be4ae6a0518dbde7b89cafbfeae76cc23170a84071afd4f6771a9ef301bf"
+    },
+    "historical_evidence_mutations": 0,
     "production_dashboard_data": "UNTOUCHED",
-    "historical_evidence_mutations": 0
+    "scope_allowlist": "PASS",
+    "unexpected_changed_paths_before_artifact": []
   },
+  "normalization_version": "historical-attack-event-observation-v2",
+  "overall_blocker": null,
+  "overall_verdict": "PROVEN",
+  "proof": "historical-v2-formalization-chernivtsi-ivano-frankivsk-proof-2026-10-02",
   "public_web_research": "NO",
+  "schema_version": 2,
   "source_discovery": "NO",
-  "authoritative_evidence_mutations": 0,
-  "incorporation": "NO"
+  "tested_head": "e9be481f7b7c3039769c85bca697f95b86dcc5c0"
 }
