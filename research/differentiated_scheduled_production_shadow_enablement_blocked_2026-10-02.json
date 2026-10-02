@@ -1,0 +1,148 @@
+{
+  "task": "CONTINUE EXISTING BLOCKED DIFFERENTIATED SCHEDULED PRODUCTION SHADOW ENABLEMENT PROOF",
+  "proof_branch": "differentiated-alert-same-run-source-seam-proof-2026-10-02",
+  "current_proof_head_before_artifact": "52409be3170c2ffccd120ce7fc8a2638377dd978",
+  "fresh_refs": {
+    "main": "b7f2778d4d3e7c72cec64237914cdd51e5621e8f",
+    "site_prod": "3c34e52d859e9793d0f10aa93fea4e7cdd7b2228"
+  },
+  "source_seam": {
+    "verdict": "DIFFERENTIATED SAME-RUN SOURCE SEAM PROVEN",
+    "artifact_path": "research/differentiated_alert_same_run_source_seam_proof_2026-10-02.json",
+    "artifact_commit": "f4964ece26dfa8c35308a8bb8127bf0024083e42",
+    "successful_run": 36973362739,
+    "request_counts_control": {
+      "kyiv_official": 0,
+      "ukrainealarm": 0,
+      "alerts_in_ua": 0
+    },
+    "request_counts_capture_only": {
+      "kyiv_official": 1,
+      "ukrainealarm": 1,
+      "alerts_in_ua": 1
+    },
+    "request_counts_capture_plus_shadow": {
+      "kyiv_official": 1,
+      "ukrainealarm": 1,
+      "alerts_in_ua": 1
+    },
+    "sidecar_network_requests_stored_only": 0,
+    "product_parity": "PASS",
+    "strict_missing_input": "PASS",
+    "capture_failure_fail_open": "PASS",
+    "credentials_exposed": false
+  },
+  "phase_e": {
+    "verdict": "BLOCKED_BEFORE_DB_PERSISTENCE",
+    "failed_gate": "Phase E live frozen source-set acquisition: Kyiv accepted current-state JSON",
+    "expected_state": "One production-compatible capture of all three accepted differentiated inputs, with Kyiv /open-api/air-alert/state returning parseable accepted JSON, then freeze those files for Phase E.",
+    "observed_state": {
+      "run_36973713400": {
+        "captured_at": "2026-10-02T06:28:42.319081Z",
+        "kyiv_official": {
+          "logical_acquisition_count": 1,
+          "status": "FAILED",
+          "error_type": "JSONDecodeError",
+          "error": "Expecting value: line 1 column 1 (char 0)"
+        },
+        "ukrainealarm": {
+          "logical_acquisition_count": 1,
+          "status": "SUCCEEDED",
+          "http_status": 200,
+          "accepted_input_sha256": "a82c00e019c6fd7cfbed6a3848d42b9ceebbc3c46046d6f0840c9fea5a7ce854"
+        },
+        "alerts_in_ua": {
+          "logical_acquisition_count": 1,
+          "status": "SUCCEEDED",
+          "http_status": 200,
+          "accepted_input_sha256": "e904d314c3e5395a062a84d2b699e1685195b041e936c4df6055a557ae14bf71"
+        },
+        "db_persistence_started": false
+      },
+      "run_36973832942": {
+        "captured_at": "2026-10-02T06:30:09.547549Z",
+        "kyiv_official": {
+          "logical_acquisition_count": 1,
+          "status": "FAILED",
+          "error_type": "JSONDecodeError",
+          "error": "Expecting value: line 1 column 1 (char 0)"
+        },
+        "ukrainealarm": {
+          "logical_acquisition_count": 1,
+          "status": "SUCCEEDED",
+          "http_status": 200,
+          "accepted_input_sha256": "a82c00e019c6fd7cfbed6a3848d42b9ceebbc3c46046d6f0840c9fea5a7ce854"
+        },
+        "alerts_in_ua": {
+          "logical_acquisition_count": 1,
+          "status": "SUCCEEDED",
+          "http_status": 200,
+          "accepted_input_sha256": "e904d314c3e5395a062a84d2b699e1685195b041e936c4df6055a557ae14bf71"
+        },
+        "db_persistence_started": false
+      }
+    },
+    "retry_policy": "One fresh Phase E execution was allowed after the first pre-DB transient failure. The same Kyiv parse failure repeated, so no further proof polling was performed."
+  },
+  "neon_guard": {
+    "permanent_branch": "br-bold-mode-b5rub8pq",
+    "permanent": {
+      "alert_episodes": 28021,
+      "distinct_cities": 23,
+      "alert_episode_sources": 143,
+      "ingestion_runs": 24,
+      "differentiated_tables_absent": true
+    },
+    "disposable_branch": "br-quiet-hat-b5z5hdqu",
+    "disposable_parent": "br-bold-mode-b5rub8pq",
+    "disposable": {
+      "alert_episodes": 28021,
+      "distinct_cities": 23,
+      "alert_episode_sources": 143,
+      "ingestion_runs": 24,
+      "alert_state_snapshots": 0,
+      "alert_threat_observations": 0
+    },
+    "legacy_phase1_checkpoint_seq": 18,
+    "attack_event_neon_writes": 0
+  },
+  "mutations": {
+    "main": 0,
+    "site_prod": 0,
+    "permanent_neon": 0,
+    "disposable_neon_committed_rows": 0,
+    "new_neon_branches": 0,
+    "proof_git_branch_created": "differentiated-alert-same-run-source-seam-proof-2026-10-02",
+    "proof_files_added_or_updated": [
+      "kyiv-air-alerts-grafana/scripts/proof_differentiated_alert_schema_v2.py",
+      "kyiv-air-alerts-grafana/scripts/proof_differentiated_alert_shadow_ingestion.py",
+      "kyiv-air-alerts-grafana/scripts/differentiated_alert_postgres.py",
+      "kyiv-air-alerts-grafana/scripts/differentiated_alert_source_capture.py",
+      "kyiv-air-alerts-grafana/scripts/differentiated_alert_shadow_runtime.py",
+      "kyiv-air-alerts-grafana/tests/test_differentiated_alert_same_run_source_seam.py",
+      ".github/workflows/differentiated-alert-same-run-source-seam-proof.yml",
+      ".github/workflows/differentiated-alert-phase-e-f-disposable-proof.yml",
+      "research/differentiated_alert_same_run_source_seam_proof_2026-10-02.json"
+    ]
+  },
+  "safe_continuation_point": {
+    "action": "Resume Phase E only; do not redo Phases A-D or the proven source-seam deterministic gates unless relevant code drift occurs.",
+    "prerequisite": "A single fresh accepted Phase E capture must obtain parseable Kyiv current-state JSON together with the accepted UkraineAlarm and Alerts.in.ua objects.",
+    "neon_branch_to_reuse": "br-quiet-hat-b5z5hdqu",
+    "disposable_baseline_to_expect": {
+      "alert_state_snapshots": 0,
+      "alert_threat_observations": 0
+    },
+    "next_steps_if_prerequisite_passes": [
+      "Freeze that same-run three-source set for the rest of Phase E.",
+      "Run stored_only sidecar with zero network calls against the existing disposable branch.",
+      "Prove OFF/ON product parity, binding invariants, raw-value preservation, parent non-mutation and exact/fresh-process idempotent replay.",
+      "Run Phase F injected child transaction failure on the same disposable branch.",
+      "Only then resume Phase G onward."
+    ]
+  },
+  "overall_verdict": "DIFFERENTIATED SCHEDULED PRODUCTION SHADOW ENABLEMENT BLOCKED",
+  "reason": "PHASE_E_CURRENT_KYIV_SOURCE_RESPONSE_NOT_PARSEABLE_JSON",
+  "credentials_exposed": false,
+  "db_cutover": false
+}
