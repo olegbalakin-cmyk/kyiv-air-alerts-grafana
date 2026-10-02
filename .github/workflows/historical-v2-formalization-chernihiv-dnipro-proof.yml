@@ -112,7 +112,85 @@ jobs:
           test -z "$(git diff --name-only "$base"...HEAD -- 'deploy/**')"
           test -z "$(git diff --name-only "$base"...HEAD -- 'research/historical_attack_event_backfill/**')"
 
-          unexpected="$(git diff --name-only "$base"...HEAD | grep -Ev '^(kyiv-air-alerts-grafana/scripts/formalize_historical_v2_chernihiv_dnipro\.py|\.github/workflows/historical-v2-formalization-chernihiv-dnipro-proof\.yml)$' || true)"
+          unexpected="$(git diff --name-only "$base"...HEAD | grep -Ev '^(kyiv-air-alerts-grafana/scripts/formalize_historical_v2_chernihiv_dnipro\.py|\.github/workflows/historical-v2-formalization-chernihiv-dnipro-proof\.yml|research/historical_v2_formalization_chernihiv_dnipro_proof_2026-10-02\.json)
+          test -z "$unexpected"
+
+          dirty="$(git status --porcelain --untracked-files=all | grep -Ev '^(\?\?| M) research/historical_v2_formalization_chernihiv_dnipro_proof_2026-10-02\.json
+          test -z "$dirty"
+
+          echo "authoritative evidence mutations = 0"
+          echo "historical source slice mutations = 0"
+          echo "canonical/data mutations = 0"
+          echo "production/dashboard mutations = 0"
+          echo "DB/Neon = untouched"
+          echo "scope allowlist = PASS"
+
+      - name: Print compact proof artifact
+        shell: bash
+        run: |
+          echo '__PROOF_JSON_BEGIN__'
+          cat research/historical_v2_formalization_chernihiv_dnipro_proof_2026-10-02.json
+          echo '__PROOF_JSON_END__'
+
+      - name: Upload compact proof artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: historical-v2-formalization-chernihiv-dnipro-proof-2026-10-02
+          path: ${{ runner.temp }}/proof.json
+          if-no-files-found: error
+          retention-days: 30
+ || true)"
+          test -z "$unexpected"
+
+          dirty="$(git status --porcelain --untracked-files=all | grep -v '^?? research/historical_v2_formalization_chernihiv_dnipro_proof_2026-10-02.json$' || true)"
+          test -z "$dirty"
+
+          echo "authoritative evidence mutations = 0"
+          echo "historical source slice mutations = 0"
+          echo "canonical/data mutations = 0"
+          echo "production/dashboard mutations = 0"
+          echo "DB/Neon = untouched"
+          echo "scope allowlist = PASS"
+
+      - name: Print compact proof artifact
+        shell: bash
+        run: |
+          echo '__PROOF_JSON_BEGIN__'
+          cat research/historical_v2_formalization_chernihiv_dnipro_proof_2026-10-02.json
+          echo '__PROOF_JSON_END__'
+
+      - name: Upload compact proof artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: historical-v2-formalization-chernihiv-dnipro-proof-2026-10-02
+          path: ${{ runner.temp }}/proof.json
+          if-no-files-found: error
+          retention-days: 30
+ || true)"
+          test -z "$dirty"
+
+          echo "authoritative evidence mutations = 0"
+          echo "historical source slice mutations = 0"
+          echo "canonical/data mutations = 0"
+          echo "production/dashboard mutations = 0"
+          echo "DB/Neon = untouched"
+          echo "scope allowlist = PASS"
+
+      - name: Print compact proof artifact
+        shell: bash
+        run: |
+          echo '__PROOF_JSON_BEGIN__'
+          cat research/historical_v2_formalization_chernihiv_dnipro_proof_2026-10-02.json
+          echo '__PROOF_JSON_END__'
+
+      - name: Upload compact proof artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: historical-v2-formalization-chernihiv-dnipro-proof-2026-10-02
+          path: ${{ runner.temp }}/proof.json
+          if-no-files-found: error
+          retention-days: 30
+ || true)"
           test -z "$unexpected"
 
           dirty="$(git status --porcelain --untracked-files=all | grep -v '^?? research/historical_v2_formalization_chernihiv_dnipro_proof_2026-10-02.json$' || true)"
