@@ -27,7 +27,7 @@ jobs:
       - name: Fetch all accessible branch refs
         run: git fetch --prune origin '+refs/heads/*:refs/remotes/origin/*'
       - name: Focused forensic tests
-        run: python -m pytest -q -p no:cacheprovider kyiv-air-alerts-grafana/tests/test_historical_source_coverage_forensic.py
+        run: cd kyiv-air-alerts-grafana/tests && python -m unittest -v test_historical_source_coverage_forensic.py
       - name: Verify tests left repository clean
         run: test -z "$(git status --porcelain)"
 
