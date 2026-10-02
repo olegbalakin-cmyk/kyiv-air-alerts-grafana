@@ -165,7 +165,7 @@ jobs:
 
                   cur.execute("""SELECT source_observation_id::text, episode_uid::text, source_key,
                                         source_start_at::text, source_end_at::text
-                                 FROM alert_episode_sources ORDER BY source_observation_uid""")
+                                 FROM alert_episode_sources ORDER BY source_observation_id""")
                   hs = hashlib.sha256()
                   for row in cur:
                       hs.update(json.dumps(row, separators=(",", ":"), ensure_ascii=False).encode())
@@ -561,7 +561,7 @@ jobs:
                   count += 1
               cur.execute("""SELECT source_observation_id::text, episode_uid::text, source_key,
                                     source_start_at::text, source_end_at::text
-                             FROM alert_episode_sources ORDER BY source_observation_uid""")
+                             FROM alert_episode_sources ORDER BY source_observation_id""")
               hs = hashlib.sha256()
               scount = 0
               for row in cur:
