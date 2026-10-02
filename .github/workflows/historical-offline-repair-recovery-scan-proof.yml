@@ -1,0 +1,33 @@
+name: Historical offline repair recovery scan proof
+
+on:
+  push:
+    branches:
+      - historical-offline-repair-recovery-scan-proof-2026-10-02
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  offline-recovery-scan:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout proof branch
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Run offline corpus scan
+        env:
+          PYTHONDONTWRITEBYTECODE: "1"
+        run: |
+          python kyiv-air-alerts-grafana/scripts/audit_historical_offline_repair_recovery.py
+
+      - name: Preserve compact proof artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: historical-offline-repair-recovery-scan-2026-10-02
+          path: research/historical_offline_repair_recovery_scan_2026-10-02.json
+          if-no-files-found: error
