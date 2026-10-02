@@ -252,7 +252,9 @@ jobs:
         run: |
           set -euo pipefail
           test "$(git rev-parse HEAD)" = "1998919036b4832fc3555b54c9854e6cfe24a696"
-          unexpected="$(git status --porcelain --untracked-files=all | grep -v '^?? research/historical_blind_freeze_chernihiv_2026-10-02.json$' || true)"
+          status="$(git status --porcelain --untracked-files=all)"
+          printf '%s\n' "$status"
+          unexpected="$(printf '%s\n' "$status" | awk '$0 != "?? research/historical_blind_freeze_chernihiv_2026-10-02.json" && $0 != ""')"
           test -z "$unexpected"
           test -f research/historical_blind_freeze_chernihiv_2026-10-02.json
           echo "authoritative data mutations = 0"
