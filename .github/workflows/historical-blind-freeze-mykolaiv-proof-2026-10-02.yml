@@ -1,0 +1,278 @@
+name: Historical blind freeze Mykolaiv proof
+
+on:
+  push:
+    branches:
+      - historical-blind-freeze-mykolaiv-proof-2026-10-02
+    paths:
+      - ".github/workflows/historical-blind-freeze-mykolaiv-proof-2026-10-02.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  freeze:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      PYTHONDONTWRITEBYTECODE: "1"
+
+    steps:
+      - name: Check out exact accepted formalization HEAD
+        uses: actions/checkout@v4
+        with:
+          ref: b09a95da6354d496eea478fc7e6871e62acb4b7d
+          fetch-depth: 0
+
+      - name: Verify exact accepted source
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "b09a95da6354d496eea478fc7e6871e62acb4b7d"
+          test "$(git status --porcelain --untracked-files=all)" = ""
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: kyiv-air-alerts-grafana/requirements.txt
+
+      - name: Install accepted local dependencies
+        working-directory: kyiv-air-alerts-grafana
+        run: pip install -r requirements.txt
+
+      - name: Freeze exactly five Mykolaiv cases
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from __future__ import annotations
+
+          import hashlib
+          import importlib.util
+          import json
+          import subprocess
+          import sys
+          from pathlib import Path
+
+          ACCEPTED_HEAD = "b09a95da6354d496eea478fc7e6871e62acb4b7d"
+          CITY = "mykolaiv"
+          CASE_START = 101
+          EXPECTED_CANONICAL = 1648
+          EXPECTED_NO_CONFIRMED = 1512
+          SEED = "20261002-23city-blind-v1"
+          EXPECTED_TARGET_STATE_SHA256 = "357cf4fc1eb761ba266d97058e23700605ef46ba23087b5fab7955883b9cdeeb"
+          OUTPUT = Path("research/historical_blind_freeze_mykolaiv_2026-10-02.json")
+
+          checkout = Path.cwd()
+          source_path = checkout / "kyiv-air-alerts-grafana" / "scripts" / "formalize_historical_v2_existing_evidence.py"
+          accepted_artifact_path = checkout / "research" / "historical_v2_formalization_mykolaiv_mykolaiv_proof_2026-10-02.json"
+
+          head = subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip()
+          if head != ACCEPTED_HEAD:
+              raise SystemExit(f"WRONG_ACCEPTED_HEAD:{head}")
+
+          accepted_artifact = json.loads(accepted_artifact_path.read_text(encoding="utf-8"))
+          accepted_city = accepted_artifact["cities"][CITY]
+          if accepted_city["counts"]["canonical_episodes"] != EXPECTED_CANONICAL:
+              raise SystemExit(
+                  f"CITY BLIND SAMPLE FREEZE BLOCKED:CANONICAL_COUNT_MISMATCH:"
+                  f"{accepted_city['counts']['canonical_episodes']}!={EXPECTED_CANONICAL}"
+              )
+          if accepted_city["counts"]["no_confirmed_event"] != EXPECTED_NO_CONFIRMED:
+              raise SystemExit(
+                  f"CITY BLIND FREEZE BLOCKED — NO_CONFIRMED COUNT MISMATCH:"
+                  f"{accepted_city['counts']['no_confirmed_event']}!={EXPECTED_NO_CONFIRMED}"
+              )
+          if accepted_city["target_state_sha256"] != EXPECTED_TARGET_STATE_SHA256:
+              raise SystemExit(
+                  "CITY BLIND SAMPLE FREEZE BLOCKED:ACCEPTED_TARGET_STATE_HASH_MISMATCH"
+              )
+
+          sys.path.insert(0, str(source_path.parent))
+          spec = importlib.util.spec_from_file_location("accepted_formalize_mykolaiv", source_path)
+          if spec is None or spec.loader is None:
+              raise RuntimeError("CANNOT_IMPORT_ACCEPTED_FORMALIZATION")
+          formalize = importlib.util.module_from_spec(spec)
+          spec.loader.exec_module(formalize)
+
+          captured: dict[str, object] = {}
+
+          def trace_formalize(frame, event, arg):
+              if event == "return" and frame.f_code is formalize.formalize_city.__code__:
+                  captured["target_rows"] = [dict(row) for row in (frame.f_locals.get("target_rows") or [])]
+                  captured["episodes"] = [dict(ep) for ep in (frame.f_locals.get("episodes") or [])]
+                  captured["candidates_by_episode"] = {
+                      str(eid): [dict(candidate) for candidate in candidates]
+                      for eid, candidates in (frame.f_locals.get("candidates_by_episode") or {}).items()
+                  }
+              return trace_formalize
+
+          with formalize.replay.network_blocked():
+              sys.settrace(trace_formalize)
+              try:
+                  summary = formalize.formalize_city(CITY, EXPECTED_CANONICAL)
+              finally:
+                  sys.settrace(None)
+
+          if summary["verdict"] != "CITY V2 FORMALIZATION PROVEN":
+              raise SystemExit(
+                  "CITY BLIND SAMPLE FREEZE BLOCKED:"
+                  + "|".join(summary.get("blockers") or ["FORMALIZATION_NOT_PROVEN"])
+              )
+          if summary["counts"]["no_confirmed_event"] != EXPECTED_NO_CONFIRMED:
+              raise SystemExit(
+                  f"CITY BLIND FREEZE BLOCKED — NO_CONFIRMED COUNT MISMATCH:"
+                  f"{summary['counts']['no_confirmed_event']}!={EXPECTED_NO_CONFIRMED}"
+              )
+          if summary["target_state_sha256"] != EXPECTED_TARGET_STATE_SHA256:
+              raise SystemExit("CITY BLIND SAMPLE FREEZE BLOCKED:TARGET_STATE_HASH_MISMATCH")
+
+          target_rows = list(captured.get("target_rows") or [])
+          episodes = list(captured.get("episodes") or [])
+          candidates_by_episode = dict(captured.get("candidates_by_episode") or {})
+          if len(target_rows) != EXPECTED_CANONICAL:
+              raise SystemExit(
+                  f"CITY BLIND SAMPLE FREEZE BLOCKED:TARGET_ROW_CAPTURE_MISMATCH:"
+                  f"{len(target_rows)}!={EXPECTED_CANONICAL}"
+              )
+          if len(episodes) != EXPECTED_CANONICAL:
+              raise SystemExit(
+                  f"CITY BLIND SAMPLE FREEZE BLOCKED:EPISODE_CAPTURE_MISMATCH:"
+                  f"{len(episodes)}!={EXPECTED_CANONICAL}"
+              )
+
+          state_by_episode = {
+              str(row["episode_id"]): str(row["state"])
+              for row in target_rows
+          }
+          eligible_before = sorted(
+              eid for eid, state in state_by_episode.items()
+              if state == "NO_CONFIRMED_EVENT"
+          )
+          if len(eligible_before) != EXPECTED_NO_CONFIRMED:
+              raise SystemExit(
+                  f"CITY BLIND FREEZE BLOCKED — NO_CONFIRMED COUNT MISMATCH:"
+                  f"{len(eligible_before)}!={EXPECTED_NO_CONFIRMED}"
+              )
+
+          prior_researched_episodes: list[str] = []
+          prior_set = set(prior_researched_episodes)
+          eligible_after = [eid for eid in eligible_before if eid not in prior_set]
+          exclusions_count = len(eligible_before) - len(eligible_after)
+
+          ranked = []
+          for episode_id in eligible_after:
+              rank = hashlib.sha256(
+                  f"{SEED}|{CITY}|{episode_id}".encode("utf-8")
+              ).hexdigest()
+              ranked.append((rank, episode_id))
+          ranked.sort(key=lambda row: (row[0], row[1]))
+          chosen = ranked[:5]
+          if len(chosen) != 5:
+              raise SystemExit("CITY BLIND SAMPLE FREEZE BLOCKED:SELECTION_COUNT")
+
+          episode_by_id = {
+              str(ep.get("episode_id") or ""): ep
+              for ep in episodes
+              if ep.get("episode_id")
+          }
+          observation_counts = {
+              str(eid): len(candidates)
+              for eid, candidates in candidates_by_episode.items()
+          }
+
+          selected_cases = []
+          for offset, (rank, episode_id) in enumerate(chosen):
+              ep = episode_by_id.get(episode_id)
+              if ep is None:
+                  raise SystemExit(f"CITY BLIND SAMPLE FREEZE BLOCKED:MISSING_EPISODE:{episode_id}")
+              alert_start = ep.get("alert_start")
+              alert_end = ep.get("alert_end")
+              if not alert_start or not alert_end:
+                  raise SystemExit(f"CITY BLIND SAMPLE FREEZE BLOCKED:MISSING_ALERT_BOUNDS:{episode_id}")
+              selected_cases.append({
+                  "case": CASE_START + offset,
+                  "city_key": CITY,
+                  "episode_id": episode_id,
+                  "alert_start": str(alert_start),
+                  "alert_end": str(alert_end),
+                  "final_outcome": state_by_episode[episode_id],
+                  "observation_count": int(observation_counts.get(episode_id, 0)),
+                  "rank": rank,
+              })
+
+          for row in selected_cases:
+              if row["final_outcome"] != "NO_CONFIRMED_EVENT":
+                  raise SystemExit("CITY BLIND SAMPLE FREEZE BLOCKED:NON_NO_CONFIRMED_SELECTION")
+
+          compact_sample = json.dumps(
+              selected_cases,
+              ensure_ascii=False,
+              separators=(",", ":"),
+              sort_keys=False,
+          ).encode("utf-8")
+          city_sample_sha256 = hashlib.sha256(compact_sample).hexdigest()
+
+          result = {
+              "schema_version": 1,
+              "verdict": "CITY BLIND SAMPLE FROZEN",
+              "city": CITY,
+              "source_accepted_head": ACCEPTED_HEAD,
+              "source_target_state_sha256": EXPECTED_TARGET_STATE_SHA256,
+              "selection_seed": SEED,
+              "eligible_count_before_exclusions": len(eligible_before),
+              "prior_researched_episodes": prior_researched_episodes,
+              "exclusions_count": exclusions_count,
+              "eligible_count_after_exclusions": len(eligible_after),
+              "selected_cases": selected_cases,
+              "CITY_SAMPLE_SHA256": city_sample_sha256,
+              "mutation_guards": {
+                  "research_performed": "NO",
+                  "public_web": "NO",
+                  "source_discovery": "NO",
+                  "db_neon": "UNTOUCHED",
+                  "deploy": "NO",
+                  "authoritative_data_mutations": 0,
+                  "reconstruction_city_scope": [CITY],
+                  "network_during_reconstruction": "BLOCKED",
+                  "accepted_checkout_head_exact": head == ACCEPTED_HEAD,
+                  "accepted_target_state_hash_exact": summary["target_state_sha256"] == EXPECTED_TARGET_STATE_SHA256,
+              },
+          }
+
+          OUTPUT.parent.mkdir(parents=True, exist_ok=True)
+          OUTPUT.write_text(
+              json.dumps(result, ensure_ascii=False, indent=2, sort_keys=False) + "\n",
+              encoding="utf-8",
+          )
+
+          print("__FREEZE_JSON_BEGIN__")
+          print(OUTPUT.read_text(encoding="utf-8"), end="")
+          print("__FREEZE_JSON_END__")
+          PY
+
+      - name: Verify read-only mutation guard
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "b09a95da6354d496eea478fc7e6871e62acb4b7d"
+          status="$(git status --porcelain --untracked-files=all)"
+          printf '%s\n' "$status"
+          unexpected="$(printf '%s\n' "$status" | awk '$0 != "?? research/historical_blind_freeze_mykolaiv_2026-10-02.json" && $0 != ""')"
+          test -z "$unexpected"
+          test -f research/historical_blind_freeze_mykolaiv_2026-10-02.json
+          echo "authoritative data mutations = 0"
+          echo "DB/Neon = untouched"
+          echo "deploy = no"
+          echo "public web = no"
+          echo "source discovery = no"
+
+      - name: Upload compact freeze artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: historical-blind-freeze-mykolaiv-2026-10-02
+          path: research/historical_blind_freeze_mykolaiv_2026-10-02.json
+          if-no-files-found: error
+          retention-days: 30
