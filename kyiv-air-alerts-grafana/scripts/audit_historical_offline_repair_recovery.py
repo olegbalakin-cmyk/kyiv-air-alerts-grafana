@@ -359,6 +359,37 @@ def main() -> int:
                 if h==EXPECTED_ORIGINAL_HASH:
                     ordering_hash_matches.append({"ordering":"episode_results_lexical","variant":name,"sort_keys":sort_keys,"compact":compact})
 
+
+    # Test the accepted sample-freeze target record schema over the full universe.
+    er_by_key = {}
+    for er in episode_rows_all:
+        er_by_key[(str(er.get("city") or ""), str(er.get("episode_id") or ""))] = er
+    sample_schema_hashes = {}
+    sample_schema_matches = []
+    for ordering_name, ordered in orderings.items():
+        rows=[]
+        for cty,eid,sp in ordered:
+            spd=sp if isinstance(sp,dict) else {"state":sp}
+            er=er_by_key.get((cty,eid)) or {}
+            rows.append({
+                "city_key":cty,
+                "episode_id":eid,
+                "alert_start":er.get("alert_start"),
+                "alert_end":er.get("alert_end"),
+                "original_batch":spd.get("batch"),
+                "original_observation_count":spd.get("observation_count"),
+                "final_outcome":spd.get("state"),
+            })
+        for sort_keys in (True,False):
+            for compact in (True,False):
+                raw=json.dumps(rows,ensure_ascii=False,sort_keys=sort_keys,**({"separators":(",",":")} if compact else {}))
+                for nl in ("","\n"):
+                    key=f"{ordering_name}|sort={sort_keys}|compact={compact}|nl={bool(nl)}"
+                    h=sha256_bytes((raw+nl).encode("utf-8"))
+                    sample_schema_hashes[key]=h
+                    if h==EXPECTED_ORIGINAL_HASH:
+                        sample_schema_matches.append(key)
+
     control_obs = {}
     case18_obs = []
     classifier_results = collections.Counter()
@@ -418,6 +449,8 @@ def main() -> int:
         "ordering_hash_matches": ordering_hash_matches,
         "episode_result_hash_variants": episode_result_hash_variants,
         "frozen_city_order": frozen_city_order,
+        "sample_schema_hashes": sample_schema_hashes,
+        "sample_schema_matches": sample_schema_matches,
         "classifier_result_counts": dict(classifier_results),
         "observation_count_direct": obs_count,
         "control_records": control_obs,
