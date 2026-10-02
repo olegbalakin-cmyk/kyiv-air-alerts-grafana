@@ -582,7 +582,7 @@ def main() -> int:
                 }
 
         for city, expected in CITY_SPECS.items():
-            if results[city].get("blocker", "").startswith("UNHANDLED_EXCEPTION"):
+            if str(results[city].get("blocker") or "").startswith("UNHANDLED_EXCEPTION"):
                 repeat_results[city] = results[city]
                 continue
             repeat_results[city] = formalize_city(city, expected)
