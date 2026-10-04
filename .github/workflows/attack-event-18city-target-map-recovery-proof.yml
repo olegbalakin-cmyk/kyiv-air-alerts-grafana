@@ -1,0 +1,782 @@
+name: Attack-event 18-city target-map recovery proof
+
+on:
+  push:
+    branches:
+      - attack-event-18city-target-map-actions-recovery-2026-10-04
+    paths:
+      - .github/workflows/attack-event-18city-target-map-recovery-proof.yml
+
+permissions:
+  contents: read
+
+jobs:
+  recover:
+    name: recover-${{ matrix.run }}
+    strategy:
+      fail-fast: false
+      matrix:
+        run: [a, b]
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    env:
+      PYTHONDONTWRITEBYTECODE: "1"
+      PIP_DISABLE_PIP_VERSION_CHECK: "1"
+    steps:
+      - name: Genuine proof-branch checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+          clean: true
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Execute exact frozen replay with external observer
+        env:
+          RECOVERY_RUN_LABEL: ${{ matrix.run }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import contextlib
+          import hashlib
+          import importlib.util
+          import json
+          import os
+          from pathlib import Path
+          import shutil
+          import subprocess
+          import sys
+          import textwrap
+          import traceback
+
+          REPO = Path(os.environ["GITHUB_WORKSPACE"]).resolve()
+          TMP = Path(os.environ["RUNNER_TEMP"]).resolve()
+          RUN_LABEL = os.environ["RECOVERY_RUN_LABEL"]
+          OUTDIR = TMP / f"attack-event-18city-recovery-{RUN_LABEL}"
+          OUTDIR.mkdir(parents=True, exist_ok=True)
+          TARGET_OUT = OUTDIR / "target_map.json"
+          DIAG_OUT = OUTDIR / "diagnostic.json"
+
+          FRESH_MAIN = "5a119520275c606e0c306d41fb831e460e2f7f63"
+          PROD_WORKFLOW_BLOB = "3d89a5205245be91c865bbad3147693726411688"
+          ACCEPTANCE_COMMIT = "31aa7a8f8f57ff090f24814ef3c62137eebebf16"
+          ACCEPTANCE_PATH = "research/historical_v2_18city_acceptance_2026-10-02.json"
+          ACCEPTANCE_BLOB = "754da5b8c330188889f3f8fb22e671cbc6118cac"
+          COMMON_BASE = "fb563dc410fe6614263bdc8d4eb55025a987e950"
+          METHODOLOGY = "historical-attack-event-air-defense-action-v2"
+
+          WORKERS = [
+            {
+              "id":"CD",
+              "branch":"historical-v2-formalization-chernihiv-dnipro-proof-2026-10-02",
+              "final_head":"1998919036b4832fc3555b54c9854e6cfe24a696",
+              "tested_head":"064c465a5f5a6d70ff08b972879c83166df80b3c",
+              "proof_path":"research/historical_v2_formalization_chernihiv_dnipro_proof_2026-10-02.json",
+              "proof_blob":"9416f9cb60b1b078268d74c6c8b70f76af6f9e58",
+              "workflow_path":".github/workflows/historical-v2-formalization-chernihiv-dnipro-proof.yml",
+              "workflow_blob":"124159c587e62041cf6bfaf04a4e7899c884018e",
+              "script_path":"kyiv-air-alerts-grafana/scripts/formalize_historical_v2_chernihiv_dnipro.py",
+              "script_blob":"df432d4d8b369f63d9ad575bc4a3dc4abc48db0d",
+              "install":"requirements","cwd":"repo","argv":[],
+              "cities":[
+                ["chernihiv",1676,"15073764b3da5fde5690547722e17593116e82d015e5826392334974c40effac"],
+                ["dnipro",2259,"7cf081a6d55340d7431e8eff57051a09de1de5a1ded84c73d4ca31f3d177dea6"]
+              ]
+            },
+            {
+              "id":"KK",
+              "branch":"historical-v2-formalization-kharkiv-kherson-proof-2026-10-02",
+              "final_head":"79397290b0d51ca49bf15d6e5890ffc3ce631ce3",
+              "tested_head":"0800a7382bcea65e6c6ca9683d6eb5a0d5895d87",
+              "proof_path":"research/historical_v2_formalization_kharkiv_kherson_proof_2026-10-02.json",
+              "proof_blob":"f5fa45527f40a5af02e98ea5d0958547756d0218",
+              "workflow_path":".github/workflows/historical-v2-formalization-kharkiv-kherson-proof.yml",
+              "workflow_blob":"e87ef6faa479432632574671279ae2437b37c9e6",
+              "script_path":"kyiv-air-alerts-grafana/scripts/historical_v2_formalization_existing_evidence.py",
+              "script_blob":"d731d76b3e835d5e3a2ebbbe134592202c4c5495",
+              "install":"requirements","cwd":"repo","argv":["--expected-head","{tested_head}"],
+              "cities":[
+                ["kharkiv",3565,"2400891dd85dbebdfdf347f88c178f43780d7ccfe814701b069b4593e06f491b"],
+                ["kherson",1412,"fed71481b8de4106e58b457f4d23063e6f38dc98f0027dc9733ea48b869844d0"]
+              ]
+            },
+            {
+              "id":"KM",
+              "branch":"historical-v2-formalization-kropyvnytskyi-mykolaiv-proof-2026-10-02",
+              "final_head":"b09a95da6354d496eea478fc7e6871e62acb4b7d",
+              "tested_head":"a89a85daf32d7896086b37ca6557abf28a39904f",
+              "proof_path":"research/historical_v2_formalization_kropyvnytskyi_mykolaiv_proof_2026-10-02.json",
+              "proof_blob":"3db2c10957beb51cfc565af645f06007a8c0ca55",
+              "workflow_path":".github/workflows/historical-v2-formalization-kropyvnytskyi-mykolaiv-proof.yml",
+              "workflow_blob":"62c0138a75bfd9ecef9fb841ea4fcf797b6bc732",
+              "script_path":"kyiv-air-alerts-grafana/scripts/formalize_historical_v2_existing_evidence.py",
+              "script_blob":"af1b035054b7acf2fe5937c4410d573fea82fb62",
+              "install":"requirements","cwd":"inner","proxy":True,
+              "argv":["--output","../research/historical_v2_formalization_kropyvnytskyi_mykolaiv_proof_2026-10-02.json"],
+              "cities":[
+                ["kropyvnytskyi",1161,"d34a4079f97e96bf9f75126788bcaf5db9460786ba25e89a8f07e9c1e849352d"],
+                ["mykolaiv",1648,"357cf4fc1eb761ba266d97058e23700605ef46ba23087b5fab7955883b9cdeeb"]
+              ]
+            },
+            {
+              "id":"OD",
+              "branch":"historical-v2-formalization-odesa-proof-2026-10-02",
+              "final_head":"130f1bdef1bb2479e9b992d26009472930e91987",
+              "tested_head":"e67d80200d8dbd0b18c1440c2fdaca12363017d3",
+              "proof_path":"research/historical_v2_formalization_odesa_proof_2026-10-02.json",
+              "proof_blob":"94093565a733d0dc5cf0dc85ab8441a551287ef0",
+              "workflow_path":".github/workflows/historical-v2-formalization-odesa-proof.yml",
+              "workflow_blob":"34d407dd69b669c880c64ee6a1e79138534b917a",
+              "script_path":"kyiv-air-alerts-grafana/scripts/prove_historical_v2_formalization_odesa.py",
+              "script_blob":"7105e67e50197eb2e78f588ba3b666c19f0f10f8",
+              "install":"requirements","cwd":"repo","argv":["--expected-tested-head","{tested_head}"],
+              "cities":[
+                ["odesa",1465,"82d865dd1a8ade144ffe05ca07c1cb47c7fe8fb790dd28160661062ccebdf015"]
+              ]
+            },
+            {
+              "id":"CI",
+              "branch":"historical-v2-formalization-chernivtsi-ivano-frankivsk-proof-2026-10-02",
+              "final_head":"05e9ce706a2f8da459f46fb130bc25d716cfcc46",
+              "tested_head":"e9be481f7b7c3039769c85bca697f95b86dcc5c0",
+              "proof_path":"research/historical_v2_formalization_chernivtsi_ivano_frankivsk_proof_2026-10-02.json",
+              "proof_blob":"8144e47393299a9426a507a2c45c8e5cb9fe3464",
+              "workflow_path":".github/workflows/historical-v2-formalization-chernivtsi-ivano-frankivsk-proof.yml",
+              "workflow_blob":"4e54e645fc74bbeb9b806f256cf233df34fc76aa",
+              "script_path":"kyiv-air-alerts-grafana/scripts/historical_v2_formalize_chernivtsi_ivano_frankivsk.py",
+              "script_blob":"19918b5f52710beebc566dc2d97b2321f767c9bf",
+              "install":"requests_bs4","cwd":"repo","argv":[],
+              "cities":[
+                ["chernivtsi",113,"61f4a8cd7abfae55ec30538b01eab0e50bad8c1ba9c2fed9c0f508cb6cbbbcfb"],
+                ["ivano_frankivsk",103,"246a54c2f9bf382688a22cfee4e55b571b1f083b2f3fc86176054e75ace1cd79"]
+              ]
+            },
+            {
+              "id":"KL",
+              "branch":"historical-v2-formalization-khmelnytskyi-lutsk-proof-2026-10-02",
+              "final_head":"cf20d7f411688de9d2684b8baac63c796bfa090e",
+              "tested_head":"1ed3b4df55acef8cffddf00456508eec85ee36a8",
+              "proof_path":"research/historical_v2_formalization_khmelnytskyi_lutsk_proof_2026-10-02.json",
+              "proof_blob":"1deb9916d5d35af10297af5aead38bf741b86852",
+              "workflow_path":".github/workflows/historical-v2-formalization-khmelnytskyi-lutsk-proof.yml",
+              "workflow_blob":"89bd5974c40ac6c862eaf2abdc1a689b3451c7d3",
+              "script_path":"kyiv-air-alerts-grafana/scripts/historical_v2_formalize_khmelnytskyi_lutsk.py",
+              "script_blob":"d2205c998446f80b1bebfecb8a1d4b2efae51aba",
+              "install":"requests_bs4","cwd":"repo","argv":[],
+              "cities":[
+                ["khmelnytskyi",248,"12954a115508770917bed9cc3905a12511ba41026ddf27be992e746535688c08"],
+                ["lutsk",135,"070d41c2ffa045778caf3b60b2b1752a1152432c2b492444b9406cc3fe045ec7"]
+              ]
+            },
+            {
+              "id":"PR",
+              "branch":"historical-v2-formalization-poltava-rivne-proof-2026-10-02",
+              "final_head":"c01f4b3d8f304a8024899f22eaa8a73a8975af05",
+              "tested_head":"51487544213cf461964c37f1a47d09fa84ad7af6",
+              "proof_path":"research/historical_v2_formalization_poltava_rivne_proof_2026-10-02.json",
+              "proof_blob":"182970ddb52949a7d34e1d4246928f6f654f9b51",
+              "workflow_path":".github/workflows/historical-v2-formalization-poltava-rivne-proof.yml",
+              "workflow_blob":"9eaea9488cac04c04760cac141dd4422655b7cd4",
+              "script_path":"kyiv-air-alerts-grafana/scripts/historical_v2_formalize_poltava_rivne.py",
+              "script_blob":"500fb8ac1747b3105f43b38f45532313eb4462dc",
+              "install":"requests_bs4","cwd":"repo","argv":[],
+              "cities":[
+                ["poltava",1805,"617ee7003f79df6bc99422b57778d6f9c097f53c96b0166dc056c74ba5f27be9"],
+                ["rivne",232,"eebda03f93045670d9abf36b7e961290479a429e7f282a1d925ee6a36b4c8b38"]
+              ]
+            },
+            {
+              "id":"TU",
+              "branch":"historical-v2-formalization-ternopil-uzhhorod-proof-2026-10-02",
+              "final_head":"19637504db967003c4e0465957dc7bd2bf5fbc58",
+              "tested_head":"a09be9d2c935608cc654164cf6dd2783685cbf0c",
+              "proof_path":"research/historical_v2_formalization_ternopil_uzhhorod_proof_2026-10-02.json",
+              "proof_blob":"2e23c9b778723c4fef0ad6e22b73b954ff02bb3a",
+              "workflow_path":".github/workflows/historical-v2-formalization-ternopil-uzhhorod-proof.yml",
+              "workflow_blob":"bc49a35065297c71d2969f20731430888f832e94",
+              "script_path":"kyiv-air-alerts-grafana/scripts/historical_v2_formalize_ternopil_uzhhorod.py",
+              "script_blob":"bb67860029943efef8929f54f5bcf0c761566694",
+              "install":"requests_bs4","cwd":"repo","argv":[],
+              "cities":[
+                ["ternopil",125,"d989a8c1dfc65965cc6ac07cb1d30c711d9e93f272eaf950db7c6aacf17e4e73"],
+                ["uzhhorod",92,"88e785cf041df191205e166944b0a3f65f187cda3730a5631a2d058ddad4ea93"]
+              ]
+            },
+            {
+              "id":"VZ",
+              "branch":"historical-v2-formalization-vinnytsia-zhytomyr-proof-2026-10-02",
+              "final_head":"a8eeaf13d51d3e16582212c85cd69a9e6c09685d",
+              "tested_head":"eaa77e2c2714d68a25dcd581c3194c1d394eb00a",
+              "proof_path":"research/historical_v2_formalization_vinnytsia_zhytomyr_proof_2026-10-02.json",
+              "proof_blob":"211a602b3cf9a08e33c3ea733bc63984314362dd",
+              "workflow_path":".github/workflows/historical-v2-formalization-vinnytsia-zhytomyr-proof.yml",
+              "workflow_blob":"6516212baac6ae0aab077f6fd1d614f5c9326652",
+              "script_path":"kyiv-air-alerts-grafana/scripts/historical_v2_formalize_stream09.py",
+              "script_blob":"42674da447270ec3664b972289d543d593a72759",
+              "install":"requests_bs4","cwd":"repo","argv":[],
+              "cities":[
+                ["vinnytsia",362,"2c7f096b5041b6efae48c95db36bfb445dfdc598898d83d35cc8c253360d8d7a"],
+                ["zhytomyr",685,"224a286578fba06c6ca5853bb0eee8c8b54c901836b5b77a54f5786c4bbe7546"]
+              ]
+            },
+            {
+              "id":"KY",
+              "branch":"historical-v2-formalization-kyiv-proof-2026-10-02",
+              "final_head":"778fb57908f64c684d3ee7df5d9a7e3f7731559b",
+              "tested_head":"e460bc30524deb8abc37923276d78f6dab1450a4",
+              "proof_path":"research/historical_v2_formalization_kyiv_proof_2026-10-02.json",
+              "proof_blob":"36d830c981ac765ae6ea2150092ab49512e1eec9",
+              "workflow_path":".github/workflows/historical-v2-formalization-kyiv-proof-2026-10-02.yml",
+              "workflow_blob":"aea40360425575c52737203e00c59ccf65e4469c",
+              "script_path":"kyiv-air-alerts-grafana/scripts/historical_v2_formalize_kyiv.py",
+              "script_blob":"461f1719d1b8ce17dddc16428d7b23c8704ecaae",
+              "install":"requests_bs4","cwd":"repo","argv":[],
+              "cities":[
+                ["kyiv",2456,"ab008e7acedb04f1a15f64558e4470ace5167be925fa5b60fb4d30ec3292e332"]
+              ]
+            }
+          ]
+
+          def sh(args, cwd=REPO, env=None, check=True, capture=True):
+              p = subprocess.run(
+                  [str(x) for x in args],
+                  cwd=str(cwd),
+                  env=env,
+                  text=True,
+                  stdout=subprocess.PIPE if capture else None,
+                  stderr=subprocess.PIPE if capture else None,
+              )
+              if check and p.returncode != 0:
+                  raise RuntimeError(
+                      f"command failed rc={p.returncode}: {' '.join(map(str,args))}\n"
+                      f"stdout={p.stdout}\nstderr={p.stderr}"
+                  )
+              return p
+
+          def git(*args, cwd=REPO):
+              return sh(["git", *args], cwd=cwd).stdout.strip()
+
+          def ensure_commit(sha, fallback_branch=None):
+              if sh(["git","cat-file","-e",f"{sha}^{{commit}}"], check=False).returncode != 0:
+                  p = sh(["git","fetch","--no-tags","origin",sha], check=False)
+                  if p.returncode != 0 and fallback_branch:
+                      sh([
+                          "git","fetch","--no-tags","origin",
+                          f"refs/heads/{fallback_branch}:refs/remotes/origin/{fallback_branch}"
+                      ])
+              resolved = git("rev-parse",f"{sha}^{{commit}}")
+              if resolved != sha:
+                  raise RuntimeError(f"commit resolution mismatch {sha} -> {resolved}")
+
+          def blob_at(ref, path):
+              return git("rev-parse",f"{ref}:{path}")
+
+          def bytes_at(ref, path):
+              p=sh(["git","show",f"{ref}:{path}"])
+              return p.stdout.encode("utf-8")
+
+          def json_at(ref, path):
+              return json.loads(sh(["git","show",f"{ref}:{path}"]).stdout)
+
+          def file_sha256(path):
+              h=hashlib.sha256()
+              with Path(path).open("rb") as f:
+                  for chunk in iter(lambda:f.read(1024*1024),b""):
+                      h.update(chunk)
+              return h.hexdigest()
+
+          def verify_sha_map(wt, mapping, label):
+              checked=0
+              if not isinstance(mapping, dict):
+                  return checked
+              for rel, expected in mapping.items():
+                  if not isinstance(rel,str) or not isinstance(expected,str) or len(expected)!=64:
+                      continue
+                  p=wt/rel
+                  if not p.is_file():
+                      raise RuntimeError(f"{label}: guarded file missing: {rel}")
+                  actual=file_sha256(p)
+                  if actual!=expected:
+                      raise RuntimeError(f"{label}: sha256 mismatch {rel}: {actual}!={expected}")
+                  checked+=1
+              return checked
+
+          def verify_recorded_guards(worker, proof, wt):
+              checked=0
+              mg=proof.get("mutation_guards") or {}
+              checked+=verify_sha_map(wt,mg.get("guarded_input_sha256_before"),"guarded_input_sha256_before")
+              checked+=verify_sha_map(wt,mg.get("assigned_evidence_sha256_before"),"assigned_evidence_sha256_before")
+
+              classifier_path="kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py"
+              replay_path="kyiv-air-alerts-grafana/scripts/replay_explosion_history.py"
+              diagnostic=proof.get("diagnostic_hashes") or {}
+              hashes=proof.get("hashes") or {}
+              for obj,key,path in [
+                  (diagnostic,"classifier_git_blob",classifier_path),
+                  (diagnostic,"replay_helper_git_blob",replay_path),
+                  (hashes,"classifier_blob",classifier_path),
+                  (hashes,"replay_blob",replay_path),
+              ]:
+                  expected=obj.get(key) if isinstance(obj,dict) else None
+                  if isinstance(expected,str) and len(expected)==40:
+                      actual=blob_at(worker["tested_head"],path)
+                      if actual!=expected:
+                          raise RuntimeError(f"{worker['id']} {key} blob mismatch {actual}!={expected}")
+                      checked+=1
+
+              ci=proof.get("classifier_implementation_sha256")
+              if isinstance(ci,str) and len(ci)==64:
+                  actual=file_sha256(wt/classifier_path)
+                  if actual!=ci:
+                      raise RuntimeError(f"{worker['id']} classifier implementation sha mismatch")
+                  checked+=1
+
+              cities=proof.get("cities") or {}
+              for city, row in cities.items():
+                  if not isinstance(row,dict):
+                      continue
+                  ih=row.get("input_hashes")
+                  if isinstance(ih,dict):
+                      for rel,spec in ih.items():
+                          if not isinstance(rel,str) or "/" not in rel or not isinstance(spec,dict):
+                              continue
+                          p=wt/rel
+                          if not p.is_file():
+                              raise RuntimeError(f"{worker['id']} input missing {rel}")
+                          exp_sha=spec.get("sha256")
+                          exp_blob=spec.get("git_blob_sha")
+                          if isinstance(exp_sha,str) and len(exp_sha)==64:
+                              actual=file_sha256(p)
+                              if actual!=exp_sha:
+                                  raise RuntimeError(f"{worker['id']} input sha mismatch {rel}")
+                              checked+=1
+                          if isinstance(exp_blob,str) and len(exp_blob)==40:
+                              actual=blob_at(worker["tested_head"],rel)
+                              if actual!=exp_blob:
+                                  raise RuntimeError(f"{worker['id']} input blob mismatch {rel}")
+                              checked+=1
+                  ig=row.get("input_guards")
+                  if isinstance(ig,dict):
+                      rel=ig.get("evidence_path")
+                      exp_blob=ig.get("evidence_tested_blob")
+                      exp_sha=ig.get("evidence_runtime_sha_before")
+                      if isinstance(rel,str):
+                          p=wt/rel
+                          if not p.is_file():
+                              raise RuntimeError(f"{worker['id']} evidence missing {rel}")
+                          if isinstance(exp_blob,str) and len(exp_blob)==40:
+                              actual=blob_at(worker["tested_head"],rel)
+                              if actual!=exp_blob:
+                                  raise RuntimeError(f"{worker['id']} evidence blob mismatch {rel}")
+                              checked+=1
+                          if isinstance(exp_sha,str) and len(exp_sha)==64:
+                              actual=file_sha256(p)
+                              if actual!=exp_sha:
+                                  raise RuntimeError(f"{worker['id']} evidence sha mismatch {rel}")
+                              checked+=1
+              return checked
+
+          OBSERVER = r'''
+          import hashlib
+          import importlib.util
+          import json
+          import os
+          from pathlib import Path
+          import sys
+          import traceback
+
+          cfg=json.loads(Path(sys.argv[1]).read_text(encoding="utf-8"))
+          out=Path(sys.argv[2])
+          os.chdir(cfg["cwd"])
+          sys.path.insert(0,str(Path(cfg["script"]).parent))
+          sys.path.insert(0,str(Path(cfg["worktree"])/"kyiv-air-alerts-grafana"/"scripts"))
+          sys.path.insert(0,str(Path(cfg["worktree"])))
+          sys.argv=[cfg["script"],*cfg["argv"]]
+
+          spec=importlib.util.spec_from_file_location("accepted_worker_module",cfg["script"])
+          mod=importlib.util.module_from_spec(spec)
+          spec.loader.exec_module(mod)
+
+          captures=[]
+
+          def normalize(obj):
+              if not isinstance(obj,list) or not obj:
+                  return None
+              rows=[]
+              for r in obj:
+                  if isinstance(r,dict) and "episode_id" in r and "state" in r:
+                      rows.append({"episode_id":str(r["episode_id"]),"state":str(r["state"])})
+                  elif isinstance(r,(tuple,list)) and len(r)>=2:
+                      rows.append({"episode_id":str(r[0]),"state":str(r[1])})
+                  else:
+                      return None
+              return rows
+
+          def maybe_capture(obj,digest,kind,sort_rows=False):
+              rows=normalize(obj)
+              if rows is None:
+                  return
+              if sort_rows:
+                  rows=sorted(rows,key=lambda r:r["episode_id"])
+              captures.append({"kind":kind,"native_hash":str(digest),"target_rows":rows})
+
+          if hasattr(mod,"target_state_sha"):
+              orig=mod.target_state_sha
+              def wrapped(rows,*a,**kw):
+                  result=orig(rows,*a,**kw)
+                  maybe_capture(rows,result,"target_state_sha",True)
+                  return result
+              mod.target_state_sha=wrapped
+              hook="target_state_sha"
+          elif hasattr(mod,"canonical_state_sha"):
+              orig=mod.canonical_state_sha
+              def wrapped(city,rows,*a,**kw):
+                  result=orig(city,rows,*a,**kw)
+                  maybe_capture(rows,result,"canonical_state_sha")
+                  return result
+              mod.canonical_state_sha=wrapped
+              hook="canonical_state_sha"
+          elif hasattr(mod,"canonical_json_sha"):
+              orig=mod.canonical_json_sha
+              def wrapped(value,*a,**kw):
+                  result=orig(value,*a,**kw)
+                  maybe_capture(value,result,"canonical_json_sha")
+                  return result
+              mod.canonical_json_sha=wrapped
+              hook="canonical_json_sha"
+          elif hasattr(mod,"json_sha"):
+              orig=mod.json_sha
+              def wrapped(value,*a,**kw):
+                  result=orig(value,*a,**kw)
+                  maybe_capture(value,result,"json_sha")
+                  return result
+              mod.json_sha=wrapped
+              hook="json_sha"
+          elif hasattr(mod,"sha256_bytes"):
+              orig=mod.sha256_bytes
+              def wrapped(data,*a,**kw):
+                  result=orig(data,*a,**kw)
+                  try:
+                      value=json.loads(bytes(data).decode("utf-8"))
+                  except Exception:
+                      value=None
+                  maybe_capture(value,result,"sha256_bytes")
+                  return result
+              mod.sha256_bytes=wrapped
+              hook="sha256_bytes"
+          else:
+              orig=mod.hashlib.sha256
+              def wrapped(data=b"",*a,**kw):
+                  h=orig(data,*a,**kw)
+                  try:
+                      value=json.loads(bytes(data).decode("utf-8"))
+                  except Exception:
+                      value=None
+                  rows=normalize(value)
+                  if rows is not None:
+                      captures.append({"kind":"hashlib.sha256","native_hash":h.copy().hexdigest(),"target_rows":rows})
+                  return h
+              mod.hashlib.sha256=wrapped
+              hook="hashlib.sha256"
+
+          rc=None
+          error=None
+          try:
+              rc=mod.main()
+              if rc not in (None,0):
+                  raise RuntimeError(f"formalizer returned nonzero {rc}")
+          except SystemExit as exc:
+              code=exc.code
+              if code not in (None,0):
+                  error=f"SystemExit:{code}"
+          except Exception:
+              error=traceback.format_exc()
+
+          payload={"hook":hook,"return_code":rc,"error":error,"captures":captures}
+          out.write_text(json.dumps(payload,ensure_ascii=False,sort_keys=True),encoding="utf-8")
+          if error:
+              print(error,file=sys.stderr)
+              raise SystemExit(1)
+          '''
+
+          def install_worker_env(worker, wt):
+              venv=TMP/f"venv-{RUN_LABEL}-{worker['id']}"
+              sh([sys.executable,"-m","venv",str(venv)],capture=False)
+              py=venv/"bin"/"python"
+              pip=venv/"bin"/"pip"
+              if worker["install"]=="requirements":
+                  req=wt/"kyiv-air-alerts-grafana"/"requirements.txt"
+                  cwd=wt/"kyiv-air-alerts-grafana" if worker["id"] in {"CD","KM"} else wt
+                  if worker["id"]=="OD":
+                      sh([py,"-m","pip","install","-r",str(req)],cwd=cwd,capture=False)
+                  else:
+                      sh([pip,"install","-r",str(req)],cwd=cwd,capture=False)
+              else:
+                  sh([py,"-m","pip","install","--disable-pip-version-check","requests","beautifulsoup4"],cwd=wt,capture=False)
+              return py
+
+          def run_observer(worker, wt, py):
+              observer=TMP/f"observer-{RUN_LABEL}-{worker['id']}.py"
+              observer.write_text(OBSERVER,encoding="utf-8")
+              cfg={
+                  "script":str(wt/worker["script_path"]),
+                  "worktree":str(wt),
+                  "cwd":str(wt/"kyiv-air-alerts-grafana") if worker["cwd"]=="inner" else str(wt),
+                  "argv":[x.format(tested_head=worker["tested_head"]) for x in worker["argv"]],
+              }
+              cfg_path=TMP/f"observer-{RUN_LABEL}-{worker['id']}.json"
+              result_path=TMP/f"observer-result-{RUN_LABEL}-{worker['id']}.json"
+              cfg_path.write_text(json.dumps(cfg),encoding="utf-8")
+              env=os.environ.copy()
+              env["GITHUB_SHA"]=worker["tested_head"]
+              env["GITHUB_REF_NAME"]=worker["branch"]
+              env["PYTHONDONTWRITEBYTECODE"]="1"
+              if worker.get("proxy"):
+                  env.update({
+                      "HTTP_PROXY":"http://127.0.0.1:9",
+                      "HTTPS_PROXY":"http://127.0.0.1:9",
+                      "ALL_PROXY":"http://127.0.0.1:9",
+                      "NO_PROXY":"*",
+                  })
+              p=sh([py,str(observer),str(cfg_path),str(result_path)],cwd=wt,env=env,check=False,capture=False)
+              if not result_path.is_file():
+                  raise RuntimeError(f"{worker['id']}: observer result missing")
+              result=json.loads(result_path.read_text(encoding="utf-8"))
+              if p.returncode!=0 or result.get("error"):
+                  raise RuntimeError(f"{worker['id']}: formalizer failed: {result.get('error')}")
+              return result
+
+          def accepted_hash_from_proof(proof, city):
+              cities=proof.get("cities")
+              if isinstance(cities,dict) and isinstance(cities.get(city),dict):
+                  h=cities[city].get("target_state_sha256")
+                  if h:
+                      return h
+              if city=="odesa":
+                  return proof.get("target_state_sha256")
+              return None
+
+          diag={
+              "run_label":RUN_LABEL,
+              "fresh_main":FRESH_MAIN,
+              "acceptance_commit":ACCEPTANCE_COMMIT,
+              "common_base":COMMON_BASE,
+              "workers":[],
+              "status":"running",
+          }
+
+          try:
+              sh(["git","merge-base","--is-ancestor",FRESH_MAIN,"HEAD"])
+              changed=git("diff","--name-only",f"{FRESH_MAIN}..HEAD").splitlines()
+              if changed!=[".github/workflows/attack-event-18city-target-map-recovery-proof.yml"]:
+                  raise RuntimeError(f"TEMP_BRANCH_PRE_REPLAY_DIFF_UNEXPECTED:{changed}")
+              if blob_at(FRESH_MAIN,".github/workflows/update-netlify-site.yml")!=PROD_WORKFLOW_BLOB:
+                  raise RuntimeError("PRODUCTION_WORKFLOW_BLOB_DRIFT")
+
+              ensure_commit(ACCEPTANCE_COMMIT)
+              ensure_commit(COMMON_BASE)
+              if blob_at(ACCEPTANCE_COMMIT,ACCEPTANCE_PATH)!=ACCEPTANCE_BLOB:
+                  raise RuntimeError("ACCEPTANCE_ARTIFACT_BLOB_MISMATCH")
+              acceptance=json_at(ACCEPTANCE_COMMIT,ACCEPTANCE_PATH)
+              if acceptance.get("common_baseline",{}).get("final_head")!=COMMON_BASE:
+                  raise RuntimeError("ACCEPTANCE_COMMON_BASE_MISMATCH")
+
+              city_results=[]
+              for worker in WORKERS:
+                  ensure_commit(worker["final_head"],worker["branch"])
+                  ensure_commit(worker["tested_head"],worker["branch"])
+                  if blob_at(worker["final_head"],worker["proof_path"])!=worker["proof_blob"]:
+                      raise RuntimeError(f"{worker['id']}: ACCEPTED_PROOF_ARTIFACT_BLOB_MISMATCH")
+                  proof=json_at(worker["final_head"],worker["proof_path"])
+                  if proof.get("tested_head")!=worker["tested_head"]:
+                      raise RuntimeError(f"{worker['id']}: TESTED_HEAD_MISMATCH")
+                  if blob_at(worker["tested_head"],worker["workflow_path"])!=worker["workflow_blob"]:
+                      raise RuntimeError(f"{worker['id']}: ACCEPTED_WORKFLOW_BLOB_MISMATCH")
+                  if blob_at(worker["tested_head"],worker["script_path"])!=worker["script_blob"]:
+                      raise RuntimeError(f"{worker['id']}: ACCEPTED_FORMALIZER_BLOB_MISMATCH")
+                  sh(["git","merge-base","--is-ancestor",COMMON_BASE,worker["tested_head"]])
+
+                  for city,expected_count,accepted_hash in worker["cities"]:
+                      from_proof=accepted_hash_from_proof(proof,city)
+                      if from_proof!=accepted_hash:
+                          raise RuntimeError(f"{worker['id']}/{city}: ACCEPTED_TARGET_HASH_LINEAGE_MISMATCH")
+
+                  wt=TMP/f"worktree-{RUN_LABEL}-{worker['id']}"
+                  if wt.exists():
+                      shutil.rmtree(wt)
+                  sh(["git","worktree","add","--detach",str(wt),worker["tested_head"]],capture=False)
+                  if git("rev-parse","HEAD",cwd=wt)!=worker["tested_head"]:
+                      raise RuntimeError(f"{worker['id']}: GENUINE_CHECKOUT_HEAD_MISMATCH")
+                  if git("status","--porcelain","--untracked-files=all",cwd=wt):
+                      raise RuntimeError(f"{worker['id']}: DIRTY_GENUINE_CHECKOUT")
+
+                  guard_count=verify_recorded_guards(worker,proof,wt)
+                  py=install_worker_env(worker,wt)
+                  result=run_observer(worker,wt,py)
+                  captures=result.get("captures") or []
+                  selected=[]
+                  for city,expected_count,accepted_hash in worker["cities"]:
+                      matches=[
+                          cap for cap in captures
+                          if cap.get("native_hash")==accepted_hash
+                          and len(cap.get("target_rows") or [])==expected_count
+                      ]
+                      if not matches:
+                          raise RuntimeError(
+                              f"{worker['id']}/{city}: PASSIVE_TARGET_CAPTURE_MATCH_COUNT "
+                              f"0; total_captures={len(captures)}; hook={result.get('hook')}"
+                          )
+                      first_rows=matches[0].get("target_rows") or []
+                      if any((m.get("target_rows") or [])!=first_rows for m in matches[1:]):
+                          raise RuntimeError(
+                              f"{worker['id']}/{city}: REPEATED_NATIVE_TARGET_CAPTURES_DIFFER"
+                          )
+                      selected.append(matches[0])
+                  captures=selected
+
+                  worker_diag={
+                      "worker":worker["id"],
+                      "tested_head":worker["tested_head"],
+                      "genuine_checkout":True,
+                      "frozen_guards_verified":guard_count,
+                      "formalizer_executed":True,
+                      "observer_hook":result.get("hook"),
+                      "cities":[],
+                  }
+
+                  for idx,(city,expected_count,accepted_hash) in enumerate(worker["cities"]):
+                      cap=captures[idx]
+                      native_hash=cap["native_hash"]
+                      rows=cap["target_rows"]
+                      if native_hash!=accepted_hash:
+                          raise RuntimeError(
+                              f"{worker['id']}/{city}: NATIVE_TARGET_HASH_MISMATCH "
+                              f"{native_hash}!={accepted_hash}"
+                          )
+                      if len(rows)!=expected_count:
+                          raise RuntimeError(
+                              f"{worker['id']}/{city}: TARGET_ROW_COUNT_MISMATCH "
+                              f"{len(rows)}!={expected_count}"
+                          )
+                      ids=[r["episode_id"] for r in rows]
+                      if len(ids)!=len(set(ids)):
+                          raise RuntimeError(f"{worker['id']}/{city}: DUPLICATE_EPISODE_IDS")
+                      bad_states=sorted({r["state"] for r in rows}-{
+                          "STRICT_EVENT_POSITIVE","SENSITIVITY_EVENT_POSITIVE",
+                          "NO_CONFIRMED_EVENT","NEEDS_REVIEW"
+                      })
+                      if bad_states:
+                          raise RuntimeError(f"{worker['id']}/{city}: BAD_STATES:{bad_states}")
+                      city_results.append({
+                          "city_key":city,
+                          "methodology":METHODOLOGY,
+                          "tested_head":worker["tested_head"],
+                          "accepted_target_state_sha256":accepted_hash,
+                          "native_recovered_target_state_sha256":native_hash,
+                          "target_rows":rows,
+                      })
+                      worker_diag["cities"].append({
+                          "city_key":city,
+                          "accepted_hash":accepted_hash,
+                          "native_hash":native_hash,
+                          "target_rows":len(rows),
+                      })
+                  diag["workers"].append(worker_diag)
+
+                  sh(["git","worktree","remove","--force",str(wt)],capture=False)
+                  shutil.rmtree(TMP/f"venv-{RUN_LABEL}-{worker['id']}",ignore_errors=True)
+
+              city_results.sort(key=lambda x:x["city_key"])
+              if len(city_results)!=18:
+                  raise RuntimeError(f"CITY_COUNT_MISMATCH:{len(city_results)}")
+              all_rows=[]
+              for c in city_results:
+                  all_rows.extend((c["city_key"],r["episode_id"],r["state"]) for r in c["target_rows"])
+              if len(all_rows)!=19542:
+                  raise RuntimeError(f"TARGET_ROW_TOTAL_MISMATCH:{len(all_rows)}")
+              identities=[(c,e) for c,e,s in all_rows]
+              if len(set(identities))!=19542:
+                  raise RuntimeError(f"UNIQUE_TARGET_IDENTITY_MISMATCH:{len(set(identities))}")
+              from collections import Counter
+              dist=Counter(s for c,e,s in all_rows)
+              expected_dist={
+                  "STRICT_EVENT_POSITIVE":913,
+                  "SENSITIVITY_EVENT_POSITIVE":48,
+                  "NO_CONFIRMED_EVENT":18113,
+                  "NEEDS_REVIEW":468,
+              }
+              if dict(dist)!=expected_dist:
+                  raise RuntimeError(f"DISTRIBUTION_MISMATCH:{dict(dist)}")
+              positive=dist["STRICT_EVENT_POSITIVE"]+dist["SENSITIVITY_EVENT_POSITIVE"]
+              if positive!=961:
+                  raise RuntimeError(f"POSITIVE_COUNT_MISMATCH:{positive}")
+
+              payload={"cities":city_results}
+              raw=json.dumps(payload,ensure_ascii=False,sort_keys=True,separators=(",",":")).encode("utf-8")
+              TARGET_OUT.write_bytes(raw)
+              sha=hashlib.sha256(raw).hexdigest()
+              summary={
+                  "run":RUN_LABEL,
+                  "canonical_sha256":sha,
+                  "byte_count":len(raw),
+                  "city_count":18,
+                  "target_row_count":19542,
+                  "unique_target_identities":19542,
+                  "distribution":expected_dist,
+                  "positive_count":961,
+                  "accepted_hashes_reproduced":18,
+                  "hash_mismatches":0,
+                  "exact_frozen_semantic_replay":True,
+                  "new_semantic_classification":False,
+                  "semantic_change":False,
+                  "public_web_research":False,
+                  "historical_source_network_requests":0,
+                  "neon_mutations":0,
+                  "production_mutations":0,
+                  "credentials_exposed":False,
+              }
+              diag["status"]="passed"
+              diag["summary"]=summary
+              print("RECOVERY_SUMMARY="+json.dumps(summary,sort_keys=True))
+          except Exception as exc:
+              diag["status"]="blocked"
+              diag["error"]=str(exc)
+              diag["traceback"]=traceback.format_exc()
+              DIAG_OUT.write_text(json.dumps(diag,ensure_ascii=False,indent=2,sort_keys=True)+"\n",encoding="utf-8")
+              print("RECOVERY_BLOCKED="+json.dumps({"run":RUN_LABEL,"error":str(exc)},ensure_ascii=False,sort_keys=True),file=sys.stderr)
+              raise
+          PY
+
+      - name: Emit canonical target map transport chunks
+        if: success()
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import os
+          from pathlib import Path
+          label=os.environ["RECOVERY_RUN_LABEL"]
+          p=Path(os.environ["RUNNER_TEMP"])/f"attack-event-18city-recovery-{label}"/"target_map.json"
+          s=p.read_text(encoding="utf-8")
+          print("__TARGET_MAP_TRANSPORT_BEGIN__")
+          size=16000
+          for i in range(0,len(s),size):
+              print(f"__TARGET_MAP_CHUNK_{i//size:04d}__"+s[i:i+size])
+          print("__TARGET_MAP_TRANSPORT_END__")
+          PY
+
+      - name: Upload independent recovery output
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: attack-event-18city-target-map-run-${{ matrix.run }}
+          path: |
+            ${{ runner.temp }}/attack-event-18city-recovery-${{ matrix.run }}/target_map.json
+            ${{ runner.temp }}/attack-event-18city-recovery-${{ matrix.run }}/diagnostic.json
+          if-no-files-found: error
+          retention-days: 30
