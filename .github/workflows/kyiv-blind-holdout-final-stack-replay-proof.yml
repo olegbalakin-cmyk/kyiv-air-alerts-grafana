@@ -175,7 +175,8 @@ jobs:
           kyiv_episodes = monitor.tracked_episodes_for_city(state, "kyiv")
           holdout = [
               ep for ep in kyiv_episodes
-              if (monitor.parse_dt(ep.get("alert_start")) is not None)
+              if str(ep.get("alert_source") or "") == "kyiv_combined_exact_city"
+              and (monitor.parse_dt(ep.get("alert_start")) is not None)
               and start <= monitor.parse_dt(ep.get("alert_start")) < end
           ]
           holdout = sorted(
@@ -185,7 +186,16 @@ jobs:
                   str(ep.get("episode_id") or ""),
               ),
           )
-          assert len(holdout) == 22, f"derived holdout episodes={len(holdout)}"
+          if len(holdout) != 22:
+              source_counts = {}
+              for ep in kyiv_episodes:
+                  t = monitor.parse_dt(ep.get("alert_start"))
+                  if t is not None and start <= t < end:
+                      source = str(ep.get("alert_source") or "")
+                      source_counts[source] = source_counts.get(source, 0) + 1
+              raise AssertionError(
+                  f"derived canonical holdout episodes={len(holdout)}; source_counts={source_counts}"
+              )
 
           derived_ids = [str(ep.get("episode_id") or "") for ep in holdout]
           assert len(set(derived_ids)) == 22
