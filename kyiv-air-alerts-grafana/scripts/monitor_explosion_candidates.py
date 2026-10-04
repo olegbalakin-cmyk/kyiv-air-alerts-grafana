@@ -4,6 +4,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import html
+import ipaddress
 import json
 import os
 import re
@@ -438,29 +439,257 @@ def extract_article_text(raw_html: str, max_chars: int = MAX_EXTRACTED_ARTICLE_C
     return " ".join(text.split())[:max_chars]
 
 
+GOOGLE_NEWS_BATCH_RESOLVE_URL = "https://news.google.com/_/DotsSplashUi/data/batchexecute?rpcids=Fbv4je"
+
+
+def google_host(hostname: str | None) -> bool:
+    host = str(hostname or "").strip(".").casefold()
+    return host == "google.com" or host.endswith(".google.com")
+
+
+def google_news_article_url(url: str) -> bool:
+    try:
+        parsed = urlparse(str(url or "").strip())
+    except Exception:
+        return False
+    host = (parsed.hostname or "").casefold()
+    return host == "news.google.com" and (
+        parsed.path.startswith("/rss/articles/") or parsed.path.startswith("/articles/")
+    )
+
+
+def validated_publisher_url(url: str | None) -> str | None:
+    value = str(url or "").strip()
+    if not value:
+        return None
+    try:
+        parsed = urlparse(value)
+    except Exception:
+        return None
+    if parsed.scheme.casefold() not in {"http", "https"}:
+        return None
+    host = (parsed.hostname or "").strip(".").casefold()
+    if not host or google_host(host):
+        return None
+    if host == "localhost" or host.endswith(".localhost") or host.endswith(".local"):
+        return None
+    try:
+        address = ipaddress.ip_address(host)
+    except ValueError:
+        address = None
+    if address is not None and (
+        address.is_private
+        or address.is_loopback
+        or address.is_link_local
+        or address.is_multicast
+        or address.is_reserved
+        or address.is_unspecified
+    ):
+        return None
+    return value
+
+
+def google_news_resolution_params(raw_html: str, article_url: str) -> tuple[str, int, str] | None:
+    if not google_news_article_url(article_url):
+        return None
+    parsed = urlparse(article_url)
+    article_id = parsed.path.rstrip("/").split("/")[-1]
+    if not article_id or not re.fullmatch(r"[A-Za-z0-9_-]+", article_id):
+        return None
+
+    soup = BeautifulSoup(raw_html or "", "html.parser")
+    node = soup.find(attrs={"data-n-a-sg": True, "data-n-a-ts": True})
+    if node is None:
+        return None
+    signature = str(node.get("data-n-a-sg") or "").strip()
+    timestamp_text = str(node.get("data-n-a-ts") or "").strip()
+    if not signature or not timestamp_text.isdigit():
+        return None
+    return article_id, int(timestamp_text), signature
+
+
+def google_news_batch_payload(article_id: str, timestamp: int, signature: str) -> dict:
+    request_context = [
+        [
+            "uk-UA",
+            "UA",
+            ["FINANCE_TOP_INDICES", "WEB_TEST_1_0_0"],
+            None,
+            None,
+            1,
+            1,
+            "UA:uk",
+            None,
+            180,
+            None,
+            None,
+            None,
+            None,
+            None,
+            0,
+            None,
+            None,
+            [1608992183, 723341000],
+        ],
+        "uk-UA",
+        "UA",
+        1,
+        [2, 3, 4, 8],
+        1,
+        0,
+        "655000234",
+        0,
+        0,
+        None,
+        0,
+    ]
+    rpc_argument = json.dumps(
+        ["garturlreq", request_context, article_id, timestamp, signature],
+        ensure_ascii=False,
+        separators=(",", ":"),
+    )
+    return {
+        "f.req": json.dumps(
+            [[["Fbv4je", rpc_argument, None, "generic"]]],
+            ensure_ascii=False,
+            separators=(",", ":"),
+        )
+    }
+
+
+def parse_google_news_batch_resolution(raw_text: str) -> str | None:
+    text = str(raw_text or "")
+    if text.startswith(")]}'"):
+        text = text.split("\n", 1)[1] if "\n" in text else ""
+    for line in text.splitlines():
+        line = line.strip()
+        if not line.startswith("["):
+            continue
+        try:
+            outer = json.loads(line)
+        except json.JSONDecodeError:
+            continue
+        rows = outer if isinstance(outer, list) else []
+        for row in rows:
+            if not isinstance(row, list) or len(row) < 3 or row[1] != "Fbv4je":
+                continue
+            try:
+                inner = json.loads(row[2])
+            except (TypeError, json.JSONDecodeError):
+                continue
+            if (
+                isinstance(inner, list)
+                and len(inner) >= 2
+                and inner[0] == "garturlres"
+            ):
+                return validated_publisher_url(inner[1])
+    return None
+
+
+def resolve_google_news_publisher_url(
+    url: str,
+    *,
+    wrapper_response=None,
+    http_get=None,
+    http_post=None,
+) -> str | None:
+    """Resolve one Google News article URL via Google's signed article-resolution RPC."""
+    if not google_news_article_url(url):
+        return None
+
+    getter = http_get or requests.get
+    poster = http_post or requests.post
+    headers = {
+        "User-Agent": "Mozilla/5.0 (compatible; ukraine-air-alerts-explosion-monitor/1.0)",
+        "Accept-Language": "uk,en;q=0.7",
+    }
+    try:
+        response = wrapper_response or getter(
+            url,
+            headers=headers,
+            timeout=FULLTEXT_FETCH_TIMEOUT_SECONDS,
+            allow_redirects=True,
+        )
+        response.raise_for_status()
+
+        direct_url = validated_publisher_url(str(response.url or ""))
+        if direct_url:
+            return direct_url
+
+        final_host = (urlparse(str(response.url or url)).hostname or "").casefold()
+        content_type = str(response.headers.get("Content-Type") or "").casefold()
+        if not google_host(final_host) or "html" not in content_type:
+            return None
+
+        params = google_news_resolution_params(response.text, str(response.url or url))
+        if params is None:
+            params = google_news_resolution_params(response.text, url)
+        if params is None:
+            return None
+        article_id, timestamp, signature = params
+
+        rpc = poster(
+            GOOGLE_NEWS_BATCH_RESOLVE_URL,
+            headers={
+                **headers,
+                "Content-Type": "application/x-www-form-urlencoded;charset=utf-8",
+                "Referer": str(response.url or url),
+            },
+            data=google_news_batch_payload(article_id, timestamp, signature),
+            timeout=FULLTEXT_FETCH_TIMEOUT_SECONDS,
+        )
+        rpc.raise_for_status()
+        return parse_google_news_batch_resolution(rpc.text)
+    except Exception:
+        return None
+
+
 def fetch_publisher_fulltext(url: str) -> tuple[str | None, str | None]:
+    headers = {
+        "User-Agent": "Mozilla/5.0 (compatible; ukraine-air-alerts-explosion-monitor/1.0)",
+        "Accept-Language": "uk,en;q=0.7",
+    }
     try:
         response = requests.get(
             url,
-            headers={
-                "User-Agent": "Mozilla/5.0 (compatible; ukraine-air-alerts-explosion-monitor/1.0)",
-                "Accept-Language": "uk,en;q=0.7",
-            },
+            headers=headers,
             timeout=FULLTEXT_FETCH_TIMEOUT_SECONDS,
             allow_redirects=True,
         )
         response.raise_for_status()
         content_type = str(response.headers.get("Content-Type") or "").casefold()
-        if "html" not in content_type:
+        resolved_url = validated_publisher_url(str(response.url or ""))
+
+        if resolved_url:
+            if "html" not in content_type:
+                return None, None
+            body = extract_article_text(response.text)
+            if not body:
+                return None, None
+            return body, resolved_url
+
+        resolved_url = resolve_google_news_publisher_url(url, wrapper_response=response)
+        if not resolved_url:
             return None, None
-        resolved_url = str(response.url or url)
-        resolved_host = (urlparse(resolved_url).hostname or "").casefold()
-        if resolved_host == "google.com" or resolved_host.endswith(".google.com"):
+
+        publisher_response = requests.get(
+            resolved_url,
+            headers=headers,
+            timeout=FULLTEXT_FETCH_TIMEOUT_SECONDS,
+            allow_redirects=True,
+        )
+        publisher_response.raise_for_status()
+        publisher_content_type = str(publisher_response.headers.get("Content-Type") or "").casefold()
+        if "html" not in publisher_content_type:
             return None, None
-        body = extract_article_text(response.text)
+
+        final_url = validated_publisher_url(str(publisher_response.url or resolved_url))
+        if not final_url:
+            return None, None
+        body = extract_article_text(publisher_response.text)
         if not body:
             return None, None
-        return body, resolved_url
+        return body, final_url
     except Exception:
         return None, None
 
