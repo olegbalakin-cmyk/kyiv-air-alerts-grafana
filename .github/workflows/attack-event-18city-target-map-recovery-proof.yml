@@ -620,11 +620,20 @@ jobs:
                   py=install_worker_env(worker,wt)
                   result=run_observer(worker,wt,py)
                   captures=result.get("captures") or []
-                  if len(captures)!=len(worker["cities"]):
-                      raise RuntimeError(
-                          f"{worker['id']}: PASSIVE_CAPTURE_COUNT_MISMATCH "
-                          f"{len(captures)}!={len(worker['cities'])}; hooks={result.get('hook')}"
-                      )
+                  selected=[]
+                  for city,expected_count,accepted_hash in worker["cities"]:
+                      matches=[
+                          cap for cap in captures
+                          if cap.get("native_hash")==accepted_hash
+                          and len(cap.get("target_rows") or [])==expected_count
+                      ]
+                      if len(matches)!=1:
+                          raise RuntimeError(
+                              f"{worker['id']}/{city}: PASSIVE_TARGET_CAPTURE_MATCH_COUNT "
+                              f"{len(matches)}!=1; total_captures={len(captures)}; hook={result.get('hook')}"
+                          )
+                      selected.append(matches[0])
+                  captures=selected
 
                   worker_diag={
                       "worker":worker["id"],
