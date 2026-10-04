@@ -2758,11 +2758,25 @@ def temporal_binding_evidence(row: dict, strict_evidence: dict, matching: dict, 
         support = logical_episode_support(active)
         supported_ids = list(support["supported_episode_ids"])
         specific = bool(support["episode_specific"])
+        episode_id = support["episode_id"] if specific else None
+        if specific and not episode_id:
+            # A live message may fall inside multiple persisted raw rows that are
+            # already reconciled as one logical alert window. Reuse only an
+            # existing persisted raw binding that belongs to that active logical
+            # group; never invent a raw-ID winner from publication time.
+            persisted_id = str(row.get("matched_episode_id") or "")
+            if (
+                str(matching.get("outcome") or "") == "unique_match"
+                and persisted_id
+                and persisted_id in supported_ids
+            ):
+                episode_id = persisted_id
+        strict_specific = bool(specific and episode_id)
         return {
-            "present": specific,
+            "present": strict_specific,
             "code": (
                 "TEMPORAL_CONTEMPORANEOUS_LIVE_WORDING"
-                if specific
+                if strict_specific
                 else "TEMPORAL_CONTEMPORANEOUS_LIVE_AMBIGUOUS_EPISODES"
             ),
             "evidence_type": "trusted_contemporaneous_live_message",
@@ -2770,10 +2784,10 @@ def temporal_binding_evidence(row: dict, strict_evidence: dict, matching: dict, 
             "event_time": None,
             "event_interval": None,
             "message_time": iso(published),
-            "episode_specific": specific,
+            "episode_specific": strict_specific,
             "supported_episode_ids": supported_ids,
             "logical_episode_groups": list(support["logical_episode_groups"]),
-            "episode_id": support["episode_id"] if specific else None,
+            "episode_id": episode_id if strict_specific else None,
             "near_boundary": empty_near_boundary(),
         }
 
