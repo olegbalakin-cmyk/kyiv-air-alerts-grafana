@@ -1,0 +1,283 @@
+{
+  "schema": "kyiv-publisher-fulltext-policy-gate-proof-v1",
+  "created_at_utc": "2026-10-04T08:17:00Z",
+  "repo": "olegbalakin-cmyk/kyiv-air-alerts-grafana",
+  "base_commit": "2d75e8f6383fbfd5d7631fd1e5055646feb7a467",
+  "proof_branch": "kyiv-publisher-fulltext-policy-gate-proof-2026-10-04",
+  "implementation_commit": "a9e404f37b5b3f7fa6677dc70a3a92f18c23a0a5",
+  "proof_runner_commit": "b200f38aacb9c582d0a35f8ca030af759e8499e6",
+  "frozen_inputs": [
+    "research/kyiv_12_positive_source_provenance_2026-10-04.json",
+    "research/kyiv_12_positive_evidence_enrichment_ab_2026-10-04.json"
+  ],
+  "verdict": "PROVEN",
+  "exact_code_change": {
+    "file": "kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py",
+    "summary": "Replace the unconditional publisher_fulltext -> needs_review short-circuit with a neutral provenance gate. publisher_fulltext remains review-blocking unless exact city, strict attack event, air/military context, same-attack context, and episode-specific strict temporal binding all independently pass. Deterministic rejection remains higher priority.",
+    "helper_added": "publisher_fulltext_requires_review(row, reviewed, strict_eligible=...)",
+    "strict_eligible_definition": "exact.present && strict.present && air.present && same_attack.present && temporal.present && temporal.episode_specific && temporal.episode_id",
+    "parser_changes": 0,
+    "temporal_representation_changes": 0,
+    "air_context_changes": 0,
+    "same_attack_changes": 0,
+    "source_discovery_changes": 0,
+    "source_adapter_changes": 0,
+    "query_family_changes": 0
+  },
+  "tests": {
+    "status": "PASS",
+    "workflow_run_id": 37188367837,
+    "workflow_job_id": 111395122304,
+    "pytest": {
+      "result": "143 passed",
+      "focused_test_file": "kyiv-air-alerts-grafana/tests/test_publisher_fulltext_policy_gate.py",
+      "focused_cases": [
+        "publisher_fulltext + every strict gate passes -> APPROVED_STRICT",
+        "publisher_fulltext + missing exact city -> not strict",
+        "publisher_fulltext + missing attack event -> not strict",
+        "publisher_fulltext + missing air context -> not strict",
+        "publisher_fulltext + missing same-attack -> not strict",
+        "publisher_fulltext + missing strict temporal binding -> not strict",
+        "ordinary non-fulltext classifications remain unchanged",
+        "deterministic rejection remains unchanged",
+        "frozen Kyiv 12 replay promotes exactly the four policy-gate targets"
+      ]
+    },
+    "monitor_self_test": {
+      "result": "PASS",
+      "summary": "23 audited cities; IR01-IR20 covered; 50/50 provenance approvals; 2/2 deterministic negatives; 58/58 no-adapter regression; 20/20 episode replay; 50 ordinary unreviewed controls; 50 ordinary unreviewed identity controls; unexpected future-run status changes=0"
+    },
+    "legacy_vs_current_audit_note": {
+      "script": "kyiv-air-alerts-grafana/scripts/audit_attack_event_classifier.py",
+      "result": "NOT_USED_AS_GATE",
+      "reason": "The script compares a much older legacy attack-event signal/temporal relation against the current classifier, not base-vs-repair behavior. It reports five already-existing unrelated current-vs-legacy differences (three Kyiv rejected->review and two Ternopil review->strict) and therefore cannot isolate this repair. The repository pytest suite and monitor self-test are the relevant regression gates for this proof."
+    }
+  },
+  "before": {
+    "STRICT": 0,
+    "SENSITIVITY": 0,
+    "REVIEW": 12
+  },
+  "after": {
+    "STRICT": 4,
+    "SENSITIVITY": 0,
+    "REVIEW": 8
+  },
+  "target_episodes_promoted": {
+    "count": 4,
+    "denominator": 4,
+    "episode_ids": [
+      "735a17c8622f113c4abc15b8",
+      "6bb2a52b33667e8ddf111326",
+      "4684548673d2b83089b0f15e",
+      "af3627c04d206a368662136e"
+    ]
+  },
+  "non_target_episodes_promoted": {
+    "count": 0,
+    "denominator": 8,
+    "episode_ids": []
+  },
+  "scope_leak": false,
+  "episodes": [
+    {
+      "episode_id": "5fe9c0b3aed78bd5be50d3f6",
+      "before": "REVIEW",
+      "after": "REVIEW",
+      "changed": false,
+      "before_reason_codes": [
+        "TEMPORAL_PARSER_GAP"
+      ],
+      "after_reason_codes": [
+        "TEMPORAL_PARSER_GAP"
+      ],
+      "remaining_failure_mechanism": "temporal parser",
+      "detail": "Official timeline uses leading '21:54'; unchanged event-clock parser does not accept that form."
+    },
+    {
+      "episode_id": "d727150d5170d97fea2f96f0",
+      "before": "REVIEW",
+      "after": "REVIEW",
+      "changed": false,
+      "before_reason_codes": [
+        "TEMPORAL_PARSER_GAP"
+      ],
+      "after_reason_codes": [
+        "TEMPORAL_PARSER_GAP"
+      ],
+      "remaining_failure_mechanism": "temporal parser",
+      "detail": "Official timeline uses leading '6:56'; unchanged event-clock parser does not accept that form."
+    },
+    {
+      "episode_id": "4f236ae664adedf6c45b6d1e",
+      "before": "REVIEW",
+      "after": "REVIEW",
+      "changed": false,
+      "before_reason_codes": [
+        "TEMPORAL_PARSER_GAP"
+      ],
+      "after_reason_codes": [
+        "TEMPORAL_PARSER_GAP"
+      ],
+      "remaining_failure_mechanism": "temporal parser",
+      "detail": "Official timeline uses leading '9:12'/'9:27'; unchanged parser requires an accepted clock form."
+    },
+    {
+      "episode_id": "735a17c8622f113c4abc15b8",
+      "before": "REVIEW",
+      "after": "STRICT",
+      "changed": true,
+      "before_reason_codes": [
+        "PUBLISHER_FULLTEXT_REVIEW_GATE"
+      ],
+      "after_reason_codes": [],
+      "classifier_reason_code_change": "PUBLISHER_FULLTEXT_REQUIRES_REVIEW removed because all ordinary strict gates independently pass; no new positive fulltext reason code is added.",
+      "remaining_failure_mechanism": null
+    },
+    {
+      "episode_id": "9fd2e6a9a02235982bd706ea",
+      "before": "REVIEW",
+      "after": "REVIEW",
+      "changed": false,
+      "before_reason_codes": [
+        "TEMPORAL_REPRESENTATION_GAP"
+      ],
+      "after_reason_codes": [
+        "TEMPORAL_REPRESENTATION_GAP"
+      ],
+      "remaining_failure_mechanism": "temporal representation",
+      "detail": "Source relation 'Станом на 21:50' is an upper-bound/reporting relation not represented by the unchanged parser."
+    },
+    {
+      "episode_id": "cfeec7a191817720d241fedb",
+      "before": "REVIEW",
+      "after": "REVIEW",
+      "changed": false,
+      "before_reason_codes": [
+        "TEMPORAL_REPRESENTATION_GAP"
+      ],
+      "after_reason_codes": [
+        "TEMPORAL_REPRESENTATION_GAP"
+      ],
+      "remaining_failure_mechanism": "temporal representation",
+      "detail": "Source says 'після 3 ранку'; unchanged parser has no open-interval-after-time representation."
+    },
+    {
+      "episode_id": "b8b8b8e9b42ef2e360e1a253",
+      "before": "REVIEW",
+      "after": "REVIEW",
+      "changed": false,
+      "before_reason_codes": [
+        "TEMPORAL_PARSER_GAP"
+      ],
+      "after_reason_codes": [
+        "TEMPORAL_PARSER_GAP"
+      ],
+      "remaining_failure_mechanism": "temporal parser",
+      "detail": "Official timeline uses leading '5:00'/'5:04'; unchanged event-clock parser does not accept that form."
+    },
+    {
+      "episode_id": "a422cb3549b4ba330c3b831f",
+      "before": "REVIEW",
+      "after": "REVIEW",
+      "changed": false,
+      "before_reason_codes": [
+        "SAME_ATTACK_CONTEXT_GAP"
+      ],
+      "after_reason_codes": [
+        "SAME_ATTACK_CONTEXT_GAP"
+      ],
+      "remaining_failure_mechanism": "air-context / same-attack",
+      "detail": "Air context is present but remains not linked to the exact-city event segment under unchanged same-attack rules."
+    },
+    {
+      "episode_id": "6bb2a52b33667e8ddf111326",
+      "before": "REVIEW",
+      "after": "STRICT",
+      "changed": true,
+      "before_reason_codes": [
+        "PUBLISHER_FULLTEXT_REVIEW_GATE"
+      ],
+      "after_reason_codes": [],
+      "classifier_reason_code_change": "PUBLISHER_FULLTEXT_REQUIRES_REVIEW removed because all ordinary strict gates independently pass; no new positive fulltext reason code is added.",
+      "remaining_failure_mechanism": null
+    },
+    {
+      "episode_id": "deb4614a7c618c6eb581de10",
+      "before": "REVIEW",
+      "after": "REVIEW",
+      "changed": false,
+      "before_reason_codes": [
+        "TEMPORAL_PARSER_GAP"
+      ],
+      "after_reason_codes": [
+        "TEMPORAL_PARSER_GAP"
+      ],
+      "remaining_failure_mechanism": "temporal parser",
+      "detail": "Official timeline uses leading '6:57'; unchanged event-clock parser does not accept that form."
+    },
+    {
+      "episode_id": "4684548673d2b83089b0f15e",
+      "before": "REVIEW",
+      "after": "STRICT",
+      "changed": true,
+      "before_reason_codes": [
+        "PUBLISHER_FULLTEXT_REVIEW_GATE"
+      ],
+      "after_reason_codes": [],
+      "classifier_reason_code_change": "PUBLISHER_FULLTEXT_REQUIRES_REVIEW removed because all ordinary strict gates independently pass; no new positive fulltext reason code is added.",
+      "remaining_failure_mechanism": null
+    },
+    {
+      "episode_id": "af3627c04d206a368662136e",
+      "before": "REVIEW",
+      "after": "STRICT",
+      "changed": true,
+      "before_reason_codes": [
+        "PUBLISHER_FULLTEXT_REVIEW_GATE"
+      ],
+      "after_reason_codes": [],
+      "classifier_reason_code_change": "PUBLISHER_FULLTEXT_REQUIRES_REVIEW removed because all ordinary strict gates independently pass; no new positive fulltext reason code is added.",
+      "remaining_failure_mechanism": null
+    }
+  ],
+  "remaining_failures": {
+    "temporal_parser": {
+      "count": 5,
+      "episode_ids": [
+        "5fe9c0b3aed78bd5be50d3f6",
+        "d727150d5170d97fea2f96f0",
+        "4f236ae664adedf6c45b6d1e",
+        "b8b8b8e9b42ef2e360e1a253",
+        "deb4614a7c618c6eb581de10"
+      ]
+    },
+    "temporal_representation": {
+      "count": 2,
+      "episode_ids": [
+        "9fd2e6a9a02235982bd706ea",
+        "cfeec7a191817720d241fedb"
+      ]
+    },
+    "air-context / same-attack": {
+      "count": 1,
+      "episode_ids": [
+        "a422cb3549b4ba330c3b831f"
+      ]
+    },
+    "other": {
+      "count": 0,
+      "episode_ids": []
+    }
+  },
+  "mutations": {
+    "main_mutated": false,
+    "site_prod_mutated": false,
+    "monitor_state_mutations": 0,
+    "review_queue_mutations": 0,
+    "canonical_alert_mutations": 0,
+    "neon_db_mutations": 0,
+    "deploy": false
+  },
+  "next_action": "repair the next largest remaining failure class only"
+}
