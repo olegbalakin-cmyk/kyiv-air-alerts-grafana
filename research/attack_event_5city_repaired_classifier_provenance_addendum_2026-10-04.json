@@ -1,0 +1,303 @@
+{
+  "schema_version": "attack-event-5city-repaired-classifier-provenance-addendum-v1",
+  "status": "PASS",
+  "verdict": "ATTACK-EVENT 5-CITY REPAIRED CLASSIFIER PROVENANCE CONTRACT FROZEN",
+  "purpose": "Freeze classifier-provenance availability only for the 25 accepted repaired five-city targets so attack-event-classification-key-v2 can be materialized without changing accepted classification semantics.",
+  "prior_blocker": {
+    "verdict": "ATTACK-EVENT 5-CITY PERSISTENCE IDENTITY V2 EXPORT BLOCKED",
+    "failed_gate": "FIVE_CITY_REPAIRED_CLASSIFIER_PROVENANCE_UNAVAILABLE",
+    "affected_classifications": 25
+  },
+  "fresh_main_guard": {
+    "verified_before_branch_creation": true,
+    "main_head": "5a119520275c606e0c306d41fb831e460e2f7f63"
+  },
+  "step1_persistence_contract": {
+    "commit": "b205d38dbc50bc502d10e682d4ae53491af542ea",
+    "artifact": "research/attack_event_neon_persistence_contract_2026-10-02.json",
+    "artifact_blob_sha": "e9dcbdf21551ca086fbf096138f885f453a8c2b0",
+    "verdict": "ATTACK-EVENT NEON PERSISTENCE CONTRACT FROZEN"
+  },
+  "classification_v2_addendum": {
+    "commit": "bd82a6c0a19aca4610a8af6df73a307a88c35bf6",
+    "artifact": "research/attack_event_classification_identity_availability_addendum_2026-10-04.json",
+    "artifact_blob_sha": "c4b36f92d4171f59a5b3e45f4d894aedf4d7ebd7",
+    "verdict": "ATTACK-EVENT CLASSIFICATION IDENTITY AVAILABILITY CONTRACT FROZEN",
+    "classification_key_version": "attack-event-classification-key-v2"
+  },
+  "frozen_five_city_source": {
+    "campaign_id": "historical-attack-events-v2-2026-09-27",
+    "campaign_head": "71cb6f6fbe856cc7b96759310fe9cc9c71cc0453",
+    "frozen_campaign_classifier_blob_sha": "778469b74c2aa807d851cf2c2ee35cf4aa785589",
+    "frozen_batch_count": 139,
+    "total_classifications": 6863,
+    "classifications_by_city": {
+      "lviv": 126,
+      "sevastopol": 527,
+      "cherkasy": 1548,
+      "sumy": 2297,
+      "zaporizhzhia": 2365
+    },
+    "batch_metadata_classifier_consistency": {
+      "checked_batches": 139,
+      "mismatched_batches": 0,
+      "fetch_errors": 0,
+      "status": "PASS"
+    }
+  },
+  "accepted_repair_proof": {
+    "final_repaired_target_state_head": "5d18ef85a66384f189ede5ca5654d750f60f088b",
+    "artifact": "research/historical_offline_repair_recovery_scan_2026-10-02.json",
+    "artifact_blob_sha": "26db43c2bd7fbd9e16a53e8ccefea080636bbb73",
+    "scan_execution_head": "7f55e77739d081c1858a282851143f45cd6bb6aa",
+    "implementation_head": "a208892ef6ba1437e8cfb2244e6863f1203803db",
+    "repair_executor_path": "kyiv-air-alerts-grafana/scripts/audit_historical_offline_repair_recovery.py",
+    "repair_executor_blob_sha": "06ddfa13e918b3131799c8dadd290f84f20cb901",
+    "repair_executor_blob_at_scan_execution_head": "06ddfa13e918b3131799c8dadd290f84f20cb901",
+    "repair_executor_blob_at_final_repaired_target_state_head": "06ddfa13e918b3131799c8dadd290f84f20cb901",
+    "repair_executor_blobs_match": true,
+    "repair_execution_path_verified": true,
+    "repair_execution_path_basis": [
+      "main() calls repaired_classification(...) for frozen observations",
+      "the executor constructs repaired_states from original_states and repaired observation classifications",
+      "changed_targets is mechanically derived from original_states versus repaired_states"
+    ],
+    "contextual_canonical_monitor": {
+      "path": "kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py",
+      "blob_sha": "4e5035d5239773915668e69a00c50971cfc82b74",
+      "role": "contextual implementation provenance only",
+      "used_as_repaired_persistence_classifier_identity": false
+    }
+  },
+  "accepted_state_integrity": {
+    "repaired_target_state_sha256": "652bda9bc4037d263e7e1090455ff4df5387d1f4f1a73a8c5e160d7ce62132f5",
+    "changed_target_records_sha256": "b461a762fb4764879ba6231b85a0aa857246e259831f3b7fd976b9fde46ec78f",
+    "repaired_targets": 25,
+    "repaired_targets_by_city": {
+      "sumy": 7,
+      "zaporizhzhia": 18
+    },
+    "transitions": {
+      "NEEDS_REVIEW -> STRICT_EVENT_POSITIVE": 14,
+      "NO_CONFIRMED_EVENT -> STRICT_EVENT_POSITIVE": 8,
+      "SENSITIVITY_EVENT_POSITIVE -> STRICT_EVENT_POSITIVE": 3
+    },
+    "downgrades": 0
+  },
+  "repaired_target_classifier_provenance": [
+    {
+      "city": "sumy",
+      "episode_id": "09f739c01c6857dde5f6c213",
+      "classifier_blob_sha": "06ddfa13e918b3131799c8dadd290f84f20cb901",
+      "classifier_provenance_state": "CONTRACT_DERIVED_FROM_ACCEPTED_REPAIR_EXECUTOR"
+    },
+    {
+      "city": "sumy",
+      "episode_id": "8c730446ae733b2fed99f",
+      "classifier_blob_sha": "06ddfa13e918b3131799c8dadd290f84f20cb901",
+      "classifier_provenance_state": "CONTRACT_DERIVED_FROM_ACCEPTED_REPAIR_EXECUTOR"
+    },
+    {
+      "city": "sumy",
+      "episode_id": "91e929b510db95e5fdd14938",
+      "classifier_blob_sha": "06ddfa13e918b3131799c8dadd290f84f20cb901",
+      "classifier_provenance_state": "CONTRACT_DERIVED_FROM_ACCEPTED_REPAIR_EXECUTOR"
+    },
+    {
+      "city": "sumy",
+      "episode_id": "a223ac285257b28c26405a6a",
+      "classifier_blob_sha": "06ddfa13e918b3131799c8dadd290f84f20cb901",
+      "classifier_provenance_state": "CONTRACT_DERIVED_FROM_ACCEPTED_REPAIR_EXECUTOR"
+    },
+    {
+      "city": "sumy",
+      "episode_id": "ae2718c10fcdc7079dbb220a",
+      "classifier_blob_sha": "06ddfa13e918b3131799c8dadd290f84f20cb901",
+      "classifier_provenance_state": "CONTRACT_DERIVED_FROM_ACCEPTED_REPAIR_EXECUTOR"
+    },
+    {
+      "city": "sumy",
+      "episode_id": "c7c3d34df8702f75cef31528",
+      "classifier_blob_sha": "06ddfa13e918b3131799c8dadd290f84f20cb901",
+      "classifier_provenance_state": "CONTRACT_DERIVED_FROM_ACCEPTED_REPAIR_EXECUTOR"
+    },
+    {
+      "city": "sumy",
+      "episode_id": "fa2f60f78b4b1a36471c5fb8",
+      "classifier_blob_sha": "06ddfa13e918b3131799c8dadd290f84f20cb901",
+      "classifier_provenance_state": "CONTRACT_DERIVED_FROM_ACCEPTED_REPAIR_EXECUTOR"
+    },
+    {
+      "city": "zaporizhzhia",
+      "episode_id": "006c04a81119cd9a5e366cdb",
+      "classifier_blob_sha": "06ddfa13e918b3131799c8dadd290f84f20cb901",
+      "classifier_provenance_state": "CONTRACT_DERIVED_FROM_ACCEPTED_REPAIR_EXECUTOR"
+    },
+    {
+      "city": "zaporizhzhia",
+      "episode_id": "0e5740bab3fffff2b0dab943",
+      "classifier_blob_sha": "06ddfa13e918b3131799c8dadd290f84f20cb901",
+      "classifier_provenance_state": "CONTRACT_DERIVED_FROM_ACCEPTED_REPAIR_EXECUTOR"
+    },
+    {
+      "city": "zaporizhzhia",
+      "episode_id": "17cec45920598ab757b3e572",
+      "classifier_blob_sha": "06ddfa13e918b3131799c8dadd290f84f20cb901",
+      "classifier_provenance_state": "CONTRACT_DERIVED_FROM_ACCEPTED_REPAIR_EXECUTOR"
+    },
+    {
+      "city": "zaporizhzhia",
+      "episode_id": "33c4eddfb879d586fbd5ff9c",
+      "classifier_blob_sha": "06ddfa13e918b3131799c8dadd290f84f20cb901",
+      "classifier_provenance_state": "CONTRACT_DERIVED_FROM_ACCEPTED_REPAIR_EXECUTOR"
+    },
+    {
+      "city": "zaporizhzhia",
+      "episode_id": "3eaf806fa58474c13e75dac1",
+      "classifier_blob_sha": "06ddfa13e918b3131799c8dadd290f84f20cb901",
+      "classifier_provenance_state": "CONTRACT_DERIVED_FROM_ACCEPTED_REPAIR_EXECUTOR"
+    },
+    {
+      "city": "zaporizhzhia",
+      "episode_id": "4986bef6d046cc4014d5b389",
+      "classifier_blob_sha": "06ddfa13e918b3131799c8dadd290f84f20cb901",
+      "classifier_provenance_state": "CONTRACT_DERIVED_FROM_ACCEPTED_REPAIR_EXECUTOR"
+    },
+    {
+      "city": "zaporizhzhia",
+      "episode_id": "65d570f917a90d27ae505c06",
+      "classifier_blob_sha": "06ddfa13e918b3131799c8dadd290f84f20cb901",
+      "classifier_provenance_state": "CONTRACT_DERIVED_FROM_ACCEPTED_REPAIR_EXECUTOR"
+    },
+    {
+      "city": "zaporizhzhia",
+      "episode_id": "744d42cf99805be86465d250",
+      "classifier_blob_sha": "06ddfa13e918b3131799c8dadd290f84f20cb901",
+      "classifier_provenance_state": "CONTRACT_DERIVED_FROM_ACCEPTED_REPAIR_EXECUTOR"
+    },
+    {
+      "city": "zaporizhzhia",
+      "episode_id": "7de8bff024b6393e925c3f96",
+      "classifier_blob_sha": "06ddfa13e918b3131799c8dadd290f84f20cb901",
+      "classifier_provenance_state": "CONTRACT_DERIVED_FROM_ACCEPTED_REPAIR_EXECUTOR"
+    },
+    {
+      "city": "zaporizhzhia",
+      "episode_id": "9faeeda12cfeaded4de8f51b",
+      "classifier_blob_sha": "06ddfa13e918b3131799c8dadd290f84f20cb901",
+      "classifier_provenance_state": "CONTRACT_DERIVED_FROM_ACCEPTED_REPAIR_EXECUTOR"
+    },
+    {
+      "city": "zaporizhzhia",
+      "episode_id": "a31c0887eb9e4436ce26d212",
+      "classifier_blob_sha": "06ddfa13e918b3131799c8dadd290f84f20cb901",
+      "classifier_provenance_state": "CONTRACT_DERIVED_FROM_ACCEPTED_REPAIR_EXECUTOR"
+    },
+    {
+      "city": "zaporizhzhia",
+      "episode_id": "a38685d31aaf9e9513937865",
+      "classifier_blob_sha": "06ddfa13e918b3131799c8dadd290f84f20cb901",
+      "classifier_provenance_state": "CONTRACT_DERIVED_FROM_ACCEPTED_REPAIR_EXECUTOR"
+    },
+    {
+      "city": "zaporizhzhia",
+      "episode_id": "b7c7da1cbd1cdbf7fbe7974b",
+      "classifier_blob_sha": "06ddfa13e918b3131799c8dadd290f84f20cb901",
+      "classifier_provenance_state": "CONTRACT_DERIVED_FROM_ACCEPTED_REPAIR_EXECUTOR"
+    },
+    {
+      "city": "zaporizhzhia",
+      "episode_id": "bb93b8a772c7c84e92dd19c4",
+      "classifier_blob_sha": "06ddfa13e918b3131799c8dadd290f84f20cb901",
+      "classifier_provenance_state": "CONTRACT_DERIVED_FROM_ACCEPTED_REPAIR_EXECUTOR"
+    },
+    {
+      "city": "zaporizhzhia",
+      "episode_id": "cb3ade09f433804a8d3ad394",
+      "classifier_blob_sha": "06ddfa13e918b3131799c8dadd290f84f20cb901",
+      "classifier_provenance_state": "CONTRACT_DERIVED_FROM_ACCEPTED_REPAIR_EXECUTOR"
+    },
+    {
+      "city": "zaporizhzhia",
+      "episode_id": "f925608b4627f59f007d56d4",
+      "classifier_blob_sha": "06ddfa13e918b3131799c8dadd290f84f20cb901",
+      "classifier_provenance_state": "CONTRACT_DERIVED_FROM_ACCEPTED_REPAIR_EXECUTOR"
+    },
+    {
+      "city": "zaporizhzhia",
+      "episode_id": "fb2fdd4cb26a270443fcbd99",
+      "classifier_blob_sha": "06ddfa13e918b3131799c8dadd290f84f20cb901",
+      "classifier_provenance_state": "CONTRACT_DERIVED_FROM_ACCEPTED_REPAIR_EXECUTOR"
+    },
+    {
+      "city": "zaporizhzhia",
+      "episode_id": "feb72b97aeedac61a90652a1",
+      "classifier_blob_sha": "06ddfa13e918b3131799c8dadd290f84f20cb901",
+      "classifier_provenance_state": "CONTRACT_DERIVED_FROM_ACCEPTED_REPAIR_EXECUTOR"
+    }
+  ],
+  "complete_five_city_classifier_provenance_coverage": {
+    "unchanged_classifications": {
+      "count": 6838,
+      "classifier_provenance_state": "MATERIALIZED_IN_FROZEN_CAMPAIGN",
+      "classifier_blob_sha": "778469b74c2aa807d851cf2c2ee35cf4aa785589"
+    },
+    "repaired_classifications": {
+      "count": 25,
+      "classifier_provenance_state": "CONTRACT_DERIVED_FROM_ACCEPTED_REPAIR_EXECUTOR",
+      "classifier_blob_sha": "06ddfa13e918b3131799c8dadd290f84f20cb901"
+    },
+    "total_classifications": 6863,
+    "null_classifier_blobs": 0
+  },
+  "provenance_interpretation": {
+    "statement": "For the 25 accepted repaired classifications, classifier_blob_sha is a contract-derived persistence-provenance mapping to the exact frozen executable Git blob that mechanically produced the accepted repaired classification state. This does not claim that classifier_blob_sha was serialized in the original repair artifact and does not claim that the original frozen campaign classifier produced the repaired state.",
+    "changes_classifier_semantics": false,
+    "reruns_classification": false,
+    "canonical_monitor_blob_replaces_repair_executor_blob": false
+  },
+  "classification_key_contract": {
+    "version": "attack-event-classification-key-v2",
+    "classifier_provenance_state_is_metadata_only": true,
+    "classifier_provenance_state_is_classification_key_tuple_element": false,
+    "new_classification_key_version_introduced": false,
+    "forbidden_version": "attack-event-classification-key-v3"
+  },
+  "hard_gates": {
+    "five_city_classifications_covered": 6863,
+    "unchanged": 6838,
+    "repaired": 25,
+    "sumy_repaired": 7,
+    "zaporizhzhia_repaired": 18,
+    "null_classifier_blobs": 0,
+    "original_campaign_classifier_preserved_for_unchanged_records": true,
+    "repair_executor_classifier_assigned_only_to_25_changed_targets": true,
+    "repair_executor_blob_verified": true,
+    "repair_execution_path_verified": true,
+    "repaired_target_state_sha_unchanged": true,
+    "changed_target_record_sha_unchanged": true,
+    "accepted_verdicts_changed": 0,
+    "evidence_changed": 0,
+    "qa_reasons_changed": 0,
+    "normalization_changed": 0,
+    "new_semantic_classification": false,
+    "semantic_change": false,
+    "neon_queries": 0,
+    "neon_mutations": 0,
+    "production_mutation": false,
+    "repo_final_diff_exactly_one_artifact": true,
+    "credentials_exposed": false
+  },
+  "mutation_scope": {
+    "added_artifacts": [
+      "research/attack_event_5city_repaired_classifier_provenance_addendum_2026-10-04.json"
+    ],
+    "scripts_modified": 0,
+    "workflows_modified": 0,
+    "historical_data_modified": 0,
+    "existing_artifacts_modified": 0,
+    "neon_queries": 0,
+    "neon_mutations": 0,
+    "production_mutated": false
+  }
+}
