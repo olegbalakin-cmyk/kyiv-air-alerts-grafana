@@ -10,7 +10,7 @@ on:
       - "kyiv-air-alerts-grafana/tests/test_google_news_publisher_resolution.py"
 
 permissions:
-  contents: read
+  contents: write
   actions: read
 
 jobs:
@@ -114,6 +114,12 @@ jobs:
 
           proof = {
               "schema": "google_news_resolution_protocol_inspection_v1",
+              "execution": {
+                  "repo": __import__("os").environ["GITHUB_REPOSITORY"],
+                  "branch": __import__("os").environ["GITHUB_REF_NAME"],
+                  "head": __import__("os").environ["GITHUB_SHA"],
+                  "run_id": int(__import__("os").environ["GITHUB_RUN_ID"]),
+              },
               "sample_count": len(out),
               "all_google_wrapper": all(x["final_host"].endswith("google.com") for x in out),
               "all_have_signature": all(bool(x["data_n_a_sg"]) for x in out),
@@ -138,3 +144,15 @@ jobs:
           path: /tmp/google_news_resolution_protocol_inspection.json
           if-no-files-found: error
           retention-days: 30
+
+      - name: Commit protocol inspection result
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p research
+          cp /tmp/google_news_resolution_protocol_inspection.json research/google_news_resolution_protocol_inspection_2026-10-04.json
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add research/google_news_resolution_protocol_inspection_2026-10-04.json
+          git commit -m "Record Google News resolver protocol inspection"
+          git push
