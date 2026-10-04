@@ -515,6 +515,80 @@ def build_google_news_candidate(
     }, True, True
 
 
+def rss_durability_enrichment_eligible(row: dict, decision: dict) -> bool:
+    """Return True only for semantically near-STRICT RSS evidence lacking strict temporal binding."""
+    if str(row.get("source") or "") != "Google News RSS":
+        return False
+    if str(row.get("discovery_basis") or "") != "rss_title_snippet":
+        return False
+    if row.get("resolved_url"):
+        return False
+
+    evidence = decision.get("candidate_evidence") or {}
+    for key in (
+        "exact_city",
+        "strict_explosion",
+        "air_military_context",
+        "same_attack_context",
+    ):
+        if not (evidence.get(key) or {}).get("present"):
+            return False
+
+    temporal = evidence.get("temporal_binding") or {}
+    strict_temporal_binding = bool(
+        temporal.get("present")
+        and temporal.get("episode_specific")
+        and temporal.get("episode_id")
+    )
+    return not strict_temporal_binding
+
+
+def enrich_rss_candidate_for_durability(
+    row: dict,
+    decision: dict,
+    fulltext_fetcher=None,
+    fetch_cache: dict | None = None,
+) -> tuple[dict, bool, bool]:
+    """
+    Capture publisher evidence for durability without changing classification input.
+
+    Returns (persisted_row, network_fetch_performed, enrichment_succeeded).
+    The classifier decision must be computed before this helper is called.
+    """
+    if fulltext_fetcher is None or not rss_durability_enrichment_eligible(row, decision):
+        return row, False, False
+
+    url = str(row.get("url") or "").strip()
+    if not url:
+        return row, False, False
+
+    cache = fetch_cache if isinstance(fetch_cache, dict) else {}
+    network_fetch_performed = False
+    if url in cache:
+        body, resolved_url = cache[url]
+    else:
+        network_fetch_performed = True
+        try:
+            body, resolved_url = fulltext_fetcher(url)
+        except Exception:
+            body, resolved_url = None, None
+        cache[url] = (body, resolved_url)
+        if resolved_url:
+            cache.setdefault(str(resolved_url), (body, resolved_url))
+
+    if not body or not resolved_url:
+        return row, network_fetch_performed, False
+
+    excerpt = matched_text_excerpt(body)
+    if not excerpt:
+        return row, network_fetch_performed, False
+
+    enriched = dict(row)
+    enriched["resolved_url"] = str(resolved_url)
+    enriched["matched_text_excerpt"] = excerpt
+    return enriched, network_fetch_performed, True
+
+
 def normalize_evidence_text(value: str | None) -> str:
     return " ".join((value or "").casefold().replace("’", "'").split())
 
@@ -3546,12 +3620,18 @@ def add_candidates(
     due: list[tuple[dict, dict]],
     tracked_episodes: list[dict],
     now: datetime,
+    durability_fulltext_fetcher=None,
+    durability_fetch_cache: dict | None = None,
 ) -> tuple[int, int]:
     by_id = {str(x.get("candidate_id")): x for x in queue if isinstance(x, dict) and x.get("candidate_id")}
     episode_ids = sorted({ep["episode_id"] for ep, _ in due})
     check_labels = sorted({check["label"] for _, check in due})
     added = 0
     auto_approved_strict = 0
+    durability_network_fetches = 0
+    durability_fetch_cache = (
+        durability_fetch_cache if isinstance(durability_fetch_cache, dict) else {}
+    )
     for row in rows:
         cid = candidate_id(city_key, row["url"], row["title"])
         matching = match_candidate_to_episodes(row, tracked_episodes)
@@ -3569,6 +3649,16 @@ def add_candidates(
 
         decision_input = {**row, "source": row.get("source") or "Google News RSS"}
         decision = classify_candidate(decision_input, city_key, tracked_episodes, matching)
+        persisted_row = decision_input
+        if durability_network_fetches < MAX_FULLTEXT_FETCHES_PER_CITY:
+            persisted_row, fetched, _ = enrich_rss_candidate_for_durability(
+                decision_input,
+                decision,
+                fulltext_fetcher=durability_fulltext_fetcher,
+                fetch_cache=durability_fetch_cache,
+            )
+            if fetched:
+                durability_network_fetches += 1
         status = decision["proposed_outcome"]
         item = {
             "candidate_id": cid,
@@ -3576,15 +3666,15 @@ def add_candidates(
             "city": CITY_CONFIG[city_key]["label"],
             "status": status,
             "source": decision_input["source"],
-            "publisher": row.get("publisher"),
-            "publisher_url": row.get("publisher_url"),
-            "url": row["url"],
-            "title": row["title"],
-            "published_at": row.get("published_at"),
-            "snippet": row.get("snippet"),
-            "discovery_basis": row.get("discovery_basis"),
-            "resolved_url": row.get("resolved_url"),
-            "matched_text_excerpt": row.get("matched_text_excerpt"),
+            "publisher": persisted_row.get("publisher"),
+            "publisher_url": persisted_row.get("publisher_url"),
+            "url": persisted_row["url"],
+            "title": persisted_row["title"],
+            "published_at": persisted_row.get("published_at"),
+            "snippet": persisted_row.get("snippet"),
+            "discovery_basis": persisted_row.get("discovery_basis"),
+            "resolved_url": persisted_row.get("resolved_url"),
+            "matched_text_excerpt": persisted_row.get("matched_text_excerpt"),
             "first_discovered_at": iso(now),
             "last_seen_at": iso(now),
             "trigger_episode_ids": episode_ids,
@@ -5031,6 +5121,7 @@ def main() -> None:
     new_candidates = 0
     fulltext_fetches = 0
     fulltext_rescued_candidates = 0
+    durability_fetch_cache = {}
     for city_key, city_due in sorted(due.items()):
         composition_target_episode_ids.update(
             str(ep.get("episode_id") or "") for ep, _ in city_due if ep.get("episode_id")
@@ -5057,6 +5148,8 @@ def main() -> None:
             city_due,
             tracked_episodes_for_city(state, city_key),
             started,
+            durability_fulltext_fetcher=fetch_publisher_fulltext,
+            durability_fetch_cache=durability_fetch_cache,
         )
         new_candidates += added
         fulltext_fetches += int(google_stats.get("fulltext_fetches") or 0)
