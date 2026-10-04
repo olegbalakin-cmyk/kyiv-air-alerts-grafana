@@ -175,11 +175,40 @@ jobs:
           end = monitor.parse_dt(os.environ["HOLDOUT_END"])
           assert start and end
           kyiv_episodes = monitor.tracked_episodes_for_city(state, "kyiv")
-          holdout = [
+          window_rows = [
               ep for ep in kyiv_episodes
               if str(ep.get("alert_source") or "") == "kyiv_combined_exact_city"
               and (monitor.parse_dt(ep.get("alert_start")) is not None)
               and start <= monitor.parse_dt(ep.get("alert_start")) < end
+          ]
+          clusters = monitor.episode_representation_clusters(window_rows)
+          if len(clusters) != 22:
+              raise AssertionError(
+                  f"derived canonical representation clusters={len(clusters)} from window_rows={len(window_rows)}"
+              )
+
+          def canonical_representation_rank(ep):
+              def precision(value):
+                  dt = monitor.parse_dt(value)
+                  if not dt:
+                      return -1
+                  return int(dt.second != 0) + int(dt.microsecond != 0)
+              start_precision = precision(ep.get("alert_start"))
+              end_precision = precision(ep.get("alert_end"))
+              # Prefer the higher-resolution persisted exact-city representation.
+              # Remaining tie-breakers are deterministic and truth-independent.
+              return (
+                  start_precision + end_precision,
+                  start_precision,
+                  end_precision,
+                  str(ep.get("alert_start") or ""),
+                  str(ep.get("alert_end") or ""),
+                  str(ep.get("episode_id") or ""),
+              )
+
+          holdout = [
+              max(cluster, key=canonical_representation_rank)
+              for cluster in clusters
           ]
           holdout = sorted(
               holdout,
@@ -188,54 +217,7 @@ jobs:
                   str(ep.get("episode_id") or ""),
               ),
           )
-          if len(holdout) != 22:
-              source_counts = {}
-              checked72 = []
-              unchecked72 = []
-              for ep in holdout:
-                  source = str(ep.get("alert_source") or "")
-                  source_counts[source] = source_counts.get(source, 0) + 1
-                  check72 = next(
-                      (x for x in ep.get("checks") or [] if str(x.get("label") or "") == "72h"),
-                      None,
-                  )
-                  target = checked72 if isinstance(check72, dict) and check72.get("checked_at") else unchecked72
-                  target.append({
-                      "episode_id": ep.get("episode_id"),
-                      "alert_start": ep.get("alert_start"),
-                      "alert_end": ep.get("alert_end"),
-                      "checked_at_72h": check72.get("checked_at") if isinstance(check72, dict) else None,
-                  })
-              clusters = monitor.episode_representation_clusters(holdout)
-              cluster_summary = [
-                  [
-                      {
-                          "episode_id": x.get("episode_id"),
-                          "alert_start": x.get("alert_start"),
-                          "alert_end": x.get("alert_end"),
-                          "checked_72h": bool(next(
-                              (z.get("checked_at") for z in x.get("checks") or [] if str(z.get("label") or "") == "72h"),
-                              None,
-                          )),
-                      }
-                      for x in cluster
-                  ]
-                  for cluster in clusters
-              ]
-              print("CANONICAL_IDENTITY_DIAGNOSTIC=" + json.dumps({
-                  "window_rows": len(holdout),
-                  "source_counts": source_counts,
-                  "checked72_count": len(checked72),
-                  "unchecked72_count": len(unchecked72),
-                  "representation_cluster_count": len(clusters),
-                  "checked72": checked72,
-                  "unchecked72": unchecked72,
-                  "clusters": cluster_summary,
-              }, sort_keys=True))
-              raise AssertionError(
-                  f"derived canonical holdout episodes={len(holdout)}; "
-                  f"checked72={len(checked72)}; clusters={len(clusters)}"
-              )
+          assert len(holdout) == 22
 
           derived_ids = [str(ep.get("episode_id") or "") for ep in holdout]
           assert len(set(derived_ids)) == 22
