@@ -1,0 +1,245 @@
+name: Finalize 5-city persistence identity v2 export freeze
+
+on:
+  push:
+    branches:
+      - attack-event-5city-persistence-identity-v2-export-2026-10-04
+
+permissions:
+  actions: read
+  contents: write
+
+jobs:
+  finalize:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout freeze branch
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Verify exact fresh-main base
+        shell: bash
+        env:
+          BASE_SHA: 204db59612a9154d748e98d138838aa2133774fe
+        run: |
+          set -euo pipefail
+          parent="$(git rev-parse HEAD^)"
+          if [ "$parent" != "$BASE_SHA" ]; then
+            echo "FIRST_FAILING_GATE=FRESH_MAIN_BASE_MISMATCH"
+            echo "EXPECTED_BASE=$BASE_SHA"
+            echo "OBSERVED_BASE=$parent"
+            exit 1
+          fi
+          echo "FRESH_MAIN_BASE=$BASE_SHA"
+
+      - name: Download accepted Actions artifact
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ARTIFACT_ID: "11312721451"
+          ACCEPTED_RUN_ID: "37228197343"
+          ACCEPTED_HEAD_SHA: "0ae2b596ea38c80793c18884e747dceb66d91307"
+          ACCEPTED_NAME: "attack-event-5city-persistence-identity-v2"
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/freeze-artifact"
+
+          if ! curl --fail --silent --show-error --location             -H "Authorization: Bearer $GH_TOKEN"             -H "Accept: application/vnd.github+json"             -H "X-GitHub-Api-Version: 2022-11-28"             "https://api.github.com/repos/$GITHUB_REPOSITORY/actions/artifacts/$ARTIFACT_ID"             -o "$RUNNER_TEMP/freeze-artifact/artifact-meta.json"; then
+            echo "FIRST_FAILING_GATE=ARTIFACT_METADATA_DOWNLOAD_FAILED"
+            exit 1
+          fi
+
+          if ! jq -e             --argjson artifact_id "$ARTIFACT_ID"             --argjson run_id "$ACCEPTED_RUN_ID"             --arg head "$ACCEPTED_HEAD_SHA"             --arg name "$ACCEPTED_NAME"             '.id == $artifact_id
+             and .name == $name
+             and .expired == false
+             and .workflow_run.id == $run_id
+             and .workflow_run.head_sha == $head'             "$RUNNER_TEMP/freeze-artifact/artifact-meta.json" >/dev/null; then
+            echo "FIRST_FAILING_GATE=ARTIFACT_PROVENANCE_MISMATCH"
+            exit 1
+          fi
+
+          if ! curl --fail --silent --show-error --location             -H "Authorization: Bearer $GH_TOKEN"             -H "Accept: application/vnd.github+json"             -H "X-GitHub-Api-Version: 2022-11-28"             "https://api.github.com/repos/$GITHUB_REPOSITORY/actions/artifacts/$ARTIFACT_ID/zip"             -o "$RUNNER_TEMP/freeze-artifact/artifact.zip"; then
+            echo "FIRST_FAILING_GATE=ARTIFACT_DOWNLOAD_FAILED"
+            exit 1
+          fi
+
+          if ! unzip -q "$RUNNER_TEMP/freeze-artifact/artifact.zip" -d "$RUNNER_TEMP/freeze-artifact/unpacked"; then
+            echo "FIRST_FAILING_GATE=ARTIFACT_UNZIP_FAILED"
+            exit 1
+          fi
+
+          test -f "$RUNNER_TEMP/freeze-artifact/unpacked/attack_event_5city_persistence_identity_export_v2.json" || {
+            echo "FIRST_FAILING_GATE=EXPORT_FILE_MISSING"
+            exit 1
+          }
+          test -f "$RUNNER_TEMP/freeze-artifact/unpacked/summary.json" || {
+            echo "FIRST_FAILING_GATE=SUMMARY_FILE_MISSING"
+            exit 1
+          }
+          echo "ARTIFACT_DOWNLOAD_STATUS=PASS"
+
+      - name: Verify raw export byte identity
+        shell: bash
+        env:
+          EXPECTED_SHA: 71ab9ac4f8dbeefcdb074ab60d485ac0546086ce4bd9db755af797398895d544
+          EXPECTED_BYTES: "29774541"
+        run: |
+          set -euo pipefail
+          src="$RUNNER_TEMP/freeze-artifact/unpacked/attack_event_5city_persistence_identity_export_v2.json"
+          observed_sha="$(sha256sum "$src" | awk '{print $1}')"
+          observed_bytes="$(wc -c < "$src" | tr -d ' ')"
+          echo "EXPORT_SHA256=$observed_sha"
+          echo "EXPORT_BYTES=$observed_bytes"
+          if [ "$observed_sha" != "$EXPECTED_SHA" ] || [ "$observed_bytes" != "$EXPECTED_BYTES" ]; then
+            echo "FIRST_FAILING_GATE=EXPORT_BYTE_IDENTITY_MISMATCH"
+            echo "EXPECTED_SHA=$EXPECTED_SHA"
+            echo "OBSERVED_SHA=$observed_sha"
+            echo "EXPECTED_BYTES=$EXPECTED_BYTES"
+            echo "OBSERVED_BYTES=$observed_bytes"
+            exit 1
+          fi
+
+      - name: Verify frozen summary hard gates
+        shell: bash
+        run: |
+          set -euo pipefail
+          summary="$RUNNER_TEMP/freeze-artifact/unpacked/summary.json"
+          if ! jq -e '
+            .status == "PASS"
+            and .sha256 == "71ab9ac4f8dbeefcdb074ab60d485ac0546086ce4bd9db755af797398895d544"
+            and .byte_count == 29774541
+            and .classification_count == 6863
+            and .distribution.STRICT_EVENT_POSITIVE == 104
+            and .distribution.SENSITIVITY_EVENT_POSITIVE == 15
+            and .distribution.NO_CONFIRMED_EVENT == 5417
+            and .distribution.NEEDS_REVIEW == 1327
+            and .positive_event_count == 119
+            and .source_link_count == 2340
+            and .physical_unique_observation_count == 4544
+            and .total_evidence_reference_count == 2351
+            and .cross_batch_evidence_reference_count == 675
+            and .unresolved_evidence_reference_count == 0
+            and .classifier_provenance_counts.coverage == 6863
+            and .classifier_provenance_counts.unchanged == 6838
+            and .classifier_provenance_counts.repaired == 25
+            and .classifier_provenance_counts.null_classifier_blobs == 0
+            and .target_state_sha256 == "652bda9bc4037d263e7e1090455ff4df5387d1f4f1a73a8c5e160d7ce62132f5"
+            and .target_state_sha_verification == true
+            and .neon_mutations == 0
+            and .semantic_change == "NO"
+          ' "$summary" >/dev/null; then
+            echo "FIRST_FAILING_GATE=SUMMARY_HARD_GATE_MISMATCH"
+            jq -c . "$summary"
+            exit 1
+          fi
+          echo "SUMMARY_VALIDATION_STATUS=PASS"
+          echo "CLASSIFICATIONS=6863"
+          echo "DISTRIBUTION=104/15/5417/1327"
+          echo "POSITIVE_EVENTS=119"
+          echo "SOURCE_LINKS=2340"
+          echo "UNRESOLVED_EVIDENCE_REFERENCES=0"
+          echo "CLASSIFIER_PROVENANCE_COVERAGE=6863"
+          echo "TARGET_STATE_SHA_VERIFICATION=PASS"
+          echo "NEON_MUTATIONS=0"
+          echo "SEMANTIC_CHANGE=NO"
+
+      - name: Copy bytes unchanged and create final artifact commit
+        shell: bash
+        env:
+          BASE_SHA: 204db59612a9154d748e98d138838aa2133774fe
+          DEST: research/attack_event_5city_persistence_identity_export_v2_2026-10-04.json
+          WORKFLOW: .github/workflows/attack-event-5city-persistence-identity-v2-freeze-finalize.yml
+        run: |
+          set -euo pipefail
+          src="$RUNNER_TEMP/freeze-artifact/unpacked/attack_event_5city_persistence_identity_export_v2.json"
+          cp "$src" "$DEST"
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git add "$DEST"
+          git rm "$WORKFLOW"
+
+          precommit_diff="$(git diff --name-status "$BASE_SHA")"
+          expected_precommit="$(printf 'A\t%s' "$DEST")"
+          if [ "$precommit_diff" != "$expected_precommit" ]; then
+            echo "FIRST_FAILING_GATE=FINAL_TREE_DIFF_MISMATCH_PRECOMMIT"
+            echo "OBSERVED_FINAL_TREE_DIFF<<EOF"
+            printf '%s\n' "$precommit_diff"
+            echo "EOF"
+            exit 1
+          fi
+
+          git commit -m "Freeze 5-city persistence identity v2 export"
+          final_commit="$(git rev-parse HEAD)"
+          blob="$(git ls-tree "$final_commit" -- "$DEST" | awk '{print $3}')"
+
+          final_diff="$(git diff --name-status "$BASE_SHA" "$final_commit")"
+          expected_diff="$(printf 'A\t%s' "$DEST")"
+          if [ "$final_diff" != "$expected_diff" ]; then
+            echo "FIRST_FAILING_GATE=FINAL_TREE_DIFF_MISMATCH_POSTCOMMIT"
+            echo "OBSERVED_FINAL_TREE_DIFF<<EOF"
+            printf '%s\n' "$final_diff"
+            echo "EOF"
+            exit 1
+          fi
+
+          durable_sha="$(git cat-file blob "$blob" | sha256sum | awk '{print $1}')"
+          durable_bytes="$(git cat-file -s "$blob")"
+          if [ "$durable_sha" != "71ab9ac4f8dbeefcdb074ab60d485ac0546086ce4bd9db755af797398895d544" ] || [ "$durable_bytes" != "29774541" ]; then
+            echo "FIRST_FAILING_GATE=DURABLE_GIT_BLOB_BYTE_IDENTITY_MISMATCH"
+            echo "DURABLE_FILE_SHA256=$durable_sha"
+            echo "DURABLE_FILE_BYTES=$durable_bytes"
+            exit 1
+          fi
+
+          echo "FINAL_ARTIFACT_COMMIT=$final_commit"
+          echo "DURABLE_ARTIFACT_PATH=$DEST"
+          echo "DURABLE_ARTIFACT_BLOB=$blob"
+          echo "DURABLE_FILE_SHA256=$durable_sha"
+          echo "DURABLE_FILE_BYTES=$durable_bytes"
+          echo "FINAL_DIFF_STATUS=PASS"
+
+      - name: Push final durable artifact commit and verify remote reachability
+        shell: bash
+        env:
+          BRANCH: attack-event-5city-persistence-identity-v2-export-2026-10-04
+          DEST: research/attack_event_5city_persistence_identity_export_v2_2026-10-04.json
+        run: |
+          set -euo pipefail
+          final_commit="$(git rev-parse HEAD)"
+          blob="$(git ls-tree "$final_commit" -- "$DEST" | awk '{print $3}')"
+
+          if ! git push origin "HEAD:$BRANCH"; then
+            echo "FIRST_FAILING_GATE=FINAL_ARTIFACT_PUSH_FAILED"
+            exit 1
+          fi
+
+          git fetch origin "$BRANCH"
+          remote_commit="$(git rev-parse "origin/$BRANCH")"
+          if [ "$remote_commit" != "$final_commit" ]; then
+            echo "FIRST_FAILING_GATE=REMOTE_FINAL_COMMIT_MISMATCH"
+            echo "EXPECTED_FINAL_COMMIT=$final_commit"
+            echo "OBSERVED_REMOTE_COMMIT=$remote_commit"
+            exit 1
+          fi
+
+          remote_blob="$(git ls-tree "$remote_commit" -- "$DEST" | awk '{print $3}')"
+          remote_sha="$(git cat-file blob "$remote_blob" | sha256sum | awk '{print $1}')"
+          remote_bytes="$(git cat-file -s "$remote_blob")"
+          if [ "$remote_blob" != "$blob" ] || [ "$remote_sha" != "71ab9ac4f8dbeefcdb074ab60d485ac0546086ce4bd9db755af797398895d544" ] || [ "$remote_bytes" != "29774541" ]; then
+            echo "FIRST_FAILING_GATE=REMOTE_DURABLE_GIT_BLOB_IDENTITY_MISMATCH"
+            echo "REMOTE_BLOB=$remote_blob"
+            echo "REMOTE_FILE_SHA256=$remote_sha"
+            echo "REMOTE_FILE_BYTES=$remote_bytes"
+            exit 1
+          fi
+
+          echo "REMOTE_FINAL_ARTIFACT_COMMIT=$remote_commit"
+          echo "REMOTE_DURABLE_ARTIFACT_BLOB=$remote_blob"
+          echo "REMOTE_FILE_SHA256=$remote_sha"
+          echo "REMOTE_FILE_BYTES=$remote_bytes"
+          echo "PRODUCTION_MUTATION=NO"
+          echo "CREDENTIALS_EXPOSED=false"
+          echo "FREEZE_RESULT=PASS"
