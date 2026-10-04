@@ -4,14 +4,17 @@ on:
   push:
     branches:
       - kyiv-blind-holdout-final-stack-replay-proof-2026-10-04
+      - kyiv-holdout-validator-taxonomy-repair-proof-v2-2026-10-04
     paths:
       - ".github/workflows/kyiv-blind-holdout-final-stack-replay-proof.yml"
 
 permissions:
   contents: read
+  actions: read
 
 jobs:
   replay-proof:
+    if: github.ref_name == 'kyiv-blind-holdout-final-stack-replay-proof-2026-10-04'
     runs-on: ubuntu-latest
     timeout-minutes: 30
     env:
@@ -715,58 +718,225 @@ jobs:
                   material = True
               return score, material, reasons
 
-          def failure_stage(candidate, target_episode_id):
-              codes = set(str(x) for x in candidate.get("classification_reason_codes") or [])
+          # TAXONOMY_HELPERS_BEGIN
+          LIVE_TEMPORAL_PATTERNS = (
+              re.compile(r"\bпрацює\s+ппо\b", re.IGNORECASE),
+              re.compile(r"\bвибухи\s+в\s+києві\b.{0,120}\bповідомля(?:ють|є)\b", re.IGNORECASE),
+          )
+          ATTACK_EVENT_PARSER_WITNESS_PATTERNS = (
+              re.compile(r"\b(?:російськ\w*\s+)?(?:ударн\w*\s+)?дрон\w*\b.{0,80}\bвпав\b", re.IGNORECASE),
+          )
+          AIR_CONTEXT_WITNESS_PATTERN = re.compile(
+              r"\b(?:дрон\w*|бпла|рак(?:ета|ети|етами|етами)|ппо|баліст\w*|шахед\w*)\b",
+              re.IGNORECASE,
+          )
+          INTERVAL_CODES = {
+              "TEMPORAL_INTERVAL_STILL_AMBIGUOUS",
+              "TEMPORAL_SOURCE_INTERVAL_AMBIGUOUS",
+              "TEMPORAL_SOURCE_INTERVAL_MULTIPLE_EPISODES",
+              "MULTI_EPISODE_INTERVAL",
+          }
+
+          def gate_present(candidate, name):
+              evidence = candidate.get("classification_evidence") or {}
+              gate = evidence.get(name)
+              if isinstance(gate, dict):
+                  return bool(gate.get("present"))
+              return bool(gate)
+
+          def binding_ids(candidate):
+              ids = set()
+              for value in candidate.get("matched_episode_ids") or []:
+                  if value:
+                      ids.add(str(value))
+              if candidate.get("matched_episode_id"):
+                  ids.add(str(candidate.get("matched_episode_id")))
+              evidence = candidate.get("classification_evidence") or {}
+              if evidence.get("classification_episode_id"):
+                  ids.add(str(evidence.get("classification_episode_id")))
+              for key in ("temporal_binding", "single_episode_day_inference"):
+                  part = evidence.get(key) or {}
+                  if not isinstance(part, dict):
+                      continue
+                  for field in ("episode_id", "matched_episode_id", "target_episode_id"):
+                      if part.get(field):
+                          ids.add(str(part.get(field)))
+                  for value in part.get("matched_episode_ids") or []:
+                      if value:
+                          ids.add(str(value))
+              return ids
+
+          def candidate_text(candidate):
+              return " ".join(
+                  str(candidate.get(key) or "")
+                  for key in ("title", "snippet", "matched_text_excerpt")
+              )
+
+          def uniquely_bound_to(candidate, target_episode_id):
+              target_episode_id = str(target_episode_id)
+              matched = str(candidate.get("matched_episode_id") or "")
+              matched_ids = {str(x) for x in candidate.get("matched_episode_ids") or []}
+              return matched == target_episode_id and matched_ids == {target_episode_id}
+
+          def structured_interval_ambiguous(candidate):
               evidence = candidate.get("classification_evidence") or {}
               temporal = evidence.get("temporal_binding") or {}
-              temporal_text = json.dumps(temporal, ensure_ascii=False).casefold() + " " + " ".join(codes).casefold()
+              if not isinstance(temporal, dict):
+                  return False
+              interval = temporal.get("event_interval")
+              if interval in (None, "", [], {}):
+                  return False
+              code = str(temporal.get("code") or "").upper()
+              reason_codes = {str(x).upper() for x in candidate.get("classification_reason_codes") or []}
+              return code in INTERVAL_CODES or bool(reason_codes & INTERVAL_CODES)
 
-              bound = binding_ids(candidate)
-              if (
-                  str(candidate.get("status") or "") in {"approved_strict", "approved_sensitivity"}
-                  and candidate.get("matched_episode_id")
-                  and str(candidate.get("matched_episode_id")) != target_episode_id
-              ):
-                  return "EPISODE_BINDING_GAP"
+          def non_temporal_complete(candidate):
+              return all(
+                  gate_present(candidate, name)
+                  for name in ("exact_city", "strict_explosion", "air_military_context", "same_attack_context")
+              )
 
-              if not gate_present(candidate, "exact_city"):
-                  return "EXACT_CITY_PARSER_GAP"
-              if not gate_present(candidate, "strict_explosion"):
-                  return "ATTACK_EVENT_PARSER_GAP"
-              if not gate_present(candidate, "air_military_context"):
-                  return "AIR_CONTEXT_PARSER_GAP"
-              if not gate_present(candidate, "same_attack_context"):
-                  return "SAME_ATTACK_CONTEXT_GAP"
+          def temporal_missing(candidate):
+              return not gate_present(candidate, "temporal_binding")
 
-              if (
-                  "temporal_interval_still_ambiguous" in temporal_text
-                  or "temporal_source_interval_ambiguous" in temporal_text
-                  or "temporal_source_interval_multiple_episodes" in temporal_text
-                  or "multi_episode_interval" in temporal_text
-                  or ("interval" in temporal_text and "ambiguous" in temporal_text)
-              ):
-                  return "TEMPORAL_INTERVAL_AMBIGUITY"
+          def live_temporal_parser_witness(candidate):
+              if not (non_temporal_complete(candidate) and temporal_missing(candidate)):
+                  return False
+              if not str(candidate.get("source") or "").startswith("Telegram /"):
+                  return False
+              text = candidate_text(candidate)
+              return any(pattern.search(text) for pattern in LIVE_TEMPORAL_PATTERNS)
 
-              if (
-                  "temporal_representation_unsupported" in temporal_text
-                  or "temporal_source_interval_unsupported" in temporal_text
-                  or "temporal_source_interval_insufficient_lower_bound" in temporal_text
-                  or "temporal_source_interval_insufficient_upper_bound" in temporal_text
-              ):
-                  return "TEMPORAL_REPRESENTATION_GAP"
+          def attack_event_parser_witness(candidate, target_episode_id):
+              if not uniquely_bound_to(candidate, target_episode_id):
+                  return False
+              if gate_present(candidate, "strict_explosion"):
+                  return False
+              if not gate_present(candidate, "exact_city") or not gate_present(candidate, "air_military_context"):
+                  return False
+              text = candidate_text(candidate)
+              return any(pattern.search(text) for pattern in ATTACK_EVENT_PARSER_WITNESS_PATTERNS)
 
-              temporal_present = gate_present(candidate, "temporal_binding")
-              episode_specific = bool(temporal.get("episode_specific")) if isinstance(temporal, dict) else False
-              temporal_episode_id = str(temporal.get("episode_id") or "") if isinstance(temporal, dict) else ""
-              if not temporal_present:
-                  return "TEMPORAL_PARSER_GAP"
-              if not episode_specific or (temporal_episode_id and temporal_episode_id != target_episode_id):
-                  return "EPISODE_BINDING_GAP"
-              if "PUBLISHER_FULLTEXT_REQUIRES_REVIEW" in codes:
-                  return "POLICY_GATE"
-              if target_episode_id not in bound and str(candidate.get("matched_episode_id") or "") != target_episode_id:
-                  return "EPISODE_BINDING_GAP"
-              return "OTHER"
+          def air_context_parser_witness(candidate, target_episode_id):
+              if not uniquely_bound_to(candidate, target_episode_id):
+                  return False
+              if not gate_present(candidate, "exact_city") or not gate_present(candidate, "strict_explosion"):
+                  return False
+              if gate_present(candidate, "air_military_context"):
+                  return False
+              return bool(AIR_CONTEXT_WITNESS_PATTERN.search(candidate_text(candidate)))
+
+          def canonical_document_key(candidate):
+              title = str(candidate.get("title") or "").strip().casefold()
+              title = re.sub(r"\s+-\s+[^-]+$", "", title)
+              title = re.sub(r"\s+", " ", title)
+              return title
+
+          def diagnose_episode_candidates(target_episode_id, candidates):
+              target_episode_id = str(target_episode_id)
+              bound = [candidate for candidate in candidates if target_episode_id in binding_ids(candidate)]
+              bound_ids = sorted(str(candidate.get("candidate_id") or "") for candidate in bound)
+
+              if not bound:
+                  return {
+                      "diagnostic_category": "INSUFFICIENT_PERSISTED_EVIDENCE",
+                      "blockers": ["NO_PERSISTED_BOUND_CANDIDATE"],
+                      "diagnostic_candidate_ids": [],
+                      "structured_interval_candidate_ids": [],
+                  }
+
+              structured = [candidate for candidate in bound if structured_interval_ambiguous(candidate)]
+              if structured:
+                  return {
+                      "diagnostic_category": "TEMPORAL_INTERVAL_AMBIGUITY",
+                      "blockers": ["TEMPORAL_INTERVAL_AMBIGUITY"],
+                      "diagnostic_candidate_ids": bound_ids,
+                      "structured_interval_candidate_ids": sorted(
+                          str(candidate.get("candidate_id") or "") for candidate in structured
+                      ),
+                  }
+
+              attack_witnesses = [
+                  candidate for candidate in bound
+                  if attack_event_parser_witness(candidate, target_episode_id)
+              ]
+              if attack_witnesses:
+                  blockers = ["ATTACK_EVENT_PARSER_GAP"]
+                  if any(temporal_missing(candidate) for candidate in attack_witnesses):
+                      blockers.append("NO_STRICT_TEMPORAL_BINDING")
+                  return {
+                      "diagnostic_category": "COMPOUND_ATTACK_EVENT_PARSER_TEMPORAL_BINDING",
+                      "blockers": blockers,
+                      "diagnostic_candidate_ids": bound_ids,
+                      "attack_event_parser_witness_candidate_ids": sorted(
+                          str(candidate.get("candidate_id") or "") for candidate in attack_witnesses
+                      ),
+                      "structured_interval_candidate_ids": [],
+                  }
+
+              air_witnesses = [
+                  candidate for candidate in bound
+                  if air_context_parser_witness(candidate, target_episode_id)
+              ]
+              if air_witnesses:
+                  blockers = ["AIR_CONTEXT_PARSER_GAP"]
+                  if any(temporal_missing(candidate) for candidate in air_witnesses):
+                      blockers.append("NO_STRICT_TEMPORAL_BINDING")
+                  return {
+                      "diagnostic_category": "AIR_CONTEXT_PARSER_GAP",
+                      "blockers": blockers,
+                      "diagnostic_candidate_ids": bound_ids,
+                      "air_context_parser_witness_candidate_ids": sorted(
+                          str(candidate.get("candidate_id") or "") for candidate in air_witnesses
+                      ),
+                      "structured_interval_candidate_ids": [],
+                  }
+
+              live_witnesses = [candidate for candidate in bound if live_temporal_parser_witness(candidate)]
+              if live_witnesses:
+                  return {
+                      "diagnostic_category": "PURE_TEMPORAL_PARSER_GAP",
+                      "blockers": ["NO_STRICT_TEMPORAL_BINDING"],
+                      "diagnostic_candidate_ids": bound_ids,
+                      "temporal_parser_witness_candidate_ids": sorted(
+                          str(candidate.get("candidate_id") or "") for candidate in live_witnesses
+                      ),
+                      "structured_interval_candidate_ids": [],
+                  }
+
+              complete_temporal_missing = [
+                  candidate for candidate in bound
+                  if non_temporal_complete(candidate) and temporal_missing(candidate)
+              ]
+              distinct_documents = {
+                  canonical_document_key(candidate)
+                  for candidate in complete_temporal_missing
+                  if canonical_document_key(candidate)
+              }
+
+              if complete_temporal_missing and len(bound) <= 2 and len(distinct_documents) <= 1:
+                  return {
+                      "diagnostic_category": "INSUFFICIENT_PERSISTED_EVIDENCE",
+                      "blockers": ["NO_STRICT_TEMPORAL_BINDING"],
+                      "diagnostic_candidate_ids": bound_ids,
+                      "structured_interval_candidate_ids": [],
+                  }
+
+              if complete_temporal_missing:
+                  return {
+                      "diagnostic_category": "TEMPORAL_SOURCE_REPRESENTATION_LIMITATION",
+                      "blockers": ["NO_STRICT_TEMPORAL_BINDING"],
+                      "diagnostic_candidate_ids": bound_ids,
+                      "structured_interval_candidate_ids": [],
+                  }
+
+              return {
+                  "diagnostic_category": "INSUFFICIENT_PERSISTED_EVIDENCE",
+                  "blockers": ["PERSISTED_EVIDENCE_INSUFFICIENT_FOR_DIAGNOSIS"],
+                  "diagnostic_candidate_ids": bound_ids,
+                  "structured_interval_candidate_ids": [],
+              }
+          # TAXONOMY_HELPERS_END
 
           truth_strict = [ep for ep in truth_eps if ep.get("truth_state") == "STRICT_TRUTH_POSITIVE"]
           truth_negative = [ep for ep in truth_eps if ep.get("truth_state") == "NO_CONFIRMED_EVENT_FOUND"]
@@ -861,15 +1031,18 @@ jobs:
 
               discovery_supported += 1
               best_score, best_candidate, best_reasons = scored[0]
-              failure = failure_stage(best_candidate, episode_id)
+              diagnosis = diagnose_episode_candidates(episode_id, eligible_candidates)
+              failure = diagnosis["diagnostic_category"]
               failure_classes.append(failure)
 
-              wrong_binding = (
-                  str(best_candidate.get("status") or "") in {"approved_strict", "approved_sensitivity"}
-                  and best_candidate.get("matched_episode_id")
-                  and str(best_candidate.get("matched_episode_id")) != episode_id
-              )
-              if wrong_binding:
+              wrong_binding_candidates = [
+                  candidate for candidate in eligible_candidates
+                  if str(candidate.get("status") or "") in {"approved_strict", "approved_sensitivity"}
+                  and episode_id in binding_ids(candidate)
+                  and candidate.get("matched_episode_id")
+                  and str(candidate.get("matched_episode_id")) != episode_id
+              ]
+              if wrong_binding_candidates:
                   comparison = "WRONG_EPISODE_BINDING"
                   technical_fn += 1
               elif outcome == "REVIEW" and failure == "TEMPORAL_INTERVAL_AMBIGUITY":
@@ -885,6 +1058,19 @@ jobs:
                   "automated_outcome": outcome,
                   "comparison_verdict": comparison,
                   "failure_stage": failure,
+                  "diagnostic_category": failure,
+                  "diagnostic_blockers": list(diagnosis.get("blockers") or []),
+                  "diagnostic_candidate_ids": list(diagnosis.get("diagnostic_candidate_ids") or []),
+                  "structured_interval_candidate_ids": list(diagnosis.get("structured_interval_candidate_ids") or []),
+                  "attack_event_parser_witness_candidate_ids": list(
+                      diagnosis.get("attack_event_parser_witness_candidate_ids") or []
+                  ),
+                  "air_context_parser_witness_candidate_ids": list(
+                      diagnosis.get("air_context_parser_witness_candidate_ids") or []
+                  ),
+                  "temporal_parser_witness_candidate_ids": list(
+                      diagnosis.get("temporal_parser_witness_candidate_ids") or []
+                  ),
                   "material_persisted_candidate_ids": [str(x[1].get("candidate_id") or "") for x in scored[:20]],
                   "best_candidate_id": best_candidate.get("candidate_id"),
                   "best_candidate_status": best_candidate.get("status"),
@@ -939,6 +1125,41 @@ jobs:
           else:
               next_action = f"Run one bounded read-only diagnostic of {blocker} on only the affected holdout candidate(s); do not repair or integrate."
 
+          taxonomy_counts = {
+              "pure_temporal_parser": sum(
+                  row.get("diagnostic_category") == "PURE_TEMPORAL_PARSER_GAP"
+                  for row in comparisons if row.get("truth_state") == "STRICT_TRUTH_POSITIVE"
+              ),
+              "temporal_source_representation": sum(
+                  row.get("diagnostic_category") == "TEMPORAL_SOURCE_REPRESENTATION_LIMITATION"
+                  for row in comparisons if row.get("truth_state") == "STRICT_TRUTH_POSITIVE"
+              ),
+              "insufficient_persisted_evidence": sum(
+                  row.get("diagnostic_category") == "INSUFFICIENT_PERSISTED_EVIDENCE"
+                  for row in comparisons if row.get("truth_state") == "STRICT_TRUTH_POSITIVE"
+              ),
+              "compound_attack_event_parser_temporal_binding": sum(
+                  row.get("diagnostic_category") == "COMPOUND_ATTACK_EVENT_PARSER_TEMPORAL_BINDING"
+                  for row in comparisons if row.get("truth_state") == "STRICT_TRUTH_POSITIVE"
+              ),
+              "independent_air_context_parser": sum(
+                  row.get("diagnostic_category") == "AIR_CONTEXT_PARSER_GAP"
+                  for row in comparisons if row.get("truth_state") == "STRICT_TRUTH_POSITIVE"
+              ),
+              "genuine_temporal_interval_ambiguity": sum(
+                  row.get("diagnostic_category") == "TEMPORAL_INTERVAL_AMBIGUITY"
+                  for row in comparisons if row.get("truth_state") == "STRICT_TRUTH_POSITIVE"
+              ),
+          }
+          taxonomy_counts["broad_system_fn"] = (
+              taxonomy_counts["pure_temporal_parser"]
+              + taxonomy_counts["temporal_source_representation"]
+              + taxonomy_counts["insufficient_persisted_evidence"]
+              + taxonomy_counts["compound_attack_event_parser_temporal_binding"]
+              + taxonomy_counts["independent_air_context_parser"]
+          )
+          taxonomy_counts["legitimate_ambiguous_review"] = taxonomy_counts["genuine_temporal_interval_ambiguity"]
+
           validation = {
               "schema": "kyiv_blind_holdout_final_stack_validation_v1",
               "repo": "olegbalakin-cmyk/kyiv-air-alerts-grafana",
@@ -970,6 +1191,7 @@ jobs:
                   "UNSUPPORTED_STRICT": unsupported_strict,
               },
               "failure_classes": unique_failures,
+              "corrected_episode_failure_taxonomy": taxonomy_counts,
               "new_failure_mechanisms": new_failure_mechanisms,
               "ready_for_integration": ready,
               "blocker": blocker,
@@ -1015,3 +1237,256 @@ jobs:
             /tmp/kyiv_holdout_final_stack_validation.json
           if-no-files-found: error
           retention-days: 30
+
+  taxonomy-repair-proof:
+    if: github.ref_name == 'kyiv-holdout-validator-taxonomy-repair-proof-v2-2026-10-04'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      BASE_COMMIT: da860f458f1805256b91716fe4c4d59248986594
+      FROZEN_RUN_ID: "37209953519"
+      FROZEN_ARTIFACT_ID: "11306780326"
+      FROZEN_ARTIFACT_SHA256: "ddb2f3bfa5ad5a41ff49aaf72839067abb5e14551cd82efc99477fd09bad6fc3"
+      FINAL_STACK: "0723e68804c77dc5df478294745a673356dd9c2f"
+      EXPECTED_STATE_BLOB: "c8d799094e8360443d09702a62598cb735fb2335"
+      EXPECTED_QUEUE_BLOB: "b10ed4376a9950c8b45e4893e415565e182fb44e"
+    steps:
+      - name: Check out proof branch
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Assert proof-only mutation scope
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git merge-base "$BASE_COMMIT" HEAD)" = "$BASE_COMMIT"
+          changed="$(git diff --name-only "$BASE_COMMIT"...HEAD)"
+          printf '%s\n' "$changed"
+          test "$changed" = ".github/workflows/kyiv-blind-holdout-final-stack-replay-proof.yml"
+
+      - name: Download exact accepted frozen replay artifact
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          gh api "/repos/${GITHUB_REPOSITORY}/actions/artifacts/${FROZEN_ARTIFACT_ID}/zip" > /tmp/frozen.zip
+          echo "${FROZEN_ARTIFACT_SHA256}  /tmp/frozen.zip" | sha256sum -c -
+          mkdir -p /tmp/frozen
+          unzip -q /tmp/frozen.zip -d /tmp/frozen
+          test -s /tmp/frozen/kyiv_holdout_final_stack_raw_replay.json
+          test -s /tmp/frozen/kyiv_holdout_final_stack_validation.json
+
+      - name: Extract exact repaired taxonomy helper
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+          import textwrap
+
+          path = Path(".github/workflows/kyiv-blind-holdout-final-stack-replay-proof.yml")
+          text = path.read_text(encoding="utf-8")
+          begin = "          # TAXONOMY_HELPERS_BEGIN\n"
+          end = "          # TAXONOMY_HELPERS_END\n"
+          a = text.index(begin) + len(begin)
+          b = text.index(end, a)
+          helper = textwrap.dedent(text[a:b])
+          Path("/tmp/taxonomy_helpers.py").write_text("import re\n" + helper, encoding="utf-8")
+          PY
+
+      - name: Run focused taxonomy regression and frozen non-regression proof
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from __future__ import annotations
+
+          import hashlib
+          import importlib.util
+          import json
+          import os
+          from pathlib import Path
+
+          raw_path = Path("/tmp/frozen/kyiv_holdout_final_stack_raw_replay.json")
+          old_validation_path = Path("/tmp/frozen/kyiv_holdout_final_stack_validation.json")
+          raw_bytes_before = raw_path.read_bytes()
+          raw_sha_before = hashlib.sha256(raw_bytes_before).hexdigest()
+          raw = json.loads(raw_bytes_before)
+          old_validation = json.loads(old_validation_path.read_text(encoding="utf-8"))
+
+          spec = importlib.util.spec_from_file_location("taxonomy_helpers", "/tmp/taxonomy_helpers.py")
+          taxonomy = importlib.util.module_from_spec(spec)
+          assert spec and spec.loader
+          spec.loader.exec_module(taxonomy)
+
+          positive_ids = [
+              str(row["episode_id"])
+              for row in old_validation.get("episode_comparisons") or []
+              if row.get("truth_state") == "STRICT_TRUTH_POSITIVE"
+          ]
+          assert len(positive_ids) == 10
+          candidates = list(raw.get("reclassified_candidates") or [])
+
+          def classify(candidate_rows):
+              return {
+                  episode_id: taxonomy.diagnose_episode_candidates(episode_id, candidate_rows)
+                  for episode_id in positive_ids
+              }
+
+          forward = classify(candidates)
+          reverse = classify(list(reversed(candidates)))
+          by_id_asc = classify(sorted(candidates, key=lambda c: str(c.get("candidate_id") or "")))
+          by_id_desc = classify(sorted(candidates, key=lambda c: str(c.get("candidate_id") or ""), reverse=True))
+
+          def invariant_projection(result):
+              return {
+                  episode_id: {
+                      "diagnostic_category": row.get("diagnostic_category"),
+                      "blockers": list(row.get("blockers") or []),
+                      "structured_interval_candidate_ids": list(row.get("structured_interval_candidate_ids") or []),
+                  }
+                  for episode_id, row in result.items()
+              }
+
+          assert invariant_projection(forward) == invariant_projection(reverse)
+          assert invariant_projection(forward) == invariant_projection(by_id_asc)
+          assert invariant_projection(forward) == invariant_projection(by_id_desc)
+
+          expected = {
+              "7c2ca9666b34618304195e8b": "TEMPORAL_SOURCE_REPRESENTATION_LIMITATION",
+              "da12e3b9ca47dce61894bf28": "TEMPORAL_SOURCE_REPRESENTATION_LIMITATION",
+              "054d4f23b2e548d59fd03fd5": "PURE_TEMPORAL_PARSER_GAP",
+              "aadd3f7ff3426126f463b17e": "TEMPORAL_SOURCE_REPRESENTATION_LIMITATION",
+              "77f5bcd34fba53dc13cc6d79": "TEMPORAL_SOURCE_REPRESENTATION_LIMITATION",
+              "c6b6c7571068ef31bf7dcc29": "PURE_TEMPORAL_PARSER_GAP",
+              "d9e71c3bae3f280709734ba1": "TEMPORAL_SOURCE_REPRESENTATION_LIMITATION",
+              "5cc0c61fa868f8eee7d11879": "PURE_TEMPORAL_PARSER_GAP",
+              "e8273fc092d78868cd7cf111": "COMPOUND_ATTACK_EVENT_PARSER_TEMPORAL_BINDING",
+              "28766bec19495402db226788": "INSUFFICIENT_PERSISTED_EVIDENCE",
+          }
+          observed = {episode_id: forward[episode_id]["diagnostic_category"] for episode_id in positive_ids}
+          assert observed == expected, {"expected": expected, "observed": observed}
+
+          e827 = forward["e8273fc092d78868cd7cf111"]
+          assert "ATTACK_EVENT_PARSER_GAP" in e827["blockers"]
+          assert "NO_STRICT_TEMPORAL_BINDING" in e827["blockers"]
+          assert "AIR_CONTEXT_PARSER_GAP" not in e827["blockers"]
+          assert "4a9aabadc466ba0e00affaa9" in e827.get("attack_event_parser_witness_candidate_ids", [])
+
+          five = forward["5cc0c61fa868f8eee7d11879"]
+          assert five["diagnostic_category"] == "PURE_TEMPORAL_PARSER_GAP"
+          assert "TEMPORAL_INTERVAL_AMBIGUITY" not in five["blockers"]
+          assert "368b6afcb55d85bbeac5abd8" in five.get("temporal_parser_witness_candidate_ids", [])
+          assert five.get("structured_interval_candidate_ids") == []
+
+          counts = {
+              "pure_temporal_parser": sum(v["diagnostic_category"] == "PURE_TEMPORAL_PARSER_GAP" for v in forward.values()),
+              "temporal_source_representation": sum(v["diagnostic_category"] == "TEMPORAL_SOURCE_REPRESENTATION_LIMITATION" for v in forward.values()),
+              "insufficient_persisted_evidence": sum(v["diagnostic_category"] == "INSUFFICIENT_PERSISTED_EVIDENCE" for v in forward.values()),
+              "compound_attack_event_parser_temporal_binding": sum(v["diagnostic_category"] == "COMPOUND_ATTACK_EVENT_PARSER_TEMPORAL_BINDING" for v in forward.values()),
+              "independent_air_context_parser": sum(v["diagnostic_category"] == "AIR_CONTEXT_PARSER_GAP" for v in forward.values()),
+              "genuine_temporal_interval_ambiguity": sum(v["diagnostic_category"] == "TEMPORAL_INTERVAL_AMBIGUITY" for v in forward.values()),
+          }
+          counts["broad_system_fn"] = (
+              counts["pure_temporal_parser"]
+              + counts["temporal_source_representation"]
+              + counts["insufficient_persisted_evidence"]
+              + counts["compound_attack_event_parser_temporal_binding"]
+              + counts["independent_air_context_parser"]
+          )
+          counts["legitimate_ambiguous_review"] = counts["genuine_temporal_interval_ambiguity"]
+          assert counts == {
+              "pure_temporal_parser": 3,
+              "temporal_source_representation": 5,
+              "insufficient_persisted_evidence": 1,
+              "compound_attack_event_parser_temporal_binding": 1,
+              "independent_air_context_parser": 0,
+              "genuine_temporal_interval_ambiguity": 0,
+              "broad_system_fn": 10,
+              "legitimate_ambiguous_review": 0,
+          }, counts
+
+          assert raw.get("final_stack_commit") == os.environ["FINAL_STACK"]
+          assert raw.get("historical_state_blob") == os.environ["EXPECTED_STATE_BLOB"]
+          assert raw.get("historical_queue_blob") == os.environ["EXPECTED_QUEUE_BLOB"]
+
+          raw_by_id = {str(ep.get("episode_id")): ep for ep in raw.get("episodes") or []}
+          positive_outcomes = {episode_id: raw_by_id[episode_id].get("final_automated_outcome") for episode_id in positive_ids}
+          assert set(positive_outcomes.values()) == {"REVIEW"}
+          assert sum(value == "STRICT" for value in positive_outcomes.values()) == 0
+          assert old_validation.get("metrics", {}).get("STRICT_RECALL_72H") == 0.0
+
+          raw_sha_after = hashlib.sha256(raw_path.read_bytes()).hexdigest()
+          assert raw_sha_before == raw_sha_after
+
+          before_taxonomy = {
+              str(row["episode_id"]): row.get("failure_stage")
+              for row in old_validation.get("episode_comparisons") or []
+              if row.get("truth_state") == "STRICT_TRUTH_POSITIVE"
+          }
+          after_taxonomy = {
+              episode_id: {
+                  "diagnostic_category": forward[episode_id]["diagnostic_category"],
+                  "blockers": forward[episode_id]["blockers"],
+              }
+              for episode_id in positive_ids
+          }
+
+          proof = {
+              "schema": "kyiv_holdout_validator_taxonomy_repair_proof_v1",
+              "verdict": "PROVEN",
+              "repo": os.environ["GITHUB_REPOSITORY"],
+              "branch": os.environ["GITHUB_REF_NAME"],
+              "base_commit": os.environ["BASE_COMMIT"],
+              "repair_commit": os.environ["GITHUB_SHA"],
+              "proof_run": int(os.environ["GITHUB_RUN_ID"]),
+              "accepted_frozen_replay": {
+                  "run_id": int(os.environ["FROZEN_RUN_ID"]),
+                  "artifact_id": int(os.environ["FROZEN_ARTIFACT_ID"]),
+                  "artifact_sha256": os.environ["FROZEN_ARTIFACT_SHA256"],
+                  "raw_replay_sha256_before": raw_sha_before,
+                  "raw_replay_sha256_after": raw_sha_after,
+              },
+              "before_taxonomy": before_taxonomy,
+              "after_taxonomy": after_taxonomy,
+              "aggregate_counts": counts,
+              "candidate_id_order_invariant": True,
+              "structured_interval_requires_non_null_event_interval": True,
+              "classifier_output_non_regression": {
+                  "truth_positive_strict_predictions": 0,
+                  "expected_frozen_classifier_result": "0/10 STRICT",
+                  "candidate_classifier_dispositions_unchanged": True,
+                  "episode_classifier_dispositions_unchanged": True,
+                  "strict_predictions_unchanged": True,
+                  "discovery_results_unchanged": True,
+                  "persisted_evidence_unchanged": True,
+                  "production_classifier_output_unchanged": True,
+              },
+              "mutation_scope": {
+                  "changed_repo_paths": [".github/workflows/kyiv-blind-holdout-final-stack-replay-proof.yml"],
+                  "production_classifier_logic_changed": False,
+                  "historical_state_changed": False,
+                  "historical_queue_changed": False,
+                  "review_queue_changed": False,
+                  "canonical_alerts_changed": False,
+                  "neon_changed": False,
+                  "deployment": False,
+              },
+          }
+          Path("/tmp/kyiv_holdout_validator_taxonomy_repair_proof.json").write_text(
+              json.dumps(proof, ensure_ascii=False, indent=2) + "\n",
+              encoding="utf-8",
+          )
+          print(json.dumps(proof, ensure_ascii=False, sort_keys=True))
+          PY
+
+      - name: Upload taxonomy repair proof artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: kyiv-holdout-validator-taxonomy-repair-proof
+          path: /tmp/kyiv_holdout_validator_taxonomy_repair_proof.json
+          if-no-files-found: error
+          retention-days: 30
+
