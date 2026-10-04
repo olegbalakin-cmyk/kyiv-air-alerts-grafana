@@ -1244,7 +1244,7 @@ jobs:
           retention-days: 30
 
   taxonomy-repair-proof:
-    if: github.ref_name == 'kyiv-holdout-validator-taxonomy-repair-proof-v2-2026-10-04' || github.head_ref == 'kyiv-holdout-validator-taxonomy-repair-proof-v2-2026-10-04'
+    if: github.ref_name == 'kyiv-holdout-validator-taxonomy-repair-proof-v2-2026-10-04' || github.head_ref == 'kyiv-holdout-validator-taxonomy-repair-proof-v2-2026-10-04' || startsWith(github.head_ref, 'kyiv-holdout-validator-taxonomy-repair-proof-run-')
     runs-on: ubuntu-latest
     timeout-minutes: 15
     env:
