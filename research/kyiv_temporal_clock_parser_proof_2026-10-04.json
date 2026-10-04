@@ -1,0 +1,310 @@
+{
+  "schema": "kyiv-temporal-clock-parser-proof-v1",
+  "created_at_utc": "2026-10-04T08:29:28Z",
+  "repo": "olegbalakin-cmyk/kyiv-air-alerts-grafana",
+  "verdict": "PROVEN",
+  "base_commit": "5c560b95db1290465d94cba95e84b11c7decf168",
+  "proof_branch": "kyiv-temporal-clock-parser-proof-2026-10-04",
+  "implementation_commit": "94ed9fb102741c65e191aba52e71289f2be658b5",
+  "proof_runner_commit": "0c9f7f61e9be5cda500ff73db099c0a8178a37e3",
+  "frozen_inputs": [
+    "research/kyiv_12_positive_source_provenance_2026-10-04.json",
+    "research/kyiv_12_positive_evidence_enrichment_ab_2026-10-04.json",
+    "research/kyiv_publisher_fulltext_policy_gate_proof_2026-10-04.json"
+  ],
+  "exact_target_episode_ids": [
+    "5fe9c0b3aed78bd5be50d3f6",
+    "d727150d5170d97fea2f96f0",
+    "4f236ae664adedf6c45b6d1e",
+    "b8b8b8e9b42ef2e360e1a253",
+    "deb4614a7c618c6eb581de10"
+  ],
+  "target_cases": [
+    {
+      "episode_id": "5fe9c0b3aed78bd5be50d3f6",
+      "source_temporal_excerpt": "21:54, 30 вересня … В Оболонському районі влучання в складські приміщення.",
+      "source_stated_clock": "21:54",
+      "expected_event_time_europe_kyiv": [
+        "2026-09-30T21:54:00+03:00"
+      ],
+      "expected_event_time_utc": [
+        "2026-09-30T18:54:00Z"
+      ],
+      "before_parser_result": {
+        "temporal_parser": false,
+        "episode_binding": false,
+        "outcome": "REVIEW"
+      },
+      "why_existing_parser_missed": "event_clock_mentions() accepted explicit clocks only when prefixed by 'о', 'близько', or 'приблизно'; the frozen official Kyiv City timeline entry starts directly with HH:MM.",
+      "after_parser_result": {
+        "clock_form_recognized": true,
+        "episode_specific_binding": true,
+        "outcome": "STRICT"
+      }
+    },
+    {
+      "episode_id": "d727150d5170d97fea2f96f0",
+      "source_temporal_excerpt": "6:56, 1 жовтня … Влучання БпЛА в територію нежитлового комплексу в Печерському районі.",
+      "source_stated_clock": "6:56",
+      "expected_event_time_europe_kyiv": [
+        "2026-10-01T06:56:00+03:00"
+      ],
+      "expected_event_time_utc": [
+        "2026-10-01T03:56:00Z"
+      ],
+      "before_parser_result": {
+        "temporal_parser": false,
+        "episode_binding": false,
+        "outcome": "REVIEW"
+      },
+      "why_existing_parser_missed": "event_clock_mentions() accepted explicit clocks only when prefixed by 'о', 'близько', or 'приблизно'; the frozen official Kyiv City timeline entry starts directly with HH:MM.",
+      "after_parser_result": {
+        "clock_form_recognized": true,
+        "episode_specific_binding": true,
+        "outcome": "STRICT"
+      }
+    },
+    {
+      "episode_id": "4f236ae664adedf6c45b6d1e",
+      "source_temporal_excerpt": "9:12, 1 жовтня … влучання БпЛА в будівлю школи … 9:27, 1 жовтня … влучання в складські приміщення.",
+      "source_stated_clock": [
+        "9:12",
+        "9:27"
+      ],
+      "expected_event_time_europe_kyiv": [
+        "2026-10-01T09:12:00+03:00",
+        "2026-10-01T09:27:00+03:00"
+      ],
+      "expected_event_time_utc": [
+        "2026-10-01T06:12:00Z",
+        "2026-10-01T06:27:00Z"
+      ],
+      "before_parser_result": {
+        "temporal_parser": false,
+        "episode_binding": false,
+        "outcome": "REVIEW"
+      },
+      "why_existing_parser_missed": "event_clock_mentions() accepted explicit clocks only when prefixed by 'о', 'близько', or 'приблизно'; the frozen official Kyiv City timeline entry starts directly with HH:MM.",
+      "after_parser_result": {
+        "clock_form_recognized": true,
+        "episode_specific_binding": true,
+        "outcome": "STRICT"
+      }
+    },
+    {
+      "episode_id": "b8b8b8e9b42ef2e360e1a253",
+      "source_temporal_excerpt": "5:00 … уламки впали … 5:04 … Знову влучання в Південний міст.",
+      "source_stated_clock": [
+        "5:00",
+        "5:04"
+      ],
+      "expected_event_time_europe_kyiv": [
+        "2026-10-02T05:00:00+03:00",
+        "2026-10-02T05:04:00+03:00"
+      ],
+      "expected_event_time_utc": [
+        "2026-10-02T02:00:00Z",
+        "2026-10-02T02:04:00Z"
+      ],
+      "before_parser_result": {
+        "temporal_parser": false,
+        "episode_binding": false,
+        "outcome": "REVIEW"
+      },
+      "why_existing_parser_missed": "event_clock_mentions() accepted explicit clocks only when prefixed by 'о', 'близько', or 'приблизно'; the frozen official Kyiv City timeline entry starts directly with HH:MM.",
+      "after_parser_result": {
+        "clock_form_recognized": true,
+        "episode_specific_binding": true,
+        "outcome": "STRICT"
+      }
+    },
+    {
+      "episode_id": "deb4614a7c618c6eb581de10",
+      "source_temporal_excerpt": "6:57, 3 жовтня … Влучання в Північний міст.",
+      "source_stated_clock": "6:57",
+      "expected_event_time_europe_kyiv": [
+        "2026-10-03T06:57:00+03:00"
+      ],
+      "expected_event_time_utc": [
+        "2026-10-03T03:57:00Z"
+      ],
+      "before_parser_result": {
+        "temporal_parser": false,
+        "episode_binding": false,
+        "outcome": "REVIEW"
+      },
+      "why_existing_parser_missed": "event_clock_mentions() accepted explicit clocks only when prefixed by 'о', 'близько', or 'приблизно'; the frozen official Kyiv City timeline entry starts directly with HH:MM.",
+      "after_parser_result": {
+        "clock_form_recognized": true,
+        "episode_specific_binding": true,
+        "outcome": "STRICT"
+      }
+    }
+  ],
+  "parser_change": {
+    "file": "kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py",
+    "function": "event_clock_mentions",
+    "summary": "Add one narrow exact-clock syntax: HH:MM at the start of an event segment. Existing prefixed clock parsing and all downstream Europe/Kyiv ZoneInfo binding/ambiguity logic remain unchanged.",
+    "newly_supported_form": "segment-leading HH:MM",
+    "implementation_pattern": "^(\\d{1,2}):(\\d{2})\\b",
+    "existing_prefixed_forms_unchanged": [
+      "о HH:MM / HH.MM",
+      "близько HH:MM / HH.MM",
+      "приблизно HH:MM / HH.MM"
+    ],
+    "timezone_logic": "unchanged; datetime is constructed with KYIV_TZ = ZoneInfo('Europe/Kyiv') and converted to UTC",
+    "temporal_representation_changes": 0,
+    "air_context_changes": 0,
+    "same_attack_changes": 0,
+    "publisher_fulltext_policy_changes": 0,
+    "source_discovery_changes": 0,
+    "source_adapter_changes": 0
+  },
+  "semantic_guards": {
+    "vague_or_interval_language_not_newly_exact": [
+      "після 03:00",
+      "Станом на 21:50",
+      "bare HH:MM in non-leading prose"
+    ],
+    "approximate_clock_behavior": "unchanged from predecessor; this proof adds no approximate-time syntax",
+    "invalid_clocks_rejected": [
+      "24:00",
+      "23:60",
+      "99:99"
+    ],
+    "neighboring_alert_ambiguity": "unchanged; overlapping distinct alert windows remain TEMPORAL_EXPLICIT_EVENT_TIME_AMBIGUOUS_EPISODES"
+  },
+  "tests": {
+    "status": "PASS",
+    "workflow": ".github/workflows/kyiv-temporal-clock-parser-proof.yml",
+    "workflow_run_id": 37189065231,
+    "workflow_job_id": 111397235497,
+    "focused_pytest": "23 passed",
+    "full_pytest": "166 passed",
+    "monitor_self_test": {
+      "result": "PASS",
+      "summary": "23 audited cities; IR01-IR20 covered; 50/50 provenance approvals; 2/2 deterministic negatives; 58/58 no-adapter regression; 20/20 episode replay; overlap/near-duplicate guards and dry replay purity passed"
+    },
+    "focused_assertions": [
+      "all 5 frozen parser target source excerpts recognize the demonstrated segment-leading clock",
+      "all 5 targets produce episode-specific explicit-event-time binding with Europe/Kyiv ZoneInfo conversion",
+      "2 temporal-representation cases remain outside the exact-clock parser rule",
+      "air-context/same-attack case remains non-strict because same-attack is false",
+      "4 predecessor publisher_fulltext positives remain strict",
+      "invalid and non-leading/open-interval/reporting clocks are not newly accepted",
+      "neighboring-alert ambiguity remains non-strict",
+      "frozen 12-episode replay changes exactly the 5 parser targets"
+    ]
+  },
+  "before": {
+    "STRICT": 4,
+    "SENSITIVITY": 0,
+    "REVIEW": 8
+  },
+  "after": {
+    "STRICT": 9,
+    "SENSITIVITY": 0,
+    "REVIEW": 3
+  },
+  "changed_outcomes": [
+    {
+      "episode_id": "5fe9c0b3aed78bd5be50d3f6",
+      "before": "REVIEW",
+      "after": "STRICT"
+    },
+    {
+      "episode_id": "d727150d5170d97fea2f96f0",
+      "before": "REVIEW",
+      "after": "STRICT"
+    },
+    {
+      "episode_id": "4f236ae664adedf6c45b6d1e",
+      "before": "REVIEW",
+      "after": "STRICT"
+    },
+    {
+      "episode_id": "b8b8b8e9b42ef2e360e1a253",
+      "before": "REVIEW",
+      "after": "STRICT"
+    },
+    {
+      "episode_id": "deb4614a7c618c6eb581de10",
+      "before": "REVIEW",
+      "after": "STRICT"
+    }
+  ],
+  "target_episodes_promoted": {
+    "count": 5,
+    "denominator": 5,
+    "episode_ids": [
+      "5fe9c0b3aed78bd5be50d3f6",
+      "d727150d5170d97fea2f96f0",
+      "4f236ae664adedf6c45b6d1e",
+      "b8b8b8e9b42ef2e360e1a253",
+      "deb4614a7c618c6eb581de10"
+    ]
+  },
+  "non_target_episodes_promoted": {
+    "count": 0,
+    "denominator": 3,
+    "episode_ids": []
+  },
+  "scope_leak": false,
+  "unchanged_predecessor_strict": {
+    "count": 4,
+    "episode_ids": [
+      "735a17c8622f113c4abc15b8",
+      "6bb2a52b33667e8ddf111326",
+      "4684548673d2b83089b0f15e",
+      "af3627c04d206a368662136e"
+    ]
+  },
+  "remaining_failures": {
+    "temporal_parser": {
+      "count": 0,
+      "episode_ids": []
+    },
+    "temporal_representation": {
+      "count": 2,
+      "episode_ids": [
+        "9fd2e6a9a02235982bd706ea",
+        "cfeec7a191817720d241fedb"
+      ],
+      "details": [
+        {
+          "episode_id": "9fd2e6a9a02235982bd706ea",
+          "reason": "TEMPORAL_REPRESENTATION_GAP",
+          "source_relation": "Станом на 21:50",
+          "representation": "reported_by_or_before upper bound; not converted to exact event time"
+        },
+        {
+          "episode_id": "cfeec7a191817720d241fedb",
+          "reason": "TEMPORAL_REPRESENTATION_GAP",
+          "source_relation": "після 3 ранку",
+          "representation": "open interval after 03:00; not collapsed to exact event time"
+        }
+      ]
+    },
+    "air-context / same-attack": {
+      "count": 1,
+      "episode_ids": [
+        "a422cb3549b4ba330c3b831f"
+      ],
+      "detail": "The leading 6:30 clock is syntactically parseable under the new narrow rule, but B_same_attack remains false and the episode remains REVIEW with SAME_ATTACK_CONTEXT_GAP."
+    },
+    "other": {
+      "count": 0,
+      "episode_ids": []
+    }
+  },
+  "mutations": {
+    "main_mutated": false,
+    "site_prod_mutated": false,
+    "monitor_state_mutations": 0,
+    "review_queue_mutations": 0,
+    "canonical_alert_mutations": 0,
+    "neon_db_mutations": 0,
+    "deploy": false
+  },
+  "next_action": "repair the 2 temporal-representation cases only; do not perform it in this task"
+}
