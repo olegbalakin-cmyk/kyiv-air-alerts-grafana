@@ -37,7 +37,523 @@ jobs:
           test "$(git merge-base "$REPAIR_COMMIT" HEAD)" = "$REPAIR_COMMIT"
           changed="$(git diff --name-only "$PRODUCTION_BASE"...HEAD)"
           printf '%s\n' "$changed"
-          unexpected="$(printf '%s\n' "$changed" | grep -v -E '^(\.github/workflows/google-news-publisher-resolution-repair-proof\.yml|kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates\.py|kyiv-air-alerts-grafana/tests/test_google_news_publisher_resolution\.py)$' || true)"
+          unexpected="$(printf '%s\n' "$changed" | grep -v -E '^(\.github/workflows/google-news-publisher-resolution-repair-proof\.yml|kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates\.py|kyiv-air-alerts-grafana/tests/test_google_news_publisher_resolution\.py|research/google_news_publisher_resolution_repair_proof_2026-10-04\.json)
+          test -z "$unexpected"
+          mkdir -p /tmp/proof
+          git ls-files -z 'kyiv-air-alerts-grafana/data/**' 'kyiv-air-alerts-grafana/research/**'             | sort -z | xargs -0 -r sha256sum > /tmp/proof/protected.before.sha256
+
+          python - <<'PY'
+          import ast, os, subprocess
+          from pathlib import Path
+
+          path = "kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py"
+          base = subprocess.check_output(["git", "show", f"{os.environ['PRODUCTION_BASE']}:{path}"], text=True)
+          current = Path(path).read_text(encoding="utf-8")
+
+          def funcs(text):
+              tree = ast.parse(text)
+              return {
+                  n.name: ast.dump(n, include_attributes=False)
+                  for n in tree.body
+                  if isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef))
+              }
+
+          before, after = funcs(base), funcs(current)
+          changed = sorted(name for name in set(before) | set(after) if before.get(name) != after.get(name))
+          allowed = {
+              "fetch_publisher_fulltext",
+              "google_host",
+              "google_news_article_url",
+              "validated_publisher_url",
+              "google_news_resolution_params",
+              "google_news_batch_payload",
+              "parse_google_news_batch_resolution",
+              "resolve_google_news_publisher_url",
+          }
+          assert set(changed) == allowed, changed
+
+          frozen = [
+              "google_news_query_families",
+              "rss_durability_enrichment_eligible",
+              "enrich_rss_candidate_for_durability",
+              "build_google_news_candidate",
+              "classification_text",
+              "classify_candidate",
+              "temporal_binding_evidence",
+              "strict_attack_event_signal",
+              "strict_explosion_evidence",
+              "air_military_context_evidence",
+              "same_attack_context_evidence",
+              "publisher_fulltext_requires_review",
+              "match_candidate_to_episodes",
+          ]
+          for name in frozen:
+              assert before.get(name) == after.get(name), name
+          print("BOUNDED_RESOLVER_AST_SCOPE_OK", changed)
+          PY
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: kyiv-air-alerts-grafana/requirements.txt
+
+      - name: Install dependencies
+        working-directory: kyiv-air-alerts-grafana
+        run: |
+          python -m pip install -r requirements.txt
+          python -m pip install pytest
+
+      - name: Run deterministic resolver fixtures
+        working-directory: kyiv-air-alerts-grafana
+        run: python -m pytest -q tests/test_google_news_publisher_resolution.py
+
+      - name: Run relevant and full regressions
+        working-directory: kyiv-air-alerts-grafana
+        run: |
+          python -m pytest -q tests
+          python scripts/monitor_explosion_candidates.py --self-test
+
+      - name: Download exact accepted frozen Kyiv replay
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          gh api "/repos/${GITHUB_REPOSITORY}/actions/artifacts/${FROZEN_ARTIFACT_ID}/zip" > /tmp/frozen.zip
+          echo "${FROZEN_ARTIFACT_SHA256}  /tmp/frozen.zip" | sha256sum -c -
+          mkdir -p /tmp/frozen
+          unzip -q /tmp/frozen.zip -d /tmp/frozen
+          test -s /tmp/frozen/kyiv_holdout_final_stack_raw_replay.json
+          test -s /tmp/frozen/kyiv_holdout_final_stack_validation.json
+          git show "${HISTORICAL_STATE_COMMIT}:kyiv-air-alerts-grafana/data/explosion_candidate_monitor_state.json" > /tmp/frozen/holdout-state.json
+
+      - name: Prove frozen Kyiv non-regression
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import copy, json, sys
+          from pathlib import Path
+
+          root = Path.cwd() / "kyiv-air-alerts-grafana"
+          sys.path.insert(0, str(root / "scripts"))
+          import monitor_explosion_candidates as monitor
+
+          raw = json.loads(Path("/tmp/frozen/kyiv_holdout_final_stack_raw_replay.json").read_text(encoding="utf-8"))
+          old_validation = json.loads(Path("/tmp/frozen/kyiv_holdout_final_stack_validation.json").read_text(encoding="utf-8"))
+          state = json.loads(Path("/tmp/frozen/holdout-state.json").read_text(encoding="utf-8"))
+
+          def forbidden_network(*args, **kwargs):
+              raise AssertionError("NETWORK_FORBIDDEN_IN_FROZEN_PROOF")
+          monitor.requests.sessions.Session.request = forbidden_network
+          monitor.requests.get = forbidden_network
+          monitor.requests.post = forbidden_network
+          monitor.requests.request = forbidden_network
+
+          post_candidates = []
+          for original in raw.get("reclassified_candidates") or []:
+              item = copy.deepcopy(original)
+              decision = monitor.dry_classify_existing_candidate(item, state)
+              matching = decision.get("matching") or {
+                  "outcome": "no_match",
+                  "matched_episode_ids": [],
+                  "logical_episode_groups": [],
+                  "matched_episode_id": None,
+              }
+              monitor.apply_classification_decision(item, decision, matching)
+              post_candidates.append(item)
+
+          post_by_id = {
+              str(row.get("candidate_id") or ""): row
+              for row in post_candidates
+              if row.get("candidate_id")
+          }
+          positive_ids = {
+              str(row["episode_id"])
+              for row in old_validation["episode_comparisons"]
+              if row.get("truth_state") == "STRICT_TRUTH_POSITIVE"
+          }
+          holdout_ids = {str(row["episode_id"]) for row in old_validation["episode_comparisons"]}
+          raw_eps = {str(x["episode_id"]): x for x in raw["episodes"]}
+          assert len(positive_ids) == 10
+          assert holdout_ids == set(raw_eps)
+
+          def supports(row, episode_id):
+              temporal = (row.get("classification_evidence") or {}).get("temporal_binding") or {}
+              return (
+                  str(temporal.get("episode_id") or "") == episode_id
+                  or episode_id in {str(x) for x in temporal.get("supported_episode_ids") or []}
+              )
+
+          outcomes = {}
+          for episode_id in sorted(holdout_ids):
+              candidates = [
+                  post_by_id[cid]
+                  for cid in raw_eps[episode_id].get("candidate_ids") or []
+                  if cid in post_by_id
+              ]
+              strict = [x for x in candidates if x.get("status") == "approved_strict" and supports(x, episode_id)]
+              sensitivity = [x for x in candidates if x.get("status") == "approved_sensitivity" and supports(x, episode_id)]
+              if strict:
+                  outcomes[episode_id] = "STRICT"
+              elif sensitivity:
+                  outcomes[episode_id] = "SENSITIVITY"
+              elif candidates:
+                  outcomes[episode_id] = "REVIEW"
+              else:
+                  outcomes[episode_id] = "NO_CANDIDATE"
+
+          positive = {eid: outcomes[eid] for eid in positive_ids}
+          counts = {
+              "STRICT": sum(v == "STRICT" for v in positive.values()),
+              "SENSITIVITY": sum(v == "SENSITIVITY" for v in positive.values()),
+              "REVIEW": sum(v == "REVIEW" for v in positive.values()),
+          }
+          unsupported = sorted(eid for eid in holdout_ids - positive_ids if outcomes[eid] == "STRICT")
+          assert counts == {"STRICT": 3, "SENSITIVITY": 0, "REVIEW": 7}, counts
+          assert unsupported == [], unsupported
+
+          result = {
+              "STRICT": counts["STRICT"],
+              "SENSITIVITY": counts["SENSITIVITY"],
+              "REVIEW": counts["REVIEW"],
+              "unsupported_STRICT": len(unsupported),
+              "historical_evidence_added": False,
+          }
+          Path("/tmp/proof/frozen_kyiv.json").write_text(json.dumps(result, indent=2) + "\n", encoding="utf-8")
+          print(json.dumps(result))
+          PY
+
+      - name: Run bounded live resolver proof
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json, sys
+          from datetime import datetime, timedelta, timezone
+          from pathlib import Path
+          from urllib.parse import urlparse
+
+          root = Path.cwd() / "kyiv-air-alerts-grafana"
+          sys.path.insert(0, str(root / "scripts"))
+          import monitor_explosion_candidates as m
+
+          UTC = timezone.utc
+          now = datetime.now(UTC)
+          earliest = now - timedelta(days=8)
+
+          original_cap = m.MAX_FULLTEXT_FETCHES_PER_CITY
+          m.MAX_FULLTEXT_FETCHES_PER_CITY = 0
+          discovered = []
+          discovery_errors = {}
+          try:
+              for city_key in sorted(m.CITY_CONFIG):
+                  try:
+                      rows, _, _ = m.search_city_news(city_key, earliest, now)
+                  except Exception as exc:
+                      discovery_errors[city_key] = f"{type(exc).__name__}: {exc}"
+                      continue
+                  for row in rows:
+                      url = str(row.get("url") or "")
+                      if m.google_news_article_url(url) and row.get("publisher") and row.get("publisher_url"):
+                          discovered.append({
+                              "city_key": city_key,
+                              "city": m.CITY_CONFIG[city_key]["label"],
+                              **row,
+                          })
+          finally:
+              m.MAX_FULLTEXT_FETCHES_PER_CITY = original_cap
+
+          assert discovered, discovery_errors
+
+          def norm_host(url):
+              return (urlparse(str(url or "")).hostname or "").casefold().removeprefix("www.")
+
+          discovered.sort(key=lambda r: (
+              str(r["city"]),
+              str(r.get("publisher") or ""),
+              str(r.get("url") or ""),
+          ))
+
+          sample = []
+          used_urls = set()
+          used_pubs = set()
+          used_cities = set()
+
+          for city in sorted({r["city"] for r in discovered}):
+              if len(used_cities) >= 4:
+                  break
+              for r in discovered:
+                  if r["city"] != city:
+                      continue
+                  pub = str(r.get("publisher") or "")
+                  if pub in used_pubs or r["url"] in used_urls:
+                      continue
+                  sample.append(r)
+                  used_urls.add(r["url"])
+                  used_pubs.add(pub)
+                  used_cities.add(city)
+                  break
+
+          for r in discovered:
+              if len(used_pubs) >= 6:
+                  break
+              pub = str(r.get("publisher") or "")
+              if pub in used_pubs or r["url"] in used_urls:
+                  continue
+              sample.append(r)
+              used_urls.add(r["url"])
+              used_pubs.add(pub)
+              used_cities.add(r["city"])
+
+          for r in discovered:
+              if len(sample) >= 10:
+                  break
+              if r["url"] in used_urls:
+                  continue
+              sample.append(r)
+              used_urls.add(r["url"])
+              used_pubs.add(str(r.get("publisher") or ""))
+              used_cities.add(r["city"])
+
+          assert len(sample) <= 10
+          assert len(used_pubs) >= 6, (len(used_pubs), [r.get("publisher") for r in sample])
+          assert len(used_cities) >= 4, (len(used_cities), [r.get("city") for r in sample])
+
+          headers = {
+              "User-Agent": "Mozilla/5.0 (compatible; ukraine-air-alerts-explosion-monitor/1.0)",
+              "Accept-Language": "uk,en;q=0.7",
+          }
+
+          records = []
+          for row in sample:
+              url = row["url"]
+              wrapper = m.requests.get(
+                  url,
+                  headers=headers,
+                  timeout=m.FULLTEXT_FETCH_TIMEOUT_SECONDS,
+                  allow_redirects=True,
+              )
+              wrapper_params = None
+              if wrapper.status_code < 400 and "html" in str(wrapper.headers.get("Content-Type") or "").casefold():
+                  wrapper_params = m.google_news_resolution_params(wrapper.text, str(wrapper.url or url))
+                  if wrapper_params is None:
+                      wrapper_params = m.google_news_resolution_params(wrapper.text, url)
+
+              resolver_url = m.resolve_google_news_publisher_url(
+                  url,
+                  wrapper_response=wrapper,
+              )
+              resolver_host = norm_host(resolver_url)
+              publisher_host = norm_host(row.get("publisher_url"))
+              plausible = bool(
+                  resolver_host and publisher_host and (
+                      resolver_host == publisher_host
+                      or resolver_host.endswith("." + publisher_host)
+                      or publisher_host.endswith("." + resolver_host)
+                  )
+              )
+
+              real_get = m.requests.get
+              traced = []
+              def traced_get(target, **kwargs):
+                  resp = real_get(target, **kwargs)
+                  traced.append({
+                      "url": str(target),
+                      "status": int(resp.status_code),
+                      "final_url": str(resp.url or target),
+                      "host": norm_host(resp.url or target),
+                      "content_type": str(resp.headers.get("Content-Type") or ""),
+                  })
+                  return resp
+
+              m.requests.get = traced_get
+              try:
+                  body, final_url = m.fetch_publisher_fulltext(url)
+              finally:
+                  m.requests.get = real_get
+
+              publisher_fetches = [x for x in traced if x["host"] and not m.google_host(x["host"])]
+              records.append({
+                  "city": row["city"],
+                  "publisher": row.get("publisher"),
+                  "publisher_url_from_rss": row.get("publisher_url"),
+                  "google_rss_url": url,
+                  "wrapper_status": int(wrapper.status_code),
+                  "wrapper_final_host": norm_host(wrapper.url),
+                  "wrapper_signature_present": bool(wrapper_params),
+                  "resolver_success": bool(resolver_url),
+                  "resolved_hostname": resolver_host or None,
+                  "publisher_identity_plausible": plausible if resolver_url else None,
+                  "publisher_fetch_status": publisher_fetches[-1]["status"] if publisher_fetches else None,
+                  "publisher_fetch_reached": bool(publisher_fetches),
+                  "body_extraction_success": bool(body),
+                  "final_publisher_url_returned": bool(final_url),
+              })
+
+          resolver_successes = [r for r in records if r["resolver_success"]]
+          successful_publishers = {r["publisher"] for r in resolver_successes}
+          bodies = [r for r in records if r["body_extraction_success"]]
+          plausible = all(r["publisher_identity_plausible"] for r in resolver_successes)
+          discovery_ok = len(discovered) > 0
+          gate = (
+              discovery_ok
+              and len(resolver_successes) >= 2
+              and len(successful_publishers) >= 2
+              and bool(bodies)
+              and plausible
+              and all(r["publisher_fetch_reached"] for r in resolver_successes)
+          )
+
+          result = {
+              "schema": "google_news_publisher_resolution_live_proof_v2",
+              "discovery": {
+                  "works": discovery_ok,
+                  "candidate_count": len(discovered),
+                  "errors": discovery_errors,
+              },
+              "sample_size": len(records),
+              "publishers_represented": sorted({str(r["publisher"]) for r in records}),
+              "cities_represented": sorted({str(r["city"]) for r in records}),
+              "resolver_success_count": len(resolver_successes),
+              "resolver_success_rate": (len(resolver_successes) / len(records)) if records else 0.0,
+              "successful_publishers": sorted(successful_publishers),
+              "publisher_fetch_reached_count": sum(bool(r["publisher_fetch_reached"]) for r in records),
+              "publisher_body_extraction_count": len(bodies),
+              "publisher_body_extraction_rate": (len(bodies) / len(records)) if records else 0.0,
+              "all_resolved_publisher_identities_plausible": plausible,
+              "hard_gate_pass": gate,
+              "records": records,
+          }
+          assert gate, json.dumps(result, ensure_ascii=False)
+          Path("/tmp/proof/live.json").write_text(
+              json.dumps(result, ensure_ascii=False, indent=2) + "\n",
+              encoding="utf-8",
+          )
+          print(json.dumps({
+              "sample_size": result["sample_size"],
+              "resolver_success_count": result["resolver_success_count"],
+              "resolver_success_rate": result["resolver_success_rate"],
+              "successful_publishers": result["successful_publishers"],
+              "cities_represented": result["cities_represented"],
+              "publisher_fetch_reached_count": result["publisher_fetch_reached_count"],
+              "publisher_body_extraction_count": result["publisher_body_extraction_count"],
+              "publisher_body_extraction_rate": result["publisher_body_extraction_rate"],
+          }, ensure_ascii=False))
+          PY
+
+      - name: Prove protected data unchanged and assemble proof
+        shell: bash
+        run: |
+          set -euo pipefail
+          git ls-files -z 'kyiv-air-alerts-grafana/data/**' 'kyiv-air-alerts-grafana/research/**'             | sort -z | xargs -0 -r sha256sum > /tmp/proof/protected.after.sha256
+          diff -u /tmp/proof/protected.before.sha256 /tmp/proof/protected.after.sha256
+
+          python - <<'PY'
+          import hashlib, inspect, json, os, sys
+          from pathlib import Path
+
+          root = Path.cwd() / "kyiv-air-alerts-grafana"
+          sys.path.insert(0, str(root / "scripts"))
+          import monitor_explosion_candidates as m
+
+          live = json.loads(Path("/tmp/proof/live.json").read_text(encoding="utf-8"))
+          frozen = json.loads(Path("/tmp/proof/frozen_kyiv.json").read_text(encoding="utf-8"))
+
+          proof = {
+              "schema": "google_news_publisher_resolution_repair_proof_v1",
+              "verdict": "GOOGLE NEWS PUBLISHER RESOLUTION REPAIR = PROVEN",
+              "proof_branch": os.environ["GITHUB_REF_NAME"],
+              "exact_base": os.environ["PRODUCTION_BASE"],
+              "repair_commit": os.environ["REPAIR_COMMIT"],
+              "final_proof_head": os.environ["GITHUB_SHA"],
+              "actions_run": int(os.environ["GITHUB_RUN_ID"]),
+              "resolution_mechanism": {
+                  "input": "Google News RSS /rss/articles/<opaque-id>",
+                  "current_wrapper": "Google-internal locale 302 then Google HTML wrapper carrying data-n-a-ts and data-n-a-sg",
+                  "rpc": "POST news.google.com/_/DotsSplashUi/data/batchexecute?rpcids=Fbv4je using garturlreq(article-id,timestamp,signature)",
+                  "output_validation": "HTTP(S), non-empty non-Google host, local/private literal targets rejected",
+                  "publisher_fetch": "existing publisher requests.get path followed by existing extract_article_text",
+                  "legacy_direct_redirect_preserved": True,
+              },
+              "deterministic_fixture_coverage": [
+                  "current 302 Google -> locale Google -> 200 wrapper resolution",
+                  "multiple independent publisher domains",
+                  "locale-normalizing Google 302",
+                  "malformed/expired article identifier",
+                  "unresolved Google wrapper",
+                  "non-HTML Google response",
+                  "Google HTTP failure",
+                  "resolved publisher URL validation",
+                  "fail-open behavior",
+                  "cache/deduplication behavior",
+                  "legacy direct publisher redirect",
+                  "both production callers",
+                  "publisher-fulltext semantic invariance",
+              ],
+              "live": live,
+              "production_callers": {
+                  "build_google_news_candidate_shared_fetcher": True,
+                  "enrich_rss_candidate_for_durability_shared_fetcher": True,
+                  "duplicated_resolver_implementations": False,
+              },
+              "classifier_non_regression": {
+                  "durability_classification_invariance_existing_test": True,
+                  "publisher_fulltext_existing_semantics_fixture_equal": True,
+                  "classifier_functions_ast_unchanged": True,
+              },
+              "frozen_kyiv": frozen,
+              "mutation_scope": {
+                  "discovery_query_families_changed": False,
+                  "rss_durability_eligibility_changed": False,
+                  "temporal_parser_or_policy_changed": False,
+                  "attack_event_parser_changed": False,
+                  "air_context_parser_changed": False,
+                  "same_attack_logic_changed": False,
+                  "strict_policy_changed": False,
+                  "persistence_schema_changed": False,
+                  "historical_evidence_state_queues_changed": False,
+                  "review_queue_changed": False,
+                  "canonical_alerts_changed": False,
+                  "neon_db_changed": False,
+                  "backfill": False,
+                  "deployment": False,
+              },
+              "resolver_source_sha256": hashlib.sha256(
+                  inspect.getsource(m.resolve_google_news_publisher_url).encode()
+              ).hexdigest(),
+          }
+          Path("/tmp/proof/google_news_publisher_resolution_repair_proof.json").write_text(
+              json.dumps(proof, ensure_ascii=False, indent=2) + "\n",
+              encoding="utf-8",
+          )
+          print(json.dumps({"verdict": proof["verdict"], "actions_run": proof["actions_run"]}, ensure_ascii=False))
+          PY
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: google-news-publisher-resolution-repair-proof
+          path: |
+            /tmp/proof/google_news_publisher_resolution_repair_proof.json
+            /tmp/proof/live.json
+            /tmp/proof/frozen_kyiv.json
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Commit durable proof result to proof branch
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p research
+          cp /tmp/proof/google_news_publisher_resolution_repair_proof.json research/google_news_publisher_resolution_repair_proof_2026-10-04.json
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add research/google_news_publisher_resolution_repair_proof_2026-10-04.json
+          git commit -m "Record Google News publisher resolver proof"
+          git push
+ || true)"
           test -z "$unexpected"
           mkdir -p /tmp/proof
           git ls-files -z 'kyiv-air-alerts-grafana/data/**' 'kyiv-air-alerts-grafana/research/**'             | sort -z | xargs -0 -r sha256sum > /tmp/proof/protected.before.sha256
