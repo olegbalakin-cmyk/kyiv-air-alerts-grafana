@@ -2293,6 +2293,20 @@ def dry_classify_existing_candidate(item: dict, state: dict) -> dict:
     return classify_candidate(item, city_key, episodes, matching)
 
 
+def publisher_fulltext_requires_review(
+    row: dict,
+    reviewed: dict,
+    *,
+    strict_eligible: bool,
+) -> bool:
+    """Publisher full text is neutral evidence provenance, not a positive strict signal."""
+    return (
+        row.get("discovery_basis") == "publisher_fulltext"
+        and not reviewed.get("usable")
+        and not strict_eligible
+    )
+
+
 def classify_candidate(row: dict, city_key: str, episodes: list[dict], matching: dict | None = None) -> dict:
     matching = matching or match_candidate_to_episodes(row, episodes)
 
@@ -2359,9 +2373,21 @@ def classify_candidate(row: dict, city_key: str, episodes: list[dict], matching:
         and not whole_message_non_air_defense_event
         and bool(AIR_DEFENSE_CONTEXT_RE.search(normalize_evidence_text(text)))
     )
-    fulltext_requires_review = (
-        row.get("discovery_basis") == "publisher_fulltext"
-        and not reviewed.get("usable")
+    base_event_ok = (
+        exact["present"]
+        and strict["present"]
+        and air["present"]
+        and same_attack["present"]
+    )
+    strict_episode_id = (
+        temporal.get("episode_id")
+        if temporal.get("present") and temporal.get("episode_specific")
+        else None
+    )
+    fulltext_requires_review = publisher_fulltext_requires_review(
+        row,
+        reviewed,
+        strict_eligible=bool(base_event_ok and strict_episode_id),
     )
 
     reason_codes = []
@@ -2399,17 +2425,6 @@ def classify_candidate(row: dict, city_key: str, episodes: list[dict], matching:
     if fulltext_requires_review:
         reason_codes.append("PUBLISHER_FULLTEXT_REQUIRES_REVIEW")
 
-    base_event_ok = (
-        exact["present"]
-        and strict["present"]
-        and air["present"]
-        and same_attack["present"]
-    )
-    strict_episode_id = (
-        temporal.get("episode_id")
-        if temporal.get("present") and temporal.get("episode_specific")
-        else None
-    )
     near_boundary_episode_id = (
         (temporal.get("near_boundary") or {}).get("episode_id")
         if near_boundary
@@ -3107,16 +3122,17 @@ def self_test() -> None:
     )
     assert rss_added == 1 and rss_auto == 1 and rss_queue[0]["status"] == "approved_strict"
 
-    # IR13: publisher full-text rescue remains manual-review-only.
+    # Publisher full-text provenance is neutral: it may auto-classify only
+    # when every ordinary strict gate independently passes.
     fulltext_queue = []
     fulltext_added, fulltext_auto = add_candidates(
         fulltext_queue, "poltava",
         [{**strict_base, "url": "https://news.google.test/fulltext-review", "discovery_basis": "publisher_fulltext", "matched_text_excerpt": strict_base["title"]}],
         due, [poltava_ep], dt,
     )
-    assert fulltext_added == 1 and fulltext_auto == 0
-    assert fulltext_queue[0]["status"] == "needs_review"
-    assert "PUBLISHER_FULLTEXT_REQUIRES_REVIEW" in fulltext_queue[0]["classification_reason_codes"]
+    assert fulltext_added == 1 and fulltext_auto == 1
+    assert fulltext_queue[0]["status"] == "approved_strict"
+    assert "PUBLISHER_FULLTEXT_REQUIRES_REVIEW" not in fulltext_queue[0]["classification_reason_codes"]
 
     # Unified attack-event hardening: damage/fire require attack causality and
     # still pass exact-city, air-context and episode-specific temporal gates.
