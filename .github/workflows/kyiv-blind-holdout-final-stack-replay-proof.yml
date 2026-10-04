@@ -35,7 +35,989 @@ jobs:
           set -euo pipefail
           git merge-base --is-ancestor "$EXPECTED_BASE" HEAD
           changed_paths="$(git diff --name-only "$EXPECTED_BASE"...HEAD)"
-          test "$changed_paths" = ".github/workflows/kyiv-blind-holdout-final-stack-replay-proof.yml"
+          printf '%s\n' "$changed_paths"
+          unexpected="$(printf '%s\n' "$changed_paths" | grep -v -E '^(\.github/workflows/kyiv-blind-holdout-final-stack-replay-proof\.yml|research/kyiv_blind_holdout_final_stack_replay_2026-10-04\.json)
+          for sha in "$FINAL_STACK" "$HISTORICAL_STATE_COMMIT" "$TRUTH_COMMIT"; do
+            git cat-file -e "$sha^{commit}" || git fetch origin "$sha"
+            git cat-file -e "$sha^{commit}"
+          done
+          queue_blob="$(git rev-parse "$HISTORICAL_STATE_COMMIT:kyiv-air-alerts-grafana/data/explosion_review_queue.json")"
+          state_blob="$(git rev-parse "$HISTORICAL_STATE_COMMIT:kyiv-air-alerts-grafana/data/explosion_candidate_monitor_state.json")"
+          test "$queue_blob" = "$EXPECTED_QUEUE_BLOB"
+          test "$state_blob" = "$EXPECTED_STATE_BLOB"
+          git show "$HISTORICAL_STATE_COMMIT:kyiv-air-alerts-grafana/data/explosion_review_queue.json" > /tmp/holdout-queue.json
+          git show "$HISTORICAL_STATE_COMMIT:kyiv-air-alerts-grafana/data/explosion_candidate_monitor_state.json" > /tmp/holdout-state.json
+
+      - name: Verify frozen queue invariant before replay
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          from collections import Counter
+          from pathlib import Path
+
+          queue = json.loads(Path("/tmp/holdout-queue.json").read_text(encoding="utf-8"))
+          if isinstance(queue, dict):
+              queue = queue.get("queue") or queue.get("items") or []
+          assert isinstance(queue, list), type(queue)
+          counts = Counter()
+          for row in queue:
+              if not isinstance(row, dict):
+                  continue
+              basis = row.get("discovery_basis")
+              if basis in (None, ""):
+                  counts["null_absent"] += 1
+              else:
+                  counts[str(basis)] += 1
+
+          observed = {
+              "queue_rows": len(queue),
+              "rss_title_snippet": counts["rss_title_snippet"],
+              "null_absent": counts["null_absent"],
+              "publisher_fulltext": counts["publisher_fulltext"],
+          }
+          expected = {
+              "queue_rows": 2859,
+              "rss_title_snippet": 2463,
+              "null_absent": 396,
+              "publisher_fulltext": 0,
+          }
+          if observed != expected:
+              raise SystemExit("FROZEN_QUEUE_INPUT_DRIFT: " + json.dumps({"expected": expected, "observed": observed}, sort_keys=True))
+          Path("/tmp/frozen_queue_invariant.json").write_text(
+              json.dumps(observed, indent=2, sort_keys=True) + "\n",
+              encoding="utf-8",
+          )
+          print("FROZEN_QUEUE_INPUT_INVARIANT_OK", json.dumps(observed, sort_keys=True))
+          PY
+
+      - name: Check out exact final repaired executable stack
+        shell: bash
+        run: |
+          set -euo pipefail
+          git checkout --detach "$FINAL_STACK"
+          test "$(git rev-parse HEAD)" = "$FINAL_STACK"
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: kyiv-air-alerts-grafana/requirements.txt
+
+      - name: Install dependencies
+        working-directory: kyiv-air-alerts-grafana
+        run: |
+          python -m pip install -r requirements.txt
+          python -m pip install pytest
+
+      - name: Run focused repaired-stack classifier tests
+        working-directory: kyiv-air-alerts-grafana
+        run: |
+          python -m pytest -q             tests/test_publisher_fulltext_policy_gate.py             tests/test_kyiv_temporal_clock_parser.py             tests/test_kyiv_temporal_representation.py             tests/test_kyiv_same_attack_composition.py
+
+      - name: Run full repository pytest
+        working-directory: kyiv-air-alerts-grafana
+        run: python -m pytest -q tests
+
+      - name: Run monitor self-test
+        working-directory: kyiv-air-alerts-grafana
+        run: python scripts/monitor_explosion_candidates.py --self-test
+
+      - name: Freeze raw Phase-B replay before truth
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from __future__ import annotations
+
+          import copy
+          import importlib.util
+          import json
+          import os
+          import re
+          import sys
+          from datetime import timedelta
+          from pathlib import Path
+
+          root = Path.cwd() / "kyiv-air-alerts-grafana"
+          scripts = root / "scripts"
+          sys.path.insert(0, str(scripts))
+          module_path = scripts / "monitor_explosion_candidates.py"
+          spec = importlib.util.spec_from_file_location("holdout_monitor", module_path)
+          monitor = importlib.util.module_from_spec(spec)
+          assert spec and spec.loader
+          spec.loader.exec_module(monitor)
+
+          network_attempts = []
+          candidate_native_refetch = {
+              "attempted_urls": [],
+              "recovered_urls": [],
+              "unrecoverable_urls": [],
+              "enriched_candidate_ids": [],
+          }
+
+          state = json.loads(Path("/tmp/holdout-state.json").read_text(encoding="utf-8"))
+          queue_obj = json.loads(Path("/tmp/holdout-queue.json").read_text(encoding="utf-8"))
+          if isinstance(queue_obj, dict):
+              queue = queue_obj.get("queue") or queue_obj.get("items") or []
+          else:
+              queue = queue_obj
+          assert isinstance(queue, list)
+          assert len(queue) == 2859
+
+          start = monitor.parse_dt(os.environ["HOLDOUT_START"])
+          end = monitor.parse_dt(os.environ["HOLDOUT_END"])
+          assert start and end
+          kyiv_episodes = monitor.tracked_episodes_for_city(state, "kyiv")
+          window_rows = [
+              ep for ep in kyiv_episodes
+              if str(ep.get("alert_source") or "") == "kyiv_combined_exact_city"
+              and (monitor.parse_dt(ep.get("alert_start")) is not None)
+              and start <= monitor.parse_dt(ep.get("alert_start")) < end
+          ]
+          clusters = monitor.episode_representation_clusters(window_rows)
+          if len(clusters) != 22:
+              raise AssertionError(
+                  f"derived canonical representation clusters={len(clusters)} from window_rows={len(window_rows)}"
+              )
+
+          def canonical_representation_rank(ep):
+              def precision(value):
+                  dt = monitor.parse_dt(value)
+                  if not dt:
+                      return -1
+                  return int(dt.second != 0) + int(dt.microsecond != 0)
+              start_precision = precision(ep.get("alert_start"))
+              end_precision = precision(ep.get("alert_end"))
+              # Prefer the higher-resolution persisted exact-city representation.
+              # Remaining tie-breakers are deterministic and truth-independent.
+              return (
+                  start_precision + end_precision,
+                  start_precision,
+                  end_precision,
+                  str(ep.get("alert_start") or ""),
+                  str(ep.get("alert_end") or ""),
+                  str(ep.get("episode_id") or ""),
+              )
+
+          holdout = [
+              max(cluster, key=canonical_representation_rank)
+              for cluster in clusters
+          ]
+          holdout = sorted(
+              holdout,
+              key=lambda ep: (
+                  monitor.parse_dt(ep.get("alert_start")),
+                  str(ep.get("episode_id") or ""),
+              ),
+          )
+          assert len(holdout) == 22
+
+          derived_ids = [str(ep.get("episode_id") or "") for ep in holdout]
+          assert len(set(derived_ids)) == 22
+
+          # Candidate-native evidence recovery only. Selection is blind to Phase-A truth:
+          # a row must already be mechanically linked to one of the frozen holdout
+          # representations via persisted trigger/match/classification metadata.
+          holdout_representation_ids = {
+              str(ep.get("episode_id") or "")
+              for cluster in clusters
+              for ep in cluster
+              if ep.get("episode_id")
+          }
+
+          def persisted_binding_ids(item):
+              ids = set()
+              for field in ("trigger_episode_ids", "matched_episode_ids"):
+                  for value in item.get(field) or []:
+                      if value:
+                          ids.add(str(value))
+              for field in ("trigger_episode_id", "matched_episode_id"):
+                  if item.get(field):
+                      ids.add(str(item.get(field)))
+              evidence = item.get("classification_evidence") or {}
+              if isinstance(evidence, dict):
+                  for key in ("temporal_binding", "single_episode_day_inference"):
+                      part = evidence.get(key) or {}
+                      if not isinstance(part, dict):
+                          continue
+                      for field in ("episode_id", "matched_episode_id", "target_episode_id"):
+                          if part.get(field):
+                              ids.add(str(part.get(field)))
+                      for value in part.get("matched_episode_ids") or []:
+                          if value:
+                              ids.add(str(value))
+              return ids
+
+          linked_rows = [
+              item for item in queue
+              if isinstance(item, dict)
+              and str(item.get("city_key") or "") == "kyiv"
+              and persisted_binding_ids(item).intersection(holdout_representation_ids)
+          ]
+
+          url_to_rows = {}
+          for item in linked_rows:
+              url = str(item.get("resolved_url") or item.get("url") or "").strip()
+              if not (url.startswith("http://") or url.startswith("https://")):
+                  continue
+              url_to_rows.setdefault(url, []).append(item)
+
+          # Deduplicate network work and keep it bounded to already-persisted URLs.
+          from concurrent.futures import ThreadPoolExecutor, as_completed
+
+          def recover_url(url):
+              body, resolved = monitor.fetch_publisher_fulltext(url)
+              return url, body, resolved
+
+          recovered = {}
+          candidate_native_refetch["attempted_urls"] = sorted(url_to_rows)
+          with ThreadPoolExecutor(max_workers=12) as pool:
+              futures = [pool.submit(recover_url, url) for url in sorted(url_to_rows)]
+              for future in as_completed(futures):
+                  url, body, resolved = future.result()
+                  if body:
+                      recovered[url] = (body, resolved)
+                      candidate_native_refetch["recovered_urls"].append(url)
+                  else:
+                      candidate_native_refetch["unrecoverable_urls"].append(url)
+
+          reclassified = copy.deepcopy(queue)
+          by_candidate_id = {
+              str(item.get("candidate_id") or ""): item
+              for item in reclassified
+              if isinstance(item, dict) and item.get("candidate_id")
+          }
+          for url, source_rows in url_to_rows.items():
+              payload = recovered.get(url)
+              if not payload:
+                  continue
+              body, resolved = payload
+              for original in source_rows:
+                  cid = str(original.get("candidate_id") or "")
+                  item = by_candidate_id.get(cid)
+                  if not item:
+                      continue
+                  expanded = f"{item.get('title') or ''} {item.get('snippet') or ''} {body}".strip()
+                  if not monitor.city_mentioned("kyiv", expanded):
+                      continue
+                  if not monitor.explosion_relevant(expanded):
+                      continue
+                  item["discovery_basis"] = "publisher_fulltext"
+                  item["resolved_url"] = resolved or url
+                  item["matched_text_excerpt"] = monitor.matched_text_excerpt(expanded)
+                  item["candidate_native_refetch_url"] = url
+                  candidate_native_refetch["enriched_candidate_ids"].append(cid)
+
+          for key in ("recovered_urls", "unrecoverable_urls", "enriched_candidate_ids"):
+              candidate_native_refetch[key] = sorted(set(candidate_native_refetch[key]))
+
+          # No network is permitted after the bounded candidate-native recovery stage.
+          def blocked_network(*args, **kwargs):
+              network_attempts.append({
+                  "args": [repr(x)[:200] for x in args[:2]],
+                  "kwargs": {str(k): repr(v)[:200] for k, v in kwargs.items()},
+              })
+              raise AssertionError("NETWORK_CALL_FORBIDDEN_AFTER_CANDIDATE_NATIVE_REFETCH")
+
+          monitor.requests.sessions.Session.request = blocked_network
+          monitor.requests.get = blocked_network
+          monitor.requests.post = blocked_network
+          monitor.requests.request = blocked_network
+          invalid_rows = 0
+          status_counts = {}
+          for item in reclassified:
+              if not isinstance(item, dict):
+                  invalid_rows += 1
+                  continue
+              item.pop("composition_provenance", None)
+              decision = monitor.dry_classify_existing_candidate(item, state)
+              matching = decision.get("matching")
+              if not isinstance(matching, dict):
+                  city_key = str(item.get("city_key") or "")
+                  matching = monitor.match_candidate_to_episodes(
+                      item,
+                      monitor.tracked_episodes_for_city(state, city_key)
+                      if city_key in monitor.CITY_CONFIG else [],
+                  )
+              monitor.apply_classification_decision(item, decision, matching)
+              status = str(item.get("status") or "")
+              status_counts[status] = status_counts.get(status, 0) + 1
+
+          def parse_candidate_time(item):
+              return monitor.parse_dt(item.get("first_discovered_at"))
+
+          def evidence_binding_ids(item):
+              ids = set()
+              for value in item.get("matched_episode_ids") or []:
+                  if value:
+                      ids.add(str(value))
+              if item.get("matched_episode_id"):
+                  ids.add(str(item.get("matched_episode_id")))
+              evidence = item.get("classification_evidence") or {}
+              for key in ("temporal_binding", "single_episode_day_inference"):
+                  part = evidence.get(key) or {}
+                  if isinstance(part, dict):
+                      for field in ("episode_id", "matched_episode_id", "target_episode_id"):
+                          if part.get(field):
+                              ids.add(str(part.get(field)))
+                      for value in part.get("matched_episode_ids") or []:
+                          if value:
+                              ids.add(str(value))
+              comp = item.get("composition_provenance") or {}
+              if isinstance(comp, dict):
+                  for field in ("episode_id", "target_episode_id"):
+                      if comp.get(field):
+                          ids.add(str(comp.get(field)))
+              return ids
+
+          def compact_evidence(item):
+              evidence = item.get("classification_evidence") or {}
+              return {
+                  "exact_city": evidence.get("exact_city"),
+                  "strict_explosion": evidence.get("strict_explosion"),
+                  "air_military_context": evidence.get("air_military_context"),
+                  "same_attack_context": evidence.get("same_attack_context"),
+                  "temporal_binding": evidence.get("temporal_binding"),
+                  "single_episode_day_inference": evidence.get("single_episode_day_inference"),
+                  "classification_episode_id": evidence.get("classification_episode_id"),
+              }
+
+          def compact_candidate(item):
+              return {
+                  "candidate_id": item.get("candidate_id"),
+                  "city_key": item.get("city_key"),
+                  "status": item.get("status"),
+                  "source": item.get("source"),
+                  "publisher": item.get("publisher"),
+                  "publisher_url": item.get("publisher_url"),
+                  "url": item.get("url"),
+                  "resolved_url": item.get("resolved_url"),
+                  "title": item.get("title"),
+                  "snippet": item.get("snippet"),
+                  "matched_text_excerpt": item.get("matched_text_excerpt"),
+                  "published_at": item.get("published_at"),
+                  "first_discovered_at": item.get("first_discovered_at"),
+                  "discovery_basis": item.get("discovery_basis"),
+                  "trigger_episode_ids": list(item.get("trigger_episode_ids") or []),
+                  "trigger_check_labels": list(item.get("trigger_check_labels") or []),
+                  "matched_episode_id": item.get("matched_episode_id"),
+                  "matched_episode_ids": list(item.get("matched_episode_ids") or []),
+                  "matching_outcome": item.get("matching_outcome"),
+                  "matching_reason": item.get("matching_reason"),
+                  "classification_reason_codes": list(item.get("classification_reason_codes") or []),
+                  "event_types": list(item.get("event_types") or []),
+                  "classification_evidence": compact_evidence(item),
+              }
+
+          global_candidates = [compact_candidate(x) for x in reclassified if isinstance(x, dict)]
+          episode_rows = []
+
+          for ep in holdout:
+              episode_id = str(ep.get("episode_id") or "")
+              alert_end = monitor.parse_dt(ep.get("alert_end"))
+              assert alert_end
+              cutoff = alert_end + timedelta(hours=72)
+
+              eligible = []
+              missing_timestamp_material = []
+              for item in reclassified:
+                  if not isinstance(item, dict):
+                      continue
+                  discovered = parse_candidate_time(item)
+                  if discovered is None:
+                      if episode_id in evidence_binding_ids(item) and str(item.get("status") or "") != "rejected":
+                          missing_timestamp_material.append(str(item.get("candidate_id") or ""))
+                      continue
+                  if discovered <= cutoff:
+                      eligible.append(copy.deepcopy(item))
+
+              composition_result = monitor.apply_episode_composition(
+                  eligible,
+                  state,
+                  target_episode_ids={episode_id},
+              )
+
+              relevant = [item for item in eligible if episode_id in evidence_binding_ids(item)]
+              strict_rows = [
+                  item for item in relevant
+                  if str(item.get("status") or "") == "approved_strict"
+                  and str(item.get("matched_episode_id") or "") == episode_id
+              ]
+              sensitivity_rows = [
+                  item for item in relevant
+                  if str(item.get("status") or "") == "approved_sensitivity"
+                  and str(item.get("matched_episode_id") or "") == episode_id
+              ]
+              review_rows = [
+                  item for item in relevant
+                  if str(item.get("status") or "") not in {"rejected", "approved_strict", "approved_sensitivity"}
+              ]
+
+              if strict_rows:
+                  final_outcome = "STRICT"
+              elif sensitivity_rows:
+                  final_outcome = "SENSITIVITY"
+              elif review_rows or any(
+                  str(item.get("status") or "") not in {"rejected"}
+                  and episode_id in evidence_binding_ids(item)
+                  for item in relevant
+              ):
+                  final_outcome = "REVIEW"
+              else:
+                  final_outcome = "NO_CANDIDATE"
+
+              composition_details = []
+              for item in relevant:
+                  comp = item.get("composition_provenance")
+                  if comp:
+                      composition_details.append({
+                          "candidate_id": item.get("candidate_id"),
+                          "status": item.get("status"),
+                          "composition_provenance": comp,
+                      })
+
+              episode_rows.append({
+                  "episode_id": episode_id,
+                  "alert_start": ep.get("alert_start"),
+                  "alert_end": ep.get("alert_end"),
+                  "72h_cutoff": monitor.iso(cutoff),
+                  "eligible_candidate_count": len(eligible),
+                  "episode_relevant_candidate_count": len(relevant),
+                  "candidate_ids": [str(x.get("candidate_id") or "") for x in relevant],
+                  "candidate_statuses": {
+                      str(x.get("candidate_id") or ""): str(x.get("status") or "")
+                      for x in relevant
+                  },
+                  "matched_episode_ids": {
+                      str(x.get("candidate_id") or ""): list(x.get("matched_episode_ids") or [])
+                      for x in relevant
+                  },
+                  "reason_codes": {
+                      str(x.get("candidate_id") or ""): list(x.get("classification_reason_codes") or [])
+                      for x in relevant
+                  },
+                  "composition_result": composition_result,
+                  "composition_details": composition_details,
+                  "missing_first_discovered_at_material_candidate_ids": missing_timestamp_material,
+                  "final_automated_outcome": final_outcome,
+              })
+
+          if network_attempts:
+              raise AssertionError("Replay attempted network access: " + json.dumps(network_attempts[:5]))
+
+          invariant = json.loads(Path("/tmp/frozen_queue_invariant.json").read_text(encoding="utf-8"))
+          raw = {
+              "schema": "kyiv_blind_holdout_final_stack_raw_replay_v1",
+              "repo": "olegbalakin-cmyk/kyiv-air-alerts-grafana",
+              "final_stack_commit": os.environ["FINAL_STACK"],
+              "historical_state_commit": os.environ["HISTORICAL_STATE_COMMIT"],
+              "historical_state_blob": os.environ["EXPECTED_STATE_BLOB"],
+              "historical_queue_blob": os.environ["EXPECTED_QUEUE_BLOB"],
+              "holdout_start": os.environ["HOLDOUT_START"],
+              "holdout_end_exclusive": os.environ["HOLDOUT_END"],
+              "queue_invariant": invariant,
+              "network_calls_required": len(candidate_native_refetch["attempted_urls"]),
+              "candidate_native_refetch": candidate_native_refetch,
+              "network_attempts_after_refetch": network_attempts,
+              "derived_holdout_episode_ids": derived_ids,
+              "derived_holdout_episode_count": len(derived_ids),
+              "reclassified_queue_rows": len(reclassified),
+              "invalid_queue_rows": invalid_rows,
+              "reclassified_status_counts": status_counts,
+              "episodes": episode_rows,
+              "reclassified_candidates": global_candidates,
+          }
+          out = Path("/tmp/kyiv_holdout_final_stack_raw_replay.json")
+          out.write_text(json.dumps(raw, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+          print(
+              "RAW_PHASE_B_FROZEN",
+              out,
+              "episodes=", len(episode_rows),
+              "candidate_native_refetch_attempts=", len(candidate_native_refetch["attempted_urls"]),
+              "recovered=", len(candidate_native_refetch["recovered_urls"]),
+              "enriched_candidates=", len(candidate_native_refetch["enriched_candidate_ids"]),
+          )
+          PY
+
+      - name: Materialize frozen truth only after raw replay freeze
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -s /tmp/kyiv_holdout_final_stack_raw_replay.json
+          git show "$TRUTH_COMMIT:research/kyiv_blind_holdout_truth_2026-09-27_30.json" > /tmp/holdout-truth.json
+          test -s /tmp/holdout-truth.json
+
+      - name: Compare raw replay with frozen truth and write validation
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from __future__ import annotations
+
+          import json
+          import math
+          import os
+          import re
+          from datetime import datetime, timezone
+          from difflib import SequenceMatcher
+          from pathlib import Path
+          from urllib.parse import urlsplit, urlunsplit
+
+          raw = json.loads(Path("/tmp/kyiv_holdout_final_stack_raw_replay.json").read_text(encoding="utf-8"))
+          truth = json.loads(Path("/tmp/holdout-truth.json").read_text(encoding="utf-8"))
+
+          raw_ids = list(raw.get("derived_holdout_episode_ids") or [])
+          truth_eps = list(truth.get("episodes") or [])
+          truth_ids = [str(ep.get("episode_id") or "") for ep in truth_eps]
+          if len(raw_ids) != 22 or set(raw_ids) != set(truth_ids):
+              raise SystemExit("TRUTH_REPLAY_IDENTITY_MISMATCH")
+
+          raw_by_id = {str(ep.get("episode_id")): ep for ep in raw.get("episodes") or []}
+          candidates = list(raw.get("reclassified_candidates") or [])
+
+          def parse_dt(value):
+              if not value:
+                  return None
+              text = str(value).strip().replace("Z", "+00:00")
+              try:
+                  dt = datetime.fromisoformat(text)
+              except ValueError:
+                  return None
+              if dt.tzinfo is None:
+                  dt = dt.replace(tzinfo=timezone.utc)
+              return dt.astimezone(timezone.utc)
+
+          def norm(value):
+              text = str(value or "").casefold()
+              text = re.sub(r"[^0-9a-zа-яіїєґ]+", " ", text, flags=re.IGNORECASE)
+              return re.sub(r"\s+", " ", text).strip()
+
+          def normalized_url(value):
+              if not value:
+                  return ""
+              try:
+                  p = urlsplit(str(value))
+              except Exception:
+                  return str(value).strip()
+              host = (p.hostname or "").casefold()
+              path = re.sub(r"/+$", "", p.path or "")
+              return urlunsplit((p.scheme.casefold() or "https", host, path, "", ""))
+
+          def gate_present(candidate, name):
+              evidence = candidate.get("classification_evidence") or {}
+              gate = evidence.get(name)
+              if isinstance(gate, dict):
+                  return bool(gate.get("present"))
+              return bool(gate)
+
+          def binding_ids(candidate):
+              ids = set()
+              for value in candidate.get("matched_episode_ids") or []:
+                  if value:
+                      ids.add(str(value))
+              if candidate.get("matched_episode_id"):
+                  ids.add(str(candidate.get("matched_episode_id")))
+              evidence = candidate.get("classification_evidence") or {}
+              for key in ("temporal_binding", "single_episode_day_inference"):
+                  part = evidence.get(key) or {}
+                  if isinstance(part, dict):
+                      for field in ("episode_id", "matched_episode_id", "target_episode_id"):
+                          if part.get(field):
+                              ids.add(str(part.get(field)))
+                      for value in part.get("matched_episode_ids") or []:
+                          if value:
+                              ids.add(str(value))
+              return ids
+
+          def candidate_blob(candidate):
+              return norm(" ".join(str(candidate.get(k) or "") for k in (
+                  "title", "snippet", "matched_text_excerpt", "publisher"
+              )))
+
+          def truth_candidate_score(truth_ep, candidate):
+              episode_id = str(truth_ep.get("episode_id") or "")
+              score = 0.0
+              reasons = []
+              if episode_id in binding_ids(candidate):
+                  score += 100
+                  reasons.append("final_binding")
+
+              truth_urls = {
+                  normalized_url(truth_ep.get("source_url")),
+                  normalized_url(truth_ep.get("resolved_url")),
+              } - {""}
+              cand_urls = {
+                  normalized_url(candidate.get("url")),
+                  normalized_url(candidate.get("resolved_url")),
+                  normalized_url(candidate.get("publisher_url")),
+              } - {""}
+              if truth_urls & cand_urls:
+                  score += 90
+                  reasons.append("url_match")
+
+              truth_title = norm(truth_ep.get("source_title"))
+              cand_title = norm(candidate.get("title"))
+              title_ratio = 0.0
+              if truth_title and cand_title:
+                  if len(truth_title) >= 18 and (truth_title in cand_title or cand_title in truth_title):
+                      title_ratio = 1.0
+                  else:
+                      title_ratio = SequenceMatcher(None, truth_title, cand_title).ratio()
+                  if title_ratio >= 0.72:
+                      score += 60 * title_ratio
+                      reasons.append(f"title_similarity:{title_ratio:.3f}")
+
+              truth_publisher = norm(truth_ep.get("publisher"))
+              cand_publisher = norm(candidate.get("publisher"))
+              publisher_overlap = bool(
+                  truth_publisher and cand_publisher and
+                  (truth_publisher in cand_publisher or cand_publisher in truth_publisher)
+              )
+              if publisher_overlap:
+                  score += 12
+                  reasons.append("publisher_overlap")
+
+              if episode_id in set(str(x) for x in candidate.get("trigger_episode_ids") or []):
+                  score += 10
+                  reasons.append("trigger_episode")
+
+              for name in ("exact_city", "strict_explosion", "air_military_context", "same_attack_context", "temporal_binding"):
+                  if gate_present(candidate, name):
+                      score += 3
+
+              raw_text = candidate_blob(candidate)
+              excerpt_tokens = []
+              for field in ("exact_city_excerpt", "attack_event_excerpt", "air_context_excerpt", "temporal_excerpt"):
+                  part = norm(truth_ep.get(field))
+                  excerpt_tokens.extend(tok for tok in part.split() if len(tok) >= 4)
+              excerpt_tokens = list(dict.fromkeys(excerpt_tokens))
+              if excerpt_tokens:
+                  hits = sum(1 for tok in excerpt_tokens if tok in raw_text)
+                  if hits >= min(2, len(excerpt_tokens)):
+                      score += min(20, hits * 4)
+                      reasons.append(f"truth_excerpt_token_hits:{hits}")
+
+              material = False
+              if episode_id in binding_ids(candidate):
+                  material = True
+              elif truth_urls & cand_urls:
+                  material = True
+              elif title_ratio >= 0.72 and (publisher_overlap or episode_id in set(str(x) for x in candidate.get("trigger_episode_ids") or [])):
+                  material = True
+              elif (
+                  episode_id in set(str(x) for x in candidate.get("trigger_episode_ids") or [])
+                  and gate_present(candidate, "exact_city")
+                  and gate_present(candidate, "strict_explosion")
+                  and (gate_present(candidate, "air_military_context") or gate_present(candidate, "same_attack_context"))
+              ):
+                  material = True
+              return score, material, reasons
+
+          def failure_stage(candidate, target_episode_id):
+              codes = set(str(x) for x in candidate.get("classification_reason_codes") or [])
+              evidence = candidate.get("classification_evidence") or {}
+              temporal = evidence.get("temporal_binding") or {}
+              temporal_text = json.dumps(temporal, ensure_ascii=False).casefold() + " " + " ".join(codes).casefold()
+
+              bound = binding_ids(candidate)
+              if (
+                  str(candidate.get("status") or "") in {"approved_strict", "approved_sensitivity"}
+                  and candidate.get("matched_episode_id")
+                  and str(candidate.get("matched_episode_id")) != target_episode_id
+              ):
+                  return "EPISODE_BINDING_GAP"
+
+              if not gate_present(candidate, "exact_city"):
+                  return "EXACT_CITY_PARSER_GAP"
+              if not gate_present(candidate, "strict_explosion"):
+                  return "ATTACK_EVENT_PARSER_GAP"
+              if not gate_present(candidate, "air_military_context"):
+                  return "AIR_CONTEXT_PARSER_GAP"
+              if not gate_present(candidate, "same_attack_context"):
+                  return "SAME_ATTACK_CONTEXT_GAP"
+
+              if (
+                  "temporal_interval_still_ambiguous" in temporal_text
+                  or "temporal_source_interval_ambiguous" in temporal_text
+                  or "temporal_source_interval_multiple_episodes" in temporal_text
+                  or "multi_episode_interval" in temporal_text
+                  or ("interval" in temporal_text and "ambiguous" in temporal_text)
+              ):
+                  return "TEMPORAL_INTERVAL_AMBIGUITY"
+
+              if (
+                  "temporal_representation_unsupported" in temporal_text
+                  or "temporal_source_interval_unsupported" in temporal_text
+                  or "temporal_source_interval_insufficient_lower_bound" in temporal_text
+                  or "temporal_source_interval_insufficient_upper_bound" in temporal_text
+              ):
+                  return "TEMPORAL_REPRESENTATION_GAP"
+
+              temporal_present = gate_present(candidate, "temporal_binding")
+              episode_specific = bool(temporal.get("episode_specific")) if isinstance(temporal, dict) else False
+              temporal_episode_id = str(temporal.get("episode_id") or "") if isinstance(temporal, dict) else ""
+              if not temporal_present:
+                  return "TEMPORAL_PARSER_GAP"
+              if not episode_specific or (temporal_episode_id and temporal_episode_id != target_episode_id):
+                  return "EPISODE_BINDING_GAP"
+              if "PUBLISHER_FULLTEXT_REQUIRES_REVIEW" in codes:
+                  return "POLICY_GATE"
+              if target_episode_id not in bound and str(candidate.get("matched_episode_id") or "") != target_episode_id:
+                  return "EPISODE_BINDING_GAP"
+              return "OTHER"
+
+          truth_strict = [ep for ep in truth_eps if ep.get("truth_state") == "STRICT_TRUTH_POSITIVE"]
+          truth_negative = [ep for ep in truth_eps if ep.get("truth_state") == "NO_CONFIRMED_EVENT_FOUND"]
+          assert len(truth_strict) == 10
+          assert len(truth_negative) == 12
+
+          comparisons = []
+          supported_strict = 0
+          unsupported_strict = 0
+          positive_review = 0
+          positive_no_candidate = 0
+          positive_sensitivity = 0
+          technical_fn = 0
+          discovery_fn = 0
+          legitimate_reviews = 0
+          discovery_supported = 0
+          failure_classes = []
+
+          for truth_ep in truth_eps:
+              episode_id = str(truth_ep.get("episode_id") or "")
+              replay_ep = raw_by_id[episode_id]
+              outcome = str(replay_ep.get("final_automated_outcome") or "")
+              cutoff = parse_dt(replay_ep.get("72h_cutoff"))
+              eligible_candidates = [
+                  c for c in candidates
+                  if parse_dt(c.get("first_discovered_at")) is not None
+                  and cutoff is not None
+                  and parse_dt(c.get("first_discovered_at")) <= cutoff
+                  and str(c.get("city_key") or "") == "kyiv"
+              ]
+
+              if truth_ep.get("truth_state") == "NO_CONFIRMED_EVENT_FOUND":
+                  verdict = "SUPPORTED_STRICT" if False else None
+                  if outcome == "STRICT":
+                      unsupported_strict += 1
+                      verdict = "UNSUPPORTED_STRICT"
+                  else:
+                      verdict = "TRUTH_NEGATIVE_NON_STRICT"
+                  comparisons.append({
+                      "episode_id": episode_id,
+                      "truth_state": truth_ep.get("truth_state"),
+                      "automated_outcome": outcome,
+                      "comparison_verdict": verdict,
+                      "failure_stage": None,
+                      "material_persisted_candidate_ids": [],
+                      "best_candidate_id": None,
+                  })
+                  continue
+
+              if outcome == "STRICT":
+                  supported_strict += 1
+                  discovery_supported += 1
+                  comparisons.append({
+                      "episode_id": episode_id,
+                      "truth_state": truth_ep.get("truth_state"),
+                      "automated_outcome": outcome,
+                      "comparison_verdict": "CORRECT_STRICT",
+                      "failure_stage": None,
+                      "material_persisted_candidate_ids": list(replay_ep.get("candidate_ids") or []),
+                      "best_candidate_id": (list(replay_ep.get("candidate_ids") or []) or [None])[0],
+                  })
+                  continue
+
+              if outcome == "REVIEW":
+                  positive_review += 1
+              elif outcome == "NO_CANDIDATE":
+                  positive_no_candidate += 1
+              elif outcome == "SENSITIVITY":
+                  positive_sensitivity += 1
+
+              scored = []
+              for candidate in eligible_candidates:
+                  score, material, reasons = truth_candidate_score(truth_ep, candidate)
+                  if material:
+                      scored.append((score, candidate, reasons))
+              scored.sort(key=lambda x: (-x[0], str(x[1].get("candidate_id") or "")))
+
+              if not scored:
+                  discovery_fn += 1
+                  failure = "NO_PERSISTED_MATERIAL_CANDIDATE"
+                  failure_classes.append(failure)
+                  comparisons.append({
+                      "episode_id": episode_id,
+                      "truth_state": truth_ep.get("truth_state"),
+                      "automated_outcome": outcome,
+                      "comparison_verdict": "DISCOVERY_FALSE_NEGATIVE",
+                      "failure_stage": failure,
+                      "material_persisted_candidate_ids": [],
+                      "best_candidate_id": None,
+                  })
+                  continue
+
+              discovery_supported += 1
+              best_score, best_candidate, best_reasons = scored[0]
+              failure = failure_stage(best_candidate, episode_id)
+              failure_classes.append(failure)
+
+              wrong_binding = (
+                  str(best_candidate.get("status") or "") in {"approved_strict", "approved_sensitivity"}
+                  and best_candidate.get("matched_episode_id")
+                  and str(best_candidate.get("matched_episode_id")) != episode_id
+              )
+              if wrong_binding:
+                  comparison = "WRONG_EPISODE_BINDING"
+                  technical_fn += 1
+              elif outcome == "REVIEW" and failure == "TEMPORAL_INTERVAL_AMBIGUITY":
+                  comparison = "LEGITIMATE_REVIEW"
+                  legitimate_reviews += 1
+              else:
+                  comparison = "TECHNICAL_FALSE_NEGATIVE"
+                  technical_fn += 1
+
+              comparisons.append({
+                  "episode_id": episode_id,
+                  "truth_state": truth_ep.get("truth_state"),
+                  "automated_outcome": outcome,
+                  "comparison_verdict": comparison,
+                  "failure_stage": failure,
+                  "material_persisted_candidate_ids": [str(x[1].get("candidate_id") or "") for x in scored[:20]],
+                  "best_candidate_id": best_candidate.get("candidate_id"),
+                  "best_candidate_status": best_candidate.get("status"),
+                  "best_candidate_match_ids": list(best_candidate.get("matched_episode_ids") or []),
+                  "best_candidate_reason_codes": list(best_candidate.get("classification_reason_codes") or []),
+                  "best_candidate_materiality_reasons": best_reasons,
+                  "best_candidate_score": best_score,
+              })
+
+          auto_strict_ids = [
+              ep_id for ep_id, ep in raw_by_id.items()
+              if ep.get("final_automated_outcome") == "STRICT"
+          ]
+          supported_strict_ids = [
+              row["episode_id"] for row in comparisons
+              if row.get("comparison_verdict") == "CORRECT_STRICT"
+          ]
+          unsupported_strict_ids = [
+              row["episode_id"] for row in comparisons
+              if row.get("comparison_verdict") == "UNSUPPORTED_STRICT"
+          ]
+
+          strict_recall = supported_strict / 10
+          discovery_recall = discovery_supported / 10
+          strict_den = supported_strict + unsupported_strict
+          strict_precision = (supported_strict / strict_den) if strict_den else None
+
+          known_residual = {"TEMPORAL_INTERVAL_AMBIGUITY"}
+          unique_failures = sorted(set(failure_classes))
+          new_failure_mechanisms = [x for x in unique_failures if x not in known_residual]
+
+          ready = technical_fn == 0 and discovery_fn == 0 and unsupported_strict == 0
+          blockers = []
+          if unsupported_strict:
+              blockers.append("UNSUPPORTED_STRICT")
+          blockers.extend(sorted({
+              row.get("failure_stage")
+              for row in comparisons
+              if row.get("comparison_verdict") in {"TECHNICAL_FALSE_NEGATIVE", "WRONG_EPISODE_BINDING"}
+              and row.get("failure_stage")
+          }))
+          if discovery_fn:
+              blockers.append("NO_PERSISTED_MATERIAL_CANDIDATE")
+          blocker = blockers[0] if blockers else None
+
+          if ready:
+              next_action = "Guarded integration of the already-proven repaired stack into the authoritative monitor branch; no deployment in this task."
+          elif blocker == "NO_PERSISTED_MATERIAL_CANDIDATE":
+              next_action = "Run one bounded read-only discovery-coverage diagnostic for only the affected truth-positive holdout episodes; do not change classifier logic."
+          elif blocker == "UNSUPPORTED_STRICT":
+              next_action = "Run one bounded read-only forensic check of the unsupported strict episode(s), limited to episode binding and strict evidence gates."
+          else:
+              next_action = f"Run one bounded read-only diagnostic of {blocker} on only the affected holdout candidate(s); do not repair or integrate."
+
+          validation = {
+              "schema": "kyiv_blind_holdout_final_stack_validation_v1",
+              "repo": "olegbalakin-cmyk/kyiv-air-alerts-grafana",
+              "verdict": "PROVEN" if ready else ("PARTIAL" if (supported_strict or discovery_supported) else "BLOCKED"),
+              "final_stack_commit": raw.get("final_stack_commit"),
+              "historical_state_blob": raw.get("historical_state_blob"),
+              "historical_queue_blob": raw.get("historical_queue_blob"),
+              "queue_invariant": raw.get("queue_invariant"),
+              "network_calls_required": raw.get("network_calls_required"),
+              "holdout_episode_count": len(raw_ids),
+              "truth_strict_positives": 10,
+              "automated": {
+                  "supported_strict": supported_strict,
+                  "unsupported_strict": unsupported_strict,
+                  "truth_positive_review": positive_review,
+                  "truth_positive_sensitivity": positive_sensitivity,
+                  "truth_positive_no_candidate": positive_no_candidate,
+                  "auto_strict_episode_ids": auto_strict_ids,
+                  "supported_strict_episode_ids": supported_strict_ids,
+                  "unsupported_strict_episode_ids": unsupported_strict_ids,
+              },
+              "metrics": {
+                  "STRICT_RECALL_72H": strict_recall,
+                  "DISCOVERY_RECALL_72H": discovery_recall,
+                  "STRICT_PRECISION": strict_precision,
+                  "TECHNICAL_FALSE_NEGATIVES": technical_fn,
+                  "DISCOVERY_FALSE_NEGATIVES": discovery_fn,
+                  "LEGITIMATE_AMBIGUOUS_REVIEWS": legitimate_reviews,
+                  "UNSUPPORTED_STRICT": unsupported_strict,
+              },
+              "failure_classes": unique_failures,
+              "new_failure_mechanisms": new_failure_mechanisms,
+              "ready_for_integration": ready,
+              "blocker": blocker,
+              "all_blockers": blockers,
+              "next_action": next_action,
+              "truth_negative_outcomes": [
+                  {
+                      "episode_id": row["episode_id"],
+                      "automated_outcome": row["automated_outcome"],
+                      "comparison_verdict": row["comparison_verdict"],
+                  }
+                  for row in comparisons
+                  if row.get("truth_state") == "NO_CONFIRMED_EVENT_FOUND"
+              ],
+              "episode_comparisons": comparisons,
+              "raw_replay_file": "kyiv_holdout_final_stack_raw_replay.json",
+              "truth_commit": os.environ["TRUTH_COMMIT"],
+              "cleanliness": {
+                  "PRODUCTION_CODE_MUTATIONS": 0,
+                  "MONITOR_STATE_MUTATIONS": 0,
+                  "REVIEW_QUEUE_MUTATIONS": 0,
+                  "CANONICAL_ALERT_MUTATIONS": 0,
+                  "MAIN_MUTATED": False,
+                  "SITE_PROD_MUTATED": False,
+                  "NEON_DB_MUTATIONS": 0,
+                  "DEPLOY": False,
+              },
+          }
+
+          out = Path("/tmp/kyiv_holdout_final_stack_validation.json")
+          out.write_text(json.dumps(validation, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+          print("VALIDATION_RESULT_BEGIN")
+          print(json.dumps(validation, ensure_ascii=False, sort_keys=True))
+          print("VALIDATION_RESULT_END")
+          PY
+
+      - name: Upload proof artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: kyiv-blind-holdout-final-stack-replay
+          path: |
+            /tmp/kyiv_holdout_final_stack_raw_replay.json
+            /tmp/kyiv_holdout_final_stack_validation.json
+          if-no-files-found: error
+          retention-days: 30
+ || true)"
+          test -z "$unexpected"
           for sha in "$FINAL_STACK" "$HISTORICAL_STATE_COMMIT" "$TRUTH_COMMIT"; do
             git cat-file -e "$sha^{commit}" || git fetch origin "$sha"
             git cat-file -e "$sha^{commit}"
