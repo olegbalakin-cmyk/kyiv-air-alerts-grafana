@@ -1,0 +1,689 @@
+{
+  "schema_version": "attack-event-18city-normalization-version-availability-addendum-v1",
+  "status": "PASS",
+  "verdict": "ATTACK-EVENT 18-CITY NORMALIZATION VERSION AVAILABILITY CONTRACT FROZEN",
+  "scope": "OFFLINE NORMALIZATION-VERSION PROVENANCE CONTRACT REPAIR ONLY; FULL 18-CITY PERSISTENCE IDENTITY EXPORT NOT RESUMED; COMBINED 23-CITY STEP 2A NOT STARTED",
+  "frozen_at_date": "2026-10-04",
+  "contract_purpose": "Supply a deterministic authoritative persistence normalization_version for the four accepted 18-city worker lineages whose accepted proof did not materialize a normalization-version string, without changing semantic classification or historical evidence.",
+  "blocker_repaired": "REQUIRED_NORMALIZATION_VERSION_NOT_MATERIALIZED_IN_ACCEPTED_FROZEN_IDENTITY_INPUTS",
+  "provenance_semantics": {
+    "state_name_for_derived": "CONTRACT_DERIVED_FROM_FROZEN_CODE_IDENTITY",
+    "statement": "Each derived value is a new persistence-provenance identifier stating only that the accepted corpus was normalized by the exact frozen repository code identity listed here.",
+    "historical_existence_claim": false,
+    "semantic_equivalence_to_existing_labels": false,
+    "new_semantic_classification": false,
+    "semantic_change": false,
+    "accepted_target_state_change": false
+  },
+  "frozen_predecessors": {
+    "step1_persistence_contract": {
+      "commit": "b205d38dbc50bc502d10e682d4ae53491af542ea",
+      "artifact_path": "research/attack_event_neon_persistence_contract_2026-10-02.json",
+      "artifact_blob": "e9dcbdf21551ca086fbf096138f885f453a8c2b0"
+    },
+    "classification_identity_availability_addendum": {
+      "commit": "bd82a6c0a19aca4610a8af6df73a307a88c35bf6",
+      "artifact_path": "research/attack_event_classification_identity_availability_addendum_2026-10-04.json",
+      "artifact_blob": "c4b36f92d4171f59a5b3e45f4d894aedf4d7ebd7"
+    },
+    "accepted_18city_source": {
+      "commit": "31aa7a8f8f57ff090f24814ef3c62137eebebf16",
+      "artifact_path": "research/historical_v2_18city_acceptance_2026-10-02.json",
+      "artifact_blob": "754da5b8c330188889f3f8fb22e671cbc6118cac"
+    },
+    "accepted_target_map": {
+      "commit": "3c39dabbf78ff9415213332023e6e6c4ee7e8225",
+      "artifact_path": "research/attack_event_18city_accepted_target_map_2026-10-04.json",
+      "artifact_blob": "4211c5899f219c4561cd139afbbf48c36b6ea86f",
+      "canonical_target_map_sha256": "d8c2c78d8340288308eb027f37e36de83c38fdee3230e5679a30ae41328f6eb2"
+    }
+  },
+  "fresh_state_guard_before_mutation": {
+    "main_head": "5a119520275c606e0c306d41fb831e460e2f7f63",
+    "site_prod_head": "a5756040c796dc4c7d67b0b3e2c7acd17f6006b5",
+    "production_workflow_path": ".github/workflows/update-netlify-site.yml",
+    "production_workflow_blob": "3d89a5205245be91c865bbad3147693726411688",
+    "natural_unrelated_movement_allowed": true,
+    "neon_queried": false
+  },
+  "fingerprint_contract": {
+    "version": "attack-event-normalization-code-fingerprint-v1",
+    "canonical_object": "{\"version\":\"attack-event-normalization-code-fingerprint-v1\",\"files\":[{\"path\":\"<repository-relative path>\",\"git_blob_sha\":\"<exact accepted tested-head Git blob SHA>\"}]}",
+    "file_order": "files sorted lexicographically by path",
+    "canonical_serialization": {
+      "encoding": "UTF-8 JSON",
+      "ensure_ascii": false,
+      "sort_keys": true,
+      "separators": [
+        ",",
+        ":"
+      ],
+      "whitespace": false,
+      "trailing_newline": false
+    },
+    "fingerprint_rule": "normalization_code_fingerprint_sha256 = SHA256(canonical bytes).hexdigest()",
+    "normalization_version_rule": "attack-event-normalization-code-fingerprint-v1:<normalization_code_fingerprint_sha256>",
+    "excluded_from_fingerprint": [
+      "commit timestamps",
+      "branch names",
+      "moving refs",
+      "source-data hashes",
+      "Python standard-library modules",
+      "external packages"
+    ]
+  },
+  "dependency_verification": {
+    "method": "Exact tested-head import/call inspection, restricted to repository-local code actually invoked on the accepted normalization/formalization path.",
+    "common_monitor_observation": {
+      "monitor_blob": "89b1be41909c6622339ce8a82d9ac2d982b82481",
+      "static_repository_local_import_observed": "apply_ukrainealarm_bridge as ua",
+      "ua_references": "Only inside monitor poll_alerts(); poll_alerts is reached from monitor main() network mode.",
+      "accepted_formalization_path_calls_monitor_main_or_poll_alerts": false,
+      "included_in_normalization_fingerprint": false,
+      "reason": "The bridge module is not invoked by the accepted offline formalization/normalization call path."
+    },
+    "affected_workers": {
+      "chernihiv_dnipro": {
+        "tested_head": "064c465a5f5a6d70ff08b972879c83166df80b3c",
+        "expected_file_set": [
+          "kyiv-air-alerts-grafana/scripts/formalize_historical_v2_chernihiv_dnipro.py",
+          "kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py",
+          "kyiv-air-alerts-grafana/scripts/replay_explosion_history.py"
+        ],
+        "actual_file_set": [
+          "kyiv-air-alerts-grafana/scripts/formalize_historical_v2_chernihiv_dnipro.py",
+          "kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py",
+          "kyiv-air-alerts-grafana/scripts/replay_explosion_history.py"
+        ],
+        "exact_blob_match": true,
+        "dependency_ambiguity": false,
+        "notes": "Formalizer imports replay; replay dynamically loads monitor; formalization calls replay normalization helpers and monitor classifier/composition helpers. No additional repository-local normalization module is invoked."
+      },
+      "kharkiv_kherson": {
+        "tested_head": "0800a7382bcea65e6c6ca9683d6eb5a0d5895d87",
+        "expected_file_set": [
+          "kyiv-air-alerts-grafana/scripts/historical_v2_formalization_existing_evidence.py",
+          "kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py",
+          "kyiv-air-alerts-grafana/scripts/replay_explosion_history.py"
+        ],
+        "actual_file_set": [
+          "kyiv-air-alerts-grafana/scripts/historical_v2_formalization_existing_evidence.py",
+          "kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py",
+          "kyiv-air-alerts-grafana/scripts/replay_explosion_history.py"
+        ],
+        "exact_blob_match": true,
+        "dependency_ambiguity": false,
+        "notes": "Formalizer imports replay; replay dynamically loads monitor; formalization calls replay normalization helpers and monitor classifier/composition helpers. No additional repository-local normalization module is invoked."
+      },
+      "odesa": {
+        "tested_head": "e67d80200d8dbd0b18c1440c2fdaca12363017d3",
+        "expected_file_set": [
+          "kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py",
+          "kyiv-air-alerts-grafana/scripts/prove_historical_v2_formalization_odesa.py",
+          "kyiv-air-alerts-grafana/scripts/replay_explosion_history.py"
+        ],
+        "actual_file_set": [
+          "kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py",
+          "kyiv-air-alerts-grafana/scripts/prove_historical_v2_formalization_odesa.py",
+          "kyiv-air-alerts-grafana/scripts/replay_explosion_history.py"
+        ],
+        "exact_blob_match": true,
+        "dependency_ambiguity": false,
+        "notes": "Formalizer imports replay and resolves monitor; accepted path uses replay normalization helpers and monitor classifier helpers. No additional repository-local normalization module is invoked."
+      },
+      "vinnytsia_zhytomyr": {
+        "tested_head": "eaa77e2c2714d68a25dcd581c3194c1d394eb00a",
+        "expected_file_set": [
+          "kyiv-air-alerts-grafana/scripts/historical_v2_formalize_stream09.py",
+          "kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py"
+        ],
+        "actual_file_set": [
+          "kyiv-air-alerts-grafana/scripts/historical_v2_formalize_stream09.py",
+          "kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py"
+        ],
+        "exact_blob_match": true,
+        "dependency_ambiguity": false,
+        "notes": "Formalizer dynamically loads monitor directly and calls its semantic/classifier helpers. It does not import or invoke replay_explosion_history.py."
+      }
+    },
+    "dependency_sets_verified": true
+  },
+  "run_a": {
+    "materialization_pass": "independent exact tested-head Git reread",
+    "workers": {
+      "chernihiv_dnipro": {
+        "tested_head": "064c465a5f5a6d70ff08b972879c83166df80b3c",
+        "files": [
+          {
+            "path": "kyiv-air-alerts-grafana/scripts/formalize_historical_v2_chernihiv_dnipro.py",
+            "git_blob_sha": "df432d4d8b369f63d9ad575bc4a3dc4abc48db0d"
+          },
+          {
+            "path": "kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py",
+            "git_blob_sha": "89b1be41909c6622339ce8a82d9ac2d982b82481"
+          },
+          {
+            "path": "kyiv-air-alerts-grafana/scripts/replay_explosion_history.py",
+            "git_blob_sha": "e1a6c793d680196724fbf70f09ed09a821912aca"
+          }
+        ],
+        "canonical_json": "{\"files\":[{\"git_blob_sha\":\"df432d4d8b369f63d9ad575bc4a3dc4abc48db0d\",\"path\":\"kyiv-air-alerts-grafana/scripts/formalize_historical_v2_chernihiv_dnipro.py\"},{\"git_blob_sha\":\"89b1be41909c6622339ce8a82d9ac2d982b82481\",\"path\":\"kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py\"},{\"git_blob_sha\":\"e1a6c793d680196724fbf70f09ed09a821912aca\",\"path\":\"kyiv-air-alerts-grafana/scripts/replay_explosion_history.py\"}],\"version\":\"attack-event-normalization-code-fingerprint-v1\"}",
+        "fingerprint_sha256": "50af064a170d2f10c6605addf8175fdedd27e1a0f4bd0351f1add8cc54f6fd95",
+        "normalization_version": "attack-event-normalization-code-fingerprint-v1:50af064a170d2f10c6605addf8175fdedd27e1a0f4bd0351f1add8cc54f6fd95"
+      },
+      "kharkiv_kherson": {
+        "tested_head": "0800a7382bcea65e6c6ca9683d6eb5a0d5895d87",
+        "files": [
+          {
+            "path": "kyiv-air-alerts-grafana/scripts/historical_v2_formalization_existing_evidence.py",
+            "git_blob_sha": "d731d76b3e835d5e3a2ebbbe134592202c4c5495"
+          },
+          {
+            "path": "kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py",
+            "git_blob_sha": "89b1be41909c6622339ce8a82d9ac2d982b82481"
+          },
+          {
+            "path": "kyiv-air-alerts-grafana/scripts/replay_explosion_history.py",
+            "git_blob_sha": "e1a6c793d680196724fbf70f09ed09a821912aca"
+          }
+        ],
+        "canonical_json": "{\"files\":[{\"git_blob_sha\":\"d731d76b3e835d5e3a2ebbbe134592202c4c5495\",\"path\":\"kyiv-air-alerts-grafana/scripts/historical_v2_formalization_existing_evidence.py\"},{\"git_blob_sha\":\"89b1be41909c6622339ce8a82d9ac2d982b82481\",\"path\":\"kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py\"},{\"git_blob_sha\":\"e1a6c793d680196724fbf70f09ed09a821912aca\",\"path\":\"kyiv-air-alerts-grafana/scripts/replay_explosion_history.py\"}],\"version\":\"attack-event-normalization-code-fingerprint-v1\"}",
+        "fingerprint_sha256": "6c45bd2f3393145ff3c61191aafd0a0b8b281f7157dad1147f13d652026ddce1",
+        "normalization_version": "attack-event-normalization-code-fingerprint-v1:6c45bd2f3393145ff3c61191aafd0a0b8b281f7157dad1147f13d652026ddce1"
+      },
+      "odesa": {
+        "tested_head": "e67d80200d8dbd0b18c1440c2fdaca12363017d3",
+        "files": [
+          {
+            "path": "kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py",
+            "git_blob_sha": "89b1be41909c6622339ce8a82d9ac2d982b82481"
+          },
+          {
+            "path": "kyiv-air-alerts-grafana/scripts/prove_historical_v2_formalization_odesa.py",
+            "git_blob_sha": "7105e67e50197eb2e78f588ba3b666c19f0f10f8"
+          },
+          {
+            "path": "kyiv-air-alerts-grafana/scripts/replay_explosion_history.py",
+            "git_blob_sha": "e1a6c793d680196724fbf70f09ed09a821912aca"
+          }
+        ],
+        "canonical_json": "{\"files\":[{\"git_blob_sha\":\"89b1be41909c6622339ce8a82d9ac2d982b82481\",\"path\":\"kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py\"},{\"git_blob_sha\":\"7105e67e50197eb2e78f588ba3b666c19f0f10f8\",\"path\":\"kyiv-air-alerts-grafana/scripts/prove_historical_v2_formalization_odesa.py\"},{\"git_blob_sha\":\"e1a6c793d680196724fbf70f09ed09a821912aca\",\"path\":\"kyiv-air-alerts-grafana/scripts/replay_explosion_history.py\"}],\"version\":\"attack-event-normalization-code-fingerprint-v1\"}",
+        "fingerprint_sha256": "a3360962a659c44ba97d0cfef0d64b5190dc8c9da2f90655e3bd776767544c7e",
+        "normalization_version": "attack-event-normalization-code-fingerprint-v1:a3360962a659c44ba97d0cfef0d64b5190dc8c9da2f90655e3bd776767544c7e"
+      },
+      "vinnytsia_zhytomyr": {
+        "tested_head": "eaa77e2c2714d68a25dcd581c3194c1d394eb00a",
+        "files": [
+          {
+            "path": "kyiv-air-alerts-grafana/scripts/historical_v2_formalize_stream09.py",
+            "git_blob_sha": "42674da447270ec3664b972289d543d593a72759"
+          },
+          {
+            "path": "kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py",
+            "git_blob_sha": "89b1be41909c6622339ce8a82d9ac2d982b82481"
+          }
+        ],
+        "canonical_json": "{\"files\":[{\"git_blob_sha\":\"42674da447270ec3664b972289d543d593a72759\",\"path\":\"kyiv-air-alerts-grafana/scripts/historical_v2_formalize_stream09.py\"},{\"git_blob_sha\":\"89b1be41909c6622339ce8a82d9ac2d982b82481\",\"path\":\"kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py\"}],\"version\":\"attack-event-normalization-code-fingerprint-v1\"}",
+        "fingerprint_sha256": "3f1fe74a958fa370748a40011d5b455f1e9e2feb6eaec1cee1c2c5140163a2b2",
+        "normalization_version": "attack-event-normalization-code-fingerprint-v1:3f1fe74a958fa370748a40011d5b455f1e9e2feb6eaec1cee1c2c5140163a2b2"
+      }
+    }
+  },
+  "run_b": {
+    "materialization_pass": "second independent exact tested-head Git reread",
+    "workers": {
+      "chernihiv_dnipro": {
+        "tested_head": "064c465a5f5a6d70ff08b972879c83166df80b3c",
+        "files": [
+          {
+            "path": "kyiv-air-alerts-grafana/scripts/formalize_historical_v2_chernihiv_dnipro.py",
+            "git_blob_sha": "df432d4d8b369f63d9ad575bc4a3dc4abc48db0d"
+          },
+          {
+            "path": "kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py",
+            "git_blob_sha": "89b1be41909c6622339ce8a82d9ac2d982b82481"
+          },
+          {
+            "path": "kyiv-air-alerts-grafana/scripts/replay_explosion_history.py",
+            "git_blob_sha": "e1a6c793d680196724fbf70f09ed09a821912aca"
+          }
+        ],
+        "canonical_json": "{\"files\":[{\"git_blob_sha\":\"df432d4d8b369f63d9ad575bc4a3dc4abc48db0d\",\"path\":\"kyiv-air-alerts-grafana/scripts/formalize_historical_v2_chernihiv_dnipro.py\"},{\"git_blob_sha\":\"89b1be41909c6622339ce8a82d9ac2d982b82481\",\"path\":\"kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py\"},{\"git_blob_sha\":\"e1a6c793d680196724fbf70f09ed09a821912aca\",\"path\":\"kyiv-air-alerts-grafana/scripts/replay_explosion_history.py\"}],\"version\":\"attack-event-normalization-code-fingerprint-v1\"}",
+        "fingerprint_sha256": "50af064a170d2f10c6605addf8175fdedd27e1a0f4bd0351f1add8cc54f6fd95",
+        "normalization_version": "attack-event-normalization-code-fingerprint-v1:50af064a170d2f10c6605addf8175fdedd27e1a0f4bd0351f1add8cc54f6fd95"
+      },
+      "kharkiv_kherson": {
+        "tested_head": "0800a7382bcea65e6c6ca9683d6eb5a0d5895d87",
+        "files": [
+          {
+            "path": "kyiv-air-alerts-grafana/scripts/historical_v2_formalization_existing_evidence.py",
+            "git_blob_sha": "d731d76b3e835d5e3a2ebbbe134592202c4c5495"
+          },
+          {
+            "path": "kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py",
+            "git_blob_sha": "89b1be41909c6622339ce8a82d9ac2d982b82481"
+          },
+          {
+            "path": "kyiv-air-alerts-grafana/scripts/replay_explosion_history.py",
+            "git_blob_sha": "e1a6c793d680196724fbf70f09ed09a821912aca"
+          }
+        ],
+        "canonical_json": "{\"files\":[{\"git_blob_sha\":\"d731d76b3e835d5e3a2ebbbe134592202c4c5495\",\"path\":\"kyiv-air-alerts-grafana/scripts/historical_v2_formalization_existing_evidence.py\"},{\"git_blob_sha\":\"89b1be41909c6622339ce8a82d9ac2d982b82481\",\"path\":\"kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py\"},{\"git_blob_sha\":\"e1a6c793d680196724fbf70f09ed09a821912aca\",\"path\":\"kyiv-air-alerts-grafana/scripts/replay_explosion_history.py\"}],\"version\":\"attack-event-normalization-code-fingerprint-v1\"}",
+        "fingerprint_sha256": "6c45bd2f3393145ff3c61191aafd0a0b8b281f7157dad1147f13d652026ddce1",
+        "normalization_version": "attack-event-normalization-code-fingerprint-v1:6c45bd2f3393145ff3c61191aafd0a0b8b281f7157dad1147f13d652026ddce1"
+      },
+      "odesa": {
+        "tested_head": "e67d80200d8dbd0b18c1440c2fdaca12363017d3",
+        "files": [
+          {
+            "path": "kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py",
+            "git_blob_sha": "89b1be41909c6622339ce8a82d9ac2d982b82481"
+          },
+          {
+            "path": "kyiv-air-alerts-grafana/scripts/prove_historical_v2_formalization_odesa.py",
+            "git_blob_sha": "7105e67e50197eb2e78f588ba3b666c19f0f10f8"
+          },
+          {
+            "path": "kyiv-air-alerts-grafana/scripts/replay_explosion_history.py",
+            "git_blob_sha": "e1a6c793d680196724fbf70f09ed09a821912aca"
+          }
+        ],
+        "canonical_json": "{\"files\":[{\"git_blob_sha\":\"89b1be41909c6622339ce8a82d9ac2d982b82481\",\"path\":\"kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py\"},{\"git_blob_sha\":\"7105e67e50197eb2e78f588ba3b666c19f0f10f8\",\"path\":\"kyiv-air-alerts-grafana/scripts/prove_historical_v2_formalization_odesa.py\"},{\"git_blob_sha\":\"e1a6c793d680196724fbf70f09ed09a821912aca\",\"path\":\"kyiv-air-alerts-grafana/scripts/replay_explosion_history.py\"}],\"version\":\"attack-event-normalization-code-fingerprint-v1\"}",
+        "fingerprint_sha256": "a3360962a659c44ba97d0cfef0d64b5190dc8c9da2f90655e3bd776767544c7e",
+        "normalization_version": "attack-event-normalization-code-fingerprint-v1:a3360962a659c44ba97d0cfef0d64b5190dc8c9da2f90655e3bd776767544c7e"
+      },
+      "vinnytsia_zhytomyr": {
+        "tested_head": "eaa77e2c2714d68a25dcd581c3194c1d394eb00a",
+        "files": [
+          {
+            "path": "kyiv-air-alerts-grafana/scripts/historical_v2_formalize_stream09.py",
+            "git_blob_sha": "42674da447270ec3664b972289d543d593a72759"
+          },
+          {
+            "path": "kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py",
+            "git_blob_sha": "89b1be41909c6622339ce8a82d9ac2d982b82481"
+          }
+        ],
+        "canonical_json": "{\"files\":[{\"git_blob_sha\":\"42674da447270ec3664b972289d543d593a72759\",\"path\":\"kyiv-air-alerts-grafana/scripts/historical_v2_formalize_stream09.py\"},{\"git_blob_sha\":\"89b1be41909c6622339ce8a82d9ac2d982b82481\",\"path\":\"kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py\"}],\"version\":\"attack-event-normalization-code-fingerprint-v1\"}",
+        "fingerprint_sha256": "3f1fe74a958fa370748a40011d5b455f1e9e2feb6eaec1cee1c2c5140163a2b2",
+        "normalization_version": "attack-event-normalization-code-fingerprint-v1:3f1fe74a958fa370748a40011d5b455f1e9e2feb6eaec1cee1c2c5140163a2b2"
+      }
+    }
+  },
+  "run_a_b_equality": {
+    "affected_worker_mappings_in_run_a": 4,
+    "affected_worker_mappings_in_run_b": 4,
+    "dependency_file_sets_identical": true,
+    "canonical_bytes_identical": true,
+    "fingerprint_sha256_identical": true,
+    "normalization_version_strings_identical": true,
+    "status": "PASS"
+  },
+  "worker_normalization_availability_matrix": [
+    {
+      "worker_lineage": "chernihiv_dnipro",
+      "cities": [
+        {
+          "city": "chernihiv",
+          "classifications": 1676
+        },
+        {
+          "city": "dnipro",
+          "classifications": 2259
+        }
+      ],
+      "classification_count": 3935,
+      "final_proof_head": "1998919036b4832fc3555b54c9854e6cfe24a696",
+      "tested_head": "064c465a5f5a6d70ff08b972879c83166df80b3c",
+      "proof_artifact_path": "research/historical_v2_formalization_chernihiv_dnipro_proof_2026-10-02.json",
+      "proof_artifact_blob": "9416f9cb60b1b078268d74c6c8b70f76af6f9e58",
+      "normalization_version_state": "CONTRACT_DERIVED_FROM_FROZEN_CODE_IDENTITY",
+      "accepted_materialized_normalization_version": null,
+      "derived_normalization_code_identity": {
+        "fingerprint_sha256": "50af064a170d2f10c6605addf8175fdedd27e1a0f4bd0351f1add8cc54f6fd95",
+        "normalization_version": "attack-event-normalization-code-fingerprint-v1:50af064a170d2f10c6605addf8175fdedd27e1a0f4bd0351f1add8cc54f6fd95",
+        "files": [
+          {
+            "path": "kyiv-air-alerts-grafana/scripts/formalize_historical_v2_chernihiv_dnipro.py",
+            "git_blob_sha": "df432d4d8b369f63d9ad575bc4a3dc4abc48db0d"
+          },
+          {
+            "path": "kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py",
+            "git_blob_sha": "89b1be41909c6622339ce8a82d9ac2d982b82481"
+          },
+          {
+            "path": "kyiv-air-alerts-grafana/scripts/replay_explosion_history.py",
+            "git_blob_sha": "e1a6c793d680196724fbf70f09ed09a821912aca"
+          }
+        ],
+        "canonical_json": "{\"files\":[{\"git_blob_sha\":\"df432d4d8b369f63d9ad575bc4a3dc4abc48db0d\",\"path\":\"kyiv-air-alerts-grafana/scripts/formalize_historical_v2_chernihiv_dnipro.py\"},{\"git_blob_sha\":\"89b1be41909c6622339ce8a82d9ac2d982b82481\",\"path\":\"kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py\"},{\"git_blob_sha\":\"e1a6c793d680196724fbf70f09ed09a821912aca\",\"path\":\"kyiv-air-alerts-grafana/scripts/replay_explosion_history.py\"}],\"version\":\"attack-event-normalization-code-fingerprint-v1\"}"
+      },
+      "final_authoritative_normalization_version": "attack-event-normalization-code-fingerprint-v1:50af064a170d2f10c6605addf8175fdedd27e1a0f4bd0351f1add8cc54f6fd95",
+      "classifications_receiving_version": 3935
+    },
+    {
+      "worker_lineage": "kharkiv_kherson",
+      "cities": [
+        {
+          "city": "kharkiv",
+          "classifications": 3565
+        },
+        {
+          "city": "kherson",
+          "classifications": 1412
+        }
+      ],
+      "classification_count": 4977,
+      "final_proof_head": "79397290b0d51ca49bf15d6e5890ffc3ce631ce3",
+      "tested_head": "0800a7382bcea65e6c6ca9683d6eb5a0d5895d87",
+      "proof_artifact_path": "research/historical_v2_formalization_kharkiv_kherson_proof_2026-10-02.json",
+      "proof_artifact_blob": "f5fa45527f40a5af02e98ea5d0958547756d0218",
+      "normalization_version_state": "CONTRACT_DERIVED_FROM_FROZEN_CODE_IDENTITY",
+      "accepted_materialized_normalization_version": null,
+      "derived_normalization_code_identity": {
+        "fingerprint_sha256": "6c45bd2f3393145ff3c61191aafd0a0b8b281f7157dad1147f13d652026ddce1",
+        "normalization_version": "attack-event-normalization-code-fingerprint-v1:6c45bd2f3393145ff3c61191aafd0a0b8b281f7157dad1147f13d652026ddce1",
+        "files": [
+          {
+            "path": "kyiv-air-alerts-grafana/scripts/historical_v2_formalization_existing_evidence.py",
+            "git_blob_sha": "d731d76b3e835d5e3a2ebbbe134592202c4c5495"
+          },
+          {
+            "path": "kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py",
+            "git_blob_sha": "89b1be41909c6622339ce8a82d9ac2d982b82481"
+          },
+          {
+            "path": "kyiv-air-alerts-grafana/scripts/replay_explosion_history.py",
+            "git_blob_sha": "e1a6c793d680196724fbf70f09ed09a821912aca"
+          }
+        ],
+        "canonical_json": "{\"files\":[{\"git_blob_sha\":\"d731d76b3e835d5e3a2ebbbe134592202c4c5495\",\"path\":\"kyiv-air-alerts-grafana/scripts/historical_v2_formalization_existing_evidence.py\"},{\"git_blob_sha\":\"89b1be41909c6622339ce8a82d9ac2d982b82481\",\"path\":\"kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py\"},{\"git_blob_sha\":\"e1a6c793d680196724fbf70f09ed09a821912aca\",\"path\":\"kyiv-air-alerts-grafana/scripts/replay_explosion_history.py\"}],\"version\":\"attack-event-normalization-code-fingerprint-v1\"}"
+      },
+      "final_authoritative_normalization_version": "attack-event-normalization-code-fingerprint-v1:6c45bd2f3393145ff3c61191aafd0a0b8b281f7157dad1147f13d652026ddce1",
+      "classifications_receiving_version": 4977
+    },
+    {
+      "worker_lineage": "kropyvnytskyi_mykolaiv",
+      "cities": [
+        {
+          "city": "kropyvnytskyi",
+          "classifications": 1161
+        },
+        {
+          "city": "mykolaiv",
+          "classifications": 1648
+        }
+      ],
+      "classification_count": 2809,
+      "final_proof_head": "b09a95da6354d496eea478fc7e6871e62acb4b7d",
+      "tested_head": "a89a85daf32d7896086b37ca6557abf28a39904f",
+      "proof_artifact_path": "research/historical_v2_formalization_kropyvnytskyi_mykolaiv_proof_2026-10-02.json",
+      "proof_artifact_blob": "3db2c10957beb51cfc565af645f06007a8c0ca55",
+      "normalization_version_state": "MATERIALIZED_IN_ACCEPTED_PROOF",
+      "accepted_materialized_normalization_version": "retained-final-evidence-via-replay_explosion_history-current",
+      "derived_normalization_code_identity": null,
+      "final_authoritative_normalization_version": "retained-final-evidence-via-replay_explosion_history-current",
+      "classifications_receiving_version": 2809
+    },
+    {
+      "worker_lineage": "odesa",
+      "cities": [
+        {
+          "city": "odesa",
+          "classifications": 1465
+        }
+      ],
+      "classification_count": 1465,
+      "final_proof_head": "130f1bdef1bb2479e9b992d26009472930e91987",
+      "tested_head": "e67d80200d8dbd0b18c1440c2fdaca12363017d3",
+      "proof_artifact_path": "research/historical_v2_formalization_odesa_proof_2026-10-02.json",
+      "proof_artifact_blob": "94093565a733d0dc5cf0dc85ab8441a551287ef0",
+      "normalization_version_state": "CONTRACT_DERIVED_FROM_FROZEN_CODE_IDENTITY",
+      "accepted_materialized_normalization_version": null,
+      "derived_normalization_code_identity": {
+        "fingerprint_sha256": "a3360962a659c44ba97d0cfef0d64b5190dc8c9da2f90655e3bd776767544c7e",
+        "normalization_version": "attack-event-normalization-code-fingerprint-v1:a3360962a659c44ba97d0cfef0d64b5190dc8c9da2f90655e3bd776767544c7e",
+        "files": [
+          {
+            "path": "kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py",
+            "git_blob_sha": "89b1be41909c6622339ce8a82d9ac2d982b82481"
+          },
+          {
+            "path": "kyiv-air-alerts-grafana/scripts/prove_historical_v2_formalization_odesa.py",
+            "git_blob_sha": "7105e67e50197eb2e78f588ba3b666c19f0f10f8"
+          },
+          {
+            "path": "kyiv-air-alerts-grafana/scripts/replay_explosion_history.py",
+            "git_blob_sha": "e1a6c793d680196724fbf70f09ed09a821912aca"
+          }
+        ],
+        "canonical_json": "{\"files\":[{\"git_blob_sha\":\"89b1be41909c6622339ce8a82d9ac2d982b82481\",\"path\":\"kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py\"},{\"git_blob_sha\":\"7105e67e50197eb2e78f588ba3b666c19f0f10f8\",\"path\":\"kyiv-air-alerts-grafana/scripts/prove_historical_v2_formalization_odesa.py\"},{\"git_blob_sha\":\"e1a6c793d680196724fbf70f09ed09a821912aca\",\"path\":\"kyiv-air-alerts-grafana/scripts/replay_explosion_history.py\"}],\"version\":\"attack-event-normalization-code-fingerprint-v1\"}"
+      },
+      "final_authoritative_normalization_version": "attack-event-normalization-code-fingerprint-v1:a3360962a659c44ba97d0cfef0d64b5190dc8c9da2f90655e3bd776767544c7e",
+      "classifications_receiving_version": 1465
+    },
+    {
+      "worker_lineage": "chernivtsi_ivano_frankivsk",
+      "cities": [
+        {
+          "city": "chernivtsi",
+          "classifications": 113
+        },
+        {
+          "city": "ivano_frankivsk",
+          "classifications": 103
+        }
+      ],
+      "classification_count": 216,
+      "final_proof_head": "05e9ce706a2f8da459f46fb130bc25d716cfcc46",
+      "tested_head": "e9be481f7b7c3039769c85bca697f95b86dcc5c0",
+      "proof_artifact_path": "research/historical_v2_formalization_chernivtsi_ivano_frankivsk_proof_2026-10-02.json",
+      "proof_artifact_blob": "8144e47393299a9426a507a2c45c8e5cb9fe3464",
+      "normalization_version_state": "MATERIALIZED_IN_ACCEPTED_PROOF",
+      "accepted_materialized_normalization_version": "historical-attack-event-observation-v2",
+      "derived_normalization_code_identity": null,
+      "final_authoritative_normalization_version": "historical-attack-event-observation-v2",
+      "classifications_receiving_version": 216
+    },
+    {
+      "worker_lineage": "khmelnytskyi_lutsk",
+      "cities": [
+        {
+          "city": "khmelnytskyi",
+          "classifications": 248
+        },
+        {
+          "city": "lutsk",
+          "classifications": 135
+        }
+      ],
+      "classification_count": 383,
+      "final_proof_head": "cf20d7f411688de9d2684b8baac63c796bfa090e",
+      "tested_head": "1ed3b4df55acef8cffddf00456508eec85ee36a8",
+      "proof_artifact_path": "research/historical_v2_formalization_khmelnytskyi_lutsk_proof_2026-10-02.json",
+      "proof_artifact_blob": "1deb9916d5d35af10297af5aead38bf741b86852",
+      "normalization_version_state": "MATERIALIZED_IN_ACCEPTED_PROOF",
+      "accepted_materialized_normalization_version": "historical-attack-event-observation-v2",
+      "derived_normalization_code_identity": null,
+      "final_authoritative_normalization_version": "historical-attack-event-observation-v2",
+      "classifications_receiving_version": 383
+    },
+    {
+      "worker_lineage": "poltava_rivne",
+      "cities": [
+        {
+          "city": "poltava",
+          "classifications": 1805
+        },
+        {
+          "city": "rivne",
+          "classifications": 232
+        }
+      ],
+      "classification_count": 2037,
+      "final_proof_head": "c01f4b3d8f304a8024899f22eaa8a73a8975af05",
+      "tested_head": "51487544213cf461964c37f1a47d09fa84ad7af6",
+      "proof_artifact_path": "research/historical_v2_formalization_poltava_rivne_proof_2026-10-02.json",
+      "proof_artifact_blob": "182970ddb52949a7d34e1d4246928f6f654f9b51",
+      "normalization_version_state": "MATERIALIZED_IN_ACCEPTED_PROOF",
+      "accepted_materialized_normalization_version": "historical-attack-event-observation-v2",
+      "derived_normalization_code_identity": null,
+      "final_authoritative_normalization_version": "historical-attack-event-observation-v2",
+      "classifications_receiving_version": 2037
+    },
+    {
+      "worker_lineage": "ternopil_uzhhorod",
+      "cities": [
+        {
+          "city": "ternopil",
+          "classifications": 125
+        },
+        {
+          "city": "uzhhorod",
+          "classifications": 92
+        }
+      ],
+      "classification_count": 217,
+      "final_proof_head": "19637504db967003c4e0465957dc7bd2bf5fbc58",
+      "tested_head": "a09be9d2c935608cc654164cf6dd2783685cbf0c",
+      "proof_artifact_path": "research/historical_v2_formalization_ternopil_uzhhorod_proof_2026-10-02.json",
+      "proof_artifact_blob": "2e23c9b778723c4fef0ad6e22b73b954ff02bb3a",
+      "normalization_version_state": "MATERIALIZED_IN_ACCEPTED_PROOF",
+      "accepted_materialized_normalization_version": "historical-attack-event-observation-v2",
+      "derived_normalization_code_identity": null,
+      "final_authoritative_normalization_version": "historical-attack-event-observation-v2",
+      "classifications_receiving_version": 217
+    },
+    {
+      "worker_lineage": "vinnytsia_zhytomyr",
+      "cities": [
+        {
+          "city": "vinnytsia",
+          "classifications": 362
+        },
+        {
+          "city": "zhytomyr",
+          "classifications": 685
+        }
+      ],
+      "classification_count": 1047,
+      "final_proof_head": "a8eeaf13d51d3e16582212c85cd69a9e6c09685d",
+      "tested_head": "eaa77e2c2714d68a25dcd581c3194c1d394eb00a",
+      "proof_artifact_path": "research/historical_v2_formalization_vinnytsia_zhytomyr_proof_2026-10-02.json",
+      "proof_artifact_blob": "211a602b3cf9a08e33c3ea733bc63984314362dd",
+      "normalization_version_state": "CONTRACT_DERIVED_FROM_FROZEN_CODE_IDENTITY",
+      "accepted_materialized_normalization_version": null,
+      "derived_normalization_code_identity": {
+        "fingerprint_sha256": "3f1fe74a958fa370748a40011d5b455f1e9e2feb6eaec1cee1c2c5140163a2b2",
+        "normalization_version": "attack-event-normalization-code-fingerprint-v1:3f1fe74a958fa370748a40011d5b455f1e9e2feb6eaec1cee1c2c5140163a2b2",
+        "files": [
+          {
+            "path": "kyiv-air-alerts-grafana/scripts/historical_v2_formalize_stream09.py",
+            "git_blob_sha": "42674da447270ec3664b972289d543d593a72759"
+          },
+          {
+            "path": "kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py",
+            "git_blob_sha": "89b1be41909c6622339ce8a82d9ac2d982b82481"
+          }
+        ],
+        "canonical_json": "{\"files\":[{\"git_blob_sha\":\"42674da447270ec3664b972289d543d593a72759\",\"path\":\"kyiv-air-alerts-grafana/scripts/historical_v2_formalize_stream09.py\"},{\"git_blob_sha\":\"89b1be41909c6622339ce8a82d9ac2d982b82481\",\"path\":\"kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py\"}],\"version\":\"attack-event-normalization-code-fingerprint-v1\"}"
+      },
+      "final_authoritative_normalization_version": "attack-event-normalization-code-fingerprint-v1:3f1fe74a958fa370748a40011d5b455f1e9e2feb6eaec1cee1c2c5140163a2b2",
+      "classifications_receiving_version": 1047
+    },
+    {
+      "worker_lineage": "kyiv",
+      "cities": [
+        {
+          "city": "kyiv",
+          "classifications": 2456
+        }
+      ],
+      "classification_count": 2456,
+      "final_proof_head": "778fb57908f64c684d3ee7df5d9a7e3f7731559b",
+      "tested_head": "e460bc30524deb8abc37923276d78f6dab1450a4",
+      "proof_artifact_path": "research/historical_v2_formalization_kyiv_proof_2026-10-02.json",
+      "proof_artifact_blob": "36d830c981ac765ae6ea2150092ab49512e1eec9",
+      "normalization_version_state": "MATERIALIZED_IN_ACCEPTED_PROOF",
+      "accepted_materialized_normalization_version": "historical-attack-event-observation-v2",
+      "derived_normalization_code_identity": null,
+      "final_authoritative_normalization_version": "historical-attack-event-observation-v2",
+      "classifications_receiving_version": 2456
+    }
+  ],
+  "classification_key_contract": {
+    "classification_key_version": "attack-event-classification-key-v2",
+    "tuple_changed": false,
+    "normalization_version_state_is_provenance_metadata_only": true,
+    "normalization_version_state_inserted_into_v2_tuple": false
+  },
+  "revision_rule": "If a future accepted artifact materializes a historically authoritative normalization-version label for one of the four previously unlabeled lineages, do not silently rewrite existing persisted classifications. Such a change is a provenance revision requiring an explicit later contract decision; no automatic retroactive replacement is allowed.",
+  "totals": {
+    "workers": 10,
+    "cities": 18,
+    "classifications": 19542,
+    "materialized_in_accepted_proof": {
+      "workers": 6,
+      "classifications": 8118
+    },
+    "contract_derived_from_frozen_code_identity": {
+      "workers": 4,
+      "cities": 7,
+      "classifications": 11424
+    },
+    "null_normalization_versions": 0
+  },
+  "gates": {
+    "affected_workers": 4,
+    "affected_cities": 7,
+    "affected_classifications": 11424,
+    "unaffected_materialized_classifications": 8118,
+    "combined_classifications": 19542,
+    "all_10_workers_covered": true,
+    "all_18_cities_covered": true,
+    "no_classification_receives_null_normalization_version": true,
+    "no_existing_materialized_normalization_version_altered": true,
+    "four_derived_normalization_versions_are_deterministic": true,
+    "run_a_equals_run_b_for_all_four": true,
+    "exact_tested_head_code_blobs_verified": true,
+    "dependency_sets_verified": true,
+    "target_map_canonical_sha256": "d8c2c78d8340288308eb027f37e36de83c38fdee3230e5679a30ae41328f6eb2",
+    "target_map_canonical_sha_unchanged": true,
+    "accepted_target_hashes_changed": 0,
+    "accepted_verdicts_changed": 0,
+    "historical_evidence_changed": 0,
+    "classifier_behavior_changed": 0,
+    "normalizer_behavior_changed": 0,
+    "classification_key_tuple_changed": false,
+    "classification_key_version": "attack-event-classification-key-v2",
+    "semantic_classification_or_reclassification": false,
+    "new_semantic_classification": false,
+    "semantic_change": false,
+    "public_web_research": false,
+    "source_discovery": false,
+    "neon_queried": false,
+    "neon_mutations": 0,
+    "production_mutated": false,
+    "db_cutover": false,
+    "credentials_exposed": false
+  },
+  "mutation_scope": {
+    "proof_branch": "attack-event-18city-normalization-version-addendum-2026-10-04",
+    "branch_base_main": "5a119520275c606e0c306d41fb831e460e2f7f63",
+    "expected_branch_diff": [
+      "research/attack_event_18city_normalization_version_addendum_2026-10-04.json"
+    ],
+    "step1_artifact_modified": false,
+    "classification_availability_addendum_modified": false,
+    "recovered_target_map_modified": false,
+    "worker_artifacts_modified": false,
+    "scripts_modified": false,
+    "workflows_modified": false,
+    "historical_evidence_modified": false,
+    "repo_content_mutation": "exactly one added proof artifact",
+    "neon_mutations": 0,
+    "production_mutated": false,
+    "db_cutover": false
+  },
+  "final_verdict": "ATTACK-EVENT 18-CITY NORMALIZATION VERSION AVAILABILITY CONTRACT FROZEN"
+}
