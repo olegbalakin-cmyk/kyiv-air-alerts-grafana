@@ -115,7 +115,9 @@ def test_near_duplicate_raw_rows_require_existing_persisted_identity() -> None:
     no_existing_identity["matched_episode_id"] = None
     blocked = monitor.classify_candidate(no_existing_identity, "kyiv", episodes)
     assert blocked["proposed_outcome"] != "approved_strict"
-    assert blocked["temporal_binding"]["present"] is False
+    assert blocked["temporal_binding"]["present"] is True
+    assert blocked["temporal_binding"]["episode_specific"] is True
+    assert blocked["temporal_binding"]["episode_id"] is None
 
 
 def test_untrusted_source_cannot_use_live_publication_time() -> None:
