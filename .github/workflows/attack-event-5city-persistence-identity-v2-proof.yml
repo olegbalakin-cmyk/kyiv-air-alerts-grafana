@@ -260,7 +260,8 @@ jobs:
 
               batch_docs: dict[str, dict] = {}
               batch_blobs: dict[str, str] = {}
-              obs_by_batch: dict[tuple[str, str], dict] = {}
+              obs_by_id: dict[str, dict] = {}
+              obs_origin: dict[str, tuple[str, str]] = {}
               targets: dict[tuple[str, str], dict] = {}
               target_origin: dict[tuple[str, str], tuple[str, str]] = {}
               versions_seen = set()
@@ -287,10 +288,14 @@ jobs:
                       oid = str(obs.get("observation_id") or "")
                       if not oid:
                           fail("FIVE_CITY_OBSERVATION_ID_UNAVAILABLE", path)
-                      key = (path, oid)
-                      if key in obs_by_batch:
-                          fail("FIVE_CITY_DUPLICATE_OBSERVATION_IN_BATCH", f"{path}:{oid}")
-                      obs_by_batch[key] = obs
+                      if oid in obs_by_id:
+                          fail(
+                              "FIVE_CITY_GLOBAL_OBSERVATION_ID_DUPLICATE",
+                              oid,
+                              f"{obs_origin[oid][0]} | {path}",
+                          )
+                      obs_by_id[oid] = obs
+                      obs_origin[oid] = (path, batch_blobs[path])
                   for row in doc.get("episode_results") or []:
                       eid = str(row.get("episode_id") or "")
                       key = (city, eid)
@@ -380,6 +385,81 @@ jobs:
               if dist != EXPECTED_DISTRIBUTION:
                   fail("FIVE_CITY_DISTRIBUTION_MISMATCH", "6,863 classifications", str(dist))
 
+              physical_unique_observation_count = len(obs_by_id)
+              total_evidence_reference_count = 0
+              cross_batch_evidence_reference_count = 0
+              unresolved_evidence_reference_count = 0
+              first_unresolved_reference = None
+
+              for city, eid in sorted(targets):
+                  key = (city, eid)
+                  row = targets[key]
+                  target_path, _ = target_origin[key]
+
+                  original_ids = [str(x) for x in (row.get("source_observation_ids") or [])]
+                  for oid in original_ids:
+                      total_evidence_reference_count += 1
+                      origin = obs_origin.get(oid)
+                      if origin is None:
+                          unresolved_evidence_reference_count += 1
+                          if first_unresolved_reference is None:
+                              first_unresolved_reference = (
+                                  "FIVE_CITY_FROZEN_EVIDENCE_OBSERVATION_UNAVAILABLE",
+                                  f"{city}:{eid}:{oid}",
+                                  target_path,
+                              )
+                      elif origin[0] != target_path:
+                          cross_batch_evidence_reference_count += 1
+
+                  if key in repair_map:
+                      contributor_ids = [
+                          str(x)
+                          for x in (repair_map[key].get("contributing_observation_ids") or [])
+                      ]
+                      if not contributor_ids:
+                          fail(
+                              "FIVE_CITY_REPAIRED_EVIDENCE_MEMBERSHIP_UNAVAILABLE",
+                              f"{city}:{eid}",
+                          )
+                      for oid in contributor_ids:
+                          if changed_obs.get(oid) is None:
+                              fail(
+                                  "FIVE_CITY_REPAIRED_EVIDENCE_OBSERVATION_UNAVAILABLE",
+                                  f"{city}:{eid}:{oid}",
+                                  "repair changed_observations",
+                              )
+                          total_evidence_reference_count += 1
+                          origin = obs_origin.get(oid)
+                          if origin is None:
+                              unresolved_evidence_reference_count += 1
+                              if first_unresolved_reference is None:
+                                  first_unresolved_reference = (
+                                      "FIVE_CITY_REPAIRED_EVIDENCE_OBSERVATION_UNAVAILABLE",
+                                      f"{city}:{eid}:{oid}",
+                                      "campaign-global observation index",
+                                  )
+                          elif origin[0] != target_path:
+                              cross_batch_evidence_reference_count += 1
+
+              resolver_summary = {
+                  "resolver_scope": "CAMPAIGN_GLOBAL",
+                  "physical_unique_observation_count": physical_unique_observation_count,
+                  "total_evidence_reference_count": total_evidence_reference_count,
+                  "cross_batch_evidence_reference_count": cross_batch_evidence_reference_count,
+                  "unresolved_evidence_reference_count": unresolved_evidence_reference_count,
+              }
+              print(
+                  "EVIDENCE_RESOLVER_SUMMARY="
+                  + json.dumps(resolver_summary, ensure_ascii=False, sort_keys=True)
+              )
+              if unresolved_evidence_reference_count != 0:
+                  gate, scope, detail = first_unresolved_reference
+                  fail(
+                      gate,
+                      scope,
+                      f"{detail}; campaign-wide unresolved={unresolved_evidence_reference_count}",
+                  )
+
               classifications = []
               events = []
               source_links = []
@@ -425,14 +505,16 @@ jobs:
                   member_sources: dict[str, list[tuple[str, dict, bool]]] = defaultdict(list)
 
                   for oid in original_ids:
-                      obs = obs_by_batch.get((target_path, oid))
-                      if obs is None:
+                      obs = obs_by_id.get(oid)
+                      origin = obs_origin.get(oid)
+                      if obs is None or origin is None:
                           fail(
                               "FIVE_CITY_FROZEN_EVIDENCE_OBSERVATION_UNAVAILABLE",
                               f"{city}:{eid}:{oid}",
-                              target_path,
+                              "campaign-global observation index",
                           )
-                      member_sources[oid].append((target_path, obs, False))
+                      physical_path = origin[0]
+                      member_sources[oid].append((physical_path, obs, False))
 
                   for oid in contributor_ids:
                       crec = changed_obs.get(oid)
@@ -442,15 +524,16 @@ jobs:
                               f"{city}:{eid}:{oid}",
                               "repair changed_observations",
                           )
-                      cpath = str(crec.get("frozen_batch") or "")
-                      obs = obs_by_batch.get((cpath, oid))
-                      if obs is None:
+                      obs = obs_by_id.get(oid)
+                      origin = obs_origin.get(oid)
+                      if obs is None or origin is None:
                           fail(
                               "FIVE_CITY_REPAIRED_EVIDENCE_OBSERVATION_UNAVAILABLE",
                               f"{city}:{eid}:{oid}",
-                              cpath,
+                              "campaign-global observation index",
                           )
-                      member_sources[oid].append((cpath, obs, True))
+                      physical_path = origin[0]
+                      member_sources[oid].append((physical_path, obs, True))
                       for t in obs.get("event_types") or []:
                           event_types.add(str(t))
 
@@ -710,6 +793,10 @@ jobs:
                   "target_state_sha_verification": computed_target_sha == TARGET_STATE_SHA,
                   "source_link_count": len(source_links),
                   "unique_evidence_observation_count": len(all_evidence_identities),
+                  "physical_unique_observation_count": physical_unique_observation_count,
+                  "total_evidence_reference_count": total_evidence_reference_count,
+                  "cross_batch_evidence_reference_count": cross_batch_evidence_reference_count,
+                  "unresolved_evidence_reference_count": unresolved_evidence_reference_count,
                   "neon_mutations": 0,
                   "semantic_change": "NO",
               }
@@ -766,6 +853,10 @@ jobs:
                   "positive_event_count": len(events),
                   "source_link_count": len(source_links),
                   "unique_evidence_observation_count": len(all_evidence_identities),
+                  "physical_unique_observation_count": physical_unique_observation_count,
+                  "total_evidence_reference_count": total_evidence_reference_count,
+                  "cross_batch_evidence_reference_count": cross_batch_evidence_reference_count,
+                  "unresolved_evidence_reference_count": unresolved_evidence_reference_count,
                   "classifier_provenance_counts": {
                       "unchanged": classifier_counts["unchanged"],
                       "repaired": classifier_counts["repaired"],
