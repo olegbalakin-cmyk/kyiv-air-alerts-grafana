@@ -1,0 +1,805 @@
+name: Attack-event 5-city persistence identity v2 proof
+
+on:
+  push:
+    branches:
+      - proof-5city-persistence-identity-v2-actions-2026-10-04
+    paths:
+      - .github/workflows/attack-event-5city-persistence-identity-v2-proof.yml
+
+permissions:
+  contents: read
+
+jobs:
+  materialize:
+    name: materialize
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+
+    steps:
+      - name: Checkout proof branch
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+          clean: true
+
+      - name: Setup Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Materialize frozen five-city persistence identity v2
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from __future__ import annotations
+
+          import copy
+          import hashlib
+          import json
+          import os
+          import re
+          import subprocess
+          import sys
+          import unicodedata
+          from collections import Counter, defaultdict
+          from datetime import datetime, timezone
+          from pathlib import Path
+
+          REPO = Path(os.environ["GITHUB_WORKSPACE"]).resolve()
+          OUTDIR = Path(os.environ["RUNNER_TEMP"]) / "attack-event-5city-persistence-identity-v2"
+          OUTDIR.mkdir(parents=True, exist_ok=True)
+          EXPORT_PATH = OUTDIR / "attack_event_5city_persistence_identity_export_v2.json"
+          SUMMARY_PATH = OUTDIR / "summary.json"
+
+          STEP1_COMMIT = "b205d38dbc50bc502d10e682d4ae53491af542ea"
+          STEP1_PATH = "research/attack_event_neon_persistence_contract_2026-10-02.json"
+
+          V2_COMMIT = "bd82a6c0a19aca4610a8af6df73a307a88c35bf6"
+          V2_PATH = "research/attack_event_classification_identity_availability_addendum_2026-10-04.json"
+
+          REPAIR_HEAD = "5d18ef85a66384f189ede5ca5654d750f60f088b"
+          REPAIR_PATH = "research/historical_offline_repair_recovery_scan_2026-10-02.json"
+          TARGET_STATE_SHA = "652bda9bc4037d263e7e1090455ff4df5387d1f4f1a73a8c5e160d7ce62132f5"
+
+          PROV_COMMIT = "79f79b1a7ac610ef7f1093bea214cc44e15b70bd"
+          PROV_PATH = "research/attack_event_5city_repaired_classifier_provenance_addendum_2026-10-04.json"
+          PROV_BLOB = "d5e37030e7ff1ace22c4e2185f51669d228c38e7"
+
+          CAMPAIGN_HEAD = "71cb6f6fbe856cc7b96759310fe9cc9c71cc0453"
+          CAMPAIGN_ID = "historical-attack-events-v2-2026-09-27"
+          STATUS_PATH = "research/historical_attack_event_backfill_status.json"
+          STATUS_BLOB = "615b380b51c0da7aa052bad06222c12785090986"
+          BATCH_PREFIX = "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27"
+
+          CITIES = ["lviv", "sevastopol", "cherkasy", "sumy", "zaporizhzhia"]
+          EXPECTED_CITY_COUNTS = {
+              "lviv": 126,
+              "sevastopol": 527,
+              "cherkasy": 1548,
+              "sumy": 2297,
+              "zaporizhzhia": 2365,
+          }
+          EXPECTED_BATCHES = 139
+          EXPECTED_CLASSIFICATIONS = 6863
+          EXPECTED_DISTRIBUTION = {
+              "STRICT_EVENT_POSITIVE": 104,
+              "SENSITIVITY_EVENT_POSITIVE": 15,
+              "NO_CONFIRMED_EVENT": 5417,
+              "NEEDS_REVIEW": 1327,
+          }
+          EXPECTED_POSITIVES = 119
+          EXPECTED_REPAIRED = 25
+          EXPECTED_UNCHANGED = 6838
+          UNCHANGED_CLASSIFIER = "778469b74c2aa807d851cf2c2ee35cf4aa785589"
+          REPAIRED_CLASSIFIER = "06ddfa13e918b3131799c8dadd290f84f20cb901"
+          EXPECTED_NORMALIZATION = "historical-attack-event-observation-v2"
+          EXPECTED_METHODOLOGY = "historical-attack-event-air-defense-action-v2"
+
+          CLASSIFICATION_KEY_VERSION = "attack-event-classification-key-v2"
+          EVENT_KEY_VERSION = "attack-event-key-v1"
+          SOURCE_LINK_KEY_VERSION = "attack-event-source-link-key-v1"
+
+          class GateError(RuntimeError):
+              def __init__(self, gate: str, scope: str, detail: str | None = None):
+                  self.gate = gate
+                  self.scope = scope
+                  self.detail = detail
+                  super().__init__(gate if detail is None else f"{gate}:{detail}")
+
+          def fail(gate: str, scope: str, detail: str | None = None):
+              raise GateError(gate, scope, detail)
+
+          def sh(args: list[str], check: bool = True) -> subprocess.CompletedProcess[str]:
+              p = subprocess.run(
+                  args,
+                  cwd=REPO,
+                  text=True,
+                  stdout=subprocess.PIPE,
+                  stderr=subprocess.PIPE,
+              )
+              if check and p.returncode != 0:
+                  raise RuntimeError(
+                      "command failed rc=%s: %s\nstdout=%s\nstderr=%s"
+                      % (p.returncode, " ".join(args), p.stdout, p.stderr)
+                  )
+              return p
+
+          def git(*args: str) -> str:
+              return sh(["git", *args]).stdout.strip()
+
+          def ensure_commit(sha: str):
+              p = sh(["git", "cat-file", "-e", f"{sha}^{{commit}}"], check=False)
+              if p.returncode != 0:
+                  p2 = sh(["git", "fetch", "--no-tags", "origin", sha], check=False)
+                  if p2.returncode != 0:
+                      fail("FROZEN_REF_UNAVAILABLE", sha, p2.stderr.strip()[:500])
+              got = git("rev-parse", f"{sha}^{{commit}}")
+              if got != sha:
+                  fail("FROZEN_REF_MISMATCH", sha, got)
+
+          def blob_at(ref: str, path: str) -> str:
+              p = sh(["git", "rev-parse", f"{ref}:{path}"], check=False)
+              if p.returncode != 0:
+                  fail("FROZEN_ARTIFACT_UNAVAILABLE", f"{ref}:{path}")
+              return p.stdout.strip()
+
+          def text_at(ref: str, path: str) -> str:
+              p = sh(["git", "show", f"{ref}:{path}"], check=False)
+              if p.returncode != 0:
+                  fail("FROZEN_ARTIFACT_UNAVAILABLE", f"{ref}:{path}")
+              return p.stdout
+
+          def json_at(ref: str, path: str):
+              try:
+                  return json.loads(text_at(ref, path))
+              except Exception as exc:
+                  fail("FROZEN_ARTIFACT_JSON_INVALID", f"{ref}:{path}", str(exc))
+
+          def canonical_bytes(obj) -> bytes:
+              return json.dumps(
+                  obj,
+                  ensure_ascii=False,
+                  sort_keys=True,
+                  separators=(",", ":"),
+              ).encode("utf-8")
+
+          def sha256_bytes(data: bytes) -> str:
+              return hashlib.sha256(data).hexdigest()
+
+          def canonical_sha(obj) -> str:
+              return sha256_bytes(canonical_bytes(obj))
+
+          def json_compact(obj) -> str:
+              return json.dumps(obj, ensure_ascii=False, separators=(",", ":"))
+
+          def utc_micro(value: str) -> str:
+              s = str(value or "").strip()
+              if not s:
+                  fail("FIVE_CITY_EPISODE_BOUNDS_UNAVAILABLE", "empty timestamp")
+              if s.endswith("Z"):
+                  s = s[:-1] + "+00:00"
+              try:
+                  dt = datetime.fromisoformat(s)
+              except Exception as exc:
+                  fail("FIVE_CITY_EPISODE_BOUNDS_UNAVAILABLE", value, str(exc))
+              if dt.tzinfo is None:
+                  fail("FIVE_CITY_EPISODE_BOUNDS_UNAVAILABLE", value, "naive timestamp")
+              return dt.astimezone(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%fZ")
+
+          def nonempty_review_value(v) -> bool:
+              return v not in (None, {}, [], "")
+
+          try:
+              for ref in [STEP1_COMMIT, V2_COMMIT, REPAIR_HEAD, PROV_COMMIT, CAMPAIGN_HEAD]:
+                  ensure_commit(ref)
+
+              if blob_at(PROV_COMMIT, PROV_PATH) != PROV_BLOB:
+                  fail("FIVE_CITY_PROVENANCE_ADDENDUM_BLOB_MISMATCH", PROV_PATH)
+              if blob_at(CAMPAIGN_HEAD, STATUS_PATH) != STATUS_BLOB:
+                  fail("FIVE_CITY_FROZEN_STATUS_BLOB_MISMATCH", STATUS_PATH)
+
+              step1 = json_at(STEP1_COMMIT, STEP1_PATH)
+              v2 = json_at(V2_COMMIT, V2_PATH)
+              repair = json_at(REPAIR_HEAD, REPAIR_PATH)
+              prov = json_at(PROV_COMMIT, PROV_PATH)
+              status = json_at(CAMPAIGN_HEAD, STATUS_PATH)
+
+              if step1.get("verdict") != "ATTACK-EVENT NEON PERSISTENCE CONTRACT FROZEN":
+                  fail("STEP1_PERSISTENCE_CONTRACT_NOT_FROZEN", STEP1_PATH)
+              v2_contract = v2.get("classification_identity_v2") or {}
+              if v2_contract.get("classification_key_version") != CLASSIFICATION_KEY_VERSION:
+                  fail("CLASSIFICATION_IDENTITY_V2_CONTRACT_MISMATCH", V2_PATH)
+              five = v2.get("accepted_five_city_source") or {}
+              if five.get("repaired_target_state_sha256") != TARGET_STATE_SHA:
+                  fail("FIVE_CITY_TARGET_STATE_CONTRACT_MISMATCH", V2_PATH)
+              if five.get("qa_reasons_state") != "MATERIALIZED":
+                  fail("FIVE_CITY_QA_AVAILABILITY_CONTRACT_MISMATCH", V2_PATH)
+              if int(five.get("frozen_classification_count") or -1) != EXPECTED_CLASSIFICATIONS:
+                  fail("FIVE_CITY_CLASSIFICATION_COUNT_CONTRACT_MISMATCH", V2_PATH)
+
+              repair_sha = ((repair.get("hashes") or {}).get("repaired_target_state_sha256"))
+              if repair_sha != TARGET_STATE_SHA:
+                  fail("FIVE_CITY_TARGET_STATE_SHA_MISMATCH", REPAIR_PATH, str(repair_sha))
+              if int((repair.get("targets") or {}).get("count") or -1) != EXPECTED_CLASSIFICATIONS:
+                  fail("FIVE_CITY_REPAIR_TARGET_COUNT_MISMATCH", REPAIR_PATH)
+              if int((repair.get("targets") or {}).get("total_changed_targets") or -1) != EXPECTED_REPAIRED:
+                  fail("FIVE_CITY_REPAIRED_COUNT_MISMATCH", REPAIR_PATH)
+
+              coverage = prov.get("complete_five_city_classifier_provenance_coverage") or {}
+              if int(coverage.get("total_classifications") or -1) != EXPECTED_CLASSIFICATIONS:
+                  fail("FIVE_CITY_CLASSIFIER_PROVENANCE_COVERAGE_MISMATCH", PROV_PATH)
+              u = coverage.get("unchanged_classifications") or {}
+              rp = coverage.get("repaired_classifications") or {}
+              if (
+                  int(u.get("count") or -1) != EXPECTED_UNCHANGED
+                  or u.get("classifier_blob_sha") != UNCHANGED_CLASSIFIER
+                  or int(rp.get("count") or -1) != EXPECTED_REPAIRED
+                  or rp.get("classifier_blob_sha") != REPAIRED_CLASSIFIER
+                  or int(coverage.get("null_classifier_blobs") or -1) != 0
+              ):
+                  fail("FIVE_CITY_CLASSIFIER_PROVENANCE_MAPPING_MISMATCH", PROV_PATH)
+
+              tree = git(
+                  "ls-tree", "-r", "--name-only", CAMPAIGN_HEAD, "--", BATCH_PREFIX
+              ).splitlines()
+              batch_re = re.compile(
+                  r"^" + re.escape(BATCH_PREFIX)
+                  + r"/(lviv|sevastopol|cherkasy|sumy|zaporizhzhia)/batch_[0-9]{6}\.json$"
+              )
+              batch_paths = sorted(p for p in tree if batch_re.match(p))
+              if len(batch_paths) != EXPECTED_BATCHES:
+                  fail(
+                      "FIVE_CITY_BATCH_COUNT_MISMATCH",
+                      "frozen campaign",
+                      f"{len(batch_paths)} != {EXPECTED_BATCHES}",
+                  )
+
+              batch_docs: dict[str, dict] = {}
+              batch_blobs: dict[str, str] = {}
+              obs_by_batch: dict[tuple[str, str], dict] = {}
+              targets: dict[tuple[str, str], dict] = {}
+              target_origin: dict[tuple[str, str], tuple[str, str]] = {}
+              versions_seen = set()
+              city_counts = Counter()
+
+              for path in batch_paths:
+                  doc = json_at(CAMPAIGN_HEAD, path)
+                  batch_docs[path] = doc
+                  batch_blobs[path] = blob_at(CAMPAIGN_HEAD, path)
+                  city = str(doc.get("city_key") or "")
+                  if city not in CITIES:
+                      fail("FIVE_CITY_BATCH_CITY_MISMATCH", path, city)
+                  if doc.get("campaign_id") != CAMPAIGN_ID:
+                      fail("FIVE_CITY_CAMPAIGN_ID_MISMATCH", path)
+                  version = doc.get("campaign_version") or {}
+                  versions_seen.add(
+                      (
+                          version.get("classifier_sha"),
+                          version.get("normalization_version"),
+                          version.get("methodology_version"),
+                      )
+                  )
+                  for obs in doc.get("observations") or []:
+                      oid = str(obs.get("observation_id") or "")
+                      if not oid:
+                          fail("FIVE_CITY_OBSERVATION_ID_UNAVAILABLE", path)
+                      key = (path, oid)
+                      if key in obs_by_batch:
+                          fail("FIVE_CITY_DUPLICATE_OBSERVATION_IN_BATCH", f"{path}:{oid}")
+                      obs_by_batch[key] = obs
+                  for row in doc.get("episode_results") or []:
+                      eid = str(row.get("episode_id") or "")
+                      key = (city, eid)
+                      if not re.fullmatch(r"[0-9a-f]{24}", eid):
+                          fail("FIVE_CITY_EPISODE_ID_INVALID", f"{city}:{eid}")
+                      if key in targets:
+                          fail("FIVE_CITY_DUPLICATE_CLASSIFICATION_TARGET", f"{city}:{eid}")
+                      targets[key] = row
+                      target_origin[key] = (path, batch_blobs[path])
+                      city_counts[city] += 1
+
+              if len(versions_seen) != 1:
+                  fail("FIVE_CITY_CAMPAIGN_VERSION_INCONSISTENT", "139 frozen batches")
+              frozen_classifier, normalization_version, methodology_version = next(iter(versions_seen))
+              if frozen_classifier != UNCHANGED_CLASSIFIER:
+                  fail("FIVE_CITY_FROZEN_CLASSIFIER_MISMATCH", "139 frozen batches")
+              if normalization_version != EXPECTED_NORMALIZATION:
+                  fail("FIVE_CITY_NORMALIZATION_VERSION_MISMATCH", "139 frozen batches")
+              if methodology_version != EXPECTED_METHODOLOGY:
+                  fail("FIVE_CITY_METHODOLOGY_VERSION_MISMATCH", "139 frozen batches")
+
+              if len(targets) != EXPECTED_CLASSIFICATIONS:
+                  fail(
+                      "FIVE_CITY_CLASSIFICATION_COUNT_MISMATCH",
+                      "frozen campaign",
+                      f"{len(targets)} != {EXPECTED_CLASSIFICATIONS}",
+                  )
+              if dict(city_counts) != EXPECTED_CITY_COUNTS:
+                  fail("FIVE_CITY_PER_CITY_COUNT_MISMATCH", "frozen campaign", str(dict(city_counts)))
+
+              changed_targets = (repair.get("targets") or {}).get("changed_targets") or []
+              repair_map: dict[tuple[str, str], dict] = {}
+              for rec in changed_targets:
+                  key = (str(rec.get("city") or ""), str(rec.get("episode_id") or ""))
+                  if key in repair_map:
+                      fail("FIVE_CITY_DUPLICATE_REPAIRED_TARGET", f"{key[0]}:{key[1]}")
+                  if key not in targets:
+                      fail("FIVE_CITY_REPAIRED_TARGET_NOT_IN_CAMPAIGN", f"{key[0]}:{key[1]}")
+                  repair_map[key] = rec
+              if len(repair_map) != EXPECTED_REPAIRED:
+                  fail("FIVE_CITY_REPAIRED_COUNT_MISMATCH", "repair overlay", str(len(repair_map)))
+
+              changed_obs_rows = (repair.get("observations") or {}).get("changed_observations") or []
+              changed_obs = {}
+              for rec in changed_obs_rows:
+                  oid = str(rec.get("observation_id") or "")
+                  if oid:
+                      changed_obs[oid] = rec
+
+              effective_states = {}
+              for key, row in targets.items():
+                  if key in repair_map:
+                      effective_states[key] = str(repair_map[key].get("repaired_outcome") or "")
+                  else:
+                      effective_states[key] = str(row.get("classifier_result") or "")
+
+              frozen_cities = [str(x) for x in (status.get("frozen_cities") or []) if str(x) != "kyiv"]
+              if frozen_cities != CITIES:
+                  fail("FIVE_CITY_FROZEN_CITY_ORDER_MISMATCH", STATUS_PATH, str(frozen_cities))
+              launch_order = []
+              for city in frozen_cities:
+                  ids = (((status.get("cities") or {}).get(city) or {}).get("frozen_episode_ids") or [])
+                  for eid_raw in ids:
+                      key = (city, str(eid_raw))
+                      if key not in targets:
+                          fail("FIVE_CITY_LAUNCH_ORDER_TARGET_MISSING", f"{city}:{eid_raw}")
+                      launch_order.append(key)
+              if len(launch_order) != EXPECTED_CLASSIFICATIONS or len(set(launch_order)) != EXPECTED_CLASSIFICATIONS:
+                  fail("FIVE_CITY_LAUNCH_ORDER_COUNT_MISMATCH", STATUS_PATH)
+
+              preimage = "".join(
+                  f"{city}\t{eid}\t{effective_states[(city, eid)]}\n"
+                  for city, eid in launch_order
+              ).encode("utf-8")
+              computed_target_sha = sha256_bytes(preimage)
+              if computed_target_sha != TARGET_STATE_SHA:
+                  fail(
+                      "FIVE_CITY_TARGET_STATE_SHA_MISMATCH",
+                      "6,863 reconstructed target states",
+                      computed_target_sha,
+                  )
+
+              distribution = Counter(effective_states.values())
+              for k in EXPECTED_DISTRIBUTION:
+                  distribution.setdefault(k, 0)
+              dist = {k: distribution[k] for k in EXPECTED_DISTRIBUTION}
+              if dist != EXPECTED_DISTRIBUTION:
+                  fail("FIVE_CITY_DISTRIBUTION_MISMATCH", "6,863 classifications", str(dist))
+
+              classifications = []
+              events = []
+              source_links = []
+              classifier_counts = Counter()
+              all_evidence_identities = set()
+              all_source_link_keys = set()
+
+              for city, eid in sorted(targets):
+                  key = (city, eid)
+                  row = targets[key]
+                  target_path, target_blob = target_origin[key]
+                  repaired = key in repair_map
+                  repair_rec = repair_map.get(key)
+                  verdict = effective_states[key]
+                  if verdict not in EXPECTED_DISTRIBUTION:
+                      fail("FIVE_CITY_VERDICT_INVALID", f"{city}:{eid}", verdict)
+
+                  city_norm = unicodedata.normalize("NFC", city).strip()
+                  if city_norm != city:
+                      fail("FIVE_CITY_CITY_CANONICALIZATION_MISMATCH", f"{city}:{eid}")
+
+                  start_u = utc_micro(str(row.get("alert_start") or ""))
+                  end_u = utc_micro(str(row.get("alert_end") or ""))
+                  if end_u <= start_u:
+                      fail("FIVE_CITY_EPISODE_BOUNDS_INVALID", f"{city}:{eid}")
+
+                  qa = row.get("qa_reasons")
+                  if not isinstance(qa, list):
+                      fail("FIVE_CITY_QA_REASONS_UNAVAILABLE", f"{city}:{eid}")
+                  qa_exact = copy.deepcopy(qa)
+                  if qa_exact != sorted(qa_exact):
+                      fail("FIVE_CITY_QA_REASONS_NOT_CANONICALLY_SORTED", f"{city}:{eid}")
+                  qa_state = "MATERIALIZED"
+
+                  event_types = set(str(x) for x in (row.get("event_types_found") or []))
+                  original_ids = [str(x) for x in (row.get("source_observation_ids") or [])]
+                  contributor_ids = []
+                  if repaired:
+                      contributor_ids = [str(x) for x in (repair_rec.get("contributing_observation_ids") or [])]
+                      if not contributor_ids:
+                          fail("FIVE_CITY_REPAIRED_EVIDENCE_MEMBERSHIP_UNAVAILABLE", f"{city}:{eid}")
+
+                  member_sources: dict[str, list[tuple[str, dict, bool]]] = defaultdict(list)
+
+                  for oid in original_ids:
+                      obs = obs_by_batch.get((target_path, oid))
+                      if obs is None:
+                          fail(
+                              "FIVE_CITY_FROZEN_EVIDENCE_OBSERVATION_UNAVAILABLE",
+                              f"{city}:{eid}:{oid}",
+                              target_path,
+                          )
+                      member_sources[oid].append((target_path, obs, False))
+
+                  for oid in contributor_ids:
+                      crec = changed_obs.get(oid)
+                      if crec is None:
+                          fail(
+                              "FIVE_CITY_REPAIRED_EVIDENCE_OBSERVATION_UNAVAILABLE",
+                              f"{city}:{eid}:{oid}",
+                              "repair changed_observations",
+                          )
+                      cpath = str(crec.get("frozen_batch") or "")
+                      obs = obs_by_batch.get((cpath, oid))
+                      if obs is None:
+                          fail(
+                              "FIVE_CITY_REPAIRED_EVIDENCE_OBSERVATION_UNAVAILABLE",
+                              f"{city}:{eid}:{oid}",
+                              cpath,
+                          )
+                      member_sources[oid].append((cpath, obs, True))
+                      for t in obs.get("event_types") or []:
+                          event_types.add(str(t))
+
+                  members = []
+                  class_reason_codes = set()
+                  raw_review_values = {}
+
+                  for oid in sorted(member_sources):
+                      variants = member_sources[oid]
+                      hashes = {str(v[1].get("content_hash") or "") for v in variants}
+                      if "" in hashes:
+                          fail("FIVE_CITY_SOURCE_NATIVE_CONTENT_HASH_UNAVAILABLE", f"{city}:{eid}:{oid}")
+                      if len(hashes) != 1:
+                          fail("FIVE_CITY_EVIDENCE_CONTENT_HASH_CONFLICT", f"{city}:{eid}:{oid}", str(sorted(hashes)))
+                      content_hash = next(iter(hashes))
+                      if not re.fullmatch(r"[0-9a-f]{64}", content_hash):
+                          fail("FIVE_CITY_SOURCE_NATIVE_CONTENT_HASH_INVALID", f"{city}:{eid}:{oid}", content_hash)
+                      all_evidence_identities.add((oid, content_hash))
+
+                      origin_paths = sorted({v[0] for v in variants})
+                      primary_path, primary_obs, _ = sorted(variants, key=lambda x: (x[0], not x[2]))[0]
+                      overlay = changed_obs.get(oid) if oid in contributor_ids else None
+
+                      if overlay is not None:
+                          reason_codes = overlay.get("new_classifier_reason_codes")
+                          if not isinstance(reason_codes, list):
+                              fail("FIVE_CITY_REPAIRED_CLASSIFIER_REASON_CODES_UNAVAILABLE", f"{city}:{eid}:{oid}")
+                      else:
+                          reason_codes = primary_obs.get("classifier_reason_codes") or []
+                      for code in reason_codes:
+                          class_reason_codes.add(str(code))
+
+                      for _, obs_variant, _ in variants:
+                          rv = obs_variant.get("review_provenance")
+                          if nonempty_review_value(rv):
+                              raw_review_values[canonical_sha(rv)] = copy.deepcopy(rv)
+
+                      members.append(
+                          {
+                              "observation_id": oid,
+                              "content_sha256": content_hash,
+                              "content_hash_basis": "SOURCE_NATIVE",
+                              "source_family": primary_obs.get("source_family"),
+                              "source_type": primary_obs.get("source_type"),
+                              "source_url": primary_obs.get("source_url"),
+                              "telegram_channel": primary_obs.get("telegram_channel"),
+                              "telegram_message_id": primary_obs.get("telegram_message_id"),
+                              "source_timestamp": primary_obs.get("source_timestamp"),
+                              "event_timestamp_if_stated": (
+                                  overlay.get("new_parsed_event_timestamp")
+                                  if overlay is not None and overlay.get("new_parsed_event_timestamp")
+                                  else primary_obs.get("event_timestamp_if_stated")
+                              ),
+                              "excerpt": primary_obs.get("excerpt"),
+                              "observation_classification_outcome": (
+                                  overlay.get("new_classification")
+                                  if overlay is not None
+                                  else primary_obs.get("classification_outcome")
+                              ),
+                              "classification_episode_id": primary_obs.get("classification_episode_id"),
+                              "classifier_evidence_payload": {
+                                  "event_types": list(primary_obs.get("event_types") or []),
+                                  "exact_city_evidence": primary_obs.get("exact_city_evidence"),
+                                  "aerial_war_context": primary_obs.get("aerial_war_context"),
+                                  "same_attack_context": primary_obs.get("same_attack_context"),
+                                  "temporal_binding": (
+                                      overlay.get("new_temporal_binding")
+                                      if overlay is not None
+                                      else primary_obs.get("temporal_binding")
+                                  ),
+                                  "classifier_reason_codes": list(reason_codes),
+                                  "repair_overlay": copy.deepcopy(overlay) if overlay is not None else None,
+                              },
+                              "retrieval_provenance": copy.deepcopy(primary_obs.get("retrieval_provenance") or {}),
+                              "origin": {
+                                  "ref": CAMPAIGN_HEAD,
+                                  "artifact_paths": origin_paths,
+                                  "artifact_blobs": [batch_blobs[p] for p in origin_paths],
+                              },
+                          }
+                      )
+
+                  if len(raw_review_values) > 1:
+                      fail("FIVE_CITY_REVIEW_PROVENANCE_AMBIGUOUS", f"{city}:{eid}")
+                  if raw_review_values:
+                      review_sha, review_value = next(iter(raw_review_values.items()))
+                  else:
+                      review_sha, review_value = None, None
+
+                  member_pairs = sorted(
+                      [[m["observation_id"], m["content_sha256"]] for m in members],
+                      key=lambda x: (x[0], x[1]),
+                  )
+                  evidence_set_sha = sha256_bytes(canonical_bytes(member_pairs))
+                  event_types_sorted = sorted(event_types)
+                  evtypes_json = json_compact(event_types_sorted)
+                  qa_json = json_compact(qa_exact)
+
+                  classifier_blob = REPAIRED_CLASSIFIER if repaired else UNCHANGED_CLASSIFIER
+                  classifier_counts["repaired" if repaired else "unchanged"] += 1
+                  if not classifier_blob:
+                      fail("FIVE_CITY_NULL_CLASSIFIER_BLOB", f"{city}:{eid}")
+
+                  class_tuple = [
+                      CLASSIFICATION_KEY_VERSION,
+                      city,
+                      eid,
+                      start_u,
+                      end_u,
+                      verdict,
+                      evtypes_json,
+                      qa_state,
+                      qa_json,
+                      classifier_blob,
+                      methodology_version,
+                      normalization_version,
+                      evidence_set_sha,
+                      review_sha,
+                  ]
+                  classification_key = sha256_bytes(canonical_bytes(class_tuple))
+
+                  classification = {
+                      "classification_key_version": CLASSIFICATION_KEY_VERSION,
+                      "classification_key": classification_key,
+                      "city_key": city,
+                      "historical_episode_id": eid,
+                      "alert_start_utc_microseconds": start_u,
+                      "alert_end_utc_microseconds": end_u,
+                      "verdict": verdict,
+                      "event_types": event_types_sorted,
+                      "classifier_reason_codes": sorted(class_reason_codes),
+                      "qa_reasons_state": qa_state,
+                      "qa_reasons": qa_exact,
+                      "classifier_blob_sha": classifier_blob,
+                      "classifier_provenance_state": (
+                          "CONTRACT_DERIVED_FROM_ACCEPTED_REPAIR_EXECUTOR"
+                          if repaired
+                          else "MATERIALIZED_IN_FROZEN_CAMPAIGN"
+                      ),
+                      "classifier_methodology_version": methodology_version,
+                      "normalization_version": normalization_version,
+                      "evidence_set_sha256": evidence_set_sha,
+                      "review_provenance_sha256": review_sha,
+                      "review_provenance": review_value,
+                      "accepted_evidence_membership": member_pairs,
+                      "native_frozen_episode_result": copy.deepcopy(row),
+                      "repair_overlay": copy.deepcopy(repair_rec) if repaired else None,
+                      "origin_provenance": {
+                          "origin_repository": "olegbalakin-cmyk/kyiv-air-alerts-grafana",
+                          "frozen_campaign_ref": CAMPAIGN_HEAD,
+                          "frozen_batch_path": target_path,
+                          "frozen_batch_blob": target_blob,
+                          "accepted_repair_ref": REPAIR_HEAD,
+                          "accepted_repair_artifact_path": REPAIR_PATH,
+                          "accepted_repair_artifact_blob": blob_at(REPAIR_HEAD, REPAIR_PATH),
+                          "origin_target_state_sha256": TARGET_STATE_SHA,
+                          "classifier_provenance_ref": PROV_COMMIT,
+                          "classifier_provenance_artifact_path": PROV_PATH,
+                          "classifier_provenance_artifact_blob": PROV_BLOB,
+                      },
+                  }
+                  classifications.append(classification)
+
+                  for member in members:
+                      sl_tuple = [
+                          SOURCE_LINK_KEY_VERSION,
+                          classification_key,
+                          member["observation_id"],
+                          member["content_sha256"],
+                      ]
+                      sl_key = sha256_bytes(canonical_bytes(sl_tuple))
+                      if sl_key in all_source_link_keys:
+                          fail("FIVE_CITY_DUPLICATE_SOURCE_LINK_KEY", f"{city}:{eid}:{member['observation_id']}")
+                      all_source_link_keys.add(sl_key)
+                      link = copy.deepcopy(member)
+                      link["source_link_key_version"] = SOURCE_LINK_KEY_VERSION
+                      link["source_link_key"] = sl_key
+                      link["classification_key_v2"] = classification_key
+                      source_links.append(link)
+
+                  if verdict in {"STRICT_EVENT_POSITIVE", "SENSITIVITY_EVENT_POSITIVE"}:
+                      event_tuple = [
+                          EVENT_KEY_VERSION,
+                          "HISTORICAL_ALERT_EPISODE",
+                          city,
+                          eid,
+                          start_u,
+                          end_u,
+                      ]
+                      events.append(
+                          {
+                              "attack_event_key_version": EVENT_KEY_VERSION,
+                              "attack_event_key": sha256_bytes(canonical_bytes(event_tuple)),
+                              "event_grain": "HISTORICAL_ALERT_EPISODE",
+                              "city_key": city,
+                              "historical_episode_id": eid,
+                              "alert_start_utc_microseconds": start_u,
+                              "alert_end_utc_microseconds": end_u,
+                              "classification_key_v2": classification_key,
+                          }
+                      )
+
+              classifications.sort(
+                  key=lambda x: (
+                      x["city_key"],
+                      x["historical_episode_id"],
+                      x["alert_start_utc_microseconds"],
+                      x["alert_end_utc_microseconds"],
+                  )
+              )
+              events.sort(
+                  key=lambda x: (
+                      x["city_key"],
+                      x["historical_episode_id"],
+                      x["alert_start_utc_microseconds"],
+                      x["alert_end_utc_microseconds"],
+                  )
+              )
+              source_links.sort(
+                  key=lambda x: (
+                      x["classification_key_v2"],
+                      x["observation_id"],
+                      x["content_sha256"],
+                  )
+              )
+
+              unique_class_keys = {x["classification_key"] for x in classifications}
+              unique_event_keys = {x["attack_event_key"] for x in events}
+              if len({x["city_key"] for x in classifications}) != 5:
+                  fail("FIVE_CITY_CITY_COUNT_MISMATCH", "materialized classifications")
+              if len(classifications) != EXPECTED_CLASSIFICATIONS:
+                  fail("FIVE_CITY_CLASSIFICATION_COUNT_MISMATCH", "materialized classifications")
+              if len(unique_class_keys) != EXPECTED_CLASSIFICATIONS:
+                  fail("FIVE_CITY_CLASSIFICATION_KEY_UNIQUENESS_MISMATCH", "materialized classifications")
+              if len(events) != EXPECTED_POSITIVES or len(unique_event_keys) != EXPECTED_POSITIVES:
+                  fail("FIVE_CITY_POSITIVE_EVENT_COUNT_MISMATCH", "materialized events")
+              if classifier_counts["repaired"] != EXPECTED_REPAIRED:
+                  fail("FIVE_CITY_REPAIRED_COUNT_MISMATCH", "materialized classifications")
+              if classifier_counts["unchanged"] != EXPECTED_UNCHANGED:
+                  fail("FIVE_CITY_UNCHANGED_COUNT_MISMATCH", "materialized classifications")
+              if classifier_counts["repaired"] + classifier_counts["unchanged"] != EXPECTED_CLASSIFICATIONS:
+                  fail("FIVE_CITY_CLASSIFIER_PROVENANCE_COVERAGE_MISMATCH", "materialized classifications")
+              if any(not x["classifier_blob_sha"] for x in classifications):
+                  fail("FIVE_CITY_NULL_CLASSIFIER_BLOB", "materialized classifications")
+
+              gates = {
+                  "cities": 5,
+                  "classifications": len(classifications),
+                  "unique_classification_keys": len(unique_class_keys),
+                  "distribution": dist,
+                  "positive_event_keys": len(unique_event_keys),
+                  "repaired_classifications": classifier_counts["repaired"],
+                  "unchanged_classifications": classifier_counts["unchanged"],
+                  "classifier_provenance_coverage": classifier_counts["repaired"] + classifier_counts["unchanged"],
+                  "null_classifier_blobs": sum(not bool(x["classifier_blob_sha"]) for x in classifications),
+                  "target_state_sha256": computed_target_sha,
+                  "target_state_sha_verification": computed_target_sha == TARGET_STATE_SHA,
+                  "source_link_count": len(source_links),
+                  "unique_evidence_observation_count": len(all_evidence_identities),
+                  "neon_mutations": 0,
+                  "semantic_change": "NO",
+              }
+
+              export = {
+                  "schema_version": 2,
+                  "kind": "attack_event_5city_persistence_identity_export_v2",
+                  "classification_key_version": CLASSIFICATION_KEY_VERSION,
+                  "attack_event_key_version": EVENT_KEY_VERSION,
+                  "source_link_key_version": SOURCE_LINK_KEY_VERSION,
+                  "classifier_methodology_version": methodology_version,
+                  "normalization_version": normalization_version,
+                  "accepted_inputs": {
+                      "step1_persistence_contract": {"commit": STEP1_COMMIT, "path": STEP1_PATH},
+                      "classification_identity_v2_addendum": {"commit": V2_COMMIT, "path": V2_PATH},
+                      "accepted_repair_state": {
+                          "head": REPAIR_HEAD,
+                          "path": REPAIR_PATH,
+                          "target_state_sha256": TARGET_STATE_SHA,
+                      },
+                      "classifier_provenance_addendum": {
+                          "commit": PROV_COMMIT,
+                          "path": PROV_PATH,
+                          "blob": PROV_BLOB,
+                      },
+                      "frozen_campaign_head": CAMPAIGN_HEAD,
+                  },
+                  "classifier_provenance_mapping": {
+                      "unchanged_classifications": {
+                          "count": EXPECTED_UNCHANGED,
+                          "classifier_blob_sha": UNCHANGED_CLASSIFIER,
+                      },
+                      "repaired_classifications": {
+                          "count": EXPECTED_REPAIRED,
+                          "classifier_blob_sha": REPAIRED_CLASSIFIER,
+                      },
+                  },
+                  "target_state_sha256": computed_target_sha,
+                  "classifications": classifications,
+                  "attack_events": events,
+                  "source_links": source_links,
+                  "gates": gates,
+              }
+
+              export_raw = canonical_bytes(export)
+              EXPORT_PATH.write_bytes(export_raw)
+              export_sha = sha256_bytes(export_raw)
+              summary = {
+                  "status": "PASS",
+                  "sha256": export_sha,
+                  "byte_count": len(export_raw),
+                  "classification_count": len(classifications),
+                  "distribution": dist,
+                  "positive_event_count": len(events),
+                  "source_link_count": len(source_links),
+                  "unique_evidence_observation_count": len(all_evidence_identities),
+                  "classifier_provenance_counts": {
+                      "unchanged": classifier_counts["unchanged"],
+                      "repaired": classifier_counts["repaired"],
+                      "coverage": classifier_counts["unchanged"] + classifier_counts["repaired"],
+                      "null_classifier_blobs": 0,
+                      "unchanged_classifier_blob_sha": UNCHANGED_CLASSIFIER,
+                      "repaired_classifier_blob_sha": REPAIRED_CLASSIFIER,
+                  },
+                  "target_state_sha256": computed_target_sha,
+                  "target_state_sha_verification": computed_target_sha == TARGET_STATE_SHA,
+                  "neon_mutations": 0,
+                  "semantic_change": "NO",
+              }
+              SUMMARY_PATH.write_bytes(canonical_bytes(summary))
+              print("MATERIALIZATION_SUMMARY=" + json.dumps(summary, ensure_ascii=False, sort_keys=True))
+          except GateError as exc:
+              print(f"FIRST_FAILING_GATE={exc.gate}", file=sys.stderr)
+              print(f"AFFECTED_SCOPE={exc.scope}", file=sys.stderr)
+              if exc.detail:
+                  print(f"DETAIL={exc.detail}", file=sys.stderr)
+              raise SystemExit(1)
+          except Exception as exc:
+              print("FIRST_FAILING_GATE=EXECUTION_HARNESS_FAILURE", file=sys.stderr)
+              print("AFFECTED_SCOPE=GitHub Actions materialization job", file=sys.stderr)
+              print(f"DETAIL={type(exc).__name__}:{exc}", file=sys.stderr)
+              raise
+          PY
+
+      - name: Upload persistence identity artifact
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: attack-event-5city-persistence-identity-v2
+          path: |
+            ${{ runner.temp }}/attack-event-5city-persistence-identity-v2/attack_event_5city_persistence_identity_export_v2.json
+            ${{ runner.temp }}/attack-event-5city-persistence-identity-v2/summary.json
+          if-no-files-found: error
+          retention-days: 30
