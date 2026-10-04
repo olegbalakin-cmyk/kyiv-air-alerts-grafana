@@ -752,6 +752,20 @@ def retrospective_or_cumulative_wording(text: str) -> bool:
     return any(re.search(pattern, low) for pattern in patterns)
 
 
+def trusted_live_publication_binding_extension_wording(text: str) -> bool:
+    """Narrow live forms added for publication-time temporal binding."""
+    low = normalize_evidence_text(text)
+    if retrospective_or_cumulative_wording(low):
+        return False
+    return bool(
+        re.search(
+            r"(?:\bпрацю(?:є|ють)\s+(?:сили\s+)?ппо\b|"
+            r"\bвибух\w*\s+(?:у|в)\s+[\w'’.-]+\s*,\s*повідомляють\b)",
+            low,
+        )
+    )
+
+
 def contemporaneous_live_wording(text: str) -> bool:
     low = normalize_evidence_text(text)
     if retrospective_or_cumulative_wording(low):
@@ -763,12 +777,10 @@ def contemporaneous_live_wording(text: str) -> bool:
             rf"\b(?:чутно|чути){sep}(?:(?:звук\w*|сері\w*){sep})?вибух\w*|"
             rf"\bгримлять{sep}вибух\w*|"
             r"\bщойно.{0,40}\bвибух\w*|"
-            r"\bпрямо\s+зараз.{0,40}\bвибух\w*|"
-            r"\bпрацю(?:є|ють)\s+(?:сили\s+)?ппо\b|"
-            r"\bвибух\w*\s+(?:у|в)\s+[\w'’.-]+\s*,\s*повідомляють\b)",
+            r"\bпрямо\s+зараз.{0,40}\bвибух\w*)",
             low,
         )
-    )
+    ) or trusted_live_publication_binding_extension_wording(low)
 
 
 def trusted_same_attack_source(row: dict) -> bool:
@@ -2759,11 +2771,15 @@ def temporal_binding_evidence(row: dict, strict_evidence: dict, matching: dict, 
         supported_ids = list(support["supported_episode_ids"])
         specific = bool(support["episode_specific"])
         episode_id = support["episode_id"] if specific else None
-        if specific and not episode_id:
-            # A live message may fall inside multiple persisted raw rows that are
-            # already reconciled as one logical alert window. Reuse only an
+        extension_form = any(
+            trusted_live_publication_binding_extension_wording(segment)
+            for segment in event_segments
+        )
+        if specific and not episode_id and extension_form:
+            # The new bounded live forms may fall inside multiple persisted raw
+            # rows already reconciled as one logical alert window. Reuse only an
             # existing persisted raw binding that belongs to that active logical
-            # group; never invent a raw-ID winner from publication time.
+            # group; pre-existing live forms retain their previous no-winner rule.
             persisted_id = str(row.get("matched_episode_id") or "")
             if (
                 str(matching.get("outcome") or "") == "unique_match"
