@@ -2077,6 +2077,304 @@ def explicit_event_time_binding(row: dict, event_segments: list[str], matching: 
     }
 
 
+
+def _source_clock_not_after(reference: datetime, hour: int, minute: int) -> datetime | None:
+    """Resolve a source-local clock without allowing it to become a future point."""
+    if hour > 23 or minute > 59:
+        return None
+    reference_local = reference.astimezone(KYIV_TZ)
+    day = reference_local.date()
+    candidate = datetime(
+        day.year, day.month, day.day, hour, minute, tzinfo=KYIV_TZ
+    ).astimezone(UTC)
+    if candidate <= reference:
+        return candidate
+    previous_day = day - timedelta(days=1)
+    previous = datetime(
+        previous_day.year,
+        previous_day.month,
+        previous_day.day,
+        hour,
+        minute,
+        tzinfo=KYIV_TZ,
+    ).astimezone(UTC)
+    return previous if previous <= reference else None
+
+
+def _event_already_occurred_by_publication(text: str) -> bool:
+    """Narrow past-event wording gate for using publication time as an upper bound."""
+    low = normalize_evidence_text(text)
+    patterns = (
+        r"\b(?:почул\w*|чул\w*)\b.{0,50}\bвибух\w*",
+        r"\b(?:зафіксовано|сталося|відбулося)\b.{0,90}\b(?:вибух\w*|влуч\w*|удар\w*)",
+        r"\b(?:влучил\w*|влучан\w*|поціл\w*)\b",
+    )
+    return any(re.search(pattern, low) for pattern in patterns)
+
+
+def source_temporal_constraint(row: dict, event_segments: list[str]) -> dict:
+    """
+    Represent only the two narrow source relations needed by the frozen Kyiv proof.
+
+    The result preserves bounds and inclusivity. Publication time may supply an
+    upper bound for AFTER_TIME only when the same source wording states that the
+    event had already occurred. Publication time is never converted to event time.
+    """
+    empty = {
+        "recognized": False,
+        "relation_type": None,
+        "lower_bound": None,
+        "upper_bound": None,
+        "lower_bound_inclusive": None,
+        "upper_bound_inclusive": None,
+        "basis_for_lower_bound": None,
+        "basis_for_upper_bound": None,
+        "source_excerpt": None,
+        "publication_time_used_as_event_time": False,
+    }
+    published = parse_dt(row.get("published_at"))
+    if not published:
+        return empty
+
+    after_re = re.compile(
+        r"\bпісля\s+(\d{1,2})(?:(?:[:.](\d{2}))|\s*)\s*(?:ранку\b)?",
+        re.IGNORECASE,
+    )
+    as_of_re = re.compile(
+        r"\bстаном\s+на\s+(\d{1,2})[:.](\d{2})\b",
+        re.IGNORECASE,
+    )
+
+    for segment in event_segments:
+        low = normalize_evidence_text(segment)
+        if not low:
+            continue
+        after = after_re.search(low)
+        as_of = as_of_re.search(low)
+        if not after and not as_of:
+            continue
+
+        source_excerpt = " ".join(str(segment).split())
+
+        if as_of:
+            upper = _source_clock_not_after(
+                published, int(as_of.group(1)), int(as_of.group(2))
+            )
+            if upper is None:
+                return {
+                    **empty,
+                    "recognized": True,
+                    "relation_type": "BEFORE_OR_BY_TIME",
+                    "source_excerpt": source_excerpt,
+                }
+
+            lower = None
+            lower_basis = None
+            if after:
+                lower_minute = int(after.group(2) or 0)
+                lower = _source_clock_not_after(
+                    upper, int(after.group(1)), lower_minute
+                )
+                if lower is not None and lower < upper:
+                    lower_basis = "source_after_time_same_segment"
+                else:
+                    lower = None
+
+            return {
+                **empty,
+                "recognized": True,
+                "relation_type": "BEFORE_OR_BY_TIME",
+                "lower_bound": iso(lower) if lower else None,
+                "upper_bound": iso(upper),
+                "lower_bound_inclusive": False if lower else None,
+                "upper_bound_inclusive": True,
+                "basis_for_lower_bound": lower_basis,
+                "basis_for_upper_bound": "source_as_of_time",
+                "source_excerpt": source_excerpt,
+            }
+
+        lower_minute = int(after.group(2) or 0)
+        lower = _source_clock_not_after(
+            published, int(after.group(1)), lower_minute
+        )
+        if lower is None:
+            return {
+                **empty,
+                "recognized": True,
+                "relation_type": "AFTER_TIME",
+                "source_excerpt": source_excerpt,
+            }
+
+        upper = (
+            published
+            if published > lower and _event_already_occurred_by_publication(segment)
+            else None
+        )
+        return {
+            **empty,
+            "recognized": True,
+            "relation_type": "AFTER_TIME",
+            "lower_bound": iso(lower),
+            "upper_bound": iso(upper) if upper else None,
+            "lower_bound_inclusive": False,
+            "upper_bound_inclusive": True if upper else None,
+            "basis_for_lower_bound": "source_after_time",
+            "basis_for_upper_bound": (
+                "publication_chronology_event_already_occurred"
+                if upper
+                else None
+            ),
+            "source_excerpt": source_excerpt,
+        }
+
+    return empty
+
+
+def _interval_intersects_episode(
+    lower: datetime | None,
+    upper: datetime | None,
+    lower_inclusive: bool | None,
+    upper_inclusive: bool | None,
+    episode: dict,
+) -> bool:
+    start = parse_dt(episode.get("alert_start"))
+    end = parse_dt(episode.get("alert_end"))
+    if not start or not end:
+        return False
+    if lower is not None:
+        if end < lower or (end == lower and lower_inclusive is False):
+            return False
+    if upper is not None:
+        if start > upper or (start == upper and upper_inclusive is False):
+            return False
+    return True
+
+
+def _interval_fully_covered_by_episode_group(
+    lower: datetime,
+    upper: datetime,
+    episodes: list[dict],
+) -> bool:
+    """Require the complete feasible interval, not merely an overlap, to be alert-covered."""
+    if lower > upper:
+        return False
+    spans = []
+    for episode in episodes:
+        start = parse_dt(episode.get("alert_start"))
+        end = parse_dt(episode.get("alert_end"))
+        if not start or not end or end < lower or start > upper:
+            continue
+        spans.append((max(start, lower), min(end, upper)))
+    if not spans:
+        return False
+    spans.sort()
+    cursor = lower
+    for start, end in spans:
+        if start > cursor:
+            return False
+        if end > cursor:
+            cursor = end
+        if cursor >= upper:
+            return True
+    return cursor >= upper
+
+
+def source_temporal_interval_relation(
+    row: dict,
+    event_segments: list[str],
+    episodes: list[dict],
+) -> dict:
+    """
+    Bind a source-derived non-point interval only when every allowed event time
+    belongs to one logical canonical alert episode.
+    """
+    constraint = source_temporal_constraint(row, event_segments)
+    base = {
+        "recognized": bool(constraint.get("recognized")),
+        "constraint": constraint,
+        "episode_specific": False,
+        "supported_episode_ids": [],
+        "logical_episode_groups": [],
+        "episode_id": None,
+        "failure_reason": None,
+    }
+    if not constraint.get("recognized"):
+        return base
+
+    lower = parse_dt(constraint.get("lower_bound"))
+    upper = parse_dt(constraint.get("upper_bound"))
+    lower_inclusive = constraint.get("lower_bound_inclusive")
+    upper_inclusive = constraint.get("upper_bound_inclusive")
+
+    if lower and upper and lower > upper:
+        return {**base, "failure_reason": "TEMPORAL_REPRESENTATION_UNSUPPORTED"}
+
+    # For diagnostics only, bound an otherwise-open side to the publication
+    # local day. These diagnostic bounds never satisfy the strict bound gate.
+    published = parse_dt(row.get("published_at"))
+    diagnostic_lower = lower
+    diagnostic_upper = upper
+    if published:
+        published_local = published.astimezone(KYIV_TZ)
+        local_day = published_local.date()
+        next_day = local_day + timedelta(days=1)
+        day_start = datetime(
+            local_day.year, local_day.month, local_day.day, tzinfo=KYIV_TZ
+        ).astimezone(UTC)
+        day_end = datetime(
+            next_day.year, next_day.month, next_day.day, tzinfo=KYIV_TZ
+        ).astimezone(UTC)
+        if diagnostic_lower is None:
+            diagnostic_lower = day_start
+        if diagnostic_upper is None:
+            diagnostic_upper = day_end
+
+    intersected = [
+        episode
+        for episode in episodes
+        if _interval_intersects_episode(
+            diagnostic_lower,
+            diagnostic_upper,
+            lower_inclusive if lower is not None else True,
+            upper_inclusive if upper is not None else False,
+            episode,
+        )
+    ]
+    support = logical_episode_support(intersected)
+    base = {
+        **base,
+        "supported_episode_ids": list(support["supported_episode_ids"]),
+        "logical_episode_groups": list(support["logical_episode_groups"]),
+    }
+
+    if lower is None:
+        return {**base, "failure_reason": "INSUFFICIENT_LOWER_BOUND"}
+    if upper is None:
+        return {**base, "failure_reason": "INSUFFICIENT_UPPER_BOUND"}
+
+    groups = list(support["logical_episode_groups"])
+    if len(groups) > 1:
+        return {**base, "failure_reason": "MULTI_EPISODE_INTERVAL"}
+    if not groups:
+        return {**base, "failure_reason": "TEMPORAL_INTERVAL_STILL_AMBIGUOUS"}
+
+    supported_set = set(support["supported_episode_ids"])
+    group_episodes = [
+        episode
+        for episode in intersected
+        if str(episode.get("episode_id") or "") in supported_set
+    ]
+    if not _interval_fully_covered_by_episode_group(lower, upper, group_episodes):
+        return {**base, "failure_reason": "TEMPORAL_INTERVAL_STILL_AMBIGUOUS"}
+
+    return {
+        **base,
+        "episode_specific": True,
+        "episode_id": support["episode_id"],
+        "failure_reason": None,
+    }
+
+
 def empty_near_boundary() -> dict:
     return {
         "present": False,
@@ -2169,6 +2467,36 @@ def temporal_binding_evidence(row: dict, strict_evidence: dict, matching: dict, 
             ],
             "episode_id": clock.get("episode_id"),
             "near_boundary": near,
+        }
+
+    interval = source_temporal_interval_relation(row, event_segments, episodes)
+    if interval.get("recognized"):
+        specific = bool(interval.get("episode_specific"))
+        failure = interval.get("failure_reason")
+        code = {
+            None: "TEMPORAL_SOURCE_INTERVAL_INSIDE_EPISODE",
+            "INSUFFICIENT_LOWER_BOUND": "TEMPORAL_SOURCE_INTERVAL_INSUFFICIENT_LOWER_BOUND",
+            "INSUFFICIENT_UPPER_BOUND": "TEMPORAL_SOURCE_INTERVAL_INSUFFICIENT_UPPER_BOUND",
+            "MULTI_EPISODE_INTERVAL": "TEMPORAL_SOURCE_INTERVAL_MULTIPLE_EPISODES",
+            "TEMPORAL_INTERVAL_STILL_AMBIGUOUS": "TEMPORAL_SOURCE_INTERVAL_AMBIGUOUS",
+            "TEMPORAL_REPRESENTATION_UNSUPPORTED": "TEMPORAL_SOURCE_INTERVAL_UNSUPPORTED",
+        }.get(failure, "TEMPORAL_SOURCE_INTERVAL_AMBIGUOUS")
+        constraint = dict(interval.get("constraint") or {})
+        return {
+            "present": specific,
+            "code": code,
+            "evidence_type": "source_temporal_interval",
+            "evidence": constraint.get("source_excerpt"),
+            "event_time": None,
+            "event_interval": constraint,
+            "message_time": None,
+            "episode_specific": specific,
+            "supported_episode_ids": list(interval.get("supported_episode_ids") or []),
+            "logical_episode_groups": [
+                list(group) for group in interval.get("logical_episode_groups") or []
+            ],
+            "episode_id": interval.get("episode_id") if specific else None,
+            "near_boundary": empty_near_boundary(),
         }
 
     published = parse_dt(row.get("published_at"))
