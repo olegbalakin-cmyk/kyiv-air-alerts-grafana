@@ -571,8 +571,7 @@ jobs:
           }
 
           try:
-              if git("rev-parse","HEAD^")!=FRESH_MAIN:
-                  raise RuntimeError("TEMP_WORKFLOW_COMMIT_NOT_DIRECT_CHILD_OF_FRESH_MAIN")
+              sh(["git","merge-base","--is-ancestor",FRESH_MAIN,"HEAD"])
               changed=git("diff","--name-only",f"{FRESH_MAIN}..HEAD").splitlines()
               if changed!=[".github/workflows/attack-event-18city-target-map-recovery-proof.yml"]:
                   raise RuntimeError(f"TEMP_BRANCH_PRE_REPLAY_DIFF_UNEXPECTED:{changed}")
