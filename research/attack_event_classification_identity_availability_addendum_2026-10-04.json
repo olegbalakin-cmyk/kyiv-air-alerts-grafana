@@ -1,0 +1,181 @@
+{
+  "schema_version": "attack-event-classification-identity-availability-addendum-v1",
+  "status": "PASS",
+  "verdict": "ATTACK-EVENT CLASSIFICATION IDENTITY AVAILABILITY CONTRACT FROZEN",
+  "scope": "ATTACK-EVENT PERSISTENCE CONTRACT COMPATIBILITY REPAIR ONLY; NOT STEP 2A",
+  "frozen_at_date": "2026-10-04",
+  "fresh_state_guard": {
+    "main_head": "5a119520275c606e0c306d41fb831e460e2f7f63",
+    "site_prod_head": "a5756040c796dc4c7d67b0b3e2c7acd17f6006b5",
+    "update_netlify_site_workflow_blob": "3d89a5205245be91c865bbad3147693726411688",
+    "permanent_neon": {
+      "project_id": "green-cake-44216048",
+      "branch_id": "br-bold-mode-b5rub8pq",
+      "branch_state": "ready",
+      "canonical_parent_health": {
+        "alert_episode_rows_observed": 28215,
+        "distinct_cities": 23,
+        "distinct_air_cities": 23,
+        "non_air_rows": 0,
+        "bad_canonicalization_rows": 0,
+        "bad_state_rows": 0,
+        "closed_missing_legacy_id": 0
+      },
+      "legacy_phase1_checkpoint": {
+        "source_key": "ukrainealarm_region_history",
+        "city_key": "lviv",
+        "stream_key": "region_id:90:AIR",
+        "checkpoint_seq": 18
+      },
+      "attack_or_explosion_public_tables": []
+    },
+    "credentials_exposed": false
+  },
+  "original_step1_contract": {
+    "commit": "b205d38dbc50bc502d10e682d4ae53491af542ea",
+    "artifact": "research/attack_event_neon_persistence_contract_2026-10-02.json",
+    "blob_sha": "e9dcbdf21551ca086fbf096138f885f453a8c2b0",
+    "unchanged": true,
+    "classification_key_version": "attack-event-classification-key-v1",
+    "incompatibility": "v1 requires <sorted_qa_reasons_json> as a classification identity input, but the accepted 18-city frozen representation does not authoritatively materialize episode-level qa_reasons. v1 semantics are not modified by this addendum."
+  },
+  "accepted_eighteen_city_source": {
+    "acceptance_commit": "31aa7a8f8f57ff090f24814ef3c62137eebebf16",
+    "acceptance_artifact": "research/historical_v2_18city_acceptance_2026-10-02.json",
+    "acceptance_blob_sha": "754da5b8c330188889f3f8fb22e671cbc6118cac",
+    "common_baseline": "fb563dc410fe6614263bdc8d4eb55025a987e950",
+    "worker_final_heads": {
+      "historical-v2-formalization-chernihiv-dnipro-proof-2026-10-02": "1998919036b4832fc3555b54c9854e6cfe24a696",
+      "historical-v2-formalization-kharkiv-kherson-proof-2026-10-02": "79397290b0d51ca49bf15d6e5890ffc3ce631ce3",
+      "historical-v2-formalization-kropyvnytskyi-mykolaiv-proof-2026-10-02": "b09a95da6354d496eea478fc7e6871e62acb4b7d",
+      "historical-v2-formalization-odesa-proof-2026-10-02": "130f1bdef1bb2479e9b992d26009472930e91987",
+      "historical-v2-formalization-chernivtsi-ivano-frankivsk-proof-2026-10-02": "05e9ce706a2f8da459f46fb130bc25d716cfcc46",
+      "historical-v2-formalization-khmelnytskyi-lutsk-proof-2026-10-02": "cf20d7f411688de9d2684b8baac63c796bfa090e",
+      "historical-v2-formalization-poltava-rivne-proof-2026-10-02": "c01f4b3d8f304a8024899f22eaa8a73a8975af05",
+      "historical-v2-formalization-ternopil-uzhhorod-proof-2026-10-02": "19637504db967003c4e0465957dc7bd2bf5fbc58",
+      "historical-v2-formalization-vinnytsia-zhytomyr-proof-2026-10-02": "a8eeaf13d51d3e16582212c85cd69a9e6c09685d",
+      "historical-v2-formalization-kyiv-proof-2026-10-02": "778fb57908f64c684d3ee7df5d9a7e3f7731559b"
+    },
+    "classification_count": 19542,
+    "distribution": {
+      "STRICT_EVENT_POSITIVE": 913,
+      "SENSITIVITY_EVENT_POSITIVE": 48,
+      "NO_CONFIRMED_EVENT": 18113,
+      "NEEDS_REVIEW": 468
+    },
+    "qa_reasons_state": "UNMATERIALIZED_IN_ACCEPTED_SOURCE",
+    "qa_reasons": null,
+    "availability_mapping_count": 19542,
+    "availability_mapping_basis": "Accepted predecessor blocker established qa_reasons absent for 19,542/19,542 classifications across the exact accepted 18-city worker/formalization state. This addendum records that source-provenance fact only and does not reconstruct qa_reasons.",
+    "target_state_hashes_unchanged": true
+  },
+  "accepted_five_city_source": {
+    "cities": [
+      "lviv",
+      "sevastopol",
+      "cherkasy",
+      "sumy",
+      "zaporizhzhia"
+    ],
+    "frozen_campaign_ref": "71cb6f6fbe856cc7b96759310fe9cc9c71cc0453",
+    "frozen_status_blob_sha": "615b380b51c0da7aa052bad06222c12785090986",
+    "frozen_producer_ref": "historical-attack-event-backfill-2026-09-27",
+    "frozen_producer_blob_sha": "cb2791bd309abacf4c3aae8fee0d1a8f038220b2",
+    "producer_contract": "episode_results(...) serializes qa_reasons for each episode as sorted(qa); explicit empty arrays are therefore authoritative materialized values.",
+    "frozen_classification_count": 6863,
+    "frozen_batch_count": 139,
+    "repaired_target_state_head": "5d18ef85a66384f189ede5ca5654d750f60f088b",
+    "repaired_target_state_sha256": "652bda9bc4037d263e7e1090455ff4df5387d1f4f1a73a8c5e160d7ce62132f5",
+    "distribution": {
+      "STRICT_EVENT_POSITIVE": 104,
+      "SENSITIVITY_EVENT_POSITIVE": 15,
+      "NO_CONFIRMED_EVENT": 5417,
+      "NEEDS_REVIEW": 1327
+    },
+    "qa_reasons_state": "MATERIALIZED",
+    "qa_reasons_rule": "Preserve the exact authoritative frozen episode-level qa_reasons array, including explicit []. Do not recompute residual_qa and do not reinterpret the existing array.",
+    "source_inputs_unchanged": true
+  },
+  "classification_identity_v2": {
+    "classification_key_version": "attack-event-classification-key-v2",
+    "canonical_input_tuple": [
+      "attack-event-classification-key-v2",
+      "<city_key>",
+      "<historical_episode_id>",
+      "<alert_start_utc_microseconds>",
+      "<alert_end_utc_microseconds>",
+      "<verdict>",
+      "<sorted_event_types_json>",
+      "<qa_reasons_state>",
+      "<sorted_qa_reasons_json_or_null>",
+      "<classifier_blob_sha>",
+      "<classifier_methodology_version>",
+      "<normalization_version>",
+      "<evidence_set_sha256>",
+      "<review_provenance_sha256_or_null>"
+    ],
+    "inherited_canonicalization": "All STEP 1 canonicalization and serialization rules remain unchanged except for the explicit QA availability-state semantics below.",
+    "qa_availability_states": {
+      "MATERIALIZED": {
+        "meaning": "The accepted frozen source explicitly materializes an episode-level qa_reasons array.",
+        "qa_reasons": "JSON array; may be []",
+        "serialization": "Serialize the exact sorted authoritative QA array."
+      },
+      "UNMATERIALIZED_IN_ACCEPTED_SOURCE": {
+        "meaning": "The accepted frozen source does not contain an authoritative episode-level qa_reasons value.",
+        "qa_reasons": null,
+        "serialization": "Serialize JSON null for the QA-reasons value.",
+        "forbidden_sentinel": "[]"
+      }
+    },
+    "revision_behavior": "If an authoritative episode-level qa_reasons mapping is later accepted for a classification previously marked UNMATERIALIZED_IN_ACCEPTED_SOURCE, that is a semantic/provenance revision. qa_reasons_state changes, producing a new immutable v2 classification key/revision; the earlier persisted classification must not be retroactively rewritten."
+  },
+  "future_schema_contract": {
+    "apply_now": false,
+    "supersedes_candidate_ddl_delta_only": true,
+    "original_step1_candidate_ddl_unchanged": true,
+    "required_columns": {
+      "qa_reasons_state": "TEXT NOT NULL",
+      "qa_reasons": "JSONB NULL"
+    },
+    "invariant": [
+      "MATERIALIZED => qa_reasons is a JSON array, including possibly []",
+      "UNMATERIALIZED_IN_ACCEPTED_SOURCE => qa_reasons IS NULL"
+    ],
+    "classification_key_version_required": "attack-event-classification-key-v2"
+  },
+  "proof_gates": {
+    "original_step1_artifact_blob_unchanged": true,
+    "accepted_18city_target_state_hashes_unchanged": true,
+    "accepted_18city_all_map_unmaterialized_without_invented_value": true,
+    "accepted_5city_materialized_qa_preserved_without_reinterpretation": true,
+    "combined_classification_count": 26405,
+    "combined_distribution": {
+      "STRICT_EVENT_POSITIVE": 1017,
+      "SENSITIVITY_EVENT_POSITIVE": 63,
+      "NO_CONFIRMED_EVENT": 23530,
+      "NEEDS_REVIEW": 1795
+    },
+    "positive_v1_event_grain_unchanged": 1080,
+    "public_web_research": false,
+    "semantic_classification_or_reclassification": false,
+    "neon_mutations": 0,
+    "production_mutated": false
+  },
+  "mutation_scope": {
+    "repo_mutations_expected": [
+      "research/attack_event_classification_identity_availability_addendum_2026-10-04.json"
+    ],
+    "step1_contract_edited": false,
+    "runtime_scripts_modified": false,
+    "workflows_modified": false,
+    "migrations_modified": false,
+    "production_data_modified": false,
+    "historical_evidence_modified": false,
+    "worker_artifacts_modified": false,
+    "neon_mutations": 0,
+    "production_mutated": false,
+    "db_cutover": false
+  },
+  "final_verdict": "ATTACK-EVENT CLASSIFICATION IDENTITY AVAILABILITY CONTRACT FROZEN"
+}
