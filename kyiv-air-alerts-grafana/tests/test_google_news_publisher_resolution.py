@@ -279,3 +279,69 @@ def test_cache_deduplicates_actual_repaired_fetcher(monkeypatch):
 def test_batch_parser_rejects_google_or_internal_url():
     assert monitor.parse_google_news_batch_resolution(rpc_response("https://news.google.com/articles/x")) is None
     assert monitor.parse_google_news_batch_resolution(rpc_response("http://127.0.0.1/private")) is None
+
+
+def test_build_google_news_candidate_uses_shared_repaired_fetcher(monkeypatch):
+    resolved_url = "https://discovery-publisher.example/story"
+    get, _, _, _ = current_shape_get(
+        resolved_url,
+        publisher_body="<article>У Полтаві пролунав вибух під час атаки БпЛА.</article>",
+    )
+    post, _ = current_shape_post(resolved_url)
+    monkeypatch.setattr(monitor.requests, "get", get)
+    monkeypatch.setattr(monitor.requests, "post", post)
+
+    row, fetched, rescued = monitor.build_google_news_candidate(
+        "poltava",
+        "Нічні новини",
+        "Оновлення ситуації.",
+        GOOGLE_URL,
+        "Discovery Publisher",
+        "https://discovery-publisher.example",
+        "2026-10-04T18:50:00Z",
+        fulltext_fetcher=monitor.fetch_publisher_fulltext,
+    )
+
+    assert fetched is True
+    assert rescued is True
+    assert row is not None
+    assert row["discovery_basis"] == "publisher_fulltext"
+    assert row["resolved_url"] == resolved_url
+    assert "вибух" in row["matched_text_excerpt"].casefold()
+
+
+def test_publisher_fulltext_existing_semantics_equal_injected_fetcher(monkeypatch):
+    resolved_url = "https://semantic-publisher.example/story"
+    body = "У Полтаві пролунав вибух під час атаки БпЛА."
+    expected, expected_fetched, expected_rescued = monitor.build_google_news_candidate(
+        "poltava",
+        "Нічні новини",
+        "Оновлення ситуації.",
+        GOOGLE_URL,
+        "Semantic Publisher",
+        "https://semantic-publisher.example",
+        "2026-10-04T18:50:00Z",
+        fulltext_fetcher=lambda url: (body, resolved_url),
+    )
+
+    get, _, _, _ = current_shape_get(
+        resolved_url,
+        publisher_body=f"<article>{body}</article>",
+    )
+    post, _ = current_shape_post(resolved_url)
+    monkeypatch.setattr(monitor.requests, "get", get)
+    monkeypatch.setattr(monitor.requests, "post", post)
+
+    actual, actual_fetched, actual_rescued = monitor.build_google_news_candidate(
+        "poltava",
+        "Нічні новини",
+        "Оновлення ситуації.",
+        GOOGLE_URL,
+        "Semantic Publisher",
+        "https://semantic-publisher.example",
+        "2026-10-04T18:50:00Z",
+        fulltext_fetcher=monitor.fetch_publisher_fulltext,
+    )
+
+    assert (actual_fetched, actual_rescued) == (expected_fetched, expected_rescued)
+    assert actual == expected
