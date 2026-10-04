@@ -1,0 +1,140 @@
+name: Google News publisher resolution repair proof
+
+on:
+  push:
+    branches:
+      - google-news-publisher-resolution-repair-2026-10-04
+    paths:
+      - ".github/workflows/google-news-publisher-resolution-repair-proof.yml"
+      - "kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py"
+      - "kyiv-air-alerts-grafana/tests/test_google_news_publisher_resolution.py"
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  protocol-inspect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      PRODUCTION_BASE: "d2030cb88051f05ed7692d3af7c908a87048f549"
+      DIAGNOSTIC_ARTIFACT_ID: "11312945596"
+      DIAGNOSTIC_ZIP_SHA256: "16bdd78b466c5658da0fe947e3f2eccf8ab25675bafc62c84b475fcbe6fa6d8d"
+      DIAGNOSTIC_JSON_SHA256: "a0070c8d0702ce7f83ec6d20534718501ca0a3481e6a28f341cf7be565183838"
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Assert bounded inspection scope
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git merge-base "$PRODUCTION_BASE" HEAD)" = "$PRODUCTION_BASE"
+          changed="$(git diff --name-only "$PRODUCTION_BASE"...HEAD)"
+          printf '%s\n' "$changed"
+          unexpected="$(printf '%s\n' "$changed" | grep -v -E '^(\.github/workflows/google-news-publisher-resolution-repair-proof\.yml|kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates\.py|kyiv-air-alerts-grafana/tests/test_google_news_publisher_resolution\.py)$' || true)"
+          test -z "$unexpected"
+
+      - name: Download accepted diagnostic artifact
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          gh api "/repos/${GITHUB_REPOSITORY}/actions/artifacts/${DIAGNOSTIC_ARTIFACT_ID}/zip" > /tmp/diag.zip
+          echo "${DIAGNOSTIC_ZIP_SHA256}  /tmp/diag.zip" | sha256sum -c -
+          mkdir -p /tmp/diag
+          unzip -q /tmp/diag.zip -d /tmp/diag
+          echo "${DIAGNOSTIC_JSON_SHA256}  /tmp/diag/google_news_publisher_resolution_diagnostic.json" | sha256sum -c -
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Inspect Google wrapper resolver fields
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import html, json, re
+          from pathlib import Path
+          from urllib.parse import urlparse
+          import requests
+
+          diag = json.loads(Path("/tmp/diag/google_news_publisher_resolution_diagnostic.json").read_text(encoding="utf-8"))
+          samples = diag["samples"]
+          assert len(samples) == 6
+          headers = {
+              "User-Agent": "Mozilla/5.0 (compatible; ukraine-air-alerts-explosion-monitor/1.0)",
+              "Accept-Language": "uk,en;q=0.7",
+          }
+
+          def host(url):
+              return (urlparse(str(url or "")).hostname or "").casefold()
+
+          out = []
+          for sample in samples:
+              url = sample["original_google_news_rss_article_url"]
+              r = requests.get(url, headers=headers, timeout=20, allow_redirects=True)
+              r.raise_for_status()
+              text = r.text
+              sg = re.findall(r'data-n-a-sg=["\']([^"\']+)["\']', text, re.I)
+              ts = re.findall(r'data-n-a-ts=["\']([^"\']+)["\']', text, re.I)
+              ids = re.findall(r'data-n-a-id=["\']([^"\']+)["\']', text, re.I)
+              snippets = []
+              for needle in ("data-n-a-sg", "data-n-a-ts", "Fbv4je", "garturlreq", "batchexecute", "DotsSplashUi"):
+                  idx = text.find(needle)
+                  if idx >= 0:
+                      snippets.append({
+                          "needle": needle,
+                          "snippet": re.sub(r"\s+", " ", html.unescape(text[max(0, idx-300):idx+700]))[:1200],
+                      })
+              elements = re.findall(r'<[^>]*data-n-a-sg=["\'][^"\']+["\'][^>]*>', text, re.I)
+              out.append({
+                  "city": sample["city"],
+                  "publisher": sample["publisher"],
+                  "rss_url": url,
+                  "status": r.status_code,
+                  "final_host": host(r.url),
+                  "history": [{"status": x.status_code, "host": host(x.url), "location": x.headers.get("Location")} for x in r.history],
+                  "data_n_a_sg": sg[:3],
+                  "data_n_a_ts": ts[:3],
+                  "data_n_a_id": ids[:3],
+                  "resolver_element_sample": [re.sub(r"\s+", " ", html.unescape(x))[:1600] for x in elements[:2]],
+                  "protocol_markers": {
+                      "Fbv4je": "Fbv4je" in text,
+                      "garturlreq": "garturlreq" in text,
+                      "batchexecute": "batchexecute" in text,
+                      "DotsSplashUi": "DotsSplashUi" in text,
+                  },
+                  "snippets": snippets,
+              })
+
+          proof = {
+              "schema": "google_news_resolution_protocol_inspection_v1",
+              "sample_count": len(out),
+              "all_google_wrapper": all(x["final_host"].endswith("google.com") for x in out),
+              "all_have_signature": all(bool(x["data_n_a_sg"]) for x in out),
+              "all_have_timestamp": all(bool(x["data_n_a_ts"]) for x in out),
+              "records": out,
+          }
+          Path("/tmp/google_news_resolution_protocol_inspection.json").write_text(
+              json.dumps(proof, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
+          )
+          print(json.dumps({
+              "sample_count": proof["sample_count"],
+              "all_google_wrapper": proof["all_google_wrapper"],
+              "all_have_signature": proof["all_have_signature"],
+              "all_have_timestamp": proof["all_have_timestamp"],
+              "markers": [x["protocol_markers"] for x in out],
+          }, ensure_ascii=False))
+          PY
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: google-news-resolution-protocol-inspection
+          path: /tmp/google_news_resolution_protocol_inspection.json
+          if-no-files-found: error
+          retention-days: 30
