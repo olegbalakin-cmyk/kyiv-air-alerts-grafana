@@ -33,7 +33,9 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          test "$(git rev-parse HEAD^)" = "$EXPECTED_BASE"
+          git merge-base --is-ancestor "$EXPECTED_BASE" HEAD
+          changed_paths="$(git diff --name-only "$EXPECTED_BASE"...HEAD)"
+          test "$changed_paths" = ".github/workflows/kyiv-blind-holdout-final-stack-replay-proof.yml"
           for sha in "$FINAL_STACK" "$HISTORICAL_STATE_COMMIT" "$TRUTH_COMMIT"; do
             git cat-file -e "$sha^{commit}" || git fetch origin "$sha"
             git cat-file -e "$sha^{commit}"
