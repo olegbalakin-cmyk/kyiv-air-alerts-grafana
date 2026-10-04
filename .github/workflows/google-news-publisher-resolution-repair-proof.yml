@@ -37,7 +37,7 @@ jobs:
           test "$(git merge-base "$REPAIR_COMMIT" HEAD)" = "$REPAIR_COMMIT"
           changed="$(git diff --name-only "$PRODUCTION_BASE"...HEAD)"
           printf '%s\n' "$changed"
-          unexpected="$(printf '%s\n' "$changed" | grep -v -E '^(\.github/workflows/google-news-publisher-resolution-repair-proof\.yml|kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates\.py|kyiv-air-alerts-grafana/tests/test_google_news_publisher_resolution\.py|research/google_news_publisher_resolution_repair_proof_2026-10-04\.json)
+          unexpected="$(printf '%s\n' "$changed" | grep -v -E "^(\\.github/workflows/google-news-publisher-resolution-repair-proof\\.yml|kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates\\.py|kyiv-air-alerts-grafana/tests/test_google_news_publisher_resolution\\.py|research/google_news_publisher_resolution_repair_proof_2026-10-04\\.json)$" || true)"
           test -z "$unexpected"
           mkdir -p /tmp/proof
           git ls-files -z 'kyiv-air-alerts-grafana/data/**' 'kyiv-air-alerts-grafana/research/**'             | sort -z | xargs -0 -r sha256sum > /tmp/proof/protected.before.sha256
