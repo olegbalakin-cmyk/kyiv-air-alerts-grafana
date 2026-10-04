@@ -1,0 +1,386 @@
+{
+  "schema": "kyiv-final-12-positive-regression-summary-v1",
+  "date": "2026-10-04",
+  "repo": "olegbalakin-cmyk/kyiv-air-alerts-grafana",
+  "verdict": "KYIV FINAL 12-POSITIVE REGRESSION = PROVEN",
+  "final_stack_commit": "0723e68804c77dc5df478294745a673356dd9c2f",
+  "final_executable_equivalence": {
+    "accepted_ci_implementation_commit": "6e4d0c3651164e548c03c1312011b8036025812a",
+    "final_commit_is_ahead_by": 1,
+    "final_commit_only_changed": [
+      "research/kyiv_same_attack_composition_proof_2026-10-04.json"
+    ],
+    "executable_code_changed_between_ci_commit_and_final_stack": false
+  },
+  "frozen_inputs": [
+    "research/kyiv_12_positive_source_provenance_2026-10-04.json",
+    "research/kyiv_12_positive_evidence_enrichment_ab_2026-10-04.json",
+    "research/kyiv_publisher_fulltext_policy_gate_proof_2026-10-04.json",
+    "research/kyiv_temporal_clock_parser_proof_2026-10-04.json",
+    "research/kyiv_temporal_representation_proof_2026-10-04.json",
+    "research/kyiv_same_attack_composition_proof_2026-10-04.json"
+  ],
+  "final_result": {
+    "STRICT": 10,
+    "SENSITIVITY": 0,
+    "REVIEW": 2
+  },
+  "strict_rate": {
+    "numerator": 10,
+    "denominator": 12
+  },
+  "episodes": [
+    {
+      "episode_id": "5fe9c0b3aed78bd5be50d3f6",
+      "final_outcome": "STRICT",
+      "exact_city": "PASS",
+      "attack_event": "PASS",
+      "air_context": "PASS",
+      "same_attack": "PASS",
+      "temporal_binding": "PASS",
+      "verified_gate_reason_codes": [
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "AIR_MILITARY_CONTEXT",
+        "SAME_ATTACK_CONTEXT_SUPPORTED",
+        "TEMPORAL_EXPLICIT_EVENT_TIME_INSIDE_EPISODE"
+      ],
+      "blocking_reason_codes": [],
+      "remaining_blocker": null,
+      "source_temporal_form": null,
+      "repair_lineage": "temporal_parser"
+    },
+    {
+      "episode_id": "d727150d5170d97fea2f96f0",
+      "final_outcome": "STRICT",
+      "exact_city": "PASS",
+      "attack_event": "PASS",
+      "air_context": "PASS",
+      "same_attack": "PASS",
+      "temporal_binding": "PASS",
+      "verified_gate_reason_codes": [
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "AIR_MILITARY_CONTEXT",
+        "SAME_ATTACK_CONTEXT_SUPPORTED",
+        "TEMPORAL_EXPLICIT_EVENT_TIME_INSIDE_EPISODE"
+      ],
+      "blocking_reason_codes": [],
+      "remaining_blocker": null,
+      "source_temporal_form": null,
+      "repair_lineage": "temporal_parser"
+    },
+    {
+      "episode_id": "4f236ae664adedf6c45b6d1e",
+      "final_outcome": "STRICT",
+      "exact_city": "PASS",
+      "attack_event": "PASS",
+      "air_context": "PASS",
+      "same_attack": "PASS",
+      "temporal_binding": "PASS",
+      "verified_gate_reason_codes": [
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "AIR_MILITARY_CONTEXT",
+        "SAME_ATTACK_CONTEXT_SUPPORTED",
+        "TEMPORAL_EXPLICIT_EVENT_TIME_INSIDE_EPISODE"
+      ],
+      "blocking_reason_codes": [],
+      "remaining_blocker": null,
+      "source_temporal_form": null,
+      "repair_lineage": "temporal_parser"
+    },
+    {
+      "episode_id": "735a17c8622f113c4abc15b8",
+      "final_outcome": "STRICT",
+      "exact_city": "PASS",
+      "attack_event": "PASS",
+      "air_context": "PASS",
+      "same_attack": "PASS",
+      "temporal_binding": "PASS",
+      "verified_gate_reason_codes": [
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "AIR_MILITARY_CONTEXT",
+        "SAME_ATTACK_CONTEXT_SUPPORTED",
+        "TEMPORAL_EXPLICIT_EVENT_TIME_INSIDE_EPISODE"
+      ],
+      "blocking_reason_codes": [],
+      "remaining_blocker": null,
+      "source_temporal_form": null,
+      "repair_lineage": "publisher_fulltext"
+    },
+    {
+      "episode_id": "9fd2e6a9a02235982bd706ea",
+      "final_outcome": "REVIEW",
+      "exact_city": "PASS",
+      "attack_event": "PASS",
+      "air_context": "PASS",
+      "same_attack": "PASS",
+      "temporal_binding": "FAIL",
+      "verified_gate_reason_codes": [
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "AIR_MILITARY_CONTEXT",
+        "SAME_ATTACK_CONTEXT_SUPPORTED",
+        "TEMPORAL_SOURCE_INTERVAL_INSUFFICIENT_LOWER_BOUND"
+      ],
+      "blocking_reason_codes": [
+        "TEMPORAL_SOURCE_INTERVAL_INSUFFICIENT_LOWER_BOUND"
+      ],
+      "remaining_blocker": "INSUFFICIENT_LOWER_BOUND",
+      "source_temporal_form": "Станом на 21:50",
+      "repair_lineage": "temporal_interval_safety"
+    },
+    {
+      "episode_id": "cfeec7a191817720d241fedb",
+      "final_outcome": "REVIEW",
+      "exact_city": "PASS",
+      "attack_event": "PASS",
+      "air_context": "PASS",
+      "same_attack": "PASS",
+      "temporal_binding": "FAIL",
+      "verified_gate_reason_codes": [
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "AIR_MILITARY_CONTEXT",
+        "SAME_ATTACK_CONTEXT_SUPPORTED",
+        "TEMPORAL_SOURCE_INTERVAL_MULTIPLE_EPISODES"
+      ],
+      "blocking_reason_codes": [
+        "TEMPORAL_SOURCE_INTERVAL_MULTIPLE_EPISODES"
+      ],
+      "remaining_blocker": "MULTI_EPISODE_INTERVAL",
+      "source_temporal_form": "після 3 ранку",
+      "repair_lineage": "temporal_interval_safety"
+    },
+    {
+      "episode_id": "b8b8b8e9b42ef2e360e1a253",
+      "final_outcome": "STRICT",
+      "exact_city": "PASS",
+      "attack_event": "PASS",
+      "air_context": "PASS",
+      "same_attack": "PASS",
+      "temporal_binding": "PASS",
+      "verified_gate_reason_codes": [
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "AIR_MILITARY_CONTEXT",
+        "SAME_ATTACK_CONTEXT_SUPPORTED",
+        "TEMPORAL_EXPLICIT_EVENT_TIME_INSIDE_EPISODE"
+      ],
+      "blocking_reason_codes": [],
+      "remaining_blocker": null,
+      "source_temporal_form": null,
+      "repair_lineage": "temporal_parser"
+    },
+    {
+      "episode_id": "a422cb3549b4ba330c3b831f",
+      "final_outcome": "STRICT",
+      "exact_city": "PASS",
+      "attack_event": "PASS",
+      "air_context": "PASS",
+      "same_attack": "PASS",
+      "temporal_binding": "PASS",
+      "verified_gate_reason_codes": [
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "AIR_MILITARY_CONTEXT",
+        "SAME_ATTACK_CONTEXT_SUPPORTED",
+        "TEMPORAL_EXPLICIT_EVENT_TIME_INSIDE_EPISODE"
+      ],
+      "blocking_reason_codes": [],
+      "remaining_blocker": null,
+      "source_temporal_form": null,
+      "repair_lineage": "same_attack"
+    },
+    {
+      "episode_id": "6bb2a52b33667e8ddf111326",
+      "final_outcome": "STRICT",
+      "exact_city": "PASS",
+      "attack_event": "PASS",
+      "air_context": "PASS",
+      "same_attack": "PASS",
+      "temporal_binding": "PASS",
+      "verified_gate_reason_codes": [
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "AIR_MILITARY_CONTEXT",
+        "SAME_ATTACK_CONTEXT_SUPPORTED",
+        "TEMPORAL_EXPLICIT_EVENT_TIME_INSIDE_EPISODE"
+      ],
+      "blocking_reason_codes": [],
+      "remaining_blocker": null,
+      "source_temporal_form": null,
+      "repair_lineage": "publisher_fulltext"
+    },
+    {
+      "episode_id": "deb4614a7c618c6eb581de10",
+      "final_outcome": "STRICT",
+      "exact_city": "PASS",
+      "attack_event": "PASS",
+      "air_context": "PASS",
+      "same_attack": "PASS",
+      "temporal_binding": "PASS",
+      "verified_gate_reason_codes": [
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "AIR_MILITARY_CONTEXT",
+        "SAME_ATTACK_CONTEXT_SUPPORTED",
+        "TEMPORAL_EXPLICIT_EVENT_TIME_INSIDE_EPISODE"
+      ],
+      "blocking_reason_codes": [],
+      "remaining_blocker": null,
+      "source_temporal_form": null,
+      "repair_lineage": "temporal_parser"
+    },
+    {
+      "episode_id": "4684548673d2b83089b0f15e",
+      "final_outcome": "STRICT",
+      "exact_city": "PASS",
+      "attack_event": "PASS",
+      "air_context": "PASS",
+      "same_attack": "PASS",
+      "temporal_binding": "PASS",
+      "verified_gate_reason_codes": [
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "AIR_MILITARY_CONTEXT",
+        "SAME_ATTACK_CONTEXT_SUPPORTED",
+        "TEMPORAL_EXPLICIT_EVENT_TIME_INSIDE_EPISODE"
+      ],
+      "blocking_reason_codes": [],
+      "remaining_blocker": null,
+      "source_temporal_form": null,
+      "repair_lineage": "publisher_fulltext"
+    },
+    {
+      "episode_id": "af3627c04d206a368662136e",
+      "final_outcome": "STRICT",
+      "exact_city": "PASS",
+      "attack_event": "PASS",
+      "air_context": "PASS",
+      "same_attack": "PASS",
+      "temporal_binding": "PASS",
+      "verified_gate_reason_codes": [
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "AIR_MILITARY_CONTEXT",
+        "SAME_ATTACK_CONTEXT_SUPPORTED",
+        "TEMPORAL_EXPLICIT_EVENT_TIME_INSIDE_EPISODE"
+      ],
+      "blocking_reason_codes": [],
+      "remaining_blocker": null,
+      "source_temporal_form": null,
+      "repair_lineage": "publisher_fulltext"
+    }
+  ],
+  "promotion_sets": {
+    "publisher_fulltext": [
+      "735a17c8622f113c4abc15b8",
+      "6bb2a52b33667e8ddf111326",
+      "4684548673d2b83089b0f15e",
+      "af3627c04d206a368662136e"
+    ],
+    "temporal_parser": [
+      "5fe9c0b3aed78bd5be50d3f6",
+      "d727150d5170d97fea2f96f0",
+      "4f236ae664adedf6c45b6d1e",
+      "b8b8b8e9b42ef2e360e1a253",
+      "deb4614a7c618c6eb581de10"
+    ],
+    "same_attack": [
+      "a422cb3549b4ba330c3b831f"
+    ]
+  },
+  "regressions": {
+    "publisher_fulltext": 0,
+    "temporal_parser": 0,
+    "same_attack": 0
+  },
+  "remaining_reviews": [
+    {
+      "episode_id": "9fd2e6a9a02235982bd706ea",
+      "reason": "INSUFFICIENT_LOWER_BOUND",
+      "temporal_binding_code": "TEMPORAL_SOURCE_INTERVAL_INSUFFICIENT_LOWER_BOUND",
+      "source_temporal_form": "Станом на 21:50"
+    },
+    {
+      "episode_id": "cfeec7a191817720d241fedb",
+      "reason": "MULTI_EPISODE_INTERVAL",
+      "temporal_binding_code": "TEMPORAL_SOURCE_INTERVAL_MULTIPLE_EPISODES",
+      "source_temporal_form": "після 3 ранку"
+    }
+  ],
+  "temporal_safety": {
+    "point_time_fabrication": false,
+    "unsafe_interval_binding": false,
+    "note": "Both non-point temporal relations remain non-strict because unique strict episode binding is not justified."
+  },
+  "tests": {
+    "final_code_equivalent_ci": {
+      "workflow": ".github/workflows/kyiv-same-attack-composition-proof.yml",
+      "run_id": 37193161081,
+      "job_id": 111409425745,
+      "focused": {
+        "result": "PASS",
+        "passed": 69,
+        "command_files": [
+          "tests/test_kyiv_same_attack_composition.py",
+          "tests/test_kyiv_temporal_representation.py",
+          "tests/test_kyiv_temporal_clock_parser.py",
+          "tests/test_publisher_fulltext_policy_gate.py",
+          "tests/test_monitor_near_duplicate_temporal_binding.py"
+        ]
+      },
+      "full_pytest": {
+        "result": "PASS",
+        "passed": 198
+      },
+      "monitor_self_test": {
+        "result": "PASS"
+      }
+    },
+    "proof_lineage": {
+      "publisher_fulltext": {
+        "run_id": 37188367837,
+        "total_pytest_passed": 143,
+        "monitor_self_test": "PASS"
+      },
+      "temporal_parser": {
+        "run_id": 37189065231,
+        "focused_passed": 23,
+        "full_pytest_passed": 166,
+        "monitor_self_test": "PASS"
+      },
+      "temporal_representation": {
+        "run_id": 37191802562,
+        "focused_passed": 46,
+        "full_pytest_passed": 180,
+        "monitor_self_test": "PASS"
+      },
+      "same_attack": {
+        "run_id": 37193161081,
+        "focused_passed": 69,
+        "full_pytest_passed": 198,
+        "monitor_self_test": "PASS"
+      }
+    }
+  },
+  "acceptance": {
+    "technical_false_negatives_in_frozen_12": 0,
+    "temporally_ambiguous_review_cases": 2,
+    "unsupported_strict_positives": 0,
+    "ready_for_independent_kyiv_holdout_validation": true
+  },
+  "mutations": {
+    "production_code_modified": false,
+    "existing_source_test_data_files_modified": false,
+    "main_mutated": false,
+    "site_prod_mutated": false,
+    "db_neon_mutations": 0,
+    "deploy": false,
+    "only_repository_change": "this summary artifact on a proof-summary branch"
+  },
+  "next_action": "run a blind independent Kyiv holdout validation on a new time window not used in the repair set."
+}
