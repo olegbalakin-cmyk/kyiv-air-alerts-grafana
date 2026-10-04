@@ -755,6 +755,8 @@ jobs:
       - name: Emit canonical target map transport chunks
         if: success()
         shell: bash
+        env:
+          RECOVERY_RUN_LABEL: ${{ matrix.run }}
         run: |
           set -euo pipefail
           python - <<'PY'
