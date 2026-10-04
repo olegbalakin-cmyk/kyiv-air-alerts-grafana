@@ -626,10 +626,15 @@ jobs:
                           if cap.get("native_hash")==accepted_hash
                           and len(cap.get("target_rows") or [])==expected_count
                       ]
-                      if len(matches)!=1:
+                      if not matches:
                           raise RuntimeError(
                               f"{worker['id']}/{city}: PASSIVE_TARGET_CAPTURE_MATCH_COUNT "
-                              f"{len(matches)}!=1; total_captures={len(captures)}; hook={result.get('hook')}"
+                              f"0; total_captures={len(captures)}; hook={result.get('hook')}"
+                          )
+                      first_rows=matches[0].get("target_rows") or []
+                      if any((m.get("target_rows") or [])!=first_rows for m in matches[1:]):
+                          raise RuntimeError(
+                              f"{worker['id']}/{city}: REPEATED_NATIVE_TARGET_CAPTURES_DIFFER"
                           )
                       selected.append(matches[0])
                   captures=selected
