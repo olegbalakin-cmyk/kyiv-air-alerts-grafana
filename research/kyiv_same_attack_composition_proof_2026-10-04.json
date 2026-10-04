@@ -1,0 +1,244 @@
+{
+  "schema": "kyiv-same-attack-composition-proof-v1",
+  "created_at_utc": "2026-10-04T09:46:00Z",
+  "repo": "olegbalakin-cmyk/kyiv-air-alerts-grafana",
+  "verdict": "PROVEN",
+  "base_commit": "f7a91583f0cd3561a99e974f0f8e47edcfb0cf50",
+  "proof_branch": "kyiv-same-attack-composition-proof-2026-10-04",
+  "implementation_commit": "6e4d0c3651164e548c03c1312011b8036025812a",
+  "scope": "repair only the one remaining frozen Kyiv AIR_CONTEXT / SAME_ATTACK failure; leave the two temporal-interval-safety reviews unchanged",
+  "frozen_inputs": [
+    "research/kyiv_12_positive_source_provenance_2026-10-04.json",
+    "research/kyiv_12_positive_evidence_enrichment_ab_2026-10-04.json",
+    "research/kyiv_publisher_fulltext_policy_gate_proof_2026-10-04.json",
+    "research/kyiv_temporal_clock_parser_proof_2026-10-04.json",
+    "research/kyiv_temporal_representation_proof_2026-10-04.json"
+  ],
+  "target": {
+    "episode_id": "a422cb3549b4ba330c3b831f",
+    "identity_verified_from_frozen_artifacts": true,
+    "canonical_alert_interval_utc": {
+      "start": "2026-10-02T02:47:00Z",
+      "end": "2026-10-02T03:42:00Z",
+      "local_europe_kyiv": "2026-10-02 05:47-06:42 EEST",
+      "recovery_method": "deterministic event_id SHA-256 preimage check using repository event_id(city_key,start,end); event_id('kyiv', start, end) equals frozen target ID"
+    },
+    "source_url": "https://dnipr.kyivcity.gov.ua/news/vorozha-ataka-na-stolytsiu-2-zhovtnia-informatsiia-onovliuietsia",
+    "publisher": "Dnipro district Kyiv official",
+    "source_title": "Ворожа атака на столицю 2 жовтня (інформація оновлюється)",
+    "exact_event_timeline_entry": "6:30, 2 жовтня … У Дарницькому районі влучання у верхні поверхи житлової багатоповерхівки. Є загоряння.",
+    "exact_air_context_timeline_entry": "5:48, 2 жовтня … Оголошена дронова небезпека.",
+    "event_timestamp_local": "2026-10-02T06:30:00+03:00",
+    "event_timestamp_utc": "2026-10-02T03:30:00Z",
+    "air_context_timestamp_local": "2026-10-02T05:48:00+03:00",
+    "air_context_timestamp_utc": "2026-10-02T02:48:00Z",
+    "chronology_gap_minutes": 42,
+    "exact_city_evidence": "У Дарницькому районі влучання у верхні поверхи житлової багатоповерхівки.",
+    "exact_city_basis": "accepted frozen parser result plus official Kyiv district-government source and Darnytskyi district event text",
+    "attack_event_evidence": "У Дарницькому районі влучання у верхні поверхи житлової багатоповерхівки. Є загоряння.",
+    "air_context_evidence": "5:48, 2 жовтня … Оголошена дронова небезпека.",
+    "pre": {
+      "exact_city": true,
+      "attack_event": true,
+      "air_context": true,
+      "same_attack": false,
+      "temporal_binding": {
+        "present": true,
+        "episode_specific": true,
+        "event_time_utc": "2026-10-02T03:30:00Z",
+        "code": "TEMPORAL_EXPLICIT_EVENT_TIME_INSIDE_EPISODE"
+      },
+      "outcome": "REVIEW",
+      "reason": "SAME_ATTACK_CONTEXT_GAP"
+    },
+    "post": {
+      "exact_city": true,
+      "attack_event": true,
+      "air_context": true,
+      "same_attack": true,
+      "same_attack_reason": "same_source_timeline_air_context",
+      "temporal_binding": {
+        "present": true,
+        "episode_specific": true,
+        "event_time_utc": "2026-10-02T03:30:00Z",
+        "code": "TEMPORAL_EXPLICIT_EVENT_TIME_INSIDE_EPISODE",
+        "unchanged_from_existing_temporal_path": true
+      },
+      "outcome": "STRICT"
+    },
+    "why_predecessor_refused_composition": "air context was outside the exact-city event segment; trusted_same_attack_source() only auto-linked Telegram/Suspilne paths, so the official district live chronology returned air_context_not_linked_to_exact_city_event"
+  },
+  "repair": {
+    "file": "kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py",
+    "new_path": "same_source_timeline_air_context_evidence",
+    "composition_basis": "same trusted Kyiv official live chronology; dated timeline entries; air entry precedes event; adjacent entries only; both timestamps are inside the same unique canonical episode; existing event temporal binding remains the source of event time and episode binding",
+    "max_composition_gap_minutes": 45,
+    "gap_constant_reused": "COMPOSITION_MAX_GAP_MINUTES",
+    "source_scope": "Kyiv only; publisher_fulltext; source host must be kyivcity.gov.ua or a subdomain; title must identify a live 'Ворожа атака ... (інформація оновлюється)' chronology",
+    "safeguards": {
+      "same_document": true,
+      "same_city_no_conflicting_city": true,
+      "temporal_compatibility": true,
+      "tight_chronology": "adjacent dated timeline entries; no intervening entry permitted; existing 45-minute composition ceiling",
+      "no_intervening_conflict": true,
+      "unique_episode": true,
+      "event_occurrence_from_air_context": false,
+      "exact_city_from_air_context": false,
+      "event_timestamp_from_air_context": false,
+      "episode_binding_from_air_context": false,
+      "generic_alert_only_rejected": true
+    },
+    "no_changes_to": [
+      "temporal clock parsing",
+      "temporal interval representation",
+      "publisher_fulltext policy",
+      "source discovery",
+      "source adapters",
+      "query families",
+      "exact-city semantics",
+      "attack-event taxonomy",
+      "monitor state",
+      "review queue",
+      "canonical alerts",
+      "Neon/DB",
+      "deployment"
+    ]
+  },
+  "negative_controls": [
+    {
+      "case": "different source documents",
+      "result": "PASS"
+    },
+    {
+      "case": "different cities",
+      "result": "PASS"
+    },
+    {
+      "case": "different canonical alert episodes",
+      "result": "PASS"
+    },
+    {
+      "case": "chronology gap exceeds 45 minutes",
+      "result": "PASS"
+    },
+    {
+      "case": "intervening different attack/context entry",
+      "result": "PASS"
+    },
+    {
+      "case": "generic alert language without qualifying aerial/military context",
+      "result": "PASS"
+    },
+    {
+      "case": "event evidence absent",
+      "result": "PASS"
+    },
+    {
+      "case": "temporal episode binding ambiguous",
+      "result": "PASS"
+    },
+    {
+      "case": "untrusted/non-Kyiv official chronology",
+      "result": "PASS"
+    },
+    {
+      "case": "Kherson/other-city new path remains disabled",
+      "result": "PASS"
+    }
+  ],
+  "frozen_12_replay": {
+    "before": {
+      "STRICT": 9,
+      "SENSITIVITY": 0,
+      "REVIEW": 3
+    },
+    "after": {
+      "STRICT": 10,
+      "SENSITIVITY": 0,
+      "REVIEW": 2
+    },
+    "target_promoted": true,
+    "non_target_temporal_reviews_promoted": 0,
+    "predecessor_strict_unchanged": [
+      "5fe9c0b3aed78bd5be50d3f6",
+      "d727150d5170d97fea2f96f0",
+      "4f236ae664adedf6c45b6d1e",
+      "735a17c8622f113c4abc15b8",
+      "b8b8b8e9b42ef2e360e1a253",
+      "6bb2a52b33667e8ddf111326",
+      "deb4614a7c618c6eb581de10",
+      "4684548673d2b83089b0f15e",
+      "af3627c04d206a368662136e"
+    ],
+    "changed_outcomes": [
+      {
+        "episode_id": "a422cb3549b4ba330c3b831f",
+        "before": "REVIEW",
+        "after": "STRICT",
+        "predicate": "same_source_timeline_air_context"
+      }
+    ],
+    "remaining_review_cases": [
+      {
+        "episode_id": "9fd2e6a9a02235982bd706ea",
+        "reason": "INSUFFICIENT_LOWER_BOUND"
+      },
+      {
+        "episode_id": "cfeec7a191817720d241fedb",
+        "reason": "MULTI_EPISODE_INTERVAL"
+      }
+    ],
+    "scope_leak": false,
+    "technical_false_negatives_remaining": 0,
+    "temporally_ambiguous_review_cases": 2
+  },
+  "bounded_differential": {
+    "corpus": "practical frozen candidate corpus in repository explosion_review_queue.json with current frozen monitor state",
+    "total_candidates_compared": 2859,
+    "changed_outcomes": 0,
+    "changed_to_strict": 0,
+    "all_changed_rows_satisfy_new_safe_composition_predicate": true,
+    "explanation": "the frozen target proof candidate is reconstructed from frozen provenance artifacts and is not present in the current practical queue; therefore the repository-corpus differential is zero while the exact frozen-12 replay changes exactly the target"
+  },
+  "tests": {
+    "workflow": ".github/workflows/kyiv-same-attack-composition-proof.yml",
+    "workflow_run_id": 37193161081,
+    "workflow_job_id": 111409425745,
+    "focused": {
+      "result": "PASS",
+      "count": 69
+    },
+    "full_pytest": {
+      "result": "PASS",
+      "count": 198
+    },
+    "monitor_self_test": {
+      "result": "PASS",
+      "summary": "23 audited cities; IR01-IR20 covered; 50/50 provenance approvals; 2/2 deterministic negatives; 58/58 no-adapter regression; 20/20 episode replay; 3/3 composition-positive recomputations; future-run unexpected status changes=0"
+    },
+    "first_run_note": {
+      "run_id": 37193093860,
+      "result": "FAIL",
+      "cause": "proof-only regex literals were accidentally double-escaped in the first implementation commit; corrected without widening semantics before the accepted passing run"
+    }
+  },
+  "diff_from_base_to_implementation": {
+    "files_changed": 3,
+    "files": [
+      ".github/workflows/kyiv-same-attack-composition-proof.yml",
+      "kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py",
+      "kyiv-air-alerts-grafana/tests/test_kyiv_same_attack_composition.py"
+    ],
+    "unrelated_files_changed": 0
+  },
+  "mutations": {
+    "main_mutated": false,
+    "site_prod_mutated": false,
+    "monitor_state_mutations": 0,
+    "review_queue_mutations": 0,
+    "canonical_alert_mutations": 0,
+    "neon_db_mutations": 0,
+    "deploy": false
+  },
+  "next_action": "run one final frozen 12-positive regression summary and determine whether the repaired stack is ready for broader monitor validation; do not perform in this task"
+}
