@@ -342,6 +342,20 @@ jobs:
                   if wrapper_params is None:
                       wrapper_params = m.google_news_resolution_params(wrapper.text, url)
 
+              resolver_url = m.resolve_google_news_publisher_url(
+                  url,
+                  wrapper_response=wrapper,
+              )
+              resolver_host = norm_host(resolver_url)
+              publisher_host = norm_host(row.get("publisher_url"))
+              plausible = bool(
+                  resolver_host and publisher_host and (
+                      resolver_host == publisher_host
+                      or resolver_host.endswith("." + publisher_host)
+                      or publisher_host.endswith("." + resolver_host)
+                  )
+              )
+
               real_get = m.requests.get
               traced = []
               def traced_get(target, **kwargs):
@@ -357,19 +371,10 @@ jobs:
 
               m.requests.get = traced_get
               try:
-                  body, resolved = m.fetch_publisher_fulltext(url)
+                  body, final_url = m.fetch_publisher_fulltext(url)
               finally:
                   m.requests.get = real_get
 
-              resolved_host = norm_host(resolved)
-              publisher_host = norm_host(row.get("publisher_url"))
-              plausible = bool(
-                  resolved_host and publisher_host and (
-                      resolved_host == publisher_host
-                      or resolved_host.endswith("." + publisher_host)
-                      or publisher_host.endswith("." + resolved_host)
-                  )
-              )
               publisher_fetches = [x for x in traced if x["host"] and not m.google_host(x["host"])]
               records.append({
                   "city": row["city"],
@@ -379,29 +384,31 @@ jobs:
                   "wrapper_status": int(wrapper.status_code),
                   "wrapper_final_host": norm_host(wrapper.url),
                   "wrapper_signature_present": bool(wrapper_params),
-                  "resolution_success": bool(resolved),
-                  "resolved_hostname": resolved_host or None,
-                  "publisher_identity_plausible": plausible if resolved else None,
+                  "resolver_success": bool(resolver_url),
+                  "resolved_hostname": resolver_host or None,
+                  "publisher_identity_plausible": plausible if resolver_url else None,
                   "publisher_fetch_status": publisher_fetches[-1]["status"] if publisher_fetches else None,
-                  "body_extraction_success": bool(body),
                   "publisher_fetch_reached": bool(publisher_fetches),
+                  "body_extraction_success": bool(body),
+                  "final_publisher_url_returned": bool(final_url),
               })
 
-          successes = [r for r in records if r["resolution_success"]]
-          success_publishers = {r["publisher"] for r in successes}
-          bodies = [r for r in successes if r["body_extraction_success"]]
-          plausible = all(r["publisher_identity_plausible"] for r in successes)
+          resolver_successes = [r for r in records if r["resolver_success"]]
+          successful_publishers = {r["publisher"] for r in resolver_successes}
+          bodies = [r for r in records if r["body_extraction_success"]]
+          plausible = all(r["publisher_identity_plausible"] for r in resolver_successes)
           discovery_ok = len(discovered) > 0
           gate = (
               discovery_ok
-              and len(successes) >= 2
-              and len(success_publishers) >= 2
+              and len(resolver_successes) >= 2
+              and len(successful_publishers) >= 2
               and bool(bodies)
               and plausible
+              and all(r["publisher_fetch_reached"] for r in resolver_successes)
           )
 
           result = {
-              "schema": "google_news_publisher_resolution_live_proof_v1",
+              "schema": "google_news_publisher_resolution_live_proof_v2",
               "discovery": {
                   "works": discovery_ok,
                   "candidate_count": len(discovered),
@@ -410,11 +417,13 @@ jobs:
               "sample_size": len(records),
               "publishers_represented": sorted({str(r["publisher"]) for r in records}),
               "cities_represented": sorted({str(r["city"]) for r in records}),
-              "resolution_success_count": len(successes),
-              "resolution_success_rate": (len(successes) / len(records)) if records else 0.0,
-              "successful_publishers": sorted(success_publishers),
+              "resolver_success_count": len(resolver_successes),
+              "resolver_success_rate": (len(resolver_successes) / len(records)) if records else 0.0,
+              "successful_publishers": sorted(successful_publishers),
+              "publisher_fetch_reached_count": sum(bool(r["publisher_fetch_reached"]) for r in records),
               "publisher_body_extraction_count": len(bodies),
-              "all_successes_publisher_identity_plausible": plausible,
+              "publisher_body_extraction_rate": (len(bodies) / len(records)) if records else 0.0,
+              "all_resolved_publisher_identities_plausible": plausible,
               "hard_gate_pass": gate,
               "records": records,
           }
@@ -425,11 +434,13 @@ jobs:
           )
           print(json.dumps({
               "sample_size": result["sample_size"],
-              "resolution_success_count": result["resolution_success_count"],
-              "resolution_success_rate": result["resolution_success_rate"],
+              "resolver_success_count": result["resolver_success_count"],
+              "resolver_success_rate": result["resolver_success_rate"],
               "successful_publishers": result["successful_publishers"],
               "cities_represented": result["cities_represented"],
+              "publisher_fetch_reached_count": result["publisher_fetch_reached_count"],
               "publisher_body_extraction_count": result["publisher_body_extraction_count"],
+              "publisher_body_extraction_rate": result["publisher_body_extraction_rate"],
           }, ensure_ascii=False))
           PY
 
