@@ -20,7 +20,7 @@ jobs:
     env:
       PROOF_BASE: "3076a68dcb63530d85695dbedfd30831c902716d"
       ACCEPTED_STACK: "0723e68804c77dc5df478294745a673356dd9c2f"
-      SEMANTIC_REPAIR_TIP: "a0d27dc8096bb86b2a7ac6c06746f3df218075d0"
+      SEMANTIC_REPAIR_TIP: "6e60c5a236ca8a11618d1b622b4de4223090e0c0"
       HISTORICAL_STATE_COMMIT: "22d32a3f5e9e293aec94cef41b063a2eb715c1ad"
       EXPECTED_STATE_BLOB: "c8d799094e8360443d09702a62598cb735fb2335"
       EXPECTED_QUEUE_BLOB: "b10ed4376a9950c8b45e4893e415565e182fb44e"
@@ -69,6 +69,7 @@ jobs:
               "contemporaneous_live_wording",
               "retrospective_or_cumulative_wording",
               "temporal_binding_evidence",
+              "trusted_live_publication_binding_extension_wording",
           ]
           assert changed == expected, (changed, expected)
           for frozen in (
@@ -347,6 +348,7 @@ jobs:
                       "retrospective_or_cumulative_wording",
                       "contemporaneous_live_wording",
                       "temporal_binding_evidence",
+                      "trusted_live_publication_binding_extension_wording",
                   ],
                   "live_forms_added": [
                       "present-tense працює/працюють (сили) ППО",
