@@ -1,0 +1,50 @@
+name: Kyiv same-attack composition proof
+
+on:
+  push:
+    branches:
+      - kyiv-same-attack-composition-proof-2026-10-04
+    paths:
+      - kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py
+      - kyiv-air-alerts-grafana/tests/test_kyiv_same_attack_composition.py
+      - .github/workflows/kyiv-same-attack-composition-proof.yml
+
+permissions:
+  contents: read
+
+jobs:
+  proof:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: kyiv-air-alerts-grafana/requirements.txt
+
+      - name: Install dependencies
+        working-directory: kyiv-air-alerts-grafana
+        run: |
+          python -m pip install -r requirements.txt
+          python -m pip install pytest
+
+      - name: Run focused same-attack composition proof
+        working-directory: kyiv-air-alerts-grafana
+        run: |
+          python -m pytest -q -s \
+            tests/test_kyiv_same_attack_composition.py \
+            tests/test_kyiv_temporal_representation.py \
+            tests/test_kyiv_temporal_clock_parser.py \
+            tests/test_publisher_fulltext_policy_gate.py \
+            tests/test_monitor_near_duplicate_temporal_binding.py
+
+      - name: Run full repository pytest
+        working-directory: kyiv-air-alerts-grafana
+        run: python -m pytest -q tests
+
+      - name: Run monitor self-test
+        working-directory: kyiv-air-alerts-grafana
+        run: python scripts/monitor_explosion_candidates.py --self-test

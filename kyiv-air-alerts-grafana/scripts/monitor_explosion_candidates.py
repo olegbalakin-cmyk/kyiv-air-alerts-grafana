@@ -823,7 +823,243 @@ def audited_cities_in_text(text: str) -> list[str]:
     return sorted(key for key in CITY_CONFIG if city_mentioned(key, text))
 
 
-def same_attack_context_evidence(city_key: str, row: dict, strict_evidence: dict, air_evidence: dict) -> dict:
+_KYIV_OFFICIAL_TIMELINE_MONTHS = {
+    "січня": 1,
+    "лютого": 2,
+    "березня": 3,
+    "квітня": 4,
+    "травня": 5,
+    "червня": 6,
+    "липня": 7,
+    "серпня": 8,
+    "вересня": 9,
+    "жовтня": 10,
+    "листопада": 11,
+    "грудня": 12,
+}
+_KYIV_OFFICIAL_TIMELINE_MARKER_RE = re.compile(
+    r"(?<!\\d)(\\d{1,2}):(\\d{2})\\s*,\\s*(\\d{1,2})\\s+"
+    r"(січня|лютого|березня|квітня|травня|червня|липня|серпня|"
+    r"вересня|жовтня|листопада|грудня)\\b",
+    re.IGNORECASE,
+)
+_TIMELINE_SPECIFIC_AIR_RE = re.compile(
+    r"\\b(?:бпла|безпілот\\w*|дрон\\w*|shahed\\w*|шахед\\w*|ракет\\w*|"
+    r"каб\\w*|авіабомб\\w*|баліст\\w*|крилат\\w*|іскандер\\w*|"
+    r"бандерол\\w*|молні\\w*|fpv|ппо|повітряні\\s+сили)\\b",
+    re.IGNORECASE,
+)
+_TIMELINE_ALL_CLEAR_RE = re.compile(
+    r"\\b(?:відбій|скасован\\w*.{0,20}тривог\\w*|тривог\\w*.{0,20}скасован\\w*)\\b",
+    re.IGNORECASE,
+)
+
+
+def trusted_kyiv_official_live_timeline(city_key: str, row: dict) -> bool:
+    if city_key != "kyiv" or row.get("discovery_basis") != "publisher_fulltext":
+        return False
+    source_url = str(row.get("resolved_url") or row.get("url") or "")
+    host = (urlparse(source_url).hostname or "").casefold()
+    if host != "kyivcity.gov.ua" and not host.endswith(".kyivcity.gov.ua"):
+        return False
+    title = normalize_evidence_text(row.get("title"))
+    return "інформація оновлюється" in title and "ворожа атака" in title
+
+
+def kyiv_official_timeline_entries(row: dict) -> list[dict]:
+    published = parse_dt(row.get("published_at"))
+    text = classification_text(row)
+    if not published or not text:
+        return []
+    published_local = published.astimezone(KYIV_TZ)
+    hits = list(_KYIV_OFFICIAL_TIMELINE_MARKER_RE.finditer(text))
+    entries = []
+    for index, hit in enumerate(hits):
+        hour = int(hit.group(1))
+        minute = int(hit.group(2))
+        day = int(hit.group(3))
+        month = _KYIV_OFFICIAL_TIMELINE_MONTHS.get(hit.group(4).casefold())
+        if hour > 23 or minute > 59 or month is None:
+            continue
+        try:
+            local_dt = datetime(
+                published_local.year,
+                month,
+                day,
+                hour,
+                minute,
+                tzinfo=KYIV_TZ,
+            )
+        except ValueError:
+            continue
+        if local_dt.date() != published_local.date():
+            continue
+        end = hits[index + 1].start() if index + 1 < len(hits) else len(text)
+        entries.append(
+            {
+                "index": index,
+                "time": local_dt.astimezone(UTC),
+                "text": " ".join(text[hit.start():end].split()),
+            }
+        )
+    return entries
+
+
+def _timeline_entry_overlaps_segments(entry_text: str, segments: list[str]) -> bool:
+    entry_low = normalize_evidence_text(entry_text)
+    for segment in segments or []:
+        segment_low = normalize_evidence_text(segment)
+        if segment_low and (segment_low in entry_low or entry_low in segment_low):
+            return True
+    return False
+
+
+def _qualifying_specific_timeline_air_context(text: str) -> bool:
+    low = normalize_evidence_text(text)
+    return bool(low and air_military_context(low) and _TIMELINE_SPECIFIC_AIR_RE.search(low))
+
+
+def _timeline_intervening_conflict(city_key: str, text: str) -> bool:
+    mentioned = audited_cities_in_text(text)
+    if any(key != city_key for key in mentioned):
+        return True
+    if _TIMELINE_ALL_CLEAR_RE.search(normalize_evidence_text(text)):
+        return True
+    return strict_attack_event_signal(text)
+
+
+def same_source_timeline_air_context_evidence(
+    city_key: str,
+    row: dict,
+    strict_evidence: dict,
+    air_evidence: dict,
+    temporal_binding: dict | None,
+    episodes: list[dict] | None,
+) -> dict:
+    if not trusted_kyiv_official_live_timeline(city_key, row):
+        return {"present": False, "reason": "unsupported_source_chronology"}
+    if not strict_evidence.get("present") or not air_evidence.get("present"):
+        return {"present": False, "reason": "missing_event_or_air_context"}
+    temporal = temporal_binding or {}
+    target_id = str(temporal.get("episode_id") or "")
+    event_time = parse_dt(temporal.get("event_time"))
+    if (
+        not temporal.get("present")
+        or not temporal.get("episode_specific")
+        or not target_id
+        or not event_time
+    ):
+        return {"present": False, "reason": "event_temporal_binding_not_unique"}
+    target_episode = next(
+        (
+            ep
+            for ep in (episodes or [])
+            if str(ep.get("episode_id") or "") == target_id
+        ),
+        None,
+    )
+    if target_episode is None:
+        return {"present": False, "reason": "target_episode_unavailable"}
+
+    entries = kyiv_official_timeline_entries(row)
+    strict_segments = list(strict_evidence.get("segments") or [])
+    air_segments = list(air_evidence.get("segments") or [])
+    event_entries = [
+        entry
+        for entry in entries
+        if entry["time"] == event_time
+        and strict_attack_event_signal(entry["text"])
+        and _timeline_entry_overlaps_segments(entry["text"], strict_segments)
+    ]
+    if not event_entries:
+        return {"present": False, "reason": "event_timeline_entry_not_recovered"}
+
+    air_entries = [
+        entry
+        for entry in entries
+        if entry["time"] < event_time
+        and _qualifying_specific_timeline_air_context(entry["text"])
+        and _timeline_entry_overlaps_segments(entry["text"], air_segments)
+    ]
+    if not air_entries:
+        return {"present": False, "reason": "qualifying_air_timeline_entry_not_recovered"}
+
+    for event_entry in event_entries:
+        for air_entry in reversed(air_entries):
+            event_other_cities = [
+                key for key in audited_cities_in_text(event_entry["text"]) if key != city_key
+            ]
+            air_other_cities = [
+                key for key in audited_cities_in_text(air_entry["text"]) if key != city_key
+            ]
+            if event_other_cities or air_other_cities:
+                continue
+
+            event_neighbor = composition_neighbor_check(
+                event_entry["time"], target_episode, episodes or []
+            )
+            air_neighbor = composition_neighbor_check(
+                air_entry["time"], target_episode, episodes or []
+            )
+            if not event_neighbor["passed"] or not air_neighbor["passed"]:
+                continue
+
+            gap_seconds = (event_entry["time"] - air_entry["time"]).total_seconds()
+            if gap_seconds < 0 or gap_seconds > COMPOSITION_MAX_GAP_MINUTES * 60:
+                continue
+
+            between = [
+                entry
+                for entry in entries
+                if air_entry["index"] < entry["index"] < event_entry["index"]
+            ]
+            if any(
+                _timeline_intervening_conflict(city_key, entry["text"])
+                for entry in between
+            ):
+                return {
+                    "present": False,
+                    "reason": "intervening_timeline_conflict",
+                    "gap_seconds": gap_seconds,
+                }
+            if between:
+                return {
+                    "present": False,
+                    "reason": "timeline_entries_not_adjacent",
+                    "gap_seconds": gap_seconds,
+                }
+
+            return {
+                "present": True,
+                "reason": "same_source_timeline_air_context",
+                "basis": [
+                    "same_publisher_document",
+                    "trusted_kyiv_official_live_timeline",
+                    "adjacent_timeline_entries",
+                    f"timestamps_within_{COMPOSITION_MAX_GAP_MINUTES}m",
+                    "both_entries_inside_unique_target_episode",
+                    "event_time_from_existing_temporal_binding",
+                ],
+                "gap_seconds": gap_seconds,
+                "air_entry_time": iso(air_entry["time"]),
+                "event_entry_time": iso(event_entry["time"]),
+                "air_entry_text": air_entry["text"],
+                "event_entry_text": event_entry["text"],
+                "air_neighbor_check": air_neighbor,
+                "event_neighbor_check": event_neighbor,
+            }
+
+    return {"present": False, "reason": "timeline_entries_not_same_unique_episode_or_gap"}
+
+
+def same_attack_context_evidence(
+    city_key: str,
+    row: dict,
+    strict_evidence: dict,
+    air_evidence: dict,
+    temporal_binding: dict | None = None,
+    episodes: list[dict] | None = None,
+) -> dict:
     if not strict_evidence.get("present") or not air_evidence.get("present"):
         return {"present": False, "reason": "missing_explosion_or_air_context"}
     if any(air_military_context(segment) for segment in strict_evidence.get("segments") or []):
@@ -831,6 +1067,16 @@ def same_attack_context_evidence(city_key: str, row: dict, strict_evidence: dict
     mentioned = audited_cities_in_text(classification_text(row))
     if trusted_same_attack_source(row) and len(mentioned) <= 1:
         return {"present": True, "reason": "trusted_source_adjacent_air_context"}
+    timeline = same_source_timeline_air_context_evidence(
+        city_key,
+        row,
+        strict_evidence,
+        air_evidence,
+        temporal_binding,
+        episodes,
+    )
+    if timeline.get("present"):
+        return timeline
     return {"present": False, "reason": "air_context_not_linked_to_exact_city_event"}
 
 
@@ -2655,11 +2901,16 @@ def classify_candidate(row: dict, city_key: str, episodes: list[dict], matching:
     candidate_air_defense_action = air_defense_action_signal(classification_text(row))
     candidate_interception_claim = interception_claim_signal(classification_text(row))
     candidate_air = air_military_context_evidence(row)
-    candidate_same_attack = same_attack_context_evidence(
-        city_key, row, candidate_strict, candidate_air
-    )
     candidate_temporal = temporal_binding_evidence(
         row, candidate_strict, matching, episodes
+    )
+    candidate_same_attack = same_attack_context_evidence(
+        city_key,
+        row,
+        candidate_strict,
+        candidate_air,
+        candidate_temporal,
+        episodes,
     )
     candidate_inference = single_episode_day_inference(row, matching, episodes)
 
