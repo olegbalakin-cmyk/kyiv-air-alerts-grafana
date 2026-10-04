@@ -116,7 +116,7 @@ jobs:
 
           def inspect_html(text, publisher_host):
               text = str(text or "")
-              b = text[:262144]
+              b = text
               low = b.casefold()
               unescaped = html.unescape(b).casefold()
               canon = re.findall(r'<link[^>]+rel=["\'][^"\']*canonical[^"\']*["\'][^>]+href=["\']([^"\']+)', b, re.I)
@@ -225,7 +225,13 @@ jobs:
 
           mechanisms = sorted({x["failure_mechanism"] for x in records})
           one = mechanisms == ["HTTP_200_GOOGLE_WRAPPER_FINAL_HOST_STILL_GOOGLE"]
-          zero = all(x["production_contract"]["redirect_hops"] == 0 for x in records)
+          internal_locale_redirect = all(
+              x["production_contract"]["redirect_hops"] == 1
+              and x["production_contract"]["redirect_chain"][0]["status"] == 302
+              and is_google(host(x["production_contract"]["redirect_chain"][0]["location"]))
+              and x["production_contract"]["redirect_chain"][-1]["status"] == 200
+              for x in records
+          )
           all_html = all("html" in str(x["production_contract"]["content_type"] or "").casefold() for x in records)
           all_google = all(is_google(x["production_contract"]["final_host"]) for x in records)
           none_static = all(not x["returned_representation"]["publisher_url_discoverable"] for x in records)
@@ -235,7 +241,7 @@ jobs:
 
           verdict = (
               "GOOGLE NEWS PUBLISHER RESOLUTION BLOCKER = DIAGNOSED"
-              if one and zero and all_html and all_google and not any_consent and not any_antibot
+              if one and internal_locale_redirect and all_html and all_google and not any_consent and not any_antibot
               else "GOOGLE NEWS PUBLISHER RESOLUTION BLOCKER = MULTIPLE MECHANISMS"
               if len(mechanisms) > 1
               else "GOOGLE NEWS PUBLISHER RESOLUTION BLOCKER = INDETERMINATE"
@@ -270,16 +276,16 @@ jobs:
               "mechanism_summary": {
                   "mechanisms": mechanisms,
                   "all_html": all_html,
-                  "all_zero_redirect_hops": zero,
+                  "all_one_hop_google_internal_redirect": internal_locale_redirect,
                   "all_final_hosts_google": all_google,
                   "all_publisher_urls_absent_from_static_html_surfaces": none_static,
                   "javascript_app_markers_seen": any_js,
                   "consent_interstitial_seen": any_consent,
                   "anti_bot_seen": any_antibot,
                   "exact_shared_failure_mechanism": (
-                      "Google News RSS article URLs return HTTP 200 HTML on news.google.com with no HTTP redirect to the publisher; "
-                      "fetch_publisher_fulltext follows redirects but rejects the still-Google final host before extract_article_text."
-                      if one and zero else None
+                      "Google News RSS article URLs first return one Google-internal 302 locale-normalization redirect, then HTTP 200 HTML on news.google.com; "
+                      "no redirect leaves Google, and fetch_publisher_fulltext rejects the still-Google final host before extract_article_text."
+                      if one and internal_locale_redirect else None
                   ),
               },
               "accepted_shadow_relationship": {
@@ -292,7 +298,7 @@ jobs:
               "samples": records,
               "test_contract_gap": {
                   "durability_tests_inject_fake_fetcher": True,
-                  "missing_fixture": "current Google News HTTP 200 wrapper response with zero redirect hops and final news.google.com URL",
+                  "missing_fixture": "current Google News response chain: Google-internal 302 locale-normalization redirect followed by HTTP 200 wrapper on news.google.com",
               },
               "smallest_future_repair_surface": {
                   "component": "Google News RSS article URL resolution substep inside fetch_publisher_fulltext",
