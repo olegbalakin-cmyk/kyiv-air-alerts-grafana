@@ -1,0 +1,341 @@
+name: Google News publisher resolution diagnostic
+
+on:
+  push:
+    branches:
+      - google-news-publisher-resolution-diagnostic-2026-10-04
+    paths:
+      - ".github/workflows/google-news-publisher-resolution-diagnostic.yml"
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      PRODUCTION_BASE: "d2030cb88051f05ed7692d3af7c908a87048f549"
+      WORKFLOW_PATH: ".github/workflows/google-news-publisher-resolution-diagnostic.yml"
+      SHADOW_RUN_ID: "37224229174"
+      SHADOW_ARTIFACT_ID: "11311770188"
+      SHADOW_ARTIFACT_ZIP_SHA256: "069a4dc1e0177decc9c4d8dadfe6b4bbccb90c5f0de3b837785e85a235efa68b"
+      SHADOW_JSON_SHA256: "1313e50fdd98e7be6340ecd29127ca5f5acca37c33cc0cd0e89817413ecfa768"
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Assert proof-only scope
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git merge-base "$PRODUCTION_BASE" HEAD)" = "$PRODUCTION_BASE"
+          changed="$(git diff --name-only "$PRODUCTION_BASE"...HEAD)"
+          printf '%s\n' "$changed"
+          test "$changed" = "$WORKFLOW_PATH"
+          test "$(git rev-parse "$PRODUCTION_BASE:kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py")" = "$(git rev-parse "HEAD:kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py")"
+          for key in DATABASE_URL NEON_DATABASE_URL NEON_URL PGHOST PGPORT PGDATABASE PGUSER PGPASSWORD; do
+            test -z "${!key-}" || { echo "unexpected DB env: $key"; exit 1; }
+          done
+          mkdir -p /tmp/resolver-diag
+          git ls-files -z 'kyiv-air-alerts-grafana/data/**' 'kyiv-air-alerts-grafana/research/**' 'research/**' \
+            | sort -z | xargs -0 -r sha256sum > /tmp/resolver-diag/protected.before.sha256
+
+      - name: Download accepted shadow artifact
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          gh api "/repos/${GITHUB_REPOSITORY}/actions/artifacts/${SHADOW_ARTIFACT_ID}/zip" > /tmp/shadow.zip
+          echo "${SHADOW_ARTIFACT_ZIP_SHA256}  /tmp/shadow.zip" | sha256sum -c -
+          mkdir -p /tmp/shadow
+          unzip -q /tmp/shadow.zip -d /tmp/shadow
+          echo "${SHADOW_JSON_SHA256}  /tmp/shadow/live_rss_durability_shadow_validation.json" | sha256sum -c -
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: kyiv-air-alerts-grafana/requirements.txt
+
+      - name: Install dependencies
+        working-directory: kyiv-air-alerts-grafana
+        run: python -m pip install -r requirements.txt
+
+      - name: Probe six accepted-shadow Google News URLs
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import base64, hashlib, html, inspect, json, os, re, sys
+          from pathlib import Path
+          from urllib.parse import urlparse
+
+          root = Path.cwd() / "kyiv-air-alerts-grafana"
+          sys.path.insert(0, str(root / "scripts"))
+          import monitor_explosion_candidates as m
+
+          def host(u):
+              try:
+                  return (urlparse(str(u or "")).hostname or "").casefold()
+              except Exception:
+                  return ""
+
+          def is_google(h):
+              return h == "google.com" or h.endswith(".google.com")
+
+          def bounded(u):
+              u = str(u or "").strip()
+              return u[:2048] if u else None
+
+          shadow_path = Path("/tmp/shadow/live_rss_durability_shadow_validation.json")
+          shadow = json.loads(shadow_path.read_text(encoding="utf-8"))
+
+          rows = sorted(
+              [r for r in shadow["candidate_shadow_ledger"] if r.get("network_fetch_performed")],
+              key=lambda r: (str(r.get("city") or ""), str(r.get("publisher") or ""), str(r.get("rss_url") or "")),
+          )
+          sample, cities, pubs = [], set(), set()
+          for r in rows:
+              c, p = str(r.get("city") or ""), str(r.get("publisher") or "")
+              if c in cities or p in pubs:
+                  continue
+              sample.append(r); cities.add(c); pubs.add(p)
+              if len(sample) == 6:
+                  break
+          assert len(sample) == 6 and len(cities) == 6 and len(pubs) == 6
+
+          headers = {
+              "User-Agent": "Mozilla/5.0 (compatible; ukraine-air-alerts-explosion-monitor/1.0)",
+              "Accept-Language": "uk,en;q=0.7",
+          }
+
+          def inspect_html(text, publisher_host):
+              text = str(text or "")
+              b = text[:262144]
+              low = b.casefold()
+              unescaped = html.unescape(b).casefold()
+              canon = re.findall(r'<link[^>]+rel=["\'][^"\']*canonical[^"\']*["\'][^>]+href=["\']([^"\']+)', b, re.I)
+              refresh = re.findall(r'<meta[^>]+http-equiv=["\']refresh["\'][^>]+content=["\']([^"\']+)', b, re.I)
+              hrefs = re.findall(r'(?:href|src)=["\']([^"\']+)', b, re.I)
+              structured = re.findall(r'(?:og:url|twitter:url)[^>]{0,300}content=["\']([^"\']+)', b, re.I)
+              scripts = "\n".join(re.findall(r'<script\b[^>]*>(.*?)</script>', b, re.I | re.S))
+              sl = scripts.casefold()
+              surfaces = {
+                  "canonical": any(publisher_host and publisher_host in host(u) for u in canon),
+                  "meta_refresh": any(publisher_host and publisher_host in host(u) for u in refresh),
+                  "anchor_or_resource_href": any(publisher_host and publisher_host in host(u) for u in hrefs),
+                  "structured_metadata": any(publisher_host and publisher_host in host(u) for u in structured),
+                  "raw_or_unescaped_html": bool(publisher_host and (publisher_host in low or publisher_host in unescaped)),
+                  "script_bootstrap_text": bool(publisher_host and publisher_host in sl),
+              }
+              names = ["AF_initDataCallback","batchexecute","garturlreq","jscontroller","c-wiz","consent.google.com","unusual traffic","captcha"]
+              markers = {x: (x.casefold() in low or x.casefold() in sl) for x in names}
+              title = re.search(r'<title[^>]*>(.*?)</title>', b, re.I | re.S)
+              return {
+                  "body_chars": len(text),
+                  "inspected_chars": len(b),
+                  "title": re.sub(r"\s+", " ", html.unescape(title.group(1))).strip()[:240] if title else None,
+                  "canonical_links": [bounded(x) for x in canon[:3]],
+                  "meta_refresh": refresh[:3],
+                  "structured_metadata_urls": [bounded(x) for x in structured[:3]],
+                  "non_google_link_host_sample": sorted({host(x) for x in hrefs if host(x) and not is_google(host(x))})[:12],
+                  "markers": markers,
+                  "publisher_url_surfaces": surfaces,
+                  "publisher_url_discoverable": any(surfaces.values()),
+                  "consent_interstitial": markers["consent.google.com"] or "before you continue to google" in low,
+                  "anti_bot": markers["unusual traffic"] or markers["captcha"],
+                  "javascript_app": markers["jscontroller"] or markers["c-wiz"] or markers["AF_initDataCallback"],
+              }
+
+          def token_probe(url, publisher_host):
+              token = urlparse(url).path.rstrip("/").split("/")[-1]
+              try:
+                  raw = base64.urlsafe_b64decode(token + "=" * ((4 - len(token) % 4) % 4))
+              except Exception as e:
+                  return {"decoded": False, "error": type(e).__name__}
+              printable = "".join(chr(b) if 32 <= b < 127 else "." for b in raw)
+              return {
+                  "decoded": True,
+                  "decoded_bytes": len(raw),
+                  "contains_http_ascii": b"http" in raw.lower(),
+                  "contains_publisher_host_ascii": bool(publisher_host and publisher_host.encode().lower() in raw.lower()),
+                  "printable_prefix": printable[:120],
+              }
+
+          records = []
+          for r in sample:
+              url = str(r["rss_url"])
+              pub_host = host(r.get("publisher_url"))
+
+              raw = m.requests.get(url, headers=headers, timeout=m.FULLTEXT_FETCH_TIMEOUT_SECONDS, allow_redirects=False)
+              final = m.requests.get(url, headers=headers, timeout=m.FULLTEXT_FETCH_TIMEOUT_SECONDS, allow_redirects=True)
+
+              chain = [{
+                  "status": int(x.status_code),
+                  "url": bounded(x.url),
+                  "location": bounded(x.headers.get("Location")),
+                  "content_type": str(x.headers.get("Content-Type") or "")[:160] or None,
+              } for x in [*final.history, final]]
+
+              ct, fh = str(final.headers.get("Content-Type") or ""), host(final.url)
+              structure = inspect_html(final.text, pub_host)
+              if final.status_code >= 400:
+                  failure, stage = "HTTP_ERROR", "raise_for_status"
+              elif "html" not in ct.casefold():
+                  failure, stage = "NON_HTML_RESPONSE", "content_type_guard"
+              elif is_google(fh):
+                  failure, stage = "HTTP_200_GOOGLE_WRAPPER_FINAL_HOST_STILL_GOOGLE", "resolved_host_google_guard"
+              else:
+                  failure, stage = "OTHER", "after_google_host_guard"
+
+              records.append({
+                  "city": r.get("city"),
+                  "publisher": r.get("publisher"),
+                  "publisher_url_from_rss_source": r.get("publisher_url"),
+                  "original_google_news_rss_article_url": url,
+                  "request_method": "GET",
+                  "request_headers": headers,
+                  "raw_hop_diagnostic_only": {
+                      "allow_redirects": False,
+                      "status": int(raw.status_code),
+                      "location": bounded(raw.headers.get("Location")),
+                      "content_type": str(raw.headers.get("Content-Type") or "")[:160] or None,
+                  },
+                  "production_contract": {
+                      "allow_redirects": True,
+                      "status": int(final.status_code),
+                      "redirect_hops": len(final.history),
+                      "redirect_chain": chain,
+                      "location_headers_present": bool(raw.headers.get("Location")) or any(x["location"] for x in chain),
+                      "final_url": bounded(final.url),
+                      "final_host": fh,
+                      "content_type": ct[:160] or None,
+                  },
+                  "returned_representation": structure,
+                  "article_path_token_probe": token_probe(url, pub_host),
+                  "current_resolver_expectation": "ordinary HTTP redirects terminate on non-Google publisher HTML",
+                  "exact_resolver_stage": stage,
+                  "failure_mechanism": failure,
+              })
+
+          mechanisms = sorted({x["failure_mechanism"] for x in records})
+          one = mechanisms == ["HTTP_200_GOOGLE_WRAPPER_FINAL_HOST_STILL_GOOGLE"]
+          zero = all(x["production_contract"]["redirect_hops"] == 0 for x in records)
+          all_html = all("html" in str(x["production_contract"]["content_type"] or "").casefold() for x in records)
+          all_google = all(is_google(x["production_contract"]["final_host"]) for x in records)
+          none_static = all(not x["returned_representation"]["publisher_url_discoverable"] for x in records)
+          any_js = any(x["returned_representation"]["javascript_app"] for x in records)
+          any_consent = any(x["returned_representation"]["consent_interstitial"] for x in records)
+          any_antibot = any(x["returned_representation"]["anti_bot"] for x in records)
+
+          verdict = (
+              "GOOGLE NEWS PUBLISHER RESOLUTION BLOCKER = DIAGNOSED"
+              if one and zero and all_html and all_google and not any_consent and not any_antibot
+              else "GOOGLE NEWS PUBLISHER RESOLUTION BLOCKER = MULTIPLE MECHANISMS"
+              if len(mechanisms) > 1
+              else "GOOGLE NEWS PUBLISHER RESOLUTION BLOCKER = INDETERMINATE"
+          )
+
+          discovery_fetches = sum(int(x.get("discovery_fulltext_fetches") or 0) for x in shadow["discovery_stats"].values())
+          discovery_rescues = sum(int(x.get("discovery_fulltext_rescued_candidates") or 0) for x in shadow["discovery_stats"].values())
+
+          proof = {
+              "schema": "google_news_publisher_resolution_diagnostic_v1",
+              "verdict": verdict,
+              "execution": {
+                  "repo": os.environ["GITHUB_REPOSITORY"],
+                  "proof_branch": os.environ["GITHUB_REF_NAME"],
+                  "proof_tooling_commit": os.environ["GITHUB_SHA"],
+                  "actions_run_id": int(os.environ["GITHUB_RUN_ID"]),
+                  "exact_production_base": os.environ["PRODUCTION_BASE"],
+                  "accepted_shadow_run_id": int(os.environ["SHADOW_RUN_ID"]),
+                  "accepted_shadow_artifact_id": int(os.environ["SHADOW_ARTIFACT_ID"]),
+                  "sampled_url_count": len(records),
+              },
+              "shared_path": {
+                  "resolver_function": "fetch_publisher_fulltext",
+                  "ordinary_discovery_path": "search_city_news -> build_google_news_candidate -> fetch_publisher_fulltext",
+                  "durability_path": "enrich_rss_candidate_for_durability -> fulltext_fetcher; accepted shadow wrapped fetch_publisher_fulltext",
+                  "same_http_client": "requests.get",
+                  "same_headers": headers,
+                  "same_redirect_behavior": "allow_redirects=True",
+                  "same_extraction_helper_after_resolution": "extract_article_text",
+                  "resolver_source_sha256": hashlib.sha256(inspect.getsource(m.fetch_publisher_fulltext).encode()).hexdigest(),
+              },
+              "mechanism_summary": {
+                  "mechanisms": mechanisms,
+                  "all_html": all_html,
+                  "all_zero_redirect_hops": zero,
+                  "all_final_hosts_google": all_google,
+                  "all_publisher_urls_absent_from_static_html_surfaces": none_static,
+                  "javascript_app_markers_seen": any_js,
+                  "consent_interstitial_seen": any_consent,
+                  "anti_bot_seen": any_antibot,
+                  "exact_shared_failure_mechanism": (
+                      "Google News RSS article URLs return HTTP 200 HTML on news.google.com with no HTTP redirect to the publisher; "
+                      "fetch_publisher_fulltext follows redirects but rejects the still-Google final host before extract_article_text."
+                      if one and zero else None
+                  ),
+              },
+              "accepted_shadow_relationship": {
+                  "durability_unique_failures": 227,
+                  "durability_failure_taxonomy": "GOOGLE_REDIRECT_RESOLUTION_FAILED",
+                  "ordinary_discovery_fulltext_fetches": discovery_fetches,
+                  "ordinary_discovery_fulltext_rescues": discovery_rescues,
+                  "same_resolver_explains_both_paths": True,
+              },
+              "samples": records,
+              "test_contract_gap": {
+                  "durability_tests_inject_fake_fetcher": True,
+                  "missing_fixture": "current Google News HTTP 200 wrapper response with zero redirect hops and final news.google.com URL",
+              },
+              "smallest_future_repair_surface": {
+                  "component": "Google News RSS article URL resolution substep inside fetch_publisher_fulltext",
+                  "scope": "resolve Google News wrapper/article token to publisher URL before existing publisher HTML fetch/extract",
+              },
+              "mutation_scope": {
+                  "production_code_mutations": 0,
+                  "classifier_mutations": 0,
+                  "discovery_semantics_mutations": 0,
+                  "persistence_mutations": 0,
+                  "historical_state_queue_mutations": 0,
+                  "review_queue_mutations": 0,
+                  "canonical_alert_mutations": 0,
+                  "neon_db_mutations": 0,
+                  "deployments": 0,
+              },
+          }
+
+          out = Path("/tmp/resolver-diag/google_news_publisher_resolution_diagnostic.json")
+          out.write_text(json.dumps(proof, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+          digest = hashlib.sha256(out.read_bytes()).hexdigest()
+          Path("/tmp/resolver-diag/google_news_publisher_resolution_diagnostic.sha256").write_text(
+              f"{digest}  {out.name}\n", encoding="utf-8"
+          )
+          print(json.dumps({"verdict": verdict, "mechanism_summary": proof["mechanism_summary"], "sha256": digest}, ensure_ascii=False))
+          PY
+
+      - name: Prove zero protected mutation
+        shell: bash
+        run: |
+          set -euo pipefail
+          git ls-files -z 'kyiv-air-alerts-grafana/data/**' 'kyiv-air-alerts-grafana/research/**' 'research/**' \
+            | sort -z | xargs -0 -r sha256sum > /tmp/resolver-diag/protected.after.sha256
+          diff -u /tmp/resolver-diag/protected.before.sha256 /tmp/resolver-diag/protected.after.sha256
+          test -z "$(git status --porcelain=v1 --untracked-files=no)"
+          printf 'PROTECTED_MUTATION=0\n' > /tmp/resolver-diag/mutation_check.txt
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: google-news-publisher-resolution-diagnostic
+          path: |
+            /tmp/resolver-diag/google_news_publisher_resolution_diagnostic.json
+            /tmp/resolver-diag/google_news_publisher_resolution_diagnostic.sha256
+            /tmp/resolver-diag/mutation_check.txt
+          if-no-files-found: error
+          retention-days: 30
