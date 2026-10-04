@@ -1,0 +1,211 @@
+{
+  "schema": "kyiv-temporal-representation-proof-v1",
+  "created_at_utc": "2026-10-04T09:20:10Z",
+  "repo": "olegbalakin-cmyk/kyiv-air-alerts-grafana",
+  "verdict": "PARTIAL",
+  "base_commit": "b4a6441923a949ac3a02a71c3f8870fefc49f16a",
+  "proof_branch": "kyiv-temporal-representation-proof-2026-10-04",
+  "implementation_commit": "1f8ebcd981761bb7bc7f5bc6f7e2c68fb4c39739",
+  "frozen_inputs": [
+    "research/kyiv_12_positive_source_provenance_2026-10-04.json",
+    "research/kyiv_12_positive_evidence_enrichment_ab_2026-10-04.json",
+    "research/kyiv_publisher_fulltext_policy_gate_proof_2026-10-04.json",
+    "research/kyiv_temporal_clock_parser_proof_2026-10-04.json"
+  ],
+  "target_episode_ids": [
+    "9fd2e6a9a02235982bd706ea",
+    "cfeec7a191817720d241fedb"
+  ],
+  "target_analysis": [
+    {
+      "episode_id": "9fd2e6a9a02235982bd706ea",
+      "canonical_alert_interval_utc": {
+        "start": "2026-10-01T17:45:00Z",
+        "end": "2026-10-01T18:51:00Z"
+      },
+      "source_excerpt": "Станом на 21:50 зафіксовано повторне влучання в дорожнє полотно на Південному мості.",
+      "source_temporal_excerpt": "Станом на 21:50 … нинішній удар відбувся під час жовтого рівня тривоги.",
+      "publication_timestamp_utc": "2026-10-01T18:56:00Z",
+      "predecessor_parser_output": {
+        "B_temporal_type": "EXPLICIT_EVENT_INTERVAL",
+        "B_temporal_parser": false,
+        "B_episode_binding": false,
+        "reason": "TEMPORAL_REPRESENTATION_GAP"
+      },
+      "why_point_time_representation_is_invalid": "'Станом на 21:50' establishes that the reported fact was true by 21:50; it does not establish an event time of exactly 21:50.",
+      "temporal_relation": "BEFORE_OR_BY_TIME",
+      "source_derived_constraint": {
+        "lower_bound": null,
+        "upper_bound": "2026-10-01T18:50:00Z",
+        "lower_bound_inclusive": null,
+        "upper_bound_inclusive": true
+      },
+      "basis_for_lower_bound": null,
+      "basis_for_upper_bound": "source_as_of_time",
+      "episodes_intersected": [
+        "aa9d8bb53efd6888bfe133d4",
+        "d727150d5170d97fea2f96f0",
+        "4f236ae664adedf6c45b6d1e",
+        "735a17c8622f113c4abc15b8",
+        "5ed0348b3de9b981f64113ff",
+        "a077810f151bfe7bcccd071f",
+        "ef6f417955588d48ee302c24",
+        "fda64181d019f8643f671b22",
+        "9fd2e6a9a02235982bd706ea"
+      ],
+      "safe_unique_binding": false,
+      "failure_class": "INSUFFICIENT_LOWER_BOUND",
+      "before": "REVIEW",
+      "after": "REVIEW"
+    },
+    {
+      "episode_id": "cfeec7a191817720d241fedb",
+      "canonical_alert_interval_utc": {
+        "start": "2026-10-01T23:57:00Z",
+        "end": "2026-10-02T01:03:00Z"
+      },
+      "source_excerpt": "Під час однієї з атак після 3 ранку місцеві почули вибухи.",
+      "source_temporal_excerpt": "після 3 ранку",
+      "publication_timestamp_utc": "2026-10-02T02:10:00Z",
+      "predecessor_parser_output": {
+        "B_temporal_type": "OPEN_INTERVAL_AFTER_TIME",
+        "B_temporal_parser": false,
+        "B_episode_binding": false,
+        "reason": "TEMPORAL_REPRESENTATION_GAP"
+      },
+      "why_point_time_representation_is_invalid": "'Після 3 ранку' is an exclusive lower-bound relation; 03:00 itself is not an asserted event time.",
+      "temporal_relation": "AFTER_TIME",
+      "source_derived_constraint": {
+        "lower_bound": "2026-10-02T00:00:00Z",
+        "upper_bound": "2026-10-02T02:10:00Z",
+        "lower_bound_inclusive": false,
+        "upper_bound_inclusive": true
+      },
+      "basis_for_lower_bound": "source_after_time",
+      "basis_for_upper_bound": "publication_chronology_event_already_occurred",
+      "episodes_intersected": [
+        "cfeec7a191817720d241fedb",
+        "b8b8b8e9b42ef2e360e1a253"
+      ],
+      "interval_contains_unalerted_time": true,
+      "safe_unique_binding": false,
+      "failure_class": "MULTI_EPISODE_INTERVAL",
+      "before": "REVIEW",
+      "after": "REVIEW"
+    }
+  ],
+  "implementation": {
+    "file": "kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py",
+    "new_functions": [
+      "_source_clock_not_after",
+      "_event_already_occurred_by_publication",
+      "source_temporal_constraint",
+      "_interval_intersects_episode",
+      "_interval_fully_covered_by_episode_group",
+      "source_temporal_interval_relation"
+    ],
+    "new_temporal_representations": [
+      "AFTER_TIME",
+      "BEFORE_OR_BY_TIME"
+    ],
+    "rule": "A non-point source interval is strict only when both required bounds are defensible, all canonical alert episodes intersecting the feasible interval reduce to one logical episode group, and that group fully covers the complete feasible interval.",
+    "point_time_fabrication": false,
+    "timezone": "Europe/Kyiv via existing ZoneInfo; derived bounds stored in UTC",
+    "publication_time_rule": "Publication time is used only as an upper interval bound when source wording directly establishes that the event had already occurred; publication time is never event_time.",
+    "diff": {
+      "files_changed": 3,
+      "implementation_script_additions": 328,
+      "focused_test_additions": 259,
+      "workflow_additions": 44,
+      "unrelated_files_changed": 0
+    }
+  },
+  "tests": {
+    "status": "PASS",
+    "workflow": ".github/workflows/kyiv-temporal-representation-proof.yml",
+    "workflow_run_id": 37191802562,
+    "workflow_job_id": 111405391864,
+    "focused_pytest": "46 passed",
+    "full_pytest": "180 passed",
+    "monitor_self_test": {
+      "result": "PASS",
+      "summary": "23 audited cities; IR01-IR20 covered; 50/50 provenance approvals; 2/2 deterministic negatives; 58/58 no-adapter regression; 20/20 episode replay; overlap/near-duplicate guards and dry replay purity passed"
+    },
+    "required_assertions": [
+      "AFTER_TIME with defensible upper bound wholly inside one episode supports strict temporal binding",
+      "AFTER_TIME without defensible upper bound remains non-strict",
+      "AFTER_TIME interval spanning two episodes remains non-strict",
+      "BEFORE_OR_BY_TIME with defensible lower and upper bounds inside one episode supports strict temporal binding",
+      "as-of relation without defensible lower bound and with multiple possible episodes remains non-strict",
+      "publication time is an interval bound, never an event point",
+      "predecessor exact-clock parser behavior remains unchanged",
+      "neighboring-alert ambiguity safeguards reject partial overlap",
+      "9 predecessor strict positives remain strict in frozen replay",
+      "air-context/same-attack non-target remains non-strict"
+    ]
+  },
+  "replay": {
+    "before": {
+      "STRICT": 9,
+      "SENSITIVITY": 0,
+      "REVIEW": 3
+    },
+    "after": {
+      "STRICT": 9,
+      "SENSITIVITY": 0,
+      "REVIEW": 3
+    },
+    "targets_promoted": {
+      "count": 0,
+      "denominator": 2,
+      "episode_ids": []
+    },
+    "non_targets_promoted": {
+      "count": 0,
+      "denominator": 1,
+      "episode_ids": []
+    },
+    "target_results": [
+      {
+        "episode_id": "9fd2e6a9a02235982bd706ea",
+        "pre": "REVIEW",
+        "post": "REVIEW",
+        "temporal_representation": "BEFORE_OR_BY_TIME; (-∞, 2026-10-01T18:50:00Z]",
+        "binding": "NONE",
+        "result": "INSUFFICIENT_LOWER_BOUND"
+      },
+      {
+        "episode_id": "cfeec7a191817720d241fedb",
+        "pre": "REVIEW",
+        "post": "REVIEW",
+        "temporal_representation": "AFTER_TIME; (2026-10-02T00:00:00Z, 2026-10-02T02:10:00Z]",
+        "binding": "NONE",
+        "result": "MULTI_EPISODE_INTERVAL"
+      }
+    ],
+    "scope_leak": false
+  },
+  "remaining_failures": {
+    "temporal_parser": 0,
+    "temporal_representation_unsupported": 0,
+    "temporal_interval_safety": {
+      "count": 2,
+      "details": {
+        "INSUFFICIENT_LOWER_BOUND": 1,
+        "MULTI_EPISODE_INTERVAL": 1
+      }
+    },
+    "air_context_same_attack": 1,
+    "other": 0
+  },
+  "mutations": {
+    "main_mutated": false,
+    "site_prod_mutated": false,
+    "monitor_state_mutations": 0,
+    "review_queue_mutations": 0,
+    "canonical_alert_mutations": 0,
+    "neon_db_mutations": 0,
+    "deploy": false
+  },
+  "next_action": "repair the remaining air-context / same-attack case only; do not perform that repair in this task"
+}
