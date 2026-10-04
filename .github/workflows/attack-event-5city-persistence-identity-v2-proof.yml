@@ -238,7 +238,8 @@ jobs:
                   or u.get("classifier_blob_sha") != UNCHANGED_CLASSIFIER
                   or int(rp.get("count") or -1) != EXPECTED_REPAIRED
                   or rp.get("classifier_blob_sha") != REPAIRED_CLASSIFIER
-                  or int(coverage.get("null_classifier_blobs") or -1) != 0
+                  or coverage.get("null_classifier_blobs") is None
+                  or int(coverage.get("null_classifier_blobs")) != 0
               ):
                   fail("FIVE_CITY_CLASSIFIER_PROVENANCE_MAPPING_MISMATCH", PROV_PATH)
 
