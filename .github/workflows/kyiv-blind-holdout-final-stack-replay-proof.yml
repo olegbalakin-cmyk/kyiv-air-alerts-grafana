@@ -7,6 +7,11 @@ on:
       - kyiv-holdout-validator-taxonomy-repair-proof-v2-2026-10-04
     paths:
       - ".github/workflows/kyiv-blind-holdout-final-stack-replay-proof.yml"
+  pull_request:
+    branches:
+      - kyiv-blind-holdout-final-stack-replay-proof-2026-10-04
+    paths:
+      - ".github/workflows/kyiv-blind-holdout-final-stack-replay-proof.yml"
 
 permissions:
   contents: read
@@ -1239,7 +1244,7 @@ jobs:
           retention-days: 30
 
   taxonomy-repair-proof:
-    if: github.ref_name == 'kyiv-holdout-validator-taxonomy-repair-proof-v2-2026-10-04'
+    if: github.ref_name == 'kyiv-holdout-validator-taxonomy-repair-proof-v2-2026-10-04' || github.head_ref == 'kyiv-holdout-validator-taxonomy-repair-proof-v2-2026-10-04'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     env:
