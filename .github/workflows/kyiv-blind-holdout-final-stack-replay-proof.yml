@@ -36,8 +36,7 @@ jobs:
           git merge-base --is-ancestor "$EXPECTED_BASE" HEAD
           changed_paths="$(git diff --name-only "$EXPECTED_BASE"...HEAD)"
           printf '%s\n' "$changed_paths"
-          unexpected="$(printf '%s\n' "$changed_paths" | grep -v -E '^(\.github/workflows/kyiv-blind-holdout-final-stack-replay-proof\.yml|research/kyiv_blind_holdout_final_stack_replay_2026-10-04\.json)$' || true)"
-          test -z "$unexpected"
+          unexpected="$(printf '%s\n' "$changed_paths" | grep -v -E '^(\.github/workflows/kyiv-blind-holdout-final-stack-replay-proof\.yml|research/kyiv_blind_holdout_final_stack_replay_2026-10-04\.json)
           for sha in "$FINAL_STACK" "$HISTORICAL_STATE_COMMIT" "$TRUTH_COMMIT"; do
             git cat-file -e "$sha^{commit}" || git fetch origin "$sha"
             git cat-file -e "$sha^{commit}"
@@ -219,9 +218,6 @@ jobs:
           derived_ids = [str(ep.get("episode_id") or "") for ep in holdout]
           assert len(set(derived_ids)) == 22
 
-          # Candidate-native evidence recovery only. Selection is blind to Phase-A truth:
-          # a row must already be mechanically linked to one of the frozen holdout
-          # representations via persisted trigger/match/classification metadata.
           holdout_representation_ids = {
               str(ep.get("episode_id") or "")
               for cluster in clusters
@@ -262,11 +258,9 @@ jobs:
           url_to_rows = {}
           for item in linked_rows:
               url = str(item.get("resolved_url") or item.get("url") or "").strip()
-              if not (url.startswith("http://") or url.startswith("https://")):
-                  continue
-              url_to_rows.setdefault(url, []).append(item)
+              if url.startswith("http://") or url.startswith("https://"):
+                  url_to_rows.setdefault(url, []).append(item)
 
-          # Deduplicate network work and keep it bounded to already-persisted URLs.
           from concurrent.futures import ThreadPoolExecutor, as_completed
 
           def recover_url(url):
@@ -301,7 +295,11 @@ jobs:
                   item = by_candidate_id.get(cid)
                   if not item:
                       continue
-                  expanded = f"{item.get('title') or ''} {item.get('snippet') or ''} {body}".strip()
+                  expanded = " ".join([
+                      str(item.get("title") or ""),
+                      str(item.get("snippet") or ""),
+                      body,
+                  ]).strip()
                   if not monitor.city_mentioned("kyiv", expanded):
                       continue
                   if not monitor.explosion_relevant(expanded):
@@ -315,7 +313,6 @@ jobs:
           for key in ("recovered_urls", "unrecoverable_urls", "enriched_candidate_ids"):
               candidate_native_refetch[key] = sorted(set(candidate_native_refetch[key]))
 
-          # No network is permitted after the bounded candidate-native recovery stage.
           def blocked_network(*args, **kwargs):
               network_attempts.append({
                   "args": [repr(x)[:200] for x in args[:2]],
