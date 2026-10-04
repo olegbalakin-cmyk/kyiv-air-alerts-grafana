@@ -1842,8 +1842,18 @@ def event_clock_mentions(text: str) -> list[tuple[int, int]]:
         return []
 
     out = []
-    pattern = re.compile(r"(?:\bо\b|\bблизько\b|\bприблизно\b)\s*(\d{1,2})[:.](\d{2})", re.IGNORECASE)
-    for hit in pattern.finditer(low):
+    prefixed_pattern = re.compile(
+        r"(?:\bо\b|\bблизько\b|\bприблизно\b)\s*(\d{1,2})[:.](\d{2})",
+        re.IGNORECASE,
+    )
+    # Kyiv City live timelines place an exact event clock at the start of the
+    # event segment, e.g. "21:54, 30 вересня ... Влучання ...". Keep this
+    # deliberately segment-leading: a bare clock elsewhere in prose is not
+    # promoted to an explicit event time.
+    timeline_leading_pattern = re.compile(r"^(\d{1,2}):(\d{2})\b", re.IGNORECASE)
+    clock_hits = list(prefixed_pattern.finditer(low)) + list(timeline_leading_pattern.finditer(low))
+    clock_hits.sort(key=lambda match: match.start())
+    for hit in clock_hits:
         hour, minute = int(hit.group(1)), int(hit.group(2))
         if hour > 23 or minute > 59:
             continue
