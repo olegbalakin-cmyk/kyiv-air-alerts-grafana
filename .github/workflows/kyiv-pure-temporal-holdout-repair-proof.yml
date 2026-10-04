@@ -1,0 +1,425 @@
+name: Kyiv pure temporal holdout repair proof
+
+on:
+  push:
+    branches:
+      - kyiv-pure-temporal-holdout-repair-proof-2026-10-04
+    paths:
+      - "kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py"
+      - "kyiv-air-alerts-grafana/tests/test_kyiv_pure_temporal_holdout_repair.py"
+      - ".github/workflows/kyiv-pure-temporal-holdout-repair-proof.yml"
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  proof:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      PROOF_BASE: "3076a68dcb63530d85695dbedfd30831c902716d"
+      ACCEPTED_STACK: "0723e68804c77dc5df478294745a673356dd9c2f"
+      SEMANTIC_REPAIR_TIP: "a0d27dc8096bb86b2a7ac6c06746f3df218075d0"
+      HISTORICAL_STATE_COMMIT: "22d32a3f5e9e293aec94cef41b063a2eb715c1ad"
+      EXPECTED_STATE_BLOB: "c8d799094e8360443d09702a62598cb735fb2335"
+      EXPECTED_QUEUE_BLOB: "b10ed4376a9950c8b45e4893e415565e182fb44e"
+      FROZEN_RUN_ID: "37209953519"
+      FROZEN_ARTIFACT_ID: "11306780326"
+      FROZEN_ARTIFACT_SHA256: "ddb2f3bfa5ad5a41ff49aaf72839067abb5e14551cd82efc99477fd09bad6fc3"
+    steps:
+      - name: Check out proof branch
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Assert exact base and bounded mutation scope
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git merge-base "$PROOF_BASE" HEAD)" = "$PROOF_BASE"
+          git cat-file -e "$ACCEPTED_STACK^{commit}"
+          base_blob="$(git rev-parse "$PROOF_BASE:kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py")"
+          accepted_blob="$(git rev-parse "$ACCEPTED_STACK:kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py")"
+          test "$base_blob" = "$accepted_blob"
+          changed="$(git diff --name-only "$PROOF_BASE"...HEAD)"
+          printf '%s\n' "$changed"
+          unexpected="$(printf '%s\n' "$changed" | grep -v -E '^(kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates\.py|kyiv-air-alerts-grafana/tests/test_kyiv_pure_temporal_holdout_repair\.py|\.github/workflows/kyiv-pure-temporal-holdout-repair-proof\.yml)$' || true)"
+          test -z "$unexpected"
+          git diff --quiet "$PROOF_BASE" -- .github/workflows/kyiv-blind-holdout-final-stack-replay-proof.yml
+          python - <<'PY'
+          import ast, subprocess
+          from pathlib import Path
+
+          path = "kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py"
+          base = subprocess.check_output(["git", "show", f"{__import__('os').environ['PROOF_BASE']}:{path}"], text=True)
+          current = Path(path).read_text(encoding="utf-8")
+
+          def fn_hashes(text):
+              tree = ast.parse(text)
+              out = {}
+              for node in tree.body:
+                  if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+                      out[node.name] = ast.dump(node, include_attributes=False)
+              return out
+
+          before, after = fn_hashes(base), fn_hashes(current)
+          changed = sorted(name for name in set(before) | set(after) if before.get(name) != after.get(name))
+          expected = [
+              "contemporaneous_live_wording",
+              "retrospective_or_cumulative_wording",
+              "temporal_binding_evidence",
+          ]
+          assert changed == expected, (changed, expected)
+          for frozen in (
+              "strict_attack_event_signal",
+              "strict_explosion_evidence",
+              "air_military_context_evidence",
+              "same_attack_context_evidence",
+              "match_candidate_to_episodes",
+              "fetch_publisher_fulltext",
+              "search_city_news",
+          ):
+              assert before.get(frozen) == after.get(frozen), frozen
+          print("CLASSIFIER_AST_SCOPE_OK", changed)
+          PY
+          queue_blob="$(git rev-parse "$HISTORICAL_STATE_COMMIT:kyiv-air-alerts-grafana/data/explosion_review_queue.json")"
+          state_blob="$(git rev-parse "$HISTORICAL_STATE_COMMIT:kyiv-air-alerts-grafana/data/explosion_candidate_monitor_state.json")"
+          test "$queue_blob" = "$EXPECTED_QUEUE_BLOB"
+          test "$state_blob" = "$EXPECTED_STATE_BLOB"
+          git show "$HISTORICAL_STATE_COMMIT:kyiv-air-alerts-grafana/data/explosion_candidate_monitor_state.json" > /tmp/holdout-state.json
+
+      - name: Download exact accepted frozen replay artifact
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          gh api "/repos/${GITHUB_REPOSITORY}/actions/artifacts/${FROZEN_ARTIFACT_ID}/zip" > /tmp/frozen.zip
+          echo "${FROZEN_ARTIFACT_SHA256}  /tmp/frozen.zip" | sha256sum -c -
+          mkdir -p /tmp/frozen
+          unzip -q /tmp/frozen.zip -d /tmp/frozen
+          test -s /tmp/frozen/kyiv_holdout_final_stack_raw_replay.json
+          test -s /tmp/frozen/kyiv_holdout_final_stack_validation.json
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: kyiv-air-alerts-grafana/requirements.txt
+
+      - name: Install dependencies
+        working-directory: kyiv-air-alerts-grafana
+        run: |
+          python -m pip install -r requirements.txt
+          python -m pip install pytest
+
+      - name: Run focused temporal safety tests
+        working-directory: kyiv-air-alerts-grafana
+        run: python -m pytest -q tests/test_kyiv_pure_temporal_holdout_repair.py
+
+      - name: Run predecessor temporal and classifier regressions
+        working-directory: kyiv-air-alerts-grafana
+        run: |
+          python -m pytest -q \
+            tests/test_kyiv_temporal_clock_parser.py \
+            tests/test_kyiv_temporal_representation.py \
+            tests/test_kyiv_same_attack_composition.py \
+            tests/test_publisher_fulltext_policy_gate.py
+          python -m pytest -q tests
+          python scripts/monitor_explosion_candidates.py --self-test
+
+      - name: Extract accepted episode-level taxonomy helper unchanged
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+          import textwrap
+
+          path = Path(".github/workflows/kyiv-blind-holdout-final-stack-replay-proof.yml")
+          text = path.read_text(encoding="utf-8")
+          begin = "          # TAXONOMY_HELPERS_BEGIN\n"
+          end = "          # TAXONOMY_HELPERS_END\n"
+          a = text.index(begin) + len(begin)
+          b = text.index(end, a)
+          helper = textwrap.dedent(text[a:b])
+          Path("/tmp/taxonomy_helpers.py").write_text("import re\n" + helper, encoding="utf-8")
+          PY
+
+      - name: Reclassify exact frozen evidence and prove episode result
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from __future__ import annotations
+
+          import copy
+          import hashlib
+          import importlib.util
+          import json
+          import os
+          import sys
+          from pathlib import Path
+
+          root = Path.cwd() / "kyiv-air-alerts-grafana"
+          sys.path.insert(0, str(root / "scripts"))
+          import monitor_explosion_candidates as monitor
+
+          raw_path = Path("/tmp/frozen/kyiv_holdout_final_stack_raw_replay.json")
+          val_path = Path("/tmp/frozen/kyiv_holdout_final_stack_validation.json")
+          raw_bytes = raw_path.read_bytes()
+          raw = json.loads(raw_bytes)
+          old_validation = json.loads(val_path.read_text(encoding="utf-8"))
+          state = json.loads(Path("/tmp/holdout-state.json").read_text(encoding="utf-8"))
+
+          assert raw["final_stack_commit"] == os.environ["ACCEPTED_STACK"]
+          assert raw["historical_state_blob"] == os.environ["EXPECTED_STATE_BLOB"]
+          assert raw["historical_queue_blob"] == os.environ["EXPECTED_QUEUE_BLOB"]
+          assert old_validation["metrics"]["DISCOVERY_FALSE_NEGATIVES"] == 0
+          assert old_validation["automated"]["unsupported_strict"] == 0
+
+          def forbidden_network(*args, **kwargs):
+              raise AssertionError("NETWORK_FORBIDDEN_IN_FROZEN_PROOF")
+
+          monitor.requests.sessions.Session.request = forbidden_network
+          monitor.requests.get = forbidden_network
+          monitor.requests.post = forbidden_network
+          monitor.requests.request = forbidden_network
+
+          post_candidates = []
+          for original in raw.get("reclassified_candidates") or []:
+              item = copy.deepcopy(original)
+              decision = monitor.dry_classify_existing_candidate(item, state)
+              matching = decision.get("matching") or {
+                  "outcome": "no_match",
+                  "matched_episode_ids": [],
+                  "logical_episode_groups": [],
+                  "matched_episode_id": None,
+              }
+              monitor.apply_classification_decision(item, decision, matching)
+              post_candidates.append(item)
+
+          post_by_id = {
+              str(row.get("candidate_id") or ""): row
+              for row in post_candidates
+              if row.get("candidate_id")
+          }
+
+          target_ids = {
+              "054d4f23b2e548d59fd03fd5",
+              "c6b6c7571068ef31bf7dcc29",
+              "5cc0c61fa868f8eee7d11879",
+          }
+          target_witness = {
+              "054d4f23b2e548d59fd03fd5": "b9cf5eb4fc2634c26bef6285",
+              "c6b6c7571068ef31bf7dcc29": "8f818d63baccfb27e9ef10a3",
+              "5cc0c61fa868f8eee7d11879": "368b6afcb55d85bbeac5abd8",
+          }
+          non_target_expected = {
+              "7c2ca9666b34618304195e8b": "TEMPORAL_SOURCE_REPRESENTATION_LIMITATION",
+              "da12e3b9ca47dce61894bf28": "TEMPORAL_SOURCE_REPRESENTATION_LIMITATION",
+              "aadd3f7ff3426126f463b17e": "TEMPORAL_SOURCE_REPRESENTATION_LIMITATION",
+              "77f5bcd34fba53dc13cc6d79": "TEMPORAL_SOURCE_REPRESENTATION_LIMITATION",
+              "d9e71c3bae3f280709734ba1": "TEMPORAL_SOURCE_REPRESENTATION_LIMITATION",
+              "28766bec19495402db226788": "INSUFFICIENT_PERSISTED_EVIDENCE",
+              "e8273fc092d78868cd7cf111": "COMPOUND_ATTACK_EVENT_PARSER_TEMPORAL_BINDING",
+          }
+
+          positive_ids = {
+              str(row["episode_id"])
+              for row in old_validation["episode_comparisons"]
+              if row.get("truth_state") == "STRICT_TRUTH_POSITIVE"
+          }
+          assert len(positive_ids) == 10
+          holdout_ids = {str(row["episode_id"]) for row in old_validation["episode_comparisons"]}
+          raw_eps = {str(ep["episode_id"]): ep for ep in raw["episodes"]}
+          assert holdout_ids == set(raw_eps)
+
+          def candidate_supports_episode(row, episode_id):
+              evidence = row.get("classification_evidence") or {}
+              temporal = evidence.get("temporal_binding") or {}
+              return (
+                  str(temporal.get("episode_id") or "") == episode_id
+                  or episode_id in {str(x) for x in temporal.get("supported_episode_ids") or []}
+              )
+
+          episode_outcomes = {}
+          strict_witnesses = {}
+          for episode_id in sorted(holdout_ids):
+              frozen_ep = raw_eps[episode_id]
+              candidates = [
+                  post_by_id[cid]
+                  for cid in frozen_ep.get("candidate_ids") or []
+                  if cid in post_by_id
+              ]
+              strict = [
+                  row for row in candidates
+                  if row.get("status") == "approved_strict"
+                  and candidate_supports_episode(row, episode_id)
+              ]
+              sensitivity = [
+                  row for row in candidates
+                  if row.get("status") == "approved_sensitivity"
+                  and candidate_supports_episode(row, episode_id)
+              ]
+              if strict:
+                  episode_outcomes[episode_id] = "STRICT"
+                  strict_witnesses[episode_id] = sorted(str(row["candidate_id"]) for row in strict)
+              elif sensitivity:
+                  episode_outcomes[episode_id] = "SENSITIVITY"
+              elif candidates:
+                  episode_outcomes[episode_id] = "REVIEW"
+              else:
+                  episode_outcomes[episode_id] = "NO_CANDIDATE"
+
+          strict_holdout = {eid for eid, outcome in episode_outcomes.items() if outcome == "STRICT"}
+          assert strict_holdout == target_ids, {
+              "expected": sorted(target_ids),
+              "observed": sorted(strict_holdout),
+              "witnesses": strict_witnesses,
+          }
+
+          positive_after = {eid: episode_outcomes[eid] for eid in positive_ids}
+          assert sum(v == "STRICT" for v in positive_after.values()) == 3
+          assert sum(v == "SENSITIVITY" for v in positive_after.values()) == 0
+          assert sum(v == "REVIEW" for v in positive_after.values()) == 7
+          assert {eid for eid, v in positive_after.items() if v == "STRICT"} == target_ids
+
+          for episode_id, cid in target_witness.items():
+              row = post_by_id[cid]
+              temporal = (row.get("classification_evidence") or {}).get("temporal_binding") or {}
+              assert row["status"] == "approved_strict", (episode_id, cid, row.get("classification_reason_codes"))
+              assert temporal.get("code") == "TEMPORAL_CONTEMPORANEOUS_LIVE_WORDING"
+              assert temporal.get("present") is True
+              assert temporal.get("episode_specific") is True
+              assert temporal.get("event_time") is None
+              assert temporal.get("event_interval") is None
+              assert temporal.get("message_time") == row.get("published_at")
+              assert candidate_supports_episode(row, episode_id)
+
+          truth_negative_ids = holdout_ids - positive_ids
+          unsupported_strict_ids = sorted(
+              eid for eid in truth_negative_ids if episode_outcomes[eid] == "STRICT"
+          )
+          assert unsupported_strict_ids == []
+
+          spec = importlib.util.spec_from_file_location("taxonomy_helpers", "/tmp/taxonomy_helpers.py")
+          taxonomy = importlib.util.module_from_spec(spec)
+          assert spec and spec.loader
+          spec.loader.exec_module(taxonomy)
+          remaining_taxonomy = {}
+          for episode_id, expected in non_target_expected.items():
+              diagnosed = taxonomy.diagnose_episode_candidates(episode_id, post_candidates)
+              remaining_taxonomy[episode_id] = {
+                  "diagnostic_category": diagnosed.get("diagnostic_category"),
+                  "blockers": list(diagnosed.get("blockers") or []),
+              }
+              assert diagnosed.get("diagnostic_category") == expected, (episode_id, diagnosed, expected)
+
+          before_positive = {
+              str(row["episode_id"]): row["automated_outcome"]
+              for row in old_validation["episode_comparisons"]
+              if row.get("truth_state") == "STRICT_TRUTH_POSITIVE"
+          }
+          assert set(before_positive.values()) == {"REVIEW"}
+
+          proof = {
+              "schema": "kyiv_pure_temporal_holdout_repair_proof_v1",
+              "verdict": "PROVEN",
+              "repo": os.environ["GITHUB_REPOSITORY"],
+              "proof_branch": os.environ["GITHUB_REF_NAME"],
+              "exact_base": os.environ["PROOF_BASE"],
+              "accepted_classifier_stack": os.environ["ACCEPTED_STACK"],
+              "semantic_repair_tip": os.environ["SEMANTIC_REPAIR_TIP"],
+              "final_proof_head": os.environ["GITHUB_SHA"],
+              "proof_run": int(os.environ["GITHUB_RUN_ID"]),
+              "accepted_frozen_replay": {
+                  "run_id": int(os.environ["FROZEN_RUN_ID"]),
+                  "artifact_id": int(os.environ["FROZEN_ARTIFACT_ID"]),
+                  "artifact_sha256": os.environ["FROZEN_ARTIFACT_SHA256"],
+                  "raw_replay_sha256": hashlib.sha256(raw_bytes).hexdigest(),
+              },
+              "classifier_base_byte_equivalent_to_accepted_stack": True,
+              "semantic_change": {
+                  "changed_functions": [
+                      "retrospective_or_cumulative_wording",
+                      "contemporaneous_live_wording",
+                      "temporal_binding_evidence",
+                  ],
+                  "live_forms_added": [
+                      "present-tense працює/працюють (сили) ППО",
+                      "Вибухи в <city>, повідомляють...",
+                  ],
+                  "broad_day_guard_added": "вдень",
+                  "publication_time_used_as_event_time": False,
+                  "publication_time_role": "trusted-live message_time only",
+                  "near_duplicate_raw_identity_rule": "reuse existing persisted matched_episode_id only when unique logical active cluster contains that ID",
+              },
+              "before_positive": {
+                  "STRICT": 0,
+                  "SENSITIVITY": 0,
+                  "REVIEW": 10,
+              },
+              "after_positive": {
+                  "STRICT": 3,
+                  "SENSITIVITY": 0,
+                  "REVIEW": 7,
+              },
+              "strict_episode_ids": sorted(target_ids),
+              "strict_witness_candidate_ids": target_witness,
+              "discovery_false_negatives": 0,
+              "unsupported_strict": 0,
+              "unsupported_strict_episode_ids": unsupported_strict_ids,
+              "remaining_7_taxonomy": remaining_taxonomy,
+              "tests": {
+                  "focused_positive_forms": 3,
+                  "negative_safety_classes": [
+                      "retrospective було ... чутно",
+                      "broad вдень",
+                      "cumulative summaries",
+                      "untrusted source type",
+                      "publication outside episode",
+                      "semantically incomplete candidate",
+                      "near-duplicate raw rows without existing identity",
+                  ],
+                  "predecessor_regressions_run": True,
+                  "full_pytest_run": True,
+                  "monitor_self_test_run": True,
+              },
+              "mutation_scope": {
+                  "production_classifier_changed": True,
+                  "production_classifier_functions_changed": [
+                      "retrospective_or_cumulative_wording",
+                      "contemporaneous_live_wording",
+                      "temporal_binding_evidence",
+                  ],
+                  "attack_event_parser_changed": False,
+                  "air_context_parser_changed": False,
+                  "same_attack_logic_changed": False,
+                  "source_discovery_changed": False,
+                  "source_adapters_changed": False,
+                  "query_families_changed": False,
+                  "historical_state_changed": False,
+                  "historical_queue_changed": False,
+                  "review_queue_changed": False,
+                  "canonical_alerts_changed": False,
+                  "neon_changed": False,
+                  "deployment": False,
+              },
+          }
+          Path("/tmp/kyiv_pure_temporal_holdout_repair_proof.json").write_text(
+              json.dumps(proof, ensure_ascii=False, indent=2) + "\n",
+              encoding="utf-8",
+          )
+          print(json.dumps(proof, ensure_ascii=False, sort_keys=True))
+          PY
+
+      - name: Upload proof artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: kyiv-pure-temporal-holdout-repair-proof
+          path: /tmp/kyiv_pure_temporal_holdout_repair_proof.json
+          if-no-files-found: error
+          retention-days: 30
