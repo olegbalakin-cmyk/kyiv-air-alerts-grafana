@@ -1,0 +1,256 @@
+name: Regional Suspilne Telegram incremental shadow proof
+on:
+  pull_request:
+    branches: [regional-suspilne-shadow-base-2026-10-05]
+    types: [opened, synchronize, reopened]
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: regional-suspilne-telegram-incremental-shadow-proof-${{ github.event.pull_request.number }}
+  cancel-in-progress: false
+jobs:
+  shadow:
+    if: github.event.pull_request.head.sha == '4ddc6398d3dad1c617af63a9f5f39cb20cb926dd'
+    runs-on: ubuntu-latest
+    timeout-minutes: 55
+    env:
+      PRODUCTION_CODE_COMMIT: c26307efcea065813870dc27901dbd225f4f3e33
+      LIVE_STATE_BRANCH: multicity-wip-2026-09-16
+      INVENTORY_PATH: research/suspilne_regional_telegram_inventory_2026-10-05.json
+      HARNESS_PATH: .github/proof/regional_suspilne_telegram_incremental_shadow.py
+      OUTPUT_PATH: /tmp/shadow/research/regional_suspilne_telegram_incremental_shadow_2026-10-05.json
+      SUMMARY_PATH: /tmp/shadow/summary.json
+    steps:
+      - name: Check out isolated proof head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+          path: proofsrc
+      - name: Check out latest live production state read-only
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ env.LIVE_STATE_BRANCH }}
+          fetch-depth: 1
+          path: live-state
+      - name: Freeze identities and observation window
+        id: freeze
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/shadow/research
+          proof_head="$(git -C proofsrc rev-parse HEAD)"
+          test "$(git -C proofsrc rev-parse "$PRODUCTION_CODE_COMMIT")" = "$PRODUCTION_CODE_COMMIT"
+          monitor_blob="$(git -C proofsrc rev-parse "$PRODUCTION_CODE_COMMIT:kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py")"
+          test "$monitor_blob" = "$(git -C proofsrc rev-parse "HEAD:kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py")"
+          inventory_blob="$(git -C proofsrc rev-parse "HEAD:$INVENTORY_PATH")"
+          inventory_sha="$(sha256sum "proofsrc/$INVENTORY_PATH" | awk '{print $1}')"
+          live_commit="$(git -C live-state rev-parse HEAD)"
+          state_src="live-state/kyiv-air-alerts-grafana/data/explosion_candidate_monitor_state.json"
+          state_dst="proofsrc/kyiv-air-alerts-grafana/data/explosion_candidate_monitor_state.json"
+          test -s "$state_src"
+          cp "$state_src" "$state_dst"
+          state_sha="$(sha256sum "$state_dst" | awk '{print $1}')"
+          window_end="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          window_start="$(date -u -d "$window_end - 12 hours" +%Y-%m-%dT%H:%M:%SZ)"
+          echo "proof_head=$proof_head" >> "$GITHUB_OUTPUT"
+          echo "monitor_blob=$monitor_blob" >> "$GITHUB_OUTPUT"
+          echo "inventory_blob=$inventory_blob" >> "$GITHUB_OUTPUT"
+          echo "inventory_sha=$inventory_sha" >> "$GITHUB_OUTPUT"
+          echo "live_commit=$live_commit" >> "$GITHUB_OUTPUT"
+          echo "state_sha=$state_sha" >> "$GITHUB_OUTPUT"
+          echo "window_start=$window_start" >> "$GITHUB_OUTPUT"
+          echo "window_end=$window_end" >> "$GITHUB_OUTPUT"
+      - name: Prove proof-only diff and snapshot protected files
+        shell: bash
+        run: |
+          set -euo pipefail
+          changed="$(git -C proofsrc diff --name-only "$PRODUCTION_CODE_COMMIT"...HEAD)"
+          printf '%s\n' "$changed" > /tmp/shadow/proof_diff_paths.txt
+          bad="$(printf '%s\n' "$changed" | grep -Ev '^(\.github/proof/regional_suspilne_telegram_incremental_shadow\.py|\.github/workflows/regional-suspilne-telegram-incremental-shadow-proof\.yml|research/suspilne_regional_telegram_inventory_2026-10-05\.json)$' || true)"
+          test -z "$bad" || { echo "Unexpected proof-branch diff:"; printf '%s\n' "$bad"; exit 1; }
+          if env | grep -Eq '^(DATABASE_URL|NEON_DATABASE_URL|NEON_URL|PGHOST|PGPORT|PGDATABASE|PGUSER|PGPASSWORD)='; then
+            echo "Database environment unexpectedly present"; exit 1
+          fi
+          python - <<'PY'
+          import hashlib, json
+          from pathlib import Path
+          roots=[Path("proofsrc/kyiv-air-alerts-grafana/data"),Path("proofsrc/kyiv-air-alerts-grafana/research"),Path("proofsrc/research")]
+          out={}
+          for root in roots:
+              if root.exists():
+                  for p in sorted(x for x in root.rglob("*") if x.is_file()):
+                      out[str(p)]=hashlib.sha256(p.read_bytes()).hexdigest()
+          Path("/tmp/shadow/protected.before.json").write_text(json.dumps(out,indent=2,sort_keys=True)+"\n")
+          PY
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: proofsrc/kyiv-air-alerts-grafana/requirements.txt
+      - name: Install dependencies
+        working-directory: proofsrc/kyiv-air-alerts-grafana
+        run: python -m pip install -r requirements.txt
+      - name: Validate frozen monitor and proof harness
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m py_compile "proofsrc/$HARNESS_PATH"
+          (cd proofsrc/kyiv-air-alerts-grafana && python scripts/monitor_explosion_candidates.py --self-test)
+      - name: Run one live non-persisting regional shadow
+        shell: bash
+        env:
+          WINDOW_START_UTC: ${{ steps.freeze.outputs.window_start }}
+          WINDOW_END_UTC: ${{ steps.freeze.outputs.window_end }}
+          PROOF_WORKFLOW_COMMIT: ${{ steps.freeze.outputs.proof_head }}
+          LIVE_STATE_COMMIT: ${{ steps.freeze.outputs.live_commit }}
+          LIVE_STATE_SHA256: ${{ steps.freeze.outputs.state_sha }}
+          INVENTORY_GIT_BLOB: ${{ steps.freeze.outputs.inventory_blob }}
+          INVENTORY_SHA256: ${{ steps.freeze.outputs.inventory_sha }}
+          MONITOR_BLOB: ${{ steps.freeze.outputs.monitor_blob }}
+        run: |
+          set -euo pipefail
+          (cd proofsrc && python "$HARNESS_PATH")
+      - name: Prove zero protected mutation and finalize artifact
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import hashlib, json, subprocess
+          from pathlib import Path
+          roots=[Path("proofsrc/kyiv-air-alerts-grafana/data"),Path("proofsrc/kyiv-air-alerts-grafana/research"),Path("proofsrc/research")]
+          after={}
+          for root in roots:
+              if root.exists():
+                  for p in sorted(x for x in root.rglob("*") if x.is_file()):
+                      after[str(p)]=hashlib.sha256(p.read_bytes()).hexdigest()
+          before=json.loads(Path("/tmp/shadow/protected.before.json").read_text())
+          changed=sorted(p for p in set(before)|set(after) if before.get(p)!=after.get(p))
+          scripts_dirty=subprocess.run(["git","-C","proofsrc","diff","--quiet","--","kyiv-air-alerts-grafana/scripts"],check=False).returncode!=0
+          live_state_dirty=bool(subprocess.check_output(["git","-C","live-state","status","--porcelain=v1"],text=True).strip())
+          def ends(name): return any(p.endswith(name) for p in changed)
+          mutation={
+            "production_code_semantic_mutations":int(scripts_dirty),
+            "production_TELEGRAM_CHANNELS_mutations":int(scripts_dirty),
+            "classifier_mutations":int(scripts_dirty),
+            "temporal_parser_mutations":int(scripts_dirty),
+            "temporal_representation_mutations":int(scripts_dirty),
+            "discovery_mutations":int(scripts_dirty),
+            "resolver_mutations":int(scripts_dirty),
+            "source_adapter_production_mutations":int(scripts_dirty),
+            "historical_state_queue_mutations":int(ends("explosion_candidate_monitor_state.json") or live_state_dirty),
+            "review_queue_mutations":int(ends("explosion_review_queue.json")),
+            "canonical_alerts_mutations":int(ends("alerts_combined.json")),
+            "Neon_DB_mutations":0,
+            "deployments":0,
+            "changed_protected_paths":changed,
+            "live_state_checkout_dirty":live_state_dirty,
+            "production_scripts_dirty":scripts_dirty
+          }
+          Path("/tmp/shadow/protected.after.json").write_text(json.dumps(after,indent=2,sort_keys=True)+"\n")
+          Path("/tmp/shadow/mutation_proof.json").write_text(json.dumps(mutation,indent=2,sort_keys=True)+"\n")
+          if changed or scripts_dirty or live_state_dirty or any(v!=0 for k,v in mutation.items() if k.endswith("_mutations") or k=="deployments"):
+              raise SystemExit("PROTECTED_MUTATION_DETECTED")
+          artifact_path=Path("/tmp/shadow/research/regional_suspilne_telegram_incremental_shadow_2026-10-05.json")
+          obj=json.loads(artifact_path.read_text())
+          obj["mutation_confirmation"]=mutation
+          artifact_path.write_text(json.dumps(obj,ensure_ascii=False,indent=2,sort_keys=True)+"\n")
+          summary_path=Path("/tmp/shadow/summary.json")
+          summary=json.loads(summary_path.read_text())
+          summary["mutation_confirmation"]=mutation
+          summary_path.write_text(json.dumps(summary,ensure_ascii=False,indent=2,sort_keys=True)+"\n")
+          PY
+          sha256sum "$OUTPUT_PATH" > "$OUTPUT_PATH.sha256"
+          sha256sum "$SUMMARY_PATH" > "$SUMMARY_PATH.sha256"
+      - name: Print compact proof summary
+        run: cat "$SUMMARY_PATH"
+      - name: Upload immutable shadow proof
+        uses: actions/upload-artifact@v4
+        with:
+          name: regional-suspilne-telegram-incremental-shadow-${{ github.run_id }}
+          path: |
+            /tmp/shadow/research/regional_suspilne_telegram_incremental_shadow_2026-10-05.json
+            /tmp/shadow/research/regional_suspilne_telegram_incremental_shadow_2026-10-05.json.sha256
+            /tmp/shadow/summary.json
+            /tmp/shadow/summary.json.sha256
+            /tmp/shadow/mutation_proof.json
+            /tmp/shadow/protected.before.json
+            /tmp/shadow/protected.after.json
+            /tmp/shadow/proof_diff_paths.txt
+          if-no-files-found: error
+          retention-days: 30
+
+
+  freeze_prior_artifact:
+    if: github.event.pull_request.head.sha != '4ddc6398d3dad1c617af63a9f5f39cb20cb926dd'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      actions: read
+    steps:
+      - name: Check out proof branch
+        uses: actions/checkout@v4
+        with:
+          ref: regional-suspilne-telegram-incremental-shadow-actions-2026-10-05
+          fetch-depth: 0
+      - name: Freeze accepted prior shadow artifact only
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ARTIFACT_ID: "11349423518"
+          ACCEPTED_RUN_ID: "37319420226"
+          TARGET: "research/regional_suspilne_telegram_incremental_shadow_2026-10-05.json"
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/freeze
+          gh api "/repos/$GITHUB_REPOSITORY/actions/artifacts/$ARTIFACT_ID/zip" > /tmp/freeze.zip
+          unzip -q /tmp/freeze.zip -d /tmp/freeze
+          src="$(find /tmp/freeze -type f -name 'regional_suspilne_telegram_incremental_shadow_2026-10-05.json' -print -quit)"
+          test -n "$src"
+          summary="$(find /tmp/freeze -type f -name 'summary.json' -print -quit)"
+          mutation="$(find /tmp/freeze -type f -name 'mutation_proof.json' -print -quit)"
+          test -n "$summary"
+          test -n "$mutation"
+
+          python - "$src" "$summary" "$mutation" "$ACCEPTED_RUN_ID" <<'PY'
+          import json, sys
+          artifact=json.load(open(sys.argv[1],encoding="utf-8"))
+          summary=json.load(open(sys.argv[2],encoding="utf-8"))
+          mutation=json.load(open(sys.argv[3],encoding="utf-8"))
+          run_id=sys.argv[4]
+          assert str((artifact.get("proof_integrity") or {}).get("actions_run_id")) == run_id
+          assert str(summary.get("actions_run_id")) == run_id
+          assert artifact.get("verdict") == "REGIONAL SUSPILNE TELEGRAM SHADOW = LOW INCREMENTAL VALUE"
+          assert artifact.get("recommendation") == "NO MATERIAL INCREMENTAL VALUE"
+          keys=[
+              "production_code_semantic_mutations",
+              "production_TELEGRAM_CHANNELS_mutations",
+              "classifier_mutations",
+              "temporal_parser_mutations",
+              "temporal_representation_mutations",
+              "discovery_mutations",
+              "resolver_mutations",
+              "source_adapter_production_mutations",
+              "historical_state_queue_mutations",
+              "review_queue_mutations",
+              "canonical_alerts_mutations",
+              "Neon_DB_mutations",
+              "deployments",
+          ]
+          assert all(int(mutation.get(k,-1)) == 0 for k in keys)
+          assert not mutation.get("changed_protected_paths")
+          PY
+
+          mkdir -p "$(dirname "$TARGET")"
+          cp "$src" "$TARGET"
+          git add "$TARGET"
+          if git diff --cached --quiet; then
+            echo "Durable artifact already identical"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "Freeze regional Suspilne Telegram incremental shadow artifact"
+          git push origin HEAD:regional-suspilne-telegram-incremental-shadow-actions-2026-10-05
