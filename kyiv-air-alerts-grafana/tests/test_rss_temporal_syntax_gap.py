@@ -125,3 +125,63 @@ def test_different_source_date_does_not_use_publication_day_episode() -> None:
     )
     assert got["relation"] is None
     assert got["episode_id"] is None
+
+
+def test_classifier_city_gate_blocks_different_city_clock() -> None:
+    row = {
+        "published_at": "2026-10-04T11:00:00Z",
+        "title": "Близько 14:00 ворог атакував Харків керованими авіабомбами.",
+        "snippet": "Під час повітряної тривоги повідомляли про КАБи.",
+        "publisher": "",
+        "discovery_basis": "publisher_fulltext",
+        "matched_text_excerpt": "Близько 14:00 ворог атакував Харків керованими авіабомбами.",
+    }
+    decision = monitor.classify_candidate(
+        row,
+        "sumy",
+        [episode("sumy", "2026-10-04T10:30:00Z", "2026-10-04T12:00:00Z")],
+    )
+    assert decision["proposed_outcome"] != "approved_strict"
+    assert decision["proposed_matched_episode_id"] is None
+    assert "NO_EXACT_CITY_EVENT_TEXT" in decision["reason_codes"]
+
+
+def test_adjacent_sentence_composition_reaches_full_temporal_binding() -> None:
+    row = {
+        "published_at": "2026-10-03T19:37:54Z",
+        "title": "У Києві 3 жовтня знову пролунали вибухи.",
+        "snippet": "",
+        "publisher": "",
+        "discovery_basis": "publisher_fulltext",
+        "matched_text_excerpt": (
+            "У Києві 3 жовтня знову пролунали вибухи. "
+            "Нову серію було чутно близько 22.30. "
+            "Перед цим Повітряні сили повідомляли про рух безпілотників у напрямку столиці."
+        ),
+    }
+    eps = [episode("kyiv", "2026-10-03T19:00:00Z", "2026-10-03T20:00:00Z")]
+    strict = monitor.strict_explosion_evidence("kyiv", row)
+    assert strict["present"] is True
+    got = monitor.temporal_binding_evidence(row, strict, {"outcome": "no_match"}, eps)
+    assert got["code"] == "TEMPORAL_EXPLICIT_EVENT_TIME_INSIDE_EPISODE"
+    assert got["event_time"] == "2026-10-03T19:30:00Z"
+    assert got["episode_id"] == "kyiv"
+
+
+def test_adjacent_sentence_composition_rejects_reporting_sentence_at_full_binding() -> None:
+    row = {
+        "published_at": "2026-10-03T19:37:54Z",
+        "title": "У Києві пролунали вибухи.",
+        "snippet": "",
+        "publisher": "",
+        "discovery_basis": "publisher_fulltext",
+        "matched_text_excerpt": (
+            "У Києві пролунали вибухи. "
+            "Нову інформацію оприлюднили близько 22.30."
+        ),
+    }
+    eps = [episode("kyiv", "2026-10-03T19:00:00Z", "2026-10-03T20:00:00Z")]
+    strict = monitor.strict_explosion_evidence("kyiv", row)
+    got = monitor.temporal_binding_evidence(row, strict, {"outcome": "no_match"}, eps)
+    assert got["present"] is False
+    assert got["episode_id"] is None
