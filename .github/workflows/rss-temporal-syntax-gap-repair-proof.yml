@@ -64,7 +64,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          git show 57e3bf8ca3ea2ec468be1aad7352cd91aaa4b36b:kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py > /tmp/syntax-probe/monitor_before.py
+          git show 57e3bf8ca3ea2ec468be1aad7352cd91aaa4b36b:kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py > kyiv-air-alerts-grafana/scripts/monitor_before_syntax.py
           python - <<'PY'
           import importlib.util, json, sys
           from pathlib import Path
@@ -73,7 +73,7 @@ jobs:
           sys.path.insert(0, str(root / "scripts"))
           import monitor_explosion_candidates as after
 
-          spec = importlib.util.spec_from_file_location("monitor_before", "/tmp/syntax-probe/monitor_before.py")
+          spec = importlib.util.spec_from_file_location("monitor_before", str(root / "scripts" / "monitor_before_syntax.py"))
           before = importlib.util.module_from_spec(spec)
           spec.loader.exec_module(before)
 
