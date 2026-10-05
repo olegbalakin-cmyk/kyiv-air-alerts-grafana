@@ -1,0 +1,109 @@
+name: Attack-event 25 unbound parent forensic
+
+on:
+  push:
+    branches:
+      - attack-event-25-unbound-parent-forensic-2026-10-05
+    paths:
+      - .github/workflows/attack-event-25-unbound-parent-forensic.yml
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  unbound-parent-forensic:
+    name: unbound-parent-forensic
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      actions: read
+    steps:
+      - name: Checkout proof branch
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+          persist-credentials: false
+          clean: true
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install read-only PostgreSQL client dependency
+        run: pip install "psycopg[binary]>=3,<4"
+
+      - name: Assemble and syntax-check bounded forensic proof
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat .github/forensic/attack_event_25_unbound_parent_forensic.py.part00 \
+              .github/forensic/attack_event_25_unbound_parent_forensic.py.part01 \
+              .github/forensic/attack_event_25_unbound_parent_forensic.py.part02 \
+              .github/forensic/attack_event_25_unbound_parent_forensic.py.part03 \
+              > "${RUNNER_TEMP}/attack_event_25_unbound_parent_forensic.py"
+          python -m py_compile "${RUNNER_TEMP}/attack_event_25_unbound_parent_forensic.py"
+
+      - name: Run bounded read-only forensic diagnostic
+        id: forensic
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          PHASE1_PROD_SHADOW_DATABASE_URL: ${{ secrets.PHASE1_PROD_SHADOW_DATABASE_URL }}
+          PHASE1_PROD_SHADOW_BRANCH_ID: ${{ vars.PHASE1_PROD_SHADOW_BRANCH_ID }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          python "${RUNNER_TEMP}/attack_event_25_unbound_parent_forensic.py"
+
+      - name: Print compact forensic summary
+        if: always()
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json, os
+          from pathlib import Path
+          p = Path(os.environ["RUNNER_TEMP"]) / "attack-event-25-unbound-parent-forensic" / "summary.json"
+          if not p.is_file():
+              print("FORENSIC_SUMMARY_MISSING=1")
+              raise SystemExit(0)
+          obj = json.loads(p.read_text(encoding="utf-8"))
+          if obj.get("verdict") == "ATTACK-EVENT 25 UNBOUND PARENT FORENSIC COMPLETED":
+              compact = {
+                  "verdict": obj.get("verdict"),
+                  "targets": obj.get("targets"),
+                  "count_by_city": obj.get("count_by_city"),
+                  "count_by_primary_category": obj.get("count_by_primary_category"),
+                  "upstream_cause_PROVEN_count": obj.get("upstream_cause_PROVEN_count"),
+                  "upstream_cause_NOT_PROVEN_count": obj.get("upstream_cause_NOT_PROVEN_count"),
+                  "representative_examples": obj.get("representative_examples"),
+                  "parent_corpus_sha256": obj.get("parent_corpus_sha256"),
+                  "parent_corpus_sha_match": obj.get("parent_corpus_sha_match"),
+                  "db_writes": obj.get("db_writes"),
+                  "neon_mutations": obj.get("neon_mutations"),
+                  "binding_changes": obj.get("binding_changes"),
+              }
+          else:
+              compact = {
+                  "verdict": obj.get("verdict"),
+                  "first_failing_gate": obj.get("first_failing_gate"),
+                  "affected_count": obj.get("affected_count"),
+                  "parent_corpus_sha_match": obj.get("parent_corpus_sha_match"),
+                  "db_writes": obj.get("db_writes"),
+                  "neon_mutations": obj.get("neon_mutations"),
+                  "safe_continuation_point": obj.get("safe_continuation_point"),
+              }
+          print("FORENSIC_SUMMARY=" + json.dumps(compact, ensure_ascii=False, sort_keys=True, separators=(",", ":")))
+          PY
+
+      - name: Upload forensic artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: attack-event-25-unbound-parent-forensic
+          path: |
+            ${{ runner.temp }}/attack-event-25-unbound-parent-forensic/attack_event_25_unbound_parent_forensic.json
+            ${{ runner.temp }}/attack-event-25-unbound-parent-forensic/summary.json
+          if-no-files-found: error
+          retention-days: 90
