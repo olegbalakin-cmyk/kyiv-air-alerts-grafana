@@ -2614,6 +2614,11 @@ def event_clock_mentions(text: str) -> list[tuple[int, int]]:
         hour, minute = int(hit.group(1)), int(hit.group(2))
         if hour > 23 or minute > 59:
             continue
+        if not event_hits:
+            continue
+        nearest = min(event_hits, key=lambda event: abs(hit.start() - event.start()))
+        if abs(hit.start() - nearest.start()) > 100:
+            continue
         sentence_left = max(
             (low.rfind(mark, 0, hit.start()) for mark in ".!?;"),
             default=-1,
@@ -2624,15 +2629,16 @@ def event_clock_mentions(text: str) -> list[tuple[int, int]]:
             if (pos := low.find(mark, hit.end())) >= 0
         ]
         sentence_right = min(right_marks) if right_marks else len(low)
-        same_sentence_events = [
-            event
-            for event in event_hits
-            if sentence_left <= event.start() < sentence_right
-        ]
-        if (
-            same_sentence_events
-            and min(abs(hit.start() - event.start()) for event in same_sentence_events) <= 100
-        ):
+        same_sentence = sentence_left <= nearest.start() < sentence_right
+        clock_sentence = low[sentence_left:sentence_right]
+        reporting_clock = bool(re.search(
+            r"(?:нов\\w*\\s+)?(?:інформац\\w*|дан\\w*|детал\\w*)"
+            r"[^.!?]{0,40}(?:оприлюднил\\w*|повідомил\\w*|уточнил\\w*)"
+            r"|\\bоновлен\\w*\\b",
+            clock_sentence,
+            re.IGNORECASE,
+        ))
+        if same_sentence or not reporting_clock:
             out.append((hour, minute))
 
     # Frozen bounded direct-event forms. These require an approximate clock
