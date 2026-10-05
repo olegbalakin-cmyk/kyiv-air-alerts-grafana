@@ -318,8 +318,15 @@ def classify_proven(rec, hist_ids, source_rows, canonical_text, hist_complete, c
 
 conn=None
 cur=None
-parent_sha_match="NO"
-parent_sha=None
+accepted_parent_corpus_sha256=EXPECTED_PARENT_SHA
+current_parent_corpus_sha256=None
+global_parent_corpus_drift=None
+accepted_relevant_parent_slice_sha256=None
+current_relevant_parent_slice_sha256=None
+relevant_parent_slice_match="NO"
+accepted_relevant_parent_uid_count=0
+post_freeze_relevant_rows_detected=False
+post_freeze_relevant_row_count=0
 records_out=[]
 db_prov_rows=[]
 
@@ -388,22 +395,166 @@ try:
     all_cities=sorted({str(v) for k,v in collect_values(binding,re.compile(r"^city_key$"),100000) if v})
     if len(all_cities) != 23:
         fail("PARENT_CORPUS_CITY_SCOPE_MISMATCH",EXPECTED_TARGETS,BINDING_PATH,{"city_count":len(all_cities)})
+
+    # Corrected drift model: freeze and verify only the diagnostic parent rows retained by
+    # the accepted 25-case forensic. The global 23-city fingerprint is diagnostic only.
+    relevant_fields=[
+        "episode_uid","city_key","alert_type","episode_state",
+        "canonicalization_version","start_at","end_at",
+    ]
+
+    def norm_ts_text(v):
+        if v is None:
+            return None
+        if isinstance(v, datetime):
+            dt=v
+        else:
+            dt=datetime.fromisoformat(str(v).replace("Z","+00:00"))
+        if dt.tzinfo is None:
+            fail("PREDECESSOR_RELEVANT_PARENT_TIMESTAMP_NAIVE",EXPECTED_TARGETS,"predecessor forensic artifact")
+        return dt.astimezone(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%fZ")
+
+    def parent_tuple_from_candidate(c):
+        return [
+            str(c.get("episode_uid")),
+            str(c.get("city_key")) if c.get("city_key") is not None else None,
+            str(c.get("alert_type")) if c.get("alert_type") is not None else None,
+            str(c.get("episode_state")) if c.get("episode_state") is not None else None,
+            str(c.get("canonicalization_version")) if c.get("canonicalization_version") is not None else None,
+            norm_ts_text(c.get("start_at")),
+            norm_ts_text(c.get("end_at")),
+        ]
+
+    def parent_tuple_from_db(row):
+        uid,city,atype,state,cv,st,en=row
+        return [
+            str(uid),
+            str(city) if city is not None else None,
+            str(atype) if atype is not None else None,
+            str(state) if state is not None else None,
+            str(cv) if cv is not None else None,
+            norm_ts_text(st),
+            norm_ts_text(en),
+        ]
+
+    accepted_relevant_parent_by_uid={}
+    relevant_uid_targets=defaultdict(set)
+    for pr in pred_records:
+        ck=str(pr.get("classification_key"))
+        diag=[c for c in (pr.get("diagnostic_candidates") or []) if isinstance(c,dict)]
+        if not diag:
+            fail("PREDECESSOR_DIAGNOSTIC_PARENT_MISSING",1,"predecessor forensic artifact",{"affected_target_count":1})
+        for c in diag:
+            uid=c.get("episode_uid")
+            if not uid:
+                fail("PREDECESSOR_DIAGNOSTIC_PARENT_UID_MISSING",1,"predecessor forensic artifact",{"affected_target_count":1})
+            uid=str(uid)
+            tup=parent_tuple_from_candidate(c)
+            prior=accepted_relevant_parent_by_uid.get(uid)
+            if prior is not None and prior != tup:
+                fail("PREDECESSOR_RELEVANT_PARENT_TUPLE_CONFLICT",1,"predecessor forensic artifact",
+                     {"affected_target_count":1,"changed_field_categories":["FROZEN_TUPLE_CONFLICT"]})
+            accepted_relevant_parent_by_uid[uid]=tup
+            relevant_uid_targets[uid].add(ck)
+
+    accepted_relevant_parent_uids=sorted(accepted_relevant_parent_by_uid)
+    accepted_relevant_parent_uid_count=len(accepted_relevant_parent_uids)
+    if accepted_relevant_parent_uid_count == 0:
+        fail("PREDECESSOR_RELEVANT_PARENT_UID_SET_EMPTY",EXPECTED_TARGETS,"predecessor forensic artifact")
+    accepted_relevant_parent_rows=sorted(
+        accepted_relevant_parent_by_uid.values(),
+        key=lambda row:tuple("" if v is None else str(v) for v in row),
+    )
+    accepted_relevant_parent_slice_sha256=sha256_bytes(
+        json.dumps(accepted_relevant_parent_rows,ensure_ascii=False,separators=(",",":")).encode("utf-8")
+    )
+
+    current_relevant_raw=select(
+        "SELECT episode_uid::text,city_key::text,alert_type::text,episode_state::text,canonicalization_version::text,start_at,end_at "
+        "FROM public.alert_episodes WHERE episode_uid::text=ANY(%s) ORDER BY episode_uid::text",
+        (accepted_relevant_parent_uids,),
+    )
+    current_relevant_by_uid={}
+    for row in current_relevant_raw:
+        tup=parent_tuple_from_db(row)
+        current_relevant_by_uid[tup[0]]=tup
+    current_relevant_parent_rows=sorted(
+        current_relevant_by_uid.values(),
+        key=lambda row:tuple("" if v is None else str(v) for v in row),
+    )
+    current_relevant_parent_slice_sha256=sha256_bytes(
+        json.dumps(current_relevant_parent_rows,ensure_ascii=False,separators=(",",":")).encode("utf-8")
+    )
+
+    missing_uids=sorted(set(accepted_relevant_parent_uids)-set(current_relevant_by_uid))
+    changed_uids=[]
+    changed_field_categories=set()
+    for uid in accepted_relevant_parent_uids:
+        if uid in missing_uids:
+            changed_field_categories.add("ROW_MISSING")
+            continue
+        old=accepted_relevant_parent_by_uid[uid]
+        new=current_relevant_by_uid[uid]
+        if old != new:
+            changed_uids.append(uid)
+            for idx,name in enumerate(relevant_fields):
+                if old[idx] != new[idx]:
+                    changed_field_categories.add(name.upper())
+
+    if missing_uids or changed_uids or current_relevant_parent_slice_sha256 != accepted_relevant_parent_slice_sha256:
+        affected_targets=set()
+        for uid in missing_uids+changed_uids:
+            affected_targets.update(relevant_uid_targets.get(uid,set()))
+        if not changed_field_categories:
+            changed_field_categories.add("SLICE_HASH_MISMATCH")
+        relevant_parent_slice_match="NO"
+        fail(
+            "UNBOUND_ROOT_CAUSE_RELEVANT_PARENT_DRIFT",
+            len(affected_targets) if affected_targets else EXPECTED_TARGETS,
+            "public.alert_episodes",
+            {
+                "changed_field_categories":sorted(changed_field_categories),
+                "missing_uid_count":len(missing_uids),
+                "changed_uid_count":len(changed_uids),
+            },
+        )
+    relevant_parent_slice_match="YES"
+
+    # Current global SHA is retained only as diagnostics and is never a blocker.
     parent_rows=select(
         "SELECT episode_uid::text,city_key::text,alert_type::text,episode_state::text,canonicalization_version::text,start_at,end_at "
         "FROM public.alert_episodes WHERE city_key=ANY(%s) ORDER BY city_key,start_at,end_at,episode_uid",
-        (all_cities,)
+        (all_cities,),
     )
-    norm=[]
-    for uid,city,atype,state,cv,st,en in parent_rows:
-        def ts(x):
-            return None if x is None else x.astimezone(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%fZ")
-        norm.append([str(uid),str(city),None if atype is None else str(atype),None if state is None else str(state),
-                     None if cv is None else str(cv),ts(st),ts(en)])
+    norm=[parent_tuple_from_db(row) for row in parent_rows]
     norm.sort(key=lambda row:tuple("" if v is None else str(v) for v in row))
-    parent_sha=hashlib.sha256(json.dumps(norm,ensure_ascii=False,separators=(",",":")).encode("utf-8")).hexdigest()
-    if parent_sha != EXPECTED_PARENT_SHA:
-        fail("UNBOUND_ROOT_CAUSE_PARENT_CORPUS_DRIFT",EXPECTED_TARGETS,"public.alert_episodes")
-    parent_sha_match="YES"
+    current_parent_corpus_sha256=sha256_bytes(
+        json.dumps(norm,ensure_ascii=False,separators=(",",":")).encode("utf-8")
+    )
+    global_parent_corpus_drift=(current_parent_corpus_sha256 != accepted_parent_corpus_sha256)
+
+    # Diagnostic transparency only: count live canonical rows overlapping a frozen historical
+    # interval that are outside the accepted diagnostic UID set. They do not alter geometry/binding.
+    post_freeze_uids=set()
+    for pr in pred_records:
+        city=str(pr.get("city_key"))
+        hs=pr.get("historical_start")
+        he=pr.get("historical_end")
+        if not hs or not he:
+            continue
+        hs_dt=datetime.fromisoformat(str(hs).replace("Z","+00:00")).astimezone(timezone.utc)
+        he_dt=datetime.fromisoformat(str(he).replace("Z","+00:00")).astimezone(timezone.utc)
+        extra=select(
+            "SELECT episode_uid::text FROM public.alert_episodes "
+            "WHERE city_key=%s AND alert_type='AIR' AND episode_state='closed' "
+            "AND canonicalization_version=%s AND start_at IS NOT NULL AND end_at IS NOT NULL "
+            "AND start_at < %s AND end_at > %s "
+            "AND NOT (episode_uid::text=ANY(%s))",
+            (city,CANONICAL_VERSION,he_dt,hs_dt,accepted_relevant_parent_uids),
+        )
+        post_freeze_uids.update(str(r[0]) for r in extra)
+    post_freeze_relevant_row_count=len(post_freeze_uids)
+    post_freeze_relevant_rows_detected=bool(post_freeze_relevant_row_count)
 
     # Discover the persisted canonical provenance schema without assuming optional columns.
     source_table_exists=bool(select(
@@ -416,11 +567,7 @@ try:
             "SELECT column_name FROM information_schema.columns WHERE table_schema='public' AND table_name='alert_episode_sources' ORDER BY ordinal_position"
         )]
         if "episode_uid" in source_cols:
-            all_uids=sorted({
-                str(c.get("episode_uid"))
-                for pr in pred_records for c in (pr.get("diagnostic_candidates") or [])
-                if isinstance(c,dict) and c.get("episode_uid")
-            })
+            all_uids=accepted_relevant_parent_uids
             if all_uids:
                 qcols=",".join('"' + c.replace('"','""') + '"' for c in source_cols)
                 rows=select(f"SELECT {qcols} FROM public.alert_episode_sources WHERE episode_uid::text=ANY(%s) ORDER BY episode_uid::text",(all_uids,))
@@ -430,11 +577,7 @@ try:
                     db_prov_rows.append({"table":"public.alert_episode_sources","row":obj})
 
     # Bounded canonical episode rows actually used by this forensic.
-    candidate_uids=sorted({
-        str(c.get("episode_uid"))
-        for pr in pred_records for c in (pr.get("diagnostic_candidates") or [])
-        if isinstance(c,dict) and c.get("episode_uid")
-    })
+    candidate_uids=accepted_relevant_parent_uids
     episode_rows={}
     if candidate_uids:
         rows=select(
@@ -492,10 +635,18 @@ try:
                 "source_rows":src,
             })
         canonical_text=json.dumps(candidate_summaries,ensure_ascii=False,sort_keys=True,default=str)
-        canon_complete=bool(diag and all(str(c.get("episode_uid")) in episode_rows for c in diag[:1])
-                            and source_table_exists and all_source_rows
-                            and (canon_lineage.get("commit") or canon_sources_lineage.get("commit")))
+        canon_observed_complete=bool(diag and all(str(c.get("episode_uid")) in episode_rows for c in diag)
+                                     and source_table_exists and all_source_rows
+                                     and (canon_lineage.get("commit") or canon_sources_lineage.get("commit")))
+        # Current source-link rows were not frozen by the accepted predecessor artifact, and this
+        # harness has no immutable-history contract proving they could not be appended/rewritten.
+        # Therefore they may inform hypotheses but cannot by themselves prove the historical cause.
+        canonical_current_provenance_historical_proof_eligible=False
+        canon_complete=bool(canon_observed_complete and canonical_current_provenance_historical_proof_eligible)
         canon_summary={
+            "current_provenance_observed_complete":canon_observed_complete,
+            "current_provenance_historical_proof_eligible":canonical_current_provenance_historical_proof_eligible,
+            "historical_proof_eligibility_reason":"current alert_episode_sources rows are not frozen and no immutable-history contract is established by this harness",
             "source_table_available":source_table_exists,
             "source_table_columns":source_cols,
             "candidate_count":len(diag),
@@ -636,8 +787,15 @@ try:
         "gt_30_minute_proven_causes":gt30_causes,
         "shared_proven_mechanism_groups":shared_groups,
         "representative_cases":reps,
-        "parent_corpus_sha256":parent_sha,
-        "parent_corpus_sha_match":"YES",
+        "accepted_parent_corpus_sha256":accepted_parent_corpus_sha256,
+        "current_parent_corpus_sha256":current_parent_corpus_sha256,
+        "global_parent_corpus_drift":bool(global_parent_corpus_drift),
+        "accepted_relevant_parent_slice_sha256":accepted_relevant_parent_slice_sha256,
+        "current_relevant_parent_slice_sha256":current_relevant_parent_slice_sha256,
+        "relevant_parent_slice_match":relevant_parent_slice_match,
+        "accepted_relevant_parent_uid_count":accepted_relevant_parent_uid_count,
+        "post_freeze_relevant_rows_detected":post_freeze_relevant_rows_detected,
+        "post_freeze_relevant_row_count":post_freeze_relevant_row_count,
         "forensic_db_provenance_sha256":db_prov_sha,
         "predecessor_run_id":PRED_RUN,
         "predecessor_job_id":PRED_JOB,
@@ -667,7 +825,15 @@ except GateError as exc:
         "verdict":"ATTACK-EVENT 25 UNBOUND BOUNDARY ROOT-CAUSE FORENSIC BLOCKED",
         "first_failing_gate":exc.gate,
         "affected_count":exc.affected_count,
-        "parent_corpus_sha_match":parent_sha_match,
+        "accepted_parent_corpus_sha256":accepted_parent_corpus_sha256,
+        "current_parent_corpus_sha256":current_parent_corpus_sha256,
+        "global_parent_corpus_drift":global_parent_corpus_drift,
+        "accepted_relevant_parent_slice_sha256":accepted_relevant_parent_slice_sha256,
+        "current_relevant_parent_slice_sha256":current_relevant_parent_slice_sha256,
+        "relevant_parent_slice_match":relevant_parent_slice_match,
+        "accepted_relevant_parent_uid_count":accepted_relevant_parent_uid_count,
+        "post_freeze_relevant_rows_detected":post_freeze_relevant_rows_detected,
+        "post_freeze_relevant_row_count":post_freeze_relevant_row_count,
         "provenance_source_that_failed":exc.provenance_source,
         "db_writes":0,
         "neon_mutations":0,
@@ -690,7 +856,15 @@ except Exception as exc:
         "verdict":"ATTACK-EVENT 25 UNBOUND BOUNDARY ROOT-CAUSE FORENSIC BLOCKED",
         "first_failing_gate":"EXECUTION_HARNESS_FAILURE",
         "affected_count":EXPECTED_TARGETS,
-        "parent_corpus_sha_match":parent_sha_match,
+        "accepted_parent_corpus_sha256":accepted_parent_corpus_sha256,
+        "current_parent_corpus_sha256":current_parent_corpus_sha256,
+        "global_parent_corpus_drift":global_parent_corpus_drift,
+        "accepted_relevant_parent_slice_sha256":accepted_relevant_parent_slice_sha256,
+        "current_relevant_parent_slice_sha256":current_relevant_parent_slice_sha256,
+        "relevant_parent_slice_match":relevant_parent_slice_match,
+        "accepted_relevant_parent_uid_count":accepted_relevant_parent_uid_count,
+        "post_freeze_relevant_rows_detected":post_freeze_relevant_rows_detected,
+        "post_freeze_relevant_row_count":post_freeze_relevant_row_count,
         "provenance_source_that_failed":"execution harness",
         "detail":{"error_type":type(exc).__name__,"error":msg[:1000]},
         "db_writes":0,"neon_mutations":0,"binding_changes":0,
