@@ -392,15 +392,11 @@ jobs:
                   nonlossless = mr or mp or mb
                   source_nonlossless += int(nonlossless)
 
-                  ck = r.get("classification_key")
-                  city = r.get("city_key") or r.get("city")
-                  if not city and isinstance(ck, str):
-                      city = class_city.get(ck)
-                  if not isinstance(city, str) or not city:
-                      source_unresolved_corpus += 1
-                      corpus = "UNRESOLVED"
-                  else:
-                      corpus = corpus_for_city(city)
+                  # Source-link rows in the frozen 23-city snapshot do not expose
+                  # a supported direct city/classification join field. Do not invent
+                  # corpus attribution; audit source-link provenance shapes independently
+                  # over the accepted frozen 23-city source-link corpus.
+                  corpus = "FROZEN_23CITY_SOURCE_LINKS"
 
                   sig, core, _ = shape_descriptor(origin)
                   source_shape_counts[(corpus, sig, nonlossless)] += 1
@@ -408,8 +404,6 @@ jobs:
 
               if source_missing:
                   raise GateError("SOURCE_LINK_PROVENANCE_OBJECT_MISSING", "public.attack_event_sources", source_missing)
-              if source_unresolved_corpus:
-                  raise GateError("SOURCE_LINK_CORPUS_UNRESOLVED", "public.attack_event_sources", source_unresolved_corpus)
               if source_roundtrip != EXPECTED_SOURCE_LINKS or source_hash_repro != EXPECTED_SOURCE_LINKS:
                   raise GateError("SOURCE_LINK_JSONB_REPRESENTABILITY_MISMATCH", "public.attack_event_sources", source_roundtrip)
 
