@@ -1,0 +1,1145 @@
+name: Attack-event 23-city persistence snapshot v2 freeze
+
+on:
+  push:
+    branches:
+      - attack-event-23city-persistence-snapshot-v2-2026-10-04
+    paths:
+      - .github/workflows/attack-event-23city-persistence-snapshot-v2-freeze.yml
+
+permissions:
+  contents: read
+
+
+  assemble_a:
+    name: assemble-a
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout freeze branch
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+          clean: true
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Assemble and validate independently
+        env:
+          RUN_LABEL: a
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from __future__ import annotations
+          import hashlib
+          import json
+          import os
+          import subprocess
+          import sys
+          from collections import Counter, defaultdict
+          from pathlib import Path
+          
+          RUN_LABEL=os.environ["RUN_LABEL"]
+          REPO=Path(os.environ["GITHUB_WORKSPACE"]).resolve()
+          OUTDIR=Path(os.environ["RUNNER_TEMP"])/f"attack-event-23city-snapshot-{RUN_LABEL}"
+          OUTDIR.mkdir(parents=True,exist_ok=True)
+          SNAP=OUTDIR/"attack_event_23city_persistence_snapshot_v2.json"
+          MANIFEST=OUTDIR/"manifest.json"
+          DIAG=OUTDIR/"diagnostic.json"
+          
+          SOURCE_A={
+              "label":"18-city",
+              "commit":"03a04d33f7616b77181741fd77a776c490391d07",
+              "path":"research/attack_event_18city_persistence_identity_export_v2_2026-10-04.json",
+              "blob":"a240f1950748afcb9fc974c49ac58da07adfff65",
+              "sha256":"a8440ab537e1b675c7223b7eb7b29c817c1a2e8fc26ba5cf494b5efb3caf662a",
+              "bytes":60509907,
+              "classifications":19542,
+              "cities":18,
+              "distribution":{"STRICT_EVENT_POSITIVE":913,"SENSITIVITY_EVENT_POSITIVE":48,"NO_CONFIRMED_EVENT":18113,"NEEDS_REVIEW":468},
+              "positives":961,
+          }
+          SOURCE_B={
+              "label":"5-city",
+              "commit":"02ad2e8fadee78442753567bc2d3a540345d8e8a",
+              "path":"research/attack_event_5city_persistence_identity_export_v2_2026-10-04.json",
+              "blob":"a2e34c4a114ad335d35068d6c6a3a4606b09db7f",
+              "sha256":"71ab9ac4f8dbeefcdb074ab60d485ac0546086ce4bd9db755af797398895d544",
+              "bytes":29774541,
+              "classifications":6863,
+              "cities":5,
+              "distribution":{"STRICT_EVENT_POSITIVE":104,"SENSITIVITY_EVENT_POSITIVE":15,"NO_CONFIRMED_EVENT":5417,"NEEDS_REVIEW":1327},
+              "positives":119,
+              "source_links":2340,
+          }
+          CONTRACTS=[
+              {"label":"step1_persistence_contract","commit":"b205d38dbc50bc502d10e682d4ae53491af542ea","path":"research/attack_event_neon_persistence_contract_2026-10-02.json"},
+              {"label":"classification_identity_v2_addendum","commit":"bd82a6c0a19aca4610a8af6df73a307a88c35bf6","path":"research/attack_event_classification_identity_availability_addendum_2026-10-04.json"},
+          ]
+          CLASS_VERSION="attack-event-classification-key-v2"
+          EVENT_VERSION="attack-event-key-v1"
+          SOURCE_LINK_VERSION="attack-event-source-link-key-v1"
+          EVENT_GRAIN="HISTORICAL_ALERT_EPISODE"
+          EXPECTED_COMBINED_DIST={"STRICT_EVENT_POSITIVE":1017,"SENSITIVITY_EVENT_POSITIVE":63,"NO_CONFIRMED_EVENT":23530,"NEEDS_REVIEW":1795}
+          
+          class GateError(RuntimeError):
+              def __init__(self,gate,scope="",expected=None,actual=None):
+                  self.gate=gate
+                  self.scope=scope
+                  self.expected=expected
+                  self.actual=actual
+                  super().__init__(gate)
+          
+          def fail(gate,scope="",expected=None,actual=None):
+              raise GateError(gate,scope,expected,actual)
+          
+          def sh(args,check=True,stdout=None):
+              p=subprocess.run(list(map(str,args)),cwd=REPO,stdout=stdout if stdout is not None else subprocess.PIPE,
+                               stderr=subprocess.PIPE,text=False)
+              if check and p.returncode!=0:
+                  err=(p.stderr or b"").decode("utf-8","replace")[-1000:]
+                  raise RuntimeError(f"command failed rc={p.returncode}: {' '.join(map(str,args))}: {err}")
+              return p
+          
+          def git_text(*args):
+              p=sh(["git",*args])
+              return p.stdout.decode("utf-8","replace").strip()
+          
+          def ensure_commit(sha):
+              p=sh(["git","cat-file","-e",f"{sha}^{{commit}}"],check=False)
+              if p.returncode!=0:
+                  sh(["git","fetch","--no-tags","origin",sha])
+              got=git_text("rev-parse",f"{sha}^{{commit}}")
+              if got!=sha:
+                  fail("FROZEN_SOURCE_COMMIT_MISMATCH",sha,sha,got)
+          
+          def sha_file(path):
+              h=hashlib.sha256()
+              with Path(path).open("rb") as f:
+                  for chunk in iter(lambda:f.read(1024*1024),b""):
+                      h.update(chunk)
+              return h.hexdigest()
+          
+          def materialize_source(spec,label):
+              ensure_commit(spec["commit"])
+              actual_blob=git_text("rev-parse",f'{spec["commit"]}:{spec["path"]}')
+              if actual_blob!=spec["blob"]:
+                  fail(f"SOURCE_{label}_GIT_BLOB_MISMATCH",spec["path"],spec["blob"],actual_blob)
+              out=OUTDIR/f"source-{label.lower()}.json"
+              with out.open("wb") as f:
+                  p=sh(["git","show",f'{spec["commit"]}:{spec["path"]}'],check=False,stdout=f)
+              if p.returncode!=0:
+                  fail(f"SOURCE_{label}_MATERIALIZATION_FAILED",spec["path"])
+              actual_bytes=out.stat().st_size
+              if actual_bytes!=spec["bytes"]:
+                  fail(f"SOURCE_{label}_BYTE_COUNT_MISMATCH",spec["path"],spec["bytes"],actual_bytes)
+              actual_sha=sha_file(out)
+              if actual_sha!=spec["sha256"]:
+                  fail(f"SOURCE_{label}_RAW_SHA256_MISMATCH",spec["path"],spec["sha256"],actual_sha)
+              try:
+                  obj=json.loads(out.read_bytes())
+              except Exception as exc:
+                  fail(f"SOURCE_{label}_JSON_PARSE_FAILED",spec["path"],"valid JSON",type(exc).__name__)
+              return obj,{"commit":spec["commit"],"path":spec["path"],"git_blob":actual_blob,"raw_sha256":actual_sha,
+                         "byte_count":actual_bytes,"classification_count":spec["classifications"],"integrity":"PASS"}
+          
+          def materialize_contract(spec):
+              ensure_commit(spec["commit"])
+              blob=git_text("rev-parse",f'{spec["commit"]}:{spec["path"]}')
+              out=OUTDIR/f'contract-{spec["label"]}.json'
+              with out.open("wb") as f:
+                  p=sh(["git","show",f'{spec["commit"]}:{spec["path"]}'],check=False,stdout=f)
+              if p.returncode!=0:
+                  fail("GOVERNING_CONTRACT_UNAVAILABLE",spec["label"])
+              try:
+                  json.loads(out.read_bytes())
+              except Exception as exc:
+                  fail("GOVERNING_CONTRACT_INVALID_JSON",spec["label"],"valid JSON",type(exc).__name__)
+              return {"label":spec["label"],"commit":spec["commit"],"path":spec["path"],"git_blob":blob,
+                      "raw_sha256":sha_file(out),"byte_count":out.stat().st_size}
+          
+          def require_record_fields(rows,fields,scope):
+              if not isinstance(rows,list):
+                  fail("SOURCE_EXPORT_SCHEMA_COMPATIBILITY_UNRESOLVED",scope,"list",type(rows).__name__)
+              for i,row in enumerate(rows):
+                  if not isinstance(row,dict):
+                      fail("SOURCE_EXPORT_SCHEMA_COMPATIBILITY_UNRESOLVED",f"{scope}[{i}]","object",type(row).__name__)
+                  missing=[k for k in fields if k not in row]
+                  if missing:
+                      ident=row.get("classification_key") or row.get("attack_event_key") or row.get("source_link_key") or str(i)
+                      fail("SOURCE_EXPORT_SCHEMA_COMPATIBILITY_UNRESOLVED",f"{scope}:{ident}","required fields",",".join(missing))
+          
+          def validate_schema(obj,label):
+              if not isinstance(obj,dict):
+                  fail("SOURCE_EXPORT_SCHEMA_COMPATIBILITY_UNRESOLVED",label,"object",type(obj).__name__)
+              for k in ("classifications","attack_events","source_links"):
+                  if k not in obj:
+                      fail("SOURCE_EXPORT_SCHEMA_COMPATIBILITY_UNRESOLVED",f"{label}:{k}","present","missing")
+              if obj.get("schema_version")!=2:
+                  fail("SOURCE_EXPORT_SCHEMA_COMPATIBILITY_UNRESOLVED",f"{label}:schema_version",2,obj.get("schema_version"))
+              if obj.get("classification_key_version")!=CLASS_VERSION:
+                  fail("CLASSIFICATION_IDENTITY_VERSION_MISMATCH",label,CLASS_VERSION,obj.get("classification_key_version"))
+              if obj.get("attack_event_key_version")!=EVENT_VERSION:
+                  fail("EVENT_IDENTITY_VERSION_MISMATCH",label,EVENT_VERSION,obj.get("attack_event_key_version"))
+              if obj.get("source_link_key_version")!=SOURCE_LINK_VERSION:
+                  fail("SOURCE_LINK_IDENTITY_VERSION_MISMATCH",label,SOURCE_LINK_VERSION,obj.get("source_link_key_version"))
+              require_record_fields(obj["classifications"],[
+                  "classification_key_version","classification_key","city_key","historical_episode_id",
+                  "alert_start_utc_microseconds","alert_end_utc_microseconds","verdict","event_types",
+                  "qa_reasons_state","qa_reasons","classifier_blob_sha","classifier_methodology_version",
+                  "normalization_version","evidence_set_sha256","review_provenance_sha256","review_provenance",
+                  "accepted_evidence_membership"
+              ],f"{label}:classifications")
+              require_record_fields(obj["attack_events"],[
+                  "attack_event_key_version","attack_event_key","event_grain","city_key","historical_episode_id",
+                  "alert_start_utc_microseconds","alert_end_utc_microseconds","classification_key_v2"
+              ],f"{label}:attack_events")
+              require_record_fields(obj["source_links"],[
+                  "source_link_key_version","source_link_key","classification_key_v2","observation_id","content_sha256"
+              ],f"{label}:source_links")
+          
+          def validate_source(obj,spec,label):
+              validate_schema(obj,label)
+              cls=obj["classifications"]; events=obj["attack_events"]; links=obj["source_links"]
+              ckeys=[r["classification_key"] for r in cls]
+              ekeys=[r["attack_event_key"] for r in events]
+              lkeys=[r["source_link_key"] for r in links]
+              cities={r["city_key"] for r in cls}
+              dist=dict(Counter(r["verdict"] for r in cls))
+              if len(cls)!=spec["classifications"]:
+                  fail(f"SOURCE_{label}_CLASSIFICATION_COUNT_MISMATCH",label,spec["classifications"],len(cls))
+              if len(set(ckeys))!=len(cls):
+                  fail(f"SOURCE_{label}_DUPLICATE_CLASSIFICATION_KEY",label,len(cls),len(set(ckeys)))
+              if len(cities)!=spec["cities"]:
+                  fail(f"SOURCE_{label}_CITY_COUNT_MISMATCH",label,spec["cities"],len(cities))
+              if dist!=spec["distribution"]:
+                  fail(f"SOURCE_{label}_DISTRIBUTION_MISMATCH",label,spec["distribution"],dist)
+              if len(events)!=spec["positives"] or len(set(ekeys))!=spec["positives"]:
+                  fail(f"SOURCE_{label}_POSITIVE_EVENT_COUNT_MISMATCH",label,spec["positives"],len(set(ekeys)))
+              if len(set(lkeys))!=len(links):
+                  fail(f"SOURCE_{label}_DUPLICATE_SOURCE_LINK_KEY",label,len(links),len(set(lkeys)))
+              if label=="B" and len(links)!=spec["source_links"]:
+                  fail("SOURCE_B_SOURCE_LINK_COUNT_MISMATCH",label,spec["source_links"],len(links))
+              for r in cls:
+                  if r["classification_key_version"]!=CLASS_VERSION:
+                      fail("CLASSIFICATION_IDENTITY_VERSION_MISMATCH",r["classification_key"],CLASS_VERSION,r["classification_key_version"])
+                  if not r.get("classifier_blob_sha"):
+                      fail(f"SOURCE_{label}_CLASSIFIER_PROVENANCE_UNAVAILABLE",r["classification_key"])
+                  if not r.get("normalization_version"):
+                      fail(f"SOURCE_{label}_NORMALIZATION_VERSION_UNAVAILABLE",r["classification_key"])
+              for r in events:
+                  if r["attack_event_key_version"]!=EVENT_VERSION or r["event_grain"]!=EVENT_GRAIN:
+                      fail("EVENT_IDENTITY_CONTRACT_MISMATCH",r["attack_event_key"])
+              for r in links:
+                  if r["source_link_key_version"]!=SOURCE_LINK_VERSION:
+                      fail("SOURCE_LINK_IDENTITY_VERSION_MISMATCH",r["source_link_key"],SOURCE_LINK_VERSION,r["source_link_key_version"])
+          
+              positive_cls={r["classification_key"] for r in cls if r["verdict"] in {"STRICT_EVENT_POSITIVE","SENSITIVITY_EVENT_POSITIVE"}}
+              event_cls=[r["classification_key_v2"] for r in events]
+              if len(positive_cls)!=spec["positives"] or set(event_cls)!=positive_cls or len(event_cls)!=len(set(event_cls)):
+                  fail(f"SOURCE_{label}_POSITIVE_CLASSIFICATION_EVENT_MAPPING_MISMATCH",label,spec["positives"],len(set(event_cls)))
+          
+              class_set=set(ckeys)
+              link_map=defaultdict(list)
+              for r in links:
+                  ck=r["classification_key_v2"]
+                  if ck not in class_set:
+                      fail(f"SOURCE_{label}_SOURCE_LINK_UNKNOWN_CLASSIFICATION",r["source_link_key"],"known classification",ck)
+                  link_map[ck].append((r["observation_id"],r["content_sha256"]))
+              unresolved=0
+              for r in cls:
+                  members=r["accepted_evidence_membership"]
+                  if not isinstance(members,list):
+                      fail("SOURCE_EXPORT_SCHEMA_COMPATIBILITY_UNRESOLVED",r["classification_key"],"accepted_evidence_membership list",type(members).__name__)
+                  pairs=[]
+                  for m in members:
+                      if not isinstance(m,list) or len(m)!=2:
+                          fail("SOURCE_EXPORT_SCHEMA_COMPATIBILITY_UNRESOLVED",r["classification_key"],"[observation_id,content_sha256]",repr(m)[:160])
+                      pairs.append((m[0],m[1]))
+                  linked=link_map.get(r["classification_key"],[])
+                  unresolved += len(set(pairs)-set(linked))
+                  if Counter(pairs)!=Counter(linked):
+                      missing=list(set(pairs)-set(linked))
+                      extra=list(set(linked)-set(pairs))
+                      ident=(missing or extra or [("unknown","unknown")])[0]
+                      fail(f"SOURCE_{label}_EVIDENCE_SOURCE_LINK_MEMBERSHIP_MISMATCH",r["classification_key"],
+                           "exact frozen evidence membership",f"first_pair={ident}")
+              if unresolved!=0:
+                  fail(f"SOURCE_{label}_UNRESOLVED_EVIDENCE_REFERENCES",label,0,unresolved)
+          
+              if label=="A":
+                  qa_state=sum(r["qa_reasons_state"]=="UNMATERIALIZED_IN_ACCEPTED_SOURCE" for r in cls)
+                  qa_null=sum(r["qa_reasons"] is None for r in cls)
+                  if qa_state!=19542:
+                      fail("SOURCE_A_QA_UNMATERIALIZED_COUNT_MISMATCH","A",19542,qa_state)
+                  if qa_null!=19542:
+                      fail("SOURCE_A_QA_NULL_COUNT_MISMATCH","A",19542,qa_null)
+              else:
+                  qa_state=sum(r["qa_reasons_state"]=="MATERIALIZED" for r in cls)
+                  qa_null=sum(r["qa_reasons"] is None for r in cls)
+                  qa_nonlist=sum(not isinstance(r["qa_reasons"],list) for r in cls)
+                  if qa_state!=6863:
+                      fail("SOURCE_B_QA_MATERIALIZED_COUNT_MISMATCH","B",6863,qa_state)
+                  if qa_null!=0 or qa_nonlist!=0:
+                      fail("SOURCE_B_QA_REASONS_ARRAY_CONTRACT_MISMATCH","B","0 null and all arrays",f"null={qa_null},nonlist={qa_nonlist}")
+                  prov=sum(bool(r.get("classifier_blob_sha")) for r in cls)
+                  if prov!=6863:
+                      fail("SOURCE_B_CLASSIFIER_PROVENANCE_COVERAGE_MISMATCH","B",6863,prov)
+              return {
+                  "city_keys":cities,
+                  "classification_keys":set(ckeys),
+                  "event_keys":set(ekeys),
+                  "source_link_keys":set(lkeys),
+                  "source_links":len(links),
+                  "unresolved_evidence_references":unresolved,
+                  "qa_state_count":qa_state,
+                  "qa_null_count":qa_null,
+                  "qa_empty_array_count":sum(r.get("qa_reasons")==[] for r in cls),
+              }
+          
+          diag={"status":"BLOCKED","run_label":RUN_LABEL}
+          try:
+              a,a_integrity=materialize_source(SOURCE_A,"A")
+              b,b_integrity=materialize_source(SOURCE_B,"B")
+              contract_meta=[materialize_contract(x) for x in CONTRACTS]
+              va=validate_source(a,SOURCE_A,"A")
+              vb=validate_source(b,SOURCE_B,"B")
+          
+              city_overlap=va["city_keys"] & vb["city_keys"]
+              if city_overlap:
+                  fail("SOURCE_CITY_SET_COLLISION",sorted(city_overlap)[0],"disjoint city sets","collision")
+              class_overlap=va["classification_keys"] & vb["classification_keys"]
+              if class_overlap:
+                  fail("SOURCE_CLASSIFICATION_KEY_COLLISION",sorted(class_overlap)[0],"no collision","collision")
+              event_overlap=va["event_keys"] & vb["event_keys"]
+              if event_overlap:
+                  fail("SOURCE_EVENT_KEY_COLLISION",sorted(event_overlap)[0],"no collision","collision")
+              link_overlap=va["source_link_keys"] & vb["source_link_keys"]
+              if link_overlap:
+                  fail("SOURCE_LINK_KEY_COLLISION",sorted(link_overlap)[0],"no collision","collision")
+          
+              classifications=sorted([*a["classifications"],*b["classifications"]],key=lambda r:r["classification_key"])
+              events=sorted([*a["attack_events"],*b["attack_events"]],key=lambda r:r["attack_event_key"])
+              links=sorted([*a["source_links"],*b["source_links"]],key=lambda r:r["source_link_key"])
+          
+              combined_ckeys=[r["classification_key"] for r in classifications]
+              combined_ekeys=[r["attack_event_key"] for r in events]
+              combined_lkeys=[r["source_link_key"] for r in links]
+              combined_cities={r["city_key"] for r in classifications}
+              combined_dist=dict(Counter(r["verdict"] for r in classifications))
+              positives=sum(r["verdict"] in {"STRICT_EVENT_POSITIVE","SENSITIVITY_EVENT_POSITIVE"} for r in classifications)
+          
+              if len(combined_cities)!=23: fail("COMBINED_CITY_COUNT_MISMATCH","snapshot",23,len(combined_cities))
+              if len(classifications)!=26405: fail("COMBINED_CLASSIFICATION_COUNT_MISMATCH","snapshot",26405,len(classifications))
+              if len(set(combined_ckeys))!=26405: fail("COMBINED_CLASSIFICATION_KEY_UNIQUENESS_MISMATCH","snapshot",26405,len(set(combined_ckeys)))
+              if combined_dist!=EXPECTED_COMBINED_DIST: fail("COMBINED_DISTRIBUTION_MISMATCH","snapshot",EXPECTED_COMBINED_DIST,combined_dist)
+              if positives!=1080: fail("COMBINED_POSITIVE_CLASSIFICATION_COUNT_MISMATCH","snapshot",1080,positives)
+              if len(events)!=1080 or len(set(combined_ekeys))!=1080: fail("COMBINED_UNIQUE_EVENT_KEY_COUNT_MISMATCH","snapshot",1080,len(set(combined_ekeys)))
+              if len(set(combined_lkeys))!=len(links): fail("COMBINED_SOURCE_LINK_KEY_UNIQUENESS_MISMATCH","snapshot",len(links),len(set(combined_lkeys)))
+          
+              expected_ckeys=va["classification_keys"]|vb["classification_keys"]
+              if set(combined_ckeys)!=expected_ckeys: fail("COMBINED_CLASSIFICATION_SOURCE_PRESERVATION_MISMATCH","snapshot",len(expected_ckeys),len(set(combined_ckeys)))
+              if set(combined_ekeys)!=(va["event_keys"]|vb["event_keys"]): fail("COMBINED_EVENT_SOURCE_PRESERVATION_MISMATCH","snapshot")
+              if set(combined_lkeys)!=(va["source_link_keys"]|vb["source_link_keys"]): fail("COMBINED_SOURCE_LINK_PRESERVATION_MISMATCH","snapshot")
+          
+              cidx={r["classification_key"]:r for r in classifications}
+              eidx={r["attack_event_key"]:r for r in events}
+              lidx={r["source_link_key"]:r for r in links}
+              for src in (a,b):
+                  for r in src["classifications"]:
+                      if cidx.get(r["classification_key"])!=r: fail("CLASSIFICATION_RECORD_FIELD_PRESERVATION_MISMATCH",r["classification_key"])
+                  for r in src["attack_events"]:
+                      if eidx.get(r["attack_event_key"])!=r: fail("EVENT_RECORD_FIELD_PRESERVATION_MISMATCH",r["attack_event_key"])
+                  for r in src["source_links"]:
+                      if lidx.get(r["source_link_key"])!=r: fail("SOURCE_LINK_RECORD_FIELD_PRESERVATION_MISMATCH",r["source_link_key"])
+          
+              qa_b=sum(r["qa_reasons_state"]=="MATERIALIZED" for r in b["classifications"])
+              qa_a=sum(r["qa_reasons_state"]=="UNMATERIALIZED_IN_ACCEPTED_SOURCE" for r in a["classifications"])
+              qa_b_null=sum(r["qa_reasons"] is None for r in b["classifications"])
+              qa_a_null=sum(r["qa_reasons"] is None for r in a["classifications"])
+              if (qa_b,qa_b_null)!=(6863,0): fail("COMBINED_5CITY_QA_CONTRACT_MISMATCH","5-city","6863 materialized / 0 null",f"{qa_b}/{qa_b_null}")
+              if (qa_a,qa_a_null)!=(19542,19542): fail("COMBINED_18CITY_QA_CONTRACT_MISMATCH","18-city","19542 unmaterialized / 19542 null",f"{qa_a}/{qa_a_null}")
+          
+              total_unresolved=va["unresolved_evidence_references"]+vb["unresolved_evidence_references"]
+              if total_unresolved!=0: fail("COMBINED_UNRESOLVED_EVIDENCE_REFERENCES","snapshot",0,total_unresolved)
+          
+              provenance={
+                  "assembly_mode":"OFFLINE_UNION_OF_ALREADY_FROZEN_EXPORTS",
+                  "sources":[a_integrity,b_integrity],
+                  "governing_contracts":contract_meta,
+                  "ordering":{
+                      "classifications":"classification_key",
+                      "attack_events":"attack_event_key",
+                      "source_links":"source_link_key",
+                      "source_level_unkeyed_collections":"18-city source before 5-city source"
+                  },
+                  "serialization":{"encoding":"UTF-8","bom":False,"json":"compact sort_keys=True separators=(',',':')","final_newline":False},
+                  "semantic_classification_changes":0,
+                  "historical_public_source_requests":0,
+                  "neon_mutations":0,
+                  "production_mutations":0
+              }
+              gates={
+                  "cities":23,
+                  "classifications":26405,
+                  "unique_classification_keys":len(set(combined_ckeys)),
+                  "distribution":combined_dist,
+                  "positive_classifications":positives,
+                  "unique_positive_event_keys":len(set(combined_ekeys)),
+                  "total_source_links":len(links),
+                  "unique_source_link_keys":len(set(combined_lkeys)),
+                  "unresolved_evidence_references":total_unresolved,
+                  "five_city_qa_materialized_count":qa_b,
+                  "five_city_qa_reasons_null_count":qa_b_null,
+                  "five_city_qa_explicit_empty_array_count":vb["qa_empty_array_count"],
+                  "eighteen_city_qa_unmaterialized_count":qa_a,
+                  "eighteen_city_qa_reasons_null_count":qa_a_null,
+                  "source_a_integrity":"PASS",
+                  "source_b_integrity":"PASS",
+                  "historical_public_source_requests":0,
+                  "neon_mutations":0,
+                  "production_mutations":0,
+                  "semantic_changes":0,
+                  "credentials_exposed":False
+              }
+              snapshot={
+                  "schema_version":2,
+                  "kind":"attack_event_23city_persistence_snapshot_v2",
+                  "classification_key_version":CLASS_VERSION,
+                  "attack_event_key_version":EVENT_VERSION,
+                  "source_link_key_version":SOURCE_LINK_VERSION,
+                  "snapshot_provenance":provenance,
+                  "classifications":classifications,
+                  "attack_events":events,
+                  "source_links":links,
+                  "gates":gates
+              }
+              raw=json.dumps(snapshot,ensure_ascii=False,sort_keys=True,separators=(",",":")).encode("utf-8")
+              SNAP.write_bytes(raw)
+              out_sha=hashlib.sha256(raw).hexdigest()
+              aggregate={
+                  "sha256":out_sha,
+                  "byte_count":len(raw),
+                  "cities":23,
+                  "classifications":26405,
+                  "distribution":combined_dist,
+                  "positives":1080,
+                  "total_source_links":len(links),
+                  "unresolved_evidence_references":0,
+                  "five_city_qa_materialized_count":qa_b,
+                  "eighteen_city_qa_unmaterialized_count":qa_a,
+                  "unique_classification_keys":len(set(combined_ckeys)),
+                  "unique_event_keys":len(set(combined_ekeys)),
+                  "unique_source_link_keys":len(set(combined_lkeys)),
+                  "source_a_integrity":"PASS",
+                  "source_b_integrity":"PASS",
+                  "historical_public_source_requests":0,
+                  "neon_mutations":0,
+                  "production_mutation":"NO",
+                  "semantic_change":"NO",
+                  "credentials_exposed":False
+              }
+              manifest={"status":"PASS","run_label":RUN_LABEL,"artifact_name":f"attack-event-23city-persistence-snapshot-run-{RUN_LABEL}","aggregate":aggregate}
+              MANIFEST.write_text(json.dumps(manifest,ensure_ascii=False,sort_keys=True,separators=(",",":")),encoding="utf-8")
+              diag={"status":"PASS","run_label":RUN_LABEL,"sha256":out_sha,"byte_count":len(raw)}
+              DIAG.write_text(json.dumps(diag,ensure_ascii=False,sort_keys=True,separators=(",",":")),encoding="utf-8")
+              print("SNAPSHOT_MANIFEST="+json.dumps(manifest,ensure_ascii=False,sort_keys=True,separators=(",",":")))
+          except GateError as exc:
+              diag={"status":"BLOCKED","run_label":RUN_LABEL,"first_failing_gate":exc.gate,"scope":exc.scope,"expected":exc.expected,"actual":exc.actual}
+              DIAG.write_text(json.dumps(diag,ensure_ascii=False,sort_keys=True,separators=(",",":")),encoding="utf-8")
+              print("FIRST_FAILING_GATE="+exc.gate,file=sys.stderr)
+              if exc.scope: print("AFFECTED_SCOPE="+str(exc.scope),file=sys.stderr)
+              if exc.expected is not None: print("EXPECTED="+json.dumps(exc.expected,ensure_ascii=False,sort_keys=True),file=sys.stderr)
+              if exc.actual is not None: print("ACTUAL="+json.dumps(exc.actual,ensure_ascii=False,sort_keys=True),file=sys.stderr)
+              raise SystemExit(1)
+          except Exception as exc:
+              diag={"status":"BLOCKED","run_label":RUN_LABEL,"first_failing_gate":"EXECUTION_HARNESS_FAILURE","scope":type(exc).__name__,"actual":str(exc)[:500]}
+              DIAG.write_text(json.dumps(diag,ensure_ascii=False,sort_keys=True,separators=(",",":")),encoding="utf-8")
+              print("FIRST_FAILING_GATE=EXECUTION_HARNESS_FAILURE",file=sys.stderr)
+              print("AFFECTED_SCOPE="+type(exc).__name__,file=sys.stderr)
+              print("ACTUAL="+str(exc)[:500],file=sys.stderr)
+              raise
+          PY
+
+      - name: Upload independent snapshot
+        id: upload
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: attack-event-23city-persistence-snapshot-run-a
+          path: |
+            ${{ runner.temp }}/attack-event-23city-snapshot-a/attack_event_23city_persistence_snapshot_v2.json
+            ${{ runner.temp }}/attack-event-23city-snapshot-a/manifest.json
+            ${{ runner.temp }}/attack-event-23city-snapshot-a/diagnostic.json
+          if-no-files-found: warn
+          retention-days: 30
+
+
+  assemble_b:
+    name: assemble-b
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout freeze branch
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+          clean: true
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Assemble and validate independently
+        env:
+          RUN_LABEL: b
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from __future__ import annotations
+          import hashlib
+          import json
+          import os
+          import subprocess
+          import sys
+          from collections import Counter, defaultdict
+          from pathlib import Path
+          
+          RUN_LABEL=os.environ["RUN_LABEL"]
+          REPO=Path(os.environ["GITHUB_WORKSPACE"]).resolve()
+          OUTDIR=Path(os.environ["RUNNER_TEMP"])/f"attack-event-23city-snapshot-{RUN_LABEL}"
+          OUTDIR.mkdir(parents=True,exist_ok=True)
+          SNAP=OUTDIR/"attack_event_23city_persistence_snapshot_v2.json"
+          MANIFEST=OUTDIR/"manifest.json"
+          DIAG=OUTDIR/"diagnostic.json"
+          
+          SOURCE_A={
+              "label":"18-city",
+              "commit":"03a04d33f7616b77181741fd77a776c490391d07",
+              "path":"research/attack_event_18city_persistence_identity_export_v2_2026-10-04.json",
+              "blob":"a240f1950748afcb9fc974c49ac58da07adfff65",
+              "sha256":"a8440ab537e1b675c7223b7eb7b29c817c1a2e8fc26ba5cf494b5efb3caf662a",
+              "bytes":60509907,
+              "classifications":19542,
+              "cities":18,
+              "distribution":{"STRICT_EVENT_POSITIVE":913,"SENSITIVITY_EVENT_POSITIVE":48,"NO_CONFIRMED_EVENT":18113,"NEEDS_REVIEW":468},
+              "positives":961,
+          }
+          SOURCE_B={
+              "label":"5-city",
+              "commit":"02ad2e8fadee78442753567bc2d3a540345d8e8a",
+              "path":"research/attack_event_5city_persistence_identity_export_v2_2026-10-04.json",
+              "blob":"a2e34c4a114ad335d35068d6c6a3a4606b09db7f",
+              "sha256":"71ab9ac4f8dbeefcdb074ab60d485ac0546086ce4bd9db755af797398895d544",
+              "bytes":29774541,
+              "classifications":6863,
+              "cities":5,
+              "distribution":{"STRICT_EVENT_POSITIVE":104,"SENSITIVITY_EVENT_POSITIVE":15,"NO_CONFIRMED_EVENT":5417,"NEEDS_REVIEW":1327},
+              "positives":119,
+              "source_links":2340,
+          }
+          CONTRACTS=[
+              {"label":"step1_persistence_contract","commit":"b205d38dbc50bc502d10e682d4ae53491af542ea","path":"research/attack_event_neon_persistence_contract_2026-10-02.json"},
+              {"label":"classification_identity_v2_addendum","commit":"bd82a6c0a19aca4610a8af6df73a307a88c35bf6","path":"research/attack_event_classification_identity_availability_addendum_2026-10-04.json"},
+          ]
+          CLASS_VERSION="attack-event-classification-key-v2"
+          EVENT_VERSION="attack-event-key-v1"
+          SOURCE_LINK_VERSION="attack-event-source-link-key-v1"
+          EVENT_GRAIN="HISTORICAL_ALERT_EPISODE"
+          EXPECTED_COMBINED_DIST={"STRICT_EVENT_POSITIVE":1017,"SENSITIVITY_EVENT_POSITIVE":63,"NO_CONFIRMED_EVENT":23530,"NEEDS_REVIEW":1795}
+          
+          class GateError(RuntimeError):
+              def __init__(self,gate,scope="",expected=None,actual=None):
+                  self.gate=gate
+                  self.scope=scope
+                  self.expected=expected
+                  self.actual=actual
+                  super().__init__(gate)
+          
+          def fail(gate,scope="",expected=None,actual=None):
+              raise GateError(gate,scope,expected,actual)
+          
+          def sh(args,check=True,stdout=None):
+              p=subprocess.run(list(map(str,args)),cwd=REPO,stdout=stdout if stdout is not None else subprocess.PIPE,
+                               stderr=subprocess.PIPE,text=False)
+              if check and p.returncode!=0:
+                  err=(p.stderr or b"").decode("utf-8","replace")[-1000:]
+                  raise RuntimeError(f"command failed rc={p.returncode}: {' '.join(map(str,args))}: {err}")
+              return p
+          
+          def git_text(*args):
+              p=sh(["git",*args])
+              return p.stdout.decode("utf-8","replace").strip()
+          
+          def ensure_commit(sha):
+              p=sh(["git","cat-file","-e",f"{sha}^{{commit}}"],check=False)
+              if p.returncode!=0:
+                  sh(["git","fetch","--no-tags","origin",sha])
+              got=git_text("rev-parse",f"{sha}^{{commit}}")
+              if got!=sha:
+                  fail("FROZEN_SOURCE_COMMIT_MISMATCH",sha,sha,got)
+          
+          def sha_file(path):
+              h=hashlib.sha256()
+              with Path(path).open("rb") as f:
+                  for chunk in iter(lambda:f.read(1024*1024),b""):
+                      h.update(chunk)
+              return h.hexdigest()
+          
+          def materialize_source(spec,label):
+              ensure_commit(spec["commit"])
+              actual_blob=git_text("rev-parse",f'{spec["commit"]}:{spec["path"]}')
+              if actual_blob!=spec["blob"]:
+                  fail(f"SOURCE_{label}_GIT_BLOB_MISMATCH",spec["path"],spec["blob"],actual_blob)
+              out=OUTDIR/f"source-{label.lower()}.json"
+              with out.open("wb") as f:
+                  p=sh(["git","show",f'{spec["commit"]}:{spec["path"]}'],check=False,stdout=f)
+              if p.returncode!=0:
+                  fail(f"SOURCE_{label}_MATERIALIZATION_FAILED",spec["path"])
+              actual_bytes=out.stat().st_size
+              if actual_bytes!=spec["bytes"]:
+                  fail(f"SOURCE_{label}_BYTE_COUNT_MISMATCH",spec["path"],spec["bytes"],actual_bytes)
+              actual_sha=sha_file(out)
+              if actual_sha!=spec["sha256"]:
+                  fail(f"SOURCE_{label}_RAW_SHA256_MISMATCH",spec["path"],spec["sha256"],actual_sha)
+              try:
+                  obj=json.loads(out.read_bytes())
+              except Exception as exc:
+                  fail(f"SOURCE_{label}_JSON_PARSE_FAILED",spec["path"],"valid JSON",type(exc).__name__)
+              return obj,{"commit":spec["commit"],"path":spec["path"],"git_blob":actual_blob,"raw_sha256":actual_sha,
+                         "byte_count":actual_bytes,"classification_count":spec["classifications"],"integrity":"PASS"}
+          
+          def materialize_contract(spec):
+              ensure_commit(spec["commit"])
+              blob=git_text("rev-parse",f'{spec["commit"]}:{spec["path"]}')
+              out=OUTDIR/f'contract-{spec["label"]}.json'
+              with out.open("wb") as f:
+                  p=sh(["git","show",f'{spec["commit"]}:{spec["path"]}'],check=False,stdout=f)
+              if p.returncode!=0:
+                  fail("GOVERNING_CONTRACT_UNAVAILABLE",spec["label"])
+              try:
+                  json.loads(out.read_bytes())
+              except Exception as exc:
+                  fail("GOVERNING_CONTRACT_INVALID_JSON",spec["label"],"valid JSON",type(exc).__name__)
+              return {"label":spec["label"],"commit":spec["commit"],"path":spec["path"],"git_blob":blob,
+                      "raw_sha256":sha_file(out),"byte_count":out.stat().st_size}
+          
+          def require_record_fields(rows,fields,scope):
+              if not isinstance(rows,list):
+                  fail("SOURCE_EXPORT_SCHEMA_COMPATIBILITY_UNRESOLVED",scope,"list",type(rows).__name__)
+              for i,row in enumerate(rows):
+                  if not isinstance(row,dict):
+                      fail("SOURCE_EXPORT_SCHEMA_COMPATIBILITY_UNRESOLVED",f"{scope}[{i}]","object",type(row).__name__)
+                  missing=[k for k in fields if k not in row]
+                  if missing:
+                      ident=row.get("classification_key") or row.get("attack_event_key") or row.get("source_link_key") or str(i)
+                      fail("SOURCE_EXPORT_SCHEMA_COMPATIBILITY_UNRESOLVED",f"{scope}:{ident}","required fields",",".join(missing))
+          
+          def validate_schema(obj,label):
+              if not isinstance(obj,dict):
+                  fail("SOURCE_EXPORT_SCHEMA_COMPATIBILITY_UNRESOLVED",label,"object",type(obj).__name__)
+              for k in ("classifications","attack_events","source_links"):
+                  if k not in obj:
+                      fail("SOURCE_EXPORT_SCHEMA_COMPATIBILITY_UNRESOLVED",f"{label}:{k}","present","missing")
+              if obj.get("schema_version")!=2:
+                  fail("SOURCE_EXPORT_SCHEMA_COMPATIBILITY_UNRESOLVED",f"{label}:schema_version",2,obj.get("schema_version"))
+              if obj.get("classification_key_version")!=CLASS_VERSION:
+                  fail("CLASSIFICATION_IDENTITY_VERSION_MISMATCH",label,CLASS_VERSION,obj.get("classification_key_version"))
+              if obj.get("attack_event_key_version")!=EVENT_VERSION:
+                  fail("EVENT_IDENTITY_VERSION_MISMATCH",label,EVENT_VERSION,obj.get("attack_event_key_version"))
+              if obj.get("source_link_key_version")!=SOURCE_LINK_VERSION:
+                  fail("SOURCE_LINK_IDENTITY_VERSION_MISMATCH",label,SOURCE_LINK_VERSION,obj.get("source_link_key_version"))
+              require_record_fields(obj["classifications"],[
+                  "classification_key_version","classification_key","city_key","historical_episode_id",
+                  "alert_start_utc_microseconds","alert_end_utc_microseconds","verdict","event_types",
+                  "qa_reasons_state","qa_reasons","classifier_blob_sha","classifier_methodology_version",
+                  "normalization_version","evidence_set_sha256","review_provenance_sha256","review_provenance",
+                  "accepted_evidence_membership"
+              ],f"{label}:classifications")
+              require_record_fields(obj["attack_events"],[
+                  "attack_event_key_version","attack_event_key","event_grain","city_key","historical_episode_id",
+                  "alert_start_utc_microseconds","alert_end_utc_microseconds","classification_key_v2"
+              ],f"{label}:attack_events")
+              require_record_fields(obj["source_links"],[
+                  "source_link_key_version","source_link_key","classification_key_v2","observation_id","content_sha256"
+              ],f"{label}:source_links")
+          
+          def validate_source(obj,spec,label):
+              validate_schema(obj,label)
+              cls=obj["classifications"]; events=obj["attack_events"]; links=obj["source_links"]
+              ckeys=[r["classification_key"] for r in cls]
+              ekeys=[r["attack_event_key"] for r in events]
+              lkeys=[r["source_link_key"] for r in links]
+              cities={r["city_key"] for r in cls}
+              dist=dict(Counter(r["verdict"] for r in cls))
+              if len(cls)!=spec["classifications"]:
+                  fail(f"SOURCE_{label}_CLASSIFICATION_COUNT_MISMATCH",label,spec["classifications"],len(cls))
+              if len(set(ckeys))!=len(cls):
+                  fail(f"SOURCE_{label}_DUPLICATE_CLASSIFICATION_KEY",label,len(cls),len(set(ckeys)))
+              if len(cities)!=spec["cities"]:
+                  fail(f"SOURCE_{label}_CITY_COUNT_MISMATCH",label,spec["cities"],len(cities))
+              if dist!=spec["distribution"]:
+                  fail(f"SOURCE_{label}_DISTRIBUTION_MISMATCH",label,spec["distribution"],dist)
+              if len(events)!=spec["positives"] or len(set(ekeys))!=spec["positives"]:
+                  fail(f"SOURCE_{label}_POSITIVE_EVENT_COUNT_MISMATCH",label,spec["positives"],len(set(ekeys)))
+              if len(set(lkeys))!=len(links):
+                  fail(f"SOURCE_{label}_DUPLICATE_SOURCE_LINK_KEY",label,len(links),len(set(lkeys)))
+              if label=="B" and len(links)!=spec["source_links"]:
+                  fail("SOURCE_B_SOURCE_LINK_COUNT_MISMATCH",label,spec["source_links"],len(links))
+              for r in cls:
+                  if r["classification_key_version"]!=CLASS_VERSION:
+                      fail("CLASSIFICATION_IDENTITY_VERSION_MISMATCH",r["classification_key"],CLASS_VERSION,r["classification_key_version"])
+                  if not r.get("classifier_blob_sha"):
+                      fail(f"SOURCE_{label}_CLASSIFIER_PROVENANCE_UNAVAILABLE",r["classification_key"])
+                  if not r.get("normalization_version"):
+                      fail(f"SOURCE_{label}_NORMALIZATION_VERSION_UNAVAILABLE",r["classification_key"])
+              for r in events:
+                  if r["attack_event_key_version"]!=EVENT_VERSION or r["event_grain"]!=EVENT_GRAIN:
+                      fail("EVENT_IDENTITY_CONTRACT_MISMATCH",r["attack_event_key"])
+              for r in links:
+                  if r["source_link_key_version"]!=SOURCE_LINK_VERSION:
+                      fail("SOURCE_LINK_IDENTITY_VERSION_MISMATCH",r["source_link_key"],SOURCE_LINK_VERSION,r["source_link_key_version"])
+          
+              positive_cls={r["classification_key"] for r in cls if r["verdict"] in {"STRICT_EVENT_POSITIVE","SENSITIVITY_EVENT_POSITIVE"}}
+              event_cls=[r["classification_key_v2"] for r in events]
+              if len(positive_cls)!=spec["positives"] or set(event_cls)!=positive_cls or len(event_cls)!=len(set(event_cls)):
+                  fail(f"SOURCE_{label}_POSITIVE_CLASSIFICATION_EVENT_MAPPING_MISMATCH",label,spec["positives"],len(set(event_cls)))
+          
+              class_set=set(ckeys)
+              link_map=defaultdict(list)
+              for r in links:
+                  ck=r["classification_key_v2"]
+                  if ck not in class_set:
+                      fail(f"SOURCE_{label}_SOURCE_LINK_UNKNOWN_CLASSIFICATION",r["source_link_key"],"known classification",ck)
+                  link_map[ck].append((r["observation_id"],r["content_sha256"]))
+              unresolved=0
+              for r in cls:
+                  members=r["accepted_evidence_membership"]
+                  if not isinstance(members,list):
+                      fail("SOURCE_EXPORT_SCHEMA_COMPATIBILITY_UNRESOLVED",r["classification_key"],"accepted_evidence_membership list",type(members).__name__)
+                  pairs=[]
+                  for m in members:
+                      if not isinstance(m,list) or len(m)!=2:
+                          fail("SOURCE_EXPORT_SCHEMA_COMPATIBILITY_UNRESOLVED",r["classification_key"],"[observation_id,content_sha256]",repr(m)[:160])
+                      pairs.append((m[0],m[1]))
+                  linked=link_map.get(r["classification_key"],[])
+                  unresolved += len(set(pairs)-set(linked))
+                  if Counter(pairs)!=Counter(linked):
+                      missing=list(set(pairs)-set(linked))
+                      extra=list(set(linked)-set(pairs))
+                      ident=(missing or extra or [("unknown","unknown")])[0]
+                      fail(f"SOURCE_{label}_EVIDENCE_SOURCE_LINK_MEMBERSHIP_MISMATCH",r["classification_key"],
+                           "exact frozen evidence membership",f"first_pair={ident}")
+              if unresolved!=0:
+                  fail(f"SOURCE_{label}_UNRESOLVED_EVIDENCE_REFERENCES",label,0,unresolved)
+          
+              if label=="A":
+                  qa_state=sum(r["qa_reasons_state"]=="UNMATERIALIZED_IN_ACCEPTED_SOURCE" for r in cls)
+                  qa_null=sum(r["qa_reasons"] is None for r in cls)
+                  if qa_state!=19542:
+                      fail("SOURCE_A_QA_UNMATERIALIZED_COUNT_MISMATCH","A",19542,qa_state)
+                  if qa_null!=19542:
+                      fail("SOURCE_A_QA_NULL_COUNT_MISMATCH","A",19542,qa_null)
+              else:
+                  qa_state=sum(r["qa_reasons_state"]=="MATERIALIZED" for r in cls)
+                  qa_null=sum(r["qa_reasons"] is None for r in cls)
+                  qa_nonlist=sum(not isinstance(r["qa_reasons"],list) for r in cls)
+                  if qa_state!=6863:
+                      fail("SOURCE_B_QA_MATERIALIZED_COUNT_MISMATCH","B",6863,qa_state)
+                  if qa_null!=0 or qa_nonlist!=0:
+                      fail("SOURCE_B_QA_REASONS_ARRAY_CONTRACT_MISMATCH","B","0 null and all arrays",f"null={qa_null},nonlist={qa_nonlist}")
+                  prov=sum(bool(r.get("classifier_blob_sha")) for r in cls)
+                  if prov!=6863:
+                      fail("SOURCE_B_CLASSIFIER_PROVENANCE_COVERAGE_MISMATCH","B",6863,prov)
+              return {
+                  "city_keys":cities,
+                  "classification_keys":set(ckeys),
+                  "event_keys":set(ekeys),
+                  "source_link_keys":set(lkeys),
+                  "source_links":len(links),
+                  "unresolved_evidence_references":unresolved,
+                  "qa_state_count":qa_state,
+                  "qa_null_count":qa_null,
+                  "qa_empty_array_count":sum(r.get("qa_reasons")==[] for r in cls),
+              }
+          
+          diag={"status":"BLOCKED","run_label":RUN_LABEL}
+          try:
+              a,a_integrity=materialize_source(SOURCE_A,"A")
+              b,b_integrity=materialize_source(SOURCE_B,"B")
+              contract_meta=[materialize_contract(x) for x in CONTRACTS]
+              va=validate_source(a,SOURCE_A,"A")
+              vb=validate_source(b,SOURCE_B,"B")
+          
+              city_overlap=va["city_keys"] & vb["city_keys"]
+              if city_overlap:
+                  fail("SOURCE_CITY_SET_COLLISION",sorted(city_overlap)[0],"disjoint city sets","collision")
+              class_overlap=va["classification_keys"] & vb["classification_keys"]
+              if class_overlap:
+                  fail("SOURCE_CLASSIFICATION_KEY_COLLISION",sorted(class_overlap)[0],"no collision","collision")
+              event_overlap=va["event_keys"] & vb["event_keys"]
+              if event_overlap:
+                  fail("SOURCE_EVENT_KEY_COLLISION",sorted(event_overlap)[0],"no collision","collision")
+              link_overlap=va["source_link_keys"] & vb["source_link_keys"]
+              if link_overlap:
+                  fail("SOURCE_LINK_KEY_COLLISION",sorted(link_overlap)[0],"no collision","collision")
+          
+              classifications=sorted([*a["classifications"],*b["classifications"]],key=lambda r:r["classification_key"])
+              events=sorted([*a["attack_events"],*b["attack_events"]],key=lambda r:r["attack_event_key"])
+              links=sorted([*a["source_links"],*b["source_links"]],key=lambda r:r["source_link_key"])
+          
+              combined_ckeys=[r["classification_key"] for r in classifications]
+              combined_ekeys=[r["attack_event_key"] for r in events]
+              combined_lkeys=[r["source_link_key"] for r in links]
+              combined_cities={r["city_key"] for r in classifications}
+              combined_dist=dict(Counter(r["verdict"] for r in classifications))
+              positives=sum(r["verdict"] in {"STRICT_EVENT_POSITIVE","SENSITIVITY_EVENT_POSITIVE"} for r in classifications)
+          
+              if len(combined_cities)!=23: fail("COMBINED_CITY_COUNT_MISMATCH","snapshot",23,len(combined_cities))
+              if len(classifications)!=26405: fail("COMBINED_CLASSIFICATION_COUNT_MISMATCH","snapshot",26405,len(classifications))
+              if len(set(combined_ckeys))!=26405: fail("COMBINED_CLASSIFICATION_KEY_UNIQUENESS_MISMATCH","snapshot",26405,len(set(combined_ckeys)))
+              if combined_dist!=EXPECTED_COMBINED_DIST: fail("COMBINED_DISTRIBUTION_MISMATCH","snapshot",EXPECTED_COMBINED_DIST,combined_dist)
+              if positives!=1080: fail("COMBINED_POSITIVE_CLASSIFICATION_COUNT_MISMATCH","snapshot",1080,positives)
+              if len(events)!=1080 or len(set(combined_ekeys))!=1080: fail("COMBINED_UNIQUE_EVENT_KEY_COUNT_MISMATCH","snapshot",1080,len(set(combined_ekeys)))
+              if len(set(combined_lkeys))!=len(links): fail("COMBINED_SOURCE_LINK_KEY_UNIQUENESS_MISMATCH","snapshot",len(links),len(set(combined_lkeys)))
+          
+              expected_ckeys=va["classification_keys"]|vb["classification_keys"]
+              if set(combined_ckeys)!=expected_ckeys: fail("COMBINED_CLASSIFICATION_SOURCE_PRESERVATION_MISMATCH","snapshot",len(expected_ckeys),len(set(combined_ckeys)))
+              if set(combined_ekeys)!=(va["event_keys"]|vb["event_keys"]): fail("COMBINED_EVENT_SOURCE_PRESERVATION_MISMATCH","snapshot")
+              if set(combined_lkeys)!=(va["source_link_keys"]|vb["source_link_keys"]): fail("COMBINED_SOURCE_LINK_PRESERVATION_MISMATCH","snapshot")
+          
+              cidx={r["classification_key"]:r for r in classifications}
+              eidx={r["attack_event_key"]:r for r in events}
+              lidx={r["source_link_key"]:r for r in links}
+              for src in (a,b):
+                  for r in src["classifications"]:
+                      if cidx.get(r["classification_key"])!=r: fail("CLASSIFICATION_RECORD_FIELD_PRESERVATION_MISMATCH",r["classification_key"])
+                  for r in src["attack_events"]:
+                      if eidx.get(r["attack_event_key"])!=r: fail("EVENT_RECORD_FIELD_PRESERVATION_MISMATCH",r["attack_event_key"])
+                  for r in src["source_links"]:
+                      if lidx.get(r["source_link_key"])!=r: fail("SOURCE_LINK_RECORD_FIELD_PRESERVATION_MISMATCH",r["source_link_key"])
+          
+              qa_b=sum(r["qa_reasons_state"]=="MATERIALIZED" for r in b["classifications"])
+              qa_a=sum(r["qa_reasons_state"]=="UNMATERIALIZED_IN_ACCEPTED_SOURCE" for r in a["classifications"])
+              qa_b_null=sum(r["qa_reasons"] is None for r in b["classifications"])
+              qa_a_null=sum(r["qa_reasons"] is None for r in a["classifications"])
+              if (qa_b,qa_b_null)!=(6863,0): fail("COMBINED_5CITY_QA_CONTRACT_MISMATCH","5-city","6863 materialized / 0 null",f"{qa_b}/{qa_b_null}")
+              if (qa_a,qa_a_null)!=(19542,19542): fail("COMBINED_18CITY_QA_CONTRACT_MISMATCH","18-city","19542 unmaterialized / 19542 null",f"{qa_a}/{qa_a_null}")
+          
+              total_unresolved=va["unresolved_evidence_references"]+vb["unresolved_evidence_references"]
+              if total_unresolved!=0: fail("COMBINED_UNRESOLVED_EVIDENCE_REFERENCES","snapshot",0,total_unresolved)
+          
+              provenance={
+                  "assembly_mode":"OFFLINE_UNION_OF_ALREADY_FROZEN_EXPORTS",
+                  "sources":[a_integrity,b_integrity],
+                  "governing_contracts":contract_meta,
+                  "ordering":{
+                      "classifications":"classification_key",
+                      "attack_events":"attack_event_key",
+                      "source_links":"source_link_key",
+                      "source_level_unkeyed_collections":"18-city source before 5-city source"
+                  },
+                  "serialization":{"encoding":"UTF-8","bom":False,"json":"compact sort_keys=True separators=(',',':')","final_newline":False},
+                  "semantic_classification_changes":0,
+                  "historical_public_source_requests":0,
+                  "neon_mutations":0,
+                  "production_mutations":0
+              }
+              gates={
+                  "cities":23,
+                  "classifications":26405,
+                  "unique_classification_keys":len(set(combined_ckeys)),
+                  "distribution":combined_dist,
+                  "positive_classifications":positives,
+                  "unique_positive_event_keys":len(set(combined_ekeys)),
+                  "total_source_links":len(links),
+                  "unique_source_link_keys":len(set(combined_lkeys)),
+                  "unresolved_evidence_references":total_unresolved,
+                  "five_city_qa_materialized_count":qa_b,
+                  "five_city_qa_reasons_null_count":qa_b_null,
+                  "five_city_qa_explicit_empty_array_count":vb["qa_empty_array_count"],
+                  "eighteen_city_qa_unmaterialized_count":qa_a,
+                  "eighteen_city_qa_reasons_null_count":qa_a_null,
+                  "source_a_integrity":"PASS",
+                  "source_b_integrity":"PASS",
+                  "historical_public_source_requests":0,
+                  "neon_mutations":0,
+                  "production_mutations":0,
+                  "semantic_changes":0,
+                  "credentials_exposed":False
+              }
+              snapshot={
+                  "schema_version":2,
+                  "kind":"attack_event_23city_persistence_snapshot_v2",
+                  "classification_key_version":CLASS_VERSION,
+                  "attack_event_key_version":EVENT_VERSION,
+                  "source_link_key_version":SOURCE_LINK_VERSION,
+                  "snapshot_provenance":provenance,
+                  "classifications":classifications,
+                  "attack_events":events,
+                  "source_links":links,
+                  "gates":gates
+              }
+              raw=json.dumps(snapshot,ensure_ascii=False,sort_keys=True,separators=(",",":")).encode("utf-8")
+              SNAP.write_bytes(raw)
+              out_sha=hashlib.sha256(raw).hexdigest()
+              aggregate={
+                  "sha256":out_sha,
+                  "byte_count":len(raw),
+                  "cities":23,
+                  "classifications":26405,
+                  "distribution":combined_dist,
+                  "positives":1080,
+                  "total_source_links":len(links),
+                  "unresolved_evidence_references":0,
+                  "five_city_qa_materialized_count":qa_b,
+                  "eighteen_city_qa_unmaterialized_count":qa_a,
+                  "unique_classification_keys":len(set(combined_ckeys)),
+                  "unique_event_keys":len(set(combined_ekeys)),
+                  "unique_source_link_keys":len(set(combined_lkeys)),
+                  "source_a_integrity":"PASS",
+                  "source_b_integrity":"PASS",
+                  "historical_public_source_requests":0,
+                  "neon_mutations":0,
+                  "production_mutation":"NO",
+                  "semantic_change":"NO",
+                  "credentials_exposed":False
+              }
+              manifest={"status":"PASS","run_label":RUN_LABEL,"artifact_name":f"attack-event-23city-persistence-snapshot-run-{RUN_LABEL}","aggregate":aggregate}
+              MANIFEST.write_text(json.dumps(manifest,ensure_ascii=False,sort_keys=True,separators=(",",":")),encoding="utf-8")
+              diag={"status":"PASS","run_label":RUN_LABEL,"sha256":out_sha,"byte_count":len(raw)}
+              DIAG.write_text(json.dumps(diag,ensure_ascii=False,sort_keys=True,separators=(",",":")),encoding="utf-8")
+              print("SNAPSHOT_MANIFEST="+json.dumps(manifest,ensure_ascii=False,sort_keys=True,separators=(",",":")))
+          except GateError as exc:
+              diag={"status":"BLOCKED","run_label":RUN_LABEL,"first_failing_gate":exc.gate,"scope":exc.scope,"expected":exc.expected,"actual":exc.actual}
+              DIAG.write_text(json.dumps(diag,ensure_ascii=False,sort_keys=True,separators=(",",":")),encoding="utf-8")
+              print("FIRST_FAILING_GATE="+exc.gate,file=sys.stderr)
+              if exc.scope: print("AFFECTED_SCOPE="+str(exc.scope),file=sys.stderr)
+              if exc.expected is not None: print("EXPECTED="+json.dumps(exc.expected,ensure_ascii=False,sort_keys=True),file=sys.stderr)
+              if exc.actual is not None: print("ACTUAL="+json.dumps(exc.actual,ensure_ascii=False,sort_keys=True),file=sys.stderr)
+              raise SystemExit(1)
+          except Exception as exc:
+              diag={"status":"BLOCKED","run_label":RUN_LABEL,"first_failing_gate":"EXECUTION_HARNESS_FAILURE","scope":type(exc).__name__,"actual":str(exc)[:500]}
+              DIAG.write_text(json.dumps(diag,ensure_ascii=False,sort_keys=True,separators=(",",":")),encoding="utf-8")
+              print("FIRST_FAILING_GATE=EXECUTION_HARNESS_FAILURE",file=sys.stderr)
+              print("AFFECTED_SCOPE="+type(exc).__name__,file=sys.stderr)
+              print("ACTUAL="+str(exc)[:500],file=sys.stderr)
+              raise
+          PY
+
+      - name: Upload independent snapshot
+        id: upload
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: attack-event-23city-persistence-snapshot-run-b
+          path: |
+            ${{ runner.temp }}/attack-event-23city-snapshot-b/attack_event_23city_persistence_snapshot_v2.json
+            ${{ runner.temp }}/attack-event-23city-snapshot-b/manifest.json
+            ${{ runner.temp }}/attack-event-23city-snapshot-b/diagnostic.json
+          if-no-files-found: warn
+          retention-days: 30
+
+  compare:
+    name: compare-a-b
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    needs: [assemble_a, assemble_b]
+    permissions:
+      contents: read
+    outputs:
+      snapshot_sha256: ${{ steps.cmp.outputs.sha256 }}
+      snapshot_byte_count: ${{ steps.cmp.outputs.byte_count }}
+    steps:
+      - name: Download run A
+        uses: actions/download-artifact@v4
+        with:
+          name: attack-event-23city-persistence-snapshot-run-a
+          path: run-a
+
+      - name: Download run B
+        uses: actions/download-artifact@v4
+        with:
+          name: attack-event-23city-persistence-snapshot-run-b
+          path: run-b
+
+      - name: Compare byte identity and manifests
+        id: cmp
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import hashlib,json,os,sys
+          from pathlib import Path
+          fn="attack_event_23city_persistence_snapshot_v2.json"
+          a=Path("run-a")/fn; b=Path("run-b")/fn
+          ma=Path("run-a/manifest.json"); mb=Path("run-b/manifest.json")
+          if not all(p.is_file() for p in (a,b,ma,mb)):
+              print("FIRST_FAILING_GATE=SNAPSHOT_A_B_NONDETERMINISM",file=sys.stderr)
+              print("AFFECTED_SCOPE=missing A/B proof output",file=sys.stderr)
+              raise SystemExit(1)
+          ab=a.read_bytes(); bb=b.read_bytes()
+          sha=lambda x:hashlib.sha256(x).hexdigest()
+          ja=json.loads(ma.read_text(encoding="utf-8")); jb=json.loads(mb.read_text(encoding="utf-8"))
+          reasons=[]
+          if ab!=bb: reasons.append("bytes")
+          if sha(ab)!=sha(bb): reasons.append("sha256")
+          if len(ab)!=len(bb): reasons.append("byte_count")
+          if ja.get("aggregate")!=jb.get("aggregate"): reasons.append("aggregate_manifest")
+          if reasons:
+              print("FIRST_FAILING_GATE=SNAPSHOT_A_B_NONDETERMINISM",file=sys.stderr)
+              print("AFFECTED_SCOPE="+",".join(reasons),file=sys.stderr)
+              print("RUN_A_SHA256="+sha(ab),file=sys.stderr)
+              print("RUN_B_SHA256="+sha(bb),file=sys.stderr)
+              print("RUN_A_BYTES="+str(len(ab)),file=sys.stderr)
+              print("RUN_B_BYTES="+str(len(bb)),file=sys.stderr)
+              raise SystemExit(1)
+          print("A_B_BYTE_IDENTICAL=YES")
+          print("RUN_A_SHA256="+sha(ab))
+          print("RUN_B_SHA256="+sha(bb))
+          print("BYTE_COUNT="+str(len(ab)))
+          with open(os.environ["GITHUB_OUTPUT"],"a",encoding="utf-8") as f:
+              f.write("sha256="+sha(ab)+"\n")
+              f.write("byte_count="+str(len(ab))+"\n")
+          PY
+
+  finalize:
+    name: durable-freeze
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    needs: [assemble_a, assemble_b, compare]
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout freeze branch for finalization
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: true
+          clean: true
+
+      - name: Download proven run A bytes
+        uses: actions/download-artifact@v4
+        with:
+          name: attack-event-23city-persistence-snapshot-run-a
+          path: proven-a
+
+      - name: Commit exact proven bytes and remove temporary workflow
+        id: freeze
+        env:
+          PROVEN_SHA256: ${{ needs.compare.outputs.snapshot_sha256 }}
+          PROVEN_BYTE_COUNT: ${{ needs.compare.outputs.snapshot_byte_count }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          FRESH_MAIN="204db59612a9154d748e98d138838aa2133774fe"
+          BRANCH="attack-event-23city-persistence-snapshot-v2-2026-10-04"
+          WORKFLOW=".github/workflows/attack-event-23city-persistence-snapshot-v2-freeze.yml"
+          ART="research/attack_event_23city_persistence_snapshot_v2_2026-10-04.json"
+          SRC="proven-a/attack_event_23city_persistence_snapshot_v2.json"
+
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          ACTUAL_SHA="$(sha256sum "$SRC" | awk '{print $1}')"
+          ACTUAL_BYTES="$(wc -c < "$SRC" | tr -d ' ')"
+          if [ "$ACTUAL_SHA" != "$PROVEN_SHA256" ] || [ "$ACTUAL_BYTES" != "$PROVEN_BYTE_COUNT" ]; then
+            echo "FIRST_FAILING_GATE=FINALIZATION_PROVEN_BYTES_MISMATCH" >&2
+            echo "EXPECTED=$PROVEN_SHA256/$PROVEN_BYTE_COUNT" >&2
+            echo "ACTUAL=$ACTUAL_SHA/$ACTUAL_BYTES" >&2
+            exit 1
+          fi
+          if [ "$ACTUAL_BYTES" -gt 104857600 ]; then
+            echo "FIRST_FAILING_GATE=DURABLE_ARTIFACT_GITHUB_SIZE_LIMIT" >&2
+            echo "EXPECTED_MAX_BYTES=104857600" >&2
+            echo "ACTUAL_BYTES=$ACTUAL_BYTES" >&2
+            exit 1
+          fi
+
+          mkdir -p research
+          cp "$SRC" "$ART"
+          git rm "$WORKFLOW"
+          git add "$ART"
+          if [ "$(git diff --cached --name-only "$FRESH_MAIN" | tr -d '\r')" != "$ART" ]; then
+            echo "FIRST_FAILING_GATE=FINAL_TREE_HYGIENE_MISMATCH" >&2
+            git diff --cached --name-only "$FRESH_MAIN" >&2
+            exit 1
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "Freeze 23-city persistence identity v2 snapshot"
+          FINAL="$(git rev-parse HEAD)"
+          if [ "$(git diff --name-only "$FRESH_MAIN..$FINAL" | tr -d '\r')" != "$ART" ]; then
+            echo "FIRST_FAILING_GATE=FINAL_TREE_HYGIENE_MISMATCH" >&2
+            git diff --name-only "$FRESH_MAIN..$FINAL" >&2
+            exit 1
+          fi
+          if git cat-file -e "$FINAL:$WORKFLOW" 2>/dev/null; then
+            echo "FIRST_FAILING_GATE=TEMPORARY_WORKFLOW_PRESENT_FINAL_TREE" >&2
+            exit 1
+          fi
+          FINAL_SHA="$(sha256sum "$ART" | awk '{print $1}')"
+          FINAL_BYTES="$(wc -c < "$ART" | tr -d ' ')"
+          if [ "$FINAL_SHA" != "$PROVEN_SHA256" ] || [ "$FINAL_BYTES" != "$PROVEN_BYTE_COUNT" ]; then
+            echo "FIRST_FAILING_GATE=FINAL_DURABLE_BYTES_MISMATCH" >&2
+            exit 1
+          fi
+          BLOB="$(git rev-parse "$FINAL:$ART")"
+          git push origin "HEAD:refs/heads/$BRANCH"
+          REMOTE="$(git ls-remote origin "refs/heads/$BRANCH" | cut -f1)"
+          test "$REMOTE" = "$FINAL"
+
+          python - <<'PY'
+          import json,os
+          from pathlib import Path
+          m=json.loads(Path("proven-a/manifest.json").read_text(encoding="utf-8"))
+          a=m["aggregate"]
+          out={
+            "verdict":"ATTACK-EVENT 23-CITY PERSISTENCE SNAPSHOT V2 FROZEN",
+            "fresh_main_base":"204db59612a9154d748e98d138838aa2133774fe",
+            "freeze_branch":"attack-event-23city-persistence-snapshot-v2-2026-10-04",
+            "temporary_workflow_commit":os.environ["GITHUB_SHA"],
+            "actions_run_id":int(os.environ["GITHUB_RUN_ID"]),
+            "run_a_artifact_name":"attack-event-23city-persistence-snapshot-run-a",
+            "run_b_artifact_name":"attack-event-23city-persistence-snapshot-run-b",
+            "run_a_sha256":os.environ["PROVEN_SHA256"],
+            "run_b_sha256":os.environ["PROVEN_SHA256"],
+            "a_b_byte_identical":"YES",
+            "final_artifact_commit":os.popen("git rev-parse HEAD").read().strip(),
+            "durable_artifact_path":"research/attack_event_23city_persistence_snapshot_v2_2026-10-04.json",
+            "durable_artifact_git_blob":os.popen("git rev-parse HEAD:research/attack_event_23city_persistence_snapshot_v2_2026-10-04.json").read().strip(),
+            "final_file_sha256":os.environ["PROVEN_SHA256"],
+            "byte_count":int(os.environ["PROVEN_BYTE_COUNT"]),
+            **{k:a[k] for k in (
+              "cities","classifications","distribution","positives","total_source_links",
+              "unresolved_evidence_references","five_city_qa_materialized_count",
+              "eighteen_city_qa_unmaterialized_count","unique_classification_keys",
+              "unique_event_keys","unique_source_link_keys","source_a_integrity","source_b_integrity",
+              "historical_public_source_requests","neon_mutations","production_mutation",
+              "semantic_change","credentials_exposed"
+            )},
+            "final_diff":"exactly one durable artifact",
+            "temporary_workflow_absent_final_tree":"YES"
+          }
+          Path(os.environ["RUNNER_TEMP"]).joinpath("freeze_manifest.json").write_text(
+              json.dumps(out,ensure_ascii=False,sort_keys=True,separators=(",",":")),encoding="utf-8")
+          print("FREEZE_MANIFEST="+json.dumps(out,ensure_ascii=False,sort_keys=True,separators=(",",":")))
+          PY
+
+      - name: Upload compact freeze manifest
+        uses: actions/upload-artifact@v4
+        with:
+          name: attack-event-23city-persistence-snapshot-freeze-manifest
+          path: ${{ runner.temp }}/freeze_manifest.json
+          if-no-files-found: error
+          retention-days: 30
