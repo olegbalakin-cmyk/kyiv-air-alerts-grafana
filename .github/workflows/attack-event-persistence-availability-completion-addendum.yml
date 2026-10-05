@@ -1002,7 +1002,7 @@ ALTER TABLE public.attack_event_classifications
               result["remaining_representability_gaps"] = (e.gaps or [])[:10]
               result["snapshot_sha_intact"] = result.get("frozen_snapshot", {}).get("verified_sha256") == SNAPSHOT["sha256"]
               result["safe_continuation_point"] = "fix proof/addendum only from the first failing gate; do not rerun STEP 2C or query Neon"
-              diag = TMP / "attack_event_persistence_availability_completion_addendum_blocked.json"
+              diag = Path("research/attack_event_persistence_availability_completion_addendum_blocked.json")
               diag.write_text(json.dumps(result, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8")
               print("VERDICT=" + result["verdict"])
               print("FIRST_FAILING_GATE=" + e.gate)
@@ -1010,7 +1010,6 @@ ALTER TABLE public.attack_event_classifications
               with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as f:
                   f.write("pass=false\n")
                   f.write("diagnostic_path=" + str(diag) + "\n")
-              raise
           PY
 
       - name: Commit durable artifact
@@ -1028,6 +1027,18 @@ ALTER TABLE public.attack_event_classifications
           echo "ARTIFACT_BLOB=$(git rev-parse HEAD:$OUT)"
           echo "ARTIFACT_SHA256=$(sha256sum "$OUT" | awk '{print $1}')"
 
+      - name: Commit bounded blocked diagnostic
+        if: steps.audit.outputs.pass == 'false'
+        shell: bash
+        run: |
+          set -euo pipefail
+          OUT="research/attack_event_persistence_availability_completion_addendum_blocked.json"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -- "$OUT"
+          git commit -m "Record blocked persistence availability completion diagnostic"
+          git push origin HEAD:attack-event-persistence-availability-completion-addendum-2026-10-05
+
       - name: Upload proof artifact
         if: always()
         uses: actions/upload-artifact@v4
@@ -1035,5 +1046,5 @@ ALTER TABLE public.attack_event_classifications
           name: attack-event-persistence-availability-completion-addendum-proof
           path: |
             research/attack_event_persistence_availability_completion_addendum_2026-10-05.json
-            ${{ runner.temp }}/attack-event-persistence-availability-completion/attack_event_persistence_availability_completion_addendum_blocked.json
+            research/attack_event_persistence_availability_completion_addendum_blocked.json
           if-no-files-found: ignore
