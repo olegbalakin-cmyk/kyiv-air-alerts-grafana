@@ -1,0 +1,213 @@
+                p = 2
+            elif exact_s or exact_e:
+                p = 3
+            elif ov > 0:
+                p = 4
+            elif gap is not None and gap <= NEARBY_SECONDS:
+                p = 5
+            elif canon:
+                p = 6
+            else:
+                p = 7
+            total_delta = (abs(sd) if sd is not None else 10**18) + (abs(ed) if ed is not None else 10**18)
+            return (p, -ov, gap if gap is not None else 10**18, total_delta, c["episode_uid"])
+
+        diag_candidates = sorted(union.values(), key=rank_candidate)[:5]
+        for c in diag_candidates:
+            basis = []
+            if c.get("start_delta_seconds") == 0:
+                basis.append("EXACT_START")
+            if c.get("end_delta_seconds") == 0:
+                basis.append("EXACT_END")
+            if (c.get("overlap_duration_seconds") or 0) > 0:
+                basis.append("INTERVAL_OVERLAP")
+            if c.get("boundary_gap_seconds") is not None and c["boundary_gap_seconds"] <= NEARBY_SECONDS:
+                basis.append("WITHIN_30_MIN_BOUNDARY_GAP")
+            if is_canonical(c):
+                basis.append("CANONICAL_AIR_CLOSED_V1")
+            c["candidate_similarity"] = basis
+
+        forensic_records.append({
+            "classification_key": ck,
+            "city_key": city,
+            "historical_episode_id": hist_id,
+            "historical_start": utc_microseconds(hs),
+            "historical_end": utc_microseconds(he),
+            "accepted_binding_state": "UNBOUND",
+            "primary_forensic_category": category,
+            "secondary_flags": flags,
+            "diagnostic_candidates": diag_candidates,
+            "canonical_exact_start_only_count": exact_start_count,
+            "canonical_exact_end_only_count": exact_end_count,
+            "canonical_overlap_count": overlap_count,
+            "canonical_nearby_nonoverlap_count": nearby_nonoverlap_count,
+            "representative_start_delta_seconds": representative.get("start_delta_seconds") if representative else None,
+            "representative_end_delta_seconds": representative.get("end_delta_seconds") if representative else None,
+            "representative_overlap_duration_seconds": representative.get("overlap_duration_seconds") if representative else None,
+            "representative_boundary_gap_seconds": representative.get("boundary_gap_seconds") if representative else None,
+            "mechanical_cause": mechanical,
+            "upstream_cause_status": "NOT_PROVEN",
+            "upstream_cause_evidence_references": [],
+            "binding_changed": False,
+        })
+
+    if len(forensic_records) != EXPECTED_TARGETS:
+        fail("UNBOUND_FORENSIC_RECORD_COUNT_MISMATCH", affected_count=len(forensic_records))
+    if any(r.get("accepted_binding_state") != "UNBOUND" for r in forensic_records):
+        fail("UNBOUND_FORENSIC_INPUT_STATE_MISMATCH", affected_count=EXPECTED_TARGETS)
+    if any(not r.get("primary_forensic_category") for r in forensic_records):
+        fail("UNBOUND_FORENSIC_CATEGORY_MISSING", affected_count=EXPECTED_TARGETS)
+    if len({r["classification_key"] for r in forensic_records}) != EXPECTED_TARGETS:
+        fail("UNBOUND_FORENSIC_CLASSIFICATION_KEY_UNIQUENESS_MISMATCH", affected_count=EXPECTED_TARGETS)
+
+    by_city = dict(sorted(Counter(r["city_key"] for r in forensic_records).items()))
+    by_category = dict(sorted(Counter(r["primary_forensic_category"] for r in forensic_records).items()))
+    flag_counts = Counter(flag for r in forensic_records for flag in r["secondary_flags"])
+    proven = sum(r["upstream_cause_status"] == "PROVEN_FROM_REPOSITORY_OR_DB_PROVENANCE" for r in forensic_records)
+    not_proven = sum(r["upstream_cause_status"] == "NOT_PROVEN" for r in forensic_records)
+    start_abs = [abs(float(r["representative_start_delta_seconds"])) for r in forensic_records if r.get("representative_start_delta_seconds") is not None]
+    end_abs = [abs(float(r["representative_end_delta_seconds"])) for r in forensic_records if r.get("representative_end_delta_seconds") is not None]
+    any_overlap = sum(int(r.get("canonical_overlap_count") or 0) > 0 for r in forensic_records)
+    multi_overlap = sum(int(r.get("canonical_overlap_count") or 0) >= 2 for r in forensic_records)
+    no_nearby = sum(r["primary_forensic_category"] == "NO_NEARBY_CANONICAL_EPISODE" for r in forensic_records)
+
+    # Select at most five representative examples, preferring distinct categories then cities.
+    examples = []
+    seen_cat = set()
+    seen_city = set()
+    for r in forensic_records:
+        if r["primary_forensic_category"] not in seen_cat:
+            examples.append(compact_example(r))
+            seen_cat.add(r["primary_forensic_category"])
+            seen_city.add(r["city_key"])
+        if len(examples) == 5:
+            break
+    if len(examples) < 5:
+        for r in forensic_records:
+            key = (r["city_key"], r["historical_episode_id"])
+            if any((e["city_key"], e["historical_episode_id"]) == key for e in examples):
+                continue
+            if r["city_key"] not in seen_city or len(examples) < 5:
+                examples.append(compact_example(r))
+                seen_city.add(r["city_key"])
+            if len(examples) == 5:
+                break
+
+    forensic_doc = {
+        "schema_version": 1,
+        "kind": "attack_event_25_unbound_parent_forensic",
+        "verdict": "ATTACK-EVENT 25 UNBOUND PARENT FORENSIC COMPLETED",
+        "accepted_source_audit": {
+            "run_id": EXPECTED_AUDIT_RUN,
+            "job_id": EXPECTED_AUDIT_JOB,
+            "artifact_id": EXPECTED_AUDIT_ARTIFACT,
+            "artifact_name": EXPECTED_AUDIT_ARTIFACT_NAME,
+            "head_sha": EXPECTED_AUDIT_HEAD,
+        },
+        "accepted_contract_alignment": {
+            "run_id": EXPECTED_ALIGNMENT_RUN,
+            "artifact_id": EXPECTED_ALIGNMENT_ARTIFACT,
+            "artifact_name": EXPECTED_ALIGNMENT_ARTIFACT_NAME,
+            "head_sha": EXPECTED_ALIGNMENT_HEAD,
+        },
+        "parent_corpus_sha256": parent_corpus_sha,
+        "permanent_neon_branch_id": branch_id,
+        "records": forensic_records,
+        "db_writes": 0,
+        "neon_mutations": 0,
+        "binding_changes": 0,
+    }
+    write_json(FORENSIC_PATH, forensic_doc)
+
+    summary = {
+        "verdict": "ATTACK-EVENT 25 UNBOUND PARENT FORENSIC COMPLETED",
+        "targets": EXPECTED_TARGETS,
+        "count_by_city": by_city,
+        "count_by_primary_category": by_category,
+        "count_by_secondary_flag": dict(sorted(flag_counts.items())),
+        "upstream_cause_PROVEN_count": proven,
+        "upstream_cause_NOT_PROVEN_count": not_proven,
+        "absolute_start_delta_seconds": stat_triplet(start_abs),
+        "absolute_end_delta_seconds": stat_triplet(end_abs),
+        "count_with_any_interval_overlap": any_overlap,
+        "count_with_multiple_overlaps": multi_overlap,
+        "count_with_no_nearby_canonical_episode": no_nearby,
+        "representative_examples": examples,
+        "parent_corpus_sha256": parent_corpus_sha,
+        "parent_corpus_sha_match": "YES",
+        "accepted_audit_run_id": EXPECTED_AUDIT_RUN,
+        "accepted_audit_job_id": EXPECTED_AUDIT_JOB,
+        "accepted_audit_artifact_id": EXPECTED_AUDIT_ARTIFACT,
+        "accepted_alignment_run_id": EXPECTED_ALIGNMENT_RUN,
+        "accepted_alignment_artifact_id": EXPECTED_ALIGNMENT_ARTIFACT,
+        "db_writes": 0,
+        "neon_mutations": 0,
+        "binding_changes": 0,
+    }
+    write_json(SUMMARY_PATH, summary)
+    print("FORENSIC_SUMMARY=" + json.dumps(summary, ensure_ascii=False, sort_keys=True, separators=(",", ":")))
+
+except GateError as exc:
+    blocked = {
+        "verdict": "ATTACK-EVENT 25 UNBOUND PARENT FORENSIC BLOCKED",
+        "first_failing_gate": exc.gate,
+        "affected_count": exc.affected_count,
+        "parent_corpus_sha_match": parent_sha_match,
+        "parent_corpus_sha256": parent_corpus_sha,
+        "db_writes": 0,
+        "neon_mutations": 0,
+        "binding_changes": 0,
+        "safe_continuation_point": "25-UNBOUND read-only forensic diagnostic only; repair nothing and preserve accepted binding state",
+    }
+    if exc.detail is not None:
+        blocked["detail"] = exc.detail
+    write_json(SUMMARY_PATH, blocked)
+    write_json(FORENSIC_PATH, {
+        "schema_version": 1,
+        "kind": "attack_event_25_unbound_parent_forensic",
+        "verdict": blocked["verdict"],
+        "first_failing_gate": exc.gate,
+        "records": forensic_records,
+        "db_writes": 0,
+        "neon_mutations": 0,
+        "binding_changes": 0,
+    })
+    print("FORENSIC_SUMMARY=" + json.dumps(blocked, ensure_ascii=False, sort_keys=True, separators=(",", ":")))
+    raise SystemExit(1)
+except Exception as exc:
+    blocked = {
+        "verdict": "ATTACK-EVENT 25 UNBOUND PARENT FORENSIC BLOCKED",
+        "first_failing_gate": "EXECUTION_HARNESS_FAILURE",
+        "affected_count": EXPECTED_TARGETS,
+        "parent_corpus_sha_match": parent_sha_match,
+        "parent_corpus_sha256": parent_corpus_sha,
+        "db_writes": 0,
+        "neon_mutations": 0,
+        "binding_changes": 0,
+        "safe_continuation_point": "25-UNBOUND execution harness only; repair nothing and preserve accepted binding state",
+        "detail": {"error_type": type(exc).__name__, "error": safe_error(exc)},
+    }
+    write_json(SUMMARY_PATH, blocked)
+    write_json(FORENSIC_PATH, {
+        "schema_version": 1,
+        "kind": "attack_event_25_unbound_parent_forensic",
+        "verdict": blocked["verdict"],
+        "first_failing_gate": blocked["first_failing_gate"],
+        "records": forensic_records,
+        "db_writes": 0,
+        "neon_mutations": 0,
+        "binding_changes": 0,
+    })
+    print("FORENSIC_SUMMARY=" + json.dumps(blocked, ensure_ascii=False, sort_keys=True, separators=(",", ":")))
+    raise SystemExit(1)
+finally:
+    if cur is not None:
+        try:
+            cur.execute("ROLLBACK;")
+        except Exception:
+            pass
+    if conn is not None:
+        try:
+            conn.close()
+        except Exception:
+            pass
