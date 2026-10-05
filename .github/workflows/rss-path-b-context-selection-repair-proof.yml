@@ -1,0 +1,89 @@
+name: RSS Path-B context-selection repair proof
+
+on:
+  push:
+    branches:
+      - rss-path-b-context-selection-repair-2026-10-05
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  prove:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      PRODUCTION_SEMANTIC_REFERENCE: c26307efcea065813870dc27901dbd225f4f3e33
+      FROZEN_ARTIFACT_ID: "11329769176"
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Assert bounded diff
+        shell: bash
+        run: |
+          set -euo pipefail
+          git diff --name-only "$PRODUCTION_SEMANTIC_REFERENCE"...HEAD | sort > /tmp/changed.txt
+          cat /tmp/changed.txt
+          python - <<'PY'
+          from pathlib import Path
+          allowed = {
+              "kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py",
+              ".github/proof/rss_path_b_context_selection_repair_proof.py",
+              ".github/workflows/rss-path-b-context-selection-repair-proof.yml",
+          }
+          changed=set(Path("/tmp/changed.txt").read_text().splitlines())
+          extra=changed-allowed
+          assert not extra, sorted(extra)
+          PY
+          for key in DATABASE_URL NEON_DATABASE_URL NEON_URL PGHOST PGPORT PGDATABASE PGUSER PGPASSWORD; do
+            test -z "${!key-}" || { echo "Unexpected DB env: $key"; exit 1; }
+          done
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: kyiv-air-alerts-grafana/requirements.txt
+
+      - name: Install existing requirements
+        run: python -m pip install -r kyiv-air-alerts-grafana/requirements.txt
+
+      - name: Compile and run unchanged-semantics self-test
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m py_compile             kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py             .github/proof/rss_path_b_context_selection_repair_proof.py
+          (cd kyiv-air-alerts-grafana && python scripts/monitor_explosion_candidates.py --self-test)
+
+      - name: Download only frozen predecessor artifact
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/pathb-input /tmp/pathb-proof
+          gh api "/repos/$GITHUB_REPOSITORY/actions/artifacts/$FROZEN_ARTIFACT_ID/zip" > /tmp/pathb-input/frozen.zip
+          unzip -q /tmp/pathb-input/frozen.zip -d /tmp/pathb-input
+          test -s /tmp/pathb-input/rss_temporal_audit_context_retention.json
+
+      - name: Prove complete frozen 228 denominator
+        shell: bash
+        run: |
+          set -euo pipefail
+          python .github/proof/rss_path_b_context_selection_repair_proof.py             /tmp/pathb-input/rss_temporal_audit_context_retention.json             /tmp/pathb-proof/rss_path_b_context_selection_repair_proof_2026-10-05.json
+          sha256sum /tmp/pathb-proof/rss_path_b_context_selection_repair_proof_2026-10-05.json             > /tmp/pathb-proof/rss_path_b_context_selection_repair_proof_2026-10-05.json.sha256
+
+      - name: Upload proof artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: rss-path-b-context-selection-repair-proof
+          path: /tmp/pathb-proof/
+          if-no-files-found: error
+          retention-days: 30
