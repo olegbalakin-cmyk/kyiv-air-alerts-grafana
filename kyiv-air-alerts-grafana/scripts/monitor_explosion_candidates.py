@@ -2597,7 +2597,7 @@ def event_clock_mentions(text: str) -> list[tuple[int, int]]:
     event_hits = list(
         re.finditer(
             r"(?:вибух\w*|влуч\w*|поціл\w*|приліт\w*|вдарил\w*|ударил\w*|"
-            r"\bудар\w*|\батак\w*|"
+            r"\bудар\w*|\bатак\w*|"
             r"(?:завдал\w*|нанес\w*).{0,50}удар\w*)",
             low,
         )
