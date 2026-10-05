@@ -1,0 +1,230 @@
+from __future__ import annotations
+
+import hashlib
+import io
+import json
+import os
+import re
+import statistics
+import subprocess
+import sys
+import urllib.request
+import zipfile
+from collections import Counter, defaultdict
+from datetime import datetime, timedelta, timezone
+from pathlib import Path
+
+import psycopg
+
+REPO = "olegbalakin-cmyk/kyiv-air-alerts-grafana"
+EXPECTED_BRANCH = "br-bold-mode-b5rub8pq"
+EXPECTED_PARENT_SHA = "882802f162334c336bc5015e1ef12b9e0d36b338c12f4939700fc69419387146"
+EXPECTED_AUDIT_RUN = 37269247142
+EXPECTED_AUDIT_JOB = 111632514267
+EXPECTED_AUDIT_ARTIFACT = 11327254449
+EXPECTED_AUDIT_ARTIFACT_NAME = "attack-event-23city-parent-binding-audit"
+EXPECTED_AUDIT_HEAD = "174c4a4621d1831f6d808d7c23d992dc4e41cc90"
+EXPECTED_ALIGNMENT_RUN = 37281361126
+EXPECTED_ALIGNMENT_ARTIFACT = 11332332817
+EXPECTED_ALIGNMENT_ARTIFACT_NAME = "attack-event-step2b-parent-binding-contract-alignment"
+EXPECTED_ALIGNMENT_HEAD = "74da9bbcf921e96a965ee1995320e351e7a92d0a"
+EXPECTED_COUNTS = {"BOUND": 26380, "UNBOUND": 25, "AMBIGUOUS": 0}
+EXPECTED_TARGETS = 25
+EXPECTED_CITY_SCOPE = {"kharkiv", "kyiv", "lviv", "sumy", "zaporizhzhia"}
+CANONICAL_VERSION = "alert-canonicalization-v1"
+NEARBY_SECONDS = 30 * 60
+
+OUTDIR = Path(os.environ.get("RUNNER_TEMP", "/tmp")) / "attack-event-25-unbound-parent-forensic"
+OUTDIR.mkdir(parents=True, exist_ok=True)
+FORENSIC_PATH = OUTDIR / "attack_event_25_unbound_parent_forensic.json"
+SUMMARY_PATH = OUTDIR / "summary.json"
+DOWNLOAD_DIR = OUTDIR / "inputs"
+DOWNLOAD_DIR.mkdir(parents=True, exist_ok=True)
+
+
+class GateError(RuntimeError):
+    def __init__(self, gate: str, *, affected_count: int | None = None, detail=None):
+        self.gate = gate
+        self.affected_count = affected_count
+        self.detail = detail
+        super().__init__(gate)
+
+
+def fail(gate: str, *, affected_count: int | None = None, detail=None):
+    raise GateError(gate, affected_count=affected_count, detail=detail)
+
+
+def write_json(path: Path, obj) -> None:
+    path.write_text(
+        json.dumps(obj, ensure_ascii=False, sort_keys=True, separators=(",", ":")),
+        encoding="utf-8",
+    )
+
+
+def safe_error(exc: BaseException) -> str:
+    text = str(exc)
+    secret = os.environ.get("PHASE1_PROD_SHADOW_DATABASE_URL", "")
+    if secret:
+        text = text.replace(secret, "<redacted>")
+    text = re.sub(r"(?i)(postgres(?:ql)?://)[^@\s]+@", r"\1<redacted>@", text)
+    token = os.environ.get("GITHUB_TOKEN", "")
+    if token:
+        text = text.replace(token, "<redacted>")
+    return text[:800]
+
+
+def gh_json(url: str) -> dict:
+    token = os.environ.get("GITHUB_TOKEN", "")
+    if not token:
+        fail("GITHUB_TOKEN_MISSING")
+    req = urllib.request.Request(
+        url,
+        headers={
+            "Accept": "application/vnd.github+json",
+            "Authorization": f"Bearer {token}",
+            "X-GitHub-Api-Version": "2022-11-28",
+            "User-Agent": "attack-event-unbound-forensic-proof",
+        },
+    )
+    with urllib.request.urlopen(req, timeout=30) as resp:
+        return json.loads(resp.read().decode("utf-8"))
+
+
+def validate_artifact_identity(*, artifact_id: int, name: str, run_id: int, head_sha: str) -> None:
+    meta = gh_json(f"https://api.github.com/repos/{REPO}/actions/artifacts/{artifact_id}")
+    wr = meta.get("workflow_run") or {}
+    if (
+        int(meta.get("id") or 0) != artifact_id
+        or meta.get("name") != name
+        or bool(meta.get("expired"))
+        or int(wr.get("id") or 0) != run_id
+        or wr.get("head_sha") != head_sha
+    ):
+        fail(
+            "ACCEPTED_ARTIFACT_IDENTITY_MISMATCH",
+            detail={
+                "artifact_id": artifact_id,
+                "actual_name": meta.get("name"),
+                "actual_run_id": wr.get("id"),
+                "actual_head_sha": wr.get("head_sha"),
+                "expired": meta.get("expired"),
+            },
+        )
+
+
+def download_artifact(artifact_id: int, dest: Path) -> None:
+    token = os.environ.get("GITHUB_TOKEN", "")
+    zip_path = dest.with_suffix(".zip")
+    cmd = [
+        "curl",
+        "-fsSL",
+        "-H",
+        "Accept: application/vnd.github+json",
+        "-H",
+        f"Authorization: Bearer {token}",
+        "-H",
+        "X-GitHub-Api-Version: 2022-11-28",
+        f"https://api.github.com/repos/{REPO}/actions/artifacts/{artifact_id}/zip",
+        "-o",
+        str(zip_path),
+    ]
+    p = subprocess.run(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.PIPE, text=True)
+    if p.returncode != 0:
+        fail("ACCEPTED_ARTIFACT_DOWNLOAD_FAILED", detail={"artifact_id": artifact_id})
+    dest.mkdir(parents=True, exist_ok=True)
+    try:
+        with zipfile.ZipFile(zip_path) as zf:
+            zf.extractall(dest)
+    except Exception:
+        fail("ACCEPTED_ARTIFACT_ZIP_INVALID", detail={"artifact_id": artifact_id})
+
+
+def load_single_json(root: Path, preferred_name: str | None = None) -> dict:
+    if preferred_name:
+        p = root / preferred_name
+        if p.is_file():
+            obj = json.loads(p.read_text(encoding="utf-8"))
+            if isinstance(obj, dict):
+                return obj
+    files = sorted(root.rglob("*.json"))
+    for p in files:
+        try:
+            obj = json.loads(p.read_text(encoding="utf-8"))
+        except Exception:
+            continue
+        if isinstance(obj, dict):
+            return obj
+    fail("ACCEPTED_ARTIFACT_JSON_MISSING")
+
+
+def parse_utc(value: str) -> datetime:
+    if not isinstance(value, str) or not value:
+        raise ValueError("empty timestamp")
+    dt = datetime.fromisoformat(value.replace("Z", "+00:00"))
+    if dt.tzinfo is None:
+        raise ValueError("naive timestamp")
+    return dt.astimezone(timezone.utc)
+
+
+def utc_microseconds(dt: datetime | None) -> str | None:
+    if dt is None:
+        return None
+    if dt.tzinfo is None:
+        raise ValueError("naive database timestamp")
+    return dt.astimezone(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%fZ")
+
+
+def seconds(v) -> float | None:
+    if v is None:
+        return None
+    return float(v)
+
+
+def duration_seconds(start: datetime | None, end: datetime | None) -> float | None:
+    if start is None or end is None:
+        return None
+    return (end - start).total_seconds()
+
+
+def overlap_seconds(a0: datetime, a1: datetime, b0: datetime, b1: datetime) -> float:
+    return max(0.0, (min(a1, b1) - max(a0, b0)).total_seconds())
+
+
+def interval_gap_seconds(a0: datetime, a1: datetime, b0: datetime, b1: datetime) -> float:
+    if a1 <= b0:
+        return (b0 - a1).total_seconds()
+    if b1 <= a0:
+        return (a0 - b1).total_seconds()
+    return 0.0
+
+
+def candidate_record(row, hs: datetime, he: datetime) -> dict:
+    uid, city, alert_type, state, canon, start_at, end_at = row
+    start_at = start_at.astimezone(timezone.utc) if start_at is not None else None
+    end_at = end_at.astimezone(timezone.utc) if end_at is not None else None
+    sd = (start_at - hs).total_seconds() if start_at is not None else None
+    ed = (end_at - he).total_seconds() if end_at is not None else None
+    ov = overlap_seconds(start_at, end_at, hs, he) if start_at is not None and end_at is not None else 0.0
+    gap = interval_gap_seconds(start_at, end_at, hs, he) if start_at is not None and end_at is not None else None
+    hist_contains = bool(start_at is not None and end_at is not None and hs <= start_at and end_at <= he)
+    canon_contains = bool(start_at is not None and end_at is not None and start_at <= hs and he <= end_at)
+    return {
+        "episode_uid": str(uid),
+        "city_key": str(city),
+        "alert_type": str(alert_type) if alert_type is not None else None,
+        "episode_state": str(state) if state is not None else None,
+        "canonicalization_version": str(canon) if canon is not None else None,
+        "start_at": utc_microseconds(start_at),
+        "end_at": utc_microseconds(end_at),
+        "start_delta_seconds": sd,
+        "end_delta_seconds": ed,
+        "overlap_duration_seconds": ov,
+        "boundary_gap_seconds": gap,
+        "historical_contains_canonical_interval": hist_contains,
+        "canonical_contains_historical_interval": canon_contains,
+    }
+
+
+def is_canonical(c: dict) -> bool:
+    return (
+        c.get("alert_type") == "AIR"
