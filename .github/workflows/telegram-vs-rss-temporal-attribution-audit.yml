@@ -1,0 +1,145 @@
+name: Telegram vs RSS temporal attribution live audit
+
+on:
+  push:
+    branches:
+      - telegram-vs-rss-temporal-attribution-audit-2026-10-05
+    paths:
+      - ".github/workflows/telegram-vs-rss-temporal-attribution-audit.yml"
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    env:
+      PRODUCTION_CODE_COMMIT: "c26307efcea065813870dc27901dbd225f4f3e33"
+      PROOF_SCRIPT: ".github/proof/telegram_vs_rss_temporal_attribution_audit.py"
+      WORKFLOW_PATH: ".github/workflows/telegram-vs-rss-temporal-attribution-audit.yml"
+    steps:
+      - name: Check out proof branch
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Assert exact production base and snapshot protected state
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git merge-base "$PRODUCTION_CODE_COMMIT" HEAD)" = "$PRODUCTION_CODE_COMMIT"
+          test "$(git rev-parse "$PRODUCTION_CODE_COMMIT:kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py")" = "$(git rev-parse "HEAD:kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py")"
+          changed="$(git diff --name-only "$PRODUCTION_CODE_COMMIT"...HEAD | sort)"
+          printf '%s
+' "$changed"
+          expected="$(printf '%s
+%s
+' "$PROOF_SCRIPT" "$WORKFLOW_PATH" | sort)"
+          test "$changed" = "$expected"
+
+          mkdir -p /tmp/telegram-vs-rss-temporal-audit
+          python - <<'PY'
+          import hashlib, json
+          from pathlib import Path
+          roots = [Path("kyiv-air-alerts-grafana/data"), Path("kyiv-air-alerts-grafana/research"), Path("research")]
+          manifest = {}
+          for root in roots:
+              if root.exists():
+                  for path in sorted(p for p in root.rglob("*") if p.is_file()):
+                      manifest[str(path)] = hashlib.sha256(path.read_bytes()).hexdigest()
+          Path("/tmp/telegram-vs-rss-temporal-audit/protected.before.json").write_text(
+              json.dumps(manifest, sort_keys=True, indent=2) + "\n", encoding="utf-8"
+          )
+          PY
+
+          for key in DATABASE_URL NEON_DATABASE_URL NEON_URL PGHOST PGPORT PGDATABASE PGUSER PGPASSWORD; do
+            test -z "${!key-}" || { echo "Database environment unexpectedly present: $key"; exit 1; }
+          done
+
+          for p in             kyiv-air-alerts-grafana/data/explosion_candidate_monitor_state.json             kyiv-air-alerts-grafana/data/explosion_review_queue.json             kyiv-air-alerts-grafana/data/alerts_combined.json             kyiv-air-alerts-grafana/data/explosion_candidate_monitor_last_run.json; do
+            if [ -e "$p" ]; then sha256sum "$p"; else printf 'ABSENT  %s\n' "$p"; fi
+          done > /tmp/telegram-vs-rss-temporal-audit/protected.named.before
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: kyiv-air-alerts-grafana/requirements.txt
+
+      - name: Install dependencies
+        working-directory: kyiv-air-alerts-grafana
+        run: python -m pip install -r requirements.txt
+
+      - name: Self-test production monitor
+        working-directory: kyiv-air-alerts-grafana
+        run: python scripts/monitor_explosion_candidates.py --self-test
+
+      - name: Run exactly one live source-comparison observation
+        shell: bash
+        run: |
+          set -euo pipefail
+          python "$PROOF_SCRIPT"
+
+      - name: Prove zero protected mutation
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import hashlib, json
+          from pathlib import Path
+          roots = [Path("kyiv-air-alerts-grafana/data"), Path("kyiv-air-alerts-grafana/research"), Path("research")]
+          manifest = {}
+          for root in roots:
+              if root.exists():
+                  for path in sorted(p for p in root.rglob("*") if p.is_file()):
+                      manifest[str(path)] = hashlib.sha256(path.read_bytes()).hexdigest()
+          after = json.dumps(manifest, sort_keys=True, indent=2) + "\n"
+          Path("/tmp/telegram-vs-rss-temporal-audit/protected.after.json").write_text(after, encoding="utf-8")
+          before = Path("/tmp/telegram-vs-rss-temporal-audit/protected.before.json").read_text(encoding="utf-8")
+          if before != after:
+              raise SystemExit("PROTECTED_FILES_MUTATED")
+          PY
+
+          for p in             kyiv-air-alerts-grafana/data/explosion_candidate_monitor_state.json             kyiv-air-alerts-grafana/data/explosion_review_queue.json             kyiv-air-alerts-grafana/data/alerts_combined.json             kyiv-air-alerts-grafana/data/explosion_candidate_monitor_last_run.json; do
+            if [ -e "$p" ]; then sha256sum "$p"; else printf 'ABSENT  %s\n' "$p"; fi
+          done > /tmp/telegram-vs-rss-temporal-audit/protected.named.after
+          cmp /tmp/telegram-vs-rss-temporal-audit/protected.named.before /tmp/telegram-vs-rss-temporal-audit/protected.named.after
+
+          git diff --exit-code -- kyiv-air-alerts-grafana/data kyiv-air-alerts-grafana/research research
+          test -z "$(git status --porcelain=v1 --untracked-files=all -- kyiv-air-alerts-grafana/data kyiv-air-alerts-grafana/research research)"
+
+          cat > /tmp/telegram-vs-rss-temporal-audit/mutation_proof.json <<'JSON'
+          {
+            "production_code_mutations": 0,
+            "classifier_mutations": 0,
+            "temporal_parser_policy_mutations": 0,
+            "discovery_mutations": 0,
+            "source_adapter_mutations": 0,
+            "persisted_evidence_mutations": 0,
+            "historical_state_queue_mutations": 0,
+            "review_queue_mutations": 0,
+            "canonical_alerts_mutations": 0,
+            "neon_db_mutations": 0,
+            "deployments": 0
+          }
+          JSON
+          printf 'ZERO_PROTECTED_MUTATION_OK\n'
+
+      - name: Upload proof artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: telegram-vs-rss-temporal-attribution-live-audit
+          path: |
+            /tmp/telegram-vs-rss-temporal-audit/telegram_vs_rss_temporal_attribution_live_audit_v1.json
+            /tmp/telegram-vs-rss-temporal-audit/telegram_vs_rss_temporal_attribution_live_audit_v1.sha256
+            /tmp/telegram-vs-rss-temporal-audit/summary.json
+            /tmp/telegram-vs-rss-temporal-audit/mutation_proof.json
+            /tmp/telegram-vs-rss-temporal-audit/protected.before.json
+            /tmp/telegram-vs-rss-temporal-audit/protected.after.json
+          if-no-files-found: error
+          retention-days: 30
