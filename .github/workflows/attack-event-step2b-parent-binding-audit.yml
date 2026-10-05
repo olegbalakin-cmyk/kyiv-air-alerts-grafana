@@ -1,0 +1,755 @@
+name: Attack-event STEP 2B 23-city parent binding audit
+
+on:
+  push:
+    branches:
+      - attack-event-step2b-parent-binding-audit-2026-10-05
+    paths:
+      - .github/workflows/attack-event-step2b-parent-binding-audit.yml
+
+permissions:
+  contents: read
+
+jobs:
+  parent-binding-audit:
+    name: parent-binding-audit
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout frozen snapshot proof branch
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+          clean: true
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install read-only PostgreSQL client dependency
+        run: pip install "psycopg[binary]>=3,<4"
+
+      - name: Run frozen 23-city parent-binding audit
+        id: audit
+        env:
+          PHASE1_PROD_SHADOW_DATABASE_URL: ${{ secrets.PHASE1_PROD_SHADOW_DATABASE_URL }}
+          PHASE1_PROD_SHADOW_BRANCH_ID: ${{ vars.PHASE1_PROD_SHADOW_BRANCH_ID }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from __future__ import annotations
+
+          import ast
+          import hashlib
+          import json
+          import os
+          import re
+          import subprocess
+          import sys
+          from collections import Counter, defaultdict
+          from datetime import datetime, timezone
+          from pathlib import Path
+
+          import psycopg
+
+          EXPECTED_BRANCH = "br-bold-mode-b5rub8pq"
+          SNAPSHOT_PATH = Path("research/attack_event_23city_persistence_snapshot_v2_2026-10-04.json")
+          SNAPSHOT_SHA256 = "09458bcf0a019fa2939eb9dfa484da46cd8fa2be077343c5ba6d595c93d71788"
+          SNAPSHOT_BYTES = 90282029
+          EXPECTED_CLASSIFICATIONS = 26405
+          EXPECTED_CITIES = 23
+          EXPECTED_DIST = {
+              "STRICT_EVENT_POSITIVE": 1017,
+              "SENSITIVITY_EVENT_POSITIVE": 63,
+              "NO_CONFIRMED_EVENT": 23530,
+              "NEEDS_REVIEW": 1795,
+          }
+          EXPECTED_POSITIVES = 1080
+          EXPECTED_SOURCE_LINKS = 3769
+          VALIDATOR_COMMIT = "fb563dc410fe6614263bdc8d4eb55025a987e950"
+          VALIDATOR_PATH = "kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py"
+          REQUIRED_PARENT_COLUMNS = {
+              "episode_uid",
+              "city_key",
+              "alert_type",
+              "episode_state",
+              "canonicalization_version",
+              "start_at",
+              "end_at",
+          }
+          ATTACK_EVENT_TABLES = {
+              "attack_event_classifications",
+              "attack_events",
+              "attack_event_sources",
+          }
+
+          OUTDIR = Path(os.environ["RUNNER_TEMP"]) / "attack-event-step2b-parent-binding-audit"
+          OUTDIR.mkdir(parents=True, exist_ok=True)
+          AUDIT_PATH = OUTDIR / "attack_event_23city_parent_binding_audit.json"
+          SUMMARY_PATH = OUTDIR / "summary.json"
+
+          class GateError(RuntimeError):
+              def __init__(self, gate, *, affected=None, detail=None):
+                  self.gate = gate
+                  self.affected = affected or []
+                  self.detail = detail
+                  super().__init__(gate)
+
+          def fail(gate, *, affected=None, detail=None):
+              raise GateError(gate, affected=affected, detail=detail)
+
+          def write_json(path: Path, obj) -> None:
+              path.write_text(
+                  json.dumps(obj, ensure_ascii=False, sort_keys=True, separators=(",", ":")),
+                  encoding="utf-8",
+              )
+
+          def safe_error(exc: BaseException) -> str:
+              text = str(exc)
+              secret = os.environ.get("PHASE1_PROD_SHADOW_DATABASE_URL", "")
+              if secret:
+                  text = text.replace(secret, "<redacted>")
+              text = re.sub(r"(?i)(postgres(?:ql)?://)[^@\s]+@", r"\1<redacted>@", text)
+              return text[:500]
+
+          def sha256_file(path: Path) -> str:
+              h = hashlib.sha256()
+              with path.open("rb") as f:
+                  for chunk in iter(lambda: f.read(1024 * 1024), b""):
+                      h.update(chunk)
+              return h.hexdigest()
+
+          def parse_utc(value: str) -> datetime:
+              if not isinstance(value, str) or not value:
+                  raise ValueError("empty timestamp")
+              dt = datetime.fromisoformat(value.replace("Z", "+00:00"))
+              if dt.tzinfo is None:
+                  raise ValueError("naive timestamp")
+              return dt.astimezone(timezone.utc)
+
+          def utc_microseconds(dt: datetime | None) -> str | None:
+              if dt is None:
+                  return None
+              if dt.tzinfo is None:
+                  raise ValueError("naive database timestamp")
+              return dt.astimezone(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%fZ")
+
+          def recover_validator():
+              if subprocess.run(
+                  ["git", "cat-file", "-e", f"{VALIDATOR_COMMIT}^{{commit}}"],
+                  stdout=subprocess.DEVNULL,
+                  stderr=subprocess.DEVNULL,
+              ).returncode != 0:
+                  fetch = subprocess.run(
+                      ["git", "fetch", "--no-tags", "origin", VALIDATOR_COMMIT],
+                      stdout=subprocess.DEVNULL,
+                      stderr=subprocess.PIPE,
+                      text=True,
+                  )
+                  if fetch.returncode != 0:
+                      fail("HISTORICAL_EPISODE_ID_VALIDATOR_UNAVAILABLE")
+              p = subprocess.run(
+                  ["git", "show", f"{VALIDATOR_COMMIT}:{VALIDATOR_PATH}"],
+                  stdout=subprocess.PIPE,
+                  stderr=subprocess.PIPE,
+                  text=True,
+              )
+              if p.returncode != 0 or not p.stdout:
+                  fail("HISTORICAL_EPISODE_ID_VALIDATOR_UNAVAILABLE")
+              try:
+                  tree = ast.parse(p.stdout)
+              except SyntaxError:
+                  fail("HISTORICAL_EPISODE_ID_VALIDATOR_UNAVAILABLE")
+              wanted = {"event_id", "iso", "parse_dt"}
+              nodes = [
+                  n for n in tree.body
+                  if isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef)) and n.name in wanted
+              ]
+              if {n.name for n in nodes} != wanted:
+                  fail("HISTORICAL_EPISODE_ID_VALIDATOR_UNAVAILABLE")
+              module = ast.Module(body=nodes, type_ignores=[])
+              ast.fix_missing_locations(module)
+              ns = {
+                  "hashlib": hashlib,
+                  "datetime": datetime,
+                  "UTC": timezone.utc,
+                  "__builtins__": __builtins__,
+              }
+              try:
+                  exec(compile(module, VALIDATOR_PATH, "exec"), ns, ns)
+              except Exception:
+                  fail("HISTORICAL_EPISODE_ID_VALIDATOR_UNAVAILABLE")
+              return ns["event_id"], ns["iso"], ns["parse_dt"]
+
+          db_url = os.environ.get("PHASE1_PROD_SHADOW_DATABASE_URL", "")
+          branch_id = os.environ.get("PHASE1_PROD_SHADOW_BRANCH_ID", "")
+          summary_context = {
+              "snapshot_sha_intact": "NO",
+              "snapshot_sha256": None,
+              "snapshot_byte_count": None,
+              "permanent_neon_branch_id": branch_id or None,
+              "db_writes": 0,
+              "neon_mutations": 0,
+              "attack_event_tables_created": 0,
+              "production_mutation": "NO",
+              "db_cutover": "NO",
+              "credentials_exposed": False,
+          }
+          records = []
+          parent_corpus_sha256 = None
+          relevant_parent_rows = None
+          conn = None
+          cur = None
+
+          try:
+              if not db_url:
+                  fail("PHASE1_PROD_SHADOW_DATABASE_URL_MISSING")
+              if branch_id != EXPECTED_BRANCH:
+                  fail(
+                      "PERMANENT_NEON_BRANCH_ID_MISMATCH",
+                      detail={"expected": EXPECTED_BRANCH, "actual": branch_id or None},
+                  )
+
+              if not SNAPSHOT_PATH.is_file():
+                  fail("FROZEN_SNAPSHOT_UNAVAILABLE")
+              actual_bytes = SNAPSHOT_PATH.stat().st_size
+              actual_sha = sha256_file(SNAPSHOT_PATH)
+              summary_context["snapshot_sha256"] = actual_sha
+              summary_context["snapshot_byte_count"] = actual_bytes
+              if actual_sha != SNAPSHOT_SHA256:
+                  fail("SNAPSHOT_SHA256_MISMATCH")
+              if actual_bytes != SNAPSHOT_BYTES:
+                  fail("SNAPSHOT_BYTE_COUNT_MISMATCH")
+              summary_context["snapshot_sha_intact"] = "YES"
+
+              try:
+                  snapshot = json.loads(SNAPSHOT_PATH.read_bytes())
+              except Exception:
+                  fail("SNAPSHOT_JSON_INVALID")
+              if not isinstance(snapshot, dict):
+                  fail("SNAPSHOT_SCHEMA_MISMATCH")
+              classifications = snapshot.get("classifications")
+              attack_events = snapshot.get("attack_events")
+              source_links = snapshot.get("source_links")
+              if not isinstance(classifications, list) or not isinstance(attack_events, list) or not isinstance(source_links, list):
+                  fail("SNAPSHOT_SCHEMA_MISMATCH")
+
+              required_class_fields = {
+                  "classification_key",
+                  "city_key",
+                  "historical_episode_id",
+                  "alert_start_utc_microseconds",
+                  "alert_end_utc_microseconds",
+                  "verdict",
+              }
+              for i, row in enumerate(classifications):
+                  if not isinstance(row, dict) or not required_class_fields.issubset(row):
+                      ident = row.get("classification_key") if isinstance(row, dict) else str(i)
+                      fail("SNAPSHOT_SCHEMA_MISMATCH", affected=[ident])
+
+              ckeys = [str(r["classification_key"]) for r in classifications]
+              cities = sorted({str(r["city_key"]) for r in classifications})
+              dist = dict(Counter(str(r["verdict"]) for r in classifications))
+              positive_cls = sum(
+                  str(r["verdict"]) in {"STRICT_EVENT_POSITIVE", "SENSITIVITY_EVENT_POSITIVE"}
+                  for r in classifications
+              )
+              event_keys = [str(r.get("attack_event_key") or "") for r in attack_events]
+              if len(classifications) != EXPECTED_CLASSIFICATIONS:
+                  fail("SNAPSHOT_CLASSIFICATION_COUNT_MISMATCH")
+              if len(set(ckeys)) != EXPECTED_CLASSIFICATIONS:
+                  fail("SNAPSHOT_CLASSIFICATION_KEY_UNIQUENESS_MISMATCH")
+              if len(cities) != EXPECTED_CITIES:
+                  fail("SNAPSHOT_CITY_COUNT_MISMATCH")
+              if dist != EXPECTED_DIST:
+                  fail("SNAPSHOT_DISTRIBUTION_MISMATCH")
+              if positive_cls != EXPECTED_POSITIVES:
+                  fail("SNAPSHOT_POSITIVE_CLASSIFICATION_COUNT_MISMATCH")
+              if len(attack_events) != EXPECTED_POSITIVES or len(set(event_keys)) != EXPECTED_POSITIVES:
+                  fail("SNAPSHOT_POSITIVE_EVENT_IDENTITY_COUNT_MISMATCH")
+              if len(source_links) != EXPECTED_SOURCE_LINKS:
+                  fail("SNAPSHOT_SOURCE_LINK_COUNT_MISMATCH")
+
+              event_id_fn, iso_fn, parse_dt_fn = recover_validator()
+
+              conn = psycopg.connect(
+                  db_url,
+                  autocommit=True,
+                  connect_timeout=20,
+                  options="-c default_transaction_read_only=on",
+              )
+              cur = conn.cursor()
+              cur.execute("BEGIN TRANSACTION ISOLATION LEVEL REPEATABLE READ READ ONLY;")
+              cur.execute("SET LOCAL default_transaction_read_only = on;")
+
+              def select(sql: str, params=None):
+                  if not sql.lstrip().upper().startswith("SELECT"):
+                      fail("NON_READ_ONLY_SQL_ATTEMPT")
+                  cur.execute(sql, params or ())
+                  return cur.fetchall()
+
+              settings = select(
+                  "SELECT current_setting('transaction_read_only'), current_setting('default_transaction_read_only')"
+              )
+              if not settings or tuple(settings[0]) != ("on", "on"):
+                  fail("READ_ONLY_TRANSACTION_NOT_ENFORCED")
+
+              parent_exists = select("SELECT to_regclass('public.alert_episodes')::text")
+              if not parent_exists or parent_exists[0][0] != "alert_episodes":
+                  fail("PARENT_BINDING_SCHEMA_MISMATCH")
+              column_rows = select(
+                  "SELECT column_name FROM information_schema.columns "
+                  "WHERE table_schema = %s AND table_name = %s",
+                  ("public", "alert_episodes"),
+              )
+              columns = {str(r[0]) for r in column_rows}
+              missing_columns = sorted(REQUIRED_PARENT_COLUMNS - columns)
+              if missing_columns:
+                  fail(
+                      "PARENT_BINDING_SCHEMA_MISMATCH",
+                      detail={"missing_columns": missing_columns},
+                  )
+
+              existing_attack_tables = select(
+                  "SELECT table_name FROM information_schema.tables "
+                  "WHERE table_schema = %s AND table_name IN (%s, %s, %s) ORDER BY table_name",
+                  ("public", "attack_event_classifications", "attack_events", "attack_event_sources"),
+              )
+              existing_attack_tables = [str(r[0]) for r in existing_attack_tables]
+              if existing_attack_tables:
+                  fail(
+                      "ATTACK_EVENT_PERSISTENCE_STATE_UNEXPECTED",
+                      detail={"existing_tables": existing_attack_tables},
+                  )
+
+              parent_rows_raw = select(
+                  "SELECT episode_uid::text, city_key::text, alert_type::text, episode_state::text, "
+                  "canonicalization_version::text, start_at, end_at "
+                  "FROM public.alert_episodes "
+                  "WHERE city_key = ANY(%s) "
+                  "ORDER BY city_key, start_at, end_at, episode_uid",
+                  (cities,),
+              )
+              parents = []
+              canonical_parent_rows = []
+              for uid, city, alert_type, episode_state, canon_version, start_at, end_at in parent_rows_raw:
+                  start_utc = start_at.astimezone(timezone.utc) if start_at is not None else None
+                  end_utc = end_at.astimezone(timezone.utc) if end_at is not None else None
+                  p = {
+                      "episode_uid": str(uid),
+                      "city_key": str(city),
+                      "alert_type": str(alert_type) if alert_type is not None else None,
+                      "episode_state": str(episode_state) if episode_state is not None else None,
+                      "canonicalization_version": str(canon_version) if canon_version is not None else None,
+                      "start_at": start_utc,
+                      "end_at": end_utc,
+                  }
+                  parents.append(p)
+                  canonical_parent_rows.append([
+                      p["episode_uid"],
+                      p["city_key"],
+                      p["alert_type"],
+                      p["episode_state"],
+                      p["canonicalization_version"],
+                      utc_microseconds(start_utc),
+                      utc_microseconds(end_utc),
+                  ])
+              canonical_parent_rows.sort(key=lambda row: tuple("" if v is None else str(v) for v in row))
+              parent_corpus_bytes = json.dumps(
+                  canonical_parent_rows,
+                  ensure_ascii=False,
+                  separators=(",", ":"),
+              ).encode("utf-8")
+              parent_corpus_sha256 = hashlib.sha256(parent_corpus_bytes).hexdigest()
+              relevant_parent_rows = len(canonical_parent_rows)
+
+              exact_index = defaultdict(list)
+              for p in parents:
+                  if p["start_at"] is None or p["end_at"] is None:
+                      continue
+                  exact_index[(p["city_key"], p["start_at"], p["end_at"])].append(p)
+
+              exact_parent_tuple_candidate_count = 0
+              no_exact_parent_tuple_count = 0
+              invalid_alert_type_count = 0
+              invalid_parent_state_count = 0
+              invalid_canonicalization_version_count = 0
+              historical_episode_id_mismatch_count = 0
+              multiple_valid_parent_count = 0
+              classifications_with_exact_parent_tuple = 0
+
+              for row in sorted(classifications, key=lambda r: str(r["classification_key"])):
+                  ck = str(row["classification_key"])
+                  city = str(row["city_key"])
+                  historical_id = str(row["historical_episode_id"])
+                  start_s = str(row["alert_start_utc_microseconds"])
+                  end_s = str(row["alert_end_utc_microseconds"])
+                  try:
+                      start_dt = parse_utc(start_s)
+                      end_dt = parse_utc(end_s)
+                      accepted_start = parse_dt_fn(start_s)
+                      accepted_end = parse_dt_fn(end_s)
+                  except Exception:
+                      fail("SNAPSHOT_TIMESTAMP_INVALID", affected=[ck])
+                  if accepted_start is None or accepted_end is None:
+                      fail("SNAPSHOT_TIMESTAMP_INVALID", affected=[ck])
+
+                  try:
+                      expected_historical_id = event_id_fn(
+                          city,
+                          iso_fn(accepted_start),
+                          iso_fn(accepted_end),
+                      )
+                  except Exception:
+                      fail("HISTORICAL_EPISODE_ID_VALIDATOR_UNAVAILABLE", affected=[ck])
+                  id_valid = historical_id == expected_historical_id
+                  if not id_valid:
+                      historical_episode_id_mismatch_count += 1
+
+                  exact = list(exact_index.get((city, start_dt, end_dt), []))
+                  exact_parent_tuple_candidate_count += len(exact)
+                  if exact:
+                      classifications_with_exact_parent_tuple += 1
+                  else:
+                      no_exact_parent_tuple_count += 1
+
+                  air = [p for p in exact if p["alert_type"] == "AIR"]
+                  closed = [p for p in air if p["episode_state"] == "closed"]
+                  canonical = [
+                      p for p in closed
+                      if p["canonicalization_version"] == "alert-canonicalization-v1"
+                  ]
+
+                  reasons = []
+                  if not exact:
+                      reasons.append("NO_EXACT_PARENT_TUPLE")
+                  elif not air:
+                      reasons.append("PARENT_ALERT_TYPE_MISMATCH")
+                      invalid_alert_type_count += 1
+                  elif not closed:
+                      reasons.append("PARENT_NOT_CLOSED")
+                      invalid_parent_state_count += 1
+                  elif not canonical:
+                      reasons.append("PARENT_CANONICALIZATION_VERSION_MISMATCH")
+                      invalid_canonicalization_version_count += 1
+
+                  if not id_valid:
+                      reasons.append("HISTORICAL_EPISODE_ID_MISMATCH")
+
+                  valid = canonical if id_valid else []
+                  if id_valid and len(valid) > 1:
+                      reasons.append("MULTIPLE_VALID_PARENTS")
+                      multiple_valid_parent_count += 1
+
+                  if len(valid) == 1:
+                      binding_state = "BOUND"
+                      bound_parent = valid[0]
+                  elif len(valid) == 0:
+                      if exact and not id_valid:
+                          binding_state = "AMBIGUOUS"
+                      else:
+                          binding_state = "UNBOUND"
+                      bound_parent = None
+                  else:
+                      binding_state = "AMBIGUOUS"
+                      bound_parent = None
+
+                  diagnostic_parent = bound_parent
+                  if diagnostic_parent is None and len(exact) == 1:
+                      diagnostic_parent = exact[0]
+
+                  records.append({
+                      "classification_key": ck,
+                      "city_key": city,
+                      "historical_episode_id": historical_id,
+                      "alert_start_at": start_s,
+                      "alert_end_at": end_s,
+                      "binding_state": binding_state,
+                      "alert_episode_uid": bound_parent["episode_uid"] if bound_parent else None,
+                      "matched_parent_start_at": utc_microseconds(diagnostic_parent["start_at"]) if diagnostic_parent else None,
+                      "matched_parent_end_at": utc_microseconds(diagnostic_parent["end_at"]) if diagnostic_parent else None,
+                      "matched_parent_episode_state": diagnostic_parent["episode_state"] if diagnostic_parent else None,
+                      "matched_parent_canonicalization_version": diagnostic_parent["canonicalization_version"] if diagnostic_parent else None,
+                      "matched_parent_alert_type": diagnostic_parent["alert_type"] if diagnostic_parent else None,
+                      "deterministic_episode_id_validation_result": "PASS" if id_valid else "FAIL",
+                      "expected_historical_episode_id": expected_historical_id,
+                      "exact_parent_candidate_count": len(exact),
+                      "diagnostic_reason_codes": sorted(set(reasons)),
+                  })
+
+              uid_to_indexes = defaultdict(list)
+              for idx, rec in enumerate(records):
+                  if rec["binding_state"] == "BOUND" and rec["alert_episode_uid"]:
+                      uid_to_indexes[rec["alert_episode_uid"]].append(idx)
+              collision_uids = sorted(uid for uid, idxs in uid_to_indexes.items() if len(idxs) > 1)
+              collision_affected = set()
+              for uid in collision_uids:
+                  for idx in uid_to_indexes[uid]:
+                      collision_affected.add(idx)
+                      rec = records[idx]
+                      rec["binding_state"] = "AMBIGUOUS"
+                      rec["alert_episode_uid"] = None
+                      rec["diagnostic_reason_codes"] = sorted(
+                          set(rec["diagnostic_reason_codes"] + ["PARENT_UID_REUSE_COLLISION"])
+                      )
+
+              counts = Counter(r["binding_state"] for r in records)
+              bound = counts.get("BOUND", 0)
+              unbound = counts.get("UNBOUND", 0)
+              ambiguous = counts.get("AMBIGUOUS", 0)
+              unique_bound_parent_uids = len({
+                  r["alert_episode_uid"]
+                  for r in records
+                  if r["binding_state"] == "BOUND" and r["alert_episode_uid"]
+              })
+
+              per_city = {}
+              for city in cities:
+                  city_rows = [r for r in records if r["city_key"] == city]
+                  cc = Counter(r["binding_state"] for r in city_rows)
+                  per_city[city] = {
+                      "classifications": len(city_rows),
+                      "BOUND": cc.get("BOUND", 0),
+                      "UNBOUND": cc.get("UNBOUND", 0),
+                      "AMBIGUOUS": cc.get("AMBIGUOUS", 0),
+                  }
+
+              parent_uid_reuse_collision_count = len(collision_affected)
+              collision_uid_count = len(collision_uids)
+
+              first_failing_gate = None
+              if parent_uid_reuse_collision_count:
+                  first_failing_gate = "PARENT_UID_REUSE_COLLISION"
+              elif historical_episode_id_mismatch_count:
+                  first_failing_gate = "HISTORICAL_EPISODE_ID_MISMATCH"
+              elif multiple_valid_parent_count:
+                  first_failing_gate = "MULTIPLE_VALID_PARENTS"
+              elif no_exact_parent_tuple_count:
+                  first_failing_gate = "NO_EXACT_PARENT_TUPLE"
+              elif invalid_alert_type_count:
+                  first_failing_gate = "PARENT_ALERT_TYPE_MISMATCH"
+              elif invalid_parent_state_count:
+                  first_failing_gate = "PARENT_NOT_CLOSED"
+              elif invalid_canonicalization_version_count:
+                  first_failing_gate = "PARENT_CANONICALIZATION_VERSION_MISMATCH"
+              elif (
+                  len(records) != EXPECTED_CLASSIFICATIONS
+                  or bound != EXPECTED_CLASSIFICATIONS
+                  or unbound != 0
+                  or ambiguous != 0
+                  or unique_bound_parent_uids != EXPECTED_CLASSIFICATIONS
+              ):
+                  first_failing_gate = "PARENT_BINDING_COMPLETENESS_MISMATCH"
+
+              affected_rows = [r for r in records if r["binding_state"] != "BOUND"]
+              if not affected_rows and historical_episode_id_mismatch_count:
+                  affected_rows = [
+                      r for r in records
+                      if r["deterministic_episode_id_validation_result"] == "FAIL"
+                  ]
+
+              audit_doc = {
+                  "schema_version": 1,
+                  "kind": "attack_event_23city_parent_binding_audit",
+                  "snapshot_sha256": actual_sha,
+                  "snapshot_byte_count": actual_bytes,
+                  "permanent_neon_branch_id": branch_id,
+                  "parent_corpus": {
+                      "relevant_parent_row_count": relevant_parent_rows,
+                      "parent_corpus_sha256": parent_corpus_sha256,
+                      "canonicalization": "compact JSON arrays sorted by episode_uid/city/type/state/version/exact UTC start/end fields",
+                  },
+                  "historical_episode_id_validator": {
+                      "commit": VALIDATOR_COMMIT,
+                      "path": VALIDATOR_PATH,
+                      "functions": ["event_id", "iso", "parse_dt"],
+                      "mechanically_recovered": True,
+                  },
+                  "records": records,
+              }
+              write_json(AUDIT_PATH, audit_doc)
+
+              common_counts = {
+                  "snapshot_classifications": len(records),
+                  "BOUND": bound,
+                  "UNBOUND": unbound,
+                  "AMBIGUOUS": ambiguous,
+                  "unique_bound_parent_uids": unique_bound_parent_uids,
+                  "exact_parent_tuple_candidate_count": exact_parent_tuple_candidate_count,
+                  "classifications_with_exact_parent_tuple": classifications_with_exact_parent_tuple,
+                  "no_exact_parent_tuple_count": no_exact_parent_tuple_count,
+                  "invalid_parent_alert_type_count": invalid_alert_type_count,
+                  "invalid_parent_state_count": invalid_parent_state_count,
+                  "invalid_canonicalization_version_count": invalid_canonicalization_version_count,
+                  "historical_episode_id_mismatch_count": historical_episode_id_mismatch_count,
+                  "multiple_valid_parent_count": multiple_valid_parent_count,
+                  "parent_uid_reuse_collision_count": parent_uid_reuse_collision_count,
+                  "parent_uid_reuse_collision_uid_count": collision_uid_count,
+                  "relevant_parent_corpus_row_count": relevant_parent_rows,
+                  "parent_corpus_sha256": parent_corpus_sha256,
+              }
+
+              if first_failing_gate is None:
+                  summary = {
+                      "verdict": "ATTACK-EVENT 23-CITY PARENT BINDING AUDIT PASSED",
+                      "first_failing_gate": None,
+                      "snapshot_sha_verification": "PASS",
+                      **common_counts,
+                      "per_city": per_city,
+                      "permanent_neon_branch_id": branch_id,
+                      "db_writes": 0,
+                      "neon_mutations": 0,
+                      "attack_event_tables_created": 0,
+                      "production_mutation": "NO",
+                      "db_cutover": "NO",
+                      "credentials_exposed": False,
+                  }
+                  write_json(SUMMARY_PATH, summary)
+              else:
+                  affected_cities = sorted({r["city_key"] for r in affected_rows})
+                  examples = [
+                      {
+                          "classification_key": r["classification_key"],
+                          "city_key": r["city_key"],
+                          "historical_episode_id": r["historical_episode_id"],
+                          "alert_start_at": r["alert_start_at"],
+                          "alert_end_at": r["alert_end_at"],
+                          "binding_state": r["binding_state"],
+                          "diagnostic_reason_codes": r["diagnostic_reason_codes"],
+                      }
+                      for r in affected_rows[:20]
+                  ]
+                  diagnostic_categories = sorted({
+                      code
+                      for r in affected_rows
+                      for code in r["diagnostic_reason_codes"]
+                  })
+                  summary = {
+                      "verdict": "ATTACK-EVENT 23-CITY PARENT BINDING AUDIT BLOCKED",
+                      "first_failing_gate": first_failing_gate,
+                      **common_counts,
+                      "affected_cities": affected_cities,
+                      "affected_classification_count": len(affected_rows),
+                      "exact_diagnostic_category": diagnostic_categories,
+                      "affected_classification_examples": examples,
+                      "parent_corpus_sha256": parent_corpus_sha256,
+                      "snapshot_sha_intact": "YES",
+                      "db_writes": 0,
+                      "neon_mutations": 0,
+                      "production_mutation": "NO",
+                      "safe_continuation_point": "STEP 2B read-only parent-binding audit; repair nothing; do not proceed to persistence",
+                      "permanent_neon_branch_id": branch_id,
+                      "credentials_exposed": False,
+                  }
+                  write_json(SUMMARY_PATH, summary)
+                  fail(
+                      first_failing_gate,
+                      affected=[r["classification_key"] for r in affected_rows[:20]],
+                  )
+
+          except GateError as exc:
+              if not AUDIT_PATH.exists():
+                  write_json(AUDIT_PATH, {
+                      "schema_version": 1,
+                      "kind": "attack_event_23city_parent_binding_audit",
+                      "status": "BLOCKED_BEFORE_FULL_PARENT_MATCHING",
+                      "records": records,
+                  })
+              if not SUMMARY_PATH.exists():
+                  summary = {
+                      "verdict": "ATTACK-EVENT 23-CITY PARENT BINDING AUDIT BLOCKED",
+                      "first_failing_gate": exc.gate,
+                      "BOUND": sum(r.get("binding_state") == "BOUND" for r in records) if records else None,
+                      "UNBOUND": sum(r.get("binding_state") == "UNBOUND" for r in records) if records else None,
+                      "AMBIGUOUS": sum(r.get("binding_state") == "AMBIGUOUS" for r in records) if records else None,
+                      "affected_cities": sorted({
+                          r.get("city_key") for r in records
+                          if r.get("binding_state") != "BOUND" and r.get("city_key")
+                      }),
+                      "affected_classification_count": len(exc.affected) if exc.affected else None,
+                      "exact_diagnostic_category": exc.gate,
+                      "affected_classification_examples": exc.affected[:20],
+                      "parent_corpus_sha256": parent_corpus_sha256,
+                      "snapshot_sha_intact": summary_context["snapshot_sha_intact"],
+                      "db_writes": 0,
+                      "neon_mutations": 0,
+                      "production_mutation": "NO",
+                      "safe_continuation_point": "STEP 2B read-only parent-binding audit; repair nothing; do not proceed to persistence",
+                      "permanent_neon_branch_id": branch_id or None,
+                      "credentials_exposed": False,
+                  }
+                  if exc.detail is not None:
+                      summary["detail"] = exc.detail
+                  write_json(SUMMARY_PATH, summary)
+              print("FIRST_FAILING_GATE=" + exc.gate, file=sys.stderr)
+              raise SystemExit(1)
+          except Exception as exc:
+              if not AUDIT_PATH.exists():
+                  write_json(AUDIT_PATH, {
+                      "schema_version": 1,
+                      "kind": "attack_event_23city_parent_binding_audit",
+                      "status": "BLOCKED_BEFORE_FULL_PARENT_MATCHING",
+                      "records": records,
+                  })
+              if not SUMMARY_PATH.exists():
+                  write_json(SUMMARY_PATH, {
+                      "verdict": "ATTACK-EVENT 23-CITY PARENT BINDING AUDIT BLOCKED",
+                      "first_failing_gate": "EXECUTION_HARNESS_FAILURE",
+                      "exact_diagnostic_category": type(exc).__name__,
+                      "detail": safe_error(exc),
+                      "parent_corpus_sha256": parent_corpus_sha256,
+                      "snapshot_sha_intact": summary_context["snapshot_sha_intact"],
+                      "db_writes": 0,
+                      "neon_mutations": 0,
+                      "production_mutation": "NO",
+                      "safe_continuation_point": "STEP 2B execution harness only; repair nothing; do not proceed to persistence",
+                      "permanent_neon_branch_id": branch_id or None,
+                      "credentials_exposed": False,
+                  })
+              print("FIRST_FAILING_GATE=EXECUTION_HARNESS_FAILURE", file=sys.stderr)
+              print("ERROR_TYPE=" + type(exc).__name__, file=sys.stderr)
+              print("ERROR=" + safe_error(exc), file=sys.stderr)
+              raise SystemExit(1)
+          finally:
+              if cur is not None:
+                  try:
+                      cur.execute("ROLLBACK;")
+                  except Exception:
+                      pass
+              if conn is not None:
+                  try:
+                      conn.close()
+                  except Exception:
+                      pass
+          PY
+
+      - name: Print compact audit summary
+        if: always()
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json, os
+          from pathlib import Path
+          p = Path(os.environ["RUNNER_TEMP"]) / "attack-event-step2b-parent-binding-audit" / "summary.json"
+          if p.is_file():
+              obj = json.loads(p.read_text(encoding="utf-8"))
+              print("AUDIT_SUMMARY=" + json.dumps(obj, ensure_ascii=False, sort_keys=True, separators=(",", ":")))
+          else:
+              print("AUDIT_SUMMARY_MISSING=1")
+          PY
+
+      - name: Upload parent-binding audit
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: attack-event-23city-parent-binding-audit
+          path: |
+            ${{ runner.temp }}/attack-event-step2b-parent-binding-audit/attack_event_23city_parent_binding_audit.json
+            ${{ runner.temp }}/attack-event-step2b-parent-binding-audit/summary.json
+          if-no-files-found: error
+          retention-days: 30
