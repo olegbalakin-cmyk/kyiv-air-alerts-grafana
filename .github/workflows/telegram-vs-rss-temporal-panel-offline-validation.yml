@@ -1,0 +1,63 @@
+name: Telegram RSS temporal panel offline validation
+
+on:
+  push:
+    branches:
+      - telegram-vs-rss-temporal-attribution-panel-2026-10-05
+    paths:
+      - ".github/proof/telegram_vs_rss_temporal_attribution_panel.py"
+      - ".github/workflows/telegram-vs-rss-temporal-panel-offline-validation.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Assert production tree untouched
+        shell: bash
+        run: |
+          set -euo pipefail
+          PROD=c26307efcea065813870dc27901dbd225f4f3e33
+          test -z "$(git diff --name-only "$PROD"...HEAD -- kyiv-air-alerts-grafana)"
+          test "$(git rev-parse "$PROD:kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py")" = "$(git rev-parse "HEAD:kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py")"
+
+      - name: Compile panel tooling
+        run: python -m py_compile .github/proof/telegram_vs_rss_temporal_attribution_panel.py
+
+      - name: Validate registered windows
+        shell: bash
+        run: |
+          set -euo pipefail
+          python .github/proof/telegram_vs_rss_temporal_attribution_panel.py resolve             --now 2026-10-05T08:45:00Z             --cron "45 8 * * *" > /tmp/first.json
+          python .github/proof/telegram_vs_rss_temporal_attribution_panel.py resolve             --now 2026-10-11T20:45:00Z             --cron "45 20 * * *" > /tmp/last.json
+          python - <<'PY'
+          import json
+          a=json.load(open("/tmp/first.json"))
+          b=json.load(open("/tmp/last.json"))
+          assert a["in_panel"] and a["window_index"] == 1, a
+          assert b["in_panel"] and b["window_index"] == 14, b
+          print(json.dumps({"first":a,"last":b}, sort_keys=True))
+          PY
+
+      - name: Validate empty cumulative aggregation
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/empty-panel
+          python .github/proof/telegram_vs_rss_temporal_attribution_panel.py aggregate             --input-dir /tmp/empty-panel             --as-of 2026-10-05T08:00:00Z             --out /tmp/panel.json             --summary-out /tmp/summary.json
+          python - <<'PY'
+          import json
+          p=json.load(open("/tmp/panel.json"))
+          assert len(p["pre_registration"]["schedule"]) == 14
+          assert p["valid_window_count"] == 0
+          assert p["decision"]["verdict"] == "PENDING"
+          assert p["observation_windows"][0]["status"] == "PENDING"
+          print("OFFLINE_PANEL_VALIDATION_OK")
+          PY
