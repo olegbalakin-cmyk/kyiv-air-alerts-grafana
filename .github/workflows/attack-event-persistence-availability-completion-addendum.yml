@@ -6,6 +6,11 @@ on:
       - attack-event-persistence-availability-completion-addendum-2026-10-05
     paths:
       - .github/workflows/attack-event-persistence-availability-completion-addendum.yml
+  pull_request:
+    branches:
+      - main
+    paths:
+      - .github/workflows/attack-event-persistence-availability-completion-addendum.yml
 
 permissions:
   contents: write
@@ -20,6 +25,7 @@ jobs:
       - name: Checkout proof branch
         uses: actions/checkout@v4
         with:
+          ref: attack-event-persistence-availability-completion-addendum-2026-10-05
           fetch-depth: 0
 
       - name: Run exhaustive offline availability audit
@@ -464,7 +470,7 @@ ALTER TABLE public.attack_event_classifications
               "scope": "offline contract completion for final STEP 2C representability gaps only",
               "fresh_base": None,
               "proof_branch": os.environ.get("GITHUB_REF_NAME"),
-              "temporary_workflow_commit": os.environ.get("GITHUB_SHA"),
+              "temporary_workflow_commit": sh(["git", "rev-parse", "HEAD"]),
               "actions_run_id": int(os.environ.get("GITHUB_RUN_ID", "0") or 0),
               "predecessor": PREDECESSOR,
               "frozen_snapshot": SNAPSHOT,
@@ -496,11 +502,9 @@ ALTER TABLE public.attack_event_classifications
           }
 
           try:
-              # Parent of the temporary workflow commit is the fresh-main base by construction.
-              parents = sh(["git", "show", "-s", "--format=%P", os.environ["GITHUB_SHA"]]).split()
-              if len(parents) != 1:
-                  block("FRESH_BASE_PARENT_CARDINALITY_MISMATCH", count=len(parents))
-              result["fresh_base"] = parents[0]
+              # Freeze branch ancestry against the merge-base with origin/main; proof commits may stack.
+              sh(["git", "fetch", "--no-tags", "origin", "main"])
+              result["fresh_base"] = sh(["git", "merge-base", "HEAD", "origin/main"])
 
               snap_path, snap_blob, snap_sha = materialize(SNAPSHOT, "SNAPSHOT")
               bind_path, bind_blob, bind_sha = materialize(BINDING, "BINDING")
