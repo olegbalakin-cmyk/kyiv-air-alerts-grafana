@@ -1,0 +1,1308 @@
+name: Attack-event STEP 2C rollback-only persistence proof resume2
+
+on:
+  push:
+    branches:
+      - attack-event-step2c-rollback-persistence-proof-resume2-2026-10-05
+    paths:
+      - .github/workflows/attack-event-step2c-rollback-persistence-proof-resume2.yml
+
+permissions:
+  contents: read
+
+jobs:
+  rollback-persistence-proof:
+    name: rollback-persistence-proof
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    permissions:
+      contents: read
+    env:
+      PHASE1_PROD_SHADOW_DATABASE_URL: ${{ secrets.PHASE1_PROD_SHADOW_DATABASE_URL }}
+      PHASE1_PROD_SHADOW_BRANCH_ID: ${{ vars.PHASE1_PROD_SHADOW_BRANCH_ID }}
+
+    steps:
+      - name: Checkout proof branch
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+          clean: true
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install proof-only DB client
+        run: python -m pip install --disable-pip-version-check "psycopg[binary]>=3.2,<4"
+
+      - name: Run STEP 2C rollback-only proof
+        id: proof
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from __future__ import annotations
+
+          import hashlib
+          import json
+          import os
+          import re
+          import subprocess
+          import sys
+          from collections import Counter
+          from datetime import datetime, timezone
+          from pathlib import Path
+          from uuid import UUID
+
+          import psycopg
+          from psycopg.types.json import Jsonb
+
+          REPO = "olegbalakin-cmyk/kyiv-air-alerts-grafana"
+          EXPECTED_BRANCH = "br-bold-mode-b5rub8pq"
+          SNAPSHOT = {
+              "commit": "efefa399e69eadd3d7fc8393ac1553cfde35f138",
+              "path": "research/attack_event_23city_persistence_snapshot_v2_2026-10-04.json",
+              "blob": "8a2f6bd33f879be9db978da59c12c34e61f6f843",
+              "sha256": "09458bcf0a019fa2939eb9dfa484da46cd8fa2be077343c5ba6d595c93d71788",
+              "bytes": 90282029,
+          }
+          BINDING = {
+              "commit": "e213f445f08bfc119b234c9460b66bd3efe75d36",
+              "path": "research/attack_event_23city_parent_binding_map_v1_2026-10-05.json",
+              "sha256": "b0ecd5ce980d76cf5ffce65f80ee1d5bd43c0d1b1438afb85424ae95aaef1241",
+          }
+          STEP1 = {
+              "commit": "b205d38dbc50bc502d10e682d4ae53491af542ea",
+              "path": "research/attack_event_neon_persistence_contract_2026-10-02.json",
+              "sha256": "02bfe8bb0420bcf1259b0c49a73ca76e8cc6488c1cd426be4dd8b28ad01b94c3",
+          }
+          V2 = {
+              "commit": "bd82a6c0a19aca4610a8af6df73a307a88c35bf6",
+              "path": "research/attack_event_classification_identity_availability_addendum_2026-10-04.json",
+              "sha256": "a1ba446261625383650b781233fc4956290bffd1437756dca8d7883b24906017",
+          }
+          PROVENANCE = {
+              "commit": "cafee4106d89f59d7f1020baef414ba4813ab29d",
+              "path": "research/attack_event_provenance_cardinality_addendum_2026-10-05.json",
+              "blob": "58a78e525f728fa9f6e52c38ae75c5358ca1b678",
+              "sha256": "e7bb8eb181d152b9760a5d80dc46ce0e261146e7e14433b706989f30e7ffc068",
+          }
+          HUMAN = {
+              "commit": "1b161d240013a669aefd2b9485d6e5f2ca7c7402",
+              "path": "research/attack_event_human_review_state_derivation_addendum_2026-10-05.json",
+              "blob": "5a5ca7da0335685a1480d6f22bac5452c5251f09",
+              "sha256": "b611a8171ed3e8b4d0146f03f61c511b55fbca2e1f26c2796241784bb2d6e7d1",
+          }
+          EXPECTED_DIST = {
+              "STRICT_EVENT_POSITIVE": 1017,
+              "SENSITIVITY_EVENT_POSITIVE": 63,
+              "NO_CONFIRMED_EVENT": 23530,
+              "NEEDS_REVIEW": 1795,
+          }
+          EXPECTED_HUMAN = {"NONE": 24610, "NEEDS_REVIEW": 1795, "REVIEWED_EVIDENCE": 0}
+          POSITIVE = {"STRICT_EVENT_POSITIVE", "SENSITIVITY_EVENT_POSITIVE"}
+          OUTDIR = Path(os.environ["RUNNER_TEMP"]) / "attack-event-step2c-rollback-persistence-proof-resume2"
+          OUTDIR.mkdir(parents=True, exist_ok=True)
+          PROOF_PATH = OUTDIR / "attack_event_23city_rollback_persistence_proof_resume2.json"
+
+          class GateError(RuntimeError):
+              def __init__(self, gate, *, phase=None, table=None, field=None, count=None, detail=None):
+                  self.gate = gate
+                  self.phase = phase
+                  self.table = table
+                  self.field = field
+                  self.count = count
+                  self.detail = detail
+                  super().__init__(gate)
+
+          def fail(gate, *, phase=None, table=None, field=None, count=None, detail=None):
+              raise GateError(gate, phase=phase, table=table, field=field, count=count, detail=detail)
+
+          def safe_error(exc):
+              s = str(exc)
+              secret = os.environ.get("PHASE1_PROD_SHADOW_DATABASE_URL", "")
+              if secret:
+                  s = s.replace(secret, "<redacted>")
+              s = re.sub(r"(?i)(postgres(?:ql)?://)[^@\s]+@", r"\1<redacted>@", s)
+              return s[:500]
+
+          def run(args, *, stdout=None, check=True):
+              p = subprocess.run(
+                  list(map(str, args)),
+                  stdout=stdout if stdout is not None else subprocess.PIPE,
+                  stderr=subprocess.PIPE,
+                  text=False,
+              )
+              if check and p.returncode != 0:
+                  err = (p.stderr or b"").decode("utf-8", "replace")[-500:]
+                  raise RuntimeError("command failed: " + " ".join(map(str, args)) + ": " + err)
+              return p
+
+          def git_text(*args):
+              return run(["git", *args]).stdout.decode("utf-8", "replace").strip()
+
+          def ensure_commit(sha):
+              p = run(["git", "cat-file", "-e", f"{sha}^{{commit}}"], check=False)
+              if p.returncode != 0:
+                  run(["git", "fetch", "--no-tags", "origin", sha])
+              if git_text("rev-parse", f"{sha}^{{commit}}") != sha:
+                  fail("FROZEN_INPUT_COMMIT_MISMATCH", phase="OFFLINE_PREFLIGHT")
+
+          def sha_file(path):
+              h = hashlib.sha256()
+              with Path(path).open("rb") as f:
+                  for chunk in iter(lambda: f.read(1024 * 1024), b""):
+                      h.update(chunk)
+              return h.hexdigest()
+
+          def materialize(spec, label):
+              ensure_commit(spec["commit"])
+              blob = git_text("rev-parse", f'{spec["commit"]}:{spec["path"]}')
+              if spec.get("blob") and blob != spec["blob"]:
+                  fail(label + "_GIT_BLOB_MISMATCH", phase="OFFLINE_PREFLIGHT")
+              out = OUTDIR / (label.lower() + ".json")
+              with out.open("wb") as f:
+                  p = run(["git", "show", f'{spec["commit"]}:{spec["path"]}'], stdout=f, check=False)
+              if p.returncode != 0:
+                  fail(label + "_MATERIALIZATION_FAILED", phase="OFFLINE_PREFLIGHT")
+              if spec.get("bytes") is not None and out.stat().st_size != spec["bytes"]:
+                  fail(label + "_BYTE_COUNT_MISMATCH", phase="OFFLINE_PREFLIGHT")
+              actual_sha = sha_file(out)
+              if spec.get("sha256") and actual_sha != spec["sha256"]:
+                  fail(label + "_SHA256_MISMATCH", phase="OFFLINE_PREFLIGHT")
+              return out, blob, actual_sha
+
+          def load_json(spec, label):
+              p, blob, sha = materialize(spec, label)
+              try:
+                  return json.loads(p.read_bytes()), blob, sha
+              except Exception:
+                  fail(label + "_JSON_INVALID", phase="OFFLINE_PREFLIGHT")
+
+          def canonical_json_bytes(value):
+              return json.dumps(value, ensure_ascii=False, sort_keys=True, separators=(",", ":")).encode("utf-8")
+
+          def canonical_sha(value):
+              return hashlib.sha256(canonical_json_bytes(value)).hexdigest()
+
+          def parse_utc(value):
+              if not isinstance(value, str) or not value:
+                  raise ValueError("missing timestamp")
+              dt = datetime.fromisoformat(value.replace("Z", "+00:00"))
+              if dt.tzinfo is None:
+                  raise ValueError("naive timestamp")
+              return dt.astimezone(timezone.utc)
+
+          def utc_microseconds(dt):
+              if dt is None:
+                  return None
+              return dt.astimezone(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%fZ")
+
+          def walk_values(obj, predicate):
+              out = []
+              def walk(x, key=""):
+                  if isinstance(x, dict):
+                      for k, v in x.items():
+                          walk(v, str(k))
+                  elif isinstance(x, list):
+                      for v in x:
+                          walk(v, key)
+                  elif predicate(key.lower(), x):
+                      out.append(x)
+              walk(obj)
+              return out
+
+          def unique_string(obj, predicate):
+              vals = sorted({str(v) for v in walk_values(obj, predicate) if isinstance(v, (str, int)) and str(v).strip()})
+              return vals[0] if len(vals) == 1 else None
+
+          def classification_origin_projection(origin):
+              return {
+                  "origin_repository": unique_string(origin, lambda k, v: k == "origin_repository") or REPO,
+                  "origin_ref": unique_string(origin, lambda k, v: k == "ref" or k.endswith("_ref")),
+                  "origin_commit_sha": unique_string(origin, lambda k, v: "commit" in k or k.endswith("_head") or k in {"tested_head", "accepted_final_head"}),
+                  "origin_artifact_path": unique_string(origin, lambda k, v: "path" in k),
+                  "origin_artifact_blob_sha": unique_string(origin, lambda k, v: "blob" in k),
+                  "origin_target_state_sha256": unique_string(origin, lambda k, v: k == "origin_target_state_sha256" or k.endswith("target_state_sha256")),
+                  "origin_workflow_run_id": unique_string(origin, lambda k, v: "run_id" in k and isinstance(v, (str, int))),
+              }
+
+          def source_origin_projection(origin):
+              return {
+                  "origin_artifact_path": unique_string(origin, lambda k, v: "path" in k),
+                  "origin_git_ref": unique_string(origin, lambda k, v: k == "ref" or k.endswith("_ref")),
+                  "origin_git_blob_sha": unique_string(origin, lambda k, v: "blob" in k),
+              }
+
+          def explicit_frozen_case_id(row):
+              vals = []
+              for key in ("originating_frozen_case_id", "frozen_case_id"):
+                  vals.extend(walk_values(row, lambda k, v, key=key: k == key and isinstance(v, (str, int)) and str(v).strip()))
+              vals = sorted({str(v) for v in vals})
+              return vals[0] if len(vals) == 1 else None
+
+          def has_adjudication_marker(row):
+              return bool(walk_values(row, lambda k, v: k in {"accepted_adjudication_artifact", "adjudication_class"} and v not in (None, "", False)))
+
+          def nonempty_review(value):
+              return isinstance(value, dict) and bool(value)
+
+          def derive_human_state(row):
+              rv = row.get("review_provenance")
+              rh = row.get("review_provenance_sha256")
+              if nonempty_review(rv) and isinstance(rh, str) and rh:
+                  if canonical_sha(rv) != rh:
+                      raise ValueError("review provenance hash mismatch")
+                  return "REVIEWED_EVIDENCE"
+              if nonempty_review(rv) != bool(rh):
+                  raise ValueError("review provenance/hash consistency mismatch")
+              if row.get("verdict") == "NEEDS_REVIEW":
+                  return "NEEDS_REVIEW"
+              return "NONE"
+
+          def build_effective_ddl(step1, v2, provenance, human):
+              ddl = step1.get("candidate_ddl")
+              if not isinstance(ddl, str) or not ddl.strip():
+                  fail("PERSISTENCE_CONTRACT_DDL_UNAVAILABLE", phase="OFFLINE_PREFLIGHT")
+              if (v2.get("future_schema_contract") or {}).get("classification_key_version_required") != "attack-event-classification-key-v2":
+                  fail("CLASSIFICATION_IDENTITY_V2_CONTRACT_MISMATCH", phase="OFFLINE_PREFLIGHT")
+              old_col = "    qa_reasons TEXT[] NOT NULL DEFAULT '{}'::text[],"
+              new_col = "    qa_reasons_state TEXT NOT NULL,\n    qa_reasons JSONB NULL,"
+              if ddl.count(old_col) != 1:
+                  fail("PERSISTENCE_CONTRACT_DDL_DELTA_MISMATCH", phase="OFFLINE_PREFLIGHT")
+              ddl = ddl.replace(old_col, new_col)
+              old_ver = "CHECK (classification_key_version = 'attack-event-classification-key-v1')"
+              new_ver = "CHECK (classification_key_version = 'attack-event-classification-key-v2')"
+              if ddl.count(old_ver) != 1:
+                  fail("PERSISTENCE_CONTRACT_DDL_DELTA_MISMATCH", phase="OFFLINE_PREFLIGHT")
+              ddl = ddl.replace(old_ver, new_ver)
+              ddl = ddl.rstrip() + "\n\n" + """
+          ALTER TABLE public.attack_event_classifications
+              ADD CONSTRAINT attack_event_classifications_qa_state_check
+              CHECK (qa_reasons_state IN ('MATERIALIZED','UNMATERIALIZED_IN_ACCEPTED_SOURCE'));
+
+          ALTER TABLE public.attack_event_classifications
+              ADD CONSTRAINT attack_event_classifications_qa_value_check
+              CHECK (
+                  (qa_reasons_state = 'MATERIALIZED' AND jsonb_typeof(qa_reasons) = 'array')
+                  OR
+                  (qa_reasons_state = 'UNMATERIALIZED_IN_ACCEPTED_SOURCE' AND qa_reasons IS NULL)
+              );
+          """.lstrip()
+              delta = provenance.get("candidate_ddl_delta") or {}
+              prov_sql = delta.get("sql")
+              if not isinstance(prov_sql, str) or hashlib.sha256(prov_sql.encode("utf-8")).hexdigest() != delta.get("sha256"):
+                  fail("PROVENANCE_CARDINALITY_DDL_DELTA_SHA_MISMATCH", phase="OFFLINE_PREFLIGHT")
+              if delta.get("supersedes_only_origin_provenance_representation") is not True:
+                  fail("PROVENANCE_CARDINALITY_DELTA_SCOPE_MISMATCH", phase="OFFLINE_PREFLIGHT")
+              if (human.get("future_schema_contract") or {}).get("column") != "human_review_state TEXT NOT NULL":
+                  fail("HUMAN_REVIEW_STATE_CONTRACT_MISMATCH", phase="OFFLINE_PREFLIGHT")
+              return ddl.rstrip() + "\n\n" + prov_sql.strip() + "\n"
+
+          def normalize(v):
+              if isinstance(v, UUID):
+                  return str(v)
+              if isinstance(v, datetime):
+                  return utc_microseconds(v)
+              if isinstance(v, dict):
+                  return {str(k): normalize(val) for k, val in sorted(v.items(), key=lambda x: str(x[0]))}
+              if isinstance(v, (list, tuple)):
+                  return [normalize(x) for x in v]
+              return v
+
+          result = {
+              "schema_version": 1,
+              "kind": "attack_event_23city_rollback_persistence_proof_resume2",
+              "proof_branch": os.environ.get("GITHUB_REF_NAME"),
+              "workflow_commit": os.environ.get("GITHUB_SHA"),
+              "actions_run_id": int(os.environ.get("GITHUB_RUN_ID", "0") or 0),
+              "snapshot": {"commit": SNAPSHOT["commit"], "path": SNAPSHOT["path"], "sha256": SNAPSHOT["sha256"]},
+              "binding_map": {"commit": BINDING["commit"], "path": BINDING["path"], "sha256": BINDING["sha256"]},
+              "contract_sha_status": {
+                  "step1": "NOT_RUN",
+                  "classification_identity_v2": "NOT_RUN",
+                  "provenance_cardinality": "NOT_RUN",
+                  "human_review_state": "NOT_RUN",
+              },
+              "snapshot_sha_status": "NOT_RUN",
+              "binding_map_sha_status": "NOT_RUN",
+              "db_preflight_ran": False,
+              "outer_rollback_executed": False,
+              "committed_db_mutations": 0,
+              "production_mutation": "NO",
+              "credentials_exposed": False,
+              "remaining_representability_gaps": [],
+          }
+
+          phase = "OFFLINE_PREFLIGHT"
+          write_conn = None
+          baseline_ingestion_runs = None
+          protected_parent_baseline_sha = None
+          db_url = os.environ.get("PHASE1_PROD_SHADOW_DATABASE_URL", "")
+          branch_id = os.environ.get("PHASE1_PROD_SHADOW_BRANCH_ID", "")
+          snapshot = binding = step1 = v2 = provenance = human = None
+          class_rows = event_rows = source_rows = None
+          outer_txn_opened = False
+
+          def rollback_outer():
+              global write_conn, outer_txn_opened
+              if write_conn is not None and outer_txn_opened:
+                  try:
+                      write_conn.rollback()
+                      result["outer_rollback_executed"] = True
+                  finally:
+                      outer_txn_opened = False
+
+          def protected_parent_rows(conn, bound_uids):
+              found = {}
+              with conn.cursor() as cur:
+                  chunk = 4000
+                  for i in range(0, len(bound_uids), chunk):
+                      ids = bound_uids[i:i+chunk]
+                      cur.execute(
+                          "SELECT episode_uid::text, city_key::text, alert_type::text, episode_state::text, "
+                          "canonicalization_version::text, start_at, end_at "
+                          "FROM public.alert_episodes WHERE episode_uid::text = ANY(%s)",
+                          (ids,),
+                      )
+                      for uid, city, alert_type, state, canon, start_at, end_at in cur.fetchall():
+                          found[str(uid)] = [
+                              str(uid), str(city), str(alert_type), str(state), str(canon),
+                              utc_microseconds(start_at), utc_microseconds(end_at),
+                          ]
+              return found
+
+          def post_rollback_safety():
+              if not db_url:
+                  return
+              conn = psycopg.connect(db_url, autocommit=True, connect_timeout=20, options="-c default_transaction_read_only=on")
+              try:
+                  with conn.cursor() as cur:
+                      cur.execute("BEGIN TRANSACTION ISOLATION LEVEL REPEATABLE READ READ ONLY")
+                      cur.execute("SET LOCAL default_transaction_read_only = on")
+                      cur.execute(
+                          "SELECT table_name FROM information_schema.tables "
+                          "WHERE table_schema='public' AND table_name IN "
+                          "('attack_event_classifications','attack_events','attack_event_sources') ORDER BY table_name"
+                      )
+                      tables = [r[0] for r in cur.fetchall()]
+                      result["attack_event_tables_after_rollback"] = len(tables)
+                      result["committed_attack_event_rows"] = 0 if not tables else None
+                      cur.execute("SELECT count(*) FROM public.ingestion_runs")
+                      after_runs = int(cur.fetchone()[0])
+                      if baseline_ingestion_runs is not None:
+                          result["ingestion_runs_delta"] = after_runs - baseline_ingestion_runs
+                      if binding is not None and snapshot is not None:
+                          records = binding["records"]
+                          bound_uids = sorted(str(r["alert_episode_uid"]) for r in records if r["binding_state"] == "BOUND")
+                          now_rows = protected_parent_rows(conn, bound_uids)
+                          raw = canonical_json_bytes([now_rows[k] for k in sorted(now_rows)])
+                          result["protected_parent_state_after_rollback_sha256"] = hashlib.sha256(raw).hexdigest()
+                          if protected_parent_baseline_sha is not None:
+                              result["protected_alert_episodes_unchanged"] = (
+                                  result["protected_parent_state_after_rollback_sha256"] == protected_parent_baseline_sha
+                              )
+                      cur.execute("ROLLBACK")
+              finally:
+                  conn.close()
+
+          try:
+              snapshot_path, snapshot_blob, snapshot_sha = materialize(SNAPSHOT, "SNAPSHOT")
+              binding_path, binding_blob, binding_sha = materialize(BINDING, "BINDING_MAP")
+              step1, step1_blob, step1_sha = load_json(STEP1, "STEP1_CONTRACT")
+              v2, v2_blob, v2_sha = load_json(V2, "V2_ADDENDUM")
+              provenance, provenance_blob, provenance_sha = load_json(PROVENANCE, "PROVENANCE_ADDENDUM")
+              human, human_blob, human_sha = load_json(HUMAN, "HUMAN_REVIEW_ADDENDUM")
+              result["snapshot_sha_status"] = "PASS"
+              result["binding_map_sha_status"] = "PASS"
+              result["contract_sha_status"] = {
+                  "step1": "PASS" if step1_sha == STEP1["sha256"] else "FAIL",
+                  "classification_identity_v2": "PASS" if v2_sha == V2["sha256"] else "FAIL",
+                  "provenance_cardinality": "PASS" if provenance_sha == PROVENANCE["sha256"] else "FAIL",
+                  "human_review_state": "PASS" if human_sha == HUMAN["sha256"] else "FAIL",
+              }
+              if any(v != "PASS" for v in result["contract_sha_status"].values()):
+                  fail("FROZEN_CONTRACT_SHA_MISMATCH", phase=phase)
+              if step1.get("verdict") != "ATTACK-EVENT NEON PERSISTENCE CONTRACT FROZEN":
+                  fail("STEP1_PERSISTENCE_CONTRACT_NOT_FROZEN", phase=phase)
+              if v2.get("verdict") != "ATTACK-EVENT CLASSIFICATION IDENTITY AVAILABILITY CONTRACT FROZEN":
+                  fail("CLASSIFICATION_IDENTITY_V2_ADDENDUM_NOT_FROZEN", phase=phase)
+              if provenance.get("verdict") != "ATTACK-EVENT PROVENANCE CARDINALITY SCHEMA ADDENDUM FROZEN":
+                  fail("PROVENANCE_CARDINALITY_ADDENDUM_NOT_FROZEN", phase=phase)
+              if human.get("verdict") != "ATTACK-EVENT HUMAN REVIEW STATE DERIVATION ADDENDUM FROZEN":
+                  fail("HUMAN_REVIEW_STATE_ADDENDUM_NOT_FROZEN", phase=phase)
+
+              effective_ddl = build_effective_ddl(step1, v2, provenance, human)
+              result["effective_candidate_ddl_sha256"] = hashlib.sha256(effective_ddl.encode("utf-8")).hexdigest()
+
+              snapshot = json.loads(snapshot_path.read_bytes())
+              binding = json.loads(binding_path.read_bytes())
+              cls = snapshot.get("classifications")
+              events = snapshot.get("attack_events")
+              links = snapshot.get("source_links")
+              records = binding.get("records")
+              if not all(isinstance(x, list) for x in (cls, events, links, records)):
+                  fail("FROZEN_INPUT_SCHEMA_MISMATCH", phase=phase)
+              if (len(cls), len(events), len(links), len(records)) != (26405, 1080, 3769, 26405):
+                  fail("FROZEN_INPUT_COUNT_MISMATCH", phase=phase)
+              if Counter(str(r.get("verdict")) for r in cls) != Counter(EXPECTED_DIST):
+                  fail("SNAPSHOT_DISTRIBUTION_MISMATCH", phase=phase)
+              if snapshot.get("classification_key_version") != "attack-event-classification-key-v2":
+                  fail("SNAPSHOT_CLASSIFICATION_KEY_VERSION_MISMATCH", phase=phase)
+              if snapshot.get("attack_event_key_version") != "attack-event-key-v1":
+                  fail("SNAPSHOT_EVENT_KEY_VERSION_MISMATCH", phase=phase)
+              if snapshot.get("source_link_key_version") != "attack-event-source-link-key-v1":
+                  fail("SNAPSHOT_SOURCE_LINK_KEY_VERSION_MISMATCH", phase=phase)
+
+              ckeys = [str(r.get("classification_key") or "") for r in cls]
+              ekeys = [str(r.get("attack_event_key") or "") for r in events]
+              skeys = [str(r.get("source_link_key") or "") for r in links]
+              bkeys = [str(r.get("classification_key") or "") for r in records]
+              if "" in ckeys or len(set(ckeys)) != 26405:
+                  fail("SNAPSHOT_CLASSIFICATION_KEY_UNIQUENESS_MISMATCH", phase=phase)
+              if "" in ekeys or len(set(ekeys)) != 1080:
+                  fail("SNAPSHOT_EVENT_KEY_UNIQUENESS_MISMATCH", phase=phase)
+              if "" in skeys or len(set(skeys)) != 3769:
+                  fail("SNAPSHOT_SOURCE_LINK_KEY_UNIQUENESS_MISMATCH", phase=phase)
+              if set(ckeys) != set(bkeys):
+                  fail("SNAPSHOT_BINDING_KEYSET_MISMATCH", phase=phase)
+              bc = Counter(str(r.get("binding_state")) for r in records)
+              if bc != Counter({"BOUND": 26380, "UNBOUND": 25}):
+                  fail("BINDING_MAP_STATE_COUNT_MISMATCH", phase=phase)
+              if any(r.get("alert_episode_uid") is not None for r in records if r.get("binding_state") == "UNBOUND"):
+                  fail("BINDING_MAP_UNBOUND_PARENT_NOT_NULL", phase=phase)
+
+              human_counts = Counter()
+              human_conflicts = 0
+              for row in cls:
+                  try:
+                      state = derive_human_state(row)
+                      human_counts[state] += 1
+                  except Exception:
+                      human_conflicts += 1
+              if human_conflicts:
+                  fail("HUMAN_REVIEW_STATE_DERIVATION_CONFLICT", phase=phase, table="public.attack_event_classifications", field="human_review_state", count=human_conflicts)
+              if dict(human_counts) != {k: v for k, v in EXPECTED_HUMAN.items() if v}:
+                  if human_counts.get("REVIEWED_EVIDENCE", 0) != 0 or human_counts.get("NONE", 0) != 24610 or human_counts.get("NEEDS_REVIEW", 0) != 1795:
+                      fail("HUMAN_REVIEW_STATE_DERIVATION_COUNT_MISMATCH", phase=phase)
+              result["human_review_state"] = {
+                  "NONE": human_counts.get("NONE", 0),
+                  "NEEDS_REVIEW": human_counts.get("NEEDS_REVIEW", 0),
+                  "REVIEWED_EVIDENCE": human_counts.get("REVIEWED_EVIDENCE", 0),
+                  "coverage": sum(human_counts.values()),
+                  "conflicts": human_conflicts,
+              }
+
+              bind_by_ck = {str(r["classification_key"]): r for r in records}
+              class_by_ck = {str(r["classification_key"]): r for r in cls}
+              event_by_ck = {str(r["classification_key_v2"]): r for r in events}
+              positive_keys = {str(r["classification_key"]) for r in cls if r["verdict"] in POSITIVE}
+              if set(event_by_ck) != positive_keys:
+                  fail("POSITIVE_CLASSIFICATION_EVENT_MAPPING_MISMATCH", phase=phase)
+
+              field_audit = {"public.attack_event_classifications": {}, "public.attack_events": {}, "public.attack_event_sources": {}}
+              gaps = []
+
+              def audit(table, field, status, count=0, reason=""):
+                  field_audit[table][field] = {"status": status}
+                  if status == "UNREPRESENTABLE":
+                      gap = {"table": table, "field": field, "affected_count": int(count), "reason": str(reason)[:220]}
+                      field_audit[table][field].update({"affected_count": int(count), "reason": str(reason)[:220]})
+                      gaps.append(gap)
+
+              # Classification representability.
+              ctable = "public.attack_event_classifications"
+              for f in ("classification_uid", "created_at"):
+                  audit(ctable, f, "DB_GENERATED_NON_SEMANTIC")
+              direct_class_fields = (
+                  "classification_key_version", "classification_key", "historical_episode_id", "city_key",
+                  "verdict", "event_types", "qa_reasons_state", "qa_reasons", "classifier_reason_codes",
+                  "classifier_blob_sha", "classifier_methodology_version", "normalization_version",
+                  "evidence_set_sha256", "review_provenance_sha256", "review_provenance",
+              )
+              for f in direct_class_fields:
+                  missing = sum(f not in r for r in cls)
+                  if missing:
+                      audit(ctable, f, "UNREPRESENTABLE", missing, "required frozen classification field absent")
+                  else:
+                      audit(ctable, f, "DIRECTLY_MATERIALIZED")
+              for f in ("alert_type", "alert_start_at", "alert_end_at", "is_event", "positive_tier", "human_review_state", "binding_state", "alert_episode_uid", "origin_provenance", "origin_provenance_sha256", "origin_repository", "origin_ref", "origin_commit_sha", "origin_artifact_path", "origin_artifact_blob_sha", "origin_target_state_sha256", "origin_workflow_run_id", "correction_provenance"):
+                  audit(ctable, f, "CONTRACT_DERIVED")
+              for f in ("classified_at", "supersedes_classification_uid", "revision_reason", "persisted_by_run_id"):
+                  audit(ctable, f, "LEGITIMATELY_NULL")
+
+              bad_timestamps = 0
+              bad_reason_codes = 0
+              bad_qa = 0
+              bad_prov = 0
+              missing_repo = 0
+              adjudicated_missing_case_id = 0
+              case_id_conflicts = 0
+              class_lossless = 0
+              class_hashes = set()
+              class_rows = []
+              for r in cls:
+                  ck = str(r.get("classification_key") or "")
+                  try:
+                      start_dt = parse_utc(str(r["alert_start_utc_microseconds"]))
+                      end_dt = parse_utc(str(r["alert_end_utc_microseconds"]))
+                      if end_dt <= start_dt:
+                          bad_timestamps += 1
+                  except Exception:
+                      bad_timestamps += 1
+                      start_dt = end_dt = None
+                  if not isinstance(r.get("classifier_reason_codes"), list):
+                      bad_reason_codes += 1
+                  qstate, qvalue = r.get("qa_reasons_state"), r.get("qa_reasons")
+                  if not ((qstate == "MATERIALIZED" and isinstance(qvalue, list)) or (qstate == "UNMATERIALIZED_IN_ACCEPTED_SOURCE" and qvalue is None)):
+                      bad_qa += 1
+                  op = r.get("origin_provenance")
+                  if not isinstance(op, dict):
+                      bad_prov += 1
+                      op = None
+                  else:
+                      psha = canonical_sha(op)
+                      class_hashes.add(psha)
+                      class_lossless += 1
+                  projections = classification_origin_projection(op or {})
+                  if not projections.get("origin_repository"):
+                      missing_repo += 1
+                  frozen_case_id = explicit_frozen_case_id(r)
+                  if has_adjudication_marker(r) and not frozen_case_id:
+                      adjudicated_missing_case_id += 1
+                  # Multiple explicit case IDs are not safely selectable.
+                  explicit_ids = sorted({str(v) for v in walk_values(r, lambda k, v: k in {"originating_frozen_case_id", "frozen_case_id"} and isinstance(v, (str, int)) and str(v).strip())})
+                  if len(explicit_ids) > 1:
+                      case_id_conflicts += 1
+                  if start_dt is None or end_dt is None or op is None:
+                      continue
+                  verdict = str(r["verdict"])
+                  is_event = verdict in POSITIVE
+                  tier = "STRICT" if verdict == "STRICT_EVENT_POSITIVE" else "SENSITIVITY" if verdict == "SENSITIVITY_EVENT_POSITIVE" else None
+                  b = bind_by_ck[ck]
+                  review_value = r.get("review_provenance")
+                  review_store = review_value if nonempty_review(review_value) else {}
+                  run_id = projections.get("origin_workflow_run_id")
+                  try:
+                      run_id = int(run_id) if run_id is not None and str(run_id).isdigit() else None
+                  except Exception:
+                      run_id = None
+                  class_rows.append({
+                      "classification_key_version": r["classification_key_version"],
+                      "classification_key": ck,
+                      "historical_episode_id": r["historical_episode_id"],
+                      "city_key": r["city_key"],
+                      "alert_type": "AIR",
+                      "alert_start_at": start_dt,
+                      "alert_end_at": end_dt,
+                      "verdict": verdict,
+                      "is_event": is_event,
+                      "positive_tier": tier,
+                      "event_types": list(r["event_types"]),
+                      "qa_reasons_state": qstate,
+                      "qa_reasons": qvalue,
+                      "classifier_reason_codes": list(r["classifier_reason_codes"]) if isinstance(r.get("classifier_reason_codes"), list) else None,
+                      "classifier_blob_sha": r["classifier_blob_sha"],
+                      "classifier_methodology_version": r["classifier_methodology_version"],
+                      "normalization_version": r["normalization_version"],
+                      "evidence_set_sha256": r["evidence_set_sha256"],
+                      "review_provenance_sha256": r.get("review_provenance_sha256"),
+                      "human_review_state": derive_human_state(r),
+                      "review_provenance": review_store,
+                      "originating_frozen_case_id": frozen_case_id,
+                      "binding_state": b["binding_state"],
+                      "alert_episode_uid": b.get("alert_episode_uid"),
+                      "origin_repository": projections.get("origin_repository"),
+                      "origin_ref": projections.get("origin_ref"),
+                      "origin_commit_sha": projections.get("origin_commit_sha"),
+                      "origin_artifact_path": projections.get("origin_artifact_path"),
+                      "origin_artifact_blob_sha": projections.get("origin_artifact_blob_sha"),
+                      "origin_target_state_sha256": projections.get("origin_target_state_sha256"),
+                      "origin_workflow_run_id": run_id,
+                      "classified_at": None,
+                      "supersedes_classification_uid": None,
+                      "revision_reason": None,
+                      "correction_provenance": {},
+                      "persisted_by_run_id": None,
+                      "origin_provenance": op,
+                      "origin_provenance_sha256": canonical_sha(op),
+                  })
+
+              if bad_timestamps:
+                  audit(ctable, "alert_start_at", "UNREPRESENTABLE", bad_timestamps, "frozen UTC bounds cannot be represented as valid ordered timestamps")
+                  field_audit[ctable]["alert_end_at"] = dict(field_audit[ctable]["alert_start_at"])
+                  gaps.append({"table": ctable, "field": "alert_end_at", "affected_count": bad_timestamps, "reason": "frozen UTC bounds cannot be represented as valid ordered timestamps"})
+              if bad_reason_codes:
+                  audit(ctable, "classifier_reason_codes", "UNREPRESENTABLE", bad_reason_codes, "classifier_reason_codes is not an authoritative array")
+              if bad_qa:
+                  audit(ctable, "qa_reasons", "UNREPRESENTABLE", bad_qa, "QA availability/value invariant mismatch")
+              if bad_prov:
+                  audit(ctable, "origin_provenance", "UNREPRESENTABLE", bad_prov, "authoritative classification origin_provenance object unavailable")
+              if class_lossless != 26405:
+                  audit(ctable, "origin_provenance_sha256", "UNREPRESENTABLE", 26405 - class_lossless, "lossless canonical provenance hashing unavailable")
+              if missing_repo:
+                  audit(ctable, "origin_repository", "UNREPRESENTABLE", missing_repo, "required repository projection unavailable")
+              if adjudicated_missing_case_id:
+                  audit(ctable, "originating_frozen_case_id", "UNREPRESENTABLE", adjudicated_missing_case_id, "accepted adjudication marker present but no explicit frozen/adjudicated case ID is mechanically available")
+              elif case_id_conflicts:
+                  audit(ctable, "originating_frozen_case_id", "UNREPRESENTABLE", case_id_conflicts, "multiple explicit frozen/adjudicated case IDs; no selection rule")
+              else:
+                  direct_case = sum(bool(explicit_frozen_case_id(r)) for r in cls)
+                  audit(ctable, "originating_frozen_case_id", "DIRECTLY_MATERIALIZED" if direct_case else "LEGITIMATELY_NULL")
+
+              exp_lossless = provenance.get("lossless_jsonb_proof") or {}
+              if class_lossless != ((exp_lossless.get("classification") or {}).get("losslessly_representable")):
+                  audit(ctable, "origin_provenance", "UNREPRESENTABLE", abs(26405 - class_lossless), "classification provenance coverage differs from frozen provenance-cardinality addendum")
+
+              # Event representability.
+              etable = "public.attack_events"
+              for f in ("attack_event_uid", "created_at", "updated_at"):
+                  audit(etable, f, "DB_GENERATED_NON_SEMANTIC")
+              for f in ("attack_event_key_version", "attack_event_key", "event_grain", "historical_episode_id", "city_key"):
+                  missing = sum(f not in r for r in events)
+                  audit(etable, f, "UNREPRESENTABLE" if missing else "DIRECTLY_MATERIALIZED", missing, "required frozen event identity field absent" if missing else "")
+              for f in ("alert_type", "alert_start_at", "alert_end_at", "event_status", "current_classification_uid", "binding_state", "alert_episode_uid", "correction_provenance"):
+                  audit(etable, f, "CONTRACT_DERIVED")
+              for f in ("created_by_run_id", "updated_by_run_id"):
+                  audit(etable, f, "LEGITIMATELY_NULL")
+
+              active_contract = (((step1.get("historical_backfill_input_contract") or {}).get("combined_mechanically_available_snapshot") or {}).get("active_positive_event_count_under_v1_grain"))
+              if active_contract != 1080:
+                  audit(etable, "event_status", "UNREPRESENTABLE", 1080, "STEP 1 does not establish all 1,080 frozen positive v1-grain events as ACTIVE")
+              bad_event_time = 0
+              bad_event_class = 0
+              event_rows = []
+              for r in events:
+                  ck = str(r.get("classification_key_v2") or "")
+                  if ck not in positive_keys:
+                      bad_event_class += 1
+                      continue
+                  try:
+                      start_dt = parse_utc(str(r["alert_start_utc_microseconds"]))
+                      end_dt = parse_utc(str(r["alert_end_utc_microseconds"]))
+                      if end_dt <= start_dt:
+                          raise ValueError("bad order")
+                  except Exception:
+                      bad_event_time += 1
+                      continue
+                  b = bind_by_ck[ck]
+                  event_rows.append({
+                      "attack_event_key_version": r["attack_event_key_version"],
+                      "attack_event_key": r["attack_event_key"],
+                      "event_grain": r["event_grain"],
+                      "historical_episode_id": r["historical_episode_id"],
+                      "city_key": r["city_key"],
+                      "alert_type": "AIR",
+                      "alert_start_at": start_dt,
+                      "alert_end_at": end_dt,
+                      "event_status": "ACTIVE",
+                      "classification_key_v2": ck,
+                      "binding_state": b["binding_state"],
+                      "alert_episode_uid": b.get("alert_episode_uid"),
+                      "correction_provenance": {},
+                      "created_by_run_id": None,
+                      "updated_by_run_id": None,
+                  })
+              if bad_event_time:
+                  audit(etable, "alert_start_at", "UNREPRESENTABLE", bad_event_time, "event UTC bounds invalid")
+                  field_audit[etable]["alert_end_at"] = dict(field_audit[etable]["alert_start_at"])
+                  gaps.append({"table": etable, "field": "alert_end_at", "affected_count": bad_event_time, "reason": "event UTC bounds invalid"})
+              if bad_event_class:
+                  audit(etable, "current_classification_uid", "UNREPRESENTABLE", bad_event_class, "event references non-positive or unknown classification_key_v2")
+
+              # Source representability.
+              stable = "public.attack_event_sources"
+              for f in ("attack_event_source_uid", "created_at"):
+                  audit(stable, f, "DB_GENERATED_NON_SEMANTIC")
+              for f in ("source_link_key_version", "source_link_key", "observation_id", "source_type", "content_sha256", "content_hash_basis"):
+                  missing = sum((f not in r) or (f in {"source_type", "content_sha256", "content_hash_basis"} and not r.get(f)) for r in links)
+                  audit(stable, f, "UNREPRESENTABLE" if missing else "DIRECTLY_MATERIALIZED", missing, "required frozen source field absent" if missing else "")
+              audit(stable, "classification_uid", "CONTRACT_DERIVED")
+              for f in ("source_family", "source_url", "telegram_channel", "telegram_message_id", "source_timestamp", "event_timestamp_if_stated", "excerpt", "observation_classification_outcome", "classification_episode_id"):
+                  audit(stable, f, "DIRECTLY_MATERIALIZED")
+              for f in ("evidence_payload", "retrieval_provenance", "origin_provenance", "origin_provenance_sha256", "origin_artifact_path", "origin_git_ref", "origin_git_blob_sha"):
+                  audit(stable, f, "CONTRACT_DERIVED")
+              audit(stable, "raw_object_path", "LEGITIMATELY_NULL")
+
+              bad_source_class = 0
+              bad_evidence = 0
+              bad_retrieval = 0
+              bad_source_prov = 0
+              bad_hash_basis = 0
+              bad_outcome = 0
+              bad_telegram_pair = 0
+              source_lossless = 0
+              source_hashes = set()
+              source_rows = []
+              allowed_outcomes = {None, "approved_strict", "approved_sensitivity", "needs_review", "rejected"}
+              for r in links:
+                  ck = str(r.get("classification_key_v2") or "")
+                  if ck not in class_by_ck:
+                      bad_source_class += 1
+                      continue
+                  payload = r.get("evidence_payload")
+                  if payload is None:
+                      payload = r.get("classifier_evidence_payload")
+                  if not isinstance(payload, dict):
+                      bad_evidence += 1
+                  retrieval = r.get("retrieval_provenance")
+                  if retrieval is None:
+                      retrieval = {}
+                  if not isinstance(retrieval, dict):
+                      bad_retrieval += 1
+                  op = r.get("origin")
+                  if not isinstance(op, dict):
+                      op = r.get("origin_provenance")
+                  if not isinstance(op, dict):
+                      bad_source_prov += 1
+                      op = None
+                  else:
+                      source_lossless += 1
+                      source_hashes.add(canonical_sha(op))
+                  basis = r.get("content_hash_basis")
+                  if basis not in {"SOURCE_NATIVE", "NORMALIZED_EVIDENCE"}:
+                      bad_hash_basis += 1
+                  outcome = r.get("observation_classification_outcome")
+                  if outcome not in allowed_outcomes:
+                      bad_outcome += 1
+                  ch, mid = r.get("telegram_channel"), r.get("telegram_message_id")
+                  if (ch is None) != (mid is None):
+                      bad_telegram_pair += 1
+                  projections = source_origin_projection(op or {})
+                  raw_path = r.get("raw_object_path")
+                  if raw_path is None:
+                      raw_path = unique_string(retrieval if isinstance(retrieval, dict) else {}, lambda k, v: k == "raw_object_path")
+                  def maybe_dt(v):
+                      if v in (None, ""):
+                          return None
+                      return parse_utc(str(v))
+                  try:
+                      source_ts = maybe_dt(r.get("source_timestamp"))
+                      event_ts = maybe_dt(r.get("event_timestamp_if_stated"))
+                  except Exception:
+                      bad_evidence += 1
+                      continue
+                  if op is None or not isinstance(payload, dict) or not isinstance(retrieval, dict):
+                      continue
+                  source_rows.append({
+                      "source_link_key_version": r["source_link_key_version"],
+                      "source_link_key": r["source_link_key"],
+                      "classification_key_v2": ck,
+                      "observation_id": r["observation_id"],
+                      "source_family": r.get("source_family"),
+                      "source_type": r.get("source_type"),
+                      "source_url": r.get("source_url"),
+                      "telegram_channel": ch,
+                      "telegram_message_id": int(mid) if mid is not None else None,
+                      "source_timestamp": source_ts,
+                      "event_timestamp_if_stated": event_ts,
+                      "excerpt": r.get("excerpt"),
+                      "content_sha256": r["content_sha256"],
+                      "content_hash_basis": basis,
+                      "observation_classification_outcome": outcome,
+                      "classification_episode_id": r.get("classification_episode_id"),
+                      "evidence_payload": payload,
+                      "retrieval_provenance": retrieval,
+                      "origin_artifact_path": projections.get("origin_artifact_path"),
+                      "origin_git_ref": projections.get("origin_git_ref"),
+                      "origin_git_blob_sha": projections.get("origin_git_blob_sha"),
+                      "raw_object_path": raw_path,
+                      "origin_provenance": op,
+                      "origin_provenance_sha256": canonical_sha(op),
+                  })
+
+              if bad_source_class:
+                  audit(stable, "classification_uid", "UNREPRESENTABLE", bad_source_class, "source link references unknown classification")
+              if bad_evidence:
+                  audit(stable, "evidence_payload", "UNREPRESENTABLE", bad_evidence, "classifier evidence payload missing/invalid or source timestamp invalid")
+              if bad_retrieval:
+                  audit(stable, "retrieval_provenance", "UNREPRESENTABLE", bad_retrieval, "retrieval provenance is not an object")
+              if bad_source_prov:
+                  audit(stable, "origin_provenance", "UNREPRESENTABLE", bad_source_prov, "authoritative source origin provenance object unavailable")
+              if source_lossless != 3769:
+                  audit(stable, "origin_provenance_sha256", "UNREPRESENTABLE", 3769 - source_lossless, "lossless source provenance canonicalization unavailable")
+              if source_lossless != ((exp_lossless.get("source_link") or {}).get("losslessly_representable")):
+                  audit(stable, "origin_provenance", "UNREPRESENTABLE", abs(3769 - source_lossless), "source provenance coverage differs from frozen provenance-cardinality addendum")
+              if bad_hash_basis:
+                  audit(stable, "content_hash_basis", "UNREPRESENTABLE", bad_hash_basis, "content_hash_basis outside frozen STEP 1 enum")
+              if bad_outcome:
+                  audit(stable, "observation_classification_outcome", "UNREPRESENTABLE", bad_outcome, "source outcome outside frozen STEP 1 enum")
+              if bad_telegram_pair:
+                  audit(stable, "telegram_channel", "UNREPRESENTABLE", bad_telegram_pair, "Telegram channel/message-id pair invariant violated")
+
+              result["classification_provenance_representability"] = {
+                  "lossless": class_lossless, "required": 26405, "unique_provenance_hashes": len(class_hashes)
+              }
+              result["source_provenance_representability"] = {
+                  "lossless": source_lossless, "required": 3769, "unique_provenance_hashes": len(source_hashes)
+              }
+              result["representability_field_audit"] = field_audit
+              result["remaining_representability_gaps"] = gaps
+              result["exhaustive_offline_representability"] = "PASS" if not gaps else "FAIL"
+
+              if gaps:
+                  first = gaps[0]
+                  fail(
+                      "PERSISTENCE_SCHEMA_REPRESENTABILITY_MISMATCH",
+                      phase="OFFLINE_PREFLIGHT",
+                      table=first["table"],
+                      field=first["field"],
+                      count=first["affected_count"],
+                      detail=first["reason"],
+                  )
+              if len(class_rows) != 26405 or len(event_rows) != 1080 or len(source_rows) != 3769:
+                  fail("OFFLINE_PROJECTION_ROW_COUNT_MISMATCH", phase=phase)
+
+              result["offline_counts"] = {
+                  "classifications": len(class_rows),
+                  "events": len(event_rows),
+                  "sources": len(source_rows),
+                  "verdict_distribution": EXPECTED_DIST,
+                  "qa": {"MATERIALIZED": 6863, "UNMATERIALIZED_IN_ACCEPTED_SOURCE": 19542},
+                  "binding": {"BOUND": 26380, "UNBOUND": 25, "AMBIGUOUS": 0},
+              }
+
+              # PHASE 1: read-only DB preflight.
+              phase = "DB_PREFLIGHT"
+              if not db_url:
+                  fail("PHASE1_PROD_SHADOW_DATABASE_URL_MISSING", phase=phase)
+              if branch_id != EXPECTED_BRANCH:
+                  fail("PERMANENT_NEON_BRANCH_ID_MISMATCH", phase=phase, detail=f"expected={EXPECTED_BRANCH};actual={branch_id or '<missing>'}")
+
+              ro = psycopg.connect(db_url, autocommit=True, connect_timeout=20, options="-c default_transaction_read_only=on")
+              try:
+                  with ro.cursor() as cur:
+                      cur.execute("BEGIN TRANSACTION ISOLATION LEVEL REPEATABLE READ READ ONLY")
+                      cur.execute("SET LOCAL default_transaction_read_only = on")
+                      cur.execute("SELECT current_setting('transaction_read_only'), current_setting('default_transaction_read_only')")
+                      if tuple(cur.fetchone()) != ("on", "on"):
+                          fail("READ_ONLY_TRANSACTION_NOT_ENFORCED", phase=phase)
+                      cur.execute(
+                          "SELECT table_name FROM information_schema.tables "
+                          "WHERE table_schema='public' AND table_name IN "
+                          "('attack_event_classifications','attack_events','attack_event_sources') ORDER BY table_name"
+                      )
+                      existing = [r[0] for r in cur.fetchall()]
+                      if existing:
+                          fail("ATTACK_EVENT_PERSISTENCE_STATE_UNEXPECTED", phase=phase, detail="attack-event candidate tables already exist")
+                      cur.execute("SELECT to_regclass('public.ingestion_runs')::text")
+                      if cur.fetchone()[0] != "ingestion_runs":
+                          fail("INGESTION_RUNS_SCHEMA_MISSING", phase=phase)
+                      cur.execute("SELECT count(*) FROM public.ingestion_runs")
+                      baseline_ingestion_runs = int(cur.fetchone()[0])
+
+                      bound_records = [r for r in records if r["binding_state"] == "BOUND"]
+                      bound_uids = sorted(str(r["alert_episode_uid"]) for r in bound_records)
+                      parent_rows = protected_parent_rows(ro, bound_uids)
+                      if len(parent_rows) != 26380:
+                          fail("FROZEN_BOUND_PARENT_UID_MISSING", phase=phase, count=26380 - len(parent_rows))
+                      bad_parent = 0
+                      for b in bound_records:
+                          ck = str(b["classification_key"])
+                          c = class_by_ck[ck]
+                          uid = str(b["alert_episode_uid"])
+                          p = parent_rows.get(uid)
+                          expected = [
+                              uid, str(c["city_key"]), "AIR", "closed", "alert-canonicalization-v1",
+                              str(c["alert_start_utc_microseconds"]), str(c["alert_end_utc_microseconds"]),
+                          ]
+                          if p != expected:
+                              bad_parent += 1
+                      if bad_parent:
+                          fail("FROZEN_BOUND_PARENT_ATTRIBUTE_MISMATCH", phase=phase, count=bad_parent)
+                      if any(r.get("alert_episode_uid") is not None for r in records if r["binding_state"] == "UNBOUND"):
+                          fail("FROZEN_UNBOUND_PARENT_NOT_NULL", phase=phase, count=25)
+                      parent_raw = canonical_json_bytes([parent_rows[k] for k in sorted(parent_rows)])
+                      protected_parent_baseline_sha = hashlib.sha256(parent_raw).hexdigest()
+                      result["protected_parent_baseline_sha256"] = protected_parent_baseline_sha
+                      result["parent_validation"] = "PASS"
+                      result["db_preflight_ran"] = True
+                      cur.execute("ROLLBACK")
+              finally:
+                  ro.close()
+
+              # PHASE 2: one write-capable outer transaction. No commit is ever issued.
+              phase = "OUTER_TRANSACTION"
+              write_conn = psycopg.connect(db_url, autocommit=False, connect_timeout=20)
+              if write_conn.autocommit is not False:
+                  fail("OUTER_TRANSACTION_AUTOCOMMIT_MISMATCH", phase=phase)
+              outer_txn_opened = True
+              cur = write_conn.cursor()
+              cur.execute(effective_ddl)
+
+              CLASS_COLS = [
+                  "classification_key_version","classification_key","historical_episode_id","city_key","alert_type",
+                  "alert_start_at","alert_end_at","verdict","is_event","positive_tier","event_types","qa_reasons_state",
+                  "qa_reasons","classifier_reason_codes","classifier_blob_sha","classifier_methodology_version",
+                  "normalization_version","evidence_set_sha256","review_provenance_sha256","human_review_state",
+                  "review_provenance","originating_frozen_case_id","binding_state","alert_episode_uid","origin_repository",
+                  "origin_ref","origin_commit_sha","origin_artifact_path","origin_artifact_blob_sha","origin_target_state_sha256",
+                  "origin_workflow_run_id","classified_at","supersedes_classification_uid","revision_reason",
+                  "correction_provenance","persisted_by_run_id","origin_provenance","origin_provenance_sha256"
+              ]
+              EVENT_COLS = [
+                  "attack_event_key_version","attack_event_key","event_grain","historical_episode_id","city_key","alert_type",
+                  "alert_start_at","alert_end_at","event_status","current_classification_uid","binding_state","alert_episode_uid",
+                  "correction_provenance","created_by_run_id","updated_by_run_id"
+              ]
+              SOURCE_COLS = [
+                  "source_link_key_version","source_link_key","classification_uid","observation_id","source_family","source_type",
+                  "source_url","telegram_channel","telegram_message_id","source_timestamp","event_timestamp_if_stated","excerpt",
+                  "content_sha256","content_hash_basis","observation_classification_outcome","classification_episode_id",
+                  "evidence_payload","retrieval_provenance","origin_artifact_path","origin_git_ref","origin_git_blob_sha",
+                  "raw_object_path","origin_provenance","origin_provenance_sha256"
+              ]
+
+              def class_params(r):
+                  vals = []
+                  for c in CLASS_COLS:
+                      v = r[c]
+                      if c in {"qa_reasons"} and v is not None:
+                          v = Jsonb(v)
+                      elif c in {"review_provenance","correction_provenance","origin_provenance"}:
+                          v = Jsonb(v)
+                      vals.append(v)
+                  return vals
+
+              def event_params(r, uid_map):
+                  vals = []
+                  for c in EVENT_COLS:
+                      if c == "current_classification_uid":
+                          v = uid_map[r["classification_key_v2"]]
+                      else:
+                          v = r[c]
+                      if c == "correction_provenance":
+                          v = Jsonb(v)
+                      vals.append(v)
+                  return vals
+
+              def source_params(r, uid_map):
+                  vals = []
+                  for c in SOURCE_COLS:
+                      if c == "classification_uid":
+                          v = uid_map[r["classification_key_v2"]]
+                      else:
+                          v = r[c]
+                      if c in {"evidence_payload","retrieval_provenance","origin_provenance"}:
+                          v = Jsonb(v)
+                      vals.append(v)
+                  return vals
+
+              class_sql = "INSERT INTO public.attack_event_classifications (" + ",".join(CLASS_COLS) + ") VALUES (" + ",".join(["%s"]*len(CLASS_COLS)) + ")"
+              event_sql = "INSERT INTO public.attack_events (" + ",".join(EVENT_COLS) + ") VALUES (" + ",".join(["%s"]*len(EVENT_COLS)) + ")"
+              source_sql = "INSERT INTO public.attack_event_sources (" + ",".join(SOURCE_COLS) + ") VALUES (" + ",".join(["%s"]*len(SOURCE_COLS)) + ")"
+
+              # PHASE 3: forced-failure atomicity under one savepoint.
+              phase = "FORCED_FAILURE_ATOMICITY"
+              sample_event = sorted(event_rows, key=lambda x: x["attack_event_key"])[0]
+              sample_ck = sample_event["classification_key_v2"]
+              sample_class = next(r for r in class_rows if r["classification_key"] == sample_ck)
+              sample_sources = [r for r in source_rows if r["classification_key_v2"] == sample_ck]
+              cur.execute("SAVEPOINT attack_event_atomicity_test")
+              cur.execute(class_sql, class_params(sample_class))
+              cur.execute("SELECT classification_uid::text FROM public.attack_event_classifications WHERE classification_key=%s", (sample_ck,))
+              sample_uid = cur.fetchone()[0]
+              cur.execute(event_sql, event_params(sample_event, {sample_ck: sample_uid}))
+              if sample_sources:
+                  cur.execute(source_sql, source_params(sorted(sample_sources, key=lambda x: x["source_link_key"])[0], {sample_ck: sample_uid}))
+              invalid = dict(sample_class)
+              invalid["classification_key"] = "0" * 64
+              invalid["binding_state"] = "BROKEN"
+              invalid["alert_episode_uid"] = None
+              violated = False
+              try:
+                  cur.execute(class_sql, class_params(invalid))
+              except psycopg.Error:
+                  violated = True
+              if not violated:
+                  fail("FORCED_FAILURE_CONSTRAINT_NOT_TRIGGERED", phase=phase)
+              cur.execute("ROLLBACK TO SAVEPOINT attack_event_atomicity_test")
+              cur.execute("RELEASE SAVEPOINT attack_event_atomicity_test")
+              zero_counts = []
+              for t in ("attack_event_classifications","attack_events","attack_event_sources"):
+                  cur.execute(f"SELECT count(*) FROM public.{t}")
+                  zero_counts.append(int(cur.fetchone()[0]))
+              if zero_counts != [0, 0, 0]:
+                  fail("FORCED_FAILURE_ATOMICITY_MISMATCH", phase=phase, detail=str(zero_counts))
+              result["forced_failure_atomicity"] = "PASS"
+
+              # PHASE 4: full pass A.
+              phase = "FULL_PASS_A"
+              cur.executemany(class_sql, [class_params(r) for r in class_rows])
+              cur.execute("SELECT classification_key, classification_uid::text FROM public.attack_event_classifications")
+              uid_map = {str(k): str(v) for k, v in cur.fetchall()}
+              if len(uid_map) != 26405:
+                  fail("PASS_A_CLASSIFICATION_UID_MAP_MISMATCH", phase=phase)
+              cur.executemany(event_sql, [event_params(r, uid_map) for r in event_rows])
+              cur.executemany(source_sql, [source_params(r, uid_map) for r in source_rows])
+
+              for table, expected in (("attack_event_classifications",26405),("attack_events",1080),("attack_event_sources",3769)):
+                  cur.execute(f"SELECT count(*) FROM public.{table}")
+                  if int(cur.fetchone()[0]) != expected:
+                      fail("PASS_A_ROW_COUNT_MISMATCH", phase=phase, table="public."+table, count=int(cur.fetchone()[0]) if False else None)
+              cur.execute("SELECT verdict,count(*) FROM public.attack_event_classifications GROUP BY verdict")
+              if {k:int(v) for k,v in cur.fetchall()} != EXPECTED_DIST:
+                  fail("PASS_A_VERDICT_DISTRIBUTION_MISMATCH", phase=phase)
+              cur.execute("SELECT qa_reasons_state,count(*) FROM public.attack_event_classifications GROUP BY qa_reasons_state")
+              if {k:int(v) for k,v in cur.fetchall()} != {"MATERIALIZED":6863,"UNMATERIALIZED_IN_ACCEPTED_SOURCE":19542}:
+                  fail("PASS_A_QA_DISTRIBUTION_MISMATCH", phase=phase)
+              cur.execute("SELECT human_review_state,count(*) FROM public.attack_event_classifications GROUP BY human_review_state")
+              hdb = {k:int(v) for k,v in cur.fetchall()}
+              if hdb.get("NONE",0) != 24610 or hdb.get("NEEDS_REVIEW",0) != 1795 or hdb.get("REVIEWED_EVIDENCE",0) != 0:
+                  fail("PASS_A_HUMAN_REVIEW_DISTRIBUTION_MISMATCH", phase=phase)
+              cur.execute("SELECT binding_state,count(*) FROM public.attack_event_classifications GROUP BY binding_state")
+              if {k:int(v) for k,v in cur.fetchall()} != {"BOUND":26380,"UNBOUND":25}:
+                  fail("PASS_A_BINDING_DISTRIBUTION_MISMATCH", phase=phase)
+              cur.execute(
+                  "SELECT count(*) FROM public.attack_events e "
+                  "JOIN public.attack_event_classifications c ON c.classification_uid=e.current_classification_uid "
+                  "WHERE c.verdict NOT IN ('STRICT_EVENT_POSITIVE','SENSITIVITY_EVENT_POSITIVE') "
+                  "OR c.city_key<>e.city_key OR c.historical_episode_id<>e.historical_episode_id "
+                  "OR c.binding_state<>e.binding_state OR c.alert_episode_uid IS DISTINCT FROM e.alert_episode_uid"
+              )
+              if int(cur.fetchone()[0]) != 0:
+                  fail("PASS_A_EVENT_CLASSIFICATION_INVARIANT_MISMATCH", phase=phase)
+              cur.execute(
+                  "SELECT count(*) FROM public.attack_event_sources s "
+                  "LEFT JOIN public.attack_event_classifications c ON c.classification_uid=s.classification_uid "
+                  "WHERE c.classification_uid IS NULL"
+              )
+              if int(cur.fetchone()[0]) != 0:
+                  fail("PASS_A_SOURCE_FK_INVARIANT_MISMATCH", phase=phase)
+              result["pass_a"] = {"classifications":26405,"events":1080,"sources":3769}
+              result["fk_validation"] = "PASS"
+
+              # Semantic equality before replay.
+              phase = "IDEMPOTENT_PASS_B"
+              class_sem_cols = CLASS_COLS
+              event_sem_cols = EVENT_COLS
+              source_sem_cols = SOURCE_COLS
+
+              def compare_table(table, key_col, cols, expected_rows, expected_key, transform_expected):
+                  cur.execute("SELECT " + ",".join(cols) + f" FROM public.{table} ORDER BY {key_col}")
+                  db_rows = cur.fetchall()
+                  exp = sorted(expected_rows, key=lambda r: str(r[expected_key]))
+                  if len(db_rows) != len(exp):
+                      return len(exp)
+                  mismatches = 0
+                  for dbrow, erow in zip(db_rows, exp):
+                      ex = transform_expected(erow)
+                      if normalize(list(dbrow)) != normalize([ex[c] for c in cols]):
+                          mismatches += 1
+                  return mismatches
+
+              class_conflicts = compare_table(
+                  "attack_event_classifications","classification_key",class_sem_cols,class_rows,"classification_key",lambda r:r
+              )
+              event_conflicts = compare_table(
+                  "attack_events","attack_event_key",event_sem_cols,event_rows,"attack_event_key",
+                  lambda r: {**r, "current_classification_uid": uid_map[r["classification_key_v2"]]}
+              )
+              source_conflicts = compare_table(
+                  "attack_event_sources","source_link_key",source_sem_cols,source_rows,"source_link_key",
+                  lambda r: {**r, "classification_uid": uid_map[r["classification_key_v2"]]}
+              )
+              semantic_conflicts = class_conflicts + event_conflicts + source_conflicts
+              if semantic_conflicts:
+                  fail("PASS_B_SEMANTIC_CONFLICT", phase=phase, count=semantic_conflicts)
+
+              before = {}
+              for t in ("attack_event_classifications","attack_events","attack_event_sources"):
+                  cur.execute(f"SELECT count(*) FROM public.{t}")
+                  before[t] = int(cur.fetchone()[0])
+              cur.executemany(class_sql + " ON CONFLICT DO NOTHING", [class_params(r) for r in class_rows])
+              cur.executemany(event_sql + " ON CONFLICT DO NOTHING", [event_params(r, uid_map) for r in event_rows])
+              cur.executemany(source_sql + " ON CONFLICT DO NOTHING", [source_params(r, uid_map) for r in source_rows])
+              after = {}
+              for t in ("attack_event_classifications","attack_events","attack_event_sources"):
+                  cur.execute(f"SELECT count(*) FROM public.{t}")
+                  after[t] = int(cur.fetchone()[0])
+              replay = {k: after[k]-before[k] for k in before}
+              if any(replay.values()):
+                  fail("PASS_B_NON_IDEMPOTENT_INSERT", phase=phase, detail=str(replay))
+              result["replay_inserts"] = {
+                  "classifications": replay["attack_event_classifications"],
+                  "events": replay["attack_events"],
+                  "sources": replay["attack_event_sources"],
+              }
+              result["semantic_conflicts"] = 0
+
+              # PHASE 6: explicit outer rollback via client transaction rollback; no COMMIT is issued.
+              phase = "OUTER_ROLLBACK"
+              rollback_outer()
+              write_conn.close()
+              write_conn = None
+
+              # PHASE 7: fresh read-only post-rollback verification.
+              phase = "POST_ROLLBACK"
+              post_rollback_safety()
+              if result.get("attack_event_tables_after_rollback") != 0:
+                  fail("POST_ROLLBACK_ATTACK_EVENT_TABLES_REMAIN", phase=phase)
+              if result.get("committed_attack_event_rows") != 0:
+                  fail("POST_ROLLBACK_COMMITTED_ROWS_PRESENT", phase=phase)
+              if result.get("ingestion_runs_delta") != 0:
+                  fail("POST_ROLLBACK_INGESTION_RUNS_DELTA", phase=phase, count=result.get("ingestion_runs_delta"))
+              if result.get("protected_alert_episodes_unchanged") is not True:
+                  fail("POST_ROLLBACK_PROTECTED_PARENT_STATE_CHANGED", phase=phase)
+              result["committed_db_mutations"] = 0
+              result["verdict"] = "ATTACK-EVENT 23-CITY ROLLBACK-ONLY PERSISTENCE PROOF PASSED"
+              result["first_failing_gate"] = None
+              result["phase"] = "COMPLETE"
+              result["remaining_representability_gaps"] = []
+              result["safe_continuation_point"] = "Proof complete. Do not proceed to real persistence in this task."
+              PROOF_PATH.write_text(json.dumps(result, ensure_ascii=False, sort_keys=True, separators=(",", ":")), encoding="utf-8")
+              print("VERDICT=" + result["verdict"])
+              print("EXHAUSTIVE_OFFLINE_REPRESENTABILITY=PASS")
+              print("REMAINING_REPRESENTABILITY_GAPS=0")
+              print("EFFECTIVE_CANDIDATE_DDL_SHA256=" + result["effective_candidate_ddl_sha256"])
+              print("PARENT_VALIDATION=PASS")
+              print("FORCED_FAILURE_ATOMICITY=PASS")
+              print("PASS_A_CLASSIFICATIONS=26405")
+              print("PASS_A_EVENTS=1080")
+              print("PASS_A_SOURCES=3769")
+              print("REPLAY_CLASSIFICATION_INSERTS=0")
+              print("REPLAY_EVENT_INSERTS=0")
+              print("REPLAY_SOURCE_INSERTS=0")
+              print("SEMANTIC_CONFLICTS=0")
+              print("OUTER_ROLLBACK=PASS")
+              print("COMMITTED_NEON_MUTATIONS=0")
+
+          except GateError as exc:
+              try:
+                  rollback_outer()
+              except Exception as rb_exc:
+                  result["rollback_error_type"] = type(rb_exc).__name__
+              if write_conn is not None:
+                  try:
+                      write_conn.close()
+                  except Exception:
+                      pass
+                  write_conn = None
+              if result.get("db_preflight_ran"):
+                  try:
+                      post_rollback_safety()
+                  except Exception as safety_exc:
+                      result["post_rollback_safety_error"] = type(safety_exc).__name__ + ":" + safe_error(safety_exc)
+              result.update({
+                  "verdict": "ATTACK-EVENT 23-CITY ROLLBACK-ONLY PERSISTENCE PROOF BLOCKED",
+                  "first_failing_gate": exc.gate,
+                  "phase": exc.phase or phase,
+                  "affected_table_or_contract_field": {"table": exc.table, "field": exc.field} if (exc.table or exc.field) else None,
+                  "affected_row_count": exc.count,
+                  "committed_db_mutations": 0 if result.get("attack_event_tables_after_rollback") in (0, None) else None,
+                  "production_mutation": "NO",
+                  "safe_continuation_point": (
+                      "Do not repair this blocker in the same task. Resume only from the reported gate after a separately frozen contract/addendum if required."
+                  ),
+              })
+              if exc.detail is not None:
+                  result["compact_diagnostic"] = str(exc.detail)[:500]
+              PROOF_PATH.write_text(json.dumps(result, ensure_ascii=False, sort_keys=True, separators=(",", ":")), encoding="utf-8")
+              print("VERDICT=" + result["verdict"], file=sys.stderr)
+              print("FIRST_FAILING_GATE=" + exc.gate, file=sys.stderr)
+              print("PHASE=" + str(result["phase"]), file=sys.stderr)
+              if exc.table:
+                  print("AFFECTED_TABLE=" + str(exc.table), file=sys.stderr)
+              if exc.field:
+                  print("AFFECTED_FIELD=" + str(exc.field), file=sys.stderr)
+              if exc.count is not None:
+                  print("AFFECTED_COUNT=" + str(exc.count), file=sys.stderr)
+              for i, gap in enumerate(result.get("remaining_representability_gaps", [])[:10], 1):
+                  print(
+                      "REPRESENTABILITY_GAP_" + str(i) + "=" +
+                      str(gap.get("table")) + "." + str(gap.get("field")) +
+                      ";count=" + str(gap.get("affected_count")) +
+                      ";reason=" + re.sub(r"[^A-Za-z0-9_ .,:;=/+-]", "?", str(gap.get("reason")))[:220],
+                      file=sys.stderr,
+                  )
+              raise SystemExit(1)
+
+          except Exception as exc:
+              try:
+                  rollback_outer()
+              except Exception:
+                  pass
+              if write_conn is not None:
+                  try:
+                      write_conn.close()
+                  except Exception:
+                      pass
+              if result.get("db_preflight_ran"):
+                  try:
+                      post_rollback_safety()
+                  except Exception:
+                      pass
+              result.update({
+                  "verdict": "ATTACK-EVENT 23-CITY ROLLBACK-ONLY PERSISTENCE PROOF BLOCKED",
+                  "first_failing_gate": "EXECUTION_HARNESS_FAILURE",
+                  "phase": phase,
+                  "affected_table_or_contract_field": None,
+                  "affected_row_count": None,
+                  "compact_diagnostic": type(exc).__name__ + ":" + safe_error(exc),
+                  "production_mutation": "NO",
+                  "safe_continuation_point": "Fix proof tooling only; do not repair frozen data and do not proceed to real persistence.",
+              })
+              PROOF_PATH.write_text(json.dumps(result, ensure_ascii=False, sort_keys=True, separators=(",", ":")), encoding="utf-8")
+              print("VERDICT=" + result["verdict"], file=sys.stderr)
+              print("FIRST_FAILING_GATE=EXECUTION_HARNESS_FAILURE", file=sys.stderr)
+              print("PHASE=" + phase, file=sys.stderr)
+              print("ERROR_TYPE=" + type(exc).__name__, file=sys.stderr)
+              raise SystemExit(1)
+          PY
+
+      - name: Print compact proof metadata
+        if: always()
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json, os
+          from pathlib import Path
+          p = Path(os.environ["RUNNER_TEMP"]) / "attack-event-step2c-rollback-persistence-proof-resume2" / "attack_event_23city_rollback_persistence_proof_resume2.json"
+          if not p.is_file():
+              print("PROOF_METADATA_MISSING=1")
+              raise SystemExit(0)
+          x = json.loads(p.read_text(encoding="utf-8"))
+          compact = {
+              "verdict": x.get("verdict"),
+              "first_failing_gate": x.get("first_failing_gate"),
+              "phase": x.get("phase"),
+              "affected_table_or_contract_field": x.get("affected_table_or_contract_field"),
+              "affected_row_count": x.get("affected_row_count"),
+              "snapshot_sha_status": x.get("snapshot_sha_status"),
+              "binding_map_sha_status": x.get("binding_map_sha_status"),
+              "contract_sha_status": x.get("contract_sha_status"),
+              "exhaustive_offline_representability": x.get("exhaustive_offline_representability"),
+              "remaining_representability_gap_count": len(x.get("remaining_representability_gaps") or []),
+              "remaining_representability_gaps": (x.get("remaining_representability_gaps") or [])[:10],
+              "effective_candidate_ddl_sha256": x.get("effective_candidate_ddl_sha256"),
+              "human_review_state": x.get("human_review_state"),
+              "db_preflight_ran": x.get("db_preflight_ran"),
+              "parent_validation": x.get("parent_validation"),
+              "forced_failure_atomicity": x.get("forced_failure_atomicity"),
+              "pass_a": x.get("pass_a"),
+              "fk_validation": x.get("fk_validation"),
+              "replay_inserts": x.get("replay_inserts"),
+              "semantic_conflicts": x.get("semantic_conflicts"),
+              "outer_rollback_executed": x.get("outer_rollback_executed"),
+              "attack_event_tables_after_rollback": x.get("attack_event_tables_after_rollback"),
+              "committed_attack_event_rows": x.get("committed_attack_event_rows"),
+              "ingestion_runs_delta": x.get("ingestion_runs_delta"),
+              "protected_alert_episodes_unchanged": x.get("protected_alert_episodes_unchanged"),
+              "committed_db_mutations": x.get("committed_db_mutations"),
+              "production_mutation": x.get("production_mutation"),
+              "credentials_exposed": x.get("credentials_exposed"),
+              "safe_continuation_point": x.get("safe_continuation_point"),
+          }
+          print("PROOF_METADATA=" + json.dumps(compact, ensure_ascii=False, sort_keys=True, separators=(",", ":")))
+          PY
+
+      - name: Upload rollback persistence proof
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: attack-event-23city-rollback-persistence-proof-resume2
+          path: ${{ runner.temp }}/attack-event-step2c-rollback-persistence-proof-resume2/attack_event_23city_rollback_persistence_proof_resume2.json
+          if-no-files-found: error
+          retention-days: 30
