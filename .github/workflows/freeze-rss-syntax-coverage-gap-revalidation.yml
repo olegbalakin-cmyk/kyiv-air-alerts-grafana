@@ -1,0 +1,66 @@
+name: Freeze RSS syntax coverage-gap revalidation artifact
+
+on:
+  push:
+    branches:
+      - rss-syntax-coverage-gap-complete-alert-history-revalidation-2026-10-05
+    paths:
+      - ".github/workflows/freeze-rss-syntax-coverage-gap-revalidation.yml"
+
+permissions:
+  contents: write
+  actions: read
+
+jobs:
+  freeze:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      SOURCE_ARTIFACT_ID: "11365353145"
+      DESTINATION: "research/rss_syntax_coverage_gap_complete_alert_history_revalidation_2026-10-05.json"
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Download accepted revalidation result
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/revalidation
+          gh api "/repos/$GITHUB_REPOSITORY/actions/artifacts/$SOURCE_ARTIFACT_ID/zip" > /tmp/revalidation/result.zip
+          unzip -q /tmp/revalidation/result.zip -d /tmp/revalidation
+          test -s /tmp/revalidation/rss_syntax_coverage_gap_complete_alert_history_revalidation_2026-10-05.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p=Path("/tmp/revalidation/rss_syntax_coverage_gap_complete_alert_history_revalidation_2026-10-05.json")
+          j=json.loads(p.read_text(encoding="utf-8"))
+          assert j["verdict"]=="RSS SYNTAX COVERAGE-GAP REVALIDATION = COMPLETE"
+          assert len(j["five_candidate_ledger"])==5
+          assert len(j["three_cluster_deduplicated_result"])==3
+          assert j["impact_from_12_of_228"]["counterfactual_usable_fraction"]=="16/228"
+          assert j["impact_from_12_of_228"]["additional_STRICT_candidates"]==4
+          assert j["impact_from_12_of_228"]["additional_recovered_logical_attack_clusters"]==3
+          for key,value in j["mutation_confirmation"].items():
+              if key.endswith("_mutations") or key=="deployments":
+                  assert value==0,(key,value)
+          PY
+
+      - name: Freeze durable research artifact only
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p research
+          cp /tmp/revalidation/rss_syntax_coverage_gap_complete_alert_history_revalidation_2026-10-05.json "$DESTINATION"
+          changed="$(git status --porcelain)"
+          printf '%s\n' "$changed"
+          test "$(printf '%s\n' "$changed" | wc -l)" -eq 1
+          printf '%s\n' "$changed" | grep -F "$DESTINATION"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "$DESTINATION"
+          git commit -m "Freeze RSS syntax coverage-gap alert-history revalidation"
+          git push origin HEAD:"$GITHUB_REF_NAME"
