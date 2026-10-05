@@ -89,17 +89,17 @@ def fetch_sumy():
  except Exception as e: src['error']=f'{type(e).__name__}: {e}'; return src,[],{}
 
 def kyiv_raw(t,active_eps,ctx,src):
- ids={e['episode_id'] for e in active_eps}; out=[]; sb=src.get('normalization_metadata',{}).get('merged_raw_source_by_episode_id') or {}
+ out=[]; sb=src.get('normalization_metadata',{}).get('merged_raw_source_by_episode_id') or {}
  for r in ctx.get('official') or []:
   iv=official_iv(r)
   if not iv or not active(*iv,t): continue
   e=mon.make_episode('kyiv',*iv,source='kyiv_combined_exact_city')
-  if e['episode_id'] in ids: out.append({'raw_source':'kyiv_municipal_official_json','raw_source_id':r.get('id') or r.get('_id') or r.get('alertId'),'start_utc':iso(iv[0]),'end_utc':iso(iv[1]),'used_by_combined_normalization':sb.get(e['episode_id'])=='official_json','raw_record':r})
+  out.append({'raw_source':'kyiv_municipal_official_json','raw_source_id':r.get('id') or r.get('_id') or r.get('alertId'),'start_utc':iso(iv[0]),'end_utc':iso(iv[1]),'used_by_combined_normalization':sb.get(e['episode_id'])=='official_json','raw_record':r})
  for x in ctx.get('live') or []:
   s=x.start.astimezone(UTC); e=x.end.astimezone(UTC)
   if not active(s,e,t): continue
   ep=mon.make_episode('kyiv',s,e,source='kyiv_combined_exact_city')
-  if ep['episode_id'] in ids: out.append({'raw_source':'kyiv_digital_live_history','raw_source_id':None,'start_utc':iso(s),'end_utc':iso(e),'used_by_combined_normalization':sb.get(ep['episode_id'])=='kyiv_digital_live','raw_record':{'start':x.start.isoformat(),'end':x.end.isoformat(),'source':x.source}})
+  out.append({'raw_source':'kyiv_digital_live_history','raw_source_id':None,'start_utc':iso(s),'end_utc':iso(e),'used_by_combined_normalization':sb.get(ep['episode_id'])=='kyiv_digital_live','raw_record':{'start':x.start.isoformat(),'end':x.end.isoformat(),'source':x.source}})
  return out
 
 def main():
