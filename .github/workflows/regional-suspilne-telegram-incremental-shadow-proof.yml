@@ -11,6 +11,7 @@ concurrency:
   cancel-in-progress: false
 jobs:
   shadow:
+    if: github.event.pull_request.head.sha == '4ddc6398d3dad1c617af63a9f5f39cb20cb926dd'
     runs-on: ubuntu-latest
     timeout-minutes: 55
     env:
@@ -180,3 +181,76 @@ jobs:
             /tmp/shadow/proof_diff_paths.txt
           if-no-files-found: error
           retention-days: 30
+
+
+  freeze_prior_artifact:
+    if: github.event.pull_request.head.sha != '4ddc6398d3dad1c617af63a9f5f39cb20cb926dd'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      actions: read
+    steps:
+      - name: Check out proof branch
+        uses: actions/checkout@v4
+        with:
+          ref: regional-suspilne-telegram-incremental-shadow-actions-2026-10-05
+          fetch-depth: 0
+      - name: Freeze accepted prior shadow artifact only
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ARTIFACT_ID: "11349423518"
+          ACCEPTED_RUN_ID: "37319420226"
+          TARGET: "research/regional_suspilne_telegram_incremental_shadow_2026-10-05.json"
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/freeze
+          gh api "/repos/$GITHUB_REPOSITORY/actions/artifacts/$ARTIFACT_ID/zip" > /tmp/freeze.zip
+          unzip -q /tmp/freeze.zip -d /tmp/freeze
+          src="$(find /tmp/freeze -type f -name 'regional_suspilne_telegram_incremental_shadow_2026-10-05.json' -print -quit)"
+          test -n "$src"
+          summary="$(find /tmp/freeze -type f -name 'summary.json' -print -quit)"
+          mutation="$(find /tmp/freeze -type f -name 'mutation_proof.json' -print -quit)"
+          test -n "$summary"
+          test -n "$mutation"
+
+          python - "$src" "$summary" "$mutation" "$ACCEPTED_RUN_ID" <<'PY'
+          import json, sys
+          artifact=json.load(open(sys.argv[1],encoding="utf-8"))
+          summary=json.load(open(sys.argv[2],encoding="utf-8"))
+          mutation=json.load(open(sys.argv[3],encoding="utf-8"))
+          run_id=sys.argv[4]
+          assert str((artifact.get("proof_integrity") or {}).get("actions_run_id")) == run_id
+          assert str(summary.get("actions_run_id")) == run_id
+          assert artifact.get("verdict") == "REGIONAL SUSPILNE TELEGRAM SHADOW = LOW INCREMENTAL VALUE"
+          assert artifact.get("recommendation") == "NO MATERIAL INCREMENTAL VALUE"
+          keys=[
+              "production_code_semantic_mutations",
+              "production_TELEGRAM_CHANNELS_mutations",
+              "classifier_mutations",
+              "temporal_parser_mutations",
+              "temporal_representation_mutations",
+              "discovery_mutations",
+              "resolver_mutations",
+              "source_adapter_production_mutations",
+              "historical_state_queue_mutations",
+              "review_queue_mutations",
+              "canonical_alerts_mutations",
+              "Neon_DB_mutations",
+              "deployments",
+          ]
+          assert all(int(mutation.get(k,-1)) == 0 for k in keys)
+          assert not mutation.get("changed_protected_paths")
+          PY
+
+          mkdir -p "$(dirname "$TARGET")"
+          cp "$src" "$TARGET"
+          git add "$TARGET"
+          if git diff --cached --quiet; then
+            echo "Durable artifact already identical"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "Freeze regional Suspilne Telegram incremental shadow artifact"
+          git push origin HEAD:regional-suspilne-telegram-incremental-shadow-actions-2026-10-05
