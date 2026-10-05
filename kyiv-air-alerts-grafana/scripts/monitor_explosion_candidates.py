@@ -2677,6 +2677,26 @@ def event_clock_mentions(text: str) -> list[tuple[int, int]]:
 
     return sorted(set(out))
 
+def bounded_adjacent_event_clock_segments(row: dict, event_segments: list[str]) -> list[str]:
+    """Return only the frozen same-event adjacent-sentence clock construction."""
+    full_text = classification_text(row)
+    if not full_text or not event_segments:
+        return []
+    low_segments = [normalize_evidence_text(segment) for segment in event_segments]
+    pattern = re.compile(
+        r"([^.!?]{0,220}(?:вибух\w*|удар\w*|атак\w*)[^.!?]{0,220}[.!?]\s*"
+        r"нов\w*\s+сері\w*\s+було\s+чутно\s+"
+        r"(?:близько|приблизно)\s*\d{1,2}[:.]\d{2}[^.!?]{0,80}(?:[.!?]|$))",
+        re.IGNORECASE,
+    )
+    out = []
+    for match in pattern.finditer(normalize_evidence_text(full_text)):
+        candidate = match.group(1)
+        if any(segment and segment in candidate for segment in low_segments):
+            out.append(candidate)
+    return out
+
+
 def explicit_source_local_days(text: str, published_local: datetime) -> list:
     low = normalize_evidence_text(text)
     pattern = re.compile(
@@ -2839,7 +2859,11 @@ def explicit_event_time_relation(
     day_offsets = (0, -1) if published_local.hour < 6 else (0,)
     candidates = []
     limit = SENSITIVITY_NEAR_BOUNDARY_MAX_MINUTES * 60
-    for segment in event_segments:
+    clock_segments = list(event_segments)
+    for segment in bounded_adjacent_event_clock_segments(row, event_segments):
+        if segment not in clock_segments:
+            clock_segments.append(segment)
+    for segment in clock_segments:
         source_days = explicit_source_local_days(segment, published_local)
         if len(source_days) > 1:
             continue
