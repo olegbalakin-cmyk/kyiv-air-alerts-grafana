@@ -1,0 +1,58 @@
+name: RSS temporal syntax-gap target probe
+
+on:
+  push:
+    branches:
+      - rss-temporal-syntax-gap-repair-2026-10-05
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      FROZEN_ARTIFACT_ID: "11329769176"
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Assert probe-only diff
+        shell: bash
+        run: |
+          set -euo pipefail
+          git diff --name-only 57e3bf8ca3ea2ec468be1aad7352cd91aaa4b36b...HEAD | sort
+          for key in DATABASE_URL NEON_DATABASE_URL NEON_URL PGHOST PGPORT PGDATABASE PGUSER PGPASSWORD; do
+            test -z "${!key-}" || { echo "Unexpected DB env: $key"; exit 1; }
+          done
+
+      - name: Download frozen 228-candidate source artifact
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/syntax-probe
+          gh api "/repos/$GITHUB_REPOSITORY/actions/artifacts/$FROZEN_ARTIFACT_ID/zip" > /tmp/syntax-probe/frozen.zip
+          unzip -q /tmp/syntax-probe/frozen.zip -d /tmp/syntax-probe
+          test -s /tmp/syntax-probe/rss_temporal_audit_context_retention.json
+
+      - name: Extract only seven frozen syntax targets
+        shell: bash
+        run: |
+          set -euo pipefail
+          python .github/proof/rss_temporal_syntax_gap_probe.py \
+            /tmp/syntax-probe/rss_temporal_audit_context_retention.json \
+            /tmp/syntax-probe/rss_temporal_syntax_gap_targets.json
+
+      - name: Upload target probe
+        uses: actions/upload-artifact@v4
+        with:
+          name: rss-temporal-syntax-gap-target-probe
+          path: /tmp/syntax-probe/rss_temporal_syntax_gap_targets.json
+          if-no-files-found: error
+          retention-days: 7
