@@ -388,17 +388,17 @@ jobs:
                   block("PERSISTENCE_CONTRACT_DDL_DELTA_MISMATCH")
               ddl = ddl.replace(old_ver, new_ver)
               ddl = ddl.rstrip() + "\n\n" + """ALTER TABLE public.attack_event_classifications
-    ADD CONSTRAINT attack_event_classifications_qa_state_check
-    CHECK (qa_reasons_state IN ('MATERIALIZED','UNMATERIALIZED_IN_ACCEPTED_SOURCE'));
+              ADD CONSTRAINT attack_event_classifications_qa_state_check
+              CHECK (qa_reasons_state IN ('MATERIALIZED','UNMATERIALIZED_IN_ACCEPTED_SOURCE'));
 
-ALTER TABLE public.attack_event_classifications
-    ADD CONSTRAINT attack_event_classifications_qa_value_check
-    CHECK (
-        (qa_reasons_state = 'MATERIALIZED' AND jsonb_typeof(qa_reasons) = 'array')
-        OR
-        (qa_reasons_state = 'UNMATERIALIZED_IN_ACCEPTED_SOURCE' AND qa_reasons IS NULL)
-    );
-"""
+          ALTER TABLE public.attack_event_classifications
+              ADD CONSTRAINT attack_event_classifications_qa_value_check
+              CHECK (
+                  (qa_reasons_state = 'MATERIALIZED' AND jsonb_typeof(qa_reasons) = 'array')
+                  OR
+                  (qa_reasons_state = 'UNMATERIALIZED_IN_ACCEPTED_SOURCE' AND qa_reasons IS NULL)
+              );
+          """
               delta = provenance.get("candidate_ddl_delta") or {}
               prov_sql = delta.get("sql")
               if not isinstance(prov_sql, str) or hashlib.sha256(prov_sql.encode("utf-8")).hexdigest() != delta.get("sha256"):
@@ -412,52 +412,52 @@ ALTER TABLE public.attack_event_classifications
           def make_delta(payload_needed, source_ts_needed, event_ts_needed):
               parts = []
               parts.append("""ALTER TABLE public.attack_event_classifications
-    ADD COLUMN originating_frozen_case_id_state TEXT NOT NULL,
-    ADD CONSTRAINT attack_event_classifications_frozen_case_id_state_check
-        CHECK (originating_frozen_case_id_state IN ('MATERIALIZED','UNMATERIALIZED_IN_ACCEPTED_SOURCE','NOT_APPLICABLE')),
-    ADD CONSTRAINT attack_event_classifications_frozen_case_id_value_check
-        CHECK (
-            (originating_frozen_case_id_state = 'MATERIALIZED' AND originating_frozen_case_id IS NOT NULL AND btrim(originating_frozen_case_id) <> '')
-            OR
-            (originating_frozen_case_id_state IN ('UNMATERIALIZED_IN_ACCEPTED_SOURCE','NOT_APPLICABLE') AND originating_frozen_case_id IS NULL)
-        );""")
+              ADD COLUMN originating_frozen_case_id_state TEXT NOT NULL,
+              ADD CONSTRAINT attack_event_classifications_frozen_case_id_state_check
+                  CHECK (originating_frozen_case_id_state IN ('MATERIALIZED','UNMATERIALIZED_IN_ACCEPTED_SOURCE','NOT_APPLICABLE')),
+              ADD CONSTRAINT attack_event_classifications_frozen_case_id_value_check
+                  CHECK (
+                      (originating_frozen_case_id_state = 'MATERIALIZED' AND originating_frozen_case_id IS NOT NULL AND btrim(originating_frozen_case_id) <> '')
+                      OR
+                      (originating_frozen_case_id_state IN ('UNMATERIALIZED_IN_ACCEPTED_SOURCE','NOT_APPLICABLE') AND originating_frozen_case_id IS NULL)
+                  );""")
               parts.append("""ALTER TABLE public.attack_event_sources
-    ALTER COLUMN source_type DROP NOT NULL,
-    ADD COLUMN source_type_state TEXT NOT NULL,
-    ADD CONSTRAINT attack_event_sources_source_type_state_check
-        CHECK (source_type_state IN ('MATERIALIZED','UNMATERIALIZED_IN_ACCEPTED_SOURCE')),
-    ADD CONSTRAINT attack_event_sources_source_type_value_check
-        CHECK (
-            (source_type_state = 'MATERIALIZED' AND source_type IS NOT NULL AND btrim(source_type) <> '')
-            OR
-            (source_type_state = 'UNMATERIALIZED_IN_ACCEPTED_SOURCE' AND source_type IS NULL)
-        );""")
+              ALTER COLUMN source_type DROP NOT NULL,
+              ADD COLUMN source_type_state TEXT NOT NULL,
+              ADD CONSTRAINT attack_event_sources_source_type_state_check
+                  CHECK (source_type_state IN ('MATERIALIZED','UNMATERIALIZED_IN_ACCEPTED_SOURCE')),
+              ADD CONSTRAINT attack_event_sources_source_type_value_check
+                  CHECK (
+                      (source_type_state = 'MATERIALIZED' AND source_type IS NOT NULL AND btrim(source_type) <> '')
+                      OR
+                      (source_type_state = 'UNMATERIALIZED_IN_ACCEPTED_SOURCE' AND source_type IS NULL)
+                  );""")
               if payload_needed:
                   parts.append("""ALTER TABLE public.attack_event_sources
-    ALTER COLUMN evidence_payload DROP NOT NULL,
-    ADD COLUMN evidence_payload_state TEXT NOT NULL,
-    ADD CONSTRAINT attack_event_sources_evidence_payload_state_check
-        CHECK (evidence_payload_state IN ('MATERIALIZED','UNMATERIALIZED_IN_ACCEPTED_SOURCE')),
-    ADD CONSTRAINT attack_event_sources_evidence_payload_value_check
-        CHECK (
-            (evidence_payload_state = 'MATERIALIZED' AND evidence_payload IS NOT NULL AND jsonb_typeof(evidence_payload) = 'object')
-            OR
-            (evidence_payload_state = 'UNMATERIALIZED_IN_ACCEPTED_SOURCE' AND evidence_payload IS NULL)
-        );""")
+              ALTER COLUMN evidence_payload DROP NOT NULL,
+              ADD COLUMN evidence_payload_state TEXT NOT NULL,
+              ADD CONSTRAINT attack_event_sources_evidence_payload_state_check
+                  CHECK (evidence_payload_state IN ('MATERIALIZED','UNMATERIALIZED_IN_ACCEPTED_SOURCE')),
+              ADD CONSTRAINT attack_event_sources_evidence_payload_value_check
+                  CHECK (
+                      (evidence_payload_state = 'MATERIALIZED' AND evidence_payload IS NOT NULL AND jsonb_typeof(evidence_payload) = 'object')
+                      OR
+                      (evidence_payload_state = 'UNMATERIALIZED_IN_ACCEPTED_SOURCE' AND evidence_payload IS NULL)
+                  );""")
               def ts_delta(col):
                   return f"""ALTER TABLE public.attack_event_sources
-    ADD COLUMN {col}_state TEXT NOT NULL,
-    ADD COLUMN {col}_raw TEXT NULL,
-    ADD CONSTRAINT attack_event_sources_{col}_state_check
-        CHECK ({col}_state IN ('MATERIALIZED','ABSENT_IN_ACCEPTED_SOURCE','UNPARSEABLE_IN_ACCEPTED_SOURCE')),
-    ADD CONSTRAINT attack_event_sources_{col}_value_check
-        CHECK (
-            ({col}_state = 'MATERIALIZED' AND {col} IS NOT NULL)
-            OR
-            ({col}_state = 'ABSENT_IN_ACCEPTED_SOURCE' AND {col} IS NULL AND {col}_raw IS NULL)
-            OR
-            ({col}_state = 'UNPARSEABLE_IN_ACCEPTED_SOURCE' AND {col} IS NULL AND {col}_raw IS NOT NULL AND btrim({col}_raw) <> '')
-        );"""
+              ADD COLUMN {col}_state TEXT NOT NULL,
+              ADD COLUMN {col}_raw TEXT NULL,
+              ADD CONSTRAINT attack_event_sources_{col}_state_check
+                  CHECK ({col}_state IN ('MATERIALIZED','ABSENT_IN_ACCEPTED_SOURCE','UNPARSEABLE_IN_ACCEPTED_SOURCE')),
+              ADD CONSTRAINT attack_event_sources_{col}_value_check
+                  CHECK (
+                      ({col}_state = 'MATERIALIZED' AND {col} IS NOT NULL)
+                      OR
+                      ({col}_state = 'ABSENT_IN_ACCEPTED_SOURCE' AND {col} IS NULL AND {col}_raw IS NULL)
+                      OR
+                      ({col}_state = 'UNPARSEABLE_IN_ACCEPTED_SOURCE' AND {col} IS NULL AND {col}_raw IS NOT NULL AND btrim({col}_raw) <> '')
+                  );"""
               if source_ts_needed:
                   parts.append(ts_delta("source_timestamp"))
               if event_ts_needed:
