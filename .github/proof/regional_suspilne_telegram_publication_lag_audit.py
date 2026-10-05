@@ -73,6 +73,21 @@ PART_B_RETRO_RE = re.compile(
     r"\бдо\s+\d+\s+зросл\w*\b|\ботримують\s+медичну\s+допомогу\s+після\s+удару\b)", re.I)
 
 
+DIRECT_ATTACK_RE = re.compile(
+    r"(?:\bпролунав\w*\b|\bпролунали\w*\b|\bстався\s+вибух\b|\bсталися\s+вибух\w*\b|"
+    r"\bбуло\s+чутно\b|\bчули\s+(?:звук\s+)?вибух\w*\b|"
+    r"\батакував\w*\b|\батакувала\w*\b|\батакували\w*\b|"
+    r"\bвдарив\w*\b|\bвдарила\w*\b|\bвдарили\w*\b|"
+    r"\bзавдав\w*\s+удар\w*\b|\bзавдала\w*\s+удар\w*\b|\bзавдали\w*\s+удар\w*\b|"
+    r"\bвлучив\w*\b|\bвлучила\w*\b|\bвлучили\w*\b|\bвлучання\s+(?:сталося|зафіксували|було)\b|"
+    r"\bпоцілив\w*\b|\bпоцілила\w*\b|\bпоцілили\w*\b)", re.I)
+RETRO_CONTEXT_RE = re.compile(
+    r"(?:\bяк\s+минула\s+доба\b|\bголовні\s+новини.*\bна\s+ранок\b|\bза\s+добу\b|"
+    r"\bучора\b|\bвчора\b|\bнапередодні\b|\bпротягом\s+доби\b|"
+    r"\bпісля\s+(?:атаки|удару|обстрілу)\b|\bвнаслідок\s+(?:ранкової|нічної|вечірньої)\s+атаки\b|"
+    r"\bстало\s+відомо\b|\bуточнил\w*\b|\bпідтвердил\w*\b)", re.I | re.S)
+
+
 def iso(dt):
     return monitor.iso(dt) if dt else None
 
@@ -234,47 +249,41 @@ def explicit_date_for_segment(segment, pub_local):
     return pub_local.date(), "publication_local_date_assumption"
 
 
-def wording_class(segment, full_text):
+def wording_class(segment: str, full_text: str) -> str:
     low = segment.casefold()
-    if RETRO_STRONG_RE.search(low):
+    full_low = full_text.casefold()
+    if RETRO_STRONG_RE.search(low) or RETRO_CONTEXT_RE.search(full_low):
         return "RETROSPECTIVE_OR_SUMMARY"
-    if IMMEDIATE_RE.search(low):
+    if DIRECT_ATTACK_RE.search(low) or IMMEDIATE_RE.search(low):
         return "IMMEDIATE_COMPLETED_EVENT"
     if LIVE_RE.search(low) and not re.search(r"\bбуло\s+чутно\b", low):
         return "CONTEMPORANEOUS_LIVE"
-    if RETRO_STRONG_RE.search(full_text.casefold()):
-        return "RETROSPECTIVE_OR_SUMMARY"
     return "OTHER_OR_INDETERMINATE"
 
 
-def calibrate_post(city, handle, post):
+def _segment_attack_clock_candidates(segment: str) -> list[re.Match]:
+    clocks = list(CLOCK_RE.finditer(segment))
+    if not clocks or not (EVENT_TOKEN_RE.search(segment) or DIRECT_ATTACK_RE.search(segment)):
+        return []
+    if re.search(r"\bстаном\s+на\s+\d{1,2}:\d{2}\b", segment, re.I):
+        return []
+    if re.search(r"\b(?:тривог\w*|відбій\w*)[^.!?]{0,50}\d{1,2}:\d{2}", segment, re.I) and not re.search(r"\b(?:в той же час|одночасно)\b", segment, re.I):
+        return []
+    if len(clocks) == 1 and DIRECT_ATTACK_RE.search(segment):
+        return clocks
+    if len(clocks) == 1 and re.search(r"\b(?:в той же час|одночасно)\b", segment, re.I) and re.search(r"\bвибух\w*\b", segment, re.I):
+        return clocks
+    return []
+
+
+def calibrate_post(city: str, handle: str, post: dict) -> tuple[list[dict], list[dict]]:
     text = str(post.get("text") or "")
     pub = monitor.parse_dt(post.get("published_at"))
     if not pub or not text or not CLOCK_RE.search(text):
         return [], []
-    if not monitor.city_mentioned(city, text) or not monitor.strict_attack_event_signal(text):
-        return [], []
-
-    candidates = []
-    reject_reasons = []
-    for seg in split_segments(text):
-        clocks = list(CLOCK_RE.finditer(seg))
-        if not clocks or not monitor.strict_attack_event_signal(seg) or not monitor.city_mentioned(city, seg):
-            continue
-        for cm in clocks:
-            pos = cm.start()
-            event_dist = nearest_distance(EVENT_TOKEN_RE, seg, pos)
-            alert_dist = nearest_distance(ALERT_TOKEN_RE, seg, pos)
-            if event_dist is None or event_dist > 110:
-                reject_reasons.append("clock_not_tightly_linked_to_attack_event")
-                continue
-            if alert_dist is not None and alert_dist < event_dist:
-                reject_reasons.append("clock_closer_to_alert_context_than_attack_event")
-                continue
-            candidates.append((seg, cm))
 
     base = {
-        "city": city,
+        "channel_region_city_key": city,
         "channel": handle,
         "message_id": int(post["message_id"]),
         "message_url": post.get("url"),
@@ -282,46 +291,70 @@ def calibrate_post(city, handle, post):
         "complete_source_text": text,
         "forwarded_from": post.get("forwarded_from"),
     }
-    excluded = []
     if post.get("is_forwarded"):
         return [], [{**base, "exclusion_reason": "forward_or_repost", "candidate_detail": None}]
+
+    candidates = []
+    for seg in split_segments(text):
+        for cm in _segment_attack_clock_candidates(seg):
+            candidates.append((seg, cm))
     if not candidates:
-        return [], [{**base, "exclusion_reason": reject_reasons[0] if reject_reasons else "no_direct_attack_clock_association", "candidate_detail": None}]
-    if len(candidates) != 1:
-        return [], [{**base, "exclusion_reason": "multiple_explicit_attack_clocks_or_events_in_post", "candidate_detail": [x[0] for x in candidates]}]
+        if EVENT_TOKEN_RE.search(text) or DIRECT_ATTACK_RE.search(text):
+            return [], [{**base, "exclusion_reason": "no_unambiguous_direct_attack_clock_association", "candidate_detail": None}]
+        return [], []
 
-    seg, cm = candidates[0]
+    rows, excluded = [], []
     pub_local = pub.astimezone(KYIV_TZ)
-    event_date, date_basis = explicit_date_for_segment(seg, pub_local)
-    if event_date is None:
-        return [], [{**base, "exclusion_reason": date_basis, "candidate_detail": seg}]
-    hour, minute = int(cm.group(1)), int(cm.group(2))
-    event_local = datetime.combine(event_date, dtime(hour, minute), tzinfo=KYIV_TZ)
-    event_utc = event_local.astimezone(UTC)
-    lag = (pub - event_utc).total_seconds()
-    if lag < 0:
-        return [], [{**base, "exclusion_reason": "explicit_clock_cannot_be_safely_date_bound_nonnegative", "candidate_detail": seg, "candidate_event_timestamp": iso(event_utc), "candidate_lag_seconds": lag}]
+    for seg, cm in candidates:
+        event_date, date_basis = explicit_date_for_segment(seg, pub_local)
+        if event_date is None:
+            excluded.append({**base, "exclusion_reason": date_basis, "candidate_detail": seg})
+            continue
+        hour, minute = int(cm.group(1)), int(cm.group(2))
+        event_local = datetime.combine(event_date, dtime(hour, minute), tzinfo=KYIV_TZ)
+        event_utc = event_local.astimezone(UTC)
+        lag = (pub - event_utc).total_seconds()
+        if lag < 0:
+            excluded.append({**base, "exclusion_reason": "explicit_clock_cannot_be_safely_date_bound_nonnegative", "candidate_detail": seg, "candidate_event_timestamp": iso(event_utc), "candidate_lag_seconds": lag})
+            continue
 
-    mentions = city_mentions(seg)
-    other = [x for x in mentions if x != city]
-    if other:
-        return [], [{**base, "exclusion_reason": "cross_city_event_segment", "candidate_detail": seg, "other_monitored_cities": other}]
+        mentions = city_mentions(seg)
+        binding_city = mentions[0] if len(mentions) == 1 else None
+        wc = wording_class(seg, text)
+        approx = bool(re.search(r"\b(?:близько|приблизно|орієнтовно)\b", seg.casefold()))
+        rows.append({
+            **base,
+            "event_city_candidates": mentions,
+            "binding_city": binding_city,
+            "explicit_event_segment": seg,
+            "explicit_event_clock": f"{hour:02d}:{minute:02d}",
+            "event_timestamp": iso(event_utc),
+            "event_timestamp_local": event_local.isoformat(),
+            "date_binding_basis": date_basis,
+            "timestamp_precision": "approximate_minute" if approx else "minute",
+            "publication_lag_seconds": int(lag),
+            "wording_class": wc,
+            "eligibility_basis": "same_post_explicit_attack_event_clock",
+        })
+    return rows, excluded
 
-    approx = bool(re.search(r"\b(?:близько|приблизно|орієнтовно)\b", seg.casefold()))
-    row = {
-        **base,
-        "explicit_event_segment": seg,
-        "explicit_event_clock": f"{hour:02d}:{minute:02d}",
-        "event_timestamp": iso(event_utc),
-        "event_timestamp_local": event_local.isoformat(),
-        "date_binding_basis": date_basis,
-        "timestamp_precision": "approximate_minute" if approx else "minute",
-        "publication_lag_seconds": int(lag),
-        "wording_class": wording_class(seg, text),
-        "eligibility_basis": "same_post_explicit_attack_event_clock",
-    }
-    return [row], []
 
+def dedupe_calibration_rows(rows: list[dict]) -> tuple[list[dict], list[dict]]:
+    groups = defaultdict(list)
+    for r in rows:
+        seg = re.sub(r"\s+", " ", str(r.get("explicit_event_segment") or "").casefold()).strip()
+        seg = CLOCK_RE.sub("<TIME>", seg)
+        sig = seg[:220]
+        key = (r["channel"], r["event_timestamp"], sig)
+        groups[key].append(r)
+    kept, dups = [], []
+    for key, vals in groups.items():
+        vals.sort(key=lambda r: (r["publication_timestamp"], r["message_id"]))
+        kept.append(vals[0])
+        for x in vals[1:]:
+            dups.append({**x, "exclusion_reason": "duplicate_same_independently_timestamped_event", "kept_message_id": vals[0]["message_id"]})
+    kept.sort(key=lambda r: (r["publication_timestamp"], r["channel"], r["message_id"]))
+    return kept, dups
 
 def percentile(values, q):
     if not values:
@@ -526,9 +559,13 @@ def main():
             eligible.extend(e)
             excluded.extend(x)
 
+    eligible, duplicate_exclusions = dedupe_calibration_rows(eligible)
+    excluded.extend(duplicate_exclusions)
+
     for row in eligible:
         evt = monitor.parse_dt(row["event_timestamp"])
-        row["explicit_event_time_alert_binding"] = point_binding(groups_by_city.get(row["city"], []), evt)
+        binding_city = row.get("binding_city")
+        row["explicit_event_time_alert_binding"] = point_binding(groups_by_city.get(binding_city, []), evt) if binding_city else {"status": "UNAVAILABLE", "logical_key": None, "matching_logical_keys": []}
 
     by_class = defaultdict(list)
     for row in eligible:
@@ -546,7 +583,7 @@ def main():
     for row in immediate:
         if row["publication_lag_seconds"] > 900:
             outliers.append({
-                "channel": row["channel"], "message_id": row["message_id"], "city": row["city"],
+                "channel": row["channel"], "message_id": row["message_id"], "city": row.get("binding_city"),
                 "publication_lag_seconds": row["publication_lag_seconds"], "reason": classify_outlier(row),
                 "event_segment": row["explicit_event_segment"], "publication_timestamp": row["publication_timestamp"], "event_timestamp": row["event_timestamp"],
             })
@@ -555,10 +592,11 @@ def main():
     for L in WINDOWS_MINUTES:
         correct = wrong = ambiguous = proposed = 0
         rows_detail = []
-        for row in eligible:
+        stress_rows = [r for r in eligible if r.get("binding_city") and r.get("explicit_event_time_alert_binding", {}).get("status") != "UNAVAILABLE"]
+        for row in stress_rows:
             pub = monitor.parse_dt(row["publication_timestamp"])
             ref = row["explicit_event_time_alert_binding"]
-            cand = interval_binding(groups_by_city.get(row["city"], []), pub - timedelta(minutes=L), pub)
+            cand = interval_binding(groups_by_city.get(row["binding_city"], []), pub - timedelta(minutes=L), pub)
             conservative_unique = cand["standard"] == "CONSERVATIVE_CONTAINMENT" and cand["status"] == "UNIQUE"
             outcome = "AMBIGUOUS_OR_NO_BINDING"
             if conservative_unique and ref["status"] == "UNIQUE":
@@ -576,7 +614,8 @@ def main():
                 "reference_binding": ref, "counterfactual_binding": cand, "outcome": outcome,
             })
         stress[str(L)] = {
-            "eligible_calibration_rows": len(eligible),
+            "eligible_calibration_rows": len(stress_rows),
+            "all_lag_calibration_rows": len(eligible),
             "correct_same_episode_bindings": correct,
             "wrong_episode_bindings": wrong,
             "ambiguous_or_no_binding": ambiguous,
@@ -648,6 +687,8 @@ def main():
             "max_pages_per_channel": MAX_PAGES_PER_CHANNEL,
             "event_time_truth": "same-post explicit attack event clock only; no publication/RSS/page metadata used as event time",
             "same_channel_sequence_form_used": False,
+            "calibration_scope": "all independently timestamped attack reports in the 23 accepted regional channels; not restricted to production city-matching or classifier semantics",
+            "deduplication": "earliest publication retained for same-channel, same explicit event timestamp, same normalized event segment",
         },
         "messages_inspected": inspected,
         "collection_health": health,
