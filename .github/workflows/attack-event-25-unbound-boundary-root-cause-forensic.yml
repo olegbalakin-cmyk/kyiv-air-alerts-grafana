@@ -1,0 +1,89 @@
+name: Attack-event 25 unbound boundary root-cause forensic
+
+on:
+  push:
+    branches:
+      - attack-event-25-unbound-boundary-root-cause-forensic-2026-10-05
+    paths:
+      - .github/workflows/attack-event-25-unbound-boundary-root-cause-forensic.yml
+      - .github/forensic/attack_event_25_unbound_boundary_root_cause_forensic.py
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  boundary-root-cause-forensic:
+    name: boundary-root-cause-forensic
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    permissions:
+      contents: read
+      actions: read
+    steps:
+      - name: Checkout proof branch with full history
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+          clean: true
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install read-only PostgreSQL client dependency
+        run: pip install "psycopg[binary]>=3,<4"
+
+      - name: Syntax-check forensic
+        run: python -m py_compile .github/forensic/attack_event_25_unbound_boundary_root_cause_forensic.py
+
+      - name: Run bounded provenance forensic
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          PHASE1_PROD_SHADOW_DATABASE_URL: ${{ secrets.PHASE1_PROD_SHADOW_DATABASE_URL }}
+          PHASE1_PROD_SHADOW_BRANCH_ID: ${{ vars.PHASE1_PROD_SHADOW_BRANCH_ID }}
+        run: python .github/forensic/attack_event_25_unbound_boundary_root_cause_forensic.py
+
+      - name: Print compact root-cause summary
+        if: always()
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json, os
+          from pathlib import Path
+          p = Path(os.environ["RUNNER_TEMP"]) / "attack-event-25-unbound-boundary-root-cause-forensic" / "summary.json"
+          if not p.is_file():
+              print("ROOT_CAUSE_SUMMARY_MISSING=1")
+              raise SystemExit(0)
+          obj=json.loads(p.read_text(encoding="utf-8"))
+          if obj.get("verdict")=="ATTACK-EVENT 25 UNBOUND BOUNDARY ROOT-CAUSE FORENSIC COMPLETED":
+              compact={k:obj.get(k) for k in (
+                  "verdict","proof_branch","targets","proven_root_causes_count","unresolved_count",
+                  "count_by_proven_root_cause_category","count_by_best_supported_hypothesis","count_by_city",
+                  "count_with_complete_historical_provenance","count_with_complete_canonical_provenance",
+                  "sub_60_second_mismatch_count","sub_60_second_proven_precision_or_normalization_count",
+                  "gt_30_minute_mismatch_count","gt_30_minute_proven_causes","shared_proven_mechanism_groups",
+                  "representative_cases","parent_corpus_sha256","parent_corpus_sha_match",
+                  "forensic_db_provenance_sha256","db_writes","neon_mutations","binding_changes"
+              )}
+          else:
+              compact={k:obj.get(k) for k in (
+                  "verdict","first_failing_gate","affected_count","parent_corpus_sha_match",
+                  "provenance_source_that_failed","db_writes","neon_mutations","binding_changes",
+                  "safe_continuation_point"
+              )}
+          print("ROOT_CAUSE_SUMMARY="+json.dumps(compact,ensure_ascii=False,sort_keys=True,separators=(",",":")))
+          PY
+
+      - name: Upload forensic artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: attack-event-25-unbound-boundary-root-cause-forensic
+          path: |
+            ${{ runner.temp }}/attack-event-25-unbound-boundary-root-cause-forensic/attack_event_25_unbound_boundary_root_cause_forensic.json
+            ${{ runner.temp }}/attack-event-25-unbound-boundary-root-cause-forensic/summary.json
+          if-no-files-found: error
+          retention-days: 90
