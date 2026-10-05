@@ -385,7 +385,9 @@ try:
         cur.execute(sql,params)
         return cur.fetchall()
 
-    all_cities=sorted({str(v) for k,v in collect_values(binding,re.compile(r"^city_key$"),100000) if v})\n    if len(all_cities) != 23:\n        fail("PARENT_CORPUS_CITY_SCOPE_MISMATCH",EXPECTED_TARGETS,BINDING_PATH,{"city_count":len(all_cities)})
+    all_cities=sorted({str(v) for k,v in collect_values(binding,re.compile(r"^city_key$"),100000) if v})
+    if len(all_cities) != 23:
+        fail("PARENT_CORPUS_CITY_SCOPE_MISMATCH",EXPECTED_TARGETS,BINDING_PATH,{"city_count":len(all_cities)})
     parent_rows=select(
         "SELECT episode_uid::text,city_key::text,alert_type::text,episode_state::text,canonicalization_version::text,start_at,end_at "
         "FROM public.alert_episodes WHERE city_key=ANY(%s) ORDER BY city_key,start_at,end_at,episode_uid",
