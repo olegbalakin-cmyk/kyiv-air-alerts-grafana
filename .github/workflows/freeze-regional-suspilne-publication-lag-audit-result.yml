@@ -1,0 +1,188 @@
+name: Freeze regional Suspilne publication lag audit result
+on:
+  push:
+    branches: [regional-suspilne-publication-lag-audit-result-2026-10-05]
+    paths:
+      - .github/workflows/freeze-regional-suspilne-publication-lag-audit-result.yml
+permissions:
+  contents: write
+  actions: read
+jobs:
+  freeze:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      SOURCE_ARTIFACT_ID: "11356490016"
+      OUTPUT_PATH: research/regional_suspilne_telegram_publication_lag_audit_2026-10-05.json
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: regional-suspilne-publication-lag-audit-result-2026-10-05
+          fetch-depth: 0
+      - name: Download accepted source audit artifact
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          gh api "/repos/${GITHUB_REPOSITORY}/actions/artifacts/${SOURCE_ARTIFACT_ID}/zip" > /tmp/source.zip
+          mkdir -p /tmp/source
+          unzip -q /tmp/source.zip -d /tmp/source
+          test -s /tmp/source/audit/research/regional_suspilne_telegram_publication_lag_audit_2026-10-05.json
+      - name: Correct only unsafe publication-date inference and freeze result
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json, math
+          from collections import Counter
+          from pathlib import Path
+
+          src=Path("/tmp/source/audit/research/regional_suspilne_telegram_publication_lag_audit_2026-10-05.json")
+          out=Path("research/regional_suspilne_telegram_publication_lag_audit_2026-10-05.json")
+          o=json.loads(src.read_text(encoding="utf-8"))
+
+          original=list(o.get("eligible_calibration_ledger") or [])
+          kept=[r for r in original if r.get("date_binding_basis")!="publication_local_date_assumption"]
+          dropped=[r for r in original if r.get("date_binding_basis")=="publication_local_date_assumption"]
+          excluded=list(o.get("excluded_calibration_rows") or [])
+          for r in dropped:
+              x=dict(r)
+              x["exclusion_reason"]="explicit_clock_date_not_source_stated"
+              x["correction_note"]="Bare event clock cannot be date-bound from Telegram publication time under the audit contract."
+              excluded.append(x)
+
+          def percentile(values,q):
+              if not values: return None
+              xs=sorted(values)
+              if len(xs)==1: return float(xs[0])
+              pos=(len(xs)-1)*q
+              lo=math.floor(pos); hi=math.ceil(pos)
+              if lo==hi: return float(xs[lo])
+              return xs[lo]+(xs[hi]-xs[lo])*(pos-lo)
+
+          def stats(rows):
+              vals=[int(r["publication_lag_seconds"]) for r in rows]
+              n=len(vals)
+              def share(sec): return (sum(v<=sec for v in vals)/n) if n else None
+              return {
+                  "N":n,
+                  "median_seconds":percentile(vals,.50),
+                  "p75_seconds":percentile(vals,.75),
+                  "p90_seconds":percentile(vals,.90),
+                  "p95_seconds":percentile(vals,.95),
+                  "maximum_seconds":max(vals) if vals else None,
+                  "share_le_2m":share(120),
+                  "share_le_5m":share(300),
+                  "share_le_10m":share(600),
+                  "share_le_15m":share(900),
+                  "share_le_30m":share(1800),
+                  "percentile_stability_note":"descriptive_only_sample_small" if n<30 else "descriptive_sample_n_ge_30",
+              }
+
+          classes=sorted(set(r.get("wording_class") for r in kept if r.get("wording_class")))
+          o["eligible_calibration_ledger"]=kept
+          o["excluded_calibration_rows"]=excluded
+          o["wording_class_counts"]=dict(sorted(Counter(r["wording_class"] for r in kept).items()))
+          o["lag_statistics"]={c:stats([r for r in kept if r.get("wording_class")==c]) for c in classes}
+          immediate=[r for r in kept if r.get("wording_class")=="IMMEDIATE_COMPLETED_EVENT"]
+          o["immediate_completed_event_channels"]=len({r.get("channel") for r in immediate})
+          o["immediate_completed_event_channel_stats_where_n_ge_3"]={
+              h:stats([r for r in immediate if r.get("channel")==h])
+              for h in sorted({r.get("channel") for r in immediate})
+              if len([r for r in immediate if r.get("channel")==h])>=3
+          }
+          old_out={(r.get("channel"),r.get("message_id")):r for r in o.get("outlier_review_gt_15m") or []}
+          new_out=[]
+          for r in immediate:
+              if int(r.get("publication_lag_seconds") or 0)>900:
+                  prior=old_out.get((r.get("channel"),r.get("message_id")),{})
+                  new_out.append({
+                      "channel":r.get("channel"),
+                      "message_id":r.get("message_id"),
+                      "city":r.get("binding_city"),
+                      "publication_lag_seconds":r.get("publication_lag_seconds"),
+                      "reason":prior.get("reason","delayed_reporting"),
+                      "event_segment":r.get("explicit_event_segment"),
+                      "publication_timestamp":r.get("publication_timestamp"),
+                      "event_timestamp":r.get("event_timestamp"),
+                  })
+          o["outlier_review_gt_15m"]=new_out
+
+          stress={}
+          eligible_stress={
+              (r.get("channel"),r.get("message_id"),r.get("binding_city"))
+              for r in kept
+              if r.get("binding_city") and (r.get("explicit_event_time_alert_binding") or {}).get("status")!="UNAVAILABLE"
+          }
+          for L in ("2","5","10","15","30"):
+              old=o.get("false_binding_stress_test",{}).get(L,{})
+              rows=[r for r in old.get("row_ledger") or [] if (r.get("channel"),r.get("message_id"),r.get("city")) in eligible_stress]
+              correct=sum(r.get("outcome")=="CORRECT_SAME_EPISODE" for r in rows)
+              wrong=sum(r.get("outcome")=="WRONG_EPISODE_BINDING" for r in rows)
+              ambiguous=len(rows)-correct-wrong
+              proposed=correct+wrong
+              stress[L]={
+                  "eligible_calibration_rows":len(rows),
+                  "all_lag_calibration_rows":len(kept),
+                  "correct_same_episode_bindings":correct,
+                  "wrong_episode_bindings":wrong,
+                  "ambiguous_or_no_binding":ambiguous,
+                  "precision_among_verifiable_proposed_bindings":(correct/proposed) if proposed else None,
+                  "proposed_binding_standard":"CONSERVATIVE_CONTAINMENT",
+                  "row_ledger":rows,
+              }
+          o["false_binding_stress_test"]=stress
+
+          combined={}
+          smallest=None
+          oldcf=o.get("counterfactual_results") or {}
+          for L in ("2","5","10","15","30"):
+              base=dict(oldcf.get(L) or {})
+              wrong=stress[L]["wrong_episode_bindings"]
+              base["demonstrated_wrong_bindings_in_calibration"]=wrong
+              base["zero_demonstrated_wrong_bindings"]=(wrong==0)
+              combined[L]=base
+              if smallest is None and int(base.get("conservative_bindings") or 0)>=1 and wrong==0:
+                  smallest=int(L)
+          o["counterfactual_results"]=combined
+          o["smallest_L_with_meaningful_recovery_and_zero_demonstrated_wrong_bindings"]=smallest
+          o["final_interpretation"]="NO EVIDENCE FOR CHANGING CURRENT CONTRACT"
+          o["recommendation"]="GATHER MORE PUBLICATION-LAG CALIBRATION DATA"
+          o["correction_provenance"]={
+              "source_actions_run_id":"37332039140",
+              "source_artifact_id":"11356490016",
+              "source_artifact_digest":"sha256:aa1ffa8ee59c4cee1f3077666d3fd43bff250ae720468845601e1177db6e4207",
+              "correction":"Excluded rows whose bare explicit event clock had been date-bound only by Telegram publication local date.",
+              "corrected_harness_commit":"48015356f959a1a914c0d2958c879780a580b2d9",
+          }
+          o["mutation_confirmation"]={
+              "production Telegram source config mutations":0,
+              "classifier mutations":0,
+              "temporal parser mutations":0,
+              "temporal representation mutations":0,
+              "same-attack mutations":0,
+              "source adapter production mutations":0,
+              "historical state/queue mutations":0,
+              "review queue mutations":0,
+              "canonical alerts mutations":0,
+              "Neon/DB mutations":0,
+              "deployments":0,
+          }
+          out.parent.mkdir(parents=True,exist_ok=True)
+          out.write_text(json.dumps(o,ensure_ascii=False,indent=2,sort_keys=True)+"\n",encoding="utf-8")
+
+          assert len(kept)==11, len(kept)
+          assert len(immediate)==5, len(immediate)
+          assert all(int(r["publication_lag_seconds"])>900 for r in immediate)
+          assert all(int(combined[L].get("conservative_bindings") or 0)==0 for L in combined)
+          assert all(int(stress[L]["wrong_episode_bindings"])==0 for L in stress)
+          assert smallest is None
+          PY
+      - name: Commit durable research artifact only
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "$OUTPUT_PATH"
+          git diff --cached --quiet && exit 0
+          git commit -m "Freeze regional Suspilne publication lag audit result"
+          git push origin HEAD:regional-suspilne-publication-lag-audit-result-2026-10-05
