@@ -1,0 +1,230 @@
+        and c.get("episode_state") == "closed"
+        and c.get("canonicalization_version") == CANONICAL_VERSION
+        and c.get("start_at") is not None
+        and c.get("end_at") is not None
+    )
+
+
+def add_drift_flag(flags: list[str], prefix: str, delta: float | None) -> None:
+    if delta is None or delta == 0:
+        return
+    a = abs(delta)
+    if a < 60:
+        flags.append(f"{prefix}_DELTA_UNDER_60S")
+    elif a <= 300:
+        flags.append(f"{prefix}_DELTA_1_TO_5_MIN")
+    else:
+        flags.append(f"{prefix}_DELTA_OVER_5_MIN")
+
+
+def stat_triplet(values: list[float]) -> dict | None:
+    if not values:
+        return None
+    values = sorted(values)
+    return {
+        "min": min(values),
+        "median": statistics.median(values),
+        "max": max(values),
+    }
+
+
+def compact_example(rec: dict) -> dict:
+    return {
+        "city_key": rec["city_key"],
+        "historical_episode_id": rec["historical_episode_id"],
+        "primary_forensic_category": rec["primary_forensic_category"],
+        "start_delta_seconds": rec.get("representative_start_delta_seconds"),
+        "end_delta_seconds": rec.get("representative_end_delta_seconds"),
+        "gap_seconds": rec.get("representative_boundary_gap_seconds"),
+        "overlap_seconds": rec.get("representative_overlap_duration_seconds"),
+    }
+
+
+conn = None
+cur = None
+forensic_records: list[dict] = []
+parent_corpus_sha = None
+parent_sha_match = "NO"
+branch_id = os.environ.get("PHASE1_PROD_SHADOW_BRANCH_ID", "")
+db_writes = 0
+neon_mutations = 0
+
+try:
+    # Accepted artifact identities and exact source material.
+    validate_artifact_identity(
+        artifact_id=EXPECTED_AUDIT_ARTIFACT,
+        name=EXPECTED_AUDIT_ARTIFACT_NAME,
+        run_id=EXPECTED_AUDIT_RUN,
+        head_sha=EXPECTED_AUDIT_HEAD,
+    )
+    validate_artifact_identity(
+        artifact_id=EXPECTED_ALIGNMENT_ARTIFACT,
+        name=EXPECTED_ALIGNMENT_ARTIFACT_NAME,
+        run_id=EXPECTED_ALIGNMENT_RUN,
+        head_sha=EXPECTED_ALIGNMENT_HEAD,
+    )
+    audit_dir = DOWNLOAD_DIR / "audit"
+    align_dir = DOWNLOAD_DIR / "alignment"
+    download_artifact(EXPECTED_AUDIT_ARTIFACT, audit_dir)
+    download_artifact(EXPECTED_ALIGNMENT_ARTIFACT, align_dir)
+
+    audit = load_single_json(audit_dir, "attack_event_23city_parent_binding_audit.json")
+    alignment = load_single_json(align_dir, "step2b_parent_binding_contract_alignment.json")
+
+    records = audit.get("records")
+    if not isinstance(records, list):
+        fail("ACCEPTED_AUDIT_RECORDS_MISSING")
+    targets = [r for r in records if isinstance(r, dict) and r.get("binding_state") == "UNBOUND"]
+    if len(targets) != EXPECTED_TARGETS:
+        fail("UNBOUND_TARGET_COUNT_MISMATCH", affected_count=len(targets))
+
+    invalid_targets = []
+    for r in targets:
+        reasons = r.get("diagnostic_reason_codes") or []
+        if (
+            r.get("alert_episode_uid") is not None
+            or r.get("exact_parent_candidate_count") != 0
+            or "NO_EXACT_PARENT_TUPLE" not in reasons
+            or r.get("deterministic_episode_id_validation_result") != "PASS"
+        ):
+            invalid_targets.append(r.get("classification_key"))
+    if invalid_targets:
+        fail("ACCEPTED_UNBOUND_INPUT_INVARIANT_MISMATCH", affected_count=len(invalid_targets))
+
+    target_cities = {str(r.get("city_key")) for r in targets}
+    if not target_cities.issubset(EXPECTED_CITY_SCOPE):
+        fail("UNBOUND_CITY_SCOPE_MISMATCH", affected_count=len(targets))
+
+    parent_from_audit = ((audit.get("parent_corpus") or {}).get("parent_corpus_sha256"))
+    if parent_from_audit != EXPECTED_PARENT_SHA:
+        fail("ACCEPTED_AUDIT_PARENT_SHA_MISMATCH", affected_count=EXPECTED_TARGETS)
+
+    counts = alignment.get("counts") or {}
+    if (
+        alignment.get("verdict") != "ATTACK-EVENT 23-CITY PARENT BINDING AUDIT CONTRACT-ALIGNED PASSED"
+        or alignment.get("parent_corpus_sha256") != EXPECTED_PARENT_SHA
+        or counts.get("BOUND") != EXPECTED_COUNTS["BOUND"]
+        or counts.get("UNBOUND") != EXPECTED_COUNTS["UNBOUND"]
+        or counts.get("AMBIGUOUS") != EXPECTED_COUNTS["AMBIGUOUS"]
+        or counts.get("unbound_records_satisfying_unbound_invariant") != EXPECTED_TARGETS
+    ):
+        fail("CONTRACT_ALIGNMENT_PROOF_MISMATCH", affected_count=EXPECTED_TARGETS)
+    aligned_keys = {
+        str(r.get("classification_key"))
+        for r in (alignment.get("unbound_classifications") or [])
+        if isinstance(r, dict)
+    }
+    target_keys = {str(r.get("classification_key")) for r in targets}
+    if aligned_keys != target_keys:
+        fail("CONTRACT_ALIGNMENT_TARGET_SET_MISMATCH", affected_count=EXPECTED_TARGETS)
+
+    # Permanent Neon identity guard before connection.
+    db_url = os.environ.get("PHASE1_PROD_SHADOW_DATABASE_URL", "")
+    if not db_url:
+        fail("PHASE1_PROD_SHADOW_DATABASE_URL_MISSING", affected_count=EXPECTED_TARGETS)
+    if branch_id != EXPECTED_BRANCH:
+        fail("PERMANENT_NEON_BRANCH_ID_MISMATCH", affected_count=EXPECTED_TARGETS)
+
+    conn = psycopg.connect(
+        db_url,
+        autocommit=True,
+        connect_timeout=20,
+        options="-c default_transaction_read_only=on",
+    )
+    cur = conn.cursor()
+    cur.execute("BEGIN TRANSACTION ISOLATION LEVEL REPEATABLE READ READ ONLY;")
+    cur.execute("SET LOCAL default_transaction_read_only = on;")
+
+    def select(sql: str, params=None):
+        if not sql.lstrip().upper().startswith("SELECT"):
+            fail("NON_READ_ONLY_SQL_ATTEMPT", affected_count=EXPECTED_TARGETS)
+        cur.execute(sql, params or ())
+        return cur.fetchall()
+
+    ro = select("SELECT current_setting('transaction_read_only'), current_setting('default_transaction_read_only')")
+    if not ro or tuple(ro[0]) != ("on", "on"):
+        fail("READ_ONLY_TRANSACTION_NOT_ENFORCED", affected_count=EXPECTED_TARGETS)
+
+    # Reproduce the exact accepted STEP 2B parent-corpus fingerprint logic.
+    all_cities = sorted({str(r.get("city_key")) for r in records if isinstance(r, dict) and r.get("city_key")})
+    if len(all_cities) != 23:
+        fail("AUDIT_CITY_SET_MISMATCH", affected_count=EXPECTED_TARGETS)
+    parent_rows_raw = select(
+        "SELECT episode_uid::text, city_key::text, alert_type::text, episode_state::text, "
+        "canonicalization_version::text, start_at, end_at "
+        "FROM public.alert_episodes "
+        "WHERE city_key = ANY(%s) "
+        "ORDER BY city_key, start_at, end_at, episode_uid",
+        (all_cities,),
+    )
+    canonical_parent_rows = []
+    for uid, city, alert_type, state, canon, start_at, end_at in parent_rows_raw:
+        start_utc = start_at.astimezone(timezone.utc) if start_at is not None else None
+        end_utc = end_at.astimezone(timezone.utc) if end_at is not None else None
+        canonical_parent_rows.append([
+            str(uid),
+            str(city),
+            str(alert_type) if alert_type is not None else None,
+            str(state) if state is not None else None,
+            str(canon) if canon is not None else None,
+            utc_microseconds(start_utc),
+            utc_microseconds(end_utc),
+        ])
+    canonical_parent_rows.sort(key=lambda row: tuple("" if v is None else str(v) for v in row))
+    parent_corpus_sha = hashlib.sha256(
+        json.dumps(canonical_parent_rows, ensure_ascii=False, separators=(",", ":")).encode("utf-8")
+    ).hexdigest()
+    if parent_corpus_sha != EXPECTED_PARENT_SHA:
+        fail("UNBOUND_FORENSIC_PARENT_CORPUS_DRIFT", affected_count=EXPECTED_TARGETS)
+    parent_sha_match = "YES"
+
+    # Parse all historical intervals only from the accepted audit artifact so merge-shape flags
+    # never rely on a new historical discovery source.
+    historical_by_city: dict[str, list[tuple[str, datetime, datetime]]] = defaultdict(list)
+    for r in records:
+        if not isinstance(r, dict):
+            continue
+        try:
+            hs_all = parse_utc(str(r.get("alert_start_at")))
+            he_all = parse_utc(str(r.get("alert_end_at")))
+        except Exception:
+            continue
+        historical_by_city[str(r.get("city_key"))].append((str(r.get("historical_episode_id")), hs_all, he_all))
+
+    target_rows = sorted(targets, key=lambda r: str(r.get("classification_key")))
+    for target in target_rows:
+        ck = str(target["classification_key"])
+        city = str(target["city_key"])
+        hist_id = str(target["historical_episode_id"])
+        hs = parse_utc(str(target["alert_start_at"]))
+        he = parse_utc(str(target["alert_end_at"]))
+
+        exact_any = select(
+            "SELECT count(*) FROM public.alert_episodes "
+            "WHERE city_key = %s AND start_at = %s AND end_at = %s",
+            (city, hs, he),
+        )[0][0]
+        if int(exact_any) != 0:
+            fail("UNBOUND_FORENSIC_INTERNAL_INCONSISTENCY", affected_count=1, detail={"classification_key": ck})
+
+        # Small aggregate probe for category precedence; no row dump.
+        agg = select(
+            "SELECT "
+            "count(*) FILTER (WHERE start_at = %s AND end_at IS DISTINCT FROM %s), "
+            "count(*) FILTER (WHERE end_at = %s AND start_at IS DISTINCT FROM %s), "
+            "count(*) FILTER (WHERE start_at < %s AND end_at > %s), "
+            "count(*) FILTER (WHERE "
+            "  (end_at <= %s AND (%s - end_at) <= interval '30 minutes') "
+            "  OR (start_at >= %s AND (start_at - %s) <= interval '30 minutes')"
+            ") "
+            "FROM public.alert_episodes "
+            "WHERE city_key = %s AND alert_type = 'AIR' AND episode_state = 'closed' "
+            "AND canonicalization_version = %s AND start_at IS NOT NULL AND end_at IS NOT NULL",
+            (hs, he, he, hs, he, hs, hs, hs, he, he, city, CANONICAL_VERSION),
+        )[0]
+        exact_start_count = int(agg[0])
+        exact_end_count = int(agg[1])
+        overlap_count = int(agg[2])
+        nearby_nonoverlap_count = int(agg[3])
+
+        canonical_rows = select(
