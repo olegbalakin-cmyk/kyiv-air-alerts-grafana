@@ -1,0 +1,960 @@
+name: Live RSS durability shadow rerun
+
+on:
+  push:
+    branches:
+      - live-rss-durability-shadow-rerun-2026-10-04
+    paths:
+      - ".github/workflows/live-rss-durability-shadow-rerun.yml"
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  shadow:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    env:
+      PRODUCTION_CODE_COMMIT: "c26307efcea065813870dc27901dbd225f4f3e33"
+      WORKFLOW_PATH: ".github/workflows/live-rss-durability-shadow-rerun.yml"
+    steps:
+      - name: Check out proof branch
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Assert exact production code and snapshot protected state
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git merge-base "$PRODUCTION_CODE_COMMIT" HEAD)" = "$PRODUCTION_CODE_COMMIT"
+          test "$(git rev-parse "$PRODUCTION_CODE_COMMIT:kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py")" = "$(git rev-parse "HEAD:kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py")"
+          changed="$(git diff --name-only "$PRODUCTION_CODE_COMMIT"...HEAD)"
+          printf '%s\n' "$changed"
+          test "$changed" = "$WORKFLOW_PATH"
+
+          mkdir -p /tmp/live-rss-shadow
+          python - <<'PY'
+          import hashlib
+          import json
+          from pathlib import Path
+
+          roots = [Path("kyiv-air-alerts-grafana/data"), Path("kyiv-air-alerts-grafana/research"), Path("research")]
+          manifest = {}
+          for root in roots:
+              if not root.exists():
+                  continue
+              for path in sorted(p for p in root.rglob("*") if p.is_file()):
+                  manifest[str(path)] = hashlib.sha256(path.read_bytes()).hexdigest()
+          Path("/tmp/live-rss-shadow/protected.before.json").write_text(
+              json.dumps(manifest, sort_keys=True, indent=2) + "\n",
+              encoding="utf-8",
+          )
+          PY
+
+          for key in DATABASE_URL NEON_DATABASE_URL NEON_URL PGHOST PGPORT PGDATABASE PGUSER PGPASSWORD; do
+            test -z "${!key-}" || { echo "Database environment unexpectedly present: $key"; exit 1; }
+          done
+
+          git rev-parse "HEAD:kyiv-air-alerts-grafana/data/explosion_candidate_monitor_state.json" > /tmp/live-rss-shadow/state_blob.before
+          git rev-parse "HEAD:kyiv-air-alerts-grafana/data/explosion_review_queue.json" > /tmp/live-rss-shadow/review_queue_blob.before
+          git rev-parse "HEAD:kyiv-air-alerts-grafana/data/alerts_combined.json" > /tmp/live-rss-shadow/canonical_alerts_blob.before
+          if [ -e "kyiv-air-alerts-grafana/data/explosion_candidate_monitor_last_run.json" ]; then
+            sha256sum "kyiv-air-alerts-grafana/data/explosion_candidate_monitor_last_run.json" > /tmp/live-rss-shadow/last_run.before
+          else
+            printf 'ABSENT\n' > /tmp/live-rss-shadow/last_run.before
+          fi
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: kyiv-air-alerts-grafana/requirements.txt
+
+      - name: Install dependencies
+        working-directory: kyiv-air-alerts-grafana
+        run: python -m pip install -r requirements.txt
+
+      - name: Self-test repaired monitor code
+        working-directory: kyiv-air-alerts-grafana
+        run: python scripts/monitor_explosion_candidates.py --self-test
+
+      - name: Run exactly one natural live shadow observation
+        id: observe
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from __future__ import annotations
+
+          import hashlib
+          import json
+          import os
+          import re
+          import sys
+          from collections import Counter, defaultdict
+          from pathlib import Path
+          from urllib.parse import urlparse
+
+          root = Path.cwd() / "kyiv-air-alerts-grafana"
+          sys.path.insert(0, str(root / "scripts"))
+          import monitor_explosion_candidates as monitor
+
+          out_dir = Path("/tmp/live-rss-shadow")
+          out_dir.mkdir(parents=True, exist_ok=True)
+
+          started = monitor.now_utc()
+          state = monitor.load_json(monitor.STATE_FILE, {})
+          assert isinstance(state, dict) and state.get("schema_version") == 1
+          due = monitor.due_checks(state, started)
+          due_cities = sorted(due)
+
+          def host_of(url: str | None) -> str:
+              return (urlparse(str(url or "")).hostname or "").casefold()
+
+          def is_google_host(host: str) -> bool:
+              return bool(host and monitor.google_host(host))
+
+          temporal_patterns = [
+              re.compile(r"\b(?:о|об|близько|приблизно|орієнтовно|примерно)\s*\d{1,2}[:.]\d{2}\b", re.I),
+              re.compile(r"(?<!\d)\d{1,2}:\d{2}\b", re.I),
+              re.compile(r"\b(?:з|від)\s*\d{1,2}[:.]\d{2}\s*(?:до|по)\s*\d{1,2}[:.]\d{2}\b", re.I),
+              re.compile(r"\bпісля\s+\d{1,2}(?:(?:[:.]\d{2})|\s+ранку|\s+вечора|\s+ночі)?\b", re.I),
+              re.compile(r"\bстаном\s+на\s+\d{1,2}[:.]\d{2}\b", re.I),
+              re.compile(r"\b(?:вже\s+)?за\s+\d{1,3}\s+хвилин\w*\b", re.I),
+              re.compile(r"\b(?:щойно|прямо\s+зараз)\b", re.I),
+              re.compile(r"\b(?:під\s+час|у\s+період|коли\s+(?:ще\s+)?тривала)\s+(?:повітрян\w*\s+)?тривог\w*\b", re.I),
+          ]
+
+          def temporal_tokens(text: str | None) -> list[str]:
+              value = " ".join(str(text or "").split())
+              hits = []
+              for pattern in temporal_patterns:
+                  hits.extend(" ".join(m.group(0).split()).casefold() for m in pattern.finditer(value))
+              return sorted(set(hits))
+
+          def temporal_payload(decision: dict) -> dict:
+              temporal = ((decision.get("candidate_evidence") or {}).get("temporal_binding") or {})
+              return {
+                  "present": bool(temporal.get("present")),
+                  "code": temporal.get("code"),
+                  "evidence_type": temporal.get("evidence_type"),
+                  "episode_specific": bool(temporal.get("episode_specific")),
+                  "episode_id": temporal.get("episode_id"),
+                  "supported_episode_ids": list(temporal.get("supported_episode_ids") or []),
+                  "event_time": temporal.get("event_time"),
+                  "event_interval": temporal.get("event_interval"),
+              }
+
+          def strict_episode_temporal(decision: dict) -> bool:
+              temporal = temporal_payload(decision)
+              return bool(temporal["present"] and temporal["episode_specific"] and temporal["episode_id"])
+
+          def stable_hash(value) -> str:
+              return hashlib.sha256(
+                  json.dumps(value, ensure_ascii=False, sort_keys=True, separators=(",", ":")).encode("utf-8")
+              ).hexdigest()
+
+          original_session_request = monitor.requests.sessions.Session.request
+          network_log: list[dict] = []
+
+          def traced_request(session_self, method, request_url, *args, **kwargs):
+              rec = {
+                  "method": str(method).upper(),
+                  "request_url": str(request_url),
+                  "request_host": host_of(request_url),
+              }
+              try:
+                  response = original_session_request(session_self, method, request_url, *args, **kwargs)
+                  rec.update({
+                      "status_code": int(response.status_code),
+                      "final_url": str(response.url or ""),
+                      "final_host": host_of(response.url),
+                      "content_type": str((response.headers or {}).get("Content-Type") or ""),
+                  })
+                  network_log.append(rec)
+                  return response
+              except Exception as exc:
+                  rec.update({
+                      "exception_type": type(exc).__name__,
+                      "exception_message": str(exc)[:500],
+                      "exception_url": str(getattr(getattr(exc, "request", None), "url", "") or ""),
+                      "exception_host": host_of(getattr(getattr(exc, "request", None), "url", "")),
+                  })
+                  network_log.append(rec)
+                  raise
+
+          monitor.requests.sessions.Session.request = traced_request
+
+          def summarize_fetch(pathway: str, rss_url: str, start_index: int, body, resolved_url, context: dict | None = None) -> dict:
+              calls = network_log[start_index:]
+              publisher_calls = []
+              for call in calls:
+                  req_host = str(call.get("request_host") or "")
+                  final_host = str(call.get("final_host") or "")
+                  exc_host = str(call.get("exception_host") or "")
+                  if (
+                      (req_host and not is_google_host(req_host))
+                      or (final_host and not is_google_host(final_host))
+                      or (exc_host and not is_google_host(exc_host))
+                  ):
+                      publisher_calls.append(call)
+
+              publisher_statuses = [
+                  int(c["status_code"])
+                  for c in publisher_calls
+                  if c.get("status_code") is not None
+              ]
+              publisher_fetch_success = any(status < 400 for status in publisher_statuses)
+              publisher_http_failures = [status for status in publisher_statuses if status >= 400]
+              publisher_timeout = any(
+                  "timeout" in str(c.get("exception_type") or "").casefold()
+                  for c in publisher_calls
+              )
+              resolved_host = host_of(resolved_url)
+              if not resolved_host:
+                  for call in reversed(publisher_calls):
+                      resolved_host = (
+                          str(call.get("final_host") or "")
+                          or str(call.get("request_host") or "")
+                          or str(call.get("exception_host") or "")
+                      )
+                      if resolved_host:
+                          break
+
+              resolution_success = bool(resolved_url or publisher_calls)
+              body_success = bool(body and resolved_url)
+              successful_pub_content_types = [
+                  str(c.get("content_type") or "")
+                  for c in publisher_calls
+                  if c.get("status_code") is not None and int(c["status_code"]) < 400
+              ]
+              non_html = bool(
+                  publisher_fetch_success
+                  and successful_pub_content_types
+                  and all("html" not in ctype.casefold() for ctype in successful_pub_content_types)
+              )
+
+              if body_success:
+                  failure = None
+              elif not resolution_success:
+                  failure = "GOOGLE_REDIRECT_RESOLUTION_FAILED"
+              elif publisher_http_failures:
+                  failure = "PUBLISHER_HTTP_" + str(publisher_http_failures[-1])
+              elif publisher_timeout:
+                  failure = "TIMEOUT"
+              elif publisher_calls and any(c.get("exception_type") for c in publisher_calls):
+                  failure = "PUBLISHER_REQUEST_FAILURE"
+              elif non_html:
+                  failure = "NON_HTML"
+              elif publisher_fetch_success:
+                  failure = "EMPTY_OR_WEAK_EXTRACTION"
+              else:
+                  failure = "PUBLISHER_FETCH_FAILED"
+
+              return {
+                  "pathway": pathway,
+                  "rss_url": rss_url,
+                  "resolved_url": str(resolved_url or "") or None,
+                  "resolved_host": resolved_host or None,
+                  "resolution_success": resolution_success,
+                  "publisher_fetch_attempted": bool(publisher_calls),
+                  "publisher_fetch_success": publisher_fetch_success,
+                  "publisher_http_failure_statuses": publisher_http_failures,
+                  "publisher_timeout": publisher_timeout,
+                  "body_extraction_success": body_success,
+                  "body_chars": len(body or ""),
+                  "failure_mechanism": failure,
+                  "network_request_count": len(calls),
+                  "publisher_network_request_count": len(publisher_calls),
+                  "context": dict(context or {}),
+              }
+
+          original_fetch = monitor.fetch_publisher_fulltext
+          original_build = monitor.build_google_news_candidate
+
+          path_a_fetch_records: list[dict] = []
+          path_a_bodies: dict[str, str] = {}
+          path_a_item_ledger: list[dict] = []
+          current_item_context: dict = {}
+          raw_item_counter = Counter()
+
+          def path_a_fetch(rss_url: str):
+              start_index = len(network_log)
+              body, resolved_url = original_fetch(rss_url)
+              rec = summarize_fetch("PATH_A_DISCOVERY_RESCUE", rss_url, start_index, body, resolved_url, current_item_context)
+              path_a_fetch_records.append(rec)
+              if body:
+                  path_a_bodies[rss_url] = body
+              return body, resolved_url
+
+          def instrumented_build(city_key, title, description, link, publisher, publisher_url, published_at, fulltext_fetcher=None):
+              raw_item_counter["items_processed"] += 1
+              current_item_context.clear()
+              current_item_context.update({
+                  "city": city_key,
+                  "title": title,
+                  "publisher": publisher or "Google News result",
+                  "publisher_url": publisher_url or None,
+                  "published_at": published_at,
+              })
+              before_fetches = len(path_a_fetch_records)
+              try:
+                  row, fetched, rescued = original_build(
+                      city_key,
+                      title,
+                      description,
+                      link,
+                      publisher,
+                      publisher_url,
+                      published_at,
+                      fulltext_fetcher=fulltext_fetcher,
+                  )
+              finally:
+                  pass
+              new_records = path_a_fetch_records[before_fetches:]
+              for rec in new_records:
+                  rec["fetched"] = bool(fetched)
+                  rec["rescued"] = bool(rescued)
+                  rec["candidate_emitted"] = bool(row)
+                  rec["discovery_basis"] = (row or {}).get("discovery_basis")
+              path_a_item_ledger.append({
+                  "city": city_key,
+                  "rss_url": link,
+                  "publisher": publisher or "Google News result",
+                  "fetched_for_fulltext_rescue": bool(fetched),
+                  "rescued": bool(rescued),
+                  "candidate_emitted": bool(row),
+                  "discovery_basis": (row or {}).get("discovery_basis"),
+              })
+              current_item_context.clear()
+              return row, fetched, rescued
+
+          monitor.fetch_publisher_fulltext = path_a_fetch
+          monitor.build_google_news_candidate = instrumented_build
+
+          rows_by_city: dict[str, list[dict]] = {}
+          discovery_stats = {}
+          search_errors = {}
+          discovery_network_start = len(network_log)
+
+          for city_key in due_cities:
+              city_due = due[city_key]
+              earliest = min(monitor.parse_dt(ep.get("alert_start")) or started for ep, _ in city_due)
+              try:
+                  rows, query_url, stats = monitor.search_city_news(city_key, earliest, started)
+                  rows_by_city[city_key] = rows
+                  discovery_stats[city_key] = {
+                      "due_checks": len(city_due),
+                      "earliest_due_episode_start": monitor.iso(earliest),
+                      "query_url": query_url,
+                      "query_urls": stats.get("query_urls") or {},
+                      "query_family_result_counts": stats.get("query_family_result_counts") or {},
+                      "results_after_family_merge": int(stats.get("results_after_family_merge") or 0),
+                      "path_a_fulltext_fetch_calls_reported_by_monitor": int(stats.get("fulltext_fetches") or 0),
+                      "path_a_rescue_events_reported_by_monitor": int(stats.get("fulltext_rescued_candidates") or 0),
+                  }
+              except Exception as exc:
+                  rows_by_city[city_key] = []
+                  search_errors[city_key] = f"{type(exc).__name__}: {exc}"
+                  discovery_stats[city_key] = {
+                      "due_checks": len(city_due),
+                      "earliest_due_episode_start": monitor.iso(earliest),
+                      "error": search_errors[city_key],
+                  }
+
+          discovery_network_end = len(network_log)
+          monitor.fetch_publisher_fulltext = original_fetch
+          monitor.build_google_news_candidate = original_build
+
+          rss_network_calls = [
+              call for call in network_log[discovery_network_start:discovery_network_end]
+              if str(call.get("request_url") or "").startswith(str(monitor.GOOGLE_NEWS_URL))
+          ]
+          rss_search_errors = [
+              call for call in rss_network_calls
+              if call.get("exception_type") or (call.get("status_code") is not None and int(call["status_code"]) >= 400)
+          ]
+
+          aggregate = Counter()
+          city_metrics: dict[str, Counter] = {city: Counter() for city in due_cities}
+          publisher_metrics: dict[str, Counter] = defaultdict(Counter)
+          path_a_classification = Counter()
+          path_a_ledger: list[dict] = []
+
+          all_candidate_rows = []
+          for city_key in due_cities:
+              episodes = monitor.tracked_episodes_for_city(state, city_key)
+              for raw in rows_by_city.get(city_key, []):
+                  row = {**raw, "source": raw.get("source") or "Google News RSS"}
+                  all_candidate_rows.append((city_key, row))
+                  aggregate["total_google_news_rss_candidates_observed"] += 1
+                  city_metrics[city_key]["rss_candidates"] += 1
+                  if row.get("discovery_basis") == "publisher_fulltext":
+                      matching = monitor.match_candidate_to_episodes(row, episodes)
+                      decision = monitor.classify_candidate(row, city_key, episodes, matching)
+                      outcome = str(decision.get("proposed_outcome") or "unknown")
+                      path_a_classification[outcome] += 1
+                      aggregate["path_a_unique_rescued_candidates"] += 1
+                      city_metrics[city_key]["path_a_rescued_candidates"] += 1
+                      t = temporal_payload(decision)
+                      if t["present"]:
+                          aggregate["path_a_rescued_with_parser_temporal"] += 1
+                          city_metrics[city_key]["path_a_rescued_with_parser_temporal"] += 1
+                      host = host_of(row.get("resolved_url")) or host_of(row.get("publisher_url"))
+                      if host:
+                          publisher_metrics[host]["path_a_rescued_candidates"] += 1
+                          publisher_metrics[host]["path_a_rescued_parser_temporal"] += int(t["present"])
+                      path_a_ledger.append({
+                          "city": city_key,
+                          "candidate_id": monitor.candidate_id(city_key, row["url"], row["title"]),
+                          "rss_url": row.get("url"),
+                          "publisher": row.get("publisher"),
+                          "resolved_url": row.get("resolved_url"),
+                          "classification": outcome,
+                          "reason_codes": list(decision.get("reason_codes") or []),
+                          "temporal_binding": t,
+                      })
+
+          for rec in path_a_fetch_records:
+              city = str((rec.get("context") or {}).get("city") or "")
+              if city in city_metrics:
+                  city_metrics[city]["path_a_rescue_attempts"] += 1
+                  city_metrics[city]["publisher_resolution_successes"] += int(rec["resolution_success"])
+                  city_metrics[city]["body_extraction_successes"] += int(rec["body_extraction_success"])
+              host = str(rec.get("resolved_host") or "")
+              if host:
+                  publisher_metrics[host]["path_a_fetch_attempts"] += 1
+                  publisher_metrics[host]["resolution_successes"] += int(rec["resolution_success"])
+                  publisher_metrics[host]["fetch_successes"] += int(rec["publisher_fetch_success"])
+                  publisher_metrics[host]["extraction_successes"] += int(rec["body_extraction_success"])
+
+          path_a_taxonomy = Counter()
+          for rec in path_a_fetch_records:
+              if rec.get("rescued"):
+                  key = "SUCCESS_RESCUED_PUBLISHER_FULLTEXT"
+              elif rec.get("body_extraction_success"):
+                  key = "BODY_EXTRACTED_NOT_RESCUED_BY_DISCOVERY_FILTER"
+              else:
+                  key = str(rec.get("failure_mechanism") or "UNKNOWN_FAILURE")
+              path_a_taxonomy[key] += 1
+
+          path_b_fetch_records: list[dict] = []
+          path_b_bodies: dict[str, str] = {}
+          path_b_fetch_by_rss: dict[str, dict] = {}
+          durability_cache = {}
+          path_b_ledger: list[dict] = []
+          path_b_taxonomy = Counter()
+          counterfactual_disposition = Counter()
+
+          def path_b_fetch(rss_url: str):
+              start_index = len(network_log)
+              body, resolved_url = original_fetch(rss_url)
+              rec = summarize_fetch("PATH_B_DURABILITY", rss_url, start_index, body, resolved_url)
+              path_b_fetch_records.append(rec)
+              path_b_fetch_by_rss[rss_url] = rec
+              if body:
+                  path_b_bodies[rss_url] = body
+              return body, resolved_url
+
+          for city_key, row in all_candidate_rows:
+              episodes = monitor.tracked_episodes_for_city(state, city_key)
+              matching = monitor.match_candidate_to_episodes(row, episodes)
+              official = monitor.classify_candidate(row, city_key, episodes, matching)
+
+              if row.get("discovery_basis") != "rss_title_snippet":
+                  continue
+
+              aggregate["path_b_rss_candidates_evaluated"] += 1
+              city_metrics[city_key]["path_b_rss_candidates_evaluated"] += 1
+              eligible = monitor.rss_durability_enrichment_eligible(row, official)
+              if not eligible:
+                  continue
+
+              aggregate["path_b_eligible_candidates"] += 1
+              city_metrics[city_key]["path_b_eligible_candidates"] += 1
+
+              before_fetch_count = len(path_b_fetch_records)
+              enriched, network_fetched, enrichment_succeeded = monitor.enrich_rss_candidate_for_durability(
+                  row,
+                  official,
+                  fulltext_fetcher=path_b_fetch,
+                  fetch_cache=durability_cache,
+              )
+              if network_fetched:
+                  aggregate["path_b_unique_enrichment_fetches_after_dedupe"] += 1
+                  city_metrics[city_key]["path_b_unique_enrichment_fetches_after_dedupe"] += 1
+              else:
+                  aggregate["path_b_cache_hits"] += 1
+                  city_metrics[city_key]["path_b_cache_hits"] += 1
+
+              rss_url = str(row.get("url") or "")
+              rec = path_b_fetch_by_rss.get(rss_url)
+              if rec is None and len(path_b_fetch_records) > before_fetch_count:
+                  rec = path_b_fetch_records[-1]
+
+              if rec and rec["resolution_success"]:
+                  aggregate["path_b_resolution_success_candidates"] += 1
+                  city_metrics[city_key]["publisher_resolution_successes"] += 1
+              if rec and rec["publisher_fetch_success"]:
+                  aggregate["path_b_publisher_fetch_success_candidates"] += 1
+              if rec and rec["body_extraction_success"]:
+                  aggregate["path_b_body_extraction_success_candidates"] += 1
+                  city_metrics[city_key]["body_extraction_successes"] += 1
+
+              if enriched.get("resolved_url"):
+                  aggregate["path_b_candidates_receiving_resolved_url"] += 1
+              if enrichment_succeeded and enriched.get("matched_text_excerpt"):
+                  aggregate["path_b_candidates_receiving_body_derived_excerpt"] += 1
+
+              post = monitor.classify_candidate(enriched, city_key, episodes, matching)
+              invariance = {
+                  "full_decision_equal": official == post,
+                  "proposed_outcome_equal": official.get("proposed_outcome") == post.get("proposed_outcome"),
+                  "proposed_episode_equal": official.get("proposed_matched_episode_id") == post.get("proposed_matched_episode_id"),
+                  "reason_codes_equal": list(official.get("reason_codes") or []) == list(post.get("reason_codes") or []),
+                  "classifier_evidence_payload_equal": (official.get("candidate_evidence") or {}) == (post.get("candidate_evidence") or {}),
+              }
+              if all(invariance.values()):
+                  aggregate["path_b_classification_invariant_candidates"] += 1
+              else:
+                  aggregate["path_b_classification_invariance_failures"] += 1
+
+              body = path_b_bodies.get(rss_url)
+              rss_text = f"{row.get('title') or ''} {row.get('snippet') or ''}".strip()
+              body_tokens = temporal_tokens(body) if body else []
+              rss_tokens = temporal_tokens(rss_text)
+              new_tokens = sorted(set(body_tokens) - set(rss_tokens))
+              new_temporal_language = bool(new_tokens)
+              if new_temporal_language:
+                  aggregate["path_b_body_new_temporal_language"] += 1
+
+              counterfactual = {
+                  "label": "COUNTERFACTUAL_ONLY",
+                  "evaluated": False,
+                  "stronger_temporal_evidence": False,
+                  "parser_usable_new_temporal_evidence": False,
+                  "episode_specific_clock": False,
+                  "episode_specific_interval": False,
+                  "hypothetical_disposition": None,
+                  "temporal_binding": None,
+              }
+
+              if enrichment_succeeded and enriched.get("matched_text_excerpt"):
+                  cf_row = {**enriched, "discovery_basis": "publisher_fulltext"}
+                  cf_decision = monitor.classify_candidate(cf_row, city_key, episodes, matching)
+                  cf_temporal = temporal_payload(cf_decision)
+                  official_temporal = temporal_payload(official)
+                  stronger = bool(
+                      cf_temporal["present"]
+                      and (
+                          not official_temporal["present"]
+                          or cf_temporal != official_temporal
+                      )
+                  )
+                  parser_usable = bool(strict_episode_temporal(cf_decision) and not strict_episode_temporal(official))
+                  episode_clock = bool(parser_usable and cf_temporal.get("event_time"))
+                  episode_interval = bool(parser_usable and cf_temporal.get("event_interval"))
+                  counterfactual.update({
+                      "evaluated": True,
+                      "stronger_temporal_evidence": stronger,
+                      "parser_usable_new_temporal_evidence": parser_usable,
+                      "episode_specific_clock": episode_clock,
+                      "episode_specific_interval": episode_interval,
+                      "hypothetical_disposition": cf_decision.get("proposed_outcome"),
+                      "temporal_binding": cf_temporal,
+                  })
+                  counterfactual_disposition[str(cf_decision.get("proposed_outcome") or "unknown")] += 1
+                  if stronger:
+                      aggregate["path_b_counterfactual_stronger_temporal"] += 1
+                  if parser_usable:
+                      aggregate["path_b_parser_usable_new_temporal"] += 1
+                      city_metrics[city_key]["new_temporal_evidence_count"] += 1
+                  if episode_clock:
+                      aggregate["path_b_episode_specific_clock"] += 1
+                  if episode_interval:
+                      aggregate["path_b_episode_specific_interval"] += 1
+
+              if rec:
+                  if not rec["resolution_success"]:
+                      path_b_taxonomy["GOOGLE_REDIRECT_RESOLUTION_FAILED"] += 1
+                  elif not rec["publisher_fetch_success"]:
+                      path_b_taxonomy[str(rec.get("failure_mechanism") or "PUBLISHER_FETCH_FAILED")] += 1
+                  elif not rec["body_extraction_success"]:
+                      path_b_taxonomy[str(rec.get("failure_mechanism") or "EMPTY_OR_WEAK_EXTRACTION")] += 1
+                  elif not new_temporal_language:
+                      path_b_taxonomy["BODY_PRESENT_NO_NEW_TEMPORAL_EVIDENCE"] += 1
+                  elif not counterfactual["parser_usable_new_temporal_evidence"]:
+                      path_b_taxonomy["BODY_TEMPORAL_LANGUAGE_UNSUPPORTED_OR_NOT_EPISODE_SPECIFIC"] += 1
+                  else:
+                      path_b_taxonomy["SUCCESS_PARSER_USABLE_NEW_TEMPORAL_EVIDENCE"] += 1
+              else:
+                  path_b_taxonomy["CACHE_RECORD_UNAVAILABLE"] += 1
+
+              host = ""
+              if rec:
+                  host = str(rec.get("resolved_host") or "")
+              if not host:
+                  host = host_of(row.get("publisher_url"))
+              if host:
+                  pm = publisher_metrics[host]
+                  pm["path_b_eligible_candidates"] += 1
+                  pm["resolution_successes"] += int(bool(rec and rec["resolution_success"]))
+                  pm["fetch_successes"] += int(bool(rec and rec["publisher_fetch_success"]))
+                  pm["extraction_successes"] += int(bool(rec and rec["body_extraction_success"]))
+                  pm["path_b_new_temporal_language"] += int(new_temporal_language)
+                  pm["path_b_parser_usable_new_temporal"] += int(counterfactual["parser_usable_new_temporal_evidence"])
+
+              path_b_ledger.append({
+                  "city": city_key,
+                  "city_label": monitor.CITY_CONFIG[city_key]["label"],
+                  "candidate_id": monitor.candidate_id(city_key, row["url"], row["title"]),
+                  "rss_url": row.get("url"),
+                  "publisher": row.get("publisher"),
+                  "publisher_url": row.get("publisher_url"),
+                  "rss_title": row.get("title"),
+                  "rss_snippet": row.get("snippet"),
+                  "publication_timestamp": row.get("published_at"),
+                  "official_classification_before": {
+                      "proposed_outcome": official.get("proposed_outcome"),
+                      "proposed_matched_episode_id": official.get("proposed_matched_episode_id"),
+                      "reason_codes": list(official.get("reason_codes") or []),
+                      "candidate_evidence_sha256": stable_hash(official.get("candidate_evidence") or {}),
+                      "full_decision_sha256": stable_hash(official),
+                  },
+                  "official_classification_after": {
+                      "proposed_outcome": post.get("proposed_outcome"),
+                      "proposed_matched_episode_id": post.get("proposed_matched_episode_id"),
+                      "reason_codes": list(post.get("reason_codes") or []),
+                      "candidate_evidence_sha256": stable_hash(post.get("candidate_evidence") or {}),
+                      "full_decision_sha256": stable_hash(post),
+                  },
+                  "classification_invariance": invariance,
+                  "network_fetch_performed": bool(network_fetched),
+                  "cache_hit": not bool(network_fetched),
+                  "resolution_success": bool(rec and rec["resolution_success"]),
+                  "publisher_fetch_success": bool(rec and rec["publisher_fetch_success"]),
+                  "body_extraction_success": bool(rec and rec["body_extraction_success"]),
+                  "resolved_url_populated": bool(enriched.get("resolved_url")),
+                  "body_derived_excerpt_populated": bool(enriched.get("matched_text_excerpt")),
+                  "resolved_host": (rec or {}).get("resolved_host"),
+                  "new_temporal_language_found_in_body": new_temporal_language,
+                  "new_temporal_language_tokens": new_tokens[:30],
+                  "counterfactual": counterfactual,
+              })
+
+          monitor.requests.sessions.Session.request = original_session_request
+
+          # Add host-level Path B network attempts only once per actual fetch.
+          for rec in path_b_fetch_records:
+              host = str(rec.get("resolved_host") or "")
+              if host:
+                  publisher_metrics[host]["path_b_network_fetches"] += 1
+
+          path_a_attempts = len(path_a_fetch_records)
+          path_b_attempts = len(path_b_fetch_records)
+          all_fetch_records = path_a_fetch_records + path_b_fetch_records
+          publisher_hosts_reached = sorted({str(r.get("resolved_host")) for r in all_fetch_records if r.get("resolved_host")})
+
+          publisher_resolution_successes = sum(int(r["resolution_success"]) for r in all_fetch_records)
+          publisher_resolution_failures = len(all_fetch_records) - publisher_resolution_successes
+          publisher_fetch_successes = sum(int(r["publisher_fetch_success"]) for r in all_fetch_records)
+          publisher_http_failures = sum(int(bool(r["publisher_http_failure_statuses"])) for r in all_fetch_records)
+          body_extractions = sum(int(r["body_extraction_success"]) for r in all_fetch_records)
+          extraction_failures_after_fetch = sum(
+              1 for r in all_fetch_records if r["publisher_fetch_success"] and not r["body_extraction_success"]
+          )
+
+          eligible = int(aggregate["path_b_eligible_candidates"])
+          excerpted = int(aggregate["path_b_candidates_receiving_body_derived_excerpt"])
+          parser_usable_new = int(aggregate["path_b_parser_usable_new_temporal"])
+          remaining_without_usable_temporal = eligible - parser_usable_new
+
+          unique_candidate_targets = len({str(row.get("url") or "") for _, row in all_candidate_rows if row.get("url")})
+          unique_raw_targets = len({str(x.get("rss_url") or "") for x in path_a_item_ledger if x.get("rss_url")})
+          path_a_unique_targets = len({str(r["rss_url"]) for r in path_a_fetch_records})
+          path_a_rescue_events = sum(int(bool(r.get("rescued"))) for r in path_a_fetch_records)
+
+          global_metrics = {
+              "cities_searched": len(due_cities),
+              "successful_city_searches": len(due_cities) - len(search_errors),
+              "failed_city_searches": len(search_errors),
+              "rss_searches_attempted": len(rss_network_calls),
+              "rss_search_errors": len(rss_search_errors),
+              "raw_google_news_rss_items_processed": int(raw_item_counter["items_processed"]),
+              "total_google_news_rss_candidates_observed": int(aggregate["total_google_news_rss_candidates_observed"]),
+              "unique_google_news_rss_candidate_targets": unique_candidate_targets,
+              "unique_google_news_rss_raw_targets_seen": unique_raw_targets,
+              "total_publisher_resolution_attempts": len(all_fetch_records),
+              "google_news_url_resolution_successes": publisher_resolution_successes,
+              "google_news_url_resolution_failures": publisher_resolution_failures,
+              "publisher_fetch_successes": publisher_fetch_successes,
+              "publisher_fetch_http_failures": publisher_http_failures,
+              "acceptable_article_body_extractions": body_extractions,
+              "extraction_failures_after_successful_publisher_fetch": extraction_failures_after_fetch,
+              "total_unique_publisher_hosts_reached": len(publisher_hosts_reached),
+              "publisher_hosts_reached": publisher_hosts_reached,
+              "duplicate_publisher_fetches_avoided_by_cache": int(aggregate["path_b_cache_hits"]),
+          }
+
+          path_a_metrics = {
+              "candidates_entering_publisher_fulltext_rescue": path_a_attempts,
+              "unique_rss_targets_fetched": path_a_unique_targets,
+              "duplicate_fetch_calls_for_same_rss_target": path_a_attempts - path_a_unique_targets,
+              "successfully_resolved_publisher_urls": sum(int(r["resolution_success"]) for r in path_a_fetch_records),
+              "publisher_fetch_successes": sum(int(r["publisher_fetch_success"]) for r in path_a_fetch_records),
+              "successful_body_extractions": sum(int(r["body_extraction_success"]) for r in path_a_fetch_records),
+              "rescue_events_before_cross_family_merge": path_a_rescue_events,
+              "candidates_actually_rescued_as_publisher_fulltext_after_merge": int(aggregate["path_a_unique_rescued_candidates"]),
+              "classification_distribution_of_rescued_candidates": {
+                  key: int(path_a_classification.get(key, 0))
+                  for key in ("approved_strict", "approved_sensitivity", "needs_review", "rejected")
+              },
+              "publisher_fulltext_candidates_with_parser_recognized_temporal_evidence": int(aggregate["path_a_rescued_with_parser_temporal"]),
+              "failure_taxonomy": {k: int(v) for k, v in sorted(path_a_taxonomy.items())},
+          }
+
+          path_b_metrics = {
+              "rss_title_snippet_candidates_evaluated_for_eligibility": int(aggregate["path_b_rss_candidates_evaluated"]),
+              "eligible_candidates": eligible,
+              "eligibility_rate": (eligible / int(aggregate["path_b_rss_candidates_evaluated"])) if aggregate["path_b_rss_candidates_evaluated"] else 0.0,
+              "unique_enrichment_fetches_after_dedupe": path_b_attempts,
+              "cache_hits": int(aggregate["path_b_cache_hits"]),
+              "successful_google_url_resolutions": sum(int(r["resolution_success"]) for r in path_b_fetch_records),
+              "publisher_fetch_successes": sum(int(r["publisher_fetch_success"]) for r in path_b_fetch_records),
+              "body_extraction_successes": sum(int(r["body_extraction_success"]) for r in path_b_fetch_records),
+              "candidates_receiving_populated_resolved_url": int(aggregate["path_b_candidates_receiving_resolved_url"]),
+              "candidates_receiving_body_derived_matched_text_excerpt": excerpted,
+              "candidates_where_body_contains_temporal_language_absent_from_rss": int(aggregate["path_b_body_new_temporal_language"]),
+              "candidates_where_new_temporal_evidence_is_parser_usable": parser_usable_new,
+              "candidates_with_episode_specific_clock": int(aggregate["path_b_episode_specific_clock"]),
+              "candidates_with_episode_specific_interval": int(aggregate["path_b_episode_specific_interval"]),
+              "candidates_remaining_without_usable_temporal_evidence_after_capture": remaining_without_usable_temporal,
+              "usable_body_derived_excerpt_over_eligible": {
+                  "numerator": excerpted,
+                  "denominator": eligible,
+                  "rate": (excerpted / eligible) if eligible else 0.0,
+              },
+              "parser_usable_new_temporal_evidence_over_eligible": {
+                  "numerator": parser_usable_new,
+                  "denominator": eligible,
+                  "rate": (parser_usable_new / eligible) if eligible else 0.0,
+              },
+              "classification_invariance": {
+                  "eligible_candidates_checked": eligible,
+                  "fully_invariant_candidates": int(aggregate["path_b_classification_invariant_candidates"]),
+                  "failures": int(aggregate["path_b_classification_invariance_failures"]),
+                  "proposed_outcome_changes": sum(
+                      int(not row["classification_invariance"]["proposed_outcome_equal"]) for row in path_b_ledger
+                  ),
+                  "proposed_episode_changes": sum(
+                      int(not row["classification_invariance"]["proposed_episode_equal"]) for row in path_b_ledger
+                  ),
+                  "reason_code_changes": sum(
+                      int(not row["classification_invariance"]["reason_codes_equal"]) for row in path_b_ledger
+                  ),
+                  "classifier_evidence_payload_changes": sum(
+                      int(not row["classification_invariance"]["classifier_evidence_payload_equal"]) for row in path_b_ledger
+                  ),
+              },
+              "failure_taxonomy": {k: int(v) for k, v in sorted(path_b_taxonomy.items())},
+          }
+
+          counterfactual_results = {
+              "label": "COUNTERFACTUAL_ONLY",
+              "persisted": False,
+              "fed_into_official_rss_title_snippet_classification": False,
+              "stronger_temporal_evidence_candidates": int(aggregate["path_b_counterfactual_stronger_temporal"]),
+              "parser_usable_episode_specific_temporal_candidates": parser_usable_new,
+              "episode_specific_clock_candidates": int(aggregate["path_b_episode_specific_clock"]),
+              "episode_specific_interval_candidates": int(aggregate["path_b_episode_specific_interval"]),
+              "hypothetical_disposition_distribution": {k: int(v) for k, v in sorted(counterfactual_disposition.items())},
+          }
+
+          network_cost = {
+              "unique_network_fulltext_fetch_calls": path_a_attempts + path_b_attempts,
+              "path_a_network_fulltext_fetch_calls": path_a_attempts,
+              "path_b_network_fulltext_fetch_calls": path_b_attempts,
+              "path_b_fetches_per_eligible_candidate": (path_b_attempts / eligible) if eligible else 0.0,
+              "path_b_cache_hits": int(aggregate["path_b_cache_hits"]),
+              "path_b_duplicate_fetches_avoided": int(aggregate["path_b_cache_hits"]),
+              "publisher_fetch_success_rate_over_fulltext_attempts": (publisher_fetch_successes / len(all_fetch_records)) if all_fetch_records else 0.0,
+              "article_extraction_success_rate_over_successful_publisher_fetches": (body_extractions / publisher_fetch_successes) if publisher_fetch_successes else 0.0,
+              "article_extraction_success_rate_over_fulltext_attempts": (body_extractions / len(all_fetch_records)) if all_fetch_records else 0.0,
+              "total_http_requests_observed_in_shadow": len(network_log),
+          }
+
+          per_city = {}
+          for city in due_cities:
+              c = city_metrics[city]
+              per_city[city] = {
+                  "rss_candidates": int(c["rss_candidates"]),
+                  "path_a_rescue_attempts": int(c["path_a_rescue_attempts"]),
+                  "path_a_rescue_successes": int(c["path_a_rescued_candidates"]),
+                  "path_b_eligible_candidates": int(c["path_b_eligible_candidates"]),
+                  "publisher_resolution_successes_across_paths": int(c["publisher_resolution_successes"]),
+                  "body_extraction_successes_across_paths": int(c["body_extraction_successes"]),
+                  "path_b_new_parser_usable_temporal_evidence": int(c["new_temporal_evidence_count"]),
+                  "path_b_cache_hits": int(c["path_b_cache_hits"]),
+              }
+
+          per_publisher = {}
+          for host, c in sorted(publisher_metrics.items()):
+              attempts = int(c["path_a_fetch_attempts"] + c["path_b_network_fetches"])
+              per_publisher[host] = {
+                  "network_fulltext_attempts": attempts,
+                  "resolution_successes": int(c["resolution_successes"]),
+                  "publisher_fetch_successes": int(c["fetch_successes"]),
+                  "extraction_successes": int(c["extraction_successes"]),
+                  "path_a_fetch_attempts": int(c["path_a_fetch_attempts"]),
+                  "path_a_rescued_candidates": int(c["path_a_rescued_candidates"]),
+                  "path_a_rescue_yield": (int(c["path_a_rescued_candidates"]) / int(c["path_a_fetch_attempts"])) if c["path_a_fetch_attempts"] else None,
+                  "path_b_eligible_candidates": int(c["path_b_eligible_candidates"]),
+                  "path_b_network_fetches": int(c["path_b_network_fetches"]),
+                  "path_b_new_temporal_language": int(c["path_b_new_temporal_language"]),
+                  "path_b_parser_usable_new_temporal": int(c["path_b_parser_usable_new_temporal"]),
+                  "path_b_temporal_evidence_yield": (int(c["path_b_parser_usable_new_temporal"]) / int(c["path_b_eligible_candidates"])) if c["path_b_eligible_candidates"] else None,
+              }
+
+          proof = {
+              "schema": "live_rss_durability_shadow_validation_v2",
+              "execution": {
+                  "started_at": monitor.iso(started),
+                  "finished_at": monitor.iso(monitor.now_utc()),
+                  "window": "exactly one natural current due-check observation; no repeat polling for sample improvement",
+                  "repo": os.environ["GITHUB_REPOSITORY"],
+                  "proof_branch": os.environ["GITHUB_REF_NAME"],
+                  "production_code_commit": os.environ["PRODUCTION_CODE_COMMIT"],
+                  "proof_tooling_commit": os.environ["GITHUB_SHA"],
+                  "actions_run_id": int(os.environ["GITHUB_RUN_ID"]),
+                  "observed_city_set": due_cities,
+                  "frozen_kyiv_checkpoint_not_modified_or_reinterpreted": "3 STRICT / 0 SENSITIVITY / 7 REVIEW",
+              },
+              "global_metrics": global_metrics,
+              "path_a_discovery_rescue": path_a_metrics,
+              "path_b_durability_enrichment": path_b_metrics,
+              "per_city_summary": per_city,
+              "per_publisher_summary": per_publisher,
+              "path_a_rescued_candidate_ledger": path_a_ledger,
+              "candidate_level_durability_ledger": sorted(path_b_ledger, key=lambda x: (x["city"], x["candidate_id"])),
+              "path_a_fetch_ledger": path_a_fetch_records,
+              "counterfactual_results": counterfactual_results,
+              "network_fetch_cost": network_cost,
+              "discovery_stats": discovery_stats,
+              "city_search_errors": search_errors,
+              "rss_search_request_errors": rss_search_errors,
+              "safety": {
+                  "top_level_monitor_main_called": False,
+                  "production_state_write_code_invoked": False,
+                  "database_environment_present": False,
+                  "neon_or_db_touched": False,
+                  "deployment_performed": False,
+                  "live_ledger_committed_to_repository": False,
+                  "official_path_b_classification_used_post_enrichment_body": False,
+              },
+              "decision_note": "No pre-run numeric USEFUL/LOW_YIELD threshold was imposed. Final verdict must be justified from the observed evidence gain, concentration, and fetch cost.",
+          }
+
+          result_path = out_dir / "live_rss_durability_shadow_validation_v2.json"
+          result_path.write_text(json.dumps(proof, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+          digest = hashlib.sha256(result_path.read_bytes()).hexdigest()
+          (out_dir / "live_rss_durability_shadow_validation_v2.sha256").write_text(
+              f"{digest}  {result_path.name}\n", encoding="utf-8"
+          )
+
+          summary = {
+              "global_metrics": global_metrics,
+              "path_a": path_a_metrics,
+              "path_b": path_b_metrics,
+              "counterfactual": counterfactual_results,
+              "network_cost": network_cost,
+              "classification_invariance_failures": int(aggregate["path_b_classification_invariance_failures"]),
+              "city_search_errors": search_errors,
+              "json_sha256": digest,
+          }
+          (out_dir / "summary.json").write_text(
+              json.dumps(summary, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+          )
+
+          print("PROOF_JSON_SHA256=" + digest)
+          print("PROOF_GLOBAL_METRICS=" + json.dumps(global_metrics, sort_keys=True))
+          print("PROOF_PATH_A=" + json.dumps(path_a_metrics, sort_keys=True))
+          print("PROOF_PATH_B=" + json.dumps(path_b_metrics, sort_keys=True))
+          print("PROOF_COUNTERFACTUAL=" + json.dumps(counterfactual_results, sort_keys=True))
+          print("PROOF_NETWORK_COST=" + json.dumps(network_cost, sort_keys=True))
+          print("PROOF_OBSERVED_CITIES=" + json.dumps(due_cities))
+          print("PROOF_SEARCH_ERRORS=" + json.dumps(search_errors, ensure_ascii=False, sort_keys=True))
+
+          if aggregate["path_b_classification_invariance_failures"]:
+              raise SystemExit("PATH_B_CLASSIFICATION_INVARIANCE_FAILED")
+          PY
+
+      - name: Prove zero protected mutation
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import hashlib
+          import json
+          from pathlib import Path
+
+          roots = [Path("kyiv-air-alerts-grafana/data"), Path("kyiv-air-alerts-grafana/research"), Path("research")]
+          manifest = {}
+          for root in roots:
+              if not root.exists():
+                  continue
+              for path in sorted(p for p in root.rglob("*") if p.is_file()):
+                  manifest[str(path)] = hashlib.sha256(path.read_bytes()).hexdigest()
+          after = json.dumps(manifest, sort_keys=True, indent=2) + "\n"
+          Path("/tmp/live-rss-shadow/protected.after.json").write_text(after, encoding="utf-8")
+          before = Path("/tmp/live-rss-shadow/protected.before.json").read_text(encoding="utf-8")
+          if before != after:
+              raise SystemExit("PROTECTED_FILES_MUTATED")
+          PY
+
+          test "$(git rev-parse HEAD:kyiv-air-alerts-grafana/data/explosion_candidate_monitor_state.json)" = "$(cat /tmp/live-rss-shadow/state_blob.before)"
+          test "$(git rev-parse HEAD:kyiv-air-alerts-grafana/data/explosion_review_queue.json)" = "$(cat /tmp/live-rss-shadow/review_queue_blob.before)"
+          test "$(git rev-parse HEAD:kyiv-air-alerts-grafana/data/alerts_combined.json)" = "$(cat /tmp/live-rss-shadow/canonical_alerts_blob.before)"
+
+          if [ -e "kyiv-air-alerts-grafana/data/explosion_candidate_monitor_last_run.json" ]; then
+            sha256sum "kyiv-air-alerts-grafana/data/explosion_candidate_monitor_last_run.json" > /tmp/live-rss-shadow/last_run.after
+          else
+            printf 'ABSENT\n' > /tmp/live-rss-shadow/last_run.after
+          fi
+          cmp /tmp/live-rss-shadow/last_run.before /tmp/live-rss-shadow/last_run.after
+
+          git diff --exit-code -- kyiv-air-alerts-grafana/data kyiv-air-alerts-grafana/research research
+          test -z "$(git status --porcelain=v1 --untracked-files=all -- kyiv-air-alerts-grafana/data kyiv-air-alerts-grafana/research research)"
+
+          cat > /tmp/live-rss-shadow/mutation_proof.json <<'JSON'
+          {
+            "monitor_historical_state_unchanged": true,
+            "historical_queue_unchanged": true,
+            "review_queue_unchanged": true,
+            "canonical_alerts_unchanged": true,
+            "last_run_files_unchanged": true,
+            "neon_db_untouched": true,
+            "deployment_performed": false,
+            "top_level_monitor_main_called": false,
+            "proof_only_repository_change": true
+          }
+          JSON
+          printf 'ZERO_PROTECTED_MUTATION_OK\n'
+
+      - name: Upload proof artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: live-rss-durability-shadow-validation-v2
+          path: |
+            /tmp/live-rss-shadow/live_rss_durability_shadow_validation_v2.json
+            /tmp/live-rss-shadow/live_rss_durability_shadow_validation_v2.sha256
+            /tmp/live-rss-shadow/summary.json
+            /tmp/live-rss-shadow/mutation_proof.json
+            /tmp/live-rss-shadow/protected.before.json
+            /tmp/live-rss-shadow/protected.after.json
+          if-no-files-found: error
+          retention-days: 30
