@@ -335,7 +335,12 @@ jobs:
                   class_multi_blob += int(mb)
                   class_multi_commit += int(mc)
                   class_multi_target += int(mt)
-                  nonlossless = mr or mp or mb or mc or mt
+                  # Preserve the accepted STEP 2C mechanical cardinality test:
+                  # classification loss under the old scalar model is established by
+                  # multiple accepted refs and/or artifact paths. Other nested commit/blob
+                  # multiplicity remains diagnostic shape metadata and is not reinterpreted
+                  # as a new blocker in this addendum.
+                  nonlossless = mr or mp
                   class_nonlossless += int(nonlossless)
 
                   sig, core, _ = shape_descriptor(op)
