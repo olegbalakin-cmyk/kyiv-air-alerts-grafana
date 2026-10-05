@@ -2596,18 +2596,18 @@ def event_clock_mentions(text: str) -> list[tuple[int, int]]:
     low = normalize_evidence_text(text)
     event_hits = list(
         re.finditer(
-            r"(?:вибух\\w*|влуч\\w*|поціл\\w*|приліт\\w*|вдарил\\w*|"
-            r"(?:завдал\\w*|нанес\\w*).{0,50}удар\\w*)",
+            r"(?:вибух\w*|влуч\w*|поціл\w*|приліт\w*|вдарил\w*|"
+            r"(?:завдал\w*|нанес\w*).{0,50}удар\w*)",
             low,
         )
     )
 
     out = []
     prefixed_pattern = re.compile(
-        r"(?:\\bо\\b|\\bблизько\\b|\\bприблизно\\b)\\s*(\\d{1,2})[:.](\\d{2})",
+        r"(?:\bо\b|\bблизько\b|\bприблизно\b)\s*(\d{1,2})[:.](\d{2})",
         re.IGNORECASE,
     )
-    timeline_leading_pattern = re.compile(r"^(\\d{1,2}):(\\d{2})\\b", re.IGNORECASE)
+    timeline_leading_pattern = re.compile(r"^(\d{1,2}):(\d{2})\b", re.IGNORECASE)
     clock_hits = list(prefixed_pattern.finditer(low)) + list(timeline_leading_pattern.finditer(low))
     clock_hits.sort(key=lambda match: match.start())
     for hit in clock_hits:
@@ -2621,15 +2621,15 @@ def event_clock_mentions(text: str) -> list[tuple[int, int]]:
     # syntactically attached to the attack clause; they do not make generic
     # attack/update/reporting clocks event times.
     direct_clock_first = re.compile(
-        r"(?:\\bблизько\\b|\\bприблизно\\b)\\s*(\\d{1,2})[:.](\\d{2})"
-        r"(?:\\s+[\\w’'’-]+){0,3}\\s+"
-        r"(?:росі\\w*(?:\\s+армі\\w*)?|ворог\\w*)\\s+"
-        r"(?:ударил\\w*|атак\\w*)\\b",
+        r"(?:\bблизько\b|\bприблизно\b)\s*(\d{1,2})[:.](\d{2})"
+        r"(?:\s+[\w’'’-]+){0,3}\s+"
+        r"(?:росі\w*(?:\s+армі\w*)?|ворог\w*)\s+"
+        r"(?:ударил\w*|атак\w*)\b",
         re.IGNORECASE,
     )
     direct_noun_first = re.compile(
-        r"(?:\\bудар\\s+ставс\\w*|\\bмісц\\w*\\s+удару(?:\\s+[\\w’'’-]+){0,3})"
-        r"\\s+(?:близько|приблизно)\\s*(\\d{1,2})[:.](\\d{2})",
+        r"(?:\bудар\s+ставс\w*|\bмісц\w*\s+удару(?:\s+[\w’'’-]+){0,3})"
+        r"\s+(?:близько|приблизно)\s*(\d{1,2})[:.](\d{2})",
         re.IGNORECASE,
     )
     for pattern in (direct_clock_first, direct_noun_first):
@@ -2641,9 +2641,9 @@ def event_clock_mentions(text: str) -> list[tuple[int, int]]:
     # The one frozen cross-sentence construction: an event referent immediately
     # followed by "new series was heard around HH:MM". No generic composition.
     adjacency = re.compile(
-        r"(?:вибух\\w*|удар\\w*|атак\\w*)[^.!?]{0,180}[.!?]\\s*"
-        r"нов\\w*\\s+сері\\w*\\s+було\\s+чутно\\s+"
-        r"(?:близько|приблизно)\\s*(\\d{1,2})[:.](\\d{2})",
+        r"(?:вибух\w*|удар\w*|атак\w*)[^.!?]{0,180}[.!?]\s*"
+        r"нов\w*\s+сері\w*\s+було\s+чутно\s+"
+        r"(?:близько|приблизно)\s*(\d{1,2})[:.](\d{2})",
         re.IGNORECASE,
     )
     for hit in adjacency.finditer(low):
