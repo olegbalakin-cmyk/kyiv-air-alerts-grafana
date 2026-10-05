@@ -37,7 +37,9 @@ jobs:
           cache-dependency-path: kyiv-air-alerts-grafana/requirements.txt
 
       - name: Install existing requirements
-        run: python -m pip install -r kyiv-air-alerts-grafana/requirements.txt
+        run: |
+          python -m pip install -r kyiv-air-alerts-grafana/requirements.txt
+          python -m pip install pytest
 
       - name: Download frozen 228-candidate source artifact
         env:
