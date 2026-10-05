@@ -30,6 +30,15 @@ jobs:
             test -z "${!key-}" || { echo "Unexpected DB env: $key"; exit 1; }
           done
 
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: kyiv-air-alerts-grafana/requirements.txt
+
+      - name: Install existing requirements
+        run: python -m pip install -r kyiv-air-alerts-grafana/requirements.txt
+
       - name: Download frozen 228-candidate source artifact
         env:
           GH_TOKEN: ${{ github.token }}
