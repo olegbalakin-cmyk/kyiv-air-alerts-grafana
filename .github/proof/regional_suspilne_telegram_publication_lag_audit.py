@@ -246,7 +246,7 @@ def explicit_date_for_segment(segment, pub_local):
         return pub_local.date() - timedelta(days=1), "relative_yesterday"
     if re.search(r"\bсьогодні\b", low):
         return pub_local.date(), "relative_today"
-    return pub_local.date(), "publication_local_date_assumption"
+    return None, "explicit_clock_date_not_source_stated"
 
 
 def wording_class(segment: str, full_text: str) -> str:
@@ -685,7 +685,7 @@ def main():
             "source": "Telegram public channel HTML /s/<handle>?before=<message_id>",
             "parser": "source-native message datetime + message text; forwards detected from Telegram forwarded-from markup",
             "max_pages_per_channel": MAX_PAGES_PER_CHANNEL,
-            "event_time_truth": "same-post explicit attack event clock only; no publication/RSS/page metadata used as event time",
+            "event_time_truth": "same-post explicit attack event clock plus source-stated calendar date or relative today/yesterday; bare clocks are excluded rather than date-bound from publication time",
             "same_channel_sequence_form_used": False,
             "calibration_scope": "all independently timestamped attack reports in the 23 accepted regional channels; not restricted to production city-matching or classifier semantics",
             "deduplication": "earliest publication retained for same-channel, same explicit event timestamp, same normalized event segment",
