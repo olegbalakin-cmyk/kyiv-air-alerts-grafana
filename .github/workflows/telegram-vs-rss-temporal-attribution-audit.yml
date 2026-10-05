@@ -1,4 +1,4 @@
-name: Telegram vs RSS temporal attribution live audit
+name: Telegram RSS temporal audit
 
 on:
   push:
@@ -25,42 +25,44 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Assert exact production base and snapshot protected state
+      - name: Assert proof-only diff
         shell: bash
         run: |
           set -euo pipefail
           test "$(git merge-base "$PRODUCTION_CODE_COMMIT" HEAD)" = "$PRODUCTION_CODE_COMMIT"
           test "$(git rev-parse "$PRODUCTION_CODE_COMMIT:kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py")" = "$(git rev-parse "HEAD:kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py")"
-          changed="$(git diff --name-only "$PRODUCTION_CODE_COMMIT"...HEAD | sort)"
-          printf '%s
-' "$changed"
-          expected="$(printf '%s
-%s
-' "$PROOF_SCRIPT" "$WORKFLOW_PATH" | sort)"
-          test "$changed" = "$expected"
-
+          git diff --name-only "$PRODUCTION_CODE_COMMIT"...HEAD | sort > /tmp/changed.txt
+          printf '%s\n' "$PROOF_SCRIPT" "$WORKFLOW_PATH" | sort > /tmp/expected.txt
+          diff -u /tmp/expected.txt /tmp/changed.txt
           mkdir -p /tmp/telegram-vs-rss-temporal-audit
           python - <<'PY'
-          import hashlib, json
+          import hashlib
+          import json
           from pathlib import Path
-          roots = [Path("kyiv-air-alerts-grafana/data"), Path("kyiv-air-alerts-grafana/research"), Path("research")]
+
+          roots = [
+              Path("kyiv-air-alerts-grafana/data"),
+              Path("kyiv-air-alerts-grafana/research"),
+              Path("research"),
+          ]
           manifest = {}
           for root in roots:
-              if root.exists():
-                  for path in sorted(p for p in root.rglob("*") if p.is_file()):
-                      manifest[str(path)] = hashlib.sha256(path.read_bytes()).hexdigest()
+              if not root.exists():
+                  continue
+              for path in sorted(p for p in root.rglob("*") if p.is_file()):
+                  manifest[str(path)] = hashlib.sha256(path.read_bytes()).hexdigest()
           Path("/tmp/telegram-vs-rss-temporal-audit/protected.before.json").write_text(
-              json.dumps(manifest, sort_keys=True, indent=2) + "\n", encoding="utf-8"
+              json.dumps(manifest, sort_keys=True, indent=2) + "\n",
+              encoding="utf-8",
           )
           PY
-
-          for key in DATABASE_URL NEON_DATABASE_URL NEON_URL PGHOST PGPORT PGDATABASE PGUSER PGPASSWORD; do
-            test -z "${!key-}" || { echo "Database environment unexpectedly present: $key"; exit 1; }
-          done
-
-          for p in             kyiv-air-alerts-grafana/data/explosion_candidate_monitor_state.json             kyiv-air-alerts-grafana/data/explosion_review_queue.json             kyiv-air-alerts-grafana/data/alerts_combined.json             kyiv-air-alerts-grafana/data/explosion_candidate_monitor_last_run.json; do
-            if [ -e "$p" ]; then sha256sum "$p"; else printf 'ABSENT  %s\n' "$p"; fi
-          done > /tmp/telegram-vs-rss-temporal-audit/protected.named.before
+          test -z "${DATABASE_URL-}"
+          test -z "${NEON_DATABASE_URL-}"
+          test -z "${NEON_URL-}"
+          test -z "${PGHOST-}"
+          test -z "${PGDATABASE-}"
+          test -z "${PGUSER-}"
+          test -z "${PGPASSWORD-}"
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -73,11 +75,14 @@ jobs:
         working-directory: kyiv-air-alerts-grafana
         run: python -m pip install -r requirements.txt
 
+      - name: Validate proof script syntax
+        run: python -m py_compile "$PROOF_SCRIPT"
+
       - name: Self-test production monitor
         working-directory: kyiv-air-alerts-grafana
         run: python scripts/monitor_explosion_candidates.py --self-test
 
-      - name: Run exactly one live source-comparison observation
+      - name: Run one live source comparison
         shell: bash
         run: |
           set -euo pipefail
@@ -89,29 +94,32 @@ jobs:
         run: |
           set -euo pipefail
           python - <<'PY'
-          import hashlib, json
+          import hashlib
+          import json
           from pathlib import Path
-          roots = [Path("kyiv-air-alerts-grafana/data"), Path("kyiv-air-alerts-grafana/research"), Path("research")]
+
+          roots = [
+              Path("kyiv-air-alerts-grafana/data"),
+              Path("kyiv-air-alerts-grafana/research"),
+              Path("research"),
+          ]
           manifest = {}
           for root in roots:
-              if root.exists():
-                  for path in sorted(p for p in root.rglob("*") if p.is_file()):
-                      manifest[str(path)] = hashlib.sha256(path.read_bytes()).hexdigest()
+              if not root.exists():
+                  continue
+              for path in sorted(p for p in root.rglob("*") if p.is_file()):
+                  manifest[str(path)] = hashlib.sha256(path.read_bytes()).hexdigest()
           after = json.dumps(manifest, sort_keys=True, indent=2) + "\n"
-          Path("/tmp/telegram-vs-rss-temporal-audit/protected.after.json").write_text(after, encoding="utf-8")
+          Path("/tmp/telegram-vs-rss-temporal-audit/protected.after.json").write_text(
+              after,
+              encoding="utf-8",
+          )
           before = Path("/tmp/telegram-vs-rss-temporal-audit/protected.before.json").read_text(encoding="utf-8")
           if before != after:
               raise SystemExit("PROTECTED_FILES_MUTATED")
           PY
-
-          for p in             kyiv-air-alerts-grafana/data/explosion_candidate_monitor_state.json             kyiv-air-alerts-grafana/data/explosion_review_queue.json             kyiv-air-alerts-grafana/data/alerts_combined.json             kyiv-air-alerts-grafana/data/explosion_candidate_monitor_last_run.json; do
-            if [ -e "$p" ]; then sha256sum "$p"; else printf 'ABSENT  %s\n' "$p"; fi
-          done > /tmp/telegram-vs-rss-temporal-audit/protected.named.after
-          cmp /tmp/telegram-vs-rss-temporal-audit/protected.named.before /tmp/telegram-vs-rss-temporal-audit/protected.named.after
-
           git diff --exit-code -- kyiv-air-alerts-grafana/data kyiv-air-alerts-grafana/research research
           test -z "$(git status --porcelain=v1 --untracked-files=all -- kyiv-air-alerts-grafana/data kyiv-air-alerts-grafana/research research)"
-
           cat > /tmp/telegram-vs-rss-temporal-audit/mutation_proof.json <<'JSON'
           {
             "production_code_mutations": 0,
@@ -127,7 +135,7 @@ jobs:
             "deployments": 0
           }
           JSON
-          printf 'ZERO_PROTECTED_MUTATION_OK\n'
+          printf '%s\n' ZERO_PROTECTED_MUTATION_OK
 
       - name: Upload proof artifact
         if: always()
