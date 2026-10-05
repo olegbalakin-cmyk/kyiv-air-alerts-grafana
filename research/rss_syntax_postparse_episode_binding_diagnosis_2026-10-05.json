@@ -1,0 +1,749 @@
+{
+  "schema": "rss_syntax_postparse_episode_binding_diagnosis_v1",
+  "verdict": "RSS SYNTAX POST-PARSE BINDING DIAGNOSIS = COMPLETE",
+  "generated_for_date": "2026-10-05",
+  "role": "READ_ONLY_POST_PARSE_ALERT_EPISODE_BINDING_FORENSIC_DIAGNOSTIC",
+  "predecessor_identities": {
+    "accepted_syntax_verdict": "RSS TEMPORAL SYNTAX-GAP REPAIR = PARTIAL",
+    "syntax_proof_branch": "rss-temporal-syntax-gap-repair-2026-10-05",
+    "syntax_proof_head": "f891ec51fac9f2614a8e286e75e4ddc14a7e8c00",
+    "syntax_actions_run_id": 37336878128,
+    "syntax_proof_artifact_id": 11356189561,
+    "syntax_proof_artifact_digest": "sha256:d5d156d3cc436816b23ad91e4f2c2ae8c54acd80f755fa03d352c0730514083c",
+    "accepted_path_b_verdict": "RSS PATH-B CONTEXT-SELECTION REPAIR = PROVEN",
+    "accepted_path_b_head": "57e3bf8ca3ea2ec468be1aad7352cd91aaa4b36b",
+    "accepted_path_b_proof_artifact_id": 11348239971,
+    "frozen_228_input_artifact_id": 11329769176,
+    "frozen_228_source_sha256": "5ebd77a7a1066fa4a2dabe62c98ee5c6b30d60c817282d560e8908f482ff8ef8",
+    "frozen_monitor_state_blob_sha": "c8d799094e8360443d09702a62598cb735fb2335",
+    "monitor_code_blob_sha": "b007d32ba49c7934bce978877f7b2a29cc364f1b",
+    "ukrainealarm_normalizer_code_blob_sha": "b59df2335c32a7b28fd81e7adabaec5d37f8f653",
+    "ukrainealarm_bridge_blob_sha": "9b2922b0863ff6f3dba6e84f2348ad0e4b111d41",
+    "kyiv_alert_store_blob_sha": "ab9babd3527055256017867869bc62b96a6ebffc"
+  },
+  "scope": {
+    "diagnosed_candidate_count": 6,
+    "diagnosed_candidate_ids": [
+      "ecf26b3980c9dcac8234f689",
+      "383e064c794bece60e20d4ca",
+      "5b93c789ce785522030a51f4",
+      "ccc799cf4b6706daac05f35e",
+      "130a62ecc060e529737c7326",
+      "7b99452890d6b851455983af"
+    ],
+    "excluded_complete_candidate_id": "f958519cfda65d5cd8eb81e5",
+    "excluded_representation_gap_candidates": true,
+    "frozen_evidence_only": true,
+    "public_web_research": false,
+    "live_telegram_or_rss_fetches": false,
+    "live_alert_api_queries": false,
+    "neon_queries": false,
+    "phase_a_truth_urls_used": false
+  },
+  "contract_interpretation": {
+    "exact_active_rule": "alert_start <= event_time <= alert_end",
+    "logical_representation_rule": "Two normalized episode rows share a logical group only when absolute start delta <= 90 seconds AND absolute end delta <= 90 seconds; grouping is transitive.",
+    "sumy_history_normalization": "For UkraineAlarm regionHistory, only AIR rows with valid start/end are retained; exact start/end pairs are deduplicated; upstream alarm/group identifiers are discarded.",
+    "sumy_bridge_identity": {
+      "city_key": "sumy",
+      "region_id": "114",
+      "api_region_name": "Сумський район",
+      "kind": "proxy",
+      "target": "Сумський район"
+    },
+    "coverage_interpretation": "A target instant after last_successful_poll_at is outside the accepted frozen alert-state observation boundary; absence of a later completed row cannot be interpreted as proof of a real no-alert gap."
+  },
+  "six_candidate_ledger": [
+    {
+      "candidate_id": "ecf26b3980c9dcac8234f689",
+      "city": "Київ",
+      "city_key": "kyiv",
+      "logical_cluster_id": "syntax:kyiv:2026-10-03T22:30",
+      "source_context_id": "ctx-001",
+      "retained_event_context": "У Києві 3 жовтня знову пролунали вибухи. Нову серію було чутно близько 22.30.",
+      "previously_unsupported_syntax_form": "EVENT_REFERENT_AND_APPROXIMATE_CLOCK_SPLIT_ACROSS_ADJACENT_SENTENCES",
+      "syntax_recognized": true,
+      "recognized_event_time_local": "2026-10-03T22:30:00+03:00",
+      "normalized_event_time_utc": "2026-10-03T19:30:00Z",
+      "timezone": "Europe/Kyiv",
+      "utc_offset_at_event": "+03:00",
+      "timezone_conversion_status": "CORRECT",
+      "timestamp_normalization_mismatch": false,
+      "publication_timestamp_utc": "2026-10-03T19:37:54Z",
+      "parser_code_after_syntax_repair": "NO_STRICT_TEMPORAL_BINDING",
+      "active_frozen_episode_count": 0,
+      "active_normalized_alert_rows": [],
+      "active_logical_episode_groups": [],
+      "city_region_identity": {
+        "city_key": "kyiv",
+        "monitor_city_label": "Київ",
+        "source_identity": "kyiv_combined_exact_city",
+        "exact_city_feed": true,
+        "note": "Kyiv uses the accepted special exact-city source identity in monitor state."
+      },
+      "frozen_state_coverage": {
+        "baseline_coverage_end": "2026-09-17",
+        "last_poll_at_utc": "2026-10-03T18:21:27.581732Z",
+        "last_poll_at_local": "2026-10-03T21:21:27.581+03:00",
+        "last_poll_error": null,
+        "last_successful_poll_at_utc": "2026-10-03T18:21:27.581732Z",
+        "last_successful_poll_at_local": "2026-10-03T21:21:27.581+03:00",
+        "target_minus_last_successful_poll_seconds": 4112.419,
+        "target_minus_last_successful_poll_human": "1h 8m 32s",
+        "latest_api_alert_start_utc": "2026-10-03T14:33:00Z",
+        "latest_api_alert_end_utc": "2026-10-03T14:54:00Z",
+        "latest_api_alert_start_local": "2026-10-03T17:33:00.000+03:00",
+        "latest_api_alert_end_local": "2026-10-03T17:54:00.000+03:00"
+      },
+      "neighboring_alert_rows": {
+        "nearby_window_hours": 6,
+        "all_rows_intersecting_window": [
+          {
+            "normalized_episode_id": "af3627c04d206a368662136e",
+            "upstream_raw_id": null,
+            "upstream_raw_id_retained": false,
+            "city_key": "kyiv",
+            "alert_source": "kyiv_combined_exact_city",
+            "alert_start_utc": "2026-10-03T14:33:00Z",
+            "alert_end_utc": "2026-10-03T14:54:00Z",
+            "alert_start_local": "2026-10-03T17:33:00.000+03:00",
+            "alert_end_local": "2026-10-03T17:54:00.000+03:00",
+            "logical_group_identity": [
+              "af3627c04d206a368662136e"
+            ],
+            "explicit_parent_id_retained": false
+          }
+        ],
+        "nearest_before": {
+          "normalized_episode_id": "af3627c04d206a368662136e",
+          "upstream_raw_id": null,
+          "upstream_raw_id_retained": false,
+          "city_key": "kyiv",
+          "alert_source": "kyiv_combined_exact_city",
+          "alert_start_utc": "2026-10-03T14:33:00Z",
+          "alert_end_utc": "2026-10-03T14:54:00Z",
+          "alert_start_local": "2026-10-03T17:33:00.000+03:00",
+          "alert_end_local": "2026-10-03T17:54:00.000+03:00",
+          "logical_group_identity": [
+            "af3627c04d206a368662136e"
+          ],
+          "explicit_parent_id_retained": false,
+          "distance_target_from_alert_end_seconds": 16560,
+          "distance_target_from_alert_end_human": "4h 36m 0s"
+        },
+        "nearest_after": null
+      },
+      "upstream_raw_record_retention": {
+        "source_alarm_id_retained": false,
+        "source_group_or_parent_id_retained": false,
+        "normalized_episode_id_definition": "sha256(city_key|normalized_alert_start_utc|normalized_alert_end_utc)[:24]",
+        "consequence": "For Kyiv, the frozen state retains normalized exact-city interval identity but not an upstream raw record ID."
+      },
+      "primary_blocker": "FROZEN_ALERT_STATE_COVERAGE_OR_STALENESS_GAP",
+      "secondary_blocker": "FROZEN_TARGET_INSTANT_IS_1H08M32S_AFTER_LAST_SUCCESSFUL_ALERT_POLL",
+      "corrected_taxonomy": "SYNTAX_PLUS_ALERT_STATE_COVERAGE_GAP",
+      "explanation": "The recognized event clock is after the city's last successful frozen alert poll by 1h 8m 32s. No frozen episode exists after the nearest completed row, and there is no later frozen row from which to prove a real alert gap. Therefore zero active episodes means coverage/staleness, not a demonstrated no-alert interval.",
+      "special_sumy_2026_09_27_overlap_assessment": null
+    },
+    {
+      "candidate_id": "383e064c794bece60e20d4ca",
+      "city": "Суми",
+      "city_key": "sumy",
+      "logical_cluster_id": "syntax:sumy:2026-09-27T15:00",
+      "source_context_id": "ctx-001",
+      "retained_event_context": "Що відомо про авіаудар по Сумах 27 вересня Близько 15:00 російська армія ударила по Зарічному району Сум трьома КАБами.",
+      "previously_unsupported_syntax_form": "DIRECT_ATTACK_VERB_PLUS_APPROXIMATE_CLOCK_NOT_RECOGNIZED",
+      "syntax_recognized": true,
+      "recognized_event_time_local": "2026-09-27T15:00:00+03:00",
+      "normalized_event_time_utc": "2026-09-27T12:00:00Z",
+      "timezone": "Europe/Kyiv",
+      "utc_offset_at_event": "+03:00",
+      "timezone_conversion_status": "CORRECT",
+      "timestamp_normalization_mismatch": false,
+      "publication_timestamp_utc": "2026-09-28T20:02:06Z",
+      "parser_code_after_syntax_repair": "TEMPORAL_EXPLICIT_EVENT_TIME_AMBIGUOUS_EPISODES",
+      "active_frozen_episode_count": 2,
+      "active_normalized_alert_rows": [
+        {
+          "normalized_episode_id": "e50b1d0a6607686b1ca6192b",
+          "upstream_raw_id": null,
+          "upstream_raw_id_retained": false,
+          "city_key": "sumy",
+          "alert_source": "ukrainealarm_regionHistory",
+          "alert_start_utc": "2026-09-27T10:19:21.500890Z",
+          "alert_end_utc": "2026-09-27T12:54:40.657435Z",
+          "alert_start_local": "2026-09-27T13:19:21.500+03:00",
+          "alert_end_local": "2026-09-27T15:54:40.657+03:00",
+          "logical_group_identity": [
+            "e50b1d0a6607686b1ca6192b"
+          ],
+          "explicit_parent_id_retained": false
+        },
+        {
+          "normalized_episode_id": "08483724d7be4e7e8bb37633",
+          "upstream_raw_id": null,
+          "upstream_raw_id_retained": false,
+          "city_key": "sumy",
+          "alert_source": "ukrainealarm_regionHistory",
+          "alert_start_utc": "2026-09-27T11:26:36.144659Z",
+          "alert_end_utc": "2026-09-27T12:56:57.651655Z",
+          "alert_start_local": "2026-09-27T14:26:36.144+03:00",
+          "alert_end_local": "2026-09-27T15:56:57.651+03:00",
+          "logical_group_identity": [
+            "08483724d7be4e7e8bb37633"
+          ],
+          "explicit_parent_id_retained": false
+        }
+      ],
+      "active_logical_episode_groups": [
+        [
+          "08483724d7be4e7e8bb37633"
+        ],
+        [
+          "e50b1d0a6607686b1ca6192b"
+        ]
+      ],
+      "city_region_identity": {
+        "city_key": "sumy",
+        "monitor_city_label": "Суми",
+        "source_identity": "ukrainealarm_regionHistory",
+        "bridge_kind": "proxy",
+        "bridge_target": "Сумський район",
+        "api_region_name": "Сумський район",
+        "api_region_id": "114",
+        "oblast": "Сумська область",
+        "exact_city_feed": false,
+        "note": "The accepted monitor maps Sumy to the Sumskyi raion proxy."
+      },
+      "frozen_state_coverage": {
+        "baseline_coverage_end": "2026-09-17",
+        "last_poll_at_utc": "2026-10-03T18:21:27.581732Z",
+        "last_poll_at_local": "2026-10-03T21:21:27.581+03:00",
+        "last_poll_error": null,
+        "last_successful_poll_at_utc": "2026-10-03T18:21:27.581732Z",
+        "last_successful_poll_at_local": "2026-10-03T21:21:27.581+03:00",
+        "target_minus_last_successful_poll_seconds": -541287.581,
+        "target_minus_last_successful_poll_human": "-6d 6h 21m 28s",
+        "latest_api_alert_start_utc": "2026-10-03T17:29:39.583144Z",
+        "latest_api_alert_end_utc": "2026-10-03T18:12:12.964737Z",
+        "latest_api_alert_start_local": "2026-10-03T20:29:39.583+03:00",
+        "latest_api_alert_end_local": "2026-10-03T21:12:12.964+03:00"
+      },
+      "neighboring_alert_rows": {
+        "nearby_window_hours": 3,
+        "all_rows_intersecting_window": [
+          {
+            "normalized_episode_id": "8bb77e09b3024e5b4d264429",
+            "upstream_raw_id": null,
+            "upstream_raw_id_retained": false,
+            "city_key": "sumy",
+            "alert_source": "ukrainealarm_regionHistory",
+            "alert_start_utc": "2026-09-27T07:49:52.244683Z",
+            "alert_end_utc": "2026-09-27T09:13:42.883982Z",
+            "alert_start_local": "2026-09-27T10:49:52.244+03:00",
+            "alert_end_local": "2026-09-27T12:13:42.883+03:00",
+            "logical_group_identity": [
+              "8bb77e09b3024e5b4d264429"
+            ],
+            "explicit_parent_id_retained": false
+          },
+          {
+            "normalized_episode_id": "4cd9dcb8738ef9e7d1d0f8bd",
+            "upstream_raw_id": null,
+            "upstream_raw_id_retained": false,
+            "city_key": "sumy",
+            "alert_source": "ukrainealarm_regionHistory",
+            "alert_start_utc": "2026-09-27T09:32:24.358468Z",
+            "alert_end_utc": "2026-09-27T09:56:54.899097Z",
+            "alert_start_local": "2026-09-27T12:32:24.358+03:00",
+            "alert_end_local": "2026-09-27T12:56:54.899+03:00",
+            "logical_group_identity": [
+              "4cd9dcb8738ef9e7d1d0f8bd"
+            ],
+            "explicit_parent_id_retained": false
+          },
+          {
+            "normalized_episode_id": "e50b1d0a6607686b1ca6192b",
+            "upstream_raw_id": null,
+            "upstream_raw_id_retained": false,
+            "city_key": "sumy",
+            "alert_source": "ukrainealarm_regionHistory",
+            "alert_start_utc": "2026-09-27T10:19:21.500890Z",
+            "alert_end_utc": "2026-09-27T12:54:40.657435Z",
+            "alert_start_local": "2026-09-27T13:19:21.500+03:00",
+            "alert_end_local": "2026-09-27T15:54:40.657+03:00",
+            "logical_group_identity": [
+              "e50b1d0a6607686b1ca6192b"
+            ],
+            "explicit_parent_id_retained": false
+          },
+          {
+            "normalized_episode_id": "08483724d7be4e7e8bb37633",
+            "upstream_raw_id": null,
+            "upstream_raw_id_retained": false,
+            "city_key": "sumy",
+            "alert_source": "ukrainealarm_regionHistory",
+            "alert_start_utc": "2026-09-27T11:26:36.144659Z",
+            "alert_end_utc": "2026-09-27T12:56:57.651655Z",
+            "alert_start_local": "2026-09-27T14:26:36.144+03:00",
+            "alert_end_local": "2026-09-27T15:56:57.651+03:00",
+            "logical_group_identity": [
+              "08483724d7be4e7e8bb37633"
+            ],
+            "explicit_parent_id_retained": false
+          },
+          {
+            "normalized_episode_id": "a51a164b8e1fee8990bd5d24",
+            "upstream_raw_id": null,
+            "upstream_raw_id_retained": false,
+            "city_key": "sumy",
+            "alert_source": "ukrainealarm_regionHistory",
+            "alert_start_utc": "2026-09-27T13:25:24.401900Z",
+            "alert_end_utc": "2026-09-27T15:43:49.732393Z",
+            "alert_start_local": "2026-09-27T16:25:24.401+03:00",
+            "alert_end_local": "2026-09-27T18:43:49.732+03:00",
+            "logical_group_identity": [
+              "a51a164b8e1fee8990bd5d24"
+            ],
+            "explicit_parent_id_retained": false
+          }
+        ],
+        "nearest_before": {
+          "normalized_episode_id": "4cd9dcb8738ef9e7d1d0f8bd",
+          "upstream_raw_id": null,
+          "upstream_raw_id_retained": false,
+          "city_key": "sumy",
+          "alert_source": "ukrainealarm_regionHistory",
+          "alert_start_utc": "2026-09-27T09:32:24.358468Z",
+          "alert_end_utc": "2026-09-27T09:56:54.899097Z",
+          "alert_start_local": "2026-09-27T12:32:24.358+03:00",
+          "alert_end_local": "2026-09-27T12:56:54.899+03:00",
+          "logical_group_identity": [
+            "4cd9dcb8738ef9e7d1d0f8bd"
+          ],
+          "explicit_parent_id_retained": false,
+          "distance_target_from_alert_end_seconds": 7385.101,
+          "distance_target_from_alert_end_human": "2h 3m 5s"
+        },
+        "nearest_after": {
+          "normalized_episode_id": "a51a164b8e1fee8990bd5d24",
+          "upstream_raw_id": null,
+          "upstream_raw_id_retained": false,
+          "city_key": "sumy",
+          "alert_source": "ukrainealarm_regionHistory",
+          "alert_start_utc": "2026-09-27T13:25:24.401900Z",
+          "alert_end_utc": "2026-09-27T15:43:49.732393Z",
+          "alert_start_local": "2026-09-27T16:25:24.401+03:00",
+          "alert_end_local": "2026-09-27T18:43:49.732+03:00",
+          "logical_group_identity": [
+            "a51a164b8e1fee8990bd5d24"
+          ],
+          "explicit_parent_id_retained": false,
+          "distance_alert_start_from_target_seconds": 5124.401,
+          "distance_alert_start_from_target_human": "1h 25m 24s"
+        }
+      },
+      "upstream_raw_record_retention": {
+        "source_alarm_id_retained": false,
+        "source_group_or_parent_id_retained": false,
+        "normalized_episode_id_definition": "sha256(city_key|normalized_alert_start_utc|normalized_alert_end_utc)[:24]",
+        "consequence": "For overlapping Sumy rows, the frozen state cannot reconstruct which upstream history group/alarm produced each interval."
+      },
+      "primary_blocker": "MULTIPLE_DISTINCT_LOGICAL_ALERT_GROUPS_AT_EVENT_TIME",
+      "secondary_blocker": "UPSTREAM_RAW_ALARM_AND_GROUP_IDENTITIES_ARE_NOT_RETAINED_AFTER_UKRAINEALARM_HISTORY_NORMALIZATION",
+      "corrected_taxonomy": "NOT_ACTUALLY_SAFE_EPISODE_SPECIFIC",
+      "explanation": "The recognized 15:00 local event clock is 12:00Z and lies inside two frozen Sumy rows. They form two singleton logical groups under the accepted 90-second representation contract, so exact episode attribution is unsafe. Because the UkraineAlarm normalization discarded upstream raw alarm/group identifiers, the frozen evidence cannot justify merging or choosing one group.",
+      "special_sumy_2026_09_27_overlap_assessment": {
+        "required_A_B_C_D_classification": "D_IMPOSSIBLE_TO_RESOLVE_FROM_FROZEN_EVIDENCE",
+        "active_groups": [
+          [
+            "08483724d7be4e7e8bb37633"
+          ],
+          [
+            "e50b1d0a6607686b1ca6192b"
+          ]
+        ],
+        "interval_comparison": {
+          "start_delta_seconds": 4034.644,
+          "start_delta_human": "1h 7m 15s",
+          "end_delta_seconds": 136.994,
+          "end_delta_human": "2m 17s",
+          "overlap_seconds": 5284.513,
+          "overlap_human": "1h 28m 5s",
+          "accepted_same_representation_tolerance_seconds": 90,
+          "same_episode_representation_under_current_contract": false
+        },
+        "evidence_limit": "Both rows are normalized AIR intervals from the same Sumy proxy feed, but history normalization retains only start/end and discards upstream alarm/group identity. Frozen evidence therefore cannot prove whether the upstream rows were two real alerts, duplicate representations, or nested/overlapping source records. The accepted grouping contract keeps them distinct because both boundary deltas are not within 90 seconds.",
+        "contract_evidence": "test_monitor_near_duplicate_temporal_binding.py explicitly keeps overlapping windows outside the 90-second start/end representation tolerance as multiple logical groups."
+      }
+    },
+    {
+      "candidate_id": "5b93c789ce785522030a51f4",
+      "city": "Суми",
+      "city_key": "sumy",
+      "logical_cluster_id": "syntax:sumy:2026-10-04T08:00",
+      "source_context_id": "ctx-001",
+      "retained_event_context": "Як інформує голова МВА Сергій Кривошеєнко, близько 8.00 неділі Росія ударила КАБами по житловому масиву Сум.",
+      "previously_unsupported_syntax_form": "DOT_PUNCTUATION_DIRECT_ATTACK_VERB_PLUS_APPROXIMATE_CLOCK_NOT_RECOGNIZED",
+      "syntax_recognized": true,
+      "recognized_event_time_local": "2026-10-04T08:00:00+03:00",
+      "normalized_event_time_utc": "2026-10-04T05:00:00Z",
+      "timezone": "Europe/Kyiv",
+      "utc_offset_at_event": "+03:00",
+      "timezone_conversion_status": "CORRECT",
+      "timestamp_normalization_mismatch": false,
+      "publication_timestamp_utc": "2026-10-04T06:03:00Z",
+      "parser_code_after_syntax_repair": "NO_STRICT_TEMPORAL_BINDING",
+      "active_frozen_episode_count": 0,
+      "active_normalized_alert_rows": [],
+      "active_logical_episode_groups": [],
+      "city_region_identity": {
+        "city_key": "sumy",
+        "monitor_city_label": "Суми",
+        "source_identity": "ukrainealarm_regionHistory",
+        "bridge_kind": "proxy",
+        "bridge_target": "Сумський район",
+        "api_region_name": "Сумський район",
+        "api_region_id": "114",
+        "oblast": "Сумська область",
+        "exact_city_feed": false,
+        "note": "The accepted monitor maps Sumy to the Sumskyi raion proxy."
+      },
+      "frozen_state_coverage": {
+        "baseline_coverage_end": "2026-09-17",
+        "last_poll_at_utc": "2026-10-03T18:21:27.581732Z",
+        "last_poll_at_local": "2026-10-03T21:21:27.581+03:00",
+        "last_poll_error": null,
+        "last_successful_poll_at_utc": "2026-10-03T18:21:27.581732Z",
+        "last_successful_poll_at_local": "2026-10-03T21:21:27.581+03:00",
+        "target_minus_last_successful_poll_seconds": 38312.419,
+        "target_minus_last_successful_poll_human": "10h 38m 32s",
+        "latest_api_alert_start_utc": "2026-10-03T17:29:39.583144Z",
+        "latest_api_alert_end_utc": "2026-10-03T18:12:12.964737Z",
+        "latest_api_alert_start_local": "2026-10-03T20:29:39.583+03:00",
+        "latest_api_alert_end_local": "2026-10-03T21:12:12.964+03:00"
+      },
+      "neighboring_alert_rows": {
+        "nearby_window_hours": 6,
+        "all_rows_intersecting_window": [],
+        "nearest_before": {
+          "normalized_episode_id": "5a6ac4d134a5fedbe8085cdd",
+          "upstream_raw_id": null,
+          "upstream_raw_id_retained": false,
+          "city_key": "sumy",
+          "alert_source": "ukrainealarm_regionHistory",
+          "alert_start_utc": "2026-10-03T17:29:39.583144Z",
+          "alert_end_utc": "2026-10-03T18:12:12.964737Z",
+          "alert_start_local": "2026-10-03T20:29:39.583+03:00",
+          "alert_end_local": "2026-10-03T21:12:12.964+03:00",
+          "logical_group_identity": [
+            "5a6ac4d134a5fedbe8085cdd"
+          ],
+          "explicit_parent_id_retained": false,
+          "distance_target_from_alert_end_seconds": 38867.036,
+          "distance_target_from_alert_end_human": "10h 47m 47s"
+        },
+        "nearest_after": null
+      },
+      "upstream_raw_record_retention": {
+        "source_alarm_id_retained": false,
+        "source_group_or_parent_id_retained": false,
+        "normalized_episode_id_definition": "sha256(city_key|normalized_alert_start_utc|normalized_alert_end_utc)[:24]",
+        "consequence": "For overlapping Sumy rows, the frozen state cannot reconstruct which upstream history group/alarm produced each interval."
+      },
+      "primary_blocker": "FROZEN_ALERT_STATE_COVERAGE_OR_STALENESS_GAP",
+      "secondary_blocker": "FROZEN_TARGET_INSTANT_IS_10H38M32S_AFTER_LAST_SUCCESSFUL_ALERT_POLL",
+      "corrected_taxonomy": "SYNTAX_PLUS_ALERT_STATE_COVERAGE_GAP",
+      "explanation": "The recognized event clock is after the city's last successful frozen alert poll by 10h 38m 32s. No frozen episode exists after the nearest completed row, and there is no later frozen row from which to prove a real alert gap. Therefore zero active episodes means coverage/staleness, not a demonstrated no-alert interval.",
+      "special_sumy_2026_09_27_overlap_assessment": null
+    },
+    {
+      "candidate_id": "ccc799cf4b6706daac05f35e",
+      "city": "Суми",
+      "city_key": "sumy",
+      "logical_cluster_id": "syntax:sumy:2026-10-04T08:00",
+      "source_context_id": "ctx-002",
+      "retained_event_context": "Перевернута автівка, бите скло, розкидані уламки – такий вигляд має одне з місць удару авіабомби близько 8:00 у Зарічному районі міста.",
+      "previously_unsupported_syntax_form": "DIRECT_EVENT_NOUN_MISTSE_UDARU_PLUS_APPROXIMATE_CLOCK_NOT_RECOGNIZED",
+      "syntax_recognized": true,
+      "recognized_event_time_local": "2026-10-04T08:00:00+03:00",
+      "normalized_event_time_utc": "2026-10-04T05:00:00Z",
+      "timezone": "Europe/Kyiv",
+      "utc_offset_at_event": "+03:00",
+      "timezone_conversion_status": "CORRECT",
+      "timestamp_normalization_mismatch": false,
+      "publication_timestamp_utc": "2026-10-04T11:33:56Z",
+      "parser_code_after_syntax_repair": "NO_STRICT_TEMPORAL_BINDING",
+      "active_frozen_episode_count": 0,
+      "active_normalized_alert_rows": [],
+      "active_logical_episode_groups": [],
+      "city_region_identity": {
+        "city_key": "sumy",
+        "monitor_city_label": "Суми",
+        "source_identity": "ukrainealarm_regionHistory",
+        "bridge_kind": "proxy",
+        "bridge_target": "Сумський район",
+        "api_region_name": "Сумський район",
+        "api_region_id": "114",
+        "oblast": "Сумська область",
+        "exact_city_feed": false,
+        "note": "The accepted monitor maps Sumy to the Sumskyi raion proxy."
+      },
+      "frozen_state_coverage": {
+        "baseline_coverage_end": "2026-09-17",
+        "last_poll_at_utc": "2026-10-03T18:21:27.581732Z",
+        "last_poll_at_local": "2026-10-03T21:21:27.581+03:00",
+        "last_poll_error": null,
+        "last_successful_poll_at_utc": "2026-10-03T18:21:27.581732Z",
+        "last_successful_poll_at_local": "2026-10-03T21:21:27.581+03:00",
+        "target_minus_last_successful_poll_seconds": 38312.419,
+        "target_minus_last_successful_poll_human": "10h 38m 32s",
+        "latest_api_alert_start_utc": "2026-10-03T17:29:39.583144Z",
+        "latest_api_alert_end_utc": "2026-10-03T18:12:12.964737Z",
+        "latest_api_alert_start_local": "2026-10-03T20:29:39.583+03:00",
+        "latest_api_alert_end_local": "2026-10-03T21:12:12.964+03:00"
+      },
+      "neighboring_alert_rows": {
+        "nearby_window_hours": 6,
+        "all_rows_intersecting_window": [],
+        "nearest_before": {
+          "normalized_episode_id": "5a6ac4d134a5fedbe8085cdd",
+          "upstream_raw_id": null,
+          "upstream_raw_id_retained": false,
+          "city_key": "sumy",
+          "alert_source": "ukrainealarm_regionHistory",
+          "alert_start_utc": "2026-10-03T17:29:39.583144Z",
+          "alert_end_utc": "2026-10-03T18:12:12.964737Z",
+          "alert_start_local": "2026-10-03T20:29:39.583+03:00",
+          "alert_end_local": "2026-10-03T21:12:12.964+03:00",
+          "logical_group_identity": [
+            "5a6ac4d134a5fedbe8085cdd"
+          ],
+          "explicit_parent_id_retained": false,
+          "distance_target_from_alert_end_seconds": 38867.036,
+          "distance_target_from_alert_end_human": "10h 47m 47s"
+        },
+        "nearest_after": null
+      },
+      "upstream_raw_record_retention": {
+        "source_alarm_id_retained": false,
+        "source_group_or_parent_id_retained": false,
+        "normalized_episode_id_definition": "sha256(city_key|normalized_alert_start_utc|normalized_alert_end_utc)[:24]",
+        "consequence": "For overlapping Sumy rows, the frozen state cannot reconstruct which upstream history group/alarm produced each interval."
+      },
+      "primary_blocker": "FROZEN_ALERT_STATE_COVERAGE_OR_STALENESS_GAP",
+      "secondary_blocker": "FROZEN_TARGET_INSTANT_IS_10H38M32S_AFTER_LAST_SUCCESSFUL_ALERT_POLL",
+      "corrected_taxonomy": "SYNTAX_PLUS_ALERT_STATE_COVERAGE_GAP",
+      "explanation": "The recognized event clock is after the city's last successful frozen alert poll by 10h 38m 32s. No frozen episode exists after the nearest completed row, and there is no later frozen row from which to prove a real alert gap. Therefore zero active episodes means coverage/staleness, not a demonstrated no-alert interval.",
+      "special_sumy_2026_09_27_overlap_assessment": null
+    },
+    {
+      "candidate_id": "130a62ecc060e529737c7326",
+      "city": "Суми",
+      "city_key": "sumy",
+      "logical_cluster_id": "syntax:sumy:2026-10-04T14:00",
+      "source_context_id": "ctx-001",
+      "retained_event_context": "Удар стався близько 14:00 години.",
+      "previously_unsupported_syntax_form": "DIRECT_EVENT_NOUN_UDAR_STAVSIA_PLUS_APPROXIMATE_CLOCK_NOT_RECOGNIZED",
+      "syntax_recognized": true,
+      "recognized_event_time_local": "2026-10-04T14:00:00+03:00",
+      "normalized_event_time_utc": "2026-10-04T11:00:00Z",
+      "timezone": "Europe/Kyiv",
+      "utc_offset_at_event": "+03:00",
+      "timezone_conversion_status": "CORRECT",
+      "timestamp_normalization_mismatch": false,
+      "publication_timestamp_utc": "2026-10-04T16:03:28Z",
+      "parser_code_after_syntax_repair": "NO_STRICT_TEMPORAL_BINDING",
+      "active_frozen_episode_count": 0,
+      "active_normalized_alert_rows": [],
+      "active_logical_episode_groups": [],
+      "city_region_identity": {
+        "city_key": "sumy",
+        "monitor_city_label": "Суми",
+        "source_identity": "ukrainealarm_regionHistory",
+        "bridge_kind": "proxy",
+        "bridge_target": "Сумський район",
+        "api_region_name": "Сумський район",
+        "api_region_id": "114",
+        "oblast": "Сумська область",
+        "exact_city_feed": false,
+        "note": "The accepted monitor maps Sumy to the Sumskyi raion proxy."
+      },
+      "frozen_state_coverage": {
+        "baseline_coverage_end": "2026-09-17",
+        "last_poll_at_utc": "2026-10-03T18:21:27.581732Z",
+        "last_poll_at_local": "2026-10-03T21:21:27.581+03:00",
+        "last_poll_error": null,
+        "last_successful_poll_at_utc": "2026-10-03T18:21:27.581732Z",
+        "last_successful_poll_at_local": "2026-10-03T21:21:27.581+03:00",
+        "target_minus_last_successful_poll_seconds": 59912.419,
+        "target_minus_last_successful_poll_human": "16h 38m 32s",
+        "latest_api_alert_start_utc": "2026-10-03T17:29:39.583144Z",
+        "latest_api_alert_end_utc": "2026-10-03T18:12:12.964737Z",
+        "latest_api_alert_start_local": "2026-10-03T20:29:39.583+03:00",
+        "latest_api_alert_end_local": "2026-10-03T21:12:12.964+03:00"
+      },
+      "neighboring_alert_rows": {
+        "nearby_window_hours": 6,
+        "all_rows_intersecting_window": [],
+        "nearest_before": {
+          "normalized_episode_id": "5a6ac4d134a5fedbe8085cdd",
+          "upstream_raw_id": null,
+          "upstream_raw_id_retained": false,
+          "city_key": "sumy",
+          "alert_source": "ukrainealarm_regionHistory",
+          "alert_start_utc": "2026-10-03T17:29:39.583144Z",
+          "alert_end_utc": "2026-10-03T18:12:12.964737Z",
+          "alert_start_local": "2026-10-03T20:29:39.583+03:00",
+          "alert_end_local": "2026-10-03T21:12:12.964+03:00",
+          "logical_group_identity": [
+            "5a6ac4d134a5fedbe8085cdd"
+          ],
+          "explicit_parent_id_retained": false,
+          "distance_target_from_alert_end_seconds": 60467.036,
+          "distance_target_from_alert_end_human": "16h 47m 47s"
+        },
+        "nearest_after": null
+      },
+      "upstream_raw_record_retention": {
+        "source_alarm_id_retained": false,
+        "source_group_or_parent_id_retained": false,
+        "normalized_episode_id_definition": "sha256(city_key|normalized_alert_start_utc|normalized_alert_end_utc)[:24]",
+        "consequence": "For overlapping Sumy rows, the frozen state cannot reconstruct which upstream history group/alarm produced each interval."
+      },
+      "primary_blocker": "FROZEN_ALERT_STATE_COVERAGE_OR_STALENESS_GAP",
+      "secondary_blocker": "FROZEN_TARGET_INSTANT_IS_16H38M32S_AFTER_LAST_SUCCESSFUL_ALERT_POLL",
+      "corrected_taxonomy": "SYNTAX_PLUS_ALERT_STATE_COVERAGE_GAP",
+      "explanation": "The recognized event clock is after the city's last successful frozen alert poll by 16h 38m 32s. No frozen episode exists after the nearest completed row, and there is no later frozen row from which to prove a real alert gap. Therefore zero active episodes means coverage/staleness, not a demonstrated no-alert interval.",
+      "special_sumy_2026_09_27_overlap_assessment": null
+    },
+    {
+      "candidate_id": "7b99452890d6b851455983af",
+      "city": "Суми",
+      "city_key": "sumy",
+      "logical_cluster_id": "syntax:sumy:2026-10-04T14:00",
+      "source_context_id": "ctx-001",
+      "retained_event_context": "Близько 14:00 ворог атакував місто шістьма керованими авіабомбами.",
+      "previously_unsupported_syntax_form": "DIRECT_ATTACK_VERB_PLUS_APPROXIMATE_CLOCK_NOT_RECOGNIZED",
+      "syntax_recognized": true,
+      "recognized_event_time_local": "2026-10-04T14:00:00+03:00",
+      "normalized_event_time_utc": "2026-10-04T11:00:00Z",
+      "timezone": "Europe/Kyiv",
+      "utc_offset_at_event": "+03:00",
+      "timezone_conversion_status": "CORRECT",
+      "timestamp_normalization_mismatch": false,
+      "publication_timestamp_utc": "2026-10-04T12:51:27Z",
+      "parser_code_after_syntax_repair": "NO_STRICT_TEMPORAL_BINDING",
+      "active_frozen_episode_count": 0,
+      "active_normalized_alert_rows": [],
+      "active_logical_episode_groups": [],
+      "city_region_identity": {
+        "city_key": "sumy",
+        "monitor_city_label": "Суми",
+        "source_identity": "ukrainealarm_regionHistory",
+        "bridge_kind": "proxy",
+        "bridge_target": "Сумський район",
+        "api_region_name": "Сумський район",
+        "api_region_id": "114",
+        "oblast": "Сумська область",
+        "exact_city_feed": false,
+        "note": "The accepted monitor maps Sumy to the Sumskyi raion proxy."
+      },
+      "frozen_state_coverage": {
+        "baseline_coverage_end": "2026-09-17",
+        "last_poll_at_utc": "2026-10-03T18:21:27.581732Z",
+        "last_poll_at_local": "2026-10-03T21:21:27.581+03:00",
+        "last_poll_error": null,
+        "last_successful_poll_at_utc": "2026-10-03T18:21:27.581732Z",
+        "last_successful_poll_at_local": "2026-10-03T21:21:27.581+03:00",
+        "target_minus_last_successful_poll_seconds": 59912.419,
+        "target_minus_last_successful_poll_human": "16h 38m 32s",
+        "latest_api_alert_start_utc": "2026-10-03T17:29:39.583144Z",
+        "latest_api_alert_end_utc": "2026-10-03T18:12:12.964737Z",
+        "latest_api_alert_start_local": "2026-10-03T20:29:39.583+03:00",
+        "latest_api_alert_end_local": "2026-10-03T21:12:12.964+03:00"
+      },
+      "neighboring_alert_rows": {
+        "nearby_window_hours": 6,
+        "all_rows_intersecting_window": [],
+        "nearest_before": {
+          "normalized_episode_id": "5a6ac4d134a5fedbe8085cdd",
+          "upstream_raw_id": null,
+          "upstream_raw_id_retained": false,
+          "city_key": "sumy",
+          "alert_source": "ukrainealarm_regionHistory",
+          "alert_start_utc": "2026-10-03T17:29:39.583144Z",
+          "alert_end_utc": "2026-10-03T18:12:12.964737Z",
+          "alert_start_local": "2026-10-03T20:29:39.583+03:00",
+          "alert_end_local": "2026-10-03T21:12:12.964+03:00",
+          "logical_group_identity": [
+            "5a6ac4d134a5fedbe8085cdd"
+          ],
+          "explicit_parent_id_retained": false,
+          "distance_target_from_alert_end_seconds": 60467.036,
+          "distance_target_from_alert_end_human": "16h 47m 47s"
+        },
+        "nearest_after": null
+      },
+      "upstream_raw_record_retention": {
+        "source_alarm_id_retained": false,
+        "source_group_or_parent_id_retained": false,
+        "normalized_episode_id_definition": "sha256(city_key|normalized_alert_start_utc|normalized_alert_end_utc)[:24]",
+        "consequence": "For overlapping Sumy rows, the frozen state cannot reconstruct which upstream history group/alarm produced each interval."
+      },
+      "primary_blocker": "FROZEN_ALERT_STATE_COVERAGE_OR_STALENESS_GAP",
+      "secondary_blocker": "FROZEN_TARGET_INSTANT_IS_16H38M32S_AFTER_LAST_SUCCESSFUL_ALERT_POLL",
+      "corrected_taxonomy": "SYNTAX_PLUS_ALERT_STATE_COVERAGE_GAP",
+      "explanation": "The recognized event clock is after the city's last successful frozen alert poll by 16h 38m 32s. No frozen episode exists after the nearest completed row, and there is no later frozen row from which to prove a real alert gap. Therefore zero active episodes means coverage/staleness, not a demonstrated no-alert interval.",
+      "special_sumy_2026_09_27_overlap_assessment": null
+    }
+  ],
+  "aggregate_blocker_counts": {
+    "FROZEN_ALERT_EPISODE_ABSENT_AT_EVENT_TIME": 0,
+    "MULTIPLE_DISTINCT_LOGICAL_ALERT_GROUPS_AT_EVENT_TIME": 1,
+    "TIMEZONE_OR_TIMESTAMP_NORMALIZATION_MISMATCH": 0,
+    "ALERT_EPISODE_SEGMENTATION_OR_GROUPING_GAP": 0,
+    "FROZEN_ALERT_STATE_COVERAGE_OR_STALENESS_GAP": 5,
+    "ORIGINAL_SYNTAX_TAXONOMY_EXPECTATION_INCORRECT": 0,
+    "OTHER": 0
+  },
+  "required_aggregate_result": {
+    "cases_diagnosed": 6,
+    "pure_remaining_syntax_blockers": 0,
+    "representation_grouping_blockers": 1,
+    "frozen_alert_state_coverage_blockers": 5,
+    "timezone_normalization_blockers": 0,
+    "taxonomy_invalid_cases": 1,
+    "indeterminate_cases": 0,
+    "corrected_recoverable_ceiling": {
+      "current_parser_usable_candidates": 12,
+      "denominator": 228,
+      "safely_recoverable_additional_candidates_from_these_six_under_current_frozen_evidence": 0,
+      "corrected_safe_ceiling_candidates": 12,
+      "corrected_safe_ceiling_ratio": "12 / 228",
+      "basis": "Five targets are beyond frozen alert-state coverage and one target remains multi-group ambiguous. Recognized attack time alone is insufficient for safe episode attribution."
+    }
+  },
+  "corrected_taxonomy_counts": {
+    "PURE_SYNTAX_GAP_CONFIRMED": 0,
+    "SYNTAX_PLUS_REPRESENTATION_GAP": 0,
+    "SYNTAX_PLUS_ALERT_STATE_COVERAGE_GAP": 5,
+    "SYNTAX_PLUS_TIME_NORMALIZATION_GAP": 0,
+    "NOT_ACTUALLY_SAFE_EPISODE_SPECIFIC": 1,
+    "INDETERMINATE": 0
+  },
+  "mutation_confirmation": {
+    "temporal_syntax_parser_mutations": 0,
+    "temporal_representation_mutations": 0,
+    "logical_alert_grouping_mutations": 0,
+    "classifier_mutations": 0,
+    "source_discovery_mutations": 0,
+    "frozen_alert_state_mutations": 0,
+    "historical_state_queue_mutations": 0,
+    "review_queue_mutations": 0,
+    "canonical_alerts_mutations": 0,
+    "neon_db_mutations": 0,
+    "deployments": 0
+  },
+  "repository_artifact_note": "The only repository write for this diagnostic is this requested research JSON on the diagnostic branch; no production/state/semantic files are changed."
+}
