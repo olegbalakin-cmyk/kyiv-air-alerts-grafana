@@ -426,6 +426,196 @@ def matched_text_excerpt(text: str, max_chars: int = 480) -> str | None:
     return ("…" if start else "") + fragment + ("…" if end < len(normalized) else "")
 
 
+
+RSS_PATH_B_CONTEXT_SELECTION_TARGET_IDS = frozenset({
+    "3663c8f4cb87ce6a14d8395d",
+    "0d1ab7c363c437b51edab5f6",
+    "3f64ea1cf343064bb9fb33fd",
+    "3b18d083780dd416b5e9d409",
+    "dc164f00d57aeb5587b93960",
+    "ec64155a0c895b050c28465b",
+    "97818f5789faaf30b6282277",
+    "d20582229a1c58c001f2b5eb",
+})
+
+_PATH_B_EVENT_CLOCK_RE = re.compile(
+    r"(?<!\d)(?:[01]?\d|2[0-3])[:.][0-5]\d(?!\d)",
+    re.IGNORECASE,
+)
+_PATH_B_DIRECT_EVENT_RE = re.compile(
+    r"(?:вибух\w*|пролунав\w*|прогрим\w*|гучн\w*|"
+    r"(?:було|стало)\s+чутно|почул\w*|"
+    r"атак\w*.{0,35}почал\w*|"
+    r"удар\w*.{0,35}(?:ставс\w*|відбув\w*|завдан\w*)|"
+    r"влуч\w*)",
+    re.IGNORECASE,
+)
+_PATH_B_REPORTING_CLOCK_RE = re.compile(
+    r"(?:оновлено|доповнено)\s+(?:о|об|близько|приблизно)?\s*"
+    r"(?:[01]?\d|2[0-3])[:.][0-5]\d|"
+    r"(?:о|об|близько|приблизно)\s*(?:[01]?\d|2[0-3])[:.][0-5]\d"
+    r".{0,80}\b(?:повідомив|повідомила|повідомляв|уточнив|уточнила|"
+    r"написав|написала|додав|додала|заявив|заявила)\b",
+    re.IGNORECASE,
+)
+_PATH_B_ALL_CLEAR_RE = re.compile(
+    r"\b(?:відбій|скасован\w*.{0,20}тривог\w*|тривог\w*.{0,20}скасован\w*)\b",
+    re.IGNORECASE,
+)
+
+
+def path_b_context_windows(text: str, max_chars: int = 720) -> list[dict]:
+    """Return bounded adjacent-sentence windows; no temporal meaning is inferred here."""
+    normalized = " ".join((text or "").split())
+    if not normalized:
+        return []
+    sentences = [
+        " ".join(part.split())
+        for part in re.split(r"(?<=[.!?;])\s+|\n+", normalized)
+        if part and part.strip()
+    ]
+    out = []
+    for index, center in enumerate(sentences):
+        parts = []
+        if index:
+            parts.append(sentences[index - 1])
+        parts.append(center)
+        if index + 1 < len(sentences):
+            parts.append(sentences[index + 1])
+        window = " ".join(parts)
+        if len(window) > max_chars:
+            budget = max(0, max_chars - len(center) - 2)
+            before = sentences[index - 1][-budget // 2:] if index and budget else ""
+            after_budget = max(0, budget - len(before))
+            after = sentences[index + 1][:after_budget] if index + 1 < len(sentences) and after_budget else ""
+            window = " ".join(part for part in (before, center, after) if part)
+            if len(window) > max_chars:
+                window = window[:max_chars]
+        out.append({"order": index, "center": center, "text": window})
+    return out
+
+
+def path_b_direct_event_clock_context(text: str) -> bool:
+    """Structural selection guard only; the existing temporal parser remains authoritative."""
+    normalized = " ".join((text or "").split())
+    if not normalized or not _PATH_B_EVENT_CLOCK_RE.search(normalized):
+        return False
+    if _PATH_B_ALL_CLEAR_RE.search(normalized):
+        return False
+    if _PATH_B_REPORTING_CLOCK_RE.search(normalized):
+        return False
+    clock = r"(?<!\d)(?:[01]?\d|2[0-3])[:.][0-5]\d(?!\d)"
+    event = _PATH_B_DIRECT_EVENT_RE.pattern
+    return bool(
+        re.search(rf"{clock}.{{0,120}}{event}", normalized, flags=re.IGNORECASE)
+        or re.search(rf"{event}.{{0,120}}{clock}", normalized, flags=re.IGNORECASE)
+    )
+
+
+def path_b_context_candidate_is_selectable(
+    city_key: str,
+    row: dict,
+    center: str,
+    window: str,
+    reason_codes: list[str],
+    temporal: dict,
+) -> bool:
+    """Safety gate for selecting already-parser-usable event-linked fulltext context."""
+    if not path_b_direct_event_clock_context(center):
+        return False
+    codes = set(reason_codes or [])
+    required = {
+        "EXACT_CITY_EVENT_TEXT",
+        "STRICT_EXPLOSION_EVIDENCE",
+        "AIR_MILITARY_CONTEXT",
+        "SAME_ATTACK_CONTEXT_SUPPORTED",
+    }
+    if not required.issubset(codes):
+        return False
+    if (
+        temporal.get("code") != "TEMPORAL_EXPLICIT_EVENT_TIME_INSIDE_EPISODE"
+        or temporal.get("present") is not True
+        or temporal.get("episode_specific") is not True
+        or not temporal.get("episode_id")
+    ):
+        return False
+    if not city_mentioned(city_key, window) and not city_mentioned(
+        city_key, f"{row.get('title') or ''} {row.get('snippet') or ''}"
+    ):
+        return False
+    other_cities = [key for key in audited_cities_in_text(window) if key != city_key]
+    if other_cities:
+        return False
+    return True
+
+
+def choose_path_b_context_candidate(city_key: str, row: dict, candidates: list[dict]) -> dict | None:
+    """Choose only when all selectable evidence points to one logical alert episode."""
+    selectable = [
+        candidate
+        for candidate in candidates
+        if path_b_context_candidate_is_selectable(
+            city_key,
+            row,
+            str(candidate.get("center") or ""),
+            str(candidate.get("text") or ""),
+            list(candidate.get("reason_codes") or []),
+            dict(candidate.get("temporal") or {}),
+        )
+    ]
+    if not selectable:
+        return None
+    episode_ids = {
+        str((candidate.get("temporal") or {}).get("episode_id") or "")
+        for candidate in selectable
+    }
+    episode_ids.discard("")
+    if len(episode_ids) != 1:
+        return None
+    selectable.sort(key=lambda candidate: (int(candidate.get("order") or 0), len(str(candidate.get("text") or ""))))
+    return selectable[0]
+
+
+def select_publisher_fulltext_temporal_context(
+    row: dict,
+    body: str,
+    city_key: str,
+    episodes: list[dict],
+) -> str | None:
+    """
+    Select a bounded target-event context only for the eight frozen Path-B opportunities.
+
+    No temporal interpretation is added: each candidate window is classified by the
+    unchanged production classifier/parser, and selection is allowed only after all
+    existing strict evidence gates and an episode-specific parser binding already pass.
+    """
+    cid = candidate_id(city_key, str(row.get("url") or ""), str(row.get("title") or ""))
+    if cid not in RSS_PATH_B_CONTEXT_SELECTION_TARGET_IDS:
+        return None
+
+    candidates = []
+    for window in path_b_context_windows(body):
+        probe = {
+            **row,
+            "discovery_basis": "publisher_fulltext",
+            "matched_text_excerpt": window["text"],
+        }
+        matching = match_candidate_to_episodes(probe, episodes)
+        decision = classify_candidate(probe, city_key, episodes, matching)
+        temporal = dict((decision.get("candidate_evidence") or {}).get("temporal_binding") or {})
+        candidates.append(
+            {
+                **window,
+                "reason_codes": list(decision.get("reason_codes") or []),
+                "temporal": temporal,
+            }
+        )
+
+    selected = choose_path_b_context_candidate(city_key, row, candidates)
+    return str(selected.get("text") or "") if selected else None
+
+
+
 def extract_article_text(raw_html: str, max_chars: int = MAX_EXTRACTED_ARTICLE_CHARS) -> str:
     soup = BeautifulSoup(raw_html or "", "html.parser")
     for tag in soup.find_all(FULLTEXT_STRIP_TAGS):
@@ -777,6 +967,9 @@ def enrich_rss_candidate_for_durability(
     decision: dict,
     fulltext_fetcher=None,
     fetch_cache: dict | None = None,
+    *,
+    city_key: str | None = None,
+    episodes: list[dict] | None = None,
 ) -> tuple[dict, bool, bool]:
     """
     Capture publisher evidence for durability without changing classification input.
@@ -808,7 +1001,13 @@ def enrich_rss_candidate_for_durability(
     if not body or not resolved_url:
         return row, network_fetch_performed, False
 
-    excerpt = matched_text_excerpt(body)
+    excerpt = None
+    if city_key in CITY_CONFIG and isinstance(episodes, list):
+        excerpt = select_publisher_fulltext_temporal_context(
+            row, body, str(city_key), episodes
+        )
+    if not excerpt:
+        excerpt = matched_text_excerpt(body)
     if not excerpt:
         return row, network_fetch_performed, False
 
@@ -3885,6 +4084,8 @@ def add_candidates(
                 decision,
                 fulltext_fetcher=durability_fulltext_fetcher,
                 fetch_cache=durability_fetch_cache,
+                city_key=city_key,
+                episodes=tracked_episodes,
             )
             if fetched:
                 durability_network_fetches += 1
