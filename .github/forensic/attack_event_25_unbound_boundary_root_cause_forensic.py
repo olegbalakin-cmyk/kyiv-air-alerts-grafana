@@ -81,7 +81,7 @@ def run(cmd, *, check=True, text=True):
     return p
 
 def write_json(path, obj):
-    path.write_text(json.dumps(obj, ensure_ascii=False, sort_keys=True, separators=(",", ":")), encoding="utf-8")
+    path.write_text(json.dumps(obj, ensure_ascii=False, sort_keys=True, separators=(",", ":"), default=str), encoding="utf-8")
 
 def canonical_json_bytes(obj):
     return json.dumps(obj, ensure_ascii=False, sort_keys=True, separators=(",", ":"), default=str).encode("utf-8")
