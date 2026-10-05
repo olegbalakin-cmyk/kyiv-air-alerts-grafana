@@ -65,12 +65,17 @@ jobs:
                   "count_with_complete_historical_provenance","count_with_complete_canonical_provenance",
                   "sub_60_second_mismatch_count","sub_60_second_proven_precision_or_normalization_count",
                   "gt_30_minute_mismatch_count","gt_30_minute_proven_causes","shared_proven_mechanism_groups",
-                  "representative_cases","parent_corpus_sha256","parent_corpus_sha_match",
-                  "forensic_db_provenance_sha256","db_writes","neon_mutations","binding_changes"
+                  "representative_cases","accepted_parent_corpus_sha256","current_parent_corpus_sha256",
+                  "global_parent_corpus_drift","accepted_relevant_parent_slice_sha256",
+                  "current_relevant_parent_slice_sha256","relevant_parent_slice_match",
+                  "accepted_relevant_parent_uid_count","post_freeze_relevant_rows_detected",
+                  "post_freeze_relevant_row_count","forensic_db_provenance_sha256",
+                  "db_writes","neon_mutations","binding_changes"
               )}
           else:
               compact={k:obj.get(k) for k in (
-                  "verdict","first_failing_gate","affected_count","parent_corpus_sha_match",
+                  "verdict","first_failing_gate","affected_count","relevant_parent_slice_match",
+                  "accepted_parent_corpus_sha256","current_parent_corpus_sha256","global_parent_corpus_drift",
                   "provenance_source_that_failed","db_writes","neon_mutations","binding_changes",
                   "safe_continuation_point"
               )}
