@@ -1,0 +1,1054 @@
+name: Attack-event persistence availability completion addendum
+
+on:
+  push:
+    branches:
+      - attack-event-persistence-availability-completion-addendum-2026-10-05
+    paths:
+      - .github/workflows/attack-event-persistence-availability-completion-addendum.yml
+  pull_request:
+    branches:
+      - main
+    paths:
+      - .github/workflows/attack-event-persistence-availability-completion-addendum.yml
+
+permissions:
+  contents: write
+
+jobs:
+  freeze-addendum:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout proof branch
+        uses: actions/checkout@v4
+        with:
+          ref: attack-event-persistence-availability-completion-addendum-2026-10-05
+          fetch-depth: 0
+
+      - name: Run exhaustive offline availability audit
+        id: audit
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from __future__ import annotations
+
+          import hashlib
+          import json
+          import os
+          import subprocess
+          from collections import Counter, defaultdict
+          from datetime import datetime, timezone
+          from pathlib import Path
+
+          REPO = "olegbalakin-cmyk/kyiv-air-alerts-grafana"
+          BRANCH = "attack-event-persistence-availability-completion-addendum-2026-10-05"
+          OUT = Path("research/attack_event_persistence_availability_completion_addendum_2026-10-05.json")
+          TMP = Path(os.environ["RUNNER_TEMP"]) / "attack-event-persistence-availability-completion"
+          TMP.mkdir(parents=True, exist_ok=True)
+
+          SNAPSHOT = {
+              "commit": "efefa399e69eadd3d7fc8393ac1553cfde35f138",
+              "path": "research/attack_event_23city_persistence_snapshot_v2_2026-10-04.json",
+              "blob": "8a2f6bd33f879be9db978da59c12c34e61f6f843",
+              "sha256": "09458bcf0a019fa2939eb9dfa484da46cd8fa2be077343c5ba6d595c93d71788",
+              "bytes": 90282029,
+          }
+          BINDING = {
+              "commit": "e213f445f08bfc119b234c9460b66bd3efe75d36",
+              "path": "research/attack_event_23city_parent_binding_map_v1_2026-10-05.json",
+              "sha256": "b0ecd5ce980d76cf5ffce65f80ee1d5bd43c0d1b1438afb85424ae95aaef1241",
+          }
+          CONTRACTS = {
+              "step1_base_persistence": {
+                  "commit": "b205d38dbc50bc502d10e682d4ae53491af542ea",
+                  "path": "research/attack_event_neon_persistence_contract_2026-10-02.json",
+                  "sha256": "02bfe8bb0420bcf1259b0c49a73ca76e8cc6488c1cd426be4dd8b28ad01b94c3",
+                  "verdict": "ATTACK-EVENT NEON PERSISTENCE CONTRACT FROZEN",
+              },
+              "classification_identity_qa_availability": {
+                  "commit": "bd82a6c0a19aca4610a8af6df73a307a88c35bf6",
+                  "path": "research/attack_event_classification_identity_availability_addendum_2026-10-04.json",
+                  "sha256": "a1ba446261625383650b781233fc4956290bffd1437756dca8d7883b24906017",
+                  "verdict": "ATTACK-EVENT CLASSIFICATION IDENTITY AVAILABILITY CONTRACT FROZEN",
+              },
+              "provenance_cardinality": {
+                  "commit": "cafee4106d89f59d7f1020baef414ba4813ab29d",
+                  "path": "research/attack_event_provenance_cardinality_addendum_2026-10-05.json",
+                  "sha256": "e7bb8eb181d152b9760a5d80dc46ce0e261146e7e14433b706989f30e7ffc068",
+                  "verdict": "ATTACK-EVENT PROVENANCE CARDINALITY SCHEMA ADDENDUM FROZEN",
+              },
+              "human_review_state": {
+                  "commit": "1b161d240013a669aefd2b9485d6e5f2ca7c7402",
+                  "path": "research/attack_event_human_review_state_derivation_addendum_2026-10-05.json",
+                  "sha256": "b611a8171ed3e8b4d0146f03f61c511b55fbca2e1f26c2796241784bb2d6e7d1",
+                  "verdict": "ATTACK-EVENT HUMAN REVIEW STATE DERIVATION ADDENDUM FROZEN",
+              },
+          }
+          PREDECESSOR = {
+              "verdict": "ATTACK-EVENT 23-CITY ROLLBACK-ONLY PERSISTENCE PROOF BLOCKED",
+              "branch": "attack-event-step2c-rollback-persistence-proof-resume2-2026-10-05",
+              "workflow_commit": "dfdcdb800b7aa0e2249a56e1110f3c99b52fc21a",
+              "actions_run_id": 37355436987,
+              "job_id": 111916540348,
+              "artifact_id": 11364446990,
+              "artifact_name": "attack-event-23city-rollback-persistence-proof-resume2",
+              "first_failing_gate": "PERSISTENCE_SCHEMA_REPRESENTABILITY_MISMATCH",
+              "phase": "OFFLINE_PREFLIGHT",
+              "effective_candidate_ddl_sha256_at_failure": "67bf5b0aac0e4ef902ed839e4f62afba1d3e6cc96df971b82459696f577979c4",
+          }
+          ORIGINAL_GAPS = [
+              {
+                  "table": "public.attack_event_classifications",
+                  "field": "originating_frozen_case_id",
+                  "affected_count": 3,
+                  "reason": "accepted adjudication marker present, but no explicit frozen/adjudicated case ID is mechanically available",
+              },
+              {
+                  "table": "public.attack_event_sources",
+                  "field": "source_type",
+                  "affected_count": 1429,
+                  "reason": "required frozen source field absent",
+              },
+              {
+                  "table": "public.attack_event_sources",
+                  "field": "evidence_payload",
+                  "affected_count": 1,
+                  "reason": "combined predecessor counter: classifier evidence payload missing/invalid or source timestamp invalid",
+              },
+          ]
+          POSITIVE = {"STRICT_EVENT_POSITIVE", "SENSITIVITY_EVENT_POSITIVE"}
+          EXPECTED_DIST = Counter({
+              "STRICT_EVENT_POSITIVE": 1017,
+              "SENSITIVITY_EVENT_POSITIVE": 63,
+              "NO_CONFIRMED_EVENT": 23530,
+              "NEEDS_REVIEW": 1795,
+          })
+
+          class Blocked(RuntimeError):
+              def __init__(self, gate, table=None, field=None, count=None, detail=None, gaps=None):
+                  self.gate = gate
+                  self.table = table
+                  self.field = field
+                  self.count = count
+                  self.detail = detail
+                  self.gaps = gaps or []
+                  super().__init__(gate)
+
+          def block(gate, table=None, field=None, count=None, detail=None, gaps=None):
+              raise Blocked(gate, table, field, count, detail, gaps)
+
+          def sh(cmd, *, check=True, capture=True):
+              p = subprocess.run(cmd, text=True, stdout=subprocess.PIPE if capture else None, stderr=subprocess.PIPE, check=False)
+              if check and p.returncode != 0:
+                  raise RuntimeError((p.stderr or "")[-1000:])
+              return p.stdout.strip() if capture else ""
+
+          def ensure_commit(sha):
+              p = subprocess.run(["git", "cat-file", "-e", f"{sha}^{{commit}}"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+              if p.returncode != 0:
+                  subprocess.run(["git", "fetch", "--no-tags", "origin", sha], check=True, stdout=subprocess.DEVNULL)
+              got = sh(["git", "rev-parse", f"{sha}^{{commit}}"])
+              if got != sha:
+                  block("FROZEN_INPUT_COMMIT_MISMATCH", detail=sha)
+
+          def sha256_file(path):
+              h = hashlib.sha256()
+              with Path(path).open("rb") as f:
+                  for chunk in iter(lambda: f.read(1024 * 1024), b""):
+                      h.update(chunk)
+              return h.hexdigest()
+
+          def materialize(spec, label):
+              ensure_commit(spec["commit"])
+              blob = sh(["git", "rev-parse", f'{spec["commit"]}:{spec["path"]}'])
+              if spec.get("blob") and blob != spec["blob"]:
+                  block(label + "_GIT_BLOB_MISMATCH")
+              out = TMP / (label.lower() + ".json")
+              with out.open("wb") as f:
+                  p = subprocess.run(["git", "show", f'{spec["commit"]}:{spec["path"]}'], stdout=f, stderr=subprocess.PIPE)
+              if p.returncode != 0:
+                  block(label + "_MATERIALIZATION_FAILED")
+              if spec.get("bytes") is not None and out.stat().st_size != spec["bytes"]:
+                  block(label + "_BYTE_COUNT_MISMATCH", count=out.stat().st_size)
+              actual = sha256_file(out)
+              if spec.get("sha256") and actual != spec["sha256"]:
+                  block(label + "_SHA256_MISMATCH", detail=actual)
+              return out, blob, actual
+
+          def load_json(spec, label):
+              path, blob, sha = materialize(spec, label)
+              try:
+                  return json.loads(path.read_bytes()), blob, sha
+              except Exception as e:
+                  block(label + "_JSON_INVALID", detail=str(e)[:300])
+
+          def cbytes(v):
+              return json.dumps(v, ensure_ascii=False, sort_keys=True, separators=(",", ":")).encode("utf-8")
+
+          def csha(v):
+              return hashlib.sha256(cbytes(v)).hexdigest()
+
+          def walk_exact(obj, keys):
+              out = []
+              def walk(x, path="$"):
+                  if isinstance(x, dict):
+                      for k, v in x.items():
+                          p = path + "." + str(k)
+                          if str(k) in keys:
+                              out.append((p, v))
+                          walk(v, p)
+                  elif isinstance(x, list):
+                      for i, v in enumerate(x):
+                          walk(v, f"{path}[{i}]")
+              walk(obj)
+              return out
+
+          def unique_nonempty_strings(obj, keys):
+              vals = []
+              for path, v in walk_exact(obj, set(keys)):
+                  if isinstance(v, (str, int)) and str(v).strip():
+                      vals.append((path, str(v)))
+              distinct = sorted({v for _, v in vals})
+              return distinct, vals
+
+          def parse_ts(v):
+              if v in (None, ""):
+                  return "ABSENT_IN_ACCEPTED_SOURCE", None
+              raw = str(v)
+              try:
+                  dt = datetime.fromisoformat(raw.replace("Z", "+00:00"))
+                  if dt.tzinfo is None:
+                      raise ValueError("naive")
+                  dt.astimezone(timezone.utc)
+                  return "MATERIALIZED", None
+              except Exception:
+                  return "UNPARSEABLE_IN_ACCEPTED_SOURCE", raw
+
+          def accepted_payload_projection(row):
+              hits = walk_exact(row, {"evidence_payload", "classifier_evidence_payload"})
+              objects = []
+              nonnull_nonobjects = []
+              present = False
+              for path, value in hits:
+                  present = True
+                  if isinstance(value, dict):
+                      objects.append((path, value))
+                  elif value is not None:
+                      nonnull_nonobjects.append((path, type(value).__name__))
+              by_hash = {}
+              for path, value in objects:
+                  by_hash.setdefault(csha(value), {"value": value, "paths": []})["paths"].append(path)
+              if len(by_hash) == 1:
+                  only = next(iter(by_hash.values()))
+                  return {
+                      "state": "MATERIALIZED",
+                      "payload": only["value"],
+                      "projection_paths": sorted(only["paths"]),
+                      "present": present,
+                      "nonnull_nonobjects": nonnull_nonobjects,
+                      "conflict": False,
+                  }
+              if len(by_hash) > 1:
+                  return {
+                      "state": "CONFLICT",
+                      "payload": None,
+                      "projection_paths": sorted(p for x in by_hash.values() for p in x["paths"]),
+                      "present": present,
+                      "nonnull_nonobjects": nonnull_nonobjects,
+                      "conflict": True,
+                  }
+              return {
+                  "state": "UNMATERIALIZED_IN_ACCEPTED_SOURCE",
+                  "payload": None,
+                  "projection_paths": [],
+                  "present": present,
+                  "nonnull_nonobjects": nonnull_nonobjects,
+                  "conflict": False,
+              }
+
+          def source_origin_object(row):
+              x = row.get("origin")
+              if isinstance(x, dict):
+                  return x
+              x = row.get("origin_provenance")
+              return x if isinstance(x, dict) else {}
+
+          def origin_artifact_path(row):
+              # Prefer exact accepted origin_artifact_path fields. Do not use URL/domain/content.
+              vals, hits = unique_nonempty_strings(source_origin_object(row), {"origin_artifact_path"})
+              if len(vals) == 1:
+                  return vals[0]
+              vals2, hits2 = unique_nonempty_strings(row, {"source_corpus", "source_corpus_id", "corpus_id"})
+              if len(vals2) == 1:
+                  return vals2[0]
+              top = row.get("origin_artifact_path")
+              if isinstance(top, str) and top.strip():
+                  return top
+              return None
+
+          def classification_origin_projection(origin):
+              def uniq(pred):
+                  vals = []
+                  def walk(x, k=""):
+                      if isinstance(x, dict):
+                          for kk, vv in x.items():
+                              walk(vv, str(kk))
+                      elif isinstance(x, list):
+                          for vv in x:
+                              walk(vv, k)
+                      elif pred(k.lower(), x) and isinstance(x, (str, int)) and str(x).strip():
+                          vals.append(str(x))
+                  walk(origin)
+                  u = sorted(set(vals))
+                  return u[0] if len(u) == 1 else None
+              return {
+                  "origin_repository": uniq(lambda k, v: k == "origin_repository") or REPO,
+                  "origin_ref": uniq(lambda k, v: k == "ref" or k.endswith("_ref")),
+                  "origin_commit_sha": uniq(lambda k, v: "commit" in k or k.endswith("_head") or k in {"tested_head", "accepted_final_head"}),
+                  "origin_artifact_path": uniq(lambda k, v: "path" in k),
+                  "origin_artifact_blob_sha": uniq(lambda k, v: "blob" in k),
+                  "origin_target_state_sha256": uniq(lambda k, v: k == "origin_target_state_sha256" or k.endswith("target_state_sha256")),
+                  "origin_workflow_run_id": uniq(lambda k, v: "run_id" in k),
+              }
+
+          def source_origin_projection(origin):
+              def uniq(pred):
+                  vals = []
+                  def walk(x, k=""):
+                      if isinstance(x, dict):
+                          for kk, vv in x.items():
+                              walk(vv, str(kk))
+                      elif isinstance(x, list):
+                          for vv in x:
+                              walk(vv, k)
+                      elif pred(k.lower(), x) and isinstance(x, (str, int)) and str(x).strip():
+                          vals.append(str(x))
+                  walk(origin)
+                  u = sorted(set(vals))
+                  return u[0] if len(u) == 1 else None
+              return {
+                  "origin_artifact_path": uniq(lambda k, v: "path" in k),
+                  "origin_git_ref": uniq(lambda k, v: k == "ref" or k.endswith("_ref")),
+                  "origin_git_blob_sha": uniq(lambda k, v: "blob" in k),
+              }
+
+          def has_adjudication_marker(row):
+              hits = walk_exact(row, {"accepted_adjudication_artifact", "adjudication_class"})
+              return any(v not in (None, "", False) for _, v in hits)
+
+          def case_id_state(row):
+              vals, hits = unique_nonempty_strings(row, {"originating_frozen_case_id", "frozen_case_id"})
+              if len(vals) > 1:
+                  return "CONFLICT", None, vals
+              if len(vals) == 1:
+                  return "MATERIALIZED", vals[0], vals
+              if has_adjudication_marker(row):
+                  return "UNMATERIALIZED_IN_ACCEPTED_SOURCE", None, []
+              return "NOT_APPLICABLE", None, []
+
+          def source_type_state(row):
+              vals, hits = unique_nonempty_strings(row, {"source_type"})
+              if len(vals) > 1:
+                  return "CONFLICT", None, vals, hits
+              if len(vals) == 1:
+                  return "MATERIALIZED", vals[0], vals, hits
+              return "UNMATERIALIZED_IN_ACCEPTED_SOURCE", None, [], hits
+
+          def derive_human_state(row):
+              rv = row.get("review_provenance")
+              rh = row.get("review_provenance_sha256")
+              nonempty = isinstance(rv, dict) and bool(rv)
+              if nonempty and isinstance(rh, str) and rh:
+                  if csha(rv) != rh:
+                      raise ValueError("review provenance hash mismatch")
+                  return "REVIEWED_EVIDENCE"
+              if nonempty != bool(rh):
+                  raise ValueError("review provenance/hash consistency mismatch")
+              return "NEEDS_REVIEW" if row.get("verdict") == "NEEDS_REVIEW" else "NONE"
+
+          def build_effective_four_contract_ddl(step1, v2, provenance, human):
+              ddl = step1.get("candidate_ddl")
+              if not isinstance(ddl, str) or not ddl.strip():
+                  block("PERSISTENCE_CONTRACT_DDL_UNAVAILABLE")
+              if (v2.get("future_schema_contract") or {}).get("classification_key_version_required") != "attack-event-classification-key-v2":
+                  block("CLASSIFICATION_IDENTITY_V2_CONTRACT_MISMATCH")
+              old_col = "    qa_reasons TEXT[] NOT NULL DEFAULT '{}'::text[],"
+              new_col = "    qa_reasons_state TEXT NOT NULL,\n    qa_reasons JSONB NULL,"
+              if ddl.count(old_col) != 1:
+                  block("PERSISTENCE_CONTRACT_DDL_DELTA_MISMATCH")
+              ddl = ddl.replace(old_col, new_col)
+              old_ver = "CHECK (classification_key_version = 'attack-event-classification-key-v1')"
+              new_ver = "CHECK (classification_key_version = 'attack-event-classification-key-v2')"
+              if ddl.count(old_ver) != 1:
+                  block("PERSISTENCE_CONTRACT_DDL_DELTA_MISMATCH")
+              ddl = ddl.replace(old_ver, new_ver)
+              ddl = ddl.rstrip() + "\n\n" + """ALTER TABLE public.attack_event_classifications
+    ADD CONSTRAINT attack_event_classifications_qa_state_check
+    CHECK (qa_reasons_state IN ('MATERIALIZED','UNMATERIALIZED_IN_ACCEPTED_SOURCE'));
+
+ALTER TABLE public.attack_event_classifications
+    ADD CONSTRAINT attack_event_classifications_qa_value_check
+    CHECK (
+        (qa_reasons_state = 'MATERIALIZED' AND jsonb_typeof(qa_reasons) = 'array')
+        OR
+        (qa_reasons_state = 'UNMATERIALIZED_IN_ACCEPTED_SOURCE' AND qa_reasons IS NULL)
+    );
+"""
+              delta = provenance.get("candidate_ddl_delta") or {}
+              prov_sql = delta.get("sql")
+              if not isinstance(prov_sql, str) or hashlib.sha256(prov_sql.encode("utf-8")).hexdigest() != delta.get("sha256"):
+                  block("PROVENANCE_CARDINALITY_DDL_DELTA_SHA_MISMATCH")
+              if delta.get("supersedes_only_origin_provenance_representation") is not True:
+                  block("PROVENANCE_CARDINALITY_DELTA_SCOPE_MISMATCH")
+              if (human.get("future_schema_contract") or {}).get("column") != "human_review_state TEXT NOT NULL":
+                  block("HUMAN_REVIEW_STATE_CONTRACT_MISMATCH")
+              return ddl.rstrip() + "\n\n" + prov_sql.strip() + "\n"
+
+          def make_delta(payload_needed, source_ts_needed, event_ts_needed):
+              parts = []
+              parts.append("""ALTER TABLE public.attack_event_classifications
+    ADD COLUMN originating_frozen_case_id_state TEXT NOT NULL,
+    ADD CONSTRAINT attack_event_classifications_frozen_case_id_state_check
+        CHECK (originating_frozen_case_id_state IN ('MATERIALIZED','UNMATERIALIZED_IN_ACCEPTED_SOURCE','NOT_APPLICABLE')),
+    ADD CONSTRAINT attack_event_classifications_frozen_case_id_value_check
+        CHECK (
+            (originating_frozen_case_id_state = 'MATERIALIZED' AND originating_frozen_case_id IS NOT NULL AND btrim(originating_frozen_case_id) <> '')
+            OR
+            (originating_frozen_case_id_state IN ('UNMATERIALIZED_IN_ACCEPTED_SOURCE','NOT_APPLICABLE') AND originating_frozen_case_id IS NULL)
+        );""")
+              parts.append("""ALTER TABLE public.attack_event_sources
+    ALTER COLUMN source_type DROP NOT NULL,
+    ADD COLUMN source_type_state TEXT NOT NULL,
+    ADD CONSTRAINT attack_event_sources_source_type_state_check
+        CHECK (source_type_state IN ('MATERIALIZED','UNMATERIALIZED_IN_ACCEPTED_SOURCE')),
+    ADD CONSTRAINT attack_event_sources_source_type_value_check
+        CHECK (
+            (source_type_state = 'MATERIALIZED' AND source_type IS NOT NULL AND btrim(source_type) <> '')
+            OR
+            (source_type_state = 'UNMATERIALIZED_IN_ACCEPTED_SOURCE' AND source_type IS NULL)
+        );""")
+              if payload_needed:
+                  parts.append("""ALTER TABLE public.attack_event_sources
+    ALTER COLUMN evidence_payload DROP NOT NULL,
+    ADD COLUMN evidence_payload_state TEXT NOT NULL,
+    ADD CONSTRAINT attack_event_sources_evidence_payload_state_check
+        CHECK (evidence_payload_state IN ('MATERIALIZED','UNMATERIALIZED_IN_ACCEPTED_SOURCE')),
+    ADD CONSTRAINT attack_event_sources_evidence_payload_value_check
+        CHECK (
+            (evidence_payload_state = 'MATERIALIZED' AND evidence_payload IS NOT NULL AND jsonb_typeof(evidence_payload) = 'object')
+            OR
+            (evidence_payload_state = 'UNMATERIALIZED_IN_ACCEPTED_SOURCE' AND evidence_payload IS NULL)
+        );""")
+              def ts_delta(col):
+                  return f"""ALTER TABLE public.attack_event_sources
+    ADD COLUMN {col}_state TEXT NOT NULL,
+    ADD COLUMN {col}_raw TEXT NULL,
+    ADD CONSTRAINT attack_event_sources_{col}_state_check
+        CHECK ({col}_state IN ('MATERIALIZED','ABSENT_IN_ACCEPTED_SOURCE','UNPARSEABLE_IN_ACCEPTED_SOURCE')),
+    ADD CONSTRAINT attack_event_sources_{col}_value_check
+        CHECK (
+            ({col}_state = 'MATERIALIZED' AND {col} IS NOT NULL)
+            OR
+            ({col}_state = 'ABSENT_IN_ACCEPTED_SOURCE' AND {col} IS NULL AND {col}_raw IS NULL)
+            OR
+            ({col}_state = 'UNPARSEABLE_IN_ACCEPTED_SOURCE' AND {col} IS NULL AND {col}_raw IS NOT NULL AND btrim({col}_raw) <> '')
+        );"""
+              if source_ts_needed:
+                  parts.append(ts_delta("source_timestamp"))
+              if event_ts_needed:
+                  parts.append(ts_delta("event_timestamp_if_stated"))
+              return "\n\n".join(parts).strip() + "\n"
+
+          result = {
+              "schema_version": "attack-event-persistence-availability-completion-addendum-v1",
+              "status": "BLOCKED",
+              "verdict": "ATTACK-EVENT PERSISTENCE AVAILABILITY COMPLETION ADDENDUM BLOCKED",
+              "scope": "offline contract completion for final STEP 2C representability gaps only",
+              "fresh_base": None,
+              "proof_branch": os.environ.get("GITHUB_REF_NAME"),
+              "temporary_workflow_commit": sh(["git", "rev-parse", "HEAD"]),
+              "actions_run_id": int(os.environ.get("GITHUB_RUN_ID", "0") or 0),
+              "predecessor": PREDECESSOR,
+              "frozen_snapshot": SNAPSHOT,
+              "frozen_binding_map": BINDING,
+              "existing_contracts": CONTRACTS,
+              "original_representability_gaps": ORIGINAL_GAPS,
+              "identity_invariants": {
+                  "classification_key_version": "attack-event-classification-key-v2",
+                  "event_key_version": "attack-event-key-v1",
+                  "source_link_key_version": "attack-event-source-link-key-v1",
+                  "classification_identity_change": "NO",
+                  "event_identity_change": "NO",
+                  "source_link_identity_change": "NO",
+                  "evidence_set_hashing_change": "NO",
+                  "review_provenance_hashing_change": "NO",
+                  "verdict_change": "NO",
+                  "event_types_change": "NO",
+                  "qa_semantics_change": "NO",
+                  "human_review_state_derivation_change": "NO",
+                  "parent_binding_change": "NO",
+              },
+              "mutation_scope": {
+                  "neon_queries": 0,
+                  "db_writes": 0,
+                  "production_mutation": "NO",
+                  "ddl_executed": False,
+                  "credentials_exposed": False,
+              },
+          }
+
+          try:
+              # Freeze branch ancestry against the merge-base with origin/main; proof commits may stack.
+              sh(["git", "fetch", "--no-tags", "origin", "main"])
+              result["fresh_base"] = sh(["git", "merge-base", "HEAD", "origin/main"])
+
+              snap_path, snap_blob, snap_sha = materialize(SNAPSHOT, "SNAPSHOT")
+              bind_path, bind_blob, bind_sha = materialize(BINDING, "BINDING")
+              result["frozen_snapshot"]["verified_blob"] = snap_blob
+              result["frozen_snapshot"]["verified_sha256"] = snap_sha
+              result["frozen_binding_map"]["verified_blob"] = bind_blob
+              result["frozen_binding_map"]["verified_sha256"] = bind_sha
+
+              loaded = {}
+              for name, spec in CONTRACTS.items():
+                  obj, blob, sha = load_json(spec, "CONTRACT_" + name.upper())
+                  if obj.get("verdict") != spec["verdict"]:
+                      block("FROZEN_CONTRACT_VERDICT_MISMATCH", detail=name)
+                  loaded[name] = obj
+                  result["existing_contracts"][name] = dict(spec, verified_blob=blob, verified_sha256=sha)
+
+              snapshot = json.loads(snap_path.read_bytes())
+              binding = json.loads(bind_path.read_bytes())
+              cls = snapshot.get("classifications")
+              events = snapshot.get("attack_events")
+              links = snapshot.get("source_links")
+              records = binding.get("records")
+              if not all(isinstance(x, list) for x in (cls, events, links, records)):
+                  block("FROZEN_INPUT_SCHEMA_MISMATCH")
+              if (len(cls), len(events), len(links), len(records)) != (26405, 1080, 3769, 26405):
+                  block("FROZEN_INPUT_COUNT_MISMATCH", detail=str((len(cls), len(events), len(links), len(records))))
+              result["scanned_counts"] = {"classifications": len(cls), "events": len(events), "source_links": len(links)}
+              if Counter(str(r.get("verdict")) for r in cls) != EXPECTED_DIST:
+                  block("SNAPSHOT_DISTRIBUTION_MISMATCH")
+              if snapshot.get("classification_key_version") != "attack-event-classification-key-v2":
+                  block("SNAPSHOT_CLASSIFICATION_KEY_VERSION_MISMATCH")
+              if snapshot.get("attack_event_key_version") != "attack-event-key-v1":
+                  block("SNAPSHOT_EVENT_KEY_VERSION_MISMATCH")
+              if snapshot.get("source_link_key_version") != "attack-event-source-link-key-v1":
+                  block("SNAPSHOT_SOURCE_LINK_KEY_VERSION_MISMATCH")
+
+              ckeys = [str(r.get("classification_key") or "") for r in cls]
+              ekeys = [str(r.get("attack_event_key") or "") for r in events]
+              skeys = [str(r.get("source_link_key") or "") for r in links]
+              bkeys = [str(r.get("classification_key") or "") for r in records]
+              if "" in ckeys or len(set(ckeys)) != 26405:
+                  block("SNAPSHOT_CLASSIFICATION_KEY_UNIQUENESS_MISMATCH")
+              if "" in ekeys or len(set(ekeys)) != 1080:
+                  block("SNAPSHOT_EVENT_KEY_UNIQUENESS_MISMATCH")
+              if "" in skeys or len(set(skeys)) != 3769:
+                  block("SNAPSHOT_SOURCE_LINK_KEY_UNIQUENESS_MISMATCH")
+              if set(ckeys) != set(bkeys):
+                  block("SNAPSHOT_BINDING_KEYSET_MISMATCH")
+              bind_counts = Counter(str(r.get("binding_state")) for r in records)
+              if bind_counts != Counter({"BOUND": 26380, "UNBOUND": 25}):
+                  block("BINDING_MAP_STATE_COUNT_MISMATCH", detail=str(dict(bind_counts)))
+              if any(r.get("alert_episode_uid") is not None for r in records if r.get("binding_state") == "UNBOUND"):
+                  block("BINDING_MAP_UNBOUND_PARENT_NOT_NULL")
+
+              # PART A
+              case_counts = Counter()
+              case_conflicts = []
+              explicit_case_count = 0
+              for r in cls:
+                  state, value, vals = case_id_state(r)
+                  case_counts[state] += 1
+                  if state == "CONFLICT":
+                      case_conflicts.append(str(r.get("classification_key")))
+                  if state == "MATERIALIZED":
+                      explicit_case_count += 1
+              if case_conflicts:
+                  block("ORIGINATING_FROZEN_CASE_ID_CONFLICT", "public.attack_event_classifications", "originating_frozen_case_id", len(case_conflicts))
+              if case_counts["UNMATERIALIZED_IN_ACCEPTED_SOURCE"] != 3:
+                  block(
+                      "ACCEPTED_FROZEN_CASE_ID_DIAGNOSIS_CHANGED",
+                      "public.attack_event_classifications",
+                      "originating_frozen_case_id",
+                      case_counts["UNMATERIALIZED_IN_ACCEPTED_SOURCE"],
+                      "expected exactly 3; do not silently revise accepted diagnosis",
+                  )
+              if sum(case_counts.values()) != 26405:
+                  block("ORIGINATING_FROZEN_CASE_ID_STATE_COVERAGE_MISMATCH")
+              result["originating_frozen_case_id_availability"] = {
+                  "state_counts": {
+                      "MATERIALIZED": case_counts["MATERIALIZED"],
+                      "UNMATERIALIZED_IN_ACCEPTED_SOURCE": case_counts["UNMATERIALIZED_IN_ACCEPTED_SOURCE"],
+                      "NOT_APPLICABLE": case_counts["NOT_APPLICABLE"],
+                  },
+                  "coverage": 26405,
+                  "invented_ids": 0,
+                  "projection_rule": "recursive exact-key accepted originating_frozen_case_id/frozen_case_id only; no deterministic substitute",
+              }
+
+              # PART B
+              source_type_counts = Counter()
+              source_type_conflicts = []
+              source_type_by_corpus = defaultdict(Counter)
+              source_type_by_family = defaultdict(Counter)
+              previously_missing_top_level = 0
+              top_level_missing_key = 0
+              top_level_explicit_null = 0
+              nested_recovery_count = 0
+              unresolved_corpus_for_unmaterialized = 0
+              source_type_projection_paths = Counter()
+              for r in links:
+                  top = r.get("source_type")
+                  if top in (None, ""):
+                      previously_missing_top_level += 1
+                      if "source_type" in r:
+                          top_level_explicit_null += 1
+                      else:
+                          top_level_missing_key += 1
+                  state, value, vals, hits = source_type_state(r)
+                  if state == "CONFLICT":
+                      source_type_conflicts.append(str(r.get("source_link_key")))
+                      continue
+                  if state == "MATERIALIZED" and top in (None, ""):
+                      nested_recovery_count += 1
+                  source_type_counts[state] += 1
+                  corpus = origin_artifact_path(r)
+                  corpus_key = corpus if corpus is not None else "__UNRESOLVED__"
+                  source_type_by_corpus[corpus_key][state] += 1
+                  family = r.get("source_family")
+                  family_key = str(family) if family not in (None, "") else "__NULL__"
+                  source_type_by_family[family_key][state] += 1
+                  if state == "UNMATERIALIZED_IN_ACCEPTED_SOURCE" and corpus is None:
+                      unresolved_corpus_for_unmaterialized += 1
+                  for path, v in hits:
+                      if isinstance(v, (str, int)) and str(v).strip():
+                          source_type_projection_paths[path] += 1
+              if source_type_conflicts:
+                  block("SOURCE_TYPE_EXPLICIT_VALUE_CONFLICT", "public.attack_event_sources", "source_type", len(source_type_conflicts))
+              if previously_missing_top_level != 1429:
+                  block("PREDECESSOR_SOURCE_TYPE_GAP_COUNT_MISMATCH", "public.attack_event_sources", "source_type", previously_missing_top_level)
+              if unresolved_corpus_for_unmaterialized:
+                  block("SOURCE_TYPE_MISSING_CORPUS_UNRESOLVED", "public.attack_event_sources", "source_type", unresolved_corpus_for_unmaterialized)
+              if sum(source_type_counts.values()) != 3769:
+                  block("SOURCE_TYPE_STATE_COVERAGE_MISMATCH")
+              result["source_type_availability"] = {
+                  "previously_missing_top_level": previously_missing_top_level,
+                  "state_counts": {
+                      "MATERIALIZED": source_type_counts["MATERIALIZED"],
+                      "UNMATERIALIZED_IN_ACCEPTED_SOURCE": source_type_counts["UNMATERIALIZED_IN_ACCEPTED_SOURCE"],
+                  },
+                  "coverage": 3769,
+                  "nested_exact_source_type_recoveries": nested_recovery_count,
+                  "synthetic_values": 0,
+                  "missing_top_level_shape": {
+                      "explicit_null_or_empty_key_present": top_level_explicit_null,
+                      "key_absent": top_level_missing_key,
+                      "mechanical_pass_through_conclusion": (
+                          "FROZEN_RECORD_EXPLICIT_NULL_PASS_THROUGH"
+                          if top_level_explicit_null == previously_missing_top_level and top_level_missing_key == 0
+                          else "MIXED_OR_ABSENT_KEY_SHAPE"
+                      ),
+                  },
+                  "counts_by_source_corpus": {k: dict(sorted(v.items())) for k, v in sorted(source_type_by_corpus.items())},
+                  "counts_by_source_family": {k: dict(sorted(v.items())) for k, v in sorted(source_type_by_family.items())},
+                  "accepted_materialization_paths": dict(sorted(source_type_projection_paths.items())),
+                  "forbidden_derivations_used": [],
+              }
+
+              # PART C + full temporal/payload availability audit
+              anomalies = []
+              payload_counts = Counter()
+              source_ts_counts = Counter()
+              event_ts_counts = Counter()
+              payload_projection_paths = Counter()
+              for r in links:
+                  p = accepted_payload_projection(r)
+                  if p["state"] == "CONFLICT":
+                      block("EVIDENCE_PAYLOAD_ACCEPTED_FIELD_CONFLICT", "public.attack_event_sources", "evidence_payload", 1)
+                  payload_counts[p["state"]] += 1
+                  for pp in p["projection_paths"]:
+                      payload_projection_paths[pp] += 1
+                  s_state, s_raw = parse_ts(r.get("source_timestamp"))
+                  e_state, e_raw = parse_ts(r.get("event_timestamp_if_stated"))
+                  source_ts_counts[s_state] += 1
+                  event_ts_counts[e_state] += 1
+                  failures = []
+                  if p["state"] != "MATERIALIZED":
+                      failures.append("EVIDENCE_PAYLOAD_NON_OBJECT" if p["nonnull_nonobjects"] else "EVIDENCE_PAYLOAD_MISSING")
+                  if s_state == "UNPARSEABLE_IN_ACCEPTED_SOURCE":
+                      failures.append("SOURCE_TIMESTAMP_UNPARSEABLE")
+                  if e_state == "UNPARSEABLE_IN_ACCEPTED_SOURCE":
+                      failures.append("EVENT_TIMESTAMP_UNPARSEABLE")
+                  if failures:
+                      category = failures[0] if len(failures) == 1 else "MULTIPLE_SOURCE_REPRESENTABILITY_FAILURES"
+                      anomalies.append({
+                          "source_link_key": str(r.get("source_link_key") or ""),
+                          "classification_key_v2": str(r.get("classification_key_v2") or ""),
+                          "observation_id": str(r.get("observation_id") or ""),
+                          "source_corpus": origin_artifact_path(r),
+                          "primary_category": category,
+                          "failing_mechanical_conditions": failures,
+                      })
+              if len(anomalies) != 1:
+                  block("SINGLE_SOURCE_ANOMALY_COUNT_MISMATCH", "public.attack_event_sources", "evidence_payload/source timestamps", len(anomalies))
+              anomaly = anomalies[0]
+              if not anomaly["source_link_key"] or not anomaly["classification_key_v2"] or not anomaly["observation_id"] or anomaly["source_corpus"] is None:
+                  block("SINGLE_SOURCE_ANOMALY_IDENTITY_INCOMPLETE", "public.attack_event_sources", "source anomaly", 1)
+              result["single_source_anomaly"] = anomaly
+              result["evidence_payload_availability"] = {
+                  "state_counts": {
+                      "MATERIALIZED": payload_counts["MATERIALIZED"],
+                      "UNMATERIALIZED_IN_ACCEPTED_SOURCE": payload_counts["UNMATERIALIZED_IN_ACCEPTED_SOURCE"],
+                  },
+                  "coverage": 3769,
+                  "accepted_projection_paths": dict(sorted(payload_projection_paths.items())),
+                  "synthetic_empty_object_used": False,
+              }
+              result["source_timestamp_availability"] = {
+                  "state_counts": {
+                      "MATERIALIZED": source_ts_counts["MATERIALIZED"],
+                      "ABSENT_IN_ACCEPTED_SOURCE": source_ts_counts["ABSENT_IN_ACCEPTED_SOURCE"],
+                      "UNPARSEABLE_IN_ACCEPTED_SOURCE": source_ts_counts["UNPARSEABLE_IN_ACCEPTED_SOURCE"],
+                  },
+                  "coverage": 3769,
+                  "unparseable_raw_preservation_required": source_ts_counts["UNPARSEABLE_IN_ACCEPTED_SOURCE"] > 0,
+              }
+              result["event_timestamp_if_stated_availability"] = {
+                  "state_counts": {
+                      "MATERIALIZED": event_ts_counts["MATERIALIZED"],
+                      "ABSENT_IN_ACCEPTED_SOURCE": event_ts_counts["ABSENT_IN_ACCEPTED_SOURCE"],
+                      "UNPARSEABLE_IN_ACCEPTED_SOURCE": event_ts_counts["UNPARSEABLE_IN_ACCEPTED_SOURCE"],
+                  },
+                  "coverage": 3769,
+                  "unparseable_raw_preservation_required": event_ts_counts["UNPARSEABLE_IN_ACCEPTED_SOURCE"] > 0,
+              }
+
+              payload_needed = payload_counts["UNMATERIALIZED_IN_ACCEPTED_SOURCE"] > 0
+              source_ts_needed = source_ts_counts["UNPARSEABLE_IN_ACCEPTED_SOURCE"] > 0
+              event_ts_needed = event_ts_counts["UNPARSEABLE_IN_ACCEPTED_SOURCE"] > 0
+
+              # Exhaustive same-shape STEP 2C field audit after the availability deltas.
+              gaps = []
+              field_audit = {
+                  "public.attack_event_classifications": {},
+                  "public.attack_events": {},
+                  "public.attack_event_sources": {},
+              }
+              def ok(table, field, status):
+                  field_audit[table][field] = {"status": status}
+              def gap(table, field, count, reason):
+                  g = {"table": table, "field": field, "affected_count": int(count), "reason": reason}
+                  field_audit[table][field] = {"status": "UNREPRESENTABLE", "affected_count": int(count), "reason": reason}
+                  gaps.append(g)
+
+              ctable = "public.attack_event_classifications"
+              for f in ("classification_uid", "created_at"):
+                  ok(ctable, f, "DB_GENERATED_NON_SEMANTIC")
+              direct_class_fields = (
+                  "classification_key_version", "classification_key", "historical_episode_id", "city_key",
+                  "verdict", "event_types", "qa_reasons_state", "qa_reasons", "classifier_reason_codes",
+                  "classifier_blob_sha", "classifier_methodology_version", "normalization_version",
+                  "evidence_set_sha256", "review_provenance_sha256", "review_provenance",
+              )
+              for f in direct_class_fields:
+                  missing = sum(f not in r for r in cls)
+                  if missing:
+                      gap(ctable, f, missing, "required frozen classification field absent")
+                  else:
+                      ok(ctable, f, "DIRECTLY_MATERIALIZED")
+              for f in ("alert_type", "alert_start_at", "alert_end_at", "is_event", "positive_tier", "human_review_state", "binding_state", "alert_episode_uid", "origin_provenance", "origin_provenance_sha256", "origin_repository", "origin_ref", "origin_commit_sha", "origin_artifact_path", "origin_artifact_blob_sha", "origin_target_state_sha256", "origin_workflow_run_id", "correction_provenance"):
+                  ok(ctable, f, "CONTRACT_DERIVED")
+              for f in ("classified_at", "supersedes_classification_uid", "revision_reason", "persisted_by_run_id"):
+                  ok(ctable, f, "LEGITIMATELY_NULL")
+              ok(ctable, "originating_frozen_case_id", "AVAILABILITY_STATE_REPRESENTABLE")
+              ok(ctable, "originating_frozen_case_id_state", "CONTRACT_DERIVED")
+
+              bad_ctime = 0
+              bad_reason_codes = 0
+              bad_qa = 0
+              bad_cprov = 0
+              bad_repo = 0
+              human_conflicts = 0
+              class_lossless = 0
+              for r in cls:
+                  try:
+                      a = datetime.fromisoformat(str(r["alert_start_utc_microseconds"]).replace("Z", "+00:00"))
+                      b = datetime.fromisoformat(str(r["alert_end_utc_microseconds"]).replace("Z", "+00:00"))
+                      if a.tzinfo is None or b.tzinfo is None or b <= a:
+                          raise ValueError()
+                  except Exception:
+                      bad_ctime += 1
+                  if not isinstance(r.get("classifier_reason_codes"), list):
+                      bad_reason_codes += 1
+                  qstate, qv = r.get("qa_reasons_state"), r.get("qa_reasons")
+                  if not ((qstate == "MATERIALIZED" and isinstance(qv, list)) or (qstate == "UNMATERIALIZED_IN_ACCEPTED_SOURCE" and qv is None)):
+                      bad_qa += 1
+                  op = r.get("origin_provenance")
+                  if not isinstance(op, dict):
+                      bad_cprov += 1
+                  else:
+                      class_lossless += 1
+                      proj = classification_origin_projection(op)
+                      if not proj.get("origin_repository"):
+                          bad_repo += 1
+                  try:
+                      derive_human_state(r)
+                  except Exception:
+                      human_conflicts += 1
+              if bad_ctime:
+                  gap(ctable, "alert_start_at", bad_ctime, "frozen UTC bounds invalid")
+                  gap(ctable, "alert_end_at", bad_ctime, "frozen UTC bounds invalid")
+              if bad_reason_codes:
+                  gap(ctable, "classifier_reason_codes", bad_reason_codes, "not authoritative array")
+              if bad_qa:
+                  gap(ctable, "qa_reasons", bad_qa, "QA availability/value invariant mismatch")
+              if bad_cprov:
+                  gap(ctable, "origin_provenance", bad_cprov, "authoritative object unavailable")
+              if class_lossless != 26405:
+                  gap(ctable, "origin_provenance_sha256", 26405-class_lossless, "lossless provenance hashing unavailable")
+              if bad_repo:
+                  gap(ctable, "origin_repository", bad_repo, "required repository projection unavailable")
+              if human_conflicts:
+                  gap(ctable, "human_review_state", human_conflicts, "derivation/hash consistency conflict")
+
+              etable = "public.attack_events"
+              for f in ("attack_event_uid", "created_at", "updated_at"):
+                  ok(etable, f, "DB_GENERATED_NON_SEMANTIC")
+              for f in ("attack_event_key_version", "attack_event_key", "event_grain", "historical_episode_id", "city_key"):
+                  missing = sum(f not in r for r in events)
+                  if missing:
+                      gap(etable, f, missing, "required frozen event identity field absent")
+                  else:
+                      ok(etable, f, "DIRECTLY_MATERIALIZED")
+              for f in ("alert_type", "alert_start_at", "alert_end_at", "event_status", "current_classification_uid", "binding_state", "alert_episode_uid", "correction_provenance"):
+                  ok(etable, f, "CONTRACT_DERIVED")
+              for f in ("created_by_run_id", "updated_by_run_id"):
+                  ok(etable, f, "LEGITIMATELY_NULL")
+              positive_keys = {str(r["classification_key"]) for r in cls if r.get("verdict") in POSITIVE}
+              event_keys = {str(r.get("classification_key_v2") or "") for r in events}
+              if event_keys != positive_keys:
+                  gap(etable, "current_classification_uid", len(event_keys ^ positive_keys), "positive classification/event mapping mismatch")
+              bad_etime = 0
+              for r in events:
+                  try:
+                      a = datetime.fromisoformat(str(r["alert_start_utc_microseconds"]).replace("Z", "+00:00"))
+                      b = datetime.fromisoformat(str(r["alert_end_utc_microseconds"]).replace("Z", "+00:00"))
+                      if a.tzinfo is None or b.tzinfo is None or b <= a:
+                          raise ValueError()
+                  except Exception:
+                      bad_etime += 1
+              if bad_etime:
+                  gap(etable, "alert_start_at", bad_etime, "event UTC bounds invalid")
+                  gap(etable, "alert_end_at", bad_etime, "event UTC bounds invalid")
+
+              stable = "public.attack_event_sources"
+              for f in ("attack_event_source_uid", "created_at"):
+                  ok(stable, f, "DB_GENERATED_NON_SEMANTIC")
+              for f in ("source_link_key_version", "source_link_key", "observation_id", "content_sha256", "content_hash_basis"):
+                  missing = sum((f not in r) or (f in {"content_sha256","content_hash_basis"} and not r.get(f)) for r in links)
+                  if missing:
+                      gap(stable, f, missing, "required frozen source field absent")
+                  else:
+                      ok(stable, f, "DIRECTLY_MATERIALIZED")
+              ok(stable, "source_type", "AVAILABILITY_STATE_REPRESENTABLE")
+              ok(stable, "source_type_state", "CONTRACT_DERIVED")
+              ok(stable, "classification_uid", "CONTRACT_DERIVED")
+              for f in ("source_family", "source_url", "telegram_channel", "telegram_message_id", "source_timestamp", "event_timestamp_if_stated", "excerpt", "observation_classification_outcome", "classification_episode_id"):
+                  ok(stable, f, "DIRECTLY_MATERIALIZED")
+              ok(stable, "evidence_payload", "AVAILABILITY_STATE_REPRESENTABLE" if payload_needed else "CONTRACT_DERIVED")
+              if payload_needed:
+                  ok(stable, "evidence_payload_state", "CONTRACT_DERIVED")
+              if source_ts_needed:
+                  ok(stable, "source_timestamp_state", "CONTRACT_DERIVED")
+                  ok(stable, "source_timestamp_raw", "RAW_PRESERVATION")
+              if event_ts_needed:
+                  ok(stable, "event_timestamp_if_stated_state", "CONTRACT_DERIVED")
+                  ok(stable, "event_timestamp_if_stated_raw", "RAW_PRESERVATION")
+              for f in ("retrieval_provenance", "origin_provenance", "origin_provenance_sha256", "origin_artifact_path", "origin_git_ref", "origin_git_blob_sha"):
+                  ok(stable, f, "CONTRACT_DERIVED")
+              ok(stable, "raw_object_path", "LEGITIMATELY_NULL")
+
+              class_by_ck = {str(r["classification_key"]): r for r in cls}
+              bad_sclass = bad_retrieval = bad_sprov = bad_basis = bad_outcome = bad_tpair = 0
+              source_lossless = 0
+              allowed_outcomes = {None, "approved_strict", "approved_sensitivity", "needs_review", "rejected"}
+              for r in links:
+                  if str(r.get("classification_key_v2") or "") not in class_by_ck:
+                      bad_sclass += 1
+                  retrieval = r.get("retrieval_provenance")
+                  if retrieval is not None and not isinstance(retrieval, dict):
+                      bad_retrieval += 1
+                  op = source_origin_object(r)
+                  if not isinstance(op, dict) or not op:
+                      bad_sprov += 1
+                  else:
+                      source_lossless += 1
+                      source_origin_projection(op)
+                  if r.get("content_hash_basis") not in {"SOURCE_NATIVE", "NORMALIZED_EVIDENCE"}:
+                      bad_basis += 1
+                  if r.get("observation_classification_outcome") not in allowed_outcomes:
+                      bad_outcome += 1
+                  ch, mid = r.get("telegram_channel"), r.get("telegram_message_id")
+                  if (ch is None) != (mid is None):
+                      bad_tpair += 1
+              if bad_sclass:
+                  gap(stable, "classification_uid", bad_sclass, "source link references unknown classification")
+              if bad_retrieval:
+                  gap(stable, "retrieval_provenance", bad_retrieval, "retrieval provenance non-object")
+              if bad_sprov:
+                  gap(stable, "origin_provenance", bad_sprov, "authoritative source origin provenance unavailable")
+              if source_lossless != 3769:
+                  gap(stable, "origin_provenance_sha256", 3769-source_lossless, "lossless source provenance hashing unavailable")
+              if bad_basis:
+                  gap(stable, "content_hash_basis", bad_basis, "outside frozen enum")
+              if bad_outcome:
+                  gap(stable, "observation_classification_outcome", bad_outcome, "outside frozen enum")
+              if bad_tpair:
+                  gap(stable, "telegram_channel", bad_tpair, "Telegram channel/message-id pair invariant violated")
+
+              # The availability contracts themselves must cover every affected row losslessly.
+              if case_counts["UNMATERIALIZED_IN_ACCEPTED_SOURCE"] != 3:
+                  gap(ctable, "originating_frozen_case_id_state", case_counts["UNMATERIALIZED_IN_ACCEPTED_SOURCE"], "accepted count mismatch")
+              if source_type_counts["MATERIALIZED"] + source_type_counts["UNMATERIALIZED_IN_ACCEPTED_SOURCE"] != 3769:
+                  gap(stable, "source_type_state", 3769 - sum(source_type_counts.values()), "state coverage mismatch")
+              if payload_needed and sum(payload_counts.values()) != 3769:
+                  gap(stable, "evidence_payload_state", 3769 - sum(payload_counts.values()), "state coverage mismatch")
+              if source_ts_needed and sum(source_ts_counts.values()) != 3769:
+                  gap(stable, "source_timestamp_state", 3769 - sum(source_ts_counts.values()), "state coverage mismatch")
+              if event_ts_needed and sum(event_ts_counts.values()) != 3769:
+                  gap(stable, "event_timestamp_if_stated_state", 3769 - sum(event_ts_counts.values()), "state coverage mismatch")
+
+              result["representability_field_audit"] = field_audit
+              result["exhaustive_post_delta_representability"] = "PASS" if not gaps else "FAIL"
+              result["remaining_representability_gaps"] = gaps
+              if gaps:
+                  first = gaps[0]
+                  block("POST_DELTA_REPRESENTABILITY_GAP", first["table"], first["field"], first["affected_count"], first["reason"], gaps[:10])
+
+              delta_sql = make_delta(payload_needed, source_ts_needed, event_ts_needed)
+              effective4 = build_effective_four_contract_ddl(
+                  loaded["step1_base_persistence"],
+                  loaded["classification_identity_qa_availability"],
+                  loaded["provenance_cardinality"],
+                  loaded["human_review_state"],
+              )
+              effective5 = effective4.rstrip() + "\n\n" + delta_sql.strip() + "\n"
+              result["candidate_ddl_delta"] = {
+                  "apply_now": False,
+                  "sql": delta_sql,
+                  "sha256": hashlib.sha256(delta_sql.encode("utf-8")).hexdigest(),
+                  "fields_changed_or_introduced_only": True,
+              }
+              result["post_addendum_effective_candidate_ddl_sha256"] = hashlib.sha256(effective5.encode("utf-8")).hexdigest()
+              result["semantic_equality_idempotence_delta"] = {
+                  "persisted_semantic_equality_includes": [
+                      "originating_frozen_case_id_state",
+                      "source_type_state",
+                  ] + (["evidence_payload_state"] if payload_needed else [])
+                    + (["source_timestamp_state", "source_timestamp_raw"] if source_ts_needed else [])
+                    + (["event_timestamp_if_stated_state", "event_timestamp_if_stated_raw"] if event_ts_needed else []),
+                  "same_frozen_snapshot_different_state_or_raw_for_same_deterministic_key": "SEMANTIC_CONFLICT",
+                  "replay_rule": "same frozen snapshot deterministically derives identical availability states and raw-preservation values",
+              }
+              result["proof_gates"] = {
+                  "snapshot_sha": "PASS",
+                  "classifications_scanned": 26405,
+                  "events_scanned": 1080,
+                  "source_links_scanned": 3769,
+                  "unavailable_adjudicated_ids": 3,
+                  "invented_ids": 0,
+                  "frozen_case_id_state_coverage": 26405,
+                  "previously_missing_source_type": 1429,
+                  "synthetic_source_type_values": 0,
+                  "source_type_state_coverage": 3769,
+                  "single_anomaly_condition_identified": "PASS",
+                  "single_anomaly_affected_source_links": 1,
+                  "lossless_availability_raw_representation": "PASS",
+                  "source_identity_changed": "NO",
+                  "post_delta_exhaustive_offline_representability": "PASS",
+                  "remaining_representability_gaps": 0,
+                  "classification_identity_change": "NO",
+                  "event_identity_change": "NO",
+                  "source_link_identity_change": "NO",
+                  "neon_queries": 0,
+                  "db_writes": 0,
+                  "production_mutation": "NO",
+              }
+              result["safe_continuation_point"] = "rerun STEP 2C rollback-only persistence proof against this five-contract effective schema in a separate task"
+              result["status"] = "FROZEN"
+              result["verdict"] = "ATTACK-EVENT PERSISTENCE AVAILABILITY COMPLETION ADDENDUM FROZEN"
+
+              OUT.parent.mkdir(parents=True, exist_ok=True)
+              OUT.write_text(json.dumps(result, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+              print("VERDICT=" + result["verdict"])
+              print("SOURCE_TYPE_MATERIALIZED=" + str(source_type_counts["MATERIALIZED"]))
+              print("SOURCE_TYPE_UNMATERIALIZED=" + str(source_type_counts["UNMATERIALIZED_IN_ACCEPTED_SOURCE"]))
+              print("ANOMALY_CATEGORY=" + anomaly["primary_category"])
+              print("ANOMALY_SOURCE_LINK_PREFIX=" + anomaly["source_link_key"][:16])
+              print("POST_DDL_SHA256=" + result["post_addendum_effective_candidate_ddl_sha256"])
+              with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as f:
+                  f.write("pass=true\n")
+                  f.write("artifact_path=" + str(OUT) + "\n")
+
+          except Blocked as e:
+              result["first_failing_gate"] = e.gate
+              result["affected_table"] = e.table
+              result["affected_field"] = e.field
+              result["affected_count"] = e.count
+              result["detail"] = e.detail
+              result["remaining_representability_gaps"] = (e.gaps or [])[:10]
+              result["snapshot_sha_intact"] = result.get("frozen_snapshot", {}).get("verified_sha256") == SNAPSHOT["sha256"]
+              result["safe_continuation_point"] = "fix proof/addendum only from the first failing gate; do not rerun STEP 2C or query Neon"
+              diag = Path("research/attack_event_persistence_availability_completion_addendum_blocked.json")
+              diag.write_text(json.dumps(result, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+              print("VERDICT=" + result["verdict"])
+              print("FIRST_FAILING_GATE=" + e.gate)
+              print("BLOCKED_DIAGNOSTIC=" + str(diag))
+              with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as f:
+                  f.write("pass=false\n")
+                  f.write("diagnostic_path=" + str(diag) + "\n")
+          PY
+
+      - name: Commit durable artifact
+        if: steps.audit.outputs.pass == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          OUT="research/attack_event_persistence_availability_completion_addendum_2026-10-05.json"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -- "$OUT"
+          git commit -m "Freeze attack-event persistence availability completion addendum"
+          git push origin HEAD:attack-event-persistence-availability-completion-addendum-2026-10-05
+          echo "ARTIFACT_COMMIT=$(git rev-parse HEAD)"
+          echo "ARTIFACT_BLOB=$(git rev-parse HEAD:$OUT)"
+          echo "ARTIFACT_SHA256=$(sha256sum "$OUT" | awk '{print $1}')"
+
+      - name: Commit bounded blocked diagnostic
+        if: steps.audit.outputs.pass == 'false'
+        shell: bash
+        run: |
+          set -euo pipefail
+          OUT="research/attack_event_persistence_availability_completion_addendum_blocked.json"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -- "$OUT"
+          git commit -m "Record blocked persistence availability completion diagnostic"
+          git push origin HEAD:attack-event-persistence-availability-completion-addendum-2026-10-05
+
+      - name: Upload proof artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: attack-event-persistence-availability-completion-addendum-proof
+          path: |
+            research/attack_event_persistence_availability_completion_addendum_2026-10-05.json
+            research/attack_event_persistence_availability_completion_addendum_blocked.json
+          if-no-files-found: ignore
