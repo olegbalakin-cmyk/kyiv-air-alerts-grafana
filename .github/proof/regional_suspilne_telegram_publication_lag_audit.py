@@ -610,7 +610,7 @@ def main():
             else:
                 ambiguous += 1
             rows_detail.append({
-                "channel": row["channel"], "message_id": row["message_id"], "city": row["city"],
+                "channel": row["channel"], "message_id": row["message_id"], "city": row.get("binding_city"),
                 "reference_binding": ref, "counterfactual_binding": cand, "outcome": outcome,
             })
         stress[str(L)] = {
