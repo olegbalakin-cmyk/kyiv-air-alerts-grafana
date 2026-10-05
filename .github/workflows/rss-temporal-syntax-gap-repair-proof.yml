@@ -93,7 +93,7 @@ jobs:
                       changed.append({"context_id": ctx.get("context_id"), "before": old, "after": new, "text": text})
               if changed:
                   delta.append({"candidate_id": row["candidate_id"], "city": row["city"], "changed_contexts": changed})
-          Path("/tmp/syntax-probe/recognizer_delta.json").write_text(json.dumps(delta, ensure_ascii=False, indent=2)+"\\n", encoding="utf-8")
+          Path("/tmp/syntax-probe/recognizer_delta.json").write_text(json.dumps(delta, ensure_ascii=False, indent=2)+"\n", encoding="utf-8")
           print("RECOGNIZER_DELTA_COUNT="+str(len(delta)))
           print(json.dumps(delta, ensure_ascii=False))
           PY
