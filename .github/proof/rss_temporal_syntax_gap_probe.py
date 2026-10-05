@@ -293,9 +293,9 @@ def main() -> None:
     predecessor_usable = baseline_three | PATH_B_IDS
     assert len(predecessor_usable) == 11
     assert not (predecessor_usable & set(TARGETS))
-    # Preserve the accepted Path-B episode identity on the exact eight selected
-    # contexts from the predecessor proof. Auxiliary contexts may change their
-    # parser diagnostics without constituting an episode-identity regression.
+    # Preserve the exact eight predecessor Path-B selected identities without
+    # reconstructing classification provenance. The predecessor proof selected
+    # these retained windows after the temporal parser had already resolved them.
     path_b_identity_checks = []
     predecessor_identity_regressions = []
     for accepted in pred["target_results"]:
@@ -303,27 +303,43 @@ def main() -> None:
         assert cid in PATH_B_IDS
         row = rows[cid]
         selected_text = accepted["after_selected_context"]
+        expected = accepted["resulting_episode_id"]
+        retained = next(
+            c for c in row.get("audit_contexts") or []
+            if c.get("context_id") == accepted["after_context_id"]
+        )
+        retained_temporal = retained.get("current_temporal_parser_result") or {}
+        assert retained_temporal.get("episode_id") == expected
+
         probe = target_row(row, {"source_excerpt": selected_text})
         episodes = mon.tracked_episodes_for_city(state, row["city"])
         matching = mon.match_candidate_to_episodes(probe, episodes)
-        temporal = mon.temporal_binding_evidence(
-            probe, mon.strict_explosion_evidence(row["city"], probe), matching, episodes
+        relation = mon.explicit_event_time_relation(
+            probe, [selected_text], matching, episodes
         )
-        expected = accepted["resulting_episode_id"]
-        resulting = temporal.get("episode_id")
+        old_clocks = set(before.event_clock_mentions(selected_text))
+        new_clocks = set(mon.event_clock_mentions(selected_text))
+        removed_clocks = sorted(old_clocks - new_clocks)
+        resulting = relation.get("episode_id")
+        preserved = resulting == expected and not removed_clocks
         check = {
             "candidate_id": cid,
             "context_id": accepted["after_context_id"],
             "expected_episode_id": expected,
+            "retained_predecessor_episode_id": retained_temporal.get("episode_id"),
             "resulting_episode_id": resulting,
-            "parser_code": temporal.get("code"),
-            "preserved": resulting == expected,
+            "parser_relation": relation.get("relation"),
+            "old_clocks": sorted(old_clocks),
+            "new_clocks": sorted(new_clocks),
+            "removed_clocks": removed_clocks,
+            "preserved": preserved,
         }
         path_b_identity_checks.append(check)
-        if resulting != expected:
+        if not preserved:
             predecessor_identity_regressions.append(check)
     assert len(path_b_identity_checks) == 8
-    print("PATH_B_SYNTHETIC_RECOMPUTE=" + json.dumps(path_b_identity_checks, ensure_ascii=False))
+    print("PATH_B_IDENTITY_CHECKS=" + json.dumps(path_b_identity_checks, ensure_ascii=False))
+    assert not predecessor_identity_regressions
 
     negative_controls = {}
     for family, cid in NEGATIVE_CONTROLS.items():
@@ -354,6 +370,7 @@ def main() -> None:
 
     safety_ok = (
         not newly_present_non_targets
+        and not predecessor_identity_regressions
         and all(v == 0 for k, v in mutations.items() if k.endswith("_mutations") or k == "deployments")
         and not mutations["unexpected_changed_monitor_functions"]
     )
