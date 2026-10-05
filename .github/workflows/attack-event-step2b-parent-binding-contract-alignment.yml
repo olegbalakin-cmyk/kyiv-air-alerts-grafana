@@ -217,21 +217,33 @@ jobs:
               if "unbound/ambiguous historical classifications remain persistable without forcing a link" not in str(alert_rel.get("reason", "")):
                   fail("FROZEN_CONTRACT_UNBOUND_PERSISTABILITY_TEXT_MISMATCH")
 
-              contract_text = "\n".join(strings(contract))
-              required_contract_phrases = [
-                  "Exactly one mechanically valid canonical parent satisfies all binding predicates.",
-                  "No mechanically valid canonical parent satisfies all predicates.",
-                  "More than one mechanically valid candidate exists, or historical identity does not uniquely establish the parent.",
-                  "binding_state = 'BOUND' AND alert_episode_uid IS NOT NULL",
-                  "binding_state IN ('AMBIGUOUS', 'UNBOUND') AND alert_episode_uid IS NULL",
-              ]
-              missing_contract_phrases = [
-                  phrase for phrase in required_contract_phrases if phrase not in contract_text
-              ]
-              if missing_contract_phrases:
+              try:
+                  linkage = contract["alert_episode_linkage_contract"]
+                  states = linkage["states"]
+                  storage = linkage["storage_invariant"]
+              except Exception:
+                  fail("FROZEN_CONTRACT_BINDING_SEMANTICS_MISSING")
+              if linkage.get("parent_table") != "public.alert_episodes":
+                  fail("FROZEN_CONTRACT_PARENT_TABLE_MISMATCH")
+              expected_states = {
+                  "BOUND": "Exactly one mechanically valid canonical parent satisfies all binding predicates.",
+                  "UNBOUND": "No mechanically valid canonical parent satisfies all predicates.",
+                  "AMBIGUOUS": "More than one mechanically valid candidate exists, or the historical evidence/classification does not uniquely establish the required parent.",
+              }
+              expected_storage = {
+                  "BOUND": "alert_episode_uid non-null and FK-valid",
+                  "UNBOUND": "alert_episode_uid NULL",
+                  "AMBIGUOUS": "alert_episode_uid NULL",
+              }
+              if states != expected_states:
                   fail(
-                      "FROZEN_CONTRACT_BINDING_SEMANTICS_MISMATCH",
-                      detail={"missing_phrases": missing_contract_phrases},
+                      "FROZEN_CONTRACT_BINDING_STATE_DEFINITION_MISMATCH",
+                      detail={"actual": states, "expected": expected_states},
+                  )
+              if storage != expected_storage:
+                  fail(
+                      "FROZEN_CONTRACT_STORAGE_INVARIANT_MISMATCH",
+                      detail={"actual": storage, "expected": expected_storage},
                   )
 
               # Full-record validation of the already-materialized audit.
