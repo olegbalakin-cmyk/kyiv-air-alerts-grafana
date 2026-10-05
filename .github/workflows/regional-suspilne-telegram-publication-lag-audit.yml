@@ -1,0 +1,155 @@
+name: Regional Suspilne Telegram publication lag audit
+on:
+  pull_request:
+    branches: [regional-suspilne-publication-lag-audit-base-2026-10-05]
+    types: [opened, synchronize, reopened]
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: regional-suspilne-publication-lag-audit-${{ github.event.pull_request.number }}
+  cancel-in-progress: false
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 75
+    env:
+      PRODUCTION_CODE_COMMIT: c26307efcea065813870dc27901dbd225f4f3e33
+      FROZEN_STATE_BRANCH: multicity-wip-2026-09-16
+      FROZEN_STATE_COMMIT: 7dc412666b123229112eb33b6824e54c4d2ab158
+      HARNESS_PATH: .github/proof/regional_suspilne_telegram_publication_lag_audit.py
+      OUTPUT_PATH: /tmp/audit/research/regional_suspilne_telegram_publication_lag_audit_2026-10-05.json
+      SUMMARY_PATH: /tmp/audit/summary.json
+    steps:
+      - name: Check out isolated audit head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+          path: proofsrc
+      - name: Check out frozen alert state
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ env.FROZEN_STATE_COMMIT }}
+          fetch-depth: 1
+          path: frozen-state
+      - name: Prove bounded proof-only diff
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git -C proofsrc rev-parse "$PRODUCTION_CODE_COMMIT")" = "$PRODUCTION_CODE_COMMIT"
+          monitor_blob_prod="$(git -C proofsrc rev-parse "$PRODUCTION_CODE_COMMIT:kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py")"
+          monitor_blob_head="$(git -C proofsrc rev-parse "HEAD:kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py")"
+          test "$monitor_blob_prod" = "$monitor_blob_head"
+          test "$(git -C frozen-state rev-parse HEAD)" = "$FROZEN_STATE_COMMIT"
+          state_path="frozen-state/kyiv-air-alerts-grafana/data/explosion_candidate_monitor_state.json"
+          test -s "$state_path"
+          test "$(sha256sum "$state_path" | awk '{print $1}')" = "4c758a99b759e8827f4f8e3490bf6cb72f69ff2f825526a2eb18a12ecee499f1"
+          shadow_path="proofsrc/research/regional_suspilne_telegram_incremental_shadow_2026-10-05.json"
+          inventory_path="proofsrc/research/suspilne_regional_telegram_inventory_2026-10-05.json"
+          test -s "$shadow_path"
+          test -s "$inventory_path"
+          changed="$(git -C proofsrc diff --name-only 6364ed64549263bef78beb0f0421c9a6c9f80d28...HEAD)"
+          printf '%s\n' "$changed" > /tmp/proof_diff_paths.txt
+          bad="$(printf '%s\n' "$changed" | grep -Ev '^(\.github/proof/regional_suspilne_telegram_publication_lag_audit\.py|\.github/workflows/regional-suspilne-telegram-publication-lag-audit\.yml)$' || true)"
+          test -z "$bad" || { echo "Unexpected diff"; printf '%s\n' "$bad"; exit 1; }
+          if env | grep -Eq '^(DATABASE_URL|NEON_DATABASE_URL|NEON_URL|PGHOST|PGPORT|PGDATABASE|PGUSER|PGPASSWORD)='; then
+            echo "Database environment unexpectedly present"; exit 1
+          fi
+          mkdir -p /tmp/audit/research
+          python - <<'PY'
+          import hashlib, json
+          from pathlib import Path
+          roots=[Path("proofsrc/kyiv-air-alerts-grafana/data"),Path("proofsrc/kyiv-air-alerts-grafana/research"),Path("proofsrc/research")]
+          out={}
+          for root in roots:
+              if root.exists():
+                  for p in sorted(x for x in root.rglob("*") if x.is_file()):
+                      out[str(p)]=hashlib.sha256(p.read_bytes()).hexdigest()
+          Path("/tmp/audit/protected.before.json").write_text(json.dumps(out,indent=2,sort_keys=True)+"\n")
+          PY
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: proofsrc/kyiv-air-alerts-grafana/requirements.txt
+      - name: Install dependencies
+        working-directory: proofsrc/kyiv-air-alerts-grafana
+        run: python -m pip install -r requirements.txt
+      - name: Validate frozen monitor and audit harness
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m py_compile "proofsrc/$HARNESS_PATH"
+          (cd proofsrc/kyiv-air-alerts-grafana && python scripts/monitor_explosion_candidates.py --self-test)
+      - name: Run read-only publication-lag audit
+        shell: bash
+        env:
+          FROZEN_STATE_PATH: ${{ github.workspace }}/frozen-state/kyiv-air-alerts-grafana/data/explosion_candidate_monitor_state.json
+        run: |
+          set -euo pipefail
+          (cd proofsrc && python "$HARNESS_PATH")
+      - name: Prove zero protected mutation
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import hashlib, json, subprocess
+          from pathlib import Path
+          roots=[Path("proofsrc/kyiv-air-alerts-grafana/data"),Path("proofsrc/kyiv-air-alerts-grafana/research"),Path("proofsrc/research")]
+          after={}
+          for root in roots:
+              if root.exists():
+                  for p in sorted(x for x in root.rglob("*") if x.is_file()):
+                      after[str(p)]=hashlib.sha256(p.read_bytes()).hexdigest()
+          before=json.loads(Path("/tmp/audit/protected.before.json").read_text())
+          changed=sorted(p for p in set(before)|set(after) if before.get(p)!=after.get(p))
+          scripts_dirty=subprocess.run(["git","-C","proofsrc","diff","--quiet","--","kyiv-air-alerts-grafana/scripts"],check=False).returncode!=0
+          frozen_dirty=bool(subprocess.check_output(["git","-C","frozen-state","status","--porcelain=v1"],text=True).strip())
+          mutation={
+            "production Telegram source config mutations": int(scripts_dirty),
+            "classifier mutations": int(scripts_dirty),
+            "temporal parser mutations": int(scripts_dirty),
+            "temporal representation mutations": int(scripts_dirty),
+            "same-attack mutations": int(scripts_dirty),
+            "source adapter production mutations": int(scripts_dirty),
+            "historical state/queue mutations": int(frozen_dirty),
+            "review queue mutations": 0,
+            "canonical alerts mutations": 0,
+            "Neon/DB mutations": 0,
+            "deployments": 0,
+            "changed_protected_paths": changed,
+          }
+          Path("/tmp/audit/protected.after.json").write_text(json.dumps(after,indent=2,sort_keys=True)+"\n")
+          Path("/tmp/audit/mutation_proof.json").write_text(json.dumps(mutation,indent=2,sort_keys=True)+"\n")
+          if changed or scripts_dirty or frozen_dirty or any(v != 0 for k,v in mutation.items() if k.endswith("mutations") or k=="deployments"):
+              raise SystemExit("PROTECTED_MUTATION_DETECTED")
+          artifact=Path("/tmp/audit/research/regional_suspilne_telegram_publication_lag_audit_2026-10-05.json")
+          obj=json.loads(artifact.read_text())
+          obj["mutation_confirmation"]={k:v for k,v in mutation.items() if k!="changed_protected_paths"}
+          artifact.write_text(json.dumps(obj,ensure_ascii=False,indent=2,sort_keys=True)+"\n")
+          summary=Path("/tmp/audit/summary.json")
+          sobj=json.loads(summary.read_text())
+          sobj["mutation_confirmation"]=obj["mutation_confirmation"]
+          summary.write_text(json.dumps(sobj,ensure_ascii=False,indent=2,sort_keys=True)+"\n")
+          PY
+          sha256sum "$OUTPUT_PATH" > "$OUTPUT_PATH.sha256"
+          sha256sum "$SUMMARY_PATH" > "$SUMMARY_PATH.sha256"
+      - name: Print compact audit summary
+        run: cat "$SUMMARY_PATH"
+      - name: Upload immutable audit proof
+        uses: actions/upload-artifact@v4
+        with:
+          name: regional-suspilne-publication-lag-audit-${{ github.run_id }}
+          path: |
+            /tmp/audit/research/regional_suspilne_telegram_publication_lag_audit_2026-10-05.json
+            /tmp/audit/research/regional_suspilne_telegram_publication_lag_audit_2026-10-05.json.sha256
+            /tmp/audit/summary.json
+            /tmp/audit/summary.json.sha256
+            /tmp/audit/mutation_proof.json
+            /tmp/audit/protected.before.json
+            /tmp/audit/protected.after.json
+            /tmp/proof_diff_paths.txt
+          if-no-files-found: error
+          retention-days: 30
