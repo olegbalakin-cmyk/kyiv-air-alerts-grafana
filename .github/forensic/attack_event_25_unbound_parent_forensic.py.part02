@@ -1,0 +1,230 @@
+            "SELECT episode_uid::text, city_key::text, alert_type::text, episode_state::text, "
+            "canonicalization_version::text, start_at, end_at "
+            "FROM public.alert_episodes "
+            "WHERE city_key = %s AND alert_type = 'AIR' AND episode_state = 'closed' "
+            "AND canonicalization_version = %s AND start_at IS NOT NULL AND end_at IS NOT NULL "
+            "AND ("
+            " start_at = %s OR end_at = %s "
+            " OR (start_at < %s AND end_at > %s) "
+            " OR (end_at <= %s AND (%s - end_at) <= interval '30 minutes') "
+            " OR (start_at >= %s AND (start_at - %s) <= interval '30 minutes')"
+            ") "
+            "ORDER BY "
+            "CASE WHEN start_at = %s THEN 0 WHEN end_at = %s THEN 1 "
+            "WHEN start_at < %s AND end_at > %s THEN 2 ELSE 3 END, "
+            "abs(extract(epoch from (start_at - %s))) + abs(extract(epoch from (end_at - %s))), "
+            "episode_uid LIMIT 50",
+            (city, CANONICAL_VERSION, hs, he, he, hs, hs, hs, he, he, hs, he, he, hs, hs, he),
+        )
+        canonical_candidates = [candidate_record(row, hs, he) for row in canonical_rows]
+
+        nearest_canonical_rows = select(
+            "SELECT episode_uid::text, city_key::text, alert_type::text, episode_state::text, "
+            "canonicalization_version::text, start_at, end_at "
+            "FROM public.alert_episodes "
+            "WHERE city_key = %s AND alert_type = 'AIR' AND episode_state = 'closed' "
+            "AND canonicalization_version = %s AND start_at IS NOT NULL AND end_at IS NOT NULL "
+            "ORDER BY "
+            "CASE WHEN end_at <= %s THEN extract(epoch from (%s - end_at)) "
+            "WHEN start_at >= %s THEN extract(epoch from (start_at - %s)) ELSE 0 END, "
+            "abs(extract(epoch from (start_at - %s))) + abs(extract(epoch from (end_at - %s))), episode_uid "
+            "LIMIT 5",
+            (city, CANONICAL_VERSION, hs, hs, he, he, hs, he),
+        )
+        nearest_canonical = [candidate_record(row, hs, he) for row in nearest_canonical_rows]
+
+        preceding_rows = select(
+            "SELECT episode_uid::text, city_key::text, alert_type::text, episode_state::text, "
+            "canonicalization_version::text, start_at, end_at "
+            "FROM public.alert_episodes "
+            "WHERE city_key = %s AND alert_type = 'AIR' AND episode_state = 'closed' "
+            "AND canonicalization_version = %s AND start_at IS NOT NULL AND end_at IS NOT NULL "
+            "AND end_at <= %s ORDER BY end_at DESC, start_at DESC, episode_uid LIMIT 1",
+            (city, CANONICAL_VERSION, hs),
+        )
+        following_rows = select(
+            "SELECT episode_uid::text, city_key::text, alert_type::text, episode_state::text, "
+            "canonicalization_version::text, start_at, end_at "
+            "FROM public.alert_episodes "
+            "WHERE city_key = %s AND alert_type = 'AIR' AND episode_state = 'closed' "
+            "AND canonicalization_version = %s AND start_at IS NOT NULL AND end_at IS NOT NULL "
+            "AND start_at >= %s ORDER BY start_at ASC, end_at ASC, episode_uid LIMIT 1",
+            (city, CANONICAL_VERSION, he),
+        )
+        boundary_neighbors = [candidate_record(row, hs, he) for row in (preceding_rows + following_rows)]
+
+        all_relevant_rows = select(
+            "SELECT episode_uid::text, city_key::text, alert_type::text, episode_state::text, "
+            "canonicalization_version::text, start_at, end_at "
+            "FROM public.alert_episodes "
+            "WHERE city_key = %s AND start_at IS NOT NULL AND ("
+            " start_at = %s OR (end_at IS NOT NULL AND end_at = %s) "
+            " OR (end_at IS NOT NULL AND start_at < %s AND end_at > %s) "
+            " OR (end_at IS NOT NULL AND end_at <= %s AND (%s - end_at) <= interval '30 minutes') "
+            " OR (start_at >= %s AND (start_at - %s) <= interval '30 minutes')"
+            ") "
+            "ORDER BY "
+            "CASE WHEN alert_type = 'AIR' AND episode_state = 'closed' AND canonicalization_version = %s THEN 0 ELSE 1 END, "
+            "CASE WHEN start_at = %s THEN 0 WHEN end_at = %s THEN 1 "
+            "WHEN end_at IS NOT NULL AND start_at < %s AND end_at > %s THEN 2 ELSE 3 END, "
+            "episode_uid LIMIT 20",
+            (city, hs, he, he, hs, hs, hs, he, he, CANONICAL_VERSION, hs, he, he, hs),
+        )
+        all_relevant = [candidate_record(row, hs, he) for row in all_relevant_rows]
+
+        noncanonical_flags_row = select(
+            "SELECT "
+            "coalesce(bool_or(alert_type IS DISTINCT FROM 'AIR'), false), "
+            "coalesce(bool_or(episode_state IS DISTINCT FROM 'closed'), false), "
+            "coalesce(bool_or(canonicalization_version IS DISTINCT FROM %s), false) "
+            "FROM public.alert_episodes "
+            "WHERE city_key = %s AND start_at IS NOT NULL AND ("
+            " (end_at IS NOT NULL AND start_at < (%s + interval '30 minutes') AND end_at > (%s - interval '30 minutes')) "
+            " OR (end_at IS NULL AND start_at BETWEEN (%s - interval '30 minutes') AND (%s + interval '30 minutes'))"
+            ")",
+            (CANONICAL_VERSION, city, he, hs, hs, he),
+        )[0]
+
+        exact_start = [c for c in canonical_candidates if c["start_delta_seconds"] == 0 and c["end_delta_seconds"] != 0]
+        exact_end = [c for c in canonical_candidates if c["end_delta_seconds"] == 0 and c["start_delta_seconds"] != 0]
+        overlaps = [c for c in canonical_candidates if (c.get("overlap_duration_seconds") or 0) > 0]
+        nearby_nonoverlap = [
+            c for c in canonical_candidates
+            if (c.get("overlap_duration_seconds") or 0) == 0
+            and c.get("boundary_gap_seconds") is not None
+            and c["boundary_gap_seconds"] <= NEARBY_SECONDS
+        ]
+
+        # Aggregate counts are authoritative. Candidate list must contain enough to classify the one-overlap cases.
+        if exact_start_count > 0 and not exact_start:
+            fail("UNBOUND_FORENSIC_CANDIDATE_RETRIEVAL_INCONSISTENCY", affected_count=1, detail={"classification_key": ck})
+        if exact_end_count > 0 and not exact_end:
+            fail("UNBOUND_FORENSIC_CANDIDATE_RETRIEVAL_INCONSISTENCY", affected_count=1, detail={"classification_key": ck})
+        if overlap_count == 1 and len(overlaps) != 1:
+            fail("UNBOUND_FORENSIC_CANDIDATE_RETRIEVAL_INCONSISTENCY", affected_count=1, detail={"classification_key": ck})
+
+        representative = None
+        if exact_start_count > 0:
+            category = "EXACT_START_ONLY_END_DRIFT"
+            representative = min(exact_start, key=lambda c: (abs(c["end_delta_seconds"]), c["episode_uid"]))
+            mechanical = (
+                f"Same-city canonical AIR/closed/v1 episode shares the historical start, but its end differs "
+                f"by {representative['end_delta_seconds']} seconds; the exact parent tuple is absent."
+            )
+        elif exact_end_count > 0:
+            category = "EXACT_END_ONLY_START_DRIFT"
+            representative = min(exact_end, key=lambda c: (abs(c["start_delta_seconds"]), c["episode_uid"]))
+            mechanical = (
+                f"Same-city canonical AIR/closed/v1 episode shares the historical end, but its start differs "
+                f"by {representative['start_delta_seconds']} seconds; the exact parent tuple is absent."
+            )
+        elif overlap_count >= 2:
+            category = "MULTIPLE_OVERLAPPING_CANONICAL_EPISODES"
+            if not overlaps:
+                fail("UNBOUND_FORENSIC_CANDIDATE_RETRIEVAL_INCONSISTENCY", affected_count=1, detail={"classification_key": ck})
+            representative = sorted(
+                overlaps,
+                key=lambda c: (-(c.get("overlap_duration_seconds") or 0), abs(c["start_delta_seconds"]) + abs(c["end_delta_seconds"]), c["episode_uid"]),
+            )[0]
+            mechanical = (
+                f"Historical interval overlaps {overlap_count} same-city canonical AIR/closed/v1 episodes; "
+                "no exact tuple exists and no higher-precedence exact-boundary category applies."
+            )
+        elif overlap_count == 1:
+            representative = overlaps[0]
+            if representative["canonical_contains_historical_interval"]:
+                category = "CANONICAL_INTERVAL_CONTAINS_HISTORICAL"
+                mechanical = "Exactly one canonical AIR/closed/v1 interval contains the historical interval with different boundaries."
+            elif representative["historical_contains_canonical_interval"]:
+                category = "HISTORICAL_INTERVAL_CONTAINS_CANONICAL"
+                mechanical = "Exactly one canonical AIR/closed/v1 interval is contained within the historical interval with different boundaries."
+            else:
+                category = "PARTIAL_INTERVAL_OVERLAP"
+                mechanical = "Exactly one canonical AIR/closed/v1 interval partially overlaps the historical interval without containment or an exact boundary-only match."
+        elif nearby_nonoverlap_count > 0:
+            category = "NEARBY_NONOVERLAPPING_EPISODE"
+            if nearby_nonoverlap:
+                representative = min(nearby_nonoverlap, key=lambda c: (c["boundary_gap_seconds"], abs(c["start_delta_seconds"]) + abs(c["end_delta_seconds"]), c["episode_uid"]))
+            else:
+                nearest_under = [c for c in nearest_canonical if c.get("boundary_gap_seconds") is not None and c["boundary_gap_seconds"] <= NEARBY_SECONDS]
+                if not nearest_under:
+                    fail("UNBOUND_FORENSIC_CANDIDATE_RETRIEVAL_INCONSISTENCY", affected_count=1, detail={"classification_key": ck})
+                representative = nearest_under[0]
+            mechanical = (
+                f"No canonical overlap exists; the nearest same-city canonical AIR/closed/v1 episode is "
+                f"{representative['boundary_gap_seconds']} seconds away, within the forensic 30-minute window."
+            )
+        else:
+            category = "NO_NEARBY_CANONICAL_EPISODE"
+            representative = nearest_canonical[0] if nearest_canonical else None
+            mechanical = "No canonical AIR/closed/v1 overlap exists and none lies within the forensic 30-minute boundary-gap window."
+
+        flags: list[str] = []
+        if representative:
+            add_drift_flag(flags, "START", representative.get("start_delta_seconds"))
+            add_drift_flag(flags, "END", representative.get("end_delta_seconds"))
+            hs_dur = duration_seconds(hs, he)
+            cs = parse_utc(representative["start_at"])
+            ce = parse_utc(representative["end_at"])
+            c_dur = duration_seconds(cs, ce)
+            if hs_dur is not None and c_dur is not None:
+                if hs_dur > c_dur:
+                    flags.append("HISTORICAL_LONGER_THAN_NEAREST_CANONICAL")
+                elif c_dur > hs_dur:
+                    flags.append("CANONICAL_LONGER_THAN_HISTORICAL")
+
+        if overlap_count == 0:
+            flags.append("NO_OVERLAP")
+
+        # Split shape: target overlaps multiple sequential, non-overlapping canonical episodes.
+        if overlap_count >= 2 and len(overlaps) >= 2:
+            ordered = sorted(overlaps, key=lambda c: (c["start_at"], c["end_at"], c["episode_uid"]))
+            sequential = True
+            for a, b in zip(ordered, ordered[1:]):
+                if parse_utc(a["end_at"]) > parse_utc(b["start_at"]):
+                    sequential = False
+                    break
+            if sequential:
+                flags.append("CANONICAL_SPLIT_SHAPE")
+
+        # Merge shape is only a geometry/provenance shape flag: the same canonical interval
+        # contains this target and at least one additional distinct accepted historical interval.
+        if representative and representative.get("canonical_contains_historical_interval"):
+            cs = parse_utc(representative["start_at"])
+            ce = parse_utc(representative["end_at"])
+            contained_hist = {
+                hid
+                for hid, h0, h1 in historical_by_city.get(city, [])
+                if cs <= h0 and h1 <= ce
+            }
+            if len(contained_hist) >= 2:
+                flags.append("CANONICAL_MERGE_SHAPE")
+
+        if bool(noncanonical_flags_row[0]):
+            flags.append("NON_AIR_NEARBY")
+        if bool(noncanonical_flags_row[1]):
+            flags.append("NON_CLOSED_NEARBY")
+        if bool(noncanonical_flags_row[2]):
+            flags.append("NON_V1_CANONICALIZATION_NEARBY")
+        flags = sorted(set(flags))
+
+        # At most five diagnostic candidates, deterministic and category-relevant.
+        union: dict[str, dict] = {}
+        for c in canonical_candidates + boundary_neighbors + all_relevant + nearest_canonical:
+            union[c["episode_uid"]] = c
+
+        def rank_candidate(c: dict):
+            canon = is_canonical(c)
+            sd = c.get("start_delta_seconds")
+            ed = c.get("end_delta_seconds")
+            ov = c.get("overlap_duration_seconds") or 0
+            gap = c.get("boundary_gap_seconds")
+            exact_s = sd == 0
+            exact_e = ed == 0
+            if category == "EXACT_START_ONLY_END_DRIFT" and canon and exact_s:
+                p = 0
+            elif category == "EXACT_END_ONLY_START_DRIFT" and canon and exact_e:
+                p = 0
+            elif canon and ov > 0:
+                p = 1
+            elif canon and gap is not None and gap <= NEARBY_SECONDS:
