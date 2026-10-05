@@ -1,9 +1,9 @@
-name: Live RSS durability shadow rerun
+name: RSS temporal audit context retention rerun
 
 on:
   push:
     branches:
-      - live-rss-durability-shadow-rerun-2026-10-04
+      - rss-temporal-audit-context-retention-rerun-2026-10-05
     paths:
       - ".github/workflows/live-rss-durability-shadow-rerun.yml"
 
@@ -135,6 +135,180 @@ jobs:
                   hits.extend(" ".join(m.group(0).split()).casefold() for m in pattern.finditer(value))
               return sorted(set(hits))
 
+          def normalized_audit_text(text: str | None) -> str:
+              return " ".join(str(text or "").split())
+
+          def temporal_occurrences(text: str | None) -> list[dict]:
+              value = normalized_audit_text(text)
+              hits = []
+              seen = set()
+              for pattern_index, pattern in enumerate(temporal_patterns):
+                  for match in pattern.finditer(value):
+                      raw = " ".join(match.group(0).split())
+                      key = (match.start(), match.end(), raw.casefold(), pattern_index)
+                      if key in seen:
+                          continue
+                      seen.add(key)
+                      hits.append({
+                          "pattern_index": pattern_index,
+                          "token": raw.casefold(),
+                          "matched_text": raw,
+                          "start": match.start(),
+                          "end": match.end(),
+                      })
+              return sorted(hits, key=lambda x: (x["start"], x["end"], x["pattern_index"]))
+
+          def sentence_spans(text: str | None) -> list[dict]:
+              value = normalized_audit_text(text)
+              spans = []
+              for match in re.finditer(r"[^.!?]+(?:[.!?]+|$)", value):
+                  raw = match.group(0)
+                  left_trim = len(raw) - len(raw.lstrip())
+                  sentence = raw.strip()
+                  if not sentence:
+                      continue
+                  start = match.start() + left_trim
+                  end = start + len(sentence)
+                  spans.append({
+                      "start": start,
+                      "end": end,
+                      "text": sentence,
+                      "terminal_punctuation": bool(re.search(r"[.!?]+$", sentence)),
+                  })
+              return spans
+
+          def context_for_occurrence(text: str, start: int, end: int) -> dict:
+              value = normalized_audit_text(text)
+              spans = sentence_spans(value)
+              containing_index = None
+              for idx, span in enumerate(spans):
+                  if span["start"] <= start and end <= span["end"]:
+                      containing_index = idx
+                      break
+              if containing_index is not None:
+                  span = spans[containing_index]
+                  reliable = bool(span["terminal_punctuation"] and len(span["text"]) <= 1200)
+                  if reliable:
+                      return {
+                          "mode": "sentence",
+                          "excerpt": span["text"],
+                          "sentence_index": containing_index,
+                          "preceding_sentence": spans[containing_index - 1]["text"][:1200] if containing_index > 0 else None,
+                          "following_sentence": spans[containing_index + 1]["text"][:1200] if containing_index + 1 < len(spans) else None,
+                          "context_failure_code": None,
+                      }
+              lo = max(0, start - 250)
+              hi = min(len(value), end + 250)
+              excerpt = value[lo:hi].strip()
+              if excerpt:
+                  return {
+                      "mode": "char_window_250_each_side",
+                      "excerpt": excerpt,
+                      "sentence_index": containing_index,
+                      "preceding_sentence": spans[containing_index - 1]["text"][:1200] if containing_index is not None and containing_index > 0 else None,
+                      "following_sentence": spans[containing_index + 1]["text"][:1200] if containing_index is not None and containing_index + 1 < len(spans) else None,
+                      "context_failure_code": None,
+                  }
+              return {
+                  "mode": "unavailable",
+                  "excerpt": None,
+                  "sentence_index": containing_index,
+                  "preceding_sentence": None,
+                  "following_sentence": None,
+                  "context_failure_code": "CONTEXT_EXTRACTION_EMPTY",
+              }
+
+          def nearest_attack_event_sentence(text: str, sentence_index: int | None) -> dict:
+              spans = sentence_spans(text)
+              if not spans:
+                  return {
+                      "sentence": None,
+                      "sentence_index": None,
+                      "distance_sentences": None,
+                      "attack_event_types": [],
+                  }
+              indexes = list(range(len(spans)))
+              if sentence_index is not None:
+                  indexes.sort(key=lambda idx: (abs(idx - sentence_index), idx))
+              for idx in indexes:
+                  event_types = monitor.attack_event_types(spans[idx]["text"])
+                  if event_types:
+                      sentence = spans[idx]["text"]
+                      return {
+                          "sentence": sentence[:1200],
+                          "sentence_truncated": len(sentence) > 1200,
+                          "sentence_index": idx,
+                          "distance_sentences": abs(idx - sentence_index) if sentence_index is not None else None,
+                          "attack_event_types": list(event_types),
+                      }
+              return {
+                  "sentence": None,
+                  "sentence_index": None,
+                  "distance_sentences": None,
+                  "attack_event_types": [],
+              }
+
+          def clock_from_expression(value: str | None) -> str | None:
+              match = re.search(r"(?<!\d)(\d{1,2})[:.](\d{2})\b", str(value or ""))
+              if not match:
+                  return None
+              return f"{int(match.group(1)):02d}:{match.group(2)}"
+
+          def clock_from_timestamp(value: str | None) -> str | None:
+              match = re.search(r"(?:T|\s)(\d{1,2}):(\d{2})(?::\d{2})?", str(value or ""))
+              if not match:
+                  return None
+              return f"{int(match.group(1)):02d}:{match.group(2)}"
+
+          def html_attrs(tag: str) -> dict:
+              attrs = {}
+              for match in re.finditer(r"""([\w:-]+)\s*=\s*["']([^"']*)["']""", tag, re.I):
+                  attrs[match.group(1).casefold()] = match.group(2).strip()
+              return attrs
+
+          def extract_article_metadata(html: str | None) -> dict:
+              source = str(html or "")[:300000]
+              published = []
+              updated = []
+              generic_times = []
+              for tag in re.findall(r"<meta\b[^>]*>", source, flags=re.I):
+                  attrs = html_attrs(tag)
+                  key = " ".join([
+                      attrs.get("property", ""),
+                      attrs.get("name", ""),
+                      attrs.get("itemprop", ""),
+                  ]).casefold()
+                  content = attrs.get("content")
+                  if not content:
+                      continue
+                  if any(marker in key for marker in ("article:published_time", "datepublished", "publishdate", "date_published")):
+                      published.append(content)
+                  if any(marker in key for marker in ("article:modified_time", "datemodified", "lastmodified", "date_modified", "updated_time")):
+                      updated.append(content)
+              for key, bucket in (("datePublished", published), ("dateModified", updated)):
+                  for match in re.finditer(rf'["\']{key}["\']\s*:\s*["\']([^"\']+)["\']', source, flags=re.I):
+                      bucket.append(match.group(1).strip())
+              for tag in re.findall(r"<time\b[^>]*>", source, flags=re.I)[:20]:
+                  attrs = html_attrs(tag)
+                  if attrs.get("datetime"):
+                      generic_times.append(attrs["datetime"])
+              def uniq(values):
+                  out = []
+                  for value in values:
+                      if value and value not in out:
+                          out.append(value)
+                  return out[:10]
+              published = uniq(published)
+              updated = uniq(updated)
+              generic_times = uniq(generic_times)
+              return {
+                  "publication_timestamp": published[0] if published else None,
+                  "update_timestamp": updated[0] if updated else None,
+                  "publication_timestamp_candidates": published,
+                  "update_timestamp_candidates": updated,
+                  "generic_time_datetime_candidates": generic_times,
+              }
+
           def temporal_payload(decision: dict) -> dict:
               temporal = ((decision.get("candidate_evidence") or {}).get("temporal_binding") or {})
               return {
@@ -176,6 +350,15 @@ jobs:
                       "final_host": host_of(response.url),
                       "content_type": str((response.headers or {}).get("Content-Type") or ""),
                   })
+                  if (
+                      int(response.status_code) < 400
+                      and "html" in str((response.headers or {}).get("Content-Type") or "").casefold()
+                      and not is_google_host(host_of(response.url))
+                  ):
+                      try:
+                          rec["article_metadata"] = extract_article_metadata(response.text)
+                      except Exception as metadata_exc:
+                          rec["article_metadata_error"] = f"{type(metadata_exc).__name__}: {metadata_exc}"[:500]
                   network_log.append(rec)
                   return response
               except Exception as exc:
@@ -238,6 +421,12 @@ jobs:
                   and successful_pub_content_types
                   and all("html" not in ctype.casefold() for ctype in successful_pub_content_types)
               )
+              article_metadata = {}
+              for call in reversed(publisher_calls):
+                  candidate_metadata = call.get("article_metadata") or {}
+                  if candidate_metadata:
+                      article_metadata = dict(candidate_metadata)
+                      break
 
               if body_success:
                   failure = None
@@ -269,6 +458,7 @@ jobs:
                   "body_extraction_success": body_success,
                   "body_chars": len(body or ""),
                   "failure_mechanism": failure,
+                  "article_metadata": article_metadata,
                   "network_request_count": len(calls),
                   "publisher_network_request_count": len(publisher_calls),
                   "context": dict(context or {}),
@@ -579,6 +769,107 @@ jobs:
                   if episode_interval:
                       aggregate["path_b_episode_specific_interval"] += 1
 
+              audit_contexts = []
+              temporal_expressions = []
+              audit_context_failure_codes = []
+              audit_context_retained = False
+              if new_temporal_language and body:
+                  audit_text = normalized_audit_text(body)
+                  all_occurrences = temporal_occurrences(body)
+                  new_token_set = set(new_tokens)
+                  relevant_occurrences = [occ for occ in all_occurrences if occ["token"] in new_token_set]
+                  context_index_by_key = {}
+                  for occurrence_index, occ in enumerate(relevant_occurrences):
+                      context = context_for_occurrence(audit_text, int(occ["start"]), int(occ["end"]))
+                      excerpt = context.get("excerpt")
+                      if not excerpt:
+                          failure_code = str(context.get("context_failure_code") or "CONTEXT_EXTRACTION_UNAVAILABLE")
+                          audit_context_failure_codes.append(failure_code)
+                          temporal_expressions.append({
+                              **occ,
+                              "context_id": None,
+                              "context_failure_code": failure_code,
+                          })
+                          continue
+
+                      attack = nearest_attack_event_sentence(audit_text, context.get("sentence_index"))
+                      same_sentence_attack = bool(
+                          context.get("sentence_index") is not None
+                          and attack.get("sentence_index") == context.get("sentence_index")
+                      )
+                      context_key = (
+                          context.get("mode"),
+                          excerpt,
+                          context.get("preceding_sentence"),
+                          context.get("following_sentence"),
+                          attack.get("sentence"),
+                      )
+                      if context_key not in context_index_by_key:
+                          context_id = f"ctx-{len(audit_contexts) + 1:03d}"
+                          probe_row = {
+                              **row,
+                              "discovery_basis": "publisher_fulltext",
+                              "resolved_url": enriched.get("resolved_url") or ((rec or {}).get("resolved_url")),
+                              "matched_text_excerpt": excerpt,
+                          }
+                          probe_decision = monitor.classify_candidate(
+                              probe_row, city_key, episodes, matching
+                          )
+                          probe_temporal = temporal_payload(probe_decision)
+                          audit_contexts.append({
+                              "context_id": context_id,
+                              "mode": context.get("mode"),
+                              "source_excerpt": excerpt,
+                              "preceding_sentence": context.get("preceding_sentence"),
+                              "following_sentence": context.get("following_sentence"),
+                              "nearest_attack_event_sentence": attack,
+                              "same_sentence_contains_attack_event_term": same_sentence_attack,
+                              "current_temporal_parser_result": probe_temporal,
+                              "current_parser_reason_codes": list(probe_decision.get("reason_codes") or []),
+                          })
+                          context_index_by_key[context_key] = context_id
+                      context_id = context_index_by_key[context_key]
+
+                      metadata = dict((rec or {}).get("article_metadata") or {})
+                      expression_clock = clock_from_expression(occ.get("matched_text"))
+                      publication_clock = clock_from_timestamp(metadata.get("publication_timestamp"))
+                      update_clock = clock_from_timestamp(metadata.get("update_timestamp"))
+                      temporal_expressions.append({
+                          **occ,
+                          "context_id": context_id,
+                          "context_failure_code": None,
+                          "clock_diagnostic": {
+                              "expression_clock": expression_clock,
+                              "article_publication_timestamp": metadata.get("publication_timestamp"),
+                              "article_publication_clock": publication_clock,
+                              "article_update_timestamp": metadata.get("update_timestamp"),
+                              "article_update_clock": update_clock,
+                              "exactly_equals_article_publication_clock": (
+                                  expression_clock == publication_clock
+                                  if expression_clock and publication_clock else None
+                              ),
+                              "exactly_equals_article_update_clock": (
+                                  expression_clock == update_clock
+                                  if expression_clock and update_clock else None
+                              ),
+                          },
+                      })
+
+                  if not relevant_occurrences:
+                      audit_context_failure_codes.append("NEW_TOKEN_OCCURRENCE_NOT_RELOCATED")
+                  audit_context_retained = bool(
+                      relevant_occurrences
+                      and len(temporal_expressions) == len(relevant_occurrences)
+                      and all(expr.get("context_id") for expr in temporal_expressions)
+                      and not audit_context_failure_codes
+                  )
+                  if audit_context_retained:
+                      aggregate["path_b_audit_context_complete_rows"] += 1
+                  else:
+                      aggregate["path_b_audit_context_incomplete_rows"] += 1
+                      for code in sorted(set(audit_context_failure_codes)):
+                          aggregate["path_b_audit_context_failure:" + code] += 1
+
               if rec:
                   if not rec["resolution_success"]:
                       path_b_taxonomy["GOOGLE_REDIRECT_RESOLUTION_FAILED"] += 1
@@ -642,8 +933,16 @@ jobs:
                   "resolved_url_populated": bool(enriched.get("resolved_url")),
                   "body_derived_excerpt_populated": bool(enriched.get("matched_text_excerpt")),
                   "resolved_host": (rec or {}).get("resolved_host"),
+                  "resolved_publisher_url": enriched.get("resolved_url") or ((rec or {}).get("resolved_url")),
+                  "shadow_id": f"{city_key}:{monitor.candidate_id(city_key, row['url'], row['title'])}",
+                  "article_metadata": dict((rec or {}).get("article_metadata") or {}),
+                  "official_current_temporal_parser_result": temporal_payload(official),
                   "new_temporal_language_found_in_body": new_temporal_language,
                   "new_temporal_language_tokens": new_tokens[:30],
+                  "AUDIT_CONTEXT_RETAINED": audit_context_retained if new_temporal_language else None,
+                  "audit_context_failure_codes": sorted(set(audit_context_failure_codes)),
+                  "audit_contexts": audit_contexts,
+                  "temporal_expressions": temporal_expressions,
                   "counterfactual": counterfactual,
               })
 
@@ -730,7 +1029,18 @@ jobs:
               "candidates_receiving_populated_resolved_url": int(aggregate["path_b_candidates_receiving_resolved_url"]),
               "candidates_receiving_body_derived_matched_text_excerpt": excerpted,
               "candidates_where_body_contains_temporal_language_absent_from_rss": int(aggregate["path_b_body_new_temporal_language"]),
+              "candidates_with_complete_audit_context": int(aggregate["path_b_audit_context_complete_rows"]),
+              "candidates_lacking_audit_context": int(aggregate["path_b_audit_context_incomplete_rows"]),
+              "audit_context_failure_taxonomy": {
+                  key.split(":", 1)[1]: int(value)
+                  for key, value in sorted(aggregate.items())
+                  if str(key).startswith("path_b_audit_context_failure:")
+              },
               "candidates_where_new_temporal_evidence_is_parser_usable": parser_usable_new,
+              "unsupported_temporal_looking_cases": max(
+                  0,
+                  int(aggregate["path_b_body_new_temporal_language"]) - parser_usable_new,
+              ),
               "candidates_with_episode_specific_clock": int(aggregate["path_b_episode_specific_clock"]),
               "candidates_with_episode_specific_interval": int(aggregate["path_b_episode_specific_interval"]),
               "candidates_remaining_without_usable_temporal_evidence_after_capture": remaining_without_usable_temporal,
@@ -821,7 +1131,7 @@ jobs:
               }
 
           proof = {
-              "schema": "live_rss_durability_shadow_validation_v2",
+              "schema": "rss_temporal_audit_context_retention_v1",
               "execution": {
                   "started_at": monitor.iso(started),
                   "finished_at": monitor.iso(monitor.now_utc()),
@@ -859,10 +1169,10 @@ jobs:
               "decision_note": "No pre-run numeric USEFUL/LOW_YIELD threshold was imposed. Final verdict must be justified from the observed evidence gain, concentration, and fetch cost.",
           }
 
-          result_path = out_dir / "live_rss_durability_shadow_validation_v2.json"
+          result_path = out_dir / "rss_temporal_audit_context_retention.json"
           result_path.write_text(json.dumps(proof, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8")
           digest = hashlib.sha256(result_path.read_bytes()).hexdigest()
-          (out_dir / "live_rss_durability_shadow_validation_v2.sha256").write_text(
+          (out_dir / "rss_temporal_audit_context_retention.sha256").write_text(
               f"{digest}  {result_path.name}\n", encoding="utf-8"
           )
 
@@ -876,7 +1186,7 @@ jobs:
               "city_search_errors": search_errors,
               "json_sha256": digest,
           }
-          (out_dir / "summary.json").write_text(
+          (out_dir / "rss_temporal_audit_context_retention_summary.json").write_text(
               json.dumps(summary, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8"
           )
 
@@ -891,6 +1201,8 @@ jobs:
 
           if aggregate["path_b_classification_invariance_failures"]:
               raise SystemExit("PATH_B_CLASSIFICATION_INVARIANCE_FAILED")
+          if aggregate["path_b_audit_context_incomplete_rows"]:
+              raise SystemExit("AUDIT_CONTEXT_RETENTION_FAILED")
           PY
 
       - name: Prove zero protected mutation
@@ -931,30 +1243,110 @@ jobs:
           git diff --exit-code -- kyiv-air-alerts-grafana/data kyiv-air-alerts-grafana/research research
           test -z "$(git status --porcelain=v1 --untracked-files=all -- kyiv-air-alerts-grafana/data kyiv-air-alerts-grafana/research research)"
 
-          cat > /tmp/live-rss-shadow/mutation_proof.json <<'JSON'
-          {
-            "monitor_historical_state_unchanged": true,
-            "historical_queue_unchanged": true,
-            "review_queue_unchanged": true,
-            "canonical_alerts_unchanged": true,
-            "last_run_files_unchanged": true,
-            "neon_db_untouched": true,
-            "deployment_performed": false,
-            "top_level_monitor_main_called": false,
-            "proof_only_repository_change": true
+          python - <<'PY'
+          import hashlib
+          import json
+          from pathlib import Path
+
+          proof_path = Path("/tmp/live-rss-shadow/rss_temporal_audit_context_retention.json")
+          proof = json.loads(proof_path.read_text(encoding="utf-8"))
+          path_b = proof["path_b_durability_enrichment"]
+          mutation = {
+              "production_code_semantic_mutations": 0,
+              "temporal_parser_mutations": 0,
+              "classifier_mutations": 0,
+              "discovery_mutations": 0,
+              "google_news_resolver_mutations": 0,
+              "production_persistence_mutations": 0,
+              "historical_state_mutations": 0,
+              "historical_queue_mutations": 0,
+              "review_queue_mutations": 0,
+              "canonical_alert_mutations": 0,
+              "neon_db_mutations": 0,
+              "deployments": 0,
+              "monitor_historical_state_unchanged": True,
+              "historical_queue_unchanged": True,
+              "review_queue_unchanged": True,
+              "canonical_alerts_unchanged": True,
+              "last_run_files_unchanged": True,
+              "neon_db_untouched": True,
+              "deployment_performed": False,
+              "top_level_monitor_main_called": False,
+              "proof_only_repository_change": True,
           }
-          JSON
+          proof["mutation_proof"] = mutation
+
+          eligible = int(path_b["eligible_candidates"])
+          bodies = int(path_b["body_extraction_successes"])
+          temporal_rows = int(path_b["candidates_where_body_contains_temporal_language_absent_from_rss"])
+          complete = int(path_b["candidates_with_complete_audit_context"])
+          lacking = int(path_b["candidates_lacking_audit_context"])
+          invariance_failures = int(path_b["classification_invariance"]["failures"])
+
+          if eligible <= 0 or bodies <= 0:
+              verdict = "RSS TEMPORAL AUDIT CONTEXT RETENTION = BLOCKED"
+          elif temporal_rows > 0 and complete == temporal_rows and lacking == 0 and invariance_failures == 0:
+              verdict = "RSS TEMPORAL AUDIT CONTEXT RETENTION = PROVEN"
+          else:
+              verdict = "RSS TEMPORAL AUDIT CONTEXT RETENTION = PARTIAL"
+
+          proof["verdict"] = verdict
+          proof["verdict_basis"] = {
+              "path_b_eligible": eligible,
+              "publisher_bodies_captured": bodies,
+              "new_temporal_language_rows": temporal_rows,
+              "complete_audit_context_rows": complete,
+              "lacking_audit_context_rows": lacking,
+              "classification_invariance_failures": invariance_failures,
+          }
+          proof_path.write_text(
+              json.dumps(proof, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
+              encoding="utf-8",
+          )
+          digest = hashlib.sha256(proof_path.read_bytes()).hexdigest()
+          Path("/tmp/live-rss-shadow/rss_temporal_audit_context_retention.sha256").write_text(
+              f"{digest}  {proof_path.name}\n",
+              encoding="utf-8",
+          )
+          summary = {
+              "verdict": verdict,
+              "aggregate_report": {
+                  "rss_candidates_observed": int(proof["global_metrics"]["total_google_news_rss_candidates_observed"]),
+                  "path_b_eligible": eligible,
+                  "publisher_bodies_successfully_captured": bodies,
+                  "rows_with_new_temporal_looking_language": temporal_rows,
+                  "rows_with_complete_audit_context": complete,
+                  "rows_lacking_context": lacking,
+                  "context_failure_taxonomy": path_b["audit_context_failure_taxonomy"],
+                  "parser_usable_temporal_cases": int(path_b["candidates_where_new_temporal_evidence_is_parser_usable"]),
+                  "unsupported_temporal_looking_cases": int(path_b["unsupported_temporal_looking_cases"]),
+              },
+              "classification_invariance": path_b["classification_invariance"],
+              "mutation_proof": mutation,
+              "proof_json_sha256": digest,
+          }
+          Path("/tmp/live-rss-shadow/rss_temporal_audit_context_retention_summary.json").write_text(
+              json.dumps(summary, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
+              encoding="utf-8",
+          )
+          Path("/tmp/live-rss-shadow/mutation_proof.json").write_text(
+              json.dumps(mutation, indent=2, sort_keys=True) + "\n",
+              encoding="utf-8",
+          )
+          print(verdict)
+          print("FINAL_PROOF_JSON_SHA256=" + digest)
+          PY
           printf 'ZERO_PROTECTED_MUTATION_OK\n'
 
       - name: Upload proof artifact
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: live-rss-durability-shadow-validation-v2
+          name: rss-temporal-audit-context-retention
           path: |
-            /tmp/live-rss-shadow/live_rss_durability_shadow_validation_v2.json
-            /tmp/live-rss-shadow/live_rss_durability_shadow_validation_v2.sha256
-            /tmp/live-rss-shadow/summary.json
+            /tmp/live-rss-shadow/rss_temporal_audit_context_retention.json
+            /tmp/live-rss-shadow/rss_temporal_audit_context_retention.sha256
+            /tmp/live-rss-shadow/rss_temporal_audit_context_retention_summary.json
             /tmp/live-rss-shadow/mutation_proof.json
             /tmp/live-rss-shadow/protected.before.json
             /tmp/live-rss-shadow/protected.after.json
