@@ -2596,56 +2596,54 @@ def event_clock_mentions(text: str) -> list[tuple[int, int]]:
     low = normalize_evidence_text(text)
     event_hits = list(
         re.finditer(
-            r"(?:вибух\w*|влуч\w*|поціл\w*|приліт\w*|вдарил\w*|ударил\w*|"
-            r"\bудар\w*|\bатак\w*|"
-            r"(?:завдал\w*|нанес\w*).{0,50}удар\w*)",
+            r"(?:вибух\\w*|влуч\\w*|поціл\\w*|приліт\\w*|вдарил\\w*|"
+            r"(?:завдал\\w*|нанес\\w*).{0,50}удар\\w*)",
             low,
         )
     )
 
     out = []
     prefixed_pattern = re.compile(
-        r"(?:\bо\b|\bблизько\b|\bприблизно\b)\s*(\d{1,2})[:.](\d{2})",
+        r"(?:\\bо\\b|\\bблизько\\b|\\bприблизно\\b)\\s*(\\d{1,2})[:.](\\d{2})",
         re.IGNORECASE,
     )
-    timeline_leading_pattern = re.compile(r"^(\d{1,2}):(\d{2})\b", re.IGNORECASE)
+    timeline_leading_pattern = re.compile(r"^(\\d{1,2}):(\\d{2})\\b", re.IGNORECASE)
     clock_hits = list(prefixed_pattern.finditer(low)) + list(timeline_leading_pattern.finditer(low))
     clock_hits.sort(key=lambda match: match.start())
     for hit in clock_hits:
         hour, minute = int(hit.group(1)), int(hit.group(2))
         if hour > 23 or minute > 59:
             continue
-        # Ordinary proximity is sentence-local. A reporting/update clock must
-        # not borrow an attack term from a preceding sentence; the one frozen
-        # cross-sentence form is handled by the bounded adjacency rule below.
-        sentence_left = max(
-            (low.rfind(mark, 0, hit.start()) for mark in ".!?;"),
-            default=-1,
-        ) + 1
-        right_marks = [
-            pos
-            for mark in ".!?;"
-            if (pos := low.find(mark, hit.end())) >= 0
-        ]
-        sentence_right = min(right_marks) if right_marks else len(low)
-        same_sentence_events = [
-            event
-            for event in event_hits
-            if sentence_left <= event.start() < sentence_right
-        ]
-        if (
-            same_sentence_events
-            and min(abs(hit.start() - event.start()) for event in same_sentence_events) <= 100
-        ):
+        if event_hits and min(abs(hit.start() - event.start()) for event in event_hits) <= 100:
             out.append((hour, minute))
 
-    # Tightly bounded same-event adjacency for a retained event referent followed
-    # immediately by "new series was heard around HH:MM". This is not generic
-    # cross-paragraph composition.
+    # Frozen bounded direct-event forms. These require an approximate clock
+    # syntactically attached to the attack clause; they do not make generic
+    # attack/update/reporting clocks event times.
+    direct_clock_first = re.compile(
+        r"(?:\\bблизько\\b|\\bприблизно\\b)\\s*(\\d{1,2})[:.](\\d{2})"
+        r"(?:\\s+[\\w’'’-]+){0,3}\\s+"
+        r"(?:росі\\w*(?:\\s+армі\\w*)?|ворог\\w*)\\s+"
+        r"(?:ударил\\w*|атак\\w*)\\b",
+        re.IGNORECASE,
+    )
+    direct_noun_first = re.compile(
+        r"(?:\\bудар\\s+ставс\\w*|\\bмісц\\w*\\s+удару(?:\\s+[\\w’'’-]+){0,3})"
+        r"\\s+(?:близько|приблизно)\\s*(\\d{1,2})[:.](\\d{2})",
+        re.IGNORECASE,
+    )
+    for pattern in (direct_clock_first, direct_noun_first):
+        for hit in pattern.finditer(low):
+            hour, minute = int(hit.group(1)), int(hit.group(2))
+            if hour <= 23 and minute <= 59:
+                out.append((hour, minute))
+
+    # The one frozen cross-sentence construction: an event referent immediately
+    # followed by "new series was heard around HH:MM". No generic composition.
     adjacency = re.compile(
-        r"(?:вибух\w*|удар\w*|атак\w*)[^.!?]{0,180}[.!?]\s*"
-        r"нов\w*\s+сері\w*\s+було\s+чутно\s+"
-        r"(?:близько|приблизно)\s*(\d{1,2})[:.](\d{2})",
+        r"(?:вибух\\w*|удар\\w*|атак\\w*)[^.!?]{0,180}[.!?]\\s*"
+        r"нов\\w*\\s+сері\\w*\\s+було\\s+чутно\\s+"
+        r"(?:близько|приблизно)\\s*(\\d{1,2})[:.](\\d{2})",
         re.IGNORECASE,
     )
     for hit in adjacency.finditer(low):
@@ -2654,7 +2652,6 @@ def event_clock_mentions(text: str) -> list[tuple[int, int]]:
             out.append((hour, minute))
 
     return sorted(set(out))
-
 
 def explicit_source_local_days(text: str, published_local: datetime) -> list:
     low = normalize_evidence_text(text)
