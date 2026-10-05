@@ -1,0 +1,722 @@
+name: Attack-event provenance cardinality addendum freeze
+
+on:
+  push:
+    branches:
+      - attack-event-provenance-cardinality-addendum-2026-10-05
+
+permissions:
+  contents: write
+
+jobs:
+  freeze:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout proof branch
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Audit provenance cardinality and build addendum
+        shell: bash
+        env:
+          BASE_SHA: edd9aae8ce0cda7dfc9dc62b206e5ffbf3965405
+          BRANCH_NAME: attack-event-provenance-cardinality-addendum-2026-10-05
+          WORKFLOW_PATH: .github/workflows/attack-event-provenance-cardinality-addendum-freeze.yml
+          SNAPSHOT_COMMIT: efefa399e69eadd3d7fc8393ac1553cfde35f138
+          SNAPSHOT_PATH: research/attack_event_23city_persistence_snapshot_v2_2026-10-04.json
+          SNAPSHOT_BLOB: 8a2f6bd33f879be9db978da59c12c34e61f6f843
+          SNAPSHOT_SHA256: 09458bcf0a019fa2939eb9dfa484da46cd8fa2be077343c5ba6d595c93d71788
+          STEP1_COMMIT: b205d38dbc50bc502d10e682d4ae53491af542ea
+          STEP1_PATH: research/attack_event_neon_persistence_contract_2026-10-02.json
+          V2_COMMIT: bd82a6c0a19aca4610a8af6df73a307a88c35bf6
+          V2_PATH: research/attack_event_classification_identity_availability_addendum_2026-10-04.json
+          OUTPUT_PATH: research/attack_event_provenance_cardinality_addendum_2026-10-05.json
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import collections
+          import hashlib
+          import json
+          import math
+          import os
+          import pathlib
+          import subprocess
+          import sys
+
+          BASE_SHA = os.environ["BASE_SHA"]
+          BRANCH_NAME = os.environ["BRANCH_NAME"]
+          WORKFLOW_PATH = os.environ["WORKFLOW_PATH"]
+          SNAPSHOT = {
+              "commit": os.environ["SNAPSHOT_COMMIT"],
+              "path": os.environ["SNAPSHOT_PATH"],
+              "blob": os.environ["SNAPSHOT_BLOB"],
+              "sha256": os.environ["SNAPSHOT_SHA256"],
+          }
+          STEP1 = {"commit": os.environ["STEP1_COMMIT"], "path": os.environ["STEP1_PATH"]}
+          V2 = {"commit": os.environ["V2_COMMIT"], "path": os.environ["V2_PATH"]}
+          OUTPUT_PATH = pathlib.Path(os.environ["OUTPUT_PATH"])
+          OUTDIR = pathlib.Path(os.environ["RUNNER_TEMP"]) / "attack-event-provenance-cardinality-addendum"
+          OUTDIR.mkdir(parents=True, exist_ok=True)
+          OUTFILE = OUTDIR / OUTPUT_PATH.name
+
+          FIVE_CITY = {"lviv", "sevastopol", "cherkasy", "sumy", "zaporizhzhia"}
+          EXPECTED_CLASSIFICATIONS = 26405
+          EXPECTED_SOURCE_LINKS = 3769
+          EXPECTED_OLD_CLASSIFICATION_MISMATCH = 6863
+
+          class GateError(RuntimeError):
+              def __init__(self, gate, table=None, count=None, shape=None):
+                  super().__init__(gate)
+                  self.gate = gate
+                  self.table = table
+                  self.count = count
+                  self.shape = shape
+
+          def run(args, *, stdout=subprocess.PIPE, check=True):
+              p = subprocess.run(args, stdout=stdout, stderr=subprocess.PIPE, check=False)
+              if check and p.returncode != 0:
+                  raise RuntimeError((p.stderr or b"").decode("utf-8", "replace")[-1200:])
+              return p
+
+          def git_text(*args):
+              return run(["git", *args]).stdout.decode("utf-8", "replace").strip()
+
+          def ensure_commit(sha):
+              p = run(["git", "cat-file", "-e", f"{sha}^{{commit}}"], check=False)
+              if p.returncode != 0:
+                  run(["git", "fetch", "--no-tags", "origin", sha])
+              if git_text("rev-parse", f"{sha}^{{commit}}") != sha:
+                  raise GateError("FROZEN_INPUT_COMMIT_MISMATCH")
+
+          def materialize(spec, label):
+              ensure_commit(spec["commit"])
+              blob = git_text("rev-parse", f'{spec["commit"]}:{spec["path"]}')
+              if spec.get("blob") and blob != spec["blob"]:
+                  raise GateError(f"{label}_GIT_BLOB_MISMATCH")
+              out = OUTDIR / f"{label.lower()}.json"
+              with out.open("wb") as f:
+                  p = run(["git", "show", f'{spec["commit"]}:{spec["path"]}'], stdout=f, check=False)
+              if p.returncode != 0:
+                  raise GateError(f"{label}_MATERIALIZATION_FAILED")
+              h = hashlib.sha256()
+              with out.open("rb") as f:
+                  for chunk in iter(lambda: f.read(1024 * 1024), b""):
+                      h.update(chunk)
+              sha = h.hexdigest()
+              if spec.get("sha256") and sha != spec["sha256"]:
+                  raise GateError(f"{label}_SHA256_MISMATCH")
+              return out, blob, sha
+
+          def canonical_bytes(obj):
+              return json.dumps(
+                  obj,
+                  ensure_ascii=False,
+                  sort_keys=True,
+                  separators=(",", ":"),
+                  allow_nan=False,
+              ).encode("utf-8")
+
+          def jsonb_compatible(obj):
+              stack = [obj]
+              while stack:
+                  x = stack.pop()
+                  if isinstance(x, dict):
+                      if any(not isinstance(k, str) for k in x):
+                          return False
+                      stack.extend(x.values())
+                  elif isinstance(x, list):
+                      stack.extend(x)
+                  elif isinstance(x, str):
+                      if "\x00" in x:
+                          return False
+                  elif isinstance(x, float):
+                      if not math.isfinite(x):
+                          return False
+                  elif x is None or isinstance(x, (bool, int)):
+                      pass
+                  else:
+                      return False
+              return True
+
+          def roundtrip_hash(obj):
+              if not jsonb_compatible(obj):
+                  raise ValueError("not PostgreSQL-compatible JSONB semantic content")
+              b1 = canonical_bytes(obj)
+              h1 = hashlib.sha256(b1).hexdigest()
+              parsed = json.loads(b1.decode("utf-8"))
+              if parsed != obj:
+                  raise ValueError("semantic round-trip mismatch")
+              b2 = canonical_bytes(parsed)
+              h2 = hashlib.sha256(b2).hexdigest()
+              if h1 != h2:
+                  raise ValueError("canonical hash round-trip mismatch")
+              return h1
+
+          def unique_strings(values):
+              return sorted({v for v in values if isinstance(v, str) and v.strip()})
+
+          def provenance_strings(obj, kind):
+              vals = []
+              def walk(x, key=""):
+                  if isinstance(x, dict):
+                      for k, v in x.items():
+                          walk(v, str(k))
+                  elif isinstance(x, list):
+                      for v in x:
+                          walk(v, key)
+                  elif isinstance(x, str):
+                      lk = key.lower()
+                      if kind == "ref" and (lk == "ref" or lk.endswith("_ref") or lk == "origin_ref"):
+                          vals.append(x)
+                      elif kind == "path" and "path" in lk:
+                          vals.append(x)
+                      elif kind == "blob" and "blob" in lk:
+                          vals.append(x)
+                      elif kind == "commit" and ("commit" in lk or lk.endswith("_head")):
+                          vals.append(x)
+                      elif kind == "target" and "target_state_sha" in lk:
+                          vals.append(x)
+              walk(obj)
+              return unique_strings(vals)
+
+          def card(n):
+              return "ZERO" if n == 0 else ("ONE" if n == 1 else "MULTI")
+
+          def structure_shape(x):
+              if isinstance(x, dict):
+                  return {
+                      "type": "object",
+                      "keys": {k: structure_shape(v) for k, v in sorted(x.items())},
+                  }
+              if isinstance(x, list):
+                  members = {}
+                  for v in x:
+                      s = structure_shape(v)
+                      key = json.dumps(s, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
+                      members[key] = s
+                  return {
+                      "type": "array",
+                      "cardinality": card(len(x)),
+                      "member_shapes": [members[k] for k in sorted(members)],
+                  }
+              if x is None:
+                  return {"type": "null"}
+              if isinstance(x, bool):
+                  return {"type": "boolean"}
+              if isinstance(x, int):
+                  return {"type": "integer"}
+              if isinstance(x, float):
+                  return {"type": "number"}
+              return {"type": "string"}
+
+          def shape_descriptor(obj):
+              refs = provenance_strings(obj, "ref")
+              paths = provenance_strings(obj, "path")
+              blobs = provenance_strings(obj, "blob")
+              commits = provenance_strings(obj, "commit")
+              targets = provenance_strings(obj, "target")
+              structure = structure_shape(obj)
+              core = {
+                  "structure": structure,
+                  "ref_cardinality": card(len(refs)),
+                  "path_cardinality": card(len(paths)),
+                  "blob_cardinality": card(len(blobs)),
+                  "commit_cardinality": card(len(commits)),
+                  "target_state_cardinality": card(len(targets)),
+              }
+              sig = hashlib.sha256(canonical_bytes(core)).hexdigest()
+              return sig, core, {
+                  "refs": len(refs),
+                  "paths": len(paths),
+                  "blobs": len(blobs),
+                  "commits": len(commits),
+                  "targets": len(targets),
+              }
+
+          def corpus_for_city(city):
+              return "FIVE_CITY_FROZEN" if city in FIVE_CITY else "EIGHTEEN_CITY_FROZEN"
+
+          try:
+              if git_text("rev-parse", "HEAD^") != BASE_SHA:
+                  raise GateError("FRESH_MAIN_BASE_MISMATCH")
+              net = git_text("diff", "--name-status", f"{BASE_SHA}...HEAD").splitlines()
+              expected_net = [f"A\t{WORKFLOW_PATH}"]
+              if net != expected_net:
+                  raise GateError("TEMPORARY_WORKFLOW_ONLY_PRECONDITION_MISMATCH")
+
+              snapshot_path, snapshot_blob, snapshot_sha = materialize(SNAPSHOT, "SNAPSHOT")
+              step1_path, step1_blob, step1_sha = materialize(STEP1, "STEP1")
+              v2_path, v2_blob, v2_sha = materialize(V2, "V2")
+
+              step1 = json.loads(step1_path.read_bytes())
+              v2 = json.loads(v2_path.read_bytes())
+              if step1.get("verdict") != "ATTACK-EVENT NEON PERSISTENCE CONTRACT FROZEN":
+                  raise GateError("STEP1_CONTRACT_IDENTITY_MISMATCH")
+              if (v2.get("classification_identity_v2") or {}).get("classification_key_version") != "attack-event-classification-key-v2":
+                  raise GateError("V2_ADDENDUM_IDENTITY_MISMATCH")
+              if (v2.get("original_step1_contract") or {}).get("blob_sha") != step1_blob:
+                  raise GateError("STEP1_BLOB_NOT_MATCHED_BY_V2_ADDENDUM")
+
+              ddl = step1.get("candidate_ddl") or ""
+              required_old_ddl_fragments = [
+                  "    origin_ref TEXT NOT NULL,",
+                  "    origin_commit_sha TEXT NOT NULL,",
+                  "    origin_artifact_path TEXT NOT NULL,",
+                  "    origin_artifact_path TEXT NOT NULL,\n    origin_git_ref TEXT NOT NULL,",
+              ]
+              for frag in required_old_ddl_fragments:
+                  if frag not in ddl:
+                      raise GateError("STEP1_CANDIDATE_DDL_ORIGIN_SHAPE_MISMATCH")
+
+              with snapshot_path.open("r", encoding="utf-8") as f:
+                  snapshot = json.load(f)
+              cls = snapshot.get("classifications")
+              links = snapshot.get("source_links")
+              if not isinstance(cls, list) or not isinstance(links, list):
+                  raise GateError("SNAPSHOT_SCHEMA_MISMATCH")
+              if len(cls) != EXPECTED_CLASSIFICATIONS:
+                  raise GateError("CLASSIFICATION_COUNT_MISMATCH", "public.attack_event_classifications", len(cls))
+              if len(links) != EXPECTED_SOURCE_LINKS:
+                  raise GateError("SOURCE_LINK_COUNT_MISMATCH", "public.attack_event_sources", len(links))
+
+              ckeys = [r.get("classification_key") for r in cls]
+              if any(not isinstance(k, str) or not k for k in ckeys) or len(set(ckeys)) != len(ckeys):
+                  raise GateError("CLASSIFICATION_KEYSET_MISMATCH", "public.attack_event_classifications", len(cls))
+              if snapshot.get("classification_key_version") != "attack-event-classification-key-v2":
+                  raise GateError("CLASSIFICATION_KEY_VERSION_MISMATCH")
+
+              lkeys = [r.get("source_link_key") for r in links]
+              if any(not isinstance(k, str) or not k for k in lkeys) or len(set(lkeys)) != len(lkeys):
+                  raise GateError("SOURCE_LINK_KEYSET_MISMATCH", "public.attack_event_sources", len(links))
+
+              class_city = {}
+              for r in cls:
+                  city = r.get("city_key") or r.get("city")
+                  if not isinstance(city, str) or not city:
+                      raise GateError("CLASSIFICATION_CITY_UNAVAILABLE", "public.attack_event_classifications", 1)
+                  class_city[r["classification_key"]] = city
+
+              class_shape_counts = collections.Counter()
+              class_shape_examples = {}
+              class_nonlossless = 0
+              class_multi_ref = class_multi_path = class_multi_blob = class_multi_commit = class_multi_target = 0
+              class_roundtrip = 0
+              class_hash_repro = 0
+              class_hashes = set()
+              class_missing = 0
+
+              for r in cls:
+                  op = r.get("origin_provenance")
+                  if not isinstance(op, dict):
+                      class_missing += 1
+                      continue
+                  try:
+                      ph = roundtrip_hash(op)
+                  except Exception as e:
+                      raise GateError("CLASSIFICATION_JSONB_ROUNDTRIP_FAILED", "public.attack_event_classifications", 1, type(e).__name__)
+                  class_roundtrip += 1
+                  class_hash_repro += 1
+                  class_hashes.add(ph)
+
+                  refs = provenance_strings(op, "ref")
+                  paths = provenance_strings(op, "path")
+                  blobs = provenance_strings(op, "blob")
+                  commits = provenance_strings(op, "commit")
+                  targets = provenance_strings(op, "target")
+                  mr, mp, mb, mc, mt = map(lambda x: len(x) > 1, (refs, paths, blobs, commits, targets))
+                  class_multi_ref += int(mr)
+                  class_multi_path += int(mp)
+                  class_multi_blob += int(mb)
+                  class_multi_commit += int(mc)
+                  class_multi_target += int(mt)
+                  nonlossless = mr or mp or mb or mc or mt
+                  class_nonlossless += int(nonlossless)
+
+                  sig, core, _ = shape_descriptor(op)
+                  corpus = corpus_for_city(class_city[r["classification_key"]])
+                  class_shape_counts[(corpus, sig, nonlossless)] += 1
+                  class_shape_examples[sig] = core
+
+              if class_missing:
+                  raise GateError("CLASSIFICATION_PROVENANCE_OBJECT_MISSING", "public.attack_event_classifications", class_missing)
+              if class_nonlossless != EXPECTED_OLD_CLASSIFICATION_MISMATCH:
+                  shape = (
+                      f"multi_ref={class_multi_ref};multi_path={class_multi_path};"
+                      f"multi_blob={class_multi_blob};multi_commit={class_multi_commit};multi_target={class_multi_target}"
+                  )
+                  raise GateError("OLD_CLASSIFICATION_SCHEMA_NONLOSSLESS_COUNT_MISMATCH", "public.attack_event_classifications", class_nonlossless, shape)
+              if class_roundtrip != EXPECTED_CLASSIFICATIONS or class_hash_repro != EXPECTED_CLASSIFICATIONS:
+                  raise GateError("CLASSIFICATION_JSONB_REPRESENTABILITY_MISMATCH", "public.attack_event_classifications", class_roundtrip)
+
+              source_shape_counts = collections.Counter()
+              source_shape_examples = {}
+              source_nonlossless = 0
+              source_multi_ref = source_multi_path = source_multi_blob = 0
+              source_roundtrip = 0
+              source_hash_repro = 0
+              source_hashes = set()
+              source_missing = 0
+              source_unresolved_corpus = 0
+
+              for r in links:
+                  origin = r.get("origin")
+                  if not isinstance(origin, dict):
+                      source_missing += 1
+                      continue
+                  try:
+                      ph = roundtrip_hash(origin)
+                  except Exception as e:
+                      raise GateError("SOURCE_LINK_JSONB_ROUNDTRIP_FAILED", "public.attack_event_sources", 1, type(e).__name__)
+                  source_roundtrip += 1
+                  source_hash_repro += 1
+                  source_hashes.add(ph)
+
+                  refs = provenance_strings(origin, "ref")
+                  paths = provenance_strings(origin, "path")
+                  blobs = provenance_strings(origin, "blob")
+                  mr, mp, mb = len(refs) > 1, len(paths) > 1, len(blobs) > 1
+                  source_multi_ref += int(mr)
+                  source_multi_path += int(mp)
+                  source_multi_blob += int(mb)
+                  nonlossless = mr or mp or mb
+                  source_nonlossless += int(nonlossless)
+
+                  ck = r.get("classification_key")
+                  city = r.get("city_key") or r.get("city")
+                  if not city and isinstance(ck, str):
+                      city = class_city.get(ck)
+                  if not isinstance(city, str) or not city:
+                      source_unresolved_corpus += 1
+                      corpus = "UNRESOLVED"
+                  else:
+                      corpus = corpus_for_city(city)
+
+                  sig, core, _ = shape_descriptor(origin)
+                  source_shape_counts[(corpus, sig, nonlossless)] += 1
+                  source_shape_examples[sig] = core
+
+              if source_missing:
+                  raise GateError("SOURCE_LINK_PROVENANCE_OBJECT_MISSING", "public.attack_event_sources", source_missing)
+              if source_unresolved_corpus:
+                  raise GateError("SOURCE_LINK_CORPUS_UNRESOLVED", "public.attack_event_sources", source_unresolved_corpus)
+              if source_roundtrip != EXPECTED_SOURCE_LINKS or source_hash_repro != EXPECTED_SOURCE_LINKS:
+                  raise GateError("SOURCE_LINK_JSONB_REPRESENTABILITY_MISMATCH", "public.attack_event_sources", source_roundtrip)
+
+              classification_shapes = []
+              for (corpus, sig, nonlossless), count in sorted(class_shape_counts.items()):
+                  classification_shapes.append({
+                      "source_corpus": corpus,
+                      "shape_sha256": sig,
+                      "count": count,
+                      "old_scalar_model_lossless": not nonlossless,
+                      "shape": class_shape_examples[sig],
+                  })
+              source_shapes = []
+              for (corpus, sig, nonlossless), count in sorted(source_shape_counts.items()):
+                  source_shapes.append({
+                      "source_corpus": corpus,
+                      "shape_sha256": sig,
+                      "count": count,
+                      "old_scalar_model_lossless": not nonlossless,
+                      "shape": source_shape_examples[sig],
+                  })
+
+              ddl_delta = (
+                  "ALTER TABLE public.attack_event_classifications\n"
+                  "    ADD COLUMN origin_provenance JSONB NOT NULL,\n"
+                  "    ADD COLUMN origin_provenance_sha256 TEXT NOT NULL,\n"
+                  "    ALTER COLUMN origin_ref DROP NOT NULL,\n"
+                  "    ALTER COLUMN origin_commit_sha DROP NOT NULL,\n"
+                  "    ALTER COLUMN origin_artifact_path DROP NOT NULL,\n"
+                  "    ALTER COLUMN origin_artifact_blob_sha DROP NOT NULL,\n"
+                  "    ADD CONSTRAINT attack_event_classifications_origin_provenance_sha256_check\n"
+                  "        CHECK (origin_provenance_sha256 ~ '^[0-9a-f]{64}$');\n\n"
+                  "ALTER TABLE public.attack_event_sources\n"
+                  "    ADD COLUMN origin_provenance JSONB NOT NULL,\n"
+                  "    ADD COLUMN origin_provenance_sha256 TEXT NOT NULL,\n"
+                  "    ALTER COLUMN origin_artifact_path DROP NOT NULL,\n"
+                  "    ALTER COLUMN origin_git_ref DROP NOT NULL,\n"
+                  "    ALTER COLUMN origin_git_blob_sha DROP NOT NULL,\n"
+                  "    ADD CONSTRAINT attack_event_sources_origin_provenance_sha256_check\n"
+                  "        CHECK (origin_provenance_sha256 ~ '^[0-9a-f]{64}$');"
+              )
+
+              artifact = {
+                  "schema_version": "attack-event-provenance-cardinality-addendum-v1",
+                  "status": "PASS",
+                  "verdict": "ATTACK-EVENT PROVENANCE CARDINALITY SCHEMA ADDENDUM FROZEN",
+                  "scope": "OFFLINE PERSISTENCE-SCHEMA CONTRACT REPAIR ONLY",
+                  "frozen_at_date": "2026-10-05",
+                  "fresh_base": {
+                      "main_sha": BASE_SHA,
+                      "branch": BRANCH_NAME,
+                      "temporary_workflow_commit": os.environ.get("GITHUB_SHA"),
+                      "actions_run_id": int(os.environ.get("GITHUB_RUN_ID", "0")),
+                  },
+                  "accepted_blocker": {
+                      "verdict": "ATTACK-EVENT 23-CITY ROLLBACK-ONLY PERSISTENCE PROOF BLOCKED",
+                      "proof_branch": "attack-event-step2c-rollback-persistence-proof-2026-10-05",
+                      "workflow_commit": "4ff932c58338603e4556d32f455e08cf4e1303ba",
+                      "actions_run_id": 37291856691,
+                      "job_id": 111703869672,
+                      "proof_artifact_id": 11336801401,
+                      "first_failing_gate": "PERSISTENCE_SCHEMA_REPRESENTABILITY_MISMATCH",
+                      "phase": "OFFLINE_PREFLIGHT",
+                      "affected_table": "public.attack_event_classifications",
+                      "affected_field": "origin_ref/origin_artifact_path",
+                      "affected_classifications": 6863,
+                      "candidate_ddl_v2_sha256": "34c85aa82489a43b19f19501aea371e98b3373094d1cf5a673cd231ca38fc223",
+                      "db_transaction_opened": False,
+                      "committed_db_mutations": 0,
+                  },
+                  "step1_persistence_contract": {
+                      "commit": STEP1["commit"],
+                      "path": STEP1["path"],
+                      "git_blob": step1_blob,
+                      "sha256": step1_sha,
+                      "verdict": step1.get("verdict"),
+                      "unchanged": True,
+                  },
+                  "classification_identity_availability_addendum": {
+                      "commit": V2["commit"],
+                      "path": V2["path"],
+                      "git_blob": v2_blob,
+                      "sha256": v2_sha,
+                      "classification_key_version": "attack-event-classification-key-v2",
+                      "unchanged": True,
+                  },
+                  "frozen_23city_snapshot": {
+                      "commit": SNAPSHOT["commit"],
+                      "path": SNAPSHOT["path"],
+                      "git_blob": snapshot_blob,
+                      "sha256": snapshot_sha,
+                      "sha256_verification": "PASS",
+                      "classifications": len(cls),
+                      "source_links": len(links),
+                      "changed": False,
+                  },
+                  "representability_defect": {
+                      "classification": (
+                          "The authoritative frozen origin_provenance object can contain multiple independent immutable "
+                          "refs/paths/blobs/commits/target-state hashes, while STEP 1 candidate columns are singular. "
+                          "No accepted scalar-selection rule exists."
+                      ),
+                      "source_link": (
+                          "The authoritative frozen source-link origin object can contain arrays such as artifact_paths[] "
+                          "and artifact_blobs[], while STEP 1 candidate source provenance columns are singular."
+                      ),
+                      "forbidden_resolution": "Do not select one accepted provenance value and discard the others.",
+                  },
+                  "classification_provenance_audit": {
+                      "records_scanned": len(cls),
+                      "provenance_object_present": len(cls) - class_missing,
+                      "old_scalar_model_lossless": len(cls) - class_nonlossless,
+                      "old_scalar_model_nonlossless": class_nonlossless,
+                      "multi_ref_rows": class_multi_ref,
+                      "multi_path_rows": class_multi_path,
+                      "multi_blob_rows": class_multi_blob,
+                      "multi_commit_rows": class_multi_commit,
+                      "multi_target_state_rows": class_multi_target,
+                      "provenance_shape_counts": classification_shapes,
+                  },
+                  "source_link_provenance_audit": {
+                      "records_scanned": len(links),
+                      "provenance_object_present": len(links) - source_missing,
+                      "old_scalar_model_lossless": len(links) - source_nonlossless,
+                      "old_scalar_model_nonlossless": source_nonlossless,
+                      "multi_ref_rows": source_multi_ref,
+                      "multi_path_rows": source_multi_path,
+                      "multi_blob_rows": source_multi_blob,
+                      "provenance_shape_counts": source_shapes,
+                  },
+                  "lossless_jsonb_proof": {
+                      "canonicalization": {
+                          "encoding": "UTF-8",
+                          "ensure_ascii": False,
+                          "sort_keys": True,
+                          "separators": [",", ":"],
+                          "trailing_newline": False,
+                          "hash": "SHA-256 lower-case hex",
+                      },
+                      "classification": {
+                          "losslessly_representable": class_roundtrip,
+                          "required": EXPECTED_CLASSIFICATIONS,
+                          "canonical_hash_reproducible": class_hash_repro,
+                          "unique_provenance_hashes": len(class_hashes),
+                      },
+                      "source_link": {
+                          "losslessly_representable": source_roundtrip,
+                          "required": EXPECTED_SOURCE_LINKS,
+                          "canonical_hash_reproducible": source_hash_repro,
+                          "unique_provenance_hashes": len(source_hashes),
+                      },
+                      "semantic_requirement": (
+                          "PostgreSQL JSONB formatting need not preserve source bytes; object/array/scalar semantic content "
+                          "and the canonical provenance hash must be preserved."
+                      ),
+                      "no_provenance_value_discarded": True,
+                  },
+                  "authoritative_vs_projection_semantics": {
+                      "authoritative": ["origin_provenance", "origin_provenance_sha256"],
+                      "classification_scalar_projections": {
+                          "origin_repository": "retain scalar when mechanically unique and contract-defined",
+                          "origin_ref": "OPTIONAL NULLABLE convenience projection",
+                          "origin_commit_sha": "OPTIONAL NULLABLE convenience projection",
+                          "origin_artifact_path": "OPTIONAL NULLABLE convenience projection",
+                          "origin_artifact_blob_sha": "OPTIONAL NULLABLE convenience projection",
+                          "origin_target_state_sha256": "OPTIONAL NULLABLE convenience projection",
+                          "origin_workflow_run_id": "OPTIONAL NULLABLE convenience projection",
+                      },
+                      "source_scalar_projections": {
+                          "origin_artifact_path": "OPTIONAL NULLABLE convenience projection",
+                          "origin_git_ref": "OPTIONAL NULLABLE convenience projection",
+                          "origin_git_blob_sha": "OPTIONAL NULLABLE convenience projection",
+                      },
+                      "projection_rule": (
+                          "Populate a scalar projection only when one value is mechanically unique without selecting among "
+                          "multiple accepted values; otherwise store NULL. NULL in a projection does not mean provenance is absent."
+                      ),
+                      "payload_rule": "Store only immutable provenance metadata already present in the frozen snapshot; do not duplicate large historical payloads.",
+                  },
+                  "candidate_ddl_delta": {
+                      "apply_now": False,
+                      "supersedes_only_origin_provenance_representation": True,
+                      "sql": ddl_delta,
+                      "sha256": hashlib.sha256(ddl_delta.encode("utf-8")).hexdigest(),
+                  },
+                  "idempotence_semantic_equality_delta": {
+                      "must_compare": ["origin_provenance", "origin_provenance_sha256"],
+                      "same_key_different_authoritative_provenance": (
+                          "NOT an exact semantic no-op; treat as semantic conflict or a later accepted revision under the frozen persistence contract."
+                      ),
+                      "silent_provenance_overwrite": "FORBIDDEN",
+                  },
+                  "identity_invariants": {
+                      "classification_key_version": "attack-event-classification-key-v2",
+                      "classification_key_input_tuple_changed": False,
+                      "attack_event_key_version": "attack-event-key-v1",
+                      "attack_event_key_input_tuple_changed": False,
+                      "source_link_key_version": "attack-event-source-link-key-v1",
+                      "source_link_key_input_tuple_changed": False,
+                      "evidence_set_hashing_changed": False,
+                      "review_provenance_hashing_changed": False,
+                      "qa_availability_semantics_changed": False,
+                      "event_grain_changed": False,
+                      "parent_binding_semantics_changed": False,
+                      "classification_key_v3_introduced": False,
+                  },
+                  "proof_gates": {
+                      "snapshot_sha": "PASS",
+                      "classifications_scanned": len(cls),
+                      "source_links_scanned": len(links),
+                      "old_classification_schema_nonlossless_count": class_nonlossless,
+                      "new_classification_jsonb_representability": f"{class_roundtrip}/{EXPECTED_CLASSIFICATIONS}",
+                      "new_source_link_jsonb_representability": f"{source_roundtrip}/{EXPECTED_SOURCE_LINKS}",
+                      "provenance_hashes_reproducible": "PASS",
+                      "no_provenance_value_discarded": "PASS",
+                      "classification_identity_changed": "NO",
+                      "event_identity_changed": "NO",
+                      "source_link_identity_changed": "NO",
+                      "frozen_snapshot_changed": "NO",
+                      "binding_map_changed": "NO",
+                      "neon_queries": 0,
+                      "db_writes": 0,
+                      "production_mutation": "NO",
+                      "credentials_exposed": False,
+                  },
+                  "mutation_scope": {
+                      "neon_queries": 0,
+                      "db_writes": 0,
+                      "ddl_executed": False,
+                      "attack_event_tables_created": False,
+                      "public_alert_episodes_modified": False,
+                      "frozen_snapshot_modified": False,
+                      "frozen_parent_binding_map_modified": False,
+                      "classification_modified": False,
+                      "deterministic_identity_modified": False,
+                      "deployment": False,
+                      "production_mutation": "NO",
+                  },
+                  "safe_continuation_point": (
+                      "A separate task may rerun STEP 2C from OFFLINE_PREFLIGHT using this frozen addendum; this task does not rerun STEP 2C."
+                  ),
+              }
+
+              OUTFILE.write_text(
+                  json.dumps(artifact, ensure_ascii=False, sort_keys=True, indent=2) + "\n",
+                  encoding="utf-8",
+              )
+
+              print("ADDENDUM_VERDICT=ATTACK-EVENT PROVENANCE CARDINALITY SCHEMA ADDENDUM FROZEN")
+              print(f"SNAPSHOT_SHA256={snapshot_sha}")
+              print(f"CLASSIFICATIONS_SCANNED={len(cls)}")
+              print(f"OLD_CLASSIFICATION_SCHEMA_NONLOSSLESS={class_nonlossless}")
+              print(f"SOURCE_LINKS_SCANNED={len(links)}")
+              print(f"OLD_SOURCE_LINK_SCHEMA_NONLOSSLESS={source_nonlossless}")
+              print(f"CLASSIFICATION_JSONB_LOSSLESS={class_roundtrip}")
+              print(f"SOURCE_LINK_JSONB_LOSSLESS={source_roundtrip}")
+              print("NEON_QUERIES=0")
+              print("DB_WRITES=0")
+              print("PRODUCTION_MUTATION=NO")
+
+          except GateError as e:
+              print("ADDENDUM_VERDICT=ATTACK-EVENT PROVENANCE CARDINALITY SCHEMA ADDENDUM BLOCKED", file=sys.stderr)
+              print(f"FIRST_FAILING_GATE={e.gate}", file=sys.stderr)
+              print(f"AFFECTED_TABLE={e.table or ''}", file=sys.stderr)
+              print(f"AFFECTED_RECORD_COUNT={'' if e.count is None else e.count}", file=sys.stderr)
+              print(f"PROVENANCE_SHAPE_CAUSING_FAILURE={e.shape or ''}", file=sys.stderr)
+              print(f"SNAPSHOT_SHA_INTACT={'YES' if 'snapshot_sha' in locals() and snapshot_sha == SNAPSHOT['sha256'] else 'NO'}", file=sys.stderr)
+              print("NEON_QUERIES=0", file=sys.stderr)
+              print("DB_WRITES=0", file=sys.stderr)
+              print("SAFE_CONTINUATION_POINT=Fix only this addendum proof harness or schema-contract representation; do not modify frozen provenance.", file=sys.stderr)
+              raise SystemExit(1)
+          PY
+
+      - name: Upload proof artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: attack-event-provenance-cardinality-addendum
+          path: ${{ runner.temp }}/attack-event-provenance-cardinality-addendum/attack_event_provenance_cardinality_addendum_2026-10-05.json
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Freeze durable artifact and remove temporary workflow
+        shell: bash
+        env:
+          BASE_SHA: edd9aae8ce0cda7dfc9dc62b206e5ffbf3965405
+          BRANCH_NAME: attack-event-provenance-cardinality-addendum-2026-10-05
+          WORKFLOW_PATH: .github/workflows/attack-event-provenance-cardinality-addendum-freeze.yml
+          OUTPUT_PATH: research/attack_event_provenance_cardinality_addendum_2026-10-05.json
+        run: |
+          set -euo pipefail
+          cp "${RUNNER_TEMP}/attack-event-provenance-cardinality-addendum/attack_event_provenance_cardinality_addendum_2026-10-05.json" "${OUTPUT_PATH}"
+          git rm "${WORKFLOW_PATH}"
+          git add "${OUTPUT_PATH}"
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "Freeze attack-event provenance cardinality schema addendum"
+
+          mapfile -t diff_lines < <(git diff --name-status "${BASE_SHA}...HEAD")
+          if [[ "${#diff_lines[@]}" -ne 1 || "${diff_lines[0]}" != $'A\tresearch/attack_event_provenance_cardinality_addendum_2026-10-05.json' ]]; then
+            printf 'FINAL_DIFF_MISMATCH\n%s\n' "${diff_lines[*]}" >&2
+            exit 1
+          fi
+
+          ARTIFACT_COMMIT="$(git rev-parse HEAD)"
+          ARTIFACT_BLOB="$(git rev-parse "HEAD:${OUTPUT_PATH}")"
+          ARTIFACT_SHA256="$(sha256sum "${OUTPUT_PATH}" | awk '{print $1}')"
+
+          git push origin "HEAD:${BRANCH_NAME}"
+
+          echo "ARTIFACT_COMMIT=${ARTIFACT_COMMIT}"
+          echo "ARTIFACT_BLOB=${ARTIFACT_BLOB}"
+          echo "ARTIFACT_SHA256=${ARTIFACT_SHA256}"
+          echo "FINAL_DIFF=exactly one artifact"
+          echo "CREDENTIALS_EXPOSED=false"
