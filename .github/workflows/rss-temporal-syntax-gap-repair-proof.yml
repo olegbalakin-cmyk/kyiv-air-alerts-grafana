@@ -1,4 +1,4 @@
-name: RSS temporal syntax-gap target probe
+name: RSS temporal syntax-gap frozen-denominator proof
 
 on:
   push:
@@ -15,7 +15,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     env:
-      FROZEN_ARTIFACT_ID: "11329769176"
+      FROZEN_ARTIFACT_ID: "11329769176"\n      PREDECESSOR_PROOF_ARTIFACT_ID: "11348239971"
     steps:
       - uses: actions/checkout@v4
         with:
@@ -41,7 +41,7 @@ jobs:
           python -m pip install -r kyiv-air-alerts-grafana/requirements.txt
           python -m pip install pytest
 
-      - name: Download frozen 228-candidate source artifact
+      - name: Download frozen proof inputs
         env:
           GH_TOKEN: ${{ github.token }}
         shell: bash
@@ -51,6 +51,9 @@ jobs:
           gh api "/repos/$GITHUB_REPOSITORY/actions/artifacts/$FROZEN_ARTIFACT_ID/zip" > /tmp/syntax-probe/frozen.zip
           unzip -q /tmp/syntax-probe/frozen.zip -d /tmp/syntax-probe
           test -s /tmp/syntax-probe/rss_temporal_audit_context_retention.json
+          gh api "/repos/$GITHUB_REPOSITORY/actions/artifacts/$PREDECESSOR_PROOF_ARTIFACT_ID/zip" > /tmp/syntax-probe/predecessor.zip
+          unzip -q /tmp/syntax-probe/predecessor.zip -d /tmp/syntax-probe/predecessor
+          test -s /tmp/syntax-probe/predecessor/rss_path_b_context_selection_repair_proof_2026-10-05.json
 
       - name: Run monitor self-test and temporal parser tests
         working-directory: kyiv-air-alerts-grafana
@@ -94,20 +97,22 @@ jobs:
           print(json.dumps(delta, ensure_ascii=False))
           PY
 
-      - name: Extract only seven frozen syntax targets
+      - name: Prove seven frozen targets and full 228 denominator
         shell: bash
         run: |
           set -euo pipefail
           python .github/proof/rss_temporal_syntax_gap_probe.py \
             /tmp/syntax-probe/rss_temporal_audit_context_retention.json \
-            /tmp/syntax-probe/rss_temporal_syntax_gap_targets.json
+            /tmp/syntax-probe/predecessor/rss_path_b_context_selection_repair_proof_2026-10-05.json \
+            /tmp/syntax-probe/rss_temporal_syntax_gap_repair_proof_2026-10-05.json \
+            /tmp/syntax-probe/recognizer_delta.json
 
-      - name: Upload target probe
+      - name: Upload frozen-denominator proof
         uses: actions/upload-artifact@v4
         with:
-          name: rss-temporal-syntax-gap-target-probe
+          name: rss-temporal-syntax-gap-repair-proof-2026-10-05
           path: |
-            /tmp/syntax-probe/rss_temporal_syntax_gap_targets.json
+            /tmp/syntax-probe/rss_temporal_syntax_gap_repair_proof_2026-10-05.json
             /tmp/syntax-probe/recognizer_delta.json
           if-no-files-found: error
           retention-days: 7
