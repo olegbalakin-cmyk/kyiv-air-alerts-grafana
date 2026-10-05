@@ -160,10 +160,12 @@ jobs:
           original_session_request = monitor.requests.sessions.Session.request
           network_log: list[dict] = []
 
-          def traced_request(session_self, method, request_url, *args, **kwargs):
+          def traced_request(session_self, method=None, request_url=None, *args, **kwargs):
+              if request_url is None:
+                  request_url = kwargs.pop("url", None)
               rec = {
-                  "method": str(method).upper(),
-                  "request_url": str(request_url),
+                  "method": str(method or kwargs.get("method") or "").upper(),
+                  "request_url": str(request_url or ""),
                   "request_host": host_of(request_url),
               }
               try:
