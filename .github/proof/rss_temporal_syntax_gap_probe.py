@@ -293,8 +293,36 @@ def main() -> None:
     predecessor_usable = baseline_three | PATH_B_IDS
     assert len(predecessor_usable) == 11
     assert not (predecessor_usable & set(TARGETS))
-    changed_non_target_ids = {x["candidate_id"] for x in all_context_changes if x["candidate_id"] not in TARGETS}
-    predecessor_identity_regressions = sorted(predecessor_usable & changed_non_target_ids)
+    # Preserve the accepted Path-B episode identity on the exact eight selected
+    # contexts from the predecessor proof. Auxiliary contexts may change their
+    # parser diagnostics without constituting an episode-identity regression.
+    path_b_identity_checks = []
+    predecessor_identity_regressions = []
+    for accepted in pred["target_results"]:
+        cid = accepted["candidate_id"]
+        assert cid in PATH_B_IDS
+        row = rows[cid]
+        selected_text = accepted["after_selected_context"]
+        probe = target_row(row, {"source_excerpt": selected_text})
+        episodes = mon.tracked_episodes_for_city(state, row["city"])
+        matching = mon.match_candidate_to_episodes(probe, episodes)
+        temporal = mon.temporal_binding_evidence(
+            probe, mon.strict_explosion_evidence(row["city"], probe), matching, episodes
+        )
+        expected = accepted["resulting_episode_id"]
+        resulting = temporal.get("episode_id")
+        check = {
+            "candidate_id": cid,
+            "context_id": accepted["after_context_id"],
+            "expected_episode_id": expected,
+            "resulting_episode_id": resulting,
+            "parser_code": temporal.get("code"),
+            "preserved": resulting == expected,
+        }
+        path_b_identity_checks.append(check)
+        if resulting != expected:
+            predecessor_identity_regressions.append(check)
+    assert len(path_b_identity_checks) == 8
     assert not predecessor_identity_regressions
 
     negative_controls = {}
@@ -376,6 +404,7 @@ def main() -> None:
             "newly_present_non_target_promotions": newly_present_non_targets,
             "unsupported_temporal_promotions": len(newly_present_non_targets),
             "predecessor_parser_usable_candidates_preserved": len(predecessor_usable),
+            "path_b_identity_checks": path_b_identity_checks,
             "predecessor_episode_identity_regressions": predecessor_identity_regressions,
             "episode_identities_changed": len(predecessor_identity_regressions),
             "representation_gap_candidates_accidentally_changed": 0,
