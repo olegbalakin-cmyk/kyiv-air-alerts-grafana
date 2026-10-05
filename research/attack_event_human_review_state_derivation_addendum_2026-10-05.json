@@ -1,0 +1,303 @@
+{
+  "accepted_blocker": {
+    "actions_run_id": 37325554293,
+    "affected_field": "human_review_state",
+    "affected_rows": 26405,
+    "affected_table": "public.attack_event_classifications",
+    "committed_db_mutations": 0,
+    "db_preflight_ran": false,
+    "first_failing_gate": "PERSISTENCE_SCHEMA_REPRESENTABILITY_MISMATCH",
+    "job_id": 111815261974,
+    "phase": "OFFLINE_PREFLIGHT",
+    "proof_branch": "attack-event-step2c-rollback-persistence-proof-resume-2026-10-05",
+    "proof_head": "7cf6e8807a2df24f9276fecae1954bf0414ef223",
+    "transaction_opened": false,
+    "verdict": "ATTACK-EVENT 23-CITY ROLLBACK-ONLY PERSISTENCE PROOF BLOCKED"
+  },
+  "accepted_producer_semantics": {
+    "identity_v2_preserves_review_provenance_input": true,
+    "provenance_addendum_review_hashing_changed": false,
+    "step1_allowed_state_constraint_present": true,
+    "step1_human_review_override": "The current repository semantics are evidence-backed review_provenance plus accepted curated/frozen proof artifacts. A review may contribute exact-city, event, air-context, same-attack, or temporal evidence. It must be preserved as provenance on a classification revision; it must not silently overwrite a prior machine classification.",
+    "step1_review_provenance_rule": "If review_provenance is non-empty, SHA-256 canonical JSON with ensure_ascii=false, sort_keys=true, separators=(',', ':'), no trailing newline; otherwise null."
+  },
+  "candidate_derivation_rule": {
+    "contract_compatible": true,
+    "precedence": [
+      "IF review_provenance is non-empty AND review_provenance_sha256 is non-null: REVIEWED_EVIDENCE",
+      "ELSE IF verdict = NEEDS_REVIEW: NEEDS_REVIEW",
+      "ELSE: NONE"
+    ],
+    "precedence_intent": "Accepted review evidence state takes precedence over NEEDS_REVIEW classification verdict because classification verdict and review-evidence state are distinct concepts."
+  },
+  "curated_repair_provenance_audit": {
+    "additional_authoritative_human_review_state_found": false,
+    "candidate_rule_incomplete_due_to_curated_or_repair_semantics": false,
+    "marker_key_shapes": [
+      {
+        "count": 3,
+        "key": "accepted_adjudication_artifact",
+        "value_shape": "string"
+      },
+      {
+        "count": 6863,
+        "key": "accepted_repair_artifact_blob",
+        "value_shape": "string"
+      },
+      {
+        "count": 6863,
+        "key": "accepted_repair_artifact_path",
+        "value_shape": "string"
+      },
+      {
+        "count": 6863,
+        "key": "accepted_repair_ref",
+        "value_shape": "string"
+      },
+      {
+        "count": 3,
+        "key": "adjudication_class",
+        "value_shape": "string"
+      },
+      {
+        "count": 6838,
+        "key": "repair_overlay",
+        "value_shape": "null"
+      },
+      {
+        "count": 25,
+        "key": "repair_overlay",
+        "value_shape": "object"
+      },
+      {
+        "count": 25,
+        "key": "repaired_outcome",
+        "value_shape": "string"
+      },
+      {
+        "count": 1402,
+        "key": "review_note",
+        "value_shape": "string"
+      },
+      {
+        "count": 26405,
+        "key": "review_provenance",
+        "value_shape": "null"
+      },
+      {
+        "count": 1380,
+        "key": "review_provenance",
+        "value_shape": "object"
+      },
+      {
+        "count": 2804,
+        "key": "review_provenance_adapter",
+        "value_shape": "object"
+      },
+      {
+        "count": 26405,
+        "key": "review_provenance_sha256",
+        "value_shape": "null"
+      },
+      {
+        "count": 3398,
+        "key": "reviewed_evidence",
+        "value_shape": "object"
+      },
+      {
+        "count": 5,
+        "key": "reviewed_exact_city_evidence",
+        "value_shape": "object"
+      },
+      {
+        "count": 1380,
+        "key": "validated_by_review",
+        "value_shape": "boolean"
+      }
+    ],
+    "method": "Inventory mechanically explicit review/repair/adjudication/curation/frozen-case marker key shapes without treating marker existence as human review. Only explicit review-state keys carrying an allowed state are authoritative for contradiction testing.",
+    "result": "PASS"
+  },
+  "derivation_coverage": {
+    "derived": 26405,
+    "required": 26405,
+    "result": "PASS"
+  },
+  "derived_state_counts": {
+    "NEEDS_REVIEW": 1795,
+    "NONE": 24610,
+    "REVIEWED_EVIDENCE": 0
+  },
+  "fresh_base": {
+    "actions_run_id": 37333046570,
+    "branch": "attack-event-human-review-state-derivation-addendum-2026-10-05",
+    "main_sha": "dff243dd505d20f86b85e761de5c4eb0160b0166",
+    "temporary_workflow_commit": "491719c7d2a7859ea74a133a6c8c8ba4941c5e65"
+  },
+  "frozen_contracts": {
+    "all_unchanged": true,
+    "classification_identity_availability_addendum": {
+      "commit": "bd82a6c0a19aca4610a8af6df73a307a88c35bf6",
+      "path": "research/attack_event_classification_identity_availability_addendum_2026-10-04.json",
+      "sha256": "a1ba446261625383650b781233fc4956290bffd1437756dca8d7883b24906017",
+      "verdict": "ATTACK-EVENT CLASSIFICATION IDENTITY AVAILABILITY CONTRACT FROZEN"
+    },
+    "provenance_cardinality_addendum": {
+      "commit": "cafee4106d89f59d7f1020baef414ba4813ab29d",
+      "path": "research/attack_event_provenance_cardinality_addendum_2026-10-05.json",
+      "sha256": "e7bb8eb181d152b9760a5d80dc46ce0e261146e7e14433b706989f30e7ffc068",
+      "verdict": "ATTACK-EVENT PROVENANCE CARDINALITY SCHEMA ADDENDUM FROZEN"
+    },
+    "step1_persistence_contract": {
+      "commit": "b205d38dbc50bc502d10e682d4ae53491af542ea",
+      "path": "research/attack_event_neon_persistence_contract_2026-10-02.json",
+      "sha256": "02bfe8bb0420bcf1259b0c49a73ca76e8cc6488c1cd426be4dd8b28ad01b94c3",
+      "verdict": "ATTACK-EVENT NEON PERSISTENCE CONTRACT FROZEN"
+    }
+  },
+  "future_schema_contract": {
+    "allowed_values": [
+      "NONE",
+      "NEEDS_REVIEW",
+      "REVIEWED_EVIDENCE"
+    ],
+    "availability_column_required": false,
+    "column": "human_review_state TEXT NOT NULL",
+    "persistence_adapter_rule": {
+      "derive_from_snapshot": true,
+      "expect_literal_snapshot_field": false,
+      "persisted_semantic_equality_includes_human_review_state": true,
+      "precedence": [
+        "non-empty review_provenance with non-null verified review_provenance_sha256 => REVIEWED_EVIDENCE",
+        "else verdict == NEEDS_REVIEW => NEEDS_REVIEW",
+        "else => NONE"
+      ],
+      "same_frozen_inputs_different_derived_state": "HUMAN_REVIEW_STATE_DERIVATION_NONDETERMINISM"
+    }
+  },
+  "idempotence": {
+    "classification_key_missing_count": 0,
+    "derivation_recomputed_same_row_mismatches": 0,
+    "duplicate_classification_key_same_state_count": 0,
+    "result": "PASS",
+    "rule": "For the same frozen semantic inputs and classification key, derived human_review_state must be identical on replay.",
+    "same_classification_key_different_state": 0
+  },
+  "identity_invariants": {
+    "attack_event_identity_changed": false,
+    "binding_semantics_changed": false,
+    "classification_identity_changed": false,
+    "classification_key_v3_introduced": false,
+    "classification_verdict_changed": false,
+    "evidence_set_hash_changed": false,
+    "human_review_state_is_classification_key_input": false,
+    "qa_availability_semantics_changed": false,
+    "review_provenance_changed": false,
+    "review_provenance_sha256_changed": false,
+    "source_link_identity_changed": false
+  },
+  "mutation_scope": {
+    "attack_event_tables_created": false,
+    "classification_modified": false,
+    "credentials_exposed": false,
+    "db_writes": 0,
+    "ddl_applied": false,
+    "deployment": false,
+    "frozen_parent_binding_map_modified": false,
+    "frozen_snapshot_modified": false,
+    "neon_queries": 0,
+    "production_mutation": "NO",
+    "public_alert_episodes_modified": false,
+    "step2c_rerun": false
+  },
+  "native_contradiction_audit": {
+    "authoritative_allowed_state_hits": [],
+    "contradictions": 0,
+    "explicit_state_shapes": [],
+    "literal_top_level_human_review_state_present": 0,
+    "result": "PASS",
+    "searched_explicit_state_keys": [
+      "human_review_state",
+      "human_review_status",
+      "review_state",
+      "review_status"
+    ]
+  },
+  "proof_gates": {
+    "candidate_derivation_contradictions": 0,
+    "classification_identity_change": "NO",
+    "classifications_scanned": 26405,
+    "db_writes": 0,
+    "derivation_coverage": "26405/26405",
+    "derivation_deterministic": "PASS",
+    "derived_values_allowed": "PASS",
+    "event_identity_change": "NO",
+    "missing_literal_human_review_state": 26405,
+    "neon_queries": 0,
+    "review_provenance_hash_consistency": "PASS",
+    "snapshot_mutation": "NO",
+    "snapshot_sha": "PASS",
+    "source_link_identity_change": "NO"
+  },
+  "review_provenance_hash_consistency": {
+    "canonical_hash_match_nonempty": 0,
+    "canonical_hash_mismatch_nonempty": 0,
+    "canonicalization": {
+      "encoding": "UTF-8",
+      "ensure_ascii": false,
+      "hash": "SHA-256 lower-case hex",
+      "separators": [
+        ",",
+        ":"
+      ],
+      "sort_keys": true,
+      "trailing_newline": false
+    },
+    "nonnull_hash_when_no_review": 0,
+    "null_hash_when_no_review": 26405,
+    "records_scanned": 26405,
+    "result": "PASS",
+    "review_provenance_empty_or_absent": 26405,
+    "review_provenance_nonempty": 0,
+    "review_provenance_value_shapes": [
+      {
+        "count": 26405,
+        "presence": "empty",
+        "value_shape": "null"
+      }
+    ],
+    "top_level_review_provenance_key_missing": 0,
+    "top_level_review_provenance_sha256_key_missing": 0
+  },
+  "safe_continuation_point": "A separate task may rerun STEP 2C from OFFLINE_PREFLIGHT using this frozen derivation addendum; STEP 2C was not rerun here.",
+  "schema_version": "attack-event-human-review-state-derivation-addendum-v1",
+  "scope": "OFFLINE PERSISTENCE-SCHEMA REPRESENTABILITY CONTRACT REPAIR ONLY",
+  "snapshot_identity": {
+    "changed": false,
+    "classifications": 26405,
+    "commit": "efefa399e69eadd3d7fc8393ac1553cfde35f138",
+    "path": "research/attack_event_23city_persistence_snapshot_v2_2026-10-04.json",
+    "sha256": "09458bcf0a019fa2939eb9dfa484da46cd8fa2be077343c5ba6d595c93d71788",
+    "sha256_verification": "PASS"
+  },
+  "status": "PASS",
+  "verdict": "ATTACK-EVENT HUMAN REVIEW STATE DERIVATION ADDENDUM FROZEN",
+  "verdict_x_review_provenance_cross_tab": {
+    "NEEDS_REVIEW": {
+      "no_review_provenance": 1795,
+      "review_provenance_present": 0
+    },
+    "NO_CONFIRMED_EVENT": {
+      "no_review_provenance": 23530,
+      "review_provenance_present": 0
+    },
+    "SENSITIVITY_EVENT_POSITIVE": {
+      "no_review_provenance": 63,
+      "review_provenance_present": 0
+    },
+    "STRICT_EVENT_POSITIVE": {
+      "no_review_provenance": 1017,
+      "review_provenance_present": 0
+    }
+  }
+}
