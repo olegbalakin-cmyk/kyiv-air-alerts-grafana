@@ -2632,9 +2632,9 @@ def event_clock_mentions(text: str) -> list[tuple[int, int]]:
         same_sentence = sentence_left <= nearest.start() < sentence_right
         clock_sentence = low[sentence_left:sentence_right]
         reporting_clock = bool(re.search(
-            r"(?:нов\\w*\\s+)?(?:інформац\\w*|дан\\w*|детал\\w*)"
-            r"[^.!?]{0,40}(?:оприлюднил\\w*|повідомил\\w*|уточнил\\w*)"
-            r"|\\bоновлен\\w*\\b",
+            r"(?:нов\w*\s+)?(?:інформац\w*|дан\w*|детал\w*)"
+            r"[^.!?]{0,40}(?:оприлюднил\w*|повідомил\w*|уточнил\w*)"
+            r"|\bоновлен\w*\b",
             clock_sentence,
             re.IGNORECASE,
         ))
