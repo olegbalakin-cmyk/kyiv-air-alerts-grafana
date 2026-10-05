@@ -1,5 +1,7 @@
 name: Regional Suspilne Telegram publication lag audit
 on:
+  push:
+    branches: [regional-suspilne-publication-lag-audit-2026-10-05]
   pull_request:
     branches: [regional-suspilne-publication-lag-audit-base-2026-10-05]
     types: [opened, synchronize, reopened]
@@ -7,7 +9,7 @@ permissions:
   contents: read
   actions: read
 concurrency:
-  group: regional-suspilne-publication-lag-audit-${{ github.event.pull_request.number }}
+  group: regional-suspilne-publication-lag-audit-${{ github.event.pull_request.number || github.ref_name }}
   cancel-in-progress: false
 jobs:
   audit:
@@ -24,7 +26,7 @@ jobs:
       - name: Check out isolated audit head
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.pull_request.head.sha }}
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
           fetch-depth: 0
           path: proofsrc
       - name: Check out frozen alert state
