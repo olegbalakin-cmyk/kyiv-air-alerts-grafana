@@ -2596,23 +2596,18 @@ def event_clock_mentions(text: str) -> list[tuple[int, int]]:
     low = normalize_evidence_text(text)
     event_hits = list(
         re.finditer(
-            r"(?:вибух\w*|влуч\w*|поціл\w*|приліт\w*|вдарил\w*|"
+            r"(?:вибух\w*|влуч\w*|поціл\w*|приліт\w*|вдарил\w*|ударил\w*|"
+            r"\bудар\w*|\батакув\w*|"
             r"(?:завдал\w*|нанес\w*).{0,50}удар\w*)",
             low,
         )
     )
-    if not event_hits:
-        return []
 
     out = []
     prefixed_pattern = re.compile(
         r"(?:\bо\b|\bблизько\b|\bприблизно\b)\s*(\d{1,2})[:.](\d{2})",
         re.IGNORECASE,
     )
-    # Kyiv City live timelines place an exact event clock at the start of the
-    # event segment, e.g. "21:54, 30 вересня ... Влучання ...". Keep this
-    # deliberately segment-leading: a bare clock elsewhere in prose is not
-    # promoted to an explicit event time.
     timeline_leading_pattern = re.compile(r"^(\d{1,2}):(\d{2})\b", re.IGNORECASE)
     clock_hits = list(prefixed_pattern.finditer(low)) + list(timeline_leading_pattern.finditer(low))
     clock_hits.sort(key=lambda match: match.start())
@@ -2620,10 +2615,48 @@ def event_clock_mentions(text: str) -> list[tuple[int, int]]:
         hour, minute = int(hit.group(1)), int(hit.group(2))
         if hour > 23 or minute > 59:
             continue
-        if min(abs(hit.start() - event.start()) for event in event_hits) <= 100:
+        if event_hits and min(abs(hit.start() - event.start()) for event in event_hits) <= 100:
             out.append((hour, minute))
-    return out
 
+    # Tightly bounded same-event adjacency for a retained event referent followed
+    # immediately by "new series was heard around HH:MM". This is not generic
+    # cross-paragraph composition.
+    adjacency = re.compile(
+        r"(?:вибух\w*|удар\w*|атак\w*)[^.!?]{0,180}[.!?]\s*"
+        r"нов\w*\s+сері\w*\s+було\s+чутно\s+"
+        r"(?:близько|приблизно)\s*(\d{1,2})[:.](\d{2})",
+        re.IGNORECASE,
+    )
+    for hit in adjacency.finditer(low):
+        hour, minute = int(hit.group(1)), int(hit.group(2))
+        if hour <= 23 and minute <= 59:
+            out.append((hour, minute))
+
+    return sorted(set(out))
+
+
+def explicit_source_local_days(text: str, published_local: datetime) -> list:
+    low = normalize_evidence_text(text)
+    pattern = re.compile(
+        r"(?<!\d)(\d{1,2})\s+"
+        r"(січня|лютого|березня|квітня|травня|червня|липня|серпня|"
+        r"вересня|жовтня|листопада|грудня)\b",
+        re.IGNORECASE,
+    )
+    days = set()
+    for hit in pattern.finditer(low):
+        day = int(hit.group(1))
+        month = _KYIV_OFFICIAL_TIMELINE_MONTHS.get(hit.group(2).casefold())
+        if month is None:
+            continue
+        try:
+            value = datetime(published_local.year, month, day, tzinfo=KYIV_TZ).date()
+        except ValueError:
+            continue
+        delta = (published_local.date() - value).days
+        if -1 <= delta <= 31:
+            days.add(value)
+    return sorted(days)
 
 def relative_alert_chronology_relation(row: dict, episodes: list[dict]) -> dict:
     """
@@ -2758,18 +2791,22 @@ def explicit_event_time_relation(
 
     published_local = published.astimezone(KYIV_TZ)
     local_day = published_local.date()
-    # A clock-only source statement normally belongs to the publication local
-    # day. Previous-day fallback is reserved for genuinely near-midnight
-    # publication, where a late report can describe an event before midnight.
-    # This prevents daytime reports such as "8 February ... at 08:48" from
-    # accidentally binding to an unrelated alert at the same clock on 7 February.
+    # Clock-only source statements keep the existing publication-day fallback.
+    # A single explicit source date in the retained event segment takes
+    # precedence and is never replaced by publication/update metadata.
     day_offsets = (0, -1) if published_local.hour < 6 else (0,)
     candidates = []
     limit = SENSITIVITY_NEAR_BOUNDARY_MAX_MINUTES * 60
     for segment in event_segments:
+        source_days = explicit_source_local_days(segment, published_local)
+        if len(source_days) > 1:
+            continue
+        candidate_days = source_days or [
+            local_day + timedelta(days=day_offset)
+            for day_offset in day_offsets
+        ]
         for hour, minute in event_clock_mentions(segment):
-            for day_offset in day_offsets:
-                day = local_day + timedelta(days=day_offset)
+            for day in candidate_days:
                 event_dt = datetime(
                     day.year, day.month, day.day, hour, minute, tzinfo=KYIV_TZ
                 ).astimezone(UTC)
