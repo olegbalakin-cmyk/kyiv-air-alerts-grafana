@@ -1,0 +1,499 @@
+name: Attack-event STEP 2C rollback-only persistence proof
+
+on:
+  push:
+    branches:
+      - attack-event-step2c-rollback-persistence-proof-2026-10-05
+    paths:
+      - .github/workflows/attack-event-step2c-rollback-persistence-proof.yml
+
+permissions:
+  contents: read
+
+jobs:
+  rollback-persistence-proof:
+    name: rollback-persistence-proof
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout proof branch
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+          clean: true
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Run STEP 2C offline representability preflight
+        id: proof
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from __future__ import annotations
+
+          import hashlib
+          import json
+          import re
+          import subprocess
+          import sys
+          from collections import Counter
+          from pathlib import Path
+          import os
+
+          SNAPSHOT = {
+              "commit": "efefa399e69eadd3d7fc8393ac1553cfde35f138",
+              "path": "research/attack_event_23city_persistence_snapshot_v2_2026-10-04.json",
+              "blob": "8a2f6bd33f879be9db978da59c12c34e61f6f843",
+              "sha256": "09458bcf0a019fa2939eb9dfa484da46cd8fa2be077343c5ba6d595c93d71788",
+              "bytes": 90282029,
+          }
+          BINDING = {
+              "commit": "e213f445f08bfc119b234c9460b66bd3efe75d36",
+              "path": "research/attack_event_23city_parent_binding_map_v1_2026-10-05.json",
+              "blob": "91e9bab3678e27296561c175b1b9776c3b765f68",
+              "sha256": "b0ecd5ce980d76cf5ffce65f80ee1d5bd43c0d1b1438afb85424ae95aaef1241",
+              "bytes": 8909265,
+          }
+          STEP1 = {
+              "commit": "b205d38dbc50bc502d10e682d4ae53491af542ea",
+              "path": "research/attack_event_neon_persistence_contract_2026-10-02.json",
+          }
+          V2 = {
+              "commit": "bd82a6c0a19aca4610a8af6df73a307a88c35bf6",
+              "path": "research/attack_event_classification_identity_availability_addendum_2026-10-04.json",
+          }
+
+          EXPECTED_DIST = {
+              "STRICT_EVENT_POSITIVE": 1017,
+              "SENSITIVITY_EVENT_POSITIVE": 63,
+              "NO_CONFIRMED_EVENT": 23530,
+              "NEEDS_REVIEW": 1795,
+          }
+          EXPECTED_PARENT_SHA = "882802f162334c336bc5015e1ef12b9e0d36b338c12f4939700fc69419387146"
+
+          OUTDIR = Path(os.environ["RUNNER_TEMP"]) / "attack-event-step2c-rollback-persistence-proof"
+          OUTDIR.mkdir(parents=True, exist_ok=True)
+          PROOF = OUTDIR / "attack_event_23city_rollback_persistence_proof.json"
+
+          class GateError(RuntimeError):
+              def __init__(self, gate, *, field=None, table=None, count=None, detail=None):
+                  self.gate = gate
+                  self.field = field
+                  self.table = table
+                  self.count = count
+                  self.detail = detail
+                  super().__init__(gate)
+
+          def fail(gate, *, field=None, table=None, count=None, detail=None):
+              raise GateError(gate, field=field, table=table, count=count, detail=detail)
+
+          def run(args, *, stdout=None, check=True):
+              p = subprocess.run(
+                  list(map(str, args)),
+                  stdout=stdout if stdout is not None else subprocess.PIPE,
+                  stderr=subprocess.PIPE,
+                  text=False,
+              )
+              if check and p.returncode != 0:
+                  err = (p.stderr or b"").decode("utf-8", "replace")[-500:]
+                  raise RuntimeError("command failed: " + " ".join(map(str, args)) + ": " + err)
+              return p
+
+          def git_text(*args):
+              return run(["git", *args]).stdout.decode("utf-8", "replace").strip()
+
+          def ensure_commit(sha):
+              p = run(["git", "cat-file", "-e", f"{sha}^{{commit}}"], check=False)
+              if p.returncode != 0:
+                  run(["git", "fetch", "--no-tags", "origin", sha])
+              got = git_text("rev-parse", f"{sha}^{{commit}}")
+              if got != sha:
+                  fail("FROZEN_INPUT_COMMIT_MISMATCH")
+
+          def sha_file(path):
+              h = hashlib.sha256()
+              with Path(path).open("rb") as f:
+                  for chunk in iter(lambda: f.read(1024 * 1024), b""):
+                      h.update(chunk)
+              return h.hexdigest()
+
+          def materialize(spec, label):
+              ensure_commit(spec["commit"])
+              blob = git_text("rev-parse", f'{spec["commit"]}:{spec["path"]}')
+              if spec.get("blob") and blob != spec["blob"]:
+                  fail(f"{label}_GIT_BLOB_MISMATCH")
+              out = OUTDIR / (label.lower() + ".json")
+              with out.open("wb") as f:
+                  p = run(["git", "show", f'{spec["commit"]}:{spec["path"]}'], stdout=f, check=False)
+              if p.returncode != 0:
+                  fail(f"{label}_MATERIALIZATION_FAILED")
+              if spec.get("bytes") is not None and out.stat().st_size != spec["bytes"]:
+                  fail(f"{label}_BYTE_COUNT_MISMATCH")
+              actual_sha = sha_file(out)
+              if spec.get("sha256") and actual_sha != spec["sha256"]:
+                  fail(f"{label}_SHA256_MISMATCH")
+              return out, blob, actual_sha
+
+          def load_small(spec, label):
+              path, blob, sha = materialize(spec, label)
+              try:
+                  return json.loads(path.read_bytes()), blob, sha
+              except Exception:
+                  fail(f"{label}_JSON_INVALID")
+
+          def unique_strings(values):
+              return sorted({str(v) for v in values if isinstance(v, str) and v.strip()})
+
+          def provenance_strings(obj, kind):
+              if not isinstance(obj, dict):
+                  return []
+              vals = []
+              def walk(x, key=""):
+                  if isinstance(x, dict):
+                      for k, v in x.items():
+                          walk(v, str(k))
+                  elif isinstance(x, list):
+                      for v in x:
+                          walk(v, key)
+                  elif isinstance(x, str):
+                      lk = key.lower()
+                      if kind == "ref" and (lk == "ref" or lk.endswith("_ref") or lk == "origin_ref"):
+                          vals.append(x)
+                      if kind == "path" and ("path" in lk):
+                          vals.append(x)
+              walk(obj)
+              return unique_strings(vals)
+
+          def build_candidate_ddl_v2(step1):
+              ddl = step1.get("candidate_ddl")
+              if not isinstance(ddl, str) or not ddl.strip():
+                  fail("PERSISTENCE_CONTRACT_DDL_UNAVAILABLE")
+              old_col = "    qa_reasons TEXT[] NOT NULL DEFAULT '{}'::text[],"
+              new_col = "    qa_reasons_state TEXT NOT NULL,\n    qa_reasons JSONB NULL,"
+              if ddl.count(old_col) != 1:
+                  fail("PERSISTENCE_CONTRACT_DDL_DELTA_MISMATCH")
+              ddl = ddl.replace(old_col, new_col)
+              old_ver = "CHECK (classification_key_version = 'attack-event-classification-key-v1')"
+              new_ver = "CHECK (classification_key_version = 'attack-event-classification-key-v2')"
+              if ddl.count(old_ver) != 1:
+                  fail("PERSISTENCE_CONTRACT_DDL_DELTA_MISMATCH")
+              ddl = ddl.replace(old_ver, new_ver)
+              ddl = ddl.rstrip() + "\n\n" + """
+          ALTER TABLE public.attack_event_classifications
+              ADD CONSTRAINT attack_event_classifications_qa_state_check
+              CHECK (qa_reasons_state IN ('MATERIALIZED','UNMATERIALIZED_IN_ACCEPTED_SOURCE'));
+
+          ALTER TABLE public.attack_event_classifications
+              ADD CONSTRAINT attack_event_classifications_qa_value_check
+              CHECK (
+                  (qa_reasons_state = 'MATERIALIZED' AND jsonb_typeof(qa_reasons) = 'array')
+                  OR
+                  (qa_reasons_state = 'UNMATERIALIZED_IN_ACCEPTED_SOURCE' AND qa_reasons IS NULL)
+              );
+          """.lstrip()
+              return ddl
+
+          base_result = {
+              "schema_version": 1,
+              "kind": "attack_event_23city_rollback_persistence_proof",
+              "snapshot": {
+                  "commit": SNAPSHOT["commit"],
+                  "path": SNAPSHOT["path"],
+                  "git_blob": SNAPSHOT["blob"],
+                  "sha256": SNAPSHOT["sha256"],
+                  "byte_count": SNAPSHOT["bytes"],
+              },
+              "binding_map": {
+                  "commit": BINDING["commit"],
+                  "path": BINDING["path"],
+                  "git_blob": BINDING["blob"],
+                  "sha256": BINDING["sha256"],
+                  "byte_count": BINDING["bytes"],
+              },
+              "step1_contract": dict(STEP1),
+              "v2_addendum": dict(V2),
+              "expected_parent_corpus_sha256": EXPECTED_PARENT_SHA,
+              "db_preflight_ran": False,
+              "outer_rollback_executed": False,
+              "committed_db_mutations": 0,
+              "production_mutation": "NO",
+              "db_cutover": "NO",
+              "credentials_exposed": False,
+          }
+
+          try:
+              snapshot_path, snapshot_blob, snapshot_sha = materialize(SNAPSHOT, "SNAPSHOT")
+              binding_path, binding_blob, binding_sha = materialize(BINDING, "BINDING_MAP")
+              step1, step1_blob, step1_sha = load_small(STEP1, "STEP1_CONTRACT")
+              v2, v2_blob, v2_sha = load_small(V2, "V2_ADDENDUM")
+
+              if step1.get("verdict") != "ATTACK-EVENT NEON PERSISTENCE CONTRACT FROZEN":
+                  fail("STEP1_PERSISTENCE_CONTRACT_NOT_FROZEN")
+              if (v2.get("classification_identity_v2") or {}).get("classification_key_version") != "attack-event-classification-key-v2":
+                  fail("CLASSIFICATION_IDENTITY_V2_CONTRACT_MISMATCH")
+
+              ddl_v2 = build_candidate_ddl_v2(step1)
+              ddl_sha = hashlib.sha256(ddl_v2.encode("utf-8")).hexdigest()
+              base_result["candidate_ddl_v2_sha256"] = ddl_sha
+              base_result["step1_contract"]["git_blob"] = step1_blob
+              base_result["step1_contract"]["sha256"] = step1_sha
+              base_result["v2_addendum"]["git_blob"] = v2_blob
+              base_result["v2_addendum"]["sha256"] = v2_sha
+
+              snapshot = json.loads(snapshot_path.read_bytes())
+              binding = json.loads(binding_path.read_bytes())
+              cls = snapshot.get("classifications")
+              events = snapshot.get("attack_events")
+              links = snapshot.get("source_links")
+              records = binding.get("records")
+              if not all(isinstance(x, list) for x in (cls, events, links, records)):
+                  fail("FROZEN_INPUT_SCHEMA_MISMATCH")
+
+              ckeys = [str(r.get("classification_key") or "") for r in cls]
+              if len(cls) != 26405:
+                  fail("SNAPSHOT_CLASSIFICATION_COUNT_MISMATCH")
+              if len(set(ckeys)) != 26405 or "" in ckeys:
+                  fail("SNAPSHOT_CLASSIFICATION_KEY_UNIQUENESS_MISMATCH")
+              if snapshot.get("classification_key_version") != "attack-event-classification-key-v2":
+                  fail("SNAPSHOT_CLASSIFICATION_KEY_VERSION_MISMATCH")
+              if len(events) != 1080:
+                  fail("SNAPSHOT_EVENT_COUNT_MISMATCH")
+              ekeys = [str(r.get("attack_event_key") or "") for r in events]
+              if len(set(ekeys)) != 1080 or "" in ekeys:
+                  fail("SNAPSHOT_EVENT_KEY_UNIQUENESS_MISMATCH")
+              if len(links) != 3769:
+                  fail("SNAPSHOT_SOURCE_LINK_COUNT_MISMATCH")
+              lkeys = [str(r.get("source_link_key") or "") for r in links]
+              if len(set(lkeys)) != 3769 or "" in lkeys:
+                  fail("SNAPSHOT_SOURCE_LINK_KEY_UNIQUENESS_MISMATCH")
+              dist = dict(Counter(str(r.get("verdict")) for r in cls))
+              if dist != EXPECTED_DIST:
+                  fail("SNAPSHOT_DISTRIBUTION_MISMATCH")
+              qa = Counter(str(r.get("qa_reasons_state")) for r in cls)
+              if qa != Counter({"MATERIALIZED": 6863, "UNMATERIALIZED_IN_ACCEPTED_SOURCE": 19542}):
+                  fail("SNAPSHOT_QA_STATE_COUNT_MISMATCH")
+              bad_qa = sum(
+                  not (
+                      (r.get("qa_reasons_state") == "MATERIALIZED" and isinstance(r.get("qa_reasons"), list))
+                      or
+                      (r.get("qa_reasons_state") == "UNMATERIALIZED_IN_ACCEPTED_SOURCE" and r.get("qa_reasons") is None)
+                  )
+                  for r in cls
+              )
+              if bad_qa:
+                  fail("SNAPSHOT_QA_VALUE_INVARIANT_MISMATCH", count=bad_qa)
+
+              bkeys = [str(r.get("classification_key") or "") for r in records]
+              if len(records) != 26405 or len(set(bkeys)) != 26405 or "" in bkeys:
+                  fail("BINDING_MAP_RECORD_COUNT_OR_KEY_MISMATCH")
+              if set(ckeys) != set(bkeys):
+                  fail("SNAPSHOT_BINDING_KEYSET_MISMATCH")
+              bc = Counter(str(r.get("binding_state")) for r in records)
+              if bc != Counter({"BOUND": 26380, "UNBOUND": 25}):
+                  fail("BINDING_MAP_STATE_COUNT_MISMATCH")
+              if any(r.get("binding_state") == "AMBIGUOUS" for r in records):
+                  fail("BINDING_MAP_AMBIGUOUS_PRESENT")
+              bound_uids = [
+                  str(r.get("alert_episode_uid"))
+                  for r in records
+                  if r.get("binding_state") == "BOUND"
+              ]
+              if len(bound_uids) != 26380 or len(set(bound_uids)) != 26380 or any(x in ("", "None") for x in bound_uids):
+                  fail("BINDING_MAP_BOUND_PARENT_UID_MISMATCH")
+              if any(r.get("alert_episode_uid") is not None for r in records if r.get("binding_state") == "UNBOUND"):
+                  fail("BINDING_MAP_UNBOUND_PARENT_NOT_NULL")
+
+              base_result["snapshot_sha_verification"] = "PASS"
+              base_result["binding_map_sha_verification"] = "PASS"
+              base_result["offline_counts"] = {
+                  "classifications": len(cls),
+                  "events": len(events),
+                  "sources": len(links),
+                  "qa_materialized": qa["MATERIALIZED"],
+                  "qa_unmaterialized": qa["UNMATERIALIZED_IN_ACCEPTED_SOURCE"],
+                  "bound": bc["BOUND"],
+                  "unbound": bc["UNBOUND"],
+                  "ambiguous": bc["AMBIGUOUS"],
+              }
+
+              required_cp = (step1.get("provenance_contract") or {}).get("required_classification_provenance") or []
+              if not any("origin_ref" in str(x) for x in required_cp):
+                  fail("STEP1_PROVENANCE_CONTRACT_UNEXPECTED")
+
+              multi_ref = 0
+              multi_path = 0
+              missing_origin_obj = 0
+              for row in cls:
+                  op = row.get("origin_provenance")
+                  if not isinstance(op, dict):
+                      missing_origin_obj += 1
+                      continue
+                  refs = provenance_strings(op, "ref")
+                  paths = provenance_strings(op, "path")
+                  if len(refs) > 1:
+                      multi_ref += 1
+                  if len(paths) > 1:
+                      multi_path += 1
+
+              if missing_origin_obj:
+                  fail(
+                      "PERSISTENCE_SCHEMA_REPRESENTABILITY_MISMATCH",
+                      table="public.attack_event_classifications",
+                      field="origin_provenance",
+                      count=missing_origin_obj,
+                      detail="required classification provenance object unavailable",
+                  )
+              if multi_ref or multi_path:
+                  fail(
+                      "PERSISTENCE_SCHEMA_REPRESENTABILITY_MISMATCH",
+                      table="public.attack_event_classifications",
+                      field="origin_ref/origin_artifact_path",
+                      count=max(multi_ref, multi_path),
+                      detail=f"multi_ref_rows={multi_ref};multi_path_rows={multi_path};candidate_schema_cardinality=1;accepted_selection_rule=NONE",
+                  )
+
+              missing_reason_codes = sum("classifier_reason_codes" not in r for r in cls)
+              if missing_reason_codes:
+                  fail(
+                      "PERSISTENCE_SCHEMA_REPRESENTABILITY_MISMATCH",
+                      table="public.attack_event_classifications",
+                      field="classifier_reason_codes",
+                      count=missing_reason_codes,
+                      detail="required STEP 1 classification provenance field absent",
+                  )
+
+              missing_review_state = sum("human_review_state" not in r for r in cls)
+              if missing_review_state:
+                  fail(
+                      "PERSISTENCE_SCHEMA_REPRESENTABILITY_MISMATCH",
+                      table="public.attack_event_classifications",
+                      field="human_review_state",
+                      count=missing_review_state,
+                      detail="required non-null STEP 1 field absent and no accepted frozen derivation rule exists",
+                  )
+
+              base_result.update({
+                  "verdict": "ATTACK-EVENT 23-CITY ROLLBACK-ONLY PERSISTENCE PROOF BLOCKED",
+                  "first_failing_gate": "OFFLINE_PREFLIGHT_REPRESENTABILITY_EXPECTED_BLOCKER_NOT_FOUND",
+                  "phase": "OFFLINE_PREFLIGHT",
+                  "affected_table_or_contract_field": None,
+                  "affected_row_count": 0,
+                  "snapshot_sha_intact": "YES",
+                  "binding_map_sha_intact": "YES",
+                  "parent_corpus_sha_intact": None,
+                  "outer_rollback_executed": False,
+                  "attack_event_tables_remaining_after_rollback": None,
+                  "committed_db_mutations": 0,
+                  "production_mutation": "NO",
+                  "safe_continuation_point": "Do not open a write-capable DB transaction until the Phase-0 proof harness is extended beyond representability.",
+              })
+              PROOF.write_text(json.dumps(base_result, ensure_ascii=False, sort_keys=True, separators=(",", ":")), encoding="utf-8")
+              print("FIRST_FAILING_GATE=OFFLINE_PREFLIGHT_REPRESENTABILITY_EXPECTED_BLOCKER_NOT_FOUND", file=sys.stderr)
+              raise SystemExit(1)
+
+          except GateError as exc:
+              base_result.update({
+                  "verdict": "ATTACK-EVENT 23-CITY ROLLBACK-ONLY PERSISTENCE PROOF BLOCKED",
+                  "first_failing_gate": exc.gate,
+                  "phase": "OFFLINE_PREFLIGHT",
+                  "affected_table_or_contract_field": {
+                      "table": exc.table,
+                      "field": exc.field,
+                  },
+                  "affected_row_count": exc.count,
+                  "snapshot_sha_intact": "YES" if base_result.get("snapshot_sha_verification") == "PASS" else "NO",
+                  "binding_map_sha_intact": "YES" if base_result.get("binding_map_sha_verification") == "PASS" else "NO",
+                  "parent_corpus_sha_intact": None,
+                  "outer_rollback_executed": False,
+                  "attack_event_tables_remaining_after_rollback": None,
+                  "committed_db_mutations": 0,
+                  "production_mutation": "NO",
+                  "safe_continuation_point": (
+                      "Resolve only the candidate persistence-schema representability gap; "
+                      "do not change the frozen snapshot or binding map; rerun STEP 2C from OFFLINE_PREFLIGHT."
+                  ),
+              })
+              if exc.detail is not None:
+                  base_result["compact_diagnostic"] = exc.detail
+              PROOF.write_text(json.dumps(base_result, ensure_ascii=False, sort_keys=True, separators=(",", ":")), encoding="utf-8")
+              print("FIRST_FAILING_GATE=" + exc.gate, file=sys.stderr)
+              print("PHASE=OFFLINE_PREFLIGHT", file=sys.stderr)
+              if exc.table:
+                  print("AFFECTED_TABLE=" + exc.table, file=sys.stderr)
+              if exc.field:
+                  print("AFFECTED_CONTRACT_FIELD=" + exc.field, file=sys.stderr)
+              if exc.count is not None:
+                  print("AFFECTED_ROW_COUNT=" + str(exc.count), file=sys.stderr)
+              if exc.detail:
+                  print("COMPACT_DIAGNOSTIC=" + re.sub(r"[^A-Za-z0-9_=;:,. -]", "?", str(exc.detail))[:500], file=sys.stderr)
+              raise SystemExit(1)
+          except Exception as exc:
+              base_result.update({
+                  "verdict": "ATTACK-EVENT 23-CITY ROLLBACK-ONLY PERSISTENCE PROOF BLOCKED",
+                  "first_failing_gate": "EXECUTION_HARNESS_FAILURE",
+                  "phase": "OFFLINE_PREFLIGHT",
+                  "affected_table_or_contract_field": None,
+                  "affected_row_count": None,
+                  "snapshot_sha_intact": "YES" if base_result.get("snapshot_sha_verification") == "PASS" else "NO",
+                  "binding_map_sha_intact": "YES" if base_result.get("binding_map_sha_verification") == "PASS" else "NO",
+                  "parent_corpus_sha_intact": None,
+                  "outer_rollback_executed": False,
+                  "attack_event_tables_remaining_after_rollback": None,
+                  "committed_db_mutations": 0,
+                  "production_mutation": "NO",
+                  "safe_continuation_point": "STEP 2C execution harness only; do not repair data or open a DB write transaction.",
+                  "compact_diagnostic": type(exc).__name__ + ":" + str(exc)[:300],
+              })
+              PROOF.write_text(json.dumps(base_result, ensure_ascii=False, sort_keys=True, separators=(",", ":")), encoding="utf-8")
+              print("FIRST_FAILING_GATE=EXECUTION_HARNESS_FAILURE", file=sys.stderr)
+              print("PHASE=OFFLINE_PREFLIGHT", file=sys.stderr)
+              print("ERROR_TYPE=" + type(exc).__name__, file=sys.stderr)
+              raise SystemExit(1)
+          PY
+
+      - name: Print compact proof metadata
+        if: always()
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json, os
+          from pathlib import Path
+          p = Path(os.environ["RUNNER_TEMP"]) / "attack-event-step2c-rollback-persistence-proof" / "attack_event_23city_rollback_persistence_proof.json"
+          if not p.is_file():
+              print("PROOF_METADATA_MISSING=1")
+              raise SystemExit(0)
+          x = json.loads(p.read_text(encoding="utf-8"))
+          compact = {
+              "verdict": x.get("verdict"),
+              "first_failing_gate": x.get("first_failing_gate"),
+              "phase": x.get("phase"),
+              "affected_table_or_contract_field": x.get("affected_table_or_contract_field"),
+              "affected_row_count": x.get("affected_row_count"),
+              "snapshot_sha_intact": x.get("snapshot_sha_intact"),
+              "binding_map_sha_intact": x.get("binding_map_sha_intact"),
+              "parent_corpus_sha_intact": x.get("parent_corpus_sha_intact"),
+              "outer_rollback_executed": x.get("outer_rollback_executed"),
+              "attack_event_tables_remaining_after_rollback": x.get("attack_event_tables_remaining_after_rollback"),
+              "committed_db_mutations": x.get("committed_db_mutations"),
+              "production_mutation": x.get("production_mutation"),
+              "safe_continuation_point": x.get("safe_continuation_point"),
+              "candidate_ddl_v2_sha256": x.get("candidate_ddl_v2_sha256"),
+          }
+          print("PROOF_METADATA=" + json.dumps(compact, ensure_ascii=False, sort_keys=True, separators=(",", ":")))
+          PY
+
+      - name: Upload rollback persistence proof
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: attack-event-23city-rollback-persistence-proof
+          path: ${{ runner.temp }}/attack-event-step2c-rollback-persistence-proof/attack_event_23city_rollback_persistence_proof.json
+          if-no-files-found: error
+          retention-days: 30
