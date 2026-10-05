@@ -243,7 +243,7 @@ jobs:
               return "FIVE_CITY_FROZEN" if city in FIVE_CITY else "EIGHTEEN_CITY_FROZEN"
 
           try:
-              if git_text("rev-parse", "HEAD^") != BASE_SHA:
+              if git_text("merge-base", BASE_SHA, "HEAD") != BASE_SHA:
                   raise GateError("FRESH_MAIN_BASE_MISMATCH")
               net = git_text("diff", "--name-status", f"{BASE_SHA}...HEAD").splitlines()
               expected_net = [f"A\t{WORKFLOW_PATH}"]
