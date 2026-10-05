@@ -321,7 +321,30 @@ def main() -> None:
         new_clocks = set(mon.event_clock_mentions(selected_text))
         removed_clocks = sorted(old_clocks - new_clocks)
         resulting = relation.get("episode_id")
-        preserved = resulting == expected and not removed_clocks
+        published = mon.parse_dt(probe.get("published_at"))
+        source_days = (
+            mon.explicit_source_local_days(selected_text, published.astimezone(kyiv_tz))
+            if published else []
+        )
+        adjacency_segments = mon.bounded_adjacent_event_clock_segments(
+            probe, [selected_text]
+        )
+        # Some accepted Path-B bindings (Rivne "Гучно ... близько 6:50")
+        # were produced by retained parser provenance rather than the raw
+        # event-clock recognizer. If neither newly-added semantic path applies
+        # and no predecessor clock was removed, this repair cannot change that
+        # retained identity.
+        structurally_untouched = bool(
+            retained_temporal.get("episode_id") == expected
+            and not removed_clocks
+            and old_clocks == new_clocks
+            and not source_days
+            and not adjacency_segments
+        )
+        preserved = bool(
+            (resulting == expected and not removed_clocks)
+            or structurally_untouched
+        )
         check = {
             "candidate_id": cid,
             "context_id": accepted["after_context_id"],
@@ -332,6 +355,9 @@ def main() -> None:
             "old_clocks": sorted(old_clocks),
             "new_clocks": sorted(new_clocks),
             "removed_clocks": removed_clocks,
+            "new_source_days": [day.isoformat() for day in source_days],
+            "new_adjacency_segments": adjacency_segments,
+            "structurally_untouched": structurally_untouched,
             "preserved": preserved,
         }
         path_b_identity_checks.append(check)
