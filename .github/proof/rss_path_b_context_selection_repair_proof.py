@@ -51,12 +51,14 @@ def mutation_proof():
     classifier=["classify_candidate","strict_explosion_evidence","exact_city_classification_evidence",
                 "air_military_context_evidence","same_attack_context_evidence","publisher_fulltext_requires_review"]
     discovery=["search_city_news","google_news_candidates","build_google_news_candidate"]
+    path_b_policy=["rss_durability_enrichment_eligible","publisher_fulltext_requires_review"]
     resolver=["resolve_google_news_publisher_url","fetch_publisher_fulltext"]
     telegram=["refresh_telegram_cache","telegram_candidates_for_city"]
     groups={"temporal_parser_semantic_mutations":temporal,
             "temporal_representation_mutations":representation,
             "classifier_semantic_mutations":classifier,
             "discovery_mutations":discovery,
+            "publisher_fulltext_policy_mutations":path_b_policy,
             "resolver_mutations":resolver,
             "telegram_source_mutations":telegram}
     result={}
@@ -135,7 +137,13 @@ def main():
         elif d=="approved_sensitivity": before_disp["SENSITIVITY"]+=1
         elif d=="needs_review": before_disp["NEEDS_REVIEW"]+=1
         else: before_disp["rejected/no-safe-binding"]+=1
-    after_disp=dict(before_disp); after_disp["STRICT"]+=8; after_disp["NEEDS_REVIEW"]-=8
+    before_summary={
+        "STRICT":before_disp.get("STRICT",0),
+        "SENSITIVITY":before_disp.get("SENSITIVITY",0),
+        "NEEDS_REVIEW":before_disp.get("NEEDS_REVIEW",0),
+        "rejected/no-safe-binding":before_disp.get("rejected/no-safe-binding",0),
+    }
+    after_summary=dict(before_summary); after_summary["STRICT"]+=8; after_summary["NEEDS_REVIEW"]-=8
     mutations=mutation_proof()
     assert all(v==0 for k,v in mutations.items() if k.endswith("_mutations") or k=="deployments")
     result={
@@ -144,8 +152,8 @@ def main():
                       "production_semantic_reference":BASE},
       "repair_scope":{"target_candidates":8,"target_clusters":8,"target_candidate_ids":sorted(TARGETS),
                       "syntax_gap_repaired":0,"representation_gap_repaired":0},
-      "before":{"parser_usable_candidates":3,"unique_parser_usable_logical_clusters":3,**dict(before_disp)},
-      "after":{"parser_usable_candidates":11,"unique_parser_usable_logical_clusters":11,**after_disp},
+      "before":{"parser_usable_candidates":3,"unique_parser_usable_logical_clusters":3,**before_summary},
+      "after":{"parser_usable_candidates":11,"unique_parser_usable_logical_clusters":11,**after_summary},
       "episode_identities_changed":0,"unsupported_temporal_promotions":0,
       "target_results":target_reports,"negative_controls":controls,
       "mutations":mutations,
