@@ -1,0 +1,578 @@
+name: Attack-event STEP 2B parent binding contract alignment
+
+on:
+  push:
+    branches:
+      - attack-event-step2b-parent-binding-contract-alignment-2026-10-05
+    paths:
+      - .github/workflows/attack-event-step2b-parent-binding-contract-alignment.yml
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  contract-alignment:
+    name: contract-alignment
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      actions: read
+    steps:
+      - name: Checkout proof branch
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+          clean: true
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Download accepted parent-binding audit artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: attack-event-23city-parent-binding-audit
+          path: ${{ runner.temp }}/step2b-parent-binding-contract-alignment/input
+          github-token: ${{ github.token }}
+          repository: ${{ github.repository }}
+          run-id: 37269247142
+
+      - name: Validate contract alignment offline
+        id: validate
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ORIGINAL_AUDIT_RUN_ID: "37269247142"
+          ORIGINAL_AUDIT_ARTIFACT_ID: "11327254449"
+          ORIGINAL_AUDIT_ARTIFACT_NAME: "attack-event-23city-parent-binding-audit"
+          ORIGINAL_AUDIT_HEAD: "174c4a4621d1831f6d808d7c23d992dc4e41cc90"
+          ORIGINAL_AUDIT_WORKFLOW_PATH: ".github/workflows/attack-event-step2b-parent-binding-audit.yml"
+          ORIGINAL_AUDIT_WORKFLOW_BLOB: "672959276842e49e8e2549e851f2f4e83225dfc7"
+          CONTRACT_COMMIT: "b205d38dbc50bc502d10e682d4ae53491af542ea"
+          CONTRACT_PATH: "research/attack_event_neon_persistence_contract_2026-10-02.json"
+          SNAPSHOT_PATH: "research/attack_event_23city_persistence_snapshot_v2_2026-10-04.json"
+          SNAPSHOT_SHA256: "09458bcf0a019fa2939eb9dfa484da46cd8fa2be077343c5ba6d595c93d71788"
+          PARENT_CORPUS_SHA256: "882802f162334c336bc5015e1ef12b9e0d36b338c12f4939700fc69419387146"
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/step2b-parent-binding-contract-alignment/output"
+          python - <<'PY'
+          from __future__ import annotations
+
+          import json
+          import os
+          import subprocess
+          import sys
+          from collections import Counter
+          from pathlib import Path
+
+          EXPECTED_CLASSIFICATIONS = 26405
+          EXPECTED_COUNTS = {"BOUND": 26380, "UNBOUND": 25, "AMBIGUOUS": 0}
+          EXPECTED_UNIQUE_BOUND = 26380
+          EXPECTED_ARTIFACT_FILES = {
+              "attack_event_23city_parent_binding_audit.json",
+              "summary.json",
+          }
+          EXPECTED_UNBOUND_CITIES = {"kharkiv", "kyiv", "lviv", "sumy", "zaporizhzhia"}
+
+          run_id = int(os.environ["ORIGINAL_AUDIT_RUN_ID"])
+          artifact_id = int(os.environ["ORIGINAL_AUDIT_ARTIFACT_ID"])
+          artifact_name = os.environ["ORIGINAL_AUDIT_ARTIFACT_NAME"]
+          audit_head = os.environ["ORIGINAL_AUDIT_HEAD"]
+          audit_workflow_path = os.environ["ORIGINAL_AUDIT_WORKFLOW_PATH"]
+          audit_workflow_blob = os.environ["ORIGINAL_AUDIT_WORKFLOW_BLOB"]
+          contract_commit = os.environ["CONTRACT_COMMIT"]
+          contract_path = os.environ["CONTRACT_PATH"]
+          snapshot_path = os.environ["SNAPSHOT_PATH"]
+          snapshot_sha = os.environ["SNAPSHOT_SHA256"]
+          parent_sha = os.environ["PARENT_CORPUS_SHA256"]
+
+          base_dir = Path(os.environ["RUNNER_TEMP"]) / "step2b-parent-binding-contract-alignment"
+          input_dir = base_dir / "input"
+          output_dir = base_dir / "output"
+          output_dir.mkdir(parents=True, exist_ok=True)
+          output_path = output_dir / "step2b_parent_binding_contract_alignment.json"
+
+          class AlignmentError(RuntimeError):
+              def __init__(self, gate, *, state=None, affected=None, detail=None):
+                  self.gate = gate
+                  self.state = state
+                  self.affected = list(affected or [])
+                  self.detail = detail
+                  super().__init__(gate)
+
+          def fail(gate, *, state=None, affected=None, detail=None):
+              raise AlignmentError(gate, state=state, affected=affected, detail=detail)
+
+          def write_json(obj):
+              output_path.write_text(
+                  json.dumps(obj, ensure_ascii=False, sort_keys=True, indent=2) + "\n",
+                  encoding="utf-8",
+              )
+
+          def run_text(args):
+              return subprocess.check_output(args, text=True).strip()
+
+          def gh_json(endpoint):
+              return json.loads(run_text(["gh", "api", endpoint]))
+
+          def ensure_commit(sha):
+              rc = subprocess.run(
+                  ["git", "cat-file", "-e", f"{sha}^{{commit}}"],
+                  stdout=subprocess.DEVNULL,
+                  stderr=subprocess.DEVNULL,
+              ).returncode
+              if rc != 0:
+                  subprocess.check_call(
+                      ["git", "fetch", "--no-tags", "origin", sha],
+                      stdout=subprocess.DEVNULL,
+                  )
+
+          def git_show(spec):
+              return subprocess.check_output(["git", "show", spec], text=True)
+
+          def strings(value):
+              if isinstance(value, str):
+                  yield value
+              elif isinstance(value, dict):
+                  for k, v in value.items():
+                      yield str(k)
+                      yield from strings(v)
+              elif isinstance(value, list):
+                  for item in value:
+                      yield from strings(item)
+
+          snapshot_intact = False
+          parent_intact = False
+          records = []
+          counts = {"BOUND": 0, "UNBOUND": 0, "AMBIGUOUS": 0}
+          unique_bound_count = 0
+
+          try:
+              # Exact source artifact and run identity. No database access occurs.
+              artifact_meta = gh_json(
+                  f"repos/{os.environ['GITHUB_REPOSITORY']}/actions/artifacts/{artifact_id}"
+              )
+              run_meta = gh_json(
+                  f"repos/{os.environ['GITHUB_REPOSITORY']}/actions/runs/{run_id}"
+              )
+              workflow_run = artifact_meta.get("workflow_run") or {}
+
+              if int(artifact_meta.get("id", -1)) != artifact_id:
+                  fail("ORIGINAL_AUDIT_ARTIFACT_ID_MISMATCH")
+              if artifact_meta.get("name") != artifact_name:
+                  fail("ORIGINAL_AUDIT_ARTIFACT_NAME_MISMATCH")
+              if artifact_meta.get("expired") is True:
+                  fail("ORIGINAL_AUDIT_ARTIFACT_EXPIRED")
+              if int(workflow_run.get("id", -1)) != run_id:
+                  fail("ORIGINAL_AUDIT_ARTIFACT_RUN_MISMATCH")
+              if workflow_run.get("head_sha") != audit_head:
+                  fail("ORIGINAL_AUDIT_ARTIFACT_HEAD_MISMATCH")
+              if int(run_meta.get("id", -1)) != run_id:
+                  fail("ORIGINAL_AUDIT_RUN_ID_MISMATCH")
+              if run_meta.get("head_sha") != audit_head:
+                  fail("ORIGINAL_AUDIT_RUN_HEAD_MISMATCH")
+
+              present = {p.name for p in input_dir.iterdir() if p.is_file()}
+              if not EXPECTED_ARTIFACT_FILES.issubset(present):
+                  fail(
+                      "ORIGINAL_AUDIT_EXPECTED_FILES_MISSING",
+                      detail={"missing": sorted(EXPECTED_ARTIFACT_FILES - present)},
+                  )
+
+              audit_path = input_dir / "attack_event_23city_parent_binding_audit.json"
+              summary_path = input_dir / "summary.json"
+              audit = json.loads(audit_path.read_text(encoding="utf-8"))
+              summary = json.loads(summary_path.read_text(encoding="utf-8"))
+              if not isinstance(audit, dict) or not isinstance(summary, dict):
+                  fail("ORIGINAL_AUDIT_JSON_SCHEMA_MISMATCH")
+
+              # Verify the exact predecessor workflow blob and its frozen snapshot constants.
+              ensure_commit(audit_head)
+              actual_wf_blob = run_text(
+                  ["git", "rev-parse", f"{audit_head}:{audit_workflow_path}"]
+              )
+              if actual_wf_blob != audit_workflow_blob:
+                  fail("ORIGINAL_AUDIT_WORKFLOW_BLOB_MISMATCH")
+              predecessor_workflow = git_show(f"{audit_head}:{audit_workflow_path}")
+              if f'SNAPSHOT_PATH = Path("{snapshot_path}")' not in predecessor_workflow:
+                  fail("ORIGINAL_AUDIT_SNAPSHOT_PATH_REFERENCE_MISMATCH")
+              if f'SNAPSHOT_SHA256 = "{snapshot_sha}"' not in predecessor_workflow:
+                  fail("ORIGINAL_AUDIT_SNAPSHOT_SHA_REFERENCE_MISMATCH")
+
+              # Read the frozen STEP 1 contract directly from its accepted commit.
+              ensure_commit(contract_commit)
+              contract_blob = run_text(["git", "rev-parse", f"{contract_commit}:{contract_path}"])
+              contract = json.loads(git_show(f"{contract_commit}:{contract_path}"))
+              try:
+                  alert_rel = contract["relationship_matrix"]["public.alert_episodes"]
+              except Exception:
+                  fail("FROZEN_CONTRACT_RELATIONSHIP_MATRIX_MISSING")
+              if alert_rel.get("classification") != "OPTIONAL FK":
+                  fail("FROZEN_CONTRACT_PARENT_RELATIONSHIP_NOT_OPTIONAL_FK")
+              if "unbound/ambiguous historical classifications remain persistable without forcing a link" not in str(alert_rel.get("reason", "")):
+                  fail("FROZEN_CONTRACT_UNBOUND_PERSISTABILITY_TEXT_MISMATCH")
+
+              contract_text = "\n".join(strings(contract))
+              required_contract_phrases = [
+                  "Exactly one mechanically valid canonical parent satisfies all binding predicates.",
+                  "No mechanically valid canonical parent satisfies all predicates.",
+                  "More than one mechanically valid candidate exists, or historical identity does not uniquely establish the parent.",
+                  "binding_state = 'BOUND' AND alert_episode_uid IS NOT NULL",
+                  "binding_state IN ('AMBIGUOUS', 'UNBOUND') AND alert_episode_uid IS NULL",
+              ]
+              missing_contract_phrases = [
+                  phrase for phrase in required_contract_phrases if phrase not in contract_text
+              ]
+              if missing_contract_phrases:
+                  fail(
+                      "FROZEN_CONTRACT_BINDING_SEMANTICS_MISMATCH",
+                      detail={"missing_phrases": missing_contract_phrases},
+                  )
+
+              # Full-record validation of the already-materialized audit.
+              records = audit.get("records")
+              if not isinstance(records, list):
+                  fail("AUDIT_RECORDS_NOT_A_LIST")
+              if len(records) != EXPECTED_CLASSIFICATIONS:
+                  fail(
+                      "CLASSIFICATION_COUNT_MISMATCH",
+                      affected=[str(r.get("classification_key")) for r in records[:20] if isinstance(r, dict)],
+                      detail={"actual": len(records), "expected": EXPECTED_CLASSIFICATIONS},
+                  )
+
+              keys = []
+              bad_schema = []
+              for row in records:
+                  if not isinstance(row, dict):
+                      bad_schema.append("<non-object>")
+                      continue
+                  key = row.get("classification_key")
+                  if not isinstance(key, str) or not key:
+                      bad_schema.append(str(key))
+                  else:
+                      keys.append(key)
+              if bad_schema:
+                  fail("CLASSIFICATION_KEY_SCHEMA_MISMATCH", affected=bad_schema[:20])
+              if len(set(keys)) != EXPECTED_CLASSIFICATIONS:
+                  dupes = [k for k, n in Counter(keys).items() if n > 1]
+                  fail("CLASSIFICATION_KEY_UNIQUENESS_MISMATCH", affected=dupes[:20])
+
+              allowed_states = set(EXPECTED_COUNTS)
+              bad_states = [
+                  str(r.get("classification_key"))
+                  for r in records
+                  if r.get("binding_state") not in allowed_states
+              ]
+              if bad_states:
+                  fail("BINDING_STATE_OUTSIDE_FROZEN_CONTRACT", affected=bad_states[:20])
+
+              counts_counter = Counter(r["binding_state"] for r in records)
+              counts = {state: counts_counter.get(state, 0) for state in EXPECTED_COUNTS}
+              for state, expected in EXPECTED_COUNTS.items():
+                  if counts[state] != expected:
+                      affected = [
+                          r["classification_key"]
+                          for r in records
+                          if r["binding_state"] == state
+                      ][:20]
+                      fail(
+                          "BINDING_STATE_PARTITION_MISMATCH",
+                          state=state,
+                          affected=affected,
+                          detail={"actual": counts, "expected": EXPECTED_COUNTS},
+                      )
+
+              bound = [r for r in records if r["binding_state"] == "BOUND"]
+              unbound = [r for r in records if r["binding_state"] == "UNBOUND"]
+              ambiguous = [r for r in records if r["binding_state"] == "AMBIGUOUS"]
+
+              forbidden_bound_reasons = {
+                  "NO_EXACT_PARENT_TUPLE",
+                  "PARENT_ALERT_TYPE_MISMATCH",
+                  "PARENT_NOT_CLOSED",
+                  "PARENT_CANONICALIZATION_VERSION_MISMATCH",
+                  "HISTORICAL_EPISODE_ID_MISMATCH",
+                  "MULTIPLE_VALID_PARENTS",
+                  "PARENT_UID_REUSE_COLLISION",
+              }
+
+              bad_bound = []
+              bound_id_mismatch = []
+              for r in bound:
+                  reasons = r.get("diagnostic_reason_codes")
+                  if not isinstance(reasons, list):
+                      bad_bound.append(r["classification_key"])
+                      continue
+                  problems = []
+                  if r.get("alert_episode_uid") is None:
+                      problems.append("NULL_PARENT")
+                  if r.get("deterministic_episode_id_validation_result") != "PASS":
+                      problems.append("HISTORICAL_ID_NOT_PASS")
+                      bound_id_mismatch.append(r["classification_key"])
+                  if r.get("matched_parent_alert_type") != "AIR":
+                      problems.append("PARENT_ALERT_TYPE")
+                  if r.get("matched_parent_episode_state") != "closed":
+                      problems.append("PARENT_STATE")
+                  if r.get("matched_parent_canonicalization_version") != "alert-canonicalization-v1":
+                      problems.append("PARENT_CANONICALIZATION_VERSION")
+                  if r.get("matched_parent_start_at") != r.get("alert_start_at"):
+                      problems.append("START_MISMATCH")
+                  if r.get("matched_parent_end_at") != r.get("alert_end_at"):
+                      problems.append("END_MISMATCH")
+                  if forbidden_bound_reasons.intersection(reasons):
+                      problems.append("FORBIDDEN_DIAGNOSTIC_REASON")
+                  if problems:
+                      bad_bound.append(r["classification_key"])
+
+              if bad_bound:
+                  fail(
+                      "BOUND_PREDICATE_VALIDATION_FAILED",
+                      state="BOUND",
+                      affected=bad_bound[:20],
+                      detail={"affected_count": len(bad_bound)},
+                  )
+
+              bound_uids = [r["alert_episode_uid"] for r in bound]
+              unique_bound_count = len(set(bound_uids))
+              if unique_bound_count != EXPECTED_UNIQUE_BOUND:
+                  collision_uids = [u for u, n in Counter(bound_uids).items() if n > 1]
+                  collision_keys = [
+                      r["classification_key"]
+                      for r in bound
+                      if r["alert_episode_uid"] in set(collision_uids)
+                  ]
+                  fail(
+                      "BOUND_PARENT_UID_COLLISION",
+                      state="BOUND",
+                      affected=collision_keys[:20],
+                      detail={
+                          "unique_bound_parent_uids": unique_bound_count,
+                          "collision_uid_count": len(collision_uids),
+                      },
+                  )
+
+              forbidden_unbound_reasons = {
+                  "HISTORICAL_EPISODE_ID_MISMATCH",
+                  "MULTIPLE_VALID_PARENTS",
+                  "PARENT_UID_REUSE_COLLISION",
+              }
+              bad_unbound = []
+              unbound_id_mismatch = []
+              unbound_no_exact_count = 0
+              unbound_id_pass_count = 0
+              for r in unbound:
+                  reasons = r.get("diagnostic_reason_codes")
+                  if not isinstance(reasons, list):
+                      bad_unbound.append(r["classification_key"])
+                      continue
+                  problems = []
+                  if r.get("alert_episode_uid") is not None:
+                      problems.append("NON_NULL_PARENT")
+                  if r.get("exact_parent_candidate_count") != 0:
+                      problems.append("EXACT_PARENT_CANDIDATE_COUNT_NOT_ZERO")
+                  if "NO_EXACT_PARENT_TUPLE" not in reasons:
+                      problems.append("NO_EXACT_PARENT_TUPLE_MISSING")
+                  else:
+                      unbound_no_exact_count += 1
+                  if r.get("deterministic_episode_id_validation_result") != "PASS":
+                      problems.append("HISTORICAL_ID_NOT_PASS")
+                      unbound_id_mismatch.append(r["classification_key"])
+                  else:
+                      unbound_id_pass_count += 1
+                  if forbidden_unbound_reasons.intersection(reasons):
+                      problems.append("FORBIDDEN_DIAGNOSTIC_REASON")
+                  if problems:
+                      bad_unbound.append(r["classification_key"])
+
+              if bad_unbound:
+                  fail(
+                      "UNBOUND_INVARIANT_VALIDATION_FAILED",
+                      state="UNBOUND",
+                      affected=bad_unbound[:20],
+                      detail={"affected_count": len(bad_unbound)},
+                  )
+
+              if ambiguous:
+                  fail(
+                      "OBSERVED_AMBIGUOUS_COUNT_MISMATCH",
+                      state="AMBIGUOUS",
+                      affected=[r["classification_key"] for r in ambiguous[:20]],
+                  )
+
+              # Confirm the original audit summary and audit document identify the accepted
+              # frozen snapshot and parent corpus. The snapshot file itself is deliberately
+              # not downloaded/read in this alignment proof.
+              audit_snapshot_sha = audit.get("snapshot_sha256")
+              summary_snapshot_intact = summary.get("snapshot_sha_intact")
+              if audit_snapshot_sha != snapshot_sha or summary_snapshot_intact != "YES":
+                  fail(
+                      "SNAPSHOT_SHA_INTEGRITY_MISMATCH",
+                      detail={
+                          "audit_snapshot_sha256": audit_snapshot_sha,
+                          "summary_snapshot_sha_intact": summary_snapshot_intact,
+                      },
+                  )
+              snapshot_intact = True
+
+              if summary.get("snapshot_classifications") != EXPECTED_CLASSIFICATIONS:
+                  fail("SUMMARY_CLASSIFICATION_COUNT_MISMATCH")
+              for state, expected in EXPECTED_COUNTS.items():
+                  if summary.get(state) != expected:
+                      fail("SUMMARY_BINDING_STATE_COUNT_MISMATCH", state=state)
+
+              audit_parent_sha = (
+                  (audit.get("parent_corpus") or {}).get("parent_corpus_sha256")
+              )
+              summary_parent_sha = summary.get("parent_corpus_sha256")
+              if audit_parent_sha != parent_sha or summary_parent_sha != parent_sha:
+                  fail(
+                      "PARENT_CORPUS_SHA_MISMATCH",
+                      detail={
+                          "audit_parent_corpus_sha256": audit_parent_sha,
+                          "summary_parent_corpus_sha256": summary_parent_sha,
+                      },
+                  )
+              parent_intact = True
+
+              if summary.get("db_writes") != 0:
+                  fail("ORIGINAL_AUDIT_DB_WRITES_NONZERO")
+              if summary.get("neon_mutations") != 0:
+                  fail("ORIGINAL_AUDIT_NEON_MUTATIONS_NONZERO")
+
+              unbound_cities = {str(r.get("city_key")) for r in unbound}
+              if unbound_cities != EXPECTED_UNBOUND_CITIES:
+                  fail(
+                      "UNBOUND_CITY_SET_MISMATCH",
+                      state="UNBOUND",
+                      affected=[r["classification_key"] for r in unbound[:20]],
+                      detail={"actual": sorted(unbound_cities), "expected": sorted(EXPECTED_UNBOUND_CITIES)},
+                  )
+
+              unbound_listing = [
+                  {
+                      "classification_key": r["classification_key"],
+                      "city_key": r["city_key"],
+                      "historical_episode_id": r["historical_episode_id"],
+                  }
+                  for r in sorted(unbound, key=lambda x: x["classification_key"])
+              ]
+
+              result = {
+                  "schema_version": 1,
+                  "kind": "step2b_parent_binding_contract_alignment",
+                  "verdict": "ATTACK-EVENT 23-CITY PARENT BINDING AUDIT CONTRACT-ALIGNED PASSED",
+                  "original_audit_run_identity": {
+                      "run_id": run_id,
+                      "head_sha": audit_head,
+                      "workflow_path": audit_workflow_path,
+                      "workflow_blob_sha": audit_workflow_blob,
+                  },
+                  "original_audit_artifact_identity": {
+                      "artifact_id": artifact_id,
+                      "artifact_name": artifact_name,
+                      "required_files": sorted(EXPECTED_ARTIFACT_FILES),
+                  },
+                  "frozen_persistence_contract_identity": {
+                      "commit": contract_commit,
+                      "path": contract_path,
+                      "blob_sha": contract_blob,
+                      "public.alert_episodes.classification": "OPTIONAL FK",
+                  },
+                  "snapshot_identity": {
+                      "path": snapshot_path,
+                      "sha256": snapshot_sha,
+                      "classifications": EXPECTED_CLASSIFICATIONS,
+                      "integrity": "PASS",
+                      "validation_basis": "original workflow frozen path/SHA constants plus materialized audit SHA and summary integrity flag; snapshot bytes not re-read",
+                  },
+                  "parent_corpus_sha256": parent_sha,
+                  "counts": {
+                      "classifications": EXPECTED_CLASSIFICATIONS,
+                      "unique_classification_keys": len(set(keys)),
+                      "BOUND": counts["BOUND"],
+                      "UNBOUND": counts["UNBOUND"],
+                      "AMBIGUOUS": counts["AMBIGUOUS"],
+                      "unique_bound_parent_uids": unique_bound_count,
+                      "bound_records_satisfying_all_bound_predicates": len(bound),
+                      "unbound_records_satisfying_unbound_invariant": len(unbound),
+                      "unbound_records_with_exact_parent_candidate_count_0": unbound_no_exact_count,
+                      "unbound_records_with_deterministic_episode_id_validation_PASS": unbound_id_pass_count,
+                      "bound_parent_uid_collisions": len(bound) - unique_bound_count,
+                      "historical_id_mismatch_among_BOUND": len(bound_id_mismatch),
+                      "historical_id_mismatch_among_UNBOUND": len(unbound_id_mismatch),
+                  },
+                  "unbound_classifications": unbound_listing,
+                  "all_25_unbound_have_NO_EXACT_PARENT_TUPLE": True,
+                  "all_25_unbound_satisfy_frozen_UNBOUND_storage_semantics": True,
+                  "old_proof_criterion": {
+                      "NO_EXACT_PARENT_TUPLE_was_hard_failure": True,
+                      "required_partition": {
+                          "BOUND": 26405,
+                          "UNBOUND": 0,
+                          "AMBIGUOUS": 0,
+                      },
+                  },
+                  "corrected_contract_aligned_criterion": {
+                      "NO_EXACT_PARENT_TUPLE_is_contract_valid_UNBOUND_when_no_exact_valid_parent_exists": True,
+                      "observed_required_partition_for_this_artifact": EXPECTED_COUNTS,
+                      "BOUND_storage": "alert_episode_uid non-null and mechanically valid",
+                      "UNBOUND_storage": "alert_episode_uid NULL",
+                      "AMBIGUOUS_storage": "alert_episode_uid NULL",
+                      "exact_matching_weakened": False,
+                  },
+                  "new_neon_queries": 0,
+                  "db_queries_in_this_task": 0,
+                  "db_writes": 0,
+                  "neon_mutations": 0,
+                  "semantic_change": "NO",
+                  "binding_algorithm_changed": "NO",
+                  "credentials_exposed": False,
+              }
+              write_json(result)
+              print("CONTRACT_ALIGNMENT_VERDICT=PASSED")
+              print(f"CLASSIFICATIONS={EXPECTED_CLASSIFICATIONS}")
+              print(f"BOUND={counts['BOUND']}")
+              print(f"UNBOUND={counts['UNBOUND']}")
+              print(f"AMBIGUOUS={counts['AMBIGUOUS']}")
+              print(f"UNIQUE_BOUND_PARENT_UIDS={unique_bound_count}")
+
+          except AlignmentError as exc:
+              blocked = {
+                  "schema_version": 1,
+                  "kind": "step2b_parent_binding_contract_alignment",
+                  "verdict": "ATTACK-EVENT 23-CITY PARENT BINDING AUDIT CONTRACT ALIGNMENT BLOCKED",
+                  "first_failing_gate": exc.gate,
+                  "affected_binding_state": exc.state,
+                  "affected_classification_count": len(exc.affected),
+                  "affected_classification_keys": exc.affected[:20],
+                  "original_parent_corpus_sha_intact": "YES" if parent_intact else "NO",
+                  "snapshot_sha_intact": "YES" if snapshot_intact else "NO",
+                  "new_neon_queries": 0,
+                  "db_queries_in_this_task": 0,
+                  "db_writes": 0,
+                  "neon_mutations": 0,
+                  "semantic_change": "NO",
+                  "binding_algorithm_changed": "NO",
+                  "safe_continuation_point": "STEP 2B contract-alignment proof only; repair nothing; do not proceed to persistence",
+                  "credentials_exposed": False,
+              }
+              if exc.detail is not None:
+                  blocked["detail"] = exc.detail
+              write_json(blocked)
+              print("FIRST_FAILING_GATE=" + exc.gate, file=sys.stderr)
+              raise SystemExit(1)
+          PY
+
+      - name: Upload contract-alignment proof artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: attack-event-step2b-parent-binding-contract-alignment
+          path: ${{ runner.temp }}/step2b-parent-binding-contract-alignment/output/step2b_parent_binding_contract_alignment.json
+          if-no-files-found: error
+          retention-days: 90
