@@ -50,6 +50,48 @@ jobs:
           unzip -q /tmp/syntax-probe/frozen.zip -d /tmp/syntax-probe
           test -s /tmp/syntax-probe/rss_temporal_audit_context_retention.json
 
+      - name: Run monitor self-test and temporal parser tests
+        working-directory: kyiv-air-alerts-grafana
+        shell: bash
+        run: |
+          set -euo pipefail
+          python scripts/monitor_explosion_candidates.py --self-test
+          python -m pytest -q tests/test_rss_temporal_syntax_gap.py tests/test_kyiv_temporal_clock_parser.py tests/test_kyiv_temporal_representation.py
+
+      - name: Audit syntax recognizer delta across all 228 retained contexts
+        shell: bash
+        run: |
+          set -euo pipefail
+          git show 57e3bf8ca3ea2ec468be1aad7352cd91aaa4b36b:kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py > /tmp/syntax-probe/monitor_before.py
+          python - <<'PY'
+          import importlib.util, json, sys
+          from pathlib import Path
+
+          root = Path("kyiv-air-alerts-grafana").resolve()
+          sys.path.insert(0, str(root / "scripts"))
+          import monitor_explosion_candidates as after
+
+          spec = importlib.util.spec_from_file_location("monitor_before", "/tmp/syntax-probe/monitor_before.py")
+          before = importlib.util.module_from_spec(spec)
+          spec.loader.exec_module(before)
+
+          doc = json.loads(Path("/tmp/syntax-probe/rss_temporal_audit_context_retention.json").read_text(encoding="utf-8"))
+          delta = []
+          for row in doc["candidate_level_durability_ledger"]:
+              changed = []
+              for ctx in row.get("audit_contexts") or []:
+                  text = str(ctx.get("source_excerpt") or "")
+                  old = before.event_clock_mentions(text)
+                  new = after.event_clock_mentions(text)
+                  if old != new:
+                      changed.append({"context_id": ctx.get("context_id"), "before": old, "after": new, "text": text})
+              if changed:
+                  delta.append({"candidate_id": row["candidate_id"], "city": row["city"], "changed_contexts": changed})
+          Path("/tmp/syntax-probe/recognizer_delta.json").write_text(json.dumps(delta, ensure_ascii=False, indent=2)+"\\n", encoding="utf-8")
+          print("RECOGNIZER_DELTA_COUNT="+str(len(delta)))
+          print(json.dumps(delta, ensure_ascii=False))
+          PY
+
       - name: Extract only seven frozen syntax targets
         shell: bash
         run: |
@@ -62,6 +104,8 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: rss-temporal-syntax-gap-target-probe
-          path: /tmp/syntax-probe/rss_temporal_syntax_gap_targets.json
+          path: |
+            /tmp/syntax-probe/rss_temporal_syntax_gap_targets.json
+            /tmp/syntax-probe/recognizer_delta.json
           if-no-files-found: error
           retention-days: 7
