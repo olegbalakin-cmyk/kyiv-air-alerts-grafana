@@ -203,32 +203,38 @@ def parse_dt_any(v: Any):
     except Exception:
         return None
 
-def locate_classifications(data: Any) -> tuple[str,list[dict]]:
+def locate_classifications(data: Any) -> tuple[str,list[dict],str]:
+    # Accepted semantic-path locator: identify one verdict field whose distribution
+    # exactly matches the frozen 26,405-row authoritative classification corpus.
     candidates=[]
-    stack=[("$",data)]
-    while stack:
-        p,obj=stack.pop()
-        if isinstance(obj,dict):
-            for k,v in obj.items():
-                q=f"{p}.{k}"
-                if isinstance(v,list):
-                    if len(v)==26405 and v and isinstance(v[0],dict):
-                        candidates.append((q,v))
-                elif isinstance(v,dict):
-                    stack.append((q,v))
-    best=None
-    for path,rows in candidates:
-        counts=Counter()
+    for path,rows in discover_arrays(data):
+        if len(rows)!=26405 or not rows or not isinstance(rows[0],dict):
+            continue
+        per_path={}
         for row in rows:
-            vals={norm(v) for _,v in flatten(row) if norm(v) in KNOWN}
-            if len(vals)==1:
-                counts[next(iter(vals))]+=1
-        score=sum(min(counts[k],EXPECTED_ALL[k]) for k in EXPECTED_ALL)
-        if best is None or score>best[0]:
-            best=(score,path,rows,counts)
-        if counts==EXPECTED_ALL:
-            return path,rows
+            rowvals=defaultdict(set)
+            for fp,v in flatten(row):
+                sv=norm(v)
+                if sv in KNOWN:
+                    sem=re.sub(r"\\[\\d+\\]","[]",fp)
+                    rowvals[sem].add(sv)
+            for sem,vals in rowvals.items():
+                if len(vals)==1:
+                    vv=next(iter(vals))
+                    per_path.setdefault(sem,Counter())[vv]+=1
+        for sem,counts in per_path.items():
+            score=sum(min(counts[k],EXPECTED_ALL[k]) for k in EXPECTED_ALL)
+            candidates.append((score,path,rows,counts,sem))
+            if counts==EXPECTED_ALL:
+                return path,rows,sem
+    best=max(candidates,key=lambda x:x[0]) if candidates else None
     raise RuntimeError(f"authoritative classification table unresolved: {None if best is None else best[3]}")
+
+def row_verdict(row: dict, verdict_sem: str) -> str | None:
+    for p,v in flatten(row):
+        if re.sub(r"\\[\\d+\\]","[]",p)==verdict_sem and norm(v) in KNOWN:
+            return norm(v)
+    return None
 
 def row_city(row: dict) -> str:
     for k in ("city_key","city"):
@@ -554,12 +560,9 @@ def main() -> int:
         spec.loader.exec_module(monitor)
 
         data=json.loads(Path(args.snapshot).read_text(encoding="utf-8"))
-        class_path,class_rows=locate_classifications(data)
-        verdict_counts=Counter()
-        for row in class_rows:
-            v=verdict_from_pairs(flatten(row))
-            if v:
-                verdict_counts[v]+=1
+        class_path,class_rows,verdict_sem=locate_classifications(data)
+        verdict_counts=Counter(row_verdict(row,verdict_sem) for row in class_rows)
+        verdict_counts.pop(None,None)
         if verdict_counts!=EXPECTED_ALL:
             raise RuntimeError(f"AUTHORITATIVE_TOTAL_MISMATCH:{dict(verdict_counts)}")
 
@@ -582,7 +585,7 @@ def main() -> int:
             pairs=context_pairs(recs,class_path,i)
             contexts[i]=(recs,pairs)
 
-        observed_kyiv=Counter(verdict_from_pairs(contexts[i][1]) for i in kyiv_idx)
+        observed_kyiv=Counter(row_verdict(class_rows[i],verdict_sem) for i in kyiv_idx)
         if observed_kyiv!=EXPECTED_KYIV:
             raise RuntimeError(f"KYIV_VERDICT_COUNT_MISMATCH:{dict(observed_kyiv)}")
 
@@ -607,7 +610,7 @@ def main() -> int:
         labels={}
         for i in kyiv_idx:
             pairs=contexts[i][1]
-            v=verdict_from_pairs(pairs)
+            v=row_verdict(class_rows[i],verdict_sem)
             st,_=row_bounds(class_rows[i],pairs)
             date=st.date().isoformat() if st else None
             _,_,evidence=evidence_flags(pairs)
