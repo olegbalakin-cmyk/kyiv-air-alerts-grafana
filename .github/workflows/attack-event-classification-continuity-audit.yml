@@ -18,6 +18,7 @@ concurrency:
 
 jobs:
   audit:
+    if: github.actor != 'github-actions[bot]'
     runs-on: ubuntu-latest
     timeout-minutes: 45
     env:
@@ -44,8 +45,13 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          git fetch --no-tags origin             "$PREDECESSOR_BRANCH:$PREDECESSOR_BRANCH"             "$AUTH_BRANCH:$AUTH_BRANCH"             "$HISTORICAL_BRANCH:$HISTORICAL_BRANCH"             "$LIVE_BRANCH:$LIVE_BRANCH"
-          test "$(git rev-parse main)" = "$AUDITED_MAIN"
+          git fetch --no-tags origin \
+            "main:refs/remotes/origin/main" \
+            "$PREDECESSOR_BRANCH:$PREDECESSOR_BRANCH" \
+            "$AUTH_BRANCH:$AUTH_BRANCH" \
+            "$HISTORICAL_BRANCH:$HISTORICAL_BRANCH" \
+            "$LIVE_BRANCH:$LIVE_BRANCH"
+          test "$(git rev-parse origin/main)" = "$AUDITED_MAIN"
           test "$(git rev-parse "$PREDECESSOR_COMMIT^{commit}")" = "$PREDECESSOR_COMMIT"
           test "$(git rev-parse "$AUTH_COMMIT^{commit}")" = "$AUTH_COMMIT"
           test "$(git rev-parse "$HISTORICAL_HEAD^{commit}")" = "$HISTORICAL_HEAD"
