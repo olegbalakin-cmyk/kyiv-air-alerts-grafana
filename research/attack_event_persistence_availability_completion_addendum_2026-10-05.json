@@ -1,0 +1,995 @@
+{
+  "actions_run_id": 37429685543,
+  "candidate_ddl_delta": {
+    "apply_now": false,
+    "fields_changed_or_introduced_only": true,
+    "sha256": "2fbb0b6afbad384e789768328452d3e3c43743f0bb1d0321a72acc0acfa9c586",
+    "sql": "ALTER TABLE public.attack_event_classifications\n    ADD COLUMN originating_frozen_case_id_state TEXT NOT NULL,\n    ADD CONSTRAINT attack_event_classifications_frozen_case_id_state_check\n        CHECK (originating_frozen_case_id_state IN ('MATERIALIZED','UNMATERIALIZED_IN_ACCEPTED_SOURCE','NOT_APPLICABLE')),\n    ADD CONSTRAINT attack_event_classifications_frozen_case_id_value_check\n        CHECK (\n            (originating_frozen_case_id_state = 'MATERIALIZED' AND originating_frozen_case_id IS NOT NULL AND btrim(originating_frozen_case_id) <> '')\n            OR\n            (originating_frozen_case_id_state IN ('UNMATERIALIZED_IN_ACCEPTED_SOURCE','NOT_APPLICABLE') AND originating_frozen_case_id IS NULL)\n        );\n\nALTER TABLE public.attack_event_sources\n    ALTER COLUMN source_type DROP NOT NULL,\n    ADD COLUMN source_type_state TEXT NOT NULL,\n    ADD CONSTRAINT attack_event_sources_source_type_state_check\n        CHECK (source_type_state IN ('MATERIALIZED','UNMATERIALIZED_IN_ACCEPTED_SOURCE')),\n    ADD CONSTRAINT attack_event_sources_source_type_value_check\n        CHECK (\n            (source_type_state = 'MATERIALIZED' AND source_type IS NOT NULL AND btrim(source_type) <> '')\n            OR\n            (source_type_state = 'UNMATERIALIZED_IN_ACCEPTED_SOURCE' AND source_type IS NULL)\n        );\n\nALTER TABLE public.attack_event_sources\n    ADD COLUMN source_timestamp_state TEXT NOT NULL,\n    ADD COLUMN source_timestamp_raw TEXT NULL,\n    ADD CONSTRAINT attack_event_sources_source_timestamp_state_check\n        CHECK (source_timestamp_state IN ('MATERIALIZED','ABSENT_IN_ACCEPTED_SOURCE','UNPARSEABLE_IN_ACCEPTED_SOURCE')),\n    ADD CONSTRAINT attack_event_sources_source_timestamp_value_check\n        CHECK (\n            (source_timestamp_state = 'MATERIALIZED' AND source_timestamp IS NOT NULL)\n            OR\n            (source_timestamp_state = 'ABSENT_IN_ACCEPTED_SOURCE' AND source_timestamp IS NULL AND source_timestamp_raw IS NULL)\n            OR\n            (source_timestamp_state = 'UNPARSEABLE_IN_ACCEPTED_SOURCE' AND source_timestamp IS NULL AND source_timestamp_raw IS NOT NULL AND btrim(source_timestamp_raw) <> '')\n        );\n"
+  },
+  "corpus_attribution_repair_scope": "HARNESS_ONLY",
+  "event_timestamp_if_stated_availability": {
+    "coverage": 3769,
+    "state_counts": {
+      "ABSENT_IN_ACCEPTED_SOURCE": 3639,
+      "MATERIALIZED": 130,
+      "UNPARSEABLE_IN_ACCEPTED_SOURCE": 0
+    },
+    "unparseable_raw_preservation_required": false
+  },
+  "evidence_payload_availability": {
+    "accepted_projection_paths": {
+      "$.classifier_evidence_payload": 3769
+    },
+    "coverage": 3769,
+    "state_counts": {
+      "MATERIALIZED": 3769,
+      "UNMATERIALIZED_IN_ACCEPTED_SOURCE": 0
+    },
+    "synthetic_empty_object_used": false
+  },
+  "exhaustive_post_delta_representability": "PASS",
+  "existing_contracts": {
+    "classification_identity_qa_availability": {
+      "commit": "bd82a6c0a19aca4610a8af6df73a307a88c35bf6",
+      "path": "research/attack_event_classification_identity_availability_addendum_2026-10-04.json",
+      "sha256": "a1ba446261625383650b781233fc4956290bffd1437756dca8d7883b24906017",
+      "verdict": "ATTACK-EVENT CLASSIFICATION IDENTITY AVAILABILITY CONTRACT FROZEN",
+      "verified_blob": "c4b36f92d4171f59a5b3e45f4d894aedf4d7ebd7",
+      "verified_sha256": "a1ba446261625383650b781233fc4956290bffd1437756dca8d7883b24906017"
+    },
+    "human_review_state": {
+      "commit": "1b161d240013a669aefd2b9485d6e5f2ca7c7402",
+      "path": "research/attack_event_human_review_state_derivation_addendum_2026-10-05.json",
+      "sha256": "b611a8171ed3e8b4d0146f03f61c511b55fbca2e1f26c2796241784bb2d6e7d1",
+      "verdict": "ATTACK-EVENT HUMAN REVIEW STATE DERIVATION ADDENDUM FROZEN",
+      "verified_blob": "5a5ca7da0335685a1480d6f22bac5452c5251f09",
+      "verified_sha256": "b611a8171ed3e8b4d0146f03f61c511b55fbca2e1f26c2796241784bb2d6e7d1"
+    },
+    "provenance_cardinality": {
+      "commit": "cafee4106d89f59d7f1020baef414ba4813ab29d",
+      "path": "research/attack_event_provenance_cardinality_addendum_2026-10-05.json",
+      "sha256": "e7bb8eb181d152b9760a5d80dc46ce0e261146e7e14433b706989f30e7ffc068",
+      "verdict": "ATTACK-EVENT PROVENANCE CARDINALITY SCHEMA ADDENDUM FROZEN",
+      "verified_blob": "58a78e525f728fa9f6e52c38ae75c5358ca1b678",
+      "verified_sha256": "e7bb8eb181d152b9760a5d80dc46ce0e261146e7e14433b706989f30e7ffc068"
+    },
+    "step1_base_persistence": {
+      "commit": "b205d38dbc50bc502d10e682d4ae53491af542ea",
+      "path": "research/attack_event_neon_persistence_contract_2026-10-02.json",
+      "sha256": "02bfe8bb0420bcf1259b0c49a73ca76e8cc6488c1cd426be4dd8b28ad01b94c3",
+      "verdict": "ATTACK-EVENT NEON PERSISTENCE CONTRACT FROZEN",
+      "verified_blob": "e9dcbdf21551ca086fbf096138f885f453a8c2b0",
+      "verified_sha256": "02bfe8bb0420bcf1259b0c49a73ca76e8cc6488c1cd426be4dd8b28ad01b94c3"
+    }
+  },
+  "fresh_base": "dff243dd505d20f86b85e761de5c4eb0160b0166",
+  "frozen_binding_map": {
+    "commit": "e213f445f08bfc119b234c9460b66bd3efe75d36",
+    "path": "research/attack_event_23city_parent_binding_map_v1_2026-10-05.json",
+    "sha256": "b0ecd5ce980d76cf5ffce65f80ee1d5bd43c0d1b1438afb85424ae95aaef1241",
+    "verified_blob": "91e9bab3678e27296561c175b1b9776c3b765f68",
+    "verified_sha256": "b0ecd5ce980d76cf5ffce65f80ee1d5bd43c0d1b1438afb85424ae95aaef1241"
+  },
+  "frozen_snapshot": {
+    "blob": "8a2f6bd33f879be9db978da59c12c34e61f6f843",
+    "bytes": 90282029,
+    "commit": "efefa399e69eadd3d7fc8393ac1553cfde35f138",
+    "path": "research/attack_event_23city_persistence_snapshot_v2_2026-10-04.json",
+    "sha256": "09458bcf0a019fa2939eb9dfa484da46cd8fa2be077343c5ba6d595c93d71788",
+    "verified_blob": "8a2f6bd33f879be9db978da59c12c34e61f6f843",
+    "verified_sha256": "09458bcf0a019fa2939eb9dfa484da46cd8fa2be077343c5ba6d595c93d71788"
+  },
+  "identity_invariants": {
+    "classification_identity_change": "NO",
+    "classification_key_version": "attack-event-classification-key-v2",
+    "event_identity_change": "NO",
+    "event_key_version": "attack-event-key-v1",
+    "event_types_change": "NO",
+    "evidence_set_hashing_change": "NO",
+    "human_review_state_derivation_change": "NO",
+    "parent_binding_change": "NO",
+    "qa_semantics_change": "NO",
+    "review_provenance_hashing_change": "NO",
+    "source_link_identity_change": "NO",
+    "source_link_key_version": "attack-event-source-link-key-v1",
+    "verdict_change": "NO"
+  },
+  "mutation_scope": {
+    "credentials_exposed": false,
+    "db_writes": 0,
+    "ddl_executed": false,
+    "neon_queries": 0,
+    "production_mutation": "NO"
+  },
+  "original_representability_gaps": [
+    {
+      "affected_count": 3,
+      "field": "originating_frozen_case_id",
+      "reason": "accepted adjudication marker present, but no explicit frozen/adjudicated case ID is mechanically available",
+      "table": "public.attack_event_classifications"
+    },
+    {
+      "affected_count": 1429,
+      "field": "source_type",
+      "reason": "required frozen source field absent",
+      "table": "public.attack_event_sources"
+    },
+    {
+      "affected_count": 1,
+      "field": "evidence_payload",
+      "reason": "combined predecessor counter: classifier evidence payload missing/invalid or source timestamp invalid",
+      "table": "public.attack_event_sources"
+    }
+  ],
+  "originating_frozen_case_id_availability": {
+    "coverage": 26405,
+    "invented_ids": 0,
+    "projection_rule": "recursive exact-key accepted originating_frozen_case_id/frozen_case_id only; no deterministic substitute",
+    "state_counts": {
+      "MATERIALIZED": 0,
+      "NOT_APPLICABLE": 26402,
+      "UNMATERIALIZED_IN_ACCEPTED_SOURCE": 3
+    }
+  },
+  "post_addendum_effective_candidate_ddl_sha256": "7597b78f8fc528024b5e058409b462ca77d0c873fdb153a2f2f5f3e467764baf",
+  "predecessor": {
+    "actions_run_id": 37355436987,
+    "artifact_id": 11364446990,
+    "artifact_name": "attack-event-23city-rollback-persistence-proof-resume2",
+    "branch": "attack-event-step2c-rollback-persistence-proof-resume2-2026-10-05",
+    "effective_candidate_ddl_sha256_at_failure": "67bf5b0aac0e4ef902ed839e4f62afba1d3e6cc96df971b82459696f577979c4",
+    "first_failing_gate": "PERSISTENCE_SCHEMA_REPRESENTABILITY_MISMATCH",
+    "job_id": 111916540348,
+    "phase": "OFFLINE_PREFLIGHT",
+    "verdict": "ATTACK-EVENT 23-CITY ROLLBACK-ONLY PERSISTENCE PROOF BLOCKED",
+    "workflow_commit": "dfdcdb800b7aa0e2249a56e1110f3c99b52fc21a"
+  },
+  "proof_branch": "attack-event-persistence-availability-completion-addendum-2026-10-05",
+  "proof_gates": {
+    "classification_identity_change": "NO",
+    "classifications_scanned": 26405,
+    "db_writes": 0,
+    "event_identity_change": "NO",
+    "events_scanned": 1080,
+    "frozen_case_id_state_coverage": 26405,
+    "invented_ids": 0,
+    "lossless_availability_raw_representation": "PASS",
+    "neon_queries": 0,
+    "post_delta_exhaustive_offline_representability": "PASS",
+    "previously_missing_source_type": 1429,
+    "production_mutation": "NO",
+    "remaining_representability_gaps": 0,
+    "single_anomaly_affected_source_links": 1,
+    "single_anomaly_condition_identified": "PASS",
+    "snapshot_sha": "PASS",
+    "source_identity_changed": "NO",
+    "source_link_identity_change": "NO",
+    "source_links_scanned": 3769,
+    "source_type_state_coverage": 3769,
+    "synthetic_source_type_values": 0,
+    "unavailable_adjudicated_ids": 3
+  },
+  "remaining_representability_gaps": [],
+  "representability_field_audit": {
+    "public.attack_event_classifications": {
+      "alert_end_at": {
+        "status": "CONTRACT_DERIVED"
+      },
+      "alert_episode_uid": {
+        "status": "CONTRACT_DERIVED"
+      },
+      "alert_start_at": {
+        "status": "CONTRACT_DERIVED"
+      },
+      "alert_type": {
+        "status": "CONTRACT_DERIVED"
+      },
+      "binding_state": {
+        "status": "CONTRACT_DERIVED"
+      },
+      "city_key": {
+        "status": "DIRECTLY_MATERIALIZED"
+      },
+      "classification_key": {
+        "status": "DIRECTLY_MATERIALIZED"
+      },
+      "classification_key_version": {
+        "status": "DIRECTLY_MATERIALIZED"
+      },
+      "classification_uid": {
+        "status": "DB_GENERATED_NON_SEMANTIC"
+      },
+      "classified_at": {
+        "status": "LEGITIMATELY_NULL"
+      },
+      "classifier_blob_sha": {
+        "status": "DIRECTLY_MATERIALIZED"
+      },
+      "classifier_methodology_version": {
+        "status": "DIRECTLY_MATERIALIZED"
+      },
+      "classifier_reason_codes": {
+        "status": "DIRECTLY_MATERIALIZED"
+      },
+      "correction_provenance": {
+        "status": "CONTRACT_DERIVED"
+      },
+      "created_at": {
+        "status": "DB_GENERATED_NON_SEMANTIC"
+      },
+      "event_types": {
+        "status": "DIRECTLY_MATERIALIZED"
+      },
+      "evidence_set_sha256": {
+        "status": "DIRECTLY_MATERIALIZED"
+      },
+      "historical_episode_id": {
+        "status": "DIRECTLY_MATERIALIZED"
+      },
+      "human_review_state": {
+        "status": "CONTRACT_DERIVED"
+      },
+      "is_event": {
+        "status": "CONTRACT_DERIVED"
+      },
+      "normalization_version": {
+        "status": "DIRECTLY_MATERIALIZED"
+      },
+      "origin_artifact_blob_sha": {
+        "status": "CONTRACT_DERIVED"
+      },
+      "origin_artifact_path": {
+        "status": "CONTRACT_DERIVED"
+      },
+      "origin_commit_sha": {
+        "status": "CONTRACT_DERIVED"
+      },
+      "origin_provenance": {
+        "status": "CONTRACT_DERIVED"
+      },
+      "origin_provenance_sha256": {
+        "status": "CONTRACT_DERIVED"
+      },
+      "origin_ref": {
+        "status": "CONTRACT_DERIVED"
+      },
+      "origin_repository": {
+        "status": "CONTRACT_DERIVED"
+      },
+      "origin_target_state_sha256": {
+        "status": "CONTRACT_DERIVED"
+      },
+      "origin_workflow_run_id": {
+        "status": "CONTRACT_DERIVED"
+      },
+      "originating_frozen_case_id": {
+        "status": "AVAILABILITY_STATE_REPRESENTABLE"
+      },
+      "originating_frozen_case_id_state": {
+        "status": "CONTRACT_DERIVED"
+      },
+      "persisted_by_run_id": {
+        "status": "LEGITIMATELY_NULL"
+      },
+      "positive_tier": {
+        "status": "CONTRACT_DERIVED"
+      },
+      "qa_reasons": {
+        "status": "DIRECTLY_MATERIALIZED"
+      },
+      "qa_reasons_state": {
+        "status": "DIRECTLY_MATERIALIZED"
+      },
+      "review_provenance": {
+        "status": "DIRECTLY_MATERIALIZED"
+      },
+      "review_provenance_sha256": {
+        "status": "DIRECTLY_MATERIALIZED"
+      },
+      "revision_reason": {
+        "status": "LEGITIMATELY_NULL"
+      },
+      "supersedes_classification_uid": {
+        "status": "LEGITIMATELY_NULL"
+      },
+      "verdict": {
+        "status": "DIRECTLY_MATERIALIZED"
+      }
+    },
+    "public.attack_event_sources": {
+      "attack_event_source_uid": {
+        "status": "DB_GENERATED_NON_SEMANTIC"
+      },
+      "classification_episode_id": {
+        "status": "DIRECTLY_MATERIALIZED"
+      },
+      "classification_uid": {
+        "status": "CONTRACT_DERIVED"
+      },
+      "content_hash_basis": {
+        "status": "DIRECTLY_MATERIALIZED"
+      },
+      "content_sha256": {
+        "status": "DIRECTLY_MATERIALIZED"
+      },
+      "created_at": {
+        "status": "DB_GENERATED_NON_SEMANTIC"
+      },
+      "event_timestamp_if_stated": {
+        "status": "DIRECTLY_MATERIALIZED"
+      },
+      "evidence_payload": {
+        "status": "CONTRACT_DERIVED"
+      },
+      "excerpt": {
+        "status": "DIRECTLY_MATERIALIZED"
+      },
+      "observation_classification_outcome": {
+        "status": "DIRECTLY_MATERIALIZED"
+      },
+      "observation_id": {
+        "status": "DIRECTLY_MATERIALIZED"
+      },
+      "origin_artifact_path": {
+        "status": "CONTRACT_DERIVED"
+      },
+      "origin_git_blob_sha": {
+        "status": "CONTRACT_DERIVED"
+      },
+      "origin_git_ref": {
+        "status": "CONTRACT_DERIVED"
+      },
+      "origin_provenance": {
+        "status": "CONTRACT_DERIVED"
+      },
+      "origin_provenance_sha256": {
+        "status": "CONTRACT_DERIVED"
+      },
+      "raw_object_path": {
+        "status": "LEGITIMATELY_NULL"
+      },
+      "retrieval_provenance": {
+        "status": "CONTRACT_DERIVED"
+      },
+      "source_family": {
+        "status": "DIRECTLY_MATERIALIZED"
+      },
+      "source_link_key": {
+        "status": "DIRECTLY_MATERIALIZED"
+      },
+      "source_link_key_version": {
+        "status": "DIRECTLY_MATERIALIZED"
+      },
+      "source_timestamp": {
+        "status": "DIRECTLY_MATERIALIZED"
+      },
+      "source_timestamp_raw": {
+        "status": "RAW_PRESERVATION"
+      },
+      "source_timestamp_state": {
+        "status": "CONTRACT_DERIVED"
+      },
+      "source_type": {
+        "status": "AVAILABILITY_STATE_REPRESENTABLE"
+      },
+      "source_type_state": {
+        "status": "CONTRACT_DERIVED"
+      },
+      "source_url": {
+        "status": "DIRECTLY_MATERIALIZED"
+      },
+      "telegram_channel": {
+        "status": "DIRECTLY_MATERIALIZED"
+      },
+      "telegram_message_id": {
+        "status": "DIRECTLY_MATERIALIZED"
+      }
+    },
+    "public.attack_events": {
+      "alert_end_at": {
+        "status": "CONTRACT_DERIVED"
+      },
+      "alert_episode_uid": {
+        "status": "CONTRACT_DERIVED"
+      },
+      "alert_start_at": {
+        "status": "CONTRACT_DERIVED"
+      },
+      "alert_type": {
+        "status": "CONTRACT_DERIVED"
+      },
+      "attack_event_key": {
+        "status": "DIRECTLY_MATERIALIZED"
+      },
+      "attack_event_key_version": {
+        "status": "DIRECTLY_MATERIALIZED"
+      },
+      "attack_event_uid": {
+        "status": "DB_GENERATED_NON_SEMANTIC"
+      },
+      "binding_state": {
+        "status": "CONTRACT_DERIVED"
+      },
+      "city_key": {
+        "status": "DIRECTLY_MATERIALIZED"
+      },
+      "correction_provenance": {
+        "status": "CONTRACT_DERIVED"
+      },
+      "created_at": {
+        "status": "DB_GENERATED_NON_SEMANTIC"
+      },
+      "created_by_run_id": {
+        "status": "LEGITIMATELY_NULL"
+      },
+      "current_classification_uid": {
+        "status": "CONTRACT_DERIVED"
+      },
+      "event_grain": {
+        "status": "DIRECTLY_MATERIALIZED"
+      },
+      "event_status": {
+        "status": "CONTRACT_DERIVED"
+      },
+      "historical_episode_id": {
+        "status": "DIRECTLY_MATERIALIZED"
+      },
+      "updated_at": {
+        "status": "DB_GENERATED_NON_SEMANTIC"
+      },
+      "updated_by_run_id": {
+        "status": "LEGITIMATELY_NULL"
+      }
+    }
+  },
+  "safe_continuation_point": "rerun STEP 2C rollback-only persistence proof against this five-contract effective schema in a separate task",
+  "scanned_counts": {
+    "classifications": 26405,
+    "events": 1080,
+    "source_links": 3769
+  },
+  "schema_version": "attack-event-persistence-availability-completion-addendum-v1",
+  "scope": "offline contract completion for final STEP 2C representability gaps only",
+  "script_equivalence_guard": {
+    "artifact_path_changed": false,
+    "corpus_attribution_repair_scope": "HARNESS_ONLY",
+    "ddl_delta_changed": false,
+    "evidence_anomaly_logic_changed": false,
+    "frozen_sha_guards_changed": false,
+    "identity_semantics_changed": false,
+    "source_type_inference_added": false,
+    "source_type_state_derivation_changed": false
+  },
+  "semantic_equality_idempotence_delta": {
+    "persisted_semantic_equality_includes": [
+      "originating_frozen_case_id_state",
+      "source_type_state",
+      "source_timestamp_state",
+      "source_timestamp_raw"
+    ],
+    "replay_rule": "same frozen snapshot deterministically derives identical availability states and raw-preservation values",
+    "same_frozen_snapshot_different_state_or_raw_for_same_deterministic_key": "SEMANTIC_CONFLICT"
+  },
+  "single_source_anomaly": {
+    "classification_key_v2": "9b0d95b82c4f74407a12d9b5bbeb540b16d75d80a2beec3ab7a21707835bf470",
+    "failing_mechanical_conditions": [
+      "SOURCE_TIMESTAMP_UNPARSEABLE"
+    ],
+    "observation_id": "65802aeaadfe0c14f7bf5812",
+    "primary_category": "SOURCE_TIMESTAMP_UNPARSEABLE",
+    "source_corpus": "kyiv-air-alerts-grafana/data/explosion_research/rivne/final_evidence.json",
+    "source_link_key": "06ab4bfafb8717afccf5487fed373445339a9121ca7f3e2164c18d7188af4116"
+  },
+  "source_corpus_attribution_audit": {
+    "all_source_links": {
+      "conflicting_artifact_references": 0,
+      "no_accepted_artifact_reference": 0,
+      "resolved": 3769,
+      "total": 3769,
+      "with_exact_origin_artifact_path": 0,
+      "with_origin_artifact_paths": 2340,
+      "with_singular_origin_path": 1429,
+      "with_top_level_artifact_paths": 0,
+      "with_top_level_origin_artifact_path": 0,
+      "with_top_level_path": 0
+    },
+    "authoritative_source_type_unmaterialized": {
+      "conflict": 0,
+      "resolved": 1429,
+      "total": 1429,
+      "unresolved": 0
+    },
+    "previously_missing_top_level_source_type": {
+      "conflict": 0,
+      "resolved": 1429,
+      "total": 1429,
+      "unresolved": 0
+    },
+    "projection_rule": "source_origin_object(row) direct explicit origin_artifact_path/path/artifact_paths plus accepted top-level equivalents; plural artifact_paths preserved as exact sorted unique set"
+  },
+  "source_timestamp_availability": {
+    "coverage": 3769,
+    "state_counts": {
+      "ABSENT_IN_ACCEPTED_SOURCE": 1416,
+      "MATERIALIZED": 2352,
+      "UNPARSEABLE_IN_ACCEPTED_SOURCE": 1
+    },
+    "unparseable_raw_preservation_required": true
+  },
+  "source_type_availability": {
+    "accepted_materialization_paths": {
+      "$.source_type": 2340
+    },
+    "counts_by_source_corpus": {
+      "kyiv-air-alerts-grafana/data/explosion_research/chernihiv/final_evidence.json": {
+        "UNMATERIALIZED_IN_ACCEPTED_SOURCE": 43
+      },
+      "kyiv-air-alerts-grafana/data/explosion_research/chernivtsi/final_evidence.json": {
+        "UNMATERIALIZED_IN_ACCEPTED_SOURCE": 2
+      },
+      "kyiv-air-alerts-grafana/data/explosion_research/dnipro/final_evidence.json": {
+        "UNMATERIALIZED_IN_ACCEPTED_SOURCE": 191
+      },
+      "kyiv-air-alerts-grafana/data/explosion_research/ivano_frankivsk/final_evidence.json": {
+        "UNMATERIALIZED_IN_ACCEPTED_SOURCE": 6
+      },
+      "kyiv-air-alerts-grafana/data/explosion_research/kharkiv/final_evidence.json": {
+        "UNMATERIALIZED_IN_ACCEPTED_SOURCE": 315
+      },
+      "kyiv-air-alerts-grafana/data/explosion_research/kherson/final_evidence.json": {
+        "UNMATERIALIZED_IN_ACCEPTED_SOURCE": 2
+      },
+      "kyiv-air-alerts-grafana/data/explosion_research/khmelnytskyi/final_evidence.json": {
+        "UNMATERIALIZED_IN_ACCEPTED_SOURCE": 12
+      },
+      "kyiv-air-alerts-grafana/data/explosion_research/kropyvnytskyi/final_evidence.json": {
+        "UNMATERIALIZED_IN_ACCEPTED_SOURCE": 39
+      },
+      "kyiv-air-alerts-grafana/data/explosion_research/kyiv/final_evidence.json": {
+        "UNMATERIALIZED_IN_ACCEPTED_SOURCE": 411
+      },
+      "kyiv-air-alerts-grafana/data/explosion_research/lutsk/final_evidence.json": {
+        "UNMATERIALIZED_IN_ACCEPTED_SOURCE": 12
+      },
+      "kyiv-air-alerts-grafana/data/explosion_research/mykolaiv/final_evidence.json": {
+        "UNMATERIALIZED_IN_ACCEPTED_SOURCE": 136
+      },
+      "kyiv-air-alerts-grafana/data/explosion_research/odesa/final_evidence.json": {
+        "UNMATERIALIZED_IN_ACCEPTED_SOURCE": 161
+      },
+      "kyiv-air-alerts-grafana/data/explosion_research/poltava/final_evidence.json": {
+        "UNMATERIALIZED_IN_ACCEPTED_SOURCE": 53
+      },
+      "kyiv-air-alerts-grafana/data/explosion_research/rivne/final_evidence.json": {
+        "UNMATERIALIZED_IN_ACCEPTED_SOURCE": 13
+      },
+      "kyiv-air-alerts-grafana/data/explosion_research/ternopil/final_evidence.json": {
+        "UNMATERIALIZED_IN_ACCEPTED_SOURCE": 5
+      },
+      "kyiv-air-alerts-grafana/data/explosion_research/uzhhorod/final_evidence.json": {
+        "UNMATERIALIZED_IN_ACCEPTED_SOURCE": 1
+      },
+      "kyiv-air-alerts-grafana/data/explosion_research/vinnytsia/final_evidence.json": {
+        "UNMATERIALIZED_IN_ACCEPTED_SOURCE": 7
+      },
+      "kyiv-air-alerts-grafana/data/explosion_research/zhytomyr/final_evidence.json": {
+        "UNMATERIALIZED_IN_ACCEPTED_SOURCE": 20
+      },
+      "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/cherkasy/batch_000001.json": {
+        "MATERIALIZED": 1
+      },
+      "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/cherkasy/batch_000002.json": {
+        "MATERIALIZED": 3
+      },
+      "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/cherkasy/batch_000003.json": {
+        "MATERIALIZED": 5
+      },
+      "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/cherkasy/batch_000004.json": {
+        "MATERIALIZED": 2
+      },
+      "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/cherkasy/batch_000005.json": {
+        "MATERIALIZED": 1
+      },
+      "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/cherkasy/batch_000006.json": {
+        "MATERIALIZED": 11
+      },
+      "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/cherkasy/batch_000007.json": {
+        "MATERIALIZED": 1
+      },
+      "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/cherkasy/batch_000008.json": {
+        "MATERIALIZED": 5
+      },
+      "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/cherkasy/batch_000009.json": {
+        "MATERIALIZED": 2
+      },
+      "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/cherkasy/batch_000010.json": {
+        "MATERIALIZED": 6
+      },
+      "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/cherkasy/batch_000011.json": {
+        "MATERIALIZED": 3
+      },
+      "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/cherkasy/batch_000012.json": {
+        "MATERIALIZED": 1
+      },
+      "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/cherkasy/batch_000013.json": {
+        "MATERIALIZED": 5
+      },
+      "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/cherkasy/batch_000014.json": {
+        "MATERIALIZED": 5
+      },
+      "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/cherkasy/batch_000015.json": {
+        "MATERIALIZED": 1
+      },
+      "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/cherkasy/batch_000016.json": {
+        "MATERIALIZED": 5
+      },
+      "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/cherkasy/batch_000017.json": {
+        "MATERIALIZED": 8
+      },
+      "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/cherkasy/batch_000018.json": {
+        "MATERIALIZED": 8
+      },
+      "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/cherkasy/batch_000019.json": {
+        "MATERIALIZED": 1
+      },
+      "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/cherkasy/batch_000020.json": {
+        "MATERIALIZED": 4
+      },
+      "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/cherkasy/batch_000021.json": {
+        "MATERIALIZED": 4
+      },
+      "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/cherkasy/batch_000022.json": {
+        "MATERIALIZED": 8
+      },
+      "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/cherkasy/batch_000023.json": {
+        "MATERIALIZED": 5
+      },
+      "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/cherkasy/batch_000024.json": {
+        "MATERIALIZED": 6
+      },
+      "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/cherkasy/batch_000025.json": {
+        "MATERIALIZED": 1
+      },
+      "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/cherkasy/batch_000026.json": {
+        "MATERIALIZED": 3
+      },
+      "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/cherkasy/batch_000028.json": {
+        "MATERIALIZED": 2
+      },
+      "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/cherkasy/batch_000029.json": {
+        "MATERIALIZED": 5
+      },
+      "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/cherkasy/batch_000030.json": {
+        "MATERIALIZED": 6
+      },
+      "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/cherkasy/batch_000031.json": {
+        "MATERIALIZED": 2
+      },
+      "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/lviv/batch_000001.json": {
+        "MATERIALIZED": 9
+      },
+      "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/lviv/batch_000002.json": {
+        "MATERIALIZED": 21
+      },
+      "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/lviv/batch_000003.json": {
+        "MATERIALIZED": 3
+      },
+      "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/sumy/batch_000001.json": {
+        "MATERIALIZED": 13
+      },
+      "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/sumy/batch_000002.json": {
+        "MATERIALIZED": 22
+      },
+      "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/sumy/batch_000003.json": {
+        "MATERIALIZED": 20
+      },
+      "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/sumy/batch_000004.json": {
+        "MATERIALIZED": 24
+      },
+      "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/sumy/batch_000005.json": {
+        "MATERIALIZED": 20
+      },
+      "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/sumy/batch_000006.json": {
+        "MATERIALIZED": 24
+      },
+      "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/sumy/batch_000007.json": {
+        "MATERIALIZED": 35
+      },
+      "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/sumy/batch_000008.json": {
+        "MATERIALIZED": 21
+      },
+      "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/sumy/batch_000009.json": {
+        "MATERIALIZED": 22
+      },
+      "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/sumy/batch_000010.json": {
+        "MATERIALIZED": 23
+      },
+      "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/sumy/batch_000011.json": {
+        "MATERIALIZED": 11
+      },
+      "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/sumy/batch_000012.json": {
+        "MATERIALIZED": 15
+      },
+      "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/sumy/batch_000013.json": {
+        "MATERIALIZED": 13
+      },
+      "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/sumy/batch_000014.json": {
+        "MATERIALIZED": 20
+      },
+      "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/sumy/batch_000015.json": {
+        "MATERIALIZED": 13
+      },
+      "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/sumy/batch_000016.json": {
+        "MATERIALIZED": 6
+      },
+      "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/sumy/batch_000017.json": {
+        "MATERIALIZED": 11
+      },
+      "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/sumy/batch_000018.json": {
+        "MATERIALIZED": 21
+      },
+      "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/sumy/batch_000019.json": {
+        "MATERIALIZED": 22
+      },
+      "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/sumy/batch_000020.json": {
+        "MATERIALIZED": 24
+      },
+      "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/sumy/batch_000021.json": {
+        "MATERIALIZED": 20
+      },
+      "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/sumy/batch_000022.json": {
+        "MATERIALIZED": 11
+      },
+      "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/sumy/batch_000023.json": {
+        "MATERIALIZED": 20
+      },
+      "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/sumy/batch_000024.json": {
+        "MATERIALIZED": 24
+      },
+      "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/sumy/batch_000025.json": {
+        "MATERIALIZED": 26
+      },
+      "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/sumy/batch_000026.json": {
+        "MATERIALIZED": 34
+      },
+      "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/sumy/batch_000027.json": {
+        "MATERIALIZED": 33
+      },
+      "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/sumy/batch_000028.json": {
+        "MATERIALIZED": 25
+      },
+      "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/sumy/batch_000029.json": {
+        "MATERIALIZED": 16
+      },
+      "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/sumy/batch_000030.json": {
+        "MATERIALIZED": 26
+      },
+      "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/sumy/batch_000031.json": {
+        "MATERIALIZED": 15
+      },
+      "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/sumy/batch_000032.json": {
+        "MATERIALIZED": 16
+      },
+      "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/sumy/batch_000033.json": {
+        "MATERIALIZED": 15
+      },
+      "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/sumy/batch_000034.json": {
+        "MATERIALIZED": 22
+      },
+      "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/sumy/batch_000035.json": {
+        "MATERIALIZED": 28
+      },
+      "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/sumy/batch_000036.json": {
+        "MATERIALIZED": 29
+      },
+      "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/sumy/batch_000037.json": {
+        "MATERIALIZED": 43
+      },
+      "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/sumy/batch_000038.json": {
+        "MATERIALIZED": 29
+      },
+      "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/sumy/batch_000039.json": {
+        "MATERIALIZED": 32
+      },
+      "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/sumy/batch_000040.json": {
+        "MATERIALIZED": 26
+      },
+      "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/sumy/batch_000041.json": {
+        "MATERIALIZED": 47
+      },
+      "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/sumy/batch_000042.json": {
+        "MATERIALIZED": 25
+      },
+      "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/sumy/batch_000043.json": {
+        "MATERIALIZED": 22
+      },
+      "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/sumy/batch_000044.json": {
+        "MATERIALIZED": 34
+      },
+      "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/sumy/batch_000045.json": {
+        "MATERIALIZED": 22
+      },
+      "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/sumy/batch_000046.json": {
+        "MATERIALIZED": 11
+      },
+      "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/zaporizhzhia/batch_000001.json": {
+        "MATERIALIZED": 24
+      },
+      "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/zaporizhzhia/batch_000002.json": {
+        "MATERIALIZED": 12
+      },
+      "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/zaporizhzhia/batch_000003.json": {
+        "MATERIALIZED": 6
+      },
+      "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/zaporizhzhia/batch_000004.json": {
+        "MATERIALIZED": 12
+      },
+      "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/zaporizhzhia/batch_000005.json": {
+        "MATERIALIZED": 12
+      },
+      "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/zaporizhzhia/batch_000006.json": {
+        "MATERIALIZED": 16
+      },
+      "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/zaporizhzhia/batch_000007.json": {
+        "MATERIALIZED": 10
+      },
+      "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/zaporizhzhia/batch_000008.json": {
+        "MATERIALIZED": 15
+      },
+      "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/zaporizhzhia/batch_000009.json": {
+        "MATERIALIZED": 16
+      },
+      "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/zaporizhzhia/batch_000010.json": {
+        "MATERIALIZED": 7
+      },
+      "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/zaporizhzhia/batch_000011.json": {
+        "MATERIALIZED": 3
+      },
+      "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/zaporizhzhia/batch_000012.json": {
+        "MATERIALIZED": 16
+      },
+      "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/zaporizhzhia/batch_000013.json": {
+        "MATERIALIZED": 22
+      },
+      "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/zaporizhzhia/batch_000014.json": {
+        "MATERIALIZED": 21
+      },
+      "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/zaporizhzhia/batch_000015.json": {
+        "MATERIALIZED": 9
+      },
+      "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/zaporizhzhia/batch_000016.json": {
+        "MATERIALIZED": 15
+      },
+      "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/zaporizhzhia/batch_000017.json": {
+        "MATERIALIZED": 11
+      },
+      "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/zaporizhzhia/batch_000018.json": {
+        "MATERIALIZED": 20
+      },
+      "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/zaporizhzhia/batch_000019.json": {
+        "MATERIALIZED": 10
+      },
+      "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/zaporizhzhia/batch_000020.json": {
+        "MATERIALIZED": 21
+      },
+      "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/zaporizhzhia/batch_000021.json": {
+        "MATERIALIZED": 21
+      },
+      "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/zaporizhzhia/batch_000022.json": {
+        "MATERIALIZED": 26
+      },
+      "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/zaporizhzhia/batch_000023.json": {
+        "MATERIALIZED": 37
+      },
+      "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/zaporizhzhia/batch_000024.json": {
+        "MATERIALIZED": 48
+      },
+      "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/zaporizhzhia/batch_000025.json": {
+        "MATERIALIZED": 60
+      },
+      "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/zaporizhzhia/batch_000026.json": {
+        "MATERIALIZED": 40
+      },
+      "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/zaporizhzhia/batch_000027.json": {
+        "MATERIALIZED": 23
+      },
+      "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/zaporizhzhia/batch_000028.json": {
+        "MATERIALIZED": 30
+      },
+      "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/zaporizhzhia/batch_000029.json": {
+        "MATERIALIZED": 33
+      },
+      "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/zaporizhzhia/batch_000030.json": {
+        "MATERIALIZED": 35
+      },
+      "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/zaporizhzhia/batch_000031.json": {
+        "MATERIALIZED": 30
+      },
+      "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/zaporizhzhia/batch_000032.json": {
+        "MATERIALIZED": 24
+      },
+      "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/zaporizhzhia/batch_000033.json": {
+        "MATERIALIZED": 29
+      },
+      "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/zaporizhzhia/batch_000034.json": {
+        "MATERIALIZED": 35
+      },
+      "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/zaporizhzhia/batch_000035.json": {
+        "MATERIALIZED": 28
+      },
+      "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/zaporizhzhia/batch_000036.json": {
+        "MATERIALIZED": 50
+      },
+      "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/zaporizhzhia/batch_000037.json": {
+        "MATERIALIZED": 50
+      },
+      "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/zaporizhzhia/batch_000038.json": {
+        "MATERIALIZED": 35
+      },
+      "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/zaporizhzhia/batch_000039.json": {
+        "MATERIALIZED": 26
+      },
+      "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/zaporizhzhia/batch_000040.json": {
+        "MATERIALIZED": 26
+      },
+      "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/zaporizhzhia/batch_000041.json": {
+        "MATERIALIZED": 16
+      },
+      "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/zaporizhzhia/batch_000042.json": {
+        "MATERIALIZED": 12
+      },
+      "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/zaporizhzhia/batch_000043.json": {
+        "MATERIALIZED": 23
+      },
+      "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/zaporizhzhia/batch_000044.json": {
+        "MATERIALIZED": 25
+      },
+      "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/zaporizhzhia/batch_000045.json": {
+        "MATERIALIZED": 22
+      },
+      "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/zaporizhzhia/batch_000046.json": {
+        "MATERIALIZED": 39
+      },
+      "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/zaporizhzhia/batch_000047.json": {
+        "MATERIALIZED": 50
+      },
+      "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/zaporizhzhia/batch_000048.json": {
+        "MATERIALIZED": 5
+      }
+    },
+    "counts_by_source_family": {
+      "__NULL__": {
+        "UNMATERIALIZED_IN_ACCEPTED_SOURCE": 1429
+      },
+      "suspilne.media/cherkasy": {
+        "MATERIALIZED": 120
+      },
+      "suspilne.media/lviv": {
+        "MATERIALIZED": 33
+      },
+      "suspilne.media/sumy": {
+        "MATERIALIZED": 1031
+      },
+      "suspilne.media/zaporizhzhia": {
+        "MATERIALIZED": 1156
+      }
+    },
+    "coverage": 3769,
+    "forbidden_derivations_used": [],
+    "missing_top_level_shape": {
+      "explicit_null_or_empty_key_present": 1429,
+      "key_absent": 0,
+      "mechanical_pass_through_conclusion": "FROZEN_RECORD_EXPLICIT_NULL_PASS_THROUGH"
+    },
+    "nested_exact_source_type_recoveries": 0,
+    "previously_missing_top_level": 1429,
+    "state_counts": {
+      "MATERIALIZED": 2340,
+      "UNMATERIALIZED_IN_ACCEPTED_SOURCE": 1429
+    },
+    "synthetic_values": 0
+  },
+  "status": "FROZEN",
+  "temporary_workflow_commit": "1543ca08849f4d12b90f56e907ec7e7adc677329",
+  "verdict": "ATTACK-EVENT PERSISTENCE AVAILABILITY COMPLETION ADDENDUM FROZEN"
+}
