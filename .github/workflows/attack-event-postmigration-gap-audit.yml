@@ -1,0 +1,114 @@
+name: Attack-event post-migration persistence gap audit
+
+on:
+  push:
+    branches:
+      - attack-event-postmigration-gap-audit-2026-10-06
+    paths:
+      - research/run_attack_event_postmigration_gap_audit.py
+      - .github/workflows/attack-event-postmigration-gap-audit.yml
+
+permissions:
+  contents: write
+
+jobs:
+  audit:
+    name: post-migration-gap-audit
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    permissions:
+      contents: write
+    env:
+      PHASE1_PROD_SHADOW_DATABASE_URL: ${{ secrets.PHASE1_PROD_SHADOW_DATABASE_URL }}
+      PHASE1_PROD_SHADOW_BRANCH_ID: ${{ vars.PHASE1_PROD_SHADOW_BRANCH_ID }}
+
+    steps:
+      - name: Checkout audit branch
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: true
+          clean: true
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install read-only DB client
+        run: python -m pip install --disable-pip-version-check "psycopg[binary]>=3.2,<4"
+
+      - name: Run read-only post-migration gap audit
+        shell: bash
+        run: |
+          set -euo pipefail
+          python research/run_attack_event_postmigration_gap_audit.py
+
+      - name: Print compact audit metadata
+        if: always()
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json, os
+          from pathlib import Path
+          p = Path(os.environ["RUNNER_TEMP"]) / "attack-event-postmigration-gap-audit" / "attack_event_postmigration_gap_audit_2026-10-06.json"
+          if not p.is_file():
+              print("AUDIT_METADATA_MISSING=1")
+              raise SystemExit(0)
+          x=json.loads(p.read_text(encoding="utf-8"))
+          compact={
+              "verdict":x.get("verdict"),
+              "first_failing_gate":x.get("first_failing_gate"),
+              "phase":x.get("phase"),
+              "affected_category":x.get("affected_category"),
+              "affected_count":x.get("affected_count"),
+              "audited_main_commit":x.get("audited_main_commit"),
+              "baseline_persisted_counts":x.get("baseline_persisted_counts"),
+              "current_classification_counts":x.get("current_classification_counts"),
+              "set_difference_counts":x.get("set_difference_counts"),
+              "persistence_backlog_by_city":x.get("persistence_backlog_by_city"),
+              "parent_coverage":{
+                  "new_or_absent_from_frozen_classification_coverage":(x.get("parent_coverage") or {}).get("new_or_absent_from_frozen_classification_coverage"),
+                  "closed_without_current_authoritative_classification":(x.get("parent_coverage") or {}).get("closed_without_current_authoritative_classification"),
+                  "open_or_current_without_current_authoritative_classification":(x.get("parent_coverage") or {}).get("open_or_current_without_current_authoritative_classification"),
+                  "closed_without_classification_by_city":(x.get("parent_coverage") or {}).get("closed_without_classification_by_city"),
+              },
+              "catch_up":x.get("catch_up"),
+              "neon_queries_count":x.get("neon_queries_count"),
+              "db_writes":x.get("db_writes"),
+              "production_mutation":x.get("production_mutation"),
+              "safe_continuation_point":x.get("safe_continuation_point"),
+          }
+          print("AUDIT_METADATA="+json.dumps(compact,ensure_ascii=False,sort_keys=True,separators=(",",":")))
+          PY
+
+      - name: Persist durable audit artifact
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          src="$RUNNER_TEMP/attack-event-postmigration-gap-audit/attack_event_postmigration_gap_audit_2026-10-06.json"
+          dst="research/attack_event_postmigration_gap_audit_2026-10-06.json"
+          test -s "$src"
+          cp "$src" "$dst"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "$dst"
+          if git diff --cached --quiet; then
+            echo "DURABLE_ARTIFACT_UNCHANGED=1"
+          else
+            git commit -m "Freeze post-migration gap audit"
+            git push origin "HEAD:$GITHUB_REF_NAME"
+          fi
+          echo "DURABLE_ARTIFACT_COMMIT=$(git rev-parse HEAD)"
+          echo "DURABLE_ARTIFACT_BLOB=$(git rev-parse HEAD:$dst)"
+          echo "DURABLE_ARTIFACT_SHA256=$(sha256sum "$dst" | awk '{print $1}')"
+
+      - name: Upload audit artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: attack-event-postmigration-gap-audit-2026-10-06
+          path: ${{ runner.temp }}/attack-event-postmigration-gap-audit/attack_event_postmigration_gap_audit_2026-10-06.json
+          if-no-files-found: error
+          retention-days: 30
