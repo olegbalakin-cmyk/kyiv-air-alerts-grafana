@@ -1,0 +1,458 @@
+name: Alert-level baseline audit 2026-10-06
+
+on:
+  push:
+    branches:
+      - attack-event-alert-level-baseline-2026-10-06
+    paths:
+      - .github/workflows/attack-event-alert-level-baseline-2026-10-06.yml
+
+permissions:
+  contents: write
+
+jobs:
+  baseline:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - name: Checkout isolated audit branch
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: true
+
+      - name: Materialize frozen classification snapshot
+        shell: bash
+        run: |
+          set -euo pipefail
+          MAIN_SHA="5e9fa82694be6823841dcb468e5d847e8a4620e8"
+          SNAP_BRANCH="attack-event-23city-persistence-snapshot-v2-2026-10-04"
+          SNAP_COMMIT="efefa399e69eadd3d7fc8393ac1553cfde35f138"
+          SNAP_PATH="research/attack_event_23city_persistence_snapshot_v2_2026-10-04.json"
+          SNAP_BLOB="8a2f6bd33f879be9db978da59c12c34e61f6f843"
+
+          test "$(git merge-base --is-ancestor "$MAIN_SHA" HEAD; echo $?)" = "0"
+          git fetch --no-tags origin "refs/heads/$SNAP_BRANCH:refs/remotes/origin/$SNAP_BRANCH"
+          test "$(git rev-parse "origin/$SNAP_BRANCH")" = "$SNAP_COMMIT"
+          test "$(git rev-parse "$SNAP_COMMIT:$SNAP_PATH")" = "$SNAP_BLOB"
+          git show "$SNAP_COMMIT:$SNAP_PATH" > /tmp/attack_event_23city_snapshot.json
+          sha256sum /tmp/attack_event_23city_snapshot.json
+          wc -c /tmp/attack_event_23city_snapshot.json
+
+      - name: Compute alert-level baseline
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from __future__ import annotations
+
+          import hashlib
+          import json
+          import subprocess
+          from collections import Counter, defaultdict
+          from datetime import datetime, timezone
+          from pathlib import Path
+          from zoneinfo import ZoneInfo
+
+          MAIN_SHA = "5e9fa82694be6823841dcb468e5d847e8a4620e8"
+          SNAP_BRANCH = "attack-event-23city-persistence-snapshot-v2-2026-10-04"
+          SNAP_COMMIT = "efefa399e69eadd3d7fc8393ac1553cfde35f138"
+          SNAP_PATH = "research/attack_event_23city_persistence_snapshot_v2_2026-10-04.json"
+          SNAP_BLOB = "8a2f6bd33f879be9db978da59c12c34e61f6f843"
+          OUT_PATH = Path("research/attack_event_alert_level_baseline_2026-10-06.json")
+          SNAP_LOCAL = Path("/tmp/attack_event_23city_snapshot.json")
+          BRIDGE_PATH = "kyiv-air-alerts-grafana/data/ukrainealarm_bridge.json"
+          LIVE_WORKFLOWS = [
+              ".github/workflows/explosion-monitor-wip.yml",
+              ".github/workflows/update-explosion-wip.yml",
+          ]
+          KYIV_TZ = ZoneInfo("Europe/Kyiv")
+          POSITIVE = {"STRICT_EVENT_POSITIVE", "SENSITIVITY_EVENT_POSITIVE"}
+          KNOWN = {
+              "STRICT_EVENT_POSITIVE",
+              "SENSITIVITY_EVENT_POSITIVE",
+              "NO_CONFIRMED_EVENT",
+              "NEEDS_REVIEW",
+          }
+
+          def sh(*args: str, check: bool = True) -> str:
+              p = subprocess.run(
+                  list(args),
+                  check=False,
+                  stdout=subprocess.PIPE,
+                  stderr=subprocess.PIPE,
+                  text=True,
+              )
+              if check and p.returncode != 0:
+                  raise RuntimeError(f"command failed rc={p.returncode}: {' '.join(args)}: {p.stderr[-1000:]}")
+              return p.stdout
+
+          def micros_dt(value):
+              if value is None:
+                  return None
+              return datetime.fromtimestamp(int(value) / 1_000_000, tz=timezone.utc)
+
+          def iso_utc(value):
+              dt = micros_dt(value)
+              return dt.isoformat().replace("+00:00", "Z") if dt else None
+
+          def iso_kyiv(value):
+              dt = micros_dt(value)
+              return dt.astimezone(KYIV_TZ).isoformat() if dt else None
+
+          def local_date(value):
+              dt = micros_dt(value)
+              return dt.astimezone(KYIV_TZ).date().isoformat() if dt else None
+
+          def local_month(value):
+              dt = micros_dt(value)
+              return dt.astimezone(KYIV_TZ).strftime("%Y-%m") if dt else None
+
+          raw = SNAP_LOCAL.read_bytes()
+          snapshot_sha256 = hashlib.sha256(raw).hexdigest()
+          snapshot = json.loads(raw)
+          rows = snapshot.get("classifications")
+          if not isinstance(rows, list) or not rows:
+              raise RuntimeError("snapshot classifications unavailable")
+
+          logical_keys = []
+          classification_keys = []
+          unknown_verdicts = Counter()
+          for row in rows:
+              logical_keys.append((row.get("city_key"), row.get("historical_episode_id")))
+              classification_keys.append(row.get("classification_key"))
+              if row.get("verdict") not in KNOWN:
+                  unknown_verdicts[str(row.get("verdict"))] += 1
+
+          if len(set(classification_keys)) != len(rows):
+              raise RuntimeError("duplicate classification keys")
+          if len(set(logical_keys)) != len(rows):
+              dup_count = len(rows) - len(set(logical_keys))
+              raise RuntimeError(f"logical alert episode identity is not one-to-one: duplicates={dup_count}")
+
+          by_city = defaultdict(list)
+          for row in rows:
+              by_city[row["city_key"]].append(row)
+
+          def city_summary(city, cr):
+              dist = Counter(r.get("verdict") for r in cr)
+              starts = [int(r["alert_start_utc_microseconds"]) for r in cr if r.get("alert_start_utc_microseconds") is not None]
+              ends = [int(r["alert_end_utc_microseconds"]) for r in cr if r.get("alert_end_utc_microseconds") is not None]
+              total = len(cr)
+              strict = dist["STRICT_EVENT_POSITIVE"]
+              sensitivity = dist["SENSITIVITY_EVENT_POSITIVE"]
+              no_event = dist["NO_CONFIRMED_EVENT"]
+              review = dist["NEEDS_REVIEW"]
+              missing = sum(v for k, v in dist.items() if k not in KNOWN)
+              confirmed = strict + sensitivity
+              resolved = confirmed + no_event
+              min_start = min(starts) if starts else None
+              max_start = max(starts) if starts else None
+              max_end = max(ends) if ends else None
+              return {
+                  "city_key": city,
+                  "total_alert_episodes": total,
+                  "STRICT_EVENT_POSITIVE": strict,
+                  "SENSITIVITY_EVENT_POSITIVE": sensitivity,
+                  "NO_CONFIRMED_EVENT": no_event,
+                  "NEEDS_REVIEW": review,
+                  "missing_or_unclassified": missing,
+                  "confirmed_positives": confirmed,
+                  "confirmed_share": confirmed / total if total else None,
+                  "resolved_share": resolved / total if total else None,
+                  "earliest_alert_start_utc": iso_utc(min_start),
+                  "earliest_alert_start_europe_kyiv": iso_kyiv(min_start),
+                  "latest_alert_start_utc": iso_utc(max_start),
+                  "latest_alert_start_europe_kyiv": iso_kyiv(max_start),
+                  "latest_alert_end_utc": iso_utc(max_end),
+                  "latest_alert_end_europe_kyiv": iso_kyiv(max_end),
+                  "latest_alert_date_europe_kyiv": local_date(max_start),
+              }
+
+          per_city = [city_summary(city, by_city[city]) for city in sorted(by_city)]
+
+          total_dist = Counter(r.get("verdict") for r in rows)
+          total_strict = total_dist["STRICT_EVENT_POSITIVE"]
+          total_sensitivity = total_dist["SENSITIVITY_EVENT_POSITIVE"]
+          total_no = total_dist["NO_CONFIRMED_EVENT"]
+          total_review = total_dist["NEEDS_REVIEW"]
+          total_missing = sum(v for k, v in total_dist.items() if k not in KNOWN)
+          total_confirmed = total_strict + total_sensitivity
+          total_resolved = total_confirmed + total_no
+
+          all_starts = [int(r["alert_start_utc_microseconds"]) for r in rows if r.get("alert_start_utc_microseconds") is not None]
+          all_ends = [int(r["alert_end_utc_microseconds"]) for r in rows if r.get("alert_end_utc_microseconds") is not None]
+
+          kyiv_key = "kyiv" if "kyiv" in by_city else next((c for c in by_city if "kyiv" in c.lower()), None)
+          if not kyiv_key:
+              raise RuntimeError("Kyiv city key not found")
+          kyiv_rows = by_city[kyiv_key]
+          kyiv_months = defaultdict(lambda: Counter())
+          for row in kyiv_rows:
+              month = local_month(row["alert_start_utc_microseconds"])
+              verdict = row.get("verdict")
+              c = kyiv_months[month]
+              c["total_alert_episodes"] += 1
+              c[verdict] += 1
+              if verdict in POSITIVE:
+                  c["confirmed_positives"] += 1
+
+          kyiv_monthly = []
+          for month in sorted(kyiv_months):
+              c = kyiv_months[month]
+              kyiv_monthly.append({
+                  "month_europe_kyiv": month,
+                  "total_alert_episodes": c["total_alert_episodes"],
+                  "confirmed_positives": c["confirmed_positives"],
+                  "NEEDS_REVIEW": c["NEEDS_REVIEW"],
+                  "NO_CONFIRMED_EVENT": c["NO_CONFIRMED_EVENT"],
+                  "STRICT_EVENT_POSITIVE": c["STRICT_EVENT_POSITIVE"],
+                  "SENSITIVITY_EVENT_POSITIVE": c["SENSITIVITY_EVENT_POSITIVE"],
+              })
+
+          kyiv_starts = [int(r["alert_start_utc_microseconds"]) for r in kyiv_rows]
+          kyiv_positive_rows = [r for r in kyiv_rows if r.get("verdict") in POSITIVE]
+          kyiv_last_start = max(kyiv_starts)
+          kyiv_last_positive_start = max(int(r["alert_start_utc_microseconds"]) for r in kyiv_positive_rows) if kyiv_positive_rows else None
+          kyiv_last_month = local_month(kyiv_last_start)
+          kyiv_last_positive_month = local_month(kyiv_last_positive_start) if kyiv_last_positive_start else None
+          gap_days = None
+          if kyiv_last_positive_start:
+              gap_days = (micros_dt(kyiv_last_start) - micros_dt(kyiv_last_positive_start)).total_seconds() / 86400.0
+
+          # Current-main live alert evidence. This proves temporal incompleteness if it contains
+          # a completed/known AIR alert later than the frozen corpus boundary.
+          bridge_raw = sh("git", "show", f"{MAIN_SHA}:{BRIDGE_PATH}")
+          bridge = json.loads(bridge_raw)
+          bridge_events = [e for e in bridge.get("events", []) if e.get("alert_type") == "AIR" and e.get("start")]
+          bridge_latest_start = max((e["start"] for e in bridge_events), default=None)
+          bridge_latest_end = max((e.get("end") for e in bridge_events if e.get("end")), default=None)
+          bridge_meta = bridge.get("meta") if isinstance(bridge.get("meta"), dict) else {}
+          bridge_last_checked = bridge_meta.get("last_checked_at") or bridge.get("last_checked_at")
+          if not bridge_last_checked:
+              # Some bridge versions keep per-region status entries instead of a top-level meta timestamp.
+              def collect_times(obj):
+                  out = []
+                  if isinstance(obj, dict):
+                      for k, v in obj.items():
+                          if k == "last_checked_at" and isinstance(v, str):
+                              out.append(v)
+                          else:
+                              out.extend(collect_times(v))
+                  elif isinstance(obj, list):
+                      for v in obj:
+                          out.extend(collect_times(v))
+                  return out
+              times = collect_times(bridge)
+              bridge_last_checked = max(times) if times else None
+
+          corpus_latest_start_utc = micros_dt(max(all_starts))
+          later_bridge_events = []
+          if corpus_latest_start_utc:
+              for e in bridge_events:
+                  try:
+                      dt = datetime.fromisoformat(e["start"].replace("Z", "+00:00"))
+                  except Exception:
+                      continue
+                  if dt > corpus_latest_start_utc:
+                      later_bridge_events.append(e)
+
+          # Current-main repository persistence observation.
+          workflow_text = {}
+          for path in LIVE_WORKFLOWS:
+              workflow_text[path] = sh("git", "show", f"{MAIN_SHA}:{path}")
+          combined_workflows = "\n".join(workflow_text.values())
+          main_has_snapshot = subprocess.run(
+              ["git", "cat-file", "-e", f"{MAIN_SHA}:{SNAP_PATH}"],
+              stdout=subprocess.DEVNULL,
+              stderr=subprocess.DEVNULL,
+          ).returncode == 0
+          main_snapshot_refs = sh("git", "grep", "-n", "attack_event_23city_persistence_snapshot_v2", MAIN_SHA, "--", check=False).strip().splitlines()
+          main_table_refs = sh("git", "grep", "-n", "attack_event_classifications", MAIN_SHA, "--", check=False).strip().splitlines()
+
+          live_observation = {
+              "current_main_snapshot_artifact_present": main_has_snapshot,
+              "current_main_snapshot_reference_matches": [x for x in main_snapshot_refs if x],
+              "current_main_attack_event_classifications_reference_matches": [x for x in main_table_refs if x],
+              "live_workflow_paths_inspected": LIVE_WORKFLOWS,
+              "live_workflows_checkout_wip_branch": "multicity-wip-2026-09-16" in combined_workflows,
+              "live_workflows_commit_explosion_candidate_monitor_state": "explosion_candidate_monitor_state.json" in combined_workflows,
+              "live_workflows_commit_explosion_review_queue": "explosion_review_queue.json" in combined_workflows,
+              "live_workflows_commit_explosions_test": "explosions_test.json" in combined_workflows,
+              "live_workflows_reference_frozen_snapshot_path": SNAP_PATH in combined_workflows,
+              "same_alert_level_corpus_persistence": "NOT ESTABLISHED",
+              "basis": (
+                  "Current-main live workflows persist WIP monitor/metric files on multicity-wip-2026-09-16; "
+                  "no current-main reference demonstrates writes into the frozen 23-city classification snapshot "
+                  "or an attack_event_classifications alert-level store."
+              ),
+          }
+
+          sources = snapshot.get("snapshot_provenance", {}).get("sources", [])
+          source_artifacts = [{
+              "role": "combined_23_city_frozen_snapshot",
+              "commit": SNAP_COMMIT,
+              "branch": SNAP_BRANCH,
+              "path": SNAP_PATH,
+              "git_blob": SNAP_BLOB,
+              "sha256": snapshot_sha256,
+              "byte_count": len(raw),
+          }]
+          for s in sources:
+              source_artifacts.append({
+                  "role": "constituent_frozen_export",
+                  "commit": s.get("commit"),
+                  "path": s.get("path"),
+                  "git_blob": s.get("git_blob"),
+                  "sha256": s.get("raw_sha256"),
+                  "byte_count": s.get("byte_count"),
+                  "classification_count": s.get("classification_count"),
+                  "integrity": s.get("integrity"),
+              })
+
+          result = {
+              "verdict": "ALERT-LEVEL BASELINE = COMPLETE",
+              "audit_date": "2026-10-06",
+              "scope": "READ_ONLY_ALERT_LEVEL_BASELINE",
+              "main": {
+                  "default_branch": "main",
+                  "head_at_audit_start": MAIN_SHA,
+                  "classification_snapshot_integrated_into_main": main_has_snapshot,
+              },
+              "source_classification_artifacts": source_artifacts,
+              "unit_of_analysis": {
+                  "unit": "ONE_LOGICAL_ALERT_EPISODE",
+                  "logical_identity_fields": ["city_key", "historical_episode_id"],
+                  "classification_rows": len(rows),
+                  "unique_logical_alert_episodes": len(set(logical_keys)),
+                  "one_classification_row_per_logical_episode": len(set(logical_keys)) == len(rows),
+                  "classification_key_uniqueness": len(set(classification_keys)) == len(rows),
+                  "denominator_is_source_candidates_or_attack_events": False,
+              },
+              "totals": {
+                  "total_alert_episodes": len(rows),
+                  "STRICT_EVENT_POSITIVE": total_strict,
+                  "SENSITIVITY_EVENT_POSITIVE": total_sensitivity,
+                  "confirmed_positives": total_confirmed,
+                  "NO_CONFIRMED_EVENT": total_no,
+                  "NEEDS_REVIEW": total_review,
+                  "missing_or_unclassified": total_missing,
+                  "confirmed_share": total_confirmed / len(rows),
+                  "resolved_share": total_resolved / len(rows),
+                  "city_count": len(by_city),
+              },
+              "per_city": per_city,
+              "corpus_coverage": {
+                  "earliest_alert_start_utc": iso_utc(min(all_starts)),
+                  "earliest_alert_start_europe_kyiv": iso_kyiv(min(all_starts)),
+                  "latest_alert_start_utc": iso_utc(max(all_starts)),
+                  "latest_alert_start_europe_kyiv": iso_kyiv(max(all_starts)),
+                  "latest_alert_end_utc": iso_utc(max(all_ends)),
+                  "latest_alert_end_europe_kyiv": iso_kyiv(max(all_ends)),
+                  "latest_alert_date_europe_kyiv": local_date(max(all_starts)),
+                  "current_main_bridge_latest_air_start_utc": bridge_latest_start,
+                  "current_main_bridge_latest_air_end_utc": bridge_latest_end,
+                  "current_main_bridge_last_checked_at": bridge_last_checked,
+                  "current_main_bridge_air_events_later_than_corpus_latest_start": len(later_bridge_events),
+                  "frozen_corpus_extends_to_latest_known_alert_episodes": False if later_bridge_events else "NOT ESTABLISHED",
+                  "classification_corpus_appears_temporally_complete": False if later_bridge_events else "NOT ESTABLISHED",
+                  "coverage_boundary_note": (
+                      "Frozen classification denominator ends at the latest alert episode represented by the snapshot. "
+                      "Current-main ukrainealarm_bridge.json contains later AIR-alert records, so the frozen corpus does not "
+                      "extend to the latest known alert episodes."
+                      if later_bridge_events else
+                      "No later current-main bridge alert was mechanically established; temporal completeness is NOT ESTABLISHED."
+                  ),
+              },
+              "kyiv": {
+                  "city_key": kyiv_key,
+                  "total_alert_episodes": len(kyiv_rows),
+                  "STRICT_EVENT_POSITIVE": sum(1 for r in kyiv_rows if r.get("verdict") == "STRICT_EVENT_POSITIVE"),
+                  "SENSITIVITY_EVENT_POSITIVE": sum(1 for r in kyiv_rows if r.get("verdict") == "SENSITIVITY_EVENT_POSITIVE"),
+                  "confirmed_positives": len(kyiv_positive_rows),
+                  "NO_CONFIRMED_EVENT": sum(1 for r in kyiv_rows if r.get("verdict") == "NO_CONFIRMED_EVENT"),
+                  "NEEDS_REVIEW": sum(1 for r in kyiv_rows if r.get("verdict") == "NEEDS_REVIEW"),
+                  "first_month_represented": kyiv_monthly[0]["month_europe_kyiv"] if kyiv_monthly else None,
+                  "last_month_represented": kyiv_monthly[-1]["month_europe_kyiv"] if kyiv_monthly else None,
+                  "last_alert_date_europe_kyiv": local_date(kyiv_last_start),
+                  "last_alert_start_utc": iso_utc(kyiv_last_start),
+                  "last_confirmed_positive_date_europe_kyiv": local_date(kyiv_last_positive_start) if kyiv_last_positive_start else None,
+                  "last_confirmed_positive_month_europe_kyiv": kyiv_last_positive_month,
+                  "last_confirmed_positive_start_utc": iso_utc(kyiv_last_positive_start) if kyiv_last_positive_start else None,
+                  "positive_to_denominator_gap_days": gap_days,
+                  "positives_stop_materially_earlier_than_denominator": (
+                      bool(kyiv_last_positive_month and kyiv_last_month and kyiv_last_positive_month < kyiv_last_month)
+                  ),
+                  "materiality_rule": "YES iff the last confirmed-positive calendar month precedes the last represented alert calendar month.",
+                  "monthly": kyiv_monthly,
+              },
+              "live_vs_historical_persistence": {
+                  "recent_live_alerts_represented_in_same_frozen_classification_corpus": False if later_bridge_events else "NOT ESTABLISHED",
+                  **live_observation,
+              },
+              "interpretation_guardrails": {
+                  "NO_CONFIRMED_EVENT_means_proven_no_attack_occurred": False,
+                  "note": "NO_CONFIRMED_EVENT is reported as the existing corpus verdict only; this audit does not strengthen its semantics.",
+              },
+              "mutation_confirmation": {
+                  "classifier_mutations": 0,
+                  "temporal_parser_mutations": 0,
+                  "temporal_representation_mutations": 0,
+                  "source_configuration_mutations": 0,
+                  "alert_state_mutations": 0,
+                  "historical_state_mutations": 0,
+                  "queue_mutations": 0,
+                  "canonical_alert_mutations": 0,
+                  "persistence_mutations": 0,
+                  "Neon_DB_writes": 0,
+                  "deployments": 0,
+              },
+              "audit_harness": {
+                  "execution": "GitHub Actions mechanical scan of frozen alert-level snapshot",
+                  "proof_branch": "attack-event-alert-level-baseline-2026-10-06",
+                  "workflow": ".github/workflows/attack-event-alert-level-baseline-2026-10-06.yml",
+                  "source_evidence_scan_performed": False,
+                  "RSS_or_Telegram_candidate_analysis_performed": False,
+                  "parser_gap_analysis_performed": False,
+                  "unknown_verdicts": dict(unknown_verdicts),
+              },
+          }
+
+          if len(by_city) != 23:
+              raise RuntimeError(f"expected 23 cities, got {len(by_city)}")
+          if len(rows) != 26405:
+              raise RuntimeError(f"expected 26405 logical alert episodes, got {len(rows)}")
+          if unknown_verdicts:
+              raise RuntimeError(f"unexpected verdicts: {dict(unknown_verdicts)}")
+          if total_strict != 1017 or total_sensitivity != 63 or total_no != 23530 or total_review != 1795:
+              raise RuntimeError(
+                  f"snapshot aggregate mismatch: strict={total_strict} sensitivity={total_sensitivity} "
+                  f"no={total_no} review={total_review}"
+              )
+
+          OUT_PATH.parent.mkdir(parents=True, exist_ok=True)
+          OUT_PATH.write_text(
+              json.dumps(result, ensure_ascii=False, indent=2, sort_keys=False) + "\n",
+              encoding="utf-8",
+          )
+          print(json.dumps({
+              "verdict": result["verdict"],
+              "totals": result["totals"],
+              "kyiv": {k: v for k, v in result["kyiv"].items() if k != "monthly"},
+              "coverage": result["corpus_coverage"],
+              "live_persistence": result["live_vs_historical_persistence"],
+          }, ensure_ascii=False, indent=2))
+          PY
+
+      - name: Commit durable baseline artifact only
+        shell: bash
+        run: |
+          set -euo pipefail
+          ART="research/attack_event_alert_level_baseline_2026-10-06.json"
+          BRANCH="attack-event-alert-level-baseline-2026-10-06"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "$ART"
+          test "$(git diff --cached --name-only | tr -d '\r')" = "$ART"
+          git commit -m "Add alert-level baseline audit"
+          git push origin "HEAD:refs/heads/$BRANCH"
