@@ -43,7 +43,11 @@ EXPECTED_CITY_COUNTS = {
 }
 EXPECTED_UNCOVERED = 2100
 UTC = timezone.utc
-EPOCH = datetime(1970, 1, 1, tzinfo=UTC)
+CANONICAL_UTC_RE = re.compile(
+    r"^\d{4}-\d{2}-\d{2}T"
+    r"\d{2}:\d{2}:\d{2}\."
+    r"\d{6}Z$"
+)
 
 
 class Blocked(RuntimeError):
@@ -97,14 +101,16 @@ def parse_dt(value: Any) -> datetime | None:
     return dt.astimezone(UTC)
 
 
-def parse_utc_microseconds(value: Any) -> datetime | None:
-    if value is None:
+def parse_canonical_temporal_value(value: Any) -> datetime | None:
+    if not isinstance(value, str):
+        return None
+    if not CANONICAL_UTC_RE.fullmatch(value):
         return None
     try:
-        us = int(value)
-        return EPOCH + timedelta(microseconds=us)
-    except (TypeError, ValueError, OverflowError):
+        dt = datetime.fromisoformat(value[:-1] + "+00:00")
+    except ValueError:
         return None
+    return dt.astimezone(UTC)
 
 
 def iso(dt: datetime | None) -> str | None:
@@ -164,8 +170,8 @@ def row_temporal(row: dict) -> tuple[str | None, datetime | None, datetime | Non
     city = row.get("city_key") or row.get("city")
     canonical_present = "alert_start_utc_microseconds" in row or "alert_end_utc_microseconds" in row
     if canonical_present:
-        start = parse_utc_microseconds(row.get("alert_start_utc_microseconds"))
-        end = parse_utc_microseconds(row.get("alert_end_utc_microseconds"))
+        start = parse_canonical_temporal_value(row.get("alert_start_utc_microseconds"))
+        end = parse_canonical_temporal_value(row.get("alert_end_utc_microseconds"))
         return str(city) if city is not None else None, start, end
 
     start = None
@@ -345,14 +351,36 @@ def main() -> int:
     rows_with_city_key = sum(1 for row in class_rows if "city_key" in row)
     rows_with_canonical_start = sum(1 for row in class_rows if "alert_start_utc_microseconds" in row)
     rows_with_canonical_end = sum(1 for row in class_rows if "alert_end_utc_microseconds" in row)
-    invalid_canonical_start = sum(
+    canonical_start_str = sum(
         1 for row in class_rows
-        if "alert_start_utc_microseconds" in row and parse_utc_microseconds(row.get("alert_start_utc_microseconds")) is None
+        if isinstance(row.get("alert_start_utc_microseconds"), str)
     )
-    invalid_canonical_end = sum(
+    canonical_end_str = sum(
         1 for row in class_rows
-        if "alert_end_utc_microseconds" in row and parse_utc_microseconds(row.get("alert_end_utc_microseconds")) is None
+        if isinstance(row.get("alert_end_utc_microseconds"), str)
     )
+    strict_start_lexical_matches = sum(
+        1 for row in class_rows
+        if isinstance(row.get("alert_start_utc_microseconds"), str)
+        and CANONICAL_UTC_RE.fullmatch(row["alert_start_utc_microseconds"])
+    )
+    strict_end_lexical_matches = sum(
+        1 for row in class_rows
+        if isinstance(row.get("alert_end_utc_microseconds"), str)
+        and CANONICAL_UTC_RE.fullmatch(row["alert_end_utc_microseconds"])
+    )
+    strict_start_parses = sum(
+        1 for row in class_rows
+        if "alert_start_utc_microseconds" in row
+        and parse_canonical_temporal_value(row.get("alert_start_utc_microseconds")) is not None
+    )
+    strict_end_parses = sum(
+        1 for row in class_rows
+        if "alert_end_utc_microseconds" in row
+        and parse_canonical_temporal_value(row.get("alert_end_utc_microseconds")) is not None
+    )
+    malformed_canonical_start = rows_with_canonical_start - strict_start_parses
+    malformed_canonical_end = rows_with_canonical_end - strict_end_parses
 
     class_temporal = []
     for row in class_rows:
@@ -365,9 +393,15 @@ def main() -> int:
         "rows_with_city_key": rows_with_city_key,
         "rows_with_alert_start_utc_microseconds": rows_with_canonical_start,
         "rows_with_alert_end_utc_microseconds": rows_with_canonical_end,
+        "canonical_start_values_type_str": canonical_start_str,
+        "canonical_end_values_type_str": canonical_end_str,
+        "strict_start_lexical_matches": strict_start_lexical_matches,
+        "strict_end_lexical_matches": strict_end_lexical_matches,
+        "strict_start_parses": strict_start_parses,
+        "strict_end_parses": strict_end_parses,
         "temporal_identities_extracted": len(class_temporal),
-        "invalid_canonical_microsecond_start_values": invalid_canonical_start,
-        "invalid_canonical_microsecond_end_values": invalid_canonical_end,
+        "malformed_starts": malformed_canonical_start,
+        "malformed_ends": malformed_canonical_end,
     }
     print("AUTHORITATIVE_TEMPORAL_IDENTITY_VALIDATION " + json.dumps(temporal_validation, sort_keys=True))
 
@@ -380,12 +414,24 @@ def main() -> int:
     if rows_with_canonical_end != 26405:
         raise Blocked("AUTHORITATIVE_CANONICAL_END_FIELD_COVERAGE_MISMATCH","PHASE_1","authoritative_classification_source",26405 - rows_with_canonical_end,
                       f"Expected alert_end_utc_microseconds on 26,405 rows; observed {rows_with_canonical_end}.")
-    if invalid_canonical_start:
-        raise Blocked("AUTHORITATIVE_CANONICAL_START_VALUE_INVALID","PHASE_1","authoritative_classification_source",invalid_canonical_start,
-                      f"Invalid alert_start_utc_microseconds values: {invalid_canonical_start}.")
-    if invalid_canonical_end:
-        raise Blocked("AUTHORITATIVE_CANONICAL_END_VALUE_INVALID","PHASE_1","authoritative_classification_source",invalid_canonical_end,
-                      f"Invalid alert_end_utc_microseconds values: {invalid_canonical_end}.")
+    if canonical_start_str != 26405:
+        raise Blocked("AUTHORITATIVE_CANONICAL_START_TYPE_MISMATCH","PHASE_1","authoritative_classification_source",26405 - canonical_start_str,
+                      f"Expected 26,405 string alert_start_utc_microseconds values; observed {canonical_start_str}.")
+    if canonical_end_str != 26405:
+        raise Blocked("AUTHORITATIVE_CANONICAL_END_TYPE_MISMATCH","PHASE_1","authoritative_classification_source",26405 - canonical_end_str,
+                      f"Expected 26,405 string alert_end_utc_microseconds values; observed {canonical_end_str}.")
+    if strict_start_lexical_matches != 26405:
+        raise Blocked("AUTHORITATIVE_CANONICAL_START_LEXICAL_MISMATCH","PHASE_1","authoritative_classification_source",26405 - strict_start_lexical_matches,
+                      f"Expected 26,405 strict canonical start lexical matches; observed {strict_start_lexical_matches}.")
+    if strict_end_lexical_matches != 26405:
+        raise Blocked("AUTHORITATIVE_CANONICAL_END_LEXICAL_MISMATCH","PHASE_1","authoritative_classification_source",26405 - strict_end_lexical_matches,
+                      f"Expected 26,405 strict canonical end lexical matches; observed {strict_end_lexical_matches}.")
+    if malformed_canonical_start:
+        raise Blocked("AUTHORITATIVE_CANONICAL_START_VALUE_INVALID","PHASE_1","authoritative_classification_source",malformed_canonical_start,
+                      f"Invalid alert_start_utc_microseconds values: {malformed_canonical_start}.")
+    if malformed_canonical_end:
+        raise Blocked("AUTHORITATIVE_CANONICAL_END_VALUE_INVALID","PHASE_1","authoritative_classification_source",malformed_canonical_end,
+                      f"Invalid alert_end_utc_microseconds values: {malformed_canonical_end}.")
     if len(class_temporal) != 26405:
         raise Blocked("AUTHORITATIVE_TEMPORAL_IDENTITY_COUNT_MISMATCH","PHASE_1","authoritative_classification_source",26405 - len(class_temporal),
                       f"Expected 26,405 extracted temporal identities; observed {len(class_temporal)}.")
