@@ -1,0 +1,72 @@
+name: Kyiv review semantic transfer proof
+
+on:
+  push:
+    branches:
+      - kyiv-review-semantic-transfer-proof-2026-10-06
+    paths:
+      - "research/kyiv_review_semantic_transfer_runner_2026_10_06.py"
+      - ".github/workflows/kyiv-review-semantic-transfer-proof.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  prove:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout proof branch with history
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: kyiv-review-semantic-transfer-proof-2026-10-06
+
+      - name: Materialize and verify frozen inputs runner-side
+        id: frozen
+        shell: bash
+        run: |
+          set -euo pipefail
+          AUDIT_COMMIT="ea10551381104fa2c223fe558b13351f2ad637cf"
+          AUDIT_PATH="research/kyiv_review_transferability_audit_2026-10-06.json"
+          AUDIT_BLOB_EXPECTED="07198463815373021b5b320c1dd959ed58ff795c"
+          SNAP_COMMIT="efefa399e69eadd3d7fc8393ac1553cfde35f138"
+          SNAP_PATH="research/attack_event_23city_persistence_snapshot_v2_2026-10-04.json"
+          SNAP_BLOB_EXPECTED="8a2f6bd33f879be9db978da59c12c34e61f6f843"
+
+          AUDIT_BLOB_ACTUAL="$(git rev-parse "$AUDIT_COMMIT:$AUDIT_PATH")"
+          SNAP_BLOB_ACTUAL="$(git rev-parse "$SNAP_COMMIT:$SNAP_PATH")"
+
+          test "$AUDIT_BLOB_ACTUAL" = "$AUDIT_BLOB_EXPECTED"
+          test "$SNAP_BLOB_ACTUAL" = "$SNAP_BLOB_EXPECTED"
+
+          mkdir -p runner_inputs
+          git show "$AUDIT_COMMIT:$AUDIT_PATH" > runner_inputs/review_audit.json
+          git show "$SNAP_COMMIT:$SNAP_PATH" > runner_inputs/snapshot.json
+
+          echo "audit_blob_actual=$AUDIT_BLOB_ACTUAL" >> "$GITHUB_OUTPUT"
+          echo "snapshot_blob_actual=$SNAP_BLOB_ACTUAL" >> "$GITHUB_OUTPUT"
+
+      - name: Run read-only semantic-transfer proof
+        env:
+          AUDIT_PATH: runner_inputs/review_audit.json
+          SNAPSHOT_PATH: runner_inputs/snapshot.json
+          AUDIT_BLOB_ACTUAL: ${{ steps.frozen.outputs.audit_blob_actual }}
+          SNAPSHOT_BLOB_ACTUAL: ${{ steps.frozen.outputs.snapshot_blob_actual }}
+        run: |
+          set -euo pipefail
+          python3 research/kyiv_review_semantic_transfer_runner_2026_10_06.py
+
+      - name: Upload compact summary artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: kyiv_review_semantic_transfer_summary_2026-10-06
+          path: kyiv_review_semantic_transfer_summary_2026-10-06.json
+          if-no-files-found: error
+
+      - name: Upload optional detailed ledger artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: kyiv_review_semantic_transfer_ledger_2026-10-06
+          path: kyiv_review_semantic_transfer_ledger_2026-10-06.json
+          if-no-files-found: error
