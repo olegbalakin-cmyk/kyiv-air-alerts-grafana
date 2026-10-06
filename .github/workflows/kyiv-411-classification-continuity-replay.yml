@@ -1,0 +1,119 @@
+name: Kyiv 411 classification continuity replay
+
+on:
+  push:
+    branches:
+      - kyiv-411-classification-continuity-replay-2026-10-06
+    paths:
+      - ".github/proof/kyiv_411_classification_continuity_replay.py"
+      - ".github/workflows/kyiv-411-classification-continuity-replay.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  replay:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      SNAPSHOT_COMMIT: efefa399e69eadd3d7fc8393ac1553cfde35f138
+      CLASSIFIER_COMMIT: 71cb6f6fbe856cc7b96759310fe9cc9c71cc0453
+      SUMMARY: /tmp/kyiv_411_episode_classification_continuity_summary_2026-10-06.json
+      LEDGER: /tmp/kyiv_411_episode_classification_continuity_ledger_2026-10-06.json
+      SNAPSHOT_FILE: /tmp/attack_event_23city_persistence_snapshot_v2_2026-10-04.json
+      STACK_DIR: /tmp/authoritative_classifier_stack
+    steps:
+      - name: Checkout isolated proof branch
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Fetch frozen authorities
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch --no-tags origin "$SNAPSHOT_COMMIT" "$CLASSIFIER_COMMIT"
+          test "$(git rev-parse "$SNAPSHOT_COMMIT:research/attack_event_23city_persistence_snapshot_v2_2026-10-04.json")" = "8a2f6bd33f879be9db978da59c12c34e61f6f843"
+          test "$(git rev-parse "$CLASSIFIER_COMMIT:kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py")" = "778469b74c2aa807d851cf2c2ee35cf4aa785589"
+          test "$(git rev-parse "$CLASSIFIER_COMMIT:kyiv-air-alerts-grafana/scripts/run_historical_attack_event_backfill_batch.py")" = "cb2791bd309abacf4c3aae8fee0d1a8f038220b2"
+          test "$(git rev-parse "$CLASSIFIER_COMMIT:kyiv-air-alerts-grafana/scripts/historical_attack_event_sources.py")" = "0ceb3ea480de9b401000ba9d8b0bb02b22d83c89"
+
+      - name: Assert zero database configuration
+        shell: bash
+        run: |
+          set -euo pipefail
+          for key in DATABASE_URL NEON_DATABASE_URL NEON_URL PGHOST PGPORT PGDATABASE PGUSER PGPASSWORD; do
+            test -z "${!key-}" || { echo "Unexpected DB environment variable: $key"; exit 1; }
+          done
+
+      - name: Materialize snapshot runner-side only
+        shell: bash
+        run: |
+          set -euo pipefail
+          git show "$SNAPSHOT_COMMIT:research/attack_event_23city_persistence_snapshot_v2_2026-10-04.json" > "$SNAPSHOT_FILE"
+          test -s "$SNAPSHOT_FILE"
+
+      - name: Materialize exact classifier stack
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf "$STACK_DIR"
+          mkdir -p "$STACK_DIR"
+          git archive "$CLASSIFIER_COMMIT" | tar -x -C "$STACK_DIR"
+          test -f "$STACK_DIR/kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py"
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install exact stack dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pip install -r "$STACK_DIR/kyiv-air-alerts-grafana/requirements.txt"
+
+      - name: Run authoritative classifier self-test
+        shell: bash
+        working-directory: /tmp/authoritative_classifier_stack/kyiv-air-alerts-grafana
+        run: |
+          set -euo pipefail
+          PYTHONDONTWRITEBYTECODE=1 python scripts/monitor_explosion_candidates.py --self-test
+
+      - name: Run blind 411-episode replay
+        id: replay
+        shell: bash
+        run: |
+          set +e
+          PYTHONDONTWRITEBYTECODE=1 python .github/proof/kyiv_411_classification_continuity_replay.py             --snapshot "$SNAPSHOT_FILE"             --stack "$STACK_DIR"             --summary "$SUMMARY"             --ledger "$LEDGER"             --run-id "$GITHUB_RUN_ID"
+          rc=$?
+          set -e
+          echo "exit_code=$rc" >> "$GITHUB_OUTPUT"
+          test -s "$SUMMARY"
+          cat "$SUMMARY"
+          exit 0
+
+      - name: Upload compact summary
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: kyiv-411-classification-continuity-summary-${{ github.run_id }}
+          path: /tmp/kyiv_411_episode_classification_continuity_summary_2026-10-06.json
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Upload detailed ledger
+        if: steps.replay.outputs.exit_code == '0'
+        uses: actions/upload-artifact@v4
+        with:
+          name: kyiv-411-classification-continuity-ledger-${{ github.run_id }}
+          path: /tmp/kyiv_411_episode_classification_continuity_ledger_2026-10-06.json
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Fail if replay blocked
+        if: steps.replay.outputs.exit_code != '0'
+        shell: bash
+        run: exit 1
