@@ -69,8 +69,7 @@ jobs:
           set -euo pipefail
           test "$(git rev-parse "$PREDECESSOR_COMMIT:research/attack_event_postmigration_gap_audit_2026-10-06.json")" = "75d751dcd3f9695ea5a6fdd2d70086817d7320f2"
           test "$(git rev-parse "$AUTH_COMMIT:research/attack_event_23city_persistence_snapshot_v2_2026-10-04.json")" = "8a2f6bd33f879be9db978da59c12c34e61f6f843"
-          printf '%s  %s
-'             "29bc4c7e07b000f18c207141f710fdf4ded86432460bfc65940451b521e1ed4e"             <(git show "$PREDECESSOR_COMMIT:research/attack_event_postmigration_gap_audit_2026-10-06.json") >/tmp/predecessor.sha.expected || true
+          printf '%s  %s\n' "29bc4c7e07b000f18c207141f710fdf4ded86432460bfc65940451b521e1ed4e" <(git show "$PREDECESSOR_COMMIT:research/attack_event_postmigration_gap_audit_2026-10-06.json") >/tmp/predecessor.sha.expected || true
           actual_pre="$(git show "$PREDECESSOR_COMMIT:research/attack_event_postmigration_gap_audit_2026-10-06.json" | sha256sum | awk '{print $1}')"
           test "$actual_pre" = "29bc4c7e07b000f18c207141f710fdf4ded86432460bfc65940451b521e1ed4e"
           actual_auth="$(git show "$AUTH_COMMIT:research/attack_event_23city_persistence_snapshot_v2_2026-10-04.json" | sha256sum | awk '{print $1}')"
