@@ -38,11 +38,18 @@ def find_city(rec):
     return None
 
 def find_verdict(rec):
-    vals=[]
+    preferred=("verdict","classification_verdict","final_verdict","classification","event_classification","classification_status")
+    if isinstance(rec,dict):
+        for k in preferred:
+            v=rec.get(k)
+            if isinstance(v,str) and v in ALLOWED:return v
+    hits=[]
     for p,v in walk_scalars(rec):
-        if isinstance(v,str) and v in ALLOWED: vals.append(v)
-    u=list(dict.fromkeys(vals))
-    return u[0] if len(u)==1 else None
+        if isinstance(v,str) and v in ALLOWED:hits.append((len(p),p,v))
+    if not hits:return None
+    mind=min(x[0] for x in hits)
+    vals=list(dict.fromkeys(x[2] for x in hits if x[0]==mind))
+    return vals[0] if len(vals)==1 else None
 
 def discover_time_path(records,want):
     c=Counter()
