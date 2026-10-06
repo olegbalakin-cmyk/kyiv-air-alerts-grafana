@@ -260,6 +260,15 @@ def primary_source_family(pairs):
     return "OTHER"
 
 def success_mechanism(pairs, source_family):
+    # Frozen historical replay stores explicit review provenance for successful
+    # episode binding. Treat this as the primary mechanism when present.
+    review_blob=" | ".join((p.lower()+"="+low(v)) for p,v in pairs if has_truthy(v) and "review_provenance" in p.lower())
+    if (
+        "temporal_reviewed_validated_binding" in review_blob
+        or "reviewed_episode_specific_sensitivity_binding" in review_blob
+        or ("frozen_historical_audit_episode_binding" in review_blob and "validated_by_review=true" in review_blob)
+    ):
+        return "MANUALLY_REVIEWED_OR_CURATED_BINDING"
     rel=[]
     review=[]
     for p,v in pairs:
@@ -648,7 +657,15 @@ def main():
     comparable=(pre_er==0 and post_er==0) or (pre_er>0 and post_er>=0.8*pre_er)
     fam_comparable=(pre_top_cov==0 and post_top_cov==0) or (pre_top_cov>0 and post_top_cov>=0.8*pre_top_cov)
     classifier_comparable=(not cv_pre or not cv_post or bool(cv_overlap))
-    h6=bool(post["total_alert_episodes"] and post["confirmed_positives"]==0 and comparable and fam_comparable and classifier_comparable)
+    post_unresolved_evidence_concentration = (
+        post["rows_with_any_attack_event_evidence_provenance"] > 0
+        and post["rows_with_any_attack_event_evidence_provenance"] == post["NEEDS_REVIEW"]
+    )
+    h6=bool(
+        post["total_alert_episodes"] and post["confirmed_positives"]==0
+        and comparable and fam_comparable and classifier_comparable
+        and not post_unresolved_evidence_concentration
+    )
     hypotheses={
       "H1_EVIDENCE_DISCOVERY_OR_BACKFILL_STOPS":{
         "status":"SUPPORTED" if h1 else "NOT_SUPPORTED",
@@ -672,7 +689,7 @@ def main():
       },
       "H6_REAL_ZERO_POSITIVES":{
         "status":"SUPPORTED" if h6 else "NOT_SUPPORTED",
-        "evidence":{"evidence_coverage_comparable":comparable,"dominant_source_family_coverage_comparable":fam_comparable,"classifier_coverage_comparable":classifier_comparable}
+        "evidence":{"evidence_coverage_comparable":comparable,"dominant_source_family_coverage_comparable":fam_comparable,"classifier_coverage_comparable":classifier_comparable,"post_evidence_rows_all_need_review":post_unresolved_evidence_concentration}
       }
     }
     supported=[k for k,v in hypotheses.items() if v["status"]=="SUPPORTED"]
