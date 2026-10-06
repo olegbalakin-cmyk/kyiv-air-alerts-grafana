@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# GitHub Actions retrigger marker: no audit semantics changed.
 from __future__ import annotations
 
 import hashlib
