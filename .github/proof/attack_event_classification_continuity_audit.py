@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# Read-only Actions-runner audit harness.
 from __future__ import annotations
 
 import argparse
