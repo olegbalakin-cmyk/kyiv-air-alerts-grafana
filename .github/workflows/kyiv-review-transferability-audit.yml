@@ -6,6 +6,7 @@ on:
       - main
     paths:
       - "research/kyiv_review_transferability_audit.py"
+      - "research/kyiv_review_transferability_reviewdiag.py"
       - "research/kyiv_positive_success_cutoff_audit.py"
       - ".github/workflows/kyiv-review-transferability-audit.yml"
       - "research/attack_event_23city_persistence_snapshot_v2_2026-10-04.json"
@@ -38,6 +39,7 @@ jobs:
         run: |
           set -euo pipefail
           python3 research/kyiv_review_transferability_audit.py
+          python3 research/kyiv_review_transferability_reviewdiag.py
 
       - name: Upload audit artifact
         if: always()
