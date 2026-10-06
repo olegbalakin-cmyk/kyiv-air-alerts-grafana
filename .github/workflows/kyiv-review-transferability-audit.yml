@@ -7,12 +7,13 @@ on:
     paths:
       - "research/kyiv_review_transferability_audit.py"
       - "research/kyiv_review_transferability_reviewdiag.py"
+      - "research/kyiv_review_transferability_finalize.py"
       - "research/kyiv_positive_success_cutoff_audit.py"
       - ".github/workflows/kyiv-review-transferability-audit.yml"
       - "research/attack_event_23city_persistence_snapshot_v2_2026-10-04.json"
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   audit:
@@ -22,6 +23,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 1
+          ref: kyiv-review-transferability-audit-2026-10-06
 
       - name: Verify frozen source identity
         id: frozen
@@ -40,6 +42,19 @@ jobs:
           set -euo pipefail
           python3 research/kyiv_review_transferability_audit.py
           python3 research/kyiv_review_transferability_reviewdiag.py
+          python3 research/kyiv_review_transferability_finalize.py
+
+      - name: Commit durable audit artifact only
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add research/kyiv_review_transferability_audit_2026-10-06.json
+          if ! git diff --cached --quiet; then
+            git commit -m "Add Kyiv review transferability audit artifact"
+            git push origin HEAD:kyiv-review-transferability-audit-2026-10-06
+          fi
 
       - name: Upload audit artifact
         if: always()
