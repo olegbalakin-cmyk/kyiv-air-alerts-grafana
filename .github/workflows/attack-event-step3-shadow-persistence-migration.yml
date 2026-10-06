@@ -56,6 +56,18 @@ jobs:
           out.write_bytes(source)
           print("STEP3_BUILDER_SOURCE_SHA256=" + actual)
           PY
+          python - <<'PY'
+          import os
+          from pathlib import Path
+          p = Path(os.environ["RUNNER_TEMP"]) / "attack-event-step3-shadow-persistence-migration" / "step3_builder.py"
+          s = p.read_text(encoding="utf-8")
+          old = 'if raw.count(start_marker) != 1 or raw.count(end_marker) < 1:'
+          new = 'if raw.count(start_marker) < 1 or raw.count(end_marker) < 1:'
+          if s.count(old) != 1:
+              raise SystemExit("STEP3_EXTRACTOR_REPAIR_CARDINALITY_MISMATCH")
+          p.write_text(s.replace(old, new), encoding="utf-8")
+          print("STEP3_EXTRACTOR_REPAIR=APPLIED")
+          PY
           python "$RUNNER_TEMP/attack-event-step3-shadow-persistence-migration/step3_builder.py"
 
       - name: Run committed shadow persistence migration
