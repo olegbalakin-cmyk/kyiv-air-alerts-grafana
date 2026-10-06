@@ -43,6 +43,7 @@ EXPECTED_CITY_COUNTS = {
 }
 EXPECTED_UNCOVERED = 2100
 UTC = timezone.utc
+EPOCH = datetime(1970, 1, 1, tzinfo=UTC)
 
 
 class Blocked(RuntimeError):
@@ -94,6 +95,16 @@ def parse_dt(value: Any) -> datetime | None:
     if dt.tzinfo is None:
         dt = dt.replace(tzinfo=UTC)
     return dt.astimezone(UTC)
+
+
+def parse_utc_microseconds(value: Any) -> datetime | None:
+    if value is None:
+        return None
+    try:
+        us = int(value)
+        return EPOCH + timedelta(microseconds=us)
+    except (TypeError, ValueError, OverflowError):
+        return None
 
 
 def iso(dt: datetime | None) -> str | None:
@@ -151,6 +162,12 @@ def classification_rows(doc: Any) -> tuple[str, list[dict]]:
 
 def row_temporal(row: dict) -> tuple[str | None, datetime | None, datetime | None]:
     city = row.get("city_key") or row.get("city")
+    canonical_present = "alert_start_utc_microseconds" in row or "alert_end_utc_microseconds" in row
+    if canonical_present:
+        start = parse_utc_microseconds(row.get("alert_start_utc_microseconds"))
+        end = parse_utc_microseconds(row.get("alert_end_utc_microseconds"))
+        return str(city) if city is not None else None, start, end
+
     start = None
     end = None
     for k in ("alert_start_at","alert_start","start_at","alert_episode_start","start"):
@@ -325,14 +342,53 @@ def main() -> int:
         raise Blocked("AUTHORITATIVE_ROW_COUNT_MISMATCH","PHASE_1","authoritative_classification_source",len(class_rows),
                       "Authoritative classification list did not reconcile to 26,405.")
 
+    rows_with_city_key = sum(1 for row in class_rows if "city_key" in row)
+    rows_with_canonical_start = sum(1 for row in class_rows if "alert_start_utc_microseconds" in row)
+    rows_with_canonical_end = sum(1 for row in class_rows if "alert_end_utc_microseconds" in row)
+    invalid_canonical_start = sum(
+        1 for row in class_rows
+        if "alert_start_utc_microseconds" in row and parse_utc_microseconds(row.get("alert_start_utc_microseconds")) is None
+    )
+    invalid_canonical_end = sum(
+        1 for row in class_rows
+        if "alert_end_utc_microseconds" in row and parse_utc_microseconds(row.get("alert_end_utc_microseconds")) is None
+    )
+
     class_temporal = []
     for row in class_rows:
         city, st, en = row_temporal(row)
         if city and st and en:
             class_temporal.append((city,st,en))
-    if not class_temporal:
-        raise Blocked("AUTHORITATIVE_TEMPORAL_IDENTITY_UNRESOLVED","PHASE_1","authoritative_classification_source",26405,
-                      "No alert temporal identities could be extracted from authoritative classifications.")
+
+    temporal_validation = {
+        "authoritative_classifications_scanned": len(class_rows),
+        "rows_with_city_key": rows_with_city_key,
+        "rows_with_alert_start_utc_microseconds": rows_with_canonical_start,
+        "rows_with_alert_end_utc_microseconds": rows_with_canonical_end,
+        "temporal_identities_extracted": len(class_temporal),
+        "invalid_canonical_microsecond_start_values": invalid_canonical_start,
+        "invalid_canonical_microsecond_end_values": invalid_canonical_end,
+    }
+    print("AUTHORITATIVE_TEMPORAL_IDENTITY_VALIDATION " + json.dumps(temporal_validation, sort_keys=True))
+
+    if rows_with_city_key != 26405:
+        raise Blocked("AUTHORITATIVE_CITY_KEY_COVERAGE_MISMATCH","PHASE_1","authoritative_classification_source",26405 - rows_with_city_key,
+                      f"Expected city_key on 26,405 rows; observed {rows_with_city_key}.")
+    if rows_with_canonical_start != 26405:
+        raise Blocked("AUTHORITATIVE_CANONICAL_START_FIELD_COVERAGE_MISMATCH","PHASE_1","authoritative_classification_source",26405 - rows_with_canonical_start,
+                      f"Expected alert_start_utc_microseconds on 26,405 rows; observed {rows_with_canonical_start}.")
+    if rows_with_canonical_end != 26405:
+        raise Blocked("AUTHORITATIVE_CANONICAL_END_FIELD_COVERAGE_MISMATCH","PHASE_1","authoritative_classification_source",26405 - rows_with_canonical_end,
+                      f"Expected alert_end_utc_microseconds on 26,405 rows; observed {rows_with_canonical_end}.")
+    if invalid_canonical_start:
+        raise Blocked("AUTHORITATIVE_CANONICAL_START_VALUE_INVALID","PHASE_1","authoritative_classification_source",invalid_canonical_start,
+                      f"Invalid alert_start_utc_microseconds values: {invalid_canonical_start}.")
+    if invalid_canonical_end:
+        raise Blocked("AUTHORITATIVE_CANONICAL_END_VALUE_INVALID","PHASE_1","authoritative_classification_source",invalid_canonical_end,
+                      f"Invalid alert_end_utc_microseconds values: {invalid_canonical_end}.")
+    if len(class_temporal) != 26405:
+        raise Blocked("AUTHORITATIVE_TEMPORAL_IDENTITY_COUNT_MISMATCH","PHASE_1","authoritative_classification_source",26405 - len(class_temporal),
+                      f"Expected 26,405 extracted temporal identities; observed {len(class_temporal)}.")
     max_class = max(class_temporal, key=lambda x:(x[1],x[2],x[0]))
 
     parents = list(((pred.get("parent_coverage") or {}).get("closed_parent_identities") or []))
