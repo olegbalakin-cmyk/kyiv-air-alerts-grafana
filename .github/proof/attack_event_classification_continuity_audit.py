@@ -42,6 +42,7 @@ EXPECTED_CITY_COUNTS = {
     "zaporizhzhia":103,"zhytomyr":84,
 }
 EXPECTED_UNCOVERED = 2100
+BLOCKED_CONTEXT: dict[str, Any] = {}
 UTC = timezone.utc
 CANONICAL_UTC_RE = re.compile(
     r"^\d{4}-\d{2}-\d{2}T"
@@ -453,22 +454,149 @@ def main() -> int:
     if observed_city_counts != EXPECTED_CITY_COUNTS:
         raise Blocked("CITY_COUNT_RECONCILIATION_MISMATCH","PHASE_1","city_counts",EXPECTED_UNCOVERED,
                       f"Observed={observed_city_counts}")
-    if any(st <= max_class[1] for _,st,_,_ in parent_rows):
-        raise Blocked("TEMPORAL_GAP_NOT_POST_CUTOFF_CONTIGUOUS","PHASE_1","temporal_gap",EXPECTED_UNCOVERED,
-                      "At least one uncovered episode starts at/before the latest authoritative classification start.")
+    # Phase 1 temporal characterization is city-specific. Non-contiguity is an audit result,
+    # not a failure condition. Build maximal uncovered runs in each city's combined sequence.
+    class_by_city: dict[str,list[tuple[datetime,datetime]]] = defaultdict(list)
+    for city, st, en in class_temporal:
+        class_by_city[city].append((st,en))
+    for city in class_by_city:
+        class_by_city[city].sort(key=lambda x:(x[0],x[1]))
+
+    parent_by_city: dict[str,list[tuple[datetime,datetime,dict]]] = defaultdict(list)
+    for city, st, en, parent in parent_rows:
+        parent_by_city[city].append((st,en,parent))
+    for city in parent_by_city:
+        parent_by_city[city].sort(key=lambda x:(x[0],x[1]))
+
+    parent_uids = [str(p.get("alert_episode_uid") or "") for _,_,_,p in parent_rows]
+    if any(not uid for uid in parent_uids):
+        raise Blocked("UNCOVERED_PARENT_UID_MISSING","PHASE_1","temporal_gap",sum(1 for uid in parent_uids if not uid),
+                      "Every uncovered parent must have a stable alert_episode_uid for segment reconciliation.")
+    if len(set(parent_uids)) != EXPECTED_UNCOVERED:
+        raise Blocked("UNCOVERED_PARENT_UID_DUPLICATE","PHASE_1","temporal_gap",
+                      EXPECTED_UNCOVERED - len(set(parent_uids)),
+                      "Uncovered parent UIDs are not unique.")
+
+    temporal_segments = []
+    temporal_segment_uids: list[str] = []
+    historical_coverage_hole_count = 0
+    trailing_after_city_frontier_count = 0
+    late_arriving_historical_proven_count = 0
+
+    for city in sorted(parent_by_city):
+        classified = class_by_city.get(city) or []
+        uncovered = parent_by_city[city]
+        if not classified:
+            raise Blocked("CITY_CLASSIFICATION_FRONTIER_MISSING","PHASE_1","temporal_gap",len(uncovered),
+                          f"No authoritative classification frontier exists for uncovered city {city}.")
+
+        classified_keys = {(st,en) for st,en in classified}
+        overlap = [(st,en,p) for st,en,p in uncovered if (st,en) in classified_keys]
+        if overlap:
+            raise Blocked("UNCOVERED_ALREADY_CLASSIFIED_IDENTITY","PHASE_1","temporal_gap",len(overlap),
+                          f"Uncovered parent identities overlap authoritative classifications in {city}.")
+
+        frontier_start, frontier_end = max(classified, key=lambda x:(x[0],x[1]))
+        combined = (
+            [(st,en,"CLASSIFIED",None) for st,en in classified]
+            + [(st,en,"UNCOVERED",parent) for st,en,parent in uncovered]
+        )
+        combined.sort(key=lambda x:(x[0],x[1]))
+
+        segment_no = 0
+        i = 0
+        while i < len(combined):
+            if combined[i][2] != "UNCOVERED":
+                i += 1
+                continue
+            j = i
+            members = []
+            while j < len(combined) and combined[j][2] == "UNCOVERED":
+                members.append(combined[j])
+                j += 1
+
+            segment_no += 1
+            classified_precedes = any(item[2] == "CLASSIFIED" for item in combined[:i])
+            classified_follows = any(item[2] == "CLASSIFIED" for item in combined[j:])
+            if classified_follows:
+                if classified_precedes:
+                    temporal_position = "INTERNAL_HISTORICAL_COVERAGE_HOLE"
+                else:
+                    temporal_position = "LEADING_HISTORICAL_COVERAGE_HOLE"
+                historical_coverage_hole_count += len(members)
+            else:
+                temporal_position = "TRAILING_AFTER_CITY_CLASSIFICATION_FRONTIER"
+                trailing_after_city_frontier_count += len(members)
+
+            member_uids = [str(item[3].get("alert_episode_uid")) for item in members]
+            temporal_segment_uids.extend(member_uids)
+            first_start = members[0][0]
+            last_end = max(item[1] for item in members)
+
+            temporal_segments.append({
+                "city_key":city,
+                "segment_id":f"{city}_uncovered_{segment_no:03d}",
+                "count":len(members),
+                "uncovered_episode_count":len(members),
+                "first_start_at":iso(first_start),
+                "first_uncovered_start":iso(first_start),
+                "last_end_at":iso(last_end),
+                "last_uncovered_end":iso(last_end),
+                "authoritative_classifications_precede_segment":classified_precedes,
+                "authoritative_classifications_follow_segment":classified_follows,
+                "temporal_position":temporal_position,
+                "city_classification_frontier_start_at":iso(frontier_start),
+                "city_classification_frontier_end_at":iso(frontier_end),
+                "late_arriving_historical_status":"NOT_PROVEN",
+                "late_arriving_historical_episode_count":0,
+                "internal_historical_hole_count":len(members) if temporal_position == "INTERNAL_HISTORICAL_COVERAGE_HOLE" else 0,
+                "uncovered_parent_uids":member_uids,
+                "diagnosis":temporal_position,
+            })
+            i = j
+
+    temporal_segment_total = sum(int(seg["uncovered_episode_count"]) for seg in temporal_segments)
+    segment_uid_counts = Counter(temporal_segment_uids)
+    duplicate_segment_uids = sum(n - 1 for n in segment_uid_counts.values() if n > 1)
+    parent_uid_set = set(parent_uids)
+    segment_uid_set = set(temporal_segment_uids)
+    missing_segment_uids = parent_uid_set - segment_uid_set
+    extra_segment_uids = segment_uid_set - parent_uid_set
+
+    if temporal_segment_total != EXPECTED_UNCOVERED:
+        raise Blocked("TEMPORAL_SEGMENT_COUNT_RECONCILIATION_MISMATCH","PHASE_1","temporal_gap",temporal_segment_total,
+                      f"Expected temporal segment uncovered total 2100, got {temporal_segment_total}.")
+    if duplicate_segment_uids:
+        raise Blocked("TEMPORAL_SEGMENT_DUPLICATE_IDENTITIES","PHASE_1","temporal_gap",duplicate_segment_uids,
+                      "One or more uncovered parent UIDs appear in more than one temporal segment.")
+    if missing_segment_uids:
+        raise Blocked("TEMPORAL_SEGMENT_MISSING_IDENTITIES","PHASE_1","temporal_gap",len(missing_segment_uids),
+                      "One or more accepted uncovered parent UIDs are missing from temporal segments.")
+    if extra_segment_uids:
+        raise Blocked("TEMPORAL_SEGMENT_EXTRA_IDENTITIES","PHASE_1","temporal_gap",len(extra_segment_uids),
+                      "One or more temporal-segment UIDs are not in the accepted uncovered parent set.")
+
+    global_overlap_diagnostic = sum(1 for _,st,_,_ in parent_rows if st <= max_class[1])
+    if global_overlap_diagnostic != 28:
+        raise Blocked("GLOBAL_OVERLAP_DIAGNOSTIC_MISMATCH","PHASE_1","temporal_gap",global_overlap_diagnostic,
+                      f"Expected 28 uncovered starts at/before global max classification start; observed {global_overlap_diagnostic}.")
+
+    if historical_coverage_hole_count + trailing_after_city_frontier_count != EXPECTED_UNCOVERED:
+        raise Blocked("TEMPORAL_POSITION_PARTITION_MISMATCH","PHASE_1","temporal_gap",
+                      historical_coverage_hole_count + trailing_after_city_frontier_count,
+                      "Historical-hole and trailing-frontier counts do not partition all 2,100 uncovered parents.")
+
+    BLOCKED_CONTEXT.update({
+        "temporal_identities_reconciled":f"{EXPECTED_UNCOVERED} / {EXPECTED_UNCOVERED}",
+        "historical_coverage_hole_count":historical_coverage_hole_count,
+        "trailing_after_city_frontier_count":trailing_after_city_frontier_count,
+        "temporal_segment_count":len(temporal_segments),
+        "late_arriving_historical_proven_count":late_arriving_historical_proven_count,
+        "global_overlap_diagnostic":global_overlap_diagnostic,
+    })
+    print("TEMPORAL_GAP_CHARACTERIZATION " + json.dumps(BLOCKED_CONTEXT, sort_keys=True))
 
     by_date = Counter(st.date().isoformat() for _,st,_,_ in parent_rows)
-    temporal_segments = [{
-        "segment_id":"post_cutoff_001",
-        "count":EXPECTED_UNCOVERED,
-        "first_start_at":iso(first[1]),
-        "last_end_at":iso(last[2]),
-        "classification_boundary_start_at":iso(max_class[1]),
-        "classification_boundary_end_at":iso(max_class[2]),
-        "late_arriving_historical_episode_count":0,
-        "internal_historical_hole_count":0,
-        "diagnosis":"ONE_CONTINUOUS_POST_CUTOFF_INTERVAL",
-    }]
 
     # Production-path proof.
     replay_text = text_show(HISTORICAL_HEAD, HISTORICAL_REPLAY)
@@ -724,7 +852,14 @@ def main() -> int:
         "audit_branch":AUDIT_BRANCH,
         "audited_main_commit":AUDITED_MAIN,
         "actions_run_id":int(args.run_id),
+        "authoritative_temporal_identities":len(class_temporal),
         "uncovered_alerts":EXPECTED_UNCOVERED,
+        "historical_coverage_hole_count":historical_coverage_hole_count,
+        "trailing_after_city_frontier_count":trailing_after_city_frontier_count,
+        "temporal_segment_count":len(temporal_segments),
+        "late_arriving_historical_proven_count":late_arriving_historical_proven_count,
+        "temporal_identities_reconciled":"YES",
+        "global_overlap_diagnostic":global_overlap_diagnostic,
         "first_uncovered_episode":artifact["first_uncovered_episode"],
         "last_uncovered_episode":artifact["last_uncovered_episode"],
         "classifier_ready":a,
@@ -760,6 +895,8 @@ if __name__ == "__main__":
             "production_mutation":"NO",
             "safe_continuation_point":f"Resolve {exc.gate} without classifying alerts, then rerun the same read-only continuity audit.",
         }
+        if BLOCKED_CONTEXT:
+            payload.update(BLOCKED_CONTEXT)
         # Best-effort summary for blocked runs; workflow will preserve it.
         try:
             Path(os.environ.get("CONTINUITY_SUMMARY_FALLBACK","/tmp/continuity_audit_summary.json")).write_text(
