@@ -451,7 +451,7 @@ def main() -> int:
     ap.add_argument("--out", required=True)
     ap.add_argument("--summary", required=True)
     ap.add_argument("--run-id", required=True)
-    ap.add_argument("--job-id", required=True)
+    ap.add_argument("--job-id", required=False)
     args = ap.parse_args()
     out_path = Path(args.out)
     summary_path = Path(args.summary)
@@ -543,6 +543,7 @@ def main() -> int:
                       EXPECTED_TOTAL, "No frozen live cutoff.", EXPECTED_TOTAL)
     exact_index, city_index = build_live_indexes(live_state)
     reports_by_started, _report_identities = run_report_index(live_commit)
+    queue_cache: dict[str, list[dict]] = {}
 
     # PHASE 2: materialization cohort.
     materialization_rows = []
@@ -589,13 +590,23 @@ def main() -> int:
         report_entry = reports_by_started.get(iso(checked_at)) if checked_at else None
         report = (report_entry or {}).get("report")
         collection_complete, collection_blockers = report_collection_status(report, city)
-        qrows = relevant_queue_rows(live_queue, eid, checked_at)
+        run_commit = str(((report_entry or {}).get("identity") or {}).get("commit") or "")
+        run_queue = queue_at_commit(run_commit, queue_cache) if run_commit else []
+        qrows = relevant_queue_rows(run_queue, eid, checked_at)
         projected, missing_fields = input_projection(qrows, city)
         row.update({
             "live_monitor_episode_id": eid or None,
             "followup_72h_due_at": (check72 or {}).get("due_at"),
             "followup_72h_checked_at": (check72 or {}).get("checked_at"),
             "collection_run_identity": (report_entry or {}).get("identity"),
+            "collection_queue_identity": (
+                {
+                    "commit": run_commit,
+                    "path": LIVE_QUEUE,
+                    "blob": git("rev-parse", f"{run_commit}:{LIVE_QUEUE}"),
+                }
+                if run_commit else None
+            ),
             "collection_complete": collection_complete,
             "collection_blockers": collection_blockers,
             "candidate_input_count": len(projected),
@@ -644,7 +655,6 @@ def main() -> int:
     historical_exact = find_historical_exact_states(live_commit, no_current_targets)
     historical_launch = json_show(HISTORICAL_HEAD, HISTORICAL_LAUNCH)
     historical_status = json_show(HISTORICAL_HEAD, HISTORICAL_STATUS)
-    queue_cache: dict[str, list[dict]] = {}
     evidence_rows = []
     evidence_uid_to_reason = {}
     evidence_action_counts = Counter()
@@ -1001,7 +1011,6 @@ def main() -> int:
         "verdict": verdict,
         "audit_branch": AUDIT_BRANCH,
         "actions_run_id": int(args.run_id),
-        "job_id": int(args.job_id),
         "frozen_continuity_artifact_identity": frozen_identity,
         "frozen_universe": EXPECTED_TOTAL,
         "episode_uid_universe_sha256": universe_hash,
@@ -1159,7 +1168,6 @@ def main() -> int:
         "verdict": verdict,
         "audit_branch": AUDIT_BRANCH,
         "actions_run_id": int(args.run_id),
-        "job_id": int(args.job_id),
         "frozen_universe": EXPECTED_TOTAL,
         "universe_reconciled": "YES",
         "materialization_cohort": 1737,
