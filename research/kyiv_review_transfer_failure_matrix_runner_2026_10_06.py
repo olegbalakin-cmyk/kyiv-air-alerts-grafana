@@ -153,10 +153,12 @@ def flatten_selected_top_level(r):
                 p = item.get("path")
                 if not isinstance(p, str):
                     continue
-                # All review-provenance paths used by the proof are eligible;
-                # other provenance paths are included when semantically/review relevant.
+                # The accepted proof's orig() function reads only original
+                # review_provenance paths (excluding adapter material). Match that
+                # exact proof-visible provenance surface; do not enumerate unrelated
+                # native replay/evidence payload paths.
                 pl = p.lower()
-                if ".review_provenance." in pl or field_wanted(p):
+                if ".review_provenance." in pl and "review_provenance_adapter" not in pl:
                     add_value(dst, p, item.get("value"))
 
     # The accepted proof harness reads only review/evidence provenance plus
