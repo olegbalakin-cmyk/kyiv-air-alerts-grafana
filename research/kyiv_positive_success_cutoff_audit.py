@@ -348,29 +348,41 @@ def main():
     dict_arrays=[(p,a) for p,a in arrays if a and isinstance(a[0],dict)]
     result["diagnostics"].append({"array_inventory":[{"path":p,"rows":len(a)} for p,a in dict_arrays]})
 
-    # Locate classification table mechanically by exact accepted verdict totals.
+    # Locate classification table mechanically by one canonical verdict field whose
+    # row-level distribution exactly matches the accepted frozen totals. Do not count
+    # nested provenance copies of the same verdict.
     best=None
     for p,a in dict_arrays:
-        counts=Counter()
-        verdict_paths=Counter()
+        per_path={}
         for row in a:
+            rowvals=defaultdict(set)
             for fp,v in flatten(row):
                 sv=norm(v)
                 if sv in KNOWN_VERDICTS:
-                    counts[sv]+=1
-                    verdict_paths[fp]+=1
-        score=sum(min(counts[k],EXPECTED_ALL[k]) for k in EXPECTED_ALL)
-        if best is None or score>best[0]:
-            best=(score,p,a,counts,verdict_paths)
-        if counts==EXPECTED_ALL:
-            best=(10**9,p,a,counts,verdict_paths); break
+                    sem=re.sub(r"\\[\\d+\\]","[]",fp)
+                    rowvals[sem].add(sv)
+            for sem,vals in rowvals.items():
+                if len(vals)==1:
+                    vv=next(iter(vals))
+                    per_path.setdefault(sem,Counter())[vv]+=1
+        for sem,counts in per_path.items():
+            score=sum(min(counts[k],EXPECTED_ALL[k]) for k in EXPECTED_ALL)
+            cand=(score,p,a,counts,sem)
+            if best is None or score>best[0]:
+                best=cand
+            if counts==EXPECTED_ALL:
+                best=(10**9,p,a,counts,sem)
+                break
+        if best is not None and best[0]==10**9:
+            break
     if best is None or best[3]!=EXPECTED_ALL:
         result["verdict"]="KYIV POSITIVE SUCCESS/CUTOFF AUDIT = BLOCKED"
-        result["diagnostics"].append({"classification_table_not_found": True, "best": None if best is None else {"path":best[1],"counts":dict(best[3])}})
+        result["diagnostics"].append({"classification_table_not_found": True, "best": None if best is None else {"path":best[1],"counts":dict(best[3]),"verdict_semantic_path":best[4]}})
         Path(OUT).write_text(json.dumps(result,ensure_ascii=False,indent=2),encoding="utf-8")
         return 3
-    _,class_path,class_rows,all_counts,vpaths=best
-    verdict_path=vpaths.most_common(1)[0][0]
+    _,class_path,class_rows,all_counts,verdict_sem=best
+    # Recover a representative concrete path for reporting.
+    verdict_path=verdict_sem
     result["classification_table"]={"path":class_path,"rows":len(class_rows),"verdict_path":verdict_path,"counts":dict(all_counts)}
 
     # Build relational index across top-level/nested-under-dict record arrays.
