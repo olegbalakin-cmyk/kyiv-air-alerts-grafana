@@ -1,0 +1,153 @@
+name: Attack-event classification continuity audit
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - ".github/workflows/attack-event-classification-continuity-audit.yml"
+      - ".github/proof/attack_event_classification_continuity_audit.py"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  actions: read
+
+concurrency:
+  group: attack-event-classification-continuity-audit-2026-10-06
+  cancel-in-progress: false
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      AUDIT_BRANCH: attack-event-classification-continuity-audit-2026-10-06
+      AUDITED_MAIN: 5e9fa82694be6823841dcb468e5d847e8a4620e8
+      PREDECESSOR_BRANCH: attack-event-postmigration-gap-audit-2026-10-06
+      PREDECESSOR_COMMIT: 619c753a3934fe18342649b006bdb488e9ef4a85
+      AUTH_BRANCH: attack-event-23city-persistence-snapshot-v2-2026-10-04
+      AUTH_COMMIT: efefa399e69eadd3d7fc8393ac1553cfde35f138
+      HISTORICAL_BRANCH: historical-attack-event-backfill-2026-09-27
+      HISTORICAL_HEAD: 71cb6f6fbe856cc7b96759310fe9cc9c71cc0453
+      LIVE_BRANCH: multicity-wip-2026-09-16
+      OUT_PATH: research/attack_event_classification_continuity_audit_2026-10-06.json
+      SUMMARY_PATH: /tmp/attack_event_classification_continuity_audit_summary.json
+
+    steps:
+      - name: Check out isolated audit branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ env.AUDIT_BRANCH }}
+          fetch-depth: 0
+
+      - name: Fetch exact accepted authorities and live evidence branch
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch --no-tags origin             "$PREDECESSOR_BRANCH:$PREDECESSOR_BRANCH"             "$AUTH_BRANCH:$AUTH_BRANCH"             "$HISTORICAL_BRANCH:$HISTORICAL_BRANCH"             "$LIVE_BRANCH:$LIVE_BRANCH"
+          test "$(git rev-parse main)" = "$AUDITED_MAIN"
+          test "$(git rev-parse "$PREDECESSOR_COMMIT^{commit}")" = "$PREDECESSOR_COMMIT"
+          test "$(git rev-parse "$AUTH_COMMIT^{commit}")" = "$AUTH_COMMIT"
+          test "$(git rev-parse "$HISTORICAL_HEAD^{commit}")" = "$HISTORICAL_HEAD"
+          test "$(git rev-parse "$PREDECESSOR_BRANCH")" = "$PREDECESSOR_COMMIT"
+          test "$(git rev-parse "$AUTH_BRANCH")" = "$AUTH_COMMIT"
+          test "$(git rev-parse "$HISTORICAL_BRANCH")" = "$HISTORICAL_HEAD"
+          echo "LIVE_HEAD=$(git rev-parse "$LIVE_BRANCH")" >> "$GITHUB_ENV"
+
+      - name: Verify protected authoritative blobs
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse "$PREDECESSOR_COMMIT:research/attack_event_postmigration_gap_audit_2026-10-06.json")" = "75d751dcd3f9695ea5a6fdd2d70086817d7320f2"
+          test "$(git rev-parse "$AUTH_COMMIT:research/attack_event_23city_persistence_snapshot_v2_2026-10-04.json")" = "8a2f6bd33f879be9db978da59c12c34e61f6f843"
+          printf '%s  %s
+'             "29bc4c7e07b000f18c207141f710fdf4ded86432460bfc65940451b521e1ed4e"             <(git show "$PREDECESSOR_COMMIT:research/attack_event_postmigration_gap_audit_2026-10-06.json") >/tmp/predecessor.sha.expected || true
+          actual_pre="$(git show "$PREDECESSOR_COMMIT:research/attack_event_postmigration_gap_audit_2026-10-06.json" | sha256sum | awk '{print $1}')"
+          test "$actual_pre" = "29bc4c7e07b000f18c207141f710fdf4ded86432460bfc65940451b521e1ed4e"
+          actual_auth="$(git show "$AUTH_COMMIT:research/attack_event_23city_persistence_snapshot_v2_2026-10-04.json" | sha256sum | awk '{print $1}')"
+          test "$actual_auth" = "09458bcf0a019fa2939eb9dfa484da46cd8fa2be077343c5ba6d595c93d71788"
+
+      - name: Assert zero database access configuration
+        shell: bash
+        run: |
+          set -euo pipefail
+          for key in DATABASE_URL NEON_DATABASE_URL NEON_URL PGHOST PGPORT PGDATABASE PGUSER PGPASSWORD; do
+            test -z "${!key-}" || { echo "Unexpected DB environment variable: $key"; exit 1; }
+          done
+
+      - name: Run read-only continuity audit
+        id: audit
+        shell: bash
+        env:
+          CONTINUITY_SUMMARY_FALLBACK: ${{ env.SUMMARY_PATH }}
+        run: |
+          set +e
+          python .github/proof/attack_event_classification_continuity_audit.py             --out "$OUT_PATH"             --summary "$SUMMARY_PATH"             --run-id "$GITHUB_RUN_ID"
+          rc=$?
+          set -e
+          echo "exit_code=$rc" >> "$GITHUB_OUTPUT"
+          test -s "$SUMMARY_PATH"
+          cat "$SUMMARY_PATH"
+          exit 0
+
+      - name: Upload compact summary
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: attack-event-classification-continuity-summary-${{ github.run_id }}
+          path: ${{ env.SUMMARY_PATH }}
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Commit durable audit artifact on isolated branch
+        if: steps.audit.outputs.exit_code == '0'
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -s "$OUT_PATH"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "$OUT_PATH"
+          git commit -m "Freeze classification continuity audit"
+          git push origin HEAD:"$AUDIT_BRANCH"
+
+      - name: Emit durable artifact identity
+        if: steps.audit.outputs.exit_code == '0'
+        shell: bash
+        run: |
+          set -euo pipefail
+          commit="$(git rev-parse HEAD)"
+          blob="$(git rev-parse "HEAD:$OUT_PATH")"
+          sha="$(sha256sum "$OUT_PATH" | awk '{print $1}')"
+          echo "DURABLE_COMMIT=$commit"
+          echo "DURABLE_PATH=$OUT_PATH"
+          echo "DURABLE_BLOB=$blob"
+          echo "DURABLE_SHA256=$sha"
+          python - <<'PY'
+          import json, os
+          from pathlib import Path
+          p=Path(os.environ["SUMMARY_PATH"])
+          d=json.loads(p.read_text(encoding="utf-8"))
+          d["durable_artifact_commit"]=os.popen("git rev-parse HEAD").read().strip()
+          d["durable_artifact_path"]=os.environ["OUT_PATH"]
+          d["durable_artifact_blob"]=os.popen(f"git rev-parse HEAD:{os.environ['OUT_PATH']}").read().strip()
+          import hashlib
+          d["durable_artifact_sha256"]=hashlib.sha256(Path(os.environ["OUT_PATH"]).read_bytes()).hexdigest()
+          p.write_text(json.dumps(d,ensure_ascii=False,indent=2)+"\n",encoding="utf-8")
+          PY
+
+      - name: Upload final compact summary with durable identity
+        if: steps.audit.outputs.exit_code == '0'
+        uses: actions/upload-artifact@v4
+        with:
+          name: attack-event-classification-continuity-final-${{ github.run_id }}
+          path: ${{ env.SUMMARY_PATH }}
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Fail blocked or invalid audit after preserving summary
+        if: steps.audit.outputs.exit_code != '0'
+        shell: bash
+        run: |
+          echo "Continuity audit blocked or invalid; see compact summary artifact."
+          exit 1
