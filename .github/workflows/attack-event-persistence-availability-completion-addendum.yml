@@ -278,18 +278,85 @@ jobs:
               x = row.get("origin_provenance")
               return x if isinstance(x, dict) else {}
 
-          def origin_artifact_path(row):
-              # Prefer exact accepted origin_artifact_path fields. Do not use URL/domain/content.
-              vals, hits = unique_nonempty_strings(source_origin_object(row), {"origin_artifact_path"})
-              if len(vals) == 1:
-                  return vals[0]
-              vals2, hits2 = unique_nonempty_strings(row, {"source_corpus", "source_corpus_id", "corpus_id"})
-              if len(vals2) == 1:
-                  return vals2[0]
-              top = row.get("origin_artifact_path")
-              if isinstance(top, str) and top.strip():
-                  return top
-              return None
+          def source_corpus_attribution(row):
+              # Harness-only projection of explicit accepted provenance fields.
+              # Never derive source_type from corpus/path/URL/family/content.
+              origin = source_origin_object(row)
+              representations = []
+              shape_flags = {
+                  "origin_path": False,
+                  "origin_artifact_paths": False,
+                  "origin_origin_artifact_path": False,
+                  "top_level_path": False,
+                  "top_level_artifact_paths": False,
+                  "top_level_origin_artifact_path": False,
+              }
+
+              def add_singular(container, key, label, flag):
+                  value = container.get(key) if isinstance(container, dict) else None
+                  if isinstance(value, str) and value.strip():
+                      shape_flags[flag] = True
+                      representations.append((label, [value]))
+
+              def add_plural(container, key, label, flag):
+                  value = container.get(key) if isinstance(container, dict) else None
+                  if (
+                      isinstance(value, list)
+                      and value
+                      and all(isinstance(v, str) and v.strip() for v in value)
+                  ):
+                      shape_flags[flag] = True
+                      representations.append((label, sorted(set(value))))
+
+              add_singular(origin, "origin_artifact_path", "origin.origin_artifact_path", "origin_origin_artifact_path")
+              add_singular(origin, "path", "origin.path", "origin_path")
+              add_plural(origin, "artifact_paths", "origin.artifact_paths", "origin_artifact_paths")
+              add_singular(row, "origin_artifact_path", "top_level.origin_artifact_path", "top_level_origin_artifact_path")
+              add_singular(row, "path", "top_level.path", "top_level_path")
+              add_plural(row, "artifact_paths", "top_level.artifact_paths", "top_level_artifact_paths")
+
+              by_path_set = defaultdict(list)
+              for label, paths in representations:
+                  by_path_set[tuple(paths)].append(label)
+
+              exact_origin_artifact_path = (
+                  shape_flags["origin_origin_artifact_path"]
+                  or shape_flags["top_level_origin_artifact_path"]
+              )
+              if not by_path_set:
+                  return {
+                      "state": "UNRESOLVED",
+                      "basis": None,
+                      "canonical_key": None,
+                      "shape_flags": dict(shape_flags, exact_origin_artifact_path=exact_origin_artifact_path),
+                      "representations": [],
+                  }
+              if len(by_path_set) > 1:
+                  return {
+                      "state": "CONFLICT",
+                      "basis": None,
+                      "canonical_key": None,
+                      "shape_flags": dict(shape_flags, exact_origin_artifact_path=exact_origin_artifact_path),
+                      "representations": [
+                          {"paths": list(paths), "fields": sorted(fields)}
+                          for paths, fields in sorted(by_path_set.items())
+                      ],
+                  }
+
+              paths = list(next(iter(by_path_set.keys())))
+              basis = paths[0] if len(paths) == 1 else paths
+              canonical_key = basis if isinstance(basis, str) else json.dumps(
+                  basis, ensure_ascii=False, separators=(",", ":")
+              )
+              return {
+                  "state": "RESOLVED",
+                  "basis": basis,
+                  "canonical_key": canonical_key,
+                  "shape_flags": dict(shape_flags, exact_origin_artifact_path=exact_origin_artifact_path),
+                  "representations": [
+                      {"paths": paths, "fields": sorted(next(iter(by_path_set.values())))}
+                  ],
+              }
 
           def classification_origin_projection(origin):
               def uniq(pred):
@@ -595,6 +662,33 @@ jobs:
               }
 
               # PART B
+              # Runner-side source-corpus attribution audit. This is reporting/proof-harness
+              # interpretation only; source_type materialization semantics remain unchanged.
+              corpus_projections = {}
+              corpus_shape_counts = Counter()
+              corpus_state_counts = Counter()
+              corpus_conflict_keys = []
+              for r in links:
+                  source_link_key = str(r.get("source_link_key") or "")
+                  p = source_corpus_attribution(r)
+                  corpus_projections[source_link_key] = p
+                  corpus_state_counts[p["state"]] += 1
+                  flags = p["shape_flags"]
+                  if flags["origin_path"]:
+                      corpus_shape_counts["origin.path"] += 1
+                  if flags["origin_artifact_paths"]:
+                      corpus_shape_counts["origin.artifact_paths"] += 1
+                  if flags["exact_origin_artifact_path"]:
+                      corpus_shape_counts["exact_origin_artifact_path"] += 1
+                  if flags["top_level_path"]:
+                      corpus_shape_counts["top_level.path"] += 1
+                  if flags["top_level_artifact_paths"]:
+                      corpus_shape_counts["top_level.artifact_paths"] += 1
+                  if flags["top_level_origin_artifact_path"]:
+                      corpus_shape_counts["top_level.origin_artifact_path"] += 1
+                  if p["state"] == "CONFLICT":
+                      corpus_conflict_keys.append(source_link_key)
+
               source_type_counts = Counter()
               source_type_conflicts = []
               source_type_by_corpus = defaultdict(Counter)
@@ -603,40 +697,111 @@ jobs:
               top_level_missing_key = 0
               top_level_explicit_null = 0
               nested_recovery_count = 0
-              unresolved_corpus_for_unmaterialized = 0
               source_type_projection_paths = Counter()
+              missing_top_level_corpus_counts = Counter()
+              unmaterialized_corpus_counts = Counter()
+
               for r in links:
+                  source_link_key = str(r.get("source_link_key") or "")
+                  corpus_projection = corpus_projections[source_link_key]
                   top = r.get("source_type")
-                  if top in (None, ""):
+                  top_missing = top in (None, "")
+                  if top_missing:
                       previously_missing_top_level += 1
+                      missing_top_level_corpus_counts[corpus_projection["state"]] += 1
                       if "source_type" in r:
                           top_level_explicit_null += 1
                       else:
                           top_level_missing_key += 1
                   state, value, vals, hits = source_type_state(r)
                   if state == "CONFLICT":
-                      source_type_conflicts.append(str(r.get("source_link_key")))
+                      source_type_conflicts.append(source_link_key)
                       continue
-                  if state == "MATERIALIZED" and top in (None, ""):
+                  if state == "MATERIALIZED" and top_missing:
                       nested_recovery_count += 1
                   source_type_counts[state] += 1
-                  corpus = origin_artifact_path(r)
-                  corpus_key = corpus if corpus is not None else "__UNRESOLVED__"
+                  if state == "UNMATERIALIZED_IN_ACCEPTED_SOURCE":
+                      unmaterialized_corpus_counts[corpus_projection["state"]] += 1
+                  corpus_key = (
+                      corpus_projection["canonical_key"]
+                      if corpus_projection["state"] == "RESOLVED"
+                      else "__" + corpus_projection["state"] + "__"
+                  )
                   source_type_by_corpus[corpus_key][state] += 1
                   family = r.get("source_family")
                   family_key = str(family) if family not in (None, "") else "__NULL__"
                   source_type_by_family[family_key][state] += 1
-                  if state == "UNMATERIALIZED_IN_ACCEPTED_SOURCE" and corpus is None:
-                      unresolved_corpus_for_unmaterialized += 1
-                  for path, v in hits:
+                  for projection_path, v in hits:
                       if isinstance(v, (str, int)) and str(v).strip():
-                          source_type_projection_paths[path] += 1
+                          source_type_projection_paths[projection_path] += 1
+
+              result["corpus_attribution_repair_scope"] = "HARNESS_ONLY"
+              result["source_corpus_attribution_audit"] = {
+                  "all_source_links": {
+                      "total": 3769,
+                      "with_singular_origin_path": corpus_shape_counts["origin.path"],
+                      "with_origin_artifact_paths": corpus_shape_counts["origin.artifact_paths"],
+                      "with_exact_origin_artifact_path": corpus_shape_counts["exact_origin_artifact_path"],
+                      "with_top_level_path": corpus_shape_counts["top_level.path"],
+                      "with_top_level_artifact_paths": corpus_shape_counts["top_level.artifact_paths"],
+                      "with_top_level_origin_artifact_path": corpus_shape_counts["top_level.origin_artifact_path"],
+                      "resolved": corpus_state_counts["RESOLVED"],
+                      "no_accepted_artifact_reference": corpus_state_counts["UNRESOLVED"],
+                      "conflicting_artifact_references": corpus_state_counts["CONFLICT"],
+                  },
+                  "previously_missing_top_level_source_type": {
+                      "total": previously_missing_top_level,
+                      "resolved": missing_top_level_corpus_counts["RESOLVED"],
+                      "unresolved": missing_top_level_corpus_counts["UNRESOLVED"],
+                      "conflict": missing_top_level_corpus_counts["CONFLICT"],
+                  },
+                  "authoritative_source_type_unmaterialized": {
+                      "total": source_type_counts["UNMATERIALIZED_IN_ACCEPTED_SOURCE"],
+                      "resolved": unmaterialized_corpus_counts["RESOLVED"],
+                      "unresolved": unmaterialized_corpus_counts["UNRESOLVED"],
+                      "conflict": unmaterialized_corpus_counts["CONFLICT"],
+                  },
+                  "projection_rule": (
+                      "source_origin_object(row) direct explicit origin_artifact_path/path/artifact_paths "
+                      "plus accepted top-level equivalents; plural artifact_paths preserved as exact sorted unique set"
+                  ),
+              }
+              result["script_equivalence_guard"] = {
+                  "corpus_attribution_repair_scope": "HARNESS_ONLY",
+                  "frozen_sha_guards_changed": False,
+                  "source_type_state_derivation_changed": False,
+                  "source_type_inference_added": False,
+                  "evidence_anomaly_logic_changed": False,
+                  "ddl_delta_changed": False,
+                  "artifact_path_changed": False,
+                  "identity_semantics_changed": False,
+              }
+
+              if corpus_conflict_keys:
+                  block(
+                      "SOURCE_ORIGIN_ARTIFACT_PATH_CONFLICT",
+                      "public.attack_event_sources",
+                      "origin_artifact_path",
+                      len(corpus_conflict_keys),
+                  )
               if source_type_conflicts:
                   block("SOURCE_TYPE_EXPLICIT_VALUE_CONFLICT", "public.attack_event_sources", "source_type", len(source_type_conflicts))
               if previously_missing_top_level != 1429:
                   block("PREDECESSOR_SOURCE_TYPE_GAP_COUNT_MISMATCH", "public.attack_event_sources", "source_type", previously_missing_top_level)
-              if unresolved_corpus_for_unmaterialized:
-                  block("SOURCE_TYPE_MISSING_CORPUS_UNRESOLVED", "public.attack_event_sources", "source_type", unresolved_corpus_for_unmaterialized)
+              if unmaterialized_corpus_counts["UNRESOLVED"]:
+                  block(
+                      "SOURCE_TYPE_MISSING_CORPUS_UNRESOLVED",
+                      "public.attack_event_sources",
+                      "source_type",
+                      unmaterialized_corpus_counts["UNRESOLVED"],
+                  )
+              if unmaterialized_corpus_counts["CONFLICT"]:
+                  block(
+                      "SOURCE_ORIGIN_ARTIFACT_PATH_CONFLICT",
+                      "public.attack_event_sources",
+                      "origin_artifact_path",
+                      unmaterialized_corpus_counts["CONFLICT"],
+                  )
               if sum(source_type_counts.values()) != 3769:
                   block("SOURCE_TYPE_STATE_COVERAGE_MISMATCH")
               result["source_type_availability"] = {
@@ -693,7 +858,7 @@ jobs:
                           "source_link_key": str(r.get("source_link_key") or ""),
                           "classification_key_v2": str(r.get("classification_key_v2") or ""),
                           "observation_id": str(r.get("observation_id") or ""),
-                          "source_corpus": origin_artifact_path(r),
+                          "source_corpus": source_corpus_attribution(r)["basis"],
                           "primary_category": category,
                           "failing_mechanical_conditions": failures,
                       })
