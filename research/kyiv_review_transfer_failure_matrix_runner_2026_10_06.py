@@ -159,32 +159,32 @@ def flatten_selected_top_level(r):
                 if ".review_provenance." in pl or field_wanted(p):
                     add_value(dst, p, item.get("value"))
 
-    def walk(obj, prefix=""):
-        if isinstance(obj, dict):
-            for k, v in obj.items():
-                if k in ("review_provenance", "evidence_provenance_excerpt"):
-                    continue
-                name = f"{prefix}.{k}" if prefix else str(k)
-                if isinstance(v, dict):
-                    walk(v, name)
-                elif isinstance(v, list):
-                    if field_wanted(name):
-                        if not v:
-                            add_value(dst, name, [])
-                        elif all(not isinstance(x, (dict, list)) for x in v):
-                            # ID-bearing lists are represented by presence only, not raw IDs.
-                            if is_identity_field(name):
-                                add_value(dst, name, "<NONEMPTY_IDENTIFIER_LIST>")
-                            else:
-                                for x in v:
-                                    add_value(dst, name, x)
+    # The accepted proof harness reads only review/evidence provenance plus
+    # selected top-level semantic/classifier fields. Do not recurse into bulky
+    # native replay/classification payloads that the transfer proof itself does not use.
+    for k, v in r.items():
+        if k in ("review_provenance", "evidence_provenance_excerpt", "classification"):
+            continue
+        name = str(k)
+        if not field_wanted(name):
+            continue
+        if isinstance(v, dict):
+            # Keep compact scalar semantic/review metadata one level deep only.
+            for kk, vv in v.items():
+                child = f"{name}.{kk}"
+                if field_wanted(child) and not isinstance(vv, (dict, list)):
+                    add_value(dst, child, vv)
+        elif isinstance(v, list):
+            if not v:
+                add_value(dst, name, [])
+            elif all(not isinstance(x, (dict, list)) for x in v):
+                if is_identity_field(name):
+                    add_value(dst, name, "<NONEMPTY_IDENTIFIER_LIST>")
                 else:
-                    if field_wanted(name):
-                        add_value(dst, name, v)
-        elif field_wanted(prefix):
-            add_value(dst, prefix, obj)
-
-    walk(r)
+                    for x in v:
+                        add_value(dst, name, x)
+        else:
+            add_value(dst, name, v)
     return dict(dst)
 
 record_fields = {}
