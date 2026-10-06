@@ -366,7 +366,7 @@ def main():
             best=(10**9,p,a,counts,verdict_paths); break
     if best is None or best[3]!=EXPECTED_ALL:
         result["verdict"]="KYIV POSITIVE SUCCESS/CUTOFF AUDIT = BLOCKED"
-        result["diagnostics"].append({"classification_table_not_found","best": None if best is None else {"path":best[1],"counts":best[3]}})
+        result["diagnostics"].append({"classification_table_not_found": True, "best": None if best is None else {"path":best[1],"counts":dict(best[3])}})
         Path(OUT).write_text(json.dumps(result,ensure_ascii=False,indent=2),encoding="utf-8")
         return 3
     _,class_path,class_rows,all_counts,vpaths=best
