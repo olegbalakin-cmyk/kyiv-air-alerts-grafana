@@ -54,7 +54,60 @@ jobs:
             "$AUTH_BRANCH:$AUTH_BRANCH" \
             "$HISTORICAL_BRANCH:$HISTORICAL_BRANCH" \
             "$LIVE_BRANCH:$LIVE_BRANCH"
-          test "$(git rev-parse origin/main)" = "$AUDITED_MAIN"
+          CURRENT_MAIN="$(git rev-parse origin/main)"
+          echo "CURRENT_MAIN_OBSERVED=$CURRENT_MAIN" >> "$GITHUB_ENV"
+
+          if ! git merge-base --is-ancestor "$AUDITED_MAIN" "$CURRENT_MAIN"; then
+            echo "AUDIT_RELEVANT_MAIN_DRIFT"
+            echo "CURRENT_MAIN_OBSERVED=$CURRENT_MAIN"
+            echo "FIRST_CHANGED_AUDIT_RELEVANT_PATH=AUDITED_MAIN_ANCESTRY"
+            echo "EXPECTED_BLOB=$AUDITED_MAIN"
+            echo "OBSERVED_BLOB=$CURRENT_MAIN"
+            exit 1
+          fi
+
+          check_unchanged() {
+            path="$1"
+            expected_blob="$2"
+
+            old_blob="$(git rev-parse "$AUDITED_MAIN:$path")"
+            current_blob="$(git rev-parse "$CURRENT_MAIN:$path")"
+
+            if test "$old_blob" != "$expected_blob"; then
+              echo "AUDIT_RELEVANT_MAIN_DRIFT"
+              echo "CURRENT_MAIN_OBSERVED=$CURRENT_MAIN"
+              echo "FIRST_CHANGED_AUDIT_RELEVANT_PATH=$path"
+              echo "EXPECTED_BLOB=$expected_blob"
+              echo "OBSERVED_BLOB=$old_blob"
+              exit 1
+            fi
+
+            if test "$current_blob" != "$expected_blob"; then
+              echo "AUDIT_RELEVANT_MAIN_DRIFT"
+              echo "CURRENT_MAIN_OBSERVED=$CURRENT_MAIN"
+              echo "FIRST_CHANGED_AUDIT_RELEVANT_PATH=$path"
+              echo "EXPECTED_BLOB=$expected_blob"
+              echo "OBSERVED_BLOB=$current_blob"
+              exit 1
+            fi
+          }
+
+          check_unchanged \
+            "kyiv-air-alerts-grafana/scripts/historical_attack_event_acceleration_controller.py" \
+            "2ec14f2e8c37293f06d28d73983322b227d5ba84"
+
+          check_unchanged \
+            ".github/workflows/historical-attack-event-backfill-scheduler.yml" \
+            "00876edb0c9a001aeb022f41feb13e3743d6f433"
+
+          check_unchanged \
+            ".github/workflows/explosion-monitor-wip.yml" \
+            "68591efed8201e0c6e98fb89945c8739f6e73dd8"
+
+          echo "CURRENT_MAIN_OBSERVED=$CURRENT_MAIN"
+          echo "AUDITED_MAIN=$AUDITED_MAIN"
+          echo "AUDIT_RELEVANT_MAIN_BLOBS_UNCHANGED=YES"
+          echo "AUDIT_RELEVANT_MAIN_BLOBS_UNCHANGED=YES" >> "$GITHUB_ENV"
           test "$(git rev-parse "$PREDECESSOR_COMMIT^{commit}")" = "$PREDECESSOR_COMMIT"
           test "$(git rev-parse "$AUTH_COMMIT^{commit}")" = "$AUTH_COMMIT"
           test "$(git rev-parse "$HISTORICAL_HEAD^{commit}")" = "$HISTORICAL_HEAD"
