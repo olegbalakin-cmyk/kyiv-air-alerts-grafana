@@ -4597,6 +4597,14 @@ def main() -> None:
         state,
         composition_target_episode_ids,
     )
+    from attack_event_canonical_persistence import persist_due_episode_classifications
+
+    canonical_persistence = persist_due_episode_classifications(
+        queue=queue,
+        due=due,
+        coverage_by_city=persistence_coverage_by_city,
+        dsn=os.environ.get("ATTACK_EVENT_DATABASE_URL"),
+    )
     (
         due_checks_at_cutoff,
         checked_due_checks_at_cutoff,
