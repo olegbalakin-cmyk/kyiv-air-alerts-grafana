@@ -1,0 +1,100 @@
+name: Attack-event multicity classifier parity proof
+
+on:
+  push:
+    branches:
+      - attack-event-multicity-classifier-parity-2026-10-07
+    paths:
+      - ".github/proof/attack_event_multicity_classifier_parity.py"
+      - ".github/workflows/attack-event-multicity-classifier-parity.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  actions: read
+
+concurrency:
+  group: attack-event-multicity-classifier-parity-2026-10-07
+  cancel-in-progress: false
+
+jobs:
+  parity:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    env:
+      AUDIT_BRANCH: attack-event-multicity-classifier-parity-2026-10-07
+      OUT_PATH: research/attack_event_multicity_classifier_parity_2026-10-07.json
+      SUMMARY_PATH: /tmp/attack_event_multicity_classifier_parity_summary.json
+
+    steps:
+      - name: Checkout isolated parity branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ env.AUDIT_BRANCH }}
+          fetch-depth: 0
+          clean: true
+
+      - name: Setup Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install classifier import dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pip install --disable-pip-version-check requests beautifulsoup4
+
+      - name: Assert zero database access configuration
+        shell: bash
+        run: |
+          set -euo pipefail
+          for key in DATABASE_URL NEON_DATABASE_URL NEON_URL PGHOST PGPORT PGDATABASE PGUSER PGPASSWORD; do
+            test -z "${!key-}" || { echo "Unexpected DB environment variable: $key"; exit 1; }
+          done
+
+      - name: Run read-only 23-city classifier parity proof
+        id: parity
+        shell: bash
+        env:
+          PARITY_SUMMARY_FALLBACK: ${{ env.SUMMARY_PATH }}
+        run: |
+          set +e
+          python .github/proof/attack_event_multicity_classifier_parity.py             --out "$OUT_PATH"             --summary "$SUMMARY_PATH"             --run-id "$GITHUB_RUN_ID"
+          rc=$?
+          set -e
+          echo "exit_code=$rc" >> "$GITHUB_OUTPUT"
+          test -s "$SUMMARY_PATH"
+          cat "$SUMMARY_PATH"
+          exit 0
+
+      - name: Upload compact summary
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: attack-event-multicity-classifier-parity-summary-${{ github.run_id }}
+          path: ${{ env.SUMMARY_PATH }}
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Commit durable parity artifact
+        if: steps.parity.outputs.exit_code == '0'
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -s "$OUT_PATH"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "$OUT_PATH"
+          git commit -m "Freeze multicity classifier parity proof"
+          git push origin HEAD:"$AUDIT_BRANCH"
+          echo "DURABLE_COMMIT=$(git rev-parse HEAD)"
+          echo "DURABLE_BLOB=$(git rev-parse HEAD:$OUT_PATH)"
+          echo "DURABLE_SHA256=$(sha256sum "$OUT_PATH" | awk '{print $1}')"
+
+      - name: Fail blocked or invalid proof after preserving summary
+        if: steps.parity.outputs.exit_code != '0'
+        shell: bash
+        run: |
+          echo "Multicity classifier parity proof blocked or invalid; see compact summary artifact."
+          exit 1
