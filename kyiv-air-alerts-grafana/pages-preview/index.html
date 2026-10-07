@@ -129,14 +129,18 @@
           <p>Доба поділена на 15-хвилинні інтервали. 100% — найчастіший інтервал у вибраному місті/районі та діапазоні; решта значень показані відносно нього.</p>
         </div>
         <div class="control time-profile-period-control">
-          <label for="timeOfDayRange">Діапазон</label>
-          <select id="timeOfDayRange" aria-label="Діапазон добового профілю">
-            <option value="7d">7 днів</option>
-            <option value="30d">30 днів</option>
-            <option value="90d">90 днів</option>
-            <option value="year">Рік</option>
-            <option value="all">Від початку даних</option>
-          </select>
+          <label id="timeOfDayRangeLabel">Діапазони</label>
+          <details id="timeOfDayRangeMenu" class="multi-select-dropdown">
+            <summary id="timeOfDayRangeSummary">30 днів</summary>
+            <div class="multi-select-options" role="group" aria-labelledby="timeOfDayRangeLabel">
+              <label><input class="time-of-day-range-option" type="checkbox" value="7d"><span data-time-range-label="7d">7 днів</span></label>
+              <label><input class="time-of-day-range-option" type="checkbox" value="30d" checked><span data-time-range-label="30d">30 днів</span></label>
+              <label><input class="time-of-day-range-option" type="checkbox" value="90d"><span data-time-range-label="90d">90 днів</span></label>
+              <label><input class="time-of-day-range-option" type="checkbox" value="180d"><span data-time-range-label="180d">180 днів</span></label>
+              <label><input class="time-of-day-range-option" type="checkbox" value="year"><span data-time-range-label="year">Рік</span></label>
+              <label><input class="time-of-day-range-option" type="checkbox" value="all"><span data-time-range-label="all">Від початку даних</span></label>
+            </div>
+          </details>
         </div>
       </div>
       <article class="panel chart-card wide time-profile-card">
@@ -190,6 +194,10 @@
           <p>Пізні смерті від поранень віднесені до місяця самої атаки. Наземні бої та артилерійські обстріли не включені.</p>
         </div>
         <div class="section-range-controls">
+          <div class="control casualty-year-control">
+            <label for="casualtyYear">Рік</label>
+            <select id="casualtyYear" aria-label="Рік для графіка загиблих"></select>
+          </div>
           <div class="control date-control">
             <label for="casualtyDateFrom">Від</label>
             <input id="casualtyDateFrom" type="date">
@@ -280,6 +288,7 @@
                 <option value="7d">7 днів</option>
                 <option value="30d">30 днів</option>
                 <option value="90d">90 днів</option>
+                <option value="180d">180 днів</option>
                 <option value="year">Рік</option>
                 <option value="all">Від початку даних</option>
               </select>

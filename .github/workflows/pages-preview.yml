@@ -6,6 +6,7 @@ on:
     paths:
       - "kyiv-air-alerts-grafana/pages-preview/**"
       - "kyiv-air-alerts-grafana/data/dashboard_data.json"
+      - "kyiv-air-alerts-grafana/scripts/build_time_of_day_heatmap.py"
       - ".github/workflows/pages-preview.yml"
   workflow_dispatch:
 
@@ -37,6 +38,9 @@ jobs:
           cp kyiv-air-alerts-grafana/data/dashboard_data.json /tmp/wip-dashboard-data.json
           git fetch origin site-prod
           git show origin/site-prod:kyiv-air-alerts-grafana/data/dashboard_data.json > kyiv-air-alerts-grafana/data/dashboard_data.json
+          git show origin/site-prod:kyiv-air-alerts-grafana/data/alerts_combined.json > /tmp/site-prod-alerts-combined.json
+          git show origin/site-prod:kyiv-air-alerts-grafana/data/ukrainealarm_bridge.json > /tmp/site-prod-ukrainealarm-bridge.json
+          git show origin/site-prod:kyiv-air-alerts-grafana/data/sevastopol_events.json > /tmp/site-prod-sevastopol-events.json
 
           python - <<'PY'
           import json
@@ -57,7 +61,7 @@ jobs:
               assert city.get("rolling90"), key
               assert city.get("daily28"), key
 
-          for field in ("casualties_by_city", "explosion_metric_test", "time_of_day_heatmap_test", "all_cities_table_test"):
+          for field in ("casualties_by_city", "explosion_metric_test"):
               if field in wip:
                   prod[field] = wip[field]
 
@@ -71,6 +75,32 @@ jobs:
               "rolling30_nonempty": sum(bool(prod["cities"][k].get("rolling30")) for k in keys),
               "rolling90_nonempty": sum(bool(prod["cities"][k].get("rolling90")) for k in keys),
           }, ensure_ascii=False))
+          PY
+
+      - name: Rebuild current preview time-of-day profiles
+        run: |
+          python -m pip install -r kyiv-air-alerts-grafana/requirements.txt
+          python kyiv-air-alerts-grafana/scripts/build_time_of_day_heatmap.py \
+            --dashboard kyiv-air-alerts-grafana/data/dashboard_data.json \
+            --kyiv-alerts /tmp/site-prod-alerts-combined.json \
+            --bridge-store /tmp/site-prod-ukrainealarm-bridge.json \
+            --sevastopol-events /tmp/site-prod-sevastopol-events.json
+
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          data = json.loads(Path("kyiv-air-alerts-grafana/data/dashboard_data.json").read_text(encoding="utf-8"))
+          profile = data["time_of_day_heatmap_test"]
+          assert profile["meta"]["test_only"] is True
+          assert profile["meta"]["city_count"] == 23
+          assert set(profile["meta"]["periods"]) == {"7d", "30d", "90d", "180d", "year", "all"}
+          assert set(profile["cities"]) == set(data["multicity_meta"]["production_city_keys"])
+          for key, city in profile["cities"].items():
+              for period in ("7d", "30d", "90d", "180d", "year", "all"):
+                  row = city["periods"][period]
+                  assert len(row["slots"]) == 96, (key, period)
+          print("Preview time-of-day profiles verified for 23 cities, including 180d")
           PY
 
       - name: Build Kyiv Digital differentiated threat mix
