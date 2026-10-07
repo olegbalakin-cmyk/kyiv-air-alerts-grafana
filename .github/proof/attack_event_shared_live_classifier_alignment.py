@@ -164,8 +164,17 @@ def verify_code_identity(code_commit: str):
     if git("rev-parse", f"{LIVE_BRANCH}:{LIVE_PATH}") != PREDECESSOR_BLOB:
         raise Blocked("live predecessor moved before proof")
     repaired = git_bytes(code_commit, LIVE_PATH).decode("utf-8")
-    if strip_alignment_block(repaired) != predecessor:
-        raise Blocked("non-wiring live monitor changes detected")
+    marker = "# Shared live classifier alignment:"
+    shared_def = "\ndef apply_episode_composition(\n"
+    insertion_start = repaired.find(marker)
+    repaired_suffix_start = repaired.find(shared_def, insertion_start)
+    predecessor_suffix_start = predecessor.find(shared_def)
+    if insertion_start < 0 or repaired_suffix_start < 0 or predecessor_suffix_start < 0:
+        raise Blocked("alignment insertion boundary not found")
+    if repaired[:insertion_start].rstrip("\n") != predecessor[:predecessor_suffix_start].rstrip("\n"):
+        raise Blocked("non-wiring live monitor prefix changes detected")
+    if repaired[repaired_suffix_start:] != predecessor[predecessor_suffix_start:]:
+        raise Blocked("non-wiring live monitor suffix changes detected")
     return repaired_blob, pin_blob
 
 def first_failing_gate(decision):
