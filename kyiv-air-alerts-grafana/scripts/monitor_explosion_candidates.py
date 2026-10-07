@@ -223,6 +223,17 @@ def atomic_json(path: Path, obj) -> None:
     tmp.replace(path)
 
 
+def report_json_safe(value):
+    """Serialize proof/report payloads without changing monitor or DB control flow."""
+    if isinstance(value, datetime):
+        return iso(value)
+    if isinstance(value, dict):
+        return {key: report_json_safe(item) for key, item in value.items()}
+    if isinstance(value, (list, tuple)):
+        return [report_json_safe(item) for item in value]
+    return value
+
+
 def event_id(city_key: str, start: str, end: str) -> str:
     return hashlib.sha256(f"{city_key}|{start}|{end}".encode("utf-8")).hexdigest()[:24]
 
@@ -1524,6 +1535,30 @@ def due_checks(state: dict, now: datetime) -> dict[str, list[tuple[dict, dict]]]
                 due = parse_dt(check.get("due_at"))
                 if due and due <= now:
                     out.setdefault(city_key, []).append((ep, check))
+    return out
+
+
+def select_persistence_due(
+    due: dict[str, list[tuple[dict, dict]]],
+    parent_ready_keys: set[tuple[str, str]],
+    *,
+    parent_gate_enabled: bool,
+) -> dict[str, list[tuple[dict, dict]]]:
+    """Keep only due episodes whose exact canonical parent passed the ordering gate."""
+    if not parent_gate_enabled:
+        return due
+    out: dict[str, list[tuple[dict, dict]]] = {}
+    for city_key, city_due in sorted(due.items()):
+        eligible = []
+        seen_episode_keys = set()
+        for episode, check in city_due:
+            episode_key = (city_key, str(episode.get("episode_id") or ""))
+            if episode_key not in parent_ready_keys or episode_key in seen_episode_keys:
+                continue
+            seen_episode_keys.add(episode_key)
+            eligible.append((episode, check))
+        if eligible:
+            out[city_key] = eligible
     return out
 
 
@@ -4484,6 +4519,143 @@ def self_test() -> None:
     )
 
 
+def orchestration_self_test() -> dict:
+    """Prove due selection/materialization without touching a database or discovery."""
+    import attack_event_canonical_persistence as canonical_persistence
+
+    run_started = datetime(2026, 10, 8, 0, 0, 0, tzinfo=UTC)
+    episode_id = "aaaaaaaaaaaaaaaaaaaaaaaa"
+    episode = {
+        "episode_id": episode_id,
+        "city_key": "kyiv",
+        "city": CITY_CONFIG["kyiv"]["label"],
+        "alert_start": iso(run_started - timedelta(minutes=5)),
+        "alert_end": iso(run_started + timedelta(seconds=1)),
+        "checks": [
+            {
+                "label": "immediate",
+                "due_at": iso(run_started + timedelta(seconds=1)),
+                "checked_at": None,
+                "new_candidates": None,
+            }
+        ],
+    }
+    state = {"cities": {"kyiv": {"episodes": [episode]}}}
+    parent_ready_keys = {("kyiv", episode_id)}
+
+    # Direct reproduction: run starts before the immediate check is due, while
+    # the final selection happens after it becomes due.
+    assert not due_checks(state, run_started)
+    final_cutoff = run_started + timedelta(seconds=2)
+    newly_due = due_checks(state, final_cutoff)
+    persistence_due = select_persistence_due(
+        newly_due,
+        parent_ready_keys,
+        parent_gate_enabled=True,
+    )
+    assert len(persistence_due.get("kyiv") or []) == 1
+    assert not select_persistence_due(
+        newly_due,
+        set(),
+        parent_gate_enabled=True,
+    )
+
+    fake_origin = {
+        "ref": "self-test",
+        "commit": "0" * 40,
+        "run_id": None,
+        "monitor_blob": "0" * 40,
+        "origin_provenance": {"kind": "orchestration-self-test"},
+        "origin_provenance_sha256": "0" * 64,
+    }
+    zero_candidate_record = canonical_persistence.build_episode_classification(
+        episode,
+        [],
+        origin=fake_origin,
+    )
+    assert zero_candidate_record["verdict"] == "NO_CONFIRMED_EVENT"
+    assert zero_candidate_record["is_event"] is False
+    assert zero_candidate_record["source_rows"] == []
+
+    persistence_calls = []
+    original_origin_context = canonical_persistence._origin_context
+    original_persist = canonical_persistence.persist_episode_classification
+    try:
+        canonical_persistence._origin_context = lambda: fake_origin
+
+        def fake_persist(_conn, record, *, fault_after=None):
+            persistence_calls.append(
+                {
+                    "episode_id": record["historical_episode_id"],
+                    "verdict": record["verdict"],
+                    "fault_after": fault_after,
+                }
+            )
+            return {
+                "classification_uid": "00000000-0000-0000-0000-000000000001",
+                "classification_key": record["classification_key"],
+                "classification_inserted": True,
+                "revision_inserted": False,
+                "verdict": record["verdict"],
+                "event_inserted": False,
+                "event_updated": False,
+                "source_inserts": 0,
+                "source_count": 0,
+            }
+
+        canonical_persistence.persist_episode_classification = fake_persist
+        persistence_result = canonical_persistence.persist_due_episode_classifications(
+            queue=[],
+            due=persistence_due,
+            coverage_by_city={"kyiv": True},
+            connection=object(),
+        )
+    finally:
+        canonical_persistence._origin_context = original_origin_context
+        canonical_persistence.persist_episode_classification = original_persist
+
+    assert len(persistence_calls) == 1
+    assert persistence_calls[0]["verdict"] == "NO_CONFIRMED_EVENT"
+    assert persistence_result["episodes_persisted"] == 1
+    assert persistence_result["verdicts"] == {"NO_CONFIRMED_EVENT": 1}
+
+    # No-premature-due plus restart schedulability: the same unchecked check is
+    # absent before due_at and naturally appears on the next later selection.
+    future_episode = {
+        **episode,
+        "episode_id": "bbbbbbbbbbbbbbbbbbbbbbbb",
+        "alert_end": iso(run_started + timedelta(seconds=3)),
+        "checks": [
+            {
+                "label": "immediate",
+                "due_at": iso(run_started + timedelta(seconds=3)),
+                "checked_at": None,
+                "new_candidates": None,
+            }
+        ],
+    }
+    future_state = {"cities": {"kyiv": {"episodes": [future_episode]}}}
+    future_ready = {("kyiv", future_episode["episode_id"])}
+    assert not due_checks(future_state, final_cutoff)
+    assert future_episode["checks"][0]["checked_at"] is None
+    later_due = due_checks(future_state, run_started + timedelta(seconds=4))
+    later_persistence_due = select_persistence_due(
+        later_due,
+        future_ready,
+        parent_gate_enabled=True,
+    )
+    assert len(later_persistence_due.get("kyiv") or []) == 1
+
+    return {
+        "zero_candidate_materialization": True,
+        "within_run_newly_due": True,
+        "future_not_prematurely_due": True,
+        "restart_schedulability": True,
+        "parent_gate_required": True,
+        "followup_hours": [hours for _, hours in FOLLOWUP_HOURS],
+    }
+
+
 def self_test() -> None:
     """Validate pinned classifier wiring plus preserved shared live adapters."""
     assert len(CITY_CONFIG) >= 23
@@ -4531,6 +4703,8 @@ def self_test() -> None:
     assert wrapped == direct
     eligibility_proof = live_parent_ordering.durable_eligibility_restart_proof()
     assert eligibility_proof["eligibility_changes_after_restart"] == 0
+    orchestration_proof = orchestration_self_test()
+    assert orchestration_proof["followup_hours"] == [0, 24, 72, 168]
     print(
         f"Aligned self-test OK: {len(CITY_CONFIG)} city keys; "
         f"authoritative classifier {AUTHORITATIVE_CLASSIFIER_BLOB}; "
@@ -4551,7 +4725,7 @@ def main() -> None:
         return
 
     started = now_utc()
-    followup_cutoff = started
+    run_start_followup_cutoff = started
     state = ensure_state()
     queue = load_json(QUEUE_FILE, [])
     if not isinstance(queue, list):
@@ -4603,6 +4777,9 @@ def main() -> None:
     matching_refresh = refresh_queue_matching(queue, state, {"needs_review"})
     telegram_errors = refresh_telegram_cache(state, started)
     errors.update({f"telegram:{key}": value for key, value in telegram_errors.items()})
+    # Final due selection must observe checks that became due while polling and
+    # canonical-parent synchronization were still running.
+    followup_cutoff = now_utc()
     due = due_checks(state, followup_cutoff)
     searches = {}
     composition_target_episode_ids = set()
@@ -4654,7 +4831,7 @@ def main() -> None:
             "google_error": google_error,
         }
         for _, check in city_due:
-            check["checked_at"] = iso(started)
+            check["checked_at"] = iso(followup_cutoff)
             check["new_candidates"] = added
 
     composition_refresh = apply_episode_composition(
@@ -4673,20 +4850,11 @@ def main() -> None:
         for city_key in CITY_CONFIG
     }
 
-    persistence_due = due
-    if canary_cutoff is not None:
-        persistence_due = {}
-        for city_key, city_due in sorted(due.items()):
-            eligible = []
-            seen_episode_keys = set()
-            for episode, check in city_due:
-                episode_key = (city_key, str(episode.get("episode_id") or ""))
-                if episode_key not in parent_ready_keys or episode_key in seen_episode_keys:
-                    continue
-                seen_episode_keys.add(episode_key)
-                eligible.append((episode, check))
-            if eligible:
-                persistence_due[city_key] = eligible
+    persistence_due = select_persistence_due(
+        due,
+        parent_ready_keys,
+        parent_gate_enabled=canary_cutoff is not None,
+    )
 
     canonical_persistence = persist_due_episode_classifications(
         queue=queue,
@@ -4700,7 +4868,11 @@ def main() -> None:
         unchecked_due_checks_at_cutoff,
     ) = due_check_counts(due)
     finished = now_utc()
-    became_due_during_run = checks_became_due_between(state, followup_cutoff, finished)
+    became_due_during_run = checks_became_due_between(
+        state,
+        run_start_followup_cutoff,
+        followup_cutoff,
+    )
 
     queue.sort(key=lambda x: (x.get("first_discovered_at") or "", x.get("city_key") or ""), reverse=True)
     state["last_run_at"] = iso(started)
@@ -4709,7 +4881,9 @@ def main() -> None:
         "ok": not errors,
         "started_at": iso(started),
         "finished_at": iso(finished),
+        "run_start_followup_cutoff_at": iso(run_start_followup_cutoff),
         "followup_cutoff_at": iso(followup_cutoff),
+        "final_due_selection_cutoff_at": iso(followup_cutoff),
         "due_checks_at_cutoff": due_checks_at_cutoff,
         "checked_due_checks_at_cutoff": checked_due_checks_at_cutoff,
         "unchecked_due_checks_at_cutoff": unchecked_due_checks_at_cutoff,
@@ -4749,8 +4923,9 @@ def main() -> None:
     }
     atomic_json(STATE_FILE, state)
     atomic_json(QUEUE_FILE, queue)
-    atomic_json(LAST_RUN_FILE, report)
-    print(json.dumps(report, ensure_ascii=False, indent=2))
+    report_payload = report_json_safe(report)
+    atomic_json(LAST_RUN_FILE, report_payload)
+    print(json.dumps(report_payload, ensure_ascii=False, indent=2))
 
 
 if __name__ == "__main__":
