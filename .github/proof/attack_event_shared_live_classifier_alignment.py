@@ -19,7 +19,7 @@ LIVE_BRANCH = "multicity-wip-2026-09-16"
 LIVE_PATH = "kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py"
 PIN_PATH = "kyiv-air-alerts-grafana/scripts/authoritative_classifier_71cb6f6f.py"
 PREDECESSOR_BLOB = "927dc89df0b52edd52cb31a126b0d57ca492a278"
-REPAIRED_BLOB = "d95101aa3c45f34d87f2dd4b817bcf72bcc69699"
+REPAIRED_BLOB = "b4ad5630f34e5621730384d0ed0f73f2fc4a39c5"
 AUTH_COMMIT = "71cb6f6fbe856cc7b96759310fe9cc9c71cc0453"
 AUTH_BLOB = "778469b74c2aa807d851cf2c2ee35cf4aa785589"
 RECOVERY_REF = "attack-event-multicity-86case-representability-recovery-2026-10-07"
@@ -186,7 +186,7 @@ def verify_code_identity(code_commit: str):
     repaired = git_bytes(code_commit, LIVE_PATH).decode("utf-8")
     marker = "# Shared live classifier alignment:"
     shared_def = "\ndef apply_episode_composition(\n"
-    aligned_self_test = '\ndef self_test() -> None:\n    """Validate the exact authoritative classifier plus preserved shared live adapters."""'
+    aligned_self_test = '\ndef self_test() -> None:\n    """Validate pinned classifier wiring plus preserved shared live adapters."""'
     main_def = "\ndef main() -> None:\n"
     insertion_start = repaired.find(marker)
     repaired_shared_start = repaired.find(shared_def, insertion_start)
