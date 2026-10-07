@@ -404,14 +404,17 @@ def primary_blocker(item):
     return "OTHER"
 
 def best_blocker(items):
+    # Multiple candidates may exist for one logical alert. Report the blocker
+    # from the candidate that progressed furthest through the unchanged classifier
+    # gates, rather than letting a weaker sibling candidate mask stronger evidence.
     order = [
-        "NEW_EVIDENCE_NO_QUALIFYING_EVENT",
-        "QUALIFYING_EVENT_BUT_NOT_EXACT_KYIV",
-        "AIR_CONTEXT_INSUFFICIENT",
-        "SAME_ATTACK_NOT_PROVEN",
-        "TEMPORAL_BINDING_AMBIGUOUS",
-        "EVIDENCE_PAYLOAD_INCOMPLETE",
         "OTHER",
+        "EVIDENCE_PAYLOAD_INCOMPLETE",
+        "TEMPORAL_BINDING_AMBIGUOUS",
+        "SAME_ATTACK_NOT_PROVEN",
+        "AIR_CONTEXT_INSUFFICIENT",
+        "QUALIFYING_EVENT_BUT_NOT_EXACT_KYIV",
+        "NEW_EVIDENCE_NO_QUALIFYING_EVENT",
     ]
     found = {primary_blocker(x) for x in items}
     for x in order:
