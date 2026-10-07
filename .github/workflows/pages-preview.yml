@@ -32,6 +32,47 @@ jobs:
         with:
           enablement: true
 
+      - name: Use current production-parity alert data
+        run: |
+          cp kyiv-air-alerts-grafana/data/dashboard_data.json /tmp/wip-dashboard-data.json
+          git fetch origin site-prod
+          git show origin/site-prod:kyiv-air-alerts-grafana/data/dashboard_data.json > kyiv-air-alerts-grafana/data/dashboard_data.json
+
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          path = Path("kyiv-air-alerts-grafana/data/dashboard_data.json")
+          prod = json.loads(path.read_text(encoding="utf-8"))
+          wip = json.loads(Path("/tmp/wip-dashboard-data.json").read_text(encoding="utf-8"))
+
+          keys = prod.get("multicity_meta", {}).get("production_city_keys", [])
+          assert len(keys) == 23, len(keys)
+          assert prod.get("multicity_meta", {}).get("weekly_mode") == "rolling_7d"
+          assert prod.get("multicity_meta", {}).get("rolling_window_periods") == ["weekly", "rolling30", "rolling90"]
+
+          for key in keys:
+              city = prod.get("cities", {}).get(key, {})
+              assert city.get("rolling30"), key
+              assert city.get("rolling90"), key
+              assert city.get("daily28"), key
+
+          for field in ("casualties_by_city", "explosion_metric_test", "time_of_day_heatmap_test", "all_cities_table_test"):
+              if field in wip:
+                  prod[field] = wip[field]
+
+          if prod.get("casualties") and prod.get("casualties_by_city"):
+              prod["casualties_by_city"]["kyiv"] = prod["casualties"]
+
+          path.write_text(json.dumps(prod, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+          print(json.dumps({
+              "analysis_end": prod.get("meta", {}).get("analysis_end"),
+              "cities": len(keys),
+              "rolling30_nonempty": sum(bool(prod["cities"][k].get("rolling30")) for k in keys),
+              "rolling90_nonempty": sum(bool(prod["cities"][k].get("rolling90")) for k in keys),
+          }, ensure_ascii=False))
+          PY
+
       - name: Build Kyiv Digital differentiated threat mix
         run: |
           curl -fsS \
