@@ -31,6 +31,7 @@ SPECIAL_ALERT_SOURCES = {"kyiv", "sevastopol"}
 STATE_FILE = DATA_DIR / "explosion_candidate_monitor_state.json"
 QUEUE_FILE = DATA_DIR / "explosion_review_queue.json"
 LAST_RUN_FILE = DATA_DIR / "explosion_candidate_monitor_last_run.json"
+LIVE_PERSISTENCE_ACTIVATION_FILE = ROOT / "config" / "live_persistence_activation.json"
 
 UTC = timezone.utc
 KYIV_TZ = ZoneInfo("Europe/Kyiv")
@@ -173,6 +174,37 @@ def parse_dt(value: str | None) -> datetime | None:
     if dt.tzinfo is None:
         dt = dt.replace(tzinfo=UTC)
     return dt.astimezone(UTC)
+
+def load_live_persistence_activation(*, required: bool) -> tuple[datetime | None, dict | None]:
+    if not LIVE_PERSISTENCE_ACTIVATION_FILE.exists():
+        if required:
+            raise RuntimeError(
+                f"durable live-persistence activation config is required: "
+                f"{LIVE_PERSISTENCE_ACTIVATION_FILE}"
+            )
+        return None, None
+    payload = load_json(LIVE_PERSISTENCE_ACTIVATION_FILE, None)
+    if not isinstance(payload, dict):
+        raise RuntimeError("live-persistence activation config must be a JSON object")
+    if payload.get("schema_version") != 1:
+        raise RuntimeError("unsupported live-persistence activation config schema")
+    if payload.get("eligibility_field") != "alert_end":
+        raise RuntimeError("live-persistence activation eligibility_field must be alert_end")
+    if payload.get("boundary") != "inclusive":
+        raise RuntimeError("live-persistence activation boundary must be inclusive")
+    raw = str(payload.get("activation_cutoff_utc") or "").strip()
+    cutoff = parse_dt(raw)
+    if cutoff is None or not raw.endswith("Z"):
+        raise RuntimeError("activation_cutoff_utc must be an explicit UTC Z timestamp")
+    legacy = str(os.environ.get("PRODUCTION_PERSISTENCE_CANARY_CUTOFF") or "").strip()
+    if legacy:
+        legacy_dt = parse_dt(legacy)
+        if legacy_dt != cutoff:
+            raise RuntimeError(
+                "PRODUCTION_PERSISTENCE_CANARY_CUTOFF disagrees with durable activation config"
+            )
+    return cutoff, payload
+
 
 
 def load_json(path: Path, default):
@@ -4497,6 +4529,8 @@ def self_test() -> None:
     )
     assert after == before + 1
     assert wrapped == direct
+    eligibility_proof = live_parent_ordering.durable_eligibility_restart_proof()
+    assert eligibility_proof["eligibility_changes_after_restart"] == 0
     print(
         f"Aligned self-test OK: {len(CITY_CONFIG)} city keys; "
         f"authoritative classifier {AUTHORITATIVE_CLASSIFIER_BLOB}; "
@@ -4539,10 +4573,13 @@ def main() -> None:
         mode = "network"
     new_episodes = process_events(state, polled, errors, started)
 
-    canary_cutoff_raw = str(
-        os.environ.get("PRODUCTION_PERSISTENCE_CANARY_CUTOFF") or ""
-    ).strip()
-    canary_cutoff = parse_dt(canary_cutoff_raw) if canary_cutoff_raw else None
+    persistence_enabled = bool(str(os.environ.get("ATTACK_EVENT_DATABASE_URL") or "").strip())
+    canary_cutoff, activation_config = load_live_persistence_activation(
+        required=persistence_enabled
+    )
+    canary_cutoff_raw = (
+        str((activation_config or {}).get("activation_cutoff_utc") or "").strip()
+    )
     persistence_canary_max_raw = str(
         os.environ.get("ATTACK_EVENT_PERSISTENCE_CANARY_MAX_EPISODES") or ""
     ).strip()
@@ -4699,6 +4736,10 @@ def main() -> None:
         "errors": errors,
         "strict_series_modified_by_discovery": False,
         "production_persistence_canary_cutoff": canary_cutoff_raw or None,
+        "production_persistence_cutoff_source": (
+            str(LIVE_PERSISTENCE_ACTIVATION_FILE.relative_to(ROOT))
+            if activation_config is not None else None
+        ),
         "parent_ordering": parent_ordering,
         "production_persistence_eligible_due_episodes": sum(
             len(rows) for rows in persistence_due.values()
