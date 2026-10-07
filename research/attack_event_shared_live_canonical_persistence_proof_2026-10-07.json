@@ -1,0 +1,136 @@
+{
+  "actions_run_id": 37624485113,
+  "canonical_contract": {
+    "classification_identity": "attack-event-classification-key-v2 deterministic immutable semantic revision; logical episode parent is exact city+legacy_episode_id+start_at+end_at canonical alert_episodes binding",
+    "classification_key_version": "attack-event-classification-key-v2",
+    "event_key_version": "attack-event-key-v1",
+    "reused": true,
+    "revision_semantics": "append-only attack_event_classifications with supersedes_classification_uid; stable attack_event current pointer/status",
+    "schema_changes_required": false,
+    "source_link_key_version": "attack-event-source-link-key-v1"
+  },
+  "historical_regression": {
+    "exact_matches": 26363,
+    "legacy_non_replayable": 42,
+    "replayed": 26363,
+    "semantic_mismatches": 0,
+    "unsafe_promotions": 0
+  },
+  "implementation": {
+    "authoritative_classifier_blob": "778469b74c2aa807d851cf2c2ee35cf4aa785589",
+    "coverage_failure_behavior": "skip persistence for due city checks when discovery coverage is incomplete",
+    "database_secret_reference": "PHASE1_PROD_SHADOW_DATABASE_URL",
+    "monitor_blob": "f5e3539e60591edb051ca1ec60e9fbee4d3b4e34",
+    "persistence_adapter_blob": "0118ca9e5f1308173e657257f1b49fe91cc19fe1",
+    "persistence_position": "after authoritative classification and episode composition"
+  },
+  "isolated_write_proof": {
+    "baseline_rows": {
+      "classifications": 0,
+      "events": 0,
+      "sources": 0
+    },
+    "classification_insert_absent": true,
+    "counts_at_strict_tip": {
+      "classifications": 3,
+      "events": 1,
+      "sources": 3
+    },
+    "duplicate_attack_event_rows_created": 0,
+    "duplicate_classification_rows_created": 0,
+    "durable_proof_mutations": 0,
+    "event_contract": {
+      "classifier_blob_sha": "778469b74c2aa807d851cf2c2ee35cf4aa785589",
+      "grain": "HISTORICAL_ALERT_EPISODE",
+      "key": "4f96c89c8ea11b7adb41e3f621aef7f79daa146dd0e94f09e0c63c9cf78b879f",
+      "key_version": "attack-event-key-v1",
+      "methodology": "historical-attack-event-air-defense-action-v2",
+      "normalization": "historical-attack-event-observation-v2",
+      "same_parent": true,
+      "status": "ACTIVE",
+      "verdict": "STRICT_EVENT_POSITIVE"
+    },
+    "forced_partial_failure_rolled_back": true,
+    "idempotent_rerun": true,
+    "legitimate_transitions": [
+      "NO_CONFIRMED_EVENT -> NEEDS_REVIEW",
+      "NEEDS_REVIEW -> STRICT_EVENT_POSITIVE"
+    ],
+    "non_positive_classification_persistence": true,
+    "non_positive_event_rows_created": 0,
+    "positive_attack_event_linkage": true,
+    "positive_evidence_linkage": true,
+    "retry_after_partial_failure": true,
+    "rows_after_outer_rollback": {
+      "classifications": 0,
+      "events": 0,
+      "sources": 0
+    },
+    "selected_recent_canonical_episode": {
+      "alert_end": "2026-10-07T07:01:44.482593Z",
+      "alert_start": "2026-10-07T06:17:21.326643Z",
+      "city_key": "poltava",
+      "episode_id": "ae942481524d426438cac7b1"
+    },
+    "transition_outputs_produced_by_authoritative_classifier": true
+  },
+  "mutation_confirmation": {
+    "alert_ingestion_modified": false,
+    "canonical_schema_modified": false,
+    "classifier_semantics_modified": false,
+    "discovery_modified": false,
+    "historical_backfill_started": false,
+    "historical_frozen_verdicts_modified": false,
+    "isolated_database_writes_rolled_back": true,
+    "production_live_rows_written": 0,
+    "repository_repair_branch_modified": true
+  },
+  "partial_reason": "PRODUCTION WRITE NOT EXECUTED",
+  "production_integration": {
+    "classifications_persisted": 0,
+    "executed": false,
+    "reason": "No existing deployment contract explicitly authorizes this repair proof to mutate naturally arriving production live classifications. The repair is wired, but this proof remained rollback-only."
+  },
+  "proof": "SHARED 23-CITY LIVE CANONICAL PERSISTENCE",
+  "remaining_blocker": "PRODUCTION WRITE NOT EXECUTED",
+  "schema_version": 1,
+  "shared_wiring": {
+    "checks": {
+      "city_count": 23,
+      "coverage_gate_present": true,
+      "database_client_present": true,
+      "database_secret_wired": true,
+      "one_shared_persistence_call": true,
+      "persistence_after_composition": true,
+      "same_due_object": true
+    },
+    "cities": [
+      "cherkasy",
+      "chernihiv",
+      "chernivtsi",
+      "dnipro",
+      "ivano_frankivsk",
+      "kharkiv",
+      "kherson",
+      "khmelnytskyi",
+      "kropyvnytskyi",
+      "kyiv",
+      "lutsk",
+      "lviv",
+      "mykolaiv",
+      "odesa",
+      "poltava",
+      "rivne",
+      "sevastopol",
+      "sumy",
+      "ternopil",
+      "uzhhorod",
+      "vinnytsia",
+      "zaporizhzhia",
+      "zhytomyr"
+    ],
+    "cities_bypassing_persistence": [],
+    "cities_covered": 23
+  },
+  "verdict": "SHARED 23-CITY LIVE CANONICAL PERSISTENCE = PARTIAL"
+}
