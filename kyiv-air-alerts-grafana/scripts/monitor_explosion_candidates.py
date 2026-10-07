@@ -19,6 +19,7 @@ import requests
 from bs4 import BeautifulSoup
 
 import apply_ukrainealarm_bridge as ua
+import live_parent_ordering
 
 ROOT = Path(__file__).resolve().parents[1]
 DATA_DIR = ROOT / "data"
@@ -4537,6 +4538,31 @@ def main() -> None:
         )
         mode = "network"
     new_episodes = process_events(state, polled, errors, started)
+
+    canary_cutoff_raw = str(
+        os.environ.get("PRODUCTION_PERSISTENCE_CANARY_CUTOFF") or ""
+    ).strip()
+    canary_cutoff = parse_dt(canary_cutoff_raw) if canary_cutoff_raw else None
+    persistence_canary_max_raw = str(
+        os.environ.get("ATTACK_EVENT_PERSISTENCE_CANARY_MAX_EPISODES") or ""
+    ).strip()
+    persistence_canary_max = (
+        int(persistence_canary_max_raw) if persistence_canary_max_raw else None
+    )
+    if persistence_canary_max is not None and persistence_canary_max < 1:
+        raise RuntimeError("ATTACK_EVENT_PERSISTENCE_CANARY_MAX_EPISODES must be positive")
+
+    parent_ordering = live_parent_ordering.preclassification_parent_gate(
+        state,
+        cutoff=canary_cutoff,
+        max_episodes=persistence_canary_max,
+        dsn=os.environ.get("ATTACK_EVENT_DATABASE_URL"),
+    )
+    parent_ready_keys = {
+        (str(row.get("city") or ""), str(row.get("episode_id") or ""))
+        for row in parent_ordering.get("records") or []
+    }
+
     matching_refresh = refresh_queue_matching(queue, state, {"needs_review"})
     telegram_errors = refresh_telegram_cache(state, started)
     errors.update({f"telegram:{key}": value for key, value in telegram_errors.items()})
@@ -4610,45 +4636,20 @@ def main() -> None:
         for city_key in CITY_CONFIG
     }
 
-    canary_cutoff_raw = str(
-        os.environ.get("PRODUCTION_PERSISTENCE_CANARY_CUTOFF") or ""
-    ).strip()
-    canary_cutoff = parse_dt(canary_cutoff_raw) if canary_cutoff_raw else None
     persistence_due = due
-    persistence_canary_max_raw = str(
-        os.environ.get("ATTACK_EVENT_PERSISTENCE_CANARY_MAX_EPISODES") or ""
-    ).strip()
-    persistence_canary_max = (
-        int(persistence_canary_max_raw) if persistence_canary_max_raw else None
-    )
-    if persistence_canary_max is not None and persistence_canary_max < 1:
-        raise RuntimeError("ATTACK_EVENT_PERSISTENCE_CANARY_MAX_EPISODES must be positive")
     if canary_cutoff is not None:
         persistence_due = {}
-        selected_episode_keys = set()
         for city_key, city_due in sorted(due.items()):
             eligible = []
+            seen_episode_keys = set()
             for episode, check in city_due:
-                first_seen = parse_dt(episode.get("live_first_seen_at"))
                 episode_key = (city_key, str(episode.get("episode_id") or ""))
-                if first_seen is None or first_seen < canary_cutoff:
+                if episode_key not in parent_ready_keys or episode_key in seen_episode_keys:
                     continue
-                if episode_key in selected_episode_keys:
-                    continue
-                if (
-                    persistence_canary_max is not None
-                    and len(selected_episode_keys) >= persistence_canary_max
-                ):
-                    break
-                selected_episode_keys.add(episode_key)
+                seen_episode_keys.add(episode_key)
                 eligible.append((episode, check))
             if eligible:
                 persistence_due[city_key] = eligible
-            if (
-                persistence_canary_max is not None
-                and len(selected_episode_keys) >= persistence_canary_max
-            ):
-                break
 
     canonical_persistence = persist_due_episode_classifications(
         queue=queue,
@@ -4698,6 +4699,7 @@ def main() -> None:
         "errors": errors,
         "strict_series_modified_by_discovery": False,
         "production_persistence_canary_cutoff": canary_cutoff_raw or None,
+        "parent_ordering": parent_ordering,
         "production_persistence_eligible_due_episodes": sum(
             len(rows) for rows in persistence_due.values()
         ),
