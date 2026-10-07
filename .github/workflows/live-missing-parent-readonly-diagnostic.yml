@@ -1,4 +1,4 @@
-name: Read-only live missing-parent identity diagnostic
+name: Read-only live missing-parent family sample
 
 on:
   push:
@@ -13,89 +13,46 @@ permissions:
 jobs:
   diagnose:
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 8
     steps:
-      - name: Resolve exact failed Kharkiv episode identity
+      - name: Read recent UkraineAlarm family identities
         env:
           UKRAINEALARM_API_TOKEN: ${{ secrets.UKRAINEALARM_API_TOKEN }}
         run: |
           python - <<'PY'
-          import hashlib
-          import json
-          import os
-          import urllib.parse
-          import urllib.request
+          import hashlib, json, os, urllib.parse, urllib.request
           from datetime import datetime, timezone
 
-          TARGET = "3f3c88cb48e0e8c3b7b9f720"
-          CITY = "kharkiv"
-          REGION_ID = "1293"
-          URL = "https://api.ukrainealarm.com/api/v3/alerts/regionHistory?" + urllib.parse.urlencode({"regionId": REGION_ID})
+          targets = [
+              ("kharkiv", "1293", "exact-hromada"),
+              ("zaporizhzhia", "564", "exact-hromada"),
+              ("poltava", "109", "raion-proxy"),
+              ("sumy", "114", "raion-proxy"),
+          ]
+          token = os.environ["UKRAINEALARM_API_TOKEN"].strip()
 
-          def parse_dt(value):
-              text = str(value).strip().replace("Z", "+00:00")
-              dt = datetime.fromisoformat(text)
-              if dt.tzinfo is None:
-                  dt = dt.replace(tzinfo=timezone.utc)
-              return dt.astimezone(timezone.utc)
+          def dt(v):
+              x=datetime.fromisoformat(str(v).strip().replace("Z","+00:00"))
+              if x.tzinfo is None: x=x.replace(tzinfo=timezone.utc)
+              return x.astimezone(timezone.utc)
+          def iso(x): return x.isoformat().replace("+00:00","Z")
 
-          def iso(dt):
-              return dt.astimezone(timezone.utc).isoformat().replace("+00:00", "Z")
-
-          token = os.environ.get("UKRAINEALARM_API_TOKEN", "").strip()
-          if not token:
-              raise SystemExit("UKRAINEALARM_API_TOKEN missing")
-          req = urllib.request.Request(
-              URL,
-              headers={
-                  "Accept": "application/json",
-                  "Authorization": token,
-                  "User-Agent": "kyiv-air-alerts-grafana/read-only-missing-parent-diagnostic",
-              },
-              method="GET",
-          )
-          with urllib.request.urlopen(req, timeout=60) as resp:
-              payload = json.load(resp)
-
-          groups = [payload] if isinstance(payload, dict) else [x for x in payload if isinstance(x, dict)]
-          matches = []
-          recent = []
-          for group in groups:
-              for alarm in group.get("alarms") or []:
-                  if not isinstance(alarm, dict) or str(alarm.get("alertType") or "").upper() != "AIR":
-                      continue
-                  if not alarm.get("startDate") or not alarm.get("endDate"):
-                      continue
-                  start = iso(parse_dt(alarm["startDate"]))
-                  end = iso(parse_dt(alarm["endDate"]))
-                  episode_id = hashlib.sha256(f"{CITY}|{start}|{end}".encode("utf-8")).hexdigest()[:24]
-                  row = {
-                      "city_key": CITY,
-                      "historical_episode_id": episode_id,
-                      "start_at": start,
-                      "end_at": end,
-                      "alert_source": "ukrainealarm_regionHistory",
-                      "region_id": REGION_ID,
-                      "raw_alert_fields": {
-                          "id": alarm.get("id"),
-                          "regionId": alarm.get("regionId"),
-                          "alertType": alarm.get("alertType"),
-                          "startDate": alarm.get("startDate"),
-                          "endDate": alarm.get("endDate"),
-                      },
-                  }
-                  recent.append(row)
-                  if episode_id == TARGET:
-                      matches.append(row)
-
-          result = {
-              "target": TARGET,
-              "match_count": len(matches),
-              "matches": matches,
-              "completed_air_rows_seen": len(recent),
-              "recent_completed_air_identities": recent[-25:],
-          }
-          print("READ_ONLY_IDENTITY_RESULT=" + json.dumps(result, ensure_ascii=False, sort_keys=True))
-          if len(matches) != 1:
-              raise SystemExit(f"expected exactly one target match, found {len(matches)}")
+          out=[]
+          for city,rid,family in targets:
+              url="https://api.ukrainealarm.com/api/v3/alerts/regionHistory?"+urllib.parse.urlencode({"regionId":rid})
+              req=urllib.request.Request(url,headers={"Accept":"application/json","Authorization":token,"User-Agent":"kyiv-air-alerts-grafana/read-only-family-diagnostic"})
+              with urllib.request.urlopen(req,timeout=60) as resp: payload=json.load(resp)
+              groups=[payload] if isinstance(payload,dict) else [x for x in payload if isinstance(x,dict)]
+              rows=[]
+              for g in groups:
+                  for a in g.get("alarms") or []:
+                      if str(a.get("alertType") or "").upper()!="AIR" or not a.get("startDate") or not a.get("endDate"): continue
+                      s,e=dt(a["startDate"]),dt(a["endDate"])
+                      if e<=s: continue
+                      si,ei=iso(s),iso(e)
+                      eid=hashlib.sha256(f"{city}|{si}|{ei}".encode()).hexdigest()[:24]
+                      rows.append({"city_key":city,"family":family,"region_id":rid,"historical_episode_id":eid,"start_at":si,"end_at":ei})
+              rows.sort(key=lambda x:x["start_at"])
+              out.append({"city_key":city,"family":family,"completed_count":len(rows),"recent":rows[-3:]})
+          print("READ_ONLY_FAMILY_RESULT="+json.dumps(out,sort_keys=True))
           PY
