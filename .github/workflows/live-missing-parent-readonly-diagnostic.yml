@@ -1,0 +1,101 @@
+name: Read-only live missing-parent identity diagnostic
+
+on:
+  push:
+    branches:
+      - attack-event-live-missing-parent-diagnosis-2026-10-07
+    paths:
+      - ".github/workflows/live-missing-parent-readonly-diagnostic.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Resolve exact failed Kharkiv episode identity
+        env:
+          UKRAINEALARM_API_TOKEN: ${{ secrets.UKRAINEALARM_API_TOKEN }}
+        run: |
+          python - <<'PY'
+          import hashlib
+          import json
+          import os
+          import urllib.parse
+          import urllib.request
+          from datetime import datetime, timezone
+
+          TARGET = "3f3c88cb48e0e8c3b7b9f720"
+          CITY = "kharkiv"
+          REGION_ID = "1293"
+          URL = "https://api.ukrainealarm.com/api/v3/alerts/regionHistory?" + urllib.parse.urlencode({"regionId": REGION_ID})
+
+          def parse_dt(value):
+              text = str(value).strip().replace("Z", "+00:00")
+              dt = datetime.fromisoformat(text)
+              if dt.tzinfo is None:
+                  dt = dt.replace(tzinfo=timezone.utc)
+              return dt.astimezone(timezone.utc)
+
+          def iso(dt):
+              return dt.astimezone(timezone.utc).isoformat().replace("+00:00", "Z")
+
+          token = os.environ.get("UKRAINEALARM_API_TOKEN", "").strip()
+          if not token:
+              raise SystemExit("UKRAINEALARM_API_TOKEN missing")
+          req = urllib.request.Request(
+              URL,
+              headers={
+                  "Accept": "application/json",
+                  "Authorization": token,
+                  "User-Agent": "kyiv-air-alerts-grafana/read-only-missing-parent-diagnostic",
+              },
+              method="GET",
+          )
+          with urllib.request.urlopen(req, timeout=60) as resp:
+              payload = json.load(resp)
+
+          groups = [payload] if isinstance(payload, dict) else [x for x in payload if isinstance(x, dict)]
+          matches = []
+          recent = []
+          for group in groups:
+              for alarm in group.get("alarms") or []:
+                  if not isinstance(alarm, dict) or str(alarm.get("alertType") or "").upper() != "AIR":
+                      continue
+                  if not alarm.get("startDate") or not alarm.get("endDate"):
+                      continue
+                  start = iso(parse_dt(alarm["startDate"]))
+                  end = iso(parse_dt(alarm["endDate"]))
+                  episode_id = hashlib.sha256(f"{CITY}|{start}|{end}".encode("utf-8")).hexdigest()[:24]
+                  row = {
+                      "city_key": CITY,
+                      "historical_episode_id": episode_id,
+                      "start_at": start,
+                      "end_at": end,
+                      "alert_source": "ukrainealarm_regionHistory",
+                      "region_id": REGION_ID,
+                      "raw_alert_fields": {
+                          "id": alarm.get("id"),
+                          "regionId": alarm.get("regionId"),
+                          "alertType": alarm.get("alertType"),
+                          "startDate": alarm.get("startDate"),
+                          "endDate": alarm.get("endDate"),
+                      },
+                  }
+                  recent.append(row)
+                  if episode_id == TARGET:
+                      matches.append(row)
+
+          result = {
+              "target": TARGET,
+              "match_count": len(matches),
+              "matches": matches,
+              "completed_air_rows_seen": len(recent),
+              "recent_completed_air_identities": recent[-25:],
+          }
+          print("READ_ONLY_IDENTITY_RESULT=" + json.dumps(result, ensure_ascii=False, sort_keys=True))
+          if len(matches) != 1:
+              raise SystemExit(f"expected exactly one target match, found {len(matches)}")
+          PY
