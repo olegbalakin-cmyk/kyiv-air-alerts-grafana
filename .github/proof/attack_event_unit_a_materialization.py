@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 from __future__ import annotations
 
+import base64
 import copy
+import gzip
 import hashlib
 import json
 import os
@@ -446,6 +448,12 @@ def main() -> int:
     if bytes_a != bytes_b:
         raise Blocked("RUN_A_RUN_B_BYTE_IDENTICAL", "corpus bytes differ")
 
+    compressed_a = gzip.compress(bytes_a, compresslevel=9, mtime=0)
+    compressed_b = gzip.compress(bytes_b, compresslevel=9, mtime=0)
+    if compressed_a != compressed_b:
+        raise Blocked("RUN_A_RUN_B_COMPRESSED_BYTE_IDENTICAL", "compressed corpus bytes differ")
+    encoded_corpus = base64.b64encode(compressed_a).decode("ascii")
+
     # Every hard gate is derived from frozen membership plus this no-network,
     # no-database, no-classifier execution harness.
     output_uids = [x["alert_episode_uid"] for x in corpus_a["episodes"]]
@@ -535,7 +543,23 @@ def main() -> int:
             ),
             "hard_gates": hard_gates,
         },
-        "corpus": corpus_a,
+        "corpus": {
+            "encoding": "gzip+base64",
+            "compression": {
+                "algorithm": "gzip",
+                "compresslevel": 9,
+                "mtime": 0,
+            },
+            "decoded_payload_semantics": (
+                "Base64-decode, then gzip-decompress to recover the exact canonical UTF-8 "
+                "JSON corpus bytes whose SHA-256 is uncompressed_sha256."
+            ),
+            "uncompressed_sha256": stats_a["corpus_sha256"],
+            "uncompressed_bytes": len(bytes_a),
+            "compressed_sha256": sha256(compressed_a),
+            "compressed_bytes": len(compressed_a),
+            "payload_base64": encoded_corpus,
+        },
     }
 
     final_bytes = canonical_bytes(artifact)
@@ -565,6 +589,8 @@ def main() -> int:
         "run_A_sha256": stats_a["corpus_sha256"],
         "run_B_sha256": stats_b["corpus_sha256"],
         "byte_identical": "YES",
+        "compressed_corpus_sha256": sha256(compressed_a),
+        "compressed_corpus_bytes": len(compressed_a),
         "normalization_semantic_changes": 0,
         "classifier_semantic_changes": 0,
         "neon_queries": 0,
