@@ -308,9 +308,9 @@ function derivedDaily28Rows(city) {
     time: row.time || `${row.date}T00:00:00`,
     alerts_per_day: Number(row.alerts_started) || 0,
     avg_daily_alert_hours: Number(row.total_alert_duration_hours) || 0,
-    avg_alert_duration_min: row.avg_alert_duration_minutes == null
+    avg_alert_duration_min: row.avg_active_alert_duration_minutes == null
       ? null
-      : Number(row.avg_alert_duration_minutes)
+      : Number(row.avg_active_alert_duration_minutes)
   }));
 }
 
@@ -1146,6 +1146,29 @@ function renderCity() {
       }
     }
   });
+
+  const durationCard = $("cityDurationChart")?.closest(".chart-card");
+  const durationTitle = durationCard?.querySelector("h3");
+  const durationSubtitle = durationCard?.querySelector(".chart-subtitle");
+  if (period === "daily28") {
+    if (durationTitle) durationTitle.textContent = tr(
+      "Середня тривалість тривоги в межах доби",
+      "Average within-day alert duration"
+    );
+    if (durationSubtitle) durationSubtitle.textContent = tr(
+      "Для кожного календарного дня тривоги розрізаються на межі опівночі. Показано середню тривалість відрізків тривог, що припали на цей день. Кількість тривог при цьому й далі рахується лише в день початку.",
+      "For each calendar day, alerts are split at midnight. The chart shows the average duration of alert segments that fall within that day. Alert counts still belong only to the day on which the alert started."
+    );
+  } else {
+    if (durationTitle) durationTitle.textContent = tr(
+      "Середня тривалість однієї тривоги",
+      "Average duration of one alert"
+    );
+    if (durationSubtitle) durationSubtitle.textContent = tr(
+      "Середня тривалість усіх тривог, що почалися в обраному періоді. Якщо тривога закінчилася вже після завершення періоду, вся її тривалість відноситься до періоду старту.",
+      "Average full duration of alerts that started in the selected period. If an alert ends after the period, its full duration is attributed to the period in which it started."
+    );
+  }
 
   setDurationChart("cityDurationChart", labels, [seriesDataset(labelFor(key), rows.map(r => r.avg_alert_duration_min), COLORS[2], dashed, rows)], "minutes");
 
