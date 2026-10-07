@@ -1,36 +1,14 @@
 name: Unit A existing-evidence materialization
 
 on:
-  push:
-    branches:
-      - attack-event-unit-a-existing-evidence-materialization-2026-10-07
+  workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
-  materialize:
-    if: ${{ !contains(github.event.head_commit.message, '[unit-a-artifact]') }}
+  disabled:
+    if: false
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-      - name: Fetch pinned refs
-        run: |
-          git fetch origin 71cb6f6fbe856cc7b96759310fe9cc9c71cc0453
-          git fetch origin multicity-wip-2026-09-16
-      - name: Materialize twice and freeze local artifact
-        run: python .github/proof/attack_event_unit_a_materialization.py
-      - name: Verify artifact is the only new durable output before commit
-        run: |
-          test -f research/attack_event_execution_unit_a_materialized_inputs_2026-10-07.json
-          git status --short
-          test "$(git status --short | grep '^?? research/attack_event_execution_unit_a_materialized_inputs_2026-10-07.json$' | wc -l)" -eq 1
-      - name: Commit durable artifact
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add research/attack_event_execution_unit_a_materialized_inputs_2026-10-07.json
-          git commit -m "freeze: Unit A materialized inputs [unit-a-artifact]"
-          git push origin HEAD:attack-event-unit-a-existing-evidence-materialization-2026-10-07
+      - run: echo disabled
