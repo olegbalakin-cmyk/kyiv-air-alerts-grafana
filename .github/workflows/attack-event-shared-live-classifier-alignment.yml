@@ -1,0 +1,82 @@
+name: Attack-event shared live classifier alignment proof
+
+on:
+  push:
+    branches:
+      - attack-event-shared-live-classifier-alignment-2026-10-07
+    paths:
+      - "kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py"
+      - "kyiv-air-alerts-grafana/scripts/authoritative_classifier_71cb6f6f.py"
+      - ".github/proof/attack_event_shared_live_classifier_alignment.py"
+      - ".github/workflows/attack-event-shared-live-classifier-alignment.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  actions: read
+
+concurrency:
+  group: attack-event-shared-live-classifier-alignment-2026-10-07
+  cancel-in-progress: false
+
+jobs:
+  prove:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 180
+    env:
+      OUT_PATH: research/attack_event_shared_live_classifier_alignment_2026-10-07.json
+
+    steps:
+      - name: Checkout isolated alignment branch
+        uses: actions/checkout@v4
+        with:
+          ref: attack-event-shared-live-classifier-alignment-2026-10-07
+          fetch-depth: 0
+          clean: true
+
+      - name: Setup Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install classifier import dependencies
+        run: python -m pip install --disable-pip-version-check requests beautifulsoup4
+
+      - name: Assert zero database access configuration
+        shell: bash
+        run: |
+          set -euo pipefail
+          for key in DATABASE_URL NEON_DATABASE_URL NEON_URL PGHOST PGPORT PGDATABASE PGUSER PGPASSWORD; do
+            test -z "${!key-}" || { echo "Unexpected DB environment variable: $key"; exit 1; }
+          done
+
+      - name: Run shared 23-city live classifier alignment proof
+        shell: bash
+        run: |
+          set -euo pipefail
+          python .github/proof/attack_event_shared_live_classifier_alignment.py \
+            --out "$OUT_PATH" \
+            --run-id "$GITHUB_RUN_ID"
+
+      - name: Upload durable proof artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: shared-live-classifier-alignment-${{ github.run_id }}
+          path: ${{ env.OUT_PATH }}
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Commit durable proof artifact only
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -s "$OUT_PATH"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "$OUT_PATH"
+          git diff --cached --quiet && exit 0
+          git commit -m "Freeze shared live classifier alignment proof"
+          git push origin HEAD:attack-event-shared-live-classifier-alignment-2026-10-07
+          echo "DURABLE_COMMIT=$(git rev-parse HEAD)"
+          echo "DURABLE_BLOB=$(git rev-parse HEAD:$OUT_PATH)"
+          echo "DURABLE_SHA256=$(sha256sum "$OUT_PATH" | awk '{print $1}')"
