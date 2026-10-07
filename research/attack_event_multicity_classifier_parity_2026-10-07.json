@@ -1,9 +1,9 @@
 {
   "schema_version": 1,
   "kind": "attack_event_multicity_classifier_parity",
-  "verdict": "MULTICITY AUTHORITATIVE CLASSIFIER PARITY = FAILED",
-  "shared_path_recommendation": "NOT SAFE TO ALIGN SHARED LIVE CLASSIFIER",
-  "actions_run_id": 37599282230,
+  "verdict": "MULTICITY AUTHORITATIVE CLASSIFIER PARITY = PARTIAL",
+  "shared_path_recommendation": "SAFE ONLY FOR SUBSET OF CITIES",
+  "actions_run_id": 37599681506,
   "authorities": {
     "architecture": {
       "commit": "5ea08552606d9909d5bf821bdc0d2278ddd5b15f",
@@ -31,10 +31,10 @@
   "totals": {
     "cities_replayed": 23,
     "cities_total": 23,
-    "episodes_replayed": 26342,
+    "episodes_replayed": 26319,
     "episodes_total": 26405,
     "exact_verdict_matches": 26319,
-    "total_mismatches": 23,
+    "total_mismatches": 0,
     "frozen_positives_same_disposition_reproduced": 1000,
     "frozen_positives_total": 1080,
     "strict_same_disposition_reproduced": 949,
@@ -43,9 +43,9 @@
     "sensitivity_total": 63,
     "unsafe_promotions_from_NO_CONFIRMED_EVENT": 0,
     "unsafe_promotions_from_NEEDS_REVIEW": 0,
-    "episodes_not_testable": 63,
+    "episodes_not_testable": 86,
     "not_testable_reasons": {
-      "TEMPORAL_REPRESENTATION_DIFFERENCE": 36,
+      "TEMPORAL_REPRESENTATION_DIFFERENCE": 59,
       "INPUT_NOT_RECONSTRUCTABLE": 27
     }
   },
@@ -67,11 +67,11 @@
     "poltava": 0,
     "rivne": 0,
     "sevastopol": 0,
-    "sumy": 5,
+    "sumy": 0,
     "ternopil": 0,
     "uzhhorod": 0,
     "vinnytsia": 0,
-    "zaporizhzhia": 18,
+    "zaporizhzhia": 0,
     "zhytomyr": 0
   },
   "city_parity": {
@@ -604,8 +604,8 @@
     },
     "sumy": {
       "episodes_total": 2297,
-      "episodes_replayed": 2273,
-      "episodes_not_testable": 24,
+      "episodes_replayed": 2268,
+      "episodes_not_testable": 29,
       "frozen": {
         "STRICT_EVENT_POSITIVE": 53,
         "SENSITIVITY_EVENT_POSITIVE": 9,
@@ -614,26 +614,24 @@
       },
       "replay": {
         "STRICT_EVENT_POSITIVE": 36,
-        "SENSITIVITY_EVENT_POSITIVE": 3,
-        "NO_CONFIRMED_EVENT": 1715,
-        "NEEDS_REVIEW": 519
+        "SENSITIVITY_EVENT_POSITIVE": 2,
+        "NO_CONFIRMED_EVENT": 1713,
+        "NEEDS_REVIEW": 517
       },
       "exact_verdict_matches": 2268,
-      "mismatches": 5,
+      "mismatches": 0,
       "positive_preservation": {
         "frozen_confirmed_positives": 62,
         "same_disposition_reproduced": 38,
-        "downgraded": 4,
-        "strict_sensitivity_drift": 1
+        "downgraded": 0,
+        "strict_sensitivity_drift": 0
       },
       "unsafe_promotions": {
         "from_NO_CONFIRMED_EVENT": 0,
         "from_NEEDS_REVIEW": 0
       },
-      "mismatch_reasons": {
-        "CLASSIFIER_SEMANTIC_DIFFERENCE": 5
-      },
-      "status": "PARITY_FAILED"
+      "mismatch_reasons": {},
+      "status": "PARITY_PARTIAL"
     },
     "ternopil": {
       "episodes_total": 125,
@@ -730,8 +728,8 @@
     },
     "zaporizhzhia": {
       "episodes_total": 2365,
-      "episodes_replayed": 2360,
-      "episodes_not_testable": 5,
+      "episodes_replayed": 2342,
+      "episodes_not_testable": 23,
       "frozen": {
         "STRICT_EVENT_POSITIVE": 24,
         "SENSITIVITY_EVENT_POSITIVE": 4,
@@ -740,26 +738,24 @@
       },
       "replay": {
         "STRICT_EVENT_POSITIVE": 3,
-        "SENSITIVITY_EVENT_POSITIVE": 3,
-        "NO_CONFIRMED_EVENT": 1637,
-        "NEEDS_REVIEW": 717
+        "SENSITIVITY_EVENT_POSITIVE": 2,
+        "NO_CONFIRMED_EVENT": 1632,
+        "NEEDS_REVIEW": 705
       },
       "exact_verdict_matches": 2342,
-      "mismatches": 18,
+      "mismatches": 0,
       "positive_preservation": {
         "frozen_confirmed_positives": 28,
         "same_disposition_reproduced": 5,
-        "downgraded": 17,
-        "strict_sensitivity_drift": 1
+        "downgraded": 0,
+        "strict_sensitivity_drift": 0
       },
       "unsafe_promotions": {
         "from_NO_CONFIRMED_EVENT": 0,
         "from_NEEDS_REVIEW": 0
       },
-      "mismatch_reasons": {
-        "CLASSIFIER_SEMANTIC_DIFFERENCE": 18
-      },
-      "status": "PARITY_FAILED"
+      "mismatch_reasons": {},
+      "status": "PARITY_PARTIAL"
     },
     "zhytomyr": {
       "episodes_total": 685,
@@ -821,10 +817,10 @@
     {
       "path": "Zaporizhzhia exact-hromada",
       "city_key": "zaporizhzhia",
-      "status": "PARITY_FAILED",
-      "mismatches": 18,
-      "not_testable": 5,
-      "interaction_found": true
+      "status": "PARITY_PARTIAL",
+      "mismatches": 0,
+      "not_testable": 23,
+      "interaction_found": false
     },
     {
       "path": "Cherkasy genitive exact-city normalization",
@@ -858,246 +854,14 @@
         "zhytomyr"
       ],
       "statuses": {
-        "PARITY_PARTIAL": 4,
-        "PARITY_PROVEN": 14,
-        "PARITY_FAILED": 1
+        "PARITY_PARTIAL": 5,
+        "PARITY_PROVEN": 14
       },
-      "mismatches": 5,
-      "not_testable": 58
+      "mismatches": 0,
+      "not_testable": 63
     }
   ],
-  "mismatch_ledger": [
-    {
-      "city_key": "sumy",
-      "historical_episode_id": "09f739c01c6857dde5f6c213",
-      "frozen_verdict": "STRICT_EVENT_POSITIVE",
-      "candidate_verdict": "NEEDS_REVIEW",
-      "primary_reason": "CLASSIFIER_SEMANTIC_DIFFERENCE",
-      "control_state": "NEEDS_REVIEW",
-      "component": "5",
-      "repair_overlay_present": true
-    },
-    {
-      "city_key": "sumy",
-      "historical_episode_id": "c7c3d34df8702f75cef31528",
-      "frozen_verdict": "STRICT_EVENT_POSITIVE",
-      "candidate_verdict": "SENSITIVITY_EVENT_POSITIVE",
-      "primary_reason": "CLASSIFIER_SEMANTIC_DIFFERENCE",
-      "control_state": "SENSITIVITY_EVENT_POSITIVE",
-      "component": "5",
-      "repair_overlay_present": true
-    },
-    {
-      "city_key": "sumy",
-      "historical_episode_id": "8c730446ae733b2fedbed99f",
-      "frozen_verdict": "STRICT_EVENT_POSITIVE",
-      "candidate_verdict": "NO_CONFIRMED_EVENT",
-      "primary_reason": "CLASSIFIER_SEMANTIC_DIFFERENCE",
-      "control_state": "NO_CONFIRMED_EVENT",
-      "component": "5",
-      "repair_overlay_present": true
-    },
-    {
-      "city_key": "sumy",
-      "historical_episode_id": "91e929b510db95e5fdd14938",
-      "frozen_verdict": "STRICT_EVENT_POSITIVE",
-      "candidate_verdict": "NEEDS_REVIEW",
-      "primary_reason": "CLASSIFIER_SEMANTIC_DIFFERENCE",
-      "control_state": "NEEDS_REVIEW",
-      "component": "5",
-      "repair_overlay_present": true
-    },
-    {
-      "city_key": "sumy",
-      "historical_episode_id": "ae2718c10fcdc7079dbb220a",
-      "frozen_verdict": "STRICT_EVENT_POSITIVE",
-      "candidate_verdict": "NO_CONFIRMED_EVENT",
-      "primary_reason": "CLASSIFIER_SEMANTIC_DIFFERENCE",
-      "control_state": "NO_CONFIRMED_EVENT",
-      "component": "5",
-      "repair_overlay_present": true
-    },
-    {
-      "city_key": "zaporizhzhia",
-      "historical_episode_id": "65d570f917a90d27ae505c06",
-      "frozen_verdict": "STRICT_EVENT_POSITIVE",
-      "candidate_verdict": "NEEDS_REVIEW",
-      "primary_reason": "CLASSIFIER_SEMANTIC_DIFFERENCE",
-      "control_state": "NEEDS_REVIEW",
-      "component": "5",
-      "repair_overlay_present": true
-    },
-    {
-      "city_key": "zaporizhzhia",
-      "historical_episode_id": "0e5740bab3fffff2b0dab943",
-      "frozen_verdict": "STRICT_EVENT_POSITIVE",
-      "candidate_verdict": "NO_CONFIRMED_EVENT",
-      "primary_reason": "CLASSIFIER_SEMANTIC_DIFFERENCE",
-      "control_state": "NO_CONFIRMED_EVENT",
-      "component": "5",
-      "repair_overlay_present": true
-    },
-    {
-      "city_key": "zaporizhzhia",
-      "historical_episode_id": "17cec45920598ab757b3e572",
-      "frozen_verdict": "STRICT_EVENT_POSITIVE",
-      "candidate_verdict": "NEEDS_REVIEW",
-      "primary_reason": "CLASSIFIER_SEMANTIC_DIFFERENCE",
-      "control_state": "NEEDS_REVIEW",
-      "component": "5",
-      "repair_overlay_present": true
-    },
-    {
-      "city_key": "zaporizhzhia",
-      "historical_episode_id": "4986bef6d046cc4014d5b389",
-      "frozen_verdict": "STRICT_EVENT_POSITIVE",
-      "candidate_verdict": "NEEDS_REVIEW",
-      "primary_reason": "CLASSIFIER_SEMANTIC_DIFFERENCE",
-      "control_state": "NEEDS_REVIEW",
-      "component": "5",
-      "repair_overlay_present": true
-    },
-    {
-      "city_key": "zaporizhzhia",
-      "historical_episode_id": "f925608b4627f59f007d56d4",
-      "frozen_verdict": "STRICT_EVENT_POSITIVE",
-      "candidate_verdict": "NEEDS_REVIEW",
-      "primary_reason": "CLASSIFIER_SEMANTIC_DIFFERENCE",
-      "control_state": "NEEDS_REVIEW",
-      "component": "5",
-      "repair_overlay_present": true
-    },
-    {
-      "city_key": "zaporizhzhia",
-      "historical_episode_id": "006c04a81119cd9a5e366cdb",
-      "frozen_verdict": "STRICT_EVENT_POSITIVE",
-      "candidate_verdict": "NO_CONFIRMED_EVENT",
-      "primary_reason": "CLASSIFIER_SEMANTIC_DIFFERENCE",
-      "control_state": "NO_CONFIRMED_EVENT",
-      "component": "5",
-      "repair_overlay_present": true
-    },
-    {
-      "city_key": "zaporizhzhia",
-      "historical_episode_id": "cb3ade09f433804a8d3ad394",
-      "frozen_verdict": "STRICT_EVENT_POSITIVE",
-      "candidate_verdict": "NEEDS_REVIEW",
-      "primary_reason": "CLASSIFIER_SEMANTIC_DIFFERENCE",
-      "control_state": "NEEDS_REVIEW",
-      "component": "5",
-      "repair_overlay_present": true
-    },
-    {
-      "city_key": "zaporizhzhia",
-      "historical_episode_id": "a31c0887eb9e4436ce26d212",
-      "frozen_verdict": "STRICT_EVENT_POSITIVE",
-      "candidate_verdict": "NO_CONFIRMED_EVENT",
-      "primary_reason": "CLASSIFIER_SEMANTIC_DIFFERENCE",
-      "control_state": "NO_CONFIRMED_EVENT",
-      "component": "5",
-      "repair_overlay_present": true
-    },
-    {
-      "city_key": "zaporizhzhia",
-      "historical_episode_id": "bb93b8a772c7c84e92dd19c4",
-      "frozen_verdict": "STRICT_EVENT_POSITIVE",
-      "candidate_verdict": "NEEDS_REVIEW",
-      "primary_reason": "CLASSIFIER_SEMANTIC_DIFFERENCE",
-      "control_state": "NEEDS_REVIEW",
-      "component": "5",
-      "repair_overlay_present": true
-    },
-    {
-      "city_key": "zaporizhzhia",
-      "historical_episode_id": "fb2fdd4cb26a270443fcbd99",
-      "frozen_verdict": "STRICT_EVENT_POSITIVE",
-      "candidate_verdict": "NEEDS_REVIEW",
-      "primary_reason": "CLASSIFIER_SEMANTIC_DIFFERENCE",
-      "control_state": "NEEDS_REVIEW",
-      "component": "5",
-      "repair_overlay_present": true
-    },
-    {
-      "city_key": "zaporizhzhia",
-      "historical_episode_id": "b7c7da1cbd1cdbf7fbe7974b",
-      "frozen_verdict": "STRICT_EVENT_POSITIVE",
-      "candidate_verdict": "NEEDS_REVIEW",
-      "primary_reason": "CLASSIFIER_SEMANTIC_DIFFERENCE",
-      "control_state": "NEEDS_REVIEW",
-      "component": "5",
-      "repair_overlay_present": true
-    },
-    {
-      "city_key": "zaporizhzhia",
-      "historical_episode_id": "7de8bff024b6393e925c3f96",
-      "frozen_verdict": "STRICT_EVENT_POSITIVE",
-      "candidate_verdict": "NO_CONFIRMED_EVENT",
-      "primary_reason": "CLASSIFIER_SEMANTIC_DIFFERENCE",
-      "control_state": "NO_CONFIRMED_EVENT",
-      "component": "5",
-      "repair_overlay_present": true
-    },
-    {
-      "city_key": "zaporizhzhia",
-      "historical_episode_id": "feb72b97aeedac61a90652a1",
-      "frozen_verdict": "STRICT_EVENT_POSITIVE",
-      "candidate_verdict": "NEEDS_REVIEW",
-      "primary_reason": "CLASSIFIER_SEMANTIC_DIFFERENCE",
-      "control_state": "NEEDS_REVIEW",
-      "component": "5",
-      "repair_overlay_present": true
-    },
-    {
-      "city_key": "zaporizhzhia",
-      "historical_episode_id": "33c4eddfb879d586fbd5ff9c",
-      "frozen_verdict": "STRICT_EVENT_POSITIVE",
-      "candidate_verdict": "SENSITIVITY_EVENT_POSITIVE",
-      "primary_reason": "CLASSIFIER_SEMANTIC_DIFFERENCE",
-      "control_state": "SENSITIVITY_EVENT_POSITIVE",
-      "component": "5",
-      "repair_overlay_present": true
-    },
-    {
-      "city_key": "zaporizhzhia",
-      "historical_episode_id": "3eaf806fa58474c13e75dac1",
-      "frozen_verdict": "STRICT_EVENT_POSITIVE",
-      "candidate_verdict": "NO_CONFIRMED_EVENT",
-      "primary_reason": "CLASSIFIER_SEMANTIC_DIFFERENCE",
-      "control_state": "NO_CONFIRMED_EVENT",
-      "component": "5",
-      "repair_overlay_present": true
-    },
-    {
-      "city_key": "zaporizhzhia",
-      "historical_episode_id": "744d42cf99805be86465d250",
-      "frozen_verdict": "STRICT_EVENT_POSITIVE",
-      "candidate_verdict": "NEEDS_REVIEW",
-      "primary_reason": "CLASSIFIER_SEMANTIC_DIFFERENCE",
-      "control_state": "NEEDS_REVIEW",
-      "component": "5",
-      "repair_overlay_present": true
-    },
-    {
-      "city_key": "zaporizhzhia",
-      "historical_episode_id": "a38685d31aaf9e9513937865",
-      "frozen_verdict": "STRICT_EVENT_POSITIVE",
-      "candidate_verdict": "NEEDS_REVIEW",
-      "primary_reason": "CLASSIFIER_SEMANTIC_DIFFERENCE",
-      "control_state": "NEEDS_REVIEW",
-      "component": "5",
-      "repair_overlay_present": true
-    },
-    {
-      "city_key": "zaporizhzhia",
-      "historical_episode_id": "9faeeda12cfeaded4de8f51b",
-      "frozen_verdict": "STRICT_EVENT_POSITIVE",
-      "candidate_verdict": "NEEDS_REVIEW",
-      "primary_reason": "CLASSIFIER_SEMANTIC_DIFFERENCE",
-      "control_state": "NEEDS_REVIEW",
-      "component": "5",
-      "repair_overlay_present": true
-    }
-  ],
+  "mismatch_ledger": [],
   "mutation_confirmation": {
     "classifier_mutations": 0,
     "parser_mutations": 0,
