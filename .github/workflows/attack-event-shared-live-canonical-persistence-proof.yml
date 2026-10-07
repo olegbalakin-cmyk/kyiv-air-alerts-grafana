@@ -1,0 +1,56 @@
+name: Shared live canonical attack-event persistence proof
+
+on:
+  push:
+    branches:
+      - attack-event-shared-live-canonical-persistence-2026-10-07
+    paths:
+      - .github/workflows/attack-event-shared-live-canonical-persistence-proof.yml
+      - .github/proof/attack_event_shared_live_canonical_persistence.py
+      - kyiv-air-alerts-grafana/scripts/attack_event_canonical_persistence.py
+      - kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py
+      - kyiv-air-alerts-grafana/requirements.txt
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  prove:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    env:
+      PHASE1_PROD_SHADOW_DATABASE_URL: ${{ secrets.PHASE1_PROD_SHADOW_DATABASE_URL }}
+      PHASE1_PROD_SHADOW_BRANCH_ID: ${{ vars.PHASE1_PROD_SHADOW_BRANCH_ID }}
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: true
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install runtime and proof dependencies
+        working-directory: kyiv-air-alerts-grafana
+        run: pip install -r requirements.txt
+
+      - name: Run shared live canonical persistence proof
+        run: |
+          set -euo pipefail
+          python .github/proof/attack_event_shared_live_canonical_persistence.py \
+            --out /tmp/attack_event_shared_live_canonical_persistence_proof_2026-10-07.json \
+            --run-id "${GITHUB_RUN_ID}"
+
+      - name: Freeze durable proof artifact
+        run: |
+          set -euo pipefail
+          cp /tmp/attack_event_shared_live_canonical_persistence_proof_2026-10-07.json \
+            research/attack_event_shared_live_canonical_persistence_proof_2026-10-07.json
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add research/attack_event_shared_live_canonical_persistence_proof_2026-10-07.json
+          git commit -m "Freeze shared live canonical persistence proof"
+          git push origin HEAD:attack-event-shared-live-canonical-persistence-2026-10-07
