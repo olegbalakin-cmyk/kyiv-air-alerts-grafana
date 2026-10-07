@@ -371,40 +371,54 @@ def durable_eligibility_restart_proof() -> dict[str, Any]:
     cutoff = _as_utc("2026-10-07T16:53:19Z")
     fixtures = [
         {
-            "label": "pre_cutoff_known_before_restart",
+            "label": "pre_cutoff_first_observed_after_restart",
             "city_key": "kharkiv",
-            "episode_id": "000000000000000000000001",
-            "alert_start": "2026-10-07T16:00:00Z",
-            "alert_end": "2026-10-07T16:53:18Z",
-            "live_first_seen_at": "2026-10-07T16:10:00Z",
+            "episode_id": "3f3c88cb48e0e8c3b7b9f720",
+            "alert_start": "2026-10-07T13:54:55.814104Z",
+            "alert_end": "2026-10-07T14:25:28.934445Z",
+            "live_first_seen_at": "2026-10-07T17:31:30Z",
             "expected": False,
+            "fixture_kind": "existing_episode",
         },
         {
-            "label": "exact_boundary_first_seen_after_restart",
+            "label": "pre_cutoff_reobserved_after_later_restart",
+            "city_key": "sumy",
+            "episode_id": "465a6988798a5dc76eafccee",
+            "alert_start": "2026-10-07T15:38:02.503Z",
+            "alert_end": "2026-10-07T16:22:25.311Z",
+            "live_first_seen_at": "2026-10-07T17:59:07Z",
+            "expected": False,
+            "fixture_kind": "existing_episode",
+        },
+        {
+            "label": "exact_boundary_synthetic",
             "city_key": "dnipro",
             "episode_id": "000000000000000000000002",
             "alert_start": "2026-10-07T16:40:00Z",
             "alert_end": "2026-10-07T16:53:19Z",
             "live_first_seen_at": "2026-10-07T18:00:00Z",
             "expected": True,
+            "fixture_kind": "synthetic_boundary_only",
         },
         {
             "label": "crosses_boundary_known_before_restart",
             "city_key": "poltava",
-            "episode_id": "000000000000000000000003",
-            "alert_start": "2026-10-07T16:40:00Z",
-            "alert_end": "2026-10-07T16:54:00Z",
-            "live_first_seen_at": "2026-10-07T16:45:00Z",
+            "episode_id": "5f26ee4d54e5a58586c090de",
+            "alert_start": "2026-10-07T16:20:41.362Z",
+            "alert_end": "2026-10-07T16:59:52.223Z",
+            "live_first_seen_at": "2026-10-07T17:31:32Z",
             "expected": True,
+            "fixture_kind": "existing_episode",
         },
         {
-            "label": "post_cutoff_first_seen_after_restart",
-            "city_key": "kyiv",
-            "episode_id": "000000000000000000000004",
-            "alert_start": "2026-10-07T17:00:00Z",
-            "alert_end": "2026-10-07T17:30:00Z",
-            "live_first_seen_at": "2026-10-07T18:30:00Z",
+            "label": "post_cutoff_first_observed_after_restart",
+            "city_key": "dnipro",
+            "episode_id": "b37390ebcac53290c602449f",
+            "alert_start": "2026-10-07T17:04:13.760Z",
+            "alert_end": "2026-10-07T17:04:58.062Z",
+            "live_first_seen_at": "2026-10-07T17:31:30Z",
             "expected": True,
+            "fixture_kind": "existing_episode",
         },
     ]
 
@@ -427,14 +441,24 @@ def durable_eligibility_restart_proof() -> dict[str, Any]:
         assert before[episode_id] is row["expected"]
         assert after[episode_id] is row["expected"]
     changes = sum(before[key] != after[key] for key in before)
+    false_pre_cutoff = sum(
+        before[row["episode_id"]]
+        for row in fixtures
+        if _as_utc(row["alert_end"]) < cutoff
+    )
     assert changes == 0
+    assert false_pre_cutoff == 0
     return {
         "predicate": "alert_end >= LIVE_PERSISTENCE_ACTIVATION_CUTOFF",
         "cutoff_utc": "2026-10-07T16:53:19Z",
         "inclusive": True,
+        "pre_cutoff_false_eligibility": false_pre_cutoff,
         "fixtures": [
             {
                 "label": row["label"],
+                "fixture_kind": row["fixture_kind"],
+                "city": row["city_key"],
+                "episode_id": row["episode_id"],
                 "episode_start": row["alert_start"],
                 "episode_end": row["alert_end"],
                 "runtime_first_seen": row.get("live_first_seen_at"),
