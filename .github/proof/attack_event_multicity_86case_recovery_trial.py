@@ -8,7 +8,7 @@ HERE=Path(__file__).resolve().parent
 sys.path.insert(0,str(HERE))
 import attack_event_multicity_classifier_parity as p
 
-WORKER_REF="eaa77e2c2714d68a25dcd581c3194c1d394eb00a"
+# Trial re-run after diagnostic harness cleanup.\nWORKER_REF="eaa77e2c2714d68a25dcd581c3194c1d394eb00a"
 CITIES={"cherkasy","lviv","sumy","vinnytsia","zaporizhzhia","zhytomyr"}
 POS={"STRICT_EVENT_POSITIVE","SENSITIVITY_EVENT_POSITIVE"}
 
