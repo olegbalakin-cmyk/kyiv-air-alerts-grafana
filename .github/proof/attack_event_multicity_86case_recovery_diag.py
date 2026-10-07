@@ -158,12 +158,6 @@ def main():
                         "payload_reason_codes": payload.get("classification_reason_codes") if isinstance(payload,dict) else None,
                     })
                 native=r.get("native_frozen_episode_result")
-                needles=[eid,str(r.get("classification_key") or "")]+obsids
-                refs=[p.SNAP_COMMIT,p.REPAIR_COMMIT]
-                if comp=="18": refs.append(worker_ref[city])
-                durable_paths={}
-                for ref in refs:
-                    durable_paths[ref]=grep_paths(ref,needles)
                 ledger.append({
                     "city":city,"episode_id":eid,"frozen_verdict":fv,
                     "reason":reason,"component":comp,
@@ -173,7 +167,6 @@ def main():
                     "row_keys":sorted(r.keys()),
                     "source_links":source_link_summaries,
                     "repair_matches":repair_matches,
-                    "durable_paths":durable_paths,
                     "worker_ref":worker_ref.get(city),
                 })
         assert len(ledger)==86, len(ledger)
@@ -197,8 +190,6 @@ def main():
                 "native_keys": sorted((x["native_frozen_episode_result"] or {}).keys()) if isinstance(x["native_frozen_episode_result"],dict) else None,
                 "source_link_count":len(x["source_links"]),
                 "source_payload_keys":sorted({k for l in x["source_links"] for k in ((l.get("payload") or {}).get("keys") or [])}),
-                "durable_path_count":sum(len(v) for v in x["durable_paths"].values()),
-                "durable_paths":x["durable_paths"],
             } for x in ledger if x["reason"]=="INPUT_NOT_RECONSTRUCTABLE"],
         }
         print("RECOVER86_DIAGNOSTIC="+json.dumps(compact,ensure_ascii=False,separators=(",",":")))
