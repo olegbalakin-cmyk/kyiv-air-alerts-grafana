@@ -507,7 +507,8 @@ def main() -> int:
             "unit_b_overlap": len(set(output_uids) & set(contract["b_uids"])),
             "unit_c_overlap": len(set(output_uids) & set(contract["c_uids"])),
             "ordered_canonical_identity_set_sha256": stats_a["ordered_identity_set_sha256"],
-            "candidate_input_count": stats_a["candidate_input_count"],\n            "unique_candidate_input_count": stats_a["unique_candidate_input_count"],
+            "candidate_input_count": stats_a["candidate_input_count"],
+            "unique_candidate_input_count": stats_a["unique_candidate_input_count"],
             "accepted_empty_candidate_set_count": stats_a["accepted_empty_candidate_set_count"],
             "authoritative_repository_inputs_consumed": {
                 "recovery_artifact": contract["recovery_identity"],
@@ -515,7 +516,8 @@ def main() -> int:
                 "queue_snapshots": stats_a["queue_inputs"],
             },
             "evidence_provenance_preservation": {
-                "candidate_projection": "copy only persisted frozen candidate input fields defined by the accepted recovery artifact",\n                "artifact_serialization": "content-addressed deduplication only; exact ordered candidate bundles are reconstructable by SHA-256 refs",
+                "candidate_projection": "copy only persisted frozen candidate input fields defined by the accepted recovery artifact",
+            "artifact_serialization": "content-addressed deduplication only; exact ordered candidate bundles are reconstructable by SHA-256 refs",
                 "queue_snapshot_identity_preserved_per_episode": True,
                 "candidate_multi_value_trigger_provenance_preserved": True,
                 "source_type_inference": "NONE",
@@ -569,7 +571,8 @@ def main() -> int:
         "db_writes": 0,
         "production_mutation": "NO",
         "queue_snapshots_consumed": len(stats_a["queue_inputs"]),
-        "candidate_inputs": stats_a["candidate_input_count"],\n        "unique_candidate_inputs": stats_a["unique_candidate_input_count"],
+        "candidate_inputs": stats_a["candidate_input_count"],
+            "unique_candidate_inputs": stats_a["unique_candidate_input_count"],
     }
     print(json.dumps(summary, ensure_ascii=False, sort_keys=True))
     return 0
