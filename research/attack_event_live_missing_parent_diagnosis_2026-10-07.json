@@ -1,0 +1,124 @@
+{
+  "schema_version": "attack-event-live-missing-parent-diagnosis-v1",
+  "target": {
+    "city_key": "kharkiv",
+    "historical_episode_id": "3f3c88cb48e0e8c3b7b9f720",
+    "start_at": "2026-10-07T13:54:55.814104Z",
+    "end_at": "2026-10-07T14:25:28.934445Z",
+    "source": "UkraineAlarm /api/v3/alerts/regionHistory",
+    "normalized_city_identity": "kharkiv",
+    "raw": {
+      "region_id": "1293",
+      "api_region_name": "м. Харків та Харківська територіальна громада",
+      "alert_id": null,
+      "alert_type": "AIR"
+    }
+  },
+  "expected_parent_key": "kharkiv|3f3c88cb48e0e8c3b7b9f720|2026-10-07T13:54:55.814104Z|2026-10-07T14:25:28.934445Z",
+  "neon_lookup": {
+    "project": "green-cake-44216048",
+    "branch": "br-bold-mode-b5rub8pq",
+    "exact_full_parent_matches": 0,
+    "historical_episode_id_only_matches": 0,
+    "city_start_end_matches": 0,
+    "overlapping_candidates": [],
+    "upstream_raw_identity_matches": 0,
+    "alert_episodes_created_after_canary_cutoff": 0,
+    "writes": 0
+  },
+  "primary_diagnosis": "PARENT_NOT_PERSISTED",
+  "ordering": {
+    "last_successful_parent_commit_at": "2026-10-07T13:02:27.110769Z",
+    "target_started_at": "2026-10-07T13:54:55.814104Z",
+    "target_ended_at": "2026-10-07T14:25:28.934445Z",
+    "canary_cutoff": "2026-10-07T14:36:24Z",
+    "kharkiv_monitor_poll_at": "2026-10-07T15:12:54Z",
+    "failed_parent_lookup_at": "2026-10-07T15:16:16Z",
+    "can_live_classification_run_before_parent_persistence": "YES",
+    "race_condition": "The monitor polls UkraineAlarm independently of the site-prod canonical-parent scheduler. An episode can complete after the last parent transaction and become classification-eligible before the next parent transaction."
+  },
+  "bounded_multicity_sample": {
+    "totals": {
+      "observed": 6,
+      "parents_present": 4,
+      "parents_missing": 2,
+      "identity_mismatches": 1
+    },
+    "families": {
+      "UkraineAlarm exact-hromada": {
+        "observed": 2,
+        "present": 1,
+        "missing": 1,
+        "identity_mismatches": 0,
+        "examples": [
+          {
+            "city": "kharkiv",
+            "start": "2026-10-07T13:54:55.814104Z",
+            "end": "2026-10-07T14:25:28.934445Z",
+            "exact_parent_matches": 0,
+            "overlaps": 0
+          },
+          {
+            "city": "zaporizhzhia",
+            "start": "2026-10-07T11:09:59.741353Z",
+            "end": "2026-10-07T12:14:38.994874Z",
+            "exact_parent_matches": 1
+          }
+        ]
+      },
+      "UkraineAlarm raion-proxy": {
+        "observed": 2,
+        "present": 1,
+        "missing": 1,
+        "identity_mismatches": 1,
+        "examples": [
+          {
+            "city": "poltava",
+            "start": "2026-10-07T10:04:23.402093Z",
+            "end": "2026-10-07T11:28:32.595577Z",
+            "exact_parent_matches": 1
+          },
+          {
+            "city": "sumy",
+            "start": "2026-10-07T11:50:38.196945Z",
+            "end": "2026-10-07T12:08:54.099882Z",
+            "exact_parent_matches": 0,
+            "overlap_candidate": {
+              "legacy_episode_id": "4c53573ce6ab1e149c74a39a",
+              "start": "2026-10-07T08:06:17.095523Z",
+              "end": "2026-10-07T12:08:54.099882Z"
+            }
+          }
+        ]
+      },
+      "Kyiv": {
+        "observed": 1,
+        "present": 1,
+        "missing": 0,
+        "identity_mismatches": 0
+      },
+      "Sevastopol": {
+        "observed": 1,
+        "present": 1,
+        "missing": 0,
+        "identity_mismatches": 0
+      }
+    },
+    "issue_reproduces_outside_kharkiv": true,
+    "affected_ingestion_families": [
+      "UkraineAlarm exact-hromada",
+      "UkraineAlarm raion-proxy"
+    ],
+    "note": "Kharkiv is a persistence-ordering gap. Sumy shows a separate recent exact-parent identity divergence; Kyiv and Sevastopol samples were exact-bound."
+  },
+  "recommended_repair_scope": "REPAIR SHARED ALERT_EPISODE PERSISTENCE ORDERING",
+  "verdict": "LIVE CANONICAL PARENT GAP = PERSISTENCE ORDERING BUG",
+  "safety": {
+    "neon_writes": 0,
+    "production_classification_writes": 0,
+    "historical_backfill": false,
+    "production_wiring_reenabled": false,
+    "production_ref_mutations": 0,
+    "diagnostic_branch": "attack-event-live-missing-parent-diagnosis-2026-10-07"
+  }
+}
