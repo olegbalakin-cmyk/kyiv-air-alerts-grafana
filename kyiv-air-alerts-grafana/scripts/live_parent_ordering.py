@@ -495,7 +495,7 @@ def preclassification_parent_gate(
     conn = connection or psycopg.connect(str(dsn), autocommit=False)
     try:
         for episode in episodes:
-            if max_episodes is not None and result["parents_ready"] >= max_episodes:
+            if max_episodes is not None and result["selected_live_episodes"] >= max_episodes:
                 break
             result["selected_live_episodes"] += 1
             try:
