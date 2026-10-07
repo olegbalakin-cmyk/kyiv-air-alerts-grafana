@@ -4448,6 +4448,34 @@ def self_test() -> None:
         "late discovery; overlap/near-duplicate guards; dry replay purity"
     )
 
+
+def self_test() -> None:
+    """Validate the exact authoritative classifier plus preserved shared live adapters."""
+    _authoritative_classifier.self_test()
+    assert len(CITY_CONFIG) >= 23
+    if "kyiv" in CITY_CONFIG:
+        assert load_kyiv_alert_episodes(KYIV_ALERTS_FILE)[-1]["alert_source"] == "kyiv_combined_exact_city"
+    if "sevastopol" in CITY_CONFIG:
+        assert load_sevastopol_alert_episodes(SEVASTOPOL_EVENTS_FILE)[-1]["alert_source"] == "sevastopol_verified_exact_city_pairs"
+    if "cherkasy" in CITY_CONFIG:
+        probe = {
+            "title": "Жителі Черкас чули вибухи",
+            "snippet": "",
+            "publisher": "Test",
+            "source": "self-test",
+        }
+        adapted = _authoritative_classifier_input(probe, "cherkasy")
+        assert _authoritative_classifier.city_mentioned(
+            "cherkasy", _authoritative_classifier.classification_text(adapted)
+        )
+    assert authoritative_classifier_runtime_identity()["blob"] == AUTHORITATIVE_CLASSIFIER_BLOB
+    print(
+        f"Aligned self-test OK: {len(CITY_CONFIG)} city keys; "
+        f"authoritative classifier {AUTHORITATIVE_CLASSIFIER_BLOB}; "
+        "accepted ingestion adapters preserved"
+    )
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="Monitor completed-alert explosion candidates with separated discovery, matching, and evidence-layered classification.")
     parser.add_argument("--self-test", action="store_true")
