@@ -270,6 +270,7 @@ def materialize_once(contract: dict) -> tuple[dict, dict]:
     episodes = []
     per_episode_hashes = []
     consumed_queues: dict[tuple[str, str], dict] = {}
+    candidate_store: dict[str, dict] = {}
 
     for uid in contract["a_uids"]:
         frozen_row = contract["rows_by_uid"][uid]
@@ -289,17 +290,12 @@ def materialize_once(contract: dict) -> tuple[dict, dict]:
         queue_identity = frozen_row.get("collection_queue_identity") or {}
 
         projected = []
-        candidate_provenance = []
+        refs = []
+        selection_provenance = []
         if expected_count > 0:
-            commit = str(required(
-                queue_identity.get("commit"), "QUEUE_COMMIT_MISSING", uid
-            ))
-            path = str(required(
-                queue_identity.get("path"), "QUEUE_PATH_MISSING", uid
-            ))
-            blob = str(required(
-                queue_identity.get("blob"), "QUEUE_BLOB_MISSING", uid
-            ))
+            commit = str(required(queue_identity.get("commit"), "QUEUE_COMMIT_MISSING", uid))
+            path = str(required(queue_identity.get("path"), "QUEUE_PATH_MISSING", uid))
+            blob = str(required(queue_identity.get("blob"), "QUEUE_BLOB_MISSING", uid))
             queue, consumed = queue_snapshot(commit, path, blob, qcache)
             consumed_queues[(commit, path)] = consumed
             selected = selected_queue_rows(queue, episode_id, checked_at)
@@ -311,14 +307,19 @@ def materialize_once(contract: dict) -> tuple[dict, dict]:
                     contract["optional_fields"],
                 )
                 projected.append(candidate)
-                candidate_provenance.append({
+                candidate_hash = sha256(canonical_bytes(candidate))
+                prior = candidate_store.get(candidate_hash)
+                if prior is not None and canonical_bytes(prior) != canonical_bytes(candidate):
+                    raise Blocked("CANDIDATE_STORE_HASH_COLLISION", candidate_hash)
+                candidate_store[candidate_hash] = candidate
+                refs.append(candidate_hash)
+                selection_provenance.append({
                     "candidate_id": str(raw_candidate.get("candidate_id")),
-                    "first_discovered_at": copy.deepcopy(raw_candidate.get("first_discovered_at")),
+                    "candidate_input_sha256": candidate_hash,
+                    "matched_episode_id": copy.deepcopy(raw_candidate.get("matched_episode_id")),
                     "trigger_episode_ids": copy.deepcopy(raw_candidate.get("trigger_episode_ids") or []),
                     "trigger_check_labels": copy.deepcopy(raw_candidate.get("trigger_check_labels") or []),
-                    "queue_commit": commit,
-                    "queue_path": path,
-                    "queue_blob": blob,
+                    "first_discovered_at": copy.deepcopy(raw_candidate.get("first_discovered_at")),
                 })
         else:
             if not frozen_row.get("accepted_empty_candidate_set"):
@@ -331,15 +332,16 @@ def materialize_once(contract: dict) -> tuple[dict, dict]:
             )
 
         parent_identity = copy.deepcopy(contract["parents_by_uid"][uid])
-        # Preserve the frozen identity representation verbatim. The classifier episode
-        # projection is a separate deterministic view and never rewrites parent identity.
         episode_input = {
             "episode_id": episode_id,
             "city_key": city,
             "alert_start": copy.deepcopy(frozen_row.get("start_at")),
             "alert_end": copy.deepcopy(frozen_row.get("end_at")),
         }
-        entry = {
+
+        # Hash the logically expanded materialized input, then persist an exactly
+        # reversible content-addressed representation to stay below repository limits.
+        logical_entry = {
             "alert_episode_uid": uid,
             "canonical_parent_identity": parent_identity,
             "classifier_episode_input": episode_input,
@@ -350,13 +352,21 @@ def materialize_once(contract: dict) -> tuple[dict, dict]:
                 "collection_queue_identity": copy.deepcopy(frozen_row.get("collection_queue_identity")),
                 "followup_72h_checked_at": copy.deepcopy(checked_at),
                 "accepted_empty_candidate_set": bool(frozen_row.get("accepted_empty_candidate_set")),
-                "candidate_provenance": candidate_provenance,
+                "candidate_selection_provenance": selection_provenance,
             },
         }
-        entry_hash = sha256(canonical_bytes(entry))
-        entry["materialized_input_sha256"] = entry_hash
-        episodes.append(entry)
-        per_episode_hashes.append({"alert_episode_uid": uid, "sha256": entry_hash})
+        logical_hash = sha256(canonical_bytes(logical_entry))
+        stored_entry = {
+            "alert_episode_uid": uid,
+            "canonical_parent_identity": parent_identity,
+            "classifier_episode_input": episode_input,
+            "candidate_input_representation": "FROZEN_LIVE_CANDIDATE_INPUT_BUNDLE",
+            "candidate_input_refs": refs,
+            "evidence_provenance": logical_entry["evidence_provenance"],
+            "materialized_input_sha256": logical_hash,
+        }
+        episodes.append(stored_entry)
+        per_episode_hashes.append({"alert_episode_uid": uid, "sha256": logical_hash})
 
     if len(episodes) != EXPECTED_A:
         raise Blocked("MATERIALIZED_OUTPUT_COUNT", f"observed={len(episodes)}")
@@ -370,12 +380,25 @@ def materialize_once(contract: dict) -> tuple[dict, dict]:
     if unexpected:
         raise Blocked("UNEXPECTED_OUTPUT_IDENTITIES", unexpected[0])
 
+    candidate_store_rows = [
+        {"sha256": key, "candidate_input": candidate_store[key]}
+        for key in sorted(candidate_store)
+    ]
     corpus = {
-        "schema_version": 1,
+        "schema_version": 2,
         "kind": "attack_event_execution_unit_a_materialized_input_corpus",
         "methodology_version": METHODOLOGY,
         "normalization_version": NORMALIZATION,
         "candidate_input_representation": "FROZEN_LIVE_CANDIDATE_INPUT_BUNDLE",
+        "artifact_serialization": {
+            "format": "content-addressed-candidate-dedup-v1",
+            "reconstruction_rule": (
+                "For each episode, replace candidate_input_refs in order with the "
+                "candidate_input whose sha256 matches each ref. No semantic value is "
+                "added, removed, reordered, normalized, or inferred."
+            ),
+        },
+        "candidate_input_store": candidate_store_rows,
         "episodes": episodes,
     }
     corpus_bytes = canonical_bytes(corpus)
@@ -386,7 +409,8 @@ def materialize_once(contract: dict) -> tuple[dict, dict]:
     )
     stats = {
         "episode_count": len(episodes),
-        "candidate_input_count": sum(len(x["candidate_inputs"]) for x in episodes),
+        "candidate_input_count": sum(len(x["candidate_input_refs"]) for x in episodes),
+        "unique_candidate_input_count": len(candidate_store_rows),
         "accepted_empty_candidate_set_count": sum(
             bool((x.get("evidence_provenance") or {}).get("accepted_empty_candidate_set"))
             for x in episodes
@@ -483,7 +507,7 @@ def main() -> int:
             "unit_b_overlap": len(set(output_uids) & set(contract["b_uids"])),
             "unit_c_overlap": len(set(output_uids) & set(contract["c_uids"])),
             "ordered_canonical_identity_set_sha256": stats_a["ordered_identity_set_sha256"],
-            "candidate_input_count": stats_a["candidate_input_count"],
+            "candidate_input_count": stats_a["candidate_input_count"],\n            "unique_candidate_input_count": stats_a["unique_candidate_input_count"],
             "accepted_empty_candidate_set_count": stats_a["accepted_empty_candidate_set_count"],
             "authoritative_repository_inputs_consumed": {
                 "recovery_artifact": contract["recovery_identity"],
@@ -491,7 +515,7 @@ def main() -> int:
                 "queue_snapshots": stats_a["queue_inputs"],
             },
             "evidence_provenance_preservation": {
-                "candidate_projection": "copy only persisted frozen candidate input fields defined by the accepted recovery artifact",
+                "candidate_projection": "copy only persisted frozen candidate input fields defined by the accepted recovery artifact",\n                "artifact_serialization": "content-addressed deduplication only; exact ordered candidate bundles are reconstructable by SHA-256 refs",
                 "queue_snapshot_identity_preserved_per_episode": True,
                 "candidate_multi_value_trigger_provenance_preserved": True,
                 "source_type_inference": "NONE",
@@ -545,7 +569,7 @@ def main() -> int:
         "db_writes": 0,
         "production_mutation": "NO",
         "queue_snapshots_consumed": len(stats_a["queue_inputs"]),
-        "candidate_inputs": stats_a["candidate_input_count"],
+        "candidate_inputs": stats_a["candidate_input_count"],\n        "unique_candidate_inputs": stats_a["unique_candidate_input_count"],
     }
     print(json.dumps(summary, ensure_ascii=False, sort_keys=True))
     return 0
