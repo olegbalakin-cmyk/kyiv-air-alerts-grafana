@@ -1,0 +1,211 @@
+name: Kyiv post-cutoff historical backfill shadow
+
+on:
+  push:
+    branches:
+      - kyiv-postcutoff-historical-backfill-shadow-2026-10-07
+    paths:
+      - ".github/workflows/kyiv-postcutoff-historical-backfill-shadow.yml"
+      - ".github/proof/kyiv_postcutoff_historical_backfill_shadow.py"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  actions: read
+
+concurrency:
+  group: kyiv-postcutoff-historical-backfill-shadow-2026-10-07
+  cancel-in-progress: false
+
+jobs:
+  shadow-backfill:
+    runs-on: ubuntu-latest
+    timeout-minutes: 330
+    env:
+      AUTHORITATIVE_CLASSIFIER_COMMIT: "71cb6f6fbe856cc7b96759310fe9cc9c71cc0453"
+      AUTHORITATIVE_CLASSIFIER_BLOB: "778469b74c2aa807d851cf2c2ee35cf4aa785589"
+      SNAPSHOT_COMMIT: "efefa399e69eadd3d7fc8393ac1553cfde35f138"
+      SNAPSHOT_PATH: "research/attack_event_23city_persistence_snapshot_v2_2026-10-04.json"
+      OUTPUT_PATH: "research/kyiv_postcutoff_historical_backfill_shadow_2026-10-07.json"
+
+    steps:
+      - name: Check out isolated shadow branch
+        uses: actions/checkout@v4
+        with:
+          ref: kyiv-postcutoff-historical-backfill-shadow-2026-10-07
+          fetch-depth: 0
+
+      - name: Assert authoritative code identity and no database environment
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse "$AUTHORITATIVE_CLASSIFIER_COMMIT:kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py")" = "$AUTHORITATIVE_CLASSIFIER_BLOB"
+          test "$(git rev-parse "HEAD:kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py")" = "$AUTHORITATIVE_CLASSIFIER_BLOB"
+          for key in DATABASE_URL NEON_DATABASE_URL NEON_URL PGHOST PGPORT PGDATABASE PGUSER PGPASSWORD; do
+            test -z "${!key-}" || { echo "Database environment unexpectedly present: $key"; exit 1; }
+          done
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p=Path("kyiv-air-alerts-grafana/data/alerts_combined.json")
+          rows=json.loads(p.read_text(encoding="utf-8"))
+          assert isinstance(rows,list) and len(rows)==2456, len(rows)
+          print("kyiv_alert_rows=2456")
+          PY
+
+      - name: Materialize frozen 23-city snapshot runner-side
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch --no-tags origin "$SNAPSHOT_COMMIT" --depth=1
+          mkdir -p /tmp/kyiv-backfill
+          git show "$SNAPSHOT_COMMIT:$SNAPSHOT_PATH" > /tmp/kyiv-backfill/snapshot.json
+          test -s /tmp/kyiv-backfill/snapshot.json
+          python - <<'PY'
+          import json
+          p="/tmp/kyiv-backfill/snapshot.json"
+          with open(p,encoding="utf-8") as f:
+              obj=json.load(f)
+          print("snapshot_json_valid=true")
+          print("snapshot_top_level_type="+type(obj).__name__)
+          PY
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: kyiv-air-alerts-grafana/requirements.txt
+
+      - name: Install existing project dependencies
+        working-directory: kyiv-air-alerts-grafana
+        run: python -m pip install -r requirements.txt
+
+      - name: Self-test authoritative classifier
+        working-directory: kyiv-air-alerts-grafana
+        run: python scripts/monitor_explosion_candidates.py --self-test
+
+      - name: Capture protected pre-run hashes
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import hashlib, json
+          from pathlib import Path
+          paths=[
+            Path("kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py"),
+            Path("kyiv-air-alerts-grafana/scripts/historical_attack_event_sources.py"),
+            Path("kyiv-air-alerts-grafana/data/alerts_combined.json"),
+            Path("kyiv-air-alerts-grafana/data/explosion_candidate_monitor_state.json"),
+            Path("kyiv-air-alerts-grafana/data/explosion_review_queue.json"),
+            Path("research/historical_attack_event_source_registry.json"),
+          ]
+          def h(p):
+              x=hashlib.sha256()
+              with p.open("rb") as f:
+                  for c in iter(lambda:f.read(1024*1024),b""): x.update(c)
+              return x.hexdigest()
+          out={str(p):h(p) for p in paths if p.exists()}
+          Path("/tmp/kyiv-backfill/protected.before.json").write_text(json.dumps(out,indent=2,sort_keys=True)+"\n",encoding="utf-8")
+          PY
+
+      - name: Run calibration and full 982-alert historical shadow backfill
+        id: backfill
+        shell: bash
+        run: |
+          set +e
+          python .github/proof/kyiv_postcutoff_historical_backfill_shadow.py \
+            --snapshot /tmp/kyiv-backfill/snapshot.json \
+            --output "$OUTPUT_PATH" \
+            > /tmp/kyiv-backfill/run.stdout.txt 2> /tmp/kyiv-backfill/run.stderr.txt
+          rc=$?
+          set -e
+          echo "exit_code=$rc" >> "$GITHUB_OUTPUT"
+          test -s "$OUTPUT_PATH"
+          python - "$OUTPUT_PATH" <<'PY'
+          import json, sys
+          obj=json.load(open(sys.argv[1],encoding="utf-8"))
+          print(json.dumps({
+            "verdict": obj.get("verdict"),
+            "status": obj.get("status"),
+            "calibration": obj.get("calibration"),
+            "aggregate_summary": obj.get("aggregate_summary"),
+            "mutation_confirmation": obj.get("mutation_confirmation"),
+          }, ensure_ascii=False, indent=2))
+          PY
+
+      - name: Prove zero protected-state mutation
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import hashlib, json
+          from pathlib import Path
+          before=json.loads(Path("/tmp/kyiv-backfill/protected.before.json").read_text(encoding="utf-8"))
+          def h(p):
+              x=hashlib.sha256()
+              with p.open("rb") as f:
+                  for c in iter(lambda:f.read(1024*1024),b""): x.update(c)
+              return x.hexdigest()
+          after={k:h(Path(k)) for k in before}
+          changed=sorted(k for k in before if before[k]!=after[k])
+          print(json.dumps({"changed_protected_paths":changed},indent=2))
+          if changed:
+              raise SystemExit(1)
+          PY
+          test -z "$(git status --porcelain=v1 -- kyiv-air-alerts-grafana)" || {
+            echo "Production/application tree changed unexpectedly"
+            git status --short -- kyiv-air-alerts-grafana
+            exit 1
+          }
+
+      - name: Build small aggregate summary
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - "$OUTPUT_PATH" /tmp/kyiv-backfill/summary.json <<'PY'
+          import json, sys
+          src,dst=sys.argv[1:]
+          obj=json.load(open(src,encoding="utf-8"))
+          out={
+            "verdict":obj.get("verdict"),
+            "status":obj.get("status"),
+            "scope":obj.get("scope"),
+            "classifier":obj.get("classifier"),
+            "calibration":obj.get("calibration"),
+            "aggregate_summary":obj.get("aggregate_summary"),
+            "mutation_confirmation":obj.get("mutation_confirmation"),
+          }
+          json.dump(out,open(dst,"w",encoding="utf-8"),ensure_ascii=False,indent=2)
+          open(dst,"a",encoding="utf-8").write("\n")
+          print(json.dumps(out,ensure_ascii=False,indent=2))
+          PY
+
+      - name: Upload shadow result artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: kyiv-postcutoff-historical-backfill-shadow-2026-10-07
+          path: |
+            research/kyiv_postcutoff_historical_backfill_shadow_2026-10-07.json
+            /tmp/kyiv-backfill/summary.json
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Commit durable research artifact to isolated audit branch
+        if: steps.backfill.outputs.exit_code == '0'
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "$OUTPUT_PATH"
+          git diff --cached --quiet && exit 0
+          git commit -m "Freeze Kyiv post-cutoff historical backfill shadow result"
+          git push origin HEAD:kyiv-postcutoff-historical-backfill-shadow-2026-10-07
+
+      - name: Enforce successful complete result
+        shell: bash
+        run: |
+          set -euo pipefail
+          rc='${{ steps.backfill.outputs.exit_code }}'
+          test "$rc" = "0"
