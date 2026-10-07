@@ -1,0 +1,72 @@
+{
+  "proof": "SHARED 23-CITY LIVE PRODUCTION PERSISTENCE",
+  "schema_version": 1,
+  "production_canary_cutoff_utc": "2026-10-07T14:36:24Z",
+  "deployed_shared_path": {
+    "cities_covered": 23,
+    "authoritative_classifier_blob": "778469b74c2aa807d851cf2c2ee35cf4aa785589",
+    "canonical_persistence_blob": "0118ca9e5f1308173e657257f1b49fe91cc19fe1"
+  },
+  "live_canary_episodes_processed": 0,
+  "canonical_classification_rows_written": 0,
+  "strict_written": 0,
+  "sensitivity_written": 0,
+  "needs_review_written": 0,
+  "no_confirmed_event_written": 0,
+  "positive_attack_event_rows_written": 0,
+  "evidence_linkages_written": 0,
+  "duplicate_classification_rows": 0,
+  "duplicate_attack_event_rows": 0,
+  "idempotent_rerun_proven": false,
+  "classifier_to_neon_read_back_exact_matches": 0,
+  "classifier_to_neon_read_back_total": 0,
+  "unauthorized_historical_writes": 0,
+  "historical_backfill_jobs_started": 0,
+  "blocked_first_eligible_live_episode": {
+    "city": "kharkiv",
+    "episode_id": "3f3c88cb48e0e8c3b7b9f720",
+    "canonical_alert_episode_parent_matches": 0,
+    "persistence_error": "live classification requires exactly one canonical alert_episodes parent: kharkiv:3f3c88cb48e0e8c3b7b9f720 matches=0"
+  },
+  "neon_read_back": {
+    "workflow_run_id": 37642999827,
+    "post_cutoff_classification_rows": 0,
+    "canary_origin_rows": 0,
+    "unauthorized_post_cutoff_rows": 0,
+    "blocked_parent_matches": 0,
+    "duplicate_classification_rows": 0,
+    "duplicate_attack_event_rows": 0
+  },
+  "canary_execution": {
+    "production_monitor_run_id": 37639333609,
+    "result": "FAILED_BEFORE_CANONICAL_WRITE",
+    "failure_stage": "canonical parent binding",
+    "pre_fix_cancelled_run_id": 37638975736,
+    "pre_fix_cancelled_before_persistence_completion": true,
+    "max_authorized_live_episodes": 10
+  },
+  "historical_safety": {
+    "historical_or_missing_classification_sweep_used": false,
+    "historical_discovery_or_backfill_started": false,
+    "read_only_historical_qa_preflight_workflows_auto_triggered_by_wip_pushes": true,
+    "those_qa_preflight_workflows_performed_production_backfill": false
+  },
+  "mutation_confirmation": {
+    "production_write_path_enabled_during_bounded_canary": true,
+    "canonical_classification_rows_committed": 0,
+    "canonical_attack_event_rows_committed": 0,
+    "evidence_linkages_committed": 0,
+    "unauthorized_historical_writes": 0,
+    "production_write_wiring_after_canary": "DISABLED_FAIL_CLOSED",
+    "classifier_semantics_modified": false,
+    "parser_semantics_modified": false,
+    "temporal_semantics_modified": false,
+    "alert_grouping_modified": false,
+    "discovery_strategy_modified": false,
+    "source_configuration_modified": false,
+    "city_ingestion_mappings_modified": false,
+    "persistence_schema_modified": false
+  },
+  "remaining_live_blocker": "CANONICAL alert_episodes parent materialization is not present for newly observed live episodes before classification persistence; first proven miss: kharkiv:3f3c88cb48e0e8c3b7b9f720",
+  "verdict": "SHARED 23-CITY LIVE PRODUCTION PERSISTENCE = BLOCKED"
+}
