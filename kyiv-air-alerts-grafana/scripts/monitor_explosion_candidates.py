@@ -4450,9 +4450,9 @@ def self_test() -> None:
 
 
 def self_test() -> None:
-    """Validate the exact authoritative classifier plus preserved shared live adapters."""
-    _authoritative_classifier.self_test()
+    """Validate pinned classifier wiring plus preserved shared live adapters."""
     assert len(CITY_CONFIG) >= 23
+    assert authoritative_classifier_runtime_identity()["blob"] == AUTHORITATIVE_CLASSIFIER_BLOB
     if "kyiv" in CITY_CONFIG:
         assert load_kyiv_alert_episodes(KYIV_ALERTS_FILE)[-1]["alert_source"] == "kyiv_combined_exact_city"
     if "sevastopol" in CITY_CONFIG:
@@ -4468,11 +4468,36 @@ def self_test() -> None:
         assert _authoritative_classifier.city_mentioned(
             "cherkasy", _authoritative_classifier.classification_text(adapted)
         )
-    assert authoritative_classifier_runtime_identity()["blob"] == AUTHORITATIVE_CLASSIFIER_BLOB
+
+    episodes = [{
+        "episode_id": "self-test-episode",
+        "city_key": "kyiv",
+        "city": CITY_CONFIG["kyiv"]["label"],
+        "alert_start": "2026-10-07T00:00:00Z",
+        "alert_end": "2026-10-07T01:00:00Z",
+    }]
+    row = {
+        "city_key": "kyiv",
+        "title": "Київ",
+        "snippet": "deterministic neutral classifier wiring probe",
+        "published_at": "2026-10-07T00:30:00Z",
+        "source": "self-test",
+        "publisher": "self-test",
+    }
+    matching = match_candidate_to_episodes(row, episodes)
+    before = authoritative_classifier_runtime_identity()["invocations"]
+    wrapped = classify_candidate(row, "kyiv", episodes, matching)
+    after = authoritative_classifier_runtime_identity()["invocations"]
+    direct_matching = _authoritative_classifier.match_candidate_to_episodes(row, episodes)
+    direct = _authoritative_classifier.classify_candidate(
+        row, "kyiv", episodes, direct_matching
+    )
+    assert after == before + 1
+    assert wrapped == direct
     print(
         f"Aligned self-test OK: {len(CITY_CONFIG)} city keys; "
         f"authoritative classifier {AUTHORITATIVE_CLASSIFIER_BLOB}; "
-        "accepted ingestion adapters preserved"
+        "shared wrapper equals direct authoritative execution"
     )
 
 
