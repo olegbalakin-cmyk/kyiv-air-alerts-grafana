@@ -320,22 +320,36 @@ def ensure_canonical_parent(
     }
 
 
+def live_persistence_eligible(
+    episode: dict[str, Any],
+    *,
+    cutoff: datetime,
+) -> bool:
+    """Restart-safe live admission based only on the closed alert lifecycle."""
+    cutoff_utc = _as_utc(cutoff)
+    end_raw = episode.get("alert_end")
+    if not end_raw:
+        return False
+    try:
+        end_at = _as_utc(end_raw)
+    except (TypeError, ValueError):
+        return False
+    return end_at >= cutoff_utc
+
+
 def select_post_cutoff_live_episodes(
     state: dict[str, Any],
     *,
     cutoff: datetime,
     max_episodes: int | None,
 ) -> tuple[list[dict[str, Any]], int]:
-    rows: list[tuple[datetime, str, str, dict[str, Any]]] = []
+    cutoff_utc = _as_utc(cutoff)
+    rows: list[tuple[datetime, datetime, str, str, dict[str, Any]]] = []
     seen: set[tuple[str, str]] = set()
     for city_key, cstate in (state.get("cities") or {}).items():
         for episode in cstate.get("episodes") or []:
             episode_id = str(episode.get("episode_id") or "")
-            first_seen_raw = episode.get("live_first_seen_at")
-            if not episode_id or not first_seen_raw:
-                continue
-            first_seen = _as_utc(first_seen_raw)
-            if first_seen < cutoff:
+            if not episode_id or not live_persistence_eligible(episode, cutoff=cutoff_utc):
                 continue
             key = (str(city_key), episode_id)
             if key in seen:
@@ -343,12 +357,119 @@ def select_post_cutoff_live_episodes(
             seen.add(key)
             row = dict(episode)
             row["city_key"] = str(city_key)
-            rows.append((first_seen, str(city_key), episode_id, row))
-    rows.sort(key=lambda item: (item[0], item[1], item[2]))
+            end_at = _as_utc(row.get("alert_end"))
+            start_at = _as_utc(row.get("alert_start"))
+            rows.append((end_at, start_at, str(city_key), episode_id, row))
+    rows.sort(key=lambda item: (item[0], item[1], item[2], item[3]))
     total = len(rows)
     if max_episodes is not None:
         rows = rows[:max_episodes]
-    return [row[3] for row in rows], total
+    return [row[4] for row in rows], total
+
+
+def durable_eligibility_restart_proof() -> dict[str, Any]:
+    cutoff = _as_utc("2026-10-07T16:53:19Z")
+    fixtures = [
+        {
+            "label": "pre_cutoff_first_observed_after_restart",
+            "city_key": "kharkiv",
+            "episode_id": "3f3c88cb48e0e8c3b7b9f720",
+            "alert_start": "2026-10-07T13:54:55.814104Z",
+            "alert_end": "2026-10-07T14:25:28.934445Z",
+            "live_first_seen_at": "2026-10-07T17:31:30Z",
+            "expected": False,
+            "fixture_kind": "existing_episode",
+        },
+        {
+            "label": "pre_cutoff_reobserved_after_later_restart",
+            "city_key": "sumy",
+            "episode_id": "465a6988798a5dc76eafccee",
+            "alert_start": "2026-10-07T15:38:02.503Z",
+            "alert_end": "2026-10-07T16:22:25.311Z",
+            "live_first_seen_at": "2026-10-07T17:59:07Z",
+            "expected": False,
+            "fixture_kind": "existing_episode",
+        },
+        {
+            "label": "exact_boundary_synthetic",
+            "city_key": "dnipro",
+            "episode_id": "000000000000000000000002",
+            "alert_start": "2026-10-07T16:40:00Z",
+            "alert_end": "2026-10-07T16:53:19Z",
+            "live_first_seen_at": "2026-10-07T18:00:00Z",
+            "expected": True,
+            "fixture_kind": "synthetic_boundary_only",
+        },
+        {
+            "label": "crosses_boundary_known_before_restart",
+            "city_key": "poltava",
+            "episode_id": "5f26ee4d54e5a58586c090de",
+            "alert_start": "2026-10-07T16:20:41.362Z",
+            "alert_end": "2026-10-07T16:59:52.223Z",
+            "live_first_seen_at": "2026-10-07T17:31:32Z",
+            "expected": True,
+            "fixture_kind": "existing_episode",
+        },
+        {
+            "label": "post_cutoff_first_observed_after_restart",
+            "city_key": "dnipro",
+            "episode_id": "b37390ebcac53290c602449f",
+            "alert_start": "2026-10-07T17:04:13.760Z",
+            "alert_end": "2026-10-07T17:04:58.062Z",
+            "live_first_seen_at": "2026-10-07T17:31:30Z",
+            "expected": True,
+            "fixture_kind": "existing_episode",
+        },
+    ]
+
+    before = {
+        row["episode_id"]: live_persistence_eligible(row, cutoff=cutoff)
+        for row in fixtures
+    }
+    recreated = []
+    for row in fixtures:
+        copy = dict(row)
+        copy.pop("live_first_seen_at", None)
+        copy["live_first_seen_at"] = "2099-01-01T00:00:00Z"
+        recreated.append(copy)
+    after = {
+        row["episode_id"]: live_persistence_eligible(row, cutoff=cutoff)
+        for row in recreated
+    }
+    for row in fixtures:
+        episode_id = row["episode_id"]
+        assert before[episode_id] is row["expected"]
+        assert after[episode_id] is row["expected"]
+    changes = sum(before[key] != after[key] for key in before)
+    false_pre_cutoff = sum(
+        before[row["episode_id"]]
+        for row in fixtures
+        if _as_utc(row["alert_end"]) < cutoff
+    )
+    assert changes == 0
+    assert false_pre_cutoff == 0
+    return {
+        "predicate": "alert_end >= LIVE_PERSISTENCE_ACTIVATION_CUTOFF",
+        "cutoff_utc": "2026-10-07T16:53:19Z",
+        "inclusive": True,
+        "pre_cutoff_false_eligibility": false_pre_cutoff,
+        "fixtures": [
+            {
+                "label": row["label"],
+                "fixture_kind": row["fixture_kind"],
+                "city": row["city_key"],
+                "episode_id": row["episode_id"],
+                "episode_start": row["alert_start"],
+                "episode_end": row["alert_end"],
+                "runtime_first_seen": row.get("live_first_seen_at"),
+                "expected_eligibility": row["expected"],
+                "actual_eligibility": before[row["episode_id"]],
+                "eligibility_after_recreated_state": after[row["episode_id"]],
+            }
+            for row in fixtures
+        ],
+        "eligibility_changes_after_restart": changes,
+    }
 
 
 def preclassification_parent_gate(
@@ -386,22 +507,40 @@ def preclassification_parent_gate(
     episodes, total = select_post_cutoff_live_episodes(
         state, cutoff=cutoff, max_episodes=None
     )
-    canary_selected = total if max_episodes is None else min(total, max_episodes)
+    result["eligibility_predicate"] = "alert_end >= LIVE_PERSISTENCE_ACTIVATION_CUTOFF"
+    result["eligibility_boundary_inclusive"] = True
     result["eligible_post_cutoff_live_episodes"] = total
-    result["selected_live_episodes"] = canary_selected
-    result["deferred_by_canary_limit"] = max(0, total - canary_selected)
-    result["parents_synced_live_episodes"] = total
+    result["selected_live_episodes"] = 0
+    result["deferred_by_canary_limit"] = 0
+    result["parents_synced_live_episodes"] = 0
+    result["separate_identity_blockers"] = []
 
     own = connection is None
     conn = connection or psycopg.connect(str(dsn), autocommit=False)
     try:
-        for index, episode in enumerate(episodes):
-            record = ensure_canonical_parent(conn, episode)
-            if max_episodes is None or index < max_episodes:
-                result["records"].append(record)
+        for episode in episodes:
+            if max_episodes is not None and result["selected_live_episodes"] >= max_episodes:
+                break
+            result["selected_live_episodes"] += 1
+            try:
+                record = ensure_canonical_parent(conn, episode)
+            except SeparateCanonicalIdentityBlocker as exc:
+                result["separate_identity_blockers"].append({
+                    "city": str(episode.get("city_key") or ""),
+                    "episode_id": str(episode.get("episode_id") or ""),
+                    "code": exc.code,
+                    "action": "FAIL_CLOSED_IDENTITY_NOT_REPAIRED",
+                })
+                continue
+            result["records"].append(record)
             result["parents_ready"] += 1
             result["parents_newly_inserted"] += int(record["parent_newly_inserted"])
             result["parents_already_present"] += int(record["parent_already_present"])
+        result["parents_synced_live_episodes"] = result["parents_ready"]
+        result["deferred_by_canary_limit"] = max(
+            0,
+            total - result["selected_live_episodes"],
+        )
         return result
     finally:
         if own:
