@@ -146,7 +146,7 @@ def strip_alignment_block(src: str) -> str:
     end = src.find("\ndef apply_episode_composition(\n", start)
     if start < 0 or end < 0:
         raise Blocked("alignment block markers missing")
-    return src[:start] + src[end+1:]
+    return src[:start].rstrip("\\n") + "\\n\\n" + src[end+1:].lstrip("\\n")
 
 def verify_code_identity(code_commit: str):
     repaired_blob = git("rev-parse", f"{code_commit}:{LIVE_PATH}")
