@@ -402,6 +402,47 @@ function periodRows(city, period) {
   return city?.[period] || [];
 }
 
+function resetCityDisplayRange() {
+  const key = $("citySelect")?.value;
+  const period = $("cityPeriod")?.value;
+  const city = state.data.cities?.[key];
+  const rows = periodRows(city, period);
+  const range = syncDateRange(
+    "cityDateFrom",
+    "cityDateTo",
+    rows.map(row => rowTime(row, period))
+  );
+  if (range.min && range.max) {
+    setDateRangeValues("cityDateFrom", "cityDateTo", range.min, range.max);
+  }
+}
+
+function commonPeriodTimes(keys, period) {
+  const maps = keys.map(key => {
+    const m = new Map();
+    for (const row of periodRows(state.data.cities[key], period)) {
+      m.set(rowTime(row, period), row);
+    }
+    return m;
+  });
+  if (!maps.length) return [];
+  let shared = new Set(maps[0].keys());
+  for (const map of maps.slice(1)) {
+    shared = new Set([...shared].filter(value => map.has(value)));
+  }
+  return [...shared].sort();
+}
+
+function resetComparisonDisplayRange() {
+  const keys = [$("compareA")?.value, $("compareB")?.value, $("compareC")?.value].filter(Boolean);
+  const period = $("comparePeriod")?.value;
+  const times = commonPeriodTimes(keys, period);
+  const range = syncDateRange("compareDateFrom", "compareDateTo", times);
+  if (range.min && range.max) {
+    setDateRangeValues("compareDateFrom", "compareDateTo", range.min, range.max);
+  }
+}
+
 function getParams() {
   return new URLSearchParams(location.search);
 }
@@ -415,9 +456,54 @@ function validOptionalParam(name, values, fallback) {
   return values.includes(value) ? value : fallback;
 }
 
+function normalizeTypedDate(value) {
+  const raw = String(value || "").trim();
+  if (!raw) return "";
+
+  let year, month, day;
+  let match = /^(\d{4})[-./](\d{1,2})[-./](\d{1,2})$/.exec(raw);
+  if (match) {
+    year = Number(match[1]);
+    month = Number(match[2]);
+    day = Number(match[3]);
+  } else {
+    match = /^(\d{1,2})[.\/-](\d{1,2})[.\/-](\d{4})$/.exec(raw);
+    if (!match) return null;
+    day = Number(match[1]);
+    month = Number(match[2]);
+    year = Number(match[3]);
+  }
+
+  const d = new Date(Date.UTC(year, month - 1, day));
+  if (
+    d.getUTCFullYear() !== year ||
+    d.getUTCMonth() !== month - 1 ||
+    d.getUTCDate() !== day
+  ) return null;
+
+  return `${String(year).padStart(4,"0")}-${String(month).padStart(2,"0")}-${String(day).padStart(2,"0")}`;
+}
+
+function normalizeDateInputElement(el) {
+  if (!el) return true;
+  const normalized = normalizeTypedDate(el.value);
+  if (normalized === null) {
+    el.classList.add("invalid");
+    el.title = tr(
+      "Введіть дату як YYYY-MM-DD або DD.MM.YYYY",
+      "Enter the date as YYYY-MM-DD or DD.MM.YYYY"
+    );
+    return false;
+  }
+  el.classList.remove("invalid");
+  el.removeAttribute("title");
+  el.value = normalized;
+  return true;
+}
+
 function validDateParam(name) {
-  const value = getParams().get(name) || "";
-  return /^\d{4}-\d{2}-\d{2}$/.test(value) ? value : "";
+  const normalized = normalizeTypedDate(getParams().get(name) || "");
+  return normalized || "";
 }
 
 function setDateInputFromParam(id, name) {
@@ -450,6 +536,9 @@ function syncDateRange(fromId, toId, values) {
   const fromEl = $(fromId);
   const toEl = $(toId);
   if (!fromEl || !toEl) return { from: "", to: "", min: "", max: "" };
+
+  normalizeDateInputElement(fromEl);
+  normalizeDateInputElement(toEl);
 
   const bounds = (values || []).map(dateKeyBounds).filter(Boolean);
   if (!bounds.length) {
@@ -1383,9 +1472,7 @@ function sharedRows(keys, period) {
     return m;
   });
   if (!maps.length) return [];
-  let shared = new Set(maps[0].keys());
-  for (const map of maps.slice(1)) shared = new Set([...shared].filter(x => map.has(x)));
-  const times = [...shared].sort();
+  const times = commonPeriodTimes(keys, period);
   const range = syncDateRange("compareDateFrom", "compareDateTo", times);
   return times
     .filter(t => dateKeyInRange(t, range.from, range.to))
@@ -1860,7 +1947,10 @@ function renderMethodology(){
 
 function bind() {
   $("citySelect").addEventListener("change", renderCity);
-  $("cityPeriod").addEventListener("change", renderCity);
+  $("cityPeriod").addEventListener("change", () => {
+    resetCityDisplayRange();
+    renderCity();
+  });
   document.querySelectorAll(".time-of-day-range-option").forEach(option => {
     option.addEventListener("change", () => {
       if (!selectedTimeOfDayRanges().length) option.checked = true;
@@ -1882,15 +1972,27 @@ function bind() {
     renderCasualties($("citySelect").value);
     updateUrl();
   });
-  for (const id of ["compareA", "compareB", "compareC", "comparePeriod", "compareTimeOfDayRange"]) $(id).addEventListener("change", renderComparison);
+  for (const id of ["compareA", "compareB", "compareC", "compareTimeOfDayRange"]) $(id).addEventListener("change", renderComparison);
+  $("comparePeriod")?.addEventListener("change", () => {
+    resetComparisonDisplayRange();
+    renderComparison();
+  });
 
   const bindRange = (fromId, toId, render, onEdit = null) => {
     for (const id of [fromId, toId]) {
       $(id)?.addEventListener("change", () => {
+        const el = $(id);
+        if (!normalizeDateInputElement(el)) return;
         normalizeDatePair(fromId, toId, id);
         if (onEdit) onEdit();
         render();
         updateUrl();
+      });
+      $(id)?.addEventListener("keydown", event => {
+        if (event.key === "Enter") {
+          event.preventDefault();
+          event.currentTarget.blur();
+        }
       });
     }
   };
