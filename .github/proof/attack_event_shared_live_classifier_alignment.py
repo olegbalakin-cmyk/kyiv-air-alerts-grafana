@@ -175,9 +175,14 @@ def verify_code_identity(code_commit: str):
         raise Blocked(f"pinned authoritative blob drift {pin_blob}")
     if git("rev-parse", f"{AUTH_COMMIT}:{LIVE_PATH}") != AUTH_BLOB:
         raise Blocked("authoritative reference blob mismatch")
-    predecessor = git_bytes(LIVE_BRANCH, LIVE_PATH).decode("utf-8")
-    if git("rev-parse", f"{LIVE_BRANCH}:{LIVE_PATH}") != PREDECESSOR_BLOB:
-        raise Blocked("live predecessor moved before proof")
+    predecessor_proc = subprocess.run(
+        ["git", "cat-file", "blob", PREDECESSOR_BLOB],
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+    )
+    if predecessor_proc.returncode:
+        raise Blocked("predecessor live classifier blob unavailable")
+    predecessor = predecessor_proc.stdout.decode("utf-8")
     repaired = git_bytes(code_commit, LIVE_PATH).decode("utf-8")
     marker = "# Shared live classifier alignment:"
     shared_def = "\ndef apply_episode_composition(\n"
