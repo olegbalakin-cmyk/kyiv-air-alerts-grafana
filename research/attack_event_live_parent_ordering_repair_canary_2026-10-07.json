@@ -1,0 +1,120 @@
+{
+  "proof": "LIVE CANONICAL PARENT ORDERING",
+  "schema_version": 1,
+  "verdict": "LIVE CANONICAL PARENT ORDERING = FAILED",
+  "repair": {
+    "wip_repair_commit": "0abdfe7689e96b79b012129ec43c5c0b63108111",
+    "live_parent_ordering_blob": "b3127bd674a0d58efa178e46a9f01a254f8570c4",
+    "monitor_blob": "19c88e09bfb0ae680fe6cc837b0b7c29364df683",
+    "activation_commit": "d2e6de8023b13b62bed14ca3f78ddcf7a1aa21bf",
+    "fail_closed_disable_commit": "06a0f8654a789cad91ff33faef94d236fb8f5ca8",
+    "classifier_semantics_modified": false,
+    "classification_persistence_semantics_modified": false,
+    "ingestion_semantics_modified": false,
+    "schema_modified": false
+  },
+  "ordering": {
+    "implemented": true,
+    "sequence": [
+      "LIVE_LOGICAL_ALERT_EPISODE",
+      "CANONICAL_ALERT_EPISODES_PARENT_DURABLY_EXISTS",
+      "AUTHORITATIVE_CLASSIFIER",
+      "CANONICAL_ATTACK_EVENT_CLASSIFICATION_PERSISTENCE"
+    ],
+    "existing_parent_contract_reused": true,
+    "canonicalization_version": "alert-canonicalization-v1",
+    "exact_identity_fields": [
+      "city_key",
+      "historical_episode_id",
+      "start_at",
+      "end_at"
+    ],
+    "classification_before_parent_prevented": true,
+    "ingestion_families_covered": [
+      "UkraineAlarm exact-hromada",
+      "UkraineAlarm raion-proxy",
+      "Kyiv exact-city combined",
+      "Sevastopol verified exact-city pairs"
+    ]
+  },
+  "isolated_proof": {
+    "branch": "br-quiet-hat-b5z5hdqu",
+    "synthetic_identity": {
+      "city": "kharkiv",
+      "episode_id": "470c45c0c430cfff3b014300",
+      "start_at": "2099-01-01T00:00:00Z",
+      "end_at": "2099-01-01T00:30:00Z",
+      "parent_uid": "2839191b-3c9b-44aa-bdc8-9cae2049fbd6"
+    },
+    "absent_parent_insert_proven": true,
+    "exact_parent_readback_count": 1,
+    "idempotency_readback": {
+      "legacy_id_rows": 1,
+      "exact_interval_rows": 1,
+      "exact_parent_rows": 1
+    },
+    "parent_idempotency_proven": true,
+    "fail_closed_before_classifier_proven": true
+  },
+  "production_canary": {
+    "cutoff_utc": "2026-10-07T16:53:19Z",
+    "max_classification_episodes": 10,
+    "workflow_runs": [
+      {
+        "run_id": 37656124378,
+        "job_id": 112911408704,
+        "result": "failure",
+        "blocker": "SEPARATE_CANONICAL_IDENTITY_BLOCKER"
+      },
+      {
+        "run_id": 37660054974,
+        "job_id": 112924965534,
+        "result": "failure",
+        "blocker": "SEPARATE_CANONICAL_IDENTITY_BLOCKER"
+      }
+    ],
+    "live_canary_episodes_processed": 0,
+    "canonical_parents_successfully_available_before_classification": 23,
+    "canonical_classifications_written": 0,
+    "classifier_to_neon_exact_matches": 0,
+    "duplicate_alert_episode_rows": 0,
+    "duplicate_classification_rows": 0,
+    "positive_attack_event_evidence_linkages_written": 0,
+    "canary_episodes": [],
+    "separate_identity_blockers": {
+      "unique_count": 1,
+      "occurrence_count": 2,
+      "rows": [
+        {
+          "city": "sumy",
+          "episode_id": "746b99dbcaf8659120b2a3d9",
+          "code": "SEPARATE_CANONICAL_IDENTITY_BLOCKER",
+          "action": "classification_not_written_identity_not_repaired"
+        }
+      ]
+    },
+    "safety_boundary": {
+      "parent_rows_created_after_cutoff": 23,
+      "parents_for_episodes_ended_before_cutoff": 15,
+      "parents_for_episodes_ended_at_or_after_cutoff": 8,
+      "unauthorized_historical_writes": 15,
+      "unauthorized_historical_classification_writes": 0,
+      "historical_backfill_jobs_started": 0,
+      "failed_earlier_kharkiv_parent_was_inserted": true,
+      "failed_earlier_kharkiv_classification_written": false
+    }
+  },
+  "remaining_blocker": "Production canary failed closed on the separate Sumy canonical identity divergence, and live_first_seen_at is not durable across failed monitor runs; this caused 15 pre-cutoff-ended episodes to be re-seen as eligible and receive canonical parent rows. Production persistence was disabled fail-closed; no canonical classifications were written.",
+  "mutation_confirmation": {
+    "production_parent_rows_written": 23,
+    "production_classification_rows_written": 0,
+    "unauthorized_historical_parent_rows_written": 15,
+    "unauthorized_historical_classification_rows_written": 0,
+    "isolated_nonproduction_parent_rows_written": 1,
+    "classifier_semantics_modified": false,
+    "classification_persistence_semantics_modified": false,
+    "historical_backfill_started": false,
+    "sumy_identity_repaired": false,
+    "production_persistence_enabled_after_task": false
+  }
+}
