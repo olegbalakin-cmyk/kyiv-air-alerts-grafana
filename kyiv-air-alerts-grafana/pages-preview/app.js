@@ -2,7 +2,8 @@ const state = {
   data: null,
   features: { attack_events: false },
   charts: {},
-  tableSort: { key: "alerts", direction: "desc" }
+  tableSort: { key: "alerts", direction: "desc" },
+  lastAllCitiesRows: []
 };
 
 const DATA_URL = "data.json";
@@ -232,6 +233,291 @@ function setChart(id, labels, datasets, yTitle, type = "line", extra = {}) {
   });
 }
 
+const CSV_CHART_CONFIG = {
+  cityIntensityChart: { slug: "city-intensity", labelHeader: "period" },
+  cityDurationChart: { slug: "city-duration", labelHeader: "period", defaultUnit: "minutes" },
+  timeOfDayChart: { slug: "time-of-day", labelHeader: "time_of_day", profile: true },
+  casualtyChart: { slug: "deaths", labelHeader: "period" },
+  compareAlertsChart: { slug: "compare-alerts", labelHeader: "period" },
+  compareHoursChart: { slug: "compare-alert-hours", labelHeader: "period", defaultUnit: "hours" },
+  compareDurationChart: { slug: "compare-duration", labelHeader: "period", defaultUnit: "minutes" },
+  compareTimeOfDayChart: { slug: "compare-time-of-day", labelHeader: "time_of_day", profile: true },
+  compareExplosionsChart: { slug: "compare-events", labelHeader: "period", defaultUnit: "percent" },
+  compareCasualtiesChart: { slug: "compare-deaths", labelHeader: "period" }
+};
+
+function csvEscape(value) {
+  if (value === null || value === undefined) return "";
+  const text = String(value);
+  return /[",\r\n]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text;
+}
+
+function numericCsvValue(value) {
+  if (value === null || value === undefined || value === "") return "";
+  if (typeof value === "object" && value !== null) {
+    if (Number.isFinite(Number(value.y))) return Number(value.y);
+    if (Number.isFinite(Number(value.x))) return Number(value.x);
+  }
+  const n = Number(value);
+  return Number.isFinite(n) ? n : "";
+}
+
+function safeFilePart(value) {
+  return String(value || "")
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9._-]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 80);
+}
+
+function csvDownloadIcon() {
+  return '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12"></path><path d="m7 10 5 5 5-5"></path><path d="M5 20h14"></path></svg><span>CSV</span>';
+}
+
+function triggerCsvDownload(filename, headers, rows) {
+  const lines = [
+    headers.map(csvEscape).join(","),
+    ...rows.map(row => row.map(csvEscape).join(","))
+  ];
+  const blob = new Blob(["\ufeff" + lines.join("\r\n") + "\r\n"], {
+    type: "text/csv;charset=utf-8"
+  });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 0);
+}
+
+function datasetExportUnit(chartId, dataset, config) {
+  if (config?.profile) return "profile";
+  if (chartId === "cityIntensityChart" && dataset.yAxisID === "yHours") return "hours";
+  return config?.defaultUnit || "number";
+}
+
+function exportContextParts(chartId, slug) {
+  const parts = ["air-alerts"];
+  if (chartId.startsWith("compare")) {
+    const selected = [$("compareA")?.value, $("compareB")?.value, $("compareC")?.value]
+      .filter(Boolean)
+      .map(safeFilePart);
+    parts.push("compare", ...selected, slug);
+    if (chartId === "compareCasualtiesChart") {
+      parts.push(safeFilePart($("compareCasualtyInterval")?.value || "monthly"));
+      parts.push(safeFilePart($("compareCasualtyYear")?.value || "all"));
+    } else if (chartId === "compareTimeOfDayChart") {
+      parts.push(safeFilePart($("compareTimeOfDayRange")?.value || "30d"));
+    } else {
+      parts.push(safeFilePart($("comparePeriod")?.value || ""));
+      if ($("compareDateFrom")?.value) parts.push(safeFilePart($("compareDateFrom").value));
+      if ($("compareDateTo")?.value) parts.push(safeFilePart($("compareDateTo").value));
+    }
+  } else {
+    parts.push(safeFilePart($("citySelect")?.value || "city"), slug);
+    if (chartId === "casualtyChart") {
+      parts.push(safeFilePart($("casualtyInterval")?.value || "monthly"));
+      parts.push(safeFilePart($("casualtyYear")?.value || "all"));
+    } else if (chartId === "timeOfDayChart") {
+      parts.push(...selectedTimeOfDayRanges().map(safeFilePart));
+    } else {
+      parts.push(safeFilePart($("cityPeriod")?.value || ""));
+      if ($("cityDateFrom")?.value) parts.push(safeFilePart($("cityDateFrom").value));
+      if ($("cityDateTo")?.value) parts.push(safeFilePart($("cityDateTo").value));
+    }
+  }
+  return parts.filter(Boolean).join("_") + ".csv";
+}
+
+function visibleChartDatasets(chart) {
+  return (chart?.data?.datasets || [])
+    .map((dataset, index) => ({ dataset, index }))
+    .filter(({ dataset, index }) => dataset.hidden !== true && chart.isDatasetVisible(index));
+}
+
+function exportChartCsv(chartId) {
+  const chart = state.charts[chartId];
+  const config = CSV_CHART_CONFIG[chartId];
+  if (!chart || !config) return;
+
+  const labels = chart.data?.labels || [];
+  const visible = visibleChartDatasets(chart);
+  if (!labels.length || !visible.length) return;
+
+  const headers = [config.labelHeader || "period"];
+  const columnBuilders = [];
+
+  for (const { dataset } of visible) {
+    const label = dataset.label || "series";
+    const unit = datasetExportUnit(chartId, dataset, config);
+
+    if (unit === "hours") {
+      headers.push(`${label} [hours]`, `${label} [display]`);
+      columnBuilders.push(index => {
+        const raw = numericCsvValue(dataset.data?.[index]);
+        return [raw, raw === "" ? "" : formatDurationHours(raw)];
+      });
+    } else if (unit === "minutes") {
+      headers.push(`${label} [minutes]`, `${label} [display]`);
+      columnBuilders.push(index => {
+        const raw = numericCsvValue(dataset.data?.[index]);
+        return [raw, raw === "" ? "" : formatDurationMinutes(raw)];
+      });
+    } else if (unit === "profile") {
+      headers.push(`${label} [relative_peak_pct]`, `${label} [alert_time_pct]`);
+      columnBuilders.push(index => [
+        numericCsvValue(dataset.data?.[index]),
+        numericCsvValue(dataset.alertShares?.[index])
+      ]);
+    } else if (unit === "percent") {
+      headers.push(`${label} [%]`);
+      columnBuilders.push(index => [numericCsvValue(dataset.data?.[index])]);
+    } else {
+      headers.push(label);
+      columnBuilders.push(index => [numericCsvValue(dataset.data?.[index])]);
+    }
+  }
+
+  const exportRows = visible
+    .map(({ dataset }) => dataset._exportRows)
+    .filter(Array.isArray);
+  const hasPartial = labels.some((_, index) =>
+    exportRows.some(rows => Boolean(rows?.[index]?.is_partial_period))
+  );
+
+  if (hasPartial) headers.push("partial_period", "partial_through");
+
+  const rows = labels.map((label, index) => {
+    const row = [label];
+    for (const build of columnBuilders) row.push(...build(index));
+    if (hasPartial) {
+      const source = exportRows.map(rows => rows?.[index]).find(Boolean);
+      row.push(source?.is_partial_period ? "true" : "false", source?.partial_through || "");
+    }
+    return row;
+  });
+
+  triggerCsvDownload(exportContextParts(chartId, config.slug), headers, rows);
+}
+
+function exportAllCitiesCsv() {
+  const rows = state.lastAllCitiesRows || [];
+  if (!rows.length) return;
+  const headers = [
+    "city",
+    "alerts",
+    "alert_hours",
+    "alert_hours_display",
+    "avg_duration_minutes",
+    "avg_duration_display",
+    "coverage_start",
+    "range_start",
+    "range_end"
+  ];
+  const data = rows.map(row => [
+    row.label,
+    row.alerts ?? "",
+    row.hours ?? "",
+    row.hours == null ? "" : formatDurationHours(row.hours),
+    row.duration ?? "",
+    row.duration == null ? "" : formatDurationMinutes(row.duration),
+    row.coverage || "",
+    row.rangeStart || "",
+    row.rangeEnd || ""
+  ]);
+  const range = safeFilePart($("allCitiesRange")?.value || "current");
+  const from = safeFilePart($("tableDateFrom")?.value || "");
+  const to = safeFilePart($("tableDateTo")?.value || "");
+  triggerCsvDownload(
+    ["air-alerts", "all-cities", range, from, to].filter(Boolean).join("_") + ".csv",
+    headers,
+    data
+  );
+}
+
+function exportKpisCsv() {
+  const key = $("citySelect")?.value;
+  const city = state.data?.cities?.[key];
+  const kpi = city?.kpis?.[0];
+  if (!key || !kpi) return;
+  const headers = [
+    "city",
+    "period_start",
+    "period_end",
+    "alerts_28d",
+    "alert_hours_28d",
+    "alert_hours_display",
+    "avg_duration_minutes_28d",
+    "avg_duration_display",
+    "max_alerts_day",
+    "max_alerts_day_date"
+  ];
+  const rows = [[
+    labelFor(key),
+    kpi.period_start || "",
+    kpi.period_end || "",
+    kpi.alerts_28d ?? "",
+    kpi.alert_hours_28d ?? "",
+    kpi.alert_hours_28d == null ? "" : formatDurationHours(kpi.alert_hours_28d),
+    kpi.avg_alert_duration_min_28d ?? "",
+    kpi.avg_alert_duration_min_28d == null ? "" : formatDurationMinutes(kpi.avg_alert_duration_min_28d),
+    kpi.max_alerts_day ?? "",
+    kpi.max_alerts_day_date || ""
+  ]];
+  triggerCsvDownload(`air-alerts_${safeFilePart(key)}_kpi-28d.csv`, headers, rows);
+}
+
+function makeCsvButton(handler, id = "") {
+  const button = document.createElement("button");
+  button.type = "button";
+  button.className = "csv-export-button";
+  if (id) button.id = id;
+  button.innerHTML = csvDownloadIcon();
+  button.setAttribute("aria-label", tr("Завантажити поточне представлення у CSV","Download current view as CSV"));
+  button.title = tr(
+    "CSV містить поточний зріз і лише видимі серії графіка",
+    "CSV contains the current view and only visible chart series"
+  );
+  button.addEventListener("click", handler);
+  return button;
+}
+
+function setupCsvExports() {
+  for (const chartId of Object.keys(CSV_CHART_CONFIG)) {
+    const canvas = $(chartId);
+    const card = canvas?.closest(".chart-card");
+    const wrap = canvas?.closest(".chart-wrap");
+    if (!canvas || !card || !wrap || card.querySelector(`[data-csv-chart="${chartId}"]`)) continue;
+    const row = document.createElement("div");
+    row.className = "chart-export-row";
+    row.dataset.csvChart = chartId;
+    row.appendChild(makeCsvButton(() => exportChartCsv(chartId)));
+    card.insertBefore(row, wrap);
+  }
+
+  const tablePanel = $("allCitiesTable")?.closest(".table-panel");
+  const tableScroll = tablePanel?.querySelector(".table-scroll");
+  if (tablePanel && tableScroll && !tablePanel.querySelector("[data-csv-table]")) {
+    const row = document.createElement("div");
+    row.className = "table-export-row";
+    row.dataset.csvTable = "all-cities";
+    row.appendChild(makeCsvButton(exportAllCitiesCsv));
+    tablePanel.insertBefore(row, tableScroll);
+  }
+
+  const kpiGrid = document.querySelector(".kpi-grid");
+  if (kpiGrid && !document.querySelector("[data-csv-kpis]")) {
+    const row = document.createElement("div");
+    row.className = "kpi-export-row";
+    row.dataset.csvKpis = "28d";
+    row.appendChild(makeCsvButton(exportKpisCsv));
+    kpiGrid.parentNode.insertBefore(row, kpiGrid);
+  }
+}
+
 function isPartialPeriod(row) {
   return Boolean(row?.is_partial_period);
 }
@@ -295,6 +581,7 @@ function seriesDataset(label, values, color, dashed = false, rows = null) {
     borderWidth: 2,
     borderDash: dashed ? [7, 5] : [],
     segment: rows ? partialSegment(rows, color) : undefined,
+    _exportRows: rows || null,
     tension: 0,
     spanGaps: true
   };
@@ -1105,7 +1392,8 @@ function renderCity() {
       yAxisID: "yHours",
       backgroundColor: rows.map(r => isPartialPeriod(r) ? COLORS[0] + "22" : COLORS[0] + "77"),
       borderColor: rows.map(() => COLORS[0]),
-      borderWidth: rows.map(r => isPartialPeriod(r) ? 0 : 1)
+      borderWidth: rows.map(r => isPartialPeriod(r) ? 0 : 1),
+      _exportRows: rows
     },
     {
       type: "line",
@@ -1119,6 +1407,7 @@ function renderCity() {
       borderWidth: 2,
       borderDash: dashed ? [7, 5] : [],
       segment: partialSegment(rows, COLORS[1]),
+      _exportRows: rows,
       tension: 0,
       spanGaps: true
     }
@@ -1908,6 +2197,7 @@ function renderAllCitiesTable() {
   }
 
   rows.sort(compareTableRows);
+  state.lastAllCitiesRows = rows.map(row => ({ ...row }));
   $("allCitiesTable").innerHTML = rows.map(r => `
     <tr>
       <td><button class="table-city-link" data-city="${r.key}" type="button">${r.label}</button></td>
@@ -2217,6 +2507,7 @@ async function init() {
   renderCity();
   renderComparison();
   renderAllCitiesTable();
+  setupCsvExports();
   updateUrl();
   maybeStartIntroTour();
 }
