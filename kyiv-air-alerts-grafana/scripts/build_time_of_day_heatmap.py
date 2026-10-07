@@ -340,6 +340,68 @@ def analysis_end(dashboard: dict, key: str) -> date:
     return date.fromisoformat(str(value)[:10])
 
 
+def append_current_day_daily28(city_output: dict, alerts: list[Alert], now_local: datetime) -> None:
+    """Preview-only daily view: 27 completed days plus the current partial day."""
+    today = now_local.astimezone(TZ).date()
+    day_start = datetime.combine(today, time.min, tzinfo=TZ).astimezone(UTC)
+    cutoff = now_local.astimezone(UTC)
+    if cutoff <= day_start:
+        return
+
+    active_segments: list[tuple[datetime, datetime]] = []
+    starts_today: list[tuple[datetime, datetime]] = []
+
+    for alert in alerts:
+        a0 = alert.start.astimezone(UTC)
+        a1 = min(alert.end.astimezone(UTC), cutoff)
+        if day_start <= a0 < cutoff and a1 > a0:
+            starts_today.append((a0, a1))
+        start = max(a0, day_start)
+        end = min(a1, cutoff)
+        if end > start:
+            active_segments.append((start, end))
+
+    merged: list[list[datetime]] = []
+    for start, end in sorted(active_segments, key=lambda item: item[0]):
+        if not merged or start > merged[-1][1]:
+            merged.append([start, end])
+        elif end > merged[-1][1]:
+            merged[-1][1] = end
+
+    total_seconds = sum((end - start).total_seconds() for start, end in merged)
+    active_durations_min = [(end - start).total_seconds() / 60.0 for start, end in active_segments]
+    started_durations_min = [(end - start).total_seconds() / 60.0 for start, end in starts_today]
+
+    current_row = {
+        "time": datetime.combine(today, time.min, tzinfo=TZ).isoformat(),
+        "date": today.isoformat(),
+        "alerts_started": len(starts_today),
+        "active_alerts": len(active_segments),
+        "total_alert_duration_minutes": round(total_seconds / 60.0, 3),
+        "total_alert_duration_hours": round(total_seconds / 3600.0, 3),
+        "avg_alert_duration_minutes": (
+            round(sum(started_durations_min) / len(started_durations_min), 3)
+            if started_durations_min else None
+        ),
+        "avg_active_alert_duration_minutes": (
+            round(sum(active_durations_min) / len(active_durations_min), 3)
+            if active_durations_min else None
+        ),
+        "is_partial_period": True,
+        "partial_through": now_local.astimezone(TZ).isoformat(),
+    }
+
+    completed = [
+        row for row in city_output.get("daily28", [])
+        if str(row.get("date") or row.get("time") or "")[:10] < today.isoformat()
+    ]
+    city_output["daily28"] = completed[-27:] + [current_row]
+    meta = city_output.setdefault("meta", {})
+    meta["daily28_preview_mode"] = "27_completed_days_plus_current_partial_day"
+    meta["daily28_partial_through"] = current_row["partial_through"]
+
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--dashboard", type=Path, required=True)
@@ -393,6 +455,8 @@ def main() -> None:
             f"No shared all-city window: {common_start_day} > {common_end_day}"
         )
 
+    build_now = datetime.now(TZ)
+
     cities = {}
     table_cities = {}
     table_specs = {
@@ -419,6 +483,7 @@ def main() -> None:
         }
 
         city_output = dashboard.get("cities", {}).get(key, {})
+        append_current_day_daily28(city_output, alerts, build_now)
 
         # Preview-only current incomplete calendar month, through the latest
         # completed day. Historical completed months stay unchanged.

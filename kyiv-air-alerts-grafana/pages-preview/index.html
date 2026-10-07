@@ -16,12 +16,19 @@
   <meta property="og:title" content="Статистика повітряних тривог у містах України">
   <meta property="og:description" content="Графіки частоти й тривалості повітряних тривог, години під тривогою, порівняння обласних центрів і дані про загиблих від повітряних атак.">
   <meta property="og:url" content="https://ukraine-air-alerts.netlify.app/">
+  <meta property="og:image" content="https://olegbalakin-cmyk.github.io/kyiv-air-alerts-grafana/share-card.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:type" content="image/png">
+  <meta property="og:image:alt" content="Стилізований графік статистики повітряних тривог">
 
-  <meta name="twitter:card" content="summary">
+  <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="Статистика повітряних тривог у містах України">
   <meta name="twitter:description" content="Графіки частоти й тривалості повітряних тривог, години під тривогою, порівняння міст і дані про загиблих у Києві.">
+  <meta name="twitter:image" content="https://olegbalakin-cmyk.github.io/kyiv-air-alerts-grafana/share-card.png">
+  <meta name="twitter:image:alt" content="Стилізований графік статистики повітряних тривог">
 
-  <link rel="stylesheet" href="styles.css?v=20261007-3">
+  <link rel="stylesheet" href="styles.css?v=20261007-5">
 </head>
 <body>
   <header class="page-header">
@@ -194,17 +201,16 @@
           <p>Пізні смерті від поранень віднесені до місяця самої атаки. Наземні бої та артилерійські обстріли не включені.</p>
         </div>
         <div class="section-range-controls">
+          <div class="control casualty-interval-control">
+            <label for="casualtyInterval">Інтервал</label>
+            <select id="casualtyInterval" aria-label="Інтервал для графіка загиблих">
+              <option value="monthly">Місяці</option>
+              <option value="yearly">Роки</option>
+            </select>
+          </div>
           <div class="control casualty-year-control">
             <label for="casualtyYear">Рік</label>
             <select id="casualtyYear" aria-label="Рік для графіка загиблих"></select>
-          </div>
-          <div class="control date-control">
-            <label for="casualtyDateFrom">Від</label>
-            <input id="casualtyDateFrom" type="text" class="date-entry" inputmode="numeric" autocomplete="off" placeholder="YYYY-MM-DD / DD.MM.YYYY">
-          </div>
-          <div class="control date-control">
-            <label for="casualtyDateTo">До</label>
-            <input id="casualtyDateTo" type="text" class="date-entry" inputmode="numeric" autocomplete="off" placeholder="YYYY-MM-DD / DD.MM.YYYY">
           </div>
         </div>
       </div>
@@ -467,6 +473,6 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
-  <script src="app.js?v=20261007-4"></script>
+  <script src="app.js?v=20261007-5"></script>
 </body>
 </html>
