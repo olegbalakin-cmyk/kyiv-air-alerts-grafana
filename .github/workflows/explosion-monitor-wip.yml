@@ -81,6 +81,9 @@ jobs:
         working-directory: kyiv-air-alerts-grafana
         env:
           UKRAINEALARM_API_TOKEN: ${{ secrets.UKRAINEALARM_API_TOKEN }}
+          ATTACK_EVENT_DATABASE_URL: ${{ secrets.PHASE1_PROD_SHADOW_DATABASE_URL }}
+          PRODUCTION_PERSISTENCE_CANARY_CUTOFF: "2026-10-07T14:36:24Z"
+          ATTACK_EVENT_PERSISTENCE_CANARY_MAX_EPISODES: "10"
         run: |
           python scripts/monitor_explosion_candidates.py \
             --kyiv-alerts-file /tmp/prod-kyiv-alerts.json \
@@ -139,6 +142,13 @@ jobs:
           }, ensure_ascii=False, indent=2))
           PY
 
+      - name: Verify bounded production persistence canary
+        working-directory: kyiv-air-alerts-grafana
+        env:
+          ATTACK_EVENT_DATABASE_URL: ${{ secrets.PHASE1_PROD_SHADOW_DATABASE_URL }}
+          PRODUCTION_PERSISTENCE_CANARY_CUTOFF: "2026-10-07T14:36:24Z"
+        run: python scripts/verify_attack_event_production_canary.py
+
       - name: Commit WIP monitor state and metric updates
         run: |
           git config user.name "github-actions[bot]"
@@ -150,7 +160,8 @@ jobs:
             kyiv-air-alerts-grafana/data/explosion_review_queue.json \
             kyiv-air-alerts-grafana/data/explosion_candidate_monitor_last_run.json \
             kyiv-air-alerts-grafana/data/explosions_test.json \
-            kyiv-air-alerts-grafana/data/dashboard_data.json
+            kyiv-air-alerts-grafana/data/dashboard_data.json \
+            research/attack_event_shared_live_production_persistence_canary_2026-10-07.json
 
           if git diff --cached --quiet; then
             echo "No explosion-monitor changes"
