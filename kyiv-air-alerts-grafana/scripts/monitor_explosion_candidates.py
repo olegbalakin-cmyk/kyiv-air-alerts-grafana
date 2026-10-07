@@ -4606,16 +4606,40 @@ def main() -> None:
     ).strip()
     canary_cutoff = parse_dt(canary_cutoff_raw) if canary_cutoff_raw else None
     persistence_due = due
+    persistence_canary_max_raw = str(
+        os.environ.get("ATTACK_EVENT_PERSISTENCE_CANARY_MAX_EPISODES") or ""
+    ).strip()
+    persistence_canary_max = (
+        int(persistence_canary_max_raw) if persistence_canary_max_raw else None
+    )
+    if persistence_canary_max is not None and persistence_canary_max < 1:
+        raise RuntimeError("ATTACK_EVENT_PERSISTENCE_CANARY_MAX_EPISODES must be positive")
     if canary_cutoff is not None:
         persistence_due = {}
-        for city_key, city_due in due.items():
+        selected_episode_keys = set()
+        for city_key, city_due in sorted(due.items()):
             eligible = []
             for episode, check in city_due:
                 first_seen = parse_dt(episode.get("live_first_seen_at"))
-                if first_seen is not None and first_seen >= canary_cutoff:
-                    eligible.append((episode, check))
+                episode_key = (city_key, str(episode.get("episode_id") or ""))
+                if first_seen is None or first_seen < canary_cutoff:
+                    continue
+                if episode_key in selected_episode_keys:
+                    continue
+                if (
+                    persistence_canary_max is not None
+                    and len(selected_episode_keys) >= persistence_canary_max
+                ):
+                    break
+                selected_episode_keys.add(episode_key)
+                eligible.append((episode, check))
             if eligible:
                 persistence_due[city_key] = eligible
+            if (
+                persistence_canary_max is not None
+                and len(selected_episode_keys) >= persistence_canary_max
+            ):
+                break
 
     canonical_persistence = persist_due_episode_classifications(
         queue=queue,
@@ -4668,6 +4692,7 @@ def main() -> None:
         "production_persistence_eligible_due_episodes": sum(
             len(rows) for rows in persistence_due.values()
         ),
+        "production_persistence_canary_max_episodes": persistence_canary_max,
         "canonical_persistence": canonical_persistence,
     }
     atomic_json(STATE_FILE, state)

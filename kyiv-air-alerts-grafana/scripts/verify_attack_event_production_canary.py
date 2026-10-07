@@ -141,7 +141,9 @@ def main():
             duplicate_attack_event_rows = sum(int(r["n"]) - 1 for r in cur.fetchall())
 
     verdict_counts = {}
-    for d in detailed:
+    for d, raw in zip(detailed, canary_records):
+        if not raw.get("classification_inserted"):
+            continue
         v = d.get("classifier_verdict")
         if v:
             verdict_counts[v] = verdict_counts.get(v, 0) + 1
