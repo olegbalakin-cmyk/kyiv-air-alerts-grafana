@@ -53,10 +53,13 @@
       <div class="control">
         <label for="cityPeriod">Період графіків</label>
         <select id="cityPeriod">
-          <option value="monthly">Місяці</option>
+          <option value="daily28">Останні 28 днів</option>
           <option id="cityWeeklyOption" value="weekly">Ковзні 7 днів</option>
           <option value="rolling30">Ковзні 30 днів</option>
           <option value="rolling90">Ковзні 90 днів</option>
+          <option value="rolling180">Ковзні 180 днів</option>
+          <option value="calendarWeekly">Тижні</option>
+          <option value="monthly">Місяці</option>
         </select>
       </div>
       <div class="control date-control">
@@ -179,38 +182,6 @@
       </section>
     </section>
 
-    <section id="shortHorizonSection" class="comparison-section">
-      <div class="section-heading">
-        <div>
-          <div class="eyebrow">Короткий горизонт</div>
-          <h2>Щоденний розріз</h2>
-          <p id="daily28Range">Доступні останні 28 завершених днів для обраного міста. Сьогоднішній день не включається.</p>
-        </div>
-        <div class="section-range-controls">
-          <div class="control date-control">
-            <label for="shortDateFrom">Від</label>
-            <input id="shortDateFrom" type="date">
-          </div>
-          <div class="control date-control">
-            <label for="shortDateTo">До</label>
-            <input id="shortDateTo" type="date">
-          </div>
-        </div>
-      </div>
-      <section class="chart-grid">
-        <article class="panel chart-card wide">
-          <h3>Сумарний час під тривогою за день</h3>
-          <p class="chart-subtitle">Скільки годин кожної календарної доби припало на повітряну тривогу. Якщо інтервали перекриваються, час не рахується двічі; тривога через північ розподіляється між відповідними днями.</p>
-          <div class="chart-wrap"><canvas id="daily28HoursChart"></canvas></div>
-        </article>
-        <article class="panel chart-card wide">
-          <h3>Кількість тривог і середня тривалість за день</h3>
-          <p class="chart-subtitle">Стовпчики — кількість тривог, що почалися цього дня. Лінія — середня тривалість тривог, що почалися цього дня.</p>
-          <div class="chart-wrap"><canvas id="daily28AlertsDurationChart"></canvas></div>
-        </article>
-      </section>
-    </section>
-
     <section id="casualtySection" class="comparison-section hidden">
       <div class="section-heading">
         <div>
@@ -260,8 +231,13 @@
         <div class="control">
           <label for="comparePeriod">Інтервал</label>
           <select id="comparePeriod">
+            <option value="daily28">Останні 28 днів</option>
+            <option id="compareWeeklyOption" value="weekly">Ковзні 7 днів</option>
+            <option value="rolling30">Ковзні 30 днів</option>
+            <option value="rolling90">Ковзні 90 днів</option>
+            <option value="rolling180">Ковзні 180 днів</option>
+            <option value="calendarWeekly">Тижні</option>
             <option value="monthly">Місяці</option>
-            <option id="compareWeeklyOption" value="weekly">Тижні</option>
           </select>
         </div>
         <div class="control date-control">
