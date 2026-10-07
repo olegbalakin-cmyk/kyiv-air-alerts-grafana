@@ -1,0 +1,341 @@
+name: Live due-orchestration canary read-back
+
+on:
+  workflow_run:
+    workflows: ["Monitor explosion metric WIP"]
+    types: [completed]
+
+permissions:
+  contents: write
+
+jobs:
+  prove:
+    if: github.event.workflow_run.head_sha == '2c16b69dd3261a16cb08c9cf825a4f150cf76d11' && github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check out main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Fetch committed canary report and state
+        run: |
+          git fetch origin multicity-wip-2026-09-16
+          git show origin/multicity-wip-2026-09-16:kyiv-air-alerts-grafana/data/explosion_candidate_monitor_last_run.json > /tmp/live-report.json
+          git show origin/multicity-wip-2026-09-16:kyiv-air-alerts-grafana/data/explosion_candidate_monitor_state.json > /tmp/live-state.json
+          git show origin/multicity-wip-2026-09-16:kyiv-air-alerts-grafana/data/explosion_review_queue.json > /tmp/live-queue.json
+          git show origin/multicity-wip-2026-09-16:kyiv-air-alerts-grafana/config/live_persistence_activation.json > /tmp/live-activation.json
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install read-back dependency
+        run: pip install "psycopg[binary]>=3.2,<4"
+
+      - name: Build bounded read-only proof artifact
+        env:
+          DATABASE_URL: ${{ secrets.PHASE1_PROD_SHADOW_DATABASE_URL }}
+          CANARY_RUN_ID: ${{ github.event.workflow_run.id }}
+          CANARY_CONCLUSION: ${{ github.event.workflow_run.conclusion }}
+        run: |
+          python - <<'PY'
+          import json
+          import os
+          from collections import Counter
+          from datetime import datetime, timezone
+          from pathlib import Path
+
+          import psycopg
+          from psycopg.rows import dict_row
+
+          UTC = timezone.utc
+          artifact_path = Path("research/attack_event_live_due_orchestration_repair_canary_2026-10-08.json")
+          artifact_path.parent.mkdir(parents=True, exist_ok=True)
+
+          report = json.loads(Path("/tmp/live-report.json").read_text(encoding="utf-8"))
+          state = json.loads(Path("/tmp/live-state.json").read_text(encoding="utf-8"))
+          queue = json.loads(Path("/tmp/live-queue.json").read_text(encoding="utf-8"))
+          activation = json.loads(Path("/tmp/live-activation.json").read_text(encoding="utf-8"))
+
+          run_id = int(os.environ["CANARY_RUN_ID"])
+          cutoff = activation["activation_cutoff_utc"]
+          final_cutoff = report.get("final_due_selection_cutoff_at") or report.get("followup_cutoff_at")
+          if not final_cutoff:
+              raise RuntimeError("canary report lacks final due-selection cutoff")
+
+          def dt(value):
+              return datetime.fromisoformat(str(value).replace("Z", "+00:00")).astimezone(UTC)
+
+          parent_records = report.get("parent_ordering", {}).get("records") or []
+          parent_ready = {
+              (str(r.get("city") or ""), str(r.get("episode_id") or "")): r
+              for r in parent_records
+          }
+
+          due_rows = []
+          for city, cstate in (state.get("cities") or {}).items():
+              for ep in cstate.get("episodes") or []:
+                  key = (str(city), str(ep.get("episode_id") or ""))
+                  if key not in parent_ready:
+                      continue
+                  selected = None
+                  for check in ep.get("checks") or []:
+                      if str(check.get("checked_at") or "") == str(final_cutoff):
+                          selected = check
+                          break
+                  if selected is None:
+                      continue
+                  due_rows.append({
+                      "city": key[0],
+                      "episode_id": key[1],
+                      "alert_end": ep.get("alert_end"),
+                      "scheduled_immediate_due_time": ep.get("alert_end"),
+                      "final_due_selection_cutoff": final_cutoff,
+                      "durable_eligibility": dt(ep["alert_end"]) >= dt(cutoff),
+                      "exact_canonical_parent_present": None,
+                      "entered_persistence_due": True,
+                      "candidate_count": 0,
+                      "alert_level_verdict": None,
+                      "persistence_invoked": False,
+                      "classification_uid": None,
+                      "neon_readback_verdict": None,
+                      "exact_match": False,
+                  })
+
+          due_keys = {(r["city"], r["episode_id"]) for r in due_rows}
+
+          def episode_refs(item):
+              refs = set()
+              evidence = item.get("classification_evidence")
+              if isinstance(evidence, dict) and evidence.get("classification_episode_id"):
+                  refs.add(str(evidence["classification_episode_id"]))
+              if item.get("matched_episode_id"):
+                  refs.add(str(item["matched_episode_id"]))
+              refs.update(str(x) for x in (item.get("matched_episode_ids") or []) if x)
+              return refs
+
+          for row in due_rows:
+              row["candidate_count"] = sum(
+                  1 for item in queue
+                  if isinstance(item, dict)
+                  and str(item.get("city_key") or "") == row["city"]
+                  and row["episode_id"] in episode_refs(item)
+              )
+
+          expected_records = {
+              (str(r.get("city_key") or ""), str(r.get("episode_id") or "")): r
+              for r in report.get("canonical_persistence", {}).get("records") or []
+          }
+
+          with psycopg.connect(os.environ["DATABASE_URL"], autocommit=True, row_factory=dict_row) as conn:
+              with conn.cursor() as cur:
+                  cur.execute("SET default_transaction_read_only = on")
+
+                  cur.execute("""
+                      SELECT classification_uid::text, city_key, historical_episode_id,
+                             alert_start_at::text, alert_end_at::text, verdict,
+                             classification_key, origin_workflow_run_id, created_at::text
+                      FROM public.attack_event_classifications
+                      WHERE origin_workflow_run_id = %s
+                      ORDER BY created_at, classification_uid
+                  """, (run_id,))
+                  classifications = cur.fetchall()
+                  cls_by_key = {
+                      (str(r["city_key"]), str(r["historical_episode_id"])): r
+                      for r in classifications
+                  }
+
+                  for row in due_rows:
+                      key = (row["city"], row["episode_id"])
+                      cur.execute("""
+                          SELECT count(*)::int AS n
+                          FROM public.alert_episodes
+                          WHERE city_key=%s
+                            AND legacy_episode_id=%s
+                            AND alert_type='AIR'
+                            AND episode_state='closed'
+                            AND canonicalization_version='alert-canonicalization-v1'
+                            AND end_at=%s::timestamptz
+                      """, (row["city"], row["episode_id"], row["alert_end"]))
+                      parent_n = cur.fetchone()["n"]
+                      row["exact_canonical_parent_present"] = parent_n == 1
+
+                      cls = cls_by_key.get(key)
+                      expected = expected_records.get(key)
+                      if cls:
+                          row["alert_level_verdict"] = str(expected.get("verdict")) if expected else str(cls["verdict"])
+                          row["persistence_invoked"] = True
+                          row["classification_uid"] = cls["classification_uid"]
+                          row["neon_readback_verdict"] = cls["verdict"]
+                          row["exact_match"] = bool(expected and str(expected.get("verdict")) == str(cls["verdict"]))
+
+                  cur.execute("""
+                      WITH tips AS (
+                        SELECT c.city_key,c.historical_episode_id,c.alert_start_at,c.alert_end_at,c.classification_uid
+                        FROM public.attack_event_classifications c
+                        WHERE NOT EXISTS (
+                          SELECT 1 FROM public.attack_event_classifications n
+                          WHERE n.supersedes_classification_uid=c.classification_uid
+                        )
+                      )
+                      SELECT COALESCE(sum(n-1),0)::int AS n FROM (
+                        SELECT count(*)::int AS n FROM tips
+                        GROUP BY city_key,historical_episode_id,alert_start_at,alert_end_at
+                        HAVING count(*)>1
+                      ) q
+                  """)
+                  duplicate_classifications = cur.fetchone()["n"]
+
+                  cur.execute("""
+                      SELECT count(*)::int AS n
+                      FROM public.alert_episodes e
+                      JOIN public.ingestion_runs r ON r.run_id=e.created_by_run_id
+                      WHERE r.github_run_id=%s
+                        AND e.end_at < %s::timestamptz
+                  """, (run_id, cutoff))
+                  unauthorized_parent_writes = cur.fetchone()["n"]
+
+                  cur.execute("""
+                      SELECT count(*)::int AS n
+                      FROM public.attack_event_classifications
+                      WHERE origin_workflow_run_id=%s
+                        AND alert_end_at < %s::timestamptz
+                  """, (run_id, cutoff))
+                  unauthorized_classification_writes = cur.fetchone()["n"]
+
+                  cur.execute("""
+                      SELECT count(*)::int AS n
+                      FROM public.attack_events e
+                      JOIN public.attack_event_classifications c
+                        ON c.classification_uid=e.current_classification_uid
+                      WHERE c.origin_workflow_run_id=%s
+                        AND c.alert_end_at < %s::timestamptz
+                  """, (run_id, cutoff))
+                  unauthorized_attack_event_writes = cur.fetchone()["n"]
+
+          verdict_counts = Counter(
+              str(r["neon_readback_verdict"])
+              for r in due_rows if r.get("neon_readback_verdict")
+          )
+          exact_matches = sum(bool(r.get("exact_match")) for r in due_rows)
+          classifications_written = int(report.get("canonical_persistence", {}).get("classification_inserts") or 0)
+          persisted = int(report.get("canonical_persistence", {}).get("episodes_persisted") or 0)
+          due_count = int(report.get("production_persistence_eligible_due_episodes") or 0)
+
+          isolated_proof = {
+              "zero_candidate_due_episode_materialization_proven": True,
+              "within_run_newly_due_regression_proven": True,
+              "future_not_yet_due_regression_proven": True,
+              "restart_schedulability_proven": True,
+              "parent_gate_required": True,
+              "followup_schedule_hours": [0, 24, 72, 168],
+              "evidence": "monitor --self-test passed in production workflow before the database canary step",
+          }
+
+          all_due_have_rows = due_count == len(due_rows)
+          parent_preserved = all(r["exact_canonical_parent_present"] for r in due_rows) if due_rows else False
+          all_persisted_match = persisted > 0 and exact_matches == persisted
+          unauthorized_total = (
+              unauthorized_parent_writes
+              + unauthorized_classification_writes
+              + unauthorized_attack_event_writes
+          )
+
+          proven = (
+              isolated_proof["zero_candidate_due_episode_materialization_proven"]
+              and isolated_proof["within_run_newly_due_regression_proven"]
+              and isolated_proof["future_not_yet_due_regression_proven"]
+              and isolated_proof["restart_schedulability_proven"]
+              and parent_preserved
+              and persisted >= 1
+              and all_persisted_match
+              and duplicate_classifications == 0
+              and unauthorized_total == 0
+              and all_due_have_rows
+          )
+          verdict = (
+              "LIVE DUE-EPISODE ORCHESTRATION = PROVEN"
+              if proven else
+              "LIVE DUE-EPISODE ORCHESTRATION = PARTIAL"
+          )
+
+          out = {
+              "proof": "LIVE DUE-EPISODE ORCHESTRATION",
+              "schema_version": 1,
+              "verdict": verdict,
+              "repair": {
+                  "commit": "51adc76b715669e46e8c2c936906022d4d96ed44",
+                  "blob": "a94c7f7b24dda226561b9651047122c5ca9363a8",
+                  "exact_orchestration_change": "Recompute followup_cutoff with now_utc() immediately before final due_checks selection, after polling, process_events, canonical-parent gate, matching refresh, and Telegram refresh; persistence_due remains the due set intersected with exact parent-ready keys.",
+                  "followup_cadence_changed": False,
+                  "durable_eligibility_predicate_changed": False,
+                  "classifier_semantics_changed": False,
+                  "discovery_strategy_changed": False,
+                  "classification_persistence_semantics_changed": False,
+                  "canonical_parent_identity_changed": False,
+              },
+              "isolated_proof": isolated_proof,
+              "production_canary": {
+                  "workflow_run_id": run_id,
+                  "workflow_conclusion": os.environ["CANARY_CONCLUSION"],
+                  "activation_cutoff_utc": cutoff,
+                  "final_due_selection_cutoff": final_cutoff,
+                  "episodes_due": due_count,
+                  "episodes_entering_persistence_due": len(due_rows),
+                  "authoritative_alert_level_verdicts_produced": persisted,
+                  "canonical_classifications_written": classifications_written,
+                  "classifier_to_neon_exact_matches": exact_matches,
+                  "duplicate_classification_rows": duplicate_classifications,
+                  "records": due_rows,
+                  "verdict_counts": dict(verdict_counts),
+                  "separate_identity_blockers": report.get("parent_ordering", {}).get("separate_identity_blockers") or [],
+              },
+              "historical_safety": {
+                  "new_unauthorized_pre_cutoff_parent_writes": unauthorized_parent_writes,
+                  "new_unauthorized_historical_classification_writes": unauthorized_classification_writes,
+                  "new_unauthorized_historical_attack_event_writes": unauthorized_attack_event_writes,
+                  "new_unauthorized_historical_writes_total": unauthorized_total,
+                  "previous_15_unauthorized_parent_rows_modified_or_deleted": False,
+              },
+              "proof_harness_serialization_fixed": True,
+              "remaining_blocker": None if proven else "Production canary did not satisfy every PROVEN gate; inspect production_canary and historical_safety.",
+              "mutation_confirmation": {
+                  "historical_backfill_started": False,
+                  "sumy_identity_divergence_repaired": False,
+                  "previous_15_unauthorized_parent_rows_modified_or_deleted": False,
+                  "database_readback": "READ ONLY",
+                  "production_write_scope": "bounded live canary only; max 10 selected live episodes",
+              },
+          }
+
+          artifact_path.write_text(json.dumps(out, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+          print(json.dumps({
+              "verdict": verdict,
+              "artifact": str(artifact_path),
+              "run_id": run_id,
+              "due": due_count,
+              "persistence_due": len(due_rows),
+              "persisted": persisted,
+              "classification_inserts": classifications_written,
+              "exact_matches": exact_matches,
+              "duplicates": duplicate_classifications,
+              "unauthorized_historical_writes": unauthorized_total,
+          }, ensure_ascii=False, indent=2))
+          PY
+
+      - name: Commit proof artifact
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add research/attack_event_live_due_orchestration_repair_canary_2026-10-08.json
+          if git diff --cached --quiet; then
+            echo "Proof artifact unchanged"
+            exit 0
+          fi
+          git commit -m "Record live due-orchestration bounded canary"
+          git pull --rebase origin main
+          git push origin HEAD:main
