@@ -1,0 +1,269 @@
+{
+  "actions_run_id": 37609330109,
+  "boundaries": {
+    "Neon_writes": 0,
+    "alert_grouping_changes": 0,
+    "canonical_persistence_writes": 0,
+    "city_ingestion_semantics_changes": 0,
+    "classifier_policy_changes": 0,
+    "deployments": 0,
+    "historical_backfill": 0,
+    "parser_policy_changes": 0,
+    "persistence_changes": 0,
+    "source_ingestion_changes": 0,
+    "source_query_strategy_changes": 0,
+    "temporal_semantics_changes": 0
+  },
+  "historical_regression": {
+    "exact_verdict_matches": 26363,
+    "frozen_total": 26405,
+    "initial_parity_replayed": 26319,
+    "legacy_input_not_replayable": 42,
+    "legacy_label": "LEGACY_INPUT_NOT_REPLAYABLE",
+    "recovered_replayed": 44,
+    "remaining_blocker_counts": {
+      "AMBIGUOUS_DURABLE_DISPOSITION_CONFLICT": 3,
+      "AMBIGUOUS_NON_EQUIVALENT_DURABLE_REPRESENTATION": 12,
+      "MISSING_DURABLE_ATTACK_EVENT_ROLE": 4,
+      "MISSING_DURABLE_EPISODE_SPECIFIC_TEMPORAL_BINDING": 1,
+      "MISSING_DURABLE_EXACT_CITY_ROLE": 1,
+      "MISSING_DURABLE_SAME_ATTACK_LINKAGE": 20,
+      "NO_EPISODE_SPECIFIC_DURABLE_CLASSIFIER_INPUT": 1
+    },
+    "replayed": 26363,
+    "semantic_mismatches": 0,
+    "unsafe_promotions": 0
+  },
+  "implementation": {
+    "authoritative_reference_blob": "778469b74c2aa807d851cf2c2ee35cf4aa785589",
+    "authoritative_reference_commit": "71cb6f6fbe856cc7b96759310fe9cc9c71cc0453",
+    "blob_identity_reason": "The repaired live monitor retains ingestion/discovery and contains a thin shared delegation/input-normalization wrapper; the invoked authoritative runtime file itself is byte-identical to the reference blob.",
+    "cherkasy_normalization": "accepted upstream genitive normalization preserved before authoritative classifier invocation",
+    "pinned_authoritative_runtime_blob": "778469b74c2aa807d851cf2c2ee35cf4aa785589",
+    "predecessor_live_classifier_blob": "927dc89df0b52edd52cb31a126b0d57ca492a278",
+    "repaired_live_classifier_blob": "e8bb3def24e411eb59028410cf144339ece0f28a",
+    "semantic_identity": "BEHAVIORALLY_IDENTICAL_WITH_BYTE_IDENTICAL_PINNED_AUTHORITATIVE_RUNTIME"
+  },
+  "live_shadow": {
+    "authoritative_classifier_execution_proven": 19,
+    "cities_shadow_tested": [
+      "cherkasy",
+      "chernihiv",
+      "dnipro",
+      "kharkiv",
+      "kherson",
+      "khmelnytskyi",
+      "kropyvnytskyi",
+      "kyiv",
+      "lutsk",
+      "mykolaiv",
+      "odesa",
+      "poltava",
+      "rivne",
+      "sevastopol",
+      "sumy",
+      "ternopil",
+      "vinnytsia",
+      "zaporizhzhia",
+      "zhytomyr"
+    ],
+    "recent_live_episodes_shadow_tested": 19,
+    "records": [
+      {
+        "authoritative_classifier_invoked": "YES",
+        "city": "cherkasy",
+        "episode_id": "07b22d211073575398c3d83a",
+        "evidence_available": "YES",
+        "first_failing_gate": "NO_AIR_MILITARY_CONTEXT",
+        "shadow_verdict": "needs_review"
+      },
+      {
+        "authoritative_classifier_invoked": "YES",
+        "city": "chernihiv",
+        "episode_id": "1a731eab010fbedd83936b16",
+        "evidence_available": "YES",
+        "first_failing_gate": "NO_STRICT_TEMPORAL_BINDING",
+        "shadow_verdict": "needs_review"
+      },
+      {
+        "authoritative_classifier_invoked": "YES",
+        "city": "dnipro",
+        "episode_id": "4e2004c3dd13341dc1c60984",
+        "evidence_available": "YES",
+        "first_failing_gate": "NO_AIR_MILITARY_CONTEXT",
+        "shadow_verdict": "needs_review"
+      },
+      {
+        "authoritative_classifier_invoked": "YES",
+        "city": "kharkiv",
+        "episode_id": "01bd057146baa718ae70a1cb",
+        "evidence_available": "YES",
+        "first_failing_gate": "NO_STRICT_EXPLOSION_EVIDENCE",
+        "shadow_verdict": "needs_review"
+      },
+      {
+        "authoritative_classifier_invoked": "YES",
+        "city": "kherson",
+        "episode_id": "1db73b4847d1d03174c252a5",
+        "evidence_available": "YES",
+        "first_failing_gate": "NO_AIR_MILITARY_CONTEXT",
+        "shadow_verdict": "needs_review"
+      },
+      {
+        "authoritative_classifier_invoked": "YES",
+        "city": "khmelnytskyi",
+        "episode_id": "421f418f80e48a15f4b1ba3f",
+        "evidence_available": "YES",
+        "first_failing_gate": "MATCH_NONE",
+        "shadow_verdict": "needs_review"
+      },
+      {
+        "authoritative_classifier_invoked": "YES",
+        "city": "kropyvnytskyi",
+        "episode_id": "1fba78d6428298d064143a89",
+        "evidence_available": "YES",
+        "first_failing_gate": null,
+        "shadow_verdict": "rejected"
+      },
+      {
+        "authoritative_classifier_invoked": "YES",
+        "city": "kyiv",
+        "episode_id": "7eecb0127242d4d62eca833a",
+        "evidence_available": "YES",
+        "first_failing_gate": "NO_STRICT_TEMPORAL_BINDING",
+        "shadow_verdict": "needs_review"
+      },
+      {
+        "authoritative_classifier_invoked": "YES",
+        "city": "lutsk",
+        "episode_id": "2d0985cc773d638a15096683",
+        "evidence_available": "YES",
+        "first_failing_gate": "NO_STRICT_TEMPORAL_BINDING",
+        "shadow_verdict": "needs_review"
+      },
+      {
+        "authoritative_classifier_invoked": "YES",
+        "city": "mykolaiv",
+        "episode_id": "0e88cb82c9cae12cfb93926a",
+        "evidence_available": "YES",
+        "first_failing_gate": "MATCH_NONE",
+        "shadow_verdict": "needs_review"
+      },
+      {
+        "authoritative_classifier_invoked": "YES",
+        "city": "odesa",
+        "episode_id": "1de7602923fc2cc43d51c452",
+        "evidence_available": "YES",
+        "first_failing_gate": "NO_AIR_MILITARY_CONTEXT",
+        "shadow_verdict": "needs_review"
+      },
+      {
+        "authoritative_classifier_invoked": "YES",
+        "city": "poltava",
+        "episode_id": "293c400e35df740a0d218689",
+        "evidence_available": "YES",
+        "first_failing_gate": "NO_AIR_MILITARY_CONTEXT",
+        "shadow_verdict": "needs_review"
+      },
+      {
+        "authoritative_classifier_invoked": "YES",
+        "city": "rivne",
+        "episode_id": "004c3e19272ed950e4e0f1b2",
+        "evidence_available": "YES",
+        "first_failing_gate": null,
+        "shadow_verdict": "rejected"
+      },
+      {
+        "authoritative_classifier_invoked": "YES",
+        "city": "sevastopol",
+        "episode_id": "2950c89ed49965f5ba509138",
+        "evidence_available": "YES",
+        "first_failing_gate": "MATCH_NONE",
+        "shadow_verdict": "needs_review"
+      },
+      {
+        "authoritative_classifier_invoked": "YES",
+        "city": "sumy",
+        "episode_id": "4dd51063550ebb82540a9053",
+        "evidence_available": "YES",
+        "first_failing_gate": "NO_STRICT_TEMPORAL_BINDING",
+        "shadow_verdict": "needs_review"
+      },
+      {
+        "authoritative_classifier_invoked": "YES",
+        "city": "ternopil",
+        "episode_id": "301ee75c8a79b3914d981039",
+        "evidence_available": "YES",
+        "first_failing_gate": "NO_AIR_MILITARY_CONTEXT",
+        "shadow_verdict": "needs_review"
+      },
+      {
+        "authoritative_classifier_invoked": "YES",
+        "city": "vinnytsia",
+        "episode_id": "26ae1b85ed4c554d5bca3947",
+        "evidence_available": "YES",
+        "first_failing_gate": "NO_AIR_MILITARY_CONTEXT",
+        "shadow_verdict": "needs_review"
+      },
+      {
+        "authoritative_classifier_invoked": "YES",
+        "city": "zaporizhzhia",
+        "episode_id": "9c1ccc9eda7b97512422daad",
+        "evidence_available": "YES",
+        "first_failing_gate": "NO_AIR_MILITARY_CONTEXT",
+        "shadow_verdict": "needs_review"
+      },
+      {
+        "authoritative_classifier_invoked": "YES",
+        "city": "zhytomyr",
+        "episode_id": "1ac54bdcf85c08ddda181593",
+        "evidence_available": "YES",
+        "first_failing_gate": "NO_STRICT_TEMPORAL_BINDING",
+        "shadow_verdict": "needs_review"
+      }
+    ],
+    "replacement_evidence_fetched": false
+  },
+  "mutation_confirmation": {
+    "allowed_mutations_only": true,
+    "canonical_persistence_unchanged": true,
+    "deployment_started": false,
+    "durable_proof_artifact_written": true,
+    "historical_backfill_started": false,
+    "live_shared_classifier_wiring_changed": true,
+    "proof_harness_workflow_changed": true
+  },
+  "proof": "SHARED 23-CITY LIVE CLASSIFIER ALIGNMENT",
+  "schema_version": 1,
+  "shared_coverage": {
+    "bypass_cities": [],
+    "cities_covered": 23,
+    "cities_total": 23,
+    "city_keys": [
+      "cherkasy",
+      "chernihiv",
+      "chernivtsi",
+      "dnipro",
+      "ivano_frankivsk",
+      "kharkiv",
+      "kherson",
+      "khmelnytskyi",
+      "kropyvnytskyi",
+      "kyiv",
+      "lutsk",
+      "lviv",
+      "mykolaiv",
+      "odesa",
+      "poltava",
+      "rivne",
+      "sevastopol",
+      "sumy",
+      "ternopil",
+      "uzhhorod",
+      "vinnytsia",
+      "zaporizhzhia",
+      "zhytomyr"
+    ]
+  },
+  "verdict": "SHARED 23-CITY LIVE CLASSIFIER ALIGNMENT = PROVEN"
+}
