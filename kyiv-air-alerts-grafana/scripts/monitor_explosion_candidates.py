@@ -4601,6 +4601,15 @@ def main() -> None:
     )
     from attack_event_canonical_persistence import persist_due_episode_classifications
 
+    persistence_coverage_by_city = {
+        city_key: (
+            city_key not in errors
+            and f"search:{city_key}" not in errors
+            and not telegram_errors
+        )
+        for city_key in CITY_CONFIG
+    }
+
     canary_cutoff_raw = str(
         os.environ.get("PRODUCTION_PERSISTENCE_CANARY_CUTOFF") or ""
     ).strip()
