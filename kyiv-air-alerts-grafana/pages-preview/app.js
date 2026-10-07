@@ -16,7 +16,7 @@ const TIME_PROFILE_COLORS = ["#ef4444", "#62a0ea", "#8ff0a4", "#f8e45c", "#c061c
 const PARTIAL_PERIOD_DASH = [3, 4];
 const TOUR_STORAGE_KEY = "air-alerts-intro-tour-v2";
 const TOUR_STEPS = [
-  {selector:".controls-panel",titleUk:"Оберіть місто і період",titleEn:"Choose a city and period",textUk:"Тут можна змінити місто та масштаб графіків. За замовчуванням відкривається ковзне 90-денне вікно.",textEn:"Change the city and chart time scale here. The default view is a rolling 90-day window."},
+  {selector:".controls-panel",titleUk:"Оберіть місто і період",titleEn:"Choose a city and period",textUk:"Тут можна змінити місто та масштаб графіків. За замовчуванням відкривається помісячний ряд.",textEn:"Change the city and chart time scale here. The default view is monthly."},
   {selector:"#cityIntensityChart",closest:".chart-card",titleUk:"Як читати головний графік",titleEn:"How to read the main chart",textUk:"Стовпчики показують середній час під тривогою на добу, лінія — середню кількість тривог на день. Пунктиром позначений поточний неповний зріз.",textEn:"Bars show average hours under alert per day; the line shows average alerts per day. A dashed segment marks the current incomplete period."},
   {selector:"#cityIntensityChart",closest:".chart-card",titleUk:"Легенда — це перемикач",titleEn:"The legend is interactive",textUk:"Натисніть на назву показника в легенді графіка, щоб тимчасово приховати його. Натисніть ще раз — і показник повернеться. Можете спробувати прямо зараз.",textEn:"Click a metric in the chart legend to hide it temporarily. Click it again to bring it back."},
   {selector:"#timeOfDaySection",titleUk:"Добовий профіль",titleEn:"Time-of-day profile",textUk:"Цей графік показує, у які години тривога відносно частіше активна. 100% — власний максимум вибраного міста й періоду, а не 100% часу під тривогою.",textEn:"This chart shows when alerts are relatively more active during the day. 100% is the selected city's own peak for the chosen period, not 100% of time under alert."},
@@ -2459,7 +2459,7 @@ async function init() {
   while (defaults.length < 3 && keys[defaults.length]) defaults.push(keys[defaults.length]);
 
   const cityDefault = validParam("city", keys, defaults[0] || keys[0]);
-  const periodDefault = validParam("period", ["daily28", "weekly", "rolling30", "rolling90", "rolling180", "calendarWeekly", "monthly"], "rolling90");
+  const periodDefault = validParam("period", ["daily28", "weekly", "rolling30", "rolling90", "rolling180", "calendarWeekly", "monthly"], "monthly");
   const aDefault = validParam("a", keys, defaults[0] || keys[0]);
   const bDefault = validParam("b", keys, defaults[1] || keys[0]);
   const cDefault = validOptionalParam("c", keys, defaults[2] || "");
