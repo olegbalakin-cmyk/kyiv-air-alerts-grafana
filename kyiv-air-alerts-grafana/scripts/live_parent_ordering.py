@@ -384,18 +384,21 @@ def preclassification_parent_gate(
         )
 
     episodes, total = select_post_cutoff_live_episodes(
-        state, cutoff=cutoff, max_episodes=max_episodes
+        state, cutoff=cutoff, max_episodes=None
     )
+    canary_selected = total if max_episodes is None else min(total, max_episodes)
     result["eligible_post_cutoff_live_episodes"] = total
-    result["selected_live_episodes"] = len(episodes)
-    result["deferred_by_canary_limit"] = max(0, total - len(episodes))
+    result["selected_live_episodes"] = canary_selected
+    result["deferred_by_canary_limit"] = max(0, total - canary_selected)
+    result["parents_synced_live_episodes"] = total
 
     own = connection is None
     conn = connection or psycopg.connect(str(dsn), autocommit=False)
     try:
-        for episode in episodes:
+        for index, episode in enumerate(episodes):
             record = ensure_canonical_parent(conn, episode)
-            result["records"].append(record)
+            if max_episodes is None or index < max_episodes:
+                result["records"].append(record)
             result["parents_ready"] += 1
             result["parents_newly_inserted"] += int(record["parent_newly_inserted"])
             result["parents_already_present"] += int(record["parent_already_present"])
