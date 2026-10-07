@@ -62,6 +62,8 @@ def historical_regression(run_id: str) -> dict:
         "kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py"
     )
     alignment.REPAIRED_BLOB = monitor_blob
+    alignment.ensure_ref(alignment.RECOVERY_REF)
+    alignment.ensure_ref(alignment.AUTH_COMMIT)
     tmp = Path(tempfile.mkdtemp(prefix="shared-live-persistence-regression-"))
     try:
         parity, recovery = alignment.run_historical_regression(
