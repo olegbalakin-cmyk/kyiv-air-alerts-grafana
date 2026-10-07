@@ -60,7 +60,10 @@ def git_bytes(ref, path):
 def ensure_ref(ref):
     p = sh(["git","cat-file","-e",f"{ref}^{{commit}}"], check=False)
     if p.returncode:
-        sh(["git","fetch","--no-tags","origin",ref])
+        if re.fullmatch(r"[0-9a-f]{40}", ref):
+            sh(["git","fetch","--no-tags","origin",ref])
+        else:
+            sh(["git","fetch","--no-tags","origin",f"refs/heads/{ref}:refs/heads/{ref}"])
     git("rev-parse", f"{ref}^{{commit}}")
 
 def load_module(path, name):
