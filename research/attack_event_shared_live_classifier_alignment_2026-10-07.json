@@ -231,7 +231,10 @@
     "durable_proof_artifact_written": true,
     "historical_backfill_started": false,
     "live_shared_classifier_wiring_changed": true,
-    "proof_harness_workflow_changed": true
+    "proof_harness_workflow_changed": true,
+    "final_live_branch_diff_allowed_only": true,
+    "automatic_historical_qa_files_restored": true,
+    "production_deployment_started": false
   },
   "proof": "SHARED 23-CITY LIVE CLASSIFIER ALIGNMENT",
   "schema_version": 1,
@@ -265,5 +268,28 @@
       "zhytomyr"
     ]
   },
-  "verdict": "SHARED 23-CITY LIVE CLASSIFIER ALIGNMENT = PROVEN"
+  "verdict": "SHARED 23-CITY LIVE CLASSIFIER ALIGNMENT = PROVEN",
+  "promotion_verification": {
+    "live_branch": "multicity-wip-2026-09-16",
+    "pre_task_live_head": "01af65c08d5786c7bf86227c4ef2c3b2a840135a",
+    "final_repaired_live_classifier_blob": "b4ad5630f34e5621730384d0ed0f73f2fc4a39c5",
+    "pinned_authoritative_runtime_blob": "778469b74c2aa807d851cf2c2ee35cf4aa785589",
+    "final_durable_diff_paths": [
+      "kyiv-air-alerts-grafana/scripts/authoritative_classifier_71cb6f6f.py",
+      "kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py",
+      "research/attack_event_shared_live_classifier_alignment_2026-10-07.json"
+    ],
+    "final_live_branch_diff_allowed_only": true,
+    "wip_smoke_run_id": 37611025297,
+    "classifier_self_test_step": "SUCCESS",
+    "cached_bridge_primary_monitor_step": "SUCCESS",
+    "unrelated_smoke_failure": "legacy next-city simulation asserts a 12-city baseline while current audited baseline has 23 cities",
+    "classifier_hardening_run_id": 37611025309,
+    "classifier_hardening_result": "SUCCESS",
+    "automatic_historical_qa_files_restored_to_pre_task_state": true,
+    "canonical_persistence_changed": false,
+    "neon_writes": 0,
+    "deployment_started": false,
+    "historical_backfill_started": false
+  }
 }
