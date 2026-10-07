@@ -90,17 +90,32 @@ def patch_recovery_script(src: str) -> str:
         raise Blocked("recovery candidate write hook missing")
     return src.replace(needle, insert, 1)
 
+def patch_recovery_diag_script(src: str) -> str:
+    needle = '            cand.write_bytes(candidate_bytes)'
+    insert = needle + '\n            auth=wt/"kyiv-air-alerts-grafana"/"scripts"/"authoritative_classifier_71cb6f6f.py"\n            auth.write_bytes(p.git_bytes(p.CAND_COMMIT,"' + PIN_PATH + '"))'
+    if needle not in src:
+        raise Blocked("recovery diagnostic candidate write hook missing")
+    return src.replace(needle, insert, 1)
+
+def patch_recovery_trial_script(src: str) -> str:
+    needle = '        candpath.write_bytes(p.git_bytes(p.CAND_COMMIT,p.CAND_PATH))'
+    insert = needle + '\n        authpath=wt/"kyiv-air-alerts-grafana"/"scripts"/"authoritative_classifier_71cb6f6f.py"\n        authpath.write_bytes(p.git_bytes(p.CAND_COMMIT,"' + PIN_PATH + '"))'
+    if needle not in src:
+        raise Blocked("recovery trial candidate write hook missing")
+    return src.replace(needle, insert, 1)
+
 def run_historical_regression(tmp: Path, code_commit: str, run_id: str):
     proofdir = tmp / "proof"
     proofdir.mkdir(parents=True)
     parity_src = git_bytes(RECOVERY_REF, PARITY_SCRIPT).decode("utf-8")
     parity_src = patch_parity_script(parity_src, code_commit)
     (proofdir / "attack_event_multicity_classifier_parity.py").write_text(parity_src, encoding="utf-8")
-    for rel, name in [
-        (RECOVERY_TRIAL, "attack_event_multicity_86case_recovery_trial.py"),
-        (RECOVERY_DIAG, "attack_event_multicity_86case_recovery_diag.py"),
-    ]:
-        (proofdir / name).write_bytes(git_bytes(RECOVERY_REF, rel))
+    trial_src = git_bytes(RECOVERY_REF, RECOVERY_TRIAL).decode("utf-8")
+    trial_src = patch_recovery_trial_script(trial_src)
+    (proofdir / "attack_event_multicity_86case_recovery_trial.py").write_text(trial_src, encoding="utf-8")
+    diag_src = git_bytes(RECOVERY_REF, RECOVERY_DIAG).decode("utf-8")
+    diag_src = patch_recovery_diag_script(diag_src)
+    (proofdir / "attack_event_multicity_86case_recovery_diag.py").write_text(diag_src, encoding="utf-8")
     recovery_src = git_bytes(RECOVERY_REF, RECOVERY_SCRIPT).decode("utf-8")
     recovery_src = patch_recovery_script(recovery_src)
     recovery_py = proofdir / "attack_event_multicity_86case_representability_recovery.py"
