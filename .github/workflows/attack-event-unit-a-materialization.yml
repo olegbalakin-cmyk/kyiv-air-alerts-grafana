@@ -1,0 +1,24 @@
+name: Unit A existing-evidence materialization
+
+on:
+  push:
+    branches:
+      - attack-event-unit-a-existing-evidence-materialization-2026-10-07
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Fetch pinned refs
+        run: |
+          git fetch origin 71cb6f6fbe856cc7b96759310fe9cc9c71cc0453
+          git fetch origin multicity-wip-2026-09-16
+      - name: Validate frozen Unit A shape
+        run: python .github/proof/attack_event_unit_a_materialization.py
