@@ -18,17 +18,6 @@ def load(path,name):
 p=load(PARITY_PATH,"parity_base")
 AFFECTED={"cherkasy","lviv","sumy","vinnytsia","zaporizhzhia","zhytomyr"}
 
-def grep_paths(ref, needles):
-    paths=set()
-    for needle in needles:
-        if not needle: continue
-        cp=p.sh(["git","grep","-l","-F",str(needle),ref,"--","research","kyiv-air-alerts-grafana"],check=False)
-        if cp.returncode in (0,1):
-            for line in cp.stdout.splitlines():
-                if ":" in line:
-                    paths.add(line.split(":",1)[1])
-    return sorted(paths)
-
 def summarize_obj(v):
     if isinstance(v,dict):
         return {"type":"dict","keys":sorted(v.keys())}
