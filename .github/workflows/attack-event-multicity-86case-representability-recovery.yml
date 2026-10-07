@@ -1,0 +1,58 @@
+name: Attack-event multicity 86-case representability recovery
+
+on:
+  push:
+    branches:
+      - attack-event-multicity-86case-representability-recovery-2026-10-07
+    paths:
+      - ".github/proof/attack_event_multicity_86case_representability_recovery.py"
+      - ".github/workflows/attack-event-multicity-86case-representability-recovery.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  actions: read
+
+jobs:
+  recover:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: attack-event-multicity-86case-representability-recovery-2026-10-07
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python -m pip install --disable-pip-version-check requests beautifulsoup4
+      - name: Assert no database configuration
+        shell: bash
+        run: |
+          set -euo pipefail
+          for key in DATABASE_URL NEON_DATABASE_URL NEON_URL PGHOST PGPORT PGDATABASE PGUSER PGPASSWORD; do
+            test -z "${!key-}" || { echo "Unexpected DB environment variable: $key"; exit 1; }
+          done
+      - name: Run bounded recovery and replay
+        shell: bash
+        run: |
+          set -euo pipefail
+          python .github/proof/attack_event_multicity_86case_representability_recovery.py \
+            research/attack_event_multicity_86case_representability_recovery_2026-10-07.json \
+            "${{ github.run_id }}"
+      - name: Commit durable proof artifact only
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add research/attack_event_multicity_86case_representability_recovery_2026-10-07.json
+          git diff --cached --quiet && exit 0
+          git commit -m "Freeze multicity 86-case representability recovery"
+          git push origin HEAD:attack-event-multicity-86case-representability-recovery-2026-10-07
+      - uses: actions/upload-artifact@v4
+        with:
+          name: multicity-86case-representability-recovery-${{ github.run_id }}
+          path: research/attack_event_multicity_86case_representability_recovery_2026-10-07.json
+          if-no-files-found: error
+          retention-days: 30
