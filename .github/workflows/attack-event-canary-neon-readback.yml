@@ -1,0 +1,95 @@
+name: Attack-event canary Neon read-back
+on:
+  push:
+    branches: [main]
+    paths:
+      - deploy/attack-event-canary-readback-trigger.txt
+permissions:
+  contents: read
+jobs:
+  readback:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install "psycopg[binary]>=3.2,<4"
+      - name: Read-only Neon canary audit
+        env:
+          DATABASE_URL: ${{ secrets.PHASE1_PROD_SHADOW_DATABASE_URL }}
+        run: |
+          python - <<'PY'
+          import json, os
+          import psycopg
+          from psycopg.rows import dict_row
+          cutoff="2026-10-07T14:36:24Z"
+          run_id=37639333609
+          blocked=("kharkiv","3f3c88cb48e0e8c3b7b9f720")
+          with psycopg.connect(os.environ["DATABASE_URL"], autocommit=True, row_factory=dict_row) as conn:
+            with conn.cursor() as cur:
+              cur.execute("""
+                SELECT classification_uid::text, classification_key, city_key,
+                       historical_episode_id, alert_start_at::text, alert_end_at::text,
+                       verdict, classifier_blob_sha,
+                       supersedes_classification_uid::text,
+                       origin_workflow_run_id, created_at::text
+                FROM public.attack_event_classifications
+                WHERE created_at >= %s::timestamptz
+                ORDER BY created_at, classification_uid
+              """,(cutoff,))
+              rows=cur.fetchall()
+              cur.execute("""
+                SELECT count(*)::int AS n FROM public.alert_episodes
+                WHERE city_key=%s AND legacy_episode_id=%s
+              """,blocked)
+              parent_n=cur.fetchone()["n"]
+              cur.execute("""
+                WITH tips AS (
+                  SELECT c.city_key,c.historical_episode_id,c.alert_start_at,c.alert_end_at,c.classification_uid
+                  FROM public.attack_event_classifications c
+                  WHERE NOT EXISTS (
+                    SELECT 1 FROM public.attack_event_classifications n
+                    WHERE n.supersedes_classification_uid=c.classification_uid
+                  )
+                )
+                SELECT COALESCE(sum(n-1),0)::int AS n FROM (
+                  SELECT count(*)::int AS n FROM tips
+                  GROUP BY city_key,historical_episode_id,alert_start_at,alert_end_at
+                  HAVING count(*)>1
+                ) q
+              """)
+              dup_cls=cur.fetchone()["n"]
+              cur.execute("""
+                SELECT COALESCE(sum(n-1),0)::int AS n FROM (
+                  SELECT count(*)::int AS n FROM public.attack_events
+                  GROUP BY city_key,historical_episode_id,alert_start_at,alert_end_at
+                  HAVING count(*)>1
+                ) q
+              """)
+              dup_evt=cur.fetchone()["n"]
+              enriched=[]
+              for r in rows:
+                cur.execute("""
+                  SELECT attack_event_uid::text,event_status
+                  FROM public.attack_events
+                  WHERE current_classification_uid=%s
+                """,(r["classification_uid"],))
+                evt=cur.fetchone()
+                cur.execute("SELECT count(*)::int AS n FROM public.attack_event_sources WHERE classification_uid=%s",(r["classification_uid"],))
+                src=cur.fetchone()["n"]
+                enriched.append({**r,"attack_event_uid":evt["attack_event_uid"] if evt else None,"evidence_linkage_count":src})
+          canary=[r for r in enriched if r["origin_workflow_run_id"]==run_id]
+          unauthorized=[r for r in enriched if r["origin_workflow_run_id"]!=run_id]
+          out={
+            "cutoff":cutoff,
+            "canary_run_id":run_id,
+            "post_cutoff_rows":enriched,
+            "canary_rows":canary,
+            "unauthorized_rows":unauthorized,
+            "blocked_parent_matches":parent_n,
+            "duplicate_classification_rows":dup_cls,
+            "duplicate_attack_event_rows":dup_evt
+          }
+          print("CANARY_READBACK_JSON="+json.dumps(out,default=str,separators=(",",":")))
+          PY
