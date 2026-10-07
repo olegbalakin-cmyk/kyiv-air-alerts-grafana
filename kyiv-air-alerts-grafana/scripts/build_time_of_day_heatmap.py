@@ -340,6 +340,32 @@ def analysis_end(dashboard: dict, key: str) -> date:
     return date.fromisoformat(str(value)[:10])
 
 
+def enrich_daily28_active_durations(city_output: dict, alerts: list[Alert]) -> None:
+    """Backfill within-day duration metrics for the preview daily series."""
+    for row in city_output.get("daily28", []):
+        raw_day = str(row.get("date") or row.get("time") or "")[:10]
+        try:
+            current_day = date.fromisoformat(raw_day)
+        except ValueError:
+            continue
+
+        day_start = datetime.combine(current_day, time.min, tzinfo=TZ).astimezone(UTC)
+        day_end = datetime.combine(current_day + timedelta(days=1), time.min, tzinfo=TZ).astimezone(UTC)
+        durations_min: list[float] = []
+
+        for alert in alerts:
+            start = max(alert.start.astimezone(UTC), day_start)
+            end = min(alert.end.astimezone(UTC), day_end)
+            if end > start:
+                durations_min.append((end - start).total_seconds() / 60.0)
+
+        row["active_alerts"] = len(durations_min)
+        row["avg_active_alert_duration_minutes"] = (
+            round(sum(durations_min) / len(durations_min), 3)
+            if durations_min else None
+        )
+
+
 def append_current_day_daily28(city_output: dict, alerts: list[Alert], now_local: datetime) -> None:
     """Preview-only daily view: 27 completed days plus the current partial day."""
     today = now_local.astimezone(TZ).date()
@@ -483,6 +509,7 @@ def main() -> None:
         }
 
         city_output = dashboard.get("cities", {}).get(key, {})
+        enrich_daily28_active_durations(city_output, alerts)
         append_current_day_daily28(city_output, alerts, build_now)
 
         # Preview-only current incomplete calendar month, through the latest

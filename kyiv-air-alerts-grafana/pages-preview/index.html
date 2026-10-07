@@ -28,7 +28,7 @@
   <meta name="twitter:image" content="https://olegbalakin-cmyk.github.io/kyiv-air-alerts-grafana/share-card.png">
   <meta name="twitter:image:alt" content="Стилізований графік статистики повітряних тривог">
 
-  <link rel="stylesheet" href="styles.css?v=20261007-5">
+  <link rel="stylesheet" href="styles.css?v=20261007-6">
 </head>
 <body>
   <header class="page-header">
@@ -131,7 +131,7 @@
     <section id="timeOfDaySection" class="comparison-section hidden">
       <div class="section-heading time-profile-heading">
         <div>
-          <div class="eyebrow">Час доби · тест</div>
+          <div class="eyebrow">Час доби</div>
           <h2>Коли протягом доби тривога найчастіше активна</h2>
           <p>Доба поділена на 15-хвилинні інтервали. 100% — найчастіший інтервал у вибраному місті/районі та діапазоні; решта значень показані відносно нього.</p>
         </div>
@@ -155,42 +155,6 @@
         <div class="chart-wrap time-profile-chart"><canvas id="timeOfDayChart"></canvas></div>
         <p class="chart-subtitle time-profile-note">100% — не частка часу під тривогою, а відносний максимум для цього міста/району та діапазону. У підказці показано також фактичну частку часу під тривогою.</p>
       </article>
-    </section>
-
-    <section id="rolling7dSection" class="comparison-section">
-      <div class="section-heading rolling7d-heading">
-        <div>
-          <div class="eyebrow">Ковзні 7 днів</div>
-          <h2>Динаміка за 7-денним вікном</h2>
-          <p>Кожна точка охоплює 7 завершених календарних днів і датована останнім днем вікна; сусідні точки перекриваються на 6 днів. За замовчуванням показано поточний календарний рік.</p>
-        </div>
-        <div class="section-range-controls">
-          <div class="control rolling7d-year-control">
-            <label for="rolling7dYear">Швидкий вибір</label>
-            <select id="rolling7dYear" aria-label="Швидкий вибір періоду для 7-денного вікна"></select>
-          </div>
-          <div class="control date-control">
-            <label for="rolling7dDateFrom">Від</label>
-            <input id="rolling7dDateFrom" type="text" class="date-entry" inputmode="numeric" autocomplete="off" placeholder="YYYY-MM-DD / DD.MM.YYYY">
-          </div>
-          <div class="control date-control">
-            <label for="rolling7dDateTo">До</label>
-            <input id="rolling7dDateTo" type="text" class="date-entry" inputmode="numeric" autocomplete="off" placeholder="YYYY-MM-DD / DD.MM.YYYY">
-          </div>
-        </div>
-      </div>
-      <section class="chart-grid">
-        <article class="panel chart-card wide">
-          <h3>Інтенсивність тривог</h3>
-          <p class="chart-subtitle">Стовпчики: середній час під тривогою на добу за 7 днів. Лінія: середня кількість тривог на день за ті самі 7 днів.</p>
-          <div class="chart-wrap"><canvas id="rolling7dIntensityChart"></canvas></div>
-        </article>
-        <article class="panel chart-card wide">
-          <h3>Середня тривалість однієї тривоги</h3>
-          <p class="chart-subtitle">Середня тривалість тривог, що почалися у відповідному 7-денному вікні.</p>
-          <div class="chart-wrap"><canvas id="rolling7dDurationChart"></canvas></div>
-        </article>
-      </section>
     </section>
 
     <section id="casualtySection" class="comparison-section hidden">
@@ -310,8 +274,25 @@
           <div class="chart-wrap"><canvas id="compareExplosionsChart"></canvas></div>
         </article>
         <article id="compareCasualtiesCard" class="panel chart-card wide">
-          <h3>Загиблі від повітряних атак РФ</h3>
-          <p class="chart-subtitle">Підтверджені смерті за місяцем атаки. Наземні бої та артилерійські обстріли не включені.</p>
+          <div class="time-profile-card-heading">
+            <div>
+              <h3>Загиблі від повітряних атак РФ</h3>
+              <p class="chart-subtitle">Підтверджені смерті за місяцем атаки. Наземні бої та артилерійські обстріли не включені.</p>
+            </div>
+            <div class="compare-casualty-controls">
+              <div class="control compare-casualty-control">
+                <label for="compareCasualtyInterval">Інтервал</label>
+                <select id="compareCasualtyInterval" aria-label="Інтервал для порівняння загиблих">
+                  <option value="monthly">Місяці</option>
+                  <option value="yearly">Роки</option>
+                </select>
+              </div>
+              <div class="control compare-casualty-control">
+                <label for="compareCasualtyYear">Рік</label>
+                <select id="compareCasualtyYear" aria-label="Рік для порівняння загиблих"></select>
+              </div>
+            </div>
+          </div>
           <p id="compareCasualtiesNote" class="chart-subtitle"></p>
           <div class="chart-wrap"><canvas id="compareCasualtiesChart"></canvas></div>
         </article>
@@ -374,7 +355,7 @@
       <p>Ряди загиблих реконструйовані за публічними повідомленнями офіційних органів і медіа. Для оперативного моніторингу Києва, зокрема, використовуються <a href="https://suspilne.media/kyiv/" target="_blank" rel="noopener noreferrer">Суспільне Київ</a>, <a href="https://hromadske.ua/kyyiv" target="_blank" rel="noopener noreferrer">hromadske Київ</a> та <a href="https://www.pravda.com.ua/" target="_blank" rel="noopener noreferrer">Українська правда</a>.</p>
 
       <h3>Як рахуються показники?</h3>
-      <p id="periodMethodology">У розрахунках використовуються лише завершені календарні дні за часовою зоною Europe/Kyiv. Сьогоднішній день не враховується. Показники за останні 28 днів охоплюють рівно 28 завершених днів до вчора включно.</p>
+      <p id="periodMethodology">Базові показники та KPI використовують завершені календарні дні за часовою зоною Europe/Kyiv. KPI за 28 днів охоплюють рівно 28 завершених днів до вчора включно. У графіках з інтервалом «Останні 28 днів» показано 27 завершених днів і поточний неповний день пунктиром.</p>
       <ul class="methodology-metrics">
         <li><strong>Тривог на день</strong> — кількість тривог, що почалися в обраному періоді, поділена на кількість календарних днів.</li>
         <li><strong>Годин під тривогою на добу</strong> — сумарний час під тривогою, поділений на кількість днів. Якщо інтервали тривог перекриваються, спільний час не рахується двічі. Якщо тривога переходить через північ, її час розподіляється між відповідними календарними днями.</li>
@@ -473,6 +454,6 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
-  <script src="app.js?v=20261007-5"></script>
+  <script src="app.js?v=20261007-6"></script>
 </body>
 </html>
