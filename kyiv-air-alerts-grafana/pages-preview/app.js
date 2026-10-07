@@ -1,10 +1,12 @@
 const state = {
   data: null,
+  features: { attack_events: false },
   charts: {},
   tableSort: { key: "alerts", direction: "desc" }
 };
 
 const DATA_URL = "data.json";
+const FEATURES_URL = "features.json";
 const EXPLOSION_LIVE_URL = "https://raw.githubusercontent.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/multicity-wip-2026-09-16/kyiv-air-alerts-grafana/data/explosions_test.json";
 const COLORS = ["#62a0ea", "#8ff0a4", "#f8e45c"];
 const EXPLOSION_COLOR = "#ff9f43";
@@ -151,7 +153,28 @@ function districtText(key){const raw=proxyRaion(key);return currentLanguage==="e
 function rolling7dEnabled() {
   return state.data.multicity_meta?.weekly_mode === "rolling_7d";
 }
+function attackEventFeaturesEnabled() {
+  return state.features?.attack_events === true;
+}
+async function loadPreviewFeatures() {
+  try {
+    const response = await fetch(FEATURES_URL + "?v=" + Date.now(), { cache: "no-store" });
+    if (!response.ok) throw new Error("feature config HTTP " + response.status);
+    const parsed = await response.json();
+    return { attack_events: parsed?.attack_events === true };
+  } catch (err) {
+    console.warn("Preview feature config unavailable; attack-event features stay disabled", err);
+    return { attack_events: false };
+  }
+}
+function applyPreviewFeatureVisibility() {
+  const enabled = attackEventFeaturesEnabled();
+  document.querySelectorAll('[data-preview-feature="attack-events"]').forEach(el => {
+    if (!enabled) el.classList.add("hidden");
+  });
+}
 function explosionCity(key) {
+  if (!attackEventFeaturesEnabled()) return null;
   const explosionKey = key === "ivano-frankivsk" ? "ivano_frankivsk" : key;
   return state.data.explosion_metric_test?.cities?.[explosionKey] || null;
 }
@@ -1548,6 +1571,14 @@ function sharedRows(keys, period) {
 function renderExplosionComparison(keys) {
   const card = $("compareExplosionsCard");
   const note = $("compareExplosionsNote");
+  if (!attackEventFeaturesEnabled()) {
+    card?.classList.add("hidden");
+    if (state.charts.compareExplosionsChart) {
+      state.charts.compareExplosionsChart.destroy();
+      delete state.charts.compareExplosionsChart;
+    }
+    return;
+  }
   const availableKeys = keys.filter(key => (explosionCity(key)?.rolling90 || []).length);
   const missingKeys = keys.filter(key => !availableKeys.includes(key));
 
@@ -2109,20 +2140,27 @@ function bind() {
 }
 
 async function init() {
+  state.features = await loadPreviewFeatures();
+  applyPreviewFeatureVisibility();
+
   const response = await fetch(`${DATA_URL}?v=${Date.now()}`, { cache: "no-store" });
   if (!response.ok) throw new Error(`Failed to load live dashboard data: ${response.status}`);
   state.data = await response.json();
 
-  try {
-    const explosionResponse = await fetch(`${EXPLOSION_LIVE_URL}?v=${Date.now()}`, { cache: "no-store" });
-    if (explosionResponse.ok) {
-      const explosionLive = await explosionResponse.json();
-      if (explosionLive?.meta?.test_only && explosionLive?.cities) {
-        state.data.explosion_metric_test = explosionLive;
+  if (attackEventFeaturesEnabled()) {
+    try {
+      const explosionResponse = await fetch(`${EXPLOSION_LIVE_URL}?v=${Date.now()}`, { cache: "no-store" });
+      if (explosionResponse.ok) {
+        const explosionLive = await explosionResponse.json();
+        if (explosionLive?.meta?.test_only && explosionLive?.cities) {
+          state.data.explosion_metric_test = explosionLive;
+        }
       }
+    } catch (err) {
+      console.warn("Explosion live data unavailable; using embedded preview snapshot", err);
     }
-  } catch (err) {
-    console.warn("Explosion live data unavailable; using embedded preview snapshot", err);
+  } else {
+    delete state.data.explosion_metric_test;
   }
 
   const keys = cityKeys();

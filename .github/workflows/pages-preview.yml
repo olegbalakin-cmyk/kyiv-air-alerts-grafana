@@ -49,6 +49,8 @@ jobs:
           path = Path("kyiv-air-alerts-grafana/data/dashboard_data.json")
           prod = json.loads(path.read_text(encoding="utf-8"))
           wip = json.loads(Path("/tmp/wip-dashboard-data.json").read_text(encoding="utf-8"))
+          features = json.loads(Path("kyiv-air-alerts-grafana/pages-preview/features.json").read_text(encoding="utf-8"))
+          attack_events_enabled = features.get("attack_events") is True
 
           keys = prod.get("multicity_meta", {}).get("production_city_keys", [])
           assert len(keys) == 23, len(keys)
@@ -61,9 +63,13 @@ jobs:
               assert city.get("rolling90"), key
               assert city.get("daily28"), key
 
-          for field in ("casualties_by_city", "explosion_metric_test"):
-              if field in wip:
-                  prod[field] = wip[field]
+          if "casualties_by_city" in wip:
+              prod["casualties_by_city"] = wip["casualties_by_city"]
+
+          if attack_events_enabled and "explosion_metric_test" in wip:
+              prod["explosion_metric_test"] = wip["explosion_metric_test"]
+          else:
+              prod.pop("explosion_metric_test", None)
 
           if prod.get("casualties") and prod.get("casualties_by_city"):
               prod["casualties_by_city"]["kyiv"] = prod["casualties"]
@@ -74,6 +80,8 @@ jobs:
               "cities": len(keys),
               "rolling30_nonempty": sum(bool(prod["cities"][k].get("rolling30")) for k in keys),
               "rolling90_nonempty": sum(bool(prod["cities"][k].get("rolling90")) for k in keys),
+              "attack_events_enabled": attack_events_enabled,
+              "explosion_metric_embedded": "explosion_metric_test" in prod,
           }, ensure_ascii=False))
           PY
 
@@ -303,6 +311,7 @@ jobs:
           cp kyiv-air-alerts-grafana/pages-preview/index.html _site/index.html
           cp kyiv-air-alerts-grafana/pages-preview/styles.css _site/styles.css
           cp kyiv-air-alerts-grafana/pages-preview/app.js _site/app.js
+          cp kyiv-air-alerts-grafana/pages-preview/features.json _site/features.json
           python - <<'PY'
           import struct
           import zlib
@@ -375,8 +384,18 @@ jobs:
           png += chunk(b"IEND", b"")
           Path("_site/share-card.png").write_bytes(png)
           PY
-          cp kyiv-air-alerts-grafana/pages-preview/threat-mix-test.html _site/threat-mix-test.html
-          cp /tmp/kyiv-threat-mix-data.json _site/kyiv-threat-mix-data.json
+          if python - <<'PY'
+          import json
+          from pathlib import Path
+          cfg = json.loads(Path("kyiv-air-alerts-grafana/pages-preview/features.json").read_text(encoding="utf-8"))
+          raise SystemExit(0 if cfg.get("attack_events") is True else 1)
+          PY
+          then
+            cp kyiv-air-alerts-grafana/pages-preview/threat-mix-test.html _site/threat-mix-test.html
+            cp /tmp/kyiv-threat-mix-data.json _site/kyiv-threat-mix-data.json
+          else
+            echo "Attack-event preview features disabled; standalone event pages are not published."
+          fi
           cp kyiv-air-alerts-grafana/data/dashboard_data.json _site/data.json
           touch _site/.nojekyll
 

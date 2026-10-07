@@ -28,7 +28,7 @@
   <meta name="twitter:image" content="https://olegbalakin-cmyk.github.io/kyiv-air-alerts-grafana/share-card.png">
   <meta name="twitter:image:alt" content="Стилізований графік статистики повітряних тривог">
 
-  <link rel="stylesheet" href="styles.css?v=20261007-6">
+  <link rel="stylesheet" href="styles.css?v=20261007-7">
 </head>
 <body>
   <header class="page-header">
@@ -104,7 +104,7 @@
         <strong id="kpiMaxDay">—</strong>
         <small id="kpiMaxDayDate"></small>
       </article>
-      <article id="kpiExplosionsCard" class="kpi-card hidden">
+      <article id="kpiExplosionsCard" class="kpi-card hidden" data-preview-feature="attack-events">
         <span class="kpi-label">Тривог, під час яких повідомлялось про вибухи</span>
         <strong id="kpiExplosionsPct">—</strong>
         <small id="kpiExplosionsRange"></small>
@@ -267,7 +267,7 @@
           <p id="compareTimeOfDayNote" class="chart-subtitle"></p>
           <div class="chart-wrap time-profile-chart"><canvas id="compareTimeOfDayChart"></canvas></div>
         </article>
-        <article id="compareExplosionsCard" class="panel chart-card wide hidden">
+        <article id="compareExplosionsCard" class="panel chart-card wide hidden" data-preview-feature="attack-events">
           <h3>Частка тривог із повідомленнями про вибухи</h3>
           <p class="chart-subtitle">Ковзне 90-денне вікно з кроком відображення 7 днів. Strict-метрика: підтверджене повідомлення саме про вибухи в місті, зіставлене з конкретною тривогою.</p>
           <p id="compareExplosionsNote" class="chart-subtitle"></p>
@@ -454,6 +454,6 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
-  <script src="app.js?v=20261007-6"></script>
+  <script src="app.js?v=20261007-7"></script>
 </body>
 </html>
