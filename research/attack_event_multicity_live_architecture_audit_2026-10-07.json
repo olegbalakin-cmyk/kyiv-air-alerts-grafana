@@ -1,0 +1,2048 @@
+{
+  "schema_version": 1,
+  "kind": "attack_event_multicity_live_architecture_audit",
+  "generated_at": "2026-10-07T06:21:00Z",
+  "repository": "olegbalakin-cmyk/kyiv-air-alerts-grafana",
+  "branch_created_for_audit_artifact": "attack-event-multicity-live-architecture-audit-2026-10-07",
+  "audit_mode": "READ_ONLY_WIRING_AUDIT_WITH_ISOLATED_RESEARCH_ARTIFACT_FREEZE",
+  "scope": {
+    "cities_requested": 23,
+    "cities_audited": 23,
+    "cities": [
+      "cherkasy",
+      "chernihiv",
+      "chernivtsi",
+      "dnipro",
+      "ivano_frankivsk",
+      "kharkiv",
+      "kherson",
+      "khmelnytskyi",
+      "kropyvnytskyi",
+      "kyiv",
+      "lutsk",
+      "lviv",
+      "mykolaiv",
+      "odesa",
+      "poltava",
+      "rivne",
+      "sevastopol",
+      "sumy",
+      "ternopil",
+      "uzhhorod",
+      "vinnytsia",
+      "zaporizhzhia",
+      "zhytomyr"
+    ],
+    "historical_backfill": false,
+    "classifier_semantics_modified": false,
+    "replacement_evidence_fetched": false,
+    "database_queried": false,
+    "database_written": false,
+    "production_deployed": false
+  },
+  "accepted_reference": {
+    "frozen_totals": {
+      "logical_alert_episodes": 26405,
+      "confirmed_positives": 1080,
+      "strict": 1017,
+      "sensitivity": 63,
+      "no_confirmed_event": 23530,
+      "needs_review": 1795
+    },
+    "authoritative_kyiv_classifier": {
+      "commit": "71cb6f6fbe856cc7b96759310fe9cc9c71cc0453",
+      "blob": "778469b74c2aa807d851cf2c2ee35cf4aa785589",
+      "validated_historical_positives": "145/145",
+      "validated_historical_holds": "57/57",
+      "unsupported_promotions": "0/57"
+    }
+  },
+  "evidence": {
+    "live_monitor_workflow": {
+      "path": ".github/workflows/explosion-monitor-wip.yml",
+      "blob": "68591efed8201e0c6e98fb89945c8739f6e73dd8",
+      "scheduler": "20 1-23/4 * * *",
+      "code_checkout_branch": "multicity-wip-2026-09-16",
+      "production_alert_inputs_branch": "site-prod"
+    },
+    "live_monitor_classifier": {
+      "path": "kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py",
+      "live_blob": "927dc89df0b52edd52cb31a126b0d57ca492a278",
+      "authoritative_kyiv_blob": "778469b74c2aa807d851cf2c2ee35cf4aa785589",
+      "blobs_equal": false
+    },
+    "latest_live_run": {
+      "actions_run_id": 37576833298,
+      "job_id": 112647501344,
+      "event": "schedule",
+      "conclusion": "success",
+      "started_at": "2026-10-07T05:32:43Z",
+      "monitor_started_at": "2026-10-07T05:33:15.501011Z",
+      "monitor_finished_at": "2026-10-07T05:57:36.147895Z",
+      "city_count": 23,
+      "new_alert_episodes": 22,
+      "new_review_candidates": 38,
+      "review_queue_size": 3645,
+      "errors": {},
+      "strict_series_modified_by_discovery": false,
+      "monitor_state_commit": "f84a794deb435c690c1423e498f469beeceea5cc"
+    },
+    "canonical_parent_alert_persistence_run": {
+      "workflow": ".github/workflows/update-netlify-site.yml",
+      "actions_run_id": 37571761606,
+      "job_id": 112631749161,
+      "conclusion": "success",
+      "city_count": 23,
+      "canonical_episode_count": 28508,
+      "episodes_existing": 28495,
+      "episodes_inserted": 13,
+      "episodes_updated": 0,
+      "source_observations_inserted": 0,
+      "writes": 15,
+      "note": "multicity canonical parent persistence writes alert_episodes only; it is separate from live attack-event classification persistence"
+    },
+    "source_config_snapshot": {
+      "ukrainealarm_bridge_blob": "201d30d6254a504636cdeb37b2ad252ec3d469e8",
+      "exact_hromada_cities": [
+        "kharkiv",
+        "zaporizhzhia"
+      ],
+      "raion_proxy_cities": [
+        "cherkasy",
+        "chernihiv",
+        "chernivtsi",
+        "dnipro",
+        "ivano_frankivsk",
+        "kherson",
+        "khmelnytskyi",
+        "kropyvnytskyi",
+        "lutsk",
+        "lviv",
+        "mykolaiv",
+        "odesa",
+        "poltava",
+        "rivne",
+        "sumy",
+        "ternopil",
+        "uzhhorod",
+        "vinnytsia",
+        "zhytomyr"
+      ],
+      "kyiv_special_source": true,
+      "sevastopol_special_source": true
+    }
+  },
+  "family_counts": {
+    "distinct_alert_ingestion_families": 4,
+    "distinct_alert_ingestion_code_implementations": 3,
+    "distinct_monitor_families": 1,
+    "distinct_discovery_implementations": 1,
+    "distinct_classifier_implementations_or_blobs": 1,
+    "distinct_persistence_implementations": 1
+  },
+  "alert_ingestion_families": {
+    "UKRAINEALARM_EXACT_HROMADA_REGIONHISTORY": {
+      "cities": [
+        "kharkiv",
+        "zaporizhzhia"
+      ],
+      "implementation": "shared UkraineAlarmClient/history_rows live polling",
+      "normalization": "exact city/hromada API region mapping"
+    },
+    "UKRAINEALARM_RAION_PROXY_REGIONHISTORY": {
+      "cities": [
+        "cherkasy",
+        "chernihiv",
+        "chernivtsi",
+        "dnipro",
+        "ivano_frankivsk",
+        "kherson",
+        "khmelnytskyi",
+        "kropyvnytskyi",
+        "lutsk",
+        "lviv",
+        "mykolaiv",
+        "odesa",
+        "poltava",
+        "rivne",
+        "sumy",
+        "ternopil",
+        "uzhhorod",
+        "vinnytsia",
+        "zhytomyr"
+      ],
+      "implementation": "shared UkraineAlarmClient/history_rows live polling",
+      "normalization": "configured city-raion proxy region mapping"
+    },
+    "KYIV_COMBINED_EXACT_CITY": {
+      "cities": [
+        "kyiv"
+      ],
+      "implementation": "load_kyiv_alert_episodes from production alerts_combined.json",
+      "upstream": "municipal history + Kyiv Digital live exact-city history"
+    },
+    "SEVASTOPOL_VERIFIED_EXACT_CITY_PAIRS": {
+      "cities": [
+        "sevastopol"
+      ],
+      "implementation": "load_sevastopol_alert_episodes from production sevastopol_events.json",
+      "upstream": "verified exact-city start/end pairing from occupation-administration Telegram"
+    }
+  },
+  "monitor_architecture": {
+    "distinct_implementations": 1,
+    "all_cities_share_entrypoint": true,
+    "entrypoint": "monitor_explosion_candidates.py",
+    "scheduler": "explosion-monitor-wip.yml",
+    "active_alert_processing": false,
+    "completed_alert_processing": true,
+    "followup_schedule_hours": [
+      0,
+      24,
+      72,
+      168
+    ],
+    "city_specific_monitor_branching": [
+      "kyiv/sevastopol alert-source adapters only"
+    ],
+    "convergence_point": "after poll_alerts/special_source_alerts, all cities use make_episode/process_events/due_checks/shared discovery/matching/classification"
+  },
+  "discovery_architecture": {
+    "distinct_implementations": 1,
+    "same_engine_all_23": true,
+    "source_configuration": "same Telegram channels and same five Google News query families; city label/alias substitutions differ",
+    "telegram_channels": [
+      "suspilnenews",
+      "ukrpravda_news"
+    ],
+    "google_news_query_families": [
+      "explosion",
+      "impact_arrival",
+      "strike",
+      "attack_consequence",
+      "air_defense_action"
+    ],
+    "publisher_fulltext_rescue": true,
+    "city_specific_discovery_implementation": false
+  },
+  "classifier_architecture": {
+    "distinct_live_implementations_or_blobs": 1,
+    "live_blob": "927dc89df0b52edd52cb31a126b0d57ca492a278",
+    "shared_by_cities": [
+      "cherkasy",
+      "chernihiv",
+      "chernivtsi",
+      "dnipro",
+      "ivano_frankivsk",
+      "kharkiv",
+      "kherson",
+      "khmelnytskyi",
+      "kropyvnytskyi",
+      "kyiv",
+      "lutsk",
+      "lviv",
+      "mykolaiv",
+      "odesa",
+      "poltava",
+      "rivne",
+      "sevastopol",
+      "sumy",
+      "ternopil",
+      "uzhhorod",
+      "vinnytsia",
+      "zaporizhzhia",
+      "zhytomyr"
+    ],
+    "authoritative_kyiv_blob": "778469b74c2aa807d851cf2c2ee35cf4aa785589",
+    "authoritative_equals_live": false,
+    "city_specific_semantics": {
+      "cherkasy": "narrow cherkasy_genitive_city_event exact-city normalization exception",
+      "all_cities": "city-specific aliases in shared ALL_CITY_CONFIG"
+    },
+    "temporal_matching_city_specific": false,
+    "repair_kyiv_call_path_covers_other_cities": {
+      "answer": "YES",
+      "cities": [
+        "cherkasy",
+        "chernihiv",
+        "chernivtsi",
+        "dnipro",
+        "ivano_frankivsk",
+        "kharkiv",
+        "kherson",
+        "khmelnytskyi",
+        "kropyvnytskyi",
+        "kyiv",
+        "lutsk",
+        "lviv",
+        "mykolaiv",
+        "odesa",
+        "poltava",
+        "rivne",
+        "sevastopol",
+        "sumy",
+        "ternopil",
+        "uzhhorod",
+        "vinnytsia",
+        "zaporizhzhia",
+        "zhytomyr"
+      ],
+      "boundary": "wiring only; this does not assert that Kyiv-validated semantics are independently validated for all 22 non-Kyiv cities"
+    }
+  },
+  "persistence_architecture": {
+    "distinct_implementations": 1,
+    "canonical_alert_parent_path": {
+      "cities": [
+        "cherkasy",
+        "chernihiv",
+        "chernivtsi",
+        "dnipro",
+        "ivano_frankivsk",
+        "kharkiv",
+        "kherson",
+        "khmelnytskyi",
+        "kropyvnytskyi",
+        "kyiv",
+        "lutsk",
+        "lviv",
+        "mykolaiv",
+        "odesa",
+        "poltava",
+        "rivne",
+        "sevastopol",
+        "sumy",
+        "ternopil",
+        "uzhhorod",
+        "vinnytsia",
+        "zaporizhzhia",
+        "zhytomyr"
+      ],
+      "writes_alert_episodes": true,
+      "implementation": "site-prod multicity_canonical_shadow.py -> multicity_canonical_postgres.py",
+      "live_monitor_reads_canonical_alert_episodes": false
+    },
+    "live_attack_event_result_path": {
+      "cities": [
+        "cherkasy",
+        "chernihiv",
+        "chernivtsi",
+        "dnipro",
+        "ivano_frankivsk",
+        "kharkiv",
+        "kherson",
+        "khmelnytskyi",
+        "kropyvnytskyi",
+        "kyiv",
+        "lutsk",
+        "lviv",
+        "mykolaiv",
+        "odesa",
+        "poltava",
+        "rivne",
+        "sevastopol",
+        "sumy",
+        "ternopil",
+        "uzhhorod",
+        "vinnytsia",
+        "zaporizhzhia",
+        "zhytomyr"
+      ],
+      "writes_attack_event_classifications": false,
+      "writes_attack_events": false,
+      "writes_canonical_source_evidence_linkage": false,
+      "writes_wip_candidate_queue": true,
+      "shared_gap": true
+    }
+  },
+  "recent_operational_proof": {
+    "source": "existing live run outputs and state delta only",
+    "run_id": 37576833298,
+    "total_new_alert_episodes": 22,
+    "cities_with_new_alert_episodes": [
+      "cherkasy",
+      "chernihiv",
+      "dnipro",
+      "kharkiv",
+      "kherson",
+      "kropyvnytskyi",
+      "kyiv",
+      "mykolaiv",
+      "poltava",
+      "sumy",
+      "vinnytsia",
+      "zhytomyr"
+    ],
+    "per_city": {
+      "cherkasy": {
+        "recent_alerts_seen": 1,
+        "discovery_executed": true,
+        "due_checks": 1,
+        "new_candidates": 0,
+        "classifier_execution_demonstrable": false,
+        "classifier_execution_note": "NOT INDEPENDENTLY DEMONSTRATED BY A NEW-CANDIDATE TRANSITION IN THIS RUN; shared classifier path is wired but all discovered rows were empty or deduplicated",
+        "canonical_final_classification_persisted": false
+      },
+      "chernihiv": {
+        "recent_alerts_seen": 2,
+        "discovery_executed": true,
+        "due_checks": 6,
+        "new_candidates": 0,
+        "classifier_execution_demonstrable": false,
+        "classifier_execution_note": "NOT INDEPENDENTLY DEMONSTRATED BY A NEW-CANDIDATE TRANSITION IN THIS RUN; shared classifier path is wired but all discovered rows were empty or deduplicated",
+        "canonical_final_classification_persisted": false
+      },
+      "dnipro": {
+        "recent_alerts_seen": 4,
+        "discovery_executed": true,
+        "due_checks": 4,
+        "new_candidates": 11,
+        "classifier_execution_demonstrable": true,
+        "classifier_execution_note": "YES: new candidate(s) passed through add_candidates -> classify_candidate in this run",
+        "canonical_final_classification_persisted": false
+      },
+      "kharkiv": {
+        "recent_alerts_seen": 2,
+        "discovery_executed": true,
+        "due_checks": 7,
+        "new_candidates": 1,
+        "classifier_execution_demonstrable": true,
+        "classifier_execution_note": "YES: new candidate(s) passed through add_candidates -> classify_candidate in this run",
+        "canonical_final_classification_persisted": false
+      },
+      "kherson": {
+        "recent_alerts_seen": 2,
+        "discovery_executed": true,
+        "due_checks": 2,
+        "new_candidates": 1,
+        "classifier_execution_demonstrable": true,
+        "classifier_execution_note": "YES: new candidate(s) passed through add_candidates -> classify_candidate in this run",
+        "canonical_final_classification_persisted": false
+      },
+      "kropyvnytskyi": {
+        "recent_alerts_seen": 1,
+        "discovery_executed": true,
+        "due_checks": 2,
+        "new_candidates": 0,
+        "classifier_execution_demonstrable": false,
+        "classifier_execution_note": "NOT INDEPENDENTLY DEMONSTRATED BY A NEW-CANDIDATE TRANSITION IN THIS RUN; shared classifier path is wired but all discovered rows were empty or deduplicated",
+        "canonical_final_classification_persisted": false
+      },
+      "kyiv": {
+        "recent_alerts_seen": 1,
+        "discovery_executed": true,
+        "due_checks": 8,
+        "new_candidates": 24,
+        "classifier_execution_demonstrable": true,
+        "classifier_execution_note": "YES: new candidate(s) passed through add_candidates -> classify_candidate in this run",
+        "canonical_final_classification_persisted": false
+      },
+      "mykolaiv": {
+        "recent_alerts_seen": 4,
+        "discovery_executed": true,
+        "due_checks": 13,
+        "new_candidates": 0,
+        "classifier_execution_demonstrable": false,
+        "classifier_execution_note": "NOT INDEPENDENTLY DEMONSTRATED BY A NEW-CANDIDATE TRANSITION IN THIS RUN; shared classifier path is wired but all discovered rows were empty or deduplicated",
+        "canonical_final_classification_persisted": false
+      },
+      "poltava": {
+        "recent_alerts_seen": 1,
+        "discovery_executed": true,
+        "due_checks": 3,
+        "new_candidates": 0,
+        "classifier_execution_demonstrable": false,
+        "classifier_execution_note": "NOT INDEPENDENTLY DEMONSTRATED BY A NEW-CANDIDATE TRANSITION IN THIS RUN; shared classifier path is wired but all discovered rows were empty or deduplicated",
+        "canonical_final_classification_persisted": false
+      },
+      "sumy": {
+        "recent_alerts_seen": 2,
+        "discovery_executed": true,
+        "due_checks": 3,
+        "new_candidates": 1,
+        "classifier_execution_demonstrable": true,
+        "classifier_execution_note": "YES: new candidate(s) passed through add_candidates -> classify_candidate in this run",
+        "canonical_final_classification_persisted": false
+      },
+      "vinnytsia": {
+        "recent_alerts_seen": 1,
+        "discovery_executed": true,
+        "due_checks": 2,
+        "new_candidates": 0,
+        "classifier_execution_demonstrable": false,
+        "classifier_execution_note": "NOT INDEPENDENTLY DEMONSTRATED BY A NEW-CANDIDATE TRANSITION IN THIS RUN; shared classifier path is wired but all discovered rows were empty or deduplicated",
+        "canonical_final_classification_persisted": false
+      },
+      "zhytomyr": {
+        "recent_alerts_seen": 1,
+        "discovery_executed": true,
+        "due_checks": 5,
+        "new_candidates": 0,
+        "classifier_execution_demonstrable": false,
+        "classifier_execution_note": "NOT INDEPENDENTLY DEMONSTRATED BY A NEW-CANDIDATE TRANSITION IN THIS RUN; shared classifier path is wired but all discovered rows were empty or deduplicated",
+        "canonical_final_classification_persisted": false
+      }
+    },
+    "classifier_execution_demonstrated_cities": [
+      "dnipro",
+      "kharkiv",
+      "kherson",
+      "kyiv",
+      "sumy"
+    ],
+    "no_canonical_final_classification_persisted_cities": [
+      "cherkasy",
+      "chernihiv",
+      "dnipro",
+      "kharkiv",
+      "kherson",
+      "kropyvnytskyi",
+      "kyiv",
+      "mykolaiv",
+      "poltava",
+      "sumy",
+      "vinnytsia",
+      "zhytomyr"
+    ]
+  },
+  "architecture_equivalent_sets": [
+    {
+      "id": "A_UA_PROXY_STANDARD_CLASSIFIER_NORMALIZATION",
+      "cities": [
+        "chernihiv",
+        "chernivtsi",
+        "dnipro",
+        "ivano_frankivsk",
+        "kherson",
+        "khmelnytskyi",
+        "kropyvnytskyi",
+        "lutsk",
+        "lviv",
+        "mykolaiv",
+        "odesa",
+        "poltava",
+        "rivne",
+        "sumy",
+        "ternopil",
+        "uzhhorod",
+        "vinnytsia",
+        "zhytomyr"
+      ],
+      "tuple": [
+        "UKRAINEALARM_RAION_PROXY_REGIONHISTORY",
+        "SHARED_COMPLETED_ALERT_MONITOR_V1",
+        "SHARED_TELEGRAM_GOOGLE_FULLTEXT_V1",
+        "SHARED_LIVE_WIP_CLASSIFIER",
+        "SHARED_WIP_QUEUE_NO_CANONICAL_ATTACK_EVENT_FINALIZATION"
+      ]
+    },
+    {
+      "id": "B_UA_PROXY_CHERKASY_NORMALIZATION",
+      "cities": [
+        "cherkasy"
+      ],
+      "tuple": [
+        "UKRAINEALARM_RAION_PROXY_REGIONHISTORY",
+        "SHARED_COMPLETED_ALERT_MONITOR_V1",
+        "SHARED_TELEGRAM_GOOGLE_FULLTEXT_V1",
+        "SHARED_LIVE_WIP_CLASSIFIER + cherkasy_genitive_city_event",
+        "SHARED_WIP_QUEUE_NO_CANONICAL_ATTACK_EVENT_FINALIZATION"
+      ]
+    },
+    {
+      "id": "C_UA_EXACT_HROMADA",
+      "cities": [
+        "kharkiv",
+        "zaporizhzhia"
+      ],
+      "tuple": [
+        "UKRAINEALARM_EXACT_HROMADA_REGIONHISTORY",
+        "SHARED_COMPLETED_ALERT_MONITOR_V1",
+        "SHARED_TELEGRAM_GOOGLE_FULLTEXT_V1",
+        "SHARED_LIVE_WIP_CLASSIFIER",
+        "SHARED_WIP_QUEUE_NO_CANONICAL_ATTACK_EVENT_FINALIZATION"
+      ]
+    },
+    {
+      "id": "D_KYIV_EXACT_COMBINED",
+      "cities": [
+        "kyiv"
+      ],
+      "tuple": [
+        "KYIV_COMBINED_EXACT_CITY",
+        "SHARED_COMPLETED_ALERT_MONITOR_V1",
+        "SHARED_TELEGRAM_GOOGLE_FULLTEXT_V1",
+        "SHARED_LIVE_WIP_CLASSIFIER",
+        "SHARED_WIP_QUEUE_NO_CANONICAL_ATTACK_EVENT_FINALIZATION"
+      ]
+    },
+    {
+      "id": "E_SEVASTOPOL_VERIFIED_PAIRS",
+      "cities": [
+        "sevastopol"
+      ],
+      "tuple": [
+        "SEVASTOPOL_VERIFIED_EXACT_CITY_PAIRS",
+        "SHARED_COMPLETED_ALERT_MONITOR_V1",
+        "SHARED_TELEGRAM_GOOGLE_FULLTEXT_V1",
+        "SHARED_LIVE_WIP_CLASSIFIER",
+        "SHARED_WIP_QUEUE_NO_CANONICAL_ATTACK_EVENT_FINALIZATION"
+      ]
+    }
+  ],
+  "city_specific_special_paths": {
+    "kyiv": "special alert ingestion from alerts_combined.json exact-city store",
+    "sevastopol": "special alert ingestion from verified sevastopol_events.json pairs",
+    "cherkasy": "narrow classifier exact-city genitive normalization exception",
+    "kharkiv": "UkraineAlarm exact city/hromada region mapping rather than raion proxy",
+    "zaporizhzhia": "UkraineAlarm exact city/hromada region mapping rather than raion proxy"
+  },
+  "per_city": {
+    "cherkasy": {
+      "alert_ingestion_family": "UKRAINEALARM_RAION_PROXY_REGIONHISTORY",
+      "authoritative_live_alert_source": "UkraineAlarm official API regionHistory for configured city-raion proxy mapping",
+      "new_completed_alerts_enter_automatically": true,
+      "frozen_episode_universe": {
+        "historical_baseline_exists": true,
+        "baseline_coverage_end": "2026-09-17",
+        "live_future_universe_frozen": false,
+        "behavior": "episodes after baseline_coverage_end are appended automatically when first observed"
+      },
+      "logical_episode_construction": {
+        "raw_episode_id": "sha256(city_key|start|end) truncated to 24 hex chars in live monitor",
+        "completed_pairs_only": true,
+        "representation_grouping": "shared <=90-second start/end tolerance clustering in episode_representation_clusters()",
+        "city_specific_grouping": false
+      },
+      "latest_completed_alert_end_visible_to_live_monitor": "2026-10-07T04:05:43.819199Z",
+      "tracked_postbaseline_episode_rows": 127,
+      "monitor_family": "SHARED_COMPLETED_ALERT_MONITOR_V1",
+      "monitor_entrypoint": "kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py",
+      "monitoring_scheduler": ".github/workflows/explosion-monitor-wip.yml :: cron 20 1-23/4 * * *",
+      "active_vs_completed_behavior": "completed alerts only; immediate check is due at alert_end, then +24h, +72h, +7d",
+      "discovery_family": "SHARED_TELEGRAM_GOOGLE_FULLTEXT_V1",
+      "discovery_sources": {
+        "telegram": [
+          "suspilnenews",
+          "ukrpravda_news"
+        ],
+        "google_news_rss_query_families": [
+          "explosion",
+          "impact_arrival",
+          "strike",
+          "attack_consequence",
+          "air_defense_action"
+        ],
+        "publisher_fulltext": true,
+        "city_specific_source_family": false,
+        "configuration_difference": "city label and alias matching only"
+      },
+      "classifier_family": "SHARED_LIVE_WIP_CLASSIFIER",
+      "live_classifier_module": "kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py",
+      "live_classifier_blob": "927dc89df0b52edd52cb31a126b0d57ca492a278",
+      "same_classifier_code_path_as_kyiv": true,
+      "exact_city_normalization": "shared alias normalization plus narrow cherkasy_genitive_city_event reviewed-phrase exception",
+      "temporal_matching": "shared match_candidate_to_episodes / logical_episode_support / temporal binding and composition path",
+      "persistence_family": "SHARED_WIP_QUEUE_NO_CANONICAL_ATTACK_EVENT_FINALIZATION",
+      "live_persistence": {
+        "canonical_alert_episodes": "YES, but via separate site-prod multicity canonical parent persistence rather than the live attack-event monitor",
+        "canonical_attack_event_classifications": "NO live write",
+        "canonical_attack_events": "NO live write",
+        "canonical_source_or_evidence_linkage": "NO live write from attack-event monitor; candidate evidence remains in WIP queue JSON",
+        "noncanonical_wip_outputs": [
+          "data/explosion_candidate_monitor_state.json",
+          "data/explosion_review_queue.json",
+          "data/explosion_candidate_monitor_last_run.json",
+          "data/explosions_test.json"
+        ]
+      }
+    },
+    "chernihiv": {
+      "alert_ingestion_family": "UKRAINEALARM_RAION_PROXY_REGIONHISTORY",
+      "authoritative_live_alert_source": "UkraineAlarm official API regionHistory for configured city-raion proxy mapping",
+      "new_completed_alerts_enter_automatically": true,
+      "frozen_episode_universe": {
+        "historical_baseline_exists": true,
+        "baseline_coverage_end": "2026-09-17",
+        "live_future_universe_frozen": false,
+        "behavior": "episodes after baseline_coverage_end are appended automatically when first observed"
+      },
+      "logical_episode_construction": {
+        "raw_episode_id": "sha256(city_key|start|end) truncated to 24 hex chars in live monitor",
+        "completed_pairs_only": true,
+        "representation_grouping": "shared <=90-second start/end tolerance clustering in episode_representation_clusters()",
+        "city_specific_grouping": false
+      },
+      "latest_completed_alert_end_visible_to_live_monitor": "2026-10-07T05:26:43.192944Z",
+      "tracked_postbaseline_episode_rows": 139,
+      "monitor_family": "SHARED_COMPLETED_ALERT_MONITOR_V1",
+      "monitor_entrypoint": "kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py",
+      "monitoring_scheduler": ".github/workflows/explosion-monitor-wip.yml :: cron 20 1-23/4 * * *",
+      "active_vs_completed_behavior": "completed alerts only; immediate check is due at alert_end, then +24h, +72h, +7d",
+      "discovery_family": "SHARED_TELEGRAM_GOOGLE_FULLTEXT_V1",
+      "discovery_sources": {
+        "telegram": [
+          "suspilnenews",
+          "ukrpravda_news"
+        ],
+        "google_news_rss_query_families": [
+          "explosion",
+          "impact_arrival",
+          "strike",
+          "attack_consequence",
+          "air_defense_action"
+        ],
+        "publisher_fulltext": true,
+        "city_specific_source_family": false,
+        "configuration_difference": "city label and alias matching only"
+      },
+      "classifier_family": "SHARED_LIVE_WIP_CLASSIFIER",
+      "live_classifier_module": "kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py",
+      "live_classifier_blob": "927dc89df0b52edd52cb31a126b0d57ca492a278",
+      "same_classifier_code_path_as_kyiv": true,
+      "exact_city_normalization": "shared city_mentioned() alias normalization using ALL_CITY_CONFIG",
+      "temporal_matching": "shared match_candidate_to_episodes / logical_episode_support / temporal binding and composition path",
+      "persistence_family": "SHARED_WIP_QUEUE_NO_CANONICAL_ATTACK_EVENT_FINALIZATION",
+      "live_persistence": {
+        "canonical_alert_episodes": "YES, but via separate site-prod multicity canonical parent persistence rather than the live attack-event monitor",
+        "canonical_attack_event_classifications": "NO live write",
+        "canonical_attack_events": "NO live write",
+        "canonical_source_or_evidence_linkage": "NO live write from attack-event monitor; candidate evidence remains in WIP queue JSON",
+        "noncanonical_wip_outputs": [
+          "data/explosion_candidate_monitor_state.json",
+          "data/explosion_review_queue.json",
+          "data/explosion_candidate_monitor_last_run.json",
+          "data/explosions_test.json"
+        ]
+      }
+    },
+    "chernivtsi": {
+      "alert_ingestion_family": "UKRAINEALARM_RAION_PROXY_REGIONHISTORY",
+      "authoritative_live_alert_source": "UkraineAlarm official API regionHistory for configured city-raion proxy mapping",
+      "new_completed_alerts_enter_automatically": true,
+      "frozen_episode_universe": {
+        "historical_baseline_exists": true,
+        "baseline_coverage_end": "2026-09-17",
+        "live_future_universe_frozen": false,
+        "behavior": "episodes after baseline_coverage_end are appended automatically when first observed"
+      },
+      "logical_episode_construction": {
+        "raw_episode_id": "sha256(city_key|start|end) truncated to 24 hex chars in live monitor",
+        "completed_pairs_only": true,
+        "representation_grouping": "shared <=90-second start/end tolerance clustering in episode_representation_clusters()",
+        "city_specific_grouping": false
+      },
+      "latest_completed_alert_end_visible_to_live_monitor": "2026-09-24T09:41:51.479733Z",
+      "tracked_postbaseline_episode_rows": 4,
+      "monitor_family": "SHARED_COMPLETED_ALERT_MONITOR_V1",
+      "monitor_entrypoint": "kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py",
+      "monitoring_scheduler": ".github/workflows/explosion-monitor-wip.yml :: cron 20 1-23/4 * * *",
+      "active_vs_completed_behavior": "completed alerts only; immediate check is due at alert_end, then +24h, +72h, +7d",
+      "discovery_family": "SHARED_TELEGRAM_GOOGLE_FULLTEXT_V1",
+      "discovery_sources": {
+        "telegram": [
+          "suspilnenews",
+          "ukrpravda_news"
+        ],
+        "google_news_rss_query_families": [
+          "explosion",
+          "impact_arrival",
+          "strike",
+          "attack_consequence",
+          "air_defense_action"
+        ],
+        "publisher_fulltext": true,
+        "city_specific_source_family": false,
+        "configuration_difference": "city label and alias matching only"
+      },
+      "classifier_family": "SHARED_LIVE_WIP_CLASSIFIER",
+      "live_classifier_module": "kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py",
+      "live_classifier_blob": "927dc89df0b52edd52cb31a126b0d57ca492a278",
+      "same_classifier_code_path_as_kyiv": true,
+      "exact_city_normalization": "shared city_mentioned() alias normalization using ALL_CITY_CONFIG",
+      "temporal_matching": "shared match_candidate_to_episodes / logical_episode_support / temporal binding and composition path",
+      "persistence_family": "SHARED_WIP_QUEUE_NO_CANONICAL_ATTACK_EVENT_FINALIZATION",
+      "live_persistence": {
+        "canonical_alert_episodes": "YES, but via separate site-prod multicity canonical parent persistence rather than the live attack-event monitor",
+        "canonical_attack_event_classifications": "NO live write",
+        "canonical_attack_events": "NO live write",
+        "canonical_source_or_evidence_linkage": "NO live write from attack-event monitor; candidate evidence remains in WIP queue JSON",
+        "noncanonical_wip_outputs": [
+          "data/explosion_candidate_monitor_state.json",
+          "data/explosion_review_queue.json",
+          "data/explosion_candidate_monitor_last_run.json",
+          "data/explosions_test.json"
+        ]
+      }
+    },
+    "dnipro": {
+      "alert_ingestion_family": "UKRAINEALARM_RAION_PROXY_REGIONHISTORY",
+      "authoritative_live_alert_source": "UkraineAlarm official API regionHistory for configured city-raion proxy mapping",
+      "new_completed_alerts_enter_automatically": true,
+      "frozen_episode_universe": {
+        "historical_baseline_exists": true,
+        "baseline_coverage_end": "2026-09-17",
+        "live_future_universe_frozen": false,
+        "behavior": "episodes after baseline_coverage_end are appended automatically when first observed"
+      },
+      "logical_episode_construction": {
+        "raw_episode_id": "sha256(city_key|start|end) truncated to 24 hex chars in live monitor",
+        "completed_pairs_only": true,
+        "representation_grouping": "shared <=90-second start/end tolerance clustering in episode_representation_clusters()",
+        "city_specific_grouping": false
+      },
+      "latest_completed_alert_end_visible_to_live_monitor": "2026-10-07T05:25:13.373722Z",
+      "tracked_postbaseline_episode_rows": 158,
+      "monitor_family": "SHARED_COMPLETED_ALERT_MONITOR_V1",
+      "monitor_entrypoint": "kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py",
+      "monitoring_scheduler": ".github/workflows/explosion-monitor-wip.yml :: cron 20 1-23/4 * * *",
+      "active_vs_completed_behavior": "completed alerts only; immediate check is due at alert_end, then +24h, +72h, +7d",
+      "discovery_family": "SHARED_TELEGRAM_GOOGLE_FULLTEXT_V1",
+      "discovery_sources": {
+        "telegram": [
+          "suspilnenews",
+          "ukrpravda_news"
+        ],
+        "google_news_rss_query_families": [
+          "explosion",
+          "impact_arrival",
+          "strike",
+          "attack_consequence",
+          "air_defense_action"
+        ],
+        "publisher_fulltext": true,
+        "city_specific_source_family": false,
+        "configuration_difference": "city label and alias matching only"
+      },
+      "classifier_family": "SHARED_LIVE_WIP_CLASSIFIER",
+      "live_classifier_module": "kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py",
+      "live_classifier_blob": "927dc89df0b52edd52cb31a126b0d57ca492a278",
+      "same_classifier_code_path_as_kyiv": true,
+      "exact_city_normalization": "shared city_mentioned() alias normalization using ALL_CITY_CONFIG",
+      "temporal_matching": "shared match_candidate_to_episodes / logical_episode_support / temporal binding and composition path",
+      "persistence_family": "SHARED_WIP_QUEUE_NO_CANONICAL_ATTACK_EVENT_FINALIZATION",
+      "live_persistence": {
+        "canonical_alert_episodes": "YES, but via separate site-prod multicity canonical parent persistence rather than the live attack-event monitor",
+        "canonical_attack_event_classifications": "NO live write",
+        "canonical_attack_events": "NO live write",
+        "canonical_source_or_evidence_linkage": "NO live write from attack-event monitor; candidate evidence remains in WIP queue JSON",
+        "noncanonical_wip_outputs": [
+          "data/explosion_candidate_monitor_state.json",
+          "data/explosion_review_queue.json",
+          "data/explosion_candidate_monitor_last_run.json",
+          "data/explosions_test.json"
+        ]
+      }
+    },
+    "ivano_frankivsk": {
+      "alert_ingestion_family": "UKRAINEALARM_RAION_PROXY_REGIONHISTORY",
+      "authoritative_live_alert_source": "UkraineAlarm official API regionHistory for configured city-raion proxy mapping",
+      "new_completed_alerts_enter_automatically": true,
+      "frozen_episode_universe": {
+        "historical_baseline_exists": true,
+        "baseline_coverage_end": "2026-09-17",
+        "live_future_universe_frozen": false,
+        "behavior": "episodes after baseline_coverage_end are appended automatically when first observed"
+      },
+      "logical_episode_construction": {
+        "raw_episode_id": "sha256(city_key|start|end) truncated to 24 hex chars in live monitor",
+        "completed_pairs_only": true,
+        "representation_grouping": "shared <=90-second start/end tolerance clustering in episode_representation_clusters()",
+        "city_specific_grouping": false
+      },
+      "latest_completed_alert_end_visible_to_live_monitor": "2026-09-29T07:07:45.136278Z",
+      "tracked_postbaseline_episode_rows": 2,
+      "monitor_family": "SHARED_COMPLETED_ALERT_MONITOR_V1",
+      "monitor_entrypoint": "kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py",
+      "monitoring_scheduler": ".github/workflows/explosion-monitor-wip.yml :: cron 20 1-23/4 * * *",
+      "active_vs_completed_behavior": "completed alerts only; immediate check is due at alert_end, then +24h, +72h, +7d",
+      "discovery_family": "SHARED_TELEGRAM_GOOGLE_FULLTEXT_V1",
+      "discovery_sources": {
+        "telegram": [
+          "suspilnenews",
+          "ukrpravda_news"
+        ],
+        "google_news_rss_query_families": [
+          "explosion",
+          "impact_arrival",
+          "strike",
+          "attack_consequence",
+          "air_defense_action"
+        ],
+        "publisher_fulltext": true,
+        "city_specific_source_family": false,
+        "configuration_difference": "city label and alias matching only"
+      },
+      "classifier_family": "SHARED_LIVE_WIP_CLASSIFIER",
+      "live_classifier_module": "kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py",
+      "live_classifier_blob": "927dc89df0b52edd52cb31a126b0d57ca492a278",
+      "same_classifier_code_path_as_kyiv": true,
+      "exact_city_normalization": "shared city_mentioned() alias normalization using ALL_CITY_CONFIG",
+      "temporal_matching": "shared match_candidate_to_episodes / logical_episode_support / temporal binding and composition path",
+      "persistence_family": "SHARED_WIP_QUEUE_NO_CANONICAL_ATTACK_EVENT_FINALIZATION",
+      "live_persistence": {
+        "canonical_alert_episodes": "YES, but via separate site-prod multicity canonical parent persistence rather than the live attack-event monitor",
+        "canonical_attack_event_classifications": "NO live write",
+        "canonical_attack_events": "NO live write",
+        "canonical_source_or_evidence_linkage": "NO live write from attack-event monitor; candidate evidence remains in WIP queue JSON",
+        "noncanonical_wip_outputs": [
+          "data/explosion_candidate_monitor_state.json",
+          "data/explosion_review_queue.json",
+          "data/explosion_candidate_monitor_last_run.json",
+          "data/explosions_test.json"
+        ]
+      }
+    },
+    "kharkiv": {
+      "alert_ingestion_family": "UKRAINEALARM_EXACT_HROMADA_REGIONHISTORY",
+      "authoritative_live_alert_source": "UkraineAlarm official API regionHistory for exact city/hromada region mapping",
+      "new_completed_alerts_enter_automatically": true,
+      "frozen_episode_universe": {
+        "historical_baseline_exists": true,
+        "baseline_coverage_end": "2026-09-17",
+        "live_future_universe_frozen": false,
+        "behavior": "episodes after baseline_coverage_end are appended automatically when first observed"
+      },
+      "logical_episode_construction": {
+        "raw_episode_id": "sha256(city_key|start|end) truncated to 24 hex chars in live monitor",
+        "completed_pairs_only": true,
+        "representation_grouping": "shared <=90-second start/end tolerance clustering in episode_representation_clusters()",
+        "city_specific_grouping": false
+      },
+      "latest_completed_alert_end_visible_to_live_monitor": "2026-10-07T05:37:53.902083Z",
+      "tracked_postbaseline_episode_rows": 191,
+      "monitor_family": "SHARED_COMPLETED_ALERT_MONITOR_V1",
+      "monitor_entrypoint": "kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py",
+      "monitoring_scheduler": ".github/workflows/explosion-monitor-wip.yml :: cron 20 1-23/4 * * *",
+      "active_vs_completed_behavior": "completed alerts only; immediate check is due at alert_end, then +24h, +72h, +7d",
+      "discovery_family": "SHARED_TELEGRAM_GOOGLE_FULLTEXT_V1",
+      "discovery_sources": {
+        "telegram": [
+          "suspilnenews",
+          "ukrpravda_news"
+        ],
+        "google_news_rss_query_families": [
+          "explosion",
+          "impact_arrival",
+          "strike",
+          "attack_consequence",
+          "air_defense_action"
+        ],
+        "publisher_fulltext": true,
+        "city_specific_source_family": false,
+        "configuration_difference": "city label and alias matching only"
+      },
+      "classifier_family": "SHARED_LIVE_WIP_CLASSIFIER",
+      "live_classifier_module": "kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py",
+      "live_classifier_blob": "927dc89df0b52edd52cb31a126b0d57ca492a278",
+      "same_classifier_code_path_as_kyiv": true,
+      "exact_city_normalization": "shared city_mentioned() alias normalization using ALL_CITY_CONFIG",
+      "temporal_matching": "shared match_candidate_to_episodes / logical_episode_support / temporal binding and composition path",
+      "persistence_family": "SHARED_WIP_QUEUE_NO_CANONICAL_ATTACK_EVENT_FINALIZATION",
+      "live_persistence": {
+        "canonical_alert_episodes": "YES, but via separate site-prod multicity canonical parent persistence rather than the live attack-event monitor",
+        "canonical_attack_event_classifications": "NO live write",
+        "canonical_attack_events": "NO live write",
+        "canonical_source_or_evidence_linkage": "NO live write from attack-event monitor; candidate evidence remains in WIP queue JSON",
+        "noncanonical_wip_outputs": [
+          "data/explosion_candidate_monitor_state.json",
+          "data/explosion_review_queue.json",
+          "data/explosion_candidate_monitor_last_run.json",
+          "data/explosions_test.json"
+        ]
+      }
+    },
+    "kherson": {
+      "alert_ingestion_family": "UKRAINEALARM_RAION_PROXY_REGIONHISTORY",
+      "authoritative_live_alert_source": "UkraineAlarm official API regionHistory for configured city-raion proxy mapping",
+      "new_completed_alerts_enter_automatically": true,
+      "frozen_episode_universe": {
+        "historical_baseline_exists": true,
+        "baseline_coverage_end": "2026-09-17",
+        "live_future_universe_frozen": false,
+        "behavior": "episodes after baseline_coverage_end are appended automatically when first observed"
+      },
+      "logical_episode_construction": {
+        "raw_episode_id": "sha256(city_key|start|end) truncated to 24 hex chars in live monitor",
+        "completed_pairs_only": true,
+        "representation_grouping": "shared <=90-second start/end tolerance clustering in episode_representation_clusters()",
+        "city_specific_grouping": false
+      },
+      "latest_completed_alert_end_visible_to_live_monitor": "2026-10-07T04:31:09.664692Z",
+      "tracked_postbaseline_episode_rows": 74,
+      "monitor_family": "SHARED_COMPLETED_ALERT_MONITOR_V1",
+      "monitor_entrypoint": "kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py",
+      "monitoring_scheduler": ".github/workflows/explosion-monitor-wip.yml :: cron 20 1-23/4 * * *",
+      "active_vs_completed_behavior": "completed alerts only; immediate check is due at alert_end, then +24h, +72h, +7d",
+      "discovery_family": "SHARED_TELEGRAM_GOOGLE_FULLTEXT_V1",
+      "discovery_sources": {
+        "telegram": [
+          "suspilnenews",
+          "ukrpravda_news"
+        ],
+        "google_news_rss_query_families": [
+          "explosion",
+          "impact_arrival",
+          "strike",
+          "attack_consequence",
+          "air_defense_action"
+        ],
+        "publisher_fulltext": true,
+        "city_specific_source_family": false,
+        "configuration_difference": "city label and alias matching only"
+      },
+      "classifier_family": "SHARED_LIVE_WIP_CLASSIFIER",
+      "live_classifier_module": "kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py",
+      "live_classifier_blob": "927dc89df0b52edd52cb31a126b0d57ca492a278",
+      "same_classifier_code_path_as_kyiv": true,
+      "exact_city_normalization": "shared city_mentioned() alias normalization using ALL_CITY_CONFIG",
+      "temporal_matching": "shared match_candidate_to_episodes / logical_episode_support / temporal binding and composition path",
+      "persistence_family": "SHARED_WIP_QUEUE_NO_CANONICAL_ATTACK_EVENT_FINALIZATION",
+      "live_persistence": {
+        "canonical_alert_episodes": "YES, but via separate site-prod multicity canonical parent persistence rather than the live attack-event monitor",
+        "canonical_attack_event_classifications": "NO live write",
+        "canonical_attack_events": "NO live write",
+        "canonical_source_or_evidence_linkage": "NO live write from attack-event monitor; candidate evidence remains in WIP queue JSON",
+        "noncanonical_wip_outputs": [
+          "data/explosion_candidate_monitor_state.json",
+          "data/explosion_review_queue.json",
+          "data/explosion_candidate_monitor_last_run.json",
+          "data/explosions_test.json"
+        ]
+      }
+    },
+    "khmelnytskyi": {
+      "alert_ingestion_family": "UKRAINEALARM_RAION_PROXY_REGIONHISTORY",
+      "authoritative_live_alert_source": "UkraineAlarm official API regionHistory for configured city-raion proxy mapping",
+      "new_completed_alerts_enter_automatically": true,
+      "frozen_episode_universe": {
+        "historical_baseline_exists": true,
+        "baseline_coverage_end": "2026-09-17",
+        "live_future_universe_frozen": false,
+        "behavior": "episodes after baseline_coverage_end are appended automatically when first observed"
+      },
+      "logical_episode_construction": {
+        "raw_episode_id": "sha256(city_key|start|end) truncated to 24 hex chars in live monitor",
+        "completed_pairs_only": true,
+        "representation_grouping": "shared <=90-second start/end tolerance clustering in episode_representation_clusters()",
+        "city_specific_grouping": false
+      },
+      "latest_completed_alert_end_visible_to_live_monitor": "2026-10-06T20:56:04.407991Z",
+      "tracked_postbaseline_episode_rows": 37,
+      "monitor_family": "SHARED_COMPLETED_ALERT_MONITOR_V1",
+      "monitor_entrypoint": "kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py",
+      "monitoring_scheduler": ".github/workflows/explosion-monitor-wip.yml :: cron 20 1-23/4 * * *",
+      "active_vs_completed_behavior": "completed alerts only; immediate check is due at alert_end, then +24h, +72h, +7d",
+      "discovery_family": "SHARED_TELEGRAM_GOOGLE_FULLTEXT_V1",
+      "discovery_sources": {
+        "telegram": [
+          "suspilnenews",
+          "ukrpravda_news"
+        ],
+        "google_news_rss_query_families": [
+          "explosion",
+          "impact_arrival",
+          "strike",
+          "attack_consequence",
+          "air_defense_action"
+        ],
+        "publisher_fulltext": true,
+        "city_specific_source_family": false,
+        "configuration_difference": "city label and alias matching only"
+      },
+      "classifier_family": "SHARED_LIVE_WIP_CLASSIFIER",
+      "live_classifier_module": "kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py",
+      "live_classifier_blob": "927dc89df0b52edd52cb31a126b0d57ca492a278",
+      "same_classifier_code_path_as_kyiv": true,
+      "exact_city_normalization": "shared city_mentioned() alias normalization using ALL_CITY_CONFIG",
+      "temporal_matching": "shared match_candidate_to_episodes / logical_episode_support / temporal binding and composition path",
+      "persistence_family": "SHARED_WIP_QUEUE_NO_CANONICAL_ATTACK_EVENT_FINALIZATION",
+      "live_persistence": {
+        "canonical_alert_episodes": "YES, but via separate site-prod multicity canonical parent persistence rather than the live attack-event monitor",
+        "canonical_attack_event_classifications": "NO live write",
+        "canonical_attack_events": "NO live write",
+        "canonical_source_or_evidence_linkage": "NO live write from attack-event monitor; candidate evidence remains in WIP queue JSON",
+        "noncanonical_wip_outputs": [
+          "data/explosion_candidate_monitor_state.json",
+          "data/explosion_review_queue.json",
+          "data/explosion_candidate_monitor_last_run.json",
+          "data/explosions_test.json"
+        ]
+      }
+    },
+    "kropyvnytskyi": {
+      "alert_ingestion_family": "UKRAINEALARM_RAION_PROXY_REGIONHISTORY",
+      "authoritative_live_alert_source": "UkraineAlarm official API regionHistory for configured city-raion proxy mapping",
+      "new_completed_alerts_enter_automatically": true,
+      "frozen_episode_universe": {
+        "historical_baseline_exists": true,
+        "baseline_coverage_end": "2026-09-17",
+        "live_future_universe_frozen": false,
+        "behavior": "episodes after baseline_coverage_end are appended automatically when first observed"
+      },
+      "logical_episode_construction": {
+        "raw_episode_id": "sha256(city_key|start|end) truncated to 24 hex chars in live monitor",
+        "completed_pairs_only": true,
+        "representation_grouping": "shared <=90-second start/end tolerance clustering in episode_representation_clusters()",
+        "city_specific_grouping": false
+      },
+      "latest_completed_alert_end_visible_to_live_monitor": "2026-10-07T04:39:14.345248Z",
+      "tracked_postbaseline_episode_rows": 143,
+      "monitor_family": "SHARED_COMPLETED_ALERT_MONITOR_V1",
+      "monitor_entrypoint": "kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py",
+      "monitoring_scheduler": ".github/workflows/explosion-monitor-wip.yml :: cron 20 1-23/4 * * *",
+      "active_vs_completed_behavior": "completed alerts only; immediate check is due at alert_end, then +24h, +72h, +7d",
+      "discovery_family": "SHARED_TELEGRAM_GOOGLE_FULLTEXT_V1",
+      "discovery_sources": {
+        "telegram": [
+          "suspilnenews",
+          "ukrpravda_news"
+        ],
+        "google_news_rss_query_families": [
+          "explosion",
+          "impact_arrival",
+          "strike",
+          "attack_consequence",
+          "air_defense_action"
+        ],
+        "publisher_fulltext": true,
+        "city_specific_source_family": false,
+        "configuration_difference": "city label and alias matching only"
+      },
+      "classifier_family": "SHARED_LIVE_WIP_CLASSIFIER",
+      "live_classifier_module": "kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py",
+      "live_classifier_blob": "927dc89df0b52edd52cb31a126b0d57ca492a278",
+      "same_classifier_code_path_as_kyiv": true,
+      "exact_city_normalization": "shared city_mentioned() alias normalization using ALL_CITY_CONFIG",
+      "temporal_matching": "shared match_candidate_to_episodes / logical_episode_support / temporal binding and composition path",
+      "persistence_family": "SHARED_WIP_QUEUE_NO_CANONICAL_ATTACK_EVENT_FINALIZATION",
+      "live_persistence": {
+        "canonical_alert_episodes": "YES, but via separate site-prod multicity canonical parent persistence rather than the live attack-event monitor",
+        "canonical_attack_event_classifications": "NO live write",
+        "canonical_attack_events": "NO live write",
+        "canonical_source_or_evidence_linkage": "NO live write from attack-event monitor; candidate evidence remains in WIP queue JSON",
+        "noncanonical_wip_outputs": [
+          "data/explosion_candidate_monitor_state.json",
+          "data/explosion_review_queue.json",
+          "data/explosion_candidate_monitor_last_run.json",
+          "data/explosions_test.json"
+        ]
+      }
+    },
+    "kyiv": {
+      "alert_ingestion_family": "KYIV_COMBINED_EXACT_CITY",
+      "authoritative_live_alert_source": "site-prod alerts_combined.json; upstream Kyiv municipal history + Kyiv Digital live exact-city history",
+      "new_completed_alerts_enter_automatically": true,
+      "frozen_episode_universe": {
+        "historical_baseline_exists": true,
+        "baseline_coverage_end": "2026-09-17",
+        "live_future_universe_frozen": false,
+        "behavior": "episodes after baseline_coverage_end are appended automatically when first observed"
+      },
+      "logical_episode_construction": {
+        "raw_episode_id": "sha256(city_key|start|end) truncated to 24 hex chars in live monitor",
+        "completed_pairs_only": true,
+        "representation_grouping": "shared <=90-second start/end tolerance clustering in episode_representation_clusters()",
+        "city_specific_grouping": false
+      },
+      "latest_completed_alert_end_visible_to_live_monitor": "2026-10-07T04:06:00Z",
+      "tracked_postbaseline_episode_rows": 282,
+      "monitor_family": "SHARED_COMPLETED_ALERT_MONITOR_V1",
+      "monitor_entrypoint": "kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py",
+      "monitoring_scheduler": ".github/workflows/explosion-monitor-wip.yml :: cron 20 1-23/4 * * *",
+      "active_vs_completed_behavior": "completed alerts only; immediate check is due at alert_end, then +24h, +72h, +7d",
+      "discovery_family": "SHARED_TELEGRAM_GOOGLE_FULLTEXT_V1",
+      "discovery_sources": {
+        "telegram": [
+          "suspilnenews",
+          "ukrpravda_news"
+        ],
+        "google_news_rss_query_families": [
+          "explosion",
+          "impact_arrival",
+          "strike",
+          "attack_consequence",
+          "air_defense_action"
+        ],
+        "publisher_fulltext": true,
+        "city_specific_source_family": false,
+        "configuration_difference": "city label and alias matching only"
+      },
+      "classifier_family": "SHARED_LIVE_WIP_CLASSIFIER",
+      "live_classifier_module": "kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py",
+      "live_classifier_blob": "927dc89df0b52edd52cb31a126b0d57ca492a278",
+      "same_classifier_code_path_as_kyiv": true,
+      "exact_city_normalization": "shared city_mentioned() alias normalization using ALL_CITY_CONFIG",
+      "temporal_matching": "shared match_candidate_to_episodes / logical_episode_support / temporal binding and composition path",
+      "persistence_family": "SHARED_WIP_QUEUE_NO_CANONICAL_ATTACK_EVENT_FINALIZATION",
+      "live_persistence": {
+        "canonical_alert_episodes": "YES, but via separate site-prod multicity canonical parent persistence rather than the live attack-event monitor",
+        "canonical_attack_event_classifications": "NO live write",
+        "canonical_attack_events": "NO live write",
+        "canonical_source_or_evidence_linkage": "NO live write from attack-event monitor; candidate evidence remains in WIP queue JSON",
+        "noncanonical_wip_outputs": [
+          "data/explosion_candidate_monitor_state.json",
+          "data/explosion_review_queue.json",
+          "data/explosion_candidate_monitor_last_run.json",
+          "data/explosions_test.json"
+        ]
+      }
+    },
+    "lutsk": {
+      "alert_ingestion_family": "UKRAINEALARM_RAION_PROXY_REGIONHISTORY",
+      "authoritative_live_alert_source": "UkraineAlarm official API regionHistory for configured city-raion proxy mapping",
+      "new_completed_alerts_enter_automatically": true,
+      "frozen_episode_universe": {
+        "historical_baseline_exists": true,
+        "baseline_coverage_end": "2026-09-17",
+        "live_future_universe_frozen": false,
+        "behavior": "episodes after baseline_coverage_end are appended automatically when first observed"
+      },
+      "logical_episode_construction": {
+        "raw_episode_id": "sha256(city_key|start|end) truncated to 24 hex chars in live monitor",
+        "completed_pairs_only": true,
+        "representation_grouping": "shared <=90-second start/end tolerance clustering in episode_representation_clusters()",
+        "city_specific_grouping": false
+      },
+      "latest_completed_alert_end_visible_to_live_monitor": "2026-10-05T16:38:06.312333Z",
+      "tracked_postbaseline_episode_rows": 27,
+      "monitor_family": "SHARED_COMPLETED_ALERT_MONITOR_V1",
+      "monitor_entrypoint": "kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py",
+      "monitoring_scheduler": ".github/workflows/explosion-monitor-wip.yml :: cron 20 1-23/4 * * *",
+      "active_vs_completed_behavior": "completed alerts only; immediate check is due at alert_end, then +24h, +72h, +7d",
+      "discovery_family": "SHARED_TELEGRAM_GOOGLE_FULLTEXT_V1",
+      "discovery_sources": {
+        "telegram": [
+          "suspilnenews",
+          "ukrpravda_news"
+        ],
+        "google_news_rss_query_families": [
+          "explosion",
+          "impact_arrival",
+          "strike",
+          "attack_consequence",
+          "air_defense_action"
+        ],
+        "publisher_fulltext": true,
+        "city_specific_source_family": false,
+        "configuration_difference": "city label and alias matching only"
+      },
+      "classifier_family": "SHARED_LIVE_WIP_CLASSIFIER",
+      "live_classifier_module": "kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py",
+      "live_classifier_blob": "927dc89df0b52edd52cb31a126b0d57ca492a278",
+      "same_classifier_code_path_as_kyiv": true,
+      "exact_city_normalization": "shared city_mentioned() alias normalization using ALL_CITY_CONFIG",
+      "temporal_matching": "shared match_candidate_to_episodes / logical_episode_support / temporal binding and composition path",
+      "persistence_family": "SHARED_WIP_QUEUE_NO_CANONICAL_ATTACK_EVENT_FINALIZATION",
+      "live_persistence": {
+        "canonical_alert_episodes": "YES, but via separate site-prod multicity canonical parent persistence rather than the live attack-event monitor",
+        "canonical_attack_event_classifications": "NO live write",
+        "canonical_attack_events": "NO live write",
+        "canonical_source_or_evidence_linkage": "NO live write from attack-event monitor; candidate evidence remains in WIP queue JSON",
+        "noncanonical_wip_outputs": [
+          "data/explosion_candidate_monitor_state.json",
+          "data/explosion_review_queue.json",
+          "data/explosion_candidate_monitor_last_run.json",
+          "data/explosions_test.json"
+        ]
+      }
+    },
+    "lviv": {
+      "alert_ingestion_family": "UKRAINEALARM_RAION_PROXY_REGIONHISTORY",
+      "authoritative_live_alert_source": "UkraineAlarm official API regionHistory for configured city-raion proxy mapping",
+      "new_completed_alerts_enter_automatically": true,
+      "frozen_episode_universe": {
+        "historical_baseline_exists": true,
+        "baseline_coverage_end": "2026-09-17",
+        "live_future_universe_frozen": false,
+        "behavior": "episodes after baseline_coverage_end are appended automatically when first observed"
+      },
+      "logical_episode_construction": {
+        "raw_episode_id": "sha256(city_key|start|end) truncated to 24 hex chars in live monitor",
+        "completed_pairs_only": true,
+        "representation_grouping": "shared <=90-second start/end tolerance clustering in episode_representation_clusters()",
+        "city_specific_grouping": false
+      },
+      "latest_completed_alert_end_visible_to_live_monitor": "2026-09-17T10:41:50.457837Z",
+      "tracked_postbaseline_episode_rows": 0,
+      "monitor_family": "SHARED_COMPLETED_ALERT_MONITOR_V1",
+      "monitor_entrypoint": "kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py",
+      "monitoring_scheduler": ".github/workflows/explosion-monitor-wip.yml :: cron 20 1-23/4 * * *",
+      "active_vs_completed_behavior": "completed alerts only; immediate check is due at alert_end, then +24h, +72h, +7d",
+      "discovery_family": "SHARED_TELEGRAM_GOOGLE_FULLTEXT_V1",
+      "discovery_sources": {
+        "telegram": [
+          "suspilnenews",
+          "ukrpravda_news"
+        ],
+        "google_news_rss_query_families": [
+          "explosion",
+          "impact_arrival",
+          "strike",
+          "attack_consequence",
+          "air_defense_action"
+        ],
+        "publisher_fulltext": true,
+        "city_specific_source_family": false,
+        "configuration_difference": "city label and alias matching only"
+      },
+      "classifier_family": "SHARED_LIVE_WIP_CLASSIFIER",
+      "live_classifier_module": "kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py",
+      "live_classifier_blob": "927dc89df0b52edd52cb31a126b0d57ca492a278",
+      "same_classifier_code_path_as_kyiv": true,
+      "exact_city_normalization": "shared city_mentioned() alias normalization using ALL_CITY_CONFIG",
+      "temporal_matching": "shared match_candidate_to_episodes / logical_episode_support / temporal binding and composition path",
+      "persistence_family": "SHARED_WIP_QUEUE_NO_CANONICAL_ATTACK_EVENT_FINALIZATION",
+      "live_persistence": {
+        "canonical_alert_episodes": "YES, but via separate site-prod multicity canonical parent persistence rather than the live attack-event monitor",
+        "canonical_attack_event_classifications": "NO live write",
+        "canonical_attack_events": "NO live write",
+        "canonical_source_or_evidence_linkage": "NO live write from attack-event monitor; candidate evidence remains in WIP queue JSON",
+        "noncanonical_wip_outputs": [
+          "data/explosion_candidate_monitor_state.json",
+          "data/explosion_review_queue.json",
+          "data/explosion_candidate_monitor_last_run.json",
+          "data/explosions_test.json"
+        ]
+      }
+    },
+    "mykolaiv": {
+      "alert_ingestion_family": "UKRAINEALARM_RAION_PROXY_REGIONHISTORY",
+      "authoritative_live_alert_source": "UkraineAlarm official API regionHistory for configured city-raion proxy mapping",
+      "new_completed_alerts_enter_automatically": true,
+      "frozen_episode_universe": {
+        "historical_baseline_exists": true,
+        "baseline_coverage_end": "2026-09-17",
+        "live_future_universe_frozen": false,
+        "behavior": "episodes after baseline_coverage_end are appended automatically when first observed"
+      },
+      "logical_episode_construction": {
+        "raw_episode_id": "sha256(city_key|start|end) truncated to 24 hex chars in live monitor",
+        "completed_pairs_only": true,
+        "representation_grouping": "shared <=90-second start/end tolerance clustering in episode_representation_clusters()",
+        "city_specific_grouping": false
+      },
+      "latest_completed_alert_end_visible_to_live_monitor": "2026-10-07T04:58:47.911207Z",
+      "tracked_postbaseline_episode_rows": 260,
+      "monitor_family": "SHARED_COMPLETED_ALERT_MONITOR_V1",
+      "monitor_entrypoint": "kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py",
+      "monitoring_scheduler": ".github/workflows/explosion-monitor-wip.yml :: cron 20 1-23/4 * * *",
+      "active_vs_completed_behavior": "completed alerts only; immediate check is due at alert_end, then +24h, +72h, +7d",
+      "discovery_family": "SHARED_TELEGRAM_GOOGLE_FULLTEXT_V1",
+      "discovery_sources": {
+        "telegram": [
+          "suspilnenews",
+          "ukrpravda_news"
+        ],
+        "google_news_rss_query_families": [
+          "explosion",
+          "impact_arrival",
+          "strike",
+          "attack_consequence",
+          "air_defense_action"
+        ],
+        "publisher_fulltext": true,
+        "city_specific_source_family": false,
+        "configuration_difference": "city label and alias matching only"
+      },
+      "classifier_family": "SHARED_LIVE_WIP_CLASSIFIER",
+      "live_classifier_module": "kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py",
+      "live_classifier_blob": "927dc89df0b52edd52cb31a126b0d57ca492a278",
+      "same_classifier_code_path_as_kyiv": true,
+      "exact_city_normalization": "shared city_mentioned() alias normalization using ALL_CITY_CONFIG",
+      "temporal_matching": "shared match_candidate_to_episodes / logical_episode_support / temporal binding and composition path",
+      "persistence_family": "SHARED_WIP_QUEUE_NO_CANONICAL_ATTACK_EVENT_FINALIZATION",
+      "live_persistence": {
+        "canonical_alert_episodes": "YES, but via separate site-prod multicity canonical parent persistence rather than the live attack-event monitor",
+        "canonical_attack_event_classifications": "NO live write",
+        "canonical_attack_events": "NO live write",
+        "canonical_source_or_evidence_linkage": "NO live write from attack-event monitor; candidate evidence remains in WIP queue JSON",
+        "noncanonical_wip_outputs": [
+          "data/explosion_candidate_monitor_state.json",
+          "data/explosion_review_queue.json",
+          "data/explosion_candidate_monitor_last_run.json",
+          "data/explosions_test.json"
+        ]
+      }
+    },
+    "odesa": {
+      "alert_ingestion_family": "UKRAINEALARM_RAION_PROXY_REGIONHISTORY",
+      "authoritative_live_alert_source": "UkraineAlarm official API regionHistory for configured city-raion proxy mapping",
+      "new_completed_alerts_enter_automatically": true,
+      "frozen_episode_universe": {
+        "historical_baseline_exists": true,
+        "baseline_coverage_end": "2026-09-17",
+        "live_future_universe_frozen": false,
+        "behavior": "episodes after baseline_coverage_end are appended automatically when first observed"
+      },
+      "logical_episode_construction": {
+        "raw_episode_id": "sha256(city_key|start|end) truncated to 24 hex chars in live monitor",
+        "completed_pairs_only": true,
+        "representation_grouping": "shared <=90-second start/end tolerance clustering in episode_representation_clusters()",
+        "city_specific_grouping": false
+      },
+      "latest_completed_alert_end_visible_to_live_monitor": "2026-10-06T19:06:11.223752Z",
+      "tracked_postbaseline_episode_rows": 180,
+      "monitor_family": "SHARED_COMPLETED_ALERT_MONITOR_V1",
+      "monitor_entrypoint": "kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py",
+      "monitoring_scheduler": ".github/workflows/explosion-monitor-wip.yml :: cron 20 1-23/4 * * *",
+      "active_vs_completed_behavior": "completed alerts only; immediate check is due at alert_end, then +24h, +72h, +7d",
+      "discovery_family": "SHARED_TELEGRAM_GOOGLE_FULLTEXT_V1",
+      "discovery_sources": {
+        "telegram": [
+          "suspilnenews",
+          "ukrpravda_news"
+        ],
+        "google_news_rss_query_families": [
+          "explosion",
+          "impact_arrival",
+          "strike",
+          "attack_consequence",
+          "air_defense_action"
+        ],
+        "publisher_fulltext": true,
+        "city_specific_source_family": false,
+        "configuration_difference": "city label and alias matching only"
+      },
+      "classifier_family": "SHARED_LIVE_WIP_CLASSIFIER",
+      "live_classifier_module": "kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py",
+      "live_classifier_blob": "927dc89df0b52edd52cb31a126b0d57ca492a278",
+      "same_classifier_code_path_as_kyiv": true,
+      "exact_city_normalization": "shared city_mentioned() alias normalization using ALL_CITY_CONFIG",
+      "temporal_matching": "shared match_candidate_to_episodes / logical_episode_support / temporal binding and composition path",
+      "persistence_family": "SHARED_WIP_QUEUE_NO_CANONICAL_ATTACK_EVENT_FINALIZATION",
+      "live_persistence": {
+        "canonical_alert_episodes": "YES, but via separate site-prod multicity canonical parent persistence rather than the live attack-event monitor",
+        "canonical_attack_event_classifications": "NO live write",
+        "canonical_attack_events": "NO live write",
+        "canonical_source_or_evidence_linkage": "NO live write from attack-event monitor; candidate evidence remains in WIP queue JSON",
+        "noncanonical_wip_outputs": [
+          "data/explosion_candidate_monitor_state.json",
+          "data/explosion_review_queue.json",
+          "data/explosion_candidate_monitor_last_run.json",
+          "data/explosions_test.json"
+        ]
+      }
+    },
+    "poltava": {
+      "alert_ingestion_family": "UKRAINEALARM_RAION_PROXY_REGIONHISTORY",
+      "authoritative_live_alert_source": "UkraineAlarm official API regionHistory for configured city-raion proxy mapping",
+      "new_completed_alerts_enter_automatically": true,
+      "frozen_episode_universe": {
+        "historical_baseline_exists": true,
+        "baseline_coverage_end": "2026-09-17",
+        "live_future_universe_frozen": false,
+        "behavior": "episodes after baseline_coverage_end are appended automatically when first observed"
+      },
+      "logical_episode_construction": {
+        "raw_episode_id": "sha256(city_key|start|end) truncated to 24 hex chars in live monitor",
+        "completed_pairs_only": true,
+        "representation_grouping": "shared <=90-second start/end tolerance clustering in episode_representation_clusters()",
+        "city_specific_grouping": false
+      },
+      "latest_completed_alert_end_visible_to_live_monitor": "2026-10-07T04:05:44.497675Z",
+      "tracked_postbaseline_episode_rows": 179,
+      "monitor_family": "SHARED_COMPLETED_ALERT_MONITOR_V1",
+      "monitor_entrypoint": "kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py",
+      "monitoring_scheduler": ".github/workflows/explosion-monitor-wip.yml :: cron 20 1-23/4 * * *",
+      "active_vs_completed_behavior": "completed alerts only; immediate check is due at alert_end, then +24h, +72h, +7d",
+      "discovery_family": "SHARED_TELEGRAM_GOOGLE_FULLTEXT_V1",
+      "discovery_sources": {
+        "telegram": [
+          "suspilnenews",
+          "ukrpravda_news"
+        ],
+        "google_news_rss_query_families": [
+          "explosion",
+          "impact_arrival",
+          "strike",
+          "attack_consequence",
+          "air_defense_action"
+        ],
+        "publisher_fulltext": true,
+        "city_specific_source_family": false,
+        "configuration_difference": "city label and alias matching only"
+      },
+      "classifier_family": "SHARED_LIVE_WIP_CLASSIFIER",
+      "live_classifier_module": "kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py",
+      "live_classifier_blob": "927dc89df0b52edd52cb31a126b0d57ca492a278",
+      "same_classifier_code_path_as_kyiv": true,
+      "exact_city_normalization": "shared city_mentioned() alias normalization using ALL_CITY_CONFIG",
+      "temporal_matching": "shared match_candidate_to_episodes / logical_episode_support / temporal binding and composition path",
+      "persistence_family": "SHARED_WIP_QUEUE_NO_CANONICAL_ATTACK_EVENT_FINALIZATION",
+      "live_persistence": {
+        "canonical_alert_episodes": "YES, but via separate site-prod multicity canonical parent persistence rather than the live attack-event monitor",
+        "canonical_attack_event_classifications": "NO live write",
+        "canonical_attack_events": "NO live write",
+        "canonical_source_or_evidence_linkage": "NO live write from attack-event monitor; candidate evidence remains in WIP queue JSON",
+        "noncanonical_wip_outputs": [
+          "data/explosion_candidate_monitor_state.json",
+          "data/explosion_review_queue.json",
+          "data/explosion_candidate_monitor_last_run.json",
+          "data/explosions_test.json"
+        ]
+      }
+    },
+    "rivne": {
+      "alert_ingestion_family": "UKRAINEALARM_RAION_PROXY_REGIONHISTORY",
+      "authoritative_live_alert_source": "UkraineAlarm official API regionHistory for configured city-raion proxy mapping",
+      "new_completed_alerts_enter_automatically": true,
+      "frozen_episode_universe": {
+        "historical_baseline_exists": true,
+        "baseline_coverage_end": "2026-09-17",
+        "live_future_universe_frozen": false,
+        "behavior": "episodes after baseline_coverage_end are appended automatically when first observed"
+      },
+      "logical_episode_construction": {
+        "raw_episode_id": "sha256(city_key|start|end) truncated to 24 hex chars in live monitor",
+        "completed_pairs_only": true,
+        "representation_grouping": "shared <=90-second start/end tolerance clustering in episode_representation_clusters()",
+        "city_specific_grouping": false
+      },
+      "latest_completed_alert_end_visible_to_live_monitor": "2026-10-06T18:17:42.407398Z",
+      "tracked_postbaseline_episode_rows": 55,
+      "monitor_family": "SHARED_COMPLETED_ALERT_MONITOR_V1",
+      "monitor_entrypoint": "kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py",
+      "monitoring_scheduler": ".github/workflows/explosion-monitor-wip.yml :: cron 20 1-23/4 * * *",
+      "active_vs_completed_behavior": "completed alerts only; immediate check is due at alert_end, then +24h, +72h, +7d",
+      "discovery_family": "SHARED_TELEGRAM_GOOGLE_FULLTEXT_V1",
+      "discovery_sources": {
+        "telegram": [
+          "suspilnenews",
+          "ukrpravda_news"
+        ],
+        "google_news_rss_query_families": [
+          "explosion",
+          "impact_arrival",
+          "strike",
+          "attack_consequence",
+          "air_defense_action"
+        ],
+        "publisher_fulltext": true,
+        "city_specific_source_family": false,
+        "configuration_difference": "city label and alias matching only"
+      },
+      "classifier_family": "SHARED_LIVE_WIP_CLASSIFIER",
+      "live_classifier_module": "kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py",
+      "live_classifier_blob": "927dc89df0b52edd52cb31a126b0d57ca492a278",
+      "same_classifier_code_path_as_kyiv": true,
+      "exact_city_normalization": "shared city_mentioned() alias normalization using ALL_CITY_CONFIG",
+      "temporal_matching": "shared match_candidate_to_episodes / logical_episode_support / temporal binding and composition path",
+      "persistence_family": "SHARED_WIP_QUEUE_NO_CANONICAL_ATTACK_EVENT_FINALIZATION",
+      "live_persistence": {
+        "canonical_alert_episodes": "YES, but via separate site-prod multicity canonical parent persistence rather than the live attack-event monitor",
+        "canonical_attack_event_classifications": "NO live write",
+        "canonical_attack_events": "NO live write",
+        "canonical_source_or_evidence_linkage": "NO live write from attack-event monitor; candidate evidence remains in WIP queue JSON",
+        "noncanonical_wip_outputs": [
+          "data/explosion_candidate_monitor_state.json",
+          "data/explosion_review_queue.json",
+          "data/explosion_candidate_monitor_last_run.json",
+          "data/explosions_test.json"
+        ]
+      }
+    },
+    "sevastopol": {
+      "alert_ingestion_family": "SEVASTOPOL_VERIFIED_EXACT_CITY_PAIRS",
+      "authoritative_live_alert_source": "site-prod sevastopol_events.json verified completed exact-city pairs; upstream Sevastopol occupation-administration Telegram event pairing",
+      "new_completed_alerts_enter_automatically": true,
+      "frozen_episode_universe": {
+        "historical_baseline_exists": true,
+        "baseline_coverage_end": "2026-09-17",
+        "live_future_universe_frozen": false,
+        "behavior": "episodes after baseline_coverage_end are appended automatically when first observed"
+      },
+      "logical_episode_construction": {
+        "raw_episode_id": "sha256(city_key|start|end) truncated to 24 hex chars in live monitor",
+        "completed_pairs_only": true,
+        "representation_grouping": "shared <=90-second start/end tolerance clustering in episode_representation_clusters()",
+        "city_specific_grouping": false
+      },
+      "latest_completed_alert_end_visible_to_live_monitor": "2026-10-07T01:03:18Z",
+      "tracked_postbaseline_episode_rows": 26,
+      "monitor_family": "SHARED_COMPLETED_ALERT_MONITOR_V1",
+      "monitor_entrypoint": "kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py",
+      "monitoring_scheduler": ".github/workflows/explosion-monitor-wip.yml :: cron 20 1-23/4 * * *",
+      "active_vs_completed_behavior": "completed alerts only; immediate check is due at alert_end, then +24h, +72h, +7d",
+      "discovery_family": "SHARED_TELEGRAM_GOOGLE_FULLTEXT_V1",
+      "discovery_sources": {
+        "telegram": [
+          "suspilnenews",
+          "ukrpravda_news"
+        ],
+        "google_news_rss_query_families": [
+          "explosion",
+          "impact_arrival",
+          "strike",
+          "attack_consequence",
+          "air_defense_action"
+        ],
+        "publisher_fulltext": true,
+        "city_specific_source_family": false,
+        "configuration_difference": "city label and alias matching only"
+      },
+      "classifier_family": "SHARED_LIVE_WIP_CLASSIFIER",
+      "live_classifier_module": "kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py",
+      "live_classifier_blob": "927dc89df0b52edd52cb31a126b0d57ca492a278",
+      "same_classifier_code_path_as_kyiv": true,
+      "exact_city_normalization": "shared city_mentioned() alias normalization using ALL_CITY_CONFIG",
+      "temporal_matching": "shared match_candidate_to_episodes / logical_episode_support / temporal binding and composition path",
+      "persistence_family": "SHARED_WIP_QUEUE_NO_CANONICAL_ATTACK_EVENT_FINALIZATION",
+      "live_persistence": {
+        "canonical_alert_episodes": "YES, but via separate site-prod multicity canonical parent persistence rather than the live attack-event monitor",
+        "canonical_attack_event_classifications": "NO live write",
+        "canonical_attack_events": "NO live write",
+        "canonical_source_or_evidence_linkage": "NO live write from attack-event monitor; candidate evidence remains in WIP queue JSON",
+        "noncanonical_wip_outputs": [
+          "data/explosion_candidate_monitor_state.json",
+          "data/explosion_review_queue.json",
+          "data/explosion_candidate_monitor_last_run.json",
+          "data/explosions_test.json"
+        ]
+      }
+    },
+    "sumy": {
+      "alert_ingestion_family": "UKRAINEALARM_RAION_PROXY_REGIONHISTORY",
+      "authoritative_live_alert_source": "UkraineAlarm official API regionHistory for configured city-raion proxy mapping",
+      "new_completed_alerts_enter_automatically": true,
+      "frozen_episode_universe": {
+        "historical_baseline_exists": true,
+        "baseline_coverage_end": "2026-09-17",
+        "live_future_universe_frozen": false,
+        "behavior": "episodes after baseline_coverage_end are appended automatically when first observed"
+      },
+      "logical_episode_construction": {
+        "raw_episode_id": "sha256(city_key|start|end) truncated to 24 hex chars in live monitor",
+        "completed_pairs_only": true,
+        "representation_grouping": "shared <=90-second start/end tolerance clustering in episode_representation_clusters()",
+        "city_specific_grouping": false
+      },
+      "latest_completed_alert_end_visible_to_live_monitor": "2026-10-07T05:36:50.095176Z",
+      "tracked_postbaseline_episode_rows": 211,
+      "monitor_family": "SHARED_COMPLETED_ALERT_MONITOR_V1",
+      "monitor_entrypoint": "kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py",
+      "monitoring_scheduler": ".github/workflows/explosion-monitor-wip.yml :: cron 20 1-23/4 * * *",
+      "active_vs_completed_behavior": "completed alerts only; immediate check is due at alert_end, then +24h, +72h, +7d",
+      "discovery_family": "SHARED_TELEGRAM_GOOGLE_FULLTEXT_V1",
+      "discovery_sources": {
+        "telegram": [
+          "suspilnenews",
+          "ukrpravda_news"
+        ],
+        "google_news_rss_query_families": [
+          "explosion",
+          "impact_arrival",
+          "strike",
+          "attack_consequence",
+          "air_defense_action"
+        ],
+        "publisher_fulltext": true,
+        "city_specific_source_family": false,
+        "configuration_difference": "city label and alias matching only"
+      },
+      "classifier_family": "SHARED_LIVE_WIP_CLASSIFIER",
+      "live_classifier_module": "kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py",
+      "live_classifier_blob": "927dc89df0b52edd52cb31a126b0d57ca492a278",
+      "same_classifier_code_path_as_kyiv": true,
+      "exact_city_normalization": "shared city_mentioned() alias normalization using ALL_CITY_CONFIG",
+      "temporal_matching": "shared match_candidate_to_episodes / logical_episode_support / temporal binding and composition path",
+      "persistence_family": "SHARED_WIP_QUEUE_NO_CANONICAL_ATTACK_EVENT_FINALIZATION",
+      "live_persistence": {
+        "canonical_alert_episodes": "YES, but via separate site-prod multicity canonical parent persistence rather than the live attack-event monitor",
+        "canonical_attack_event_classifications": "NO live write",
+        "canonical_attack_events": "NO live write",
+        "canonical_source_or_evidence_linkage": "NO live write from attack-event monitor; candidate evidence remains in WIP queue JSON",
+        "noncanonical_wip_outputs": [
+          "data/explosion_candidate_monitor_state.json",
+          "data/explosion_review_queue.json",
+          "data/explosion_candidate_monitor_last_run.json",
+          "data/explosions_test.json"
+        ]
+      }
+    },
+    "ternopil": {
+      "alert_ingestion_family": "UKRAINEALARM_RAION_PROXY_REGIONHISTORY",
+      "authoritative_live_alert_source": "UkraineAlarm official API regionHistory for configured city-raion proxy mapping",
+      "new_completed_alerts_enter_automatically": true,
+      "frozen_episode_universe": {
+        "historical_baseline_exists": true,
+        "baseline_coverage_end": "2026-09-17",
+        "live_future_universe_frozen": false,
+        "behavior": "episodes after baseline_coverage_end are appended automatically when first observed"
+      },
+      "logical_episode_construction": {
+        "raw_episode_id": "sha256(city_key|start|end) truncated to 24 hex chars in live monitor",
+        "completed_pairs_only": true,
+        "representation_grouping": "shared <=90-second start/end tolerance clustering in episode_representation_clusters()",
+        "city_specific_grouping": false
+      },
+      "latest_completed_alert_end_visible_to_live_monitor": "2026-10-04T19:17:40.897228Z",
+      "tracked_postbaseline_episode_rows": 11,
+      "monitor_family": "SHARED_COMPLETED_ALERT_MONITOR_V1",
+      "monitor_entrypoint": "kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py",
+      "monitoring_scheduler": ".github/workflows/explosion-monitor-wip.yml :: cron 20 1-23/4 * * *",
+      "active_vs_completed_behavior": "completed alerts only; immediate check is due at alert_end, then +24h, +72h, +7d",
+      "discovery_family": "SHARED_TELEGRAM_GOOGLE_FULLTEXT_V1",
+      "discovery_sources": {
+        "telegram": [
+          "suspilnenews",
+          "ukrpravda_news"
+        ],
+        "google_news_rss_query_families": [
+          "explosion",
+          "impact_arrival",
+          "strike",
+          "attack_consequence",
+          "air_defense_action"
+        ],
+        "publisher_fulltext": true,
+        "city_specific_source_family": false,
+        "configuration_difference": "city label and alias matching only"
+      },
+      "classifier_family": "SHARED_LIVE_WIP_CLASSIFIER",
+      "live_classifier_module": "kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py",
+      "live_classifier_blob": "927dc89df0b52edd52cb31a126b0d57ca492a278",
+      "same_classifier_code_path_as_kyiv": true,
+      "exact_city_normalization": "shared city_mentioned() alias normalization using ALL_CITY_CONFIG",
+      "temporal_matching": "shared match_candidate_to_episodes / logical_episode_support / temporal binding and composition path",
+      "persistence_family": "SHARED_WIP_QUEUE_NO_CANONICAL_ATTACK_EVENT_FINALIZATION",
+      "live_persistence": {
+        "canonical_alert_episodes": "YES, but via separate site-prod multicity canonical parent persistence rather than the live attack-event monitor",
+        "canonical_attack_event_classifications": "NO live write",
+        "canonical_attack_events": "NO live write",
+        "canonical_source_or_evidence_linkage": "NO live write from attack-event monitor; candidate evidence remains in WIP queue JSON",
+        "noncanonical_wip_outputs": [
+          "data/explosion_candidate_monitor_state.json",
+          "data/explosion_review_queue.json",
+          "data/explosion_candidate_monitor_last_run.json",
+          "data/explosions_test.json"
+        ]
+      }
+    },
+    "uzhhorod": {
+      "alert_ingestion_family": "UKRAINEALARM_RAION_PROXY_REGIONHISTORY",
+      "authoritative_live_alert_source": "UkraineAlarm official API regionHistory for configured city-raion proxy mapping",
+      "new_completed_alerts_enter_automatically": true,
+      "frozen_episode_universe": {
+        "historical_baseline_exists": true,
+        "baseline_coverage_end": "2026-09-17",
+        "live_future_universe_frozen": false,
+        "behavior": "episodes after baseline_coverage_end are appended automatically when first observed"
+      },
+      "logical_episode_construction": {
+        "raw_episode_id": "sha256(city_key|start|end) truncated to 24 hex chars in live monitor",
+        "completed_pairs_only": true,
+        "representation_grouping": "shared <=90-second start/end tolerance clustering in episode_representation_clusters()",
+        "city_specific_grouping": false
+      },
+      "latest_completed_alert_end_visible_to_live_monitor": "2026-09-17T10:41:41.009227Z",
+      "tracked_postbaseline_episode_rows": 0,
+      "monitor_family": "SHARED_COMPLETED_ALERT_MONITOR_V1",
+      "monitor_entrypoint": "kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py",
+      "monitoring_scheduler": ".github/workflows/explosion-monitor-wip.yml :: cron 20 1-23/4 * * *",
+      "active_vs_completed_behavior": "completed alerts only; immediate check is due at alert_end, then +24h, +72h, +7d",
+      "discovery_family": "SHARED_TELEGRAM_GOOGLE_FULLTEXT_V1",
+      "discovery_sources": {
+        "telegram": [
+          "suspilnenews",
+          "ukrpravda_news"
+        ],
+        "google_news_rss_query_families": [
+          "explosion",
+          "impact_arrival",
+          "strike",
+          "attack_consequence",
+          "air_defense_action"
+        ],
+        "publisher_fulltext": true,
+        "city_specific_source_family": false,
+        "configuration_difference": "city label and alias matching only"
+      },
+      "classifier_family": "SHARED_LIVE_WIP_CLASSIFIER",
+      "live_classifier_module": "kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py",
+      "live_classifier_blob": "927dc89df0b52edd52cb31a126b0d57ca492a278",
+      "same_classifier_code_path_as_kyiv": true,
+      "exact_city_normalization": "shared city_mentioned() alias normalization using ALL_CITY_CONFIG",
+      "temporal_matching": "shared match_candidate_to_episodes / logical_episode_support / temporal binding and composition path",
+      "persistence_family": "SHARED_WIP_QUEUE_NO_CANONICAL_ATTACK_EVENT_FINALIZATION",
+      "live_persistence": {
+        "canonical_alert_episodes": "YES, but via separate site-prod multicity canonical parent persistence rather than the live attack-event monitor",
+        "canonical_attack_event_classifications": "NO live write",
+        "canonical_attack_events": "NO live write",
+        "canonical_source_or_evidence_linkage": "NO live write from attack-event monitor; candidate evidence remains in WIP queue JSON",
+        "noncanonical_wip_outputs": [
+          "data/explosion_candidate_monitor_state.json",
+          "data/explosion_review_queue.json",
+          "data/explosion_candidate_monitor_last_run.json",
+          "data/explosions_test.json"
+        ]
+      }
+    },
+    "vinnytsia": {
+      "alert_ingestion_family": "UKRAINEALARM_RAION_PROXY_REGIONHISTORY",
+      "authoritative_live_alert_source": "UkraineAlarm official API regionHistory for configured city-raion proxy mapping",
+      "new_completed_alerts_enter_automatically": true,
+      "frozen_episode_universe": {
+        "historical_baseline_exists": true,
+        "baseline_coverage_end": "2026-09-17",
+        "live_future_universe_frozen": false,
+        "behavior": "episodes after baseline_coverage_end are appended automatically when first observed"
+      },
+      "logical_episode_construction": {
+        "raw_episode_id": "sha256(city_key|start|end) truncated to 24 hex chars in live monitor",
+        "completed_pairs_only": true,
+        "representation_grouping": "shared <=90-second start/end tolerance clustering in episode_representation_clusters()",
+        "city_specific_grouping": false
+      },
+      "latest_completed_alert_end_visible_to_live_monitor": "2026-10-07T03:59:12.319327Z",
+      "tracked_postbaseline_episode_rows": 60,
+      "monitor_family": "SHARED_COMPLETED_ALERT_MONITOR_V1",
+      "monitor_entrypoint": "kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py",
+      "monitoring_scheduler": ".github/workflows/explosion-monitor-wip.yml :: cron 20 1-23/4 * * *",
+      "active_vs_completed_behavior": "completed alerts only; immediate check is due at alert_end, then +24h, +72h, +7d",
+      "discovery_family": "SHARED_TELEGRAM_GOOGLE_FULLTEXT_V1",
+      "discovery_sources": {
+        "telegram": [
+          "suspilnenews",
+          "ukrpravda_news"
+        ],
+        "google_news_rss_query_families": [
+          "explosion",
+          "impact_arrival",
+          "strike",
+          "attack_consequence",
+          "air_defense_action"
+        ],
+        "publisher_fulltext": true,
+        "city_specific_source_family": false,
+        "configuration_difference": "city label and alias matching only"
+      },
+      "classifier_family": "SHARED_LIVE_WIP_CLASSIFIER",
+      "live_classifier_module": "kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py",
+      "live_classifier_blob": "927dc89df0b52edd52cb31a126b0d57ca492a278",
+      "same_classifier_code_path_as_kyiv": true,
+      "exact_city_normalization": "shared city_mentioned() alias normalization using ALL_CITY_CONFIG",
+      "temporal_matching": "shared match_candidate_to_episodes / logical_episode_support / temporal binding and composition path",
+      "persistence_family": "SHARED_WIP_QUEUE_NO_CANONICAL_ATTACK_EVENT_FINALIZATION",
+      "live_persistence": {
+        "canonical_alert_episodes": "YES, but via separate site-prod multicity canonical parent persistence rather than the live attack-event monitor",
+        "canonical_attack_event_classifications": "NO live write",
+        "canonical_attack_events": "NO live write",
+        "canonical_source_or_evidence_linkage": "NO live write from attack-event monitor; candidate evidence remains in WIP queue JSON",
+        "noncanonical_wip_outputs": [
+          "data/explosion_candidate_monitor_state.json",
+          "data/explosion_review_queue.json",
+          "data/explosion_candidate_monitor_last_run.json",
+          "data/explosions_test.json"
+        ]
+      }
+    },
+    "zaporizhzhia": {
+      "alert_ingestion_family": "UKRAINEALARM_EXACT_HROMADA_REGIONHISTORY",
+      "authoritative_live_alert_source": "UkraineAlarm official API regionHistory for exact city/hromada region mapping",
+      "new_completed_alerts_enter_automatically": true,
+      "frozen_episode_universe": {
+        "historical_baseline_exists": true,
+        "baseline_coverage_end": "2026-09-17",
+        "live_future_universe_frozen": false,
+        "behavior": "episodes after baseline_coverage_end are appended automatically when first observed"
+      },
+      "logical_episode_construction": {
+        "raw_episode_id": "sha256(city_key|start|end) truncated to 24 hex chars in live monitor",
+        "completed_pairs_only": true,
+        "representation_grouping": "shared <=90-second start/end tolerance clustering in episode_representation_clusters()",
+        "city_specific_grouping": false
+      },
+      "latest_completed_alert_end_visible_to_live_monitor": "2026-10-06T23:01:25.923205Z",
+      "tracked_postbaseline_episode_rows": 106,
+      "monitor_family": "SHARED_COMPLETED_ALERT_MONITOR_V1",
+      "monitor_entrypoint": "kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py",
+      "monitoring_scheduler": ".github/workflows/explosion-monitor-wip.yml :: cron 20 1-23/4 * * *",
+      "active_vs_completed_behavior": "completed alerts only; immediate check is due at alert_end, then +24h, +72h, +7d",
+      "discovery_family": "SHARED_TELEGRAM_GOOGLE_FULLTEXT_V1",
+      "discovery_sources": {
+        "telegram": [
+          "suspilnenews",
+          "ukrpravda_news"
+        ],
+        "google_news_rss_query_families": [
+          "explosion",
+          "impact_arrival",
+          "strike",
+          "attack_consequence",
+          "air_defense_action"
+        ],
+        "publisher_fulltext": true,
+        "city_specific_source_family": false,
+        "configuration_difference": "city label and alias matching only"
+      },
+      "classifier_family": "SHARED_LIVE_WIP_CLASSIFIER",
+      "live_classifier_module": "kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py",
+      "live_classifier_blob": "927dc89df0b52edd52cb31a126b0d57ca492a278",
+      "same_classifier_code_path_as_kyiv": true,
+      "exact_city_normalization": "shared city_mentioned() alias normalization using ALL_CITY_CONFIG",
+      "temporal_matching": "shared match_candidate_to_episodes / logical_episode_support / temporal binding and composition path",
+      "persistence_family": "SHARED_WIP_QUEUE_NO_CANONICAL_ATTACK_EVENT_FINALIZATION",
+      "live_persistence": {
+        "canonical_alert_episodes": "YES, but via separate site-prod multicity canonical parent persistence rather than the live attack-event monitor",
+        "canonical_attack_event_classifications": "NO live write",
+        "canonical_attack_events": "NO live write",
+        "canonical_source_or_evidence_linkage": "NO live write from attack-event monitor; candidate evidence remains in WIP queue JSON",
+        "noncanonical_wip_outputs": [
+          "data/explosion_candidate_monitor_state.json",
+          "data/explosion_review_queue.json",
+          "data/explosion_candidate_monitor_last_run.json",
+          "data/explosions_test.json"
+        ]
+      }
+    },
+    "zhytomyr": {
+      "alert_ingestion_family": "UKRAINEALARM_RAION_PROXY_REGIONHISTORY",
+      "authoritative_live_alert_source": "UkraineAlarm official API regionHistory for configured city-raion proxy mapping",
+      "new_completed_alerts_enter_automatically": true,
+      "frozen_episode_universe": {
+        "historical_baseline_exists": true,
+        "baseline_coverage_end": "2026-09-17",
+        "live_future_universe_frozen": false,
+        "behavior": "episodes after baseline_coverage_end are appended automatically when first observed"
+      },
+      "logical_episode_construction": {
+        "raw_episode_id": "sha256(city_key|start|end) truncated to 24 hex chars in live monitor",
+        "completed_pairs_only": true,
+        "representation_grouping": "shared <=90-second start/end tolerance clustering in episode_representation_clusters()",
+        "city_specific_grouping": false
+      },
+      "latest_completed_alert_end_visible_to_live_monitor": "2026-10-07T03:59:11.206071Z",
+      "tracked_postbaseline_episode_rows": 91,
+      "monitor_family": "SHARED_COMPLETED_ALERT_MONITOR_V1",
+      "monitor_entrypoint": "kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py",
+      "monitoring_scheduler": ".github/workflows/explosion-monitor-wip.yml :: cron 20 1-23/4 * * *",
+      "active_vs_completed_behavior": "completed alerts only; immediate check is due at alert_end, then +24h, +72h, +7d",
+      "discovery_family": "SHARED_TELEGRAM_GOOGLE_FULLTEXT_V1",
+      "discovery_sources": {
+        "telegram": [
+          "suspilnenews",
+          "ukrpravda_news"
+        ],
+        "google_news_rss_query_families": [
+          "explosion",
+          "impact_arrival",
+          "strike",
+          "attack_consequence",
+          "air_defense_action"
+        ],
+        "publisher_fulltext": true,
+        "city_specific_source_family": false,
+        "configuration_difference": "city label and alias matching only"
+      },
+      "classifier_family": "SHARED_LIVE_WIP_CLASSIFIER",
+      "live_classifier_module": "kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py",
+      "live_classifier_blob": "927dc89df0b52edd52cb31a126b0d57ca492a278",
+      "same_classifier_code_path_as_kyiv": true,
+      "exact_city_normalization": "shared city_mentioned() alias normalization using ALL_CITY_CONFIG",
+      "temporal_matching": "shared match_candidate_to_episodes / logical_episode_support / temporal binding and composition path",
+      "persistence_family": "SHARED_WIP_QUEUE_NO_CANONICAL_ATTACK_EVENT_FINALIZATION",
+      "live_persistence": {
+        "canonical_alert_episodes": "YES, but via separate site-prod multicity canonical parent persistence rather than the live attack-event monitor",
+        "canonical_attack_event_classifications": "NO live write",
+        "canonical_attack_events": "NO live write",
+        "canonical_source_or_evidence_linkage": "NO live write from attack-event monitor; candidate evidence remains in WIP queue JSON",
+        "noncanonical_wip_outputs": [
+          "data/explosion_candidate_monitor_state.json",
+          "data/explosion_review_queue.json",
+          "data/explosion_candidate_monitor_last_run.json",
+          "data/explosions_test.json"
+        ]
+      }
+    }
+  },
+  "critical_answers": {
+    "kyiv_live_classifier_path_repair_automatically_covers_other_cities": {
+      "answer": "YES",
+      "affected_cities": [
+        "cherkasy",
+        "chernihiv",
+        "chernivtsi",
+        "dnipro",
+        "ivano_frankivsk",
+        "kharkiv",
+        "kherson",
+        "khmelnytskyi",
+        "kropyvnytskyi",
+        "kyiv",
+        "lutsk",
+        "lviv",
+        "mykolaiv",
+        "odesa",
+        "poltava",
+        "rivne",
+        "sevastopol",
+        "sumy",
+        "ternopil",
+        "uzhhorod",
+        "vinnytsia",
+        "zaporizhzhia",
+        "zhytomyr"
+      ]
+    },
+    "kyiv_missing_final_alert_level_persistence_is_shared": {
+      "answer": "YES",
+      "affected_cities": [
+        "cherkasy",
+        "chernihiv",
+        "chernivtsi",
+        "dnipro",
+        "ivano_frankivsk",
+        "kharkiv",
+        "kherson",
+        "khmelnytskyi",
+        "kropyvnytskyi",
+        "kyiv",
+        "lutsk",
+        "lviv",
+        "mykolaiv",
+        "odesa",
+        "poltava",
+        "rivne",
+        "sevastopol",
+        "sumy",
+        "ternopil",
+        "uzhhorod",
+        "vinnytsia",
+        "zaporizhzhia",
+        "zhytomyr"
+      ]
+    },
+    "single_shared_repair_can_cover_all_23": {
+      "answer": "YES",
+      "qualification": "repair the shared post-ingestion classifier invocation/version seam and canonical final attack-event persistence seam once; preserve the three ingestion implementations, four ingestion configuration families, and Cherkasy normalization exception"
+    }
+  },
+  "repair_scope_recommendation": "REPAIR SHARED 23-CITY LIVE PATH ONCE",
+  "repair_scope_detail": {
+    "target_seams": [
+      "shared live classifier invocation/version path used by monitor_explosion_candidates.py for all 23 cities",
+      "shared final alert-level canonical persistence after classification"
+    ],
+    "do_not_change": [
+      "Kyiv ingestion adapter",
+      "Sevastopol ingestion adapter",
+      "UkraineAlarm exact-vs-proxy source mappings",
+      "Cherkasy reviewed exact-city normalization exception",
+      "temporal parser/matcher semantics",
+      "historical backfill"
+    ]
+  },
+  "mutation_confirmation": {
+    "production_data_mutations": 0,
+    "database_reads": 0,
+    "database_writes": 0,
+    "deployments": 0,
+    "historical_backfill_runs": 0,
+    "classifier_semantics_mutations": 0,
+    "production_code_mutations": 0,
+    "repository_audit_artifact_writes": 1,
+    "repository_audit_artifact_scope": "isolated audit branch; research/attack_event_multicity_live_architecture_audit_2026-10-07.json only"
+  },
+  "verdict": "MULTICITY LIVE ARCHITECTURE = FEW SHARED FAMILIES"
+}
