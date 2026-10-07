@@ -1466,7 +1466,9 @@ def process_events(state: dict, polled: dict[str, list[dict]], errors: dict[str,
                 continue
             if ep["episode_id"] in known:
                 continue
-            cstate.setdefault("episodes", []).append(ep)
+            episode_row = dict(ep)
+            episode_row["live_first_seen_at"] = iso(now)
+            cstate.setdefault("episodes", []).append(episode_row)
             known.add(ep["episode_id"])
             new_count += 1
         cstate["episodes"] = sorted(cstate.get("episodes", []), key=lambda x: x.get("alert_start") or "")[-MAX_EPISODES_PER_CITY:]
@@ -4597,6 +4599,30 @@ def main() -> None:
         state,
         composition_target_episode_ids,
     )
+    from attack_event_canonical_persistence import persist_due_episode_classifications
+
+    canary_cutoff_raw = str(
+        os.environ.get("PRODUCTION_PERSISTENCE_CANARY_CUTOFF") or ""
+    ).strip()
+    canary_cutoff = parse_dt(canary_cutoff_raw) if canary_cutoff_raw else None
+    persistence_due = due
+    if canary_cutoff is not None:
+        persistence_due = {}
+        for city_key, city_due in due.items():
+            eligible = []
+            for episode, check in city_due:
+                first_seen = parse_dt(episode.get("live_first_seen_at"))
+                if first_seen is not None and first_seen >= canary_cutoff:
+                    eligible.append((episode, check))
+            if eligible:
+                persistence_due[city_key] = eligible
+
+    canonical_persistence = persist_due_episode_classifications(
+        queue=queue,
+        due=persistence_due,
+        coverage_by_city=persistence_coverage_by_city,
+        dsn=os.environ.get("ATTACK_EVENT_DATABASE_URL"),
+    )
     (
         due_checks_at_cutoff,
         checked_due_checks_at_cutoff,
@@ -4638,6 +4664,11 @@ def main() -> None:
         },
         "errors": errors,
         "strict_series_modified_by_discovery": False,
+        "production_persistence_canary_cutoff": canary_cutoff_raw or None,
+        "production_persistence_eligible_due_episodes": sum(
+            len(rows) for rows in persistence_due.values()
+        ),
+        "canonical_persistence": canonical_persistence,
     }
     atomic_json(STATE_FILE, state)
     atomic_json(QUEUE_FILE, queue)
