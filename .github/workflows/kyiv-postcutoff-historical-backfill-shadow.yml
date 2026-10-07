@@ -15,7 +15,7 @@ permissions:
 
 concurrency:
   group: kyiv-postcutoff-historical-backfill-shadow-2026-10-07
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   shadow-backfill:
@@ -27,6 +27,7 @@ jobs:
       SNAPSHOT_COMMIT: "efefa399e69eadd3d7fc8393ac1553cfde35f138"
       SNAPSHOT_PATH: "research/attack_event_23city_persistence_snapshot_v2_2026-10-04.json"
       OUTPUT_PATH: "research/kyiv_postcutoff_historical_backfill_shadow_2026-10-07.json"
+      PYTHONDONTWRITEBYTECODE: "1"
 
     steps:
       - name: Check out isolated shadow branch
