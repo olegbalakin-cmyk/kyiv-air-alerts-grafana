@@ -59,6 +59,14 @@
           <option value="rolling90">Ковзні 90 днів</option>
         </select>
       </div>
+      <div class="control date-control">
+        <label for="cityDateFrom">Від</label>
+        <input id="cityDateFrom" type="date">
+      </div>
+      <div class="control date-control">
+        <label for="cityDateTo">До</label>
+        <input id="cityDateTo" type="date">
+      </div>
     </section>
 
     <section class="city-heading">
@@ -142,9 +150,19 @@
           <h2>Динаміка за 7-денним вікном</h2>
           <p>Кожна точка охоплює 7 завершених календарних днів і датована останнім днем вікна; сусідні точки перекриваються на 6 днів. За замовчуванням показано поточний календарний рік.</p>
         </div>
-        <div class="control rolling7d-year-control">
-          <label for="rolling7dYear">Рік</label>
-          <select id="rolling7dYear" aria-label="Рік для 7-денного вікна"></select>
+        <div class="section-range-controls">
+          <div class="control rolling7d-year-control">
+            <label for="rolling7dYear">Швидкий вибір</label>
+            <select id="rolling7dYear" aria-label="Швидкий вибір періоду для 7-денного вікна"></select>
+          </div>
+          <div class="control date-control">
+            <label for="rolling7dDateFrom">Від</label>
+            <input id="rolling7dDateFrom" type="date">
+          </div>
+          <div class="control date-control">
+            <label for="rolling7dDateTo">До</label>
+            <input id="rolling7dDateTo" type="date">
+          </div>
         </div>
       </div>
       <section class="chart-grid">
@@ -165,8 +183,18 @@
       <div class="section-heading">
         <div>
           <div class="eyebrow">Короткий горизонт</div>
-          <h2>Останні 28 завершених днів</h2>
-          <p id="daily28Range">Щоденний розріз для обраного міста. Сьогоднішній день не включається.</p>
+          <h2>Щоденний розріз</h2>
+          <p id="daily28Range">Доступні останні 28 завершених днів для обраного міста. Сьогоднішній день не включається.</p>
+        </div>
+        <div class="section-range-controls">
+          <div class="control date-control">
+            <label for="shortDateFrom">Від</label>
+            <input id="shortDateFrom" type="date">
+          </div>
+          <div class="control date-control">
+            <label for="shortDateTo">До</label>
+            <input id="shortDateTo" type="date">
+          </div>
         </div>
       </div>
       <section class="chart-grid">
@@ -189,6 +217,16 @@
           <div id="casualtyCityEyebrow" class="eyebrow">—</div>
           <h2>Загиблі від повітряних атак РФ</h2>
           <p>Пізні смерті від поранень віднесені до місяця самої атаки. Наземні бої та артилерійські обстріли не включені.</p>
+        </div>
+        <div class="section-range-controls">
+          <div class="control date-control">
+            <label for="casualtyDateFrom">Від</label>
+            <input id="casualtyDateFrom" type="date">
+          </div>
+          <div class="control date-control">
+            <label for="casualtyDateTo">До</label>
+            <input id="casualtyDateTo" type="date">
+          </div>
         </div>
       </div>
       <article class="panel chart-card wide">
@@ -220,11 +258,19 @@
           <select id="compareC"></select>
         </div>
         <div class="control">
-          <label for="comparePeriod">Період</label>
+          <label for="comparePeriod">Інтервал</label>
           <select id="comparePeriod">
             <option value="monthly">Місяці</option>
             <option id="compareWeeklyOption" value="weekly">Тижні</option>
           </select>
+        </div>
+        <div class="control date-control">
+          <label for="compareDateFrom">Від</label>
+          <input id="compareDateFrom" type="date">
+        </div>
+        <div class="control date-control">
+          <label for="compareDateTo">До</label>
+          <input id="compareDateTo" type="date">
         </div>
       </div>
 
@@ -288,15 +334,26 @@
           <h2>Усі міста</h2>
           <p id="allCitiesRangeNote">Порівняння ключових показників за спільний часовий діапазон.</p>
         </div>
-        <div class="control all-cities-period-control">
-          <label for="allCitiesRange">Діапазон</label>
-          <select id="allCitiesRange" aria-label="Діапазон для таблиці всіх міст">
-            <option value="7d">7 днів</option>
-            <option value="30d">30 днів</option>
-            <option value="90d">90 днів</option>
-            <option value="year">Рік</option>
-            <option value="common">Від початку спільних даних</option>
-          </select>
+        <div class="section-range-controls">
+          <div class="control all-cities-period-control">
+            <label for="allCitiesRange">Швидкий вибір</label>
+            <select id="allCitiesRange" aria-label="Швидкий вибір діапазону для таблиці всіх міст">
+              <option value="7d">7 днів</option>
+              <option value="30d">30 днів</option>
+              <option value="90d">90 днів</option>
+              <option value="year">Рік</option>
+              <option value="common">Від початку спільних даних</option>
+              <option value="custom">Довільно</option>
+            </select>
+          </div>
+          <div class="control date-control">
+            <label for="tableDateFrom">Від</label>
+            <input id="tableDateFrom" type="date">
+          </div>
+          <div class="control date-control">
+            <label for="tableDateTo">До</label>
+            <input id="tableDateTo" type="date">
+          </div>
         </div>
       </div>
       <div class="panel table-panel">
