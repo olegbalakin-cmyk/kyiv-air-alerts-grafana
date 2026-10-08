@@ -1,0 +1,138 @@
+name: Unit A bounded classification replay v4
+
+on:
+  push:
+    branches:
+      - attack-event-unit-a-bounded-classification-replay-v4-2026-10-08
+    paths:
+      - .github/workflows/attack-event-unit-a-bounded-classification-replay.yml
+
+permissions:
+  contents: write
+
+jobs:
+  replay:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    env:
+      PYTHONDONTWRITEBYTECODE: "1"
+    steps:
+      - name: Checkout exact branch with history
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: attack-event-unit-a-bounded-classification-replay-v4-2026-10-08
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Verify and install pinned classifier runtime dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git merge-base HEAD b93f708727d11aaacab52079f3c6542bdab8d6e5)" = "b93f708727d11aaacab52079f3c6542bdab8d6e5"
+          test -z "${PHASE1_PROD_SHADOW_DATABASE_URL:-}"
+          test -z "${DATABASE_URL:-}"
+          test "$(git rev-parse 71cb6f6fbe856cc7b96759310fe9cc9c71cc0453:kyiv-air-alerts-grafana/requirements.txt)" = "d7a2ff05af67cda88e4930d238f0282ca557a963"
+          tmp_req="$(mktemp)"
+          git show 71cb6f6fbe856cc7b96759310fe9cc9c71cc0453:kyiv-air-alerts-grafana/requirements.txt > "$tmp_req"
+          printf '%s\n' "requests>=2.32,<3" "beautifulsoup4>=4.12,<5" > "$tmp_req.expected"
+          cmp -s "$tmp_req" "$tmp_req.expected"
+          python -m pip install --disable-pip-version-check -r "$tmp_req"
+          python - <<'PY'
+          import sys, importlib.metadata
+          import requests, bs4
+          from bs4 import BeautifulSoup
+          assert sys.version_info[:2] == (3,12)
+          print("PYTHON_VERSION="+sys.version.split()[0])
+          print("REQUESTS_VERSION="+importlib.metadata.version("requests"))
+          print("BEAUTIFULSOUP4_VERSION="+importlib.metadata.version("beautifulsoup4"))
+          print("REQUESTS_IMPORT=PASS")
+          print("BS4_IMPORT=PASS")
+          print("BEAUTIFULSOUP_IMPORT=PASS")
+          PY
+
+      - name: Execute offline authoritative replay twice
+        shell: bash
+        run: |
+          set -euo pipefail
+          python .github/proof/attack_event_unit_a_bounded_classification_replay.py \
+            --out research/attack_event_execution_unit_a_classification_replay_2026-10-08.json \
+            --run-id "${GITHUB_RUN_ID}"
+
+      - name: Cleanup temporary execution files on blocked replay
+        if: failure()
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          rm -f .github/workflows/attack-event-unit-a-bounded-classification-replay.yml
+          rm -f .github/proof/attack_event_unit_a_bounded_classification_replay.py
+          git add -A .github/workflows/attack-event-unit-a-bounded-classification-replay.yml .github/proof/attack_event_unit_a_bounded_classification_replay.py
+          if ! git diff --cached --quiet; then
+            git commit -m "Clean blocked Unit A v4 replay execution files"
+            git push origin "HEAD:attack-event-unit-a-bounded-classification-replay-v4-2026-10-08"
+          fi
+          MAP="$(git diff --name-status b93f708727d11aaacab52079f3c6542bdab8d6e5..HEAD)"
+          test -z "$MAP"
+          echo "BLOCKED_FINAL_DIFF_FILE_COUNT=0"
+          echo "TEMP_WORKFLOW_REMOVED=YES"
+          echo "TEMP_HARNESS_REMOVED=YES"
+          echo "PRODUCTION_MUTATION=NO"
+
+      - name: Freeze durable classification artifact
+        id: freeze
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add research/attack_event_execution_unit_a_classification_replay_2026-10-08.json
+          git commit -m "Freeze Unit A bounded classification replay"
+          ARTIFACT_COMMIT="$(git rev-parse HEAD)"
+          ARTIFACT_BLOB="$(git rev-parse HEAD:research/attack_event_execution_unit_a_classification_replay_2026-10-08.json)"
+          ARTIFACT_SHA256="$(sha256sum research/attack_event_execution_unit_a_classification_replay_2026-10-08.json | awk '{print $1}')"
+          echo "ARTIFACT_COMMIT=$ARTIFACT_COMMIT"
+          echo "ARTIFACT_BLOB=$ARTIFACT_BLOB"
+          echo "ARTIFACT_SHA256=$ARTIFACT_SHA256"
+          echo "artifact_commit=$ARTIFACT_COMMIT" >> "$GITHUB_OUTPUT"
+          echo "artifact_blob=$ARTIFACT_BLOB" >> "$GITHUB_OUTPUT"
+          echo "artifact_sha256=$ARTIFACT_SHA256" >> "$GITHUB_OUTPUT"
+          git push origin "HEAD:attack-event-unit-a-bounded-classification-replay-v4-2026-10-08"
+
+      - name: Cleanup temporary execution files without replay
+        id: cleanup
+        shell: bash
+        run: |
+          set -euo pipefail
+          ARTIFACT_BLOB_BEFORE="$(git hash-object research/attack_event_execution_unit_a_classification_replay_2026-10-08.json)"
+          rm .github/workflows/attack-event-unit-a-bounded-classification-replay.yml
+          rm .github/proof/attack_event_unit_a_bounded_classification_replay.py
+          git add -A .github/workflows/attack-event-unit-a-bounded-classification-replay.yml .github/proof/attack_event_unit_a_bounded_classification_replay.py
+          git commit -m "Clean temporary Unit A replay execution files"
+          ARTIFACT_BLOB_AFTER="$(git hash-object research/attack_event_execution_unit_a_classification_replay_2026-10-08.json)"
+          test "$ARTIFACT_BLOB_BEFORE" = "$ARTIFACT_BLOB_AFTER"
+          git push origin "HEAD:attack-event-unit-a-bounded-classification-replay-v4-2026-10-08"
+          FINAL_HEAD="$(git rev-parse HEAD)"
+          echo "FINAL_HEAD=$FINAL_HEAD"
+          echo "final_head=$FINAL_HEAD" >> "$GITHUB_OUTPUT"
+
+      - name: Verify final repository hygiene
+        shell: bash
+        run: |
+          set -euo pipefail
+          test ! -e .github/workflows/attack-event-unit-a-bounded-classification-replay.yml
+          test ! -e .github/proof/attack_event_unit_a_bounded_classification_replay.py
+          MAP="$(git diff --name-status b93f708727d11aaacab52079f3c6542bdab8d6e5..HEAD)"
+          printf '%s\n' "$MAP"
+          test "$MAP" = "A	research/attack_event_execution_unit_a_classification_replay_2026-10-08.json"
+          test "$(git rev-parse HEAD:research/attack_event_execution_unit_a_materialized_inputs_2026-10-07.json)" = "52e89792352513664428da3a7fcb9b43f79f1ba1"
+          test "$(git rev-parse HEAD:research/attack_event_execution_unit_a_classifier_readiness_validation_2026-10-08.json)" = "96b680bf740a27c10428f6dd2f1ec3ed183277b1"
+          test "$(git rev-parse HEAD:research/attack_event_unit_a_frozen_classifier_context_2026-10-08.json)" = "a0dbd84c7d121cf6a7891fafd6e5db77c616c6e1"
+          echo "FINAL_DIFF_FILE_COUNT=1"
+          echo "TEMP_WORKFLOW_REMOVED=YES"
+          echo "TEMP_HARNESS_REMOVED=YES"
+          echo "PRODUCTION_MUTATION=NO"
