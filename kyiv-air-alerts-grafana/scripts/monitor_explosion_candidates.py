@@ -277,6 +277,134 @@ def make_episode(city_key: str, start: datetime, end: datetime, source: str = "u
     }
 
 
+def is_raion_proxy_city(city_key: str) -> bool:
+    return live_parent_ordering.ingestion_family(city_key) == "UkraineAlarm raion-proxy"
+
+
+def _coerce_utc(value) -> datetime | None:
+    if isinstance(value, datetime):
+        dt = value
+        if dt.tzinfo is None:
+            return None
+        return dt.astimezone(UTC)
+    return parse_dt(value)
+
+
+def raion_proxy_raw_alerts(
+    city_key: str,
+    bridge: dict,
+    current_rows: list[dict],
+) -> list:
+    unique: dict[tuple[str, str], tuple[datetime, datetime]] = {}
+    for row in bridge.get("events", []):
+        if not isinstance(row, dict) or str(row.get("city_key") or "") != city_key:
+            continue
+        if str(row.get("alert_type") or "AIR").upper() != "AIR":
+            continue
+        start = _coerce_utc(row.get("start"))
+        end = _coerce_utc(row.get("end"))
+        if start and end and end > start:
+            unique[(iso(start), iso(end))] = (start, end)
+    for row in current_rows:
+        if not isinstance(row, dict):
+            continue
+        start = _coerce_utc(row.get("start"))
+        end = _coerce_utc(row.get("end"))
+        if start and end and end > start:
+            unique[(iso(start), iso(end))] = (start, end)
+    return [
+        ua.Alert(
+            start=start.astimezone(ua.TZ),
+            end=end.astimezone(ua.TZ),
+            source="ukrainealarm_raion_proxy_observation",
+        )
+        for start, end in sorted(unique.values(), key=lambda pair: (pair[0], pair[1]))
+    ]
+
+
+def raion_proxy_logical_episodes(
+    city_key: str,
+    bridge: dict,
+    current_rows: list[dict],
+    *,
+    source: str,
+) -> list[dict]:
+    raw_alerts = raion_proxy_raw_alerts(city_key, bridge, current_rows)
+    merged = ua.union_alerts(raw_alerts, "live_raion_proxy_authoritative_union")
+    episodes: list[dict] = []
+    for alert in merged:
+        start = alert.start.astimezone(UTC)
+        end = alert.end.astimezone(UTC)
+        episode = make_episode(city_key, start, end, source=source)
+        members = [
+            raw for raw in raw_alerts
+            if raw.start >= alert.start and raw.end <= alert.end
+        ]
+        episode["logical_grouping"] = "apply_ukrainealarm_bridge.union_alerts"
+        episode["raw_interval_count"] = len(members)
+        episode["raw_intervals"] = [
+            {"start": iso(raw.start.astimezone(UTC)), "end": iso(raw.end.astimezone(UTC))}
+            for raw in sorted(members, key=lambda item: (item.start, item.end))
+        ]
+        episodes.append(episode)
+    return sorted(episodes, key=lambda x: (x["alert_end"], x["alert_start"], x["episode_id"]))
+
+
+def _strict_interval_constituent(fragment: dict, authoritative: dict) -> bool:
+    fragment_start = parse_dt(fragment.get("alert_start"))
+    fragment_end = parse_dt(fragment.get("alert_end"))
+    union_start = parse_dt(authoritative.get("alert_start"))
+    union_end = parse_dt(authoritative.get("alert_end"))
+    if not fragment_start or not fragment_end or not union_start or not union_end:
+        return False
+    return (
+        union_start <= fragment_start
+        and fragment_end <= union_end
+        and (union_start < fragment_start or fragment_end < union_end)
+    )
+
+
+def reconcile_raion_proxy_fragment_state(
+    city_key: str,
+    cstate: dict,
+    authoritative_episodes: list[dict],
+    now: datetime,
+) -> dict:
+    if not is_raion_proxy_city(city_key):
+        return {"city": city_key, "authoritative_union_ids": [], "fragments_newly_suppressed": 0, "fragments_suppressed_total": 0}
+    authoritative = {
+        str(ep.get("episode_id") or ""): ep
+        for ep in authoritative_episodes
+        if isinstance(ep, dict) and ep.get("episode_id")
+    }
+    newly = 0
+    for fragment in cstate.get("episodes", []):
+        fragment_id = str(fragment.get("episode_id") or "")
+        if not fragment_id or fragment_id in authoritative:
+            continue
+        for union_id, union_episode in authoritative.items():
+            if not _strict_interval_constituent(fragment, union_episode):
+                continue
+            if str(fragment.get("identity_superseded_by_episode_id") or "") != union_id:
+                newly += 1
+            fragment["identity_superseded_by_episode_id"] = union_id
+            fragment["identity_superseded_at"] = iso(now)
+            fragment["identity_superseded_reason"] = "raion_proxy_authoritative_union"
+            fragment["identity_superseded_by_start"] = union_episode["alert_start"]
+            fragment["identity_superseded_by_end"] = union_episode["alert_end"]
+            break
+    suppressed_total = sum(
+        1 for ep in cstate.get("episodes", [])
+        if ep.get("identity_superseded_by_episode_id")
+    )
+    return {
+        "city": city_key,
+        "authoritative_union_ids": sorted(authoritative),
+        "fragments_newly_suppressed": newly,
+        "fragments_suppressed_total": suppressed_total,
+    }
+
+
 def load_kyiv_alert_episodes(path: Path) -> list[dict]:
     rows = load_json(path, [])
     if not isinstance(rows, list):
@@ -354,14 +482,19 @@ def poll_cached_bridge(
         end = parse_dt(row.get("end"))
         if not start or not end or end <= start:
             continue
-        ep = make_episode(city_key, start, end)
-        ep["alert_source"] = "ukrainealarm_bridge_cached"
-        rows_by_city[city_key].append(ep)
+        if not is_raion_proxy_city(city_key):
+            ep = make_episode(city_key, start, end)
+            ep["alert_source"] = "ukrainealarm_bridge_cached"
+            rows_by_city[city_key].append(ep)
 
     regions = bridge.get("regions") or {}
     for city_key in CITY_CONFIG:
         if city_key in SPECIAL_ALERT_SOURCES:
             continue
+        if is_raion_proxy_city(city_key):
+            rows_by_city[city_key] = raion_proxy_logical_episodes(
+                city_key, bridge, [], source="ukrainealarm_bridge_cached_union"
+            )
         region = regions.get(city_key) or {}
         checked = parse_dt(region.get("last_checked_at"))
         if not checked:
@@ -400,13 +533,18 @@ def poll_alerts(
             continue
         try:
             rows = ua.history_rows(client, region_id, api_name)
-            episodes = {}
-            for row in rows:
-                start, end = row.get("start"), row.get("end")
-                if start and end and end > start:
-                    ep = make_episode(city_key, start, end)
-                    episodes[ep["episode_id"]] = ep
-            out[city_key] = sorted(episodes.values(), key=lambda x: x["alert_end"])
+            if is_raion_proxy_city(city_key):
+                out[city_key] = raion_proxy_logical_episodes(
+                    city_key, bridge, rows, source="ukrainealarm_regionHistory_authoritative_union"
+                )
+            else:
+                episodes = {}
+                for row in rows:
+                    start, end = row.get("start"), row.get("end")
+                    if start and end and end > start:
+                        ep = make_episode(city_key, start, end)
+                        episodes[ep["episode_id"]] = ep
+                out[city_key] = sorted(episodes.values(), key=lambda x: x["alert_end"])
             print(f"[{idx}/{len(normal_keys)}] {city_key}: {len(out[city_key])} completed alerts", flush=True)
         except Exception as exc:
             errors[city_key] = f"{type(exc).__name__}: {exc}"
@@ -1502,6 +1640,10 @@ def process_events(state: dict, polled: dict[str, list[dict]], errors: dict[str,
         cstate["last_poll_error"] = errors.get(city_key)
         if city_key not in errors:
             cstate["last_successful_poll_at"] = iso(now)
+            if is_raion_proxy_city(city_key):
+                cstate["last_identity_reconciliation"] = reconcile_raion_proxy_fragment_state(
+                    city_key, cstate, rows, now
+                )
         known = {str(ep.get("episode_id")) for ep in cstate.get("episodes", []) if ep.get("episode_id")}
         if city_key in errors:
             continue
@@ -1529,6 +1671,8 @@ def due_checks(state: dict, now: datetime) -> dict[str, list[tuple[dict, dict]]]
         if city_key not in CITY_CONFIG:
             continue
         for ep in cstate.get("episodes", []):
+            if ep.get("identity_superseded_by_episode_id"):
+                continue
             for check in ep.get("checks", []):
                 if check.get("checked_at"):
                     continue
@@ -1589,7 +1733,9 @@ def tracked_episodes_for_city(state: dict, city_key: str) -> list[dict]:
     by_id = {
         str(ep.get("episode_id")): ep
         for ep in cstate.get("episodes", [])
-        if isinstance(ep, dict) and ep.get("episode_id")
+        if isinstance(ep, dict)
+        and ep.get("episode_id")
+        and not ep.get("identity_superseded_by_episode_id")
     }
     return sorted(
         by_id.values(),
@@ -4519,6 +4665,104 @@ def self_test() -> None:
     )
 
 
+def raion_proxy_grouping_self_test() -> dict:
+    def rows(pairs):
+        return [{"start": parse_dt(start), "end": parse_dt(end)} for start, end in pairs]
+
+    target_pairs = [
+        ("2026-10-07T17:49:34.073014Z", "2026-10-07T19:11:30.034575Z"),
+        ("2026-10-07T19:10:55.805260Z", "2026-10-07T19:59:32.932823Z"),
+        ("2026-10-07T19:17:34.603290Z", "2026-10-07T19:58:56.491722Z"),
+    ]
+    target = raion_proxy_logical_episodes("sumy", {"events": []}, rows(target_pairs), source="self-test")
+    assert len(target) == 1
+    assert target[0]["alert_start"] == "2026-10-07T17:49:34.073014Z"
+    assert target[0]["alert_end"] == "2026-10-07T19:59:32.932823Z"
+    assert target[0]["episode_id"] == "07ba1a638e3a08c341856db7"
+    assert target[0]["raw_interval_count"] == 3
+
+    earlier_pairs = [
+        ("2026-10-07T13:53:42.927864Z", "2026-10-07T15:36:22.509548Z"),
+        ("2026-10-07T14:53:53.419010Z", "2026-10-07T15:37:18.811372Z"),
+    ]
+    earlier = raion_proxy_logical_episodes("sumy", {"events": []}, rows(earlier_pairs), source="self-test")
+    assert len(earlier) == 1
+    assert earlier[0]["alert_start"] == "2026-10-07T13:53:42.927864Z"
+    assert earlier[0]["alert_end"] == "2026-10-07T15:37:18.811372Z"
+    assert earlier[0]["episode_id"] == "6994e2498f98caad7c5b35ea"
+
+    def grouped(pairs):
+        return raion_proxy_logical_episodes("sumy", {"events": []}, rows(pairs), source="self-test")
+
+    assert len(grouped([
+        ("2026-01-01T00:00:00Z", "2026-01-01T01:00:00Z"),
+        ("2026-01-01T00:30:00Z", "2026-01-01T02:00:00Z"),
+    ])) == 1
+    nested = grouped([
+        ("2026-01-01T00:00:00Z", "2026-01-01T03:00:00Z"),
+        ("2026-01-01T01:00:00Z", "2026-01-01T02:00:00Z"),
+    ])
+    assert len(nested) == 1 and nested[0]["alert_end"] == "2026-01-01T03:00:00Z"
+    assert len(grouped([
+        ("2026-01-01T00:00:00Z", "2026-01-01T01:00:00Z"),
+        ("2026-01-01T01:00:00Z", "2026-01-01T02:00:00Z"),
+    ])) == 1
+    assert len(grouped([
+        ("2026-01-01T00:00:00Z", "2026-01-01T01:00:00Z"),
+        ("2026-01-01T01:00:00.000001Z", "2026-01-01T02:00:00Z"),
+    ])) == 2
+    assert len(grouped([
+        ("2026-01-01T00:00:00Z", "2026-01-01T01:00:00Z"),
+        ("2026-01-01T00:00:00Z", "2026-01-01T01:00:00Z"),
+    ])) == 1
+    forward = [(ep["alert_start"], ep["alert_end"], ep["episode_id"]) for ep in target]
+    reverse = [(ep["alert_start"], ep["alert_end"], ep["episode_id"]) for ep in grouped(list(reversed(target_pairs)))]
+    assert forward == reverse
+
+    fragments = [make_episode("sumy", row["start"], row["end"]) for row in rows(target_pairs)]
+    assert [ep["episode_id"] for ep in fragments] == [
+        "e9bb95e0dcdcfa7b45bbf1bc",
+        "0a2cbd1d1b7f670386b26eab",
+        "940f568ecd11d47800caeac3",
+    ]
+    state = {"cities": {"sumy": {"episodes": fragments}}}
+    reconciliation = reconcile_raion_proxy_fragment_state(
+        "sumy", state["cities"]["sumy"], target, parse_dt("2026-10-08T00:00:00Z")
+    )
+    state["cities"]["sumy"]["episodes"].append(dict(target[0]))
+    due = due_checks(state, parse_dt("2026-10-08T00:00:01Z"))
+    due_ids = {str(ep.get("episode_id")) for ep, _ in due.get("sumy", [])}
+    assert due_ids == {"07ba1a638e3a08c341856db7"}
+
+    restarted = json.loads(json.dumps(state))
+    reconcile_raion_proxy_fragment_state(
+        "sumy", restarted["cities"]["sumy"], target, parse_dt("2026-10-08T00:05:00Z")
+    )
+    restart_due = due_checks(restarted, parse_dt("2026-10-08T00:05:01Z"))
+    restart_due_ids = {str(ep.get("episode_id")) for ep, _ in restart_due.get("sumy", [])}
+    assert restart_due_ids == due_ids
+
+    assert is_raion_proxy_city("sumy")
+    for city_key in ("kharkiv", "zaporizhzhia", "kyiv", "sevastopol"):
+        assert not is_raion_proxy_city(city_key)
+
+    return {
+        "authoritative_grouping": "apply_ukrainealarm_bridge.union_alerts",
+        "target_sumy_exact": True,
+        "earlier_sumy_exact": True,
+        "overlap": True,
+        "nested": True,
+        "touching": True,
+        "positive_gap": True,
+        "duplicate_idempotency": True,
+        "input_order_invariance": True,
+        "fragment_state_reconciliation": reconciliation["fragments_suppressed_total"] == 3,
+        "fragment_independent_due_prevented": True,
+        "restart_identity_changes": 0,
+        "non_raion_identity_changes": 0,
+    }
+
+
 def orchestration_self_test() -> dict:
     """Prove due selection/materialization without touching a database or discovery."""
     import attack_event_canonical_persistence as canonical_persistence
@@ -4703,6 +4947,9 @@ def self_test() -> None:
     assert wrapped == direct
     eligibility_proof = live_parent_ordering.durable_eligibility_restart_proof()
     assert eligibility_proof["eligibility_changes_after_restart"] == 0
+    grouping_proof = raion_proxy_grouping_self_test()
+    assert grouping_proof["restart_identity_changes"] == 0
+    assert grouping_proof["non_raion_identity_changes"] == 0
     orchestration_proof = orchestration_self_test()
     assert orchestration_proof["followup_hours"] == [0, 24, 72, 168]
     print(
@@ -4915,6 +5162,11 @@ def main() -> None:
             if activation_config is not None else None
         ),
         "parent_ordering": parent_ordering,
+        "raion_proxy_identity_reconciliation": {
+            city_key: dict(cstate.get("last_identity_reconciliation") or {})
+            for city_key, cstate in sorted((state.get("cities") or {}).items())
+            if is_raion_proxy_city(city_key)
+        },
         "production_persistence_eligible_due_episodes": sum(
             len(rows) for rows in persistence_due.values()
         ),
