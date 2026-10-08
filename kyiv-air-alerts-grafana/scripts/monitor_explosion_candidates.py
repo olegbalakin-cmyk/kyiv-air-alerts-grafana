@@ -4742,6 +4742,21 @@ def raion_proxy_grouping_self_test() -> dict:
     assert total == 1
     assert [ep["episode_id"] for ep in selected] == ["07ba1a638e3a08c341856db7"]
 
+    from attack_event_canonical_persistence import build_episode_classification
+    fake_origin = {
+        "ref": "isolated-proof",
+        "commit": "0" * 40,
+        "run_id": None,
+        "monitor_blob": "0" * 40,
+        "origin_provenance": {"kind": "isolated_raion_proxy_grouping_proof"},
+        "origin_provenance_sha256": "0" * 64,
+    }
+    classification = build_episode_classification(target[0], [], origin=fake_origin)
+    assert classification["historical_episode_id"] == "07ba1a638e3a08c341856db7"
+    assert classification["verdict"] == "NO_CONFIRMED_EVENT"
+    assert classification["alert_start_utc_microseconds"] == "2026-10-07T17:49:34.073014Z"
+    assert classification["alert_end_utc_microseconds"] == "2026-10-07T19:59:32.932823Z"
+
     restarted = json.loads(json.dumps(state))
     reconcile_raion_proxy_fragment_state(
         "sumy", restarted["cities"]["sumy"], target, parse_dt("2026-10-08T00:05:00Z")
@@ -4766,6 +4781,8 @@ def raion_proxy_grouping_self_test() -> dict:
         "input_order_invariance": True,
         "fragment_state_reconciliation": reconciliation["fragments_suppressed_total"] == 3,
         "fragment_independent_due_prevented": True,
+        "isolated_union_to_verdict": classification["verdict"] == "NO_CONFIRMED_EVENT",
+        "isolated_logical_classification_targets": 1,
         "restart_identity_changes": 0,
         "non_raion_identity_changes": 0,
     }
