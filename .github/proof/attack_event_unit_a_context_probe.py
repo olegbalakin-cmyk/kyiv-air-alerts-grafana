@@ -214,7 +214,7 @@ print(json.dumps({
 
 
 # Authoritative loader proof from the continuity-pinned audited main commit.
-import importlib, shutil, sys
+import importlib, shutil, sys, types
 audited=str(cont.get("audited_main_commit") or "")
 pinned="71cb6f6fbe856cc7b96759310fe9cc9c71cc0453"
 for path in ("/tmp/unit_a_audited_main","/tmp/unit_a_pinned_impl"):
@@ -223,6 +223,12 @@ subprocess.check_call(["git","worktree","add","--detach","/tmp/unit_a_audited_ma
 subprocess.check_call(["git","worktree","add","--detach","/tmp/unit_a_pinned_impl",pinned],stdout=subprocess.DEVNULL)
 scripts=Path("/tmp/unit_a_pinned_impl/kyiv-air-alerts-grafana/scripts")
 sys.path.insert(0,str(scripts))
+if "bs4" not in sys.modules:
+    bs4_stub=types.ModuleType("bs4")
+    def _unused_bs4(*args,**kwargs):
+        raise RuntimeError("DISCOVERY_BS4_PATH_FORBIDDEN_IN_CONTEXT_PROBE")
+    bs4_stub.BeautifulSoup=_unused_bs4
+    sys.modules["bs4"]=bs4_stub
 monitor=importlib.import_module("monitor_explosion_candidates")
 replay=importlib.import_module("replay_explosion_history")
 audited_root=Path("/tmp/unit_a_audited_main/kyiv-air-alerts-grafana")
