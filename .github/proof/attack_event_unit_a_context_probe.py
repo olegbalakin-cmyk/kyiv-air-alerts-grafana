@@ -112,4 +112,103 @@ if pred.get("commit") and pred.get("path"):
         elif isinstance(v,dict) and any(tok in k.lower() for tok in ("parent","episode","identity","classification")):
             print(json.dumps({"pred_collection":k,"type":"dict","keys":list(v.keys())[:120]},ensure_ascii=False,sort_keys=True))
 
+
+
+# Context reproducibility proof: old classified snapshot + all 2,100 uncovered parents.
+src=cont["authoritative_classification_source"]
+snap=json.loads(git_show(str(src["commit"]),str(src["path"])))
+classified=list(snap.get("classifications") or [])
+old=[]
+for row in classified:
+    old.append({
+        "episode_id": str(row.get("historical_episode_id") or ""),
+        "city_key": str(row.get("city_key") or ""),
+        "alert_start": row.get("alert_start_utc_microseconds"),
+        "alert_end": row.get("alert_end_utc_microseconds"),
+    })
+old_bad=sum(not all([x["episode_id"],x["city_key"],x["alert_start"],x["alert_end"]]) for x in old)
+old_ids=[(x["city_key"],x["episode_id"]) for x in old]
+old_identity=[(x["city_key"],x["alert_start"],x["alert_end"]) for x in old]
+parents=list(cont.get("uncovered_parent_identities") or [])
+cohort_rows=[]
+for cohort_name in ("materialization_cohort","evidence_missing_cohort","identity_binding_cohort"):
+    co=rec.get(cohort_name) or {}
+    for row in co.get("rows") or []:
+        rr=dict(row); rr["_cohort"]=cohort_name; cohort_rows.append(rr)
+by_uid={}
+dups=0
+for row in cohort_rows:
+    uid=str(row.get("alert_episode_uid") or "")
+    if uid in by_uid: dups+=1
+    else: by_uid[uid]=row
+uncovered=[]
+missing_row=[]
+missing_live_id=[]
+parent_mismatch=[]
+cohort_counts={}
+for p in parents:
+    uid=str(p.get("alert_episode_uid") or "")
+    rr=by_uid.get(uid)
+    if rr is None:
+        missing_row.append(uid); continue
+    cohort_counts[rr["_cohort"]]=cohort_counts.get(rr["_cohort"],0)+1
+    eid=str(rr.get("live_monitor_episode_id") or "")
+    if not eid:
+        missing_live_id.append({"uid":uid,"cohort":rr["_cohort"],"keys":list(rr.keys())})
+    if rr.get("city_key")!=p.get("city_key") or rr.get("start_at")!=p.get("start_at") or rr.get("end_at")!=p.get("end_at"):
+        parent_mismatch.append(uid)
+    uncovered.append({
+        "alert_episode_uid":uid,
+        "episode_id":eid,
+        "city_key":str(p.get("city_key") or ""),
+        "alert_start":p.get("start_at"),
+        "alert_end":p.get("end_at"),
+        "cohort":rr["_cohort"],
+    })
+uncovered_identities={(x["city_key"],x["alert_start"],x["alert_end"]) for x in uncovered}
+old_identity_set=set(old_identity)
+overlap=old_identity_set & uncovered_identities
+
+mat=json.loads(Path(MAT_PATH).read_text(encoding="utf-8"))
+corpus=json.loads(gzip.decompress(base64.b64decode(mat["corpus"]["payload_base64"])))
+targets=corpus.get("episodes") or []
+target_context_missing=[]
+target_context_mismatch=[]
+uncovered_by_uid={x["alert_episode_uid"]:x for x in uncovered}
+for t in targets:
+    uid=str(t.get("alert_episode_uid") or "")
+    ci=t.get("classifier_episode_input") or {}
+    ctx=uncovered_by_uid.get(uid)
+    if not ctx:
+        target_context_missing.append(uid)
+    elif (ci.get("episode_id"),ci.get("city_key"),ci.get("alert_start"),ci.get("alert_end")) != (ctx.get("episode_id"),ctx.get("city_key"),ctx.get("alert_start"),ctx.get("alert_end")):
+        target_context_mismatch.append(uid)
+
+pc=pdoc.get("parent_coverage") or {}
+print(json.dumps({
+ "context_proof":{
+   "continuity_audited_main_commit":cont.get("audited_main_commit"),
+   "classified_rows":len(old),
+   "classified_bad_required_fields":old_bad,
+   "classified_duplicate_city_episode_ids":len(old_ids)-len(set(old_ids)),
+   "classified_duplicate_temporal_identities":len(old_identity)-len(old_identity_set),
+   "uncovered_parent_rows":len(parents),
+   "recovery_cohort_rows":len(cohort_rows),
+   "recovery_cohort_duplicate_uids":dups,
+   "cohort_counts_for_uncovered":cohort_counts,
+   "uncovered_missing_recovery_row_count":len(missing_row),
+   "uncovered_missing_live_episode_id_count":len(missing_live_id),
+   "uncovered_parent_identity_mismatch_count":len(parent_mismatch),
+   "classified_uncovered_temporal_overlap_count":len(overlap),
+   "combined_context_count":len(old)+len(uncovered),
+   "gap_audit_current_canonical_air_parent_count":pc.get("current_canonical_air_parent_count"),
+   "gap_audit_covered_by_current_authoritative_classification":pc.get("covered_by_current_authoritative_classification"),
+   "gap_audit_closed_without_current_authoritative_classification":pc.get("closed_without_current_authoritative_classification"),
+   "target_context_missing_count":len(target_context_missing),
+   "target_context_mismatch_count":len(target_context_mismatch),
+   "smallest_missing_live_id":missing_live_id[0] if missing_live_id else None,
+   "smallest_target_context_mismatch":target_context_mismatch[0] if target_context_mismatch else None
+ }
+},ensure_ascii=False,sort_keys=True))
+
 print("CONTEXT_PROBE_DONE")
