@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# Development-only proof. Synchronize trigger marker.
 from __future__ import annotations
 
 import copy
