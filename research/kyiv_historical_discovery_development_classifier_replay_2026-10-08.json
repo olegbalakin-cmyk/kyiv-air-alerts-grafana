@@ -52,9 +52,10 @@
     "positive_episodes_with_candidate": 19,
     "positives_lost_before_admission": 29,
     "positives_lost_in_classifier": 19,
+    "potential_hold_positive_promotions": 1,
     "sensitivity_reproduced": 0,
     "strict_reproduced": 0,
-    "unsupported_hold_promotions": 1,
+    "unsupported_hold_promotions": 0,
     "usable_native_texts": 90
   },
   "discovery_vs_classifier_loss": {
@@ -4771,6 +4772,7 @@
   "hold_safety_results": [
     {
       "classifier_verdict": "NEEDS_REVIEW",
+      "demonstrated_unsupported": false,
       "episode_id": "22fc470fb24e88a1022fd27d",
       "reason": "Authoritative classifier retained the hold as non-positive.",
       "recovered_native_evidence": [
@@ -4803,6 +4805,7 @@
     },
     {
       "classifier_verdict": "NEEDS_REVIEW",
+      "demonstrated_unsupported": false,
       "episode_id": "0e19275d8e1e1a428796b484",
       "reason": "Authoritative classifier retained the hold as non-positive.",
       "recovered_native_evidence": [
@@ -4827,6 +4830,7 @@
     },
     {
       "classifier_verdict": "NEEDS_REVIEW",
+      "demonstrated_unsupported": false,
       "episode_id": "0bbc4d1cae4a818f9ed15033",
       "reason": "Authoritative classifier retained the hold as non-positive.",
       "recovered_native_evidence": [
@@ -4867,6 +4871,7 @@
     },
     {
       "classifier_verdict": "NEEDS_REVIEW",
+      "demonstrated_unsupported": false,
       "episode_id": "27b2e9241a2ad8bf89c070b1",
       "reason": "Authoritative classifier retained the hold as non-positive.",
       "recovered_native_evidence": [
@@ -4907,8 +4912,9 @@
     },
     {
       "classifier_verdict": "STRICT_EVENT_POSITIVE",
+      "demonstrated_unsupported": false,
       "episode_id": "f06c52e0ed82b44792ec2ec7",
-      "reason": "Historical hold control received a positive authoritative alert-level verdict; no mutation performed.",
+      "reason": "Positive versus historical hold control, but newly recovered evidence satisfies the unchanged authoritative positive semantics; report as POTENTIAL only, not demonstrated unsupported. No mutation performed.",
       "recovered_native_evidence": [
         {
           "admission_reason": null,
@@ -4923,6 +4929,7 @@
     },
     {
       "classifier_verdict": "NEEDS_REVIEW",
+      "demonstrated_unsupported": false,
       "episode_id": "e700d1bae5a1e86e265de4b6",
       "reason": "Authoritative classifier retained the hold as non-positive.",
       "recovered_native_evidence": [
@@ -4979,6 +4986,7 @@
     },
     {
       "classifier_verdict": "NEEDS_REVIEW",
+      "demonstrated_unsupported": false,
       "episode_id": "ceafef7b2d21a8d27fa83240",
       "reason": "Authoritative classifier retained the hold as non-positive.",
       "recovered_native_evidence": [
@@ -11168,7 +11176,7 @@
       }
     ]
   },
-  "recommendation": "SAFETY FAILURE",
+  "recommendation": "DEVELOPMENT PERFORMANCE INSUFFICIENT",
   "schema_version": 1,
   "technical_execution": {
     "classifier_input_sha_unchanged_after_replay": true,
@@ -11176,5 +11184,5 @@
     "technical_blocker_remaining": false,
     "technical_errors": []
   },
-  "verdict": "KYIV HISTORICAL DEVELOPMENT CLASSIFIER REPLAY = SAFETY FAILURE"
+  "verdict": "KYIV HISTORICAL DEVELOPMENT CLASSIFIER REPLAY = PERFORMANCE INSUFFICIENT"
 }
