@@ -1,0 +1,973 @@
+#!/usr/bin/env python3
+from __future__ import annotations
+
+import argparse
+import csv
+import io
+import json
+import math
+from collections import defaultdict
+from datetime import date, datetime, time, timedelta, timezone
+from pathlib import Path
+
+import add_duration_unit_switch as exactmod
+import apply_ukrainealarm_bridge as bridge
+import expand_multicity_production as base
+import extend_remaining_proxies as extended
+from update_data import Alert, TZ, http_session
+
+UTC = timezone.utc
+SLOT_MINUTES = 15
+SLOT_SECONDS = SLOT_MINUTES * 60
+PERIODS = {
+    "7d": 7,
+    "30d": 30,
+    "90d": 90,
+    "180d": 180,
+    "year": 365,
+    "all": None,
+}
+
+
+def parse_dt(value: str) -> datetime:
+    dt = datetime.fromisoformat(str(value).replace("Z", "+00:00"))
+    if dt.tzinfo is None:
+        raise ValueError(f"Timezone-aware datetime required: {value!r}")
+    return dt
+
+
+def union_alerts(alerts: list[Alert], source: str) -> list[Alert]:
+    merged: list[list[datetime]] = []
+    for alert in sorted(alerts, key=lambda a: a.start.astimezone(UTC)):
+        start = alert.start.astimezone(TZ)
+        end = alert.end.astimezone(TZ)
+        if end <= start:
+            continue
+        if not merged or start.astimezone(UTC) > merged[-1][1].astimezone(UTC):
+            merged.append([start, end])
+        elif end.astimezone(UTC) > merged[-1][1].astimezone(UTC):
+            merged[-1][1] = end
+    return [Alert(start=s, end=e, source=source) for s, e in merged]
+
+
+def load_historical_source() -> tuple[dict[str, list[Alert]], dict[str, list[Alert]], dict[str, dict]]:
+    proxy_cfg = extended.configure_all_proxies()
+    session = http_session()
+    response = session.get(exactmod.CITY_SOURCE_URL, timeout=120)
+    response.raise_for_status()
+    source_text = response.content.decode("utf-8-sig")
+
+    hromada_to_key = {cfg["hromada"]: key for key, cfg in exactmod.CITY_CONFIG.items()}
+    exact: dict[str, list[Alert]] = {key: [] for key in exactmod.CITY_CONFIG}
+    exact_seen: dict[str, set[tuple[str, str]]] = {key: set() for key in exactmod.CITY_CONFIG}
+
+    oblast_to_key = {cfg["oblast"]: key for key, cfg in proxy_cfg.items()}
+    proxy_intervals: dict[str, list[tuple[datetime, datetime]]] = {key: [] for key in proxy_cfg}
+    proxy_seen: dict[str, set[tuple[str, str, str]]] = {key: set() for key in proxy_cfg}
+
+    for row in csv.DictReader(io.StringIO(source_text)):
+        level = (row.get("level") or "").strip()
+        started = (row.get("started_at") or "").strip()
+        finished = (row.get("finished_at") or "").strip()
+        if not started or not finished:
+            continue
+        try:
+            start = parse_dt(started).astimezone(TZ)
+            end = parse_dt(finished).astimezone(TZ)
+        except ValueError:
+            continue
+        if end <= start:
+            continue
+
+        if level == "hromada":
+            key = hromada_to_key.get((row.get("hromada") or "").strip())
+            if key:
+                marker = (started, finished)
+                valid_from = parse_dt(exactmod.CITY_CONFIG[key]["valid_from"]).astimezone(TZ)
+                if marker not in exact_seen[key] and start >= valid_from:
+                    exact_seen[key].add(marker)
+                    exact[key].append(Alert(start=start, end=end, source="vadimkin_official"))
+
+        oblast = (row.get("oblast") or "").strip()
+        proxy_key = oblast_to_key.get(oblast)
+        if not proxy_key:
+            continue
+        cfg = proxy_cfg[proxy_key]
+        raion = (row.get("raion") or "").strip()
+        if level != "oblast" and not (level == "raion" and raion == cfg["raion"]):
+            continue
+        marker = (level, started, finished)
+        if marker in proxy_seen[proxy_key]:
+            continue
+        cutoff = datetime.combine(date.fromisoformat(cfg["coverage_start"]), time.min, tzinfo=TZ)
+        if end <= cutoff:
+            continue
+        proxy_seen[proxy_key].add(marker)
+        proxy_intervals[proxy_key].append((max(start, cutoff), end))
+
+    for alerts in exact.values():
+        alerts.sort(key=lambda a: a.start.astimezone(UTC))
+    proxy = {
+        key: [Alert(start=a.start, end=a.end, source=a.source) for a in base.union_alerts(intervals)]
+        for key, intervals in proxy_intervals.items()
+    }
+    return exact, proxy, proxy_cfg
+
+
+def load_kyiv(path: Path) -> list[Alert]:
+    rows = json.loads(path.read_text(encoding="utf-8"))
+    alerts = []
+    for row in rows:
+        try:
+            start = parse_dt(row["start"]).astimezone(TZ)
+            end = parse_dt(row["end"]).astimezone(TZ)
+        except (KeyError, ValueError, TypeError):
+            continue
+        if end > start:
+            alerts.append(Alert(start=start, end=end, source=row.get("source", "kyiv_combined")))
+    return union_alerts(alerts, "kyiv_production_combined")
+
+
+def load_sevastopol(path: Path) -> list[Alert]:
+    store = json.loads(path.read_text(encoding="utf-8"))
+    alerts = []
+    for row in store.get("pairs", []):
+        try:
+            start = parse_dt(row["start"]).astimezone(TZ)
+            end = parse_dt(row["end"]).astimezone(TZ)
+        except (KeyError, ValueError, TypeError):
+            continue
+        if end > start:
+            alerts.append(Alert(start=start, end=end, source="sevastopol_occupation_admin_telegram"))
+    return union_alerts(alerts, "sevastopol_production_combined")
+
+
+def load_bridge_store(path: Path) -> dict:
+    store = json.loads(path.read_text(encoding="utf-8"))
+    if not isinstance(store.get("events"), list):
+        raise RuntimeError("UkraineAlarm bridge store has no events array")
+    return store
+
+
+def bridge_alerts(store: dict, key: str) -> list[Alert]:
+    alerts = []
+    for row in store.get("events", []):
+        if row.get("city_key") != key or row.get("alert_type") not in (None, "AIR"):
+            continue
+        try:
+            start = parse_dt(row["start"]).astimezone(TZ)
+            end = parse_dt(row["end"]).astimezone(TZ)
+        except (KeyError, ValueError, TypeError):
+            continue
+        if end > start:
+            alerts.append(Alert(start=start, end=end, source="ukrainealarm_bridge"))
+    return alerts
+
+
+def slot_index(local_dt: datetime) -> int:
+    return local_dt.hour * 4 + local_dt.minute // SLOT_MINUTES
+
+
+def add_interval_seconds(buckets: list[float], start: datetime, end: datetime) -> None:
+    cur = start.astimezone(UTC)
+    stop = end.astimezone(UTC)
+    while cur < stop:
+        ts = cur.timestamp()
+        next_boundary_ts = (math.floor(ts / SLOT_SECONDS) + 1) * SLOT_SECONDS
+        nxt = min(stop, datetime.fromtimestamp(next_boundary_ts, UTC))
+        midpoint = cur + (nxt - cur) / 2
+        buckets[slot_index(midpoint.astimezone(TZ))] += (nxt - cur).total_seconds()
+        cur = nxt
+
+
+def format_slot(index: int) -> tuple[str, str]:
+    start_minutes = index * SLOT_MINUTES
+    end_minutes = (start_minutes + SLOT_MINUTES) % (24 * 60)
+    sh, sm = divmod(start_minutes, 60)
+    eh, em = divmod(end_minutes, 60)
+    start = f"{sh:02d}:{sm:02d}"
+    end = f"{eh:02d}:{em:02d}"
+    return start, f"{start}–{end}"
+
+
+def period_heatmap(
+    alerts: list[Alert],
+    coverage_day: date,
+    end_day: date,
+    requested_days: int | None,
+) -> dict:
+    if requested_days is None:
+        start_day = coverage_day
+    else:
+        start_day = max(coverage_day, end_day - timedelta(days=requested_days - 1))
+    if start_day > end_day:
+        raise RuntimeError(f"Invalid heatmap range: {start_day} > {end_day}")
+
+    start_local = datetime.combine(start_day, time.min, tzinfo=TZ)
+    end_local = datetime.combine(end_day + timedelta(days=1), time.min, tzinfo=TZ)
+    start_utc = start_local.astimezone(UTC)
+    end_utc = end_local.astimezone(UTC)
+
+    possible = [0.0] * 96
+    active = [0.0] * 96
+    add_interval_seconds(possible, start_utc, end_utc)
+
+    for alert in alerts:
+        a0 = max(alert.start.astimezone(UTC), start_utc)
+        a1 = min(alert.end.astimezone(UTC), end_utc)
+        if a1 > a0:
+            add_interval_seconds(active, a0, a1)
+
+    shares = [
+        (active[i] / possible[i] * 100.0) if possible[i] > 0 else 0.0
+        for i in range(96)
+    ]
+    peak = max(shares) if shares else 0.0
+    peak_index = shares.index(peak) if peak > 0 else None
+    slots = []
+    for i, share in enumerate(shares):
+        start_label, label = format_slot(i)
+        slots.append(
+            {
+                "index": i,
+                "start": start_label,
+                "label": label,
+                "alert_share_pct": round(share, 3),
+                "relative_intensity": round((share / peak * 100.0) if peak > 0 else 0.0, 2),
+                "alert_minutes": round(active[i] / 60.0, 2),
+                "possible_minutes": round(possible[i] / 60.0, 2),
+            }
+        )
+
+    return {
+        "range_start": start_day.isoformat(),
+        "range_end": end_day.isoformat(),
+        "days": (end_day - start_day).days + 1,
+        "requested_days": requested_days,
+        "peak_slot": format_slot(peak_index)[1] if peak_index is not None else None,
+        "peak_alert_share_pct": round(peak, 3),
+        "slots": slots,
+    }
+
+
+def period_summary(alerts: list[Alert], start_day: date, end_day: date) -> dict:
+    start_local = datetime.combine(start_day, time.min, tzinfo=TZ)
+    end_local = datetime.combine(end_day + timedelta(days=1), time.min, tzinfo=TZ)
+    start_utc = start_local.astimezone(UTC)
+    end_utc = end_local.astimezone(UTC)
+
+    active_seconds = 0.0
+    for alert in alerts:
+        a0 = max(alert.start.astimezone(UTC), start_utc)
+        a1 = min(alert.end.astimezone(UTC), end_utc)
+        if a1 > a0:
+            active_seconds += (a1 - a0).total_seconds()
+
+    starts_in_period = [
+        alert
+        for alert in alerts
+        if start_utc <= alert.start.astimezone(UTC) < end_utc
+    ]
+    durations_min = [
+        (alert.end.astimezone(UTC) - alert.start.astimezone(UTC)).total_seconds() / 60.0
+        for alert in starts_in_period
+        if alert.end.astimezone(UTC) > alert.start.astimezone(UTC)
+    ]
+    avg_duration = sum(durations_min) / len(durations_min) if durations_min else None
+
+    return {
+        "range_start": start_day.isoformat(),
+        "range_end": end_day.isoformat(),
+        "days": (end_day - start_day).days + 1,
+        "alerts_started": len(starts_in_period),
+        "alert_hours": round(active_seconds / 3600.0, 3),
+        "avg_alert_duration_min": round(avg_duration, 3) if avg_duration is not None else None,
+    }
+
+
+def rolling_window_row(
+    alerts: list[Alert],
+    coverage_day: date,
+    end_day: date,
+    window_days: int,
+    *,
+    partial: bool = False,
+) -> dict | None:
+    start_day = end_day - timedelta(days=window_days - 1)
+    if start_day < coverage_day:
+        return None
+    summary = period_summary(alerts, start_day, end_day)
+    return {
+        "time": datetime.combine(end_day, time.min, tzinfo=TZ).isoformat(),
+        "window_start": start_day.isoformat(),
+        "window_end": end_day.isoformat(),
+        "window_days": window_days,
+        "alerts_per_day": round(summary["alerts_started"] / window_days, 3),
+        "avg_daily_alert_hours": round(summary["alert_hours"] / window_days, 3),
+        "avg_alert_duration_min": summary["avg_alert_duration_min"],
+        "alerts_started": summary["alerts_started"],
+        "is_partial_period": partial,
+        "partial_through": end_day.isoformat() if partial else None,
+    }
+
+
+def rolling_window_series(
+    alerts: list[Alert],
+    coverage_day: date,
+    endpoints: list[date],
+    window_days: int,
+) -> list[dict]:
+    rows = []
+    for end_day in endpoints:
+        row = rolling_window_row(alerts, coverage_day, end_day, window_days)
+        if row is not None:
+            rows.append(row)
+    return rows
+
+def coverage_start(dashboard: dict, key: str, alerts: list[Alert]) -> date:
+    meta = dashboard.get("multicity_meta", {}).get("cities", {}).get(key, {})
+    value = meta.get("coverage_start") or dashboard.get("cities", {}).get(key, {}).get("meta", {}).get("coverage_start")
+    if value:
+        return date.fromisoformat(str(value)[:10])
+    return min(a.start.astimezone(TZ).date() for a in alerts)
+
+
+def analysis_end(dashboard: dict, key: str) -> date:
+    city_meta = dashboard.get("cities", {}).get(key, {}).get("meta", {})
+    value = city_meta.get("analysis_end") or dashboard.get("meta", {}).get("analysis_end")
+    if not value:
+        raise RuntimeError(f"No analysis_end for {key}")
+    return date.fromisoformat(str(value)[:10])
+
+
+def enrich_daily28_active_durations(city_output: dict, alerts: list[Alert]) -> None:
+    """Backfill within-day duration metrics for the preview daily series."""
+    for row in city_output.get("daily28", []):
+        raw_day = str(row.get("date") or row.get("time") or "")[:10]
+        try:
+            current_day = date.fromisoformat(raw_day)
+        except ValueError:
+            continue
+
+        day_start = datetime.combine(current_day, time.min, tzinfo=TZ).astimezone(UTC)
+        day_end = datetime.combine(current_day + timedelta(days=1), time.min, tzinfo=TZ).astimezone(UTC)
+        durations_min: list[float] = []
+
+        for alert in alerts:
+            start = max(alert.start.astimezone(UTC), day_start)
+            end = min(alert.end.astimezone(UTC), day_end)
+            if end > start:
+                durations_min.append((end - start).total_seconds() / 60.0)
+
+        row["active_alerts"] = len(durations_min)
+        row["avg_active_alert_duration_minutes"] = (
+            round(sum(durations_min) / len(durations_min), 3)
+            if durations_min else None
+        )
+
+
+def append_current_day_daily28(city_output: dict, alerts: list[Alert], now_local: datetime) -> None:
+    """Preview-only daily view: 27 completed days plus the current partial day."""
+    today = now_local.astimezone(TZ).date()
+    day_start = datetime.combine(today, time.min, tzinfo=TZ).astimezone(UTC)
+    cutoff = now_local.astimezone(UTC)
+    if cutoff <= day_start:
+        return
+
+    active_segments: list[tuple[datetime, datetime]] = []
+    starts_today: list[tuple[datetime, datetime]] = []
+
+    for alert in alerts:
+        a0 = alert.start.astimezone(UTC)
+        a1 = min(alert.end.astimezone(UTC), cutoff)
+        if day_start <= a0 < cutoff and a1 > a0:
+            starts_today.append((a0, a1))
+        start = max(a0, day_start)
+        end = min(a1, cutoff)
+        if end > start:
+            active_segments.append((start, end))
+
+    merged: list[list[datetime]] = []
+    for start, end in sorted(active_segments, key=lambda item: item[0]):
+        if not merged or start > merged[-1][1]:
+            merged.append([start, end])
+        elif end > merged[-1][1]:
+            merged[-1][1] = end
+
+    total_seconds = sum((end - start).total_seconds() for start, end in merged)
+    active_durations_min = [(end - start).total_seconds() / 60.0 for start, end in active_segments]
+    started_durations_min = [(end - start).total_seconds() / 60.0 for start, end in starts_today]
+
+    current_row = {
+        "time": datetime.combine(today, time.min, tzinfo=TZ).isoformat(),
+        "date": today.isoformat(),
+        "alerts_started": len(starts_today),
+        "active_alerts": len(active_segments),
+        "total_alert_duration_minutes": round(total_seconds / 60.0, 3),
+        "total_alert_duration_hours": round(total_seconds / 3600.0, 3),
+        "avg_alert_duration_minutes": (
+            round(sum(started_durations_min) / len(started_durations_min), 3)
+            if started_durations_min else None
+        ),
+        "avg_active_alert_duration_minutes": (
+            round(sum(active_durations_min) / len(active_durations_min), 3)
+            if active_durations_min else None
+        ),
+        "is_partial_period": True,
+        "partial_through": now_local.astimezone(TZ).isoformat(),
+    }
+
+    completed = [
+        row for row in city_output.get("daily28", [])
+        if str(row.get("date") or row.get("time") or "")[:10] < today.isoformat()
+    ]
+    city_output["daily28"] = completed[-27:] + [current_row]
+    meta = city_output.setdefault("meta", {})
+    meta["daily28_preview_mode"] = "27_completed_days_plus_current_partial_day"
+    meta["daily28_partial_through"] = current_row["partial_through"]
+
+
+
+def exploration_percentile(values: list[float], p: float) -> float | None:
+    if not values:
+        return None
+    ordered = sorted(values)
+    if len(ordered) == 1:
+        return ordered[0]
+    position = (len(ordered) - 1) * p
+    low = math.floor(position)
+    high = math.ceil(position)
+    if low == high:
+        return ordered[low]
+    fraction = position - low
+    return ordered[low] * (1.0 - fraction) + ordered[high] * fraction
+
+
+def exploration_next_month(d: date) -> date:
+    if d.month == 12:
+        return date(d.year + 1, 1, 1)
+    return date(d.year, d.month + 1, 1)
+
+
+def exploration_days(start_day: date, end_day: date):
+    current = start_day
+    while current <= end_day:
+        yield current
+        current += timedelta(days=1)
+
+
+def aggregate_exploration_profile(profile_15: dict, slot_minutes: int) -> dict:
+    if slot_minutes not in (15, 30, 60):
+        raise ValueError(f"Unsupported slot size: {slot_minutes}")
+    factor = slot_minutes // 15
+    source_slots = profile_15.get("slots", [])
+    aggregated = []
+
+    for start in range(0, len(source_slots), factor):
+        group = source_slots[start:start + factor]
+        if len(group) != factor:
+            continue
+        alert_minutes = sum(float(slot.get("alert_minutes") or 0.0) for slot in group)
+        possible_minutes = sum(float(slot.get("possible_minutes") or 0.0) for slot in group)
+        share = alert_minutes / possible_minutes * 100.0 if possible_minutes > 0 else 0.0
+
+        start_total = start * 15
+        end_total = (start_total + slot_minutes) % (24 * 60)
+        sh, sm = divmod(start_total, 60)
+        eh, em = divmod(end_total, 60)
+        start_label = f"{sh:02d}:{sm:02d}"
+        end_label = f"{eh:02d}:{em:02d}"
+
+        aggregated.append({
+            "index": len(aggregated),
+            "start": start_label,
+            "label": f"{start_label}–{end_label}",
+            "alert_share_pct": round(share, 3),
+            "relative_intensity": 0.0,
+            "alert_minutes": round(alert_minutes, 2),
+            "possible_minutes": round(possible_minutes, 2),
+        })
+
+    peak = max((slot["alert_share_pct"] for slot in aggregated), default=0.0)
+    for slot in aggregated:
+        slot["relative_intensity"] = round(
+            (slot["alert_share_pct"] / peak * 100.0) if peak > 0 else 0.0,
+            2,
+        )
+
+    peak_slot = None
+    if peak > 0:
+        peak_slot = next(
+            (slot["label"] for slot in aggregated if slot["alert_share_pct"] == peak),
+            None,
+        )
+
+    return {
+        "range_start": profile_15.get("range_start"),
+        "range_end": profile_15.get("range_end"),
+        "days": profile_15.get("days"),
+        "slot_minutes": slot_minutes,
+        "peak_slot": peak_slot,
+        "peak_alert_share_pct": round(peak, 3),
+        "slots": aggregated,
+    }
+
+
+def build_exploration_city(
+    alerts: list[Alert],
+    coverage_day: date,
+    end_day: date,
+    *,
+    label: str,
+    source_type: str | None,
+) -> dict:
+    range_start_utc = datetime.combine(coverage_day, time.min, tzinfo=TZ).astimezone(UTC)
+    range_end_utc = datetime.combine(end_day + timedelta(days=1), time.min, tzinfo=TZ).astimezone(UTC)
+
+    daily_seconds: dict[date, float] = defaultdict(float)
+    daily_starts: dict[date, int] = defaultdict(int)
+    durations_by_month: dict[str, list[float]] = defaultdict(list)
+    month_intervals: dict[str, list[tuple[datetime, datetime]]] = defaultdict(list)
+    band_seconds: dict[str, list[float]] = defaultdict(lambda: [0.0, 0.0, 0.0, 0.0])
+
+    for alert in alerts:
+        raw_start_utc = alert.start.astimezone(UTC)
+        raw_end_utc = alert.end.astimezone(UTC)
+        if raw_end_utc <= range_start_utc or raw_start_utc >= range_end_utc:
+            continue
+
+        start_local = alert.start.astimezone(TZ)
+        if coverage_day <= start_local.date() <= end_day:
+            daily_starts[start_local.date()] += 1
+            duration_min = max(0.0, (raw_end_utc - raw_start_utc).total_seconds() / 60.0)
+            durations_by_month[start_local.strftime("%Y-%m")].append(duration_min)
+
+        clipped_start = max(raw_start_utc, range_start_utc)
+        clipped_end = min(raw_end_utc, range_end_utc)
+
+        cursor = clipped_start
+        while cursor < clipped_end:
+            local = cursor.astimezone(TZ)
+            day = local.date()
+            band = min(3, local.hour // 6)
+            boundary_hour = (band + 1) * 6
+            if boundary_hour >= 24:
+                boundary_local = datetime.combine(day + timedelta(days=1), time.min, tzinfo=TZ)
+            else:
+                boundary_local = datetime.combine(day, time(boundary_hour, 0), tzinfo=TZ)
+            segment_end = min(clipped_end, boundary_local.astimezone(UTC))
+            if segment_end <= cursor:
+                segment_end = min(clipped_end, cursor + timedelta(minutes=1))
+            elapsed = max(0.0, (segment_end - cursor).total_seconds())
+            daily_seconds[day] += elapsed
+            band_seconds[day.strftime("%Y-%m")][band] += elapsed
+            cursor = segment_end
+
+        cursor = clipped_start
+        while cursor < clipped_end:
+            local = cursor.astimezone(TZ)
+            month_start = date(local.year, local.month, 1)
+            next_month = exploration_next_month(month_start)
+            month_end_utc = datetime.combine(next_month, time.min, tzinfo=TZ).astimezone(UTC)
+            segment_end = min(clipped_end, month_end_utc)
+            if segment_end <= cursor:
+                break
+            month_intervals[month_start.strftime("%Y-%m")].append((cursor, segment_end))
+            cursor = segment_end
+
+    daily_rows = []
+    for day in exploration_days(coverage_day, end_day):
+        hours = daily_seconds.get(day, 0.0) / 3600.0
+        daily_rows.append({
+            "date": day.isoformat(),
+            "alert_hours": round(hours, 3),
+            "alerts_started": int(daily_starts.get(day, 0)),
+        })
+
+    monthly_rows = []
+    month_cursor = coverage_day.replace(day=1)
+    final_month = end_day.replace(day=1)
+    while month_cursor <= final_month:
+        next_month = exploration_next_month(month_cursor)
+        calendar_month_end = next_month - timedelta(days=1)
+        covered_start = max(month_cursor, coverage_day)
+        covered_end = min(calendar_month_end, end_day)
+        if covered_start <= covered_end:
+            key = month_cursor.strftime("%Y-%m")
+            days = list(exploration_days(covered_start, covered_end))
+            durations = durations_by_month.get(key, [])
+            alert_hours = [daily_seconds.get(day, 0.0) / 3600.0 for day in days]
+            total_alert_hours = sum(alert_hours)
+            starts = sum(daily_starts.get(day, 0) for day in days)
+
+            burden = {
+                "zero": 0,
+                "lt1": 0,
+                "h1_3": 0,
+                "h3_6": 0,
+                "h6_12": 0,
+                "h12plus": 0,
+            }
+            for hours in alert_hours:
+                if hours <= 1e-9:
+                    burden["zero"] += 1
+                elif hours < 1:
+                    burden["lt1"] += 1
+                elif hours < 3:
+                    burden["h1_3"] += 1
+                elif hours < 6:
+                    burden["h3_6"] += 1
+                elif hours < 12:
+                    burden["h6_12"] += 1
+                else:
+                    burden["h12plus"] += 1
+
+            bound_start_utc = datetime.combine(covered_start, time.min, tzinfo=TZ).astimezone(UTC)
+            bound_end_utc = datetime.combine(covered_end + timedelta(days=1), time.min, tzinfo=TZ).astimezone(UTC)
+            intervals = sorted(month_intervals.get(key, []), key=lambda item: item[0])
+            merged: list[list[datetime]] = []
+            for start, end in intervals:
+                start = max(start, bound_start_utc)
+                end = min(end, bound_end_utc)
+                if end <= start:
+                    continue
+                if not merged or start > merged[-1][1]:
+                    merged.append([start, end])
+                elif end > merged[-1][1]:
+                    merged[-1][1] = end
+
+            if merged:
+                quiet_seconds = max(
+                    [(merged[0][0] - bound_start_utc).total_seconds()]
+                    + [
+                        (merged[index][0] - merged[index - 1][1]).total_seconds()
+                        for index in range(1, len(merged))
+                    ]
+                    + [(bound_end_utc - merged[-1][1]).total_seconds()]
+                )
+            else:
+                quiet_seconds = (bound_end_utc - bound_start_utc).total_seconds()
+
+            bands = band_seconds.get(key, [0.0, 0.0, 0.0, 0.0])
+            band_total = sum(bands)
+            band_names = ["00_06", "06_12", "12_18", "18_24"]
+            band_minutes = {
+                band_names[index]: round(bands[index] / 60.0, 2)
+                for index in range(4)
+            }
+            band_shares = {
+                band_names[index]: round((bands[index] / band_total * 100.0) if band_total > 0 else 0.0, 3)
+                for index in range(4)
+            }
+
+            avg_duration = sum(durations) / len(durations) if durations else None
+            monthly_rows.append({
+                "month": key,
+                "days_covered": len(days),
+                "partial_period": covered_start != month_cursor or covered_end != calendar_month_end,
+                "alerts_started": starts,
+                "alerts_per_day": round(starts / len(days), 4) if days else 0.0,
+                "alert_hours": round(total_alert_hours, 3),
+                "avg_daily_alert_hours": round(total_alert_hours / len(days), 4) if days else 0.0,
+                "avg_duration_min": round(avg_duration, 3) if avg_duration is not None else None,
+                "duration_p50_min": round(exploration_percentile(durations, 0.50), 3) if durations else None,
+                "duration_p75_min": round(exploration_percentile(durations, 0.75), 3) if durations else None,
+                "duration_p90_min": round(exploration_percentile(durations, 0.90), 3) if durations else None,
+                "max_duration_min": round(max(durations), 3) if durations else None,
+                "longest_alert_min": round(max(durations), 3) if durations else None,
+                "longest_quiet_gap_min": round(max(0.0, quiet_seconds) / 60.0, 3),
+                "burden_day_counts": burden,
+                "time_band_minutes": band_minutes,
+                "time_band_shares": band_shares,
+            })
+        month_cursor = next_month
+
+    years = sorted({row["date"][:4] for row in daily_rows})
+    time_profiles = {}
+    for year in years:
+        year_start = max(coverage_day, date(int(year), 1, 1))
+        year_end = min(end_day, date(int(year), 12, 31))
+        if year_start > year_end:
+            continue
+        profile_15 = period_heatmap(alerts, year_start, year_end, None)
+        time_profiles[year] = {
+            "15": aggregate_exploration_profile(profile_15, 15),
+            "30": aggregate_exploration_profile(profile_15, 30),
+            "60": aggregate_exploration_profile(profile_15, 60),
+        }
+
+    return {
+        "label": label,
+        "source_type": source_type,
+        "coverage_start": coverage_day.isoformat(),
+        "analysis_end": end_day.isoformat(),
+        "years": years,
+        "daily": daily_rows,
+        "monthly": monthly_rows,
+        "time_profiles": time_profiles,
+    }
+
+
+def build_exploration_payload(
+    dashboard: dict,
+    production_keys: list[str],
+    city_alerts: dict[str, list[Alert]],
+    coverage_days: dict[str, date],
+    analysis_days: dict[str, date],
+    generated_at: datetime,
+) -> dict:
+    cities = {}
+    meta_cities = dashboard.get("multicity_meta", {}).get("cities", {})
+    for key in production_keys:
+        city_meta = meta_cities.get(key, {})
+        label = city_meta.get("label") or dashboard.get("cities", {}).get(key, {}).get("meta", {}).get("city_label") or key
+        cities[key] = build_exploration_city(
+            city_alerts[key],
+            coverage_days[key],
+            analysis_days[key],
+            label=label,
+            source_type=city_meta.get("source_type"),
+        )
+
+    return {
+        "meta": {
+            "test_only": True,
+            "generated_at": generated_at.astimezone(UTC).isoformat(),
+            "timezone": "Europe/Kyiv",
+            "city_count": len(cities),
+            "views": [
+                "calendar_burden",
+                "regime_scatter",
+                "duration_percentiles",
+                "heavy_day_distribution",
+                "longest_alert_and_quiet_gap",
+                "daypart_share",
+            ],
+            "supporting_views": [
+                "time_of_day_profile_15_30_60",
+            ],
+            "notes": {
+                "alert_counts": "Alert counts are assigned to the local calendar day/month in which the alert starts.",
+                "daily_time": "Alert time is split at local calendar boundaries.",
+                "duration_distribution": "Duration percentiles use full durations of alerts that start in the month.",
+                "quiet_gap": "Longest quiet gap is measured within the covered part of each calendar month, including month-boundary-to-first-alert and last-alert-to-month-boundary gaps.",
+                "dayparts": "Alert time is split into Europe/Kyiv local-time bands 00-06, 06-12, 12-18, and 18-24.",
+                "time_profile": "Time-of-day profiles are normalized separately for 15-, 30-, and 60-minute local-time slots.",
+            },
+        },
+        "cities": cities,
+    }
+
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--dashboard", type=Path, required=True)
+    parser.add_argument("--kyiv-alerts", type=Path, required=True)
+    parser.add_argument("--bridge-store", type=Path, required=True)
+    parser.add_argument("--sevastopol-events", type=Path, required=True)
+    parser.add_argument("--explorations-output", type=Path)
+    args = parser.parse_args()
+
+    dashboard = json.loads(args.dashboard.read_text(encoding="utf-8"))
+    production_keys = list(dashboard.get("multicity_meta", {}).get("production_city_keys", []))
+    if len(production_keys) != 23:
+        raise RuntimeError(f"Expected 23 production rows, got {len(production_keys)}")
+
+    exact_base, proxy_base, proxy_cfg = load_historical_source()
+    static, _ = bridge.load_static_bridge()
+    store = load_bridge_store(args.bridge_store)
+
+    city_alerts: dict[str, list[Alert]] = {
+        "kyiv": load_kyiv(args.kyiv_alerts),
+        "sevastopol": load_sevastopol(args.sevastopol_events),
+    }
+
+    for key in exactmod.CITY_CONFIG:
+        city_alerts[key] = union_alerts(
+            [*exact_base.get(key, []), *static.get(key, []), *bridge_alerts(store, key)],
+            "historical_exact_plus_bridge",
+        )
+
+    for key in proxy_cfg:
+        city_alerts[key] = union_alerts(
+            [*proxy_base.get(key, []), *static.get(key, []), *bridge_alerts(store, key)],
+            "historical_proxy_plus_bridge",
+        )
+
+    missing = [key for key in production_keys if not city_alerts.get(key)]
+    if missing:
+        raise RuntimeError(f"Missing alert intervals for heatmap rows: {missing}")
+
+    coverage_days = {
+        key: coverage_start(dashboard, key, city_alerts[key])
+        for key in production_keys
+    }
+    analysis_days = {
+        key: analysis_end(dashboard, key)
+        for key in production_keys
+    }
+    common_start_day = max(coverage_days.values())
+    common_end_day = min(analysis_days.values())
+    if common_start_day > common_end_day:
+        raise RuntimeError(
+            f"No shared all-city window: {common_start_day} > {common_end_day}"
+        )
+
+    build_now = datetime.now(TZ)
+
+    cities = {}
+    table_cities = {}
+    table_specs = {
+        "7d": 7,
+        "30d": 30,
+        "90d": 90,
+        "year": 365,
+        "common": None,
+    }
+
+    for key in production_keys:
+        alerts = city_alerts[key]
+        start_day = coverage_days[key]
+        end_day = analysis_days[key]
+        periods = {
+            period: period_heatmap(alerts, start_day, end_day, days)
+            for period, days in PERIODS.items()
+        }
+        cities[key] = {
+            "coverage_start": start_day.isoformat(),
+            "analysis_end": end_day.isoformat(),
+            "source_type": dashboard.get("multicity_meta", {}).get("cities", {}).get(key, {}).get("source_type"),
+            "periods": periods,
+        }
+
+        city_output = dashboard.get("cities", {}).get(key, {})
+        enrich_daily28_active_durations(city_output, alerts)
+        append_current_day_daily28(city_output, alerts, build_now)
+
+        # Preview-only current incomplete calendar month, through the latest
+        # completed day. Historical completed months stay unchanged.
+        monthly_rows = city_output.get("monthly", [])
+        month_start = end_day.replace(day=1)
+        if month_start.month == 12:
+            next_month_start = date(month_start.year + 1, 1, 1)
+        else:
+            next_month_start = date(month_start.year, month_start.month + 1, 1)
+        month_last_day = next_month_start - timedelta(days=1)
+        if end_day < month_last_day and month_start >= start_day:
+            summary = period_summary(alerts, month_start, end_day)
+            elapsed_days = summary["days"]
+            partial_month_row = {
+                "time": datetime.combine(month_start, time.min, tzinfo=TZ).isoformat(),
+                "month": month_start.strftime("%Y-%m"),
+                "alerts_per_day": round(summary["alerts_started"] / elapsed_days, 3),
+                "avg_daily_alert_hours": round(summary["alert_hours"] / elapsed_days, 3),
+                "avg_alert_duration_min": summary["avg_alert_duration_min"],
+                "alerts_started": summary["alerts_started"],
+                "is_partial_period": True,
+                "partial_through": end_day.isoformat(),
+            }
+            if not monthly_rows or monthly_rows[-1].get("month") != partial_month_row["month"]:
+                monthly_rows.append(partial_month_row)
+
+        # Keep the regular weekly display cadence, and add one current rolling
+        # slice through the latest completed day if it falls after that cadence.
+        weekly_rows = city_output.get("weekly", [])
+        endpoints = []
+        for row in weekly_rows:
+            endpoint_value = row.get("week_end") or str(row.get("time", ""))[:10]
+            if not endpoint_value:
+                continue
+            try:
+                endpoints.append(date.fromisoformat(endpoint_value))
+            except ValueError:
+                continue
+        endpoints = sorted(set(endpoints))
+        last_regular_endpoint = endpoints[-1] if endpoints else None
+
+        rolling30 = rolling_window_series(alerts, start_day, endpoints, 30)
+        rolling90 = rolling_window_series(alerts, start_day, endpoints, 90)
+
+        if last_regular_endpoint is None or last_regular_endpoint < end_day:
+            current7 = rolling_window_row(alerts, start_day, end_day, 7, partial=True)
+            if current7 is not None:
+                current7["week_start"] = current7["window_start"]
+                current7["week_end"] = current7["window_end"]
+                weekly_rows.append(current7)
+
+            current30 = rolling_window_row(alerts, start_day, end_day, 30, partial=True)
+            if current30 is not None:
+                rolling30.append(current30)
+
+            current90 = rolling_window_row(alerts, start_day, end_day, 90, partial=True)
+            if current90 is not None:
+                rolling90.append(current90)
+
+        city_output["rolling30"] = rolling30
+        city_output["rolling90"] = rolling90
+
+        table_periods = {}
+        for period, requested_days in table_specs.items():
+            if requested_days is None:
+                table_start = common_start_day
+            else:
+                requested_start = common_end_day - timedelta(days=requested_days - 1)
+                table_start = max(common_start_day, requested_start)
+            table_periods[period] = period_summary(alerts, table_start, common_end_day)
+        table_cities[key] = {"periods": table_periods}
+
+    dashboard["all_cities_table_test"] = {
+        "meta": {
+            "test_only": True,
+            "city_count": len(table_cities),
+            "periods": list(table_specs),
+            "common_start": common_start_day.isoformat(),
+            "common_end": common_end_day.isoformat(),
+            "comparison_window": "intersection_of_all_23_city_rows",
+            "current_day_excluded": True,
+        },
+        "cities": table_cities,
+    }
+
+    dashboard["time_of_day_heatmap_test"] = {
+        "meta": {
+            "test_only": True,
+            "slot_minutes": SLOT_MINUTES,
+            "timezone": "Europe/Kyiv",
+            "city_count": len(cities),
+            "periods": list(PERIODS),
+            "current_day_excluded": True,
+            "color_scale": "normalized_to_city_period_peak",
+            "cell_value": "share_of_real_elapsed_time_in_local_15_minute_slot_spent_under_alert",
+            "dst_handling": "actual elapsed seconds are mapped to Europe/Kyiv local slots; repeated or skipped DST time is weighted by real duration",
+        },
+        "cities": cities,
+    }
+    if args.explorations_output is not None:
+        exploration_payload = build_exploration_payload(
+            dashboard,
+            production_keys,
+            city_alerts,
+            coverage_days,
+            analysis_days,
+            build_now,
+        )
+        args.explorations_output.parent.mkdir(parents=True, exist_ok=True)
+        args.explorations_output.write_text(
+            json.dumps(exploration_payload, ensure_ascii=False, indent=2) + "\n",
+            encoding="utf-8",
+        )
+
+    args.dashboard.write_text(json.dumps(dashboard, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    print(json.dumps({
+        "ok": True,
+        "city_count": len(cities),
+        "slot_minutes": SLOT_MINUTES,
+        "periods": list(PERIODS),
+        "all_cities_table_common_start": common_start_day.isoformat(),
+        "all_cities_table_common_end": common_end_day.isoformat(),
+    }, ensure_ascii=False))
+
+
+if __name__ == "__main__":
+    main()

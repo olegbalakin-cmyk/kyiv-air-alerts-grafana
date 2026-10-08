@@ -6,7 +6,7 @@
   <meta name="color-scheme" content="dark">
   <meta name="theme-color" content="#0b0f14">
   <title>Статистика повітряних тривог у містах України — графіки та порівняння</title>
-  <meta name="description" content="Статистика повітряних тривог у Києві та обласних центрах України: кількість тривог, години під тривогою, середня тривалість, порівняння міст і дані про загиблих у Києві.">
+  <meta name="description" content="Статистика повітряних тривог у Києві та обласних центрах України: кількість тривог, години під тривогою, середня тривалість, порівняння міст і дані про загиблих від повітряних атак.">
   <meta name="robots" content="index,follow,max-snippet:-1">
   <link rel="canonical" href="https://ukraine-air-alerts.netlify.app/">
 
@@ -14,14 +14,21 @@
   <meta property="og:locale" content="uk_UA">
   <meta property="og:site_name" content="Повітряні тривоги — міста України">
   <meta property="og:title" content="Статистика повітряних тривог у містах України">
-  <meta property="og:description" content="Графіки частоти й тривалості повітряних тривог, години під тривогою, порівняння обласних центрів і дані про загиблих у Києві.">
+  <meta property="og:description" content="Графіки частоти й тривалості повітряних тривог, години під тривогою, порівняння обласних центрів і дані про загиблих від повітряних атак.">
   <meta property="og:url" content="https://ukraine-air-alerts.netlify.app/">
+  <meta property="og:image" content="https://olegbalakin-cmyk.github.io/kyiv-air-alerts-grafana/share-card.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:type" content="image/png">
+  <meta property="og:image:alt" content="Стилізований графік статистики повітряних тривог">
 
-  <meta name="twitter:card" content="summary">
+  <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="Статистика повітряних тривог у містах України">
   <meta name="twitter:description" content="Графіки частоти й тривалості повітряних тривог, години під тривогою, порівняння міст і дані про загиблих у Києві.">
+  <meta name="twitter:image" content="https://olegbalakin-cmyk.github.io/kyiv-air-alerts-grafana/share-card.png">
+  <meta name="twitter:image:alt" content="Стилізований графік статистики повітряних тривог">
 
-  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="styles.css?v=20261008-5">
 </head>
 <body>
   <header class="page-header">
@@ -32,6 +39,10 @@
       <div id="datasetSummary" class="dataset-summary"></div>
     </div>
     <div class="header-actions">
+      <div id="languageSwitch" class="language-switch" role="group" aria-label="Мова">
+        <button id="langUk" class="language-button" type="button" aria-pressed="true">UA</button>
+        <button id="langEn" class="language-button" type="button" aria-pressed="false">EN</button>
+      </div>
       <div id="updatedAt" class="updated-at"></div>
       <button id="showTour" class="ghost-button" type="button">Показати тур</button>
       <button id="copyLink" class="ghost-button" type="button">Скопіювати посилання</button>
@@ -49,11 +60,22 @@
       <div class="control">
         <label for="cityPeriod">Період графіків</label>
         <select id="cityPeriod">
-          <option value="monthly">Місяці</option>
+          <option value="daily28">Останні 28 днів</option>
           <option id="cityWeeklyOption" value="weekly">Ковзні 7 днів</option>
           <option value="rolling30">Ковзні 30 днів</option>
           <option value="rolling90">Ковзні 90 днів</option>
+          <option value="rolling180">Ковзні 180 днів</option>
+          <option value="calendarWeekly">Тижні</option>
+          <option value="monthly">Місяці</option>
         </select>
+      </div>
+      <div class="control date-control">
+        <label for="cityDateFrom">Від</label>
+        <input id="cityDateFrom" type="text" class="date-entry" inputmode="numeric" autocomplete="off" placeholder="YYYY-MM-DD / DD.MM.YYYY">
+      </div>
+      <div class="control date-control">
+        <label for="cityDateTo">До</label>
+        <input id="cityDateTo" type="text" class="date-entry" inputmode="numeric" autocomplete="off" placeholder="YYYY-MM-DD / DD.MM.YYYY">
       </div>
     </section>
 
@@ -74,7 +96,7 @@
         <strong id="kpiHours">—</strong>
       </article>
       <article class="kpi-card">
-        <span class="kpi-label">Середня повна тривалість тривог, що почалися за останні 28 завершених днів</span>
+        <span class="kpi-label">Середня тривалість тривог, що почалися за останні 28 завершених днів</span>
         <strong id="kpiDuration">—</strong>
       </article>
       <article class="kpi-card">
@@ -82,38 +104,81 @@
         <strong id="kpiMaxDay">—</strong>
         <small id="kpiMaxDayDate"></small>
       </article>
+      <article id="kpiExplosionsCard" class="kpi-card hidden" data-preview-feature="attack-events">
+        <span class="kpi-label">Тривог, під час яких повідомлялось про вибухи</span>
+        <strong id="kpiExplosionsPct">—</strong>
+        <small id="kpiExplosionsRange"></small>
+        <small id="kpiExplosionsCount"></small>
+      </article>
     </section>
+
+
+
 
     <section class="chart-grid">
       <article class="panel chart-card wide">
         <h3>Інтенсивність тривог</h3>
         <p class="chart-subtitle">Стовпчики: сумарний час під тривогою в обраному періоді ÷ кількість календарних днів. Лінія: кількість тривог, що почалися в періоді ÷ кількість днів.</p>
-        <p class="chart-interaction-hint">Натисніть на показник у легенді, щоб приховати або повернути його.</p>
         <div class="chart-wrap"><canvas id="cityIntensityChart"></canvas></div>
       </article>
       <article class="panel chart-card wide">
-        <h3>Середня повна тривалість однієї тривоги</h3>
-        <p class="chart-subtitle">Середнє повної тривалості всіх тривог, що почалися в обраному періоді. Якщо тривога закінчилася вже після завершення періоду, вся її тривалість відноситься до періоду старту.</p>
+        <h3>Середня тривалість однієї тривоги</h3>
+        <p class="chart-subtitle">Середня тривалість усіх тривог, що почалися в обраному періоді. Якщо тривога закінчилася вже після завершення періоду, вся її тривалість відноситься до періоду старту.</p>
         <div class="chart-wrap"><canvas id="cityDurationChart"></canvas></div>
       </article>
+    </section>
+
+    <section id="alertBurdenSection" class="comparison-section hidden">
+      <div class="section-heading insight-section-heading">
+        <div>
+          <div class="eyebrow">Структура навантаження</div>
+          <h2>Тривалість і навантаження</h2>
+          <p>Як розподілялися дні за часом під тривогою та як змінювалися найдовші епізоди.</p>
+        </div>
+        <div class="control insight-year-control">
+          <label for="burdenYear">Рік</label>
+          <select id="burdenYear" aria-label="Рік для графіків структури навантаження"></select>
+        </div>
+      </div>
+      <section class="chart-grid">
+        <article class="panel chart-card wide">
+          <h3>Розподіл днів за часом під тривогою</h3>
+          <p class="chart-subtitle">100% кожного місяця розкладено за часткою днів без тривоги, до 1 год, 1–3, 3–6, 6–12 та 12+ годин під тривогою.</p>
+          <label class="inline-check" for="heavyDaysExcludeZero">
+            <input id="heavyDaysExcludeZero" type="checkbox">
+            <span id="heavyDaysExcludeZeroLabel">Не враховувати дні без тривог</span>
+          </label>
+          <div class="chart-wrap insight-chart"><canvas id="heavyDaysChart"></canvas></div>
+          <p class="chart-subtitle insight-note">У підказці показано і відсоток, і абсолютне число днів.</p>
+        </article>
+        <article class="panel chart-card wide">
+          <h3>Найдовша тривога і найдовша тиша</h3>
+          <p class="chart-subtitle">Ліва вісь — найдовша тривога, що почалася в місяці. Права вісь — найдовший безперервний проміжок без тривоги всередині місяця.</p>
+          <div class="chart-wrap insight-chart"><canvas id="extremesChart"></canvas></div>
+        </article>
+      </section>
     </section>
 
     <section id="timeOfDaySection" class="comparison-section hidden">
       <div class="section-heading time-profile-heading">
         <div>
           <div class="eyebrow">Час доби</div>
-          <h2>Коли протягом доби тривога найчастіше активна</h2>
-          <p>Доба поділена на 15-хвилинні інтервали. 100% — найчастіший інтервал у вибраному місті/районі та діапазоні; решта значень показані відносно нього.</p>
+          <h2>Як тривоги розподіляються протягом доби</h2>
+          <p>Два взаємодоповнювальні погляди: детальний нормалізований профіль і фактичний розподіл усього часу під тривогою за частинами доби.</p>
         </div>
         <div class="control time-profile-period-control">
-          <label for="timeOfDayRange">Діапазон</label>
-          <select id="timeOfDayRange" aria-label="Діапазон добового профілю">
-            <option value="7d">7 днів</option>
-            <option value="30d">30 днів</option>
-            <option value="90d">90 днів</option>
-            <option value="year">Рік</option>
-            <option value="all">Від початку даних</option>
-          </select>
+          <label id="timeOfDayRangeLabel">Діапазони</label>
+          <details id="timeOfDayRangeMenu" class="multi-select-dropdown">
+            <summary id="timeOfDayRangeSummary">30 днів</summary>
+            <div class="multi-select-options" role="group" aria-labelledby="timeOfDayRangeLabel">
+              <label><input class="time-of-day-range-option" type="checkbox" value="7d"><span data-time-range-label="7d">7 днів</span></label>
+              <label><input class="time-of-day-range-option" type="checkbox" value="30d" checked><span data-time-range-label="30d">30 днів</span></label>
+              <label><input class="time-of-day-range-option" type="checkbox" value="90d"><span data-time-range-label="90d">90 днів</span></label>
+              <label><input class="time-of-day-range-option" type="checkbox" value="180d"><span data-time-range-label="180d">180 днів</span></label>
+              <label><input class="time-of-day-range-option" type="checkbox" value="year"><span data-time-range-label="year">Рік</span></label>
+              <label><input class="time-of-day-range-option" type="checkbox" value="all"><span data-time-range-label="all">Від початку даних</span></label>
+            </div>
+          </details>
         </div>
       </div>
       <article class="panel chart-card wide time-profile-card">
@@ -121,28 +186,36 @@
         <div class="chart-wrap time-profile-chart"><canvas id="timeOfDayChart"></canvas></div>
         <p class="chart-subtitle time-profile-note">100% — не частка часу під тривогою, а відносний максимум для цього міста/району та діапазону. У підказці показано також фактичну частку часу під тривогою.</p>
       </article>
+      <article class="panel chart-card wide daypart-card">
+        <div class="time-profile-card-heading">
+          <div>
+            <h3>Розподіл часу під тривогою за частинами доби</h3>
+            <p class="chart-subtitle">100% фактичного часу під тривогою в кожному місяці розкладено на 00–06, 06–12, 12–18 та 18–24 за Europe/Kyiv.</p>
+          </div>
+          <div class="control time-profile-compare-control">
+            <label for="daypartYear">Рік</label>
+            <select id="daypartYear" aria-label="Рік для розподілу часу під тривогою за частинами доби"></select>
+          </div>
+        </div>
+        <div class="chart-wrap time-profile-chart"><canvas id="daypartChart"></canvas></div>
+        <p class="chart-subtitle daypart-note">На відміну від профілю вище, тут показана частка всього фактичного часу під тривогою, що припала на кожну частину доби.</p>
+      </article>
     </section>
 
-    <section class="comparison-section">
+    <section id="kyivThreatCausesSection" class="comparison-section hidden">
       <div class="section-heading">
         <div>
-          <div class="eyebrow">Короткий горизонт</div>
-          <h2>Останні 28 завершених днів</h2>
-          <p id="daily28Range">Щоденний розріз для обраного міста. Сьогоднішній день не включається.</p>
+          <div class="eyebrow">Київ</div>
+          <h2>Причини повітряних тривог</h2>
+          <p>Розподіл часу під тривогою за причиною, яку Kyiv Digital вказує для завершеної тривоги.</p>
         </div>
       </div>
-      <section class="chart-grid">
-        <article class="panel chart-card wide">
-          <h3>Сумарний час під тривогою за день</h3>
-          <p class="chart-subtitle">Скільки годин кожної календарної доби припало на повітряну тривогу. Якщо інтервали перекриваються, час не рахується двічі; тривога через північ розподіляється між відповідними днями.</p>
-          <div class="chart-wrap"><canvas id="daily28HoursChart"></canvas></div>
-        </article>
-        <article class="panel chart-card wide">
-          <h3>Кількість тривог і середня тривалість за день</h3>
-          <p class="chart-subtitle">Стовпчики — кількість тривог, що почалися цього дня. Лінія — середня повна тривалість тривог, що почалися цього дня.</p>
-          <div class="chart-wrap"><canvas id="daily28AlertsDurationChart"></canvas></div>
-        </article>
-      </section>
+      <article class="panel chart-card wide">
+        <h3>З чого складався час під тривогою</h3>
+        <p class="chart-subtitle">Кожен стовпчик — один завершений день. 100% = увесь класифікований час повітряної тривоги цього дня.</p>
+        <div class="chart-wrap kyiv-threat-causes-chart"><canvas id="kyivThreatCausesChart"></canvas></div>
+      </article>
+      <p id="kyivThreatCausesNote" class="source-note"></p>
     </section>
 
     <section id="casualtySection" class="comparison-section hidden">
@@ -152,6 +225,19 @@
           <h2>Загиблі від повітряних атак РФ</h2>
           <p>Пізні смерті від поранень віднесені до місяця самої атаки. Наземні бої та артилерійські обстріли не включені.</p>
         </div>
+        <div class="section-range-controls">
+          <div class="control casualty-interval-control">
+            <label for="casualtyInterval">Інтервал</label>
+            <select id="casualtyInterval" aria-label="Інтервал для графіка загиблих">
+              <option value="monthly">Місяці</option>
+              <option value="yearly">Роки</option>
+            </select>
+          </div>
+          <div class="control casualty-year-control">
+            <label for="casualtyYear">Рік</label>
+            <select id="casualtyYear" aria-label="Рік для графіка загиблих"></select>
+          </div>
+        </div>
       </div>
       <article class="panel chart-card wide">
         <div class="chart-wrap casualty-chart"><canvas id="casualtyChart"></canvas></div>
@@ -159,7 +245,7 @@
       <p id="casualtySourceNote" class="source-note">Це реконструкція за публічно доступними повідомленнями офіційних органів і медіа.</p>
     </section>
 
-    <section class="comparison-section">
+    <section id="comparisonSection" class="comparison-section">
       <div class="section-heading">
         <div>
           <div class="eyebrow">Порівняння</div>
@@ -182,11 +268,24 @@
           <select id="compareC"></select>
         </div>
         <div class="control">
-          <label for="comparePeriod">Період</label>
+          <label for="comparePeriod">Інтервал</label>
           <select id="comparePeriod">
+            <option value="daily28">Останні 28 днів</option>
+            <option id="compareWeeklyOption" value="weekly">Ковзні 7 днів</option>
+            <option value="rolling30">Ковзні 30 днів</option>
+            <option value="rolling90">Ковзні 90 днів</option>
+            <option value="rolling180">Ковзні 180 днів</option>
+            <option value="calendarWeekly">Тижні</option>
             <option value="monthly">Місяці</option>
-            <option id="compareWeeklyOption" value="weekly">Тижні</option>
           </select>
+        </div>
+        <div class="control date-control">
+          <label for="compareDateFrom">Від</label>
+          <input id="compareDateFrom" type="text" class="date-entry" inputmode="numeric" autocomplete="off" placeholder="YYYY-MM-DD / DD.MM.YYYY">
+        </div>
+        <div class="control date-control">
+          <label for="compareDateTo">До</label>
+          <input id="compareDateTo" type="text" class="date-entry" inputmode="numeric" autocomplete="off" placeholder="YYYY-MM-DD / DD.MM.YYYY">
         </div>
       </div>
 
@@ -204,8 +303,8 @@
           <div class="chart-wrap"><canvas id="compareHoursChart"></canvas></div>
         </article>
         <article class="panel chart-card wide">
-          <h3>Середня повна тривалість однієї тривоги</h3>
-          <p class="chart-subtitle">Середнє повної тривалості тривог, що почалися в обраному періоді; тривалість відноситься до періоду старту.</p>
+          <h3>Середня тривалість однієї тривоги</h3>
+          <p class="chart-subtitle">Середня тривалість тривог, що почалися в обраному періоді; тривалість відноситься до періоду старту.</p>
           <div class="chart-wrap"><canvas id="compareDurationChart"></canvas></div>
         </article>
         <article id="compareTimeOfDayCard" class="panel chart-card wide">
@@ -220,6 +319,7 @@
                 <option value="7d">7 днів</option>
                 <option value="30d">30 днів</option>
                 <option value="90d">90 днів</option>
+                <option value="180d">180 днів</option>
                 <option value="year">Рік</option>
                 <option value="all">Від початку даних</option>
               </select>
@@ -227,6 +327,35 @@
           </div>
           <p id="compareTimeOfDayNote" class="chart-subtitle"></p>
           <div class="chart-wrap time-profile-chart"><canvas id="compareTimeOfDayChart"></canvas></div>
+        </article>
+        <article id="compareExplosionsCard" class="panel chart-card wide hidden" data-preview-feature="attack-events">
+          <h3>Частка тривог із повідомленнями про вибухи</h3>
+          <p class="chart-subtitle">Ковзне 90-денне вікно з кроком відображення 7 днів. Strict-метрика: підтверджене повідомлення саме про вибухи в місті, зіставлене з конкретною тривогою.</p>
+          <p id="compareExplosionsNote" class="chart-subtitle"></p>
+          <div class="chart-wrap"><canvas id="compareExplosionsChart"></canvas></div>
+        </article>
+        <article id="compareCasualtiesCard" class="panel chart-card wide">
+          <div class="time-profile-card-heading">
+            <div>
+              <h3>Загиблі від повітряних атак РФ</h3>
+              <p class="chart-subtitle">Підтверджені смерті за місяцем атаки. Наземні бої та артилерійські обстріли не включені.</p>
+            </div>
+            <div class="compare-casualty-controls">
+              <div class="control compare-casualty-control">
+                <label for="compareCasualtyInterval">Інтервал</label>
+                <select id="compareCasualtyInterval" aria-label="Інтервал для порівняння загиблих">
+                  <option value="monthly">Місяці</option>
+                  <option value="yearly">Роки</option>
+                </select>
+              </div>
+              <div class="control compare-casualty-control">
+                <label for="compareCasualtyYear">Рік</label>
+                <select id="compareCasualtyYear" aria-label="Рік для порівняння загиблих"></select>
+              </div>
+            </div>
+          </div>
+          <p id="compareCasualtiesNote" class="chart-subtitle"></p>
+          <div class="chart-wrap"><canvas id="compareCasualtiesChart"></canvas></div>
         </article>
       </section>
     </section>
@@ -238,15 +367,26 @@
           <h2>Усі міста</h2>
           <p id="allCitiesRangeNote">Порівняння ключових показників за спільний часовий діапазон.</p>
         </div>
-        <div class="control all-cities-period-control">
-          <label for="allCitiesRange">Діапазон</label>
-          <select id="allCitiesRange" aria-label="Діапазон для таблиці всіх міст">
-            <option value="7d">7 днів</option>
-            <option value="30d">30 днів</option>
-            <option value="90d">90 днів</option>
-            <option value="year">Рік</option>
-            <option value="common">Від початку спільних даних</option>
-          </select>
+        <div class="section-range-controls">
+          <div class="control all-cities-period-control">
+            <label for="allCitiesRange">Швидкий вибір</label>
+            <select id="allCitiesRange" aria-label="Швидкий вибір діапазону для таблиці всіх міст">
+              <option value="7d">7 днів</option>
+              <option value="30d">30 днів</option>
+              <option value="90d">90 днів</option>
+              <option value="year">Рік</option>
+              <option value="common">Від початку спільних даних</option>
+              <option value="custom">Довільно</option>
+            </select>
+          </div>
+          <div class="control date-control">
+            <label for="tableDateFrom">Від</label>
+            <input id="tableDateFrom" type="text" class="date-entry" inputmode="numeric" autocomplete="off" placeholder="YYYY-MM-DD / DD.MM.YYYY">
+          </div>
+          <div class="control date-control">
+            <label for="tableDateTo">До</label>
+            <input id="tableDateTo" type="text" class="date-entry" inputmode="numeric" autocomplete="off" placeholder="YYYY-MM-DD / DD.MM.YYYY">
+          </div>
         </div>
       </div>
       <div class="panel table-panel">
@@ -261,28 +401,52 @@
       </div>
     </section>
 
-    <section class="panel methodology">
+    <section id="methodologySection" class="panel methodology">
       <div class="eyebrow">Методологія</div>
       <h2>Як читати дані</h2>
 
-      <p><strong>Що саме показує сайт.</strong> Тут 23 ряди. Для Києва, Харкова, Запоріжжя та Севастополя використовуються дані безпосередньо по місту. Для інших 19 обласних центрів тривога не оголошується окремо для міста, тому використовуються дані відповідного адміністративного району. У таких випадках район завжди вказаний у назві в дужках.</p>
+      <h3>Що показує сайт?</h3>
+      <p>Сайт показує історію повітряних тривог для 23 міст України та місячні дані про загиблих від повітряних атак у цих містах.</p>
+      <p>Для Києва, Харкова, Запоріжжя та Севастополя використовуються окремі міські ряди тривог. Для інших 19 міст використовується ряд відповідного адміністративного району. Це позначено прямо в назві, наприклад «Львів (Львівський район)».</p>
+      <p>Районний ряд не є точним виміром тривог лише в межах міста: він може включати сигнали, що стосуються інших населених пунктів району.</p>
 
-      <p><strong>Основні джерела даних.</strong></p>
+      <h3>Звідки дані?</h3>
+      <p>Для Києва основні джерела тривог — <a href="https://data.kyivcity.gov.ua/dataset/statystyka-povitrianykh-tryvoh-u-misti-kyievi-dep-municipal/" target="_blank" rel="noopener noreferrer">Портал відкритих даних Києва</a> та <a href="https://kyiv.digital/storage/air-alert/stats.html" target="_blank" rel="noopener noreferrer">Kyiv Digital</a>. Для Харкова, Запоріжжя і районних рядів історична основа — <a href="https://github.com/Vadimkin/ukrainian-air-raid-sirens-dataset" target="_blank" rel="noopener noreferrer">ukrainian-air-raid-sirens-dataset</a>, а новіші дані надходять з офіційного <a href="https://api.ukrainealarm.com/api/v3" target="_blank" rel="noopener noreferrer">UkraineAlarm API</a>.</p>
+      <p>Для Севастополя використовуються публічні міські сигнали про тривогу та відбій, опубліковані Telegram-каналом окупаційної адміністрації <a href="https://t.me/s/razvozhaev" target="_blank" rel="noopener noreferrer">@razvozhaev</a>. Позначення джерела описує походження даних і не означає визнання окупаційної адміністрації.</p>
+      <p>Ряди загиблих реконструйовані за публічними повідомленнями офіційних органів і медіа. Для оперативного моніторингу Києва, зокрема, використовуються <a href="https://suspilne.media/kyiv/" target="_blank" rel="noopener noreferrer">Суспільне Київ</a>, <a href="https://hromadske.ua/kyyiv" target="_blank" rel="noopener noreferrer">hromadske Київ</a> та <a href="https://www.pravda.com.ua/" target="_blank" rel="noopener noreferrer">Українська правда</a>.</p>
+
+      <h3>Як рахуються показники?</h3>
+      <p id="periodMethodology">Базові показники та KPI використовують завершені календарні дні за часовою зоною Europe/Kyiv. KPI за 28 днів охоплюють рівно 28 завершених днів до вчора включно. У графіках з інтервалом «Останні 28 днів» показано 27 завершених днів і поточний неповний день пунктиром.</p>
       <ul class="methodology-metrics">
-        <li><strong>Київ:</strong> <a href="https://data.kyivcity.gov.ua/dataset/statystyka-povitrianykh-tryvoh-u-misti-kyievi-dep-municipal/" target="_blank" rel="noopener noreferrer">Портал відкритих даних Києва</a>; для найсвіжіших подій — <a href="https://kyiv.digital/storage/air-alert/stats.html" target="_blank" rel="noopener noreferrer">Kyiv Digital</a>.</li>
-        <li><strong>Харків, Запоріжжя та дані по районах:</strong> історична база — <a href="https://github.com/Vadimkin/ukrainian-air-raid-sirens-dataset" target="_blank" rel="noopener noreferrer">ukrainian-air-raid-sirens-dataset</a>; актуальне продовження — <a href="https://api.ukrainealarm.com/api/v3" target="_blank" rel="noopener noreferrer">UkraineAlarm API</a>.</li>
-        <li><strong>Севастополь:</strong> публічні повідомлення Telegram-каналу окупаційної адміністрації <a href="https://t.me/s/razvozhaev" target="_blank" rel="noopener noreferrer">@razvozhaev</a>. Цей ряд на сайті окремо маркований.</li>
-        <li><strong>Загиблі в Києві:</strong> історична серія реконструйована за публічними повідомленнями. Для моніторингу нових повідомлень використовуються <a href="https://suspilne.media/kyiv/" target="_blank" rel="noopener noreferrer">Суспільне Київ</a>, <a href="https://hromadske.ua/kyyiv" target="_blank" rel="noopener noreferrer">hromadske Київ</a> та <a href="https://www.pravda.com.ua/" target="_blank" rel="noopener noreferrer">Українська правда</a>.</li>
+        <li><strong>Тривог на день</strong> — кількість тривог, що почалися в обраному періоді, поділена на кількість календарних днів.</li>
+        <li><strong>Годин під тривогою на добу</strong> — сумарний час під тривогою, поділений на кількість днів. Якщо інтервали тривог перекриваються, спільний час не рахується двічі. Якщо тривога переходить через північ, її час розподіляється між відповідними календарними днями.</li>
+        <li><strong>Середня повна тривалість тривоги</strong> — середня тривалість тривог, що почалися в обраному періоді. Якщо тривога завершилася вже в наступному періоді, її повна тривалість відноситься до періоду початку.</li>
       </ul>
-      <p class="muted">Допоміжні джерела, які використовувалися лише для закриття коротких технічних розривів або перевірки стику, тут не перелічені.</p>
+      <p>У порівнянні міст використовуються лише часові відрізки, які одночасно доступні для всіх вибраних рядів.</p>
 
-      <p><strong>З якої дати використовуються районні дані.</strong> Для 12 міст дата старту взята з публічно задокументованого переходу на районне оповіщення. Для ще 7 міст — з моменту, коли в історичних даних з’являється стабільний ряд по району; його стикування з новішими джерелами окремо перевірене по конкретних подіях.</p>
+      <h3>Як рахуються загиблі?</h3>
+      <p>Для всіх 23 міст показується місячний реконструйований ряд загиблих у межах адміністративних кордонів самого міста. Географія цього показника залишається міською навіть там, де для тривог використовується районний ряд.</p>
+      <p>Враховуються смерті, причинно пов’язані з ракетними, дроновими та іншими повітряними атаками. Наземні бої та артилерійські обстріли до цього ряду не входять. Якщо людина померла пізніше від отриманих під час атаки поранень, смерть відноситься до місяця самої атаки.</p>
+      <p>Невирішені випадки, які ще потребують перевірки, не додаються до підтвердженого підрахунку. Поточний місяць є неповним і може доповнюватися. Оскільки історичний ряд реконструйований із публічних повідомлень, його не слід трактувати як гарантовано повний реєстр усіх смертей.</p>
+
+      <h3>Що потрібно враховувати?</h3>
+      <p>Різні ряди починаються з різних дат. Дата початку показана поруч із містом. Перший неповний період не показується.</p>
+      <p>Донецьк і Луганськ поки не включені: для них потрібна окрема методологія, і обласні дані не підставляються замість міських.</p>
 
       <details class="methodology-details">
-        <summary>Показати дати початку використання районних даних</summary>
+        <summary>Дати початку рядів</summary>
         <div class="methodology-detail-grid">
           <div>
-            <strong>Дата підтверджена публічними повідомленнями про перехід на районне оповіщення</strong>
+            <strong>Дані безпосередньо по місту</strong>
+            <ul>
+              <li>Київ — 28.02.2022</li>
+              <li>Севастополь — 25.09.2023</li>
+              <li>Харків — 17.02.2025</li>
+              <li>Запоріжжя — 19.03.2025</li>
+            </ul>
+          </div>
+          <div>
+            <strong>Районні ряди: дата підтверджена переходом на районне оповіщення</strong>
             <ul>
               <li>Черкаси — 10.01.2025</li>
               <li>Житомир — 23.01.2025</li>
@@ -299,7 +463,7 @@
             </ul>
           </div>
           <div>
-            <strong>Дата визначена за появою стабільних даних по району</strong>
+            <strong>Районні ряди: дата визначена за появою стабільного районного ряду</strong>
             <ul>
               <li>Херсон — 30.08.2025</li>
               <li>Миколаїв — 05.11.2025</li>
@@ -313,27 +477,18 @@
         </div>
       </details>
 
-      <p id="periodMethodology"><strong>Які дні потрапляють у розрахунки.</strong> Усі показники рахуються лише по завершених календарних днях. Сьогоднішній день не враховується. Картки вгорі і блок «Останні 28 завершених днів» показують рівно останні 28 завершених днів — до вчора включно. На місячному графіку показуються лише повні календарні місяці, а на тижневому — лише повні тижні з понеділка до неділі. Якщо дані для міста починаються посеред місяця або тижня, цей перший неповний період не показується.</p>
+      <details class="methodology-details">
+        <summary>Технічні примітки до джерел</summary>
+        <p>Під час перевірки безперервності між сусідніми джерелами два записи можуть вважатися тією самою подією, якщо їхні часові позначки відрізняються не більш ніж на 15 секунд. Це правило використовується лише для перевірки стику: фактичний час подій не пересувається і не округлюється.</p>
+        <p>Допоміжні джерела, використані для перевірки стику або закриття коротких розривів, не перелічені в основному описі.</p>
+        <p>Для Севастополя використовуються завершені пари «тривога → відбій». Неповні епізоди не інтерполюються; окрема корекція часу допускається лише за наявності прямого зовнішнього підтвердження.</p>
+      </details>
 
-      <p><strong>Як рахуються показники.</strong></p>
-      <ul class="methodology-metrics">
-        <li><strong>Тривог/день</strong> — кількість тривог, що почалися в обраному періоді, поділена на кількість календарних днів у цьому періоді.</li>
-        <li><strong>Годин під тривогою/добу</strong> — увесь час, проведений під тривогою в обраному періоді, поділений на кількість днів. Якщо інтервали тривог перекриваються, час не рахується двічі. Якщо тривога проходить через північ, її час розподіляється між відповідними календарними днями.</li>
-        <li><strong>Середня повна тривалість тривоги</strong> — середнє повної тривалості всіх тривог, що почалися в обраному періоді. Якщо тривога закінчилася вже після завершення періоду, вся її тривалість залишається в періоді, коли вона почалася.</li>
-      </ul>
-
-      <p><strong>Як працює порівняння міст.</strong> Якщо обрано два або три міста, графіки показують тільки ті періоди, які є одночасно в усіх вибраних рядах. Так міста з різною датою початку покриття не порівнюються на різних часових відрізках.</p>
-
-      <p><strong>Як трактувати дані по району.</strong> Районні дані можуть включати тривоги або часові інтервали, що стосуються інших населених пунктів цього району, тому їх не слід читати як точний вимір лише для обласного центру.</p>
-
-      <p><strong>Що поки не включено.</strong> Донецьк і Луганськ не показуються: для них потрібна окрема методологія побудови ряду.</p>
-
-            <p><strong>Таблиця «Усі міста».</strong> Усі 23 ряди порівнюються на одному спільному часовому вікні. «Від початку спільних даних» означає період від найпізнішої дати старту серед усіх включених рядів до спільної останньої завершеної дати.</p>
-
-      <p><strong>Добовий профіль.</strong> Доба поділена на 96 15-хвилинних слотів у часовій зоні Europe/Kyiv. Для кожного слота рахується частка фактичного часу, проведеного під тривогою, а потім ряд нормалізується: найвище значення для вибраного міста/району та діапазону = 100%. У порівнянні кожен ряд нормалізується до власного максимуму.</p>
-
-<p class="muted"><strong>Технічна примітка про стик джерел.</strong> Для перевірки безперервності ряду між сусідніми джерелами одна й та сама подія може вважатися збігом, якщо timestamp відрізняється не більш ніж на 15 секунд. Це лише допуск для валідації: самі часи подій не пересуваються і не округлюються.</p>
-      <p id="methodologyDynamic" class="hidden"></p>
+      <details class="methodology-details">
+        <summary>Тестові функції</summary>
+        <p><strong>Тривоги з повідомленнями про вибухи.</strong> Це тестова strict-метрика лише для міст із завершеним ручним аудитом. У чисельник входять епізоди тривоги, для яких є підтверджене повідомлення саме про вибухи в місті, зіставлене з конкретною тривогою. Для динаміки використовується ковзне 90-денне вікно; на графіку відображається одна точка кожні 7 днів.</p>
+        <p><strong>Добовий профіль тривог.</strong> Доба поділена на 96 15-хвилинних інтервалів. Для кожного інтервалу рахується частка фактичного часу під тривогою, після чого ряд нормалізується до власного максимуму.</p>
+      </details>
     </section>
   </main>
 
@@ -360,6 +515,6 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
-  <script src="app.js"></script>
+  <script src="app.js?v=20261008-7"></script>
 </body>
 </html>
