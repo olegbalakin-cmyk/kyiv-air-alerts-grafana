@@ -4733,6 +4733,13 @@ def raion_proxy_grouping_self_test() -> dict:
     due = due_checks(state, parse_dt("2026-10-08T00:00:01Z"))
     due_ids = {str(ep.get("episode_id")) for ep, _ in due.get("sumy", [])}
     assert due_ids == {"07ba1a638e3a08c341856db7"}
+    selected, total = live_parent_ordering.select_post_cutoff_live_episodes(
+        state,
+        cutoff=parse_dt("2026-10-07T19:05:00Z"),
+        max_episodes=None,
+    )
+    assert total == 1
+    assert [ep["episode_id"] for ep in selected] == ["07ba1a638e3a08c341856db7"]
 
     restarted = json.loads(json.dumps(state))
     reconcile_raion_proxy_fragment_state(
