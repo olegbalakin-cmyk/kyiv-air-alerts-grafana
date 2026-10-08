@@ -359,6 +359,50 @@ jobs:
           print('Production dataset verified:', len(keys), 'rows; rolling 7-day series enabled')
           PY
 
+      - name: Build derived site JSON without Netlify
+        run: |
+          cp data/dashboard_data.json "${RUNNER_TEMP}/site-derived-dashboard.json"
+          python scripts/build_time_of_day_heatmap.py \
+            --dashboard "${RUNNER_TEMP}/site-derived-dashboard.json" \
+            --kyiv-alerts data/alerts_combined.json \
+            --bridge-store data/ukrainealarm_bridge.json \
+            --sevastopol-events data/sevastopol_events.json \
+            --explorations-output "${RUNNER_TEMP}/site-explorations.json"
+
+          python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          root = Path(os.environ["RUNNER_TEMP"])
+          derived_dashboard = json.loads((root / "site-derived-dashboard.json").read_text(encoding="utf-8"))
+          explorations = json.loads((root / "site-explorations.json").read_text(encoding="utf-8"))
+
+          payload = {
+              "meta": {
+                  "generated_at": derived_dashboard.get("meta", {}).get("generated_at"),
+                  "source": "site-prod production updater",
+                  "city_count": len(derived_dashboard.get("multicity_meta", {}).get("production_city_keys", [])),
+              },
+              "time_of_day_heatmap_test": derived_dashboard["time_of_day_heatmap_test"],
+              "all_cities_table_test": derived_dashboard["all_cities_table_test"],
+              "explorations": explorations,
+          }
+
+          out = Path("data/site_derived.json")
+          out.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+
+          keys = derived_dashboard["multicity_meta"]["production_city_keys"]
+          assert payload["meta"]["city_count"] == 23
+          assert set(payload["time_of_day_heatmap_test"]["cities"]) == set(keys)
+          assert set(payload["all_cities_table_test"]["cities"]) == set(keys)
+          assert set(payload["explorations"]["cities"]) == set(keys)
+          print("Derived site JSON verified for", len(keys), "cities")
+          PY
+
+      - name: Build Kyiv alert-cause JSON without Netlify
+        run: python scripts/build_kyiv_threat_mix.py --output data/kyiv_threat_mix.json
+
       - name: Commit updated production data
         working-directory: .
         run: |
