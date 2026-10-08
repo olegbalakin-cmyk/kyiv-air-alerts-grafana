@@ -1,0 +1,70 @@
+name: Kyiv historical Google News URL resolution proof
+
+on:
+  push:
+    branches: [kyiv-historical-google-news-url-resolution-repair-2026-10-08]
+    paths:
+      - ".github/proof/kyiv_historical_discovery_calibration_pilot.py"
+      - ".github/proof/kyiv_historical_google_news_url_resolution_proof.py"
+      - ".github/workflows/kyiv-historical-google-news-url-resolution-proof.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: kyiv-historical-google-news-url-resolution-proof-2026-10-08
+  cancel-in-progress: true
+
+jobs:
+  proof:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 330
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: kyiv-historical-google-news-url-resolution-repair-2026-10-08
+          fetch-depth: 0
+          clean: true
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install bounded proof dependencies
+        run: python -m pip install --disable-pip-version-check requests beautifulsoup4
+
+      - name: Assert zero database configuration
+        shell: bash
+        run: |
+          set -euo pipefail
+          for key in DATABASE_URL NEON_DATABASE_URL NEON_URL PGHOST PGPORT PGDATABASE PGUSER PGPASSWORD; do
+            test -z "${!key-}" || { echo "Unexpected DB environment variable: $key"; exit 1; }
+          done
+
+      - name: Run development-only URL resolution proof
+        run: python .github/proof/kyiv_historical_google_news_url_resolution_proof.py
+
+      - name: Upload proof artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: kyiv-historical-google-news-url-resolution-${{ github.run_id }}
+          path: research/kyiv_historical_google_news_url_resolution_repair_2026-10-08.json
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Commit only requested research artifact
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add research/kyiv_historical_google_news_url_resolution_repair_2026-10-08.json
+          if git diff --cached --quiet; then
+            exit 0
+          fi
+          changed="$(git diff --cached --name-only)"
+          test "$changed" = "research/kyiv_historical_google_news_url_resolution_repair_2026-10-08.json"
+          git commit -m "Record Kyiv Google News URL resolution proof"
+          git push origin HEAD:kyiv-historical-google-news-url-resolution-repair-2026-10-08
