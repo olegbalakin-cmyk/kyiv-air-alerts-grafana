@@ -171,3 +171,5 @@ def main():
  print('DEVELOPMENT_CLASSIFIER_REPLAY_SUMMARY='+json.dumps({'verdict':final,'classifier_input_sha256':fsha,'texts':frozen['reconstruction_counts']['usable_source_native_texts'],'candidates':frozen['reconstruction_counts']['admitted_candidates'],'positive_candidate_episodes':pc,'hold_candidate_episodes':hc,'candidate_recall':crecall,'rejected_by_admission':sum(adm.values()),'admission_reasons':dict(adm),'classifier_invocations':inv,'alert_verdicts':len(rows),'reproduced':reproduced,'final_recall':frecall,'strict':strict,'sensitivity':sens,'review':review,'no_confirmed':no,'hold_strict':hs,'hold_sensitivity':hse,'unsupported_hold_promotions':unsupported,'lost_before_admission':before,'lost_in_classifier':inside,'dominant_miss':mc.most_common(1)[0][0] if mc else None,'miss_counts':dict(mc),'technical_blocker':blocker,'technical_errors':tech,'recommendation':rec},sort_keys=True))
  return 0
 if __name__=='__main__':raise SystemExit(main())
+
+# workflow trigger: development classifier replay proof only
