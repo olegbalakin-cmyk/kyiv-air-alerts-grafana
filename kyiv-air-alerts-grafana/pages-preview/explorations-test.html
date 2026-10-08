@@ -44,6 +44,8 @@
     .profile-card-heading{display:flex;justify-content:space-between;gap:16px;align-items:flex-start}
     .profile-slot-control{min-width:145px;width:145px;flex:0 0 145px}
     .profile-meta{font-size:12px;color:#9ba9b5;line-height:1.45;margin:2px 0 8px}
+    .inline-check{display:flex;align-items:center;gap:8px;margin:8px 0 10px;color:#b8c4cf;font-size:13px;cursor:pointer;width:max-content}
+    .inline-check input{width:16px;height:16px;margin:0;accent-color:#62a0ea}
     @media(max-width:980px){.lab-grid{grid-template-columns:1fr}.lab-card.wide{grid-column:auto}.lab-header{flex-direction:column}.scope-note{margin-left:0}.lab-chart,.lab-card.wide .lab-chart{height:330px}.daily-profile-heading,.profile-card-heading{flex-direction:column;align-items:stretch}.profile-slot-control{width:100%;min-width:100%;flex-basis:auto}}
     @media(max-width:620px){.lab-shell{padding:24px 14px 42px}.lab-controls .control{width:100%;min-width:100%}.lab-chart,.lab-card.wide .lab-chart{height:300px}}
   </style>
@@ -118,6 +120,10 @@
         <div class="idea-tag">Ідея 4 · скільки було важких днів</div>
         <h2>Розподіл днів за часом під тривогою</h2>
         <p class="chart-subtitle">100% кожного місяця розкладено за часткою днів без тривоги, до 1 год, 1–3, 3–6, 6–12 та 12+ годин під тривогою.</p>
+        <label class="inline-check" for="heavyDaysExcludeZero">
+          <input id="heavyDaysExcludeZero" type="checkbox">
+          <span>Не враховувати дні без тривог</span>
+        </label>
         <div class="chart-wrap lab-chart"><canvas id="heavyDaysChart"></canvas></div>
         <p class="lab-note">Нормалізація прибирає різницю між 28/30/31 днями та дозволяє коректно порівнювати неповний поточний місяць. У tooltip лишається абсолютне число днів.</p>
       </article>
@@ -361,8 +367,9 @@
 
     function renderHeavyDays(rows){
       destroyChart("heavyDaysChart");
+      const excludeZero=Boolean($("heavyDaysExcludeZero")?.checked);
       const labels=rows.map(r=>monthLabel(r.month));
-      const keys=[
+      const allKeys=[
         ["zero","Без тривоги"],
         ["lt1","<1 год"],
         ["h1_3","1–3 год"],
@@ -370,13 +377,18 @@
         ["h6_12","6–12 год"],
         ["h12plus","12+ год"]
       ];
+      const keys=excludeZero?allKeys.filter(([key])=>key!=="zero"):allKeys;
       const opts=chartBase();
       opts.scales.x.stacked=true;
       opts.scales.y.stacked=true;
       opts.scales.y.min=0;
       opts.scales.y.max=100;
       opts.scales.y.ticks.callback=v=>v+"%";
-      opts.scales.y.title={display:true,text:"Частка днів у місяці",color:text};
+      opts.scales.y.title={
+        display:true,
+        text:excludeZero?"Частка днів із тривогою":"Частка днів у місяці",
+        color:text
+      };
       opts.plugins.tooltip={
         mode:"index",
         intersect:false,
@@ -385,8 +397,14 @@
           label:ctx=>{
             const i=ctx.dataIndex;
             const count=ctx.dataset.dayCounts?.[i]||0;
-            const total=ctx.dataset.coveredDays?.[i]||0;
+            const total=ctx.dataset.denominatorDays?.[i]||0;
             return " "+ctx.dataset.label+": "+fmt(ctx.parsed.y,1)+"% · "+count+" із "+total+" днів";
+          },
+          footer:items=>{
+            if(!excludeZero||!items.length) return "";
+            const row=rows[items[0].dataIndex];
+            const zero=Number(row.burden_day_counts?.zero||0);
+            return "Не враховано днів без тривоги: "+zero;
           }
         }
       };
@@ -395,13 +413,19 @@
         data:{labels,datasets:keys.map(([key,label],i)=>({
           label,
           data:rows.map(r=>{
-            const total=Number(r.days_covered)||0;
+            const covered=Number(r.days_covered)||0;
+            const zero=Number(r.burden_day_counts?.zero||0);
+            const denominator=excludeZero?Math.max(0,covered-zero):covered;
             const count=Number(r.burden_day_counts?.[key]||0);
-            return total>0?count/total*100:0;
+            return denominator>0?count/denominator*100:0;
           }),
           dayCounts:rows.map(r=>Number(r.burden_day_counts?.[key]||0)),
-          coveredDays:rows.map(r=>Number(r.days_covered)||0),
-          backgroundColor:colors[i%colors.length]+"bb",
+          denominatorDays:rows.map(r=>{
+            const covered=Number(r.days_covered)||0;
+            const zero=Number(r.burden_day_counts?.zero||0);
+            return excludeZero?Math.max(0,covered-zero):covered;
+          }),
+          backgroundColor:colors[(excludeZero?i+1:i)%colors.length]+"bb",
           borderWidth:0,
           stack:"days"
         }))},
@@ -551,6 +575,7 @@
       $("labCity").addEventListener("change",()=>{fillYears();render();});
       $("labYear").addEventListener("change",render);
       $("profileSlotMinutes").addEventListener("change",render);
+      $("heavyDaysExcludeZero").addEventListener("change",render);
       render();
     }
 
