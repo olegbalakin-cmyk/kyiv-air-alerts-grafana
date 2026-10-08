@@ -231,7 +231,8 @@ if "bs4" not in sys.modules:
     sys.modules["bs4"]=bs4_stub
 monitor=importlib.import_module("monitor_explosion_candidates")
 replay=importlib.import_module("replay_explosion_history")
-audited_root=Path("/tmp/unit_a_frozen_context/kyiv-air-alerts-grafana")
+main_root=Path("/tmp/unit_a_main_context/kyiv-air-alerts-grafana")
+live_root=Path("/tmp/unit_a_live_context/kyiv-air-alerts-grafana")
 cities=sorted({str((t.get("classifier_episode_input") or {}).get("city_key") or "") for t in targets if str((t.get("classifier_episode_input") or {}).get("city_key") or "")})
 target_city_counts={}
 for t in targets:
@@ -266,8 +267,14 @@ print(json.dumps({
 },ensure_ascii=False,sort_keys=True))
 loaded_by_city={}
 source_files={}
+context_root_by_city={}
 for city in cities:
-    eps,sources=replay.load_historical_episodes(audited_root,city,monitor)
+    # Accepted split-state architecture: Kyiv + all historical source slices come from
+    # continuity-pinned audited main; Sevastopol's live event store comes from the
+    # continuity-pinned live-state commit.
+    root = live_root if city == "sevastopol" else main_root
+    context_root_by_city[city] = "live_state" if city == "sevastopol" else "audited_main"
+    eps,sources=replay.load_historical_episodes(root,city,monitor)
     eps=sorted([dict(x) for x in eps],key=lambda x:(str(x.get("alert_start") or ""),str(x.get("episode_id") or "")))
     loaded_by_city[city]=eps
     source_files[city]=sources
@@ -302,7 +309,8 @@ context_repr=[
 context_bytes=(json.dumps(context_repr,ensure_ascii=False,sort_keys=True,separators=(",",":"))+"\n").encode("utf-8")
 print(json.dumps({
  "audited_loader_context_proof":{
-   "frozen_context_source_commit":audited,
+   "frozen_context_source_commits":{"audited_main":main_context,"live_state":live_context},
+   "context_root_by_city":context_root_by_city,
    "pinned_replay_blob":git_text("rev-parse",f"{pinned}:kyiv-air-alerts-grafana/scripts/replay_explosion_history.py"),
    "city_count":len(cities),
    "loaded_episode_count":len(all_loaded),
