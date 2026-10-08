@@ -28,14 +28,65 @@ const KYIV_THREAT_CAUSE_COLORS = {
   "unknown": "#7f8c99"
 };
 const PARTIAL_PERIOD_DASH = [3, 4];
-const TOUR_STORAGE_KEY = "air-alerts-intro-tour-v2";
+const TOUR_STORAGE_KEY = "air-alerts-intro-tour-v3";
 const TOUR_STEPS = [
-  {selector:".controls-panel",titleUk:"Оберіть місто і період",titleEn:"Choose a city and period",textUk:"Тут можна змінити місто та масштаб графіків. За замовчуванням відкривається помісячний ряд.",textEn:"Change the city and chart time scale here. The default view is monthly."},
-  {selector:"#cityIntensityChart",closest:".chart-card",titleUk:"Як читати головний графік",titleEn:"How to read the main chart",textUk:"Стовпчики показують середній час під тривогою на добу, лінія — середню кількість тривог на день. Пунктиром позначений поточний неповний зріз.",textEn:"Bars show average hours under alert per day; the line shows average alerts per day. A dashed segment marks the current incomplete period."},
-  {selector:"#cityIntensityChart",closest:".chart-card",titleUk:"Легенда — це перемикач",titleEn:"The legend is interactive",textUk:"Натисніть на назву показника в легенді графіка, щоб тимчасово приховати його. Натисніть ще раз — і показник повернеться. Можете спробувати прямо зараз.",textEn:"Click a metric in the chart legend to hide it temporarily. Click it again to bring it back."},
-  {selector:"#timeOfDaySection",titleUk:"Добовий профіль",titleEn:"Time-of-day profile",textUk:"Цей графік показує, у які години тривога відносно частіше активна. 100% — власний максимум вибраного міста й періоду, а не 100% часу під тривогою.",textEn:"This chart shows when alerts are relatively more active during the day. 100% is the selected city's own peak for the chosen period, not 100% of time under alert."},
-  {selector:".comparison-controls",titleUk:"Порівнюйте міста",titleEn:"Compare cities",textUk:"Оберіть два або три міста. Порівняльні графіки використовують лише спільні для вибраних рядів періоди.",textEn:"Choose two or three cities. Comparison charts use only periods available in all selected series."},
-  {selector:"#allCitiesSection",titleUk:"Огляд усіх міст",titleEn:"All-city overview",textUk:"У нижній таблиці можна швидко порівняти всі 23 ряди та змінити горизонт: 7, 30, 90 днів, рік або від початку спільних даних.",textEn:"The table below compares all 23 series across 7, 30 or 90 days, one year, or the full common data period."}
+  {
+    selector:".controls-panel",
+    titleUk:"Оберіть місто і масштаб",
+    titleEn:"Choose a city and time scale",
+    textUk:"Тут можна змінити місто та спосіб групування часу: від останніх 28 днів до місяців і довших ковзних вікон. За замовчуванням відкривається помісячний ряд.",
+    textEn:"Choose the city and how time is grouped, from the last 28 days to months and longer rolling windows. The default view is monthly."
+  },
+  {
+    selector:"#cityIntensityChart",
+    closest:".chart-card",
+    titleUk:"Інтенсивність тривог",
+    titleEn:"Alert intensity",
+    textUk:"Стовпчики показують середній час під тривогою на добу, лінія — середню кількість тривог на день. У режимі «Останні 28 днів» поточний неповний день позначений пунктиром. Показники в легенді можна вмикати й вимикати.",
+    textEn:"Bars show average time under alert per day; the line shows average alerts per day. In the Last 28 days view, the current incomplete day is dashed. Legend items can be toggled on and off."
+  },
+  {
+    selector:"#alertBurdenSection",
+    titleUk:"Тривалість і навантаження",
+    titleEn:"Duration and burden",
+    textUk:"Тут видно те, що губиться в середніх: яку частку місяця становили дні з різним навантаженням, а також найдовшу тривогу й найдовший безперервний період без тривог. Дні без тривог можна виключити з першого графіка.",
+    textEn:"This section shows what averages hide: how the month was split among days with different alert burdens, plus the longest alert and the longest continuous alert-free spell. Days without alerts can be excluded from the first chart."
+  },
+  {
+    selector:"#timeOfDaySection",
+    titleUk:"Два погляди на час доби",
+    titleEn:"Two views of time of day",
+    textUk:"Перший графік показує форму добового профілю: 100% — власний пік вибраного періоду. Другий показує, яка частка всього фактичного часу під тривогою припала на 00–06, 06–12, 12–18 і 18–24.",
+    textEn:"The first chart shows the shape of the daily profile: 100% is the selected period's own peak. The second shows what share of all actual alert time fell in 00–06, 06–12, 12–18 and 18–24."
+  },
+  {
+    selector:"#kyivThreatCausesSection",
+    titleUk:"Причини тривог у Києві",
+    titleEn:"Alert causes in Kyiv",
+    textUk:"Для Києва окремо показано, з яких причин складався час під тривогою за даними Kyiv Digital. Цей блок доступний лише для Києва, бо для інших міст таких даних поки немає.",
+    textEn:"For Kyiv, this section shows which causes made up the time under alert using Kyiv Digital data. It is Kyiv-only because comparable data are not yet available for the other cities."
+  },
+  {
+    selector:"#casualtySection",
+    titleUk:"Наслідки атак",
+    titleEn:"Attack consequences",
+    textUk:"Окремий графік показує загиблих унаслідок повітряних атак. Для нього можна перемикатися між місячним і річним представленням та обирати рік.",
+    textEn:"A separate chart shows deaths caused by aerial attacks. It can be viewed by month or year, with a year selector."
+  },
+  {
+    selector:".comparison-controls",
+    titleUk:"Порівнюйте міста",
+    titleEn:"Compare cities",
+    textUk:"Оберіть два або три міста. Порівняльні графіки використовують лише періоди, доступні для всіх вибраних рядів, тому межі можуть відрізнятися від графіка одного міста.",
+    textEn:"Choose two or three cities. Comparison charts use only periods available for every selected series, so their date bounds may differ from a single-city chart."
+  },
+  {
+    selector:"#allCitiesSection",
+    titleUk:"Огляд усіх міст",
+    titleEn:"All-city overview",
+    textUk:"У таблиці можна швидко порівняти всі 23 ряди, змінити горизонт або задати власний діапазон дат. Майже кожен графік також можна вивантажити у CSV у поточному представленні.",
+    textEn:"The table provides a quick comparison of all 23 series, with preset horizons or a custom date range. Almost every chart can also be exported to CSV in its current view."
+  }
 ];
 const GRID = "rgba(148,163,184,.16)";
 const TEXT = "#b8c4cf";
@@ -2679,6 +2730,13 @@ function resolveTourTarget(step) {
   return target;
 }
 
+function visibleTourStepIndices() {
+  return TOUR_STEPS
+    .map((step, index) => ({ index, target: resolveTourTarget(step) }))
+    .filter(item => item.target && item.target.getClientRects().length)
+    .map(item => item.index);
+}
+
 function clearTourTarget() {
   if (activeTourTarget) activeTourTarget.classList.remove("tour-target");
   activeTourTarget = null;
@@ -2688,30 +2746,43 @@ function showTourStep(index) {
   const root = $("introTour");
   if (!root) return;
 
-  const direction = index >= tourStepIndex ? 1 : -1;
-  let nextIndex = index;
-  let target = null;
-  while (nextIndex >= 0 && nextIndex < TOUR_STEPS.length) {
-    target = resolveTourTarget(TOUR_STEPS[nextIndex]);
-    if (target && target.getClientRects().length) break;
-    nextIndex += direction;
+  const visible = visibleTourStepIndices();
+  if (!visible.length) {
+    finishIntroTour();
+    return;
   }
-  if (!target || nextIndex < 0 || nextIndex >= TOUR_STEPS.length) {
+
+  let nextIndex = index;
+  if (!visible.includes(nextIndex)) {
+    const direction = index >= tourStepIndex ? 1 : -1;
+    nextIndex = direction > 0
+      ? visible.find(value => value >= index)
+      : [...visible].reverse().find(value => value <= index);
+  }
+  if (nextIndex == null || !visible.includes(nextIndex)) {
+    finishIntroTour();
+    return;
+  }
+
+  const target = resolveTourTarget(TOUR_STEPS[nextIndex]);
+  if (!target) {
     finishIntroTour();
     return;
   }
 
   tourStepIndex = nextIndex;
   const step = TOUR_STEPS[tourStepIndex];
+  const position = visible.indexOf(tourStepIndex);
+
   clearTourTarget();
   activeTourTarget = target;
   activeTourTarget.classList.add("tour-target");
 
   $("tourTitle").textContent=tr(step.titleUk,step.titleEn);
   $("tourText").textContent=tr(step.textUk,step.textEn);
-  $("tourProgress").textContent = String(tourStepIndex + 1) + " / " + String(TOUR_STEPS.length);
-  $("tourPrev").disabled = tourStepIndex === 0;
-  $("tourNext").textContent=tourStepIndex===TOUR_STEPS.length-1?tr("Готово","Done"):tr("Далі","Next");
+  $("tourProgress").textContent = String(position + 1) + " / " + String(visible.length);
+  $("tourPrev").disabled = position === 0;
+  $("tourNext").textContent=position===visible.length-1?tr("Готово","Done"):tr("Далі","Next");
 
   root.classList.remove("hidden");
   root.setAttribute("aria-hidden", "false");
@@ -2744,11 +2815,15 @@ function finishIntroTour() {
 function bindIntroTour() {
   $("showTour")?.addEventListener("click", startIntroTour);
   $("tourNext")?.addEventListener("click", () => {
-    if (tourStepIndex >= TOUR_STEPS.length - 1) finishIntroTour();
-    else showTourStep(tourStepIndex + 1);
+    const visible = visibleTourStepIndices();
+    const position = visible.indexOf(tourStepIndex);
+    if (position < 0 || position >= visible.length - 1) finishIntroTour();
+    else showTourStep(visible[position + 1]);
   });
   $("tourPrev")?.addEventListener("click", () => {
-    if (tourStepIndex > 0) showTourStep(tourStepIndex - 1);
+    const visible = visibleTourStepIndices();
+    const position = visible.indexOf(tourStepIndex);
+    if (position > 0) showTourStep(visible[position - 1]);
   });
   $("tourSkip")?.addEventListener("click", finishIntroTour);
   $("tourClose")?.addEventListener("click", finishIntroTour);
