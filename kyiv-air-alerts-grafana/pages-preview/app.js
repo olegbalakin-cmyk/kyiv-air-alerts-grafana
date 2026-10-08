@@ -8,10 +8,11 @@ const state = {
   lastAllCitiesRows: []
 };
 
-const DATA_URL = "data.json";
+const RAW_DATA_BASE = "https://raw.githubusercontent.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/site-prod/kyiv-air-alerts-grafana/data/";
+const DATA_URL = RAW_DATA_BASE + "dashboard_data.json";
+const DERIVED_DATA_URL = RAW_DATA_BASE + "site_derived.json";
 const FEATURES_URL = "features.json";
-const KYIV_THREAT_MIX_URL = "kyiv-threat-mix-data.json";
-const EXPLORATIONS_URL = "explorations-test-data.json";
+const KYIV_THREAT_MIX_URL = RAW_DATA_BASE + "kyiv_threat_mix.json";
 const EXPLOSION_LIVE_URL = "https://raw.githubusercontent.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/multicity-wip-2026-09-16/kyiv-air-alerts-grafana/data/explosions_test.json";
 const COLORS = ["#62a0ea", "#8ff0a4", "#f8e45c"];
 const EXPLOSION_COLOR = "#ff9f43";
@@ -2861,13 +2862,21 @@ async function init() {
   state.data = await response.json();
 
   try {
-    const explorationResponse = await fetch(`${EXPLORATIONS_URL}?v=${Date.now()}`, { cache: "no-store" });
-    if (explorationResponse.ok) {
-      const explorationData = await explorationResponse.json();
-      if (explorationData?.meta?.test_only && explorationData?.cities) state.explorations = explorationData;
+    const derivedResponse = await fetch(`${DERIVED_DATA_URL}?v=${Date.now()}`, { cache: "no-store" });
+    if (derivedResponse.ok) {
+      const derived = await derivedResponse.json();
+      if (derived?.time_of_day_heatmap_test) {
+        state.data.time_of_day_heatmap_test = derived.time_of_day_heatmap_test;
+      }
+      if (derived?.all_cities_table_test) {
+        state.data.all_cities_table_test = derived.all_cities_table_test;
+      }
+      if (derived?.explorations?.cities) {
+        state.explorations = derived.explorations;
+      }
     }
   } catch (err) {
-    console.warn("Preview exploration data unavailable", err);
+    console.warn("Derived production data unavailable", err);
   }
 
   try {
