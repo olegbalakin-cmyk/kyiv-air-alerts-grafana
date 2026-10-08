@@ -1,6 +1,7 @@
 const state = {
   data: null,
   features: { attack_events: false },
+  kyivThreatMix: null,
   charts: {},
   tableSort: { key: "alerts", direction: "desc" },
   lastAllCitiesRows: []
@@ -8,11 +9,22 @@ const state = {
 
 const DATA_URL = "data.json";
 const FEATURES_URL = "features.json";
+const KYIV_THREAT_MIX_URL = "kyiv-threat-mix-data.json";
 const EXPLOSION_LIVE_URL = "https://raw.githubusercontent.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/multicity-wip-2026-09-16/kyiv-air-alerts-grafana/data/explosions_test.json";
 const COLORS = ["#62a0ea", "#8ff0a4", "#f8e45c"];
 const EXPLOSION_COLOR = "#ff9f43";
 const TIME_PROFILE_COLOR = "#ef4444";
 const TIME_PROFILE_COLORS = ["#ef4444", "#62a0ea", "#8ff0a4", "#f8e45c", "#c061cb", "#ff9f43"];
+const KYIV_THREAT_CAUSE_ORDER = ["drone", "massive-drone", "missile", "ballistic", "mig", "combined", "unknown"];
+const KYIV_THREAT_CAUSE_COLORS = {
+  "drone": "#62a0ea",
+  "massive-drone": "#3dd6b5",
+  "missile": "#ff7b72",
+  "ballistic": "#ff9b54",
+  "mig": "#c061cb",
+  "combined": "#f8e45c",
+  "unknown": "#7f8c99"
+};
 const PARTIAL_PERIOD_DASH = [3, 4];
 const TOUR_STORAGE_KEY = "air-alerts-intro-tour-v2";
 const TOUR_STEPS = [
@@ -76,7 +88,7 @@ function applyStaticLanguage(){
  for(const id of ["cityDateTo","rolling7dDateTo","shortDateTo","compareDateTo","tableDateTo"])setLocalizedText(`label[for="${id}"]`,"До","To");
  setKpiLabel("kpiAlerts","Тривог за останні 28 завершених днів","Alerts in the last 28 completed days");setKpiLabel("kpiHours","Годин під тривогою за останні 28 завершених днів","Hours under alert in the last 28 completed days");setKpiLabel("kpiDuration","Середня тривалість тривог, що почалися за останні 28 завершених днів","Average duration of alerts that started in the last 28 completed days");setKpiLabel("kpiMaxDay","Найбільше тривог за день у цьому 28-денному вікні","Most alerts in one day within this 28-day window");setKpiLabel("kpiExplosionsPct","Тривог, під час яких повідомлялось про вибухи","Alerts with reported explosions");
  setCardCopy("cityIntensityChart","Інтенсивність тривог","Alert intensity","Стовпчики: сумарний час під тривогою в обраному періоді ÷ кількість календарних днів. Лінія: кількість тривог, що почалися в періоді ÷ кількість днів.","Bars: total time under alert in the selected period ÷ calendar days. Line: alerts that started in the period ÷ days.");setCardCopy("cityDurationChart","Середня тривалість однієї тривоги","Average duration of one alert","Середня тривалість усіх тривог, що почалися в обраному періоді. Якщо тривога закінчилася вже після завершення періоду, вся її тривалість відноситься до періоду старту.","Average full duration of alerts that started in the selected period. If an alert ends after the period, its full duration is attributed to the period in which it started.");
- setSectionHeading("timeOfDaySection","Час доби","Time of day","Коли протягом доби тривога найчастіше активна","When alerts are most often active during the day","Доба поділена на 15-хвилинні інтервали. Можна накласти кілька часових профілів одночасно; кожен профіль нормалізується до власного піку = 100%.","The day is divided into 15-minute intervals. Multiple time profiles can be overlaid; each profile is normalized to its own peak = 100%.");setLocalizedText("#timeOfDayRangeLabel","Діапазони","Ranges");for(const [v,u,e] of [["7d","7 днів","7 days"],["30d","30 днів","30 days"],["90d","90 днів","90 days"],["180d","180 днів","180 days"],["year","Рік","Year"],["all","Від початку даних","From start of data"]]){const el=document.querySelector(`[data-time-range-label="${v}"]`);if(el)el.textContent=tr(u,e);}setLocalizedText("#timeOfDaySection .time-profile-note","100% — не частка часу під тривогою, а відносний максимум окремого профілю. У підказці показано також фактичну частку часу під тривогою.","100% is not the share of time under alert; it is each profile's own relative peak. The tooltip also shows the actual share of time under alert.");
+ setSectionHeading("timeOfDaySection","Час доби","Time of day","Коли протягом доби тривога найчастіше активна","When alerts are most often active during the day","Доба поділена на 15-хвилинні інтервали. Можна накласти кілька часових профілів одночасно; кожен профіль нормалізується до власного піку = 100%.","The day is divided into 15-minute intervals. Multiple time profiles can be overlaid; each profile is normalized to its own peak = 100%.");setSectionHeading("kyivThreatCausesSection","Київ","Kyiv","Причини повітряних тривог","Air-alert causes","Розподіл часу під тривогою за причиною, яку Kyiv Digital вказує для завершеної тривоги.","Distribution of time under alert by the cause assigned to a completed alert by Kyiv Digital.");setCardCopy("kyivThreatCausesChart","З чого складався час під тривогою","What time under alert consisted of","Кожен стовпчик — один завершений день. 100% = увесь класифікований час повітряної тривоги цього дня.","Each bar is one completed day. 100% = all classified air-alert time during that day.");setLocalizedText("#timeOfDayRangeLabel","Діапазони","Ranges");for(const [v,u,e] of [["7d","7 днів","7 days"],["30d","30 днів","30 days"],["90d","90 днів","90 days"],["180d","180 днів","180 days"],["year","Рік","Year"],["all","Від початку даних","From start of data"]]){const el=document.querySelector(`[data-time-range-label="${v}"]`);if(el)el.textContent=tr(u,e);}setLocalizedText("#timeOfDaySection .time-profile-note","100% — не частка часу під тривогою, а відносний максимум окремого профілю. У підказці показано також фактичну частку часу під тривогою.","100% is not the share of time under alert; it is each profile's own relative peak. The tooltip also shows the actual share of time under alert.");
  setSectionHeading("rolling7dSection","Ковзні 7 днів","Rolling 7 days","Динаміка за 7-денним вікном","7-day rolling trend","Кожна точка охоплює 7 завершених календарних днів і датована останнім днем вікна; сусідні точки перекриваються на 6 днів. За замовчуванням показано поточний календарний рік.","Each point covers 7 completed calendar days and is dated by the window’s final day; adjacent points overlap by 6 days. The current calendar year is shown by default.");setLocalizedText('label[for="rolling7dYear"]',"Швидкий вибір","Quick range");setLocalizedAttr("#rolling7dYear","aria-label","Швидкий вибір періоду для 7-денного вікна","Quick range for the 7-day window");setCardCopy("rolling7dIntensityChart","Інтенсивність тривог","Alert intensity","Стовпчики: середній час під тривогою на добу за 7 днів. Лінія: середня кількість тривог на день за ті самі 7 днів.","Bars: average hours under alert per day across 7 days. Line: average alerts per day across the same 7 days.");setCardCopy("rolling7dDurationChart","Середня тривалість однієї тривоги","Average duration of one alert","Середня тривалість тривог, що почалися у відповідному 7-денному вікні.","Average duration of alerts that started within the corresponding 7-day window.");
  setSectionHeading("shortHorizonSection","Короткий горизонт","Short horizon","Щоденний розріз","Daily view","Доступні останні 28 завершених днів для обраного міста. Сьогоднішній день не включається.","The last 28 completed days are available for the selected city. Today is excluded.");setCardCopy("daily28HoursChart","Сумарний час під тривогою за день","Total time under alert per day","Скільки годин кожної календарної доби припало на повітряну тривогу. Якщо інтервали перекриваються, час не рахується двічі; тривога через північ розподіляється між відповідними днями.","Hours of each calendar day spent under air alert. Overlapping intervals are not counted twice; an alert crossing midnight is split between the relevant days.");setCardCopy("daily28AlertsDurationChart","Кількість тривог і середня тривалість за день","Alert count and average duration per day","Стовпчики — кількість тривог, що почалися цього дня. Лінія — середня тривалість тривог, що почалися цього дня.","Bars show alerts that started that day. The line shows the average duration of alerts that started that day.");
  setSectionHeading("casualtySection","","","Загиблі від повітряних атак РФ","Deaths from Russian aerial attacks","Пізні смерті від поранень віднесені до місяця самої атаки. Наземні бої та артилерійські обстріли не включені.","Deaths occurring later from attack-related injuries are attributed to the month of the attack. Ground combat and artillery shelling are excluded.");setLocalizedText('label[for="casualtyInterval"]',"Інтервал","Interval");setOptionText("casualtyInterval","monthly","Місяці","Months");setOptionText("casualtyInterval","yearly","Роки","Years");setLocalizedAttr("#casualtyInterval","aria-label","Інтервал для графіка загиблих","Interval for the deaths chart");setLocalizedText('label[for="casualtyYear"]',"Рік","Year");setLocalizedAttr("#casualtyYear","aria-label","Рік для графіка загиблих","Year for the deaths chart");
@@ -237,6 +249,7 @@ const CSV_CHART_CONFIG = {
   cityIntensityChart: { slug: "city-intensity", labelHeader: "period" },
   cityDurationChart: { slug: "city-duration", labelHeader: "period", defaultUnit: "minutes" },
   timeOfDayChart: { slug: "time-of-day", labelHeader: "time_of_day", profile: true },
+  kyivThreatCausesChart: { slug: "kyiv-alert-causes", labelHeader: "date", threatMix: true },
   casualtyChart: { slug: "deaths", labelHeader: "period" },
   compareAlertsChart: { slug: "compare-alerts", labelHeader: "period" },
   compareHoursChart: { slug: "compare-alert-hours", labelHeader: "period", defaultUnit: "hours" },
@@ -295,6 +308,7 @@ function triggerCsvDownload(filename, headers, rows) {
 
 function datasetExportUnit(chartId, dataset, config) {
   if (config?.profile) return "profile";
+  if (config?.threatMix) return "threat_mix";
   if (chartId === "cityIntensityChart" && dataset.yAxisID === "yHours") return "hours";
   return config?.defaultUnit || "number";
 }
@@ -371,6 +385,12 @@ function exportChartCsv(chartId) {
       columnBuilders.push(index => [
         numericCsvValue(dataset.data?.[index]),
         numericCsvValue(dataset.alertShares?.[index])
+      ]);
+    } else if (unit === "threat_mix") {
+      headers.push(`${label} [%]`, `${label} [minutes]`);
+      columnBuilders.push(index => [
+        numericCsvValue(dataset.data?.[index]),
+        numericCsvValue(dataset.alertMinutes?.[index])
       ]);
     } else if (unit === "percent") {
       headers.push(`${label} [%]`);
@@ -1313,6 +1333,144 @@ function renderTimeOfDayComparison(keys) {
   });
 }
 
+
+function kyivThreatCauseLabel(key) {
+  const labels = currentLanguage === "en"
+    ? {
+        "drone": "UAV",
+        "massive-drone": "Mass UAV attack",
+        "missile": "Missile",
+        "ballistic": "Ballistic",
+        "mig": "MiG-31K",
+        "combined": "Combined",
+        "unknown": "Other / unknown"
+      }
+    : {
+        "drone": "БпЛА",
+        "massive-drone": "Масована атака БпЛА",
+        "missile": "Ракетна",
+        "ballistic": "Балістична",
+        "mig": "МіГ-31К",
+        "combined": "Комбінована",
+        "unknown": "Інше / невизначене"
+      };
+  return labels[key] || key;
+}
+
+function shortDateLabel(iso) {
+  const parts = String(iso || "").split("-");
+  return parts.length === 3 ? `${parts[2]}.${parts[1]}` : iso;
+}
+
+function renderKyivThreatCauses(key) {
+  const section = $("kyivThreatCausesSection");
+  const note = $("kyivThreatCausesNote");
+  const data = state.kyivThreatMix;
+  const rows = Array.isArray(data?.rows) ? data.rows : [];
+
+  if (!section || key !== "kyiv" || !rows.length) {
+    section?.classList.add("hidden");
+    if (state.charts.kyivThreatCausesChart) {
+      state.charts.kyivThreatCausesChart.destroy();
+      delete state.charts.kyivThreatCausesChart;
+    }
+    return;
+  }
+
+  section.classList.remove("hidden");
+  const used = KYIV_THREAT_CAUSE_ORDER.filter(cause =>
+    rows.some(row => Number(row.minutes?.[cause] || 0) > 0)
+  );
+  const labels = rows.map(row => row.date);
+  const datasets = used.map(cause => ({
+    cause,
+    label: kyivThreatCauseLabel(cause),
+    data: rows.map(row => Number(row.shares?.[cause] || 0)),
+    alertMinutes: rows.map(row => Number(row.minutes?.[cause] || 0)),
+    backgroundColor: KYIV_THREAT_CAUSE_COLORS[cause],
+    borderColor: KYIV_THREAT_CAUSE_COLORS[cause],
+    borderWidth: 0,
+    stack: "alert-time"
+  }));
+
+  if (state.charts.kyivThreatCausesChart) state.charts.kyivThreatCausesChart.destroy();
+  state.charts.kyivThreatCausesChart = new Chart($("kyivThreatCausesChart"), {
+    type: "bar",
+    data: { labels, datasets },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      animation: false,
+      interaction: { mode: "index", intersect: false },
+      plugins: {
+        legend: { position: "top", labels: { color: TEXT, boxWidth: 14, usePointStyle: true } },
+        tooltip: {
+          mode: "index",
+          intersect: false,
+          filter(context) {
+            const total = Number(rows[context.dataIndex]?.total_minutes || 0);
+            return total > 0 && Number(context.raw) > 0;
+          },
+          callbacks: {
+            title(items) {
+              if (!items.length) return "";
+              return labels[items[0].dataIndex] || "";
+            },
+            label(context) {
+              const row = rows[context.dataIndex];
+              const cause = context.dataset.cause;
+              const pct = Number(context.raw || 0);
+              const mins = Number(row.minutes?.[cause] || 0);
+              return ` ${context.dataset.label}: ${pct.toFixed(1)}% · ${mins.toFixed(0)} ${tr("хв","min")}`;
+            },
+            footer(items) {
+              if (!items.length) return "";
+              const total = Number(rows[items[0].dataIndex]?.total_minutes || 0);
+              return total > 0
+                ? `${tr("Усього під тривогою","Total time under alert")}: ${formatDurationMinutes(total)}`
+                : tr("Тривог не було","No alerts");
+            }
+          }
+        }
+      },
+      scales: {
+        x: {
+          stacked: true,
+          ticks: {
+            color: TEXT,
+            maxRotation: 0,
+            autoSkip: true,
+            maxTicksLimit: 14,
+            callback(value) {
+              return shortDateLabel(this.getLabelForValue(value));
+            }
+          },
+          grid: { color: GRID }
+        },
+        y: {
+          stacked: true,
+          min: 0,
+          max: 100,
+          ticks: { color: TEXT, callback: value => `${value}%` },
+          grid: { color: GRID },
+          title: { display: true, text: tr("% часу тривог","% of alert time"), color: TEXT }
+        }
+      }
+    }
+  });
+
+  const meta = data.meta || {};
+  const first = meta.first_differentiated_date || rows[0]?.date || "";
+  const start = meta.visible_start || rows[0]?.date || "";
+  const end = meta.visible_end || rows[rows.length - 1]?.date || "";
+  if (note) {
+    note.textContent = tr(
+      `Kyiv Digital · показано ${start} — ${end}. Диференційовані причини доступні з ${first}. Причина задається на рівні всієї завершеної тривоги; зміни причини всередині однієї тривоги історичний API не відновлює. Якщо в тривоги кілька причин, її час віднесено до «Комбінованої».`,
+      `Kyiv Digital · shown ${start} — ${end}. Differentiated causes are available from ${first}. A cause is assigned to the whole completed alert; the historical API does not reconstruct changes within one alert. Alerts with multiple causes are assigned to “Combined”.`
+    );
+  }
+}
+
 function renderFreshness() {
   const banner = $("freshnessBanner");
   const fresh = state.data.multicity_meta?.effective_freshness || state.data.multicity_meta?.upstream_freshness;
@@ -1524,6 +1682,7 @@ function renderCity() {
   setDurationChart("cityDurationChart", labels, [seriesDataset(labelFor(key), rows.map(r => r.avg_alert_duration_min), COLORS[2], dashed, rows)], "minutes");
 
   renderTimeOfDay(key);
+  renderKyivThreatCauses(key);
   renderCasualties(key);
   updateUrl();
 }
@@ -2436,6 +2595,16 @@ async function init() {
   const response = await fetch(`${DATA_URL}?v=${Date.now()}`, { cache: "no-store" });
   if (!response.ok) throw new Error(`Failed to load live dashboard data: ${response.status}`);
   state.data = await response.json();
+
+  try {
+    const threatResponse = await fetch(`${KYIV_THREAT_MIX_URL}?v=${Date.now()}`, { cache: "no-store" });
+    if (threatResponse.ok) {
+      const threatData = await threatResponse.json();
+      if (Array.isArray(threatData?.rows)) state.kyivThreatMix = threatData;
+    }
+  } catch (err) {
+    console.warn("Kyiv alert-cause data unavailable", err);
+  }
 
   if (attackEventFeaturesEnabled()) {
     try {

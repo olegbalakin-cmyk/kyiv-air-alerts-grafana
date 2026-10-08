@@ -28,7 +28,7 @@
   <meta name="twitter:image" content="https://olegbalakin-cmyk.github.io/kyiv-air-alerts-grafana/share-card.png">
   <meta name="twitter:image:alt" content="Стилізований графік статистики повітряних тривог">
 
-  <link rel="stylesheet" href="styles.css?v=20261008-1">
+  <link rel="stylesheet" href="styles.css?v=20261008-3">
 </head>
 <body>
   <header class="page-header">
@@ -155,6 +155,22 @@
         <div class="chart-wrap time-profile-chart"><canvas id="timeOfDayChart"></canvas></div>
         <p class="chart-subtitle time-profile-note">100% — не частка часу під тривогою, а відносний максимум для цього міста/району та діапазону. У підказці показано також фактичну частку часу під тривогою.</p>
       </article>
+    </section>
+
+    <section id="kyivThreatCausesSection" class="comparison-section hidden">
+      <div class="section-heading">
+        <div>
+          <div class="eyebrow">Київ</div>
+          <h2>Причини повітряних тривог</h2>
+          <p>Розподіл часу під тривогою за причиною, яку Kyiv Digital вказує для завершеної тривоги.</p>
+        </div>
+      </div>
+      <article class="panel chart-card wide">
+        <h3>З чого складався час під тривогою</h3>
+        <p class="chart-subtitle">Кожен стовпчик — один завершений день. 100% = увесь класифікований час повітряної тривоги цього дня.</p>
+        <div class="chart-wrap kyiv-threat-causes-chart"><canvas id="kyivThreatCausesChart"></canvas></div>
+      </article>
+      <p id="kyivThreatCausesNote" class="source-note"></p>
     </section>
 
     <section id="casualtySection" class="comparison-section hidden">
@@ -454,6 +470,6 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
-  <script src="app.js?v=20261008-2"></script>
+  <script src="app.js?v=20261008-3"></script>
 </body>
 </html>

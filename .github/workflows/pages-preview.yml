@@ -392,10 +392,12 @@ jobs:
           PY
           then
             cp kyiv-air-alerts-grafana/pages-preview/threat-mix-test.html _site/threat-mix-test.html
-            cp /tmp/kyiv-threat-mix-data.json _site/kyiv-threat-mix-data.json
           else
             echo "Attack-event preview features disabled; standalone event pages are not published."
           fi
+          # Kyiv Digital alert-cause data is a separate Kyiv-only dashboard feature,
+          # not part of the hidden attack-event/explosion feature family.
+          cp /tmp/kyiv-threat-mix-data.json _site/kyiv-threat-mix-data.json
           cp kyiv-air-alerts-grafana/data/dashboard_data.json _site/data.json
           touch _site/.nojekyll
 
