@@ -2,6 +2,7 @@ const state = {
   data: null,
   features: { attack_events: false },
   kyivThreatMix: null,
+  explorations: null,
   charts: {},
   tableSort: { key: "alerts", direction: "desc" },
   lastAllCitiesRows: []
@@ -10,6 +11,7 @@ const state = {
 const DATA_URL = "data.json";
 const FEATURES_URL = "features.json";
 const KYIV_THREAT_MIX_URL = "kyiv-threat-mix-data.json";
+const EXPLORATIONS_URL = "explorations-test-data.json";
 const EXPLOSION_LIVE_URL = "https://raw.githubusercontent.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/multicity-wip-2026-09-16/kyiv-air-alerts-grafana/data/explosions_test.json";
 const COLORS = ["#62a0ea", "#8ff0a4", "#f8e45c"];
 const EXPLOSION_COLOR = "#ff9f43";
@@ -88,7 +90,7 @@ function applyStaticLanguage(){
  for(const id of ["cityDateTo","rolling7dDateTo","shortDateTo","compareDateTo","tableDateTo"])setLocalizedText(`label[for="${id}"]`,"До","To");
  setKpiLabel("kpiAlerts","Тривог за останні 28 завершених днів","Alerts in the last 28 completed days");setKpiLabel("kpiHours","Годин під тривогою за останні 28 завершених днів","Hours under alert in the last 28 completed days");setKpiLabel("kpiDuration","Середня тривалість тривог, що почалися за останні 28 завершених днів","Average duration of alerts that started in the last 28 completed days");setKpiLabel("kpiMaxDay","Найбільше тривог за день у цьому 28-денному вікні","Most alerts in one day within this 28-day window");setKpiLabel("kpiExplosionsPct","Тривог, під час яких повідомлялось про вибухи","Alerts with reported explosions");
  setCardCopy("cityIntensityChart","Інтенсивність тривог","Alert intensity","Стовпчики: сумарний час під тривогою в обраному періоді ÷ кількість календарних днів. Лінія: кількість тривог, що почалися в періоді ÷ кількість днів.","Bars: total time under alert in the selected period ÷ calendar days. Line: alerts that started in the period ÷ days.");setCardCopy("cityDurationChart","Середня тривалість однієї тривоги","Average duration of one alert","Середня тривалість усіх тривог, що почалися в обраному періоді. Якщо тривога закінчилася вже після завершення періоду, вся її тривалість відноситься до періоду старту.","Average full duration of alerts that started in the selected period. If an alert ends after the period, its full duration is attributed to the period in which it started.");
- setSectionHeading("timeOfDaySection","Час доби","Time of day","Коли протягом доби тривога найчастіше активна","When alerts are most often active during the day","Доба поділена на 15-хвилинні інтервали. Можна накласти кілька часових профілів одночасно; кожен профіль нормалізується до власного піку = 100%.","The day is divided into 15-minute intervals. Multiple time profiles can be overlaid; each profile is normalized to its own peak = 100%.");setSectionHeading("kyivThreatCausesSection","Київ","Kyiv","Причини повітряних тривог","Air-alert causes","Розподіл часу під тривогою за причиною, яку Kyiv Digital вказує для завершеної тривоги.","Distribution of time under alert by the cause assigned to a completed alert by Kyiv Digital.");setCardCopy("kyivThreatCausesChart","З чого складався час під тривогою","What time under alert consisted of","Кожен стовпчик — один завершений день. 100% = увесь класифікований час повітряної тривоги цього дня.","Each bar is one completed day. 100% = all classified air-alert time during that day.");setLocalizedText("#timeOfDayRangeLabel","Діапазони","Ranges");for(const [v,u,e] of [["7d","7 днів","7 days"],["30d","30 днів","30 days"],["90d","90 днів","90 days"],["180d","180 днів","180 days"],["year","Рік","Year"],["all","Від початку даних","From start of data"]]){const el=document.querySelector(`[data-time-range-label="${v}"]`);if(el)el.textContent=tr(u,e);}setLocalizedText("#timeOfDaySection .time-profile-note","100% — не частка часу під тривогою, а відносний максимум окремого профілю. У підказці показано також фактичну частку часу під тривогою.","100% is not the share of time under alert; it is each profile's own relative peak. The tooltip also shows the actual share of time under alert.");
+ setSectionHeading("timeOfDaySection","Час доби","Time of day","Як тривоги розподіляються протягом доби","How alerts are distributed through the day","Два взаємодоповнювальні погляди: детальний нормалізований профіль і фактичний розподіл усього часу під тривогою за частинами доби.","Two complementary views: a detailed normalized profile and the actual distribution of all alert time across parts of the day.");setSectionHeading("alertBurdenSection","Структура навантаження","Burden structure","Наскільки важкими були дні та крайні епізоди","How heavy the days and extreme episodes were","Два додаткові погляди на навантаження, які не видно зі середніх значень.","Two additional views of alert burden that averages do not reveal.");setSectionHeading("kyivThreatCausesSection","Київ","Kyiv","Причини повітряних тривог","Air-alert causes","Розподіл часу під тривогою за причиною, яку Kyiv Digital вказує для завершеної тривоги.","Distribution of time under alert by the cause assigned to a completed alert by Kyiv Digital.");setCardCopy("kyivThreatCausesChart","З чого складався час під тривогою","What time under alert consisted of","Кожен стовпчик — один завершений день. 100% = увесь класифікований час повітряної тривоги цього дня.","Each bar is one completed day. 100% = all classified air-alert time during that day.");setLocalizedText("#timeOfDayRangeLabel","Діапазони","Ranges");for(const [v,u,e] of [["7d","7 днів","7 days"],["30d","30 днів","30 days"],["90d","90 днів","90 days"],["180d","180 днів","180 days"],["year","Рік","Year"],["all","Від початку даних","From start of data"]]){const el=document.querySelector(`[data-time-range-label="${v}"]`);if(el)el.textContent=tr(u,e);}setLocalizedText("#timeOfDaySection .time-profile-note","100% — не частка часу під тривогою, а відносний максимум окремого профілю. У підказці показано також фактичну частку часу під тривогою.","100% is not the share of time under alert; it is each profile's own relative peak. The tooltip also shows the actual share of time under alert.");setLocalizedText('label[for="burdenYear"]',"Рік","Year");setLocalizedText('label[for="daypartYear"]',"Рік","Year");setLocalizedText("#heavyDaysExcludeZeroLabel","Не враховувати дні без тривог","Exclude days without alerts");setCardCopy("heavyDaysChart","Розподіл днів за часом під тривогою","Distribution of days by time under alert","100% кожного місяця розкладено за часткою днів без тривоги, до 1 год, 1–3, 3–6, 6–12 та 12+ годин під тривогою.","Each month is normalized to 100% and split by days with no alert, under 1 hour, 1–3, 3–6, 6–12, and 12+ hours under alert.");setCardCopy("extremesChart","Найдовша тривога і найдовша тиша","Longest alert and longest quiet spell","Ліва вісь — найдовша тривога, що почалася в місяці. Права вісь — найдовший безперервний проміжок без тривоги всередині місяця.","Left axis: the longest alert that started in the month. Right axis: the longest continuous alert-free spell within the month.");setCardCopy("daypartChart","Розподіл часу під тривогою за частинами доби","Distribution of alert time by part of day","100% фактичного часу під тривогою в кожному місяці розкладено на 00–06, 06–12, 12–18 та 18–24 за Europe/Kyiv.","100% of actual alert time in each month is split into 00–06, 06–12, 12–18 and 18–24 in Europe/Kyiv time.");setLocalizedText("#timeOfDaySection .daypart-note","На відміну від профілю вище, тут показана частка всього фактичного часу під тривогою, що припала на кожну частину доби.","Unlike the profile above, this shows the share of all actual alert time that fell in each part of the day.");
  setSectionHeading("rolling7dSection","Ковзні 7 днів","Rolling 7 days","Динаміка за 7-денним вікном","7-day rolling trend","Кожна точка охоплює 7 завершених календарних днів і датована останнім днем вікна; сусідні точки перекриваються на 6 днів. За замовчуванням показано поточний календарний рік.","Each point covers 7 completed calendar days and is dated by the window’s final day; adjacent points overlap by 6 days. The current calendar year is shown by default.");setLocalizedText('label[for="rolling7dYear"]',"Швидкий вибір","Quick range");setLocalizedAttr("#rolling7dYear","aria-label","Швидкий вибір періоду для 7-денного вікна","Quick range for the 7-day window");setCardCopy("rolling7dIntensityChart","Інтенсивність тривог","Alert intensity","Стовпчики: середній час під тривогою на добу за 7 днів. Лінія: середня кількість тривог на день за ті самі 7 днів.","Bars: average hours under alert per day across 7 days. Line: average alerts per day across the same 7 days.");setCardCopy("rolling7dDurationChart","Середня тривалість однієї тривоги","Average duration of one alert","Середня тривалість тривог, що почалися у відповідному 7-денному вікні.","Average duration of alerts that started within the corresponding 7-day window.");
  setSectionHeading("shortHorizonSection","Короткий горизонт","Short horizon","Щоденний розріз","Daily view","Доступні останні 28 завершених днів для обраного міста. Сьогоднішній день не включається.","The last 28 completed days are available for the selected city. Today is excluded.");setCardCopy("daily28HoursChart","Сумарний час під тривогою за день","Total time under alert per day","Скільки годин кожної календарної доби припало на повітряну тривогу. Якщо інтервали перекриваються, час не рахується двічі; тривога через північ розподіляється між відповідними днями.","Hours of each calendar day spent under air alert. Overlapping intervals are not counted twice; an alert crossing midnight is split between the relevant days.");setCardCopy("daily28AlertsDurationChart","Кількість тривог і середня тривалість за день","Alert count and average duration per day","Стовпчики — кількість тривог, що почалися цього дня. Лінія — середня тривалість тривог, що почалися цього дня.","Bars show alerts that started that day. The line shows the average duration of alerts that started that day.");
  setSectionHeading("casualtySection","","","Загиблі від повітряних атак РФ","Deaths from Russian aerial attacks","Пізні смерті від поранень віднесені до місяця самої атаки. Наземні бої та артилерійські обстріли не включені.","Deaths occurring later from attack-related injuries are attributed to the month of the attack. Ground combat and artillery shelling are excluded.");setLocalizedText('label[for="casualtyInterval"]',"Інтервал","Interval");setOptionText("casualtyInterval","monthly","Місяці","Months");setOptionText("casualtyInterval","yearly","Роки","Years");setLocalizedAttr("#casualtyInterval","aria-label","Інтервал для графіка загиблих","Interval for the deaths chart");setLocalizedText('label[for="casualtyYear"]',"Рік","Year");setLocalizedAttr("#casualtyYear","aria-label","Рік для графіка загиблих","Year for the deaths chart");
@@ -249,6 +251,9 @@ const CSV_CHART_CONFIG = {
   cityIntensityChart: { slug: "city-intensity", labelHeader: "period" },
   cityDurationChart: { slug: "city-duration", labelHeader: "period", defaultUnit: "minutes" },
   timeOfDayChart: { slug: "time-of-day", labelHeader: "time_of_day", profile: true },
+  heavyDaysChart: { slug: "day-burden", labelHeader: "month", heavyDay: true },
+  extremesChart: { slug: "alert-extremes", labelHeader: "month" },
+  daypartChart: { slug: "daypart-share", labelHeader: "month", defaultUnit: "percent" },
   kyivThreatCausesChart: { slug: "kyiv-alert-causes", labelHeader: "date", threatMix: true },
   casualtyChart: { slug: "deaths", labelHeader: "period" },
   compareAlertsChart: { slug: "compare-alerts", labelHeader: "period" },
@@ -308,6 +313,7 @@ function triggerCsvDownload(filename, headers, rows) {
 
 function datasetExportUnit(chartId, dataset, config) {
   if (config?.profile) return "profile";
+  if (config?.heavyDay) return "heavy_day";
   if (config?.threatMix) return "threat_mix";
   if (chartId === "cityIntensityChart" && dataset.yAxisID === "yHours") return "hours";
   return config?.defaultUnit || "number";
@@ -335,6 +341,11 @@ function exportContextParts(chartId, slug) {
     if (chartId === "casualtyChart") {
       parts.push(safeFilePart($("casualtyInterval")?.value || "monthly"));
       parts.push(safeFilePart($("casualtyYear")?.value || "all"));
+    } else if (chartId === "heavyDaysChart" || chartId === "extremesChart") {
+      parts.push(safeFilePart($("burdenYear")?.value || "all"));
+      if (chartId === "heavyDaysChart" && $("heavyDaysExcludeZero")?.checked) parts.push("alert-days-only");
+    } else if (chartId === "daypartChart") {
+      parts.push(safeFilePart($("daypartYear")?.value || "all"));
     } else if (chartId === "timeOfDayChart") {
       parts.push(...selectedTimeOfDayRanges().map(safeFilePart));
     } else {
@@ -391,6 +402,12 @@ function exportChartCsv(chartId) {
       columnBuilders.push(index => [
         numericCsvValue(dataset.data?.[index]),
         numericCsvValue(dataset.alertMinutes?.[index])
+      ]);
+    } else if (unit === "heavy_day") {
+      headers.push(`${label} [%]`, `${label} [days]`);
+      columnBuilders.push(index => [
+        numericCsvValue(dataset.data?.[index]),
+        numericCsvValue(dataset.dayCounts?.[index])
       ]);
     } else if (unit === "percent") {
       headers.push(`${label} [%]`);
@@ -1124,6 +1141,9 @@ function updateUrl() {
   const todRanges = selectedTimeOfDayRanges();
   if (todRanges.length) params.set("tod", todRanges.join(","));
   if ($("compareTimeOfDayRange")?.value) params.set("ctod", $("compareTimeOfDayRange").value);
+  if ($("burdenYear")?.value) params.set("burdenyear", $("burdenYear").value);
+  if ($("heavyDaysExcludeZero")?.checked) params.set("heavyexclude", "1");
+  if ($("daypartYear")?.value) params.set("daypartyear", $("daypartYear").value);
   if ($("casualtyYear")?.value) params.set("casyear", $("casualtyYear").value);
   if ($("casualtyInterval")?.value) params.set("casint", $("casualtyInterval").value);
   if ($("compareCasualtyYear")?.value) params.set("ccasyear", $("compareCasualtyYear").value);
@@ -1140,6 +1160,245 @@ function updateUrl() {
   history.replaceState(null, "", `${location.pathname}?${params.toString()}`);
 }
 
+
+
+function explorationCity(key) {
+  return state.explorations?.cities?.[key] || null;
+}
+
+function explorationYearOptions(selectId, key) {
+  const select = $(selectId);
+  const city = explorationCity(key);
+  if (!select || !city) return null;
+  const years = [...(city.years || [])].sort((a, b) => Number(b) - Number(a));
+  const requested = select.dataset.requested || "";
+  const current = select.value;
+  const desired = years.includes(current)
+    ? current
+    : (years.includes(requested) ? requested : (years[0] || ""));
+  select.innerHTML = years.map(year => `<option value="${year}">${year}</option>`).join("");
+  if (desired) select.value = desired;
+  delete select.dataset.requested;
+  return select.value || null;
+}
+
+function explorationMonthlyRows(key, year) {
+  const city = explorationCity(key);
+  return (city?.monthly || []).filter(row => String(row.month || "").startsWith(String(year || "")));
+}
+
+function renderAlertBurden(key) {
+  const section = $("alertBurdenSection");
+  const city = explorationCity(key);
+  if (!section || !city?.monthly?.length) {
+    section?.classList.add("hidden");
+    for (const id of ["heavyDaysChart", "extremesChart"]) {
+      if (state.charts[id]) { state.charts[id].destroy(); delete state.charts[id]; }
+    }
+    return;
+  }
+
+  section.classList.remove("hidden");
+  const year = explorationYearOptions("burdenYear", key);
+  const rows = explorationMonthlyRows(key, year);
+  if (!rows.length) return;
+
+  const labels = rows.map(row => row.month);
+  const excludeZero = Boolean($("heavyDaysExcludeZero")?.checked);
+  const allKeys = [
+    ["zero", tr("Без тривоги","No alert")],
+    ["lt1", tr("<1 год","<1 hr")],
+    ["h1_3", tr("1–3 год","1–3 hr")],
+    ["h3_6", tr("3–6 год","3–6 hr")],
+    ["h6_12", tr("6–12 год","6–12 hr")],
+    ["h12plus", tr("12+ год","12+ hr")]
+  ];
+  const keys = excludeZero ? allKeys.filter(([bucket]) => bucket !== "zero") : allKeys;
+  const burdenColors = ["#7f8c99", "#62a0ea", "#8ff0a4", "#f8e45c", "#ff9f43", "#ef4444"];
+
+  if (state.charts.heavyDaysChart) state.charts.heavyDaysChart.destroy();
+  state.charts.heavyDaysChart = new Chart($("heavyDaysChart"), {
+    type: "bar",
+    data: {
+      labels,
+      datasets: keys.map(([bucket, label], index) => ({
+        label,
+        data: rows.map(row => {
+          const covered = Number(row.days_covered) || 0;
+          const zero = Number(row.burden_day_counts?.zero || 0);
+          const denominator = excludeZero ? Math.max(0, covered - zero) : covered;
+          const count = Number(row.burden_day_counts?.[bucket] || 0);
+          return denominator > 0 ? count / denominator * 100 : 0;
+        }),
+        dayCounts: rows.map(row => Number(row.burden_day_counts?.[bucket] || 0)),
+        denominatorDays: rows.map(row => {
+          const covered = Number(row.days_covered) || 0;
+          const zero = Number(row.burden_day_counts?.zero || 0);
+          return excludeZero ? Math.max(0, covered - zero) : covered;
+        }),
+        backgroundColor: burdenColors[allKeys.findIndex(([value]) => value === bucket)] + "bb",
+        borderWidth: 0,
+        stack: "days"
+      }))
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      animation: false,
+      interaction: { mode: "index", intersect: false },
+      plugins: {
+        legend: { labels: { color: TEXT, boxWidth: 14, usePointStyle: true } },
+        tooltip: {
+          callbacks: {
+            label(context) {
+              const index = context.dataIndex;
+              const count = context.dataset.dayCounts?.[index] || 0;
+              const total = context.dataset.denominatorDays?.[index] || 0;
+              return tr(
+                `${context.dataset.label}: ${fmt(context.parsed.y,1)}% · ${count} із ${total} днів`,
+                `${context.dataset.label}: ${fmt(context.parsed.y,1)}% · ${count} of ${total} days`
+              );
+            },
+            footer(items) {
+              if (!excludeZero || !items.length) return "";
+              const row = rows[items[0].dataIndex];
+              const zero = Number(row.burden_day_counts?.zero || 0);
+              return tr(`Не враховано днів без тривоги: ${zero}`, `Days without alerts excluded: ${zero}`);
+            }
+          }
+        }
+      },
+      scales: {
+        x: { stacked: true, ticks: { color: TEXT, maxRotation: 0 }, grid: { color: GRID } },
+        y: {
+          stacked: true, min: 0, max: 100,
+          ticks: { color: TEXT, callback: value => `${value}%` },
+          grid: { color: GRID },
+          title: { display: true, text: excludeZero ? tr("Частка днів із тривогою","Share of alert days") : tr("Частка днів у місяці","Share of days in month"), color: TEXT }
+        }
+      }
+    }
+  });
+
+  if (state.charts.extremesChart) state.charts.extremesChart.destroy();
+  state.charts.extremesChart = new Chart($("extremesChart"), {
+    type: "line",
+    data: {
+      labels,
+      datasets: [
+        {
+          label: tr("Найдовша тривога","Longest alert"),
+          data: rows.map(row => row.longest_alert_min == null ? null : Number(row.longest_alert_min) / 60),
+          borderColor: TIME_PROFILE_COLORS[1],
+          backgroundColor: TIME_PROFILE_COLORS[1] + "22",
+          yAxisID: "yAlert",
+          pointRadius: 2,
+          tension: .15
+        },
+        {
+          label: tr("Найдовша тиша","Longest quiet spell"),
+          data: rows.map(row => Number(row.longest_quiet_gap_min || 0) / 1440),
+          borderColor: TIME_PROFILE_COLORS[2],
+          backgroundColor: TIME_PROFILE_COLORS[2] + "22",
+          yAxisID: "yQuiet",
+          pointRadius: 2,
+          tension: .15
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      animation: false,
+      interaction: { mode: "index", intersect: false },
+      plugins: {
+        legend: { labels: { color: TEXT, boxWidth: 14, usePointStyle: true } },
+        tooltip: {
+          callbacks: {
+            label(context) {
+              return context.dataset.yAxisID === "yAlert"
+                ? `${context.dataset.label}: ${fmt(context.parsed.y,1)} ${tr("год","hr")}`
+                : `${context.dataset.label}: ${fmt(context.parsed.y,1)} ${tr("діб","days")}`;
+            }
+          }
+        }
+      },
+      scales: {
+        x: { ticks: { color: TEXT, maxRotation: 0 }, grid: { color: GRID } },
+        yAlert: {
+          position: "left", beginAtZero: true,
+          ticks: { color: TEXT, callback: value => `${value} ${tr("год","hr")}` },
+          grid: { color: GRID },
+          title: { display: true, text: tr("Найдовша тривога, год","Longest alert, hours"), color: TEXT }
+        },
+        yQuiet: {
+          position: "right", beginAtZero: true,
+          ticks: { color: TEXT, callback: value => `${value} ${tr("д","d")}` },
+          grid: { drawOnChartArea: false },
+          title: { display: true, text: tr("Найдовша тиша, діб","Longest quiet spell, days"), color: TEXT }
+        }
+      }
+    }
+  });
+}
+
+function renderDaypart(key) {
+  const card = $("daypartChart")?.closest(".daypart-card");
+  const city = explorationCity(key);
+  if (!card || !city?.monthly?.length) {
+    card?.classList.add("hidden");
+    if (state.charts.daypartChart) { state.charts.daypartChart.destroy(); delete state.charts.daypartChart; }
+    return;
+  }
+  card.classList.remove("hidden");
+  const year = explorationYearOptions("daypartYear", key);
+  const rows = explorationMonthlyRows(key, year);
+  const labels = rows.map(row => row.month);
+  const bands = [
+    ["00_06","00–06"],
+    ["06_12","06–12"],
+    ["12_18","12–18"],
+    ["18_24","18–24"]
+  ];
+
+  if (state.charts.daypartChart) state.charts.daypartChart.destroy();
+  state.charts.daypartChart = new Chart($("daypartChart"), {
+    type: "bar",
+    data: {
+      labels,
+      datasets: bands.map(([bucket, label], index) => ({
+        label,
+        data: rows.map(row => Number(row.time_band_shares?.[bucket] || 0)),
+        backgroundColor: TIME_PROFILE_COLORS[index + 1] + "bb",
+        borderWidth: 0,
+        stack: "time"
+      }))
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      animation: false,
+      interaction: { mode: "index", intersect: false },
+      plugins: {
+        legend: { labels: { color: TEXT, boxWidth: 14, usePointStyle: true } },
+        tooltip: {
+          callbacks: {
+            label(context) { return `${context.dataset.label}: ${fmt(context.parsed.y,1)}%`; }
+          }
+        }
+      },
+      scales: {
+        x: { stacked: true, ticks: { color: TEXT, maxRotation: 0 }, grid: { color: GRID } },
+        y: {
+          stacked: true, min: 0, max: 100,
+          ticks: { color: TEXT, callback: value => `${value}%` },
+          grid: { color: GRID },
+          title: { display: true, text: tr("Частка часу під тривогою","Share of alert time"), color: TEXT }
+        }
+      }
+    }
+  });
+}
 
 function renderTimeOfDay(key) {
   const section = $("timeOfDaySection");
@@ -1681,7 +1940,9 @@ function renderCity() {
 
   setDurationChart("cityDurationChart", labels, [seriesDataset(labelFor(key), rows.map(r => r.avg_alert_duration_min), COLORS[2], dashed, rows)], "minutes");
 
+  renderAlertBurden(key);
   renderTimeOfDay(key);
+  renderDaypart(key);
   renderKyivThreatCauses(key);
   renderCasualties(key);
   updateUrl();
@@ -2514,6 +2775,9 @@ function renderMethodology(){
 
 function bind() {
   $("citySelect").addEventListener("change", renderCity);
+  $("burdenYear")?.addEventListener("change", () => { renderAlertBurden($("citySelect").value); updateUrl(); });
+  $("heavyDaysExcludeZero")?.addEventListener("change", () => { renderAlertBurden($("citySelect").value); updateUrl(); });
+  $("daypartYear")?.addEventListener("change", () => { renderDaypart($("citySelect").value); updateUrl(); });
   $("cityPeriod").addEventListener("change", () => {
     resetCityDisplayRange();
     renderCity();
@@ -2597,6 +2861,16 @@ async function init() {
   state.data = await response.json();
 
   try {
+    const explorationResponse = await fetch(`${EXPLORATIONS_URL}?v=${Date.now()}`, { cache: "no-store" });
+    if (explorationResponse.ok) {
+      const explorationData = await explorationResponse.json();
+      if (explorationData?.meta?.test_only && explorationData?.cities) state.explorations = explorationData;
+    }
+  } catch (err) {
+    console.warn("Preview exploration data unavailable", err);
+  }
+
+  try {
     const threatResponse = await fetch(`${KYIV_THREAT_MIX_URL}?v=${Date.now()}`, { cache: "no-store" });
     if (threatResponse.ok) {
       const threatData = await threatResponse.json();
@@ -2638,6 +2912,10 @@ async function init() {
   const casualtyIntervalDefault = validParam("casint", ["monthly", "yearly"], "monthly");
   const compareCasualtyIntervalDefault = validParam("ccasint", ["monthly", "yearly"], "monthly");
   const allCitiesRangeDefault = validParam("table", TABLE_RANGES, "30d");
+
+  if ($("burdenYear")) $("burdenYear").dataset.requested = getParams().get("burdenyear") || "";
+  if ($("daypartYear")) $("daypartYear").dataset.requested = getParams().get("daypartyear") || "";
+  if ($("heavyDaysExcludeZero")) $("heavyDaysExcludeZero").checked = getParams().get("heavyexclude") === "1";
 
   fillSelect($("citySelect"), keys, cityDefault);
   fillSelect($("compareA"), keys, aDefault);

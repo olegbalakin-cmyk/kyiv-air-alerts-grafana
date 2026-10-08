@@ -28,7 +28,7 @@
   <meta name="twitter:image" content="https://olegbalakin-cmyk.github.io/kyiv-air-alerts-grafana/share-card.png">
   <meta name="twitter:image:alt" content="Стилізований графік статистики повітряних тривог">
 
-  <link rel="stylesheet" href="styles.css?v=20261008-3">
+  <link rel="stylesheet" href="styles.css?v=20261008-5">
 </head>
 <body>
   <header class="page-header">
@@ -128,12 +128,43 @@
       </article>
     </section>
 
+    <section id="alertBurdenSection" class="comparison-section hidden">
+      <div class="section-heading insight-section-heading">
+        <div>
+          <div class="eyebrow">Структура навантаження</div>
+          <h2>Наскільки важкими були дні та крайні епізоди</h2>
+          <p>Два додаткові погляди на навантаження, які не видно зі середніх значень.</p>
+        </div>
+        <div class="control insight-year-control">
+          <label for="burdenYear">Рік</label>
+          <select id="burdenYear" aria-label="Рік для графіків структури навантаження"></select>
+        </div>
+      </div>
+      <section class="chart-grid">
+        <article class="panel chart-card wide">
+          <h3>Розподіл днів за часом під тривогою</h3>
+          <p class="chart-subtitle">100% кожного місяця розкладено за часткою днів без тривоги, до 1 год, 1–3, 3–6, 6–12 та 12+ годин під тривогою.</p>
+          <label class="inline-check" for="heavyDaysExcludeZero">
+            <input id="heavyDaysExcludeZero" type="checkbox">
+            <span id="heavyDaysExcludeZeroLabel">Не враховувати дні без тривог</span>
+          </label>
+          <div class="chart-wrap insight-chart"><canvas id="heavyDaysChart"></canvas></div>
+          <p class="chart-subtitle insight-note">У підказці показано і відсоток, і абсолютне число днів.</p>
+        </article>
+        <article class="panel chart-card wide">
+          <h3>Найдовша тривога і найдовша тиша</h3>
+          <p class="chart-subtitle">Ліва вісь — найдовша тривога, що почалася в місяці. Права вісь — найдовший безперервний проміжок без тривоги всередині місяця.</p>
+          <div class="chart-wrap insight-chart"><canvas id="extremesChart"></canvas></div>
+        </article>
+      </section>
+    </section>
+
     <section id="timeOfDaySection" class="comparison-section hidden">
       <div class="section-heading time-profile-heading">
         <div>
           <div class="eyebrow">Час доби</div>
-          <h2>Коли протягом доби тривога найчастіше активна</h2>
-          <p>Доба поділена на 15-хвилинні інтервали. 100% — найчастіший інтервал у вибраному місті/районі та діапазоні; решта значень показані відносно нього.</p>
+          <h2>Як тривоги розподіляються протягом доби</h2>
+          <p>Два взаємодоповнювальні погляди: детальний нормалізований профіль і фактичний розподіл усього часу під тривогою за частинами доби.</p>
         </div>
         <div class="control time-profile-period-control">
           <label id="timeOfDayRangeLabel">Діапазони</label>
@@ -154,6 +185,20 @@
         <div id="timeOfDayMeta" class="time-profile-meta"></div>
         <div class="chart-wrap time-profile-chart"><canvas id="timeOfDayChart"></canvas></div>
         <p class="chart-subtitle time-profile-note">100% — не частка часу під тривогою, а відносний максимум для цього міста/району та діапазону. У підказці показано також фактичну частку часу під тривогою.</p>
+      </article>
+      <article class="panel chart-card wide daypart-card">
+        <div class="time-profile-card-heading">
+          <div>
+            <h3>Розподіл часу під тривогою за частинами доби</h3>
+            <p class="chart-subtitle">100% фактичного часу під тривогою в кожному місяці розкладено на 00–06, 06–12, 12–18 та 18–24 за Europe/Kyiv.</p>
+          </div>
+          <div class="control time-profile-compare-control">
+            <label for="daypartYear">Рік</label>
+            <select id="daypartYear" aria-label="Рік для розподілу часу під тривогою за частинами доби"></select>
+          </div>
+        </div>
+        <div class="chart-wrap time-profile-chart"><canvas id="daypartChart"></canvas></div>
+        <p class="chart-subtitle daypart-note">На відміну від профілю вище, тут показана частка всього фактичного часу під тривогою, що припала на кожну частину доби.</p>
       </article>
     </section>
 
@@ -470,6 +515,6 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
-  <script src="app.js?v=20261008-3"></script>
+  <script src="app.js?v=20261008-5"></script>
 </body>
 </html>
