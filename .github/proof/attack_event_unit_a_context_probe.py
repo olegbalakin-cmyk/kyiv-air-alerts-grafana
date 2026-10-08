@@ -215,9 +215,9 @@ print(json.dumps({
 
 # Authoritative loader proof from the continuity-pinned audited main commit.
 import importlib, shutil, sys, types
-audited=str(cont.get("audited_main_commit") or "")
+audited=str((((cont.get("existing_evidence_coverage_by_source_family") or {}).get("live_monitor") or {}).get("commit")) or "")
 pinned="71cb6f6fbe856cc7b96759310fe9cc9c71cc0453"
-for path in ("/tmp/unit_a_audited_main","/tmp/unit_a_pinned_impl"):
+for path in ("/tmp/unit_a_frozen_context","/tmp/unit_a_pinned_impl"):
     shutil.rmtree(path,ignore_errors=True)
 subprocess.check_call(["git","worktree","add","--detach","/tmp/unit_a_audited_main",audited],stdout=subprocess.DEVNULL)
 subprocess.check_call(["git","worktree","add","--detach","/tmp/unit_a_pinned_impl",pinned],stdout=subprocess.DEVNULL)
@@ -231,7 +231,7 @@ if "bs4" not in sys.modules:
     sys.modules["bs4"]=bs4_stub
 monitor=importlib.import_module("monitor_explosion_candidates")
 replay=importlib.import_module("replay_explosion_history")
-audited_root=Path("/tmp/unit_a_audited_main/kyiv-air-alerts-grafana")
+audited_root=Path("/tmp/unit_a_frozen_context/kyiv-air-alerts-grafana")
 cities=sorted({str((t.get("classifier_episode_input") or {}).get("city_key") or "") for t in targets if str((t.get("classifier_episode_input") or {}).get("city_key") or "")})
 target_city_counts={}
 for t in targets:
@@ -302,7 +302,7 @@ context_repr=[
 context_bytes=(json.dumps(context_repr,ensure_ascii=False,sort_keys=True,separators=(",",":"))+"\n").encode("utf-8")
 print(json.dumps({
  "audited_loader_context_proof":{
-   "audited_main_commit":audited,
+   "frozen_context_source_commit":audited,
    "pinned_replay_blob":git_text("rev-parse",f"{pinned}:kyiv-air-alerts-grafana/scripts/replay_explosion_history.py"),
    "city_count":len(cities),
    "loaded_episode_count":len(all_loaded),
