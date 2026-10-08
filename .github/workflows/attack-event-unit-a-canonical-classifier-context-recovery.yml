@@ -1,0 +1,159 @@
+name: Attack-event Unit A canonical classifier context recovery
+
+on:
+  push:
+    branches:
+      - attack-event-unit-a-canonical-classifier-context-recovery-2026-10-08
+
+permissions:
+  contents: write
+  actions: read
+
+concurrency:
+  group: attack-event-unit-a-canonical-classifier-context-recovery-2026-10-08
+  cancel-in-progress: false
+
+jobs:
+  recover:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    env:
+      TARGET_BRANCH: attack-event-unit-a-canonical-classifier-context-recovery-2026-10-08
+      PREDECESSOR: 61239fb8a3751bb62ecbcfd948c0d5b19aadb4f3
+      OUT_PATH: research/attack_event_unit_a_frozen_classifier_context_2026-10-08.json
+      SUMMARY_PATH: /tmp/attack_event_unit_a_frozen_classifier_context_summary.json
+      PHASE1_PROD_SHADOW_DATABASE_URL: ${{ secrets.PHASE1_PROD_SHADOW_DATABASE_URL }}
+      PHASE1_PROD_SHADOW_BRANCH_ID: ${{ vars.PHASE1_PROD_SHADOW_BRANCH_ID }}
+
+    steps:
+      - name: Check out isolated recovery branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ env.TARGET_BRANCH }}
+          fetch-depth: 0
+          persist-credentials: true
+          clean: true
+
+      - name: Fetch exact frozen authorities
+        shell: bash
+        run: |
+          set -euo pipefail
+          for sha in \
+            48099cd6d93c2b911e331e79b5141dd482d242a8 \
+            ccb2e6ea2637b2bdbde5d21744a79d8f4a91ff4d \
+            efefa399e69eadd3d7fc8393ac1553cfde35f138 \
+            71cb6f6fbe856cc7b96759310fe9cc9c71cc0453; do
+            git cat-file -e "$sha^{commit}" 2>/dev/null || git fetch --no-tags origin "$sha"
+            test "$(git rev-parse "$sha^{commit}")" = "$sha"
+          done
+          test "$(git merge-base HEAD "$PREDECESSOR")" = "$PREDECESSOR"
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install read-only proof dependencies
+        run: python -m pip install --disable-pip-version-check "psycopg[binary]>=3.2,<4" "requests>=2.31,<3" "beautifulsoup4>=4.12,<5"
+
+      - name: Run canonical context recovery proof
+        id: proof
+        shell: bash
+        run: |
+          set +e
+          python .github/proof/attack_event_unit_a_canonical_classifier_context_recovery.py \
+            --summary "$SUMMARY_PATH" \
+            --run-id "$GITHUB_RUN_ID"
+          rc=$?
+          set -e
+          echo "exit_code=$rc" >> "$GITHUB_OUTPUT"
+          test -s "$SUMMARY_PATH"
+          python - <<'PY'
+          import json, os
+          from pathlib import Path
+          x=json.loads(Path(os.environ["SUMMARY_PATH"]).read_text(encoding="utf-8"))
+          compact={k:x.get(k) for k in (
+              "verdict","failed_gate","affected_count","smallest_demonstrated_blocker",
+              "blocker_distribution","db_branch","db_queries","db_writes",
+              "historical_classifications_scanned","historical_canonical_parent_matches",
+              "historical_unbound","ambiguous_historical_bindings",
+              "frozen_uncovered_expected","frozen_uncovered_matched","parent_drift",
+              "total_canonical_context_episodes","duplicate_context_identities",
+              "unit_a_target_count","unit_a_reconstructed_episode_id_matches",
+              "unit_a_temporal_mismatches",
+              "classifier_consumed_unresolved_episode_references",
+              "ambiguous_episode_references","post_audit_alerts_admitted",
+              "run_a_context_sha256","run_b_context_sha256","deterministic",
+              "external_evidence_requests","discovery_executions","classifier_executions",
+              "classification_verdicts","production_mutation"
+          )}
+          print("CONTEXT_RECOVERY_SUMMARY="+json.dumps(compact,ensure_ascii=False,sort_keys=True,separators=(",",":")))
+          PY
+          exit 0
+
+      - name: Upload compact proof summary
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: unit-a-canonical-context-summary-${{ github.run_id }}
+          path: ${{ env.SUMMARY_PATH }}
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Commit durable frozen context
+        if: steps.proof.outputs.exit_code == '0'
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -s "$OUT_PATH"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "$OUT_PATH"
+          git diff --cached --name-only | grep -Fx "$OUT_PATH"
+          test "$(git diff --cached --name-only | wc -l)" -eq 1
+          git commit -m "Freeze Unit A canonical classifier context"
+          git push origin HEAD:"$TARGET_BRANCH"
+          echo "DURABLE_COMMIT=$(git rev-parse HEAD)"
+          echo "DURABLE_BLOB=$(git rev-parse "HEAD:$OUT_PATH")"
+          echo "DURABLE_SHA256=$(sha256sum "$OUT_PATH" | awk '{print $1}')"
+
+      - name: Enrich final summary with durable identity
+        if: steps.proof.outputs.exit_code == '0'
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import hashlib, json, os, subprocess
+          from pathlib import Path
+          p=Path(os.environ["SUMMARY_PATH"])
+          d=json.loads(p.read_text(encoding="utf-8"))
+          out=Path(os.environ["OUT_PATH"])
+          d["durable_context_artifact_path"]=str(out)
+          d["durable_context_artifact_commit"]=subprocess.check_output(["git","rev-parse","HEAD"],text=True).strip()
+          d["durable_context_artifact_blob"]=subprocess.check_output(["git","rev-parse",f"HEAD:{out}"],text=True).strip()
+          d["durable_context_artifact_sha256"]=hashlib.sha256(out.read_bytes()).hexdigest()
+          p.write_text(json.dumps(d,ensure_ascii=False,indent=2,sort_keys=True)+"\n",encoding="utf-8")
+          print("DURABLE_IDENTITY="+json.dumps({
+              "commit":d["durable_context_artifact_commit"],
+              "path":d["durable_context_artifact_path"],
+              "blob":d["durable_context_artifact_blob"],
+              "sha256":d["durable_context_artifact_sha256"],
+          },sort_keys=True))
+          PY
+
+      - name: Upload final summary with durable identity
+        if: steps.proof.outputs.exit_code == '0'
+        uses: actions/upload-artifact@v4
+        with:
+          name: unit-a-canonical-context-final-${{ github.run_id }}
+          path: ${{ env.SUMMARY_PATH }}
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Fail blocked proof after preserving summary
+        if: steps.proof.outputs.exit_code != '0'
+        shell: bash
+        run: |
+          echo "Unit A canonical classifier context recovery blocked; no durable context artifact committed."
+          exit 1
