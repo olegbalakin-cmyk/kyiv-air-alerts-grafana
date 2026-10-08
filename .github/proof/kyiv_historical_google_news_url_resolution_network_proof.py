@@ -18,6 +18,7 @@ import requests
 PILOT_PATH = Path(".github/proof/kyiv_historical_discovery_calibration_pilot.py")
 OLD_PROOF_PATH = Path(".github/proof/kyiv_historical_google_news_url_resolution_proof.py")
 STRATEGY_PATH = Path("research/kyiv_historical_discovery_frozen_strategy_2026-10-08.json")
+OLD_PROOF_ARTIFACT_PATH = Path("research/kyiv_historical_google_news_url_resolution_repair_2026-10-08.json")
 OUT_PATH = Path("research/kyiv_historical_google_news_url_resolution_network_proof_2026-10-08.json")
 PRE_REPAIR_COMMIT = "dcacfc6517d78361802ec5c41280b6ec57c7fe87"
 TESTED_RESOLVER_COMMIT = "010d65e8bf0b8672778a4977e8d1e05aaf071951"
@@ -476,45 +477,42 @@ def network_gate(pilot, wrapper):
     return result
 
 
-def rss_item_for_wrapper(pilot, http, row, wrapper, cache):
-    diag = (
-        ((row.get("result") or {}).get("source_diagnostics") or {})
-        .get("generic_search") or {}
-    )
-    query_url = str(diag.get("query_url") or "")
-    if not query_url:
-        return None
-    if query_url not in cache:
-        try:
-            rss = http.get(query_url)
-            cache[query_url] = {
-                pilot.canonical_url(str(item.get("link") or "")): item
-                for item in pilot.parse_google_rss(rss.content)
-            }
-        except Exception:
-            cache[query_url] = {}
-    return cache[query_url].get(pilot.canonical_url(wrapper))
-
-
 def correctness_sample(
-    pilot, old_proof, development, broad_cases, n=30
+    pilot, old_proof, broad_cases, n=30
 ):
-    rows = {row["episode_id"]: row for row in development}
-    http = pilot.HTTP()
-    query_cache = {}
-    sample = []
-    ordered = sorted(
-        (case for case in broad_cases if case.get("decoded_url")),
-        key=lambda case: (case["episode_id"], case["wrapper_url"]),
+    prior = json.loads(
+        OLD_PROOF_ARTIFACT_PATH.read_text(encoding="utf-8")
     )
-    for case in ordered:
+    retained = list(
+        (prior.get("correctness_guard") or {}).get("sample") or []
+    )
+    broad_map = {
+        case["wrapper_url"]: case
+        for case in broad_cases
+        if case.get("decoded_url")
+    }
+    http = pilot.HTTP()
+    sample = []
+    for retained_case in retained:
         if len(sample) >= n:
             break
-        row = rows[case["episode_id"]]
-        item = rss_item_for_wrapper(
-            pilot, http, row, case["wrapper_url"], query_cache
-        )
-        url = case["decoded_url"]
+        wrapper = str(retained_case.get("wrapper_url") or "")
+        current = broad_map.get(wrapper)
+        if not current:
+            continue
+        url = current["decoded_url"]
+        if url != retained_case.get("decoded_native_url"):
+            sample.append({
+                "wrapper_url": wrapper,
+                "decoded_native_url": url,
+                "retained_decoded_native_url":
+                    retained_case.get("decoded_native_url"),
+                "classification": "INCONSISTENT",
+                "detail": {
+                    "reason": "DECODE_TARGET_CHANGED"
+                },
+            })
+            continue
         if pilot.tg_identity(url):
             native, fetch_error = pilot.fetch_telegram_post(
                 http, url
@@ -523,29 +521,24 @@ def correctness_sample(
             native, fetch_error = pilot.extract_article(
                 http, url
             )
-        event = copy.deepcopy(case.get("trace") or {})
-        if item:
-            event["google_rss_title"] = (
-                str(item.get("title") or "") or None
-            )
-            event["google_rss_source"] = (
-                str(item.get("source") or "") or None
-            )
-            event["google_rss_pubDate"] = (
-                str(item.get("pubDate") or "") or None
-            )
+        event = copy.deepcopy(current.get("trace") or {})
+        event["google_rss_title"] = (
+            retained_case.get("google_rss_title")
+        )
+        event["google_rss_source"] = (
+            retained_case.get("google_rss_source")
+        )
         classification, detail = (
             old_proof.correctness_classification(event, native)
         )
         sample.append({
-            "episode_id": case["episode_id"],
-            "wrapper_url": case["wrapper_url"],
+            "wrapper_url": wrapper,
             "decoded_native_url": url,
-            "rss_result_title": (item or {}).get("title"),
+            "rss_result_title":
+                retained_case.get("google_rss_title"),
             "rss_publisher_source_name":
-                (item or {}).get("source"),
-            "rss_publication_time":
-                (item or {}).get("pubDate"),
+                retained_case.get("google_rss_source"),
+            "rss_publication_time": None,
             "native_page_title":
                 (native or {}).get("title"),
             "native_publisher_domain":
@@ -566,8 +559,10 @@ def correctness_sample(
         "UNVERIFIABLE": counts["UNVERIFIABLE"],
         "sample": sample,
         "historical_truth_urls_used": False,
+        "new_google_news_discovery_queries": 0,
+        "rss_metadata_source":
+            "retained prior development-only proof metadata",
     }
-
 
 def cat_for_url(pilot, url):
     identity = pilot.tg_identity(url)
@@ -907,7 +902,7 @@ def main():
     })
 
     correctness = correctness_sample(
-        pilot, old_proof, development, broad_cases, 30
+        pilot, old_proof, broad_cases, 30
     )
     downstream = downstream_replay(
         pilot, development, broad_cases, http
