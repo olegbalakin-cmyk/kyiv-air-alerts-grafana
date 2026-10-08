@@ -166,19 +166,29 @@
           <h2>Як тривоги розподіляються протягом доби</h2>
           <p>Два взаємодоповнювальні погляди: детальний нормалізований профіль і фактичний розподіл усього часу під тривогою за частинами доби.</p>
         </div>
-        <div class="control time-profile-period-control">
-          <label id="timeOfDayRangeLabel">Діапазони</label>
-          <details id="timeOfDayRangeMenu" class="multi-select-dropdown">
-            <summary id="timeOfDayRangeSummary">30 днів</summary>
-            <div class="multi-select-options" role="group" aria-labelledby="timeOfDayRangeLabel">
-              <label><input class="time-of-day-range-option" type="checkbox" value="7d"><span data-time-range-label="7d">7 днів</span></label>
-              <label><input class="time-of-day-range-option" type="checkbox" value="30d" checked><span data-time-range-label="30d">30 днів</span></label>
-              <label><input class="time-of-day-range-option" type="checkbox" value="90d"><span data-time-range-label="90d">90 днів</span></label>
-              <label><input class="time-of-day-range-option" type="checkbox" value="180d"><span data-time-range-label="180d">180 днів</span></label>
-              <label><input class="time-of-day-range-option" type="checkbox" value="year"><span data-time-range-label="year">Рік</span></label>
-              <label><input class="time-of-day-range-option" type="checkbox" value="all"><span data-time-range-label="all">Від початку даних</span></label>
-            </div>
-          </details>
+        <div class="section-range-controls">
+          <div class="control time-profile-period-control">
+            <label id="timeOfDayRangeLabel">Діапазони</label>
+            <details id="timeOfDayRangeMenu" class="multi-select-dropdown">
+              <summary id="timeOfDayRangeSummary">30 днів</summary>
+              <div class="multi-select-options" role="group" aria-labelledby="timeOfDayRangeLabel">
+                <label><input class="time-of-day-range-option" type="checkbox" value="7d"><span data-time-range-label="7d">7 днів</span></label>
+                <label><input class="time-of-day-range-option" type="checkbox" value="30d" checked><span data-time-range-label="30d">30 днів</span></label>
+                <label><input class="time-of-day-range-option" type="checkbox" value="90d"><span data-time-range-label="90d">90 днів</span></label>
+                <label><input class="time-of-day-range-option" type="checkbox" value="180d"><span data-time-range-label="180d">180 днів</span></label>
+                <label><input class="time-of-day-range-option" type="checkbox" value="year"><span data-time-range-label="year">Рік</span></label>
+                <label><input class="time-of-day-range-option" type="checkbox" value="all"><span data-time-range-label="all">Від початку даних</span></label>
+              </div>
+            </details>
+          </div>
+          <div class="control time-profile-interval-control">
+            <label for="timeOfDayBin">Інтервал</label>
+            <select id="timeOfDayBin" aria-label="Інтервал добового профілю">
+              <option value="15">15 хв</option>
+              <option value="30">30 хв</option>
+              <option value="60">1 година</option>
+            </select>
+          </div>
         </div>
       </div>
       <article class="panel chart-card wide time-profile-card">
@@ -311,18 +321,28 @@
           <div class="time-profile-card-heading">
             <div>
               <h3>Добовий профіль тривог</h3>
-              <p class="chart-subtitle">Порівняння форми добового патерну. Кожне місто/район нормалізовано окремо: його власний найчастіший 15-хвилинний інтервал = 100%.</p>
+              <p class="chart-subtitle">Порівняння форми добового патерну. Кожне місто/район нормалізовано окремо: його власний найактивніший інтервал = 100%.</p>
             </div>
-            <div class="control time-profile-compare-control">
-              <label for="compareTimeOfDayRange">Діапазон</label>
-              <select id="compareTimeOfDayRange" aria-label="Діапазон добового профілю для порівняння">
-                <option value="7d">7 днів</option>
-                <option value="30d">30 днів</option>
-                <option value="90d">90 днів</option>
-                <option value="180d">180 днів</option>
-                <option value="year">Рік</option>
-                <option value="all">Від початку даних</option>
-              </select>
+            <div class="section-range-controls">
+              <div class="control time-profile-compare-control">
+                <label for="compareTimeOfDayRange">Діапазон</label>
+                <select id="compareTimeOfDayRange" aria-label="Діапазон добового профілю для порівняння">
+                  <option value="7d">7 днів</option>
+                  <option value="30d">30 днів</option>
+                  <option value="90d">90 днів</option>
+                  <option value="180d">180 днів</option>
+                  <option value="year">Рік</option>
+                  <option value="all">Від початку даних</option>
+                </select>
+              </div>
+              <div class="control time-profile-compare-control">
+                <label for="compareTimeOfDayBin">Інтервал</label>
+                <select id="compareTimeOfDayBin" aria-label="Інтервал добового профілю для порівняння">
+                  <option value="15">15 хв</option>
+                  <option value="30">30 хв</option>
+                  <option value="60">1 година</option>
+                </select>
+              </div>
             </div>
           </div>
           <p id="compareTimeOfDayNote" class="chart-subtitle"></p>
@@ -515,6 +535,6 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
-  <script src="app.js?v=20261008-9"></script>
+  <script src="app.js?v=20261008-10"></script>
 </body>
 </html>
