@@ -28,7 +28,7 @@ const KYIV_THREAT_CAUSE_COLORS = {
   "unknown": "#7f8c99"
 };
 const PARTIAL_PERIOD_DASH = [3, 4];
-const TOUR_STORAGE_KEY = "air-alerts-intro-tour-v3";
+const TOUR_STORAGE_KEY = "air-alerts-intro-tour-v4";
 const TOUR_STEPS = [
   {
     selector:".controls-panel",
@@ -56,8 +56,8 @@ const TOUR_STEPS = [
     selector:"#timeOfDaySection",
     titleUk:"Два погляди на час доби",
     titleEn:"Two views of time of day",
-    textUk:"Перший графік показує форму добового профілю: 100% — власний пік вибраного періоду. Другий показує, яка частка всього фактичного часу під тривогою припала на 00–06, 06–12, 12–18 і 18–24.",
-    textEn:"The first chart shows the shape of the daily profile: 100% is the selected period's own peak. The second shows what share of all actual alert time fell in 00–06, 06–12, 12–18 and 18–24."
+    textUk:"Перший графік показує форму добового профілю: 100% — власний пік вибраного періоду. Деталізацію можна перемикати між 15 хв, 30 хв і 1 годиною. Другий показує, яка частка всього фактичного часу під тривогою припала на 00–06, 06–12, 12–18 і 18–24.",
+    textEn:"The first chart shows the shape of the daily profile: 100% is the selected period's own peak. You can switch the interval between 15 minutes, 30 minutes and 1 hour. The second shows what share of all actual alert time fell in 00–06, 06–12, 12–18 and 18–24."
   },
   {
     selector:"#kyivThreatCausesSection",
