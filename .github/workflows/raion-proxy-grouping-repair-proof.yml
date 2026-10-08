@@ -33,5 +33,10 @@ jobs:
       - run: pip install -r requirements.txt
       - name: Shared monitor self-test
         run: python scripts/monitor_explosion_candidates.py --self-test
+      - name: Read current production bridge
+        working-directory: .
+        run: |
+          git fetch origin site-prod
+          git show origin/site-prod:kyiv-air-alerts-grafana/data/ukrainealarm_bridge.json > /tmp/prod-ukrainealarm-bridge.json
       - name: Recent raion-proxy canonical parity
-        run: python scripts/prove_raion_proxy_grouping_repair.py
+        run: python scripts/prove_raion_proxy_grouping_repair.py --bridge-file /tmp/prod-ukrainealarm-bridge.json
