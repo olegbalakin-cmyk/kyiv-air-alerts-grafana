@@ -232,7 +232,7 @@ if "bs4" not in sys.modules:
 monitor=importlib.import_module("monitor_explosion_candidates")
 replay=importlib.import_module("replay_explosion_history")
 audited_root=Path("/tmp/unit_a_audited_main/kyiv-air-alerts-grafana")
-cities=sorted((cont.get("uncovered_counts_by_city") or {}).keys())
+cities=sorted({str((t.get("classifier_episode_input") or {}).get("city_key") or "") for t in targets if str((t.get("classifier_episode_input") or {}).get("city_key") or "")})
 loaded_by_city={}
 source_files={}
 for city in cities:
