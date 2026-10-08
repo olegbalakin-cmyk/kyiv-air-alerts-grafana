@@ -92,7 +92,8 @@ jobs:
             --dashboard kyiv-air-alerts-grafana/data/dashboard_data.json \
             --kyiv-alerts /tmp/site-prod-alerts-combined.json \
             --bridge-store /tmp/site-prod-ukrainealarm-bridge.json \
-            --sevastopol-events /tmp/site-prod-sevastopol-events.json
+            --sevastopol-events /tmp/site-prod-sevastopol-events.json \
+            --explorations-output /tmp/explorations-test-data.json
 
           python - <<'PY'
           import json
@@ -109,6 +110,17 @@ jobs:
                   row = city["periods"][period]
                   assert len(row["slots"]) == 96, (key, period)
           print("Preview time-of-day profiles verified for 23 cities, including 180d")
+
+          explorations = json.loads(Path("/tmp/explorations-test-data.json").read_text(encoding="utf-8"))
+          assert explorations["meta"]["test_only"] is True
+          assert explorations["meta"]["city_count"] == 23
+          assert len(explorations["meta"]["views"]) == 6
+          assert set(explorations["cities"]) == set(data["multicity_meta"]["production_city_keys"])
+          for key, city in explorations["cities"].items():
+              assert city["daily"], key
+              assert city["monthly"], key
+              assert city["years"], key
+          print("Exploration lab data verified for 23 cities and 6 views")
           PY
 
       - name: Build Kyiv Digital differentiated threat mix
@@ -312,6 +324,8 @@ jobs:
           cp kyiv-air-alerts-grafana/pages-preview/styles.css _site/styles.css
           cp kyiv-air-alerts-grafana/pages-preview/app.js _site/app.js
           cp kyiv-air-alerts-grafana/pages-preview/features.json _site/features.json
+          cp kyiv-air-alerts-grafana/pages-preview/explorations-test.html _site/explorations-test.html
+          cp /tmp/explorations-test-data.json _site/explorations-test-data.json
           python - <<'PY'
           import struct
           import zlib

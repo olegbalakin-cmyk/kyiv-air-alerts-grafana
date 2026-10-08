@@ -1,0 +1,441 @@
+<!doctype html>
+<html lang="uk">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <meta name="theme-color" content="#0b0f14">
+  <title>Експериментальні представлення тривог</title>
+  <link rel="stylesheet" href="styles.css?v=20261008-4">
+  <style>
+    .lab-shell{max-width:1500px;margin:0 auto;padding:34px 24px 56px}
+    .lab-header{display:flex;justify-content:space-between;gap:24px;align-items:flex-start;margin-bottom:18px}
+    .lab-header h1{margin:4px 0 8px}
+    .lab-header .subtitle{max-width:960px}
+    .lab-actions{display:flex;gap:8px;flex-wrap:wrap}
+    .lab-banner{border:1px solid #375a7a;background:#102235;color:#cce6ff;border-radius:10px;padding:12px 14px;margin:14px 0 18px;line-height:1.5}
+    .lab-controls{display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap;margin-bottom:20px}
+    .lab-controls .control{min-width:190px}
+    .lab-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+    .lab-card{padding:18px;min-width:0}
+    .lab-card.wide{grid-column:1/-1}
+    .lab-card h2{font-size:22px;margin:3px 0 7px}
+    .idea-tag{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:#8fb4d8}
+    .lab-chart{height:380px}
+    .lab-card.wide .lab-chart{height:430px}
+    .lab-note{font-size:13px;color:#9ba9b5;line-height:1.55;margin-top:10px}
+    .scope-note{font-size:13px;color:#aebbc6;margin-left:auto}
+    .calendar-shell{overflow-x:auto;padding:8px 0 4px}
+    .calendar-label-grid,.calendar-grid{display:grid;grid-template-columns:repeat(54,14px);column-gap:3px;width:max-content}
+    .calendar-label-grid{height:20px;align-items:end;margin-left:34px}
+    .calendar-month-label{font-size:11px;color:#9ba9b5;white-space:nowrap}
+    .calendar-body{display:flex;gap:8px;align-items:flex-start}
+    .calendar-weekdays{display:grid;grid-template-rows:repeat(7,14px);row-gap:3px;width:26px}
+    .calendar-weekdays span{font-size:10px;color:#7f8c99;line-height:14px;text-align:right}
+    .calendar-grid{grid-template-rows:repeat(7,14px);row-gap:3px}
+    .calendar-cell{width:14px;height:14px;border-radius:3px;border:1px solid rgba(255,255,255,.04)}
+    .heat-0{background:#141b22}.heat-1{background:#173247}.heat-2{background:#1e4d68}.heat-3{background:#286f87}.heat-4{background:#3b93a1}.heat-5{background:#75c7b7}
+    .calendar-legend{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:12px;font-size:11px;color:#9ba9b5}
+    .legend-swatch{width:14px;height:14px;border-radius:3px;display:inline-block;vertical-align:middle;margin-right:3px}
+    .empty-state{display:flex;align-items:center;justify-content:center;height:260px;color:#8e9aa5}
+    @media(max-width:980px){.lab-grid{grid-template-columns:1fr}.lab-card.wide{grid-column:auto}.lab-header{flex-direction:column}.scope-note{margin-left:0}.lab-chart,.lab-card.wide .lab-chart{height:330px}}
+    @media(max-width:620px){.lab-shell{padding:24px 14px 42px}.lab-controls .control{width:100%;min-width:100%}.lab-chart,.lab-card.wide .lab-chart{height:300px}}
+  </style>
+</head>
+<body>
+  <main class="lab-shell">
+    <header class="lab-header">
+      <div>
+        <div class="eyebrow">Лабораторія представлень</div>
+        <h1>6 альтернативних способів показати тривоги</h1>
+        <p class="subtitle">Окрема тестова сторінка на реальних alert episodes. Вона не є частиною основного сайту й потрібна лише для оцінки того, які представлення справді додають зміст.</p>
+      </div>
+      <div class="lab-actions">
+        <a class="ghost-button" href="./">← До тестового сайту</a>
+      </div>
+    </header>
+
+    <div class="lab-banner"><strong>Експеримент.</strong> Усі шість блоків синхронізовані за містом і роком. Поточний неповний рік показується до останнього доступного завершеного дня.</div>
+
+    <section class="panel lab-controls">
+      <div class="control">
+        <label for="labCity">Місто / ряд</label>
+        <select id="labCity"></select>
+      </div>
+      <div class="control">
+        <label for="labYear">Рік</label>
+        <select id="labYear"></select>
+      </div>
+      <div id="scopeNote" class="scope-note"></div>
+    </section>
+
+    <section class="lab-grid">
+      <article class="panel lab-card wide">
+        <div class="idea-tag">Ідея 1 · календар навантаження</div>
+        <h2>Скільки часу кожен день був під тривогою</h2>
+        <p class="chart-subtitle">Одна клітинка = один календарний день. Насиченість показує години під тривогою.</p>
+        <div class="calendar-shell">
+          <div id="calendarMonths" class="calendar-label-grid"></div>
+          <div class="calendar-body">
+            <div class="calendar-weekdays"><span>Пн</span><span></span><span>Ср</span><span></span><span>Пт</span><span></span><span>Нд</span></div>
+            <div id="calendarGrid" class="calendar-grid"></div>
+          </div>
+          <div class="calendar-legend">
+            <span><span class="legend-swatch heat-0"></span>0</span>
+            <span><span class="legend-swatch heat-1"></span>&lt;1 год</span>
+            <span><span class="legend-swatch heat-2"></span>1–3</span>
+            <span><span class="legend-swatch heat-3"></span>3–6</span>
+            <span><span class="legend-swatch heat-4"></span>6–12</span>
+            <span><span class="legend-swatch heat-5"></span>12+</span>
+          </div>
+        </div>
+        <p class="lab-note">Добре показує хвилі навантаження, кластери «важких» днів і довгі спокійні відрізки, які губляться в місячному усередненні.</p>
+      </article>
+
+      <article class="panel lab-card">
+        <div class="idea-tag">Ідея 2 · режими тривог</div>
+        <h2>Часто й коротко vs рідко й довго</h2>
+        <p class="chart-subtitle">Кожна точка = місяць. X — тривог на день; Y — середня повна тривалість. Розмір точки — середні години під тривогою на добу.</p>
+        <div class="chart-wrap lab-chart"><canvas id="regimeChart"></canvas></div>
+        <p class="lab-note">Дає змогу відрізнити місяці з однаковим часовим навантаженням, але принципово різною структурою тривог.</p>
+      </article>
+
+      <article class="panel lab-card">
+        <div class="idea-tag">Ідея 3 · форма розподілу</div>
+        <h2>Не лише середнє: медіана та перцентилі</h2>
+        <p class="chart-subtitle">Повна тривалість тривог, що почалися в місяці: P50, P75, P90 та найдовша тривога.</p>
+        <div class="chart-wrap lab-chart"><canvas id="percentileChart"></canvas></div>
+        <p class="lab-note">Показує, чи зростання середнього створене масою довших тривог або лише кількома екстремальними епізодами.</p>
+      </article>
+
+      <article class="panel lab-card wide">
+        <div class="idea-tag">Ідея 4 · скільки було важких днів</div>
+        <h2>Розподіл днів за часом під тривогою</h2>
+        <p class="chart-subtitle">Кожен місяць розкладено на кількість днів без тривоги, до 1 год, 1–3, 3–6, 6–12 та 12+ годин під тривогою.</p>
+        <div class="chart-wrap lab-chart"><canvas id="heavyDaysChart"></canvas></div>
+        <p class="lab-note">Перекладає абстрактне «3,2 год/добу» у зрозуміле питання: скільки днів місяця реально були важкими.</p>
+      </article>
+
+      <article class="panel lab-card">
+        <div class="idea-tag">Ідея 5 · крайні стани</div>
+        <h2>Найдовша тривога і найдовша тиша</h2>
+        <p class="chart-subtitle">Синя вісь — найдовша тривога, що почалася в місяці. Права вісь — найдовший безперервний проміжок без тривоги всередині місяця.</p>
+        <div class="chart-wrap lab-chart"><canvas id="extremesChart"></canvas></div>
+        <p class="lab-note">Дозволяє бачити не лише інтенсивність атак, а й те, чи зникають довгі періоди повної тиші.</p>
+      </article>
+
+      <article class="panel lab-card">
+        <div class="idea-tag">Ідея 6 · день / ніч</div>
+        <h2>Коли припадав реальний час під тривогою</h2>
+        <p class="chart-subtitle">100% часу під тривогою в кожному місяці розкладено на 00–06, 06–12, 12–18 та 18–24 за Europe/Kyiv.</p>
+        <div class="chart-wrap lab-chart"><canvas id="daypartChart"></canvas></div>
+        <p class="lab-note">На відміну від нормалізованого добового профілю на основному сайті, тут показана реальна частка всього часу під тривогою.</p>
+      </article>
+    </section>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+  <script>
+    const DATA_URL = "explorations-test-data.json";
+    const charts = {};
+    let data = null;
+
+    const $ = id => document.getElementById(id);
+    const fmt = (value, digits=1) => Number.isFinite(Number(value)) ? Number(value).toFixed(digits) : "—";
+    const fmtDuration = minutes => {
+      const n = Number(minutes);
+      if (!Number.isFinite(n)) return "—";
+      const total = Math.max(0, Math.round(n));
+      const h = Math.floor(total / 60);
+      const m = total % 60;
+      return h ? h + " год " + String(m).padStart(2,"0") + " хв" : m + " хв";
+    };
+    const monthLabel = month => {
+      const d = new Date(month + "-01T00:00:00Z");
+      return new Intl.DateTimeFormat("uk-UA",{month:"short"}).format(d).replace(".","");
+    };
+    const fullMonthLabel = month => {
+      const d = new Date(month + "-01T00:00:00Z");
+      return new Intl.DateTimeFormat("uk-UA",{month:"long",year:"numeric"}).format(d);
+    };
+    const grid = "rgba(148,163,184,.16)";
+    const text = "#b8c4cf";
+    const colors = ["#62a0ea","#8ff0a4","#f8e45c","#c061cb","#ff9f43","#ef4444"];
+
+    function destroyChart(id){
+      if(charts[id]){ charts[id].destroy(); delete charts[id]; }
+    }
+
+    function chartBase(){
+      return {
+        responsive:true,
+        maintainAspectRatio:false,
+        animation:false,
+        interaction:{mode:"index",intersect:false},
+        plugins:{legend:{labels:{color:text,boxWidth:13,usePointStyle:true}}},
+        scales:{
+          x:{ticks:{color:text,maxRotation:0,autoSkip:true},grid:{color:grid}},
+          y:{beginAtZero:true,ticks:{color:text},grid:{color:grid}}
+        }
+      };
+    }
+
+    function currentCity(){
+      return data?.cities?.[$("labCity").value] || null;
+    }
+
+    function currentYear(){
+      return $("labYear").value;
+    }
+
+    function monthlyRows(city,year){
+      return (city?.monthly || []).filter(row => String(row.month).startsWith(year));
+    }
+
+    function dailyRows(city,year){
+      return (city?.daily || []).filter(row => String(row.date).startsWith(year));
+    }
+
+    function fillCities(){
+      const keys = Object.keys(data?.cities || {}).sort((a,b)=>{
+        if(a==="kyiv") return -1;
+        if(b==="kyiv") return 1;
+        return data.cities[a].label.localeCompare(data.cities[b].label,"uk");
+      });
+      $("labCity").innerHTML = keys.map(key => '<option value="'+key+'">'+data.cities[key].label+'</option>').join("");
+      $("labCity").value = keys.includes("kyiv") ? "kyiv" : keys[0];
+    }
+
+    function fillYears(){
+      const city = currentCity();
+      const years = [...(city?.years || [])].sort((a,b)=>Number(b)-Number(a));
+      const previous = $("labYear").value;
+      $("labYear").innerHTML = years.map(year => '<option value="'+year+'">'+year+'</option>').join("");
+      $("labYear").value = years.includes(previous) ? previous : years[0];
+    }
+
+    function heatClass(hours){
+      const h = Number(hours)||0;
+      if(h<=0) return "heat-0";
+      if(h<1) return "heat-1";
+      if(h<3) return "heat-2";
+      if(h<6) return "heat-3";
+      if(h<12) return "heat-4";
+      return "heat-5";
+    }
+
+    function renderCalendar(city,year){
+      const rows = dailyRows(city,year);
+      const gridEl = $("calendarGrid");
+      const monthEl = $("calendarMonths");
+      gridEl.innerHTML = "";
+      monthEl.innerHTML = "";
+      if(!rows.length) return;
+
+      const yearStart = new Date(year+"-01-01T00:00:00Z");
+      const mondayOffset = (yearStart.getUTCDay()+6)%7;
+      const gridStart = new Date(yearStart);
+      gridStart.setUTCDate(gridStart.getUTCDate()-mondayOffset);
+
+      const seenMonths = new Set();
+      for(const row of rows){
+        const d = new Date(row.date+"T00:00:00Z");
+        const diffDays = Math.floor((d-gridStart)/86400000);
+        const week = Math.floor(diffDays/7)+1;
+        const weekday = (d.getUTCDay()+6)%7+1;
+        const cell = document.createElement("div");
+        cell.className = "calendar-cell "+heatClass(row.alert_hours);
+        cell.style.gridColumn = week;
+        cell.style.gridRow = weekday;
+        cell.title = row.date+" · "+fmt(row.alert_hours,1)+" год під тривогою · "+row.alerts_started+" тривог почалося";
+        gridEl.appendChild(cell);
+
+        const month = row.date.slice(0,7);
+        if(!seenMonths.has(month)){
+          seenMonths.add(month);
+          const label = document.createElement("span");
+          label.className = "calendar-month-label";
+          label.style.gridColumn = week;
+          label.textContent = monthLabel(month);
+          monthEl.appendChild(label);
+        }
+      }
+    }
+
+    function renderRegime(rows){
+      destroyChart("regimeChart");
+      const dataset = rows.filter(r=>Number(r.avg_duration_min)>=0).map(r=>({
+        x:Number(r.alerts_per_day)||0,
+        y:Number(r.avg_duration_min)||0,
+        month:r.month,
+        hours:Number(r.avg_daily_alert_hours)||0
+      }));
+      charts.regimeChart = new Chart($("regimeChart"),{
+        type:"scatter",
+        data:{datasets:[{
+          label:"Місяці",
+          data:dataset,
+          showLine:true,
+          borderColor:colors[0],
+          backgroundColor:colors[0]+"99",
+          pointRadius:ctx=>Math.max(4,Math.min(18,4+(ctx.raw?.hours||0)*2.2)),
+          pointHoverRadius:ctx=>Math.max(6,Math.min(20,6+(ctx.raw?.hours||0)*2.2)),
+          borderWidth:1.5,
+          tension:.18
+        }]},
+        options:{
+          responsive:true,maintainAspectRatio:false,animation:false,interaction:{mode:"nearest",intersect:true},
+          plugins:{
+            legend:{display:false},
+            tooltip:{callbacks:{
+              title:items=>items.length?fullMonthLabel(items[0].raw.month):"",
+              label:ctx=>" "+fmt(ctx.raw.x,2)+" тривог/день · "+fmtDuration(ctx.raw.y)+" · "+fmt(ctx.raw.hours,1)+" год/добу"
+            }}
+          },
+          scales:{
+            x:{beginAtZero:true,ticks:{color:text},grid:{color:grid},title:{display:true,text:"Тривог на день",color:text}},
+            y:{beginAtZero:true,ticks:{color:text,callback:v=>fmtDuration(v)},grid:{color:grid},title:{display:true,text:"Середня тривалість",color:text}}
+          }
+        }
+      });
+    }
+
+    function renderPercentiles(rows){
+      destroyChart("percentileChart");
+      const labels=rows.map(r=>monthLabel(r.month));
+      const opts=chartBase();
+      opts.scales.y.ticks.callback=v=>fmtDuration(v);
+      opts.scales.y.title={display:true,text:"Тривалість",color:text};
+      opts.plugins.tooltip={mode:"index",intersect:false,callbacks:{label:ctx=>" "+ctx.dataset.label+": "+fmtDuration(ctx.parsed.y)}};
+      charts.percentileChart=new Chart($("percentileChart"),{
+        type:"line",
+        data:{labels,datasets:[
+          {label:"P50 (медіана)",data:rows.map(r=>r.duration_p50_min),borderColor:colors[0],backgroundColor:colors[0]+"22",pointRadius:2,tension:.15},
+          {label:"P75",data:rows.map(r=>r.duration_p75_min),borderColor:colors[1],backgroundColor:colors[1]+"22",pointRadius:2,tension:.15},
+          {label:"P90",data:rows.map(r=>r.duration_p90_min),borderColor:colors[2],backgroundColor:colors[2]+"22",pointRadius:2,tension:.15},
+          {label:"Максимум",data:rows.map(r=>r.max_duration_min),borderColor:colors[5],backgroundColor:colors[5]+"22",pointRadius:2,borderDash:[5,4],tension:.15}
+        ]},
+        options:opts
+      });
+    }
+
+    function renderHeavyDays(rows){
+      destroyChart("heavyDaysChart");
+      const labels=rows.map(r=>monthLabel(r.month));
+      const keys=[
+        ["zero","Без тривоги"],
+        ["lt1","<1 год"],
+        ["h1_3","1–3 год"],
+        ["h3_6","3–6 год"],
+        ["h6_12","6–12 год"],
+        ["h12plus","12+ год"]
+      ];
+      const opts=chartBase();
+      opts.scales.x.stacked=true;
+      opts.scales.y.stacked=true;
+      opts.scales.y.title={display:true,text:"Днів",color:text};
+      charts.heavyDaysChart=new Chart($("heavyDaysChart"),{
+        type:"bar",
+        data:{labels,datasets:keys.map(([key,label],i)=>({
+          label,
+          data:rows.map(r=>Number(r.burden_day_counts?.[key]||0)),
+          backgroundColor:colors[i%colors.length]+"bb",
+          borderWidth:0,
+          stack:"days"
+        }))},
+        options:opts
+      });
+    }
+
+    function renderExtremes(rows){
+      destroyChart("extremesChart");
+      const labels=rows.map(r=>monthLabel(r.month));
+      charts.extremesChart=new Chart($("extremesChart"),{
+        type:"line",
+        data:{labels,datasets:[
+          {
+            label:"Найдовша тривога",
+            data:rows.map(r=>r.longest_alert_min==null?null:Number(r.longest_alert_min)/60),
+            borderColor:colors[0],backgroundColor:colors[0]+"22",yAxisID:"yAlert",pointRadius:2,tension:.15
+          },
+          {
+            label:"Найдовша тиша",
+            data:rows.map(r=>Number(r.longest_quiet_gap_min||0)/1440),
+            borderColor:colors[1],backgroundColor:colors[1]+"22",yAxisID:"yQuiet",pointRadius:2,tension:.15
+          }
+        ]},
+        options:{
+          responsive:true,maintainAspectRatio:false,animation:false,interaction:{mode:"index",intersect:false},
+          plugins:{legend:{labels:{color:text,boxWidth:13,usePointStyle:true}},tooltip:{callbacks:{
+            label:ctx=>ctx.dataset.yAxisID==="yAlert"
+              ?" "+ctx.dataset.label+": "+fmt(ctx.parsed.y,1)+" год"
+              :" "+ctx.dataset.label+": "+fmt(ctx.parsed.y,1)+" діб"
+          }}},
+          scales:{
+            x:{ticks:{color:text,maxRotation:0,autoSkip:true},grid:{color:grid}},
+            yAlert:{position:"left",beginAtZero:true,ticks:{color:text,callback:v=>v+" год"},grid:{color:grid},title:{display:true,text:"Найдовша тривога, год",color:text}},
+            yQuiet:{position:"right",beginAtZero:true,ticks:{color:text,callback:v=>v+" д"},grid:{drawOnChartArea:false},title:{display:true,text:"Найдовша тиша, діб",color:text}}
+          }
+        }
+      });
+    }
+
+    function renderDayparts(rows){
+      destroyChart("daypartChart");
+      const labels=rows.map(r=>monthLabel(r.month));
+      const bands=[["00_06","00–06"],["06_12","06–12"],["12_18","12–18"],["18_24","18–24"]];
+      const opts=chartBase();
+      opts.scales.x.stacked=true;
+      opts.scales.y.stacked=true;
+      opts.scales.y.min=0;
+      opts.scales.y.max=100;
+      opts.scales.y.ticks.callback=v=>v+"%";
+      opts.scales.y.title={display:true,text:"Частка часу під тривогою",color:text};
+      opts.plugins.tooltip={mode:"index",intersect:false,callbacks:{label:ctx=>" "+ctx.dataset.label+": "+fmt(ctx.parsed.y,1)+"%"}};
+      charts.daypartChart=new Chart($("daypartChart"),{
+        type:"bar",
+        data:{labels,datasets:bands.map(([key,label],i)=>({
+          label,
+          data:rows.map(r=>Number(r.time_band_shares?.[key]||0)),
+          backgroundColor:colors[i]+"bb",
+          borderWidth:0,
+          stack:"time"
+        }))},
+        options:opts
+      });
+    }
+
+    function render(){
+      const city=currentCity();
+      const year=currentYear();
+      if(!city||!year) return;
+      const monthly=monthlyRows(city,year);
+      const daily=dailyRows(city,year);
+      const partial=monthly.some(r=>r.partial_period);
+      $("scopeNote").textContent=city.label+" · "+year+" · "+city.coverage_start+" — "+city.analysis_end+(partial?" · є неповний календарний період":"");
+      renderCalendar(city,year);
+      renderRegime(monthly);
+      renderPercentiles(monthly);
+      renderHeavyDays(monthly);
+      renderExtremes(monthly);
+      renderDayparts(monthly);
+    }
+
+    async function init(){
+      const response=await fetch(DATA_URL+"?v="+Date.now(),{cache:"no-store"});
+      if(!response.ok) throw new Error("HTTP "+response.status);
+      data=await response.json();
+      fillCities();
+      fillYears();
+      $("labCity").addEventListener("change",()=>{fillYears();render();});
+      $("labYear").addEventListener("change",render);
+      render();
+    }
+
+    init().catch(err=>{
+      console.error(err);
+      $("scopeNote").textContent="Не вдалося завантажити експериментальні дані: "+err.message;
+    });
+  </script>
+</body>
+</html>
