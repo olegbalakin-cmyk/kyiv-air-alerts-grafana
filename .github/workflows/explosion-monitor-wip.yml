@@ -45,6 +45,7 @@ jobs:
           git show origin/site-prod:kyiv-air-alerts-grafana/data/dashboard_data.json > /tmp/prod-dashboard.json
           git show origin/site-prod:kyiv-air-alerts-grafana/data/alerts_combined.json > /tmp/prod-kyiv-alerts.json
           git show origin/site-prod:kyiv-air-alerts-grafana/data/sevastopol_events.json > /tmp/prod-sevastopol-events.json
+          git show origin/site-prod:kyiv-air-alerts-grafana/data/ukrainealarm_bridge.json > /tmp/prod-ukrainealarm-bridge.json
           mkdir -p /tmp/canonical-parent-contract
           git show origin/site-prod:kyiv-air-alerts-grafana/scripts/db_phase1_core.py > /tmp/canonical-parent-contract/db_phase1_core.py
           git show origin/site-prod:kyiv-air-alerts-grafana/scripts/db_phase1_persistence.py > /tmp/canonical-parent-contract/db_phase1_persistence.py
@@ -90,6 +91,7 @@ jobs:
           ATTACK_EVENT_PERSISTENCE_CANARY_MAX_EPISODES: "10"
         run: |
           python scripts/monitor_explosion_candidates.py \
+            --bridge-file /tmp/prod-ukrainealarm-bridge.json \
             --kyiv-alerts-file /tmp/prod-kyiv-alerts.json \
             --sevastopol-events-file /tmp/prod-sevastopol-events.json
 
