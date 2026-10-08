@@ -479,6 +479,9 @@ def resolve_google_result(http: HTTP, item):
         "metadata_signature_step_status": "NOT_ATTEMPTED",
         "rpc_step_status": "NOT_ATTEMPTED",
         "resolution_outcome": None,
+        "google_rss_title": str(item.get("title") or "") or None,
+        "google_rss_source": str(item.get("source") or "") or None,
+        "google_rss_pubDate": str(item.get("pubDate") or "") or None,
     }
     if not link:
         trace["resolution_outcome"] = "EMPTY_SEARCH_LINK"
