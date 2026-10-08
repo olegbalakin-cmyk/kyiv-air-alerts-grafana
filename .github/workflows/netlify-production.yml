@@ -2,18 +2,6 @@ name: Deploy Netlify production site
 
 on:
   workflow_dispatch:
-  push:
-    branches: [site-prod]
-    paths:
-      - "kyiv-air-alerts-grafana/pages-preview/**"
-      - "kyiv-air-alerts-grafana/scripts/build_time_of_day_heatmap.py"
-      - "kyiv-air-alerts-grafana/data/dashboard_data.json"
-      - "kyiv-air-alerts-grafana/data/alerts_combined.json"
-      - "kyiv-air-alerts-grafana/data/ukrainealarm_bridge.json"
-      - "kyiv-air-alerts-grafana/data/sevastopol_events.json"
-      - "kyiv-air-alerts-grafana/data/alerts_in_ua_bridge_*.csv.gz.b64"
-      - "kyiv-air-alerts-grafana/data/alerts_in_ua_bridge_*.meta.json"
-      - ".github/workflows/netlify-production.yml"
 
 concurrency:
   group: netlify-production-site
