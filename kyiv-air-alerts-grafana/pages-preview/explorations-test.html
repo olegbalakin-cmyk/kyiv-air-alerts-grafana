@@ -38,7 +38,13 @@
     .calendar-legend{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:12px;font-size:11px;color:#9ba9b5}
     .legend-swatch{width:14px;height:14px;border-radius:3px;display:inline-block;vertical-align:middle;margin-right:3px}
     .empty-state{display:flex;align-items:center;justify-content:center;height:260px;color:#8e9aa5}
-    @media(max-width:980px){.lab-grid{grid-template-columns:1fr}.lab-card.wide{grid-column:auto}.lab-header{flex-direction:column}.scope-note{margin-left:0}.lab-chart,.lab-card.wide .lab-chart{height:330px}}
+    .daily-profile-section{margin-top:28px}
+    .daily-profile-heading{display:flex;justify-content:space-between;gap:18px;align-items:flex-end;margin-bottom:14px}
+    .daily-profile-heading h2{margin:3px 0 6px}
+    .profile-card-heading{display:flex;justify-content:space-between;gap:16px;align-items:flex-start}
+    .profile-slot-control{min-width:145px;width:145px;flex:0 0 145px}
+    .profile-meta{font-size:12px;color:#9ba9b5;line-height:1.45;margin:2px 0 8px}
+    @media(max-width:980px){.lab-grid{grid-template-columns:1fr}.lab-card.wide{grid-column:auto}.lab-header{flex-direction:column}.scope-note{margin-left:0}.lab-chart,.lab-card.wide .lab-chart{height:330px}.daily-profile-heading,.profile-card-heading{flex-direction:column;align-items:stretch}.profile-slot-control{width:100%;min-width:100%;flex-basis:auto}}
     @media(max-width:620px){.lab-shell{padding:24px 14px 42px}.lab-controls .control{width:100%;min-width:100%}.lab-chart,.lab-card.wide .lab-chart{height:300px}}
   </style>
 </head>
@@ -111,9 +117,9 @@
       <article class="panel lab-card wide">
         <div class="idea-tag">Ідея 4 · скільки було важких днів</div>
         <h2>Розподіл днів за часом під тривогою</h2>
-        <p class="chart-subtitle">Кожен місяць розкладено на кількість днів без тривоги, до 1 год, 1–3, 3–6, 6–12 та 12+ годин під тривогою.</p>
+        <p class="chart-subtitle">100% кожного місяця розкладено за часткою днів без тривоги, до 1 год, 1–3, 3–6, 6–12 та 12+ годин під тривогою.</p>
         <div class="chart-wrap lab-chart"><canvas id="heavyDaysChart"></canvas></div>
-        <p class="lab-note">Перекладає абстрактне «3,2 год/добу» у зрозуміле питання: скільки днів місяця реально були важкими.</p>
+        <p class="lab-note">Нормалізація прибирає різницю між 28/30/31 днями та дозволяє коректно порівнювати неповний поточний місяць. У tooltip лишається абсолютне число днів.</p>
       </article>
 
       <article class="panel lab-card">
@@ -124,13 +130,47 @@
         <p class="lab-note">Дозволяє бачити не лише інтенсивність атак, а й те, чи зникають довгі періоди повної тиші.</p>
       </article>
 
-      <article class="panel lab-card">
-        <div class="idea-tag">Ідея 6 · день / ніч</div>
-        <h2>Коли припадав реальний час під тривогою</h2>
-        <p class="chart-subtitle">100% часу під тривогою в кожному місяці розкладено на 00–06, 06–12, 12–18 та 18–24 за Europe/Kyiv.</p>
-        <div class="chart-wrap lab-chart"><canvas id="daypartChart"></canvas></div>
-        <p class="lab-note">На відміну від нормалізованого добового профілю на основному сайті, тут показана реальна частка всього часу під тривогою.</p>
-      </article>
+    </section>
+
+    <section class="daily-profile-section">
+      <div class="daily-profile-heading">
+        <div>
+          <div class="eyebrow">Добовий профіль</div>
+          <h2>Як тривоги розподіляються протягом доби</h2>
+          <p class="subtitle">Два взаємодоповнювальні погляди: нормалізована форма профілю та реальний внесок великих частин доби у весь час під тривогою.</p>
+        </div>
+      </div>
+
+      <section class="lab-grid">
+        <article class="panel lab-card">
+          <div class="profile-card-heading">
+            <div>
+              <div class="idea-tag">Контекст · добовий профіль</div>
+              <h2>Добовий профіль тривог</h2>
+              <p class="chart-subtitle">Кожен часовий слот показує фактичну частку часу під тривогою, нормалізовану до найактивнішого слота = 100%.</p>
+            </div>
+            <div class="control profile-slot-control">
+              <label for="profileSlotMinutes">Інтервал</label>
+              <select id="profileSlotMinutes">
+                <option value="15">15 хв</option>
+                <option value="30">30 хв</option>
+                <option value="60">1 година</option>
+              </select>
+            </div>
+          </div>
+          <div id="timeProfileMeta" class="profile-meta"></div>
+          <div class="chart-wrap lab-chart"><canvas id="timeProfileChart"></canvas></div>
+          <p class="lab-note">Зміна ширини слота дає змогу перевірити, чи зберігається форма патерну при меншій часовій деталізації.</p>
+        </article>
+
+        <article class="panel lab-card">
+          <div class="idea-tag">Ідея 6 · частини доби</div>
+          <h2>Розподіл часу під тривогою за частинами доби</h2>
+          <p class="chart-subtitle">100% фактичного часу під тривогою в кожному місяці розкладено на 00–06, 06–12, 12–18 та 18–24 за Europe/Kyiv.</p>
+          <div class="chart-wrap lab-chart"><canvas id="daypartChart"></canvas></div>
+          <p class="lab-note">Цей графік відповідає не на питання «де пік профілю», а на питання «яка частина всього часу під тривогою припала на кожну частину доби».</p>
+        </article>
+      </section>
     </section>
   </main>
 
@@ -333,12 +373,34 @@
       const opts=chartBase();
       opts.scales.x.stacked=true;
       opts.scales.y.stacked=true;
-      opts.scales.y.title={display:true,text:"Днів",color:text};
+      opts.scales.y.min=0;
+      opts.scales.y.max=100;
+      opts.scales.y.ticks.callback=v=>v+"%";
+      opts.scales.y.title={display:true,text:"Частка днів у місяці",color:text};
+      opts.plugins.tooltip={
+        mode:"index",
+        intersect:false,
+        callbacks:{
+          title:items=>items.length?fullMonthLabel(rows[items[0].dataIndex].month):"",
+          label:ctx=>{
+            const i=ctx.dataIndex;
+            const count=ctx.dataset.dayCounts?.[i]||0;
+            const total=ctx.dataset.coveredDays?.[i]||0;
+            return " "+ctx.dataset.label+": "+fmt(ctx.parsed.y,1)+"% · "+count+" із "+total+" днів";
+          }
+        }
+      };
       charts.heavyDaysChart=new Chart($("heavyDaysChart"),{
         type:"bar",
         data:{labels,datasets:keys.map(([key,label],i)=>({
           label,
-          data:rows.map(r=>Number(r.burden_day_counts?.[key]||0)),
+          data:rows.map(r=>{
+            const total=Number(r.days_covered)||0;
+            const count=Number(r.burden_day_counts?.[key]||0);
+            return total>0?count/total*100:0;
+          }),
+          dayCounts:rows.map(r=>Number(r.burden_day_counts?.[key]||0)),
+          coveredDays:rows.map(r=>Number(r.days_covered)||0),
           backgroundColor:colors[i%colors.length]+"bb",
           borderWidth:0,
           stack:"days"
@@ -375,6 +437,64 @@
             x:{ticks:{color:text,maxRotation:0,autoSkip:true},grid:{color:grid}},
             yAlert:{position:"left",beginAtZero:true,ticks:{color:text,callback:v=>v+" год"},grid:{color:grid},title:{display:true,text:"Найдовша тривога, год",color:text}},
             yQuiet:{position:"right",beginAtZero:true,ticks:{color:text,callback:v=>v+" д"},grid:{drawOnChartArea:false},title:{display:true,text:"Найдовша тиша, діб",color:text}}
+          }
+        }
+      });
+    }
+
+    function renderTimeProfile(city,year){
+      destroyChart("timeProfileChart");
+      const slot=String($("profileSlotMinutes")?.value||"15");
+      const profile=city?.time_profiles?.[year]?.[slot];
+      const slots=profile?.slots||[];
+      if(!slots.length){
+        $("timeProfileMeta").textContent="Немає даних для цього профілю.";
+        return;
+      }
+
+      $("timeProfileMeta").textContent=
+        profile.range_start+" — "+profile.range_end+
+        " · пік "+(profile.peak_slot||"—")+
+        " · "+fmt(profile.peak_alert_share_pct,1)+"% фактичного часу у піковому слоті";
+
+      charts.timeProfileChart=new Chart($("timeProfileChart"),{
+        type:"line",
+        data:{
+          labels:slots.map(s=>s.start),
+          datasets:[{
+            label:"Відносна інтенсивність",
+            data:slots.map(s=>Number(s.relative_intensity)||0),
+            alertShares:slots.map(s=>Number(s.alert_share_pct)||0),
+            slotLabels:slots.map(s=>s.label),
+            borderColor:colors[5],
+            backgroundColor:colors[5]+"18",
+            pointRadius:0,
+            pointHoverRadius:3,
+            borderWidth:2,
+            tension:.15,
+            fill:false
+          }]
+        },
+        options:{
+          responsive:true,
+          maintainAspectRatio:false,
+          animation:false,
+          interaction:{mode:"index",intersect:false},
+          plugins:{
+            legend:{display:false},
+            tooltip:{
+              callbacks:{
+                title:items=>{
+                  if(!items.length) return "";
+                  return items[0].dataset.slotLabels?.[items[0].dataIndex]||items[0].label;
+                },
+                label:ctx=>" "+fmt(ctx.parsed.y,0)+"% від піку · фактично "+fmt(ctx.dataset.alertShares?.[ctx.dataIndex],1)+"% часу"
+              }
+            }
+          },
+          scales:{
+            x:{ticks:{color:text,maxRotation:0,autoSkip:true,maxTicksLimit:12},grid:{color:grid},title:{display:true,text:"Час доби",color:text}},
+            y:{min:0,max:100,ticks:{color:text,callback:v=>v+"%"},grid:{color:grid},title:{display:true,text:"Відносна інтенсивність",color:text}}
           }
         }
       });
@@ -418,6 +538,7 @@
       renderPercentiles(monthly);
       renderHeavyDays(monthly);
       renderExtremes(monthly);
+      renderTimeProfile(city,year);
       renderDayparts(monthly);
     }
 
@@ -429,6 +550,7 @@
       fillYears();
       $("labCity").addEventListener("change",()=>{fillYears();render();});
       $("labYear").addEventListener("change",render);
+      $("profileSlotMinutes").addEventListener("change",render);
       render();
     }
 

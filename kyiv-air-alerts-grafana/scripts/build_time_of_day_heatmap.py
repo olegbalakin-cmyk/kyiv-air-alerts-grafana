@@ -456,6 +456,63 @@ def exploration_days(start_day: date, end_day: date):
         current += timedelta(days=1)
 
 
+def aggregate_exploration_profile(profile_15: dict, slot_minutes: int) -> dict:
+    if slot_minutes not in (15, 30, 60):
+        raise ValueError(f"Unsupported slot size: {slot_minutes}")
+    factor = slot_minutes // 15
+    source_slots = profile_15.get("slots", [])
+    aggregated = []
+
+    for start in range(0, len(source_slots), factor):
+        group = source_slots[start:start + factor]
+        if len(group) != factor:
+            continue
+        alert_minutes = sum(float(slot.get("alert_minutes") or 0.0) for slot in group)
+        possible_minutes = sum(float(slot.get("possible_minutes") or 0.0) for slot in group)
+        share = alert_minutes / possible_minutes * 100.0 if possible_minutes > 0 else 0.0
+
+        start_total = start * 15
+        end_total = (start_total + slot_minutes) % (24 * 60)
+        sh, sm = divmod(start_total, 60)
+        eh, em = divmod(end_total, 60)
+        start_label = f"{sh:02d}:{sm:02d}"
+        end_label = f"{eh:02d}:{em:02d}"
+
+        aggregated.append({
+            "index": len(aggregated),
+            "start": start_label,
+            "label": f"{start_label}–{end_label}",
+            "alert_share_pct": round(share, 3),
+            "relative_intensity": 0.0,
+            "alert_minutes": round(alert_minutes, 2),
+            "possible_minutes": round(possible_minutes, 2),
+        })
+
+    peak = max((slot["alert_share_pct"] for slot in aggregated), default=0.0)
+    for slot in aggregated:
+        slot["relative_intensity"] = round(
+            (slot["alert_share_pct"] / peak * 100.0) if peak > 0 else 0.0,
+            2,
+        )
+
+    peak_slot = None
+    if peak > 0:
+        peak_slot = next(
+            (slot["label"] for slot in aggregated if slot["alert_share_pct"] == peak),
+            None,
+        )
+
+    return {
+        "range_start": profile_15.get("range_start"),
+        "range_end": profile_15.get("range_end"),
+        "days": profile_15.get("days"),
+        "slot_minutes": slot_minutes,
+        "peak_slot": peak_slot,
+        "peak_alert_share_pct": round(peak, 3),
+        "slots": aggregated,
+    }
+
+
 def build_exploration_city(
     alerts: list[Alert],
     coverage_day: date,
@@ -626,6 +683,19 @@ def build_exploration_city(
         month_cursor = next_month
 
     years = sorted({row["date"][:4] for row in daily_rows})
+    time_profiles = {}
+    for year in years:
+        year_start = max(coverage_day, date(int(year), 1, 1))
+        year_end = min(end_day, date(int(year), 12, 31))
+        if year_start > year_end:
+            continue
+        profile_15 = period_heatmap(alerts, year_start, year_end, None)
+        time_profiles[year] = {
+            "15": aggregate_exploration_profile(profile_15, 15),
+            "30": aggregate_exploration_profile(profile_15, 30),
+            "60": aggregate_exploration_profile(profile_15, 60),
+        }
+
     return {
         "label": label,
         "source_type": source_type,
@@ -634,6 +704,7 @@ def build_exploration_city(
         "years": years,
         "daily": daily_rows,
         "monthly": monthly_rows,
+        "time_profiles": time_profiles,
     }
 
 
@@ -672,12 +743,16 @@ def build_exploration_payload(
                 "longest_alert_and_quiet_gap",
                 "daypart_share",
             ],
+            "supporting_views": [
+                "time_of_day_profile_15_30_60",
+            ],
             "notes": {
                 "alert_counts": "Alert counts are assigned to the local calendar day/month in which the alert starts.",
                 "daily_time": "Alert time is split at local calendar boundaries.",
                 "duration_distribution": "Duration percentiles use full durations of alerts that start in the month.",
                 "quiet_gap": "Longest quiet gap is measured within the covered part of each calendar month, including month-boundary-to-first-alert and last-alert-to-month-boundary gaps.",
                 "dayparts": "Alert time is split into Europe/Kyiv local-time bands 00-06, 06-12, 12-18, and 18-24.",
+                "time_profile": "Time-of-day profiles are normalized separately for 15-, 30-, and 60-minute local-time slots.",
             },
         },
         "cities": cities,
