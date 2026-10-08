@@ -13,11 +13,12 @@ permissions:
   contents: write
 
 concurrency:
-  group: kyiv-historical-discovery-calibration-pilot-fast-2026-10-08
+  group: kyiv-historical-discovery-calibration-pilot-2026-10-08
   cancel-in-progress: true
 
 jobs:
   pilot:
+    if: ${{ false }}
     runs-on: ubuntu-24.04
     timeout-minutes: 330
     env:
