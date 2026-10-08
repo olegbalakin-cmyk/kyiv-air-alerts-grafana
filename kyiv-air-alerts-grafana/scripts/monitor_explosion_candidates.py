@@ -513,11 +513,12 @@ def poll_cached_bridge(
 def poll_alerts(
     kyiv_alerts_path: Path = KYIV_ALERTS_FILE,
     sevastopol_events_path: Path = SEVASTOPOL_EVENTS_FILE,
+    bridge_path: Path = BRIDGE_FILE,
 ) -> tuple[dict[str, list[dict]], dict[str, str]]:
     token = os.getenv(ua.TOKEN_ENV, "").strip()
     if not token:
         raise RuntimeError(f"{ua.TOKEN_ENV} is not configured")
-    bridge = load_json(BRIDGE_FILE, {})
+    bridge = load_json(bridge_path, {})
     regions = bridge.get("regions") or {}
     client = ua.UkraineAlarmClient(token)
     out: dict[str, list[dict]] = {}
@@ -4997,6 +4998,7 @@ def main() -> None:
         polled, errors = poll_alerts(
             Path(args.kyiv_alerts_file),
             Path(args.sevastopol_events_file),
+            Path(args.bridge_file),
         )
         mode = "network"
     new_episodes = process_events(state, polled, errors, started)
