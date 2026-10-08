@@ -1,0 +1,20 @@
+name: Unit A frozen context probe
+
+on:
+  push:
+    branches:
+      - attack-event-unit-a-bounded-classification-replay-2026-10-08
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    if: ${{ !contains(github.event.head_commit.message, '[unit-a-context-probe-output]') }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Run frozen-context probe
+        run: python .github/proof/attack_event_unit_a_context_probe.py
