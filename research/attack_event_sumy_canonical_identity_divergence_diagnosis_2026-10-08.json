@@ -1,0 +1,337 @@
+{
+  "diagnosis": "SUMY CANONICAL ALERT-EPISODE IDENTITY DIVERGENCE",
+  "schema_version": 1,
+  "generated_at": "2026-10-08",
+  "scope": {
+    "role": "READ-ONLY SINGLE-CITY CANONICAL-IDENTITY DIAGNOSTIC",
+    "target_city": "sumy",
+    "target_episode_id": "0a2cbd1d1b7f670386b26eab",
+    "comparison_episode_id": "746b99dbcaf8659120b2a3d9",
+    "repairs_implemented": false,
+    "classifier_semantics_changed": false,
+    "discovery_changed": false,
+    "live_historical_eligibility_changed": false,
+    "followup_orchestration_changed": false,
+    "classification_persistence_semantics_changed": false,
+    "historical_backfill_started": false,
+    "neon_writes": 0
+  },
+  "accepted_predecessor": {
+    "verdict": "LIVE DUE-EPISODE ORCHESTRATION = PROVEN",
+    "commit": "51adc76b715669e46e8c2c936906022d4d96ed44",
+    "monitor_blob": "a94c7f7b24dda226561b9651047122c5ca9363a8"
+  },
+  "target": {
+    "key": "sumy:0a2cbd1d1b7f670386b26eab",
+    "live_identity": {
+      "city_key": "sumy",
+      "episode_id": "0a2cbd1d1b7f670386b26eab",
+      "start_at": "2026-10-07T19:10:55.805260Z",
+      "end_at": "2026-10-07T19:59:32.932823Z",
+      "alert_source": "ukrainealarm_regionHistory",
+      "ingestion_family": "UkraineAlarm raion-proxy",
+      "region_id": "114",
+      "api_region_name": "Сумський район",
+      "alert_type": "AIR",
+      "upstream_native_alarm_id": null,
+      "upstream_native_alarm_id_note": "The UkraineAlarm regionHistory adapter retains regionId, alertType, startDate and endDate but does not retain a per-alarm native identifier.",
+      "raw_alert_start": "2026-10-07T19:10:55.805260Z",
+      "raw_alert_end": "2026-10-07T19:59:32.932823Z",
+      "episode_id_generation": {
+        "algorithm": "sha256(f'{city_key}|{start_iso_utc}|{end_iso_utc}')[:24]",
+        "inputs": [
+          "sumy",
+          "2026-10-07T19:10:55.805260Z",
+          "2026-10-07T19:59:32.932823Z"
+        ]
+      },
+      "source_event_sequence_used_by_live_episode": [
+        {
+          "region_id": "114",
+          "api_region_name": "Сумський район",
+          "alert_type": "AIR",
+          "start": "2026-10-07T19:10:55.805260Z",
+          "end": "2026-10-07T19:59:32.932823Z"
+        }
+      ],
+      "adjacent_overlapping_raw_observations": [
+        {
+          "live_episode_id": "e9bb95e0dcdcfa7b45bbf1bc",
+          "start": "2026-10-07T17:49:34.073014Z",
+          "end": "2026-10-07T19:11:30.034575Z"
+        },
+        {
+          "live_episode_id": "940f568ecd11d47800caeac3",
+          "start": "2026-10-07T19:17:34.603290Z",
+          "end": "2026-10-07T19:58:56.491722Z"
+        }
+      ]
+    },
+    "expected_canonical_parent_key": {
+      "city_key": "sumy",
+      "historical_episode_id": "0a2cbd1d1b7f670386b26eab",
+      "start_at": "2026-10-07T19:10:55.805260Z",
+      "end_at": "2026-10-07T19:59:32.932823Z",
+      "joined": "sumy|0a2cbd1d1b7f670386b26eab|2026-10-07T19:10:55.805260Z|2026-10-07T19:59:32.932823Z"
+    },
+    "neon_readback": {
+      "project_id": "green-cake-44216048",
+      "branch_id": "br-bold-mode-b5rub8pq",
+      "branch_name": "lviv-phase1-production-shadow-2026-09-28",
+      "queries_read_only": true,
+      "exact_full_expected_key_matches": 0,
+      "exact_live_episode_id_matches": 0,
+      "exact_sumy_start_end_matches": 0,
+      "overlapping_sumy_rows": 3,
+      "equivalent_canonical_parent_found": true
+    },
+    "equivalent_canonical_parent": {
+      "episode_uid": "88068658-ae02-4ffb-97f8-7beb6b3d0c98",
+      "city_key": "sumy",
+      "historical_episode_id": "07ba1a638e3a08c341856db7",
+      "start_at": "2026-10-07T17:49:34.073014Z",
+      "end_at": "2026-10-07T19:59:32.932823Z",
+      "alert_type": "AIR",
+      "episode_state": "closed",
+      "canonicalization_version": "alert-canonicalization-v1",
+      "source_mapping": {
+        "family": "UkraineAlarm raion-proxy",
+        "target": "Сумський район",
+        "region_id": "114",
+        "note": "The canonical parent row has no alert_episode_sources rows because this multicity canonical shadow records parent episodes with partial source provenance. Region mapping is established by the same-run Sumy proxy producer."
+      },
+      "created_by_run_id": "2cdb176b-91ca-4e23-8304-ab763589f7b3",
+      "created_at": "2026-10-08T01:02:54.020535Z",
+      "provenance": {
+        "run_kind": "multicity_canonical_shadow",
+        "workflow_name": "Update Ukraine air-alert production data",
+        "workflow_sha": "ab63ff79d1778448e64d8a7afdcc0892cb2c30f6",
+        "input_ref": "site-prod",
+        "input_sha": "bf8bfda8c7daaf56ae89249dc19b0841ca41be7f",
+        "github_run_id": 37708810081,
+        "same_run_payload": true,
+        "source_provenance_coverage": "partial"
+      },
+      "same_real_world_continuous_alert": true,
+      "construction": "Canonical raion-proxy production calls union_alerts over historical proxy + Alerts.in.ua seam + UkraineAlarm API inputs before record_city_alerts. Overlapping intervals are merged into one continuous episode."
+    },
+    "plausible_canonical_rows": [
+      {
+        "episode_uid": "541b59ce-6b6e-41a7-83c7-25fd6211f3ca",
+        "historical_episode_id": "e9bb95e0dcdcfa7b45bbf1bc",
+        "start_at": "2026-10-07T17:49:34.073014Z",
+        "end_at": "2026-10-07T19:11:30.034575Z",
+        "provenance_run_kind": "live_parent_ordering_sync",
+        "relation_to_target": "overlaps target; raw-row live parent, not the canonical merged representation"
+      },
+      {
+        "episode_uid": "88068658-ae02-4ffb-97f8-7beb6b3d0c98",
+        "historical_episode_id": "07ba1a638e3a08c341856db7",
+        "start_at": "2026-10-07T17:49:34.073014Z",
+        "end_at": "2026-10-07T19:59:32.932823Z",
+        "provenance_run_kind": "multicity_canonical_shadow",
+        "relation_to_target": "equivalent canonical continuous-alert parent"
+      },
+      {
+        "episode_uid": "20e454a8-9723-489f-856d-603d95171e3f",
+        "historical_episode_id": "940f568ecd11d47800caeac3",
+        "start_at": "2026-10-07T19:17:34.603290Z",
+        "end_at": "2026-10-07T19:58:56.491722Z",
+        "provenance_run_kind": "live_parent_ordering_sync",
+        "relation_to_target": "nested overlapping raw-row live parent, not the canonical merged representation"
+      }
+    ],
+    "field_by_field_diff": {
+      "city_key": {
+        "live": "sumy",
+        "canonical": "sumy",
+        "differs": false
+      },
+      "episode_id": {
+        "live": "0a2cbd1d1b7f670386b26eab",
+        "canonical": "07ba1a638e3a08c341856db7",
+        "differs": true
+      },
+      "start_at": {
+        "live": "2026-10-07T19:10:55.805260Z",
+        "canonical": "2026-10-07T17:49:34.073014Z",
+        "differs": true
+      },
+      "end_at": {
+        "live": "2026-10-07T19:59:32.932823Z",
+        "canonical": "2026-10-07T19:59:32.932823Z",
+        "differs": false
+      },
+      "source_mapping": {
+        "live": "UkraineAlarm raion-proxy region 114 / Сумський район",
+        "canonical": "UkraineAlarm raion-proxy region 114 / Сумський район",
+        "differs": false
+      },
+      "upstream_identifiers": {
+        "live": "region_id=114; per-alarm native ID not retained",
+        "canonical": "region_id=114 at producer stage; per-parent source observation not persisted",
+        "differs": false,
+        "storage_note": "Storage completeness differs, but no mapping divergence is evidenced."
+      }
+    }
+  },
+  "identity_trace": [
+    {
+      "stage": "UkraineAlarm raw observations",
+      "live_identity": [
+        "sumy",
+        "region=114",
+        "AIR",
+        "2026-10-07T19:10:55.805260Z",
+        "2026-10-07T19:59:32.932823Z"
+      ],
+      "canonical_path_identity": [
+        "sumy",
+        "region=114",
+        "AIR",
+        "raw observations including 17:49:34.073014-19:11:30.034575, 19:10:55.805260-19:59:32.932823, 19:17:34.603290-19:58:56.491722"
+      ],
+      "paths_agree_through_stage": true
+    },
+    {
+      "stage": "raion-proxy normalization",
+      "live_identity": [
+        "sumy",
+        "region=114",
+        "Сумський район",
+        "AIR"
+      ],
+      "canonical_path_identity": [
+        "sumy",
+        "region=114",
+        "Сумський район",
+        "AIR"
+      ],
+      "paths_agree_through_stage": true
+    },
+    {
+      "stage": "logical episode grouping",
+      "live_identity": [
+        "sumy",
+        "2026-10-07T19:10:55.805260Z",
+        "2026-10-07T19:59:32.932823Z",
+        "single raw regionHistory row"
+      ],
+      "canonical_path_identity": [
+        "sumy",
+        "2026-10-07T17:49:34.073014Z",
+        "2026-10-07T19:59:32.932823Z",
+        "union of overlapping intervals"
+      ],
+      "paths_agree_through_stage": false,
+      "first_divergence": true
+    },
+    {
+      "stage": "episode_id generation",
+      "live_identity": "0a2cbd1d1b7f670386b26eab",
+      "canonical_path_identity": "07ba1a638e3a08c341856db7",
+      "paths_agree_through_stage": false,
+      "note": "Hash algorithms are consistent; IDs differ because grouping produced different start boundaries."
+    },
+    {
+      "stage": "monitor state",
+      "live_identity": "0a2cbd1d1b7f670386b26eab retained as its own completed episode",
+      "canonical_path_identity": "not a state-reconstruction divergence",
+      "paths_agree_through_stage": false
+    },
+    {
+      "stage": "canonical alert_episodes construction",
+      "live_expected_identity": "sumy|0a2cbd1d1b7f670386b26eab|2026-10-07T19:10:55.805260Z|2026-10-07T19:59:32.932823Z",
+      "canonical_identity": "sumy|07ba1a638e3a08c341856db7|2026-10-07T17:49:34.073014Z|2026-10-07T19:59:32.932823Z",
+      "paths_agree_through_stage": false
+    },
+    {
+      "stage": "exact parent lookup",
+      "exact_match_count": 0,
+      "overlap_conflict_count": 3,
+      "result": "SEPARATE_CANONICAL_IDENTITY_BLOCKER",
+      "note": "The lookup correctly failed closed; it did not create the divergence."
+    }
+  ],
+  "mechanism_tests": {
+    "boundary_divergence": {
+      "result": true,
+      "mechanism": "alert continuation/merge / overlapping raw regionHistory intervals",
+      "delayed_clear": false,
+      "duplicate_start_end": false,
+      "polling_gap": false,
+      "restart": false,
+      "split_episode": true,
+      "stale_state": false,
+      "explanation": "Live treats overlapping raw rows as separate episodes; canonical production merges them into one continuous interval."
+    },
+    "deterministic_episode_id_divergence": {
+      "result": false,
+      "explanation": "Given identical city/start/end, both live event_id and canonical legacy_episode_id use the same UTC-normalized SHA-256 first-24-hex algorithm. The observed IDs differ only because boundaries differ."
+    },
+    "raion_proxy_mapping_divergence": {
+      "result": false,
+      "explanation": "Both paths map Sumy to UkraineAlarm region 114, Сумський район."
+    },
+    "timestamp_representation_divergence": {
+      "result": false,
+      "checks": {
+        "timezone": "UTC on both paths",
+        "fractional_seconds": "microseconds preserved",
+        "serialization": "ISO-8601 with Z after UTC normalization",
+        "truncation_rounding_altered_identity": false
+      }
+    },
+    "restart_state_divergence": {
+      "result": false,
+      "explanation": "The live episode identity is derived deterministically from the raw current regionHistory interval; process_events preserves that ID and does not reconstruct or merge boundaries on restart."
+    }
+  },
+  "comparison_case": {
+    "key": "sumy:746b99dbcaf8659120b2a3d9",
+    "live_interval": {
+      "start_at": "2026-10-07T13:53:42.927864Z",
+      "end_at": "2026-10-07T15:36:22.509548Z"
+    },
+    "overlapping_raw_interval": {
+      "episode_id": "26ad841dcbf1c54b9f5c631f",
+      "start_at": "2026-10-07T14:53:53.419010Z",
+      "end_at": "2026-10-07T15:37:18.811372Z"
+    },
+    "canonical_merged_parent": {
+      "episode_uid": "2220084c-f82c-47d8-960c-a484ddafe5f3",
+      "historical_episode_id": "6994e2498f98caad7c5b35ea",
+      "start_at": "2026-10-07T13:53:42.927864Z",
+      "end_at": "2026-10-07T15:37:18.811372Z",
+      "run_kind": "multicity_canonical_shadow",
+      "workflow_sha": "ab63ff79d1778448e64d8a7afdcc0892cb2c30f6",
+      "github_run_id": 37708810081
+    },
+    "first_divergence_stage": "logical episode grouping",
+    "same_root_cause": true
+  },
+  "root_cause": {
+    "first_divergence_stage": "logical episode grouping",
+    "primary": "The shared live UkraineAlarm monitor materializes each completed regionHistory AIR row as an independent logical episode before hashing, while the canonical raion-proxy production path unions overlapping intervals before canonical parent construction. For this Sumy sequence, canonical unioning moves the episode start from 19:10:55.805260Z back to 17:49:34.073014Z, producing a different deterministic episode ID.",
+    "verdict": "SUMY CANONICAL IDENTITY DIVERGENCE = EPISODE-BOUNDARY BUG"
+  },
+  "repair_scope": {
+    "recommendation": "REPAIR LOGICAL EPISODE BOUNDARY RECONSTRUCTION",
+    "implement_now": false,
+    "structural_scope": "raion-proxy family",
+    "structural_reasoning": "The diagnosed mechanism is present in the UkraineAlarm raion-proxy path: raw overlapping regionHistory intervals are separately materialized live while the canonical proxy producer unions them. No 23-city data audit was performed.",
+    "overlap_fuzzy_lookup_unsafe": true,
+    "overlap_fuzzy_lookup_reason": "The target interval overlaps multiple non-identical rows. Binding by overlap would hide the grouping mismatch and can attach a classification to the wrong logical alert episode."
+  },
+  "mutation_confirmation": {
+    "neon_writes": 0,
+    "source_code_changes": 0,
+    "config_changes": 0,
+    "workflow_changes": 0,
+    "production_data_changes": 0,
+    "classifier_changes": 0,
+    "discovery_changes": 0,
+    "backfill_started": false,
+    "repository_mutation": "requested diagnosis artifact only"
+  }
+}
