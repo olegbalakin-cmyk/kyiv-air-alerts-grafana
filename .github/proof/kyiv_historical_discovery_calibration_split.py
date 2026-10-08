@@ -112,10 +112,17 @@ def main() -> int:
         if key in by_key:
             evidence_link_counts[key] += 1
 
+    # Accepted 57 safety controls are the frozen PRE_CUTOFF_REVIEW cohort
+    # established by kyiv_review_transferability_audit.py: evidence-backed
+    # NEEDS_REVIEW rows with alert date <= 2025-02-12. In this snapshot all
+    # 266 Kyiv NEEDS_REVIEW rows have retained source links; the historical
+    # cutoff is what distinguishes the accepted 57 controls from the later
+    # 209 review-transfer cases.
     holds = [
         r for r in kyiv
         if str(r.get("verdict")) == "NEEDS_REVIEW"
         and evidence_link_counts[str(r.get("classification_key") or "")] > 0
+        and str(r.get("alert_start_utc_microseconds") or "")[:10] <= "2025-02-12"
     ]
     if len(holds) != EXPECTED_HOLDS:
         raise RuntimeError(f"EVIDENCE_BACKED_HOLD_COUNT_MISMATCH:{len(holds)}")
@@ -184,7 +191,7 @@ def main() -> int:
             "sensitivity": dist["SENSITIVITY_EVENT_POSITIVE"],
             "positive_total": len(pos),
             "evidence_backed_holds": len(holds),
-            "hold_definition": "frozen NEEDS_REVIEW classification with >=1 frozen source_link; source-link content is never projected into discovery",
+            "hold_definition": "accepted PRE_CUTOFF_REVIEW cohort: frozen NEEDS_REVIEW with retained evidence and alert date <= 2025-02-12, matching the accepted 57-control transferability audit; source-link content is never projected into discovery",
         },
         "split_method": {
             "name": "deterministic_evenly_spaced_time_systematic_v1",
