@@ -1,0 +1,127 @@
+{
+  "verdict": "CASUALTY REVIEW/PROMOTION PRODUCTION INTEGRATION = PROVEN",
+  "integration_branch": "casualty-review-promotion-production-integration-2026-10-08",
+  "integration_head_before_artifact_commit": "707ac59a5848cd68a0f1fcc8a501fe7ef23328cb",
+  "integration_base_site_prod_sha": "1b7214223e5d6539ae298c8da5903538b3bae25b",
+  "isolated_repair_commit": "6222ce2ca9837284ccf6759d1c2e81b3a33f6dc2",
+  "isolated_semantics_preserved": true,
+  "integrated_blobs": {
+    "update_casualties.py": "5cbcced1402be3d5707e8b1510186a98d150b2ff",
+    "review_casualty_candidates.py": "57c67af1ce108222c9a8dc0fefe34d67f9d0e23e",
+    "test_casualty_review_promotion.py": "8c09c60b6a9ee1067b1bb241435a1f26ed3e79bb",
+    "revisions.csv": "8c4674db505b5cccfcd240c6474f8e0e92919c80"
+  },
+  "authoritative_refs": {
+    "main_head_at_proof": "132ee33dae023a3653bb049f611f2e7f6b31165b",
+    "site_prod_head_at_proof": "1b7214223e5d6539ae298c8da5903538b3bae25b",
+    "multicity_wip_head_at_proof": "d714858a77daa3e1073f5317ad0c05a582deafad",
+    "workflow_blobs": {
+      "casualty_monitor": "bc5585b53a88e76df0a53040655cb4ab66ea7f43",
+      "production_update": "c34eda91540cd144142b58058012def45a0d6271",
+      "legacy_main_update": "92df71b25bda6cffa0d337c6ca75e05f4e01e096"
+    },
+    "multicity_review_queue_blob": "ef4772dcab812e46ef86123dc046a719c5def4f4",
+    "production_pre_repair_update_blob": "32c9f99b17a1d8da5f11d862b9825370366060ee"
+  },
+  "authoritative_lineage": {
+    "multicity_casualty_monitor": {
+      "workflow_branch": "main",
+      "workflow": ".github/workflows/casualty-monitor-wip.yml",
+      "checkout_branch": "multicity-wip-2026-09-16",
+      "queue": "kyiv-air-alerts-grafana/data/casualties/multicity_review_queue.json"
+    },
+    "casualty_monthly_aggregation": {
+      "workflow_branch": "main",
+      "workflow": ".github/workflows/update-netlify-site.yml",
+      "checkout_branch": "site-prod",
+      "script": "kyiv-air-alerts-grafana/scripts/update_casualties.py"
+    },
+    "dashboard_generation": {
+      "branch": "site-prod",
+      "file": "kyiv-air-alerts-grafana/data/dashboard_data.json",
+      "workflow": ".github/workflows/update-netlify-site.yml"
+    },
+    "publication": {
+      "workflow_branch": "main",
+      "workflow": ".github/workflows/update-netlify-site.yml",
+      "published_branch": "site-prod",
+      "commit_step": "Commit updated production data"
+    },
+    "secondary_legacy_main_grafana_workflow": ".github/workflows/update.yml"
+  },
+  "production_trace": [
+    "data/casualties/revisions.csv",
+    "scripts/update_casualties.py:load_revisions",
+    "baseline family: Kyiv baseline_monthly.csv / master_20cities_monthly_wide.csv / validated Odesa-Zaporizhzhia-Kherson city CSVs",
+    "scripts/update_casualties.py:build_monthly + apply_city_revision_overlay",
+    "data/dashboard_data.json:casualties + casualties_by_city",
+    ".github/workflows/update-netlify-site.yml:configure_full_city_dashboard.py + add_casualty_panel.py",
+    ".github/workflows/update-netlify-site.yml:git push origin HEAD:site-prod"
+  ],
+  "production_aggregation_consumes_revisions_ledger": true,
+  "scheduled_workflow_can_auto_confirm_candidate": false,
+  "scheduled_auto_confirm_hits": [],
+  "real_queue": {
+    "records_audited": 772,
+    "status_counts": {
+      "needs_review": 772
+    },
+    "needs_review_records": 772,
+    "needs_review_with_source_url": 772,
+    "needs_review_with_review_disposition": 0,
+    "needs_review_with_approval_like_fields": 0,
+    "needs_review_records_producing_revisions": 0,
+    "source_blob": "ef4772dcab812e46ef86123dc046a719c5def4f4",
+    "read_only": true,
+    "real_candidate_status_changes": 0
+  },
+  "zero_ledger_regression": {
+    "cities_compared": 23,
+    "city_month_values_compared": 1288,
+    "mismatches": 0,
+    "before_month_hash": "b26ab76fac760ad39b296ab5a7924a2e8e13c18144d0da64aff6d6e4517a66cf",
+    "after_month_hash": "b26ab76fac760ad39b296ab5a7924a2e8e13c18144d0da64aff6d6e4517a66cf",
+    "noncasualty_payload_unchanged": true,
+    "dashboard_schema_regression": false,
+    "builder_stdout": "Updated casualty series: 56 Kyiv months, 0 confirmed revision records, 69 Kyiv review candidates"
+  },
+  "synthetic_confirmed_canary": {
+    "delta": 2,
+    "rerun_additional_delta": 0,
+    "revision_rows_after_first": 1,
+    "revision_rows_after_second": 1,
+    "unrelated_city_month_changes": 0
+  },
+  "duplicate_media_synthetic_canary": {
+    "delta_count": 1,
+    "monthly_increment": 2,
+    "provenance_preserved": true,
+    "rerun_additional_delta": 0
+  },
+  "historical_baseline_blobs": {
+    "kyiv": "52238c1e72bdba3b06fc0c0469d699f018d8e353",
+    "master_20city": "f3b7fdf6750e12d7b9af05ffd094bb47aa9ed801",
+    "odesa": "b51a2cd204b3a3c977025e7acd9311ba98e3a317",
+    "zaporizhzhia": "1b32d8808069b4499fda35b092fd56f51c64583f",
+    "kherson": "5520e34c5d0696a167ed0eea378a8648c8836c49"
+  },
+  "historical_baseline_blobs_on_integration_branch": {
+    "kyiv": "52238c1e72bdba3b06fc0c0469d699f018d8e353",
+    "master_20city": "f3b7fdf6750e12d7b9af05ffd094bb47aa9ed801",
+    "odesa": "b51a2cd204b3a3c977025e7acd9311ba98e3a317",
+    "zaporizhzhia": "1b32d8808069b4499fda35b092fd56f51c64583f",
+    "kherson": "5520e34c5d0696a167ed0eea378a8648c8836c49"
+  },
+  "historical_baseline_blobs_changed": false,
+  "production_dashboard_schema_regression": false,
+  "real_candidate_mutations": 0,
+  "real_revision_rows_before": 0,
+  "real_revision_rows_after": 0,
+  "real_revision_rows_added": 0,
+  "real_casualty_total_changes": 0,
+  "production_historical_total_changes": 0,
+  "historical_backfill_started": false,
+  "production_deployment_performed": false,
+  "remaining_blocker": "NONE; first real human confirmation remains intentionally not performed",
+  "mutation_confirmation": "ZERO REAL CANDIDATE/LEDGER/CASUALTY MUTATIONS; integration branch and temporary proof state only"
+}
