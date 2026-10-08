@@ -43,7 +43,7 @@ def evenly_spaced_indices(total: int, count: int) -> list[int]:
     return out
 
 def year_of(row: dict) -> str:
-    return str(row["alert_start_utc_microseconds"])[:4]
+    return str(row.get("alert_start") or row.get("alert_start_utc_microseconds") or "")[:4]
 
 def compact(row: dict, cohort: str, truth: str) -> dict:
     return {
