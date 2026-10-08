@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 from __future__ import annotations
 
+import argparse
 import json
 from pathlib import Path
 
@@ -26,7 +27,11 @@ def canonical_episode(city_key: str, alert) -> dict:
 
 
 def main() -> None:
-    bridge = json.loads(BRIDGE.read_text(encoding="utf-8"))
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--bridge-file", default=str(BRIDGE))
+    args = parser.parse_args()
+    bridge_path = Path(args.bridge_file)
+    bridge = json.loads(bridge_path.read_text(encoding="utf-8"))
     activation = json.loads(ACTIVATION.read_text(encoding="utf-8"))
     cutoff = monitor.parse_dt(activation["activation_cutoff_utc"])
     assert cutoff is not None
@@ -86,6 +91,8 @@ def main() -> None:
         "raion_proxy_cities": sorted(proxy_cfg),
         "city_count": len(proxy_cfg),
         "activation_cutoff": activation["activation_cutoff_utc"],
+        "bridge_file": str(bridge_path),
+        "bridge_last_successful_fetch_at": bridge.get("last_successful_fetch_at"),
         "logical_episodes_compared": compared,
         "exact_boundary_matches": exact_rows,
         "exact_episode_id_matches": exact_rows,
