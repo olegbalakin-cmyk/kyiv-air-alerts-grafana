@@ -67,6 +67,11 @@ jobs:
             exit 0
           fi
           changed="$(git diff --cached --name-only)"
-          test "$(printf '%s\n' "$changed" | wc -l)" -eq 2
+          while IFS= read -r file; do
+            case "$file" in
+              research/kyiv_historical_discovery_development_classifier_input_2026-10-08.json|research/kyiv_historical_discovery_development_classifier_replay_2026-10-08.json) ;;
+              *) echo "Unexpected staged path: $file"; exit 1 ;;
+            esac
+          done <<< "$changed"
           git commit -m "Record Kyiv development classifier replay"
           git push origin HEAD:kyiv-historical-development-classifier-replay-2026-10-08
