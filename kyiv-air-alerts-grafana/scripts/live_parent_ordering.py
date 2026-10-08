@@ -348,6 +348,8 @@ def select_post_cutoff_live_episodes(
     seen: set[tuple[str, str]] = set()
     for city_key, cstate in (state.get("cities") or {}).items():
         for episode in cstate.get("episodes") or []:
+            if episode.get("identity_superseded_by_episode_id"):
+                continue
             episode_id = str(episode.get("episode_id") or "")
             if not episode_id or not live_persistence_eligible(episode, cutoff=cutoff_utc):
                 continue
