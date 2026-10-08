@@ -132,14 +132,19 @@ class HTTP:
         self.s = requests.Session()
         self.s.headers.update({"User-Agent": UA, "Accept-Language":"uk,en;q=0.7"})
         self.stats = Counter()
+        self.cache = {}
 
     def get(self, url, *, timeout=HTTP_TIMEOUT):
+        if url in self.cache:
+            self.stats["cache_hits"] += 1
+            return self.cache[url]
         self.stats["requests"] += 1
         last = None
         for attempt in range(2):
             try:
                 r = self.s.get(url, timeout=timeout, allow_redirects=True)
                 r.raise_for_status()
+                self.cache[url] = r
                 return r
             except requests.RequestException as exc:
                 last = exc
@@ -416,6 +421,82 @@ def discover_via_google(http: HTTP, family, kind, handle, sanitized_ep):
     diagnostic["outside_fixed_source_set"] = sorted(set(outside))
     return list(found.values()), diagnostic
 
+
+def fixed_family_for_url(url):
+    ident = tg_identity(url)
+    if ident:
+        handle = ident[0].casefold()
+        for family, kind, configured in SOURCE_ORDER:
+            if kind == "telegram" and configured and handle == configured.casefold():
+                return family, "telegram", configured
+        return None
+    if host_of(url) in ALLOWED_FIXED_DOMAINS and "/kyiv/" in (urlparse(url).path.casefold() + "/"):
+        return "suspilne.media/kyiv", "web", "suspilne.media/kyiv"
+    return None
+
+def fixed_aggregate_query(start, end):
+    after = (start.astimezone(KYIV_TZ).date() - timedelta(days=1)).isoformat()
+    before = (end.astimezone(KYIV_TZ).date() + timedelta(days=1)).isoformat()
+    attack = " OR ".join(f'"{t}"' for t in QUERY_TERMS)
+    sites = [
+        "site:t.me/VA_Kyiv",
+        "site:t.me/KyivCityOfficial",
+        "site:t.me/vitaliy_klitschko",
+        "site:t.me/dsns_kyiv",
+        "site:t.me/kpszsu",
+        "site:t.me/suspilnenews",
+        "site:t.me/suspilne_kyiv",
+        "site:suspilne.media/kyiv",
+    ]
+    q = f'"Київ" ({attack}) (' + " OR ".join(sites) + f') after:{after} before:{before}'
+    return "https://news.google.com/rss/search?q=" + quote_plus(q) + "&hl=uk&gl=UA&ceid=UA:uk"
+
+def discover_fixed_aggregate(http, sanitized_ep):
+    start = parse_dt(sanitized_ep["alert_start"]) - timedelta(hours=6)
+    end = parse_dt(sanitized_ep["alert_end"]) + timedelta(hours=24)
+    query_url = fixed_aggregate_query(start, end)
+    diagnostic = {"query_url":query_url,"search_hits":0,"resolve_failures":[]}
+    per_family = {family:[] for family,_,_ in SOURCE_ORDER if family != "generic_search"}
+    try:
+        rss = http.get(query_url)
+        items = parse_google_rss(rss.content)
+    except Exception as exc:
+        diagnostic["technical_error"] = f"{type(exc).__name__}:{exc}"
+        return per_family, diagnostic
+    diagnostic["search_hits"] = len(items)
+    seen = set()
+    for item in items:
+        resolved, err = resolve_google_result(http, item)
+        if not resolved:
+            diagnostic["resolve_failures"].append({"link":item.get("link"),"reason":err})
+            continue
+        faminfo = fixed_family_for_url(resolved)
+        if not faminfo:
+            continue
+        family, kind, handle = faminfo
+        if kind == "telegram":
+            native, ferr = fetch_telegram_post(http, resolved, handle)
+        else:
+            native, ferr = extract_article(http, resolved)
+        if not native:
+            diagnostic["resolve_failures"].append({"link":resolved,"reason":ferr})
+            continue
+        if not native_in_window(native,start,end):
+            continue
+        combined = f'{native.get("title","")} {native.get("text","")}'
+        if not ATTACK_RE.search(combined) or not re.search(r"\bКи(їв|єв)", combined, re.I):
+            continue
+        row, meta = make_candidate(family, native, "fixed_source_aggregate_generic_attack_search", {
+            "query_family":"generic_attack_vocabulary",
+            "source_filter":"aggregate_fixed_source_set",
+        })
+        key=(family,row["candidate_id"])
+        if key in seen:
+            continue
+        seen.add(key)
+        per_family[family].append((row,meta))
+    return per_family, diagnostic
+
 def context_episodes(all_eps, target_ep):
     # Matching context is derived only from alert start/end, never from truth evidence.
     st = parse_dt(target_ep["alert_start"]) - timedelta(hours=12)
@@ -520,21 +601,37 @@ def primary_miss(source_diags, candidate_records, final):
 
 def run_one(mon, http, all_eps, ep):
     # ep is guaranteed sanitized: only episode_id/city_key/alert_start/alert_end.
-    per_source_candidates = {}
+    per_source_candidates = {family:[] for family,_,_ in SOURCE_ORDER}
     source_diags = {}
     all_candidates = {}
     outside = set()
-    for family, kind, handle in SOURCE_ORDER:
-        cands, diag = discover_via_google(http, family, kind, handle, ep)
+
+    # One date-bounded query spans the complete fixed source set; native URLs
+    # are then attributed back to the exact source family before fulltext fetch.
+    fixed_map, fixed_diag = discover_fixed_aggregate(http, ep)
+    for family, _, _ in SOURCE_ORDER:
+        if family == "generic_search":
+            continue
+        cands = fixed_map.get(family) or []
         per_source_candidates[family] = cands
-        source_diags[family] = diag
-        for u in diag.get("outside_fixed_source_set") or []:
-            outside.add(u)
+        source_diags[family] = {
+            **fixed_diag,
+            "aggregate_fixed_source_query": True,
+            "family_candidate_count": len(cands),
+        }
         for row, meta in cands:
-            # A native URL can be discovered by >1 family; retain per-source attribution,
-            # but dedupe classification execution by candidate_id/source family pair.
-            key = (family, row["candidate_id"])
-            all_candidates[key] = (row, meta)
+            all_candidates[(family,row["candidate_id"])] = (row,meta)
+
+    # Generic search is a separate discovery layer. Only fixed-source native
+    # results count in primary metrics; other publishers are recorded outside.
+    generic_cands, generic_diag = discover_via_google(http, "generic_search", "search", None, ep)
+    per_source_candidates["generic_search"] = generic_cands
+    source_diags["generic_search"] = generic_diag
+    for u in generic_diag.get("outside_fixed_source_set") or []:
+        outside.add(u)
+    for row, meta in generic_cands:
+        all_candidates[("generic_search",row["candidate_id"])] = (row,meta)
+
     final, records, composed, invocations = classify_episode(mon, all_eps, ep, list(all_candidates.values()))
     miss, miss_detail = primary_miss(source_diags, records, final)
     source_summary = {}
@@ -681,12 +778,12 @@ def main():
             "fixed_generic_attack_vocabulary":VOCAB,
             "query_terms":QUERY_TERMS,
             "retrieval_window":{"start_offset_hours":-6,"end_offset_hours":24},
-            "telegram_retrieval_method":"Google News-style date-bounded source-filtered discovery resolved to original public t.me post; original post text/time fetched before classification",
+            "telegram_retrieval_method":"one Google News-style date-bounded aggregate query over all fixed Telegram/web sources, then exact native-URL family attribution and original public t.me post fetch; separate generic-search query retained for marginal gain",
             "publisher_resolution_rule":"Search result is discovery only; resolved source-native content required. Fixed web publisher is suspline.media/kyiv. Other publishers are OUTSIDE_FIXED_SOURCE_SET.",
             "fulltext_extraction_method":"source-native HTML article/main/p fallback; original Telegram post text for t.me",
             "candidate_deduplication":"source_family + deterministic native candidate_id",
-            "candidate_ranking":"chronological within source; Google News RSS capped at 30 results/query",
-            "maximum_candidates_per_episode":"bounded by 9 source-family queries x 30 search results before native filtering",
+            "candidate_ranking":"Google News RSS order within each fixed aggregate or generic query; native publication time retained; capped at 30 results/query",
+            "maximum_candidates_per_episode":"bounded by 2 search queries (aggregate fixed-source + generic) x 30 search results before native filtering",
             "development_iterations":[{
                 "iteration":1,
                 "strategy_change_after_iteration":"NONE — initial compliant fixed strategy frozen unchanged",
