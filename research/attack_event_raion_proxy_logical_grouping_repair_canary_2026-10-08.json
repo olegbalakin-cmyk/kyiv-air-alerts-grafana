@@ -1,0 +1,382 @@
+{
+  "schema_version": 1,
+  "artifact": "attack_event_raion_proxy_logical_grouping_repair_canary",
+  "date_utc": "2026-10-08",
+  "verdict": "RAION-PROXY LIVE/CANONICAL EPISODE IDENTITY = PROVEN",
+  "scope": {
+    "repo": "olegbalakin-cmyk/kyiv-air-alerts-grafana",
+    "role": "BOUNDED RAION-PROXY LIVE/CANONICAL IDENTITY REPAIR + PRODUCTION CANARY",
+    "historical_backfill_started_by_this_task": 0
+  },
+  "accepted_predecessor": {
+    "commit": "51adc76b715669e46e8c2c936906022d4d96ed44",
+    "monitor_blob": "a94c7f7b24dda226561b9651047122c5ca9363a8",
+    "status": "LIVE DUE-EPISODE ORCHESTRATION = PROVEN"
+  },
+  "repair": {
+    "repair_branch": "attack-event-raion-proxy-grouping-repair-2026-10-08",
+    "repair_commit": "b424ce1fbcdc87f6261c16722d88846f48be8149",
+    "monitor_blob": "95e0eb313c6c68016601f681ab5186bf147d6dd1",
+    "live_parent_ordering_blob": "d43ee3573d78e70e4d9fa3559e81cf950799db0b",
+    "canonical_persistence_blob_before": "0118ca9e5f1308173e657257f1b49fe91cc19fe1",
+    "canonical_persistence_blob_after": "0118ca9e5f1308173e657257f1b49fe91cc19fe1",
+    "production_trigger_commit": "bcc7661b4979834c60204232903761689263c383",
+    "runtime_branch": "multicity-wip-2026-09-16",
+    "runtime_monitor_blob": "95e0eb313c6c68016601f681ab5186bf147d6dd1"
+  },
+  "authoritative_grouping": {
+    "implementation_reused": "apply_ukrainealarm_bridge.union_alerts",
+    "second_overlap_merger_created": false,
+    "canonical_input_universe": [
+      "historical raion-proxy intervals from expand_multicity_production.fetch_proxy_alerts()",
+      "Alerts.in.ua static seam intervals from apply_ukrainealarm_bridge.load_static_bridge()",
+      "retained official UkraineAlarm observations from apply_ukrainealarm_bridge.api_store_alerts()"
+    ],
+    "live_minimum_shared_representation": [
+      "retained production ukrainealarm_bridge.json events for the city",
+      "current UkraineAlarm regionHistory rows for the same city"
+    ],
+    "current_bridge_last_successful_fetch_at": "2026-10-08T15:01:49.462280Z",
+    "semantics": "sort by start; merge when next.start <= current.end; extend end to max end"
+  },
+  "raion_proxy_family": {
+    "cities": [
+      "cherkasy",
+      "chernihiv",
+      "chernivtsi",
+      "dnipro",
+      "ivano_frankivsk",
+      "kherson",
+      "khmelnytskyi",
+      "kropyvnytskyi",
+      "lutsk",
+      "lviv",
+      "mykolaiv",
+      "odesa",
+      "poltava",
+      "rivne",
+      "sumy",
+      "ternopil",
+      "uzhhorod",
+      "vinnytsia",
+      "zhytomyr"
+    ],
+    "city_count": 19
+  },
+  "known_case_regressions": {
+    "sumy_target": {
+      "raw_intervals": [
+        {
+          "start": "2026-10-07T17:49:34.073014Z",
+          "end": "2026-10-07T19:11:30.034575Z"
+        },
+        {
+          "start": "2026-10-07T19:10:55.805260Z",
+          "end": "2026-10-07T19:59:32.932823Z"
+        },
+        {
+          "start": "2026-10-07T19:17:34.603290Z",
+          "end": "2026-10-07T19:58:56.491722Z"
+        }
+      ],
+      "expected": {
+        "start": "2026-10-07T17:49:34.073014Z",
+        "end": "2026-10-07T19:59:32.932823Z",
+        "episode_id": "07ba1a638e3a08c341856db7"
+      },
+      "repaired": {
+        "start": "2026-10-07T17:49:34.073014Z",
+        "end": "2026-10-07T19:59:32.932823Z",
+        "episode_id": "07ba1a638e3a08c341856db7",
+        "raw_interval_count": 3
+      },
+      "exact_match": true
+    },
+    "earlier_sumy": {
+      "raw_intervals": [
+        {
+          "start": "2026-10-07T13:53:42.927864Z",
+          "end": "2026-10-07T15:36:22.509548Z"
+        },
+        {
+          "start": "2026-10-07T14:53:53.419010Z",
+          "end": "2026-10-07T15:37:18.811372Z"
+        }
+      ],
+      "expected": {
+        "start": "2026-10-07T13:53:42.927864Z",
+        "end": "2026-10-07T15:37:18.811372Z",
+        "episode_id": "6994e2498f98caad7c5b35ea"
+      },
+      "exact_match": true
+    }
+  },
+  "grouping_regression": {
+    "overlap": true,
+    "nested": true,
+    "touching_matches_authoritative_union_alerts": true,
+    "positive_gap_remains_separate": true,
+    "duplicate_input_idempotent": true,
+    "input_order_invariant": true
+  },
+  "recent_parity_proof": {
+    "workflow_run_id": 37798666871,
+    "proof_head": "b424ce1fbcdc87f6261c16722d88846f48be8149",
+    "cities_tested": 19,
+    "logical_episodes_compared": 55,
+    "exact_boundary_matches": 55,
+    "exact_episode_id_matches": 55,
+    "identity_mismatches": 0
+  },
+  "fragment_state_transition": {
+    "mechanism": "strict constituent fragments are marked identity_superseded_by_episode_id and excluded from due_checks, tracked_episodes_for_city, and select_post_cutoff_live_episodes",
+    "fragment_rows_deleted": 0,
+    "fragment_historical_classifications_rewritten": 0,
+    "isolated_sumy_fixture_fragments_suppressed": 3,
+    "isolated_fragment_independent_due_prevented": true,
+    "restart_identity_changes": 0,
+    "production_sumy_fragments_newly_suppressed": 83,
+    "production_sumy_fragments_suppressed_total": 83,
+    "known_fragment_database_state_after_canary": [
+      {
+        "episode_id": "e9bb95e0dcdcfa7b45bbf1bc",
+        "parent_count": 1,
+        "pre_repair_classification_uid": "e01dcd90-6730-4a54-8ef6-6a41003626c7",
+        "pre_repair_classification_created_at": "2026-10-07T21:57:46.840215Z",
+        "new_canary_classification": false
+      },
+      {
+        "episode_id": "0a2cbd1d1b7f670386b26eab",
+        "parent_count": 0,
+        "new_canary_classification": false
+      },
+      {
+        "episode_id": "940f568ecd11d47800caeac3",
+        "parent_count": 1,
+        "pre_repair_classification_uid": "b17ec3e5-4c8e-4fd4-8c83-bd632d96624c",
+        "pre_repair_classification_created_at": "2026-10-07T21:57:47.202679Z",
+        "new_canary_classification": false
+      }
+    ]
+  },
+  "unchanged_contracts": {
+    "durable_eligibility_predicate": "alert_end >= LIVE_PERSISTENCE_ACTIVATION_CUTOFF",
+    "durable_eligibility_changed": false,
+    "followup_hours": [
+      0,
+      24,
+      72,
+      168
+    ],
+    "followup_cadence_changed": false,
+    "exact_parent_lookup_changed": false,
+    "canonical_persistence_blob_changed": false,
+    "fuzzy_parent_binding_added": false,
+    "classifier_semantics_changed": false,
+    "discovery_strategy_changed": false
+  },
+  "isolated_union_to_classification": {
+    "proven": true,
+    "logical_classification_targets": 1,
+    "historical_episode_id": "07ba1a638e3a08c341856db7",
+    "verdict": "NO_CONFIRMED_EVENT",
+    "fragment_classification_created": false
+  },
+  "production_canary": {
+    "workflow_run_id": 37798870617,
+    "trigger_commit": "bcc7661b4979834c60204232903761689263c383",
+    "status": "success",
+    "started_at": "2026-10-08T15:13:21.861796Z",
+    "finished_at": "2026-10-08T15:45:21.403341Z",
+    "final_due_selection_cutoff_at": "2026-10-08T15:44:04.703531Z",
+    "selected_live_parents_total": 10,
+    "selected_raion_proxy_logical_episodes": 9,
+    "naturally_due_raion_proxy_episodes": 1,
+    "canonical_classifications_written": 1,
+    "classifier_to_neon_exact_matches": 1,
+    "duplicate_parents": 0,
+    "duplicate_classifications": 0,
+    "canary_raion_proxy_records": [
+      {
+        "city": "cherkasy",
+        "raw_interval_count": 1,
+        "start": "2026-10-07T16:41:12.065757Z",
+        "end": "2026-10-07T19:21:46.978338Z",
+        "episode_id": "4940991a0f3931d732972d06",
+        "canonical_expected_episode_id": "4940991a0f3931d732972d06",
+        "exact_identity_match": true,
+        "parent_present_before_classification": true,
+        "entered_persistence_due": false,
+        "alert_level_verdict": null,
+        "classification_uid": null,
+        "neon_readback": null,
+        "constituent_fragments_suppressed": true
+      },
+      {
+        "city": "kropyvnytskyi",
+        "raw_interval_count": 1,
+        "start": "2026-10-07T18:18:00.458148Z",
+        "end": "2026-10-07T19:21:47.138185Z",
+        "episode_id": "3869ccb06859d1c1e446ac01",
+        "canonical_expected_episode_id": "3869ccb06859d1c1e446ac01",
+        "exact_identity_match": true,
+        "parent_present_before_classification": true,
+        "entered_persistence_due": false,
+        "alert_level_verdict": null,
+        "classification_uid": null,
+        "neon_readback": null,
+        "constituent_fragments_suppressed": true
+      },
+      {
+        "city": "poltava",
+        "raw_interval_count": 1,
+        "start": "2026-10-07T17:55:06.790557Z",
+        "end": "2026-10-07T19:21:47.617044Z",
+        "episode_id": "5fa1ed80232786ac39ce512e",
+        "canonical_expected_episode_id": "5fa1ed80232786ac39ce512e",
+        "exact_identity_match": true,
+        "parent_present_before_classification": true,
+        "entered_persistence_due": false,
+        "alert_level_verdict": null,
+        "classification_uid": null,
+        "neon_readback": null,
+        "constituent_fragments_suppressed": true
+      },
+      {
+        "city": "zhytomyr",
+        "raw_interval_count": 1,
+        "start": "2026-10-07T18:35:20.531390Z",
+        "end": "2026-10-07T19:35:54.312905Z",
+        "episode_id": "82f142f0fc91531df839b57f",
+        "canonical_expected_episode_id": "82f142f0fc91531df839b57f",
+        "exact_identity_match": true,
+        "parent_present_before_classification": true,
+        "entered_persistence_due": false,
+        "alert_level_verdict": null,
+        "classification_uid": null,
+        "neon_readback": null,
+        "constituent_fragments_suppressed": true
+      },
+      {
+        "city": "odesa",
+        "raw_interval_count": 1,
+        "start": "2026-10-07T19:31:31.834787Z",
+        "end": "2026-10-07T19:37:23.153344Z",
+        "episode_id": "ee7206c800dfd91bb27aa011",
+        "canonical_expected_episode_id": "ee7206c800dfd91bb27aa011",
+        "exact_identity_match": true,
+        "parent_present_before_classification": true,
+        "entered_persistence_due": false,
+        "alert_level_verdict": null,
+        "classification_uid": null,
+        "neon_readback": null,
+        "constituent_fragments_suppressed": true
+      },
+      {
+        "city": "mykolaiv",
+        "raw_interval_count": 1,
+        "start": "2026-10-07T17:24:09.425211Z",
+        "end": "2026-10-07T19:37:23.320630Z",
+        "episode_id": "9471377153e3e493ce483812",
+        "canonical_expected_episode_id": "9471377153e3e493ce483812",
+        "exact_identity_match": true,
+        "parent_present_before_classification": true,
+        "entered_persistence_due": false,
+        "alert_level_verdict": null,
+        "classification_uid": null,
+        "neon_readback": null,
+        "constituent_fragments_suppressed": true
+      },
+      {
+        "city": "sumy",
+        "raw_interval_count": 3,
+        "start": "2026-10-07T17:49:34.073014Z",
+        "end": "2026-10-07T19:59:32.932823Z",
+        "episode_id": "07ba1a638e3a08c341856db7",
+        "canonical_expected_episode_id": "07ba1a638e3a08c341856db7",
+        "exact_identity_match": true,
+        "parent_present_before_classification": true,
+        "entered_persistence_due": true,
+        "alert_level_verdict": "NO_CONFIRMED_EVENT",
+        "classification_uid": "5a707b32-c973-4824-bc5e-2ff501494b1f",
+        "classification_key": "06407e6ed001b5af2d954d8d6651f12defb6f4fbe53c8e1c7d219ed26cad1e30",
+        "neon_readback": {
+          "exact": true,
+          "verdict": "NO_CONFIRMED_EVENT",
+          "binding_state": "BOUND",
+          "alert_episode_uid": "88068658-ae02-4ffb-97f8-7beb6b3d0c98",
+          "classifier_blob_sha": "778469b74c2aa807d851cf2c2ee35cf4aa785589",
+          "origin_workflow_run_id": 37798870617
+        },
+        "constituent_fragments_suppressed": true
+      },
+      {
+        "city": "zhytomyr",
+        "raw_interval_count": 1,
+        "start": "2026-10-07T19:49:00.078613Z",
+        "end": "2026-10-07T20:16:28.992725Z",
+        "episode_id": "ea0044ebe3e09014ba6fc81f",
+        "canonical_expected_episode_id": "ea0044ebe3e09014ba6fc81f",
+        "exact_identity_match": true,
+        "parent_present_before_classification": true,
+        "entered_persistence_due": false,
+        "alert_level_verdict": null,
+        "classification_uid": null,
+        "neon_readback": null,
+        "constituent_fragments_suppressed": true
+      },
+      {
+        "city": "vinnytsia",
+        "raw_interval_count": 1,
+        "start": "2026-10-07T18:18:00.063301Z",
+        "end": "2026-10-07T20:16:29.759857Z",
+        "episode_id": "5165b03f6cf55c1bb72e9dce",
+        "canonical_expected_episode_id": "5165b03f6cf55c1bb72e9dce",
+        "exact_identity_match": true,
+        "parent_present_before_classification": true,
+        "entered_persistence_due": false,
+        "alert_level_verdict": null,
+        "classification_uid": null,
+        "neon_readback": null,
+        "constituent_fragments_suppressed": true
+      }
+    ]
+  },
+  "database_readback": {
+    "target_parent_exact_count": 1,
+    "target_classification_count": 1,
+    "target_attack_event_count_created_by_canary": 0,
+    "canary_origin_workflow_classification_rows": 1,
+    "canary_origin_workflow_pre_activation_rows": 0,
+    "canary_origin_workflow_post_activation_rows": 1
+  },
+  "non_raion_regression": {
+    "families_checked": [
+      "UkraineAlarm exact-hromada",
+      "Kyiv exact-city combined",
+      "Sevastopol verified exact-city pairs"
+    ],
+    "identity_changes": 0,
+    "basis": "repair is gated by is_raion_proxy_city; deterministic make_episode is unchanged; self-test excludes kharkiv, zaporizhzhia, kyiv, sevastopol from repaired grouping path"
+  },
+  "historical_safety": {
+    "historical_backfill_started_by_this_task": 0,
+    "unauthorized_historical_classification_writes_by_canary": 0,
+    "unauthorized_attack_event_writes_by_canary": 0,
+    "pre_existing_fragment_parents_deleted": 0,
+    "pre_existing_historical_classifications_rewritten": 0,
+    "canary_origin_rows_before_activation_cutoff": 0
+  },
+  "mutation_confirmation": {
+    "classifier_semantics": "unchanged",
+    "discovery": "unchanged",
+    "followup_cadence": "unchanged",
+    "durable_live_historical_eligibility": "unchanged",
+    "classification_persistence_semantics": "unchanged",
+    "exact_parent_lookup": "unchanged",
+    "historical_backfill": "not started by this task",
+    "fragment_parent_deletion": "none",
+    "historical_classification_rewrite": "none"
+  },
+  "remaining_blocker": null
+}
