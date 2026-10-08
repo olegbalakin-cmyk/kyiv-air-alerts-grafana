@@ -1,0 +1,121 @@
+name: Prove casualty production cutover zero mutation
+
+on:
+  push:
+    branches:
+      - casualty-review-promotion-production-cutover-proof-2026-10-08
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  prove:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: kyiv-air-alerts-grafana
+    steps:
+      - name: Check out exact deployed production commit
+        uses: actions/checkout@v4
+        with:
+          ref: 0c59ccabc9e75896bc52b8c70142ece77c1f684b
+          fetch-depth: 1
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install production casualty dependencies
+        run: pip install -r requirements.txt
+
+      - name: Freeze production dashboard before canary
+        run: cp data/dashboard_data.json "${RUNNER_TEMP}/dashboard-before.json"
+
+      - name: Run authoritative casualty builder without discovery
+        run: python scripts/update_casualties.py --no-network
+
+      - name: Prove zero mutation
+        shell: bash
+        run: |
+          python - <<'PY'
+          import csv
+          import json
+          import os
+          from pathlib import Path
+
+          root = Path(".")
+          before = json.loads(Path(os.environ["RUNNER_TEMP"]).joinpath("dashboard-before.json").read_text(encoding="utf-8"))
+          after = json.loads((root / "data/dashboard_data.json").read_text(encoding="utf-8"))
+
+          with (root / "data/casualties/revisions.csv").open(encoding="utf-8-sig", newline="") as f:
+              revision_rows = list(csv.DictReader(f))
+          confirmed_rows = [r for r in revision_rows if (r.get("status") or "").strip() == "confirmed"]
+          assert revision_rows == [], revision_rows
+          assert confirmed_rows == [], confirmed_rows
+
+          def casualty_map(payload):
+              out = {}
+              totals = {}
+              by_city = payload.get("casualties_by_city") or {}
+              assert len(by_city) == 23, len(by_city)
+              for city, series in by_city.items():
+                  rows = series.get("monthly") or []
+                  totals[city] = sum(int(r.get("deaths") or 0) for r in rows)
+                  for row in rows:
+                      key = (city, str(row.get("month")))
+                      assert key not in out, key
+                      out[key] = int(row.get("deaths") or 0)
+              return out, totals
+
+          before_map, before_totals = casualty_map(before)
+          after_map, after_totals = casualty_map(after)
+          assert len(before_map) == 1288, len(before_map)
+          assert len(after_map) == 1288, len(after_map)
+          assert before_map == after_map
+          assert before_totals == after_totals
+
+          assert after.get("casualties", {}).get("meta", {}).get("confirmed_revision_records") == 0
+
+          def noncasualty(payload):
+              value = dict(payload)
+              value.pop("casualties", None)
+              value.pop("casualties_by_city", None)
+              return value
+
+          assert noncasualty(before) == noncasualty(after)
+          assert set(before) == set(after)
+
+          result = {
+              "verdict": "ZERO_MUTATION_CANARY_PASS",
+              "production_commit": "0c59ccabc9e75896bc52b8c70142ece77c1f684b",
+              "cities": 23,
+              "city_month_values": 1288,
+              "mismatches": 0,
+              "revision_rows": len(revision_rows),
+              "confirmed_revision_rows": len(confirmed_rows),
+              "casualty_total_delta": sum(after_totals.values()) - sum(before_totals.values()),
+              "pre_totals": before_totals,
+              "post_totals": after_totals,
+              "noncasualty_payload_unchanged": True,
+              "needs_review_entered_confirmed_totals": False,
+          }
+          out = Path(os.environ["RUNNER_TEMP"]) / "casualty-production-cutover-proof.json"
+          out.write_text(json.dumps(result, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+          print(json.dumps(result, ensure_ascii=False, sort_keys=True))
+          PY
+
+      - name: Verify canary only changed generated casualty output
+        shell: bash
+        run: |
+          changed="$(git diff --name-only)"
+          test "$changed" = "kyiv-air-alerts-grafana/data/dashboard_data.json"
+
+      - name: Upload proof artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: casualty-production-cutover-zero-mutation
+          path: ${{ runner.temp }}/casualty-production-cutover-proof.json
+          retention-days: 30
