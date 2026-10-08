@@ -233,6 +233,37 @@ monitor=importlib.import_module("monitor_explosion_candidates")
 replay=importlib.import_module("replay_explosion_history")
 audited_root=Path("/tmp/unit_a_audited_main/kyiv-air-alerts-grafana")
 cities=sorted({str((t.get("classifier_episode_input") or {}).get("city_key") or "") for t in targets if str((t.get("classifier_episode_input") or {}).get("city_key") or "")})
+target_city_counts={}
+for t in targets:
+    c=str((t.get("classifier_episode_input") or {}).get("city_key") or "")
+    target_city_counts[c]=target_city_counts.get(c,0)+1
+sev_parents=[p for p in parents if str(p.get("city_key") or "")=="sevastopol"]
+sev_rows=[]
+for p in sev_parents:
+    uid=str(p.get("alert_episode_uid") or "")
+    rr=by_uid.get(uid) or {}
+    sev_rows.append({
+        "uid":uid,
+        "episode_id":str(rr.get("live_monitor_episode_id") or ""),
+        "parent_start":p.get("start_at"),
+        "parent_end":p.get("end_at"),
+        "row_start":rr.get("start_at") if "start_at" in rr else rr.get("canonical_start_at"),
+        "row_end":rr.get("end_at") if "end_at" in rr else rr.get("canonical_end_at"),
+        "cohort":rr.get("_cohort"),
+    })
+print(json.dumps({
+ "target_city_counts":target_city_counts,
+ "continuity_live_monitor":(cont.get("existing_evidence_coverage_by_source_family") or {}).get("live_monitor"),
+ "continuity_ongoing_pipeline":(cont.get("classification_production_path") or {}).get("ongoing_evidence_pipeline"),
+ "sevastopol_context_probe":{
+   "parent_count":len(sev_parents),
+   "rows_with_live_episode_id":sum(bool(x["episode_id"]) for x in sev_rows),
+   "rows_exact_parent_times":sum(x["parent_start"]==x["row_start"] and x["parent_end"]==x["row_end"] for x in sev_rows),
+   "cohorts":{k:sum(x["cohort"]==k for x in sev_rows) for k in sorted({x["cohort"] for x in sev_rows if x["cohort"]})},
+   "smallest_missing_id":next((x for x in sev_rows if not x["episode_id"]),None),
+   "smallest_time_mismatch":next((x for x in sev_rows if not (x["parent_start"]==x["row_start"] and x["parent_end"]==x["row_end"])),None)
+ }
+},ensure_ascii=False,sort_keys=True))
 loaded_by_city={}
 source_files={}
 for city in cities:
