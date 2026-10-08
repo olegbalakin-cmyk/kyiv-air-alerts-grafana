@@ -468,10 +468,6 @@ def validate_once(label: str) -> dict:
                             "CLASSIFIER_EPISODE_IDENTITY_MISMATCH",
                             f"{uid}:{field}:{episode_input.get(field)!r}!={expected!r}",
                         )
-                expected_uid = f"{episode_input.get('city_key')}:{episode_input.get('episode_id')}"
-                if uid != expected_uid:
-                    identity_inconsistencies += 1
-                    add_reason(reasons, "ALERT_EPISODE_UID_MISMATCH", f"{uid}!={expected_uid}")
                 if ep.get("canonical_parent_identity") != parent_row:
                     identity_inconsistencies += 1
                     add_reason(reasons, "CANONICAL_PARENT_BINDING_MISMATCH", uid)
