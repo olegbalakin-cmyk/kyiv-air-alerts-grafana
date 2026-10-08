@@ -211,4 +211,78 @@ print(json.dumps({
  }
 },ensure_ascii=False,sort_keys=True))
 
+
+
+# Authoritative loader proof from the continuity-pinned audited main commit.
+import importlib, shutil, sys
+audited=str(cont.get("audited_main_commit") or "")
+pinned="71cb6f6fbe856cc7b96759310fe9cc9c71cc0453"
+for path in ("/tmp/unit_a_audited_main","/tmp/unit_a_pinned_impl"):
+    shutil.rmtree(path,ignore_errors=True)
+subprocess.check_call(["git","worktree","add","--detach","/tmp/unit_a_audited_main",audited],stdout=subprocess.DEVNULL)
+subprocess.check_call(["git","worktree","add","--detach","/tmp/unit_a_pinned_impl",pinned],stdout=subprocess.DEVNULL)
+scripts=Path("/tmp/unit_a_pinned_impl/kyiv-air-alerts-grafana/scripts")
+sys.path.insert(0,str(scripts))
+monitor=importlib.import_module("monitor_explosion_candidates")
+replay=importlib.import_module("replay_explosion_history")
+audited_root=Path("/tmp/unit_a_audited_main/kyiv-air-alerts-grafana")
+cities=sorted((cont.get("uncovered_counts_by_city") or {}).keys())
+loaded_by_city={}
+source_files={}
+for city in cities:
+    eps,sources=replay.load_historical_episodes(audited_root,city,monitor)
+    eps=sorted([dict(x) for x in eps],key=lambda x:(str(x.get("alert_start") or ""),str(x.get("episode_id") or "")))
+    loaded_by_city[city]=eps
+    source_files[city]=sources
+all_loaded=[x for city in cities for x in loaded_by_city[city]]
+loaded_bad=sum(not all([x.get("episode_id"),x.get("alert_start"),x.get("alert_end")]) for x in all_loaded)
+loaded_dup=sum(len(v)-len({str(x.get("episode_id") or "") for x in v}) for v in loaded_by_city.values())
+loaded_index={(city,str(ep.get("episode_id") or "")):(ep.get("alert_start"),ep.get("alert_end")) for city,eps in loaded_by_city.items() for ep in eps}
+loaded_temporal={(city,ep.get("alert_start"),ep.get("alert_end")):str(ep.get("episode_id") or "") for city,eps in loaded_by_city.items() for ep in eps}
+target_exact=0
+target_missing=[]
+target_mismatch=[]
+for t in targets:
+    ci=t.get("classifier_episode_input") or {}
+    key=(str(ci.get("city_key") or ""),str(ci.get("episode_id") or ""))
+    got=loaded_index.get(key)
+    if got is None:
+        target_missing.append(str(t.get("alert_episode_uid") or ""))
+    elif got!=(ci.get("alert_start"),ci.get("alert_end")):
+        target_mismatch.append(str(t.get("alert_episode_uid") or ""))
+    else:
+        target_exact+=1
+parent_exact=0
+parent_missing=[]
+for p in parents:
+    key=(str(p.get("city_key") or ""),p.get("start_at"),p.get("end_at"))
+    if key in loaded_temporal: parent_exact+=1
+    else: parent_missing.append(str(p.get("alert_episode_uid") or ""))
+context_repr=[
+ {"city_key":city,"episode_id":str(ep.get("episode_id") or ""),"alert_start":ep.get("alert_start"),"alert_end":ep.get("alert_end")}
+ for city in cities for ep in loaded_by_city[city]
+]
+context_bytes=(json.dumps(context_repr,ensure_ascii=False,sort_keys=True,separators=(",",":"))+"\n").encode("utf-8")
+print(json.dumps({
+ "audited_loader_context_proof":{
+   "audited_main_commit":audited,
+   "pinned_replay_blob":git_text("rev-parse",f"{pinned}:kyiv-air-alerts-grafana/scripts/replay_explosion_history.py"),
+   "city_count":len(cities),
+   "loaded_episode_count":len(all_loaded),
+   "loaded_bad_required_fields":loaded_bad,
+   "loaded_duplicate_city_episode_ids":loaded_dup,
+   "target_exact_matches":target_exact,
+   "target_missing_count":len(target_missing),
+   "target_mismatch_count":len(target_mismatch),
+   "uncovered_parent_exact_temporal_matches":parent_exact,
+   "uncovered_parent_missing_temporal_count":len(parent_missing),
+   "context_sha256":__import__("hashlib").sha256(context_bytes).hexdigest(),
+   "per_city_counts":{c:len(loaded_by_city[c]) for c in cities},
+   "source_file_counts":{c:len(source_files[c]) for c in cities},
+   "smallest_target_missing":target_missing[0] if target_missing else None,
+   "smallest_target_mismatch":target_mismatch[0] if target_mismatch else None,
+   "smallest_parent_missing":parent_missing[0] if parent_missing else None
+ }
+},ensure_ascii=False,sort_keys=True))
+
 print("CONTEXT_PROBE_DONE")
