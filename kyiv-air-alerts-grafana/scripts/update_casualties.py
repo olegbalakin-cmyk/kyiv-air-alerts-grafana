@@ -163,6 +163,9 @@ def load_revisions() -> list[dict]:
             if record_id in seen_ids:
                 raise RuntimeError(f"Duplicate casualty revision record_id: {record_id}")
             seen_ids.add(record_id)
+            city_key = (row.get("city_key") or "").strip()
+            if not city_key:
+                raise RuntimeError(f"Missing city_key in casualty revision {record_id}")
             attack_date = (row.get("attack_date") or "").strip()
             try:
                 attack_day = date.fromisoformat(attack_date)
@@ -178,6 +181,7 @@ def load_revisions() -> list[dict]:
             rows.append(
                 {
                     "record_id": record_id,
+                    "city_key": city_key,
                     "observed_at": (row.get("observed_at") or "").strip(),
                     "attack_date": attack_day,
                     "deaths_delta": delta,
@@ -185,6 +189,7 @@ def load_revisions() -> list[dict]:
                     "source_name": (row.get("source_name") or "").strip(),
                     "source_url": (row.get("source_url") or "").strip(),
                     "note": (row.get("note") or "").strip(),
+                    "candidate_ids": (row.get("candidate_ids") or "").strip(),
                 }
             )
     return rows
@@ -195,11 +200,15 @@ def month_timestamp(month: str) -> str:
     return datetime(year, mon, 1, tzinfo=TZ).isoformat()
 
 
-def build_monthly(baseline: list[dict], revisions: list[dict]) -> list[dict]:
+def build_monthly(
+    baseline: list[dict],
+    revisions: list[dict],
+    city_key: str = "kyiv",
+) -> list[dict]:
     base = {row["month"]: row for row in baseline}
     deltas = defaultdict(int)
     for row in revisions:
-        if row["status"] != "confirmed":
+        if row["status"] != "confirmed" or row.get("city_key") != city_key:
             continue
         month = row["attack_date"].strftime("%Y-%m")
         deltas[month] += row["deaths_delta"]
@@ -211,7 +220,9 @@ def build_monthly(baseline: list[dict], revisions: list[dict]) -> list[dict]:
         delta = deltas.get(month, 0)
         deaths = baseline_deaths + delta
         if deaths < 0:
-            raise RuntimeError(f"Confirmed revisions make {month} negative: {deaths}")
+            raise RuntimeError(
+                f"Confirmed revisions make {city_key} {month} negative: {deaths}"
+            )
         row = {
             "time": month_timestamp(month),
             "month": month,
@@ -474,18 +485,110 @@ def load_validated_city_series() -> dict[str, dict]:
     return out
 
 
+def city_baseline_routes() -> dict[str, str]:
+    manifest = load_json(MASTER_MANIFEST_FILE, {})
+    if not isinstance(manifest, dict):
+        raise RuntimeError("Invalid casualty master manifest")
+    master_cities = {
+        str(item.get("slug") or "").strip()
+        for item in (manifest.get("cities") or [])
+        if isinstance(item, dict) and str(item.get("slug") or "").strip()
+    }
+    if "kyiv" not in master_cities:
+        raise RuntimeError("Casualty master must contain Kyiv for routing validation")
+
+    routes = {"kyiv": "kyiv_baseline"}
+    for city_key in sorted(master_cities - {"kyiv"}):
+        routes[city_key] = "master_20cities"
+
+    if CITY_SERIES_DIR.exists():
+        for city_dir in sorted(p for p in CITY_SERIES_DIR.iterdir() if p.is_dir()):
+            city_manifest = load_json(city_dir / "manifest.json", {})
+            if not isinstance(city_manifest, dict):
+                continue
+            city_key = str(city_manifest.get("city_slug") or city_dir.name).strip()
+            if city_key:
+                routes[city_key] = "validated_city"
+    return routes
+
+
+def apply_city_revision_overlay(
+    series: dict,
+    revisions: list[dict],
+    city_key: str,
+) -> dict:
+    confirmed = [
+        row
+        for row in revisions
+        if row["status"] == "confirmed" and row.get("city_key") == city_key
+    ]
+    if not confirmed:
+        return series
+
+    monthly = [dict(row) for row in series.get("monthly", [])]
+    original_total = sum(int(row.get("deaths") or 0) for row in monthly)
+    by_month = {str(row.get("month")): row for row in monthly if row.get("month")}
+
+    for revision in confirmed:
+        month = revision["attack_date"].strftime("%Y-%m")
+        if month not in by_month:
+            item = {
+                "time": month_timestamp(month),
+                "month": month,
+                "deaths": 0,
+            }
+            monthly.append(item)
+            by_month[month] = item
+        item = by_month[month]
+        baseline_deaths = int(item.get("deaths") or 0)
+        if "baseline_deaths" not in item:
+            item["baseline_deaths"] = baseline_deaths
+            item["revision_delta"] = 0
+        item["revision_delta"] = int(item.get("revision_delta") or 0) + revision["deaths_delta"]
+        item["deaths"] = baseline_deaths + revision["deaths_delta"]
+        if item["deaths"] < 0:
+            raise RuntimeError(
+                f"Confirmed revisions make {city_key} {month} negative: {item['deaths']}"
+            )
+
+    monthly.sort(key=lambda row: row["month"])
+    meta = dict(series.get("meta") or {})
+    meta["baseline_confirmed_deaths"] = original_total
+    meta["confirmed_deaths"] = sum(int(row.get("deaths") or 0) for row in monthly)
+    meta["confirmed_revision_records"] = len(confirmed)
+    return {"meta": meta, "monthly": monthly}
+
+
 def update_dashboard_data(no_network: bool) -> None:
     baseline = load_baseline()
     validate_baseline(baseline)
     revisions = load_revisions()
+    routes = city_baseline_routes()
+    unknown_revision_cities = sorted(
+        {
+            row["city_key"]
+            for row in revisions
+            if row["status"] == "confirmed" and row["city_key"] not in routes
+        }
+    )
+    if unknown_revision_cities:
+        raise RuntimeError(
+            "Confirmed casualty revisions target unknown city keys: "
+            + ", ".join(unknown_revision_cities)
+        )
+
     queue = load_json(REVIEW_QUEUE_FILE, [])
     if not no_network:
         queue, _ = discover_candidates()
     if not isinstance(queue, list):
         queue = []
 
-    monthly = build_monthly(baseline, revisions)
-    confirmed = [r for r in revisions if r["status"] == "confirmed"]
+    monthly = build_monthly(baseline, revisions, city_key="kyiv")
+    confirmed_kyiv = [
+        r for r in revisions
+        if r["status"] == "confirmed" and r.get("city_key") == "kyiv"
+    ]
+    confirmed_all = [r for r in revisions if r["status"] == "confirmed"]
     pending = [item for item in queue if isinstance(item, dict) and item.get("status") == "needs_review"]
 
     if DATA_FILE.exists():
@@ -507,7 +610,7 @@ def update_dashboard_data(no_network: bool) -> None:
                 "The five-person difference could not be attributed to specific attacks in public sources; "
                 "the audited attack-level reconstruction is used in the chart."
             ),
-            "confirmed_revision_records": len(confirmed),
+            "confirmed_revision_records": len(confirmed_kyiv),
             "pending_review_candidates": len(pending),
             "generated_at": datetime.now(TZ).isoformat(),
         },
@@ -515,14 +618,24 @@ def update_dashboard_data(no_network: bool) -> None:
     }
     city_series = load_validated_city_series()
     city_series["kyiv"] = dashboard_data["casualties"]
+    for city_key in routes:
+        if city_key == "kyiv":
+            continue
+        if city_key not in city_series:
+            raise RuntimeError(f"Missing validated casualty baseline for {city_key}")
+        city_series[city_key] = apply_city_revision_overlay(
+            city_series[city_key],
+            revisions,
+            city_key,
+        )
     dashboard_data["casualties_by_city"] = city_series
 
     DATA_FILE.parent.mkdir(parents=True, exist_ok=True)
     DATA_FILE.write_text(json.dumps(dashboard_data, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
     print(
-        f"Updated casualty series: {len(monthly)} months, "
-        f"{len(confirmed)} confirmed revision records, {len(pending)} review candidates"
+        f"Updated casualty series: {len(monthly)} Kyiv months, "
+        f"{len(confirmed_all)} confirmed revision records, {len(pending)} Kyiv review candidates"
     )
 
 
