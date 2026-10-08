@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import argparse
+import base64
 import copy
 import hashlib
 import importlib.util
@@ -133,6 +134,8 @@ class HTTP:
         self.s.headers.update({"User-Agent": UA, "Accept-Language":"uk,en;q=0.7"})
         self.stats = Counter()
         self.cache = {}
+        self.google_resolution_cache = {}
+        self.resolution_events = []
 
     def get(self, url, *, timeout=HTTP_TIMEOUT):
         if url in self.cache:
@@ -145,6 +148,29 @@ class HTTP:
                 r = self.s.get(url, timeout=timeout, allow_redirects=True)
                 r.raise_for_status()
                 self.cache[url] = r
+                return r
+            except requests.RequestException as exc:
+                last = exc
+                self.stats["errors"] += 1
+                if attempt == 0:
+                    time.sleep(0.25)
+        raise last
+
+    def post(self, url, *, data=None, headers=None, timeout=HTTP_TIMEOUT):
+        cache_key = ("POST", url, str(data))
+        if cache_key in self.cache:
+            self.stats["cache_hits"] += 1
+            return self.cache[cache_key]
+        self.stats["requests"] += 1
+        last = None
+        for attempt in range(2):
+            try:
+                r = self.s.post(
+                    url, data=data, headers=headers, timeout=timeout,
+                    allow_redirects=True,
+                )
+                r.raise_for_status()
+                self.cache[cache_key] = r
                 return r
             except requests.RequestException as exc:
                 last = exc
@@ -225,23 +251,322 @@ def outbound_links_from_google_html(html_text):
             continue
     return urls
 
+GOOGLE_WRAPPER_PATH_RE = re.compile(r"^/(?:rss/)?articles/([A-Za-z0-9_-]{16,})/?$")
+GOOGLE_READ_PATH_RE = re.compile(r"^/read/([A-Za-z0-9_-]{16,})/?$")
+GOOGLE_HOST_RE = re.compile(r"(^|\\.)google\\.[a-z.]+$", re.I)
+GOOGLE_RPC_URL = "https://news.google.com/_/DotsSplashUi/data/batchexecute"
+GOOGLE_RPC_ID = "Fbv4je"
+
+
+def is_google_wrapper_host(host):
+    h = str(host or "").casefold().split(":")[0]
+    return h == "news.google.com" or bool(GOOGLE_HOST_RE.search(h))
+
+
+def valid_native_url(url):
+    value = canonical_url(url)
+    try:
+        p = urlparse(value)
+    except Exception:
+        return None
+    if p.scheme.casefold() not in {"http", "https"} or not p.netloc:
+        return None
+    if is_google_wrapper_host(p.hostname or ""):
+        return None
+    return value
+
+
+def google_article_id(url):
+    try:
+        p = urlparse(str(url or ""))
+    except Exception:
+        return None
+    if (p.hostname or "").casefold() != "news.google.com":
+        return None
+    m = GOOGLE_WRAPPER_PATH_RE.match(p.path) or GOOGLE_READ_PATH_RE.match(p.path)
+    return m.group(1) if m else None
+
+
+def opaque_google_id(article_id):
+    try:
+        raw = base64.urlsafe_b64decode(
+            article_id + "=" * ((4 - len(article_id) % 4) % 4)
+        )
+    except Exception:
+        return None
+    m = re.search(rb"AU_yq[A-Za-z0-9_-]+", raw)
+    return m.group(0).decode("ascii") if m else None
+
+
+def _record_google_resolution(http, trace, resolved=None, error=None):
+    if not hasattr(http, "resolution_events"):
+        http.resolution_events = []
+    event = copy.deepcopy(trace)
+    event["decoded_native_url"] = resolved
+    event["final_domain"] = host_of(resolved) if resolved else None
+    event["native_kind"] = (
+        "TELEGRAM" if resolved and tg_identity(resolved) else
+        "PUBLISHER" if resolved else None
+    )
+    event["terminal_failure_reason"] = error
+    event["resolution_outcome"] = (
+        "GOOGLE_WRAPPER_DECODED" if resolved and trace.get("opaque_decode_attempted")
+        else trace.get("resolution_outcome")
+    )
+    http.resolution_events.append(event)
+    return resolved, error
+
+
+def _google_signature_metadata(html_text, article_id):
+    soup = BeautifulSoup(html_text or "", "html.parser")
+    nodes = soup.find_all(attrs={"data-n-a-sg": True, "data-n-a-ts": True})
+    exact = [
+        n for n in nodes
+        if str(n.get("data-n-a-id") or "") == str(article_id)
+    ]
+    for node in exact + nodes:
+        signature = str(node.get("data-n-a-sg") or "").strip()
+        timestamp = str(node.get("data-n-a-ts") or "").strip()
+        if signature and timestamp and timestamp.isdigit():
+            return timestamp, signature
+    return None, None
+
+
+def _google_rpc_native_url(response_text):
+    parsed_any = False
+
+    def inspect(node):
+        nonlocal parsed_any
+        if isinstance(node, list):
+            if (
+                len(node) >= 3 and node[0] == "wrb.fr"
+                and node[1] == GOOGLE_RPC_ID and isinstance(node[2], str)
+            ):
+                try:
+                    inner = json.loads(node[2])
+                    parsed_any = True
+                except Exception:
+                    return None
+                return inspect(inner)
+            for child in node:
+                found = inspect(child)
+                if found:
+                    return found
+        elif isinstance(node, dict):
+            for child in node.values():
+                found = inspect(child)
+                if found:
+                    return found
+        elif isinstance(node, str) and node.startswith(("http://", "https://")):
+            found = valid_native_url(node)
+            if found:
+                return found
+        return None
+
+    for line in str(response_text or "").splitlines():
+        line = line.strip()
+        if not line or line.startswith(")]}'") or line.isdigit():
+            continue
+        try:
+            payload = json.loads(line)
+            parsed_any = True
+        except Exception:
+            continue
+        found = inspect(payload)
+        if found:
+            return found, "OK"
+    return None, "NO_NATIVE_URL" if parsed_any else "UNPARSEABLE"
+
+
+def _opaque_google_decode(http, wrapper_url, article_id, initial_html, trace):
+    trace["opaque_decode_attempted"] = True
+    trace["opaque_id"] = opaque_google_id(article_id)
+    if not trace["opaque_id"]:
+        trace["metadata_signature_step_status"] = "NOT_ATTEMPTED"
+        trace["rpc_step_status"] = "NOT_ATTEMPTED"
+        trace["resolution_outcome"] = "GOOGLE_WRAPPER_UNSUPPORTED_FORMAT"
+        return _record_google_resolution(
+            http, trace, error="GOOGLE_WRAPPER_UNSUPPORTED_FORMAT"
+        )
+
+    timestamp, signature = _google_signature_metadata(initial_html, article_id)
+    if not (timestamp and signature):
+        metadata_url = f"https://news.google.com/articles/{article_id}"
+        try:
+            metadata_response = http.get(metadata_url)
+        except (requests.ConnectionError, requests.Timeout):
+            trace["metadata_signature_step_status"] = "NETWORK_FAILED"
+            trace["rpc_step_status"] = "NOT_ATTEMPTED"
+            trace["resolution_outcome"] = "GOOGLE_WRAPPER_NETWORK_FAILED"
+            return _record_google_resolution(
+                http, trace, error="GOOGLE_WRAPPER_NETWORK_FAILED"
+            )
+        except requests.RequestException:
+            trace["metadata_signature_step_status"] = "FAILED"
+            trace["rpc_step_status"] = "NOT_ATTEMPTED"
+            trace["resolution_outcome"] = "GOOGLE_WRAPPER_SIGNATURE_METADATA_FAILED"
+            return _record_google_resolution(
+                http, trace, error="GOOGLE_WRAPPER_SIGNATURE_METADATA_FAILED"
+            )
+        timestamp, signature = _google_signature_metadata(
+            metadata_response.text, article_id
+        )
+    if not (timestamp and signature):
+        trace["metadata_signature_step_status"] = "FAILED"
+        trace["rpc_step_status"] = "NOT_ATTEMPTED"
+        trace["resolution_outcome"] = "GOOGLE_WRAPPER_SIGNATURE_METADATA_FAILED"
+        return _record_google_resolution(
+            http, trace, error="GOOGLE_WRAPPER_SIGNATURE_METADATA_FAILED"
+        )
+    trace["metadata_signature_step_status"] = "OK"
+
+    rpc_context = [
+        ["X", "X", ["X", "X"], None, None, 1, 1, "US:en", None, 1,
+         None, None, None, None, None, 0, 1],
+        "X", "X", 1, [1, 1, 1], 1, 1, None, 0, 0, None, 0,
+    ]
+    rpc_request = [
+        "garturlreq", rpc_context, article_id, int(timestamp), signature
+    ]
+    rpc_call = [
+        GOOGLE_RPC_ID,
+        json.dumps(rpc_request, ensure_ascii=False, separators=(",", ":")),
+    ]
+    try:
+        response = http.post(
+            GOOGLE_RPC_URL,
+            data={"f.req": json.dumps([[rpc_call]], ensure_ascii=False, separators=(",", ":"))},
+            headers={"Content-Type": "application/x-www-form-urlencoded;charset=UTF-8"},
+        )
+    except (requests.ConnectionError, requests.Timeout):
+        trace["rpc_step_status"] = "NETWORK_FAILED"
+        trace["resolution_outcome"] = "GOOGLE_WRAPPER_NETWORK_FAILED"
+        return _record_google_resolution(
+            http, trace, error="GOOGLE_WRAPPER_NETWORK_FAILED"
+        )
+    except requests.RequestException:
+        trace["rpc_step_status"] = "FAILED"
+        trace["resolution_outcome"] = "GOOGLE_WRAPPER_RPC_FAILED"
+        return _record_google_resolution(
+            http, trace, error="GOOGLE_WRAPPER_RPC_FAILED"
+        )
+
+    native, parse_status = _google_rpc_native_url(response.text)
+    if native:
+        trace["rpc_step_status"] = "OK"
+        trace["resolution_outcome"] = "GOOGLE_WRAPPER_DECODED"
+        return _record_google_resolution(http, trace, resolved=native, error=None)
+    if parse_status == "UNPARSEABLE":
+        trace["rpc_step_status"] = "RESPONSE_UNPARSEABLE"
+        trace["resolution_outcome"] = "GOOGLE_WRAPPER_RESPONSE_UNPARSEABLE"
+        return _record_google_resolution(
+            http, trace, error="GOOGLE_WRAPPER_RESPONSE_UNPARSEABLE"
+        )
+    trace["rpc_step_status"] = "NO_NATIVE_URL"
+    trace["resolution_outcome"] = "GOOGLE_WRAPPER_NO_NATIVE_URL"
+    return _record_google_resolution(
+        http, trace, error="GOOGLE_WRAPPER_NO_NATIVE_URL"
+    )
+
+
 def resolve_google_result(http: HTTP, item):
-    link = str(item.get("link") or "")
+    link = canonical_url(str(item.get("link") or ""))
+    trace = {
+        "wrapper_url": link or None,
+        "opaque_id": None,
+        "legacy_resolution_attempted": False,
+        "opaque_decode_attempted": False,
+        "metadata_signature_step_status": "NOT_ATTEMPTED",
+        "rpc_step_status": "NOT_ATTEMPTED",
+        "resolution_outcome": None,
+    }
     if not link:
-        return None, "EMPTY_SEARCH_LINK"
+        trace["resolution_outcome"] = "EMPTY_SEARCH_LINK"
+        return _record_google_resolution(http, trace, error="EMPTY_SEARCH_LINK")
+
+    direct = valid_native_url(link)
+    if direct:
+        trace["resolution_outcome"] = "DIRECT_NATIVE_URL"
+        return _record_google_resolution(http, trace, resolved=direct, error=None)
+
+    if not hasattr(http, "google_resolution_cache"):
+        http.google_resolution_cache = {}
+    if link in http.google_resolution_cache:
+        resolved, error, cached_trace = http.google_resolution_cache[link]
+        event = copy.deepcopy(cached_trace)
+        event["cache_hit"] = True
+        if not hasattr(http, "resolution_events"):
+            http.resolution_events = []
+        http.resolution_events.append(event)
+        return resolved, error
+
+    trace["legacy_resolution_attempted"] = True
     try:
         r = http.get(link)
-    except requests.RequestException as exc:
-        return None, f"SEARCH_RESOLVE_FAILED:{type(exc).__name__}"
+    except (requests.ConnectionError, requests.Timeout):
+        trace["resolution_outcome"] = "GOOGLE_WRAPPER_NETWORK_FAILED"
+        resolved, error = _record_google_resolution(
+            http, trace, error="GOOGLE_WRAPPER_NETWORK_FAILED"
+        )
+        http.google_resolution_cache[link] = (
+            resolved, error, copy.deepcopy(http.resolution_events[-1])
+        )
+        return resolved, error
+    except requests.RequestException:
+        article_id = google_article_id(link)
+        outcome = (
+            "GOOGLE_WRAPPER_SIGNATURE_METADATA_FAILED"
+            if article_id else "SEARCH_RESOLVE_FAILED"
+        )
+        trace["resolution_outcome"] = outcome
+        resolved, error = _record_google_resolution(http, trace, error=outcome)
+        http.google_resolution_cache[link] = (
+            resolved, error, copy.deepcopy(http.resolution_events[-1])
+        )
+        return resolved, error
+
     final = canonical_url(str(r.url))
-    if host_of(final) not in {"news.google.com","www.google.com","google.com"}:
-        return final, None
-    # RSS redirect pages can retain a Google URL; inspect outbound anchors.
+    redirected = valid_native_url(final)
+    if redirected:
+        trace["resolution_outcome"] = "LEGACY_HTTP_REDIRECT"
+        resolved, error = _record_google_resolution(
+            http, trace, resolved=redirected, error=None
+        )
+        http.google_resolution_cache[link] = (
+            resolved, error, copy.deepcopy(http.resolution_events[-1])
+        )
+        return resolved, error
+
     for candidate in outbound_links_from_google_html(r.text):
-        h = host_of(candidate)
-        if h and "google." not in h and h != "news.google.com":
-            return canonical_url(candidate), None
-    return None, "SEARCH_HIT_SNIPPET_ONLY"
+        native = valid_native_url(candidate)
+        if native:
+            trace["resolution_outcome"] = "LEGACY_OUTBOUND_ANCHOR"
+            resolved, error = _record_google_resolution(
+                http, trace, resolved=native, error=None
+            )
+            http.google_resolution_cache[link] = (
+                resolved, error, copy.deepcopy(http.resolution_events[-1])
+            )
+            return resolved, error
+
+    article_id = google_article_id(link)
+    if not article_id:
+        trace["resolution_outcome"] = "GOOGLE_WRAPPER_UNSUPPORTED_FORMAT"
+        resolved, error = _record_google_resolution(
+            http, trace, error="GOOGLE_WRAPPER_UNSUPPORTED_FORMAT"
+        )
+        http.google_resolution_cache[link] = (
+            resolved, error, copy.deepcopy(http.resolution_events[-1])
+        )
+        return resolved, error
+
+    resolved, error = _opaque_google_decode(
+        http, link, article_id, r.text, trace
+    )
+    http.google_resolution_cache[link] = (
+        resolved, error, copy.deepcopy(http.resolution_events[-1])
+    )
+    return resolved, error
 
 def fetch_telegram_post(http: HTTP, url, expected_channel=None):
     ident = tg_identity(url)
