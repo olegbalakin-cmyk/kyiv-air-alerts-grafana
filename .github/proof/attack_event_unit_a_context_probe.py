@@ -80,4 +80,36 @@ for k in ["uncovered_parent_identities","covered_parent_identities","all_parent_
     if isinstance(v,list):
         print(json.dumps({"continuity_collection":k,"count":len(v),"first":v[0] if v else None},ensure_ascii=False,sort_keys=True))
 
+
+
+# Deep probe authoritative classified source and predecessor gap source.
+src=cont.get("authoritative_classification_source") or {}
+print(json.dumps({"authoritative_classification_source_identity":src},ensure_ascii=False,sort_keys=True))
+if src.get("commit") and src.get("path"):
+    sdoc=json.loads(git_show(str(src["commit"]),str(src["path"])))
+    shape("authoritative_classification_source_doc",sdoc)
+    path_parts=str(src.get("classification_list_path") or "").split(".") if src.get("classification_list_path") else []
+    cur=sdoc
+    ok=True
+    for part in path_parts:
+        if isinstance(cur,dict) and part in cur:
+            cur=cur[part]
+        else:
+            ok=False; break
+    if ok:
+        shape("authoritative_classification_list",cur)
+        if isinstance(cur,list) and cur:
+            print(json.dumps({"authoritative_classification_first":cur[0]},ensure_ascii=False,sort_keys=True))
+
+pred=cont.get("predecessor_gap_audit_identity") or {}
+print(json.dumps({"predecessor_gap_audit_identity":pred},ensure_ascii=False,sort_keys=True))
+if pred.get("commit") and pred.get("path"):
+    pdoc=json.loads(git_show(str(pred["commit"]),str(pred["path"])))
+    shape("predecessor_gap_audit_doc",pdoc)
+    for k,v in pdoc.items():
+        if isinstance(v,list) and any(tok in k.lower() for tok in ("parent","episode","identity","classification")):
+            print(json.dumps({"pred_collection":k,"count":len(v),"first_keys":list(v[0].keys()) if v and isinstance(v[0],dict) else None,"first":v[0] if v and isinstance(v[0],dict) else None},ensure_ascii=False,sort_keys=True))
+        elif isinstance(v,dict) and any(tok in k.lower() for tok in ("parent","episode","identity","classification")):
+            print(json.dumps({"pred_collection":k,"type":"dict","keys":list(v.keys())[:120]},ensure_ascii=False,sort_keys=True))
+
 print("CONTEXT_PROBE_DONE")
