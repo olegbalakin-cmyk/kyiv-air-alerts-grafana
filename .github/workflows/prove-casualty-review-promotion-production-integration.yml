@@ -1,0 +1,81 @@
+name: Prove casualty review promotion production integration
+
+on:
+  push:
+    branches:
+      - casualty-review-promotion-production-integration-2026-10-08
+    paths:
+      - ".github/workflows/prove-casualty-review-promotion-production-integration.yml"
+      - "kyiv-air-alerts-grafana/tests/prove_casualty_review_promotion_production_integration.py"
+      - "kyiv-air-alerts-grafana/scripts/review_casualty_candidates.py"
+      - "kyiv-air-alerts-grafana/scripts/update_casualties.py"
+      - "kyiv-air-alerts-grafana/tests/test_casualty_review_promotion.py"
+      - "kyiv-air-alerts-grafana/data/casualties/revisions.csv"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  integration-proof:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Check out integration branch
+        uses: actions/checkout@v4
+        with:
+          ref: casualty-review-promotion-production-integration-2026-10-08
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        working-directory: kyiv-air-alerts-grafana
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements.txt pytest
+
+      - name: Fetch authoritative refs
+        run: |
+          git fetch origin main site-prod multicity-wip-2026-09-16
+
+      - name: Build zero-mutation production snapshot
+        run: |
+          rm -rf /tmp/casualty-production-root /tmp/site-prod-archive
+          mkdir -p /tmp/site-prod-archive
+          git archive origin/site-prod kyiv-air-alerts-grafana/data | tar -x -C /tmp/site-prod-archive
+          mkdir -p /tmp/casualty-production-root/scripts
+          cp -a /tmp/site-prod-archive/kyiv-air-alerts-grafana/data /tmp/casualty-production-root/data
+          cp kyiv-air-alerts-grafana/scripts/update_casualties.py /tmp/casualty-production-root/scripts/update_casualties.py
+          cp kyiv-air-alerts-grafana/scripts/review_casualty_candidates.py /tmp/casualty-production-root/scripts/review_casualty_candidates.py
+
+      - name: Run isolated focused tests
+        working-directory: kyiv-air-alerts-grafana
+        run: python -m pytest -q -s tests/test_casualty_review_promotion.py
+
+      - name: Run production-path integration proof
+        working-directory: kyiv-air-alerts-grafana
+        env:
+          PRODUCTION_ROOT: /tmp/casualty-production-root
+        run: python tests/prove_casualty_review_promotion_production_integration.py
+
+      - name: Assert real production refs unchanged
+        run: |
+          test "$(git rev-parse origin/site-prod)" = "1b7214223e5d6539ae298c8da5903538b3bae25b"
+          test "$(git rev-parse origin/multicity-wip-2026-09-16:kyiv-air-alerts-grafana/data/casualties/multicity_review_queue.json)" = "ef4772dcab812e46ef86123dc046a719c5def4f4"
+          test "$(git rev-parse origin/site-prod:kyiv-air-alerts-grafana/data/casualties/revisions.csv)" = "3b2b04438a12a55a0e42ed3b38a3b3a6ba5135c1"
+
+      - name: Commit proof artifact to integration branch only
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add kyiv-air-alerts-grafana/research/casualty_review_promotion_production_integration_proof_2026-10-08.json
+          if git diff --cached --quiet; then
+            echo "Proof artifact already current"
+          else
+            git commit -m "Record casualty review promotion production integration proof"
+            git push origin HEAD:casualty-review-promotion-production-integration-2026-10-08
+          fi
