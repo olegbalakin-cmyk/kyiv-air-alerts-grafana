@@ -1,0 +1,114 @@
+{
+  "schema_version": 1,
+  "kind": "attack_event_execution_unit_a_shadow_persistence_gap_audit",
+  "verdict": "ATTACK-EVENT EXECUTION UNIT A SHADOW PERSISTENCE GAP AUDIT = BLOCKED",
+  "persistence_action": "NOT_AUTHORIZED_PROJECTION_BLOCKED",
+  "phase": "OFFLINE_PERSISTENCE_REPRESENTABILITY_PREFLIGHT",
+  "first_failing_gate": "UNIT_A_SOURCE_LINK_PROJECTION_NOT_LOSSLESS",
+  "smallest_demonstrated_blocker": "The 18 A3 final contributor references on 10 positive targets resolve to frozen A1 candidate_input objects without source observation_id or content_sha256. The frozen persistence source-link key requires [classification_key,observation_id,content_sha256]. No authorized lossless conversion from classifier candidate_id/decision_ref to source observation_id/content_sha256 has been established.",
+  "blocker_category": "PERSISTENCE_REPRESENTABILITY",
+  "affected_targets_demonstrated": 10,
+  "affected_final_contributor_references": 18,
+  "predecessor_commit": "b98514916ebff9bc65e2b835a5aadf310346e60c",
+  "target_neon_project": "green-cake-44216048",
+  "target_neon_branch": "br-bold-mode-b5rub8pq",
+  "neon_branch_verified": false,
+  "db_transaction_opened": false,
+  "repeatable_read_read_only_transaction": false,
+  "schema_checked": false,
+  "input_artifacts": {
+    "A3": {
+      "path": "research/attack_event_execution_unit_a_classification_replay_2026-10-09.json",
+      "git_blob": "4dfc8aa7132706e2a3a4febd655ffa0a2bd71640",
+      "sha256": "bacbc9e0473a9108b380a4c568115303da5cdb27def595acaf5e2691a6163042",
+      "runner_blob_and_file_sha_verified": true
+    },
+    "A1": {
+      "path": "research/attack_event_execution_unit_a_materialized_inputs_2026-10-07.json",
+      "git_blob": "52e89792352513664428da3a7fcb9b43f79f1ba1",
+      "sha256": "07148ac498a6f4251e356bbf24be0aa40ebf220dd39c5df7ec99177a6f7214cc",
+      "decoded_corpus_sha256": "9b3a1cb44dcf3ad18230309f4e49c3ad04dbe6837fc12ba4f8930bda1e812073",
+      "runner_blob_file_and_decoded_sha_verified": true
+    },
+    "A2": {
+      "path": "research/attack_event_execution_unit_a_classifier_readiness_validation_2026-10-08.json",
+      "git_blob": "96b680bf740a27c10428f6dd2f1ec3ed183277b1",
+      "sha256": "80b679a89b5f9450da6afc663451abb81d131ed9f81bcb2b5c4d86ee41a215fa",
+      "runner_sha_verified": false
+    },
+    "frozen_context": {
+      "path": "research/attack_event_unit_a_frozen_classifier_context_2026-10-08.json",
+      "git_blob": "a0dbd84c7d121cf6a7891fafd6e5db77c616c6e1",
+      "sha256": "469bbc319a093d2e4a480e196b704d84002de336c4fc4cc137b911272fd22fb1",
+      "runner_sha_verified": false
+    }
+  },
+  "frozen_counts": {
+    "target_episodes": 1713,
+    "verdict_distribution": {
+      "STRICT_EVENT_POSITIVE": 9,
+      "SENSITIVITY_EVENT_POSITIVE": 1,
+      "NO_CONFIRMED_EVENT": 1260,
+      "NEEDS_REVIEW": 443
+    },
+    "positive_episodes": 10,
+    "candidate_input_references": 99663,
+    "candidate_store_entries": 3347
+  },
+  "offline_probe": {
+    "actions_run_id": 37902798043,
+    "job_id": 113729040182,
+    "runner_step": "Probe frozen provenance and contributor representability",
+    "step_conclusion": "success",
+    "a3_a1_target_ref_alignment": "PASS",
+    "final_contributor_refs_total": 18,
+    "final_contributor_refs_not_in_decision_refs": 0,
+    "final_contributor_refs_missing_decision_store": 0,
+    "positive_contributor_observation_id_materialized": 0,
+    "positive_contributor_content_sha256_materialized": 0,
+    "positive_contributor_candidate_id_materialized": 18,
+    "positive_contributor_source_url_materialized": 18
+  },
+  "representability": {
+    "complete_projection_constructed": false,
+    "representable_classifications": null,
+    "unrepresentable_classifications": null,
+    "expected_classifications": 1713,
+    "expected_positive_events": 10,
+    "expected_source_links": null,
+    "classification_key_uniqueness": null,
+    "event_key_uniqueness": null,
+    "source_link_key_uniqueness": null,
+    "projection_run_a_sha256": null,
+    "projection_run_b_sha256": null,
+    "projection_semantic_mismatches": null
+  },
+  "db_comparison": {
+    "classification_exact_present": null,
+    "classification_missing_without_prior_revision": null,
+    "classification_missing_with_prior_revision": null,
+    "classification_semantic_conflicts": null,
+    "events_exact_present": null,
+    "events_missing": null,
+    "event_pointer_updates_required": null,
+    "event_withdrawals_required": null,
+    "event_semantic_conflicts": null,
+    "source_links_exact_present": null,
+    "source_links_missing": null,
+    "source_link_semantic_conflicts": null,
+    "bound": null,
+    "unbound": null,
+    "ambiguous": null,
+    "parent_drift": null
+  },
+  "safety": {
+    "sql_select_count": 0,
+    "attempted_db_writes": 0,
+    "actual_db_writes": 0,
+    "ddl_statements": 0,
+    "ingestion_runs_delta": 0,
+    "public_alert_episodes_mutations": 0,
+    "production_mutation": "NO"
+  },
+  "continuation": "STOP BEFORE NEON; no A5, no Unit B or C; next separate task must first establish a frozen lossless evidence/source-identity adapter, without reclassifying A3."
+}
