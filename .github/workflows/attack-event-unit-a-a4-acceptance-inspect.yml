@@ -1,0 +1,42 @@
+name: Unit A A4 Acceptance Artifact Offline Schema Inspection
+on:
+  push:
+    branches:
+      - attack-event-unit-a-a4-resume3-acceptance-audit-2026-10-09
+    paths:
+      - .github/workflows/attack-event-unit-a-a4-acceptance-inspect.yml
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - name: Print bounded frozen JSON schema and independent identity
+        env:
+          PYTHONDONTWRITEBYTECODE: "1"
+        run: |
+          python3 - <<'PY'
+          import json,hashlib,os,subprocess
+          p="research/attack_event_execution_unit_a_shadow_persistence_gap_audit_resume3_2026-10-09.json"
+          with open(p,"rb") as f: data=f.read()
+          print("FILE_BYTES",len(data),"FILE_SHA256",hashlib.sha256(data).hexdigest())
+          print("FILE_GIT_BLOB",subprocess.check_output(["git","hash-object",p],text=True).strip())
+          obj=json.loads(data)
+          seen=[0]
+          def visit(v,path,depth):
+            if seen[0]>=230: return
+            if isinstance(v,dict):
+              print("OBJECT",path,"KEYS",",".join(map(str,list(v.keys())[:160])))
+              seen[0]+=1
+              if depth>0:
+                for k,w in v.items():
+                  if seen[0]>=230:break
+                  if isinstance(w,(list,dict)): visit(w,path+"."+str(k),depth-1)
+            elif isinstance(v,list):
+              print("ARRAY",path,"LENGTH",len(v))
+              seen[0]+=1
+              if depth>0 and len(v)>0: visit(v[0],path+"[0]",depth-1)
+          visit(obj,"root",6)
+          print("STRUCTURE_INSPECTION_DONE")
+          PY
