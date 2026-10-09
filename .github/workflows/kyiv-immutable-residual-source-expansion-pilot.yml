@@ -1,0 +1,125 @@
+name: Kyiv immutable residual source expansion pilot
+on:
+  push:
+    branches:
+      - kyiv-immutable-residual-source-expansion-pilot-2026-10-09
+    paths:
+      - ".github/proof/kyiv_immutable_residual_source_expansion_pilot.py"
+      - ".github/workflows/kyiv-immutable-residual-source-expansion-pilot.yml"
+
+permissions:
+  contents: write
+  actions: read
+
+concurrency:
+  group: kyiv-immutable-residual-source-expansion-pilot-2026-10-09
+  cancel-in-progress: false
+
+jobs:
+  bounded-offline-residual-pilot:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    env:
+      PYTHONDONTWRITEBYTECODE: "1"
+    steps:
+      - name: Checkout isolated proof branch and all history
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: true
+      - name: Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install unchanged classifier dependencies
+        run: python -m pip install 'requests>=2.31,<3' 'beautifulsoup4>=4.12,<5'
+      - name: Prohibit database credentials
+        run: |
+          python - <<'PY'
+          import os
+          deny=[k for k,v in os.environ.items() if v and (k in {"DATABASE_URL","DIRECT_URL","PGHOST","PGUSER","PGPASSWORD","PGDATABASE"} or k.startswith(("NEON_","POSTGRES_","SUPABASE_DB_")))]
+          assert not deny, "DB_CREDENTIAL_PRESENT:"+",".join(sorted(deny))
+          PY
+      - name: Retrieve ONLY existing immutable Github Actions artifacts
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p pilot-input
+          python - <<'PY'
+          import os,requests,zipfile
+          from pathlib import Path
+          repository="olegbalakin-cmyk/kyiv-air-alerts-grafana"
+          session=requests.Session()
+          session.headers.update({"Authorization":"Bearer "+os.environ["GH_TOKEN"],
+              "Accept":"application/vnd.github+json",
+              "X-GitHub-Api-Version":"2022-11-28"})
+          for artifact_id,dirname in ((11608819645,"acquisition"),(11609004684,"replay")):
+              res=session.get(f"https://api.github.com/repos/{repository}/actions/artifacts/{artifact_id}/zip",timeout=120)
+              res.raise_for_status()
+              target=Path("pilot-input")/(dirname+".zip")
+              target.write_bytes(res.content)
+              with zipfile.ZipFile(target) as archive:
+                  archive.extractall(Path("pilot-input")/dirname)
+              print("EXISTING_ARTIFACT_ONLY",artifact_id,dirname)
+          PY
+      - name: Execute verified baseline plus relevant residual singles and bounded combinations
+        run: |
+          python -u .github/proof/kyiv_immutable_residual_source_expansion_pilot.py \
+            --mode primary --corpus-dir pilot-input/acquisition \
+            --prior-replay pilot-input/replay/runner-replay-1.json \
+            --output pilot-primary.json
+      - name: Independent clean process replay A
+        run: |
+          python -u .github/proof/kyiv_immutable_residual_source_expansion_pilot.py \
+            --mode repeat --corpus-dir pilot-input/acquisition \
+            --prior-replay pilot-input/replay/runner-replay-1.json \
+            --primary pilot-primary.json --output pilot-repeat-a.json
+      - name: Independent clean process replay B
+        run: |
+          python -u .github/proof/kyiv_immutable_residual_source_expansion_pilot.py \
+            --mode repeat --corpus-dir pilot-input/acquisition \
+            --prior-replay pilot-input/replay/runner-replay-1.json \
+            --primary pilot-primary.json --output pilot-repeat-b.json
+      - name: Finalize deterministic proof artifact
+        run: |
+          python -u .github/proof/kyiv_immutable_residual_source_expansion_pilot.py \
+            --mode finalize --primary pilot-primary.json \
+            --repeat-a pilot-repeat-a.json --repeat-b pilot-repeat-b.json \
+            --output research/kyiv_immutable_residual_source_expansion_pilot_2026-10-09.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          d=json.loads(Path("research/kyiv_immutable_residual_source_expansion_pilot_2026-10-09.json").read_text())
+          assert d["deterministic_replay_proof"]["episode_verdicts_equal"]==67
+          assert d["evidence_network_fetches"]=={"publisher":0,"search":0,"telegram":0,"wrappers":0,"native":0}
+          assert d["production_mutations"]==d["neon_writes"]==0
+          assert not d["blind_per_episode_inspected"] and not d["historical_backfill_started"]
+          assert d["cumulative_additions_tested"]<=2
+          print("BOUNDED_RESIDUAL_VERDICT="+d["verdict"])
+          PY
+      - name: Commit ONLY proof JSON on isolated proof branch
+        run: |
+          git add research/kyiv_immutable_residual_source_expansion_pilot_2026-10-09.json
+          test "$(git diff --cached --name-only)" = "research/kyiv_immutable_residual_source_expansion_pilot_2026-10-09.json"
+          git -c user.name="github-actions[bot]" \
+            -c user.email="41898282+github-actions[bot]@users.noreply.github.com" \
+            commit -m "Record immutable residual eligibility pilot proof"
+          git push origin HEAD:kyiv-immutable-residual-source-expansion-pilot-2026-10-09
+      - name: Verify bounded branch mutations
+        run: |
+          test "$(git status --porcelain)" = ""
+          git diff --name-only cb46d7b8232bc3af75c29f40592b731001aed8ea HEAD
+          git rev-parse HEAD
+          sha256sum research/kyiv_immutable_residual_source_expansion_pilot_2026-10-09.json
+      - name: Upload proof artifact even on failure
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: kyiv-immutable-residual-source-expansion-pilot
+          path: |
+            pilot-primary.json
+            pilot-repeat-a.json
+            pilot-repeat-b.json
+            research/kyiv_immutable_residual_source_expansion_pilot_2026-10-09.json
+          if-no-files-found: warn
+          retention-days: 30
