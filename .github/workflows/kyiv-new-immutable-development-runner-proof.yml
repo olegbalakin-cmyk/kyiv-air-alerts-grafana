@@ -1,0 +1,101 @@
+name: Kyiv new immutable development runner proof
+
+on:
+  push:
+    branches:
+      - kyiv-new-immutable-development-runner-proof-2026-10-09
+
+permissions:
+  contents: read
+
+concurrency:
+  group: kyiv-new-immutable-development-runner-proof-2026-10-09
+  cancel-in-progress: false
+
+jobs:
+  acquire-and-freeze:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install existing evidence-extraction dependencies
+        run: python -m pip install 'requests>=2.31,<3' 'beautifulsoup4>=4.12,<5'
+      - name: Assert no DB credentials
+        run: |
+          python - <<'PY'
+          import os
+          denied = [x for x, v in os.environ.items() if v and (x in {"DATABASE_URL","DIRECT_URL","PGHOST","PGUSER","PGPASSWORD","PGDATABASE"} or x.startswith(("NEON_","POSTGRES_","SUPABASE_DB_")))]
+          assert not denied, "DB_CREDENTIAL_PRESENT:" + ",".join(sorted(denied))
+          PY
+      - name: Acquire and freeze immutable development corpus on runner
+        run: |
+          python -u .github/proof/kyiv_new_immutable_development_acquire.py --output-dir runner-proof
+      - name: Preserve acquisition evidence even if gate fails
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: kyiv-immutable-development-acquisition
+          path: runner-proof/
+          if-no-files-found: warn
+          retention-days: 30
+
+  offline-same-corpus-replay:
+    needs: acquire-and-freeze
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install existing classifier dependencies
+        run: python -m pip install 'requests>=2.31,<3' 'beautifulsoup4>=4.12,<5'
+      - name: Download immutable corpus from Job A
+        uses: actions/download-artifact@v4
+        with:
+          name: kyiv-immutable-development-acquisition
+          path: runner-proof
+      - name: Replay pass 1 in clean offline process
+        run: |
+          python -u .github/proof/kyiv_new_immutable_development_replay.py --corpus-dir runner-proof --output runner-replay-1.json
+      - name: Replay pass 2 in clean offline process
+        run: |
+          python -u .github/proof/kyiv_new_immutable_development_replay.py --corpus-dir runner-proof --output runner-replay-2.json
+      - name: Verify byte-identical candidate and verdict replay
+        run: |
+          cmp runner-replay-1.json runner-replay-2.json
+          python - <<'PY'
+          import json,hashlib
+          from pathlib import Path
+          x=json.loads(Path('runner-replay-1.json').read_text())
+          assert len(x['results']['SOURCE SET 0']['per_episode'])==67
+          assert len(x['results']['VARIANT A']['per_episode'])==67
+          assert x['evidence_network_fetches']=={'publisher':0,'search':0,'telegram':0}
+          assert not x['blind_per_episode_data_inspected']
+          assert x['blind_wrapper_decode_attempts']==0
+          assert x['neon_writes']==x['production_mutations']==0
+          summary={'replay_deterministic':True,'sha256':hashlib.sha256(Path('runner-replay-1.json').read_bytes()).hexdigest(),'new_uncleared_hold_promotions':len(x['new_uncleared_holds']),'selected_development_baseline':x['selected_development_baseline']}
+          Path('runner-proof-summary.json').write_text(json.dumps(summary,sort_keys=True,indent=2)+'\n')
+          print('JOB_B_DETERMINISM=YES')
+          print('JOB_B_FINAL_SUMMARY='+json.dumps(summary,sort_keys=True))
+          PY
+      - name: Upload final immutable proof artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: kyiv-immutable-development-replay
+          path: |
+            runner-replay-1.json
+            runner-replay-2.json
+            runner-proof-summary.json
+          if-no-files-found: warn
+          retention-days: 30
