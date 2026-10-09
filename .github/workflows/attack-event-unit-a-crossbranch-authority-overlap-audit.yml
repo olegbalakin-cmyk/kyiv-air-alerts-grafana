@@ -1,0 +1,23 @@
+name: Unit A crossbranch authority overlap offline audit
+on:
+  push:
+    branches:
+      - attack-event-unit-a-crossbranch-authority-overlap-audit-2026-10-09
+    paths:
+      - .github/workflows/attack-event-unit-a-crossbranch-authority-overlap-audit.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  offline-audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+          persist-credentials: true
+      - name: Structural audit probe (zero external evidence, zero database access)
+        shell: bash
+        run: |
+          python3 .github/proof/attack_event_unit_a_crossbranch_authority_overlap_audit.py
