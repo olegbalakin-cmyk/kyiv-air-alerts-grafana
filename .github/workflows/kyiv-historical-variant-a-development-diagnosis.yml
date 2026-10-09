@@ -1,0 +1,86 @@
+name: Kyiv historical Variant A development-only freeze and failure diagnosis
+
+on:
+  push:
+    branches: [kyiv-historical-variant-a-development-diagnosis-2026-10-09]
+    paths:
+      - ".github/proof/kyiv_historical_variant_a_development_failure_diagnosis.py"
+      - ".github/workflows/kyiv-historical-variant-a-development-diagnosis.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: kyiv-historical-variant-a-development-diagnosis-2026-10-09
+  cancel-in-progress: false
+
+jobs:
+  read-only-development-replay:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 180
+    env:
+      PYTHONDONTWRITEBYTECODE: "1"
+      PYTHONUNBUFFERED: "1"
+    steps:
+      - name: Checkout isolated development branch
+        uses: actions/checkout@v4
+        with:
+          ref: kyiv-historical-variant-a-development-diagnosis-2026-10-09
+          fetch-depth: 0
+          clean: true
+          persist-credentials: true
+
+      - name: Install Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install existing source-native extraction dependencies
+        run: python -m pip install --disable-pip-version-check requests beautifulsoup4
+
+      - name: Hard gate no database access
+        shell: bash
+        run: |
+          set -euo pipefail
+          for key in DATABASE_URL NEON_DATABASE_URL NEON_URL PGHOST PGPORT PGDATABASE PGUSER PGPASSWORD; do
+            test -z "${!key-}" || { echo "Unexpected database configuration: $key"; exit 1; }
+          done
+
+      - name: Check Python syntax
+        run: python -m py_compile .github/proof/kyiv_historical_variant_a_development_failure_diagnosis.py
+
+      - name: Replay frozen Variant A on only development cohort
+        run: python .github/proof/kyiv_historical_variant_a_development_failure_diagnosis.py
+
+      - name: Upload bounded proof artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: kyiv-historical-variant-a-dev-${{ github.run_id }}
+          path: |
+            research/kyiv_historical_source_set_variant_a_freeze_2026-10-09.json
+            research/kyiv_historical_variant_a_development_failure_diagnosis_2026-10-09.json
+          if-no-files-found: warn
+          retention-days: 30
+
+      - name: Assert and persist only two proof files
+        if: success()
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          test -f research/kyiv_historical_source_set_variant_a_freeze_2026-10-09.json
+          test -f research/kyiv_historical_variant_a_development_failure_diagnosis_2026-10-09.json
+          git add research/kyiv_historical_source_set_variant_a_freeze_2026-10-09.json
+          git add research/kyiv_historical_variant_a_development_failure_diagnosis_2026-10-09.json
+          while IFS= read -r changed; do
+            case "$changed" in
+              research/kyiv_historical_source_set_variant_a_freeze_2026-10-09.json|research/kyiv_historical_variant_a_development_failure_diagnosis_2026-10-09.json) ;;
+              *) echo "Unexpected tracked path: $changed"; exit 1 ;;
+            esac
+          done < <(git diff --cached --name-only)
+          git diff --cached --quiet && exit 0
+          git commit -m "Record development-only Variant A freeze and failure diagnosis"
+          git push origin HEAD:kyiv-historical-variant-a-development-diagnosis-2026-10-09
