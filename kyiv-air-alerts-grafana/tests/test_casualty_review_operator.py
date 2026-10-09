@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""25 synthetic operator acceptance checks. No production refs or real data."""
+"""29 synthetic operator acceptance checks. No production refs or real data."""
 import csv
 import json
 import sys
@@ -10,13 +10,24 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
 from casualty_review_operator import (
-    RefStaleError, apply_preview, build_preview, git_blob_sha, render_summary,
+    ALLOWED_CITY_KEYS, RefStaleError, apply_preview, build_preview, git_blob_sha,
+    render_summary,
 )
 from review_casualty_candidates import REVISION_FIELDS, load_queue, load_revision_rows
 
 C = "c-one"
 OTHER = "c-two"
 URL = "https://example.org/a"
+# Frozen production route membership: site-prod at e71412503f27c3301d30bff841e449c901138e33.
+# Authority: master_20cities_manifest.json (20) + cities/{kherson,odesa,zaporizhzhia}/manifest.json (3).
+EXPECTED_PRODUCTION_CITY_KEYS = frozenset({
+    "cherkasy", "chernihiv", "chernivtsi", "dnipro",
+    "ivano-frankivsk", "kharkiv", "kherson", "khmelnytskyi",
+    "kropyvnytskyi", "kyiv", "lutsk", "lviv",
+    "mykolaiv", "odesa", "poltava", "rivne",
+    "sevastopol", "sumy", "ternopil", "uzhhorod",
+    "vinnytsia", "zaporizhzhia", "zhytomyr",
+})
 def candidate(cid=C, city="sumy", status="needs_review", title="S"):
     return dict(candidate_id=cid, city_key=city, status=status, url=URL, title=title,
                 snippet="synthetic", source="test", published_at="2026-10-01")
@@ -117,6 +128,9 @@ class OperatorAcceptance(unittest.TestCase):
         with self.assertRaises(RefStaleError): self.apply(pre, pre["state"])
     def test_11_invalid_city(self):
         with self.assertRaises(ValueError): self.preview(value={**payload(),"city_key":"fictional"})
+        self.write_queue([candidate(city="fictional")])
+        with self.assertRaisesRegex(ValueError, "Unknown production city_key"):
+            self.preview(value={**payload(), "city_key": "fictional"})
     def test_12_invalid_attack_date(self):
         with self.assertRaises(ValueError): self.preview(value={**payload(),"attack_date":"2026-99-77"})
     def test_13_zero_deaths(self):
@@ -193,6 +207,24 @@ class OperatorAcceptance(unittest.TestCase):
             apply_preview(pre,queue_path=self.queue,revisions_path=self.rev,
                           current_state=self.state(),reviewed_by="github-actions[bot]",
                           workflow_run_id="1")
+
+    def test_28_all_authoritative_23_cities_accepted(self):
+        self.assertEqual(len(EXPECTED_PRODUCTION_CITY_KEYS), 23)
+        for city in sorted(EXPECTED_PRODUCTION_CITY_KEYS):
+            with self.subTest(city=city):
+                self.write_queue([candidate(city=city)])
+                request = payload(record=f"casualty:{city}:2026-10-01:synthetic")
+                request["city_key"] = city
+                preview = self.preview(value=request)
+                self.assertEqual(preview["payload"]["city_key"], city)
+                self.assertEqual(preview["effect"]["projected_revision_increment"], 1)
+
+    def test_29_exact_production_city_allowlist(self):
+        self.assertEqual(len(EXPECTED_PRODUCTION_CITY_KEYS), 23)
+        self.assertEqual(len(ALLOWED_CITY_KEYS), 23)
+        self.assertEqual(EXPECTED_PRODUCTION_CITY_KEYS - ALLOWED_CITY_KEYS, set())
+        self.assertEqual(ALLOWED_CITY_KEYS - EXPECTED_PRODUCTION_CITY_KEYS, set())
+        self.assertEqual(ALLOWED_CITY_KEYS, EXPECTED_PRODUCTION_CITY_KEYS)
 
 if __name__=="__main__":
     unittest.main(verbosity=2)

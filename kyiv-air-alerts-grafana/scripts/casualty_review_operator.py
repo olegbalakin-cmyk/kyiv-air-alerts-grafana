@@ -29,6 +29,8 @@ ALLOWED_CITY_KEYS = frozenset({
     "kyiv", "kharkiv", "zaporizhzhia", "cherkasy", "zhytomyr", "dnipro",
     "khmelnytskyi", "poltava", "rivne", "sumy", "vinnytsia",
     "kropyvnytskyi", "lviv", "chernihiv", "odesa",
+    "sevastopol", "kherson", "mykolaiv", "lutsk",
+    "uzhhorod", "ivano-frankivsk", "ternopil", "chernivtsi",
 })
 STATES = ("wip_head", "site_prod_head", "queue_blob_sha", "revisions_blob_sha")
 REVIEW_DECISIONS = ("CONFIRM", "REJECT", "HOLD", "REOPEN")
