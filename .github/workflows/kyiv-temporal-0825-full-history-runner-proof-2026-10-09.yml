@@ -1,0 +1,222 @@
+name: Kyiv frozen 08:25 canonical uniqueness proof runner
+
+on:
+  push:
+    branches:
+      - kyiv-temporal-0825-full-history-runner-proof-2026-10-09
+
+permissions:
+  contents: read
+
+jobs:
+  canonical-uniqueness:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: e460bc30524deb8abc37923276d78f6dab1450a4
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install pinned-loader import prerequisites only
+        run: python -m pip install --disable-pip-version-check requests beautifulsoup4
+      - name: Run bounded read-only canonical loader proof
+        env:
+          PYTHONDONTWRITEBYTECODE: '1'
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from __future__ import annotations
+          import hashlib
+          import json
+          import os
+          import subprocess
+          import sys
+          from collections import Counter
+          from datetime import datetime, timedelta, timezone
+          from pathlib import Path
+          from zoneinfo import ZoneInfo
+
+          EXPECTED_COMMIT = "e460bc30524deb8abc37923276d78f6dab1450a4"
+          EXPECTED_BLOB = "ab9babd3527055256017867869bc62b96a6ebffc"
+          EXPECTED_REPLAY_SHA256 = "5df4be4ae6a0518dbde7b89cafbfeae76cc23170a84071afd4f6771a9ef301bf"
+          EXPECTED_MONITOR_SHA256 = "499df82ee4a0e9997f31c381850241bc19667ffc2b3882e7a1123df52c900c18"
+          EXPECTED_ID = "cfd8acaf2ae96fb3ab6508d6"
+          EXPECTED_START = "2024-08-26T02:57:22Z"
+          EXPECTED_END = "2024-08-26T10:43:22Z"
+          EXPECTED_RAW_START = "2024-08-26T05:57:22+03:00"
+          EXPECTED_RAW_END = "2024-08-26T13:43:22+03:00"
+          ARTIFACT = Path("research/kyiv_immutable_temporal_0825_full_history_uniqueness_proof_2026-10-09.json")
+
+          def guard(condition, label):
+              if not condition:
+                  raise SystemExit(label)
+
+          def sha256(path):
+              return hashlib.sha256(path.read_bytes()).hexdigest()
+
+          def git(*args):
+              return subprocess.check_output(["git", *args], text=True).strip()
+
+          repo = Path.cwd()
+          app_root = repo / "kyiv-air-alerts-grafana"
+          raw_path = app_root / "data/alerts_combined.json"
+          replay_path = app_root / "scripts/replay_explosion_history.py"
+          monitor_path = app_root / "scripts/monitor_explosion_candidates.py"
+          guard(os.environ.get("GITHUB_REF") == "refs/heads/kyiv-temporal-0825-full-history-runner-proof-2026-10-09", "UNEXPECTED_WORKFLOW_BRANCH")
+          guard(git("rev-parse", "HEAD") == EXPECTED_COMMIT, "ACCEPTED_V2_COMMIT_MISMATCH")
+          guard(git("rev-parse", f"HEAD:{raw_path.relative_to(repo)}") == EXPECTED_BLOB, "FULL-HISTORY KYIV CANONICAL SOURCE IDENTITY MISMATCH")
+          guard(sha256(replay_path) == EXPECTED_REPLAY_SHA256, "PINNED_REPLAY_LOADER_SHA256_MISMATCH")
+          guard(sha256(monitor_path) == EXPECTED_MONITOR_SHA256, "PINNED_MONITOR_SHA256_MISMATCH")
+
+          raw_rows = json.loads(raw_path.read_text(encoding="utf-8"))
+          guard(isinstance(raw_rows, list) and len(raw_rows) == 2456, "FULL-HISTORY KYIV CANONICAL SOURCE IDENTITY MISMATCH")
+
+          sys.dont_write_bytecode = True
+          sys.path.insert(0, str(app_root / "scripts"))
+          import monitor_explosion_candidates as monitor
+          import replay_explosion_history as replay
+
+          with replay.network_blocked():
+              episodes, source_files = replay.load_historical_episodes(app_root, "kyiv", monitor)
+          guard(source_files == ["data/alerts_combined.json"], "ACCEPTED_V2_CANONICAL_SOURCE_LIST_MISMATCH")
+          guard(len(episodes) == 2456, "ACCEPTED_V2_CANONICAL_EPISODE_COUNT_MISMATCH")
+          ids = [str(x.get("episode_id") or "") for x in episodes]
+          guard(len(ids) == 2456 and all(ids) and len(set(ids)) == 2456, "ACCEPTED_V2_CANONICAL_EPISODE_IDS_MISMATCH")
+
+          kyiv_tz = ZoneInfo("Europe/Kyiv")
+          local_dt = datetime(2024, 8, 26, 8, 25, tzinfo=kyiv_tz)
+          utc_dt = local_dt.astimezone(timezone.utc)
+          guard(local_dt.utcoffset() == timedelta(hours=3) and utc_dt.isoformat() == "2024-08-26T05:25:00+00:00", "08:25 TIMEZONE CONVERSION MISMATCH")
+          day_start_local = datetime(2024, 8, 26, tzinfo=kyiv_tz)
+          day_end_local = day_start_local + timedelta(days=1)
+          day_start_utc = day_start_local.astimezone(timezone.utc)
+          day_end_utc = day_end_local.astimezone(timezone.utc)
+
+          def entry(ep):
+              start = monitor.parse_dt(ep.get("alert_start"))
+              end = monitor.parse_dt(ep.get("alert_end"))
+              guard(start is not None and end is not None and end > start, "MALFORMED_CANONICAL_EPISODE_INTERVAL")
+              return {
+                  "episode_id": str(ep["episode_id"]),
+                  "utc_start": monitor.iso(start),
+                  "utc_end": monitor.iso(end),
+                  "kyiv_local_start": start.astimezone(kyiv_tz).isoformat(),
+                  "kyiv_local_end": end.astimezone(kyiv_tz).isoformat(),
+                  "contains_0825_local": start <= utc_dt <= end,
+              }
+
+          full_matches = []
+          neighborhood = []
+          for episode in episodes:
+              row = entry(episode)
+              start = monitor.parse_dt(row["utc_start"])
+              end = monitor.parse_dt(row["utc_end"])
+              if row["contains_0825_local"]:
+                  full_matches.append(row)
+              if start < day_end_utc and end >= day_start_utc:
+                  neighborhood.append(row)
+          neighborhood.sort(key=lambda x: (x["utc_start"], x["episode_id"]))
+          full_matches.sort(key=lambda x: x["episode_id"])
+
+          raw_matches = []
+          for row in raw_rows:
+              if not isinstance(row, dict):
+                  continue
+              start = monitor.parse_dt(row.get("start"))
+              end = monitor.parse_dt(row.get("end"))
+              if start and end and start <= utc_dt <= end:
+                  raw_matches.append({"start": row["start"], "end": row["end"]})
+          guard(len(raw_matches) == 1 and raw_matches[0] == {"start": EXPECTED_RAW_START, "end": EXPECTED_RAW_END}, "RAW_SOURCE_CONTAINMENT_IDENTITY_MISMATCH")
+
+          matched = full_matches[0] if len(full_matches) == 1 else None
+          identity_equal = bool(matched and matched["episode_id"] == EXPECTED_ID)
+          canonical_raw_interval_equal = bool(
+              matched
+              and matched["utc_start"] == EXPECTED_START
+              and matched["utc_end"] == EXPECTED_END
+              and matched["kyiv_local_start"] == EXPECTED_RAW_START
+              and matched["kyiv_local_end"] == EXPECTED_RAW_END
+          )
+          proven = bool(len(full_matches) == 1 and identity_equal and canonical_raw_interval_equal)
+          if proven:
+              outcome = "YES"
+              verdict = "KYIV 08:25 FULL-HISTORY EPISODE UNIQUENESS = PROVEN"
+              next_recommendation = "FINALIZE FIVE-CASE TEMPORAL FORENSIC AUDIT WITH 08:25 AS THE ONLY SAFE DIRECT-EVENT-CLOCK CASE"
+          else:
+              if len(full_matches) > 1:
+                  outcome = "NO — MULTIPLE_EPISODES"
+              elif len(full_matches) == 0:
+                  outcome = "NO — NO_EPISODE"
+              else:
+                  outcome = "NO — IDENTITY_MISMATCH"
+              verdict = "KYIV 08:25 FULL-HISTORY EPISODE UNIQUENESS = NOT UNIQUE"
+              next_recommendation = "RECLASSIFY 08:25 CASE AS NOT SAFE FOR PARSER-ONLY REPAIR"
+
+          proof = {
+              "schema": "kyiv-immutable-temporal-0825-full-history-uniqueness-proof-v1",
+              "accepted_v2_formalization": {
+                  "tested_head": EXPECTED_COMMIT,
+                  "proof_branch": "historical-v2-formalization-kyiv-proof-2026-10-02",
+                  "proof_artifact": "research/historical_v2_formalization_kyiv_proof_2026-10-02.json",
+                  "overall_verdict": "PROVEN",
+                  "canonical_source_files": ["data/alerts_combined.json"],
+                  "target_state_sha256": "ab008e7acedb04f1a15f64558e4470ace5167be925fa5b60fb4d30ec3292e332",
+              },
+              "canonical_source_path": "kyiv-air-alerts-grafana/data/alerts_combined.json",
+              "canonical_source_git_blob_sha": EXPECTED_BLOB,
+              "accepted_replay_loader_sha256": sha256(replay_path),
+              "accepted_monitor_sha256": sha256(monitor_path),
+              "canonical_source_files": source_files,
+              "raw_canonical_row_count": len(raw_rows),
+              "canonical_episode_count": len(episodes),
+              "nonempty_canonical_episode_id_count": sum(bool(x) for x in ids),
+              "unique_canonical_episode_id_count": len(set(ids)),
+              "target_development_episode_id": EXPECTED_ID,
+              "local_event_timestamp": local_dt.isoformat(),
+              "timezone": "Europe/Kyiv",
+              "utc_offset": "+03:00",
+              "utc_offset_seconds": int(local_dt.utcoffset().total_seconds()),
+              "utc_event_timestamp": monitor.iso(utc_dt),
+              "full_history_containment_match_count": len(full_matches),
+              "full_history_containment_matches": full_matches,
+              "same_local_day": "2024-08-26",
+              "same_local_day_episode_count": len(neighborhood),
+              "same_local_day_neighborhood": neighborhood,
+              "raw_source_containment_matches": raw_matches,
+              "raw_source_interval_cross_check": {"start": EXPECTED_RAW_START, "end": EXPECTED_RAW_END},
+              "target_identity_equality": identity_equal,
+              "canonical_raw_interval_equality": canonical_raw_interval_equal,
+              "full_history_uniqueness_equality": proven,
+              "full_history_uniqueness_proven": outcome,
+              "blind_per_episode_inspected": False,
+              "public_evidence_network_fetches": 0,
+              "publisher_fetches": 0,
+              "telegram_fetches": 0,
+              "historical_backfill_started": False,
+              "neon_writes": 0,
+              "production_mutations": 0,
+              "classifier_code_modified": False,
+              "temporal_parser_modified": False,
+              "evidence_segment_selection_modified": False,
+              "next_recommended_task": next_recommendation,
+              "verdict": verdict,
+          }
+          ARTIFACT.parent.mkdir(exist_ok=True, parents=True)
+          ARTIFACT.write_text(json.dumps(proof, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+          changed = git("status", "--porcelain").splitlines()
+          guard(changed == ["?? " + str(ARTIFACT)], "NON_PROOF_WORKTREE_MUTATION")
+          print("PROOF_JSON_BEGIN")
+          print(json.dumps(proof, ensure_ascii=False, sort_keys=True, separators=(",", ":")))
+          print("PROOF_JSON_END")
+          print("PROOF_FILE_SHA256=" + sha256(ARTIFACT))
+          PY
+      - name: Upload proof-only JSON artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: kyiv-0825-frozen-full-history-uniqueness-proof
+          path: research/kyiv_immutable_temporal_0825_full_history_uniqueness_proof_2026-10-09.json
+          if-no-files-found: error
