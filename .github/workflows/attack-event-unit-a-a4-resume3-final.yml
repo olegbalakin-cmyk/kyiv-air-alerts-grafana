@@ -1,0 +1,126 @@
+name: Unit A A4 resume3 canonical projection and read-only shadow
+on:
+  push:
+    branches:
+      - attack-event-unit-a-a4-shadow-gap-audit-resume3-2026-10-09
+    paths:
+      - .github/workflows/attack-event-unit-a-a4-resume3-final.yml
+permissions:
+  contents: write
+jobs:
+  a4-resume3:
+    runs-on: ubuntu-latest
+    timeout-minutes: 105
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: true
+      - name: Fetch immutable authorities and historical queue branch
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch --no-tags origin multicity-wip-2026-09-16
+          for sha in \
+            d8fe91fdbfdcf8d1b851a52358d7eb441308e0ee \
+            1422e8482303ec9262647ca55fef753a9aa2b3ea \
+            2d07c81147932d39cb3a9d9934830f6eb707ee37 \
+            a0eb594dd4240d1d923ca5262725fc42f4807338 \
+            6a891372d4d59f9f2454123afcac2a21ef042d68 \
+            41bec58604420333dc71910ec38f4a785f6b108e \
+            51adc76b715669e46e8c2c936906022d4d96ed44 \
+            71cb6f6fbe856cc7b96759310fe9cc9c71cc0453 \
+            41ee8d160c34145b9d9a51b9da095084cf342824; do
+            git fetch --no-tags origin "$sha"
+          done
+          test "$(git merge-base HEAD c7886eece726ec4b1a0b7f7b2680c43ab7c979c6)" = c7886eece726ec4b1a0b7f7b2680c43ab7c979c6
+      - name: Independently construct both exact offline projections
+        env:
+          GIT_NO_LAZY_FETCH: "1"
+          PYTHONDONTWRITEBYTECODE: "1"
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -z "${PHASE1_PROD_SHADOW_DATABASE_URL:-}"
+          python3 -B .github/proof/attack_event_unit_a_a4_resume3.py --offline
+          python3 - <<'PY'
+          import json
+          r=json.load(open("research/attack_event_execution_unit_a_shadow_persistence_gap_audit_resume3_2026-10-09.json"))
+          print("OFFLINE_PROJECTION_GATE="+r["A4_OFFLINE_PROJECTION_GATE"])
+          print("NEON_CONTACTED="+str(r["neon"]["contacted"]))
+          assert not r["neon"]["contacted"]
+          assert r["safety"]["db_writes_attempted"] == 0
+          PY
+      - name: Install PostgreSQL client (no connection in this step)
+        if: success()
+        run: python3 -m pip install --disable-pip-version-check 'psycopg[binary]==3.2.10'
+      - name: Bounded permanent-shadow SELECT-only audit
+        if: success()
+        env:
+          PHASE1_PROD_SHADOW_DATABASE_URL: ${{ secrets.PHASE1_PROD_SHADOW_DATABASE_URL }}
+          PHASE1_PROD_SHADOW_BRANCH_ID: ${{ vars.PHASE1_PROD_SHADOW_BRANCH_ID }}
+          A4_EXPECTED_SHADOW_HOST: ep-still-violet-b5bg6mhp.c-7.us-east-2.aws.neon.tech
+          PYTHONDONTWRITEBYTECODE: "1"
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -B .github/proof/attack_event_unit_a_a4_resume3_shadow.py
+      - name: Freeze exact A4 result and clean branch to single artifact
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          artifact=research/attack_event_execution_unit_a_shadow_persistence_gap_audit_resume3_2026-10-09.json
+          test -f "$artifact"
+          python3 - "$artifact" <<'PY'
+          import json,sys
+          r=json.load(open(sys.argv[1]))
+          assert r["A5_AUTHORIZED"] == "NO"
+          assert r["safety"]["classifier_executions"] == 0
+          assert r["safety"]["matching_executions"] == 0
+          assert r["safety"]["composition_executions"] == 0
+          assert r["safety"]["discovery_executions"] == 0
+          assert r["safety"]["db_writes_attempted"] == 0
+          assert r["safety"]["db_writes_committed"] == 0
+          assert r["safety"]["a5_executions"] == 0
+          assert r["safety"]["production_mutation"] == "NO"
+          assert r["verdict"] in (
+            "ATTACK-EVENT EXECUTION UNIT A SHADOW PERSISTENCE GAP AUDIT = BLOCKED",
+            "ATTACK-EVENT EXECUTION UNIT A SHADOW PERSISTENCE GAP AUDIT = PROVEN")
+          if r["verdict"].endswith("PROVEN"):
+            assert r["A4_CANONICAL_PROJECTION_GATE"]=="PASS"
+            assert r["A5_PERSISTENCE_DELTA_GATE"]=="PASS"
+            assert r["neon"]["read_only_transaction"] is True
+          else:
+            assert r["A5_PERSISTENCE_DELTA_GATE"]=="FAIL"
+            assert r["first_failing_gate"] is not None
+          print("VERDICT="+r["verdict"])
+          print("FIRST_FAILING_GATE="+str(r["first_failing_gate"]))
+          print("A5_REQUIRED="+r["A5_REQUIRED"])
+          print("A5_AUTHORIZED=NO")
+          print("SHADOW_SELECT_COUNT="+str(r["neon"]["select_count"]))
+          PY
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "$artifact"
+          git commit -m "Freeze Unit A A4 resume3 bounded read-only shadow gap audit"
+          artifact_commit="$(git rev-parse HEAD)"
+          before="$(git hash-object "$artifact")"
+          echo "ARTIFACT_COMMIT=$artifact_commit"
+          echo "ARTIFACT_BLOB=$(git rev-parse HEAD:$artifact)"
+          echo "ARTIFACT_SHA256=$(sha256sum "$artifact" | cut -d' ' -f1)"
+          rm -f .github/proof/attack_event_unit_a_a4_resume3.py
+          rm -f .github/proof/attack_event_unit_a_a4_resume3_shadow.py
+          rm -f .github/proof/.unit_a_a4_resume3_projection.tmp.json
+          rm -f .github/workflows/attack-event-unit-a-a4-shadow-gap-audit-resume3.yml
+          rm -f .github/workflows/attack-event-unit-a-a4-resume3-final.yml
+          git add -A .github/proof/attack_event_unit_a_a4_resume3.py .github/proof/attack_event_unit_a_a4_resume3_shadow.py .github/workflows/attack-event-unit-a-a4-shadow-gap-audit-resume3.yml .github/workflows/attack-event-unit-a-a4-resume3-final.yml
+          git commit -m "Remove temporary Unit A A4 resume3 runner and workflow"
+          test "$before" = "$(git hash-object "$artifact")"
+          test "$(git diff --name-status c7886eece726ec4b1a0b7f7b2680c43ab7c979c6..HEAD)" = "$(printf 'A\tresearch/attack_event_execution_unit_a_shadow_persistence_gap_audit_resume3_2026-10-09.json')"
+          echo "FINAL_HEAD=$(git rev-parse HEAD)"
+          echo "FINAL_DIFF_FILE_COUNT=1"
+          echo "TEMP_WORKFLOW_REMOVED=YES"
+          echo "TEMP_HARNESS_REMOVED=YES"
+          echo "PRODUCTION_MUTATION=NO"
+          git push origin HEAD:attack-event-unit-a-a4-shadow-gap-audit-resume3-2026-10-09
