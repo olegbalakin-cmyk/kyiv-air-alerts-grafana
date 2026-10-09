@@ -101,10 +101,14 @@ jobs:
         run: |
           git add research/kyiv_immutable_residual_source_expansion_pilot_2026-10-09.json
           test "$(git diff --cached --name-only)" = "research/kyiv_immutable_residual_source_expansion_pilot_2026-10-09.json"
-          git -c user.name="github-actions[bot]" \
-            -c user.email="41898282+github-actions[bot]@users.noreply.github.com" \
-            commit -m "Record immutable residual eligibility pilot proof"
-          git push origin HEAD:kyiv-immutable-residual-source-expansion-pilot-2026-10-09
+          if ! git diff --cached --quiet; then
+            git -c user.name="github-actions[bot]" \
+              -c user.email="41898282+github-actions[bot]@users.noreply.github.com" \
+              commit -m "Record immutable residual eligibility pilot proof"
+            git push origin HEAD:kyiv-immutable-residual-source-expansion-pilot-2026-10-09
+          else
+            echo "IDENTICAL_EXISTING_PROOF_JSON"
+          fi
       - name: Verify bounded branch mutations
         run: |
           test "$(git status --porcelain --untracked-files=no)" = ""
