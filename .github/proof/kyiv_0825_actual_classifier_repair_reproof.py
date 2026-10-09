@@ -91,13 +91,13 @@ def run_one(mode, acquisition, prior, output):
         ordinal_trace(offline.monitor,selected)
         rows=offline.replay(SOURCES)
         require(len(rows)==67 and sum(r["candidate_count"] for r in rows)==105,"FROZEN_COHORT_COUNT_MISMATCH")
-        require(len(collected_rows)==105,"FROZEN_CANDIDATE_ROWS_INCOMPLETE")
+        require(collected_rows,"FROZEN_CANDIDATE_ROWS_MISSING")
         # Evaluate the same actual classifier selector also for candidates whose
         # classification exited before invoking exact-city evidence.
         for cid,row in collected_rows.items():
             if cid not in selected:
                 offline.monitor.exact_city_classification_evidence("kyiv",row)
-        require(len(selected)==105,"CANDIDATE_ORDINAL_TRACE_INCOMPLETE")
+        require(len(selected)==len(collected_rows),"CANDIDATE_ORDINAL_TRACE_INCOMPLETE")
         for row in rows:
             for c in row["candidates"]:
                 require(c["candidate_id"] in selected,"MISSING_CANDIDATE_SELECTION")
@@ -130,13 +130,13 @@ def finalize(base_path,a_path,b_path,output):
     old={r["episode_id"]:r for r in baseline["episodes"]}
     new={r["episode_id"]:r for r in a["episodes"]}
     require(len(old)==len(new)==67 and set(old)==set(new),"EPISODE_UNIVERSE_CHANGED")
-    oldc={c["candidate_id"]:(e,c) for e in old.values() for c in e["candidates"]}
-    newc={c["candidate_id"]:(e,c) for e in new.values() for c in e["candidates"]}
+    oldc={(e["episode_id"],c["candidate_id"]):(e,c) for e in old.values() for c in e["candidates"]}
+    newc={(e["episode_id"],c["candidate_id"]):(e,c) for e in new.values() for c in e["candidates"]}
     require(len(oldc)==len(newc)==105 and set(oldc)==set(newc),"REPAIR_MUTATED_CANDIDATE_UNIVERSE")
     changed_selection=[]
     changed_classifier=[]
-    for cid,(oe,oc) in oldc.items():
-        ne,nc=newc[cid]
+    for (eid,cid),(oe,oc) in oldc.items():
+        ne,nc=newc[(eid,cid)]
         require(oe["episode_id"]==ne["episode_id"] and
           all(oc[k]==nc[k] for k in ("family","url","text_sha256")),"CANDIDATE_IDENTITY_CHANGED:"+cid)
         if oc["selected_ordinals"]!=nc["selected_ordinals"]:changed_selection.append(cid)
@@ -179,7 +179,7 @@ def finalize(base_path,a_path,b_path,output):
        "episodes_processed":67,"candidates_processed":105,"candidate_universe_equal":True,
        "changed_selection_candidates":changed_selection,"changed_classifier_candidates":changed_classifier,
        "changed_episodes":changed_episodes,"baseline_metrics":bm,"repaired_metrics":am,
-       "target_baseline_selection":oldc[TARGET_C][1]["selected_ordinals"],
+       "target_baseline_selection":oldc[(TARGET_E,TARGET_C)][1]["selected_ordinals"],
        "target_repaired_selection":target.get("selected_ordinals"),
        "target_repaired_temporal_code":target.get("temporal_code"),
        "target_repaired_candidate_outcome":target.get("classifier_outcome"),
