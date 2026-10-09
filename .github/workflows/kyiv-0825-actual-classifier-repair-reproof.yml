@@ -6,6 +6,7 @@ on:
     paths:
       - .github/workflows/kyiv-0825-actual-classifier-repair-reproof.yml
       - .github/proof/kyiv_0825_actual_classifier_repair_reproof.py
+      - .github/proof/kyiv_0825_generic_selection_tests.py
   workflow_dispatch:
 permissions:
   contents: read
@@ -63,6 +64,8 @@ jobs:
                   z.extractall(dest)
               print("IMMUTABLE_ARTIFACT_LOADED",aid,name,flush=True)
           PY
+      - name: Verify twelve generic segment selection invariants
+        run: python -u .github/proof/kyiv_0825_generic_selection_tests.py
       - name: Baseline original classifier on 67 episodes
         run: |
           python -u .github/proof/kyiv_0825_actual_classifier_repair_reproof.py --mode baseline --corpus-dir proof-input/acquisition --prior-replay proof-input/replay/runner-replay-1.json --output proof-input/baseline.json
