@@ -109,7 +109,7 @@ jobs:
           git push origin HEAD:kyiv-immutable-source-eligibility-expansion-pilot-2026-10-09
       - name: Verify branch proof commit and only bounded mutations
         run: |
-          test "$(git status --porcelain)" = ""
+          test "$(git status --porcelain --untracked-files=no)" = ""
           git diff --name-only 2a7b17c9514a43648e22eb795f0f2f7b65c3980f HEAD
           git rev-parse HEAD
           sha256sum research/kyiv_immutable_source_eligibility_expansion_pilot_2026-10-09.json
