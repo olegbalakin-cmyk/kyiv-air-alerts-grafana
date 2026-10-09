@@ -100,7 +100,7 @@ jobs:
       - name: Commit ONLY proof JSON on isolated proof branch
         run: |
           git add research/kyiv_immutable_residual_source_expansion_pilot_2026-10-09.json
-          test "$(git diff --cached --name-only)" = "research/kyiv_immutable_residual_source_expansion_pilot_2026-10-09.json"
+          test -z "$(git diff --cached --name-only)" || test "$(git diff --cached --name-only)" = "research/kyiv_immutable_residual_source_expansion_pilot_2026-10-09.json"
           if ! git diff --cached --quiet; then
             git -c user.name="github-actions[bot]" \
               -c user.email="41898282+github-actions[bot]@users.noreply.github.com" \
