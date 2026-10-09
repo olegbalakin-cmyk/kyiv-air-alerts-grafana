@@ -97,7 +97,7 @@ def pinned(commit, path, blob, expected_sha=None):
 def extract(source, names, label, extra=None):
     tree = ast.parse(source.decode("utf-8"))
     defs = {n.name:n for n in tree.body if isinstance(n, ast.FunctionDef)}
-    require(all(n in defs for n in names), "PINNED_FUNCTION_NOT_FOUND:" + label)
+    require(all(n in defs for n in names), "PINNED_FUNCTION_NOT_FOUND:" + label + ": available=" + ",".join(sorted(defs)))
     module = ast.fix_missing_locations(ast.Module(
         body=[copy.deepcopy(defs[n]) for n in names], type_ignores=[]))
     env = {"__builtins__":__builtins__, "Any":Any, "json":json,
