@@ -1,0 +1,108 @@
+{
+  "schema_version": "unit-a-a4-acceptance-v1",
+  "verdict": "ATTACK-EVENT EXECUTION UNIT A A4 CHECKPOINT ACCEPTANCE = BLOCKED",
+  "A4_ACCEPTANCE_GATE": "FAIL",
+  "A5_MANIFEST_ACCEPTED": "NO",
+  "A5_REQUIRED": "YES",
+  "A5_AUTHORIZED": "NO",
+  "first_failing_gate": "UNIT_A_A4_FROZEN_ARTIFACT_NOT_INDEPENDENTLY_AUDITABLE",
+  "smallest_deterministic_blocker_example": {
+    "object_class": "classification",
+    "required": "per-target frozen classification gap states including EXACT_PRESENT, MISSING_NO_PRIOR_REVISION, MISSING_WITH_PRIOR_REVISION, SEMANTIC_CONFLICT",
+    "observed": "classification_gap includes aggregate counts only; A5_frozen_delta_manifest.classification_actions is producer's mutation list, not an independent per-target gap partition",
+    "consequence": "Cannot independently derive and validate 1,713 classified target gap states and recreate 3,282 A5 actions from independently audited gap records."
+  },
+  "candidate": {
+    "proof_branch": "attack-event-unit-a-a4-shadow-gap-audit-resume3-2026-10-09",
+    "actions_run": 37968628459,
+    "job": 113949253239,
+    "actions_head_sha": "8710429205c4ab08fedfb9e5034d1459e30e8828",
+    "artifact_commit": "36a5989229ed5c1ad1cd07fbb61df5033af22681",
+    "final_proof_head": "391d2a880cc2c0b1ec73bb64302d10145d33e896",
+    "artifact_path": "research/attack_event_execution_unit_a_shadow_persistence_gap_audit_resume3_2026-10-09.json",
+    "artifact_git_blob": "d9bd54a946c3bb88faa0e351d18883eed7c44e60",
+    "artifact_sha256": "2e6a3b0b8ab0dec2ac5d38c996a71325cabd257d5b80864e32b6c47756667e55",
+    "producer_projection_sha256": "7978087ad00f37d0d1eb9f4326a478d5760e79cd7f7a68ae2be39fc5211bffa3",
+    "producer_delta_sha256": "6070b6dbfc03e16b5236aed5b3cb090fa066100857a9c4f7bed502d6bb294aa3"
+  },
+  "preflight": {
+    "main_head": "1fad23d3b1f169fa7b60f8f343876b0a0ca924ce",
+    "project_state_blob": "eedd0a9c71437bfc869665bf2157a83e4ebf6fdf",
+    "changelog_blob": "e5556df95bc9688fbaa692c9350d445a655a4041",
+    "newer_accepted_a4_a5_checkpoint_in_docs": false,
+    "proof_head_descends_from_start_main": true,
+    "artifact_commit_ancestor_of_proof_head": true,
+    "final_proof_tree_diff_file_count": 1
+  },
+  "offline_inspection": {
+    "run": 37971133867,
+    "job": 113957738277,
+    "status": "SUCCESS",
+    "file_bytes": 26314915,
+    "independent_artifact_sha256": "2e6a3b0b8ab0dec2ac5d38c996a71325cabd257d5b80864e32b6c47756667e55",
+    "independent_git_blob": "d9bd54a946c3bb88faa0e351d18883eed7c44e60",
+    "top_level_has_classification_gap": true,
+    "top_level_has_source_gap": true,
+    "top_level_has_event_gap": true,
+    "classification_gap_fields": [
+      "exact_present",
+      "missing_no_prior_revision",
+      "missing_with_prior_revision",
+      "multiple_current_tips",
+      "semantic_conflicts"
+    ],
+    "source_gap_fields": [
+      "exact_present",
+      "missing",
+      "semantic_conflicts"
+    ],
+    "event_gap_fields": [
+      "exact_present",
+      "missing",
+      "pointer_updates_required",
+      "semantic_conflicts",
+      "withdrawals_required"
+    ],
+    "source_gap_per_record_array_present": false,
+    "classification_gap_per_record_array_present": false,
+    "event_gap_per_record_array_present": false,
+    "producer_manifest_classification_actions": 1713,
+    "producer_manifest_source_actions": 1559,
+    "producer_manifest_event_actions": 10,
+    "producer_manifest_total_actions": 3282,
+    "producer_manifest_action_count_keys": [
+      "INSERT_INITIAL",
+      "INSERT_SOURCE_LINK",
+      "INSERT_EVENT"
+    ]
+  },
+  "not_independently_accepted": {
+    "projection_target_count": 1713,
+    "repaired_memberships": 1559,
+    "positive_events": 10,
+    "source_links": 1559,
+    "independent_projection_hash": null,
+    "independently_reconstructed_manifest_count": null,
+    "independent_delta_sha256": null,
+    "gap_partition_counts": null,
+    "manifest_bijection": null,
+    "precondition_coverage": null
+  },
+  "safety": {
+    "acceptance_neon_connections": 0,
+    "acceptance_sql_queries": 0,
+    "acceptance_db_writes": 0,
+    "acceptance_classifier_executions": 0,
+    "acceptance_matching_executions": 0,
+    "acceptance_composition_executions": 0,
+    "acceptance_a5_executions": 0,
+    "acceptance_production_mutation": "NO",
+    "original_a4_artifact_modified": "NO"
+  },
+  "limitations": [
+    "Producer manifest is insufficient as its own independent source for reconstructing required actions.",
+    "A4 read-only shadow producer assertions were observed in Actions logs, not independently reproduced against Neon by the offline acceptance.",
+    "No attempt made to recover missing primitive state from Neon, producer harness, or recreated matching/classification."
+  ],
+  "notes": "Fail-closed at the first critical independent-auditability gate. A5 execution is unauthorized. No code, workflows or original A4 JSON may remain modified at final cleanup."
+}
