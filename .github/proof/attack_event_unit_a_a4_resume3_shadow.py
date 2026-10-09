@@ -10,7 +10,7 @@ from attack_event_unit_a_a4_resume3 import init, save, Blocked, need, canon, hob
 
 def guard(report, statement, args=()):
     sql=statement.lstrip()
-    need(re.match(r"(?is)^(SELECT|WITH|SHOW)\\b",sql) is not None,
+    need(re.match(r"(?is)^(SELECT|WITH|SHOW)\b",sql) is not None,
          "UNIT_A_A4_SHADOW_CONFIGURATION_MISMATCH","non-readonly SQL rejected")
     report["neon"]["select_count"]+=1
     return args
@@ -59,7 +59,7 @@ def validate_schema(cur,report):
     missing={t:sorted(required[t]-cols[t]) for t in names if required[t]-cols[t]}
     uniq={}
     for t,key in (("attack_event_classifications","classification_key"),("attack_events","attack_event_key"),("attack_event_sources","source_link_key")):
-        uniq[t]=any("UNIQUE" in str(v[2]).upper() and re.search(r"\\b"+re.escape(key)+r"\\b",str(v[2])) for v in indices if v[0]==t)
+        uniq[t]=any("UNIQUE" in str(v[2]).upper() and re.search(r"\b"+re.escape(key)+r"\b",str(v[2])) for v in indices if v[0]==t)
     report["neon"]["schema_catalog_sha256"]=hobj({"columns":catalog,"indices":indices,"constraints":constraints})
     report["neon"]["schema_missing_columns"]=missing
     report["neon"]["schema_unique_keys"]=uniq
