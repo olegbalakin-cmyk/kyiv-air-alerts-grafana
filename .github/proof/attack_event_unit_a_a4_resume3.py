@@ -179,8 +179,8 @@ def build_once(report,label,rec,adapter):
  # Deliberately reload and decode frozen materialization independently for each run.
  helper=helper_from_git(HELP_COMMIT,HELP,"adapter_offline_"+label)
  recmod=helper_from_git(REC_HELP_COMMIT,REC_HELP,"recovery_offline_"+label)
- _,docs=helper.verify_inputs()
- a1=json.loads(docs["A1"]); a3=json.loads(docs["A3"])
+ # Original artifacts are pinned on immutable commits; not copied into main.
+ a1=json.loads(raw(PINS[A1][0],A1)); a3=json.loads(raw(PINS[A3][0],A3))
  repaired=json.loads(raw(PINS[R3][0],R3))
  _,a1episodes,store,refs_total=helper.decode_a1(a1)
  original,ds,byuid=helper.verify_a3(a3,a1episodes)
