@@ -781,7 +781,26 @@ def trusted_live_source(row: dict) -> bool:
 
 def exact_city_classification_evidence(city_key: str, row: dict) -> dict:
     segments = [segment for segment in classification_segments(row) if city_mentioned(city_key, segment)]
-    return {"present": bool(segments), "segments": segments[:4]}
+    first_four = segments[:4]
+    if len(segments) > 4:
+        late_strict_clocks = [
+            segment for segment in segments[4:]
+            if strict_attack_event_signal(segment) and len(event_clock_mentions(segment)) == 1
+        ]
+        if len(late_strict_clocks) == 1:
+            retained_strict = [segment for segment in first_four if strict_attack_event_signal(segment)]
+            free_slots = [
+                index for index, segment in enumerate(first_four)
+                if not strict_attack_event_signal(segment)
+            ]
+            if free_slots and not any(event_clock_mentions(segment) for segment in retained_strict):
+                # Replace the last non-strict slot; the late segment follows all retained
+                # ordinals, so appending preserves original source order and the cap.
+                first_four = [
+                    segment for index, segment in enumerate(first_four)
+                    if index != free_slots[-1]
+                ] + late_strict_clocks
+    return {"present": bool(segments), "segments": first_four}
 
 
 def strict_explosion_evidence(city_key: str, row: dict) -> dict:
