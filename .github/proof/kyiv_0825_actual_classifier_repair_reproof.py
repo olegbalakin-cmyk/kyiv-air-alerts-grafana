@@ -81,9 +81,22 @@ def run_one(mode, acquisition, prior, output):
     offline=prepare(mode,acquisition,prior)
     try:
         selected={}
+        collected_rows={}
+        native_make=offline.p.make_candidate
+        def traced_make(*args,**kwargs):
+            row,meta=native_make(*args,**kwargs)
+            collected_rows[row["candidate_id"]]=row
+            return row,meta
+        offline.p.make_candidate=traced_make
         ordinal_trace(offline.monitor,selected)
         rows=offline.replay(SOURCES)
         require(len(rows)==67 and sum(r["candidate_count"] for r in rows)==105,"FROZEN_COHORT_COUNT_MISMATCH")
+        require(len(collected_rows)==105,"FROZEN_CANDIDATE_ROWS_INCOMPLETE")
+        # Evaluate the same actual classifier selector also for candidates whose
+        # classification exited before invoking exact-city evidence.
+        for cid,row in collected_rows.items():
+            if cid not in selected:
+                offline.monitor.exact_city_classification_evidence("kyiv",row)
         require(len(selected)==105,"CANDIDATE_ORDINAL_TRACE_INCOMPLETE")
         for row in rows:
             for c in row["candidates"]:
