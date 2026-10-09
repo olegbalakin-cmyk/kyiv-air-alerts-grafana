@@ -7,17 +7,51 @@ on:
       - .github/workflows/attack-event-unit-a-crossbranch-authority-overlap-audit.yml
   workflow_dispatch:
 permissions:
-  contents: read
+  contents: write
 jobs:
   offline-audit:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 1
           persist-credentials: true
-      - name: Structural audit probe (zero external evidence, zero database access)
+      - name: Deny DB credential exposure
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import os
+          keys=[k for k,v in os.environ.items() if v and (k in {'DATABASE_URL','DIRECT_URL','PGHOST','PGUSER','PGPASSWORD','PGDATABASE'} or k.startswith(('NEON_','POSTGRES_','SUPABASE_DB_')))]
+          if keys:
+              raise SystemExit('Disallowed DB credential exposure')
+          print('DB_CREDENTIALS=ABSENT')
+          PY
+      - name: Complete deterministic read-only authority audit twice
         shell: bash
         run: |
           python3 .github/proof/attack_event_unit_a_crossbranch_authority_overlap_audit.py
+      - name: Freeze only bounded durable audit artifact, then remove temporary execution files
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -s research/attack_event_unit_a_crossbranch_authority_overlap_audit_2026-10-09.json
+          artifact=research/attack_event_unit_a_crossbranch_authority_overlap_audit_2026-10-09.json
+          before=$(sha256sum "$artifact" | cut -d ' ' -f 1)
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -- "$artifact"
+          git commit -m 'Freeze deterministic Unit A cross-branch authority audit'
+          git rm -- .github/proof/attack_event_unit_a_crossbranch_authority_overlap_audit.py .github/workflows/attack-event-unit-a-crossbranch-authority-overlap-audit.yml
+          git commit -m 'Remove temporary cross-branch authority audit runner'
+          after=$(sha256sum "$artifact" | cut -d ' ' -f 1)
+          test "$before" = "$after"
+          test "$(git diff --name-only 729276473163a55d0a60ef53b196d84591b1d7fe HEAD | wc -l)" -eq 1
+          test "$(git diff --name-only 729276473163a55d0a60ef53b196d84591b1d7fe HEAD)" = "$artifact"
+          test ! -e .github/proof/attack_event_unit_a_crossbranch_authority_overlap_audit.py
+          test ! -e .github/workflows/attack-event-unit-a-crossbranch-authority-overlap-audit.yml
+          echo "FINAL_ARTIFACT_SHA256=$after"
+          echo "FINAL_ARTIFACT_BLOB=$(git rev-parse HEAD:"$artifact")"
+          echo "FINAL_HEAD=$(git rev-parse HEAD)"
+          echo "FINAL_DIFF_FILE_COUNT=1"
+          git push origin HEAD:refs/heads/attack-event-unit-a-crossbranch-authority-overlap-audit-2026-10-09
