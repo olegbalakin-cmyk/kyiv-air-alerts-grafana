@@ -4,6 +4,12 @@ Accepted project checkpoints, newest first. This is not the full Git history, a 
 
 ## 2026-10-09
 
+### Kyiv 08:25 evidence-segment selection contract accepted as design checkpoint
+- **Status:** `SAFE CONTRACT IDENTIFIED`, **not yet an implemented or reproven classifier repair**. **Evidence:** commit [`ba3cc8b0`](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/commit/ba3cc8b04a4c689c17b223b9c1a989928c0b397a), artifact `research/kyiv_immutable_0825_evidence_segment_selection_contract_diagnosis_2026-10-09.json`.
+- Recommended contract: `UNIQUE_LATE_CLOCK_AND_FREE_SLOT`. It retains the first four exact-city segments unless exactly one later segment satisfies the existing strict attack-event predicate and has exactly one existing parsed event clock, no retained strict segment already has a parsed event clock, and a non-strict slot is available; it then replaces the last retained non-strict segment and preserves original source order.
+- Frozen-cohort selection effect: **67** episodes, **105** candidates, **1** changed candidate, **1** affected known-positive episode, **0/19** affected holds, **1** newly visible strict-event segment and **1** newly visible explicit-clock segment. Target selection becomes `[1,4,7,8]` instead of `[1,4,5,7]`.
+- The full pinned classifier was **not executed** under this contract. The target `NEEDS_REVIEW -> STRICT_EVENT_POSITIVE` and aggregate **5 -> 6** final positives are projections only. Historical 411 counterfactual regression was not run because doing so would require prohibited blind-detail exposure.
+- **Next:** implement and reprove only this contract on the frozen 67-episode cohort, with exact classifier execution, deterministic outcome equality outside the intended target, and zero new uncleared hold promotions.
 ### Kyiv five-case temporal forensic audit accepted
 - **Status:** `PROVEN`. **Evidence:** commit [`cf451a61`](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/commit/cf451a61c0f590ca1745f66744ce9c99561c9d13), artifact `research/kyiv_immutable_temporal_parser_five_case_forensic_audit_2026-10-09.json`.
 - Corrected the preliminary temporal-parser ceiling **5 -> 0 safe parser-syntax misses**. Final five-case taxonomy: **1** `EVIDENCE_SEGMENT_SELECTION_LIMIT`, **2** `TEMPORAL_REPRESENTATION_LIMIT`, **2** `NON_EVENT_CLOCK`.
