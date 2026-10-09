@@ -4,6 +4,24 @@ Accepted project checkpoints, newest first. This is not the full Git history, a 
 
 ## 2026-10-09
 
+### Kyiv five-case temporal forensic audit accepted
+- **Status:** `PROVEN`. **Evidence:** commit [`cf451a61`](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/commit/cf451a61c0f590ca1745f66744ce9c99561c9d13), artifact `research/kyiv_immutable_temporal_parser_five_case_forensic_audit_2026-10-09.json`.
+- Corrected the preliminary temporal-parser ceiling **5 -> 0 safe parser-syntax misses**. Final five-case taxonomy: **1** `EVIDENCE_SEGMENT_SELECTION_LIMIT`, **2** `TEMPORAL_REPRESENTATION_LIMIT`, **2** `NON_EVENT_CLOCK`.
+- For the sole safe direct-event clock, `event_clock_mentions(...)` already recognizes `(8,25)` and `strict_attack_event_signal(...)` is true; the sentence is classification segment **8/16**, exact-Kyiv segment **5/5**, and is removed by the existing `segments[:4]` selection before temporal evaluation. No classifier, source, backfill, Neon or production mutation occurred.
+- **Next:** diagnose only this `08:25` evidence-segment selection limit and define a safe selection contract. No repair is authorized yet.
+
+### Kyiv 08:25 full-history uniqueness accepted
+- **Status:** `PROVEN`. **Evidence:** [run 37963714123](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/37963714123), final proof commit `9355e17f4d2cacba90401e98b79fa15b7867fd95`.
+- The accepted historical loader returned **2,456** canonical Kyiv episodes with **2,456** unique IDs. `2024-08-26 08:25 Europe/Kyiv` matched exactly one episode, `cfd8acaf2ae96fb3ab6508d6`, with canonical/raw interval equality. This proved episode specificity only, not a parser repair.
+
+### Kyiv residual source-eligibility pilot accepted
+- **Status:** `SMALL GAIN`. **Evidence:** [run 37955711497](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/37955711497), final proof head `26eb3e560481115fb1c9f09f9c984af10c802733`.
+- Best tested addition `Kyiv24 + bigkyiv.com.ua` raised candidate-covered positives **31/48 -> 36/48** but left final positives at **5/48**. New uncleared hold promotions: **0**.
+- No new source-set freeze was accepted; the frozen **15-family** development baseline remains authoritative.
+
+### Expanded-baseline 43-failure diagnosis accepted
+- **Status:** `MIXED — ACCEPTED`. **Evidence:** commit `cb46d7b8232bc3af75c29f40592b731001aed8ea`, artifact `research/kyiv_immutable_expanded_baseline_remaining_failure_diagnosis_2026-10-09.json`.
+- On the frozen 15-family baseline, **43/48** known positives remained non-final. Largest first-failure class was relevant frozen evidence outside the source set (**11**). The reported temporal-parser ceiling of **5** was a preliminary potential-repair ceiling and is now superseded by the accepted five-case forensic audit above.
 ### Human casualty review operator isolated proof accepted
 - **Status:** `PROVEN` in isolated GitHub Actions only; **NOT production-activated**. **Evidence:** repair commit `81ef49a8af79123986ac48b5cb0d7e4e2fff4937`, [run 37963256291](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/37963256291).
 - Synthetic acceptance passed **29/29**, including exact equality with the authoritative **23-city** casualty scope, stale-SHA/concurrency guards, duplicate/idempotency behavior, no scheduled auto-confirm path, and no dashboard/historical mutation.
