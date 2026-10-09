@@ -422,8 +422,8 @@ class Collector:
     self.lineage_errors.append({"source":compact_source(source),
        "candidate_id":cid,"candidate_input_ref":ref,"decision_ref":explicit_dr,
        "present_fields":sorted(present),"cause":"NO_EXACT_FROZEN_A3_DECISION_PROJECTION"})
-   role="QUEUE_STATE_WITHOUT_DECISION_LINEAGE" if "queue" in
-      str(source.get("path") or source.get("file_name") or "").lower() else "UNUSABLE_LINEAGE"
+   role=("QUEUE_STATE_WITHOUT_DECISION_LINEAGE" if "queue" in
+      str(source.get("path") or source.get("file_name") or "").lower() else "UNUSABLE_LINEAGE")
    return [],role
   return [],"UNRELATED_CLASSIFIER_OUTPUT"
 
