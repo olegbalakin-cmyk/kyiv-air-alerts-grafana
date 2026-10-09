@@ -51,7 +51,7 @@ def ordinal_trace(mon, selection):
     original=mon.exact_city_classification_evidence
     def wrapped(city,row):
         out=original(city,row)
-        all_segments=[s for s in mon.classification_segments(row) if mon.city_mentioned(city,s)]
+        all_segments=mon.classification_segments(row)  # original source ordinals, not exact-city ordinal
         chosen=list(out["segments"])
         ordinals=[]
         low=0
