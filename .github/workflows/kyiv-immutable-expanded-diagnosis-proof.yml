@@ -1,0 +1,99 @@
+name: Kyiv immutable expanded baseline failure diagnosis proof
+on:
+  push:
+    branches: [kyiv-immutable-expanded-diagnosis-proof-2026-10-09]
+    paths: [".github/workflows/kyiv-immutable-expanded-diagnosis-proof.yml"]
+permissions:
+  contents: write
+  actions: read
+jobs:
+  frozen-offline-diagnosis:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install requests
+        run: python -m pip install 'requests>=2.31,<3'
+      - name: Reject database credentials
+        run: |
+          python - <<'PY'
+          import os
+          bad=[k for k,v in os.environ.items() if v and (k in {"DATABASE_URL","DIRECT_URL","PGHOST","PGUSER","PGPASSWORD","PGDATABASE"} or k.startswith(("NEON_","POSTGRES_","SUPABASE_DB_")))]
+          assert not bad, "DATABASE_ENV_PRESENT:"+",".join(bad)
+          PY
+      - name: Download only frozen existing GitHub artifacts
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          python - <<'PY'
+          import os,requests,zipfile
+          from pathlib import Path
+          repo="olegbalakin-cmyk/kyiv-air-alerts-grafana"
+          s=requests.Session()
+          s.headers.update({"Authorization":"Bearer "+os.environ["GH_TOKEN"],"Accept":"application/vnd.github+json","X-GitHub-Api-Version":"2022-11-28"})
+          for aid,sub in ((11608819645,"acquisition"),(11609004684,"replay"),(11624138372,"acceptance")):
+              resp=s.get(f"https://api.github.com/repos/{repo}/actions/artifacts/{aid}/zip",timeout=120)
+              resp.raise_for_status()
+              root=Path("diagnosis-input")/sub
+              root.mkdir(parents=True,exist_ok=True)
+              zp=root.with_suffix(".zip")
+              zp.write_bytes(resp.content)
+              with zipfile.ZipFile(zp) as z:
+                  for info in z.infolist():
+                      assert (root/info.filename).resolve().is_relative_to(root.resolve()), "UNSAFE_ZIP_ENTRY"
+                  z.extractall(root)
+              print("FROZEN_INPUT_OK",aid,sub,flush=True)
+          PY
+      - name: Verify frozen identity and synthesize 43-case diagnosis
+        run: |
+          python .github/proof/kyiv_immutable_expanded_failure_diagnosis.py diagnosis-input diagnosis-output.json
+          python - <<'PY'
+          import json
+          p=json.load(open("diagnosis-output.json"))
+          assert p["first_failure_total"]==43
+          assert len(p["exact_43_remaining_failures"])==43
+          assert sum(p["first_failure_counts"].values())==43
+          assert p["cohort"]["no_candidate_failures"]==17
+          assert p["cohort"]["candidate_covered_nonfinal_failures"]==26
+          assert not p["safety"]["blind_per_episode_inspected"]
+          assert p["safety"]["neon_writes"]==p["safety"]["production_mutations"]==0
+          print("FROZEN_DIAGNOSIS_VERIFIED")
+          PY
+      - name: Persist exactly one JSON on pristine diagnosis branch
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          python - <<'PY'
+          import os,base64,requests,hashlib
+          from pathlib import Path
+          repo="olegbalakin-cmyk/kyiv-air-alerts-grafana"
+          branch="kyiv-immutable-expanded-baseline-failure-diagnosis-2026-10-09"
+          base="7fdcc2903205e8fc489b2eff588332a45cfaca09"
+          path="research/kyiv_immutable_expanded_baseline_remaining_failure_diagnosis_2026-10-09.json"
+          s=requests.Session()
+          s.headers.update({"Authorization":"Bearer "+os.environ["GH_TOKEN"],"Accept":"application/vnd.github+json","X-GitHub-Api-Version":"2022-11-28"})
+          b=s.get(f"https://api.github.com/repos/{repo}/branches/{branch}",timeout=30)
+          b.raise_for_status()
+          assert b.json()["commit"]["sha"]==base,"DIAGNOSIS_BASE_MISMATCH"
+          payload=Path("diagnosis-output.json").read_bytes()
+          body={"message":"Persist frozen Kyiv 43-case remaining-failure diagnosis","content":base64.b64encode(payload).decode(),"branch":branch}
+          put=s.put(f"https://api.github.com/repos/{repo}/contents/{path}",json=body,timeout=120)
+          print("PERSIST_STATUS",put.status_code,put.text[:500] if not put.ok else "")
+          put.raise_for_status()
+          print("DIAGNOSIS_COMMIT",put.json()["commit"]["sha"])
+          print("DIAGNOSIS_SHA256",hashlib.sha256(payload).hexdigest())
+          PY
+      - name: Upload offline proof artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: kyiv-expanded-43-failure-diagnosis-proof
+          path: diagnosis-output.json
+          if-no-files-found: warn
+          retention-days: 30
