@@ -1,0 +1,867 @@
+{
+  "schema": "kyiv-immutable-0825-evidence-segment-selection-contract-diagnosis-v1",
+  "date": "2026-10-09",
+  "current_main": {
+    "sha": "c7886eece726ec4b1a0b7f7b2680c43ab7c979c6",
+    "coordination_merge_pr": 24,
+    "project_state_sha": "7d2a0d90716a9a01ea8024d2293cb7bd4949a192",
+    "changelog_sha": "13311e0adb8bc0a91f9fda254d147b129dd29489"
+  },
+  "frozen_baseline": {
+    "commit": "7fdcc2903205e8fc489b2eff588332a45cfaca09",
+    "families": 15,
+    "manifest_sha256": "58dbde111229d099413ad03e99be3839557431957c4ac72832b23be8a49bc08e",
+    "corpus_sha256": {
+      "discovery": "fc1e184741c8409ce634015771a9484de8cfd8230037be56e3d8970d0178e5cc",
+      "native": "bcfdedba186b58671dab7c3c1bd33dc8ec0f2772c8b9f9c3bf053c7d64cff858",
+      "normalized": "e5790301a8d17b9997a3dbdfb71651e486de8ba6a4c39a552043754805e7ce2d"
+    },
+    "accepted_run": 37947654494,
+    "acceptance_artifact_id": 11624138372,
+    "episodes": 67,
+    "positives": 48,
+    "holds": 19,
+    "source_candidates": 105,
+    "verified_candidate_frozen_id_and_text_sha": "105/105",
+    "baseline_positive_final": 5,
+    "baseline_hold_STRICT": 2,
+    "baseline_hold_SENSITIVITY": 0
+  },
+  "classifier": {
+    "commit": "71cb6f6fbe856cc7b96759310fe9cc9c71cc0453",
+    "blob": "778469b74c2aa807d851cf2c2ee35cf4aa785589",
+    "file": "kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py"
+  },
+  "accepted_audit": {
+    "commit": "cf451a61c0f590ca1745f66744ce9c99561c9d13",
+    "sha256": "971027f6aa30bcd554d5a53bbae80603c1a02f7493aadacbd2f323656746eead",
+    "segment_selection_limit": 1,
+    "temporal_representation_limit": 2,
+    "non_event_clock": 2,
+    "safe_parser_syntax_misses": 0
+  },
+  "accepted_failure_diagnosis": {
+    "commit": "cb46d7b8232bc3af75c29f40592b731001aed8ea",
+    "sha256": "d6f39ebf96a61814ce679f49193e53c798ae6750b7fdf9efee0e98febfa48969",
+    "nonfinal_positive_cases": 43
+  },
+  "accepted_uniqueness": {
+    "proof_commit": "9355e17f4d2cacba90401e98b79fa15b7867fd95",
+    "run": 37963714123,
+    "local": "2024-08-26T08:25:00+03:00",
+    "utc": "2024-08-26T05:25:00Z",
+    "history_episodes": 2456,
+    "matching_episodes": 1,
+    "supported_episode_id": "cfd8acaf2ae96fb3ab6508d6"
+  },
+  "current_path": [
+    {
+      "stage": "classification_segments(row)",
+      "input": "classification_text: debranded title+snippet, and excerpt only for publisher_fulltext",
+      "predicate": "split by punctuation/newline, skip empty",
+      "order": "native input order",
+      "cap": null
+    },
+    {
+      "stage": "exact_city_classification_evidence",
+      "input": "all classification segments",
+      "predicate": "city_mentioned",
+      "order": "input order",
+      "cap": "segments[:4]"
+    },
+    {
+      "stage": "strict_explosion_evidence",
+      "input": "first 4 exact-city segments",
+      "predicate": "strict_attack_event_signal",
+      "order": "first-seen exact-city order",
+      "cap": "segments[:4] (second, redundant current cap)"
+    },
+    {
+      "stage": "temporal_binding_evidence",
+      "input": "only strict segments",
+      "predicate": "existing relative/explicit clock/alert relation",
+      "order": "existing branch precedence",
+      "cap": null
+    }
+  ],
+  "other_caps_unchanged": [
+    "air_military_context_evidence: filtered segments[:4]",
+    "_review_role: review evidence segments[:4]"
+  ],
+  "rationale": "RATIONALE_NOT_DURABLY_ENCODED",
+  "code_observation": "The first-four behavior bounds evidence and preserves source order. Original motivation regarding retrospective text is not documented.",
+  "contracts": {
+    "A": "control: existing exact-city first four",
+    "B": "filter existing strict_attack_event_signal across all exact-city segments BEFORE taking first four strict, with source-ordered fallback",
+    "C": "preserve earliest late strict+event_clock_mentions segment in last nonstrict first-four slot, unchanged strict evidence",
+    "D": "existing strict+clock then strict then nonstrict; stable ordinal tie-break, cap four",
+    "E": "RECOMMENDED: retain first four except when exactly ONE later exact-city segment passes existing strict_attack_event_signal with exactly ONE parsed event_clock_mentions; no retained strict segment already has a parsed event clock; at least one first-four nonstrict exists. Replace LAST nonstrict segment, reorder by original ordinal. Otherwise no change; cap remains four."
+  },
+  "contract_selection_metrics": {
+    "A": {
+      "contract": "FIRST_4_EXACT_CITY_SEGMENTS",
+      "changed_candidate_rows": 0,
+      "changed_positive_episodes": 0,
+      "changed_hold_episodes": 0,
+      "new_strict_segments": 0,
+      "new_clock_segments": 0,
+      "original_strict_segments_removed": 0,
+      "unchanged_candidate_rows": 105,
+      "target_retained": false,
+      "target_exact_city_classification_ordinals": [
+        1,
+        4,
+        5,
+        7
+      ],
+      "target_temporal_code_projected": "NO_STRICT_TEMPORAL_BINDING",
+      "target_candidate_outcome_projected": "needs_review",
+      "target_episode_verdict_projected": "NEEDS_REVIEW"
+    },
+    "B": {
+      "contract": "STRICT_FILTER_BEFORE_CAP",
+      "changed_candidate_rows": 6,
+      "changed_positive_episodes": 4,
+      "changed_hold_episodes": 1,
+      "new_strict_segments": 7,
+      "new_clock_segments": 1,
+      "original_strict_segments_removed": 0,
+      "unchanged_candidate_rows": 99,
+      "target_retained": true,
+      "target_exact_city_classification_ordinals": [
+        1,
+        4,
+        7,
+        8
+      ],
+      "target_temporal_code_projected": "TEMPORAL_EXPLICIT_EVENT_TIME_INSIDE_EPISODE",
+      "target_candidate_outcome_projected": "approved_strict",
+      "target_episode_verdict_projected": "STRICT_EVENT_POSITIVE"
+    },
+    "C": {
+      "contract": "PRESERVE_ONE_LATE_STRICT_EXPLICIT_CLOCK",
+      "changed_candidate_rows": 1,
+      "changed_positive_episodes": 1,
+      "changed_hold_episodes": 0,
+      "new_strict_segments": 1,
+      "new_clock_segments": 1,
+      "original_strict_segments_removed": 0,
+      "unchanged_candidate_rows": 104,
+      "target_retained": true,
+      "target_exact_city_classification_ordinals": [
+        1,
+        4,
+        7,
+        8
+      ],
+      "target_temporal_code_projected": "TEMPORAL_EXPLICIT_EVENT_TIME_INSIDE_EPISODE",
+      "target_candidate_outcome_projected": "approved_strict",
+      "target_episode_verdict_projected": "STRICT_EVENT_POSITIVE"
+    },
+    "D": {
+      "contract": "RELEVANCE_RANKED_BOUNDED",
+      "changed_candidate_rows": 6,
+      "changed_positive_episodes": 4,
+      "changed_hold_episodes": 1,
+      "new_strict_segments": 7,
+      "new_clock_segments": 1,
+      "original_strict_segments_removed": 0,
+      "unchanged_candidate_rows": 99,
+      "target_retained": true,
+      "target_exact_city_classification_ordinals": [
+        1,
+        4,
+        7,
+        8
+      ],
+      "target_temporal_code_projected": "TEMPORAL_EXPLICIT_EVENT_TIME_INSIDE_EPISODE",
+      "target_candidate_outcome_projected": "approved_strict",
+      "target_episode_verdict_projected": "STRICT_EVENT_POSITIVE"
+    },
+    "E": {
+      "contract": "UNIQUE_LATE_CLOCK_AND_FREE_SLOT",
+      "changed_candidate_rows": 1,
+      "changed_positive_episodes": 1,
+      "changed_hold_episodes": 0,
+      "new_strict_segments": 1,
+      "new_clock_segments": 1,
+      "original_strict_segments_removed": 0,
+      "unchanged_candidate_rows": 104,
+      "target_retained": true,
+      "target_exact_city_classification_ordinals": [
+        1,
+        4,
+        7,
+        8
+      ],
+      "target_temporal_code_projected": "TEMPORAL_EXPLICIT_EVENT_TIME_INSIDE_EPISODE",
+      "target_candidate_outcome_projected": "approved_strict",
+      "target_episode_verdict_projected": "STRICT_EVENT_POSITIVE"
+    }
+  },
+  "per_episode_baseline_and_conditional_E_projection": [
+    {
+      "episode_id": "01ba82a909e539ff5cc3bd0b",
+      "truth": "KNOWN_POSITIVE",
+      "baseline": "NO_CONFIRMED_EVENT",
+      "projected_E": "NO_CONFIRMED_EVENT"
+    },
+    {
+      "episode_id": "0404dff72663daa6be63e53d",
+      "truth": "KNOWN_POSITIVE",
+      "baseline": "NO_CONFIRMED_EVENT",
+      "projected_E": "NO_CONFIRMED_EVENT"
+    },
+    {
+      "episode_id": "0bbc4d1cae4a818f9ed15033",
+      "truth": "HOLD_CONTROL",
+      "baseline": "NEEDS_REVIEW",
+      "projected_E": "NEEDS_REVIEW"
+    },
+    {
+      "episode_id": "0cd3f3ba51803739eeff6e54",
+      "truth": "KNOWN_POSITIVE",
+      "baseline": "NEEDS_REVIEW",
+      "projected_E": "NEEDS_REVIEW"
+    },
+    {
+      "episode_id": "0e19275d8e1e1a428796b484",
+      "truth": "HOLD_CONTROL",
+      "baseline": "NEEDS_REVIEW",
+      "projected_E": "NEEDS_REVIEW"
+    },
+    {
+      "episode_id": "0e8524c2751c7a424a68005f",
+      "truth": "KNOWN_POSITIVE",
+      "baseline": "NO_CONFIRMED_EVENT",
+      "projected_E": "NO_CONFIRMED_EVENT"
+    },
+    {
+      "episode_id": "1216abdb8a6d4cf8febfa361",
+      "truth": "KNOWN_POSITIVE",
+      "baseline": "NEEDS_REVIEW",
+      "projected_E": "NEEDS_REVIEW"
+    },
+    {
+      "episode_id": "147c36b91f2873dbdb60111b",
+      "truth": "KNOWN_POSITIVE",
+      "baseline": "NEEDS_REVIEW",
+      "projected_E": "NEEDS_REVIEW"
+    },
+    {
+      "episode_id": "168254a2ce25aaddeebac2ea",
+      "truth": "KNOWN_POSITIVE",
+      "baseline": "NEEDS_REVIEW",
+      "projected_E": "NEEDS_REVIEW"
+    },
+    {
+      "episode_id": "16bc2bf84fc831300762775e",
+      "truth": "KNOWN_POSITIVE",
+      "baseline": "NEEDS_REVIEW",
+      "projected_E": "NEEDS_REVIEW"
+    },
+    {
+      "episode_id": "1d6d134a30236c5a3f4e5fc1",
+      "truth": "HOLD_CONTROL",
+      "baseline": "NO_CONFIRMED_EVENT",
+      "projected_E": "NO_CONFIRMED_EVENT"
+    },
+    {
+      "episode_id": "1e5a30f90ed7c3d37acfec09",
+      "truth": "KNOWN_POSITIVE",
+      "baseline": "NO_CONFIRMED_EVENT",
+      "projected_E": "NO_CONFIRMED_EVENT"
+    },
+    {
+      "episode_id": "22fc470fb24e88a1022fd27d",
+      "truth": "HOLD_CONTROL",
+      "baseline": "NEEDS_REVIEW",
+      "projected_E": "NEEDS_REVIEW"
+    },
+    {
+      "episode_id": "26c809a6df927f379fa024c2",
+      "truth": "KNOWN_POSITIVE",
+      "baseline": "NEEDS_REVIEW",
+      "projected_E": "NEEDS_REVIEW"
+    },
+    {
+      "episode_id": "27b2e9241a2ad8bf89c070b1",
+      "truth": "HOLD_CONTROL",
+      "baseline": "NEEDS_REVIEW",
+      "projected_E": "NEEDS_REVIEW"
+    },
+    {
+      "episode_id": "33b1cae83785426737f84083",
+      "truth": "KNOWN_POSITIVE",
+      "baseline": "NO_CONFIRMED_EVENT",
+      "projected_E": "NO_CONFIRMED_EVENT"
+    },
+    {
+      "episode_id": "40157dbe4b61c4016765bebe",
+      "truth": "KNOWN_POSITIVE",
+      "baseline": "STRICT_EVENT_POSITIVE",
+      "projected_E": "STRICT_EVENT_POSITIVE"
+    },
+    {
+      "episode_id": "4049f3c4caa124ef85917591",
+      "truth": "KNOWN_POSITIVE",
+      "baseline": "NEEDS_REVIEW",
+      "projected_E": "NEEDS_REVIEW"
+    },
+    {
+      "episode_id": "41d9805f11c0502bf96883ef",
+      "truth": "KNOWN_POSITIVE",
+      "baseline": "NEEDS_REVIEW",
+      "projected_E": "NEEDS_REVIEW"
+    },
+    {
+      "episode_id": "4a80aa1717ac46c27bdae139",
+      "truth": "KNOWN_POSITIVE",
+      "baseline": "NEEDS_REVIEW",
+      "projected_E": "NEEDS_REVIEW"
+    },
+    {
+      "episode_id": "4ccafc37528fe99ae73fab25",
+      "truth": "KNOWN_POSITIVE",
+      "baseline": "NO_CONFIRMED_EVENT",
+      "projected_E": "NO_CONFIRMED_EVENT"
+    },
+    {
+      "episode_id": "4d27be817fdcaee69850917b",
+      "truth": "KNOWN_POSITIVE",
+      "baseline": "SENSITIVITY_EVENT_POSITIVE",
+      "projected_E": "SENSITIVITY_EVENT_POSITIVE"
+    },
+    {
+      "episode_id": "543f593b398ed68307f52512",
+      "truth": "HOLD_CONTROL",
+      "baseline": "NEEDS_REVIEW",
+      "projected_E": "NEEDS_REVIEW"
+    },
+    {
+      "episode_id": "54b37cda1eb090d51cbfa53a",
+      "truth": "HOLD_CONTROL",
+      "baseline": "NO_CONFIRMED_EVENT",
+      "projected_E": "NO_CONFIRMED_EVENT"
+    },
+    {
+      "episode_id": "5ccb7f44480bee98de8e01c4",
+      "truth": "KNOWN_POSITIVE",
+      "baseline": "NEEDS_REVIEW",
+      "projected_E": "NEEDS_REVIEW"
+    },
+    {
+      "episode_id": "61d634a5595e9f7e63f1454c",
+      "truth": "HOLD_CONTROL",
+      "baseline": "NO_CONFIRMED_EVENT",
+      "projected_E": "NO_CONFIRMED_EVENT"
+    },
+    {
+      "episode_id": "636a2ee8464e0041c402cef1",
+      "truth": "KNOWN_POSITIVE",
+      "baseline": "NEEDS_REVIEW",
+      "projected_E": "NEEDS_REVIEW"
+    },
+    {
+      "episode_id": "66fa86bef63d59c4548bf527",
+      "truth": "HOLD_CONTROL",
+      "baseline": "NEEDS_REVIEW",
+      "projected_E": "NEEDS_REVIEW"
+    },
+    {
+      "episode_id": "6b10a67efd1fa1deac9bff8e",
+      "truth": "HOLD_CONTROL",
+      "baseline": "NEEDS_REVIEW",
+      "projected_E": "NEEDS_REVIEW"
+    },
+    {
+      "episode_id": "6e4aada601d4b2bdd4e82796",
+      "truth": "KNOWN_POSITIVE",
+      "baseline": "NO_CONFIRMED_EVENT",
+      "projected_E": "NO_CONFIRMED_EVENT"
+    },
+    {
+      "episode_id": "74f6abf659844954ad2e49d6",
+      "truth": "KNOWN_POSITIVE",
+      "baseline": "NO_CONFIRMED_EVENT",
+      "projected_E": "NO_CONFIRMED_EVENT"
+    },
+    {
+      "episode_id": "7c557193ec35e62a61d81e27",
+      "truth": "HOLD_CONTROL",
+      "baseline": "NO_CONFIRMED_EVENT",
+      "projected_E": "NO_CONFIRMED_EVENT"
+    },
+    {
+      "episode_id": "880f46473f3bc2726147b82f",
+      "truth": "KNOWN_POSITIVE",
+      "baseline": "NEEDS_REVIEW",
+      "projected_E": "NEEDS_REVIEW"
+    },
+    {
+      "episode_id": "88a0811097de29dc32d957dc",
+      "truth": "KNOWN_POSITIVE",
+      "baseline": "NEEDS_REVIEW",
+      "projected_E": "NEEDS_REVIEW"
+    },
+    {
+      "episode_id": "88ca1c1ef79951ae26254a27",
+      "truth": "KNOWN_POSITIVE",
+      "baseline": "NEEDS_REVIEW",
+      "projected_E": "NEEDS_REVIEW"
+    },
+    {
+      "episode_id": "8f30ec2c7271b6334f0e330e",
+      "truth": "KNOWN_POSITIVE",
+      "baseline": "NEEDS_REVIEW",
+      "projected_E": "NEEDS_REVIEW"
+    },
+    {
+      "episode_id": "8fbd6afd7256938d98a8604b",
+      "truth": "KNOWN_POSITIVE",
+      "baseline": "NEEDS_REVIEW",
+      "projected_E": "NEEDS_REVIEW"
+    },
+    {
+      "episode_id": "9655b05af7afaf32ec48589c",
+      "truth": "KNOWN_POSITIVE",
+      "baseline": "NEEDS_REVIEW",
+      "projected_E": "NEEDS_REVIEW"
+    },
+    {
+      "episode_id": "984992b5764fb58bcccb003e",
+      "truth": "KNOWN_POSITIVE",
+      "baseline": "STRICT_EVENT_POSITIVE",
+      "projected_E": "STRICT_EVENT_POSITIVE"
+    },
+    {
+      "episode_id": "9a2bf3c34a79636d8066c78d",
+      "truth": "KNOWN_POSITIVE",
+      "baseline": "NEEDS_REVIEW",
+      "projected_E": "NEEDS_REVIEW"
+    },
+    {
+      "episode_id": "9a7292036d131c5ba4aef348",
+      "truth": "KNOWN_POSITIVE",
+      "baseline": "NEEDS_REVIEW",
+      "projected_E": "NEEDS_REVIEW"
+    },
+    {
+      "episode_id": "9af004368bc48e63928d7bfb",
+      "truth": "KNOWN_POSITIVE",
+      "baseline": "NEEDS_REVIEW",
+      "projected_E": "NEEDS_REVIEW"
+    },
+    {
+      "episode_id": "9bb71c005f9b42c9c0c7b9e8",
+      "truth": "KNOWN_POSITIVE",
+      "baseline": "SENSITIVITY_EVENT_POSITIVE",
+      "projected_E": "SENSITIVITY_EVENT_POSITIVE"
+    },
+    {
+      "episode_id": "9fdcbb450cc23f35cffa44a5",
+      "truth": "KNOWN_POSITIVE",
+      "baseline": "NO_CONFIRMED_EVENT",
+      "projected_E": "NO_CONFIRMED_EVENT"
+    },
+    {
+      "episode_id": "a270a3c5ea1acc90815b3fa7",
+      "truth": "KNOWN_POSITIVE",
+      "baseline": "NO_CONFIRMED_EVENT",
+      "projected_E": "NO_CONFIRMED_EVENT"
+    },
+    {
+      "episode_id": "ac50698c6960aacb3003fde3",
+      "truth": "HOLD_CONTROL",
+      "baseline": "NO_CONFIRMED_EVENT",
+      "projected_E": "NO_CONFIRMED_EVENT"
+    },
+    {
+      "episode_id": "b1a3ce8a8570afa5bef2aea9",
+      "truth": "KNOWN_POSITIVE",
+      "baseline": "NEEDS_REVIEW",
+      "projected_E": "NEEDS_REVIEW"
+    },
+    {
+      "episode_id": "b92627878d0872ccdac947fd",
+      "truth": "HOLD_CONTROL",
+      "baseline": "NO_CONFIRMED_EVENT",
+      "projected_E": "NO_CONFIRMED_EVENT"
+    },
+    {
+      "episode_id": "bc6a6d169ce879e22f52c163",
+      "truth": "KNOWN_POSITIVE",
+      "baseline": "NO_CONFIRMED_EVENT",
+      "projected_E": "NO_CONFIRMED_EVENT"
+    },
+    {
+      "episode_id": "bce8edfb6de8569f8f0cfb78",
+      "truth": "KNOWN_POSITIVE",
+      "baseline": "NO_CONFIRMED_EVENT",
+      "projected_E": "NO_CONFIRMED_EVENT"
+    },
+    {
+      "episode_id": "c475d1dca5c22956189e88e3",
+      "truth": "KNOWN_POSITIVE",
+      "baseline": "NEEDS_REVIEW",
+      "projected_E": "NEEDS_REVIEW"
+    },
+    {
+      "episode_id": "c5f05a41bcd9e336afbb2362",
+      "truth": "KNOWN_POSITIVE",
+      "baseline": "NEEDS_REVIEW",
+      "projected_E": "NEEDS_REVIEW"
+    },
+    {
+      "episode_id": "cbf5948f83b063e3f47d5f15",
+      "truth": "KNOWN_POSITIVE",
+      "baseline": "NEEDS_REVIEW",
+      "projected_E": "NEEDS_REVIEW"
+    },
+    {
+      "episode_id": "ceafef7b2d21a8d27fa83240",
+      "truth": "HOLD_CONTROL",
+      "baseline": "NEEDS_REVIEW",
+      "projected_E": "NEEDS_REVIEW"
+    },
+    {
+      "episode_id": "cfd8acaf2ae96fb3ab6508d6",
+      "truth": "KNOWN_POSITIVE",
+      "baseline": "NEEDS_REVIEW",
+      "projected_E": "STRICT_EVENT_POSITIVE"
+    },
+    {
+      "episode_id": "d01da34b7f5dffa9338f303f",
+      "truth": "HOLD_CONTROL",
+      "baseline": "NEEDS_REVIEW",
+      "projected_E": "NEEDS_REVIEW"
+    },
+    {
+      "episode_id": "d3111283a5df66d38a665c20",
+      "truth": "KNOWN_POSITIVE",
+      "baseline": "NEEDS_REVIEW",
+      "projected_E": "NEEDS_REVIEW"
+    },
+    {
+      "episode_id": "d38211541ab9a1cb801d172e",
+      "truth": "KNOWN_POSITIVE",
+      "baseline": "NO_CONFIRMED_EVENT",
+      "projected_E": "NO_CONFIRMED_EVENT"
+    },
+    {
+      "episode_id": "d3bd74d1f16f20c03bea4c37",
+      "truth": "KNOWN_POSITIVE",
+      "baseline": "NO_CONFIRMED_EVENT",
+      "projected_E": "NO_CONFIRMED_EVENT"
+    },
+    {
+      "episode_id": "dd8e4cdc58e0e8777ee6c519",
+      "truth": "HOLD_CONTROL",
+      "baseline": "NEEDS_REVIEW",
+      "projected_E": "NEEDS_REVIEW"
+    },
+    {
+      "episode_id": "e56cdca45ed5b1cd7b0b9746",
+      "truth": "HOLD_CONTROL",
+      "baseline": "STRICT_EVENT_POSITIVE",
+      "projected_E": "STRICT_EVENT_POSITIVE"
+    },
+    {
+      "episode_id": "e700d1bae5a1e86e265de4b6",
+      "truth": "HOLD_CONTROL",
+      "baseline": "NEEDS_REVIEW",
+      "projected_E": "NEEDS_REVIEW"
+    },
+    {
+      "episode_id": "f06c52e0ed82b44792ec2ec7",
+      "truth": "HOLD_CONTROL",
+      "baseline": "STRICT_EVENT_POSITIVE",
+      "projected_E": "STRICT_EVENT_POSITIVE"
+    },
+    {
+      "episode_id": "f2225226e10802309d9e1f28",
+      "truth": "KNOWN_POSITIVE",
+      "baseline": "NO_CONFIRMED_EVENT",
+      "projected_E": "NO_CONFIRMED_EVENT"
+    },
+    {
+      "episode_id": "f72f1143c41c1116e2acf0c4",
+      "truth": "KNOWN_POSITIVE",
+      "baseline": "STRICT_EVENT_POSITIVE",
+      "projected_E": "STRICT_EVENT_POSITIVE"
+    },
+    {
+      "episode_id": "ff853b73b65d1efa270a3c00",
+      "truth": "KNOWN_POSITIVE",
+      "baseline": "NO_CONFIRMED_EVENT",
+      "projected_E": "NO_CONFIRMED_EVENT"
+    },
+    {
+      "episode_id": "ffdd8e7b96244ea6d8eff1ba",
+      "truth": "KNOWN_POSITIVE",
+      "baseline": "NO_CONFIRMED_EVENT",
+      "projected_E": "NO_CONFIRMED_EVENT"
+    }
+  ],
+  "target": {
+    "episode_id": "cfd8acaf2ae96fb3ab6508d6",
+    "candidate_id": "f0882d6580bb10476195589f",
+    "source": "war.telegraf.com.ua",
+    "normalized_text_sha256": "65c6dd5cdace3b4e0a83bb03624ba3ec01dec5591058ca516f9b6178db8940e2",
+    "direct_clock_sentence": "Близько 8:25 у Києві пролунали повторні вибухи.",
+    "all_segments": 16,
+    "classification_ordinal": 8,
+    "exact_city_segments": 5,
+    "exact_city_ordinal": 5,
+    "previously_retained": [
+      1,
+      4,
+      5,
+      7
+    ],
+    "contract_E_retained": [
+      1,
+      4,
+      7,
+      8
+    ],
+    "parsed_clock": [
+      [
+        8,
+        25
+      ]
+    ],
+    "temporal_binding_code_projected": "TEMPORAL_EXPLICIT_EVENT_TIME_INSIDE_EPISODE",
+    "candidate_outcome_projected": "approved_strict",
+    "episode_verdict_projected": "STRICT_EVENT_POSITIVE"
+  },
+  "changed_row_trace": [
+    {
+      "contracts": [
+        "B",
+        "D"
+      ],
+      "episode": "c475d1dca5c22956189e88e3",
+      "candidate": "d4d735341b0eff1f733029af",
+      "baseline": [
+        1,
+        2,
+        3,
+        5
+      ],
+      "counterfactual": [
+        2,
+        3,
+        5,
+        7
+      ],
+      "added": [
+        7
+      ],
+      "removed": [
+        1
+      ]
+    },
+    {
+      "contracts": [
+        "B",
+        "D"
+      ],
+      "episode": "27b2e9241a2ad8bf89c070b1",
+      "candidate": "19d8db1a5032f30c7fdf8e7d",
+      "baseline": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "counterfactual": [
+        1,
+        2,
+        3,
+        12
+      ],
+      "added": [
+        12
+      ],
+      "removed": [
+        4
+      ],
+      "hold": true,
+      "added_strict_text": "Історії людей, які постраждали через масований удар по Києву та Харкову ...",
+      "parsed_clocks": [],
+      "counterfactual_hold_classifier_outcome": "NOT_EXECUTED"
+    },
+    {
+      "contracts": [
+        "B",
+        "C",
+        "D",
+        "E"
+      ],
+      "episode": "cfd8acaf2ae96fb3ab6508d6",
+      "candidate": "f0882d6580bb10476195589f",
+      "baseline": [
+        1,
+        4,
+        5,
+        7
+      ],
+      "counterfactual": [
+        1,
+        4,
+        7,
+        8
+      ],
+      "added": [
+        8
+      ],
+      "removed": [
+        5
+      ],
+      "added_text": "Близько 8:25 у Києві пролунали повторні вибухи.",
+      "removed_text": "До цього повідомлялось про те, що ракети \"Кинжал\" летять на Київ."
+    },
+    {
+      "contracts": [
+        "B",
+        "D"
+      ],
+      "episode": "f72f1143c41c1116e2acf0c4",
+      "candidate": "f08cd4c50cd41a951a36c16e",
+      "baseline": [
+        1,
+        2,
+        3,
+        11
+      ],
+      "counterfactual": [
+        1,
+        2,
+        12,
+        14
+      ],
+      "added": [
+        12,
+        14
+      ],
+      "removed": [
+        3,
+        11
+      ]
+    },
+    {
+      "contracts": [
+        "B",
+        "D"
+      ],
+      "episode": "1216abdb8a6d4cf8febfa361",
+      "candidate": "2b3af78b5322fd22efe6bf3f",
+      "baseline": [
+        1,
+        2,
+        5,
+        9
+      ],
+      "counterfactual": [
+        1,
+        2,
+        5,
+        13
+      ],
+      "added": [
+        13
+      ],
+      "removed": [
+        9
+      ]
+    },
+    {
+      "contracts": [
+        "B",
+        "D"
+      ],
+      "episode": "1216abdb8a6d4cf8febfa361",
+      "candidate": "9c87253c0bf69c8a4596f9e7",
+      "baseline": [
+        1,
+        2,
+        4,
+        5
+      ],
+      "counterfactual": [
+        1,
+        2,
+        5,
+        10
+      ],
+      "added": [
+        10
+      ],
+      "removed": [
+        4
+      ]
+    }
+  ],
+  "impact": {
+    "classifier_counterfactual_executed": false,
+    "reason": "Exact full pinned Python classifier was not run. 105 candidate segment selections were replayed offline using faithfully reconstructed pinned helpers. Outcome columns below are projections, not executed verdicts.",
+    "baseline_known_positive_finals": 5,
+    "recommended_E_projected_known_positive_finals": 6,
+    "recommended_E_projected_STRICT": 4,
+    "recommended_E_projected_SENSITIVITY": 2,
+    "recommended_E_unchanged_candidate_rows": 104,
+    "recommended_E_unchanged_episode_verdicts": 66,
+    "all_19_hold_selections_unchanged_under_E": true,
+    "new_uncleared_hold_promotions_projected": 0,
+    "other_changed_B_D_candidate_outcomes": "UNKNOWN",
+    "new_positive_is_development_projection_only": true
+  },
+  "holds": {
+    "total": 19,
+    "baseline_STRICT": 2,
+    "baseline_SENSITIVITY": 0,
+    "E56": "e56cdca45ed5b1cd7b0b9746 precleared for exact frozen Suspilne only, unchanged",
+    "F06": "f06c52e0ed82b44792ec2ec7 legacy positive without new clearance, unchanged",
+    "B_D_changed_hold": "27b2e9241a2ad8bf89c070b1",
+    "E_changed_hold_count": 0
+  },
+  "historical_411": {
+    "status": "411 REGRESSION NOT EXECUTED — BLIND DETAIL EXPOSURE WOULD BE REQUIRED",
+    "prior_compact_aggregate_run": 37529446549,
+    "summary_artifact": 11443926832,
+    "baseline_positive_preserved": "145/145",
+    "baseline_STRICT": "141/141",
+    "baseline_SENSITIVITY": "4/4",
+    "baseline_holds": "57/57",
+    "baseline_unsupported_promotions": "0/57",
+    "counterfactual_regression_executed": false,
+    "blind_detail_inspected": false
+  },
+  "recommendation": {
+    "contract": "E",
+    "classification": "SAFE_SELECTION_CONTRACT_IDENTIFIED",
+    "narrowness": "A fails target; B/D change a hold and require full safety reproof; C admits a broader class of late clocks than E. E changes one candidate only; no hold and no existing positive controls touched.",
+    "safety": "PASS on 67-episode segment-selection gate; pinned full-classifier projection not an executed independent replay",
+    "implemented": false
+  },
+  "guards": {
+    "publisher_fetches": 0,
+    "telegram_fetches": 0,
+    "new_search": 0,
+    "new_native_acquisitions": 0,
+    "old_blind_inspected": false,
+    "backfill": false,
+    "neon_queries": 0,
+    "neon_writes": 0,
+    "production_changes": 0,
+    "main_changes": 0,
+    "classifier_changes": 0,
+    "parser_changes": 0,
+    "source_policy_changes": 0,
+    "review_provenance_changes": 0,
+    "workflow_dispatches": 0
+  },
+  "final_verdict": "KYIV 08:25 SEGMENT-SELECTION CONTRACT = SAFE CONTRACT IDENTIFIED",
+  "exactly_one_next_task": "IMPLEMENT AND REPROVE ONLY THE ACCEPTED EVIDENCE-SEGMENT SELECTION CONTRACT"
+}
