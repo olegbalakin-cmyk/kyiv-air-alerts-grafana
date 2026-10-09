@@ -1,0 +1,89 @@
+name: Unit A bounded persistence payload replay proof
+
+on:
+  push:
+    branches:
+      - attack-event-unit-a-bounded-persistence-payload-replay-proof-2026-10-09
+    paths:
+      - .github/workflows/attack-event-unit-a-bounded-persistence-payload-replay-proof.yml
+
+permissions:
+  contents: write
+  actions: read
+
+jobs:
+  bounded-proof:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    env:
+      PYTHONDONTWRITEBYTECODE: "1"
+    steps:
+      - name: Checkout full immutable lineage
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: attack-event-unit-a-bounded-persistence-payload-replay-proof-2026-10-09
+      - name: Setup exact A3 Python runtime
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install original pinned classifier requirements
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git merge-base HEAD 1a987d347d5b1fb7590bcfc83e2e518f72fb31f5)" = "1a987d347d5b1fb7590bcfc83e2e518f72fb31f5"
+          test "$(git rev-parse 71cb6f6fbe856cc7b96759310fe9cc9c71cc0453:kyiv-air-alerts-grafana/requirements.txt)" = "d7a2ff05af67cda88e4930d238f0282ca557a963"
+          req="$(mktemp)"
+          git show 71cb6f6fbe856cc7b96759310fe9cc9c71cc0453:kyiv-air-alerts-grafana/requirements.txt > "$req"
+          printf '%s\n' "requests>=2.32,<3" "beautifulsoup4>=4.12,<5" > "$req.expected"
+          cmp -s "$req" "$req.expected"
+          python -m pip install --disable-pip-version-check -r "$req"
+      - name: Source exhaustion then conditional offline replay
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -z "${DATABASE_URL:-}"
+          test -z "${PHASE1_PROD_SHADOW_DATABASE_URL:-}"
+          python .github/proof/attack_event_unit_a_bounded_persistence_payload_replay_proof.py
+          test -f research/attack_event_unit_a_bounded_persistence_payload_replay_proof_2026-10-09.json
+      - name: Freeze deterministic result
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          p="research/attack_event_unit_a_bounded_persistence_payload_replay_proof_2026-10-09.json"
+          test -f "$p"
+          git add "$p"
+          git commit -m "Freeze bounded Unit A persistence payload replay proof"
+          echo "ARTIFACT_COMMIT=$(git rev-parse HEAD)"
+          echo "ARTIFACT_BLOB=$(git rev-parse HEAD:"$p")"
+          echo "ARTIFACT_SHA256=$(sha256sum "$p" | awk '{print $1}')"
+          git push origin HEAD:attack-event-unit-a-bounded-persistence-payload-replay-proof-2026-10-09
+      - name: Cleanup temporary files without replay
+        shell: bash
+        run: |
+          set -euo pipefail
+          p="research/attack_event_unit_a_bounded_persistence_payload_replay_proof_2026-10-09.json"
+          before="$(git hash-object "$p")"
+          rm .github/proof/attack_event_unit_a_bounded_persistence_payload_replay_proof.py
+          rm .github/workflows/attack-event-unit-a-bounded-persistence-payload-replay-proof.yml
+          git add -A .github/proof/attack_event_unit_a_bounded_persistence_payload_replay_proof.py .github/workflows/attack-event-unit-a-bounded-persistence-payload-replay-proof.yml
+          git commit -m "Remove temporary Unit A replay proof workflow and harness"
+          test "$before" = "$(git hash-object "$p")"
+          git push origin HEAD:attack-event-unit-a-bounded-persistence-payload-replay-proof-2026-10-09
+          echo "FINAL_HEAD=$(git rev-parse HEAD)"
+      - name: Verify final one-file diff
+        shell: bash
+        run: |
+          set -euo pipefail
+          test ! -e .github/proof/attack_event_unit_a_bounded_persistence_payload_replay_proof.py
+          test ! -e .github/workflows/attack-event-unit-a-bounded-persistence-payload-replay-proof.yml
+          git diff --name-status 1a987d347d5b1fb7590bcfc83e2e518f72fb31f5..HEAD
+          test "$(git diff --name-only 1a987d347d5b1fb7590bcfc83e2e518f72fb31f5..HEAD)" = "research/attack_event_unit_a_bounded_persistence_payload_replay_proof_2026-10-09.json"
+          echo "FINAL_DIFF_FILE_COUNT=1"
+          echo "TEMP_WORKFLOW_REMOVED=YES"
+          echo "TEMP_HARNESS_REMOVED=YES"
+          echo "PRODUCTION_MUTATION=NO"
