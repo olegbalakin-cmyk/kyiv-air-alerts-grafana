@@ -1,0 +1,81 @@
+name: Unit A frozen persistence payload lineage recovery
+on:
+  push:
+    branches:
+      - attack-event-unit-a-frozen-persistence-payload-recovery-2026-10-09
+    paths:
+      - .github/workflows/attack-event-unit-a-frozen-persistence-payload-recovery.yml
+permissions:
+  contents: write
+  actions: read
+jobs:
+  offline-lineage-only:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: true
+      - name: Fetch immutable refs for historical lineage search
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch --no-tags origin '+refs/heads/*:refs/remotes/origin/*'
+          for sha in 71cb6f6fbe856cc7b96759310fe9cc9c71cc0453 1422e8482303ec9262647ca55fef753a9aa2b3ea; do
+            git fetch --no-tags origin "$sha"
+          done
+          test "$(git merge-base HEAD 510b9afcf48d1644cdd9af0c7a135d8f59afd486)" = 510b9afcf48d1644cdd9af0c7a135d8f59afd486
+      - name: Inspect frozen Git and existing Actions artifacts only
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PYTHONDONTWRITEBYTECODE: "1"
+        run: |
+          set -euo pipefail
+          python -B .github/proof/attack_event_unit_a_frozen_persistence_payload_recovery.py
+      - name: Freeze and clean up proof-only execution files
+        shell: bash
+        run: |
+          set -euo pipefail
+          artifact=research/attack_event_unit_a_frozen_persistence_payload_recovery_2026-10-09.json
+          test -f "$artifact"
+          python - "$artifact" <<'PY'
+          import json,sys
+          r=json.load(open(sys.argv[1]))
+          assert r["A4_PAYLOAD_RECOVERY_GATE"] in ("PASS","FAIL")
+          assert r["verdict"] in (
+             "ATTACK-EVENT UNIT A FROZEN PERSISTENCE PAYLOAD RECOVERY = BLOCKED",
+             "ATTACK-EVENT UNIT A FROZEN PERSISTENCE PAYLOAD RECOVERY = RECOVERED")
+          for k in ("classifier_executions","matching_executions","composition_executions",
+                    "discovery_executions","public_evidence_requests","neon_queries",
+                    "db_connections","db_queries","db_writes","unit_b_executions","unit_c_executions"):
+             assert r["safety"][k]==0,(k,r["safety"][k])
+          assert r["safety"]["a4_resumed"] is False
+          assert r["safety"]["a5_executed"] is False
+          assert r["safety"]["production_mutation"]=="NO"
+          if r["A4_PAYLOAD_RECOVERY_GATE"]=="PASS":
+             assert r["recovery_target_counts"]["repaired_membership_occurrences"]==1559
+             assert r["persistence_payload_construction"]["payloads_constructable"]==1559
+             assert all(v["recovered_occurrences"]==1559 for v in r["per_field_recovery_coverage"].values())
+             assert r["determinism"]["semantic_mismatches"]==0
+             assert r["determinism"]["run_a_recovery_sha256"]==r["determinism"]["run_b_recovery_sha256"]
+          PY
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "$artifact"
+          git commit -m "Freeze Unit A immutable persistence payload recovery verdict"
+          echo "ARTIFACT_COMMIT=$(git rev-parse HEAD)"
+          echo "ARTIFACT_BLOB=$(git rev-parse HEAD:$artifact)"
+          echo "ARTIFACT_SHA256=$(sha256sum "$artifact" | cut -d' ' -f1)"
+          before=$(git hash-object "$artifact")
+          rm .github/proof/attack_event_unit_a_frozen_persistence_payload_recovery.py
+          rm .github/workflows/attack-event-unit-a-frozen-persistence-payload-recovery.yml
+          git add -A .github/proof/attack_event_unit_a_frozen_persistence_payload_recovery.py .github/workflows/attack-event-unit-a-frozen-persistence-payload-recovery.yml
+          git commit -m "Remove temporary Unit A payload recovery workflow and harness"
+          test "$before" = "$(git hash-object "$artifact")"
+          test "$(git diff --name-status 510b9afcf48d1644cdd9af0c7a135d8f59afd486..HEAD)" = "$(printf 'A\tresearch/attack_event_unit_a_frozen_persistence_payload_recovery_2026-10-09.json')"
+          echo "FINAL_HEAD=$(git rev-parse HEAD)"
+          echo "FINAL_DIFF_FILE_COUNT=1"
+          echo "TEMP_WORKFLOW_REMOVED=YES"
+          echo "TEMP_HARNESS_REMOVED=YES"
+          git push origin HEAD:attack-event-unit-a-frozen-persistence-payload-recovery-2026-10-09
