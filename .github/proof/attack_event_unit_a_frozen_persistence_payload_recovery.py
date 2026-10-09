@@ -257,8 +257,8 @@ def snapshot_refs(corpus):
   if isinstance(x,dict):
    for k,v in x.items():
     key=str(k).lower()
-    if isinstance(v,str) and HEX40.fullmatch(v) and
-       ("queue" in key or "snapshot" in key or ("commit" in key and ("queue" in kcontext or "snapshot" in kcontext))):
+    if (isinstance(v,str) and HEX40.fullmatch(v) and
+       ("queue" in key or "snapshot" in key or ("commit" in key and ("queue" in kcontext or "snapshot" in kcontext)))):
      found.add(v)
     elif isinstance(v,list) and ("queue" in key or "snapshot" in key):
      for z in v:
@@ -378,8 +378,8 @@ class Collector:
   norm=pick("normalization_version")
   # Exact A3 projection identity must be established, not inferred from text or reason codes.
   decision=next((d for d in ancestors if all(k in d for k in PRESERVED)),None)
-  if not decision and isinstance(node.get("decision"),dict) and
-     all(k in node["decision"] for k in PRESERVED):
+  if (not decision and isinstance(node.get("decision"),dict) and
+     all(k in node["decision"] for k in PRESERVED)):
    decision=node["decision"]
   verified=[]
   if decision is not None and ref:
@@ -410,14 +410,14 @@ class Collector:
      val=node[field]
      self.values[dr][field].append({"value":copy.deepcopy(val),
        "hash":hobj(val),"source":compact_source(source)})
-   kind="QUEUE_STATE_WITH_EXACT_DECISION_LINEAGE" if "queue" in
+   kind=("QUEUE_STATE_WITH_EXACT_DECISION_LINEAGE" if "queue" in
       str(source.get("path") or source.get("file_name") or "").lower() else (
-      "EXACT_FULL_DECISION_SOURCE" if len(present)==len(MISSING) else "PARTIAL_DECISION_SOURCE")
+      "EXACT_FULL_DECISION_SOURCE" if len(present)==len(MISSING) else "PARTIAL_DECISION_SOURCE"))
    self.matched_sources[kind]+=1
    return verified,kind
-  if (cid and any(t["candidate_id"]==cid for t in self.bydr.values())) or
+  if ((cid and any(t["candidate_id"]==cid for t in self.bydr.values())) or
      (ref and any(t["candidate_input_ref"]==ref for t in self.bydr.values())) or
-     (explicit_dr and explicit_dr in self.bydr):
+     (explicit_dr and explicit_dr in self.bydr)):
    if len(self.lineage_errors)<12:
     self.lineage_errors.append({"source":compact_source(source),
        "candidate_id":cid,"candidate_input_ref":ref,"decision_ref":explicit_dr,
