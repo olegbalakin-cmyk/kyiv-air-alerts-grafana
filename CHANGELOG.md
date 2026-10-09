@@ -4,9 +4,14 @@ Accepted project checkpoints, newest first. This is not the full Git history, a 
 
 ## 2026-10-09
 
+### Expanded Kyiv immutable development source set frozen
+- **Status:** `FROZEN`. **Evidence:** [freeze commit 7fdcc290](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/commit/7fdcc2903205e8fc489b2eff588332a45cfaca09), [single-file freeze artifact](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/blob/7fdcc2903205e8fc489b2eff588332a45cfaca09/research/kyiv_immutable_development_source_set_expanded_freeze_2026-10-09.json), [acceptance run 37947654494](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/37947654494).
+- Expanded development manifest SHA-256 `58dbde111229d099413ad03e99be3839557431957c4ac72832b23be8a49bc08e`; **15** source families. **31/48** known positives candidate-covered and **5/48** final-positive, with **43/48** known positives remaining non-final and **zero** new uncleared hold promotions.
+- Previous **12-family freeze SUPERSEDED FOR FUTURE DEVELOPMENT EXPERIMENTS** and preserved as historical provenance. The 15-family configuration is now the authoritative **development-only** reference. Production source strategy unchanged; no historical backfill or Neon writes from this freeze.
+
 ### EXPANSION-3 authoritative offline acceptance
 - **Status:** `PROVEN`. **Evidence:** [run 37947654494](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/37947654494), artifact `11624138372`, proof-branch commit `6f237628994c6d6ae1c6a1f50c73069473ce27e7`.
-- 67/67 verdict/candidate/outcome equality; **31/48** candidate-covered, **5/48** final-positive, zero new uncleared holds. Expanded manifest SHA-256 `58dbde111229d099413ad03e99be3839557431957c4ac72832b23be8a49bc08e` was emitted to an Actions artifact, **not** committed as a new repository freeze. Production unchanged.
+- 67/67 verdict/candidate/outcome equality; **31/48** candidate-covered, **5/48** final-positive, zero new uncleared holds. Expanded manifest SHA-256 `58dbde111229d099413ad03e99be3839557431957c4ac72832b23be8a49bc08e` was emitted to an Actions artifact; **at that acceptance checkpoint**, the expanded repository freeze had not yet been committed. Production unchanged.
 
 ### Source-eligibility expansion selected in development
 - **Status:** `ACCEPTED` as a **material pilot only**. **Evidence:** [pilot commit b749e019](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/commit/b749e0195c4ec1b2262c998e381a92277a89a5e9), [run 37937223379](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/37937223379).
@@ -14,7 +19,7 @@ Accepted project checkpoints, newest first. This is not the full Git history, a 
 
 ### First durable Kyiv immutable development source-set freeze
 - **Status:** `FROZEN`. **Evidence:** [commit 2a7b17c](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/commit/2a7b17c9514a43648e22eb795f0f2f7b65c3980f), `research/kyiv_immutable_development_source_set_freeze_2026-10-09.json`.
-- Selected **12** safe families, including `war.telegraf.com.ua`; **26/48** candidate-covered and **3/48** final-positive. Manifest SHA-256 `bc77629b7936e02488cd611da1515dc9f9b52db945d5cf334aaa60245ca295ee`. Still the latest **repository-committed** Kyiv discovery source-set freeze.
+- Selected **12** safe families, including `war.telegraf.com.ua`; **26/48** candidate-covered and **3/48** final-positive. Manifest SHA-256 `bc77629b7936e02488cd611da1515dc9f9b52db945d5cf334aaa60245ca295ee`. At that checkpoint it was the latest **repository-committed** Kyiv discovery source-set freeze; subsequently superseded by the accepted 15-family freeze.
 
 ### Source-dominant failure diagnosis
 - **Status:** `PROVEN` for the frozen 12-family corpus. **Evidence:** diagnosis provenance in [expansion pilot proof](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/blob/b749e0195c4ec1b2262c998e381a92277a89a5e9/research/kyiv_immutable_source_eligibility_expansion_pilot_2026-10-09.json).
