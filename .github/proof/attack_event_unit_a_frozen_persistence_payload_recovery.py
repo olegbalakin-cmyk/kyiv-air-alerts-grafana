@@ -178,8 +178,8 @@ def preflight(out):
  tree=ast.parse(source)
  fn=next((n for n in tree.body if isinstance(n,ast.FunctionDef) and n.name=="decision_projection"),None)
  rr=next((n.value for n in ast.walk(fn) if isinstance(n,ast.Return)),None) if fn else None
- names=[k.value for k in rr.keys] if isinstance(rr,ast.Dict) and
-       all(isinstance(k,ast.Constant) and isinstance(k.value,str) for k in rr.keys) else []
+ names=([k.value for k in rr.keys] if (isinstance(rr,ast.Dict) and
+       all(isinstance(k,ast.Constant) and isinstance(k.value,str) for k in rr.keys)) else [])
  if set(names)!=set(PRESERVED):
   raise Blocked("UNIT_A_PAYLOAD_RECOVERY_INPUT_DRIFT","A3 decision_projection AST changed")
  return a4,r3,a3
@@ -486,8 +486,8 @@ def scan_actions(out,collector):
     name=str(r.get("name") or "").lower()
     branch=str(r.get("head_branch") or "").lower()
     if r.get("status")!="completed":continue
-    if ("unit a" in name or "unit-a" in branch or "attack-event" in branch) and
-       ("classif" in name or "replay" in name or "context" in name):
+    if (("unit a" in name or "unit-a" in branch or "attack-event" in branch) and
+       ("classif" in name or "replay" in name or "context" in name)):
      runs.add(int(r["id"]))
      if int(r["id"]) not in RUNS:
       actions["discovered_earlier_a3_runs"].append(int(r["id"]))
