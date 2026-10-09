@@ -132,7 +132,13 @@ def lineage_contract():
     ae = extract(a3raw, ["related", "qa_for"], "frozen_A3_related")
     he = extract(hist, ["observation_episode_refs"], "historical_episode_membership")
     pe = extract(prod, ["_episode_refs"], "production_episode_membership")
-    py = extract(parity, ["residual_qa"], "accepted_parity_relation")
+    parity_tree = ast.parse(parity.decode("utf-8"))
+    workers = [n.value.value for n in parity_tree.body
+               if isinstance(n,ast.Assign) and isinstance(n.value,ast.Constant)
+               and isinstance(n.value.value,str)
+               and any(isinstance(t,ast.Name) and t.id=="REPLAY_WORKER" for t in n.targets)]
+    require(len(workers)==1, "PARITY_WORKER_CONTRACT_MISSING")
+    py = extract(workers[0].encode("utf-8"), ["residual_qa"], "accepted_parity_relation")
     me = extract(monitor, ["apply_matching_result"], "pinned_matching")
     adapter = extract(prod, ["canonical_json_bytes", "canonical_sha256",
                              "_normalized_source_content", "_review_provenance"],
