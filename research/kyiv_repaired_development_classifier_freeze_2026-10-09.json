@@ -1,0 +1,85 @@
+{
+  "schema": "kyiv-repaired-development-classifier-identity-freeze-v1",
+  "version": 1,
+  "track": "Kyiv immutable historical discovery — development",
+  "status": "FROZEN",
+  "coordination_main_read": "23f6308b97c3ac6c8d93b02b7c6ba973928d6053",
+  "project_state_read": true,
+  "changelog_read": true,
+  "newer_accepted_kyiv_development_checkpoint_found": false,
+  "source_freeze_identity": {
+    "commit": "7fdcc2903205e8fc489b2eff588332a45cfaca09",
+    "manifest_sha256": "58dbde111229d099413ad03e99be3839557431957c4ac72832b23be8a49bc08e",
+    "source_families": 15,
+    "configuration_id": "EXPANSION-3",
+    "frozen_corpus_sha256": {
+      "discovery": "fc1e184741c8409ce634015771a9484de8cfd8230037be56e3d8970d0178e5cc",
+      "native": "bcfdedba186b58671dab7c3c1bd33dc8ec0f2772c8b9f9c3bf053c7d64cff858",
+      "normalized": "e5790301a8d17b9997a3dbdfb71651e486de8ba6a4c39a552043754805e7ce2d"
+    },
+    "manifest_and_all_payload_hashes_recomputed_from_existing_immutable_actions_artifacts": true,
+    "acquisition_run_id": 37916038826,
+    "acquisition_artifact_id": 11608819645
+  },
+  "classifier_identity": {
+    "classifier_path": "kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py",
+    "base_commit": "71cb6f6fbe856cc7b96759310fe9cc9c71cc0453",
+    "original_classifier_blob_sha": "778469b74c2aa807d851cf2c2ee35cf4aa785589",
+    "semantic_repair_commit": "c5dd5fec6fe8f9a3fa0bbdefdd2cf71cee2ff801",
+    "repaired_classifier_blob_sha": "4019b8374dcc44846df04ed0cc41356652214bff",
+    "changed_files": [
+      "kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py"
+    ],
+    "changed_functions": [
+      "exact_city_classification_evidence"
+    ],
+    "contract_name": "UNIQUE_LATE_CLOCK_AND_FREE_SLOT",
+    "base_is_ancestor_of_repair": true,
+    "semantic_diff_exactly_one_file_and_function": true,
+    "code_modified_in_this_freeze": false
+  },
+  "accepted_proof": {
+    "branch": "kyiv-0825-evidence-segment-selection-repair-proof-2026-10-09",
+    "head": "906b9e18aa9e0a2056bcb798b9870ae35d8dee3d",
+    "actions_run_id": 37974699629,
+    "actions_run_status": "completed",
+    "actions_run_conclusion": "success",
+    "actions_artifact_id": 11638425268,
+    "proof_json_path": "research/kyiv_immutable_0825_evidence_segment_selection_repair_proof_2026-10-09.json",
+    "proof_json_sha256": "d09bb068d7e23d2afd345e5e23f6aacd5e49c5871bf410f40b37ea3e7214308f",
+    "repaired_deterministic_fingerprint_a": "57fa5e402a79ab852b48d540de6a56581c3dd27fde4e986d3cce28ea3b611af8",
+    "repaired_deterministic_fingerprint_b": "57fa5e402a79ab852b48d540de6a56581c3dd27fde4e986d3cce28ea3b611af8",
+    "repaired_replay_outputs_byte_equal": true,
+    "proof_head_descends_from_semantic_repair_commit": true
+  },
+  "executed_repaired_cohort": {
+    "episodes": 67,
+    "candidate_rows": 105,
+    "known_positives": 48,
+    "holds": 19,
+    "candidate_covered_positives": 31,
+    "strict_positives": 4,
+    "sensitivity_positives": 2,
+    "final_positives": 6,
+    "remaining_nonfinal_known_positives": 42,
+    "all_five_pre_repair_final_positives_preserved": true,
+    "holds_unchanged": 19,
+    "hold_strict": 2,
+    "hold_sensitivity": 0,
+    "new_uncleared_hold_promotions": 0,
+    "changed_classifier_candidates": 1,
+    "changed_final_episode_verdicts": 1
+  },
+  "safety": {
+    "production_deployment": "NO",
+    "independent_validation": "NO",
+    "historical_backfill_started": "NO",
+    "neon_queries": 0,
+    "neon_writes": 0,
+    "production_mutations": 0,
+    "network_evidence_fetches": 0,
+    "blind_per_episode_inspected": false,
+    "historical_411_regression": "411 REGRESSION NOT RERUN — NOT REQUIRED FOR READ-ONLY REMAINING-FAILURE DIAGNOSIS"
+  },
+  "verdict": "KYIV REPAIRED DEVELOPMENT CLASSIFIER IDENTITY = FROZEN"
+}
