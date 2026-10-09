@@ -1,0 +1,75 @@
+name: Unit A resumed shadow persistence gap read-only audit
+
+on:
+  push:
+    branches:
+      - attack-event-unit-a-shadow-persistence-gap-audit-resume-2026-10-09
+    paths:
+      - .github/workflows/attack-event-unit-a-shadow-persistence-gap-audit-resume.yml
+
+permissions:
+  contents: write
+
+jobs:
+  unit-a-a4-resume:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: true
+      - name: Fetch pinned historical Git objects
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch --no-tags origin multicity-wip-2026-09-16
+          for sha in \
+            51adc76b715669e46e8c2c936906022d4d96ed44 \
+            71cb6f6fbe856cc7b96759310fe9cc9c71cc0453 \
+            f54b0d6dcfcdd7e5b51a5b45b996273d1df72cff \
+            1422e8482303ec9262647ca55fef753a9aa2b3ea \
+            bc58ab0705699c1686d897f07852c3493b5eec16 \
+            a0eb594dd4240d1d923ca5262725fc42f4807338; do
+            git fetch --no-tags origin "$sha"
+          done
+          test "$(git merge-base HEAD 7a076e6e1c9b71c2aab16fef9e2bb40b15e1b64c)" = "7a076e6e1c9b71c2aab16fef9e2bb40b15e1b64c"
+      - name: Offline audit without classifier or Neon
+        shell: bash
+        env:
+          GIT_NO_LAZY_FETCH: "1"
+          PYTHONDONTWRITEBYTECODE: "1"
+        run: |
+          set -euo pipefail
+          python -B .github/proof/attack_event_unit_a_shadow_persistence_gap_audit_resume.py
+      - name: Freeze audit artifact and clean execution files without rerun
+        shell: bash
+        run: |
+          set -euo pipefail
+          artifact="research/attack_event_execution_unit_a_shadow_persistence_gap_audit_resume_2026-10-09.json"
+          test -f "$artifact"
+          test "$(git rev-parse HEAD:research/attack_event_execution_unit_a_classification_replay_2026-10-09.json)" = "4dfc8aa7132706e2a3a4febd655ffa0a2bd71640"
+          test "$(git rev-parse HEAD:research/attack_event_execution_unit_a_source_identity_adapter_proof_2026-10-09.json)" = "a7e6b992180bfef3dd640fcd9ef8eec8a6436af7"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "$artifact"
+          git commit -m "Freeze resumed Unit A shadow persistence gap audit [unit-a-a4-resume-artifact]"
+          echo "ARTIFACT_COMMIT=$(git rev-parse HEAD)"
+          echo "ARTIFACT_BLOB=$(git rev-parse HEAD:$artifact)"
+          echo "ARTIFACT_SHA256=$(sha256sum "$artifact" | cut -d' ' -f1)"
+          before="$(git hash-object "$artifact")"
+          rm .github/workflows/attack-event-unit-a-shadow-persistence-gap-audit-resume.yml
+          rm .github/proof/attack_event_unit_a_shadow_persistence_gap_audit_resume.py
+          git add -A .github/workflows/attack-event-unit-a-shadow-persistence-gap-audit-resume.yml .github/proof/attack_event_unit_a_shadow_persistence_gap_audit_resume.py
+          git commit -m "Remove temporary resumed A4 audit execution files"
+          after="$(git hash-object "$artifact")"
+          test "$before" = "$after"
+          test ! -e .github/workflows/attack-event-unit-a-shadow-persistence-gap-audit-resume.yml
+          test ! -e .github/proof/attack_event_unit_a_shadow_persistence_gap_audit_resume.py
+          test "$(git diff --name-status 7a076e6e1c9b71c2aab16fef9e2bb40b15e1b64c..HEAD)" = "$(printf 'A\tresearch/attack_event_execution_unit_a_shadow_persistence_gap_audit_resume_2026-10-09.json')"
+          echo "FINAL_HEAD=$(git rev-parse HEAD)"
+          echo "FINAL_DIFF_FILE_COUNT=1"
+          echo "TEMP_WORKFLOW_REMOVED=YES"
+          echo "TEMP_HARNESS_REMOVED=YES"
+          echo "PRODUCTION_MUTATION=NO"
+          git push origin HEAD:attack-event-unit-a-shadow-persistence-gap-audit-resume-2026-10-09
