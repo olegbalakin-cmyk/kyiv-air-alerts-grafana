@@ -1,0 +1,88 @@
+name: Kyiv 0825 bounded actual-classifier repair reproof
+on:
+  push:
+    branches:
+      - kyiv-0825-evidence-segment-selection-repair-proof-2026-10-09
+    paths:
+      - .github/workflows/kyiv-0825-actual-classifier-repair-reproof.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: kyiv-0825-actual-classifier-repair-reproof
+  cancel-in-progress: false
+jobs:
+  bounded-offline-actual-classifier-proof:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    env:
+      PYTHONDONTWRITEBYTECODE: "1"
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install original classifier dependencies
+        run: python -m pip install 'requests>=2.31,<3' 'beautifulsoup4>=4.12,<5'
+      - name: Verify no database credentials
+        run: |
+          python - <<'PY'
+          import os
+          denied=[k for k,v in os.environ.items() if v and (k in {"DATABASE_URL","DIRECT_URL","PGHOST","PGUSER","PGPASSWORD","PGDATABASE"} or k.startswith(("NEON_","POSTGRES_","SUPABASE_DB_")))]
+          assert not denied,"DB_CREDENTIAL_PRESENT:"+",".join(denied)
+          PY
+      - name: Verify pinned proof ancestry and code diff
+        run: |
+          git merge-base --is-ancestor 71cb6f6fbe856cc7b96759310fe9cc9c71cc0453 HEAD
+          test "$(git rev-parse HEAD:kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py)" = "4019b8374dcc44846df04ed0cc41356652214bff"
+          test "$(git diff --name-only 71cb6f6fbe856cc7b96759310fe9cc9c71cc0453 c5dd5fec6fe8f9a3fa0bbdefdd2cf71cee2ff801)" = "kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py"
+      - name: Download only immutable Github evidence artifacts
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p proof-input
+          python - <<'PY'
+          import os,requests,zipfile
+          from pathlib import Path
+          repo="olegbalakin-cmyk/kyiv-air-alerts-grafana"
+          sources=((11608819645,"acquisition"),(11609004684,"replay"))
+          s=requests.Session()
+          s.headers.update({"Authorization":"Bearer "+os.environ["GH_TOKEN"],"Accept":"application/vnd.github+json","X-GitHub-Api-Version":"2022-11-28"})
+          for aid,name in sources:
+              r=s.get(f"https://api.github.com/repos/{repo}/actions/artifacts/{aid}/zip",timeout=120)
+              r.raise_for_status()
+              with zipfile.ZipFile(__import__("io").BytesIO(r.content)) as z:
+                  dest=Path("proof-input")/name
+                  for info in z.infolist():
+                      assert (dest/info.filename).resolve().is_relative_to(dest.resolve()),"UNSAFE_ZIP_ENTRY"
+                  z.extractall(dest)
+              print("IMMUTABLE_ARTIFACT_LOADED",aid,name,flush=True)
+          PY
+      - name: Baseline original classifier on 67 episodes
+        run: |
+          python -u .github/proof/kyiv_0825_actual_classifier_repair_reproof.py --mode baseline --corpus-dir proof-input/acquisition --prior-replay proof-input/replay/runner-replay-1.json --output proof-input/baseline.json
+      - name: Repaired classifier RUN A independent process
+        run: |
+          python -u .github/proof/kyiv_0825_actual_classifier_repair_reproof.py --mode repaired --corpus-dir proof-input/acquisition --prior-replay proof-input/replay/runner-replay-1.json --output proof-input/repaired-a.json
+      - name: Repaired classifier RUN B independent process
+        run: |
+          python -u .github/proof/kyiv_0825_actual_classifier_repair_reproof.py --mode repaired --corpus-dir proof-input/acquisition --prior-replay proof-input/replay/runner-replay-1.json --output proof-input/repaired-b.json
+      - name: Compare all 105 candidates and 67 episode final verdicts
+        run: |
+          python -u .github/proof/kyiv_0825_actual_classifier_repair_reproof.py --mode finalize --baseline proof-input/baseline.json --run-a proof-input/repaired-a.json --run-b proof-input/repaired-b.json --output research/kyiv_immutable_0825_evidence_segment_selection_repair_proof_2026-10-09.json
+      - name: Upload proof and bounded trace files
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: kyiv-0825-evidence-selection-actual-classifier-proof
+          path: |
+            proof-input/baseline.json
+            proof-input/repaired-a.json
+            proof-input/repaired-b.json
+            research/kyiv_immutable_0825_evidence_segment_selection_repair_proof_2026-10-09.json
+          retention-days: 30
+          if-no-files-found: warn
