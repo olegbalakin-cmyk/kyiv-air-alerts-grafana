@@ -5,10 +5,10 @@ import base64, collections, copy, hashlib, importlib.util, io, json, os, pathlib
 import socket, subprocess, sys, tempfile, traceback, urllib.error, urllib.parse
 import urllib.request, zipfile
 
-BASE="1a987d347d5b1fb7590bcfc83e2e518f72fb31f5"
-BRANCH="attack-event-unit-a-bounded-persistence-payload-replay-proof-2026-10-09"
+BASE="0a805ced391a15f73e542948ea387e3469c169d6"
+BRANCH="attack-event-unit-a-bounded-payload-replay-schema-repair-2026-10-09"
 REPO="olegbalakin-cmyk/kyiv-air-alerts-grafana"
-OUT=pathlib.Path("research/attack_event_unit_a_bounded_persistence_payload_replay_proof_2026-10-09.json")
+OUT=pathlib.Path("research/attack_event_unit_a_bounded_persistence_payload_replay_schema_repair_2026-10-09.json")
 PIN="71cb6f6fbe856cc7b96759310fe9cc9c71cc0453"
 CLASS="kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py"
 CLASS_BLOB="778469b74c2aa807d851cf2c2ee35cf4aa785589"
@@ -21,12 +21,16 @@ A3_HARNESS=".github/proof/attack_event_unit_a_bounded_classification_replay.py"
 REC_HARNESS=".github/proof/attack_event_unit_a_frozen_persistence_payload_recovery.py"
 SIX=("air_defense_context","candidate_evidence","controlled_blast_event_segments",
      "sensitivity_basis","single_episode_day_inference","strict_explosion_evidence")
-REQUIRED=("exact_city_classification_evidence","strict_explosion_evidence",
-          "event_types","air_defense_context","air_defense_action","interception_claim",
-          "air_military_context","same_attack_context","temporal_binding",
-          "single_episode_day_inference","controlled_blast_event_segments",
-          "sensitivity_basis","proposed_matched_episode_id","candidate_evidence",
-          "review_provenance_adapter")
+REQUIRED=("exact_city","strict_explosion","event_types","air_defense_context",
+ "air_defense_action","interception_claim","air_military_context","same_attack_context",
+ "temporal_binding","single_episode_day_inference","controlled_blast_event_segments",
+ "sensitivity_basis","classification_episode_id","candidate_evidence","review_provenance_adapter")
+PREVIOUS="research/attack_event_unit_a_bounded_persistence_payload_replay_proof_2026-10-09.json"
+PREVIOUS_BLOB="c022e0f0bfccaab695915bda8d5681e71e181a22"
+PREVIOUS_SHA="7c73daa1bddffc790ee8c4122e31ea9329ba328bea557250270d18159d37354c"
+TARGET_SHA="fec07dca09c6eeb025075dd563723dd0f29b1221e7422c19af7540a3f28facbd"
+OCC_SHA="c1393fc2cfc167323a8ff2031201ac3810c1197a86d7ff5ab1063def9fa9f1a2"
+RECOVERED_SHA="3dd4706afb5b48b874d9fd47b9d8e88e61b3de6f8574a57629b9c51b57cb5f35"
 PINS={
  RECOVERY:("76322fa04a2716865c1a1606a7671c46efeb6735","192aa20276c61d3ac7c78c1bc0a47e3bd80cea29781010a24be4473e70c5fa0a"),
  R3:("a53f665c4f4da26f0b0699939c3b165f376da047","a61dfcb222c2973195de0d2929f76745935553f40eda8c0eb35e648e71921302"),
@@ -106,137 +110,32 @@ def initialize():
     "neon_queries":0,"db_connections":0,"db_queries":0,"db_writes":0,
     "a4_resumed":False,"a5_executed":False,"production_mutation":"NO",
     "unit_b_executions":0,"unit_c_executions":0},
+  "predecessor":{"artifact_identity_verified":"NO","frozen_source_exhaustion_accepted":"NO"},
   "recovered_decision_map":{},
   "smallest_deterministic_blocker_example":None,
   "original_a3_usable_unchanged":True}
-class NoRedirect(urllib.request.HTTPRedirectHandler):
- def redirect_request(self,req,fp,code,msg,headers,newurl):return None
-def api_json(url,token):
- req=urllib.request.Request(url,headers={"Authorization":"Bearer "+token,
-  "Accept":"application/vnd.github+json","X-GitHub-Api-Version":"2022-11-28",
-  "User-Agent":"unit-a-bounded-payload-replay-proof"})
- with urllib.request.urlopen(req,timeout=45) as res:return json.load(res)
-def authenticated_artifact_zip(artifact_id,token):
- # API request is authenticated. Its short-lived signed 302 redirect is consumed
- # without forwarding the GitHub bearer token to a non-GitHub storage host.
- url="https://api.github.com/repos/"+REPO+"/actions/artifacts/"+str(artifact_id)+"/zip"
- req=urllib.request.Request(url,headers={"Authorization":"Bearer "+token,
-  "Accept":"application/vnd.github+json","X-GitHub-Api-Version":"2022-11-28",
-  "User-Agent":"unit-a-bounded-payload-replay-proof"})
- opener=urllib.request.build_opener(NoRedirect)
- try:
-  response=opener.open(req,timeout=45)
-  try:
-   if response.status!=200:raise ValueError("unexpected HTTP "+str(response.status))
-   content=response.read(MAX_ZIP+1)
-  finally:response.close()
- except urllib.error.HTTPError as e:
-  if e.code not in (301,302,303,307,308):raise
-  loc=e.headers.get("Location") or ""
-  parsed=urllib.parse.urlparse(loc)
-  if parsed.scheme!="https" or not parsed.netloc:
-   raise ValueError("invalid GitHub API signed redirect")
-  # This URL was issued by the authenticated API and is not a public
-  # unauthenticated artifact-download endpoint.
-  with urllib.request.urlopen(urllib.request.Request(loc,headers={
-    "User-Agent":"unit-a-bounded-payload-replay-proof"}),timeout=120) as res:
-   content=res.read(MAX_ZIP+1)
- if len(content)>MAX_ZIP:raise ValueError("artifact ZIP limit exceeded")
- return content
-def inventory_actions(out,rec,collector):
- old=rec.get("actions",{}).get("artifacts_expired_or_inaccessible",[])
- source={int(x["artifact_id"]):x for x in old if x.get("artifact_id")}
- if set(source)!=set(ART_IDS) or len(source)!=14:
-  fail("UNIT_A_BOUNDED_REPLAY_INPUT_LINEAGE_UNPROVEN","predecessor 14-artifact inventory drift")
- token=os.environ.get("GITHUB_TOKEN","")
- if not token:fail("UNIT_A_ACTIONS_ARTIFACT_ACCESS_INCOMPLETE","GITHUB_TOKEN not provided")
- r=out["frozen_source_exhaustion"];problems=[]
- for aid in ART_IDS:
-  original=source[aid]
-  entry={"artifact_id":aid,"source_run":original.get("run_id"),
-    "artifact_name":original.get("artifact_name"),
-    "authenticated_download_success":False,"files":[],
-    "fields_found":[],"usable_exact_decision_state":False,
-    "exact_decision_refs_tied":0}
-  r["results"].append(entry)
-  try:
-   meta=api_json("https://api.github.com/repos/"+REPO+"/actions/artifacts/"+str(aid),token)
-   if int(meta.get("id",-1))!=aid or meta.get("name")!=entry["artifact_name"]:
-    raise ValueError("artifact metadata identity drift")
-   if meta.get("expired"):raise ValueError("artifact expired")
-   run_id=((meta.get("workflow_run") or {}).get("id"))
-   if run_id is not None and int(run_id)!=int(entry["source_run"]):
-    raise ValueError("source run identity drift")
-   data=authenticated_artifact_zip(aid,token)
-   with zipfile.ZipFile(io.BytesIO(data)) as archive:
-    if archive.testzip() is not None:raise ValueError("corrupt ZIP member")
-    names=sorted(x for x in archive.namelist() if not x.endswith("/"))
-    if len(names)>3000:raise ValueError("artifact file count bound exceeded")
-    all_fields=set();covered_before=set(collector.values.keys())
-    for name in names:
-     entry["files"].append(name)
-     zi=archive.getinfo(name)
-     if zi.file_size>MAX_FILE:raise ValueError("oversize ZIP member "+name)
-     raw=archive.read(zi)
-     lname=name.lower()
-     if lname.endswith(".gz"):
-      import gzip
-      raw=gzip.decompress(raw)
-      if len(raw)>MAX_FILE:raise ValueError("oversize decompressed member")
-      lname=lname[:-3]
-     present={k for k in SIX if k.encode("utf-8") in raw}
-     all_fields.update(present)
-     if not present:continue
-     candidate=name if lname.endswith((".json",".ndjson",".jsonl")) else name+".json"
-     before=set(collector.values.keys())
-     # Collector from the ACCEPTED recovery audit demands an exact candidate_ref,
-     # all preserved A3 fields, and an identical canonical decision_ref hash.
-     try:
-      if lname.endswith((".ndjson",".jsonl")):
-       for line in raw.splitlines():
-        if line.strip():json.loads(line.decode("utf-8"))
-      else:json.loads(raw.decode("utf-8"))
-      collector.source({"origin":"actions","artifact_id":aid,
-         "artifact_name":entry["artifact_name"],"run_id":entry["source_run"],
-         "file_name":candidate,"bytes":len(raw)},raw)
-     except (ValueError,UnicodeDecodeError) as exc:
-      r["unparseable_field_bearing_files"].append({"artifact_id":aid,
-       "file_name":name,"reason":str(exc)[:120]})
-    new_refs=set(collector.values.keys())-covered_before
-    # Exact decision refs also count when another artifact provides different fields
-    # for a previously resolved decision_ref.
-    matched_sources=[x for x in collector.sources if x.get("artifact_id")==aid
-      and x.get("classification") in ("EXACT_FULL_DECISION_SOURCE",
-       "PARTIAL_DECISION_SOURCE","QUEUE_STATE_WITH_EXACT_DECISION_LINEAGE")]
-    entry["exact_decision_refs_tied"]=len(new_refs) if new_refs else sum(
-      int(x.get("matched_decisions") or 0) for x in matched_sources)
-    entry["usable_exact_decision_state"]=bool(matched_sources)
-    entry["fields_found"]=sorted(all_fields)
-    entry["authenticated_download_success"]=True
-    r["successfully_downloaded"]+=1
-    out["safety"]["github_artifact_downloads"]+=1
-  except Exception as exc:
-   entry["access_error"]=str(exc)[:260]
-   problems.append({"artifact_id":aid,"error":str(exc)[:160]})
- r["artifacts_with_any_six_fields"]=sum(bool(x["fields_found"]) for x in r["results"])
- r["artifacts_with_usable_exact_decision_state"]=sum(
-   bool(x["usable_exact_decision_state"]) for x in r["results"])
- if problems or r["unparseable_field_bearing_files"]:
-  out["FROZEN_SOURCE_EXHAUSTION_GATE"]="BLOCKED"
-  fail("UNIT_A_ACTIONS_ARTIFACT_ACCESS_INCOMPLETE",
-   repr(problems[:2] or r["unparseable_field_bearing_files"][:2]))
- if r["successfully_downloaded"]!=14:
-  out["FROZEN_SOURCE_EXHAUSTION_GATE"]="BLOCKED"
-  fail("UNIT_A_ACTIONS_ARTIFACT_ACCESS_INCOMPLETE","not all 14 downloaded")
- if r["artifacts_with_usable_exact_decision_state"]:
-  out["FROZEN_SOURCE_EXHAUSTION_GATE"]="FROZEN_SOURCE_FOUND"
-  out["verdict"]="ATTACK-EVENT UNIT A BOUNDED PERSISTENCE PAYLOAD REPLAY = NOT REQUIRED"
-  out["A4_PAYLOAD_REPLAY_GATE"]="FROZEN_SOURCE_FOUND"
-  out["BOUNDED_PAYLOAD_REPLAY_REQUIRED"]="NO"
-  out["first_failing_gate"]="UNIT_A_FROZEN_SOURCE_FOUND_REPLAY_NOT_AUTHORIZED"
-  fail("UNIT_A_FROZEN_SOURCE_FOUND_REPLAY_NOT_AUTHORIZED",
-       "exact historical decision state present; replay prohibited")
- out["FROZEN_SOURCE_EXHAUSTION_GATE"]="PASS"
+def accept_predecessor(out):
+ pin(BASE,PREVIOUS,PREVIOUS_BLOB,PREVIOUS_SHA)
+ x=load(PREVIOUS)
+ t=x.get("targets",{});f=x.get("frozen_source_exhaustion",{});d=x.get("determinism",{})
+ if (x.get("verdict")!="ATTACK-EVENT UNIT A BOUNDED PERSISTENCE PAYLOAD REPLAY = BLOCKED"
+  or x.get("first_failing_gate")!="UNIT_A_REPLAYED_PERSISTENCE_PAYLOAD_NOT_REPRESENTABLE"
+  or x.get("FROZEN_SOURCE_EXHAUSTION_GATE")!="PASS"
+  or x.get("BOUNDED_PAYLOAD_REPLAY_REQUIRED")!="YES"
+  or (t.get("unique_decision_refs"),t.get("repaired_membership_occurrences"),t.get("affected_episodes"))!=(1418,1559,370)
+  or t.get("target_set_sha256")!=TARGET_SHA or t.get("occurrence_to_decision_coverage_sha256")!=OCC_SHA
+  or x.get("input_reconstruction")!={"ambiguous_inputs":0,"exact_target_inputs":1418,"frozen_matching_objects":1418,"missing_inputs":0}
+  or x.get("parity")!={"event_type_mismatches":0,"existing_a3_field_comparisons":17016,"existing_a3_semantic_mismatches":0,"proposed_outcome_mismatches":0,"reason_code_mismatches":0,"replayed_decisions_compared":1418,"review_provenance_mismatches":0,"temporal_binding_mismatches":0}
+  or d.get("run_a_recovered_payload_sha256")!=RECOVERED_SHA or d.get("run_b_recovered_payload_sha256")!=RECOVERED_SHA or d.get("semantic_mismatches")!=0
+  or f.get("successfully_downloaded")!=14 or f.get("artifacts_with_any_six_fields")!=0 or f.get("artifacts_with_usable_exact_decision_state")!=0
+  or x.get("persistence_evidence",{}).get("missing_required_keys")!=4677 or x.get("persistence_evidence",{}).get("construction_failures")!=1559):
+  fail("UNIT_A_SCHEMA_REPAIR_PREDECESSOR_DRIFT","frozen predecessor disagrees")
+ for k in SIX:
+  if x.get("per_field_recovery_coverage",{}).get(k)!={"unique_decision_coverage":1418,"occurrence_coverage":1559,"run_a_b_mismatches":0}:
+   fail("UNIT_A_SCHEMA_REPAIR_PREDECESSOR_DRIFT",k)
+ out["predecessor"]={"artifact_identity_verified":"YES","frozen_source_exhaustion_accepted":"YES","final_head":BASE,"artifact_blob":PREVIOUS_BLOB,"artifact_sha256":PREVIOUS_SHA}
+ out["frozen_source_exhaustion"]=f;out["FROZEN_SOURCE_EXHAUSTION_GATE"]="PASS"
+ out["BOUNDED_PAYLOAD_REPLAY_REQUIRED"]="YES"
 def prepare_targets(out,recmod,a3mod,a3,r3,a1,ctx):
  corpus,meta=a3mod.decode_materialization(a1)
  if meta["uncompressed_sha256"]!="9b3a1cb44dcf3ad18230309f4e49c3ad04dbe6837fc12ba4f8930bda1e812073":
@@ -348,6 +247,7 @@ def prove(out):
   fail("UNIT_A_BOUNDED_REPLAY_INPUT_LINEAGE_UNPROVEN","Python is not 3.12")
  if os.environ.get("DATABASE_URL") or os.environ.get("PHASE1_PROD_SHADOW_DATABASE_URL"):
   fail("UNIT_A_BOUNDED_REPLAY_INPUT_LINEAGE_UNPROVEN","database environment exposed")
+ accept_predecessor(out)
  for path,(blob,filesha) in PINS.items():pin("HEAD",path,blob,filesha)
  pin(PIN,CLASS,CLASS_BLOB)
  pin("1422e8482303ec9262647ca55fef753a9aa2b3ea",
@@ -367,9 +267,7 @@ def prove(out):
   a3mod=module_from_git("1422e8482303ec9262647ca55fef753a9aa2b3ea",
     A3_HARNESS,"accepted_a3_input",tmp)
   occ,bydr,ds,store,ctxdoc,a3mod,recmod=prepare_targets(out,recmod,a3mod,a3,r3,a1,ctx)
-  collector=recmod.Collector(occ,bydr,ds)
-  inventory_actions(out,rec,collector)
-  out["BOUNDED_PAYLOAD_REPLAY_REQUIRED"]="YES"
+  # No artifact downloads: predecessor already proves frozen-source exhaustion.
   import requests,bs4
   versions=a3.get("execution_environment") or {}
   import importlib.metadata
@@ -389,6 +287,8 @@ def prove(out):
    runb=one_run(out,"B",bydr,store,ctxdoc,a3mod,ds,worktree)
   finally:
    sh("git","worktree","remove","--force",str(worktree))
+  if out["parity"]!={"event_type_mismatches":0,"existing_a3_field_comparisons":17016,"existing_a3_semantic_mismatches":0,"proposed_outcome_mismatches":0,"reason_code_mismatches":0,"replayed_decisions_compared":1418,"review_provenance_mismatches":0,"temporal_binding_mismatches":0}:
+   fail("UNIT_A_SCHEMA_REPAIR_REPLAY_PARITY_DRIFT","A3 replay parity")
   runasha=hobj(runa);runbsha=hobj(runb)
   out["determinism"]["run_a_recovered_payload_sha256"]=runasha
   out["determinism"]["run_b_recovered_payload_sha256"]=runbsha
@@ -401,6 +301,8 @@ def prove(out):
   out["determinism"]["semantic_mismatches"]=mismatch
   if mismatch or runasha!=runbsha:
    fail("UNIT_A_BOUNDED_PAYLOAD_REPLAY_NONDETERMINISTIC","RUN A/B six-field mismatch")
+  if runasha!=RECOVERED_SHA or runbsha!=RECOVERED_SHA:
+   fail("UNIT_A_SCHEMA_REPAIR_RECOVERED_VALUE_DRIFT","recovered hash")
   for field in SIX:
    n=sum(field in runa[d] and field in runb[d] for d in bydr)
    c=sum(field in runa[t["decision_ref"]] for t in occ)
@@ -409,28 +311,46 @@ def prove(out):
    if n!=1418 or c!=1559:
     fail("UNIT_A_BOUNDED_PAYLOAD_REPLAY_INCOMPLETE",field)
   fmt=recmod.payload_formatter()
-  payload_hashes=[]
-  missingkeys=0; failures=0
+  hashes=[];missingkeys=0;extra_keys=0;failures=0;mapping=0
   for occurrence in occ:
    dr=occurrence["decision_ref"]
    combined={**copy.deepcopy(ds[dr]),**copy.deepcopy(runa[dr])}
    try:
     pl=fmt(combined)
-    if not isinstance(pl,dict):raise TypeError("formatter output not a mapping")
-    absent=set(REQUIRED)-set(pl)
-    if absent:
-     missingkeys+=len(absent)
-     failures+=1
-    else:payload_hashes.append({"occurrence":occurrence,"evidence_sha256":hobj(pl)})
+    if not isinstance(pl,dict):
+     failures+=1;continue
+    missing=set(REQUIRED)-set(pl);extra=set(pl)-set(REQUIRED)
+    missingkeys+=len(missing);extra_keys+=len(extra)
+    if missing or extra:
+     failures+=1;continue
+    expected={"exact_city":combined["exact_city_classification_evidence"],
+     "strict_explosion":combined["strict_explosion_evidence"],
+     "event_types":list(combined.get("event_types") or []),
+     "air_defense_context":bool(combined.get("air_defense_context")),
+     "air_defense_action":bool(combined.get("air_defense_action")),
+     "interception_claim":bool(combined.get("interception_claim")),
+     "air_military_context":combined["air_military_context"],
+     "same_attack_context":combined["same_attack_context"],
+     "temporal_binding":combined["temporal_binding"],
+     "single_episode_day_inference":combined["single_episode_day_inference"],
+     "controlled_blast_event_segments":combined["controlled_blast_event_segments"],
+     "sensitivity_basis":combined["sensitivity_basis"],
+     "classification_episode_id":combined["proposed_matched_episode_id"],
+     "candidate_evidence":combined.get("candidate_evidence") or {},
+     "review_provenance_adapter":combined.get("review_provenance_adapter") or {}}
+    if pl!=expected:
+     mapping+=1;failures+=1;continue
+    hashes.append({"occurrence":occurrence,"evidence_sha256":hobj(pl)})
    except Exception:
     failures+=1
-  out["persistence_evidence"]={
-   "payloads_constructable":len(payload_hashes),
-   "missing_required_keys":missingkeys,"construction_failures":failures,
-   "occurrence_coverage_sha256":hobj(payload_hashes)}
-  if failures or len(payload_hashes)!=1559 or missingkeys:
-   fail("UNIT_A_REPLAYED_PERSISTENCE_PAYLOAD_NOT_REPRESENTABLE",
-        str(failures)+" construction failures")
+  out["persistence_evidence"]={"canonical_output_schema":list(REQUIRED),
+   "canonical_output_key_count":15,"payloads_constructable":len(hashes),
+   "missing_required_keys":missingkeys,"unexpected_output_schema_keys":extra_keys,
+   "formatter_semantic_mapping_mismatches":mapping,"construction_failures":failures,
+   "occurrence_coverage_sha256":hobj(hashes),"payloads_sha256":hobj(hashes)}
+  if missingkeys or extra_keys:fail("UNIT_A_PERSISTENCE_PAYLOAD_OUTPUT_SCHEMA_DRIFT",str(missingkeys)+" / "+str(extra_keys))
+  if mapping:fail("UNIT_A_PERSISTENCE_PAYLOAD_FORMATTER_MAPPING_DRIFT",str(mapping))
+  if failures or len(hashes)!=1559:fail("UNIT_A_REPLAYED_PERSISTENCE_PAYLOAD_NOT_REPRESENTABLE",str(failures))
   distribution=collections.Counter(row.get("verdict") for row in r3.get("episode_results",[]))
   wanted={"STRICT_EVENT_POSITIVE":9,"SENSITIVITY_EVENT_POSITIVE":1,
     "NEEDS_REVIEW":356,"NO_CONFIRMED_EVENT":1347}
@@ -442,6 +362,11 @@ def prove(out):
      or s["classifier_executions_total"]!=2836 or s["matching_executions"]
      or s["composition_executions"] or s["discovery_executions"]):
    fail("UNIT_A_BOUNDED_PAYLOAD_REPLAY_INCOMPLETE","safety counters")
+  if out["targets"]["target_set_sha256"]!=TARGET_SHA or out["targets"]["occurrence_to_decision_coverage_sha256"]!=OCC_SHA:
+   fail("UNIT_A_SCHEMA_REPAIR_TARGET_SET_DRIFT","target hashes")
+  out["occurrence_coverage"]={"mapped_occurrences":len(occ),"unmapped_occurrences":0,
+   "affected_episodes":370,"occurrence_to_decision_coverage_sha256":OCC_SHA,
+   "occurrences":[{"alert_episode_uid":x["alert_episode_uid"],"decision_ref":x["decision_ref"],"candidate_id":x["candidate_id"]} for x in occ]}
   out["recovered_decision_map"]={
    dr:{"decision_ref":dr,"candidate_input_ref":bydr[dr]["candidate_input_ref"],
        "candidate_id":bydr[dr]["candidate_id"],"city_key":bydr[dr]["city_key"],
@@ -449,6 +374,7 @@ def prove(out):
        "recovered_fields_canonical_sha256":hobj(runa[dr]),
        "frozen_a3_parity_status":"EXACT_MATCH",
        "run_a_b_equality_status":"EQUAL"} for dr in sorted(bydr)}
+  out["recovered_map_summary"]={"decision_entries_frozen":len(out["recovered_decision_map"]),"unmapped_decisions":1418-len(out["recovered_decision_map"])}
   out["verdict"]="ATTACK-EVENT UNIT A BOUNDED PERSISTENCE PAYLOAD REPLAY = PROVEN"
   out["A4_PAYLOAD_REPLAY_GATE"]="PASS"
   out["BOUNDED_PAYLOAD_REPLAY_PROVEN_SAFE"]="YES"
@@ -477,7 +403,7 @@ def main():
   "BOUNDED_PAYLOAD_REPLAY_PROVEN_SAFE","FROZEN_SOURCE_EXHAUSTION_GATE",
   "first_failing_gate"):
   print(str(key)+"="+str(out.get(key)))
- print("ACTIONS_ARTIFACTS_DOWNLOADED="+str(out["frozen_source_exhaustion"]["successfully_downloaded"]))
+ print("ACTIONS_ARTIFACTS_DOWNLOADED_THIS_RUN="+str(out["safety"]["github_artifact_downloads"]))
  print("TARGETS="+json.dumps(out["targets"],sort_keys=True))
  print("INPUTS="+json.dumps(out["input_reconstruction"],sort_keys=True))
  print("PARITY="+json.dumps(out["parity"],sort_keys=True))
