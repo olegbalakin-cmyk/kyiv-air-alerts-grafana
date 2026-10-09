@@ -1,0 +1,106 @@
+{
+  "blind_data_inspected": false,
+  "blind_wrapper_decode_attempts": 0,
+  "current_fixed_source_families_retained": [
+    "VA_Kyiv",
+    "KyivCityOfficial",
+    "vitaliy_klitschko",
+    "dsns_kyiv",
+    "kpszsu",
+    "suspilnenews",
+    "suspilne_kyiv",
+    "suspilne.media/kyiv"
+  ],
+  "frozen_components": {
+    ".github/proof/kyiv_historical_discovery_calibration_pilot.py": "2bd9b9ee2f6d9c797c816476cc25e72214584a86",
+    ".github/proof/kyiv_historical_discovery_development_classifier_replay.py": "f31988f3de7b805896b97156fd2586f0fb420d26",
+    ".github/proof/kyiv_historical_source_set_revision_pilot.py": "dfb8cb1102ee69ceeb1f422cff5f6a6905ecf76c",
+    "research/kyiv_historical_development_failure_diagnosis_2026-10-08.json": "e682d78919ac4bcedcdc10b03d8aa476f0b0df70",
+    "research/kyiv_historical_discovery_development_classifier_input_2026-10-08.json": "6e3d4e878e9b8258c3bdbba709fb34958f391263",
+    "research/kyiv_historical_discovery_development_classifier_replay_2026-10-08.json": "e98a8bb902688612dc42b65d41086508c2079802",
+    "research/kyiv_historical_source_set_revision_candidates_2026-10-09.json": "652241e3b1378db2865d62bb14c5ccaafe28e245",
+    "research/kyiv_historical_source_set_revision_pilot_2026-10-09.json": "0465e7ae26d79f23fd0a8e200c7bd8ad21c20f74"
+  },
+  "hash_method": "SHA256 over UTF-8 canonical JSON of this manifest without manifest_sha256 field; sorted keys, compact separators, ensure_ascii=False",
+  "historical_backfill_started": false,
+  "manifest_sha256": "a0dc0d4634d8a66757258593c69f0049b3238ea8c352be43c227c1375e6914a7",
+  "neon_writes": 0,
+  "no_other_source_families_authorized": true,
+  "predecessors": {
+    "authoritative_classifier_blob": "778469b74c2aa807d851cf2c2ee35cf4aa785589",
+    "authoritative_classifier_commit": "71cb6f6fbe856cc7b96759310fe9cc9c71cc0453",
+    "pilot_artifact_commit": "b08321c4607f48667091b7b7da3d6e41e780d7fa",
+    "pilot_branch": "kyiv-historical-source-set-revision-pilot-2026-10-09",
+    "pilot_inventory_blob": "652241e3b1378db2865d62bb14c5ccaafe28e245",
+    "pilot_proof_job": 113705431021,
+    "pilot_proof_run": 37895378088,
+    "pilot_report_blob": "0465e7ae26d79f23fd0a8e200c7bd8ad21c20f74"
+  },
+  "production_mutations": 0,
+  "purpose": "DEVELOPMENT_HISTORICAL_ONLY; NO PRODUCTION CHANGE",
+  "schema": "kyiv-historical-variant-a-source-set-freeze-v1",
+  "semantic_isolation": "PASS",
+  "sole_replay_variable": "SOURCE_ELIGIBILITY",
+  "source_eligibility_delta_only": [
+    "BBC_Ukrainian",
+    "Radio_Svoboda",
+    "Suspilne_National"
+  ],
+  "source_family_rules": {
+    "BBC_Ukrainian": {
+      "accepted_hostnames": [
+        "bbc.com",
+        "www.bbc.com"
+      ],
+      "aliases": [
+        "www.bbc.com -> bbc.com"
+      ],
+      "canonical_id": "BBC_Ukrainian",
+      "match": "exact hostname after lowercase and stripping leading www.; other bbc subdomains rejected",
+      "path_rule": "no additional path restriction in accepted pilot",
+      "reject": "any host outside bbc.com or www.bbc.com"
+    },
+    "Radio_Svoboda": {
+      "accepted_hostnames": [
+        "radiosvoboda.org",
+        "www.radiosvoboda.org"
+      ],
+      "aliases": [
+        "www.radiosvoboda.org -> radiosvoboda.org"
+      ],
+      "canonical_id": "Radio_Svoboda",
+      "match": "exact hostname after lowercase and stripping leading www.",
+      "path_rule": "no path restriction",
+      "reject": "any host outside radiosvoboda.org or www.radiosvoboda.org"
+    },
+    "Suspilne_National": {
+      "accepted_hostnames": [
+        "suspilne.media",
+        "www.suspilne.media"
+      ],
+      "aliases": [
+        "www.suspilne.media -> suspilne.media"
+      ],
+      "canonical_id": "Suspilne_National",
+      "match": "exact hostname after lowercase and stripping leading www.",
+      "path_rule": "reject /kyiv/ URLs already owned by fixed susplilne.media/kyiv family",
+      "reject": "other hosts and fixed /kyiv/ family records"
+    }
+  },
+  "unchanged_semantics": [
+    "query_vocabulary",
+    "query_windows",
+    "native_url_resolver",
+    "native_fetch",
+    "publication_timestamp_extraction",
+    "candidate_admission",
+    "authoritative_classifier",
+    "alert_boundaries",
+    "temporal_parser",
+    "temporal_representation",
+    "same_attack",
+    "exact_city",
+    "air_context",
+    "alert_level_materialization"
+  ]
+}
