@@ -4,6 +4,18 @@ Accepted project checkpoints, newest first. This is not the full Git history, a 
 
 ## 2026-10-09
 
+### Human casualty review operator isolated proof accepted
+- **Status:** `PROVEN` in isolated GitHub Actions only; **NOT production-activated**. **Evidence:** repair commit `81ef49a8af79123986ac48b5cb0d7e4e2fff4937`, [run 37963256291](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/37963256291).
+- Synthetic acceptance passed **29/29**, including exact equality with the authoritative **23-city** casualty scope, stale-SHA/concurrency guards, duplicate/idempotency behavior, no scheduled auto-confirm path, and no dashboard/historical mutation.
+- GitHub environment `casualty-review-approval` is configured for required human approval by the single repository operator, self-review permitted, administrator bypass disabled. This account-side setting is not repository-versioned.
+- The production-intended operator remains `workflow_dispatch`-only and outside `main`; no real candidate has been reviewed by it and no operator production canary has run. Next step is bounded production activation followed by a read-only/INSPECT canary.
+
+### Casualty scheduled publication idempotency accepted
+- **Status:** `PROVEN`. **Evidence:** manual publication [run 37916019429](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/37916019429), first qualifying later scheduled [run 37930852302](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/37930852302).
+- The first real Sumy revision published exactly once: September 2026 **3 -> 4**, Sumy total **158 -> 159**. The subsequent scheduled run consumed the published state, observed one confirmed revision, passed casualty aggregation / 23-city QA / production verification, and preserved **4 / 159** with no repeated +1.
+- Later scheduled run `37959553608` failed upstream at the UkraineAlarm checkpoint before casualty aggregation; it does not supersede or invalidate the accepted idempotency proof.
+
+
 ### Expanded Kyiv immutable development source set frozen
 - **Status:** `FROZEN`. **Evidence:** [freeze commit 7fdcc290](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/commit/7fdcc2903205e8fc489b2eff588332a45cfaca09), [single-file freeze artifact](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/blob/7fdcc2903205e8fc489b2eff588332a45cfaca09/research/kyiv_immutable_development_source_set_expanded_freeze_2026-10-09.json), [acceptance run 37947654494](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/37947654494).
 - Expanded development manifest SHA-256 `58dbde111229d099413ad03e99be3839557431957c4ac72832b23be8a49bc08e`; **15** source families. **31/48** known positives candidate-covered and **5/48** final-positive, with **43/48** known positives remaining non-final and **zero** new uncleared hold promotions.
