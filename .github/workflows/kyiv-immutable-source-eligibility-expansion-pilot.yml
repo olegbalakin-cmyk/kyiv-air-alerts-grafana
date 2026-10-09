@@ -104,9 +104,13 @@ jobs:
         run: |
           git add research/kyiv_immutable_source_eligibility_expansion_pilot_2026-10-09.json
           test "$(git diff --cached --name-only)" = "research/kyiv_immutable_source_eligibility_expansion_pilot_2026-10-09.json"
-          git -c user.name="github-actions[bot]" -c user.email="41898282+github-actions[bot]@users.noreply.github.com" \
-            commit -m "Record offline immutable Kyiv source eligibility pilot proof"
-          git push origin HEAD:kyiv-immutable-source-eligibility-expansion-pilot-2026-10-09
+          if ! git diff --cached --quiet; then
+            git -c user.name="github-actions[bot]" -c user.email="41898282+github-actions[bot]@users.noreply.github.com" \
+              commit -m "Record offline immutable Kyiv source eligibility pilot proof"
+            git push origin HEAD:kyiv-immutable-source-eligibility-expansion-pilot-2026-10-09
+          else
+            echo "Already committed identical proof artifact"
+          fi
       - name: Verify branch proof commit and only bounded mutations
         run: |
           test "$(git status --porcelain --untracked-files=no)" = ""
