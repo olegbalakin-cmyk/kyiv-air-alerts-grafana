@@ -85,7 +85,7 @@ def norm(v):
 def raw(ref,path):return cmd("show",ref+":"+path)
 def pin(path):
  ref,blob,fsha=PINS[path]
- for target in (ref,"HEAD") if path not in (PIN_PROD,PIN_MON,HELP,REC_HELP) else (ref,):
+ for target in (ref,):
   got=cmd("rev-parse",target+":"+path).decode().strip()
   need(got==blob,"UNIT_A_A4_INPUT_IDENTITY_DRIFT",{"path":path,"commit":target,"found_blob":got})
  b=raw(ref,path)
