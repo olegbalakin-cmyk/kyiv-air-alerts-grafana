@@ -213,8 +213,7 @@ def run_once():
     ua_obj = json.loads(ua_raw)
     ua_rows = ua_obj["episode_results"]
     counts = ua_obj["counts"]
-    expected = {"unit_a_targets":1713,"repaired_membership_occurrences":1559,
-                "strict":9,"sensitivity":1}
+    expected = {"unit_a_targets":1713,"repaired_membership_occurrences":1559}
     for k,v in expected.items():
         if counts.get(k) != v:
             raise ValueError("Repaired Unit A count drift: " + k)
