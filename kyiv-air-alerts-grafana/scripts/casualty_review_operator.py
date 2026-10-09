@@ -268,7 +268,7 @@ def apply_preview(preview: dict, *, queue_path: Path, revisions_path: Path,
         decision = preview["decision"]
         if decision in {"CONFIRM", "REJECT"}:
             result = review_candidate(
-                queue_path, status=decision.lower(),
+                queue_path, status=("confirmed" if decision == "CONFIRM" else "rejected"),
                 **common,
                 **({key: payload[key] for key in (
                     "record_id", "attack_date", "deaths_delta", "source_name",
