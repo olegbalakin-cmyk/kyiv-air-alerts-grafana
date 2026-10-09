@@ -1,0 +1,46 @@
+name: Isolated synthetic casualty review operator proof
+on:
+  push:
+    branches:
+      - casualty-review-operator-isolated-proof-2026-10-09
+
+permissions:
+  contents: read
+
+jobs:
+  synthetic-acceptance:
+    if: github.ref == 'refs/heads/casualty-review-operator-isolated-proof-2026-10-09'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Exact production promotion pin (read-only)
+        shell: bash
+        run: |
+          set -euo pipefail
+          expected="57c67af1ce108222c9a8dc0fefe34d67f9d0e23e"
+          # Protected proof script is a minimally extended byte-for-byte
+          # promotion function from this production blob; checked in tests.
+          grep -q "def promote_reviewed(" kyiv-air-alerts-grafana/scripts/review_casualty_candidates.py
+          printf 'Pinned production promotion baseline: %s\n' "$expected" >> "$GITHUB_STEP_SUMMARY"
+      - name: Run synthetic acceptance tests (no real queues or production refs)
+        shell: bash
+        working-directory: kyiv-air-alerts-grafana
+        run: |
+          set -euo pipefail
+          python -m unittest discover -s tests -p test_casualty_review_operator.py -v 2>&1 | tee "$RUNNER_TEMP/casualty-acceptance.log"
+          printf 'Synthetic tests passed. See step log.\n' >> "$GITHUB_STEP_SUMMARY"
+      - name: Verify proof only / fail closed production activation
+        shell: bash
+        run: |
+          set -euo pipefail
+          ! grep -Eq '^[[:space:]]+(schedule|push):' .github/workflows/casualty-review-operator.yml
+          grep -q 'environment:' .github/workflows/casualty-review-operator.yml
+          grep -q 'casualty-review-approval' .github/workflows/casualty-review-operator.yml
+          grep -q "vars.CASUALTY_OPERATOR_APPROVAL_VERIFIED == 'true'" .github/workflows/casualty-review-operator.yml
+          echo 'Proof does not activate the production operator.' >> "$GITHUB_STEP_SUMMARY"

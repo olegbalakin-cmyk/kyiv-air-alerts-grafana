@@ -1,0 +1,196 @@
+name: Human casualty review operator (protected manual)
+
+# Production-intended ONLY. Remains isolated until a separately authorized cutover.
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "INSPECT reads only; REVIEW decides; PROMOTE requires a durable confirmation"
+        type: choice
+        required: true
+        options:
+          - INSPECT
+          - REVIEW
+          - PROMOTE
+      candidate_id:
+        description: "Exact authoritative multicity candidate_id (empty only for INSPECT inbox)"
+        type: string
+        required: false
+      decision:
+        description: "REVIEW only; REOPEN is permitted only after HOLD"
+        type: choice
+        required: true
+        default: NONE
+        options:
+          - NONE
+          - CONFIRM
+          - REJECT
+          - HOLD
+          - REOPEN
+      review_payload_json:
+        description: "JSON object with city_key, note and (for CONFIRM) canonical details"
+        type: string
+        required: true
+        default: "{}"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: casualty-review-human-operator
+  cancel-in-progress: false
+
+jobs:
+  preflight:
+    if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main'
+    name: Immutable read-only preflight and human decision preview
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    env:
+      CASUALTY_MODE: ${{ inputs.mode }}
+      CASUALTY_CANDIDATE_ID: ${{ inputs.candidate_id }}
+      CASUALTY_DECISION: ${{ inputs.decision }}
+      CASUALTY_REVIEW_PAYLOAD_JSON: ${{ inputs.review_payload_json }}
+      QUEUE_GIT_PATH: kyiv-air-alerts-grafana/data/casualties/multicity_review_queue.json
+      REVISIONS_GIT_PATH: kyiv-air-alerts-grafana/data/casualties/revisions.csv
+      REVIEWER_GIT_PATH: kyiv-air-alerts-grafana/scripts/review_casualty_candidates.py
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          fetch-depth: 1
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Read immutable authoritative snapshots; verify the production promotion pin
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch --no-tags origin \
+            +refs/heads/multicity-wip-2026-09-16:refs/remotes/origin/multicity-wip-2026-09-16 \
+            +refs/heads/site-prod:refs/remotes/origin/site-prod
+          wip=$(git rev-parse refs/remotes/origin/multicity-wip-2026-09-16)
+          prod=$(git rev-parse refs/remotes/origin/site-prod)
+          queue=$(git rev-parse "$wip:$QUEUE_GIT_PATH")
+          revisions=$(git rev-parse "$prod:$REVISIONS_GIT_PATH")
+          pinned=$(git rev-parse "$prod:$REVIEWER_GIT_PATH")
+          test "$pinned" = "57c67af1ce108222c9a8dc0fefe34d67f9d0e23e"
+          mkdir -p "$RUNNER_TEMP/casualty-operator"
+          git show "$wip:$QUEUE_GIT_PATH" > "$RUNNER_TEMP/casualty-operator/queue.json"
+          git show "$prod:$REVISIONS_GIT_PATH" > "$RUNNER_TEMP/casualty-operator/revisions.csv"
+          echo "WIP_HEAD=$wip" >> "$GITHUB_ENV"
+          echo "PROD_HEAD=$prod" >> "$GITHUB_ENV"
+          echo "QUEUE_BLOB=$queue" >> "$GITHUB_ENV"
+          echo "REVISIONS_BLOB=$revisions" >> "$GITHUB_ENV"
+      - name: Validate explicit payload and render escaped human decision preview
+        shell: bash
+        run: |
+          set -euo pipefail
+          python kyiv-air-alerts-grafana/scripts/casualty_review_operator.py preview \
+            --queue "$RUNNER_TEMP/casualty-operator/queue.json" \
+            --revisions "$RUNNER_TEMP/casualty-operator/revisions.csv" \
+            --snapshot "$RUNNER_TEMP/casualty-operator/approved-preview.json" \
+            --wip-head "$WIP_HEAD" --site-prod-head "$PROD_HEAD" \
+            --queue-blob-sha "$QUEUE_BLOB" --revisions-blob-sha "$REVISIONS_BLOB"
+      - name: Preserve preview for protected job (no write authority)
+        uses: actions/upload-artifact@v4
+        with:
+          name: casualty-review-immutable-preview
+          path: ${{ runner.temp }}/casualty-operator/approved-preview.json
+          if-no-files-found: error
+          retention-days: 1
+
+  protected_mutation:
+    name: Single-ref bounded approved write
+    needs: preflight
+    # Hard fail-closed rollout flag, independent of the GitHub environment.
+    # An administrator must deliberately enable it only AFTER proving required reviewers.
+    if: >-
+      github.event_name == 'workflow_dispatch' &&
+      github.ref == 'refs/heads/main' &&
+      inputs.mode != 'INSPECT' &&
+      vars.CASUALTY_OPERATOR_APPROVAL_VERIFIED == 'true'
+    runs-on: ubuntu-latest
+    environment:
+      name: casualty-review-approval
+    permissions:
+      contents: write
+    env:
+      QUEUE_GIT_PATH: kyiv-air-alerts-grafana/data/casualties/multicity_review_queue.json
+      REVISIONS_GIT_PATH: kyiv-air-alerts-grafana/data/casualties/revisions.csv
+      REVIEWER_GIT_PATH: kyiv-air-alerts-grafana/scripts/review_casualty_candidates.py
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+          fetch-depth: 1
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/download-artifact@v4
+        with:
+          name: casualty-review-immutable-preview
+          path: ${{ runner.temp }}/casualty-operator
+      - name: Re-read refs and blobs immediately before guarded mutation
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch --no-tags origin \
+            +refs/heads/multicity-wip-2026-09-16:refs/remotes/origin/multicity-wip-2026-09-16 \
+            +refs/heads/site-prod:refs/remotes/origin/site-prod
+          wip=$(git rev-parse refs/remotes/origin/multicity-wip-2026-09-16)
+          prod=$(git rev-parse refs/remotes/origin/site-prod)
+          queue=$(git rev-parse "$wip:$QUEUE_GIT_PATH")
+          revisions=$(git rev-parse "$prod:$REVISIONS_GIT_PATH")
+          pinned=$(git rev-parse "$prod:$REVIEWER_GIT_PATH")
+          test "$pinned" = "57c67af1ce108222c9a8dc0fefe34d67f9d0e23e"
+          git show "$wip:$QUEUE_GIT_PATH" > "$RUNNER_TEMP/casualty-operator/queue.json"
+          git show "$prod:$REVISIONS_GIT_PATH" > "$RUNNER_TEMP/casualty-operator/revisions.csv"
+          echo "WIP_HEAD=$wip" >> "$GITHUB_ENV"
+          echo "PROD_HEAD=$prod" >> "$GITHUB_ENV"
+          echo "QUEUE_BLOB=$queue" >> "$GITHUB_ENV"
+          echo "REVISIONS_BLOB=$revisions" >> "$GITHUB_ENV"
+      - name: Verify approved snapshot and mutate only a scratch copy
+        shell: bash
+        run: |
+          set -euo pipefail
+          python kyiv-air-alerts-grafana/scripts/casualty_review_operator.py apply \
+            --queue "$RUNNER_TEMP/casualty-operator/queue.json" \
+            --revisions "$RUNNER_TEMP/casualty-operator/revisions.csv" \
+            --snapshot "$RUNNER_TEMP/casualty-operator/approved-preview.json" \
+            --wip-head "$WIP_HEAD" --site-prod-head "$PROD_HEAD" \
+            --queue-blob-sha "$QUEUE_BLOB" --revisions-blob-sha "$REVISIONS_BLOB"
+      - name: Commit exactly one authorized file; fast-forward push only
+        shell: bash
+        run: |
+          set -euo pipefail
+          mode=$(python -c 'import json,sys; print(json.load(open(sys.argv[1]))["mode"])' \
+            "$RUNNER_TEMP/casualty-operator/approved-preview.json")
+          if [ "$mode" = "REVIEW" ]; then
+            target_head="$WIP_HEAD"
+            target_branch="multicity-wip-2026-09-16"
+            target_path="$QUEUE_GIT_PATH"
+            source_path="$RUNNER_TEMP/casualty-operator/queue.json"
+          elif [ "$mode" = "PROMOTE" ]; then
+            target_head="$PROD_HEAD"
+            target_branch="site-prod"
+            target_path="$REVISIONS_GIT_PATH"
+            source_path="$RUNNER_TEMP/casualty-operator/revisions.csv"
+          else
+            echo "Refusing unexpected mode"
+            exit 1
+          fi
+          git checkout --detach "$target_head"
+          cp "$source_path" "$target_path"
+          git add -- "$target_path"
+          if git diff --cached --quiet; then
+            echo "Exact idempotency: nothing to commit"
+            exit 0
+          fi
+          test "$(git diff --cached --name-only)" = "$target_path"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "Human casualty $mode: approved run $GITHUB_RUN_ID"
+          # Never force, rebase, merge, amend, or retry by updating to a newer head.
+          git push origin "HEAD:refs/heads/$target_branch"
