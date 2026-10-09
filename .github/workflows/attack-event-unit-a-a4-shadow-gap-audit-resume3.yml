@@ -1,0 +1,64 @@
+name: Unit A A4 resume3 deterministic offline projection
+on:
+  push:
+    branches:
+      - attack-event-unit-a-a4-shadow-gap-audit-resume3-2026-10-09
+    paths:
+      - .github/workflows/attack-event-unit-a-a4-shadow-gap-audit-resume3.yml
+      - .github/proof/attack_event_unit_a_a4_resume3.py
+permissions:
+  contents: read
+jobs:
+  unit-a-a4-resume3-offline:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Fetch only immutable predecessor refs
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch --no-tags origin multicity-wip-2026-09-16
+          for sha in \
+            d8fe91fdbfdcf8d1b851a52358d7eb441308e0ee \
+            1422e8482303ec9262647ca55fef753a9aa2b3ea \
+            2d07c81147932d39cb3a9d9934830f6eb707ee37 \
+            a0eb594dd4240d1d923ca5262725fc42f4807338 \
+            6a891372d4d59f9f2454123afcac2a21ef042d68 \
+            41bec58604420333dc71910ec38f4a785f6b108e \
+            51adc76b715669e46e8c2c936906022d4d96ed44 \
+            71cb6f6fbe856cc7b96759310fe9cc9c71cc0453 \
+            41ee8d160c34145b9d9a51b9da095084cf342824; do
+            git fetch --no-tags origin "$sha"
+          done
+      - name: Run offline A4 gates only; no Neon secrets
+        env:
+          PYTHONDONTWRITEBYTECODE: "1"
+          GIT_NO_LAZY_FETCH: "1"
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -z "${PHASE1_PROD_SHADOW_DATABASE_URL:-}"
+          python3 -B .github/proof/attack_event_unit_a_a4_resume3.py --offline
+          python3 - <<'PY'
+          import json
+          p="research/attack_event_execution_unit_a_shadow_persistence_gap_audit_resume3_2026-10-09.json"
+          d=json.load(open(p))
+          print("VERDICT", d["verdict"], "FIRST_FAILING_GATE",d["first_failing_gate"])
+          print("OFFLINE_GATE",d["A4_OFFLINE_PROJECTION_GATE"])
+          print("NEON_CONTACTED",d["neon"]["contacted"])
+          assert d["neon"]["contacted"] is False
+          assert d["safety"]["db_writes_attempted"] == 0
+          PY
+      - name: Upload pre-acceptance diagnostic, no repository freeze
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: unit-a-a4-resume3-offline-diagnostic
+          path: |
+            research/attack_event_execution_unit_a_shadow_persistence_gap_audit_resume3_2026-10-09.json
+          if-no-files-found: error
+          retention-days: 7
