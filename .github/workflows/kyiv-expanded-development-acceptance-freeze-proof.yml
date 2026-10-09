@@ -1,0 +1,103 @@
+name: Kyiv expanded immutable development acceptance freeze proof
+
+on:
+  push:
+    branches:
+      - kyiv-expanded-development-freeze-acceptance-proof-2026-10-09
+    paths:
+      - ".github/workflows/kyiv-expanded-development-acceptance-freeze-proof.yml"
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: kyiv-expanded-development-freeze-acceptance-proof-2026-10-09
+  cancel-in-progress: false
+
+jobs:
+  authoritative-offline-expansion3-acceptance:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    env:
+      PYTHONDONTWRITEBYTECODE: "1"
+    steps:
+      - name: Checkout isolated proof branch with complete history
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Install Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install original classifier prerequisites
+        run: python -m pip install 'requests>=2.31,<3' 'beautifulsoup4>=4.12,<5'
+      - name: Reject database credentials
+        run: |
+          python - <<'PY'
+          import os
+          denied=[k for k,v in os.environ.items() if v and (k in {"DATABASE_URL","DIRECT_URL","PGHOST","PGUSER","PGPASSWORD","PGDATABASE"} or k.startswith(("NEON_","POSTGRES_","SUPABASE_DB_")))]
+          assert not denied, "DB_CREDENTIAL_PRESENT:"+",".join(denied)
+          PY
+      - name: Download ONLY frozen GitHub evidence and prior replay artifacts
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p acceptance-input
+          python - <<'PY'
+          import os,requests,zipfile
+          from pathlib import Path
+          repo="olegbalakin-cmyk/kyiv-air-alerts-grafana"
+          sources=((11608819645,"acquisition"),(11609004684,"replay"),(11618274220,"pilot"))
+          session=requests.Session()
+          session.headers.update({"Authorization":"Bearer "+os.environ["GH_TOKEN"],
+                                  "Accept":"application/vnd.github+json",
+                                  "X-GitHub-Api-Version":"2022-11-28"})
+          for aid,name in sources:
+              url=f"https://api.github.com/repos/{repo}/actions/artifacts/{aid}/zip"
+              res=session.get(url,timeout=120)
+              res.raise_for_status()
+              path=Path("acceptance-input")/f"{name}.zip"
+              path.write_bytes(res.content)
+              with zipfile.ZipFile(path) as z:
+                  dest=Path("acceptance-input")/name
+                  for info in z.infolist():
+                      target=(dest/info.filename).resolve()
+                      assert target.is_relative_to(dest.resolve()), "UNSAFE_ARTIFACT_ZIP_ENTRY"
+                  z.extractall(dest)
+              print("EXISTING_GITHUB_ARTIFACT_LOADED",aid,name,flush=True)
+          PY
+      - name: Execute exactly ONE new authoritative 67-episode EXPANSION-3 replay
+        run: |
+          python -u .github/proof/kyiv_expanded_development_acceptance_freeze_proof.py \
+            --corpus-dir acceptance-input/acquisition \
+            --prior-replay acceptance-input/replay/runner-replay-1.json \
+            --fingerprint-a acceptance-input/pilot/pilot-repeat-a.json \
+            --fingerprint-b acceptance-input/pilot/pilot-repeat-b.json \
+            --output acceptance-proof.json
+      - name: Verify no changes to repository files
+        run: |
+          test "$(git status --porcelain --untracked-files=no)" = ""
+          test "$(git diff --name-only b749e0195c4ec1b2262c998e381a92277a89a5e9 HEAD | sort)" = "$(printf '%s\n' .github/proof/kyiv_expanded_development_acceptance_freeze_proof.py .github/workflows/kyiv-expanded-development-acceptance-freeze-proof.yml | sort)"
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p=json.loads(Path("acceptance-proof.json").read_text())
+          assert p["result"]=="ALL_ACCEPTANCE_GATES_PASS"
+          assert p["pilot_expansion3_comparison"]["candidate_set_equality"]==67
+          assert p["pilot_expansion3_comparison"]["classifier_outcome_equality"]==67
+          assert p["pilot_expansion3_comparison"]["episode_verdict_equality"]==67
+          assert p["new_uncleared_hold_promotions"]==0
+          assert not p["blind_per_episode_inspected"]
+          assert p["neon_writes"]==p["production_mutations"]==0
+          print("AUTHORITATIVE_ACCEPTANCE=SUCCESS")
+          PY
+      - name: Upload bounded proof artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: kyiv-expansion3-authoritative-acceptance-proof
+          path: acceptance-proof.json
+          if-no-files-found: warn
+          retention-days: 30
