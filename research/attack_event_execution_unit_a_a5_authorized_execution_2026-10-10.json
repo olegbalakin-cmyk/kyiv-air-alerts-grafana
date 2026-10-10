@@ -1,7 +1,7 @@
 {
   "A5_AUTHORIZED": "YES",
-  "A5_EXECUTED": "NO",
-  "A5_EXECUTION_GATE": "FAIL",
+  "A5_EXECUTED": "YES",
+  "A5_EXECUTION_GATE": "PASS",
   "accepted_delta_sha256": "6070b6dbfc03e16b5236aed5b3cb090fa066100857a9c4f7bed502d6bb294aa3",
   "accepted_distribution": {
     "INSERT_EVENT": 10,
@@ -14,57 +14,25 @@
     "coordination_main": "6a47d703a7bd4f236767fc39642c723c01aadf42",
     "explicit": true
   },
-  "bounded_example": {
-    "bounded_mismatches": [
-      {
-        "field": "alert_episode_uid",
-        "key": "006571fa9d8c30853112cd16e499eb398a231aab6cb07720df6d609e355b9e9b",
-        "type": "classification_field"
-      },
-      {
-        "field": "alert_episode_uid",
-        "key": "0085c85e8f17bd3cfe4d2a232e140774ff170368565db3365378cc05481d7faf",
-        "type": "classification_field"
-      },
-      {
-        "field": "alert_episode_uid",
-        "key": "00a08069cab7d81b53b622a738270b08522daf14315ec3b336af7de29edc83f6",
-        "type": "classification_field"
-      }
-    ],
+  "bounded_example": null,
+  "first_failure": null,
+  "idempotency": {
+    "future_mutations": 0
+  },
+  "kind": "unit_a_a5_authorized_execution",
+  "postcommit_readback": {
+    "bounded_mismatches": [],
     "classification_rows": 1713,
     "event_rows": 10,
-    "mismatch_count": 1713,
+    "mismatch_count": 0,
     "parent_rows": 1713,
     "source_rows": 1559
   },
-  "first_failure": "PRECOMMIT_READBACK_FAILED",
-  "idempotency": {
-    "future_mutations": null
-  },
-  "kind": "unit_a_a5_authorized_execution",
-  "postcommit_readback": {},
   "precommit_readback": {
-    "bounded_mismatches": [
-      {
-        "field": "alert_episode_uid",
-        "key": "006571fa9d8c30853112cd16e499eb398a231aab6cb07720df6d609e355b9e9b",
-        "type": "classification_field"
-      },
-      {
-        "field": "alert_episode_uid",
-        "key": "0085c85e8f17bd3cfe4d2a232e140774ff170368565db3365378cc05481d7faf",
-        "type": "classification_field"
-      },
-      {
-        "field": "alert_episode_uid",
-        "key": "00a08069cab7d81b53b622a738270b08522daf14315ec3b336af7de29edc83f6",
-        "type": "classification_field"
-      }
-    ],
+    "bounded_mismatches": [],
     "classification_rows": 1713,
     "event_rows": 10,
-    "mismatch_count": 1713,
+    "mismatch_count": 0,
     "parent_rows": 1713,
     "source_rows": 1559
   },
@@ -112,14 +80,14 @@
   "transaction": {
     "advisory_lock": true,
     "branch": "br-bold-mode-b5rub8pq",
-    "committed": false,
+    "committed": true,
     "database": "neondb",
     "isolation": "serializable",
     "project": "green-cake-44216048",
     "read_only": false,
-    "rolled_back": true
+    "rolled_back": false
   },
-  "verdict": "ATTACK-EVENT EXECUTION UNIT A A5 ATOMIC PERSISTENCE = BLOCKED",
+  "verdict": "ATTACK-EVENT EXECUTION UNIT A A5 ATOMIC PERSISTENCE = COMMITTED",
   "writes": {
     "classifications": 1713,
     "events": 10,
