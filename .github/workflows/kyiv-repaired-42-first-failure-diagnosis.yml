@@ -1,0 +1,49 @@
+name: Kyiv 42 frozen first-failure diagnosis
+on:
+  push:
+    branches:
+      - kyiv-repaired-42-failure-rediagnosis-proof-2026-10-10
+    paths:
+      - .github/workflows/kyiv-repaired-42-first-failure-diagnosis.yml
+      - .github/proof/kyiv_repaired_42_first_failure_diagnosis.py
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: kyiv-repaired-42-first-failure-diagnosis
+  cancel-in-progress: false
+jobs:
+  pinned-code-bundle:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Export only pinned repository code for local offline diagnostic harness construction
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD:kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py)" = "4019b8374dcc44846df04ed0cc41356652214bff"
+          mkdir -p /tmp/kyiv42-source
+          cp kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py /tmp/kyiv42-source/monitor_explosion_candidates.py
+          for path in \
+            .github/proof/kyiv_historical_discovery_calibration_pilot.py \
+            .github/proof/kyiv_new_immutable_development_replay.py \
+            .github/proof/kyiv_immutable_source_eligibility_expansion_pilot.py \
+            research/kyiv_immutable_development_source_set_freeze_2026-10-09.json \
+            research/kyiv_historical_discovery_development_classifier_input_2026-10-08.json; do
+            git show "b749e0195c4ec1b2262c998e381a92277a89a5e9:$path" > "/tmp/kyiv42-source/$(basename "$path")"
+          done
+          git show "906b9e18aa9e0a2056bcb798b9870ae35d8dee3d:.github/proof/kyiv_0825_actual_classifier_repair_reproof.py" > /tmp/kyiv42-source/kyiv_0825_actual_classifier_repair_reproof.py
+          git show "cb46d7b8232bc3af75c29f40592b731001aed8ea:research/kyiv_immutable_expanded_baseline_remaining_failure_diagnosis_2026-10-09.json" > /tmp/kyiv42-source/previous_43.json
+          cd /tmp/kyiv42-source
+          zip -q /tmp/kyiv42-pinned-sources.zip *
+          sha256sum /tmp/kyiv42-pinned-sources.zip
+      - uses: actions/upload-artifact@v4
+        with:
+          name: kyiv42-pinned-code-inputs
+          path: /tmp/kyiv42-pinned-sources.zip
+          retention-days: 3
+          if-no-files-found: error
