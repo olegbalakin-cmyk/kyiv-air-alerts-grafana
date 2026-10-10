@@ -72,7 +72,7 @@ SOURCE_INSERT_FIELDS = (
     "classification_episode_id evidence_payload retrieval_provenance"
 ).split()
 STATIC_GENERATED_IDS = {"classification_uid","source_uid","source_link_uid",
-                        "attack_event_uid","id","source_id"}
+                        "attack_event_uid","attack_event_source_uid","id","source_id"}
 DYNAMIC_TIMES = {"created_at","updated_at","classified_at"}
 MISMATCH_LIMIT = 5
 
