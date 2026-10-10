@@ -281,7 +281,23 @@ def current_candidate_trace(mon,offline,ep,row,rec):
 
 def candidate_stage(trace,ep,forensic):
     eid=ep["episode_id"]
-    # Only positive evidence from the exact current frozen classifier earns a later stage.
+    # A cryptographically matched forensic clock role is independent of whether
+    # the existing attack-event predicate admitted a strict segment. Candidate
+    # progression is not episode causal authority. Validate no target time first.
+    if forensic:
+        role=forensic["semantic_role"]
+        code=trace["temporal_binding"].get("code")
+        require(not trace["temporal_binding"].get("present") and
+                code in ("NO_STRICT_TEMPORAL_BINDING","TEMPORAL_EXPLICIT_EVENT_TIME_NEAR_BOUNDARY",
+                         "TEMPORAL_EXPLICIT_ALERT_RELATION_AMBIGUOUS_DATE",
+                         "TEMPORAL_EXPLICIT_ALERT_RELATION_NO_EPISODE"),
+                "ACCEPTED_TEMPORAL_FORENSIC_CONTRADICTION:"+eid+":"+str(code))
+        if role=="EVENT_ONSET_LOWER_BOUND":
+            return 10,"TEMPORAL_REPRESENTATION_LIMIT","Verified onset bound lacks a point event timestamp"
+        if role in ("NARRATIVE_ANCHOR_CLOCK","REPORT_OR_STATEMENT_CLOCK"):
+            return 8,"NON_EVENT_CLOCK","Verified narrative/report clock is not the strike clock"
+        raise RuntimeError("UNSUPPORTED_ACCEPTED_FORENSIC_ROLE:"+eid+":"+role)
+    # Unverified candidates retain the original classifier progression gates.
     if not trace["_all_city_strict_count"]:
         if trace["attack_event_predicate"] and not trace["exact_city_predicate"]:
             return 5,"EXACT_CITY_CLASSIFIER_INSUFFICIENT","Event predicate present without target city"
@@ -296,21 +312,6 @@ def candidate_stage(trace,ep,forensic):
         x["selected"] and x["strict_event"] and x["parsed_clocks"]
         for x in trace["clocks_by_segment"]):
         return 7,"EVIDENCE_SEGMENT_SELECTION_LIMIT","Qualifying direct event clock lost at current selector"
-    # Accepted semantic-clock analysis is independently matched to frozen text and
-    # exact candidate identity before applying the semantic role; no truth labels.
-    if forensic:
-        role=forensic["semantic_role"]
-        code=trace["temporal_binding"].get("code")
-        require(not trace["temporal_binding"].get("present") and
-                code in ("NO_STRICT_TEMPORAL_BINDING","TEMPORAL_EXPLICIT_EVENT_TIME_NEAR_BOUNDARY",
-                         "TEMPORAL_EXPLICIT_ALERT_RELATION_AMBIGUOUS_DATE",
-                         "TEMPORAL_EXPLICIT_ALERT_RELATION_NO_EPISODE"),
-                "ACCEPTED_TEMPORAL_FORENSIC_CONTRADICTION:"+eid+":"+str(code))
-        if role=="EVENT_ONSET_LOWER_BOUND":
-            return 10,"TEMPORAL_REPRESENTATION_LIMIT","Frozen source states a lower bound, not a point timestamp"
-        if role in ("NARRATIVE_ANCHOR_CLOCK","REPORT_OR_STATEMENT_CLOCK"):
-            return 8,"NON_EVENT_CLOCK","Frozen clock denotes witness action or report, not the strike"
-        raise RuntimeError("UNSUPPORTED_ACCEPTED_FORENSIC_ROLE:"+eid+":"+role)
     event_time=trace["temporal_binding"]
     bound=event_time.get("episode_id")
     if bound and bound!=eid:
@@ -576,6 +577,23 @@ def assert_aggregation_regression_controls():
              "attack_event_predicate":True,"evidence_selection_loss":False,
              "temporal_binding":{"present":False,"code":"NO_STRICT_TEMPORAL_BINDING"},
              "clocks_by_segment":[],"semantic_clock_roles":[]}
+    # Match the observed real competition: a verified narrative clock need not
+    # be admitted by the strict-attack predicate, unlike a generic competitor.
+    real_shape={**fixture,"_all_city_strict_count":0,"attack_event_predicate":False}
+    stage,cat,_=candidate_stage(real_shape,{"episode_id":"synthetic-real-shape"},
+                                {"semantic_role":"NARRATIVE_ANCHOR_CLOCK"})
+    require((stage,cat)==(8,"NON_EVENT_CLOCK"),
+            "FORENSIC_CLOCK_LOST_BEFORE_SEMANTIC_GATE")
+    real_forensic=sample("z",cat,stage,"NARRATIVE_ANCHOR_CLOCK")
+    real_forensic["attack_event_predicate"]=False
+    require(rank_episode_candidates([generic,real_forensic])[0] is real_forensic,
+            "REAL_SHAPE_GENERIC_TEMPORAL_WINNER_NOT_OVERRIDDEN")
+    for downstream,category,stage_number in (
+        ("air","AIR_CONTEXT_INSUFFICIENT",12),
+        ("same_attack","SAME_ATTACK_INSUFFICIENT",13)):
+        proven=sample(downstream,category,stage_number)
+        require(rank_episode_candidates([real_forensic,proven])[0] is proven,
+                "GENUINE_LATER_EPISODE_GATE_OVERRIDDEN:"+downstream)
     for role,expected in (
         ("NARRATIVE_ANCHOR_CLOCK","NON_EVENT_CLOCK"),
         ("REPORT_OR_STATEMENT_CLOCK","NON_EVENT_CLOCK"),
