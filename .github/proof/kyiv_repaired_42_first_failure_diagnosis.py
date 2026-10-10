@@ -479,7 +479,108 @@ def verify_accepted_semantics(offline,forensic,rows,generated):
     require(set(accepted)==set(EXPECTED_TEMPORAL),"TEMPORAL_FORENSIC_UNIVERSE_CHANGED")
     return accepted
 
+def rank_episode_candidates(candidates):
+    """Keep normal progression ranking unless exact verified semantics refines a temporal blocker."""
+    require(bool(candidates), "EMPTY_EPISODE_CANDIDATE_RANKING")
+    ranked=sorted(candidates,key=lambda c:(-c["earliest_failing_stage_number"],
+                                           -int(c["attack_event_predicate"]),
+                                           -int(c["exact_city_predicate"]),
+                                           c["candidate_id"]))
+    verified=[c for c in ranked if c.get("candidate_semantics") is not None]
+    require(len(verified)<=1,"MULTIPLE_VERIFIED_FORENSIC_CANDIDATES")
+    if verified and ranked[0] is not verified[0]:
+        generic=ranked[0]
+        semantic=verified[0]
+        # Only a competing temporal-deficiency inference may yield to a
+        # cryptographically verified semantic-clock disposition. Do not override
+        # unrelated later gates such as air context or same-attack.
+        if (generic["primary_failure_if_best_candidate"] in (
+                "TEMPORAL_PARSER_SYNTAX_MISS","EVENT_TIME_TRULY_ABSENT",
+                "TEMPORAL_REPRESENTATION_LIMIT","NON_EVENT_CLOCK")
+            and semantic["primary_failure_if_best_candidate"] in (
+                "TEMPORAL_REPRESENTATION_LIMIT","NON_EVENT_CLOCK")):
+            ranked.remove(semantic)
+            ranked.insert(0,semantic)
+    return ranked
+
+
+def assert_aggregation_regression_controls():
+    def sample(cid,cat,stage,role=None):
+        return {"candidate_id":cid,"primary_failure_if_best_candidate":cat,
+                "earliest_failing_stage_number":stage,
+                "attack_event_predicate":True,"exact_city_predicate":True,
+                "candidate_semantics":role}
+    generic=sample("a","EVENT_TIME_TRULY_ABSENT",8)
+    unrelated=sample("b","AIR_CONTEXT_INSUFFICIENT",12)
+    require(rank_episode_candidates([generic,unrelated])[0] is unrelated,
+            "NO_FORENSIC_GENERIC_RANKING_REGRESSION")
+    fixture={"_all_city_strict_count":1,"exact_city_predicate":True,
+             "attack_event_predicate":True,"evidence_selection_loss":False,
+             "temporal_binding":{"present":False,"code":"NO_STRICT_TEMPORAL_BINDING"},
+             "clocks_by_segment":[],"semantic_clock_roles":[]}
+    for role,expected in (
+        ("NARRATIVE_ANCHOR_CLOCK","NON_EVENT_CLOCK"),
+        ("REPORT_OR_STATEMENT_CLOCK","NON_EVENT_CLOCK"),
+        ("EVENT_ONSET_LOWER_BOUND","TEMPORAL_REPRESENTATION_LIMIT")):
+        stage,cat,_=candidate_stage(fixture,{"episode_id":"synthetic-aggregation"},
+                                    {"semantic_role":role})
+        require(cat==expected,"FORENSIC_ROLE_NOT_MECHANICALLY_DERIVED:"+role)
+        specific=sample("z",cat,stage,role)
+        require(rank_episode_candidates([generic,specific])[0] is specific,
+                "VERIFIED_SEMANTIC_DISCARDED_BY_GENERIC_ABSENCE:"+role)
+        later_generic=sample("a","TEMPORAL_REPRESENTATION_LIMIT",10)
+        require(rank_episode_candidates([later_generic,specific])[0] is specific,
+                "VERIFIED_SEMANTIC_DISCARDED_BY_GENERIC_REPRESENTATION:"+role)
+        require(rank_episode_candidates([unrelated,specific])[0] is unrelated,
+                "UNRELATED_LATER_GATE_OVERRIDDEN_BY_FORENSIC:"+role)
+
+
+def assert_forensic_identity_negative_controls(offline,forensic,rows,generated):
+    # Negative controls exercise the existing fail-closed forensic verifier.
+    disposition=next(d for d in forensic["dispositions"] if d["episode_id"]!=REMOVED_ID)
+    eid=disposition["episode_id"]
+    identity=disposition["frozen_evidence_identity"]
+    index=next(i for i,r in enumerate(rows) if r["episode_id"]==eid)
+    original=rows[index]
+    target=next(c for c in original["candidates"]
+                if c["candidate_id"]==identity["candidate_id"])
+    def must_reject(view=offline,dispositions=forensic,case_rows=rows,label=""):
+        try:
+            verify_accepted_semantics(view,dispositions,case_rows,generated)
+        except RuntimeError as exc:
+            require(str(exc).startswith((
+                "ACCEPTED_FORENSIC_CANDIDATE_IDENTITY_CHANGED",
+                "FORENSIC_NATIVE_BODY_MISMATCH",
+                "ACCEPTED_FORENSIC_QUOTE_MISSING")),
+                "WRONG_FORENSIC_NEGATIVE_CONTROL_ERROR:"+label+":"+str(exc))
+        else:
+            raise RuntimeError("FORENSIC_IDENTITY_NEGATIVE_CONTROL_ACCEPTED:"+label)
+    for field in ("candidate_id","family","url","text_sha256"):
+        changed=dict(target)
+        changed[field]="__INVALID_FROZEN_IDENTITY__"
+        case=dict(original)
+        case["candidates"]=[changed if c is target else c for c in original["candidates"]]
+        test_rows=list(rows)
+        test_rows[index]=case
+        must_reject(case_rows=test_rows,label=field)
+    records=[]
+    for rec in offline.native["records"]:
+        if rec["requested_native_url"]==identity["url"]:
+            native=dict(rec["native"])
+            native["text"]=native["text"]+" __MODIFIED_NATIVE_TEXT__"
+            rec={**rec,"native":native}
+        records.append(rec)
+    view=type("FrozenNativeNegativeControl",(),{
+        "monitor":offline.monitor,"native":{"records":records}})()
+    must_reject(view=view,label="normalized_native_text_sha")
+    broken={**forensic,"dispositions":[
+        {**d,"exact_relevant_wording":"__ABSENT_VERBATIM_WORDING__"}
+        if d["episode_id"]==eid else d for d in forensic["dispositions"]]}
+    must_reject(dispositions=broken,label="verbatim_quote")
+
+
 def diagnose(acquisition,prior,out):
+    assert_aggregation_regression_controls()
     runner,offline,manifest=prepare(acquisition,prior)
     try:
         rows,generated,failed,hold_promotions=replay(offline)
@@ -489,6 +590,7 @@ def diagnose(acquisition,prior,out):
                 "PREDECESSOR_43_TO_42_UNIVERSE_MISMATCH")
         forensic=load_json(FORENSIC_COMMIT,FORENSIC_FILE)
         accepted=verify_accepted_semantics(offline,forensic,rows,generated)
+        assert_forensic_identity_negative_controls(offline,forensic,rows,generated)
         epi={r["episode_id"]:r for r in offline.cohort}
         nmap={r["requested_native_url"]:r for r in offline.native["records"]}
         allowed=set(manifest["included_source_families"])
@@ -515,12 +617,9 @@ def diagnose(acquisition,prior,out):
                 t["mechanical_failure_explanation"]=why
                 candidates.append(t)
             if candidates:
-                # The strongest progressed candidate determines the episode-level
-                # first missing gate. Irrelevant weaker candidates are secondary.
-                candidates.sort(key=lambda c:(-c["earliest_failing_stage_number"],
-                                               -int(c["attack_event_predicate"]),
-                                               -int(c["exact_city_predicate"]),
-                                               c["candidate_id"]))
+                # Generic progression ranking retains precedence except that verified
+                # accepted semantic evidence refines a competing generic temporal inference.
+                candidates=rank_episode_candidates(candidates)
                 best=candidates[0]
                 primary=best["primary_failure_if_best_candidate"]
                 reason=best["mechanical_failure_explanation"]
@@ -547,6 +646,8 @@ def diagnose(acquisition,prior,out):
                        "ADMISSION_EXACT_CITY":4,"ADMISSION_OTHER":4}[primary]
                 secondary=[]
             if eid in accepted:
+                require(candidates and best["candidate_semantics"]==accepted[eid]["semantic_role"],
+                        "VERIFIED_FORENSIC_CANDIDATE_NOT_EPISODE_PRIMARY:"+eid)
                 require(primary==EXPECTED_TEMPORAL[eid],
                         "ACCEPTED_TEMPORAL_DISPOSITION_CONTRADICTION:"+eid+
                         ":got="+primary+":expected="+EXPECTED_TEMPORAL[eid])
@@ -625,6 +726,7 @@ def diagnose(acquisition,prior,out):
         offline.close()
 
 def precheck(acquisition,prior):
+    assert_aggregation_regression_controls()
     runner,offline,manifest=prepare(acquisition,prior)
     try:
         rows,generated,failed,holds=replay(offline)
