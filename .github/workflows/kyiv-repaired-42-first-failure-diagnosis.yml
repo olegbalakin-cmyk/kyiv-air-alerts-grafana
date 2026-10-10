@@ -7,7 +7,7 @@ on:
       - .github/workflows/kyiv-repaired-42-first-failure-diagnosis.yml
       - .github/proof/kyiv_repaired_42_first_failure_diagnosis.py
 permissions:
-  contents: read
+  contents: write
   actions: read
 concurrency:
   group: kyiv-repaired-42-first-failure-diagnosis
@@ -117,6 +117,43 @@ jobs:
       - name: Verify classifier remains identical
         run: |
           test "$(git rev-parse HEAD:kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py)" = "4019b8374dcc44846df04ed0cc41356652214bff"
+      - name: Publish accepted one-file diagnosis from exact classifier freeze
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          python - <<'PY'
+          import base64,hashlib,json,os,pathlib,requests
+          repo='olegbalakin-cmyk/kyiv-air-alerts-grafana'
+          api=f'https://api.github.com/repos/{repo}'
+          branch='kyiv-repaired-42-failure-rediagnosis-2026-10-10'
+          freeze='9784473e64c3ddfe3474bacdc30a12458923ff87'
+          path='research/kyiv_repaired_remaining_failure_rediagnosis_2026-10-10.json'
+          raw=(pathlib.Path('proof-input')/pathlib.Path(path).name).read_bytes()
+          obj=json.loads(raw)
+          assert obj['final_verdict']=='KYIV REPAIRED 42-FAILURE FIRST-FAILURE REDIAGNOSIS = PROVEN'
+          assert obj['proof_head']==os.environ['GITHUB_SHA']
+          s=requests.Session();s.headers.update({'Authorization':'Bearer '+os.environ['GH_TOKEN'],'Accept':'application/vnd.github+json','X-GitHub-Api-Version':'2022-11-28'})
+          check=s.get(f'{api}/git/ref/heads/{branch}',timeout=30)
+          assert check.status_code==404,'FINAL_BRANCH_ALREADY_EXISTS'
+          ref=s.post(f'{api}/git/refs',json={'ref':f'refs/heads/{branch}','sha':freeze},timeout=30)
+          ref.raise_for_status()
+          put=s.put(f'{api}/contents/{path}',json={'message':'research: freeze accepted Kyiv 42-case first-failure diagnosis','content':base64.b64encode(raw).decode(),'branch':branch},timeout=60)
+          put.raise_for_status()
+          commit=put.json()['commit']['sha']
+          details=s.get(f'{api}/compare/{freeze}...{commit}',timeout=30)
+          details.raise_for_status()
+          diff=details.json()
+          assert diff['ahead_by']==1 and diff['behind_by']==0
+          assert [x['filename'] for x in diff['files']]==[path]
+          confirm=s.get(f'{api}/contents/{path}',params={'ref':branch},timeout=30)
+          confirm.raise_for_status()
+          assert base64.b64decode(confirm.json()['content'])==raw,'FINAL_ARTIFACT_BYTES_MISMATCH'
+          print('FINAL_BRANCH='+branch)
+          print('FINAL_COMMIT='+commit)
+          print('FINAL_ARTIFACT_SHA256='+hashlib.sha256(raw).hexdigest())
+          print('FINAL_EXACTLY_ONE_PATH='+path)
+          PY
       - name: Upload complete read-only proof materials
         if: always()
         uses: actions/upload-artifact@v4
