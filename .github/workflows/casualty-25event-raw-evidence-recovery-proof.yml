@@ -1,0 +1,41 @@
+name: Casualty 25-event exact raw Git evidence proof
+
+on:
+  push:
+    branches:
+      - casualty-25event-raw-evidence-recovery-proof-2026-10-10
+    paths:
+      - .github/workflows/casualty-25event-raw-evidence-recovery-proof.yml
+      - .github/proof/casualty_25event_raw_evidence_recovery.py
+
+permissions:
+  contents: read
+
+jobs:
+  raw-evidence-only:
+    if: github.ref == 'refs/heads/casualty-25event-raw-evidence-recovery-proof-2026-10-10'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout with complete history (read-only permission)
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Ensure authoritative WIP branch Git objects exist (fetch only)
+        run: |
+          git fetch --no-tags origin '+refs/heads/multicity-wip-2026-09-16:refs/remotes/origin/multicity-wip-2026-09-16'
+          git cat-file -e 'b4219a896193602fd93ef92fc231cd9bdb2fe2c0^{commit}'
+          git cat-file -e '04823b17f60ac6fe23ecb74848a6ac7c618637df^{commit}'
+          git merge-base --is-ancestor b4219a896193602fd93ef92fc231cd9bdb2fe2c0 04823b17f60ac6fe23ecb74848a6ac7c618637df
+      - name: Extract exact immutable Git blobs and calculate twice offline
+        run: |
+          python3 -I .github/proof/casualty_25event_raw_evidence_recovery.py --output-dir proof-output
+          cd proof-output
+          sha256sum --check checksums.sha256
+      - name: Upload single read-only proof artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: casualty-25event-raw-evidence-proof
+          path: proof-output/
+          if-no-files-found: error
+          retention-days: 30
