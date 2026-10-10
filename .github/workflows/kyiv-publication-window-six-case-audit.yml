@@ -1,0 +1,152 @@
+name: Kyiv six-case frozen publication-window audit
+on:
+  push:
+    branches:
+      - kyiv-publication-window-six-case-audit-proof-2026-10-10
+    paths:
+      - .github/proof/kyiv_publication_window_six_case_audit.py.xz.b64
+      - .github/workflows/kyiv-publication-window-six-case-audit.yml
+permissions:
+  contents: write
+  actions: read
+concurrency:
+  group: kyiv-six-case-publication-window-audit
+  cancel-in-progress: false
+jobs:
+  bounded-offline-forensics:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install offline parser dependencies
+        run: python -m pip install 'beautifulsoup4>=4.12,<5' 'requests>=2.31,<3'
+      - name: Verify exact base, proof-only diff, frozen classifier
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD:kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py)" = "4019b8374dcc44846df04ed0cc41356652214bff"
+          python - <<'PY'
+          import subprocess
+          base='38d5ef12a18e27a6f9cc89cc45608f080fd75736'
+          def git(*args): return subprocess.check_output(['git',*args],text=True).strip()
+          assert git('merge-base','HEAD',base)==base
+          actual=set(git('diff','--name-only',base,'HEAD').splitlines())
+          allowed={'.github/proof/kyiv_publication_window_six_case_audit.py.xz.b64','.github/workflows/kyiv-publication-window-six-case-audit.yml'}
+          assert actual==allowed,(actual,allowed)
+          assert git('rev-parse',base+':research/kyiv_repaired_remaining_failure_rediagnosis_2026-10-10.json')==git('rev-parse','HEAD:research/kyiv_repaired_remaining_failure_rediagnosis_2026-10-10.json')
+          print('BASE_AND_FROZEN_IDENTITY_PASS',base)
+          PY
+      - name: Download retained GitHub Actions artifacts only
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import requests,os,io,zipfile
+          from pathlib import Path
+          root=Path('proof-input')
+          session=requests.Session()
+          session.headers.update({'Authorization':'Bearer '+os.environ['GH_TOKEN'],'Accept':'application/vnd.github+json','X-GitHub-Api-Version':'2022-11-28'})
+          repo='olegbalakin-cmyk/kyiv-air-alerts-grafana'
+          for artifact,dest in ((11608819645,'acquisition'),(11663989974,'accepted')):
+              response=session.get(f'https://api.github.com/repos/{repo}/actions/artifacts/{artifact}/zip',timeout=120)
+              response.raise_for_status()
+              folder=root/dest
+              folder.mkdir(parents=True,exist_ok=True)
+              with zipfile.ZipFile(io.BytesIO(response.content)) as z:
+                  for member in z.infolist():
+                      assert (folder/member.filename).resolve().is_relative_to(folder.resolve()),'UNSAFE_ZIP_PATH'
+                  z.extractall(folder)
+              print('FROZEN_ACTIONS_INPUT',artifact,dest,flush=True)
+          PY
+      - name: Decode and verify pinned offline auditor
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import base64,hashlib,lzma
+          from pathlib import Path
+          source=Path('.github/proof/kyiv_publication_window_six_case_audit.py.xz.b64').read_text().strip()
+          raw=lzma.decompress(base64.b64decode(source))
+          expected='8fd3d0281ed29bb12243912d72ed23a7a08815144e83a458f2520116ab983e4b'
+          assert hashlib.sha256(raw).hexdigest()==expected,'PINNED_AUDITOR_SHA_MISMATCH'
+          Path('proof-input/kyiv_six_auditor.py').write_bytes(raw)
+          print('AUDITOR_SOURCE_SHA256',expected)
+          PY
+      - name: Independent audit A
+        run: python -u proof-input/kyiv_six_auditor.py --input proof-input --output proof-input/a.json
+      - name: Independent audit B
+        run: python -u proof-input/kyiv_six_auditor.py --input proof-input --output proof-input/b.json
+      - name: Compare canonical runs and publish one-file final branch
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import base64,hashlib,json,os
+          from pathlib import Path
+          import requests
+          a=Path('proof-input/a.json').read_bytes()
+          b=Path('proof-input/b.json').read_bytes()
+          hash_a=hashlib.sha256(a).hexdigest()
+          hash_b=hashlib.sha256(b).hexdigest()
+          assert a==b and hash_a==hash_b=='6e10da008248d1026619a9c89898f544e7b20ccae23b3565643ff4eb75ba1a84','NONDETERMINISTIC_AUDIT'
+          result=json.loads(a)
+          assert result['final_verdict']=='KYIV SIX-CASE PUBLICATION-WINDOW AUDIT = MIXED'
+          assert result['network_evidence_fetches']==0 and result['classifier_mutations']==0 and result['source_mutations']==0
+          assert len(result['episode_level_audit'])==6 and result['frozen_records_audited_count']==17
+          branch='kyiv-publication-window-six-case-audit-2026-10-10'
+          path='research/kyiv_publication_window_six_case_audit_2026-10-10.json'
+          base='38d5ef12a18e27a6f9cc89cc45608f080fd75736'
+          result.update({'audit_fingerprint_a':hash_a,'audit_fingerprint_b':hash_b,
+                         'deterministic_equality':True,'proof_branch':'kyiv-publication-window-six-case-audit-proof-2026-10-10',
+                         'proof_head':os.environ['GITHUB_SHA'],'proof_run':int(os.environ['GITHUB_RUN_ID']),
+                         'proof_auditor_source_sha256':'8fd3d0281ed29bb12243912d72ed23a7a08815144e83a458f2520116ab983e4b',
+                         'final_artifact_branch':branch,'final_artifact_path':path})
+          raw=(json.dumps(result,ensure_ascii=False,sort_keys=True,separators=(',',':'))+'\n').encode('utf-8')
+          Path('proof-input/final.json').write_bytes(raw)
+          sha=hashlib.sha256(raw).hexdigest()
+          api='https://api.github.com/repos/olegbalakin-cmyk/kyiv-air-alerts-grafana'
+          session=requests.Session()
+          session.headers.update({'Authorization':'Bearer '+os.environ['GH_TOKEN'],'Accept':'application/vnd.github+json','X-GitHub-Api-Version':'2022-11-28'})
+          check=session.get(f'{api}/git/ref/heads/{branch}',timeout=30)
+          assert check.status_code==404,('FINAL_BRANCH_ALREADY_EXISTS',check.status_code)
+          create=session.post(f'{api}/git/refs',json={'ref':f'refs/heads/{branch}','sha':base},timeout=30)
+          create.raise_for_status()
+          put=session.put(f'{api}/contents/{path}',json={'message':'research: freeze accepted six-case publication-window audit','content':base64.b64encode(raw).decode(),'branch':branch},timeout=60)
+          put.raise_for_status()
+          commit=put.json()['commit']['sha']
+          compare=session.get(f'{api}/compare/{base}...{commit}',timeout=30)
+          compare.raise_for_status()
+          delta=compare.json()
+          assert delta['ahead_by']==1 and delta['behind_by']==0
+          assert [f['filename'] for f in delta['files']]==[path]
+          check_final=session.get(f'{api}/contents/{path}',params={'ref':branch},timeout=30)
+          check_final.raise_for_status()
+          assert base64.b64decode(check_final.json()['content'])==raw
+          print('AUDIT_FINGERPRINT_A',hash_a,flush=True)
+          print('AUDIT_FINGERPRINT_B',hash_b,flush=True)
+          print('FINAL_BRANCH',branch,flush=True)
+          print('FINAL_COMMIT',commit,flush=True)
+          print('FINAL_ARTIFACT_SHA256',sha,flush=True)
+          print('VERDICT',result['final_verdict'],flush=True)
+          PY
+      - name: Archive deterministic six-case audit outputs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: kyiv-six-case-publication-window-offline-proof
+          path: |
+            proof-input/a.json
+            proof-input/b.json
+            proof-input/final.json
+          retention-days: 30
+          if-no-files-found: warn
