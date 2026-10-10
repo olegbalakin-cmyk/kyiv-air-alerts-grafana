@@ -4,6 +4,10 @@ Accepted project checkpoints, newest first. This is not the full Git history, a 
 
 ## 2026-10-10
 
+### Kyiv 42-case harness remains blocked after first aggregation repair
+- **Status:** `KYIV REPAIRED 42-FAILURE FIRST-FAILURE REDIAGNOSIS = BLOCKED`. Proof commit `aa07ccaef848ca348860e7997a8dda4089af6ec2` changes only `.github/proof/kyiv_repaired_42_first_failure_diagnosis.py`; classifier blob remains `4019b8374dcc44846df04ed0cc41356652214bff`.
+- [Run 38033720781](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/38033720781) again passed frozen classifier/source checks, `48 / 6 / 42`, exact 42-ID SHA and hold precheck, then failed in Diagnosis A with `VERIFIED_FORENSIC_CANDIDATE_NOT_EPISODE_PRIMARY:c475d1dca5c22956189e88e3`. Diagnosis B, determinism and final artifact were not executed.
+- The added semantic-priority helper and fail-closed forensic identity controls are insufficient for the real episode. The next task must first identify the exact competing candidate/category/stage that outranks the verified forensic candidate, then apply the narrowest generic proof-harness aggregation correction. No classifier, source, production, Neon or backfill mutation is authorized.
 ### Kyiv 42-case diagnostic harness blocked on accepted semantic-disposition conflict
 - **Status:** `KYIV REPAIRED 42-FAILURE FIRST-FAILURE REDIAGNOSIS = BLOCKED`. **Evidence:** proof commit `86413d069b9403a6c442d383e51867b9d788ad4d`, [run 38032645986](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/38032645986), artifact `11663131301`.
 - Precheck passed the frozen repaired classifier/source identity, reproduced **48 known positives / 6 final positives / 42 failures**, matched 42-ID SHA-256 `fcf85d81ccfa59501fe3a3a51f1c11cab48f5ff36a79b20454309db23b2913ab`, and preserved **19 holds**, STRICT **2**, SENSITIVITY **0**, new uncleared promotions **0**.
