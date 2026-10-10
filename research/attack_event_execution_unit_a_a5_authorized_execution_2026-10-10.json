@@ -14,24 +14,116 @@
     "coordination_main": "6a47d703a7bd4f236767fc39642c723c01aadf42",
     "explicit": true
   },
-  "bounded_example": null,
-  "first_failure": "ProofFailure",
+  "bounded_example": {
+    "bounded_mismatches": [
+      {
+        "field": "alert_episode_uid",
+        "key": "006571fa9d8c30853112cd16e499eb398a231aab6cb07720df6d609e355b9e9b",
+        "type": "classification_field"
+      },
+      {
+        "field": "alert_episode_uid",
+        "key": "0085c85e8f17bd3cfe4d2a232e140774ff170368565db3365378cc05481d7faf",
+        "type": "classification_field"
+      },
+      {
+        "field": "alert_episode_uid",
+        "key": "00a08069cab7d81b53b622a738270b08522daf14315ec3b336af7de29edc83f6",
+        "type": "classification_field"
+      }
+    ],
+    "classification_rows": 1713,
+    "event_rows": 10,
+    "mismatch_count": 1713,
+    "parent_rows": 1713,
+    "source_rows": 1559
+  },
+  "first_failure": "PRECOMMIT_READBACK_FAILED",
   "idempotency": {
     "future_mutations": null
   },
   "kind": "unit_a_a5_authorized_execution",
   "postcommit_readback": {},
-  "precommit_readback": {},
-  "preconditions": {},
+  "precommit_readback": {
+    "bounded_mismatches": [
+      {
+        "field": "alert_episode_uid",
+        "key": "006571fa9d8c30853112cd16e499eb398a231aab6cb07720df6d609e355b9e9b",
+        "type": "classification_field"
+      },
+      {
+        "field": "alert_episode_uid",
+        "key": "0085c85e8f17bd3cfe4d2a232e140774ff170368565db3365378cc05481d7faf",
+        "type": "classification_field"
+      },
+      {
+        "field": "alert_episode_uid",
+        "key": "00a08069cab7d81b53b622a738270b08522daf14315ec3b336af7de29edc83f6",
+        "type": "classification_field"
+      }
+    ],
+    "classification_rows": 1713,
+    "event_rows": 10,
+    "mismatch_count": 1713,
+    "parent_rows": 1713,
+    "source_rows": 1559
+  },
+  "preconditions": {
+    "classifications": {
+      "checked": 1713,
+      "drifted": 0,
+      "semantic_conflicts": 0,
+      "unexpected_tips": 0,
+      "valid": 1713
+    },
+    "mutations": {
+      "checked": 0,
+      "drifted": 0,
+      "valid": 0
+    },
+    "nonpositive_targets": {
+      "checked": 1703,
+      "drifted": 0,
+      "unchanged": 1703
+    },
+    "parents": {
+      "ambiguous": 0,
+      "changed_binding": 0,
+      "checked": 1713,
+      "drifted": 0,
+      "missing": 0,
+      "unchanged": 1713
+    },
+    "positive_events": {
+      "checked": 10,
+      "drifted": 0,
+      "valid": 10
+    },
+    "sources": {
+      "checked": 1559,
+      "drifted": 0,
+      "semantic_conflicts": 0,
+      "valid": 1559
+    }
+  },
   "production_mutation": "NO",
   "schema_version": 1,
   "site_prod_mutation": "NO",
-  "transaction": {},
+  "transaction": {
+    "advisory_lock": true,
+    "branch": "br-bold-mode-b5rub8pq",
+    "committed": false,
+    "database": "neondb",
+    "isolation": "serializable",
+    "project": "green-cake-44216048",
+    "read_only": false,
+    "rolled_back": true
+  },
   "verdict": "ATTACK-EVENT EXECUTION UNIT A A5 ATOMIC PERSISTENCE = BLOCKED",
   "writes": {
-    "classifications": 0,
-    "events": 0,
-    "sources": 0,
-    "total": 0
+    "classifications": 1713,
+    "events": 10,
+    "sources": 1559,
+    "total": 3282
   }
 }
