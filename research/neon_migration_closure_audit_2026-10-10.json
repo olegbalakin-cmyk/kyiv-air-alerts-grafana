@@ -1,0 +1,979 @@
+{
+  "schema_version": 1,
+  "kind": "neon_migration_closure_audit",
+  "audit_date": "2026-10-10",
+  "primary_verdict": "NEON MIGRATION CLOSURE AUDIT = CUTOVER INCOMPLETE",
+  "scope": "Independent repository-level persistence migration to Neon, strictly read-only with no production or database mutation. Excludes casualty migration, unapproved Kyiv discovery backfill, BBC parser/classifier work and site-prod mutation.",
+  "baseline": {
+    "repository": "olegbalakin-cmyk/kyiv-air-alerts-grafana",
+    "inspected_main": "aefd54e7b9d1cb2330827b9eac2d10d7789c4eec",
+    "coordination_documents": [
+      "PROJECT_STATE.md",
+      "CHANGELOG.md"
+    ],
+    "site_prod": "20166bf9f60b9dd8275a2c98f7b1fce2458c7055",
+    "multicity_wip": "018223f4c60b4a4f915da19438e425fc1428d89c",
+    "completed_historical_campaign": "71cb6f6fbe856cc7b96759310fe9cc9c71cc0453",
+    "newer_neon_unit_a_checkpoint_discovered": false,
+    "latest_unit_a": {
+      "verdict": "ATTACK-EVENT EXECUTION UNIT A A5 ATOMIC PERSISTENCE = COMMITTED",
+      "actions_run": 38079407732,
+      "job": 114293036632,
+      "artifact_commit": "fd295f2d526cf4f3af2c52377e6db8ccca0be9d5",
+      "artifact_blob": "1feee426e045dd39691bd1ac21a291f6ab438bf9",
+      "artifact_sha256": "4062159090e56c2cb2b92ba5839a240e9a4002d21d8e6d78b2c8bf91b2c0f848",
+      "cleaned_proof_head": "bca72a36986581730eb966ff95849dca19aa1574",
+      "committed_actions": 3282,
+      "classification_rows": 1713,
+      "source_rows": 1559,
+      "event_rows": 10,
+      "postcommit_mismatches": 0,
+      "idempotent_future_mutations": 0
+    }
+  },
+  "proof_method": {
+    "repository": "GitHub branch/file/commit and workflow-content connector reads, pinned to explicit SHA",
+    "database": "Direct Neon connector metadata/table-schema reads and SELECT-only SQL; no CI database credentials or temporary harness required",
+    "proof_branch": "neon-migration-closure-audit-2026-10-10",
+    "proof_job": null,
+    "proof_run": null,
+    "proof_run_necessity": "not required; direct read-only Neon connector available",
+    "target_artifact": "research/neon_migration_closure_audit_2026-10-10.json",
+    "comparison_baseline": "aefd54e7b9d1cb2330827b9eac2d10d7789c4eec",
+    "postgres_read_only_transaction_enforced": false,
+    "note": "Queries were SELECT statements; Neon connector's default transaction_read_only was reported off. No write statement was issued. Some aggregate SELECTs were blocked by tool-side safety checks; narrower SELECTs returned the required observations."
+  },
+  "neon": {
+    "project_id": "green-cake-44216048",
+    "database": "neondb",
+    "inspected_branch": {
+      "id": "br-bold-mode-b5rub8pq",
+      "name": "lviv-phase1-production-shadow-2026-09-28",
+      "primary": false,
+      "default": false
+    },
+    "separate_neon_default_branch": {
+      "id": "br-wandering-sunset-b5835alw",
+      "name": "production",
+      "primary": true,
+      "default": true,
+      "public_tables": [
+        "alert_episodes",
+        "alert_episode_sources",
+        "ingestion_checkpoints",
+        "ingestion_runs"
+      ],
+      "all_four_public_table_counts": 0,
+      "attack_event_tables_present": false
+    },
+    "main_public_table_counts": {
+      "alert_episodes": 29050,
+      "alert_episode_sources": 143,
+      "alert_state_snapshots": 96,
+      "alert_threat_observations": 101,
+      "attack_event_classifications": 28131,
+      "attack_event_sources": 5335,
+      "attack_events": 1090,
+      "ingestion_checkpoints": 18,
+      "ingestion_runs": 102
+    },
+    "public_view": [
+      "current_ingestion_checkpoints"
+    ],
+    "nonproduction_proof_only_schemas": [
+      "differentiated_alert_shadow_proof_20260930_unittest",
+      "differentiated_alert_shadow_proof_36677192887_unittest",
+      "differentiated_alert_shadow_proof_36677489579_unittest"
+    ],
+    "other_proof_schema_note": "Each proof schema contains alert_state_snapshot and alert_threat_observation tables; excluded from production persistence inventory.",
+    "relevant_key_constraints": {
+      "alert_episodes": [
+        "PK episode_uid",
+        "UNIQUE legacy_episode_id",
+        "UNIQUE (city_key, alert_type, start_at, end_at)",
+        "FK run provenance -> ingestion_runs"
+      ],
+      "attack_event_classifications": [
+        "PK classification_uid",
+        "UNIQUE classification_key",
+        "FK alert_episode_uid -> alert_episodes",
+        "FK supersedes_classification_uid -> attack_event_classifications",
+        "FK persisted_by_run_id -> ingestion_runs"
+      ],
+      "attack_event_sources": [
+        "PK attack_event_source_uid",
+        "UNIQUE source_link_key",
+        "UNIQUE (classification_uid, observation_id, content_sha256)",
+        "FK classification_uid -> attack_event_classifications"
+      ],
+      "attack_events": [
+        "PK attack_event_uid",
+        "UNIQUE attack_event_key",
+        "UNIQUE (city_key,historical_episode_id)",
+        "FK current_classification_uid -> attack_event_classifications",
+        "FK alert_episode_uid -> alert_episodes",
+        "FK run ids -> ingestion_runs"
+      ],
+      "alert_state_snapshots": [
+        "FK episode_uid -> alert_episodes",
+        "FK episode_source_observation_id -> alert_episode_sources"
+      ],
+      "ingestion_checkpoints": [
+        "FK created_by_run_id -> ingestion_runs",
+        "unique source/city/stream checkpoint sequence"
+      ],
+      "alert_episode_sources": [
+        "FK episode_uid -> alert_episodes",
+        "unique source record identity"
+      ]
+    },
+    "observed_invariants": {
+      "classification_rows": 28131,
+      "distinct_classification_episode_keys": 28130,
+      "initial_classifications": 28130,
+      "revisions": 1,
+      "classification_parent_bound": 28106,
+      "classification_parent_unbound": 25,
+      "classification_unbound_label": "UNBOUND",
+      "classification_fk_orphans": 0,
+      "attack_event_rows": 1090,
+      "attack_events_status_active": 1090,
+      "attack_event_missing_current_classification": 0,
+      "attack_event_to_classification_parent_mismatch": 0,
+      "attack_event_to_classification_historical_id_mismatch": 0,
+      "attack_event_pointing_to_nonpositive_classification": 0,
+      "attack_event_pointing_to_superseded_tip": 0,
+      "latest_ingestion_run_started_utc": "2026-10-10 16:52:55.497858+00",
+      "latest_parent_updated_utc": "2026-10-10 16:52:53.445602+00",
+      "latest_attack_event_classification_created_utc": "2026-10-10 19:20:51.1018+00"
+    },
+    "ingestion_writer_evidence": [
+      {
+        "run_kind": "multicity_canonical_shadow",
+        "workflow": "Update Ukraine air-alert production data",
+        "ref": "refs/heads/main",
+        "successful_runs": 50,
+        "last_started_utc": "2026-10-10 16:52:55.497858+00"
+      },
+      {
+        "run_kind": "live_parent_ordering_sync",
+        "workflow": "Monitor explosion metric WIP",
+        "ref": "refs/heads/main",
+        "successful_runs": 32,
+        "last_started_utc": "2026-10-07 21:56:40.43133+00"
+      },
+      {
+        "run_kind": "shadow_poll",
+        "workflow": "Update Ukraine air-alert production data",
+        "successful_runs": 17
+      },
+      {
+        "run_kind": "multicity_canonical_bootstrap",
+        "successful_runs": 1
+      },
+      {
+        "run_kind": "canonical_boundary_repair",
+        "successful_runs": 1
+      },
+      {
+        "run_kind": "bootstrap_import",
+        "successful_runs": 1
+      }
+    ]
+  },
+  "historical_populations": {
+    "derivation": "Neon SELECT GROUP BY classification origin_artifact_path and origin_ref, independently cross-checked against accepted frozen campaign total and Unit A A5 proof.",
+    "cohort_rows": [
+      {
+        "cohort": "five_city_older_campaign",
+        "cities": [
+          "cherkasy",
+          "lviv",
+          "sevastopol",
+          "sumy",
+          "zaporizhzhia"
+        ],
+        "accepted_frozen_episodes": 6863,
+        "neon_classification_rows": 6863,
+        "neon_source_links": 2340,
+        "neon_unbound_parents": 5,
+        "match_level": "EXACT COUNT AND FIVE-CITY SCOPE; episode-ID equality, frozen decision/hash parity not yet independently proven",
+        "authority": "NEON_WRITTEN_BUT_NOT_YET_AUTHORITATIVE",
+        "mutation_required_now": false
+      },
+      {
+        "cohort": "historical_v2_formalization_other",
+        "neon_classification_rows": 19542,
+        "neon_source_links": 1429,
+        "neon_unbound_parents": 20,
+        "match_level": "Neon origin_artifact_path grouping observed; frozen expected universe identity reconciliation still required",
+        "authority": "NEON_WRITTEN_BUT_NOT_YET_AUTHORITATIVE"
+      },
+      {
+        "cohort": "Unit_A_A5",
+        "target_episodes": 1713,
+        "neon_classification_rows": 1713,
+        "neon_source_links": 1559,
+        "neon_attack_events": 10,
+        "neon_unbound_parents": 0,
+        "match_level": "Accepted atomic execution, exact post-commit semantic read-back, zero future mutations",
+        "authority": "NEON_WRITTEN_BUT_NOT_YET_AUTHORITATIVE_FOR_REPOSITORY_LEVEL_CUTOVER; COMMITTED_AND_VERIFIED_FOR_UNIT_A"
+      },
+      {
+        "cohort": "bounded_live",
+        "neon_classification_rows": 13,
+        "neon_source_links": 7,
+        "neon_unbound_parents": 0,
+        "match_level": "Observed existing live writer provenance; not full scheduled-stream coverage",
+        "authority": "NEON_WRITTEN_BUT_NOT_YET_AUTHORITATIVE"
+      }
+    ],
+    "detailed_five_city_neon_rows": {
+      "cherkasy": 1548,
+      "lviv": 126,
+      "sevastopol": 527,
+      "sumy": 2297,
+      "zaporizhzhia": 2365
+    },
+    "immutable_kyiv_development": {
+      "not_approved_for_backfill": true,
+      "neon_migration_blocker": false,
+      "reason": "Development-only discovery outcomes do not become accepted historical production records"
+    },
+    "overlap_rule": "Do not add five-city + Unit A + other-v2 totals as unique alert episodes without exact per-episode overlap/deduplication proof; listed classification populations are distinguished by origin evidence."
+  },
+  "persistence_inventory": [
+    {
+      "domain": "canonical alert-episode parents",
+      "storage": "Neon PostgreSQL plus site-prod JSON generation",
+      "location": "public.alert_episodes; site-prod kyiv-air-alerts-grafana/data/dashboard_data.json; ukrainealarm_bridge.json",
+      "writers": [
+        "update-netlify-site.yml -> multicity_canonical_shadow.py",
+        "live_parent_ordering_sync"
+      ],
+      "readers": [
+        "attack_event_canonical_persistence._parent_binding",
+        "WIP parent ordering",
+        "site-prod dashboard writer from static upstream"
+      ],
+      "environment": "scheduled normal production and Neon shadow",
+      "current_authority": "LEGACY_AUTHORITATIVE for publishing/production alert source; NEON_WRITTEN_BUT_NOT_YET_AUTHORITATIVE for attack-event parents",
+      "intended_authority": "Neon canonical parents for attack-event FK and lifecycle, with Git retained as input/export",
+      "migration_relevance": "CUTOVER_BLOCKER"
+    },
+    {
+      "domain": "attack-event classifications",
+      "storage": "Neon PostgreSQL + WIP candidate decisions as upstream input",
+      "location": "public.attack_event_classifications; WIP data/explosion_review_queue.json",
+      "writers": [
+        "scheduled Monitor explosion metric WIP, bounded max=10",
+        "Unit A A5 one-time accepted writer",
+        "older historical projection writers"
+      ],
+      "readers": [
+        "attack_event_canonical_persistence._current_tip and _existing_classification",
+        "read-only canary/proof workflows"
+      ],
+      "environment": "mixed live canary and historical persisted",
+      "current_authority": "NEON_WRITTEN_BUT_NOT_YET_AUTHORITATIVE",
+      "intended_authority": "Neon current classification revision tips for eligible production attack events",
+      "migration_relevance": "CUTOVER_BLOCKER"
+    },
+    {
+      "domain": "attack-event source links",
+      "storage": "Neon PostgreSQL",
+      "location": "public.attack_event_sources",
+      "writers": [
+        "scheduled WIP bounded persistence",
+        "historical and Unit A ingestion"
+      ],
+      "readers": [
+        "persistence conflict/read-back and independent proof SQL"
+      ],
+      "environment": "mixed production canary/historical",
+      "current_authority": "NEON_WRITTEN_BUT_NOT_YET_AUTHORITATIVE",
+      "intended_authority": "Neon provenance links to current/frozen canonical classifications",
+      "migration_relevance": "CUTOVER_BLOCKER"
+    },
+    {
+      "domain": "attack events",
+      "storage": "Neon PostgreSQL",
+      "location": "public.attack_events",
+      "writers": [
+        "scheduled WIP bounded persistence",
+        "historical and Unit A persistence"
+      ],
+      "readers": [
+        "internal Neon persistence checks; read-only proof workflows; no verified production dashboard consumer"
+      ],
+      "environment": "mixed production canary/historical",
+      "current_authority": "NEON_WRITTEN_BUT_NOT_YET_AUTHORITATIVE",
+      "intended_authority": "Neon canonical event state and current classification pointer",
+      "migration_relevance": "CUTOVER_BLOCKER"
+    },
+    {
+      "domain": "historical attack-event frozen batches",
+      "storage": "Git committed JSON",
+      "location": "historical-attack-event-backfill-2026-09-27:research/historical_attack_event_backfill/**",
+      "writers": [
+        "completed historical batch scheduler"
+      ],
+      "readers": [
+        "historical validators, evidence-replay, Neon projection"
+      ],
+      "environment": "completed isolated historical campaign",
+      "current_authority": "INTENTIONALLY_GIT_BACKED for frozen source/proof; Neon rows mirrored",
+      "intended_authority": "Retain immutable Git evidence; accepted historical canonical event persistence must be parity-proven if declared Neon authoritative",
+      "migration_relevance": "IDENTITY_PARITY_PROOF_PENDING"
+    },
+    {
+      "domain": "monitor state and attack candidate review queue",
+      "storage": "Git committed JSON",
+      "location": "multicity-wip-2026-09-16:data/explosion_candidate_monitor_state.json; data/explosion_review_queue.json; data/explosion_candidate_monitor_last_run.json",
+      "writers": [
+        "scheduled explosion-monitor-wip.yml"
+      ],
+      "readers": [
+        "monitor_explosion_candidates.py, attack_event_canonical_persistence projection"
+      ],
+      "environment": "active WIP upstream workstream",
+      "current_authority": "LEGACY_AUTHORITATIVE for monitor scheduling and review inputs",
+      "intended_authority": "INTENTIONALLY_GIT_BACKED may remain for input/review; ensure it is not separate canonical attack-event revision tip",
+      "migration_relevance": "BOUNDARY_PROOF_REQUIRED; NO BLANKET_QUEUE_MIGRATION"
+    },
+    {
+      "domain": "normal alert publication and public/dashboard exports",
+      "storage": "Git JSON/CSV + Grafana/Netlify",
+      "location": "main and site-prod kyiv-air-alerts-grafana/data/**, grafana/dashboard.json",
+      "writers": [
+        "update.yml",
+        "update-netlify-site.yml",
+        "refresh-production-derived.yml"
+      ],
+      "readers": [
+        "public static dashboard, Netlify/Grafana, WIP monitors"
+      ],
+      "environment": "normal production",
+      "current_authority": "INTENTIONALLY_GIT_BACKED",
+      "intended_authority": "Git derived/publication layers may remain after Neon canonical persistence cutover",
+      "migration_relevance": "SAFE_TO_KEEP; parity of canonical attack-event dependencies only where such consumption exists"
+    },
+    {
+      "domain": "ingestion provenance and source observations",
+      "storage": "Neon PostgreSQL",
+      "location": "public.ingestion_runs; ingestion_checkpoints; alert_episode_sources",
+      "writers": [
+        "scheduled parent shadow workflows and import/proofs"
+      ],
+      "readers": [
+        "Neon parent persistence/preflight and live parent gate"
+      ],
+      "environment": "shadow",
+      "current_authority": "NEON_WRITTEN_BUT_NOT_YET_AUTHORITATIVE for ongoing canonical ingestion",
+      "intended_authority": "Neon if used as canonical ingestion checkpoints, except Git bridge checkpoint as independent upstream feed",
+      "migration_relevance": "PARTIAL"
+    },
+    {
+      "domain": "differentiated alert threat snapshots",
+      "storage": "Neon PostgreSQL",
+      "location": "public.alert_state_snapshots; alert_threat_observations",
+      "writers": [
+        "update-netlify-site differentiated_alert_shadow_runtime"
+      ],
+      "readers": [
+        "shadow verification; no evidenced production downstream"
+      ],
+      "environment": "shadow",
+      "current_authority": "NEON_WRITTEN_BUT_NOT_YET_AUTHORITATIVE",
+      "intended_authority": "Undecided separate differentiated alert subsystem, not automatically an attack-event migration gate",
+      "migration_relevance": "UNKNOWN / REQUIRES PROOF OF SCOPE"
+    },
+    {
+      "domain": "casualty candidate discovery and review",
+      "storage": "Git committed JSON",
+      "location": "WIP data/casualties/candidate_monitor_state.json and multicity_review_queue.json",
+      "writers": [
+        "casualty-monitor-wip.yml",
+        "manual casualty review operator"
+      ],
+      "readers": [
+        "review operator"
+      ],
+      "environment": "separate casualty track",
+      "current_authority": "INTENTIONALLY_GIT_BACKED",
+      "intended_authority": "Unchanged for this Neon attack-event migration",
+      "migration_relevance": "OUT_OF_SCOPE_FOR_NEON_MIGRATION"
+    },
+    {
+      "domain": "confirmed casualty ledger and published casualty dashboard",
+      "storage": "Git CSV + static derived data",
+      "location": "site-prod kyiv-air-alerts-grafana/data/casualties/revisions.csv and dashboard_data.json",
+      "writers": [
+        "protected manual PROMOTE",
+        "update-netlify-site.yml"
+      ],
+      "readers": [
+        "production casualty dashboard"
+      ],
+      "environment": "production casualty track",
+      "current_authority": "INTENTIONALLY_GIT_BACKED",
+      "intended_authority": "Unchanged for this migration",
+      "migration_relevance": "OUT_OF_SCOPE_FOR_NEON_MIGRATION"
+    },
+    {
+      "domain": "development Kyiv research and GitHub proof artifacts",
+      "storage": "Git research JSON, immutable references and GitHub Actions artifacts",
+      "location": "research/**; development branches",
+      "writers": [
+        "isolated proof workflows"
+      ],
+      "readers": [
+        "validation and auditors"
+      ],
+      "environment": "development/proof only",
+      "current_authority": "INTENTIONALLY_GIT_BACKED",
+      "intended_authority": "Immutable evidence, not canonical live production DB",
+      "migration_relevance": "OUT_OF_SCOPE_FOR_NEON_MIGRATION"
+    }
+  ],
+  "writer_reader_matrix": [
+    {
+      "workflow": "main:.github/workflows/update-netlify-site.yml",
+      "trigger": "scheduled 15 */4; manual; limited push",
+      "path": "site-prod scripts multicity_canonical_shadow and differentiated_alert_shadow_runtime",
+      "neon_writer": "YES, fail-open canonical parents + differentiated snapshots, shadow branch",
+      "neon_reader": "shadow-internal preflight only",
+      "legacy_writer": "YES, site-prod dashboard_data and source bridge",
+      "legacy_reader": "YES, site-prod files as authoritative input/output",
+      "normal_production": true,
+      "cap": null,
+      "proof": "https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/blob/aefd54e7b9d1cb2330827b9eac2d10d7789c4eec/.github/workflows/update-netlify-site.yml"
+    },
+    {
+      "workflow": "main:.github/workflows/explosion-monitor-wip.yml",
+      "trigger": "scheduled 20 1-23/4; manual; release push",
+      "path": "WIP monitor_explosion_candidates -> canonical_persistence",
+      "neon_writer": "YES, bounded classification/event/source + parent gate",
+      "neon_reader": "YES, parent binding and existing classification tip/uniqueness within write contract",
+      "legacy_writer": "YES, WIP monitor state, queue, explosions_test",
+      "legacy_reader": "YES, site-prod alert files and WIP queue",
+      "normal_production": true,
+      "cap": "ATTACK_EVENT_PERSISTENCE_CANARY_MAX_EPISODES=10",
+      "proof": "https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/blob/aefd54e7b9d1cb2330827b9eac2d10d7789c4eec/.github/workflows/explosion-monitor-wip.yml"
+    },
+    {
+      "workflow": "main:.github/workflows/update.yml",
+      "trigger": "scheduled 15 4,12; manual; targeted push",
+      "path": "main dashboard data updater",
+      "neon_writer": "NO",
+      "neon_reader": "NO",
+      "legacy_writer": "YES, main Git publication data and Grafana",
+      "legacy_reader": "YES, its own Git/feeds",
+      "normal_production": true,
+      "cap": null,
+      "proof": "https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/blob/aefd54e7b9d1cb2330827b9eac2d10d7789c4eec/.github/workflows/update.yml"
+    },
+    {
+      "workflow": "main:.github/workflows/historical-attack-event-backfill-scheduler.yml",
+      "trigger": "scheduled; manual",
+      "path": "completed isolated historical campaign",
+      "neon_writer": "NO from scheduler; historical campaign artifacts Git",
+      "neon_reader": "NO",
+      "legacy_writer": "Git campaign if unfinished; currently COMPLETE no new batches",
+      "legacy_reader": "YES, frozen Git status",
+      "normal_production": false,
+      "cap": "COMPLETE 6863",
+      "proof": "https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/blob/71cb6f6fbe856cc7b96759310fe9cc9c71cc0453/.github/workflows/historical-attack-event-backfill.yml"
+    },
+    {
+      "workflow": "main:.github/workflows/attack-event-canary-neon-readback.yml",
+      "trigger": "pinned push trigger only",
+      "path": "Neon SELECT canary",
+      "neon_writer": "NO",
+      "neon_reader": "YES, PROOF ONLY",
+      "legacy_writer": "NO",
+      "legacy_reader": "NO",
+      "normal_production": false
+    },
+    {
+      "workflow": "main:.github/workflows/live-due-orchestration-readback.yml",
+      "trigger": "workflow_run + exact pinned historical SHA",
+      "path": "Neon SELECT/read-back frozen proof",
+      "neon_writer": "NO",
+      "neon_reader": "YES, PROOF ONLY",
+      "legacy_writer": "only proof artifact commit",
+      "legacy_reader": "YES, WIP report",
+      "normal_production": false
+    },
+    {
+      "workflow": "main:.github/workflows/casualty-monitor-wip.yml",
+      "trigger": "scheduled",
+      "path": "casualty WIP queue",
+      "neon_writer": "NO",
+      "neon_reader": "NO",
+      "legacy_writer": "YES, WIP casualty JSON",
+      "legacy_reader": "YES, site-prod alert data",
+      "normal_production": true,
+      "migration_relevance": "out of scope"
+    }
+  ],
+  "authority_matrix": {
+    "alert_episodes": {
+      "source_of_truth": "site-prod source/canonical interval JSON for publication and source assembly; Neon parent rows for bounded event FK",
+      "neon_authority": "PARTIAL",
+      "class": "NEON_WRITTEN_BUT_NOT_YET_AUTHORITATIVE"
+    },
+    "attack_event_classifications": {
+      "source_of_truth": "Neon persisted historical/live rows, but Git/WIP authoritative upstream decision material and max-10 live limit; no accepted full writer cutover",
+      "neon_authority": "PARTIAL",
+      "class": "NEON_WRITTEN_BUT_NOT_YET_AUTHORITATIVE"
+    },
+    "attack_event_source_links": {
+      "source_of_truth": "Neon for already persisted link rows; live eligibility remains bounded",
+      "neon_authority": "PARTIAL",
+      "class": "NEON_WRITTEN_BUT_NOT_YET_AUTHORITATIVE"
+    },
+    "attack_events": {
+      "source_of_truth": "Neon for existing event rows; no full-stream production authority/consumer proof",
+      "neon_authority": "PARTIAL",
+      "class": "NEON_WRITTEN_BUT_NOT_YET_AUTHORITATIVE"
+    },
+    "historical_attack_event_persistence": {
+      "source_of_truth": "Git frozen evidence plus Neon mirror; Unit A exact accepted, older five-city and v2 exact-identity parity pending",
+      "neon_authority": "MIXED",
+      "class": "NEON_WRITTEN_BUT_NOT_YET_AUTHORITATIVE"
+    },
+    "public_dashboard_exports": {
+      "source_of_truth": "site-prod and main Git JSON/CSV + public dashboard",
+      "must_migrate_to_neon_for_closure": "NO",
+      "class": "INTENTIONALLY_GIT_BACKED"
+    },
+    "casualty_ledger": {
+      "source_of_truth": "site-prod revisions.csv",
+      "must_migrate_to_neon_for_this_closure": "NO",
+      "class": "OUT_OF_SCOPE_FOR_NEON_MIGRATION"
+    }
+  },
+  "shadow_semantics": {
+    "chosen_interpretation": "REAL ARCHITECTURAL SHADOW BOUNDARY, not merely stale naming. C for fail-open alert-parent shadow and B for already-written but only bounded live attack-event canonical persistence.",
+    "evidence": [
+      "update-netlify-site.yml explicitly sets MULTICITY_CANONICAL_DB_SHADOW=1, MULTICITY_CANONICAL_DB_SHADOW_FAILURE_POLICY=fail_open, uses Git site-prod as upstream and publication authority",
+      "The separate primary/default Neon branch production has no attack-event tables and zero parent/source/run/checkpoint rows",
+      "The WIP attack-event writer reads and writes Neon but is capped by ATTACK_EVENT_PERSISTENCE_CANARY_MAX_EPISODES=10 and retains Git monitor/review state",
+      "No normal production dashboard/serving reader of public.attack_events verified; only internal persistence and proof SQL readers"
+    ],
+    "rename_performed": false
+  },
+  "legacy_dependencies": [
+    {
+      "legacy": "site-prod canonical alert intervals and bridge JSON",
+      "writer": "scheduled update-netlify-site",
+      "reader": "production dashboard; WIP monitors; Neon shadow parent builder",
+      "state": "source/canonical-for-publication plus derived",
+      "neon_equivalent": "public.alert_episodes 29050",
+      "parity": "row-count available, exact all-stream authority/continuity unproven",
+      "category": "CUTOVER_BLOCKER if declared duplicate attack-event canonical parent source; SAFE_TO_KEEP as source/export",
+      "disable_consequence": "would break dashboard and WIP ingestion",
+      "removal_requirement": "do not disable Git publication; only remove duplicate canonical authority after explicit contract"
+    },
+    {
+      "legacy": "WIP explosion_candidate_monitor_state.json",
+      "writer": "scheduled explosion monitor",
+      "reader": "due orchestration, news search, classification",
+      "state": "operational scheduler and upstream state",
+      "neon_equivalent": "partial ingestion checkpoints and classifications, not proven equivalent scheduling semantics",
+      "parity": "not proven",
+      "category": "UNKNOWN",
+      "disable_consequence": "due checks/follow-ups and replay can stop",
+      "removal_requirement": "can remain Git-backed if explicitly defined as upstream scheduling state, not canonical class tip"
+    },
+    {
+      "legacy": "WIP explosion_review_queue.json",
+      "writer": "scheduled monitor and review process",
+      "reader": "composition and classification projection",
+      "state": "evidence/review queue; can overlap classification decision semantics",
+      "neon_equivalent": "classified rows and source links",
+      "parity": "no full bidirectional accepted proof",
+      "category": "CUTOVER_BLOCKER for duplicate canonical decision authority; SAFE_TO_KEEP as governed upstream evidence",
+      "disable_consequence": "discovery/review/persistence composition would stop",
+      "removal_requirement": "prove no separate authoritative current event classification outside Neon"
+    },
+    {
+      "legacy": "historical backfill frozen research batches",
+      "writer": "completed campaign workflow",
+      "reader": "offline validators, historical projection",
+      "state": "immutable reference/evidence",
+      "neon_equivalent": "6863 classification rows with aligned 5 cities",
+      "parity": "exact count match; no episode ID/hash-by-ID verification",
+      "category": "SAFE_TO_KEEP with parity gate",
+      "disable_consequence": "loss of reproducibility/provenance",
+      "removal_requirement": "never delete frozen evidence"
+    },
+    {
+      "legacy": "site-prod/main dashboard_data.json and UX CSV",
+      "writer": "production updater",
+      "reader": "Grafana, static site, WIP triggers",
+      "state": "publication and derived material",
+      "neon_equivalent": "not required; Neon is canonical attack-event DB, not necessarily dashboard backing",
+      "parity": "published feed parity currently independent; only actual Neon-derived event products need check",
+      "category": "SAFE_TO_KEEP",
+      "disable_consequence": "public dashboard outage",
+      "removal_requirement": "none"
+    },
+    {
+      "legacy": "site-prod casualty revisions.csv; WIP multicity_review_queue.json",
+      "writer": "protected casualty manual operator",
+      "reader": "casualty aggregation",
+      "state": "separate canonical casualty ledger",
+      "neon_equivalent": "not scoped",
+      "parity": "not applicable",
+      "category": "NOT_MIGRATION_RELEVANT",
+      "disable_consequence": "casualty review/publication break",
+      "removal_requirement": "none for Neon migration"
+    },
+    {
+      "legacy": "GitHub Actions proof artifacts and development historical slices",
+      "writer": "isolated research/proof",
+      "reader": "audit",
+      "state": "frozen research evidence",
+      "neon_equivalent": "not intended",
+      "parity": "not applicable",
+      "category": "NOT_MIGRATION_RELEVANT",
+      "disable_consequence": "lose audit provenance",
+      "removal_requirement": "none"
+    }
+  ],
+  "gap_matrix": [
+    {
+      "component": "canonical alert-episode parents",
+      "current_authority": "Git/source side for publication; shadow Neon parents for FK",
+      "neon_state": "29050 rows in nondefault shadow; default production branch zero",
+      "writer_cutover": "NO - fail_open shadow",
+      "reader_cutover": "PARTIAL - internal parent lookup",
+      "parity_proof": "parent IDs for A5, not global stream",
+      "remaining_action": "prove full 23-city parent parity and promote fail-closed canonical ingestion on chosen branch",
+      "blocks_migration_closure": true
+    },
+    {
+      "component": "attack-event classifications",
+      "current_authority": "mixed Git upstream review decisions and Neon persisted rows",
+      "neon_state": "28131 rows; 28106 parent BOUND; one revision; 13 live",
+      "writer_cutover": "NO - live max 10",
+      "reader_cutover": "PARTIAL - internal only",
+      "parity_proof": "Unit A yes; 13 live bounded; other historical exact IDs pending",
+      "remaining_action": "prove coverage/due parity and expand normal writer beyond canary by bounded checkpoints",
+      "blocks_migration_closure": true
+    },
+    {
+      "component": "attack-event source links",
+      "current_authority": "Neon existing links but incomplete full-live coverage proof",
+      "neon_state": "5335 rows; FK and unique constraints",
+      "writer_cutover": "NO - tied to capped live writer",
+      "reader_cutover": "proof and internal only",
+      "parity_proof": "Unit A 1559 exact, older populations count only",
+      "remaining_action": "reconcile source counts/keys for required populations and full live",
+      "blocks_migration_closure": true
+    },
+    {
+      "component": "attack events",
+      "current_authority": "Neon rows only for persisted episodes; no full live serving contract",
+      "neon_state": "1090 active events; 0 invalid event-to-tip/parent links",
+      "writer_cutover": "NO - max 10 live gate",
+      "reader_cutover": "NO accepted user-facing read path; internal readback only",
+      "parity_proof": "Unit A 10 exact, global relational integrity yes",
+      "remaining_action": "define production consumers (or prove none), ensure current Neon event-tip authority, parity and controlled reader cutover if applicable",
+      "blocks_migration_closure": true
+    },
+    {
+      "component": "older 5-city historical campaign",
+      "current_authority": "frozen Git evidence + Neon projection",
+      "neon_state": "6863 classifications, 2340 links, 5 unbound parents",
+      "writer_cutover": "one-time corpus present",
+      "reader_cutover": "not proved",
+      "parity_proof": "6863 count/five-city membership only",
+      "remaining_action": "exact episode-ID and semantic/hash parity or document excluded historical records",
+      "blocks_migration_closure": true
+    },
+    {
+      "component": "historical v2 formalization cohorts",
+      "current_authority": "Git frozen references + Neon projection",
+      "neon_state": "19542 classifications, 1429 links, 20 unbound",
+      "writer_cutover": "historical projection present",
+      "reader_cutover": "not proved",
+      "parity_proof": "origin paths and row counts, not exact frozen denominators",
+      "remaining_action": "derive accepted authority and reconcile exact required identities and 20 unbound dispositions",
+      "blocks_migration_closure": true
+    },
+    {
+      "component": "Unit A A5",
+      "current_authority": "permanent shadow Neon committed scope",
+      "neon_state": "1713 cls / 1559 sources / 10 events",
+      "writer_cutover": "COMMITTED, non-recurring",
+      "reader_cutover": "bounded proof read-back",
+      "parity_proof": "PASS exact 3282 manifest",
+      "remaining_action": "preserve only; no A5 rerun",
+      "blocks_migration_closure": false
+    },
+    {
+      "component": "live monitor/review scheduling JSON",
+      "current_authority": "WIP Git",
+      "neon_state": "no demonstrated matching durable scheduler table",
+      "writer_cutover": "can remain Git if explicitly upstream",
+      "reader_cutover": "WIP monitor reads Git",
+      "parity_proof": "need authority/no-dual-tip contract",
+      "remaining_action": "decide and prove input queue vs canonical event ownership",
+      "blocks_migration_closure": true
+    },
+    {
+      "component": "public/Grafana/Netlify exports",
+      "current_authority": "Git site-prod/main",
+      "neon_state": "not a required replacement",
+      "writer_cutover": "N/A",
+      "reader_cutover": "N/A",
+      "parity_proof": "public publication independent",
+      "remaining_action": "retain Git export and validate it after any canonical upstream switch",
+      "blocks_migration_closure": false
+    },
+    {
+      "component": "casualty revisions/queues",
+      "current_authority": "Git WIP/site-prod",
+      "neon_state": "out of scope",
+      "writer_cutover": "N/A",
+      "reader_cutover": "N/A",
+      "parity_proof": "not relevant",
+      "remaining_action": "no migration",
+      "blocks_migration_closure": false
+    }
+  ],
+  "closure_criteria": [
+    {
+      "id": "C1",
+      "observable": "Pin one explicit canonical Neon project/branch/database for production, with migration boundary relative to Neon default production branch; current shadow no longer merely fail-open secondary",
+      "current_result": "FAIL"
+    },
+    {
+      "id": "C2",
+      "observable": "23-city canonical parent writer is durable and fail-closed or otherwise prevents accepted canonical attack-event work whenever parent persistence fails, with exact read-back and conflict rules",
+      "current_result": "FAIL"
+    },
+    {
+      "id": "C3",
+      "observable": "Full eligible normal scheduled live attack-event cohort is handled (no max=10 canary coverage restriction), with no missed due episodes and no unauthorized duplicate writes; bounded staged rollout demonstrated",
+      "current_result": "FAIL"
+    },
+    {
+      "id": "C4",
+      "observable": "All required historical canonical episode IDs and current decisions, classification source links and event-tip semantics agree by ID/hash or have explicitly accepted, bounded exclusions; older 6863 and historical-v2 19542 reconciled",
+      "current_result": "NOT PROVEN"
+    },
+    {
+      "id": "C5",
+      "observable": "No authoritative current attack-event verdict/event state remains solely in Git/WIP separate from Neon; WIP queue's input/review role documented and fail-closed against conflicting canonical tips",
+      "current_result": "NOT PROVEN"
+    },
+    {
+      "id": "C6",
+      "observable": "All actual production readers of canonical attack-event state use Neon or are explicitly documented as nonexistent; any event-driven derived exports match Neon-backed state",
+      "current_result": "NOT PROVEN"
+    },
+    {
+      "id": "C7",
+      "observable": "Legacy competing canonical writer authority disabled or demoted only after exact provenance+parity proof; preserve legitimate static Git publication, frozen evidence and casualty ledger",
+      "current_result": "FAIL"
+    },
+    {
+      "id": "C8",
+      "observable": "At least one eligible post-cutover scheduled production cycle proves correct parent/classification/source/event read-back, zero unhandled backlog, no contradictions, and a subsequent rerun proves idempotency",
+      "current_result": "NOT RUN"
+    },
+    {
+      "id": "C9",
+      "observable": "Version-pinned rollback/recovery and monitoring/alerting contract documents chosen Neon branch, replay boundaries, incomplete-coverage policy, Git publication continuity and emergency fail-closed behavior",
+      "current_result": "NOT PROVEN"
+    },
+    {
+      "id": "C10",
+      "observable": "New accepted closure checkpoint documented separately in PROJECT_STATE.md and CHANGELOG.md only after technical proof; no production inference from proof branches",
+      "current_result": "NOT YET"
+    }
+  ],
+  "remaining_ordered_cutover_plan": [
+    {
+      "step": 1,
+      "objective": "Freeze a repository-level Neon migration scope/authority contract, explicitly choose branch br-bold-mode-b5rub8pq or a separately justified primary-branch transfer, and designate which WIP state remains upstream Git",
+      "read_write": "READ ONLY design; proof branch artifact only",
+      "component": "Neon branch authority; alert episodes; classifications/events; WIP queue",
+      "prerequisite": "this audit and current docs",
+      "acceptance_gate": "exact named canonical branch; responsibility/consumer matrix; no unaccounted duplicate authority",
+      "rollback_boundary": "no production change",
+      "explicit_authorization_required": false
+    },
+    {
+      "step": 2,
+      "objective": "Execute immutable-ID/hash parity audit across the 6863 five-city, 19542 historical v2, 1713 A5 and eligible live cohorts, including 25 UNBOUND interpretations and historical overlap",
+      "read_write": "READ ONLY SQL, Git artifacts; no backfill",
+      "component": "all canonical historical rows/parents/source/event links",
+      "prerequisite": "step 1 cohort authority",
+      "acceptance_gate": "full accepted expected denominator per cohort, missing/extra/conflicting IDs=0 or individually accepted exclusions, current classification-tip semantics exact",
+      "rollback_boundary": "no production change",
+      "explicit_authorization_required": false
+    },
+    {
+      "step": 3,
+      "objective": "Prove parent ingestion and due-event completeness in shadow; design exact fail-closed parent gate and explicit publication continuity, retaining Git static exports",
+      "read_write": "READ ONLY rehearsals; no switch",
+      "component": "update-netlify-site parent writer and WIP parent ordering",
+      "prerequisite": "step 2 identity parity",
+      "acceptance_gate": "all scoped 23-city parent mappings and checkpoint continuity match, synthetic fault tests reject stale/missing parents without consuming eligible due work",
+      "rollback_boundary": "no production change",
+      "explicit_authorization_required": false
+    },
+    {
+      "step": 4,
+      "objective": "After separate approval, make chosen Neon parent path production-authoritative and fail-closed for canonical attack-event work; do not disable static publication",
+      "read_write": "PRODUCTION CONFIG/CODE WRITE, authorized separately",
+      "component": "update-netlify-site.yml; site-prod multicity_canonical_shadow.py or accepted successor",
+      "prerequisite": "steps 1-3 and rollback design",
+      "acceptance_gate": "bounded scheduled canary proves canonical parent read-back, fail-closed error behavior and stable Git publication",
+      "rollback_boundary": "revert only parent authority workflow to pinned pre-change refs; retain Neon append-only rows",
+      "explicit_authorization_required": true
+    },
+    {
+      "step": 5,
+      "objective": "Expand attack-event writer from ATTACK_EVENT_PERSISTENCE_CANARY_MAX_EPISODES=10 in separately bounded cohorts without re-running Unit A A5",
+      "read_write": "PRODUCTION CONFIG/CODE WRITE + controlled new Neon live writes; authorized separately",
+      "component": "explosion-monitor-wip.yml and WIP attack_event_canonical_persistence.py",
+      "prerequisite": "step 4, accepted eligibility/cutoff and no historical drift",
+      "acceptance_gate": "eligible due=processed or explicitly retryable; expected event/current-tip/source link parity; no duplicates; two staged runs and idempotent re-run",
+      "rollback_boundary": "restore pinned max/cutoff gate for unprocessed future work, never replay A5 or delete committed rows",
+      "explicit_authorization_required": true
+    },
+    {
+      "step": 6,
+      "objective": "Audit each actual canonical attack-event consumer and cut readers to Neon current tips/events when required, or prove no user-facing canonical reader exists; retain static Git-derived publishing",
+      "read_write": "READ ONLY parity then separately approved reader/code write if applicable",
+      "component": "attack-event event consumers, Grafana publication projection if attack-event-backed",
+      "prerequisite": "step 5 writer parity",
+      "acceptance_gate": "per-consumer output parity exact and no hidden legacy authoritative reader",
+      "rollback_boundary": "pin and revert reader feature flag/reference to last proven output",
+      "explicit_authorization_required": "YES for production reader switch, NO for audit"
+    },
+    {
+      "step": 7,
+      "objective": "Retire only duplicate legacy canonical authority (not Git proofs/publication/casualty) after shadow observation and durable recovery contract",
+      "read_write": "PRODUCTION WORKFLOW/CONFIG WRITE, authorized separately",
+      "component": "competing canonical writers/legacy read paths",
+      "prerequisite": "step 6, verified rollback",
+      "acceptance_gate": "zero authoritative canonical attack-event rows only in legacy, exact parity and deliberately disabled duplicate writers",
+      "rollback_boundary": "document explicit staged restoration with stale-state/conflict checks",
+      "explicit_authorization_required": true
+    },
+    {
+      "step": 8,
+      "objective": "Observe scheduled post-cutover ingestion plus repeat for idempotency, prove continuity, publish read-only closure evidence; then separately record accepted docs checkpoint",
+      "read_write": "READ ONLY observation and separate coordination-doc-only update after acceptance",
+      "component": "all relevant Neon canonical tables, normal workflows, PROJECT_STATE.md and CHANGELOG.md",
+      "prerequisite": "steps 4-7",
+      "acceptance_gate": "C1-C9 PASS, no unacknowledged drift, 0 duplicate canonical authority, normal publications still correct; only then NEON MIGRATION = COMPLETE",
+      "rollback_boundary": "if gate fails, leave migration incomplete and use preauthorized recovery plan",
+      "explicit_authorization_required": "YES for any recovery mutation; docs-only accepted transition separately"
+    }
+  ],
+  "quantitative_summary": {
+    "production_neon_writer_workflows": 2,
+    "production_neon_writer_components": [
+      "scheduled site-prod parent/differentiated shadow",
+      "scheduled WIP live event canary"
+    ],
+    "production_neon_readers": "Internal WIP canonical persistence parent/tip checks; no verified public/dashboard reader of attack-event tables",
+    "legacy_authoritative_writers": [
+      "site-prod normal updater",
+      "WIP monitor/review queue producer",
+      "main dashboard updater",
+      "casualty ledger writer (out of scope)"
+    ],
+    "legacy_authoritative_readers": [
+      "site-prod dashboard/public",
+      "WIP monitor",
+      "main Grafana",
+      "casualty aggregator (out of scope)"
+    ],
+    "canonical_populations_fully_proven": [
+      "Unit A A5:1713 cls/1559 links/10 events committed exact"
+    ],
+    "canonical_populations_count_present_but_identity_parity_pending": [
+      "older five-city 6863",
+      "other historical v2 19542"
+    ],
+    "canonical_populations_partial": [
+      "live normal scheduled stream: 13 existing live classifications, max=10 admission cap"
+    ],
+    "unresolved_closure_gates": [
+      "C1",
+      "C2",
+      "C3",
+      "C4",
+      "C5",
+      "C6",
+      "C7",
+      "C8",
+      "C9",
+      "C10"
+    ],
+    "intentionally_git_backed_nonblockers": [
+      "site-prod/static Grafana and Netlify datasets",
+      "main dashboard JSON/CSV",
+      "frozen historical research/batch/proof artifacts",
+      "WIP candidate/review scheduling as governed upstream inputs",
+      "casualty queues and revisions"
+    ],
+    "specific_unknowns": [
+      "Exact-key reconciliation 6863 five-city and 19542 formalized historical rows",
+      "Whether 25 UNBOUND classification parents are accepted by their historical persistence contract",
+      "Exact complete eligible due denominator versus max=10 selection on normal WIP scheduler",
+      "Effective production reader inventory for canonical attack-event data beyond internal Neon checks",
+      "Final primary-vs-shadow branch activation choice"
+    ]
+  },
+  "limitations": [
+    "Direct Neon SQL was SELECT-only; there was no PostgreSQL server-enforced READ ONLY transaction wrapper exposed by this connector; no write statement was issued.",
+    "Five-city Neon's 6863 rows match the accepted frozen total and five-city membership, but a full byte-exact historical episode ID / semantic hash comparison was not performed.",
+    "No new Actions proof run or temporary CI workflow was created because direct Neon read-only access was available; this artifact is repository+live-Neon inspection evidence.",
+    "The presence of source/decision data in WIP Git is not by itself a migration failure; a migration gap arises only if those files retain competing canonical final authority.",
+    "The separate default Neon production branch is empty and lacks attack-event schema; this does not imply cutover must target that branch without an explicit architecture decision.",
+    "The historical Kyiv development-only discovery corpus and casualty source adjudication are excluded and do not delay this infrastructure audit."
+  ],
+  "sources": {
+    "coordination": [
+      "https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/blob/aefd54e7b9d1cb2330827b9eac2d10d7789c4eec/PROJECT_STATE.md",
+      "https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/blob/aefd54e7b9d1cb2330827b9eac2d10d7789c4eec/CHANGELOG.md"
+    ],
+    "production_workflow": "https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/blob/aefd54e7b9d1cb2330827b9eac2d10d7789c4eec/.github/workflows/update-netlify-site.yml",
+    "production_parent_writer": "https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/blob/20166bf9f60b9dd8275a2c98f7b1fce2458c7055/kyiv-air-alerts-grafana/scripts/multicity_canonical_shadow.py",
+    "live_workflow": "https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/blob/aefd54e7b9d1cb2330827b9eac2d10d7789c4eec/.github/workflows/explosion-monitor-wip.yml",
+    "live_writer": "https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/blob/018223f4c60b4a4f915da19438e425fc1428d89c/kyiv-air-alerts-grafana/scripts/attack_event_canonical_persistence.py",
+    "live_monitor": "https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/blob/018223f4c60b4a4f915da19438e425fc1428d89c/kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py",
+    "live_activation": "https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/blob/018223f4c60b4a4f915da19438e425fc1428d89c/kyiv-air-alerts-grafana/config/live_persistence_activation.json",
+    "historical_campaign": "https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/blob/71cb6f6fbe856cc7b96759310fe9cc9c71cc0453/research/historical_attack_event_backfill_acceleration_state.json",
+    "historical_workflow": "https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/blob/71cb6f6fbe856cc7b96759310fe9cc9c71cc0453/.github/workflows/historical-attack-event-backfill.yml",
+    "unit_a": "https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/blob/fd295f2d526cf4f3af2c52377e6db8ccca0be9d5/research/attack_event_execution_unit_a_a5_authorized_execution_2026-10-10.json",
+    "casualty_workflow": "https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/blob/aefd54e7b9d1cb2330827b9eac2d10d7789c4eec/.github/workflows/casualty-monitor-wip.yml",
+    "casualty_operator": "https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/blob/aefd54e7b9d1cb2330827b9eac2d10d7789c4eec/.github/workflows/casualty-review-operator.yml",
+    "derived_workflow": "https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/blob/aefd54e7b9d1cb2330827b9eac2d10d7789c4eec/.github/workflows/refresh-production-derived.yml",
+    "main_dashboard_workflow": "https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/blob/aefd54e7b9d1cb2330827b9eac2d10d7789c4eec/.github/workflows/update.yml"
+  },
+  "safety": {
+    "DB_WRITES": 0,
+    "PRODUCTION_MUTATION": "NO",
+    "SITE_PROD_MUTATION": "NO",
+    "CUTOVER_ACTIONS": 0,
+    "LEGACY_PATHS_DISABLED": 0,
+    "UNIT_A_A5_REEXECUTIONS": 0,
+    "NEW_HISTORICAL_BACKFILLS": 0,
+    "NEW_CLASSIFIER_EXECUTIONS": 0,
+    "NEON_DDL": 0,
+    "NEON_MUTATIONS": 0,
+    "PROOF_BRANCH_ONLY_GIT_FILE_WRITES": 1,
+    "MAIN_DOC_MUTATIONS": 0
+  }
+}
