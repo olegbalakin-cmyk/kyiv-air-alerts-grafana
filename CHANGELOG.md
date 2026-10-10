@@ -4,6 +4,16 @@ Accepted project checkpoints, newest first. This is not the full Git history, a 
 
 ## 2026-10-10
 
+### Kyiv six-case publication-window audit accepted as MIXED
+- **Status:** `KYIV SIX-CASE PUBLICATION-WINDOW AUDIT = MIXED — ACCEPTED`. **Evidence:** proof branch `kyiv-publication-window-six-case-audit-proof-2026-10-10`, proof head `bf78104ef7606b28707c3aec5f57a9fa8e0c2b53`, [Actions run 38040984890](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/38040984890) **SUCCESS**, artifact ID `11666160650`; final branch `kyiv-publication-window-six-case-audit-2026-10-10`, final commit `1d9846c127f64629cb076b5d7116f6a78a1a8a93`, artifact SHA-256 `d28d614e2d0bbe418eab91b1d38edfda8efd2fd483923d18c9b100a46ecf3126`.
+- The bounded audit inspected **17 frozen records across exactly six episodes**. Independent A/B executions were byte-identical at fingerprint `6e10da008248d1026619a9c89898f544e7b20ccae23b3565643ff4eb75ba1a84`.
+- Final disposition: **4** episodes are wrong attack/chronology, **1** is a genuine late publication, and **1** is a low-precision timestamp blocker. Precision classes across 17 records: **11 SECOND_PRECISE**, **6 DATE_ONLY**.
+- The existing admission contract remains `alert_start - 6h <= publication <= alert_end + 24h`, inclusive and compared as UTC-aware instants. No material defect from timezone handling, local-date conversion, or inclusive-boundary semantics was established.
+- Only `ffdd8e7b96244ea6d8eff1ba` has admission-recovery ceiling **1**: three target-relevant BBC_Ukrainian records visibly prove only publication date `31 December 2022`. Their stored `00:00:00Z` values cannot be treated as proven exact clocks because raw BBC HTML was omitted from the frozen corpus. This is a timestamp-precision limitation, not a proven parser bug, and does **not** establish final-positive recovery.
+- Zero network evidence fetches, classifier/source mutations, historical backfill, Neon queries/writes, blind inspection, or production mutations.
+- **Next:** define only a precision-aware `BBC_UKRAINIAN` publication-date admission contract; **no implementation**.
+
+
 ### Casualty exact raw Git evidence recovery accepted; full coverage audit remains PARTIAL
 - **Accepted boundary:** `CASUALTY EXACT RAW EVIDENCE RECOVERY = PROVEN`; separately `25-EVENT CASUALTY COVERAGE AUDIT = PARTIAL`. The result closes exact Git-blob recovery and deterministic offline reproduction only, not the 25-reference-event source/physical-attack audit.
 - **Independent proof:** branch `casualty-25event-raw-evidence-recovery-proof-2026-10-10`, [commit `3ccbcfbe27d5c13f303edb5b9ee8842af5d3b971`](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/commit/3ccbcfbe27d5c13f303edb5b9ee8842af5d3b971) (exactly two new proof files: isolated script and read-only workflow), [Actions run `38037987752`](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/38037987752) **SUCCESS**, artifact `casualty-25event-raw-evidence-proof` ID `11664965528`, ZIP SHA-256 `3273ca3deb39a0069edf3e244963726d2229d0cae6977f81a437040b9b0aa55f`.
