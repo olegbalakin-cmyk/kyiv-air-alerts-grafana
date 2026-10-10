@@ -1,0 +1,83 @@
+name: Kyiv historical discovery calibration pilot
+
+on:
+  push:
+    branches: [kyiv-historical-discovery-calibration-pilot-2026-10-08]
+    paths:
+      - ".github/proof/kyiv_historical_discovery_calibration_split.py"
+      - ".github/proof/kyiv_historical_discovery_calibration_pilot.py"
+      - ".github/workflows/kyiv-historical-discovery-calibration-pilot.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: kyiv-historical-discovery-calibration-pilot-2026-10-08
+  cancel-in-progress: true
+
+jobs:
+  pilot:
+    if: ${{ false }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 330
+    env:
+      SPLIT: research/kyiv_historical_discovery_calibration_split_2026-10-08.json
+      STRATEGY: research/kyiv_historical_discovery_frozen_strategy_2026-10-08.json
+      BLIND: research/kyiv_historical_discovery_blind_pilot_2026-10-08.json
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: kyiv-historical-discovery-calibration-pilot-2026-10-08
+          fetch-depth: 0
+          clean: true
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install bounded pilot dependencies
+        run: python -m pip install --disable-pip-version-check requests beautifulsoup4
+
+      - name: Assert zero database configuration
+        shell: bash
+        run: |
+          set -euo pipefail
+          for key in DATABASE_URL NEON_DATABASE_URL NEON_URL PGHOST PGPORT PGDATABASE PGUSER PGPASSWORD; do
+            test -z "${!key-}" || { echo "Unexpected DB environment variable: $key"; exit 1; }
+          done
+
+      - name: Freeze deterministic split
+        run: |
+          python .github/proof/kyiv_historical_discovery_calibration_split.py             --out "$SPLIT" --run-id "$GITHUB_RUN_ID"
+
+      - name: Run development freeze and one-shot blind holdout
+        run: |
+          python .github/proof/kyiv_historical_discovery_calibration_pilot.py             --split "$SPLIT" --strategy "$STRATEGY" --blind "$BLIND"             --run-id "$GITHUB_RUN_ID"
+
+      - name: Upload pilot artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: kyiv-historical-discovery-calibration-${{ github.run_id }}
+          path: |
+            ${{ env.SPLIT }}
+            ${{ env.STRATEGY }}
+            ${{ env.BLIND }}
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Commit only requested research artifacts
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "$SPLIT" "$STRATEGY" "$BLIND"
+          if git diff --cached --quiet; then
+            exit 0
+          fi
+          changed="$(git diff --cached --name-only)"
+          test "$(printf '%s\n' "$changed" | wc -l)" -eq 3
+          git commit -m "Record Kyiv historical discovery blind pilot"
+          git push origin HEAD:kyiv-historical-discovery-calibration-pilot-2026-10-08
