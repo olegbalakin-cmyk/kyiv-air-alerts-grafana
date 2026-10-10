@@ -13,37 +13,125 @@ concurrency:
   group: kyiv-repaired-42-first-failure-diagnosis
   cancel-in-progress: false
 jobs:
-  pinned-code-bundle:
+  bounded-offline-diagnosis:
     runs-on: ubuntu-24.04
-    timeout-minutes: 20
+    timeout-minutes: 90
+    env:
+      PYTHONDONTWRITEBYTECODE: "1"
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
           persist-credentials: false
-      - name: Export only pinned repository code for local offline diagnostic harness construction
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install original classifier parsing dependencies
+        run: python -m pip install 'requests>=2.31,<3' 'beautifulsoup4>=4.12,<5'
+      - name: Verify frozen classifier and strict branch diff
         shell: bash
         run: |
           set -euo pipefail
           test "$(git rev-parse HEAD:kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py)" = "4019b8374dcc44846df04ed0cc41356652214bff"
-          mkdir -p /tmp/kyiv42-source
-          cp kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py /tmp/kyiv42-source/monitor_explosion_candidates.py
-          for path in \
-            .github/proof/kyiv_historical_discovery_calibration_pilot.py \
-            .github/proof/kyiv_new_immutable_development_replay.py \
-            .github/proof/kyiv_immutable_source_eligibility_expansion_pilot.py \
-            research/kyiv_immutable_development_source_set_freeze_2026-10-09.json \
-            research/kyiv_historical_discovery_development_classifier_input_2026-10-08.json; do
-            git show "b749e0195c4ec1b2262c998e381a92277a89a5e9:$path" > "/tmp/kyiv42-source/$(basename "$path")"
-          done
-          git show "906b9e18aa9e0a2056bcb798b9870ae35d8dee3d:.github/proof/kyiv_0825_actual_classifier_repair_reproof.py" > /tmp/kyiv42-source/kyiv_0825_actual_classifier_repair_reproof.py
-          git show "cb46d7b8232bc3af75c29f40592b731001aed8ea:research/kyiv_immutable_expanded_baseline_remaining_failure_diagnosis_2026-10-09.json" > /tmp/kyiv42-source/previous_43.json
-          cd /tmp/kyiv42-source
-          zip -q /tmp/kyiv42-pinned-sources.zip *
-          sha256sum /tmp/kyiv42-pinned-sources.zip
-      - uses: actions/upload-artifact@v4
+          git merge-base --is-ancestor b8e18f37509aa93cebc44fbe6664016ed618446d HEAD
+          python - <<'PY'
+          import subprocess
+          actual=set(subprocess.check_output(['git','diff','--name-only','9784473e64c3ddfe3474bacdc30a12458923ff87','HEAD'],text=True).splitlines())
+          allowed={'.github/proof/kyiv_repaired_42_first_failure_diagnosis.py','.github/workflows/kyiv-repaired-42-first-failure-diagnosis.yml'}
+          assert actual==allowed, 'PROOF_BRANCH_UNAUTHORIZED_DIFF:'+repr(actual)
+          PY
+      - name: Download only retained immutable GitHub Actions artifacts
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p proof-input
+          python - <<'PY'
+          import io,os,requests,zipfile
+          from pathlib import Path
+          repository='olegbalakin-cmyk/kyiv-air-alerts-grafana'
+          acquisitions=((11608819645,'acquisition'),(11609004684,'replay'))
+          session=requests.Session()
+          session.headers.update({'Authorization':'Bearer '+os.environ['GH_TOKEN'],
+                                  'Accept':'application/vnd.github+json',
+                                  'X-GitHub-Api-Version':'2022-11-28'})
+          for artifact_id,name in acquisitions:
+              resp=session.get(f'https://api.github.com/repos/{repository}/actions/artifacts/{artifact_id}/zip',timeout=120)
+              resp.raise_for_status()
+              destination=Path('proof-input')/name
+              destination.mkdir(parents=True,exist_ok=True)
+              with zipfile.ZipFile(io.BytesIO(resp.content)) as archive:
+                  for member in archive.infolist():
+                      assert (destination/member.filename).resolve().is_relative_to(destination.resolve()),'UNSAFE_ZIP_ENTRY'
+                  archive.extractall(destination)
+              print('IMMUTABLE_INPUT_ARTIFACT',artifact_id,name,flush=True)
+          PY
+          test -f proof-input/replay/runner-replay-1.json
+      - name: PRECHECK frozen corpus classifier and exact 42 universe
+        run: |
+          python -u .github/proof/kyiv_repaired_42_first_failure_diagnosis.py \
+            --mode precheck --acquisition proof-input/acquisition \
+            --prior proof-input/replay/runner-replay-1.json \
+            --out proof-input/precheck.json
+      - name: DIAGNOSIS A independent Python process
+        run: |
+          python -u .github/proof/kyiv_repaired_42_first_failure_diagnosis.py \
+            --mode diagnose --acquisition proof-input/acquisition \
+            --prior proof-input/replay/runner-replay-1.json \
+            --out proof-input/diagnosis_run_a.json
+      - name: DIAGNOSIS B independent Python process
+        run: |
+          python -u .github/proof/kyiv_repaired_42_first_failure_diagnosis.py \
+            --mode diagnose --acquisition proof-input/acquisition \
+            --prior proof-input/replay/runner-replay-1.json \
+            --out proof-input/diagnosis_run_b.json
+      - name: DETERMINISM comparison and complete 42-case transition analysis
+        run: |
+          python -u .github/proof/kyiv_repaired_42_first_failure_diagnosis.py \
+            --mode compare --run-a proof-input/diagnosis_run_a.json \
+            --run-b proof-input/diagnosis_run_b.json \
+            --out proof-input/kyiv_repaired_remaining_failure_rediagnosis_2026-10-10.json
+      - name: ACCEPTANCE full 42 case categories holds safety and no mutation
+        run: |
+          python -u .github/proof/kyiv_repaired_42_first_failure_diagnosis.py \
+            --mode accept \
+            --final proof-input/kyiv_repaired_remaining_failure_rediagnosis_2026-10-10.json
+          python - <<'PY'
+          import json,pathlib
+          folder=pathlib.Path('proof-input')
+          result=json.loads((folder/'kyiv_repaired_remaining_failure_rediagnosis_2026-10-10.json').read_text())
+          for name,field in [('category_summary.json','primary_category_counts'),
+                             ('repairability_summary.json','repairability_counts'),
+                             ('transition_table.json','predecessor_transition_table'),
+                             ('repair_ceilings.json','repair_ceilings'),
+                             ('priority_ranking.json','priority_ranking')]:
+              (folder/name).write_text(json.dumps(result[field],ensure_ascii=False,sort_keys=True,indent=2)+'\n')
+          (folder/'canonical_comparison.json').write_text(json.dumps({
+            'fingerprint_a':result['fingerprint_a'],
+            'fingerprint_b':result['fingerprint_b'],
+            'deterministic_equality':result['deterministic_equality'],
+            'complete_case_count':len(result['full_42_case_traces'])
+          },sort_keys=True,indent=2)+'\n')
+          PY
+      - name: Verify classifier remains identical
+        run: |
+          test "$(git rev-parse HEAD:kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py)" = "4019b8374dcc44846df04ed0cc41356652214bff"
+      - name: Upload complete read-only proof materials
+        if: always()
+        uses: actions/upload-artifact@v4
         with:
-          name: kyiv42-pinned-code-inputs
-          path: /tmp/kyiv42-pinned-sources.zip
-          retention-days: 3
-          if-no-files-found: error
+          name: kyiv-repaired-42-first-failure-diagnostic-proof
+          path: |
+            proof-input/precheck.json
+            proof-input/diagnosis_run_a.json
+            proof-input/diagnosis_run_b.json
+            proof-input/canonical_comparison.json
+            proof-input/category_summary.json
+            proof-input/repairability_summary.json
+            proof-input/transition_table.json
+            proof-input/repair_ceilings.json
+            proof-input/priority_ranking.json
+            proof-input/kyiv_repaired_remaining_failure_rediagnosis_2026-10-10.json
+          retention-days: 30
+          if-no-files-found: warn
