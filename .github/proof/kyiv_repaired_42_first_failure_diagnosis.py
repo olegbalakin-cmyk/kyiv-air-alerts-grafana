@@ -504,6 +504,64 @@ def rank_episode_candidates(candidates):
     return ranked
 
 
+def episode_ranking_diagnostic(eid,candidates,ranked):
+    """Record actual competing classifier traces; never affect candidate ranking."""
+    raw=sorted(candidates,key=lambda c:(-c["earliest_failing_stage_number"],
+                                         -int(c["attack_event_predicate"]),
+                                         -int(c["exact_city_predicate"]),
+                                         c["candidate_id"]))
+    verified=[c for c in candidates if c.get("candidate_semantics") is not None]
+    require(len(verified)==1,"FORENSIC_RANKING_DIAGNOSTIC_IDENTITY_COUNT:"+eid)
+    semantic=verified[0]
+    winner=ranked[0]
+    def key(c):
+        return [-c["earliest_failing_stage_number"],
+                -int(c["attack_event_predicate"]),
+                -int(c["exact_city_predicate"]),c["candidate_id"]]
+    def brief(c):
+        return {"candidate_id":c["candidate_id"],
+                "primary_category":c["primary_failure_if_best_candidate"],
+                "earliest_failing_stage_number":c["earliest_failing_stage_number"],
+                "ranking_key":key(c),
+                "candidate_semantics":c["candidate_semantics"],
+                "repairability_class":REPAIR_BY_CATEGORY[c["primary_failure_if_best_candidate"]]}
+    return {
+        "episode_id":eid,
+        "candidate_count":len(candidates),
+        "all_candidate_traces":[{**c,"full_original_ranking_key":key(c),
+                                  "repairability_class":REPAIR_BY_CATEGORY[c["primary_failure_if_best_candidate"]]}
+                                for c in sorted(candidates,key=lambda c:c["candidate_id"])],
+        "ranked_before_semantic_override":[brief(c) for c in raw],
+        "ranked_after_current_semantic_override":[brief(c) for c in ranked],
+        "verified_forensic_candidate_id":semantic["candidate_id"],
+        "forensic_original_rank":raw.index(semantic)+1,
+        "forensic_rank_after_current_override":ranked.index(semantic)+1,
+        "actual_primary_candidate_id":winner["candidate_id"],
+        "winning_candidate_category":winner["primary_failure_if_best_candidate"],
+        "winning_candidate_stage":winner["earliest_failing_stage_number"],
+        "semantic_override_changed_top":raw[0] is not winner,
+        "ranking_field_differences":{
+            "winner_key":key(winner),
+            "forensic_key":key(semantic),
+            "stage_delta_winner_minus_forensic":winner["earliest_failing_stage_number"]-semantic["earliest_failing_stage_number"],
+            "attack_event_predicate_winner_and_forensic":[winner["attack_event_predicate"],semantic["attack_event_predicate"]],
+            "exact_city_predicate_winner_and_forensic":[winner["exact_city_predicate"],semantic["exact_city_predicate"]],
+            "candidate_id_tiebreak":[winner["candidate_id"],semantic["candidate_id"]],
+        },
+        "winning_target_temporal_binding":{
+            "temporal_present":winner["temporal_binding"].get("present"),
+            "temporal_episode_id":winner["temporal_binding"].get("episode_id"),
+            "classifier_episode_id":winner["classifier_episode_id"],
+            "matches_target":bool(winner["temporal_binding"].get("present") and
+                                   winner["temporal_binding"].get("episode_id")==eid and
+                                   winner["classifier_episode_id"] in (None,eid)),
+            "air_context_predicate":winner["air_context_predicate"],
+            "same_attack_predicate":winner["same_attack_predicate"],
+        },
+        "diagnostic_explanation":"Raw candidate progression is ranked by stage DESC, attack-event DESC, exact-city DESC, candidate_id ASC; semantic override only affects competing generic temporal categories. This record does not adjudicate episode causal primacy.",
+    }
+
+
 def assert_aggregation_regression_controls():
     def sample(cid,cat,stage,role=None):
         return {"candidate_id":cid,"primary_failure_if_best_candidate":cat,
@@ -595,6 +653,7 @@ def diagnose(acquisition,prior,out):
         nmap={r["requested_native_url"]:r for r in offline.native["records"]}
         allowed=set(manifest["included_source_families"])
         items=[]
+        ranking_diagnostics={}
         for row in rows:
             eid=row["episode_id"]
             if eid not in failed:continue
@@ -620,6 +679,22 @@ def diagnose(acquisition,prior,out):
                 # Generic progression ranking retains precedence except that verified
                 # accepted semantic evidence refines a competing generic temporal inference.
                 candidates=rank_episode_candidates(candidates)
+                if eid in accepted:
+                    ranking_diagnostics[eid]=episode_ranking_diagnostic(eid,candidates,candidates)
+                    # The ranking is a read-only observation. Persist before acceptance
+                    # assertions so even a failed diagnosis keeps its exact competitors.
+                    write_json(Path(out).with_name("forensic_episode_ranking_diagnostics.json"),
+                               ranking_diagnostics)
+                    probe=ranking_diagnostics[eid]
+                    print("FORENSIC_EPISODE_RANKING_OBSERVED="+json.dumps({
+                        "episode_id":eid,
+                        "candidate_count":probe["candidate_count"],
+                        "forensic_original_rank":probe["forensic_original_rank"],
+                        "winner":probe["actual_primary_candidate_id"],
+                        "winning_category":probe["winning_candidate_category"],
+                        "winning_stage":probe["winning_candidate_stage"],
+                        "comparison":probe["ranking_field_differences"]
+                    },ensure_ascii=False,sort_keys=True),flush=True)
                 best=candidates[0]
                 primary=best["primary_failure_if_best_candidate"]
                 reason=best["mechanical_failure_explanation"]
