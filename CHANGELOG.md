@@ -2,6 +2,13 @@
 
 Accepted project checkpoints, newest first. This is not the full Git history, a branch inventory, or a retry log. **PROVEN** describes bounded evidence; **FROZEN** additionally requires a durable exact manifest. Development checkpoints below do not change production unless explicitly stated.
 
+## 2026-10-10
+
+### Kyiv repaired development classifier identity frozen; 42-case re-diagnosis still incomplete
+- **Stage A accepted:** `KYIV REPAIRED DEVELOPMENT CLASSIFIER IDENTITY = FROZEN`. Freeze commit [`9784473e`](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/commit/9784473e64c3ddfe3474bacdc30a12458923ff87) is exactly one JSON-only commit ahead of semantic repair `c5dd5fec6fe8f9a3fa0bbdefdd2cf71cee2ff801`; artifact `research/kyiv_repaired_development_classifier_freeze_2026-10-09.json`, Git blob `52f7179fe3dd58d82ba1f479824c6076deab25d3`.
+- The freeze records the already-proven repaired classifier blob `4019b8374dcc44846df04ed0cc41356652214bff`, unchanged 15-family corpus, repair run `37974699629`, **6/48** final positives, **19/19** holds unchanged, and zero new uncleared hold promotions. No classifier code changed in the freeze.
+- **Stage B not accepted:** repaired replay A/B identify exactly **42** known-positive non-final episodes and exclude `cfd8acaf2ae96fb3ab6508d6`; sorted compact-JSON-with-LF 42-ID SHA-256 `fcf85d81ccfa59501fe3a3a51f1c11cab48f5ff36a79b20454309db23b2913ab`. No complete deterministic per-case first-failure taxonomy, category counts, repair ceilings, priority ranking or re-diagnosis artifact exists yet.
+- **Next:** replay only those 42 frozen episodes under the frozen repaired classifier and produce deterministic per-case first-failure diagnosis. No repair or source change.
 ## 2026-10-09
 
 ### Real production casualty INSPECT canary accepted; full operator activation remains PARTIAL
