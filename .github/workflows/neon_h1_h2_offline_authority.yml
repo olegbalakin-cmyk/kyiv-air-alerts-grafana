@@ -1,0 +1,92 @@
+name: Disposable H1 H2 offline row authority check
+on:
+  push:
+    branches: [neon-h1-h2-large-export-authority-transport-2026-10-11]
+    paths: [.github/workflows/neon_h1_h2_offline_authority.yml]
+permissions:
+  contents: read
+jobs:
+  row-authority:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - name: Check frozen row projections and provenance
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import collections,hashlib,json,subprocess
+          objects={
+            "H1":("02ad2e8fadee78442753567bc2d3a540345d8e8a","a2e34c4a114ad335d35068d6c6a3a4606b09db7f"),
+            "H2":("03a04d33f7616b77181741fd77a776c490391d07","a240f1950748afcb9fc974c49ac58da07adfff65"),
+            "COMBINED":("efefa399e69eadd3d7fc8393ac1553cfde35f138","8a2f6bd33f879be9db978da59c12c34e61f6f843")}
+          for commit,_ in objects.values():subprocess.check_call(["git","fetch","--depth=1","origin",commit],stdout=subprocess.DEVNULL)
+          def raw(blob):return subprocess.check_output(["git","cat-file","blob",blob])
+          def sha(b):return hashlib.sha256(b).hexdigest()
+          def canon(o):return json.dumps(o,ensure_ascii=False,sort_keys=True,separators=(",",":")).encode()
+          data={k:json.loads(raw(blob)) for k,(_,blob) in objects.items()}
+          reports={}
+          for label,d in data.items():
+            cl=d["classifications"];sl=d["source_links"];ev=d["attack_events"]
+            ids=[(r["city_key"],r["historical_episode_id"]) for r in cl]
+            dist=dict(sorted(collections.Counter(r["verdict"] for r in cl).items()))
+            city={k:len([i for i in ids if i[0]==k]) for k in sorted({i[0] for i in ids})}
+            projection=[{k:r.get(k) for k in ["city_key","historical_episode_id","verdict","classification_key","qa_reasons","event_types","evidence_set_sha256","classifier_blob_sha"]} for r in cl]
+            p={
+              "rows":len(cl),"unique_episode_identities":len(set(ids)),"city_counts":city,
+              "distribution":dist,"sources":len(sl),"events":len(ev),
+              "unique_classification_keys":len({r.get("classification_key") for r in cl}),
+              "unique_source_keys":len({r.get("source_link_key") for r in sl}),
+              "unique_event_keys":len({r.get("attack_event_key") for r in ev}),
+              "identity_projection_sha256":sha(canon(sorted(ids))),
+              "classification_projection_sha256":sha(canon(sorted(projection,key=lambda x:(x["city_key"],x["historical_episode_id"])))),
+              "source_projection_sha256":sha(canon(sorted(sl,key=lambda x:x["source_link_key"]))),
+              "event_projection_sha256":sha(canon(sorted(ev,key=lambda x:x["attack_event_key"]))),
+              "origin_provenance_first":cl[0].get("origin_provenance",{}),
+              "binding_metadata_nonempty":sum(bool(r.get("binding_metadata")) for r in cl),
+              "unbound_eligible_parent_context":sum(bool(r.get("canonical_parent_candidates") or r.get("parent_eligibility")) for r in cl),
+              "nonempty_native_replay":sum(bool(r.get("native_replay_classification_objects")) for r in cl),
+              "nonempty_episode_composition":sum(bool(r.get("episode_composition_objects")) for r in cl)
+            }
+            reports[label]=p
+          h1=data["H1"];h2=data["H2"];merged=data["COMBINED"]
+          # Accepted H1 hash is frozen city/episode order, cannot validate
+          # by sorted order alone. Compare export's own target hash and repair proof.
+          h1repair=json.loads(raw("26db43c2bd7fbd9e16a53e8ccefea080636bbb73"))
+          reports["H1"]["target_hash_claim"]=h1.get("target_state_sha256")
+          reports["H1"]["accepted_repaired_target_hash"]=h1repair["hashes"]["repaired_target_state_sha256"]
+          reports["H1"]["repair_overlay_count"]=sum(r.get("repair_overlay") is not None for r in h1["classifications"])
+          reports["H1"]["repair_target_count"]=len(h1repair["targets"]["changed_targets"])
+          reports["H1"]["repaired_hash_claim_matches"]=h1.get("target_state_sha256")==h1repair["hashes"]["repaired_target_state_sha256"]
+          acceptance=json.loads(raw("754da5b8c330188889f3f8fb22e671cbc6118cac"))
+          expected={r["city_key"]:r for r in acceptance["city_matrix"]}
+          city_results={}
+          for city,e in expected.items():
+            rows=sorted([r for r in h2["classifications"] if r["city_key"]==city],key=lambda x:x["historical_episode_id"])
+            pairs=[(r["historical_episode_id"],r["verdict"]) for r in rows]
+            tsv=sha("".join(a+"\t"+b+"\n" for a,b in pairs).encode())
+            canonical=sha(canon({"city_key":city,"methodology":h2.get("classifier_methodology_version"),"targets":[{"episode_id":a,"state":b} for a,b in pairs]}))
+            city_results[city]={
+               "row_count":len(rows),"accepted_count":e["canonical_episodes"],
+               "accepted_tsv_hash":e["target_state_sha256"],"recomputed_tsv_hash":tsv,"tsv_match":tsv==e["target_state_sha256"],
+               "recomputed_canonical_json_hash":canonical,
+               "export_embedded_hash":h2["target_hashes"].get(city),
+               "embedded_hash_match":tsv==h2["target_hashes"].get(city)}
+          reports["H2"]["city_target_hashes"]=city_results
+          reports["H2"]["accepted_city_tsv_matches"]=sum(x["tsv_match"] for x in city_results.values())
+          reports["H2"]["embedded_city_tsv_matches"]=sum(x["embedded_hash_match"] for x in city_results.values())
+          reports["H2"]["accepted_city_row_count_matches"]=sum(x["row_count"]==x["accepted_count"] for x in city_results.values())
+          # Cross-check combined snapshot by exact canonical row serialization, allowing ordering differences.
+          def items_equal(key,sortkey):
+            a=sorted(h1[key]+h2[key],key=lambda x:canon(x))
+            b=sorted(merged[key],key=lambda x:canon(x))
+            return len(a)==len(b),sha(canon(a))==sha(canon(b)),len(a),len(b)
+          reports["COMBINED"]["components_comparison"]={k:items_equal(k,None) for k in ["classifications","source_links","attack_events"]}
+          reports["COMBINED"]["source_provenance"]=merged.get("snapshot_provenance",{})
+          report={"inspected_head":subprocess.check_output(["git","rev-parse","HEAD"],text=True).strip(),"rows":reports}
+          digest=sha(canon(report))
+          print("FROZEN_AUTHORITY_ROW_CHECK_JSON="+json.dumps({"report_sha256":digest,"report":report},sort_keys=True,separators=(",",":"),ensure_ascii=False))
+          PY
