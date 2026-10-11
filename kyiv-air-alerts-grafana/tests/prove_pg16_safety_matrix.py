@@ -198,8 +198,8 @@ def t2():
     base = persist(p.build_episode_classification(e, [], origin=p._origin_context()))
     tip = base["classification_uid"]
     _, r1 = classified_positive(e, "race-1")
-    _, r2 = classified_positive(e, "race-2")
-    assert r1["classification_key"] != r2["classification_key"]
+    r2 = copy.deepcopy(r1)  # same frozen input; scheduler winner cannot change A/B semantics
+    assert r1["classification_key"] == r2["classification_key"]
     key = f"{e['city_key']}|{e['episode_id']}|{r1['alert_start_utc_microseconds']}|{r1['alert_end_utc_microseconds']}"
     start = threading.Barrier(3)
     def writer(rec):
@@ -367,7 +367,7 @@ def t4():
     assert counts() == {"parents": 2, "classifications": 2, "sources": 1, "events": 1}
     return {"identity_conflict": conflict, "content_conflict": content_conflict,
             "actual_fk_constraint": fk_constraint, "atomic_rollback": True,
-            "source_hash_restored": True, "input_sha256": p.canonical_sha256(source)}
+            "source_hash_restored": True, "input_sha256": p.canonical_sha256([source["source_link_key"], source["observation_id"], source["content_sha256"]])}
 
 def t5():
     e = episode(0)
