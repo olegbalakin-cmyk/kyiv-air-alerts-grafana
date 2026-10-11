@@ -1,0 +1,92 @@
+name: Disposable PG16 canonical queue SAFETY matrix
+on:
+  push:
+    branches: [kyiv-live-canonical-queue-pg16-safety-matrix-2026-10-11]
+    paths:
+      - ".github/workflows/kyiv-canonical-pg16-safety-matrix.yml"
+      - "kyiv-air-alerts-grafana/tests/prove_pg16_safety_matrix.py"
+      - "kyiv-air-alerts-grafana/tests/fixtures/pg16_verified_canonical_schema.sql"
+      - "kyiv-air-alerts-grafana/scripts/attack_event_canonical_persistence.py"
+      - "kyiv-air-alerts-grafana/scripts/live_canonical_queue.py"
+      - "kyiv-air-alerts-grafana/scripts/live_parent_ordering.py"
+permissions:
+  contents: read
+jobs:
+  safety:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        replay: [A, B]
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: offline
+          POSTGRES_PASSWORD: offline
+          POSTGRES_DB: offline_acceptance
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U offline -d offline_acceptance"
+          --health-interval 5s --health-timeout 5s --health-retries 12
+    env:
+      LOCAL_PROOF_POSTGRES_DSN: "postgresql://offline:offline@localhost:5432/offline_acceptance"
+      ATTACK_EVENT_DATABASE_URL: ""
+      DATABASE_URL: ""
+      NEON_DATABASE_URL: ""
+      UKRAINEALARM_API_TOKEN: ""
+      GITHUB_TOKEN: ""
+      ATTACK_EVENT_PERSISTENCE_CANARY_MAX_EPISODES: "10"
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install offline dependencies
+        run: |
+          pip install psycopg[binary] requests beautifulsoup4
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq postgresql-client
+      - name: Initialize independent PG16 database with real constraints
+        run: |
+          PGPASSWORD=offline psql -v ON_ERROR_STOP=1 -h localhost -U offline -d offline_acceptance -f kyiv-air-alerts-grafana/tests/fixtures/pg16_verified_canonical_schema.sql
+      - name: Syntax-check full safety matrix
+        run: python -m py_compile kyiv-air-alerts-grafana/tests/prove_pg16_safety_matrix.py
+      - name: Execute T1-T8 against real PostgreSQL transactions
+        run: |
+          python kyiv-air-alerts-grafana/tests/prove_pg16_safety_matrix.py > /tmp/pg16-safety-${{ matrix.replay }}.json
+          python -m json.tool /tmp/pg16-safety-${{ matrix.replay }}.json > /dev/null
+          python -c 'import json,sys; d=json.load(open(sys.argv[1])); print("CASES:",[(k,v["status"]) for k,v in d["cases"].items()]); print("FINGERPRINT:",d["fingerprint"])' /tmp/pg16-safety-${{ matrix.replay }}.json
+      - name: Preserve full success/failure proof
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: kyiv-pg16-safety-${{ matrix.replay }}
+          path: /tmp/pg16-safety-${{ matrix.replay }}.json
+          if-no-files-found: warn
+          retention-days: 30
+  ab-compare:
+    if: always()
+    needs: safety
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: kyiv-pg16-safety-A
+          path: /tmp/a
+      - uses: actions/download-artifact@v4
+        with:
+          name: kyiv-pg16-safety-B
+          path: /tmp/b
+      - name: Verify byte-exact normalized independent PG16 A/B proof
+        run: |
+          set -euo pipefail
+          cmp /tmp/a/pg16-safety-A.json /tmp/b/pg16-safety-B.json
+          python -c 'import json; p="/tmp/a/pg16-safety-A.json"; d=json.load(open(p)); assert not d["failures"],d["failures"]; assert len(d["cases"])==8; print("PG16_SAFETY_AB",d["fingerprint"])'
+          sha256sum /tmp/a/pg16-safety-A.json /tmp/b/pg16-safety-B.json
