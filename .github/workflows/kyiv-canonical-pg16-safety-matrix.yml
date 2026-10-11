@@ -60,6 +60,9 @@ jobs:
         run: |
           python kyiv-air-alerts-grafana/tests/prove_pg16_safety_matrix.py > /tmp/pg16-safety-${{ matrix.replay }}.json || { cat /tmp/pg16-safety-${{ matrix.replay }}.json; exit 1; }
           python -m json.tool /tmp/pg16-safety-${{ matrix.replay }}.json > /dev/null
+          echo 'FULL_PG16_PROOF_BEGIN'
+          cat /tmp/pg16-safety-${{ matrix.replay }}.json
+          echo 'FULL_PG16_PROOF_END'
           python -c 'import json,sys; d=json.load(open(sys.argv[1])); print("CASES:",[(k,v["status"]) for k,v in d["cases"].items()]); print("FINGERPRINT:",d["fingerprint"])' /tmp/pg16-safety-${{ matrix.replay }}.json
       - name: Preserve full success/failure proof
         if: always()
