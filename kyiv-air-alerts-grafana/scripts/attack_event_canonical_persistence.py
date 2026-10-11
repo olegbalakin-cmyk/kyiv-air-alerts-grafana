@@ -11,6 +11,7 @@ from typing import Any
 from urllib.parse import urlparse
 
 import psycopg
+from psycopg.pq import TransactionStatus
 from psycopg.types.json import Jsonb
 
 CLASSIFICATION_KEY_VERSION = "attack-event-classification-key-v2"
@@ -990,6 +991,8 @@ def persist_episode_classification(
         f"{record['city_key']}|{record['historical_episode_id']}|"
         f"{record['alert_start_utc_microseconds']}|{record['alert_end_utc_microseconds']}"
     )
+    if conn.info.transaction_status != TransactionStatus.IDLE:
+        raise PersistenceContractError("CLASSIFICATION_REQUIRES_IDLE_TOP_LEVEL_TRANSACTION")
     with conn.transaction():
         cur = conn.cursor()
         cur.execute("SELECT pg_advisory_xact_lock(hashtextextended(%s, 0))", (lock_key,))
@@ -1154,10 +1157,14 @@ def persist_canonical_work(
                 persisted = persist_episode_classification(
                     conn, record, expected_tip=selected["expected_current_tip"],
                 )
-                # Read-back may fail after COMMIT: retry will reconcile the tip.
-                verified = independent_post_commit_readback(
-                    conn, record, persisted, selected["expected_current_tip"]
-                )
+                # The transaction() block MUST have committed, not released a savepoint.
+                if conn.info.transaction_status != TransactionStatus.IDLE:
+                    raise PersistenceContractError("CLASSIFICATION_NOT_COMMITTED_BEFORE_READBACK")
+                # A fresh independent session cannot see this connection's uncommitted state.
+                with psycopg.connect(conn.info.dsn, autocommit=True) as verifier:
+                    verified = independent_post_commit_readback(
+                        verifier, record, persisted, selected["expected_current_tip"]
+                    )
                 committed_readback(state, key, record["classification_key"], verified["classification_key"])
                 result["committed"] += 1
                 result["readback_verified"] += 1
