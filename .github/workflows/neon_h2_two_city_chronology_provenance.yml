@@ -1,0 +1,64 @@
+name: Frozen H2 two-city original chronology proof
+on:
+  push:
+    branches:
+      - neon-h2-two-city-chronology-provenance-proof-2026-10-11
+    paths:
+      - .github/workflows/neon_h2_two_city_chronology_provenance.yml
+permissions:
+  contents: write
+jobs:
+  frozen-offline-proof:
+    runs-on: ubuntu-latest
+    timeout-minutes: 75
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: true
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Verify exact HEAD and frozen inputs
+        run: |
+          set -euo pipefail
+          test "$(git diff --name-only 182f783526a1d9db9d298bb4b18e291639998fc5...HEAD | sort)" = "$(printf '%s\n' '.github/proof/neon_h2_two_city_chronology_provenance.py' '.github/workflows/neon_h2_two_city_chronology_provenance.yml' | sort)"
+          git fetch --no-tags origin 182f783526a1d9db9d298bb4b18e291639998fc5
+      - name: Separate offline A/B verification
+        env:
+          PYTHONDONTWRITEBYTECODE: "1"
+          GIT_TERMINAL_PROMPT: "0"
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/h2proof"
+          PYTHONHASHSEED=61 PROOF_OUT="$RUNNER_TEMP/h2proof/run-a.json" python .github/proof/neon_h2_two_city_chronology_provenance.py
+          PYTHONHASHSEED=97 PROOF_OUT="$RUNNER_TEMP/h2proof/run-b.json" python .github/proof/neon_h2_two_city_chronology_provenance.py
+          cmp "$RUNNER_TEMP/h2proof/run-a.json" "$RUNNER_TEMP/h2proof/run-b.json"
+          python - <<'PY'
+          import json,hashlib,os,pathlib
+          p=pathlib.Path(os.environ['RUNNER_TEMP'])/'h2proof'/'run-a.json'
+          obj=json.loads(p.read_bytes())
+          print("FROZEN_RECONSTRUCTION_SUMMARY="+json.dumps({"two_cities":{k:{"verdict":v["verdict"],"sha":v["recomputed_original_hash"],"count":v["canonical_episodes"]} for k,v in obj.get("chronology",{}).items()},"independence":obj.get("H2_EXPORT_NEON_INDEPENDENCE"),"verdict":obj["H2_TWO_CITY_CHRONOLOGY_AND_EXPORT_PROVENANCE"],"blocker":obj.get("blocker")},sort_keys=True))
+          if obj["H2_TWO_CITY_CHRONOLOGY_AND_EXPORT_PROVENANCE"]=="BLOCKED":raise SystemExit("FROZEN_RECONSTRUCTION_BLOCKED")
+          PY
+      - name: Freeze exact compact one-file result and remove disposable verifier
+        run: |
+          set -euo pipefail
+          BASE=182f783526a1d9db9d298bb4b18e291639998fc5
+          PROOF=research/neon_h2_two_city_chronology_export_provenance_2026-10-11.json
+          mkdir -p research
+          cp "$RUNNER_TEMP/h2proof/run-a.json" "$PROOF"
+          rm .github/proof/neon_h2_two_city_chronology_provenance.py
+          rm .github/workflows/neon_h2_two_city_chronology_provenance.yml
+          git add -A
+          test "$(git diff --cached --name-only "$BASE")" = "$PROOF"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "research: freeze H2 two-city chronology and exporter provenance"
+          FINAL=$(git rev-parse HEAD)
+          test "$(git diff --name-only "$BASE..$FINAL")" = "$PROOF"
+          git push --force-with-lease=refs/heads/neon-h2-two-city-chronology-provenance-proof-2026-10-11:$GITHUB_SHA origin HEAD:refs/heads/neon-h2-two-city-chronology-provenance-proof-2026-10-11
+          echo "FROZEN_PROOF_COMMIT=$FINAL"
+          echo "FROZEN_PROOF_BLOB=$(git rev-parse "$FINAL:$PROOF")"
+          sha256sum "$PROOF"
+          wc -c "$PROOF"
