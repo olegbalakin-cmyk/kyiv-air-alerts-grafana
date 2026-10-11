@@ -1,0 +1,562 @@
+{
+  "authoritative_classifier_blob": "778469b74c2aa807d851cf2c2ee35cf4aa785589",
+  "canary_max": 10,
+  "cases": {
+    "T1": {
+      "assertions": {
+        "commit_before_ack": true,
+        "input_sha256": "30a3c6b0b168bf086ed5ddee0f465bba9ca985a056847fdbd4f8717739a1c52a",
+        "max_batch": 10,
+        "no_duplicate_revision": true,
+        "restarted_from_stale_serialized_journal": true,
+        "retry_state_serialized": true,
+        "unrelated_episode_committed": true
+      },
+      "post": {
+        "classifications": [
+          [
+            "kyiv",
+            "486ea0046f7c57bcf6e75c32",
+            "31665651363c53a4701080ca2c82edcac4049d8ce446f7a9e0fd4be8e03ba83c",
+            "NO_CONFIRMED_EVENT",
+            "False",
+            "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+            null,
+            "kyiv",
+            "486ea0046f7c57bcf6e75c32",
+            "2026-10-09 01:00:00+00:00",
+            "2026-10-09 01:30:00+00:00"
+          ],
+          [
+            "kyiv",
+            "74e703809cc19acd4bf0b8fc",
+            "2546470f6ac3baae390f4c3df3fd2d526514dc9b553a7bc3358b88fde0de2a0d",
+            "NO_CONFIRMED_EVENT",
+            "False",
+            "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+            null,
+            "kyiv",
+            "74e703809cc19acd4bf0b8fc",
+            "2026-10-09 03:00:00+00:00",
+            "2026-10-09 03:30:00+00:00"
+          ]
+        ],
+        "events": [],
+        "parents": [
+          [
+            "kyiv",
+            "486ea0046f7c57bcf6e75c32",
+            "2026-10-09 01:00:00+00:00",
+            "2026-10-09 01:30:00+00:00"
+          ],
+          [
+            "kyiv",
+            "74e703809cc19acd4bf0b8fc",
+            "2026-10-09 03:00:00+00:00",
+            "2026-10-09 03:30:00+00:00"
+          ]
+        ],
+        "sources": []
+      },
+      "pre": {
+        "classifications": [],
+        "events": [],
+        "parents": [],
+        "sources": []
+      },
+      "status": "PASS"
+    },
+    "T2": {
+      "assertions": {
+        "input_sha256": "2883cf0d3c833580ef7c8a749835e76b0724adcbb82d848492bdd8698223292d",
+        "one_committed": true,
+        "one_current_tip": true,
+        "one_stale_failed_closed": true,
+        "unrelated_completed_while_same_episode_locked": true,
+        "waiting_writers": 2
+      },
+      "post": {
+        "classifications": [
+          [
+            "kyiv",
+            "486ea0046f7c57bcf6e75c32",
+            "31665651363c53a4701080ca2c82edcac4049d8ce446f7a9e0fd4be8e03ba83c",
+            "NO_CONFIRMED_EVENT",
+            "False",
+            "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+            null,
+            "kyiv",
+            "486ea0046f7c57bcf6e75c32",
+            "2026-10-09 01:00:00+00:00",
+            "2026-10-09 01:30:00+00:00"
+          ],
+          [
+            "kyiv",
+            "486ea0046f7c57bcf6e75c32",
+            "d0a74ae270a1ed438cdc8e814311288b0f10151d77f72f97713437a718afc9f1",
+            "STRICT_EVENT_POSITIVE",
+            "True",
+            "456e18da3fb79e79bb7f66797483d020a85c90dd4481a904d98481800bd671fa",
+            "31665651363c53a4701080ca2c82edcac4049d8ce446f7a9e0fd4be8e03ba83c",
+            "kyiv",
+            "486ea0046f7c57bcf6e75c32",
+            "2026-10-09 01:00:00+00:00",
+            "2026-10-09 01:30:00+00:00"
+          ],
+          [
+            "kyiv",
+            "74e703809cc19acd4bf0b8fc",
+            "2546470f6ac3baae390f4c3df3fd2d526514dc9b553a7bc3358b88fde0de2a0d",
+            "NO_CONFIRMED_EVENT",
+            "False",
+            "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+            null,
+            "kyiv",
+            "74e703809cc19acd4bf0b8fc",
+            "2026-10-09 03:00:00+00:00",
+            "2026-10-09 03:30:00+00:00"
+          ]
+        ],
+        "events": [
+          [
+            "kyiv",
+            "486ea0046f7c57bcf6e75c32",
+            "02cc2041f7c4a0f89913f748b24cba15df67753e08a344b8efdcb24d02d9fe50",
+            "ACTIVE",
+            "d0a74ae270a1ed438cdc8e814311288b0f10151d77f72f97713437a718afc9f1",
+            "486ea0046f7c57bcf6e75c32"
+          ]
+        ],
+        "parents": [
+          [
+            "kyiv",
+            "486ea0046f7c57bcf6e75c32",
+            "2026-10-09 01:00:00+00:00",
+            "2026-10-09 01:30:00+00:00"
+          ],
+          [
+            "kyiv",
+            "74e703809cc19acd4bf0b8fc",
+            "2026-10-09 03:00:00+00:00",
+            "2026-10-09 03:30:00+00:00"
+          ]
+        ],
+        "sources": [
+          [
+            "d0a74ae270a1ed438cdc8e814311288b0f10151d77f72f97713437a718afc9f1",
+            "43616968bccd868298dfd451d930aefb7676313b8899b6c6b35541ed08f8faca",
+            "cb2506730621365b82863e24",
+            "d79631734830e7d7f46d3ae75e407c96864945b8bdf600a8f477e731d2990117",
+            "https://example.invalid/offline-verified-race-1"
+          ]
+        ]
+      },
+      "pre": {
+        "classifications": [],
+        "events": [],
+        "parents": [],
+        "sources": []
+      },
+      "status": "PASS"
+    },
+    "T3": {
+      "assertions": {
+        "db_tip_parent_conflict_quarantined": true,
+        "input_sha256": "655057bbc60a7e618b15bb2c4de2ac7f0b524a41cb1d308550a95a33fa0c3955",
+        "no_conflicting_classification_committed": true,
+        "same_id_different_interval": "CANONICAL_PARENT_IDENTITY_MISMATCH",
+        "same_interval_different_id": "CANONICAL_PARENT_IDENTITY_MISMATCH",
+        "schema_uniqueness_rejected": true
+      },
+      "post": {
+        "classifications": [
+          [
+            "kyiv",
+            "486ea0046f7c57bcf6e75c32",
+            "31665651363c53a4701080ca2c82edcac4049d8ce446f7a9e0fd4be8e03ba83c",
+            "NO_CONFIRMED_EVENT",
+            "False",
+            "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+            null,
+            "kyiv",
+            "486ea0046f7c57bcf6e75c32",
+            "2026-10-09 01:00:00+00:00",
+            "2026-10-09 01:30:00+00:00"
+          ]
+        ],
+        "events": [],
+        "parents": [
+          [
+            "kyiv",
+            "486ea0046f7c57bcf6e75c32",
+            "2026-10-09 01:00:00+00:00",
+            "2026-10-09 01:30:00+00:00"
+          ]
+        ],
+        "sources": []
+      },
+      "pre": {
+        "classifications": [],
+        "events": [],
+        "parents": [],
+        "sources": []
+      },
+      "status": "PASS"
+    },
+    "T4": {
+      "assertions": {
+        "actual_fk_constraint": "attack_event_sources_classification_uid_fkey",
+        "atomic_rollback": true,
+        "content_conflict": "existing source-link semantic conflict",
+        "identity_conflict": "existing source-link semantic conflict",
+        "input_sha256": "e92fe46c671659c605f72a29aad5df9c305a177a37a2b58f35167255b48d46ab",
+        "source_hash_restored": true
+      },
+      "post": {
+        "classifications": [
+          [
+            "kyiv",
+            "486ea0046f7c57bcf6e75c32",
+            "a74d3cd02f78da1e0468e988f24c25c0efbd4317fbea7392dc412ff13239551f",
+            "STRICT_EVENT_POSITIVE",
+            "True",
+            "f80560999583dc74a0ee5e7239acbb5113fef90925e35117d0a2e9147b134644",
+            null,
+            "kyiv",
+            "486ea0046f7c57bcf6e75c32",
+            "2026-10-09 01:00:00+00:00",
+            "2026-10-09 01:30:00+00:00"
+          ],
+          [
+            "kyiv",
+            "74e703809cc19acd4bf0b8fc",
+            "2546470f6ac3baae390f4c3df3fd2d526514dc9b553a7bc3358b88fde0de2a0d",
+            "NO_CONFIRMED_EVENT",
+            "False",
+            "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+            null,
+            "kyiv",
+            "74e703809cc19acd4bf0b8fc",
+            "2026-10-09 03:00:00+00:00",
+            "2026-10-09 03:30:00+00:00"
+          ]
+        ],
+        "events": [
+          [
+            "kyiv",
+            "486ea0046f7c57bcf6e75c32",
+            "02cc2041f7c4a0f89913f748b24cba15df67753e08a344b8efdcb24d02d9fe50",
+            "ACTIVE",
+            "a74d3cd02f78da1e0468e988f24c25c0efbd4317fbea7392dc412ff13239551f",
+            "486ea0046f7c57bcf6e75c32"
+          ]
+        ],
+        "parents": [
+          [
+            "kyiv",
+            "486ea0046f7c57bcf6e75c32",
+            "2026-10-09 01:00:00+00:00",
+            "2026-10-09 01:30:00+00:00"
+          ],
+          [
+            "kyiv",
+            "74e703809cc19acd4bf0b8fc",
+            "2026-10-09 03:00:00+00:00",
+            "2026-10-09 03:30:00+00:00"
+          ]
+        ],
+        "sources": [
+          [
+            "a74d3cd02f78da1e0468e988f24c25c0efbd4317fbea7392dc412ff13239551f",
+            "b6f43fbf283817a6922a58422062cf5b27ca95ba259f86b81455375adb79cb31",
+            "11c9c9e57e700ca510cd6ee0",
+            "fc61e71ca05e18cbeab758e4c059f498e60a428c4a35a1afb4b6755ddeafffaa",
+            "https://example.invalid/offline-verified-source-conflict"
+          ]
+        ]
+      },
+      "pre": {
+        "classifications": [],
+        "events": [],
+        "parents": [],
+        "sources": []
+      },
+      "status": "PASS"
+    },
+    "T5": {
+      "assertions": {
+        "attack_event_active": true,
+        "authoritative_classifier_invoked": true,
+        "initial": "NO_CONFIRMED_EVENT",
+        "input_sha256": "ae43792c43d06b56d233002e38ec86b9a0f4378b445318e634f456c96539a872",
+        "revised": "STRICT_EVENT_POSITIVE",
+        "revision_chain_exact": true,
+        "source_links": 1
+      },
+      "post": {
+        "classifications": [
+          [
+            "kyiv",
+            "486ea0046f7c57bcf6e75c32",
+            "31665651363c53a4701080ca2c82edcac4049d8ce446f7a9e0fd4be8e03ba83c",
+            "NO_CONFIRMED_EVENT",
+            "False",
+            "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+            null,
+            "kyiv",
+            "486ea0046f7c57bcf6e75c32",
+            "2026-10-09 01:00:00+00:00",
+            "2026-10-09 01:30:00+00:00"
+          ],
+          [
+            "kyiv",
+            "486ea0046f7c57bcf6e75c32",
+            "eab6d59e7aa49166c356edc90eda98046447f7ebeb53b1a553ae5460c467f6c3",
+            "STRICT_EVENT_POSITIVE",
+            "True",
+            "0c18c9f943b58fb1ac581e13148aaef271166010fae785dad66fd385b83ef303",
+            "31665651363c53a4701080ca2c82edcac4049d8ce446f7a9e0fd4be8e03ba83c",
+            "kyiv",
+            "486ea0046f7c57bcf6e75c32",
+            "2026-10-09 01:00:00+00:00",
+            "2026-10-09 01:30:00+00:00"
+          ]
+        ],
+        "events": [
+          [
+            "kyiv",
+            "486ea0046f7c57bcf6e75c32",
+            "02cc2041f7c4a0f89913f748b24cba15df67753e08a344b8efdcb24d02d9fe50",
+            "ACTIVE",
+            "eab6d59e7aa49166c356edc90eda98046447f7ebeb53b1a553ae5460c467f6c3",
+            "486ea0046f7c57bcf6e75c32"
+          ]
+        ],
+        "parents": [
+          [
+            "kyiv",
+            "486ea0046f7c57bcf6e75c32",
+            "2026-10-09 01:00:00+00:00",
+            "2026-10-09 01:30:00+00:00"
+          ]
+        ],
+        "sources": [
+          [
+            "eab6d59e7aa49166c356edc90eda98046447f7ebeb53b1a553ae5460c467f6c3",
+            "cd6208c93c7b6ece8b7e05a999a02ddc163e1277408bd5999026a05efecfc925",
+            "61914a65963fd89937dfe58c",
+            "2c8ee0fc38d854e0cb8b47957fee98ca4a880f10f3352490409ebcc45c622ef6",
+            "https://example.invalid/offline-verified-followup"
+          ]
+        ]
+      },
+      "pre": {
+        "classifications": [],
+        "events": [],
+        "parents": [],
+        "sources": []
+      },
+      "status": "PASS"
+    },
+    "T6": {
+      "assertions": {
+        "decision": "REJECTED_BY_DURABLE_POSITIVE_EVIDENCE_RETENTION_POLICY",
+        "event_remains_active": true,
+        "input_sha256": "9601ee40750b27b70ae1a66afaa520ded082b1383192d6647fe75c50dd922e9b",
+        "no_manual_demote_or_classifier_override": true,
+        "no_withdrawal_without_valid_review": true,
+        "requested_transition": "STRICT_EVENT_POSITIVE -> NO_CONFIRMED_EVENT"
+      },
+      "post": {
+        "classifications": [
+          [
+            "kyiv",
+            "486ea0046f7c57bcf6e75c32",
+            "303f64cf78fd469bd29bfa005f37356c211e901be1e8d3e2fcdcaedde8ba320f",
+            "STRICT_EVENT_POSITIVE",
+            "True",
+            "e5790113e63692500d990957ad3f7f7d2fc8f8ebc7aa50325ab2e24fe926fd8d",
+            null,
+            "kyiv",
+            "486ea0046f7c57bcf6e75c32",
+            "2026-10-09 01:00:00+00:00",
+            "2026-10-09 01:30:00+00:00"
+          ]
+        ],
+        "events": [
+          [
+            "kyiv",
+            "486ea0046f7c57bcf6e75c32",
+            "02cc2041f7c4a0f89913f748b24cba15df67753e08a344b8efdcb24d02d9fe50",
+            "ACTIVE",
+            "303f64cf78fd469bd29bfa005f37356c211e901be1e8d3e2fcdcaedde8ba320f",
+            "486ea0046f7c57bcf6e75c32"
+          ]
+        ],
+        "parents": [
+          [
+            "kyiv",
+            "486ea0046f7c57bcf6e75c32",
+            "2026-10-09 01:00:00+00:00",
+            "2026-10-09 01:30:00+00:00"
+          ]
+        ],
+        "sources": [
+          [
+            "303f64cf78fd469bd29bfa005f37356c211e901be1e8d3e2fcdcaedde8ba320f",
+            "bc56beb0c1fd1f0d3f0446f4d8529002cf845f84bea446de0a11c1047f959dfb",
+            "df06bdd465115617a2946276",
+            "2990202cbe4cb52c34d775fba8bc5904aa7f26ee91588a45f46b3596e07c823b",
+            "https://example.invalid/offline-verified-retention"
+          ]
+        ]
+      },
+      "pre": {
+        "classifications": [],
+        "events": [],
+        "parents": [],
+        "sources": []
+      },
+      "status": "PASS"
+    },
+    "T7": {
+      "assertions": {
+        "atomic_three_table_rollback": true,
+        "injected_failure": "FORCED_PERSISTENCE_FAILURE_AFTER_EVENT",
+        "input_sha256": "c129b08e644972cf14ed295f73a9322731fc1a554c428cc4795579829de21517",
+        "retry_one_consistent_commit": true
+      },
+      "post": {
+        "classifications": [
+          [
+            "kyiv",
+            "486ea0046f7c57bcf6e75c32",
+            "ef20cae7dcd823a4e5b2e3cd13503fefe44557d8c92301b6c383f788030f031a",
+            "STRICT_EVENT_POSITIVE",
+            "True",
+            "ed61be070e3bfacdfddfd36951d77c609ade406e51dbf94be1e9d6a1ee5f1600",
+            null,
+            "kyiv",
+            "486ea0046f7c57bcf6e75c32",
+            "2026-10-09 01:00:00+00:00",
+            "2026-10-09 01:30:00+00:00"
+          ]
+        ],
+        "events": [
+          [
+            "kyiv",
+            "486ea0046f7c57bcf6e75c32",
+            "02cc2041f7c4a0f89913f748b24cba15df67753e08a344b8efdcb24d02d9fe50",
+            "ACTIVE",
+            "ef20cae7dcd823a4e5b2e3cd13503fefe44557d8c92301b6c383f788030f031a",
+            "486ea0046f7c57bcf6e75c32"
+          ]
+        ],
+        "parents": [
+          [
+            "kyiv",
+            "486ea0046f7c57bcf6e75c32",
+            "2026-10-09 01:00:00+00:00",
+            "2026-10-09 01:30:00+00:00"
+          ]
+        ],
+        "sources": [
+          [
+            "ef20cae7dcd823a4e5b2e3cd13503fefe44557d8c92301b6c383f788030f031a",
+            "e1602715559f56982a12621fbcf86ad1813f315a542df38ace8a0dbe41b93dd9",
+            "c890eeda4ed24ba8e87241a3",
+            "92fabf81c9ffbd8ffcda4d996ffeda1f693458c6170e17124ae718b9bbfc8c5a",
+            "https://example.invalid/offline-verified-event-fault"
+          ]
+        ]
+      },
+      "pre": {
+        "classifications": [],
+        "events": [],
+        "parents": [],
+        "sources": []
+      },
+      "status": "PASS"
+    },
+    "T8": {
+      "assertions": {
+        "corruptions_detected": {
+          "current_tip": "PersistenceContractError:POST_COMMIT_TIP_KEY_OR_VERDICT_MISMATCH",
+          "event_status": "PersistenceContractError:POST_COMMIT_POSITIVE_EVENT_MISMATCH",
+          "parent": "PersistenceContractError:POST_COMMIT_PARENT_BINDING_MISMATCH",
+          "required_source_missing": "PersistenceContractError:POST_COMMIT_SOURCE_LINK_MISMATCH",
+          "source_link": "PersistenceContractError:POST_COMMIT_SOURCE_LINK_MISMATCH"
+        },
+        "input_sha256": "286a8cf1075f301d9bf161814c7b9a5b74d9e4bc5c388cea8bab33169a1d8563",
+        "journal_not_acknowledged_on_failed_readback": true,
+        "retry_survives_restart": true,
+        "valid_repair_reconciled_after_independent_readback": true
+      },
+      "post": {
+        "classifications": [
+          [
+            "kyiv",
+            "486ea0046f7c57bcf6e75c32",
+            "8d05bcd893b3d69470a3135789c72b96ce8270b0f2975bc595ab85a0bf38281e",
+            "STRICT_EVENT_POSITIVE",
+            "True",
+            "7a813a1b79329c88101c19d598a3e011d1f5bde0ea8ea13f550e0cb99ae88e18",
+            null,
+            "kyiv",
+            "486ea0046f7c57bcf6e75c32",
+            "2026-10-09 01:00:00+00:00",
+            "2026-10-09 01:30:00+00:00"
+          ]
+        ],
+        "events": [
+          [
+            "kyiv",
+            "486ea0046f7c57bcf6e75c32",
+            "02cc2041f7c4a0f89913f748b24cba15df67753e08a344b8efdcb24d02d9fe50",
+            "ACTIVE",
+            "8d05bcd893b3d69470a3135789c72b96ce8270b0f2975bc595ab85a0bf38281e",
+            "486ea0046f7c57bcf6e75c32"
+          ]
+        ],
+        "parents": [
+          [
+            "kyiv",
+            "486ea0046f7c57bcf6e75c32",
+            "2026-10-09 01:00:00+00:00",
+            "2026-10-09 01:30:00+00:00"
+          ],
+          [
+            "kyiv",
+            "74e703809cc19acd4bf0b8fc",
+            "2026-10-09 03:00:00+00:00",
+            "2026-10-09 03:30:00+00:00"
+          ]
+        ],
+        "sources": [
+          [
+            "8d05bcd893b3d69470a3135789c72b96ce8270b0f2975bc595ab85a0bf38281e",
+            "0fef6faeb3c93a360776f885d192400266e16faa1cc9183fff8c2f174bd77b56",
+            "0f4cdc0a6842b16b7e7431fd",
+            "dcedc90417c9daaba67c023ced801525856842fc12ca6d116d7620c73b00cc16",
+            "https://example.invalid/offline-verified-readback"
+          ]
+        ]
+      },
+      "pre": {
+        "classifications": [],
+        "events": [],
+        "parents": [],
+        "sources": []
+      },
+      "status": "PASS"
+    }
+  },
+  "failures": [],
+  "fingerprint": "8099f4c0d6756ae7b1262ad2d69fb6bcda3362948a6d347330b19bed370196ed",
+  "matrix": "kyiv-live-canonical-queue-pg16-safety-2026-10-11",
+  "parent_git_blob": "d43ee3573d78e70e4d9fa3559e81cf950799db0b",
+  "persistence_git_blob": "d3ad61f9807c4dec2c6e3bf97a29d78af60500be",
+  "postgres_major": 16,
+  "queue_git_blob": "68c31cec6316d236c6839a4f5bb29adec89ab0c9",
+  "schema_git_blob": "1196fae6ac33903f7b338b10787f42e745530d7a"
+}
