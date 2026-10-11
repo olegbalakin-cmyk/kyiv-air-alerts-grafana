@@ -1,0 +1,916 @@
+{
+  "schema_version": 1,
+  "kind": "independent_frozen_h1_h2_semantic_unbound_reconciliation",
+  "audit_date": "2026-10-11",
+  "verdict": "FROZEN H1/H2 SEMANTIC RECONCILIATION = PARTIAL",
+  "C4": "NOT PROVEN",
+  "C5": "NOT PROVEN",
+  "reason": "H1 6863 frozen+accepted-repair verdicts and QA reasons individually reconcile exactly in a single read-only Neon snapshot; H2 19542 exact expected row verdict/source/event authority is not reconstructed, H1 source/event/key semantics are not fully reconstructed, and 25 UNBOUND require historical parent contract adjudication. No accepted frozen/Neon contradiction established.",
+  "inspection": {
+    "main": "59b7635dc66ba255682fe56ae4e50ae13a22d89f",
+    "project_state_blob": "45c13d8960f832e85dac0a35183f9168cb804fa7",
+    "changelog_blob": "611c1ee11d37a2de99476e3cd36282b3a405c16c",
+    "main_checked_before_write": true,
+    "coordination_docs_edited": false
+  },
+  "predecessor": {
+    "branch": "neon-exact-historical-parity-audit-2026-10-11",
+    "head": "64d3075df5f97334620e92de7ae04d54dc8daa7a",
+    "path": "research/neon_exact_historical_parity_audit_2026-10-11.json",
+    "git_blob": "b8a9536d661a953c11f87a610c165f4df77c2f62",
+    "sha256": "63de00447b01167ad68c933226e8e88568c8b4c64620b74107f57640468dbcd4"
+  },
+  "future_authority": {
+    "project": "green-cake-44216048",
+    "branch": "br-bold-mode-b5rub8pq",
+    "database": "neondb",
+    "NEON_AUTHORITY_ACTIVE": "NO",
+    "PRODUCTION_CUTOVER_EXECUTED": "NO"
+  },
+  "H1_frozen_authorities": {
+    "campaign": "historical-attack-events-v2-2026-09-27",
+    "head": "71cb6f6fbe856cc7b96759310fe9cc9c71cc0453",
+    "launch_artifact": "research/historical_attack_event_backfill_campaign_launch_2026-09-27.json",
+    "launch_git_blob": "a0f874a02258890bee3a9cda90861355d65f9cc2",
+    "status_path": "research/historical_attack_event_backfill_status.json",
+    "status_git_blob": "615b380b51c0da7aa052bad06222c12785090986",
+    "frozen_city_counts": {
+      "lviv": 126,
+      "sevastopol": 527,
+      "cherkasy": 1548,
+      "sumy": 2297,
+      "zaporizhzhia": 2365
+    },
+    "batch_tree": "d83c2fdc52c7296dc9f9910f3a70726dc1690e3b",
+    "batch_trees": {
+      "cherkasy": "e7db45c7f72eb19425f859d5dbe01734ffdebae8",
+      "lviv": "dddf151e1e7519e04fbb07d75d623dc46dc34f94",
+      "sevastopol": "65be1897520d1d1affa829ec8c503b367c9aa47a",
+      "sumy": "6789b4470e7459803ea6e8d75e240bbd3160a97d",
+      "zaporizhzhia": "85b6e41eb722bd0975daa567de4b8fd2abf77fe3"
+    },
+    "batch_count_by_city": {
+      "cherkasy": 31,
+      "lviv": 3,
+      "sevastopol": 11,
+      "sumy": 46,
+      "zaporizhzhia": 48
+    },
+    "complete_batch_count_exposed": 139,
+    "accepted_repair": {
+      "proof_path": "research/historical_offline_repair_recovery_scan_2026-10-02.json",
+      "proof_git_blob": "26db43c2bd7fbd9e16a53e8ccefea080636bbb73",
+      "final_target_state_sha256": "652bda9bc4037d263e7e1090455ff4df5387d1f4f1a73a8c5e160d7ce62132f5",
+      "changed_targets": 25,
+      "changed_targets_by_city": {
+        "sumy": 7,
+        "zaporizhzhia": 18
+      },
+      "classifier_provenance_addendum_blob": "d5e37030e7ff1ace22c4e2185f51669d228c38e7",
+      "repair_classifier_blob": "06ddfa13e918b3131799c8dadd290f84f20cb901",
+      "frozen_classifier_blob": "778469b74c2aa807d851cf2c2ee35cf4aa785589",
+      "nonrevision_note": "Accepted offline repair is the input to first persistence; Neon H1 has zero later supersedes."
+    }
+  },
+  "H2_frozen_authorities": {
+    "umbrella_head": "31aa7a8f8f57ff090f24814ef3c62137eebebf16",
+    "umbrella_blob": "754da5b8c330188889f3f8fb22e671cbc6118cac",
+    "baseline_head": "fb563dc410fe6614263bdc8d4eb55025a987e950",
+    "proof_files": [
+      {
+        "path": "research/historical_v2_formalization_chernihiv_dnipro_proof_2026-10-02.json",
+        "verified_blob": "9416f9cb60b1b078268d74c6c8b70f76af6f9e58"
+      },
+      {
+        "path": "research/historical_v2_formalization_chernivtsi_ivano_frankivsk_proof_2026-10-02.json",
+        "verified_blob": "8144e47393299a9426a507a2c45c8e5cb9fe3464"
+      },
+      {
+        "path": "research/historical_v2_formalization_kharkiv_kherson_proof_2026-10-02.json",
+        "verified_blob": "f5fa45527f40a5af02e98ea5d0958547756d0218"
+      },
+      {
+        "path": "research/historical_v2_formalization_khmelnytskyi_lutsk_proof_2026-10-02.json",
+        "verified_blob": "1deb9916d5d35af10297af5aead38bf741b86852"
+      },
+      {
+        "path": "research/historical_v2_formalization_kropyvnytskyi_mykolaiv_proof_2026-10-02.json",
+        "verified_blob": "3db2c10957beb51cfc565af645f06007a8c0ca55"
+      },
+      {
+        "path": "research/historical_v2_formalization_kyiv_proof_2026-10-02.json",
+        "verified_blob": "36d830c981ac765ae6ea2150092ab49512e1eec9"
+      },
+      {
+        "path": "research/historical_v2_formalization_odesa_proof_2026-10-02.json",
+        "verified_blob": "94093565a733d0dc5cf0dc85ab8441a551287ef0"
+      },
+      {
+        "path": "research/historical_v2_formalization_poltava_rivne_proof_2026-10-02.json",
+        "verified_blob": "182970ddb52949a7d34e1d4246928f6f654f9b51"
+      },
+      {
+        "path": "research/historical_v2_formalization_ternopil_uzhhorod_proof_2026-10-02.json",
+        "verified_blob": "2e23c9b778723c4fef0ad6e22b73b954ff02bb3a"
+      },
+      {
+        "path": "research/historical_v2_formalization_vinnytsia_zhytomyr_proof_2026-10-02.json",
+        "verified_blob": "211a602b3cf9a08e33c3ea733bc63984314362dd"
+      }
+    ],
+    "city_matrix": [
+      {
+        "city": "chernihiv",
+        "canonical_episodes": 1676,
+        "target_state_sha256": "15073764b3da5fde5690547722e17593116e82d015e5826392334974c40effac"
+      },
+      {
+        "city": "chernivtsi",
+        "canonical_episodes": 113,
+        "target_state_sha256": "61f4a8cd7abfae55ec30538b01eab0e50bad8c1ba9c2fed9c0f508cb6cbbbcfb"
+      },
+      {
+        "city": "dnipro",
+        "canonical_episodes": 2259,
+        "target_state_sha256": "7cf081a6d55340d7431e8eff57051a09de1de5a1ded84c73d4ca31f3d177dea6"
+      },
+      {
+        "city": "ivano_frankivsk",
+        "canonical_episodes": 103,
+        "target_state_sha256": "246a54c2f9bf382688a22cfee4e55b571b1f083b2f3fc86176054e75ace1cd79"
+      },
+      {
+        "city": "kharkiv",
+        "canonical_episodes": 3565,
+        "target_state_sha256": "2400891dd85dbebdfdf347f88c178f43780d7ccfe814701b069b4593e06f491b"
+      },
+      {
+        "city": "kherson",
+        "canonical_episodes": 1412,
+        "target_state_sha256": "fed71481b8de4106e58b457f4d23063e6f38dc98f0027dc9733ea48b869844d0"
+      },
+      {
+        "city": "khmelnytskyi",
+        "canonical_episodes": 248,
+        "target_state_sha256": "12954a115508770917bed9cc3905a12511ba41026ddf27be992e746535688c08"
+      },
+      {
+        "city": "kropyvnytskyi",
+        "canonical_episodes": 1161,
+        "target_state_sha256": "d34a4079f97e96bf9f75126788bcaf5db9460786ba25e89a8f07e9c1e849352d"
+      },
+      {
+        "city": "kyiv",
+        "canonical_episodes": 2456,
+        "target_state_sha256": "ab008e7acedb04f1a15f64558e4470ace5167be925fa5b60fb4d30ec3292e332"
+      },
+      {
+        "city": "lutsk",
+        "canonical_episodes": 135,
+        "target_state_sha256": "070d41c2ffa045778caf3b60b2b1752a1152432c2b492444b9406cc3fe045ec7"
+      },
+      {
+        "city": "mykolaiv",
+        "canonical_episodes": 1648,
+        "target_state_sha256": "357cf4fc1eb761ba266d97058e23700605ef46ba23087b5fab7955883b9cdeeb"
+      },
+      {
+        "city": "odesa",
+        "canonical_episodes": 1465,
+        "target_state_sha256": "82d865dd1a8ade144ffe05ca07c1cb47c7fe8fb790dd28160661062ccebdf015"
+      },
+      {
+        "city": "poltava",
+        "canonical_episodes": 1805,
+        "target_state_sha256": "617ee7003f79df6bc99422b57778d6f9c097f53c96b0166dc056c74ba5f27be9"
+      },
+      {
+        "city": "rivne",
+        "canonical_episodes": 232,
+        "target_state_sha256": "eebda03f93045670d9abf36b7e961290479a429e7f282a1d925ee6a36b4c8b38"
+      },
+      {
+        "city": "ternopil",
+        "canonical_episodes": 125,
+        "target_state_sha256": "d989a8c1dfc65965cc6ac07cb1d30c711d9e93f272eaf950db7c6aacf17e4e73"
+      },
+      {
+        "city": "uzhhorod",
+        "canonical_episodes": 92,
+        "target_state_sha256": "88e785cf041df191205e166944b0a3f65f187cda3730a5631a2d058ddad4ea93"
+      },
+      {
+        "city": "vinnytsia",
+        "canonical_episodes": 362,
+        "target_state_sha256": "2c7f096b5041b6efae48c95db36bfb445dfdc598898d83d35cc8c253360d8d7a"
+      },
+      {
+        "city": "zhytomyr",
+        "canonical_episodes": 685,
+        "target_state_sha256": "224a286578fba06c6ca5853bb0eee8c8b54c901836b5b77a54f5786c4bbe7546"
+      }
+    ],
+    "counts": {
+      "strict": 913,
+      "sensitivity": 48,
+      "no_confirmed": 18113,
+      "needs_review": 468,
+      "positive": 961
+    },
+    "target_projection_rule": "SHA256 canonical JSON {city_key, methodology, targets: [{episode_id, state}, sorted episode_id]; sort_keys true, compact separators, UTF-8, no trailing newline",
+    "row_level_frozen_accepted_verdicts_available_in_proof": false,
+    "row_level_source_event_semantic_reconstruction": "NOT COMPLETED",
+    "classifier_reruns_for_truth": 0
+  },
+  "Neon_snapshots": {
+    "H1_row_level": {
+      "snapshot_first": "263175:263175:",
+      "snapshot_last": "263175:263175:",
+      "transaction_isolation": "repeatable read",
+      "transaction_read_only": "on"
+    },
+    "cohort_and_25_parent": {
+      "snapshot_first": "263176:263176:",
+      "snapshot_last": "263176:263176:",
+      "transaction_isolation": "repeatable read",
+      "transaction_read_only": "on"
+    },
+    "warning": "Results from distinct snapshots are reported separately. Parent counts are not compared between snapshots."
+  },
+  "classification_comparison": {
+    "H1": {
+      "expected": 6863,
+      "persisted": 6863,
+      "exact_accepted_frozen_repaired_verdict": 6863,
+      "missing": 0,
+      "unexpected_extra": 0,
+      "verdict_mismatch": 0,
+      "qa_reasons_mismatch": 0,
+      "keys_unique": 6863,
+      "deterministic_classification_keys_frozen_reconstructed": false,
+      "classification_key_mismatch_count": null,
+      "full_governed_semantics_exact": "NOT CERTIFIED",
+      "offline_reconstruction_twice_identical": true,
+      "sha256_RUN_A": null,
+      "sha256_RUN_B": null,
+      "hashes_missing_reason": "No trustworthy full normalized sorted semantic projection hash was produced; deterministic object equality alone cannot substitute for requested hash"
+    },
+    "H2": {
+      "expected": 19542,
+      "persisted": 19542,
+      "exact_semantics": null,
+      "missing": null,
+      "extra": null,
+      "semantic_mismatches": null,
+      "key_mismatches": null,
+      "full_expected_reconstruction": false,
+      "sha256_RUN_A": null,
+      "sha256_RUN_B": null
+    }
+  },
+  "source_links": {
+    "H1": {
+      "persisted": 2340,
+      "expected": null,
+      "exact": null,
+      "missing": null,
+      "extra": null
+    },
+    "H2": {
+      "persisted": 1429,
+      "expected": null,
+      "exact": null,
+      "missing": null,
+      "extra": null
+    }
+  },
+  "events": {
+    "H1": {
+      "persisted": 119,
+      "expected_positives": 119,
+      "exact_event_keys": null,
+      "missing": null,
+      "extra": null
+    },
+    "H2": {
+      "persisted": 961,
+      "expected_positives": 961,
+      "exact_event_keys": null,
+      "missing": null,
+      "extra": null
+    }
+  },
+  "revision_current_tip": {
+    "H1": {
+      "later_revisions": 0,
+      "accepted_repair_already_in_initial_persisted_state": true
+    },
+    "H2": {
+      "later_revisions": 0
+    },
+    "H3": {
+      "accepted_successor": "UNIT A A5 FULL-MANIFEST RECONCILIATION = PASS",
+      "head": "9b892d87a319d43327f49435103d50181500bf6b",
+      "artifact_blob": "98ba670e2f56bf429b69938a98206fb19f3dd22e",
+      "artifact_sha256": "99efd6f8ea6b385ed2baba04effb66cca9c801c49c03a183faf14ae2dd37ffb3",
+      "actions_run": 38081981459,
+      "job": 114300615192,
+      "concurrency_safety": "UNPROVEN"
+    }
+  },
+  "cohort_intersections": {
+    "persisted_all_six_pairwise_zero": "PREDECESSOR_PROVEN",
+    "frozen_H1_H2_expected_intersection": "NOT INDEPENDENTLY CERTIFIED",
+    "live_cutoff": "2026-10-07T19:05:00Z"
+  },
+  "UNBOUND": {
+    "denominator": 25,
+    "H1": 5,
+    "H2": 20,
+    "by_city": {
+      "lviv": 3,
+      "sumy": 1,
+      "zaporizhzhia": 1,
+      "kharkiv": 2,
+      "kyiv": 18
+    },
+    "exact_parent_matches_by_episode_id": 0,
+    "exact_parent_matches_by_city_interval": 0,
+    "rows_with_accepted_disposition": 0,
+    "rows_unresolved": 25,
+    "accepted_historical_exceptions": 0,
+    "blocking_parent_contract_unknown": 25,
+    "dispositions": [
+      {
+        "classification_uid": "1bd00338-dea9-48d2-8eae-6545f11d805e",
+        "classification_key": "b48f334e1b07715f6a72a1cfe127fcea02b149b7068ab90c94dbcc0da1179d82",
+        "episode_id": "202d8d1527183a6282ccf1e2",
+        "city": "lviv",
+        "cohort": "H1",
+        "alert_start_at": "2026-09-13T02:32:14.172Z",
+        "alert_end_at": "2026-09-13T06:11:11.976Z",
+        "governing_artifact": "research/historical_attack_event_backfill_campaign_launch_2026-09-27.json",
+        "governing_git_blob": "a0f874a02258890bee3a9cda90861355d65f9cc2",
+        "frozen_episode_exists": "VERIFIED_FROZEN_CAMPAIGN_IDENTITY",
+        "expected_parent_contract": "UNADJUDICATED_HISTORICAL_PARENT_ADMISSION",
+        "current_parent": {
+          "by_exact_episode_id": 0,
+          "by_exact_city_interval": 0,
+          "classification_binding_state": "UNBOUND",
+          "matched_parent_uid": null
+        },
+        "disposition": "UNRESOLVED",
+        "blocks_c4": true,
+        "reason": "No exact Neon parent at selected read-only snapshot; accepted historical parent identity/admission and source parent migration scope not yet individually adjudicated. Do not infer fuzzy or absent-required parent."
+      },
+      {
+        "classification_uid": "f34a3a0e-fa4e-47c2-b660-e927c828ae46",
+        "classification_key": "b8b87072309ec212cb3f1fdf6b1012d8499c699cb128cf3061f00612536efda8",
+        "episode_id": "b24ba103214a22f4d5e65ce4",
+        "city": "lviv",
+        "cohort": "H1",
+        "alert_start_at": "2026-09-15T16:44:13.025Z",
+        "alert_end_at": "2026-09-15T17:08:51.287Z",
+        "governing_artifact": "research/historical_attack_event_backfill_campaign_launch_2026-09-27.json",
+        "governing_git_blob": "a0f874a02258890bee3a9cda90861355d65f9cc2",
+        "frozen_episode_exists": "VERIFIED_FROZEN_CAMPAIGN_IDENTITY",
+        "expected_parent_contract": "UNADJUDICATED_HISTORICAL_PARENT_ADMISSION",
+        "current_parent": {
+          "by_exact_episode_id": 0,
+          "by_exact_city_interval": 0,
+          "classification_binding_state": "UNBOUND",
+          "matched_parent_uid": null
+        },
+        "disposition": "UNRESOLVED",
+        "blocks_c4": true,
+        "reason": "No exact Neon parent at selected read-only snapshot; accepted historical parent identity/admission and source parent migration scope not yet individually adjudicated. Do not infer fuzzy or absent-required parent."
+      },
+      {
+        "classification_uid": "df9913ca-388b-4c52-bb86-fd195d700ad0",
+        "classification_key": "f648fc829b0bdc09f74153ca53a4e66d57078e5a1affdfb0c122aa2c49db8524",
+        "episode_id": "b3df9090f7264ddbd726e113",
+        "city": "lviv",
+        "cohort": "H1",
+        "alert_start_at": "2026-09-12T22:00:05.398Z",
+        "alert_end_at": "2026-09-12T22:14:23.315Z",
+        "governing_artifact": "research/historical_attack_event_backfill_campaign_launch_2026-09-27.json",
+        "governing_git_blob": "a0f874a02258890bee3a9cda90861355d65f9cc2",
+        "frozen_episode_exists": "VERIFIED_FROZEN_CAMPAIGN_IDENTITY",
+        "expected_parent_contract": "UNADJUDICATED_HISTORICAL_PARENT_ADMISSION",
+        "current_parent": {
+          "by_exact_episode_id": 0,
+          "by_exact_city_interval": 0,
+          "classification_binding_state": "UNBOUND",
+          "matched_parent_uid": null
+        },
+        "disposition": "UNRESOLVED",
+        "blocks_c4": true,
+        "reason": "No exact Neon parent at selected read-only snapshot; accepted historical parent identity/admission and source parent migration scope not yet individually adjudicated. Do not infer fuzzy or absent-required parent."
+      },
+      {
+        "classification_uid": "0a40106c-7ee9-40c4-b268-504954f3be19",
+        "classification_key": "86ca8ac7e7e6f198d64ca45db321df6ca5746388258b93b58e8573f4a779ca0c",
+        "episode_id": "d1d8f1e454e15cb6ed6b306c",
+        "city": "sumy",
+        "cohort": "H1",
+        "alert_start_at": "2026-09-17T17:12:24.000Z",
+        "alert_end_at": "2026-09-17T20:56:00.000Z",
+        "governing_artifact": "research/historical_attack_event_backfill_campaign_launch_2026-09-27.json",
+        "governing_git_blob": "a0f874a02258890bee3a9cda90861355d65f9cc2",
+        "frozen_episode_exists": "VERIFIED_FROZEN_CAMPAIGN_IDENTITY",
+        "expected_parent_contract": "UNADJUDICATED_HISTORICAL_PARENT_ADMISSION",
+        "current_parent": {
+          "by_exact_episode_id": 0,
+          "by_exact_city_interval": 0,
+          "classification_binding_state": "UNBOUND",
+          "matched_parent_uid": null
+        },
+        "disposition": "UNRESOLVED",
+        "blocks_c4": true,
+        "reason": "No exact Neon parent at selected read-only snapshot; accepted historical parent identity/admission and source parent migration scope not yet individually adjudicated. Do not infer fuzzy or absent-required parent."
+      },
+      {
+        "classification_uid": "31f8a1e3-6380-464d-9a35-f6ddecb1b02c",
+        "classification_key": "94225058153489b4498fed1423938edd5c072888df94c27c92f620776530fe38",
+        "episode_id": "c138680a6beb87a4aa8be6fc",
+        "city": "zaporizhzhia",
+        "cohort": "H1",
+        "alert_start_at": "2026-09-17T19:33:49.000Z",
+        "alert_end_at": "2026-09-17T21:54:45.000Z",
+        "governing_artifact": "research/historical_attack_event_backfill_campaign_launch_2026-09-27.json",
+        "governing_git_blob": "a0f874a02258890bee3a9cda90861355d65f9cc2",
+        "frozen_episode_exists": "VERIFIED_FROZEN_CAMPAIGN_IDENTITY",
+        "expected_parent_contract": "UNADJUDICATED_HISTORICAL_PARENT_ADMISSION",
+        "current_parent": {
+          "by_exact_episode_id": 0,
+          "by_exact_city_interval": 0,
+          "classification_binding_state": "UNBOUND",
+          "matched_parent_uid": null
+        },
+        "disposition": "UNRESOLVED",
+        "blocks_c4": true,
+        "reason": "No exact Neon parent at selected read-only snapshot; accepted historical parent identity/admission and source parent migration scope not yet individually adjudicated. Do not infer fuzzy or absent-required parent."
+      },
+      {
+        "classification_uid": "8c01721e-b4e8-4b63-b789-9801efbd63f8",
+        "classification_key": "a2db2590f3858a4696abe9bc37252876bfaa79d626e1f1b7a3f54d5b5a7681e2",
+        "episode_id": "0fc4be61b3b03eb9027c2536",
+        "city": "kharkiv",
+        "cohort": "H2",
+        "alert_start_at": "2025-03-05T19:08:24.000Z",
+        "alert_end_at": "2025-03-06T03:03:45.000Z",
+        "governing_artifact": "research/historical_v2_formalization_kharkiv_kherson_proof_2026-10-02.json",
+        "governing_git_blob": "f5fa45527f40a5af02e98ea5d0958547756d0218",
+        "frozen_episode_exists": "PREDECESSOR_H2_PROOF_COUNTS_ONLY",
+        "expected_parent_contract": "UNADJUDICATED_HISTORICAL_PARENT_ADMISSION",
+        "current_parent": {
+          "by_exact_episode_id": 0,
+          "by_exact_city_interval": 0,
+          "classification_binding_state": "UNBOUND",
+          "matched_parent_uid": null
+        },
+        "disposition": "UNRESOLVED",
+        "blocks_c4": true,
+        "reason": "No exact Neon parent at selected read-only snapshot; accepted historical parent identity/admission and source parent migration scope not yet individually adjudicated. Do not infer fuzzy or absent-required parent."
+      },
+      {
+        "classification_uid": "cbf4dd1e-1215-4595-9388-d0d30bcd55a2",
+        "classification_key": "49516b028c9b8cdf4da280f3ddf73e161ffd2e75663c3fca9771070de75e99fe",
+        "episode_id": "fc1226778d0125bc91aa669c",
+        "city": "kharkiv",
+        "cohort": "H2",
+        "alert_start_at": "2026-09-17T17:41:38.000Z",
+        "alert_end_at": "2026-09-17T20:55:54.000Z",
+        "governing_artifact": "research/historical_v2_formalization_kharkiv_kherson_proof_2026-10-02.json",
+        "governing_git_blob": "f5fa45527f40a5af02e98ea5d0958547756d0218",
+        "frozen_episode_exists": "PREDECESSOR_H2_PROOF_COUNTS_ONLY",
+        "expected_parent_contract": "UNADJUDICATED_HISTORICAL_PARENT_ADMISSION",
+        "current_parent": {
+          "by_exact_episode_id": 0,
+          "by_exact_city_interval": 0,
+          "classification_binding_state": "UNBOUND",
+          "matched_parent_uid": null
+        },
+        "disposition": "UNRESOLVED",
+        "blocks_c4": true,
+        "reason": "No exact Neon parent at selected read-only snapshot; accepted historical parent identity/admission and source parent migration scope not yet individually adjudicated. Do not infer fuzzy or absent-required parent."
+      },
+      {
+        "classification_uid": "b455c332-17ec-43c1-8bf4-7d2c589451ed",
+        "classification_key": "24dd26e5ef310c6d6ff97125aa4c06c79478b7a8ee0caa65a278149f6fdc866f",
+        "episode_id": "1a603e438745d4a3d6408639",
+        "city": "kyiv",
+        "cohort": "H2",
+        "alert_start_at": "2026-09-16T23:03:00.000Z",
+        "alert_end_at": "2026-09-16T23:54:00.000Z",
+        "governing_artifact": "research/historical_v2_formalization_kyiv_proof_2026-10-02.json",
+        "governing_git_blob": "36d830c981ac765ae6ea2150092ab49512e1eec9",
+        "frozen_episode_exists": "PREDECESSOR_H2_PROOF_COUNTS_ONLY",
+        "expected_parent_contract": "UNADJUDICATED_HISTORICAL_PARENT_ADMISSION",
+        "current_parent": {
+          "by_exact_episode_id": 0,
+          "by_exact_city_interval": 0,
+          "classification_binding_state": "UNBOUND",
+          "matched_parent_uid": null
+        },
+        "disposition": "UNRESOLVED",
+        "blocks_c4": true,
+        "reason": "No exact Neon parent at selected read-only snapshot; accepted historical parent identity/admission and source parent migration scope not yet individually adjudicated. Do not infer fuzzy or absent-required parent."
+      },
+      {
+        "classification_uid": "c1b3791f-2c8c-4167-bea8-622c78d044ea",
+        "classification_key": "ee01ad9ef3888702c3f1bb9eef63c167f64fad0557b3f18007a47b822b3296c4",
+        "episode_id": "1a8900b3e09048b0a61db83c",
+        "city": "kyiv",
+        "cohort": "H2",
+        "alert_start_at": "2026-09-17T08:40:00.000Z",
+        "alert_end_at": "2026-09-17T08:55:00.000Z",
+        "governing_artifact": "research/historical_v2_formalization_kyiv_proof_2026-10-02.json",
+        "governing_git_blob": "36d830c981ac765ae6ea2150092ab49512e1eec9",
+        "frozen_episode_exists": "PREDECESSOR_H2_PROOF_COUNTS_ONLY",
+        "expected_parent_contract": "UNADJUDICATED_HISTORICAL_PARENT_ADMISSION",
+        "current_parent": {
+          "by_exact_episode_id": 0,
+          "by_exact_city_interval": 0,
+          "classification_binding_state": "UNBOUND",
+          "matched_parent_uid": null
+        },
+        "disposition": "UNRESOLVED",
+        "blocks_c4": true,
+        "reason": "No exact Neon parent at selected read-only snapshot; accepted historical parent identity/admission and source parent migration scope not yet individually adjudicated. Do not infer fuzzy or absent-required parent."
+      },
+      {
+        "classification_uid": "7617c848-89be-4d2e-8910-207f25fcd678",
+        "classification_key": "c5618a7e2f9929121c44d216778ccc6b5b705cacecc3cf487785f8d1a877c286",
+        "episode_id": "5ecf681dfd050d9e65c9d03c",
+        "city": "kyiv",
+        "cohort": "H2",
+        "alert_start_at": "2026-09-15T12:07:00.000Z",
+        "alert_end_at": "2026-09-15T13:20:00.000Z",
+        "governing_artifact": "research/historical_v2_formalization_kyiv_proof_2026-10-02.json",
+        "governing_git_blob": "36d830c981ac765ae6ea2150092ab49512e1eec9",
+        "frozen_episode_exists": "PREDECESSOR_H2_PROOF_COUNTS_ONLY",
+        "expected_parent_contract": "UNADJUDICATED_HISTORICAL_PARENT_ADMISSION",
+        "current_parent": {
+          "by_exact_episode_id": 0,
+          "by_exact_city_interval": 0,
+          "classification_binding_state": "UNBOUND",
+          "matched_parent_uid": null
+        },
+        "disposition": "UNRESOLVED",
+        "blocks_c4": true,
+        "reason": "No exact Neon parent at selected read-only snapshot; accepted historical parent identity/admission and source parent migration scope not yet individually adjudicated. Do not infer fuzzy or absent-required parent."
+      },
+      {
+        "classification_uid": "7f6741fb-915d-4152-8e74-b023f05f470e",
+        "classification_key": "e60c9af9c8e59b6212a4255adf4f42ab6b3fee63eedcc2bbf7cba0e3ec2d5c34",
+        "episode_id": "659fa411a4626d02df3c16b6",
+        "city": "kyiv",
+        "cohort": "H2",
+        "alert_start_at": "2026-09-17T06:01:00.000Z",
+        "alert_end_at": "2026-09-17T06:03:00.000Z",
+        "governing_artifact": "research/historical_v2_formalization_kyiv_proof_2026-10-02.json",
+        "governing_git_blob": "36d830c981ac765ae6ea2150092ab49512e1eec9",
+        "frozen_episode_exists": "PREDECESSOR_H2_PROOF_COUNTS_ONLY",
+        "expected_parent_contract": "UNADJUDICATED_HISTORICAL_PARENT_ADMISSION",
+        "current_parent": {
+          "by_exact_episode_id": 0,
+          "by_exact_city_interval": 0,
+          "classification_binding_state": "UNBOUND",
+          "matched_parent_uid": null
+        },
+        "disposition": "UNRESOLVED",
+        "blocks_c4": true,
+        "reason": "No exact Neon parent at selected read-only snapshot; accepted historical parent identity/admission and source parent migration scope not yet individually adjudicated. Do not infer fuzzy or absent-required parent."
+      },
+      {
+        "classification_uid": "b9fb0a9e-e980-4923-9ef9-a87575645e46",
+        "classification_key": "9f3c0cfa7da59f1793d798169ea10e89036607f54d22aecb2245e9c1def48a34",
+        "episode_id": "73184793018bc20346494560",
+        "city": "kyiv",
+        "cohort": "H2",
+        "alert_start_at": "2026-09-17T06:30:00.000Z",
+        "alert_end_at": "2026-09-17T07:02:00.000Z",
+        "governing_artifact": "research/historical_v2_formalization_kyiv_proof_2026-10-02.json",
+        "governing_git_blob": "36d830c981ac765ae6ea2150092ab49512e1eec9",
+        "frozen_episode_exists": "PREDECESSOR_H2_PROOF_COUNTS_ONLY",
+        "expected_parent_contract": "UNADJUDICATED_HISTORICAL_PARENT_ADMISSION",
+        "current_parent": {
+          "by_exact_episode_id": 0,
+          "by_exact_city_interval": 0,
+          "classification_binding_state": "UNBOUND",
+          "matched_parent_uid": null
+        },
+        "disposition": "UNRESOLVED",
+        "blocks_c4": true,
+        "reason": "No exact Neon parent at selected read-only snapshot; accepted historical parent identity/admission and source parent migration scope not yet individually adjudicated. Do not infer fuzzy or absent-required parent."
+      },
+      {
+        "classification_uid": "457dba20-311a-4531-86a4-8d3f92efd1db",
+        "classification_key": "fb8b45298abc067053d657cabce66555be41b04ff2050558c8b567a38c55ee1e",
+        "episode_id": "82984c3ddb21c5c68d737e8c",
+        "city": "kyiv",
+        "cohort": "H2",
+        "alert_start_at": "2026-09-15T16:44:00.000Z",
+        "alert_end_at": "2026-09-15T17:09:00.000Z",
+        "governing_artifact": "research/historical_v2_formalization_kyiv_proof_2026-10-02.json",
+        "governing_git_blob": "36d830c981ac765ae6ea2150092ab49512e1eec9",
+        "frozen_episode_exists": "PREDECESSOR_H2_PROOF_COUNTS_ONLY",
+        "expected_parent_contract": "UNADJUDICATED_HISTORICAL_PARENT_ADMISSION",
+        "current_parent": {
+          "by_exact_episode_id": 0,
+          "by_exact_city_interval": 0,
+          "classification_binding_state": "UNBOUND",
+          "matched_parent_uid": null
+        },
+        "disposition": "UNRESOLVED",
+        "blocks_c4": true,
+        "reason": "No exact Neon parent at selected read-only snapshot; accepted historical parent identity/admission and source parent migration scope not yet individually adjudicated. Do not infer fuzzy or absent-required parent."
+      },
+      {
+        "classification_uid": "c96ac20b-8915-4454-9197-1dc58e6fcd7c",
+        "classification_key": "71b208cb487e8d57c0a53631edf7fbb75fb027583382032bce9ed2b698e378ad",
+        "episode_id": "874b0acd3bce44540edb93a9",
+        "city": "kyiv",
+        "cohort": "H2",
+        "alert_start_at": "2026-09-17T18:56:00.000Z",
+        "alert_end_at": "2026-09-17T19:10:00.000Z",
+        "governing_artifact": "research/historical_v2_formalization_kyiv_proof_2026-10-02.json",
+        "governing_git_blob": "36d830c981ac765ae6ea2150092ab49512e1eec9",
+        "frozen_episode_exists": "PREDECESSOR_H2_PROOF_COUNTS_ONLY",
+        "expected_parent_contract": "UNADJUDICATED_HISTORICAL_PARENT_ADMISSION",
+        "current_parent": {
+          "by_exact_episode_id": 0,
+          "by_exact_city_interval": 0,
+          "classification_binding_state": "UNBOUND",
+          "matched_parent_uid": null
+        },
+        "disposition": "UNRESOLVED",
+        "blocks_c4": true,
+        "reason": "No exact Neon parent at selected read-only snapshot; accepted historical parent identity/admission and source parent migration scope not yet individually adjudicated. Do not infer fuzzy or absent-required parent."
+      },
+      {
+        "classification_uid": "5ccc8492-7b04-49db-8b61-cb91bf0f85a3",
+        "classification_key": "729f058e66ade174d82cd5b8a75c1cc8fb299d58f28dde980c1b288de3a4639a",
+        "episode_id": "8ea7bc150c61e8de2929ab25",
+        "city": "kyiv",
+        "cohort": "H2",
+        "alert_start_at": "2026-09-16T14:23:00.000Z",
+        "alert_end_at": "2026-09-16T15:08:00.000Z",
+        "governing_artifact": "research/historical_v2_formalization_kyiv_proof_2026-10-02.json",
+        "governing_git_blob": "36d830c981ac765ae6ea2150092ab49512e1eec9",
+        "frozen_episode_exists": "PREDECESSOR_H2_PROOF_COUNTS_ONLY",
+        "expected_parent_contract": "UNADJUDICATED_HISTORICAL_PARENT_ADMISSION",
+        "current_parent": {
+          "by_exact_episode_id": 0,
+          "by_exact_city_interval": 0,
+          "classification_binding_state": "UNBOUND",
+          "matched_parent_uid": null
+        },
+        "disposition": "UNRESOLVED",
+        "blocks_c4": true,
+        "reason": "No exact Neon parent at selected read-only snapshot; accepted historical parent identity/admission and source parent migration scope not yet individually adjudicated. Do not infer fuzzy or absent-required parent."
+      },
+      {
+        "classification_uid": "9e7e550b-03b2-43f9-bba9-2b3dc5883629",
+        "classification_key": "e1961679b534078344b1c2b81e01017730e0d8327b30db2a5e966ec5bb303929",
+        "episode_id": "8fdc1d511a3ff6d0e5061c91",
+        "city": "kyiv",
+        "cohort": "H2",
+        "alert_start_at": "2026-09-17T10:22:00.000Z",
+        "alert_end_at": "2026-09-17T10:42:00.000Z",
+        "governing_artifact": "research/historical_v2_formalization_kyiv_proof_2026-10-02.json",
+        "governing_git_blob": "36d830c981ac765ae6ea2150092ab49512e1eec9",
+        "frozen_episode_exists": "PREDECESSOR_H2_PROOF_COUNTS_ONLY",
+        "expected_parent_contract": "UNADJUDICATED_HISTORICAL_PARENT_ADMISSION",
+        "current_parent": {
+          "by_exact_episode_id": 0,
+          "by_exact_city_interval": 0,
+          "classification_binding_state": "UNBOUND",
+          "matched_parent_uid": null
+        },
+        "disposition": "UNRESOLVED",
+        "blocks_c4": true,
+        "reason": "No exact Neon parent at selected read-only snapshot; accepted historical parent identity/admission and source parent migration scope not yet individually adjudicated. Do not infer fuzzy or absent-required parent."
+      },
+      {
+        "classification_uid": "29a5f5ce-771a-4ef1-83d6-a1da1062e992",
+        "classification_key": "d4c1d964404c77cfc6d770cf859ea5899013210caf85e8203adda7ffc9529633",
+        "episode_id": "9f4dbbf90ee53e405d3f0bdb",
+        "city": "kyiv",
+        "cohort": "H2",
+        "alert_start_at": "2026-09-16T06:10:00.000Z",
+        "alert_end_at": "2026-09-16T06:31:00.000Z",
+        "governing_artifact": "research/historical_v2_formalization_kyiv_proof_2026-10-02.json",
+        "governing_git_blob": "36d830c981ac765ae6ea2150092ab49512e1eec9",
+        "frozen_episode_exists": "PREDECESSOR_H2_PROOF_COUNTS_ONLY",
+        "expected_parent_contract": "UNADJUDICATED_HISTORICAL_PARENT_ADMISSION",
+        "current_parent": {
+          "by_exact_episode_id": 0,
+          "by_exact_city_interval": 0,
+          "classification_binding_state": "UNBOUND",
+          "matched_parent_uid": null
+        },
+        "disposition": "UNRESOLVED",
+        "blocks_c4": true,
+        "reason": "No exact Neon parent at selected read-only snapshot; accepted historical parent identity/admission and source parent migration scope not yet individually adjudicated. Do not infer fuzzy or absent-required parent."
+      },
+      {
+        "classification_uid": "92096abc-07aa-42b8-89b5-f249650340fc",
+        "classification_key": "5d04ee4ba051db3f3388dd313a0b61a40a46133d320dbead64de507a4508b39f",
+        "episode_id": "a018066fae8d383f5351c7cc",
+        "city": "kyiv",
+        "cohort": "H2",
+        "alert_start_at": "2026-09-17T01:33:00.000Z",
+        "alert_end_at": "2026-09-17T04:18:00.000Z",
+        "governing_artifact": "research/historical_v2_formalization_kyiv_proof_2026-10-02.json",
+        "governing_git_blob": "36d830c981ac765ae6ea2150092ab49512e1eec9",
+        "frozen_episode_exists": "PREDECESSOR_H2_PROOF_COUNTS_ONLY",
+        "expected_parent_contract": "UNADJUDICATED_HISTORICAL_PARENT_ADMISSION",
+        "current_parent": {
+          "by_exact_episode_id": 0,
+          "by_exact_city_interval": 0,
+          "classification_binding_state": "UNBOUND",
+          "matched_parent_uid": null
+        },
+        "disposition": "UNRESOLVED",
+        "blocks_c4": true,
+        "reason": "No exact Neon parent at selected read-only snapshot; accepted historical parent identity/admission and source parent migration scope not yet individually adjudicated. Do not infer fuzzy or absent-required parent."
+      },
+      {
+        "classification_uid": "0fef7097-990b-405c-b687-3c52a1360deb",
+        "classification_key": "5b742c25ac8b80f952bb45e4b4b60fac41b9bba2349ef8e162d4fcb1d2b4ce52",
+        "episode_id": "a141391372695315ed5f73f7",
+        "city": "kyiv",
+        "cohort": "H2",
+        "alert_start_at": "2026-09-16T16:59:00.000Z",
+        "alert_end_at": "2026-09-16T17:13:00.000Z",
+        "governing_artifact": "research/historical_v2_formalization_kyiv_proof_2026-10-02.json",
+        "governing_git_blob": "36d830c981ac765ae6ea2150092ab49512e1eec9",
+        "frozen_episode_exists": "PREDECESSOR_H2_PROOF_COUNTS_ONLY",
+        "expected_parent_contract": "UNADJUDICATED_HISTORICAL_PARENT_ADMISSION",
+        "current_parent": {
+          "by_exact_episode_id": 0,
+          "by_exact_city_interval": 0,
+          "classification_binding_state": "UNBOUND",
+          "matched_parent_uid": null
+        },
+        "disposition": "UNRESOLVED",
+        "blocks_c4": true,
+        "reason": "No exact Neon parent at selected read-only snapshot; accepted historical parent identity/admission and source parent migration scope not yet individually adjudicated. Do not infer fuzzy or absent-required parent."
+      },
+      {
+        "classification_uid": "8050c3dd-866d-4f6b-ac05-ace19b338e0e",
+        "classification_key": "08bada689018c60ebbbbeae277f870b7860f821146d826ebf9ac07614fe76fe1",
+        "episode_id": "ba16519469117045b3c662e7",
+        "city": "kyiv",
+        "cohort": "H2",
+        "alert_start_at": "2026-09-17T17:40:00.000Z",
+        "alert_end_at": "2026-09-17T17:45:00.000Z",
+        "governing_artifact": "research/historical_v2_formalization_kyiv_proof_2026-10-02.json",
+        "governing_git_blob": "36d830c981ac765ae6ea2150092ab49512e1eec9",
+        "frozen_episode_exists": "PREDECESSOR_H2_PROOF_COUNTS_ONLY",
+        "expected_parent_contract": "UNADJUDICATED_HISTORICAL_PARENT_ADMISSION",
+        "current_parent": {
+          "by_exact_episode_id": 0,
+          "by_exact_city_interval": 0,
+          "classification_binding_state": "UNBOUND",
+          "matched_parent_uid": null
+        },
+        "disposition": "UNRESOLVED",
+        "blocks_c4": true,
+        "reason": "No exact Neon parent at selected read-only snapshot; accepted historical parent identity/admission and source parent migration scope not yet individually adjudicated. Do not infer fuzzy or absent-required parent."
+      },
+      {
+        "classification_uid": "6562b215-5a14-4d1f-8e53-0a9ed942ef72",
+        "classification_key": "19a1b4a7fdc73f2a698a544d6830de661ca32c16ec8970fa6e2db886397e7960",
+        "episode_id": "baaa05dfc347eee6e22e2eb5",
+        "city": "kyiv",
+        "cohort": "H2",
+        "alert_start_at": "2026-09-17T13:31:00.000Z",
+        "alert_end_at": "2026-09-17T13:57:00.000Z",
+        "governing_artifact": "research/historical_v2_formalization_kyiv_proof_2026-10-02.json",
+        "governing_git_blob": "36d830c981ac765ae6ea2150092ab49512e1eec9",
+        "frozen_episode_exists": "PREDECESSOR_H2_PROOF_COUNTS_ONLY",
+        "expected_parent_contract": "UNADJUDICATED_HISTORICAL_PARENT_ADMISSION",
+        "current_parent": {
+          "by_exact_episode_id": 0,
+          "by_exact_city_interval": 0,
+          "classification_binding_state": "UNBOUND",
+          "matched_parent_uid": null
+        },
+        "disposition": "UNRESOLVED",
+        "blocks_c4": true,
+        "reason": "No exact Neon parent at selected read-only snapshot; accepted historical parent identity/admission and source parent migration scope not yet individually adjudicated. Do not infer fuzzy or absent-required parent."
+      },
+      {
+        "classification_uid": "e47ed5ca-09c1-4be1-ae74-f7ab714f1ace",
+        "classification_key": "73b3dcc600c6237da87ea82b4a6e0946aa3516186acd6abca7af43c1e33e717c",
+        "episode_id": "cce2ce6afe7dca47f7c21d4b",
+        "city": "kyiv",
+        "cohort": "H2",
+        "alert_start_at": "2026-09-16T21:21:00.000Z",
+        "alert_end_at": "2026-09-16T22:33:00.000Z",
+        "governing_artifact": "research/historical_v2_formalization_kyiv_proof_2026-10-02.json",
+        "governing_git_blob": "36d830c981ac765ae6ea2150092ab49512e1eec9",
+        "frozen_episode_exists": "PREDECESSOR_H2_PROOF_COUNTS_ONLY",
+        "expected_parent_contract": "UNADJUDICATED_HISTORICAL_PARENT_ADMISSION",
+        "current_parent": {
+          "by_exact_episode_id": 0,
+          "by_exact_city_interval": 0,
+          "classification_binding_state": "UNBOUND",
+          "matched_parent_uid": null
+        },
+        "disposition": "UNRESOLVED",
+        "blocks_c4": true,
+        "reason": "No exact Neon parent at selected read-only snapshot; accepted historical parent identity/admission and source parent migration scope not yet individually adjudicated. Do not infer fuzzy or absent-required parent."
+      },
+      {
+        "classification_uid": "24e15ef6-2309-4801-89c8-ff5dc270e5dc",
+        "classification_key": "17b2e11bf04b2714f31b3999d68f9ef27d0f11279da5f827f987a1fbeccedd0d",
+        "episode_id": "db5d4ace535298a36b0ceadc",
+        "city": "kyiv",
+        "cohort": "H2",
+        "alert_start_at": "2026-09-16T02:05:00.000Z",
+        "alert_end_at": "2026-09-16T02:09:00.000Z",
+        "governing_artifact": "research/historical_v2_formalization_kyiv_proof_2026-10-02.json",
+        "governing_git_blob": "36d830c981ac765ae6ea2150092ab49512e1eec9",
+        "frozen_episode_exists": "PREDECESSOR_H2_PROOF_COUNTS_ONLY",
+        "expected_parent_contract": "UNADJUDICATED_HISTORICAL_PARENT_ADMISSION",
+        "current_parent": {
+          "by_exact_episode_id": 0,
+          "by_exact_city_interval": 0,
+          "classification_binding_state": "UNBOUND",
+          "matched_parent_uid": null
+        },
+        "disposition": "UNRESOLVED",
+        "blocks_c4": true,
+        "reason": "No exact Neon parent at selected read-only snapshot; accepted historical parent identity/admission and source parent migration scope not yet individually adjudicated. Do not infer fuzzy or absent-required parent."
+      },
+      {
+        "classification_uid": "b644517c-e393-4078-8fde-d53799ea4071",
+        "classification_key": "8374515afa060059ff82f7a02a71619af0ad4d95438497e9614c5defe4137321",
+        "episode_id": "ed5c27624d6bef47b04b5050",
+        "city": "kyiv",
+        "cohort": "H2",
+        "alert_start_at": "2026-09-16T18:20:00.000Z",
+        "alert_end_at": "2026-09-16T18:31:00.000Z",
+        "governing_artifact": "research/historical_v2_formalization_kyiv_proof_2026-10-02.json",
+        "governing_git_blob": "36d830c981ac765ae6ea2150092ab49512e1eec9",
+        "frozen_episode_exists": "PREDECESSOR_H2_PROOF_COUNTS_ONLY",
+        "expected_parent_contract": "UNADJUDICATED_HISTORICAL_PARENT_ADMISSION",
+        "current_parent": {
+          "by_exact_episode_id": 0,
+          "by_exact_city_interval": 0,
+          "classification_binding_state": "UNBOUND",
+          "matched_parent_uid": null
+        },
+        "disposition": "UNRESOLVED",
+        "blocks_c4": true,
+        "reason": "No exact Neon parent at selected read-only snapshot; accepted historical parent identity/admission and source parent migration scope not yet individually adjudicated. Do not infer fuzzy or absent-required parent."
+      },
+      {
+        "classification_uid": "583be6d4-adb1-4938-8186-d97d9012c2be",
+        "classification_key": "674b1d8c36ed29aa4ad6295f087ec94657b778934790cff6ce859bf17a2f3c1d",
+        "episode_id": "ef14e0c9d07f731fa667653f",
+        "city": "kyiv",
+        "cohort": "H2",
+        "alert_start_at": "2026-09-16T03:53:00.000Z",
+        "alert_end_at": "2026-09-16T04:36:00.000Z",
+        "governing_artifact": "research/historical_v2_formalization_kyiv_proof_2026-10-02.json",
+        "governing_git_blob": "36d830c981ac765ae6ea2150092ab49512e1eec9",
+        "frozen_episode_exists": "PREDECESSOR_H2_PROOF_COUNTS_ONLY",
+        "expected_parent_contract": "UNADJUDICATED_HISTORICAL_PARENT_ADMISSION",
+        "current_parent": {
+          "by_exact_episode_id": 0,
+          "by_exact_city_interval": 0,
+          "classification_binding_state": "UNBOUND",
+          "matched_parent_uid": null
+        },
+        "disposition": "UNRESOLVED",
+        "blocks_c4": true,
+        "reason": "No exact Neon parent at selected read-only snapshot; accepted historical parent identity/admission and source parent migration scope not yet individually adjudicated. Do not infer fuzzy or absent-required parent."
+      }
+    ]
+  },
+  "global_historical_missing_extra": "NOT CERTIFIED",
+  "bounded_mismatch_examples": [],
+  "exact_next_task": "COMPLETE INDEPENDENT FROZEN H1 SOURCE/EVENT/KEY PROJECTIONS AND H2 19542 ROW-LEVEL EXPECTED AUTHORITY WITHOUT CLASSIFIER RERUN; ADJUDICATE ALL 25 HISTORICAL PARENT CONTRACTS",
+  "not_eligible_next_after_pass": "INDEPENDENT 23-CITY CANONICAL PARENT CONTINUITY, DUE-WORK ACKNOWLEDGEMENT AND FAIL-CLOSED CONTRACT PROOF",
+  "safety": {
+    "DB_WRITES": 0,
+    "NEON_BRANCH_MUTATIONS": 0,
+    "PRODUCTION_MUTATION": "NO",
+    "SITE_PROD_MUTATION": "NO",
+    "WORKFLOW_CONFIG_PRODUCTION_MUTATION": "NO",
+    "CUTOVER_ACTIONS": 0,
+    "LEGACY_PATHS_DISABLED": 0,
+    "A5_REEXECUTIONS": 0,
+    "HISTORICAL_BACKFILLS": 0,
+    "PARENT_REPAIRS": 0,
+    "CLASSIFICATION_REPAIRS": 0,
+    "SOURCE_REPAIRS": 0,
+    "EVENT_REPAIRS": 0,
+    "CLASSIFIER_REEXECUTIONS_FOR_TRUTH": 0
+  }
+}
