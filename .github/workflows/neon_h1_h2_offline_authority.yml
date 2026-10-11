@@ -78,9 +78,14 @@ jobs:
               return json.loads(raw),{"commit":commit,"path":path,"git_blob":blob,"bytes":len(raw),"sha256":sha256(raw),"status":"EXACT_BYTES_VERIFIED"}
           
           def find_time(row,key):
+              from datetime import datetime,timezone
               for parent in [row,row.get("historical_episode") or {},row.get("canonical_episode") or {},row.get("episode") or {},row.get("origin_episode") or {}]:
                   if isinstance(parent,dict) and key in parent:
                       return parent.get(key),key
+              micros=row.get(key+"_utc_microseconds")
+              if isinstance(micros,int):
+                  dt=datetime.fromtimestamp(micros/1000000,timezone.utc)
+                  return dt.isoformat(timespec="microseconds").replace("+00:00","Z"),"UTC_MICROSECOND_EXPORT_CONVERSION"
               return None,None
           
           def main():
