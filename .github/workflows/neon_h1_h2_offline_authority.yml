@@ -13,80 +13,230 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 1
-      - name: Check frozen row projections and provenance
+      - name: Verify historical inputs offline with independent A and B
         shell: bash
         run: |
           set -euo pipefail
+          for commit in 02ad2e8fadee78442753567bc2d3a540345d8e8a 03a04d33f7616b77181741fd77a776c490391d07 efefa399e69eadd3d7fc8393ac1553cfde35f138 31aa7a8f8f57ff090f24814ef3c62137eebebf16 5d18ef85a66384f189ede5ca5654d750f60f088b 71cb6f6fbe856cc7b96759310fe9cc9c71cc0453 1998919036b4832fc3555b54c9854e6cfe24a696 79397290b0d51ca49bf15d6e5890ffc3ce631ce3 b09a95da6354d496eea478fc7e6871e62acb4b7d 130f1bdef1bb2479e9b992d26009472930e91987 05e9ce706a2f8da459f46fb130bc25d716cfcc46 cf20d7f411688de9d2684b8baac63c796bfa090e c01f4b3d8f304a8024899f22eaa8a73a8975af05 19637504db967003c4e0465957dc7bd2bf5fbc58 a8eeaf13d51d3e16582212c85cd69a9e6c09685d 778fb57908f64c684d3ee7df5d9a7e3f7731559b; do
+            git fetch --quiet --no-tags --depth=1 origin "$commit"
+          done
+          cat > /tmp/recon.py <<'PY'
+          import collections
+          import hashlib
+          import json
+          import os
+          import re
+          import subprocess
+          import sys
+          
+          REPO=os.environ["GITHUB_WORKSPACE"]
+          H1=("02ad2e8fadee78442753567bc2d3a540345d8e8a","research/attack_event_5city_persistence_identity_export_v2_2026-10-04.json","a2e34c4a114ad335d35068d6c6a3a4606b09db7f",29774541,"71ab9ac4f8dbeefcdb074ab60d485ac0546086ce4bd9db755af797398895d544")
+          H2=("03a04d33f7616b77181741fd77a776c490391d07","research/attack_event_18city_persistence_identity_export_v2_2026-10-04.json","a240f1950748afcb9fc974c49ac58da07adfff65",60509907,"a8440ab537e1b675c7223b7eb7b29c817c1a2e8fc26ba5cf494b5efb3caf662a")
+          COMBINED=("efefa399e69eadd3d7fc8393ac1553cfde35f138","research/attack_event_23city_persistence_snapshot_v2_2026-10-04.json","8a2f6bd33f879be9db978da59c12c34e61f6f843",90282029,"09458bcf0a019fa2939eb9dfa484da46cd8fa2be077343c5ba6d595c93d71788")
+          WORKERS=[
+          ("chernihiv_dnipro","1998919036b4832fc3555b54c9854e6cfe24a696","9416f9cb60b1b078268d74c6c8b70f76af6f9e58","df432d4d8b369f63d9ad575bc4a3dc4abc48db0d","TSV_ID_STATE","chernihiv,dnipro"),
+          ("kharkiv_kherson","79397290b0d51ca49bf15d6e5890ffc3ce631ce3","f5fa45527f40a5af02e98ea5d0958547756d0218","d731d76b3e835d5e3a2ebbbe134592202c4c5495","CANON_CITY_TARGETS","kharkiv,kherson"),
+          ("kropyvnytskyi_mykolaiv","b09a95da6354d496eea478fc7e6871e62acb4b7d","3db2c10957beb51cfc565af645f06007a8c0ca55","af1b035054b7acf2fe5937c4410d573fea82fb62","CANON_CHRONO_FULL","kropyvnytskyi,mykolaiv"),
+          ("odesa","130f1bdef1bb2479e9b992d26009472930e91987","94093565a733d0dc5cf0dc85ab8441a551287ef0","7105e67e50197eb2e78f588ba3b666c19f0f10f8","CANON_ID_STATE_ARRAY","odesa"),
+          ("chernivtsi_ivano_frankivsk","05e9ce706a2f8da459f46fb130bc25d716cfcc46","8144e47393299a9426a507a2c45c8e5cb9fe3464","19918b5f52710beebc566dc2d97b2321f767c9bf","CANON_ID_STATE_ARRAY","chernivtsi,ivano_frankivsk"),
+          ("khmelnytskyi_lutsk","cf20d7f411688de9d2684b8baac63c796bfa090e","1deb9916d5d35af10297af5aead38bf741b86852","OTHER","CANON_ID_STATE_ARRAY","khmelnytskyi,lutsk"),
+          ("poltava_rivne","c01f4b3d8f304a8024899f22eaa8a73a8975af05","182970ddb52949a7d34e1d4246928f6f654f9b51","OTHER","CANON_ID_STATE_ARRAY","poltava,rivne"),
+          ("ternopil_uzhhorod","19637504db967003c4e0465957dc7bd2bf5fbc58","2e23c9b778723c4fef0ad6e22b73b954ff02bb3a","bb67860029943efef8929f54f5bcf0c761566694","CANON_ID_STATE_ARRAY","ternopil,uzhhorod"),
+          ("vinnytsia_zhytomyr","a8eeaf13d51d3e16582212c85cd69a9e6c09685d","211a602b3cf9a08e33c3ea733bc63984314362dd","42674da447270ec3664b972289d543d593a72759","CANON_ID_STATE_ARRAY","vinnytsia,zhytomyr"),
+          ("kyiv","778fb57908f64c684d3ee7df5d9a7e3f7731559b","36d830c981ac765ae6ea2150092ab49512e1eec9","461f1719d1b8ce17dddc16428d7b23c8704ecaae","CANON_ID_STATE_ARRAY","kyiv")
+          ]
+          SCRIPTS={"chernihiv_dnipro":"form alize_historical_v2_chernihiv_dnipro.py","kharkiv_kherson":"historical_v2_formalization_existing_evidence.py","kropyvnytskyi_mykolaiv":"formalize_historical_v2_existing_evidence.py","odesa":"prove_historical_v2_formalization_odesa.py","chernivtsi_ivano_frankivsk":"historical_v2_formalize_chernivtsi_ivano_frankivsk.py","khmelnytskyi_lutsk":"historical_v2_formalize_khmelnytskyi_lutsk.py","poltava_rivne":"historical_v2_formalize_poltava_rivne.py","ternopil_uzhhorod":"historical_v2_formalize_ternopil_uzhhorod.py","vinnytsia_zhytomyr":"historical_v2_formalize_stream09.py","kyiv":"historical_v2_formalize_kyiv.py"}
+          SCRIPTS["chernihiv_dnipro"]="formalize_historical_v2_chernihiv_dnipro.py"
+          SCRIPT_SHA={"khmelnytskyi_lutsk":"89bd5974c40ac6c862eaf2abdc1a689b3451c7d3","poltava_rivne":"9eaea9488cac04c04760cac141dd4422655b7cd4"}
+          ACCEPTANCE=("31aa7a8f8f57ff090f24814ef3c62137eebebf16","research/historical_v2_18city_acceptance_2026-10-02.json","754da5b8c330188889f3f8fb22e671cbc6118cac")
+          REPAIR=("5d18ef85a66384f189ede5ca5654d750f60f088b","research/historical_offline_repair_recovery_scan_2026-10-02.json","26db43c2bd7fbd9e16a53e8ccefea080636bbb73")
+          CAMPAIGN="71cb6f6fbe856cc7b96759310fe9cc9c71cc0453"
+          METHODOLOGY="historical-attack-event-air-defense-action-v2"
+          
+          def git(*parts,raw=False):
+              data=subprocess.check_output(["git",*parts],cwd=REPO,stderr=subprocess.DEVNULL)
+              return data if raw else data.decode().strip()
+          
+          def sha256(data):
+              return hashlib.sha256(data).hexdigest()
+          
+          def canonical(obj):
+              return json.dumps(obj,sort_keys=True,separators=(",",":"),ensure_ascii=False).encode("utf-8")
+          
+          def load_at(ref,path,blob):
+              actual=git("rev-parse",f"{ref}:{path}")
+              if actual != blob:
+                  raise ValueError("PROOF_BLOB_MISMATCH:"+path+" "+actual)
+              return json.loads(git("cat-file","blob",blob,raw=True))
+          
+          def load_export(t):
+              commit,path,blob,nbytes,digest=t
+              actual=git("rev-parse",f"{commit}:{path}")
+              raw=git("cat-file","blob",blob,raw=True)
+              if actual!=blob or len(raw)!=nbytes or sha256(raw)!=digest or hashlib.sha1(f"blob {len(raw)}\0".encode()+raw).hexdigest()!=blob:
+                  raise ValueError("EXPORT_OBJECT_IDENTITY_MISMATCH:"+path)
+              return json.loads(raw),{"commit":commit,"path":path,"git_blob":blob,"bytes":len(raw),"sha256":sha256(raw),"status":"EXACT_BYTES_VERIFIED"}
+          
+          def find_time(row,key):
+              for parent in [row,row.get("historical_episode") or {},row.get("canonical_episode") or {},row.get("episode") or {},row.get("origin_episode") or {}]:
+                  if isinstance(parent,dict) and key in parent:
+                      return parent.get(key),key
+              return None,None
+          
+          def main():
+              h1,h1obj=load_export(H1)
+              h2,h2obj=load_export(H2)
+              combined,combinedobj=load_export(COMBINED)
+              accepted=load_at(*ACCEPTANCE)
+              repairs=load_at(*REPAIR)
+              matrix={r["city_key"]:r for r in accepted["city_matrix"]}
+              h2group=collections.defaultdict(list)
+              for r in h2["classifications"]:
+                  h2group[r["city_key"]].append(r)
+              worker_records=[]
+              cities={}
+              for name,head,proof_blob,script_blob,mode,clist in WORKERS:
+                  path=f"research/historical_v2_formalization_{name}_proof_2026-10-02.json"
+                  proof=load_at(head,path,proof_blob)
+                  script_path="kyiv-air-alerts-grafana/scripts/"+SCRIPTS[name]
+                  observed_script_blob=git("rev-parse",f"{head}:{script_path}")
+                  if script_blob!="OTHER" and observed_script_blob!=script_blob:
+                      raise ValueError("ACCEPTED_GENERATING_SCRIPT_MISMATCH:"+name)
+                  if name in SCRIPT_SHA and observed_script_blob!=SCRIPT_SHA[name]:
+                      raise ValueError("ACCEPTED_GENERATING_SCRIPT_MISMATCH:"+name)
+                  worker_records.append({"worker":name,"accepted_head":head,"proof_path":path,"proof_blob":proof_blob,"original_generator":script_path,"generator_blob":observed_script_blob,"hash_method":mode})
+                  for city in clist.split(","):
+                      p=proof.get("cities",{}).get(city) or (proof if name=="odesa" else {})
+                      expected=matrix[city]["target_state_sha256"]
+                      original=p.get("target_state_sha256")
+                      rows=sorted(h2group[city],key=lambda r:r["historical_episode_id"])
+                      pairs=[(r["historical_episode_id"],r["verdict"]) for r in rows]
+                      missing=[]
+                      if mode=="TSV_ID_STATE":
+                          data="".join(a+"\t"+b+"\n" for a,b in pairs).encode("utf-8")
+                      elif mode=="CANON_CITY_TARGETS":
+                          data=canonical({"city_key":city,"methodology":METHODOLOGY,"targets":[{"episode_id":a,"state":b} for a,b in pairs]})
+                      elif mode=="CANON_ID_STATE_ARRAY":
+                          data=canonical([{"episode_id":a,"state":b} for a,b in pairs])
+                      elif mode=="CANON_CHRONO_FULL":
+                          full=[]
+                          for r in h2group[city]:
+                              start,_=find_time(r,"alert_start")
+                              end,_=find_time(r,"alert_end")
+                              if not isinstance(start,str) or not isinstance(end,str):
+                                  missing.append(r["historical_episode_id"])
+                              full.append({"episode_id":r["historical_episode_id"],"alert_start":start,"alert_end":end,"state":r["verdict"]})
+                          full.sort(key=lambda r:(str(r.get("alert_start") or ""),str(r["episode_id"])))
+                          data=canonical(full) if not missing else None
+                      else:
+                          raise ValueError("UNKNOWN_HASH_MODE")
+                      calculated=sha256(data) if data is not None else None
+                      verdict="PASS" if original==expected and calculated==expected and len(rows)==matrix[city]["canonical_episodes"] else ("UNRESOLVED_INPUT" if missing else "MISMATCH")
+                      cities[city]={"proof_head":head,"original_proof_blob":proof_blob,"generator_blob":observed_script_blob,"method":mode,"rows":len(rows),"accepted_rows":matrix[city]["canonical_episodes"],"original_proof_sha256":original,"accepted_matrix_sha256":expected,"export_embedded_sha256":h2.get("target_hashes",{}).get(city),"recomputed_sha256":calculated,"missing_hash_input_fields":len(missing),"result":verdict}
+              if sorted(cities)!=sorted(matrix):
+                  raise ValueError("H2_CITY_SET_MISMATCH")
+              # Genuine independent H1 row-state and QA comparison against immutable campaign JSON, no classifier.
+              prefix="research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/"
+              paths=git("ls-tree","-r","--name-only",CAMPAIGN,"--",prefix).splitlines()
+              batches=sorted(p for p in paths if re.search(r"/batch_[0-9]+\.json$",p))
+              base={}
+              collisions=[]
+              for p in batches:
+                  blob=git("rev-parse",f"{CAMPAIGN}:{p}")
+                  j=json.loads(git("cat-file","blob",blob,raw=True))
+                  for r in j.get("episode_results",[]):
+                      k=(j["city_key"],r["episode_id"])
+                      if k in base:
+                          collisions.append(k)
+                      base[k]={"state":r.get("classifier_result"),"qa":r.get("qa_reasons"),"source_observation_ids":r.get("source_observation_ids"),"blob":blob}
+              overlay={(r["city"],r["episode_id"]):r for r in repairs["targets"]["changed_targets"]}
+              h1_rows=h1["classifications"]
+              h1_keys=[(r["city_key"],r["historical_episode_id"]) for r in h1_rows]
+              h1_bykey={k:r for k,r in zip(h1_keys,h1_rows)}
+              base_mismatch=[]
+              repaired_mismatch=[]
+              qa_mismatch=[]
+              for k,row in h1_bykey.items():
+                  if k not in base:
+                      base_mismatch.append(k)
+                      continue
+                  expected=overlay[k]["repaired_outcome"] if k in overlay else base[k]["state"]
+                  if row.get("verdict") != expected:
+                      (repaired_mismatch if k in overlay else base_mismatch).append(k)
+                  if k not in overlay and row.get("qa_reasons") is not None and base[k]["qa"] is not None and sorted(row["qa_reasons"])!=sorted(base[k]["qa"]):
+                      qa_mismatch.append(k)
+              h1_report={"frozen_campaign_commit":CAMPAIGN,"frozen_batch_files_read":len(batches),"expected_batch_files":139,"frozen_episode_rows":len(base),"duplicate_frozen_identities":len(collisions),"export_classifications":len(h1_rows),"export_unique_episode_identities":len(set(h1_keys)),"historical_identity_missing":len(set(base)-set(h1_keys)),"historical_identity_extra":len(set(h1_keys)-set(base)),"original_unrepaired_verdict_mismatches":len(base_mismatch),"accepted_repair_overlay_count":len(overlay),"export_repaired_overlay_count":sum(r.get("repair_overlay") is not None for r in h1_rows),"repaired_verdict_mismatches":len(repaired_mismatch),"unchanged_original_qa_mismatches":len(qa_mismatch),"accepted_repaired_target_sha256":repairs["hashes"]["repaired_target_state_sha256"],"embedded_repaired_target_sha256":h1.get("target_state_sha256"),"source_membership_projection_independently_reconstructed":False}
+              h1_report["independent_verdict_identity_gate"]=all([len(batches)==139,len(base)==6863,len(collisions)==0,len(h1_rows)==6863,len(set(h1_keys))==6863,h1_report["historical_identity_missing"]==0,h1_report["historical_identity_extra"]==0,len(base_mismatch)==0,len(repaired_mismatch)==0,len(qa_mismatch)==0,len(overlay)==25,h1_report["embedded_repaired_target_sha256"]==h1_report["accepted_repaired_target_sha256"]])
+              components={}
+              for key in ["classifications","source_links","attack_events"]:
+                  a=sorted(h1[key]+h2[key],key=canonical)
+                  b=sorted(combined[key],key=canonical)
+                  components[key]={"component_count":len(a),"combined_count":len(b),"equal":len(a)==len(b) and sha256(canonical(a))==sha256(canonical(b))}
+              source_code_coverage={
+                  "H1":{"source":"accepted 2026-10-04 H1 Actions producer workflow at HEAD 0ae2b596... plus 2026-10-04 exact freeze finalization source","worker_run_id":37228197343,"worker_artifact_id":11312721451,"generation_lineage":"139 frozen September campaign batch Git blobs plus 25 accepted offline repaired overlays and pinned identity contract","neon_independence":"AFFIRMATIVE_OFFLINE_GIT_INPUT_LINEAGE_IN_ACCEPTED_GENERATOR","export_could_have_been_derived_from_neon":"NO","source_event_key_status":"CODE_DERIVED_NOT_FULLY_INDEPENDENTLY_RECONCILED"},
+                  "H2":{"source":"10 accepted 2026-10-02 formalization worker proof commits and accepted H2 row-target hash matrix; exporter 2026-10-04 commit adds only JSON","generation_lineage":"worker decisions independently frozen; export generation code and inputs not independently tied to exporter file","neon_independence":"NOT_PROVEN_FOR_EXPORT","export_could_have_been_derived_from_neon":"NOT PROVEN","source_event_key_status":"UNRESOLVED"}
+              }
+              h2matched=sum(x["result"]=="PASS" for x in cities.values())
+              blockers=[]
+              if h2matched!=18:blockers.append("H2_CITY_HASHES_NOT_FULLY_INDEPENDENTLY_RECONSTRUCTED")
+              if not h1_report["independent_verdict_identity_gate"]:blockers.append("H1_FROZEN_EPISODE_ROW_RECONCILIATION_NOT_PASS")
+              if source_code_coverage["H2"]["export_could_have_been_derived_from_neon"]!="NO":blockers.append("H2_EXPORT_INDEPENDENCE_FROM_NEON_NOT_AFFIRMATIVELY_PROVEN")
+              blockers.extend(["H1_H2_FULL_SOURCE_EVENT_AND_DETERMINISTIC_KEY_AUTHORITY_NOT_INDEPENDENTLY_PROVEN","25_HISTORICAL_PARENT_ADMISSION_CONTRACTS_UNRESOLVED"])
+              field_coverage={
+                  "H1":{
+                      "historical_episode_identity":"INDEPENDENTLY_PROVEN" if h1_report["independent_verdict_identity_gate"] else "UNRESOLVED",
+                      "accepted_classification_verdict":"INDEPENDENTLY_PROVEN" if h1_report["independent_verdict_identity_gate"] else "UNRESOLVED",
+                      "qa_state":"INDEPENDENTLY_PROVEN_PREVIOUS_ACCEPTED_6863_6863; ORIGINAL_UNREPAIRED_QA_CHECKED_HERE",
+                      "classification_deterministic_key":"DERIVED_CONSISTENCY_ONLY",
+                      "classification_evidence_provenance":"DERIVED_CONSISTENCY_ONLY",
+                      "source_membership_and_source_link_keys":"DERIVED_CONSISTENCY_ONLY",
+                      "attack_event_keys_and_classification_relationships":"DERIVED_CONSISTENCY_ONLY",
+                      "canonical_parent_binding":"UNRESOLVED",
+                      "historical_parent_admission_scope":"UNRESOLVED"
+                  },
+                  "H2":{
+                      "historical_episode_identity":"INDEPENDENTLY_PROVEN_FOR_STATE_PAIRS" if h2matched==18 else "UNRESOLVED",
+                      "accepted_classification_verdict":"INDEPENDENTLY_PROVEN_FOR_STATE_PAIRS" if h2matched==18 else "UNRESOLVED",
+                      "qa_state":"UNRESOLVED",
+                      "classification_deterministic_key":"UNRESOLVED",
+                      "classification_evidence_provenance":"DERIVED_CONSISTENCY_ONLY",
+                      "source_membership_and_source_link_keys":"UNRESOLVED",
+                      "attack_event_keys_and_classification_relationships":"UNRESOLVED",
+                      "canonical_parent_binding":"UNRESOLVED",
+                      "historical_parent_admission_scope":"UNRESOLVED"
+                  }
+              }
+              report={"schema_version":"neon-h1-h2-large-export-authority-transport-v2","purpose":"Bounded offline authority proof; does not assert persisted Neon parity or production activation",
+                  "source_objects":{"H1":h1obj,"H2":h2obj,"COMBINED_DERIVED":combinedobj},
+                  "accepted_18city_matrix":{"commit":ACCEPTANCE[0],"blob":ACCEPTANCE[2],"workers":worker_records,"city_results":dict(sorted(cities.items())),"independently_recomputed_matches":h2matched,"accepted_total_cities":18,"row_total":len(h2["classifications"])},
+                  "H1_offline_frozen_repair_reconciliation":h1_report,
+                  "provenance_and_neon_independence":source_code_coverage,
+                  "combined_derived_consistency":components,
+                  "field_authority_coverage":field_coverage,
+                  "parent_admission":{"eligibility_universe_reconstructable":"NOT_PROVEN","unbound_total":25,"H1_unbound":5,"H2_unbound":20,"accepted_permanent_exceptions":0,"disposition":"ALL_25_REMAIN_UNRESOLVED_NO_FUZZY_BINDINGS","distinct_from_accepted_H1_offline_repairs":True},
+                  "unresolved_limitations":blockers,"neon_queries":0,"database_mutations":0,"production_mutations":0,
+                  "verdict":"H1/H2 ROW-LEVEL AUTHORITY TRANSPORT = PARTIAL" if blockers else "H1/H2 ROW-LEVEL AUTHORITY TRANSPORT = PASS"}
+              target=sys.argv[1]
+              with open(target,"wb") as f:f.write(canonical(report))
+              print("RUN_RESULT="+json.dumps({"report_sha256":sha256(canonical(report)),"h2_hash_matches":h2matched,"h1_gate":h1_report["independent_verdict_identity_gate"],"h2_sample_keys":list(h2["classifications"][0].keys()),"kropy_example":{k:find_time(h2group["kropyvnytskyi"][0],k)[0] for k in ("alert_start","alert_end")}}))
+          if __name__=="__main__":
+              main()
+          
+          PY
+          mkdir -p /tmp/recon_a /tmp/recon_b
+          PYTHONHASHSEED=61 TMPDIR=/tmp/recon_a python3 /tmp/recon.py /tmp/recon_a/result.json
+          PYTHONHASHSEED=97 TMPDIR=/tmp/recon_b python3 /tmp/recon.py /tmp/recon_b/result.json
+          cmp /tmp/recon_a/result.json /tmp/recon_b/result.json
           python3 - <<'PY'
-          import collections,hashlib,json,subprocess
-          objects={
-            "H1":("02ad2e8fadee78442753567bc2d3a540345d8e8a","a2e34c4a114ad335d35068d6c6a3a4606b09db7f"),
-            "H2":("03a04d33f7616b77181741fd77a776c490391d07","a240f1950748afcb9fc974c49ac58da07adfff65"),
-            "COMBINED":("efefa399e69eadd3d7fc8393ac1553cfde35f138","8a2f6bd33f879be9db978da59c12c34e61f6f843")}
-          for commit in [*(v[0] for v in objects.values()),"5d18ef85a66384f189ede5ca5654d750f60f088b","31aa7a8f8f57ff090f24814ef3c62137eebebf16"]:subprocess.check_call(["git","fetch","--depth=1","origin",commit],stdout=subprocess.DEVNULL)
-          def raw(blob):return subprocess.check_output(["git","cat-file","blob",blob])
-          def sha(b):return hashlib.sha256(b).hexdigest()
-          def canon(o):return json.dumps(o,ensure_ascii=False,sort_keys=True,separators=(",",":")).encode()
-          data={k:json.loads(raw(blob)) for k,(_,blob) in objects.items()}
-          reports={}
-          for label,d in data.items():
-            cl=d["classifications"];sl=d["source_links"];ev=d["attack_events"]
-            ids=[(r["city_key"],r["historical_episode_id"]) for r in cl]
-            dist=dict(sorted(collections.Counter(r["verdict"] for r in cl).items()))
-            city={k:len([i for i in ids if i[0]==k]) for k in sorted({i[0] for i in ids})}
-            projection=[{k:r.get(k) for k in ["city_key","historical_episode_id","verdict","classification_key","qa_reasons","event_types","evidence_set_sha256","classifier_blob_sha"]} for r in cl]
-            p={
-              "rows":len(cl),"unique_episode_identities":len(set(ids)),"city_counts":city,
-              "distribution":dist,"sources":len(sl),"events":len(ev),
-              "unique_classification_keys":len({r.get("classification_key") for r in cl}),
-              "unique_source_keys":len({r.get("source_link_key") for r in sl}),
-              "unique_event_keys":len({r.get("attack_event_key") for r in ev}),
-              "identity_projection_sha256":sha(canon(sorted(ids))),
-              "classification_projection_sha256":sha(canon(sorted(projection,key=lambda x:(x["city_key"],x["historical_episode_id"])))),
-              "source_projection_sha256":sha(canon(sorted(sl,key=lambda x:x["source_link_key"]))),
-              "event_projection_sha256":sha(canon(sorted(ev,key=lambda x:x["attack_event_key"]))),
-              "origin_provenance_first":cl[0].get("origin_provenance",{}),
-              "binding_metadata_nonempty":sum(bool(r.get("binding_metadata")) for r in cl),
-              "unbound_eligible_parent_context":sum(bool(r.get("canonical_parent_candidates") or r.get("parent_eligibility")) for r in cl),
-              "nonempty_native_replay":sum(bool(r.get("native_replay_classification_objects")) for r in cl),
-              "nonempty_episode_composition":sum(bool(r.get("episode_composition_objects")) for r in cl)
-            }
-            reports[label]=p
-          h1=data["H1"];h2=data["H2"];merged=data["COMBINED"]
-          # Accepted H1 hash is frozen city/episode order, cannot validate
-          # by sorted order alone. Compare export's own target hash and repair proof.
-          h1repair=json.loads(raw("26db43c2bd7fbd9e16a53e8ccefea080636bbb73"))
-          reports["H1"]["target_hash_claim"]=h1.get("target_state_sha256")
-          reports["H1"]["accepted_repaired_target_hash"]=h1repair["hashes"]["repaired_target_state_sha256"]
-          reports["H1"]["repair_overlay_count"]=sum(r.get("repair_overlay") is not None for r in h1["classifications"])
-          reports["H1"]["repair_target_count"]=len(h1repair["targets"]["changed_targets"])
-          reports["H1"]["repaired_hash_claim_matches"]=h1.get("target_state_sha256")==h1repair["hashes"]["repaired_target_state_sha256"]
-          acceptance=json.loads(raw("754da5b8c330188889f3f8fb22e671cbc6118cac"))
-          expected={r["city_key"]:r for r in acceptance["city_matrix"]}
-          city_results={}
-          for city,e in expected.items():
-            rows=sorted([r for r in h2["classifications"] if r["city_key"]==city],key=lambda x:x["historical_episode_id"])
-            pairs=[(r["historical_episode_id"],r["verdict"]) for r in rows]
-            tsv=sha("".join(a+"\t"+b+"\n" for a,b in pairs).encode())
-            canonical=sha(canon({"city_key":city,"methodology":h2.get("classifier_methodology_version"),"targets":[{"episode_id":a,"state":b} for a,b in pairs]}))
-            city_results[city]={
-               "row_count":len(rows),"accepted_count":e["canonical_episodes"],
-               "accepted_tsv_hash":e["target_state_sha256"],"recomputed_tsv_hash":tsv,"tsv_match":tsv==e["target_state_sha256"],
-               "recomputed_canonical_json_hash":canonical,
-               "export_embedded_hash":h2["target_hashes"].get(city),
-               "embedded_hash_match":tsv==h2["target_hashes"].get(city)}
-          reports["H2"]["city_target_hashes"]=city_results
-          reports["H2"]["accepted_city_tsv_matches"]=sum(x["tsv_match"] for x in city_results.values())
-          reports["H2"]["embedded_city_tsv_matches"]=sum(x["embedded_hash_match"] for x in city_results.values())
-          reports["H2"]["accepted_city_row_count_matches"]=sum(x["row_count"]==x["accepted_count"] for x in city_results.values())
-          # Cross-check combined snapshot by exact canonical row serialization, allowing ordering differences.
-          def items_equal(key,sortkey):
-            a=sorted(h1[key]+h2[key],key=lambda x:canon(x))
-            b=sorted(merged[key],key=lambda x:canon(x))
-            return len(a)==len(b),sha(canon(a))==sha(canon(b)),len(a),len(b)
-          reports["COMBINED"]["components_comparison"]={k:items_equal(k,None) for k in ["classifications","source_links","attack_events"]}
-          reports["COMBINED"]["source_provenance"]=merged.get("snapshot_provenance",{})
-          report={"inspected_head":subprocess.check_output(["git","rev-parse","HEAD"],text=True).strip(),"rows":reports}
-          digest=sha(canon(report))
-          print("FROZEN_AUTHORITY_ROW_CHECK_JSON="+json.dumps({"report_sha256":digest,"report":report},sort_keys=True,separators=(",",":"),ensure_ascii=False))
+          import hashlib,json,pathlib
+          a=pathlib.Path('/tmp/recon_a/result.json').read_bytes()
+          b=pathlib.Path('/tmp/recon_b/result.json').read_bytes()
+          assert a==b
+          p=json.loads(a)
+          sha=hashlib.sha256(a).hexdigest()
+          p["deterministic_ab"]={"independently_executed_processes":2,"python_hash_seeds":[61,97],"run_a_canonical_sha256":sha,"run_b_canonical_sha256":sha,"byte_exact":True}
+          raw=json.dumps(p,sort_keys=True,separators=(",",":"),ensure_ascii=False).encode()
+          print("FINAL_AUTHORITY_PROOF_SHA256="+hashlib.sha256(raw).hexdigest())
+          print("FINAL_AUTHORITY_PROOF_BYTES="+str(len(raw)))
+          print("FINAL_AUTHORITY_PROOF_JSON="+raw.decode())
           PY
