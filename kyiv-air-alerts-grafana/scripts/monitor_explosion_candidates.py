@@ -4831,60 +4831,6 @@ def orchestration_self_test() -> dict:
     assert not due_checks(state, run_started)
     final_cutoff = run_started + timedelta(seconds=2)
     newly_due = due_checks(state, final_cutoff)
-    # Legacy follow-up selection remains independent; it no longer drives
-    # canonical persistence. Persist coverage before journal selection.
-    if canary_cutoff is not None and persistence_enabled:
-        live_canonical_queue.register_state(state, canary_cutoff, set(CITY_CONFIG))
-        coverage_result = live_canonical_queue.record_coverage(
-            state, due, persistence_coverage_by_city, queue, followup_cutoff,
-        )
-        import psycopg
-        from attack_event_canonical_persistence import persist_canonical_work
-        with psycopg.connect(os.environ["ATTACK_EVENT_DATABASE_URL"], autocommit=False) as canonical_conn:
-            tips = live_canonical_queue.read_current_tips(canonical_conn, canary_cutoff)
-            canonical_conn.rollback()
-            selection = live_canonical_queue.reconcile_and_select(
-                state, tips=tips, candidates=queue, cutoff=canary_cutoff,
-                max_episodes=min(10, persistence_canary_max or 10), now=followup_cutoff,
-            )
-            parent_selection_state = {
-                "cities": {
-                    city: {"episodes": [row["episode"] for row in selection["selected"]
-                                        if row["episode"]["city_key"] == city]}
-                    for city in CITY_CONFIG
-                }
-            }
-            parent_ordering = live_parent_ordering.preclassification_parent_gate(
-                parent_selection_state, cutoff=canary_cutoff,
-                max_episodes=min(10, persistence_canary_max or 10),
-                connection=canonical_conn,
-            )
-            parent_ready_keys = {
-                (str(row.get("city") or ""), str(row.get("episode_id") or ""))
-                for row in parent_ordering.get("records") or []
-            }
-            selected_ready = {
-                "selected": [row for row in selection["selected"]
-                             if (row["episode"]["city_key"], row["episode"]["episode_id"])
-                             in parent_ready_keys]
-            }
-            canonical_persistence = persist_canonical_work(
-                state=state, selection=selected_ready, candidates=queue,
-                connection=canonical_conn, at=followup_cutoff,
-            )
-            for row in selection["selected"]:
-                pair = (row["episode"]["city_key"], row["episode"]["episode_id"])
-                if pair not in parent_ready_keys:
-                    live_canonical_queue.retry(state, row["work_id"], followup_cutoff, "CANONICAL_PARENT_NOT_READY")
-            canonical_persistence["queue"] = {
-                key: value for key, value in selection.items() if key != "selected"
-            }
-            canonical_persistence["queue"]["selected"] = len(selection["selected"])
-            canonical_persistence["coverage"] = coverage_result
-    else:
-        canonical_persistence = {"enabled": False, "reason": "ATTACK_EVENT_DATABASE_URL_NOT_CONFIGURED"}
-        parent_ordering = {"enabled": False, "reason": "ATTACK_EVENT_DATABASE_URL_NOT_CONFIGURED"}
-
     persistence_due = select_persistence_due(
         newly_due,
         parent_ready_keys,
@@ -5184,6 +5130,60 @@ def main() -> None:
         )
         for city_key in CITY_CONFIG
     }
+
+    # Legacy follow-up selection remains independent; it no longer drives
+    # canonical persistence. Persist coverage before journal selection.
+    if canary_cutoff is not None and persistence_enabled:
+        live_canonical_queue.register_state(state, canary_cutoff, set(CITY_CONFIG))
+        coverage_result = live_canonical_queue.record_coverage(
+            state, due, persistence_coverage_by_city, queue, followup_cutoff,
+        )
+        import psycopg
+        from attack_event_canonical_persistence import persist_canonical_work
+        with psycopg.connect(os.environ["ATTACK_EVENT_DATABASE_URL"], autocommit=False) as canonical_conn:
+            tips = live_canonical_queue.read_current_tips(canonical_conn, canary_cutoff)
+            canonical_conn.rollback()
+            selection = live_canonical_queue.reconcile_and_select(
+                state, tips=tips, candidates=queue, cutoff=canary_cutoff,
+                max_episodes=min(10, persistence_canary_max or 10), now=followup_cutoff,
+            )
+            parent_selection_state = {
+                "cities": {
+                    city: {"episodes": [row["episode"] for row in selection["selected"]
+                                        if row["episode"]["city_key"] == city]}
+                    for city in CITY_CONFIG
+                }
+            }
+            parent_ordering = live_parent_ordering.preclassification_parent_gate(
+                parent_selection_state, cutoff=canary_cutoff,
+                max_episodes=min(10, persistence_canary_max or 10),
+                connection=canonical_conn,
+            )
+            parent_ready_keys = {
+                (str(row.get("city") or ""), str(row.get("episode_id") or ""))
+                for row in parent_ordering.get("records") or []
+            }
+            selected_ready = {
+                "selected": [row for row in selection["selected"]
+                             if (row["episode"]["city_key"], row["episode"]["episode_id"])
+                             in parent_ready_keys]
+            }
+            canonical_persistence = persist_canonical_work(
+                state=state, selection=selected_ready, candidates=queue,
+                connection=canonical_conn, at=followup_cutoff,
+            )
+            for row in selection["selected"]:
+                pair = (row["episode"]["city_key"], row["episode"]["episode_id"])
+                if pair not in parent_ready_keys:
+                    live_canonical_queue.retry(state, row["work_id"], followup_cutoff, "CANONICAL_PARENT_NOT_READY")
+            canonical_persistence["queue"] = {
+                key: value for key, value in selection.items() if key != "selected"
+            }
+            canonical_persistence["queue"]["selected"] = len(selection["selected"])
+            canonical_persistence["coverage"] = coverage_result
+    else:
+        canonical_persistence = {"enabled": False, "reason": "ATTACK_EVENT_DATABASE_URL_NOT_CONFIGURED"}
+        parent_ordering = {"enabled": False, "reason": "ATTACK_EVENT_DATABASE_URL_NOT_CONFIGURED"}
 
     persistence_due = select_persistence_due(
         due,
