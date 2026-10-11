@@ -1,0 +1,92 @@
+{
+  "proof_kind": "kyiv_live_canonical_queue_disposable_postgres_partial_acceptance",
+  "date_utc": "2026-10-11",
+  "verdict": "KYIV LIVE CANONICAL QUEUE INTEGRATION = PARTIAL",
+  "accepted_predecessor": "KYIV LIVE CANONICAL QUEUE INTEGRATION = PARTIAL",
+  "repository": "olegbalakin-cmyk/kyiv-air-alerts-grafana",
+  "branch": "kyiv-live-canonical-queue-pg16-proof-2026-10-11",
+  "tested_head": "b1036d43ebd9b2df15eb58fce2192f67eb30ee68",
+  "original_implementation_commit": "0bcd0a3745036cab330c264e9097b4abdcdc8053",
+  "baseline_wip": "92d57bbbfad60e6c09bb92372b1e84f38fa6ced4",
+  "pg16": {
+    "version": "16.15",
+    "method": "GitHub Actions service container, fresh DB per matrix job",
+    "schema_tables": [
+      "ingestion_runs",
+      "ingestion_checkpoints",
+      "alert_episodes",
+      "alert_episode_sources",
+      "attack_event_classifications",
+      "attack_event_sources",
+      "attack_events"
+    ],
+    "schema_source": "Read-only Neon catalog metadata, original constraints and indexes retained",
+    "successful_batched_classifications_per_replay": 470,
+    "synthetic_pending_episode_count": 469,
+    "batch_size_limit": 10,
+    "successful_batches": 47,
+    "test_case_failures_per_replay": 0,
+    "test_cases": [
+      "initial_postgres_commit_and_separate_readback",
+      "idempotent_identical_rerun",
+      "classification_crash_rolls_back",
+      "stale_expected_tip_fail_closed",
+      "missing_parent_fail_closed",
+      "469_real_postgres_commits_47_batches"
+    ],
+    "monitor_main_invocations_per_replay": 2,
+    "authoritative_classifier_invocations_per_replay": 1,
+    "monitor_actual_positive_verdict": "STRICT_EVENT_POSITIVE",
+    "monitor_committed_classifications_per_replay": 1,
+    "monitor_replay_no_duplicate": true,
+    "monitor_source_links": 1,
+    "monitor_episode_id": "486ea0046f7c57bcf6e75c32",
+    "configured_city_count": 23,
+    "city_by_city_regression_executed": false
+  },
+  "actions": {
+    "run_id": 38127425160,
+    "conclusion": "success",
+    "jobs": {
+      "A": 114434584216,
+      "B": 114434584104,
+      "comparison": 114434752420
+    },
+    "artifacts": {
+      "A": {
+        "id": 11697344113,
+        "sha256_zip": "8974c9a49ce49631ecf9db7a6d040e8f4adf03af1533833e38d39176905c2107"
+      },
+      "B": {
+        "id": 11697877981,
+        "sha256_zip": "38268b0f2997ec309b783564053c885e83fea74681d84484980a6885baac9b89"
+      }
+    },
+    "pg_report_file_sha256": "b268699987a71ccd451deb6531f620b091213f6c2f27c9df032f5d620945af2a",
+    "monitor_summary_sha256": "5f249f9b4eeb6a0f349bfe8c754875400c84c40c992e2cae858e603195c09208",
+    "pg_fingerprint": "639b2c7f0bd01a3d70c82e8da01c27aa34096250c00904d4d6bc6ee303addce8",
+    "comparison": "cmp of full PG report and selected monitor summary identical"
+  },
+  "code_fixes": [
+    "Classifications require IDLE PostgreSQL connection before entering top-level transaction",
+    "Independent post-commit readback uses a separate authenticated PostgreSQL connection configured by explicit dsn or ATTACK_EVENT_DATABASE_URL",
+    "Fail closed if verification DSN unavailable"
+  ],
+  "remaining_gates": [
+    "All 12 required transaction scenarios were not executed: crash after commit before acknowledgement, dual-worker same-episode concurrency, parent identity mismatch (missing-parent alone tested), exact source-link semantic conflict and FK failure, positive-to-nonpositive revision and event withdraw, failure after event insert rollback, independent deliberate readback tampering",
+    "October 11 frozen WIP 29 eligible / 1 classified / 28 unclassified identities and evidence dispositions not reconstructed; synthetic workload does not replace this",
+    "Existing full monitoring regression and exact per-city comparisons against pinned implementation not run; 23 configured city count alone is not 23-city regression",
+    "Full deterministic JSON identity/file-hash/SQL-row snapshot and transactions attempted/committed/rolled-back across every test case not frozen as comprehensive report",
+    "All original configured source policies and every historical/Sevastopol/raion proxy exclusion not exhaustively exercised",
+    "Not eligible for PROVEN OFFLINE despite successful real PG and actual main() subset"
+  ],
+  "constraints": {
+    "neon_writes": 0,
+    "production_deploy": false,
+    "site_prod_changes": false,
+    "main_docs_changes": false,
+    "active_wip_changes": false,
+    "canary_limit": 10
+  },
+  "smallest_corrective_task": "Extend the same isolated PG16 A/B workflow from its validated implementation to complete all missing transaction/crash/concurrency/revision/source-link tamper cases, reconstruct and adjudicate all real 29 frozen Kyiv identities without false certification, run full 23-city and original-code regressions, and freeze per-row + per-batch deterministic evidence before independent acceptance."
+}
