@@ -23,7 +23,7 @@ jobs:
             "H1":("02ad2e8fadee78442753567bc2d3a540345d8e8a","a2e34c4a114ad335d35068d6c6a3a4606b09db7f"),
             "H2":("03a04d33f7616b77181741fd77a776c490391d07","a240f1950748afcb9fc974c49ac58da07adfff65"),
             "COMBINED":("efefa399e69eadd3d7fc8393ac1553cfde35f138","8a2f6bd33f879be9db978da59c12c34e61f6f843")}
-          for commit,_ in objects.values():subprocess.check_call(["git","fetch","--depth=1","origin",commit],stdout=subprocess.DEVNULL)
+          for commit in [*(v[0] for v in objects.values()),"5d18ef85a66384f189ede5ca5654d750f60f088b","31aa7a8f8f57ff090f24814ef3c62137eebebf16"]:subprocess.check_call(["git","fetch","--depth=1","origin",commit],stdout=subprocess.DEVNULL)
           def raw(blob):return subprocess.check_output(["git","cat-file","blob",blob])
           def sha(b):return hashlib.sha256(b).hexdigest()
           def canon(o):return json.dumps(o,ensure_ascii=False,sort_keys=True,separators=(",",":")).encode()
