@@ -1,0 +1,41 @@
+name: Isolated Kyiv canonical journal proof
+
+on:
+  push:
+    branches: [kyiv-live-canonical-queue-proof-2026-10-11]
+    paths:
+      - ".github/workflows/kyiv-canonical-journal-proof.yml"
+      - "kyiv-air-alerts-grafana/scripts/live_canonical_queue.py"
+      - "kyiv-air-alerts-grafana/tests/prove_live_canonical_queue_journal.py"
+
+permissions:
+  contents: read
+
+jobs:
+  isolated-offline:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      ATTACK_EVENT_DATABASE_URL: ""
+      DATABASE_URL: ""
+      NEON_DATABASE_URL: ""
+      GITHUB_TOKEN: ""
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: A/B standalone pure-journal replay
+        run: |
+          set -euo pipefail
+          python kyiv-air-alerts-grafana/tests/prove_live_canonical_queue_journal.py > /tmp/queue-proof-A.json
+          python kyiv-air-alerts-grafana/tests/prove_live_canonical_queue_journal.py > /tmp/queue-proof-B.json
+          cmp /tmp/queue-proof-A.json /tmp/queue-proof-B.json
+          cat /tmp/queue-proof-A.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: kyiv-canonical-journal-smoke-A-B
+          path: /tmp/queue-proof-*.json
+          retention-days: 30
