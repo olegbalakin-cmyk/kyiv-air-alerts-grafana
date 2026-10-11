@@ -58,7 +58,7 @@ jobs:
         run: python -m py_compile kyiv-air-alerts-grafana/tests/prove_pg16_safety_matrix.py
       - name: Execute T1-T8 against real PostgreSQL transactions
         run: |
-          python kyiv-air-alerts-grafana/tests/prove_pg16_safety_matrix.py > /tmp/pg16-safety-${{ matrix.replay }}.json
+          python kyiv-air-alerts-grafana/tests/prove_pg16_safety_matrix.py > /tmp/pg16-safety-${{ matrix.replay }}.json || { cat /tmp/pg16-safety-${{ matrix.replay }}.json; exit 1; }
           python -m json.tool /tmp/pg16-safety-${{ matrix.replay }}.json > /dev/null
           python -c 'import json,sys; d=json.load(open(sys.argv[1])); print("CASES:",[(k,v["status"]) for k,v in d["cases"].items()]); print("FINGERPRINT:",d["fingerprint"])' /tmp/pg16-safety-${{ matrix.replay }}.json
       - name: Preserve full success/failure proof
