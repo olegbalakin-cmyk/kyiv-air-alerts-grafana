@@ -5,6 +5,7 @@ on:
     paths:
       - ".github/workflows/kyiv-canonical-pg16-proof.yml"
       - "kyiv-air-alerts-grafana/tests/prove_pg16_canonical_pipeline.py"
+      - "kyiv-air-alerts-grafana/tests/prove_pg16_monitor_main.py"
       - "kyiv-air-alerts-grafana/tests/fixtures/**"
       - "kyiv-air-alerts-grafana/scripts/attack_event_canonical_persistence.py"
       - "kyiv-air-alerts-grafana/scripts/live_canonical_queue.py"
@@ -15,6 +16,10 @@ jobs:
   disposable-pg16:
     runs-on: ubuntu-latest
     timeout-minutes: 18
+    strategy:
+      fail-fast: false
+      matrix:
+        replay: [A, B]
     services:
       postgres:
         image: postgres:16
@@ -52,13 +57,43 @@ jobs:
           PGPASSWORD=offline psql -v ON_ERROR_STOP=1 -h localhost -U offline -d offline_acceptance -f kyiv-air-alerts-grafana/tests/fixtures/pg16_verified_canonical_schema.sql
       - name: Execute real SQL persistence and queue acceptance
         run: |
-          python kyiv-air-alerts-grafana/tests/prove_pg16_canonical_pipeline.py > /tmp/pg16-proof-A.json
-          cat /tmp/pg16-proof-A.json
+          python kyiv-air-alerts-grafana/tests/prove_pg16_canonical_pipeline.py > /tmp/pg16-proof-${{ matrix.replay }}.json
+          cat /tmp/pg16-proof-${{ matrix.replay }}.json
+      - name: Execute real monitor.main with frozen offline source responses
+        run: |
+          python kyiv-air-alerts-grafana/tests/prove_pg16_monitor_main.py > /tmp/monitor-main-${{ matrix.replay }}.json
+          grep '^MAIN_INTEGRATION_REPORT=' /tmp/monitor-main-${{ matrix.replay }}.json
       - name: Upload proof, even on failure
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: kyiv-pg16-integration-intermediate
-          path: /tmp/pg16-proof-A.json
+          name: kyiv-pg16-proof-${{ matrix.replay }}
+          path: |
+            /tmp/pg16-proof-${{ matrix.replay }}.json
+            /tmp/monitor-main-${{ matrix.replay }}.json
           if-no-files-found: warn
           retention-days: 30
+
+  ab-comparison:
+    runs-on: ubuntu-latest
+    needs: disposable-pg16
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: kyiv-pg16-proof-A
+          path: /tmp/proof-A
+      - uses: actions/download-artifact@v4
+        with:
+          name: kyiv-pg16-proof-B
+          path: /tmp/proof-B
+      - name: Compare independent clean PostgreSQL 16 execution reports
+        run: |
+          set -euo pipefail
+          cmp /tmp/proof-A/pg16-proof-A.json /tmp/proof-B/pg16-proof-B.json
+          grep '^MAIN_INTEGRATION_REPORT=' /tmp/proof-A/monitor-main-A.json > /tmp/a.summary
+          grep '^MAIN_INTEGRATION_REPORT=' /tmp/proof-B/monitor-main-B.json > /tmp/b.summary
+          cmp /tmp/a.summary /tmp/b.summary
+          cat /tmp/a.summary
+          sha256sum /tmp/proof-A/pg16-proof-A.json /tmp/a.summary
