@@ -24,7 +24,7 @@ import attack_event_canonical_persistence as p
 UTC = timezone.utc
 START = datetime(2026, 10, 8, tzinfo=UTC)
 CUTOFF = datetime(2026, 10, 7, 19, 5, tzinfo=UTC)
-NOW = datetime(2026, 10, 19, tzinfo=UTC)
+NOW = datetime(2026, 11, 15, tzinfo=UTC)
 DSN = os.environ["LOCAL_PROOF_POSTGRES_DSN"]
 os.environ["CANONICAL_PARENT_CONTRACT_DIR"] = str(ROOT / "tests/fixtures/parent_contract")
 os.environ["CANONICAL_PARENT_DB_BRANCH"] = "offline-disposable-postgres-16"
