@@ -213,10 +213,10 @@ def t2():
             except p.PersistenceContractError as exc:
                 assert "STALE_EXPECTED_CURRENT_CLASSIFICATION_TIP" in str(exc)
                 return ("STALE_REJECTED", rec["classification_key"], 0)
-    with psycopg.connect(DSN, autocommit=False) as locker:
-        with locker.transaction():
-            locker.execute("SELECT pg_advisory_xact_lock(hashtextextended(%s, 0))", (key,))
-            with ThreadPoolExecutor(max_workers=2) as pool:
+    with ThreadPoolExecutor(max_workers=2) as pool:
+        with psycopg.connect(DSN, autocommit=False) as locker:
+            with locker.transaction():
+                locker.execute("SELECT pg_advisory_xact_lock(hashtextextended(%s, 0))", (key,))
                 a, b = pool.submit(writer, r1), pool.submit(writer, r2)
                 start.wait(timeout=15)
                 locked = False
@@ -230,6 +230,7 @@ def t2():
                 initial_parent(other)
                 other_saved = persist(p.build_episode_classification(other, [], origin=p._origin_context()))
                 assert other_saved["classification_inserted"]
+            # Commit releases the advisory lock before waiting for the workers.
         outcomes = [a.result(timeout=20), b.result(timeout=20)]
     assert sorted(x[0] for x in outcomes) == ["COMMITTED", "STALE_REJECTED"], outcomes
     current = get_tip(e)
