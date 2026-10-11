@@ -1,0 +1,3086 @@
+{
+  "schema_version": 1,
+  "kind": "neon_h1_h2_completion_reconciliation_bounded_transport_gap",
+  "audit_date": "2026-10-11",
+  "verdict": "FROZEN H1/H2 COMPLETION RECONCILIATION = PARTIAL",
+  "C4": "NOT PROVEN",
+  "C5": "NOT PROVEN",
+  "base_main": "8acf1cf72791e40d2fcf9e24f0243e29841bee94",
+  "coordination_blobs": {
+    "PROJECT_STATE": "3d80022fcac5d0c687f15e0fdf668b0fe7ebccb8",
+    "CHANGELOG": "44beee7a31e449e96e8e31beecac752ebd53d66b"
+  },
+  "predecessor": {
+    "head": "3d10cb3c3509c6945f9c9f3cdf02d8cfae46d143",
+    "blob": "9676e3d559a22ef8989c43604dce85dab95fa38b",
+    "sha256": "21da6418a9a89917f3eb207eaacbb229bb843eaa905cfac5b28c7397cc839f30"
+  },
+  "discovery": {
+    "H1_exact_batch_blobs_enumerated": 139,
+    "H2_proof_blobs_inspected": 10,
+    "H2_proof_files_embed_full_accepted_rows": false,
+    "additional_evidence": "Previously uninspected October 4 large 5city and 18city export Git blobs located and pinned, but full bytes unavailable via current connector. Their production method and accepted-origin status remain to be verified.",
+    "transport_gap": "GitHub connector returned zero file content for 60,509,907-byte H2 and 29,774,541-byte H1 exports; local git remote inaccessible. Neither export was ingested as an expected-state authority.",
+    "H1_sample_batch_checked": "sumy/batch_000001.json blob c5594ecc11fd963fe3f52df40ec6bdfb7e3dbc0d includes episode_results and observations",
+    "H2_cities_denominator": 19542,
+    "expected_global_historical_rows": 26405
+  },
+  "immutable_input_manifest": [
+    {
+      "path": "research/historical_attack_event_backfill_campaign_launch_2026-09-27.json",
+      "commit": "71cb6f6fbe856cc7b96759310fe9cc9c71cc0453",
+      "blob": "a0f874a02258890bee3a9cda90861355d65f9cc2",
+      "authority_type": "frozen_identity_set_and_provenance",
+      "role": "H1_launch"
+    },
+    {
+      "path": "research/historical_attack_event_backfill_status.json",
+      "commit": "71cb6f6fbe856cc7b96759310fe9cc9c71cc0453",
+      "blob": "615b380b51c0da7aa052bad06222c12785090986",
+      "authority_type": "campaign_status_only",
+      "role": "H1_status"
+    },
+    {
+      "path": "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/cherkasy/batch_000001.json",
+      "commit": "71cb6f6fbe856cc7b96759310fe9cc9c71cc0453",
+      "blob": "84bd07918bbc52a191615c48c502bca79ec55b9e",
+      "byte_count": 117313,
+      "role": "frozen_H1_direct_batch_evidence",
+      "governs": [
+        "historical_episode_id",
+        "city_key",
+        "alert_interval",
+        "frozen_verdict",
+        "qa_reasons",
+        "source_membership_candidates"
+      ],
+      "authority_type": "direct_row_level_evidence_requires_projection"
+    },
+    {
+      "path": "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/cherkasy/batch_000002.json",
+      "commit": "71cb6f6fbe856cc7b96759310fe9cc9c71cc0453",
+      "blob": "77a519632da56072952a02697c1e388385691a7a",
+      "byte_count": 180609,
+      "role": "frozen_H1_direct_batch_evidence",
+      "governs": [
+        "historical_episode_id",
+        "city_key",
+        "alert_interval",
+        "frozen_verdict",
+        "qa_reasons",
+        "source_membership_candidates"
+      ],
+      "authority_type": "direct_row_level_evidence_requires_projection"
+    },
+    {
+      "path": "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/cherkasy/batch_000003.json",
+      "commit": "71cb6f6fbe856cc7b96759310fe9cc9c71cc0453",
+      "blob": "8e6cf2215c43b80a034157b86b7c7c6634aa392b",
+      "byte_count": 132070,
+      "role": "frozen_H1_direct_batch_evidence",
+      "governs": [
+        "historical_episode_id",
+        "city_key",
+        "alert_interval",
+        "frozen_verdict",
+        "qa_reasons",
+        "source_membership_candidates"
+      ],
+      "authority_type": "direct_row_level_evidence_requires_projection"
+    },
+    {
+      "path": "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/cherkasy/batch_000004.json",
+      "commit": "71cb6f6fbe856cc7b96759310fe9cc9c71cc0453",
+      "blob": "9203d8beb798904b96afc82e7629300c6e4190bf",
+      "byte_count": 164188,
+      "role": "frozen_H1_direct_batch_evidence",
+      "governs": [
+        "historical_episode_id",
+        "city_key",
+        "alert_interval",
+        "frozen_verdict",
+        "qa_reasons",
+        "source_membership_candidates"
+      ],
+      "authority_type": "direct_row_level_evidence_requires_projection"
+    },
+    {
+      "path": "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/cherkasy/batch_000005.json",
+      "commit": "71cb6f6fbe856cc7b96759310fe9cc9c71cc0453",
+      "blob": "51e09648ed585377cdeb46582e0ce11ad096c411",
+      "byte_count": 134567,
+      "role": "frozen_H1_direct_batch_evidence",
+      "governs": [
+        "historical_episode_id",
+        "city_key",
+        "alert_interval",
+        "frozen_verdict",
+        "qa_reasons",
+        "source_membership_candidates"
+      ],
+      "authority_type": "direct_row_level_evidence_requires_projection"
+    },
+    {
+      "path": "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/cherkasy/batch_000006.json",
+      "commit": "71cb6f6fbe856cc7b96759310fe9cc9c71cc0453",
+      "blob": "6c0ae1a77b9cc5744b4a1c9d8cc9b54ab6fb39ac",
+      "byte_count": 214527,
+      "role": "frozen_H1_direct_batch_evidence",
+      "governs": [
+        "historical_episode_id",
+        "city_key",
+        "alert_interval",
+        "frozen_verdict",
+        "qa_reasons",
+        "source_membership_candidates"
+      ],
+      "authority_type": "direct_row_level_evidence_requires_projection"
+    },
+    {
+      "path": "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/cherkasy/batch_000007.json",
+      "commit": "71cb6f6fbe856cc7b96759310fe9cc9c71cc0453",
+      "blob": "830246a865ec146ccbdb71a63a754946c7b5ca05",
+      "byte_count": 104085,
+      "role": "frozen_H1_direct_batch_evidence",
+      "governs": [
+        "historical_episode_id",
+        "city_key",
+        "alert_interval",
+        "frozen_verdict",
+        "qa_reasons",
+        "source_membership_candidates"
+      ],
+      "authority_type": "direct_row_level_evidence_requires_projection"
+    },
+    {
+      "path": "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/cherkasy/batch_000008.json",
+      "commit": "71cb6f6fbe856cc7b96759310fe9cc9c71cc0453",
+      "blob": "7d5adfadbe28301afb64360eda02ba8992319311",
+      "byte_count": 101729,
+      "role": "frozen_H1_direct_batch_evidence",
+      "governs": [
+        "historical_episode_id",
+        "city_key",
+        "alert_interval",
+        "frozen_verdict",
+        "qa_reasons",
+        "source_membership_candidates"
+      ],
+      "authority_type": "direct_row_level_evidence_requires_projection"
+    },
+    {
+      "path": "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/cherkasy/batch_000009.json",
+      "commit": "71cb6f6fbe856cc7b96759310fe9cc9c71cc0453",
+      "blob": "9f5ac7b98d5364b457d1a055a9cb705128f9db8d",
+      "byte_count": 137238,
+      "role": "frozen_H1_direct_batch_evidence",
+      "governs": [
+        "historical_episode_id",
+        "city_key",
+        "alert_interval",
+        "frozen_verdict",
+        "qa_reasons",
+        "source_membership_candidates"
+      ],
+      "authority_type": "direct_row_level_evidence_requires_projection"
+    },
+    {
+      "path": "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/cherkasy/batch_000010.json",
+      "commit": "71cb6f6fbe856cc7b96759310fe9cc9c71cc0453",
+      "blob": "390108d6f85fa246790c8f55ca557183cc432fba",
+      "byte_count": 228029,
+      "role": "frozen_H1_direct_batch_evidence",
+      "governs": [
+        "historical_episode_id",
+        "city_key",
+        "alert_interval",
+        "frozen_verdict",
+        "qa_reasons",
+        "source_membership_candidates"
+      ],
+      "authority_type": "direct_row_level_evidence_requires_projection"
+    },
+    {
+      "path": "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/cherkasy/batch_000011.json",
+      "commit": "71cb6f6fbe856cc7b96759310fe9cc9c71cc0453",
+      "blob": "6762b7602ba46cd57664f8089fb2ab6e51be1552",
+      "byte_count": 153420,
+      "role": "frozen_H1_direct_batch_evidence",
+      "governs": [
+        "historical_episode_id",
+        "city_key",
+        "alert_interval",
+        "frozen_verdict",
+        "qa_reasons",
+        "source_membership_candidates"
+      ],
+      "authority_type": "direct_row_level_evidence_requires_projection"
+    },
+    {
+      "path": "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/cherkasy/batch_000012.json",
+      "commit": "71cb6f6fbe856cc7b96759310fe9cc9c71cc0453",
+      "blob": "efba0203845a5b5e45f9cb2d533b191c7beb793c",
+      "byte_count": 116302,
+      "role": "frozen_H1_direct_batch_evidence",
+      "governs": [
+        "historical_episode_id",
+        "city_key",
+        "alert_interval",
+        "frozen_verdict",
+        "qa_reasons",
+        "source_membership_candidates"
+      ],
+      "authority_type": "direct_row_level_evidence_requires_projection"
+    },
+    {
+      "path": "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/cherkasy/batch_000013.json",
+      "commit": "71cb6f6fbe856cc7b96759310fe9cc9c71cc0453",
+      "blob": "15b401fedcea4b849b66b2d204f7e66a3127b852",
+      "byte_count": 142085,
+      "role": "frozen_H1_direct_batch_evidence",
+      "governs": [
+        "historical_episode_id",
+        "city_key",
+        "alert_interval",
+        "frozen_verdict",
+        "qa_reasons",
+        "source_membership_candidates"
+      ],
+      "authority_type": "direct_row_level_evidence_requires_projection"
+    },
+    {
+      "path": "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/cherkasy/batch_000014.json",
+      "commit": "71cb6f6fbe856cc7b96759310fe9cc9c71cc0453",
+      "blob": "48530abd9bc10390ca2407aaec53773be467d80e",
+      "byte_count": 132606,
+      "role": "frozen_H1_direct_batch_evidence",
+      "governs": [
+        "historical_episode_id",
+        "city_key",
+        "alert_interval",
+        "frozen_verdict",
+        "qa_reasons",
+        "source_membership_candidates"
+      ],
+      "authority_type": "direct_row_level_evidence_requires_projection"
+    },
+    {
+      "path": "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/cherkasy/batch_000015.json",
+      "commit": "71cb6f6fbe856cc7b96759310fe9cc9c71cc0453",
+      "blob": "a6c4cecc3841e6458c4547f37723676a6ad235f6",
+      "byte_count": 81388,
+      "role": "frozen_H1_direct_batch_evidence",
+      "governs": [
+        "historical_episode_id",
+        "city_key",
+        "alert_interval",
+        "frozen_verdict",
+        "qa_reasons",
+        "source_membership_candidates"
+      ],
+      "authority_type": "direct_row_level_evidence_requires_projection"
+    },
+    {
+      "path": "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/cherkasy/batch_000016.json",
+      "commit": "71cb6f6fbe856cc7b96759310fe9cc9c71cc0453",
+      "blob": "c8204c0ca6a091197683d3a326ab19dcd66b7ae0",
+      "byte_count": 147835,
+      "role": "frozen_H1_direct_batch_evidence",
+      "governs": [
+        "historical_episode_id",
+        "city_key",
+        "alert_interval",
+        "frozen_verdict",
+        "qa_reasons",
+        "source_membership_candidates"
+      ],
+      "authority_type": "direct_row_level_evidence_requires_projection"
+    },
+    {
+      "path": "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/cherkasy/batch_000017.json",
+      "commit": "71cb6f6fbe856cc7b96759310fe9cc9c71cc0453",
+      "blob": "d435f4211f1e259911b62a14d62049661ce565ec",
+      "byte_count": 198620,
+      "role": "frozen_H1_direct_batch_evidence",
+      "governs": [
+        "historical_episode_id",
+        "city_key",
+        "alert_interval",
+        "frozen_verdict",
+        "qa_reasons",
+        "source_membership_candidates"
+      ],
+      "authority_type": "direct_row_level_evidence_requires_projection"
+    },
+    {
+      "path": "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/cherkasy/batch_000018.json",
+      "commit": "71cb6f6fbe856cc7b96759310fe9cc9c71cc0453",
+      "blob": "b3560250bd859fa0428f600aa5fa8e0b2be04c50",
+      "byte_count": 156743,
+      "role": "frozen_H1_direct_batch_evidence",
+      "governs": [
+        "historical_episode_id",
+        "city_key",
+        "alert_interval",
+        "frozen_verdict",
+        "qa_reasons",
+        "source_membership_candidates"
+      ],
+      "authority_type": "direct_row_level_evidence_requires_projection"
+    },
+    {
+      "path": "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/cherkasy/batch_000019.json",
+      "commit": "71cb6f6fbe856cc7b96759310fe9cc9c71cc0453",
+      "blob": "2e4dce3740c1964e8531f2ec0fd25ef6998d9137",
+      "byte_count": 125615,
+      "role": "frozen_H1_direct_batch_evidence",
+      "governs": [
+        "historical_episode_id",
+        "city_key",
+        "alert_interval",
+        "frozen_verdict",
+        "qa_reasons",
+        "source_membership_candidates"
+      ],
+      "authority_type": "direct_row_level_evidence_requires_projection"
+    },
+    {
+      "path": "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/cherkasy/batch_000020.json",
+      "commit": "71cb6f6fbe856cc7b96759310fe9cc9c71cc0453",
+      "blob": "2ff2685f06f608ef32e8a52827c04173bceefe80",
+      "byte_count": 132091,
+      "role": "frozen_H1_direct_batch_evidence",
+      "governs": [
+        "historical_episode_id",
+        "city_key",
+        "alert_interval",
+        "frozen_verdict",
+        "qa_reasons",
+        "source_membership_candidates"
+      ],
+      "authority_type": "direct_row_level_evidence_requires_projection"
+    },
+    {
+      "path": "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/cherkasy/batch_000021.json",
+      "commit": "71cb6f6fbe856cc7b96759310fe9cc9c71cc0453",
+      "blob": "2ea44a042d68fcc257d98e74ba6c139983ac949a",
+      "byte_count": 145098,
+      "role": "frozen_H1_direct_batch_evidence",
+      "governs": [
+        "historical_episode_id",
+        "city_key",
+        "alert_interval",
+        "frozen_verdict",
+        "qa_reasons",
+        "source_membership_candidates"
+      ],
+      "authority_type": "direct_row_level_evidence_requires_projection"
+    },
+    {
+      "path": "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/cherkasy/batch_000022.json",
+      "commit": "71cb6f6fbe856cc7b96759310fe9cc9c71cc0453",
+      "blob": "7923bfd5433dd99b5ca4523668280970de1f541b",
+      "byte_count": 188621,
+      "role": "frozen_H1_direct_batch_evidence",
+      "governs": [
+        "historical_episode_id",
+        "city_key",
+        "alert_interval",
+        "frozen_verdict",
+        "qa_reasons",
+        "source_membership_candidates"
+      ],
+      "authority_type": "direct_row_level_evidence_requires_projection"
+    },
+    {
+      "path": "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/cherkasy/batch_000023.json",
+      "commit": "71cb6f6fbe856cc7b96759310fe9cc9c71cc0453",
+      "blob": "a35e49c399b007e6e82bb8de847cba0f2fdd0d54",
+      "byte_count": 141855,
+      "role": "frozen_H1_direct_batch_evidence",
+      "governs": [
+        "historical_episode_id",
+        "city_key",
+        "alert_interval",
+        "frozen_verdict",
+        "qa_reasons",
+        "source_membership_candidates"
+      ],
+      "authority_type": "direct_row_level_evidence_requires_projection"
+    },
+    {
+      "path": "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/cherkasy/batch_000024.json",
+      "commit": "71cb6f6fbe856cc7b96759310fe9cc9c71cc0453",
+      "blob": "2f7f0c7e47188879eab67139e100d526650cbae2",
+      "byte_count": 147861,
+      "role": "frozen_H1_direct_batch_evidence",
+      "governs": [
+        "historical_episode_id",
+        "city_key",
+        "alert_interval",
+        "frozen_verdict",
+        "qa_reasons",
+        "source_membership_candidates"
+      ],
+      "authority_type": "direct_row_level_evidence_requires_projection"
+    },
+    {
+      "path": "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/cherkasy/batch_000025.json",
+      "commit": "71cb6f6fbe856cc7b96759310fe9cc9c71cc0453",
+      "blob": "9df4116b1b9d3f12563569ae0c97992882eb06b0",
+      "byte_count": 89903,
+      "role": "frozen_H1_direct_batch_evidence",
+      "governs": [
+        "historical_episode_id",
+        "city_key",
+        "alert_interval",
+        "frozen_verdict",
+        "qa_reasons",
+        "source_membership_candidates"
+      ],
+      "authority_type": "direct_row_level_evidence_requires_projection"
+    },
+    {
+      "path": "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/cherkasy/batch_000026.json",
+      "commit": "71cb6f6fbe856cc7b96759310fe9cc9c71cc0453",
+      "blob": "109ef9c6ec6ad302d6be34acbf0d09de0ae2b36a",
+      "byte_count": 71435,
+      "role": "frozen_H1_direct_batch_evidence",
+      "governs": [
+        "historical_episode_id",
+        "city_key",
+        "alert_interval",
+        "frozen_verdict",
+        "qa_reasons",
+        "source_membership_candidates"
+      ],
+      "authority_type": "direct_row_level_evidence_requires_projection"
+    },
+    {
+      "path": "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/cherkasy/batch_000027.json",
+      "commit": "71cb6f6fbe856cc7b96759310fe9cc9c71cc0453",
+      "blob": "f12b39c458c9d7d3a4b2a12500c31333fe3328b0",
+      "byte_count": 42352,
+      "role": "frozen_H1_direct_batch_evidence",
+      "governs": [
+        "historical_episode_id",
+        "city_key",
+        "alert_interval",
+        "frozen_verdict",
+        "qa_reasons",
+        "source_membership_candidates"
+      ],
+      "authority_type": "direct_row_level_evidence_requires_projection"
+    },
+    {
+      "path": "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/cherkasy/batch_000028.json",
+      "commit": "71cb6f6fbe856cc7b96759310fe9cc9c71cc0453",
+      "blob": "c19ad5fbba510bede935986400cc0d8455b77c28",
+      "byte_count": 96527,
+      "role": "frozen_H1_direct_batch_evidence",
+      "governs": [
+        "historical_episode_id",
+        "city_key",
+        "alert_interval",
+        "frozen_verdict",
+        "qa_reasons",
+        "source_membership_candidates"
+      ],
+      "authority_type": "direct_row_level_evidence_requires_projection"
+    },
+    {
+      "path": "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/cherkasy/batch_000029.json",
+      "commit": "71cb6f6fbe856cc7b96759310fe9cc9c71cc0453",
+      "blob": "59b0193bbb5e4592f67d949038c82ca13d1a8c9c",
+      "byte_count": 135169,
+      "role": "frozen_H1_direct_batch_evidence",
+      "governs": [
+        "historical_episode_id",
+        "city_key",
+        "alert_interval",
+        "frozen_verdict",
+        "qa_reasons",
+        "source_membership_candidates"
+      ],
+      "authority_type": "direct_row_level_evidence_requires_projection"
+    },
+    {
+      "path": "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/cherkasy/batch_000030.json",
+      "commit": "71cb6f6fbe856cc7b96759310fe9cc9c71cc0453",
+      "blob": "25d4c75ff0d1e322d595e94dd240281b744d68cb",
+      "byte_count": 183820,
+      "role": "frozen_H1_direct_batch_evidence",
+      "governs": [
+        "historical_episode_id",
+        "city_key",
+        "alert_interval",
+        "frozen_verdict",
+        "qa_reasons",
+        "source_membership_candidates"
+      ],
+      "authority_type": "direct_row_level_evidence_requires_projection"
+    },
+    {
+      "path": "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/cherkasy/batch_000031.json",
+      "commit": "71cb6f6fbe856cc7b96759310fe9cc9c71cc0453",
+      "blob": "7ad4aa151b5be1d3be0fb12a818d06cafa03a527",
+      "byte_count": 84088,
+      "role": "frozen_H1_direct_batch_evidence",
+      "governs": [
+        "historical_episode_id",
+        "city_key",
+        "alert_interval",
+        "frozen_verdict",
+        "qa_reasons",
+        "source_membership_candidates"
+      ],
+      "authority_type": "direct_row_level_evidence_requires_projection"
+    },
+    {
+      "path": "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/lviv/batch_000001.json",
+      "commit": "71cb6f6fbe856cc7b96759310fe9cc9c71cc0453",
+      "blob": "b8a90771184adde93bbd3c5b5946059e502acf65",
+      "byte_count": 691976,
+      "role": "frozen_H1_direct_batch_evidence",
+      "governs": [
+        "historical_episode_id",
+        "city_key",
+        "alert_interval",
+        "frozen_verdict",
+        "qa_reasons",
+        "source_membership_candidates"
+      ],
+      "authority_type": "direct_row_level_evidence_requires_projection"
+    },
+    {
+      "path": "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/lviv/batch_000002.json",
+      "commit": "71cb6f6fbe856cc7b96759310fe9cc9c71cc0453",
+      "blob": "def851dbb1fc9f45971bccbe6c6f4c8a50e1bdcc",
+      "byte_count": 844439,
+      "role": "frozen_H1_direct_batch_evidence",
+      "governs": [
+        "historical_episode_id",
+        "city_key",
+        "alert_interval",
+        "frozen_verdict",
+        "qa_reasons",
+        "source_membership_candidates"
+      ],
+      "authority_type": "direct_row_level_evidence_requires_projection"
+    },
+    {
+      "path": "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/lviv/batch_000003.json",
+      "commit": "71cb6f6fbe856cc7b96759310fe9cc9c71cc0453",
+      "blob": "c278ec2d871244523d9b1c71256c2d1017f4b71a",
+      "byte_count": 381869,
+      "role": "frozen_H1_direct_batch_evidence",
+      "governs": [
+        "historical_episode_id",
+        "city_key",
+        "alert_interval",
+        "frozen_verdict",
+        "qa_reasons",
+        "source_membership_candidates"
+      ],
+      "authority_type": "direct_row_level_evidence_requires_projection"
+    },
+    {
+      "path": "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/sevastopol/batch_000001.json",
+      "commit": "71cb6f6fbe856cc7b96759310fe9cc9c71cc0453",
+      "blob": "16c2719b370e2ae69a3af5bb816c5e64cbc42b15",
+      "byte_count": 33832,
+      "role": "frozen_H1_direct_batch_evidence",
+      "governs": [
+        "historical_episode_id",
+        "city_key",
+        "alert_interval",
+        "frozen_verdict",
+        "qa_reasons",
+        "source_membership_candidates"
+      ],
+      "authority_type": "direct_row_level_evidence_requires_projection"
+    },
+    {
+      "path": "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/sevastopol/batch_000002.json",
+      "commit": "71cb6f6fbe856cc7b96759310fe9cc9c71cc0453",
+      "blob": "88032efabba937255729f81726d72b398a6ecb6e",
+      "byte_count": 33832,
+      "role": "frozen_H1_direct_batch_evidence",
+      "governs": [
+        "historical_episode_id",
+        "city_key",
+        "alert_interval",
+        "frozen_verdict",
+        "qa_reasons",
+        "source_membership_candidates"
+      ],
+      "authority_type": "direct_row_level_evidence_requires_projection"
+    },
+    {
+      "path": "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/sevastopol/batch_000003.json",
+      "commit": "71cb6f6fbe856cc7b96759310fe9cc9c71cc0453",
+      "blob": "f85de1904a282a1f2743fe59e72847e67a9f1943",
+      "byte_count": 33832,
+      "role": "frozen_H1_direct_batch_evidence",
+      "governs": [
+        "historical_episode_id",
+        "city_key",
+        "alert_interval",
+        "frozen_verdict",
+        "qa_reasons",
+        "source_membership_candidates"
+      ],
+      "authority_type": "direct_row_level_evidence_requires_projection"
+    },
+    {
+      "path": "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/sevastopol/batch_000004.json",
+      "commit": "71cb6f6fbe856cc7b96759310fe9cc9c71cc0453",
+      "blob": "c4a06d3905cd4f93243813820ee7e665c8fe57e6",
+      "byte_count": 33832,
+      "role": "frozen_H1_direct_batch_evidence",
+      "governs": [
+        "historical_episode_id",
+        "city_key",
+        "alert_interval",
+        "frozen_verdict",
+        "qa_reasons",
+        "source_membership_candidates"
+      ],
+      "authority_type": "direct_row_level_evidence_requires_projection"
+    },
+    {
+      "path": "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/sevastopol/batch_000005.json",
+      "commit": "71cb6f6fbe856cc7b96759310fe9cc9c71cc0453",
+      "blob": "58888ff4f8b82dbef7ca34b891f8adcdf4a0a3b1",
+      "byte_count": 33832,
+      "role": "frozen_H1_direct_batch_evidence",
+      "governs": [
+        "historical_episode_id",
+        "city_key",
+        "alert_interval",
+        "frozen_verdict",
+        "qa_reasons",
+        "source_membership_candidates"
+      ],
+      "authority_type": "direct_row_level_evidence_requires_projection"
+    },
+    {
+      "path": "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/sevastopol/batch_000006.json",
+      "commit": "71cb6f6fbe856cc7b96759310fe9cc9c71cc0453",
+      "blob": "3b6b9039601c8a8b09d4b4ce6e0117b0184cd4f8",
+      "byte_count": 33832,
+      "role": "frozen_H1_direct_batch_evidence",
+      "governs": [
+        "historical_episode_id",
+        "city_key",
+        "alert_interval",
+        "frozen_verdict",
+        "qa_reasons",
+        "source_membership_candidates"
+      ],
+      "authority_type": "direct_row_level_evidence_requires_projection"
+    },
+    {
+      "path": "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/sevastopol/batch_000007.json",
+      "commit": "71cb6f6fbe856cc7b96759310fe9cc9c71cc0453",
+      "blob": "3367d240e9b145f5f3a6d7e3ef8b170eae65e099",
+      "byte_count": 33832,
+      "role": "frozen_H1_direct_batch_evidence",
+      "governs": [
+        "historical_episode_id",
+        "city_key",
+        "alert_interval",
+        "frozen_verdict",
+        "qa_reasons",
+        "source_membership_candidates"
+      ],
+      "authority_type": "direct_row_level_evidence_requires_projection"
+    },
+    {
+      "path": "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/sevastopol/batch_000008.json",
+      "commit": "71cb6f6fbe856cc7b96759310fe9cc9c71cc0453",
+      "blob": "028ea8c516311977d3999b89c63c62756a937c35",
+      "byte_count": 33832,
+      "role": "frozen_H1_direct_batch_evidence",
+      "governs": [
+        "historical_episode_id",
+        "city_key",
+        "alert_interval",
+        "frozen_verdict",
+        "qa_reasons",
+        "source_membership_candidates"
+      ],
+      "authority_type": "direct_row_level_evidence_requires_projection"
+    },
+    {
+      "path": "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/sevastopol/batch_000009.json",
+      "commit": "71cb6f6fbe856cc7b96759310fe9cc9c71cc0453",
+      "blob": "fe22deea492cd14efd370814a5e1774665dce8e0",
+      "byte_count": 33832,
+      "role": "frozen_H1_direct_batch_evidence",
+      "governs": [
+        "historical_episode_id",
+        "city_key",
+        "alert_interval",
+        "frozen_verdict",
+        "qa_reasons",
+        "source_membership_candidates"
+      ],
+      "authority_type": "direct_row_level_evidence_requires_projection"
+    },
+    {
+      "path": "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/sevastopol/batch_000010.json",
+      "commit": "71cb6f6fbe856cc7b96759310fe9cc9c71cc0453",
+      "blob": "0a074260abc8707c0b53f035b5189dabebfc6765",
+      "byte_count": 33833,
+      "role": "frozen_H1_direct_batch_evidence",
+      "governs": [
+        "historical_episode_id",
+        "city_key",
+        "alert_interval",
+        "frozen_verdict",
+        "qa_reasons",
+        "source_membership_candidates"
+      ],
+      "authority_type": "direct_row_level_evidence_requires_projection"
+    },
+    {
+      "path": "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/sevastopol/batch_000011.json",
+      "commit": "71cb6f6fbe856cc7b96759310fe9cc9c71cc0453",
+      "blob": "5ccb6837d298351eba716822cb80a3ab93eac691",
+      "byte_count": 18975,
+      "role": "frozen_H1_direct_batch_evidence",
+      "governs": [
+        "historical_episode_id",
+        "city_key",
+        "alert_interval",
+        "frozen_verdict",
+        "qa_reasons",
+        "source_membership_candidates"
+      ],
+      "authority_type": "direct_row_level_evidence_requires_projection"
+    },
+    {
+      "path": "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/sumy/batch_000001.json",
+      "commit": "71cb6f6fbe856cc7b96759310fe9cc9c71cc0453",
+      "blob": "c5594ecc11fd963fe3f52df40ec6bdfb7e3dbc0d",
+      "byte_count": 149729,
+      "role": "frozen_H1_direct_batch_evidence",
+      "governs": [
+        "historical_episode_id",
+        "city_key",
+        "alert_interval",
+        "frozen_verdict",
+        "qa_reasons",
+        "source_membership_candidates"
+      ],
+      "authority_type": "direct_row_level_evidence_requires_projection"
+    },
+    {
+      "path": "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/sumy/batch_000002.json",
+      "commit": "71cb6f6fbe856cc7b96759310fe9cc9c71cc0453",
+      "blob": "b412066a626c1d6337108f5f4108ac9136caea41",
+      "byte_count": 207642,
+      "role": "frozen_H1_direct_batch_evidence",
+      "governs": [
+        "historical_episode_id",
+        "city_key",
+        "alert_interval",
+        "frozen_verdict",
+        "qa_reasons",
+        "source_membership_candidates"
+      ],
+      "authority_type": "direct_row_level_evidence_requires_projection"
+    },
+    {
+      "path": "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/sumy/batch_000003.json",
+      "commit": "71cb6f6fbe856cc7b96759310fe9cc9c71cc0453",
+      "blob": "2b3e6dd69cf854cbf6eadaf4e2c19e2b733e83ea",
+      "byte_count": 228368,
+      "role": "frozen_H1_direct_batch_evidence",
+      "governs": [
+        "historical_episode_id",
+        "city_key",
+        "alert_interval",
+        "frozen_verdict",
+        "qa_reasons",
+        "source_membership_candidates"
+      ],
+      "authority_type": "direct_row_level_evidence_requires_projection"
+    },
+    {
+      "path": "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/sumy/batch_000004.json",
+      "commit": "71cb6f6fbe856cc7b96759310fe9cc9c71cc0453",
+      "blob": "0d2b003b9576e4032a7f756f4574021a94b05647",
+      "byte_count": 217640,
+      "role": "frozen_H1_direct_batch_evidence",
+      "governs": [
+        "historical_episode_id",
+        "city_key",
+        "alert_interval",
+        "frozen_verdict",
+        "qa_reasons",
+        "source_membership_candidates"
+      ],
+      "authority_type": "direct_row_level_evidence_requires_projection"
+    },
+    {
+      "path": "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/sumy/batch_000005.json",
+      "commit": "71cb6f6fbe856cc7b96759310fe9cc9c71cc0453",
+      "blob": "7a666f8071bc8c532991d1574320082d91af5f02",
+      "byte_count": 213186,
+      "role": "frozen_H1_direct_batch_evidence",
+      "governs": [
+        "historical_episode_id",
+        "city_key",
+        "alert_interval",
+        "frozen_verdict",
+        "qa_reasons",
+        "source_membership_candidates"
+      ],
+      "authority_type": "direct_row_level_evidence_requires_projection"
+    },
+    {
+      "path": "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/sumy/batch_000006.json",
+      "commit": "71cb6f6fbe856cc7b96759310fe9cc9c71cc0453",
+      "blob": "75dd6d2fced7083169d9fdcd9ffe41dd60ee00a6",
+      "byte_count": 189379,
+      "role": "frozen_H1_direct_batch_evidence",
+      "governs": [
+        "historical_episode_id",
+        "city_key",
+        "alert_interval",
+        "frozen_verdict",
+        "qa_reasons",
+        "source_membership_candidates"
+      ],
+      "authority_type": "direct_row_level_evidence_requires_projection"
+    },
+    {
+      "path": "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/sumy/batch_000007.json",
+      "commit": "71cb6f6fbe856cc7b96759310fe9cc9c71cc0453",
+      "blob": "fce082be7a99738d3f252a302d5a0b6d74a45008",
+      "byte_count": 291121,
+      "role": "frozen_H1_direct_batch_evidence",
+      "governs": [
+        "historical_episode_id",
+        "city_key",
+        "alert_interval",
+        "frozen_verdict",
+        "qa_reasons",
+        "source_membership_candidates"
+      ],
+      "authority_type": "direct_row_level_evidence_requires_projection"
+    },
+    {
+      "path": "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/sumy/batch_000008.json",
+      "commit": "71cb6f6fbe856cc7b96759310fe9cc9c71cc0453",
+      "blob": "9eca86eef331ee5a2b2fab3f5ca30fbe3d87d729",
+      "byte_count": 261756,
+      "role": "frozen_H1_direct_batch_evidence",
+      "governs": [
+        "historical_episode_id",
+        "city_key",
+        "alert_interval",
+        "frozen_verdict",
+        "qa_reasons",
+        "source_membership_candidates"
+      ],
+      "authority_type": "direct_row_level_evidence_requires_projection"
+    },
+    {
+      "path": "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/sumy/batch_000009.json",
+      "commit": "71cb6f6fbe856cc7b96759310fe9cc9c71cc0453",
+      "blob": "2a7ca29af89c89f58ff06056d9f2ffe7ed46c20e",
+      "byte_count": 277492,
+      "role": "frozen_H1_direct_batch_evidence",
+      "governs": [
+        "historical_episode_id",
+        "city_key",
+        "alert_interval",
+        "frozen_verdict",
+        "qa_reasons",
+        "source_membership_candidates"
+      ],
+      "authority_type": "direct_row_level_evidence_requires_projection"
+    },
+    {
+      "path": "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/sumy/batch_000010.json",
+      "commit": "71cb6f6fbe856cc7b96759310fe9cc9c71cc0453",
+      "blob": "cbf81e22f5b4d0e7d6ff6a159e86ed44f90a8cd2",
+      "byte_count": 220288,
+      "role": "frozen_H1_direct_batch_evidence",
+      "governs": [
+        "historical_episode_id",
+        "city_key",
+        "alert_interval",
+        "frozen_verdict",
+        "qa_reasons",
+        "source_membership_candidates"
+      ],
+      "authority_type": "direct_row_level_evidence_requires_projection"
+    },
+    {
+      "path": "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/sumy/batch_000011.json",
+      "commit": "71cb6f6fbe856cc7b96759310fe9cc9c71cc0453",
+      "blob": "ae4c3b23763959229f3974e61c032cff95d8d74d",
+      "byte_count": 144068,
+      "role": "frozen_H1_direct_batch_evidence",
+      "governs": [
+        "historical_episode_id",
+        "city_key",
+        "alert_interval",
+        "frozen_verdict",
+        "qa_reasons",
+        "source_membership_candidates"
+      ],
+      "authority_type": "direct_row_level_evidence_requires_projection"
+    },
+    {
+      "path": "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/sumy/batch_000012.json",
+      "commit": "71cb6f6fbe856cc7b96759310fe9cc9c71cc0453",
+      "blob": "5cafd310e20db2eeef1e02a32778b4efc704c3b1",
+      "byte_count": 173200,
+      "role": "frozen_H1_direct_batch_evidence",
+      "governs": [
+        "historical_episode_id",
+        "city_key",
+        "alert_interval",
+        "frozen_verdict",
+        "qa_reasons",
+        "source_membership_candidates"
+      ],
+      "authority_type": "direct_row_level_evidence_requires_projection"
+    },
+    {
+      "path": "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/sumy/batch_000013.json",
+      "commit": "71cb6f6fbe856cc7b96759310fe9cc9c71cc0453",
+      "blob": "7c4d60cee7f13b5e84fd34803607122c7f209986",
+      "byte_count": 186424,
+      "role": "frozen_H1_direct_batch_evidence",
+      "governs": [
+        "historical_episode_id",
+        "city_key",
+        "alert_interval",
+        "frozen_verdict",
+        "qa_reasons",
+        "source_membership_candidates"
+      ],
+      "authority_type": "direct_row_level_evidence_requires_projection"
+    },
+    {
+      "path": "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/sumy/batch_000014.json",
+      "commit": "71cb6f6fbe856cc7b96759310fe9cc9c71cc0453",
+      "blob": "a66968215c4e0cab809d943f8de47128a624f8e5",
+      "byte_count": 196612,
+      "role": "frozen_H1_direct_batch_evidence",
+      "governs": [
+        "historical_episode_id",
+        "city_key",
+        "alert_interval",
+        "frozen_verdict",
+        "qa_reasons",
+        "source_membership_candidates"
+      ],
+      "authority_type": "direct_row_level_evidence_requires_projection"
+    },
+    {
+      "path": "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/sumy/batch_000015.json",
+      "commit": "71cb6f6fbe856cc7b96759310fe9cc9c71cc0453",
+      "blob": "22e896e37586271add7f1c6d6793ad73fa0ae225",
+      "byte_count": 168693,
+      "role": "frozen_H1_direct_batch_evidence",
+      "governs": [
+        "historical_episode_id",
+        "city_key",
+        "alert_interval",
+        "frozen_verdict",
+        "qa_reasons",
+        "source_membership_candidates"
+      ],
+      "authority_type": "direct_row_level_evidence_requires_projection"
+    },
+    {
+      "path": "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/sumy/batch_000016.json",
+      "commit": "71cb6f6fbe856cc7b96759310fe9cc9c71cc0453",
+      "blob": "f00fd9b255b1a69ae36a3f08f77fd568d485a040",
+      "byte_count": 93064,
+      "role": "frozen_H1_direct_batch_evidence",
+      "governs": [
+        "historical_episode_id",
+        "city_key",
+        "alert_interval",
+        "frozen_verdict",
+        "qa_reasons",
+        "source_membership_candidates"
+      ],
+      "authority_type": "direct_row_level_evidence_requires_projection"
+    },
+    {
+      "path": "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/sumy/batch_000017.json",
+      "commit": "71cb6f6fbe856cc7b96759310fe9cc9c71cc0453",
+      "blob": "db3afa11bb0dc867528b671e50ae0cf47b66108d",
+      "byte_count": 162920,
+      "role": "frozen_H1_direct_batch_evidence",
+      "governs": [
+        "historical_episode_id",
+        "city_key",
+        "alert_interval",
+        "frozen_verdict",
+        "qa_reasons",
+        "source_membership_candidates"
+      ],
+      "authority_type": "direct_row_level_evidence_requires_projection"
+    },
+    {
+      "path": "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/sumy/batch_000018.json",
+      "commit": "71cb6f6fbe856cc7b96759310fe9cc9c71cc0453",
+      "blob": "ee07189c2a10ad48d51a8fb85c96131738e566ed",
+      "byte_count": 225668,
+      "role": "frozen_H1_direct_batch_evidence",
+      "governs": [
+        "historical_episode_id",
+        "city_key",
+        "alert_interval",
+        "frozen_verdict",
+        "qa_reasons",
+        "source_membership_candidates"
+      ],
+      "authority_type": "direct_row_level_evidence_requires_projection"
+    },
+    {
+      "path": "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/sumy/batch_000019.json",
+      "commit": "71cb6f6fbe856cc7b96759310fe9cc9c71cc0453",
+      "blob": "f527bff95a05a85b7cbc3aa3611546fedbc3e1ac",
+      "byte_count": 177427,
+      "role": "frozen_H1_direct_batch_evidence",
+      "governs": [
+        "historical_episode_id",
+        "city_key",
+        "alert_interval",
+        "frozen_verdict",
+        "qa_reasons",
+        "source_membership_candidates"
+      ],
+      "authority_type": "direct_row_level_evidence_requires_projection"
+    },
+    {
+      "path": "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/sumy/batch_000020.json",
+      "commit": "71cb6f6fbe856cc7b96759310fe9cc9c71cc0453",
+      "blob": "e221515f379cd0b528a1e381bd8548194c026ddb",
+      "byte_count": 222205,
+      "role": "frozen_H1_direct_batch_evidence",
+      "governs": [
+        "historical_episode_id",
+        "city_key",
+        "alert_interval",
+        "frozen_verdict",
+        "qa_reasons",
+        "source_membership_candidates"
+      ],
+      "authority_type": "direct_row_level_evidence_requires_projection"
+    },
+    {
+      "path": "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/sumy/batch_000021.json",
+      "commit": "71cb6f6fbe856cc7b96759310fe9cc9c71cc0453",
+      "blob": "6ac8b2ed87fb01ac3e5dfac4ab4de814a78cbb0b",
+      "byte_count": 193369,
+      "role": "frozen_H1_direct_batch_evidence",
+      "governs": [
+        "historical_episode_id",
+        "city_key",
+        "alert_interval",
+        "frozen_verdict",
+        "qa_reasons",
+        "source_membership_candidates"
+      ],
+      "authority_type": "direct_row_level_evidence_requires_projection"
+    },
+    {
+      "path": "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/sumy/batch_000022.json",
+      "commit": "71cb6f6fbe856cc7b96759310fe9cc9c71cc0453",
+      "blob": "0d6b9b9212e40a4dc0115da22ba8745a10ffffcb",
+      "byte_count": 165812,
+      "role": "frozen_H1_direct_batch_evidence",
+      "governs": [
+        "historical_episode_id",
+        "city_key",
+        "alert_interval",
+        "frozen_verdict",
+        "qa_reasons",
+        "source_membership_candidates"
+      ],
+      "authority_type": "direct_row_level_evidence_requires_projection"
+    },
+    {
+      "path": "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/sumy/batch_000023.json",
+      "commit": "71cb6f6fbe856cc7b96759310fe9cc9c71cc0453",
+      "blob": "70e3e4aa6ed07d1fac253349f65944b7ee668811",
+      "byte_count": 209513,
+      "role": "frozen_H1_direct_batch_evidence",
+      "governs": [
+        "historical_episode_id",
+        "city_key",
+        "alert_interval",
+        "frozen_verdict",
+        "qa_reasons",
+        "source_membership_candidates"
+      ],
+      "authority_type": "direct_row_level_evidence_requires_projection"
+    },
+    {
+      "path": "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/sumy/batch_000024.json",
+      "commit": "71cb6f6fbe856cc7b96759310fe9cc9c71cc0453",
+      "blob": "78fb30c00bc71aa31c45b0ef8b24ad6d07cf176b",
+      "byte_count": 199990,
+      "role": "frozen_H1_direct_batch_evidence",
+      "governs": [
+        "historical_episode_id",
+        "city_key",
+        "alert_interval",
+        "frozen_verdict",
+        "qa_reasons",
+        "source_membership_candidates"
+      ],
+      "authority_type": "direct_row_level_evidence_requires_projection"
+    },
+    {
+      "path": "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/sumy/batch_000025.json",
+      "commit": "71cb6f6fbe856cc7b96759310fe9cc9c71cc0453",
+      "blob": "487bea70db895eb799f75ac2cb20bb5f4501f9e1",
+      "byte_count": 211779,
+      "role": "frozen_H1_direct_batch_evidence",
+      "governs": [
+        "historical_episode_id",
+        "city_key",
+        "alert_interval",
+        "frozen_verdict",
+        "qa_reasons",
+        "source_membership_candidates"
+      ],
+      "authority_type": "direct_row_level_evidence_requires_projection"
+    },
+    {
+      "path": "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/sumy/batch_000026.json",
+      "commit": "71cb6f6fbe856cc7b96759310fe9cc9c71cc0453",
+      "blob": "8c36b5d3b0b727ac8d39e593d0ee1eb290d3be89",
+      "byte_count": 261918,
+      "role": "frozen_H1_direct_batch_evidence",
+      "governs": [
+        "historical_episode_id",
+        "city_key",
+        "alert_interval",
+        "frozen_verdict",
+        "qa_reasons",
+        "source_membership_candidates"
+      ],
+      "authority_type": "direct_row_level_evidence_requires_projection"
+    },
+    {
+      "path": "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/sumy/batch_000027.json",
+      "commit": "71cb6f6fbe856cc7b96759310fe9cc9c71cc0453",
+      "blob": "9774c9bb1c6d21c6eb49fd23e5aed0c9fe5b334f",
+      "byte_count": 338038,
+      "role": "frozen_H1_direct_batch_evidence",
+      "governs": [
+        "historical_episode_id",
+        "city_key",
+        "alert_interval",
+        "frozen_verdict",
+        "qa_reasons",
+        "source_membership_candidates"
+      ],
+      "authority_type": "direct_row_level_evidence_requires_projection"
+    },
+    {
+      "path": "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/sumy/batch_000028.json",
+      "commit": "71cb6f6fbe856cc7b96759310fe9cc9c71cc0453",
+      "blob": "1d04423ec0371831a62a7e70adc71c3d3bc3c7b5",
+      "byte_count": 295654,
+      "role": "frozen_H1_direct_batch_evidence",
+      "governs": [
+        "historical_episode_id",
+        "city_key",
+        "alert_interval",
+        "frozen_verdict",
+        "qa_reasons",
+        "source_membership_candidates"
+      ],
+      "authority_type": "direct_row_level_evidence_requires_projection"
+    },
+    {
+      "path": "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/sumy/batch_000029.json",
+      "commit": "71cb6f6fbe856cc7b96759310fe9cc9c71cc0453",
+      "blob": "bb2dda65b55e62c8bd87f5980b62207b290fbacc",
+      "byte_count": 212340,
+      "role": "frozen_H1_direct_batch_evidence",
+      "governs": [
+        "historical_episode_id",
+        "city_key",
+        "alert_interval",
+        "frozen_verdict",
+        "qa_reasons",
+        "source_membership_candidates"
+      ],
+      "authority_type": "direct_row_level_evidence_requires_projection"
+    },
+    {
+      "path": "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/sumy/batch_000030.json",
+      "commit": "71cb6f6fbe856cc7b96759310fe9cc9c71cc0453",
+      "blob": "cb4f61c0c855384ada048b48937b0c7ee5b74407",
+      "byte_count": 249826,
+      "role": "frozen_H1_direct_batch_evidence",
+      "governs": [
+        "historical_episode_id",
+        "city_key",
+        "alert_interval",
+        "frozen_verdict",
+        "qa_reasons",
+        "source_membership_candidates"
+      ],
+      "authority_type": "direct_row_level_evidence_requires_projection"
+    },
+    {
+      "path": "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/sumy/batch_000031.json",
+      "commit": "71cb6f6fbe856cc7b96759310fe9cc9c71cc0453",
+      "blob": "58b0a8ee57aff0b273f6a804baaf443ade697b3d",
+      "byte_count": 206245,
+      "role": "frozen_H1_direct_batch_evidence",
+      "governs": [
+        "historical_episode_id",
+        "city_key",
+        "alert_interval",
+        "frozen_verdict",
+        "qa_reasons",
+        "source_membership_candidates"
+      ],
+      "authority_type": "direct_row_level_evidence_requires_projection"
+    },
+    {
+      "path": "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/sumy/batch_000032.json",
+      "commit": "71cb6f6fbe856cc7b96759310fe9cc9c71cc0453",
+      "blob": "a6fc94c834350f5f32f8dba17e522eafa3141a10",
+      "byte_count": 176037,
+      "role": "frozen_H1_direct_batch_evidence",
+      "governs": [
+        "historical_episode_id",
+        "city_key",
+        "alert_interval",
+        "frozen_verdict",
+        "qa_reasons",
+        "source_membership_candidates"
+      ],
+      "authority_type": "direct_row_level_evidence_requires_projection"
+    },
+    {
+      "path": "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/sumy/batch_000033.json",
+      "commit": "71cb6f6fbe856cc7b96759310fe9cc9c71cc0453",
+      "blob": "7f22609e53cb8df02cc359fa31250d0b9e78c2be",
+      "byte_count": 153996,
+      "role": "frozen_H1_direct_batch_evidence",
+      "governs": [
+        "historical_episode_id",
+        "city_key",
+        "alert_interval",
+        "frozen_verdict",
+        "qa_reasons",
+        "source_membership_candidates"
+      ],
+      "authority_type": "direct_row_level_evidence_requires_projection"
+    },
+    {
+      "path": "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/sumy/batch_000034.json",
+      "commit": "71cb6f6fbe856cc7b96759310fe9cc9c71cc0453",
+      "blob": "a26eb06c1e614cdc8c2aff6b8ade22024d48090e",
+      "byte_count": 224061,
+      "role": "frozen_H1_direct_batch_evidence",
+      "governs": [
+        "historical_episode_id",
+        "city_key",
+        "alert_interval",
+        "frozen_verdict",
+        "qa_reasons",
+        "source_membership_candidates"
+      ],
+      "authority_type": "direct_row_level_evidence_requires_projection"
+    },
+    {
+      "path": "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/sumy/batch_000035.json",
+      "commit": "71cb6f6fbe856cc7b96759310fe9cc9c71cc0453",
+      "blob": "b3271f2aaa13afa35577ba0918d57fce8a209cc5",
+      "byte_count": 298064,
+      "role": "frozen_H1_direct_batch_evidence",
+      "governs": [
+        "historical_episode_id",
+        "city_key",
+        "alert_interval",
+        "frozen_verdict",
+        "qa_reasons",
+        "source_membership_candidates"
+      ],
+      "authority_type": "direct_row_level_evidence_requires_projection"
+    },
+    {
+      "path": "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/sumy/batch_000036.json",
+      "commit": "71cb6f6fbe856cc7b96759310fe9cc9c71cc0453",
+      "blob": "1d2f4eb24e150c207fb03904352ca49ed48e175e",
+      "byte_count": 273207,
+      "role": "frozen_H1_direct_batch_evidence",
+      "governs": [
+        "historical_episode_id",
+        "city_key",
+        "alert_interval",
+        "frozen_verdict",
+        "qa_reasons",
+        "source_membership_candidates"
+      ],
+      "authority_type": "direct_row_level_evidence_requires_projection"
+    },
+    {
+      "path": "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/sumy/batch_000037.json",
+      "commit": "71cb6f6fbe856cc7b96759310fe9cc9c71cc0453",
+      "blob": "943c3505b92405b794741f2820577e75d47a2d42",
+      "byte_count": 333025,
+      "role": "frozen_H1_direct_batch_evidence",
+      "governs": [
+        "historical_episode_id",
+        "city_key",
+        "alert_interval",
+        "frozen_verdict",
+        "qa_reasons",
+        "source_membership_candidates"
+      ],
+      "authority_type": "direct_row_level_evidence_requires_projection"
+    },
+    {
+      "path": "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/sumy/batch_000038.json",
+      "commit": "71cb6f6fbe856cc7b96759310fe9cc9c71cc0453",
+      "blob": "021dd8d173849942f6f8010daea39bc1a40499f1",
+      "byte_count": 286960,
+      "role": "frozen_H1_direct_batch_evidence",
+      "governs": [
+        "historical_episode_id",
+        "city_key",
+        "alert_interval",
+        "frozen_verdict",
+        "qa_reasons",
+        "source_membership_candidates"
+      ],
+      "authority_type": "direct_row_level_evidence_requires_projection"
+    },
+    {
+      "path": "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/sumy/batch_000039.json",
+      "commit": "71cb6f6fbe856cc7b96759310fe9cc9c71cc0453",
+      "blob": "90efc6f2fb914a0971843e6ef58cb7ac5f0ebdf8",
+      "byte_count": 304553,
+      "role": "frozen_H1_direct_batch_evidence",
+      "governs": [
+        "historical_episode_id",
+        "city_key",
+        "alert_interval",
+        "frozen_verdict",
+        "qa_reasons",
+        "source_membership_candidates"
+      ],
+      "authority_type": "direct_row_level_evidence_requires_projection"
+    },
+    {
+      "path": "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/sumy/batch_000040.json",
+      "commit": "71cb6f6fbe856cc7b96759310fe9cc9c71cc0453",
+      "blob": "47982e06021cdfc55556d1bf05df83f71e48eb50",
+      "byte_count": 285190,
+      "role": "frozen_H1_direct_batch_evidence",
+      "governs": [
+        "historical_episode_id",
+        "city_key",
+        "alert_interval",
+        "frozen_verdict",
+        "qa_reasons",
+        "source_membership_candidates"
+      ],
+      "authority_type": "direct_row_level_evidence_requires_projection"
+    },
+    {
+      "path": "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/sumy/batch_000041.json",
+      "commit": "71cb6f6fbe856cc7b96759310fe9cc9c71cc0453",
+      "blob": "8fc590a2d996d266b8cf139c52ce9eb3d5a77bfa",
+      "byte_count": 382359,
+      "role": "frozen_H1_direct_batch_evidence",
+      "governs": [
+        "historical_episode_id",
+        "city_key",
+        "alert_interval",
+        "frozen_verdict",
+        "qa_reasons",
+        "source_membership_candidates"
+      ],
+      "authority_type": "direct_row_level_evidence_requires_projection"
+    },
+    {
+      "path": "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/sumy/batch_000042.json",
+      "commit": "71cb6f6fbe856cc7b96759310fe9cc9c71cc0453",
+      "blob": "4fa9f755e2580f98c57cb6944f730d9d2cf5281d",
+      "byte_count": 266010,
+      "role": "frozen_H1_direct_batch_evidence",
+      "governs": [
+        "historical_episode_id",
+        "city_key",
+        "alert_interval",
+        "frozen_verdict",
+        "qa_reasons",
+        "source_membership_candidates"
+      ],
+      "authority_type": "direct_row_level_evidence_requires_projection"
+    },
+    {
+      "path": "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/sumy/batch_000043.json",
+      "commit": "71cb6f6fbe856cc7b96759310fe9cc9c71cc0453",
+      "blob": "268dddb4231f637f4f1c5746a4e92adb9ddcd8a0",
+      "byte_count": 177066,
+      "role": "frozen_H1_direct_batch_evidence",
+      "governs": [
+        "historical_episode_id",
+        "city_key",
+        "alert_interval",
+        "frozen_verdict",
+        "qa_reasons",
+        "source_membership_candidates"
+      ],
+      "authority_type": "direct_row_level_evidence_requires_projection"
+    },
+    {
+      "path": "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/sumy/batch_000044.json",
+      "commit": "71cb6f6fbe856cc7b96759310fe9cc9c71cc0453",
+      "blob": "67ab3e3a225d2ef5be7394e1caeeda2af671c3c5",
+      "byte_count": 287764,
+      "role": "frozen_H1_direct_batch_evidence",
+      "governs": [
+        "historical_episode_id",
+        "city_key",
+        "alert_interval",
+        "frozen_verdict",
+        "qa_reasons",
+        "source_membership_candidates"
+      ],
+      "authority_type": "direct_row_level_evidence_requires_projection"
+    },
+    {
+      "path": "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/sumy/batch_000045.json",
+      "commit": "71cb6f6fbe856cc7b96759310fe9cc9c71cc0453",
+      "blob": "6e0e766c41ba2ce7c1e69a0e59f48815274cd77f",
+      "byte_count": 229382,
+      "role": "frozen_H1_direct_batch_evidence",
+      "governs": [
+        "historical_episode_id",
+        "city_key",
+        "alert_interval",
+        "frozen_verdict",
+        "qa_reasons",
+        "source_membership_candidates"
+      ],
+      "authority_type": "direct_row_level_evidence_requires_projection"
+    },
+    {
+      "path": "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/sumy/batch_000046.json",
+      "commit": "71cb6f6fbe856cc7b96759310fe9cc9c71cc0453",
+      "blob": "1e275ff1a445de985ef060db5d7f403d3cb96894",
+      "byte_count": 235704,
+      "role": "frozen_H1_direct_batch_evidence",
+      "governs": [
+        "historical_episode_id",
+        "city_key",
+        "alert_interval",
+        "frozen_verdict",
+        "qa_reasons",
+        "source_membership_candidates"
+      ],
+      "authority_type": "direct_row_level_evidence_requires_projection"
+    },
+    {
+      "path": "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/zaporizhzhia/batch_000001.json",
+      "commit": "71cb6f6fbe856cc7b96759310fe9cc9c71cc0453",
+      "blob": "ab0fed73c352a5b5a61fbbb7cb4f73bc55460838",
+      "byte_count": 371561,
+      "role": "frozen_H1_direct_batch_evidence",
+      "governs": [
+        "historical_episode_id",
+        "city_key",
+        "alert_interval",
+        "frozen_verdict",
+        "qa_reasons",
+        "source_membership_candidates"
+      ],
+      "authority_type": "direct_row_level_evidence_requires_projection"
+    },
+    {
+      "path": "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/zaporizhzhia/batch_000002.json",
+      "commit": "71cb6f6fbe856cc7b96759310fe9cc9c71cc0453",
+      "blob": "83a7ed54ee334c2fb0ff86a01e0241d560672fa7",
+      "byte_count": 298522,
+      "role": "frozen_H1_direct_batch_evidence",
+      "governs": [
+        "historical_episode_id",
+        "city_key",
+        "alert_interval",
+        "frozen_verdict",
+        "qa_reasons",
+        "source_membership_candidates"
+      ],
+      "authority_type": "direct_row_level_evidence_requires_projection"
+    },
+    {
+      "path": "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/zaporizhzhia/batch_000003.json",
+      "commit": "71cb6f6fbe856cc7b96759310fe9cc9c71cc0453",
+      "blob": "7a40a95e2ad1c31aebc3c18442b06e554faf2ff4",
+      "byte_count": 275723,
+      "role": "frozen_H1_direct_batch_evidence",
+      "governs": [
+        "historical_episode_id",
+        "city_key",
+        "alert_interval",
+        "frozen_verdict",
+        "qa_reasons",
+        "source_membership_candidates"
+      ],
+      "authority_type": "direct_row_level_evidence_requires_projection"
+    },
+    {
+      "path": "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/zaporizhzhia/batch_000004.json",
+      "commit": "71cb6f6fbe856cc7b96759310fe9cc9c71cc0453",
+      "blob": "3b01c4605873e72ce56b60d596f938ab43f7bd0d",
+      "byte_count": 293875,
+      "role": "frozen_H1_direct_batch_evidence",
+      "governs": [
+        "historical_episode_id",
+        "city_key",
+        "alert_interval",
+        "frozen_verdict",
+        "qa_reasons",
+        "source_membership_candidates"
+      ],
+      "authority_type": "direct_row_level_evidence_requires_projection"
+    },
+    {
+      "path": "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/zaporizhzhia/batch_000005.json",
+      "commit": "71cb6f6fbe856cc7b96759310fe9cc9c71cc0453",
+      "blob": "37c5c5b8c5ae6666e0a7c7d9ecc021bcfe78798c",
+      "byte_count": 350681,
+      "role": "frozen_H1_direct_batch_evidence",
+      "governs": [
+        "historical_episode_id",
+        "city_key",
+        "alert_interval",
+        "frozen_verdict",
+        "qa_reasons",
+        "source_membership_candidates"
+      ],
+      "authority_type": "direct_row_level_evidence_requires_projection"
+    },
+    {
+      "path": "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/zaporizhzhia/batch_000006.json",
+      "commit": "71cb6f6fbe856cc7b96759310fe9cc9c71cc0453",
+      "blob": "046f8137fd1943cfd95afd755bf25d0854990c99",
+      "byte_count": 399826,
+      "role": "frozen_H1_direct_batch_evidence",
+      "governs": [
+        "historical_episode_id",
+        "city_key",
+        "alert_interval",
+        "frozen_verdict",
+        "qa_reasons",
+        "source_membership_candidates"
+      ],
+      "authority_type": "direct_row_level_evidence_requires_projection"
+    },
+    {
+      "path": "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/zaporizhzhia/batch_000007.json",
+      "commit": "71cb6f6fbe856cc7b96759310fe9cc9c71cc0453",
+      "blob": "902bd641f430f614f1cadd52755cade4bd557175",
+      "byte_count": 339977,
+      "role": "frozen_H1_direct_batch_evidence",
+      "governs": [
+        "historical_episode_id",
+        "city_key",
+        "alert_interval",
+        "frozen_verdict",
+        "qa_reasons",
+        "source_membership_candidates"
+      ],
+      "authority_type": "direct_row_level_evidence_requires_projection"
+    },
+    {
+      "path": "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/zaporizhzhia/batch_000008.json",
+      "commit": "71cb6f6fbe856cc7b96759310fe9cc9c71cc0453",
+      "blob": "82a70b1f9c57183693bf0387353e4b07277e02b7",
+      "byte_count": 299668,
+      "role": "frozen_H1_direct_batch_evidence",
+      "governs": [
+        "historical_episode_id",
+        "city_key",
+        "alert_interval",
+        "frozen_verdict",
+        "qa_reasons",
+        "source_membership_candidates"
+      ],
+      "authority_type": "direct_row_level_evidence_requires_projection"
+    },
+    {
+      "path": "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/zaporizhzhia/batch_000009.json",
+      "commit": "71cb6f6fbe856cc7b96759310fe9cc9c71cc0453",
+      "blob": "0fb6f11c343f1b7a18c336691ab096ebd31f8a6b",
+      "byte_count": 405441,
+      "role": "frozen_H1_direct_batch_evidence",
+      "governs": [
+        "historical_episode_id",
+        "city_key",
+        "alert_interval",
+        "frozen_verdict",
+        "qa_reasons",
+        "source_membership_candidates"
+      ],
+      "authority_type": "direct_row_level_evidence_requires_projection"
+    },
+    {
+      "path": "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/zaporizhzhia/batch_000010.json",
+      "commit": "71cb6f6fbe856cc7b96759310fe9cc9c71cc0453",
+      "blob": "2684f66a93ff7535c18436a20793d56644f5f12e",
+      "byte_count": 360747,
+      "role": "frozen_H1_direct_batch_evidence",
+      "governs": [
+        "historical_episode_id",
+        "city_key",
+        "alert_interval",
+        "frozen_verdict",
+        "qa_reasons",
+        "source_membership_candidates"
+      ],
+      "authority_type": "direct_row_level_evidence_requires_projection"
+    },
+    {
+      "path": "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/zaporizhzhia/batch_000011.json",
+      "commit": "71cb6f6fbe856cc7b96759310fe9cc9c71cc0453",
+      "blob": "ee87e95c581a2278472a0933c95b05ee8c15d081",
+      "byte_count": 274454,
+      "role": "frozen_H1_direct_batch_evidence",
+      "governs": [
+        "historical_episode_id",
+        "city_key",
+        "alert_interval",
+        "frozen_verdict",
+        "qa_reasons",
+        "source_membership_candidates"
+      ],
+      "authority_type": "direct_row_level_evidence_requires_projection"
+    },
+    {
+      "path": "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/zaporizhzhia/batch_000012.json",
+      "commit": "71cb6f6fbe856cc7b96759310fe9cc9c71cc0453",
+      "blob": "59debd7b19f747caecfae0477e80954f66bb98f2",
+      "byte_count": 369750,
+      "role": "frozen_H1_direct_batch_evidence",
+      "governs": [
+        "historical_episode_id",
+        "city_key",
+        "alert_interval",
+        "frozen_verdict",
+        "qa_reasons",
+        "source_membership_candidates"
+      ],
+      "authority_type": "direct_row_level_evidence_requires_projection"
+    },
+    {
+      "path": "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/zaporizhzhia/batch_000013.json",
+      "commit": "71cb6f6fbe856cc7b96759310fe9cc9c71cc0453",
+      "blob": "f721a5f114125a9a48bdd86aff94677757cd082a",
+      "byte_count": 452023,
+      "role": "frozen_H1_direct_batch_evidence",
+      "governs": [
+        "historical_episode_id",
+        "city_key",
+        "alert_interval",
+        "frozen_verdict",
+        "qa_reasons",
+        "source_membership_candidates"
+      ],
+      "authority_type": "direct_row_level_evidence_requires_projection"
+    },
+    {
+      "path": "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/zaporizhzhia/batch_000014.json",
+      "commit": "71cb6f6fbe856cc7b96759310fe9cc9c71cc0453",
+      "blob": "30b21fc17a9c39f45a03cb118c43a49294adb457",
+      "byte_count": 468815,
+      "role": "frozen_H1_direct_batch_evidence",
+      "governs": [
+        "historical_episode_id",
+        "city_key",
+        "alert_interval",
+        "frozen_verdict",
+        "qa_reasons",
+        "source_membership_candidates"
+      ],
+      "authority_type": "direct_row_level_evidence_requires_projection"
+    },
+    {
+      "path": "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/zaporizhzhia/batch_000015.json",
+      "commit": "71cb6f6fbe856cc7b96759310fe9cc9c71cc0453",
+      "blob": "119a4de3b078345f696c6e3d6745edff8962c81a",
+      "byte_count": 382002,
+      "role": "frozen_H1_direct_batch_evidence",
+      "governs": [
+        "historical_episode_id",
+        "city_key",
+        "alert_interval",
+        "frozen_verdict",
+        "qa_reasons",
+        "source_membership_candidates"
+      ],
+      "authority_type": "direct_row_level_evidence_requires_projection"
+    },
+    {
+      "path": "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/zaporizhzhia/batch_000016.json",
+      "commit": "71cb6f6fbe856cc7b96759310fe9cc9c71cc0453",
+      "blob": "25ba89c8602114f5c3b3e96e5b6fb78f47357d8b",
+      "byte_count": 361960,
+      "role": "frozen_H1_direct_batch_evidence",
+      "governs": [
+        "historical_episode_id",
+        "city_key",
+        "alert_interval",
+        "frozen_verdict",
+        "qa_reasons",
+        "source_membership_candidates"
+      ],
+      "authority_type": "direct_row_level_evidence_requires_projection"
+    },
+    {
+      "path": "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/zaporizhzhia/batch_000017.json",
+      "commit": "71cb6f6fbe856cc7b96759310fe9cc9c71cc0453",
+      "blob": "beb4b4329a79b7f0c563a73ed2c232dff5f60d41",
+      "byte_count": 252619,
+      "role": "frozen_H1_direct_batch_evidence",
+      "governs": [
+        "historical_episode_id",
+        "city_key",
+        "alert_interval",
+        "frozen_verdict",
+        "qa_reasons",
+        "source_membership_candidates"
+      ],
+      "authority_type": "direct_row_level_evidence_requires_projection"
+    },
+    {
+      "path": "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/zaporizhzhia/batch_000018.json",
+      "commit": "71cb6f6fbe856cc7b96759310fe9cc9c71cc0453",
+      "blob": "27625d34561b7eff0112d34d2eb974c49472648b",
+      "byte_count": 279191,
+      "role": "frozen_H1_direct_batch_evidence",
+      "governs": [
+        "historical_episode_id",
+        "city_key",
+        "alert_interval",
+        "frozen_verdict",
+        "qa_reasons",
+        "source_membership_candidates"
+      ],
+      "authority_type": "direct_row_level_evidence_requires_projection"
+    },
+    {
+      "path": "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/zaporizhzhia/batch_000019.json",
+      "commit": "71cb6f6fbe856cc7b96759310fe9cc9c71cc0453",
+      "blob": "a1b47920d93a8a9e34628b1e6d42a32b98bcdf22",
+      "byte_count": 441902,
+      "role": "frozen_H1_direct_batch_evidence",
+      "governs": [
+        "historical_episode_id",
+        "city_key",
+        "alert_interval",
+        "frozen_verdict",
+        "qa_reasons",
+        "source_membership_candidates"
+      ],
+      "authority_type": "direct_row_level_evidence_requires_projection"
+    },
+    {
+      "path": "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/zaporizhzhia/batch_000020.json",
+      "commit": "71cb6f6fbe856cc7b96759310fe9cc9c71cc0453",
+      "blob": "327ff71061d0d092ddb3293397edbb90994e22d5",
+      "byte_count": 457558,
+      "role": "frozen_H1_direct_batch_evidence",
+      "governs": [
+        "historical_episode_id",
+        "city_key",
+        "alert_interval",
+        "frozen_verdict",
+        "qa_reasons",
+        "source_membership_candidates"
+      ],
+      "authority_type": "direct_row_level_evidence_requires_projection"
+    },
+    {
+      "path": "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/zaporizhzhia/batch_000021.json",
+      "commit": "71cb6f6fbe856cc7b96759310fe9cc9c71cc0453",
+      "blob": "339b131c09e8b81bc3bb2c0c8cc97b863e80bb59",
+      "byte_count": 378953,
+      "role": "frozen_H1_direct_batch_evidence",
+      "governs": [
+        "historical_episode_id",
+        "city_key",
+        "alert_interval",
+        "frozen_verdict",
+        "qa_reasons",
+        "source_membership_candidates"
+      ],
+      "authority_type": "direct_row_level_evidence_requires_projection"
+    },
+    {
+      "path": "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/zaporizhzhia/batch_000022.json",
+      "commit": "71cb6f6fbe856cc7b96759310fe9cc9c71cc0453",
+      "blob": "e52862e7f31a1294111c028b719078e96d997cd3",
+      "byte_count": 424710,
+      "role": "frozen_H1_direct_batch_evidence",
+      "governs": [
+        "historical_episode_id",
+        "city_key",
+        "alert_interval",
+        "frozen_verdict",
+        "qa_reasons",
+        "source_membership_candidates"
+      ],
+      "authority_type": "direct_row_level_evidence_requires_projection"
+    },
+    {
+      "path": "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/zaporizhzhia/batch_000023.json",
+      "commit": "71cb6f6fbe856cc7b96759310fe9cc9c71cc0453",
+      "blob": "c39ba7c1a1e760e1f63e51c3f75ea064d4ff5282",
+      "byte_count": 381308,
+      "role": "frozen_H1_direct_batch_evidence",
+      "governs": [
+        "historical_episode_id",
+        "city_key",
+        "alert_interval",
+        "frozen_verdict",
+        "qa_reasons",
+        "source_membership_candidates"
+      ],
+      "authority_type": "direct_row_level_evidence_requires_projection"
+    },
+    {
+      "path": "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/zaporizhzhia/batch_000024.json",
+      "commit": "71cb6f6fbe856cc7b96759310fe9cc9c71cc0453",
+      "blob": "5e5e78441ab3ced35fa4e3d4fa60467ea58be33f",
+      "byte_count": 438139,
+      "role": "frozen_H1_direct_batch_evidence",
+      "governs": [
+        "historical_episode_id",
+        "city_key",
+        "alert_interval",
+        "frozen_verdict",
+        "qa_reasons",
+        "source_membership_candidates"
+      ],
+      "authority_type": "direct_row_level_evidence_requires_projection"
+    },
+    {
+      "path": "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/zaporizhzhia/batch_000025.json",
+      "commit": "71cb6f6fbe856cc7b96759310fe9cc9c71cc0453",
+      "blob": "e4e954eefc03a0169284e614019d12dd3dff30e2",
+      "byte_count": 689732,
+      "role": "frozen_H1_direct_batch_evidence",
+      "governs": [
+        "historical_episode_id",
+        "city_key",
+        "alert_interval",
+        "frozen_verdict",
+        "qa_reasons",
+        "source_membership_candidates"
+      ],
+      "authority_type": "direct_row_level_evidence_requires_projection"
+    },
+    {
+      "path": "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/zaporizhzhia/batch_000026.json",
+      "commit": "71cb6f6fbe856cc7b96759310fe9cc9c71cc0453",
+      "blob": "b76b9d37184e9425c30e1f4a2014cf485a6ef496",
+      "byte_count": 464864,
+      "role": "frozen_H1_direct_batch_evidence",
+      "governs": [
+        "historical_episode_id",
+        "city_key",
+        "alert_interval",
+        "frozen_verdict",
+        "qa_reasons",
+        "source_membership_candidates"
+      ],
+      "authority_type": "direct_row_level_evidence_requires_projection"
+    },
+    {
+      "path": "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/zaporizhzhia/batch_000027.json",
+      "commit": "71cb6f6fbe856cc7b96759310fe9cc9c71cc0453",
+      "blob": "a5964b694a19c3ca69e9fd2c89a517de4d4c8ded",
+      "byte_count": 398152,
+      "role": "frozen_H1_direct_batch_evidence",
+      "governs": [
+        "historical_episode_id",
+        "city_key",
+        "alert_interval",
+        "frozen_verdict",
+        "qa_reasons",
+        "source_membership_candidates"
+      ],
+      "authority_type": "direct_row_level_evidence_requires_projection"
+    },
+    {
+      "path": "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/zaporizhzhia/batch_000028.json",
+      "commit": "71cb6f6fbe856cc7b96759310fe9cc9c71cc0453",
+      "blob": "6a03e80a16b7af39b6c25fd32d83ac217dab2c2e",
+      "byte_count": 431092,
+      "role": "frozen_H1_direct_batch_evidence",
+      "governs": [
+        "historical_episode_id",
+        "city_key",
+        "alert_interval",
+        "frozen_verdict",
+        "qa_reasons",
+        "source_membership_candidates"
+      ],
+      "authority_type": "direct_row_level_evidence_requires_projection"
+    },
+    {
+      "path": "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/zaporizhzhia/batch_000029.json",
+      "commit": "71cb6f6fbe856cc7b96759310fe9cc9c71cc0453",
+      "blob": "32168a8bce774f7d95a337e6c387888ab66e21d8",
+      "byte_count": 413557,
+      "role": "frozen_H1_direct_batch_evidence",
+      "governs": [
+        "historical_episode_id",
+        "city_key",
+        "alert_interval",
+        "frozen_verdict",
+        "qa_reasons",
+        "source_membership_candidates"
+      ],
+      "authority_type": "direct_row_level_evidence_requires_projection"
+    },
+    {
+      "path": "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/zaporizhzhia/batch_000030.json",
+      "commit": "71cb6f6fbe856cc7b96759310fe9cc9c71cc0453",
+      "blob": "14a2e25b975a4ebd23bcecfd4d2291caf994a0ac",
+      "byte_count": 414487,
+      "role": "frozen_H1_direct_batch_evidence",
+      "governs": [
+        "historical_episode_id",
+        "city_key",
+        "alert_interval",
+        "frozen_verdict",
+        "qa_reasons",
+        "source_membership_candidates"
+      ],
+      "authority_type": "direct_row_level_evidence_requires_projection"
+    },
+    {
+      "path": "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/zaporizhzhia/batch_000031.json",
+      "commit": "71cb6f6fbe856cc7b96759310fe9cc9c71cc0453",
+      "blob": "bc27babdae68541ff79e72a4679b4491f4588f37",
+      "byte_count": 443617,
+      "role": "frozen_H1_direct_batch_evidence",
+      "governs": [
+        "historical_episode_id",
+        "city_key",
+        "alert_interval",
+        "frozen_verdict",
+        "qa_reasons",
+        "source_membership_candidates"
+      ],
+      "authority_type": "direct_row_level_evidence_requires_projection"
+    },
+    {
+      "path": "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/zaporizhzhia/batch_000032.json",
+      "commit": "71cb6f6fbe856cc7b96759310fe9cc9c71cc0453",
+      "blob": "d497024497dd43d320d8c9e4d940fed5fcc3dee4",
+      "byte_count": 321175,
+      "role": "frozen_H1_direct_batch_evidence",
+      "governs": [
+        "historical_episode_id",
+        "city_key",
+        "alert_interval",
+        "frozen_verdict",
+        "qa_reasons",
+        "source_membership_candidates"
+      ],
+      "authority_type": "direct_row_level_evidence_requires_projection"
+    },
+    {
+      "path": "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/zaporizhzhia/batch_000033.json",
+      "commit": "71cb6f6fbe856cc7b96759310fe9cc9c71cc0453",
+      "blob": "8cf2fe1c242b9ad7849b27be317ca30fc54f485c",
+      "byte_count": 411267,
+      "role": "frozen_H1_direct_batch_evidence",
+      "governs": [
+        "historical_episode_id",
+        "city_key",
+        "alert_interval",
+        "frozen_verdict",
+        "qa_reasons",
+        "source_membership_candidates"
+      ],
+      "authority_type": "direct_row_level_evidence_requires_projection"
+    },
+    {
+      "path": "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/zaporizhzhia/batch_000034.json",
+      "commit": "71cb6f6fbe856cc7b96759310fe9cc9c71cc0453",
+      "blob": "76336f2df92889bee5ab9251497eea92018376f6",
+      "byte_count": 373301,
+      "role": "frozen_H1_direct_batch_evidence",
+      "governs": [
+        "historical_episode_id",
+        "city_key",
+        "alert_interval",
+        "frozen_verdict",
+        "qa_reasons",
+        "source_membership_candidates"
+      ],
+      "authority_type": "direct_row_level_evidence_requires_projection"
+    },
+    {
+      "path": "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/zaporizhzhia/batch_000035.json",
+      "commit": "71cb6f6fbe856cc7b96759310fe9cc9c71cc0453",
+      "blob": "baaf2ba7038f9b10301c2171a49585e65b5c1ae9",
+      "byte_count": 372150,
+      "role": "frozen_H1_direct_batch_evidence",
+      "governs": [
+        "historical_episode_id",
+        "city_key",
+        "alert_interval",
+        "frozen_verdict",
+        "qa_reasons",
+        "source_membership_candidates"
+      ],
+      "authority_type": "direct_row_level_evidence_requires_projection"
+    },
+    {
+      "path": "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/zaporizhzhia/batch_000036.json",
+      "commit": "71cb6f6fbe856cc7b96759310fe9cc9c71cc0453",
+      "blob": "ad5a68d1f31e1d090589ff6feff5e8006bf0401d",
+      "byte_count": 459235,
+      "role": "frozen_H1_direct_batch_evidence",
+      "governs": [
+        "historical_episode_id",
+        "city_key",
+        "alert_interval",
+        "frozen_verdict",
+        "qa_reasons",
+        "source_membership_candidates"
+      ],
+      "authority_type": "direct_row_level_evidence_requires_projection"
+    },
+    {
+      "path": "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/zaporizhzhia/batch_000037.json",
+      "commit": "71cb6f6fbe856cc7b96759310fe9cc9c71cc0453",
+      "blob": "6ef6c39e300fe24ba8eebb21930216f2742d5c52",
+      "byte_count": 562113,
+      "role": "frozen_H1_direct_batch_evidence",
+      "governs": [
+        "historical_episode_id",
+        "city_key",
+        "alert_interval",
+        "frozen_verdict",
+        "qa_reasons",
+        "source_membership_candidates"
+      ],
+      "authority_type": "direct_row_level_evidence_requires_projection"
+    },
+    {
+      "path": "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/zaporizhzhia/batch_000038.json",
+      "commit": "71cb6f6fbe856cc7b96759310fe9cc9c71cc0453",
+      "blob": "6a381c1b83004a102fd3e0bf9c7d73e7824b82d7",
+      "byte_count": 535335,
+      "role": "frozen_H1_direct_batch_evidence",
+      "governs": [
+        "historical_episode_id",
+        "city_key",
+        "alert_interval",
+        "frozen_verdict",
+        "qa_reasons",
+        "source_membership_candidates"
+      ],
+      "authority_type": "direct_row_level_evidence_requires_projection"
+    },
+    {
+      "path": "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/zaporizhzhia/batch_000039.json",
+      "commit": "71cb6f6fbe856cc7b96759310fe9cc9c71cc0453",
+      "blob": "d7d31c750b52095b2cf4d98cd945a6e8d4e39774",
+      "byte_count": 529786,
+      "role": "frozen_H1_direct_batch_evidence",
+      "governs": [
+        "historical_episode_id",
+        "city_key",
+        "alert_interval",
+        "frozen_verdict",
+        "qa_reasons",
+        "source_membership_candidates"
+      ],
+      "authority_type": "direct_row_level_evidence_requires_projection"
+    },
+    {
+      "path": "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/zaporizhzhia/batch_000040.json",
+      "commit": "71cb6f6fbe856cc7b96759310fe9cc9c71cc0453",
+      "blob": "fae4029180a04ff26c869d0088b9ee9920f84431",
+      "byte_count": 584420,
+      "role": "frozen_H1_direct_batch_evidence",
+      "governs": [
+        "historical_episode_id",
+        "city_key",
+        "alert_interval",
+        "frozen_verdict",
+        "qa_reasons",
+        "source_membership_candidates"
+      ],
+      "authority_type": "direct_row_level_evidence_requires_projection"
+    },
+    {
+      "path": "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/zaporizhzhia/batch_000041.json",
+      "commit": "71cb6f6fbe856cc7b96759310fe9cc9c71cc0453",
+      "blob": "4197107ed72810a3fc609a8a28119164c0958364",
+      "byte_count": 413801,
+      "role": "frozen_H1_direct_batch_evidence",
+      "governs": [
+        "historical_episode_id",
+        "city_key",
+        "alert_interval",
+        "frozen_verdict",
+        "qa_reasons",
+        "source_membership_candidates"
+      ],
+      "authority_type": "direct_row_level_evidence_requires_projection"
+    },
+    {
+      "path": "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/zaporizhzhia/batch_000042.json",
+      "commit": "71cb6f6fbe856cc7b96759310fe9cc9c71cc0453",
+      "blob": "c9f0f488888bb5e60aea67d9b45161bc28ec78e1",
+      "byte_count": 492183,
+      "role": "frozen_H1_direct_batch_evidence",
+      "governs": [
+        "historical_episode_id",
+        "city_key",
+        "alert_interval",
+        "frozen_verdict",
+        "qa_reasons",
+        "source_membership_candidates"
+      ],
+      "authority_type": "direct_row_level_evidence_requires_projection"
+    },
+    {
+      "path": "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/zaporizhzhia/batch_000043.json",
+      "commit": "71cb6f6fbe856cc7b96759310fe9cc9c71cc0453",
+      "blob": "9c5f8ad5c0d712aec7d43c23b6689165344d0030",
+      "byte_count": 435795,
+      "role": "frozen_H1_direct_batch_evidence",
+      "governs": [
+        "historical_episode_id",
+        "city_key",
+        "alert_interval",
+        "frozen_verdict",
+        "qa_reasons",
+        "source_membership_candidates"
+      ],
+      "authority_type": "direct_row_level_evidence_requires_projection"
+    },
+    {
+      "path": "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/zaporizhzhia/batch_000044.json",
+      "commit": "71cb6f6fbe856cc7b96759310fe9cc9c71cc0453",
+      "blob": "9b435b43ddfe00037f67efa27b8a6f752cb7b4b4",
+      "byte_count": 508818,
+      "role": "frozen_H1_direct_batch_evidence",
+      "governs": [
+        "historical_episode_id",
+        "city_key",
+        "alert_interval",
+        "frozen_verdict",
+        "qa_reasons",
+        "source_membership_candidates"
+      ],
+      "authority_type": "direct_row_level_evidence_requires_projection"
+    },
+    {
+      "path": "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/zaporizhzhia/batch_000045.json",
+      "commit": "71cb6f6fbe856cc7b96759310fe9cc9c71cc0453",
+      "blob": "de5bed4a9c1ef712a05b31f255debf116a843f76",
+      "byte_count": 447573,
+      "role": "frozen_H1_direct_batch_evidence",
+      "governs": [
+        "historical_episode_id",
+        "city_key",
+        "alert_interval",
+        "frozen_verdict",
+        "qa_reasons",
+        "source_membership_candidates"
+      ],
+      "authority_type": "direct_row_level_evidence_requires_projection"
+    },
+    {
+      "path": "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/zaporizhzhia/batch_000046.json",
+      "commit": "71cb6f6fbe856cc7b96759310fe9cc9c71cc0453",
+      "blob": "a844962ad3caa33316283512d2d218acd1219f52",
+      "byte_count": 524653,
+      "role": "frozen_H1_direct_batch_evidence",
+      "governs": [
+        "historical_episode_id",
+        "city_key",
+        "alert_interval",
+        "frozen_verdict",
+        "qa_reasons",
+        "source_membership_candidates"
+      ],
+      "authority_type": "direct_row_level_evidence_requires_projection"
+    },
+    {
+      "path": "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/zaporizhzhia/batch_000047.json",
+      "commit": "71cb6f6fbe856cc7b96759310fe9cc9c71cc0453",
+      "blob": "aff4e9f151a3f12287acf688fde4a77b2b33824c",
+      "byte_count": 480157,
+      "role": "frozen_H1_direct_batch_evidence",
+      "governs": [
+        "historical_episode_id",
+        "city_key",
+        "alert_interval",
+        "frozen_verdict",
+        "qa_reasons",
+        "source_membership_candidates"
+      ],
+      "authority_type": "direct_row_level_evidence_requires_projection"
+    },
+    {
+      "path": "research/historical_attack_event_backfill/historical-attack-events-v2-2026-09-27/zaporizhzhia/batch_000048.json",
+      "commit": "71cb6f6fbe856cc7b96759310fe9cc9c71cc0453",
+      "blob": "a735d29eb4ca60999046a6c9da71c06e193c8e14",
+      "byte_count": 233756,
+      "role": "frozen_H1_direct_batch_evidence",
+      "governs": [
+        "historical_episode_id",
+        "city_key",
+        "alert_interval",
+        "frozen_verdict",
+        "qa_reasons",
+        "source_membership_candidates"
+      ],
+      "authority_type": "direct_row_level_evidence_requires_projection"
+    },
+    {
+      "path": "research/historical_offline_repair_recovery_scan_2026-10-02.json",
+      "commit": "5d18ef85a66384f189ede5ca5654d750f60f088b",
+      "blob": "26db43c2bd7fbd9e16a53e8ccefea080636bbb73",
+      "authority_type": "accepted_H1_repair_transition_proof",
+      "role": "H1_repair"
+    },
+    {
+      "path": "research/historical_v2_18city_acceptance_2026-10-02.json",
+      "commit": "31aa7a8f8f57ff090f24814ef3c62137eebebf16",
+      "blob": "754da5b8c330188889f3f8fb22e671cbc6118cac",
+      "authority_type": "aggregate_h2_acceptance",
+      "role": "H2_umbrella"
+    },
+    {
+      "path": "research/historical_v2_formalization_chernihiv_dnipro_proof_2026-10-02.json",
+      "blob": "9416f9cb60b1b078268d74c6c8b70f76af6f9e58",
+      "role": "accepted_city_formalization_metadata",
+      "governs": [
+        "city_denominator",
+        "aggregate_verdict_totals",
+        "target_state_sha256",
+        "input_provenance"
+      ],
+      "authority_type": "aggregate_or_hash_only_not_row_level",
+      "embedded_complete_target_rows": false,
+      "byte_count": 9800
+    },
+    {
+      "path": "research/historical_v2_formalization_chernivtsi_ivano_frankivsk_proof_2026-10-02.json",
+      "blob": "8144e47393299a9426a507a2c45c8e5cb9fe3464",
+      "role": "accepted_city_formalization_metadata",
+      "governs": [
+        "city_denominator",
+        "aggregate_verdict_totals",
+        "target_state_sha256",
+        "input_provenance"
+      ],
+      "authority_type": "aggregate_or_hash_only_not_row_level",
+      "embedded_complete_target_rows": false,
+      "byte_count": 4948
+    },
+    {
+      "path": "research/historical_v2_formalization_kharkiv_kherson_proof_2026-10-02.json",
+      "blob": "f5fa45527f40a5af02e98ea5d0958547756d0218",
+      "role": "accepted_city_formalization_metadata",
+      "governs": [
+        "city_denominator",
+        "aggregate_verdict_totals",
+        "target_state_sha256",
+        "input_provenance"
+      ],
+      "authority_type": "aggregate_or_hash_only_not_row_level",
+      "embedded_complete_target_rows": false,
+      "byte_count": 15005
+    },
+    {
+      "path": "research/historical_v2_formalization_khmelnytskyi_lutsk_proof_2026-10-02.json",
+      "blob": "1deb9916d5d35af10297af5aead38bf741b86852",
+      "role": "accepted_city_formalization_metadata",
+      "governs": [
+        "city_denominator",
+        "aggregate_verdict_totals",
+        "target_state_sha256",
+        "input_provenance"
+      ],
+      "authority_type": "aggregate_or_hash_only_not_row_level",
+      "embedded_complete_target_rows": false,
+      "byte_count": 5084
+    },
+    {
+      "path": "research/historical_v2_formalization_kropyvnytskyi_mykolaiv_proof_2026-10-02.json",
+      "blob": "3db2c10957beb51cfc565af645f06007a8c0ca55",
+      "role": "accepted_city_formalization_metadata",
+      "governs": [
+        "city_denominator",
+        "aggregate_verdict_totals",
+        "target_state_sha256",
+        "input_provenance"
+      ],
+      "authority_type": "aggregate_or_hash_only_not_row_level",
+      "embedded_complete_target_rows": false,
+      "byte_count": 7835
+    },
+    {
+      "path": "research/historical_v2_formalization_kyiv_proof_2026-10-02.json",
+      "blob": "36d830c981ac765ae6ea2150092ab49512e1eec9",
+      "role": "accepted_city_formalization_metadata",
+      "governs": [
+        "city_denominator",
+        "aggregate_verdict_totals",
+        "target_state_sha256",
+        "input_provenance"
+      ],
+      "authority_type": "aggregate_or_hash_only_not_row_level",
+      "embedded_complete_target_rows": false,
+      "byte_count": 2770
+    },
+    {
+      "path": "research/historical_v2_formalization_odesa_proof_2026-10-02.json",
+      "blob": "94093565a733d0dc5cf0dc85ab8441a551287ef0",
+      "role": "accepted_city_formalization_metadata",
+      "governs": [
+        "city_denominator",
+        "aggregate_verdict_totals",
+        "target_state_sha256",
+        "input_provenance"
+      ],
+      "authority_type": "aggregate_or_hash_only_not_row_level",
+      "embedded_complete_target_rows": false,
+      "byte_count": 3296
+    },
+    {
+      "path": "research/historical_v2_formalization_poltava_rivne_proof_2026-10-02.json",
+      "blob": "182970ddb52949a7d34e1d4246928f6f654f9b51",
+      "role": "accepted_city_formalization_metadata",
+      "governs": [
+        "city_denominator",
+        "aggregate_verdict_totals",
+        "target_state_sha256",
+        "input_provenance"
+      ],
+      "authority_type": "aggregate_or_hash_only_not_row_level",
+      "embedded_complete_target_rows": false,
+      "byte_count": 6784
+    },
+    {
+      "path": "research/historical_v2_formalization_ternopil_uzhhorod_proof_2026-10-02.json",
+      "blob": "2e23c9b778723c4fef0ad6e22b73b954ff02bb3a",
+      "role": "accepted_city_formalization_metadata",
+      "governs": [
+        "city_denominator",
+        "aggregate_verdict_totals",
+        "target_state_sha256",
+        "input_provenance"
+      ],
+      "authority_type": "aggregate_or_hash_only_not_row_level",
+      "embedded_complete_target_rows": false,
+      "byte_count": 5065
+    },
+    {
+      "path": "research/historical_v2_formalization_vinnytsia_zhytomyr_proof_2026-10-02.json",
+      "blob": "211a602b3cf9a08e33c3ea733bc63984314362dd",
+      "role": "accepted_city_formalization_metadata",
+      "governs": [
+        "city_denominator",
+        "aggregate_verdict_totals",
+        "target_state_sha256",
+        "input_provenance"
+      ],
+      "authority_type": "aggregate_or_hash_only_not_row_level",
+      "embedded_complete_target_rows": false,
+      "byte_count": 4833
+    },
+    {
+      "path": "research/attack_event_18city_persistence_identity_export_v2_2026-10-04.json",
+      "commit": "03a04d33f7616b77181741fd77a776c490391d07",
+      "blob": "a240f1950748afcb9fc974c49ac58da07adfff65",
+      "byte_count": 60509907,
+      "authority_type": "candidate_large_derived_identity_export_not_yet_adjudicated",
+      "role": "H2_transport_blocker"
+    },
+    {
+      "path": "research/attack_event_5city_persistence_identity_export_v2_2026-10-04.json",
+      "commit": "02ad2e8fadee78442753567bc2d3a540345d8e8a",
+      "blob": "a2e34c4a114ad335d35068d6c6a3a4606b09db7f",
+      "byte_count": 29774541,
+      "authority_type": "candidate_large_derived_identity_export_not_yet_adjudicated",
+      "role": "H1_transport_blocker"
+    },
+    {
+      "path": "research/attack_event_23city_persistence_snapshot_v2_2026-10-04.json",
+      "commit": "efefa399e69eadd3d7fc8393ac1553cfde35f138",
+      "blob": "8a2f6bd33f879be9db978da59c12c34e61f6f843",
+      "byte_count": 90282029,
+      "authority_type": "derived_persistence_snapshot_not_original_historical_truth",
+      "role": "migration_snapshot"
+    },
+    {
+      "path": "research/attack_event_neon_persistence_contract_2026-10-02.json",
+      "commit": "b205d38dbc50bc502d10e682d4ae53491af542ea",
+      "blob": "e9dcbdf21551ca086fbf096138f885f453a8c2b0",
+      "authority_type": "deterministic_key_parent_and_source_contract",
+      "role": "persistence_contract"
+    }
+  ],
+  "H1": {
+    "expected_classifications": 6863,
+    "verified_predecessor_exact_verdict_and_qa": 6863,
+    "predecessor_missing_identities": 0,
+    "predecessor_extra_identities": 0,
+    "accepted_repair_targets": 25,
+    "accepted_repair_distinct_unbound": true,
+    "classification_key_contract": "attack-event-classification-key-v1; SHA256 canonical UTF-8 JSON tuple; exact rule in contract blob e9dcbdf...",
+    "expected_deterministic_keys": "NOT_RECONSTRUCTED",
+    "key_mismatches": null,
+    "expected_source_links": null,
+    "persisted_source_links_prior_snapshot": 2340,
+    "expected_events": 119,
+    "exact_event_keys": null,
+    "source_and_event_parity": "NOT_CERTIFIED",
+    "runA_hashes": null,
+    "runB_hashes": null
+  },
+  "H2": {
+    "expected_classifications": 19542,
+    "persisted_classifications_predecessor": 19542,
+    "accepted_aggregates": {
+      "strict": 913,
+      "sensitivity": 48,
+      "needs_review": 468,
+      "no_confirmed_event": 18113
+    },
+    "accepted_proof_metadata_files": 10,
+    "immutable_complete_expected_rows_recovered": false,
+    "row_transport_status": "H2_ROW_AUTHORITY_TRANSPORT_GAP",
+    "expected_classification_identity_set": "NOT_RECONSTRUCTED",
+    "expected_classification_keys": "NOT_RECONSTRUCTED",
+    "expected_source_links": null,
+    "persisted_source_links_prior_snapshot": 1429,
+    "expected_events": 961,
+    "exact_event_keys": null,
+    "runA_hashes": null,
+    "runB_hashes": null
+  },
+  "parent_contracts": {
+    "count": 25,
+    "H1": 5,
+    "H2": 20,
+    "dispositions": {
+      "UNRESOLVED": 25,
+      "ACCEPTED_HISTORICAL_UNBOUND_EXCEPTION": 0,
+      "EXPECTED_PARENT_MISSING_FROM_NEON": 0,
+      "CANONICAL_PARENT_EXISTS_BUT_BINDING_MISSING": 0,
+      "CANONICAL_PARENT_IDENTITY_TRANSFORMED_BY_ACCEPTED_CONTRACT": 0,
+      "CANONICAL_PARENT_IDENTITY_AMBIGUOUS": 0,
+      "FROZEN_AUTHORITY_DOES_NOT_GOVERN_PARENT": 0,
+      "COHORT_IDENTITY_CONFLICT": 0
+    },
+    "blocking_parent_contract_unknown": 25,
+    "source": "predecessor fixed 25-row inventory; bounded original parent contract discovered, full historical cohort-admission proof and current Neon recheck not completed",
+    "rows": [
+      {
+        "classification_uid": "1bd00338-dea9-48d2-8eae-6545f11d805e",
+        "classification_key": "b48f334e1b07715f6a72a1cfe127fcea02b149b7068ab90c94dbcc0da1179d82",
+        "episode_id": "202d8d1527183a6282ccf1e2",
+        "city": "lviv",
+        "cohort": "H1",
+        "alert_start_at": "2026-09-13T02:32:14.172Z",
+        "alert_end_at": "2026-09-13T06:11:11.976Z",
+        "contract": "attack-event-neon-persistence-contract-v1",
+        "contract_blob": "e9dcbdf21551ca086fbf096138f885f453a8c2b0",
+        "contract_rules": "UNBOUND is storable with NULL alert_episode_uid where zero exact eligible canonical parents; no fuzzy matching. A historical migration accepted exception surviving C4 is not affirmatively proven for this row.",
+        "parent_eligibility": "NO EXACT ELIGIBLE PARENT PROVEN",
+        "expected_parent_identity": "NOT_GOVERNED_BY_VERIFIED_FROZEN_ROW_AUTHORITY",
+        "neon_result_prior_accepted": {
+          "exact_episode_id_matches": 0,
+          "exact_city_interval_matches": 0,
+          "binding_state": "UNBOUND",
+          "snapshot": "263176:263176:"
+        },
+        "disposition": "UNRESOLVED",
+        "C4_blocker": true
+      },
+      {
+        "classification_uid": "f34a3a0e-fa4e-47c2-b660-e927c828ae46",
+        "classification_key": "b8b87072309ec212cb3f1fdf6b1012d8499c699cb128cf3061f00612536efda8",
+        "episode_id": "b24ba103214a22f4d5e65ce4",
+        "city": "lviv",
+        "cohort": "H1",
+        "alert_start_at": "2026-09-15T16:44:13.025Z",
+        "alert_end_at": "2026-09-15T17:08:51.287Z",
+        "contract": "attack-event-neon-persistence-contract-v1",
+        "contract_blob": "e9dcbdf21551ca086fbf096138f885f453a8c2b0",
+        "contract_rules": "UNBOUND is storable with NULL alert_episode_uid where zero exact eligible canonical parents; no fuzzy matching. A historical migration accepted exception surviving C4 is not affirmatively proven for this row.",
+        "parent_eligibility": "NO EXACT ELIGIBLE PARENT PROVEN",
+        "expected_parent_identity": "NOT_GOVERNED_BY_VERIFIED_FROZEN_ROW_AUTHORITY",
+        "neon_result_prior_accepted": {
+          "exact_episode_id_matches": 0,
+          "exact_city_interval_matches": 0,
+          "binding_state": "UNBOUND",
+          "snapshot": "263176:263176:"
+        },
+        "disposition": "UNRESOLVED",
+        "C4_blocker": true
+      },
+      {
+        "classification_uid": "df9913ca-388b-4c52-bb86-fd195d700ad0",
+        "classification_key": "f648fc829b0bdc09f74153ca53a4e66d57078e5a1affdfb0c122aa2c49db8524",
+        "episode_id": "b3df9090f7264ddbd726e113",
+        "city": "lviv",
+        "cohort": "H1",
+        "alert_start_at": "2026-09-12T22:00:05.398Z",
+        "alert_end_at": "2026-09-12T22:14:23.315Z",
+        "contract": "attack-event-neon-persistence-contract-v1",
+        "contract_blob": "e9dcbdf21551ca086fbf096138f885f453a8c2b0",
+        "contract_rules": "UNBOUND is storable with NULL alert_episode_uid where zero exact eligible canonical parents; no fuzzy matching. A historical migration accepted exception surviving C4 is not affirmatively proven for this row.",
+        "parent_eligibility": "NO EXACT ELIGIBLE PARENT PROVEN",
+        "expected_parent_identity": "NOT_GOVERNED_BY_VERIFIED_FROZEN_ROW_AUTHORITY",
+        "neon_result_prior_accepted": {
+          "exact_episode_id_matches": 0,
+          "exact_city_interval_matches": 0,
+          "binding_state": "UNBOUND",
+          "snapshot": "263176:263176:"
+        },
+        "disposition": "UNRESOLVED",
+        "C4_blocker": true
+      },
+      {
+        "classification_uid": "0a40106c-7ee9-40c4-b268-504954f3be19",
+        "classification_key": "86ca8ac7e7e6f198d64ca45db321df6ca5746388258b93b58e8573f4a779ca0c",
+        "episode_id": "d1d8f1e454e15cb6ed6b306c",
+        "city": "sumy",
+        "cohort": "H1",
+        "alert_start_at": "2026-09-17T17:12:24.000Z",
+        "alert_end_at": "2026-09-17T20:56:00.000Z",
+        "contract": "attack-event-neon-persistence-contract-v1",
+        "contract_blob": "e9dcbdf21551ca086fbf096138f885f453a8c2b0",
+        "contract_rules": "UNBOUND is storable with NULL alert_episode_uid where zero exact eligible canonical parents; no fuzzy matching. A historical migration accepted exception surviving C4 is not affirmatively proven for this row.",
+        "parent_eligibility": "NO EXACT ELIGIBLE PARENT PROVEN",
+        "expected_parent_identity": "NOT_GOVERNED_BY_VERIFIED_FROZEN_ROW_AUTHORITY",
+        "neon_result_prior_accepted": {
+          "exact_episode_id_matches": 0,
+          "exact_city_interval_matches": 0,
+          "binding_state": "UNBOUND",
+          "snapshot": "263176:263176:"
+        },
+        "disposition": "UNRESOLVED",
+        "C4_blocker": true
+      },
+      {
+        "classification_uid": "31f8a1e3-6380-464d-9a35-f6ddecb1b02c",
+        "classification_key": "94225058153489b4498fed1423938edd5c072888df94c27c92f620776530fe38",
+        "episode_id": "c138680a6beb87a4aa8be6fc",
+        "city": "zaporizhzhia",
+        "cohort": "H1",
+        "alert_start_at": "2026-09-17T19:33:49.000Z",
+        "alert_end_at": "2026-09-17T21:54:45.000Z",
+        "contract": "attack-event-neon-persistence-contract-v1",
+        "contract_blob": "e9dcbdf21551ca086fbf096138f885f453a8c2b0",
+        "contract_rules": "UNBOUND is storable with NULL alert_episode_uid where zero exact eligible canonical parents; no fuzzy matching. A historical migration accepted exception surviving C4 is not affirmatively proven for this row.",
+        "parent_eligibility": "NO EXACT ELIGIBLE PARENT PROVEN",
+        "expected_parent_identity": "NOT_GOVERNED_BY_VERIFIED_FROZEN_ROW_AUTHORITY",
+        "neon_result_prior_accepted": {
+          "exact_episode_id_matches": 0,
+          "exact_city_interval_matches": 0,
+          "binding_state": "UNBOUND",
+          "snapshot": "263176:263176:"
+        },
+        "disposition": "UNRESOLVED",
+        "C4_blocker": true
+      },
+      {
+        "classification_uid": "8c01721e-b4e8-4b63-b789-9801efbd63f8",
+        "classification_key": "a2db2590f3858a4696abe9bc37252876bfaa79d626e1f1b7a3f54d5b5a7681e2",
+        "episode_id": "0fc4be61b3b03eb9027c2536",
+        "city": "kharkiv",
+        "cohort": "H2",
+        "alert_start_at": "2025-03-05T19:08:24.000Z",
+        "alert_end_at": "2025-03-06T03:03:45.000Z",
+        "contract": "attack-event-neon-persistence-contract-v1",
+        "contract_blob": "e9dcbdf21551ca086fbf096138f885f453a8c2b0",
+        "contract_rules": "UNBOUND is storable with NULL alert_episode_uid where zero exact eligible canonical parents; no fuzzy matching. A historical migration accepted exception surviving C4 is not affirmatively proven for this row.",
+        "parent_eligibility": "NO EXACT ELIGIBLE PARENT PROVEN",
+        "expected_parent_identity": "NOT_GOVERNED_BY_VERIFIED_FROZEN_ROW_AUTHORITY",
+        "neon_result_prior_accepted": {
+          "exact_episode_id_matches": 0,
+          "exact_city_interval_matches": 0,
+          "binding_state": "UNBOUND",
+          "snapshot": "263176:263176:"
+        },
+        "disposition": "UNRESOLVED",
+        "C4_blocker": true
+      },
+      {
+        "classification_uid": "cbf4dd1e-1215-4595-9388-d0d30bcd55a2",
+        "classification_key": "49516b028c9b8cdf4da280f3ddf73e161ffd2e75663c3fca9771070de75e99fe",
+        "episode_id": "fc1226778d0125bc91aa669c",
+        "city": "kharkiv",
+        "cohort": "H2",
+        "alert_start_at": "2026-09-17T17:41:38.000Z",
+        "alert_end_at": "2026-09-17T20:55:54.000Z",
+        "contract": "attack-event-neon-persistence-contract-v1",
+        "contract_blob": "e9dcbdf21551ca086fbf096138f885f453a8c2b0",
+        "contract_rules": "UNBOUND is storable with NULL alert_episode_uid where zero exact eligible canonical parents; no fuzzy matching. A historical migration accepted exception surviving C4 is not affirmatively proven for this row.",
+        "parent_eligibility": "NO EXACT ELIGIBLE PARENT PROVEN",
+        "expected_parent_identity": "NOT_GOVERNED_BY_VERIFIED_FROZEN_ROW_AUTHORITY",
+        "neon_result_prior_accepted": {
+          "exact_episode_id_matches": 0,
+          "exact_city_interval_matches": 0,
+          "binding_state": "UNBOUND",
+          "snapshot": "263176:263176:"
+        },
+        "disposition": "UNRESOLVED",
+        "C4_blocker": true
+      },
+      {
+        "classification_uid": "b455c332-17ec-43c1-8bf4-7d2c589451ed",
+        "classification_key": "24dd26e5ef310c6d6ff97125aa4c06c79478b7a8ee0caa65a278149f6fdc866f",
+        "episode_id": "1a603e438745d4a3d6408639",
+        "city": "kyiv",
+        "cohort": "H2",
+        "alert_start_at": "2026-09-16T23:03:00.000Z",
+        "alert_end_at": "2026-09-16T23:54:00.000Z",
+        "contract": "attack-event-neon-persistence-contract-v1",
+        "contract_blob": "e9dcbdf21551ca086fbf096138f885f453a8c2b0",
+        "contract_rules": "UNBOUND is storable with NULL alert_episode_uid where zero exact eligible canonical parents; no fuzzy matching. A historical migration accepted exception surviving C4 is not affirmatively proven for this row.",
+        "parent_eligibility": "NO EXACT ELIGIBLE PARENT PROVEN",
+        "expected_parent_identity": "NOT_GOVERNED_BY_VERIFIED_FROZEN_ROW_AUTHORITY",
+        "neon_result_prior_accepted": {
+          "exact_episode_id_matches": 0,
+          "exact_city_interval_matches": 0,
+          "binding_state": "UNBOUND",
+          "snapshot": "263176:263176:"
+        },
+        "disposition": "UNRESOLVED",
+        "C4_blocker": true
+      },
+      {
+        "classification_uid": "c1b3791f-2c8c-4167-bea8-622c78d044ea",
+        "classification_key": "ee01ad9ef3888702c3f1bb9eef63c167f64fad0557b3f18007a47b822b3296c4",
+        "episode_id": "1a8900b3e09048b0a61db83c",
+        "city": "kyiv",
+        "cohort": "H2",
+        "alert_start_at": "2026-09-17T08:40:00.000Z",
+        "alert_end_at": "2026-09-17T08:55:00.000Z",
+        "contract": "attack-event-neon-persistence-contract-v1",
+        "contract_blob": "e9dcbdf21551ca086fbf096138f885f453a8c2b0",
+        "contract_rules": "UNBOUND is storable with NULL alert_episode_uid where zero exact eligible canonical parents; no fuzzy matching. A historical migration accepted exception surviving C4 is not affirmatively proven for this row.",
+        "parent_eligibility": "NO EXACT ELIGIBLE PARENT PROVEN",
+        "expected_parent_identity": "NOT_GOVERNED_BY_VERIFIED_FROZEN_ROW_AUTHORITY",
+        "neon_result_prior_accepted": {
+          "exact_episode_id_matches": 0,
+          "exact_city_interval_matches": 0,
+          "binding_state": "UNBOUND",
+          "snapshot": "263176:263176:"
+        },
+        "disposition": "UNRESOLVED",
+        "C4_blocker": true
+      },
+      {
+        "classification_uid": "7617c848-89be-4d2e-8910-207f25fcd678",
+        "classification_key": "c5618a7e2f9929121c44d216778ccc6b5b705cacecc3cf487785f8d1a877c286",
+        "episode_id": "5ecf681dfd050d9e65c9d03c",
+        "city": "kyiv",
+        "cohort": "H2",
+        "alert_start_at": "2026-09-15T12:07:00.000Z",
+        "alert_end_at": "2026-09-15T13:20:00.000Z",
+        "contract": "attack-event-neon-persistence-contract-v1",
+        "contract_blob": "e9dcbdf21551ca086fbf096138f885f453a8c2b0",
+        "contract_rules": "UNBOUND is storable with NULL alert_episode_uid where zero exact eligible canonical parents; no fuzzy matching. A historical migration accepted exception surviving C4 is not affirmatively proven for this row.",
+        "parent_eligibility": "NO EXACT ELIGIBLE PARENT PROVEN",
+        "expected_parent_identity": "NOT_GOVERNED_BY_VERIFIED_FROZEN_ROW_AUTHORITY",
+        "neon_result_prior_accepted": {
+          "exact_episode_id_matches": 0,
+          "exact_city_interval_matches": 0,
+          "binding_state": "UNBOUND",
+          "snapshot": "263176:263176:"
+        },
+        "disposition": "UNRESOLVED",
+        "C4_blocker": true
+      },
+      {
+        "classification_uid": "7f6741fb-915d-4152-8e74-b023f05f470e",
+        "classification_key": "e60c9af9c8e59b6212a4255adf4f42ab6b3fee63eedcc2bbf7cba0e3ec2d5c34",
+        "episode_id": "659fa411a4626d02df3c16b6",
+        "city": "kyiv",
+        "cohort": "H2",
+        "alert_start_at": "2026-09-17T06:01:00.000Z",
+        "alert_end_at": "2026-09-17T06:03:00.000Z",
+        "contract": "attack-event-neon-persistence-contract-v1",
+        "contract_blob": "e9dcbdf21551ca086fbf096138f885f453a8c2b0",
+        "contract_rules": "UNBOUND is storable with NULL alert_episode_uid where zero exact eligible canonical parents; no fuzzy matching. A historical migration accepted exception surviving C4 is not affirmatively proven for this row.",
+        "parent_eligibility": "NO EXACT ELIGIBLE PARENT PROVEN",
+        "expected_parent_identity": "NOT_GOVERNED_BY_VERIFIED_FROZEN_ROW_AUTHORITY",
+        "neon_result_prior_accepted": {
+          "exact_episode_id_matches": 0,
+          "exact_city_interval_matches": 0,
+          "binding_state": "UNBOUND",
+          "snapshot": "263176:263176:"
+        },
+        "disposition": "UNRESOLVED",
+        "C4_blocker": true
+      },
+      {
+        "classification_uid": "b9fb0a9e-e980-4923-9ef9-a87575645e46",
+        "classification_key": "9f3c0cfa7da59f1793d798169ea10e89036607f54d22aecb2245e9c1def48a34",
+        "episode_id": "73184793018bc20346494560",
+        "city": "kyiv",
+        "cohort": "H2",
+        "alert_start_at": "2026-09-17T06:30:00.000Z",
+        "alert_end_at": "2026-09-17T07:02:00.000Z",
+        "contract": "attack-event-neon-persistence-contract-v1",
+        "contract_blob": "e9dcbdf21551ca086fbf096138f885f453a8c2b0",
+        "contract_rules": "UNBOUND is storable with NULL alert_episode_uid where zero exact eligible canonical parents; no fuzzy matching. A historical migration accepted exception surviving C4 is not affirmatively proven for this row.",
+        "parent_eligibility": "NO EXACT ELIGIBLE PARENT PROVEN",
+        "expected_parent_identity": "NOT_GOVERNED_BY_VERIFIED_FROZEN_ROW_AUTHORITY",
+        "neon_result_prior_accepted": {
+          "exact_episode_id_matches": 0,
+          "exact_city_interval_matches": 0,
+          "binding_state": "UNBOUND",
+          "snapshot": "263176:263176:"
+        },
+        "disposition": "UNRESOLVED",
+        "C4_blocker": true
+      },
+      {
+        "classification_uid": "457dba20-311a-4531-86a4-8d3f92efd1db",
+        "classification_key": "fb8b45298abc067053d657cabce66555be41b04ff2050558c8b567a38c55ee1e",
+        "episode_id": "82984c3ddb21c5c68d737e8c",
+        "city": "kyiv",
+        "cohort": "H2",
+        "alert_start_at": "2026-09-15T16:44:00.000Z",
+        "alert_end_at": "2026-09-15T17:09:00.000Z",
+        "contract": "attack-event-neon-persistence-contract-v1",
+        "contract_blob": "e9dcbdf21551ca086fbf096138f885f453a8c2b0",
+        "contract_rules": "UNBOUND is storable with NULL alert_episode_uid where zero exact eligible canonical parents; no fuzzy matching. A historical migration accepted exception surviving C4 is not affirmatively proven for this row.",
+        "parent_eligibility": "NO EXACT ELIGIBLE PARENT PROVEN",
+        "expected_parent_identity": "NOT_GOVERNED_BY_VERIFIED_FROZEN_ROW_AUTHORITY",
+        "neon_result_prior_accepted": {
+          "exact_episode_id_matches": 0,
+          "exact_city_interval_matches": 0,
+          "binding_state": "UNBOUND",
+          "snapshot": "263176:263176:"
+        },
+        "disposition": "UNRESOLVED",
+        "C4_blocker": true
+      },
+      {
+        "classification_uid": "c96ac20b-8915-4454-9197-1dc58e6fcd7c",
+        "classification_key": "71b208cb487e8d57c0a53631edf7fbb75fb027583382032bce9ed2b698e378ad",
+        "episode_id": "874b0acd3bce44540edb93a9",
+        "city": "kyiv",
+        "cohort": "H2",
+        "alert_start_at": "2026-09-17T18:56:00.000Z",
+        "alert_end_at": "2026-09-17T19:10:00.000Z",
+        "contract": "attack-event-neon-persistence-contract-v1",
+        "contract_blob": "e9dcbdf21551ca086fbf096138f885f453a8c2b0",
+        "contract_rules": "UNBOUND is storable with NULL alert_episode_uid where zero exact eligible canonical parents; no fuzzy matching. A historical migration accepted exception surviving C4 is not affirmatively proven for this row.",
+        "parent_eligibility": "NO EXACT ELIGIBLE PARENT PROVEN",
+        "expected_parent_identity": "NOT_GOVERNED_BY_VERIFIED_FROZEN_ROW_AUTHORITY",
+        "neon_result_prior_accepted": {
+          "exact_episode_id_matches": 0,
+          "exact_city_interval_matches": 0,
+          "binding_state": "UNBOUND",
+          "snapshot": "263176:263176:"
+        },
+        "disposition": "UNRESOLVED",
+        "C4_blocker": true
+      },
+      {
+        "classification_uid": "5ccc8492-7b04-49db-8b61-cb91bf0f85a3",
+        "classification_key": "729f058e66ade174d82cd5b8a75c1cc8fb299d58f28dde980c1b288de3a4639a",
+        "episode_id": "8ea7bc150c61e8de2929ab25",
+        "city": "kyiv",
+        "cohort": "H2",
+        "alert_start_at": "2026-09-16T14:23:00.000Z",
+        "alert_end_at": "2026-09-16T15:08:00.000Z",
+        "contract": "attack-event-neon-persistence-contract-v1",
+        "contract_blob": "e9dcbdf21551ca086fbf096138f885f453a8c2b0",
+        "contract_rules": "UNBOUND is storable with NULL alert_episode_uid where zero exact eligible canonical parents; no fuzzy matching. A historical migration accepted exception surviving C4 is not affirmatively proven for this row.",
+        "parent_eligibility": "NO EXACT ELIGIBLE PARENT PROVEN",
+        "expected_parent_identity": "NOT_GOVERNED_BY_VERIFIED_FROZEN_ROW_AUTHORITY",
+        "neon_result_prior_accepted": {
+          "exact_episode_id_matches": 0,
+          "exact_city_interval_matches": 0,
+          "binding_state": "UNBOUND",
+          "snapshot": "263176:263176:"
+        },
+        "disposition": "UNRESOLVED",
+        "C4_blocker": true
+      },
+      {
+        "classification_uid": "9e7e550b-03b2-43f9-bba9-2b3dc5883629",
+        "classification_key": "e1961679b534078344b1c2b81e01017730e0d8327b30db2a5e966ec5bb303929",
+        "episode_id": "8fdc1d511a3ff6d0e5061c91",
+        "city": "kyiv",
+        "cohort": "H2",
+        "alert_start_at": "2026-09-17T10:22:00.000Z",
+        "alert_end_at": "2026-09-17T10:42:00.000Z",
+        "contract": "attack-event-neon-persistence-contract-v1",
+        "contract_blob": "e9dcbdf21551ca086fbf096138f885f453a8c2b0",
+        "contract_rules": "UNBOUND is storable with NULL alert_episode_uid where zero exact eligible canonical parents; no fuzzy matching. A historical migration accepted exception surviving C4 is not affirmatively proven for this row.",
+        "parent_eligibility": "NO EXACT ELIGIBLE PARENT PROVEN",
+        "expected_parent_identity": "NOT_GOVERNED_BY_VERIFIED_FROZEN_ROW_AUTHORITY",
+        "neon_result_prior_accepted": {
+          "exact_episode_id_matches": 0,
+          "exact_city_interval_matches": 0,
+          "binding_state": "UNBOUND",
+          "snapshot": "263176:263176:"
+        },
+        "disposition": "UNRESOLVED",
+        "C4_blocker": true
+      },
+      {
+        "classification_uid": "29a5f5ce-771a-4ef1-83d6-a1da1062e992",
+        "classification_key": "d4c1d964404c77cfc6d770cf859ea5899013210caf85e8203adda7ffc9529633",
+        "episode_id": "9f4dbbf90ee53e405d3f0bdb",
+        "city": "kyiv",
+        "cohort": "H2",
+        "alert_start_at": "2026-09-16T06:10:00.000Z",
+        "alert_end_at": "2026-09-16T06:31:00.000Z",
+        "contract": "attack-event-neon-persistence-contract-v1",
+        "contract_blob": "e9dcbdf21551ca086fbf096138f885f453a8c2b0",
+        "contract_rules": "UNBOUND is storable with NULL alert_episode_uid where zero exact eligible canonical parents; no fuzzy matching. A historical migration accepted exception surviving C4 is not affirmatively proven for this row.",
+        "parent_eligibility": "NO EXACT ELIGIBLE PARENT PROVEN",
+        "expected_parent_identity": "NOT_GOVERNED_BY_VERIFIED_FROZEN_ROW_AUTHORITY",
+        "neon_result_prior_accepted": {
+          "exact_episode_id_matches": 0,
+          "exact_city_interval_matches": 0,
+          "binding_state": "UNBOUND",
+          "snapshot": "263176:263176:"
+        },
+        "disposition": "UNRESOLVED",
+        "C4_blocker": true
+      },
+      {
+        "classification_uid": "92096abc-07aa-42b8-89b5-f249650340fc",
+        "classification_key": "5d04ee4ba051db3f3388dd313a0b61a40a46133d320dbead64de507a4508b39f",
+        "episode_id": "a018066fae8d383f5351c7cc",
+        "city": "kyiv",
+        "cohort": "H2",
+        "alert_start_at": "2026-09-17T01:33:00.000Z",
+        "alert_end_at": "2026-09-17T04:18:00.000Z",
+        "contract": "attack-event-neon-persistence-contract-v1",
+        "contract_blob": "e9dcbdf21551ca086fbf096138f885f453a8c2b0",
+        "contract_rules": "UNBOUND is storable with NULL alert_episode_uid where zero exact eligible canonical parents; no fuzzy matching. A historical migration accepted exception surviving C4 is not affirmatively proven for this row.",
+        "parent_eligibility": "NO EXACT ELIGIBLE PARENT PROVEN",
+        "expected_parent_identity": "NOT_GOVERNED_BY_VERIFIED_FROZEN_ROW_AUTHORITY",
+        "neon_result_prior_accepted": {
+          "exact_episode_id_matches": 0,
+          "exact_city_interval_matches": 0,
+          "binding_state": "UNBOUND",
+          "snapshot": "263176:263176:"
+        },
+        "disposition": "UNRESOLVED",
+        "C4_blocker": true
+      },
+      {
+        "classification_uid": "0fef7097-990b-405c-b687-3c52a1360deb",
+        "classification_key": "5b742c25ac8b80f952bb45e4b4b60fac41b9bba2349ef8e162d4fcb1d2b4ce52",
+        "episode_id": "a141391372695315ed5f73f7",
+        "city": "kyiv",
+        "cohort": "H2",
+        "alert_start_at": "2026-09-16T16:59:00.000Z",
+        "alert_end_at": "2026-09-16T17:13:00.000Z",
+        "contract": "attack-event-neon-persistence-contract-v1",
+        "contract_blob": "e9dcbdf21551ca086fbf096138f885f453a8c2b0",
+        "contract_rules": "UNBOUND is storable with NULL alert_episode_uid where zero exact eligible canonical parents; no fuzzy matching. A historical migration accepted exception surviving C4 is not affirmatively proven for this row.",
+        "parent_eligibility": "NO EXACT ELIGIBLE PARENT PROVEN",
+        "expected_parent_identity": "NOT_GOVERNED_BY_VERIFIED_FROZEN_ROW_AUTHORITY",
+        "neon_result_prior_accepted": {
+          "exact_episode_id_matches": 0,
+          "exact_city_interval_matches": 0,
+          "binding_state": "UNBOUND",
+          "snapshot": "263176:263176:"
+        },
+        "disposition": "UNRESOLVED",
+        "C4_blocker": true
+      },
+      {
+        "classification_uid": "8050c3dd-866d-4f6b-ac05-ace19b338e0e",
+        "classification_key": "08bada689018c60ebbbbeae277f870b7860f821146d826ebf9ac07614fe76fe1",
+        "episode_id": "ba16519469117045b3c662e7",
+        "city": "kyiv",
+        "cohort": "H2",
+        "alert_start_at": "2026-09-17T17:40:00.000Z",
+        "alert_end_at": "2026-09-17T17:45:00.000Z",
+        "contract": "attack-event-neon-persistence-contract-v1",
+        "contract_blob": "e9dcbdf21551ca086fbf096138f885f453a8c2b0",
+        "contract_rules": "UNBOUND is storable with NULL alert_episode_uid where zero exact eligible canonical parents; no fuzzy matching. A historical migration accepted exception surviving C4 is not affirmatively proven for this row.",
+        "parent_eligibility": "NO EXACT ELIGIBLE PARENT PROVEN",
+        "expected_parent_identity": "NOT_GOVERNED_BY_VERIFIED_FROZEN_ROW_AUTHORITY",
+        "neon_result_prior_accepted": {
+          "exact_episode_id_matches": 0,
+          "exact_city_interval_matches": 0,
+          "binding_state": "UNBOUND",
+          "snapshot": "263176:263176:"
+        },
+        "disposition": "UNRESOLVED",
+        "C4_blocker": true
+      },
+      {
+        "classification_uid": "6562b215-5a14-4d1f-8e53-0a9ed942ef72",
+        "classification_key": "19a1b4a7fdc73f2a698a544d6830de661ca32c16ec8970fa6e2db886397e7960",
+        "episode_id": "baaa05dfc347eee6e22e2eb5",
+        "city": "kyiv",
+        "cohort": "H2",
+        "alert_start_at": "2026-09-17T13:31:00.000Z",
+        "alert_end_at": "2026-09-17T13:57:00.000Z",
+        "contract": "attack-event-neon-persistence-contract-v1",
+        "contract_blob": "e9dcbdf21551ca086fbf096138f885f453a8c2b0",
+        "contract_rules": "UNBOUND is storable with NULL alert_episode_uid where zero exact eligible canonical parents; no fuzzy matching. A historical migration accepted exception surviving C4 is not affirmatively proven for this row.",
+        "parent_eligibility": "NO EXACT ELIGIBLE PARENT PROVEN",
+        "expected_parent_identity": "NOT_GOVERNED_BY_VERIFIED_FROZEN_ROW_AUTHORITY",
+        "neon_result_prior_accepted": {
+          "exact_episode_id_matches": 0,
+          "exact_city_interval_matches": 0,
+          "binding_state": "UNBOUND",
+          "snapshot": "263176:263176:"
+        },
+        "disposition": "UNRESOLVED",
+        "C4_blocker": true
+      },
+      {
+        "classification_uid": "e47ed5ca-09c1-4be1-ae74-f7ab714f1ace",
+        "classification_key": "73b3dcc600c6237da87ea82b4a6e0946aa3516186acd6abca7af43c1e33e717c",
+        "episode_id": "cce2ce6afe7dca47f7c21d4b",
+        "city": "kyiv",
+        "cohort": "H2",
+        "alert_start_at": "2026-09-16T21:21:00.000Z",
+        "alert_end_at": "2026-09-16T22:33:00.000Z",
+        "contract": "attack-event-neon-persistence-contract-v1",
+        "contract_blob": "e9dcbdf21551ca086fbf096138f885f453a8c2b0",
+        "contract_rules": "UNBOUND is storable with NULL alert_episode_uid where zero exact eligible canonical parents; no fuzzy matching. A historical migration accepted exception surviving C4 is not affirmatively proven for this row.",
+        "parent_eligibility": "NO EXACT ELIGIBLE PARENT PROVEN",
+        "expected_parent_identity": "NOT_GOVERNED_BY_VERIFIED_FROZEN_ROW_AUTHORITY",
+        "neon_result_prior_accepted": {
+          "exact_episode_id_matches": 0,
+          "exact_city_interval_matches": 0,
+          "binding_state": "UNBOUND",
+          "snapshot": "263176:263176:"
+        },
+        "disposition": "UNRESOLVED",
+        "C4_blocker": true
+      },
+      {
+        "classification_uid": "24e15ef6-2309-4801-89c8-ff5dc270e5dc",
+        "classification_key": "17b2e11bf04b2714f31b3999d68f9ef27d0f11279da5f827f987a1fbeccedd0d",
+        "episode_id": "db5d4ace535298a36b0ceadc",
+        "city": "kyiv",
+        "cohort": "H2",
+        "alert_start_at": "2026-09-16T02:05:00.000Z",
+        "alert_end_at": "2026-09-16T02:09:00.000Z",
+        "contract": "attack-event-neon-persistence-contract-v1",
+        "contract_blob": "e9dcbdf21551ca086fbf096138f885f453a8c2b0",
+        "contract_rules": "UNBOUND is storable with NULL alert_episode_uid where zero exact eligible canonical parents; no fuzzy matching. A historical migration accepted exception surviving C4 is not affirmatively proven for this row.",
+        "parent_eligibility": "NO EXACT ELIGIBLE PARENT PROVEN",
+        "expected_parent_identity": "NOT_GOVERNED_BY_VERIFIED_FROZEN_ROW_AUTHORITY",
+        "neon_result_prior_accepted": {
+          "exact_episode_id_matches": 0,
+          "exact_city_interval_matches": 0,
+          "binding_state": "UNBOUND",
+          "snapshot": "263176:263176:"
+        },
+        "disposition": "UNRESOLVED",
+        "C4_blocker": true
+      },
+      {
+        "classification_uid": "b644517c-e393-4078-8fde-d53799ea4071",
+        "classification_key": "8374515afa060059ff82f7a02a71619af0ad4d95438497e9614c5defe4137321",
+        "episode_id": "ed5c27624d6bef47b04b5050",
+        "city": "kyiv",
+        "cohort": "H2",
+        "alert_start_at": "2026-09-16T18:20:00.000Z",
+        "alert_end_at": "2026-09-16T18:31:00.000Z",
+        "contract": "attack-event-neon-persistence-contract-v1",
+        "contract_blob": "e9dcbdf21551ca086fbf096138f885f453a8c2b0",
+        "contract_rules": "UNBOUND is storable with NULL alert_episode_uid where zero exact eligible canonical parents; no fuzzy matching. A historical migration accepted exception surviving C4 is not affirmatively proven for this row.",
+        "parent_eligibility": "NO EXACT ELIGIBLE PARENT PROVEN",
+        "expected_parent_identity": "NOT_GOVERNED_BY_VERIFIED_FROZEN_ROW_AUTHORITY",
+        "neon_result_prior_accepted": {
+          "exact_episode_id_matches": 0,
+          "exact_city_interval_matches": 0,
+          "binding_state": "UNBOUND",
+          "snapshot": "263176:263176:"
+        },
+        "disposition": "UNRESOLVED",
+        "C4_blocker": true
+      },
+      {
+        "classification_uid": "583be6d4-adb1-4938-8186-d97d9012c2be",
+        "classification_key": "674b1d8c36ed29aa4ad6295f087ec94657b778934790cff6ce859bf17a2f3c1d",
+        "episode_id": "ef14e0c9d07f731fa667653f",
+        "city": "kyiv",
+        "cohort": "H2",
+        "alert_start_at": "2026-09-16T03:53:00.000Z",
+        "alert_end_at": "2026-09-16T04:36:00.000Z",
+        "contract": "attack-event-neon-persistence-contract-v1",
+        "contract_blob": "e9dcbdf21551ca086fbf096138f885f453a8c2b0",
+        "contract_rules": "UNBOUND is storable with NULL alert_episode_uid where zero exact eligible canonical parents; no fuzzy matching. A historical migration accepted exception surviving C4 is not affirmatively proven for this row.",
+        "parent_eligibility": "NO EXACT ELIGIBLE PARENT PROVEN",
+        "expected_parent_identity": "NOT_GOVERNED_BY_VERIFIED_FROZEN_ROW_AUTHORITY",
+        "neon_result_prior_accepted": {
+          "exact_episode_id_matches": 0,
+          "exact_city_interval_matches": 0,
+          "binding_state": "UNBOUND",
+          "snapshot": "263176:263176:"
+        },
+        "disposition": "UNRESOLVED",
+        "C4_blocker": true
+      }
+    ]
+  },
+  "overlap_expected": "NOT_CERTIFIED; H2 immutable full expected identities unavailable",
+  "global_missing_extra": "NOT_CERTIFIED",
+  "snapshot_current_audit": null,
+  "Neon_queries_current_audit": 0,
+  "previous_snapshot": "263176:263176: (historical predecessor only; not a new current comparison)",
+  "classification_reexecutions_for_truth": 0,
+  "canonical_serialization": "JSON artifact itself formatted with UTF-8 JSON.stringify indentation=2 plus trailing newline; no claimed projection A/B hashes",
+  "exact_next_task": "RETRIEVE AND VALIDATE EXACT OCTOBER-4 H2 60,509,907-BYTE AND H1 29,774,541-BYTE IDENTITY EXPORT BLOBS; ESTABLISH INDEPENDENT FROZEN ROW-LEVEL AUTHORITY AND HISTORICAL PARENT-ADMISSION SCOPE WITHOUT CLASSIFIER RERUN",
+  "limitations": "No final all-row H1/H2 expected semantic/source/event parity or repeatable-read comparison is claimed. Historical project state and C4/C5 remain unchanged.",
+  "safety": {
+    "DB_WRITES": 0,
+    "NEON_BRANCH_MUTATIONS": 0,
+    "PRODUCTION_MUTATION": "NO",
+    "SITE_PROD_MUTATION": "NO",
+    "WORKFLOW_CONFIG_PRODUCTION_MUTATION": "NO",
+    "CUTOVER_ACTIONS": 0,
+    "LEGACY_PATHS_DISABLED": 0,
+    "A5_REEXECUTIONS": 0,
+    "HISTORICAL_BACKFILLS": 0,
+    "PARENT_REPAIRS": 0,
+    "CLASSIFICATION_REPAIRS": 0,
+    "SOURCE_REPAIRS": 0,
+    "EVENT_REPAIRS": 0,
+    "CLASSIFIER_REEXECUTIONS_FOR_TRUTH": 0
+  }
+}
