@@ -1,0 +1,64 @@
+name: Disposable PG16 canonical queue verification
+on:
+  push:
+    branches: [kyiv-live-canonical-queue-pg16-proof-2026-10-11]
+    paths:
+      - ".github/workflows/kyiv-canonical-pg16-proof.yml"
+      - "kyiv-air-alerts-grafana/tests/prove_pg16_canonical_pipeline.py"
+      - "kyiv-air-alerts-grafana/tests/fixtures/**"
+      - "kyiv-air-alerts-grafana/scripts/attack_event_canonical_persistence.py"
+      - "kyiv-air-alerts-grafana/scripts/live_canonical_queue.py"
+      - "kyiv-air-alerts-grafana/scripts/live_parent_ordering.py"
+permissions:
+  contents: read
+jobs:
+  disposable-pg16:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: offline
+          POSTGRES_PASSWORD: offline
+          POSTGRES_DB: offline_acceptance
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U offline -d offline_acceptance"
+          --health-interval 5s --health-timeout 5s --health-retries 12
+    env:
+      LOCAL_PROOF_POSTGRES_DSN: "postgresql://offline:offline@localhost:5432/offline_acceptance"
+      ATTACK_EVENT_DATABASE_URL: ""
+      DATABASE_URL: ""
+      NEON_DATABASE_URL: ""
+      UKRAINEALARM_API_TOKEN: ""
+      GITHUB_TOKEN: ""
+      ATTACK_EVENT_PERSISTENCE_CANARY_MAX_EPISODES: "10"
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install offline dependencies
+        run: |
+          pip install psycopg[binary] requests beautifulsoup4
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq postgresql-client
+      - name: Validate canonical schema on real PG16
+        run: |
+          PGPASSWORD=offline psql -v ON_ERROR_STOP=1 -h localhost -U offline -d offline_acceptance -f kyiv-air-alerts-grafana/tests/fixtures/pg16_verified_canonical_schema.sql
+      - name: Execute real SQL persistence and queue acceptance
+        run: |
+          python kyiv-air-alerts-grafana/tests/prove_pg16_canonical_pipeline.py > /tmp/pg16-proof-A.json
+          cat /tmp/pg16-proof-A.json
+      - name: Upload proof, even on failure
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: kyiv-pg16-integration-intermediate
+          path: /tmp/pg16-proof-A.json
+          if-no-files-found: warn
+          retention-days: 30
