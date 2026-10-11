@@ -7,6 +7,7 @@ No discovery/check schedule or classifier semantics are changed here.
 """
 from __future__ import annotations
 
+import copy
 import hashlib
 import json
 from datetime import datetime, timedelta, timezone
@@ -85,12 +86,32 @@ def register_city(state: dict[str, Any], city_key: str, episodes: list[dict[str,
                 "expected_current_tip": None,
                 "last_committed_key": None,
                 "quarantine_reason": None,
+                "coverage_checks": {},
+                "evidence_snapshots": {},
             }
             added += 1
         else:
             saved = entries[key]
             if tuple(saved.get(field) for field in ("city_key", "episode_id", "alert_start", "alert_end")) != values:
                 raise CanonicalQueueError("durable identity-key collision")
+        # Previously checked legacy work does not acquire a fictitious coverage
+        # certificate. New observations are certified only after source checks.
+        checks = entries[key].setdefault("coverage_checks", {})
+        entries[key].setdefault("evidence_snapshots", {})
+        for check in episode.get("checks") or []:
+            label = str(check.get("label") or "")
+            if not label:
+                continue
+            due = precise(check["due_at"])
+            if label not in checks:
+                checks[label] = {
+                    "due_at": due,
+                    "status": "legacy_unverified" if check.get("checked_at") else "pending",
+                    "completed_at": None,
+                    "reason": "LEGACY_CHECK_WITHOUT_SOURCE_COVERAGE" if check.get("checked_at") else None,
+                }
+            elif checks[label]["due_at"] != due:
+                raise CanonicalQueueError("FOLLOWUP_SCHEDULE_IDENTITY_DRIFT")
         if episode.get("identity_superseded_by_episode_id"):
             entries[key]["status"] = "quarantined"
             entries[key]["quarantine_reason"] = "SUPERSEDED_LOGICAL_IDENTITY"
@@ -160,6 +181,86 @@ def read_current_tips(conn, cutoff: datetime) -> dict[str, dict[str, Any]]:
     return output
 
 
+
+def relevant_evidence(entry: dict[str, Any], candidates: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Recover durable source observations; the current review queue wins for updated reviews.
+
+    A source disappearing from the mutable queue cannot turn an earlier positive
+    or review hold into a spurious negative.
+    """
+    from attack_event_canonical_persistence import _episode_refs
+    city, episode_id = entry["city_key"], entry["episode_id"]
+    retained = entry.get("evidence_snapshots") or {}
+    if not isinstance(retained, dict):
+        raise CanonicalQueueError("EVIDENCE_SNAPSHOT_CORRUPT")
+    merged = {key: copy.deepcopy(value) for key, value in retained.items()}
+    for row in candidates:
+        if not isinstance(row, dict) or str(row.get("city_key") or "") != city:
+            continue
+        if episode_id not in _episode_refs(row):
+            continue
+        cid = str(row.get("candidate_id") or "")
+        if not cid:
+            raise CanonicalQueueError("EPISODE_EVIDENCE_MISSING_CANDIDATE_ID")
+        merged[cid] = row
+    for cid, row in merged.items():
+        if str(row.get("candidate_id")) != cid or str(row.get("city_key")) != city or episode_id not in _episode_refs(row):
+            raise CanonicalQueueError("DURABLE_EPISODE_EVIDENCE_IDENTITY_MISMATCH")
+    return [merged[key] for key in sorted(merged)]
+
+
+def record_coverage(
+    state: dict[str, Any],
+    due: dict[str, list[tuple[dict[str, Any], dict[str, Any]]]],
+    coverage_by_city: dict[str, bool],
+    candidates: list[dict[str, Any]],
+    checked_at: datetime,
+) -> dict[str, int]:
+    """Certify each executed follow-up only after the approved discovery path finishes.
+
+    Missing source coverage stays pending; the monitor must not set checked_at
+    on those checks, allowing the unchanged discovery strategy to retry.
+    """
+    complete = failed = 0
+    entries = store(state)
+    for city, city_due in sorted(due.items()):
+        for episode, check in city_due:
+            key = identity_key(identity(episode, city))
+            entry = entries.get(key)
+            if entry is None:
+                raise CanonicalQueueError("UNREGISTERED_FOLLOWUP_OBLIGATION")
+            label = str(check.get("label") or "")
+            cert = entry.get("coverage_checks", {}).get(label)
+            if cert is None:
+                raise CanonicalQueueError("MISSING_FOLLOWUP_COVERAGE_SCHEDULE")
+            if not coverage_by_city.get(city):
+                cert["status"] = "pending"
+                cert["reason"] = "SOURCE_COVERAGE_INCOMPLETE_RETRY_DUE_CHECK"
+                check["checked_at"] = None
+                failed += 1
+                continue
+            for row in relevant_evidence(entry, candidates):
+                entry["evidence_snapshots"][row["candidate_id"]] = copy.deepcopy(row)
+            cert["status"] = "complete"
+            cert["reason"] = None
+            cert["completed_at"] = precise(checked_at)
+            check["checked_at"] = precise(checked_at)
+            complete += 1
+    return {"checks_complete": complete, "checks_retryable": failed}
+
+
+def evidence_gate(entry: dict[str, Any], now: datetime) -> tuple[bool, str | None]:
+    checks = entry.get("coverage_checks") or {}
+    if not isinstance(checks, dict) or not checks:
+        return False, "NO_DURABLE_FOLLOWUP_COVERAGE_CONTRACT"
+    eligible = [check for check in checks.values() if instant(check["due_at"]) <= instant(now)]
+    if not eligible:
+        return False, "NO_FOLLOWUP_CHECK_DUE_YET"
+    for check in eligible:
+        if check.get("status") != "complete":
+            return False, str(check.get("reason") or "FOLLOWUP_EVIDENCE_NOT_COMPLETE")
+    return True, None
+
 def desired_classification_key(
     entry: dict[str, Any],
     candidates: list[dict[str, Any]],
@@ -201,7 +302,7 @@ def reconcile_and_select(
     entries = store(state)
     total = 0
     pending: list[tuple[tuple[str, str, str, str], str, dict[str, Any], dict[str, Any] | None]] = []
-    committed = quarantined = retry_waiting = 0
+    committed = quarantined = retry_waiting = blocked_evidence = 0
     for digest, entry in entries.items():
         i = identity(episode_from_entry(entry))
         if identity_key(i) != digest:
@@ -210,40 +311,59 @@ def reconcile_and_select(
             continue
         total += 1
         tip = tips.get(digest)
-        if tip:
-            if not tip.get("exact_parent"):
-                entry["status"] = "quarantined"
-                entry["quarantine_reason"] = "CURRENT_TIP_PARENT_NOT_EXACT"
-            elif entry.get("status") != "quarantined":
-                key = desired_classification_key(entry, candidates)
-                if key == tip.get("classification_key"):
-                    entry["status"] = "committed"
-                    entry["last_committed_key"] = key
-                    entry["next_retry_at"] = None
-                elif tip.get("origin_kind") != LIVE_ORIGIN_KIND:
-                    entry["status"] = "quarantined"
-                    entry["quarantine_reason"] = "NONLIVE_ORIGIN_REVISION_FORBIDDEN"
-                else:
-                    entry["status"] = "pending"
-                    entry["expected_current_tip"] = tip["classification_uid"]
-                    entry["expected_current_key"] = tip["classification_key"]
-        elif entry.get("status") == "committed":
-            # A WIP flag can NEVER overrule missing database commitment.
-            entry["status"] = "pending"
-            entry["last_committed_key"] = None
         if entry.get("status") == "quarantined":
             quarantined += 1
             continue
-        if entry.get("status") == "committed":
+        if tip and not tip.get("exact_parent"):
+            entry["status"] = "quarantined"
+            entry["quarantine_reason"] = "CURRENT_TIP_PARENT_NOT_EXACT"
+            quarantined += 1
+            continue
+
+        covered, reason = evidence_gate(entry, now)
+        if not covered:
+            # A committed tip is authoritative even if old WIP discovery metadata
+            # is incomplete. Never fabricate a revision from missing candidates.
+            if tip:
+                entry["status"] = "committed"
+                entry["last_committed_key"] = tip["classification_key"]
+                entry["next_retry_at"] = None
+                committed += 1
+            else:
+                entry["status"] = "blocked_evidence"
+                entry["last_error"] = reason
+                blocked_evidence += 1
+            continue
+
+        try:
+            source_rows = relevant_evidence(entry, candidates)
+            wanted_key = desired_classification_key(entry, source_rows)
+        except (CanonicalQueueError, ValueError, KeyError) as exc:
+            entry["status"] = "blocked_evidence"
+            entry["last_error"] = f"EVIDENCE_RECONSTRUCTION_FAILED:{type(exc).__name__}:{exc}"[:350]
+            blocked_evidence += 1
+            continue
+        if tip and wanted_key == tip["classification_key"]:
+            entry["status"] = "committed"
+            entry["last_committed_key"] = wanted_key
+            entry["next_retry_at"] = None
+            entry["last_error"] = None
             committed += 1
             continue
+        if tip and tip.get("origin_kind") != LIVE_ORIGIN_KIND:
+            entry["status"] = "quarantined"
+            entry["quarantine_reason"] = "NONLIVE_ORIGIN_REVISION_FORBIDDEN"
+            quarantined += 1
+            continue
+        if entry.get("status") == "committed" and tip is None:
+            entry["last_committed_key"] = None
+        entry["status"] = "pending"
+        entry["expected_current_tip"] = tip["classification_uid"] if tip else None
+        entry["expected_current_key"] = tip["classification_key"] if tip else None
         next_retry = entry.get("next_retry_at")
         if next_retry and instant(next_retry) > now:
             retry_waiting += 1
             continue
-        if tip is None:
-            entry["expected_current_tip"] = None
-            entry["expected_current_key"] = None
         pending.append((i, digest, entry, tip))
     pending.sort(key=lambda row: (row[0][3], row[0][2], row[0][0], row[0][1]))
     selected_rows = pending[:max_episodes] if max_episodes is not None else pending
@@ -252,6 +372,7 @@ def reconcile_and_select(
         "db_committed_current": committed,
         "quarantined": quarantined,
         "retry_waiting": retry_waiting,
+        "blocked_evidence": blocked_evidence,
         "ready_pending": len(pending),
         "selected": [
             {
@@ -260,6 +381,7 @@ def reconcile_and_select(
                 "expected_current_tip": tip["classification_uid"] if tip else None,
                 "expected_current_key": tip["classification_key"] if tip else None,
                 "work_kind": "revision" if tip else "initial",
+                "coverage_complete": True,
             }
             for _, digest, entry, tip in selected_rows
         ],
