@@ -196,6 +196,38 @@ CREATE TABLE public.attack_events (
   updated_at timestamp with time zone NOT NULL DEFAULT now()
 );
 
+ALTER TABLE public.ingestion_runs ADD CONSTRAINT ingestion_runs_pkey PRIMARY KEY (run_id);
+
+ALTER TABLE public.ingestion_checkpoints ADD CONSTRAINT ingestion_checkpoints_pkey PRIMARY KEY (checkpoint_id);
+
+ALTER TABLE public.alert_episodes ADD CONSTRAINT alert_episodes_pkey PRIMARY KEY (episode_uid);
+
+ALTER TABLE public.alert_episode_sources ADD CONSTRAINT alert_episode_sources_pkey PRIMARY KEY (source_observation_id);
+
+ALTER TABLE public.attack_event_classifications ADD CONSTRAINT attack_event_classifications_pkey PRIMARY KEY (classification_uid);
+
+ALTER TABLE public.attack_event_sources ADD CONSTRAINT attack_event_sources_pkey PRIMARY KEY (attack_event_source_uid);
+
+ALTER TABLE public.attack_events ADD CONSTRAINT attack_events_pkey PRIMARY KEY (attack_event_uid);
+
+ALTER TABLE public.ingestion_checkpoints ADD CONSTRAINT ingestion_checkpoints_identity_stream_key UNIQUE (checkpoint_id, source_key, city_key, stream_key);
+
+ALTER TABLE public.alert_episodes ADD CONSTRAINT alert_episodes_exact_interval_key UNIQUE (city_key, alert_type, start_at, end_at);
+
+ALTER TABLE public.alert_episodes ADD CONSTRAINT alert_episodes_legacy_episode_id_key UNIQUE (legacy_episode_id);
+
+ALTER TABLE public.alert_episode_sources ADD CONSTRAINT alert_episode_sources_record_identity_key UNIQUE (source_key, source_record_key_version, source_record_key);
+
+ALTER TABLE public.attack_event_classifications ADD CONSTRAINT attack_event_classifications_classification_key_key UNIQUE (classification_key);
+
+ALTER TABLE public.attack_event_sources ADD CONSTRAINT attack_event_sources_classification_observation_unique UNIQUE (classification_uid, observation_id, content_sha256);
+
+ALTER TABLE public.attack_event_sources ADD CONSTRAINT attack_event_sources_source_link_key_key UNIQUE (source_link_key);
+
+ALTER TABLE public.attack_events ADD CONSTRAINT attack_events_attack_event_key_key UNIQUE (attack_event_key);
+
+ALTER TABLE public.attack_events ADD CONSTRAINT attack_events_historical_episode_unique UNIQUE (city_key, historical_episode_id);
+
 ALTER TABLE public.ingestion_runs ADD CONSTRAINT ingestion_runs_commit_before_finish_check CHECK (((ingest_committed_at IS NULL) OR (finished_at IS NULL) OR (ingest_committed_at <= finished_at)));
 
 ALTER TABLE public.ingestion_runs ADD CONSTRAINT ingestion_runs_commit_time_check CHECK (((ingest_committed_at IS NULL) OR (ingest_committed_at >= started_at)));
@@ -207,8 +239,6 @@ ALTER TABLE public.ingestion_runs ADD CONSTRAINT ingestion_runs_finished_time_ch
 ALTER TABLE public.ingestion_runs ADD CONSTRAINT ingestion_runs_github_attempt_check CHECK (((github_run_attempt IS NULL) OR (github_run_attempt >= 1)));
 
 ALTER TABLE public.ingestion_runs ADD CONSTRAINT ingestion_runs_parameters_object_check CHECK ((jsonb_typeof(parameters) = 'object'::text));
-
-ALTER TABLE public.ingestion_runs ADD CONSTRAINT ingestion_runs_pkey PRIMARY KEY (run_id);
 
 ALTER TABLE public.ingestion_runs ADD CONSTRAINT ingestion_runs_run_kind_check CHECK ((btrim(run_kind) <> ''::text));
 
@@ -228,11 +258,7 @@ ALTER TABLE public.ingestion_checkpoints ADD CONSTRAINT ingestion_checkpoints_ci
 
 ALTER TABLE public.ingestion_checkpoints ADD CONSTRAINT ingestion_checkpoints_continuity_method_check CHECK (((NOT continuity_verified) OR (continuity_method IS NOT NULL)));
 
-ALTER TABLE public.ingestion_checkpoints ADD CONSTRAINT ingestion_checkpoints_created_by_run_id_fkey FOREIGN KEY (created_by_run_id) REFERENCES ingestion_runs(run_id) ON DELETE RESTRICT;
-
 ALTER TABLE public.ingestion_checkpoints ADD CONSTRAINT ingestion_checkpoints_cursor_object_check CHECK (((cursor IS NULL) OR (jsonb_typeof(cursor) = 'object'::text)));
-
-ALTER TABLE public.ingestion_checkpoints ADD CONSTRAINT ingestion_checkpoints_identity_stream_key UNIQUE (checkpoint_id, source_key, city_key, stream_key);
 
 ALTER TABLE public.ingestion_checkpoints ADD CONSTRAINT ingestion_checkpoints_metadata_object_check CHECK ((jsonb_typeof(metadata) = 'object'::text));
 
@@ -242,11 +268,7 @@ ALTER TABLE public.ingestion_checkpoints ADD CONSTRAINT ingestion_checkpoints_ob
 
 ALTER TABLE public.ingestion_checkpoints ADD CONSTRAINT ingestion_checkpoints_observed_interval_check CHECK (((observed_oldest_start_at IS NULL) OR (observed_latest_end_at IS NULL) OR (observed_latest_end_at >= observed_oldest_start_at)));
 
-ALTER TABLE public.ingestion_checkpoints ADD CONSTRAINT ingestion_checkpoints_pkey PRIMARY KEY (checkpoint_id);
-
 ALTER TABLE public.ingestion_checkpoints ADD CONSTRAINT ingestion_checkpoints_previous_presence_check CHECK ((((checkpoint_seq = 1) AND (previous_checkpoint_id IS NULL)) OR ((checkpoint_seq > 1) AND (previous_checkpoint_id IS NOT NULL))));
-
-ALTER TABLE public.ingestion_checkpoints ADD CONSTRAINT ingestion_checkpoints_previous_same_stream_fk FOREIGN KEY (previous_checkpoint_id, source_key, city_key, stream_key) REFERENCES ingestion_checkpoints(checkpoint_id, source_key, city_key, stream_key) ON DELETE RESTRICT;
 
 ALTER TABLE public.ingestion_checkpoints ADD CONSTRAINT ingestion_checkpoints_seq_check CHECK ((checkpoint_seq >= 1));
 
@@ -260,23 +282,13 @@ ALTER TABLE public.alert_episodes ADD CONSTRAINT alert_episodes_canonicalization
 
 ALTER TABLE public.alert_episodes ADD CONSTRAINT alert_episodes_city_key_check CHECK ((btrim(city_key) <> ''::text));
 
-ALTER TABLE public.alert_episodes ADD CONSTRAINT alert_episodes_created_by_run_id_fkey FOREIGN KEY (created_by_run_id) REFERENCES ingestion_runs(run_id) ON DELETE RESTRICT;
-
 ALTER TABLE public.alert_episodes ADD CONSTRAINT alert_episodes_episode_state_check CHECK ((episode_state = ANY (ARRAY['open'::text, 'closed'::text])));
-
-ALTER TABLE public.alert_episodes ADD CONSTRAINT alert_episodes_exact_interval_key UNIQUE (city_key, alert_type, start_at, end_at);
-
-ALTER TABLE public.alert_episodes ADD CONSTRAINT alert_episodes_legacy_episode_id_key UNIQUE (legacy_episode_id);
 
 ALTER TABLE public.alert_episodes ADD CONSTRAINT alert_episodes_legacy_id_format_check CHECK (((legacy_episode_id IS NULL) OR (legacy_episode_id ~ '^[0-9a-f]{24}$'::text)));
 
 ALTER TABLE public.alert_episodes ADD CONSTRAINT alert_episodes_open_legacy_id_check CHECK (((episode_state <> 'open'::text) OR (legacy_episode_id IS NULL)));
 
-ALTER TABLE public.alert_episodes ADD CONSTRAINT alert_episodes_pkey PRIMARY KEY (episode_uid);
-
 ALTER TABLE public.alert_episodes ADD CONSTRAINT alert_episodes_state_interval_check CHECK ((((episode_state = 'open'::text) AND (end_at IS NULL)) OR ((episode_state = 'closed'::text) AND (end_at IS NOT NULL) AND (end_at > start_at))));
-
-ALTER TABLE public.alert_episodes ADD CONSTRAINT alert_episodes_updated_by_run_id_fkey FOREIGN KEY (updated_by_run_id) REFERENCES ingestion_runs(run_id) ON DELETE RESTRICT;
 
 ALTER TABLE public.alert_episodes ADD CONSTRAINT alert_episodes_updated_time_check CHECK ((updated_at >= created_at));
 
@@ -292,29 +304,17 @@ ALTER TABLE public.alert_episode_sources ADD CONSTRAINT alert_episode_sources_ca
 
 ALTER TABLE public.alert_episode_sources ADD CONSTRAINT alert_episode_sources_city_key_check CHECK ((btrim(city_key) <> ''::text));
 
-ALTER TABLE public.alert_episode_sources ADD CONSTRAINT alert_episode_sources_duplicate_of_observation_id_fkey FOREIGN KEY (duplicate_of_observation_id) REFERENCES alert_episode_sources(source_observation_id) ON DELETE RESTRICT;
-
 ALTER TABLE public.alert_episode_sources ADD CONSTRAINT alert_episode_sources_duplicate_role_check CHECK ((((canonicalization_role = 'duplicate_alias'::text) AND (duplicate_of_observation_id IS NOT NULL)) OR ((canonicalization_role <> 'duplicate_alias'::text) AND (duplicate_of_observation_id IS NULL))));
 
-ALTER TABLE public.alert_episode_sources ADD CONSTRAINT alert_episode_sources_episode_uid_fkey FOREIGN KEY (episode_uid) REFERENCES alert_episodes(episode_uid) ON DELETE RESTRICT;
-
-ALTER TABLE public.alert_episode_sources ADD CONSTRAINT alert_episode_sources_first_persisted_by_run_id_fkey FOREIGN KEY (first_persisted_by_run_id) REFERENCES ingestion_runs(run_id) ON DELETE RESTRICT;
-
 ALTER TABLE public.alert_episode_sources ADD CONSTRAINT alert_episode_sources_interval_check CHECK (((source_end_at IS NULL) OR (source_end_at > source_start_at)));
-
-ALTER TABLE public.alert_episode_sources ADD CONSTRAINT alert_episode_sources_last_seen_by_run_id_fkey FOREIGN KEY (last_seen_by_run_id) REFERENCES ingestion_runs(run_id) ON DELETE RESTRICT;
 
 ALTER TABLE public.alert_episode_sources ADD CONSTRAINT alert_episode_sources_no_self_duplicate_check CHECK (((duplicate_of_observation_id IS NULL) OR (duplicate_of_observation_id <> source_observation_id)));
 
 ALTER TABLE public.alert_episode_sources ADD CONSTRAINT alert_episode_sources_noninput_boundary_check CHECK (((canonicalization_role = 'canonical_input'::text) OR ((NOT contributes_start_boundary) AND (NOT contributes_end_boundary))));
 
-ALTER TABLE public.alert_episode_sources ADD CONSTRAINT alert_episode_sources_pkey PRIMARY KEY (source_observation_id);
-
 ALTER TABLE public.alert_episode_sources ADD CONSTRAINT alert_episode_sources_provenance_object_check CHECK ((jsonb_typeof(provenance) = 'object'::text));
 
 ALTER TABLE public.alert_episode_sources ADD CONSTRAINT alert_episode_sources_raw_sha256_format_check CHECK (((raw_sha256 IS NULL) OR (raw_sha256 ~ '^[0-9a-f]{64}$'::text)));
-
-ALTER TABLE public.alert_episode_sources ADD CONSTRAINT alert_episode_sources_record_identity_key UNIQUE (source_key, source_record_key_version, source_record_key);
 
 ALTER TABLE public.alert_episode_sources ADD CONSTRAINT alert_episode_sources_record_key_format_check CHECK ((source_record_key ~ '^[0-9a-f]{64}$'::text));
 
@@ -324,8 +324,6 @@ ALTER TABLE public.alert_episode_sources ADD CONSTRAINT alert_episode_sources_so
 
 ALTER TABLE public.alert_episode_sources ADD CONSTRAINT alert_episode_sources_source_record_key_version_check CHECK ((btrim(source_record_key_version) <> ''::text));
 
-ALTER TABLE public.attack_event_classifications ADD CONSTRAINT attack_event_classifications_alert_episode_uid_fkey FOREIGN KEY (alert_episode_uid) REFERENCES alert_episodes(episode_uid) ON DELETE RESTRICT;
-
 ALTER TABLE public.attack_event_classifications ADD CONSTRAINT attack_event_classifications_alert_type_check CHECK ((alert_type = 'AIR'::text));
 
 ALTER TABLE public.attack_event_classifications ADD CONSTRAINT attack_event_classifications_binding_check CHECK ((((binding_state = 'BOUND'::text) AND (alert_episode_uid IS NOT NULL)) OR ((binding_state = ANY (ARRAY['AMBIGUOUS'::text, 'UNBOUND'::text])) AND (alert_episode_uid IS NULL))));
@@ -333,8 +331,6 @@ ALTER TABLE public.attack_event_classifications ADD CONSTRAINT attack_event_clas
 ALTER TABLE public.attack_event_classifications ADD CONSTRAINT attack_event_classifications_binding_state_check CHECK ((binding_state = ANY (ARRAY['BOUND'::text, 'AMBIGUOUS'::text, 'UNBOUND'::text])));
 
 ALTER TABLE public.attack_event_classifications ADD CONSTRAINT attack_event_classifications_city_check CHECK ((btrim(city_key) <> ''::text));
-
-ALTER TABLE public.attack_event_classifications ADD CONSTRAINT attack_event_classifications_classification_key_key UNIQUE (classification_key);
 
 ALTER TABLE public.attack_event_classifications ADD CONSTRAINT attack_event_classifications_classifier_sha_check CHECK ((classifier_blob_sha ~ '^[0-9a-f]{40}$'::text));
 
@@ -358,10 +354,6 @@ ALTER TABLE public.attack_event_classifications ADD CONSTRAINT attack_event_clas
 
 ALTER TABLE public.attack_event_classifications ADD CONSTRAINT attack_event_classifications_origin_state_sha_check CHECK (((origin_target_state_sha256 IS NULL) OR (origin_target_state_sha256 ~ '^[0-9a-f]{64}$'::text)));
 
-ALTER TABLE public.attack_event_classifications ADD CONSTRAINT attack_event_classifications_persisted_by_run_id_fkey FOREIGN KEY (persisted_by_run_id) REFERENCES ingestion_runs(run_id) ON DELETE RESTRICT;
-
-ALTER TABLE public.attack_event_classifications ADD CONSTRAINT attack_event_classifications_pkey PRIMARY KEY (classification_uid);
-
 ALTER TABLE public.attack_event_classifications ADD CONSTRAINT attack_event_classifications_positive_check CHECK ((((verdict = 'STRICT_EVENT_POSITIVE'::text) AND is_event AND (positive_tier = 'STRICT'::text)) OR ((verdict = 'SENSITIVITY_EVENT_POSITIVE'::text) AND is_event AND (positive_tier = 'SENSITIVITY'::text)) OR ((verdict = ANY (ARRAY['NO_CONFIRMED_EVENT'::text, 'NEEDS_REVIEW'::text])) AND (NOT is_event) AND (positive_tier IS NULL))));
 
 ALTER TABLE public.attack_event_classifications ADD CONSTRAINT attack_event_classifications_qa_state_check CHECK ((qa_reasons_state = ANY (ARRAY['MATERIALIZED'::text, 'UNMATERIALIZED_IN_ACCEPTED_SOURCE'::text])));
@@ -372,13 +364,7 @@ ALTER TABLE public.attack_event_classifications ADD CONSTRAINT attack_event_clas
 
 ALTER TABLE public.attack_event_classifications ADD CONSTRAINT attack_event_classifications_review_state_check CHECK ((human_review_state = ANY (ARRAY['NONE'::text, 'NEEDS_REVIEW'::text, 'REVIEWED_EVIDENCE'::text])));
 
-ALTER TABLE public.attack_event_classifications ADD CONSTRAINT attack_event_classifications_supersedes_classification_uid_fkey FOREIGN KEY (supersedes_classification_uid) REFERENCES attack_event_classifications(classification_uid) ON DELETE RESTRICT;
-
 ALTER TABLE public.attack_event_classifications ADD CONSTRAINT attack_event_classifications_verdict_check CHECK ((verdict = ANY (ARRAY['STRICT_EVENT_POSITIVE'::text, 'SENSITIVITY_EVENT_POSITIVE'::text, 'NO_CONFIRMED_EVENT'::text, 'NEEDS_REVIEW'::text])));
-
-ALTER TABLE public.attack_event_sources ADD CONSTRAINT attack_event_sources_classification_observation_unique UNIQUE (classification_uid, observation_id, content_sha256);
-
-ALTER TABLE public.attack_event_sources ADD CONSTRAINT attack_event_sources_classification_uid_fkey FOREIGN KEY (classification_uid) REFERENCES attack_event_classifications(classification_uid) ON DELETE RESTRICT;
 
 ALTER TABLE public.attack_event_sources ADD CONSTRAINT attack_event_sources_content_sha_check CHECK ((content_sha256 ~ '^[0-9a-f]{64}$'::text));
 
@@ -392,10 +378,6 @@ ALTER TABLE public.attack_event_sources ADD CONSTRAINT attack_event_sources_obse
 
 ALTER TABLE public.attack_event_sources ADD CONSTRAINT attack_event_sources_origin_provenance_sha256_check CHECK ((origin_provenance_sha256 ~ '^[0-9a-f]{64}$'::text));
 
-ALTER TABLE public.attack_event_sources ADD CONSTRAINT attack_event_sources_pkey PRIMARY KEY (attack_event_source_uid);
-
-ALTER TABLE public.attack_event_sources ADD CONSTRAINT attack_event_sources_source_link_key_key UNIQUE (source_link_key);
-
 ALTER TABLE public.attack_event_sources ADD CONSTRAINT attack_event_sources_source_timestamp_state_check CHECK ((source_timestamp_state = ANY (ARRAY['MATERIALIZED'::text, 'ABSENT_IN_ACCEPTED_SOURCE'::text, 'UNPARSEABLE_IN_ACCEPTED_SOURCE'::text])));
 
 ALTER TABLE public.attack_event_sources ADD CONSTRAINT attack_event_sources_source_timestamp_value_check CHECK ((((source_timestamp_state = 'MATERIALIZED'::text) AND (source_timestamp IS NOT NULL)) OR ((source_timestamp_state = 'ABSENT_IN_ACCEPTED_SOURCE'::text) AND (source_timestamp IS NULL) AND (source_timestamp_raw IS NULL)) OR ((source_timestamp_state = 'UNPARSEABLE_IN_ACCEPTED_SOURCE'::text) AND (source_timestamp IS NULL) AND (source_timestamp_raw IS NOT NULL) AND (btrim(source_timestamp_raw) <> ''::text))));
@@ -406,11 +388,7 @@ ALTER TABLE public.attack_event_sources ADD CONSTRAINT attack_event_sources_sour
 
 ALTER TABLE public.attack_event_sources ADD CONSTRAINT attack_event_sources_telegram_pair_check CHECK ((((telegram_channel IS NULL) AND (telegram_message_id IS NULL)) OR ((telegram_channel IS NOT NULL) AND (telegram_message_id IS NOT NULL))));
 
-ALTER TABLE public.attack_events ADD CONSTRAINT attack_events_alert_episode_uid_fkey FOREIGN KEY (alert_episode_uid) REFERENCES alert_episodes(episode_uid) ON DELETE RESTRICT;
-
 ALTER TABLE public.attack_events ADD CONSTRAINT attack_events_alert_type_check CHECK ((alert_type = 'AIR'::text));
-
-ALTER TABLE public.attack_events ADD CONSTRAINT attack_events_attack_event_key_key UNIQUE (attack_event_key);
 
 ALTER TABLE public.attack_events ADD CONSTRAINT attack_events_binding_check CHECK ((((binding_state = 'BOUND'::text) AND (alert_episode_uid IS NOT NULL)) OR ((binding_state = ANY (ARRAY['AMBIGUOUS'::text, 'UNBOUND'::text])) AND (alert_episode_uid IS NULL))));
 
@@ -418,15 +396,9 @@ ALTER TABLE public.attack_events ADD CONSTRAINT attack_events_binding_state_chec
 
 ALTER TABLE public.attack_events ADD CONSTRAINT attack_events_city_check CHECK ((btrim(city_key) <> ''::text));
 
-ALTER TABLE public.attack_events ADD CONSTRAINT attack_events_created_by_run_id_fkey FOREIGN KEY (created_by_run_id) REFERENCES ingestion_runs(run_id) ON DELETE RESTRICT;
-
-ALTER TABLE public.attack_events ADD CONSTRAINT attack_events_current_classification_uid_fkey FOREIGN KEY (current_classification_uid) REFERENCES attack_event_classifications(classification_uid) ON DELETE RESTRICT;
-
 ALTER TABLE public.attack_events ADD CONSTRAINT attack_events_episode_id_check CHECK ((historical_episode_id ~ '^[0-9a-f]{24}$'::text));
 
 ALTER TABLE public.attack_events ADD CONSTRAINT attack_events_grain_check CHECK ((event_grain = 'HISTORICAL_ALERT_EPISODE'::text));
-
-ALTER TABLE public.attack_events ADD CONSTRAINT attack_events_historical_episode_unique UNIQUE (city_key, historical_episode_id);
 
 ALTER TABLE public.attack_events ADD CONSTRAINT attack_events_interval_check CHECK ((alert_end_at > alert_start_at));
 
@@ -434,9 +406,37 @@ ALTER TABLE public.attack_events ADD CONSTRAINT attack_events_key_format_check C
 
 ALTER TABLE public.attack_events ADD CONSTRAINT attack_events_key_version_check CHECK ((attack_event_key_version = 'attack-event-key-v1'::text));
 
-ALTER TABLE public.attack_events ADD CONSTRAINT attack_events_pkey PRIMARY KEY (attack_event_uid);
-
 ALTER TABLE public.attack_events ADD CONSTRAINT attack_events_status_check CHECK ((event_status = ANY (ARRAY['ACTIVE'::text, 'WITHDRAWN'::text, 'SUPERSEDED'::text])));
+
+ALTER TABLE public.ingestion_checkpoints ADD CONSTRAINT ingestion_checkpoints_created_by_run_id_fkey FOREIGN KEY (created_by_run_id) REFERENCES ingestion_runs(run_id) ON DELETE RESTRICT;
+
+ALTER TABLE public.ingestion_checkpoints ADD CONSTRAINT ingestion_checkpoints_previous_same_stream_fk FOREIGN KEY (previous_checkpoint_id, source_key, city_key, stream_key) REFERENCES ingestion_checkpoints(checkpoint_id, source_key, city_key, stream_key) ON DELETE RESTRICT;
+
+ALTER TABLE public.alert_episodes ADD CONSTRAINT alert_episodes_created_by_run_id_fkey FOREIGN KEY (created_by_run_id) REFERENCES ingestion_runs(run_id) ON DELETE RESTRICT;
+
+ALTER TABLE public.alert_episodes ADD CONSTRAINT alert_episodes_updated_by_run_id_fkey FOREIGN KEY (updated_by_run_id) REFERENCES ingestion_runs(run_id) ON DELETE RESTRICT;
+
+ALTER TABLE public.alert_episode_sources ADD CONSTRAINT alert_episode_sources_duplicate_of_observation_id_fkey FOREIGN KEY (duplicate_of_observation_id) REFERENCES alert_episode_sources(source_observation_id) ON DELETE RESTRICT;
+
+ALTER TABLE public.alert_episode_sources ADD CONSTRAINT alert_episode_sources_episode_uid_fkey FOREIGN KEY (episode_uid) REFERENCES alert_episodes(episode_uid) ON DELETE RESTRICT;
+
+ALTER TABLE public.alert_episode_sources ADD CONSTRAINT alert_episode_sources_first_persisted_by_run_id_fkey FOREIGN KEY (first_persisted_by_run_id) REFERENCES ingestion_runs(run_id) ON DELETE RESTRICT;
+
+ALTER TABLE public.alert_episode_sources ADD CONSTRAINT alert_episode_sources_last_seen_by_run_id_fkey FOREIGN KEY (last_seen_by_run_id) REFERENCES ingestion_runs(run_id) ON DELETE RESTRICT;
+
+ALTER TABLE public.attack_event_classifications ADD CONSTRAINT attack_event_classifications_alert_episode_uid_fkey FOREIGN KEY (alert_episode_uid) REFERENCES alert_episodes(episode_uid) ON DELETE RESTRICT;
+
+ALTER TABLE public.attack_event_classifications ADD CONSTRAINT attack_event_classifications_persisted_by_run_id_fkey FOREIGN KEY (persisted_by_run_id) REFERENCES ingestion_runs(run_id) ON DELETE RESTRICT;
+
+ALTER TABLE public.attack_event_classifications ADD CONSTRAINT attack_event_classifications_supersedes_classification_uid_fkey FOREIGN KEY (supersedes_classification_uid) REFERENCES attack_event_classifications(classification_uid) ON DELETE RESTRICT;
+
+ALTER TABLE public.attack_event_sources ADD CONSTRAINT attack_event_sources_classification_uid_fkey FOREIGN KEY (classification_uid) REFERENCES attack_event_classifications(classification_uid) ON DELETE RESTRICT;
+
+ALTER TABLE public.attack_events ADD CONSTRAINT attack_events_alert_episode_uid_fkey FOREIGN KEY (alert_episode_uid) REFERENCES alert_episodes(episode_uid) ON DELETE RESTRICT;
+
+ALTER TABLE public.attack_events ADD CONSTRAINT attack_events_created_by_run_id_fkey FOREIGN KEY (created_by_run_id) REFERENCES ingestion_runs(run_id) ON DELETE RESTRICT;
+
+ALTER TABLE public.attack_events ADD CONSTRAINT attack_events_current_classification_uid_fkey FOREIGN KEY (current_classification_uid) REFERENCES attack_event_classifications(classification_uid) ON DELETE RESTRICT;
 
 ALTER TABLE public.attack_events ADD CONSTRAINT attack_events_updated_by_run_id_fkey FOREIGN KEY (updated_by_run_id) REFERENCES ingestion_runs(run_id) ON DELETE RESTRICT;
 
