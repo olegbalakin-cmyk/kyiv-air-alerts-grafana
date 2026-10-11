@@ -1,0 +1,54 @@
+name: Isolated canonical integration offline checks
+on:
+  push:
+    branches: [kyiv-live-canonical-queue-integration-proof-2026-10-11]
+    paths:
+      - ".github/workflows/kyiv-canonical-integration-offline-proof.yml"
+      - "kyiv-air-alerts-grafana/scripts/live_canonical_queue.py"
+      - "kyiv-air-alerts-grafana/scripts/live_parent_ordering.py"
+      - "kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py"
+      - "kyiv-air-alerts-grafana/scripts/attack_event_canonical_persistence.py"
+      - "kyiv-air-alerts-grafana/tests/prove_integrated_live_queue_contract.py"
+permissions:
+  contents: read
+jobs:
+  module-integration:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    env:
+      ATTACK_EVENT_DATABASE_URL: ""
+      DATABASE_URL: ""
+      NEON_DATABASE_URL: ""
+      CANONICAL_PARENT_CONTRACT_DIR: ""
+      CANONICAL_PARENT_DB_BRANCH: ""
+      UKRAINEALARM_API_TOKEN: ""
+      GITHUB_TOKEN: ""
+    steps:
+      - name: Checkout only this proof branch
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install offline Python imports only
+        run: pip install psycopg[binary] requests beautifulsoup4
+      - name: Compile integrated production modules
+        run: |
+          python -m py_compile kyiv-air-alerts-grafana/scripts/live_canonical_queue.py kyiv-air-alerts-grafana/scripts/live_parent_ordering.py kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py kyiv-air-alerts-grafana/scripts/attack_event_canonical_persistence.py
+      - name: A and B actual-module offline checks (not PostgreSQL proof)
+        run: |
+          set -euo pipefail
+          python kyiv-air-alerts-grafana/tests/prove_integrated_live_queue_contract.py > /tmp/integrated-A.json
+          python kyiv-air-alerts-grafana/tests/prove_integrated_live_queue_contract.py > /tmp/integrated-B.json
+          cmp /tmp/integrated-A.json /tmp/integrated-B.json
+          cat /tmp/integrated-A.json
+      - name: Upload bounded reproducible test reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: canonical-integration-module-A-B-PARTIAL
+          path: /tmp/integrated-*.json
+          if-no-files-found: warn
+          retention-days: 30
