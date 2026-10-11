@@ -976,11 +976,15 @@ def _ensure_sources(
     return inserted_count
 
 
+_UNGUARDED = object()
+
+
 def persist_episode_classification(
     conn,
     record: dict[str, Any],
     *,
     fault_after: str | None = None,
+    expected_tip: str | None | object = _UNGUARDED,
 ) -> dict[str, Any]:
     lock_key = (
         f"{record['city_key']}|{record['historical_episode_id']}|"
@@ -991,6 +995,10 @@ def persist_episode_classification(
         cur.execute("SELECT pg_advisory_xact_lock(hashtextextended(%s, 0))", (lock_key,))
         parent_uid = _parent_binding(cur, record)
         current = _current_tip(cur, record)
+        if expected_tip is not _UNGUARDED:
+            observed_tip = current["classification_uid"] if current else None
+            if observed_tip != expected_tip:
+                raise PersistenceContractError("STALE_EXPECTED_CURRENT_CLASSIFICATION_TIP")
         existing = _existing_classification(cur, record["classification_key"])
 
         if existing is not None:
@@ -1067,6 +1075,113 @@ def persist_episode_classification(
             "source_count": len(record["source_rows"]),
         }
 
+
+
+def independent_post_commit_readback(conn, record: dict[str, Any], persisted: dict[str, Any], expected_tip: str | None) -> dict[str, Any]:
+    """New independent transaction, never an uncommitted insert response."""
+    with conn.cursor() as cur:
+        parent = _parent_binding(cur, record)
+        tip = _current_tip(cur, record)
+        if tip is None or tip["classification_uid"] != persisted["classification_uid"]:
+            raise PersistenceContractError("POST_COMMIT_CURRENT_TIP_UID_MISMATCH")
+        if tip["classification_key"] != record["classification_key"] or tip["verdict"] != record["verdict"]:
+            raise PersistenceContractError("POST_COMMIT_TIP_KEY_OR_VERDICT_MISMATCH")
+        cur.execute("""
+            SELECT alert_episode_uid, supersedes_classification_uid
+            FROM public.attack_event_classifications WHERE classification_uid=%s
+        """, (persisted["classification_uid"],))
+        row = cur.fetchone()
+        if row is None or str(row[0]) != parent:
+            raise PersistenceContractError("POST_COMMIT_PARENT_BINDING_MISMATCH")
+        observed_previous = str(row[1]) if row[1] is not None else None
+        if persisted["classification_inserted"] and observed_previous != expected_tip:
+            raise PersistenceContractError("POST_COMMIT_REVISION_RELATIONSHIP_MISMATCH")
+        for source in record["source_rows"]:
+            cur.execute("""
+                SELECT classification_uid, observation_id, content_sha256
+                FROM public.attack_event_sources WHERE source_link_key=%s
+            """, (source["source_link_key"],))
+            link = cur.fetchone()
+            if link is None or tuple(str(x) for x in link) != (
+                persisted["classification_uid"], source["observation_id"], source["content_sha256"]
+            ):
+                raise PersistenceContractError("POST_COMMIT_SOURCE_LINK_MISMATCH")
+        cur.execute("""
+            SELECT attack_event_key, event_status, current_classification_uid, alert_episode_uid
+            FROM public.attack_events WHERE city_key=%s AND historical_episode_id=%s
+        """, (record["city_key"], record["historical_episode_id"]))
+        event = cur.fetchone()
+        if record["is_event"]:
+            if event is None or str(event[0]) != record["attack_event_key"] or str(event[1]) != "ACTIVE" or str(event[2]) != persisted["classification_uid"] or str(event[3]) != parent:
+                raise PersistenceContractError("POST_COMMIT_POSITIVE_EVENT_MISMATCH")
+        elif event is not None:
+            if str(event[1]) != "WITHDRAWN" or str(event[2]) != persisted["classification_uid"]:
+                raise PersistenceContractError("POST_COMMIT_WITHDRAWN_EVENT_MISMATCH")
+    conn.rollback()
+    return {"verified": True, "classification_uid": persisted["classification_uid"],
+            "classification_key": record["classification_key"], "verdict": record["verdict"],
+            "source_count": len(record["source_rows"]), "parent_uid": parent}
+
+
+def persist_canonical_work(
+    *, state: dict[str, Any], selection: dict[str, Any],
+    candidates: list[dict[str, Any]], dsn: str | None = None, connection=None,
+    at: datetime | None = None,
+) -> dict[str, Any]:
+    """Process only selected obligations, not follow-up due checks."""
+    from live_canonical_queue import (
+        store, relevant_evidence, retry, quarantine, committed_readback, CanonicalQueueError,
+    )
+    result = {"selected": len(selection["selected"]), "committed": 0,
+              "readback_verified": 0, "retryable": 0, "quarantined": 0,
+              "classification_inserts": 0, "classification_revisions": 0, "records": []}
+    if not selection["selected"]:
+        return result
+    if connection is None and not dsn:
+        raise PersistenceContractError("CANONICAL_WORK_REQUIRES_DB_CONNECTION")
+    origin = _origin_context()
+    own_connection = connection is None
+    conn = connection or psycopg.connect(str(dsn), autocommit=False)
+    try:
+        for selected in selection["selected"]:
+            key = selected["work_id"]
+            try:
+                entry = store(state)[key]
+                if not selected.get("coverage_complete"):
+                    raise CanonicalQueueError("SELECTED_WITHOUT_COMPLETE_COVERAGE")
+                evidence = relevant_evidence(entry, candidates)
+                record = build_episode_classification(selected["episode"], evidence, origin=origin)
+                persisted = persist_episode_classification(
+                    conn, record, expected_tip=selected["expected_current_tip"],
+                )
+                # Read-back may fail after COMMIT: retry will reconcile the tip.
+                verified = independent_post_commit_readback(
+                    conn, record, persisted, selected["expected_current_tip"]
+                )
+                committed_readback(state, key, record["classification_key"], verified["classification_key"])
+                result["committed"] += 1
+                result["readback_verified"] += 1
+                result["classification_inserts"] += int(persisted["classification_inserted"])
+                result["classification_revisions"] += int(persisted["revision_inserted"])
+                result["records"].append({
+                    "work_id": key, "episode_id": selected["episode"]["episode_id"],
+                    "verdict": record["verdict"], "classification_key": record["classification_key"],
+                    "classification_uid": persisted["classification_uid"],
+                })
+            except Exception as exc:
+                try:
+                    conn.rollback()
+                except Exception:
+                    pass
+                # The database might have committed before acknowledgement.
+                # Keep retryable; subsequent DB-tip reconciliation is authoritative.
+                retry(state, key, at or datetime.now(timezone.utc), f"{type(exc).__name__}:{exc}")
+                result["retryable"] += 1
+                result["records"].append({"work_id": key, "error": f"{type(exc).__name__}:{exc}"[:350]})
+    finally:
+        if own_connection:
+            conn.close()
+    return result
 
 def persist_due_episode_classifications(
     *,
