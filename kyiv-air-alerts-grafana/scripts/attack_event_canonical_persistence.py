@@ -1161,7 +1161,10 @@ def persist_canonical_work(
                 if conn.info.transaction_status != TransactionStatus.IDLE:
                     raise PersistenceContractError("CLASSIFICATION_NOT_COMMITTED_BEFORE_READBACK")
                 # A fresh independent session cannot see this connection's uncommitted state.
-                with psycopg.connect(conn.info.dsn, autocommit=True) as verifier:
+                verifier_dsn = dsn or os.environ.get("ATTACK_EVENT_DATABASE_URL")
+                if not verifier_dsn:
+                    raise PersistenceContractError("POST_COMMIT_INDEPENDENT_VERIFIER_DSN_REQUIRED")
+                with psycopg.connect(verifier_dsn, autocommit=True) as verifier:
                     verified = independent_post_commit_readback(
                         verifier, record, persisted, selected["expected_current_tip"]
                     )
