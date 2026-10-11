@@ -79,7 +79,7 @@ def queue_persist(state, candidates=None):
         parents=po.preclassification_parent_gate({"cities":{city:{"episodes":[row["episode"] for row in s["selected"] if row["episode"]["city_key"]==city]} for city in state["cities"]}},cutoff=CUTOFF,max_episodes=10,connection=conn)
         allowed={(x["city"],x["episode_id"]) for x in parents["records"]}
         selected={"selected":[row for row in s["selected"] if (row["episode"]["city_key"],row["episode"]["episode_id"]) in allowed]}
-        persisted=p.persist_canonical_work(state=state,selection=selected,candidates=candidates,connection=conn,at=NOW)
+        persisted=p.persist_canonical_work(state=state,selection=selected,candidates=candidates,connection=conn,dsn=DSN,at=NOW)
     return s,persisted
 
 def run():
