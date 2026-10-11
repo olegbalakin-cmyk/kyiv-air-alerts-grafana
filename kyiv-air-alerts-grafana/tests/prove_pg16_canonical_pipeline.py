@@ -147,7 +147,7 @@ def run():
         return db_assert({"alert_episodes":2,"attack_event_classifications":1})
     with_case("missing_parent_fail_closed",missing_parent)
 
-    def 469_forward():
+    def forward_469():
         # Distinct from safety cases; 469 pending episode identities.
         episodes=[ep(1000+i) for i in range(469)]
         state=ready_state(episodes)
@@ -168,7 +168,7 @@ def run():
         assert not sel["selected"]
         assert q.store(blob).keys()==q.store(state).keys()
         return {"batches":47,"committed":469,"duplicates":0,"restart_preserved":True}
-    with_case("469_real_postgres_commits_47_batches",469_forward)
+    with_case("469_real_postgres_commits_47_batches",forward_469)
 
     with psycopg.connect(DSN,autocommit=True) as con:
         REPORT["classification_count"]=count(con,"attack_event_classifications")
