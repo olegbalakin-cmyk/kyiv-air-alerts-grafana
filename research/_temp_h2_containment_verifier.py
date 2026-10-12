@@ -362,6 +362,22 @@ def audit():
         ss=[(eid,start) for eid,start,end in starts[city]]
         # independent binding: input row versus accepted episode chronology, never trust the exported binding as expected truth
         s,method,conflict=original_binding(row,city,ss,starts[city],linked_eid)
+        old_starts=[(ep,iso_utc(cc["alert_start_utc_microseconds"])) for (cy,ep),cc in cls_by_pair.items() if cy==city]
+        old_status,old_reason,_=original_binding(row,city,old_starts,[],linked_eid,clock_parser=legacy_raw_time)
+        clock_values={fld:row.get(fld) for fld in START_FIELDS+("event_time","event_time_kyiv","event_time_local") if fld in row}
+        clock_evidence={}
+        for fld,val in clock_values.items():
+            parsed=raw_time(val,fld)
+            candidate_ids=sorted(ep for ep,lo,hi in starts[city] if parsed and lo<=parsed<=hi) if fld.startswith("event_time") else []
+            clock_evidence[fld]={"raw":val,"exact_utc":parsed.isoformat() if parsed else None,
+                "containment_candidate_count":len(candidate_ids),"containment_candidate_episodes":candidate_ids}
+        memberships.append({"city":city,"bucket":bucket,"original_row_index":index,
+            "observation_id":obs,"original_source_head":worker["tested_head"],"original_source_blob":evidence_blob,
+            "original_record_sha256":digest(row),"parent_record_id":parentid,
+            "exported_episode_id":linked_eid,"previous_authority":old_status,"corrected_authority":s,
+            "previous_reason":old_reason,"corrected_reason":method,"corrected_detail":conflict,
+            "original_clock_evidence":clock_evidence,"previously_replay_only":obs in old_unresolved_ids,
+            "split_child":bool(pv.get("is_split_child"))})
         if s=="CONTRADICTION":
             contradictions.append({"city":city,"bucket":bucket,"index":index,"observation_id":obs,"reason":method,"detail":conflict})
         if s not in cities[city]["membership_authority"]:s="NOT_OBSERVABLE"
