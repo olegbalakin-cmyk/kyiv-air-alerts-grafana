@@ -976,6 +976,23 @@ def main() -> None:
             analysis_days,
             build_now,
         )
+        today = build_now.astimezone(TZ).date().isoformat()
+        current_rows = {}
+        for key in production_keys:
+            daily28 = dashboard["cities"][key].get("daily28", [])
+            row = daily28[-1] if daily28 else None
+            if row and row.get("date") == today and row.get("is_partial_period") is True:
+                current_rows[key] = row
+        exploration_payload["daily28_current"] = {
+            "meta": {
+                "timezone": "Europe/Kyiv",
+                "current_day": today,
+                "current_day_is_partial": True,
+                "kpi_period_unchanged": True,
+                "city_count": len(current_rows),
+            },
+            "cities": current_rows,
+        }
         args.explorations_output.parent.mkdir(parents=True, exist_ok=True)
         args.explorations_output.write_text(
             json.dumps(exploration_payload, ensure_ascii=False, indent=2) + "\n",
