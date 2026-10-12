@@ -9,13 +9,14 @@ permissions:
   contents: write
 jobs:
   single-bbc-capture:
-    if: github.event.head_commit.message == 'research(bbc): trigger one isolated publisher GET'
+    if: "${{ github.event.head_commit.message == 'research(bbc): trigger one isolated publisher GET' }}"
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
       - uses: actions/checkout@v4
         with:
           persist-credentials: true
+          fetch-depth: 0
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
