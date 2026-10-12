@@ -1,0 +1,65 @@
+name: Bounded Kyiv live DSN identity attestation (no SQL)
+on:
+  push:
+    branches:
+      - research-kyiv-live-dsn-replica-2026-10-12
+    paths:
+      - .github/workflows/kyiv-live-dsn-replica-attestation-2026-10-12.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  attest:
+    if: github.ref == 'refs/heads/research-kyiv-live-dsn-replica-2026-10-12'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      LIVE_DSN: ${{ secrets.PHASE1_PROD_SHADOW_DATABASE_URL }}
+      WRITER_BRANCH: ${{ vars.PHASE1_PROD_SHADOW_BRANCH_ID }}
+    steps:
+      - name: Parse identity only; never connect or print secret
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import json, os
+          from urllib.parse import urlsplit, unquote
+          dsn = os.environ.get("LIVE_DSN") or ""
+          expected_host = "ep-still-violet-b5bg6mhp.c-7.us-east-2.aws.neon.tech"
+          expected_pooled = "ep-still-violet-b5bg6mhp-pooler.c-7.us-east-2.aws.neon.tech"
+          expected_branch = "br-bold-mode-b5rub8pq"
+          expected_db = "neondb"
+          present = bool(dsn.strip())
+          host_ok = db_ok = scheme_ok = role_ok = False
+          parseable = False
+          if present:
+              try:
+                  p = urlsplit(dsn)
+                  parseable = True
+                  host_ok = (p.hostname or "").lower() in (expected_host, expected_pooled)
+                  db_ok = unquote(p.path.lstrip("/")) == expected_db
+                  scheme_ok = p.scheme in ("postgres", "postgresql")
+                  role_ok = bool(p.username)
+              except (ValueError, TypeError):
+                  pass
+          matched_branch = os.environ.get("WRITER_BRANCH") == expected_branch
+          report = {
+              "proof_scope": "GitHub scheduled-writer repository secret string identity only; NO CONNECTION",
+              "secret_present": present,
+              "parseable_url": parseable,
+              "dsn_host_matches_verified_branch_primary_compute": host_ok,
+              "database_matches_neondb": db_ok,
+              "scheme_postgresql": scheme_ok,
+              "role_identifier_present": role_ok,
+              "runtime_writer_branch_id_matches_verified_neon_branch": matched_branch,
+              "neon_project": "green-cake-44216048",
+              "neon_branch": expected_branch,
+              "branch_compute_id": "ep-still-violet-b5bg6mhp",
+              "sql_queries": 0,
+              "db_writes": 0,
+              "credential_values_emitted": 0
+          }
+          report["passed"] = all([present, parseable, host_ok, db_ok, scheme_ok, role_ok, matched_branch])
+          print("SAFE_LIVE_WRITER_DSN_ATTESTATION " + json.dumps(report,sort_keys=True))
+          if not report["passed"]:
+              raise SystemExit(2)
+          PY
