@@ -4,6 +4,13 @@ Accepted project checkpoints, newest first. This is not the full Git history, a 
 
 ## 2026-10-12
 
+### Kyiv live read replica provisioned — exact writer DSN attested, no SQL read-back yet
+
+- **Bounded infrastructure checkpoint:** `KYIV LIVE READ-ONLY REPLICA PROVISIONED — VERIFIED (ACCESS NOT YET TESTED)`. Independent isolated GitHub Actions DSN identity [run 38305611148](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/38305611148) SUCCESS, executed HEAD `18d12acd87f07588d6ace4b60711540f896ae9b7`; secret parsed only in memory, zero credentials emitted, no network database connection or SQL. Exact DSN host matches primary Neon compute `ep-still-violet-b5bg6mhp`; database `neondb`; runtime branch `br-bold-mode-b5rub8pq`; project `green-cake-44216048` from Neon metadata.
+- **Actual Neon infrastructure change, independently verified:** read-only endpoint `ep-calm-rice-b5073ypp` named `kyiv-live-29-readonly-audit`, branch `br-bold-mode-b5rub8pq`, region `aws-us-east-2`, 0.25 CU, Neon reports `type=read_only` and `active`. Existing writer endpoint remains distinct and `read_write`. No database rows/roles, live-writer connection, production/active WIP, site-prod, classifier, canary 10 or GitHub secrets changed. A failed initial provisioning request attempting to set suspend timeout to 300 seconds made no endpoint; successful request omitted that setting, and replica uses account-permitted suspend configuration.
+- **Current limits:** Read replica access and query session have not been tested, no 29 canonical episode SELECTs performed, no physical attack/positive determination; prior `KYIV LIVE 29 CANONICAL READ-ONLY RECONCILIATION = BLOCKED` is not transformed retroactively into PASS. `KYIV LIVE CANONICAL QUEUE INTEGRATION = PARTIAL`; no queue repair deployed. Next: safely attest connection to replica and enforce read-only transactional query scope, then separately conduct 29-row canonical SQL reconciliation and independent proof. Replica compute may incur charges; cleanup requires a separate authorization.
+
+
 ### Google News BBC original article URL resolution independently accepted — one frozen RSS item
 
 - **Accepted:** `GOOGLE NEWS BBC ARTICLE URL RESOLUTION = PROVEN — ACCEPTED` for precisely one frozen BBC Google News RSS GUID only; predecessor `ISOLATED PROSPECTIVE RSS/PUBLISHER CAPTURE = PARTIAL — ACCEPTED` remains partial and independent. Original raw-proof commit `8334442092a24f5eace79c1d9212610d33e53655`, predecessor acceptance `4a7d6ec41289e532cda7047d2d433e654cac5de3`, original ZIP SHA-256 `786edbd21e51ddcde0f68cd5f2fed6debbeff7fa034532fa86c3022ef8d26389`.
