@@ -1,0 +1,33 @@
+name: Frozen Kyiv 29 queue read-only schema probe
+on:
+  push:
+    branches: [research-kyiv-live-29-queue-recovery-2026-10-12]
+    paths:
+      - research/kyiv_live_29_queue_schema_probe_runner_2026-10-12.py
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: research-kyiv-live-29-queue-recovery-2026-10-12
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Fetch exact immutable commit and recover original Git objects
+        run: |
+          git fetch --no-tags origin 92d57bbbfad60e6c09bb92372b1e84f38fa6ced4
+          python3 research/kyiv_live_29_queue_schema_probe_runner_2026-10-12.py
+      - name: Commit compact research-only result
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add research/kyiv_live_29_queue_schema_probe_2026-10-12.json
+          git diff --cached --quiet && exit 0
+          git commit -m "Freeze read-only Kyiv 29 queue schema probe"
+          git -c http.extraheader="AUTHORIZATION: basic $(printf 'x-access-token:%s' "$GH_TOKEN" | base64 -w0)" push origin HEAD:research-kyiv-live-29-queue-recovery-2026-10-12
