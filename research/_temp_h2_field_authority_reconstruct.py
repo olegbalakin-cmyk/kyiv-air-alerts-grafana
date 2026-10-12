@@ -295,7 +295,7 @@ def audit():
         counts["source_links_checked"]+=1
     # Exact missing-row universe and the original workers' unresolved reason ledgers
     for city in sorted(target_by_city):
-        w=worker_by_city[city]; pc=proofs[w["worker"]]["cities"][city]
+        w=worker_by_city[city]; pc=proofs[w["worker"]]["cities"][city] if "cities" in proofs[w["worker"]] else proofs[w["worker"]]
         unresolved=pc.get("unresolved_items",[])
         used=set(); unbound_here=[]
         for (bucket,idx),row in sorted(rows_by_city[city].items(),key=lambda z:(BKT.index(z[0][0]),z[0][1])):
