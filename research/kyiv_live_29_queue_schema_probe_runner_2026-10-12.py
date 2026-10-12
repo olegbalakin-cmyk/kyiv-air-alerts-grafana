@@ -82,4 +82,61 @@ def main():
  print("OBJECT_FINGERPRINTS",json.dumps(objects,sort_keys=True))
  print("KYIV_STATE",json.dumps(schema.get("state_kyiv",{}),ensure_ascii=False)[:5000])
  print("QUEUE_COLLECTIONS",json.dumps(schema.get("queue_collections",{}),ensure_ascii=False)[:5000])
-if __name__=="__main__":main()
+
+def crosswalk():
+ from collections import defaultdict
+ import csv,io
+ from datetime import datetime,timezone
+ def iso(s):return datetime.fromisoformat(s.replace("Z","+00:00"))
+ inputs={k:fingerprint(k)[0] for k in OBJECTS}
+ cutoff=iso("2026-10-07T19:05:00Z")
+ frozen=iso("2026-10-11T05:56:28.255150Z")
+ eps=sorted([e for e in inputs["state"]["cities"]["kyiv"]["episodes"] if iso(e["alert_start"])>=cutoff],key=lambda x:(x["alert_start"],x["episode_id"]))
+ assert len(eps)==29,("frozen_count",len(eps))
+ ids={e["episode_id"] for e in eps}
+ assert len(ids)==29
+ assert all(e["city_key"]=="kyiv" and e["alert_source"]=="kyiv_combined_exact_city" for e in eps)
+ links=defaultdict(list);relationships=[];unresolved=[]
+ for c in inputs["queue"]:
+  triggers=c.get("trigger_episode_ids") or []
+  if not isinstance(triggers,list):triggers=[triggers] if isinstance(triggers,str) else []
+  matched=c.get("matched_episode_id")
+  refs=sorted({x for x in triggers+([matched] if isinstance(matched,str) else []) if x in ids})
+  if not refs:continue
+  disposition="EXACT_MATCHED" if matched in refs and len(refs)==1 else ("AMBIGUOUS" if len(refs)>1 else "TRIGGER_ONLY")
+  rec={"candidate_id":c.get("candidate_id","NOT_OBSERVABLE"),"observation_id":c.get("observation_id","NOT_OBSERVABLE"),"frozen_episode_refs":refs,"binding_disposition":disposition,"matched_episode_id":matched or "NOT_OBSERVABLE","trigger_episode_ids":triggers,"original_candidate":c}
+  relationships.append(rec)
+  for ep in refs:links[ep].append(rec["candidate_id"])
+  if disposition!="EXACT_MATCHED":unresolved.append(rec)
+ relationships.sort(key=lambda x:(x["candidate_id"],x["frozen_episode_refs"]))
+ summaries=[];checks=[]
+ for e in eps:
+  due=checked=0
+  for c in e["checks"]:
+   d=iso(c["due_at"])<=frozen
+   due+=d;checked+=bool(c.get("checked_at"))
+   checks.append({"episode_id":e["episode_id"],"check_label":c.get("label","NOT_OBSERVABLE"),"due_at":c["due_at"],"checked_at":c.get("checked_at") or "NOT_OBSERVABLE","new_candidates":c.get("new_candidates","NOT_OBSERVABLE"),"is_due_at_frozen":d,"independent_successful_source_execution":"NOT_OBSERVABLE","coverage_evidence":"UNVERIFIED" if d else "NOT_DUE"})
+  summaries.append({"city_key":e["city_key"],"episode_id":e["episode_id"],"alert_start":e["alert_start"],"alert_end":e["alert_end"],"alert_source":e["alert_source"],"candidate_ids":sorted(links[e["episode_id"]]),"candidate_count":len(links[e["episode_id"]]),"checks_scheduled":len(e["checks"]),"checks_due":due,"checks_checked":checked,"checks_independently_executed":"NOT_OBSERVABLE","checks_missing_coverage":due,"coverage_disposition":"UNVERIFIED"})
+ assert sum(x["checks_scheduled"] for x in summaries)==116
+ assert sum(x["checks_checked"] for x in summaries)==55
+ assert sum(x["checks_scheduled"] for x in summaries[1:])==112
+ assert sum(x["checks_checked"] for x in summaries[1:])==52
+ out=Path("research/kyiv_live_29_frozen_git_outputs");out.mkdir(parents=True,exist_ok=True)
+ def save(path,obj): (out/path).write_text(json.dumps(obj,sort_keys=True,indent=2,ensure_ascii=False)+"\n",encoding="utf-8")
+ save("01_integrity.json",{"pinned_commit":PIN,"objects":{k:fingerprint(k)[1] for k in OBJECTS}})
+ save("02_episodes.json",summaries)
+ with (out/"03_episodes.csv").open("w",newline="",encoding="utf-8") as f:
+  keys=["city_key","episode_id","alert_start","alert_end","alert_source","candidate_count","checks_scheduled","checks_due","checks_checked","checks_independently_executed","checks_missing_coverage","coverage_disposition"]
+  w=csv.DictWriter(f,fieldnames=keys,lineterminator="\n");w.writeheader();w.writerows({k:e[k] for k in keys} for e in summaries)
+ save("04_candidate_relationships.json",relationships)
+ save("05_followup_checks.json",checks)
+ save("06_unresolved.json",{"candidate_relationships":unresolved,"due_checks_with_unverified_coverage":[x for x in checks if x["coverage_evidence"]=="UNVERIFIED"]})
+ totals={"episodes":29,"full_queue_records":len(inputs["queue"]),"related_candidate_records":len(relationships),"candidate_episode_links":sum(len(x["frozen_episode_refs"]) for x in relationships),"unresolved_candidates":len(unresolved),"scheduled":sum(x["checks_scheduled"] for x in summaries),"due":sum(x["checks_due"] for x in summaries),"checked":sum(x["checks_checked"] for x in summaries),"independent_source_execution":"NOT_OBSERVABLE","missing_coverage":sum(x["checks_missing_coverage"] for x in summaries)}
+ save("07_totals.json",totals)
+ print("CROSSWALK_TOTALS",json.dumps(totals,sort_keys=True))
+ print("OUTPUT_SHA256",json.dumps({p.name:hashlib.sha256(p.read_bytes()).hexdigest() for p in sorted(out.iterdir())},sort_keys=True))
+
+if __name__=="__main__":
+ main()
+ crosswalk()
+
