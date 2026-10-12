@@ -6,7 +6,7 @@ on:
     paths:
       - .github/workflows/h2-independent-revalidation-TEMP.yml
 permissions:
-  contents: read
+  contents: write
 jobs:
   verify:
     runs-on: ubuntu-latest
@@ -15,7 +15,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          persist-credentials: false
+          persist-credentials: true
       - name: Independent A and B from exact Git objects
         shell: bash
         run: |
@@ -50,3 +50,20 @@ jobs:
           name: h2-independent-revalidation-ab
           path: ${{ runner.temp }}/h2/*.json
           retention-days: 21
+
+      - name: Freeze compact result on research branch only
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REF_NAME" = "neon-h2-independent-export-keys-crosswalk-2026-10-12"
+          python3 - "$RUNNER_TEMP/h2/a.json" <<'PY'
+          import json,sys
+          d=json.load(open(sys.argv[1]))
+          if d.get("status")=="BLOCKED":raise SystemExit("NO_FREEZE_FOR_BLOCKED_RUN")
+          PY
+          cp "$RUNNER_TEMP/h2/a.json" research/neon_h2_independent_export_keys_crosswalk_time_contract_2026-10-12.json
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add research/neon_h2_independent_export_keys_crosswalk_time_contract_2026-10-12.json
+          git commit -m "research: freeze independent H2 export/key/crosswalk and timezone evidence"
+          git push origin HEAD:refs/heads/neon-h2-independent-export-keys-crosswalk-2026-10-12
