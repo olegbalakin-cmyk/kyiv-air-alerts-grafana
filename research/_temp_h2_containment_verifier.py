@@ -67,14 +67,20 @@ def iso_utc(s):
     if not isinstance(s,str) or not re.fullmatch(r"\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d\.\d{6}Z",s): return None
     try: return dt.datetime.fromisoformat(s.replace("Z","+00:00"))
     except ValueError: return None
-def raw_time(value):
+def raw_time(value,field=None):
     if not isinstance(value,str): return None
     s=value.strip()
     # Only an exact source clock may prove a unique historical time binding.
     if not re.fullmatch(r"\d{4}-\d\d-\d\d(?:T| )\d\d:\d\d(?::\d\d(?:\.\d{1,6})?)?(?:Z|[+-]\d\d:\d\d)?",s): return None
     try:
         d=dt.datetime.fromisoformat(s.replace("Z","+00:00"))
-        if d.tzinfo is None: d=d.replace(tzinfo=KYIV)
+        if d.tzinfo is None:
+            if field not in ("event_time_kyiv", "matched_episode_start_kyiv", "alert_start_kyiv", "alert_episode_start_kyiv", "matched_alert_start_kyiv"):
+                return None
+            local0=d.replace(tzinfo=KYIV,fold=0)
+            local1=d.replace(tzinfo=KYIV,fold=1)
+            if local0.utcoffset()!=local1.utcoffset(): return None
+            d=local0
         return d.astimezone(UTC)
     except ValueError: return None
 def strip_ids(row):
@@ -100,7 +106,7 @@ def original_binding(row,city,start_rows,original_intervals,classification_id):
         return "CONTRADICTION","no_original_explicit_id_matches_export",{"original":sorted(unique),"exported":classification_id}
     for field in START_FIELDS:
         val=row.get(field)
-        t=raw_time(val)
+        t=raw_time(val,field)
         if t is None: continue
         candidates=[eid for eid,s in start_rows if abs((s-t).total_seconds())<=90]
         if len(candidates)==1:
@@ -110,7 +116,7 @@ def original_binding(row,city,start_rows,original_intervals,classification_id):
     # Event-only containment deliberately not treated as accepted identity unless
     # it resolves one unique accepted episode from an exact (not publication) clock.
     for field in ("event_time","event_time_kyiv","event_time_local"):
-        t=raw_time(row.get(field))
+        t=raw_time(row.get(field),field)
         if t is None: continue
         candidates=[eid for eid,s,e in original_intervals if s<=t<=e]
         if len(candidates)==1:
