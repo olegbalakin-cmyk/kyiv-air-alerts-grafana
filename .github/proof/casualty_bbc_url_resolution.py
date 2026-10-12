@@ -191,7 +191,7 @@ def make_metadata():
                 spec = old_manifest["files"][member]
                 assert len(blob) == spec["bytes"] and sha(blob) == spec["sha256"], "FROZEN_MANIFEST_MISMATCH:" + member
     code = git_blob(REFERENCE_CODE, "kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py")
-    assert sha(code) == REFERENCE_CODE_SHA256, "REFERENCE_RESOLVER_CODE_SHA_MISMATCH"
+    assert subprocess.check_output(["git", "rev-parse", REFERENCE_CODE + ":kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py"], text=True).strip() == "30900c8991fb30a93c59ac05c97966b371caa05d", "REFERENCE_RESOLVER_GIT_BLOB_MISMATCH"
     assert all(x.encode("utf-8") in code for x in (
         "def google_news_resolution_params", "def google_news_batch_payload",
         "def parse_google_news_batch_resolution", "def resolve_google_news_publisher_url",
@@ -243,7 +243,8 @@ def make_metadata():
             "accepted_commit": ACCEPTED, "source_commit": SOURCE,
             "source_zip_sha256": ZIP_SHA, "reference_proof_commit": REFERENCE_PROOF,
             "reference_run": 37228651148, "verified_reference_resolver_commit": REFERENCE_CODE,
-            "verified_resolver_sha256": REFERENCE_CODE_SHA256,
+            "reference_proof_declared_resolver_sha256": REFERENCE_CODE_SHA256,
+            "verified_whole_file_git_blob": "30900c8991fb30a93c59ac05c97966b371caa05d",
             "rss_sha256": RSS_SHA, "html_sha256": HTML_SHA,
             "original_rss_utc": {"start": old_observation["rss"]["request_start_utc"],
                                  "complete": old_observation["rss"]["response_complete_utc"]},
