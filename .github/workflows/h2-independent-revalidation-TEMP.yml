@@ -35,6 +35,12 @@ jobs:
           print("A/B bytes",len(a),"sha256",hashlib.sha256(a).hexdigest())
           print("verdicts",json.dumps(proof.get("verdicts"),sort_keys=True))
           print("checks",json.dumps(proof.get("key_revalidation",{}).get("counts",{}),sort_keys=True))
+          kr=proof.get("key_revalidation",{})
+          print("SOURCE_ROW_ERRORS",json.dumps(kr.get("source_original_row_errors",[])[:40],sort_keys=True))
+          print("SOURCE_LINK_MISMATCHES",json.dumps(kr.get("mismatches",{}).get("source",[])[:40],sort_keys=True))
+          print("EVIDENCE_MEMBERSHIP_MISMATCHES",json.dumps(kr.get("mismatches",{}).get("evidence_membership",[])[:15],sort_keys=True))
+          print("CHRONOLOGY_MISMATCHES",json.dumps(proof.get("chronology",{}).get("mismatches",[])[:35],sort_keys=True))
+          print("CHRONOLOGY_PER_CITY",json.dumps({city:{"match":x.get("matching_reported_hash"),"sha256":x.get("recomputed_original_sha256"),"expected":x.get("expected_reported_original_sha256")} for city,x in proof.get("chronology",{}).get("cities",{}).items()},sort_keys=True))
           if proof.get("status")=="BLOCKED":
               print("BLOCKER",proof.get("failure_message"))
           PY
