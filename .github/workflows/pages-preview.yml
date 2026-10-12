@@ -28,6 +28,9 @@ jobs:
         with:
           ref: multicity-wip-2026-09-16
 
+      - name: Test cumulative-hours comparison (preview only)
+        run: node kyiv-air-alerts-grafana/tests/test_cumulative_comparison.js
+
       - name: Configure Pages
         uses: actions/configure-pages@v5
         with:
