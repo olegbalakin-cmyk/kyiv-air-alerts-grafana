@@ -1,33 +1,45 @@
-name: Frozen Kyiv 29 queue read-only schema probe
+name: Frozen Kyiv 29 queue Git-only recovery
 on:
   push:
-    branches: [research-kyiv-live-29-queue-recovery-2026-10-12]
+    branches:
+      - research-kyiv-live-29-queue-recovery-2026-10-12
     paths:
+      - .github/workflows/kyiv-live-29-queue-schema-probe.yml
       - research/kyiv_live_29_queue_schema_probe_runner_2026-10-12.py
   workflow_dispatch:
 permissions:
-  contents: write
+  contents: read
 jobs:
   inspect:
+    if: github.ref == 'refs/heads/research-kyiv-live-29-queue-recovery-2026-10-12'
     runs-on: ubuntu-latest
-    timeout-minutes: 12
+    timeout-minutes: 18
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: research-kyiv-live-29-queue-recovery-2026-10-12
           fetch-depth: 0
           persist-credentials: false
-      - name: Fetch exact immutable commit and recover original Git objects
+      - name: Fetch exact immutable Git commit
+        run: git fetch --no-tags origin 92d57bbbfad60e6c09bb92372b1e84f38fa6ced4
+      - name: Recover original objects and inspect exact schema
         run: |
-          git fetch --no-tags origin 92d57bbbfad60e6c09bb92372b1e84f38fa6ced4
           python3 research/kyiv_live_29_queue_schema_probe_runner_2026-10-12.py
-      - name: Commit compact research-only result
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add research/kyiv_live_29_queue_schema_probe_2026-10-12.json
-          git diff --cached --quiet && exit 0
-          git commit -m "Freeze read-only Kyiv 29 queue schema probe"
-          git -c http.extraheader="AUTHORIZATION: basic $(printf 'x-access-token:%s' "$GH_TOKEN" | base64 -w0)" push origin HEAD:research-kyiv-live-29-queue-recovery-2026-10-12
+          echo "EXECUTED_HEAD=$(git rev-parse HEAD)"
+          echo "SCHEMA_DETAIL_BEGIN"
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          d=json.loads(Path("research/kyiv_live_29_queue_schema_probe_2026-10-12.json").read_text())
+          print(json.dumps({"objects":d["objects"],"schema":d["schema"],"report_meta":d["report_meta"]},ensure_ascii=False,sort_keys=True)[:27000])
+          PY
+          echo "SCHEMA_DETAIL_END"
+      - name: Preserve compact deterministic research outputs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: kyiv-live-29-frozen-git-recovery
+          path: |
+            research/kyiv_live_29_queue_schema_probe_2026-10-12.json
+            research/kyiv_live_29_frozen_git_*
+          if-no-files-found: warn
+          retention-days: 90
