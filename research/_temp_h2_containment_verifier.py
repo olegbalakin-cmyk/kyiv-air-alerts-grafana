@@ -19,6 +19,7 @@ CLASSIFIER_BLOB="89b1be41909c6622339ce8a82d9ac2d982b82481"
 METHODOLOGY="historical-attack-event-air-defense-action-v2"
 PREV_INVENTORY=("9628c9ba7f23afe2f9fc9bb76454c62bfdd639f5","research/neon_h2_19542_field_authority_audit_2026-10-11.json","43d0c92dab32eaf559b5066f337f6479e652397a","1e614a93409ca7270b433e75bb0e7e44b22b109f53744cf1ce589a4897cb1b88")
 BASE="dea5d7c5a79edb2e330ff010bc275878f778be33"
+PREV_FULL=("eaaf00526769bdcc3da26886016152707dba7acc","research/neon_h2_19542_field_authority_audit_2026-10-12.json","06ad728a90d85153e17637deeb99d2586585818e","f864000f769d9d24af0ad7257eede41aa34193564023ddec3d620b6d45d1ff94")
 BKT=("strict_events","sensitivity_only_events","review_events")
 V09={"strict":"strict_events","sensitivity":"sensitivity_only_events","review":"review_events"}
 START_FIELDS=("matched_episode_start","matched_alert_episode_start","alert_episode_start","alert_start","alert_start_kyiv","alert_start_local","matched_alert_start","matched_alert_start_kyiv","episode_start","matched_start","alert_episode_start_kyiv","alert_start_utc")
@@ -56,7 +57,7 @@ def ensure(ref):
     if subprocess.run(["git","cat-file","-e",ref+"^{commit}"],capture_output=True).returncode!=0:
         subprocess.run(["git","fetch","--no-tags","origin",ref],check=True,stdout=subprocess.DEVNULL)
 def prep():
-    for spec in (EXPORT,TARGET,NORM,IDENTITY,PREV_INVENTORY): ensure(spec[0])
+    for spec in (EXPORT,TARGET,NORM,IDENTITY,PREV_INVENTORY,PREV_FULL): ensure(spec[0])
     target=get(TARGET)
     assert len(target["workers"])==10 and len(target["target_map"])==18
     for w in target["workers"]:
@@ -189,7 +190,7 @@ def metric(v,k):
     return v.get("counts",{}).get(k)
 
 def audit():
-    export=get(EXPORT); target=get(TARGET); norm=get(NORM); ident=get(IDENTITY); inv=get(PREV_INVENTORY)
+    export=get(EXPORT); target=get(TARGET); norm=get(NORM); ident=get(IDENTITY); inv=get(PREV_INVENTORY); predecessor=get(PREV_FULL)
     assert ident["classification_identity_v2"]["classification_key_version"]=="attack-event-classification-key-v2"
     target_by_city={x["city_key"]:{r["episode_id"]:r["state"] for r in x["target_rows"]} for x in target["target_map"]}
     worker_by_city={city:w for w in target["workers"] for city in w["cities"]}
@@ -207,6 +208,8 @@ def audit():
     exceptions=[]
     unresolved_bound_cases=[]
     split_child_cases=[]
+    memberships=[]
+    old_unresolved_ids={x["observation_id"] for x in predecessor["unresolved_bound_source_memberships"]}
     for city in sorted(target_by_city):
         w=worker_by_city[city]
         if city not in cities:
