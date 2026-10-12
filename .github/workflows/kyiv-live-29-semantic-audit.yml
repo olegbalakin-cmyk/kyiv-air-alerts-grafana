@@ -1,0 +1,84 @@
+name: Frozen Kyiv 29 field-aware semantic audit
+on:
+  push:
+    branches:
+      - research-kyiv-live-29-semantic-audit-2026-10-12
+    paths:
+      - .github/workflows/kyiv-live-29-semantic-audit.yml
+      - research/kyiv_live_29_candidate_semantic_audit_2026-10-12.py
+      - research/kyiv_live_29_semantic_independent_verify_2026-10-12.py
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    if: github.ref == 'refs/heads/research-kyiv-live-29-semantic-audit-2026-10-12'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Fetch immutable snapshot
+        run: git fetch --no-tags origin 92d57bbbfad60e6c09bb92372b1e84f38fa6ced4
+      - name: Execute clean reconstruction A
+        run: |
+          KYIV_SEMANTIC_OUT=/tmp/kyiv-semantic-a python3 research/kyiv_live_29_candidate_semantic_audit_2026-10-12.py > /tmp/kyiv-semantic-a.log
+          tail -n 3 /tmp/kyiv-semantic-a.log
+      - name: Execute independent raw-object verification A
+        run: |
+          mkdir -p research/kyiv_live_29_semantic_outputs
+          cp -a /tmp/kyiv-semantic-a/. research/kyiv_live_29_semantic_outputs/
+          python3 research/kyiv_live_29_semantic_independent_verify_2026-10-12.py
+      - name: Execute clean reconstruction B
+        run: |
+          KYIV_SEMANTIC_OUT=/tmp/kyiv-semantic-b python3 research/kyiv_live_29_candidate_semantic_audit_2026-10-12.py > /tmp/kyiv-semantic-b.log
+          tail -n 3 /tmp/kyiv-semantic-b.log
+      - name: Compare independent executions and preserve verification
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import hashlib,json
+          a=Path('/tmp/kyiv-semantic-a')
+          b=Path('/tmp/kyiv-semantic-b')
+          names=sorted(x.name for x in a.iterdir())
+          assert names==sorted(x.name for x in b.iterdir())
+          files={}
+          for name in names:
+              payload=a.joinpath(name).read_bytes()
+              assert payload==b.joinpath(name).read_bytes(),name
+              files[name]={'sha256':hashlib.sha256(payload).hexdigest(),'bytes':len(payload)}
+          count=json.loads(a.joinpath('08_count_reconciliation.json').read_text())['corrected']
+          report={'verdict':'PASS','ab_byte_identical':True,
+                  'independent_raw_verification':'PASS','file_count':len(names),
+                  'files':files,'counts':count,
+                  'original_git_commit':'92d57bbbfad60e6c09bb92372b1e84f38fa6ced4',
+                  'executed_head':__import__('subprocess').check_output(['git','rev-parse','HEAD']).decode().strip(),
+                  'neon_queries':0,'db_writes':0,'classifier_runs':0,'new_source_searches':0}
+          dest=Path('research/kyiv_live_29_semantic_outputs/09_verification.json')
+          dest.write_text(json.dumps(report,sort_keys=True,indent=2,ensure_ascii=False)+'\n')
+          print('A_B_INDEPENDENT_PASS',json.dumps({'files':len(names),'head':report['executed_head'],
+                 'related':count['candidate_rows_with_any_cohort_reference'],
+                 'explicit':count['candidate_rows_with_explicit_stored_relationship'],
+                 'classifier':count['candidate_rows_with_final_classifier_binding'],
+                 'trigger_only':count['candidate_rows_trigger_references_only'],
+                 'conflict':count['candidate_rows_with_conflicting_final_bindings'],
+                 'review_approved':count['candidate_rows_review_approved'],
+                 'review_hold':count['candidate_rows_review_held'],
+                 'references':count['raw_references_all_fields'],
+                 'pairs':count['distinct_candidate_episode_pairs_any']},sort_keys=True))
+          PY
+          python3 research/kyiv_live_29_semantic_independent_verify_2026-10-12.py
+          echo "EPISODE_29_CSV_BEGIN"
+          cat research/kyiv_live_29_semantic_outputs/05_kyiv_29_episodes.csv
+          echo "EPISODE_29_CSV_END"
+      - name: Preserve bounded research evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: kyiv-live-29-candidate-semantic-audit
+          path: |
+            research/kyiv_live_29_semantic_outputs/
+          if-no-files-found: warn
+          retention-days: 90
