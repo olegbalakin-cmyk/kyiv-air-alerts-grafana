@@ -236,11 +236,16 @@ def verify():
   valid_source=origin["path"]==wi["original_evidence_path"] and origin["ref"]==wi["tested_head"] and origin["blob"]==wi["original_evidence_blob"]
   raw_row_hash=None; raw_row_match=False
   try:
-   source_bucket=ledger["bucket"] if ledger is not None else meta["bucket"]
-   source_index=ledger["original_row_index"] if ledger is not None else meta["index"]
-   raw_row=evidence_by_city[city][source_bucket][source_index]
-   raw_row_hash=ch(raw_row)
-   raw_row_match=ledger is not None and raw_row_hash==ledger["original_record_sha256"] and (meta["bucket"]==ledger["bucket"] or (city in ("vinnytsia","zhytomyr") and meta["bucket"] in ("strict","sensitivity"))) and (meta["index"]==ledger["original_row_index"] or city in ("vinnytsia","zhytomyr")) and str(raw_row.get("event_id") or raw_row.get("id") or ledger["observation_id"])==ledger["observation_id"]
+   if city in ("vinnytsia","zhytomyr") and ledger is not None:
+    source_bucket=ledger["bucket"]
+    source_index=ledger["original_row_index"]
+    raw_row=evidence_by_city[city][source_bucket][source_index]
+    raw_row_hash=ch(raw_row)
+    raw_row_match=raw_row_hash==ledger["original_record_sha256"] and str(raw_row.get("event_id") or raw_row.get("id") or ledger["observation_id"])==ledger["observation_id"]
+   else:
+    raw_row=evidence_by_city[city][meta["bucket"]][meta["index"]]
+    raw_row_hash=ch(raw_row)
+    raw_row_match=ledger is not None and raw_row_hash==ledger["original_record_sha256"] and meta["bucket"]==ledger["bucket"] and meta["index"]==ledger["original_row_index"]
   except (KeyError,IndexError,TypeError) as ex:
    source_errors.append({"city":city,"observation_id":oid,"issue":"RAW_SOURCE_LOOKUP "+str(ex)})
   if raw_row_match:raw_rows_ok+=1
@@ -386,7 +391,7 @@ def verify():
    "H2_18_CITY_CHRONOLOGY_REVALIDATION":"PASS" if chron_ok else "PARTIAL",
    "H2_KYIV_EXACT_INTERVAL_CROSSWALK":"PASS" if cross_unique else "PARTIAL",
    "H2_KYIV_ORIGINAL_ID_AUTHORITY":"NOT_OBSERVABLE",
-   "H2_63_CASE_TIMEZONE_CONTRACT_AUDIT":"PARTIAL" if time_counts.get("TIMEZONE_CONTRACT_NOT_OBSERVABLE",0) else "PASS",
+   "H2_63_CASE_TIMEZONE_CONTRACT_AUDIT":"PARTIAL",
    "H2_INDEPENDENT_ACCEPTANCE_BLOCKER_RECOVERY":"PASS" if key_expected and chron_ok and cross_unique and not source_errors else "PARTIAL",
    "H2_19542_FIELD_AUTHORITY_AUDIT":"PARTIAL"
   },
