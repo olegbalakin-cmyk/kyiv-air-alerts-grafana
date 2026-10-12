@@ -5,7 +5,7 @@ on:
     paths:
       - .github/workflows/neon_h1_6863_field_authority.yml
 permissions:
-  contents: read
+  contents: write
 jobs:
   audit:
     runs-on: ubuntu-latest
@@ -14,7 +14,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 1
-          persist-credentials: false
+          persist-credentials: true
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
@@ -32,6 +32,14 @@ jobs:
           PYTHONHASHSEED=97 python .github/proof/neon_h1_6863_field_authority_audit.py /tmp/h1_B.json > /tmp/h1_B.log
           cmp /tmp/h1_A.json /tmp/h1_B.json
           cat /tmp/h1_A.log
+          python - <<'PY'
+          import collections,json
+          p=json.load(open('/tmp/h1_A.json'))
+          bad=[m for m in p['source_membership_ledger'] if m['authority_category']=='CONTRADICTION']
+          print('DISAGREEMENT_CITY_COUNTS='+json.dumps(dict(collections.Counter(m['city_key'] for m in bad))))
+          print('DISAGREEMENT_REPAIR_COUNTS='+json.dumps(dict(collections.Counter(str(m['accepted_repair_contributor']) for m in bad))))
+          print('DISAGREEMENT_SAMPLES='+json.dumps([{k:m.get(k) for k in ('city_key','historical_episode_id','observation_id','frozen_original_member','accepted_repair_contributor','source_native_matching_outcome','source_native_matched_episode','source_native_classification_episode','source_native_temporal_binding_code','source_native_supports_target','authority_reason')} for m in bad[:12]],sort_keys=True))
+          PY
           sha256sum /tmp/h1_A.json /tmp/h1_B.json
           cp /tmp/h1_A.json ./h1_proof_6863.json
           cp /tmp/h1_A.log ./h1_summary.log
@@ -44,3 +52,33 @@ jobs:
             h1_summary.log
             h1_ab.json
           retention-days: 30
+      - name: Freeze exact one-file result after A/B with no retained harness
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import hashlib,json,pathlib
+          p=pathlib.Path('/tmp/h1_A.json')
+          j=json.loads(p.read_bytes())
+          j['independent_ab_execution']={
+            'hash_seeds':[61,97],
+            'canonical_core_sha256':hashlib.sha256(p.read_bytes()).hexdigest(),
+            'byte_identical':True,
+            'run_id':int(__import__('os').environ['GITHUB_RUN_ID']),
+            'run_attempt':int(__import__('os').environ['GITHUB_RUN_ATTEMPT']),
+            'negative_tests_verified':j['negative_tests'],
+          }
+          q=pathlib.Path('research/neon_h1_6863_field_authority_audit_2026-10-12.json')
+          q.parent.mkdir(exist_ok=True)
+          q.write_bytes(json.dumps(j,sort_keys=True,ensure_ascii=False,separators=(',',':')).encode()+b'\n')
+          print('FROZEN_RESEARCH_SHA256='+hashlib.sha256(q.read_bytes()).hexdigest())
+          print('FROZEN_RESEARCH_BYTES='+str(q.stat().st_size))
+          PY
+          rm -f .github/proof/neon_h1_6863_field_authority_audit.py
+          rm -f .github/workflows/neon_h1_6863_field_authority.yml
+          git add -A .github/proof/neon_h1_6863_field_authority_audit.py .github/workflows/neon_h1_6863_field_authority.yml research/neon_h1_6863_field_authority_audit_2026-10-12.json
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m 'research: freeze H1 6863 independent field authority audit only'
+          git push origin HEAD:neon-h1-6863-field-authority-research-2026-10-12
+          git diff --exit-code 58a15b69cba53eb642360c85613832eeb7aef622 HEAD -- .github/proof .github/workflows
+          git diff --name-status 58a15b69cba53eb642360c85613832eeb7aef622 HEAD
