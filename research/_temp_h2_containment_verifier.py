@@ -119,6 +119,39 @@ def original_binding(row,city,start_rows,original_intervals,classification_id):
             return "CONTRADICTION","unique_original_event_containment_conflicts_with_export",{"field":field,"event_time_utc":t.isoformat(),"original":candidates[0],"exported":classification_id}
     return "REPLAY_DERIVED_ONLY","no_independent_original_unique_binding",None
 
+def original_intervals(city,worker,accepted,pcity):
+    """Read full episode intervals from tested immutable worker input slices."""
+    root="kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/"
+    head=worker["tested_head"]
+    files=sorted(x for x in run("git","ls-tree","-r","--name-only",head,"--",root).decode().splitlines() if x.startswith(root+city+"-") and x.endswith("_alerts.json"))
+    expected=(pcity.get("input_hashes") or {}).get("source_slice_count")
+    if not files or (expected is not None and expected!=len(files)):
+        raise ValueError("INVALID_ORIGINAL_SLICE_SET:"+city)
+    found={}; sources=[]
+    for path in files:
+        blob=gt("rev-parse",head+":"+path)
+        raw=getraw(head,path)
+        source=json.loads(raw)
+        if source.get("city_key")!=city: raise ValueError("SLICE_CITY_MISMATCH:"+path)
+        for record in source["episodes"]:
+            eid=record["episode_id"]
+            a=dt.datetime.fromisoformat(record["alert_start"].replace("Z","+00:00"))
+            b=dt.datetime.fromisoformat(record["alert_end"].replace("Z","+00:00"))
+            if a.tzinfo is None or b.tzinfo is None or a>=b or eid in found:
+                raise ValueError("INVALID_ORIGINAL_INTERVAL:"+city+":"+eid)
+            found[eid]=(a.astimezone(UTC),b.astimezone(UTC),record["alert_start"],record["alert_end"])
+        sources.append({"path":path,"blob":blob,"sha256":hashlib.sha256(raw).hexdigest(),"episodes":len(source["episodes"])})
+    if set(found)!=set(accepted):
+        raise ValueError("ORIGINAL_EPISODE_COVERAGE_MISMATCH:"+city+":"+str(len(found))+":"+str(len(accepted)))
+    original=[{"episode_id":eid,"alert_start":v[2],"alert_end":v[3],"state":accepted[eid]} for eid,v in found.items()]
+    original.sort(key=lambda x:(x["alert_start"],x["episode_id"]))
+    ch=digest(original)
+    expected_hash={"kropyvnytskyi":"d34a4079f97e96bf9f75126788bcaf5db9460786ba25e89a8f07e9c1e849352d",
+        "mykolaiv":"357cf4fc1eb761ba266d97058e23700605ef46ba23087b5fab7955883b9cdeeb"}.get(city)
+    if expected_hash and expected_hash!=ch: raise ValueError("ORIGINAL_CHRONOLOGY_HASH_MISMATCH:"+city)
+    intervals=sorted(((eid,v[0],v[1]) for eid,v in found.items()),key=lambda x:(x[1],x[0]))
+    return intervals,{"original_tested_head":head,"sources":sources,"episodes":len(intervals),"canonical_original_chronology_sha256":ch,"accepted_original_hash":expected_hash}
+
 def evidence_source_id(row,city,bucket,idx,stream):
     candidates=set()
     for f in ("evidence_id","event_id","record_id","id","candidate_id","source_url","url"):
@@ -224,9 +257,15 @@ def audit():
     for city in sorted(target_by_city):
         missing=set(target_by_city[city])-set(e for c,e in cls_by_pair if c==city)
         if missing: errors.extend({"city":city,"error":"MISSING_CLASSIFICATION","episode_id":x} for x in sorted(missing))
-    starts={}
+    starts={}; chronological_provenance={}
     for city in sorted(target_by_city):
-        starts[city]=[(eid,iso_utc(c["alert_start_utc_microseconds"]),iso_utc(c["alert_end_utc_microseconds"])) for (cy,eid),c in cls_by_pair.items() if cy==city and iso_utc(c["alert_start_utc_microseconds"]) and iso_utc(c["alert_end_utc_microseconds"])]
+        w=worker_by_city[city]
+        pc=proofs[w["worker"]]["cities"][city] if "cities" in proofs[w["worker"]] else proofs[w["worker"]]
+        starts[city],chronological_provenance[city]=original_intervals(city,w,target_by_city[city],pc)
+        for eid,a,b in starts[city]:
+            c=cls_by_pair[(city,eid)]
+            if a!=iso_utc(c["alert_start_utc_microseconds"]) or b!=iso_utc(c["alert_end_utc_microseconds"]):
+                errors.append({"error":"ORIGINAL_EXPORT_INTERVAL_MISMATCH","city":city,"episode_id":eid})
     links_by_class=collections.defaultdict(list)
     links_by_raw=collections.defaultdict(list)
     source_records_by_city=collections.defaultdict(list)
@@ -469,6 +508,7 @@ def audit():
       "coverage":dict(counts),
       "membership_authority_totals":totals,
       "per_city":cities,
+      "original_chronological_provenance":chronological_provenance,
       "unbound_original_source_records":exceptions,
       "unresolved_bound_source_memberships":sorted(unresolved_bound_cases,key=lambda x:canon(x)),
       "split_child_provenance":sorted(split_child_cases,key=lambda x:canon(x)),
