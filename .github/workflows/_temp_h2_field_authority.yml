@@ -1,0 +1,30 @@
+name: Temporary H2 independent audit
+on:
+  push:
+    branches: [neon-h2-field-authority-successor-proof-2026-10-12]
+    paths: ['.github/workflows/_temp_h2_field_authority.yml']
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Frozen inputs and independent A-B
+        run: |
+          python3 research/_temp_h2_field_authority_reconstruct.py --prepare
+          PYTHONHASHSEED=17 python3 research/_temp_h2_field_authority_reconstruct.py --audit /tmp/h2_a.json
+          PYTHONHASHSEED=997 python3 research/_temp_h2_field_authority_reconstruct.py --audit /tmp/h2_b.json
+          cmp /tmp/h2_a.json /tmp/h2_b.json
+          sha256sum /tmp/h2_a.json /tmp/h2_b.json
+          wc -c /tmp/h2_a.json /tmp/h2_b.json
+      - name: Upload proof candidate
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: h2-audit-candidate
+          path: /tmp/h2_a.json
+          retention-days: 7
