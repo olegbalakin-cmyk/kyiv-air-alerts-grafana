@@ -1,0 +1,65 @@
+name: Isolated one-shot casualty RSS publisher capture
+on:
+  push:
+    branches: [research-casualty-rss-publisher-prospective-proof-2026-10-12]
+    paths: [.github/workflows/casualty-prospective-capture-2026-10-12.yml]
+permissions:
+  contents: write
+jobs:
+  capture:
+    if: github.ref == 'refs/heads/research-casualty-rss-publisher-prospective-proof-2026-10-12'
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: research-casualty-rss-publisher-prospective-proof-2026-10-12
+      - name: Guard isolated context
+        run: |
+          test "$(git branch --show-current)" = "research-casualty-rss-publisher-prospective-proof-2026-10-12"
+          test -z "${DATABASE_URL-}" && test -z "${NEON_DATABASE_URL-}" && test -z "${PGHOST-}"
+          test ! -d research/casualty_prospective_rss_publisher_2026-10-12
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install requests==2.32.3
+      - name: Exactly one bounded RSS plus up to one article request
+        run: python .github/proof/casualty_prospective_capture.py
+      - name: Two clean independent offline verification passes
+        run: |
+          set -euo pipefail
+          src=research/casualty_prospective_rss_publisher_2026-10-12
+          mkdir -p /tmp/proofA /tmp/proofB
+          cp -a "$src/." /tmp/proofA/
+          cp -a "$src/." /tmp/proofB/
+          python /tmp/proofA/validate_offline.py --root /tmp/proofA > /tmp/A.json
+          python /tmp/proofB/validate_offline.py --root /tmp/proofB > /tmp/B.json
+          cmp /tmp/A.json /tmp/B.json
+          cp /tmp/A.json "$src/derived/clean_validation_A.json"
+          cp /tmp/B.json "$src/derived/clean_validation_B.json"
+      - name: Package independent offline archive
+        run: |
+          python - <<'PY'
+          import hashlib, zipfile
+          from pathlib import Path
+          root=Path("research/casualty_prospective_rss_publisher_2026-10-12")
+          out=Path("research/casualty_prospective_rss_publisher_2026-10-12.zip")
+          with zipfile.ZipFile(out,"w",zipfile.ZIP_DEFLATED,compresslevel=9) as z:
+              for p in sorted(root.rglob("*")):
+                  if p.is_file():
+                      z.write(p,p.relative_to(root).as_posix())
+          with zipfile.ZipFile(out) as z:
+              assert z.testzip() is None
+              z.extractall("/tmp/zip-readback")
+          print("ZIP SHA256",hashlib.sha256(out.read_bytes()).hexdigest())
+          PY
+          python /tmp/zip-readback/validate_offline.py --root /tmp/zip-readback
+      - name: Freeze observation and ZIP only on disposable branch
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add research/casualty_prospective_rss_publisher_2026-10-12
+          git add research/casualty_prospective_rss_publisher_2026-10-12.zip
+          git commit -m "Freeze one-shot isolated prospective RSS publisher proof"
+          git push origin HEAD:research-casualty-rss-publisher-prospective-proof-2026-10-12
