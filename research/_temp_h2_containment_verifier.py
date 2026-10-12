@@ -517,6 +517,17 @@ def audit():
     total_identity=sum(c["observation_identity_verified"] for c in cities.values())
     total_payload=sum(c["normalized_payload_verified"] for c in cities.values())
     total_reason=sum(c["unbound_reason_verified"] for c in cities.values())
+    before=collections.Counter(x["previous_authority"] for x in memberships)
+    transition=collections.defaultdict(collections.Counter)
+    transitions_by_city=collections.defaultdict(lambda:collections.defaultdict(collections.Counter))
+    for x in memberships:
+        transition[x["previous_authority"]][x["corrected_authority"]]+=1
+        transitions_by_city[x["city"]][x["previous_authority"]][x["corrected_authority"]]+=1
+    for name,expected in predecessor["membership_authority_totals"].items():
+        if before[name]!=expected:
+            errors.append({"error":"PREDECESSOR_MEMBERSHIP_COUNT_MISMATCH","status":name,"expected":expected,"got":before[name]})
+    seen_previous_ids={x["observation_id"] for x in memberships if x["previously_replay_only"]}
+    if seen_previous_ids!=old_unresolved_ids:errors.append({"error":"PREDECESSOR_24_MISSING","ids":sorted(old_unresolved_ids-seen_previous_ids)})
     has_incomplete=bool(errors or source_join_bad or any(key_bad.values()) or total_identity!=1429 or total_payload!=1429 or total_reason!=74 or
         (counts["classifications"],counts["source_links"],counts["events"],counts["original_evidence_rows"],counts["normalized_observations"],counts["worker_bound_expected"],counts["worker_unbound_expected"],counts["unbound_parent_records"],counts["split_observation_excess"])!=(19542,1429,961,1502,1503,1429,74,74,1))
     if contradictions:
@@ -560,6 +571,10 @@ def audit():
       "membership_authority_totals":totals,
       "per_city":cities,
       "original_chronological_provenance":chronological_provenance,
+      "full_membership_regression":sorted(memberships,key=lambda x:(x["city"],x["bucket"],x["original_row_index"],x["observation_id"])),
+      "previous_24_reassessed":sorted([x for x in memberships if x["previously_replay_only"]],key=lambda x:(x["city"],x["original_row_index"],x["observation_id"])),
+      "authority_transition_matrix":{k:dict(v) for k,v in sorted(transition.items())},
+      "authority_transition_by_city":{city:{k:dict(v) for k,v in sorted(states.items())} for city,states in sorted(transitions_by_city.items())},
       "unbound_original_source_records":exceptions,
       "unresolved_bound_source_memberships":sorted(unresolved_bound_cases,key=lambda x:canon(x)),
       "split_child_provenance":sorted(split_child_cases,key=lambda x:canon(x)),
