@@ -84,9 +84,18 @@ def raw_time(value,field=None):
             d=local0
         return d.astimezone(UTC)
     except ValueError: return None
+def legacy_raw_time(value,field=None):
+    if not isinstance(value,str): return None
+    st=value.strip()
+    if not re.fullmatch(r"\d{4}-\d\d-\d\d(?:T| )\d\d:\d\d(?::\d\d(?:\.\d{1,6})?)?(?:Z|[+-]\d\d:\d\d)?",st):return None
+    try:
+        d=dt.datetime.fromisoformat(st.replace("Z","+00:00"))
+        if d.tzinfo is None:d=d.replace(tzinfo=KYIV)
+        return d.astimezone(UTC)
+    except ValueError:return None
 def strip_ids(row):
     return {k:v for k,v in row.items() if k not in ("episode_id","matched_episode_id","alert_episode_id")}
-def original_binding(row,city,start_rows,original_intervals,classification_id):
+def original_binding(row,city,start_rows,original_intervals,classification_id,clock_parser=raw_time):
     explicit=[]
     for field in EP_IDS:
         v=row.get(field)
@@ -107,7 +116,7 @@ def original_binding(row,city,start_rows,original_intervals,classification_id):
         return "CONTRADICTION","no_original_explicit_id_matches_export",{"original":sorted(unique),"exported":classification_id}
     for field in START_FIELDS:
         val=row.get(field)
-        t=raw_time(val,field)
+        t=clock_parser(val,field)
         if t is None: continue
         candidates=[eid for eid,s in start_rows if abs((s-t).total_seconds())<=90]
         if len(candidates)==1:
@@ -117,7 +126,7 @@ def original_binding(row,city,start_rows,original_intervals,classification_id):
     # Event-only containment deliberately not treated as accepted identity unless
     # it resolves one unique accepted episode from an exact (not publication) clock.
     for field in ("event_time","event_time_kyiv","event_time_local"):
-        t=raw_time(row.get(field),field)
+        t=clock_parser(row.get(field),field)
         if t is None: continue
         candidates=[eid for eid,s,e in original_intervals if s<=t<=e]
         if len(candidates)==1:
