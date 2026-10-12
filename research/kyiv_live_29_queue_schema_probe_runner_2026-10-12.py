@@ -91,7 +91,7 @@ def crosswalk():
  inputs={k:fingerprint(k)[0] for k in OBJECTS}
  cutoff=iso("2026-10-07T19:05:00Z")
  frozen=iso("2026-10-11T05:56:28.255150Z")
- eps=sorted([e for e in inputs["state"]["cities"]["kyiv"]["episodes"] if iso(e["alert_start"])>=cutoff],key=lambda x:(x["alert_start"],x["episode_id"]))
+ eps=sorted([e for e in inputs["state"]["cities"]["kyiv"]["episodes"] if iso(e["alert_end"])>=cutoff],key=lambda x:(x["alert_start"],x["episode_id"]))
  assert len(eps)==29,("frozen_count",len(eps))
  ids={e["episode_id"] for e in eps}
  assert len(ids)==29
