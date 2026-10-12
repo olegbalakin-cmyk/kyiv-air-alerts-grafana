@@ -4,6 +4,14 @@ Accepted project checkpoints, newest first. This is not the full Git history, a 
 
 ## 2026-10-12
 
+### Production website UI release verified (site-prod only)
+
+- **Accepted:** `PRODUCTION SITE UI CUMULATIVE/DAYNIGHT RELEASE = DEPLOYED — VERIFIED`. `site-prod` exact commit `5999cb86b38b6199c813bfdfbffc3b0863a4d774`, [Netlify production run 38271260887](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/38271260887) SUCCESS; published Netlify deploy `6accfe4db54bde9cf10159da` ready/current. Regression run [38271172943](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/38271172943) SUCCESS.
+- **Changes:** cumulative monthly city comparison, 09:00–18:00 day vs evening/night, All time burden selector, updated onboarding tour, and current incomplete day in daily28 when source-derived same-day observations are available; KPI retains 28 completed days. Current-day refreshed presentation is **code-proven but post-deploy data-update observability is not separately demonstrated**.
+- **No-deploy data refresh:** frontend fetches live site-prod Git raw JSON, separate from static Netlify bundle; existing main updater continues to publish JSON, while production Netlify workflow triggers only on frontend files. Data-only commits require no Netlify deployment.
+- **Boundaries:** site-prod three-file UI/source-derived builder promotion only; not a live monitoring, classifier, casualty, backfill, historical authority, Neon or DB change. No additional production cuts, source-strategy changes or G1 authorization.
+
+
 ### Independent isolated prospective RSS/publisher capture accepted as PARTIAL — HTTP transport only
 
 - **Independent verdict:** `INDEPENDENT RSS/PUBLISHER PARTIAL EVIDENCE ACCEPTANCE = PASS` for underlying `ISOLATED PROSPECTIVE RSS/PUBLISHER CAPTURE = PARTIAL — ACCEPTED`; accepted predecessor `CASUALTY 23-CITY AUDIT G0 INPUT TRANSPORT = PARTIAL — ACCEPTED` is unchanged. Non-production one-observation HTTP transport only, **not** original publisher retrieval, eligible casualty discovery, collection readiness, G1 or performance.
