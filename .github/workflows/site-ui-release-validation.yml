@@ -1,0 +1,28 @@
+name: Validate site UI release
+on:
+  push:
+    branches: [site-ui-release-candidate-2026-10-12]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate production UI
+        run: |
+          node --check kyiv-air-alerts-grafana/pages-preview/app.js
+          node kyiv-air-alerts-grafana/tests/test_cumulative_comparison.js
+          node kyiv-air-alerts-grafana/tests/test_daynight_burden_preview.js
+          grep -q 'site-prod/kyiv-air-alerts-grafana/data/' kyiv-air-alerts-grafana/pages-preview/app.js
+          grep -q 'DERIVED_DATA_URL' kyiv-air-alerts-grafana/pages-preview/app.js
+          grep -q 'daily28_current' kyiv-air-alerts-grafana/scripts/build_time_of_day_heatmap.py
+          grep -q '"attack_events": false' kyiv-air-alerts-grafana/pages-preview/features.json
+          ! grep -q 'EXPLORATIONS_URL' kyiv-air-alerts-grafana/pages-preview/app.js
+      - name: Install source builder dependencies
+        run: pip install -r kyiv-air-alerts-grafana/requirements.txt
+      - name: Test original-interval day and night
+        run: |
+          python -m py_compile kyiv-air-alerts-grafana/scripts/build_time_of_day_heatmap.py
+          python kyiv-air-alerts-grafana/tests/test_daynight_burden_preview.py
