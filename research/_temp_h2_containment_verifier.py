@@ -79,7 +79,7 @@ def raw_time(value):
     except ValueError: return None
 def strip_ids(row):
     return {k:v for k,v in row.items() if k not in ("episode_id","matched_episode_id","alert_episode_id")}
-def original_binding(row,city,start_rows,classification_id):
+def original_binding(row,city,start_rows,original_intervals,classification_id):
     explicit=[]
     for field in EP_IDS:
         v=row.get(field)
@@ -112,9 +112,11 @@ def original_binding(row,city,start_rows,classification_id):
     for field in ("event_time","event_time_kyiv","event_time_local"):
         t=raw_time(row.get(field))
         if t is None: continue
-        candidates=[eid for eid,s,e in start_rows._intervals if s<=t<=e] if hasattr(start_rows,"_intervals") else []
-        if len(candidates)==1 and candidates[0]==classification_id:
-            return "INDEPENDENTLY_DERIVABLE_UNDER_FROZEN_CONTRACT","unique_exact_event_time_containment",None
+        candidates=[eid for eid,s,e in original_intervals if s<=t<=e]
+        if len(candidates)==1:
+            if candidates[0]==classification_id:
+                return "INDEPENDENTLY_DERIVABLE_UNDER_FROZEN_CONTRACT","unique_exact_event_time_containment",{"field":field,"event_time_utc":t.isoformat()}
+            return "CONTRADICTION","unique_original_event_containment_conflicts_with_export",{"field":field,"event_time_utc":t.isoformat(),"original":candidates[0],"exported":classification_id}
     return "REPLAY_DERIVED_ONLY","no_independent_original_unique_binding",None
 
 def evidence_source_id(row,city,bucket,idx,stream):
@@ -285,7 +287,7 @@ def audit():
             source_join_bad.append({"error":"EXPORTED_SOURCE_EPISODE_BINDING_INCONSISTENT","city":city,"observation_id":obs})
         ss=[(eid,start) for eid,start,end in starts[city]]
         # independent binding: input row versus accepted episode chronology, never trust the exported binding as expected truth
-        s,method,conflict=original_binding(row,city,ss,linked_eid)
+        s,method,conflict=original_binding(row,city,ss,starts[city],linked_eid)
         if s=="CONTRADICTION":
             contradictions.append({"city":city,"bucket":bucket,"index":index,"observation_id":obs,"reason":method,"detail":conflict})
         if s not in cities[city]["membership_authority"]:s="NOT_OBSERVABLE"
