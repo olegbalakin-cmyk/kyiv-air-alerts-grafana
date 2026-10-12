@@ -529,6 +529,7 @@ def build_exploration_city(
     durations_by_month: dict[str, list[float]] = defaultdict(list)
     month_intervals: dict[str, list[tuple[datetime, datetime]]] = defaultdict(list)
     band_seconds: dict[str, list[float]] = defaultdict(lambda: [0.0, 0.0, 0.0, 0.0])
+    day_night_seconds: dict[str, list[float]] = defaultdict(lambda: [0.0, 0.0])
 
     for alert in alerts:
         raw_start_utc = alert.start.astimezone(UTC)
@@ -550,7 +551,7 @@ def build_exploration_city(
             local = cursor.astimezone(TZ)
             day = local.date()
             band = min(3, local.hour // 6)
-            boundary_hour = (band + 1) * 6
+            boundary_hour = 9 if 6 <= local.hour < 9 else (band + 1) * 6
             if boundary_hour >= 24:
                 boundary_local = datetime.combine(day + timedelta(days=1), time.min, tzinfo=TZ)
             else:
@@ -561,6 +562,9 @@ def build_exploration_city(
             elapsed = max(0.0, (segment_end - cursor).total_seconds())
             daily_seconds[day] += elapsed
             band_seconds[day.strftime("%Y-%m")][band] += elapsed
+            # 09:00 splits the 06-12 bucket; 18:00 is already a band boundary.
+            day_bucket = 0 if 9 <= local.hour < 18 else 1
+            day_night_seconds[day.strftime("%Y-%m")][day_bucket] += elapsed
             cursor = segment_end
 
         cursor = clipped_start
@@ -660,6 +664,23 @@ def build_exploration_city(
                 for index in range(4)
             }
 
+            day_night = day_night_seconds.get(key, [0.0, 0.0])
+            day_night_total = sum(day_night)
+            if abs(day_night_total - band_total) > 1e-5:
+                raise RuntimeError(f"Day/night vs six-hour bands disagreement for {key}")
+            day_night_names = ["day", "evening_night"]
+            day_night_minutes = {
+                day_night_names[i]: round(day_night[i] / 60.0, 2)
+                for i in range(2)
+            }
+            day_night_shares = {
+                day_night_names[i]: round(
+                    (day_night[i] / day_night_total * 100.0) if day_night_total > 0 else 0.0,
+                    3,
+                )
+                for i in range(2)
+            }
+
             avg_duration = sum(durations) / len(durations) if durations else None
             monthly_rows.append({
                 "month": key,
@@ -679,6 +700,8 @@ def build_exploration_city(
                 "burden_day_counts": burden,
                 "time_band_minutes": band_minutes,
                 "time_band_shares": band_shares,
+                "time_day_night_minutes": day_night_minutes,
+                "time_day_night_shares": day_night_shares,
             })
         month_cursor = next_month
 
@@ -752,6 +775,7 @@ def build_exploration_payload(
                 "duration_distribution": "Duration percentiles use full durations of alerts that start in the month.",
                 "quiet_gap": "Longest quiet gap is measured within the covered part of each calendar month, including month-boundary-to-first-alert and last-alert-to-month-boundary gaps.",
                 "dayparts": "Alert time is split into Europe/Kyiv local-time bands 00-06, 06-12, 12-18, and 18-24.",
+                "day_night": "Day=09:00-18:00; evening/night=18:00-09:00 Europe/Kyiv. Source intervals split at exact local boundaries, honoring DST.",
                 "time_profile": "Time-of-day profiles are normalized separately for 15-, 30-, and 60-minute local-time slots.",
             },
         },
