@@ -1,0 +1,65 @@
+name: Isolated BBC Google News URL resolution proof
+on:
+  push:
+    branches: [research-casualty-bbc-url-resolution-2026-10-12]
+    paths: [.github/workflows/casualty-bbc-url-resolution-2026-10-12.yml]
+permissions:
+  contents: write
+jobs:
+  research:
+    runs-on: ubuntu-latest
+    timeout-minutes: 9
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Guard isolated branch and environments
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REF_NAME" = "research-casualty-bbc-url-resolution-2026-10-12"
+          test -z "$DATABASE_URL" && test -z "$NEON_DATABASE_URL" && test -z "$PGHOST"
+          test ! -e research/google_news_bbc_url_resolution_2026-10-12
+          git cat-file -e 8334442092a24f5eace79c1d9212610d33e53655
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Offline and one bounded Google RPC
+        run: python .github/proof/casualty_bbc_url_resolution.py
+      - name: Independent A/B verification
+        run: |
+          set -euo pipefail
+          root=research/google_news_bbc_url_resolution_2026-10-12
+          mkdir -p /tmp/bbc_verify_A /tmp/bbc_verify_B
+          cp -a "$root/." /tmp/bbc_verify_A/
+          cp -a "$root/." /tmp/bbc_verify_B/
+          python .github/proof/casualty_bbc_url_verify_offline.py --root /tmp/bbc_verify_A > /tmp/bbc_pass_A.json
+          python .github/proof/casualty_bbc_url_verify_offline.py --root /tmp/bbc_verify_B > /tmp/bbc_pass_B.json
+          cmp /tmp/bbc_pass_A.json /tmp/bbc_pass_B.json
+          mkdir -p "$root/derived/verification"
+          cp /tmp/bbc_pass_A.json "$root/derived/verification/clean_A.json"
+          cp /tmp/bbc_pass_B.json "$root/derived/verification/clean_B.json"
+          python -c 'import hashlib,json,pathlib;p=pathlib.Path("research/google_news_bbc_url_resolution_2026-10-12/derived/verification");a=(p/"clean_A.json").read_bytes();b=(p/"clean_B.json").read_bytes();assert a==b;(p/"AB.json").write_text(json.dumps({"A":"PASS","B":"PASS","byte_identical":True,"sha256":hashlib.sha256(a).hexdigest()},indent=2)+"\n")'
+      - name: Zip and byte-check frozen members
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import hashlib,zipfile
+          root=Path("research/google_news_bbc_url_resolution_2026-10-12")
+          output=Path(str(root)+".zip")
+          with zipfile.ZipFile(output,"w",zipfile.ZIP_DEFLATED,compresslevel=9) as z:
+              for p in sorted(root.rglob("*")):
+                  if p.is_file(): z.write(p,p.relative_to(root).as_posix())
+          with zipfile.ZipFile(output) as z:
+              assert z.testzip() is None
+              for name in z.namelist(): assert z.read(name)==(root/name).read_bytes()
+          print("FROZEN_PROOF_ZIP_SHA256",hashlib.sha256(output.read_bytes()).hexdigest())
+          PY
+      - name: Commit only to research branch
+        run: |
+          set -euo pipefail
+          test "$(git branch --show-current)" = "research-casualty-bbc-url-resolution-2026-10-12"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add research/google_news_bbc_url_resolution_2026-10-12 research/google_news_bbc_url_resolution_2026-10-12.zip
+          git commit -m "Freeze isolated single-item BBC URL evidence"
+          git push origin HEAD:research-casualty-bbc-url-resolution-2026-10-12
