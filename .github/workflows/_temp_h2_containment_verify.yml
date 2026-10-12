@@ -1,0 +1,72 @@
+name: Temporary H2 Containment Verification
+on:
+  push:
+    branches:
+      - neon-h2-field-authority-containment-proof-2026-10-12
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  offline:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Verify source and syntax
+        run: |
+          python -m py_compile research/_temp_h2_containment_verifier.py
+          python - <<'PY'
+          import importlib.util, datetime as dt
+          s=importlib.util.spec_from_file_location("h2","research/_temp_h2_containment_verifier.py")
+          import sys
+          m=importlib.util.module_from_spec(s);s.loader.exec_module(m)
+          U=dt.timezone.utc
+          def t(x):return dt.datetime.fromisoformat(x.replace("Z","+00:00"))
+          rows=[("a",t("2026-01-01T00:00:00Z"),t("2026-01-01T01:00:00Z")),("b",t("2026-01-01T02:00:00Z"),t("2026-01-01T03:00:00Z"))]
+          def check(tag,row,target,expected,ints=rows):
+            actual=m.original_binding(row,"test",[(e,s) for e,s,_ in ints],ints,target)
+            assert actual[0]==expected,(tag,actual,expected)
+            print("TEMPORAL_TEST_PASS",tag,actual[:2])
+          check("unique_exact_containment",{"event_time":"2026-01-01T00:30:00Z"},"a","INDEPENDENTLY_DERIVABLE_UNDER_FROZEN_CONTRACT")
+          check("outside",{"event_time":"2026-01-01T04:30:00Z"},"a","REPLAY_DERIVED_ONLY")
+          check("other_target_contradiction",{"event_time":"2026-01-01T00:30:00Z"},"b","CONTRADICTION")
+          check("explicit_offset",{"event_time":"2026-01-01T02:30:00+02:00"},"a","INDEPENDENTLY_DERIVABLE_UNDER_FROZEN_CONTRACT")
+          check("approximate",{"event_time":"~2026-01-01T00:30:00Z"},"a","REPLAY_DERIVED_ONLY")
+          check("multiple_clocks",{"event_time":"2026-01-01T00:30:00Z;2026-01-01T00:45:00Z"},"a","REPLAY_DERIVED_ONLY")
+          check("naive_unsupported",{"event_time":"2026-01-01T00:30:00"},"a","REPLAY_DERIVED_ONLY")
+          check("publication_not_event",{"published_at":"2026-01-01T00:30:00Z"},"a","REPLAY_DERIVED_ONLY")
+          check("missing_interval",{"event_time":"2026-01-01T00:30:00Z"},"a","REPLAY_DERIVED_ONLY",[])
+          check("overlap",{"event_time":"2026-01-01T00:30:00Z"},"a","REPLAY_DERIVED_ONLY",rows+[("c",t("2026-01-01T00:15:00Z"),t("2026-01-01T00:45:00Z"))])
+          assert m.raw_time("2026-10-25T03:30:00","event_time_kyiv") is None
+          assert m.raw_time("2026-01-01T02:30:00","event_time_kyiv") is not None
+          print("TEMPORAL_TEST_PASS DST_FOLD_AND_NAIVE_CONTRACT")
+          PY
+      - name: Prepare frozen inputs
+        run: python research/_temp_h2_containment_verifier.py --prepare
+      - name: Offline A
+        run: PYTHONHASHSEED=17 python research/_temp_h2_containment_verifier.py --audit /tmp/h2_a.json
+      - name: Offline B
+        run: PYTHONHASHSEED=997 python research/_temp_h2_containment_verifier.py --audit /tmp/h2_b.json
+      - name: A B compare
+        run: |
+          cmp /tmp/h2_a.json /tmp/h2_b.json
+          sha256sum /tmp/h2_a.json /tmp/h2_b.json
+          python - <<'PY'
+          import json
+          d=json.load(open("/tmp/h2_a.json"))
+          print("FINAL_COVERAGE",d["coverage"])
+          print("FINAL_AUTHORITY",d["membership_authority_totals"])
+          print("FINAL_VERDICTS",d["verdicts"])
+          print("ORIGINAL_INTERVALS",[(c,v["episodes"]) for c,v in sorted(d["original_chronological_provenance"].items())])
+          assert len(d["original_chronological_provenance"])==18
+          assert len(d["unresolved_bound_source_memberships"])<=24
+          assert not d["transport_exception_rows"] and not d["other_exception_rows"]
+          assert all(v["checked"]==v["matches"] for v in d["key_recalculation"].values())
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: h2-containment-corrected-proof
+          path: /tmp/h2_a.json
