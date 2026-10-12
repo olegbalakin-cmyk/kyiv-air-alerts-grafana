@@ -125,7 +125,7 @@ def original_binding(row,city,start_rows,original_intervals,classification_id):
             return "CONTRADICTION","unique_original_event_containment_conflicts_with_export",{"field":field,"event_time_utc":t.isoformat(),"original":candidates[0],"exported":classification_id}
     return "REPLAY_DERIVED_ONLY","no_independent_original_unique_binding",None
 
-def original_intervals(city,worker,accepted,pcity):
+def original_intervals(city,worker,accepted,pcity,cls_by_pair):
     """Read full episode intervals from tested immutable worker input slices."""
     root="kyiv-air-alerts-grafana/data/explosion_metric_handoff/source_slices/"
     head=worker["tested_head"]
@@ -147,8 +147,25 @@ def original_intervals(city,worker,accepted,pcity):
                 raise ValueError("INVALID_ORIGINAL_INTERVAL:"+city+":"+eid)
             found[eid]=(a.astimezone(UTC),b.astimezone(UTC),record["alert_start"],record["alert_end"])
         sources.append({"path":path,"blob":blob,"sha256":hashlib.sha256(raw).hexdigest(),"episodes":len(source["episodes"])})
+    mapping="DIRECT_ORIGINAL_EPISODE_ID"; remaps=0
     if set(found)!=set(accepted):
-        raise ValueError("ORIGINAL_EPISODE_COVERAGE_MISMATCH:"+city+":"+str(len(found))+":"+str(len(accepted))+":missing="+str(sorted(set(accepted)-set(found))[:12])+":extra="+str(sorted(set(found)-set(accepted))[:12]))
+        # Only candidate crosswalk: exported clocks select a record; original immutable
+        # boundaries must match exactly. Never count such selection as original ID authority.
+        if city!="kyiv": raise ValueError("NON_KYIV_ORIGINAL_EPISODE_ID_MISMATCH:"+city)
+        lookup={}
+        for oldid,v in found.items():
+            key=(v[0],v[1])
+            if key in lookup: raise ValueError("AMBIGUOUS_ORIGINAL_CLOCK_CROSSWALK:"+city)
+            lookup[key]=oldid
+        remapped={}
+        for (cc,eid),c in cls_by_pair.items():
+            if cc!=city: continue
+            key=(iso_utc(c["alert_start_utc_microseconds"]),iso_utc(c["alert_end_utc_microseconds"]))
+            oid=lookup.get(key)
+            if oid is None or eid in remapped:raise ValueError("ORIGINAL_CHRONOLOGY_CROSSWALK_UNPROVEN:"+city+":"+eid)
+            remapped[eid]=found[oid]
+        if len(remapped)!=len(found):raise ValueError("ORIGINAL_CHRONOLOGY_NOT_BIJECTIVE:"+city)
+        found=remapped;mapping="EXPORTED_ID_CANDIDATE_MATCHED_TO_EXACT_ORIGINAL_INTERVAL_NOT_INDEPENDENT_ID_AUTHORITY";remaps=len(remapped)
     original=[{"episode_id":eid,"alert_start":v[2],"alert_end":v[3],"state":accepted[eid]} for eid,v in found.items()]
     original.sort(key=lambda x:(x["alert_start"],x["episode_id"]))
     ch=digest(original)
@@ -156,7 +173,7 @@ def original_intervals(city,worker,accepted,pcity):
         "mykolaiv":"357cf4fc1eb761ba266d97058e23700605ef46ba23087b5fab7955883b9cdeeb"}.get(city)
     if expected_hash and expected_hash!=ch: raise ValueError("ORIGINAL_CHRONOLOGY_HASH_MISMATCH:"+city)
     intervals=sorted(((eid,v[0],v[1]) for eid,v in found.items()),key=lambda x:(x[1],x[0]))
-    return intervals,{"original_tested_head":head,"sources":sources,"episodes":len(intervals),"canonical_original_chronology_sha256":ch,"accepted_original_hash":expected_hash}
+    return intervals,{"original_tested_head":head,"sources":sources,"episodes":len(intervals),"canonical_original_chronology_sha256":ch,"accepted_original_hash":expected_hash,"episode_identity_crosswalk":mapping,"crosswalk_count":remaps}
 
 def evidence_source_id(row,city,bucket,idx,stream):
     candidates=set()
@@ -267,7 +284,7 @@ def audit():
     for city in sorted(target_by_city):
         w=worker_by_city[city]
         pc=proofs[w["worker"]]["cities"][city] if "cities" in proofs[w["worker"]] else proofs[w["worker"]]
-        starts[city],chronological_provenance[city]=original_intervals(city,w,target_by_city[city],pc)
+        starts[city],chronological_provenance[city]=original_intervals(city,w,target_by_city[city],pc,cls_by_pair)
         for eid,a,b in starts[city]:
             c=cls_by_pair[(city,eid)]
             if a!=iso_utc(c["alert_start_utc_microseconds"]) or b!=iso_utc(c["alert_end_utc_microseconds"]):
