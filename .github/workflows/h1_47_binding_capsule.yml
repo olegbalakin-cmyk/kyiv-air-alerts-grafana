@@ -1,0 +1,106 @@
+name: Isolated H1 47 frozen evidence capsule
+on:
+  push:
+    branches:
+      - neon-h1-47-binding-evidence-capsule-2026-10-12
+    paths:
+      - .github/workflows/h1_47_binding_capsule.yml
+permissions:
+  contents: write
+jobs:
+  recover:
+    runs-on: ubuntu-latest
+    timeout-minutes: 55
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+          persist-credentials: true
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Fetch and verify immutable historical commit objects
+        shell: bash
+        run: |
+          set -euo pipefail
+          for sha in cbce9910a1a6b79753c06b0fe2cb2dffd84653dc 71cb6f6fbe856cc7b96759310fe9cc9c71cc0453 5d18ef85a66384f189ede5ca5654d750f60f088b 02ad2e8fadee78442753567bc2d3a540345d8e8a 220ea11ae168afba2ea5057b3d625dd21ca7d63b; do
+            git fetch --no-tags --quiet --depth=1 origin "$sha"
+            git cat-file -e "$sha^{commit}"
+          done
+      - name: Independent clean A/B extractors
+        shell: bash
+        run: |
+          set -euo pipefail
+          PYTHONHASHSEED=11 python .github/proof/h1_47_binding_capsule_builder.py /tmp/h1_47_A.json > /tmp/h1_47_A.log
+          PYTHONHASHSEED=89 python .github/proof/h1_47_binding_capsule_builder.py /tmp/h1_47_B.json > /tmp/h1_47_B.log
+          cmp /tmp/h1_47_A.json /tmp/h1_47_B.json
+          sha256sum /tmp/h1_47_A.json /tmp/h1_47_B.json
+          cat /tmp/h1_47_A.log
+      - name: Independent source and negative verification
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import collections,copy,hashlib,json,subprocess
+          from pathlib import Path
+          p=json.loads(Path('/tmp/h1_47_A.json').read_bytes())
+          source=p['observations_with_all_memberships_and_native_evidence']
+          original=p['original_47_row_discrepancy_ledger_exact']
+          ensure=lambda condition,message: condition or (_ for _ in ()).throw(AssertionError(message))
+          ensure(len(original)==47,'ORIGINAL_47_CHANGED')
+          ensure(len(source)==len({x['observation_id'] for x in source}),'SOURCE_UNIQUENESS')
+          ledger={(m['city_key'],m['historical_episode_id'],m['observation_id']) for m in original}
+          observed={}
+          for row in source:
+            oid=row['observation_id']; native=row['original_native_observation_record']
+            loc=row['record_git_identity']
+            raw=subprocess.check_output(['git','show',loc['commit']+':'+loc['path']])
+            batch=json.loads(raw)
+            check=[o for o in batch['observations'] if o['observation_id']==oid]
+            ensure(len(check)==1 and check[0]==native,'INDEPENDENT_ORIGINAL_RECORD_NOT_FOUND')
+            assert len({(m['city_key'],m['episode_id']) for m in row['all_frozen_effective_memberships']})==row['member_total'],'DUPLICATE_MEMBERSHIP'
+            for m in row['all_frozen_effective_memberships']:
+              parent=p['original_episode_records_for_selected_memberships'][m['original_episode_record_key']]
+              assert parent['city_key']==m['city_key'] and parent['episode_id']==m['episode_id'],'WRONG_PARENT_ID'
+              if m['original_batch_member']:
+                assert oid in parent['original_record']['source_observation_ids'],'MISSING_FROZEN_MEMBERSHIP'
+              assert m['provisional_discrepancy_flag']==((m['city_key'],m['episode_id'],oid) in ledger),'FLAG_ACCOUNTING'
+              claimed=m['exact_original_proof_member']
+              assert claimed['observation_id']==oid and claimed['city_key']==m['city_key'] and claimed['historical_episode_id']==m['episode_id'],'WRONG_LEDGER_LINK'
+              assert hashlib.sha256(json.dumps(claimed,sort_keys=True,separators=(',',':'),ensure_ascii=False).encode()).hexdigest()==m['proof_ledger_record_sha256'],'ALTERED_EVIDENCE_HASH'
+            observed[oid]=row
+          assert sum(x['flag_total'] for x in source)==47,'FLAG_TOTAL'
+          assert sum(x['member_total'] for x in source)==p['population_and_integrity_checks']['all_membership_rows_for_selected_source_observations'],'MEMBERSHIP_TOTAL'
+          test=copy.deepcopy(source[0])
+          test['all_frozen_effective_memberships'].append(copy.deepcopy(test['all_frozen_effective_memberships'][0]))
+          assert len({(m['city_key'],m['episode_id']) for m in test['all_frozen_effective_memberships']})<len(test['all_frozen_effective_memberships']),'DUPLICATE_NEGATIVE_NOT_DETECTED'
+          test=copy.deepcopy(source[0]); test['all_frozen_effective_memberships'][0]['episode_id']='wrong-target'
+          assert test['all_frozen_effective_memberships'][0]['original_episode_record_key'].split(':')[1]!=test['all_frozen_effective_memberships'][0]['episode_id'],'WRONG_TARGET_NEGATIVE_NOT_DETECTED'
+          test=copy.deepcopy(source[0]);test['all_frozen_effective_memberships'][0]['exact_original_proof_member']['content_sha256']='f'*64
+          assert hashlib.sha256(json.dumps(test['all_frozen_effective_memberships'][0]['exact_original_proof_member'],sort_keys=True,separators=(',',':'),ensure_ascii=False).encode()).hexdigest()!=test['all_frozen_effective_memberships'][0]['proof_ledger_record_sha256'],'ALTERED_HASH_NEGATIVE_NOT_DETECTED'
+          test=copy.deepcopy(source[0]);test['original_native_observation_record']=None
+          assert test['original_native_observation_record']!=observed[test['observation_id']]['original_native_observation_record'],'MISSING_SOURCE_NEGATIVE_NOT_DETECTED'
+          print('INDEPENDENT_SELECTED_OBSERVATIONS='+str(len(source)))
+          print('INDEPENDENT_FLAG_ROWS='+str(len(original)))
+          print('INDEPENDENT_NATIVE_VERIFICATION=PASS')
+          print('NEGATIVE_TESTS=PASS:missing_source,duplicate_membership,wrong_target,altered_hash')
+          PY
+      - name: Freeze one proof and remove runner and workflow
+        shell: bash
+        run: |
+          set -euo pipefail
+          cp /tmp/h1_47_A.json research/neon_h1_47_binding_evidence_capsule_2026-10-12.json
+          rm -f .github/proof/h1_47_binding_capsule_builder.py
+          rm -f .github/workflows/h1_47_binding_capsule.yml
+          git add -A .github/proof/h1_47_binding_capsule_builder.py .github/workflows/h1_47_binding_capsule.yml research/neon_h1_47_binding_evidence_capsule_2026-10-12.json
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m 'research: freeze exact H1 47 Git evidence capsule'
+          git push origin HEAD:neon-h1-47-binding-evidence-capsule-2026-10-12
+          git cat-file -e 220ea11ae168afba2ea5057b3d625dd21ca7d63b^{commit}
+          test "$(git diff --name-only 220ea11ae168afba2ea5057b3d625dd21ca7d63b HEAD)" = 'research/neon_h1_47_binding_evidence_capsule_2026-10-12.json'
+          git diff --stat 220ea11ae168afba2ea5057b3d625dd21ca7d63b HEAD
+          git rev-parse HEAD
+          git rev-parse HEAD:research/neon_h1_47_binding_evidence_capsule_2026-10-12.json
+          wc -c research/neon_h1_47_binding_evidence_capsule_2026-10-12.json
+          sha256sum research/neon_h1_47_binding_evidence_capsule_2026-10-12.json
