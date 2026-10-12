@@ -1,0 +1,50 @@
+name: Research isolated BBC publisher single GET
+on:
+  push:
+    branches:
+      - research-casualty-bbc-publisher-http-2026-10-12
+    paths:
+      - '.github/workflows/research-bbc-publisher-http-once.yml'
+permissions:
+  contents: write
+jobs:
+  single-bbc-capture:
+    if: github.event.head_commit.message == 'research(bbc): trigger one isolated publisher GET'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Verify fixed accepted preflight
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git show 220ea11ae168afba2ea5057b3d625dd21ca7d63b:PROJECT_STATE.md | grep -c 'GOOGLE NEWS BBC ARTICLE URL RESOLUTION = PROVEN')" -ge 1
+          test "$(git cat-file -t cbfc7707b37e04ed03298a89ed5a0bd60cce9e4e)" = commit
+          test "$(git cat-file -t 220ea11ae168afba2ea5057b3d625dd21ca7d63b)" = commit
+          test "$(git rev-parse HEAD^)" != ""
+      - name: One bounded BBC request, ephemeral evidence, two distinct offline checks
+        shell: bash
+        run: |
+          set -euo pipefail
+          umask 077
+          trap 'rm -rf "$RUNNER_TEMP/bbc-single-publisher-private-20261012"' EXIT
+          python research/bbc_publisher_http_2026_10_12/capture.py
+          python research/bbc_publisher_http_2026_10_12/verify_a.py
+          python research/bbc_publisher_http_2026_10_12/verify_b.py
+          python research/bbc_publisher_http_2026_10_12/finalize.py
+      - name: Freeze public-safe evidence only
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add research/bbc_publisher_http_2026_10_12/proof/
+          git diff --cached --name-only | grep -E '^research/bbc_publisher_http_2026_10_12/proof/'
+          if git diff --cached --name-only | grep -vE '^research/bbc_publisher_http_2026_10_12/proof/(README.md|observation.json|verify_A.json|verify_B.json|adjudication.json|sha256_manifest.json|sha256_manifest.sha256)$'; then exit 1; fi
+          git commit -m 'research(bbc): freeze safe single-request HTTP proof, no publisher bytes'
+          git push origin HEAD:research-casualty-bbc-publisher-http-2026-10-12
