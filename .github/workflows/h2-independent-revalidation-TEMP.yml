@@ -1,0 +1,46 @@
+name: Isolated H2 independent source/key transport verification
+on:
+  push:
+    branches:
+      - neon-h2-independent-export-keys-crosswalk-2026-10-12
+    paths:
+      - .github/workflows/h2-independent-revalidation-TEMP.yml
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Independent A and B from exact Git objects
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 --version
+          mkdir -p "$RUNNER_TEMP/h2"
+          PYTHONHASHSEED=17 python3 research/h2_independent_transport_verifier_TEMP.py --output "$RUNNER_TEMP/h2/a.json"
+          PYTHONHASHSEED=997 python3 research/h2_independent_transport_verifier_TEMP.py --output "$RUNNER_TEMP/h2/b.json"
+          python3 - "$RUNNER_TEMP/h2" <<'PY'
+          import hashlib,json,pathlib,sys
+          folder=pathlib.Path(sys.argv[1])
+          a=(folder/"a.json").read_bytes()
+          b=(folder/"b.json").read_bytes()
+          if a!=b:
+              raise SystemExit("INDEPENDENT_AB_BYTE_MISMATCH")
+          proof=json.loads(a)
+          print("A/B bytes",len(a),"sha256",hashlib.sha256(a).hexdigest())
+          print("verdicts",json.dumps(proof.get("verdicts"),sort_keys=True))
+          print("checks",json.dumps(proof.get("key_revalidation",{}).get("counts",{}),sort_keys=True))
+          if proof.get("status")=="BLOCKED":
+              print("BLOCKER",proof.get("failure_message"))
+          PY
+      - name: Upload compact A/B verification ledger
+        uses: actions/upload-artifact@v4
+        with:
+          name: h2-independent-revalidation-ab
+          path: ${{ runner.temp }}/h2/*.json
+          retention-days: 21
