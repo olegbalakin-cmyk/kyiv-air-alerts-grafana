@@ -148,7 +148,7 @@ def original_intervals(city,worker,accepted,pcity):
             found[eid]=(a.astimezone(UTC),b.astimezone(UTC),record["alert_start"],record["alert_end"])
         sources.append({"path":path,"blob":blob,"sha256":hashlib.sha256(raw).hexdigest(),"episodes":len(source["episodes"])})
     if set(found)!=set(accepted):
-        raise ValueError("ORIGINAL_EPISODE_COVERAGE_MISMATCH:"+city+":"+str(len(found))+":"+str(len(accepted)))
+        raise ValueError("ORIGINAL_EPISODE_COVERAGE_MISMATCH:"+city+":"+str(len(found))+":"+str(len(accepted))+":missing="+str(sorted(set(accepted)-set(found))[:12])+":extra="+str(sorted(set(found)-set(accepted))[:12]))
     original=[{"episode_id":eid,"alert_start":v[2],"alert_end":v[3],"state":accepted[eid]} for eid,v in found.items()]
     original.sort(key=lambda x:(x["alert_start"],x["episode_id"]))
     ch=digest(original)
