@@ -5,7 +5,7 @@ on:
       - neon-h2-field-authority-containment-proof-2026-10-12
   workflow_dispatch:
 permissions:
-  contents: read
+  contents: write
 jobs:
   offline:
     runs-on: ubuntu-latest
@@ -61,7 +61,9 @@ jobs:
           print("FINAL_VERDICTS",d["verdicts"])
           print("ORIGINAL_INTERVALS",[(c,v["episodes"]) for c,v in sorted(d["original_chronological_provenance"].items())])
           assert len(d["original_chronological_provenance"])==18
-          assert len(d["unresolved_bound_source_memberships"])<=24
+          assert len(d["previous_24_reassessed"])==24
+          assert len(d["full_membership_regression"])==1429
+          assert sum(sum(z.values()) for z in d["authority_transition_matrix"].values())==1429
           assert not d["transport_exception_rows"] and not d["other_exception_rows"]
           assert all(v["checked"]==v["matches"] for v in d["key_recalculation"].values())
           PY
@@ -70,3 +72,14 @@ jobs:
         with:
           name: h2-containment-corrected-proof
           path: /tmp/h2_a.json
+      - name: Freeze sole research proof and remove temporary harness
+        run: |
+          cp /tmp/h2_a.json research/neon_h2_19542_field_authority_containment_revalidation_2026-10-12.json
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git config user.name "github-actions[bot]"
+          git rm -- research/_temp_h2_containment_verifier.py .github/workflows/_temp_h2_containment_verify.yml
+          git add research/neon_h2_19542_field_authority_containment_revalidation_2026-10-12.json
+          echo "STAGED_DIFF:"
+          git diff --cached --name-status
+          git commit -m "research: freeze corrected H2 event containment field-authority proof"
+          git push origin HEAD:neon-h2-field-authority-containment-proof-2026-10-12
