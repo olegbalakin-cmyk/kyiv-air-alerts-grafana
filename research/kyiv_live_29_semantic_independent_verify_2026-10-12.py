@@ -86,7 +86,7 @@ def main():
     assert len(candidate_set)==count["candidate_rows_with_any_cohort_reference"]
     assert len(expected_pair)==count["distinct_candidate_episode_pairs_any"]
     assert sum(expected_refs.values())==count["raw_references_all_fields"]==len(ledger)
-    assert dict(sorted(expected_refs.items()))==count["raw_references_by_top_level_root"],(expected_refs,count["raw_references_by_top_level_root"])
+    assert {k:v for k,v in sorted(expected_refs.items()) if v}==count["raw_references_by_top_level_root"],(expected_refs,count["raw_references_by_top_level_root"])
     assert len(explicit)==count["candidate_rows_with_explicit_stored_relationship"]
     assert len(classifier)==count["candidate_rows_with_final_classifier_binding"]
     assert len(triggeronly)==count["candidate_rows_trigger_references_only"]
