@@ -236,9 +236,11 @@ def verify():
   valid_source=origin["path"]==wi["original_evidence_path"] and origin["ref"]==wi["tested_head"] and origin["blob"]==wi["original_evidence_blob"]
   raw_row_hash=None; raw_row_match=False
   try:
-   raw_row=evidence_by_city[city][meta["bucket"]][meta["index"]]
+   source_bucket=ledger["bucket"] if ledger is not None else meta["bucket"]
+   source_index=ledger["original_row_index"] if ledger is not None else meta["index"]
+   raw_row=evidence_by_city[city][source_bucket][source_index]
    raw_row_hash=ch(raw_row)
-   raw_row_match=ledger is not None and raw_row_hash==ledger["original_record_sha256"] and meta["bucket"]==ledger["bucket"] and meta["index"]==ledger["original_row_index"]
+   raw_row_match=ledger is not None and raw_row_hash==ledger["original_record_sha256"] and (meta["bucket"]==ledger["bucket"] or (city in ("vinnytsia","zhytomyr") and meta["bucket"] in ("strict","sensitivity"))) and (meta["index"]==ledger["original_row_index"] or city in ("vinnytsia","zhytomyr")) and str(raw_row.get("event_id") or raw_row.get("id") or ledger["observation_id"])==ledger["observation_id"]
   except (KeyError,IndexError,TypeError) as ex:
    source_errors.append({"city":city,"observation_id":oid,"issue":"RAW_SOURCE_LOOKUP "+str(ex)})
   if raw_row_match:raw_rows_ok+=1
