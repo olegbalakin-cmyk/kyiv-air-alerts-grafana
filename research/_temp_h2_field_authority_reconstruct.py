@@ -126,6 +126,10 @@ def evidence_source_id(row,city,bucket,idx,stream):
     if stream: candidates.add(stream09_id({"strict_events":"strict","sensitivity_only_events":"sensitivity","review_events":"review"}[bucket],idx,row))
     return candidates
 
+def metric(v,k):
+    if k in v: return v[k]
+    return v.get("counts",{}).get(k)
+
 def audit():
     export=get(EXPORT); target=get(TARGET); norm=get(NORM); ident=get(IDENTITY); inv=get(PREV_INVENTORY)
     assert ident["classification_identity_v2"]["classification_key_version"]=="attack-event-classification-key-v2"
@@ -161,7 +165,7 @@ def audit():
             p=json.loads(proof_raw)
             if p.get("tested_head")!=w["tested_head"]: raise ValueError("WORKER_HEAD_MISMATCH:"+w["worker"])
             proofs[w["worker"]]=p
-        pcity=proofs[w["worker"]]["cities"][city]
+        pcity=proofs[w["worker"]]["cities"][city] if "cities" in proofs[w["worker"]] else proofs[w["worker"]]
         path="kyiv-air-alerts-grafana/data/explosion_research/"+city+"/final_evidence.json"
         blob=gt("rev-parse",w["tested_head"]+":"+path)
         expected=pcity.get("input_hashes",{}).get("final_evidence_blob") or pcity.get("input_guards",{}).get("evidence_tested_blob")
@@ -172,17 +176,17 @@ def audit():
         if not all(isinstance(row,dict) for _,_,row in seq): raise ValueError("INVALID_ORIGINAL_EVIDENCE_ROW:"+city)
         rows_by_city[city]={(bucket,index):row for bucket,index,row in seq}
         cities[city]["original_evidence_rows"]=len(seq)
-        cities[city]["normalized_observations"]=int(pcity["normalized_observations"])
+        cities[city]["normalized_observations"]=int(metric(pcity,"normalized_observations"))
         input_refs.append({"city":city,"tested_head":w["tested_head"],"original_evidence_path":path,
                            "original_evidence_blob":blob,"original_evidence_sha256":hashlib.sha256(raw).hexdigest(),
                            "worker_proof_ref":w["final_head"],"worker_proof_blob":w["proof_artifact_blob"],
                            "worker_formalizer_blob":w["formalizer_blob"]})
-        if len(seq)!=pcity["evidence_records_read"]:
-            errors.append({"city":city,"error":"ORIGINAL_WORKER_RECORD_COUNT_MISMATCH","observed":len(seq),"expected":pcity["evidence_records_read"]})
+        if len(seq)!=metric(pcity,"evidence_records_read"):
+            errors.append({"city":city,"error":"ORIGINAL_WORKER_RECORD_COUNT_MISMATCH","observed":len(seq),"expected":metric(pcity,"evidence_records_read")})
         counts["original_evidence_rows"]+=len(seq)
-        counts["normalized_observations"]+=int(pcity["normalized_observations"])
-        counts["worker_bound_expected"]+=int(pcity["bound_observations"])
-        counts["worker_unbound_expected"]+=int(pcity["unbound_observations"])
+        counts["normalized_observations"]+=int(metric(pcity,"normalized_observations"))
+        counts["worker_bound_expected"]+=int(metric(pcity,"bound_observations"))
+        counts["worker_unbound_expected"]+=int(metric(pcity,"unbound_observations"))
     cls_by_pair={}
     cls_by_key={}
     class_row_summaries=collections.defaultdict(list)
@@ -312,13 +316,13 @@ def audit():
                  "worker_unresolved_item_index":chosen,"worker_unresolved_candidate_episode_ids":unresolved[chosen].get("candidate_episode_ids") if chosen is not None else None})
             cities[city]["unbound_observations"]+=1
         exceptions.extend(unbound_here)
-        if len(unbound_here)!=int(pc["unbound_observations"]):
-            errors.append({"city":city,"error":"UNBOUND_PARENT_COUNT_DIFFERS_FROM_NORMALIZED_UNBOUND","parent_rows":len(unbound_here),"original_worker_unbound":pc["unbound_observations"]})
+        if len(unbound_here)!=int(metric(pc,"unbound_observations")):
+            errors.append({"city":city,"error":"UNBOUND_PARENT_COUNT_DIFFERS_FROM_NORMALIZED_UNBOUND","parent_rows":len(unbound_here),"original_worker_unbound":metric(pc,"unbound_observations")})
         if len(used)!=len(unresolved):
             errors.append({"city":city,"error":"ORIGINAL_WORKER_UNRESOLVED_LEDGER_NOT_FULLY_JOINED","verified":len(used),"ledger":len(unresolved)})
-        if cities[city]["bound_observations"]!=int(pc["bound_observations"]):
-            errors.append({"city":city,"error":"BOUND_SOURCE_COUNT_CONTRADICTS_WORKER","observed":cities[city]["bound_observations"],"worker":pc["bound_observations"]})
-        if cities[city]["bound_observations"]+cities[city]["unbound_observations"]!=int(pc["normalized_observations"]):
+        if cities[city]["bound_observations"]!=int(metric(pc,"bound_observations")):
+            errors.append({"city":city,"error":"BOUND_SOURCE_COUNT_CONTRADICTS_WORKER","observed":cities[city]["bound_observations"],"worker":metric(pc,"bound_observations")})
+        if cities[city]["bound_observations"]+cities[city]["unbound_observations"]!=int(metric(pc,"normalized_observations")):
             errors.append({"city":city,"error":"NORMALIZED_OBSERVATION_TRANSPORT_NOT_EXPLAINED"})
         parent_mult=collections.Counter((bucket,index) for c,bucket,index in links_by_raw if c==city)
         raw_bound=sum(bool(links_by_raw[(city,b,i)]) for b,i in rows_by_city[city])
