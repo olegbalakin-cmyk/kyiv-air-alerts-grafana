@@ -1,0 +1,17 @@
+name: Temporary H2 Authority Inventory
+on:
+  push:
+    branches: [neon-h2-19542-field-authority-audit-proof-2026-10-12]
+    paths: ['.github/workflows/_temp_h2_authority_inventory.yml']
+permissions:
+  contents: read
+jobs:
+  inventory:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Inspect frozen original evidence and export
+        run: python3 research/_temp_h2_field_authority_probe.py
