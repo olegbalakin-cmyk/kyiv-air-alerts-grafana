@@ -1,0 +1,46 @@
+name: Disposable H1 6863 field authority audit
+on:
+  push:
+    branches: [neon-h1-6863-field-authority-research-2026-10-12]
+    paths:
+      - .github/workflows/neon_h1_6863_field_authority.yml
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Fetch exact Git objects
+        run: |
+          set -euo pipefail
+          for sha in 71cb6f6fbe856cc7b96759310fe9cc9c71cc0453 02ad2e8fadee78442753567bc2d3a540345d8e8a 5d18ef85a66384f189ede5ca5654d750f60f088b 0ae2b596ea38c80793c18884e747dceb66d91307 bd82a6c0a19aca4610a8af6df73a307a88c35bf6 b205d38dbc50bc502d10e682d4ae53491af542ea 79f79b1a7ac610ef7f1093bea214cc44e15b70bd; do
+            git fetch --no-tags --quiet --depth=1 origin "$sha"
+            git cat-file -e "$sha^{commit}"
+          done
+      - name: Independent Python A/B with different hash seeds
+        run: |
+          set -euo pipefail
+          PYTHONHASHSEED=61 python .github/proof/neon_h1_6863_field_authority_audit.py /tmp/h1_A.json > /tmp/h1_A.log
+          PYTHONHASHSEED=97 python .github/proof/neon_h1_6863_field_authority_audit.py /tmp/h1_B.json > /tmp/h1_B.log
+          cmp /tmp/h1_A.json /tmp/h1_B.json
+          cat /tmp/h1_A.log
+          sha256sum /tmp/h1_A.json /tmp/h1_B.json
+          cp /tmp/h1_A.json ./h1_proof_6863.json
+          cp /tmp/h1_A.log ./h1_summary.log
+          printf '{"python_hash_seeds":[61,97],"exact_bytes_equal":true}\n' > ./h1_ab.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: h1-6863-field-authority-audit
+          path: |
+            h1_proof_6863.json
+            h1_summary.log
+            h1_ab.json
+          retention-days: 30
