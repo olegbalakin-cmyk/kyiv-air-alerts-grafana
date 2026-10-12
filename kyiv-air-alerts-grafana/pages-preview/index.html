@@ -136,7 +136,7 @@
           <p>Як розподілялися дні за часом під тривогою та як змінювалися найдовші епізоди.</p>
         </div>
         <div class="control insight-year-control">
-          <label for="burdenYear">Рік</label>
+          <label for="burdenYear">Період</label>
           <select id="burdenYear" aria-label="Рік для графіків структури навантаження"></select>
         </div>
       </div>
@@ -202,9 +202,18 @@
             <h3>Розподіл часу під тривогою за частинами доби</h3>
             <p class="chart-subtitle">100% фактичного часу під тривогою в кожному місяці розкладено на 00–06, 06–12, 12–18 та 18–24 за Europe/Kyiv.</p>
           </div>
-          <div class="control time-profile-compare-control">
-            <label for="daypartYear">Рік</label>
-            <select id="daypartYear" aria-label="Рік для розподілу часу під тривогою за частинами доби"></select>
+          <div class="section-range-controls">
+            <div class="control time-profile-compare-control">
+              <label for="daypartMode">Розподіл</label>
+              <select id="daypartMode" aria-label="Спосіб розподілу часу під тривогою">
+                <option value="four">4 частини доби</option>
+                <option value="daynight">День / вечір і ніч</option>
+              </select>
+            </div>
+            <div class="control time-profile-compare-control">
+              <label for="daypartYear">Рік</label>
+              <select id="daypartYear" aria-label="Рік для розподілу часу під тривогою за частинами доби"></select>
+            </div>
           </div>
         </div>
         <div class="chart-wrap time-profile-chart"><canvas id="daypartChart"></canvas></div>
