@@ -17,7 +17,7 @@ jobs:
         run: |
           set -euo pipefail
           test "$GITHUB_REF_NAME" = "research-casualty-bbc-url-resolution-2026-10-12"
-          test -z "$DATABASE_URL" && test -z "$NEON_DATABASE_URL" && test -z "$PGHOST"
+          test -z "$(printenv DATABASE_URL || true)" && test -z "$(printenv NEON_DATABASE_URL || true)" && test -z "$(printenv PGHOST || true)"
           test ! -e research/google_news_bbc_url_resolution_2026-10-12
           git cat-file -e 8334442092a24f5eace79c1d9212610d33e53655
       - uses: actions/setup-python@v5
