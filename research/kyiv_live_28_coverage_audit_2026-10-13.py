@@ -48,7 +48,7 @@ CONTROL = "176a083e264eec607cdb1ea6"
 
 def sha(b): return hashlib.sha256(b).hexdigest()
 def fmt(x): return json.dumps(x,sort_keys=True,ensure_ascii=False,separators=(",",":"),default=str).encode()
-def git(*args): return subprocess.check_output(["git",*args],stderr=subprocess.PIPE)
+def git(*args,**kwargs): return subprocess.check_output(["git",*args],stderr=subprocess.PIPE,**kwargs)
 def iso(s): return dt.datetime.fromisoformat(str(s).replace("Z","+00:00")).astimezone(dt.timezone.utc)
 def us(s): return iso(s).isoformat().replace("+00:00","Z")
 def rowhash(x): return sha(fmt(x))
