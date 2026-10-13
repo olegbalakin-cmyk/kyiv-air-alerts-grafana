@@ -247,10 +247,10 @@ def main():
                 z=cur.fetchone()
                 if z[0]!=DB or z[2]!="on" or z[4]!="repeatable read":
                     fail("READONLY_TRANSACTION_IDENTITY_GATE_FAILED")
-                cur.execute("SELECT ssl FROM pg_stat_ssl WHERE pid=pg_backend_pid()")
-                ssl=cur.fetchone()
-                if not ssl or not ssl[0]:
-                    fail("REPLICA_TLS_NOT_PROVEN")
+                # Neon proxy can terminate TLS before pg_stat_ssl sees the connection.
+                # Verify actual libpq client transport, not PostgreSQL backend SSL state.
+                if not bool(conn.pgconn.ssl_in_use):
+                    fail("REPLICA_CLIENT_TLS_NOT_PROVEN")
                 artifact_01.update({"actual_connection_verified":True,"driver_actual_host":conn.info.host,"driver_port":conn.info.port,"connected_database":z[0],"connected_user":z[1],"server_address":z[10],"server_port":z[11],"ssl_in_use":True})
                 put("01_replica_identity_and_access.json",artifact_01)
                 a2={"snapshot_id":z[7],"utc_observed_at":fmt(z[8]),"transaction_started_at_utc":fmt(z[9]),"transaction_read_only":z[2],"default_transaction_read_only":z[3],"isolation":z[4],"statement_timeout":z[5],"lock_timeout":z[6],"query_scope":"29 frozen Kyiv identities only","sql_statement_kind":"SELECT and transaction/session controls only"}
