@@ -1,0 +1,49 @@
+name: Kyiv live 28 frozen coverage forensic A/B
+on:
+  push:
+    branches:
+      - research-kyiv-live-28-frozen-coverage-2026-10-13
+    paths:
+      - .github/workflows/research-kyiv-live-28-frozen-coverage.yml
+permissions:
+  contents: read
+  actions: read
+jobs:
+  forensic:
+    runs-on: ubuntu-latest
+    timeout-minutes: 24
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - name: Fetch frozen objects
+        run: |
+          git fetch --no-tags origin 92d57bbbfad60e6c09bb92372b1e84f38fa6ced4 2648aea950f489e5547869ca422e463dda84648d multicity-wip-2026-09-16
+          git cat-file -e 92d57bbbfad60e6c09bb92372b1e84f38fa6ced4:kyiv-air-alerts-grafana/data/explosion_review_queue.json
+      - name: Verify accepted readback ZIP without new SQL
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          python3 research/kyiv_live_28_coverage_audit_2026-10-13.py --snapshot frozen_input/accepted_29_readback.zip --fetch-snapshot
+      - name: Reconstruct primary A
+        run: |
+          python3 research/kyiv_live_28_coverage_audit_2026-10-13.py --snapshot frozen_input/accepted_29_readback.zip --out kyiv_28_results/A
+      - name: Reconstruct primary B independently from source
+        run: |
+          python3 research/kyiv_live_28_coverage_audit_2026-10-13.py --snapshot frozen_input/accepted_29_readback.zip --out kyiv_28_results/B
+      - name: Compare deterministic A/B byte outputs
+        run: |
+          diff -qr kyiv_28_results/A kyiv_28_results/B
+          echo PRIMARY_A_B_BYTE_IDENTICAL_PASS
+      - name: Run separate original-input semantic verifier
+        run: |
+          python3 research/kyiv_live_28_coverage_independent_verify_2026-10-13.py
+      - name: Upload compact audit evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: kyiv-live-28-frozen-coverage-forensic-a-b
+          path: kyiv_28_results/A/
+          if-no-files-found: warn
+          retention-days: 30
