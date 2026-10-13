@@ -21,11 +21,18 @@ jobs:
         run: |
           git fetch --no-tags origin 92d57bbbfad60e6c09bb92372b1e84f38fa6ced4 2648aea950f489e5547869ca422e463dda84648d multicity-wip-2026-09-16
           git cat-file -e 92d57bbbfad60e6c09bb92372b1e84f38fa6ced4:kyiv-air-alerts-grafana/data/explosion_review_queue.json
-      - name: Verify accepted readback ZIP without new SQL
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
+      - name: Download original accepted artifact from prior trusted run
+        uses: actions/download-artifact@v4
+        with:
+          name: kyiv-live-29-readonly-canonical-one-snapshot
+          run-id: 38356854594
+          github-token: ${{ github.token }}
+          path: frozen_input
+      - name: Verify exact accepted archived snapshot identity
         run: |
-          python3 research/kyiv_live_28_coverage_audit_2026-10-13.py --snapshot frozen_input/accepted_29_readback.zip --fetch-snapshot
+          mkdir -p frozen_input
+          python3 -c 'import pathlib,hashlib; p=next(x for x in pathlib.Path("frozen_input").glob("**/04_canonical_readback_redacted.json")); assert hashlib.sha256(p.read_bytes()).hexdigest()=="61adf25c29fbf819e3823430f473032acc117cc3e2aa86d40a0b8860c7b9ff5a"'
+          python3 -c 'import pathlib,zipfile; z=zipfile.ZipFile("frozen_input/accepted_29_readback.zip","w",compression=zipfile.ZIP_DEFLATED); files=sorted(pathlib.Path("frozen_input").glob("**/*")); [z.write(p,arcname=p.name) for p in files if p.is_file() and p.name!="accepted_29_readback.zip"]; z.close()'
       - name: Reconstruct primary A
         run: |
           python3 research/kyiv_live_28_coverage_audit_2026-10-13.py --snapshot frozen_input/accepted_29_readback.zip --out kyiv_28_results/A
