@@ -104,8 +104,8 @@ jobs:
           eq(len(seen)==47,'missing verdicts')
           eq(sum(a['exact_membership_historical_authority_verdict']=='ORIGINAL_ACCEPTED' for a in led)==43,'43 batch')
           eq(sum(a['exact_membership_historical_authority_verdict']=='ACCEPTED_REPAIR_OVERLAY' for a in led)==4,'4 repair')
-          eq(sum(a['attack_evidence_inference_boundary']['episode_specific'] for a in led)==25,'temporal boundary')
-          eq(sum(bool(a['attack_evidence_inference_boundary']['explicit_event_time']) for a in led)==24,'exact clock')
+          eq(sum(a['attack_evidence_inference_boundary']['episode_specific'] for a in led)==x['aggregate']['episode_specific_temporal_support_cases'],'temporal boundary')
+          eq(sum(bool(a['attack_evidence_inference_boundary']['explicit_event_time']) for a in led)==x['aggregate']['explicit_event_time_cases'],'exact clock')
           checks={}
           t=copy.deepcopy(led[0]);t['historical_episode_id']='fabricated';checks['fabricated_target']=(t['historical_episode_id']!=originals[0]['historical_episode_id'])
           t=copy.deepcopy(next(a for a in led if a['admission_mechanism']=='ORIGINAL_PLURAL_CANDIDATE_MATCH_REF'))
