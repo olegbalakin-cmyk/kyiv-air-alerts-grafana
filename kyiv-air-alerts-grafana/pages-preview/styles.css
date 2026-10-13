@@ -46,3 +46,31 @@
   .insight-year-control{width:100%;min-width:100%;flex-basis:auto}
   .insight-chart{height:330px}
 }
+
+
+/* Reusable individual chart/section sharing controls; no data changes. */
+.chart-export-row,.table-export-row,.kpi-export-row{gap:7px}
+.share-action-button{
+  display:inline-flex;align-items:center;justify-content:center;gap:6px;
+  border:1px solid #33404c;background:#0c1218;color:#b8c4cf;
+  border-radius:7px;padding:5px 9px;min-height:28px;flex-shrink:0;
+  font:inherit;font-size:12px;line-height:1.1;white-space:nowrap;cursor:pointer;
+  transition:border-color .15s ease,color .15s ease,background .15s ease
+}
+.share-action-button:hover{border-color:#62a0ea;color:#edf3f8;background:#111b24}
+.share-action-button:focus-visible{outline:2px solid #79bfff;outline-offset:2px}
+.share-action-button[disabled]{opacity:.72;cursor:default}
+.share-action-button svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.shareable-block{scroll-margin-top:28px}
+.shareable-block:target{outline:2px solid #62a0ea;outline-offset:5px}
+.shareable-section-heading{gap:12px;flex-wrap:wrap}
+.shareable-section-heading>.share-action-button{margin-left:auto;align-self:center}
+.kpi-card{position:relative}
+.kpi-card .share-kpi-button{position:absolute;top:8px;right:8px;padding:5px}
+.kpi-card .share-kpi-button .share-action-label{display:none}
+.kpi-card .kpi-label{padding-right:24px}
+.methodology .share-methodology-button{float:right;margin-left:12px;margin-bottom:8px}
+@media(max-width:620px){
+  .share-action-button .share-action-label{display:none}
+  .shareable-section-heading>.share-action-button{margin-left:0}
+}

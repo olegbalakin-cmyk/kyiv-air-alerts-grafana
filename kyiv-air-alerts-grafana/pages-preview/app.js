@@ -611,6 +611,159 @@ function setupCsvExports() {
   }
 }
 
+
+/*
+ * Stable block permalinks: bookmark a section, chart, KPI, table or methodology
+ * while retaining current URL query state. They always show the latest public
+ * data, not a frozen image. No external sharing service is required.
+ */
+function buildBlockShareUrl(pageHref, blockId) {
+  const url = new URL(pageHref);
+  url.hash = blockId;
+  return url.href;
+}
+function findSharedBlock(hash, doc = document) {
+  if (!/^#[A-Za-z][A-Za-z0-9_-]*$/.test(hash || "")) return null;
+  const target = doc.getElementById(hash.slice(1));
+  if (!target || !target.classList.contains("shareable-block") || target.closest(".hidden")) return null;
+  return target;
+}
+function shareLinkIcon() {
+  return '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.7 10.6 6.6-4.1m-6.6 6.9 6.6 4.1"/></svg>';
+}
+async function copyBlockShareUrl(url) {
+  if (navigator.clipboard?.writeText) {
+    await navigator.clipboard.writeText(url);
+    return;
+  }
+  // Browsers without the async clipboard API may still support copying.
+  const field = document.createElement("textarea");
+  field.value = url;
+  field.setAttribute("readonly","");
+  field.style.position = "fixed";
+  field.style.opacity = "0";
+  document.body.appendChild(field);
+  field.select();
+  try {
+    if (!document.execCommand("copy")) throw new Error("Copy unsupported");
+  } finally {
+    field.remove();
+  }
+}
+function shareButtonForBlock(block, title) {
+  const button = document.createElement("button");
+  button.type = "button";
+  button.className = "share-action-button";
+  button.dataset.shareTarget = block.id;
+  button.title = tr("Поділитися посиланням на цей блок","Share a link to this block");
+  button.setAttribute("aria-label",tr("Поділитися: ","Share: ") + title);
+  button.innerHTML = shareLinkIcon() + '<span class="share-action-label"></span>';
+  const span = button.querySelector(".share-action-label");
+  const reset = () => { button.disabled=false; span.textContent=tr("Поділитися","Share"); };
+  reset();
+  button.addEventListener("click",async () => {
+    updateUrl();
+    const url = buildBlockShareUrl(location.href,block.id);
+    button.disabled=true;
+    try {
+      if (typeof navigator.share === "function") {
+        await navigator.share({title,url});
+        span.textContent=tr("Готово","Done");
+      } else {
+        await copyBlockShareUrl(url);
+        span.textContent=tr("Скопійовано","Copied");
+      }
+    } catch (err) {
+      if (err?.name === "AbortError") { reset(); return; }
+      try {
+        await copyBlockShareUrl(url);
+        span.textContent=tr("Скопійовано","Copied");
+      } catch (_) {
+        span.textContent=tr("Не вдалося","Failed");
+      }
+    }
+    window.setTimeout(reset,1800);
+  });
+  return button;
+}
+function makeShareable(block, id) {
+  if (!block.id) block.id=id;
+  block.classList.add("shareable-block");
+  if (!block.hasAttribute("tabindex")) block.setAttribute("tabindex","-1");
+  return block;
+}
+function setupShareButtons() {
+  // Every chart has a share control next to its existing CSV export.
+  document.querySelectorAll(".chart-card").forEach(card => {
+    const canvas=card.querySelector("canvas[id]");
+    const wrap=canvas?.closest(".chart-wrap");
+    if (!canvas || !wrap || card.querySelector(".share-action-button")) return;
+    makeShareable(card,"block-"+canvas.id);
+    let row=card.querySelector(".chart-export-row");
+    if (!row) {
+      row=document.createElement("div");
+      row.className="chart-export-row";
+      let before=wrap;
+      while (before.parentElement && before.parentElement!==card) before=before.parentElement;
+      if (before.parentElement!==card) return;
+      card.insertBefore(row,before);
+    }
+    const title=card.querySelector("h3")?.textContent?.trim()
+      || card.closest(".comparison-section")?.querySelector("h2")?.textContent?.trim()
+      || tr("Графік","Chart");
+    row.appendChild(shareButtonForBlock(card,title));
+  });
+
+  // Also share a whole section, keeping its own period/date controls in URL.
+  document.querySelectorAll(".comparison-section[id]").forEach(section => {
+    const heading=section.querySelector(":scope > .section-heading");
+    if (!heading || heading.querySelector(".share-action-button")) return;
+    makeShareable(section,section.id);
+    const title=heading.querySelector("h2")?.textContent?.trim() || tr("Розділ","Section");
+    heading.classList.add("shareable-section-heading");
+    heading.appendChild(shareButtonForBlock(section,title));
+  });
+
+  const table=$("allCitiesTable")?.closest(".table-panel");
+  const tableRow=table?.querySelector(".table-export-row");
+  if (table && tableRow && !tableRow.querySelector(".share-action-button")) {
+    makeShareable(table,"block-allCitiesTable");
+    tableRow.appendChild(shareButtonForBlock(table,tr("Таблиця всіх міст","All cities table")));
+  }
+  const grid=document.querySelector(".kpi-grid");
+  const kpiRow=document.querySelector(".kpi-export-row");
+  if (grid && kpiRow && !kpiRow.querySelector(".share-action-button")) {
+    makeShareable(grid,"block-kpis");
+    kpiRow.appendChild(shareButtonForBlock(grid,tr("Основні показники","Key indicators")));
+  }
+  document.querySelectorAll(".kpi-card").forEach(card => {
+    const metric=card.querySelector("strong[id]");
+    if (!metric || card.querySelector(".share-action-button")) return;
+    makeShareable(card,"block-"+metric.id);
+    const title=card.querySelector(".kpi-label")?.textContent?.trim() || tr("Показник","Metric");
+    const button=shareButtonForBlock(card,title);
+    button.classList.add("share-kpi-button");
+    card.appendChild(button);
+  });
+  const method=$("methodologySection");
+  if (method && !method.querySelector(".share-action-button")) {
+    makeShareable(method,method.id);
+    const button=shareButtonForBlock(method,tr("Методологія","Methodology"));
+    button.classList.add("share-methodology-button");
+    method.insertBefore(button,method.firstChild);
+  }
+}
+function restoreSharedBlock() {
+  const block=findSharedBlock(location.hash);
+  if (!block) return false;
+  window.requestAnimationFrame(() => window.requestAnimationFrame(() => {
+    if (findSharedBlock(location.hash)!==block) return;
+    block.scrollIntoView({behavior:"auto",block:"start"});
+    block.focus({preventScroll:true});
+  }));
+  return true;
+}
+
 function isPartialPeriod(row) {
   return Boolean(row?.is_partial_period);
 }
@@ -1279,7 +1432,8 @@ function updateUrl() {
   ]) {
     if ($(id)?.value) params.set(param, $(id).value);
   }
-  history.replaceState(null, "", `${location.pathname}?${params.toString()}`);
+  // Preserve deep-link anchors when the selected city, period or filter changes.
+  history.replaceState(null, "", `${location.pathname}?${params.toString()}${location.hash || ""}`);
 }
 
 
@@ -3266,8 +3420,11 @@ async function init() {
   renderComparison();
   renderAllCitiesTable();
   setupCsvExports();
+  setupShareButtons();
   updateUrl();
-  maybeStartIntroTour();
+  window.addEventListener("hashchange",restoreSharedBlock);
+  // A directly shared block must be visible instead of covered by the tour.
+  if (!restoreSharedBlock()) maybeStartIntroTour();
 }
 
 applyStaticLanguage();
