@@ -1,0 +1,41 @@
+name: Kyiv live 29 replica canonical audit (one-off read-only)
+on:
+  push:
+    branches:
+      - research-kyiv-live-29-replica-canonical-2026-10-12
+    paths:
+      - .github/workflows/kyiv-live-29-replica-canonical-2026-10-12.yml
+permissions:
+  contents: read
+jobs:
+  canonical-audit:
+    if: github.ref == 'refs/heads/research-kyiv-live-29-replica-canonical-2026-10-12'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      AUDIT_SOURCE_SECRET: ${{ secrets.PHASE1_PROD_SHADOW_DATABASE_URL }}
+      AUDIT_WRITER_BRANCH: ${{ vars.PHASE1_PROD_SHADOW_BRANCH_ID }}
+      AUDIT_EXPECTED_REPLICA: ep-calm-rice-b5073ypp.c-7.us-east-2.aws.neon.tech
+      PYTHONUNBUFFERED: '1'
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+          fetch-depth: 1
+      - name: Install isolated PostgreSQL client
+        run: |
+          python3 -m pip install --disable-pip-version-check --no-input 'psycopg[binary]==3.2.12'
+      - name: Execute pinned read-only replica snapshot
+        run: |
+          python3 research/kyiv_live_29_replica_capture_2026-10-12.py
+      - name: Independently verify same frozen readback
+        run: |
+          python3 research/kyiv_live_29_replica_independent_verify_2026-10-12.py
+      - name: Upload bounded sanitized artifacts
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: kyiv-live-29-readonly-canonical-one-snapshot
+          path: replica_audit_results/
+          if-no-files-found: warn
+          retention-days: 30
