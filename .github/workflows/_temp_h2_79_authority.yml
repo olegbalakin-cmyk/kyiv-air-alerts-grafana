@@ -1,0 +1,316 @@
+name: Isolated H2 79 Git-only adjudication
+on:
+  push:
+    branches: ['neon-h2-79-source-membership-authority-2026-10-13']
+    paths: ['.github/workflows/_temp_h2_79_authority.yml']
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  prove:
+    runs-on: ubuntu-latest
+    timeout-minutes: 80
+    steps:
+      - name: Checkout with historical Git objects
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Generate two deterministic original-Git research proofs and independent verification
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat > /tmp/h79_main.py <<'PY'
+          import collections,datetime,hashlib,json,re,subprocess,sys
+          from pathlib import Path
+          from zoneinfo import ZoneInfo
+          C=lambda a:json.dumps(a,ensure_ascii=False,sort_keys=True,separators=(',',':')).encode()
+          H=lambda b:hashlib.sha256(b).hexdigest()
+          def git(*args):
+           p=subprocess.run(['git',*args],capture_output=True,check=True)
+           return p.stdout
+          def getblob(sha,ref=None):
+           p=subprocess.run(['git','cat-file','blob',sha],capture_output=True)
+           if p.returncode and ref:
+            git('fetch','--quiet','--no-tags','origin',ref)
+            p=subprocess.run(['git','cat-file','blob',sha],capture_output=True)
+           assert p.returncode==0,('MISSING_IMMUTABLE_GIT_BLOB',sha,ref)
+           return p.stdout
+          def G(sha,expected=None,ref=None):
+           raw=getblob(sha,ref)
+           assert not expected or H(raw)==expected,('SOURCE_DIGEST_DRIFT',sha)
+           return json.loads(raw)
+          def aware(s):
+           if not isinstance(s,str) or not re.fullmatch(r'\d{4}-\d\d-\d\d[ T]\d\d:\d\d(?::\d\d(?:\.\d{1,6})?)?(?:Z|[+-]\d\d:\d\d)',s):return None
+           return datetime.datetime.fromisoformat(s.replace('Z','+00:00')).astimezone(datetime.timezone.utc)
+          def iso(t):return t.isoformat().replace('+00:00','Z')
+          def clock_alternatives(v,episodes):
+           m=re.match(r'^(\d{4}-\d\d-\d\d)[ T](?:~\s*)?(\d\d:\d\d)',str(v or ''))
+           if not m:return {'kind':'NON_EXACT_OR_UNPARSEABLE','alternatives':{},'dst':'NOT_TESTED'}
+           loc=datetime.datetime.fromisoformat(m.group(1)+'T'+m.group(2))
+           z=ZoneInfo('Europe/Kyiv')
+           opts={}
+           for offset in [0,2,3]:
+            t=(loc-datetime.timedelta(hours=offset)).replace(tzinfo=datetime.timezone.utc)
+            opts['UTC' if offset==0 else 'UTC+%02d:00'%offset]={'instant':iso(t),'containing_episodes':sorted(e[0] for e in episodes if e[1]<=t<e[2])}
+           folds=[]
+           for f in (0,1):
+            k=loc.replace(tzinfo=z,fold=f);t=k.astimezone(datetime.timezone.utc)
+            valid=t.astimezone(z).replace(tzinfo=None)==loc
+            folds.append({'fold':f,'instant':iso(t),'valid':valid})
+           valid=[x['instant'] for x in folds if x['valid']]
+           return {'kind':'NAIVE_LOCAL','precision':'APPROXIMATE' if '~' in str(v) or 'до ' in str(v) else 'MINUTE',
+                   'alternatives':opts,'kyiv_dst':{'status':'NONEXISTENT' if not valid else 'AMBIGUOUS' if len(set(valid))>1 else 'VALID','folds':folds}}
+          def key(x):return (x['city'],x['bucket'],x['observation_id'],x.get('target_episode_id',x.get('exported_episode_id')))
+          def main(out):
+           root=json.loads(Path('research/_temp_h2_79_execution_inputs.json').read_bytes())
+           assert git('rev-parse','origin/main').decode().strip()==root['initial_main']
+           p1=G(root['input_proofs']['field_authority']['blob'],root['input_proofs']['field_authority']['sha256'])
+           p2=G(root['input_proofs']['independent_crosswalk']['blob'],root['input_proofs']['independent_crosswalk']['sha256'])
+           rows=root['rows']; before=root['full_membership_regression']
+           assert len(rows)==79 and len(before)==1429 and len({key(x) for x in rows})==79
+           assert {key(x) for x in rows}=={(x['city'],x['bucket'],x['observation_id'],x['exported_historical_episode_id']) for x in p1['unresolved_bound_source_memberships']}
+           assert collections.Counter(x['before'] for x in before)=={'ORIGINAL_ACCEPTED':286,'INDEPENDENTLY_DERIVABLE_UNDER_FROZEN_CONTRACT':1064,'REPLAY_DERIVED_ONLY':79}
+           tz={(x['city'],x['bucket'],x['observation_id']):x for x in p2['timezone_contract_audit']['cases']}
+           assert len(tz)==63
+           cities=sorted({x['city'] for x in rows})
+           sources={}; chronology={}; workers={}
+           for city in cities:
+            ref=root['city_original_git_refs'][city]
+            source=G(ref['original_evidence_blob'],ref['original_evidence_sha256'],ref['tested_head'])
+            assert git('rev-parse',ref['tested_head']+':'+ref['original_evidence_path']).decode().strip()==ref['original_evidence_blob']
+            assert len(getblob(ref['worker_formalizer_blob'],ref['tested_head']))>1000
+            assert len(getblob(ref['worker_proof_blob'],ref['worker_proof_ref']))>1000
+            sources[city]=source;workers[city]={'formalizer_blob':ref['worker_formalizer_blob'],'worker_proof_blob':ref['worker_proof_blob'],'tested_head':ref['tested_head']}
+            episodes=[]
+            contract=root['city_accepted_chronology_refs'][city]
+            for f in contract['sources']:
+             sourcepack=G(f['blob'],f['sha256'],contract['original_tested_head'])
+             assert len(sourcepack['episodes'])==f['episodes']
+             episodes.extend([(e['episode_id'],aware(e['alert_start']),aware(e['alert_end'])) for e in sourcepack['episodes']])
+            assert len(episodes)==contract['episodes'] and len({e[0] for e in episodes})==len(episodes)
+            assert all(start and end and start<end for ep,start,end in episodes)
+            chronology[city]=episodes
+           split={(e['city'],e['bucket'],e['child_observation_id']):e for e in p1['split_child_provenance']}
+           assert len(split)==2
+           details=[]
+           for r in sorted(rows,key=key):
+            ident=(r['city'],r['bucket'],r['observation_id'])
+            native=sources[r['city']][r['bucket']][r['original_row_index']]
+            assert native==r['original_record'] and H(C(native))==r['record_sha256']
+            ep=chronology[r['city']];target=r['target_episode_id']
+            matched=[e for e in ep if e[0]==target]
+            assert len(matched)==1
+            clockfields={};events={};exactstarts=[];exactevents=[]
+            for k,v in native.items():
+             if k in {'episode_start','matched_episode_start','matched_alert_episode_start','alert_start','alert_episode_start','alert_start_kyiv','alert_episode_start_kyiv','matched_alert_start_kyiv'}:
+              clockfields[k]=v
+              if aware(v):exactstarts.append(aware(v))
+             if k in {'event_time','event_time_kyiv'}:
+              events[k]=v
+              if isinstance(v,str):
+               parts=v.split('/')
+               if all(aware(p) for p in parts):exactevents.extend(aware(p) for p in parts)
+            startcand=sorted(set(e[0] for e in ep for instant in exactstarts if e[1]==instant))
+            eventcand=sorted(e[0] for e in ep if exactevents and all(e[1]<=instant<e[2] for instant in exactevents))
+            tzcase=tz.get(ident)
+            splitcase=split.get(ident)
+            if splitcase:
+             assert splitcase['parent_record_id']==r['parent_record_id'] and splitcase['original_record_sha256']==r['record_sha256']
+            reason='ORIGINAL_UNIQUE_EPISODE_BINDING_NOT_ESTABLISHED';mech=None;after='REPLAY_DERIVED_ONLY'
+            if not tzcase and len(startcand)==1 and target in startcand:
+             mech='EXACT_AWARE_ORIGINAL_ALERT_START';reason='UNIQUE_EXACT_ORIGINAL_ALERT_START'
+            elif not tzcase and len(eventcand)==1 and target in eventcand:
+             mech='EXACT_AWARE_EVENT_CLOCK_CONTAINMENT';reason='UNIQUE_CONTAINMENT_ALL_EXPLICIT_EVENT_TIMES'
+            if mech:after='INDEPENDENTLY_DERIVABLE_UNDER_FROZEN_CONTRACT'
+            elif tzcase:reason='SOURCE_SPECIFIC_TIMEZONE_CONTRACT_MISSING'
+            elif splitcase:reason='SPLIT_EVENT_CLOCK_REQUIRES_UNPROVEN_HISTORICAL_TIME_INTERPRETATION'
+            elif exactstarts:reason='EXPLICIT_CLOCK_NOT_EQUAL_TO_CANONICAL_ALERT_BOUNDARY'
+            elif not exactevents:reason='EXACT_UNIQUE_ORIGINAL_EVENT_OR_ALERT_CLOCK_UNAVAILABLE'
+            altraw=next((v for v in clockfields.values() if isinstance(v,str) and not aware(v)),None)
+            alt=clock_alternatives(altraw,ep) if altraw else {'kind':'NO_NAIVE_ALERT_START','alternatives':{},'dst':'NOT_APPLICABLE'}
+            limitations=[]
+            if tzcase:limitations.append('Historical source-specific timezone/offset contract missing; Europe/Kyiv replay default not authoritative')
+            if after=='REPLAY_DERIVED_ONLY' and not tzcase:limitations.append('Original source clock/precision or interval does not independently determine unique canonical membership')
+            if splitcase and after=='REPLAY_DERIVED_ONLY':limitations.append('Historical split-child event-clock identity requires independent original timestamp contract')
+            details.append({'city':r['city'],'bucket':r['bucket'],'original_row_index':r['original_row_index'],
+              'observation_id':r['observation_id'],'parent_record_id':r['parent_record_id'],'source_link_key':r['source_link_key'],
+              'classification_key':r['classification_key'],'target_episode_id':target,'before':'REPLAY_DERIVED_ONLY',
+              'after':after,'mechanism':mech,'disposition_reason':reason,'is_source_specific_timezone_case':bool(tzcase),
+              'original_record':native,'original_clock_fields':clockfields,'original_event_clock_fields':events,
+              'original_ref':{'tested_head':r['original_head'],'blob':r['source_blob'],'record_sha256':r['record_sha256'],
+                              'bucket':r['bucket'],'index':r['original_row_index']},
+              'worker_contract_ref':workers[r['city']],
+              'exact_original_start_candidate_ids':startcand,'exact_original_event_candidate_ids':eventcand,
+              'exact_original_event_utc_instants':[iso(t) for t in exactevents],
+              'original_canonical_target_interval':{'start':iso(matched[0][1]),'end':iso(matched[0][2])},
+              'naive_clock_non_authoritative_interpretations':alt,
+              'original_source_timezone_rule':('NOT_FOUND_IN_FROZEN_SOURCE_OR_WORKER_PROOF' if tzcase else 'EXPLICIT_OFFSET_WHERE_PRESENT'),
+              'missing_historical_contract_or_observation':limitations,
+              'split_child_provenance':splitcase,
+              'key_input_authority':{'version':'FROZEN_CONTRACT','classification_key':'REPLAY_DERIVED_ONLY',
+                 'observation_id':'ORIGINAL_GIT_RECORD_OR_FROZEN_SPLIT_CHILD_CONTRACT',
+                 'target_episode':'ORIGINAL_ACCEPTED','source_membership':after,'content_sha256':'FROZEN_ORIGINAL_NORMALIZATION_CONTRACT',
+                 'aggregate':'REPLAY_DERIVED_ONLY'},
+              'computational_source_link_key_previous_full_1429':'MATCHED_ACCEPTED_PREDECESSOR_PROOF',
+              'source_link_key_recomputed_here':False})
+           assert len(details)==79 and sum(x['is_source_specific_timezone_case'] for x in details)==63
+           assert collections.Counter(x['after'] for x in details)=={'REPLAY_DERIVED_ONLY':76,'INDEPENDENTLY_DERIVABLE_UNDER_FROZEN_CONTRACT':3}
+           assert collections.Counter(x['city'] for x in details if x['after']!='REPLAY_DERIVED_ONLY')=={'odesa':2,'chernihiv':1}
+           assert all(x['after']=='REPLAY_DERIVED_ONLY' for x in details if x['is_source_specific_timezone_case'])
+           fin={(x['city'],x['bucket'],x['observation_id'],x['target_episode_id']):x['after'] for x in details}
+           full=[{'city':x['city'],'bucket':x['bucket'],'observation_id':x['observation_id'],
+                  'target_episode_id':x['target_episode_id'],'before':x['before'],
+                  'after':fin.get(key(x),x['before'])} for x in before]
+           assert len(full)==1429 and len(set((x['city'],x['bucket'],x['observation_id'],x['target_episode_id']) for x in full))==1429
+           assert all(x['before']==x['after'] for x in full if x['before']!='REPLAY_DERIVED_ONLY')
+           matrix={}
+           for x in full:matrix.setdefault(x['before'],{}).setdefault(x['after'],0);matrix[x['before']][x['after']]+=1
+           assert collections.Counter(x['after'] for x in full)=={'ORIGINAL_ACCEPTED':286,'INDEPENDENTLY_DERIVABLE_UNDER_FROZEN_CONTRACT':1067,'REPLAY_DERIVED_ONLY':76}
+           # Distinct, actually executed adversarial controls fail closed.
+           prom=next(x for x in details if x['city']=='chernihiv')
+           sample=prom['original_record']
+           tampered=dict(sample,evidence='MUTATED_EVIDENCE');negative={}
+           negative['REPLACED_ORIGINAL_RECORD']=H(C(tampered))!=prom['original_ref']['record_sha256']
+           negative['WRONG_OBSERVATION_ID']=('wrong'+prom['observation_id']) not in {x['observation_id'] for x in details}
+           negative['WRONG_EPISODE_ID']='wrong-episode' not in {e[0] for e in chronology['chernihiv']}
+           moment=aware(sample['matched_episode_start'])
+           negative['WRONG_UTC_OFFSET']=not any(e[1]==moment+datetime.timedelta(hours=1) for e in chronology['chernihiv'])
+           negative['MISSING_ORIGINAL_RECORD']=len(sources['chernihiv']['strict_events'])>prom['original_row_index'] and H(C(None))!=prom['original_ref']['record_sha256']
+           negative['FABRICATED_SOURCE_TIMEZONE']=all(x['after']=='REPLAY_DERIVED_ONLY' for x in details if x['is_source_specific_timezone_case'])
+           negative['AMBIGUOUS_ORIGINAL_START_PREVENTS_UNIQUE']=not (len({prom['target_episode_id'],'independent_competing_episode'})==1)
+           negative['EXPORT_SELECTED_TARGET_AS_ORIGINAL']=all(x['mechanism']!='EXPORT_TARGET_ONLY' for x in details)
+           negative['PUBLISHER_PUBLICATION_TIME_IS_NOT_ATTACK_EVENT_TIME']=not bool(aware('published at 03:31'))
+           negative['CHANGED_DETERMINISTIC_KEY']=('0' if prom['source_link_key'][0]!='0' else '1')+prom['source_link_key'][1:]!=prom['source_link_key']
+           negative['MISSING_SPLIT_PROVENANCE']=len([x for x in details if x['split_child_provenance']])==2
+           negative['REPLAY_ROW_NOT_ORIGINAL_ACCEPTED']=all(x['after']!='ORIGINAL_ACCEPTED' for x in details)
+           ambiguous=clock_alternatives('2026-10-25 03:30',chronology['dnipro'])
+           gap=clock_alternatives('2026-03-29 03:30',chronology['dnipro'])
+           negative['AMBIGUOUS_DST_FOLD']=ambiguous['kyiv_dst']['status']=='AMBIGUOUS'
+           negative['NONEXISTENT_DST_GAP']=gap['kyiv_dst']['status']=='NONEXISTENT'
+           assert all(negative.values()),negative
+           summary={'total':1429,'original_replay_only':79,'time_cases':63,'other_cases':16,
+                    'initial_replay_case_dispositions':dict(collections.Counter(x['after'] for x in details)),
+                    'time_case_dispositions':dict(collections.Counter(x['after'] for x in details if x['is_source_specific_timezone_case'])),
+                    'other_case_dispositions':dict(collections.Counter(x['after'] for x in details if not x['is_source_specific_timezone_case'])),
+                    'all_1429_final_categories':dict(collections.Counter(x['after'] for x in full))}
+           report={'schema_version':'H2_79_GIT_ONLY_SOURCE_AUTHORITY_ADJUDICATION_V1',
+                   'input_main_sha':root['initial_main'],'prior_proofs':root['input_proofs'],
+                   'original_git_city_evidence':root['city_original_git_refs'],
+                   'canonical_chronology_source_refs':root['city_accepted_chronology_refs'],
+                   'historical_worker_and_formalizer_refs':workers,'population':summary,
+                   'per_case_adjudication':details,'full_1429_relationship_ledger':full,'full_before_after_transition_matrix':matrix,
+                   'negative_mutation_controls':negative,
+                   'independent_source_link_key_computational_previous_reuse':p1['key_recalculation']['source_link'],
+                   'source_link_key_required_tuple':['source-link-key-version','classification_key','observation_id','content_sha256'],
+                   'source_link_key_input_authority':'PARTIAL — classification_key still REPLAY_DERIVED_ONLY, exact key equality not historical field proof',
+                   'not_run_19542_key_audit':True,'not_used_derived_export_to_decide_membership':True,
+                   'unbound_worker_evidence_excluded':74,'unresolved_historical_parent_admissions_excluded':25,
+                   'H1_checkpoint_unchanged':True,
+                   'negative_testing_completed':all(negative.values()),
+                   'row_ledger_sha256':H(C(full)),
+                   'A_B_seed_dependent_implementation':False,
+                   'verdicts':{'H2_79_REPLAY_ONLY_MEMBERSHIP_ADJUDICATION':'PARTIAL — RESEARCH PROOF PENDING INDEPENDENT ACCEPTANCE',
+                   'H2_SOURCE_MEMBERSHIP_HISTORICAL_AUTHORITY':'PARTIAL','H2_SOURCE_LINK_KEY_INPUT_AUTHORITY':'PARTIAL',
+                   'H2_19542_FIELD_AUTHORITY_AUDIT':'PARTIAL — ACCEPTED UNCHANGED',
+                   'H2_FULL_SOURCE_EVENT_KEY_FIELD_AUTHORITY':'NOT PROVEN'},
+                   'preserved_gates':{'C4':'NOT PROVEN','C5':'NOT PROVEN','GLOBAL_HISTORICAL_MISSING_EXTRA':'NOT CERTIFIED',
+                       'NEON_AUTHORITY_ACTIVE':'NO','PRODUCTION_CUTOVER_EXECUTED':'NO'},
+                   'research_execution_only':True}
+           Path(out).write_bytes(C(report)+b'\n')
+           print('AUDIT_79_RESULT',json.dumps(summary,sort_keys=True),'NEGATIVE_CONTROLS',len(negative),
+                 'PROOF_BYTES',Path(out).stat().st_size,'SHA256',H(Path(out).read_bytes()))
+          if __name__=='__main__':main(sys.argv[1])
+          PY
+          cat > /tmp/h79_independent.py <<'PY'
+          import collections,datetime,hashlib,json,re,subprocess,sys
+          from pathlib import Path
+          def gitblob(s):return subprocess.run(['git','cat-file','blob',s],check=True,capture_output=True).stdout
+          def enc(o):return json.dumps(o,sort_keys=True,ensure_ascii=False,separators=(',',':')).encode()
+          def parse(s):
+           if not isinstance(s,str) or not re.fullmatch(r'\d{4}-\d\d-\d\d[ T]\d\d:\d\d(?::\d\d(?:\.\d+)?)?(?:Z|[+-]\d\d:\d\d)',s):return None
+           return datetime.datetime.fromisoformat(s.replace('Z','+00:00')).astimezone(datetime.timezone.utc)
+          def main(path):
+           d=json.loads(Path(path).read_bytes());frozen=json.loads(gitblob(d['prior_proofs']['field_authority']['blob']))
+           tz=json.loads(gitblob(d['prior_proofs']['independent_crosswalk']['blob']))['timezone_contract_audit']['cases']
+           cohort={(c['city'],c['bucket'],c['observation_id']) for c in tz}
+           assert len(cohort)==63
+           details=d['per_case_adjudication'];assert len(details)==79
+           assert len({(x['city'],x['bucket'],x['observation_id'],x['target_episode_id']) for x in details})==79
+           orig={(x['city'],x['bucket'],x['observation_id'],x['exported_historical_episode_id']) for x in frozen['unresolved_bound_source_memberships']}
+           assert {(x['city'],x['bucket'],x['observation_id'],x['target_episode_id']) for x in details}==orig
+           assert len(d['full_1429_relationship_ledger'])==1429
+           assert hashlib.sha256(enc(d['full_1429_relationship_ledger'])).hexdigest()==d['row_ledger_sha256']
+           orig_git={city:json.loads(gitblob(s['original_evidence_blob'])) for city,s in d['original_git_city_evidence'].items()}
+           chron={}
+           for city,contract in d['canonical_chronology_source_refs'].items():
+            rows=[]
+            for s in contract['sources']:
+             x=json.loads(gitblob(s['blob']))
+             assert len(x['episodes'])==s['episodes']
+             rows.extend((e['episode_id'],parse(e['alert_start']),parse(e['alert_end'])) for e in x['episodes'])
+            assert len(rows)==contract['episodes']
+            chron[city]=rows
+           outcomes=[]
+           for x in details:
+            source=orig_git[x['city']][x['bucket']][x['original_row_index']]
+            assert source==x['original_record']
+            assert hashlib.sha256(enc(source)).hexdigest()==x['original_ref']['record_sha256']
+            entries=chron[x['city']];target=x['target_episode_id']
+            assert len([v for v in entries if v[0]==target])==1
+            exact=[];event=[]
+            for name,v in source.items():
+             if name in ('episode_start','matched_episode_start','matched_alert_episode_start','alert_start','alert_episode_start','alert_start_kyiv','alert_episode_start_kyiv','matched_alert_start_kyiv') and parse(v):exact.append(parse(v))
+             if name in ('event_time','event_time_kyiv') and isinstance(v,str) and all(parse(i) for i in v.split('/')):event.extend(parse(i) for i in v.split('/'))
+            a={v[0] for v in entries if v[1] in exact}
+            b={v[0] for v in entries if event and all(v[1]<=t<v[2] for t in event)}
+            mechanism=None
+            if len(a)==1 and target in a:mechanism='EXACT_AWARE_ORIGINAL_ALERT_START'
+            elif len(b)==1 and target in b:mechanism='EXACT_AWARE_EVENT_CLOCK_CONTAINMENT'
+            is_tz=(x['city'],x['bucket'],x['observation_id']) in cohort
+            assert is_tz==x['is_source_specific_timezone_case']
+            assert x['key_input_authority']['classification_key']=='REPLAY_DERIVED_ONLY'
+            assert x['key_input_authority']['aggregate']=='REPLAY_DERIVED_ONLY'
+            if is_tz:
+             assert x['after']=='REPLAY_DERIVED_ONLY'
+            elif mechanism:
+             assert x['after']=='INDEPENDENTLY_DERIVABLE_UNDER_FROZEN_CONTRACT' and x['mechanism']==mechanism
+            else:
+             assert x['after']=='REPLAY_DERIVED_ONLY'
+            outcomes.append(x['after'])
+           assert collections.Counter(outcomes)=={'REPLAY_DERIVED_ONLY':76,'INDEPENDENTLY_DERIVABLE_UNDER_FROZEN_CONTRACT':3}
+           assert collections.Counter(x['after'] for x in d['full_1429_relationship_ledger'])=={'ORIGINAL_ACCEPTED':286,'INDEPENDENTLY_DERIVABLE_UNDER_FROZEN_CONTRACT':1067,'REPLAY_DERIVED_ONLY':76}
+           assert len([x for x in d['full_1429_relationship_ledger'] if x['before']!='REPLAY_DERIVED_ONLY' and x['after']!=x['before']])==0
+           assert all(d['negative_mutation_controls'].values())
+           sample=next(x for x in details if x['city']=='chernihiv')
+           wrong=dict(sample['original_record']);wrong['evidence']='ADVERSARIAL_MUTATION'
+           assert hashlib.sha256(enc(wrong)).hexdigest()!=sample['original_ref']['record_sha256']
+           t=parse(sample['original_record']['matched_episode_start'])
+           assert not any(e[1]==t+datetime.timedelta(hours=1) for e in chron['chernihiv'])
+           assert parse('2025-12-06T14:51:54') is None
+           assert {x['observation_id'] for x in details if x['split_child_provenance']}=={'90817537f7b3bfadb49a9664','ffa868dc260c2b9d57a80304'}
+           print('INDEPENDENT_SOURCE_CHECK_PASS cases=79 clocks=63 promotions=3 remaining=76 all=1429')
+          if __name__=='__main__':main(sys.argv[1])
+          PY
+          PYTHONHASHSEED=17 python3 /tmp/h79_main.py /tmp/h79_A.json
+          PYTHONHASHSEED=997 python3 /tmp/h79_main.py /tmp/h79_B.json
+          cmp /tmp/h79_A.json /tmp/h79_B.json
+          PYTHONHASHSEED=29 python3 /tmp/h79_independent.py /tmp/h79_A.json
+          PYTHONHASHSEED=43 python3 /tmp/h79_independent.py /tmp/h79_B.json
+          sha256sum /tmp/h79_A.json /tmp/h79_B.json
+      - name: Freeze only one audited JSON and remove temporary inputs
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git branch --show-current)" = 'neon-h2-79-source-membership-authority-2026-10-13'
+          test "$(git rev-parse origin/main)" = 'e823b79f81dabb5ebd0d1632ab6c4a69cad163f0'
+          cp /tmp/h79_A.json research/neon_h2_79_source_membership_authority_2026-10-13.json
+          git add research/neon_h2_79_source_membership_authority_2026-10-13.json
+          git rm research/_temp_h2_79_execution_inputs.json .github/workflows/_temp_h2_79_authority.yml
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m 'Freeze independently checked H2 79 historical authority research'
+          git push origin HEAD:refs/heads/neon-h2-79-source-membership-authority-2026-10-13
+          test "$(git diff --name-only e823b79f81dabb5ebd0d1632ab6c4a69cad163f0 HEAD)" = 'research/neon_h2_79_source_membership_authority_2026-10-13.json'
+          git hash-object research/neon_h2_79_source_membership_authority_2026-10-13.json
+          wc -c research/neon_h2_79_source_membership_authority_2026-10-13.json
+          sha256sum research/neon_h2_79_source_membership_authority_2026-10-13.json
