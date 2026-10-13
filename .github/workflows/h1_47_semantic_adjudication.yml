@@ -1,0 +1,143 @@
+name: H1 47 isolated semantic adjudication proof
+on:
+  push:
+    branches:
+      - neon-h1-47-semantic-contract-adjudication-2026-10-12
+    paths:
+      - .github/workflows/h1_47_semantic_adjudication.yml
+permissions:
+  contents: write
+jobs:
+  adjudicate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+          persist-credentials: true
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Retrieve pinned historical Git objects
+        shell: bash
+        run: |
+          set -euo pipefail
+          for sha in 63e244b7d2cc0c5b302f7814f5a4cc9b82d1052e cbce9910a1a6b79753c06b0fe2cb2dffd84653dc 71cb6f6fbe856cc7b96759310fe9cc9c71cc0453 5d18ef85a66384f189ede5ca5654d750f60f088b 02ad2e8fadee78442753567bc2d3a540345d8e8a cae1f7a9b7c1fdd00fdbbe3d88cf3991985e01cb; do
+            git fetch --no-tags --quiet --depth=1 origin "$sha"
+            git cat-file -e "$sha^{commit}"
+          done
+      - name: Clean-process deterministic A and B
+        shell: bash
+        run: |
+          set -euo pipefail
+          PYTHONHASHSEED=11 python .github/proof/h1_47_semantic_adjudication_builder.py /tmp/h1_47_semantic_A.json
+          PYTHONHASHSEED=89 python .github/proof/h1_47_semantic_adjudication_builder.py /tmp/h1_47_semantic_B.json
+          cmp /tmp/h1_47_semantic_A.json /tmp/h1_47_semantic_B.json
+          sha256sum /tmp/h1_47_semantic_A.json /tmp/h1_47_semantic_B.json
+      - name: Independent code-path and adversarial verification
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import collections, copy, hashlib, json, subprocess
+          from pathlib import Path
+          def git(*args):
+              return subprocess.check_output(['git']+list(args))
+          def h(b):
+              return hashlib.sha256(b).hexdigest()
+          def eq(cond,msg):
+              if not cond:
+                  raise AssertionError(msg)
+          data=Path('/tmp/h1_47_semantic_A.json').read_bytes()
+          x=json.loads(data)
+          cap=json.loads(git('show','63e244b7d2cc0c5b302f7814f5a4cc9b82d1052e:research/neon_h1_47_binding_evidence_capsule_2026-10-12.json'))
+          led=x['47_case_decision_ledger']
+          source={(o['city_key'],o['observation_id']):o for o in cap['observations_with_all_memberships_and_native_evidence']}
+          parents=cap['original_episode_records_for_selected_memberships']
+          originals=cap['original_47_row_discrepancy_ledger_exact']
+          eq(len(led)==len(originals)==47,'flag_count')
+          eq(len(source)==27,'source_count')
+          eq(len(x['8_unflagged_control_assessments'])==8,'controls')
+          seen=set()
+          historical_worker=git('show','71cb6f6fbe856cc7b96759310fe9cc9c71cc0453:kyiv-air-alerts-grafana/scripts/run_historical_attack_event_backfill_batch.py').decode()
+          eq('refs.update(str(x) for x in (matching.get("matched_episode_ids") or []) if x)' in historical_worker,'plural contract')
+          eq('related = [obs for obs in observations if eid in observation_episode_refs(obs)]' in historical_worker,'membership contract')
+          for i, (a,b) in enumerate(zip(led,originals)):
+              ident=(a['city_key'],a['historical_episode_id'],a['source_observation_id'])
+              eq(ident==(b['city_key'],b['historical_episode_id'],b['observation_id']),'row_identity')
+              eq(ident not in seen,'duplicate_case')
+              seen.add(ident)
+              o=source[(ident[0],ident[2])]
+              native=o['original_native_observation_record']
+              items=[v for v in o['all_frozen_effective_memberships'] if v['episode_id']==ident[1]]
+              eq(len(items)==1,'missing membership')
+              m=items[0]
+              eq(m['provisional_discrepancy_flag'] and m['exact_original_proof_member']==b,'tampered flags')
+              parent=parents[ident[0]+':'+ident[1]]
+              raw=json.loads(git('show',parent['record_git_identity']['commit']+':'+parent['record_git_identity']['path']))
+              target=next(z for z in raw['episode_results'] if z['episode_id']==ident[1])
+              eq(target==parent['original_record'],'episode mismatch')
+              cm=native.get('candidate_matching') or {}
+              cr={z for z in [native.get('classification_episode_id'),cm.get('matched_episode_id'),*(cm.get('matched_episode_ids') or [])] if z}
+              if m['accepted_repair_member']:
+                  eq(a['exact_membership_historical_authority_verdict']=='ACCEPTED_REPAIR_OVERLAY','repair category')
+                  repair=cap['observations_with_all_memberships_and_native_evidence']
+                  eq(o['accepted_repair_observation_change']['new_temporal_binding']['episode_id']==ident[1],'repair episode')
+                  eq(ident[2] in parent['accepted_repair_target']['contributing_observation_ids'],'repair contributor')
+              elif ident[1] in cr:
+                  eq(a['exact_membership_historical_authority_verdict']=='ORIGINAL_ACCEPTED','original category')
+                  eq(ident[2] in target['source_observation_ids'],'frozen source missing')
+                  eq(a['admission_mechanism'] in ['ORIGINAL_CLASSIFICATION_EPISODE_REF','ORIGINAL_SINGULAR_CANDIDATE_MATCH_REF','ORIGINAL_PLURAL_CANDIDATE_MATCH_REF'],'direct ref')
+              else:
+                  ds=[z for z in raw['campaign_observation_dedupe']['duplicates'] if z['observation_id']==ident[2]]
+                  eq(len(ds)==1 and ds[0]['equivalence']=='EQUIVALENT_DETERMINISTIC_DUPLICATE','cross-batch dedupe')
+                  regen=ds[0]['regenerated_context']
+                  match=regen['candidate_matching']
+                  rr={z for z in [regen.get('classification_episode_id'),match.get('matched_episode_id'),*(match.get('matched_episode_ids') or [])] if z}
+                  eq(ident[1] in rr,'regenerated missing membership')
+                  eq(a['admission_mechanism']=='ACCEPTED_CROSS_BATCH_DEDUP_REGENERATED_CONTEXT','bad dedupe label')
+              t=a['attack_evidence_inference_boundary']
+              if a['admission_mechanism'] in ['ORIGINAL_SINGULAR_CANDIDATE_MATCH_REF','ORIGINAL_PLURAL_CANDIDATE_MATCH_REF']:
+                  eq(not t['episode_specific'],'false publication-time event')
+              eq(a['original_discrepancy_mechanism_verdict']!='MATERIAL_HISTORICAL_CONTRADICTION','unwarranted contradiction')
+          eq(len(seen)==47,'missing verdicts')
+          eq(sum(a['exact_membership_historical_authority_verdict']=='ORIGINAL_ACCEPTED' for a in led)==43,'43 batch')
+          eq(sum(a['exact_membership_historical_authority_verdict']=='ACCEPTED_REPAIR_OVERLAY' for a in led)==4,'4 repair')
+          eq(sum(a['attack_evidence_inference_boundary']['episode_specific'] for a in led)==25,'temporal boundary')
+          eq(sum(bool(a['attack_evidence_inference_boundary']['explicit_event_time']) for a in led)==24,'exact clock')
+          checks={}
+          t=copy.deepcopy(led[0]);t['historical_episode_id']='fabricated';checks['fabricated_target']=(t['historical_episode_id']!=originals[0]['historical_episode_id'])
+          t=copy.deepcopy(next(a for a in led if a['admission_mechanism']=='ORIGINAL_PLURAL_CANDIDATE_MATCH_REF'))
+          t['native_matched_episode_ids']=[];checks['removed_plural']=(t['historical_episode_id'] not in t['native_matched_episode_ids'] and t['native_matched_episode_id']!=t['historical_episode_id'])
+          t=copy.deepcopy(next(a for a in led if a['admission_mechanism']=='ORIGINAL_CLASSIFICATION_EPISODE_REF'))
+          checks['false_equality']=(t['native_classification_episode_id']!=t['native_matched_episode_id'] and t['historical_episode_id']==t['native_classification_episode_id'])
+          t=copy.deepcopy(next(a for a in led if a['original_provenance']=='ACCEPTED_REPAIR_OVERLAY'))
+          del t['original_batch_or_repair_witness'];checks['missing_repair']=('original_batch_or_repair_witness' not in t)
+          t=copy.deepcopy(next(a for a in led if a['admission_mechanism']=='ORIGINAL_SINGULAR_CANDIDATE_MATCH_REF'))
+          t['attack_evidence_inference_boundary']['episode_specific']=True;checks['publication_not_event']=t['attack_evidence_inference_boundary']['episode_specific']!=next(z for z in led if z['case_id']==t['case_id'])['attack_evidence_inference_boundary']['episode_specific']
+          t=copy.deepcopy(led[0]);t['original_verifier_row_sha256']='0'*64;checks['changed_source_membership']=t['original_verifier_row_sha256']!=led[0]['original_verifier_row_sha256']
+          eq(all(checks.values()),'negative tests')
+          eq(x['revised_full_2340_membership_distribution']['total']==2340,'full total')
+          print('INDEPENDENT_HISTORICAL_CODE_AND_BATCH_VERIFICATION=PASS')
+          print('INDEPENDENT_ALL_47_CASES=PASS')
+          print('NEGATIVE_TESTS='+json.dumps(checks,sort_keys=True))
+          print('A_B_FINGERPRINT_SHA256='+h(data))
+          PY
+      - name: Freeze proof only, remove temporary tooling
+        shell: bash
+        run: |
+          set -euo pipefail
+          cp /tmp/h1_47_semantic_A.json research/neon_h1_47_semantic_adjudication_2026-10-12.json
+          rm -f .github/proof/h1_47_semantic_adjudication_builder.py
+          rm -f .github/workflows/h1_47_semantic_adjudication.yml
+          git add -A .github/proof/h1_47_semantic_adjudication_builder.py .github/workflows/h1_47_semantic_adjudication.yml research/neon_h1_47_semantic_adjudication_2026-10-12.json
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m 'research: freeze H1 47 historical semantic adjudication'
+          git push origin HEAD:neon-h1-47-semantic-contract-adjudication-2026-10-12
+          test "$(git diff --name-only cae1f7a9b7c1fdd00fdbbe3d88cf3991985e01cb HEAD)" = 'research/neon_h1_47_semantic_adjudication_2026-10-12.json'
+          git rev-parse HEAD
+          git rev-parse HEAD:research/neon_h1_47_semantic_adjudication_2026-10-12.json
+          wc -c research/neon_h1_47_semantic_adjudication_2026-10-12.json
+          sha256sum research/neon_h1_47_semantic_adjudication_2026-10-12.json
