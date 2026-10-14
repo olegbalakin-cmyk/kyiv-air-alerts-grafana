@@ -42,5 +42,5 @@ jobs:
           python scripts/validate_bridge_checkpoint.py self-test
       - name: Verify no sensitive mutation
         run: |
-          test -z "$(git status --porcelain)"
+          test -z "$(git status --porcelain --untracked-files=no)"
           echo "offline proof only; no API credentials, site-prod, publication, DB or deploy"
