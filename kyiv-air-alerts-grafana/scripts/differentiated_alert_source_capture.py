@@ -180,7 +180,15 @@ def capture_sources(
         try:
             result["logical_acquisition_counts"][source] += 1
             sr["logical_acquisition_count"] = 1
-            status, payload = fetch(url, headers=headers, timeout=30)
+            # Same-run handoff records an attempted authenticated request even if
+            # its HTTP response or parsing fails. No token or headers are stored.
+            if needs_token:
+                sr["request_started_at"] = utc_now()
+            try:
+                status, payload = fetch(url, headers=headers, timeout=30)
+            finally:
+                if needs_token:
+                    sr["request_finished_at"] = utc_now()
             response_body = canonical_bytes(payload)
             accepted = _accepted_input(source, payload)
             meta = _write_payload(output_path, accepted)
