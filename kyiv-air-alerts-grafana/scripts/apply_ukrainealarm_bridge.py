@@ -15,6 +15,12 @@ from urllib.parse import urlsplit
 
 import requests
 
+from ukrainealarm_request_policy import (
+    UkraineAlarmClient,
+    UkraineAlarmAuthenticationError,
+    UkraineAlarmRateLimitExhausted,
+    UkraineAlarmRetryBudgetExceeded,
+)
 import multicity_shadow_payload
 import add_duration_unit_switch as exactmod
 import expand_multicity_production as base
@@ -39,7 +45,7 @@ HISTORY_URL = f"{API_BASE}/alerts/regionHistory"
 TOKEN_ENV = "UKRAINEALARM_API_TOKEN"
 UTC = timezone.utc
 MATCH_TOLERANCE_SECONDS = 15.0
-MIN_API_INTERVAL_SECONDS = float(os.getenv("UKRAINEALARM_MIN_INTERVAL_SECONDS", "70"))
+MIN_API_INTERVAL_SECONDS = max(70.0, float(os.getenv("UKRAINEALARM_MIN_INTERVAL_SECONDS", "70")))
 MAX_401_RETRIES = 2
 STORE_SCHEMA_VERSION = 3
 
@@ -215,50 +221,6 @@ def resolve_region(nodes: list[dict], names: list[str], oblast: str) -> dict | N
         return None
     matches.sort(key=lambda n: (len(n.get("ancestors", [])), n["regionId"]))
     return matches[-1]
-
-
-class UkraineAlarmClient:
-    def __init__(self, token: str) -> None:
-        self.token = token
-        self.session = requests.Session()
-        self.last_request_at: float | None = None
-
-    def _wait_for_slot(self) -> None:
-        if self.last_request_at is None:
-            return
-        wait = MIN_API_INTERVAL_SECONDS - (time.monotonic() - self.last_request_at)
-        if wait > 0:
-            print(f"UkraineAlarm rate-limit guard: sleeping {wait:.1f}s", flush=True)
-            time.sleep(wait)
-
-    def get(self, url: str, *, params: dict | None = None, context: str) -> requests.Response:
-        for attempt in range(MAX_401_RETRIES + 1):
-            self._wait_for_slot()
-            response = self.session.get(
-                url,
-                headers={
-                    "Accept": "application/json",
-                    "Authorization": self.token,
-                    "User-Agent": "kyiv-air-alerts-grafana/verified-multicity-bridge",
-                },
-                params=params,
-                timeout=60,
-            )
-            self.last_request_at = time.monotonic()
-            if response.status_code != 401:
-                if not response.ok:
-                    body = response.text.strip().replace("\n", " ")[:300]
-                    raise RuntimeError(
-                        f"{context}: HTTP {response.status_code} {response.reason}; response={body!r}"
-                    )
-                return response
-            if attempt >= MAX_401_RETRIES:
-                raise RuntimeError(f"{context}: HTTP 401 after {attempt + 1} attempts")
-            print(
-                f"{context}: HTTP 401 on attempt {attempt + 1}; retrying after guard interval",
-                flush=True,
-            )
-        raise AssertionError("unreachable")
 
 
 def history_rows(client: UkraineAlarmClient, region_id: str, name: str) -> list[dict]:
@@ -754,7 +716,11 @@ def main() -> None:
     fetched_keys: list[str] = []
 
     if token:
-        client = UkraineAlarmClient(token)
+        client = UkraineAlarmClient(
+            token,
+            capture_diagnostic_path=os.getenv("DIFFERENTIATED_ALERT_SOURCE_CAPTURE_DIAGNOSTIC"),
+            min_interval=MIN_API_INTERVAL_SECONDS,
+        )
         nodes: list[dict] | None = None
         unresolved = [key for key in required_keys if not store.get("regions", {}).get(key, {}).get("region_id")]
         if unresolved:
@@ -846,6 +812,14 @@ def main() -> None:
                     f"static_match={bool(initial_match)} poll_overlap={poll_overlap}",
                     flush=True,
                 )
+            except (
+                UkraineAlarmAuthenticationError,
+                UkraineAlarmRateLimitExhausted,
+                UkraineAlarmRetryBudgetExceeded,
+            ):
+                # A systemic auth/rate-limit failure must stop the entire update,
+                # rather than spending the remaining window on doomed regions.
+                raise
             except Exception as exc:
                 message = f"{type(exc).__name__}: {exc}"
                 request_errors[key] = message
