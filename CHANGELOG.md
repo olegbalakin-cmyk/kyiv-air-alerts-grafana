@@ -2,6 +2,12 @@
 
 Accepted project checkpoints, newest first. This is not the full Git history, a branch inventory, or a retry log. **PROVEN** describes bounded evidence; **FROZEN** additionally requires a durable exact manifest. Development checkpoints below do not change production unless explicitly stated.
 
+## 2026-10-15
+
+### UkraineAlarm shared-token emergency guard — promoted, recovery pending
+
+- **Checkpoint:** `UKRAINEALARM SECONDARY API WORKFLOW EMERGENCY PAUSE = PROMOTED — LIVE RECOVERY PENDING`. After the Oct 14 manual production [run 38632617697](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/38632617697) failed at Odesa's 14th UkraineAlarm region (three HTTP 429 despite 70-second retries), a concurrent WIP explosion [run 38634459239](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/38634459239) was confirmed active. Causation by overlapping token requests **not proven**, but shared-token collision remains credible. Verified two-file, six-line-only production-workflow configuration commit [`7c1eea31`](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/commit/7c1eea31f77192545c9deedff53849b075ab498d) gates secondary automatic `explosion-monitor-wip.yml` and `update.yml` jobs to `workflow_dispatch`. Push-triggered Kyiv [run 38637413108](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/38637413108) **SKIPPED**. The already-active WIP job is **not cancelled** by this guard. Manual secondary dispatch remains possible, so no global token guarantee. No `site-prod` change, no new live updater/recovery, no Netlify change. Next: allow active WIP to finish or stop it explicitly, avoid concurrent token consumers, then one verified production 21-region recovery run; reinstate secondary scheduled workflows only under a separately accepted coordination plan. This acceptance adds only two root markdown coordination edits.
+
 ## 2026-10-14
 
 ### UkraineAlarm 429 runtime promotion — accepted PASS, live recovery pending
