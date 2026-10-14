@@ -1,0 +1,58 @@
+{
+  "schema_version": 1,
+  "checkpoint": "ISOLATED UKRAINEALARM RATE-LIMIT REPAIR / NOT PRODUCTION",
+  "date_utc": "2026-10-14",
+  "runtime_baseline": {
+    "branch": "site-prod",
+    "commit": "7410f30840850a8bbf96b80b66afebb66ecd1a86"
+  },
+  "workflow_baseline": {
+    "branch": "main",
+    "commit": "c1ca10236fccde27a4ef3ad8441690fcf61d0dea"
+  },
+  "validated_code_commit": "a2462dbfa2a7d4332b6e88acd70d01398845e1ae",
+  "branch": "repair-ukrainealarm-429-2026-10-14",
+  "accepted_by_independent_reviewer": false,
+  "production_deployed": false,
+  "external_ukrainealarm_api_requests_in_proof": 0,
+  "github_actions": {
+    "successful_run_id": 38627582538,
+    "successful_job_id": 116070566877,
+    "conclusion": "success",
+    "previous_failing_runs": [
+      38627435807,
+      38627509450
+    ]
+  },
+  "validation": {
+    "new_mocked_cases": {
+      "passed": 17,
+      "total": 17
+    },
+    "existing_regressions": {
+      "passed": 10,
+      "total": 10
+    },
+    "checkpoint_self_test": "PASS",
+    "python_compilation": "PASS",
+    "tracked_git_worktree": "CLEAN",
+    "live_21_region_completion": "NOT EXECUTED",
+    "full_23_city_publication": "NOT EXECUTED"
+  },
+  "changes": [
+    "kyiv-air-alerts-grafana/scripts/differentiated_alert_source_capture.py",
+    "kyiv-air-alerts-grafana/scripts/apply_ukrainealarm_bridge.py",
+    "kyiv-air-alerts-grafana/scripts/ukrainealarm_request_policy.py",
+    "kyiv-air-alerts-grafana/tests/test_ukrainealarm_retry_policy.py",
+    ".github/workflows/ukrainealarm-429-offline-proof.yml"
+  ],
+  "limitations": [
+    "No independently controlled token serialization across update-netlify-site.yml, update.yml and explosion-monitor-wip.yml.",
+    "Provider 429 vs 401 error semantics and hidden upstream limit changes remain unverified.",
+    "No live API fetch, end-to-end production 21-region success or 23-city read-back in this checkpoint.",
+    "Latest site-prod 21-region successful checkpoint unchanged at 2026-10-13T21:09:18.259569Z.",
+    "No Netlify redeployment expected for data-only changes; actual runtime outcome not verified."
+  ],
+  "promotion_gate": "INDEPENDENT_ACCEPTANCE_REQUIRED; EXPLICIT_PRODUCTION_AUTHORIZATION_REQUIRED",
+  "rollback": "Restore original 3 runtime files from site-prod base 7410f30840850a8bbf96b80b66afebb66ecd1a86; revert proposed main workflow changes if any."
+}
