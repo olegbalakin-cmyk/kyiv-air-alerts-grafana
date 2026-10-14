@@ -168,7 +168,7 @@ class PolicyTest(unittest.TestCase):
         self.assertEqual(session.calls[1][1] - session.calls[0][1], 70)
 
     def test_13_budget_exhaustion(self):
-        client, session, clock = self.client([response(200)], budget=65)
+        client, session, clock = self.client([response(200)], budget=59)
         with self.assertRaises(policy.UkraineAlarmRetryBudgetExceeded):
             client.get("history", context="x")
         self.assertEqual(len(session.calls), 0)
