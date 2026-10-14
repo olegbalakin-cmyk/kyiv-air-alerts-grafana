@@ -1,0 +1,96 @@
+{
+  "schema_version": "h2-nine-case-disposable-neon-blocked-proof-v1",
+  "date_utc": "2026-10-14",
+  "outcome": "BLOCKED_INFRASTRUCTURE_BRANCH_LIMIT",
+  "scope": "OWNER_AUTHORIZED_ISOLATED_TEST_NO_MUTATIONS",
+  "repository": "olegbalakin-cmyk/kyiv-air-alerts-grafana",
+  "git": {
+    "main_head_inspected": "b8912ad7f678a9d3f669ea294c77e79fd0bf6220",
+    "manifest_commit": "a4786408c7361cec253d67a0458623c914f5677a",
+    "manifest_path": "research/h2_nine_case_disposable_neon_test_manifest_2026-10-14.json",
+    "manifest_blob": "566df58f5109f6f24d6e8fba1138dec630328a33",
+    "manifest_compare": {
+      "base": "c1ca10236fccde27a4ef3ad8441690fcf61d0dea",
+      "ahead": 1,
+      "files_changed": 1,
+      "only_manifest_added": true
+    },
+    "accepted_prior_action": {
+      "run": 38552005627,
+      "conclusion": "success",
+      "executed_head": "de09bdf0eb65fc6f3187d661f07d39f674bc6058"
+    },
+    "proof_branch": "research-h2-nine-case-disposable-blocked-2026-10-14"
+  },
+  "neon": {
+    "project_id": "green-cake-44216048",
+    "parent_branch_id": "br-bold-mode-b5rub8pq",
+    "database": "neondb",
+    "region": "aws-us-east-2",
+    "project_branch_limit": 10,
+    "branches_before": 10,
+    "create_attempt": {
+      "name": "h2-nine-case-disposable-2026-10-14",
+      "parent_id": "br-bold-mode-b5rub8pq",
+      "result": "HTTP_422_BRANCHES_LIMIT_EXCEEDED"
+    },
+    "branches_after": 10,
+    "disposable_created": false,
+    "mutation_sql_count": 0,
+    "parent_read_only_preflight": true,
+    "existing_branches_deleted": 0,
+    "cleanup": "NO_TEST_BRANCH_CREATED; NO_CHILD_CLEANUP_NEEDED",
+    "schema": {
+      "classification_version": "attack-event-classification-key-v2",
+      "attack_event_version": "attack-event-key-v1",
+      "source_link_version": "attack-event-source-link-key-v1",
+      "historical_manifest_v1_is_not_deployed_version": true,
+      "classification_count_at_read_only_preflight": 28132,
+      "revision_count_at_preflight": 1
+    },
+    "historical_predecessor_readback": {
+      "classification_keys_found": 9,
+      "expected": 9,
+      "all_v2": true,
+      "all_bound": true,
+      "full_row_hash_and_source_membership_reconciliation": "NOT_RUN"
+    }
+  },
+  "test_A": {
+    "population": 9,
+    "NO_OP": 5,
+    "REVIEW_ONLY": 4,
+    "planned_historical_mutations": 0,
+    "executed_sql_mutations": 0,
+    "status": "BLOCKED_DISPOSABLE_BRANCH_NOT_CREATED",
+    "replay_and_idempotency": "NOT_RUN"
+  },
+  "test_B": {
+    "status": "BLOCKED_DISPOSABLE_BRANCH_NOT_CREATED",
+    "synthetic_parent_created": false,
+    "synthetic_rows_inserted": 0,
+    "supersession": "NOT_RUN",
+    "idempotency": "NOT_RUN",
+    "negative_tests": "NOT_RUN",
+    "rollback": "NOT_RUN"
+  },
+  "json_db_reconciliation": {
+    "status": "NOT_EXECUTED",
+    "historical_classification_key_presence": "9/9 on parent READ ONLY",
+    "synthetic_exact_key_semantic_hash_parity": "NOT_RUN",
+    "missing_extra_delta": "NOT_RUN",
+    "zero_mutations_due_to_failed_branch_creation": true
+  },
+  "safety": {
+    "production_untouched": true,
+    "site_prod_untouched": true,
+    "main_untouched": true,
+    "parent_sql_mutations": 0,
+    "no_existing_neon_branch_deleted": true,
+    "no_historical_backfill": true,
+    "no_cutover": true,
+    "no_neon_authority_activation": true
+  },
+  "unblock": "Obtain a free Neon branch slot via separately authorized cleanup of an explicitly identified old branch, or increase the branch limit; then rerun the guarded experiment.",
+  "acceptance": "NO_TECHNICAL_TEST_PASS_CLAIM; NO_COORDINATION_MAIN_UPDATE"
+}
