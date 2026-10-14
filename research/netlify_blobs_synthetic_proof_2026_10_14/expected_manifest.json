@@ -1,0 +1,28 @@
+{
+  "schema_version": 1,
+  "state": "OFFLINE_CANDIDATE_ONLY__NOT_FROZEN_FOR_UPLOAD",
+  "test_id": "netlify-synthetic-64k-20261014-blocked",
+  "synthetic_only": true,
+  "generator": {
+    "version": "1.0",
+    "algorithm": "Concatenate bytes 0x00..0xff exactly 256 times; equivalent to b[i]=i mod 256 for i=0..65535"
+  },
+  "expected_byte_length": 65536,
+  "expected_sha256": "7daca2095d0438260fa849183dfc67faa459fdf4936e1bc91eec6b281b27e4c2",
+  "contains_nul": true,
+  "contains_non_utf8_bytes": true,
+  "hash_checks": [
+    "Python 3 hashlib.sha256: MATCH",
+    "OpenSSL dgst -sha256: MATCH"
+  ],
+  "target_site_id": "620b2d03-f5ee-4fc1-8839-0c897c8ad3f9",
+  "region": "eu-central-1",
+  "store_namespace": "publisher-raw-proof-synthetic-20261014",
+  "object_key": "synthetic/2026-10-14/fixture-v1-7daca2095d043826-65536.bin",
+  "intended_store_type": "site-wide",
+  "research_base_commit": "2f55b09eeaca6f8c88b0d72281bde2733198909c",
+  "research_commit_identity": "NOT_FROZEN_FOR_WRITE_AS_GATE_FAILED",
+  "caution": "Before any separately authorized write freeze a fresh upload-authoritative manifest containing its known prewrite research commit identity; this candidate is not permission to write",
+  "publisher_content_present": false,
+  "fixture_bytes_in_git": false
+}

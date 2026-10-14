@@ -1,0 +1,112 @@
+{
+  "schema_version": 1,
+  "verdict": "NETLIFY NONPROD STORAGE ACCESS PRECHECK = BLOCKED",
+  "status": "BLOCKED",
+  "evidence_sources": [
+    "Netlify connected team and project metadata",
+    "GitHub main coordination files and branch heads",
+    "GitHub current production deploy workflow references (without secrets)",
+    "Netlify Blobs docs updated 2026-09-30",
+    "Netlify team roles and free plan docs"
+  ],
+  "credentials_read": false,
+  "blob_listing_attempted": false,
+  "blob_write_attempted": false,
+  "controls": [
+    {
+      "name": "Target site exists and owner permission supplied",
+      "category": "PROVEN BY TEST",
+      "status": "PASS",
+      "evidence": "Netlify site metadata matched exact site ID; user-supplied authorization"
+    },
+    {
+      "name": "eu-central-1 supported",
+      "category": "PROVIDER-ENFORCED",
+      "status": "DOCUMENTED_ONLY",
+      "evidence": "Netlify published list of allowed Blob regions"
+    },
+    {
+      "name": "Site-wide binary set/get and onlyIfNew",
+      "category": "PROVIDER-ENFORCED",
+      "status": "DOCUMENTED_ONLY",
+      "evidence": "Netlify SDK; not invoked in this account"
+    },
+    {
+      "name": "Unique synthetic namespace",
+      "category": "APPLICATION-ENFORCED",
+      "status": "PROPOSED",
+      "evidence": "Store/key prefixes do not scope a PAT at the provider"
+    },
+    {
+      "name": "Nonproduction-only writer credential",
+      "category": "NOT PROVEN",
+      "status": "FAIL",
+      "evidence": "No independently restricted writer identity or site-scoped permission proven"
+    },
+    {
+      "name": "Independently restricted reader identity",
+      "category": "NOT PROVEN",
+      "status": "FAIL",
+      "evidence": "One Owner on team; no separate restricted reader or negative permission proof"
+    },
+    {
+      "name": "Cross-site/store denials",
+      "category": "NOT PROVEN",
+      "status": "FAIL",
+      "evidence": "No Blob-level IAM/negative authorization evidence exposed"
+    },
+    {
+      "name": "Netlify connector Blob store list/IAM",
+      "category": "NOT SUPPORTED",
+      "status": "UNAVAILABLE",
+      "evidence": "Connector exposes site/team metadata only"
+    },
+    {
+      "name": "Public read denied",
+      "category": "NOT PROVEN",
+      "status": "NOT_TESTED",
+      "evidence": "Site webpage visibility does not establish Blob access controls"
+    },
+    {
+      "name": "Permanent per-object WORM",
+      "category": "NOT SUPPORTED",
+      "status": "NOT_AVAILABLE_IN_DOCUMENTED_API",
+      "evidence": "Ordinary set overwrites; delete/deleteAll exist; onlyIfNew is per-call"
+    },
+    {
+      "name": "Retention and cleanup executor",
+      "category": "NOT PROVEN",
+      "status": "FAIL",
+      "evidence": "7 days proposed but no approved cleanup procedure/independent cleanup permission"
+    },
+    {
+      "name": "Account-specific cost and usage",
+      "category": "NOT PROVEN",
+      "status": "FAIL",
+      "evidence": "Free hard monthly credit ceiling documented; remaining account balance/storage usage not observable"
+    },
+    {
+      "name": "Per-object audit trail",
+      "category": "NOT PROVEN",
+      "status": "UNVERIFIED",
+      "evidence": "No exact Blob read/write/delete event log evidenced"
+    },
+    {
+      "name": "Actions workflow dispatch through connector",
+      "category": "NOT SUPPORTED",
+      "status": "UNAVAILABLE",
+      "evidence": "Connected GitHub actions expose workflow data but no dispatch operation"
+    }
+  ],
+  "current_team_member_count": 1,
+  "current_team_identity": "Owner",
+  "two_owner_pats_would_not_be_independent": true,
+  "existing_managed_context": "No currently authorized separately restricted Netlify-managed writer/reader contexts established",
+  "blocker_owner": "NETLIFY IAM / existing credential configuration, plus connector visibility and cleanup governance",
+  "exact_missing_capability": "Provider-evidenced nonproduction site-bounded write-only creator and independently authorized read-only verifier, with denied cross-role/cross-site operations",
+  "docs": [
+    "https://docs.netlify.com/build/data-and-storage/netlify-blobs/",
+    "https://docs.netlify.com/manage/accounts-and-billing/team-management/roles-and-permissions/",
+    "https://docs.netlify.com/manage/accounts-and-billing/billing/billing-for-credit-based-plans/credit-based-pricing-plans/"
+  ]
+}
