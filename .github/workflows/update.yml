@@ -23,6 +23,9 @@ permissions:
 
 jobs:
   update:
+    # TEMP-UKRAINEALARM-RECOVERY-GUARD-2026-10-15: pause automatic secondary API consumption while site-prod recovers.
+    # Manual dispatch remains available only when production is idle; restore after separate acceptance.
+    if: ${{ github.event_name == 'workflow_dispatch' }}
     runs-on: ubuntu-latest
     defaults:
       run:
