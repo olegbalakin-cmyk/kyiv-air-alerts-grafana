@@ -1,0 +1,244 @@
+name: Temporary H2 nine-case independent Git verifier
+on:
+  push:
+    branches:
+      - research-h2-nine-case-reinspection-2026-10-14
+    paths:
+      - .github/workflows/_temp_h2_nine_case_verify.yml
+permissions:
+  contents: read
+jobs:
+  independent-git-verification:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout exact research branch
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Fetch immutable H2 research and historical refs
+        run: |
+          git fetch --no-tags origin '+refs/heads/*:refs/remotes/origin/*'
+          git cat-file -e 38fe5d2b0309f0413ae071b4daefe08e9c62fb41^{commit}
+          git cat-file -e c23387942a6b3effafa612195582b1e56afe618f^{commit}
+          git cat-file -e 064c465a5f5a6d70ff08b972879c83166df80b3c^{commit}
+          git cat-file -e a89a85daf32d7896086b37ca6557abf28a39904f^{commit}
+      - name: Create independent offline validator
+        shell: bash
+        run: |
+          cat > /tmp/h2-nine-independent-validator.py <<'PY'
+          import copy
+          import hashlib
+          import json
+          import os
+          import pathlib
+          import subprocess
+
+          PATH = pathlib.Path("research/h2_nine_case_evidence_refresh_2026-10-14.json")
+          IDS = [
+              "8ba888f1b3ec75f28e49804d",
+              "f6e4428ae6bcd6d54138bd95",
+              "4f882b343fececee727b9490",
+              "887eda18e1fe7f5a79d0f1ff",
+              "072f0616d4a26b7a8d54cdf5",
+              "651df48d8d9de816a6a1a4f7",
+              "a38e9d36c0e07e47bc34a3e6",
+              "3fc4d29cf2b31843d3e61ef4",
+              "133d84c39a0988ec75becebd"
+          ]
+          EXPECTED_BLOBS = {
+            "field_proof": ("c23387942a6b3effafa612195582b1e56afe618f", "research/neon_h2_19542_field_authority_containment_revalidation_2026-10-12.json", "2abd72d10bdac896d3c4ed10c582c38aafb162af"),
+            "successor": ("38fe5d2b0309f0413ae071b4daefe08e9c62fb41", "research/neon_h2_79_source_membership_authority_2026-10-13.json", "26f6e58522223d5cee18358c8dab46d7761b5b03"),
+            "dnipro_original": ("064c465a5f5a6d70ff08b972879c83166df80b3c", "kyiv-air-alerts-grafana/data/explosion_research/dnipro/final_evidence.json", "99758ae2a7d888593ffd863cc53cd9f48bf34f5a"),
+            "mykolaiv_original": ("a89a85daf32d7896086b37ca6557abf28a39904f", "kyiv-air-alerts-grafana/data/explosion_research/mykolaiv/final_evidence.json", "0860488bc18fb3c1a90b9e86df23001abb675c9c")
+          }
+          def git(*argv):
+              return subprocess.check_output(["git", *argv], stderr=subprocess.PIPE)
+          def sha256(b):
+              return hashlib.sha256(b).hexdigest()
+          def canon(x):
+              return json.dumps(x, sort_keys=True, separators=(",",":"), ensure_ascii=False).encode("utf-8")
+          def blob_check():
+              for name, (ref, path, expected) in EXPECTED_BLOBS.items():
+                  actual = git("rev-parse", ref + ":" + path).decode().strip()
+                  assert actual == expected, ("GIT_BLOB_IDENTITY", name, actual, expected)
+          def json_at(ref, path):
+              return json.loads(git("show", ref + ":" + path))
+          def verify(doc, original, ledger):
+              assert doc["schema_version"] == "h2-nine-case-evidence-refresh-proposal-v1"
+              assert doc["exact_population"] == IDS
+              assert doc["verification"]["separate_acceptance"] == "AWAITING_INDEPENDENT_EVIDENCE_ACCEPTANCE"
+              assert doc["verification"]["neon_test_write_authorization"] == "AWAITING_NEON_TEST_WRITE_AUTHORIZATION"
+              assert doc["invariant_gates"]["NEON_AUTHORITY_ACTIVE"] == "NO"
+              assert doc["invariant_gates"]["PRODUCTION_CUTOVER_EXECUTED"] == "NO"
+              assert doc["totals"]["historical_authority_promotions"] == 0
+              assert doc["totals"]["proposed_changed_classifications"] == 0
+              assert doc["totals"]["proposed_changed_memberships"] == 0
+              assert len(doc["source_records"]) == 7
+              assert len(doc["cases"]) == 9
+              assert len(ledger["per_case_adjudication"]) == 79
+              assert len(ledger["full_1429_relationship_ledger"]) == 1429
+              rows = {x["observation_id"]: x for x in ledger["per_case_adjudication"]}
+              membership = {x["observation_id"]: x for x in ledger["full_1429_relationship_ledger"]}
+              got = set()
+              outcomes = {}
+              ops = {}
+              tz_cases = 0
+              projection = []
+              for c in doc["cases"]:
+                  oid = c["observation_id"]
+                  assert oid in IDS and oid not in got
+                  got.add(oid)
+                  h = c["original_historical_record"]
+                  t = c["seven_time_concepts"]
+                  new = c["new_evidence"]
+                  proposal = c["interpretation"]
+                  db = c["proposed_neon_persistence"]
+                  pilot = c["alerts_csv_pilot_not_refreshed"]
+                  led = rows[oid]
+                  city = c["city"]
+                  historical = original[city][led["original_ref"]["bucket"]][led["original_ref"]["index"]]
+                  assert h["value"] == historical == led["original_record"]
+                  assert h["record_sha256"] == led["original_ref"]["record_sha256"]
+                  assert h["git_blob"] == led["original_ref"]["blob"] == EXPECTED_BLOBS[city+"_original"][2]
+                  assert h["git_commit"] == led["original_ref"]["tested_head"]
+                  assert h["modeled_episode_id"] == led["target_episode_id"] == membership[oid]["target_episode_id"]
+                  assert membership[oid]["city"] == city and membership[oid]["bucket"] == led["bucket"]
+                  assert h["classification_key"] == led["classification_key"]
+                  assert h["source_link_key"] == led["source_link_key"]
+                  assert h["source_membership_authority_in_unaccepted_successor"] == "REPLAY_DERIVED_ONLY"
+                  assert membership[oid]["before"] == "REPLAY_DERIVED_ONLY"
+                  assert h["source_specific_timezone_limitation"] == led["is_source_specific_timezone_case"]
+                  assert h["original_source_timezone_rule"] == led["original_source_timezone_rule"]
+                  tz_cases += int(h["source_specific_timezone_limitation"])
+                  expected_outcome = {"strict_events":"STRICT","review_events":"NEEDS_REVIEW","sensitivity_only_events":"SENSITIVITY_EVENT_POSITIVE"}[led["bucket"]]
+                  assert h["classification_outcome"] == expected_outcome
+                  outcomes[expected_outcome] = outcomes.get(expected_outcome, 0) + 1
+                  assert t["alert_start_utc"] == led["original_canonical_target_interval"]["start"]
+                  assert t["alert_end_utc"] == led["original_canonical_target_interval"]["end"]
+                  assert t["original_alert_clock_raw"] == led["original_clock_fields"]
+                  assert t["explosion_occurred_claim_raw"] == led["original_event_clock_fields"]
+                  assert t["original_source_timezone"] == "SOURCE_TIMEZONE_NOT_OBSERVABLE"
+                  assert t["utc_offset_explicit"] is None
+                  assert t["publisher_published_instant_utc"] is None
+                  assert t["publisher_updated_instant_utc"] is None
+                  assert new["original_publisher_url"] == historical["source_url"]
+                  assert doc["source_records"][new["original_publisher_source_key"]]["original_url"] == historical["source_url"]
+                  assert new["original_historical_page_snapshot_retrieved"] is False
+                  assert new["specific_physical_event_identity"] is None
+                  assert proposal["original_classification"] == expected_outcome
+                  assert proposal["proposed_classification"] == expected_outcome
+                  assert proposal["original_modeled_alert_link"] == led["target_episode_id"]
+                  assert proposal["proposed_modeled_alert_link"] == led["target_episode_id"]
+                  assert proposal["classification_revision_proposed"] is False
+                  assert proposal["modeled_link_revision_proposed"] is False
+                  assert proposal["historical_authority_unchanged"] is True
+                  assert db["original_classification_key"] == led["classification_key"]
+                  assert db["original_source_link_key"] == led["source_link_key"]
+                  assert db["original_modeled_episode_id"] == led["target_episode_id"]
+                  assert db["proposed_classification_key"] is None and db["proposed_source_link_key"] is None
+                  assert db["sql_writes_authorized"] is False
+                  assert db["prior_db_row_id"] is None
+                  assert db["intended_operation"] in ("REVIEW_ONLY","NO_OP")
+                  assert (db["intended_operation"] == "REVIEW_ONLY") == proposal["human_review_required"]
+                  assert pilot["fresh_raw_csv_sha256_verified"] is False
+                  assert pilot["source_specific_timezone_contract_attested"] is False
+                  assert pilot["historical_city_raion_equivalence_proven"] is False
+                  ops[db["intended_operation"]] = ops.get(db["intended_operation"],0) + 1
+                  projection.append({"id":oid,"city":city,"episode":h["modeled_episode_id"],"original":h["value"],
+                      "original_outcome":expected_outcome,"classification_key":h["classification_key"],
+                      "source_link_key":h["source_link_key"],"new_source":new["original_publisher_url"],
+                      "prospective_disposition":proposal["prospective_disposition"],
+                      "operation":db["intended_operation"],"start":t["alert_start_utc"],"end":t["alert_end_utc"],
+                      "frozen_publisher_summary":new["summary"]})
+              assert got == set(IDS)
+              assert len(set(x["episode"] for x in projection)) == 9
+              assert tz_cases == 6
+              assert outcomes == {"STRICT":7,"SENSITIVITY_EVENT_POSITIVE":1,"NEEDS_REVIEW":1}
+              assert ops == {"NO_OP":5,"REVIEW_ONLY":4}
+              assert doc["totals"]["neon_NO_OP"] == 5 and doc["totals"]["neon_REVIEW_ONLY"] == 4
+              return {"projection":sorted(projection,key=lambda x:IDS.index(x["id"])), "operation_counts":ops,
+                      "outcome_counts":outcomes,"timezone_case_count":tz_cases}
+          blob_check()
+          data = PATH.read_bytes()
+          document = json.loads(data)
+          original = {}
+          for city in ("dnipro","mykolaiv"):
+              ref,path,_ = EXPECTED_BLOBS[city+"_original"]
+              original[city] = json_at(ref,path)
+          ref,path,_ = EXPECTED_BLOBS["successor"]
+          ledger = json_at(ref,path)
+          confirmed = verify(document,original,ledger)
+          mutations = [
+            lambda d: d["cases"].append(copy.deepcopy(d["cases"][0])),
+            lambda d: d["cases"][0]["original_historical_record"]["value"].update({"decision":"forged"}),
+            lambda d: d["cases"][0]["original_historical_record"].update({"classification_key":"forged"}),
+            lambda d: d["cases"][0]["seven_time_concepts"].update({"original_source_timezone":"Europe/Kyiv"}),
+            lambda d: d["cases"][0]["new_evidence"].update({"original_publisher_url":"https://unknown.example.test"}),
+            lambda d: d["cases"][0]["interpretation"].update({"classification_revision_proposed":True}),
+            lambda d: d["cases"][0]["proposed_neon_persistence"].update({"sql_writes_authorized":True}),
+            lambda d: d["cases"][0]["alerts_csv_pilot_not_refreshed"].update({"fresh_raw_csv_sha256_verified":True}),
+            lambda d: d["totals"].update({"historical_authority_promotions":1}),
+            lambda d: d["cases"][0]["original_historical_record"].update({"source_membership_authority_in_unaccepted_successor":"ORIGINAL_ACCEPTED"}),
+            lambda d: d["cases"][0]["original_historical_record"].update({"modeled_episode_id":"forged"})
+          ]
+          for idx, change in enumerate(mutations):
+              bad = copy.deepcopy(document)
+              change(bad)
+              try:
+                  verify(bad,original,ledger)
+              except (AssertionError,KeyError,TypeError):
+                  continue
+              raise RuntimeError(f"Negative mutation escaped validator: {idx}")
+          sha = sha256(data)
+          byte_len = len(data)
+          blob = git("hash-object",str(PATH)).decode().strip()
+          git_blob = git("rev-parse","HEAD:"+str(PATH)).decode().strip()
+          assert blob == git_blob
+          source_hashes={k:sha256(canon(v)) for k,v in sorted(document["source_records"].items())}
+          receipt={
+            "schema_version":"h2-nine-case-independent-original-git-verification-v1",
+            "run_id":os.getenv("GITHUB_RUN_ID"),
+            "executed_head":os.getenv("GITHUB_SHA"),
+            "original_city_blobs":{x:EXPECTED_BLOBS[x][2] for x in ("dnipro_original","mykolaiv_original")},
+            "original_successor_git_blob":EXPECTED_BLOBS["successor"][2],
+            "frozen_git_blob":git_blob,"frozen_json_sha256":sha,"frozen_json_bytes":byte_len,
+            "source_record_metadata_sha256":source_hashes,
+            "independently_reconstructed_original_git_relationships":9,
+            "validated_negative_mutations":len(mutations),
+            "all_historical_outcomes_and_links_unchanged":True,
+            "no_time_zone_promotions":True,"publisher_raw_content_hash_verified":False,
+            "pilot_four_csv_sha256_refreshed":False,
+            "independent_original_web_archive_review":"NOT_DONE",
+            "separate_human_acceptance":"AWAITING_INDEPENDENT_EVIDENCE_ACCEPTANCE",
+            "neon_write_authorization":"NOT_AUTHORIZED",
+            "verified_projection":confirmed,
+            "technical_validation":"PASS"
+          }
+          out=pathlib.Path(os.environ["H2_OUTPUT_DIR"]);out.mkdir(parents=True,exist_ok=True)
+          (out/"projection.json").write_bytes(canon(confirmed)+b"\n")
+          (out/"verification_receipt.json").write_bytes(canon(receipt)+b"\n")
+          print(json.dumps({"seed":os.environ.get("PYTHONHASHSEED"),"blob":blob,"bytes":byte_len,"sha256":sha,"cases":9,"negative_controls":len(mutations),"PASS":True}))
+          PY
+      - name: Independent offline A build
+        run: |
+          PYTHONHASHSEED=17 H2_OUTPUT_DIR=/tmp/h2-nine-A python3 /tmp/h2-nine-independent-validator.py
+      - name: Independent offline B build
+        run: |
+          PYTHONHASHSEED=91 H2_OUTPUT_DIR=/tmp/h2-nine-B python3 /tmp/h2-nine-independent-validator.py
+      - name: Byte-identical A/B and receipt
+        run: |
+          cmp /tmp/h2-nine-A/projection.json /tmp/h2-nine-B/projection.json
+          cmp /tmp/h2-nine-A/verification_receipt.json /tmp/h2-nine-B/verification_receipt.json
+          sha256sum /tmp/h2-nine-A/projection.json /tmp/h2-nine-A/verification_receipt.json
+          echo "H2_NINE_CASE_INDEPENDENT_GIT_VERIFICATION = PASS"
+          echo "H2_NINE_CASE_A_B_BYTE_IDENTICAL = PASS"
+      - name: Upload temporary bounded proof receipt
+        uses: actions/upload-artifact@v4
+        with:
+          name: h2-nine-case-verification-receipt
+          path: |
+            /tmp/h2-nine-A/projection.json
+            /tmp/h2-nine-A/verification_receipt.json
+          retention-days: 14
