@@ -1,0 +1,129 @@
+name: Independent frozen WIP 209 source-time lineage audit
+on:
+  push:
+    branches: [proof-wip-209-source-time-lineage-2026-10-15]
+    paths:
+      - "research/independent_wip_209_source_lineage_2026_10_15.py"
+      - ".github/workflows/wip-209-source-lineage-audit.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  actions: read
+
+concurrency:
+  group: isolated-wip-209-source-lineage-audit-2026-10-15
+  cancel-in-progress: false
+
+jobs:
+  independent-audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      PYTHONDONTWRITEBYTECODE: "1"
+      UKRAINEALARM_API_TOKEN: ""
+      ATTACK_EVENT_DATABASE_URL: ""
+      DATABASE_URL: ""
+      NETLIFY_AUTH_TOKEN: ""
+      GH_TOKEN: \${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - name: Checkout audit-only branch
+        uses: actions/checkout@v4
+        with:
+          ref: proof-wip-209-source-time-lineage-2026-10-15
+          fetch-depth: 1
+      - name: Checkout frozen WIP complete historical Git lineage
+        uses: actions/checkout@v4
+        with:
+          ref: 567c0aab3aaf98a5b8dd788021a26ece41f083e3
+          path: frozen-wip
+          persist-credentials: false
+          fetch-depth: 0
+      - name: Checkout frozen production snapshot
+        uses: actions/checkout@v4
+        with:
+          ref: 97ec99389259f8d0cfcecc17a2ff77302bb0615f
+          path: frozen-prod
+          persist-credentials: false
+          fetch-depth: 1
+      - name: Checkout exact Kyiv historical repair and its parent
+        uses: actions/checkout@v4
+        with:
+          ref: e325e1f7bde398e7267098f1e5d565aa78dc43ac
+          path: frozen-repair
+          persist-credentials: false
+          fetch-depth: 2
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Obtain exact original archived Actions proof
+        shell: bash
+        run: |
+          curl --fail --silent --show-error --location --retry 2 \
+            -H "Authorization: Bearer \${GH_TOKEN}" \
+            -H "Accept: application/vnd.github+json" \
+            "https://api.github.com/repos/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/artifacts/11956428181/zip" \
+            -o original-209-artifact.zip
+          python - <<'PY'
+          import hashlib
+          from pathlib import Path
+          raw=Path("original-209-artifact.zip").read_bytes()
+          assert hashlib.sha256(raw).hexdigest()=="0d10cceb48b6266a67faab90bad27201b7be8537bb244d7008824ffc3227e486"
+          assert len(raw)>100000
+          print("Exact original Actions archive verified")
+          PY
+      - name: Independent pinned manifest and Git-history forensic run A
+        shell: bash
+        run: |
+          python research/independent_wip_209_source_lineage_2026_10_15.py \
+            --wip frozen-wip \
+            --prod frozen-prod \
+            --repair frozen-repair \
+            --manifest research/wip_cached_209_forensic_2026-10-15/wip_cached_209_identity_manifest_2026-10-15.json \
+            --archive original-209-artifact.zip \
+            --out result-a | tee audit-summary-a.txt
+      - name: Independent forensic run B and deterministic byte comparison
+        shell: bash
+        run: |
+          python research/independent_wip_209_source_lineage_2026_10_15.py \
+            --wip frozen-wip \
+            --prod frozen-prod \
+            --repair frozen-repair \
+            --manifest research/wip_cached_209_forensic_2026-10-15/wip_cached_209_identity_manifest_2026-10-15.json \
+            --archive original-209-artifact.zip \
+            --out result-b | tee audit-summary-b.txt
+          diff -u audit-summary-a.txt audit-summary-b.txt
+          diff -rq result-a result-b
+          sha256sum result-a/* | tee result-hashes.txt
+          test "$(find result-a -maxdepth 1 -type f | wc -l)" -eq 6
+          test "$(git -C frozen-wip rev-parse HEAD)" = "567c0aab3aaf98a5b8dd788021a26ece41f083e3"
+          test "$(git -C frozen-prod rev-parse HEAD)" = "97ec99389259f8d0cfcecc17a2ff77302bb0615f"
+          test "$(git -C frozen-repair rev-parse HEAD)" = "e325e1f7bde398e7267098f1e5d565aa78dc43ac"
+          test -z "$(git -C frozen-wip status --porcelain)"
+          test -z "$(git -C frozen-prod status --porcelain)"
+          test -z "$(git -C frozen-repair status --porcelain)"
+          echo "Independent two-run byte-parity PASS"
+      - name: Upload isolated immutable result package
+        uses: actions/upload-artifact@v4
+        with:
+          name: independent-wip-209-source-time-lineage
+          path: |
+            result-a/*
+            result-hashes.txt
+            audit-summary-a.txt
+          retention-days: 30
+      - name: Freeze only proof research files on isolated branch
+        shell: bash
+        run: |
+          test "$(git symbolic-ref --short HEAD)" = "proof-wip-209-source-time-lineage-2026-10-15"
+          mkdir -p research/wip_209_independent_lineage_2026-10-15
+          cp result-a/* research/wip_209_independent_lineage_2026-10-15/
+          cp result-hashes.txt research/wip_209_independent_lineage_2026-10-15/
+          cp audit-summary-a.txt research/wip_209_independent_lineage_2026-10-15/
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add research/wip_209_independent_lineage_2026-10-15/
+          git diff --cached --name-only | grep -v '^research/wip_209_independent_lineage_2026-10-15/' && exit 1 || true
+          git commit -m "Freeze isolated independent WIP 209 source lineage audit receipts"
+          git push origin HEAD:proof-wip-209-source-time-lineage-2026-10-15
