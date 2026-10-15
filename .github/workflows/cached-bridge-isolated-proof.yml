@@ -100,6 +100,35 @@ jobs:
           except v.CachedSnapshotError as exc:
               result={"status":"BLOCKED","reason":str(exc),
                       "episode_counts":{k:len(rows) for k,rows in polled.items()}}
+          # Diagnose accepted WIP identities without modifying history or rules.
+          mismatches={}
+          for key,city_state in sorted(state.get("cities",{}).items()):
+              if key not in polled:
+                  continue
+              now_rows=polled[key]
+              ids={ep.get("episode_id") for ep in now_rows}
+              if not now_rows:
+                  continue
+              oldest=min(m.parse_dt(ep.get("alert_end")) for ep in now_rows)
+              newest=max(m.parse_dt(ep.get("alert_end")) for ep in now_rows)
+              missed=[]
+              for old in city_state.get("episodes") or []:
+                  if old.get("identity_superseded_by_episode_id") or old.get("episode_id") in ids:
+                      continue
+                  old_end=m.parse_dt(old.get("alert_end"))
+                  if not old_end or not oldest<=old_end<=newest:
+                      continue
+                  old_start=m.parse_dt(old.get("alert_start"))
+                  nearest=min(now_rows,key=lambda ep:abs((m.parse_dt(ep["alert_end"])-old_end).total_seconds()))
+                  missed.append({"episode_id":old["episode_id"],"start":old.get("alert_start"),
+                                 "end":old.get("alert_end"),"nearest_id":nearest["episode_id"],
+                                 "nearest_start":nearest["alert_start"],"nearest_end":nearest["alert_end"],
+                                 "start_delta_seconds":round((m.parse_dt(nearest["alert_start"])-old_start).total_seconds(),3) if old_start else None,
+                                 "end_delta_seconds":round((m.parse_dt(nearest["alert_end"])-old_end).total_seconds(),3)})
+              if missed:
+                  mismatches[key]={"count":len(missed),"examples":missed[:5]}
+          result["identity_diagnostics"]=mismatches
+          result["total_unmatched_within_snapshot_horizon"]=sum(x["count"] for x in mismatches.values())
           hashes_after={p.name:__import__("hashlib").sha256(p.read_bytes()).hexdigest()
                          for p in (original,queue)}
           assert hashes_before==hashes_after,"WIP data mutated by read-only proof"
