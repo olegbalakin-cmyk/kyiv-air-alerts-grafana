@@ -1,0 +1,47 @@
+name: Kyiv positive success cutoff audit
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "research/kyiv_positive_success_cutoff_audit.py"
+      - ".github/workflows/kyiv-positive-success-cutoff-audit.yml"
+      - "research/attack_event_23city_persistence_snapshot_v2_2026-10-04.json"
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout audit branch
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Verify frozen source identity
+        id: frozen
+        shell: bash
+        run: |
+          set -euo pipefail
+          ACTUAL="$(git rev-parse HEAD:research/attack_event_23city_persistence_snapshot_v2_2026-10-04.json)"
+          echo "actual_blob=$ACTUAL" >> "$GITHUB_OUTPUT"
+          test "$ACTUAL" = "8a2f6bd33f879be9db978da59c12c34e61f6f843"
+
+      - name: Run read-only provenance audit
+        env:
+          FROZEN_BLOB_ACTUAL: ${{ steps.frozen.outputs.actual_blob }}
+          SNAPSHOT_PATH: research/attack_event_23city_persistence_snapshot_v2_2026-10-04.json
+        run: |
+          set -euo pipefail
+          python3 research/kyiv_positive_success_cutoff_audit.py
+
+      - name: Upload durable audit artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: attack_event_kyiv_positive_success_cutoff_audit_2026-10-06
+          path: attack_event_kyiv_positive_success_cutoff_audit_2026-10-06.json
+          if-no-files-found: error
