@@ -1,0 +1,458 @@
+{
+  "schema_version": "neon_single_branch_backup_restore_preflight_v1",
+  "date_utc": "2026-10-15",
+  "repository": "olegbalakin-cmyk/kyiv-air-alerts-grafana",
+  "project_id": "green-cake-44216048",
+  "scope": "Independent metadata-only feasibility and bounded next authorization; NO source connection, new compute, SQL, export, storage, restore, deletion, billing or operational changes.",
+  "repo_preflight": {
+    "main_head": "59ec87f5b678a21829e0ca1b6abf5e611fca0203",
+    "project_state_blob": "06855cef6d817e55019106f08b67dc0e781f0d55",
+    "project_state_read": true,
+    "changelog_read": true,
+    "newer_equivalent_accepted_neon_preflight_found": false,
+    "governing_checkpoint": "NEON TWO-BRANCH SQL PROOF = PARTIAL - INDEPENDENTLY ACCEPTED (FROZEN PROOF / INFRASTRUCTURE SCOPE ONLY)",
+    "main_coordination_update": false,
+    "reason": "No qualified backup destination or approved real restore environment, no independently accepted new state transition."
+  },
+  "predecessors": {
+    "accepted_proof": {
+      "commit": "e6cdb3348ed2502c151789ecb11010d715294033",
+      "path": "research/neon_two_branch_sql_proof_independent_acceptance_and_preservation_contract_2026-10-15.json",
+      "blob_sha1": "1b9613a0471788fd90015b2fb3367eb8936529d5",
+      "utf8_bytes": 27640,
+      "sha256": "9ec1577cdb5ce5b6471b0d51d772171e001f0835f2544c73a19ad52c86045e57",
+      "current_metadata_and_content_rechecked": true
+    },
+    "original_sql": {
+      "commit": "ef207d01e6449ede530ed8431c3006ca39e0f7c0",
+      "path": "research/neon_two_branch_read_only_sql_inspection_2026-10-15.json",
+      "blob_sha1": "4e5dd72351f53c2a9f0e0ad06778ad7345318410",
+      "utf8_bytes": 10454,
+      "sha256": "dca6c632143ed6e64aa3f8fcea7a265b3caaf91db26d1ecbf0ba8fb69f184bc6",
+      "current_metadata_and_content_rechecked": true
+    },
+    "zip_preservation": {
+      "commit": "285e08c7043446cc5abe8da14bf83ba3671f0809",
+      "blob_sha1": "ac7dcda4dbde39430c12b03099c1b867fa82e9e2",
+      "zip_independent_bytes_and_crc_from_prior_accepted_proof": true,
+      "new_zip_download_in_this_preflight": false
+    },
+    "A_actions": {
+      "run": 36407705040,
+      "job": 108880291090,
+      "head": "7b2899e4ab92de855e2a741f482c57ec3e6dbac1",
+      "current_run_status": "completed/success",
+      "zip_artifact": 10962649440,
+      "zip_bytes": 37319,
+      "zip_sha256": "241c9794735a44e0203cbf15b82b7031972925812bbb9ccdfb95051b2919f63f"
+    },
+    "B_actions": {
+      "run": 36456983073,
+      "job": 109045702946,
+      "head": "0882f07f7427f39b79f8af40280f97871cf72db7",
+      "current_run_status": "completed/success",
+      "zip_artifact": 10987225380,
+      "zip_bytes": 3687,
+      "zip_sha256": "294f848fad1bdc5aa42606c73957e0403a78628f27c58f766f165aa5c902ac8d"
+    },
+    "invalid_B_fingerprint": {
+      "field": "branch_B.hashes.source_uuid_set",
+      "observed_hex_chars": 63,
+      "sha256_expected_hex_chars": 64,
+      "status": "INVALID_FINGERPRINT_FORMAT",
+      "instruction": "No retroactive edit. Compute new keyed digests directly from separately authorized real rows in future."
+    },
+    "semantic_scope_warning": "Reported 126 episode/140 source semantic equality is original-verifier-only within a 241-object scoped catalog, not full independent DB equivalence, physical UUID identity or complete PostgreSQL backup."
+  },
+  "live_neon_metadata": {
+    "project_id": "green-cake-44216048",
+    "plan": "free_v3",
+    "pg_major": 18,
+    "region": "aws-us-east-2",
+    "branches": 10,
+    "branch_limit": 10,
+    "archived_branches": 6,
+    "free_slots": 0,
+    "endpoints": 11,
+    "snapshots": 0,
+    "temporary_sql_endpoints_absent": [
+      "ep-spring-credit-b5hw0fyw",
+      "ep-cold-salad-b5e4j6xb"
+    ],
+    "A": {
+      "id": "br-still-sea-b5062r40",
+      "name": "lviv-phase1-adapter-e2e-2026-09-28",
+      "parent": "br-wandering-sunset-b5835alw",
+      "branch_state": "archived",
+      "archived_at": "2026-10-15T10:59:51Z",
+      "protected": false,
+      "children": 0,
+      "logical_size_bytes": 32727040,
+      "databases": [
+        "neondb"
+      ],
+      "database_owner": "neondb_owner",
+      "original_endpoint": "ep-wispy-sea-b5y3qhci",
+      "endpoint_state": "idle",
+      "endpoint_type": "read_write",
+      "endpoint_min_cu": 0.25,
+      "endpoint_max_cu": 2
+    },
+    "B": {
+      "id": "br-quiet-tooth-b51ewryz",
+      "name": "lviv-phase1-shadow-integration-v2-e2e-2026-09-28",
+      "parent": "br-young-feather-b5q19nli",
+      "branch_state": "archived",
+      "archived_at": "2026-10-15T10:59:51Z",
+      "protected": false,
+      "children": 0,
+      "logical_size_bytes": 32751616,
+      "databases": [
+        "neondb"
+      ],
+      "database_owner": "neondb_owner",
+      "original_endpoint": "ep-green-base-b5emkaib",
+      "endpoint_state": "idle",
+      "endpoint_type": "read_write",
+      "endpoint_min_cu": 0.25,
+      "endpoint_max_cu": 2
+    },
+    "logical_size_caveat": "Neon branch logical_size is not a reliable upper bound on pg_dump or encrypted archive bytes.",
+    "provider_state_warning": "Metadata does not prove no off-repo consumers. Original RW endpoints were not used for any SQL here."
+  },
+  "candidates": {
+    "decision": "CANDIDATE_A_PREFERRED",
+    "preferred_retirement_candidate": "A",
+    "no_retirement_authorized": true,
+    "A": {
+      "rows": {
+        "episodes": 126,
+        "sources": 140,
+        "runs": 2,
+        "checkpoints": 1,
+        "observed_total": 269
+      },
+      "unique_history": "Two bootstrap import attempts, one bootstrap checkpoint, distinct physical UUID and FK history",
+      "parent": "Neon root production branch",
+      "children": 0,
+      "backup_complexity": "relatively lower",
+      "confidence": "MEDIUM for simpler historical preservation, LOW for safe deletion",
+      "risk": "External consumers and complete source-state metadata not proven",
+      "cost": "Near equal to B by logical size; real dump/cost unproven"
+    },
+    "B": {
+      "rows": {
+        "episodes": 126,
+        "sources": 140,
+        "runs": 3,
+        "checkpoints": 2,
+        "observed_total": 271
+      },
+      "unique_history": "One bootstrap, two shadow polls, second poll checkpoint/previous checkpoint chain, unique physical UUID and FK history",
+      "parent": "Lviv tx-pilot ancestor",
+      "children": 0,
+      "backup_complexity": "relatively higher",
+      "confidence": "MEDIUM for more unique histories, LOW for safe deletion",
+      "risk": "Additional shadow poll lineage must remain reproducible; hidden consumers unresolved",
+      "cost": "Near equal to A by logical size; real dump/cost unproven"
+    },
+    "reason": "Prefer simpler A for exactly ONE first backup without pretending A and B are physically equivalent. Keep B intact. Neither source may be retired on this research.",
+    "smallest_missing_evidence": "Owner inventory of external consumers and approved storage/runner data processing, followed by fully authorized source catalog/role/physical row attestations."
+  },
+  "storage": {
+    "decision": "PRIVATE_BACKUP_DESTINATION = CONDITIONAL",
+    "preferred": {
+      "provider": "Backblaze",
+      "service": "B2 Cloud Storage",
+      "region_preference": "EU Central / Amsterdam, subject to owner explicit residency approval",
+      "exact_account_bucket_endpoint": "NOT_SELECTED_OR_VERIFIED",
+      "privacy": "Only a private owner-controlled bucket is acceptable",
+      "encryption": "HTTPS transport; provider encrypted at rest; client-side age encryption with separate owner-controlled decryption key",
+      "object_lock": "COMPLIANCE 90 days on EXACT version (not merely bucket feature enabled); verify GetObjectRetention and VersionId",
+      "roles": "Writer key upload-only, verifier key read-only, owner administrative/deletion approval separately controlled; all short lived and scoped",
+      "retention": "Proposed 90 days; owner legal/data classification signoff required",
+      "content_identity": "Key derived from plaintext SHA256 plus immutable encrypted object VersionId; independently verify both archive/cipher SHA256 and lengths",
+      "object_key_design": "neon/green-cake-44216048/br-still-sea-b5062r40/neondb/pg18/<sha256>.dump.age",
+      "independent_readback": "Exact VersionId object fetched with different read-only key and hashed before restore",
+      "billing": "Free first 10GB is provider generic price claim; account usage/egress unknown",
+      "critical_blocker": "B2 Bucket Access Logs available only to paying customers, must be enabled, need an additional unlocked logs bucket; logs best effort and do not audit all administrative operations. No account or approved paid logging verified.",
+      "status": "CONDITIONAL"
+    },
+    "alternatives": [
+      {
+        "provider": "ChatGPT private Library",
+        "status": "NOT_QUALIFIED",
+        "reason": "Actions ZIP preservation, not complete DB/WORM, verified access logs, independent role-separated retirement"
+      },
+      {
+        "provider": "OneDrive/SharePoint",
+        "status": "UNVERIFIED",
+        "reason": "Owner tenant/access unavailable; version history and sync do not create non-bypassable WORM"
+      },
+      {
+        "provider": "Cloudflare R2",
+        "status": "CONDITIONAL",
+        "reason": "Retention locks and administrator removal exposure require independent policy proof, not assumed S3 COMPLIANCE"
+      },
+      {
+        "provider": "Existing AWS S3 bucket",
+        "status": "UNVERIFIED",
+        "reason": "Could qualify with approved exact existing bucket, COMPLIANCE Object Lock, versioning, logs and roles; no owner-side bucket accessible"
+      },
+      {
+        "provider": "Neon integrated branch storage",
+        "status": "NOT_QUALIFIED",
+        "reason": "Not an independent off-Neon survival domain for planned source-branch retirement"
+      }
+    ],
+    "security_gates": [
+      "Approved exact bucket, region, private ACL and data residency",
+      "Proof of object-version compliance lock and retention",
+      "Independent restricted writer, reader and owner principals",
+      "Owner-held age key, rotation and recovery test",
+      "Logging and immutable audit receipt with verified cost/authorization",
+      "Quota, egress and non-zero billing limits checked live"
+    ]
+  },
+  "restore": {
+    "decision": "ISOLATED_PG18_RESTORE_TARGET = CONDITIONAL",
+    "preferred": {
+      "provider": "GitHub Actions hosted runner",
+      "repository": "olegbalakin-cmyk/kyiv-air-alerts-grafana",
+      "repository_visibility": "public",
+      "runner": "ubuntu-24.04",
+      "standard_public_runner": {
+        "cpu": 4,
+        "memory_gb": 16,
+        "ssd_gb": 14,
+        "published_runner_minutes": "free/unlimited under current policy"
+      },
+      "pg": "postgres:18.6 official image, pin specific reviewed architecture digest before execution",
+      "availability": "Existing Actions executions verified; new approval-gated workflow not yet configured",
+      "execution": "Owner-only workflow_dispatch with required reviewer and environment-scoped short-lived secrets; no PR or scheduled access",
+      "runtime_limit_minutes": 30,
+      "security": "No public TCP DB port, no raw SQL dumps or query contents printed, no artifact uploads/caches/backups in public repo, no set -x/debug, restrict GITHUB_TOKEN to contents:read, pin actions SHAs",
+      "material": "Retrieve encrypted backup via TLS exact version; verify and decrypt only in ephemeral isolated job after owner acceptance",
+      "risk": "PUBLIC Actions job logs and secrets administration can expose sensitive content; GitHub's redaction is not guaranteed. Explicit owner data-classification and third-party processor approval required.",
+      "cleanup": "Kill container, delete Docker volume and temp files, revoke scoped keys, confirm workflow execution receipt and no raw public outputs.",
+      "status": "CONDITIONAL"
+    },
+    "alternatives": [
+      {
+        "provider": "Owner-controlled local isolated PG18 Docker",
+        "status": "NOT_VERIFIED",
+        "reason": "No owner Docker/runtime/disk/access confirmation; preferred substitute when PUBLIC Actions cannot handle data"
+      },
+      {
+        "provider": "Another cloud PG18 project",
+        "status": "NOT_SELECTED",
+        "reason": "New account/compute and potential charges not authorized, and would not use current 10/10 Neon branch quota"
+      }
+    ]
+  },
+  "export_contract": {
+    "decision": "PG18_EXPORT_COMPATIBILITY = CONDITIONAL; READ_ONLY_EXPORT_FEASIBILITY = CONDITIONAL",
+    "scope": "One and only one source branch A, entire neondb database; database-global PostgreSQL objects, permissions/settings, provider branch metadata separately inventoried",
+    "client": "pg_dump 18.x against server PG18; direct (NON-pooler) TLS sslmode=verify-full",
+    "source_compute": "one fixed 0.25 CU read_only endpoint, only if independently authorized; otherwise fail closed",
+    "tools": [
+      "pg_dump --format=custom --blobs --create --file=\"$PRIVATE_TMP/neondb.dump\" \"$PG_DSN_DIRECT\"",
+      "pg_restore --list \"$PRIVATE_TMP/neondb.dump\" > \"$PRIVATE_TMP/restore_toc.txt\"",
+      "pg_dumpall --globals-only --no-role-passwords --file=\"$PRIVATE_TMP/globals.sql\" \"$DIRECT_GLOBALS_DSN\" (ONLY IF metadata-only privilege feasible and authorized)"
+    ],
+    "snapshot": "pg_dump one consistent source snapshot. Independently capture full catalog and per-row source attestations in same exported snapshot if pg_export_snapshot / --snapshot is available; otherwise prove no writers and pre/post equality or stop. Never claim cross-session consistency automatically.",
+    "privileges": "Require SELECT access to all tables, partitions, large objects, sequences, metadata and schema; role/owner/ACL and global coverage. Read-only role can be insufficient; fail rather than silently exclude.",
+    "required_components": [
+      "All schemas, tables, columns, indexes, constraints, FKs, partitions and views/materialized views/results",
+      "All functions, triggers, RLS, privileges, defaults, ownership, extensions/versions, sequences last_value/is_called, migration state",
+      "All original physical UUIDs, PK values, exact table values, business keys, FK and duplicate graph",
+      "Every ingestion run and checkpoint UUID, payload, timestamp and previous checkpoint relation",
+      "Other databases (Neon metadata currently shows only neondb), global roles and cluster-level settings",
+      "Neon branch parent/provenance metadata recorded; WAL/COW/provider internal pages expressly excluded"
+    ],
+    "forbidden_shortcuts": [
+      "Four app-table JSONs instead of complete pg_dump",
+      "Automatic --no-owner or --no-acl",
+      "Pooled source URL",
+      "Assumed RLS bypass or universal catalog select privilege",
+      "Assumed globals are in pg_dump",
+      "Publishing raw rows or secrets in repository or artifact"
+    ]
+  },
+  "manifest_design": {
+    "sanitized_public_fields": [
+      "project ID, branch ID/name, parent ID and parent LSN",
+      "database name and PG server/client versions, start/end UTC, consistent snapshot/freeze method",
+      "Complete schema/catalog/extension/table, sequence, migration and global role inventory DIGESTS",
+      "Per-table exact row counts and original PK/UUID/business-key/FK ledger DIGESTS without exposing raw identifiers",
+      "All ingestion run/checkpoint history DIGESTS and counts",
+      "Archive format, original plaintext archive bytes and SHA256",
+      "Encrypted archive bytes/SHA256 and crypto scheme without keys",
+      "Bucket/account region, private object key and exact VersionId, retention mode and retain-until UTC",
+      "Separate independent object readback receipt and source/restored attestation IDs",
+      "Original frozen Git/Actions receipts and new verifier commit/runner IDs",
+      "Any missing or inaccessible components explicitly listed, never silently omitted"
+    ],
+    "separately_encrypted_private_fields": [
+      "Complete original per-row full typed value ledger keyed by each original PK/UUID, with duplicate multiplicity",
+      "Original run/checkpoint data, optional sensitive metadata and roles/ACL entries",
+      "Original pg_dump and any globals/role-preservation material"
+    ],
+    "historical_invalid_fingerprint": "Keep original B 63-character hash as invalid predecessor; new future digests independently computed directly from source data."
+  },
+  "restore_acceptance": {
+    "steps": [
+      "Owner-approved verifier GET exact private object VersionId and SHA256/length; independently verify object retention and restore accessibility",
+      "Decrypt in restricted ephemeral environment and verify original PG18 custom dump digest plus pg_restore TOC",
+      "Create separate isolated PG18 cluster and database with matching required extensions/locales, never in original 10-branch Neon project",
+      "Restore required globals/roles/ownership/ACLs or fail if exact accepted privilege contract cannot be reconstructed",
+      "Run pg_restore with --exit-on-error, no suppressed warnings or data transformations",
+      "Compare source-original and restored exact catalog scope, all table counts and original UUID/PK/business-key sets",
+      "Independently recompute complete per-primary-key full-row digests with explicit types/NULL/timestamps/JSON/multiplicities",
+      "Reconcile foreign keys, source duplicate links, ingestion-run identities, checkpoints and previous_checkpoint chain, sequence state, views and migration state",
+      "Assert exactly zero missing/extra/changed rows, attributes, identities and broken relationships",
+      "Freeze sanitized independent source/restored comparison and cleanup all ephemeral DB/keys/files without uploading raw data"
+    ],
+    "zero_tolerance": {
+      "missing": 0,
+      "extra": 0,
+      "changed_full_rows": 0,
+      "changed_primary_keys_or_uuids": 0,
+      "broken_fks": 0,
+      "missing_run_ids": 0,
+      "missing_checkpoints": 0,
+      "changed_sequences": 0,
+      "unapproved_schema_or_acl_differences": 0
+    },
+    "allowed_future_conclusion": "LOGICAL_DATABASE_STATE_RESTORED = PASS only after independently reconciled full-state restoration",
+    "never_claim": "ORIGINAL_NEON_PHYSICAL_BRANCH_STATE_REPRODUCED = PASS (physical WAL/COW/timeline omitted from logical dump)"
+  },
+  "dependencies": {
+    "status": "UNRESOLVED",
+    "main_workflows_checked_in_accepted_proof": 17,
+    "exact_target_branch_refs_in_main_code_search": "Only PROJECT_STATE; none in active workflows",
+    "original_endpoint_refs_in_main_search": 0,
+    "target_neon_children": 0,
+    "available_snapshots": 0,
+    "owner_required_checks": [
+      "All other Git branches, deployed jobs/apps and non-GitHub endpoint consumers",
+      "All credential holders, application keys, active URLs, secrets and scheduled off-repo tasks",
+      "Endpoint logs and dependent services where safely observable",
+      "Original evidence proofs and ancestor/dependent snapshot preservation needs",
+      "Last-minute deletion-specific dependency recheck plus separate explicit owner retirement authorization"
+    ],
+    "caveat": "No main-string hits, no children, and one successful logical restore do not prove retirement safety."
+  },
+  "costs": {
+    "known": {
+      "neon_branch_A_logical_bytes": 32727040,
+      "source_compute_proposed_cu": 0.25,
+      "source_compute_time_ceiling_minutes": 60,
+      "source_max_cu_hours": 0.25,
+      "pg18_restore_gha_timeout_minutes": 30,
+      "gha_public_standard_minutes": "published free/unlimited",
+      "neon_free_generic": "Current public documentation 100 CU hours/project/month, 10 branches, 1GB storage; actual account usage must be verified"
+    },
+    "future_hard_limits": {
+      "plaintext_dump_max_bytes": 1073741824,
+      "encrypted_upload_max_bytes": 1073741824,
+      "readback_download_max_bytes": 2147483648,
+      "retention_days": 90,
+      "additional_cost_usd_proposed_ceiling": 1
+    },
+    "unproven": [
+      "Real pg_dump and compression size",
+      "Remaining account CU-hours, egress and Neon unarchiving/re-archive charges",
+      "B2 real owner quota, egress and paid access logging",
+      "Local vs GitHub runner data handling authorization",
+      "Exact 0 USD total cost"
+    ],
+    "safety": "No billing change or paid infrastructure now. Future operations stop if quotas, privacy, audit logs or charges exceed explicitly authorized ceiling. USD 1 is only a proposed ceiling, not permission already granted."
+  },
+  "next_stage_auth": {
+    "status": "REQUIRES_OWNER_DECISION",
+    "text": "Authorize exactly one temporary full logical PG18 export from Neon project green-cake-44216048, archived branch br-still-sea-b5062r40, database neondb. Permit temporary unarchive and at most one independently restricted read_only endpoint fixed 0.25 CU for at most 60 minutes; direct TLS verify-full, full pg_dump -Fc with complete neondb schema/data/large objects and separate read-only role, ACL, global and provider metadata attestation. No source DML, DDL or authority changes. Permit age-encrypted (owner-kept key) upload of maximum 1 GiB to exactly owner-approved private Backblaze B2 EU Central bucket [REQUIRES EXACT BUCKET/REGION/ENDPOINT], with compliance Object Lock 90 days, exact immutable VersionId and SHA256, independent separate-principal readback and approved access/deletion logging. Permit 1 owner-gated manual workflow_dispatch on GitHub public-repository ubuntu-24.04 runner, 4 CPUs, 16 GiB RAM, 14 GB SSD, at most 30 minutes, official pinned PG18 Docker image, after explicit owner consent for sensitive source data handling and secret/log exposure; alternatively specify exact owner-controlled isolated local PostgreSQL 18 Docker host. Require independent source-vs-restored complete row/UUID/PK/FK/run/checkpoint/schema/role/sequence reconciliation with zero mismatches. Allow deletion only of newly created temporary compute, restoring Docker containers and temporary local files, NEVER deletion of source branch. Limit source transfer 1 GiB, verifier downloads 2 GiB and total extra provider charge <=USD 1 only if owner separately approves after account-specific limits are confirmed. Stop if any control/ceiling is unproven, an account upgrade or new payment method is needed, or raw source content would enter public logs/artifacts. Do NOT create another Neon branch, alter billing, production, WIP, H1/H2 historical state or run H2 tests.",
+    "unresolved_owner_values": [
+      "Exact existing or new private B2 bucket, region, S3 endpoint, quota and 90-day compliance configuration",
+      "Audit/deletion logging costs and independent log retention acceptance",
+      "Data classification, region and explicit public GitHub Actions data processing authorization (or exact owner local PG18 Docker target)",
+      "Exact read/write/verify keys and key lifecycle, created separately after authorization",
+      "Acceptance of proposed 0.25-CU, 60-min, 1-GiB, 2-GiB, 30-min and USD-1 ceilings"
+    ],
+    "deletion_explicitly_out_of_scope": true
+  },
+  "verification": {
+    "completed": [
+      "Current main/docs and accepted predecessors read through GitHub connector",
+      "Commits and successful original Actions run metadata checked",
+      "Live Neon archived branch, parent, compute, database and snapshot inventory via read-only metadata",
+      "Official PostgreSQL 18, Backblaze B2 and GitHub runner/security documentation researched"
+    ],
+    "separate_verifier": "NOT YET INDEPENDENTLY ACCEPTED; second-pass file integrity and negative-control checks may run after freeze, but owner-side private storage/access proof cannot be simulated.",
+    "negative_controls": [
+      "Normalized rows are not full physical equality",
+      "Actions ZIPs are not whole database backups",
+      "Private synchronized files are not automatically WORM",
+      "pg_dump success is not pg_restore success",
+      "Successful restore alone never authorizes source deletion",
+      "Research branch does not change production authority",
+      "Historical invalid 63-char hash is not secretly fixed",
+      "Public Actions runners are not implicitly privacy-safe",
+      "B2 Object Lock feature enablement does not prove per-version active COMPLIANCE",
+      "No B2 paying-customer access logs should be assumed on free storage"
+    ]
+  },
+  "execution_receipt": {
+    "neon_sql_queries": 0,
+    "neon_compute_starts": 0,
+    "neon_compute_creates": 0,
+    "neon_branch_creates": 0,
+    "neon_branch_deletions": 0,
+    "neon_database_mutations": 0,
+    "private_storage_objects_created": 0,
+    "databases_exported": 0,
+    "pg_restore_executions": 0,
+    "billing_changes": 0,
+    "production_changes": 0,
+    "main_docs_changes": 0,
+    "wip_changes": 0,
+    "historical_H2_promotions": 0,
+    "secret_or_raw_row_in_research_file": false
+  },
+  "verdicts": {
+    "NEON_SINGLE_BRANCH_BACKUP_RESTORE_PREFLIGHT": "CONDITIONAL",
+    "PREFERRED_RETIREMENT_CANDIDATE": "A",
+    "PRIVATE_BACKUP_DESTINATION": "CONDITIONAL",
+    "ISOLATED_PG18_RESTORE_TARGET": "CONDITIONAL",
+    "PG18_EXPORT_COMPATIBILITY": "CONDITIONAL",
+    "READ_ONLY_EXPORT_FEASIBILITY": "CONDITIONAL",
+    "FULL_LOGICAL_PRESERVATION_CONTRACT": "CONDITIONAL",
+    "EXTERNAL_DEPENDENCIES": "UNRESOLVED",
+    "ZERO_ADDITIONAL_COST": "NOT_PROVEN",
+    "NEXT_STAGE_AUTHORIZATION": "REQUIRES_OWNER_DECISION",
+    "BRANCH_A_RETIREMENT": "NOT_PROVEN",
+    "BRANCH_B_RETIREMENT": "NOT_PROVEN",
+    "SAFE_BRANCH_SLOT_RECOVERY": "NOT_PROVEN",
+    "NEON_SQL_QUERIES": 0,
+    "NEON_COMPUTE_STARTS": 0,
+    "NEON_DATABASE_MUTATIONS": 0,
+    "NEON_BRANCH_DELETIONS": 0,
+    "H2_NINE_CASE_DISPOSABLE_NEON_REVISION_TEST": "BLOCKED",
+    "H2_HISTORICAL_AUTHORITY_PROMOTIONS": 0,
+    "UNBOUND_UNRESOLVED": 25,
+    "C4": "NOT PROVEN",
+    "C5": "NOT PROVEN",
+    "NEON_AUTHORITY_ACTIVE": "NO",
+    "PRODUCTION_CUTOVER_EXECUTED": "NO"
+  },
+  "sources": [
+    "https://www.postgresql.org/docs/18/app-pgdump.html",
+    "https://www.postgresql.org/docs/18/app-pg-dumpall.html",
+    "https://www.backblaze.com/docs/cloud-storage-object-lock",
+    "https://www.backblaze.com/docs/cloud-storage-configure-audit-and-access-logging",
+    "https://www.backblaze.com/docs/cloud-storage-data-regions",
+    "https://docs.github.com/en/actions/reference/runners/github-hosted-runners",
+    "https://docs.github.com/en/actions/reference/security/secure-use",
+    "https://neon.com/blog/neon-free-plan-1-gb-per-project"
+  ]
+}
