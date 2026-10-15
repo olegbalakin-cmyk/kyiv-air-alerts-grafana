@@ -144,7 +144,7 @@ class SnapshotValidationTests(unittest.TestCase):
 
     def test_invalid_event_timestamp(self):
         self.data[0]["events"][0]["end"] = "broken"
-        self.assert_rejected("malformed timestamp")
+        self.assert_rejected("timezone is missing")
 
     def test_event_region_identity(self):
         self.data[0]["events"][0]["region_id"] = "999"
