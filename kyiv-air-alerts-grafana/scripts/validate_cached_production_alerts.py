@@ -184,7 +184,7 @@ def validate_snapshot(
         "kyiv_exact_city_intervals": kyiv_count, "sevastopol_exact_city_intervals": seva_count,
         "input_sha256": input_hashes, "input_bytes": {
             "ukrainealarm_bridge.json": bridge_size, "alerts_combined.json": kyiv_size,
-            "sevastopol_events.json": seva_size,
+            "sevastopol_events.json": sev_size,
         }, "snapshot_sha256": snapshot_hash,
     }
 
