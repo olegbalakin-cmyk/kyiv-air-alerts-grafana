@@ -121,6 +121,9 @@ class SnapshotValidationTests(unittest.TestCase):
         for row in self.data[0]["regions"].values():
             row["last_checked_at"] = timestamp(dt)
         self.data[2]["meta"]["updated_at"] = timestamp(dt)
+        for event in self.data[0]["events"]:
+            event["start"] = timestamp(dt - timedelta(hours=1))
+            event["end"] = timestamp(dt - timedelta(minutes=45))
         self.assertTrue(evaluate(self.data)["ok"])
 
     def test_just_above_12h(self):
