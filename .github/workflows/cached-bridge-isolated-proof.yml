@@ -50,6 +50,23 @@ jobs:
           assert "mode = \"cached_bridge\"" in text
           print("cached route source static checks PASS")
           PY
+      - name: Checkout one pinned production snapshot read-only
+        uses: actions/checkout@v4
+        with:
+          ref: 97ec99389259f8d0cfcecc17a2ff77302bb0615f
+          path: pinned-prod
+          persist-credentials: false
+          fetch-depth: 1
+      - name: Validate actual pinned 21-region source without UkraineAlarm requests
+        run: |
+          mkdir -p proof
+          test "$(git -C pinned-prod rev-parse HEAD)" = "$PRODUCTION_ALERT_SOURCE_COMMIT"
+          python kyiv-air-alerts-grafana/scripts/validate_cached_production_alerts.py \
+            --bridge-file pinned-prod/kyiv-air-alerts-grafana/data/ukrainealarm_bridge.json \
+            --kyiv-alerts-file pinned-prod/kyiv-air-alerts-grafana/data/alerts_combined.json \
+            --sevastopol-events-file pinned-prod/kyiv-air-alerts-grafana/data/sevastopol_events.json \
+            --source-commit-sha "$PRODUCTION_ALERT_SOURCE_COMMIT" \
+            --output proof/pinned-production-source.json
       - name: Emit synthetic proof receipt
         run: |
           mkdir -p proof
@@ -75,5 +92,5 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: cached-bridge-isolated-proof
-          path: proof/cached-bridge-synthetic.json
+          path: proof/*.json
           retention-days: 30
