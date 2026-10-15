@@ -1,0 +1,219 @@
+{
+  "schema_version": "neon-two-archived-branches-read-only-sql-inspection-v1",
+  "audit_date_utc": "2026-10-15",
+  "project_id": "green-cake-44216048",
+  "scope": "Two exact Phase-1 historical branches only; current SQL readback via isolated temporary read_only compute; no DML/DDL/role changes, branch copies, merge, reset, restore, or branch deletion.",
+  "github": {
+    "main_head": "d425c3475565b4db1c36c472ab967b3283811d43",
+    "coordination_files_read_from_main": true,
+    "project_state_blob": "a20b2eacd5d037041ae46c235a8172aa1f0c0a98",
+    "changelog_blob": "bc5e09eb25053a2eb107660a80005ae052735b40",
+    "predecessor_proof_commit": "bf1799d22094957e6d47da94319b849e948129ff",
+    "preserved_original_actions_receipt_commit": "285e08c7043446cc5abe8da14bf83ba3671f0809",
+    "original_A_actions_run": 36407705040,
+    "original_B_actions_run": 36456983073
+  },
+  "access": {
+    "plan": "free_v3",
+    "branch_limit": 10,
+    "branches_at_preflight": 10,
+    "region": "aws-us-east-2",
+    "database": "neondb",
+    "free_plan_explicit_zero_usd_charge_unproven": "No payment, plan change, or direct paid purchase performed; account free_v3; does not assert provider billing settlement",
+    "original_read_write_endpoints_untouched": true,
+    "attempted_custom_suspend_interval_rejected_http_412": true,
+    "read_only_compute_created": [
+      {
+        "branch": "br-still-sea-b5062r40",
+        "id": "ep-spring-credit-b5hw0fyw",
+        "cu_min": 0.25,
+        "cu_max": 0.25,
+        "created_at": "2026-10-15T10:45:57Z"
+      },
+      {
+        "branch": "br-quiet-tooth-b51ewryz",
+        "id": "ep-cold-salad-b5e4j6xb",
+        "cu_min": 0.25,
+        "cu_max": 0.25,
+        "created_at": "2026-10-15T10:47:18Z"
+      }
+    ],
+    "all_new_endpoints_deleted": true,
+    "verified_endpoint_count_after_cleanup": 11,
+    "session_check": "0 other client sessions observed on both target databases at final SQL check",
+    "transaction_settings": {
+      "isolation": "repeatable read",
+      "read_only": "on",
+      "pg_is_in_recovery": true
+    },
+    "compute_time_observed_caveat": "Project cumulative compute_time_seconds was 31665 before and immediately after audit; usage counters may lag. No exact billed CU-hour readback; transient 0.25-CU endpoints existed for approximately 7-8 minutes each before deletion, under 0.5 CU-hours even conservatively.",
+    "at_final_check_target_branch_states": "ready, automatic re-archive pending"
+  },
+  "branch_A": {
+    "branch_id": "br-still-sea-b5062r40",
+    "parent_id": "br-wandering-sunset-b5835alw",
+    "database": "neondb",
+    "observed_sql_at": "2026-10-15T10:50:56.626Z",
+    "counts": {
+      "alert_episodes": 126,
+      "alert_episode_sources": 140,
+      "ingestion_runs": 2,
+      "ingestion_checkpoints": 1
+    },
+    "hashes": {
+      "schema": "60a4b1ea66c0f59b2fb5b0ceb581181288e1020b994eebca4fac9dbbdd2ef615",
+      "episode_business_identity_set": "fa6cb466ca578068b573fcf9e1c1570963c729cd5b7e807fe662dcfad29d0bd7",
+      "episode_semantic_set": "436278be2e2a86bf0c30b8c8a11b5429076320ee4a329c0b2bb72d9582c1bd5a",
+      "source_business_identity_set": "4ba656ad195f68c273e932b45e1b178e2121c65a7448fa1e6b2d9984c92e91c1",
+      "source_semantic_set": "349d9bf5e3881472275a62831c0334fea25a812667ffa8b2cd99240875212647",
+      "episode_uuid_set": "58ec3d71d68e54e711b37d2c9f07e5ff3a7566c32f4bd06c95f8e124a7621994",
+      "source_uuid_set": "9fa6f02b01a5393cc658248c489ad81a4438d58a46bb0a4ddac795fea6dc458d",
+      "ingestion_runs_full_set": "f107fa8f56c4b4411b154c0904dc77607ef081ebbd49f25fb66b4ac79d9b548b",
+      "ingestion_checkpoints_full_set": "3e6b93932535118f9437657e3092b27f42656c93a24154bf81e45af6ac57b1c1"
+    },
+    "source_counts": {
+      "ukrainealarm_region_history": 20,
+      "vadimkin_official_data_uk": 120
+    },
+    "run_kinds": {
+      "bootstrap_import/succeeded": 2
+    },
+    "checkpoint_kinds": {
+      "1/bootstrap": 1
+    }
+  },
+  "branch_B": {
+    "branch_id": "br-quiet-tooth-b51ewryz",
+    "parent_id": "br-young-feather-b5q19nli",
+    "database": "neondb",
+    "observed_sql_at": "2026-10-15T10:50:59.820Z",
+    "counts": {
+      "alert_episodes": 126,
+      "alert_episode_sources": 140,
+      "ingestion_runs": 3,
+      "ingestion_checkpoints": 2
+    },
+    "hashes": {
+      "schema": "60a4b1ea66c0f59b2fb5b0ceb581181288e1020b994eebca4fac9dbbdd2ef615",
+      "episode_business_identity_set": "fa6cb466ca578068b573fcf9e1c1570963c729cd5b7e807fe662dcfad29d0bd7",
+      "episode_semantic_set": "436278be2e2a86bf0c30b8c8a11b5429076320ee4a329c0b2bb72d9582c1bd5a",
+      "source_business_identity_set": "4ba656ad195f68c273e932b45e1b178e2121c65a7448fa1e6b2d9984c92e91c1",
+      "source_semantic_set": "349d9bf5e3881472275a62831c0334fea25a812667ffa8b2cd99240875212647",
+      "episode_uuid_set": "9fd8f2f1100279bb552b0dfba19390d0352a83238e81581fb8a040a481542468",
+      "source_uuid_set": "a59bdf342955a64deeb53c71b40704d6d8fc56b450b950efca51b21b8b20eb2",
+      "ingestion_runs_full_set": "af099582c6e800db4b052bb7d2350f910c9f143c908c04f1a7179d5dbfd0f402",
+      "ingestion_checkpoints_full_set": "84a5e626aeeaa8e11d30de64baba4cd59a47a708f8765ad2519f2a76567c39e9"
+    },
+    "source_counts": {
+      "ukrainealarm_region_history": 20,
+      "vadimkin_official_data_uk": 120
+    },
+    "run_kinds": {
+      "bootstrap_import/succeeded": 1,
+      "shadow_poll/succeeded": 2
+    },
+    "checkpoint_kinds": {
+      "1/bootstrap": 1,
+      "2/poll": 1
+    }
+  },
+  "schema_comparison": {
+    "matching_hash": true,
+    "object_count": 241,
+    "object_counts": {
+      "view": 1,
+      "index": 14,
+      "column": 97,
+      "relation": 19,
+      "extension": 1,
+      "namespace": 1,
+      "constraint": 108
+    },
+    "method": "Sorted SQL-catalog canonical text entries SHA-256 within read-only transactions, including non-system namespaces, relations, columns, constraints, indexes, views, user-defined triggers/functions and extensions; logical system object count includes internal relkind entries.",
+    "limitations": "May not certify global cluster parameters, Neon integration state, every ACL/owner or hidden extension internal object; not a database backup."
+  },
+  "comparison": {
+    "episodes": {
+      "A": 126,
+      "B": 126,
+      "intersection_business_keys": 126,
+      "only_A": 0,
+      "only_B": 0,
+      "matching_normalized_semantics": 126,
+      "diverging_normalized_semantics": 0,
+      "matching_physical_uuids": 0,
+      "different_full_rows": 126
+    },
+    "sources": {
+      "A": 140,
+      "B": 140,
+      "intersection_business_keys": 140,
+      "only_A": 0,
+      "only_B": 0,
+      "matching_normalized_semantics": 140,
+      "diverging_normalized_semantics": 0,
+      "matching_physical_uuids": 0,
+      "different_full_rows": 140
+    },
+    "runs": {
+      "A": 2,
+      "B": 3,
+      "uuid_intersection": 0,
+      "only_A": 2,
+      "only_B": 3
+    },
+    "checkpoints": {
+      "A": 1,
+      "B": 2,
+      "uuid_intersection": 0,
+      "only_A": 1,
+      "only_B": 2,
+      "normalized_checkpoint_semantics_only_B": 1
+    },
+    "integrity": {
+      "orphan_sources_to_episodes_A": 0,
+      "orphan_sources_to_episodes_B": 0,
+      "legacy_episode_id_distinct_A": 126,
+      "legacy_episode_id_distinct_B": 126,
+      "current_checkpoint_view_count_A": 1,
+      "current_checkpoint_view_count_B": 1,
+      "raw_sha256_present_A": 0,
+      "raw_sha256_present_B": 0
+    }
+  },
+  "hash_protocol": "In Postgres SHA-256 = encode(sha256(convert_to(text,'UTF8')),'hex'). ID = jsonb_build_array business key, where episodes (city_key,alert_type,start_at,end_at) and sources (source_key,source_record_key_version,source_record_key). Per-row SHA-256 computed over normalized JSONB::text. Set digest = SHA-256 of sorted individual digests LF-joined with terminal LF. Semantic episodes exclude [episode_uid,created_by_run_id,updated_by_run_id,created_at,updated_at]. Semantic sources exclude [source_observation_id,episode_uid,first_persisted_by_run_id,last_seen_by_run_id,first_persisted_at,last_seen_at], and include bound episode business interval. Run/checkpoint normalized hashes exclude ephemeral IDs and selected time fields. UUID hashes separately computed. This is a research comparison fingerprint, not original persistence canonical key.",
+  "verification": {
+    "same_transaction_read_only_settings_on_both": true,
+    "repeated_separate_SQL_counts_match_on_both": true,
+    "full_row_hash_reconciliation_per_business_identity": "126/126 episode and 140/140 source row normalized fingerprint matches, aggregated by JS comparison of Postgres-reported SHA-256 digests; raw row payload not exported",
+    "same_schema_fingerprint": true,
+    "original_A_B_actions_jobs_verified_success": true,
+    "independent_second_implementation_of_full_semantic_hasher": false,
+    "original_zip_preservation_previous_receipt_reused": true,
+    "preexisting_local_16861_byte_sha256": "b5b521e339f680abcf0cb2094b34d8333ed4dbf96e1d1c53aa55c29c2a818bf0",
+    "preexisting_local_16861_byte_artifact_original_bytes_independently_verified": false,
+    "preexisting_local_file_git_accepted": false
+  },
+  "verdict": {
+    "NEON_TWO_BRANCH_READ_ONLY_SQL_INSPECTION": "PARTIAL - CURRENT ROW COMPARISON PASS; PRESERVATION/RETIREMENT NOT PROVEN",
+    "SCHEMA_MATCH": "PASS_WITH_DEFINED_SQL_SCOPE",
+    "ALERT_EPISODE_SEMANTIC_EQUALITY": "126/126",
+    "SOURCE_LINK_SEMANTIC_EQUALITY": "140/140",
+    "RUN_AND_CHECKPOINT_HISTORY_EQUALITY": "NO",
+    "BRANCH_A_RETIREMENT": "NOT_PROVEN",
+    "BRANCH_B_RETIREMENT": "NOT_PROVEN",
+    "SAFE_BRANCH_SLOT_RECOVERY": "NOT_PROVEN",
+    "NEON_BRANCH_DELETIONS": 0,
+    "NEON_DATABASE_MUTATIONS": 0,
+    "NEON_ORIGINAL_ENDPOINT_DELETIONS": 0,
+    "NEON_TEMPORARY_ENDPOINT_DELETIONS": 2,
+    "PRODUCTION_MUTATIONS": 0
+  },
+  "next_gates": [
+    "Preserve complete unique ingestion runs, checkpoint lineage, experiment-specific metadata and ability to reconstruct branch-local state before proposing retirement.",
+    "Independently certify full SQL fingerprint algorithm with a separate implementation plus committed re-read of research JSON bytes.",
+    "Review hidden/external endpoint consumers and unique experimental resources; equal canonical content is not a deletion mandate.",
+    "Seek separate owner authorization and independent acceptance for any future consolidation/branch deletion.",
+    "Verify later automatic re-archiving; present final state ready not archived."
+  ]
+}
