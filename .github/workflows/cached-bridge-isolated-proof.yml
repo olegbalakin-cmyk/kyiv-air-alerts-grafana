@@ -67,6 +67,51 @@ jobs:
             --sevastopol-events-file pinned-prod/kyiv-air-alerts-grafana/data/sevastopol_events.json \
             --source-commit-sha "$PRODUCTION_ALERT_SOURCE_COMMIT" \
             --output proof/pinned-production-source.json
+      - name: Read-only 23-city WIP state and cached episode regression probe
+        working-directory: kyiv-air-alerts-grafana
+        run: |
+          pip install -r requirements.txt
+          python - <<'PY'
+          import json, sys, pathlib, datetime
+          from unittest.mock import patch
+          sys.path.insert(0, "scripts")
+          import monitor_explosion_candidates as m
+          import validate_cached_production_alerts as v
+          prod=pathlib.Path("../pinned-prod/kyiv-air-alerts-grafana/data")
+          original=pathlib.Path("data/explosion_candidate_monitor_state.json")
+          queue=pathlib.Path("data/explosion_review_queue.json")
+          hashes_before={p.name:__import__("hashlib").sha256(p.read_bytes()).hexdigest()
+                         for p in (original,queue)}
+          with patch.dict(__import__("os").environ, {"UKRAINEALARM_API_TOKEN": ""}):
+              with patch.object(m.ua, "UkraineAlarmClient", side_effect=AssertionError("UkraineAlarm client attempted")):
+                  snapshot=v.validate_snapshot(
+                      prod/"ukrainealarm_bridge.json",prod/"alerts_combined.json",
+                      prod/"sevastopol_events.json",now=datetime.datetime.now(datetime.timezone.utc),
+                      source_commit_sha="97ec99389259f8d0cfcecc17a2ff77302bb0615f")
+                  polled,errors=m.poll_cached_bridge(
+                      prod/"ukrainealarm_bridge.json",datetime.datetime.now(datetime.timezone.utc),
+                      prod/"alerts_combined.json",prod/"sevastopol_events.json")
+          assert not errors, errors
+          state=m.ensure_state()
+          try:
+              regression=v.validate_episode_regression(polled,state,snapshot,
+                                                        is_proxy=m.is_raion_proxy_city)
+              result={"status":"PASS","regression":regression}
+          except v.CachedSnapshotError as exc:
+              result={"status":"BLOCKED","reason":str(exc),
+                      "episode_counts":{k:len(rows) for k,rows in polled.items()}}
+          hashes_after={p.name:__import__("hashlib").sha256(p.read_bytes()).hexdigest()
+                         for p in (original,queue)}
+          assert hashes_before==hashes_after,"WIP data mutated by read-only proof"
+          result.update({"cached_city_count":len(polled),
+                         "cached_episode_count":sum(len(x) for x in polled.values()),
+                         "source_validation_status":"PASS",
+                         "zero_ukrainealarm_client_instantiations":True,
+                         "WIP_state_and_queue_unchanged":True})
+          pathlib.Path("../proof/wip-readonly-regression.json").write_text(
+              json.dumps(result,ensure_ascii=False,indent=2)+"\n",encoding="utf-8")
+          print(json.dumps(result,ensure_ascii=False,indent=2))
+          PY
       - name: Emit synthetic proof receipt
         run: |
           mkdir -p proof
