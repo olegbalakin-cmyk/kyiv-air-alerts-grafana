@@ -1,0 +1,62 @@
+name: Isolated Kyiv 185 historical site-prod input recovery
+on:
+  push:
+    branches: [proof-kyiv-185-siteprod-input-lineage-2026-10-15]
+    paths: [.github/workflows/kyiv-185-historical-siteprod-proof.yml]
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  recover:
+    runs-on: ubuntu-latest
+    timeout-minutes: 50
+    steps:
+      - name: Checkout exact research branch
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Assert frozen sources
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REF_NAME" = "proof-kyiv-185-siteprod-input-lineage-2026-10-15"
+          git fetch --no-tags origin main site-prod multicity-wip-2026-09-16 proof-wip-209-source-time-lineage-2026-10-15
+          test "$(git rev-parse origin/main)" = "d425c3475565b4db1c36c472ab967b3283811d43"
+          test "$(git rev-parse origin/site-prod)" = "97ec99389259f8d0cfcecc17a2ff77302bb0615f"
+          test "$(git rev-parse origin/multicity-wip-2026-09-16)" = "567c0aab3aaf98a5b8dd788021a26ece41f083e3"
+          test "$(git rev-parse origin/proof-wip-209-source-time-lineage-2026-10-15)" = "e55246eacc5044f5d75ff138a78fe3e01331beea"
+          mkdir -p /tmp/kyiv-185-producer-evidence /tmp/kyiv-185-proof/a /tmp/kyiv-185-proof/b
+      - name: Download exact original 209-case archive
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          curl --fail --silent --show-error --location -H "Authorization: Bearer $GH_TOKEN" -H "Accept: application/vnd.github+json" "https://api.github.com/repos/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/artifacts/11956428181/zip" -o original-209-artifact.zip
+          echo "0d10cceb48b6266a67faab90bad27201b7be8537bb244d7008824ffc3227e486  original-209-artifact.zip" | sha256sum --check
+      - name: Capture original producer job runtime receipts
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python research/kyiv_185_historical_siteprod_input_2026-10-15/kyiv_185_historical_siteprod_recovery.py collect
+      - name: Reconstruct historical input evidence A
+        run: python research/kyiv_185_historical_siteprod_input_2026-10-15/kyiv_185_historical_siteprod_recovery.py audit --outdir /tmp/kyiv-185-proof/a
+      - name: Independently rerun deterministic reconstruction B
+        run: python research/kyiv_185_historical_siteprod_input_2026-10-15/kyiv_185_historical_siteprod_recovery.py audit --outdir /tmp/kyiv-185-proof/b
+      - name: Verify exact A/B parity and no operational changes
+        run: |
+          set -euo pipefail
+          diff -qr /tmp/kyiv-185-proof/a /tmp/kyiv-185-proof/b
+          find /tmp/kyiv-185-proof/a -type f -print0 | sort -z | xargs -0 sha256sum
+          git diff --exit-code
+          git diff --cached --exit-code
+          test "$(git rev-parse origin/main)" = "d425c3475565b4db1c36c472ab967b3283811d43"
+          test "$(git rev-parse origin/site-prod)" = "97ec99389259f8d0cfcecc17a2ff77302bb0615f"
+          test "$(git rev-parse origin/multicity-wip-2026-09-16)" = "567c0aab3aaf98a5b8dd788021a26ece41f083e3"
+      - name: Upload research proof
+        uses: actions/upload-artifact@v4
+        with:
+          name: kyiv-185-historical-siteprod-source-recovery
+          path: |
+            /tmp/kyiv-185-proof/a/
+            /tmp/kyiv-185-producer-evidence/producer_evidence.json
+          retention-days: 30
