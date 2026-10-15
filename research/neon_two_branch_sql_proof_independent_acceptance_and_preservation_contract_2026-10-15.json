@@ -1,0 +1,635 @@
+{
+  "schema_version": "neon_two_branch_sql_proof_independent_acceptance_and_preservation_contract_v1",
+  "date_utc": "2026-10-15",
+  "repository": "olegbalakin-cmyk/kyiv-air-alerts-grafana",
+  "neon_project_id": "green-cake-44216048",
+  "scope": "Independent frozen Git/Actions proof acceptance plus metadata-only Neon confirmation and conditional preservation contract; no archived database connections or exports.",
+  "github_preflight": {
+    "main_old": "d425c3475565b4db1c36c472ab967b3283811d43",
+    "main_newer": "b0292f568426b32958ed52ebaa75a24c0f3a003b",
+    "main_advanced_checkpoint": "Kyiv 185 historical site-prod input recovery PARTIAL accepted; unrelated track preserved",
+    "main_state_blob": "bced90e7a4b1f8c3fec0576abd27424dc020ad27",
+    "main_changelog_blob": "8d929f5ce144ffa378d49397283b2ba6babba9ac",
+    "newer_equivalent_neon_checkpoint": false
+  },
+  "frozen_git": {
+    "retention": {
+      "commit": "7985a3217f1a0eca841e77a05c7e819214a28cfa",
+      "blob": "b6161ba3faecdce6a666d7886006765372785a92",
+      "verdict": "NO_SAFE_DELETION_CANDIDATE_ESTABLISHED"
+    },
+    "feasibility": {
+      "commit": "bf1799d22094957e6d47da94319b849e948129ff",
+      "blob": "9eba4ceca326a7f3574ef4c374c8d9da5acc3f0a",
+      "parent": "d425c3475565b4db1c36c472ab967b3283811d43",
+      "verdict": "PARTIAL"
+    },
+    "actions_preservation": {
+      "commit": "285e08c7043446cc5abe8da14bf83ba3671f0809",
+      "blob": "ac7dcda4dbde39430c12b03099c1b867fa82e9e2"
+    },
+    "sql": {
+      "commit": "ef207d01e6449ede530ed8431c3006ca39e0f7c0",
+      "parent": "bf1799d22094957e6d47da94319b849e948129ff",
+      "path": "research/neon_two_branch_read_only_sql_inspection_2026-10-15.json",
+      "blob": "4e5dd72351f53c2a9f0e0ad06778ad7345318410",
+      "utf8_bytes": 10454,
+      "sha256": "dca6c632143ed6e64aa3f8fcea7a265b3caaf91db26d1ecbf0ba8fb69f184bc6",
+      "git_immediate_diff": "exactly one added SQL JSON",
+      "cumulative_note": "SQL proof branch also has predecessor feasibility JSON vs main"
+    }
+  },
+  "original_proof_independent_checks": {
+    "git_source_original_base64_bytes": true,
+    "git_sha1_blob_recomputed": true,
+    "sha256_original_bytes_recomputed": true,
+    "independent_legacy_hash_test_vectors_pass": true,
+    "builtin_json_parser_pass": true,
+    "separate_recursive_json_parser_pass": true,
+    "duplicate_keys_found": 0,
+    "negative_json_fixtures_rejected": 5,
+    "sql_json_population_arithmetic_consistent": true,
+    "schema_object_count_arithmetic_241": true
+  },
+  "critical_hash_defect": {
+    "location": "branch_B.hashes.source_uuid_set",
+    "frozen_value": "a59bdf342955a64deeb53c71b40704d6d8fc56b450b950efca51b21b8b20eb2",
+    "actual_hex_chars": 63,
+    "required_hex_chars": 64,
+    "result": "INVALID_FINGERPRINT_FORMAT",
+    "treatment": "Do not guess omitted nibble or silently repair frozen predecessor. It cannot independently prove Branch B source UUID fingerprint; original SQL assertion of UUID nonintersection remains verifier-only evidence."
+  },
+  "original_actions": {
+    "storage": "Private ChatGPT Library /БД/Neon-Original-Actions-Evidence-2026-09-28, auxiliary and not certified WORM/retention",
+    "A": {
+      "neon_branch_id": "br-still-sea-b5062r40",
+      "run": 36407705040,
+      "job": 108880291090,
+      "run_head": "7b2899e4ab92de855e2a741f482c57ec3e6dbac1",
+      "original_proof_commit": "182abd7bc6ac761417a4ba74aa20697f533c637c",
+      "artifact": 10962649440,
+      "artifact_expires": "2026-10-28T10:07:13Z",
+      "library_id": "libfile_da4cb0218f848191aeb79d0fc8e81359",
+      "zip_bytes": 37319,
+      "zip_sha256": "241c9794735a44e0203cbf15b82b7031972925812bbb9ccdfb95051b2919f63f",
+      "members": [
+        [
+          "db_phase1_live_e2e_result.json",
+          86322,
+          "a0aafd650d571859c95300a06ce91864c14c8ed62912ce74356092f326ff0860"
+        ],
+        [
+          "db_phase1_live_e2e_identities.json",
+          75314,
+          "771453feae3896b4ab5e094c62d4023799def0e0aad5e2594f6b5d6c5c962ee3"
+        ],
+        [
+          "db_phase1_live_e2e_branch_meta.json",
+          528,
+          "5bb44a67c053b80af6e1f56f1efe0ae3384cbfd4a69b57aa10441d31d493db8b"
+        ]
+      ]
+    },
+    "B": {
+      "neon_branch_id": "br-quiet-tooth-b51ewryz",
+      "run": 36456983073,
+      "job": 109045702946,
+      "run_head": "0882f07f7427f39b79f8af40280f97871cf72db7",
+      "artifact": 10987225380,
+      "artifact_expires": "2026-10-28T17:42:12Z",
+      "library_id": "libfile_df84af2a1d588191be12edaaa90244ea",
+      "zip_bytes": 3687,
+      "zip_sha256": "294f848fad1bdc5aa42606c73957e0403a78628f27c58f766f165aa5c902ac8d",
+      "members": [
+        [
+          "db_phase1_shadow_ingestion_integration_proof_2026-09-28.json",
+          3889,
+          "d27f8958e800013235443632e5f745cc942860ba47726c334dce4906434bb213"
+        ],
+        [
+          "db_phase1_shadow_prepare.json",
+          338,
+          "ae8be893dc66ade271a1916f91cb24492d216be881e54ff6387517a0a785a2be"
+        ],
+        [
+          "phase1_tests.log",
+          8700,
+          "c1c1a770ba9182e13a74149535e968e038a9ae16f991c4671501f92c7b57be7"
+        ]
+      ]
+    },
+    "independent_verification": "Both saved ZIPs re-read byte for byte: original sizes, independent SHA256, ZIP CRC 6/6, all member lengths/hashes; both original Actions runs/jobs success and live artifact digest/expiry corroborated.",
+    "cannot_establish": "ZIPs preserve historical experiment evidence, not whole PostgreSQL database state or provider branch WAL/COW storage."
+  },
+  "neon_metadata": {
+    "project": "green-cake-44216048",
+    "project_plan": "free_v3",
+    "region": "aws-us-east-2",
+    "postgres_major": 18,
+    "branches": 10,
+    "branch_limit": 10,
+    "archived_branches": 6,
+    "free_slots": 0,
+    "provider_snapshots": 0,
+    "history_retention_seconds": 21600,
+    "total_endpoints": 11,
+    "original_endpoints_preserved": true,
+    "temp_endpoints_absent": [
+      "ep-spring-credit-b5hw0fyw",
+      "ep-cold-salad-b5e4j6xb"
+    ],
+    "target_child_branches_found": 0,
+    "archive_receipts": [
+      {
+        "branch": "br-still-sea-b5062r40",
+        "operation_id": "c93f49b4-41d8-46fb-858e-9a8168af95c3",
+        "action": "timeline_archive",
+        "state": "finished",
+        "failures": 0,
+        "at": "2026-10-15T10:59:51Z"
+      },
+      {
+        "branch": "br-quiet-tooth-b51ewryz",
+        "operation_id": "3ec4508e-91fa-4791-a105-0e6ed4d4a698",
+        "action": "timeline_archive",
+        "state": "finished",
+        "failures": 0,
+        "at": "2026-10-15T10:59:51Z"
+      }
+    ],
+    "endpoint_suspension_is_distinct_from_branch_archival": true,
+    "billing_cumulative_seconds_current": 32018,
+    "billing_cumulative_seconds_prior_inspection": 31665,
+    "billing_delta_cannot_be_attributed": true,
+    "billing_statement_inaccessible": true,
+    "zero_additional_charge_not_proven": true
+  },
+  "sql_reported_scope": {
+    "A": {
+      "branch": "br-still-sea-b5062r40",
+      "parent": "br-wandering-sunset-b5835alw",
+      "endpoint": "ep-wispy-sea-b5y3qhci",
+      "endpoint_state": "idle",
+      "archive_state": "archived",
+      "rows": {
+        "alert_episodes": 126,
+        "alert_episode_sources": 140,
+        "ingestion_runs": 2,
+        "ingestion_checkpoints": 1
+      },
+      "runs": "2 bootstrap_import/succeeded",
+      "checkpoints": "1/bootstrap"
+    },
+    "B": {
+      "branch": "br-quiet-tooth-b51ewryz",
+      "parent": "br-young-feather-b5q19nli",
+      "endpoint": "ep-green-base-b5emkaib",
+      "endpoint_state": "idle",
+      "archive_state": "archived",
+      "rows": {
+        "alert_episodes": 126,
+        "alert_episode_sources": 140,
+        "ingestion_runs": 3,
+        "ingestion_checkpoints": 2
+      },
+      "runs": "1 bootstrap_import + 2 shadow_poll/succeeded",
+      "checkpoints": "1/bootstrap + 2/poll"
+    },
+    "schema_hash_both": "60a4b1ea66c0f59b2fb5b0ceb581181288e1020b994eebca4fac9dbbdd2ef615",
+    "schema_object_scope": {
+      "total": 241,
+      "view": 1,
+      "index": 14,
+      "column": 97,
+      "relation": 19,
+      "extension": 1,
+      "namespace": 1,
+      "constraint": 108
+    },
+    "episodes": {
+      "same_business_keys": 126,
+      "only_A": 0,
+      "only_B": 0,
+      "semantic_fingerprint_matches_reported": 126,
+      "matching_physical_UUIDs_reported": 0
+    },
+    "sources": {
+      "same_business_keys": 140,
+      "only_A": 0,
+      "only_B": 0,
+      "semantic_fingerprint_matches_reported": 140,
+      "matching_physical_UUIDs_reported": 0
+    },
+    "shared_ingestion_run_UUIDs_reported": 0,
+    "shared_checkpoint_UUIDs_reported": 0,
+    "additional_normalized_checkpoint_state_B": 1,
+    "orphans_reported_A": 0,
+    "orphans_reported_B": 0,
+    "source_raw_sha256_present_each": 0,
+    "transaction_receipt": "Original verifier reported REPEATABLE READ / READ ONLY / pg_is_in_recovery; infrastructure corroboration exists, but exact executed SQL transcript absent.",
+    "scope_warning": "Aggregate SQL hashes and counts are not full row-level bytes or PostgreSQL backup."
+  },
+  "hash_audit": {
+    "protocol": "SHA256(UTF8(PostgreSQL JSONB::text normalized row)); jsonb_build_array business keys; sort row digest strings and join LF with terminating LF",
+    "episode_business_key": [
+      "city_key",
+      "alert_type",
+      "start_at",
+      "end_at"
+    ],
+    "source_business_key": [
+      "source_key",
+      "source_record_key_version",
+      "source_record_key"
+    ],
+    "episode_exclusions": [
+      "episode_uid",
+      "created_by_run_id",
+      "updated_by_run_id",
+      "created_at",
+      "updated_at"
+    ],
+    "source_exclusions": [
+      "source_observation_id",
+      "episode_uid",
+      "first_persisted_by_run_id",
+      "last_seen_by_run_id",
+      "first_persisted_at",
+      "last_seen_at"
+    ],
+    "source_join": "Physical episode_uid replaced with joined episode business interval",
+    "run_checkpoint_exclusions": "Original artifact does not enumerate exact ephemeral IDs/selected timestamp fields",
+    "synthetic_independent_tests_passed": 16,
+    "synthetic_independent_tests_total": 16,
+    "synthetic_tests": [
+      "known SHA-256 test vector",
+      "JSON array boundary framing vs concatenation ambiguity",
+      "same-key differing payload swaps hidden by unkeyed digest set",
+      "duplicate digest set drops row multiplicity",
+      "JSON null vs absent",
+      "integer vs fractional JSON",
+      "boolean vs number",
+      "timestamp zone and precision consistency",
+      "NFC vs NFD Unicode",
+      "technical UUID exclusion hides distinct identity",
+      "terminal LF changes aggregate",
+      "physical FK mapping lost after normalization"
+    ],
+    "algorithm_test_limitation": "Python independent synthetic serializer is not PostgreSQL jsonb::text nor a real-data reexecution.",
+    "primary_risks": [
+      "Missing keyed per-row digest ledger means same-key/different-payload conflicts cannot independently be ruled out",
+      "Input uniqueness plus null open intervals requires partial UNIQUE validation",
+      "DISTINCT digests can suppress duplicates and multiplicity",
+      "JSONB text numeric/timezone/null/Unicode behavior and column/schema versions not frozen",
+      "Foreign key relationships after UUID remapping not covered by normalized equivalence",
+      "Technical columns intentionally excluded and original run/checkpoint omitted fields not specified",
+      "63-character B source UUID digest cannot be independently accepted"
+    ],
+    "full_266_row_recomputation": "NOT_AVAILABLE; requires separate authorized read-only SQL."
+  },
+  "original_historical_ddl": {
+    "path": "kyiv-air-alerts-grafana/db/migrations/001_phase1_core.sql",
+    "same_ddl_git_blob_in_both_original_workflow_commits": "3b8af7940b23aae03a4f6b434d90d97dde10bfc0",
+    "original_postgres_tables": [
+      "ingestion_runs",
+      "alert_episodes",
+      "alert_episode_sources",
+      "ingestion_checkpoints"
+    ],
+    "original_view": "current_ingestion_checkpoints",
+    "important_constraints": [
+      "Episode FK created/updated ingestion_runs",
+      "Source FK episode_uid, duplicate_of_observation_id self FK, first/last ingestion_runs",
+      "Checkpoint composite same-stream previous_checkpoint FK, created_by_run FK",
+      "Unique exact intervals, separate partial unique open interval, unique source versioned business key, unique checkpoint stream seq"
+    ],
+    "full_live_ddl_acl_owner_settings": "NOT_OBSERVABLE_WITH_EXISTING_SQL_PROOF"
+  },
+  "storage_requirements": {
+    "raw_db_in_public_git": false,
+    "expiring_actions_as_backup": false,
+    "private_chatgpt_library_is_only_auxiliary": true,
+    "qualifying_backup_destination_selected": false,
+    "minimum": [
+      "Owner/role-scoped independent principals: export writer, verifier/reader and deletion approver",
+      "Human approved purpose, data classification, rights/privacy, retention period and exact residency region",
+      "Encryption at rest and in transit and restricted separate read/write/delete permissions",
+      "WORM/object-lock or tested version and overwrite/delete protection with logs",
+      "Exact archive object immutable ID/version, byte length, independently frozen SHA256 and separate independent read-back",
+      "Retention expiration monitoring/alerts, deletion policy and period, recovery documentation and successful trial restore",
+      "Validate actual storage billing/quota before implementation"
+    ],
+    "storage_contract_status": "CONDITIONAL"
+  },
+  "external_dependency_audit": {
+    "main_workflows_checked": 17,
+    "main_workflows_exact_A_B_branch_and_endpoint_refs_found": 0,
+    "historical_A_workflow_blob": "900c7a747f6d6c96b86adeb8f25dfa06ab4dd867",
+    "historical_B_workflow_blob": "b3e6c762364085926ef157c229adffc515eebbab",
+    "historical_B_workflow_refs_A_as_test_isolation": true,
+    "other_git_branches_and_secret_held_consumers_not_exhaustively_observable": true,
+    "no_current_consumers_proven": false,
+    "status": "UNRESOLVED",
+    "closure": "Independent owner inventory of deployed processes/apps/non-GitHub consumers and private configs plus Neon credential/session/endpoint dependency/snapshot metadata and immediately-before-delete reconfirmation."
+  },
+  "historical_track_gates": {
+    "H2_HISTORICAL_AUTHORITY_PROMOTIONS": 0,
+    "UNBOUND_UNRESOLVED": 25,
+    "C4": "NOT PROVEN",
+    "C5": "NOT PROVEN",
+    "NEON_AUTHORITY_ACTIVE": "NO",
+    "PRODUCTION_CUTOVER_EXECUTED": "NO",
+    "H2_NINE_CASE_DISPOSABLE_NEON_REVISION_TEST": "BLOCKED"
+  },
+  "preservation_inventory": {
+    "historical_schema_and_migration": {
+      "state": "PARTIALLY_PRESERVED",
+      "evidence": "Frozen original migration source and scoped SQL hash",
+      "missing": "All exact live database object definitions, ACL/ownership/roles, RLS, extensions, database and role settings, sequence values, triggers and functions, uninspected schemas/tables."
+    },
+    "A": {
+      "scope_rows": 269,
+      "observed_rows": {
+        "alert_episodes": 126,
+        "alert_episode_sources": 140,
+        "ingestion_runs": 2,
+        "ingestion_checkpoints": 1
+      },
+      "original_actions_zip": "FULLY_PRESERVED",
+      "episode_business_identity": "PARTIALLY_PRESERVED",
+      "source_business_identity": "PARTIALLY_PRESERVED",
+      "complete_physical_episode_rows_UUID_and_run_FKs": "NOT_PRESERVED",
+      "complete_physical_source_rows_UUID_and_relationships": "NOT_PRESERVED",
+      "full_ingestion_run_history": "PARTIALLY_PRESERVED",
+      "full_checkpoint_and_previous_chain": "PARTIALLY_PRESERVED",
+      "unknown_extra_rows_objects": "NOT_OBSERVABLE",
+      "neon_provider_physical_state": "NOT_PRESERVED",
+      "unique_state": "2 distinct bootstrap attempts + one bootstrap checkpoint, original run UUIDs/metadata must be preserved."
+    },
+    "B": {
+      "scope_rows": 271,
+      "observed_rows": {
+        "alert_episodes": 126,
+        "alert_episode_sources": 140,
+        "ingestion_runs": 3,
+        "ingestion_checkpoints": 2
+      },
+      "original_actions_zip": "FULLY_PRESERVED",
+      "episode_business_identity": "PARTIALLY_PRESERVED",
+      "source_business_identity": "PARTIALLY_PRESERVED",
+      "complete_physical_episode_rows_UUID_and_run_FKs": "NOT_PRESERVED",
+      "complete_physical_source_rows_UUID_and_relationships": "NOT_PRESERVED",
+      "full_ingestion_run_history": "PARTIALLY_PRESERVED",
+      "full_checkpoint_and_previous_chain": "PARTIALLY_PRESERVED",
+      "unknown_extra_rows_objects": "NOT_OBSERVABLE",
+      "neon_provider_physical_state": "NOT_PRESERVED",
+      "unique_state": "One bootstrap + two shadow polls; checkpoint seq 2 and predecessor seq 1 must not be merged away."
+    },
+    "preservation_must_include": [
+      "every table and every row, complete source and episode physical UUIDs and original timestamps",
+      "full source duplicate links and episode/run checkpoint foreign key graph",
+      "all run metadata including workflow and input identifiers, retries, errors, start/finish/commit times",
+      "complete checkpoint cursor/sequence/previous same-stream references and B poll",
+      "tables/views/materialized views, constraints, indexes, triggers, functions, sequences, extensions and dependency graph",
+      "roles/ownership/ACL/privileges, DB settings, migration state, RLS, extension config and other databases/large objects",
+      "row multiplicity with exact physical primary keys and JSON fields"
+    ]
+  },
+  "backup_options": {
+    "complete_logical_database": {
+      "decision": "CONDITIONALLY_PREFERRED_FOR_FULL_LOGICAL_STATE",
+      "approach": "Under separate explicit authorization, read-only direct (not pooled) PostgreSQL 18-compatible pg_dump custom archive (-Fc) of complete source database including data/DDL/large objects plus separately captured global roles/settings/extension metadata and versioned manifest.",
+      "must_prove": [
+        "pg_dump and pg_restore compatibility with server major 18",
+        "source read-only snapshot and TLS, no writes",
+        "full schema and roles/grants/ownership without discarding --no-owner/--no-acl unless separately accepted mapping",
+        "all databases and objects within agreed scope, table counts, sequence and extension settings",
+        "exact original row UUIDs, JSON values and FK graph, migration state",
+        "archive SHA256/size, private independent readback and separately authorized restore"
+      ],
+      "known_losses": [
+        "Neon physical pages/WAL/COW/timeline, original provider metadata/settings not separately exported",
+        "original API conditions, sessions and network side effects not replayable"
+      ],
+      "claim_allowed": "LOGICAL_DATABASE_STATE_RESTORED only"
+    },
+    "versioned_experiment_package": {
+      "decision": "ACCEPTABLE_AS_AUDIT_SUPPLEMENT_BUT_NOT_ALONE_AS_FULL_POSTGRES_RESTORE",
+      "required": [
+        "all complete original row payloads with UUIDs",
+        "schema catalog/contract and exact dependency graph",
+        "ingestion runs and checkpoints full history",
+        "original Git/Actions references and receipt ZIP hashes",
+        "per-key canonical row SHA256 digest ledger plus duplicate/FK checks",
+        "independent reconstruction manifest and tests"
+      ],
+      "limitations": [
+        "Full global roles, ACL/RLS, sequences, extension/provider state cannot be inferred from four app-table row files",
+        "No guaranteed reexecution of historical source conditions",
+        "Not a complete independent PostgreSQL recovery without additional state"
+      ]
+    }
+  },
+  "restore_gate": {
+    "environment": "Separately authorized isolated PostgreSQL 18-compatible system in a different safe project/server, no production or long-lived br-bold-mode-b5rub8pq; 10/10 Neon quota means separate capacity/cost approval first.",
+    "steps": [
+      "Read independent private backup object and independently confirm frozen bytes SHA256 + length + version.",
+      "Restore complete custom-format database plus approved roles, extensions, settings, sequence/identity state.",
+      "Diff complete SQL catalog, migration versions, database objects, relevant roles/permissions/RLS and view outputs.",
+      "Exact counts for all tables: at minimum observed 269 A, 271 B in four in-scope tables; any additional objects/rows separately inventoried.",
+      "Full physical UUID/PK and business-key sets exactly equal to original backed-up row ledger; all required columns and JSONB values match.",
+      "Validate all FK, source episode/run links, duplicate links, checkpoint same-stream seq and previous-checkpoint chain, B shadow history.",
+      "Verify all ingestion_runs original UUID/kind/status/input, timestamps/outcome/error JSON and related checkpoints.",
+      "Independently compute keyed row digests/aggregate digests with duplicate counts, nulls, timestamps and full schema contract.",
+      "Zero tolerances for missing or added rows, changed identifiers or values, broken relationships or unapproved transformations.",
+      "Freeze sanitized result, source/original/readback object IDs, original and restored independent test receipts."
+    ],
+    "zero_tolerance": {
+      "missing_rows": 0,
+      "extra_rows": 0,
+      "changed_UUID": 0,
+      "changed_columns": 0,
+      "broken_FK": 0,
+      "missing_runs": 0,
+      "missing_checkpoints": 0,
+      "schema_contract_mismatch": 0
+    },
+    "logical_state_verdict": "LOGICAL_DATABASE_STATE_RESTORED = PASS only after independent full test",
+    "physical_neon_verdict": "ORIGINAL_NEON_PHYSICAL_BRANCH_STATE_REPRODUCED = NOT_CLAIMED"
+  },
+  "retirement_gates": [
+    {
+      "gate": 1,
+      "requirement": "Complete source preservation inventory verified",
+      "status": "NOT_SATISFIED_FOR_RETIREMENT"
+    },
+    {
+      "gate": 2,
+      "requirement": "Explicitly authorized complete branch-specific export",
+      "status": "NOT_SATISFIED_FOR_RETIREMENT"
+    },
+    {
+      "gate": 3,
+      "requirement": "Original export exact SHA256 and byte length frozen",
+      "status": "NOT_SATISFIED_FOR_RETIREMENT"
+    },
+    {
+      "gate": 4,
+      "requirement": "Independent private storage readback matches",
+      "status": "NOT_SATISFIED_FOR_RETIREMENT"
+    },
+    {
+      "gate": 5,
+      "requirement": "Independent isolated exact restoration passes",
+      "status": "NOT_SATISFIED_FOR_RETIREMENT"
+    },
+    {
+      "gate": 6,
+      "requirement": "All physical UUIDs, PKs, FK graph and row values exact",
+      "status": "NOT_SATISFIED_FOR_RETIREMENT"
+    },
+    {
+      "gate": 7,
+      "requirement": "All original ingestion runs and checkpoint histories exact",
+      "status": "NOT_SATISFIED_FOR_RETIREMENT"
+    },
+    {
+      "gate": 8,
+      "requirement": "Schema, migration and required privilege/sequence state restored",
+      "status": "NOT_SATISFIED_FOR_RETIREMENT"
+    },
+    {
+      "gate": 9,
+      "requirement": "No unresolved critical information loss",
+      "status": "NOT_SATISFIED_FOR_RETIREMENT"
+    },
+    {
+      "gate": 10,
+      "requirement": "Affirmatively no active external consumer",
+      "status": "NOT_SATISFIED_FOR_RETIREMENT"
+    },
+    {
+      "gate": 11,
+      "requirement": "No dependent Neon branch or required snapshot",
+      "status": "NOT_SATISFIED_FOR_RETIREMENT"
+    },
+    {
+      "gate": 12,
+      "requirement": "No accepted proof/coordination checkpoint undermined",
+      "status": "NOT_SATISFIED_FOR_RETIREMENT"
+    },
+    {
+      "gate": 13,
+      "requirement": "Separate exact branch-ID owner deletion authorization",
+      "status": "NOT_SATISFIED_FOR_RETIREMENT"
+    },
+    {
+      "gate": 14,
+      "requirement": "Last-minute pre-deletion read-only safety recheck",
+      "status": "NOT_SATISFIED_FOR_RETIREMENT"
+    }
+  ],
+  "next_separately_authorized_task": {
+    "title": "GUARDED FULL-STATE LOGICAL EXPORT, PRIVATE READBACK AND INDEPENDENT ISOLATED RESTORE",
+    "preflight_first": "Before unarchival/SQL: approve exact targeted source branch, minimal read-only access/compute budget, data classification/residency/retention and independent private WORM-like backup destination with restricted reader and isolated PG18 target; then obtain separate authorization for export and restore.",
+    "deletion": "NEON SINGLE-BRANCH GUARDED RETIREMENT requires all 14 future gates and a separate exact-ID owner approval; no deletion in this audit."
+  },
+  "claim_acceptance": [
+    {
+      "claim": "Original Git bytes, SHA256, blob SHA1, commit, JSON",
+      "verdict": "PASS — INDEPENDENTLY VERIFIED"
+    },
+    {
+      "claim": "Original Actions ZIP bytes, 6 members, live successful run metadata",
+      "verdict": "PASS — INDEPENDENTLY VERIFIED"
+    },
+    {
+      "claim": "Original SQL read-only restrictions and all statements",
+      "verdict": "PARTIAL — EVIDENCE-BOUNDED"
+    },
+    {
+      "claim": "Current both branch archives and cleanup",
+      "verdict": "PASS — INDEPENDENTLY VERIFIED"
+    },
+    {
+      "claim": "241-object scoped schema hash equality",
+      "verdict": "PARTIAL — EVIDENCE-BOUNDED"
+    },
+    {
+      "claim": "126 episode matching semantics",
+      "verdict": "PARTIAL — EVIDENCE-BOUNDED"
+    },
+    {
+      "claim": "140 source matching semantics",
+      "verdict": "PARTIAL — EVIDENCE-BOUNDED"
+    },
+    {
+      "claim": "Physical UUID difference including invalid B source set digest",
+      "verdict": "PARTIAL — EVIDENCE-BOUNDED"
+    },
+    {
+      "claim": "Unique runs and checkpoints",
+      "verdict": "PARTIAL — EVIDENCE-BOUNDED"
+    },
+    {
+      "claim": "Complete branch state preservation",
+      "verdict": "NOT_PROVEN"
+    },
+    {
+      "claim": "No external dependencies",
+      "verdict": "NOT_PROVEN"
+    },
+    {
+      "claim": "Zero extra billing",
+      "verdict": "NOT_PROVEN"
+    },
+    {
+      "claim": "Retirement eligibility",
+      "verdict": "BLOCKED"
+    }
+  ],
+  "verdict": {
+    "NEON_TWO_BRANCH_SQL_PROOF_INDEPENDENT_ACCEPTANCE": "PARTIAL",
+    "FROZEN_JSON_INTEGRITY": "PASS",
+    "ORIGINAL_ACTIONS_PRESERVATION": "VERIFIED",
+    "SQL_SCHEMA_FINGERPRINT_ACCEPTANCE": "PARTIAL",
+    "EPISODE_SEMANTIC_EQUALITY_ACCEPTANCE": "PARTIAL",
+    "SOURCE_SEMANTIC_EQUALITY_ACCEPTANCE": "PARTIAL",
+    "INDEPENDENT_266_ROW_RECOMPUTATION": "NOT_AVAILABLE",
+    "FULL_ROW_SEMANTIC_RECOMPUTATION": "REQUIRES_SEPARATE_SQL_AUTHORIZATION",
+    "BRANCH_A_ARCHIVAL": "VERIFIED",
+    "BRANCH_B_ARCHIVAL": "VERIFIED",
+    "TEMPORARY_ENDPOINT_CLEANUP": "VERIFIED",
+    "FULL_BRANCH_A_STATE_PRESERVATION": "NOT_PROVEN",
+    "FULL_BRANCH_B_STATE_PRESERVATION": "NOT_PROVEN",
+    "RETIREMENT_PRESERVATION_CONTRACT": "CONDITIONAL",
+    "EXTERNAL_DEPENDENCIES": "UNRESOLVED",
+    "ZERO_ADDITIONAL_CHARGE": "NOT_PROVEN",
+    "BRANCH_A_RETIREMENT": "NOT_PROVEN",
+    "BRANCH_B_RETIREMENT": "NOT_PROVEN",
+    "SAFE_BRANCH_SLOT_RECOVERY": "NOT_PROVEN",
+    "NEON_BRANCH_DELETIONS": 0,
+    "NEON_DATABASE_MUTATIONS": 0,
+    "H2_NINE_CASE_DISPOSABLE_NEON_REVISION_TEST": "BLOCKED",
+    "H2_HISTORICAL_AUTHORITY_PROMOTIONS": 0,
+    "UNBOUND_UNRESOLVED": 25,
+    "C4": "NOT PROVEN",
+    "C5": "NOT PROVEN",
+    "NEON_AUTHORITY_ACTIVE": "NO",
+    "PRODUCTION_CUTOVER_EXECUTED": "NO"
+  },
+  "execution_receipt": {
+    "neon_SQL_queries": 0,
+    "neon_connections": 0,
+    "neon_branch_creations": 0,
+    "neon_branch_deletions": 0,
+    "neon_compute_starts": 0,
+    "neon_mutations": 0,
+    "production_mutations": 0,
+    "site_prod_mutations": 0,
+    "unit_a_a5_replays": 0,
+    "h2_test_a_and_b_executions": 0,
+    "raw_SQL_rows_uploaded_to_public_git": false,
+    "credentials_disclosed": false
+  }
+}
