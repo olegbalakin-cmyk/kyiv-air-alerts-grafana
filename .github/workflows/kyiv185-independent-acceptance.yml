@@ -1,0 +1,43 @@
+name: Independent Kyiv 185 frozen evidence verifier
+on:
+  push:
+    branches: [proof-kyiv-185-source-recovery-acceptance-2026-10-15]
+    paths: [.github/workflows/kyiv185-independent-acceptance.yml]
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  independently-verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 55
+    steps:
+      - name: Checkout research-only proof branch
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Fetch immutable predecessor source history
+        run: |
+          set -euo pipefail
+          git fetch --no-tags origin main site-prod multicity-wip-2026-09-16 proof-wip-209-source-time-lineage-2026-10-15
+          test "$(git rev-parse origin/main)" = "d425c3475565b4db1c36c472ab967b3283811d43"
+          test "$(git rev-parse origin/site-prod)" = "4649aa4fd9b97f4d72e55879befa1de130579bb1"
+          test "$(git rev-parse origin/multicity-wip-2026-09-16)" = "1ae29da3efca63ca8252226dfdb284c45243d738"
+          git cat-file -e 97ec99389259f8d0cfcecc17a2ff77302bb0615f^{commit}
+          git cat-file -e 567c0aab3aaf98a5b8dd788021a26ece41f083e3^{commit}
+          git cat-file -e e55246eacc5044f5d75ff138a78fe3e01331beea^{commit}
+      - name: Independently verify original evidence and produce derivatives
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          python research/kyiv_185_source_recovery_acceptance_2026-10-15/verify_acceptance.py verify
+          test "$(git status --short | grep -v '^?? research/kyiv_185_source_recovery_acceptance_2026-10-15/' | wc -l)" = "0"
+      - name: Upload independently validated evidence for immutable Git freeze
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: kyiv185-independent-acceptance-candidate
+          path: research/kyiv_185_source_recovery_acceptance_2026-10-15/*.json
+          retention-days: 30
