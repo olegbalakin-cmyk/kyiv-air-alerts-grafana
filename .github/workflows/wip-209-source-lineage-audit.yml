@@ -25,7 +25,7 @@ jobs:
       ATTACK_EVENT_DATABASE_URL: ""
       DATABASE_URL: ""
       NETLIFY_AUTH_TOKEN: ""
-      GH_TOKEN: \${{ secrets.GITHUB_TOKEN }}
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - name: Checkout audit-only branch
         uses: actions/checkout@v4
@@ -61,7 +61,7 @@ jobs:
         shell: bash
         run: |
           curl --fail --silent --show-error --location --retry 2 \
-            -H "Authorization: Bearer \${GH_TOKEN}" \
+            -H "Authorization: Bearer ${GH_TOKEN}" \
             -H "Accept: application/vnd.github+json" \
             "https://api.github.com/repos/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/artifacts/11956428181/zip" \
             -o original-209-artifact.zip
