@@ -1,0 +1,62 @@
+{
+  "schema_version": 1,
+  "kind": "full_23city_cached_bridge_identity_diagnostic",
+  "date": "2026-10-15",
+  "github_actions": {
+    "run_id": 38694914629,
+    "job_id": 116289118276,
+    "executed_commit": "61fefb145faf8d4659ac7b4b884a8169ddd6a50e",
+    "status": "SUCCESS",
+    "semantic_result": "BLOCKED"
+  },
+  "input": {
+    "site_prod_sha": "97ec99389259f8d0cfcecc17a2ff77302bb0615f",
+    "wip_baseline_sha": "567c0aab3aaf98a5b8dd788021a26ece41f083e3",
+    "snapshot_sha256": "37e26fc1a7433785ae3b80c3deb07840b8263473f0167ca14787b3621263a35c",
+    "valid_regions": 21,
+    "city_count": 23,
+    "cached_episodes": 6556
+  },
+  "result": {
+    "unmatched_existing_episode_identities_within_snapshot_horizon": 209,
+    "by_city": {
+      "kharkiv": 3,
+      "kyiv": 185,
+      "mykolaiv": 12,
+      "sumy": 9
+    },
+    "examples": [
+      {
+        "city": "kharkiv",
+        "old_id": "7c9e0d9dddae7394aff73c0e",
+        "old_start": "2026-09-25T06:08:22.320260Z",
+        "old_end": "2026-09-25T06:46:37.804194Z",
+        "nearest_new_id": "e89dda516f02e24ec8185006",
+        "new_start": "2026-09-25T06:08:22Z",
+        "new_end": "2026-09-25T06:46:37Z",
+        "delta_start_s": -0.32,
+        "delta_end_s": -0.804
+      },
+      {
+        "city": "kyiv",
+        "old_id": "bd3e4a7c95541bcee04bccfa",
+        "old_start": "2026-09-18T12:18:00Z",
+        "old_end": "2026-09-18T12:34:00Z",
+        "nearest_new_id": "17c16c2a04d3152276fac052",
+        "new_start": "2026-09-18T12:18:57Z",
+        "new_end": "2026-09-18T12:34:13Z",
+        "delta_start_s": 57,
+        "delta_end_s": 13
+      }
+    ]
+  },
+  "scope": "Nearest-neighbor deltas are diagnostic only; not an approved equivalence mapping or evidence of lost alerts.",
+  "safety": {
+    "api_client_instantiations": 0,
+    "token_present": false,
+    "read_only_wip_state_queue_sha256_unchanged": true,
+    "database_writes": 0,
+    "production_writes": 0
+  },
+  "decision": "NO-GO; reconcile 209 historical identities without rewriting episode IDs or implicit city/raion attribution, then rerun regression and publisher/classifier invariance tests"
+}
