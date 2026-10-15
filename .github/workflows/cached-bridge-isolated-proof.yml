@@ -32,7 +32,7 @@ jobs:
       - name: Run deterministic unit tests without credentials
         working-directory: kyiv-air-alerts-grafana
         run: |
-          python -m unittest -v scripts/test_cached_production_alerts.py
+          python scripts/test_cached_production_alerts.py -v
           python -m py_compile scripts/validate_cached_production_alerts.py scripts/monitor_explosion_candidates.py
       - name: Assert the consumer has zero UkraineAlarm network call on cached path
         run: |
