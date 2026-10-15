@@ -1,0 +1,93 @@
+{
+  "schema_version": 1,
+  "task": "KYIV 185 HISTORICAL-TO-MODERN EPISODE IDENTITY RECONCILIATION",
+  "verdict": "PARTIAL — RESEARCH PROOF ONLY, INDEPENDENT ACCEPTANCE PENDING",
+  "exact_inputs": {
+    "accepted_predecessor_commit": "bafd42939f683a6b8fe53385e8031bf437667e54",
+    "original_source_index_blob": "409dd445a53c18ec1674150f9ae7d50285ab7f88",
+    "original_source_index_sha256": "e29afda24255b7b355893dd7e493d50485dacfdf6e6ed77ed8ee2630e629b83f",
+    "frozen_original_kyiv_lineage_commit": "e55246eacc5044f5d75ff138a78fe3e01331beea",
+    "frozen_original_kyiv_lineage_blob": "83d16c43e442c624f8c0edccb2b9b219d57a7c6c",
+    "frozen_original_kyiv_lineage_sha256": "c007f81f10a242e3a3ee3eb2696d03a11369861b8cb797ca505142449bbe8645",
+    "modern_site_prod_commit": "4649aa4fd9b97f4d72e55879befa1de130579bb1",
+    "modern_combined_alerts_blob": "eae6a91dde1710afd8b60d4178bc89887e2d46d3",
+    "modern_combined_alerts_sha256": "9dbf75438df13467a84eccf7d4368d32f5f47fc84e59161dcdce162f51c9a7d2",
+    "producer_gap_source_blob": "4dd2a1fd2f75d6bf764cb69831b1ff2fe74242a0",
+    "original_209_case_manifest_sha256_previous_acceptance": "54ce8c9800739b294a83991f71130ab3c6096742ed861b469c1df2ecf2ec9d76"
+  },
+  "output_github_blobs": {
+    "crosswalk": {
+      "blob": "43972931bd618bd1418f9c4b1ecd3718a0631930",
+      "sha256": "49e13309c6e36393e4f5cdc247772956c38ba94db23de5ce27df03ec798a8646",
+      "bytes": 958039,
+      "readback_equal": true
+    },
+    "summary": {
+      "blob": "79506459a8e3aff9e4e50f2af00178f10e36ff4d",
+      "bytes": 4903,
+      "readback_equal": true
+    },
+    "seven_provenance_gaps": {
+      "blob": "220bb58abf3208a99a6957cbb8e3dba23a9e6a64",
+      "bytes": 22616,
+      "readback_equal": true
+    },
+    "offline_verifier": {
+      "blob": "7fc58ee4d91d2b04a27d3a96c7b4c356bae2be4b",
+      "bytes": 3934,
+      "readback_equal": true
+    }
+  },
+  "checks": {
+    "original_index_ids": 185,
+    "original_id_hash_recomputed_correct": 185,
+    "original_lineage_intervals_equal": 185,
+    "first_persistence_commits_equal": 185,
+    "first_persistence_json_pointers_equal": 185,
+    "first_persistence_city_source_semantics_kyiv_exact_city": 185,
+    "modern_current_source_rows_checked": 2664,
+    "unique_modern_minute_pair_candidates": 185,
+    "unique_overlapping_modern_candidates": 185,
+    "exact_utc_pair_matches": 0,
+    "distinct_modern_derived_ids": 185,
+    "original_candidate_vs_prior_frozen_recovery_ledger_equal": 185,
+    "split_or_merge_detected": 0,
+    "source_or_geo_semantic_disagreements_demonstrated": 0,
+    "stable_provider_join_identity_available": 0,
+    "independently_proven_equivalence": 0,
+    "plausible_unproven": 185,
+    "independent_producer_runtime_shas_pinned": 0,
+    "seven_original_producer_gaps_preserved": 7,
+    "negative_controls": [
+      "Different geographic key changes SHA-derived episode ID for all 185 records",
+      "Reversing start/end changes SHA-derived episode ID for all 185 records",
+      "Modern second-precision derived ID differs from original minute-precision ID for all 185 records",
+      "All 185 original overlapping candidate sets have size exactly one",
+      "All modern candidate IDs reverse-map to exactly one original ID"
+    ]
+  },
+  "reproducibility": {
+    "research_crosswalk_compared_against_pinned_git_content": true,
+    "all_four_output_blobs_fetched_and_equal": true,
+    "independent_git_sha256_for_eight_original_frozen_nonreceipt_files_verified": true,
+    "python_offline_verifier_written_but_not_executed": true,
+    "raw_209_case_manifest_directly_reopened": false,
+    "live_external_source_requests": 0,
+    "ukrainealarm_requests": 0,
+    "neon_connections": 0,
+    "production_or_wip_changes": 0,
+    "main_docs_changes": 0
+  },
+  "decision": {
+    "HISTORICAL_SOURCE_RECOVERED": "178 with producer corroboration; 7 historical Git records lacking attributable producer execution evidence",
+    "MODERN_CANDIDATE_IDENTIFIED": "185/185",
+    "MODERN_IDENTITY_INDEPENDENTLY_PROVEN": "0/185",
+    "SAFE_FOR_AUTOMATIC_REMAPPING": "NO",
+    "WIP_ACTIVATION": "NO-GO"
+  },
+  "acceptance_required": [
+    "Independent execution of committed verifier against exact pinned input files",
+    "Independent direct read-back/recheck of original 209-case manifest if strict archive-level parity required",
+    "Independent cross-provider immutable identity evidence or validated non-timestamp source transformation for PROVEN_EQUIVALENCE"
+  ]
+}
