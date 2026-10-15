@@ -19,6 +19,7 @@ import requests
 from bs4 import BeautifulSoup
 
 import apply_ukrainealarm_bridge as ua
+import validate_cached_production_alerts as cached_source
 import live_parent_ordering
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -4998,6 +4999,16 @@ def main() -> None:
 
     started = now_utc()
     run_start_followup_cutoff = started
+    # Validate all pinned production files before creating or modifying monitoring state.
+    # The WIP state and review queue are read-only until validation and episode
+    # regression checks have passed. No cached-source network fallback exists.
+    snapshot_validation = None
+    if args.local_only:
+        snapshot_validation = cached_source.validate_snapshot(
+            Path(args.bridge_file), Path(args.kyiv_alerts_file),
+            Path(args.sevastopol_events_file), now=started,
+            source_commit_sha=os.environ.get("PRODUCTION_ALERT_SOURCE_COMMIT") or None,
+        )
     state = ensure_state()
     queue = load_json(QUEUE_FILE, [])
     if not isinstance(queue, list):
@@ -5010,6 +5021,13 @@ def main() -> None:
             Path(args.kyiv_alerts_file),
             Path(args.sevastopol_events_file),
         )
+        if errors:
+            raise cached_source.CachedSnapshotError(
+                "cached source cannot be consumed: " + json.dumps(errors, sort_keys=True)
+            )
+        regression = cached_source.validate_episode_regression(
+            polled, state, snapshot_validation, is_proxy=is_raion_proxy_city
+        )
         mode = "cached_bridge"
     else:
         polled, errors = poll_alerts(
@@ -5019,6 +5037,16 @@ def main() -> None:
         )
         mode = "network"
     new_episodes = process_events(state, polled, errors, started)
+    if args.local_only:
+        # This metadata changes only in the successful WIP commit, and guards
+        # later runs against bridge checkpoint and event-count rollback.
+        state["cached_bridge_source"] = {
+            "source_commit_sha": snapshot_validation["source_commit_sha"],
+            "last_successful_fetch_at": snapshot_validation["last_successful_fetch_at"],
+            "event_count": snapshot_validation["event_count"],
+            "input_sha256": snapshot_validation["input_sha256"],
+            "snapshot_sha256": snapshot_validation["snapshot_sha256"],
+        }
 
     persistence_enabled = bool(str(os.environ.get("ATTACK_EVENT_DATABASE_URL") or "").strip())
     canary_cutoff, activation_config = load_live_persistence_activation(
@@ -5103,9 +5131,11 @@ def main() -> None:
             "results_after_family_merge": int(google_stats.get("results_after_family_merge") or 0),
             "google_error": google_error,
         }
-        for _, check in city_due:
-            check["checked_at"] = iso(followup_cutoff)
-            check["new_candidates"] = added
+        # Never mark failed publisher discovery as a completed follow-up.
+        if google_error is None and not telegram_errors:
+            for _, check in city_due:
+                check["checked_at"] = iso(followup_cutoff)
+                check["new_candidates"] = added
 
     composition_refresh = apply_episode_composition(
         queue,
@@ -5163,6 +5193,9 @@ def main() -> None:
         "became_due_during_run": became_due_during_run,
         "city_count": len(CITY_CONFIG),
         "mode": mode,
+        "cached_source_validation": snapshot_validation,
+        "cached_source_regression": regression if args.local_only else None,
+        "ukrainealarm_http_requests": 0 if args.local_only else None,
         "new_alert_episodes": new_episodes,
         "cities_searched": sorted(searches),
         "searches": searches,
