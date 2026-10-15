@@ -1,0 +1,112 @@
+name: WIP 209 frozen identity forensic proof
+
+on:
+  push:
+    branches: [proof-wip-cached-209-identity-2026-10-15]
+    paths:
+      - "research/forensic_cached_bridge_209.py"
+      - ".github/workflows/wip-cached-209-identity-proof.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: wip-frozen-identity-proof-2026-10-15
+  cancel-in-progress: false
+
+jobs:
+  offline-209:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      PYTHONDONTWRITEBYTECODE: "1"
+      UKRAINEALARM_API_TOKEN: ""
+      ATTACK_EVENT_DATABASE_URL: ""
+      DATABASE_URL: ""
+    steps:
+      - name: Checkout isolated proof code
+        uses: actions/checkout@v4
+        with:
+          ref: proof-wip-cached-209-identity-2026-10-15
+          fetch-depth: 1
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Checkout immutable WIP data
+        uses: actions/checkout@v4
+        with:
+          ref: 567c0aab3aaf98a5b8dd788021a26ece41f083e3
+          path: frozen-wip
+          persist-credentials: false
+          fetch-depth: 1
+      - name: Checkout immutable production data
+        uses: actions/checkout@v4
+        with:
+          ref: 97ec99389259f8d0cfcecc17a2ff77302bb0615f
+          path: frozen-prod
+          persist-credentials: false
+          fetch-depth: 1
+      - name: Offline reproducibility run A
+        run: |
+          python research/forensic_cached_bridge_209.py \
+            --wip frozen-wip --prod frozen-prod --out proof-a
+      - name: Offline reproducibility run B and byte parity
+        run: |
+          python research/forensic_cached_bridge_209.py \
+            --wip frozen-wip --prod frozen-prod --out proof-b
+          python - <<'PY'
+          from pathlib import Path
+          import hashlib
+          a=Path("proof-a"); b=Path("proof-b")
+          files=sorted(x.name for x in a.iterdir() if x.is_file())
+          assert len(files)==5, files
+          assert files==sorted(x.name for x in b.iterdir() if x.is_file())
+          for f in files:
+              l=a.joinpath(f).read_bytes(); r=b.joinpath(f).read_bytes()
+              assert l==r, f"{f} is non-deterministic"
+              print(f, len(l), hashlib.sha256(l).hexdigest())
+          print("A/B byte-identical reproducibility PASS")
+          PY
+      - name: Freeze source and worktree invariants
+        run: |
+          test "$(git -C frozen-wip rev-parse HEAD)" = "567c0aab3aaf98a5b8dd788021a26ece41f083e3"
+          test "$(git -C frozen-prod rev-parse HEAD)" = "97ec99389259f8d0cfcecc17a2ff77302bb0615f"
+          test -z "$(git -C frozen-wip status --porcelain)"
+          test -z "$(git -C frozen-prod status --porcelain)"
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p=Path("proof-a")
+          manifest=json.loads((p/"wip_cached_209_identity_manifest_2026-10-15.json").read_text())
+          report=json.loads((p/"wip_cached_209_reconciliation_report_2026-10-15.json").read_text())
+          proof=json.loads((p/"wip_cached_209_regression_proof_2026-10-15.json").read_text())
+          assert len(manifest["rows"])==209
+          assert report["city_counts"]=={"kyiv":185,"mykolaiv":12,"sumy":9,"kharkiv":3}
+          assert report["historical_episode_ids_changed"]==0
+          assert report["review_decisions_transferred"]==0
+          assert proof["ukrainealarm_request_count"]==0
+          assert proof["neon_read_count"]==0 and proof["neon_write_count"]==0
+          assert proof["byte_identical"] and proof["git_worktree_unchanged"]
+          print("non-mutation, 209-ID and zero-network invariants PASS")
+          PY
+      - name: Upload independent proof artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: wip-cached-209-identity-offline-proof
+          path: proof-a/*
+          retention-days: 30
+      - name: Commit evidence to isolated proof branch only
+        run: |
+          mkdir -p research/wip_cached_209_forensic_2026-10-15
+          cp proof-a/* research/wip_cached_209_forensic_2026-10-15/
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add research/wip_cached_209_forensic_2026-10-15/
+          if git diff --cached --quiet; then
+            echo "No new forensic artifacts to commit"
+          else
+            git commit -m "Freeze verified 209-case offline identity reconciliation artifacts"
+            test "$(git symbolic-ref --short HEAD)" = "proof-wip-cached-209-identity-2026-10-15"
+            git push origin HEAD:proof-wip-cached-209-identity-2026-10-15
+          fi
