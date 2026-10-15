@@ -1,0 +1,88 @@
+{
+  "schema_version": 1,
+  "checkpoint": "WIP CACHED-BRIDGE INTEGRATION = PARTIAL — BLOCKED",
+  "assessment_date": "2026-10-15",
+  "source": {
+    "main": "d425c3475565b4db1c36c472ab967b3283811d43",
+    "wip_base": "567c0aab3aaf98a5b8dd788021a26ece41f083e3",
+    "site_prod_snapshot": "97ec99389259f8d0cfcecc17a2ff77302bb0615f"
+  },
+  "isolated_proof": {
+    "branch": "proof-ukrainealarm-cached-bridge-2026-10-15",
+    "tested_commit": "e4c285c60721913dcf52666f15c6f3d2a88c8cfc",
+    "github_actions_run": 38694381222,
+    "github_actions_job": 116287412840,
+    "artifact_id": 11953810973,
+    "status": "SUCCESS",
+    "synthetic_test_count": 25,
+    "synthetic_failed_count": 0,
+    "live_ukrainealarm_http_requests": 0,
+    "token_supplied": false,
+    "production_neon_credentials_supplied": false,
+    "production_git_writes": 0,
+    "test_scope": [
+      "synthetic validator rejection/freshness/identity/idempotence checks",
+      "offline socket-blocked validator with no token",
+      "static cached-mode consumer guards",
+      "pinned production site-prod JSON read-only validation"
+    ],
+    "not_tested": [
+      "Full WIP monitor execution using real accepted WIP state",
+      "publisher/review/classifier invariance against current WIP state",
+      "end-to-end synthetic full monitor + persistence canary",
+      "WIP code deployed to multicity-wip branch",
+      "real schedule WIP activation",
+      "production HTTP readback"
+    ]
+  },
+  "production_input_validation": {
+    "status": "PASS",
+    "valid_regions": 21,
+    "required_regions": 21,
+    "continuous_regions": 21,
+    "overlap_verified_regions": 21,
+    "bridge_schema_version": 3,
+    "last_successful_fetch_at": "2026-10-15T05:01:09.536745Z",
+    "global_checkpoint_age_hours_at_proof": 1.748876,
+    "last_fetch_error": null,
+    "event_count": 3543,
+    "kyiv_exact_city_intervals": 2661,
+    "sevastopol_exact_city_intervals": 557,
+    "snapshot_sha256": "37e26fc1a7433785ae3b80c3deb07840b8263473f0167ca14787b3621263a35c",
+    "input_sha256": {
+      "ukrainealarm_bridge.json": "7194d5089fbb68165366bea0045660c9c5365cff4457e652d7a18e31b6793f75",
+      "alerts_combined.json": "cb18e0c7a2cbcb7bdcd5ef5d5a2009029346ed27523642c59f03a6bdb1fb6cda",
+      "sevastopol_events.json": "1b0a92690c9bd79878c0c7802fb20cb4dca2f5cef59992ca435fc661877d6f1f"
+    }
+  },
+  "code_git_blobs": {
+    "kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py": "368b4bb8fe616e74238fa98455a1aaee60efd89d",
+    "kyiv-air-alerts-grafana/scripts/validate_cached_production_alerts.py": "5258eaca400b82c7907f291dbc15737794d5f7aa",
+    "kyiv-air-alerts-grafana/scripts/test_cached_production_alerts.py": "d8ca3626f077762099cc130b56db09c25f9a10c8",
+    ".github/workflows/cached-bridge-isolated-proof.yml": "682c6b9ccd526d0d9034a941a5df597ae97c615f"
+  },
+  "activation_prep": {
+    "branch": "prepare-cached-bridge-wip-activation-2026-10-15",
+    "commit": "693f85dfa18748af4bd95a8320909cdbbb03a8a6",
+    "draft_pr": 32,
+    "manual_only_guard_preserved": true,
+    "read_only_draft": true
+  },
+  "safety": {
+    "main_unchanged": true,
+    "site_prod_unchanged": true,
+    "original_wip_unchanged": true,
+    "neon_unchanged": true,
+    "classifier_rules_unchanged": true,
+    "production_data_unchanged": true,
+    "update_yml_guard_unchanged": true
+  },
+  "remaining_gates": [
+    "Independently inspect accepted WIP state and prove regression safety against full 23-city episode set",
+    "Instrument entire WIP monitor path to establish zero UkraineAlarm client calls, not only validator",
+    "Test publisher follow-ups, classification and review invariance and canary boundaries offline",
+    "Promote the exact tested code blobs into WIP only after acceptance",
+    "Review and authorize the separate main workflow activation while preserving emergency job guard until explicit scheduled restoration"
+  ],
+  "guarded_wip_activation": "NO-GO"
+}
