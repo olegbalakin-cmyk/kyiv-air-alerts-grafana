@@ -1,0 +1,42 @@
+{
+  "schema_version": 1,
+  "kind": "read_only_wip_cached_bridge_23_city_regression",
+  "executed_at_utc": "2026-10-15T06:49:29Z",
+  "code_commit": "ed5a96d8bf633fa8826c296882baa4c965af9147",
+  "source_commit": "97ec99389259f8d0cfcecc17a2ff77302bb0615f",
+  "accepted_wip_base": "567c0aab3aaf98a5b8dd788021a26ece41f083e3",
+  "workflow_run_id": 38694725753,
+  "workflow_job_id": 116288513560,
+  "workflow_conclusion": "SUCCESS",
+  "regression_disposition": "BLOCKED",
+  "source_validation": "PASS_21_OF_21",
+  "cached_city_count": 23,
+  "cached_episode_count": 6556,
+  "first_blocker": {
+    "city_key": "kharkiv",
+    "type": "accepted_episode_identity_not_in_cached_source",
+    "episode_id": "7c9e0d9dddae7394aff73c0e"
+  },
+  "possible_explanations_not_yet_verified": [
+    "interval boundary differences",
+    "timestamp precision differences",
+    "live-API vs published bridge event membership/identity differences"
+  ],
+  "network": {
+    "ukrainealarm_client_instantiations": 0,
+    "ukrainealarm_credentials_supplied": false,
+    "live_ukrainealarm_requests_observed": 0
+  },
+  "mutations": {
+    "wip_monitor_state": false,
+    "wip_review_queue": false,
+    "production_git": false,
+    "production_neon": false
+  },
+  "artifact_id": 11953616930,
+  "source_snapshot_sha256": "37e26fc1a7433785ae3b80c3deb07840b8263473f0167ca14787b3621263a35c",
+  "scope_warning": "Successful GitHub workflow does NOT imply WIP regression acceptance; explicit regression status is BLOCKED.",
+  "disposition": "WIP CACHED-BRIDGE INTEGRATION = PARTIAL — BLOCKED",
+  "activation": "NO-GO",
+  "next": "Investigate full 23-city accepted-WIP versus pinned production snapshot identity discrepancies; resolve with evidence, rerun read-only regression, then conduct full offline monitor invariance and independent acceptance before promotion."
+}
