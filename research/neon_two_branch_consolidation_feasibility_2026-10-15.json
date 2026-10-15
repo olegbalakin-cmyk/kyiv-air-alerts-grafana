@@ -1,0 +1,484 @@
+{
+  "schema_version": "neon-two-branch-consolidation-feasibility-v1",
+  "assessment_date_utc": "2026-10-15",
+  "repository": "olegbalakin-cmyk/kyiv-air-alerts-grafana",
+  "objective": "Compare exactly two archived Phase-1 Neon experiments for possible future evidence-preserving consolidation; no SQL, Neon mutations, merge, export or deletion.",
+  "verdict": {
+    "NEON_TWO_BRANCH_CONSOLIDATION_FEASIBILITY": "PARTIAL",
+    "BRANCH_A_CONSOLIDATION": "CONSOLIDATION_PARTIAL",
+    "BRANCH_B_CONSOLIDATION": "CONSOLIDATION_PARTIAL",
+    "BRANCH_A_RETIREMENT": "RETIREMENT_NOT_PROVEN",
+    "BRANCH_B_RETIREMENT": "RETIREMENT_NOT_PROVEN",
+    "SAFE_BRANCH_SLOT_RECOVERY": "NOT_PROVEN",
+    "EXTERNAL_DEPENDENCY_STATUS": "UNRESOLVED",
+    "HISTORICAL_ROW_EQUALITY": "NOT_VERIFIABLE",
+    "CURRENT_SQL_SCHEMA_EQUALITY": "NOT_VERIFIABLE",
+    "H2_NINE_CASE_DISPOSABLE_NEON_REVISION_TEST": "BLOCKED",
+    "C4": "NOT_PROVEN",
+    "C5": "NOT_PROVEN",
+    "UNBOUND_UNRESOLVED": 25,
+    "NEON_AUTHORITY_ACTIVE": "NO",
+    "PRODUCTION_CUTOVER_EXECUTED": "NO",
+    "NEON_BRANCH_DELETIONS": 0,
+    "NEON_DATABASE_MUTATIONS": 0,
+    "NEON_SQL_QUERIES": 0
+  },
+  "github_preflight": {
+    "main_head": "d425c3475565b4db1c36c472ab967b3283811d43",
+    "project_state_blob": "a20b2eacd5d037041ae46c235a8172aa1f0c0a98",
+    "changelog_blob": "bc5e09eb25053a2eb107660a80005ae052735b40",
+    "coordination_files_read_before_work": true,
+    "accepted_newer_equivalent_consolidation_checkpoint_found": false,
+    "precedence": "Current main coordination documentation and the immutable cited original proof govern, not the supplied earlier main guess.",
+    "retention_audit": {
+      "commit": "7985a3217f1a0eca841e77a05c7e819214a28cfa",
+      "path": "research/neon_archived_branch_retention_audit_2026-10-14.json",
+      "git_blob": "b6161ba3faecdce6a666d7886006765372785a92",
+      "byte_length": 43542,
+      "sha256": "49904b0ff81fb4bcaed5f9902e31460023b818157e83ee5324297bd72631d496",
+      "independently_rehashed": true,
+      "status": "PARTIAL_RESEARCH_PREDECESSOR; NO_SAFE_DELETION_CANDIDATE_ESTABLISHED"
+    },
+    "correction_to_supplied_branch_a_reference": {
+      "incorrect_commit": "0871e272cb0d8f7204f94a9a05d47aef0b52486c",
+      "incorrect_path": "kyiv-air-alerts-grafana/research/db_phase1_adapter_e2e_proof_2026-09-28.json",
+      "explanation": "The actual file in commit 0871e272 is db_phase1_live_poll_persistence_adapter_proof_2026-09-28.json, belonging to a different live-poll experiment (br-cold-sky-b5jhai9p). The target Branch A original E2E proof is at commit 182abd7b below."
+    }
+  },
+  "live_neon_inventory": {
+    "project_id": "green-cake-44216048",
+    "project_name": "kyiv-air-alerts-phase1-pilot",
+    "region": "aws-us-east-2",
+    "plan": "free_v3",
+    "branch_limit": 10,
+    "branches_found": 10,
+    "archived_branches_found": 6,
+    "available_branch_slots": 0,
+    "history_retention_seconds": 21600,
+    "listed_snapshots": 0,
+    "protected_by_task_branch_ids": [
+      "br-wandering-sunset-b5835alw",
+      "br-young-feather-b5q19nli",
+      "br-bold-mode-b5rub8pq",
+      "br-quiet-hat-b5z5hdqu"
+    ],
+    "target_branches": [
+      {
+        "role": "A",
+        "id": "br-still-sea-b5062r40",
+        "name": "lviv-phase1-adapter-e2e-2026-09-28",
+        "parent_id": "br-wandering-sunset-b5835alw",
+        "parent_lsn": "0/1CCE2B8",
+        "parent_timestamp": "2026-09-28T09:04:13Z",
+        "created_at": "2026-09-28T10:06:56Z",
+        "current_state": "archived",
+        "protected": false,
+        "default": false,
+        "logical_size_bytes": 32727040,
+        "database_name": "neondb",
+        "endpoint_id": "ep-wispy-sea-b5y3qhci",
+        "endpoint_type": "read_write",
+        "endpoint_current_state": "idle",
+        "endpoint_suspended_at": "2026-09-29T06:43:46Z",
+        "children_observed": 0,
+        "branch_snapshots_observed": 0
+      },
+      {
+        "role": "B",
+        "id": "br-quiet-tooth-b51ewryz",
+        "name": "lviv-phase1-shadow-integration-v2-e2e-2026-09-28",
+        "parent_id": "br-young-feather-b5q19nli",
+        "parent_lsn": "0/1DE9330",
+        "parent_timestamp": "2026-09-28T16:26:59Z",
+        "created_at": "2026-09-28T17:40:37Z",
+        "current_state": "archived",
+        "protected": false,
+        "default": false,
+        "logical_size_bytes": 32751616,
+        "database_name": "neondb",
+        "endpoint_id": "ep-green-base-b5emkaib",
+        "endpoint_type": "read_write",
+        "endpoint_current_state": "idle",
+        "endpoint_suspended_at": "2026-09-29T06:44:01Z",
+        "children_observed": 0,
+        "branch_snapshots_observed": 0
+      }
+    ],
+    "credential_observation": "Each branch lists two inherited credential metadata entries. No credential was created, rotated, disclosed, or used; private external consumers cannot be ruled out.",
+    "observed_no_snapshots_warning": "No separately listed Neon snapshots. Current six-hour history retention cannot be assumed to reconstruct the 2026-09-28 branch-origin SQL state.",
+    "archive_access_status": "Neither branch queried: both are archived and only read_write idle endpoints were observed; unarchive, compute start and independently read-only SQL connection not authorized."
+  },
+  "frozen_historical_evidence": {
+    "branch_A": {
+      "proof_commit": "182abd7bc6ac761417a4ba74aa20697f533c637c",
+      "proof_path": "kyiv-air-alerts-grafana/research/db_phase1_live_e2e_persistence_adapter_proof_2026-09-28.json",
+      "proof_blob": "f013e63cf274b17aaaff0e8eef0dc49551b689e0",
+      "executed_code_commit": "7b2899e4ab92de855e2a741f482c57ec3e6dbac1",
+      "actions_run_id": 36407705040,
+      "actions_job_id": 108880291090,
+      "actions_conclusion": "success",
+      "actions_artifact_id": 10962649440,
+      "actions_zip_bytes": 37319,
+      "actions_zip_sha256": "241c9794735a44e0203cbf15b82b7031972925812bbb9ccdfb95051b2919f63f",
+      "artifact_expires_at": "2026-10-28T10:07:13Z",
+      "exact_original_members": [
+        {
+          "name": "db_phase1_live_e2e_result.json",
+          "bytes": 86322,
+          "sha256": "a0aafd650d571859c95300a06ce91864c14c8ed62912ce74356092f326ff0860"
+        },
+        {
+          "name": "db_phase1_live_e2e_identities.json",
+          "bytes": 75314,
+          "sha256": "771453feae3896b4ab5e094c62d4023799def0e0aad5e2594f6b5d6c5c962ee3"
+        },
+        {
+          "name": "db_phase1_live_e2e_branch_meta.json",
+          "bytes": 528,
+          "sha256": "5bb44a67c053b80af6e1f56f1efe0ae3384cbfd4a69b57aa10441d31d493db8b"
+        }
+      ],
+      "tests": {
+        "passed": 23,
+        "failed": 0
+      },
+      "original_parent_isolation": "primary branch reported 0 rows in all four Phase-1 tables before and after A E2E",
+      "original_initial_counts": {
+        "ingestion_runs": 0,
+        "alert_episodes": 0,
+        "alert_episode_sources": 0,
+        "ingestion_checkpoints": 0
+      },
+      "original_final_counts": {
+        "ingestion_runs": 2,
+        "alert_episodes": 126,
+        "alert_episode_sources": 140,
+        "ingestion_checkpoints": 1
+      },
+      "first_apply": {
+        "episodes_inserted": 126,
+        "sources_inserted": 140,
+        "checkpoints_inserted": 1,
+        "run_id": "cd293bae-0215-4c45-bf14-739a6cfc0633"
+      },
+      "exact_retry": {
+        "episodes_inserted": 0,
+        "sources_inserted": 0,
+        "sources_last_seen_updated": 140,
+        "checkpoints_inserted": 0,
+        "run_id": "827f585e-0e22-4f04-96ac-83e10bc90700"
+      },
+      "checkpoint_ids": [
+        {
+          "id": "169e8b12-9966-4cab-9330-0a0762d53781",
+          "seq": 1
+        }
+      ],
+      "original_readback": {
+        "episodes_count": 126,
+        "sources_count": 140,
+        "episodes_identity_set_sha256": "c03a06a6ac45c3fe1f4260bdff8e8402f74de4ce97b9c03819b7e5a120c7fa33",
+        "sources_identity_set_sha256": "d113ca7a949639c9510a85cd42318589841291dddff441cc71c5f67f001b4090",
+        "episode_id_interval_map_sha256": "52896e7e67b19a0f70298311d10440cd16c168dd6a7f181a5f63fbcd6920199f",
+        "hash_method": "Research-only SHA-256. Keysets: sorted UTF-8 key strings joined with LF and terminal LF. Interval map: JSON sorted keys, UTF-8, ensure_ascii=false, separators=(',',':'); values {start:<original exported second element>,end:<original exported third element>}. Not a newly accepted persistence key.",
+        "source_type_counts": {
+          "ukrainealarm_region_history": 20,
+          "vadimkin_official_data_uk": 120
+        },
+        "duplicate_episode_keys": 0,
+        "duplicate_source_keys": 0,
+        "original_actions_result_snapshot_equal_to_standalone_identities": true
+      },
+      "ddl_blob": "3b8af7940b23aae03a4f6b434d90d97dde10bfc0",
+      "persistence_adapter_blob": "06f3098df63d7aaf2348c366b6a351901926cb53"
+    },
+    "branch_B": {
+      "proof_commit": "fd85611963e1132dcdbc297f2b13260d9bae9161",
+      "proof_path": "kyiv-air-alerts-grafana/research/db_phase1_shadow_ingestion_integration_proof_2026-09-28.json",
+      "proof_blob": "e8bf062a2995de211308ce3fe30e9fff3ac0bc20",
+      "executed_code_commit": "0882f07f7427f39b79f8af40280f97871cf72db7",
+      "actions_run_id": 36456983073,
+      "actions_job_id": 109045702946,
+      "actions_conclusion": "success",
+      "actions_artifact_id": 10987225380,
+      "actions_zip_bytes": 3687,
+      "actions_zip_sha256": "294f848fad1bdc5aa42606c73957e0403a78628f27c58f766f165aa5c902ac8d",
+      "artifact_expires_at": "2026-10-28T17:42:12Z",
+      "exact_original_members": [
+        {
+          "name": "db_phase1_shadow_ingestion_integration_proof_2026-09-28.json",
+          "bytes": 3889,
+          "sha256": "d27f8958e800013235443632e5f745cc942860ba47726c334dce4906434bb213"
+        },
+        {
+          "name": "db_phase1_shadow_prepare.json",
+          "bytes": 338,
+          "sha256": "ae8be893dc66ade271a1916f91cb24492d216be881e54ff6387517a0a785a2be"
+        },
+        {
+          "name": "phase1_tests.log",
+          "bytes": 8700,
+          "sha256": "c1c1a770ba9182e13a74149535e968e038a9ae16f991c4671501f92c7b57be7e"
+        }
+      ],
+      "tests": {
+        "passed": 51,
+        "failed": 0
+      },
+      "captured_input_sha256": "e774f65947ef1a06fb6ef371f240f3bf112f168c5ece05b79b17cab6d7485ff6",
+      "original_initial_counts": {
+        "ingestion_runs": 1,
+        "alert_episodes": 126,
+        "alert_episode_sources": 140,
+        "ingestion_checkpoints": 1
+      },
+      "original_final_counts": {
+        "ingestion_runs": 3,
+        "alert_episodes": 126,
+        "alert_episode_sources": 140,
+        "ingestion_checkpoints": 2
+      },
+      "inherited_checkpoint": {
+        "id": "40a0d262-2a79-405b-8e06-1af6e28bc908",
+        "seq": 1,
+        "created_by_run_id": "9d4bd0a3-2d59-4f00-9431-49cef2edaba8"
+      },
+      "new_checkpoint": {
+        "id": "36c8d302-62b3-48ce-9450-1f88786b80f4",
+        "seq": 2
+      },
+      "first_shadow": {
+        "run_id": "5db610eb-c090-4c1e-9c40-42a0956384e8",
+        "episodes_inserted": 0,
+        "sources_inserted": 0,
+        "sources_last_seen_updated": 140,
+        "checkpoints_inserted": 1
+      },
+      "exact_retry": {
+        "run_id": "cc46f2df-bff0-413c-80b9-fe09c81f8c7d",
+        "episodes_inserted": 0,
+        "sources_inserted": 0,
+        "sources_last_seen_updated": 140,
+        "checkpoints_inserted": 0
+      },
+      "shadow_off_on_product_output_parity": true,
+      "scheduled_shadow_enabled": false,
+      "original_readback_granularity": "FROZEN_AGGREGATE_ONLY for row IDs and row payload; unlike A, this retrieved Actions ZIP has no complete episode/source identity export",
+      "source_type_counts": {
+        "ukrainealarm_region_history": 20,
+        "vadimkin_official_data_uk": 120
+      },
+      "ddl_blob": "3b8af7940b23aae03a4f6b434d90d97dde10bfc0",
+      "persistence_adapter_blob": "ed014e61fc6186fa9daf91c763c847e7df2f0306"
+    }
+  },
+  "schema_comparison": {
+    "original_committed_ddl_blob_equal": true,
+    "ddl_git_blob": "3b8af7940b23aae03a4f6b434d90d97dde10bfc0",
+    "original_ddl_tables": [
+      "ingestion_runs",
+      "alert_episodes",
+      "alert_episode_sources",
+      "ingestion_checkpoints"
+    ],
+    "original_ddl_views": [
+      "current_ingestion_checkpoints"
+    ],
+    "original_ddl_explicit_indexes_count": 6,
+    "original_ddl_has_create_trigger": false,
+    "original_persistence_adapter_blob_equal": false,
+    "original_persistence_adapter_blobs": [
+      "06f3098df63d7aaf2348c366b6a351901926cb53",
+      "ed014e61fc6186fa9daf91c763c847e7df2f0306"
+    ],
+    "actual_archived_database_schema_fingerprints": "NOT_VERIFIABLE_NO_AUTHORIZED_ARCHIVED_SQL",
+    "migration_table_current_state": "NOT_VERIFIABLE",
+    "note": "Equal original DDL blobs are immutable code-evidence equality, not equality of current schema, extensions, extra objects, row values or runtime behavior."
+  },
+  "comparison_evidence_matrix": [
+    {
+      "table": "alert_episodes",
+      "A": "EXACT_IMMUTABLE_ROW_PROOF for original A IDs and timing read-back; not present-day SQL",
+      "B": "FROZEN_AGGREGATE_ONLY (126 inherited, 0 inserted in B)",
+      "frozen_A_final": 126,
+      "frozen_B_final": 126,
+      "identity_intersection": "NOT_VERIFIABLE",
+      "only_A": "NOT_VERIFIABLE",
+      "only_B": "NOT_VERIFIABLE",
+      "same_key_different_payload": "NOT_VERIFIABLE",
+      "different_key_same_semantics": "NOT_VERIFIABLE",
+      "current_state": "NOT_VERIFIABLE"
+    },
+    {
+      "table": "alert_episode_sources",
+      "A": "EXACT_IMMUTABLE_ROW_PROOF for original A deterministic source keys/provenance read-back",
+      "B": "FROZEN_AGGREGATE_ONLY (140 inherited, 0 inserted in B)",
+      "frozen_A_final": 140,
+      "frozen_B_final": 140,
+      "identity_intersection": "NOT_VERIFIABLE",
+      "only_A": "NOT_VERIFIABLE",
+      "only_B": "NOT_VERIFIABLE",
+      "same_key_different_payload": "NOT_VERIFIABLE",
+      "different_key_same_semantics": "NOT_VERIFIABLE",
+      "current_state": "NOT_VERIFIABLE"
+    },
+    {
+      "table": "ingestion_runs",
+      "A": "ORIGINAL_ACTIONS_READBACK (2 distinct proven original experiment run IDs)",
+      "B": "FROZEN_AGGREGATE_ONLY plus 3 original run IDs including inherited bootstrap",
+      "frozen_A_final": 2,
+      "frozen_B_final": 3,
+      "original_distinct_run_ids_proven": true,
+      "exact_current_diff": "NOT_VERIFIABLE"
+    },
+    {
+      "table": "ingestion_checkpoints",
+      "A": "EXACT_IMMUTABLE_ROW_PROOF of original seq=1 checkpoint",
+      "B": "FROZEN_AGGREGATE_ONLY plus UUIDs of inherited seq=1 and new seq=2",
+      "frozen_A_final": 1,
+      "frozen_B_final": 2,
+      "original_checkpoint_uuids_distinct": true,
+      "exact_current_diff": "NOT_VERIFIABLE"
+    },
+    {
+      "table": "all_other_possible_live_objects",
+      "A": "NOT_OBSERVABLE",
+      "B": "NOT_OBSERVABLE",
+      "schema_or_contract_incompatible": "NOT_VERIFIABLE"
+    }
+  ],
+  "inherited_vs_experiment_specific": {
+    "branch_A": "Original primary-parent isolation reported 0 rows in all four core tables; A itself added 126/140, one seq=1 checkpoint, and two ingestion-run records.",
+    "branch_B": "Original young-feather bootstrap parent already contained 126/140, one seq=1 checkpoint and one ingestion run; B added a seq=2 checkpoint, two ingestion runs and changed last_seen metadata for 140 sources.",
+    "original_parent_lsn_equal": false,
+    "temporal_origin": "Parent origin points differ by more than seven hours and are different branches.",
+    "current_parent_state_substitute_for_origin": "PROHIBITED",
+    "durable_origin_snapshot_available": false,
+    "exact_row_level_parent_three_way_reconstruction": "NOT_VERIFIABLE"
+  },
+  "scenarios": {
+    "A_fully_redundant": "NOT_PROVEN: first persistence apply and retry, distinct run IDs/checkpoint and original row provenance cannot be discarded based on matching source counts.",
+    "B_fully_redundant": "NOT_PROVEN: inherited bootstrap plus shadow OFF/ON parity, own seq=2 checkpoint and idempotent shadow retry are distinct historical evidence.",
+    "unique_state_portable": "TECHNICALLY_PLAUSIBLE_WITH_SEPARATE_EXPORT_AND_INDEPENDENT_RECONCILIATION_NOT_YET_PROVEN",
+    "incompatible_or_irreplaceable": "NOT_EXCLUDED; current schema and row conflicts inaccessible. Preserve both meanwhile.",
+    "direct_neon_branch_merge": "NOT_PROPOSED",
+    "prohibited_authority_target": "Never transfer experiment evidence into br-bold-mode-b5rub8pq just to free a slot."
+  },
+  "dependencies_and_preservation": {
+    "current_default_branch_exact_branch_id_search_hits": {
+      "A": 0,
+      "B": 0
+    },
+    "current_default_branch_exact_endpoint_id_search_hits": {
+      "A": 0,
+      "B": 0
+    },
+    "historical_workflow_reference_status": "Both original successful runs/workflow provenance recovered; no proof of complete current non-secret/external consumers.",
+    "private_secrets_and_external_endpoint_consumers": "NOT_OBSERVABLE",
+    "EXTERNAL_DEPENDENCY_STATUS": "UNRESOLVED",
+    "expiry_risk": "Both 2026-09-28 original Actions artifacts expire 2026-10-28. Existing Git JSON summaries do not preserve the full original A identity bytes nor guarantee full branch-only database state.",
+    "preserve_original_artifacts": "Separate authorization: place original artifact ZIP bytes and per-member integrity manifest in durable access-controlled evidence store before expiry; independent read-back with byte SHA-256, expiry/retention and allowed-use contract.",
+    "preserve_database_state_if_authorized": "For each exact branch, independently authorized branch-specific read-only snapshot; enumerate full schema/DDL, roles and privileges metadata, relevant tables, exact keys, source content hashes, relationships, checkpoint/run rows, revision pointers and synthetic fixtures. Canonicalize semantic values with explicit excluded volatile columns and hash each row; do not conflate it with accepted deterministic keys.",
+    "transfer_plan": "Only after separate approved destination and export rights: serialize unique branch-only data and experimental receipts into an independent dedicated versioned evidence store, with source-branch manifest, two independent read-backs and reversible restoration proof. No copy or merge in this task.",
+    "original_behavior_not_replaced_by_database_copy": [
+      "transaction timing",
+      "rollback path",
+      "shadow OFF/ON effects",
+      "lock waits/attempt history",
+      "first-run and retry receipt identity"
+    ],
+    "no_accepted_complete_branch_retention_archive": true
+  },
+  "deletion_gates": {
+    "branch_A": {
+      "no_active_external_consumer": "UNRESOLVED",
+      "no_children": "PASS",
+      "historical_provenance": "PASS_ORIGINAL_ACTIONS",
+      "durable_complete_proof": "PARTIAL_ACTIONS_EXPIRE",
+      "unique_database_state_accounted": "NO",
+      "conflicts_excluded": "NO",
+      "reversible_preservation": "NO",
+      "durable_database_retention_contract": "NO",
+      "accepted_checkpoint_impact_excluded": "NO",
+      "separate_owner_exact_id_deletion_authorization": "NO"
+    },
+    "branch_B": {
+      "no_active_external_consumer": "UNRESOLVED",
+      "no_children": "PASS",
+      "historical_provenance": "PASS_ORIGINAL_ACTIONS",
+      "durable_complete_proof": "PARTIAL_ACTIONS_EXPIRE",
+      "unique_database_state_accounted": "NO",
+      "conflicts_excluded": "NO",
+      "reversible_preservation": "NO",
+      "durable_database_retention_contract": "NO",
+      "accepted_checkpoint_impact_excluded": "NO",
+      "separate_owner_exact_id_deletion_authorization": "NO"
+    }
+  },
+  "separate_second_stage_authorization_required": {
+    "only_branch_ids": [
+      "br-still-sea-b5062r40",
+      "br-quiet-tooth-b51ewryz"
+    ],
+    "read_only_scope": "Inspect and hash exact present schema/rows in each branch using independently verified read-only compute endpoints and SELECT-only transactions, without altering historical rows or checkpoint/pointer state.",
+    "conditional_state_changes": "Only if individually authorized: temporary unarchive of exactly A and B; provision or use independently verified read-only compute/role connectivity; minimal time-bounded activation; restore both branches to archived state afterwards and remove only separately authorized temporary compute resources.",
+    "prohibited": "No parent/authority branch writes, no data copy/import, no reset/restore, no raw public export, no billable plan change, no deletion.",
+    "cost_estimate_note": "Both current endpoints are read_write and idle; using an independent read-only compute may incur CU-hours. At 0.25 CU per replica, two replicas active for ten minutes consume about 0.083 CU-hours before autoscaling and overhead, but account-specific remaining allowance and actual charges were not independently verified. Authorize only after cost/plan preflight.",
+    "safety_stop": "If selective read-only connectivity or reversible archived-state restoration cannot be certified, stop before SQL."
+  },
+  "independent_verifier": {
+    "verified_using": "Separate local Python ZIP/member/hash/identity-set checks against the two downloaded original Actions ZIPs, independent of original Git proof producer; separate GitHub/Neon API read-only metadata checks.",
+    "zip_digests_match_github": true,
+    "zip_crc_members_pass": {
+      "A": "3/3",
+      "B": "3/3"
+    },
+    "A_result_identity_snapshot_equals_A_export": true,
+    "A_keyset_counts_and_source_type_split_pass": true,
+    "original_run_metadata_and_head_sha_match": true,
+    "original_ddl_git_blob_equality_pass": true,
+    "negative_controls": [
+      {
+        "condition": "equal 126/140 aggregate counts",
+        "conclusion_if_only_condition": "REJECT_EQUALITY_OR_RETIREMENT"
+      },
+      {
+        "condition": "same original DDL Git blob",
+        "conclusion_if_only_condition": "REJECT_CURRENT_SCHEMA_AND_ROW_PARITY"
+      },
+      {
+        "condition": "same creation date or near size",
+        "conclusion_if_only_condition": "REJECT_REDUNDANCY"
+      },
+      {
+        "condition": "archived + idle endpoint",
+        "conclusion_if_only_condition": "REJECT_NO_EXTERNAL_CONSUMERS"
+      },
+      {
+        "condition": "different inherited parents and no origin snapshots",
+        "conclusion_if_only_condition": "REJECT_UNATTRIBUTED_FULL_BRANCH_DIFF"
+      },
+      {
+        "condition": "green original Actions run, but no B exact identity set and no current SQL",
+        "conclusion_if_only_condition": "REJECT_EXACT_ROW_OVERLAP"
+      }
+    ],
+    "final_gate": "PASS_FOR_BOUNDED_RESEARCH_COMPARISON_ONLY; DATABASE_CONSOLIDATION_AND_RETIREMENT_NOT_PROVEN"
+  },
+  "execution_receipt": {
+    "neon_queries_sql": 0,
+    "neon_mutations": 0,
+    "neon_branch_unarchives": 0,
+    "neon_compute_starts": 0,
+    "neon_computes_created": 0,
+    "neon_snapshots_created": 0,
+    "neon_branches_deleted": 0,
+    "neon_branches_created": 0,
+    "neon_credentials_created_or_rotated": 0,
+    "github_main_modified": false,
+    "github_site_prod_modified": false,
+    "github_wip_modified": false,
+    "github_workflow_executions_started": 0,
+    "git_change_scope": "ONE_NEW_SANITIZED_RESEARCH_JSON_ON_ISOLATED_BRANCH_ONLY; NOT_MERGED_TO_MAIN"
+  }
+}
