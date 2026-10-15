@@ -1,0 +1,79 @@
+name: Cached UkraineAlarm bridge isolated proof
+
+on:
+  push:
+    branches: [proof-ukrainealarm-cached-bridge-2026-10-15]
+    paths:
+      - "kyiv-air-alerts-grafana/scripts/validate_cached_production_alerts.py"
+      - "kyiv-air-alerts-grafana/scripts/test_cached_production_alerts.py"
+      - "kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py"
+      - ".github/workflows/cached-bridge-isolated-proof.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  offline-proof:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      PYTHONDONTWRITEBYTECODE: "1"
+      PRODUCTION_ALERT_SOURCE_COMMIT: "97ec99389259f8d0cfcecc17a2ff77302bb0615f"
+    steps:
+      - name: Checkout exact proof code
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          fetch-depth: 1
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Run deterministic unit tests without credentials
+        working-directory: kyiv-air-alerts-grafana
+        run: |
+          python -m unittest -v scripts/test_cached_production_alerts.py
+          python -m py_compile scripts/validate_cached_production_alerts.py scripts/monitor_explosion_candidates.py
+      - name: Assert the consumer has zero UkraineAlarm network call on cached path
+        run: |
+          python - <<'PY'
+          import ast
+          from pathlib import Path
+          p=Path("kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py")
+          tree=ast.parse(p.read_text(encoding="utf-8"))
+          main=next(n for n in tree.body if isinstance(n,ast.FunctionDef) and n.name=="main")
+          text=ast.get_source_segment(p.read_text(encoding="utf-8"),main)
+          assert "validate_snapshot(" in text
+          assert "validate_episode_regression(" in text
+          assert "args.local_only" in text
+          assert "cached_source" in text
+          assert "mode = \"cached_bridge\"" in text
+          print("cached route source static checks PASS")
+          PY
+      - name: Emit synthetic proof receipt
+        run: |
+          mkdir -p proof
+          python - <<'PY'
+          import hashlib,json,os,pathlib,subprocess
+          root=pathlib.Path("kyiv-air-alerts-grafana/scripts")
+          paths=[root/"validate_cached_production_alerts.py",root/"monitor_explosion_candidates.py",
+                 root/"test_cached_production_alerts.py",pathlib.Path(".github/workflows/cached-bridge-isolated-proof.yml")]
+          receipt={"kind":"isolated_offline_synthetic_cached_bridge",
+                   "source_commit_frozen":"97ec99389259f8d0cfcecc17a2ff77302bb0615f",
+                   "executed_commit":os.getenv("GITHUB_SHA"),
+                   "run_id":os.getenv("GITHUB_RUN_ID"),
+                   "job":"offline-proof",
+                   "live_ukrainealarm_requests":0,
+                   "production_database_writes":0,"production_git_writes":0,
+                   "credentials_supplied":False,"network_isolation_scope":"UkraineAlarm transport not used in synthetic tests",
+                   "fixtures":"in-memory deterministic 21-region JSON",
+                   "files":[{"path":str(p),"sha256":hashlib.sha256(p.read_bytes()).hexdigest(),
+                             "git_blob":subprocess.check_output(["git","hash-object",str(p)],text=True).strip()} for p in paths]}
+          pathlib.Path("proof/cached-bridge-synthetic.json").write_text(json.dumps(receipt,indent=2)+"\n",encoding="utf-8")
+          print(json.dumps(receipt,indent=2))
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: cached-bridge-isolated-proof
+          path: proof/cached-bridge-synthetic.json
+          retention-days: 30
