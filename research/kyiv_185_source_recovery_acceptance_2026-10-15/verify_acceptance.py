@@ -307,9 +307,9 @@ def build():
                   "Independent timing/pair/row-count source reconstruction differs")
         for row in group:
             id_number = row["original_episode_id"]
-            originals = row["historical_source_records"]
+            source_observations = row["historical_source_records"]
             if run is None:
-                check(not originals and row["producer_run_id"] is None and
+                check(not source_observations and row["producer_run_id"] is None and
                       row["source_disposition"] == "PRODUCER_RUNTIME_EVIDENCE_UNAVAILABLE",
                       "Seven-case unavailable producer disposition inconsistent")
                 historical_candidates = []
@@ -344,10 +344,10 @@ def build():
                 })
                 disposition["PRODUCER_RUNTIME_EVIDENCE_UNAVAILABLE"] += 1
             else:
-                check(len(originals) == 1 and row["producer_run_id"] == run["run_id"] and
+                check(len(source_observations) == 1 and row["producer_run_id"] == run["run_id"] and
                       row["producer_job_id"] == run["job_id"],
                       "Recovered source or Actions producer identity mismatch")
-                original = originals[0]
+                original = source_observations[0]
                 check(original["git_commit"] == eligible["commit"] and
                       original["git_blob"] == eligible["blob"],
                       "Recovered historical Git source revision mismatch")
@@ -371,7 +371,7 @@ def build():
                 "first_wip_state_pointer": row["original_wip_state_pointer"],
                 "original_times_exact_utc": row["original_times_exact_utc"],
                 "source_disposition": row["source_disposition"],
-                "source_records": originals,
+                "source_records": source_observations,
                 "candidate_runtime_source_sha": row["candidate_runtime_site_prod_commit"],
                 "producer_run_id": row["producer_run_id"],
                 "producer_job_id": row["producer_job_id"],
