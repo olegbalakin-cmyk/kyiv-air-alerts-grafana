@@ -1,0 +1,94 @@
+{
+  "schema_version": 1,
+  "checkpoint": "KYIV 185 HISTORICAL-TO-MODERN IDENTITY RECONCILIATION = PARTIAL (RESEARCH-ONLY; NOT INDEPENDENTLY ACCEPTED)",
+  "base_commit": "bafd42939f683a6b8fe53385e8031bf437667e54",
+  "proof_scope": "Pinned-Git offline identity candidates only; no API, publisher, Neon or production/WIP activity",
+  "pinned_heads_at_preflight": {
+    "main": "b0292f568426b32958ed52ebaa75a24c0f3a003b",
+    "site_prod": "4649aa4fd9b97f4d72e55879befa1de130579bb1",
+    "multicity_wip": "1ae29da3efca63ca8252226dfdb284c45243d738"
+  },
+  "counts": {
+    "original_kyiv": 185,
+    "current_modern_source_rows": 2664,
+    "original_id_sha256_verified": 185,
+    "modern_candidates_identified": 185,
+    "unique_one_to_one_candidates": 185,
+    "split_or_merged": 0,
+    "source_or_geographic_conflict": 0,
+    "no_modern_candidate": 0,
+    "not_observable": 0,
+    "plausible_unproven": 185,
+    "proven_equivalence": 0,
+    "safe_for_automatic_remapping": 0,
+    "original_source_with_producer_evidence": 178,
+    "original_producer_evidence_gap": 7,
+    "runtime_source_sha_pins": 0,
+    "distinct_modern_candidate_ids": 185,
+    "unchanged_modern_candidates_vs_frozen_predecessor": 185
+  },
+  "time_identity": {
+    "all_modern_start_end_minute_pairs_project_exactly_to_original": true,
+    "raw_utc_boundaries_both_equal_count": 0,
+    "start_delta_seconds": {
+      "min": 0,
+      "max": 59,
+      "zero_count": 6
+    },
+    "end_delta_seconds": {
+      "min": 0,
+      "max": 59,
+      "zero_count": 2
+    },
+    "duration_delta_seconds": {
+      "min": -55,
+      "max": 56
+    },
+    "original_minute_precision_mechanism": "Historic update_data.py parse_live_history/_parse_live_dt uses HH:MM dd.mm.yy and resolves seconds 00",
+    "modern_seconds_mechanism": "Current update_data.py parse_official retains dateTimeStart/dateTimeEnd seconds as supplied by municipal official_json",
+    "verified_hash_contract": "sha256(UTF8('kyiv|'+UTCstart+'|'+UTCend)).hexdigest()[:24]",
+    "identity_proof_comment": "Observed 185 minute-floor projections are not a proven source-to-source deterministic transformation; source family changed and stable provider alert identifiers are unavailable"
+  },
+  "source_and_geography": {
+    "historical_attributed_family": "kyiv_digital_live",
+    "historical_attributed_rows": 178,
+    "historical_unattributed_rows": 7,
+    "modern_family": "official_json",
+    "modern_rows_matched": 185,
+    "historical_city_grain": "Kyiv exact city from WIP load_kyiv_alert_episodes",
+    "modern_city_grain": "Kyiv exact city from same ingestion function and combined source path",
+    "source_family_changed_attributed": 178,
+    "raw_stable_provider_alert_ids_in_modern_json": 0
+  },
+  "crosswalk": {
+    "filename": "identity_crosswalk_185.json",
+    "git_blob": "43972931bd618bd1418f9c4b1ecd3718a0631930",
+    "sha256": "49e13309c6e36393e4f5cdc247772956c38ba94db23de5ce27df03ec798a8646",
+    "row_count": 185
+  },
+  "provenance_gap_rule": "Keep seven first-persistence producer evidence gaps separate from the 185 modern ID candidates; no modern match creates a historical runtime SHA pin.",
+  "original_209_manifest": {
+    "raw_file_reopened_this_run": false,
+    "accepted_prior_manifest_sha256": "54ce8c9800739b294a83991f71130ab3c6096742ed861b469c1df2ecf2ec9d76",
+    "accepted_prior_rows": 209,
+    "accepted_prior_kyiv_rows": 185,
+    "independently_reverified_git_frozen_kyiv_185_lineage_rows": 185,
+    "status": "185 subset reverified against Git-frozen derived lineage and accepted manifest receipt; direct raw 44,645,890-byte original manifest read-back not completed in this execution"
+  },
+  "disposition_policy": {
+    "PROVEN_EQUIVALENCE": "requires independently joined source episode identity and no competing candidate",
+    "PLAUSIBLE_UNPROVEN": "unique minute-projection candidate without source-record join",
+    "SPLIT_OR_MERGED": "multiple boundary/overlap candidate relationships",
+    "SOURCE_OR_GEOGRAPHIC_CONFLICT": "demonstrable contradictory territorial/source semantics",
+    "NO_MODERN_CANDIDATE": "no row in pinned production source meeting candidate rules",
+    "NOT_OBSERVABLE": "source needed for comparison cannot be read"
+  },
+  "decision": {
+    "HISTORICAL_SOURCE_RECOVERED": "178 attributed source records; 7 historical Git candidates without producer execution attribution",
+    "MODERN_CANDIDATE_IDENTIFIED": "185/185 unique",
+    "MODERN_IDENTITY_INDEPENDENTLY_PROVEN": "0/185",
+    "SAFE_FOR_AUTOMATIC_REMAPPING": "NO",
+    "WIP_ACTIVATION": "NO-GO"
+  },
+  "next_narrow_task": "Read-only retrospective municipal official_json vs Kyiv Digital exact-city record identity provenance audit using already archived Git/source records; find immutable shared provider identifiers or independently validated cross-source transformation. No new publisher/API requests, runtime SHA inference, reclassification or remapping."
+}
