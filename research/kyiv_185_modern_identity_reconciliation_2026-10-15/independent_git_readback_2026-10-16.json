@@ -1,0 +1,172 @@
+{
+  "schema_version": 1,
+  "title": "KYIV 185 — independent frozen-proof read-back and updated site-prod comparator verification",
+  "audit_date": "2026-10-16",
+  "status": "PARTIAL — DETERMINISTIC GIT-ONLY RECONCILIATION REPRODUCED; MODERN SOURCE IDENTITY UNPROVEN; NOT ACCEPTED ON MAIN",
+  "purpose": "Independently verify an already frozen 185-row research crosswalk, separately recheck the seven first-persistence producer gaps, and repeat the candidate comparison against an updated pinned production snapshot without any operational state change.",
+  "independent_method": {
+    "execution": "Independent client-side JavaScript verification against exact GitHub file contents retrieved by immutable commit SHA; SHA-256 implementation self-tested against standard empty-string and abc vectors.",
+    "assertions": "For each of 185 rows: recompute frozen ID, compare original UTC endpoints/first-persistence commit/state blob/JSON pointer against frozen source index and earlier independent lineage; recompute SHA-256 modern derived IDs, minute-projection and all overlapping candidates on both production snapshots; compare frozen crosswalk intervals/IDs/source/index and duration deltas; enforce one-to-one reverse cardinality; reject unsupported equivalence and remapping.",
+    "negative_controls": "For all 185: reversed endpoint order, changed geographic hash key (kyiv_oblast) and modern second-precision endpoints must not hash to original ID; all original interval overlaps and minute coincidences exhaustively enumerated; changed source family does not authorize cross-source identity; source/grain proof cannot be inferred from minute coincidence.",
+    "code_reuse": "No operational application code or classifier code executed; original Python proof verifier is included in inherited frozen research branch but was NOT executed in this audit.",
+    "scope_of_full_209_archive": "The separately accepted 209-case raw ZIP and its 44,645,890-byte manifest were not directly reopened; the previously frozen 185-row Git lineage and accepted 209-case manifest receipt were checked as available."
+  },
+  "git_inputs": {
+    "current_branch_heads_at_preflight": {
+      "main": "1bdd461b2d504e0acff9f1767c15299b0c6be566",
+      "site_prod": "ce3c6e541601c7ee4d7bdabc34371cdf94015938",
+      "multicity_wip": "2b2291bb52276413e384e3b425b31951360fc2a8"
+    },
+    "predecessor_recovery_commit": "bafd42939f683a6b8fe53385e8031bf437667e54",
+    "original_lineage_commit": "e55246eacc5044f5d75ff138a78fe3e01331beea",
+    "original_209_manifest_sha256_from_accepted_prior_receipt": "54ce8c9800739b294a83991f71130ab3c6096742ed861b469c1df2ecf2ec9d76",
+    "proof_branch_parent_commit": "1c5e7043f2ea8dcbc366f30c29b6fcdbf1fe42f6",
+    "production_comparator_2026_10_15": "4649aa4fd9b97f4d72e55879befa1de130579bb1",
+    "production_comparator_2026_10_16": "ce3c6e541601c7ee4d7bdabc34371cdf94015938",
+    "paths": {
+      "historical_index": "research/kyiv_185_source_recovery_acceptance_2026-10-15/source_producer_evidence_index.json",
+      "historical_ledger": "research/kyiv_185_source_recovery_acceptance_2026-10-15/kyiv_185_original_source_recovery_ledger.json",
+      "seven_gaps": "research/kyiv_185_source_recovery_acceptance_2026-10-15/seven_unresolved_cases.json",
+      "independent_lineage": "research/wip_209_independent_lineage_2026-10-15/kyiv_185_source_time_lineage_2026-10-15.json",
+      "frozen_crosswalk": "research/kyiv_185_modern_identity_reconciliation_2026-10-15/identity_crosswalk_185.json",
+      "modern_alerts": "kyiv-air-alerts-grafana/data/alerts_combined.json",
+      "WIP_monitor_code": "kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py",
+      "prod_source_code": "kyiv-air-alerts-grafana/scripts/update_data.py"
+    }
+  },
+  "input_and_proof_hashes": {
+    "historical_index": {
+      "git_blob_sha1": "409dd445a53c18ec1674150f9ae7d50285ab7f88",
+      "sha256": "e29afda24255b7b355893dd7e493d50485dacfdf6e6ed77ed8ee2630e629b83f"
+    },
+    "historical_ledger": {
+      "git_blob_sha1": "12aa39449d4613ca78b28053d37e40b029499e6e",
+      "sha256": "1391cdbc2688a08a5caa06ee4735f6d56ace7553b7183b4130314c6758770127"
+    },
+    "seven_gaps": {
+      "git_blob_sha1": "4dd2a1fd2f75d6bf764cb69831b1ff2fe74242a0",
+      "sha256": "2dd1247602767a97a326303b06514d1fe8323a1c022ff776a4ebe17e25aeba71"
+    },
+    "original_185_lineage": {
+      "git_blob_sha1": "83d16c43e442c624f8c0edccb2b9b219d57a7c6c",
+      "sha256": "c007f81f10a242e3a3ee3eb2696d03a11369861b8cb797ca505142449bbe8645"
+    },
+    "previous_production_alerts": {
+      "git_blob_sha1": "eae6a91dde1710afd8b60d4178bc89887e2d46d3",
+      "sha256": "9dbf75438df13467a84eccf7d4368d32f5f47fc84e59161dcdce162f51c9a7d2"
+    },
+    "current_production_alerts": {
+      "git_blob_sha1": "5b827e03626f35f6184ed1c2ff38c4f1e9fb3e57",
+      "sha256": "6ca1abd37bdf761d7061606d3e52863bc19054de60bd6cdad4609a997b4a58ca"
+    },
+    "crosswalk": {
+      "git_blob_sha1": "43972931bd618bd1418f9c4b1ecd3718a0631930",
+      "sha256": "49e13309c6e36393e4f5cdc247772956c38ba94db23de5ce27df03ec798a8646",
+      "bytes": 958039
+    },
+    "crosswalk_summary": {
+      "git_blob_sha1": "79506459a8e3aff9e4e50f2af00178f10e36ff4d",
+      "sha256": "7e459839001f5031281c364f0c01bb692670e81f69fc901567d22e31bb6e6eb9"
+    },
+    "seven_gap_report": {
+      "git_blob_sha1": "220bb58abf3208a99a6957cbb8e3dba23a9e6a64",
+      "sha256": "45daa9bb90b595543fe403ff0120938db4fa77a17a077ad612c57e0701978cec"
+    },
+    "proof_receipt": {
+      "git_blob_sha1": "efecad9df5ae34d2c043dad77a74a34aa21dbad7",
+      "sha256": "513561a41d425822f0eddeb5d4f0e6e184fb9cd4981d7a0b2c96115b7ada3eb3"
+    },
+    "proof_python_verifier": {
+      "git_blob_sha1": "7fc58ee4d91d2b04a27d3a96c7b4c356bae2be4b",
+      "sha256": "ca2a8b7e5db8d55b97dd57db53bea714518783115eeed8bc5e9025933c006271"
+    }
+  },
+  "independent_185_row_checks": {
+    "initial_production_record_count": 2664,
+    "latest_production_record_count": 2672,
+    "source_records_appended_since_prior_proof": 8,
+    "original_ID_SHA256_correct": 185,
+    "historical_provenance_index_equals_crosswalk": 185,
+    "independent_prior_lineage_equals_crosswalk": 185,
+    "first_persistence_git_pointer_equal": 185,
+    "exactly_one_old_production_minute_projection_candidate": 185,
+    "exactly_one_current_production_minute_projection_candidate": 185,
+    "exactly_one_old_production_interval_overlap": 185,
+    "exactly_one_current_production_interval_overlap": 185,
+    "modern_derived_SHA256_ID_correct": 185,
+    "original_ID_equals_modern_derived_ID": 0,
+    "frozen_candidate_unmodified_in_latest_site_prod": 185,
+    "original_matches_current_modern_to_exact_second": 0,
+    "candidate_git_json_pointer_unchanged": 185,
+    "original_producer_evidence_gaps": 7,
+    "original_runtime_source_SHA_pins": 0,
+    "distinct_modern_derived_IDs": 185,
+    "duplicate_modern_ID_reverse_links": 0,
+    "split_or_merge_cases": 0,
+    "explicit_city_or_raion_semantic_conflicts": 0,
+    "provider_stable_alert_ID_join_links": 0,
+    "modern_cross_provider_episode_identity_proofs": 0,
+    "unsupported_promotions": 0,
+    "rejected_inferred_remapping": 185,
+    "technical_checks_pass": true
+  },
+  "interval_precision_and_source": {
+    "old_episode_clock": "HH:MM minute precision from Kyiv Digital live history for 178 producer-attributed historical entries, and independently observed historical kyiv_digital_live Git records for the 7 producer-unattributed entries",
+    "modern_clock": "second precision from municipal official_json",
+    "start_delta_seconds": {
+      "min": 0,
+      "max": 59,
+      "zero_count": 6
+    },
+    "end_delta_seconds": {
+      "min": 0,
+      "max": 59,
+      "zero_count": 2
+    },
+    "duration_delta_seconds": {
+      "min": -55,
+      "max": 56
+    },
+    "source_discontinuity_attributed_178": "kyiv_digital_live -> official_json",
+    "unattributed_7": "Historical kyiv_digital_live records exist in Git, but none has an attributable first-persistence runtime input SHA",
+    "geography": "Both models use exact Kyiv city, not an observed raion/oblast conflict",
+    "cross_source_identity_transform_proven": false
+  },
+  "result": {
+    "dispositions": {
+      "PROVEN_EQUIVALENCE": 0,
+      "PLAUSIBLE_UNPROVEN": 185,
+      "SPLIT_OR_MERGED": 0,
+      "SOURCE_OR_GEOGRAPHIC_CONFLICT": 0,
+      "NO_MODERN_CANDIDATE": 0,
+      "NOT_OBSERVABLE": 0
+    },
+    "HISTORICAL_SOURCE_RECOVERED": "178 attributed producer-corrob historical input candidates + seven corroborated historical Git exact records with separate runtime evidence gap",
+    "MODERN_CANDIDATE_IDENTIFIED": "185/185, unique and stable in two pinned production snapshots; IDs derived offline, not native to production JSON",
+    "MODERN_IDENTITY_INDEPENDENTLY_PROVEN": "0/185",
+    "SAFE_FOR_AUTOMATIC_REMAPPING": "NO",
+    "WIP_ACTIVATION": "NO-GO",
+    "technical_evidence_readback": "PASS — independent 185/185 deterministic Git comparison",
+    "cross_source_identity_authority": "PARTIAL — NO EQUIVALENCE",
+    "independently_accepted_main_checkpoint": false
+  },
+  "unresolved_gates": [
+    "The full 209-case original raw Actions archive manifest was not directly re-opened in this independent follow-up; its accepted receipt and the full Git-frozen 185 original subset were checked.",
+    "The inherited proof's Python offline verifier remains unexecuted; this follow-up independently recomputed its substantive row and cardinality invariants in JavaScript. The Python verifier is pinned to its original 2,664-row production comparator, not a live HEAD.",
+    "No stable provider episode identifier or independently validated immutable cross-source Kyiv Digital-to-municipal official_json transformation was recovered; minute-level coincidence and preserved JSON ordinal position cannot prove equivalence.",
+    "All seven missing producer-runtime source SHA attestations remain missing independent of the modern candidates."
+  ],
+  "next_narrow_task": "Read-only audit of already archived exact-city Kyiv Digital versus municipal official_json records for a stable same-alert provider ID or independently validated immutable cross-provider identity/clock transformation. Do not perform new publisher/API discovery or automatic ID remap.",
+  "changes_guard": {
+    "research_only_new_receipt": true,
+    "modified_main": false,
+    "modified_site_prod": false,
+    "modified_multicity_wip": false,
+    "ukrainalarm_requests": 0,
+    "publisher_requests": 0,
+    "neon_connections_or_writes": 0,
+    "netlify_changes": 0,
+    "classifier_or_review_transfer": 0,
+    "WIP_activation": "NO-GO"
+  }
+}
