@@ -4,6 +4,14 @@ Accepted project checkpoints, newest first. This is not the full Git history, a 
 
 ## 2026-10-16
 
+### H2 nine-case Neon disposable attempt 2 — PARTIAL SQL CONTRACT / CLEANUP PASS
+
+- Corrected single child creation succeeded: `br-calm-water-b5pzig2i` from shadow parent `br-bold-mode-b5rub8pq`, compute `ep-green-boat-b5mlp0rj`, fixed 0.25 CU, account default suspend and 24h expiration read-back.
+- Test A confirmed **9/9 classification** and **9/9 source-link** keys, **5 NO_OP / 4 REVIEW_ONLY**, historical before/after fingerprints unchanged; `origin_commit_sha` missing for all 9, so historical Git provenance not established.
+- Test B **SQL_CONTRACT_SIMULATION_ONLY** in isolated synthetic schema: append-only predecessor/successor, CAS, exact idempotent readback, stale-tip, unique and FK conflicts, injected subtransaction rollback and no orphans passed. Application implementation and true concurrent transaction proof were not exercised.
+- [Sanitized Git proof](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/blob/ed7e1bd0afe78f1f2ab12a083fe02eb6e611bfe4/research/h2_nine_case_disposable_neon_attempt2_sql_proof_2026-10-16.json), frozen in isolated commit `ed7e1bd0afe78f1f2ab12a083fe02eb6e611bfe4`, blob `2f304303e0cb716793e03c4dfd7dc7cd56786c0e` read back. Independent SHA-256 and compute consumption accounting remain pending.
+- After proof freeze, exact child deleted; independent Neon count returned **9/10**, child and endpoint absent (HTTP 404), parent retained. No production, casualty, WIP, classifier, historical or backfill promotion. `UNBOUND_UNRESOLVED=25`, `C4/C5=NOT PROVEN`, `NEON_AUTHORITY_ACTIVE=NO`, `PRODUCTION_CUTOVER_EXECUTED=NO`.
+
 ### Neon Lviv disposable E2E Branch A retired — one slot recovered (2026-10-16)
 
 - **Authorized exact-ID deletion:** Owner knowingly approved irreversible deletion of `br-still-sea-b5062r40` despite incomplete full PostgreSQL backup/restore and unresolved off-repository dependency census, treating this one completed E2E fixture as intentionally disposable. This is an **explicit owner-authorized policy exception** to the predecessor's 14 retirement gates, not a retroactive PASS or a precedent for any other branch.
