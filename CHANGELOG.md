@@ -2,6 +2,15 @@
 
 Accepted project checkpoints, newest first. This is not the full Git history, a branch inventory, or a retry log. **PROVEN** describes bounded evidence; **FROZEN** additionally requires a durable exact manifest. Development checkpoints below do not change production unless explicitly stated.
 
+## 2026-10-16
+
+### Neon Lviv disposable E2E Branch A retired — one slot recovered (2026-10-16)
+
+- **Authorized exact-ID deletion:** Owner knowingly approved irreversible deletion of `br-still-sea-b5062r40` despite incomplete full PostgreSQL backup/restore and unresolved off-repository dependency census, treating this one completed E2E fixture as intentionally disposable. This is an **explicit owner-authorized policy exception** to the predecessor's 14 retirement gates, not a retroactive PASS or a precedent for any other branch.
+- **Preflight:** Correct archived Lviv test branch, parent `br-wandering-sunset-b5835alw`, non-default/non-primary/non-protected, zero children; original idle endpoint `ep-wispy-sea-b5y3qhci`; 10/10 branches. Original E2E Git/Actions proof and verified original ZIP retained; full original physical SQL state NOT preserved.
+- **Independent Neon confirmation:** `delete_timeline` operation `9a5554a4-2656-4023-b4a2-c82b4d32f0d5` finished at 2026-10-16T07:17:42Z; target absent (HTTP 404), endpoint absent, remaining 9 branches and 10 endpoints. Branch B and long-lived authority untouched. **One branch slot available**.
+- **Next / exclusions:** No H2 test or new child branch executed; no database writes beyond the expressly authorized branch deletion; no production, site-prod, WIP, casualty, backfill or A5 changes. Preserve `C4/C5 = NOT PROVEN`, `UNBOUND_UNRESOLVED = 25`, `NEON_AUTHORITY_ACTIVE = NO`, `PRODUCTION_CUTOVER_EXECUTED = NO`. Separate owner authorization required before consuming the released slot.
+
 ## 2026-10-15
 
 ### Neon two-branch SQL proof — independently accepted PARTIAL; preservation/retirement remains blocked
