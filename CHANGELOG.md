@@ -4,6 +4,13 @@ Accepted project checkpoints, newest first. This is not the full Git history, a 
 
 ## 2026-10-16
 
+### H2 attempt2 independent proof hash and Neon cleanup — bounded PASS (2026-10-16)
+
+- Verified frozen commit `ed7e1bd0afe78f1f2ab12a083fe02eb6e611bfe4`: exactly one research JSON, Git blob `2f304303e0cb716793e03c4dfd7dc7cd56786c0e`, 4,159 bytes, **independent SHA-256 `5724e25c405ac65915491f72c682fd28c3c3ba2efc109da59`**.
+- Independently rechecked Neon delete operation `635aa1ac-145f-484a-ac64-37e4a5de0752` (`finished`), child/endpoint absence, permanent parent presence and **9/10** final branch count.
+- **Acceptance boundary:** Integrity and cleanup PASS; Test A 9/9 and Test B SQL assertions remain aggregate proof-reported and `SQL_CONTRACT_SIMULATION_ONLY`, not independently rerun against raw SQL receipts or actual application writer. No concurrent dual-session CAS, full outer transaction rollback, historical Git provenance, CU-hour audit or production authority acceptance. **Next:** separate authorized WIP application-code integration and concurrency/rollback test; all historical/production/cutover gates unchanged.
+
+
 ### H2 nine-case Neon disposable attempt 2 — PARTIAL SQL CONTRACT / CLEANUP PASS
 
 - Corrected single child creation succeeded: `br-calm-water-b5pzig2i` from shadow parent `br-bold-mode-b5rub8pq`, compute `ep-green-boat-b5mlp0rj`, fixed 0.25 CU, account default suspend and 24h expiration read-back.
