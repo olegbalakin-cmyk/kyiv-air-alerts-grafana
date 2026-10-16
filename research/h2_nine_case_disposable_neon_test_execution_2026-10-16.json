@@ -1,0 +1,76 @@
+{
+  "document_type": "H2_NINE_CASE_DISPOSABLE_NEON_TEST_CREATION_BLOCKER",
+  "recorded_date_utc": "2026-10-16",
+  "repository": "olegbalakin-cmyk/kyiv-air-alerts-grafana",
+  "preflight": {
+    "main_head": "1bdd461b2d504e0acff9f1767c15299b0c6be566",
+    "coordination_files_read": [
+      "PROJECT_STATE.md",
+      "CHANGELOG.md"
+    ],
+    "original_frozen_proof_commit": "e028b5e2c41d8c30f0014746b05563c80b3f8ac5",
+    "original_frozen_proof_path": "research/h2_nine_case_evidence_refresh_2026-10-14.json",
+    "original_frozen_proof_blob_sha1": "5f966df352c135015b68edfa98b57bce15415f17",
+    "independent_actions_run": 38552005627,
+    "independent_actions_job": 115811944081,
+    "actions_result": "SUCCESS",
+    "neon_project": "green-cake-44216048",
+    "parent_branch": "br-bold-mode-b5rub8pq",
+    "parent_state": "ready",
+    "initial_branch_count": 9,
+    "branch_limit": 10,
+    "initial_endpoint_count": 10,
+    "subscription": "free_v3"
+  },
+  "attempt": {
+    "name": "h2-nine-case-revision-disposable-2026-10-16",
+    "parent_id": "br-bold-mode-b5rub8pq",
+    "compute": {
+      "min_cu": 0.25,
+      "max_cu": 0.25,
+      "suspend_timeout_seconds": 60
+    },
+    "result": "REJECTED",
+    "neon_error": "HTTP 412: modifying the suspend interval is not permitted on this account",
+    "retry_performed": false,
+    "reason_no_retry": "Explicit one-attempt guard: do not create a second child after failed creation attempt"
+  },
+  "post_attempt": {
+    "branch_count": 9,
+    "endpoint_count": 10,
+    "matching_child_count": 0,
+    "orphan_endpoint_count": 0,
+    "parent_state": "ready",
+    "test_a_executed": false,
+    "test_b_executed": false,
+    "sql_test_writes": 0,
+    "cleanup_required": false
+  },
+  "verdicts": {
+    "H2_NINE_CASE_DISPOSABLE_TEST": "BLOCKED",
+    "NINE_CLASSIFICATION_KEYS": "NOT_REVERIFIED_THIS_ATTEMPT",
+    "NINE_SOURCE_LINK_KEYS": "NOT_REVERIFIED_THIS_ATTEMPT",
+    "EIGHT_EXPECTED_EVENT_ROWS": "NOT_VERIFIED_THIS_ATTEMPT",
+    "TEST_A_KEY_BOUND_BEHAVIOR": "BLOCKED",
+    "TEST_A_ORIGINAL_HISTORICAL_PROVENANCE": "NOT_PROVEN",
+    "TEST_A_HISTORICAL_MUTATIONS": "NOT_VERIFIABLE",
+    "TEST_B_CANONICAL_IMPLEMENTATION": "NOT_AVAILABLE_AS_VERDICT",
+    "TEST_B_SYNTHETIC_APPEND_ONLY": "BLOCKED",
+    "TEST_B_IDEMPOTENT_RETRY": "BLOCKED",
+    "TEST_B_STALE_TIP_REJECTION": "BLOCKED",
+    "TEST_B_CONFLICT_REJECTION": "BLOCKED",
+    "TEST_B_ROLLBACK": "BLOCKED",
+    "CONCURRENCY_SAFETY": "NOT_PROVEN",
+    "PARENT_ISOLATION": "NOT_VERIFIED_BY_SQL",
+    "TEST_CHILD_CREATED": "NO",
+    "TEST_CHILD_DELETED": "NO_NOT_CREATED",
+    "INDEPENDENT_VERIFICATION": "PARTIAL_PREFLIGHT_ONLY",
+    "FINAL_NEON_BRANCH_COUNT": "9/10",
+    "UNBOUND_UNRESOLVED": 25,
+    "C4": "NOT_PROVEN",
+    "C5": "NOT_PROVEN",
+    "NEON_AUTHORITY_ACTIVE": "NO",
+    "PRODUCTION_CUTOVER_EXECUTED": "NO"
+  },
+  "next_step": "Separate authorized fresh attempt using account-allowed default suspend_timeout (omit suspend_timeout_seconds), first verify branch quota and expiration update support; do not claim tests or accepted state in this report."
+}
