@@ -1,9 +1,16 @@
 # Project State
 
-Last updated: 2026-10-15  
-Main baseline inspected for this update: `0cff844cd4ff85bfe1c9c866f673d7a9ec31577f`
+Last updated: 2026-10-16  
+Main baseline inspected for this update: `65989b3527922eabfc75a024f1d136c90b1aa36a`
 
 > This file records the **accepted coordination state** of the repository, not a new technical acceptance. Read it before proposing work in another ChatGPT chat. Detailed authority remains in the linked immutable commits, workflow runs and proof artifacts; if this summary conflicts with a more specific accepted artifact, that artifact governs. **Never infer production activation from a development-only proof.** Update this file only after an accepted checkpoint.
+
+### H2 attempt2 independent frozen-proof and cleanup verification (2026-10-16) — PASS IN BOUNDED SCOPE
+
+- **Artifact independently verified:** Isolated research commit `ed7e1bd0afe78f1f2ab12a083fe02eb6e611bfe4` changes only `research/h2_nine_case_disposable_neon_attempt2_sql_proof_2026-10-16.json`. Exact Git blob `2f304303e0cb716793e03c4dfd7dc7cd56786c0e`; **4,159 bytes**, independently recomputed SHA-256 `5724e25c405ac65915491f72c682fd28c3c3ba2efc109da59` (validated SHA-256 algorithm against published empty-string and `abc` test vectors). Re-reading the JSON confirms `PARTIAL_SQL_CONTRACT_SIMULATION_ONLY_CLEANUP_PASS`, not application-level PASS.
+- **Infrastructure read-back:** Neon project `green-cake-44216048`: completed child `br-calm-water-b5pzig2i` deletion operation `635aa1ac-145f-484a-ac64-37e4a5de0752`, `delete_timeline=finished`; live branch inventory **9/10** with child absent, child compute `ep-green-boat-b5mlp0rj` absent and permanent parent `br-bold-mode-b5rub8pq` present. One test slot free.
+- **Evidence ceiling:** Published JSON contains aggregate Test A (9/9 classification keys, 9/9 source links, five NO_OP/four REVIEW_ONLY, no reported historical writes) and bounded Test B synthetic SQL assertions, but **not complete independently reproducible SQL statements, SQLSTATE receipts or two-connection transaction logs**. Independently accepted here: Git artifact integrity and Neon cleanup; SQL behavioral conclusions remain proof-reported `SQL_CONTRACT_SIMULATION_ONLY`. No application-code integration, genuine concurrent CAS, full outer-transaction rollback, origin Git provenance or compute CU-hours independently proven.
+- **Next gated task:** Inspect actual WIP persistence writer and test its executable application revision path on a *new separately authorized* disposable Neon child with two independent sessions, CAS, idempotency, full transaction rollback and exact parent isolation. Do not repeat SQL simulation as app proof. Keep `UNBOUND_UNRESOLVED=25`, `C4/C5=NOT PROVEN`, `NEON_AUTHORITY_ACTIVE=NO`, `PRODUCTION_CUTOVER_EXECUTED=NO`; no production/site-prod/WIP/casualty/backfill changes in this read-only revalidation.
 
 ### H2 nine-case Neon attempt 2 (2026-10-16) — PARTIAL SQL-CONTRACT SIMULATION; CLEANUP VERIFIED
 
