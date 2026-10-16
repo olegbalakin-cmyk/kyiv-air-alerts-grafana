@@ -1,0 +1,111 @@
+{
+  "document_type": "H2_NINE_CASE_DISPOSABLE_NEON_ATTEMPT2_SQL_EXECUTION_PROOF",
+  "date_utc": "2026-10-16",
+  "status": "SQL_CONTRACT_SIMULATION_ONLY_PARTIAL",
+  "scope": "Neon child only; application code not invoked",
+  "preflight": {
+    "main": "1bdd461b2d504e0acff9f1767c15299b0c6be566",
+    "original_research_commit": "e028b5e2c41d8c30f0014746b05563c80b3f8ac5",
+    "research_blob": "5f966df352c135015b68edfa98b57bce15415f17",
+    "original_verifier_run": 38552005627,
+    "original_verifier_conclusion": "success",
+    "http_412_failure_commit": "719b386e3b3ede6466b70d16af99f409f991b5d1",
+    "failure_blob": "d939e089868a3b3e7d8102e2de799f70d0bb8757",
+    "initial_branches": 9,
+    "branch_limit": 10
+  },
+  "child": {
+    "project_id": "green-cake-44216048",
+    "parent_id": "br-bold-mode-b5rub8pq",
+    "id": "br-calm-water-b5pzig2i",
+    "name": "h2-nine-case-revision-disposable-2026-10-16-attempt2",
+    "endpoint_id": "ep-green-boat-b5mlp0rj",
+    "creation_parameters": {
+      "min_cu": 0.25,
+      "max_cu": 0.25
+    },
+    "created_at": "2026-10-16T20:43:26Z",
+    "expires_at": "2026-10-17T20:43:26Z",
+    "expiry_readback_confirmed": true,
+    "compute_readback": {
+      "min_cu": 0.25,
+      "max_cu": 0.25,
+      "suspend_timeout_seconds": 0
+    }
+  },
+  "test_a": {
+    "population": 9,
+    "no_op": 5,
+    "review_only": 4,
+    "classification_key_matches": 9,
+    "source_link_key_matches": 9,
+    "origin_commit_sha_nonnull": 0,
+    "no_historical_sql_writes": true,
+    "original_git_provenance": "NOT_PROVEN",
+    "historical_authority": "UNCHANGED"
+  },
+  "historical_fingerprints": {
+    "algorithm": "MD5 of concatenated per-row MD5(to_jsonb(row)::text), ordered by deterministic key; applies to child historical rows",
+    "before": {
+      "classifications": "39cae8b6a5d50c41920d09727752e65a",
+      "sources": "b135f1defc636ef677f3e17bf27e9f04",
+      "events": "8e8f2d32a514d5fd54a439b00b53e12d"
+    },
+    "after": {
+      "classifications": "39cae8b6a5d50c41920d09727752e65a",
+      "sources": "b135f1defc636ef677f3e17bf27e9f04",
+      "events": "8e8f2d32a514d5fd54a439b00b53e12d"
+    },
+    "counts": {
+      "alert_episodes": 29971,
+      "attack_event_classifications": 28132,
+      "attack_event_sources": 5339,
+      "attack_events": 1090
+    }
+  },
+  "test_b": {
+    "namespace": "h2_disposable_revision_attempt2",
+    "method": "SQL_CONTRACT_SIMULATION_ONLY",
+    "initial_revision": 1,
+    "successor_revision": 2,
+    "predecessor_retained": true,
+    "cas_tip_after": 2,
+    "idempotency_existing_same_key_and_payload": true,
+    "stale_tip_update_affected_zero_rows": true,
+    "duplicate_key_unique_violation_caught": true,
+    "invalid_predecessor_foreign_key_violation_caught": true,
+    "competing_successor_unique_violation_caught": true,
+    "injected_failure_savepoint_block_rolled_back": true,
+    "orphan_relationships_after_failure": 0,
+    "revision_count_after": 2,
+    "relationship_count_after": 1,
+    "application_level_integration": "NOT_TESTED",
+    "concurrent_competing_transactions": "NOT_TESTED",
+    "full_transaction_rollback_across_independent_connection": "NOT_TESTED"
+  },
+  "parent_isolation": {
+    "parent_read_only_sql_counts": {
+      "classifications": 28132,
+      "sources": 5339,
+      "events": 1090
+    },
+    "parent_writes": 0,
+    "exact_parent_row_fingerprint": "NOT_INDEPENDENTLY_COMPUTED"
+  },
+  "resource_accounting": {
+    "initial_active_window": "2026-10-16T20:43:26Z",
+    "compute_consumption_cu_hours": "NOT_INDEPENDENTLY_METERED",
+    "max_permitted_cu_hours": 0.5
+  },
+  "cleanup": {
+    "status": "PENDING_AT_INITIAL_FREEZE",
+    "expected_final_branch_count": 9
+  },
+  "unchanged": {
+    "UNBOUND_UNRESOLVED": 25,
+    "C4": "NOT_PROVEN",
+    "C5": "NOT_PROVEN",
+    "NEON_AUTHORITY_ACTIVE": "NO",
+    "PRODUCTION_CUTOVER_EXECUTED": "NO"
+  }
+}
