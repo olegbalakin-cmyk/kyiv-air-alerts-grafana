@@ -1,0 +1,61 @@
+{
+  "audit_date": "2026-10-17",
+  "method_A": "ElementTree full parse, ascending chronological 1 -> 0 adjacency",
+  "method_B": "XML iterparse descending archive, 0 -> 1 reverse adjacency",
+  "A_B_independent_multiset_equal": true,
+  "completed_pairs": 2674,
+  "history_state_events": 5401,
+  "municipal_uid_unique": 2641,
+  "municipal_history_direct_exact_pairs": 2641,
+  "API_pairs_after_last_municipal": 33,
+  "frozen_source_digests": {
+    "municipal_zip_sha256": "dad4e7e9bb21af90f99f2de667ed8608874c0b7fcdaf8b4d43db797bc5aead20",
+    "crosswalk_csv_sha256": "5b6f6e9903e7e94e120989bb2fda34e135124a8461b99542180db824bb31a349",
+    "readback_json_sha256": "27d3c8af3b447352d38bce3f3afa752ba1d5a4ca36bd0d604162926b556919c1",
+    "sorted_API_pairs_sha256": "788b9b8571e78a759cd9d91c374ab6d5cbfa8390e3af21c1202ac9959485d503"
+  },
+  "candidate_records": 185,
+  "candidate_uid_range": [
+    2457,
+    2641
+  ],
+  "seven_gaps_covered": 7,
+  "seven_original_producer_receipts_recovered": 0,
+  "sample_checks": {
+    "count": 12,
+    "sha256_episode_id_rehash": 12,
+    "matched_floor_to_minute": 12,
+    "unique_minute_pair_candidates": 12,
+    "nearest_minute_differs": 9,
+    "incorrect_adjacent_UID_rejected": 12,
+    "first_persistence_full_Git_JSON_readback": 9,
+    "first_persistence_Git_added_diff_readback": 2,
+    "first_persistence_predecessor_only": 1,
+    "original_HTML_found": 0,
+    "identity_proven": 0
+  },
+  "negative_controls": {
+    "timezone": "Europe/Kyiv +03 for all 185 (September 18–October 12)",
+    "DST_real_cohort": "No DST switch inside cohort",
+    "DST_synthetic": "October 25 +03 before / +02 after",
+    "adjacent_intervals": "UID 2472 and 2473 not merged",
+    "incorrect_UID": "12/12 rejected",
+    "rounding": "9/12 nearest-minute would contradict original"
+  },
+  "guard": {
+    "main_modified": false,
+    "site_prod_modified": false,
+    "operational_wip_modified": false,
+    "UkraineAlarm_API_requests": 0,
+    "Kyiv_Digital_API_requests": 0,
+    "Neon_operations": 0,
+    "deployments": 0,
+    "review_or_classification_transfers": 0
+  },
+  "output_limitations": [
+    "Raw source proof files verified locally; this Git receipt reports results and input hashes and does not itself embed original municipality ZIP",
+    "No historical stats.html source bytes",
+    "No exact original WIP HTML response binding",
+    "One 12-case original WIP entry relies on previously accepted ledger because full Git file content was not returned"
+  ]
+}
