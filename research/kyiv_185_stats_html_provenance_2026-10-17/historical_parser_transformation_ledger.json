@@ -1,0 +1,745 @@
+{
+  "title": "KYIV 185 — 12-case frozen historical transformation ledger",
+  "scope": "12 predefined; 7 producer gaps, 5 ordinary; no expansion to 185 WIP identities because raw historical HTML is unavailable",
+  "evidence_ceiling": "OUTPUT_AND_PARSER_RECONSTRUCTED__HISTORICAL_HTML_INPUT_NOT_OBSERVABLE",
+  "source_file_sha256": {
+    "municipal_zip": "dad4e7e9bb21af90f99f2de667ed8608874c0b7fcdaf8b4d43db797bc5aead20",
+    "municipal_uid_crosswalk_csv": "5b6f6e9903e7e94e120989bb2fda34e135124a8461b99542180db824bb31a349",
+    "kyiv_digital_readback_json": "27d3c8af3b447352d38bce3f3afa752ba1d5a4ca36bd0d604162926b556919c1"
+  },
+  "immutable_prior": {
+    "historical_recovery_commit": "bafd42939f683a6b8fe53385e8031bf437667e54",
+    "historical_185_ledger_blob": "12aa39449d4613ca78b28053d37e40b029499e6e",
+    "previous_reconciliation_commit": "2ee9efcc245b03ce53ae8b78473312432d9345c8",
+    "previous_crosswalk_blob": "43972931bd618bd1418f9c4b1ecd3718a0631930"
+  },
+  "historical_transformation": {
+    "stages": [
+      "Kyiv Digital original state changes (not archived here)",
+      "stats.html original response (missing)",
+      "site-prod parser code (archived)",
+      "site-prod alerts_combined.json outputs (some archived)",
+      "WIP original episode_id (archived)"
+    ],
+    "parse": "Regex captures HH:MM DD.MM.YY; datetime.strptime drops unavailable seconds; localize Europe/Kyiv; scan tr/li/div/p or text fallback; sort(set((dt,kind))); earliest start followed by next end; append kyiv_digital_live",
+    "site_prod_merge": "Retain municipal historical base, add parsed live intervals only with start later than max historical start; sort by start; serialize ISO local timestamps",
+    "wip_make_episode": "SHA256('kyiv|' + UTC_ISO_start + '|' + UTC_ISO_end) first 24 hex; original WIP source kyiv_combined_exact_city",
+    "round_vs_floor_caution": "Second-precision municipal pair floor is a diagnostic simulation, not proof that unseen HTML had the same source event",
+    "parsed_runtime_raw_html": false,
+    "historically_executed_parser_sha_binding_to_original_response": false
+  },
+  "negative_controls": {
+    "alternative_pair_candidates_count_for_each": 1,
+    "nearest_minute_different_cases": 9,
+    "incorrect_neighbor_uid_rejected": 12,
+    "misreading_local_as_UTC_rejected": 12,
+    "DST_in_cohort": false,
+    "October25_synthetic_zone_offsets_pre_03_post_02": true,
+    "adjacent_UIDs_2472_2473_verified": true
+  },
+  "counts": {
+    "cases": 12,
+    "producer_runtime_gaps": 7,
+    "first_persistence_git_full_file_readbacks": 9,
+    "first_persistence_git_added_diff_readbacks": 2,
+    "first_persistence_predecessor_only_readbacks": 1,
+    "archived_html_rows": 0,
+    "proven_runtime_pinned_ids": 0
+  },
+  "cases": [
+    {
+      "municipal_uid_candidate": "2457",
+      "original_wip_episode_id": "bd3e4a7c95541bcee04bccfa",
+      "original_wip_start_end_utc": [
+        "2026-09-18T12:18:00Z",
+        "2026-09-18T12:34:00Z"
+      ],
+      "first_persistence": {
+        "git_commit": "5cc7aaaec46a09cdc780a68f39a9871fb96b7456",
+        "git_blob": "d918c32b7721eba388bddccdbd1074493b6ef673",
+        "json_pointer": "/cities/kyiv/episodes/0",
+        "independent_readback": "GIT_FIRST_PERSISTENCE_FULL_JSON_READBACK_VERIFIED"
+      },
+      "original_source_output": {
+        "status": "EXACT_HISTORICAL_INPUT_FOUND_RUNTIME_PIN_UNPROVEN",
+        "producer_run_id": 35481398674,
+        "producer_job_id": 105999757509,
+        "historical_source_record": {
+          "git_blob": "7be4bd3a33e603d8fb3d57f7c6d174fe611c0377",
+          "git_commit": "639cf3c24b5e87afe53a3838bca5f0a73acebfad",
+          "json_pointer": "/2456",
+          "parsed_utc": [
+            "2026-09-18T12:18:00Z",
+            "2026-09-18T12:34:00Z"
+          ],
+          "source_fields": {
+            "duration_minutes": 16,
+            "end": "2026-09-18T15:34:00+03:00",
+            "source": "kyiv_digital_live",
+            "start": "2026-09-18T15:18:00+03:00"
+          }
+        },
+        "unattributed_historical_json_candidates_count": 0,
+        "source_html_row": null,
+        "source_html_payload_hash": null,
+        "site_prod_runtime_sha_pin": null
+      },
+      "historical_parser_code": {
+        "git_blob": "2acad623e3055ebf077f15f93d0b7c80ff461959",
+        "file": "kyiv-air-alerts-grafana/scripts/update_data.py",
+        "live_history_url": "https://kyiv.digital/storage/air-alert/stats.html",
+        "date_format": "%H:%M %d.%m.%y",
+        "assumed_zone": "Europe/Kyiv"
+      },
+      "municipal_exact_second_utc": [
+        "2026-09-18T12:18:57Z",
+        "2026-09-18T12:34:13Z"
+      ],
+      "kyiv_digital_xml_direct_state_pair_exact_second_utc": [
+        "2026-09-18T12:18:57Z",
+        "2026-09-18T12:34:13Z"
+      ],
+      "deterministic_diagnostic": {
+        "floor_to_minute_utc": [
+          "2026-09-18T12:18:00Z",
+          "2026-09-18T12:34:00Z"
+        ],
+        "original_wip_id_sha256_rehash_pass_in_offline_A_B": true,
+        "municipal_minute_pair_candidate_count": 1,
+        "nearest_minute_differs": true,
+        "neighbor_uid_negative_control_pass": true
+      },
+      "identity_verdict": "SOURCE_TRANSITION_CORROBORATED",
+      "original_to_modern_identity": "PLAUSIBLE_UNPROVEN",
+      "missing_proof": "No historically preserved original stats.html row or runtime-pinned HTTP response-to-parser-to-original-WIP linkage; municipal UID is absent from original WIP and API XML."
+    },
+    {
+      "municipal_uid_candidate": "2458",
+      "original_wip_episode_id": "a8492af10441d3d930b38d2f",
+      "original_wip_start_end_utc": [
+        "2026-09-18T15:14:00Z",
+        "2026-09-18T15:53:00Z"
+      ],
+      "first_persistence": {
+        "git_commit": "5cc7aaaec46a09cdc780a68f39a9871fb96b7456",
+        "git_blob": "d918c32b7721eba388bddccdbd1074493b6ef673",
+        "json_pointer": "/cities/kyiv/episodes/1",
+        "independent_readback": "GIT_FIRST_PERSISTENCE_FULL_JSON_READBACK_VERIFIED"
+      },
+      "original_source_output": {
+        "status": "EXACT_HISTORICAL_INPUT_FOUND_RUNTIME_PIN_UNPROVEN",
+        "producer_run_id": 35481398674,
+        "producer_job_id": 105999757509,
+        "historical_source_record": {
+          "git_blob": "7be4bd3a33e603d8fb3d57f7c6d174fe611c0377",
+          "git_commit": "639cf3c24b5e87afe53a3838bca5f0a73acebfad",
+          "json_pointer": "/2457",
+          "parsed_utc": [
+            "2026-09-18T15:14:00Z",
+            "2026-09-18T15:53:00Z"
+          ],
+          "source_fields": {
+            "duration_minutes": 39,
+            "end": "2026-09-18T18:53:00+03:00",
+            "source": "kyiv_digital_live",
+            "start": "2026-09-18T18:14:00+03:00"
+          }
+        },
+        "unattributed_historical_json_candidates_count": 0,
+        "source_html_row": null,
+        "source_html_payload_hash": null,
+        "site_prod_runtime_sha_pin": null
+      },
+      "historical_parser_code": {
+        "git_blob": "2acad623e3055ebf077f15f93d0b7c80ff461959",
+        "file": "kyiv-air-alerts-grafana/scripts/update_data.py",
+        "live_history_url": "https://kyiv.digital/storage/air-alert/stats.html",
+        "date_format": "%H:%M %d.%m.%y",
+        "assumed_zone": "Europe/Kyiv"
+      },
+      "municipal_exact_second_utc": [
+        "2026-09-18T15:14:02Z",
+        "2026-09-18T15:53:44Z"
+      ],
+      "kyiv_digital_xml_direct_state_pair_exact_second_utc": [
+        "2026-09-18T15:14:02Z",
+        "2026-09-18T15:53:44Z"
+      ],
+      "deterministic_diagnostic": {
+        "floor_to_minute_utc": [
+          "2026-09-18T15:14:00Z",
+          "2026-09-18T15:53:00Z"
+        ],
+        "original_wip_id_sha256_rehash_pass_in_offline_A_B": true,
+        "municipal_minute_pair_candidate_count": 1,
+        "nearest_minute_differs": true,
+        "neighbor_uid_negative_control_pass": true
+      },
+      "identity_verdict": "SOURCE_TRANSITION_CORROBORATED",
+      "original_to_modern_identity": "PLAUSIBLE_UNPROVEN",
+      "missing_proof": "No historically preserved original stats.html row or runtime-pinned HTTP response-to-parser-to-original-WIP linkage; municipal UID is absent from original WIP and API XML."
+    },
+    {
+      "municipal_uid_candidate": "2471",
+      "original_wip_episode_id": "c964a9db4271b3a9d76be49a",
+      "original_wip_start_end_utc": [
+        "2026-09-20T05:01:00Z",
+        "2026-09-20T10:30:00Z"
+      ],
+      "first_persistence": {
+        "git_commit": "a722ae0bbce0f229869e92351052499cddc68b85",
+        "git_blob": "91e449d8927410a1e3a296fb5420ce70b238a8bd",
+        "json_pointer": "/cities/kyiv/episodes/14",
+        "independent_readback": "GIT_FIRST_PERSISTENCE_FULL_JSON_READBACK_VERIFIED"
+      },
+      "original_source_output": {
+        "status": "PRODUCER_RUNTIME_EVIDENCE_UNAVAILABLE",
+        "producer_run_id": null,
+        "producer_job_id": null,
+        "historical_source_record": null,
+        "unattributed_historical_json_candidates_count": 5,
+        "source_html_row": null,
+        "source_html_payload_hash": null,
+        "site_prod_runtime_sha_pin": null
+      },
+      "historical_parser_code": {
+        "git_blob": "2acad623e3055ebf077f15f93d0b7c80ff461959",
+        "file": "kyiv-air-alerts-grafana/scripts/update_data.py",
+        "live_history_url": "https://kyiv.digital/storage/air-alert/stats.html",
+        "date_format": "%H:%M %d.%m.%y",
+        "assumed_zone": "Europe/Kyiv"
+      },
+      "municipal_exact_second_utc": [
+        "2026-09-20T05:01:32Z",
+        "2026-09-20T10:30:43Z"
+      ],
+      "kyiv_digital_xml_direct_state_pair_exact_second_utc": [
+        "2026-09-20T05:01:32Z",
+        "2026-09-20T10:30:43Z"
+      ],
+      "deterministic_diagnostic": {
+        "floor_to_minute_utc": [
+          "2026-09-20T05:01:00Z",
+          "2026-09-20T10:30:00Z"
+        ],
+        "original_wip_id_sha256_rehash_pass_in_offline_A_B": true,
+        "municipal_minute_pair_candidate_count": 1,
+        "nearest_minute_differs": true,
+        "neighbor_uid_negative_control_pass": true
+      },
+      "identity_verdict": "SOURCE_TRANSITION_CORROBORATED",
+      "original_to_modern_identity": "PLAUSIBLE_UNPROVEN",
+      "missing_proof": "No historically preserved original stats.html row or runtime-pinned HTTP response-to-parser-to-original-WIP linkage; municipal UID is absent from original WIP and API XML."
+    },
+    {
+      "municipal_uid_candidate": "2472",
+      "original_wip_episode_id": "c5f144df5c05c9a588fd02f4",
+      "original_wip_start_end_utc": [
+        "2026-09-20T11:27:00Z",
+        "2026-09-20T14:11:00Z"
+      ],
+      "first_persistence": {
+        "git_commit": "4258f50269217bd76b9688bb1031b72a98c4e004",
+        "git_blob": "0d1637e8300cdb815b2af2598a500cd9971d7d08",
+        "json_pointer": "/cities/kyiv/episodes/15",
+        "independent_readback": "GIT_FIRST_PERSISTENCE_FULL_JSON_READBACK_VERIFIED"
+      },
+      "original_source_output": {
+        "status": "PRODUCER_RUNTIME_EVIDENCE_UNAVAILABLE",
+        "producer_run_id": null,
+        "producer_job_id": null,
+        "historical_source_record": null,
+        "unattributed_historical_json_candidates_count": 4,
+        "source_html_row": null,
+        "source_html_payload_hash": null,
+        "site_prod_runtime_sha_pin": null
+      },
+      "historical_parser_code": {
+        "git_blob": "2acad623e3055ebf077f15f93d0b7c80ff461959",
+        "file": "kyiv-air-alerts-grafana/scripts/update_data.py",
+        "live_history_url": "https://kyiv.digital/storage/air-alert/stats.html",
+        "date_format": "%H:%M %d.%m.%y",
+        "assumed_zone": "Europe/Kyiv"
+      },
+      "municipal_exact_second_utc": [
+        "2026-09-20T11:27:51Z",
+        "2026-09-20T14:11:30Z"
+      ],
+      "kyiv_digital_xml_direct_state_pair_exact_second_utc": [
+        "2026-09-20T11:27:51Z",
+        "2026-09-20T14:11:30Z"
+      ],
+      "deterministic_diagnostic": {
+        "floor_to_minute_utc": [
+          "2026-09-20T11:27:00Z",
+          "2026-09-20T14:11:00Z"
+        ],
+        "original_wip_id_sha256_rehash_pass_in_offline_A_B": true,
+        "municipal_minute_pair_candidate_count": 1,
+        "nearest_minute_differs": true,
+        "neighbor_uid_negative_control_pass": true
+      },
+      "identity_verdict": "SOURCE_TRANSITION_CORROBORATED",
+      "original_to_modern_identity": "PLAUSIBLE_UNPROVEN",
+      "missing_proof": "No historically preserved original stats.html row or runtime-pinned HTTP response-to-parser-to-original-WIP linkage; municipal UID is absent from original WIP and API XML."
+    },
+    {
+      "municipal_uid_candidate": "2473",
+      "original_wip_episode_id": "b6043fef9f70f63c4cc6596f",
+      "original_wip_start_end_utc": [
+        "2026-09-20T14:46:00Z",
+        "2026-09-20T15:03:00Z"
+      ],
+      "first_persistence": {
+        "git_commit": "4258f50269217bd76b9688bb1031b72a98c4e004",
+        "git_blob": "0d1637e8300cdb815b2af2598a500cd9971d7d08",
+        "json_pointer": "/cities/kyiv/episodes/16",
+        "independent_readback": "GIT_FIRST_PERSISTENCE_FULL_JSON_READBACK_VERIFIED"
+      },
+      "original_source_output": {
+        "status": "PRODUCER_RUNTIME_EVIDENCE_UNAVAILABLE",
+        "producer_run_id": null,
+        "producer_job_id": null,
+        "historical_source_record": null,
+        "unattributed_historical_json_candidates_count": 4,
+        "source_html_row": null,
+        "source_html_payload_hash": null,
+        "site_prod_runtime_sha_pin": null
+      },
+      "historical_parser_code": {
+        "git_blob": "2acad623e3055ebf077f15f93d0b7c80ff461959",
+        "file": "kyiv-air-alerts-grafana/scripts/update_data.py",
+        "live_history_url": "https://kyiv.digital/storage/air-alert/stats.html",
+        "date_format": "%H:%M %d.%m.%y",
+        "assumed_zone": "Europe/Kyiv"
+      },
+      "municipal_exact_second_utc": [
+        "2026-09-20T14:46:28Z",
+        "2026-09-20T15:03:29Z"
+      ],
+      "kyiv_digital_xml_direct_state_pair_exact_second_utc": [
+        "2026-09-20T14:46:28Z",
+        "2026-09-20T15:03:29Z"
+      ],
+      "deterministic_diagnostic": {
+        "floor_to_minute_utc": [
+          "2026-09-20T14:46:00Z",
+          "2026-09-20T15:03:00Z"
+        ],
+        "original_wip_id_sha256_rehash_pass_in_offline_A_B": true,
+        "municipal_minute_pair_candidate_count": 1,
+        "nearest_minute_differs": false,
+        "neighbor_uid_negative_control_pass": true
+      },
+      "identity_verdict": "SOURCE_TRANSITION_CORROBORATED",
+      "original_to_modern_identity": "PLAUSIBLE_UNPROVEN",
+      "missing_proof": "No historically preserved original stats.html row or runtime-pinned HTTP response-to-parser-to-original-WIP linkage; municipal UID is absent from original WIP and API XML."
+    },
+    {
+      "municipal_uid_candidate": "2474",
+      "original_wip_episode_id": "390fe0ec9b9eb45f51577412",
+      "original_wip_start_end_utc": [
+        "2026-09-20T15:52:00Z",
+        "2026-09-20T16:01:00Z"
+      ],
+      "first_persistence": {
+        "git_commit": "4258f50269217bd76b9688bb1031b72a98c4e004",
+        "git_blob": "0d1637e8300cdb815b2af2598a500cd9971d7d08",
+        "json_pointer": "/cities/kyiv/episodes/17",
+        "independent_readback": "GIT_FIRST_PERSISTENCE_FULL_JSON_READBACK_VERIFIED"
+      },
+      "original_source_output": {
+        "status": "PRODUCER_RUNTIME_EVIDENCE_UNAVAILABLE",
+        "producer_run_id": null,
+        "producer_job_id": null,
+        "historical_source_record": null,
+        "unattributed_historical_json_candidates_count": 4,
+        "source_html_row": null,
+        "source_html_payload_hash": null,
+        "site_prod_runtime_sha_pin": null
+      },
+      "historical_parser_code": {
+        "git_blob": "2acad623e3055ebf077f15f93d0b7c80ff461959",
+        "file": "kyiv-air-alerts-grafana/scripts/update_data.py",
+        "live_history_url": "https://kyiv.digital/storage/air-alert/stats.html",
+        "date_format": "%H:%M %d.%m.%y",
+        "assumed_zone": "Europe/Kyiv"
+      },
+      "municipal_exact_second_utc": [
+        "2026-09-20T15:52:28Z",
+        "2026-09-20T16:01:16Z"
+      ],
+      "kyiv_digital_xml_direct_state_pair_exact_second_utc": [
+        "2026-09-20T15:52:28Z",
+        "2026-09-20T16:01:16Z"
+      ],
+      "deterministic_diagnostic": {
+        "floor_to_minute_utc": [
+          "2026-09-20T15:52:00Z",
+          "2026-09-20T16:01:00Z"
+        ],
+        "original_wip_id_sha256_rehash_pass_in_offline_A_B": true,
+        "municipal_minute_pair_candidate_count": 1,
+        "nearest_minute_differs": false,
+        "neighbor_uid_negative_control_pass": true
+      },
+      "identity_verdict": "SOURCE_TRANSITION_CORROBORATED",
+      "original_to_modern_identity": "PLAUSIBLE_UNPROVEN",
+      "missing_proof": "No historically preserved original stats.html row or runtime-pinned HTTP response-to-parser-to-original-WIP linkage; municipal UID is absent from original WIP and API XML."
+    },
+    {
+      "municipal_uid_candidate": "2484",
+      "original_wip_episode_id": "0908582bc2b40f65ebcc8e60",
+      "original_wip_start_end_utc": [
+        "2026-09-22T01:59:00Z",
+        "2026-09-22T02:27:00Z"
+      ],
+      "first_persistence": {
+        "git_commit": "0e135b496c78409d7e92a896fa260866845e9a35",
+        "git_blob": "53f7df1c65ba2b73c1594342a3f66ed7cd95118c",
+        "json_pointer": "/cities/kyiv/episodes/48",
+        "independent_readback": "GIT_FIRST_PERSISTENCE_FULL_JSON_READBACK_VERIFIED"
+      },
+      "original_source_output": {
+        "status": "EXACT_HISTORICAL_INPUT_FOUND_RUNTIME_PIN_UNPROVEN",
+        "producer_run_id": 35690762945,
+        "producer_job_id": 106627078242,
+        "historical_source_record": {
+          "git_blob": "4029a551df12b7e79d0ad78698ba25befab66b7c",
+          "git_commit": "bfc2d416177084011d34ce426435de43452ba3d4",
+          "json_pointer": "/2483",
+          "parsed_utc": [
+            "2026-09-22T01:59:00Z",
+            "2026-09-22T02:27:00Z"
+          ],
+          "source_fields": {
+            "duration_minutes": 28,
+            "end": "2026-09-22T05:27:00+03:00",
+            "source": "kyiv_digital_live",
+            "start": "2026-09-22T04:59:00+03:00"
+          }
+        },
+        "unattributed_historical_json_candidates_count": 0,
+        "source_html_row": null,
+        "source_html_payload_hash": null,
+        "site_prod_runtime_sha_pin": null
+      },
+      "historical_parser_code": {
+        "git_blob": "2acad623e3055ebf077f15f93d0b7c80ff461959",
+        "file": "kyiv-air-alerts-grafana/scripts/update_data.py",
+        "live_history_url": "https://kyiv.digital/storage/air-alert/stats.html",
+        "date_format": "%H:%M %d.%m.%y",
+        "assumed_zone": "Europe/Kyiv"
+      },
+      "municipal_exact_second_utc": [
+        "2026-09-22T01:59:59Z",
+        "2026-09-22T02:27:42Z"
+      ],
+      "kyiv_digital_xml_direct_state_pair_exact_second_utc": [
+        "2026-09-22T01:59:59Z",
+        "2026-09-22T02:27:42Z"
+      ],
+      "deterministic_diagnostic": {
+        "floor_to_minute_utc": [
+          "2026-09-22T01:59:00Z",
+          "2026-09-22T02:27:00Z"
+        ],
+        "original_wip_id_sha256_rehash_pass_in_offline_A_B": true,
+        "municipal_minute_pair_candidate_count": 1,
+        "nearest_minute_differs": true,
+        "neighbor_uid_negative_control_pass": true
+      },
+      "identity_verdict": "SOURCE_TRANSITION_CORROBORATED",
+      "original_to_modern_identity": "PLAUSIBLE_UNPROVEN",
+      "missing_proof": "No historically preserved original stats.html row or runtime-pinned HTTP response-to-parser-to-original-WIP linkage; municipal UID is absent from original WIP and API XML."
+    },
+    {
+      "municipal_uid_candidate": "2488",
+      "original_wip_episode_id": "006c5c153c255ff5d487e57e",
+      "original_wip_start_end_utc": [
+        "2026-09-22T12:40:00Z",
+        "2026-09-22T12:44:00Z"
+      ],
+      "first_persistence": {
+        "git_commit": "b2165f99ed98c1b60185cb3946a1893cc171e63a",
+        "git_blob": "a70aabad8440da5c39ff04bddca7c48ad0051249",
+        "json_pointer": "/cities/kyiv/episodes/52",
+        "independent_readback": "GIT_FIRST_PERSISTENCE_FULL_JSON_READBACK_VERIFIED"
+      },
+      "original_source_output": {
+        "status": "PRODUCER_RUNTIME_EVIDENCE_UNAVAILABLE",
+        "producer_run_id": null,
+        "producer_job_id": null,
+        "historical_source_record": null,
+        "unattributed_historical_json_candidates_count": 23,
+        "source_html_row": null,
+        "source_html_payload_hash": null,
+        "site_prod_runtime_sha_pin": null
+      },
+      "historical_parser_code": {
+        "git_blob": "2acad623e3055ebf077f15f93d0b7c80ff461959",
+        "file": "kyiv-air-alerts-grafana/scripts/update_data.py",
+        "live_history_url": "https://kyiv.digital/storage/air-alert/stats.html",
+        "date_format": "%H:%M %d.%m.%y",
+        "assumed_zone": "Europe/Kyiv"
+      },
+      "municipal_exact_second_utc": [
+        "2026-09-22T12:40:59Z",
+        "2026-09-22T12:44:40Z"
+      ],
+      "kyiv_digital_xml_direct_state_pair_exact_second_utc": [
+        "2026-09-22T12:40:59Z",
+        "2026-09-22T12:44:40Z"
+      ],
+      "deterministic_diagnostic": {
+        "floor_to_minute_utc": [
+          "2026-09-22T12:40:00Z",
+          "2026-09-22T12:44:00Z"
+        ],
+        "original_wip_id_sha256_rehash_pass_in_offline_A_B": true,
+        "municipal_minute_pair_candidate_count": 1,
+        "nearest_minute_differs": true,
+        "neighbor_uid_negative_control_pass": true
+      },
+      "identity_verdict": "SOURCE_TRANSITION_CORROBORATED",
+      "original_to_modern_identity": "PLAUSIBLE_UNPROVEN",
+      "missing_proof": "No historically preserved original stats.html row or runtime-pinned HTTP response-to-parser-to-original-WIP linkage; municipal UID is absent from original WIP and API XML."
+    },
+    {
+      "municipal_uid_candidate": "2489",
+      "original_wip_episode_id": "da90f993ab369a680b3bb7c4",
+      "original_wip_start_end_utc": [
+        "2026-09-22T14:20:00Z",
+        "2026-09-22T15:31:00Z"
+      ],
+      "first_persistence": {
+        "git_commit": "b2165f99ed98c1b60185cb3946a1893cc171e63a",
+        "git_blob": "a70aabad8440da5c39ff04bddca7c48ad0051249",
+        "json_pointer": "/cities/kyiv/episodes/53",
+        "independent_readback": "GIT_FIRST_PERSISTENCE_FULL_JSON_READBACK_VERIFIED"
+      },
+      "original_source_output": {
+        "status": "PRODUCER_RUNTIME_EVIDENCE_UNAVAILABLE",
+        "producer_run_id": null,
+        "producer_job_id": null,
+        "historical_source_record": null,
+        "unattributed_historical_json_candidates_count": 23,
+        "source_html_row": null,
+        "source_html_payload_hash": null,
+        "site_prod_runtime_sha_pin": null
+      },
+      "historical_parser_code": {
+        "git_blob": "2acad623e3055ebf077f15f93d0b7c80ff461959",
+        "file": "kyiv-air-alerts-grafana/scripts/update_data.py",
+        "live_history_url": "https://kyiv.digital/storage/air-alert/stats.html",
+        "date_format": "%H:%M %d.%m.%y",
+        "assumed_zone": "Europe/Kyiv"
+      },
+      "municipal_exact_second_utc": [
+        "2026-09-22T14:20:10Z",
+        "2026-09-22T15:31:02Z"
+      ],
+      "kyiv_digital_xml_direct_state_pair_exact_second_utc": [
+        "2026-09-22T14:20:10Z",
+        "2026-09-22T15:31:02Z"
+      ],
+      "deterministic_diagnostic": {
+        "floor_to_minute_utc": [
+          "2026-09-22T14:20:00Z",
+          "2026-09-22T15:31:00Z"
+        ],
+        "original_wip_id_sha256_rehash_pass_in_offline_A_B": true,
+        "municipal_minute_pair_candidate_count": 1,
+        "nearest_minute_differs": false,
+        "neighbor_uid_negative_control_pass": true
+      },
+      "identity_verdict": "SOURCE_TRANSITION_CORROBORATED",
+      "original_to_modern_identity": "PLAUSIBLE_UNPROVEN",
+      "missing_proof": "No historically preserved original stats.html row or runtime-pinned HTTP response-to-parser-to-original-WIP linkage; municipal UID is absent from original WIP and API XML."
+    },
+    {
+      "municipal_uid_candidate": "2531",
+      "original_wip_episode_id": "dc7a226469f4f2ff7f4e28d6",
+      "original_wip_start_end_utc": [
+        "2026-09-28T02:46:00Z",
+        "2026-09-28T07:22:00Z"
+      ],
+      "first_persistence": {
+        "git_commit": "2c4151bd5a9412f9017dc1f2308da35489515b69",
+        "git_blob": "236add5d8fcb7e55eca0025c1df32dabde7a2400",
+        "json_pointer": "/cities/kyiv/episodes/95",
+        "independent_readback": "GIT_FIRST_PERSISTENCE_ADDED_DIFF_VERIFIED"
+      },
+      "original_source_output": {
+        "status": "PRODUCER_RUNTIME_EVIDENCE_UNAVAILABLE",
+        "producer_run_id": null,
+        "producer_job_id": null,
+        "historical_source_record": null,
+        "unattributed_historical_json_candidates_count": 8,
+        "source_html_row": null,
+        "source_html_payload_hash": null,
+        "site_prod_runtime_sha_pin": null
+      },
+      "historical_parser_code": {
+        "git_blob": "7d7fde6d8c736cd754804dd051845cf59738d8c9",
+        "file": "kyiv-air-alerts-grafana/scripts/update_data.py",
+        "live_history_url": "https://kyiv.digital/storage/air-alert/stats.html",
+        "date_format": "%H:%M %d.%m.%y",
+        "assumed_zone": "Europe/Kyiv"
+      },
+      "municipal_exact_second_utc": [
+        "2026-09-28T02:46:43Z",
+        "2026-09-28T07:22:18Z"
+      ],
+      "kyiv_digital_xml_direct_state_pair_exact_second_utc": [
+        "2026-09-28T02:46:43Z",
+        "2026-09-28T07:22:18Z"
+      ],
+      "deterministic_diagnostic": {
+        "floor_to_minute_utc": [
+          "2026-09-28T02:46:00Z",
+          "2026-09-28T07:22:00Z"
+        ],
+        "original_wip_id_sha256_rehash_pass_in_offline_A_B": true,
+        "municipal_minute_pair_candidate_count": 1,
+        "nearest_minute_differs": true,
+        "neighbor_uid_negative_control_pass": true
+      },
+      "identity_verdict": "SOURCE_TRANSITION_CORROBORATED",
+      "original_to_modern_identity": "PLAUSIBLE_UNPROVEN",
+      "missing_proof": "No historically preserved original stats.html row or runtime-pinned HTTP response-to-parser-to-original-WIP linkage; municipal UID is absent from original WIP and API XML."
+    },
+    {
+      "municipal_uid_candidate": "2602",
+      "original_wip_episode_id": "01fdcf6742e41b18c04393d5",
+      "original_wip_start_end_utc": [
+        "2026-10-07T10:24:00Z",
+        "2026-10-07T10:25:00Z"
+      ],
+      "first_persistence": {
+        "git_commit": "065b53aefa546ba2ced390d7b679d43cd9be6a22",
+        "git_blob": "a3a898fb1a51f12de9a25fdecbe74dc17f0c59ac",
+        "json_pointer": "/cities/kyiv/episodes/283",
+        "independent_readback": "GIT_FIRST_PERSISTENCE_ADDED_DIFF_VERIFIED"
+      },
+      "original_source_output": {
+        "status": "EXACT_HISTORICAL_INPUT_FOUND_RUNTIME_PIN_UNPROVEN",
+        "producer_run_id": 37629611850,
+        "producer_job_id": 112820127940,
+        "historical_source_record": {
+          "git_blob": "ecbb02bf124c48703208f825ab10e06bde80e98b",
+          "git_commit": "bf8bfda8c7daaf56ae89249dc19b0841ca41be7f",
+          "json_pointer": "/2601",
+          "parsed_utc": [
+            "2026-10-07T10:24:00Z",
+            "2026-10-07T10:25:00Z"
+          ],
+          "source_fields": {
+            "duration_minutes": 1,
+            "end": "2026-10-07T13:25:00+03:00",
+            "source": "kyiv_digital_live",
+            "start": "2026-10-07T13:24:00+03:00"
+          }
+        },
+        "unattributed_historical_json_candidates_count": 0,
+        "source_html_row": null,
+        "source_html_payload_hash": null,
+        "site_prod_runtime_sha_pin": null
+      },
+      "historical_parser_code": {
+        "git_blob": "7d7fde6d8c736cd754804dd051845cf59738d8c9",
+        "file": "kyiv-air-alerts-grafana/scripts/update_data.py",
+        "live_history_url": "https://kyiv.digital/storage/air-alert/stats.html",
+        "date_format": "%H:%M %d.%m.%y",
+        "assumed_zone": "Europe/Kyiv"
+      },
+      "municipal_exact_second_utc": [
+        "2026-10-07T10:24:25Z",
+        "2026-10-07T10:25:53Z"
+      ],
+      "kyiv_digital_xml_direct_state_pair_exact_second_utc": [
+        "2026-10-07T10:24:25Z",
+        "2026-10-07T10:25:53Z"
+      ],
+      "deterministic_diagnostic": {
+        "floor_to_minute_utc": [
+          "2026-10-07T10:24:00Z",
+          "2026-10-07T10:25:00Z"
+        ],
+        "original_wip_id_sha256_rehash_pass_in_offline_A_B": true,
+        "municipal_minute_pair_candidate_count": 1,
+        "nearest_minute_differs": true,
+        "neighbor_uid_negative_control_pass": true
+      },
+      "identity_verdict": "SOURCE_TRANSITION_CORROBORATED",
+      "original_to_modern_identity": "PLAUSIBLE_UNPROVEN",
+      "missing_proof": "No historically preserved original stats.html row or runtime-pinned HTTP response-to-parser-to-original-WIP linkage; municipal UID is absent from original WIP and API XML."
+    },
+    {
+      "municipal_uid_candidate": "2641",
+      "original_wip_episode_id": "c52544fa543feccd9fef5701",
+      "original_wip_start_end_utc": [
+        "2026-10-12T02:46:00Z",
+        "2026-10-12T03:14:00Z"
+      ],
+      "first_persistence": {
+        "git_commit": "c2c190b3ec362199457f7e46cd90f7bd2b5ca0b8",
+        "git_blob": "9ff8fdc16214ded2f50e566eb52b520a7e8419bd",
+        "json_pointer": "/cities/kyiv/episodes/322",
+        "independent_readback": "ACCEPTED_PREDECESSOR_LEDGER_ONLY__LARGE_BLOB_CONTENT_UNAVAILABLE"
+      },
+      "original_source_output": {
+        "status": "EXACT_HISTORICAL_INPUT_FOUND_RUNTIME_PIN_UNPROVEN",
+        "producer_run_id": 38208533624,
+        "producer_job_id": 114677309262,
+        "historical_source_record": {
+          "git_blob": "8c894d02450b69f73cfb212ef90681ccd74a72b0",
+          "git_commit": "54353510251d9b3f82779dbd747a7d296b12eb8c",
+          "json_pointer": "/2640",
+          "parsed_utc": [
+            "2026-10-12T02:46:00Z",
+            "2026-10-12T03:14:00Z"
+          ],
+          "source_fields": {
+            "duration_minutes": 28,
+            "end": "2026-10-12T06:14:00+03:00",
+            "source": "kyiv_digital_live",
+            "start": "2026-10-12T05:46:00+03:00"
+          }
+        },
+        "unattributed_historical_json_candidates_count": 0,
+        "source_html_row": null,
+        "source_html_payload_hash": null,
+        "site_prod_runtime_sha_pin": null
+      },
+      "historical_parser_code": {
+        "git_blob": "7d7fde6d8c736cd754804dd051845cf59738d8c9",
+        "file": "kyiv-air-alerts-grafana/scripts/update_data.py",
+        "live_history_url": "https://kyiv.digital/storage/air-alert/stats.html",
+        "date_format": "%H:%M %d.%m.%y",
+        "assumed_zone": "Europe/Kyiv"
+      },
+      "municipal_exact_second_utc": [
+        "2026-10-12T02:46:31Z",
+        "2026-10-12T03:14:33Z"
+      ],
+      "kyiv_digital_xml_direct_state_pair_exact_second_utc": [
+        "2026-10-12T02:46:31Z",
+        "2026-10-12T03:14:33Z"
+      ],
+      "deterministic_diagnostic": {
+        "floor_to_minute_utc": [
+          "2026-10-12T02:46:00Z",
+          "2026-10-12T03:14:00Z"
+        ],
+        "original_wip_id_sha256_rehash_pass_in_offline_A_B": true,
+        "municipal_minute_pair_candidate_count": 1,
+        "nearest_minute_differs": true,
+        "neighbor_uid_negative_control_pass": true
+      },
+      "identity_verdict": "SOURCE_TRANSITION_CORROBORATED",
+      "original_to_modern_identity": "PLAUSIBLE_UNPROVEN",
+      "missing_proof": "No historically preserved original stats.html row or runtime-pinned HTTP response-to-parser-to-original-WIP linkage; municipal UID is absent from original WIP and API XML."
+    }
+  ]
+}
