@@ -2,6 +2,15 @@
 
 Accepted project checkpoints, newest first. This is not the full Git history, a branch inventory, or a retry log. **PROVEN** describes bounded evidence; **FROZEN** additionally requires a durable exact manifest. Development checkpoints below do not change production unless explicitly stated.
 
+## 2026-10-17
+
+### Kyiv 185 historical stats.html provenance and second-to-minute transformation — PARTIAL, bounded independently accepted
+
+- **Research checkpoint:** `KYIV 185 CROSS-SOURCE CORROBORATION = STRONG — ORIGINAL IDENTITY UNPROVEN`; isolated [freeze commit `4b55f8dc`](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/commit/4b55f8dcdda7a651da1317b0562944fa97a0f69c), four research JSON files only vs prior `main` `52e121fb6011af4d0291ec835d39a023b91ee4bb`: inventory blob `ff69ef0835aa1a979217eae645a4237ce945aacf`, 12-case ledger `d6aa7110709d8c5ebcbe9fda635a519174167525`, verdicts `428364fadeb9c8a8d810963dd2dad14acfd0d006`, independent receipt `a5d57c6e48cbcc665f621829c6eb5985c9d08c7d`. Git branch and four files independently read back, diff contains no operational changes.
+- **Independent check:** Historical parser blob identities `2acad623e3055ebf077f15f93d0b7c80ff461959` and `7d7fde6d8c736cd754804dd051845cf59738d8c9` verified with `%H:%M %d.%m.%y` minute-only state parsing. A separate SHA-256 recheck (algorithm validated with known test vectors) reproduced **12/12** original WIP episode IDs, **12/12** second-to-minute interval pairs and **12/12** municipal/XML exact second pairs from the frozen ledger. Frozen evidence additionally reports **2,641/2,641** municipal/API direct pair matches, **185/185** modern UID candidates (2457–2641) and all seven producer-gap candidate matches; original municipal ZIP SHA-256 `dad4e7e9bb21af90f99f2de667ed8608874c0b7fcdaf8b4d43db797bc5aead20`, supplied externally, not archived in Git. Do not overclaim independent full raw-archive reexecution from the Git receipt alone.
+- **Limit:** No original `stats.html` HTML bytes, no original execution-time source binding, zero proven original WIP/modern identity equivalences; **seven runtime receipts still absent**. Prior accepted 178 source-output matches remain valid, but all **185 original ID pairs remain `PLAUSIBLE_UNPROVEN`**. `SAFE_FOR_AUTOMATIC_REMAPPING=NO`, `HISTORICAL_REVIEW_TRANSFER=NO`, `WIP_ACTIVATION=NO-GO`.
+- **Next:** Stop further repetitive Git historical matching unless genuinely new raw HTML or execution-time provenance emerges. Resume the separate priority of WIP `--local-only` offline fail-closed UkraineAlarm source hardening (strict 12-hour freshness/continuity, zero UkraineAlarm requests, cached mode workflow validation), before any separately authorized scheduling or prospective activation. No production/site-prod/WIP/Neon/casualty/classifier/backfill mutation.
+
 ## 2026-10-16
 
 ### H2 attempt2 independent proof hash and Neon cleanup — bounded PASS (2026-10-16)
