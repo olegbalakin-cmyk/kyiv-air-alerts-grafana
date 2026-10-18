@@ -1,0 +1,74 @@
+{
+  "document_type": "H2_NEON_LIVE_CATALOG_AND_AB_ARCHIVE_RECONCILIATION_BOUNDARY",
+  "date_utc": "2026-10-18",
+  "archive": {
+    "old_git_bundle_blob": "286c6cd4a0972a26a48ca7651356839ecd9b0245",
+    "old_decoding": "FAIL_LZMA_CORRUPT_INPUT",
+    "confirmed_fail_run": 39125222191,
+    "source_zips": [
+      {
+        "id": 12133264983,
+        "sha256": "5a89963dc518c69e61cf507f250d92041455253b1fce12f0c8764fa580e2a295",
+        "crc": "PASS"
+      },
+      {
+        "id": 12134845420,
+        "sha256": "416e432fd2f18459b44dc11f7a8aba2ba92671683af19c34bb895c2001133148",
+        "crc": "PASS"
+      }
+    ],
+    "source_member_hashes_match_original_manifest": "6/6",
+    "reconstructed_off_repo_bundle_sha256": "7c086b05595418f7e5d99db81862e8b5b8d2497118a4385b680216b84bc3512c",
+    "reconstructed_xz_sha256": "1d6f56c9e14da97387a47e85d4c6633b69f5cc3f92382c39e65d2349fb712dae",
+    "reconstructed_json_map_sha256": "a56a8e9934418b754de23e4d9117a8cb09a060512fe69f738f3dbbd9f679daad",
+    "exact_members_verified": 6,
+    "local_receipt_sha256": "514628caffc336818800d5525f36fd2f187b4885a0634a8a1104e1ed05c63e49",
+    "git_bundle_frozen": false,
+    "verdict": "PASS_LOCAL_SIX_MEMBER_RECOVERY__GIT_RETENTION_PENDING"
+  },
+  "neon": {
+    "project": "green-cake-44216048",
+    "branch": "br-bold-mode-b5rub8pq",
+    "database": "neondb",
+    "endpoint": "ep-calm-rice-b5073ypp",
+    "endpoint_type": "read_only",
+    "postgres": "18.6",
+    "transaction_read_only": "on",
+    "timeout": "15s",
+    "lock_timeout": "5s",
+    "schema_objects": 8,
+    "observed_columns": 185,
+    "observed_constraints": 221,
+    "observed_indexes": 30,
+    "observed_user_triggers": 0,
+    "observed_policies": 0,
+    "observed_extensions": 1,
+    "preliminary_matrix": {
+      "MATCH": 180,
+      "MISMATCH": 0,
+      "UNVERIFIED": 33
+    },
+    "interpretation": "Column match tests existence and approximate type family, not full nullability/default/privileges or application guarantees",
+    "structural_verdict": "PARTIAL"
+  },
+  "offline_reconstructed_schema": {
+    "status": "NOT_EXECUTED",
+    "reason": "Full schema fixture and exact runtime test not constructed"
+  },
+  "disposable_readiness": "BLOCKED",
+  "safety": {
+    "neon_application_rows_read": 0,
+    "neon_writes": 0,
+    "neon_branches_created": 0,
+    "neon_resource_config_changes": 0,
+    "production_changes": 0,
+    "operational_wip_changes": 0
+  },
+  "accepted_limits": {
+    "unbound_unresolved": 25,
+    "c4": "NOT PROVEN",
+    "c5": "NOT PROVEN",
+    "neon_authority_active": "NO",
+    "production_cutover_executed": "NO"
+  }
+}
