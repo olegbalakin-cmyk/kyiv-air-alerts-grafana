@@ -186,7 +186,7 @@ class Fixture:
 
     def refresh_bridge(self):
         json_write(self.bridge_path, {"events": [], "regions": {
-            CITY: {"last_checked_at": mon.iso(self.clock)}})
+            CITY: {"last_checked_at": mon.iso(self.clock)}}})
 
     def advance(self, when):
         self.clock = when
