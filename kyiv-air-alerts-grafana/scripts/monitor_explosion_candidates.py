@@ -5148,6 +5148,19 @@ def main() -> None:
         dsn=os.environ.get("ATTACK_EVENT_DATABASE_URL"),
         expected_snapshots=expected_snapshots,
     )
+    # Incomplete evidence coverage is not a durable canonical classification.
+    # Keep those due checks pending for a future fresh-evidence attempt rather
+    # than recording them as successfully completed persistence work.
+    if persistence_enabled:
+        skipped = 0
+        for city_key, rows in persistence_due.items():
+            if persistence_coverage_by_city.get(city_key):
+                continue
+            for _episode, check in rows:
+                check["checked_at"] = None
+                skipped += 1
+        if skipped != int(canonical_persistence["episodes_skipped_incomplete_coverage"]):
+            raise RuntimeError("CANONICAL_PERSISTENCE_COVERAGE_ACK_MISMATCH")
     (
         due_checks_at_cutoff,
         checked_due_checks_at_cutoff,
