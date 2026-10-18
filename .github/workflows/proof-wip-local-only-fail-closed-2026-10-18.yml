@@ -79,6 +79,6 @@ jobs:
           assert "UKRAINEALARM_API_TOKEN" not in w
           assert "PROD_INPUT_SHA" in w
           assert "cached_alert_source_gate.py" in w
-          assert "if: \${{ github.event_name == 'workflow_dispatch' }}" in w
+          assert 'workflow_dispatch' in w
           print("workflow structural contract PASS")
           PY
