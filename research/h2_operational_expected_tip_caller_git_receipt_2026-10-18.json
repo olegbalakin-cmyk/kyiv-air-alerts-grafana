@@ -1,0 +1,37 @@
+{
+  "version": 1,
+  "scope": "INDEPENDENT_GIT_READBACK_ONLY_PARTIAL_OFFLINE_SCOPE",
+  "final_verdict": "PARTIAL",
+  "reason": "Real monitor.main() not executed against PostgreSQL; no full checkpoint E2E",
+  "proof_commit": "8aa0c39e05cd79558e44a6e8df464572e7812b92",
+  "proof_path": "research/h2_operational_expected_tip_caller_proof_2026-10-18.json",
+  "proof_blob": "de83ffd5caa081bfe5be94e87f43b2f9b14e3ff9",
+  "proof_sha256": "440d34b6c6490b4148bf5699dd89fcb87c8c5a43e83cae314dad11e96d65a71c",
+  "proof_bytes": 6325,
+  "sha256_calculator": "Python hashlib.sha256, independent GitHub Actions 39117870162",
+  "git_blob_calculator": "git hash-object, independently run on frozen checked out proof 39117870162",
+  "independently_verified_code_blobs": 5,
+  "test_runs_final": [
+    {
+      "id": 39117623751,
+      "sha": "d2364cc41bdfb64bd9075e5b213262dcfdd7344f",
+      "result": "success"
+    },
+    {
+      "id": 39117723218,
+      "sha": "1dfec9944b0c954900afa33eb6e60b4cd2427a5c",
+      "result": "success"
+    }
+  ],
+  "independent_git_readback_run": {
+    "id": 39117870162,
+    "sha": "481f15eadaabc7b70f7e8bc018a4c468f611ab89",
+    "result": "success",
+    "code_and_tests_unchanged": true
+  },
+  "pg18_regressions_each": "24/24 + 3/3",
+  "new_caller_tests_each": "I1-I15 all passed, I5 genuine two-PG-connection competition",
+  "zero_neon_or_production_mutations": true,
+  "no_operational_promotion": true,
+  "coordinate_docs_unchanged": true
+}
