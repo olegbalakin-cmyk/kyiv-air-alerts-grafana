@@ -1,0 +1,47 @@
+{
+  "date": "2026-10-18",
+  "scope": "EXACT_ARCHIVE_GIT_ONLY_VERIFY_AND_PARTIAL_NEON_SCHEMA_SMOKE",
+  "accepted_level": "RESEARCH_EXECUTION_PROOF_NOT_INDEPENDENTLY_ACCEPTED",
+  "tested_commit": "0d936d9f70d75da4919910790e5ced6fc3403eff",
+  "actions_run": 39159323793,
+  "actions_url": "https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/39159323793",
+  "jobs": [
+    {
+      "id": 117769096654,
+      "label": "A",
+      "conclusion": "success"
+    },
+    {
+      "id": 117769096878,
+      "label": "B",
+      "conclusion": "success"
+    }
+  ],
+  "test_proofs": {
+    "archive_verifier": "PASS on A and B from Git alone",
+    "reconstructed_pg18_sql": "PASS on two independent PostgreSQL 18 service containers",
+    "structural_smoke": "PASS on A and B",
+    "real_monitor_main": "NOT_EXECUTED",
+    "E1_to_E15": "NOT_EXECUTED",
+    "full_M_N_I_T_regressions": "NOT_REEXECUTED"
+  },
+  "archive_bundle_blob": "3a290279d7eb34f895d14b701a616ed60251340b",
+  "schema_fixture_blob": "09f9c5a2f0c4eeddaba63e7c9c5834cce85f7ab3",
+  "contract_matrix_blob": "87123b0d7f0fe4c93a442be29dd37b9eea960953",
+  "schema_type": "PARTIALLY_RECONSTRUCTED_SCHEMA",
+  "known_metadata_gaps": [
+    "exact view body",
+    "role/ACL metadata",
+    "function privileges and search_path"
+  ],
+  "db_invariant_mismatches": 3,
+  "counts": {
+    "match_static": 203,
+    "mismatch_db": 3,
+    "unverified": 7
+  },
+  "neon_sql": 0,
+  "neon_writes": 0,
+  "operational_mutations": 0,
+  "overall": "ARCHIVE_PASS; PARTIAL_SCHEMA_SMOKE_PASS; EXACT_SCHEMA_MONITOR_E2E_NOT_EXECUTED; DISPOSABLE_PREFLIGHT_BLOCKED"
+}
