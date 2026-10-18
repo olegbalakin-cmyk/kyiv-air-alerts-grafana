@@ -286,11 +286,66 @@ with conn() as c:
     receipts["negative_rollback"]={"leaked_classification_with_tx_disabled":True,
                                   "synthetic_cleanup_confirmed":True}
 
+
+# Phase A: actual positive batch call against the frozen predecessor writer.
+# This is an EXPECTED DEFECT reproduction; no persistence function is mocked.
+def _batch_episode(eid="a"*24):
+    return {"episode_id": eid, "city_key": "testcity",
+            "alert_start": "2026-01-01T00:00:00+00:00",
+            "alert_end": "2026-01-01T00:20:00+00:00"}
+
+def _batch_source(eid="a"*24, *, label="first", status="approved_strict"):
+    return {"candidate_id": "synthetic-"+label, "city_key": "testcity",
+            "matched_episode_id": eid,
+            "classification_evidence": {"classification_episode_id": eid},
+            "source": "synthetic", "status": status,
+            "title": "Synthetic evidence "+label,
+            "url": "https://example.invalid/"+label}
+
+def _batch_call(c, queue, eid="a"*24, *, tip=None):
+    return writer.persist_due_episode_classifications(
+        queue=queue, due={"testcity":[(_batch_episode(eid), {"label":"offline"})]},
+        coverage_by_city={"testcity":True}, connection=c,
+        expected_tips={eid: tip})
+
+if os.environ.get("H2_TEST_PHASE") == "pre_fix":
+    setup()  # isolated fixture, independently readable on separate connection
+    _eid = "a"*24
+    _error = None
+    with conn() as c:
+        try:
+            _batch_call(c, [_batch_source(_eid)])
+        except writer.PersistenceContractError as exc:
+            _error = str(exc)
+    with conn() as independent:
+        _counts = read(independent)
+        _rows = independent.execute(
+            """SELECT c.classification_key,c.classification_uid,
+                      s.classification_uid,e.current_classification_uid
+               FROM public.attack_event_classifications c
+               JOIN public.attack_event_sources s ON s.classification_uid=c.classification_uid
+               JOIN public.attack_events e ON e.current_classification_uid=c.classification_uid"""
+        ).fetchall()
+        _version = independent.execute("SHOW server_version").fetchone()[0]
+    assert _error == "PERSISTENCE_ACK_BEFORE_COMMIT", (_error,_counts)
+    assert _counts == (1,1,1) and len(_rows)==1, (_counts,_rows)
+    assert _rows[0][1] == _rows[0][2] == _rows[0][3], _rows
+    assert _version.startswith("18."), _version
+    test_results["PRE_FIX_POSITIVE_BATCH"] = "EXPECTED_DEFECT_REPRODUCED"
+    receipts["pre_fix"] = {
+        "batch_error": _error,
+        "independent_readback_counts": _counts,
+        "classification_source_event_pointer_equal": True,
+        "server_version": _version,
+        "committed_rows_despite_error": True,
+        "persistence_mocked": False
+    }
+
 with conn() as version_conn:
     version = version_conn.execute("SHOW server_version").fetchone()[0]
 report={"postgres_version":version,
         "schema":"REDUCED_SYNTHETIC_SCHEMA_NOT_EQUIVALENT_TO_ACCEPTED_NEON",
         "tests":test_results,"receipts":receipts,"final_counts":final_counts,
-        "verdict":"PARTIAL_SCHEMA_EQUIVALENCE_UNPROVEN"}
+        "verdict":("EXPECTED_DEFECT_REPRODUCED" if os.environ.get("H2_TEST_PHASE")=="pre_fix" else "PARTIAL_SCHEMA_EQUIVALENCE_UNPROVEN")}
 print(json.dumps(report,indent=2,default=str))
 Path(os.environ.get("H2_OUTPUT","/tmp/h2_pg18_result.json")).write_text(json.dumps(report,indent=2,default=str))
