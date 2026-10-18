@@ -1,0 +1,120 @@
+{
+  "document_type": "H2_OPERATIONAL_EXPECTED_TIP_CALLER_OFFLINE_PG18_PROOF",
+  "date_utc": "2026-10-18",
+  "verdict": "PARTIAL_INDEPENDENT_PG18_SNAPSHOT_TO_CANONICAL_BATCH_REAL_DB_FULL_MONITOR_MAIN_NOT_RUN",
+  "accepted_checkpoint_awarded": false,
+  "task_target": "H2 OPERATIONAL EXPECTED-TIP CALLER INTEGRATION = PASS — OFFLINE PG18 SCOPE",
+  "repository": "olegbalakin-cmyk/kyiv-air-alerts-grafana",
+  "branch": "research-h2-operational-expected-tip-caller-2026-10-18",
+  "preflight": {
+    "main_head": "067f514dbf40ddc9ed4082087056d3bacba71fbe",
+    "site_prod_head": "41da789e61424c4f5b58d3b9fb8547ba98a194bf",
+    "operational_wip_head": "1a8b57553ba66319db326d65080ade93ae6ca01c",
+    "baseline_head": "1a8b57553ba66319db326d65080ade93ae6ca01c",
+    "coordination_files_read": [
+      "main:PROJECT_STATE.md",
+      "main:CHANGELOG.md"
+    ],
+    "no_newer_accepted_h2_caller_checkpoint_observed": true,
+    "research_branch_push_triggers_checked": true
+  },
+  "predecessor": {
+    "accepted_research_head": "ff4444816ad025961be78db957aa80b61a40c36f",
+    "accepted_writer_blob": "ce21bfa5edea37cb2268cc561aa8ab73d7baeb11",
+    "accepted_test_blob": "9f05fa9849b33dfc9a0626b10f7b168fbb80c96e",
+    "frozen_proof_commit": "a3b11a925e411bc4ca1d9436c6b2e13ce8f58d00",
+    "frozen_proof_blob": "9e5c853a379902407eac4f965277154ecc762f5e",
+    "frozen_proof_sha256": "222eb3c75dd7d3a20dbc489437bfaa8e4c69853e152f1e202ea7e26d6cdb99ad",
+    "accepted_runs": [
+      39109332963,
+      39109376403
+    ]
+  },
+  "implementation": {
+    "tested_head_A": "d2364cc41bdfb64bd9075e5b213262dcfdd7344f",
+    "tested_head_B": "1dfec9944b0c954900afa33eb6e60b4cd2427a5c",
+    "modified_files": {
+      "kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py": "a94741aa3a65c18d7bffb846a2c26973564c7812",
+      "kyiv-air-alerts-grafana/scripts/attack_event_canonical_persistence.py": "2a5354aa4ad2bc67893ffa40589024ecb84fa15e",
+      "kyiv-air-alerts-grafana/scripts/attack_event_tip_snapshot.py": "4e8890c88381fad5af3ecc4721ff435c0dd958f5",
+      "kyiv-air-alerts-grafana/tests/test_h2_canonical_writer_pg18_offline.py": "9f05fa9849b33dfc9a0626b10f7b168fbb80c96e",
+      "kyiv-air-alerts-grafana/tests/test_h2_operational_expected_tip_pg18.py": "1d53294ad50e5d8fa4628bca7948a66cd17e13e3"
+    },
+    "workflow_path": ".github/workflows/h2-operational-expected-tip-caller-pg18.yml",
+    "source_blobs_identical_A_B": true,
+    "existing_writer_import_origin": "accepted blob ce21bfa5edea37cb2268cc561aa8ab73d7baeb11; modified minimally for composite episode snapshots, expected parent UID and city guard",
+    "snapshot_boundary": "monitor obtains read-only repeatable-read snapshot after due selection/parent gate and before external evidence discovery/preparation",
+    "snapshot_source": "public.alert_episodes and public.attack_event_classifications, supersession NOT EXISTS tip relationship",
+    "snapshot_key": [
+      "city_key",
+      "historical_episode_id",
+      "alert_start_utc_microseconds",
+      "alert_end_utc_microseconds"
+    ],
+    "snapshot_binds": [
+      "canonical_parent_uid",
+      "check_label",
+      "check_due_at",
+      "observation_id",
+      "observed classification UID or authoritative SQL absence"
+    ],
+    "no_stale_tip_refresh": true,
+    "writer_advisory_lock_and_cas_preserved": true,
+    "caller_due_check_state": "writes state files only after batch returns; persistence exception aborts state checkpoint; incomplete coverage checks reset pending",
+    "partial_batch_atomicity_claimed": false
+  },
+  "tests": {
+    "postgres_version": "18.6 (Debian 18.6-1.pgdg13+2)",
+    "schema": "REDUCED_SYNTHETIC_SCHEMA_NOT_CANONICAL_NEON_DDL",
+    "new_suite": "I1-I15 PASS in both final A/B runs (plus I5_CONCURRENCY_RECEIPT)",
+    "real_connections": "I5 uses 2 distinct PostgreSQL backend PIDs, barrier, independent CAS competitor; one ACCEPTED and one STALE",
+    "stale_planned_snapshot": "I4 captured before competing durable writer then reused unchanged and rejected",
+    "writer_regression": "T1-T24 24/24 PASS plus 3/3 additional transaction tests, both final runs",
+    "test_database_is_actual_pg18": true,
+    "sql_reader_mocked": false,
+    "canonical_batch_writer_mocked": false,
+    "monitor_main_executed": false,
+    "monitor_syntax_compiled": true,
+    "monitor_state_e2e_verified": false,
+    "network_dependencies_not_contacted_by_test": true
+  },
+  "independent_runs": [
+    {
+      "run_id": 39117623751,
+      "job_id": 117646512152,
+      "head_sha": "d2364cc41bdfb64bd9075e5b213262dcfdd7344f",
+      "conclusion": "success",
+      "artifact_id": 12133340137,
+      "artifact_sha256": "6b1f1e13d7babc7602052995d68be0b02aa7bf94dd4b500db64c0103b42a8221"
+    },
+    {
+      "run_id": 39117723218,
+      "job_id": 117646803956,
+      "head_sha": "1dfec9944b0c954900afa33eb6e60b4cd2427a5c",
+      "conclusion": "success",
+      "artifact_id": 12132767336,
+      "artifact_sha256": "7de9ee7da275de493f62f42ef0c3c4c797cbd31bc1487be4d8d1c1acb1e714be"
+    }
+  ],
+  "safety": {
+    "neon_sql_writes": 0,
+    "neon_branches_or_computes_created": 0,
+    "production_mutations": 0,
+    "main_site_prod_and_operational_wip_mutations": 0,
+    "no_external_ukrainealarm_publisher_telegram_google_news_calls_during_tests": true,
+    "no_real_credentials_in_test_workflow": true,
+    "unbound_unresolved": 25,
+    "C4": "NOT PROVEN",
+    "C5": "NOT PROVEN",
+    "neon_authority_active": false,
+    "production_cutover_executed": false
+  },
+  "limitations": [
+    "No full monitor.main() with real PostgreSQL and synthetic source inputs; only live monitor code path has been wired and compiled",
+    "No real monitor output/checkpoint mutation consistency measured under failed persistence",
+    "No parity proof against accepted canonical Neon schema; offline synthetic reduced PostgreSQL schema only",
+    "No Neon database operation, operational deployment or activation",
+    "No durable independently normalized raw Actions archive in Git; two Actions artifacts subject to retention"
+  ],
+  "next_executable_task": "Perform synthetic real monitor.main() -> canonical persisted PG18 E2E, including fail-closed checkpoint and competing attempts, twice on fresh instances; only then independent review for offline caller PASS. Separately later Neon canonical DDL parity preflight."
+}
