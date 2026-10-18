@@ -103,11 +103,57 @@ with patch.dict(os.environ,{"UKRAINEALARM_API_TOKEN":"SYNTHETIC"},clear=True),\
     except AssertionError:pass
     else:raise AssertionError("baseline vulnerability not detected")
 assert calls["api_client"]==1 and calls["api_history"]==calls["other"]==0
+
+# Independently compare actual persisted site-prod alert snapshots in isolated temp trees.
+PROD="41da789e61424c4f5b58d3b9fb8547ba98a194bf"
+snapshot_files=[
+    "ukrainealarm_bridge.json","alerts_combined.json","sevastopol_events.json"]
+prod_bytes={}
+for filename in snapshot_files:
+    p="kyiv-air-alerts-grafana/data/"+filename
+    prod_bytes[filename]=subprocess.check_output(["git","show",PROD+":"+p],cwd=ROOT)
+production_cases=[]
+with tempfile.TemporaryDirectory() as da,tempfile.TemporaryDirectory() as db:
+    # The pair is initialized identically before swapping synthetic alert stores
+    # for exact pinned production blobs.
+    init(baseline,da,"valid")
+    init(repaired,db,"valid")
+    for m in (baseline,repaired):
+        for filename in snapshot_files:
+            (m.BRIDGE_FILE.parent/filename).write_bytes(prod_bytes[filename])
+    output_pairs=[]
+    for cycle in range(2):
+        pair=[]
+        for m in (baseline,repaired):
+            with patch.object(m,"now_utc",lambda:clock),\
+                 patch.object(m.requests,"get",fake_news),\
+                 patch.object(m.ua,"UkraineAlarmClient",forbidden("api_client")),\
+                 patch.object(m.ua,"history_rows",forbidden("api_history")),\
+                 patch.object(m.kyivdata,"http_session",forbidden("other")),\
+                 patch.object(m.sev,"update_event_store",forbidden("other")),\
+                 patch.dict(os.environ,{"UKRAINEALARM_API_TOKEN":"SYNTHETIC"},clear=True),\
+                 patch.object(sys,"argv",["monitor","--local-only"]),\
+                 contextlib.redirect_stdout(io.StringIO()):
+                m.main()
+            pair.append(snapshot(m))
+        assert pair[0]==pair[1],("real_siteprod_A_B",cycle)
+        for filename in snapshot_files:
+            assert (baseline.BRIDGE_FILE.parent/filename).read_bytes()==prod_bytes[filename]
+            assert (repaired.BRIDGE_FILE.parent/filename).read_bytes()==prod_bytes[filename]
+        output_pairs.append(pair[0])
+    production_cases.append({"source_ref":PROD,"cycles":2,"diffs":0,
+        "inputs_sha256":{k:hashlib.sha256(v).hexdigest() for k,v in prod_bytes.items()},
+        "state_sha256":hashlib.sha256(output_pairs[-1]["state"]).hexdigest(),
+        "queue_sha256":hashlib.sha256(output_pairs[-1]["queue"]).hexdigest(),
+        "report_sha256":hashlib.sha256(output_pairs[-1]["report"]).hexdigest(),
+        "first_new_alert_episodes":json.loads(output_pairs[0]["report"])["new_alert_episodes"],
+        "second_new_alert_episodes":json.loads(output_pairs[1]["report"])["new_alert_episodes"]})
+assert calls["api_client"]==1 and calls["api_history"]==calls["other"]==0
 result={"status":"PASS_OFFLINE_SYNTHETIC","baseline":BASE,"reference_clock":clock.isoformat(),
     "original_blob_sha256":hashlib.sha256(old.encode()).hexdigest(),
     "candidate_blob_sha256":hashlib.sha256(new.encode()).hexdigest(),
     "scenario_count":len(cases),"ab_cycle_pairs":len(cases)*2,"ab_differences":0,
     "real_api_requests":0,"original_synthetic_client_attempts":1,
     "repaired_synthetic_client_attempts":0,"mock_google_news_requests":calls["news"],
-    "cases":cases,"scope":"Synthetic offline fixtures only; degraded-input semantics preserved, not repaired"}
+    "cases":cases,"production_snapshot_offline":production_cases,"scope":"Synthetic failures plus exact pinned site-prod alert stores; state and queue remain isolated fixtures; degraded-input semantics preserved"}
 print(json.dumps(result,ensure_ascii=False,indent=2))
