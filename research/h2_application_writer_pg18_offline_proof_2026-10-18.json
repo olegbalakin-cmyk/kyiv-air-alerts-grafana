@@ -1,0 +1,256 @@
+{
+  "document_type": "H2_APPLICATION_WRITER_PG18_OFFLINE_PROOF",
+  "date_utc": "2026-10-18",
+  "preflight": {
+    "coordination_documents_read_from_main": [
+      "PROJECT_STATE.md",
+      "CHANGELOG.md"
+    ],
+    "main_head": "8b97543982c85ef001e47ca69dac65559251488a",
+    "site_prod_head": "41da789e61424c4f5b58d3b9fb8547ba98a194bf",
+    "wip_base_head": "1a8b57553ba66319db326d65080ade93ae6ca01c",
+    "isolated_branch": "research-h2-app-writer-pg18-cas-2026-10-18",
+    "actions_push_gate": "workflow triggers reviewed; isolated branch name did not match existing operational push triggers",
+    "newer_accepted_application_writer_checkpoint_found": false
+  },
+  "main_head": "8b97543982c85ef001e47ca69dac65559251488a",
+  "wip_base_head": "1a8b57553ba66319db326d65080ade93ae6ca01c",
+  "source_blob_shas": {
+    "original_writer": "0118ca9e5f1308173e657257f1b49fe91cc19fe1",
+    "original_monitor": "95e0eb313c6c68016601f681ab5186bf147d6dd1",
+    "final_writer": "b2655f47e0ce42c943287f10765a74911db5f16b",
+    "final_tests": "c13292990b64721619042c4c87b114125771fc9e",
+    "final_workflow": "7acbff7724a03517d5c27a11c8130aa3a609c58a"
+  },
+  "predecessor_proof": {
+    "commit": "ed7e1bd0afe78f1f2ab12a083fe02eb6e611bfe4",
+    "path": "research/h2_nine_case_disposable_neon_attempt2_sql_proof_2026-10-16.json",
+    "blob": "2f304303e0cb716793e03c4dfd7dc7cd56786c0e",
+    "sha256": "5724e25c405ac65915491f72c682fd28c3c3ba2efc109da59",
+    "accepted_verdict": "PARTIAL_SQL_CONTRACT_SIMULATION_ONLY_CLEANUP_PASS"
+  },
+  "writer_contract_before": {
+    "expected_tip_from_caller": "ABSENT",
+    "advisory_episode_lock": "PRESENT",
+    "deterministic_key_check": "PRESENT",
+    "write_tx": "conn.transaction()",
+    "batch_connection": "autocommit=False; close without explicit commit",
+    "source_event_relationships": "within writer transaction"
+  },
+  "defects_found": [
+    {
+      "severity": "HIGH",
+      "issue": "Stale caller silently treated latest database tip as an expected predecessor",
+      "location": "persist_episode_classification"
+    },
+    {
+      "severity": "HIGH",
+      "issue": "Owned batch connection autocommit=False closed without explicit commit",
+      "location": "persist_due_episode_classifications"
+    },
+    {
+      "severity": "HIGH",
+      "issue": "Missing DSN could result in disabled result rather than fail-closed for eligible work",
+      "location": "persist_due_episode_classifications"
+    },
+    {
+      "severity": "HIGH",
+      "issue": "Caller-side authoritative expected tip unavailable",
+      "location": "monitor_explosion_candidates.py",
+      "status": "REMAINS_UNRESOLVED"
+    },
+    {
+      "severity": "HIGH",
+      "issue": "Caller-owned outer transaction may not be committed when inner writer returns",
+      "status": "RETURN_STATE_REPAIRED; BATCH_FAIL_CLOSED"
+    }
+  ],
+  "changes_implemented": [
+    {
+      "path": "kyiv-air-alerts-grafana/scripts/attack_event_canonical_persistence.py",
+      "functions": [
+        "persist_episode_classification",
+        "persist_due_episode_classifications"
+      ],
+      "changes": [
+        "expected_current_tip explicit CAS under episode-scoped advisory lock",
+        "reject stale or missing expected tips except current exact-key retry",
+        "append-only supersession maintained",
+        "fault_after=source added",
+        "owned connection autocommit=True so individual writer transaction commits",
+        "commit_state distinguishes pending outer transaction from committed state",
+        "batch refuses pending caller transactions and non-durable ACK",
+        "missing required database config fails closed"
+      ]
+    },
+    {
+      "path": "kyiv-air-alerts-grafana/tests/test_h2_canonical_writer_pg18_offline.py",
+      "changes": [
+        "real psycopg application integration and synthetic fixture",
+        "14 positive tests T1-T14",
+        "true two-connection contention and independent SQL readbacks",
+        "in-memory mutant negative CAS and transaction controls"
+      ]
+    },
+    {
+      "path": ".github/workflows/h2-offline-canonical-writer-pg18.yml",
+      "changes": [
+        "isolated-branch-only push workflow; ephemeral postgres:18; no production secrets"
+      ]
+    }
+  ],
+  "expected_tip_contract": {
+    "initial_insert": "Explicit None when caller independently knows there is no tip",
+    "revision": "Explicit UUID of expected current predecessor",
+    "current_exact_retry": "Idempotent even if prior request carried initial None; cannot move current state backward",
+    "stale": "PersistenceContractError; no mutation",
+    "caller_tip_origin": "NOT_WIRED_IN_OPERATIONAL_MONITOR; due episode processing now fails closed without explicit expected_tips"
+  },
+  "transaction_boundaries": {
+    "owned_connection": "autocommit=True; writer per episode transaction commits before durable ACK",
+    "external_connection": "outer conn.transaction() controls commit/rollback; writer reports CALLER_TRANSACTION_PENDING",
+    "batch_atomicity": "NOT_CLAIMED; per-episode owned commits only",
+    "rollback": "T8-T11 confirmed independent count equality; faults after classification/event/source and outer caller rollback"
+  },
+  "postgres_version": "18.6 (Debian 18.6-1.pgdg13+2)",
+  "schema_fixture_provenance": "Dynamically derived reduced SQL CREATE TABLE fixture based on INSERT column names in actual writer, with synthetic alert parent, UUID PKs, unique keys and FK constraints",
+  "schema_equivalence_limitations": [
+    "No canonical Neon PG18 DDL or full constraint equivalence independently reconstructed",
+    "Simplified inferred types, constraints and defaults",
+    "No actual Neon DB queries or writes",
+    "No historical correction operation tested",
+    "No permanent integration or operational live monitor run"
+  ],
+  "test_results": {
+    "matrix": {
+      "T1": "PASS",
+      "T2": "PASS",
+      "T3": "PASS",
+      "T4": "PASS",
+      "T5": "PASS",
+      "T6": "PASS",
+      "T7": "PASS",
+      "T8": "PASS",
+      "T9": "PASS",
+      "T10": "PASS",
+      "T11": "PASS",
+      "T12": "PASS",
+      "T13": "PASS",
+      "T14": "PASS"
+    },
+    "initial_success_run": {
+      "id": 39107449714,
+      "head_sha": "528e42c3ac714cae320f0982e1a1ad83da4ee760",
+      "job_id": 117616275723,
+      "conclusion": "success",
+      "artifact_id": 12129261003,
+      "artifact_zip_sha256": "286697a091afd7a6586e61f909f9db85a08d00d94618f1bec2be557da03a1ead"
+    },
+    "independent_fresh_run": {
+      "id": 39107502472,
+      "head_sha": "00926b81e66a095638223eb3f6386e3aa5e6fa58",
+      "job_id": 117616429467,
+      "conclusion": "success",
+      "artifact_id": 12127899862,
+      "artifact_zip_sha256": "ef2d4bdeb010868dca6906cfebd902f464315f711bd073e8460077779081d52e"
+    },
+    "failed_precursor_runs": [
+      39107158235,
+      39107204453,
+      39107395312
+    ],
+    "code_blobs_unchanged_between_success_runs": true
+  },
+  "concurrency_session_receipts": [
+    {
+      "run_id": 39107449714,
+      "backend_pids": [
+        97,
+        98
+      ],
+      "outcomes": [
+        "STALE_EXPECTED_TIP",
+        "ACCEPTED"
+      ],
+      "tips": 1,
+      "final_counts": {
+        "classifications": 3,
+        "sources": 3,
+        "events": 1
+      },
+      "orphans": 0
+    },
+    {
+      "run_id": 39107502472,
+      "backend_pids": [
+        97,
+        98
+      ],
+      "outcomes": [
+        "STALE_EXPECTED_TIP",
+        "ACCEPTED"
+      ],
+      "tips": 1,
+      "final_counts": {
+        "classifications": 3,
+        "sources": 3,
+        "events": 1
+      },
+      "orphans": 0
+    }
+  ],
+  "rollback_readbacks": {
+    "T8": "PASS",
+    "T9": "PASS",
+    "T10": "PASS",
+    "T11": "PASS",
+    "negative_control": "Disabling transaction context in temporary in-memory writer leaves 1 inserted synthetic classification after injected fault; exact synthetic cleanup restored counts; no persisted mutation left"
+  },
+  "idempotency_readbacks": {
+    "T2": "PASS",
+    "T12": "PASS",
+    "extra_classification_source_event_rows": 0
+  },
+  "historical_protection": {
+    "T13": "PASS",
+    "rule": "Original non-live/frozen classification cannot be automatically superseded",
+    "historical_correction_api": "NOT_IMPLEMENTED"
+  },
+  "independent_verification": {
+    "fresh_postgres_instances": 2,
+    "exact_code_test_git_blobs_in_both_runs": true,
+    "normalized_results": "T1-T14=PASS; unique tip=1; counts=(3,3,1); orphan=0; stale/accepted pair; two distinct backend PIDs; negative CAS and transaction controls detected",
+    "dynamic_uuids_expected_to_differ": true,
+    "final_original_Git_readback": "TO_BE_VERIFIED_SEPARATELY",
+    "sqlstate_for_application_rejection": "N/A: application PersistenceContractError before SQL constraint violation"
+  },
+  "git_commit": "00926b81e66a095638223eb3f6386e3aa5e6fa58",
+  "git_blob_sha": "STORED_IN_SEPARATE_RECEIPT_TO_AVOID_CIRCULAR_HASH",
+  "sha256": "STORED_IN_SEPARATE_RECEIPT_TO_AVOID_CIRCULAR_HASH",
+  "operational_boundaries": {
+    "neon_mutations": 0,
+    "production_mutations": 0,
+    "site_prod_mutations": 0,
+    "existing_wip_branch_mutations": 0,
+    "github_merges": 0,
+    "live_api_calls": 0,
+    "casualty_changes": 0,
+    "production_credential_use": 0
+  },
+  "remaining_gaps": [
+    "Canonical PostgreSQL 18 schema equivalence is NOT PROVEN",
+    "Operational monitor does not supply independently authoritative expected tip; automatic revisions fail closed",
+    "No tested legitimate historical H2 correction API",
+    "SQLSTATE receipts not applicable to app-level CAS; full Neon equivalent FK/schema rejection not proven",
+    "No integration with a disposable Neon child, no independent parent isolation verification",
+    "Batch per-episode atomicity only; no batch atomicity claimed"
+  ],
+  "verdict": "PARTIAL — APPLICATION WRITER CAS/ROLLBACK/CONCURRENCY PROVEN ON REDUCED SYNTHETIC PG18; CANONICAL SCHEMA AND OPERATIONAL CALLER INTEGRATION NOT PROVEN",
+  "unchanged": {
+    "UNBOUND_UNRESOLVED": 25,
+    "C4": "NOT_PROVEN",
+    "C5": "NOT_PROVEN",
+    "NEON_AUTHORITY_ACTIVE": "NO",
+    "PRODUCTION_CUTOVER_EXECUTED": "NO"
+  }
+}
