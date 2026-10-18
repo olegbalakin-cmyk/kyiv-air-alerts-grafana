@@ -1,0 +1,99 @@
+name: Isolated WIP Full Main E2E A/B Offline Proof
+on:
+  push:
+    branches:
+      - proof-wip-local-only-main-e2e-ab-2026-10-18
+    paths:
+      - "kyiv-air-alerts-grafana/tests/wip_local_only_main_e2e_ab_proof.py"
+      - ".github/workflows/proof-wip-local-only-main-e2e-ab-2026-10-18.yml"
+permissions:
+  contents: read
+jobs:
+  full-main-ab-proof:
+    if: github.ref == 'refs/heads/proof-wip-local-only-main-e2e-ab-2026-10-18'
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    env:
+      WIP_E2E_PROOF_DIR: /tmp/wip-main-e2e-ab-proof
+      PYTHONDONTWRITEBYTECODE: "1"
+      UKRAINEALARM_API_TOKEN: ""
+      ATTACK_EVENT_DATABASE_URL: ""
+    steps:
+      - name: Check out isolated proof commit without persisted credentials
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install pinned project Python requirements
+        working-directory: kyiv-air-alerts-grafana
+        run: pip install -r requirements.txt
+      - name: Fetch exact frozen source commits without secrets
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch --no-tags origin 48fe06216f672327d02c1635b15692f14e1b2125
+          git fetch --no-tags origin fcb634e07678a796f9cdf87732d354bf169af8f1
+          git fetch --no-tags origin 1593ff0995e81cc14a537c5c94670c5fda98738d
+      - name: Execute actual monitor main in isolated worker processes
+        shell: bash
+        run: |
+          set -euo pipefail
+          set +e
+          python -B kyiv-air-alerts-grafana/tests/wip_local_only_main_e2e_ab_proof.py > /tmp/proof-execution.log 2>&1
+          status=$?
+          set -e
+          cat /tmp/proof-execution.log
+          printf '%s\n' "$status" > /tmp/proof-execution-exit-code
+          exit "$status"
+      - name: Upload isolated sanitized proof receipts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: wip-main-e2e-ab-offline-receipts
+          path: |
+            /tmp/wip-main-e2e-ab-proof/receipts/
+            /tmp/proof-execution.log
+            /tmp/proof-execution-exit-code
+          retention-days: 30
+          if-no-files-found: warn
+      - name: Independently verify output files and receipt assertions
+        if: success()
+        shell: bash
+        run: |
+          python - <<'PY'
+          import hashlib, json
+          from pathlib import Path
+          root=Path('/tmp/wip-main-e2e-ab-proof')
+          ledger=json.loads((root/'receipts/execution_ledger.json').read_text())
+          assert ledger['assertions']['all_pass']
+          assert len(ledger['negatives']) >= 19
+          assert len(ledger['scenarios']) >= 3
+          for name, row in ledger['negatives'].items():
+              assert row['pass'], name
+              assert row['before'] == row['after'], name
+              assert all(row['calls'][x] == 0 for x in (
+                  'ensure_state','process_events','canonical_parent',
+                  'refresh_telegram','search_city_news','canonical_persistence',
+                  'network_requests','database_connections',
+                  'ukrainealarm_constructors','ukrainealarm_requests')), name
+          for scenario, item in ledger['scenarios'].items():
+              assert item['pass'], scenario
+              for cycle in ('cycle1','cycle2'):
+                  assert all(item['parity'][cycle].values()), (scenario,cycle)
+                  dirs=[root/'receipts/output_snapshots'/scenario/variant/cycle
+                        for variant in ('A','B')]
+                  for filename in ('explosion_candidate_monitor_state.json',
+                                   'explosion_review_queue.json',
+                                   'explosion_candidate_monitor_last_run.json'):
+                      assert dirs[0].joinpath(filename).read_bytes() == dirs[1].joinpath(filename).read_bytes(), (scenario,cycle,filename)
+          report={'result':'INDEPENDENT_WORKSPACE_READBACK_PASS',
+                  'scenario_count':len(ledger['scenarios']),
+                  'negative_count':len(ledger['negatives']),
+                  'ledger_sha256':hashlib.sha256((root/'receipts/execution_ledger.json').read_bytes()).hexdigest()}
+          (root/'receipts/independent_receipt.json').write_text(json.dumps(report,sort_keys=True,indent=2)+'\n')
+          print(json.dumps(report))
+          PY
