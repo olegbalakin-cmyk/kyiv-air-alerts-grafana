@@ -41,7 +41,10 @@ concurrency:
 
 jobs:
   plan:
-    if: ${{ github.event_name != 'workflow_run' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'multicity-wip-2026-09-16') }}
+    # WIP-PRE-PROMOTION-TRIGGER-SAFETY-HOLD-2026-10-18: no staging execution.
+    # Removal requires a separately authorized, independently proven transition.
+    if: ${{ false }}
+    # PRE-HOLD ORIGINAL JOB CONDITION: if: ${{ github.event_name != 'workflow_run' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'multicity-wip-2026-09-16') }}
     runs-on: ubuntu-latest
     outputs:
       matrix: ${{ steps.plan.outputs.matrix }}
@@ -126,7 +129,10 @@ jobs:
           PY
 
   preflight:
-    if: ${{ needs.plan.outputs.has_work == 'true' }}
+    # WIP-PRE-PROMOTION-TRIGGER-SAFETY-HOLD-2026-10-18: no staging execution.
+    # Removal requires a separately authorized, independently proven transition.
+    if: ${{ false }}
+    # PRE-HOLD ORIGINAL JOB CONDITION: if: ${{ needs.plan.outputs.has_work == 'true' }}
     needs: plan
     strategy:
       fail-fast: false
@@ -222,7 +228,10 @@ jobs:
           retention-days: 30
 
   aggregate:
-    if: ${{ always() && needs.plan.result == 'success' && needs.plan.outputs.has_work == 'true' && needs.preflight.result == 'success' }}
+    # WIP-PRE-PROMOTION-TRIGGER-SAFETY-HOLD-2026-10-18: no staging execution.
+    # Removal requires a separately authorized, independently proven transition.
+    if: ${{ false }}
+    # PRE-HOLD ORIGINAL JOB CONDITION: if: ${{ always() && needs.plan.result == 'success' && needs.plan.outputs.has_work == 'true' && needs.preflight.result == 'success' }}
     needs:
       - plan
       - preflight

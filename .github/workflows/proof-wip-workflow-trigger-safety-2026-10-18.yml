@@ -1,0 +1,65 @@
+name: Isolated WIP workflow trigger safety proof 2026-10-18
+
+on:
+  push:
+    branches: [proof-wip-trigger-safety-2026-10-18-gpt6]
+    paths:
+      - ".github/workflows/**"
+      - "research/wip_workflow_trigger_safety_2026-10-18/**"
+
+permissions:
+  contents: read
+
+jobs:
+  prove-safety:
+    if: ${{ github.ref == 'refs/heads/proof-wip-trigger-safety-2026-10-18-gpt6' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Checkout isolated proof branch without persistent credentials
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+          persist-credentials: false
+
+      - name: Configure Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install isolated syntax validation tools
+        run: |
+          set -euo pipefail
+          python -m pip install --disable-pip-version-check --no-input PyYAML==6.0.2 wcmatch==10.1
+          go install github.com/rhysd/actionlint/cmd/actionlint@v1.7.9
+
+      - name: Validate all changed workflows with actionlint
+        run: |
+          set -euo pipefail
+          "$(go env GOPATH)/bin/actionlint" -version | tee "$RUNNER_TEMP/actionlint-version.txt"
+          "$(go env GOPATH)/bin/actionlint" -color=false -shellcheck= -pyflakes= \
+            .github/workflows/full-site-wip.yml \
+            .github/workflows/test-explosion-monitor-wip.yml \
+            .github/workflows/historical-replay-qa.yml \
+            .github/workflows/historical-replay-qa-finalize.yml \
+            .github/workflows/historical-source-retention-repair-preflight.yml \
+            .github/workflows/attack-event-classifier-hardening.yml \
+            .github/workflows/explosion-monitor-wip.yml \
+            .github/workflows/proof-wip-workflow-trigger-safety-2026-10-18.yml \
+            2>&1 | tee "$RUNNER_TEMP/actionlint-results.txt"
+
+      - name: Parse all WIP YAML and prove five trigger scenarios
+        run: |
+          set -euo pipefail
+          python research/wip_workflow_trigger_safety_2026-10-18/check_workflow_safety.py
+
+      - name: Preserve offline proof artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: isolated-wip-workflow-trigger-safety-proof
+          path: |
+            ${{ runner.temp }}/wip-workflow-trigger-safety-receipt.json
+            ${{ runner.temp }}/actionlint-results.txt
+            ${{ runner.temp }}/actionlint-version.txt
+          if-no-files-found: warn
