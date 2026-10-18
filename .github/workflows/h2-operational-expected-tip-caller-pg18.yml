@@ -1,0 +1,65 @@
+name: H2 Operational Expected Tip Caller Offline PG18
+on:
+  push:
+    branches: [research-h2-operational-expected-tip-caller-2026-10-18]
+    paths:
+      - "kyiv-air-alerts-grafana/scripts/attack_event_canonical_persistence.py"
+      - "kyiv-air-alerts-grafana/scripts/attack_event_tip_snapshot.py"
+      - "kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py"
+      - "kyiv-air-alerts-grafana/tests/test_h2_canonical_writer_pg18_offline.py"
+      - "kyiv-air-alerts-grafana/tests/test_h2_operational_expected_tip_pg18.py"
+      - ".github/workflows/h2-operational-expected-tip-caller-pg18.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  pg18-caller-proof:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres:18
+        env:
+          POSTGRES_DB: h2_offline
+          POSTGRES_USER: h2_local
+          POSTGRES_PASSWORD: synthetic_only
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U h2_local -d h2_offline"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 15
+    env:
+      H2_OFFLINE_POSTGRES_DSN: postgresql://h2_local:synthetic_only@127.0.0.1:5432/h2_offline
+      H2_OUTPUT: /tmp/h2_pg18_result.json
+      H2_CALLER_OUTPUT: /tmp/h2_caller_report.json
+      H2_TEST_PHASE: post_fix
+      ATTACK_EVENT_ORIGIN_COMMIT_SHA: ffffffffffffffffffffffffffffffffffffffff
+      ATTACK_EVENT_ORIGIN_REF: synthetic-pg18
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install test dependencies only
+        run: python -m pip install "psycopg[binary]==3.2.12" requests beautifulsoup4
+      - name: Syntax check exact monitor and caller
+        run: |
+          python -m py_compile kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py
+          python -m py_compile kyiv-air-alerts-grafana/scripts/attack_event_canonical_persistence.py
+          python -m py_compile kyiv-air-alerts-grafana/scripts/attack_event_tip_snapshot.py
+          python -m py_compile kyiv-air-alerts-grafana/tests/test_h2_operational_expected_tip_pg18.py
+      - name: Execute canonical offline expected-tip PG18
+        run: python kyiv-air-alerts-grafana/tests/test_h2_operational_expected_tip_pg18.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: h2-operational-caller-pg18-synthetic-receipts
+          path: |
+            /tmp/h2_pg18_result.json
+            /tmp/h2_caller_report.json
+          retention-days: 30
+          if-no-files-found: ignore
