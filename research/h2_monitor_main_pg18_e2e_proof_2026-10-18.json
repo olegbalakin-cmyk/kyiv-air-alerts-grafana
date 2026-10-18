@@ -1,0 +1,167 @@
+{
+  "document_type": "H2_OPERATIONAL_MONITOR_MAIN_CANONICAL_WRITER_FULL_OFFLINE_PG18_E2E",
+  "as_of_utc": "2026-10-18",
+  "verdict": "PASS_OFFLINE_REDUCED_SYNTHETIC_PG18",
+  "accepted_checkpoint_awarded": false,
+  "scope": "Real monitor_explosion_candidates.main() with actual PostgreSQL 18.6 parent SQL, tip snapshot SQL, writer CAS/transactions and independent persisted state/queue/report and database readback; no live external services, canonical Neon schema equivalence or production operation",
+  "repository": "olegbalakin-cmyk/kyiv-air-alerts-grafana",
+  "branch": "research-h2-monitor-main-pg18-e2e-2026-10-18",
+  "preflight": {
+    "main": "9f40d5190744226b3f99c9bcbc67d549b99a9986",
+    "site_prod": "41da789e61424c4f5b58d3b9fb8547ba98a194bf",
+    "operational_wip": "1a8b57553ba66319db326d65080ade93ae6ca01c",
+    "accepted_predecessor": "07e439c82a31c4ed01bd4515cec95fe1365784de",
+    "predecessor_proof_commit": "8aa0c39e05cd79558e44a6e8df464572e7812b92",
+    "predecessor_proof_blob": "de83ffd5caa081bfe5be94e87f43b2f9b14e3ff9",
+    "coordination_docs": [
+      "main:PROJECT_STATE.md",
+      "main:CHANGELOG.md"
+    ],
+    "trigger_inventory": "Read WIP and research workflow trigger paths; research branch does not match operational WIP code-push triggers; no WIP push"
+  },
+  "source_blobs_A_B": {
+    "kyiv-air-alerts-grafana/tests/test_h2_monitor_main_pg18_e2e.py": "7cebb4416ca3bef7ae9d6b8699f7d7f0b5ef952c",
+    "kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py": "a94741aa3a65c18d7bffb846a2c26973564c7812",
+    "kyiv-air-alerts-grafana/scripts/live_parent_ordering.py": "d43ee3573d78e70e4d9fa3559e81cf950799db0b",
+    "kyiv-air-alerts-grafana/scripts/attack_event_canonical_persistence.py": "2a5354aa4ad2bc67893ffa40589024ecb84fa15e",
+    "kyiv-air-alerts-grafana/scripts/attack_event_tip_snapshot.py": "4e8890c88381fad5af3ecc4721ff435c0dd958f5",
+    "kyiv-air-alerts-grafana/tests/test_h2_canonical_writer_pg18_offline.py": "9f05fa9849b33dfc9a0626b10f7b168fbb80c96e",
+    "kyiv-air-alerts-grafana/tests/test_h2_operational_expected_tip_pg18.py": "1d53294ad50e5d8fa4628bca7948a66cd17e13e3"
+  },
+  "pinned_external_read_only_contract": {
+    "ref": "site-prod@41da789e61424c4f5b58d3b9fb8547ba98a194bf",
+    "db_phase1_core.py": "dda23c268e08f74367f33b189a8bafc1358aadd2",
+    "db_phase1_persistence.py": "ed014e61fc6186fa9daf91c763c847e7df2f0306",
+    "verification": "CI downloads exact immutable ref and independently hashes Git blob bytes prior to execution"
+  },
+  "implemented_files": [
+    "kyiv-air-alerts-grafana/tests/test_h2_monitor_main_pg18_e2e.py",
+    ".github/workflows/h2-monitor-main-pg18-e2e-2026-10-18.yml",
+    "research/h2_monitor_main_pg18_e2e_proof_2026-10-18.json"
+  ],
+  "main_invocation": "Import exact source module, patch its temporary fixture paths/sys.argv/UTC clock and external adapters, call mon.main() in --local-only mode; no copied main(), no SQL reader/writer mocks on positive path.",
+  "synthetic_inputs": {
+    "root": "fresh tempfile.TemporaryDirectory per fixture",
+    "files": [
+      "data/state.json",
+      "data/queue.json",
+      "data/last_run.json",
+      "data/baseline.json",
+      "data/bridge.json",
+      "data/kyiv.json",
+      "data/sevastopol.json",
+      "config/activation.json"
+    ],
+    "city": "kharkiv",
+    "episodes": "1 or 2 independently generated canonical IDs from actual monitor.make_episode()",
+    "coverage": "controlled synthetic persisted cached bridge and synthetic Kyiv/Sevastopol input",
+    "clock": "2026-01-01T04:21:00Z, advancing 1 day for follow-up",
+    "activation": {
+      "schema_version": 1,
+      "eligibility_field": "alert_end",
+      "boundary": "inclusive",
+      "activation_cutoff_utc": "2026-01-01T00:00:00Z"
+    },
+    "database": "fresh postgres:18 service on localhost; synthetic_only DSN; no production credentials",
+    "network": "requests.sessions.Session.request, urllib.request.urlopen, UkraineAlarmClient and poll_alerts fail immediately; controlled Google News/Telegram adapters return synthetic empty results; forbidden network call count zero"
+  },
+  "postgres_schema": "REDUCED_SYNTHETIC_SCHEMA; original writer DDL fixture extended minimally with ingestion_runs, alert_episodes run audit fields, uniqueness, parent foreign keys. Pinned unchanged site-prod phase1 SQL/transactions executed, not mocked. NOT proven equivalent to Neon.",
+  "cases": {
+    "M1": "main() commits first classification/source/event with real canonical parent insertion, authoritative snapshot and JSON checkpoints",
+    "M2": "identical main() restart no duplicate or extra writes",
+    "M3": "new 24-hour due check and additional synthetic evidence append valid successor revision, one current tip",
+    "M4": "snapshot observed on connection A, competitor real writer committed on independent connection B; unchanged original expected tip rejected with STALE_EXPECTED_TIP; no false checkpoint",
+    "M5": "unavailable PG connection rejects the monitor before successful checkpoint; no absence fabricated",
+    "M6": "synthetic search error means incomplete coverage, no classification persisted and saved due check remains pending",
+    "M7": "fault after first classification insert within real writer transaction rolls back classification/source/event; previously inserted parent is independently accounted",
+    "M8": "two episodes selected, first commit durable, second fails inside writer transaction; no false state/queue/report checkpoint",
+    "M9": "actual main() restart with unchanged temp files reconciles committed first episode idempotently, commits second without duplicate",
+    "M10": "subsequent main() exact restart and persisted JSON readback reconcile all two classifications and source/event/parent relationships",
+    "N1": "mutation control replaces canonical batch call with false success; independent persisted-file/database reconciliation detects missing classification",
+    "N2": "mutation control corrupts saved checked_at; saved-state tip-equivalence readback detects inconsistent checkpoint",
+    "N3": "mutation control creates a duplicate current tip in synthetic database; independent tip integrity readback catches duplication"
+  },
+  "expected_row_counts": {
+    "M1": {
+      "parents": 1,
+      "ingestion_runs": 1,
+      "classifications": 1,
+      "sources": 1,
+      "events": 1,
+      "current_tips": 1
+    },
+    "M3": {
+      "classifications": 2,
+      "current_tips": 1,
+      "revision_link": "second supersedes first"
+    },
+    "M8_after_failure": {
+      "parents": 2,
+      "classifications": 1,
+      "sources": 1,
+      "events": 1
+    },
+    "M9_after_restart": {
+      "parents": 2,
+      "classifications": 2,
+      "sources": 2,
+      "events": 2,
+      "current_tips": 2
+    }
+  },
+  "execution": {
+    "A": {
+      "run_id": 39121230968,
+      "job_id": 117657083097,
+      "head": "8f448862404803336e4ca8204b7261a320c4a6ed",
+      "conclusion": "success",
+      "artifact_id": 12133264983,
+      "artifact_size_bytes": 5128,
+      "artifact_expires_at": "2026-11-17T10:57:00Z"
+    },
+    "B": {
+      "run_id": 39121282275,
+      "job_id": 117657237939,
+      "head": "a39f2b738059d03b091fb35a2f37044236de1c50",
+      "conclusion": "success",
+      "artifact_id": 12134845420,
+      "artifact_size_bytes": 5125,
+      "artifact_expires_at": "2026-11-17T10:57:51Z"
+    },
+    "postgres_version": "18.6 (Debian 18.6-1.pgdg13+2)",
+    "results": "M1-M10 10/10 PASS; N1-N3 3/3 PASS per run; writer T1-T24 24/24 and 3 additional regressions per run; I1-I15 15/15 per run",
+    "source_blobs_equal_A_B": true,
+    "external_live_source_calls": 0,
+    "receipts": "Exact per-case JSON file SHA-256, parent/classification/source/event counts, CAS PID/tips and committed restart relationships in zipped /tmp/h2_monitor_main_report.json per independent run"
+  },
+  "safety": {
+    "neon_sql_operations": 0,
+    "neon_branches_created": 0,
+    "production_mutations": 0,
+    "main_mutations": 0,
+    "site_prod_mutations": 0,
+    "operational_wip_mutations": 0,
+    "ukrainealarm_api_requests": 0,
+    "live_publisher_requests": 0,
+    "live_google_news_requests": 0,
+    "live_telegram_requests": 0,
+    "production_cutover_executed": false
+  },
+  "limitations": [
+    "The SQL fixture remains reduced synthetic schema and does not establish canonical Neon DDL equivalence",
+    "External Google News and Telegram behavior is controlled and mocked; no real publisher-source availability proof",
+    "Synthetic first/restart/followup and multi-episode scenarios are not a full 5521-entry historical queue replay",
+    "State/queue/last-run hashes and row-level trace are in 30-day Actions artifacts; durable raw archive preservation remains a separate evidence-retention concern",
+    "No explicit lost-acknowledgement-after-commit full-main fault scenario; the accepted writer T regressions separately exercise uncertain commit",
+    "Negative controls cover writer bypass, malformed JSON and duplicate current tip, but do not directly mutate monitor to silently refresh a stale tip",
+    "No operational workflow or live cutover safety proof"
+  ],
+  "retained_gates": {
+    "UNBOUND_UNRESOLVED": 25,
+    "C4": "NOT PROVEN",
+    "C5": "NOT PROVEN",
+    "NEON_AUTHORITY_ACTIVE": "NO",
+    "PRODUCTION_CUTOVER_EXECUTED": "NO"
+  },
+  "next_task": "H2 CANONICAL NEON SCHEMA EQUIVALENCE AND DISPOSABLE APPLICATION INTEGRATION PREFLIGHT (requires separate authorization)"
+}
