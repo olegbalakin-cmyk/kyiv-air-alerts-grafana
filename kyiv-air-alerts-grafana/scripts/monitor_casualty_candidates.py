@@ -284,6 +284,9 @@ def poll_sevastopol() -> list[dict]:
 
 
 def poll_ukrainealarm() -> tuple[dict[str, list[dict]], dict[str, str]]:
+    # Explicitly block direct imports/calls as well as the CLI entry point.
+    # The production updater is the sole UkraineAlarm API collector.
+    raise RuntimeError("CASUALTY_UKRAINEALARM_API_DISABLED: use persisted production alerts")
     token = os.getenv(ua.TOKEN_ENV, "").strip()
     if not token:
         raise RuntimeError(f"{ua.TOKEN_ENV} is not configured")
@@ -330,6 +333,8 @@ def poll_ukrainealarm() -> tuple[dict[str, list[dict]], dict[str, str]]:
 
 
 def poll_all(local_only: bool) -> tuple[dict[str, list[dict]], dict[str, str]]:
+    if not local_only:
+        raise RuntimeError("CASUALTY_NETWORK_MODE_DISABLED: use --local-only")
     if local_only:
         return local_bridge_events(), {}
 
@@ -635,6 +640,10 @@ def main() -> None:
     if args.self_test:
         self_test()
         return
+
+    # Refuse omitted --local-only before reading or changing persisted state.
+    if not args.local_only:
+        parser.error("--local-only is required: casualty monitoring uses persisted production alerts")
 
     started = now_utc()
     state = ensure_state()
