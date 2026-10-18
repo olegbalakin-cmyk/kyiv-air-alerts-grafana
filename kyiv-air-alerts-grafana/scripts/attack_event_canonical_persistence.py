@@ -1073,7 +1073,11 @@ def persist_episode_classification(
         if fault_after == "source":
             raise RuntimeError("FORCED_PERSISTENCE_FAILURE_AFTER_SOURCE")
 
+        # The savepoint or nested transaction can finish before the owner commits.
+        # The result must never be interpreted as a durable ACK by outer callers.
+        transaction_commit_pending = conn.info.transaction_status == psycopg.pq.TransactionStatus.INTRANS
         return {
+            "commit_state": ("CALLER_TRANSACTION_PENDING" if transaction_commit_pending else "COMMITTED"),
             "classification_uid": classification_uid,
             "classification_key": record["classification_key"],
             "classification_inserted": classification_inserted,
@@ -1123,6 +1127,12 @@ def persist_due_episode_classifications(
     # An owned connection starts no implicit outer transaction. Each episode commits
     # on exit from persist_episode_classification's conn.transaction().
     conn = connection if connection is not None else psycopg.connect(str(dsn), autocommit=True)
+    # The batch API reports durable episode counters, so it cannot operate
+    # inside an already-open caller transaction whose commit may later fail.
+    if conn.info.transaction_status != psycopg.pq.TransactionStatus.IDLE:
+        if own_connection:
+            conn.close()
+        raise PersistenceContractError("CALLER_TRANSACTION_PENDING: durable ACK unavailable")
     try:
         for city_key in city_keys:
             city_due = due.get(city_key) or []
@@ -1143,6 +1153,8 @@ def persist_due_episode_classifications(
                     conn, record,
                     expected_current_tip=expected_tips[record["historical_episode_id"]],
                 )
+                if persisted["commit_state"] != "COMMITTED":
+                    raise PersistenceContractError("PERSISTENCE_ACK_BEFORE_COMMIT")
                 result["episodes_persisted"] += 1
                 result["classification_inserts"] += int(
                     persisted["classification_inserted"]
