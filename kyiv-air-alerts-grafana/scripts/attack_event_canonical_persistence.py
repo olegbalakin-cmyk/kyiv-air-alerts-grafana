@@ -1156,6 +1156,8 @@ def persist_due_episode_classifications(
             city_due = due.get(city_key) or []
             coverage_complete = bool(coverage_by_city.get(city_key))
             for episode, _check in city_due:
+                if str(episode.get("city_key") or "") != city_key:
+                    raise PersistenceContractError("PERSISTENCE_DUE_CITY_IDENTITY_MISMATCH")
                 result["episodes_considered"] += 1
                 if not coverage_complete:
                     result["episodes_skipped_incomplete_coverage"] += 1
