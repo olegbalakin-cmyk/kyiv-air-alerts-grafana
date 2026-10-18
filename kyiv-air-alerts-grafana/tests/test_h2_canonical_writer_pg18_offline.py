@@ -157,7 +157,7 @@ with conn() as c:
         global second
         second=writer.persist_episode_classification(c,r1,expected_current_tip=first["classification_uid"])
         assert second["revision_inserted"] and read(c)==(2,2,1)
-        assert c.execute("SELECT supersedes_classification_uid FROM attack_event_classifications WHERE classification_key=%s",(r1["classification_key"],)).fetchone()[0] == first["classification_uid"]
+        assert str(c.execute("SELECT supersedes_classification_uid FROM attack_event_classifications WHERE classification_key=%s",(r1["classification_key"],)).fetchone()[0]) == first["classification_uid"]
     check("T3",t3)
     check("T4",lambda: (expect_contract(lambda:writer.persist_episode_classification(c,r2,expected_current_tip=first["classification_uid"])),read(c)==(2,2,1) or (_ for _ in ()).throw(AssertionError("mutated"))))
     def t6():
