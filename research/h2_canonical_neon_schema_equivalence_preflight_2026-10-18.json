@@ -1,0 +1,201 @@
+{
+  "document_type": "H2_CANONICAL_NEON_SCHEMA_EQUIVALENCE_AND_DISPOSABLE_APP_PREFLIGHT",
+  "date_utc": "2026-10-18",
+  "verdicts": {
+    "H2_CANONICAL_NEON_SCHEMA_EQUIVALENCE": "NOT PROVEN",
+    "H2_DISPOSABLE_APPLICATION_INTEGRATION_PREFLIGHT": "BLOCKED",
+    "offline_exact_schema_test": "NOT_EXECUTED",
+    "evidence_retention": "PASS_SIX_SANITIZED_JSON_RECEIPTS_ARCHIVED"
+  },
+  "preflight": {
+    "repository": "olegbalakin-cmyk/kyiv-air-alerts-grafana",
+    "main": "f6706a6691d786df2f1056045389964139dc1018",
+    "site_prod": "41da789e61424c4f5b58d3b9fb8547ba98a194bf",
+    "operational_wip": "1a8b57553ba66319db326d65080ade93ae6ca01c",
+    "accepted_h2_research": "0413154609561ce713462cb2b6abf43fe80372b1",
+    "accepted_proof_blob": "901f90fb9f7a7ceb92e3b93f8fac6f93b7b1b2ef",
+    "accepted_proof_sha256": "49d62ab65a00bcc4ac4976e811f41f396b1646cc78e4cbb6c73e245f88c4f78f",
+    "actions_runs": [
+      39121230968,
+      39121282275,
+      39121401569
+    ],
+    "acceptance": "PASS_REDUCED_SYNTHETIC_PG18_ONLY"
+  },
+  "neon": {
+    "project_id": "green-cake-44216048",
+    "pg_version": 18,
+    "shadow_parent": {
+      "id": "br-bold-mode-b5rub8pq",
+      "name": "lviv-phase1-production-shadow-2026-09-28",
+      "parent_id": "br-young-feather-b5q19nli",
+      "current_state": "ready",
+      "primary": false,
+      "default": false,
+      "data_bearing": true
+    },
+    "database": "neondb",
+    "database_owner_role": "neondb_owner",
+    "schema_target_candidate": "public",
+    "schema_target_verified_by_catalog": false,
+    "branch_slots": {
+      "occupied": 9,
+      "limit": 10,
+      "remaining": 1
+    },
+    "existing_read_only_endpoint": {
+      "id": "ep-calm-rice-b5073ypp",
+      "type": "read_only",
+      "current_state": "idle",
+      "suspended_at": "2026-10-16T17:03:16Z",
+      "auto_wake_required_or_possible": true
+    },
+    "existing_read_write_endpoint": {
+      "id": "ep-still-violet-b5bg6mhp",
+      "current_state": "idle",
+      "suspended_at": "2026-10-18T05:00:32Z"
+    },
+    "previous_create_http_412": "suspend_timeout_seconds=60 modification disallowed on account; future branch requests must omit unsupported override",
+    "observed_live_catalog_objects": 0,
+    "neon_sql_calls": 0,
+    "neon_write_calls": 0,
+    "compute_wakes": 0,
+    "resource_creations": 0,
+    "settings_changes": 0
+  },
+  "scope": {
+    "git_application_sources": [
+      {
+        "file": "monitor_explosion_candidates.py",
+        "blob": "a94741aa3a65c18d7bffb846a2c26973564c7812"
+      },
+      {
+        "file": "live_parent_ordering.py",
+        "blob": "d43ee3573d78e70e4d9fa3559e81cf950799db0b"
+      },
+      {
+        "file": "attack_event_tip_snapshot.py",
+        "blob": "4e8890c88381fad5af3ecc4721ff435c0dd958f5"
+      },
+      {
+        "file": "attack_event_canonical_persistence.py",
+        "blob": "2a5354aa4ad2bc67893ffa40589024ecb84fa15e"
+      },
+      {
+        "file": "db_phase1_core.py",
+        "blob": "dda23c268e08f74367f33b189a8bafc1358aadd2"
+      },
+      {
+        "file": "db_phase1_persistence.py",
+        "blob": "ed014e61fc6186fa9daf91c763c847e7df2f0306"
+      }
+    ],
+    "matrix_path": "research/h2_canonical_neon_schema_equivalence_matrix_2026-10-18.json",
+    "matrix_rows": 213,
+    "required_column_rows": 180,
+    "constraint_policy_contract_rows": 33,
+    "matrix_match": 0,
+    "matrix_mismatch": 0,
+    "matrix_unverified": 213,
+    "distinct_dependencies": [
+      "public.alert_episodes",
+      "public.ingestion_runs",
+      "public.alert_episode_sources",
+      "public.ingestion_checkpoints",
+      "public.current_ingestion_checkpoints",
+      "public.attack_event_classifications",
+      "public.attack_event_sources",
+      "public.attack_events"
+    ],
+    "origin_of_declared_contract": "Application SQL, frozen pinned phase1 Python and reduced synthetic PG18 tests; NOT canonical Git SQL migrations; observed schema absent"
+  },
+  "frozen_evidence": {
+    "retention_manifest": "research/h2_monitor_main_pg18_e2e_AB_retention_manifest_2026-10-18.json",
+    "lossless_six_json_bundle": "research/h2_monitor_main_pg18_e2e_AB_receipts_2026-10-18.json.xz.b64",
+    "raw_member_count": 6,
+    "original_artifact_ids": [
+      12133264983,
+      12134845420
+    ],
+    "archive_original_zip_hashes": [
+      "5a89963dc518c69e61cf507f250d92041455253b1fce12f0c8764fa580e2a295",
+      "416e432fd2f18459b44dc11f7a8aba2ba92671683af19c34bb895c2001133148"
+    ],
+    "sanitization": "reviewed six JSON files; credential regex scan without hits; no production payloads"
+  },
+  "blocking_differences": [
+    {
+      "id": "B1",
+      "kind": "EVIDENCE_GAP",
+      "reason": "Actual target Neon public pg_catalog not inspected because both existing endpoints suspended/idle and any connector SQL access could activate compute, forbidden by explicit authorization.",
+      "action": "Request separate explicit bounded authorization to wake ONLY existing read-only endpoint ep-calm-rice-b5073ypp for catalog-only read-only transaction with 5s lock timeout and 15s statement timeout; no new resource."
+    },
+    {
+      "id": "B2",
+      "kind": "EVIDENCE_GAP",
+      "reason": "No canonical Neon DDL recovered; reduced fixture generates columns/types and weakens unknown production constraints.",
+      "action": "Compare live pg_catalog table/column/default/index/FK/triggers/policies/privileges with 213 provisional contract rows; reconcile missing/extra dependencies."
+    },
+    {
+      "id": "B3",
+      "kind": "READINESS_GAP",
+      "reason": "Cannot safely approve data-bearing disposable test before actual schema parity and role privileges are verified.",
+      "action": "After catalog pass, rebuild observed schema in clean PostgreSQL 18; run independent A/B exact fixture PG18 E2E. No synthetic data in Neon in this task."
+    }
+  ],
+  "compatibility_test": {
+    "status": "NOT_EXECUTED",
+    "why": "No observed Neon catalog DDL from target branch, so any PostgreSQL fixture would only repeat reduced synthetic test rather than real-schema equivalence.",
+    "previous_work": "Accepted PG18 reduced synthetic application E2E remains PASS, unchanged."
+  },
+  "future_disposable_plan": {
+    "ready": false,
+    "requires_separate_owner_authorization": true,
+    "parent": "br-bold-mode-b5rub8pq",
+    "parent_branch_is_data_bearing": true,
+    "parent_data_copy_caveat": "Neon child inherits snapshot of parent data; validate acceptable access controls and avoid historical rows entirely",
+    "database": "neondb",
+    "schema": "public candidate; verify before execution",
+    "branches_required": 1,
+    "computes_required": "At most one 0.25 CU read_write compute, only after verifying branch-slot availability and cost/configuration; omit suspend_timeout_seconds",
+    "current_slots": 1,
+    "synthetic_namespace": "h2_disposable_test_20261018_<unique_uuid> in city/episode identifiers; no production namespace",
+    "ttl_hours_max": 72,
+    "checks": [
+      "insert first classification",
+      "authoritative expected-tip snapshot",
+      "append-only revision",
+      "exact idempotent retry",
+      "stale CAS reject",
+      "two-session concurrency",
+      "fault rollback",
+      "parent source event FK integrity",
+      "actual main() caller",
+      "exact readback reconciliation",
+      "parent before/after no mutation",
+      "manual/automatic cleanup and independent absence proof"
+    ],
+    "minimum_permissions": "CREATE temporary disposable child and endpoint under separate authorization; SQL INSERT/SELECT/UPDATE for synthetic rows on child only, catalog access, no DELETE historical rows",
+    "cleanup": "Delete only exact newly created child/compute after receipts frozen; verify project inventory restored 9/10 and parent unchanged",
+    "cutover": "NOT AUTHORIZED"
+  },
+  "safety": {
+    "neon_sql_queries": 0,
+    "neon_mutations": 0,
+    "neon_resource_mutations": 0,
+    "production_mutations": 0,
+    "site_prod_mutations": 0,
+    "operational_wip_mutations": 0,
+    "main_mutations": 0,
+    "scheduled_workflows_started": 0
+  },
+  "retained_gates": {
+    "UNBOUND_UNRESOLVED": 25,
+    "C4": "NOT PROVEN",
+    "C5": "NOT PROVEN",
+    "NEON_AUTHORITY_ACTIVE": "NO",
+    "PRODUCTION_CUTOVER_EXECUTED": "NO",
+    "WIP_WORKFLOW_TRIGGER_PROMOTION": "BLOCKED"
+  },
+  "coordination": "No main PROJECT_STATE.md/CHANGELOG.md changes; research-only assessment awaits separate independent acceptance."
+}
