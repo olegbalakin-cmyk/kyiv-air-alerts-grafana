@@ -123,8 +123,9 @@ class LocalSourceGateTest(unittest.TestCase):
                 self.flush()
 
     def test_exact_twelve_hour_boundary(self):
-        self.data["bridge"]["last_successful_fetch_at"]=T
-        self.data["qa"]["effective_freshness"]["last_successful_fetch_at"]=T
+        boundary="2026-10-17T04:00:00Z"
+        self.data["bridge"]["last_successful_fetch_at"]=boundary
+        self.data["qa"]["effective_freshness"]["last_successful_fetch_at"]=boundary
         self.flush()
         self.assertTrue(self.check(NOW)["ok"])
         with self.assertRaises(SourceGateError):
