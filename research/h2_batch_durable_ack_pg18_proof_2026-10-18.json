@@ -1,0 +1,256 @@
+{
+  "document_type": "H2_BATCH_DURABLE_ACK_PG18_EXECUTION_PROOF",
+  "date_utc": "2026-10-18",
+  "verdict": "PASS_OFFLINE_BATCH_DURABLE_ACK_REDUCED_SCHEMA_ONLY",
+  "preflight": {
+    "main": "5edf71e3476e1236a103e98fc6938b5db2b108e0",
+    "site_prod": "41da789e61424c4f5b58d3b9fb8547ba98a194bf",
+    "operational_wip": "1a8b57553ba66319db326d65080ade93ae6ca01c",
+    "source_research_head": "a8606441a0983508984f3be2fefac8cc79ccde84",
+    "read": [
+      "main:PROJECT_STATE.md",
+      "main:CHANGELOG.md"
+    ],
+    "newer_accepted_durable_ack_checkpoint": false,
+    "operational_push_scope_verified": "Relevant active production and WIP workflows target main or multicity-wip; research workflow isolated to named proof branch"
+  },
+  "predecessor": {
+    "accepted_status": "H2 APPLICATION WRITER OFFLINE PG18 = PARTIAL — ACCEPTED (DIRECT APPLICATION WRITER TESTS / REDUCED SCHEMA ONLY)",
+    "proof_commit": "b6c76cbb9c0ba17b507dabe2b8b14673d5f448aa",
+    "proof_path": "research/h2_application_writer_pg18_offline_proof_2026-10-18.json",
+    "proof_git_blob": "1da7ba3fcb21fdcdabd3a89e75f202a3547168dc",
+    "proof_sha256": "fca20961ae7ee80e7f4ee1b4fa3af8db4570fa8b00e3c5af3951daa5be58608d",
+    "research_head": "a8606441a0983508984f3be2fefac8cc79ccde84",
+    "frozen_writer_blob": "b2655f47e0ce42c943287f10765a74911db5f16b",
+    "frozen_regression_test_blob": "c13292990b64721619042c4c87b114125771fc9e",
+    "accepted_runs": [
+      39107449714,
+      39107502472
+    ]
+  },
+  "pre_fix_reproduction": {
+    "isolated_code_commit": "95bde9006e8fa361d7e7d748ffb0e920b86f09ee",
+    "actions_run": 39109141893,
+    "job_id": 117621297024,
+    "artifact_id": 12129323904,
+    "postgres_version": "18.6",
+    "batch_function": "persist_due_episode_classifications",
+    "classifier": "build_episode_classification real",
+    "writer": "persist_episode_classification real, frozen unmodified",
+    "expected_error": "PERSISTENCE_ACK_BEFORE_COMMIT",
+    "observed_error": "PERSISTENCE_ACK_BEFORE_COMMIT",
+    "independent_new_connection_counts": {
+      "classifications": 1,
+      "sources": 1,
+      "events": 1
+    },
+    "relationship_pointer_equal": true,
+    "committed_despite_error": true,
+    "interpretation": "confirmed false failure ACK after committed write; not absence of durable persistence"
+  },
+  "repair": {
+    "commit": "35e4cab0683c2e869ff62713e7235dbe05a591ff",
+    "path": "kyiv-air-alerts-grafana/scripts/attack_event_canonical_persistence.py",
+    "git_blob": "ce21bfa5edea37cb2268cc561aa8ab73d7baeb11",
+    "change": "Sample caller-owned transaction state before entering conn.transaction(); execute all writes within transaction; return result payload only after exiting transaction context; only then label owned success COMMITTED or caller-owned outer transaction CALLER_TRANSACTION_PENDING.",
+    "owned_commit": "COMMITTED only after successful conn.transaction() exit",
+    "caller_owned": "CALLER_TRANSACTION_PENDING; nested savepoint does not commit outer transaction",
+    "failure": "commit or SQL failure raises without successful ACK",
+    "cas_expected_tip": "caller supplied; no implicit lookup",
+    "scope_preserved": [
+      "advisory lock",
+      "append-only supersession",
+      "deterministic key",
+      "historical frozen protection",
+      "per-episode transaction"
+    ]
+  },
+  "tests": {
+    "path": "kyiv-air-alerts-grafana/tests/test_h2_canonical_writer_pg18_offline.py",
+    "git_blob": "9f05fa9849b33dfc9a0626b10f7b168fbb80c96e",
+    "suite": [
+      "T1",
+      "T2",
+      "T3",
+      "T4",
+      "T5",
+      "T6",
+      "T7",
+      "T8",
+      "T9",
+      "T10",
+      "T11",
+      "T12",
+      "T13",
+      "T14",
+      "T15",
+      "T16",
+      "T17",
+      "T18",
+      "T19",
+      "T20",
+      "T21",
+      "T22",
+      "T23",
+      "T24",
+      "MULTI_EPISODE_PARTIAL_COMMIT",
+      "REAL_SERVER_DEFERRED_COMMIT_FAILURE",
+      "NEGATIVE_EARLY_ACK"
+    ],
+    "verdict_each": "PASS in both final runs",
+    "positive_batch": {
+      "new_classification": 1,
+      "new_source": 1,
+      "new_event": 1,
+      "independent_readback": [
+        1,
+        1,
+        1
+      ]
+    },
+    "exact_retry": {
+      "new_mutations": 0,
+      "independent_readback": [
+        1,
+        1,
+        1
+      ]
+    },
+    "revision": {
+      "old_revision_preserved": true,
+      "new_tip_updated": true,
+      "rows_after": [
+        2,
+        2,
+        1
+      ]
+    },
+    "stale_expected_tip": {
+      "rejected": true,
+      "additional_mutations": 0
+    },
+    "transaction_rollback": {
+      "after_classification": true,
+      "after_event_or_source": true,
+      "outer_caller_abort": true
+    },
+    "missing_configuration_or_expected_tip": {
+      "fail_closed": true,
+      "no_writes": true
+    },
+    "t23_injected_ack_response_loss": {
+      "ack_state": "NO_FALSE_COMMITTED",
+      "server_outcome": "UNCERTAIN",
+      "second_connection_rows": [
+        1,
+        1,
+        1
+      ]
+    },
+    "actual_server_deferred_commit_failure": {
+      "ack_state": "NO_FALSE_COMMITTED",
+      "server_rollback_confirmed": true,
+      "independent_readback": [
+        0,
+        0,
+        0
+      ]
+    },
+    "multi_episode": {
+      "earlier_episode_durable_after_later_error": true,
+      "overall_batch_does_not_return_success": true,
+      "successful_retry_with_explicit_all_tips": true,
+      "readback_after_retry": [
+        2,
+        2,
+        2
+      ],
+      "whole_batch_atomicity": false
+    },
+    "negative_regression_control": {
+      "method": "in-memory faulty early pending ACK wrapper reproducing original error semantics; predecessor itself independently exercised in pre-fix run",
+      "defective_batch_raises": "PERSISTENCE_ACK_BEFORE_COMMIT",
+      "independent_rows_still_committed": [
+        1,
+        1,
+        1
+      ],
+      "fixed_batch_passes": true
+    }
+  },
+  "independent_runs": [
+    {
+      "label": "A",
+      "run_id": 39109332963,
+      "job_id": 117621864805,
+      "artifact_id": 12129442445,
+      "tested_commit": "91f6969dea3f724640f5d4b7a09d57b7d38241c6",
+      "status": "SUCCESS",
+      "pg_version": "18.6",
+      "all_27_test_keys": "PASS",
+      "writer_blob": "ce21bfa5edea37cb2268cc561aa8ab73d7baeb11",
+      "test_blob": "9f05fa9849b33dfc9a0626b10f7b168fbb80c96e"
+    },
+    {
+      "label": "B",
+      "run_id": 39109376403,
+      "job_id": 117621994217,
+      "artifact_id": 12129936650,
+      "tested_commit": "62713d467f2c633402866874878171cbe18a7a1d",
+      "status": "SUCCESS",
+      "pg_version": "18.6",
+      "all_27_test_keys": "PASS",
+      "writer_blob": "ce21bfa5edea37cb2268cc561aa8ab73d7baeb11",
+      "test_blob": "9f05fa9849b33dfc9a0626b10f7b168fbb80c96e"
+    }
+  ],
+  "workflow": {
+    "path": ".github/workflows/h2-batch-durable-ack-pg18.yml",
+    "git_blob": "c20bd0e09df13246aa41b91b0ab62b386da034b7",
+    "trigger": "push on isolated research branch only",
+    "resources": "fresh GitHub Actions postgres:18 per run",
+    "credentials": "synthetic only",
+    "external_live_source_calls": 0
+  },
+  "normalization_reconciliation": {
+    "difference_allowed": [
+      "UUIDs",
+      "backend PID",
+      "timestamps"
+    ],
+    "both_runs_match_on": [
+      "27 test verdicts",
+      "PostgreSQL 18.6 version",
+      "classification/source/event counts",
+      "revision relationships",
+      "expected tip / idempotency",
+      "commit failure behavior",
+      "multi episode partial commit",
+      "negative control"
+    ],
+    "verdict": "MATCH"
+  },
+  "remaining_limits": {
+    "CANONICAL_NEON_SCHEMA_EQUIVALENCE": "NOT PROVEN",
+    "CANONICAL_NEON_INTEGRATION": "NOT PERFORMED",
+    "OPERATIONAL_EXPECTED_TIP_AUTHORITY": "NOT PROVEN",
+    "OPERATIONAL_CALLER_INTEGRATION": "NOT PROVEN",
+    "H2_HISTORICAL_CORRECTION_API": "NOT IMPLEMENTED",
+    "EXACT_AUTOMATED_PROOF_JSON_SHA256_RECEIPT": "PENDING_SEPARATE_HASH_RECEIPT"
+  },
+  "safety": {
+    "NEON_SQL_OPERATIONS": 0,
+    "NEON_BRANCH_OPERATIONS": 0,
+    "PRODUCTION_MODIFICATIONS": 0,
+    "SITE_PROD_MODIFICATIONS": 0,
+    "OPERATIONAL_WIP_MODIFICATIONS": 0,
+    "HISTORICAL_H1_H2_BACKFILLS": 0,
+    "CASUALTY_MODIFICATIONS": 0,
+    "UNBOUND_UNRESOLVED": 25,
+    "C4": "NOT PROVEN",
+    "C5": "NOT PROVEN",
+    "NEON_AUTHORITY_ACTIVE": "NO",
+    "PRODUCTION_CUTOVER_EXECUTED": "NO"
+  },
+  "next_gate": "INDEPENDENT ACCEPTANCE OF THIS OFFLINE PROOF, THEN H2 OPERATIONAL EXPECTED-TIP AUTHORITY AND CALLER INTEGRATION"
+}
