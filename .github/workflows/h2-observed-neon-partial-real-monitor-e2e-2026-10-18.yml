@@ -1,0 +1,134 @@
+name: H2 observed partial Neon schema real monitor offline PG18 E2E
+on:
+  push:
+    branches: [research-h2-observed-neon-partial-schema-monitor-e2e-2026-10-18]
+    paths:
+      - 'kyiv-air-alerts-grafana/tests/test_h2_observed_neon_partial_pg18_e2e.py'
+      - '.github/workflows/h2-observed-neon-partial-real-monitor-e2e-2026-10-18.yml'
+      - 'research/h2_observed_neon_partial_schema_monitor_e2e_proof_2026-10-18.json'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  isolated-real-monitor:
+    name: Frozen observed partial PG18 ${{ matrix.copy }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    strategy:
+      fail-fast: false
+      matrix:
+        copy: [A, B]
+    services:
+      postgres:
+        image: postgres:18
+        env:
+          POSTGRES_DB: h2_seed
+          POSTGRES_USER: h2_local
+          POSTGRES_PASSWORD: synthetic_only
+        ports: [5432:5432]
+        options: >-
+          --health-cmd "pg_isready -U h2_local -d h2_seed"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 15
+    env:
+      H2_OFFLINE_POSTGRES_DSN: postgresql://h2_local:synthetic_only@127.0.0.1:5432/h2_legacy
+      H2_OBSERVED_POSTGRES_DSN: postgresql://h2_local:synthetic_only@127.0.0.1:5432/h2_observed
+      ATTACK_EVENT_DATABASE_URL: postgresql://h2_local:synthetic_only@127.0.0.1:5432/h2_legacy
+      ATTACK_EVENT_ORIGIN_COMMIT_SHA: ffffffffffffffffffffffffffffffffffffffff
+      ATTACK_EVENT_ORIGIN_REF: synthetic-pg18
+      CANONICAL_PARENT_DB_BRANCH: synthetic-offline
+      CANONICAL_PARENT_CONTRACT_DIR: /tmp/h2-parent-contract
+      H2_MAIN_OUTPUT: /tmp/h2_legacy_main_report.json
+      H2_CALLER_OUTPUT: /tmp/h2_legacy_caller_report.json
+      H2_OBSERVED_REPORT: /tmp/h2_observed_result.json
+      H2_TEST_PHASE: post_fix
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Verify exact frozen source and fixture blobs
+        run: |
+          python - <<'PY'
+          import hashlib
+          from pathlib import Path
+          pinned={
+            'kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py':'a94741aa3a65c18d7bffb846a2c26973564c7812',
+            'kyiv-air-alerts-grafana/scripts/attack_event_canonical_persistence.py':'2a5354aa4ad2bc67893ffa40589024ecb84fa15e',
+            'kyiv-air-alerts-grafana/scripts/attack_event_tip_snapshot.py':'4e8890c88381fad5af3ecc4721ff435c0dd958f5',
+            'kyiv-air-alerts-grafana/scripts/live_parent_ordering.py':'d43ee3573d78e70e4d9fa3559e81cf950799db0b',
+            'research/h2_neon_catalog_reconciliation_2026-10-18/neon_observed_partial_schema_fixture_v1.sql':'09f9c5a2f0c4eeddaba63e7c9c5834cce85f7ab3',
+            'research/h2_neon_catalog_reconciliation_2026-10-18/neon_catalog_verified.json':'60246ffa7a436eef830592c7999c9e7dc3941123',
+            'research/h2_neon_catalog_reconciliation_2026-10-18/equivalence_matrix_v4_static_closure_2026-10-18.json':'87123b0d7f0fe4c93a442be29dd37b9eea960953'
+          }
+          for path,expected in pinned.items():
+            raw=Path(path).read_bytes()
+            actual=hashlib.sha1(('blob '+str(len(raw))+'\0').encode()+raw).hexdigest()
+            assert actual==expected,(path,actual,expected)
+            print('PINNED_BLOB',path,actual)
+          PY
+      - name: Install offline test dependencies and separate databases
+        run: |
+          python -m pip install "psycopg[binary]==3.2.12" requests beautifulsoup4
+          docker run --rm --network host -e PGPASSWORD=synthetic_only postgres:18 \
+            psql -X -v ON_ERROR_STOP=1 -h 127.0.0.1 -U h2_local -d h2_seed \
+            -c 'CREATE DATABASE h2_legacy' -c 'CREATE DATABASE h2_observed'
+      - name: Retrieve and verify accepted pinned GitHub parent code
+        run: |
+          mkdir -p /tmp/h2-parent-contract
+          curl --fail --location --silent --show-error \
+            https://raw.githubusercontent.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/41da789e61424c4f5b58d3b9fb8547ba98a194bf/kyiv-air-alerts-grafana/scripts/db_phase1_core.py \
+            -o /tmp/h2-parent-contract/db_phase1_core.py
+          curl --fail --location --silent --show-error \
+            https://raw.githubusercontent.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/41da789e61424c4f5b58d3b9fb8547ba98a194bf/kyiv-air-alerts-grafana/scripts/db_phase1_persistence.py \
+            -o /tmp/h2-parent-contract/db_phase1_persistence.py
+          python - <<'PY'
+          import hashlib
+          from pathlib import Path
+          for name,expected in [
+            ('db_phase1_core.py','dda23c268e08f74367f33b189a8bafc1358aadd2'),
+            ('db_phase1_persistence.py','ed014e61fc6186fa9daf91c763c847e7df2f0306')]:
+            raw=(Path('/tmp/h2-parent-contract')/name).read_bytes()
+            actual=hashlib.sha1(('blob '+str(len(raw))+'\0').encode()+raw).hexdigest()
+            assert actual==expected,(name,actual,expected)
+            print('PINNED_PARENT',name,actual)
+          PY
+      - name: Legacy accepted M N T I regressions ONLY in h2_legacy
+        run: |
+          python kyiv-air-alerts-grafana/tests/test_h2_monitor_main_pg18_e2e.py
+          python kyiv-air-alerts-grafana/tests/test_h2_operational_expected_tip_pg18.py
+      - name: Observed-partial Neon fixture E1-E15 ONLY in h2_observed
+        run: python kyiv-air-alerts-grafana/tests/test_h2_observed_neon_partial_pg18_e2e.py
+      - name: Independent persisted JSON readback
+        if: always()
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          for name in ['/tmp/h2_legacy_main_report.json','/tmp/h2_legacy_caller_report.json','/tmp/h2_observed_result.json']:
+            p=Path(name)
+            if not p.exists():
+              print('MISSING_REPORT',name)
+              continue
+            v=json.loads(p.read_bytes())
+            print('READBACK',name,'VERDICT',v.get('verdict'),'BYTES',p.stat().st_size)
+            if 'schema_fingerprints' in v:
+              print('STRUCTURES',len(v['schema_fingerprints']),
+                    'FINGERPRINT',v['structural_fingerprint'],
+                    'CASES',{k:x['status'] for k,x in v['cases'].items()})
+          PY
+      - name: Upload sanitized independent proof
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: h2-observed-neon-partial-pg18-${{ matrix.copy }}
+          path: |
+            /tmp/h2_legacy_main_report.json
+            /tmp/h2_legacy_caller_report.json
+            /tmp/h2_observed_result.json
+          if-no-files-found: warn
+          retention-days: 30
