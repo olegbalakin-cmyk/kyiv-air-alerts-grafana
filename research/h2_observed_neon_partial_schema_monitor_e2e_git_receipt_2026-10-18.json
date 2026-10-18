@@ -1,0 +1,53 @@
+{
+  "document_type": "H2_OBSERVED_PARTIAL_SCHEMA_MONITOR_E2E_INDEPENDENT_GIT_RECEIPT",
+  "date": "2026-10-18",
+  "base_commit": "e82134d0961dd027f591ced942cc42616ce36a2c",
+  "tested_commit": "17d5573778b1c06b120620d8630538db469663f7",
+  "actions_run_id": 39166480370,
+  "run_status": "SUCCESS",
+  "two_jobs_one_run": true,
+  "jobs": [
+    {
+      "job_id": 117790372462,
+      "status": "SUCCESS",
+      "artifact_id": 12151185495,
+      "zip_sha256": "e40ff3782adc48cf5bbc9f27a5cff61ac6506080f80a4ebf2ac3bbe13b16607b"
+    },
+    {
+      "job_id": 117790372638,
+      "status": "SUCCESS",
+      "artifact_id": 12151220377,
+      "zip_sha256": "947994a1aae4eff5e9f068e03782a62a34143c57be8c34f37d48f29732a59685"
+    }
+  ],
+  "verified_git_blobs": {
+    "kyiv-air-alerts-grafana/tests/test_h2_observed_neon_partial_pg18_e2e.py": "84bc34af899ddf0152a034050e9a2d2a6f4f53dd",
+    ".github/workflows/h2-observed-neon-partial-real-monitor-e2e-2026-10-18.yml": "33f9094b8365484322583ff0831ab640f2960540",
+    "research/h2_observed_neon_partial_schema_monitor_e2e_proof_2026-10-18.json": "79ded2bfe65a58a5eb856f48c2526607d0b254e7",
+    "research/h2_neon_schema_contract_matrix_v5_runtime_2026-10-18.json": "810fa36d0064888587ec88a0ab1380b6ef7e2a1e"
+  },
+  "fixture_git_blob": "09f9c5a2f0c4eeddaba63e7c9c5834cce85f7ab3",
+  "schema_fingerprint": "089938b20ac7b61f3b67c3e371c50c22b592b83f5ec713682e9f4082c4407b30",
+  "contract_counts": {
+    "match": 203,
+    "mismatch": 3,
+    "unverified": 7
+  },
+  "observed_monitor": "E1-E15 PASS on synthetic local PG18 observed-partial fixture only",
+  "negative_controls_partial": [
+    "bypass writer detected",
+    "false JSON checkpoint detected",
+    "SQL orphan source rejected",
+    "DB-only sibling and owner-update bypass demonstrated"
+  ],
+  "not_fully_proven": [
+    "full observed Neon schema",
+    "Neon role permissions/view semantics",
+    "specific stale-CAS-bypass and duplicate-on-restart mutation controls",
+    "two separate Actions runs",
+    "production cutover",
+    "disposable Neon integration"
+  ],
+  "safety": "No Neon SQL, operational repo mutation or production deployment",
+  "acceptance_note": "Bounded observed partial-schema application E2E execution passed in two matrix jobs. Formal unconditional acceptance should not be overstated until remaining negative-control coverage and Neon metadata are independently reviewed."
+}
