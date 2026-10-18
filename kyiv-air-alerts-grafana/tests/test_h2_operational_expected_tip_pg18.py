@@ -152,7 +152,7 @@ def i13():
     reset()
     d=due();sn=read_due(d)
     bad={**d,"wrong":[(dict(d["testcity"][0][0]),dict(d["testcity"][0][1]))]}
-    fails(lambda:batch(bad,sn),"EXPECTED_TIP_SNAPSHOT_IDENTITY_MISSING")
+    fails(lambda:batch(bad,sn),"PERSISTENCE_DUE_CITY_IDENTITY_MISMATCH")
     assert state()==(1,1,1)
 check("I13",i13)
 def i14():
