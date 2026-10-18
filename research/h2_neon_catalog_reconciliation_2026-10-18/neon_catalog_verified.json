@@ -1,0 +1,3518 @@
+{
+  "document_type": "H2_CANONICAL_NEON_LIVE_CATALOG_SANITIZED_2026_10_18",
+  "source": {
+    "project": "green-cake-44216048",
+    "branch": "br-bold-mode-b5rub8pq",
+    "database": "neondb",
+    "read_only_compute": "ep-calm-rice-b5073ypp"
+  },
+  "transaction": {
+    "read_only": true,
+    "statement_timeout": "15s",
+    "lock_timeout": "5s",
+    "metadata_only": true
+  },
+  "query": "SELECT jsonb_build_object(\n'identity', jsonb_build_object('database',current_database(),'read_only',current_setting('transaction_read_only'),'version',current_setting('server_version'),'role',current_user),\n'objects',(SELECT coalesce(jsonb_agg(jsonb_build_object('name',c.relname,'kind',c.relkind,'rls',c.relrowsecurity,'force_rls',c.relforcerowsecurity,'owner',pg_get_userbyid(c.relowner)) ORDER BY c.relname),'[]'::jsonb) FROM pg_catalog.pg_class c JOIN pg_catalog.pg_namespace n ON n.oid=c.relnamespace WHERE n.nspname='public' AND c.relname IN ('alert_episodes','ingestion_runs','alert_episode_sources','ingestion_checkpoints','current_ingestion_checkpoints','attack_event_classifications','attack_event_sources','attack_events')),\n'columns',(SELECT coalesce(jsonb_agg(jsonb_build_object('table',c.relname,'name',a.attname,'type',pg_catalog.format_type(a.atttypid,a.atttypmod),'nullable',NOT a.attnotnull,'default',pg_catalog.pg_get_expr(d.adbin,d.adrelid),'identity',a.attidentity,'generated',a.attgenerated) ORDER BY c.relname,a.attnum),'[]'::jsonb) FROM pg_catalog.pg_attribute a JOIN pg_catalog.pg_class c ON c.oid=a.attrelid JOIN pg_catalog.pg_namespace n ON n.oid=c.relnamespace LEFT JOIN pg_catalog.pg_attrdef d ON d.adrelid=a.attrelid AND d.adnum=a.attnum WHERE n.nspname='public' AND c.relname IN ('alert_episodes','ingestion_runs','alert_episode_sources','ingestion_checkpoints','current_ingestion_checkpoints','attack_event_classifications','attack_event_sources','attack_events') AND a.attnum>0 AND NOT a.attisdropped),\n'constraints',(SELECT coalesce(jsonb_agg(jsonb_build_object('table',c.relname,'name',co.conname,'type',co.contype,'def',pg_catalog.pg_get_constraintdef(co.oid,true),'deferred',co.condeferrable) ORDER BY c.relname,co.conname),'[]'::jsonb) FROM pg_catalog.pg_constraint co JOIN pg_catalog.pg_class c ON c.oid=co.conrelid JOIN pg_catalog.pg_namespace n ON n.oid=c.relnamespace WHERE n.nspname='public' AND c.relname IN ('alert_episodes','ingestion_runs','alert_episode_sources','ingestion_checkpoints','current_ingestion_checkpoints','attack_event_classifications','attack_event_sources','attack_events')),\n'indexes',(SELECT coalesce(jsonb_agg(jsonb_build_object('table',t.relname,'name',i.relname,'unique',x.indisunique,'primary',x.indisprimary,'def',pg_catalog.pg_get_indexdef(i.oid)) ORDER BY t.relname,i.relname),'[]'::jsonb) FROM pg_catalog.pg_index x JOIN pg_catalog.pg_class t ON t.oid=x.indrelid JOIN pg_catalog.pg_class i ON i.oid=x.indexrelid JOIN pg_catalog.pg_namespace n ON n.oid=t.relnamespace WHERE n.nspname='public' AND t.relname IN ('alert_episodes','ingestion_runs','alert_episode_sources','ingestion_checkpoints','current_ingestion_checkpoints','attack_event_classifications','attack_event_sources','attack_events')),\n'triggers',(SELECT coalesce(jsonb_agg(jsonb_build_object('table',c.relname,'name',t.tgname,'enabled',t.tgenabled,'def',pg_catalog.pg_get_triggerdef(t.oid,true),'function',nf.nspname||'.'||f.proname) ORDER BY c.relname,t.tgname),'[]'::jsonb) FROM pg_catalog.pg_trigger t JOIN pg_catalog.pg_class c ON c.oid=t.tgrelid JOIN pg_catalog.pg_namespace n ON n.oid=c.relnamespace JOIN pg_catalog.pg_proc f ON f.oid=t.tgfoid JOIN pg_catalog.pg_namespace nf ON nf.oid=f.pronamespace WHERE n.nspname='public' AND NOT t.tgisinternal AND c.relname IN ('alert_episodes','ingestion_runs','alert_episode_sources','ingestion_checkpoints','current_ingestion_checkpoints','attack_event_classifications','attack_event_sources','attack_events')),\n'policies',(SELECT coalesce(jsonb_agg(jsonb_build_object('table',tablename,'policy',policyname,'cmd',cmd,'qual',qual,'check',with_check)),'[]'::jsonb) FROM pg_catalog.pg_policies WHERE schemaname='public' AND tablename IN ('alert_episodes','ingestion_runs','alert_episode_sources','ingestion_checkpoints','current_ingestion_checkpoints','attack_event_classifications','attack_event_sources','attack_events')),\n'extensions',(SELECT coalesce(jsonb_agg(jsonb_build_object('name',extname,'version',extversion) ORDER BY extname),'[]'::jsonb) FROM pg_catalog.pg_extension)\n) AS inventory",
+  "catalog": {
+    "columns": [
+      {
+        "name": "source_observation_id",
+        "type": "uuid",
+        "table": "alert_episode_sources",
+        "default": "gen_random_uuid()",
+        "identity": "",
+        "nullable": false,
+        "generated": ""
+      },
+      {
+        "name": "episode_uid",
+        "type": "uuid",
+        "table": "alert_episode_sources",
+        "default": null,
+        "identity": "",
+        "nullable": true,
+        "generated": ""
+      },
+      {
+        "name": "source_key",
+        "type": "text",
+        "table": "alert_episode_sources",
+        "default": null,
+        "identity": "",
+        "nullable": false,
+        "generated": ""
+      },
+      {
+        "name": "source_record_key_version",
+        "type": "text",
+        "table": "alert_episode_sources",
+        "default": null,
+        "identity": "",
+        "nullable": false,
+        "generated": ""
+      },
+      {
+        "name": "source_record_key",
+        "type": "text",
+        "table": "alert_episode_sources",
+        "default": null,
+        "identity": "",
+        "nullable": false,
+        "generated": ""
+      },
+      {
+        "name": "source_native_id",
+        "type": "text",
+        "table": "alert_episode_sources",
+        "default": null,
+        "identity": "",
+        "nullable": true,
+        "generated": ""
+      },
+      {
+        "name": "city_key",
+        "type": "text",
+        "table": "alert_episode_sources",
+        "default": null,
+        "identity": "",
+        "nullable": false,
+        "generated": ""
+      },
+      {
+        "name": "alert_type",
+        "type": "text",
+        "table": "alert_episode_sources",
+        "default": null,
+        "identity": "",
+        "nullable": false,
+        "generated": ""
+      },
+      {
+        "name": "source_start_at",
+        "type": "timestamp with time zone",
+        "table": "alert_episode_sources",
+        "default": null,
+        "identity": "",
+        "nullable": false,
+        "generated": ""
+      },
+      {
+        "name": "source_end_at",
+        "type": "timestamp with time zone",
+        "table": "alert_episode_sources",
+        "default": null,
+        "identity": "",
+        "nullable": true,
+        "generated": ""
+      },
+      {
+        "name": "source_retrieved_at",
+        "type": "timestamp with time zone",
+        "table": "alert_episode_sources",
+        "default": null,
+        "identity": "",
+        "nullable": true,
+        "generated": ""
+      },
+      {
+        "name": "binding_state",
+        "type": "text",
+        "table": "alert_episode_sources",
+        "default": null,
+        "identity": "",
+        "nullable": false,
+        "generated": ""
+      },
+      {
+        "name": "canonicalization_role",
+        "type": "text",
+        "table": "alert_episode_sources",
+        "default": null,
+        "identity": "",
+        "nullable": false,
+        "generated": ""
+      },
+      {
+        "name": "duplicate_of_observation_id",
+        "type": "uuid",
+        "table": "alert_episode_sources",
+        "default": null,
+        "identity": "",
+        "nullable": true,
+        "generated": ""
+      },
+      {
+        "name": "match_method",
+        "type": "text",
+        "table": "alert_episode_sources",
+        "default": null,
+        "identity": "",
+        "nullable": true,
+        "generated": ""
+      },
+      {
+        "name": "start_delta_ms",
+        "type": "integer",
+        "table": "alert_episode_sources",
+        "default": null,
+        "identity": "",
+        "nullable": true,
+        "generated": ""
+      },
+      {
+        "name": "end_delta_ms",
+        "type": "integer",
+        "table": "alert_episode_sources",
+        "default": null,
+        "identity": "",
+        "nullable": true,
+        "generated": ""
+      },
+      {
+        "name": "contributes_start_boundary",
+        "type": "boolean",
+        "table": "alert_episode_sources",
+        "default": "false",
+        "identity": "",
+        "nullable": false,
+        "generated": ""
+      },
+      {
+        "name": "contributes_end_boundary",
+        "type": "boolean",
+        "table": "alert_episode_sources",
+        "default": "false",
+        "identity": "",
+        "nullable": false,
+        "generated": ""
+      },
+      {
+        "name": "raw_sha256",
+        "type": "text",
+        "table": "alert_episode_sources",
+        "default": null,
+        "identity": "",
+        "nullable": true,
+        "generated": ""
+      },
+      {
+        "name": "raw_object_path",
+        "type": "text",
+        "table": "alert_episode_sources",
+        "default": null,
+        "identity": "",
+        "nullable": true,
+        "generated": ""
+      },
+      {
+        "name": "provenance",
+        "type": "jsonb",
+        "table": "alert_episode_sources",
+        "default": "'{}'::jsonb",
+        "identity": "",
+        "nullable": false,
+        "generated": ""
+      },
+      {
+        "name": "first_persisted_by_run_id",
+        "type": "uuid",
+        "table": "alert_episode_sources",
+        "default": null,
+        "identity": "",
+        "nullable": false,
+        "generated": ""
+      },
+      {
+        "name": "last_seen_by_run_id",
+        "type": "uuid",
+        "table": "alert_episode_sources",
+        "default": null,
+        "identity": "",
+        "nullable": false,
+        "generated": ""
+      },
+      {
+        "name": "first_persisted_at",
+        "type": "timestamp with time zone",
+        "table": "alert_episode_sources",
+        "default": "now()",
+        "identity": "",
+        "nullable": false,
+        "generated": ""
+      },
+      {
+        "name": "last_seen_at",
+        "type": "timestamp with time zone",
+        "table": "alert_episode_sources",
+        "default": "now()",
+        "identity": "",
+        "nullable": false,
+        "generated": ""
+      },
+      {
+        "name": "episode_uid",
+        "type": "uuid",
+        "table": "alert_episodes",
+        "default": "gen_random_uuid()",
+        "identity": "",
+        "nullable": false,
+        "generated": ""
+      },
+      {
+        "name": "legacy_episode_id",
+        "type": "text",
+        "table": "alert_episodes",
+        "default": null,
+        "identity": "",
+        "nullable": true,
+        "generated": ""
+      },
+      {
+        "name": "city_key",
+        "type": "text",
+        "table": "alert_episodes",
+        "default": null,
+        "identity": "",
+        "nullable": false,
+        "generated": ""
+      },
+      {
+        "name": "alert_type",
+        "type": "text",
+        "table": "alert_episodes",
+        "default": null,
+        "identity": "",
+        "nullable": false,
+        "generated": ""
+      },
+      {
+        "name": "start_at",
+        "type": "timestamp with time zone",
+        "table": "alert_episodes",
+        "default": null,
+        "identity": "",
+        "nullable": false,
+        "generated": ""
+      },
+      {
+        "name": "end_at",
+        "type": "timestamp with time zone",
+        "table": "alert_episodes",
+        "default": null,
+        "identity": "",
+        "nullable": true,
+        "generated": ""
+      },
+      {
+        "name": "episode_state",
+        "type": "text",
+        "table": "alert_episodes",
+        "default": null,
+        "identity": "",
+        "nullable": false,
+        "generated": ""
+      },
+      {
+        "name": "canonicalization_version",
+        "type": "text",
+        "table": "alert_episodes",
+        "default": null,
+        "identity": "",
+        "nullable": false,
+        "generated": ""
+      },
+      {
+        "name": "created_by_run_id",
+        "type": "uuid",
+        "table": "alert_episodes",
+        "default": null,
+        "identity": "",
+        "nullable": false,
+        "generated": ""
+      },
+      {
+        "name": "updated_by_run_id",
+        "type": "uuid",
+        "table": "alert_episodes",
+        "default": null,
+        "identity": "",
+        "nullable": false,
+        "generated": ""
+      },
+      {
+        "name": "created_at",
+        "type": "timestamp with time zone",
+        "table": "alert_episodes",
+        "default": "now()",
+        "identity": "",
+        "nullable": false,
+        "generated": ""
+      },
+      {
+        "name": "updated_at",
+        "type": "timestamp with time zone",
+        "table": "alert_episodes",
+        "default": "now()",
+        "identity": "",
+        "nullable": false,
+        "generated": ""
+      },
+      {
+        "name": "classification_uid",
+        "type": "uuid",
+        "table": "attack_event_classifications",
+        "default": "gen_random_uuid()",
+        "identity": "",
+        "nullable": false,
+        "generated": ""
+      },
+      {
+        "name": "classification_key_version",
+        "type": "text",
+        "table": "attack_event_classifications",
+        "default": null,
+        "identity": "",
+        "nullable": false,
+        "generated": ""
+      },
+      {
+        "name": "classification_key",
+        "type": "text",
+        "table": "attack_event_classifications",
+        "default": null,
+        "identity": "",
+        "nullable": false,
+        "generated": ""
+      },
+      {
+        "name": "historical_episode_id",
+        "type": "text",
+        "table": "attack_event_classifications",
+        "default": null,
+        "identity": "",
+        "nullable": false,
+        "generated": ""
+      },
+      {
+        "name": "city_key",
+        "type": "text",
+        "table": "attack_event_classifications",
+        "default": null,
+        "identity": "",
+        "nullable": false,
+        "generated": ""
+      },
+      {
+        "name": "alert_type",
+        "type": "text",
+        "table": "attack_event_classifications",
+        "default": "'AIR'::text",
+        "identity": "",
+        "nullable": false,
+        "generated": ""
+      },
+      {
+        "name": "alert_start_at",
+        "type": "timestamp with time zone",
+        "table": "attack_event_classifications",
+        "default": null,
+        "identity": "",
+        "nullable": false,
+        "generated": ""
+      },
+      {
+        "name": "alert_end_at",
+        "type": "timestamp with time zone",
+        "table": "attack_event_classifications",
+        "default": null,
+        "identity": "",
+        "nullable": false,
+        "generated": ""
+      },
+      {
+        "name": "verdict",
+        "type": "text",
+        "table": "attack_event_classifications",
+        "default": null,
+        "identity": "",
+        "nullable": false,
+        "generated": ""
+      },
+      {
+        "name": "is_event",
+        "type": "boolean",
+        "table": "attack_event_classifications",
+        "default": null,
+        "identity": "",
+        "nullable": false,
+        "generated": ""
+      },
+      {
+        "name": "positive_tier",
+        "type": "text",
+        "table": "attack_event_classifications",
+        "default": null,
+        "identity": "",
+        "nullable": true,
+        "generated": ""
+      },
+      {
+        "name": "event_types",
+        "type": "text[]",
+        "table": "attack_event_classifications",
+        "default": "'{}'::text[]",
+        "identity": "",
+        "nullable": false,
+        "generated": ""
+      },
+      {
+        "name": "qa_reasons_state",
+        "type": "text",
+        "table": "attack_event_classifications",
+        "default": null,
+        "identity": "",
+        "nullable": false,
+        "generated": ""
+      },
+      {
+        "name": "qa_reasons",
+        "type": "jsonb",
+        "table": "attack_event_classifications",
+        "default": null,
+        "identity": "",
+        "nullable": true,
+        "generated": ""
+      },
+      {
+        "name": "classifier_reason_codes",
+        "type": "text[]",
+        "table": "attack_event_classifications",
+        "default": "'{}'::text[]",
+        "identity": "",
+        "nullable": false,
+        "generated": ""
+      },
+      {
+        "name": "classifier_blob_sha",
+        "type": "text",
+        "table": "attack_event_classifications",
+        "default": null,
+        "identity": "",
+        "nullable": false,
+        "generated": ""
+      },
+      {
+        "name": "classifier_methodology_version",
+        "type": "text",
+        "table": "attack_event_classifications",
+        "default": null,
+        "identity": "",
+        "nullable": false,
+        "generated": ""
+      },
+      {
+        "name": "normalization_version",
+        "type": "text",
+        "table": "attack_event_classifications",
+        "default": null,
+        "identity": "",
+        "nullable": false,
+        "generated": ""
+      },
+      {
+        "name": "evidence_set_sha256",
+        "type": "text",
+        "table": "attack_event_classifications",
+        "default": null,
+        "identity": "",
+        "nullable": false,
+        "generated": ""
+      },
+      {
+        "name": "review_provenance_sha256",
+        "type": "text",
+        "table": "attack_event_classifications",
+        "default": null,
+        "identity": "",
+        "nullable": true,
+        "generated": ""
+      },
+      {
+        "name": "human_review_state",
+        "type": "text",
+        "table": "attack_event_classifications",
+        "default": "'NONE'::text",
+        "identity": "",
+        "nullable": false,
+        "generated": ""
+      },
+      {
+        "name": "review_provenance",
+        "type": "jsonb",
+        "table": "attack_event_classifications",
+        "default": "'{}'::jsonb",
+        "identity": "",
+        "nullable": false,
+        "generated": ""
+      },
+      {
+        "name": "originating_frozen_case_id",
+        "type": "text",
+        "table": "attack_event_classifications",
+        "default": null,
+        "identity": "",
+        "nullable": true,
+        "generated": ""
+      },
+      {
+        "name": "binding_state",
+        "type": "text",
+        "table": "attack_event_classifications",
+        "default": null,
+        "identity": "",
+        "nullable": false,
+        "generated": ""
+      },
+      {
+        "name": "alert_episode_uid",
+        "type": "uuid",
+        "table": "attack_event_classifications",
+        "default": null,
+        "identity": "",
+        "nullable": true,
+        "generated": ""
+      },
+      {
+        "name": "origin_repository",
+        "type": "text",
+        "table": "attack_event_classifications",
+        "default": null,
+        "identity": "",
+        "nullable": false,
+        "generated": ""
+      },
+      {
+        "name": "origin_ref",
+        "type": "text",
+        "table": "attack_event_classifications",
+        "default": null,
+        "identity": "",
+        "nullable": true,
+        "generated": ""
+      },
+      {
+        "name": "origin_commit_sha",
+        "type": "text",
+        "table": "attack_event_classifications",
+        "default": null,
+        "identity": "",
+        "nullable": true,
+        "generated": ""
+      },
+      {
+        "name": "origin_artifact_path",
+        "type": "text",
+        "table": "attack_event_classifications",
+        "default": null,
+        "identity": "",
+        "nullable": true,
+        "generated": ""
+      },
+      {
+        "name": "origin_artifact_blob_sha",
+        "type": "text",
+        "table": "attack_event_classifications",
+        "default": null,
+        "identity": "",
+        "nullable": true,
+        "generated": ""
+      },
+      {
+        "name": "origin_target_state_sha256",
+        "type": "text",
+        "table": "attack_event_classifications",
+        "default": null,
+        "identity": "",
+        "nullable": true,
+        "generated": ""
+      },
+      {
+        "name": "origin_workflow_run_id",
+        "type": "bigint",
+        "table": "attack_event_classifications",
+        "default": null,
+        "identity": "",
+        "nullable": true,
+        "generated": ""
+      },
+      {
+        "name": "classified_at",
+        "type": "timestamp with time zone",
+        "table": "attack_event_classifications",
+        "default": null,
+        "identity": "",
+        "nullable": true,
+        "generated": ""
+      },
+      {
+        "name": "supersedes_classification_uid",
+        "type": "uuid",
+        "table": "attack_event_classifications",
+        "default": null,
+        "identity": "",
+        "nullable": true,
+        "generated": ""
+      },
+      {
+        "name": "revision_reason",
+        "type": "text",
+        "table": "attack_event_classifications",
+        "default": null,
+        "identity": "",
+        "nullable": true,
+        "generated": ""
+      },
+      {
+        "name": "correction_provenance",
+        "type": "jsonb",
+        "table": "attack_event_classifications",
+        "default": "'{}'::jsonb",
+        "identity": "",
+        "nullable": false,
+        "generated": ""
+      },
+      {
+        "name": "persisted_by_run_id",
+        "type": "uuid",
+        "table": "attack_event_classifications",
+        "default": null,
+        "identity": "",
+        "nullable": true,
+        "generated": ""
+      },
+      {
+        "name": "created_at",
+        "type": "timestamp with time zone",
+        "table": "attack_event_classifications",
+        "default": "now()",
+        "identity": "",
+        "nullable": false,
+        "generated": ""
+      },
+      {
+        "name": "origin_provenance",
+        "type": "jsonb",
+        "table": "attack_event_classifications",
+        "default": null,
+        "identity": "",
+        "nullable": false,
+        "generated": ""
+      },
+      {
+        "name": "origin_provenance_sha256",
+        "type": "text",
+        "table": "attack_event_classifications",
+        "default": null,
+        "identity": "",
+        "nullable": false,
+        "generated": ""
+      },
+      {
+        "name": "originating_frozen_case_id_state",
+        "type": "text",
+        "table": "attack_event_classifications",
+        "default": null,
+        "identity": "",
+        "nullable": false,
+        "generated": ""
+      },
+      {
+        "name": "attack_event_source_uid",
+        "type": "uuid",
+        "table": "attack_event_sources",
+        "default": "gen_random_uuid()",
+        "identity": "",
+        "nullable": false,
+        "generated": ""
+      },
+      {
+        "name": "source_link_key_version",
+        "type": "text",
+        "table": "attack_event_sources",
+        "default": null,
+        "identity": "",
+        "nullable": false,
+        "generated": ""
+      },
+      {
+        "name": "source_link_key",
+        "type": "text",
+        "table": "attack_event_sources",
+        "default": null,
+        "identity": "",
+        "nullable": false,
+        "generated": ""
+      },
+      {
+        "name": "classification_uid",
+        "type": "uuid",
+        "table": "attack_event_sources",
+        "default": null,
+        "identity": "",
+        "nullable": false,
+        "generated": ""
+      },
+      {
+        "name": "observation_id",
+        "type": "text",
+        "table": "attack_event_sources",
+        "default": null,
+        "identity": "",
+        "nullable": false,
+        "generated": ""
+      },
+      {
+        "name": "source_family",
+        "type": "text",
+        "table": "attack_event_sources",
+        "default": null,
+        "identity": "",
+        "nullable": true,
+        "generated": ""
+      },
+      {
+        "name": "source_type",
+        "type": "text",
+        "table": "attack_event_sources",
+        "default": null,
+        "identity": "",
+        "nullable": true,
+        "generated": ""
+      },
+      {
+        "name": "source_url",
+        "type": "text",
+        "table": "attack_event_sources",
+        "default": null,
+        "identity": "",
+        "nullable": true,
+        "generated": ""
+      },
+      {
+        "name": "telegram_channel",
+        "type": "text",
+        "table": "attack_event_sources",
+        "default": null,
+        "identity": "",
+        "nullable": true,
+        "generated": ""
+      },
+      {
+        "name": "telegram_message_id",
+        "type": "bigint",
+        "table": "attack_event_sources",
+        "default": null,
+        "identity": "",
+        "nullable": true,
+        "generated": ""
+      },
+      {
+        "name": "source_timestamp",
+        "type": "timestamp with time zone",
+        "table": "attack_event_sources",
+        "default": null,
+        "identity": "",
+        "nullable": true,
+        "generated": ""
+      },
+      {
+        "name": "event_timestamp_if_stated",
+        "type": "timestamp with time zone",
+        "table": "attack_event_sources",
+        "default": null,
+        "identity": "",
+        "nullable": true,
+        "generated": ""
+      },
+      {
+        "name": "excerpt",
+        "type": "text",
+        "table": "attack_event_sources",
+        "default": null,
+        "identity": "",
+        "nullable": true,
+        "generated": ""
+      },
+      {
+        "name": "content_sha256",
+        "type": "text",
+        "table": "attack_event_sources",
+        "default": null,
+        "identity": "",
+        "nullable": false,
+        "generated": ""
+      },
+      {
+        "name": "content_hash_basis",
+        "type": "text",
+        "table": "attack_event_sources",
+        "default": null,
+        "identity": "",
+        "nullable": false,
+        "generated": ""
+      },
+      {
+        "name": "observation_classification_outcome",
+        "type": "text",
+        "table": "attack_event_sources",
+        "default": null,
+        "identity": "",
+        "nullable": true,
+        "generated": ""
+      },
+      {
+        "name": "classification_episode_id",
+        "type": "text",
+        "table": "attack_event_sources",
+        "default": null,
+        "identity": "",
+        "nullable": true,
+        "generated": ""
+      },
+      {
+        "name": "evidence_payload",
+        "type": "jsonb",
+        "table": "attack_event_sources",
+        "default": null,
+        "identity": "",
+        "nullable": false,
+        "generated": ""
+      },
+      {
+        "name": "retrieval_provenance",
+        "type": "jsonb",
+        "table": "attack_event_sources",
+        "default": "'{}'::jsonb",
+        "identity": "",
+        "nullable": false,
+        "generated": ""
+      },
+      {
+        "name": "origin_artifact_path",
+        "type": "text",
+        "table": "attack_event_sources",
+        "default": null,
+        "identity": "",
+        "nullable": true,
+        "generated": ""
+      },
+      {
+        "name": "origin_git_ref",
+        "type": "text",
+        "table": "attack_event_sources",
+        "default": null,
+        "identity": "",
+        "nullable": true,
+        "generated": ""
+      },
+      {
+        "name": "origin_git_blob_sha",
+        "type": "text",
+        "table": "attack_event_sources",
+        "default": null,
+        "identity": "",
+        "nullable": true,
+        "generated": ""
+      },
+      {
+        "name": "raw_object_path",
+        "type": "text",
+        "table": "attack_event_sources",
+        "default": null,
+        "identity": "",
+        "nullable": true,
+        "generated": ""
+      },
+      {
+        "name": "created_at",
+        "type": "timestamp with time zone",
+        "table": "attack_event_sources",
+        "default": "now()",
+        "identity": "",
+        "nullable": false,
+        "generated": ""
+      },
+      {
+        "name": "origin_provenance",
+        "type": "jsonb",
+        "table": "attack_event_sources",
+        "default": null,
+        "identity": "",
+        "nullable": false,
+        "generated": ""
+      },
+      {
+        "name": "origin_provenance_sha256",
+        "type": "text",
+        "table": "attack_event_sources",
+        "default": null,
+        "identity": "",
+        "nullable": false,
+        "generated": ""
+      },
+      {
+        "name": "source_type_state",
+        "type": "text",
+        "table": "attack_event_sources",
+        "default": null,
+        "identity": "",
+        "nullable": false,
+        "generated": ""
+      },
+      {
+        "name": "source_timestamp_state",
+        "type": "text",
+        "table": "attack_event_sources",
+        "default": null,
+        "identity": "",
+        "nullable": false,
+        "generated": ""
+      },
+      {
+        "name": "source_timestamp_raw",
+        "type": "text",
+        "table": "attack_event_sources",
+        "default": null,
+        "identity": "",
+        "nullable": true,
+        "generated": ""
+      },
+      {
+        "name": "attack_event_uid",
+        "type": "uuid",
+        "table": "attack_events",
+        "default": "gen_random_uuid()",
+        "identity": "",
+        "nullable": false,
+        "generated": ""
+      },
+      {
+        "name": "attack_event_key_version",
+        "type": "text",
+        "table": "attack_events",
+        "default": null,
+        "identity": "",
+        "nullable": false,
+        "generated": ""
+      },
+      {
+        "name": "attack_event_key",
+        "type": "text",
+        "table": "attack_events",
+        "default": null,
+        "identity": "",
+        "nullable": false,
+        "generated": ""
+      },
+      {
+        "name": "event_grain",
+        "type": "text",
+        "table": "attack_events",
+        "default": null,
+        "identity": "",
+        "nullable": false,
+        "generated": ""
+      },
+      {
+        "name": "historical_episode_id",
+        "type": "text",
+        "table": "attack_events",
+        "default": null,
+        "identity": "",
+        "nullable": false,
+        "generated": ""
+      },
+      {
+        "name": "city_key",
+        "type": "text",
+        "table": "attack_events",
+        "default": null,
+        "identity": "",
+        "nullable": false,
+        "generated": ""
+      },
+      {
+        "name": "alert_type",
+        "type": "text",
+        "table": "attack_events",
+        "default": "'AIR'::text",
+        "identity": "",
+        "nullable": false,
+        "generated": ""
+      },
+      {
+        "name": "alert_start_at",
+        "type": "timestamp with time zone",
+        "table": "attack_events",
+        "default": null,
+        "identity": "",
+        "nullable": false,
+        "generated": ""
+      },
+      {
+        "name": "alert_end_at",
+        "type": "timestamp with time zone",
+        "table": "attack_events",
+        "default": null,
+        "identity": "",
+        "nullable": false,
+        "generated": ""
+      },
+      {
+        "name": "event_status",
+        "type": "text",
+        "table": "attack_events",
+        "default": null,
+        "identity": "",
+        "nullable": false,
+        "generated": ""
+      },
+      {
+        "name": "current_classification_uid",
+        "type": "uuid",
+        "table": "attack_events",
+        "default": null,
+        "identity": "",
+        "nullable": false,
+        "generated": ""
+      },
+      {
+        "name": "binding_state",
+        "type": "text",
+        "table": "attack_events",
+        "default": null,
+        "identity": "",
+        "nullable": false,
+        "generated": ""
+      },
+      {
+        "name": "alert_episode_uid",
+        "type": "uuid",
+        "table": "attack_events",
+        "default": null,
+        "identity": "",
+        "nullable": true,
+        "generated": ""
+      },
+      {
+        "name": "correction_provenance",
+        "type": "jsonb",
+        "table": "attack_events",
+        "default": "'{}'::jsonb",
+        "identity": "",
+        "nullable": false,
+        "generated": ""
+      },
+      {
+        "name": "created_by_run_id",
+        "type": "uuid",
+        "table": "attack_events",
+        "default": null,
+        "identity": "",
+        "nullable": true,
+        "generated": ""
+      },
+      {
+        "name": "updated_by_run_id",
+        "type": "uuid",
+        "table": "attack_events",
+        "default": null,
+        "identity": "",
+        "nullable": true,
+        "generated": ""
+      },
+      {
+        "name": "created_at",
+        "type": "timestamp with time zone",
+        "table": "attack_events",
+        "default": "now()",
+        "identity": "",
+        "nullable": false,
+        "generated": ""
+      },
+      {
+        "name": "updated_at",
+        "type": "timestamp with time zone",
+        "table": "attack_events",
+        "default": "now()",
+        "identity": "",
+        "nullable": false,
+        "generated": ""
+      },
+      {
+        "name": "checkpoint_id",
+        "type": "uuid",
+        "table": "current_ingestion_checkpoints",
+        "default": null,
+        "identity": "",
+        "nullable": true,
+        "generated": ""
+      },
+      {
+        "name": "source_key",
+        "type": "text",
+        "table": "current_ingestion_checkpoints",
+        "default": null,
+        "identity": "",
+        "nullable": true,
+        "generated": ""
+      },
+      {
+        "name": "city_key",
+        "type": "text",
+        "table": "current_ingestion_checkpoints",
+        "default": null,
+        "identity": "",
+        "nullable": true,
+        "generated": ""
+      },
+      {
+        "name": "stream_key",
+        "type": "text",
+        "table": "current_ingestion_checkpoints",
+        "default": null,
+        "identity": "",
+        "nullable": true,
+        "generated": ""
+      },
+      {
+        "name": "checkpoint_seq",
+        "type": "bigint",
+        "table": "current_ingestion_checkpoints",
+        "default": null,
+        "identity": "",
+        "nullable": true,
+        "generated": ""
+      },
+      {
+        "name": "checkpoint_kind",
+        "type": "text",
+        "table": "current_ingestion_checkpoints",
+        "default": null,
+        "identity": "",
+        "nullable": true,
+        "generated": ""
+      },
+      {
+        "name": "previous_checkpoint_id",
+        "type": "uuid",
+        "table": "current_ingestion_checkpoints",
+        "default": null,
+        "identity": "",
+        "nullable": true,
+        "generated": ""
+      },
+      {
+        "name": "checked_at",
+        "type": "timestamp with time zone",
+        "table": "current_ingestion_checkpoints",
+        "default": null,
+        "identity": "",
+        "nullable": true,
+        "generated": ""
+      },
+      {
+        "name": "continuity_verified",
+        "type": "boolean",
+        "table": "current_ingestion_checkpoints",
+        "default": null,
+        "identity": "",
+        "nullable": true,
+        "generated": ""
+      },
+      {
+        "name": "continuity_method",
+        "type": "text",
+        "table": "current_ingestion_checkpoints",
+        "default": null,
+        "identity": "",
+        "nullable": true,
+        "generated": ""
+      },
+      {
+        "name": "continuity_anchor_at",
+        "type": "timestamp with time zone",
+        "table": "current_ingestion_checkpoints",
+        "default": null,
+        "identity": "",
+        "nullable": true,
+        "generated": ""
+      },
+      {
+        "name": "observed_oldest_start_at",
+        "type": "timestamp with time zone",
+        "table": "current_ingestion_checkpoints",
+        "default": null,
+        "identity": "",
+        "nullable": true,
+        "generated": ""
+      },
+      {
+        "name": "observed_latest_end_at",
+        "type": "timestamp with time zone",
+        "table": "current_ingestion_checkpoints",
+        "default": null,
+        "identity": "",
+        "nullable": true,
+        "generated": ""
+      },
+      {
+        "name": "observed_record_count",
+        "type": "bigint",
+        "table": "current_ingestion_checkpoints",
+        "default": null,
+        "identity": "",
+        "nullable": true,
+        "generated": ""
+      },
+      {
+        "name": "cursor",
+        "type": "jsonb",
+        "table": "current_ingestion_checkpoints",
+        "default": null,
+        "identity": "",
+        "nullable": true,
+        "generated": ""
+      },
+      {
+        "name": "metadata",
+        "type": "jsonb",
+        "table": "current_ingestion_checkpoints",
+        "default": null,
+        "identity": "",
+        "nullable": true,
+        "generated": ""
+      },
+      {
+        "name": "created_by_run_id",
+        "type": "uuid",
+        "table": "current_ingestion_checkpoints",
+        "default": null,
+        "identity": "",
+        "nullable": true,
+        "generated": ""
+      },
+      {
+        "name": "created_at",
+        "type": "timestamp with time zone",
+        "table": "current_ingestion_checkpoints",
+        "default": null,
+        "identity": "",
+        "nullable": true,
+        "generated": ""
+      },
+      {
+        "name": "checkpoint_id",
+        "type": "uuid",
+        "table": "ingestion_checkpoints",
+        "default": "gen_random_uuid()",
+        "identity": "",
+        "nullable": false,
+        "generated": ""
+      },
+      {
+        "name": "source_key",
+        "type": "text",
+        "table": "ingestion_checkpoints",
+        "default": null,
+        "identity": "",
+        "nullable": false,
+        "generated": ""
+      },
+      {
+        "name": "city_key",
+        "type": "text",
+        "table": "ingestion_checkpoints",
+        "default": null,
+        "identity": "",
+        "nullable": false,
+        "generated": ""
+      },
+      {
+        "name": "stream_key",
+        "type": "text",
+        "table": "ingestion_checkpoints",
+        "default": null,
+        "identity": "",
+        "nullable": false,
+        "generated": ""
+      },
+      {
+        "name": "checkpoint_seq",
+        "type": "bigint",
+        "table": "ingestion_checkpoints",
+        "default": null,
+        "identity": "",
+        "nullable": false,
+        "generated": ""
+      },
+      {
+        "name": "checkpoint_kind",
+        "type": "text",
+        "table": "ingestion_checkpoints",
+        "default": null,
+        "identity": "",
+        "nullable": false,
+        "generated": ""
+      },
+      {
+        "name": "previous_checkpoint_id",
+        "type": "uuid",
+        "table": "ingestion_checkpoints",
+        "default": null,
+        "identity": "",
+        "nullable": true,
+        "generated": ""
+      },
+      {
+        "name": "checked_at",
+        "type": "timestamp with time zone",
+        "table": "ingestion_checkpoints",
+        "default": null,
+        "identity": "",
+        "nullable": false,
+        "generated": ""
+      },
+      {
+        "name": "continuity_verified",
+        "type": "boolean",
+        "table": "ingestion_checkpoints",
+        "default": "false",
+        "identity": "",
+        "nullable": false,
+        "generated": ""
+      },
+      {
+        "name": "continuity_method",
+        "type": "text",
+        "table": "ingestion_checkpoints",
+        "default": null,
+        "identity": "",
+        "nullable": true,
+        "generated": ""
+      },
+      {
+        "name": "continuity_anchor_at",
+        "type": "timestamp with time zone",
+        "table": "ingestion_checkpoints",
+        "default": null,
+        "identity": "",
+        "nullable": true,
+        "generated": ""
+      },
+      {
+        "name": "observed_oldest_start_at",
+        "type": "timestamp with time zone",
+        "table": "ingestion_checkpoints",
+        "default": null,
+        "identity": "",
+        "nullable": true,
+        "generated": ""
+      },
+      {
+        "name": "observed_latest_end_at",
+        "type": "timestamp with time zone",
+        "table": "ingestion_checkpoints",
+        "default": null,
+        "identity": "",
+        "nullable": true,
+        "generated": ""
+      },
+      {
+        "name": "observed_record_count",
+        "type": "bigint",
+        "table": "ingestion_checkpoints",
+        "default": null,
+        "identity": "",
+        "nullable": true,
+        "generated": ""
+      },
+      {
+        "name": "cursor",
+        "type": "jsonb",
+        "table": "ingestion_checkpoints",
+        "default": null,
+        "identity": "",
+        "nullable": true,
+        "generated": ""
+      },
+      {
+        "name": "metadata",
+        "type": "jsonb",
+        "table": "ingestion_checkpoints",
+        "default": "'{}'::jsonb",
+        "identity": "",
+        "nullable": false,
+        "generated": ""
+      },
+      {
+        "name": "created_by_run_id",
+        "type": "uuid",
+        "table": "ingestion_checkpoints",
+        "default": null,
+        "identity": "",
+        "nullable": false,
+        "generated": ""
+      },
+      {
+        "name": "created_at",
+        "type": "timestamp with time zone",
+        "table": "ingestion_checkpoints",
+        "default": "now()",
+        "identity": "",
+        "nullable": false,
+        "generated": ""
+      },
+      {
+        "name": "run_id",
+        "type": "uuid",
+        "table": "ingestion_runs",
+        "default": "gen_random_uuid()",
+        "identity": "",
+        "nullable": false,
+        "generated": ""
+      },
+      {
+        "name": "run_kind",
+        "type": "text",
+        "table": "ingestion_runs",
+        "default": null,
+        "identity": "",
+        "nullable": false,
+        "generated": ""
+      },
+      {
+        "name": "source_key",
+        "type": "text",
+        "table": "ingestion_runs",
+        "default": null,
+        "identity": "",
+        "nullable": true,
+        "generated": ""
+      },
+      {
+        "name": "city_key",
+        "type": "text",
+        "table": "ingestion_runs",
+        "default": null,
+        "identity": "",
+        "nullable": true,
+        "generated": ""
+      },
+      {
+        "name": "workflow_repository",
+        "type": "text",
+        "table": "ingestion_runs",
+        "default": null,
+        "identity": "",
+        "nullable": true,
+        "generated": ""
+      },
+      {
+        "name": "workflow_name",
+        "type": "text",
+        "table": "ingestion_runs",
+        "default": null,
+        "identity": "",
+        "nullable": true,
+        "generated": ""
+      },
+      {
+        "name": "workflow_ref",
+        "type": "text",
+        "table": "ingestion_runs",
+        "default": null,
+        "identity": "",
+        "nullable": true,
+        "generated": ""
+      },
+      {
+        "name": "workflow_sha",
+        "type": "text",
+        "table": "ingestion_runs",
+        "default": null,
+        "identity": "",
+        "nullable": true,
+        "generated": ""
+      },
+      {
+        "name": "input_repository",
+        "type": "text",
+        "table": "ingestion_runs",
+        "default": null,
+        "identity": "",
+        "nullable": true,
+        "generated": ""
+      },
+      {
+        "name": "input_ref",
+        "type": "text",
+        "table": "ingestion_runs",
+        "default": null,
+        "identity": "",
+        "nullable": true,
+        "generated": ""
+      },
+      {
+        "name": "input_sha",
+        "type": "text",
+        "table": "ingestion_runs",
+        "default": null,
+        "identity": "",
+        "nullable": true,
+        "generated": ""
+      },
+      {
+        "name": "github_run_id",
+        "type": "bigint",
+        "table": "ingestion_runs",
+        "default": null,
+        "identity": "",
+        "nullable": true,
+        "generated": ""
+      },
+      {
+        "name": "github_run_attempt",
+        "type": "integer",
+        "table": "ingestion_runs",
+        "default": null,
+        "identity": "",
+        "nullable": true,
+        "generated": ""
+      },
+      {
+        "name": "db_branch",
+        "type": "text",
+        "table": "ingestion_runs",
+        "default": null,
+        "identity": "",
+        "nullable": true,
+        "generated": ""
+      },
+      {
+        "name": "schema_version",
+        "type": "text",
+        "table": "ingestion_runs",
+        "default": null,
+        "identity": "",
+        "nullable": false,
+        "generated": ""
+      },
+      {
+        "name": "canonicalization_version",
+        "type": "text",
+        "table": "ingestion_runs",
+        "default": null,
+        "identity": "",
+        "nullable": true,
+        "generated": ""
+      },
+      {
+        "name": "status",
+        "type": "text",
+        "table": "ingestion_runs",
+        "default": null,
+        "identity": "",
+        "nullable": false,
+        "generated": ""
+      },
+      {
+        "name": "started_at",
+        "type": "timestamp with time zone",
+        "table": "ingestion_runs",
+        "default": null,
+        "identity": "",
+        "nullable": false,
+        "generated": ""
+      },
+      {
+        "name": "ingest_committed_at",
+        "type": "timestamp with time zone",
+        "table": "ingestion_runs",
+        "default": null,
+        "identity": "",
+        "nullable": true,
+        "generated": ""
+      },
+      {
+        "name": "finished_at",
+        "type": "timestamp with time zone",
+        "table": "ingestion_runs",
+        "default": null,
+        "identity": "",
+        "nullable": true,
+        "generated": ""
+      },
+      {
+        "name": "parameters",
+        "type": "jsonb",
+        "table": "ingestion_runs",
+        "default": "'{}'::jsonb",
+        "identity": "",
+        "nullable": false,
+        "generated": ""
+      },
+      {
+        "name": "stats",
+        "type": "jsonb",
+        "table": "ingestion_runs",
+        "default": "'{}'::jsonb",
+        "identity": "",
+        "nullable": false,
+        "generated": ""
+      },
+      {
+        "name": "error",
+        "type": "jsonb",
+        "table": "ingestion_runs",
+        "default": null,
+        "identity": "",
+        "nullable": true,
+        "generated": ""
+      }
+    ],
+    "indexes": [
+      {
+        "def": "CREATE INDEX alert_episode_sources_episode_idx ON public.alert_episode_sources USING btree (episode_uid) WHERE (episode_uid IS NOT NULL)",
+        "name": "alert_episode_sources_episode_idx",
+        "table": "alert_episode_sources",
+        "unique": false,
+        "primary": false
+      },
+      {
+        "def": "CREATE UNIQUE INDEX alert_episode_sources_pkey ON public.alert_episode_sources USING btree (source_observation_id)",
+        "name": "alert_episode_sources_pkey",
+        "table": "alert_episode_sources",
+        "unique": true,
+        "primary": true
+      },
+      {
+        "def": "CREATE UNIQUE INDEX alert_episode_sources_record_identity_key ON public.alert_episode_sources USING btree (source_key, source_record_key_version, source_record_key)",
+        "name": "alert_episode_sources_record_identity_key",
+        "table": "alert_episode_sources",
+        "unique": true,
+        "primary": false
+      },
+      {
+        "def": "CREATE INDEX alert_episode_sources_source_time_idx ON public.alert_episode_sources USING btree (source_key, city_key, source_start_at)",
+        "name": "alert_episode_sources_source_time_idx",
+        "table": "alert_episode_sources",
+        "unique": false,
+        "primary": false
+      },
+      {
+        "def": "CREATE INDEX alert_episodes_city_start_idx ON public.alert_episodes USING btree (city_key, start_at)",
+        "name": "alert_episodes_city_start_idx",
+        "table": "alert_episodes",
+        "unique": false,
+        "primary": false
+      },
+      {
+        "def": "CREATE UNIQUE INDEX alert_episodes_exact_interval_key ON public.alert_episodes USING btree (city_key, alert_type, start_at, end_at)",
+        "name": "alert_episodes_exact_interval_key",
+        "table": "alert_episodes",
+        "unique": true,
+        "primary": false
+      },
+      {
+        "def": "CREATE UNIQUE INDEX alert_episodes_legacy_episode_id_key ON public.alert_episodes USING btree (legacy_episode_id)",
+        "name": "alert_episodes_legacy_episode_id_key",
+        "table": "alert_episodes",
+        "unique": true,
+        "primary": false
+      },
+      {
+        "def": "CREATE UNIQUE INDEX alert_episodes_open_interval_uidx ON public.alert_episodes USING btree (city_key, alert_type, start_at) WHERE (end_at IS NULL)",
+        "name": "alert_episodes_open_interval_uidx",
+        "table": "alert_episodes",
+        "unique": true,
+        "primary": false
+      },
+      {
+        "def": "CREATE UNIQUE INDEX alert_episodes_pkey ON public.alert_episodes USING btree (episode_uid)",
+        "name": "alert_episodes_pkey",
+        "table": "alert_episodes",
+        "unique": true,
+        "primary": true
+      },
+      {
+        "def": "CREATE UNIQUE INDEX attack_event_classifications_classification_key_key ON public.attack_event_classifications USING btree (classification_key)",
+        "name": "attack_event_classifications_classification_key_key",
+        "table": "attack_event_classifications",
+        "unique": true,
+        "primary": false
+      },
+      {
+        "def": "CREATE INDEX attack_event_classifications_episode_idx ON public.attack_event_classifications USING btree (city_key, historical_episode_id, created_at)",
+        "name": "attack_event_classifications_episode_idx",
+        "table": "attack_event_classifications",
+        "unique": false,
+        "primary": false
+      },
+      {
+        "def": "CREATE INDEX attack_event_classifications_parent_idx ON public.attack_event_classifications USING btree (alert_episode_uid, created_at) WHERE (alert_episode_uid IS NOT NULL)",
+        "name": "attack_event_classifications_parent_idx",
+        "table": "attack_event_classifications",
+        "unique": false,
+        "primary": false
+      },
+      {
+        "def": "CREATE UNIQUE INDEX attack_event_classifications_pkey ON public.attack_event_classifications USING btree (classification_uid)",
+        "name": "attack_event_classifications_pkey",
+        "table": "attack_event_classifications",
+        "unique": true,
+        "primary": true
+      },
+      {
+        "def": "CREATE INDEX attack_event_classifications_verdict_idx ON public.attack_event_classifications USING btree (verdict, city_key, alert_start_at)",
+        "name": "attack_event_classifications_verdict_idx",
+        "table": "attack_event_classifications",
+        "unique": false,
+        "primary": false
+      },
+      {
+        "def": "CREATE INDEX attack_event_sources_classification_idx ON public.attack_event_sources USING btree (classification_uid)",
+        "name": "attack_event_sources_classification_idx",
+        "table": "attack_event_sources",
+        "unique": false,
+        "primary": false
+      },
+      {
+        "def": "CREATE UNIQUE INDEX attack_event_sources_classification_observation_unique ON public.attack_event_sources USING btree (classification_uid, observation_id, content_sha256)",
+        "name": "attack_event_sources_classification_observation_unique",
+        "table": "attack_event_sources",
+        "unique": true,
+        "primary": false
+      },
+      {
+        "def": "CREATE UNIQUE INDEX attack_event_sources_pkey ON public.attack_event_sources USING btree (attack_event_source_uid)",
+        "name": "attack_event_sources_pkey",
+        "table": "attack_event_sources",
+        "unique": true,
+        "primary": true
+      },
+      {
+        "def": "CREATE UNIQUE INDEX attack_event_sources_source_link_key_key ON public.attack_event_sources USING btree (source_link_key)",
+        "name": "attack_event_sources_source_link_key_key",
+        "table": "attack_event_sources",
+        "unique": true,
+        "primary": false
+      },
+      {
+        "def": "CREATE INDEX attack_event_sources_source_time_idx ON public.attack_event_sources USING btree (source_type, source_timestamp)",
+        "name": "attack_event_sources_source_time_idx",
+        "table": "attack_event_sources",
+        "unique": false,
+        "primary": false
+      },
+      {
+        "def": "CREATE INDEX attack_event_sources_url_idx ON public.attack_event_sources USING btree (source_url) WHERE (source_url IS NOT NULL)",
+        "name": "attack_event_sources_url_idx",
+        "table": "attack_event_sources",
+        "unique": false,
+        "primary": false
+      },
+      {
+        "def": "CREATE INDEX attack_events_active_city_time_idx ON public.attack_events USING btree (city_key, alert_start_at) WHERE (event_status = 'ACTIVE'::text)",
+        "name": "attack_events_active_city_time_idx",
+        "table": "attack_events",
+        "unique": false,
+        "primary": false
+      },
+      {
+        "def": "CREATE UNIQUE INDEX attack_events_attack_event_key_key ON public.attack_events USING btree (attack_event_key)",
+        "name": "attack_events_attack_event_key_key",
+        "table": "attack_events",
+        "unique": true,
+        "primary": false
+      },
+      {
+        "def": "CREATE UNIQUE INDEX attack_events_historical_episode_unique ON public.attack_events USING btree (city_key, historical_episode_id)",
+        "name": "attack_events_historical_episode_unique",
+        "table": "attack_events",
+        "unique": true,
+        "primary": false
+      },
+      {
+        "def": "CREATE INDEX attack_events_parent_idx ON public.attack_events USING btree (alert_episode_uid) WHERE (alert_episode_uid IS NOT NULL)",
+        "name": "attack_events_parent_idx",
+        "table": "attack_events",
+        "unique": false,
+        "primary": false
+      },
+      {
+        "def": "CREATE UNIQUE INDEX attack_events_pkey ON public.attack_events USING btree (attack_event_uid)",
+        "name": "attack_events_pkey",
+        "table": "attack_events",
+        "unique": true,
+        "primary": true
+      },
+      {
+        "def": "CREATE UNIQUE INDEX ingestion_checkpoints_identity_stream_key ON public.ingestion_checkpoints USING btree (checkpoint_id, source_key, city_key, stream_key)",
+        "name": "ingestion_checkpoints_identity_stream_key",
+        "table": "ingestion_checkpoints",
+        "unique": true,
+        "primary": false
+      },
+      {
+        "def": "CREATE UNIQUE INDEX ingestion_checkpoints_pkey ON public.ingestion_checkpoints USING btree (checkpoint_id)",
+        "name": "ingestion_checkpoints_pkey",
+        "table": "ingestion_checkpoints",
+        "unique": true,
+        "primary": true
+      },
+      {
+        "def": "CREATE UNIQUE INDEX ingestion_checkpoints_stream_seq_uidx ON public.ingestion_checkpoints USING btree (source_key, city_key, stream_key, checkpoint_seq DESC)",
+        "name": "ingestion_checkpoints_stream_seq_uidx",
+        "table": "ingestion_checkpoints",
+        "unique": true,
+        "primary": false
+      },
+      {
+        "def": "CREATE UNIQUE INDEX ingestion_runs_pkey ON public.ingestion_runs USING btree (run_id)",
+        "name": "ingestion_runs_pkey",
+        "table": "ingestion_runs",
+        "unique": true,
+        "primary": true
+      },
+      {
+        "def": "CREATE INDEX ingestion_runs_status_started_idx ON public.ingestion_runs USING btree (status, started_at DESC)",
+        "name": "ingestion_runs_status_started_idx",
+        "table": "ingestion_runs",
+        "unique": false,
+        "primary": false
+      }
+    ],
+    "objects": [
+      {
+        "rls": false,
+        "kind": "r",
+        "name": "alert_episode_sources",
+        "owner": "neondb_owner",
+        "force_rls": false
+      },
+      {
+        "rls": false,
+        "kind": "r",
+        "name": "alert_episodes",
+        "owner": "neondb_owner",
+        "force_rls": false
+      },
+      {
+        "rls": false,
+        "kind": "r",
+        "name": "attack_event_classifications",
+        "owner": "neondb_owner",
+        "force_rls": false
+      },
+      {
+        "rls": false,
+        "kind": "r",
+        "name": "attack_event_sources",
+        "owner": "neondb_owner",
+        "force_rls": false
+      },
+      {
+        "rls": false,
+        "kind": "r",
+        "name": "attack_events",
+        "owner": "neondb_owner",
+        "force_rls": false
+      },
+      {
+        "rls": false,
+        "kind": "v",
+        "name": "current_ingestion_checkpoints",
+        "owner": "neondb_owner",
+        "force_rls": false
+      },
+      {
+        "rls": false,
+        "kind": "r",
+        "name": "ingestion_checkpoints",
+        "owner": "neondb_owner",
+        "force_rls": false
+      },
+      {
+        "rls": false,
+        "kind": "r",
+        "name": "ingestion_runs",
+        "owner": "neondb_owner",
+        "force_rls": false
+      }
+    ],
+    "identity": {
+      "role": "neondb_owner",
+      "version": "18.6 (653b019)",
+      "database": "neondb",
+      "read_only": "on"
+    },
+    "policies": [],
+    "triggers": [],
+    "extensions": [
+      {
+        "name": "plpgsql",
+        "version": "1.0"
+      }
+    ],
+    "constraints": [
+      {
+        "def": "CHECK (btrim(alert_type) <> ''::text)",
+        "name": "alert_episode_sources_alert_type_check",
+        "type": "c",
+        "table": "alert_episode_sources",
+        "deferred": false
+      },
+      {
+        "def": "NOT NULL alert_type",
+        "name": "alert_episode_sources_alert_type_not_null",
+        "type": "n",
+        "table": "alert_episode_sources",
+        "deferred": false
+      },
+      {
+        "def": "CHECK (binding_state = 'bound'::text AND episode_uid IS NOT NULL OR (binding_state = ANY (ARRAY['ambiguous'::text, 'rejected'::text])) AND episode_uid IS NULL)",
+        "name": "alert_episode_sources_binding_check",
+        "type": "c",
+        "table": "alert_episode_sources",
+        "deferred": false
+      },
+      {
+        "def": "CHECK (binding_state = ANY (ARRAY['bound'::text, 'ambiguous'::text, 'rejected'::text]))",
+        "name": "alert_episode_sources_binding_state_check",
+        "type": "c",
+        "table": "alert_episode_sources",
+        "deferred": false
+      },
+      {
+        "def": "NOT NULL binding_state",
+        "name": "alert_episode_sources_binding_state_not_null",
+        "type": "n",
+        "table": "alert_episode_sources",
+        "deferred": false
+      },
+      {
+        "def": "CHECK (NOT contributes_start_boundary AND NOT contributes_end_boundary OR binding_state = 'bound'::text AND canonicalization_role = 'canonical_input'::text)",
+        "name": "alert_episode_sources_boundary_binding_check",
+        "type": "c",
+        "table": "alert_episode_sources",
+        "deferred": false
+      },
+      {
+        "def": "CHECK (canonicalization_role = ANY (ARRAY['canonical_input'::text, 'duplicate_alias'::text, 'excluded'::text]))",
+        "name": "alert_episode_sources_canonicalization_role_check",
+        "type": "c",
+        "table": "alert_episode_sources",
+        "deferred": false
+      },
+      {
+        "def": "NOT NULL canonicalization_role",
+        "name": "alert_episode_sources_canonicalization_role_not_null",
+        "type": "n",
+        "table": "alert_episode_sources",
+        "deferred": false
+      },
+      {
+        "def": "CHECK (btrim(city_key) <> ''::text)",
+        "name": "alert_episode_sources_city_key_check",
+        "type": "c",
+        "table": "alert_episode_sources",
+        "deferred": false
+      },
+      {
+        "def": "NOT NULL city_key",
+        "name": "alert_episode_sources_city_key_not_null",
+        "type": "n",
+        "table": "alert_episode_sources",
+        "deferred": false
+      },
+      {
+        "def": "NOT NULL contributes_end_boundary",
+        "name": "alert_episode_sources_contributes_end_boundary_not_null",
+        "type": "n",
+        "table": "alert_episode_sources",
+        "deferred": false
+      },
+      {
+        "def": "NOT NULL contributes_start_boundary",
+        "name": "alert_episode_sources_contributes_start_boundary_not_null",
+        "type": "n",
+        "table": "alert_episode_sources",
+        "deferred": false
+      },
+      {
+        "def": "FOREIGN KEY (duplicate_of_observation_id) REFERENCES alert_episode_sources(source_observation_id) ON DELETE RESTRICT",
+        "name": "alert_episode_sources_duplicate_of_observation_id_fkey",
+        "type": "f",
+        "table": "alert_episode_sources",
+        "deferred": false
+      },
+      {
+        "def": "CHECK (canonicalization_role = 'duplicate_alias'::text AND duplicate_of_observation_id IS NOT NULL OR canonicalization_role <> 'duplicate_alias'::text AND duplicate_of_observation_id IS NULL)",
+        "name": "alert_episode_sources_duplicate_role_check",
+        "type": "c",
+        "table": "alert_episode_sources",
+        "deferred": false
+      },
+      {
+        "def": "FOREIGN KEY (episode_uid) REFERENCES alert_episodes(episode_uid) ON DELETE RESTRICT",
+        "name": "alert_episode_sources_episode_uid_fkey",
+        "type": "f",
+        "table": "alert_episode_sources",
+        "deferred": false
+      },
+      {
+        "def": "NOT NULL first_persisted_at",
+        "name": "alert_episode_sources_first_persisted_at_not_null",
+        "type": "n",
+        "table": "alert_episode_sources",
+        "deferred": false
+      },
+      {
+        "def": "FOREIGN KEY (first_persisted_by_run_id) REFERENCES ingestion_runs(run_id) ON DELETE RESTRICT",
+        "name": "alert_episode_sources_first_persisted_by_run_id_fkey",
+        "type": "f",
+        "table": "alert_episode_sources",
+        "deferred": false
+      },
+      {
+        "def": "NOT NULL first_persisted_by_run_id",
+        "name": "alert_episode_sources_first_persisted_by_run_id_not_null",
+        "type": "n",
+        "table": "alert_episode_sources",
+        "deferred": false
+      },
+      {
+        "def": "CHECK (source_end_at IS NULL OR source_end_at > source_start_at)",
+        "name": "alert_episode_sources_interval_check",
+        "type": "c",
+        "table": "alert_episode_sources",
+        "deferred": false
+      },
+      {
+        "def": "NOT NULL last_seen_at",
+        "name": "alert_episode_sources_last_seen_at_not_null",
+        "type": "n",
+        "table": "alert_episode_sources",
+        "deferred": false
+      },
+      {
+        "def": "FOREIGN KEY (last_seen_by_run_id) REFERENCES ingestion_runs(run_id) ON DELETE RESTRICT",
+        "name": "alert_episode_sources_last_seen_by_run_id_fkey",
+        "type": "f",
+        "table": "alert_episode_sources",
+        "deferred": false
+      },
+      {
+        "def": "NOT NULL last_seen_by_run_id",
+        "name": "alert_episode_sources_last_seen_by_run_id_not_null",
+        "type": "n",
+        "table": "alert_episode_sources",
+        "deferred": false
+      },
+      {
+        "def": "CHECK (duplicate_of_observation_id IS NULL OR duplicate_of_observation_id <> source_observation_id)",
+        "name": "alert_episode_sources_no_self_duplicate_check",
+        "type": "c",
+        "table": "alert_episode_sources",
+        "deferred": false
+      },
+      {
+        "def": "CHECK (canonicalization_role = 'canonical_input'::text OR NOT contributes_start_boundary AND NOT contributes_end_boundary)",
+        "name": "alert_episode_sources_noninput_boundary_check",
+        "type": "c",
+        "table": "alert_episode_sources",
+        "deferred": false
+      },
+      {
+        "def": "PRIMARY KEY (source_observation_id)",
+        "name": "alert_episode_sources_pkey",
+        "type": "p",
+        "table": "alert_episode_sources",
+        "deferred": false
+      },
+      {
+        "def": "NOT NULL provenance",
+        "name": "alert_episode_sources_provenance_not_null",
+        "type": "n",
+        "table": "alert_episode_sources",
+        "deferred": false
+      },
+      {
+        "def": "CHECK (jsonb_typeof(provenance) = 'object'::text)",
+        "name": "alert_episode_sources_provenance_object_check",
+        "type": "c",
+        "table": "alert_episode_sources",
+        "deferred": false
+      },
+      {
+        "def": "CHECK (raw_sha256 IS NULL OR raw_sha256 ~ '^[0-9a-f]{64}$'::text)",
+        "name": "alert_episode_sources_raw_sha256_format_check",
+        "type": "c",
+        "table": "alert_episode_sources",
+        "deferred": false
+      },
+      {
+        "def": "UNIQUE (source_key, source_record_key_version, source_record_key)",
+        "name": "alert_episode_sources_record_identity_key",
+        "type": "u",
+        "table": "alert_episode_sources",
+        "deferred": false
+      },
+      {
+        "def": "CHECK (source_record_key ~ '^[0-9a-f]{64}$'::text)",
+        "name": "alert_episode_sources_record_key_format_check",
+        "type": "c",
+        "table": "alert_episode_sources",
+        "deferred": false
+      },
+      {
+        "def": "CHECK (last_seen_at >= first_persisted_at)",
+        "name": "alert_episode_sources_seen_time_check",
+        "type": "c",
+        "table": "alert_episode_sources",
+        "deferred": false
+      },
+      {
+        "def": "CHECK (btrim(source_key) <> ''::text)",
+        "name": "alert_episode_sources_source_key_check",
+        "type": "c",
+        "table": "alert_episode_sources",
+        "deferred": false
+      },
+      {
+        "def": "NOT NULL source_key",
+        "name": "alert_episode_sources_source_key_not_null",
+        "type": "n",
+        "table": "alert_episode_sources",
+        "deferred": false
+      },
+      {
+        "def": "NOT NULL source_observation_id",
+        "name": "alert_episode_sources_source_observation_id_not_null",
+        "type": "n",
+        "table": "alert_episode_sources",
+        "deferred": false
+      },
+      {
+        "def": "NOT NULL source_record_key",
+        "name": "alert_episode_sources_source_record_key_not_null",
+        "type": "n",
+        "table": "alert_episode_sources",
+        "deferred": false
+      },
+      {
+        "def": "CHECK (btrim(source_record_key_version) <> ''::text)",
+        "name": "alert_episode_sources_source_record_key_version_check",
+        "type": "c",
+        "table": "alert_episode_sources",
+        "deferred": false
+      },
+      {
+        "def": "NOT NULL source_record_key_version",
+        "name": "alert_episode_sources_source_record_key_version_not_null",
+        "type": "n",
+        "table": "alert_episode_sources",
+        "deferred": false
+      },
+      {
+        "def": "NOT NULL source_start_at",
+        "name": "alert_episode_sources_source_start_at_not_null",
+        "type": "n",
+        "table": "alert_episode_sources",
+        "deferred": false
+      },
+      {
+        "def": "CHECK (btrim(alert_type) <> ''::text)",
+        "name": "alert_episodes_alert_type_check",
+        "type": "c",
+        "table": "alert_episodes",
+        "deferred": false
+      },
+      {
+        "def": "NOT NULL alert_type",
+        "name": "alert_episodes_alert_type_not_null",
+        "type": "n",
+        "table": "alert_episodes",
+        "deferred": false
+      },
+      {
+        "def": "CHECK (canonicalization_version = 'alert-canonicalization-v1'::text)",
+        "name": "alert_episodes_canonicalization_version_check",
+        "type": "c",
+        "table": "alert_episodes",
+        "deferred": false
+      },
+      {
+        "def": "NOT NULL canonicalization_version",
+        "name": "alert_episodes_canonicalization_version_not_null",
+        "type": "n",
+        "table": "alert_episodes",
+        "deferred": false
+      },
+      {
+        "def": "CHECK (btrim(city_key) <> ''::text)",
+        "name": "alert_episodes_city_key_check",
+        "type": "c",
+        "table": "alert_episodes",
+        "deferred": false
+      },
+      {
+        "def": "NOT NULL city_key",
+        "name": "alert_episodes_city_key_not_null",
+        "type": "n",
+        "table": "alert_episodes",
+        "deferred": false
+      },
+      {
+        "def": "NOT NULL created_at",
+        "name": "alert_episodes_created_at_not_null",
+        "type": "n",
+        "table": "alert_episodes",
+        "deferred": false
+      },
+      {
+        "def": "FOREIGN KEY (created_by_run_id) REFERENCES ingestion_runs(run_id) ON DELETE RESTRICT",
+        "name": "alert_episodes_created_by_run_id_fkey",
+        "type": "f",
+        "table": "alert_episodes",
+        "deferred": false
+      },
+      {
+        "def": "NOT NULL created_by_run_id",
+        "name": "alert_episodes_created_by_run_id_not_null",
+        "type": "n",
+        "table": "alert_episodes",
+        "deferred": false
+      },
+      {
+        "def": "CHECK (episode_state = ANY (ARRAY['open'::text, 'closed'::text]))",
+        "name": "alert_episodes_episode_state_check",
+        "type": "c",
+        "table": "alert_episodes",
+        "deferred": false
+      },
+      {
+        "def": "NOT NULL episode_state",
+        "name": "alert_episodes_episode_state_not_null",
+        "type": "n",
+        "table": "alert_episodes",
+        "deferred": false
+      },
+      {
+        "def": "NOT NULL episode_uid",
+        "name": "alert_episodes_episode_uid_not_null",
+        "type": "n",
+        "table": "alert_episodes",
+        "deferred": false
+      },
+      {
+        "def": "UNIQUE (city_key, alert_type, start_at, end_at)",
+        "name": "alert_episodes_exact_interval_key",
+        "type": "u",
+        "table": "alert_episodes",
+        "deferred": false
+      },
+      {
+        "def": "UNIQUE (legacy_episode_id)",
+        "name": "alert_episodes_legacy_episode_id_key",
+        "type": "u",
+        "table": "alert_episodes",
+        "deferred": false
+      },
+      {
+        "def": "CHECK (legacy_episode_id IS NULL OR legacy_episode_id ~ '^[0-9a-f]{24}$'::text)",
+        "name": "alert_episodes_legacy_id_format_check",
+        "type": "c",
+        "table": "alert_episodes",
+        "deferred": false
+      },
+      {
+        "def": "CHECK (episode_state <> 'open'::text OR legacy_episode_id IS NULL)",
+        "name": "alert_episodes_open_legacy_id_check",
+        "type": "c",
+        "table": "alert_episodes",
+        "deferred": false
+      },
+      {
+        "def": "PRIMARY KEY (episode_uid)",
+        "name": "alert_episodes_pkey",
+        "type": "p",
+        "table": "alert_episodes",
+        "deferred": false
+      },
+      {
+        "def": "NOT NULL start_at",
+        "name": "alert_episodes_start_at_not_null",
+        "type": "n",
+        "table": "alert_episodes",
+        "deferred": false
+      },
+      {
+        "def": "CHECK (episode_state = 'open'::text AND end_at IS NULL OR episode_state = 'closed'::text AND end_at IS NOT NULL AND end_at > start_at)",
+        "name": "alert_episodes_state_interval_check",
+        "type": "c",
+        "table": "alert_episodes",
+        "deferred": false
+      },
+      {
+        "def": "NOT NULL updated_at",
+        "name": "alert_episodes_updated_at_not_null",
+        "type": "n",
+        "table": "alert_episodes",
+        "deferred": false
+      },
+      {
+        "def": "FOREIGN KEY (updated_by_run_id) REFERENCES ingestion_runs(run_id) ON DELETE RESTRICT",
+        "name": "alert_episodes_updated_by_run_id_fkey",
+        "type": "f",
+        "table": "alert_episodes",
+        "deferred": false
+      },
+      {
+        "def": "NOT NULL updated_by_run_id",
+        "name": "alert_episodes_updated_by_run_id_not_null",
+        "type": "n",
+        "table": "alert_episodes",
+        "deferred": false
+      },
+      {
+        "def": "CHECK (updated_at >= created_at)",
+        "name": "alert_episodes_updated_time_check",
+        "type": "c",
+        "table": "alert_episodes",
+        "deferred": false
+      },
+      {
+        "def": "NOT NULL classification_key_version",
+        "name": "attack_event_classification_classification_key_version_not_null",
+        "type": "n",
+        "table": "attack_event_classifications",
+        "deferred": false
+      },
+      {
+        "def": "NOT NULL classifier_methodology_version",
+        "name": "attack_event_classification_classifier_methodology_ver_not_null",
+        "type": "n",
+        "table": "attack_event_classifications",
+        "deferred": false
+      },
+      {
+        "def": "NOT NULL originating_frozen_case_id_state",
+        "name": "attack_event_classification_originating_frozen_case_id_not_null",
+        "type": "n",
+        "table": "attack_event_classifications",
+        "deferred": false
+      },
+      {
+        "def": "NOT NULL alert_end_at",
+        "name": "attack_event_classifications_alert_end_at_not_null",
+        "type": "n",
+        "table": "attack_event_classifications",
+        "deferred": false
+      },
+      {
+        "def": "FOREIGN KEY (alert_episode_uid) REFERENCES alert_episodes(episode_uid) ON DELETE RESTRICT",
+        "name": "attack_event_classifications_alert_episode_uid_fkey",
+        "type": "f",
+        "table": "attack_event_classifications",
+        "deferred": false
+      },
+      {
+        "def": "NOT NULL alert_start_at",
+        "name": "attack_event_classifications_alert_start_at_not_null",
+        "type": "n",
+        "table": "attack_event_classifications",
+        "deferred": false
+      },
+      {
+        "def": "CHECK (alert_type = 'AIR'::text)",
+        "name": "attack_event_classifications_alert_type_check",
+        "type": "c",
+        "table": "attack_event_classifications",
+        "deferred": false
+      },
+      {
+        "def": "NOT NULL alert_type",
+        "name": "attack_event_classifications_alert_type_not_null",
+        "type": "n",
+        "table": "attack_event_classifications",
+        "deferred": false
+      },
+      {
+        "def": "CHECK (binding_state = 'BOUND'::text AND alert_episode_uid IS NOT NULL OR (binding_state = ANY (ARRAY['AMBIGUOUS'::text, 'UNBOUND'::text])) AND alert_episode_uid IS NULL)",
+        "name": "attack_event_classifications_binding_check",
+        "type": "c",
+        "table": "attack_event_classifications",
+        "deferred": false
+      },
+      {
+        "def": "CHECK (binding_state = ANY (ARRAY['BOUND'::text, 'AMBIGUOUS'::text, 'UNBOUND'::text]))",
+        "name": "attack_event_classifications_binding_state_check",
+        "type": "c",
+        "table": "attack_event_classifications",
+        "deferred": false
+      },
+      {
+        "def": "NOT NULL binding_state",
+        "name": "attack_event_classifications_binding_state_not_null",
+        "type": "n",
+        "table": "attack_event_classifications",
+        "deferred": false
+      },
+      {
+        "def": "CHECK (btrim(city_key) <> ''::text)",
+        "name": "attack_event_classifications_city_check",
+        "type": "c",
+        "table": "attack_event_classifications",
+        "deferred": false
+      },
+      {
+        "def": "NOT NULL city_key",
+        "name": "attack_event_classifications_city_key_not_null",
+        "type": "n",
+        "table": "attack_event_classifications",
+        "deferred": false
+      },
+      {
+        "def": "UNIQUE (classification_key)",
+        "name": "attack_event_classifications_classification_key_key",
+        "type": "u",
+        "table": "attack_event_classifications",
+        "deferred": false
+      },
+      {
+        "def": "NOT NULL classification_key",
+        "name": "attack_event_classifications_classification_key_not_null",
+        "type": "n",
+        "table": "attack_event_classifications",
+        "deferred": false
+      },
+      {
+        "def": "NOT NULL classification_uid",
+        "name": "attack_event_classifications_classification_uid_not_null",
+        "type": "n",
+        "table": "attack_event_classifications",
+        "deferred": false
+      },
+      {
+        "def": "NOT NULL classifier_blob_sha",
+        "name": "attack_event_classifications_classifier_blob_sha_not_null",
+        "type": "n",
+        "table": "attack_event_classifications",
+        "deferred": false
+      },
+      {
+        "def": "NOT NULL classifier_reason_codes",
+        "name": "attack_event_classifications_classifier_reason_codes_not_null",
+        "type": "n",
+        "table": "attack_event_classifications",
+        "deferred": false
+      },
+      {
+        "def": "CHECK (classifier_blob_sha ~ '^[0-9a-f]{40}$'::text)",
+        "name": "attack_event_classifications_classifier_sha_check",
+        "type": "c",
+        "table": "attack_event_classifications",
+        "deferred": false
+      },
+      {
+        "def": "NOT NULL correction_provenance",
+        "name": "attack_event_classifications_correction_provenance_not_null",
+        "type": "n",
+        "table": "attack_event_classifications",
+        "deferred": false
+      },
+      {
+        "def": "NOT NULL created_at",
+        "name": "attack_event_classifications_created_at_not_null",
+        "type": "n",
+        "table": "attack_event_classifications",
+        "deferred": false
+      },
+      {
+        "def": "CHECK (historical_episode_id ~ '^[0-9a-f]{24}$'::text)",
+        "name": "attack_event_classifications_episode_id_check",
+        "type": "c",
+        "table": "attack_event_classifications",
+        "deferred": false
+      },
+      {
+        "def": "NOT NULL event_types",
+        "name": "attack_event_classifications_event_types_not_null",
+        "type": "n",
+        "table": "attack_event_classifications",
+        "deferred": false
+      },
+      {
+        "def": "NOT NULL evidence_set_sha256",
+        "name": "attack_event_classifications_evidence_set_sha256_not_null",
+        "type": "n",
+        "table": "attack_event_classifications",
+        "deferred": false
+      },
+      {
+        "def": "CHECK (evidence_set_sha256 ~ '^[0-9a-f]{64}$'::text)",
+        "name": "attack_event_classifications_evidence_sha_check",
+        "type": "c",
+        "table": "attack_event_classifications",
+        "deferred": false
+      },
+      {
+        "def": "CHECK (originating_frozen_case_id_state = ANY (ARRAY['MATERIALIZED'::text, 'UNMATERIALIZED_IN_ACCEPTED_SOURCE'::text, 'NOT_APPLICABLE'::text]))",
+        "name": "attack_event_classifications_frozen_case_id_state_check",
+        "type": "c",
+        "table": "attack_event_classifications",
+        "deferred": false
+      },
+      {
+        "def": "CHECK (originating_frozen_case_id_state = 'MATERIALIZED'::text AND originating_frozen_case_id IS NOT NULL AND btrim(originating_frozen_case_id) <> ''::text OR (originating_frozen_case_id_state = ANY (ARRAY['UNMATERIALIZED_IN_ACCEPTED_SOURCE'::text, 'NOT_APPLICABLE'::text])) AND originating_frozen_case_id IS NULL)",
+        "name": "attack_event_classifications_frozen_case_id_value_check",
+        "type": "c",
+        "table": "attack_event_classifications",
+        "deferred": false
+      },
+      {
+        "def": "NOT NULL historical_episode_id",
+        "name": "attack_event_classifications_historical_episode_id_not_null",
+        "type": "n",
+        "table": "attack_event_classifications",
+        "deferred": false
+      },
+      {
+        "def": "NOT NULL human_review_state",
+        "name": "attack_event_classifications_human_review_state_not_null",
+        "type": "n",
+        "table": "attack_event_classifications",
+        "deferred": false
+      },
+      {
+        "def": "CHECK (alert_end_at > alert_start_at)",
+        "name": "attack_event_classifications_interval_check",
+        "type": "c",
+        "table": "attack_event_classifications",
+        "deferred": false
+      },
+      {
+        "def": "NOT NULL is_event",
+        "name": "attack_event_classifications_is_event_not_null",
+        "type": "n",
+        "table": "attack_event_classifications",
+        "deferred": false
+      },
+      {
+        "def": "CHECK (classification_key ~ '^[0-9a-f]{64}$'::text)",
+        "name": "attack_event_classifications_key_format_check",
+        "type": "c",
+        "table": "attack_event_classifications",
+        "deferred": false
+      },
+      {
+        "def": "CHECK (classification_key_version = 'attack-event-classification-key-v2'::text)",
+        "name": "attack_event_classifications_key_version_check",
+        "type": "c",
+        "table": "attack_event_classifications",
+        "deferred": false
+      },
+      {
+        "def": "NOT NULL normalization_version",
+        "name": "attack_event_classifications_normalization_version_not_null",
+        "type": "n",
+        "table": "attack_event_classifications",
+        "deferred": false
+      },
+      {
+        "def": "CHECK (origin_commit_sha ~ '^[0-9a-f]{40}$'::text)",
+        "name": "attack_event_classifications_origin_commit_check",
+        "type": "c",
+        "table": "attack_event_classifications",
+        "deferred": false
+      },
+      {
+        "def": "NOT NULL origin_provenance",
+        "name": "attack_event_classifications_origin_provenance_not_null",
+        "type": "n",
+        "table": "attack_event_classifications",
+        "deferred": false
+      },
+      {
+        "def": "CHECK (origin_provenance_sha256 ~ '^[0-9a-f]{64}$'::text)",
+        "name": "attack_event_classifications_origin_provenance_sha256_check",
+        "type": "c",
+        "table": "attack_event_classifications",
+        "deferred": false
+      },
+      {
+        "def": "NOT NULL origin_provenance_sha256",
+        "name": "attack_event_classifications_origin_provenance_sha256_not_null",
+        "type": "n",
+        "table": "attack_event_classifications",
+        "deferred": false
+      },
+      {
+        "def": "NOT NULL origin_repository",
+        "name": "attack_event_classifications_origin_repository_not_null",
+        "type": "n",
+        "table": "attack_event_classifications",
+        "deferred": false
+      },
+      {
+        "def": "CHECK (origin_target_state_sha256 IS NULL OR origin_target_state_sha256 ~ '^[0-9a-f]{64}$'::text)",
+        "name": "attack_event_classifications_origin_state_sha_check",
+        "type": "c",
+        "table": "attack_event_classifications",
+        "deferred": false
+      },
+      {
+        "def": "FOREIGN KEY (persisted_by_run_id) REFERENCES ingestion_runs(run_id) ON DELETE RESTRICT",
+        "name": "attack_event_classifications_persisted_by_run_id_fkey",
+        "type": "f",
+        "table": "attack_event_classifications",
+        "deferred": false
+      },
+      {
+        "def": "PRIMARY KEY (classification_uid)",
+        "name": "attack_event_classifications_pkey",
+        "type": "p",
+        "table": "attack_event_classifications",
+        "deferred": false
+      },
+      {
+        "def": "CHECK (verdict = 'STRICT_EVENT_POSITIVE'::text AND is_event AND positive_tier = 'STRICT'::text OR verdict = 'SENSITIVITY_EVENT_POSITIVE'::text AND is_event AND positive_tier = 'SENSITIVITY'::text OR (verdict = ANY (ARRAY['NO_CONFIRMED_EVENT'::text, 'NEEDS_REVIEW'::text])) AND NOT is_event AND positive_tier IS NULL)",
+        "name": "attack_event_classifications_positive_check",
+        "type": "c",
+        "table": "attack_event_classifications",
+        "deferred": false
+      },
+      {
+        "def": "NOT NULL qa_reasons_state",
+        "name": "attack_event_classifications_qa_reasons_state_not_null",
+        "type": "n",
+        "table": "attack_event_classifications",
+        "deferred": false
+      },
+      {
+        "def": "CHECK (qa_reasons_state = ANY (ARRAY['MATERIALIZED'::text, 'UNMATERIALIZED_IN_ACCEPTED_SOURCE'::text]))",
+        "name": "attack_event_classifications_qa_state_check",
+        "type": "c",
+        "table": "attack_event_classifications",
+        "deferred": false
+      },
+      {
+        "def": "CHECK (qa_reasons_state = 'MATERIALIZED'::text AND jsonb_typeof(qa_reasons) = 'array'::text OR qa_reasons_state = 'UNMATERIALIZED_IN_ACCEPTED_SOURCE'::text AND qa_reasons IS NULL)",
+        "name": "attack_event_classifications_qa_value_check",
+        "type": "c",
+        "table": "attack_event_classifications",
+        "deferred": false
+      },
+      {
+        "def": "NOT NULL review_provenance",
+        "name": "attack_event_classifications_review_provenance_not_null",
+        "type": "n",
+        "table": "attack_event_classifications",
+        "deferred": false
+      },
+      {
+        "def": "CHECK (review_provenance_sha256 IS NULL OR review_provenance_sha256 ~ '^[0-9a-f]{64}$'::text)",
+        "name": "attack_event_classifications_review_sha_check",
+        "type": "c",
+        "table": "attack_event_classifications",
+        "deferred": false
+      },
+      {
+        "def": "CHECK (human_review_state = ANY (ARRAY['NONE'::text, 'NEEDS_REVIEW'::text, 'REVIEWED_EVIDENCE'::text]))",
+        "name": "attack_event_classifications_review_state_check",
+        "type": "c",
+        "table": "attack_event_classifications",
+        "deferred": false
+      },
+      {
+        "def": "FOREIGN KEY (supersedes_classification_uid) REFERENCES attack_event_classifications(classification_uid) ON DELETE RESTRICT",
+        "name": "attack_event_classifications_supersedes_classification_uid_fkey",
+        "type": "f",
+        "table": "attack_event_classifications",
+        "deferred": false
+      },
+      {
+        "def": "CHECK (verdict = ANY (ARRAY['STRICT_EVENT_POSITIVE'::text, 'SENSITIVITY_EVENT_POSITIVE'::text, 'NO_CONFIRMED_EVENT'::text, 'NEEDS_REVIEW'::text]))",
+        "name": "attack_event_classifications_verdict_check",
+        "type": "c",
+        "table": "attack_event_classifications",
+        "deferred": false
+      },
+      {
+        "def": "NOT NULL verdict",
+        "name": "attack_event_classifications_verdict_not_null",
+        "type": "n",
+        "table": "attack_event_classifications",
+        "deferred": false
+      },
+      {
+        "def": "NOT NULL attack_event_source_uid",
+        "name": "attack_event_sources_attack_event_source_uid_not_null",
+        "type": "n",
+        "table": "attack_event_sources",
+        "deferred": false
+      },
+      {
+        "def": "UNIQUE (classification_uid, observation_id, content_sha256)",
+        "name": "attack_event_sources_classification_observation_unique",
+        "type": "u",
+        "table": "attack_event_sources",
+        "deferred": false
+      },
+      {
+        "def": "FOREIGN KEY (classification_uid) REFERENCES attack_event_classifications(classification_uid) ON DELETE RESTRICT",
+        "name": "attack_event_sources_classification_uid_fkey",
+        "type": "f",
+        "table": "attack_event_sources",
+        "deferred": false
+      },
+      {
+        "def": "NOT NULL classification_uid",
+        "name": "attack_event_sources_classification_uid_not_null",
+        "type": "n",
+        "table": "attack_event_sources",
+        "deferred": false
+      },
+      {
+        "def": "NOT NULL content_hash_basis",
+        "name": "attack_event_sources_content_hash_basis_not_null",
+        "type": "n",
+        "table": "attack_event_sources",
+        "deferred": false
+      },
+      {
+        "def": "NOT NULL content_sha256",
+        "name": "attack_event_sources_content_sha256_not_null",
+        "type": "n",
+        "table": "attack_event_sources",
+        "deferred": false
+      },
+      {
+        "def": "CHECK (content_sha256 ~ '^[0-9a-f]{64}$'::text)",
+        "name": "attack_event_sources_content_sha_check",
+        "type": "c",
+        "table": "attack_event_sources",
+        "deferred": false
+      },
+      {
+        "def": "NOT NULL created_at",
+        "name": "attack_event_sources_created_at_not_null",
+        "type": "n",
+        "table": "attack_event_sources",
+        "deferred": false
+      },
+      {
+        "def": "NOT NULL evidence_payload",
+        "name": "attack_event_sources_evidence_payload_not_null",
+        "type": "n",
+        "table": "attack_event_sources",
+        "deferred": false
+      },
+      {
+        "def": "CHECK (content_hash_basis = ANY (ARRAY['SOURCE_NATIVE'::text, 'NORMALIZED_EVIDENCE'::text]))",
+        "name": "attack_event_sources_hash_basis_check",
+        "type": "c",
+        "table": "attack_event_sources",
+        "deferred": false
+      },
+      {
+        "def": "CHECK (source_link_key ~ '^[0-9a-f]{64}$'::text)",
+        "name": "attack_event_sources_key_format_check",
+        "type": "c",
+        "table": "attack_event_sources",
+        "deferred": false
+      },
+      {
+        "def": "CHECK (source_link_key_version = 'attack-event-source-link-key-v1'::text)",
+        "name": "attack_event_sources_key_version_check",
+        "type": "c",
+        "table": "attack_event_sources",
+        "deferred": false
+      },
+      {
+        "def": "NOT NULL observation_id",
+        "name": "attack_event_sources_observation_id_not_null",
+        "type": "n",
+        "table": "attack_event_sources",
+        "deferred": false
+      },
+      {
+        "def": "CHECK (observation_classification_outcome IS NULL OR (observation_classification_outcome = ANY (ARRAY['approved_strict'::text, 'approved_sensitivity'::text, 'needs_review'::text, 'rejected'::text])))",
+        "name": "attack_event_sources_observation_outcome_check",
+        "type": "c",
+        "table": "attack_event_sources",
+        "deferred": false
+      },
+      {
+        "def": "NOT NULL origin_provenance",
+        "name": "attack_event_sources_origin_provenance_not_null",
+        "type": "n",
+        "table": "attack_event_sources",
+        "deferred": false
+      },
+      {
+        "def": "CHECK (origin_provenance_sha256 ~ '^[0-9a-f]{64}$'::text)",
+        "name": "attack_event_sources_origin_provenance_sha256_check",
+        "type": "c",
+        "table": "attack_event_sources",
+        "deferred": false
+      },
+      {
+        "def": "NOT NULL origin_provenance_sha256",
+        "name": "attack_event_sources_origin_provenance_sha256_not_null",
+        "type": "n",
+        "table": "attack_event_sources",
+        "deferred": false
+      },
+      {
+        "def": "PRIMARY KEY (attack_event_source_uid)",
+        "name": "attack_event_sources_pkey",
+        "type": "p",
+        "table": "attack_event_sources",
+        "deferred": false
+      },
+      {
+        "def": "NOT NULL retrieval_provenance",
+        "name": "attack_event_sources_retrieval_provenance_not_null",
+        "type": "n",
+        "table": "attack_event_sources",
+        "deferred": false
+      },
+      {
+        "def": "UNIQUE (source_link_key)",
+        "name": "attack_event_sources_source_link_key_key",
+        "type": "u",
+        "table": "attack_event_sources",
+        "deferred": false
+      },
+      {
+        "def": "NOT NULL source_link_key",
+        "name": "attack_event_sources_source_link_key_not_null",
+        "type": "n",
+        "table": "attack_event_sources",
+        "deferred": false
+      },
+      {
+        "def": "NOT NULL source_link_key_version",
+        "name": "attack_event_sources_source_link_key_version_not_null",
+        "type": "n",
+        "table": "attack_event_sources",
+        "deferred": false
+      },
+      {
+        "def": "CHECK (source_timestamp_state = ANY (ARRAY['MATERIALIZED'::text, 'ABSENT_IN_ACCEPTED_SOURCE'::text, 'UNPARSEABLE_IN_ACCEPTED_SOURCE'::text]))",
+        "name": "attack_event_sources_source_timestamp_state_check",
+        "type": "c",
+        "table": "attack_event_sources",
+        "deferred": false
+      },
+      {
+        "def": "NOT NULL source_timestamp_state",
+        "name": "attack_event_sources_source_timestamp_state_not_null",
+        "type": "n",
+        "table": "attack_event_sources",
+        "deferred": false
+      },
+      {
+        "def": "CHECK (source_timestamp_state = 'MATERIALIZED'::text AND source_timestamp IS NOT NULL OR source_timestamp_state = 'ABSENT_IN_ACCEPTED_SOURCE'::text AND source_timestamp IS NULL AND source_timestamp_raw IS NULL OR source_timestamp_state = 'UNPARSEABLE_IN_ACCEPTED_SOURCE'::text AND source_timestamp IS NULL AND source_timestamp_raw IS NOT NULL AND btrim(source_timestamp_raw) <> ''::text)",
+        "name": "attack_event_sources_source_timestamp_value_check",
+        "type": "c",
+        "table": "attack_event_sources",
+        "deferred": false
+      },
+      {
+        "def": "CHECK (source_type_state = ANY (ARRAY['MATERIALIZED'::text, 'UNMATERIALIZED_IN_ACCEPTED_SOURCE'::text]))",
+        "name": "attack_event_sources_source_type_state_check",
+        "type": "c",
+        "table": "attack_event_sources",
+        "deferred": false
+      },
+      {
+        "def": "NOT NULL source_type_state",
+        "name": "attack_event_sources_source_type_state_not_null",
+        "type": "n",
+        "table": "attack_event_sources",
+        "deferred": false
+      },
+      {
+        "def": "CHECK (source_type_state = 'MATERIALIZED'::text AND source_type IS NOT NULL AND btrim(source_type) <> ''::text OR source_type_state = 'UNMATERIALIZED_IN_ACCEPTED_SOURCE'::text AND source_type IS NULL)",
+        "name": "attack_event_sources_source_type_value_check",
+        "type": "c",
+        "table": "attack_event_sources",
+        "deferred": false
+      },
+      {
+        "def": "CHECK (telegram_channel IS NULL AND telegram_message_id IS NULL OR telegram_channel IS NOT NULL AND telegram_message_id IS NOT NULL)",
+        "name": "attack_event_sources_telegram_pair_check",
+        "type": "c",
+        "table": "attack_event_sources",
+        "deferred": false
+      },
+      {
+        "def": "NOT NULL alert_end_at",
+        "name": "attack_events_alert_end_at_not_null",
+        "type": "n",
+        "table": "attack_events",
+        "deferred": false
+      },
+      {
+        "def": "FOREIGN KEY (alert_episode_uid) REFERENCES alert_episodes(episode_uid) ON DELETE RESTRICT",
+        "name": "attack_events_alert_episode_uid_fkey",
+        "type": "f",
+        "table": "attack_events",
+        "deferred": false
+      },
+      {
+        "def": "NOT NULL alert_start_at",
+        "name": "attack_events_alert_start_at_not_null",
+        "type": "n",
+        "table": "attack_events",
+        "deferred": false
+      },
+      {
+        "def": "CHECK (alert_type = 'AIR'::text)",
+        "name": "attack_events_alert_type_check",
+        "type": "c",
+        "table": "attack_events",
+        "deferred": false
+      },
+      {
+        "def": "NOT NULL alert_type",
+        "name": "attack_events_alert_type_not_null",
+        "type": "n",
+        "table": "attack_events",
+        "deferred": false
+      },
+      {
+        "def": "UNIQUE (attack_event_key)",
+        "name": "attack_events_attack_event_key_key",
+        "type": "u",
+        "table": "attack_events",
+        "deferred": false
+      },
+      {
+        "def": "NOT NULL attack_event_key",
+        "name": "attack_events_attack_event_key_not_null",
+        "type": "n",
+        "table": "attack_events",
+        "deferred": false
+      },
+      {
+        "def": "NOT NULL attack_event_key_version",
+        "name": "attack_events_attack_event_key_version_not_null",
+        "type": "n",
+        "table": "attack_events",
+        "deferred": false
+      },
+      {
+        "def": "NOT NULL attack_event_uid",
+        "name": "attack_events_attack_event_uid_not_null",
+        "type": "n",
+        "table": "attack_events",
+        "deferred": false
+      },
+      {
+        "def": "CHECK (binding_state = 'BOUND'::text AND alert_episode_uid IS NOT NULL OR (binding_state = ANY (ARRAY['AMBIGUOUS'::text, 'UNBOUND'::text])) AND alert_episode_uid IS NULL)",
+        "name": "attack_events_binding_check",
+        "type": "c",
+        "table": "attack_events",
+        "deferred": false
+      },
+      {
+        "def": "CHECK (binding_state = ANY (ARRAY['BOUND'::text, 'AMBIGUOUS'::text, 'UNBOUND'::text]))",
+        "name": "attack_events_binding_state_check",
+        "type": "c",
+        "table": "attack_events",
+        "deferred": false
+      },
+      {
+        "def": "NOT NULL binding_state",
+        "name": "attack_events_binding_state_not_null",
+        "type": "n",
+        "table": "attack_events",
+        "deferred": false
+      },
+      {
+        "def": "CHECK (btrim(city_key) <> ''::text)",
+        "name": "attack_events_city_check",
+        "type": "c",
+        "table": "attack_events",
+        "deferred": false
+      },
+      {
+        "def": "NOT NULL city_key",
+        "name": "attack_events_city_key_not_null",
+        "type": "n",
+        "table": "attack_events",
+        "deferred": false
+      },
+      {
+        "def": "NOT NULL correction_provenance",
+        "name": "attack_events_correction_provenance_not_null",
+        "type": "n",
+        "table": "attack_events",
+        "deferred": false
+      },
+      {
+        "def": "NOT NULL created_at",
+        "name": "attack_events_created_at_not_null",
+        "type": "n",
+        "table": "attack_events",
+        "deferred": false
+      },
+      {
+        "def": "FOREIGN KEY (created_by_run_id) REFERENCES ingestion_runs(run_id) ON DELETE RESTRICT",
+        "name": "attack_events_created_by_run_id_fkey",
+        "type": "f",
+        "table": "attack_events",
+        "deferred": false
+      },
+      {
+        "def": "FOREIGN KEY (current_classification_uid) REFERENCES attack_event_classifications(classification_uid) ON DELETE RESTRICT",
+        "name": "attack_events_current_classification_uid_fkey",
+        "type": "f",
+        "table": "attack_events",
+        "deferred": false
+      },
+      {
+        "def": "NOT NULL current_classification_uid",
+        "name": "attack_events_current_classification_uid_not_null",
+        "type": "n",
+        "table": "attack_events",
+        "deferred": false
+      },
+      {
+        "def": "CHECK (historical_episode_id ~ '^[0-9a-f]{24}$'::text)",
+        "name": "attack_events_episode_id_check",
+        "type": "c",
+        "table": "attack_events",
+        "deferred": false
+      },
+      {
+        "def": "NOT NULL event_grain",
+        "name": "attack_events_event_grain_not_null",
+        "type": "n",
+        "table": "attack_events",
+        "deferred": false
+      },
+      {
+        "def": "NOT NULL event_status",
+        "name": "attack_events_event_status_not_null",
+        "type": "n",
+        "table": "attack_events",
+        "deferred": false
+      },
+      {
+        "def": "CHECK (event_grain = 'HISTORICAL_ALERT_EPISODE'::text)",
+        "name": "attack_events_grain_check",
+        "type": "c",
+        "table": "attack_events",
+        "deferred": false
+      },
+      {
+        "def": "NOT NULL historical_episode_id",
+        "name": "attack_events_historical_episode_id_not_null",
+        "type": "n",
+        "table": "attack_events",
+        "deferred": false
+      },
+      {
+        "def": "UNIQUE (city_key, historical_episode_id)",
+        "name": "attack_events_historical_episode_unique",
+        "type": "u",
+        "table": "attack_events",
+        "deferred": false
+      },
+      {
+        "def": "CHECK (alert_end_at > alert_start_at)",
+        "name": "attack_events_interval_check",
+        "type": "c",
+        "table": "attack_events",
+        "deferred": false
+      },
+      {
+        "def": "CHECK (attack_event_key ~ '^[0-9a-f]{64}$'::text)",
+        "name": "attack_events_key_format_check",
+        "type": "c",
+        "table": "attack_events",
+        "deferred": false
+      },
+      {
+        "def": "CHECK (attack_event_key_version = 'attack-event-key-v1'::text)",
+        "name": "attack_events_key_version_check",
+        "type": "c",
+        "table": "attack_events",
+        "deferred": false
+      },
+      {
+        "def": "PRIMARY KEY (attack_event_uid)",
+        "name": "attack_events_pkey",
+        "type": "p",
+        "table": "attack_events",
+        "deferred": false
+      },
+      {
+        "def": "CHECK (event_status = ANY (ARRAY['ACTIVE'::text, 'WITHDRAWN'::text, 'SUPERSEDED'::text]))",
+        "name": "attack_events_status_check",
+        "type": "c",
+        "table": "attack_events",
+        "deferred": false
+      },
+      {
+        "def": "NOT NULL updated_at",
+        "name": "attack_events_updated_at_not_null",
+        "type": "n",
+        "table": "attack_events",
+        "deferred": false
+      },
+      {
+        "def": "FOREIGN KEY (updated_by_run_id) REFERENCES ingestion_runs(run_id) ON DELETE RESTRICT",
+        "name": "attack_events_updated_by_run_id_fkey",
+        "type": "f",
+        "table": "attack_events",
+        "deferred": false
+      },
+      {
+        "def": "NOT NULL checked_at",
+        "name": "ingestion_checkpoints_checked_at_not_null",
+        "type": "n",
+        "table": "ingestion_checkpoints",
+        "deferred": false
+      },
+      {
+        "def": "NOT NULL checkpoint_id",
+        "name": "ingestion_checkpoints_checkpoint_id_not_null",
+        "type": "n",
+        "table": "ingestion_checkpoints",
+        "deferred": false
+      },
+      {
+        "def": "CHECK (checkpoint_kind = ANY (ARRAY['bootstrap'::text, 'poll'::text]))",
+        "name": "ingestion_checkpoints_checkpoint_kind_check",
+        "type": "c",
+        "table": "ingestion_checkpoints",
+        "deferred": false
+      },
+      {
+        "def": "NOT NULL checkpoint_kind",
+        "name": "ingestion_checkpoints_checkpoint_kind_not_null",
+        "type": "n",
+        "table": "ingestion_checkpoints",
+        "deferred": false
+      },
+      {
+        "def": "NOT NULL checkpoint_seq",
+        "name": "ingestion_checkpoints_checkpoint_seq_not_null",
+        "type": "n",
+        "table": "ingestion_checkpoints",
+        "deferred": false
+      },
+      {
+        "def": "CHECK (btrim(city_key) <> ''::text)",
+        "name": "ingestion_checkpoints_city_key_check",
+        "type": "c",
+        "table": "ingestion_checkpoints",
+        "deferred": false
+      },
+      {
+        "def": "NOT NULL city_key",
+        "name": "ingestion_checkpoints_city_key_not_null",
+        "type": "n",
+        "table": "ingestion_checkpoints",
+        "deferred": false
+      },
+      {
+        "def": "CHECK (NOT continuity_verified OR continuity_method IS NOT NULL)",
+        "name": "ingestion_checkpoints_continuity_method_check",
+        "type": "c",
+        "table": "ingestion_checkpoints",
+        "deferred": false
+      },
+      {
+        "def": "NOT NULL continuity_verified",
+        "name": "ingestion_checkpoints_continuity_verified_not_null",
+        "type": "n",
+        "table": "ingestion_checkpoints",
+        "deferred": false
+      },
+      {
+        "def": "NOT NULL created_at",
+        "name": "ingestion_checkpoints_created_at_not_null",
+        "type": "n",
+        "table": "ingestion_checkpoints",
+        "deferred": false
+      },
+      {
+        "def": "FOREIGN KEY (created_by_run_id) REFERENCES ingestion_runs(run_id) ON DELETE RESTRICT",
+        "name": "ingestion_checkpoints_created_by_run_id_fkey",
+        "type": "f",
+        "table": "ingestion_checkpoints",
+        "deferred": false
+      },
+      {
+        "def": "NOT NULL created_by_run_id",
+        "name": "ingestion_checkpoints_created_by_run_id_not_null",
+        "type": "n",
+        "table": "ingestion_checkpoints",
+        "deferred": false
+      },
+      {
+        "def": "CHECK (cursor IS NULL OR jsonb_typeof(cursor) = 'object'::text)",
+        "name": "ingestion_checkpoints_cursor_object_check",
+        "type": "c",
+        "table": "ingestion_checkpoints",
+        "deferred": false
+      },
+      {
+        "def": "UNIQUE (checkpoint_id, source_key, city_key, stream_key)",
+        "name": "ingestion_checkpoints_identity_stream_key",
+        "type": "u",
+        "table": "ingestion_checkpoints",
+        "deferred": false
+      },
+      {
+        "def": "NOT NULL metadata",
+        "name": "ingestion_checkpoints_metadata_not_null",
+        "type": "n",
+        "table": "ingestion_checkpoints",
+        "deferred": false
+      },
+      {
+        "def": "CHECK (jsonb_typeof(metadata) = 'object'::text)",
+        "name": "ingestion_checkpoints_metadata_object_check",
+        "type": "c",
+        "table": "ingestion_checkpoints",
+        "deferred": false
+      },
+      {
+        "def": "CHECK (previous_checkpoint_id IS NULL OR previous_checkpoint_id <> checkpoint_id)",
+        "name": "ingestion_checkpoints_no_self_previous_check",
+        "type": "c",
+        "table": "ingestion_checkpoints",
+        "deferred": false
+      },
+      {
+        "def": "CHECK (observed_record_count IS NULL OR observed_record_count >= 0)",
+        "name": "ingestion_checkpoints_observed_count_check",
+        "type": "c",
+        "table": "ingestion_checkpoints",
+        "deferred": false
+      },
+      {
+        "def": "CHECK (observed_oldest_start_at IS NULL OR observed_latest_end_at IS NULL OR observed_latest_end_at >= observed_oldest_start_at)",
+        "name": "ingestion_checkpoints_observed_interval_check",
+        "type": "c",
+        "table": "ingestion_checkpoints",
+        "deferred": false
+      },
+      {
+        "def": "PRIMARY KEY (checkpoint_id)",
+        "name": "ingestion_checkpoints_pkey",
+        "type": "p",
+        "table": "ingestion_checkpoints",
+        "deferred": false
+      },
+      {
+        "def": "CHECK (checkpoint_seq = 1 AND previous_checkpoint_id IS NULL OR checkpoint_seq > 1 AND previous_checkpoint_id IS NOT NULL)",
+        "name": "ingestion_checkpoints_previous_presence_check",
+        "type": "c",
+        "table": "ingestion_checkpoints",
+        "deferred": false
+      },
+      {
+        "def": "FOREIGN KEY (previous_checkpoint_id, source_key, city_key, stream_key) REFERENCES ingestion_checkpoints(checkpoint_id, source_key, city_key, stream_key) ON DELETE RESTRICT",
+        "name": "ingestion_checkpoints_previous_same_stream_fk",
+        "type": "f",
+        "table": "ingestion_checkpoints",
+        "deferred": false
+      },
+      {
+        "def": "CHECK (checkpoint_seq >= 1)",
+        "name": "ingestion_checkpoints_seq_check",
+        "type": "c",
+        "table": "ingestion_checkpoints",
+        "deferred": false
+      },
+      {
+        "def": "CHECK (btrim(source_key) <> ''::text)",
+        "name": "ingestion_checkpoints_source_key_check",
+        "type": "c",
+        "table": "ingestion_checkpoints",
+        "deferred": false
+      },
+      {
+        "def": "NOT NULL source_key",
+        "name": "ingestion_checkpoints_source_key_not_null",
+        "type": "n",
+        "table": "ingestion_checkpoints",
+        "deferred": false
+      },
+      {
+        "def": "CHECK (btrim(stream_key) <> ''::text)",
+        "name": "ingestion_checkpoints_stream_key_check",
+        "type": "c",
+        "table": "ingestion_checkpoints",
+        "deferred": false
+      },
+      {
+        "def": "NOT NULL stream_key",
+        "name": "ingestion_checkpoints_stream_key_not_null",
+        "type": "n",
+        "table": "ingestion_checkpoints",
+        "deferred": false
+      },
+      {
+        "def": "CHECK (ingest_committed_at IS NULL OR finished_at IS NULL OR ingest_committed_at <= finished_at)",
+        "name": "ingestion_runs_commit_before_finish_check",
+        "type": "c",
+        "table": "ingestion_runs",
+        "deferred": false
+      },
+      {
+        "def": "CHECK (ingest_committed_at IS NULL OR ingest_committed_at >= started_at)",
+        "name": "ingestion_runs_commit_time_check",
+        "type": "c",
+        "table": "ingestion_runs",
+        "deferred": false
+      },
+      {
+        "def": "CHECK (error IS NULL OR jsonb_typeof(error) = 'object'::text)",
+        "name": "ingestion_runs_error_object_check",
+        "type": "c",
+        "table": "ingestion_runs",
+        "deferred": false
+      },
+      {
+        "def": "CHECK (finished_at IS NULL OR finished_at >= started_at)",
+        "name": "ingestion_runs_finished_time_check",
+        "type": "c",
+        "table": "ingestion_runs",
+        "deferred": false
+      },
+      {
+        "def": "CHECK (github_run_attempt IS NULL OR github_run_attempt >= 1)",
+        "name": "ingestion_runs_github_attempt_check",
+        "type": "c",
+        "table": "ingestion_runs",
+        "deferred": false
+      },
+      {
+        "def": "NOT NULL parameters",
+        "name": "ingestion_runs_parameters_not_null",
+        "type": "n",
+        "table": "ingestion_runs",
+        "deferred": false
+      },
+      {
+        "def": "CHECK (jsonb_typeof(parameters) = 'object'::text)",
+        "name": "ingestion_runs_parameters_object_check",
+        "type": "c",
+        "table": "ingestion_runs",
+        "deferred": false
+      },
+      {
+        "def": "PRIMARY KEY (run_id)",
+        "name": "ingestion_runs_pkey",
+        "type": "p",
+        "table": "ingestion_runs",
+        "deferred": false
+      },
+      {
+        "def": "NOT NULL run_id",
+        "name": "ingestion_runs_run_id_not_null",
+        "type": "n",
+        "table": "ingestion_runs",
+        "deferred": false
+      },
+      {
+        "def": "CHECK (btrim(run_kind) <> ''::text)",
+        "name": "ingestion_runs_run_kind_check",
+        "type": "c",
+        "table": "ingestion_runs",
+        "deferred": false
+      },
+      {
+        "def": "NOT NULL run_kind",
+        "name": "ingestion_runs_run_kind_not_null",
+        "type": "n",
+        "table": "ingestion_runs",
+        "deferred": false
+      },
+      {
+        "def": "CHECK (btrim(schema_version) <> ''::text)",
+        "name": "ingestion_runs_schema_version_check",
+        "type": "c",
+        "table": "ingestion_runs",
+        "deferred": false
+      },
+      {
+        "def": "NOT NULL schema_version",
+        "name": "ingestion_runs_schema_version_not_null",
+        "type": "n",
+        "table": "ingestion_runs",
+        "deferred": false
+      },
+      {
+        "def": "NOT NULL started_at",
+        "name": "ingestion_runs_started_at_not_null",
+        "type": "n",
+        "table": "ingestion_runs",
+        "deferred": false
+      },
+      {
+        "def": "NOT NULL stats",
+        "name": "ingestion_runs_stats_not_null",
+        "type": "n",
+        "table": "ingestion_runs",
+        "deferred": false
+      },
+      {
+        "def": "CHECK (jsonb_typeof(stats) = 'object'::text)",
+        "name": "ingestion_runs_stats_object_check",
+        "type": "c",
+        "table": "ingestion_runs",
+        "deferred": false
+      },
+      {
+        "def": "CHECK (status = ANY (ARRAY['running'::text, 'succeeded'::text, 'failed'::text, 'cancelled'::text]))",
+        "name": "ingestion_runs_status_check",
+        "type": "c",
+        "table": "ingestion_runs",
+        "deferred": false
+      },
+      {
+        "def": "NOT NULL status",
+        "name": "ingestion_runs_status_not_null",
+        "type": "n",
+        "table": "ingestion_runs",
+        "deferred": false
+      },
+      {
+        "def": "CHECK (status = 'running'::text AND finished_at IS NULL OR status <> 'running'::text AND finished_at IS NOT NULL)",
+        "name": "ingestion_runs_status_time_check",
+        "type": "c",
+        "table": "ingestion_runs",
+        "deferred": false
+      },
+      {
+        "def": "CHECK (status <> 'succeeded'::text OR ingest_committed_at IS NOT NULL)",
+        "name": "ingestion_runs_succeeded_commit_check",
+        "type": "c",
+        "table": "ingestion_runs",
+        "deferred": false
+      }
+    ]
+  }
+}
