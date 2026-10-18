@@ -1,0 +1,51 @@
+{
+  "schema_version": 1,
+  "kind": "independent_readback_receipt",
+  "date": "2026-10-18",
+  "result": "PARTIAL_OFFLINE_VERIFIED_NOT_PROMOTION_READY",
+  "base_wip": "fcb634e07678a796f9cdf87732d354bf169af8f1",
+  "tested_implementation_commit": "1593ff0995e81cc14a537c5c94670c5fda98738d",
+  "real_production_snapshot_commit": "48fe06216f672327d02c1635b15692f14e1b2125",
+  "reference_clock": "2026-10-17T16:00:00Z",
+  "workflow_test_run": 39106830633,
+  "workflow_test_job": 117614386574,
+  "conclusion": "success",
+  "independent_readback": {
+    "run_completed_success": true,
+    "job_completed_success": true,
+    "all_steps_success": true,
+    "comparison_wip_ahead_by": 9,
+    "comparison_wip_behind_by": 0,
+    "changed_files": 6
+  },
+  "tested": {
+    "synthetic_validation_matrix": "PASS",
+    "real_pinned_snapshot_21_regions_and_23_cities": "PASS",
+    "real_pinned_kyiv_sevastopol_sources": "PASS",
+    "real_pinned_cached_ingestion_twice_deterministic": "PASS",
+    "real_pinned_no_ua_client_constructor_history_rows": "PASS",
+    "real_pinned_raion_grouping_episode_id_invariants": "PASS",
+    "monitor_self_test": "PASS",
+    "workflow_overlay_static_controls": "PASS"
+  },
+  "boundaries": [
+    "No live monitor or publisher discovery was run",
+    "No Neon, Telegram or publisher connections were performed in CI; no direct instrumentation of full main() downstream graph",
+    "The validation matrix checks local source files, not full operational monitor state/queue/KPI immutability for each negative input",
+    "No executed A/B comparison against the pre-repair full monitor run or persisted historical reference snapshots",
+    "Not an end-to-end two-independent full monitor deterministic replay",
+    "Workflow is a proposed main overlay, not promoted; no integrated operational workflow canary",
+    "No assertion that a single SUCCESS test establishes general future freshness",
+    "No proof that unrelated historical live canonical queue starvation is repaired",
+    "No proof of historical Kyiv 185 original producer equivalence"
+  ],
+  "operational_changes": {
+    "main": false,
+    "site_prod": false,
+    "operational_wip": false,
+    "neon": false,
+    "website": false,
+    "auto_monitoring": false
+  },
+  "next_gate": "Independent end-to-end offline fail-closed main() state/output hash and pre-repair A/B proof; then separately authorize guarded promotion with automatic scheduling still disabled"
+}
