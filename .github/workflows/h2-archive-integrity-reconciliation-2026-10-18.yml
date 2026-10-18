@@ -1,0 +1,33 @@
+name: H2 Archive Exact Member Reconciliation
+on:
+  push:
+    branches: [research-h2-neon-catalog-readonly-and-retention-repair-2026-10-18]
+    paths:
+      - 'research/h2_neon_catalog_reconciliation_2026-10-18/**'
+      - '.github/workflows/h2-archive-integrity-reconciliation-2026-10-18.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  independent-archive:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Verify original ZIP members, decode retained XZ and freeze receipts
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: python3 research/h2_neon_catalog_reconciliation_2026-10-18/verify_archive_integrity.py
+      - name: Upload exact verifier receipts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: h2-original-zip-member-reconciliation
+          path: |
+            research/h2_neon_catalog_reconciliation_2026-10-18/archive_exact_member_reconciliation_v2.json
+            research/h2_neon_catalog_reconciliation_2026-10-18/retention_manifest_corrected_v2.json
+            research/h2_neon_catalog_reconciliation_2026-10-18/archive_git_evidence_receipt_v2.json
+          retention-days: 30
