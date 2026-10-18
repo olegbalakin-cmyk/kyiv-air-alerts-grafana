@@ -25,7 +25,7 @@ jobs:
           set -euo pipefail
           git fetch --no-tags origin '+refs/heads/main:refs/remotes/origin/main'
           git fetch --no-tags origin '+refs/heads/*:refs/remotes/origin/*'
-          test "$(git rev-parse origin/main)" = "f6706a6691d786df2f1056045389964139dc1018"
+          test "$(git rev-parse origin/main:.github/workflows/explosion-monitor-wip.yml)" = "1bf3385b3438a0ed471375db446ab08132d5bd87"
           test "$(git rev-parse origin/multicity-wip-2026-09-16)" = "1a8b57553ba66319db326d65080ade93ae6ca01c"
       - name: Install proof-only dependencies
         run: python -m pip install --disable-pip-version-check --no-input PyYAML==6.0.2 wcmatch==10.1
