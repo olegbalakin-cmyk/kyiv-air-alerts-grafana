@@ -40,6 +40,9 @@ class PersistenceContractError(RuntimeError):
     pass
 
 
+_EXPECTED_TIP_NOT_SUPPLIED = object()
+
+
 def canonical_json_bytes(value: Any) -> bytes:
     return json.dumps(
         value,
@@ -981,7 +984,12 @@ def persist_episode_classification(
     record: dict[str, Any],
     *,
     fault_after: str | None = None,
+    expected_current_tip: str | None | object = _EXPECTED_TIP_NOT_SUPPLIED,
 ) -> dict[str, Any]:
+    if expected_current_tip is _EXPECTED_TIP_NOT_SUPPLIED:
+        raise PersistenceContractError("expected_current_tip is required for CAS")
+    if expected_current_tip is not None and not str(expected_current_tip).strip():
+        raise PersistenceContractError("expected_current_tip cannot be empty")
     lock_key = (
         f"{record['city_key']}|{record['historical_episode_id']}|"
         f"{record['alert_start_utc_microseconds']}|{record['alert_end_utc_microseconds']}"
@@ -992,6 +1000,14 @@ def persist_episode_classification(
         parent_uid = _parent_binding(cur, record)
         current = _current_tip(cur, record)
         existing = _existing_classification(cur, record["classification_key"])
+        actual_tip = current["classification_uid"] if current is not None else None
+        # An exact current-tip retry is idempotent; it is not a new CAS revision.
+        exact_current_retry = (existing is not None and
+                               str(existing["classification_uid"]) == actual_tip)
+        if not exact_current_retry and actual_tip != expected_current_tip:
+            raise PersistenceContractError(
+                f"STALE_EXPECTED_TIP: expected={expected_current_tip!r} actual={actual_tip!r}"
+            )
 
         if existing is not None:
             _assert_existing_classification(existing, record)
@@ -1054,6 +1070,8 @@ def persist_episode_classification(
             record,
             classification_uid=classification_uid,
         )
+        if fault_after == "source":
+            raise RuntimeError("FORCED_PERSISTENCE_FAILURE_AFTER_SOURCE")
 
         return {
             "classification_uid": classification_uid,
@@ -1075,6 +1093,7 @@ def persist_due_episode_classifications(
     coverage_by_city: dict[str, bool],
     dsn: str | None = None,
     connection=None,
+    expected_tips: dict[str, str | None] | None = None,
 ) -> dict[str, Any]:
     city_keys = sorted(due)
     result: dict[str, Any] = {
@@ -1092,12 +1111,18 @@ def persist_due_episode_classifications(
         "records": [],
     }
     if connection is None and not dsn:
+        if any(coverage_by_city.get(c) and due.get(c) for c in city_keys):
+            raise PersistenceContractError("ATTACK_EVENT_DATABASE_URL_NOT_CONFIGURED")
         result["reason"] = "ATTACK_EVENT_DATABASE_URL_NOT_CONFIGURED"
         return result
+    if expected_tips is None and any(coverage_by_city.get(c) and due.get(c) for c in city_keys):
+        raise PersistenceContractError("EXPECTED_TIPS_NOT_SUPPLIED: fail closed")
 
     origin = _origin_context()
     own_connection = connection is None
-    conn = connection or psycopg.connect(str(dsn), autocommit=False)
+    # An owned connection starts no implicit outer transaction. Each episode commits
+    # on exit from persist_episode_classification's conn.transaction().
+    conn = connection if connection is not None else psycopg.connect(str(dsn), autocommit=True)
     try:
         for city_key in city_keys:
             city_due = due.get(city_key) or []
@@ -1112,7 +1137,12 @@ def persist_due_episode_classifications(
                     queue,
                     origin=origin,
                 )
-                persisted = persist_episode_classification(conn, record)
+                if record["historical_episode_id"] not in expected_tips:
+                    raise PersistenceContractError("EXPECTED_TIP_MISSING_FOR_EPISODE")
+                persisted = persist_episode_classification(
+                    conn, record,
+                    expected_current_tip=expected_tips[record["historical_episode_id"]],
+                )
                 result["episodes_persisted"] += 1
                 result["classification_inserts"] += int(
                     persisted["classification_inserted"]
