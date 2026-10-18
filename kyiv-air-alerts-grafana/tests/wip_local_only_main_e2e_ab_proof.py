@@ -299,6 +299,11 @@ def worker(args):
             "--production-qa-file", str(root / "data" / "dashboard_qa.json"),
             "--kyiv-alerts-file", str(root / "data" / "alerts_combined.json"),
             "--sevastopol-events-file", str(root / "data" / "sevastopol_events.json")]
+    # Historical A predates the new QA/dashboard CLI switches. Both consume
+    # byte-identical local inputs; only B's source gate accepts those switches.
+    if args.variant == "A":
+        argv = [token for i, token in enumerate(argv)
+                if i not in (5, 6, 7, 8)]
     sys.argv = argv
     try:
         with contextlib.redirect_stdout(stdout), contextlib.redirect_stderr(stderr):
