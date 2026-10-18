@@ -57,7 +57,7 @@ def schema(c):
                "attack_event_sources":"attack_event_source_uid"}[table]
         specs = [f"{uid} uuid PRIMARY KEY DEFAULT gen_random_uuid()"]
         for field in cols:
-            if field in ("classification_uid", "attack_event_uid", "attack_event_source_uid"): continue
+            if field == uid: continue
             kind = "text"
             if field.endswith("_at") or field in ("alert_start_at","alert_end_at","source_timestamp","event_timestamp_if_stated","classified_at"):
                 kind = "timestamptz"
