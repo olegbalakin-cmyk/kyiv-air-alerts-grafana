@@ -1,0 +1,125 @@
+{
+  "scope": "Static reachable-path classification with separate observed-run proof; not blanket safety certification",
+  "baseline": "1a8b57553ba66319db326d65080ade93ae6ca01c",
+  "patch_only_branch": "proof-casualty-ukrainealarm-single-owner-2026-10-18",
+  "accepted_S1_S2_isolated": "f22c64f5fb55d690f50c60db9d1b203d0e7faf21",
+  "S3_S4": "INCOMPLETE_EXISTING_ACCEPTED_GATE",
+  "definitions": {
+    "EVENT_CREATED": "Whether a GitHub event is created",
+    "WORKFLOW_ELIGIBLE": "Whether branch/path/ref filters admit the event",
+    "JOB_EXECUTABLE": "Whether job can run under source workflow definitions",
+    "STEP_EXECUTABLE": "Whether tokenized step can run",
+    "API_CALL_POSSIBLE": "Static source/token path permits network request",
+    "API_CALL_OBSERVED": "Actual UkraineAlarm network request independently recorded"
+  },
+  "cases": [
+    {
+      "case": "Scheduled casualty GITHUB_TOKEN push",
+      "EVENT_CREATED": true,
+      "WORKFLOW_ELIGIBLE": false,
+      "JOB_EXECUTABLE": false,
+      "STEP_EXECUTABLE": false,
+      "API_CALL_POSSIBLE": false,
+      "API_CALL_OBSERVED": false,
+      "qualification": "Standard GITHUB_TOKEN push recursion suppression; last successful workflow uses actions/checkout default token and contents:write. Applies to subsequent push only, not its scheduled casualty job. No observed downstream full-site run directly attributable."
+    },
+    {
+      "case": "User-authored casualty WIP push",
+      "EVENT_CREATED": true,
+      "WORKFLOW_ELIGIBLE": true,
+      "JOB_EXECUTABLE": true,
+      "STEP_EXECUTABLE": true,
+      "API_CALL_POSSIBLE": true,
+      "API_CALL_OBSERVED": null,
+      "qualification": "Operational full-site-wip.yml paths include data/casualties/** and jobs.build tokenized apply_ukrainealarm_bridge.py"
+    },
+    {
+      "case": "PAT-authenticated casualty WIP push",
+      "EVENT_CREATED": true,
+      "WORKFLOW_ELIGIBLE": true,
+      "JOB_EXECUTABLE": true,
+      "STEP_EXECUTABLE": true,
+      "API_CALL_POSSIBLE": true,
+      "API_CALL_OBSERVED": null,
+      "qualification": "PAT does not inherit standard GITHUB_TOKEN workflow-run suppression; no live PAT push performed"
+    },
+    {
+      "case": "GitHub-App-authenticated casualty WIP push",
+      "EVENT_CREATED": true,
+      "WORKFLOW_ELIGIBLE": true,
+      "JOB_EXECUTABLE": true,
+      "STEP_EXECUTABLE": true,
+      "API_CALL_POSSIBLE": true,
+      "API_CALL_OBSERVED": null,
+      "qualification": "App token does not inherit standard GITHUB_TOKEN workflow-run suppression; no live push performed"
+    },
+    {
+      "case": "Original full-site WIP manual dispatch",
+      "EVENT_CREATED": true,
+      "WORKFLOW_ELIGIBLE": true,
+      "JOB_EXECUTABLE": true,
+      "STEP_EXECUTABLE": true,
+      "API_CALL_POSSIBLE": true,
+      "API_CALL_OBSERVED": null,
+      "qualification": "workflow_dispatch exists; original WIP build has no job hold; tokenized bridge step"
+    },
+    {
+      "case": "Isolated candidate guarded full-site WIP dispatch",
+      "EVENT_CREATED": true,
+      "WORKFLOW_ELIGIBLE": true,
+      "JOB_EXECUTABLE": false,
+      "STEP_EXECUTABLE": false,
+      "API_CALL_POSSIBLE": false,
+      "API_CALL_OBSERVED": false,
+      "qualification": "Candidate proof-only full-site-wip.yml has jobs.build if:false and bridge step if:false; not operationally deployed"
+    },
+    {
+      "case": "Scheduled casualty --local-only",
+      "EVENT_CREATED": true,
+      "WORKFLOW_ELIGIBLE": true,
+      "JOB_EXECUTABLE": true,
+      "STEP_EXECUTABLE": true,
+      "API_CALL_POSSIBLE": false,
+      "API_CALL_OBSERVED": false,
+      "qualification": "Successful scheduled run 39099635869; source does not call poll_ukrainealarm on local-only path"
+    },
+    {
+      "case": "Original casualty CLI without --local-only plus available token",
+      "EVENT_CREATED": null,
+      "WORKFLOW_ELIGIBLE": null,
+      "JOB_EXECUTABLE": null,
+      "STEP_EXECUTABLE": true,
+      "API_CALL_POSSIBLE": true,
+      "API_CALL_OBSERVED": null,
+      "qualification": "Original argparse default false -> poll_all(false) -> poll_ukrainealarm() -> UkraineAlarmClient(token)"
+    },
+    {
+      "case": "Repaired casualty CLI without --local-only",
+      "EVENT_CREATED": null,
+      "WORKFLOW_ELIGIBLE": null,
+      "JOB_EXECUTABLE": null,
+      "STEP_EXECUTABLE": false,
+      "API_CALL_POSSIBLE": false,
+      "API_CALL_OBSERVED": false,
+      "qualification": "Proof-only parser.error before state read; offline runtime CI pending"
+    },
+    {
+      "case": "Historical unguarded Git ref manual execution",
+      "EVENT_CREATED": true,
+      "WORKFLOW_ELIGIBLE": null,
+      "JOB_EXECUTABLE": null,
+      "STEP_EXECUTABLE": null,
+      "API_CALL_POSSIBLE": true,
+      "API_CALL_OBSERVED": null,
+      "qualification": "Ref-scoped dispatch/legacy workflows remain under S3/S4 review; do not claim global guard"
+    }
+  ],
+  "external_semantics": "https://docs.github.com/en/actions/how-tos/write-workflows/choose-when-workflows-run/trigger-a-workflow",
+  "changes_to_operational_branches": false,
+  "residual_hazards": [
+    "Operational WIP full-site job remains tokenized/reachable via non-GITHUB_TOKEN push and manual dispatch",
+    "Seven-workflow guard not promoted",
+    "S3/S4 workflow_run cascading and historical selected refs remain incomplete",
+    "No real UkraineAlarm requests sent in proof"
+  ]
+}
