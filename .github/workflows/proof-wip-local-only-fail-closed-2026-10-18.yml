@@ -7,6 +7,7 @@ on:
       - "kyiv-air-alerts-grafana/scripts/cached_alert_source_gate.py"
       - "kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py"
       - "kyiv-air-alerts-grafana/tests/test_cached_alert_source_gate.py"
+      - "kyiv-air-alerts-grafana/tests/test_cached_bridge_pinned_ingestion.py"
       - ".github/workflows/proof-wip-local-only-fail-closed-2026-10-18.yml"
 
 permissions:
@@ -63,6 +64,10 @@ jobs:
           assert receipt["mode"] == "cached_bridge"
           print(receipt)
           PY
+      - name: Read-only pinned monitor ingestion parity and network isolation
+        working-directory: kyiv-air-alerts-grafana
+        run: python tests/test_cached_bridge_pinned_ingestion.py
+
       - name: Offline monitor selftest
         working-directory: kyiv-air-alerts-grafana
         env:
