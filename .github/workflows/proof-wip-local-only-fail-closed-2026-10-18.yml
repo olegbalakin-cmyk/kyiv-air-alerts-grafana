@@ -1,0 +1,84 @@
+name: Isolated WIP Local-Only Source Gate Proof
+on:
+  push:
+    branches:
+      - proof-wip-local-only-fail-closed-2026-10-18
+    paths:
+      - "kyiv-air-alerts-grafana/scripts/cached_alert_source_gate.py"
+      - "kyiv-air-alerts-grafana/scripts/monitor_explosion_candidates.py"
+      - "kyiv-air-alerts-grafana/tests/test_cached_alert_source_gate.py"
+      - ".github/workflows/proof-wip-local-only-fail-closed-2026-10-18.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  offline-proof:
+    if: github.ref == 'refs/heads/proof-wip-local-only-fail-closed-2026-10-18'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Read-only proof checkout
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - name: Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Dependency install for isolated self-tests
+        working-directory: kyiv-air-alerts-grafana
+        run: pip install -r requirements.txt
+      - name: Source gate offline unit matrix
+        working-directory: kyiv-air-alerts-grafana
+        env:
+          PYTHONPATH: scripts
+        run: python -m unittest discover -s tests -p test_cached_alert_source_gate.py -v
+      - name: Pinned real production inputs (read-only)
+        run: |
+          PROD_INPUT_SHA=48fe06216f672327d02c1635b15692f14e1b2125
+          git fetch --no-tags origin "$PROD_INPUT_SHA"
+          mkdir -p /tmp/ukrainealarm-proof
+          for file in ukrainealarm_bridge.json dashboard_data.json alerts_combined.json sevastopol_events.json dashboard_qa.json; do
+            git show "$PROD_INPUT_SHA:kyiv-air-alerts-grafana/data/$file" > "/tmp/ukrainealarm-proof/$file"
+          done
+      - name: Real pinned production gate at recorded freshness
+        working-directory: kyiv-air-alerts-grafana
+        run: |
+          python - <<'PY'
+          from datetime import datetime, timezone
+          from pathlib import Path
+          from scripts.cached_alert_source_gate import validate_cached_source_files
+          root=Path("/tmp/ukrainealarm-proof")
+          receipt=validate_cached_source_files(
+              bridge_path=root/"ukrainealarm_bridge.json",
+              dashboard_path=root/"dashboard_data.json",
+              kyiv_alerts_path=root/"alerts_combined.json",
+              sevastopol_events_path=root/"sevastopol_events.json",
+              qa_path=root/"dashboard_qa.json",
+              now=datetime(2026,10,17,16,0,0,tzinfo=timezone.utc))
+          assert receipt["required_region_count"] == 21
+          assert receipt["production_city_count"] == 23
+          assert receipt["mode"] == "cached_bridge"
+          print(receipt)
+          PY
+      - name: Offline monitor selftest
+        working-directory: kyiv-air-alerts-grafana
+        env:
+          UKRAINEALARM_API_TOKEN: ""
+          ATTACK_EVENT_DATABASE_URL: ""
+        run: python scripts/monitor_explosion_candidates.py --self-test
+      - name: Proposed workflow structural verification
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          w=Path("research/wip_local_only_proposed_main_workflow_2026-10-18.txt").read_text()
+          assert "--local-only" in w
+          assert "cached_bridge" in w
+          assert "UKRAINEALARM_API_TOKEN" not in w
+          assert "PROD_INPUT_SHA" in w
+          assert "cached_alert_source_gate.py" in w
+          assert "if: \${{ github.event_name == 'workflow_dispatch' }}" in w
+          print("workflow structural contract PASS")
+          PY
