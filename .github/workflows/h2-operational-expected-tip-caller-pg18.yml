@@ -54,6 +54,25 @@ jobs:
           python -m py_compile kyiv-air-alerts-grafana/tests/test_h2_operational_expected_tip_pg18.py
       - name: Execute canonical offline expected-tip PG18
         run: python kyiv-air-alerts-grafana/tests/test_h2_operational_expected_tip_pg18.py
+      - name: Verify frozen evidence and source blobs independently
+        run: |
+          python - <<'PY'
+          import json, hashlib, subprocess
+          from pathlib import Path
+          path=Path("research/h2_operational_expected_tip_caller_proof_2026-10-18.json")
+          raw=path.read_bytes()
+          proof=json.loads(raw)
+          assert proof["verdict"].startswith("PARTIAL_")
+          assert proof["tests"]["monitor_main_executed"] is False
+          assert len(proof["independent_runs"])==2
+          print("PROOF_BYTE_COUNT:",len(raw))
+          print("PROOF_SHA256:",hashlib.sha256(raw).hexdigest())
+          print("PROOF_GIT_BLOB:",subprocess.check_output(["git","hash-object",str(path)],text=True).strip())
+          for path, expected in proof["implementation"]["modified_files"].items():
+              actual=subprocess.check_output(["git","hash-object",path],text=True).strip()
+              assert actual==expected,(path,actual,expected)
+              print("VERIFIED_CODE_BLOB:",path,actual)
+          PY
       - uses: actions/upload-artifact@v4
         if: always()
         with:
