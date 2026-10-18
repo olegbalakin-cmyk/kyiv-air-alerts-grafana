@@ -85,6 +85,26 @@ jobs:
           assert all(p['cases'][x]['status']=='PASS' for x in ['M'+str(n) for n in range(1,11)])
           assert all(p['cases'][x]['status']=='PASS' for x in ['N1_BYPASS_PERSISTENCE_DETECTED','N2_BAD_PERSISTED_JSON_DETECTED','N3_DUPLICATE_CURRENT_TIP_DETECTED'])
           PY
+      - name: Independently hash frozen proof and exact tested code blobs
+        run: |
+          python - <<'PY'
+          import hashlib,json,subprocess
+          from pathlib import Path
+          p=Path("research/h2_monitor_main_pg18_e2e_proof_2026-10-18.json")
+          raw=p.read_bytes()
+          x=json.loads(raw)
+          assert x["verdict"]=="PASS_OFFLINE_REDUCED_SYNTHETIC_PG18"
+          assert x["execution"]["A"]["conclusion"]==x["execution"]["B"]["conclusion"]=="success"
+          assert x["execution"]["source_blobs_equal_A_B"]
+          print("FROZEN_PROOF_BYTES",len(raw))
+          print("FROZEN_PROOF_SHA256",hashlib.sha256(raw).hexdigest())
+          print("FROZEN_PROOF_GIT_BLOB",subprocess.check_output(["git","hash-object",str(p)],text=True).strip())
+          for path,sha in sorted(x["source_blobs_A_B"].items()):
+              actual=subprocess.check_output(["git","hash-object",path],text=True).strip()
+              assert actual==sha,(path,sha,actual)
+              print("FROZEN_TESTED_BLOB",path,actual)
+          assert x["safety"]["neon_sql_operations"]==0
+          PY
       - uses: actions/upload-artifact@v4
         if: always()
         with:
