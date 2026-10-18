@@ -1,0 +1,37 @@
+{
+  "schema_type": "PARTIALLY_RECONSTRUCTED_SCHEMA",
+  "expected_pg_version": "18.6",
+  "catalog_counts": {
+    "objects": 8,
+    "tables": 7,
+    "views": 1,
+    "columns": 185,
+    "constraints": 221,
+    "indexes": 30
+  },
+  "baseline_enforcement_gaps": [
+    {
+      "name": "UNIQUE(supersedes_classification_uid)",
+      "observed_neon": "ABSENT",
+      "fixture": "ABSENT"
+    },
+    {
+      "name": "append-only trigger or RLS",
+      "observed_neon": "ABSENT",
+      "fixture": "ABSENT"
+    },
+    {
+      "name": "one-current-tip independent arbiter",
+      "observed_neon": "ABSENT",
+      "fixture": "ABSENT"
+    }
+  ],
+  "known_missing": [
+    "exact current_ingestion_checkpoints view body",
+    "runtime grants/ACL/ownership equivalence",
+    "function search_path and execute grants"
+  ],
+  "earlier_reduced_fixture_contrast": "Prior PG18 reduced test fixture used synthetic constraints, including unique successors; cannot infer actual Neon equivalent.",
+  "execution": "NOT_EXECUTED_THIS_CHECKPOINT",
+  "limitations": "This SQL was derived from frozen static catalog; untested against PG18 and may require fixture corrections. Do not claim exact DDL equivalence."
+}
