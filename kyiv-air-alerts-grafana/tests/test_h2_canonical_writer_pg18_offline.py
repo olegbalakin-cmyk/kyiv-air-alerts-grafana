@@ -514,6 +514,37 @@ if os.environ.get("H2_TEST_PHASE") == "post_fix":
             "batch_overall_success_on_failure":False,
             "safe_retry":True,"final_counts":counts_independent()}
     check("MULTI_EPISODE_PARTIAL_COMMIT",multi_partial)
+
+    def commit_failure_actual_server():
+        setup()
+        with conn() as c:
+            c.execute("""CREATE FUNCTION pg_temp.unavailable() RETURNS trigger
+                          LANGUAGE plpgsql AS $ BEGIN
+                          RAISE EXCEPTION 'SYNTHETIC_DEFERRED_COMMIT_FAILURE';
+                          END $""")
+            # Use a persistent public trigger function because the writer and
+            # deferred trigger execute on the same connection.
+            c.execute("""CREATE OR REPLACE FUNCTION public.h2_synthetic_commit_fail()
+                         RETURNS trigger LANGUAGE plpgsql AS $
+                         BEGIN RAISE EXCEPTION 'SYNTHETIC_DEFERRED_COMMIT_FAILURE';
+                         END $""")
+            c.execute("""CREATE CONSTRAINT TRIGGER h2_commit_failure
+                         AFTER INSERT ON public.attack_event_classifications
+                         DEFERRABLE INITIALLY DEFERRED FOR EACH ROW
+                         EXECUTE FUNCTION public.h2_synthetic_commit_fail()""")
+            try:
+                try:_batch_call(c,[_batch_source(eid)])
+                except psycopg.Error as exc:
+                    assert "SYNTHETIC_DEFERRED_COMMIT_FAILURE" in str(exc)
+                else:raise AssertionError("writer falsely acknowledged failed server commit")
+            finally:
+                c.execute("DROP TRIGGER h2_commit_failure ON public.attack_event_classifications")
+                c.execute("DROP FUNCTION public.h2_synthetic_commit_fail()")
+        assert counts_independent()==(0,0,0)
+        receipts["REAL_SERVER_DEFERRED_COMMIT_FAILURE"]={"no_false_ack":True,
+            "postgres_commit_error_observed":True,"independent_readback":counts_independent()}
+    check("REAL_SERVER_DEFERRED_COMMIT_FAILURE",commit_failure_actual_server)
+
     # Negative control: restore the old inside-transaction commit status, ONLY
     # in memory, on a new fixture. Positive batch must reject it.
     def negative_early_ack():
