@@ -267,6 +267,7 @@ with conn() as c:
     # connection now leaks a classification row, proving the rollback test
     # detects absent transaction protection. Delete exact synthetic row.
     weakened_tx_ns = dict(vars(writer))
+    weakened_tx_ns["contextlib"] = contextlib
     exec(source.replace(tx_gate,"with contextlib.nullcontext():"),weakened_tx_ns)
     weakened_tx = weakened_tx_ns["persist_episode_classification"]
     candidate_tx = record("tx-disabled",verdict="NO_CONFIRMED_EVENT")
