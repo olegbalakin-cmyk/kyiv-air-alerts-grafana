@@ -5054,6 +5054,24 @@ def main() -> None:
     # canonical-parent synchronization were still running.
     followup_cutoff = now_utc()
     due = due_checks(state, followup_cutoff)
+    # Capture canonical revision authority before candidate discovery/classification.
+    # Never refresh these observations merely to bypass a stale CAS rejection.
+    from attack_event_tip_snapshot import observe_expected_tips
+    persistence_due = select_persistence_due(
+        due,
+        parent_ready_keys,
+        parent_gate_enabled=canary_cutoff is not None,
+    )
+    if persistence_enabled and persistence_due:
+        eligible_snapshot_due = {
+            city: rows for city, rows in persistence_due.items()
+            if city not in errors
+        }
+        expected_snapshots = observe_expected_tips(
+            eligible_snapshot_due, dsn=os.environ.get("ATTACK_EVENT_DATABASE_URL"),
+        )
+    else:
+        expected_snapshots = None
     searches = {}
     composition_target_episode_ids = set()
     new_candidates = 0
@@ -5123,17 +5141,12 @@ def main() -> None:
         for city_key in CITY_CONFIG
     }
 
-    persistence_due = select_persistence_due(
-        due,
-        parent_ready_keys,
-        parent_gate_enabled=canary_cutoff is not None,
-    )
-
     canonical_persistence = persist_due_episode_classifications(
         queue=queue,
         due=persistence_due,
         coverage_by_city=persistence_coverage_by_city,
         dsn=os.environ.get("ATTACK_EVENT_DATABASE_URL"),
+        expected_snapshots=expected_snapshots,
     )
     (
         due_checks_at_cutoff,
