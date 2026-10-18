@@ -1,0 +1,55 @@
+name: H2 observed Neon partial-schema offline PG18 smoke
+on:
+  push:
+    branches: [research-h2-exact-neon-schema-offline-e2e-2026-10-18]
+    paths:
+      - 'research/h2_neon_catalog_reconciliation_2026-10-18/neon_observed_partial_schema_fixture_v1.sql'
+      - 'research/h2_monitor_main_pg18_e2e_AB_receipts_repaired_v2_2026-10-18.json.xz.b64'
+      - 'research/h2_monitor_main_pg18_e2e_AB_retention_manifest_corrected_v2_2026-10-18.json'
+      - 'research/h2_verify_AB_retention_v2_2026-10-18.py'
+      - '.github/workflows/h2-observed-partial-schema-offline-smoke-2026-10-18.yml'
+permissions:
+  contents: read
+jobs:
+  isolated-offline:
+    name: Synthetic PG18 ${{ matrix.copy }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        copy: [A, B]
+    timeout-minutes: 12
+    services:
+      postgres:
+        image: postgres:18
+        env:
+          POSTGRES_DB: h2_offline
+          POSTGRES_USER: h2_local
+          POSTGRES_PASSWORD: synthetic_only
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U h2_local -d h2_offline"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Verify archived source receipts from Git alone
+        run: python3 research/h2_verify_AB_retention_v2_2026-10-18.py
+      - name: Apply observed partial Neon schema on fresh PostgreSQL 18
+        run: |
+          docker run --rm --network host \
+            -v "$GITHUB_WORKSPACE:/workspace:ro" \
+            -e PGPASSWORD=synthetic_only \
+            postgres:18 psql -X -v ON_ERROR_STOP=1 \
+              -h 127.0.0.1 -U h2_local -d h2_offline \
+              -f /workspace/research/h2_neon_catalog_reconciliation_2026-10-18/neon_observed_partial_schema_fixture_v1.sql
+      - name: Emit structural smoke receipt (does not prove monitor E2E)
+        run: |
+          docker run --rm --network host \
+            -e PGPASSWORD=synthetic_only postgres:18 \
+            psql -XAt -h 127.0.0.1 -U h2_local -d h2_offline \
+              -c "SELECT current_setting('server_version'), (SELECT count(*) FROM pg_class c JOIN pg_namespace n ON c.relnamespace=n.oid WHERE n.nspname='public' AND c.relkind='r' AND c.relname IN ('alert_episodes','ingestion_runs','alert_episode_sources','ingestion_checkpoints','attack_event_classifications','attack_event_sources','attack_events')), (SELECT count(*) FROM pg_constraint con JOIN pg_class c ON con.conrelid=c.oid JOIN pg_namespace n ON c.relnamespace=n.oid WHERE n.nspname='public'), (SELECT count(*) FROM pg_indexes WHERE schemaname='public'), (SELECT count(*) FROM pg_trigger t JOIN pg_class c ON t.tgrelid=c.oid WHERE NOT t.tgisinternal AND c.relnamespace='public'::regnamespace);"
