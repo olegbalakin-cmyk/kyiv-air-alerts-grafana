@@ -19,6 +19,7 @@ import requests
 from bs4 import BeautifulSoup
 
 import apply_ukrainealarm_bridge as ua
+from cached_alert_source_gate import validate_cached_source_files, SourceGateError
 import live_parent_ordering
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -4989,6 +4990,8 @@ def main() -> None:
     parser.add_argument("--self-test", action="store_true")
     parser.add_argument("--local-only", action="store_true", help="Read completed alerts from a cached UkraineAlarm bridge instead of calling the API.")
     parser.add_argument("--bridge-file", default=str(BRIDGE_FILE), help="Bridge JSON used with --local-only.")
+    parser.add_argument("--dashboard-data-file", default=str(DATA_DIR / "dashboard_data.json"))
+    parser.add_argument("--production-qa-file", default=str(DATA_DIR / "dashboard_qa.json"))
     parser.add_argument("--kyiv-alerts-file", default=str(KYIV_ALERTS_FILE), help="Completed Kyiv exact-city alert store.")
     parser.add_argument("--sevastopol-events-file", default=str(SEVASTOPOL_EVENTS_FILE), help="Verified completed Sevastopol event store.")
     args = parser.parse_args()
@@ -4998,6 +5001,17 @@ def main() -> None:
 
     started = now_utc()
     run_start_followup_cutoff = started
+    # Strict source acceptance precedes state loading, discovery, Neon, and writes.
+    if args.local_only:
+        validate_cached_source_files(
+            bridge_path=Path(args.bridge_file),
+            dashboard_path=Path(args.dashboard_data_file),
+            kyiv_alerts_path=Path(args.kyiv_alerts_file),
+            sevastopol_events_path=Path(args.sevastopol_events_file),
+            qa_path=Path(args.production_qa_file),
+            now=started,
+            monitor_city_keys=CITY_CONFIG,
+        )
     state = ensure_state()
     queue = load_json(QUEUE_FILE, [])
     if not isinstance(queue, list):
