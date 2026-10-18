@@ -23,7 +23,7 @@ def forbidden(key):
         calls[key]+=1;raise AssertionError("Forbidden "+key)
     return f
 class Response:
-    content=b"""<rss><channel><item><title>У Києві загинула людина після атаки дрона</title><description>У Києві після атаки дрона загинула людина</description><link>https://example.org/kyiv</link><pubDate>Sun, 18 Oct 2026 11:10:00 GMT</pubDate></item></channel></rss>"""
+    content="""<rss><channel><item><title>У Києві загинула людина після атаки дрона</title><description>У Києві після атаки дрона загинула людина</description><link>https://example.org/kyiv</link><pubDate>Sun, 18 Oct 2026 11:10:00 GMT</pubDate></item></channel></rss>""".encode("utf-8")
     def raise_for_status(self):pass
 def fake_news(url,**kwargs):
     assert url.startswith("https://news.google.com/rss/search")
