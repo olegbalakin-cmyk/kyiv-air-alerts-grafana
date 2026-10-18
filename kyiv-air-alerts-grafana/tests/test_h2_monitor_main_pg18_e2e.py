@@ -202,6 +202,7 @@ class Fixture:
         with contextlib.ExitStack() as e:
             changes = {
                 "CITY_CONFIG": {CITY: copy.deepcopy(mon.ALL_CITY_CONFIG[CITY])},
+                "ROOT": self.root,
                 "STATE_FILE": self.state_path, "QUEUE_FILE": self.queue_path,
                 "LAST_RUN_FILE": self.report_path, "BASELINE_FILE": self.baseline_path,
                 "BRIDGE_FILE": self.bridge_path,
