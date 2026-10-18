@@ -86,11 +86,40 @@ def i4():
     assert state()==(1,1,1)
 check("I4",i4)
 def i5():
+    import threading
+    import concurrent.futures
     reset()
-    d=due();a=read_due(d);b=read_due(d)
-    batch(d,a)
-    fails(lambda:batch(d,b,[legacy["_batch_source"](label="competing")]),"STALE_EXPECTED_TIP")
-    assert state()==(1,1,1)
+    d=due()
+    a=read_due(d);b=read_due(d)
+    barrier=threading.Barrier(2)
+    def attempt(label,snapshot):
+        with conn() as c:
+            pid=c.execute("SELECT pg_backend_pid()").fetchone()[0]
+            barrier.wait(timeout=8)
+            try:
+                x=w.persist_due_episode_classifications(
+                    queue=[legacy["_batch_source"](label=label)],
+                    due=d,coverage_by_city={"testcity":True},
+                    connection=c,expected_snapshots=snapshot)
+                return (pid,"ACCEPTED",x["episodes_persisted"])
+            except w.PersistenceContractError as exc:
+                if "STALE_EXPECTED_TIP" not in str(exc):raise
+                return (pid,"STALE",str(exc).split(":")[0])
+    with concurrent.futures.ThreadPoolExecutor(max_workers=2) as pool:
+        first=pool.submit(attempt,"competing-a",a)
+        second=pool.submit(attempt,"competing-b",b)
+        outcomes=[first.result(timeout=20),second.result(timeout=20)]
+    assert len({x[0] for x in outcomes})==2,outcomes
+    assert sorted(x[1] for x in outcomes)==["ACCEPTED","STALE"],outcomes
+    with conn() as c:
+        tips=c.execute("""SELECT c.classification_uid FROM public.attack_event_classifications c
+            WHERE NOT EXISTS (SELECT 1 FROM public.attack_event_classifications n
+              WHERE n.supersedes_classification_uid=c.classification_uid)""").fetchall()
+        orphans=c.execute("""SELECT count(*) FROM public.attack_event_sources s LEFT JOIN
+            public.attack_event_classifications c ON c.classification_uid=s.classification_uid
+            WHERE c.classification_uid IS NULL""").fetchone()[0]
+    assert len(tips)==1 and orphans==0 and state()==(1,1,1)
+    results["I5_CONCURRENCY_RECEIPT"]={"pids_distinct":True,"outcomes":sorted(x[1] for x in outcomes),"one_current_tip":True,"no_orphans":True}
 check("I5",i5)
 check("I6",lambda:fails(lambda:batch(d,{}),"EXPECTED_TIP_SNAPSHOT_IDENTITY_MISSING"))
 def i7():
