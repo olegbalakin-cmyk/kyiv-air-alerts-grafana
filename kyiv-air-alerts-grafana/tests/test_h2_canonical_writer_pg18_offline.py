@@ -518,16 +518,12 @@ if os.environ.get("H2_TEST_PHASE") == "post_fix":
     def commit_failure_actual_server():
         setup()
         with conn() as c:
-            c.execute("""CREATE FUNCTION pg_temp.unavailable() RETURNS trigger
-                          LANGUAGE plpgsql AS $ BEGIN
-                          RAISE EXCEPTION 'SYNTHETIC_DEFERRED_COMMIT_FAILURE';
-                          END $""")
             # Use a persistent public trigger function because the writer and
             # deferred trigger execute on the same connection.
             c.execute("""CREATE OR REPLACE FUNCTION public.h2_synthetic_commit_fail()
-                         RETURNS trigger LANGUAGE plpgsql AS $
+                         RETURNS trigger LANGUAGE plpgsql AS $body$
                          BEGIN RAISE EXCEPTION 'SYNTHETIC_DEFERRED_COMMIT_FAILURE';
-                         END $""")
+                         END $body$""")
             c.execute("""CREATE CONSTRAINT TRIGGER h2_commit_failure
                          AFTER INSERT ON public.attack_event_classifications
                          DEFERRABLE INITIALLY DEFERRED FOR EACH ROW
