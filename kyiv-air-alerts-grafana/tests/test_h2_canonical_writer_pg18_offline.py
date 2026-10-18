@@ -341,11 +341,208 @@ if os.environ.get("H2_TEST_PHASE") == "pre_fix":
         "persistence_mocked": False
     }
 
+
+if os.environ.get("H2_TEST_PHASE") == "post_fix":
+    # The whole batch path uses the genuine classifier and genuine psycopg writer.
+    # Each case begins from a fresh reduced fixture, with cross-session readback.
+    os.environ["ATTACK_EVENT_ORIGIN_COMMIT_SHA"] = "f"*40
+    os.environ["ATTACK_EVENT_ORIGIN_REF"] = "synthetic-pg18"
+    eid = "a"*24
+    def initial(c, *, label="first", status="approved_strict"):
+        q = [_batch_source(eid, label=label, status=status)]
+        return _batch_call(c, q, tip=None), q
+    def counts_independent():
+        with conn() as other:
+            return read(other)
+    def check_integrity():
+        with conn() as other:
+            rows = other.execute(
+                """SELECT c.classification_uid,s.classification_uid,
+                          e.current_classification_uid,c.verdict
+                   FROM public.attack_event_classifications c
+                   JOIN public.attack_event_sources s ON s.classification_uid=c.classification_uid
+                   JOIN public.attack_events e ON e.current_classification_uid=c.classification_uid"""
+            ).fetchall()
+            assert all(row[0]==row[1]==row[2] for row in rows),rows
+            return len(rows)
+    def t15():
+        setup()
+        with conn() as c:
+            out,q = initial(c)
+        assert out["episodes_persisted"]==1 and out["classification_inserts"]==1,out
+        assert out["event_inserts"]==1 and out["source_inserts"]==1,out
+        assert counts_independent()==(1,1,1)
+        receipts["T15"]={"counters":out,"readback":counts_independent()}
+    check("T15",t15)
+    def t16():
+        assert counts_independent()==(1,1,1)
+        assert check_integrity()==1
+        receipts["T16"]={"committed_readback":True,"relationships_exact":True}
+    check("T16",t16)
+    def t17():
+        with conn() as c:
+            ret = _batch_call(c,[_batch_source(eid)],tip=None)
+        assert ret["episodes_persisted"]==1 and ret["classification_inserts"]==0,ret
+        assert ret["source_inserts"]==0 and counts_independent()==(1,1,1)
+        receipts["T17"]={"retry":ret,"readback":counts_independent()}
+    check("T17",t17)
+    def t18():
+        with conn() as c:
+            prior = c.execute("SELECT classification_uid FROM attack_event_classifications").fetchone()[0]
+            newer = _batch_call(c,[_batch_source(eid,label="second",status="approved_sensitivity")],tip=str(prior))
+            assert newer["classification_revisions"]==1 and newer["episodes_persisted"]==1,newer
+        with conn() as other:
+            old = other.execute("SELECT classification_uid FROM attack_event_classifications WHERE supersedes_classification_uid IS NULL").fetchone()[0]
+            successor = other.execute("SELECT classification_uid,supersedes_classification_uid FROM attack_event_classifications WHERE supersedes_classification_uid IS NOT NULL").fetchone()
+            current=other.execute("SELECT current_classification_uid FROM attack_events").fetchone()[0]
+        assert old==prior and successor[1]==prior and current==successor[0]
+        assert counts_independent()==(2,2,1)
+        receipts["T18"]={"revision":newer,"prior_preserved":True,"current_tip_updated":True}
+    check("T18",t18)
+    def t19():
+        baseline=counts_independent()
+        with conn() as c:
+            prior=c.execute("SELECT classification_uid FROM attack_event_classifications WHERE supersedes_classification_uid IS NULL").fetchone()[0]
+            expect_contract(lambda:_batch_call(c,[_batch_source(eid,label="third")],tip=str(prior)))
+        assert counts_independent()==baseline
+        receipts["T19"]={"no_mutation":True}
+    check("T19",t19)
+    def fault_batch(phase):
+        setup()
+        before=counts_independent()
+        real=writer._ensure_event if phase=="classification" else writer._ensure_sources
+        def fail(*args,**kwargs):
+            raise RuntimeError("SYNTHETIC_"+phase+"_FAIL")
+        try:
+            if phase=="classification":writer._ensure_event=fail
+            else:writer._ensure_sources=fail
+            with conn() as c:
+                try:_batch_call(c,[_batch_source(eid)])
+                except RuntimeError as exc:assert "SYNTHETIC_" in str(exc)
+                else:raise AssertionError("error was silently acknowledged")
+        finally:
+            if phase=="classification":writer._ensure_event=real
+            else:writer._ensure_sources=real
+        assert counts_independent()==before
+        receipts["T20" if phase=="classification" else "T21"]={"rolled_back":True,"acknowledged":False}
+    check("T20",lambda:fault_batch("classification"))
+    check("T21",lambda:fault_batch("sources"))
+    def t22():
+        setup()
+        with conn() as c:
+            record = writer.build_episode_classification(_batch_episode(eid),[_batch_source(eid)],origin=writer._origin_context())
+            try:
+                with c.transaction():
+                    state=writer.persist_episode_classification(c,record,expected_current_tip=None)
+                    assert state["commit_state"]=="CALLER_TRANSACTION_PENDING"
+                    with conn() as outside:
+                        assert read(outside)==(0,0,0)
+                    raise RuntimeError("caller aborted")
+            except RuntimeError as exc:assert str(exc)=="caller aborted"
+        assert counts_independent()==(0,0,0)
+        receipts["T22"]={"caller_pending":True,"outside_read_before_commit":(0,0,0),"rollback_clean":True}
+    check("T22",t22)
+    def t23():
+        setup()
+        with conn() as c:
+            record=writer.build_episode_classification(_batch_episode(eid),[_batch_source(eid)],origin=writer._origin_context())
+            class CommitFailureWrapper:
+                def __init__(self,real):self.real=real;self.info=real.info
+                def cursor(self):return self.real.cursor()
+                def transaction(self):
+                    original=self.real.transaction()
+                    class Trigger:
+                        def __enter__(self):return original.__enter__()
+                        def __exit__(self,typ,val,tb):
+                            original.__exit__(typ,val,tb)
+                            # Force a commit-stage failure (after context exit)
+                            # and ensure caller never gets a false success.
+                            raise psycopg.OperationalError("SYNTHETIC_COMMIT_ACK_FAILURE")
+                    return Trigger()
+            try:
+                writer.persist_episode_classification(CommitFailureWrapper(c),record,expected_current_tip=None)
+            except psycopg.OperationalError:pass
+            else:raise AssertionError("false COMMITTED returned")
+        # This injected exception models a lost commit response, NOT a proven failed
+        # server commit. A durable readback could contain the row.
+        receipts["T23"]={"no_false_commit_ack":True,"commit_outcome":"UNCERTAIN_INJECTED_ACK_FAILURE",
+                         "independent_rows":counts_independent()}
+    check("T23",t23)
+    def t24():
+        setup()
+        with conn() as c:
+            expect_contract(lambda:writer.persist_due_episode_classifications(
+                queue=[_batch_source(eid)],due={"testcity":[(_batch_episode(eid),{})]},
+                coverage_by_city={"testcity":True},connection=c,expected_tips=None))
+            expect_contract(lambda:writer.persist_due_episode_classifications(
+                queue=[_batch_source(eid)],due={"testcity":[(_batch_episode(eid),{})]},
+                coverage_by_city={"testcity":True},connection=c,expected_tips={}))
+            expect_contract(lambda:writer.persist_due_episode_classifications(
+                queue=[_batch_source(eid)],due={"testcity":[(_batch_episode(eid),{})]},
+                coverage_by_city={"testcity":True},dsn=None))
+        assert counts_independent()==(0,0,0)
+        receipts["T24"]={"failed_closed":True,"zero_mutations":True}
+    check("T24",t24)
+    def multi_partial():
+        setup()
+        second_eid="b"*24
+        with conn() as c:
+            c.execute("""INSERT INTO public.alert_episodes
+            (legacy_episode_id,city_key,alert_type,episode_state,canonicalization_version,start_at,end_at)
+            VALUES (%s,'testcity','AIR','closed','alert-canonicalization-v1',%s,%s)""",
+            (second_eid,datetime(2026,1,1,tzinfo=timezone.utc),
+             datetime(2026,1,1,0,20,tzinfo=timezone.utc)))
+            try:
+                writer.persist_due_episode_classifications(
+                    queue=[_batch_source(eid),_batch_source(second_eid,label="second")],
+                    due={"testcity":[(_batch_episode(eid),{}),(_batch_episode(second_eid),{})]},
+                    coverage_by_city={"testcity":True},connection=c,expected_tips={eid:None})
+            except writer.PersistenceContractError as exc:
+                assert "EXPECTED_TIP_MISSING" in str(exc)
+            else:raise AssertionError("partial failure silently succeeded")
+        assert counts_independent()==(1,1,1)
+        with conn() as c:
+            retry=writer.persist_due_episode_classifications(
+                queue=[_batch_source(eid),_batch_source(second_eid,label="second")],
+                due={"testcity":[(_batch_episode(eid),{}),(_batch_episode(second_eid),{})]},
+                coverage_by_city={"testcity":True},connection=c,
+                expected_tips={eid:None,second_eid:None})
+        assert retry["episodes_persisted"]==2
+        assert retry["classification_inserts"]==1
+        assert counts_independent()==(2,2,2)
+        receipts["MULTI_EPISODE_PARTIAL_COMMIT"]={"first_durable_on_later_failure":True,
+            "batch_overall_success_on_failure":False,
+            "safe_retry":True,"final_counts":counts_independent()}
+    check("MULTI_EPISODE_PARTIAL_COMMIT",multi_partial)
+    # Negative control: restore the old inside-transaction commit status, ONLY
+    # in memory, on a new fixture. Positive batch must reject it.
+    def negative_early_ack():
+        setup()
+        original=writer.persist_episode_classification
+        def broken(*args,**kwargs):
+            with args[0].transaction():
+                result=original(*args,**kwargs)
+                result["commit_state"]="CALLER_TRANSACTION_PENDING"
+                return result
+        try:
+            writer.persist_episode_classification=broken
+            with conn() as c:
+                try:_batch_call(c,[_batch_source(eid)])
+                except writer.PersistenceContractError as exc:
+                    assert "PERSISTENCE_ACK_BEFORE_COMMIT" in str(exc)
+                else:raise AssertionError("old ACK defect not detected")
+        finally:
+            writer.persist_episode_classification=original
+        assert counts_independent()==(1,1,1)
+        receipts["NEGATIVE_EARLY_ACK"]={"defective_batch_rejected":True,
+            "readback_committed":True,"mutation_type":"IN_MEMORY_WRAPPER_ONLY"}
+    check("NEGATIVE_EARLY_ACK",negative_early_ack)
+
 with conn() as version_conn:
     version = version_conn.execute("SHOW server_version").fetchone()[0]
 report={"postgres_version":version,
         "schema":"REDUCED_SYNTHETIC_SCHEMA_NOT_EQUIVALENT_TO_ACCEPTED_NEON",
         "tests":test_results,"receipts":receipts,"final_counts":final_counts,
-        "verdict":("EXPECTED_DEFECT_REPRODUCED" if os.environ.get("H2_TEST_PHASE")=="pre_fix" else "PARTIAL_SCHEMA_EQUIVALENCE_UNPROVEN")}
+        "verdict":("EXPECTED_DEFECT_REPRODUCED" if os.environ.get("H2_TEST_PHASE")=="pre_fix" else "PARTIAL_OFFLINE_SCHEMA_EQUIVALENCE_UNPROVEN")}
 print(json.dumps(report,indent=2,default=str))
 Path(os.environ.get("H2_OUTPUT","/tmp/h2_pg18_result.json")).write_text(json.dumps(report,indent=2,default=str))
