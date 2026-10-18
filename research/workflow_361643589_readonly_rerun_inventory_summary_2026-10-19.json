@@ -1,0 +1,103 @@
+{
+  "audit_date": "2026-10-19",
+  "repository": "olegbalakin-cmyk/kyiv-air-alerts-grafana",
+  "workflow_id": 361643589,
+  "user_uploaded_evidence_zip_sha256": "c2762f66094da1dda4b21d120cf6c7719082ccac6b6aacaa3e4723bc947b944a",
+  "zip_crc": "PASS",
+  "user_json_sha256_manifest": "6/6 match, README not in manifest",
+  "provider": "GitHub Actions repository-level REST via connected GitHub tool",
+  "queries": [
+    {
+      "event": "schedule",
+      "filter": "created=2026-09-18..2026-10-19",
+      "per_page": 100,
+      "pages_checked": 8,
+      "repository_total": 755,
+      "target_workflow_runs": 170
+    },
+    {
+      "event": "push",
+      "filter": "created=2026-09-18..2026-10-19",
+      "per_page": 100,
+      "pages_checked": 15,
+      "repository_total": 1438,
+      "target_workflow_runs": 8
+    },
+    {
+      "event": "workflow_dispatch",
+      "filter": "created=2026-09-18..2026-10-19",
+      "per_page": 100,
+      "pages_checked": 1,
+      "repository_total": 6,
+      "target_workflow_runs": 1
+    }
+  ],
+  "target_count": 179,
+  "target_conclusions": {
+    "success": 147,
+    "failure": 8,
+    "cancelled": 6,
+    "skipped": 18
+  },
+  "active_run_status_point_in_time": {
+    "queued": 0,
+    "in_progress": 0,
+    "waiting": 0,
+    "pending": 0,
+    "requested": 0
+  },
+  "verified_runs": [
+    {
+      "id": 35536529991,
+      "created_at": "2026-09-20T20:44:56Z",
+      "event": "workflow_dispatch",
+      "conclusion": "success",
+      "run_attempt": 1,
+      "head_sha": "1f5c32b3e8d9cf72ea9645d546db600441feb139",
+      "workflow_blob": "68591efed8201e0c6e98fb89945c8739f6e73dd8",
+      "unguarded": true
+    },
+    {
+      "id": 38575039007,
+      "created_at": "2026-10-14T13:49:16Z",
+      "event": "schedule",
+      "conclusion": "success",
+      "run_attempt": 1,
+      "head_sha": "2f55b09eeaca6f8c88b0d72281bde2733198909c",
+      "workflow_blob": "58df6c042d5740623432bbd5f871eb36b5e0cac9",
+      "unguarded": true,
+      "ukrainealarm_api_token_env": true,
+      "mode_assertion": "network"
+    },
+    {
+      "id": 38634459239,
+      "created_at": "2026-10-14T20:43:23Z",
+      "event": "schedule",
+      "conclusion": "cancelled",
+      "run_attempt": 1,
+      "head_sha": "b8912ad7f678a9d3f669ea294c77e79fd0bf6220",
+      "workflow_blob": "58df6c042d5740623432bbd5f871eb36b5e0cac9",
+      "unguarded": true
+    },
+    {
+      "id": 39158768687,
+      "created_at": "2026-10-18T19:26:21Z",
+      "event": "schedule",
+      "conclusion": "skipped",
+      "workflow_blob": "1bf3385b3438a0ed471375db446ab08132d5bd87",
+      "job_if_false": true
+    }
+  ],
+  "conditional_30day_calendar_example_utc": "2026-11-13T20:43:23Z",
+  "limits": [
+    "Summary receipt only: full 179-run raw JSON responses/IDs are NOT retained in this file",
+    "Only three known trigger event types enumerated; complete all-events exposure unproven",
+    "Documented 30-day rerun window does not prove present eligibility or outcome",
+    "Current registered workflow state and duplicate workflow IDs unknown because registry endpoints denied by connector allowlist (400, not GitHub API 403/404)",
+    "Disabled-manually cross-ref and historical whole-run/failed-job/single-job rerun enforcement unverified",
+    "A successful past monitor job does not independently demonstrate actual UkraineAlarm network requests",
+    "In-flight 0 is a point-in-time snapshot only",
+    "No disable, dispatch, rerun, runtime promotion, operational WIP, Neon or site-prod changes were made"
+  ],
+  "verdict": "HISTORICAL_RUN_ENUMERATION=PARTIAL_ACCEPTED; CENTRAL_DISABLE=BLOCKED_NOT_EXECUTED"
+}

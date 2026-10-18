@@ -2,6 +2,14 @@
 
 Accepted project checkpoints, newest first. This is not the full Git history, a branch inventory, or a retry log. **PROVEN** describes bounded evidence; **FROZEN** additionally requires a durable exact manifest. Development checkpoints below do not change production unless explicitly stated.
 
+## 2026-10-19
+
+### Explosion workflow 361643589 read-only run inventory — bounded PARTIAL accepted, disable BLOCKED
+
+- **New verified source evidence:** user ZIP SHA-256 `c2762f66094da1dda4b21d120cf6c7719082ccac6b6aacaa3e4723bc947b944a`, ZIP CRC PASS and 6/6 JSON manifest sizes/hash PASS. GitHub REST complete event-filtered repository run listing (`schedule`, `push`, `workflow_dispatch`) across 2026-09-18..2026-10-19 found **179 exact workflow-ID records: 170/8/1 by event; 147 success / 8 failure / 6 cancelled / 18 skipped**. [Git-frozen bounded summary](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/blob/main/research/workflow_361643589_readonly_rerun_inventory_summary_2026-10-19.json) records query counts and representative immutable run IDs, not all 179 raw JSON records. Five active statuses each zero at one inspection snapshot; older manual `35536529991` has `run_attempt=1`.
+- **Rerun risk lasts beyond Sep 20:** newer unheld network-mode monitor [successful `38575039007`](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/38575039007) on 2026-10-14 and [cancelled `38634459239`](https://github.com/olegbalakin-cmyk/kyiv-air-alerts-grafana/actions/runs/38634459239) on the same unguarded token-bearing blob `58df6c04`; arithmetic up-to-30-day window could reach **2026-11-13T20:43:23Z** for the latter if reruns remain eligible. Actual enabled/disabled rerun rules, effects on cross-refs, registry state and duplicate registered workflows still unknown. Success alone does not demonstrate real API calls.
+- **Accepted only bounded status:** `RUN_ENUMERATION=PARTIAL`, `ACTIVE_RUN_SNAPSHOT=ZERO`; `WORKFLOW_361643589_CENTRAL_DISABLE=BLOCKED/NOT_EXECUTED`, `WIP_ACTIVATION=NO-GO`. Next: permitted authenticated read-only registry GET/list and authoritative disabled-rerun semantics; verify latest run/permissions/collateral preflight and obtain separate consent before workflow control. Operational WIP, production updater, casualty, Neon, historical records and site-prod unchanged.
+
 ## 2026-10-18
 
 ### H2 observed partial Neon-schema monitor E2E — executed PASS, bounded PARTIAL accepted
