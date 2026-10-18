@@ -62,11 +62,15 @@ def matches(value, patterns):
     return state
 
 def event_context(kind="workflow_dispatch", *, head_sha=None, branch=WIP,
-                  conclusion="success", workflow="Monitor explosion metric WIP"):
-    ev = {"workflow_run": {"head_sha": head_sha, "head_branch": branch,
-           "conclusion": conclusion, "name": workflow}}
-    return {"github": {"event_name": kind, "ref": "refs/heads/" + branch,
-                      "ref_name": branch, "event": ev}}
+                  conclusion="success", workflow="Monitor explosion metric WIP", default_branch="main"):
+    ev = {"workflow_run": {"head_branch": branch, "name": workflow}}
+    if head_sha is not None:
+        ev["workflow_run"]["head_sha"] = head_sha
+    if conclusion is not None:
+        ev["workflow_run"]["conclusion"] = conclusion
+    execution_branch = default_branch if kind == "workflow_run" else branch
+    return {"github": {"event_name": kind, "ref": "refs/heads/" + execution_branch,
+                       "ref_name": execution_branch, "event": ev}}
 
 def bool3(x):
     if x is UNKNOWN:
@@ -187,12 +191,21 @@ def eval_tree(tree, ctx, need_status):
         if tree[1] == "always":
             return True
         vals = list(need_status.values())
+        # A known failure must not be overwritten by an unrelated UNKNOWN.
+        # An implicit success() is false for failed, cancelled or skipped needs.
         if tree[1] == "success":
-            return all(v == "success" for v in vals) if not any(v == "unknown" for v in vals) else UNKNOWN
+            if any(v in ("failure", "cancelled", "skipped") for v in vals):
+                return False
+            return UNKNOWN if any(v == "unknown" for v in vals) else True
         if tree[1] == "failure":
-            return any(v == "failure" for v in vals) if not any(v == "unknown" for v in vals) else UNKNOWN
+            if any(v == "failure" for v in vals):
+                return True
+            return UNKNOWN if any(v == "unknown" for v in vals) else False
         if tree[1] == "cancelled":
-            return any(v == "cancelled" for v in vals) if not any(v == "unknown" for v in vals) else UNKNOWN
+            if any(v == "cancelled" for v in vals):
+                return True
+            return UNKNOWN if any(v == "unknown" for v in vals) else False
+
     if op == "not":
         x = bool3(eval_tree(tree[1], ctx, need_status))
         return UNKNOWN if x is UNKNOWN else not x
@@ -236,9 +249,19 @@ def effects(job, wf):
         "invokes_monitor": "monitor_explosion_candidates.py" in text
     }
 
-def job_matrix(wf, ctx, force_needs=None):
+def job_matrix(wf, ctx, force_needs=None, job_results=None):
+    """Compute eligibility separately from actual outcomes.
+
+    With no supplied outcome an executable job has UNKNOWN result. It is never
+    implicitly promoted to success for dependent jobs. The ancestor status set
+    supports failure()/cancelled() in chained needs.
+    """
     jobs = wf["jobs"]
-    statuses, details = {}, {}
+    statuses, details, ancestors = {}, {}, {}
+    allowed = {"success", "failure", "cancelled", "skipped", "unknown"}
+    forced = job_results or {}
+    if any(v not in allowed for v in forced.values()):
+        raise ValueError("invalid modeled job result")
     todo = set(jobs)
     while todo:
         advanced = False
@@ -251,22 +274,31 @@ def job_matrix(wf, ctx, force_needs=None):
             needs_status = {n: statuses[n] for n in needs}
             if force_needs:
                 needs_status.update({n: v for n, v in force_needs.items() if n in needs})
+            all_relevant = {}
+            for n in needs:
+                all_relevant.update(ancestors.get(n, {}))
+                all_relevant[n] = needs_status[n]
             effective_ctx = copy.deepcopy(ctx)
             effective_ctx["needs"] = {n: {"result": v, "outputs": {}} for n, v in needs_status.items()}
             condition = j.get("if")
-            v, kind = evaluate(condition, effective_ctx, needs_status)
+            v, kind = evaluate(condition, effective_ctx, all_relevant)
             state = "JOB_EXECUTABLE" if v is True else ("JOB_SKIPPED" if v is False else "UNKNOWN")
-            statuses[name] = "success" if v is True else ("skipped" if v is False else "unknown")
-            details[name] = {"state": state, "if": condition, "condition_evaluation": flag(v),
-                             "condition_parse": kind, "needs": needs, "needs_assumed_results": needs_status,
-                             "potential_effects": effects(j, wf)}
+            actual = (forced.get(name, "unknown") if v is True
+                      else "skipped" if v is False else "unknown")
+            statuses[name] = actual
+            ancestors[name] = all_relevant
+            details[name] = {"state": state, "if": condition,
+                             "condition_evaluation": flag(v), "condition_parse": kind,
+                             "needs": needs, "needs_actual_results": needs_status,
+                             "modeled_job_result": actual, "potential_effects": effects(j, wf)}
             todo.remove(name)
             advanced = True
             break
         if not advanced:
             for name in sorted(todo):
                 statuses[name] = "unknown"
-                details[name] = {"state": "UNKNOWN", "reason": "cycle_or_missing_needs", "needs": jobs[name].get("needs")}
+                details[name] = {"state": "UNKNOWN", "reason": "cycle_or_missing_needs",
+                                 "needs": jobs[name].get("needs"), "modeled_job_result": "unknown"}
             break
     return details
 
@@ -282,7 +314,8 @@ def can_run(wf, *, default_registered=False, ref_present=True, dispatch=True, ct
             "executable": sorted(k for k, v in jobs.items() if v["state"] == "JOB_EXECUTABLE"),
             "unknown": sorted(k for k, v in jobs.items() if v["state"] == "UNKNOWN")}
 
-def run_event(wf, name, upstream, activity="completed", default_present=True, depth=1):
+def run_event(wf, name, upstream, activity="completed", default_present=True, depth=1,
+              job_results=None):
     if not default_present or wf is None:
         return {"state": "DOWNSTREAM_BLOCKED", "reason": "consumer_absent_on_default_branch"}
     if depth > 3:
@@ -293,22 +326,24 @@ def run_event(wf, name, upstream, activity="completed", default_present=True, de
     names = trigger.get("workflows") or []
     if isinstance(names, str):
         names = [names]
-    if name not in names:
-        return {"state": "DOWNSTREAM_BLOCKED", "reason": "upstream_workflow_name_mismatch"}
+    if not matches(name, names):
+        return {"state": "EVENT_NOT_CREATED", "reason": "upstream_workflow_name_mismatch"}
     types = trigger.get("types") or ["completed", "requested", "in_progress"]
     if isinstance(types, str):
         types = [types]
     if activity not in types:
-        return {"state": "DOWNSTREAM_BLOCKED", "reason": "activity_filter_mismatch"}
+        return {"state": "EVENT_NOT_CREATED", "reason": "activity_filter_mismatch"}
     branch = upstream.get("head_branch")
-    if "branches" in trigger and (not branch or not matches(branch, trigger["branches"])):
-        return {"state": "DOWNSTREAM_BLOCKED", "reason": "branch_filter_mismatch"}
+    if ("branches" in trigger or "branches-ignore" in trigger) and branch is None:
+        return {"state": "UNKNOWN", "reason": "upstream_branch_unavailable"}
+    if "branches" in trigger and not matches(branch, trigger["branches"]):
+        return {"state": "EVENT_NOT_CREATED", "reason": "branch_filter_mismatch"}
     if "branches-ignore" in trigger and branch and matches(branch, trigger["branches-ignore"]):
-        return {"state": "DOWNSTREAM_BLOCKED", "reason": "branch_excluded"}
+        return {"state": "EVENT_NOT_CREATED", "reason": "branch_excluded"}
     ctx = event_context("workflow_run", head_sha=upstream.get("head_sha"),
                         branch=branch or "unknown", conclusion=upstream.get("conclusion"),
                         workflow=name)
-    jobs = job_matrix(wf, ctx)
+    jobs = job_matrix(wf, ctx, job_results=job_results)
     return {"state": "EVENT_CREATED", "reason": "matching_workflow_run",
             "depth": depth, "jobs": jobs,
             "jobs_executable": sorted(k for k, j in jobs.items() if j["state"] == "JOB_EXECUTABLE"),
